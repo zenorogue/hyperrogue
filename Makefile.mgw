@@ -1,0 +1,11 @@
+hyper.exe: hyper.cpp graph.cpp hyperpoint.cpp geometry.cpp cell.cpp heptagon.cpp game.cpp polygons.cpp classes.cpp hyper.res language-data.cpp
+	g++ -mwindows hyper.cpp hyper.res -o hyper.exe -lSDL -lSDL_mixer -lopengl32 SDL_ttf.dll SDL_gfx.dll -O3
+
+hyper.res: hyper.rc hr-icon.ico
+	windres hyper.rc -O coff -o hyper.res
+
+langen.exe: langen.cpp language-cz.cpp language-pl.cpp language-tr.cpp language-ru.cpp
+	g++ langen.cpp -o langen.exe
+
+language-data.cpp: langen.exe
+	./langen.exe > language-data.cpp

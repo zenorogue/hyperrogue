@@ -1,0 +1,107 @@
+
+<html><head>
+<meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
+<title>HyperRogue</title>
+<link href="zeno.css" type=text/css rel=stylesheet>
+</head><body>
+
+<h1><center><font color="#0000ff">@</font> HyperRogue</center></h1>
+<center><b>Current version: 5.5a (Feb 15, 2014)</b></center>
+<hr>
+
+<h2>The game</h2>
+You are a lone outsider in a 
+<a href="http://zenorogue.blogspot.com/2012/03/hyperbolic-geometry-in-hyperbolic-rogue.html">strange, non-Euclidean world</a>.
+You can move with the numpad, vi keys (hjklyubn), or mouse.
+You can also skip turns by pressing ".".<br/><br/>
+
+As a Rogue, your goal is to collect as many treasures as possible. However, collecting treasures attracts dangerous monsters
+(on the other hand, killing the monsters allows more treasures to be generated).<br/><br/>
+
+You can kill most monsters by moving into them. Similarly, if the monster was next to you at the end of your
+turn, it would kill you. The game protects you from getting yourself killed accidentally by ignoring moves which
+lead to instant death (similar to the check rule from Chess).
+<br/><br/>
+Ultimately, you will probably run into a situation where monsters surround you. That means that your adventure
+is over, and you will have to teleport back to the Euclidean world to survive by pressing Escape (quit).
+<br/><br/>
+Collecting enough treasure also allows you to find rare magical orbs, which grant you one-time or time-limited
+special abilities.
+<br/><br/>
+The world is a combination of thirteen types of lands. Each land type has specific style (monsters, treasure,
+magical orbs, terrain features). Collecting treasures only attracts more monsters in lands of the same type,
+so you can try to collect lots of treasure in several different lands!
+<br/><br/>
+Some of these lands are available from the beginning, others can be found only if you have proven yourself 
+(press ESC to know what you should do to access more lands). Ultimately, you will be able to access Hell,
+and look for the fabulous <b>Orbs of Yendor</b> which are hidden there. Get at least one of them to prove that you are
+a true winner! Only the best players will be able to face the challenges of Hell, but both the monsters and the 
+challenges associated with the Orbs of Yendor are different than in the rest of the game, so it should be worth it.
+<br/><br/>
+You can see tooltips by placing the mouse over stuff. You can also right click to get more information
+about game objects.
+<br/><br/>
+[desktop only] 
+Press <b>v</b> to configure the game. You can also rotate the world by pressing <b>arrow keys</b>, <b>PageUp</b> and
+<b>PageDn</b> (not numpad). You can center on the PC by pressing <b>Home</b>.<br/><br/>
+Your scores and other stats about your games are recorded to file
+<tt>hyperrogue.log</tt> (in Linux, <tt>~/.hyperrogue.log</tt>). You can save your configation to file
+<tt>hyperrogue.ini</tt> (in Linux, <tt>~/.hyperrogue.ini</tt>).
+
+<hr/>
+<center><a href="http://roguetemple.com/z/hyper.php">See the website for some screenshots, and more detailed and up-to-date information!</a></center>
+<hr/>
+
+The surface the game is played on is called a hyperbolic plane. It seems there is just a very
+small amount of games and other works of art which use hyperbolic geometry (the most well
+known are some works of M.C.Escher).<br/><br>
+The game dynamically generates new parts of the world as you move. Due to nature of the
+hyperbolic plane, the chances that you get back to a place where you have been before
+are very low (unless you go back exactly the same way). See more information about the geometry
+used <a href="http://zenorogue.blogspot.com/2012/03/hyperbolic-geometry-in-hyperbolic-rogue.html">on the blog</a>.
+<br/><br/>
+You can aim for the Orb of Yendor, or you can simply aim for as high score as possible.
+My best so far is $175 but it should be beatable (I mean, I have won fairly only once,
+and that was my end score in the winning game).
+
+<h2>Technical information</h2>
+
+The HyperRogue package includes a Windows executable, documentation, and C++ source which has been tested under Linux
+(you need SDL, SDL_ttf, and SDL_gfx). You should be able to compile on Ubuntu (or similar) with something like this:
+
+<br/><br/>
+<tt>
+sudo apt-get install gcc libsdl1.2-dev libsdl-ttf2.0-dev libsdl-gfx1.2-dev<br/>
+unzip hyperrogue-55.zip<br/>
+cd hyperrogue-55<br/>
+make
+</tt>
+<br/><br/>
+It should also compile under MacOS with something like <tt>make -f Makefile.mac</tt> (note: I have no
+access to a MacOS machine to test this makefile myself, it is based on 
+<a href="http://groups.google.com/group/rec.games.roguelike.development/browse_thread/thread/9c02e09c0195dc16/3cbde3dc4a0b7e4e">
+this post</a> by Konstantin Stupnik).
+<br/><br/>
+
+Released under
+<a href="http://www.gnu.org/licenses/gpl-2.0.html">GNU General Public License, version 2</a>.
+As such, it comes with without any warranty.
+<br/><br/>
+
+<hr>
+
+If you would like to thank me for HyperRogue, 
+<a href="http://www.roguetemple.com/z/donate.php?id=NotEye">donations</a> are welcome.
+
+<hr>
+
+You can contact me at zeno@attnam.com, or at 
+<a href="http://www.roguetemple.com/forums/">RogueTemple</a> 
+or New Attnam forums (Z), or
+at <a href="http://zenorogue.blogspot.com/">my blog</a>.
+<br/>
+
+<hr>
+
+      <center><a href="http://www.roguetemple.com/z/index.php">See my other games and stuff</a></center> <br>
+</body></html>

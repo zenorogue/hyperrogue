@@ -1,0 +1,33 @@
+# Crossroads [02]
+[02] */hr3-crossroads.ogg
+# Desert [03]
+[03] */hr3-desert.ogg
+# Icy Lands [04]
+[04] */hr3-icyland.ogg
+# Living Caves [05]
+[05] */hr3-caves.ogg
+# Jungle [06]
+[06] */hr3-jungle.ogg
+# Alchemist's Lab [07]
+[07] */hr3-laboratory.ogg
+# Mirror [08]
+[08] */hr3-mirror.ogg
+# Graveyard [09]
+[09] */hr3-graveyard.ogg
+# R'Lyeh [10]
+[10] */hr3-rlyeh.ogg
+# Hell [11]
+[11] */hr3-hell.ogg
+# Cheaterland [12]
+[12] */hr3-icyland.ogg
+# Motion [13]
+[13] */hr3-motion.ogg
+# Dry Forest [14]
+[14] */hr3-jungle.ogg
+# Game Board [15]
+[15] */hr3-laboratory.ogg
+# Barrier [01] (useless)
+# None [00] (used when the window is out of focus)
+
+
+HyperRogue soundtrack by Shawn Parrotte (http://www.shawnparrotte.com), under the Creative Commons BY-SA 3.0 license, http://creativecommons.org/licenses/by-sa/3.0/

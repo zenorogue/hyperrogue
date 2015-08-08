@@ -1,0 +1,26 @@
+BODY {
+        background: #000000; color: #C0C0C0
+}
+A {
+	font-weight: bold; color: #FFFF00; text-decoration: none
+}
+A:hover {
+	font-weight: bold; color: #FF0000; text-decoration: underline
+}
+h1 {
+	color: #FF0000
+}
+h2 {
+	color: #FF8000
+}
+.pic {
+        vertical-align: top; width: 100; text-align: center
+}
+img {
+	border-style:outset; border-color: white; border-width:2px;
+}
+.noborder {
+	border-width:0px;
+}
+td {
+        padding-top:8px;

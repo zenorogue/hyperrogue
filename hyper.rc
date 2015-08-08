@@ -1,0 +1,26 @@
+id ICON "hr-icon.ico"
+
+1 VERSIONINFO
+FILEVERSION     5,5,1,0
+PRODUCTVERSION  5,5,1,0
+BEGIN
+  BLOCK "StringFileInfo"
+  BEGIN
+    BLOCK "040904E4"
+    BEGIN
+      VALUE "CompanyName", "Zeno Rogue"
+      VALUE "FileDescription", "A roguelike in non-euclidean space"
+      VALUE "FileVersion", "55a"
+      VALUE "InternalName", "hyper"
+      VALUE "LegalCopyright", "Zeno Rogue"
+      VALUE "OriginalFilename", "hyper.exe"
+      VALUE "ProductName", "HyperRogue"
+      VALUE "ProductVersion", "5.5a"
+    END
+  END
+
+  BLOCK "VarFileInfo"
+  BEGIN
+    VALUE "Translation", 0x409, 1252
+  END
+END

@@ -1,0 +1,7 @@
+# note: this Makefile for Mac is based on this post. I have no resources to test it myself.
+# http://groups.google.com/group/rec.games.roguelike.development/browse_thread/thread/9c02e09c0195dc16/3cbde3dc4a0b7e4e
+#
+# You will also probably need to configure it yourself a bit to make it work.
+
+hyper: hyper.cpp graph.cpp hyperpoint.cpp geometry.cpp cell.cpp heptagon.cpp game.cpp polygons.cpp classes.cpp
+	g++ -m32 -I/sw/include hyper.cpp -L/sw/lib -lSDL -lSDLMain -lSDL_ttf -lSDL_gfx -framework AppKit -DMAC -O3
