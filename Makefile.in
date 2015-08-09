@@ -95,16 +95,17 @@ am__aclocal_m4_deps = $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 DIST_COMMON = $(srcdir)/Makefile.am $(top_srcdir)/configure \
-	$(am__configure_deps) $(dist_doc_DATA) $(am__DIST_COMMON)
+	$(am__configure_deps) $(dist_doc_DATA) $(dist_hyperrogue_DATA) \
+	$(dist_music_DATA) $(am__DIST_COMMON)
 am__CONFIG_DISTCLEAN_FILES = config.status config.cache config.log \
  configure.lineno config.status.lineno
 mkinstalldirs = $(install_sh) -d
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(docdir)" \
-	"$(DESTDIR)$(hyperroguedir)"
+	"$(DESTDIR)$(hyperroguedir)" "$(DESTDIR)$(musicdir)"
 PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
-am_hyperrogue_OBJECTS = hyper.$(OBJEXT)
+am_hyperrogue_OBJECTS = hyperrogue-hyper.$(OBJEXT)
 hyperrogue_OBJECTS = $(am_hyperrogue_OBJECTS)
 hyperrogue_LDADD = $(LDADD)
 am_langen_OBJECTS = langen.$(OBJEXT)
@@ -126,6 +127,10 @@ DEFAULT_INCLUDES = -I.@am__isrc@
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
 am__mv = mv -f
+AM_V_lt = $(am__v_lt_@AM_V@)
+am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
+am__v_lt_0 = --silent
+am__v_lt_1 = 
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
 AM_V_CXX = $(am__v_CXX_@AM_V@)
@@ -173,7 +178,7 @@ am__uninstall_files_from_dir = { \
     || { echo " ( cd '$$dir' && rm -f" $$files ")"; \
          $(am__cd) "$$dir" && rm -f $$files; }; \
   }
-DATA = $(dist_doc_DATA) $(hyperrogue_DATA)
+DATA = $(dist_doc_DATA) $(dist_hyperrogue_DATA) $(dist_music_DATA)
 am__tagged_files = $(HEADERS) $(SOURCES) $(TAGS_FILES) $(LISP)
 # Read a list of newline-separated strings from the standard input,
 # and print each of them once, without duplicates.  Input order is
@@ -306,9 +311,16 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 hyperroguedir = $(datadir)/hyperrogue
-hyperrogue_DATA = music/hr3-caves.ogg music/hr3-graveyard.ogg  music/hr3-jungle.ogg music/hr3-motion.ogg music/hr3-crossroads.ogg music/hr3-hell.ogg music/hr3-laboratory.ogg  music/hr3-rlyeh.ogg music/hr3-desert.ogg music/hr3-icyland.ogg music/hr3-mirror.ogg hyperrogue hyperrogue-music.txt DejaVuSans-Bold.ttf
+dist_hyperrogue_DATA = hyperrogue-music.txt DejaVuSans-Bold.ttf
 dist_doc_DATA = README.md
 hyperrogue_SOURCES = hyper.cpp
+
+# Some definitions used in graph.cpp
+hyperrogue_CPPFLAGS = -DFONTDESTDIR=\"$(pkgdatadir)/DejaVuSans-Bold.ttf\" -DMUSICDESTDIR=\"$(pkgdatadir)/hyperrogue-music.txt\"
+
+# Musicdir
+musicdir = $(datadir)/hyperrogue/music
+dist_music_DATA = music/hr3-caves.ogg music/hr3-desert.ogg music/hr3-hell.ogg music/hr3-jungle.ogg music/hr3-mirror.ogg music/hr3-rlyeh.ogg music/hr3-crossroads.ogg music/hr3-graveyard.ogg music/hr3-icyland.ogg music/hr3-laboratory.ogg music/hr3-motion.ogg
 langen_SOURCES = langen.cpp 
 
 # First target made
@@ -411,7 +423,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hyper.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hyperrogue-hyper.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/langen.Po@am__quote@
 
 .cpp.o:
@@ -427,6 +439,20 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXXCOMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
+
+hyperrogue-hyper.o: hyper.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(hyperrogue_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT hyperrogue-hyper.o -MD -MP -MF $(DEPDIR)/hyperrogue-hyper.Tpo -c -o hyperrogue-hyper.o `test -f 'hyper.cpp' || echo '$(srcdir)/'`hyper.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/hyperrogue-hyper.Tpo $(DEPDIR)/hyperrogue-hyper.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='hyper.cpp' object='hyperrogue-hyper.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(hyperrogue_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o hyperrogue-hyper.o `test -f 'hyper.cpp' || echo '$(srcdir)/'`hyper.cpp
+
+hyperrogue-hyper.obj: hyper.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(hyperrogue_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT hyperrogue-hyper.obj -MD -MP -MF $(DEPDIR)/hyperrogue-hyper.Tpo -c -o hyperrogue-hyper.obj `if test -f 'hyper.cpp'; then $(CYGPATH_W) 'hyper.cpp'; else $(CYGPATH_W) '$(srcdir)/hyper.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/hyperrogue-hyper.Tpo $(DEPDIR)/hyperrogue-hyper.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='hyper.cpp' object='hyperrogue-hyper.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(hyperrogue_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o hyperrogue-hyper.obj `if test -f 'hyper.cpp'; then $(CYGPATH_W) 'hyper.cpp'; else $(CYGPATH_W) '$(srcdir)/hyper.cpp'; fi`
 install-dist_docDATA: $(dist_doc_DATA)
 	@$(NORMAL_INSTALL)
 	@list='$(dist_doc_DATA)'; test -n "$(docdir)" || list=; \
@@ -448,9 +474,9 @@ uninstall-dist_docDATA:
 	@list='$(dist_doc_DATA)'; test -n "$(docdir)" || list=; \
 	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
 	dir='$(DESTDIR)$(docdir)'; $(am__uninstall_files_from_dir)
-install-hyperrogueDATA: $(hyperrogue_DATA)
+install-dist_hyperrogueDATA: $(dist_hyperrogue_DATA)
 	@$(NORMAL_INSTALL)
-	@list='$(hyperrogue_DATA)'; test -n "$(hyperroguedir)" || list=; \
+	@list='$(dist_hyperrogue_DATA)'; test -n "$(hyperroguedir)" || list=; \
 	if test -n "$$list"; then \
 	  echo " $(MKDIR_P) '$(DESTDIR)$(hyperroguedir)'"; \
 	  $(MKDIR_P) "$(DESTDIR)$(hyperroguedir)" || exit 1; \
@@ -464,11 +490,32 @@ install-hyperrogueDATA: $(hyperrogue_DATA)
 	  $(INSTALL_DATA) $$files "$(DESTDIR)$(hyperroguedir)" || exit $$?; \
 	done
 
-uninstall-hyperrogueDATA:
+uninstall-dist_hyperrogueDATA:
 	@$(NORMAL_UNINSTALL)
-	@list='$(hyperrogue_DATA)'; test -n "$(hyperroguedir)" || list=; \
+	@list='$(dist_hyperrogue_DATA)'; test -n "$(hyperroguedir)" || list=; \
 	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
 	dir='$(DESTDIR)$(hyperroguedir)'; $(am__uninstall_files_from_dir)
+install-dist_musicDATA: $(dist_music_DATA)
+	@$(NORMAL_INSTALL)
+	@list='$(dist_music_DATA)'; test -n "$(musicdir)" || list=; \
+	if test -n "$$list"; then \
+	  echo " $(MKDIR_P) '$(DESTDIR)$(musicdir)'"; \
+	  $(MKDIR_P) "$(DESTDIR)$(musicdir)" || exit 1; \
+	fi; \
+	for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  echo "$$d$$p"; \
+	done | $(am__base_list) | \
+	while read files; do \
+	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(musicdir)'"; \
+	  $(INSTALL_DATA) $$files "$(DESTDIR)$(musicdir)" || exit $$?; \
+	done
+
+uninstall-dist_musicDATA:
+	@$(NORMAL_UNINSTALL)
+	@list='$(dist_music_DATA)'; test -n "$(musicdir)" || list=; \
+	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
+	dir='$(DESTDIR)$(musicdir)'; $(am__uninstall_files_from_dir)
 
 ID: $(am__tagged_files)
 	$(am__define_uniq_tagged_files); mkid -fID $$unique
@@ -697,7 +744,7 @@ check: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) check-am
 all-am: Makefile $(PROGRAMS) $(DATA)
 installdirs:
-	for dir in "$(DESTDIR)$(bindir)" "$(DESTDIR)$(docdir)" "$(DESTDIR)$(hyperroguedir)"; do \
+	for dir in "$(DESTDIR)$(bindir)" "$(DESTDIR)$(docdir)" "$(DESTDIR)$(hyperroguedir)" "$(DESTDIR)$(musicdir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: $(BUILT_SOURCES)
@@ -756,7 +803,8 @@ info: info-am
 
 info-am:
 
-install-data-am: install-dist_docDATA install-hyperrogueDATA
+install-data-am: install-dist_docDATA install-dist_hyperrogueDATA \
+	install-dist_musicDATA
 
 install-dvi: install-dvi-am
 
@@ -804,7 +852,7 @@ ps: ps-am
 ps-am:
 
 uninstall-am: uninstall-binPROGRAMS uninstall-dist_docDATA \
-	uninstall-hyperrogueDATA
+	uninstall-dist_hyperrogueDATA uninstall-dist_musicDATA
 
 .MAKE: all check install install-am install-strip
 
@@ -816,16 +864,17 @@ uninstall-am: uninstall-binPROGRAMS uninstall-dist_docDATA \
 	distclean-generic distclean-tags distcleancheck distdir \
 	distuninstallcheck dvi dvi-am html html-am info info-am \
 	install install-am install-binPROGRAMS install-data \
-	install-data-am install-dist_docDATA install-dvi \
+	install-data-am install-dist_docDATA \
+	install-dist_hyperrogueDATA install-dist_musicDATA install-dvi \
 	install-dvi-am install-exec install-exec-am install-html \
-	install-html-am install-hyperrogueDATA install-info \
-	install-info-am install-man install-pdf install-pdf-am \
-	install-ps install-ps-am install-strip installcheck \
-	installcheck-am installdirs maintainer-clean \
-	maintainer-clean-generic mostlyclean mostlyclean-compile \
-	mostlyclean-generic pdf pdf-am ps ps-am tags tags-am uninstall \
-	uninstall-am uninstall-binPROGRAMS uninstall-dist_docDATA \
-	uninstall-hyperrogueDATA
+	install-html-am install-info install-info-am install-man \
+	install-pdf install-pdf-am install-ps install-ps-am \
+	install-strip installcheck installcheck-am installdirs \
+	maintainer-clean maintainer-clean-generic mostlyclean \
+	mostlyclean-compile mostlyclean-generic pdf pdf-am ps ps-am \
+	tags tags-am uninstall uninstall-am uninstall-binPROGRAMS \
+	uninstall-dist_docDATA uninstall-dist_hyperrogueDATA \
+	uninstall-dist_musicDATA
 
 .PRECIOUS: Makefile
 

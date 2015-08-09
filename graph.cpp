@@ -214,8 +214,14 @@ void loadfont(int siz) {
   if(!font[siz]) {
     font[siz] = TTF_OpenFont("DejaVuSans-Bold.ttf", siz);
     if (font[siz] == NULL) {
-      printf("error: Font file not found\n");
-      exit(1);
+      // Destination set by ./configure
+      #ifdef FONTDESTDIR
+      font[siz] = TTF_OpenFont(FONTDESTDIR, siz);
+      #endif
+      if (font[siz] == NULL) {
+        printf("error: Font file not found\n");
+        exit(1);
+        }
       }
     }
   }
@@ -3611,6 +3617,10 @@ void initgraph() {
     loadMusicInfo(musicfile)
     || loadMusicInfo("./hyperrogue-music.txt") 
     || loadMusicInfo("music/hyperrogue-music.txt")
+// Destination set by ./configure
+#ifdef MUSICDESTDIR
+    || loadMusicInfo(MUSICDESTDIR)
+#endif
 #ifdef FHS
     || loadMusicInfo("/usr/share/hyperrogue/hyperrogue-music.txt") 
     || loadMusicInfo(s0 + getenv("HOME") + "/.hyperrogue-music.txt")
