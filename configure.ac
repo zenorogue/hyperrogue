@@ -38,5 +38,23 @@ AC_TYPE_SIZE_T
 # Checks for library functions.
 AC_CHECK_FUNCS([memset sqrt strstr])
 
+#############################
+# Platform specific setup
+#############################
+AC_CANONICAL_HOST
+# Check for which host we are on and setup a few things
+# specifically based on the host
+case $host_os in
+  darwin* )
+        SYSTEM=DARWIN
+        ;;
+  linux*)
+        SYSTEM=LINUX
+        ;;
+   *mingw*)
+        SYSTEM=MINGW
+        ;;
+esac
+
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT
