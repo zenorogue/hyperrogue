@@ -1,12 +1,15 @@
-./deps/*
+.deps/
 ChangeLog
 Makefile.in
 aclocal.m4
 autom4te*
 config.guess
 config.sub
+config.log
+config.status
 configure
 depcomp
+Makefile
 install-sh
 missing
 compile
