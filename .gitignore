@@ -1,0 +1,15 @@
+./deps/*
+ChangeLog
+Makefile.in
+aclocal.m4
+autom4te*
+config.guess
+config.sub
+configure
+depcomp
+install-sh
+missing
+compile
+NEWS
+AUTHORS
+README
