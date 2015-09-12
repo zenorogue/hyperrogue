@@ -34,8 +34,9 @@ The HyperRogue package includes a Windows executable, documentation, and C++ sou
 
 ```
 sudo apt-get install gcc libsdl1.2-dev libsdl-ttf2.0-dev libsdl-gfx1.2-dev
-git clone https://github.com/nobrakal/hyperrogue.git hyperrogue-git
+git clone https://github.com/zenorogue/hyperrogue.git hyperrogue-git
 cd hyperrogue-git
+./configure
 make
 ```
 
