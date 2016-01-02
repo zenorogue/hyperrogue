@@ -2863,6 +2863,7 @@ END
   fi
 fi
 
+${CXXFLAGS=""}
 
 #AC_CONFIG_HEADERS([config.h])
 

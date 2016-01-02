@@ -6,7 +6,7 @@ dist_doc_DATA = README.md
 hyperrogue_SOURCES = hyper.cpp
 
 # Some definitions used in graph.cpp
-hyperrogue_CPPFLAGS = -DFONTDESTDIR=\"$(pkgdatadir)/DejaVuSans-Bold.ttf\" -DMUSICDESTDIR=\"$(pkgdatadir)/hyperrogue-music.txt\"
+hyperrogue_CPPFLAGS = -DFONTDESTDIR=\"$(pkgdatadir)/DejaVuSans-Bold.ttf\" -DMUSICDESTDIR=\"$(pkgdatadir)/hyperrogue-music.txt\" -O2
 
 # Musicdir
 musicdir=$(datadir)/hyperrogue/music
@@ -19,6 +19,8 @@ music/hyperrogue-music.txt: hyperrogue
 # Langen binary rules
 noinst_PROGRAMS = langen
 langen_SOURCES = langen.cpp 
+# Disable optimization, not needed
+langen_CXXFLAGS = -O0
 
 # Generation of language-data.cpp
 language-data.cpp: langen

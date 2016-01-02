@@ -1,9 +1,10 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 
-AC_PREREQ([2.69])
+AC_PREREQ([2.68])
 AC_INIT([hyperrogue], [7.7h])
 AM_INIT_AUTOMAKE([-Wall -Werror foreign])
+${CXXFLAGS=""}
 AC_CONFIG_SRCDIR([hyperpoint.cpp])
 #AC_CONFIG_HEADERS([config.h])
 
