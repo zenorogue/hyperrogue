@@ -1,4 +1,38 @@
-#define QHPC 5000      
+#ifdef GFX
+#ifndef MOBILE
+#include <SDL/SDL_gfxPrimitives.h>
+#endif
+#endif
+
+#ifndef MOBILE
+#ifdef GL
+#ifdef MAC
+#include <OpenGL/gl.h>
+#include <OpenGL/glu.h>
+#else
+#include <GL/gl.h>
+#include <GL/glu.h>
+#endif
+
+#ifdef MAC
+#include <OpenGL/glext.h>
+#else
+#include <GL/glext.h>
+#endif
+#endif
+#endif
+
+#ifdef ANDROID
+#ifndef FAKE
+#ifdef GL
+#include <GLES/gl.h>
+#include <GLES/glext.h>
+#include <GLES2/gl2.h>
+#endif
+#endif
+#endif
+
+#define QHPC 16000
 
 int qhpc, prehpc;
 
@@ -83,6 +117,15 @@ void initPolyForGL() {
 #endif
 
 #ifdef GL
+#endif
+
+#define POLYMAX 60000
+int polyi;
+
+#ifdef MOBILE
+short polyx[POLYMAX], polyy[POLYMAX];
+#else
+Sint16 polyx[POLYMAX], polyxr[POLYMAX], polyy[POLYMAX];
 #endif
 
 void drawqueue() {
@@ -264,27 +307,64 @@ void drawqueue() {
   }
 
 hpcshape 
-  shFloor[2], shBFloor[2], shMFloor2[2], shWall[2], 
-  shStarFloor[2], shCloudFloor[2], shTriFloor[2], 
+  shFloor[2], shBFloor[2], shMFloor2[2], shMFloor3[2], shMFloor4[2],
+  shWall[2], shMineMark[2],
+  shStarFloor[2], shCloudFloor[2], shTriFloor[2], shZebra[4], shTower[7],
+  shEmeraldFloor[6],
   shFeatherFloor[2], shDemonFloor[2], shCrossFloor[2], shMFloor[2], shCaveFloor[2],
   shSemiFeatherFloor[2], shPowerFloor[2],
   shSemiFloor[2], shSemiBFloor[2], 
-  shDesertFloor[2],
+  shDesertFloor[2], shRedRockFloor[3][2],
   shCross, shGiantStar[2], shLake, shMirror,
   shGem[2], shStar, shDisk, shRing, shDaisy, shTriangle, shNecro, shStatue, shKey,
+  shFigurine,
+  shElementalShard,
   shBranch, shIBranch, shTentacle, shTentacleX, shILeaf[2], 
   shMovestar,
-  shWolf, shYeti, shDemon, shGDemon, shEagle,
-  shPBody, shPSword, shPHead, shPFace, shGolemhead, shHood, shArmor, 
+  shWolf, shYeti, shDemon, shGDemon, shEagle, shGargoyleWings, shGargoyleBody,
+  shWolf1, shWolf2, shWolf3,
+  shDogStripes,
+  shPBody, shPSword, shPKnife,
+  shPHead, shPFace, shGolemhead, shHood, shArmor, 
+  shSabre, shTurban1, shTurban2, shVikingHelmet,
   shKnightArmor, shKnightCloak,
   shGhost, shEyes, shSlime, shJoint, shWormHead, shTentHead, shShark,
-  shUser[8][3], shHedgehogBlade, shHedgehogBladePlayer,
+  shHedgehogBlade, shHedgehogBladePlayer,
   shWolfBody, shWolfHead, shWolfLegs, shWolfEyes,
-  shBigHepta, shBigTriangle,
+  shBigHepta, shBigTriangle, shBigHex, shBigHexTriangle, shBigHexTriangleRev,
   shFemaleBody, shFemaleHair, shFemaleDress, shWitchDress,
   shBugBody, shBugArmor,
   shPickAxe, shPike, shFlailBall, shFlailTrunk, shFlailChain,
-  shBook, shBookCover, shGrail;
+  shBook, shBookCover, shGrail,
+  shBoatOuter, shBoatInner, shCompass1, shCompass2, shCompass3,
+  shKnife, shTongue, shFlailMissile,
+  shPirateHook, shPirateHood, shEyepatch, shPirateX,
+  shScratch, shHeptaMarker,
+  shSkeletonBody, shSkull, shSkullEyes, shFatBody, shWaterElemental,
+  shPalaceFloor[2], shNewFloor[2], shPalaceGate, shFishTail,
+  shMouse, shMouseLegs, shMouseEyes,
+  shPrincessDress, shPrinceDress,
+  shBigCarpet1, shBigCarpet2, shBigCarpet3,
+  shGoatHead;
+
+#define USERLAYERS 8
+#define USERSHAPEGROUPS 8
+#define USERSHAPEIDS 256
+
+struct usershapelayer {
+  vector<hyperpoint> list;
+  bool sym;
+  int rots;
+  int color;
+  hyperpoint shift, spin;
+  hpcshape sh;
+  };
+
+struct usershape {
+  usershapelayer d[USERLAYERS];
+  };
+
+usershape *usershapes[USERSHAPEGROUPS][USERSHAPEIDS];
 
 void drawTentacle(hpcshape &h, ld rad, ld var, ld divby) {
   for(int i=0; i<=20; i++)
@@ -376,6 +456,17 @@ void bshape(hpcshape& sh, int p) {
   last = &sh;
   last->s = qhpc, last->prio = p;
   first = true; 
+  }
+
+void zoomShape(hpcshape& old, hpcshape& newsh, double factor, int lev) {
+
+  bshape(newsh, lev);
+  for(int i=old.s; i<old.e; i++) {
+    hyperpoint H = hpc[i];
+    H = hpxyz(factor*H[0], factor*H[1], H[2]);
+    H = mid(H,H);
+    hpcpush(H);
+    }
   }
 
 void bshapeend() {
@@ -833,6 +924,76 @@ void buildpolys() {
   hpcpush(hpxyz(-0.118617,0.313063,1.054551));
   hpcpush(hpxyz(-0.118344,0.338747,1.062429));
   hpcpush(hpxyz(-0.097861,0.337622,1.059984));
+
+  bshape(shNewFloor[0], 10);
+  hpcpush(hpxyz(-0.243151,-0.202057,1.048785));
+  hpcpush(hpxyz(-0.249456,-0.026167,1.030977));
+  hpcpush(hpxyz(-0.208097,0.124704,1.029007));
+  hpcpush(hpxyz(-0.053410,0.311604,1.048785));
+  hpcpush(hpxyz(0.102066,0.229119,1.030977));
+  hpcpush(hpxyz(0.212045,0.117865,1.029007));
+  hpcpush(hpxyz(0.296562,-0.109547,1.048785));
+  hpcpush(hpxyz(0.147390,-0.202952,1.030977));
+  hpcpush(hpxyz(-0.003949,-0.242569,1.029007));
+  hpcpush(hpxyz(-0.243151,-0.202057,1.048785));
+
+  bshape(shNewFloor[1], 10);
+  hpcpush(hpxyz(-0.343473,0.068811,1.059580));
+  hpcpush(hpxyz(-0.371524,0.213003,1.087842));
+  hpcpush(hpxyz(-0.243649,0.253621,1.060042));
+  hpcpush(hpxyz(-0.160353,0.311441,1.059580));
+  hpcpush(hpxyz(-0.065108,0.423274,1.087842));
+  hpcpush(hpxyz(0.046377,0.348623,1.060042));
+  hpcpush(hpxyz(0.143516,0.319550,1.059580));
+  hpcpush(hpxyz(0.290335,0.314811,1.087842));
+  hpcpush(hpxyz(0.301479,0.181104,1.060042));
+  hpcpush(hpxyz(0.339315,0.087031,1.059580));
+  hpcpush(hpxyz(0.427150,-0.030712,1.087842));
+  hpcpush(hpxyz(0.329562,-0.122790,1.060042));
+  hpcpush(hpxyz(0.279603,-0.211024,1.059580));
+  hpcpush(hpxyz(0.242312,-0.353108,1.087842));
+  hpcpush(hpxyz(0.109478,-0.334220,1.060042));
+  hpcpush(hpxyz(0.009344,-0.350173,1.059580));
+  hpcpush(hpxyz(-0.124991,-0.409606,1.087842));
+  hpcpush(hpxyz(-0.193046,-0.293976,1.060042));
+  hpcpush(hpxyz(-0.267951,-0.225635,1.059580));
+  hpcpush(hpxyz(-0.398174,-0.157663,1.087842));
+  hpcpush(hpxyz(-0.350202,-0.032362,1.060042));
+  hpcpush(hpxyz(-0.343473,0.068811,1.059580));
+
+  // group 0 layer 0
+
+  bshape(shPalaceFloor[0], 10);
+  hpcpush(hpxyz(0.118361,0.205152,1.027666));
+  hpcpush(hpxyz(0.273318,0.190450,1.054028));
+  hpcpush(hpxyz(0.273318,-0.190450,1.054028));
+  hpcpush(hpxyz(0.118361,-0.205152,1.027666));
+  hpcpush(hpxyz(0.118486,-0.205080,1.027666));
+  hpcpush(hpxyz(0.028276,-0.331925,1.054028));
+  hpcpush(hpxyz(-0.301594,-0.141475,1.054028));
+  hpcpush(hpxyz(-0.236847,0.000072,1.027666));
+  hpcpush(hpxyz(-0.236847,-0.000072,1.027666));
+  hpcpush(hpxyz(-0.301594,0.141475,1.054028));
+  hpcpush(hpxyz(0.028276,0.331925,1.054028));
+  hpcpush(hpxyz(0.118486,0.205080,1.027666));
+  hpcpush(hpxyz(0.118361,0.205152,1.027666));
+
+  bshape(shPalaceFloor[1], 10);
+  hpcpush(hpxyz(-0.225907,0.287688,1.064800));
+  hpcpush(hpxyz(0.084073,0.355992,1.064800));
+  hpcpush(hpxyz(0.330745,0.156227,1.064800));
+  hpcpush(hpxyz(0.328359,-0.161181,1.064800));
+  hpcpush(hpxyz(0.078712,-0.357216,1.064800));
+  hpcpush(hpxyz(-0.230206,-0.284260,1.064800));
+  hpcpush(hpxyz(-0.365775,0.002749,1.064800));
+  hpcpush(hpxyz(-0.225907,0.287688,1.064800));
+  
+  bshape(shPalaceGate, 13);
+  hpcpush(hpxyz(-0.219482,-0.025012,1.024108));
+  hpcpush(hpxyz(0.135153,-0.049012,1.010281));
+  hpcpush(hpxyz(0.135153,0.049012,1.010281));
+  hpcpush(hpxyz(-0.219482,0.025012,1.024108));
+  hpcpush(hpxyz(-0.219482,-0.025012,1.024108));  
 
   bshape(shSemiFeatherFloor[0], 10);
   hpcpush(hpxyz(-0.213723,0.142000,1.032396));
@@ -1330,7 +1491,7 @@ void buildpolys() {
   hpcpush(hpxyz(-0.167602,0.109998,1.019897));
   hpcpush(hpxyz(-0.121700,0.283485,1.046506));
   hpcpush(hpxyz(-0.122282,0.287492,1.047666));
-
+  
   bshape(shDesertFloor[1], 10);
   hpcpush(hpxyz(-0.336141,-0.153280,1.066061));
   hpcpush(hpxyz(-0.336530,-0.140779,1.064458));
@@ -1403,7 +1564,7 @@ void buildpolys() {
   hpcpush(hpxyz(-0.319889,-0.175335,1.064458));
   hpcpush(hpxyz(-0.329419,-0.167237,1.066061));
   hpcpush(hpxyz(-0.336141,-0.153280,1.066061));
-
+  
   bshape(shFloor[0], 11);
   for(int t=0; t<=6; t++) hpcpush(ddi(7 + t*14, hexf*.8) * C0);
 
@@ -1427,10 +1588,40 @@ void buildpolys() {
   bshape(shMFloor2[1], 13);
   for(int t=0; t<=7; t++) hpcpush(ddi(t*12, hexf*.7) * C0);
   
-  bshape(shBFloor[0], 14);
+  bshape(shMFloor3[0], 14);
+  for(int t=0; t<=6; t++) hpcpush(ddi(7 + t*14, hexf*.5) * C0);
+
+  bshape(shMFloor3[1], 14);
+  for(int t=0; t<=7; t++) hpcpush(ddi(t*12, hexf*.6) * C0);
+  
+  bshape(shMFloor4[0], 15);
+  for(int t=0; t<=6; t++) hpcpush(ddi(7 + t*14, hexf*.4) * C0);
+
+  bshape(shMFloor4[1], 15);
+  for(int t=0; t<=7; t++) hpcpush(ddi(t*12, hexf*.5) * C0);
+
+  bshape(shBigCarpet1, 14);
+//for(int t=0; t<=7; t++) hpcpush(ddi(t*12, -hexf*3.5) * C0);  
+  for(int t=0; t<=7; t++) hpcpush(ddi(t*12, -hexf*2.1) * C0);  
+
+  bshape(shBigCarpet2, 15);
+//for(int t=0; t<=7; t++) hpcpush(ddi(t*12, -hexf*3.4) * C0);
+  for(int t=0; t<=7; t++) hpcpush(ddi(t*12, -hexf*1.9) * C0);
+
+  bshape(shBigCarpet3, 16);
+//for(int t=0; t<=7; t++) hpcpush(ddi(t*12, -hexf*3.4) * C0);
+  for(int t=0; t<=7; t++) hpcpush(ddi(t*12*3, -hexf*1.7) * C0);
+
+  bshape(shBFloor[0], 16);
   for(int t=0; t<=6; t++) hpcpush(ddi(7 + t*14, hexf*.1) * C0);
 
-  bshape(shBFloor[1], 14);
+  bshape(shBFloor[1], 16);
+  for(int t=0; t<=7; t++) hpcpush(ddi(t*12, hexf*.1) * C0);
+  
+  bshape(shMineMark[0], 50);
+  for(int t=0; t<=6; t++) hpcpush(ddi(7 + t*14, hexf*.1) * C0);
+
+  bshape(shMineMark[1], 50);
   for(int t=0; t<=7; t++) hpcpush(ddi(t*12, hexf*.1) * C0);
   
   for(int d=0; d<2; d++) {
@@ -1515,6 +1706,114 @@ void buildpolys() {
   bshape(shGem[1], 21);
   for(int t=0; t<=7; t++) hpcpush(ddi(t*36, hexf*.5) * C0);
 
+  bshape(shElementalShard, 21);
+  hpcpush(hpxyz(-0.345978,0.004270,1.058168));
+  hpcpush(hpxyz(-0.054981,0.027419,1.001886));
+  hpcpush(hpxyz(-0.063949,0.034031,1.002620));
+  hpcpush(hpxyz(-0.078659,0.057318,1.004725));
+  hpcpush(hpxyz(-0.103108,0.086449,1.009012));
+  hpcpush(hpxyz(-0.130880,0.100059,1.013480));
+  hpcpush(hpxyz(-0.157829,0.107491,1.018069));
+  hpcpush(hpxyz(-0.173912,0.106860,1.020620));
+  hpcpush(hpxyz(-0.191566,0.100397,1.023121));
+  hpcpush(hpxyz(-0.200633,0.095930,1.024430));
+  hpcpush(hpxyz(-0.216136,0.090593,1.027094));
+  hpcpush(hpxyz(-0.200642,0.111259,1.025980));
+  hpcpush(hpxyz(-0.173354,0.128719,1.023045));
+  hpcpush(hpxyz(-0.141916,0.144399,1.020290));
+  hpcpush(hpxyz(-0.106497,0.138938,1.015207));
+  hpcpush(hpxyz(-0.079427,0.124373,1.010830));
+  hpcpush(hpxyz(-0.053552,0.106563,1.007087));
+  hpcpush(hpxyz(-0.030995,0.078798,1.003579));
+  hpcpush(hpxyz(-0.024668,0.068596,1.002653));
+  hpcpush(hpxyz(-0.027285,0.085742,1.004040));
+  hpcpush(hpxyz(-0.033561,0.111171,1.006720));
+  hpcpush(hpxyz(-0.036750,0.137167,1.010032));
+  hpcpush(hpxyz(-0.035531,0.165577,1.014238));
+  hpcpush(hpxyz(-0.023882,0.199023,1.019892));
+  hpcpush(hpxyz(-0.002982,0.230118,1.026140));
+  hpcpush(hpxyz(0.021321,0.244715,1.029728));
+  hpcpush(hpxyz(0.012442,0.234213,1.027137));
+  hpcpush(hpxyz(-0.002073,0.208126,1.021431));
+  hpcpush(hpxyz(-0.005433,0.188040,1.017540));
+  hpcpush(hpxyz(-0.004352,0.170363,1.014417));
+  hpcpush(hpxyz(0.001158,0.155057,1.011951));
+  hpcpush(hpxyz(0.002408,0.141554,1.009972));
+  hpcpush(hpxyz(0.008798,0.125672,1.007904));
+  hpcpush(hpxyz(0.018292,0.110314,1.006232));
+  hpcpush(hpxyz(0.026174,0.100337,1.005362));
+  hpcpush(hpxyz(0.176687,0.297491,1.058168));
+  hpcpush(hpxyz(0.051236,0.033906,1.001886));
+  hpcpush(hpxyz(0.061446,0.038366,1.002620));
+  hpcpush(hpxyz(0.088968,0.039461,1.004725));
+  hpcpush(hpxyz(0.126421,0.046070,1.009012));
+  hpcpush(hpxyz(0.152094,0.063316,1.013480));
+  hpcpush(hpxyz(0.172004,0.082938,1.018069));
+  hpcpush(hpxyz(0.179499,0.097182,1.020620));
+  hpcpush(hpxyz(0.182729,0.115702,1.023121));
+  hpcpush(hpxyz(0.183395,0.125788,1.024430));
+  hpcpush(hpxyz(0.186524,0.141882,1.027094));
+  hpcpush(hpxyz(0.196674,0.118132,1.025980));
+  hpcpush(hpxyz(0.198151,0.085770,1.023045));
+  hpcpush(hpxyz(0.196011,0.050703,1.020290));
+  hpcpush(hpxyz(0.173572,0.022760,1.015207));
+  hpcpush(hpxyz(0.147423,0.006599,1.010830));
+  hpcpush(hpxyz(0.119062,-0.006904,1.007087));
+  hpcpush(hpxyz(0.083739,-0.012556,1.003579));
+  hpcpush(hpxyz(0.071740,-0.012935,1.002653));
+  hpcpush(hpxyz(0.087898,-0.019242,1.004040));
+  hpcpush(hpxyz(0.113057,-0.026521,1.006720));
+  hpcpush(hpxyz(0.137165,-0.036757,1.010032));
+  hpcpush(hpxyz(0.161159,-0.052018,1.014238));
+  hpcpush(hpxyz(0.184300,-0.078830,1.019892));
+  hpcpush(hpxyz(0.200779,-0.112477,1.026140));
+  hpcpush(hpxyz(0.201269,-0.140822,1.029728));
+  hpcpush(hpxyz(0.196613,-0.127882,1.027137));
+  hpcpush(hpxyz(0.181278,-0.102268,1.021431));
+  hpcpush(hpxyz(0.165564,-0.089315,1.017540));
+  hpcpush(hpxyz(0.149715,-0.081413,1.014417));
+  hpcpush(hpxyz(0.133704,-0.078531,1.011951));
+  hpcpush(hpxyz(0.121386,-0.072862,1.009972));
+  hpcpush(hpxyz(0.104436,-0.070455,1.007904));
+  hpcpush(hpxyz(0.086388,-0.070998,1.006232));
+  hpcpush(hpxyz(0.073808,-0.072835,1.005362));
+  hpcpush(hpxyz(0.169291,-0.301761,1.058168));
+  hpcpush(hpxyz(0.003745,-0.061325,1.001886));
+  hpcpush(hpxyz(0.002503,-0.072397,1.002620));
+  hpcpush(hpxyz(-0.010310,-0.096779,1.004725));
+  hpcpush(hpxyz(-0.023313,-0.132518,1.009012));
+  hpcpush(hpxyz(-0.021214,-0.163375,1.013480));
+  hpcpush(hpxyz(-0.014176,-0.190429,1.018069));
+  hpcpush(hpxyz(-0.005587,-0.204042,1.020620));
+  hpcpush(hpxyz(0.008837,-0.216099,1.023121));
+  hpcpush(hpxyz(0.017239,-0.221719,1.024430));
+  hpcpush(hpxyz(0.029612,-0.232476,1.027094));
+  hpcpush(hpxyz(0.003968,-0.229391,1.025980));
+  hpcpush(hpxyz(-0.024797,-0.214489,1.023045));
+  hpcpush(hpxyz(-0.054095,-0.195102,1.020290));
+  hpcpush(hpxyz(-0.067075,-0.161698,1.015207));
+  hpcpush(hpxyz(-0.067996,-0.130972,1.010830));
+  hpcpush(hpxyz(-0.065511,-0.099659,1.007087));
+  hpcpush(hpxyz(-0.052744,-0.066242,1.003579));
+  hpcpush(hpxyz(-0.047072,-0.055661,1.002653));
+  hpcpush(hpxyz(-0.060613,-0.066501,1.004040));
+  hpcpush(hpxyz(-0.079496,-0.084650,1.006720));
+  hpcpush(hpxyz(-0.100415,-0.100410,1.010032));
+  hpcpush(hpxyz(-0.125628,-0.113559,1.014238));
+  hpcpush(hpxyz(-0.160419,-0.120194,1.019892));
+  hpcpush(hpxyz(-0.197797,-0.117641,1.026140));
+  hpcpush(hpxyz(-0.222590,-0.103893,1.029728));
+  hpcpush(hpxyz(-0.209056,-0.106331,1.027137));
+  hpcpush(hpxyz(-0.179206,-0.105858,1.021431));
+  hpcpush(hpxyz(-0.160131,-0.098725,1.017540));
+  hpcpush(hpxyz(-0.145363,-0.088950,1.014417));
+  hpcpush(hpxyz(-0.134862,-0.076526,1.011951));
+  hpcpush(hpxyz(-0.123793,-0.068692,1.009972));
+  hpcpush(hpxyz(-0.113234,-0.055216,1.007904));
+  hpcpush(hpxyz(-0.104681,-0.039315,1.006232));
+  hpcpush(hpxyz(-0.099981,-0.027501,1.005362));
+  hpcpush(hpxyz(-0.345978,0.004270,1.058168));
+  
   bshape(shStar, 21);
   for(int t=0; t<84; t+=6) {
     hpcpush(ddi(t,   hexf*.2) * C0);
@@ -1531,6 +1830,19 @@ void buildpolys() {
   for(int i=84; i>=0; i--)
     hpcpush(ddi(i, crossf * .30) * C0);
   hpcpush(ddi(0, crossf * .25) * C0);
+  
+  bshape(shCompass1, 21);
+  for(int i=0; i<=84; i+=3)
+    hpcpush(ddi(i, crossf * .35) * C0);
+  
+  bshape(shCompass2, 22);
+  for(int i=0; i<=84; i+=3)
+    hpcpush(ddi(i, crossf * .3) * C0);
+  
+  bshape(shCompass3, 23);
+  hpcpush(ddi(0, crossf * .29) * C0);
+  hpcpush(ddi(21, crossf * .04) * C0);
+  hpcpush(ddi(-21, crossf * .04) * C0);
   
   bshape(shNecro, 21);
     hpcpush(hpxyz(-0.280120,0.002558,1.038496));
@@ -1578,6 +1890,29 @@ void buildpolys() {
   hpcpush(hpxyz(-0.252806,-0.037921,1.032157));
   hpcpush(hpxyz(-0.280120,-0.002558,1.038496));
   hpcpush(hpxyz(-0.280120,0.002558,1.038496));
+
+  bshape(shFigurine, 21);
+  hpcpush(hpxyz(-0.105008,0.082180,1.008851));
+  hpcpush(hpxyz(-0.018191,0.040930,1.001003));
+  hpcpush(hpxyz(-0.011407,0.123195,1.007625));
+  hpcpush(hpxyz(0.041081,0.123243,1.008403));
+  hpcpush(hpxyz(0.040941,0.038667,1.001584));
+  hpcpush(hpxyz(0.070555,0.027312,1.002858));
+  hpcpush(hpxyz(0.086601,0.059253,1.005490));
+  hpcpush(hpxyz(0.134876,0.073153,1.011703));
+  hpcpush(hpxyz(0.190524,0.064273,1.020015));
+  hpcpush(hpxyz(0.211472,0.036778,1.022777));
+  hpcpush(hpxyz(0.211472,-0.036778,1.022777));
+  hpcpush(hpxyz(0.190524,-0.064273,1.020015));
+  hpcpush(hpxyz(0.134876,-0.073153,1.011703));
+  hpcpush(hpxyz(0.086601,-0.059253,1.005490));
+  hpcpush(hpxyz(0.070555,-0.027312,1.002858));
+  hpcpush(hpxyz(0.040941,-0.038667,1.001584));
+  hpcpush(hpxyz(0.041081,-0.123243,1.008403));
+  hpcpush(hpxyz(-0.011407,-0.123195,1.007625));
+  hpcpush(hpxyz(-0.018191,-0.040930,1.001003));
+  hpcpush(hpxyz(-0.105008,-0.082180,1.008851));
+  hpcpush(hpxyz(-0.105008,0.082180,1.008851));
 
   bshape(shStatue, 21);
   hpcpush(hpxyz(-0.047663,0.032172,1.001652));
@@ -1867,6 +2202,10 @@ void buildpolys() {
   hpcpush(hpxyz(-0.280212,-0.017913,1.038672));
   hpcpush(hpxyz(-0.280212,-0.017913,1.038672));
 
+  for(int i=1; i<=3; i++) for(int j=0; j<2; j++) {
+    zoomShape(shDesertFloor[j], shRedRockFloor[i-1][j], 1 - .1 * i, 11+i);
+    }
+    
   // monsters
   
   bshape(shTentacleX, 31);
@@ -1968,7 +2307,223 @@ void buildpolys() {
   bshape(shILeaf[1], 33);
   for(int t=0; t<=7; t++) hpcpush(ddi(t*36, hexf*.8) * C0);
 
+  bshape(shGargoyleWings, 34);
+  hpcpush(hpxyz(0.042241,0.002223,1.000894));
+  hpcpush(hpxyz(0.041129,-0.007781,1.000876));
+  hpcpush(hpxyz(0.045593,-0.034473,1.001632));
+  hpcpush(hpxyz(0.066799,-0.059006,1.003964));
+  hpcpush(hpxyz(0.116090,-0.071440,1.009247));
+  hpcpush(hpxyz(0.169203,-0.075077,1.016989));
+  hpcpush(hpxyz(0.154517,-0.085096,1.015439));
+  hpcpush(hpxyz(0.124220,-0.116387,1.014385));
+  hpcpush(hpxyz(0.104146,-0.144461,1.015734));
+  hpcpush(hpxyz(0.082994,-0.176082,1.018770));
+  hpcpush(hpxyz(0.049446,-0.209023,1.022808));
+  hpcpush(hpxyz(0.004505,-0.235397,1.027342));
+  hpcpush(hpxyz(-0.039494,-0.248247,1.031109));
+  hpcpush(hpxyz(-0.071220,-0.256618,1.034855));
+  hpcpush(hpxyz(-0.116784,-0.264180,1.040879));
+  hpcpush(hpxyz(-0.160337,-0.264954,1.046857));
+  hpcpush(hpxyz(-0.177592,-0.262973,1.049140));
+  hpcpush(hpxyz(-0.159002,-0.255539,1.044309));
+  hpcpush(hpxyz(-0.137018,-0.243463,1.038291));
+  hpcpush(hpxyz(-0.124173,-0.222383,1.031927));
+  hpcpush(hpxyz(-0.128481,-0.203992,1.028650));
+  hpcpush(hpxyz(-0.160238,-0.194091,1.031188));
+  hpcpush(hpxyz(-0.184305,-0.194482,1.035274));
+  hpcpush(hpxyz(-0.160187,-0.190645,1.030536));
+  hpcpush(hpxyz(-0.117943,-0.174106,1.021872));
+  hpcpush(hpxyz(-0.108751,-0.156961,1.018069));
+  hpcpush(hpxyz(-0.107466,-0.136571,1.014988));
+  hpcpush(hpxyz(-0.120870,-0.120870,1.014504));
+  hpcpush(hpxyz(-0.143330,-0.104138,1.015573));
+  hpcpush(hpxyz(-0.156871,-0.097484,1.016913));
+  hpcpush(hpxyz(-0.143266,-0.095138,1.014680));
+  hpcpush(hpxyz(-0.119536,-0.087138,1.010882));
+  hpcpush(hpxyz(-0.103741,-0.071392,1.007898));
+  hpcpush(hpxyz(-0.091360,-0.051251,1.005472));
+  hpcpush(hpxyz(-0.083500,-0.032287,1.003999));
+  hpcpush(hpxyz(-0.077900,-0.015580,1.003151));
+  hpcpush(hpxyz(-0.077900,0.015580,1.003151));
+  hpcpush(hpxyz(-0.083500,0.032287,1.003999));
+  hpcpush(hpxyz(-0.091360,0.051251,1.005472));
+  hpcpush(hpxyz(-0.103741,0.071392,1.007898));
+  hpcpush(hpxyz(-0.119536,0.087138,1.010882));
+  hpcpush(hpxyz(-0.143266,0.095138,1.014680));
+  hpcpush(hpxyz(-0.156871,0.097484,1.016913));
+  hpcpush(hpxyz(-0.143330,0.104138,1.015573));
+  hpcpush(hpxyz(-0.120870,0.120870,1.014504));
+  hpcpush(hpxyz(-0.107466,0.136571,1.014988));
+  hpcpush(hpxyz(-0.108751,0.156961,1.018069));
+  hpcpush(hpxyz(-0.117943,0.174106,1.021872));
+  hpcpush(hpxyz(-0.160187,0.190645,1.030536));
+  hpcpush(hpxyz(-0.184305,0.194482,1.035274));
+  hpcpush(hpxyz(-0.160238,0.194091,1.031188));
+  hpcpush(hpxyz(-0.128481,0.203992,1.028650));
+  hpcpush(hpxyz(-0.124173,0.222383,1.031927));
+  hpcpush(hpxyz(-0.137018,0.243463,1.038291));
+  hpcpush(hpxyz(-0.159002,0.255539,1.044309));
+  hpcpush(hpxyz(-0.177592,0.262973,1.049140));
+  hpcpush(hpxyz(-0.160337,0.264954,1.046857));
+  hpcpush(hpxyz(-0.116784,0.264180,1.040879));
+  hpcpush(hpxyz(-0.071220,0.256618,1.034855));
+  hpcpush(hpxyz(-0.039494,0.248247,1.031109));
+  hpcpush(hpxyz(0.004505,0.235397,1.027342));
+  hpcpush(hpxyz(0.049446,0.209023,1.022808));
+  hpcpush(hpxyz(0.082994,0.176082,1.018770));
+  hpcpush(hpxyz(0.104146,0.144461,1.015734));
+  hpcpush(hpxyz(0.124220,0.116387,1.014385));
+  hpcpush(hpxyz(0.154517,0.085096,1.015439));
+  hpcpush(hpxyz(0.169203,0.075077,1.016989));
+  hpcpush(hpxyz(0.116090,0.071440,1.009247));
+  hpcpush(hpxyz(0.066799,0.059006,1.003964));
+  hpcpush(hpxyz(0.045593,0.034473,1.001632));
+  hpcpush(hpxyz(0.041129,0.007781,1.000876));
+  hpcpush(hpxyz(0.042241,-0.002223,1.000894));
+  hpcpush(hpxyz(0.042241,0.002223,1.000894));
+
+  bshape(shGargoyleBody, 33);
+  hpcpush(hpxyz(0.128302,-0.002231,1.008200));
+  hpcpush(hpxyz(0.128305,-0.010041,1.008247));
+  hpcpush(hpxyz(0.136196,-0.021211,1.009455));
+  hpcpush(hpxyz(0.146366,-0.031284,1.011139));
+  hpcpush(hpxyz(0.164504,-0.042525,1.014332));
+  hpcpush(hpxyz(0.161107,-0.043633,1.013834));
+  hpcpush(hpxyz(0.143009,-0.042456,1.011066));
+  hpcpush(hpxyz(0.127212,-0.033477,1.008615));
+  hpcpush(hpxyz(0.114839,-0.025644,1.006899));
+  hpcpush(hpxyz(0.108151,-0.046828,1.006921));
+  hpcpush(hpxyz(0.094666,-0.021161,1.004694));
+  hpcpush(hpxyz(0.081255,-0.022262,1.003543));
+  hpcpush(hpxyz(0.068979,-0.022251,1.002623));
+  hpcpush(hpxyz(0.057838,-0.028919,1.002089));
+  hpcpush(hpxyz(0.082541,-0.093696,1.007766));
+  hpcpush(hpxyz(0.108462,-0.117407,1.012694));
+  hpcpush(hpxyz(0.080377,-0.111634,1.009417));
+  hpcpush(hpxyz(0.074909,-0.139757,1.012494));
+  hpcpush(hpxyz(0.066894,-0.095881,1.006811));
+  hpcpush(hpxyz(0.056798,-0.077958,1.004641));
+  hpcpush(hpxyz(0.043402,-0.066772,1.003166));
+  hpcpush(hpxyz(0.031144,-0.056726,1.002092));
+  hpcpush(hpxyz(0.011119,-0.053373,1.001485));
+  hpcpush(hpxyz(-0.024478,-0.070096,1.002753));
+  hpcpush(hpxyz(-0.007782,-0.046693,1.001120));
+  hpcpush(hpxyz(-0.062361,-0.071270,1.004474));
+  hpcpush(hpxyz(-0.041154,-0.050052,1.002097));
+  hpcpush(hpxyz(-0.097005,-0.068015,1.006994));
+  hpcpush(hpxyz(-0.066772,-0.043402,1.003166));
+  hpcpush(hpxyz(-0.120555,-0.063626,1.009248));
+  hpcpush(hpxyz(-0.092454,-0.038987,1.005021));
+  hpcpush(hpxyz(-0.144240,-0.068206,1.012649));
+  hpcpush(hpxyz(-0.151438,-0.125638,1.019175));
+  hpcpush(hpxyz(-0.186951,-0.141902,1.027174));
+  hpcpush(hpxyz(-0.209987,-0.145636,1.032136));
+  hpcpush(hpxyz(-0.230971,-0.155113,1.037983));
+  hpcpush(hpxyz(-0.216796,-0.137756,1.032462));
+  hpcpush(hpxyz(-0.243372,-0.131308,1.037531));
+  hpcpush(hpxyz(-0.209646,-0.120603,1.028833));
+  hpcpush(hpxyz(-0.188968,-0.119230,1.024658));
+  hpcpush(hpxyz(-0.167228,-0.113356,1.020203));
+  hpcpush(hpxyz(-0.164543,-0.052609,1.014811));
+  hpcpush(hpxyz(-0.121573,-0.023422,1.007635));
+  hpcpush(hpxyz(-0.142949,-0.011168,1.010227));
+  hpcpush(hpxyz(-0.187169,-0.007845,1.017396));
+  hpcpush(hpxyz(-0.243507,-0.003382,1.029226));
+  hpcpush(hpxyz(-0.243507,0.003382,1.029226));
+  hpcpush(hpxyz(-0.187169,0.007845,1.017396));
+  hpcpush(hpxyz(-0.142949,0.011168,1.010227));
+  hpcpush(hpxyz(-0.121573,0.023422,1.007635));
+  hpcpush(hpxyz(-0.164543,0.052609,1.014811));
+  hpcpush(hpxyz(-0.167228,0.113356,1.020203));
+  hpcpush(hpxyz(-0.188968,0.119230,1.024658));
+  hpcpush(hpxyz(-0.209646,0.120603,1.028833));
+  hpcpush(hpxyz(-0.243372,0.131308,1.037531));
+  hpcpush(hpxyz(-0.216796,0.137756,1.032462));
+  hpcpush(hpxyz(-0.230971,0.155113,1.037983));
+  hpcpush(hpxyz(-0.209987,0.145636,1.032136));
+  hpcpush(hpxyz(-0.186951,0.141902,1.027174));
+  hpcpush(hpxyz(-0.151438,0.125638,1.019175));
+  hpcpush(hpxyz(-0.144240,0.068206,1.012649));
+  hpcpush(hpxyz(-0.092454,0.038987,1.005021));
+  hpcpush(hpxyz(-0.120555,0.063626,1.009248));
+  hpcpush(hpxyz(-0.066772,0.043402,1.003166));
+  hpcpush(hpxyz(-0.097005,0.068015,1.006994));
+  hpcpush(hpxyz(-0.041154,0.050052,1.002097));
+  hpcpush(hpxyz(-0.062361,0.071270,1.004474));
+  hpcpush(hpxyz(-0.007782,0.046693,1.001120));
+  hpcpush(hpxyz(-0.024478,0.070096,1.002753));
+  hpcpush(hpxyz(0.011119,0.053373,1.001485));
+  hpcpush(hpxyz(0.031144,0.056726,1.002092));
+  hpcpush(hpxyz(0.043402,0.066772,1.003166));
+  hpcpush(hpxyz(0.056798,0.077958,1.004641));
+  hpcpush(hpxyz(0.066894,0.095881,1.006811));
+  hpcpush(hpxyz(0.074909,0.139757,1.012494));
+  hpcpush(hpxyz(0.080377,0.111634,1.009417));
+  hpcpush(hpxyz(0.108462,0.117407,1.012694));
+  hpcpush(hpxyz(0.082541,0.093696,1.007766));
+  hpcpush(hpxyz(0.057838,0.028919,1.002089));
+  hpcpush(hpxyz(0.068979,0.022251,1.002623));
+  hpcpush(hpxyz(0.081255,0.022262,1.003543));
+  hpcpush(hpxyz(0.094666,0.021161,1.004694));
+  hpcpush(hpxyz(0.108151,0.046828,1.006921));
+  hpcpush(hpxyz(0.114839,0.025644,1.006899));
+  hpcpush(hpxyz(0.127212,0.033477,1.008615));
+  hpcpush(hpxyz(0.143009,0.042456,1.011066));
+  hpcpush(hpxyz(0.161107,0.043633,1.013834));
+  hpcpush(hpxyz(0.164504,0.042525,1.014332));
+  hpcpush(hpxyz(0.146366,0.031284,1.011139));
+  hpcpush(hpxyz(0.136196,0.021211,1.009455));
+  hpcpush(hpxyz(0.128305,0.010041,1.008247));
+  hpcpush(hpxyz(0.128302,0.002231,1.008200));
+  hpcpush(hpxyz(0.128302,-0.002231,1.008200));
+
+  bshape(shDogStripes, 34);
+  hpcpush(hpxyz(-0.147497,-0.001105,1.010820));
+  hpcpush(hpxyz(-0.159242,0.009400,1.012643));
+  hpcpush(hpxyz(-0.153105,0.023214,1.011919));
+  hpcpush(hpxyz(-0.135232,0.011039,1.009163));
+  hpcpush(hpxyz(-0.110779,0.007165,1.006143));
+  hpcpush(hpxyz(-0.119793,0.067901,1.009436));
+  hpcpush(hpxyz(-0.099799,0.063959,1.007001));
+  hpcpush(hpxyz(-0.090296,0.011012,1.004129));
+  hpcpush(hpxyz(-0.047281,0.012095,1.001190));
+  hpcpush(hpxyz(-0.058915,0.070478,1.004210));
+  hpcpush(hpxyz(-0.041289,0.078174,1.003900));
+  hpcpush(hpxyz(-0.021982,0.013189,1.000329));
+  hpcpush(hpxyz(0.011539,0.012638,1.000146));
+  hpcpush(hpxyz(-0.001651,0.079245,1.003136));
+  hpcpush(hpxyz(0.011562,0.089191,1.004036));
+  hpcpush(hpxyz(0.034627,0.013741,1.000694));
+  hpcpush(hpxyz(0.043979,0.012094,1.001040));
+  hpcpush(hpxyz(0.052798,0.032449,1.001918));
+  hpcpush(hpxyz(0.058855,0.029703,1.002171));
+  hpcpush(hpxyz(0.077053,0.029170,1.003388));
+  hpcpush(hpxyz(0.066006,0.005501,1.002191));
+  hpcpush(hpxyz(0.066006,-0.005501,1.002191));
+  hpcpush(hpxyz(0.077053,-0.029170,1.003388));
+  hpcpush(hpxyz(0.058855,-0.029703,1.002171));
+  hpcpush(hpxyz(0.052798,-0.032449,1.001918));
+  hpcpush(hpxyz(0.043979,-0.012094,1.001040));
+  hpcpush(hpxyz(0.034627,-0.013741,1.000694));
+  hpcpush(hpxyz(0.011562,-0.089191,1.004036));
+  hpcpush(hpxyz(-0.001651,-0.079245,1.003136));
+  hpcpush(hpxyz(0.011539,-0.012638,1.000146));
+  hpcpush(hpxyz(-0.021982,-0.013189,1.000329));
+  hpcpush(hpxyz(-0.041289,-0.078174,1.003900));
+  hpcpush(hpxyz(-0.058915,-0.070478,1.004210));
+  hpcpush(hpxyz(-0.047281,-0.012095,1.001190));
+  hpcpush(hpxyz(-0.090296,-0.011012,1.004129));
+  hpcpush(hpxyz(-0.099799,-0.063959,1.007001));
+  hpcpush(hpxyz(-0.119793,-0.067901,1.009436));
+  hpcpush(hpxyz(-0.110779,-0.007165,1.006143));
+  hpcpush(hpxyz(-0.135232,-0.011039,1.009163));
+  hpcpush(hpxyz(-0.153105,-0.023214,1.011919));
+  hpcpush(hpxyz(-0.159242,-0.009400,1.012643));
+  hpcpush(hpxyz(-0.147497,0.001105,1.010820));
+  hpcpush(hpxyz(-0.147497,-0.001105,1.010820));
+
   bshape(shWolf, 33);
+  /*
   hpcpush(hpxyz(-0.310601,0.000000,1.047126));
   hpcpush(hpxyz(-0.158251,0.009739,1.012491));
   hpcpush(hpxyz(-0.149626,0.045009,1.012133));
@@ -2110,7 +2665,185 @@ void buildpolys() {
   hpcpush(hpxyz(-0.158251,-0.009739,1.012491));
   hpcpush(hpxyz(-0.310601,-0.000000,1.047126));
   hpcpush(hpxyz(-0.310601,0.000000,1.047126));
+  */
+  hpcpush(hpxyz(-0.310601,0.000000,1.047126));
+  hpcpush(hpxyz(-0.158251,0.009739,1.012491));
+  hpcpush(hpxyz(-0.149626,0.045009,1.012133));
+  hpcpush(hpxyz(-0.173168,0.066320,1.017047));
+  hpcpush(hpxyz(-0.250414,0.056912,1.032447));
+  hpcpush(hpxyz(-0.242122,0.064314,1.030902));
+  hpcpush(hpxyz(-0.253563,0.065926,1.033751));
+  hpcpush(hpxyz(-0.241104,0.075740,1.031440));
+  hpcpush(hpxyz(-0.249897,0.082453,1.034044));
+  hpcpush(hpxyz(-0.237118,0.081982,1.030993));
+  hpcpush(hpxyz(-0.246310,0.097762,1.034517));
+  hpcpush(hpxyz(-0.230366,0.088118,1.029968));
+  hpcpush(hpxyz(-0.210870,0.082352,1.025304));
+  hpcpush(hpxyz(-0.194727,0.083100,1.022166));
+  hpcpush(hpxyz(-0.180298,0.087679,1.019899));
+  hpcpush(hpxyz(-0.162032,0.087154,1.016784));
+  hpcpush(hpxyz(-0.135091,0.081542,1.012373));
+  hpcpush(hpxyz(-0.116083,0.068924,1.009072));
+  hpcpush(hpxyz(-0.106144,0.066340,1.007803));
+  hpcpush(hpxyz(-0.084057,0.063643,1.005543));
+  hpcpush(hpxyz(-0.061108,0.071892,1.004441));
+  hpcpush(hpxyz(-0.044295,0.077815,1.004001));
+  hpcpush(hpxyz(-0.021516,0.077698,1.003245));
+  hpcpush(hpxyz(0.000000,0.078872,1.003106));
+  hpcpush(hpxyz(0.025203,0.099613,1.005265));
+  hpcpush(hpxyz(0.040964,0.113252,1.007226));
+  hpcpush(hpxyz(0.067885,0.127285,1.010351));
+  hpcpush(hpxyz(0.086481,0.135203,1.012798));
+  hpcpush(hpxyz(0.104129,0.144556,1.015746));
+  hpcpush(hpxyz(0.097579,0.132951,1.013508));
+  hpcpush(hpxyz(0.112604,0.134635,1.015286));
+  hpcpush(hpxyz(0.098603,0.124167,1.012492));
+  hpcpush(hpxyz(0.118341,0.115901,1.013626));
+  hpcpush(hpxyz(0.094688,0.115325,1.011072));
+  hpcpush(hpxyz(0.079806,0.108826,1.009065));
+  hpcpush(hpxyz(0.065011,0.097516,1.006845));
+  hpcpush(hpxyz(0.053964,0.082746,1.004868));
+  hpcpush(hpxyz(0.049028,0.066966,1.003438));
+  hpcpush(hpxyz(0.045353,0.053708,1.002468));
+  hpcpush(hpxyz(0.046494,0.040534,1.001901));
+  hpcpush(hpxyz(0.051260,0.033378,1.001869));
+  hpcpush(hpxyz(0.059646,0.029823,1.002221));
+  hpcpush(hpxyz(0.069275,0.029860,1.002841));
+  hpcpush(hpxyz(0.077732,0.029897,1.003462));
+  hpcpush(hpxyz(0.081360,0.028715,1.003715));
+  hpcpush(hpxyz(0.066249,0.039649,1.002976));
+  hpcpush(hpxyz(0.106662,0.046229,1.006734));
+  hpcpush(hpxyz(0.146020,0.025919,1.010937));
+  hpcpush(hpxyz(0.159666,0.028110,1.013056));
+  hpcpush(hpxyz(0.172131,0.020186,1.014907));
+  hpcpush(hpxyz(0.172077,0.013438,1.014786));
+  hpcpush(hpxyz(0.168613,0.007837,1.014146));
+  hpcpush(hpxyz(0.168613,-0.007837,1.014146));
+  hpcpush(hpxyz(0.172077,-0.013438,1.014786));
+  hpcpush(hpxyz(0.172131,-0.020186,1.014907));
+  hpcpush(hpxyz(0.159666,-0.028110,1.013056));
+  hpcpush(hpxyz(0.146020,-0.025919,1.010937));
+  hpcpush(hpxyz(0.106662,-0.046229,1.006734));
+  hpcpush(hpxyz(0.066249,-0.039649,1.002976));
+  hpcpush(hpxyz(0.081360,-0.028715,1.003715));
+  hpcpush(hpxyz(0.077732,-0.029897,1.003462));
+  hpcpush(hpxyz(0.069275,-0.029860,1.002841));
+  hpcpush(hpxyz(0.059646,-0.029823,1.002221));
+  hpcpush(hpxyz(0.051260,-0.033378,1.001869));
+  hpcpush(hpxyz(0.046494,-0.040534,1.001901));
+  hpcpush(hpxyz(0.045353,-0.053708,1.002468));
+  hpcpush(hpxyz(0.049028,-0.066966,1.003438));
+  hpcpush(hpxyz(0.053964,-0.082746,1.004868));
+  hpcpush(hpxyz(0.065011,-0.097516,1.006845));
+  hpcpush(hpxyz(0.079806,-0.108826,1.009065));
+  hpcpush(hpxyz(0.094688,-0.115325,1.011072));
+  hpcpush(hpxyz(0.118341,-0.115901,1.013626));
+  hpcpush(hpxyz(0.098603,-0.124167,1.012492));
+  hpcpush(hpxyz(0.112604,-0.134635,1.015286));
+  hpcpush(hpxyz(0.097579,-0.132951,1.013508));
+  hpcpush(hpxyz(0.104129,-0.144556,1.015746));
+  hpcpush(hpxyz(0.086481,-0.135203,1.012798));
+  hpcpush(hpxyz(0.067885,-0.127285,1.010351));
+  hpcpush(hpxyz(0.040964,-0.113252,1.007226));
+  hpcpush(hpxyz(0.025203,-0.099613,1.005265));
+  hpcpush(hpxyz(0.000000,-0.078872,1.003106));
+  hpcpush(hpxyz(-0.021516,-0.077698,1.003245));
+  hpcpush(hpxyz(-0.044295,-0.077815,1.004001));
+  hpcpush(hpxyz(-0.061108,-0.071892,1.004441));
+  hpcpush(hpxyz(-0.084057,-0.063643,1.005543));
+  hpcpush(hpxyz(-0.106144,-0.066340,1.007803));
+  hpcpush(hpxyz(-0.116083,-0.068924,1.009072));
+  hpcpush(hpxyz(-0.135091,-0.081542,1.012373));
+  hpcpush(hpxyz(-0.162032,-0.087154,1.016784));
+  hpcpush(hpxyz(-0.180298,-0.087679,1.019899));
+  hpcpush(hpxyz(-0.194727,-0.083100,1.022166));
+  hpcpush(hpxyz(-0.210870,-0.082352,1.025304));
+  hpcpush(hpxyz(-0.230366,-0.088118,1.029968));
+  hpcpush(hpxyz(-0.246310,-0.097762,1.034517));
+  hpcpush(hpxyz(-0.237118,-0.081982,1.030993));
+  hpcpush(hpxyz(-0.249897,-0.082453,1.034044));
+  hpcpush(hpxyz(-0.241104,-0.075740,1.031440));
+  hpcpush(hpxyz(-0.253563,-0.065926,1.033751));
+  hpcpush(hpxyz(-0.242122,-0.064314,1.030902));
+  hpcpush(hpxyz(-0.250414,-0.056912,1.032447));
+  hpcpush(hpxyz(-0.173168,-0.066320,1.017047));
+  hpcpush(hpxyz(-0.149626,-0.045009,1.012133));
+  hpcpush(hpxyz(-0.158251,-0.009739,1.012491));
+  hpcpush(hpxyz(-0.310601,0.000000,1.047126));
+  hpcpush(hpxyz(-0.310601,0.000000,1.047126));
   
+  bshape(shWolf1, 34);
+  hpcpush(hpxyz(0.121226,-0.019639,1.007513));
+  hpcpush(hpxyz(0.119731,-0.021190,1.007365));
+  hpcpush(hpxyz(0.117841,-0.022233,1.007165));
+  hpcpush(hpxyz(0.115725,-0.022676,1.006929));
+  hpcpush(hpxyz(0.113570,-0.022480,1.006679));
+  hpcpush(hpxyz(0.111568,-0.021661,1.006438));
+  hpcpush(hpxyz(0.109897,-0.020293,1.006225));
+  hpcpush(hpxyz(0.108705,-0.018496,1.006061));
+  hpcpush(hpxyz(0.108099,-0.016432,1.005960));
+  hpcpush(hpxyz(0.108131,-0.014283,1.005931));
+  hpcpush(hpxyz(0.108800,-0.012240,1.005976));
+  hpcpush(hpxyz(0.110046,-0.010484,1.006091));
+  hpcpush(hpxyz(0.111757,-0.009172,1.006267));
+  hpcpush(hpxyz(0.113783,-0.008421,1.006488));
+  hpcpush(hpxyz(0.115942,-0.008296,1.006733));
+  hpcpush(hpxyz(0.118044,-0.008810,1.006982));
+  hpcpush(hpxyz(0.119902,-0.009915,1.007211));
+  hpcpush(hpxyz(0.121349,-0.011516,1.007402));
+  hpcpush(hpxyz(0.122258,-0.013468,1.007536));
+  hpcpush(hpxyz(0.122549,-0.015598,1.007602));
+  hpcpush(hpxyz(0.122194,-0.017718,1.007594));
+  hpcpush(hpxyz(0.121226,-0.019639,1.007513));
+
+  bshape(shWolf2, 34);
+  hpcpush(hpxyz(0.110896,0.008835,1.006169));
+  hpcpush(hpxyz(0.109780,0.010595,1.006064));
+  hpcpush(hpxyz(0.109236,0.012605,1.006028));
+  hpcpush(hpxyz(0.109313,0.014686,1.006064));
+  hpcpush(hpxyz(0.110004,0.016653,1.006170));
+  hpcpush(hpxyz(0.111247,0.018331,1.006336));
+  hpcpush(hpxyz(0.112933,0.019572,1.006547));
+  hpcpush(hpxyz(0.114911,0.020264,1.006785));
+  hpcpush(hpxyz(0.117005,0.020346,1.007027));
+  hpcpush(hpxyz(0.119030,0.019812,1.007254));
+  hpcpush(hpxyz(0.120806,0.018708,1.007444));
+  hpcpush(hpxyz(0.122174,0.017133,1.007581));
+  hpcpush(hpxyz(0.123014,0.015226,1.007653));
+  hpcpush(hpxyz(0.123250,0.013158,1.007653));
+  hpcpush(hpxyz(0.122862,0.011111,1.007581));
+  hpcpush(hpxyz(0.121884,0.009268,1.007443));
+  hpcpush(hpxyz(0.120403,0.007792,1.007252));
+  hpcpush(hpxyz(0.118550,0.006815,1.007026));
+  hpcpush(hpxyz(0.116491,0.006423,1.006783));
+  hpcpush(hpxyz(0.114408,0.006652,1.006545));
+  hpcpush(hpxyz(0.112486,0.007480,1.006334));
+  hpcpush(hpxyz(0.110896,0.008835,1.006169));
+
+  bshape(shWolf3, 34);
+  hpcpush(hpxyz(0.157399,-0.008998,1.012351));
+  hpcpush(hpxyz(0.154869,-0.009703,1.011968));
+  hpcpush(hpxyz(0.152240,-0.009639,1.011568));
+  hpcpush(hpxyz(0.149747,-0.008812,1.011188));
+  hpcpush(hpxyz(0.147612,-0.007296,1.010862));
+  hpcpush(hpxyz(0.146023,-0.005225,1.010619));
+  hpcpush(hpxyz(0.145123,-0.002783,1.010479));
+  hpcpush(hpxyz(0.144991,-0.000188,1.010456));
+  hpcpush(hpxyz(0.145638,0.002331,1.010552));
+  hpcpush(hpxyz(0.147008,0.004549,1.010758));
+  hpcpush(hpxyz(0.148979,0.006269,1.011056));
+  hpcpush(hpxyz(0.151375,0.007339,1.011419));
+  hpcpush(hpxyz(0.153983,0.007663,1.011815));
+  hpcpush(hpxyz(0.156573,0.007212,1.012209));
+  hpcpush(hpxyz(0.158913,0.006027,1.012566));
+  hpcpush(hpxyz(0.160796,0.004213,1.012854));
+  hpcpush(hpxyz(0.162055,0.001931,1.013048));
+  hpcpush(hpxyz(0.162577,-0.000616,1.013130));
+  hpcpush(hpxyz(0.162316,-0.003201,1.013093));
+  hpcpush(hpxyz(0.161296,-0.005596,1.012940));
+  hpcpush(hpxyz(0.159607,-0.007588,1.012686));
+  hpcpush(hpxyz(0.157399,-0.008998,1.012351));
+
   bshape(shEagle, 33);
   hpcpush(hpxyz(-0.153132,0.000000,1.011657));
   hpcpush(hpxyz(-0.151960,0.025529,1.011802));
@@ -2398,6 +3131,186 @@ void buildpolys() {
   
   // bodyparts
 
+  bshape(shWaterElemental, 41);
+  hpcpush(hpxyz(0.033277,-0.002494,1.000557));
+  hpcpush(hpxyz(0.030600,0.009657,1.000515));
+  hpcpush(hpxyz(0.028387,0.043359,1.001342));
+  hpcpush(hpxyz(0.023906,0.062967,1.002266));
+  hpcpush(hpxyz(0.019706,0.086354,1.003915));
+  hpcpush(hpxyz(0.012812,0.106509,1.005738));
+  hpcpush(hpxyz(0.005882,0.110737,1.006130));
+  hpcpush(hpxyz(-0.011019,0.128245,1.008250));
+  hpcpush(hpxyz(-0.022186,0.143031,1.010421));
+  hpcpush(hpxyz(-0.030554,0.165535,1.014069));
+  hpcpush(hpxyz(-0.031448,0.191850,1.018722));
+  hpcpush(hpxyz(-0.019105,0.210887,1.022173));
+  hpcpush(hpxyz(-0.011140,0.218374,1.023627));
+  hpcpush(hpxyz(0.003294,0.228201,1.025713));
+  hpcpush(hpxyz(0.022226,0.229526,1.026244));
+  hpcpush(hpxyz(0.030754,0.226143,1.025713));
+  hpcpush(hpxyz(0.045164,0.218293,1.024545));
+  hpcpush(hpxyz(0.048550,0.213967,1.023787));
+  hpcpush(hpxyz(0.049437,0.209816,1.022970));
+  hpcpush(hpxyz(0.066512,0.191298,1.020303));
+  hpcpush(hpxyz(0.088299,0.195587,1.022766));
+  hpcpush(hpxyz(0.104559,0.227968,1.030971));
+  hpcpush(hpxyz(0.106012,0.240682,1.034005));
+  hpcpush(hpxyz(0.089373,0.265934,1.038609));
+  hpcpush(hpxyz(0.046213,0.273931,1.037870));
+  hpcpush(hpxyz(0.013854,0.270257,1.035968));
+  hpcpush(hpxyz(-0.022699,0.280947,1.038964));
+  hpcpush(hpxyz(-0.082207,0.292512,1.045142));
+  hpcpush(hpxyz(-0.094232,0.286583,1.044514));
+  hpcpush(hpxyz(-0.060514,0.273212,1.038416));
+  hpcpush(hpxyz(-0.030455,0.255305,1.032525));
+  hpcpush(hpxyz(-0.028453,0.245093,1.029990));
+  hpcpush(hpxyz(-0.035130,0.238686,1.028691));
+  hpcpush(hpxyz(-0.050479,0.236064,1.028725));
+  hpcpush(hpxyz(-0.095235,0.239928,1.032780));
+  hpcpush(hpxyz(-0.156131,0.242848,1.040842));
+  hpcpush(hpxyz(-0.180731,0.231002,1.042126));
+  hpcpush(hpxyz(-0.161568,0.228039,1.038319));
+  hpcpush(hpxyz(-0.140105,0.226302,1.034815));
+  hpcpush(hpxyz(-0.114110,0.211717,1.028516));
+  hpcpush(hpxyz(-0.104006,0.203643,1.025811));
+  hpcpush(hpxyz(-0.096764,0.190676,1.022605));
+  hpcpush(hpxyz(-0.097207,0.178784,1.020496));
+  hpcpush(hpxyz(-0.104028,0.166435,1.019079));
+  hpcpush(hpxyz(-0.109337,0.160521,1.018686));
+  hpcpush(hpxyz(-0.119778,0.153916,1.018841));
+  hpcpush(hpxyz(-0.145551,0.154306,1.022250));
+  hpcpush(hpxyz(-0.196422,0.144903,1.029358));
+  hpcpush(hpxyz(-0.238648,0.130576,1.036341));
+  hpcpush(hpxyz(-0.251825,0.121707,1.038378));
+  hpcpush(hpxyz(-0.243461,0.108932,1.034959));
+  hpcpush(hpxyz(-0.227615,0.116160,1.032135));
+  hpcpush(hpxyz(-0.199823,0.119359,1.026731));
+  hpcpush(hpxyz(-0.155889,0.119514,1.019110));
+  hpcpush(hpxyz(-0.126863,0.107638,1.013746));
+  hpcpush(hpxyz(-0.121879,0.082303,1.010756));
+  hpcpush(hpxyz(-0.130612,0.062191,1.010409));
+  hpcpush(hpxyz(-0.149053,0.051540,1.012360));
+  hpcpush(hpxyz(-0.176729,0.044071,1.016452));
+  hpcpush(hpxyz(-0.213072,0.040955,1.023268));
+  hpcpush(hpxyz(-0.257325,0.030738,1.033035));
+  hpcpush(hpxyz(-0.282810,0.025058,1.039524));
+  hpcpush(hpxyz(-0.296088,0.010521,1.042966));
+  hpcpush(hpxyz(-0.296088,-0.010521,1.042966));
+  hpcpush(hpxyz(-0.282810,-0.025058,1.039524));
+  hpcpush(hpxyz(-0.257325,-0.030738,1.033035));
+  hpcpush(hpxyz(-0.213072,-0.040955,1.023268));
+  hpcpush(hpxyz(-0.176729,-0.044071,1.016452));
+  hpcpush(hpxyz(-0.149053,-0.051540,1.012360));
+  hpcpush(hpxyz(-0.130612,-0.062191,1.010409));
+  hpcpush(hpxyz(-0.121879,-0.082303,1.010756));
+  hpcpush(hpxyz(-0.126863,-0.107638,1.013746));
+  hpcpush(hpxyz(-0.155889,-0.119514,1.019110));
+  hpcpush(hpxyz(-0.199823,-0.119359,1.026731));
+  hpcpush(hpxyz(-0.227615,-0.116160,1.032135));
+  hpcpush(hpxyz(-0.243461,-0.108932,1.034959));
+  hpcpush(hpxyz(-0.251825,-0.121707,1.038378));
+  hpcpush(hpxyz(-0.238648,-0.130576,1.036341));
+  hpcpush(hpxyz(-0.196422,-0.144903,1.029358));
+  hpcpush(hpxyz(-0.145551,-0.154306,1.022250));
+  hpcpush(hpxyz(-0.119778,-0.153916,1.018841));
+  hpcpush(hpxyz(-0.109337,-0.160521,1.018686));
+  hpcpush(hpxyz(-0.104028,-0.166435,1.019079));
+  hpcpush(hpxyz(-0.097207,-0.178784,1.020496));
+  hpcpush(hpxyz(-0.096764,-0.190676,1.022605));
+  hpcpush(hpxyz(-0.104006,-0.203643,1.025811));
+  hpcpush(hpxyz(-0.114110,-0.211717,1.028516));
+  hpcpush(hpxyz(-0.140105,-0.226302,1.034815));
+  hpcpush(hpxyz(-0.161568,-0.228039,1.038319));
+  hpcpush(hpxyz(-0.180731,-0.231002,1.042126));
+  hpcpush(hpxyz(-0.156131,-0.242848,1.040842));
+  hpcpush(hpxyz(-0.095235,-0.239928,1.032780));
+  hpcpush(hpxyz(-0.050479,-0.236064,1.028725));
+  hpcpush(hpxyz(-0.035130,-0.238686,1.028691));
+  hpcpush(hpxyz(-0.028453,-0.245093,1.029990));
+  hpcpush(hpxyz(-0.030455,-0.255305,1.032525));
+  hpcpush(hpxyz(-0.060514,-0.273212,1.038416));
+  hpcpush(hpxyz(-0.094232,-0.286583,1.044514));
+  hpcpush(hpxyz(-0.082207,-0.292512,1.045142));
+  hpcpush(hpxyz(-0.022699,-0.280947,1.038964));
+  hpcpush(hpxyz(0.013854,-0.270257,1.035968));
+  hpcpush(hpxyz(0.046213,-0.273931,1.037870));
+  hpcpush(hpxyz(0.089373,-0.265934,1.038609));
+  hpcpush(hpxyz(0.106012,-0.240682,1.034005));
+  hpcpush(hpxyz(0.104559,-0.227968,1.030971));
+  hpcpush(hpxyz(0.088299,-0.195587,1.022766));
+  hpcpush(hpxyz(0.066512,-0.191298,1.020303));
+  hpcpush(hpxyz(0.049437,-0.209816,1.022970));
+  hpcpush(hpxyz(0.048550,-0.213967,1.023787));
+  hpcpush(hpxyz(0.045164,-0.218293,1.024545));
+  hpcpush(hpxyz(0.030754,-0.226143,1.025713));
+  hpcpush(hpxyz(0.022226,-0.229526,1.026244));
+  hpcpush(hpxyz(0.003294,-0.228201,1.025713));
+  hpcpush(hpxyz(-0.011140,-0.218374,1.023627));
+  hpcpush(hpxyz(-0.019105,-0.210887,1.022173));
+  hpcpush(hpxyz(-0.031448,-0.191850,1.018722));
+  hpcpush(hpxyz(-0.030554,-0.165535,1.014069));
+  hpcpush(hpxyz(-0.022186,-0.143031,1.010421));
+  hpcpush(hpxyz(-0.011019,-0.128245,1.008250));
+  hpcpush(hpxyz(0.005882,-0.110737,1.006130));
+  hpcpush(hpxyz(0.012812,-0.106509,1.005738));
+  hpcpush(hpxyz(0.019706,-0.086354,1.003915));
+  hpcpush(hpxyz(0.023906,-0.062967,1.002266));
+  hpcpush(hpxyz(0.028387,-0.043359,1.001342));
+  hpcpush(hpxyz(0.030600,-0.009657,1.000515));
+  hpcpush(hpxyz(0.033277,0.002494,1.000557));
+  hpcpush(hpxyz(0.033277,-0.002494,1.000557));
+  
+  bshape(shMouse, 42);
+  hpcpush(hpxyz(-0.180666,0.000000,1.016189));
+  hpcpush(hpxyz(-0.063349,-0.003586,1.002011));
+  hpcpush(hpxyz(-0.052534,-0.013134,1.001465));
+  hpcpush(hpxyz(-0.040561,-0.021474,1.001053));
+  hpcpush(hpxyz(-0.020260,-0.026219,1.000549));
+  hpcpush(hpxyz(-0.001191,-0.028595,1.000409));
+  hpcpush(hpxyz(0.025033,-0.026225,1.000657));
+  hpcpush(hpxyz(0.045342,-0.015512,1.001148));
+  hpcpush(hpxyz(0.056152,-0.020310,1.001781));
+  hpcpush(hpxyz(0.077865,-0.014375,1.003130));
+  hpcpush(hpxyz(0.094893,-0.002402,1.004495));
+  hpcpush(hpxyz(0.101018,-0.000000,1.005089));
+  hpcpush(hpxyz(0.101018,0.000000,1.005089));
+  hpcpush(hpxyz(0.094893,0.002402,1.004495));
+  hpcpush(hpxyz(0.077865,0.014375,1.003130));
+  hpcpush(hpxyz(0.056152,0.020310,1.001781));
+  hpcpush(hpxyz(0.045342,0.015512,1.001148));
+  hpcpush(hpxyz(0.025033,0.026225,1.000657));
+  hpcpush(hpxyz(-0.001191,0.028595,1.000409));
+  hpcpush(hpxyz(-0.020260,0.026219,1.000549));
+  hpcpush(hpxyz(-0.040561,0.021474,1.001053));
+  hpcpush(hpxyz(-0.052534,0.013134,1.001465));
+  hpcpush(hpxyz(-0.063349,0.003586,1.002011));
+  hpcpush(hpxyz(-0.180666,-0.000000,1.016189));
+  hpcpush(hpxyz(-0.180666,0.000000,1.016189));
+
+  bshape(shMouseLegs, 41);
+  hpcpush(hpxyz(-0.033372,-0.005959,1.000574));
+  hpcpush(hpxyz(-0.047793,-0.037040,1.001826));
+  hpcpush(hpxyz(-0.003572,-0.011907,1.000077));
+  hpcpush(hpxyz(0.033422,-0.039390,1.001333));
+  hpcpush(hpxyz(0.026209,-0.004765,1.000355));
+  hpcpush(hpxyz(0.026209,0.004765,1.000355));
+  hpcpush(hpxyz(0.033422,0.039390,1.001333));
+  hpcpush(hpxyz(-0.003572,0.011907,1.000077));
+  hpcpush(hpxyz(-0.047793,0.037040,1.001826));
+  hpcpush(hpxyz(-0.033372,0.005959,1.000574));
+  hpcpush(hpxyz(-0.033372,-0.005959,1.000574));
+
+  bshape(shMouseEyes, 43);
+  hpcpush(hpxyz(0.073016,-0.011970,1.002734));
+  hpcpush(hpxyz(0.065770,-0.013154,1.002247));
+  hpcpush(hpxyz(0.065764,-0.008370,1.002195));
+  hpcpush(hpxyz(0.071797,-0.003590,1.002581));
+  hpcpush(hpxyz(0.071797,0.003590,1.002581));
+  hpcpush(hpxyz(0.065764,0.008370,1.002195));
+  hpcpush(hpxyz(0.065770,0.013154,1.002247));
+  hpcpush(hpxyz(0.073016,0.011970,1.002734));
+  hpcpush(hpxyz(0.073016,-0.011970,1.002734));
+
   bshape(shPBody, 41);
   hpcpush(hpxyz(-0.127943,0.000000,1.008151));
   hpcpush(hpxyz(-0.121732,0.008437,1.007417));
@@ -2668,6 +3581,95 @@ void buildpolys() {
   hpcpush(hpxyz(-0.146785,-0.001213,1.010716));
   hpcpush(hpxyz(-0.146785,0.001213,1.010716));
   
+  bshape(shKnife, 42);
+  hpcpush(hpxyz(-0.086373,0.015595,1.003844));
+  hpcpush(hpxyz(-0.063364,0.015542,1.002126));
+  hpcpush(hpxyz(-0.061008,0.033495,1.002419));
+  hpcpush(hpxyz(-0.041796,0.037020,1.001557));
+  hpcpush(hpxyz(-0.038168,0.021470,1.000958));
+  hpcpush(hpxyz(0.085206,0.028802,1.004037));
+  hpcpush(hpxyz(0.158634,0.003661,1.012511));
+  hpcpush(hpxyz(0.158634,-0.003661,1.012511));
+  hpcpush(hpxyz(0.085206,-0.028802,1.004037));
+  hpcpush(hpxyz(-0.038168,-0.021470,1.000958));
+  hpcpush(hpxyz(-0.041796,-0.037020,1.001557));
+  hpcpush(hpxyz(-0.061008,-0.033495,1.002419));
+  hpcpush(hpxyz(-0.063364,-0.015542,1.002126));
+  hpcpush(hpxyz(-0.086373,-0.015595,1.003844));
+  hpcpush(hpxyz(-0.086373,0.015595,1.003844));
+  
+  bshape(shTongue, 42);
+  hpcpush(hpxyz(-0.036955,0.001192,1.000683));
+  hpcpush(hpxyz(-0.036957,-0.007153,1.000708));
+  hpcpush(hpxyz(-0.048967,-0.028663,1.001608));
+  hpcpush(hpxyz(-0.061094,-0.050313,1.003127));
+  hpcpush(hpxyz(-0.064717,-0.050336,1.003355));
+  hpcpush(hpxyz(-0.049075,-0.055059,1.002716));
+  hpcpush(hpxyz(-0.022708,-0.058563,1.001971));
+  hpcpush(hpxyz(0.011941,-0.053734,1.001514));
+  hpcpush(hpxyz(0.029846,-0.044173,1.001420));
+  hpcpush(hpxyz(0.046581,-0.033443,1.001643));
+  hpcpush(hpxyz(0.062159,-0.015540,1.002050));
+  hpcpush(hpxyz(0.066968,-0.005979,1.002258));
+  hpcpush(hpxyz(0.066968,0.005979,1.002258));
+  hpcpush(hpxyz(0.062159,0.015540,1.002050));
+  hpcpush(hpxyz(0.046581,0.033443,1.001643));
+  hpcpush(hpxyz(0.029846,0.044173,1.001420));
+  hpcpush(hpxyz(0.011941,0.053734,1.001514));
+  hpcpush(hpxyz(-0.022708,0.058563,1.001971));
+  hpcpush(hpxyz(-0.049075,0.055059,1.002716));
+  hpcpush(hpxyz(-0.064717,0.050336,1.003355));
+  hpcpush(hpxyz(-0.061094,0.050313,1.003127));
+  hpcpush(hpxyz(-0.048967,0.028663,1.001608));
+  hpcpush(hpxyz(-0.036957,0.007153,1.000708));
+  hpcpush(hpxyz(-0.036955,-0.001192,1.000683));
+  hpcpush(hpxyz(-0.036955,0.001192,1.000683));  
+  
+  bshape(shFlailMissile, 42);
+  hpcpush(hpxyz(-0.064558,0.008369,1.002117));
+  hpcpush(hpxyz(-0.038156,0.011924,1.000799));
+  hpcpush(hpxyz(-0.059223,0.027026,1.002117));
+  hpcpush(hpxyz(-0.032946,0.022641,1.000799));
+  hpcpush(hpxyz(-0.048626,0.043281,1.002117));
+  hpcpush(hpxyz(-0.024809,0.031346,1.000799));
+  hpcpush(hpxyz(-0.033708,0.055691,1.002117));
+  hpcpush(hpxyz(-0.014468,0.037266,1.000799));
+  hpcpush(hpxyz(-0.015796,0.063153,1.002117));
+  hpcpush(hpxyz(-0.002840,0.039875,1.000799));
+  hpcpush(hpxyz(0.003521,0.065003,1.002117));
+  hpcpush(hpxyz(0.009039,0.038940,1.000799));
+  hpcpush(hpxyz(0.022524,0.061077,1.002117));
+  hpcpush(hpxyz(0.020115,0.034546,1.000799));
+  hpcpush(hpxyz(0.039526,0.051724,1.002117));
+  hpcpush(hpxyz(0.029404,0.027082,1.000799));
+  hpcpush(hpxyz(0.053016,0.037776,1.002117));
+  hpcpush(hpxyz(0.036081,0.017212,1.000799));
+  hpcpush(hpxyz(0.061796,0.020471,1.002117));
+  hpcpush(hpxyz(0.039551,0.005812,1.000799));
+  hpcpush(hpxyz(0.065084,0.001347,1.002117));
+  hpcpush(hpxyz(0.039507,-0.006104,1.000799));
+  hpcpush(hpxyz(0.062590,-0.017897,1.002117));
+  hpcpush(hpxyz(0.035953,-0.017477,1.000799));
+  hpcpush(hpxyz(0.054534,-0.035550,1.002117));
+  hpcpush(hpxyz(0.029204,-0.027298,1.000799));
+  hpcpush(hpxyz(0.041632,-0.050045,1.002117));
+  hpcpush(hpxyz(0.019860,-0.034693,1.000799));
+  hpcpush(hpxyz(0.025031,-0.060093,1.002117));
+  hpcpush(hpxyz(0.008752,-0.039006,1.000799));
+  hpcpush(hpxyz(0.006207,-0.064801,1.002117));
+  hpcpush(hpxyz(-0.003134,-0.039853,1.000799));
+  hpcpush(hpxyz(-0.013170,-0.063752,1.002117));
+  hpcpush(hpxyz(-0.014742,-0.037158,1.000799));
+  hpcpush(hpxyz(-0.031376,-0.057038,1.002117));
+  hpcpush(hpxyz(-0.025040,-0.031162,1.000799));
+  hpcpush(hpxyz(-0.046794,-0.045256,1.002117));
+  hpcpush(hpxyz(-0.033112,-0.022397,1.000799));
+  hpcpush(hpxyz(-0.058054,-0.029452,1.002117));
+  hpcpush(hpxyz(-0.038243,-0.011642,1.000799));
+  hpcpush(hpxyz(-0.064156,-0.011032,1.002117));
+  hpcpush(hpxyz(-0.039976,0.000147,1.000799));
+  hpcpush(hpxyz(-0.064558,0.008369,1.002117));
+  
   bshape(shPSword, 42);
   hpcpush(hpxyz(0.093822,0.244697,1.033769));
   hpcpush(hpxyz(0.105758,0.251015,1.036433));
@@ -2692,6 +3694,106 @@ void buildpolys() {
   hpcpush(hpxyz(0.086260,0.248631,1.034049));
   hpcpush(hpxyz(0.086431,0.252937,1.035107));
   hpcpush(hpxyz(0.093822,0.244697,1.033769));
+
+  bshape(shPKnife, 40);
+  hpcpush(hpxyz(0.070235,0.261061,1.035898));
+  hpcpush(hpxyz(0.085110,0.243297,1.032685));
+  hpcpush(hpxyz(0.100384,0.253764,1.036568));
+  hpcpush(hpxyz(0.115592,0.241462,1.035212));
+  hpcpush(hpxyz(0.106046,0.228043,1.031139));
+  hpcpush(hpxyz(0.193021,0.140235,1.028068));
+  hpcpush(hpxyz(0.223042,0.069158,1.026903));
+  hpcpush(hpxyz(0.217457,0.064184,1.025382));
+  hpcpush(hpxyz(0.149083,0.101106,1.016095));
+  hpcpush(hpxyz(0.073293,0.198875,1.022214));
+  hpcpush(hpxyz(0.059119,0.191168,1.019823));
+  hpcpush(hpxyz(0.049288,0.208259,1.022644));
+  hpcpush(hpxyz(0.061401,0.222183,1.026224));
+  hpcpush(hpxyz(0.046445,0.239874,1.029415));
+  hpcpush(hpxyz(0.070235,0.261061,1.035898));
+
+  bshape(shPirateHook, 42);
+  hpcpush(hpxyz(0.025637,0.290334,1.041610));
+  hpcpush(hpxyz(0.015893,0.212083,1.022366));
+  hpcpush(hpxyz(0.070681,0.208634,1.023975));
+  hpcpush(hpxyz(0.078764,0.213716,1.025611));
+  hpcpush(hpxyz(0.092820,0.214478,1.026945));
+  hpcpush(hpxyz(0.128742,0.099394,1.013141));
+  hpcpush(hpxyz(0.114620,0.096368,1.011150));
+  hpcpush(hpxyz(0.104002,0.089501,1.009370));
+  hpcpush(hpxyz(0.096284,0.072719,1.007253));
+  hpcpush(hpxyz(0.093155,0.050966,1.005622));
+  hpcpush(hpxyz(0.099066,0.033609,1.005457));
+  hpcpush(hpxyz(0.110446,0.021946,1.006320));
+  hpcpush(hpxyz(0.127291,0.014728,1.008176));
+  hpcpush(hpxyz(0.145718,0.008586,1.010598));
+  hpcpush(hpxyz(0.167517,0.008308,1.013968));
+  hpcpush(hpxyz(0.156477,0.015183,1.012282));
+  hpcpush(hpxyz(0.140613,0.023565,1.010113));
+  hpcpush(hpxyz(0.132241,0.028989,1.009122));
+  hpcpush(hpxyz(0.118961,0.034720,1.007649));
+  hpcpush(hpxyz(0.108990,0.048739,1.007102));
+  hpcpush(hpxyz(0.107378,0.058592,1.007454));
+  hpcpush(hpxyz(0.115339,0.077749,1.009628));
+  hpcpush(hpxyz(0.131027,0.084323,1.012066));
+  hpcpush(hpxyz(0.151797,0.088283,1.015301));
+  hpcpush(hpxyz(0.113111,0.234773,1.033398));
+  hpcpush(hpxyz(0.104917,0.253698,1.037001));
+  hpcpush(hpxyz(0.105424,0.258064,1.038129));
+  hpcpush(hpxyz(0.096993,0.264198,1.038850));
+  hpcpush(hpxyz(0.089213,0.264464,1.038220));
+  hpcpush(hpxyz(0.087585,0.273426,1.040400));
+  hpcpush(hpxyz(0.080433,0.279698,1.041489));
+  hpcpush(hpxyz(0.072806,0.281526,1.041421));
+  hpcpush(hpxyz(0.025637,0.290334,1.041610));
+  
+  bshape(shSabre, 42);
+  hpcpush(hpxyz(0.052478,0.211644,1.023497));
+  hpcpush(hpxyz(0.042242,0.185536,1.017943));
+  hpcpush(hpxyz(0.057979,0.181601,1.018008));
+  hpcpush(hpxyz(0.068086,0.204991,1.023062));
+  hpcpush(hpxyz(0.085295,0.201073,1.023575));
+  hpcpush(hpxyz(0.100829,0.193318,1.023493));
+  hpcpush(hpxyz(0.113718,0.184489,1.023215));
+  hpcpush(hpxyz(0.125735,0.178476,1.023554));
+  hpcpush(hpxyz(0.134891,0.170005,1.023278));
+  hpcpush(hpxyz(0.144264,0.162907,1.023402));
+  hpcpush(hpxyz(0.152391,0.155912,1.023490));
+  hpcpush(hpxyz(0.160192,0.146346,1.023269));
+  hpcpush(hpxyz(0.166733,0.136894,1.023005));
+  hpcpush(hpxyz(0.180659,0.123243,1.023634));
+  hpcpush(hpxyz(0.189268,0.108634,1.023535));
+  hpcpush(hpxyz(0.197644,0.091550,1.023447));
+  hpcpush(hpxyz(0.204992,0.075866,1.023610));
+  hpcpush(hpxyz(0.207394,0.063057,1.023224));
+  hpcpush(hpxyz(0.213308,0.045015,1.023487));
+  hpcpush(hpxyz(0.215741,0.031014,1.023477));
+  hpcpush(hpxyz(0.216495,0.013402,1.023254));
+  hpcpush(hpxyz(0.217512,-0.002957,1.023387));
+  hpcpush(hpxyz(0.216708,-0.025412,1.023527));
+  hpcpush(hpxyz(0.215602,-0.037833,1.023677));
+  hpcpush(hpxyz(0.209033,-0.050943,1.022883));
+  hpcpush(hpxyz(0.249210,-0.008237,1.030618));
+  hpcpush(hpxyz(0.247115,0.012233,1.030153));
+  hpcpush(hpxyz(0.246190,0.028812,1.030262));
+  hpcpush(hpxyz(0.239192,0.052194,1.029533));
+  hpcpush(hpxyz(0.237023,0.067663,1.029931));
+  hpcpush(hpxyz(0.231339,0.087245,1.030111));
+  hpcpush(hpxyz(0.221702,0.107109,1.029866));
+  hpcpush(hpxyz(0.215996,0.124316,1.030587));
+  hpcpush(hpxyz(0.206323,0.141806,1.030863));
+  hpcpush(hpxyz(0.194941,0.164879,1.032079));
+  hpcpush(hpxyz(0.173125,0.180454,1.030794));
+  hpcpush(hpxyz(0.158905,0.191858,1.030563));
+  hpcpush(hpxyz(0.143293,0.202073,1.030226));
+  hpcpush(hpxyz(0.128179,0.215193,1.030892));
+  hpcpush(hpxyz(0.111272,0.224403,1.030892));
+  hpcpush(hpxyz(0.090433,0.232613,1.030673));
+  hpcpush(hpxyz(0.079164,0.234740,1.030228));
+  hpcpush(hpxyz(0.083027,0.256039,1.035591));
+  hpcpush(hpxyz(0.071081,0.264147,1.036738));
+  hpcpush(hpxyz(0.060044,0.234679,1.028921));
+  hpcpush(hpxyz(0.052478,0.211644,1.023497));
 
   bshape(shHedgehogBlade, 42);
   hpcpush(hpxyz(0.117178,0.032617,1.007370));
@@ -2831,7 +3933,78 @@ void buildpolys() {
 
   bshape(shDemon, 43);
   drawDemon(1);
-
+  
+  bshape(shGoatHead, 43);
+  hpcpush(hpxyz(0.098234,-0.008161,1.004847));
+  hpcpush(hpxyz(0.097458,-0.016878,1.004880));
+  hpcpush(hpxyz(0.085163,-0.036297,1.004276));
+  hpcpush(hpxyz(0.074171,-0.049357,1.003961));
+  hpcpush(hpxyz(0.064423,-0.056062,1.003640));
+  hpcpush(hpxyz(0.071545,-0.060919,1.004405));
+  hpcpush(hpxyz(0.090299,-0.086141,1.007757));
+  hpcpush(hpxyz(0.099873,-0.119956,1.012109));
+  hpcpush(hpxyz(0.098555,-0.155296,1.016774));
+  hpcpush(hpxyz(0.084548,-0.179003,1.019407));
+  hpcpush(hpxyz(0.066861,-0.191576,1.020378));
+  hpcpush(hpxyz(0.016947,-0.207877,1.021519));
+  hpcpush(hpxyz(-0.036121,-0.216389,1.023782));
+  hpcpush(hpxyz(-0.071628,-0.210733,1.024470));
+  hpcpush(hpxyz(-0.053640,-0.210686,1.023360));
+  hpcpush(hpxyz(-0.029915,-0.199910,1.020225));
+  hpcpush(hpxyz(-0.013982,-0.189736,1.017937));
+  hpcpush(hpxyz(0.018469,-0.168500,1.014265));
+  hpcpush(hpxyz(0.033113,-0.153873,1.012311));
+  hpcpush(hpxyz(0.045027,-0.132252,1.009712));
+  hpcpush(hpxyz(0.044982,-0.113169,1.007388));
+  hpcpush(hpxyz(0.039048,-0.095429,1.005302));
+  hpcpush(hpxyz(0.028215,-0.083777,1.003900));
+  hpcpush(hpxyz(0.018818,-0.079369,1.003321));
+  hpcpush(hpxyz(0.005692,-0.074475,1.002786));
+  hpcpush(hpxyz(-0.012112,-0.070532,1.002557));
+  hpcpush(hpxyz(-0.028520,-0.067591,1.002687));
+  hpcpush(hpxyz(-0.047548,-0.063966,1.003171));
+  hpcpush(hpxyz(-0.060278,-0.061572,1.003705));
+  hpcpush(hpxyz(-0.079475,-0.058008,1.004829));
+  hpcpush(hpxyz(-0.093451,-0.049712,1.005587));
+  hpcpush(hpxyz(-0.106876,-0.031455,1.006187));
+  hpcpush(hpxyz(-0.109804,-0.016063,1.006139));
+  hpcpush(hpxyz(-0.108918,-0.001180,1.005915));
+  hpcpush(hpxyz(-0.108918,0.001180,1.005915));
+  hpcpush(hpxyz(-0.109804,0.016063,1.006139));
+  hpcpush(hpxyz(-0.106876,0.031455,1.006187));
+  hpcpush(hpxyz(-0.093451,0.049712,1.005587));
+  hpcpush(hpxyz(-0.079475,0.058008,1.004829));
+  hpcpush(hpxyz(-0.060278,0.061572,1.003705));
+  hpcpush(hpxyz(-0.047548,0.063966,1.003171));
+  hpcpush(hpxyz(-0.028520,0.067591,1.002687));
+  hpcpush(hpxyz(-0.012112,0.070532,1.002557));
+  hpcpush(hpxyz(0.005692,0.074475,1.002786));
+  hpcpush(hpxyz(0.018818,0.079369,1.003321));
+  hpcpush(hpxyz(0.028215,0.083777,1.003900));
+  hpcpush(hpxyz(0.039048,0.095429,1.005302));
+  hpcpush(hpxyz(0.044982,0.113169,1.007388));
+  hpcpush(hpxyz(0.045027,0.132252,1.009712));
+  hpcpush(hpxyz(0.033113,0.153873,1.012311));
+  hpcpush(hpxyz(0.018469,0.168500,1.014265));
+  hpcpush(hpxyz(-0.013982,0.189736,1.017937));
+  hpcpush(hpxyz(-0.029915,0.199910,1.020225));
+  hpcpush(hpxyz(-0.053640,0.210686,1.023360));
+  hpcpush(hpxyz(-0.071628,0.210733,1.024470));
+  hpcpush(hpxyz(-0.036121,0.216389,1.023782));
+  hpcpush(hpxyz(0.016947,0.207877,1.021519));
+  hpcpush(hpxyz(0.066861,0.191576,1.020378));
+  hpcpush(hpxyz(0.084548,0.179003,1.019407));
+  hpcpush(hpxyz(0.098555,0.155296,1.016774));
+  hpcpush(hpxyz(0.099873,0.119956,1.012109));
+  hpcpush(hpxyz(0.090299,0.086141,1.007757));
+  hpcpush(hpxyz(0.071545,0.060919,1.004405));
+  hpcpush(hpxyz(0.064423,0.056062,1.003640));
+  hpcpush(hpxyz(0.074171,0.049357,1.003961));
+  hpcpush(hpxyz(0.085163,0.036297,1.004276));
+  hpcpush(hpxyz(0.097458,0.016878,1.004880));
+  hpcpush(hpxyz(0.098234,0.008161,1.004847));
+  hpcpush(hpxyz(0.098234,-0.008161,1.004847));
+  
   bshape(shKnightArmor, 42);
   hpcpush(hpxyz(-0.129512,-0.004842,1.008363));
   hpcpush(hpxyz(-0.129934,0.057074,1.010020));
@@ -2909,6 +4082,72 @@ void buildpolys() {
   hpcpush(hpxyz(0.007931,0.006370,1.000052));
   hpcpush(hpxyz(-0.000015,-0.003765,1.000007));
   hpcpush(hpxyz(-0.000015,0.003765,1.000007));
+  
+  bshape(shPrincessDress, 43);
+  hpcpush(hpxyz(0.041877,-0.057431,1.002523));
+  hpcpush(hpxyz(0.046812,-0.078020,1.004131));
+  hpcpush(hpxyz(0.028859,-0.096196,1.005031));
+  hpcpush(hpxyz(-0.001205,-0.110866,1.006128));
+  hpcpush(hpxyz(-0.053233,-0.116144,1.008128));
+  hpcpush(hpxyz(-0.110022,-0.122246,1.013434));
+  hpcpush(hpxyz(-0.181271,-0.133766,1.025062));
+  hpcpush(hpxyz(-0.221411,-0.145062,1.034440));
+  hpcpush(hpxyz(-0.252155,-0.156465,1.043103));
+  hpcpush(hpxyz(-0.285822,-0.165961,1.053203));
+  hpcpush(hpxyz(-0.259590,-0.116944,1.039742));
+  hpcpush(hpxyz(-0.258096,-0.089439,1.036635));
+  hpcpush(hpxyz(-0.246236,-0.031569,1.030354));
+  hpcpush(hpxyz(-0.247436,0.011362,1.030220));
+  hpcpush(hpxyz(-0.253890,0.054586,1.033170));
+  hpcpush(hpxyz(-0.268619,0.095109,1.039809));
+  hpcpush(hpxyz(-0.277680,0.121972,1.044980));
+  hpcpush(hpxyz(-0.286489,0.138666,1.049430));
+  hpcpush(hpxyz(-0.295278,0.151594,1.053646));
+  hpcpush(hpxyz(-0.248719,0.149489,1.041253));
+  hpcpush(hpxyz(-0.200432,0.139924,1.029442));
+  hpcpush(hpxyz(-0.139171,0.124392,1.017272));
+  hpcpush(hpxyz(-0.102260,0.110782,1.011301));
+  hpcpush(hpxyz(-0.077429,0.101626,1.008128));
+  hpcpush(hpxyz(0.041877,-0.057431,1.002523));  
+  
+  bshape(shPrinceDress, 42);
+  hpcpush(hpxyz(-0.123399,0.032664,1.008114));
+  hpcpush(hpxyz(-0.122325,0.049657,1.008677));
+  hpcpush(hpxyz(-0.121280,0.064278,1.009376));
+  hpcpush(hpxyz(-0.114003,0.076406,1.009373));
+  hpcpush(hpxyz(-0.098124,0.089645,1.008794));
+  hpcpush(hpxyz(-0.084789,0.101747,1.008733));
+  hpcpush(hpxyz(-0.081167,0.105396,1.008809));
+  hpcpush(hpxyz(-0.080113,0.115314,1.009810));
+  hpcpush(hpxyz(-0.099259,0.181148,1.021111));
+  hpcpush(hpxyz(-0.053980,0.166846,1.015259));
+  hpcpush(hpxyz(-0.018484,0.187307,1.017559));
+  hpcpush(hpxyz(-0.015849,0.154831,1.012039));
+  hpcpush(hpxyz(-0.013334,0.134548,1.009099));
+  hpcpush(hpxyz(0.006043,0.123271,1.007587));
+  hpcpush(hpxyz(0.021636,0.096161,1.004846));
+  hpcpush(hpxyz(0.031121,0.067030,1.002727));
+  hpcpush(hpxyz(0.038206,0.038206,1.001459));
+  hpcpush(hpxyz(0.038163,0.017889,1.000888));
+  hpcpush(hpxyz(0.038163,-0.017889,1.000888));
+  hpcpush(hpxyz(0.038206,-0.038206,1.001459));
+  hpcpush(hpxyz(0.031121,-0.067030,1.002727));
+  hpcpush(hpxyz(0.021636,-0.096161,1.004846));
+  hpcpush(hpxyz(0.006043,-0.123271,1.007587));
+  hpcpush(hpxyz(-0.013334,-0.134548,1.009099));
+  hpcpush(hpxyz(-0.015849,-0.154831,1.012039));
+  hpcpush(hpxyz(-0.018484,-0.187307,1.017559));
+  hpcpush(hpxyz(-0.053980,-0.166846,1.015259));
+  hpcpush(hpxyz(-0.099259,-0.181148,1.021111));
+  hpcpush(hpxyz(-0.080113,-0.115314,1.009810));
+  hpcpush(hpxyz(-0.081167,-0.105396,1.008809));
+  hpcpush(hpxyz(-0.084789,-0.101747,1.008733));
+  hpcpush(hpxyz(-0.098124,-0.089645,1.008794));
+  hpcpush(hpxyz(-0.114003,-0.076406,1.009373));
+  hpcpush(hpxyz(-0.121280,-0.064278,1.009376));
+  hpcpush(hpxyz(-0.122325,-0.049657,1.008677));
+  hpcpush(hpxyz(-0.123399,-0.032664,1.008114));
+  hpcpush(hpxyz(-0.123399,0.032664,1.008114));
 
   bshape(shArmor, 42);
   hpcpush(hpxyz(-0.131705,0.010875,1.008694));
@@ -2946,6 +4185,83 @@ void buildpolys() {
   hpcpush(hpxyz(-0.133453,-0.061874,1.010761));
   hpcpush(hpxyz(-0.131705,-0.010875,1.008694));
   hpcpush(hpxyz(-0.131705,0.010875,1.008694));
+
+  bshape(shTurban1, 44);
+  hpcpush(hpxyz(-0.072384,-0.002801,1.002620));
+  hpcpush(hpxyz(-0.075078,0.020302,1.003020));
+  hpcpush(hpxyz(-0.067673,0.048512,1.003461));
+  hpcpush(hpxyz(-0.046761,0.065782,1.003252));
+  hpcpush(hpxyz(-0.011565,0.081749,1.003403));
+  hpcpush(hpxyz(0.024684,0.095470,1.004850));
+  hpcpush(hpxyz(0.076082,0.087352,1.006687));
+  hpcpush(hpxyz(0.102859,0.061877,1.007179));
+  hpcpush(hpxyz(0.113555,0.034171,1.007007));
+  hpcpush(hpxyz(0.113555,-0.034171,1.007007));
+  hpcpush(hpxyz(0.102859,-0.061877,1.007179));
+  hpcpush(hpxyz(0.076082,-0.087352,1.006687));
+  hpcpush(hpxyz(0.024684,-0.095470,1.004850));
+  hpcpush(hpxyz(-0.011565,-0.081749,1.003403));
+  hpcpush(hpxyz(-0.046761,-0.065782,1.003252));
+  hpcpush(hpxyz(-0.067673,-0.048512,1.003461));
+  hpcpush(hpxyz(-0.075078,-0.020302,1.003020));
+  hpcpush(hpxyz(-0.072384,0.002801,1.002620));
+  hpcpush(hpxyz(-0.072384,-0.002801,1.002620));
+
+  bshape(shTurban2, 45);
+  hpcpush(hpxyz(-0.041779,0.001538,1.000874));
+  hpcpush(hpxyz(-0.029927,0.025572,1.000774));
+  hpcpush(hpxyz(-0.001577,0.046885,1.001100));
+  hpcpush(hpxyz(0.030017,0.051171,1.001758));
+  hpcpush(hpxyz(0.051757,0.039557,1.002120));
+  hpcpush(hpxyz(0.066202,0.014187,1.002289));
+  hpcpush(hpxyz(0.066202,-0.014187,1.002289));
+  hpcpush(hpxyz(0.051757,-0.039557,1.002120));
+  hpcpush(hpxyz(0.030017,-0.051171,1.001758));
+  hpcpush(hpxyz(-0.001577,-0.046885,1.001100));
+  hpcpush(hpxyz(-0.029927,-0.025572,1.000774));
+  hpcpush(hpxyz(-0.041779,-0.001538,1.000874));
+  hpcpush(hpxyz(-0.041779,0.001538,1.000874));
+
+  bshape(shVikingHelmet, 44);
+  hpcpush(hpxyz(-0.068191,-0.016749,1.002462));
+  hpcpush(hpxyz(-0.064642,-0.037110,1.002774));
+  hpcpush(hpxyz(-0.055059,-0.049075,1.002716));
+  hpcpush(hpxyz(-0.040676,-0.057425,1.002473));
+  hpcpush(hpxyz(-0.027503,-0.060986,1.002235));
+  hpcpush(hpxyz(-0.030377,-0.140951,1.010342));
+  hpcpush(hpxyz(-0.026834,-0.154904,1.012282));
+  hpcpush(hpxyz(-0.003670,-0.166357,1.013750));
+  hpcpush(hpxyz(0.018370,-0.168999,1.014346));
+  hpcpush(hpxyz(0.055380,-0.175984,1.016876));
+  hpcpush(hpxyz(0.082350,-0.161012,1.016222));
+  hpcpush(hpxyz(0.068527,-0.152961,1.013949));
+  hpcpush(hpxyz(0.031640,-0.146029,1.011101));
+  hpcpush(hpxyz(0.008493,-0.138308,1.009555));
+  hpcpush(hpxyz(-0.002413,-0.117054,1.006830));
+  hpcpush(hpxyz(-0.004785,-0.069381,1.002415));
+  hpcpush(hpxyz(0.017935,-0.063369,1.002166));
+  hpcpush(hpxyz(0.049033,-0.046641,1.002287));
+  hpcpush(hpxyz(0.032200,-0.027430,1.000894));
+  hpcpush(hpxyz(0.032200,0.027430,1.000894));
+  hpcpush(hpxyz(0.049033,0.046641,1.002287));
+  hpcpush(hpxyz(0.017935,0.063369,1.002166));
+  hpcpush(hpxyz(-0.004785,0.069381,1.002415));
+  hpcpush(hpxyz(-0.002413,0.117054,1.006830));
+  hpcpush(hpxyz(0.008493,0.138308,1.009555));
+  hpcpush(hpxyz(0.031640,0.146029,1.011101));
+  hpcpush(hpxyz(0.068527,0.152961,1.013949));
+  hpcpush(hpxyz(0.082350,0.161012,1.016222));
+  hpcpush(hpxyz(0.055380,0.175984,1.016876));
+  hpcpush(hpxyz(0.018370,0.168999,1.014346));
+  hpcpush(hpxyz(-0.003670,0.166357,1.013750));
+  hpcpush(hpxyz(-0.026834,0.154904,1.012282));
+  hpcpush(hpxyz(-0.030377,0.140951,1.010342));
+  hpcpush(hpxyz(-0.027503,0.060986,1.002235));
+  hpcpush(hpxyz(-0.040676,0.057425,1.002473));
+  hpcpush(hpxyz(-0.055059,0.049075,1.002716));
+  hpcpush(hpxyz(-0.064642,0.037110,1.002774));
+  hpcpush(hpxyz(-0.068191,0.016749,1.002462));
+  hpcpush(hpxyz(-0.068191,-0.016749,1.002462));
 
   bshape(shHood, 43);
   hpcpush(hpxyz(-0.289108,0.001285,1.040954));
@@ -3021,6 +4337,71 @@ void buildpolys() {
   hpcpush(hpxyz(-0.253872,-0.006315,1.031742));
   hpcpush(hpxyz(-0.289108,-0.001285,1.040954));
   hpcpush(hpxyz(-0.289108,0.001285,1.040954));
+
+  bshape(shPirateX, 21);
+  hpcpush(hpxyz(-0.217493,-0.115996,1.029931));
+  hpcpush(hpxyz(-0.119624,-0.071774,1.009684));
+  hpcpush(hpxyz(-0.076312,-0.023848,1.003191));
+  hpcpush(hpxyz(-0.076312,0.023848,1.003191));
+  hpcpush(hpxyz(-0.119624,0.071774,1.009684));
+  hpcpush(hpxyz(-0.217493,0.115996,1.029931));
+  hpcpush(hpxyz(-0.115996,0.217493,1.029931));
+  hpcpush(hpxyz(-0.071774,0.119624,1.009684));
+  hpcpush(hpxyz(-0.023848,0.076312,1.003191));
+  hpcpush(hpxyz(0.023848,0.076312,1.003191));
+  hpcpush(hpxyz(0.071774,0.119624,1.009684));
+  hpcpush(hpxyz(0.115996,0.217493,1.029931));
+  hpcpush(hpxyz(0.217493,0.115996,1.029931));
+  hpcpush(hpxyz(0.119624,0.071774,1.009684));
+  hpcpush(hpxyz(0.076312,0.023848,1.003191));
+  hpcpush(hpxyz(0.076312,-0.023848,1.003191));
+  hpcpush(hpxyz(0.119624,-0.071774,1.009684));
+  hpcpush(hpxyz(0.217493,-0.115996,1.029931));
+  hpcpush(hpxyz(0.115996,-0.217493,1.029931));
+  hpcpush(hpxyz(0.071774,-0.119624,1.009684));
+  hpcpush(hpxyz(0.023848,-0.076312,1.003191));
+  hpcpush(hpxyz(-0.023848,-0.076312,1.003191));
+  hpcpush(hpxyz(-0.071774,-0.119624,1.009684));
+  hpcpush(hpxyz(-0.115996,-0.217493,1.029931));
+  hpcpush(hpxyz(-0.217493,-0.115996,1.029931));
+  
+  bshape(shPirateHood, 47);
+  hpcpush(hpxyz(0.028515,-0.002137,1.000409));
+  hpcpush(hpxyz(0.030041,0.018069,1.000614));
+  hpcpush(hpxyz(0.041515,0.042413,1.001760));
+  hpcpush(hpxyz(0.018125,0.065806,1.002327));
+  hpcpush(hpxyz(-0.016208,0.072033,1.002722));
+  hpcpush(hpxyz(-0.045904,0.078062,1.004092));
+  hpcpush(hpxyz(-0.082076,0.083600,1.006839));
+  hpcpush(hpxyz(-0.135647,0.084840,1.012718));
+  hpcpush(hpxyz(-0.187346,0.092498,1.021594));
+  hpcpush(hpxyz(-0.230428,0.116494,1.032796));
+  hpcpush(hpxyz(-0.151031,0.111393,1.017457));
+  hpcpush(hpxyz(-0.111628,0.086283,1.009904));
+  hpcpush(hpxyz(-0.087869,0.069439,1.006252));
+  hpcpush(hpxyz(-0.097756,0.014558,1.004872));
+  hpcpush(hpxyz(-0.097756,-0.014558,1.004872));
+  hpcpush(hpxyz(-0.087869,-0.069439,1.006252));
+  hpcpush(hpxyz(-0.111628,-0.086283,1.009904));
+  hpcpush(hpxyz(-0.151031,-0.111393,1.017457));
+  hpcpush(hpxyz(-0.230428,-0.116494,1.032796));
+  hpcpush(hpxyz(-0.187346,-0.092498,1.021594));
+  hpcpush(hpxyz(-0.135647,-0.084840,1.012718));
+  hpcpush(hpxyz(-0.082076,-0.083600,1.006839));
+  hpcpush(hpxyz(-0.045904,-0.078062,1.004092));
+  hpcpush(hpxyz(-0.016208,-0.072033,1.002722));
+  hpcpush(hpxyz(0.018125,-0.065806,1.002327));
+  hpcpush(hpxyz(0.041515,-0.042413,1.001760));
+  hpcpush(hpxyz(0.030041,-0.018069,1.000614));
+  hpcpush(hpxyz(0.028515,0.002137,1.000409));
+  hpcpush(hpxyz(0.028515,-0.002137,1.000409));
+
+  bshape(shEyepatch, 46);
+  hpcpush(hpxyz(0.029860,-0.048970,1.001643));
+  hpcpush(hpxyz(0.063361,0.014346,1.002108));
+  hpcpush(hpxyz(0.059794,0.031093,1.002268));
+  hpcpush(hpxyz(0.017892,-0.040556,1.000982));
+  hpcpush(hpxyz(0.029860,-0.048970,1.001643));
 
   bshape(shPHead, 44);
   hpcpush(hpxyz(0.060794,0.001192,1.001847));
@@ -3666,7 +5047,7 @@ void buildpolys() {
   hpcpush(hpxyz(0.069133,0.279061,1.040507));
   hpcpush(hpxyz(0.096293,0.278465,1.042504));
 
-  bshape(shFlailBall, 40);
+  bshape(shFlailBall, 46);
   hpcpush(hpxyz(-0.152664,-0.216202,1.034432));
   hpcpush(hpxyz(-0.169658,-0.186257,1.031250));
   hpcpush(hpxyz(-0.175291,-0.180580,1.031182));
@@ -3776,37 +5157,784 @@ void buildpolys() {
   hpcpush(hpxyz(0.117580,-0.140943,1.016705));
   hpcpush(hpxyz(0.124720,-0.151933,1.019136));
   hpcpush(hpxyz(0.124731,-0.149526,1.018781));
+
+  bshape(shBoatOuter, 12);
+
+  hpcpush(hpxyz(-0.254359,0.147192,1.042288));
+  hpcpush(hpxyz(-0.147845,0.149087,1.021805));
+  hpcpush(hpxyz(0.030409,0.144749,1.010879));
+  hpcpush(hpxyz(0.120225,0.127586,1.015250));
+  hpcpush(hpxyz(0.172686,0.119265,1.021785));
+  hpcpush(hpxyz(0.208240,0.105375,1.026873));
+  hpcpush(hpxyz(0.245303,0.092783,1.033819));
+  hpcpush(hpxyz(0.286782,0.068466,1.042560));
+  hpcpush(hpxyz(0.309035,0.045638,1.047657));
+  hpcpush(hpxyz(0.335671,0.021145,1.055046));
+  hpcpush(hpxyz(0.352147,0.009337,1.060233));
+  hpcpush(hpxyz(0.357212,0.006689,1.061906));
+  hpcpush(hpxyz(0.357212,-0.006689,1.061906));
+  hpcpush(hpxyz(0.352147,-0.009337,1.060233));
+  hpcpush(hpxyz(0.335671,-0.021145,1.055046));
+  hpcpush(hpxyz(0.309035,-0.045638,1.047657));
+  hpcpush(hpxyz(0.286782,-0.068466,1.042560));
+  hpcpush(hpxyz(0.245303,-0.092783,1.033819));
+  hpcpush(hpxyz(0.208240,-0.105375,1.026873));
+  hpcpush(hpxyz(0.172686,-0.119265,1.021785));
+  hpcpush(hpxyz(0.120225,-0.127586,1.015250));
+  hpcpush(hpxyz(0.030409,-0.144749,1.010879));
+  hpcpush(hpxyz(-0.147845,-0.149087,1.021805));
+  hpcpush(hpxyz(-0.254359,-0.147192,1.042288));
+  hpcpush(hpxyz(-0.254359,0.147192,1.042288));
+
+  bshape(shBoatInner, 13);
+
+  hpcpush(hpxyz(-0.229820,0.121893,1.033284));
+  hpcpush(hpxyz(0.022940,0.117115,1.007096));
+  hpcpush(hpxyz(0.169024,0.090064,1.018175));
+  hpcpush(hpxyz(0.256702,0.052103,1.033736));
+  hpcpush(hpxyz(0.299070,-0.000000,1.043764));
+  hpcpush(hpxyz(0.299070,0.000000,1.043764));
+  hpcpush(hpxyz(0.256702,-0.052103,1.033736));
+  hpcpush(hpxyz(0.169024,-0.090064,1.018175));
+  hpcpush(hpxyz(0.022940,-0.117115,1.007096));
+  hpcpush(hpxyz(-0.229820,-0.121893,1.033284));
+  hpcpush(hpxyz(-0.229820,0.121893,1.033284));
   
+  bshape(shScratch, 17);
+  hpcpush(hpxyz(-0.028983,0.241948,1.029261));
+  hpcpush(hpxyz(-0.028983,-0.241948,1.029261));
+  hpcpush(hpxyz(-0.028983,0.241948,1.029261));  
+
+  bshape(shHeptaMarker, 17);
+  for(int t=0; t<=7; t++) hpcpush(ddi(t*12, hexf*.2) * C0);
   
   bshape(shBigHepta, 11);
   for(int t=0; t<=7; t++) hpcpush(ddi(t*12, -hexf*1.5) * C0);
   
+  bshape(shBigHex, 11);
+  for(int t=0; t<=6; t++) hpcpush(ddi(t*14, -hexf*1.3) * C0);
+  
   bshape(shBigTriangle, 11);
   for(int t=0; t<=3; t++) hpcpush(ddi(t*28, -hexf*1.5) * C0);
   
+  bshape(shBigHexTriangleRev, 11);
+  for(int t=0; t<=3; t++) hpcpush(ddi(t*28, -hexf*1.3) * C0);
+  
+  bshape(shBigHexTriangle, 11);
+  for(int t=0; t<=3; t++) hpcpush(ddi(14+t*28, -hexf*1.3) * C0);
+
+  bshape(shSkeletonBody, 41);
+  hpcpush(hpxyz(0.001190,0.001190,1.000001));
+  hpcpush(hpxyz(0.001193,-0.042936,1.000922));
+  hpcpush(hpxyz(-0.004786,-0.070589,1.002500));
+  hpcpush(hpxyz(-0.016803,-0.088814,1.004077));
+  hpcpush(hpxyz(-0.036099,-0.097467,1.005387));
+  hpcpush(hpxyz(-0.038444,-0.087700,1.004574));
+  hpcpush(hpxyz(-0.028752,-0.074277,1.003167));
+  hpcpush(hpxyz(-0.022672,-0.042958,1.001179));
+  hpcpush(hpxyz(-0.022648,-0.027416,1.000632));
+  hpcpush(hpxyz(-0.044152,-0.020286,1.001180));
+  hpcpush(hpxyz(-0.046994,-0.100012,1.006087));
+  hpcpush(hpxyz(-0.031489,-0.240575,1.029013));
+  hpcpush(hpxyz(0.044046,-0.236589,1.028550));
+  hpcpush(hpxyz(0.052529,-0.220120,1.025286));
+  hpcpush(hpxyz(0.068888,-0.219190,1.026055));
+  hpcpush(hpxyz(0.079398,-0.230631,1.029318));
+  hpcpush(hpxyz(0.083186,-0.263635,1.037508));
+  hpcpush(hpxyz(0.062603,-0.265745,1.036600));
+  hpcpush(hpxyz(0.048239,-0.255158,1.033166));
+  hpcpush(hpxyz(-0.048471,-0.265315,1.035732));
+  hpcpush(hpxyz(-0.068926,-0.105203,1.007878));
+  hpcpush(hpxyz(-0.070637,-0.026339,1.002838));
+  hpcpush(hpxyz(-0.085171,-0.020393,1.003828));
+  hpcpush(hpxyz(-0.085171,0.020393,1.003828));
+  hpcpush(hpxyz(-0.070637,0.026339,1.002838));
+  hpcpush(hpxyz(-0.068926,0.105203,1.007878));
+  hpcpush(hpxyz(-0.048471,0.265315,1.035732));
+  hpcpush(hpxyz(0.048239,0.255158,1.033166));
+  hpcpush(hpxyz(0.062603,0.265745,1.036600));
+  hpcpush(hpxyz(0.083186,0.263635,1.037508));
+  hpcpush(hpxyz(0.079398,0.230631,1.029318));
+  hpcpush(hpxyz(0.068888,0.219190,1.026055));
+  hpcpush(hpxyz(0.052529,0.220120,1.025286));
+  hpcpush(hpxyz(0.044046,0.236589,1.028550));
+  hpcpush(hpxyz(-0.031489,0.240575,1.029013));
+  hpcpush(hpxyz(-0.046994,0.100012,1.006087));
+  hpcpush(hpxyz(-0.044152,0.020286,1.001180));
+  hpcpush(hpxyz(-0.022648,0.027416,1.000632));
+  hpcpush(hpxyz(-0.022672,0.042958,1.001179));
+  hpcpush(hpxyz(-0.028752,0.074277,1.003167));
+  hpcpush(hpxyz(-0.038444,0.087700,1.004574));
+  hpcpush(hpxyz(-0.036099,0.097467,1.005387));
+  hpcpush(hpxyz(-0.016803,0.088814,1.004077));
+  hpcpush(hpxyz(-0.004786,0.070589,1.002500));
+  hpcpush(hpxyz(0.001193,0.042936,1.000922));
+  hpcpush(hpxyz(0.001190,-0.001190,1.000001));
+  hpcpush(hpxyz(0.001190,0.001190,1.000001));
+
+  bshape(shSkull, 42);
+  hpcpush(hpxyz(-0.120823,0.019332,1.007458));
+  hpcpush(hpxyz(-0.089124,0.061424,1.005841));
+  hpcpush(hpxyz(-0.035904,0.063430,1.002653));
+  hpcpush(hpxyz(0.019074,0.032188,1.000700));
+  hpcpush(hpxyz(0.022631,0.004764,1.000267));
+  hpcpush(hpxyz(0.022631,-0.004764,1.000267));
+  hpcpush(hpxyz(0.019074,-0.032188,1.000700));
+  hpcpush(hpxyz(-0.035904,-0.063430,1.002653));
+  hpcpush(hpxyz(-0.089124,-0.061424,1.005841));
+  hpcpush(hpxyz(-0.120823,-0.019332,1.007458));
+  hpcpush(hpxyz(-0.120823,0.019332,1.007458));
+
+  bshape(shSkullEyes, 43);
+  hpcpush(hpxyz(-0.001191,0.010716,1.000058));
+  hpcpush(hpxyz(-0.016673,0.009527,1.000184));
+  hpcpush(hpxyz(-0.016682,0.025023,1.000452));
+  hpcpush(hpxyz(-0.002382,0.022631,1.000259));
+  hpcpush(hpxyz(0.001191,0.023823,1.000284));
+  hpcpush(hpxyz(0.001191,-0.023823,1.000284));
+  hpcpush(hpxyz(-0.002382,-0.022631,1.000259));
+  hpcpush(hpxyz(-0.016682,-0.025023,1.000452));
+  hpcpush(hpxyz(-0.016673,-0.009527,1.000184));
+  hpcpush(hpxyz(-0.001191,-0.010716,1.000058));
+  hpcpush(hpxyz(-0.001191,0.010716,1.000058));
+  
+  bshape(shFishTail, 30);
+  hpcpush(hpxyz(-0.003571,0.001190,1.000007));
+  hpcpush(hpxyz(-0.007145,0.015481,1.000145));
+  hpcpush(hpxyz(-0.015500,0.035769,1.000760));
+  hpcpush(hpxyz(-0.031072,0.053778,1.001927));
+  hpcpush(hpxyz(-0.047927,0.064702,1.003236));
+  hpcpush(hpxyz(-0.062478,0.073291,1.004627));
+  hpcpush(hpxyz(-0.083262,0.082055,1.006810));
+  hpcpush(hpxyz(-0.098001,0.082272,1.008153));
+  hpcpush(hpxyz(-0.111474,0.073912,1.008905));
+  hpcpush(hpxyz(-0.123761,0.063094,1.009603));
+  hpcpush(hpxyz(-0.129971,0.059519,1.010166));
+  hpcpush(hpxyz(-0.138754,0.057206,1.011200));
+  hpcpush(hpxyz(-0.148852,0.053684,1.012442));
+  hpcpush(hpxyz(-0.164257,0.053935,1.014835));
+  hpcpush(hpxyz(-0.177269,0.054165,1.017034));
+  hpcpush(hpxyz(-0.191786,0.054443,1.019679));
+  hpcpush(hpxyz(-0.214728,0.056179,1.024336));
+  hpcpush(hpxyz(-0.227189,0.058994,1.027178));
+  hpcpush(hpxyz(-0.237162,0.065598,1.029829));
+  hpcpush(hpxyz(-0.240110,0.069505,1.030768));
+  hpcpush(hpxyz(-0.248932,0.077474,1.033426));
+  hpcpush(hpxyz(-0.262350,0.087023,1.037497));
+  hpcpush(hpxyz(-0.271446,0.092626,1.040318));
+  hpcpush(hpxyz(-0.278978,0.094284,1.042458));
+  hpcpush(hpxyz(-0.283499,0.094500,1.043696));
+  hpcpush(hpxyz(-0.277139,0.087653,1.041388));
+  hpcpush(hpxyz(-0.269286,0.078221,1.038573));
+  hpcpush(hpxyz(-0.253927,0.055864,1.033247));
+  hpcpush(hpxyz(-0.247700,0.034122,1.030786));
+  hpcpush(hpxyz(-0.243240,0.018905,1.029331));
+  hpcpush(hpxyz(-0.241745,0.005036,1.028818));
+  hpcpush(hpxyz(-0.241745,-0.005036,1.028818));
+  hpcpush(hpxyz(-0.243240,-0.018905,1.029331));
+  hpcpush(hpxyz(-0.247700,-0.034122,1.030786));
+  hpcpush(hpxyz(-0.253927,-0.055864,1.033247));
+  hpcpush(hpxyz(-0.269286,-0.078221,1.038573));
+  hpcpush(hpxyz(-0.277139,-0.087653,1.041388));
+  hpcpush(hpxyz(-0.283499,-0.094500,1.043696));
+  hpcpush(hpxyz(-0.278978,-0.094284,1.042458));
+  hpcpush(hpxyz(-0.271446,-0.092626,1.040318));
+  hpcpush(hpxyz(-0.262350,-0.087023,1.037497));
+  hpcpush(hpxyz(-0.248932,-0.077474,1.033426));
+  hpcpush(hpxyz(-0.240110,-0.069505,1.030768));
+  hpcpush(hpxyz(-0.237162,-0.065598,1.029829));
+  hpcpush(hpxyz(-0.227189,-0.058994,1.027178));
+  hpcpush(hpxyz(-0.214728,-0.056179,1.024336));
+  hpcpush(hpxyz(-0.191786,-0.054443,1.019679));
+  hpcpush(hpxyz(-0.177269,-0.054165,1.017034));
+  hpcpush(hpxyz(-0.164257,-0.053935,1.014835));
+  hpcpush(hpxyz(-0.148852,-0.053684,1.012442));
+  hpcpush(hpxyz(-0.138754,-0.057206,1.011200));
+  hpcpush(hpxyz(-0.129971,-0.059519,1.010166));
+  hpcpush(hpxyz(-0.123761,-0.063094,1.009603));
+  hpcpush(hpxyz(-0.111474,-0.073912,1.008905));
+  hpcpush(hpxyz(-0.098001,-0.082272,1.008153));
+  hpcpush(hpxyz(-0.083262,-0.082055,1.006810));
+  hpcpush(hpxyz(-0.062478,-0.073291,1.004627));
+  hpcpush(hpxyz(-0.047927,-0.064702,1.003236));
+  hpcpush(hpxyz(-0.031072,-0.053778,1.001927));
+  hpcpush(hpxyz(-0.015500,-0.035769,1.000760));
+  hpcpush(hpxyz(-0.007145,-0.015481,1.000145));
+  hpcpush(hpxyz(-0.003571,-0.001190,1.000007));
+  hpcpush(hpxyz(-0.003571,0.001190,1.000007));
+
+  bshape(shFatBody, 41);
+  hpcpush(hpxyz(-0.158280,0.010638,1.012505));
+  hpcpush(hpxyz(-0.153491,0.063014,1.013672));
+  hpcpush(hpxyz(-0.143004,0.090522,1.014221));
+  hpcpush(hpxyz(-0.130133,0.119287,1.015463));
+  hpcpush(hpxyz(-0.120336,0.139833,1.016875));
+  hpcpush(hpxyz(-0.108707,0.144976,1.016285));
+  hpcpush(hpxyz(-0.103459,0.149545,1.016399));
+  hpcpush(hpxyz(-0.088463,0.147968,1.014751));
+  hpcpush(hpxyz(-0.090694,0.183338,1.020705));
+  hpcpush(hpxyz(-0.069574,0.274320,1.039275));
+  hpcpush(hpxyz(-0.026928,0.273931,1.037190));
+  hpcpush(hpxyz(0.000335,0.278791,1.038135));
+  hpcpush(hpxyz(0.049634,0.254674,1.033113));
+  hpcpush(hpxyz(0.064323,0.261140,1.035535));
+  hpcpush(hpxyz(0.085998,0.258714,1.036498));
+  hpcpush(hpxyz(0.084852,0.235757,1.030913));
+  hpcpush(hpxyz(0.075972,0.211105,1.024860));
+  hpcpush(hpxyz(0.051782,0.222035,1.025661));
+  hpcpush(hpxyz(-0.009808,0.219631,1.023882));
+  hpcpush(hpxyz(-0.037620,0.215354,1.023617));
+  hpcpush(hpxyz(-0.020675,0.185577,1.017284));
+  hpcpush(hpxyz(-0.021056,0.141669,1.010205));
+  hpcpush(hpxyz(0.007264,0.129328,1.008354));
+  hpcpush(hpxyz(0.036658,0.102338,1.005891));
+  hpcpush(hpxyz(0.051136,0.057412,1.002951));
+  hpcpush(hpxyz(0.056061,-0.003004,1.001575));
+  hpcpush(hpxyz(0.056061,0.003004,1.001575));
+  hpcpush(hpxyz(0.051136,-0.057412,1.002951));
+  hpcpush(hpxyz(0.036658,-0.102338,1.005891));
+  hpcpush(hpxyz(0.007264,-0.129328,1.008354));
+  hpcpush(hpxyz(-0.021056,-0.141669,1.010205));
+  hpcpush(hpxyz(-0.020675,-0.185577,1.017284));
+  hpcpush(hpxyz(-0.037620,-0.215354,1.023617));
+  hpcpush(hpxyz(-0.009808,-0.219631,1.023882));
+  hpcpush(hpxyz(0.051782,-0.222035,1.025661));
+  hpcpush(hpxyz(0.075972,-0.211105,1.024860));
+  hpcpush(hpxyz(0.084852,-0.235757,1.030913));
+  hpcpush(hpxyz(0.085998,-0.258714,1.036498));
+  hpcpush(hpxyz(0.064323,-0.261140,1.035535));
+  hpcpush(hpxyz(0.049634,-0.254674,1.033113));
+  hpcpush(hpxyz(0.000335,-0.278791,1.038135));
+  hpcpush(hpxyz(-0.026928,-0.273931,1.037190));
+  hpcpush(hpxyz(-0.069574,-0.274320,1.039275));
+  hpcpush(hpxyz(-0.090694,-0.183338,1.020705));
+  hpcpush(hpxyz(-0.088463,-0.147968,1.014751));
+  hpcpush(hpxyz(-0.103459,-0.149545,1.016399));
+  hpcpush(hpxyz(-0.108707,-0.144976,1.016285));
+  hpcpush(hpxyz(-0.120336,-0.139833,1.016875));
+  hpcpush(hpxyz(-0.130133,-0.119287,1.015463));
+  hpcpush(hpxyz(-0.143004,-0.090522,1.014221));
+  hpcpush(hpxyz(-0.153491,-0.063014,1.013672));
+  hpcpush(hpxyz(-0.158280,-0.010638,1.012505));
+  
+  bshape(shZebra[0], 10);
+  hpcpush(hpxyz(-0.307697,-0.214329,1.067995));
+  hpcpush(hpxyz(-0.339462,0.159309,1.067995));
+  hpcpush(hpxyz(-0.031766,0.373637,1.067995));
+  hpcpush(hpxyz(0.307697,0.214329,1.067995));
+  hpcpush(hpxyz(0.339462,-0.159309,1.067995));
+  hpcpush(hpxyz(0.031766,-0.373637,1.067995));
+  hpcpush(hpxyz(-0.307697,-0.214329,1.067995));
+
+  bshape(shZebra[1], 10);
+  hpcpush(hpxyz(-0.192992,-0.168975,1.032375));
+  hpcpush(hpxyz(-0.238865,0.204661,1.048305));
+  hpcpush(hpxyz(-0.080551,0.254199,1.034942));
+  hpcpush(hpxyz(0.347359,0.222111,1.081662));
+  hpcpush(hpxyz(0.392920,-0.180638,1.089503));
+  hpcpush(hpxyz(0.019691,-0.156962,1.012435));
+  hpcpush(hpxyz(-0.192992,-0.168975,1.032375));
+
+  bshape(shZebra[2], 10);
+  hpcpush(hpxyz(-0.255158,0.223637,1.055992));
+  hpcpush(hpxyz(-0.114892,0.277358,1.044092));
+  hpcpush(hpxyz(0.260873,0.219611,1.056543));
+  hpcpush(hpxyz(0.444210,0.107854,1.099525));
+  hpcpush(hpxyz(0.255129,-0.352141,1.090456));
+  hpcpush(hpxyz(-0.058563,-0.195290,1.020572));
+  hpcpush(hpxyz(-0.205857,-0.164479,1.034133));
+  hpcpush(hpxyz(-0.255158,0.223637,1.055992));
+
+  bshape(shZebra[3], 10);
+  hpcpush(hpxyz(0.248469,0.308508,1.075599));
+  hpcpush(hpxyz(0.257329,0.012990,1.032660));
+  hpcpush(hpxyz(0.288207,-0.281417,1.078081));
+  hpcpush(hpxyz(0.038093,-0.236115,1.028203));
+  hpcpush(hpxyz(-0.209655,-0.205481,1.042198));
+  hpcpush(hpxyz(-0.224279,0.047025,1.025920));
+  hpcpush(hpxyz(-0.253191,0.302526,1.075001));
+  hpcpush(hpxyz(-0.002290,0.296336,1.042986));
+  hpcpush(hpxyz(0.248469,0.308508,1.075599));
+
+  bshape(shEmeraldFloor[0], 10); // 4
+  hpcpush(hpxyz(-0.056700,0.289325,1.042556));
+  hpcpush(hpxyz(0.003114,0.299067,1.043768));
+  hpcpush(hpxyz(0.041221,0.283536,1.040237));
+  hpcpush(hpxyz(0.125459,0.234982,1.034870));
+  hpcpush(hpxyz(0.181143,0.183624,1.032730));
+  hpcpush(hpxyz(0.228595,0.105917,1.031249));
+  hpcpush(hpxyz(0.268750,0.012281,1.035557));
+  hpcpush(hpxyz(0.313793,-0.081056,1.051207));
+  hpcpush(hpxyz(0.306997,-0.188603,1.062929));
+  hpcpush(hpxyz(0.262425,-0.286297,1.072769));
+  hpcpush(hpxyz(0.218519,-0.355547,1.083588));
+  hpcpush(hpxyz(0.153244,-0.376219,1.079363));
+  hpcpush(hpxyz(0.046875,-0.364611,1.065429));
+  hpcpush(hpxyz(-0.019398,-0.349785,1.059588));
+  hpcpush(hpxyz(-0.083546,-0.322881,1.054150));
+  hpcpush(hpxyz(-0.141981,-0.272036,1.046022));
+  hpcpush(hpxyz(-0.195959,-0.227784,1.044167));
+  hpcpush(hpxyz(-0.221863,-0.171718,1.038610));
+  hpcpush(hpxyz(-0.239605,-0.111801,1.034365));
+  hpcpush(hpxyz(-0.260405,-0.063040,1.035270));
+  hpcpush(hpxyz(-0.276108,0.051160,1.038679));
+  hpcpush(hpxyz(-0.250004,0.138005,1.039975));
+  hpcpush(hpxyz(-0.184725,0.213503,1.039089));
+  hpcpush(hpxyz(-0.125567,0.259839,1.040809));
+  hpcpush(hpxyz(-0.056700,0.289325,1.042556));
+
+  bshape(shEmeraldFloor[1], 10); // 12
+  hpcpush(hpxyz(-0.012456,-0.282668,1.039258));
+  hpcpush(hpxyz(0.093943,-0.261125,1.037792));
+  hpcpush(hpxyz(0.176033,-0.224423,1.039881));
+  hpcpush(hpxyz(0.251304,-0.129592,1.039205));
+  hpcpush(hpxyz(0.253408,0.003018,1.031613));
+  hpcpush(hpxyz(0.205115,0.151740,1.032035));
+  hpcpush(hpxyz(0.136504,0.257503,1.041605));
+  hpcpush(hpxyz(0.050478,0.321171,1.051522));
+  hpcpush(hpxyz(-0.024338,0.351747,1.060339));
+  hpcpush(hpxyz(-0.113671,0.338793,1.061933));
+  hpcpush(hpxyz(-0.199507,0.312663,1.066565));
+  hpcpush(hpxyz(-0.289397,0.244537,1.069368));
+  hpcpush(hpxyz(-0.318919,0.189505,1.066593));
+  hpcpush(hpxyz(-0.296780,0.103663,1.048248));
+  hpcpush(hpxyz(-0.266492,-0.004074,1.034908));
+  hpcpush(hpxyz(-0.225121,-0.113729,1.031316));
+  hpcpush(hpxyz(-0.162566,-0.195216,1.031764));
+  hpcpush(hpxyz(-0.093623,-0.256862,1.036698));
+  hpcpush(hpxyz(-0.073239,-0.271190,1.038705));
+  hpcpush(hpxyz(-0.012456,-0.282668,1.039258));
+
+  bshape(shEmeraldFloor[2], 10); // 16
+  hpcpush(hpxyz(0.142342,0.315002,1.058058));
+  hpcpush(hpxyz(0.192633,0.259152,1.050841));
+  hpcpush(hpxyz(0.232117,0.228558,1.051721));
+  hpcpush(hpxyz(0.263994,0.150040,1.045086));
+  hpcpush(hpxyz(0.283920,0.084560,1.042958));
+  hpcpush(hpxyz(0.289892,-0.010808,1.041227));
+  hpcpush(hpxyz(0.297148,-0.086089,1.046761));
+  hpcpush(hpxyz(0.297551,-0.165417,1.056361));
+  hpcpush(hpxyz(0.290991,-0.200376,1.060578));
+  hpcpush(hpxyz(0.258510,-0.274435,1.068710));
+  hpcpush(hpxyz(0.200576,-0.292802,1.061114));
+  hpcpush(hpxyz(0.137570,-0.326255,1.060833));
+  hpcpush(hpxyz(0.057449,-0.363515,1.065572));
+  hpcpush(hpxyz(0.007219,-0.381780,1.070424));
+  hpcpush(hpxyz(-0.042563,-0.362309,1.064462));
+  hpcpush(hpxyz(-0.099799,-0.296581,1.047817));
+  hpcpush(hpxyz(-0.126618,-0.259997,1.040976));
+  hpcpush(hpxyz(-0.164471,-0.210125,1.034989));
+  hpcpush(hpxyz(-0.206762,-0.179726,1.036847));
+  hpcpush(hpxyz(-0.255672,-0.132984,1.040698));
+  hpcpush(hpxyz(-0.278657,-0.105484,1.043445));
+  hpcpush(hpxyz(-0.292210,-0.086272,1.045385));
+  hpcpush(hpxyz(-0.317777,-0.034598,1.049847));
+  hpcpush(hpxyz(-0.332027,0.039956,1.054438));
+  hpcpush(hpxyz(-0.311197,0.107127,1.052768));
+  hpcpush(hpxyz(-0.293985,0.148441,1.052835));
+  hpcpush(hpxyz(-0.261872,0.181378,1.049512));
+  hpcpush(hpxyz(-0.161843,0.220098,1.036647));
+  hpcpush(hpxyz(-0.080956,0.253464,1.034794));
+  hpcpush(hpxyz(-0.028510,0.284753,1.040143));
+  hpcpush(hpxyz(0.013578,0.313129,1.047967));
+  hpcpush(hpxyz(0.055797,0.341483,1.058170));
+  hpcpush(hpxyz(0.142342,0.315002,1.058058));
+
+  bshape(shEmeraldFloor[3], 10); // 20
+  hpcpush(hpxyz(-0.163082,-0.220437,1.036913));
+  hpcpush(hpxyz(-0.210355,-0.178152,1.037298));
+  hpcpush(hpxyz(-0.270116,-0.134375,1.044519));
+  hpcpush(hpxyz(-0.286296,-0.068967,1.042460));
+  hpcpush(hpxyz(-0.322640,0.023933,1.051033));
+  hpcpush(hpxyz(-0.303410,0.080931,1.048145));
+  hpcpush(hpxyz(-0.256143,0.157047,1.044161));
+  hpcpush(hpxyz(-0.191383,0.193946,1.036457));
+  hpcpush(hpxyz(-0.112200,0.248267,1.036448));
+  hpcpush(hpxyz(-0.006180,0.297906,1.043449));
+  hpcpush(hpxyz(0.045011,0.314576,1.049278));
+  hpcpush(hpxyz(0.123367,0.290642,1.048662));
+  hpcpush(hpxyz(0.173268,0.251704,1.045647));
+  hpcpush(hpxyz(0.226704,0.200367,1.044769));
+  hpcpush(hpxyz(0.274509,0.112459,1.043073));
+  hpcpush(hpxyz(0.272693,0.041554,1.037347));
+  hpcpush(hpxyz(0.266634,-0.039227,1.035680));
+  hpcpush(hpxyz(0.245934,-0.087769,1.033531));
+  hpcpush(hpxyz(0.206654,-0.145971,1.031510));
+  hpcpush(hpxyz(0.168911,-0.181347,1.030251));
+  hpcpush(hpxyz(0.113778,-0.241571,1.035037));
+  hpcpush(hpxyz(0.060166,-0.287358,1.042207));
+  hpcpush(hpxyz(-0.030419,-0.300995,1.044760));
+  hpcpush(hpxyz(-0.106762,-0.252814,1.036973));
+  hpcpush(hpxyz(-0.163082,-0.220437,1.036913));
+
+  bshape(shEmeraldFloor[4], 10); // 28
+  hpcpush(hpxyz(-0.121227,-0.290032,1.048244));
+  hpcpush(hpxyz(-0.211853,-0.226567,1.047003));
+  hpcpush(hpxyz(-0.271304,-0.142026,1.045838));
+  hpcpush(hpxyz(-0.291031,-0.001756,1.041490));
+  hpcpush(hpxyz(-0.289025,0.081565,1.044121));
+  hpcpush(hpxyz(-0.274404,0.151774,1.048014));
+  hpcpush(hpxyz(-0.270636,0.184903,1.052346));
+  hpcpush(hpxyz(-0.177964,0.228844,1.041173));
+  hpcpush(hpxyz(-0.109553,0.258706,1.038716));
+  hpcpush(hpxyz(-0.046057,0.288157,1.041708));
+  hpcpush(hpxyz(0.012352,0.334753,1.054615));
+  hpcpush(hpxyz(0.093790,0.294439,1.046657));
+  hpcpush(hpxyz(0.113901,0.258432,1.039115));
+  hpcpush(hpxyz(0.169445,0.181108,1.030297));
+  hpcpush(hpxyz(0.201022,0.133994,1.028768));
+  hpcpush(hpxyz(0.217873,0.089759,1.027388));
+  hpcpush(hpxyz(0.229954,0.028756,1.026502));
+  hpcpush(hpxyz(0.219894,-0.023561,1.024162));
+  hpcpush(hpxyz(0.191854,-0.102714,1.023405));
+  hpcpush(hpxyz(0.155541,-0.176809,1.027353));
+  hpcpush(hpxyz(0.124174,-0.224046,1.032287));
+  hpcpush(hpxyz(0.061461,-0.284240,1.041427));
+  hpcpush(hpxyz(0.004090,-0.327127,1.052154));
+  hpcpush(hpxyz(-0.121227,-0.290032,1.048244));
+
+  bshape(shEmeraldFloor[5], 10); // 36
+  hpcpush(hpxyz(-0.123950,0.204444,1.028183));
+  hpcpush(hpxyz(-0.062627,0.216559,1.025095));
+  hpcpush(hpxyz(0.004307,0.251676,1.031193));
+  hpcpush(hpxyz(0.053230,0.277691,1.039204));
+  hpcpush(hpxyz(0.104981,0.268275,1.040669));
+  hpcpush(hpxyz(0.179487,0.211716,1.037805));
+  hpcpush(hpxyz(0.219611,0.155886,1.035630));
+  hpcpush(hpxyz(0.242732,0.098595,1.033750));
+  hpcpush(hpxyz(0.253441,0.041064,1.032433));
+  hpcpush(hpxyz(0.251167,-0.002564,1.031063));
+  hpcpush(hpxyz(0.258569,-0.050639,1.034129));
+  hpcpush(hpxyz(0.241512,-0.095904,1.033211));
+  hpcpush(hpxyz(0.224178,-0.142437,1.034671));
+  hpcpush(hpxyz(0.200723,-0.160460,1.032491));
+  hpcpush(hpxyz(0.160438,-0.177252,1.028182));
+  hpcpush(hpxyz(0.098857,-0.201735,1.024924));
+  hpcpush(hpxyz(0.042704,-0.222826,1.025415));
+  hpcpush(hpxyz(-0.046440,-0.220643,1.025105));
+  hpcpush(hpxyz(-0.121819,-0.210954,1.029243));
+  hpcpush(hpxyz(-0.193674,-0.181500,1.034626));
+  hpcpush(hpxyz(-0.240226,-0.152286,1.039663));
+  hpcpush(hpxyz(-0.288784,-0.106825,1.046331));
+  hpcpush(hpxyz(-0.312611,-0.056858,1.049266));
+  hpcpush(hpxyz(-0.322108,0.009276,1.050638));
+  hpcpush(hpxyz(-0.323420,0.074633,1.053646));
+  hpcpush(hpxyz(-0.320770,0.110549,1.055990));
+  hpcpush(hpxyz(-0.238954,0.181091,1.043980));
+  hpcpush(hpxyz(-0.123950,0.204444,1.028183));
+
+  /*
+  bshape(shTower[0], 10); // 1
+  hpcpush(hpxyz(-0.286251,0.206460,1.060455));
+  hpcpush(hpxyz(-0.228388,0.237443,1.052872));
+  hpcpush(hpxyz(-0.159130,0.310692,1.059175));
+  hpcpush(hpxyz(-0.101028,0.374054,1.072438));
+  hpcpush(hpxyz(0.075166,0.301721,1.047227));
+  hpcpush(hpxyz(0.296628,0.282561,1.080661));
+  hpcpush(hpxyz(0.392862,0.273630,1.108699));
+  hpcpush(hpxyz(0.406414,0.155729,1.090607));
+  hpcpush(hpxyz(0.351704,0.039501,1.060781));
+  hpcpush(hpxyz(0.238677,-0.090994,1.032108));
+  hpcpush(hpxyz(0.117245,-0.194511,1.025466));
+  hpcpush(hpxyz(0.021470,-0.256598,1.032620));
+  hpcpush(hpxyz(-0.009932,-0.269112,1.035625));
+  hpcpush(hpxyz(-0.142800,-0.030207,1.010596));
+  hpcpush(hpxyz(-0.286251,0.206460,1.060455));
+
+  bshape(shTower[1], 10); // 2
+  hpcpush(hpxyz(0.250672,0.215566,1.053236));
+  hpcpush(hpxyz(-0.010561,0.166674,1.013850));
+  hpcpush(hpxyz(-0.188122,0.172750,1.032101));
+  hpcpush(hpxyz(-0.277968,0.195647,1.056193));
+  hpcpush(hpxyz(-0.273175,-0.294725,1.077723));
+  hpcpush(hpxyz(-0.058073,-0.278517,1.039685));
+  hpcpush(hpxyz(0.114633,-0.264898,1.040823));
+  hpcpush(hpxyz(0.214865,-0.223092,1.046870));
+  hpcpush(hpxyz(0.318979,-0.166948,1.062835));
+  hpcpush(hpxyz(0.348056,-0.154771,1.070092));
+  hpcpush(hpxyz(0.250672,0.215566,1.053236));
+
+  bshape(shTower[2], 10); // 4
+  hpcpush(hpxyz(-0.305085,0.182715,1.061349));
+  hpcpush(hpxyz(-0.141572,-0.249919,1.040434));
+  hpcpush(hpxyz(-0.082532,-0.256373,1.035634));
+  hpcpush(hpxyz(0.011916,-0.200378,1.019948));
+  hpcpush(hpxyz(0.107643,-0.130975,1.014269));
+  hpcpush(hpxyz(0.197879,-0.052950,1.020764));
+  hpcpush(hpxyz(0.275493,0.054106,1.038665));
+  hpcpush(hpxyz(0.346502,0.177608,1.073130));
+  hpcpush(hpxyz(0.365290,0.224553,1.088054));
+  hpcpush(hpxyz(-0.042684,0.405864,1.080068));
+  hpcpush(hpxyz(-0.305085,0.182715,1.061349));
+
+  bshape(shTower[3], 10); // 5
+  hpcpush(hpxyz(-0.244566,0.213804,1.051439));
+  hpcpush(hpxyz(-0.121406,0.179228,1.023163));
+  hpcpush(hpxyz(0.102781,0.233054,1.031929));
+  hpcpush(hpxyz(0.137859,0.248290,1.039545));
+  hpcpush(hpxyz(0.219219,0.271805,1.059214));
+  hpcpush(hpxyz(0.439787,-0.128376,1.099951));
+  hpcpush(hpxyz(0.327884,-0.165668,1.065342));
+  hpcpush(hpxyz(0.191605,-0.198467,1.037353));
+  hpcpush(hpxyz(-0.015788,-0.263051,1.034140));
+  hpcpush(hpxyz(-0.162942,-0.274063,1.049600));
+  hpcpush(hpxyz(-0.284113,-0.264520,1.072703));
+  hpcpush(hpxyz(-0.360780,-0.248815,1.091820));
+  hpcpush(hpxyz(-0.244566,0.213804,1.051439));
+
+  bshape(shTower[4], 10); // 8
+  hpcpush(hpxyz(0.571958,-0.279170,1.185357));
+  hpcpush(hpxyz(0.393753,-0.334598,1.125610));
+  hpcpush(hpxyz(0.230386,-0.380872,1.094596));
+  hpcpush(hpxyz(0.040909,-0.353244,1.061346));
+  hpcpush(hpxyz(-0.132206,-0.325608,1.059953));
+  hpcpush(hpxyz(-0.193426,-0.301627,1.062258));
+  hpcpush(hpxyz(-0.209589,-0.285475,1.060860));
+  hpcpush(hpxyz(-0.184256,0.133876,1.025609));
+  hpcpush(hpxyz(-0.122720,0.103535,1.012808));
+  hpcpush(hpxyz(0.028404,0.096630,1.005059));
+  hpcpush(hpxyz(0.131561,0.118840,1.015594));
+  hpcpush(hpxyz(0.206961,0.143553,1.031233));
+  hpcpush(hpxyz(0.285398,0.171884,1.054038));
+  hpcpush(hpxyz(0.311736,0.188934,1.064366));
+  hpcpush(hpxyz(0.427540,-0.043657,1.088437));
+  hpcpush(hpxyz(0.571958,-0.279170,1.185357));
+
+  bshape(shTower[5], 10); // 10
+  hpcpush(hpxyz(-0.311898,0.273433,1.082611));
+  hpcpush(hpxyz(-0.241832,0.284721,1.067496));
+  hpcpush(hpxyz(-0.093134,0.385666,1.075831));
+  hpcpush(hpxyz(-0.048259,0.410019,1.081871));
+  hpcpush(hpxyz(-0.034956,0.418726,1.084690));
+  hpcpush(hpxyz(0.323554,0.088209,1.054736));
+  hpcpush(hpxyz(0.281449,-0.050570,1.040082));
+  hpcpush(hpxyz(0.166974,-0.175799,1.028973));
+  hpcpush(hpxyz(0.053476,-0.232832,1.028139));
+  hpcpush(hpxyz(-0.046497,-0.270575,1.037002));
+  hpcpush(hpxyz(-0.167112,-0.296403,1.056306));
+  hpcpush(hpxyz(-0.182433,-0.298027,1.059293));
+  hpcpush(hpxyz(-0.237210,-0.011802,1.027817));
+  hpcpush(hpxyz(-0.311898,0.273433,1.082611));
+
+  bshape(shTower[6], 10); // 12
+  hpcpush(hpxyz(0.591895,-0.274213,1.193957));
+  hpcpush(hpxyz(0.451640,-0.046334,1.098237));
+  hpcpush(hpxyz(0.339584,0.178653,1.071090));
+  hpcpush(hpxyz(0.075724,0.130436,1.011310));
+  hpcpush(hpxyz(-0.048271,0.097633,1.005914));
+  hpcpush(hpxyz(-0.223763,-0.157117,1.036704));
+  hpcpush(hpxyz(-0.073558,-0.240165,1.031062));
+  hpcpush(hpxyz(0.043434,-0.280964,1.039628));
+  hpcpush(hpxyz(0.298734,-0.305291,1.087403));
+  hpcpush(hpxyz(0.591895,-0.274213,1.193957));
+
+  bshape(shTower[7], 10); // 16
+  hpcpush(hpxyz(0.078002,0.370221,1.069181));
+  hpcpush(hpxyz(0.413248,0.133206,1.090192));
+  hpcpush(hpxyz(0.355187,0.048021,1.062292));
+  hpcpush(hpxyz(0.239656,-0.028483,1.028711));
+  hpcpush(hpxyz(0.091569,-0.106563,1.009822));
+  hpcpush(hpxyz(-0.053014,-0.170046,1.015739));
+  hpcpush(hpxyz(-0.148171,-0.179787,1.026780));
+  hpcpush(hpxyz(-0.226021,0.273779,1.061151));
+  hpcpush(hpxyz(0.078002,0.370221,1.069181));
+
+  bshape(shTower[8], 10); // 17
+  hpcpush(hpxyz(0.533180,-0.117639,1.139351));
+  hpcpush(hpxyz(0.378296,-0.199392,1.087596));
+  hpcpush(hpxyz(0.209814,-0.236744,1.048842));
+  hpcpush(hpxyz(0.054537,-0.276614,1.038985));
+  hpcpush(hpxyz(-0.034481,-0.273513,1.037303));
+  hpcpush(hpxyz(-0.160263,-0.038320,1.013485));
+  hpcpush(hpxyz(-0.297354,0.194169,1.061189));
+  hpcpush(hpxyz(-0.193697,0.211849,1.040384));
+  hpcpush(hpxyz(-0.063165,0.262989,1.035931));
+  hpcpush(hpxyz(0.036923,0.306670,1.046618));
+  hpcpush(hpxyz(0.097986,0.358635,1.066874));
+  hpcpush(hpxyz(0.135238,0.379300,1.078034));
+  hpcpush(hpxyz(0.318600,0.124720,1.056911));
+  hpcpush(hpxyz(0.533180,-0.117639,1.139351));
+
+  bshape(shTower[9], 10); // 18
+  hpcpush(hpxyz(-0.217261,0.132486,1.031870));
+  hpcpush(hpxyz(0.024523,0.407718,1.080202));
+  hpcpush(hpxyz(0.145333,0.449681,1.106045));
+  hpcpush(hpxyz(0.484226,0.101907,1.115733));
+  hpcpush(hpxyz(0.321456,-0.134096,1.058922));
+  hpcpush(hpxyz(-0.036797,-0.295091,1.043280));
+  hpcpush(hpxyz(-0.180549,-0.344274,1.072904));
+  hpcpush(hpxyz(-0.259938,-0.172378,1.047512));
+  hpcpush(hpxyz(-0.217261,0.132486,1.031870));
+
+  bshape(shTower[10], 10); // 20
+  hpcpush(hpxyz(-0.174062,-0.167910,1.028830));
+  hpcpush(hpxyz(-0.295951,0.239183,1.069951));
+  hpcpush(hpxyz(-0.212854,0.268510,1.057074));
+  hpcpush(hpxyz(-0.079667,0.325104,1.054533));
+  hpcpush(hpxyz(-0.024447,0.357384,1.062224));
+  hpcpush(hpxyz(0.004880,0.379437,1.069577));
+  hpcpush(hpxyz(0.047240,0.411450,1.082369));
+  hpcpush(hpxyz(0.404628,0.134398,1.087100));
+  hpcpush(hpxyz(0.279121,0.016611,1.038357));
+  hpcpush(hpxyz(0.142934,-0.078661,1.013221));
+  hpcpush(hpxyz(0.031621,-0.149237,1.011569));
+  hpcpush(hpxyz(-0.095567,-0.210063,1.026284));
+  hpcpush(hpxyz(-0.174062,-0.167910,1.028830));
+
+  bshape(shTower[11], 10); // 21
+  hpcpush(hpxyz(-0.261640,0.232003,1.059378));
+  hpcpush(hpxyz(-0.114066,0.222344,1.030751));
+  hpcpush(hpxyz(0.070087,0.311006,1.049589));
+  hpcpush(hpxyz(0.146439,0.385502,1.081691));
+  hpcpush(hpxyz(0.156417,0.393458,1.085944));
+  hpcpush(hpxyz(0.321239,0.151530,1.061205));
+  hpcpush(hpxyz(0.513393,-0.077506,1.126756));
+  hpcpush(hpxyz(0.367820,-0.144703,1.075282));
+  hpcpush(hpxyz(0.183543,-0.172959,1.031311));
+  hpcpush(hpxyz(0.022726,-0.215721,1.023256));
+  hpcpush(hpxyz(-0.158572,-0.235502,1.039522));
+  hpcpush(hpxyz(-0.259609,-0.221068,1.056536));
+  hpcpush(hpxyz(-0.283069,-0.211523,1.060599));
+  hpcpush(hpxyz(-0.261640,0.232003,1.059378));
+  */
+  
+  bshape(shTower[0], 10); // 4
+  hpcpush(hpxyz(-0.343678,0.205736,1.077238));
+  hpcpush(hpxyz(-0.313502,-0.269598,1.082112));
+  hpcpush(hpxyz(0.053446,-0.276534,1.038907));
+  hpcpush(hpxyz(0.316036,-0.088255,1.052458));
+  hpcpush(hpxyz(0.415175,0.117882,1.089159));
+  hpcpush(hpxyz(-0.013091,0.329953,1.053110));
+  hpcpush(hpxyz(-0.343678,0.205736,1.077238));
+
+  bshape(shTower[1], 10); // 5
+  hpcpush(hpxyz(-0.311517,0.177757,1.062375));
+  hpcpush(hpxyz(-0.277989,0.198280,1.056689));
+  hpcpush(hpxyz(-0.192835,0.277382,1.055522));
+  hpcpush(hpxyz(-0.118766,0.352616,1.066979));
+  hpcpush(hpxyz(0.340632,0.220226,1.079134));
+  hpcpush(hpxyz(0.346703,0.158836,1.070248));
+  hpcpush(hpxyz(0.324069,0.046483,1.052227));
+  hpcpush(hpxyz(0.255673,-0.074052,1.034820));
+  hpcpush(hpxyz(0.185700,-0.149283,1.027993));
+  hpcpush(hpxyz(0.033206,-0.246367,1.030436));
+  hpcpush(hpxyz(-0.096570,-0.283752,1.043954));
+  hpcpush(hpxyz(-0.194307,-0.258126,1.050897));
+  hpcpush(hpxyz(-0.265575,-0.226804,1.059231));
+  hpcpush(hpxyz(-0.285480,-0.219017,1.062764));
+  hpcpush(hpxyz(-0.311517,0.177757,1.062375));
+
+  bshape(shTower[2], 10); // 6
+  hpcpush(hpxyz(-0.287245,0.124770,1.047892));
+  hpcpush(hpxyz(-0.224066,0.141558,1.034526));
+  hpcpush(hpxyz(-0.131929,0.201218,1.028540));
+  hpcpush(hpxyz(-0.078630,0.261221,1.036542));
+  hpcpush(hpxyz(-0.020026,0.337507,1.055610));
+  hpcpush(hpxyz(0.318283,0.112649,1.055459));
+  hpcpush(hpxyz(0.303068,-0.062313,1.046773));
+  hpcpush(hpxyz(0.276375,-0.100467,1.042342));
+  hpcpush(hpxyz(0.222744,-0.146642,1.034949));
+  hpcpush(hpxyz(0.008616,-0.304232,1.045290));
+  hpcpush(hpxyz(-0.058987,-0.274278,1.038609));
+  hpcpush(hpxyz(-0.112858,-0.303563,1.051136));
+  hpcpush(hpxyz(-0.233080,-0.305264,1.071220));
+  hpcpush(hpxyz(-0.372515,-0.347162,1.122180));
+  hpcpush(hpxyz(-0.287245,0.124770,1.047892));
+
+  bshape(shTower[3], 10); // 8
+  hpcpush(hpxyz(-0.276471,0.193549,1.055413));
+  hpcpush(hpxyz(-0.248272,0.167366,1.043863));
+  hpcpush(hpxyz(-0.131672,0.161485,1.021477));
+  hpcpush(hpxyz(-0.029928,0.144574,1.010840));
+  hpcpush(hpxyz(0.145677,0.141539,1.020419));
+  hpcpush(hpxyz(0.244238,0.160944,1.041900));
+  hpcpush(hpxyz(0.278308,0.181096,1.053685));
+  hpcpush(hpxyz(0.290850,-0.178199,1.056574));
+  hpcpush(hpxyz(0.244356,-0.239966,1.057021));
+  hpcpush(hpxyz(0.158564,-0.296188,1.054927));
+  hpcpush(hpxyz(0.052883,-0.325301,1.052909));
+  hpcpush(hpxyz(-0.059036,-0.324976,1.053136));
+  hpcpush(hpxyz(-0.156078,-0.299394,1.055461));
+  hpcpush(hpxyz(-0.222738,-0.269837,1.059445));
+  hpcpush(hpxyz(-0.251922,-0.245775,1.060127));
+  hpcpush(hpxyz(-0.276471,0.193549,1.055413));
+
+  bshape(shTower[4], 10); // 9
+  hpcpush(hpxyz(-0.311686,0.135147,1.056131));
+  hpcpush(hpxyz(-0.107931,0.170082,1.020087));
+  hpcpush(hpxyz(-0.054960,0.232687,1.028185));
+  hpcpush(hpxyz(0.094837,0.235522,1.031729));
+  hpcpush(hpxyz(0.206298,0.281848,1.059244));
+  hpcpush(hpxyz(0.350261,-0.169080,1.072973));
+  hpcpush(hpxyz(0.258249,-0.214408,1.054828));
+  hpcpush(hpxyz(0.149756,-0.245358,1.040494));
+  hpcpush(hpxyz(0.010018,-0.258374,1.032888));
+  hpcpush(hpxyz(-0.164035,-0.248262,1.043332));
+  hpcpush(hpxyz(-0.260903,-0.226907,1.058091));
+  hpcpush(hpxyz(-0.329503,-0.207534,1.073146));
+  hpcpush(hpxyz(-0.311686,0.135147,1.056131));
+
+  bshape(shTower[5], 10); // 10
+  hpcpush(hpxyz(-0.278494,0.161752,1.050582));
+  hpcpush(hpxyz(-0.132974,0.168104,1.022713));
+  hpcpush(hpxyz(-0.045035,0.201619,1.021116));
+  hpcpush(hpxyz(0.004416,0.226141,1.025261));
+  hpcpush(hpxyz(0.097798,0.196263,1.023760));
+  hpcpush(hpxyz(0.208310,0.187256,1.038488));
+  hpcpush(hpxyz(0.213133,0.158213,1.034629));
+  hpcpush(hpxyz(0.255407,-0.229136,1.057230));
+  hpcpush(hpxyz(0.150044,-0.303075,1.055636));
+  hpcpush(hpxyz(0.021265,-0.309104,1.046899));
+  hpcpush(hpxyz(-0.124340,-0.302692,1.052180));
+  hpcpush(hpxyz(-0.340803,-0.287456,1.094887));
+  hpcpush(hpxyz(-0.338423,-0.172501,1.069713));
+  hpcpush(hpxyz(-0.278494,0.161752,1.050582));
+
+  bshape(shTower[6], 10); // 10
+  hpcpush(hpxyz(-0.033122,-0.384901,1.072029));
+  hpcpush(hpxyz(0.122565,-0.232523,1.033968));
+  hpcpush(hpxyz(0.222346,-0.147072,1.034924));
+  hpcpush(hpxyz(0.293004,-0.141494,1.051604));
+  hpcpush(hpxyz(0.228575,0.266628,1.059876));
+  hpcpush(hpxyz(0.142937,0.283066,1.049074));
+  hpcpush(hpxyz(0.030023,0.299757,1.044392));
+  hpcpush(hpxyz(-0.078299,0.271316,1.039107));
+  hpcpush(hpxyz(-0.144933,0.245692,1.039889));
+  hpcpush(hpxyz(-0.207818,0.168012,1.035093));
+  hpcpush(hpxyz(-0.262782,0.117599,1.040617));
+  hpcpush(hpxyz(-0.313780,0.032325,1.048572));
+  hpcpush(hpxyz(-0.338217,-0.056491,1.057157));
+  hpcpush(hpxyz(-0.334152,-0.102325,1.059305));
+  hpcpush(hpxyz(-0.033122,-0.384901,1.072029));
+
+
   bshapeend();
 
-  for(int i=0; i<8; i++) 
-    shUser[i][0].prio = 1 + i,
-    shUser[i][1].prio = 1 + i,
-    shUser[i][2].prio = 50 + i;
-
   prehpc = qhpc;
+  printf("hpc = %d\n", qhpc);
   }
 
-struct drawshape {
-  vector<hyperpoint> list;
-  bool sym;
-  int rots;
-  hyperpoint shift, spin;
-  };
+void initShape(int sg, int id) {
 
-drawshape dsUser[8][3], *dsCur;
+  if(!usershapes[sg][id]) {
+    usershape *us = new usershape;
+    usershapes[sg][id] = us;
 
-int dslayer;
-bool floordraw;
+    for(int i=0; i<USERLAYERS; i++) {
+      us->d[i].sh.prio = (sg >= 3 ? 1:50) + i;
 
-void pushShape(const drawshape& ds) {
+      us->d[i].rots = 1;
+      us->d[i].sym = 0;
+      us->d[i].shift = C0;
+      us->d[i].spin = Cx1;
+      us->d[i].color = 0;
+      }
+    }
+  }
+
+void pushShape(const usershapelayer& ds) {
+
+  if(ds.list.empty()) return;
 
   transmatrix T = rgpushxto0(ds.shift) * rspintox(ds.spin);
   
@@ -3827,22 +5955,29 @@ void pushShape(const drawshape& ds) {
 void saveImages() {
   qhpc = prehpc;
   
-  for(int i=0; i<8; i++) for(int j=0; j<3; j++) {
-    if(size(dsUser[i][j].list)) {
-      shUser[i][j].s = qhpc;
+  for(int i=0; i<USERSHAPEGROUPS; i++) for(int j=0; j<USERSHAPEIDS; j++) {
+    usershape *us = usershapes[i][j];
+    if(!us) continue;
+    for(int l=0; l<USERLAYERS; l++) {
+      us->d[l].sh.s = qhpc;
       first = true;
-      pushShape(dsUser[i][j]);
-      shUser[i][j].e = qhpc;
+      pushShape(us->d[l]);
+      us->d[l].sh.e = qhpc;
       }
-    else shUser[i][j].s = 0;
     }
+  
+  static int qhpc0;
+  if(qhpc != qhpc0)
+    printf("qhpc = %d (%d+%d)\n", qhpc0 = qhpc, prehpc, qhpc-prehpc);
+
+  #ifdef GL
+  GL_initialized = false;
+  #endif
   }
 
 int poly_outline;
 
-void queuepoly(const transmatrix& V, int ct, const hpcshape& h, int col) {
-  /* printf("draw poly #%d-%d at:\n", h.s, h.e);
-  display(V); */
+void queuepoly(const transmatrix& V, const hpcshape& h, int col) {
   polytodraw ptd;
   ptd.V = V;
   ptd.start = h.s, ptd.end = h.e;

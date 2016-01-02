@@ -12,7 +12,7 @@ using namespace std;
 
 template<class T> int size(T x) { return x.size(); }
 
-#define NUMLAN 5
+#define NUMLAN 6
 
 // language generator
 
@@ -40,7 +40,7 @@ void addutftoset(set<string>& s, string& w) {
 //printf("%s\n", w.c_str());
   while(i < size(w)) {
   
-    if(w[i] < 0) {
+    if(((signed char)(w[i])) < 0) {
       string z = w.substr(i, 2);
 //    printf("Insert: %s [%02x%02x]\n", z.c_str(), w[i], w[i+1]);
       s.insert(w.substr(i, 2));
@@ -126,6 +126,9 @@ int main() {
 
   nothe.insert("R'Lyeh");
   plural.insert("Crossroads");
+  plural.insert("Crossroads II");
+  plural.insert("Crossroads III");
+  plural.insert("Elemental Planes");
   
 #define S(a,b) d[1].add(a,b);
 #define N(a,b,c,d,e,f) \
@@ -157,6 +160,13 @@ int main() {
 #undef N
 #undef S
 
+#define S(a,b) d[5].add(a,b);
+#define N(a,b,c,d,e) \
+  {noun n; n.genus = b; n.nom = c; n.nomp = d; n.acc = e; n.abl = e; nouns[5].add(a,n);}
+#include "language-de.cpp"
+#undef N
+#undef S
+
   // verify
   set<string> s;
   for(int i=1; i<NUMLAN; i++) 
@@ -167,7 +177,7 @@ int main() {
     string mis = "";
     for(int i=1; i<NUMLAN; i++) if(d[i].count(*x) == 0)
       mis += d[i]["EN"];
-    if(mis != "")
+    if(mis != "" && mis != "DE")
       printf("#warning Missing [%s]: %s\n", mis.c_str(), escape(*x, "?"));
     }
   
@@ -181,7 +191,7 @@ int main() {
     string mis = "";
     for(int i=1; i<NUMLAN; i++) if(nouns[i].count(*x) == 0)
       mis += d[i]["EN"];
-    if(mis != "")
+    if(mis != "" && mis != "DE")
       printf("#warning Missing [%s]: %s\n", mis.c_str(), escape(*x, "?"));
     }
 
@@ -221,6 +231,39 @@ int main() {
   for(int i=0; i<c; i++) printf("\"%s\",", vchars[i].c_str());
   printf("};\n");
   printf("//javastring = \"%s\";\n", javastring.c_str());
+
+  for(int i=1; i<NUMLAN; i++) 
+    for(map<string,string>::iterator it = d[i].m.begin(); it != d[i].m.end(); it++)
+      s.insert(it->first);
+  
+  printf("\n//statistics\n");
+  for(map<string, string>::iterator it = d[1].m.begin(); it != d[1].m.end(); it++)
+    d[0][it->first] = it->first;
+  for(map<string, noun>::iterator it = nouns[1].m.begin(); it != nouns[1].m.end(); it++) {
+    noun n = it->second;
+    n.nom = n.nomp = n.acc = n.abl = it->first;
+    nouns[0][it->first] = n;
+    }
+  
+  printf("// total: %5d nouns, %5d sentences\n", int(nouns[1].m.size()), int(d[1].m.size()));
+
+  for(int i=0; i<NUMLAN; i++) {
+    int bnouns = 0;
+    int dict = 0;
+
+    for(map<string, string>::iterator it = d[i].m.begin(); it != d[i].m.end(); it++)
+      dict += it->second.size();
+    for(map<string, noun>::iterator it = nouns[i].m.begin(); it != nouns[i].m.end(); it++) {
+      noun& n = it->second;
+      bnouns += n.nom.size();
+      bnouns += n.nomp.size();
+      bnouns += n.acc.size();
+      bnouns += n.abl.size();
+      }
+
+    printf("// %s: %5dB nouns, %5dB sentences\n",
+      d[i]["EN"].c_str(), bnouns, dict);
+    }
   
   set<string> allsent;
   for(map<string, string>::iterator it = d[1].m.begin(); it != d[1].m.end(); it++)

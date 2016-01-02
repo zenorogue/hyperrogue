@@ -1,5 +1,7 @@
-#define GL
 #define GL_GLEXT_PROTOTYPES
+
+#define BTOFF 0x404040
+#define BTON  0xC0C000
 
 // #define PANDORA
 
@@ -7,27 +9,6 @@
 // Copyright (C) 2011-2012 Zeno Rogue, see 'hyper.cpp' for details
 
 // basic graphics:
-
-// disable this if you have no access to SDL_gfx
-#ifndef STEAM
-#define GFX
-#endif
-
-#ifdef NOGFX
-#undef GFX
-#endif
-
-// scale the Euclidean
-#define EUCSCALE 2.3
-
-// disable this if you have no access to SDL_mixer
-#ifndef MOBILE
-#define AUDIO
-#endif
-
-#define BTOFF 0x404040
-#define BTON  0xC0C000
-
 
 #ifndef MOBILE
 #include <SDL/SDL.h>
@@ -43,40 +24,7 @@ int audiovolume = 60;
 #endif
 
 #include <SDL/SDL_ttf.h>
-
-#ifdef GFX
-#include <SDL/SDL_gfxPrimitives.h>
 #endif
-#endif
-
-#ifndef MOBILE
-#ifdef GL
-#ifdef MAC
-#include <OpenGL/gl.h>
-#include <OpenGL/glu.h>
-#else
-#include <GL/gl.h>
-#include <GL/glu.h>
-#endif
-
-#ifdef MAC
-#include <OpenGL/glext.h>
-#else
-#include <GL/glext.h>
-#endif
-#endif
-#endif
-
-#ifdef ANDROID
-#ifndef FAKE
-#ifdef GL
-#include <GLES/gl.h>
-#include <GLES/glext.h>
-#include <GLES2/gl2.h>
-#endif
-#endif
-#endif
-
 
 #ifndef MOBILE
 
@@ -86,7 +34,8 @@ int audiovolume = 60;
 
 SDL_Surface *s;
 TTF_Font *font[256];
-SDL_Joystick *stick, *panstick;
+SDL_Joystick* sticks[8];
+int numsticks;
 
 #endif
 
@@ -94,49 +43,10 @@ int webdisplay = 0;
 
 // R:239, G:208, B:207 
 
-struct videopar {
-  ld scale, eye, alpha, aspeed;
-  bool full;
-  bool goteyes;
-  bool quick;
-  bool darkhepta;
-  bool shifttarget;
-  
-  int xres, yres, framelimit;
-  
-  int xscr, yscr;
-  
-  // paramaters calculated from the above
-  int xcenter, ycenter;
-  int radius;
-  ld alphax, beta;
-  
-  int fsize;
-  int flashtime;
-  
-  int wallmode, monmode, axes;
-
-  // for OpenGL
-  float scrdist;
-  
-  bool usingGL;
-  bool usingAA;
-
-  int joyvalue, joyvalue2, joypanthreshold;
-  float joypanspeed;
-  
-  bool female;
-  int language;
-  int boardmode;
-  
-  int skincolor, haircolor, dresscolor, swordcolor;
-  int killreduction;
-  };
-
-int skincolors[]  = { 7, 0xD0D0D0FF, 0xEFD0C9FF, 0xC77A58FF, 0xA58869FF, 0x602010FF, 0xFFDCB1FF, 0xEDE4C8FF };
-int haircolors[]  = { 8, 0x686868FF, 0x8C684AFF, 0xF2E1AEFF, 0xB55239FF, 0xFFFFFFFF, 0x804000FF, 0x502810FF, 0x301800FF };
-int dresscolors[] = { 6, 0xC00000FF, 0x00C000FF, 0x0000C0FF, 0xC0C000FF, 0xC0C0C0FF, 0x202020FF };
-int swordcolors[] = { 6, 0xC0C0C0FF, 0xFFFFFFFF, 0xFFC0C0FF, 0xC0C0FFFF, 0x808080FF, 0x202020FF };
+unsigned int skincolors[]  = { 7, 0xD0D0D0FF, 0xEFD0C9FF, 0xC77A58FF, 0xA58869FF, 0x602010FF, 0xFFDCB1FF, 0xEDE4C8FF };
+unsigned int haircolors[]  = { 8, 0x686868FF, 0x8C684AFF, 0xF2E1AEFF, 0xB55239FF, 0xFFFFFFFF, 0x804000FF, 0x502810FF, 0x301800FF };
+unsigned int dresscolors[] = { 6, 0xC00000FF, 0x00C000FF, 0x0000C0FF, 0xC0C000FF, 0xC0C0C0FF, 0x202020FF };
+unsigned int swordcolors[] = { 6, 0xC0C0C0FF, 0xFFFFFFFF, 0xFFC0C0FF, 0xC0C0FFFF, 0x808080FF, 0x202020FF };
 
 // is the player using mouse? (used for auto-cross)
 bool mousing = true;
@@ -144,17 +54,21 @@ bool mousing = true;
 // is the mouse button pressed?
 bool mousepressed = false;
 
+emtype cmode = emNormal, lastmode = emNormal; // last mode in Help
+
 // 
 int axestate;
 
 int ticks;
 
-hyperpoint ccenter; ld crad;
-
 videopar vid;
 int default_language;
 
 int playergender() { return vid.female ? GEN_F : GEN_M; }
+int princessgender() {
+  return vid.samegender ? playergender() : vid.female ? GEN_M : GEN_F;
+  }
+
 int lang() { 
   if(vid.language >= 0)
     return vid.language; 
@@ -162,21 +76,20 @@ int lang() {
   }
 
 int sightrange = 7;
-
-cell *mouseover, *lmouseover, *centerover, *lcenterover; ld modist, centdist;
+               
+cell *mouseover, *mouseover2, *lmouseover, *centerover, *lcenterover; 
+ld modist, modist2, centdist;
 string mouseovers;
 
-int mousex, mousey, mousedist, mousedest, joyx, joyy, joydir, panjoyx, panjoyy;
+movedir mousedest, joydir;
+
+int mousex, mousey, joyx, joyy, panjoyx, panjoyy;
 bool autojoy = true;
 hyperpoint mouseh;
 
-bool leftclick, rightclick, targetclick, hiliteclick;
+bool leftclick, rightclick, targetclick, hiliteclick, anyshiftclick;
 bool gtouched;
 bool revcontrol;
-
-bool doHighlight() {
-  return hiliteclick ? vid.monmode == 2 : vid.monmode == 3;
-  }
 
 int getcstat; ld getcshift;
 
@@ -184,13 +97,13 @@ int ZZ;
 
 string help;
 
-enum emtype {emNormal, emHelp, emVisual1, emVisual2, 
-  emChangeMode, emCustomizeChar,
-  emQuit, emDraw, emScores, emPickEuclidean, emPickScores} cmode;
-
 int andmode = 0;
 
 int darken = 0;
+
+bool doHighlight() {
+  return (hiliteclick && darken < 2) ? vid.monmode == 2 : vid.monmode == 3;
+  }
 
 #ifndef MOBILE
 int& qpixel(SDL_Surface *surf, int x, int y) {
@@ -213,15 +126,15 @@ int qpixel3(SDL_Surface *surf, int x, int y) {
 void loadfont(int siz) {
   if(!font[siz]) {
     font[siz] = TTF_OpenFont("DejaVuSans-Bold.ttf", siz);
+    // Destination set by ./configure
+    #ifdef FONTDESTDIR
     if (font[siz] == NULL) {
-      // Destination set by ./configure
-      #ifdef FONTDESTDIR
       font[siz] = TTF_OpenFont(FONTDESTDIR, siz);
-      #endif
-      if (font[siz] == NULL) {
-        printf("error: Font file not found\n");
-        exit(1);
-        }
+      }
+    #endif
+    if (font[siz] == NULL) {
+      printf("error: Font file not found\n");
+      exit(1);
       }
     }
   }
@@ -297,8 +210,8 @@ void selectEyeGL(int ed) {
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
 
-  float sc = vid.radius / (vid.yres/2.);
-  GLfloat mat[16] = {sc,0,0,0, 0,-sc,0,0, 0,0,-1,0, 0,0,-vid.alpha,1};
+  GLfloat sc = vid.radius / (vid.yres/2.);
+  GLfloat mat[16] = {sc,0,0,0, 0,-sc,0,0, 0,0,-1,0, 0,0, GLfloat(-vid.alpha),1};
   glMultMatrixf(mat);
   
   if(ve) glTranslatef(ve, 0, vid.eye);
@@ -587,7 +500,7 @@ bool displaystr(int x, int y, int shift, int size, const char *str, int color, i
 
   loadfont(size);
 
-  SDL_Surface *txt = (vid.usingAA?TTF_RenderText_Blended:TTF_RenderText_Solid)(font[size], str, col);
+  SDL_Surface *txt = (vid.usingAA?TTF_RenderUTF8_Blended:TTF_RenderUTF8_Solid)(font[size], str, col);
   
   if(txt == NULL) return false;
 
@@ -806,22 +719,13 @@ void getcoord(const hyperpoint& H, int& x, int& y, int &shift) {
   if(tz < 1e-3 && tz > -1e-3) tz = 1000;
   x = vid.xcenter + int(vid.radius * H[0] / tz);
   y = vid.ycenter + int(vid.radius * H[1] / tz);
+
 #ifndef MOBILE
   shift = vid.goteyes ? int(vid.eye * vid.radius * (1 - vid.beta / tz)) : 0;
 #endif
   }
 
 int dlit;
-
-int polyi;
-
-#define POLYMAX 60000
-
-#ifdef MOBILE
-short polyx[POLYMAX], polyy[POLYMAX];
-#else
-Sint16 polyx[POLYMAX], polyxr[POLYMAX], polyy[POLYMAX];
-#endif
 
 void drawline(const hyperpoint& H1, int x1, int y1, int s1, const hyperpoint& H2, int x2, int y2, int col) {
   dlit++; if(dlit>500) return;
@@ -955,8 +859,6 @@ transmatrix cwtV; // player-relative view
 heptspin viewctr; // heptagon and rotation where the view is centered at
 bool playerfound; // has player been found in the last drawing?
 
-#include "geometry.cpp"
-
 ld spina(cell *c, int dir) {
   return 2 * M_PI * dir / c->type;
   }
@@ -991,10 +893,27 @@ int firecolor(int phase) {
   return gradient(0xFFFF00, 0xFF0000, -1, sin((phase + ticks)/100.0), 1);
   }
 
-int fc(int ph, int col) {
+int watercolor(int phase) {
+  return 0x0080C0FF + 256 * int(63 * sin((ticks + phase) / 50.));
+  }
+
+int aircolor(int phase) {
+  return 0x8080FF00 | int(32 + 32 * sin(ticks/200.0 + 2 * phase * M_PI / 21.));
+  }
+
+int weakfirecolor(int phase) {
+  return gradient(0xFF8000, 0xFF0000, -1, sin((phase + ticks)/500.0), 1);
+  }
+
+int fc(int ph, int col, int z) {
   if(items[itOrbFire]) col = darkena(firecolor(ph), 0, 0xFF);
   if(items[itOrbGhost]) col = (col &~0XFF) | (col&0xFF) / 2;
-  if(invismove) col = (col &~0XFF) | (int((col&0xFF) * (100+100*sin(ticks / 500.)))/200);
+  if(items[itOrbFish] && isWatery(cwt.c) && z != 3) return watercolor(ph);
+  if(invismove) 
+    col = 
+      shmup::on ?
+        (col &~0XFF) | (int((col&0xFF) * .25))
+      : (col &~0XFF) | (int((col&0xFF) * (100+100*sin(ticks / 500.)))/200);
   return col;
   }
 
@@ -1004,12 +923,6 @@ cell *flashcell;
 void drawFlash(cell *c) { flashat = ticks; flashcell = c; }
 void drawLightning() { lightat = ticks; }
 void drawSafety() { safetyat = ticks; }
-
-#include "polygons.cpp"
-
-bool drawplayer = true;
-
-transmatrix playertrans;
 
 double eurad = 0.52;
 
@@ -1023,12 +936,14 @@ bool outofmap(hyperpoint h) {
 void drawShield(const transmatrix& V) {
   float ds = ticks / 300.;
   int col = darkened(iinf[itOrbShield].color);
+  if(items[itOrbPreserve] && !orbused[itOrbShield])
+    col = (col & 0xFEFEFE) / 2;
   for(int a=0; a<84*5; a++)
     drawline(V*ddi(a, hexf + sin(ds + M_PI*2*a/20)*.1)*C0, V*ddi((a+1), hexf + sin(ds + M_PI*2*(a+1)/20)*.1)*C0, col);
   }
 
 void drawSpeed(const transmatrix& V) {
-  ld ds = ticks  / 10.;
+  ld ds = ticks / 10.;
   int col = darkened(iinf[itOrbSpeed].color);
   for(int b=0; b<84; b+=14)
   for(int a=0; a<84; a++)
@@ -1050,6 +965,22 @@ void drawFlash(const transmatrix& V) {
     ld rad = hexf * (2.5 + .5 * sin(ds+u*.3));
     for(int a=0; a<84; a++)
       drawline(V*ddi(a, rad)*C0, V*ddi(a+1, rad)*C0, col);
+    }
+  }
+
+void drawLove(const transmatrix& V, int hdir) {
+  float ds = ticks / 300.;
+  int col = darkened(iinf[itOrbLove].color);
+  col &= ~1;
+  for(int u=0; u<5; u++) {
+    for(int a=0; a<84; a++) {
+      double d = (1 + cos(a * M_PI/42)) / 2;
+      int z = a; if(z>42) z = 84-z;
+      if(z <= 10) d += (10-z) * (10-z) * (10-z) / 3000.;
+
+      ld rad = hexf * (2.5 + .5 * sin(ds+u*.3)) * d;
+      drawline(V*ddi(hdir+a-1, rad)*C0, V*ddi(hdir+a+1, rad)*C0, col);
+      }
     }
   }
 
@@ -1078,84 +1009,475 @@ int displaydir(cell *c, int d) {
     return 42 - d * 84 / c->type;
   }
 
+#include "shmup.cpp"
+
+void drawPlayerEffects(const transmatrix& V, cell *c) {
+  if(items[itOrbShield] > (shmup::on ? 0 : 1)) drawShield(V);
+
+  if(items[itOrbSpeed]) drawSpeed(V); 
+
+  int ct = c->type;
+  
+  if(items[itOrbSafety]) drawSafety(V, ct);
+
+  if(items[itOrbFlash]) drawFlash(V); 
+  if(items[itOrbLove]) drawLove(V, displaydir(c, cwt.spin)); 
+
+  if(items[itOrbWinter]) 
+    drawWinter(V, displaydir(c, cwt.spin));
+  
+  if(items[itOrbLightning] > 1) drawLightning(V);
+  
+  if(safetyat > 0) {
+    int tim = ticks - safetyat;
+    if(tim > 2500) safetyat = 0;
+    for(int u=tim; u<=2500; u++) {
+      if((u-tim)%250) continue;
+      ld rad = hexf * u / 250;
+      int col = iinf[itOrbSafety].color;
+      for(int a=0; a<84; a++)
+        drawline(V*ddi(a, rad)*C0, V*ddi(a+1, rad)*C0, col);
+      }
+    }
+  }
+
+void drawStunStars(const transmatrix& V, int t) {
+  for(int i=0; i<3*t; i++) {
+    transmatrix V2 = V * spin(M_PI * 2 * i / (3*t) + M_PI * ticks/600.);
+    queuepoly(V2, shFlailBall, 0xFFFFFFFF);
+    }
+  }
+
+bool drawUserShape(transmatrix V, int group, int id, int color) {
+#ifdef MOBILE
+  return false;
+#else
+  usershape *us = usershapes[group][id];
+  if(!us) return false;
+
+  for(int i=0; i<USERLAYERS; i++) {
+    usershapelayer& ds(us->d[i]);
+    hpcshape& sh(ds.sh);
+    if(sh.s != sh.e) 
+      queuepoly(V, sh, ds.color ? darkena(ds.color, 0, 0xFF) : color);
+    }
+  
+  if(cmode == emDraw && mapeditor::editingShape(group, id)) {
+
+    usershapelayer &ds(usershapes[group][id]->d[mapeditor::dslayer]);
+    
+    hyperpoint mh = inverse(mapeditor::drawtrans) * mouseh;
+
+    for(int a=0; a<ds.rots; a++) 
+    for(int b=0; b<(ds.sym?2:1); b++) {
+
+      if(outofmap(mouseh)) break;
+
+      hyperpoint P2 = V * spin(2*M_PI*a/ds.rots) * (b?Mirror*mh:mh);
+    
+      int xc, yc, sc;
+      getcoord(P2, xc, yc, sc);
+      displaychr(xc, yc, sc, 10, 'x', 0xFF00FF);
+
+      /* if(crad > 0 && c->cpdist <= 3) {
+        lalpha = 0x80;
+        transmatrix movtocc = V2 * inverse(cwtV) * rgpushxto0(ccenter);
+        for(int d=0; d<84; d++) 
+          drawline(movtocc * ddi(d+1, crad) * C0, movtocc * ddi(d, crad) * C0, 0xC00000);
+        lalpha = 0xFF;
+        } */
+      }
+    }
+    
+  return true;
+#endif
+  }
+
+bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, int col) {
+
+  char xch = minf[m].glyph;    
+
+#ifndef MOBILE
+  if(where == mapeditor::drawcell)
+    mapeditor::drawtrans = V;
+#endif
+
+  if(m != moPlayer)
+    drawStunStars(V, where->stuntime);
+    
+  if(m == moPlayer) {
+      
+    bool havus = drawUserShape(V, 0, vid.female ? 1 : 0, vid.skincolor);
+
+    if(mapeditor::drawplayer && !havus) {
+
+      queuepoly(V, vid.female ? shFemaleBody : shPBody, fc(0, vid.skincolor, 0));
+
+      if(items[itOrbThorns])
+        queuepoly(V, shHedgehogBladePlayer, items[itOrbDiscord] ? watercolor(0) : 0x00FF00FF);
+      else if(!shmup::on && items[itOrbDiscord])
+        queuepoly(V, shPSword, watercolor(0));
+      else if(!shmup::on)
+        queuepoly(V, shPSword, fc(314, vid.swordcolor, 3)); // 3 not colored
+      else if(shmup::curtime >= shmup::getPlayer()->nextshot)
+        queuepoly(V, shPKnife, fc(314, vid.swordcolor, 3)); // 3 not colored
+
+      if(cheater) {
+        queuepoly(V, vid.female ? shGoatHead : shDemon, darkena(0xFFFF00, 0, 0xFF));
+        // queuepoly(V, shHood, darkena(0xFF00, 1, 0xFF));
+        }
+      else {
+        queuepoly(V, shPFace, fc(500, vid.skincolor, 1));
+        queuepoly(V, vid.female ? shFemaleHair : shPHead, fc(150, vid.haircolor, 2));
+        }
+      if(vid.female)
+        queuepoly(V, shFemaleDress, fc(500, vid.dresscolor, 4));
+
+      if(knighted)
+        queuepoly(V, shKnightCloak, darkena(cloakcolor(knighted), 1, 0xFF));
+
+      if(items[itOrbFish])
+        queuepoly(V, shFishTail, watercolor(100));
+
+      }
+    }
+  
+  else if(drawUserShape(V, 1, m, darkena(col, 0, 0xFF))) return false;
+
+  else if(isMimic(m)) {
+    if(drawUserShape(V, 0, vid.female?1:0, darkena(col, 0, 0x80))) return false;
+    queuepoly(V, vid.female ? shFemaleBody : shPBody,  darkena(col, 0, 0X80));
+
+    if(!shmup::on)
+      queuepoly(V, shPSword, darkena(col, 0, 0XC0));
+    else if(shmup::curtime >= shmup::getPlayer()->nextshot)
+      queuepoly(V, shPKnife, darkena(col, 0, 0XC0));
+
+    queuepoly(V, vid.female ? shFemaleHair : shPHead,  darkena(col, 1, 0XC0));
+    queuepoly(V, shPFace,  darkena(col, 0, 0XC0));
+    if(vid.female)
+      queuepoly(V, shFemaleDress,  darkena(col, 1, 0XC0));
+    }
+  
+  else if(m == moIllusion) {
+    if(drawUserShape(V, 0, vid.female?1:0, darkena(col, 0, 0x80))) return false;
+    queuepoly(V, vid.female ? shFemaleBody : shPBody,  darkena(col, 0, 0X80));
+    queuepoly(V, shPSword, darkena(col, 0, 0XC0));
+    queuepoly(V, vid.female ? shFemaleHair : shPHead,  darkena(col, 1, 0XC0));
+    queuepoly(V, shPFace,  darkena(col, 0, 0XC0));
+    if(vid.female)
+      queuepoly(V, shFemaleDress,  darkena(col, 1, 0XC0));
+    }
+
+  else if(m == moBullet) {
+    queuepoly(V * spin(-M_PI/4), shKnife, vid.swordcolor);
+    }
+  
+  else if(m == moKnight) {
+    queuepoly(V, shPBody, darkena(0xC0C0A0, 0, 0xC0));
+    queuepoly(V, shPSword, darkena(0xFFFF00, 0, 0xFF));
+    queuepoly(V, shKnightArmor, darkena(0xD0D0D0, 1, 0xFF));
+    int col;
+    if(!euclid && where->master->alt)
+      col = cloakcolor(roundTableRadius(where));
+    else
+      col = cloakcolor(newRoundTableRadius());
+    queuepoly(V, shKnightCloak, darkena(col, 1, 0xFF));
+    queuepoly(V, shPHead, darkena(0x703800, 1, 0XFF));
+    queuepoly(V, shPFace, darkena(0xC0C0A0, 0, 0XFF));
+    return false;
+    }
+  
+  else if(m == moGolem) {
+    queuepoly(V, shPBody, darkena(col, 0, 0XC0));
+    queuepoly(V, shGolemhead, darkena(col, 1, 0XFF));
+    }
+
+  else if(isPrincess(m)) {
+  
+    bool girl = princessgender();
+
+    queuepoly(V, girl ? shFemaleBody : shPBody,  0xD0C080FF);
+
+    if(m == moPrincessArmed) 
+      queuepoly(V, shSabre, 0xFFFFFFFF);
+
+    queuepoly(V, girl ? shFemaleHair : shPHead,  0x332A22FF);
+    queuepoly(V, shPFace,  0xD0C080FF);
+    if(girl) {
+      queuepoly(V, shFemaleDress,  0x00C000FF);
+      queuepoly(V, shPrincessDress,  0x8080FFC0);
+      }
+    else {
+      queuepoly(V, shPrinceDress,  0x404040FF);
+      }    
+    }
+
+  else if(m == moWolf) {
+    queuepoly(V, shWolfLegs, darkena(col, 0, 0xFF));
+    queuepoly(V, shWolfBody, darkena(col, 0, 0xFF));
+    queuepoly(V, shWolfHead, darkena(col, 0, 0xFF));
+    queuepoly(V, shWolfEyes, darkena(col, 3, 0xFF));
+    }
+  else if(m == moVineBeast) {
+    queuepoly(V, shWolfLegs, 0x00FF00FF);
+    queuepoly(V, shWolfBody, darkena(col, 1, 0xFF));
+    queuepoly(V, shWolfHead, darkena(col, 0, 0xFF));
+    queuepoly(V, shWolfEyes, 0xFF0000FF);
+    }
+  else if(m == moMouse) {
+    queuepoly(V, shMouse, darkena(col, 0, 0xFF));
+    queuepoly(V, shMouseLegs, darkena(col, 1, 0xFF));
+    queuepoly(V, shMouseEyes, 0xFF);
+    }
+  else if(isBug(m)) {
+    queuepoly(V, shBugBody, darkena(col, 0, 0xFF));
+    queuepoly(V, shBugArmor, darkena(col, 1, 0xFF));
+    }
+  else if(m == moRunDog) {
+    queuepoly(V, shWolf, darkena(col, 0, 0xFF));
+    queuepoly(V, shWolf1, darkena(0x202020, 0, 0xFF));
+    queuepoly(V, shWolf2, darkena(0x202020, 0, 0xFF));
+    queuepoly(V, shWolf3, darkena(0x202020, 0, 0xFF));
+    }
+  else if(m == moOrangeDog) {
+    queuepoly(V, shWolf, darkena(0xFFFFFF, 0, 0xFF));
+    queuepoly(V, shWolf1, darkena(0x202020, 0, 0xFF));
+    queuepoly(V, shWolf2, darkena(0x202020, 0, 0xFF));
+    queuepoly(V, shWolf3, darkena(0x202020, 0, 0xFF));
+    queuepoly(V, shDogStripes, darkena(0x303030, 0, 0xFF));
+    }
+  else if(m == moShark || m == moGreaterShark || m == moCShark)
+    queuepoly(V, shShark, darkena(col, 0, 0xFF));
+  else if(m == moEagle || m == moParrot || m == moBomberbird || m == moAlbatross || 
+    m == moTameBomberbird)
+    queuepoly(V, shEagle, darkena(col, 0, 0xFF));
+  else if(m == moGargoyle) {
+    queuepoly(V, shGargoyleWings, darkena(col, 0, 0xD0));
+    queuepoly(V, shGargoyleBody, darkena(col, 0, 0xFF));
+    }
+  else if(m == moZombie)
+    queuepoly(V, shPBody, darkena(col, 0, 0xFF));
+  else if(m == moDesertman) {
+    queuepoly(V, shPBody, darkena(col, 0, 0xC0));
+    queuepoly(V, shPSword, 0xFFFF00FF);
+    queuepoly(V, shHood, 0xD0D000C0);
+    }
+  else if(m == moPalace || m == moFatGuard || m == moVizier || m == moSkeleton) {
+    queuepoly(V, shSabre, 0xFFFFFFFF);
+    if(m == moSkeleton) {
+      queuepoly(V, shSkeletonBody, darkena(0xFFFFFF, 0, 0xFF));
+      queuepoly(V, shSkull, darkena(0xFFFFFF, 0, 0xFF));
+      queuepoly(V, shSkullEyes, darkena(0, 0, 0xFF));
+      }
+    else {
+      if(m == moFatGuard) {
+        queuepoly(V, shFatBody, darkena(0xC06000, 0, 0xFF));
+        col = 0xFFFFFF;
+        if(where->hitpoints >= 3)
+          queuepoly(V, shKnightCloak, darkena(0xFFC0C0, 1, 0xFF));
+        }
+      else {
+        queuepoly(V, shPBody, darkena(0xFFD500, 0, 0xFF));
+        queuepoly(V, shKnightArmor, m == moVizier ? 0xC000C0FF :
+          darkena(0x00C000, 1, 0xFF));
+        if(where->hitpoints >= 3)
+          queuepoly(V, shKnightCloak, m == moVizier ? 0x800080Ff :
+            darkena(0x00FF00, 1, 0xFF));
+        }
+      queuepoly(V, shTurban1, darkena(col, 1, 0xFF));
+      if(where->hitpoints >= 2)
+        queuepoly(V, shTurban2, darkena(col, 0, 0xFF));
+      }
+      
+    drawStunStars(V, where->stuntime);
+    }
+  else if(m == moCrystalSage) {
+    queuepoly(V, shPBody, 0xFFFFFFFF);
+    queuepoly(V, shPHead, 0xFFFFFFFF);
+    queuepoly(V, shPFace, 0xFFFFFFFF);
+    }
+  else if(m == moHedge) {
+    queuepoly(V, shPBody, darkena(col, 0, 0xFF));
+    queuepoly(V, shHedgehogBlade, 0xC0C0C0FF);
+    queuepoly(V, shPHead, 0x804000FF);
+    queuepoly(V, shPFace, 0xF09000FF);
+    }
+  else if(m == moYeti || m == moMonkey) {
+    queuepoly(V, shYeti, darkena(col, 0, 0xC0));
+    queuepoly(V, shPHead, darkena(col, 0, 0xFF));
+    }
+  else if(m == moEdgeMonkey) {
+    queuepoly(V, shYeti, darkena(0xC04040, 0, 0xC0));
+    queuepoly(V, shPHead, darkena(col, 0, 0xFF));
+    }
+  else if(m == moShadow) {
+    queuepoly(V, vid.female ? shFemaleBody : shPBody,  darkena(col, 0, 0X80));
+    queuepoly(V, shPSword, darkena(col, 0, 0XC0));
+    queuepoly(V, vid.female ? shFemaleHair : shPHead,  darkena(col, 1, 0XC0));
+    queuepoly(V, shPFace,  darkena(col, 0, 0XC0));
+
+    if(vid.female)
+      queuepoly(V, shFemaleDress, darkena(col, 1, 0xC0));
+    }
+  else if(m == moRanger) {
+    queuepoly(V, shPBody, darkena(col, 0, 0xC0));
+    queuepoly(V, shPSword, darkena(col, 0, 0xFF));
+    queuepoly(V, shArmor, darkena(col, 1, 0xFF));
+    }
+  else if(m == moGhost || m == moSeep) {
+    queuepoly(V, shGhost, darkena(col, 0, 0x80));
+    queuepoly(V, shEyes, 0xFF);
+    }
+  else if(m == moVineSpirit) {
+    queuepoly(V, shGhost, 0xD0D0D0C0);
+    queuepoly(V, shEyes, 0xFF0000FF);
+    }
+  else if(m == moFireFairy) {
+    col = firecolor(0);
+    queuepoly(V, shFemaleBody, darkena(col, 0, 0XC0));
+    queuepoly(V, shFemaleHair, darkena(col, 1, 0xFF));
+    queuepoly(V, shPFace, darkena(col, 0, 0XFF));
+    }
+  else if(m == moSlime) {
+    queuepoly(V, shSlime, darkena(col, 0, 0x80));
+    queuepoly(V, shEyes, 0xFF);
+    }
+  else if(m == moCultist || m == moPyroCultist || m == moCultistLeader) {
+    queuepoly(V, shPBody, darkena(col, 0, 0xC0));
+    queuepoly(V, shPSword, darkena(col, 2, 0xFF));
+    queuepoly(V, shHood, darkena(col, 1, 0xFF));
+    }
+  else if(m == moPirate) {
+    queuepoly(V, shPBody, darkena(0x404040, 0, 0xFF));
+    queuepoly(V, shPirateHook, darkena(0xD0D0D0, 0, 0xFF));
+    queuepoly(V, shPFace, darkena(0xFFFF80, 0, 0xFF));
+    queuepoly(V, shEyepatch, darkena(0, 0, 0xC0));
+    queuepoly(V, shPirateHood, darkena(col, 0, 0xFF));
+    }
+  else if(m == moViking) {
+    queuepoly(V, shPBody, darkena(0xE00000, 0, 0xFF));
+    queuepoly(V, shPSword, darkena(0xD0D0D0, 0, 0xFF));
+    queuepoly(V, shKnightCloak, darkena(0x404040, 0, 0xFF));
+    queuepoly(V, shVikingHelmet, darkena(0xC0C0C0, 0, 0XFF));
+    queuepoly(V, shPFace, darkena(0xFFFF80, 0, 0xFF));
+    }
+  else if(m == moNecromancer) {
+    queuepoly(V, shPBody, 0xC00000C0);
+    queuepoly(V, shHood, darkena(col, 1, 0xFF));
+    }
+  else if(m == moGoblin) {
+    queuepoly(V, shYeti, darkena(col, 0, 0xC0));
+    queuepoly(V, shArmor, darkena(col, 1, 0XFF));
+    }
+  else if(m == moLancer || m == moFlailer || m == moMiner) {
+    transmatrix V2 = V;
+    if(m == moLancer)
+      V2 = V * spin(where->type == 6 ? -M_PI/3 : -M_PI/2 );
+    queuepoly(V2, shPBody, darkena(col, 0, 0xC0));
+    queuepoly(V2, m == moFlailer ? shArmor : shHood, darkena(col, 1, 0XFF));
+    if(m == moMiner)
+      queuepoly(V2, shPickAxe, darkena(0xC0C0C0, 0, 0XFF));
+    if(m == moLancer)
+      queuepoly(V2, shPike, darkena(col, 0, 0XFF));
+    if(m == moFlailer) {
+      queuepoly(V2, shFlailBall, darkena(col, 0, 0XFF));
+      queuepoly(V2, shFlailChain, darkena(col, 1, 0XFF));
+      queuepoly(V2, shFlailTrunk, darkena(col, 0, 0XFF));
+      }
+    }
+  else if(m == moTroll) {
+    queuepoly(V, shYeti, darkena(col, 0, 0xC0));
+    queuepoly(V, shPHead, darkena(col, 1, 0XFF));
+    queuepoly(V, shPFace, darkena(col, 2, 0XFF));
+    }        
+  else if(m == moFjordTroll) {
+    queuepoly(V, shYeti, darkena(col, 0, 0xC0));
+    queuepoly(V, shPHead, darkena(col, 1, 0XFF));
+    queuepoly(V, shPFace, darkena(col, 2, 0XFF));
+    }        
+  else if(m == moDarkTroll) {
+    queuepoly(V, shYeti, darkena(col, 0, 0xC0));
+    queuepoly(V, shPHead, darkena(col, 1, 0XFF));
+    queuepoly(V, shPFace, 0xFFFFFF80);
+    }        
+  else if(m == moRedTroll) {
+    queuepoly(V, shYeti, darkena(col, 0, 0xC0));
+    queuepoly(V, shPHead, darkena(0xFF8000, 0, 0XFF));
+    queuepoly(V, shPFace, 0xFFFFFF80);
+    }        
+  else if(m == moEarthElemental) {
+    queuepoly(V, shYeti, darkena(col, 0, 0xC0));
+    queuepoly(V, shPHead, darkena(col, 0, 0XFF));
+    queuepoly(V, shPFace, 0xF0000080);
+    }        
+  else if(m == moWaterElemental) {
+    queuepoly(V, shWaterElemental, watercolor(0));
+    queuepoly(V, shFemaleHair, watercolor(100));
+    queuepoly(V, shPFace, watercolor(200));
+    }        
+  else if(m == moFireElemental) {
+    queuepoly(V, shWaterElemental, darkena(firecolor(0), 0, 0xFF));
+    queuepoly(V, shFemaleHair, darkena(firecolor(100), 0, 0xFF));
+    queuepoly(V, shPFace, darkena(firecolor(200), 0, 0xFF));
+    }
+  else if(m == moAirElemental) {
+    queuepoly(V, shWaterElemental, darkena(col, 0, 0x80));
+    queuepoly(V, shFemaleHair, darkena(col, 0, 0x80));
+    queuepoly(V, shPFace, darkena(col, 0, 0x80));
+    }        
+  else if(xch == 'd' || xch == 'D') {
+    queuepoly(V, shPBody, darkena(col, 1, 0xC0));
+    int acol = col;
+    if(xch == 'D') acol = 0xD0D0D0;
+    queuepoly(V, shDemon, darkena(acol, 0, 0xFF));
+    }
+  else if(m == moEvilGolem) {
+    queuepoly(V, shPBody, darkena(col, 0, 0XC0));
+    queuepoly(V, shGolemhead, darkena(col, 1, 0XFF));
+    }
+  else if(isWitch(m)) {
+    int c = 0xFF;
+    if(m == moWitchGhost) c = 0x85 + 120 * sin(ticks / 160.0);
+    if(m == moWitchWinter) drawWinter(V, 42);
+    if(m == moWitchFlash) drawFlash(V);
+    if(m == moWitchSpeed) drawSpeed(V);
+    if(m == moWitchFire) col = firecolor(0);
+    queuepoly(V, shFemaleBody, darkena(col, 0, c));
+//    queuepoly(cV2, ct, shPSword, darkena(col, 0, 0XFF));
+//    queuepoly(V, shHood, darkena(col, 0, 0XC0));
+    if(m == moWitchFire) col = firecolor(100);
+    queuepoly(V, shFemaleHair, darkena(col, 1, c));
+    if(m == moWitchFire) col = firecolor(200);
+    queuepoly(V, shPFace, darkena(col, 0, c));
+    if(m == moWitchFire) col = firecolor(300);
+    queuepoly(V, shWitchDress, darkena(col, 1, 0XC0));
+    }
+
+  else return true;
+  
+  return false;
+  }
+
 bool drawMonster(const transmatrix& V, int ct, cell *c, int col) {
 
+  if(shmup::on) shmup::drawMonster(V, c);
+  
   if(doHighlight())
     poly_outline = 
       (c->cpdist == 0 || isFriendly(c)) ? 0x00FF00FF : 0xFF0000FF;
 
   eMonster m = c->monst;
     
-  if(c->cpdist == 0) {
-
-    if(items[itOrbShield] > 1) drawShield(V);
-
-    if(items[itOrbSpeed]) drawSpeed(V); 
-
-    int ct = c->type;
-    
-    if(items[itOrbSafety]) drawSafety(V, ct);
-
-    if(items[itOrbFlash]) drawFlash(V); 
-
-    if(items[itOrbWinter]) 
-      drawWinter(V, displaydir(c, cwt.spin));
-    
-    if(items[itOrbLightning] > 1) drawLightning(V);
-    
-    if(safetyat > 0) {
-      int tim = ticks - safetyat;
-      if(tim > 2500) safetyat = 0;
-      for(int u=tim; u<=2500; u++) {
-        if((u-tim)%250) continue;
-        ld rad = hexf * u / 250;
-        int col = iinf[itOrbSafety].color;
-        for(int a=0; a<84; a++)
-          drawline(V*ddi(a, rad)*C0, V*ddi(a+1, rad)*C0, col);
-        }
-      }
-      
-    transmatrix cV2 = c == cwt.c ? cwtV : V;
+  if(c->cpdist == 0 && !shmup::on && mapeditor::drawplayer) {
+    transmatrix cV2 = cwtV;
     // if(flipplayer) cV2 = cV2 * spin(M_PI);
     if(flipplayer) cV2 = cV2 * spin(M_PI);
     
-    if(vid.monmode < 2) return true;
-  
-    bool havus = shUser[0][2].s;
-    playertrans = cV2;
-    
-    for(int i=0; i<8; i++) if(shUser[i][2].s) 
-      queuepoly(cV2, ct, shUser[i][2], 0xFFFFFFFF);
-    
-    if(drawplayer && !havus) {
-
-      if(c->monst == moGolem) {
-        queuepoly(cV2, ct, shPBody, darkena(col, 0, 0XC0));
-        queuepoly(cV2, ct, shGolemhead, darkena(col, 1, 0XFF));
-        }
-      else {      
-        queuepoly(cV2, ct, vid.female ? shFemaleBody : shPBody, fc(0, vid.skincolor));
-
-        if(items[itOrbThorns])
-          queuepoly(cV2, ct, shHedgehogBladePlayer, 0x00FF00FF);
-        else
-          queuepoly(cV2, ct, shPSword, fc(314, vid.swordcolor));
-
-        if(cheater) {
-          queuepoly(cV2, ct, shDemon, darkena(0xFFFF00, 0, 0xFF));
-          // queuepoly(cV2, ct, shHood, darkena(0xFF00, 1, 0xFF));
-          }
-        else {
-          queuepoly(cV2, ct, shPFace, fc(500, vid.skincolor));        
-          queuepoly(cV2, ct, vid.female ? shFemaleHair : shPHead, fc(150, vid.haircolor));
-          }
-        if(vid.female)
-          queuepoly(cV2, ct, shFemaleDress, fc(500, vid.dresscolor));
-
-        if(knighted)
-          queuepoly(cV2, ct, shKnightCloak, darkena(cloakcolor(knighted), 1, 0xFF));
-        }
-      }
+    drawPlayerEffects(V, c);
+    if(vid.monmode > 1)
+      drawMonsterType(moPlayer, c, cV2, col);
+    else return true;
     }
 
   if(isIvy(c) || isWorm(c)) {
@@ -1167,15 +1489,29 @@ bool drawMonster(const transmatrix& V, int ct, cell *c, int col) {
       
       if(vid.monmode > 1) {
         V2 = V2 * spin(hdir * M_PI / 42);
+
+#ifndef MOBILE
+        if(c == mapeditor::drawcell) mapeditor::drawtrans = V2;
+#endif
+
+        if(drawUserShape(V2, 1, c->monst, (col << 8) + 0xFF)) return false;
+
         if(isIvy(c))
-          queuepoly(V2, ct, shIBranch, (col << 8) + 0xFF);
+          queuepoly(V2, shIBranch, (col << 8) + 0xFF);
         else if(c->monst < moTentacle) {
-          queuepoly(V2, ct, shTentacleX, 0xFF);
-          queuepoly(V2, ct, shTentacle, (col << 8) + 0xFF);
+          queuepoly(V2, shTentacleX, 0xFF);
+          queuepoly(V2, shTentacle, (col << 8) + 0xFF);
           }
         else {
-          queuepoly(V2, ct, shTentacleX, 0xFFFFFFFF);
-          queuepoly(V2, ct, shTentacle, (col << 8) + 0xFF);
+          if(c->monst == moTentacleGhost) {
+            hyperpoint V0 = inverse(cwtV) * V * C0;
+            hyperpoint V1 = spintox(V0) * V0;
+            transmatrix VL = cwtV * rspintox(V0) * rpushxto0(V1) * spin(M_PI);
+            drawMonsterType(moGhost, c, VL, darkena(col, 0, 0xFF));
+            col = minf[moTentacletail].color;
+            }
+          queuepoly(V2, shTentacleX, 0xFFFFFFFF);
+          queuepoly(V2, shTentacle, (col << 8) + 0xFF);
           }
         }
         
@@ -1185,15 +1521,15 @@ bool drawMonster(const transmatrix& V, int ct, cell *c, int col) {
 
     if(vid.monmode > 1) {
       if(isIvy(c)) 
-        queuepoly(V, ct, shILeaf[ct-6], darkena(col, 0, 0xFF));
-      else if(m == moWorm || m == moWormwait) {
-        queuepoly(V2 * spin(M_PI), ct, shWormHead, darkena(col, 0, 0xFF));
-        queuepoly(V2 * spin(M_PI), ct, shEyes, 0xFF);
+        queuepoly(V, shILeaf[ct-6], darkena(col, 0, 0xFF));
+      else if(m == moWorm || m == moWormwait || m == moHexSnake) {
+        queuepoly(V2 * spin(M_PI), shWormHead, darkena(col, 0, 0xFF));
+        queuepoly(V2 * spin(M_PI), shEyes, 0xFF);
         }
       else if(m == moTentacle || m == moTentaclewait || m == moTentacleEscaping)
-        queuepoly(V2 * spin(M_PI), ct, shTentHead, darkena(col, 0, 0xFF));
+        queuepoly(V2 * spin(M_PI), shTentHead, darkena(col, 0, 0xFF));
       else
-        queuepoly(V2, ct, shJoint, darkena(col, 0, 0xFF));
+        queuepoly(V2, shJoint, darkena(col, 0, 0xFF));
       }
 
     return vid.monmode < 2;
@@ -1203,23 +1539,19 @@ bool drawMonster(const transmatrix& V, int ct, cell *c, int col) {
   
     int hdir = displaydir(c, c->mondir);
 
-    transmatrix mirrortrans = Id;    
-    if(c->monst == moMirror) mirrortrans[1][1] = -1;
-    transmatrix V2 = V * spin(M_PI*hdir/42) * mirrortrans;
+    transmatrix V2 = V * spin(M_PI*hdir/42);
+    if(c->monst == moMirror) V2 = V2 * Mirror;
     
-    if(vid.monmode > 1) {
-      if(flipplayer) V2 = V2 * spin(M_PI);
-      queuepoly(V2, ct, vid.female ? shFemaleBody : shPBody,  darkena(col, 0, 0X80));
-      queuepoly(V2, ct, shPSword, darkena(col, 0, 0XC0));
-      queuepoly(V2, ct, vid.female ? shFemaleHair : shPHead,  darkena(col, 1, 0XC0));
-      queuepoly(V2, ct, shPFace,  darkena(col, 0, 0XC0));
-      if(vid.female)
-        queuepoly(V2, ct, shFemaleDress,  darkena(col, 1, 0XC0));
-      if(flipplayer) V2 = V2 * spin(M_PI);
-      }
-    
+    if(flipplayer) V2 = V2 * spin(M_PI);
+
+    if(vid.monmode > 1) drawMonsterType(c->monst, c, V2, col);
+
+    if(flipplayer) V2 = V2 * spin(M_PI);
+
     if(!outofmap(mouseh)) {
-      hyperpoint P2 = V2 * inverse(cwtV) * mouseh;    
+      // transmatrix invxy = Id; invxy[0][0] = invxy[1][1] = -1;
+      
+      hyperpoint P2 = V2 * inverse(cwtV) * mouseh;
       int xc, yc, sc;
       getcoord(P2, xc, yc, sc);
       displaychr(xc, yc, sc, 10, 'x', 0xFF00);
@@ -1228,46 +1560,38 @@ bool drawMonster(const transmatrix& V, int ct, cell *c, int col) {
     return vid.monmode < 2;
     }
   
-  else if(c->monst == moIllusion) {
-    if(vid.monmode > 1) {
-      queuepoly(V, ct, vid.female ? shFemaleBody : shPBody,  darkena(col, 0, 0X80));
-      queuepoly(V, ct, shPSword, darkena(col, 0, 0XC0));
-      queuepoly(V, ct, vid.female ? shFemaleHair : shPHead,  darkena(col, 1, 0XC0));
-      queuepoly(V, ct, shPFace,  darkena(col, 0, 0XC0));
-      if(vid.female)
-        queuepoly(V, ct, shFemaleDress,  darkena(col, 1, 0XC0));
-      }
-    return vid.monmode < 2;
-    }
-
   else if(c->monst && vid.monmode < 2) return true;
   
-  else if(isFriendly(c)) {
-    // golems and knights don't face player
-    int hdir = displaydir(c, c->mondir) + 42;      
-    transmatrix V2 = V * spin(hdir * M_PI / 42) ;
-    if(m == moKnight) {
-      queuepoly(V2, ct, shPBody, darkena(0xC0C0A0, 0, 0xC0));
-      queuepoly(V2, ct, shPSword, darkena(0xFFFF00, 0, 0xFF));
-      queuepoly(V2, ct, shKnightArmor, darkena(0xD0D0D0, 1, 0xFF));
-      int col;
-      if(c->master->alt)
-        col = cloakcolor(roundTableRadius(c));
-      else
-        col = cloakcolor(newRoundTableRadius());
-      queuepoly(V2, ct, shKnightCloak, darkena(col, 1, 0xFF));
-      queuepoly(V2, ct, shPHead, darkena(0x703800, 1, 0XFF));
-      queuepoly(V2, ct, shPFace, darkena(0xC0C0A0, 0, 0XFF));
-      }
-    else {
-      queuepoly(V2, ct, shPBody, darkena(col, 0, 0XC0));
-      queuepoly(V2, ct, shGolemhead, darkena(col, 1, 0XFF));
-      }
+  // illusions face randomly
+  
+  else if(c->monst == moIllusion) {
+    drawMonsterType(c->monst, c, V, col);
     }
 
-  else if(c->monst) {
+  // golems, knights, and hyperbugs don't face the player (mondir-controlled)
+
+  else if(isFriendly(c) || isBug(c)) {
+    int hdir = displaydir(c, c->mondir) + 42;      
+    transmatrix V2 = V * spin(hdir * M_PI / 42) ;
+    return drawMonsterType(m, c, V2, col);
+    }
+
+  // wolves face the heat
   
-    // face the player
+  else if(c->monst == moWolf && c->cpdist > 1) {
+    int d = 0;
+    double bheat = -999;
+    for(int i=0; i<c->type; i++) if(c->mov[i] && HEAT(c->mov[i]) > bheat) {
+      bheat = HEAT(c->mov[i]);
+      d = i;
+      }
+    int hdir = displaydir(c, d);
+    transmatrix V2 = V * spin(hdir * M_PI / 42);
+    return drawMonsterType(m, c, V2, col);
+    }
+
+  else if(c->monst) {  
+    // other monsters face the player
     transmatrix VL;
     
     if(false) {
@@ -1281,166 +1605,19 @@ bool drawMonster(const transmatrix& V, int ct, cell *c, int col) {
       VL = cwtV * rspintox(V0) * rpushxto0(V1) * spin(M_PI);
       }
     
-    char xch = minf[m].glyph;
-
-    if(m == moWolf) {
-      queuepoly(VL, ct, shWolfLegs, darkena(col, 0, 0xFF));
-      queuepoly(VL, ct, shWolfBody, darkena(col, 0, 0xFF));
-      queuepoly(VL, ct, shWolfHead, darkena(col, 0, 0xFF));
-      queuepoly(VL, ct, shWolfEyes, darkena(col, 3, 0xFF));
-      }
-    else if(m == moVineBeast) {
-      queuepoly(VL, ct, shWolfLegs, 0x00FF00FF);
-      queuepoly(VL, ct, shWolfBody, darkena(col, 1, 0xFF));
-      queuepoly(VL, ct, shWolfHead, darkena(col, 0, 0xFF));
-      queuepoly(VL, ct, shWolfEyes, 0xFF0000FF);
-      }
-    else if(isBug(m)) {
-
-      int hdir = displaydir(c, c->mondir) + 42;
-      
-      transmatrix V2 = V * spin(hdir * M_PI / 42) ;
-
-      queuepoly(V2, ct, shBugBody, darkena(col, 0, 0xFF));
-      queuepoly(V2, ct, shBugArmor, darkena(col, 1, 0xFF));
-      }
-    else if(m == moRunDog) {
-      queuepoly(VL, ct, shWolf, darkena(col, 0, 0xFF));
-      }
-    else if(m == moShark || m == moGreaterShark)
-      queuepoly(VL, ct, shShark, darkena(col, 0, 0xFF));
-    else if(m == moEagle)
-      queuepoly(VL, ct, shEagle, darkena(col, 0, 0xFF));
-    else if(m == moZombie)
-      queuepoly(VL, ct, shPBody, darkena(col, 0, 0xFF));
-    else if(m == moDesertman) {
-      queuepoly(VL, ct, shPBody, darkena(col, 0, 0xC0));
-      queuepoly(VL, ct, shPSword, 0xFFFF00FF);
-      queuepoly(VL, ct, shHood, 0xD0D000C0);
-      }
-    else if(m == moCrystalSage) {
-      queuepoly(VL, ct, shPBody, 0xFFFFFFFF);
-      queuepoly(VL, ct, shPHead, 0xFFFFFFFF);
-      queuepoly(VL, ct, shPFace, 0xFFFFFFFF);
-      }
-    else if(m == moHedge) {
-      queuepoly(VL, ct, shPBody, darkena(col, 0, 0xFF));
-      queuepoly(VL, ct, shHedgehogBlade, 0xC0C0C0FF);
-      queuepoly(VL, ct, shPHead, 0x804000FF);
-      queuepoly(VL, ct, shPFace, 0xF09000FF);
-      }
-    else if(m == moYeti || m == moMonkey) {
-      queuepoly(VL, ct, shYeti, darkena(col, 0, 0xC0));
-      queuepoly(VL, ct, shPHead, darkena(col, 0, 0xFF));
-      }
-    else if(m == moShadow) {
-      queuepoly(VL, ct, shPBody,  darkena(col, 0, 0X80));
-      queuepoly(VL, ct, shPSword, darkena(col, 0, 0XC0));
-      queuepoly(VL, ct, shPHead,  darkena(col, 1, 0XC0));
-      queuepoly(VL, ct, shPFace,  darkena(col, 0, 0XC0));
-      }
-    else if(m == moRanger) {
-      queuepoly(VL, ct, shPBody, darkena(col, 0, 0xC0));
-      queuepoly(VL, ct, shPSword, darkena(col, 0, 0xFF));
-      queuepoly(VL, ct, shArmor, darkena(col, 1, 0xFF));
-      }
-    else if(m == moGhost || m == moSeep) {
-      queuepoly(VL, ct, shGhost, darkena(col, 0, 0x80));
-      queuepoly(VL, ct, shEyes, 0xFF);
-      }
-    else if(m == moVineSpirit) {
-      queuepoly(VL, ct, shGhost, 0xD0D0D0C0);
-      queuepoly(VL, ct, shEyes, 0xFF0000FF);
-      }
-    else if(m == moFireFairy) {
-      col = firecolor(0);
-      queuepoly(VL, ct, shFemaleBody, darkena(col, 0, 0XC0));
-//    queuepoly(cV2, ct, shPSword, darkena(col, 0, 0XFF));
-      queuepoly(VL, ct, shFemaleHair, darkena(col, 1, 0xFF));
-      queuepoly(VL, ct, shPFace, darkena(col, 0, 0XFF));
-//    queuepoly(cV2, ct, shFemaleDress, 0xC00000FF);
-      }
-    else if(m == moSlime) {
-      queuepoly(VL, ct, shSlime, darkena(col, 0, 0x80));
-      queuepoly(VL, ct, shEyes, 0xFF);
-      }
-    else if(m == moCultist || m == moPyroCultist || m == moCultistLeader) {
-      queuepoly(VL, ct, shPBody, darkena(col, 0, 0xC0));
-      queuepoly(VL, ct, shPSword, darkena(col, 2, 0xFF));
-      queuepoly(VL, ct, shHood, darkena(col, 1, 0xFF));
-      }
-    else if(m == moNecromancer) {
-      queuepoly(VL, ct, shPBody, 0xC00000C0);
-      queuepoly(VL, ct, shHood, darkena(col, 1, 0xFF));
-      }
-    else if(m == moGoblin) {
-      queuepoly(VL, ct, shYeti, darkena(col, 0, 0xC0));
-      queuepoly(VL, ct, shArmor, darkena(col, 1, 0XFF));
-      }
-    else if(m == moLancer || m == moFlailer || m == moMiner) {
-      if(m == moLancer)
-        VL = VL * spin(c->type == 6 ? -M_PI/3 : -M_PI/2 );
-      queuepoly(VL, ct, shPBody, darkena(col, 0, 0xC0));
-      queuepoly(VL, ct, m == moFlailer ? shArmor : shHood, darkena(col, 1, 0XFF));
-      if(m == moMiner)
-        queuepoly(VL, ct, shPickAxe, darkena(0xC0C0C0, 0, 0XFF));
-      if(m == moLancer)
-        queuepoly(VL, ct, shPike, darkena(col, 0, 0XFF));
-      if(m == moFlailer) {
-        queuepoly(VL, ct, shFlailBall, darkena(col, 0, 0XFF));
-        queuepoly(VL, ct, shFlailChain, darkena(col, 1, 0XFF));
-        queuepoly(VL, ct, shFlailTrunk, darkena(col, 0, 0XFF));
-        }
-      }
-    else if(m == moTroll) {
-      queuepoly(VL, ct, shYeti, darkena(col, 0, 0xC0));
-      queuepoly(VL, ct, shPHead, darkena(col, 1, 0XFF));
-      queuepoly(VL, ct, shPFace, darkena(col, 2, 0XFF));
-      }        
-    else if(m == moDarkTroll) {
-      queuepoly(VL, ct, shYeti, darkena(col, 0, 0xC0));
-      queuepoly(VL, ct, shPHead, darkena(col, 0, 0XFF));
-      queuepoly(VL, ct, shPFace, 0xFFFFFF80);
-      }        
-    else if(m == moEarthElemental) {
-      queuepoly(VL, ct, shYeti, darkena(col, 0, 0xC0));
-      queuepoly(VL, ct, shPHead, darkena(col, 0, 0XFF));
-      queuepoly(VL, ct, shPFace, 0xF0000080);
-      }        
-    else if(xch == 'd' || xch == 'D') {
-      queuepoly(VL, ct, shPBody, darkena(col, 1, 0xC0));
-      int acol = col;
-      if(xch == 'D') acol = 0xD0D0D0;
-      queuepoly(VL, ct, shDemon, darkena(acol, 0, 0xFF));
-      }
-    else if(m == moEvilGolem) {
-      queuepoly(VL, ct, shPBody, darkena(col, 0, 0XC0));
-      queuepoly(VL, ct, shGolemhead, darkena(col, 1, 0XFF));
-      }
-    else if(isWitch(m)) {
-      int c = 0xFF;
-      if(m == moWitchGhost) c = 0x85 + 120 * sin(ticks / 160.0);
-      if(m == moWitchWinter) drawWinter(VL, 42);
-      if(m == moWitchFlash) drawFlash(VL);
-      if(m == moWitchSpeed) drawSpeed(VL);
-      if(m == moWitchFire) col = firecolor(0);
-      queuepoly(VL, ct, shFemaleBody, darkena(col, 0, c));
-//    queuepoly(cV2, ct, shPSword, darkena(col, 0, 0XFF));
-//    queuepoly(VL, ct, shHood, darkena(col, 0, 0XC0));
-      if(m == moWitchFire) col = firecolor(100);
-      queuepoly(VL, ct, shFemaleHair, darkena(col, 1, c));
-      if(m == moWitchFire) col = firecolor(200);
-      queuepoly(VL, ct, shPFace, darkena(col, 0, c));
-      if(m == moWitchFire) col = firecolor(300);
-      queuepoly(VL, ct, shWitchDress, darkena(col, 1, 0XC0));
-      }
-    else return true;
+    return drawMonsterType(m, c, VL, col);
     }
   
   return false;
   }
 
-cell *keycell;
+bool showPirateX;
+cell *keycell, *pirateTreasureSeek, *pirateTreasureFound;
+transmatrix pirateCoords;
+
+double downspin;
+cell *straightDownSeek;
+
 int keycelldist;
 
 void drawCircle(int x, int y, int size, int color) {
@@ -1480,6 +1657,8 @@ void drawCircle(int x, int y, int size, int color) {
 #endif
   }
 
+int fnt[100][7];
+
 bool bugsNearby(cell *c, int dist = 2) {
   if(!havebugs) return false;
   if(isBug(c)) return true;
@@ -1487,16 +1666,62 @@ bool bugsNearby(cell *c, int dist = 2) {
   return false;
   }
 
+int minecolors[8] = {
+  0xFFFFFF, 0xF0, 0xF000, 0xF00000, 
+  0x60, 0x600000, 0x00C0C0, 0
+  };
+
+const char* minetexts[8] = {
+  "No mines next to you.",
+  "A mine is next to you!",
+  "Two mines next to you!",
+  "Three mines next to you!",
+  "Four mines next to you!",
+  "Five mines next to you!",
+  "Six mines next to you!",
+  "Seven mines next to you!"
+  };
+
+int countMinesAround(cell *c) {
+  int mines = 0;
+  for(int i=0; i<c->type; i++)
+    if(c->mov[i] && c->mov[i]->wall == waMineMine)
+      mines++;
+  return mines;
+  }
+
+transmatrix movecell[7], curcell;
+
+transmatrix applyPatterndir(cell *c, char patt = mapeditor::whichPattern) {
+  int hdir = displaydir(c, mapeditor::patterndir(c, patt));
+  transmatrix V = spin((42+hdir) * M_PI / 42);
+
+  if(mapeditor::reflectPatternAt(c)) 
+    return V * Mirror;
+  
+  return V;
+  }
+
 void drawcell(cell *c, transmatrix V, int spinv) {
 
+#ifdef BUILDZEBRA
+  if(c->type == 6 && c->tmp > 0) {
+    int i = c->tmp;
+    zebra(cellwalker(c, i&15), 1, i>>4, "", 0);
+    }
+  
+  c->item = eItem(c->heat / 4);
+  buildAutomatonRule(c);
+#endif
+  
   // todo: fix when scrolling
-  if(c->land != laGameBoard && sightrange < 10) {
+  if(!buggyGeneration && c->land != laCanvas && sightrange < 10) {
     // not yet created
-    if(c->mpdist > 7) return;
+    if(c->mpdist > 7 && !cheater) return;
     // (incorrect comment) too far, no bugs nearby
     if(playermoved && c->cpdist > sightrange) return;
     }
-  
+
   if(!euclid) {
     // draw a web-like map
     if(webdisplay & 1) {
@@ -1514,7 +1739,7 @@ void drawcell(cell *c, transmatrix V, int spinv) {
       drawline(V*C0, V*xpush(tessf)*C0, 0xd0d0 >> darken);
       }
     
-    if(webdisplay & 4) if(c->type == 7 && c->master->alt) {
+    if(webdisplay & 4) if(c->type == 7 && !euclid && c->master->alt) {
       for(int i=0; i<7; i++)
         if(c->master->move[i]->alt == c->master->alt->move[0])
           drawline(V*C0, V*spin(-2*M_PI*i/7)*xpush(tessf)*C0, 0xd000d0 >> darken);
@@ -1522,7 +1747,7 @@ void drawcell(cell *c, transmatrix V, int spinv) {
     }
   
   // save the player's view center
-  if(c == cwt.c) {
+  if(c == cwt.c && !shmup::on) {
     playerfound = true;
 
 /*   if(euclid)
@@ -1533,14 +1758,26 @@ void drawcell(cell *c, transmatrix V, int spinv) {
 
     cwtV = V * spin(displaydir(c, cwt.spin) * M_PI/42);
     }
+  
+  /* if(cwt.c->land == laEdge) {   
+    if(c == chosenDown(cwt.c, 1, 0)) 
+      playerfoundL = c, cwtVL = V;
+    if(c == chosenDown(cwt.c, -1, 0)) 
+      playerfoundR = c, cwtVR = V;
+    } */
 
   if(1) {
   
     hyperpoint VC0 = V*C0;
   
     if(intval(mouseh, VC0) < modist) {
+      modist2 = modist; mouseover2 = mouseover;
       modist = intval(mouseh, VC0);
       mouseover = c;
+      }
+    else if(intval(mouseh, VC0) < modist2) {
+      modist2 = intval(mouseh, VC0);
+      mouseover2 = c;
       }
 
     double dfc = euclid ? intval(VC0, C0) : VC0[2];
@@ -1555,30 +1792,59 @@ void drawcell(cell *c, transmatrix V, int spinv) {
     getcoord(V*xpush(.5)*C0, xs, ys, ss);
     // int col = 0xFFFFFF - 0x20 * c->maxdist - 0x2000 * c->cpdist;
 
-    if(c->mpdist > 8) return; // not yet generated
-
+    if(!buggyGeneration && c->mpdist > 8 && !cheater) return; // not yet generated
+    
+    if(c->land == laNone && cmode == emMapEditor) {
+      queuepoly(V, shTriangle, 0xFF0000FF);
+      }
+  
     char ch = winf[c->wall].glyph;
     int col = winf[c->wall].color;
     
     if(c->land == laAlchemist && c->wall == waNone) col = 0x202020;
     
     if(c->land == laCrossroads && c->wall == waNone) col = (vid.goteyes ? 0xFF3030 : 0xFF0000);
+    if(c->land == laCrossroads2 && c->wall == waNone) 
+      col = linf[laCrossroads2].color;
+
+    if(c->land == laCrossroads3 && c->wall == waNone) 
+      col = linf[laCrossroads3].color;
+
+    if(isElemental(c->land) && c->wall == waNone) 
+      col = linf[c->land].color;
+      
+    if(c->land == laElementalWall && c->wall == waNone) 
+      col = (linf[c->barleft].color>>1) + (linf[c->barright].color>>1);
+      
+    if(c->land == laZebra && c->wall == waNone) {
+      col = 0xE0E0E0;
+      }
+      
+    if(c->land == laZebra && c->wall == waTrapdoor)
+      col = 0x808080;
+      
     if(c->land == laDesert && c->wall == waNone) col = 0xEDC9AF;
     if(c->land == laCaves && c->wall == waNone) col = 0x202020;
-    if(c->land == laFjord && c->wall == waNone) col = 0x202020;
+    if(c->land == laEmerald && c->wall == waNone) col = 0x202020;
     if(c->land == laDeadCaves && c->wall == waNone) col = 0x202020;
-    if(isHive(c->land)) {
+
+    if(c->land == laNone && c->wall == waNone) {
+      col = 0x101010;
+      queuepoly(V, shTriangle, 0xFFFF0000);
+      }
+
+    if(isHive(c->land) && !isWateryOrBoat(c) && c->wall != waCloud && c->wall != waMirror && c->wall != waMineMine) {
       col = linf[c->land].color;
       if(c->wall == waWaxWall)
-        col = int(c->heat) & 0xFFFFFF;
+        col = c->landparam;
       }
     if(c->land == laJungle && c->wall == waNone) col = (vid.goteyes ? 0x408040 : 0x008000);
     if(c->land == laPower && c->wall == waNone)
       col = linf[c->land].color;
-/*     if(c->land == laFjord && c->wall == waNone) {
+/*     if(c->land == laEmerald && c->wall == waNone) {
       col = 0x50A020;
       }
-    if(c->land == laFjord && c->wall == waLake) {
+    if(c->land == laEmerald && c->wall == waLake) {
       col = 0x202080;
       int i = 0;
       for(int k=0; k<c->type; k++) if(c->mov[k] && c->mov[k]->wall != waLake)
@@ -1596,19 +1862,19 @@ void drawcell(cell *c, transmatrix V, int spinv) {
       else if(c->wall == waWetTree)
         col = (vid.goteyes ? 0x60C060 : 0x00C000);
       else if(c->wall == waNone) {
-        col = gradient(0x008000, 0x800000, 0, c->heat, 10);
+        col = gradient(0x008000, 0x800000, 0, c->landparam, 10);
         }
       }
     if(c->land == laMirror && c->wall == waNone) col = 0x808080;
     if(c->land == laMotion && c->wall == waNone) col = 0xF0F000;
     if(c->land == laGraveyard && c->wall == waNone) col = 0x107010;
     if(c->land == laCamelot && c->wall == waNone) {
-      int d = showoff ? 0 : celldistAltRelative(c);
+      int d = showoff ? 0 : ((euclid||c->master->alt) ? celldistAltRelative(c) : 0);
       if(d < 0)
         col = 0xA0A0A0;
       else {
         // a nice floor pattern
-        int v = fjordval(c);
+        int v = emeraldval(c);
         int v0 = (v&~3);
         bool sw = (v&1);
         if(v0 == 8 || v0 == 12 || v0 == 20 || v0 == 40 || v0 == 36 || v0 == 24)
@@ -1621,7 +1887,7 @@ void drawcell(cell *c, transmatrix V, int spinv) {
       }
     if(c->land == laRlyeh && c->wall == waNone) col = (vid.goteyes ? 0x4080C0 : 0x004080);
     if(c->land == laTemple) {
-      int d = showoff ? 0 : celldistAlt(c);
+      int d = showoff ? 0 : (euclid||c->master->alt) ? celldistAlt(c) : 99;
       if(d % TEMPLE_EACH == 0)
         col = c->wall == waColumn ? winf[waColumn].color : 
           gradient(0x304080, winf[waColumn].color, 0, 0.5, 1);
@@ -1633,30 +1899,28 @@ void drawcell(cell *c, transmatrix V, int spinv) {
         col = 0x405090;
       }
     if(c->land == laHell && c->wall == waNone) col = (vid.goteyes ? 0xC03030 : 0xC00000);
-    if(c->land == laGameBoard) {
-      col = linf[c->land].color;
-      if(c->wall != waNone)
-        col = winf[c->wall].color;
-      if(c->wall == waLake) col = 0x202020;
-      if(c->wall == waFrozenLake) col = 0xC0C0C0;
 
-      if(c->type == 7 && vid.boardmode == '3') col = 0;
-      if(c->type == 6 && vid.boardmode == '7') col = 0;
-      }
-
+    if(c->land == laPalace && (c->wall == waNone || c->wall == waClosePlate || c->wall == waOpenPlate ||
+      c->wall == waTrapdoor) && (c->wall == waNone || vid.wallmode != 0)) 
+      col = 0x806020;
+    
+    if(c->land == laPalace && c->wall == waCamelot)
+      col = 0xFFD500;
+    
     if(isIcyLand(c) && isIcyWall(c)) {
-      if(c->heat < -0.4)
-        col = gradient(0x4040FF, 0x0000FF, -0.4, c->heat, -1);
-      else if(c->heat < 0)
-        col = gradient(0x8080FF, 0x4040FF, 0, c->heat, -0.4);
-      else if(c->heat < 0.2)
-        col = gradient(0x8080FF, 0xFFFFFF, 0, c->heat, 0.2);
-      // else if(c->heat < 0.4)
-      //  col = gradient(0xFFFFFF, 0xFFFF00, 0.2, c->heat, 0.4);
-      else if(c->heat < 0.6)
-        col = gradient(0xFFFFFF, 0xFF0000, 0.2, c->heat, 0.6);
-      else if(c->heat < 0.8)
-        col = gradient(0xFF0000, 0xFFFF00, 0.6, c->heat, 0.8);
+      float h = HEAT(c);
+      if(h < -0.4)
+        col = gradient(0x4040FF, 0x0000FF, -0.4, h, -1);
+      else if(h < 0)
+        col = gradient(0x8080FF, 0x4040FF, 0, h, -0.4);
+      else if(h < 0.2)
+        col = gradient(0x8080FF, 0xFFFFFF, 0, h, 0.2);
+      // else if(h < 0.4)
+      //  col = gradient(0xFFFFFF, 0xFFFF00, 0.2, h, 0.4);
+      else if(h < 0.6)
+        col = gradient(0xFFFFFF, 0xFF0000, 0.2, h, 0.6);
+      else if(h < 0.8)
+        col = gradient(0xFF0000, 0xFFFF00, 0.6, h, 0.8);
       else
         col = 0xFFFF00;
       if(c->wall == waNone) 
@@ -1665,16 +1929,16 @@ void drawcell(cell *c, transmatrix V, int spinv) {
         col = (col & 0xFCFCFC) >> 2;
       }
     
-    if(c->wall == waBonfire && c->tmp == 0)
-      col = 0x404040;
+    /* if(c->wall == waBonfireOff)
+      col = 0x404040; */
       
-    if(isFire(c) && c->tmp > 0)
-      col = firecolor(100);
+    if(isFire(c))
+      col = c->wall == waEternalFire ? weakfirecolor(1500) : firecolor(100);
       
-    if(c->wall == waThumper && c->tmp == 0)
-      col = 0xEDC9AF;
+    /* if(c->wall == waThumperOff)
+      col = 0xEDC9AF; */
       
-    if(c->wall == waThumper && c->tmp > 0) {
+    if(c->wall == waThumperOn) {
       int ds = ticks;
       for(int u=0; u<5; u++) {
         ld rad = hexf * (.3 * u + (ds%1000) * .0003);
@@ -1684,21 +1948,54 @@ void drawcell(cell *c, transmatrix V, int spinv) {
         }
       }
     
-    if(c->land == laFjord && c->wall == waCavefloor) {
+    if(c->land == laEmerald && c->wall == waCavefloor) {
       col = gradient(col, 0xFF00, 0, 0.5, 1);
       // col |= 0xFF00; // col += 0x300060; // col += 0x2F18; col -= 0x100000;
       }
+
+    if(c->land == laOcean && (c->wall == waNone || c->wall == waStrandedBoat)) {
+      col = 0xD0D020;
+      }
+
+    if(c->land == laLivefjord && (c->wall == waNone || c->wall == waStrandedBoat))
+      col = 0x306030;
       
-    if(c->land == laFjord && c->wall == waCavewall) {
+    if(c->land == laEmerald && c->wall == waCavewall) {
       col = 0xC0FFC0;
       // col |= 0xFF00; // col += 0x300060; // col += 0x2F18; col -= 0x100000;
       }
       
-    if(c->land == laHive && items[itOrbInvis] && c->wall == waNone && c->heat)
-      col = gradient(col, 0xFF0000, 0, c->heat, 100);
+    if(c->land == laHive && items[itOrbInvis] && c->wall == waNone && c->landparam)
+      col = gradient(col, 0xFF0000, 0, c->landparam, 100);
 
-    if(vid.darkhepta && ishept(c))
-      col = gradient(0, col, 0, 0.75, 1);
+    if(c->land == laCaribbean && (c->wall == waCIsland || c->wall == waCIsland2))
+      col = winf[c->wall].color;
+
+    if(c->wall == waBoat && !vid.wallmode) {
+      col = 0xC06000;
+      }
+    
+    if(c->land == laMinefield && c->wall == waMineMine && (cmode == emMapEditor || !canmove))
+      col = 0xFF4040;
+      
+    if(c->land == laMinefield && c->wall == waNone)
+      col = 0x80A080;
+      
+    if(c->land == laCaribbean && c->wall == waNone)
+      col = 0x006000;
+      
+    if(c->land == laRedRock && (c->wall == waNone || snakelevel(c))) {
+      col = linf[c->land].color;
+      }
+    
+    if(c->land == laCanvas && c->wall == waNone) {
+      col = c->landparam;
+      }
+
+    if(ishept(c)) {
+      if(vid.darkhepta)
+        col = gradient(0, col, 0, 0.75, 1);
+      }
       
     int ycol = col;
 
@@ -1708,18 +2005,26 @@ void drawcell(cell *c, transmatrix V, int spinv) {
 
     int xcol = col;
     
-    if(c->item) 
-      ch = iinf[c->item].glyph, col = iinf[c->item].color;
+    eItem it = c->item;
+    
+    bool hidden = itemHidden(c);
+    bool hiddens = itemHiddenFromSight(c);
+    
+    if(hiddens && cmode != emMapEditor)
+      it = itNone;
+
+    if(it) 
+      ch = iinf[it].glyph, col = iinf[it].color;
     
     int icol = col;
     
-    if(c->item && c->land == laAlchemist)
+    if(it && c->land == laAlchemist)
       xcol = col;
 
     if(c->monst)
       ch = minf[c->monst].glyph, col = minf[c->monst].color;
     
-    if(c->cpdist == 0 && drawplayer) { ch = '@'; col = cheater ? 0xFF3030 : 0xD0D0D0; }
+    if(c->cpdist == 0 && mapeditor::drawplayer) { ch = '@'; col = cheater ? 0xFF3030 : 0xD0D0D0; }
     
     if(c->monst == moSlime) {
       col = winf[c->wall].color;
@@ -1740,6 +2045,24 @@ void drawcell(cell *c, transmatrix V, int spinv) {
 
     bool error = false;
     
+    if(c->land == laEdge && (c->wall == waNone || c->wall == waLadder))
+      // xcol = (c->landparam&1) ? 0xD00000 : 0x00D000;
+      xcol = 0x10101 * (32 + (c->landparam&1) * 32) - 0x000010;
+    
+    if(c->wall == waSea || c->wall == waBoat) {
+      if(c->land == laOcean)
+        xcol = c->landparam > 25 ? 0x000090 : 
+          0x1010C0 + int(32 * sin(ticks / 500. + c->landparam*1.5));
+      else if(c->land == laOceanWall)
+        xcol = 0x2020FF;
+      else if(c->land == laAlchemist)
+        xcol = 0x900090;
+      else if(c->land == laWhirlpool)
+        xcol = 0x0000C0 + int(32 * sin(ticks / 200. + ((euclid||c->master->alt) ? celldistAlt(c) : 0)*1.5));
+      else if(c->land == laLivefjord)
+        xcol = 0x000080;
+      }
+    
     if(vid.wallmode) {
     
       poly_outline = 0x000000FF;
@@ -1747,16 +2070,42 @@ void drawcell(cell *c, transmatrix V, int spinv) {
       // floor
       
       int fd = 
+        c->land == laRedRock ? 0 : (c->land == laOcean || c->land == laLivefjord) ? 1 :
         c->land == laAlchemist || c->land == laIce || c->land == laGraveyard ||
-        c->land == laRlyeh || c->land == laTemple ? 1 : 2;
+        c->land == laRlyeh || c->land == laTemple || c->land == laWineyard ||
+        c->land == laDeadCaves || c->land == laPalace ? 1 : 
+        c->land == laCanvas ? 0 :
+        c->land == laEdge ? 1 :
+        2;
       
-      if(shUser[0][ct-6].s) {
-        for(int i=0; i<8; i++) if(shUser[i][ct-6].s)
-          queuepoly(V, ct, shUser[i][ct-6], darkena(xcol, 2, 0xC0));
+      transmatrix Vpdir = V * applyPatterndir(c);
+#ifndef MOBILE
+      if(c == mapeditor::drawcell && c != cwt.c && !c->monst && !c->item) {
+        mapeditor::drawtrans = Vpdir;
+        }
+#endif
+
+      if(c->wall == waChasm) ;
+      
+#ifndef MOBILE
+      else if(drawUserShape(Vpdir, mapeditor::cellShapeGroup(), mapeditor::realpattern(c),
+        darkena(xcol, fd, cmode == emDraw ? 0xC0 : 0xFF))) ;
+      
+      else if(mapeditor::whichShape == '7') {
+        if(ishept(c))
+          queuepoly(V, vid.wallmode == 1 ? shBFloor[ct-6] : 
+            euclid ? shBigHex :
+            shBigHepta, darkena(xcol, fd, 0xFF));
         }
       
-      else if(c->wall == waChasm)
-        ;
+      else if(mapeditor::whichShape == '6') {
+        if(!ishept(c))
+          queuepoly(V, 
+            vid.wallmode == 1 ? shBFloor[ct-6] : 
+            euclid ? (ishex1(c) ? shBigHexTriangle : shBigHexTriangleRev) :
+            shBigTriangle, darkena(xcol, fd, 0xFF));
+        }
+#endif
       
       else if(c->land == laWineyard && (c->wall == waVineHalfA || c-> wall == waVineHalfB)) {
 
@@ -1773,139 +2122,280 @@ void drawcell(cell *c, transmatrix V, int spinv) {
         if(vid.wallmode == 1) shar = shSemiBFloor;
         if(vid.wallmode == 2) shar = shSemiFloor;
         
-        int dk = vid.wallmode == 1 ? 0 : vid.wallmode == 2 ? 2 : 1;
+        int dk = vid.wallmode == 1 ? 0 : vid.wallmode == 2 ? 1 : 1;
         
-        queuepoly(V2, ct, shar[0], darkena(winf[waVinePlant].color, dk, 0xFF));
-        queuepoly(V2, ct, shar[1], darkena(xcol, dk, 0xFF));
+        queuepoly(V2, shar[0], darkena(winf[waVinePlant].color, dk, 0xFF));
+        queuepoly(V2, shar[1], darkena(xcol, dk, 0xFF));
         }
 
       else if(vid.wallmode == 1 && c->land == laAlchemist)
-        queuepoly(V, ct, shFloor[ct-6], darkena(xcol, 1, 0xFF));
+        queuepoly(V, shFloor[ct-6], darkena(xcol, 1, 0xFF));
       
-      else if(vid.wallmode == 1 && c->land != laGameBoard)
-        queuepoly(V, ct, shBFloor[ct-6], darkena(xcol, 0, 0xFF));
+      else if(vid.wallmode == 1 && c->wall == waMineOpen) 
+        ;
       
-      else if(vid.wallmode == 2 && c->land != laGameBoard) {
-        queuepoly(V, ct, shFloor[ct-6], darkena(xcol, fd, 0xFF));
+      else if(vid.wallmode == 1) 
+        queuepoly(V, shBFloor[ct-6], darkena(xcol, 0, 0xFF));
+      
+      else if(vid.wallmode == 2) {
+        queuepoly(V, shFloor[ct-6], darkena(xcol, fd, 0xFF));
         }
       
       else if(c->land == laWineyard) {
-        queuepoly(V, ct, (euclid ? shStarFloor : shFeatherFloor)[ct-6], darkena(xcol, 1, 0xFF));
+        queuepoly(V, (euclid ? shStarFloor : shFeatherFloor)[ct-6], darkena(xcol, 1, 0xFF));
+        }
+
+      else if(c->land == laZebra && !euclid) {
+        int i = zebra40(c);
+        i &= ~3;
+        
+        int j;
+
+        if(i >=4 && i < 16) j = 2;
+        else if(i >= 16 && i < 28) j = 1;
+        else if(i >= 28 && i < 40) j = 3;
+        else j = 0;
+
+        queuepoly(V * applyPatterndir(c, 'z'), shZebra[j], darkena(xcol, fd, 0xFF));
+        }
+
+      else if(c->land == laEdge && !euclid) {
+        int j = -1;
+
+        if(c->landparam > 1) { 
+          int i = towerval(c);
+          if(i == 4) j = 0;
+          if(i == 5) j = 1;
+          if(i == 6) j = 2;
+          if(i == 8) j = 3;
+          if(i == 9) j = 4;
+          if(i == 10) j = 5;
+          if(i == 13) j = 6;
+          }
+
+        if(j >= 0)
+          queuepoly(V * applyPatterndir(c, 'H'), shTower[j], darkena(xcol, fd, 0xFF));
+        else if(c->wall != waLadder)
+          queuepoly(V * applyPatterndir(c, 'H'), shMFloor[c->type-6], darkena(xcol, fd, 0xFF));
+        }
+
+      else if(c->land == laEmerald) {
+        int j = -1;
+        
+        if(!euclid) {
+          int i = emeraldval(c) & ~3;
+          if(i == 8) j = 0;
+          else if(i == 12) j = 1;
+          else if(i == 16) j = 2;
+          else if(i == 20) j = 3;
+          else if(i == 28) j = 4;
+          else if(i == 36) j = 5;
+          }
+
+        if(j >= 0)
+          queuepoly(V * applyPatterndir(c, 'f'), shEmeraldFloor[j], darkena(xcol, fd, 0xFF));
+        else
+          queuepoly(V, (euclid ? shFloor : shCaveFloor)[ct-6], darkena(xcol, 2, 0xFF));
         }
 
       else if(c->land == laRlyeh)
-        queuepoly(V, ct, (euclid ? shFloor: shTriFloor)[ct-6], darkena(xcol, 1, 0xFF));
+        queuepoly(V, (euclid ? shFloor: shTriFloor)[ct-6], darkena(xcol, 1, 0xFF));
 
       else if(c->land == laTemple)
-        queuepoly(V, ct, (euclid ? shFloor: shTriFloor)[ct-6], darkena(xcol, 1, 0xFF));
+        queuepoly(V, (euclid ? shFloor: shTriFloor)[ct-6], darkena(xcol, 1, 0xFF));
 
       else if(c->land == laAlchemist)
-        queuepoly(V, ct, shCloudFloor[ct-6], darkena(xcol, 1, 0xFF));
+        queuepoly(V, shCloudFloor[ct-6], darkena(xcol, 1, 0xFF));
+
+      else if((isElemental(c->land) || c->land == laElementalWall) && !euclid)
+        queuepoly(V, shNewFloor[ct-6], darkena(xcol, fd, 0xFF));
 
       else if(c->land == laJungle)
-        queuepoly(V, ct, (euclid ? shStarFloor : shFeatherFloor)[ct-6], darkena(xcol, 2, 0xFF));
+        queuepoly(V, (euclid ? shStarFloor : shFeatherFloor)[ct-6], darkena(xcol, 2, 0xFF));
 
       else if(c->land == laGraveyard)
-        queuepoly(V, ct, (euclid ? shFloor : shCrossFloor)[ct-6], darkena(xcol, 1, 0xFF));
-
-      else if(c->land == laFjord) {
-        queuepoly(V, ct, (euclid ? shFloor : shCaveFloor)[ct-6], darkena(xcol, 2, 0xFF));
-        }
+        queuepoly(V, (euclid ? shFloor : shCrossFloor)[ct-6], darkena(xcol, 1, 0xFF));
 
       else if(c->land == laDeadCaves) {
-        queuepoly(V, ct, (euclid ? shFloor : shCaveFloor)[ct-6], darkena(xcol, 1, 0xFF));
+        queuepoly(V, (euclid ? shFloor : shCaveFloor)[ct-6], darkena(xcol, 1, 0xFF));
         }
 
       else if(c->land == laMotion)
-        queuepoly(V, ct, shMFloor[ct-6], darkena(xcol, 2, 0xFF));
+        queuepoly(V, shMFloor[ct-6], darkena(xcol, 2, 0xFF));
 
       else if(c->land == laHell)
-        queuepoly(V, ct, (euclid ? shStarFloor : shDemonFloor)[ct-6], darkena(xcol, 2, 0xFF));
+        queuepoly(V, (euclid ? shStarFloor : shDemonFloor)[ct-6], darkena(xcol, 2, 0xFF));
 
       else if(c->land == laIce)
-//      queuepoly(V, ct, shFloor[ct-6], darkena(xcol, 2, 0xFF));
-        queuepoly(V, ct, shStarFloor[ct-6], darkena(xcol, 1, 0xFF));
+//      queuepoly(V, shFloor[ct-6], darkena(xcol, 2, 0xFF));
+        queuepoly(V, shStarFloor[ct-6], darkena(xcol, 1, 0xFF));
 
       else if(c->land == laCocytus)
-        queuepoly(V, ct, (euclid ? shCloudFloor : shDesertFloor)[ct-6], darkena(xcol, 1, 0xFF));
+        queuepoly(V, (euclid ? shCloudFloor : shDesertFloor)[ct-6], darkena(xcol, 1, 0xFF));
 
       else if(c->land == laPower)
-        queuepoly(V, ct, (euclid ? shCloudFloor : shPowerFloor)[ct-6], darkena(xcol, 1, 0xFF));
+        queuepoly(V, (euclid ? shCloudFloor : shPowerFloor)[ct-6], darkena(xcol, 1, 0xFF));
 
-      else if(c->land == laHive) {
-        queuepoly(V, ct, shFloor[ct-6], darkena(xcol, 1, 0xFF));
-        queuepoly(V, ct, shMFloor[ct-6], darkena(xcol, 2, 0xFF));
-        if(c->wall != waWaxWall && c->wall != waDeadTroll && c->wall != waVinePlant) 
-          queuepoly(V, ct, shMFloor2[ct-6], darkena(xcol, xcol==ycol ? 1 : 2, 0xFF));
+      else if(c->land == laHive && !isWateryOrBoat(c) && c->wall != waFloorB && c->wall != waFloorA &&
+        c->wall != waMirror && c->wall != waCloud) {
+        queuepoly(V, shFloor[ct-6], darkena(xcol, 1, 0xFF));
+        if(!snakelevel(c) && c->wall != waMirror && c->wall != waCloud)
+          queuepoly(V, shMFloor[ct-6], darkena(xcol, 2, 0xFF));
+        if(c->wall != waWaxWall && c->wall != waDeadTroll && c->wall != waVinePlant &&
+          !snakelevel(c) && c->wall != waMirror && c->wall != waCloud) 
+          queuepoly(V, shMFloor2[ct-6], darkena(xcol, xcol==ycol ? 1 : 2, 0xFF));
         }
 
       else if(c->land == laCaves)
-        queuepoly(V, ct, (euclid ? shCloudFloor : shCaveFloor)[ct-6], darkena(xcol, 2, 0xFF));
+        queuepoly(V, (euclid ? shCloudFloor : shCaveFloor)[ct-6], darkena(xcol, 2, 0xFF));
 
-      else if(c->land == laGameBoard) {
-        if(c->type == 7 && vid.boardmode == '7')
-          queuepoly(V, ct, vid.wallmode == 1 ? shBFloor[ct-6] : shBigHepta, darkena(xcol, 2, 0xFF));
+      else if(c->land == laDesert)
+        queuepoly(V, (euclid ? shCloudFloor : shDesertFloor)[ct-6], darkena(xcol, 2, 0xFF));
 
-        if(c->type == 6 && vid.boardmode == '3')
-          queuepoly(V, ct, vid.wallmode == 1 ? shBFloor[ct-6] : shBigTriangle, darkena(xcol, 2, 0xFF));
+      else if(c->land == laDryForest)
+        queuepoly(V, (euclid ? shStarFloor : shDesertFloor)[ct-6], darkena(xcol, 2, 0xFF));
 
-        if(vid.boardmode == 'h')
-          queuepoly(V, ct, vid.wallmode == 1 ? shBFloor[ct-6] : shFloor[c->type - 6], darkena(xcol, 2, 0xFF));
-          
-        if(vid.boardmode == 'f') {
-          static int fcol[4] = { 0x404040FF, 0xFF000080, 0x008000FF, 0x000080FF };
-          int fv = fjordval(c);
-          col = fcol[fv&3];
-          queuepoly(V, ct, vid.wallmode == 1 ? shBFloor[ct-6] : shFloor[c->type - 6], col);
-          if(fjordwalled[fv])
-            queuepoly(V, ct, shWall[ct-6], col | 0xFF3F3F);
-          int siz = int(sqrt(squar(xc-xs)+squar(yc-ys))) / 5;
-          displaystr(xc, yc, sc, siz, its(fv), 0xFFFFFFFF, 8);
+      else if(c->land == laCaribbean || c->land == laOcean || c->land == laOceanWall || c->land == laWhirlpool)
+        queuepoly(V, shCloudFloor[ct-6], darkena(xcol, 1, 0xFF));
+
+      else if(c->land == laLivefjord)
+        queuepoly(V, (euclid ? shCloudFloor : shCaveFloor)[ct-6], darkena(xcol, 1, 0xFF));
+
+      else if(c->land == laRedRock)
+        queuepoly(V, euclid ? shFloor[ct-6] : shDesertFloor[ct-6], darkena(xcol, 0, 0xFF));
+
+      else if(c->land == laPalace)
+        queuepoly(V, (euclid?shFloor:shPalaceFloor)[ct-6], darkena(xcol, 1, 0xFF));
+
+      else {
+        queuepoly(V, shFloor[ct-6], darkena(xcol, fd, 0xFF));
+        }
+      // walls
+
+#ifndef MOBILE
+      if(cmode == emMapEditor && mapeditor::displaycodes) {
+
+        int labeli = mapeditor::displaycodes == 1 ? mapeditor::realpattern(c) : mapeditor::subpattern(c);
+        
+        string label = its(labeli);
+        int siz = int(sqrt(squar(xc-xs)+squar(yc-ys))) / 5;
+        displaystr(xc, yc, sc, siz, label, 0xFFFFFFFF, 8);
+        
+        /* transmatrix V2 = V * applyPatterndir(c);
+        queuepoly(V2, shNecro, 0x80808080);
+        queuepoly(V2, shStatue, 0x80808080); */
+        }
+#endif
+
+      if(realred(c->wall)) {
+        int s = snakelevel(c);
+        if(s >= 1)
+          queuepoly(V, shRedRockFloor[0][ct-6], darkena(winf[waRed1].color, 0, 0xFF));
+        if(s >= 2)
+          queuepoly(V, shRedRockFloor[1][ct-6], darkena(winf[waRed2].color, 0, 0xFF));
+        if(s >= 3)
+          queuepoly(V, shRedRockFloor[2][ct-6], darkena(winf[waRed3].color, 0, 0xFF));
+        }
+      
+      if(c->land == laRedRock && ishept(c)) {
+        queuepoly(V, shHeptaMarker, 0x00000080);
+//      queuepoly(V * spin((c-(cell*)NULL)), shScratch, 0xFF);
+//      queuepoly(V * spin((c->mov[0]-(cell*)NULL)), shScratch, 0xFF);
+//      queuepoly(V * spin((c->mov[1]-(cell*)NULL)), shScratch, 0xFF);
+        }
+
+      /* if(c->land == laBarrier || c->land == laCrossroads2) {
+        int siz = int(sqrt(squar(xc-xs)+squar(yc-ys))) / 5;
+        displaystr(xc, yc, sc, siz, its(int(c->heat + .5)), 0xFFFFFFFF, 8);
+        } */
+      
+      char xch = winf[c->wall].glyph;
+
+      if(c->wall == waLadder) {
+        if(euclid) {
+          queuepoly(V, shMFloor[ct-6], 0x804000FF);
+          queuepoly(V, shMFloor2[ct-6], 0x000000FF);
+          }
+        else {
+          queuepoly(V, shFloor[ct-6], 0x804000FF);
+          queuepoly(V, shMFloor[ct-6], 0x000000FF);
           }
         }
 
-      else if(c->land == laDesert)
-        queuepoly(V, ct, (euclid ? shCloudFloor : shDesertFloor)[ct-6], darkena(xcol, 2, 0xFF));
+      if(c->wall == waBoat || c->wall == waStrandedBoat) {    
+        int hdir = displaydir(c, c->mondir);
+        transmatrix V2 = V * spin((42+hdir) * M_PI / 42);
+        if(c == cwt.c && items[itOrbWater]) {
+          queuepoly(V2, shBoatOuter, watercolor(0));
+          queuepoly(V2, shBoatInner, 0x0060C0FF);
+          }
+        else {
+          queuepoly(V2, shBoatOuter, 0xC06000FF);
+          queuepoly(V2, shBoatInner, 0x804000FF);
+          }
+        }
 
-      else if(c->land == laDryForest)
-        queuepoly(V, ct, (euclid ? shStarFloor : shDesertFloor)[ct-6], darkena(xcol, 2, 0xFF));
-
-      else 
-        queuepoly(V, ct, shFloor[ct-6], darkena(xcol, 2, 0xFF));
-      // walls
-      
-      char xch = winf[c->wall].glyph;
-      
-      if(c->wall == waBigStatue)
-        queuepoly(V, ct, shStatue, 
+      else if(c->wall == waBigStatue)
+        queuepoly(V, shStatue, 
           darkena(winf[c->wall].color, 0, 0xFF)
           );
       
-      else if(c->wall == waSulphurC)
-        queuepoly(V, ct, shGiantStar[ct-6], darkena(xcol, 0, 0xFF));
-    
+      else if(c->wall == waSulphurC) {
+        bool drawStar = true;
+        for(int t=0; t<c->type; t++) 
+          if(c->mov[t] && c->mov[t]->wall != waSulphur && c->mov[t]->wall != waSulphurC &&
+           c->mov[t]->wall != waBarrier)
+            drawStar = false;
+        if(drawStar) queuepoly(V, shGiantStar[ct-6], darkena(xcol, 0, 0xFF));
+        }
+
+      else if(c->wall == waClosePlate || c->wall == waOpenPlate || (c->wall == waTrapdoor && c->land != laZebra)) {
+        transmatrix V2 = V;
+        if(ct == 7 && vid.wallmode == 3) V2 = V * spin(M_PI);
+        queuepoly(V2, shMFloor[ct-6], darkena(winf[c->wall].color, 0, 0xFF));
+        queuepoly(V2, shMFloor2[ct-6], vid.wallmode >= 2 ? darkena(xcol, 1, 0xFF) : darkena(0,1,0xFF));
+        }
+
       else if(c->wall == waFrozenLake || c->wall == waLake || c->wall == waCamelotMoat ||
-        c->wall == waRoundTable)
+        c->wall == waRoundTable || c->wall == waSea || c->wall == waClosePlate || c->wall == waOpenPlate ||
+        c->wall == waOpenGate || c->wall == waTrapdoor)
         ;
       
       else if(xch == '#') {
         if(c->wall == waVinePlant)
           xcol = 0x60C000;
-        queuepoly(V, ct, shWall[ct-6], darkena(xcol, 0, 0xFF));
+        if(c->wall != waPlatform)
+          queuepoly(V, shWall[ct-6], darkena(xcol, 0, 0xFF));
         }
       
       else if(xch == '%')
-        queuepoly(V, ct, shMirror, darkena(xcol, 0, 0xC0));
+        queuepoly(V, shMirror, darkena(xcol, 0, 0xC0));
       
-      else if(isActiv(c)) {
-        ld sp = c->tmp > 0 ? ticks / 500. : 0;
-        queuepoly(V * spin(sp), ct, shStar, darkena(col, 0, 0xF0));
+      else if(isFire(c) || isThumper(c) || c->wall == waBonfireOff) {
+        ld sp = 0;
+        if(hasTimeout(c)) sp = ticks / (c->land == laPower ? 5000. : 500.);
+        queuepoly(V * spin(sp), shStar, darkena(col, 0, 0xF0));
         }
       
       else if(xch == '+' && c->land == laGraveyard && c->wall != waFloorB && c->wall != waFloorA)
-        queuepoly(V, ct, shCross, darkena(xcol, 0, 0xFF));
+        queuepoly(V, shCross, darkena(xcol, 0, 0xFF));
 
-      else if(xch != '.' && xch != '+' && xch != '>' && xch != ':' && xch != ';' && c->wall != waSulphur)
+      else if(xch == '+' && c->wall == waClosedGate) {
+        int hdir = 0;
+        for(int i=0; i<c->type; i++) if(c->mov[i]->wall == waClosedGate)
+          hdir = i;
+        hdir = displaydir(c, hdir);
+        transmatrix V2 = V * spin((42+hdir) * M_PI / 42);
+        queuepoly(V2, shPalaceGate, darkena(xcol, 0, 0xFF));
+        }
+
+      else if(xch == '+' && c->wall == waGiantRug) {
+        queuepoly(V, shBigCarpet1, darkena(0xC09F00, 0, 0xFF));
+        queuepoly(V, shBigCarpet2, darkena(0x600000, 0, 0xFF));
+        queuepoly(V, shBigCarpet3, darkena(0xC09F00, 0, 0xFF));
+        }
+
+      else if(xch != '.' && xch != '+' && xch != '>' && xch != ':' && xch != ';' && c->wall != waSulphur && xch != ',')
         error = true;
 
 /*    if(c->master->alt) {
@@ -1915,20 +2405,37 @@ void drawcell(cell *c, transmatrix V, int spinv) {
           displaystr(xc, yc, sc, siz, its(d), 0xFFFFFFFF, 8);
         } */
       }
-    else if(!(c->item || c->monst || c->cpdist == 0)) error = true;
+    else if(!(it || c->monst || c->cpdist == 0)) error = true;
+
+    if(c->wall == waMineOpen) {
+      int mines = countMinesAround(c);
+      
+      if(vid.wallmode == 0) {
+        if(ch == '.') {
+          if(mines == 0) ch = ' ';
+          else ch = '0' + mines, col = minecolors[mines];
+          }
+        else if(ch == '@') col = minecolors[mines];
+        }
+      else if(mines > 0)
+        queuepoly(V, shMineMark[c->type-6], (minecolors[mines] << 8) | 0xFF);
+      }
     
     // treasure
-
-    char xch = iinf[c->item].glyph;
+    
+    char xch = iinf[it].glyph;
     hpcshape *xsh = 
-      c->item == itHolyGrail ? &shGrail :
+      it == itPirate ? &shPirateX :
+      it == itHolyGrail ? &shGrail :
+      isElementalShard(it) ? &shElementalShard :
       xch == '*' ? &shGem[ct-6] : xch == '%' ? &shDaisy : xch == '$' ? &shStar : xch == ';' ? &shTriangle :
-      xch == '!' ? &shTriangle : c->item == itBone ? &shNecro : c->item == itStatue ? &shStatue :
+      xch == '!' ? &shTriangle : it == itBone ? &shNecro : it == itStatue ? &shStatue :
+      it == itEdge ? &shFigurine : 
       xch == '?' ? &shBookCover : 
-      c->item == itKey ? &shKey : NULL;
+      it == itKey ? &shKey : NULL;
     
     if(doHighlight()) {
-      int k = itemclass(c->item);
+      int k = itemclass(it);
       if(k == IC_TREASURE)
         poly_outline = 0xFFFF00FF;
       else if(k == IC_ORB)
@@ -1937,23 +2444,61 @@ void drawcell(cell *c, transmatrix V, int spinv) {
         poly_outline = 0xFFFFFFFF;
       }
       
-    if(vid.monmode == 0 && c->item)
+#ifndef MOBILE
+    if(c == mapeditor::drawcell && mapeditor::drawcellShapeGroup() == 2)
+      mapeditor::drawtrans = V;
+#endif
+      
+    if(vid.monmode == 0 && it)
       error = true;
     
-    else if(xsh)
-      queuepoly(V * spin(ticks / 1500.), ct, *xsh, darkena(icol, 0, 0xF0));
-    
-    else if(xch == 'o') {
-      if(c->item == itOrbFire) icol = firecolor(100);
-      queuepoly(V, ct, shDisk, darkena(icol, 0, 0xC0));
-      if(c->item == itOrbFire) icol = firecolor(200);
-      queuepoly(V, ct, shRing, darkena(icol, 0, int(0x80 + 0x70 * sin(ticks / 300.))));
+    else if(it == itCompass) {
+      transmatrix V2 = V;       
+      if(euclid) V2 = V2 * spin(M_PI/2);
+      else V2 = V2 * rspintox(inverse(V) * pirateCoords * C0);
+      V2 = V2 * spin(M_PI * sin(ticks/100.) / 30);
+      queuepoly(V2, shCompass1, 0xFF8080FF);
+      queuepoly(V2, shCompass2, 0xFFFFFFFF);
+      queuepoly(V2, shCompass3, 0xFF0000FF);
+      queuepoly(V2 * spin(M_PI), shCompass3, 0x000000FF);
+      xsh = NULL;
       }
 
-    else if(c->item) error = true;
+    else if(it == itPalace) {
+      transmatrix V2 = V * spin(ticks / 1500.);
+      queuepoly(V2, shMFloor3[ct-6], 0xFFD500FF);
+      queuepoly(V2, shMFloor4[ct-6], darkena(icol, 0, 0xFF));
+      queuepoly(V2, shGem[ct-6], 0xFFD500FF);
+      xsh = NULL;
+      }
     
-    if(xsh == &shBookCover)
-      queuepoly(V * spin(ticks / 1500.), ct, shBook, 0x805020FF);
+    else if(drawUserShape(V, 2, it, darkena(icol, 0, 0xFF))) ;
+
+    else if(xsh) {
+      if(it == itFireShard) icol = firecolor(100);
+      if(it == itWaterShard) icol = watercolor(100) >> 8;
+      
+      if(it == itZebra) icol = 0x202020;
+    
+      queuepoly(V * spin(ticks / 1500.), *xsh, darkena(icol, 0, hidden ? 0x40 : 0xF0));
+      if(xsh == &shBookCover && vid.monmode)
+        queuepoly(V * spin(ticks / 1500.), shBook, 0x805020FF);
+      if(it == itZebra)
+        queuepoly(V * spin(ticks / 1500. + M_PI/c->type), *xsh, darkena(0xFFFFFF, 0, hidden ? 0x40 : 0xF0));
+      }
+    
+    else if(xch == 'o') {
+      if(it == itOrbFire) icol = firecolor(100);
+      queuepoly(V, shDisk, darkena(icol, 0, hidden ? 0x20 : 0xC0));
+      if(it == itOrbFire) icol = firecolor(200);
+      if(it == itOrbFriend || it == itOrbDiscord) icol = 0xC0C0C0;
+      if(it == itOrbFrog) icol = 0xFF0000;
+      queuepoly(V, shRing, darkena(icol, 0, int(0x80 + 0x70 * sin(ticks / 300.))));
+      }
+
+    else if(it) error = true;
+    
+    
     
     // monsters
     
@@ -1974,6 +2519,29 @@ void drawcell(cell *c, transmatrix V, int spinv) {
       }
 
     error |= drawMonster(V, ct, c, col);
+    
+    int ad = airdist(c);
+    if(ad == 1 || ad == 2) {
+
+     for(int i=0; i<c->type; i++) {
+       cell *c2 = c->mov[i];
+       if(airdist(c2) < airdist(c)) {
+         int hdir = displaydir(c, i);
+         transmatrix V0 = spin((42+hdir) * M_PI / 42);
+         
+         double ph = ticks / 75.0 + airdir * M_PI / 21.;
+         
+         int aircol = 0x8080FF00 | int(32 + 32 * -cos(ph));
+         
+         double ph0 = ph/2;
+         ph0 -= floor(ph0/M_PI)*M_PI;
+
+         queuepoly(V*V0*ddi(0, hexf*-cos(ph0)), shDisk, aircol);
+         }
+       }
+
+//    queuepoly(V*ddi(rand() % 84, hexf*(rand()%100)/100), shDisk, aircolor(airdir));
+      }
 
 /*    if(ch == '.') {
       col = darkened(col);
@@ -1992,6 +2560,9 @@ void drawcell(cell *c, transmatrix V, int spinv) {
     
     if(error) {
       int siz = int(sqrt(squar(xc-xs)+squar(yc-ys)));
+      
+      if(c->wall == waSea) col = xcol;
+
       if(vid.wallmode >= 2) {
         displaychr(xc-2, yc, sc, siz, ch, 0);
         displaychr(xc+2, yc, sc, siz, ch, 0);
@@ -2006,54 +2577,60 @@ void drawcell(cell *c, transmatrix V, int spinv) {
       displaystr(xc, yc, sc, vid.fsize, its(keycelldist), 0x10101 * int(128 - 100 * sin(ticks / 150.)), 8);
       }
     
+    if(c == pirateTreasureFound) { 
+      pirateCoords = V;
+      if(showPirateX) {
+        displaychr(xc, yc, sc, 2*vid.fsize, 'X', 0x10100 * int(128 + 100 * sin(ticks / 150.)));
+        if(cwt.c->master->alt)
+          displaystr(xc, yc, sc, vid.fsize, its(-celldistAlt(cwt.c)), 0x10101 * int(128 - 100 * sin(ticks / 150.)), 8);
+        }
+      }
+    
+    if(!euclid && c->master->alt && (!pirateTreasureSeek || celldistAlt(c) < celldistAlt(pirateTreasureSeek)))
+      pirateTreasureSeek = c;
+    
+    if(!euclid && (!straightDownSeek || edgeDepth(c) < edgeDepth(straightDownSeek))) {
+      straightDownSeek = c;
+      if(cwt.c->land == laEdge) {
+        downspin = atan2(VC0[1], VC0[0]) - M_PI/2;
+        if(downspin < -M_PI) downspin += 2*M_PI;
+        if(downspin > +M_PI) downspin -= 2*M_PI;
+        if(cwt.c->landparam < 10)
+          downspin = downspin * cwt.c->landparam / 10;
+        }
+      }
+      
+    
 #if defined(ANDROID) || defined(PANDORA) || defined(IOS)
     if(c == lmouseover && (mousepressed || ISANDROID || ISMOBILE)) {
       drawCircle(xc, yc, int(sqrt(squar(xc-xs)+squar(yc-ys)) * .8), c->cpdist > 1 ? 0x00FFFF : 0xFF0000);
       }
 #endif
 
-    if(c == lmouseover && c->land == laGameBoard) {
+#ifndef MOBILE
+    if(cmode == emMapEditor && !mapeditor::subscreen && lmouseover &&
+      (mapeditor::whichPattern ? mapeditor::subpattern(c) == mapeditor::subpattern(lmouseover) : c == lmouseover)) {
       drawCircle(xc, yc, int(sqrt(squar(xc-xs)+squar(yc-ys)) * .8), 0x00FFFF);
       }
+#endif
     
-    if(joydir >= 0 && c == cwt.c->mov[(joydir+cwt.spin) % cwt.c->type])
+    if(joydir.d >= 0 && c == cwt.c->mov[(joydir.d+cwt.spin) % cwt.c->type])
       drawCircle(xc, yc, int(sqrt(squar(xc-xs)+squar(yc-ys)) * (.78 - .02 * sin(ticks/199.0))), 0x00FF00);
 
 #ifndef MOBILE    
     if(c == lcenterover && !playermoved)
       drawCircle(xc, yc, int(sqrt(squar(xc-xs)+squar(yc-ys)) * (.70 - .06 * sin(ticks/200.0))), int(175 + 25 * sin(ticks / 200.0)));
 #endif
+
+#ifndef MOBILE
+    mapeditor::drawGhosts(c, V, ct);
+#endif
     
-    if(cmode == emDraw && cwt.c->type == 6 && ct == 6) for(int a=0; a<dsCur->rots; a++) {
-
-      transmatrix V2 = V * spin(M_PI + 2*M_PI*a/dsCur->rots);
-
-      if(outofmap(mouseh)) break;
-
-      hyperpoint P2 = V2 * inverse(cwtV) * mouseh;
-    
-      int xc, yc, sc;
-      getcoord(P2, xc, yc, sc);
-      displaychr(xc, yc, sc, 10, 'x', 0xFF);
-
-      if(crad > 0 && c->cpdist <= 3) {
-        lalpha = 0x80;
-        transmatrix movtocc = V2 * inverse(cwtV) * rgpushxto0(ccenter);
-        for(int d=0; d<84; d++) 
-          drawline(movtocc * ddi(d+1, crad) * C0, movtocc * ddi(d, crad) * C0, 0xC00000);
-        lalpha = 0xFF;
-        }
-      }
-
     // process mouse
     
-    for(int i=-1; i<cwt.c->type; i++) if(i == -1 ? cwt.c == c : cwt.c->mov[i % cwt.c->type] == c) {
-      int mx = mousex, my = mousey;
-      if(revcontrol) mx = vid.xcenter*2-mx, my = vid.ycenter*2-my;
-      
-      int ndist = (xc-mx) * (xc-mx) + (yc-my) * (yc-my);
-      if(ndist < mousedist) mousedist = ndist, mousedest = i;
-      }
+    if(c == cwt.c) curcell = V;
+    for(int i=0; i<cwt.c->type; i++) 
+      if(c == cwt.c->mov[i]) movecell[i] = V;
     
     // drawline(V*C0, V*Crad[0], 0xC00000);
     if(c->bardir != NODIR && c->bardir != NOBARRIERS) {
@@ -2078,30 +2655,30 @@ string buildHelpText() {
   h += XLAT("! (version %1)\n\n", VER);
   
   h += XLAT(
-MC  "You have been trapped in a strange, non-Euclidean world. Collect as much treasure as possible "
-MC  "before being caught by monsters. The more treasure you collect, the more "
-MC  "monsters come to hunt you, as long as you are in the same land type. The "
-M   "Orbs of Yendor are the ultimate treasure; get at least one of them to win the game!"
+    "You have been trapped in a strange, non-Euclidean world. Collect as much treasure as possible "
+    "before being caught by monsters. The more treasure you collect, the more "
+    "monsters come to hunt you, as long as you are in the same land type. The "
+    "Orbs of Yendor are the ultimate treasure; get at least one of them to win the game!"
     );
   h += XLAT(" (press ESC for some hints about it).");
   h += "\n\n";
   
   h += XLAT(
-MC  "You can fight most monsters by moving into their location. "
-MC  "The monster could also kill you by moving into your location, but the game "
-M   "automatically cancels all moves which result in that.\n\n"
+    "You can fight most monsters by moving into their location. "
+    "The monster could also kill you by moving into your location, but the game "
+    "automatically cancels all moves which result in that.\n\n"
     );
 #ifdef MOBILE
   h += XLAT(
-MC  "Usually, you move by touching somewhere on the map; you can also touch one "
-MC  "of the four buttons on the map corners to change this (to scroll the map "
-MC  "or get information about map objects). You can also touch the "
-M   "numbers displayed to get their meanings.\n"
+    "Usually, you move by touching somewhere on the map; you can also touch one "
+    "of the four buttons on the map corners to change this (to scroll the map "
+    "or get information about map objects). You can also touch the "
+    "numbers displayed to get their meanings.\n"
     );
 #else
   h += XLAT(
-MC  "Move with mouse, num pad, qweadzxc, or hjklyubn. Wait by pressing 's' or '.'. Spin the world with arrows, PageUp/Down, and Home/Space. "
-MC  "To save the game you need an Orb of Safety. Press 'v' for config, ESC for the quest status and menu.\n\n"
+    "Move with mouse, num pad, qweadzxc, or hjklyubn. Wait by pressing 's' or '.'. Spin the world with arrows, PageUp/Down, and Home/Space. "
+    "To save the game you need an Orb of Safety. Press 'v' for config, ESC for the quest status and menu.\n\n"
     );
   h += XLAT(
     "You can right click any element to get more information about it.\n\n"
@@ -2109,6 +2686,9 @@ MC  "To save the game you need an Orb of Safety. Press 'v' for config, ESC for t
 #endif
   h += XLAT("See more on the website: ") 
     + "http//roguetemple.com/z/hyper.php\n\n";
+    
+  
+  h += XLAT("Still confused? Read the FAQ on the HyperRogue website!\n\n");
   
 #ifdef MOBILE
   h += buildCredits();
@@ -2127,19 +2707,37 @@ string buildCredits() {
     h += XLAT("add credits for your translation here");
 #ifndef NOLICENSE
   h += XLAT(
-MC  "released under GNU General Public License version 2 and thus "
-M   "comes with absolutely no warranty; see COPYING for details\n\n"
+    "released under GNU General Public License version 2 and thus "
+    "comes with absolutely no warranty; see COPYING for details\n\n"
     );
 #endif
   h += XLAT(
-M   "special thanks to the following people for their bug reports, feature requests, porting, and other help:\n\n%1\n\n",
-    "Konstantin Stupnik, ortoslon, chrysn, Adam Borowski, Damyan Ivanov, Ryan Farnsley, mcobit, Darren Grey, tricosahedron, Maciej Chojecki, Marek Čtrnáct"
+    "special thanks to the following people for their bug reports, feature requests, porting, and other help:\n\n%1\n\n",
+    "Konstantin Stupnik, ortoslon, chrysn, Adam Borowski, Damyan Ivanov, Ryan Farnsley, mcobit, Darren Grey, tricosahedron, Maciej Chojecki, Marek Čtrnáct, "
+    "wonderfullizardofoz, Piotr Migdał, tehora, Michael Heerdegen, Sprite Guard, zelda0x181e, Vipul"
     );
 #ifdef EXTRALICENSE
   h += EXTRALICENSE;
 #endif
   if(musiclicense != "") h += musiclicense;
   return h;
+  }
+
+string pushtext(stringpar p) {
+  string s = XLAT(
+    "\n\nNote: when pushing %the1 off a heptagonal cell, you can control the pushing direction "
+    "by clicking left or right half of the heptagon.", p);
+#ifndef MOBILE
+  s += XLAT(" With the keyboard, you can rotate the view for a similar effect (Page Up/Down).");
+#endif
+  return s;
+  }
+
+string princedesc() {
+  if(vid.female)
+    return XLAT("Apparently a prince is kept locked somewhere, but you won't ever find him in this hyperbolic palace. ");
+  else
+    return XLAT("Apparently a princess is kept locked somewhere, but you won't ever find her in this hyperbolic palace. ");
   }
 
 string generateHelpForItem(eItem it) {
@@ -2160,18 +2758,133 @@ string generateHelpForItem(eItem it) {
   return help;
   }
 
+string generateHelpForWall(eWall w) {
+  string s = XLAT(winf[w].help);
+  if(isThumper(w)) s += pushtext(w);
+  return s;
+  }
+
+string generateHelpForMonster(eMonster m) {
+  string s = XLAT(minf[m].help);      
+  if(m == moPalace || m == moSkeleton)
+    s += pushtext(m);  
+  if(m == moTroll) s += XLAT(trollhelp2);  
+  return s;
+  }
+
+string generateHelpForLand(eLand l) {
+  string s = XLAT(linf[l].help);
+
+  if(l == laPalace) s = princedesc() + s;
+
+  s += "\n\n";
+  if(l == laIce || l == laCaves || l == laDesert || l == laMotion || l == laJungle ||
+    l == laCrossroads)
+      s += XLAT("Always available.\n");
+
+  if(l == laMirror || l == laMinefield || l == laAlchemist || l == laPalace ||
+    l == laOcean || l == laLivefjord || l == laZebra)
+      s += XLAT("Treasure required: %1 $$$.\n", "30");
+    
+  if(l == laCaribbean || l == laWhirlpool)
+    s += XLAT("Accessible only from %the1.\n", laOcean);
+
+  if(l == laRlyeh)
+    s += XLAT("Accessible only from %the1 (until finished).\n", laOcean);
+
+  if(l == laTemple)
+    s += XLAT("Accessible only from %the1.\n", laRlyeh);
+  
+  if(l == laPrincessQuest)
+    s += XLAT("Accessible only from %the1.\n", laPalace);
+  
+  if(l == laCamelot)
+    s += XLAT("Accessible only from %the1 or %the2.\n", laCrossroads, laCrossroads3);
+  
+  if(l == laDryForest || l == laWineyard || l == laDeadCaves || l == laHive || l == laRedRock ||
+    l == laEdge)
+    s += XLAT("Treasure required: %1 $$$.\n", "60");
+  
+  if(l == laGraveyard || l == laHive)
+    s += XLAT("Kills required: %1.\n", "100");
+  
+  if(l == laHell || l == laCrossroads3)
+    s += XLAT("Finished lands required: %1 (collect 10 treasure)\n", "9");
+  
+  if(l == laCocytus || l == laPower)
+    s += XLAT("Treasure required: %1 x %2.\n", "10", itHell);
+  
+  if(l == laRedRock)
+    s += XLAT("Treasure required: %1 x %2.\n", "10", itSpice);    
+    
+  if(l == laDeadCaves)
+    s += XLAT("Treasure required: %1 x %2.\n", "10", itGold);
+    
+  if(l == laCamelot)
+    s += XLAT("Treasure required: %1 x %2.\n", "5", itEmerald);
+    
+  if(l == laEmerald) {
+    s += XLAT("Treasure required: %1 x %2.\n", "5", itFernFlower);
+    s += XLAT("Treasure required: %1 x %2.\n", "5", itGold);
+    s += XLAT("Alternatively: kill a %1 in %the2.\n", moVizier, laPalace);
+    }
+  
+  if(l == laPrincessQuest)
+    s += XLAT("Kills required: %1.\n", moVizier);
+
+  if(l == laElementalWall)
+    s += XLAT("Kills required: any Elemental (Living Fjord/Dead Caves).\n");
+  
+  if(l == laZebra)
+    s += XLAT("Treasure required: %1 x %2.\n", "10", itFeather);
+    
+  int rl = isRandland(l);
+  if(rl == 2)
+    s += XLAT("Variants of %the1 are always available in the Random Pattern Mode.", l);
+  else if(rl == 1)
+    s += XLAT(
+      "Variants of %the1 are available in the Random Pattern Mode after "
+      "getting a highscore of at least 10 %2.", l, treasureType(l));
+
+  return s;
+  }
+
 void describeMouseover() {
+
   cell *c = mousing ? mouseover : playermoved ? NULL : centerover;
   string out = mouseovers;
   if(!c) { }
-  else if(cmode == emNormal) {
+  else if(cmode == emNormal || cmode == emQuit || cmode == emMapEditor) {
     out = XLAT1(linf[c->land].name);
-    help = XLAT(linf[c->land].help);
+    help = generateHelpForLand(c->land);
+        
+    // Celsius
     
     // if(c->land == laIce) out = "Icy Lands (" + fts(60 * (c->heat - .4)) + " C)";
-    if(c->land == laIce) out += " (" + fts(60 * (c->heat-.4)) + " °C)";
-    if(c->land == laCocytus) out += " (" + fts(60 * (c->heat-.8)) + " °C)";
-    if(c->land == laDryForest && c->heat > .5) out += " (" + its(int(c->heat+.1))+"/10)";
+    if(c->land == laIce || c->land == laCocytus) 
+      out += " (" + fts(celsius(c)) + " °C)";
+    if(c->land == laDryForest && c->landparam) 
+      out += " (" + its(c->landparam)+"/10)";
+    if(c->land == laOcean && c->landparam <= 25)
+      out += " (" + its(c->landparam)+")";
+    
+    if(buggyGeneration) {
+      char buf[20]; sprintf(buf, " H=%d M=%d", c->landparam, c->mpdist); out += buf;
+      }
+    
+//  if(c->land == laBarrier)
+//    out += "(" + string(linf[c->barleft].name) + " / " + string(linf[c->barright].name) + ")";
+    
+    // out += " MD"+its(c->mpdist);
+    // char zz[64]; sprintf(zz, " P%p", c); out += zz;
+
+    // char zz[64]; sprintf(zz, " P%p", c); out += zz;
+
+    // char zz[64]; sprintf(zz, " P%d", princess::dist(c)); out += zz;
+    // out += " MD"+its(c->mpdist);
+    // out += " H "+its(c->heat);
+    // if(c->type == 7) out += " Z"+its(c->master->zebraval);
+    // out += " H"+its(c->heat);
     
 /*  // Hive debug
     if(c->land == laHive) {
@@ -2187,28 +2900,45 @@ void describeMouseover() {
       out += "]";
       } */
   
-    if(c->wall && !((c->wall == waFloorA || c->wall == waFloorB) && c->item)) { 
+    if(c->wall && 
+      !((c->wall == waFloorA || c->wall == waFloorB) && c->item)) { 
       out += ", "; out += XLAT1(winf[c->wall].name); 
-      if(!((c->wall == waCavefloor || c->wall == waCavewall) && c->land == laFjord))
-        help = XLAT(winf[c->wall].help);
+      if(c->wall != waSea && c->wall != waPalace)
+      if(!((c->wall == waCavefloor || c->wall == waCavewall) && c->land == laEmerald))
+        help = generateHelpForWall(c->wall);
       }
     
-    if(isActiv(c)) {
-      if(c->tmp < 0) out += XLAT(" (touch to activate)");
-      if(c->tmp == 0) out += XLAT(" (expired)");
-      if(c->tmp > 0 && !(c->land == laPower && c->wall == waBonfire))
-        out += XLAT(" [%1 turns]", its(c->tmp));
+    if(isActivable(c)) out += XLAT(" (touch to activate)");
+    
+    if(hasTimeout(c)) out += XLAT(" [%1 turns]", its(c->wparam));
+  
+    if(c->monst) {
+      out += ", "; out += XLAT1(minf[c->monst].name); 
+      if(hasHitpoints(c->monst))
+        out += " (" + its(c->hitpoints)+" HP)";
+      if(c->stuntime)
+        out += " (" + its(c->stuntime) + "*)";
+
+      help = generateHelpForMonster(c->monst);
       }
   
-    if(c->monst) {out += ", "; out += XLAT1(minf[c->monst].name); help = XLAT(minf[c->monst].help);}
-  
-    if(c->item) {
+    if(c->item && !itemHiddenFromSight(c)) {
       out += ", "; 
       out += XLAT1(iinf[c->item].name); 
       if(!c->monst) help = generateHelpForItem(c->item);
       }
     
-    if(!c->cpdist) out += XLAT(", you");
+    if(!c->cpdist && !shmup::on) out += XLAT(", you");
+
+    if(shmup::mousetarget && intval(mouseh, shmup::mousetarget->pat*C0) < .1) {
+      out += ", "; out += XLAT1(minf[shmup::mousetarget->type].name);
+      help = XLAT(minf[shmup::mousetarget->type].help);
+/*    char buf[64];
+      sprintf(buf, "%Lf", intval(mouseh, shmup::mousetarget->pat*C0));
+      mouseovers = mouseovers + " D: " + buf;
+      printf("ms = %s\n", mouseovers.c_str());*/
+      }  
+
     }
   else if(cmode == emVisual1) {
     if(getcstat == 'p') {
@@ -2241,7 +2971,7 @@ void describeMouseover() {
     else out = "";
     }
   else if(cmode == emVisual2) {
-    if(getcstat == 'p') { // stick) {
+    if(getcstat == 'p') {
       if(autojoy) 
         out = XLAT("joystick mode: automatic (release the joystick to move)");
       if(!autojoy) 
@@ -2252,12 +2982,26 @@ void describeMouseover() {
     else if(getcstat == 'f')
       out = XLAT("Reduce the framerate limit to conserve CPU energy");
     }
-  
+  else if(cmode == emChangeMode) {
+    if(getcstat == 'h')
+      out = XLAT("One wrong move and it is game over!");
+    }
+    
   mouseovers = out;
   #ifndef MOBILE
+  
+  int col = linf[cwt.c->land].color;
+  if(cwt.c->land == laRedRock) col = 0xC00000;
   if(cmode != emPickScores)
-    displayfr(vid.xres/2, vid.fsize,   2, vid.fsize, out, linf[cwt.c->land].color, 8);
+    displayfr(vid.xres/2, vid.fsize,   2, vid.fsize, out, col, 8);
   if(mousey < vid.fsize * 3/2) getcstat = SDLK_F1;
+
+  if(false && shmup::mousetarget) {
+    char buf[64];
+    sprintf(buf, "%Lf", intval(mouseh, shmup::mousetarget->pat*C0));
+    mouseovers = mouseovers + " D: " + buf;
+    return;
+    }
   #endif
   }
 
@@ -2293,8 +3037,8 @@ int mindx=-7, mindy=-7, maxdx=7, maxdy=7;
 void drawEuclidean() {
   eucoord px, py;
   if(!lcenterover) lcenterover = cwt.c;
-  printf("centerover = %p player = %p [%d,%d]-[%d,%d]\n", lcenterover, cwt.c,
-    mindx, mindy, maxdx, maxdy);
+  // printf("centerover = %p player = %p [%d,%d]-[%d,%d]\n", lcenterover, cwt.c,
+  //   mindx, mindy, maxdx, maxdy);
   decodeMaster(lcenterover->master, px, py);
   
   int minsx = mindx-1, maxsx=maxdx+1, minsy=mindy-1, maxsy=maxdy+1;
@@ -2339,8 +3083,18 @@ void drawEuclidean() {
 
 void drawthemap() {
 
+  for(int m=0; m<motypes; m++) if(isPrincess(eMonster(m))) 
+    minf[m].name = princessgender() ? "Princess" : "Prince";
+  iinf[itSavedPrincess].name = minf[moPrincess].name;
+
   keycell = NULL;
 
+  pirateTreasureFound = pirateTreasureSeek;
+  pirateTreasureSeek = NULL;
+  straightDownSeek = NULL; downspin = 0;
+  shmup::mousetarget = NULL;
+  showPirateX = cwt.c->item == itCompass;
+    
   if(yii < size(yi)) {
     if(!yi[yii].found) for(int i=0; i<YDIST; i++) if(yi[yii].path[i]->cpdist <= sightrange) {
       keycell = yi[yii].path[i];
@@ -2351,9 +3105,9 @@ void drawthemap() {
   #ifndef MOBILE
   lmouseover = mouseover;
   #endif
-  mousedist = 1000000;
-  mousedest = -1;
-  modist = 1e20; mouseover = NULL; mouseovers = XLAT("Press F1 or right click for help");
+  modist = 1e20; mouseover = NULL; 
+  modist2 = 1e20; mouseover2 = NULL; 
+  mouseovers = XLAT("Press F1 or right click for help");
   centdist = 1e20; lcenterover = centerover; centerover = NULL; 
   #ifdef MOBILE
   mouseovers = XLAT("No info about this...");
@@ -2361,6 +3115,8 @@ void drawthemap() {
   if(outofmap(mouseh)) 
     modist = -5;
   playerfound = false;
+  // playerfoundL = false;
+  // playerfoundR = false;
   
   if(euclid)
     drawEuclidean();
@@ -2368,12 +3124,35 @@ void drawthemap() {
     drawrec(viewctr, 
       (!playermoved) ? sightrange+1 : sightrange + 4,
       hsOrigin, View);
+
+  if(shmup::on) {
+    if(shmup::players == 1)
+      cwtV = shmup::pc[0]->pat;
+    else if(shmup::centerplayer == -1) {
+      hyperpoint h0 = shmup::pc[0]->pat * C0;
+      hyperpoint h1 = shmup::pc[1]->pat * C0;
+      hyperpoint h2 = mid(h0, h1);
+      cwtV = rgpushxto0(h2);
+      }
+    else 
+      cwtV = shmup::pc[shmup::centerplayer]->pat;
+    }
+  }
+
+void spinEdge(ld aspd) { 
+  if(downspin >  aspd) downspin =  aspd;
+  if(downspin < -aspd) downspin = -aspd;
+  View = spin(downspin) * View;
   }
 
 void centerpc(ld aspd) { 
   hyperpoint H = cwtV * C0;
   ld R = sqrt(H[0] * H[0] + H[1] * H[1]);
   if(R < 1e-9) {
+    /* if(playerfoundL && playerfoundR) {
+      
+      } */
+    spinEdge(aspd);
     return;
     }
   
@@ -2387,19 +3166,24 @@ void centerpc(ld aspd) {
     }
   
   else {
-    aspd *= (1+R);
+    aspd *= (1+R+(shmup::on?1:0));
 
     if(R < aspd) {
       View = gpushxto0(H) * View;
       }
     else 
       View = rspintox(H) * xpush(-aspd) * spintox(H) * View;
+      
+    fixmatrix(View);
+    spinEdge(aspd);
     }
   }
 
 void drawmovestar() {
 
   if(!playerfound) return;
+  
+  if(shmup::on) return;
   
   if(vid.axes == 0 || (vid.axes == 1 && mousing)) return;
 
@@ -2414,7 +3198,7 @@ void drawmovestar() {
   int starcol = (vid.goteyes? 0xE08060 : 0xC00000);
   
   if(vid.axes == 3 || (vid.wallmode == 2 && vid.axes == 1))
-    queuepoly(Centered, 7, shMovestar, darkena(starcol, 0, 0xFF));
+    queuepoly(Centered, shMovestar, darkena(starcol, 0, 0xFF));
   
   else for(int d=0; d<8; d++) {
     int col = starcol;
@@ -2454,7 +3238,7 @@ void optimizeview() {
     }
   }
 
-int vectodir(const hyperpoint& P) {
+movedir vectodir(const hyperpoint& P) {
   hyperpoint H = cwtV * C0;
   ld R = sqrt(H[0] * H[0] + H[1] * H[1]);
   transmatrix Centered = cwtV;
@@ -2462,14 +3246,24 @@ int vectodir(const hyperpoint& P) {
     Centered = gpushxto0(H)  * Centered;
   else if(R > 1e-9)
     Centered = eupush(-H[0], -H[1]) * Centered;
-  int bdir = -1;
   ld binv = 99;
+  
+  ld dirdist[7];
+  for(int i=0; i<cwt.c->type; i++) 
+    dirdist[i] = intval(Centered * spin(-i * 2 * M_PI /cwt.c->type) * xpush(1) * C0, P);
+  
+  movedir res;
+  res.d = -1;
+  
   for(int i=0; i<cwt.c->type; i++) {
-    ld inv = intval(Centered * spin(-i * 2 * M_PI /cwt.c->type) * xpush(1) * C0, P);
-    if(inv < binv) binv = inv, bdir = i;
+    if(dirdist[i] < binv) {
+      binv = dirdist[i];
+      res.d = i;
+      res.subdir = dirdist[(i+1)%cwt.c->type] < dirdist[(i+cwt.c->type-1)%cwt.c->type] ? 1 : -1;
+      }
     }
   // if(euclid) bdir = (bdir + 3) % 6;
-  return bdir;
+  return res;
   }
 
 void movepckeydir(int d) {
@@ -2480,28 +3274,64 @@ void movepckeydir(int d) {
     movepcto(vectodir(spin(-d * M_PI/4) * xpush(1) * C0));
   }
 
+void calcMousedest() {
+  if(outofmap(mouseh)) return;
+  ld mousedist = intval(mouseh, curcell * C0);
+  mousedest.d = -1;
+  
+  ld dists[7];
+  
+  for(int i=0; i<cwt.c->type; i++) 
+    dists[i] = intval(mouseh, movecell[i] * C0);
+  
+  /* printf("curcell = %Lf\n", mousedist);
+  for(int i=0; i<cwt.c->type; i++)
+    printf("d%d = %Lf\n", i, dists[i]); */
+
+  for(int i=0; i<cwt.c->type; i++) if(dists[i] < mousedist) {
+    mousedist = dists[i];
+    mousedest.d = fixdir(i - cwt.spin, cwt.c);
+    
+    mousedest.subdir =
+       dists[(i+1)%cwt.c->type] < dists[(i+cwt.c->type-1)%cwt.c->type] ? 1 : -1;
+    }
+  
+  }
+
+void mousemovement() {
+  calcMousedest();
+  movepcto(mousedest);
+  }
+
+long double sqr(long double x) { return x*x; }
+
 void checkjoy() {
-  ld joyvalue1 = vid.joyvalue * vid.joyvalue;
-  ld joyvalue2 = vid.joyvalue2 * vid.joyvalue2;
+  if(shmup::on) return;
+  ld joyvalue1 = sqr(vid.joyvalue);
+  ld joyvalue2 = sqr(vid.joyvalue2);
   
   ld jx = joyx;
   ld jy = joyy;
   ld sq = jx*jx+jy*jy;
   
   if(autojoy) {
-    if(sq < joyvalue1) { if(joydir >= 0) movepcto(joydir); joydir = -1; return; }
-    if(sq < joyvalue2 && joydir == -1) return;
+    if(sq < joyvalue1) { if(joydir.d >= 0) movepcto(joydir); joydir.d = -1; return; }
+    if(sq < joyvalue2 && joydir.d == -1) return;
     }
   else {
-    if(sq < joyvalue1) { joydir = -1; return; }
+    if(sq < joyvalue1) { joydir.d = -1; return; }
     }
   
   joydir = vectodir(hpxy(jx, jy));
   }
 
 void checkpanjoy(double t) {
-
-  if(panjoyx * panjoyx + panjoyy * panjoyy < vid.joypanthreshold * vid.joypanthreshold)
+ 
+  if(shmup::on) return;
+  
+  if(vid.joypanspeed < 1e-7) return;
+  
+  if(sqr(panjoyx) + sqr(panjoyy) < sqr(vid.joypanthreshold))
     return;
   
   ld jx = panjoyx * t * vid.joypanspeed;
@@ -2567,9 +3397,16 @@ void displayStatHelp(int y, string name) {
   displaystr(dx+100, dy, 0, vid.fsize, name, 0xC0C0C0, 0);
   }
 
-void displayButton(int x, int y, const string& name, int key, int align, int rad = 0) {
+void displayButton(int x, int y, const string& name, int key, int align, int rad) {
   if(displayfr(x, y, rad, vid.fsize, name, 0x808080, align)) {
     displayfr(x, y, rad, vid.fsize, name, 0xFFFF00, align);
+    getcstat = key;
+    }
+  }
+
+void displayColorButton(int x, int y, const string& name, int key, int align, int rad, int color, int color2) {
+  if(displayfr(x, y, rad, vid.fsize, name, color, align)) {
+    if(color2) displayfr(x, y, rad, vid.fsize, name, color2, align);
     getcstat = key;
     }
   }
@@ -2583,8 +3420,10 @@ void quitOrAgain() {
     SDLK_RETURN, 8, 2);
   displayButton(vid.xres/2, y + vid.fsize*2, XLAT("or 'r' or F5 to restart"), 'r', 8, 2);
   displayButton(vid.xres/2, y + vid.fsize*7/2, XLAT("or 't' to see the top scores"), 't', 8, 2);
-  if(canmove) displayButton(vid.xres/2, y + vid.fsize*10/2, XLAT("or another key to continue"), ' ', 8, 2);
-  else displayButton(vid.xres/2, y + vid.fsize*10/2, XLAT("or ESC to see how it ended"), ' ', 8, 2);
+  displayButton(vid.xres/2, y + vid.fsize*10/2, XLAT("or 'v' to see the main menu"), 't', 8, 2);
+  displayButton(vid.xres/2, y + vid.fsize*13/2, XLAT("or 'o' to see the world overview"), 'o', 8, 2);
+  if(canmove) displayButton(vid.xres/2, y + vid.fsize*16/2, XLAT("or another key to continue"), ' ', 8, 2);
+  else displayButton(vid.xres/2, y + vid.fsize*16/2, XLAT("or ESC to see how it ended"), SDLK_ESCAPE, 8, 2);
   }
 #endif
 
@@ -2605,7 +3444,110 @@ string timeline() {
   int timespent = savetime + (timerstopped ? 0 : (time(NULL) - timerstart));
   char buf[20];
   sprintf(buf, "%d:%02d", timespent/60, timespent % 60);
-  return XLAT("%1 turns (%2)", its(turncount), buf);
+  return 
+    shmup::on ? 
+      XLAT("%1 knives (%2)", its(turncount), buf)
+    :
+      XLAT("%1 turns (%2)", its(turncount), buf);
+  }
+
+#define NUMSEQ 29
+#define NUMLIST 33
+
+eLand lseq[NUMLIST] = {
+  laIce, laCaves, laDesert, laMotion, laJungle,
+  laCrossroads, 
+  laMirror, laMinefield, laAlchemist, laZebra, laPalace, laPrincessQuest,
+  laOcean, laLivefjord, laCaribbean, laWhirlpool, laRlyeh, laTemple,
+  laCrossroads2, laElementalWall, 
+  laDryForest, laWineyard, laDeadCaves, laGraveyard, laHive, laRedRock, laEdge, 
+  laEmerald, laCamelot,
+  laHell, laCrossroads3, laCocytus, laPower
+  };
+
+eLand seq[NUMSEQ] = {
+  laHell, laCocytus, laGraveyard, 
+  laWineyard, laDryForest, laCaves, 
+  laPalace, laEmerald, laHive, laDeadCaves, laPower,
+  laOcean, laLivefjord, laRlyeh, laTemple, laIce, 
+  laDesert, laRedRock, 
+  laWhirlpool, 
+  laCaribbean, laJungle, laAlchemist, laMotion, laMirror, laMinefield,      
+  laCrossroads, laZebra, laElementalWall, laEdge
+  };
+
+void showOverview() {
+  mouseovers = XLAT("world overview");
+  mouseovers += "       ";
+  mouseovers += XLAT(" kills: %1", its(tkills()));
+  mouseovers += XLAT(" $$$: %1", its(gold()));
+  if(hellUnlocked()) {
+    int i1, i2; countHyperstoneQuest(i1, i2);
+    mouseovers += XLAT(" Hyperstone: %1/%2", its(i1), its(i2));
+    }
+  else
+    mouseovers += XLAT(" Hell: %1/9", its(orbsUnlocked()));
+  
+  int nl = NUMLIST; eLand *landtab = lseq;
+  if(randomPatternsMode) { nl = RANDLANDS; landtab = randlands; }
+  
+  int vf = min((vid.yres-64) / nl, vid.xres/40);
+  
+  eLand curland = cwt.c->land;
+  if(curland == laPalace && princess::dist(cwt.c) < OUT_OF_PRISON)
+    curland = laPrincessQuest;
+  if(isElemental(curland)) curland = laElementalWall;
+  
+  for(int i=0; i<nl; i++) {
+    eLand l = landtab[i];
+    int xr = vid.xres / 64;
+    int i0 = 56 + i * vf;
+    int col;
+    if(landUnlocked(l)) col = linf[l].color; else col = 0x202020;
+    if(l == curland)
+      displayfr(1, i0, 1, vf-4, "*", 0xFFFFFF, 0);
+    if(displayfr(xr*1, i0, 1, vf-4, XLAT1(linf[l].name), col, 0))
+      getcstat = 1000 + l;
+    eItem it = treasureType(l);
+    int lv = items[it] * landMultiplier(l);
+    if(lv >= 25) col = 0xFFD500;
+    else if(lv >= 10) col = 0x00D500;
+    else if(items[it]) col = 0xC0C0C0;
+    else col = 0x202020;
+    if(displayfr(xr*24-48, i0, 1, vf-4, its(items[it]), col, 16))
+      getcstat = 2000+it;
+    if(displayfr(xr*24, i0, 1, vf-4, its(hiitems[it]), col, 16))
+      getcstat = 2000+it;
+    if(items[it]) col = iinf[it].color; else col = 0x202020;
+    if(displayfr(xr*24+32, i0, 1, vf-4, s0 + iinf[it].glyph, col, 16))
+      getcstat = 2000+it;
+    if(displayfr(xr*24+40, i0, 1, vf-4, XLAT1(iinf[it].name), col, 0))
+      getcstat = 2000+it;
+    eItem io = orbType(l);
+    if(io == itShard) {
+      if(items[it] >= 10) col = winf[waMirror].color; else col = 0x202020;
+      if(displayfr(xr*46, i0, 1, vf-4, XLAT1(winf[waMirror].name), col, 0))
+        getcstat = 3000+waMirror;
+      if(getcstat == 3000+waMirror)
+        mouseovers = XLAT(
+          olrDescriptions[getOLR(io, cwt.c->land)], cwt.c->land, it, treasureType(cwt.c->land));
+      }
+    else if(io) {
+      if(lv >= 25) col = 0xFFD500;
+      else if(lv >= 10) col = 0xC0C0C0;
+      else col = 0x202020;
+      if(displayfr(xr*46-32, i0, 1, vf-4, its(items[io]), col, 16))
+        getcstat = 2000+io;
+      if(items[it] >= 10) col = iinf[io].color; else col = 0x202020;
+      if(displayfr(xr*46-8, i0, 1, vf-4, s0 + iinf[io].glyph, col, 16))
+        getcstat = 2000+io;
+      if(displayfr(xr*46, i0, 1, vf-4, XLAT1(iinf[io].name), col, 0))
+        getcstat = 2000+io;
+      if(getcstat == 2000+io)
+        mouseovers = XLAT(
+          olrDescriptions[getOLR(io, curland)], curland, it, treasureType(curland));
+      }
+    }
   }
 
 void showGameover() {
@@ -2613,6 +3555,7 @@ void showGameover() {
   displayfr(vid.xres/2, y, 4, vid.fsize*2, 
     cheater ? XLAT("It is a shame to cheat!") : 
     showoff ? XLAT("Showoff mode") :
+    canmove && princess::challenge ? XLAT("%1 Challenge", moPrincess) :
     canmove ? XLAT("Quest status") : 
     XLAT("GAME OVER"), 0xC00000, 8
     );
@@ -2631,7 +3574,8 @@ void showGameover() {
     displayfr(vid.xres/2, y + vid.fsize*5, 2, vid.fsize,  XLAT("CONGRATULATIONS!"), 0xFFFF00, 8);
     }
   else {
-    if(gold() < 30)
+    if(princess::challenge) ;
+    else if(gold() < 30)
       displayfr(vid.xres/2, y+vid.fsize*5, 2, vid.fsize, XLAT("Collect 30 $$$ to access more worlds"), 0xC0C0C0, 8);
     else if(gold() < 60)
       displayfr(vid.xres/2, y+vid.fsize*5, 2, vid.fsize, XLAT("Collect 60 $$$ to access even more lands"), 0xC0C0C0, 8);
@@ -2644,16 +3588,16 @@ void showGameover() {
     else 
       displayfr(vid.xres/2, y+vid.fsize*5, 2, vid.fsize, XLAT("Unlock the Orb of Yendor!"), 0xC0C0C0, 8);
     }
-  if(tkills() < 100)
+  if(princess::challenge) 
+    displayfr(vid.xres/2, y+vid.fsize*6, 2, vid.fsize, XLAT("Follow the Mouse and escape with %the1!", moPrincess), 0xC0C0C0, 8);
+  else if(tkills() < 100)
     displayfr(vid.xres/2, y+vid.fsize*6, 2, vid.fsize, XLAT("Defeat 100 enemies to access the Graveyard"), 0xC0C0C0, 8);
+  else if(kills[moVizier] == 0 && (items[itFernFlower] < 5 || items[itGold] < 5)) {
+    displayfr(vid.xres/2, y+vid.fsize*6, 2, vid.fsize, XLAT("Kill a Vizier in the Palace to access Emerald Mine"), 0xC0C0C0, 8);
+    }
+  else if(items[itEmerald] < 5)
+    displayfr(vid.xres/2, y+vid.fsize*6, 2, vid.fsize, XLAT("Collect 5 Emeralds to access Camelot"), 0xC0C0C0, 8);
   else if(hellUnlocked()) {
-    #define NUMSEQ 19
-    eLand seq[NUMSEQ] = {
-      laHell, laCocytus, laGraveyard, 
-      laWineyard, laFjord, laHive, laDeadCaves, laPower,
-      laRlyeh, laTemple, laDryForest, laIce, laCaves, 
-      laJungle, laDesert, laAlchemist, laMotion, laMirror, laCrossroads      
-      };
     bool b = true;
     for(int i=0; i<NUMSEQ; i++)
       if(b && items[treasureType(seq[i])] < 10) {
@@ -2663,12 +3607,15 @@ void showGameover() {
     if(b)
       displayfr(vid.xres/2, y+vid.fsize*6, 2, vid.fsize, XLAT("Hyperstone Quest completed!"), 0xC0C0C0, 8);
     }
+  else {
+    displayfr(vid.xres/2, y+vid.fsize*6, 2, vid.fsize, XLAT("Some lands unlock at specific treasures or kills"), 0xC0C0C0, 8);
+    }
   if((!canmove) && (!ISMOBILE))
     displayfr(vid.xres/2, y+vid.fsize*7, 2, vid.fsize, XLAT("(press ESC during the game to review your quest)"), 0xB0B0B0, 8);
   if(cheater)
-    displayfr(vid.xres/2, y+vid.fsize*8, 2, vid.fsize, XLAT("you have cheated %1 times", its(cheater)), 0xFF2020, 8);
+    displayfr(vid.xres/2, y+vid.fsize*9, 2, vid.fsize, XLAT("you have cheated %1 times", its(cheater)), 0xFF2020, 8);
   if(!cheater) {
-    displayfr(vid.xres/2, y + vid.fsize*8, 2, vid.fsize, timeline(), 0xC0C0C0, 8);
+    displayfr(vid.xres/2, y + vid.fsize*9, 2, vid.fsize, timeline(), 0xC0C0C0, 8);
     }
   
   msgs.clear();
@@ -2694,6 +3641,47 @@ void showGameover() {
   #endif
   }
 
+string ifMousing(string key, string s) {
+  if(mousing) return XLAT(s);
+  else return key + " - " + XLAT(s);
+  }
+
+#ifndef MOBILE
+void showMainMenu() {
+  int y = vid.yres * .5 - vid.fsize * 10.5;
+  displayfr(vid.xres/2, y-vid.fsize * 2, 4, vid.fsize*2, 
+    XLAT("HyperRogue %1", VER), 0xC00000, 8
+    );
+
+  displayButton(vid.xres/2, y + vid.fsize*2, ifMousing("b", "basic configuration"), 'b', 8, 2);
+  displayButton(vid.xres/2, y + vid.fsize*4, ifMousing("a", "advanced configuration"), 'a', 8, 2);
+                                             
+  displayButton(vid.xres/2, y + vid.fsize*7, ifMousing("t", "local highscores"), 't', 8, 2);
+  displayButton(vid.xres/2, y + vid.fsize*9, ifMousing("h, F1", "help"), 'h', 8, 2);
+
+  displayButton(vid.xres/2, y + vid.fsize*12, ifMousing("r, F5", "restart game"), 'r', 8, 2);
+  displayButton(vid.xres/2, y + vid.fsize*14, ifMousing("m", "special game modes"), 'm', 8, 2);
+  
+  string q = (items[itOrbSafety] && havesave) ? "save" : "quit"; q = q + " the game";
+  displayButton(vid.xres/2, y + vid.fsize*17, ifMousing("q, F10", q), 'q', 8, 2);
+
+  if(canmove)
+    q = "review your quest";
+  else
+    q = "review the scene";
+  
+  displayButton(vid.xres/2, y + vid.fsize*20, ifMousing("ESC", q), SDLK_ESCAPE, 8, 2);
+
+  displayButton(vid.xres/2, y + vid.fsize*22, ifMousing("o", "world overview"), 'o', 8, 2);
+  
+  if(!canmove) q = "game over screen";
+  else if(turncount > 0) q = "continue game";
+  else q = "play the game!";
+  
+  displayButton(vid.xres/2, y + vid.fsize*25, ifMousing(XLAT("other"), q), ' ', 8, 2);
+  }
+#endif
+
 void displayabutton(int px, int py, string s, int col) {
   // TMP
   int siz = vid.yres > vid.xres ? vid.fsize*2 : vid.fsize * 3/2;
@@ -2714,6 +3702,7 @@ vector<score> scores;
 int scoresort = 2;
 int scoredisplay = 1;
 int scorefrom = 0;
+int scoremode = 0;
 bool scorerev = false;
 
 bool scorecompare(const score& s1, const score &s2) {
@@ -2782,7 +3771,11 @@ void loadScores() {
   fclose(f);
   addMessage(its(size(scores))+" games have been recorded in "+scorefile);
   cmode = emScores;
+  boxid = 0; applyBoxes(); 
   scoresort = 2; reverse(scores.begin(), scores.end());
+  scoremode = 0;
+  if(shmup::on) scoremode = 1;
+  else if(hardcore) scoremode = 2;
   scorefrom = 0;
   stable_sort(scores.begin(), scores.end(), scorecompare);
   }
@@ -2820,8 +3813,17 @@ void showPickScores() {
 void showScores() {
   int y = vid.fsize * 7/2;
   int bx = vid.fsize;
+  
+  string modes = 
+    scoremode == 0 ? XLAT(", m - mode: normal") :
+    scoremode == 1 ? XLAT(", m - mode: shoot'em up") :
+    scoremode == 2 ? XLAT(", m - mode: hardcore only") :
+    "?";
 
-  mouseovers = XLAT("t/left/right - change display, up/down - scroll, s - sort by");
+  if(euclid) modes += XLAT(" (E:%1)", euclidland);
+
+
+  mouseovers = XLAT("t/left/right - change display, up/down - scroll, s - sort by") + modes;
 
   displaystr(bx*4, vid.fsize*2, 0, vid.fsize, "#", 0xFFFFFF, 16);
   displaystr(bx*8, vid.fsize*2, 0, vid.fsize, "$$$", 0xFFFFFF, 16);
@@ -2831,9 +3833,22 @@ void showScores() {
   displaystr(bx*23, vid.fsize*2, 0, vid.fsize, displayfor(NULL), 0xFFFFFF, 0);
   if(scorefrom < 0) scorefrom = 0;
   int id = scorefrom;
-  while(y < (ISIOS ? vid.yres - 3*vid.fsize : vid.yres)) {
+  while(y < (ISIOS ? vid.yres - 3*vid.fsize : vid.yres)) { 
     if(id >= size(scores)) break;
+        
     score& S(scores[id]);
+    
+    bool wrongtype = false;
+    
+    wrongtype |= (euclid && (!S.box[116] || S.box[120] != euclidland));
+    wrongtype |= (!euclid && S.box[116]);
+
+    wrongtype |= (scoremode == 1 && !S.box[119]);
+    wrongtype |= (scoremode != 1 && S.box[119]);
+    wrongtype |= (scoremode == 2 && (!S.box[117] || S.box[118] >= PUREHARDCORE_LEVEL));
+    
+    if(wrongtype) { id++; continue; }
+
     char buf[16];
     
     sprintf(buf, "%d", id+1);
@@ -2888,6 +3903,7 @@ void handleScoreKeys(int sym, SDL_Event& ev) {
   else if(sym == SDLK_DOWN || sym == 'j' || sym == 'x')
     scorefrom += 5;
   else if(sym == 's') sortScores(); 
+  else if(sym == 'm') { scoremode++; scoremode %= 3; }
   else if(sym != 0 || ev.type == SDL_MOUSEBUTTONDOWN) cmode = emNormal;
   }
         
@@ -2901,10 +3917,6 @@ void handlePickScoreKeys(int uni, SDL_Event& ev) {
   }
         
 #endif
-
-string ONOFF(bool b) {
-  return XLAT(b ? "ON" : "OFF");
-  }
 
 void drawStats() {
 
@@ -2940,11 +3952,11 @@ void drawStats() {
   if(displaynum(vx, vy, 0, vid.fsize, 0xFFFFFF, gold(), "$$$")) {
     mouseovers = XLAT("Your total wealth"),
     help = XLAT(
-MC    "The total value of the treasure you have collected.\n\n"
-MC    "Every world type contains a specific type of treasure, worth 1 $$$; "
-MC    "your goal is to collect as much treasure as possible, but every treasure you find "
-MC    "causes more enemies to hunt you in its native land.\n\n"
-M     "Orbs of Yendor are worth 50 $$$ each.\n\n"
+      "The total value of the treasure you have collected.\n\n"
+      "Every world type contains a specific type of treasure, worth 1 $$$; "
+      "your goal is to collect as much treasure as possible, but every treasure you find "
+      "causes more enemies to hunt you in its native land.\n\n"
+      "Orbs of Yendor are worth 50 $$$ each.\n\n"
       );
     }
       
@@ -2990,24 +4002,24 @@ M     "Orbs of Yendor are worth 50 $$$ each.\n\n"
     mouseovers = XLAT("frames per second"),
     help = 
       XLAT(
-MC    "The higher the number, the smoother the animations in the game. "
-MC    "If you find that animations are not smooth enough, you can try "
-M     "to change the options "
+      "The higher the number, the smoother the animations in the game. "
+      "If you find that animations are not smooth enough, you can try "
+      "to change the options "
       ) +
 #ifdef ANDROID
 XLAT(
-MC    "(Menu button) and select the ASCII mode, which runs much faster. "
-MC    "Depending on your device, turning the OpenGL mode on or off might "
-M     "make it faster, slower, or cause glitches.");
+      "(Menu button) and select the ASCII mode, which runs much faster. "
+      "Depending on your device, turning the OpenGL mode on or off might "
+      "make it faster, slower, or cause glitches.");
 #else
 #ifdef IOS
 XLAT(
-MC    "(in the MENU). You can reduce the sight range, this should make "
-M     "the animations smoother.");
+      "(in the MENU). You can reduce the sight range, this should make "
+      "the animations smoother.");
 #else
 XLAT(
-MC    "(press v) and change the wall/monster mode to ASCII, or change "
-M     "the resolution.");
+      "(press v) and change the wall/monster mode to ASCII, or change "
+      "the resolution.");
 #endif
 // todo: iOS
 #endif
@@ -3049,7 +4061,134 @@ M     "the resolution.");
   DEB("stats OK");  
   achievement_display();
   }
+
+#ifndef MOBILE
+
+void saveHighQualityShot() {
+
+#ifndef GFX
+  addMessage(XLAT("High quality shots not available on this platform"));
+  return;
+#endif
+
+  int dcs = size(dcal);
+  for(int i=0; i<dcs; i++) {
+    cell *c = dcal[i];
+    if(c->cpdist <= 4) setdist(c, 1, NULL);
+    }
+
+  time_t timer;
+  timer = time(NULL);
+
+  SDL_Surface *sav = s;
+  s = SDL_CreateRGBSurface(SDL_SWSURFACE,2000,2000,32,0,0,0,0);
   
+  int ssr = sightrange; sightrange = 10; int sch = cheater; cheater = 0;
+
+  bool b = vid.usingGL;
+  vid.usingGL = false;
+  videopar vid2 = vid;
+  vid.xres = vid.yres = 2000; vid.scale = 0.99;
+  calcparam();
+
+  darken = 0;
+  ptds.clear();
+  drawthemap();
+
+  for(int i=0; i<2; i++) {
+    SDL_FillRect(s, NULL, i ? 0xFFFFFF : 0);
+  
+  #ifdef GFX
+    aacircleColor(s, vid.xcenter, vid.ycenter, vid.radius, 0x0000FF80);
+  #endif
+  
+    if(vid.wallmode < 2) {
+      int ls = size(lines);
+      for(int t=0; t<ls; t++) drawline(View * lines[t].P1, View * lines[t].P2, lines[t].col >> darken);
+      }
+  
+    drawqueue();
+    ptds.clear();
+    drawthemap();
+  
+    char buf[128]; strftime(buf, 128, "bigshota-%y%m%d-%H%M%S.bmp", localtime(&timer));
+    buf[7] += i;
+    SDL_SaveBMP(s, buf);
+
+    if(i == 0) addMessage(XLAT("Saved the high quality shot to %1", buf));
+    }
+  
+  
+  SDL_FreeSurface(s); s = sav; vid = vid2; sightrange = ssr; cheater = sch;
+  vid.usingGL = b;
+  }
+
+void showVisual1() {
+  displayStat(2, XLAT("video resolution"), its(vid.xres) + "x"+its(vid.yres), 'r');
+  displayStat(3, XLAT("fullscreen mode"), ONOFF(vid.full), 'f');
+  displayStat(4, XLAT("animation speed"), fts(vid.aspeed), 'a');
+  displayStat(5, XLAT("dist from hyperboloid ctr"), fts(vid.alpha), 'p');
+  displayStat(6, XLAT("scale factor"), fts(vid.scale), 'z');
+
+  const char *wdmodes[4] = {"ASCII", "black", "plain", "Escher"};
+  const char *mdmodes[4] = {"ASCII", "items only", "items and monsters", "high contrast"};
+  const char *axmodes[4] = {"no axes", "auto", "light", "heavy"};
+
+  displayStat(7, XLAT("draw the heptagons darker"), ONOFF(vid.darkhepta), '7');
+  
+  displayStat(8, XLAT("wall display mode"), 
+    XLAT(wdmodes[vid.wallmode]), 'w');
+  displayStat(9, XLAT("monster display mode"), 
+    XLAT(mdmodes[vid.monmode]), 'm');
+  displayStat(10, XLAT("cross display mode"), 
+    XLAT(axmodes[vid.axes]), 'c');
+  displayStat(11, XLAT("background music volume"), 
+    its(audiovolume), 'b');
+  if(lang() != 0) {
+    string s = XLAT("TRANSLATIONWARNING");
+    if(s != "" && s != "TRANSLATIONWARNING") {
+      int dy = vid.fsize * 12 + vid.yres/4;
+      int dx = vid.xres/2;
+      displaystr(dx, dy, 0, vid.fsize, s, 0xFF0000, 8);
+      }
+    }
+  displayStat(13, XLAT("language"), XLAT("EN"), 'l');
+  displayStat(14, XLAT("player character"), 
+    XLAT(vid.female ? "female" : "male"), 'g');
+  }  
+
+void showVisual2() {
+  #ifdef GL
+  displayStat(2, XLAT("openGL & antialiasing mode"), vid.usingGL ? "OpenGL" : vid.usingAA ? "AA" : "OFF", 'o');
+  #endif
+  displayStat(3, XLAT("distance between eyes"), fts(vid.eye * 10), 'e');
+  displayStat(4, XLAT("framerate limit"), its(vid.framelimit), 'f');
+
+  displayStat(6, XLAT("joystick mode"), XLAT(autojoy ? "automatic" : "manual"), 'p');
+    
+  displayStat(7, XLAT("first joystick: movement threshold"), its(vid.joyvalue), 'a');
+  displayStat(8, XLAT("first joystick: execute movement threshold"), its(vid.joyvalue2), 'b');
+  displayStat(9, XLAT("second joystick: pan threshold"), its(vid.joypanthreshold), 'c');
+  displayStat(10, XLAT("second joystick: panning speed"), fts(vid.joypanspeed * 1000), 'd');
+  displayStat(12, XLAT("message flash time"), its(vid.flashtime), 't');
+  displayStat(13, XLAT("targetting ranged Orbs Shift+click only"), ONOFF(vid.shifttarget), 'i');
+  }
+
+
+void showConfig() {
+  displayStatHelp(0, XLAT("Configuration:"));
+  
+  if(cmode == emVisual1) showVisual1();
+  else showVisual2();
+  
+  displayStatHelp(16, XLAT("use Shift to decrease and Ctrl to fine tune "));
+  displayStatHelp(17, XLAT("(e.g. Shift+Ctrl+Z)"));
+
+  displayStat(19, XLAT("exit configuration"), "", 'v');
+  displayStat(21, XLAT("save the current config"), "", 's');
+  }
+#endif
+
 void drawscreen() {
 
 #ifdef GL
@@ -3071,11 +4210,17 @@ void drawscreen() {
   if(!canmove) darken = 1;
   if(cmode != emNormal && cmode != emDraw && cmode != emCustomizeChar) darken = 2;
   if(cmode == emQuit && !canmove) darken = 0;
+#ifndef MOBILE
+  if(cmode == emMapEditor && !mapeditor::subscreen && !mapeditor::choosefile) darken = 0;
+  if(cmode == emDraw && mapeditor::choosefile) darken = 2;
+  if(cmode == emOverview) darken = 4;
+#endif
+  if(hiliteclick && darken == 0 && vid.monmode == 2) darken = 1;
   
   if(!vid.goteyes && !euclid)
-    drawCircle(vid.xcenter, vid.ycenter, vid.radius, 0xFF);
+    drawCircle(vid.xcenter, vid.ycenter, vid.radius, 0xFF >> darken);
     
-  if(vid.wallmode < 2 && !euclid && !(vid.boardmode != 'h' && cwt.c->land == laGameBoard)) {
+  if(vid.wallmode < 2 && !euclid && !mapeditor::whichShape) {
     int ls = size(lines);
     if(ISMOBILE) ls /= 10;
     for(int t=0; t<ls; t++) drawline(View * lines[t].P1, View * lines[t].P2, lines[t].col >> darken);
@@ -3092,23 +4237,10 @@ void drawscreen() {
   #ifndef MOBILE
   if(cmode == emNormal) drawmovestar();
   #endif
-  
-  if(cmode == emDraw) {
-    lalpha = 0x20;
-    for(int d=0; d<84; d++) 
-      drawline(C0, spin(M_PI*d/42)* xpush(crossf) * C0, 0xC0C0C0);
-    for(int d=0; d<84; d++) for(int u=2; u<=20; u++)
-      drawline(spin(M_PI*d/42)* xpush(crossf*u/20) * C0, spin(M_PI*(d+1)/42)* xpush(crossf*u/20) * C0, 0xC0C0C0);
 
-    lalpha = 0x80;
-    if(crad > 0) {
-      transmatrix movtocc = rgpushxto0(ccenter);
-      for(int d=0; d<84; d++) 
-        drawline(movtocc * ddi(d+1, crad) * C0, movtocc * ddi(d, crad) * C0, 0x00C000);
-      }
-      // spin(M_PI*(d+1)/42) * xpush(crad) * spin(-M_PI*(d+1)/42) * ccenter, spin(M_PI*d/42) * xpush(crad) * spin(-M_PI*d/42) * ccenter, 0xC0C0C0);
-    lalpha = 0xFF;
-    }
+#ifndef MOBILE
+  mapeditor::drawGrid();
+#endif
 
   getcstat = 0;
   
@@ -3128,15 +4260,8 @@ void drawscreen() {
     displayabutton(-1, +1, XLAT("NEW"), BTON);
     displayabutton(+1, +1, XLAT(canmove ? "PLAY" : ISIOS ? " " : "SHARE"), BTON);
     }
-  #endif
   
-  if(cmode == emDraw) {
-    mouseovers = 
-      floordraw ? (cwt.c->type == 6 ? "hex floor" : "hepta floor") : "character";
-    
-    mouseovers = 
-      XLAT("Drawing %1 (layer %2), F1 for help", XLAT(mouseovers), its(dslayer));
-    }
+  #endif
  
   // displaynum(vx,100, 0, 24, 0xc0c0c0, celldist(cwt.c), ":");
 
@@ -3166,15 +4291,18 @@ void drawscreen() {
   #ifndef MOBILE
   if(cmode == emChangeMode) {
     displayStat(2, XLAT("vector graphics editor"), "", 'g');
-    displayStat(3, XLAT("Euclidean mode"), "", 'e');
-    displayStat(4, XLAT("cheat mode"), "", 'c');
-    displayStat(6, XLAT("heptagonal game board"), "", '7');
-    displayStat(7, XLAT("triangular game board"), "", '3');
-    displayStat(8, XLAT("HyperRogue game board"), "", 'h');
-    displayStat(9, XLAT("Periodic Editor"), "", 'f');
+    displayStat(3, XLAT("map editor"), ONOFF(false), 'm');
+    displayStat(4, XLAT("cheat mode"), ONOFF(cheater), 'c');
 
-    displayStat(18, XLAT("first page [Space]"), "", ' ');
-    displayStat(19, XLAT("exit configuration"), "", 'v');
+    displayStat(6, XLAT("Euclidean mode"), ONOFF(euclid), 'e');
+    displayStat(7, XLAT("shoot'em up mode"), ONOFF(shmup::on), 's');
+    if(!shmup::on) displayStat(8, XLAT("hardcore mode"), 
+      hardcore && !pureHardcore() ? XLAT("PARTIAL") : ONOFF(hardcore), 'h');
+
+    displayStat(9, XLAT("%1 Challenge", moPrincess), ONOFF(princess::challenge), 'p');
+    displayStat(10, XLAT("random pattern mode"), ONOFF(randomPatternsMode), 'r');
+
+    displayStat(19, XLAT("return to the game"), "", 'v');
     }
 
   if(cmode == emCustomizeChar) {
@@ -3186,106 +4314,101 @@ void drawscreen() {
     displayStat(5, XLAT("hair color"), "?", 'h');
     if(vid.female)
       displayStat(6, XLAT("dress color"), "?", 'd');
+    displayStat(8, XLAT("save whom"), XLAT1(minf[moPrincess].name), 'p');
 
     displayStatHelp(16, XLAT("Shift=random, Ctrl=mix"));
 
-    displayStat(19, XLAT("exit configuration"), "", 'v');
+    displayStat(19, XLAT("return to the game"), "", 'v');
     }
+
+  if(cmode == emShmupConfig)
+    shmup::showShmupConfig();
+
+#ifndef MOBILE
+  if(cmode == emMapEditor)
+    mapeditor::showMapEditor();
+
+  if(cmode == emOverview)
+    showOverview();
+
+  if(cmode == emDraw)
+    mapeditor::showDrawEditor();
+#endif
 
   if(cmode == emPickEuclidean) {
     int s = vid.fsize;
     vid.fsize = vid.fsize * 4/5;
-    displayStatHelp(0, XLAT("Euclidean mode"));
-    int lt = landtypes;
+    displayStatHelp(-8, XLAT("Euclidean mode"));
+    if(cheater) for(int i=0; i<landtypes; i++) landvisited[i] = true;
+    for(int i=0; i<landtypes; i++)
+      if(hiitems[treasureType(eLand(i))] >= 25) landvisited[i] = true;
     landvisited[laCrossroads] = true;
     landvisited[laIce] = true;
     landvisited[laMirror] = true;
+    landvisited[laPrincessQuest] = princess::everSaved;
     // for(int i=2; i<lt; i++) landvisited[i] = true;
-    for(int i=2; i<lt; i++) if(landvisited[i])
-      displayStat(i, XLAT1(linf[i].name), "", 'a' + (i-2));
-    displayStat(lt+1, XLAT("Return to the hyperbolic world"), "", 'z');
-    displayStatHelp(lt+3, XLAT("Choose from the lands visited this game."));
-    displayStatHelp(lt+5, XLAT("Scores and achievements are not"));
-    displayStatHelp(lt+6, XLAT("saved in the Euclidean mode!"));
+    for(int i=0; i<NUMLIST; i++) {
+      eLand l = lseq[i];
+      if(landvisited[l]) {
+        char ch;
+        if(i < 26) ch = 'a' + i;
+        else ch = 'A' + (i-26);
+        displayStat(i-6, XLAT1(linf[l].name), "", ch);
+        }
+      }
+    displayStat(NUMLIST+1-6, XLAT("Return to the hyperbolic world"), "", '0');
+    displayStatHelp(NUMLIST+3-6, XLAT("Choose from the lands visited this game."));
+#ifdef HAVE_ACHIEVEMENTS
+    displayStatHelp(NUMLIST+5-6, XLAT("Scores and achievements are not"));
+    displayStatHelp(NUMLIST+6-6, XLAT("saved in the Euclidean mode!"));
+#endif
     vid.fsize = s;
     }
+
+  if(cmode == emMenu) 
+    showMainMenu();
     
-  if(cmode == emVisual1 || cmode == emVisual2) {
-    displayStatHelp(0, XLAT("Configuration:"));
+  if(cmode == emVisual1 || cmode == emVisual2) 
+    showConfig();
     
-    if(cmode == emVisual1) {
-      displayStat(2, XLAT("video resolution"), its(vid.xres) + "x"+its(vid.yres), 'r');
-      displayStat(3, XLAT("fullscreen mode"), ONOFF(vid.full), 'f');
-      displayStat(4, XLAT("animation speed"), fts(vid.aspeed), 'a');
-      displayStat(5, XLAT("dist from hyperboloid ctr"), fts(vid.alpha), 'p');
-      displayStat(6, XLAT("scale factor"), fts(vid.scale), 'z');
-  
-      const char *wdmodes[4] = {"ASCII", "black", "plain", "Escher"};
-      const char *mdmodes[4] = {"ASCII", "items only", "items and monsters", "high contrast"};
-      const char *axmodes[4] = {"no axes", "auto", "light", "heavy"};
-
-      displayStat(7, XLAT("draw the heptagons darker"), ONOFF(vid.darkhepta), '7');
-      
-      displayStat(8, XLAT("wall display mode"), 
-        XLAT(wdmodes[vid.wallmode]), 'w');
-      displayStat(9, XLAT("monster display mode"), 
-        XLAT(mdmodes[vid.monmode]), 'm');
-      displayStat(10, XLAT("cross display mode"), 
-        XLAT(axmodes[vid.axes]), 'c');
-      displayStat(11, XLAT("background music volume"), 
-        its(audiovolume), 'b');
-      if(lang() != 0) {
-        string s = XLAT("TRANSLATIONWARNING");
-        if(s != "" && s != "TRANSLATIONWARNING") {
-          int dy = vid.fsize * 12 + vid.yres/4;
-          int dx = vid.xres/2;
-          displaystr(dx, dy, 0, vid.fsize, s, 0xFF0000, 8);
-          }
-        }
-      displayStat(13, XLAT("language"), XLAT("EN"), 'l');
-      displayStat(14, XLAT("player character"), 
-        XLAT(vid.female ? "female" : "male"), 'g');
-      }
-    else {
-      #ifdef GL
-      displayStat(2, XLAT("openGL & antialiasing mode"), vid.usingGL ? "OpenGL" : vid.usingAA ? "AA" : "OFF", 'o');
-      #endif
-      displayStat(3, XLAT("distance between eyes"), fts(vid.eye * 10), 'e');
-      displayStat(4, XLAT("framerate limit"), its(vid.framelimit), 'f');
-
-      displayStat(6, XLAT("joystick mode"), XLAT(autojoy ? "automatic" : "manual"), 'p');
-        
-      displayStat(7, XLAT("first joystick: movement threshold"), its(vid.joyvalue), 'a');
-      displayStat(8, XLAT("first joystick: execute movement threshold"), its(vid.joyvalue2), 'b');
-      displayStat(9, XLAT("second joystick: pan threshold"), its(vid.joypanthreshold), 'c');
-      displayStat(10, XLAT("second joystick: panning speed"), fts(vid.joypanspeed * 1000), 'd');
-      displayStat(12, XLAT("message flash time"), its(vid.flashtime), 't');
-      displayStat(13, XLAT("targetting ranged Orbs Shift+click only"), ONOFF(vid.shifttarget), 's');
-      }
-
-    displayStatHelp(16, XLAT("use Shift to decrease and Ctrl to fine tune "));
-    displayStatHelp(17, XLAT("(e.g. Shift+Ctrl+Z)"));
-
-    if(cmode == emVisual1)
-      displayStat(18, XLAT("the second page [Space]"), "", ' ');
-    else
-      displayStat(18, XLAT("special features [Space]"), "", ' ');
-
-    displayStat(19, XLAT("exit configuration"), "", 'v');
-    displayStat(20, XLAT("see the help screen"), "", 'h');
-    displayStat(21, XLAT("save the current config"), "", 's');
-    }
   #endif
   
   describeMouseover();
 
-  if(havebugs) for(int k=0; k<3; k++)
+  if(havebugs && darken == 0) for(int k=0; k<3; k++)
     displayfr(vid.xres/2 + vid.fsize * 5 * (k-1), vid.fsize*2,   2, vid.fsize, 
       its(bugcount[k]), minf[moBug0+k].color, 8);
+    
+  bool minefieldNearby = false;
+  int mines = 0;
+  for(int i=0; i<cwt.c->type; i++) if(cwt.c->mov[i]) {
+    if(cwt.c->mov[i]->land == laMinefield) 
+      minefieldNearby = true;
+    if(cwt.c->mov[i]->wall == waMineMine)
+      mines++;
+    }
+
+  if((minefieldNearby || mines) && canmove && !items[itOrbGhost] && darken == 0) {
+    string s;
+    int col = minecolors[mines];
+    
+    if(mines == 7) seenSevenMines = true;
+      
+    displayfr(vid.xres/2, vid.ycenter - vid.radius * 3/4, 2,
+      vid.fsize, 
+      XLAT(minetexts[mines]), col, 8);
+
+    if(minefieldNearby && cwt.c->land != laMinefield && cwt.c->mov[cwt.spin]->land != laMinefield) {
+      displayfr(vid.xres/2, vid.ycenter - vid.radius * 3/4 - vid.fsize*3/2, 2,
+        vid.fsize, 
+        XLAT("WARNING: you are entering a minefield!"), 
+        col, 8);
+      }
+    }
 
   #ifndef MOBILE
-  if(cmode == emNormal || cmode == emVisual1 || cmode == emVisual2 || cmode == emChangeMode)
-    displayButton(vid.xres-8, vid.yres-vid.fsize, XLAT("(v) config"), 'v', 16);
+  if(cmode == emNormal || cmode == emVisual1 || cmode == emVisual2 || cmode == emChangeMode )
+    displayButton(vid.xres-8, vid.yres-vid.fsize, XLAT("(v) menu"), 'v', 16);
   #endif
   
   if(cmode == emQuit) {
@@ -3329,9 +4452,15 @@ void drawscreen() {
 #endif
 
 #ifndef MOBILE  
+  // DEB
   if(mouseover && targetclick) {
+    shmup::cpid = 0;
     eItem i = targetRangedOrb(mouseover, roCheck);
-    if(i)
+    if(i == itOrbSummon) {
+      eMonster m = summonedAt(mouseover);
+      displaychr(mousex, mousey, 0, vid.fsize, minf[m].glyph, minf[m].color);
+      }
+    else if(i)
       displaychr(mousex, mousey, 0, vid.fsize, '@', iinf[i].color);  
     }
 #endif
@@ -3340,14 +4469,18 @@ void drawscreen() {
   DEB("msgs3");
   // SDL_UnlockSurface(s);
 
+//profile("swapbuffers");
 #ifdef GL
   if(vid.usingGL) SDL_GL_SwapBuffers(); else
 #endif
   SDL_UpdateRect(s, 0, 0, vid.xres, vid.yres);
+  
+//printf("\ec");
 
   #endif
   
-  if(playermoved && vid.aspeed > 4.99) { 
+//profile("centerpc");
+  if(playermoved && vid.aspeed > 4.99 && !shmup::on) { 
     centerpc(1000);
     playermoved = false; 
     return; 
@@ -3425,10 +4558,19 @@ void saveConfig() {
   fprintf(f, "%f %f %f %f\n", float(vid.scale), float(vid.eye), float(vid.alpha), float(vid.aspeed));
   fprintf(f, "%d %d %d %d %d %d %d\n", vid.wallmode, vid.monmode, vid.axes, audiovolume, vid.framelimit, vid.usingGL, vid.usingAA);
   fprintf(f, "%d %d %d %f %d %d\n", vid.joyvalue, vid.joyvalue2, vid.joypanthreshold, vid.joypanspeed, autojoy, vid.flashtime);
+  
+  int gflags = 0;
+  if(vid.female) gflags |= 1;
+  if(vid.samegender) gflags |= 16;
+  
   fprintf(f, "%d %d %08x %08x %08x %08x\n", 
-    vid.female?1:0, vid.language, vid.skincolor, vid.haircolor, vid.swordcolor, vid.dresscolor);
+    gflags, vid.language, vid.skincolor, vid.haircolor, vid.swordcolor, vid.dresscolor);
 
   fprintf(f, "%d %d\n", vid.darkhepta, vid.shifttarget);
+  
+  fprintf(f, "%d %d %d %d\n", euclid, euclidland, shmup::on, hardcore);
+  
+  shmup::saveConfig(f);
 
   fprintf(f, "\n\nThis is a configuration file for HyperRogue (version "VER")\n");
   fprintf(f, "\n\nThe numbers are:\n");
@@ -3436,8 +4578,10 @@ void saveConfig() {
   fprintf(f, "scale, eye distance, parameter, animation speed\n");
   fprintf(f, "wallmode, monster mode, cross mode, audiovolume, framerate limit, usingGL, usingAA\n");
   fprintf(f, "calibrate first joystick (threshold A, threshold B), calibrate second joystick (pan threshold, pan speed), joy mode\n");
-  fprintf(f, "gender (1=female), language, skin color, hair color, sword color, dress color\n");
+  fprintf(f, "gender (1=female, 16=same gender prince), language, skin color, hair color, sword color, dress color\n");
   fprintf(f, "darken hepta, shift target\n");
+  fprintf(f, "euclid, euclid land, shmup, hardcore\n");
+  fprintf(f, "version number, shmup players, shmup keyboard/joystick config\n");
   
   fclose(f);
   addMessage(s0 + "Configuration saved to: " + conffile);
@@ -3447,7 +4591,7 @@ void loadConfig() {
   vid.xres = 9999; vid.yres = 9999; vid.framelimit = 300;
   FILE *f = fopen(conffile, "rt");
   if(f) {
-    int fs, gl=1, aa=1, bb=1;
+    int fs, gl=1, aa=1, bb=1, cc, dd;
     int err;
     err=fscanf(f, "%d%d%d%d", &vid.xres, &vid.yres, &fs, &vid.fsize);
     vid.full = fs;
@@ -3460,11 +4604,20 @@ void loadConfig() {
     vid.usingGL = gl; vid.usingAA = aa;
     err=fscanf(f, "%d%d%d%f%d%d", &vid.joyvalue, &vid.joyvalue2, &vid.joypanthreshold, &vid.joypanspeed, &aa, &vid.flashtime);
     autojoy = aa; aa = 0;
-    err=fscanf(f, "%d%d%x%x%x%x", &aa, &vid.language, &vid.skincolor, &vid.haircolor, &vid.swordcolor, &vid.dresscolor);
-    vid.female = aa;
+    int gflags;
+    err=fscanf(f, "%d%d%x%x%x%x", &gflags, &vid.language, &vid.skincolor, &vid.haircolor, &vid.swordcolor, &vid.dresscolor);
+
+    vid.female = (gflags & 1) ? true : false;
+    vid.samegender = (gflags & 16) ? true : false;
     aa=0; bb=0;
     err=fscanf(f, "%d%d", &aa, &bb);
     vid.darkhepta = aa; vid.shifttarget = bb;
+
+    aa = euclid; bb = euclidland; cc = shmup::on; dd = hardcore;
+    err=fscanf(f, "%d%d%d%d", &aa, &bb, &cc, &dd);
+    euclid = aa; euclidland = eLand(bb); shmup::on = cc; hardcore = dd;
+
+    shmup::loadConfig(f);
 
     fclose(f);
     printf("Loaded configuration: %s\n", conffile);
@@ -3482,6 +4635,10 @@ void loadConfig() {
     case 'p': vid.wallmode = 2; vid.monmode = 2; break;
     case 'a': vid.wallmode = 0; vid.monmode = 0; break;
     case 'o': vid.usingGL = !vid.usingGL; break;
+    case 'E': euclid = !euclid; if(euclid) euclidland = firstland; break;
+    case 'S': shmup::on = !shmup::on; break;
+    case 'P': vid.scfg.players = 3-vid.scfg.players; break;
+    case 'H': hardcore = !hardcore; break;
     }
 #endif
   }
@@ -3528,6 +4685,29 @@ bool loadMusicInfo(string dir) {
   }
 #endif
 
+#ifndef MOBILE
+void initJoysticks() {
+  numsticks = SDL_NumJoysticks();
+  if(numsticks > 8) numsticks = 8;
+  for(int i=0; i<numsticks; i++) {
+    sticks[i] = SDL_JoystickOpen(i);
+    /* printf("axes = %d, balls = %d, buttons = %d, hats = %d\n",
+      SDL_JoystickNumAxes(sticks[i]),
+      SDL_JoystickNumBalls(sticks[i]),
+      SDL_JoystickNumButtons(sticks[i]),
+      SDL_JoystickNumHats(sticks[i])
+      ); */
+    }
+  }
+
+void closeJoysticks() {
+  for(int i=0; i<numsticks; i++) {
+    SDL_JoystickClose(sticks[i]), sticks[i] = NULL;
+    }
+  numsticks = 0;
+  }
+#endif
+
 void initgraph() {
 
   vid.usingGL = true;
@@ -3548,7 +4728,11 @@ void initgraph() {
   vid.joyvalue = 4800;
   vid.joyvalue2 = 5600;
   vid.joypanthreshold = 2500;
+#ifdef PANDORA
   vid.joypanspeed = 0.0001;
+#else
+  vid.joypanspeed = 0;
+#endif
 
   vid.framelimit = 75;
   vid.monmode = 2;
@@ -3562,23 +4746,18 @@ void initgraph() {
   vid.killreduction = 0;
   
   vid.female = false;
+  vid.samegender = false;
   vid.language = -1;
-  vid.boardmode = 'h';
   
-  joyx = joyy = 0; joydir = -1;
+  joyx = joyy = 0; joydir.d = -1;
+  
+  shmup::initConfig();
 
   restartGraph();
   
   initgeo();
 
   buildpolys();
-  for(int i=0; i<8; i++) 
-    dsUser[i][0].rots = 6,
-    dsUser[i][1].rots = 7,
-    dsUser[i][2].rots = 1, dsUser[i][2].sym = true;
-
-  for(int i=0; i<8; i++) for(int k=0; k<3; k++)
-    dsUser[i][k].shift = C0, dsUser[i][k].spin = Cx1;
 
   #ifndef MOBILE  
   if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK) == -1)
@@ -3608,8 +4787,7 @@ void initgraph() {
     exit(2);
     }
   
-  if(SDL_NumJoysticks()) stick = SDL_JoystickOpen(0);
-  if(SDL_NumJoysticks() >= 2) panstick = SDL_JoystickOpen(1);
+  initJoysticks();
 
   #ifdef AUDIO
 
@@ -3712,10 +4890,10 @@ void panning(hyperpoint hf, hyperpoint ht) {
 #include "showoff.cpp"
 #endif
 
-void switchcolor(int& c, int* cs, int mod) {
+void switchcolor(int& c, unsigned int* cs, int mod) {
   int id = 0;
   int q = cs[0]; cs++;
-  for(int i=0; i<q; i++) if(c == cs[i]) id = i;
+  for(int i=0; i<q; i++) if(c == (int) cs[i]) id = i;
   if(mod == 1)
     c = ((rand() % 0x1000000) << 8) | 0xFF;
   else if(mod == 2)
@@ -3724,30 +4902,28 @@ void switchcolor(int& c, int* cs, int mod) {
     c = cs[(id+1) % q];
   }
 
-const char* drawhelp = 
- "In this mode you can draw your own player character and floors. "
- "Mostly for the development purposes, but you can have fun too.\n\n"
- "f - floor, p - player (repeat 'p' for layers)\n\n"
- "n - new shape, u - copy the 'player body' shape\n\n"
- "1-9 - rotational symmetries, 0 - toggle axial symmetry\n\n"
- "point with mouse and: a - add point, m - move nearest point, d - delete nearest point, c - nearest point again, b - add after nearest\n\n"
- "s - save in C++ format (but cannot be loaded yet without editing source)\n\n"
- "z - zoom, o - Poincaré model\n";
- 
+void fullcenter() {
+  if(playerfound) centerpc(INF);
+  else {
+    View = Id;
+    // EUCLIDEAN
+    if(!euclid) viewctr.h = cwt.c->master;
+    else centerover = cwt.c;
+    // SDL_LockSurface(s);
+    drawthemap(); 
+    // SDL_UnlockSurface(s);
+    centerpc(INF);
+    }
+  playermoved = true;
+  }
+
 #ifndef MOBILE
 
 // Warning: a very long function! todo: refactor
 
-void loadShape(hpcshape& sh, int d, int layer) {
-  dsCur = &(dsUser[layer][2]);
-  dsCur->list.clear();
-  dsCur->sym = d==2;
-  for(int i=sh.s; i < sh.s + (sh.e-sh.s)/d; i++)
-    dsCur->list.push_back(hpc[i]);
-  }
-
 void mainloop() {
   int lastt = 0;
+  cmode = emNormal;
   while(true) {
 
     #ifndef GFX
@@ -3761,31 +4937,39 @@ void mainloop() {
     optimizeview();
     ticks = SDL_GetTicks();
       
-    dslayer %= 8;
-    dsCur = &(dsUser[dslayer][floordraw ? cwt.c->type-6 : 2]);
-    
     int cframelimit = vid.framelimit;
-    if((cmode == emVisual1 || cmode == emVisual2 || cmode == emHelp || cmode == emQuit) && cframelimit > 15)
+    if((cmode == emVisual1 || cmode == emVisual2 || cmode == emHelp || cmode == emQuit ||
+      cmode == emCustomizeChar || cmode == emMenu || cmode == emPickEuclidean ||
+      cmode == emScores || cmode == emPickScores) && cframelimit > 15)
       cframelimit = 15;
     if(outoffocus && cframelimit > 10) cframelimit = 10;
     
     int timetowait = lastt + 1000 / cframelimit - ticks;
+
+    if(shmup::on && cmode == emNormal) 
+      timetowait = 0, shmup::turn(ticks - lastt);
+
     if(timetowait > 0)
       SDL_Delay(timetowait);
     else {
       if(playermoved && vid.aspeed > -4.99 && !outoffocus)
         centerpc((ticks - lastt) / 1000.0 * exp(vid.aspeed));
-     if(panstick || panjoyx || panjoyy) 
+      if(panjoyx || panjoyy) 
         checkpanjoy((ticks - lastt) / 1000.0);
       lastt = ticks;
       frames++;
-      if(!outoffocus) drawscreen();
+      if(!outoffocus) {
+        drawscreen();
+        }
       }      
 
     Uint8 *keystate = SDL_GetKeyState(NULL);
     rightclick = keystate[SDLK_RCTRL];
     leftclick = keystate[SDLK_RSHIFT];
     hiliteclick = keystate[SDLK_LALT] | keystate[SDLK_RALT];
+    anyshiftclick = keystate[SDLK_LSHIFT] | keystate[SDLK_RSHIFT];
+    
+    bool didsomething = false;
     
     if(vid.shifttarget) {
       leftclick = false;
@@ -3795,7 +4979,7 @@ void mainloop() {
       leftclick = keystate[SDLK_RSHIFT];
       targetclick = true;
       }
-
+    
 #ifdef AUDIO
     if(audio) handlemusic();
 #endif
@@ -3805,7 +4989,14 @@ void mainloop() {
     while(SDL_PollEvent(&ev)) {
       int sym = 0;
       int uni = 0;
-      ld shift = 1;
+      ld shiftmul = 1;
+      
+      /* if(ev.type == SDL_JOYDEVICEADDED || ev.type == SDL_JOYDEVICEREMOVED) {
+        joyx = joyy = 0;
+        panjoyx = panjoyy = 0;
+        closeJoysticks();
+        initJoysticks();
+        } */
 
       if(ev.type == SDL_ACTIVEEVENT) {
         if(ev.active.state & SDL_APPINPUTFOCUS) {
@@ -3834,12 +5025,13 @@ void mainloop() {
         }
       
       if(ev.type == SDL_JOYAXISMOTION) {
-        if(ev.jaxis.value != 0 &&
+        flashMessages();
+        /* if(ev.jaxis.value != 0 &&
           ev.jaxis.axis >= 2)
         printf("which = %d axis = %d value = %d\n",
           ev.jaxis.which,
           ev.jaxis.axis,
-          ev.jaxis.value);
+          ev.jaxis.value); */
         if(ev.jaxis.which == 0) {
           if(ev.jaxis.axis == 0)
             joyx = ev.jaxis.value;
@@ -3850,7 +5042,7 @@ void mainloop() {
           else if(ev.jaxis.axis == 4)
             panjoyy = ev.jaxis.value;
           checkjoy();
-          printf("panjoy = %d,%d\n", panjoyx, panjoyy);
+          // printf("panjoy = %d,%d\n", panjoyx, panjoyy);
           }
         else {
           if(ev.jaxis.axis == 0)
@@ -3860,7 +5052,30 @@ void mainloop() {
           }
         }
 
-      if(ev.type == SDL_JOYBUTTONDOWN) {
+      if(ev.type == SDL_JOYBUTTONDOWN && cmode == emShmupConfig && vid.scfg.setwhat) {
+        int joyid = ev.jbutton.which;
+        int button = ev.jbutton.button;
+        if(joyid < 8 && button < 32)
+           vid.scfg.joyaction[joyid][button] = vid.scfg.setwhat;
+        vid.scfg.setwhat = 0;
+        }
+
+      else if(ev.type == SDL_JOYHATMOTION && cmode == emShmupConfig && vid.scfg.setwhat) {
+        int joyid = ev.jhat.which;
+        int hat = ev.jhat.hat;
+        int dir = 4;
+        if(ev.jhat.value == SDL_HAT_UP) dir = 0;
+        if(ev.jhat.value == SDL_HAT_RIGHT) dir = 1;
+        if(ev.jhat.value == SDL_HAT_DOWN) dir = 2;
+        if(ev.jhat.value == SDL_HAT_LEFT) dir = 3;
+        if(joyid < 8 && hat < 4 && dir < 4) {
+          vid.scfg.hataction[joyid][hat][dir] = vid.scfg.setwhat;
+          vid.scfg.setwhat = 0;
+          }
+        }
+
+      else if(ev.type == SDL_JOYBUTTONDOWN && !shmup::on) {
+        flashMessages();
         movepcto(joydir);
         checkjoy();
         }
@@ -3870,8 +5085,8 @@ void mainloop() {
         mousing = false;
         sym = ev.key.keysym.sym;
         uni = ev.key.keysym.unicode;
-        if(ev.key.keysym.mod & (KMOD_LSHIFT | KMOD_RSHIFT)) shift = -1;
-        if(ev.key.keysym.mod & (KMOD_LCTRL | KMOD_RCTRL)) shift /= 10;
+        if(ev.key.keysym.mod & (KMOD_LSHIFT | KMOD_RSHIFT)) shiftmul = -1;
+        if(ev.key.keysym.mod & (KMOD_LCTRL | KMOD_RCTRL)) shiftmul /= 10;
         }
 
       if(ev.type == SDL_MOUSEBUTTONDOWN) {
@@ -3881,7 +5096,13 @@ void mainloop() {
         if(ev.button.button==SDL_BUTTON_RIGHT || leftclick) 
           sym = SDLK_F1;
         else if(ev.button.button==SDL_BUTTON_MIDDLE || rightclick) 
-          sym = 1;
+          sym = 1, didsomething = true;
+        else if(ev.button.button==SDL_BUTTON_WHEELUP && ((cmode == emQuit) ^ !canmove)) {  
+          sym = 1; msgscroll++; didsomething = true;
+          }
+        else if(ev.button.button==SDL_BUTTON_WHEELDOWN && ((cmode == emQuit) ^ !canmove)) {  
+          sym = 1; msgscroll--; didsomething = true;
+          }
         else if(ev.button.button==SDL_BUTTON_WHEELUP) {  
           ld jx = (mousex - vid.xcenter - .0) / vid.radius / 10;
           ld jy = (mousey - vid.ycenter - .0) / vid.radius / 10;
@@ -3890,22 +5111,31 @@ void mainloop() {
           sym = 1;
           }
         else {
-          sym = getcstat, uni = getcstat, shift = getcshift;
+          sym = getcstat, uni = getcstat, shiftmul = getcshift;
           }
         }
 
       if(ev.type == SDL_MOUSEBUTTONUP) 
         mousepressed = false;
 
-      if(cmode != emScores) {
+      if(((cmode == emNormal && canmove) || (cmode == emQuit && !canmove) || cmode == emDraw || cmode == emMapEditor) && !shmup::on) {
 #ifndef PANDORA
-        if(sym == SDLK_RIGHT) View = xpush(-0.2*shift) * View, playermoved = false;
-        if(sym == SDLK_LEFT) View = xpush(+0.2*shift) * View, playermoved = false;
-        if(sym == SDLK_UP) View = ypush(+0.2*shift) * View, playermoved = false;
-        if(sym == SDLK_DOWN) View = ypush(-0.2*shift) * View, playermoved = false;
+        if(sym == SDLK_RIGHT) 
+          View = xpush(-0.2*shiftmul) * View, playermoved = false, didsomething = true;
+        if(sym == SDLK_LEFT) 
+          View = xpush(+0.2*shiftmul) * View, playermoved = false, didsomething = true;
+        if(sym == SDLK_UP) 
+          View = ypush(+0.2*shiftmul) * View, playermoved = false, didsomething = true;
+        if(sym == SDLK_DOWN) 
+          View = ypush(-0.2*shiftmul) * View, playermoved = false, didsomething = true;
 #endif
-        if(sym == SDLK_PAGEUP) View = spin(M_PI/21*shift) * View;
-        if(sym == SDLK_PAGEDOWN) View = spin(-M_PI/21*shift) * View;
+        if(sym == SDLK_PAGEUP) 
+          View = spin(M_PI/21*shiftmul) * View, didsomething = true;
+        if(sym == SDLK_PAGEDOWN) 
+          View = spin(-M_PI/21*shiftmul) * View, didsomething = true;
+        
+        if(sym == SDLK_PAGEUP || sym == SDLK_PAGEDOWN) 
+          if(cwt.c->land == laEdge) playermoved = false;
         }
       
       if(ev.type == SDL_MOUSEMOTION) {
@@ -3932,7 +5162,7 @@ void mainloop() {
         }
 
       DEB("r1");
-      if(sym == SDLK_F7) {
+      if(sym == SDLK_F7 && !vid.usingGL) {
 
         time_t timer;
         timer = time(NULL);
@@ -3944,139 +5174,14 @@ void mainloop() {
 
       DEB("r2");
       
-      if(cmode == emDraw) {
-      
-        hyperpoint mh = inverse(playertrans) * mouseh;
-        // inverse(playertrans) * 
-        // mouseh;
-        
-        // spin(-M_PI/2) * mouseh;
-        
-        if(uni == 'n') {
-          dsCur->list.clear();
-          dsCur->list.push_back(mh);
-#ifdef GL
-          GL_initialized = false;
-#endif
-          }
-
-        if(uni == 'a') {
-          dsCur->list.push_back(mh);
-#ifdef GL
-          GL_initialized = false;
-#endif
-          }
-
-        if(uni == 'u') {
-          if(!vid.female) loadShape(shPBody, 2, 0);
-          else loadShape(shFemaleBody, 2, 0);
-
-          loadShape(shPSword, 1, 1);
-
-          if(vid.female)
-            loadShape(shFemaleDress, 2, 2);
-        
-          if(vid.female)
-            loadShape(shFemaleHair, 2, 3);
-          else
-            loadShape(shPHead, 2, 3);
-          
-          loadShape(shPFace, 2, 4);
-            
-#ifdef GL
-          GL_initialized = false;
-#endif
-          }
-
-        if(uni == 'm' || uni == 'd' || uni == 'c' || uni == 'b') {
-          int i = 0;
-          if(size(dsCur->list) < 2) continue;
-          for(int j=1; j<size(dsCur->list); j++) 
-            if(intval(mh, dsCur->list[j]) < intval(mh, dsCur->list[i]))
-              i = j;
-          if(uni == 'm') 
-            dsCur->list[i] = mh;
-          if(uni == 'd')
-            dsCur->list.erase(dsCur->list.begin() + i);
-          if(uni == 'c')
-            dsCur->list.push_back(dsCur->list[i]);
-          if(uni == 'b') {
-            while(i) {
-              dsCur->list.push_back(dsCur->list[0]);
-              dsCur->list.erase(dsCur->list.begin());
-              i--;
-              }
-            }
-#ifdef GL
-          GL_initialized = false;
-#endif
-          }
-
-        if(uni == 'f') {
-          if(floordraw) dslayer++; else floordraw = true;
-          }
-        if(uni == 'p') {
-          if(!floordraw) dslayer++; else floordraw = false;
-          }
-        if(uni == 'g') ccenter = mouseh, crad += shift / 20;
-        
-        if(uni == '1') dsCur->rots = 1;
-        if(uni == '2') dsCur->rots = 2;
-        if(uni == '3') dsCur->rots = 3;
-        if(uni == '4') dsCur->rots = 4;
-        if(uni == '5') dsCur->rots = 5;
-        if(uni == '6') dsCur->rots = 6;
-        if(uni == '7') dsCur->rots = 7;
-        if(uni == '8') dsCur->rots = 8;
-        if(uni == '9') dsCur->rots = 21;
-        if(uni == '0') dsCur->sym = !dsCur->sym;
-
-        if(uni == 't') dsCur->shift = mh;
-        if(uni == 'y') dsCur->spin = mh;
-        
-#ifdef GL
-        if(uni == 't' || uni == 'y') GL_initialized = false;
-#endif
-        
-
-        if(uni == 's') {
-          for(int i=prehpc; i < qhpc; i++) {
-            for(int k=0; k<8; k++)
-            for(int j=0; j<3; j++) if(i == shUser[k][j].s) 
-              printf("\n  // group %d layer %d\n\n", j, k);
-            printf("  hpcpush(hpxyz(%f,%f,%f));\n", double(hpc[i][0]), double(hpc[i][1]), double(hpc[i][2]));
-            }
-          }
-
-        if(uni == 'z') vid.alpha = -.5;
-        if(uni == 'o') vid.alpha = 1;
-
-        saveImages();
-
-        if(sym == SDLK_F6) {
-          cmode = emNormal;
-          sym = 0;
-          }
-
-        if(sym == SDLK_ESCAPE) cmode = emNormal;
-
-        if(sym == SDLK_F1) {
-          cmode = emHelp;
-          sym = 0;
-          help = XLAT(drawhelp);
-          }
-
-        if(sym == SDLK_F2) {
-          cmode = emVisual1;
-          sym = 0;
-          }
-
-        if(sym == SDLK_F10) cmode = emNormal;
-        }
-      
       if(cmode == emNormal) {
+
+        if(cheater) {
+          if(applyCheat(uni, mouseover))
+            sym = 0;
+          }
       
-        if(!(uni >= 'A' && uni <= 'Z') && cwt.c->land != laGameBoard) {
+        if(!(uni >= 'A' && uni <= 'Z') && !shmup::on) {
           if(sym == 'l' || sym == 'd' || sym == SDLK_KP6) movepckeydir(0);
           if(sym == 'n' || sym == 'c' || sym == SDLK_KP3) movepckeydir(1);
           if(sym == 'j' || sym == 'x' || sym == SDLK_KP2) movepckeydir(2);
@@ -4088,27 +5193,24 @@ void mainloop() {
           }
 
 #ifdef PANDORA
-        if(sym == SDLK_RIGHT) movepckeydir(0);
-        if(sym == SDLK_LEFT) movepckeydir(4);
-        if(sym == SDLK_DOWN) movepckeydir(2 + (leftclick?1:0) - (rightclick?1:0));
-        if(sym == SDLK_UP) movepckeydir(6 - (leftclick?1:0) + (rightclick?1:0));
+        if(!shmup::on) {
+          if(sym == SDLK_RIGHT) movepckeydir(0);
+          if(sym == SDLK_LEFT) movepckeydir(4);
+          if(sym == SDLK_DOWN) movepckeydir(2 + (leftclick?1:0) - (rightclick?1:0));
+          if(sym == SDLK_UP) movepckeydir(6 - (leftclick?1:0) + (rightclick?1:0));
+          }
 #endif
 
-        if(cheater) 
-          applyCheat(uni, mouseover);
-
-        if(cwt.c->land == laGameBoard)
-          applyGameBoard(uni, sym, mouseover, vid.boardmode);
-        else {
-          if(sym == '.' || sym == 's') movepcto(-1);
+        if(!shmup::on) {
+          if(sym == '.' || sym == 's') movepcto(-1, 1);
           if((sym == SDLK_DELETE || sym == SDLK_KP_PERIOD || sym == 'g') && uni != 'G' && uni != 'G'-64) 
-            movepcto(-2);
+            movepcto(-2, 1);
           if(sym == 't' && uni != 'T' && uni != 'T'-64) {
             targetRangedOrb(centerover, roKeyboard);
             }
           }
 
-        if(sym == SDLK_KP5) movepcto(-1);
+        if(sym == SDLK_KP5 && !shmup::on) movepcto(-1, 1);
 
         // if(sym == SDLK_F4)  restartGameSwitchEuclid();
 
@@ -4131,53 +5233,84 @@ void mainloop() {
             restartGame();
             loadScores();
             }
+          else if(sym == SDLK_UP || sym == SDLK_KP8) msgscroll++;
+          else if(sym == SDLK_DOWN || sym == SDLK_KP2) msgscroll--;
+          else if(sym == SDLK_PAGEUP || sym == SDLK_KP9) msgscroll+=5;
+          else if(sym == SDLK_PAGEDOWN || sym == SDLK_KP3) msgscroll-=5;
           }
         
-        if(sym == SDLK_HOME || sym == SDLK_F3 || sym == ' ') {
-          if(playerfound) centerpc(INF);
-          else {
-            View = Id;
-            // EUCLIDEAN
-            if(!euclid) viewctr.h = cwt.c->master;
-            else centerover = cwt.c;
-            // SDL_LockSurface(s);
-            drawthemap(); 
-            // SDL_UnlockSurface(s);
-            centerpc(INF);
-            }
-          playermoved = true;
+        if(uni == 'o') {
+          cmode = emOverview;
           }
+
+        if(sym == SDLK_HOME || sym == SDLK_F3 || (sym == ' ' && !shmup::on)) 
+          fullcenter();
         
-        if(sym == SDLK_F6) {
+/*      if(sym == SDLK_F6) {
           View = spin(M_PI/2) * inverse(cwtV) * View;
           if(flipplayer) View = spin(M_PI) * View;
           cmode = emDraw;
+          } */
+
+        if(sym == 'v') {
+          cmode = emMenu;
           }
 
-        if(sym == 'v' || sym == SDLK_F2) {
+        if(sym == SDLK_F2) {
           cmode = emVisual1;
           }
 
 #ifdef PANDORA
-        if(ev.type == SDL_MOUSEBUTTONUP && sym == 0 && !rightclick) {
+        if(ev.type == SDL_MOUSEBUTTONUP && sym == 0 && !rightclick) 
 #else
-        if(ev.type == SDL_MOUSEBUTTONDOWN && sym == 0 && !rightclick) {
+        if(ev.type == SDL_MOUSEBUTTONDOWN && sym == 0 && !rightclick) 
 #endif
-          
+          {
           bool forcetarget = (keystate[SDLK_RSHIFT] | keystate[SDLK_LSHIFT]);
           
-          if(mouseover && targetclick && targetRangedOrb(mouseover, forcetarget ? roMouseForce : roMouse))
+          shmup::cpid = 0;
+          if(mouseover && targetclick && (numplayers() == 1) && targetRangedOrb(mouseover, forcetarget ? roMouseForce : roMouse))
             ;
           else if(forcetarget)
             ;
-          else if(mousedest == -1)
-            movepcto(mousedest);
-          else
-            movepcto((mousedest + 42 - cwt.spin)%42);
+          else if(shmup::on)
+            ;
+          else mousemovement();
           }
         
         if(sym == SDLK_F1) {
+          lastmode = cmode;
           cmode = emHelp;
+          }
+        }
+
+      else if(cmode == emMenu) {
+
+        if(sym == SDLK_F1 || sym == 'h') {
+          lastmode = cmode;
+          cmode = emHelp;
+          }
+        else if(sym == 'b')
+          cmode = emVisual1;
+        else if(sym == 'a')
+          cmode = emVisual2;
+        else if(sym == 'm')
+          cmode = emChangeMode;
+        else if(sym == 't')
+          loadScores();
+        else if(sym == 'r' || sym == SDLK_F5) {
+          restartGame();
+          cmode = emNormal;
+          }
+        else if(sym == 'q' || sym == SDLK_F10)
+          return;
+        else if(sym == 'o')
+          cmode = emOverview;
+        else if(sym == SDLK_ESCAPE)
+          cmode = emQuit;
+        else if((sym != 0 && sym != SDLK_F12) || ev.type == SDL_MOUSEBUTTONDOWN) {
+          cmode = emNormal;
+          msgs.clear();
           }
         }
 
@@ -4187,14 +5320,12 @@ void mainloop() {
         
         if(uni >= 32 && uni < 64) xuni = uni;
         
-        if(uni == ' ') cmode = emVisual2;
-      
-        if(xuni == 'p') vid.alpha += shift * 0.1;        
-        if(xuni == 'z') vid.scale += shift * 0.1;
-        if(xuni == 'a') vid.aspeed += shift;
+        if(xuni == 'p') vid.alpha += shiftmul * 0.1;        
+        if(xuni == 'z') vid.scale += shiftmul * 0.1;
+        if(xuni == 'a') vid.aspeed += shiftmul;
         if(xuni == 'f') {
           vid.full = !vid.full;
-          if(shift > 0) {
+          if(shiftmul > 0) {
             vid.xres = vid.full ? vid.xscr : 9999;
             vid.yres = vid.full ? vid.yscr : 9999;
             setfsize = true;
@@ -4206,11 +5337,11 @@ void mainloop() {
         if(xuni == 's') saveConfig();
         
         if(xuni == '7') { vid.darkhepta = !vid.darkhepta; }
-        if(xuni == 'w') { vid.wallmode += 60 + (shift > 0 ? 1 : -1); vid.wallmode %= 4; }
-        if(xuni == 'm') { vid.monmode += 60 + (shift > 0 ? 1 : -1); vid.monmode %= 4; }
-        if(xuni == 'c') { vid.axes += 60 + (shift > 0 ? 1 : -1); vid.axes %= 4; }
+        if(xuni == 'w') { vid.wallmode += 60 + (shiftmul > 0 ? 1 : -1); vid.wallmode %= 4; }
+        if(xuni == 'm') { vid.monmode += 60 + (shiftmul > 0 ? 1 : -1); vid.monmode %= 4; }
+        if(xuni == 'c') { vid.axes += 60 + (shiftmul > 0 ? 1 : -1); vid.axes %= 4; }
         if(xuni == 'b') {
-          audiovolume += int(10.5 * shift);
+          audiovolume += int(10.5 * shiftmul);
           if(audiovolume < 0) audiovolume = 0;
           if(audiovolume > MIX_MAX_VOLUME) audiovolume = MIX_MAX_VOLUME;
           Mix_VolumeMusic(audiovolume);
@@ -4222,22 +5353,18 @@ void mainloop() {
         process_showoff(sym);
 #endif
 
-        if(sym == SDLK_F1 || sym == 'h') {
-          cmode = emHelp;
-          }
-
         if(xuni == 'l') {
-          vid.language++;
+          vid.language += (shiftmul>0?1:-1);
           vid.language %= NUMLAN;
-          printf("lan = %d\n", vid.language);
+          if(vid.language < 0) vid.language += NUMLAN;
           }
 
         if(xuni == 'g') {
-          vid.female = !vid.female;
-          switchcolor(vid.skincolor, skincolors, 0);
-          switchcolor(vid.haircolor, haircolors, 0);
-          switchcolor(vid.dresscolor, dresscolors, 0);
-          switchcolor(vid.swordcolor, swordcolors, 0);
+          // vid.female = !vid.female;
+          // switchcolor(vid.skincolor, skincolors, 0);
+          // switchcolor(vid.haircolor, haircolors, 0);
+          // switchcolor(vid.dresscolor, dresscolors, 0);
+          // switchcolor(vid.swordcolor, swordcolors, 0);
           cmode = emCustomizeChar;
           }
 
@@ -4246,12 +5373,13 @@ void mainloop() {
       else if(cmode == emCustomizeChar) {
         char xuni = uni | 96;
         int mod = ev.key.keysym.mod;
-        if(shift < -.5)
+        if(shiftmul < -.5)
           mod = 1;
-        else if(shift > -.2 && shift < .2)
+        else if(shiftmul > -.2 && shiftmul < .2)
           mod = 2;
         else mod = 0;
         if(xuni == 'g') vid.female = !vid.female;
+        if(xuni == 'p') vid.samegender = !vid.samegender;
         if(xuni == 's') switchcolor(vid.skincolor, skincolors, mod);
         if(xuni == 'h') switchcolor(vid.haircolor, haircolors, mod);
         if(xuni == 'w') switchcolor(vid.swordcolor, swordcolors, mod);
@@ -4262,17 +5390,21 @@ void mainloop() {
       else if(cmode == emVisual2) {
         char xuni = uni | 96;
         
-#ifdef GL          
         if(xuni == 'v' || sym == SDLK_F2 || sym == SDLK_ESCAPE) cmode = emNormal;
+        if(xuni == 's') saveConfig();
+        
+        if(sym == SDLK_F1 || sym == 'h') 
+          lastmode = cmode, cmode = emHelp;
+#ifdef GL          
 
-        if(xuni == 'o' && shift > 0) {
+        if(xuni == 'o' && shiftmul > 0) {
           vid.usingGL = !vid.usingGL;
           if(vid.usingGL) addMessage(XLAT("openGL mode enabled"));
           if(!vid.usingGL) addMessage(XLAT("openGL mode disabled"));
           setvideomode();
           }
 
-        if(xuni == 'o' && shift < 0 && !vid.usingGL) {
+        if(xuni == 'o' && shiftmul < 0 && !vid.usingGL) {
           vid.usingAA = !vid.usingAA;
           if(vid.usingAA) addMessage(XLAT("anti-aliasing enabled"));
           if(!vid.usingAA) addMessage(XLAT("anti-aliasing disabled"));
@@ -4280,68 +5412,153 @@ void mainloop() {
 #endif
 
         if(xuni == 'f') { 
-          vid.framelimit += int(10.5 * shift);
+          vid.framelimit += int(10.5 * shiftmul);
           if(vid.framelimit < 5) vid.framelimit = 5;
           }
         
-        if(xuni == 'a') vid.joyvalue += int(shift * 100);
-        if(xuni == 'b') vid.joyvalue2 += int(shift * 100);
-        if(xuni == 'c') vid.joypanthreshold += int(shift * 100);
-        if(xuni == 'd') vid.joypanspeed += shift / 50000;
-        if(xuni == 'e') vid.eye += shift * 0.01;        
-        if(xuni == 't') vid.flashtime += shift>0?1:-1;
+        if(xuni == 'a') vid.joyvalue += int(shiftmul * 100);
+        if(xuni == 'b') vid.joyvalue2 += int(shiftmul * 100);
+        if(xuni == 'c') vid.joypanthreshold += int(shiftmul * 100);
+        if(xuni == 'd') vid.joypanspeed += shiftmul / 50000;
+        if(xuni == 'e') vid.eye += shiftmul * 0.01;
+        if(xuni == 't') vid.flashtime += shiftmul>0?1:-1;
 
         if(xuni == 'p') autojoy = !autojoy;
-        if(xuni == 's') { vid.shifttarget = !vid.shifttarget; }
-
-        if(uni == ' ') cmode = emChangeMode;
+        if(xuni == 'i') { vid.shifttarget = !vid.shifttarget; }
         }
 
       else if(cmode == emChangeMode) {
 
-        char xuni = uni | 96;
+        char xuni = uni;
+        
+        if((uni >= 'A' && uni <= 'Z') || (uni >= 1 && uni <= 26)) 
+          xuni |= 96;
+        
         if(xuni == 'v' || sym == SDLK_F2 || sym == SDLK_ESCAPE) cmode = emNormal;
-        if(uni == ' ') cmode = emVisual1;
 
         if(sym == 'c') {
-          cheater++;
-          addMessage(XLAT("You activate your demonic powers!"));
-          addMessage(XLAT("Shift+F, Shift+O, Shift+T, Shift+L, Shift+U, etc."));
-          cmode = emNormal;
+          if(!cheater) {
+            cheater++;
+            addMessage(XLAT("You activate your demonic powers!"));
+            addMessage(XLAT("Shift+F, Shift+O, Shift+T, Shift+L, Shift+U, etc."));
+            cmode = emNormal;
+            }
+          else {
+            cmode = emNormal;
+            firstland = princess::challenge ? laPalace : laIce;
+            restartGame();
+            }
           }
 
-        if(xuni == 'g') cmode = emDraw;
-        if(xuni == 'e') cmode = emPickEuclidean;
-        
-        if(uni == 'h' || uni == '3' || uni == '7' || uni == 'f') {
-          vid.boardmode = uni;
-          cheater = 1;
-          showid = 0; firstland = laGameBoard;
-          for(int i=0; i<landtypes; i++) landcount[i] = 0;
-          for(int i=0; i<ittypes; i++) items[i] = 0;
-          for(int i=0; i<motypes; i++) kills[i] = 0;
-          saveStats();
-          if(euclid) restartGameSwitchEuclid();
-          clearMemory();
-          initcells();
-          initgame();
-          restartGraph();
-          cmode = emNormal;
+        if(xuni == 'g') {
+          cmode = emDraw;
+          mapeditor::drawcell = cwt.c;
           }
-        
+        if(xuni == 'e') {
+          cmode = emPickEuclidean;
+          }
+        if(xuni == 'p') {
+          if(!princess::everSaved) 
+            addMessage(XLAT("Save %the1 first to unlock this challenge!", moPrincess));
+          else {
+            restartGame('p');
+            cmode = emNormal;
+            }
+          }
+        if(xuni == 'm') {
+          cheater++;
+          cmode = emMapEditor;
+          addMessage(XLAT("You activate your terraforming powers!"));
+          }
+        if(xuni == 's') 
+          cmode = emShmupConfig;
+        if(xuni == 'h' && !shmup::on) {
+          if(hardcore && !canmove) { }
+          else if(hardcore && canmove) { hardcore = false; }
+          else { hardcore = true; canmove = true; hardcoreAt = turncount; }
+          if(hardcore)
+            addMessage("One wrong move, and it is game over!");
+          else
+            addMessage("Not so hardcore?");
+          if(pureHardcore()) cmode = emNormal;
+          }        
+        if(xuni == 'r') {
+          randomPatternsMode = !randomPatternsMode;
+          firstland = laIce;
+          restartGame();
+          cmode = emNormal;
+          }        
         }
 
+      else if(cmode == emShmupConfig) 
+        shmup::handleConfig(uni, sym);
+      
+      else if(cmode == emMapEditor)
+        mapeditor::handleKey(uni, sym);
+                
+      else if(cmode == emOverview) {
+        int umod = uni % 1000;
+        int udiv = uni / 1000;
+        if(udiv == 1 && umod < landtypes) {
+          if(cheater) {
+            activateSafety(eLand(umod));
+            cmode = emNormal;
+            canmove = true;
+            }
+          else {
+            lastmode = cmode;
+            cmode = emHelp; help = generateHelpForLand(eLand(umod));
+            }
+          }
+        else if(udiv == 2 && umod < ittypes) {
+          if(cheater) {
+            double shiftmul = 1.001;
+            if(anyshiftclick) shiftmul *= -1;
+            if(rightclick) shiftmul /= 10;
+            int ic = itemclass(eItem(umod));
+            if(ic == IC_TREASURE) items[umod] += int(10*shiftmul);
+            if(ic == IC_ORB) items[umod] += int(60*shiftmul);
+            if(umod == itGreenStone) items[umod] += int(100*shiftmul);
+            else if(ic == IC_OTHER) items[umod] += (shiftmul>0?1:-1);
+            if(items[umod] < 0) items[umod] = 0;
+            if(hardcore) canmove = true;
+            else checkmove();
+            }
+          else {
+            lastmode = cmode;
+            cmode = emHelp; help = generateHelpForItem(eItem(umod));
+            if(hardcore) canmove = true;
+            else checkmove();
+            }
+          }
+        else if(udiv == 3 && umod < walltypes) {
+          lastmode = cmode;
+          cmode = emHelp; help = generateHelpForWall(eWall(umod));
+          }
+        else if(uni) cmode = emNormal;
+        }
+                
+      else if(cmode == emDraw) 
+        mapeditor::drawHandleKey(uni, sym, shiftmul);
+
       else if(cmode == emPickEuclidean) {
-        char xuni = uni | 96;
-        if(xuni == 'z') {
-          if(euclid) restartGameSwitchEuclid();
+        int lid;
+        if(uni >= 'a' && uni <= 'z')
+          lid = uni - 'a';
+        else if(uni >= 'A' && uni <= 'Z')
+          lid = 26 + uni - 'A';
+        else
+          lid = -1;
+          
+        if(uni == '0') {
+          if(euclid) restartGame('e');
           cmode = emNormal;
           }
-        else if(xuni >= 'a' && xuni < 'a' + landtypes) {
-          euclidland = eLand(2 + (xuni - 'a'));
-          if(landvisited[euclidland]) {
+        else if(lid >= 0 && lid < NUMLIST) {
+          euclidland = lseq[lid];
+          if(landvisited[euclidland] && euclidland != laOceanWall) {
             if(euclid) restartGame();
-            else restartGameSwitchEuclid();
+            else restartGame('e');
             cmode = emNormal;
             }
           else euclidland = laIce;
@@ -4354,7 +5571,7 @@ void mainloop() {
         else if(uni == 'c')
           help = buildCredits();
         else if((sym != 0 && sym != SDLK_F12) || ev.type == SDL_MOUSEBUTTONDOWN)
-          cmode = (help == XLAT(drawhelp) ? emDraw : emNormal);
+          cmode = lastmode;
         }
         
       else if(cmode == emQuit) {
@@ -4363,18 +5580,23 @@ void mainloop() {
           restartGame(), cmode = emNormal;
           msgs.clear();
           }
+        else if(uni == 'v') cmode = emMenu;
         else if(sym == SDLK_UP || sym == SDLK_KP8) msgscroll++;
         else if(sym == SDLK_DOWN || sym == SDLK_KP2) msgscroll--;
         else if(sym == SDLK_PAGEUP || sym == SDLK_KP9) msgscroll+=5;
         else if(sym == SDLK_PAGEDOWN || sym == SDLK_KP3) msgscroll-=5;
+        else if(sym == SDLK_HOME || sym == SDLK_F3 || (sym == ' ' && !shmup::on)) 
+          fullcenter();
+        else if(uni == 'o') cmode = emOverview;
         else if(uni == 't') {
           if(!canmove) restartGame();
           loadScores();
           msgs.clear();
           }
         
-        else if((sym != 0 && sym != SDLK_F12) || ev.type == SDL_MOUSEBUTTONDOWN) {
+        else if(((sym != 0 && sym != SDLK_F12) || ev.type == SDL_MOUSEBUTTONDOWN) && !didsomething) {
           cmode = emNormal;
+          msgscroll = 0;
           msgs.clear();
           }
         }
@@ -4402,8 +5624,7 @@ void cleargraph() {
   for(int i=0; i<256; i++) if(font[i]) TTF_CloseFont(font[i]);
   for(int i=0; i<128; i++) if(glfont[i]) delete glfont[i];
 #ifndef SIMULATE_JOYSTICK
-  if(stick) SDL_JoystickClose(stick);
-  if(panstick) SDL_JoystickClose(panstick);
+  closeJoysticks();
 #endif
   SDL_Quit();
   }
@@ -4411,5 +5632,17 @@ void cleargraph() {
 
 void cleargraphmemory() {
   mouseover = centerover = lmouseover = NULL;  
+#ifndef MOBILE
+  if(mapeditor::painttype == 4) 
+    mapeditor::painttype = 0, mapeditor::paintwhat = 0,
+    mapeditor::paintwhat_str = "clear monster";
+  mapeditor::copywhat = NULL;
+  mapeditor::undo.clear();
+  if(!cheater) mapeditor::displaycodes = 0;
+  if(!cheater) mapeditor::whichShape = 0;
+#endif
   }
 
+void showMissionScreen() {
+  cmode = emQuit;
+  }

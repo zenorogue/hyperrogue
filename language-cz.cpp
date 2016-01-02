@@ -117,7 +117,7 @@ N("red slime", GEN_O, "červený sliz", "červené slizy", "červený sliz", "č
 N("blue slime", GEN_O, "modrý sliz", "modré slizy", "modrý sliz", "modrým slizem")
 N("living wall", GEN_F, "živoucí zeď", "živoucí zdi", "živoucí zeď", "živoucí zdí")
 N("living floor", GEN_F, "živoucí podlaha", "živoucí podlahy", "živoucí podlahu", "živoucí podlahou")
-N("dead troll", GEN_M, "mrtvý šutroll" ,"mrtví šutrollové", "mrtvého šutrolla", "mrtvým šutrollem")
+N("dead troll", GEN_M, "mrtvý troll" ,"mrtví trollové", "mrtvého trolla", "mrtvým trollem")
 N("sand dune", GEN_F, "písečná duna", "písečné duny", "písečnou dunu", "písečnou dunou")
 N("Magic Mirror", GEN_N, "Kouzelné zrcadlo", "Kouzelná zrcadla", "Kouzelné zrcadlo", "Kouzelným zrcadlem")
 N("Cloud of Mirage", GEN_O, "Oblak přeludů", "Oblaky přeludů", "Oblak přeludů", "Oblakem přeludů")
@@ -1216,7 +1216,7 @@ S(  "The Land of Power is filled with everburning fire, magical Orbs, and guarde
     "Witches are allowed to use all the powers of the "
     "basic orbs against intruders. These powers never expire, but a Witch "
     "can use only one power at a time (not counting Orbs of Life).\n\n"
-    "Witches and Golems don't pursue you into other Lands. Also, most Orb powers"
+    "Witches and Golems don't pursue you into other Lands. Also, most Orb powers "
     "are drained when you leave the Land of Power.",
     "Kraj Moci je plný věčně planoucích ohňů a magických Sfér a střeží ho "
     "čarodějnice a golemové. Základní Sféry se válejí všude kolem a ty cennější "
@@ -1307,6 +1307,7 @@ S("You can right click any element to get more information about it.\n\n",
 )
 
 S("TRANSLATIONWARNING", "")
+// S("TRANSLATIONWARNING", "Warning: new features from 7.2 are not yet translated to Czech")
 
 S("The Hyperbugs are fighting!", "Hyperhmyzáci bojují mezi sebou!")
 
@@ -1490,8 +1491,6 @@ S("Illusions are targetted "
 S("You create an Illusion!", "Vytvořil jsi iluzi!")
 S("You take the Illusion away.", "Zrušil jsi iluzi.")
 
-#undef Orb
-
 S("Cannot teleport on a monster!", "Nemůžeš se teleportovat na netvora!")
 S("Cannot teleport on an item!", "Nemůžeš se teleportovat na předmět!")
 S("Cannot teleport here!", "Sem se teleportovat nemůžeš!")
@@ -1516,3 +1515,1273 @@ S("Shift+F, Shift+O, Shift+T, Shift+L, Shift+U, etc.",
   "Shift+F, Shift+O, Shift+T, Shift+L, Shift+U, atd.")
 S("also hold Alt during the game to toggle high contrast",
   "Podržením klávesy Alt během hry lze přepnout vysoký kontrast")
+
+// Crossroads II
+
+N("Crossroads II", GEN_N, "Křižovatka II", "Křižovatky II", "Křižovatku II", "na Křižovatce II")
+
+S(
+  "An alternate layout of the Crossroads. It is more dense and more regular, "
+  "although you won't find the castle of Camelot here.",
+  
+  "Alternativní plán Křižovatky. Je hustší a pravidelnější, ale hrad Camelot tady nenajdete.")
+
+// Caribbean
+
+// 'Karaiby' is plural in Polish, should probably fix the grammar for this
+
+N("Caribbean", GEN_M, "Karibik", "Karibiky", "Karibuku", "v Karibiku")
+
+N("Pirate", GEN_M, "Pirát", "Piráti", "Piráta", "Pirátem")
+N("Shark", GEN_M, "Žralok", "Žraloci", "Žraloka", "Žralokem")
+N("Parrot", GEN_M, "Papoušek", "Papoušci", "Papouška", "Papouškem")
+N("Pirate Treasure", GEN_M, "Pirátský poklad", "Pirátské poklady", "Pirátský poklad", "Pirátským pokladem")
+N("Compass", GEN_M, "Kompas", "Kompasy", "Kompas", "Kompasem")
+
+N("sea", GEN_N, "moře", "moře", "moře", "mořem")
+N("boat", GEN_O, "člun", "čluny", "člun", "člunem")
+N("island", GEN_O, "ostrov", "ostrovy", "ostrov", "ostrovem")
+N("tree", GEN_O, "strom", "stromy", "strom", "stromem")
+
+Orb("Time", "Času")
+
+S("This dangerous sea contains nasty sharks and pirates. ",
+  "V tomto nebezpečném moři se vyskytují nebezpeční žraloci a piráti.")
+
+S("The islands of Caribbean are infinite and circular, and "
+  "the pirates probably have hidden their treasures somewhere far from the coast.",
+  "Karibské ostrovy jsou nekonečné a kulaté a piráti pravděpodobně ukryli své poklady kdesi daleko od pobřeží.")
+
+S(
+    "Hyperbolic pirates do not need huge ships, since so many lands to conquest "
+    "are so close. These small boats are enough for them.\n\n"
+    "Boats allow you to go through water. If you are in a boat, you can move into "
+    "a water cell (and the boat will come with you).",
+    
+    "Hyperboličtí piráti nepotřebují velké lodě, protože tolik zemí, které mohou dobývat, "
+    "je tak blízko. Tyto malé čluny jim stačí.\n\n"
+    "Čluny ti umožňují pohybovat se po vodě. Pokud jsi ve člunu, můžeš vstoupit na "
+    "vodní políčko (člun se přesune spolu s tebou).")
+
+S(
+    "The forests of Caribbean are too dense to be traversed by humans, "
+    "and they are hard to burn. Many colorful parrots can be found there.",
+    "Karibské lesy jsou příliš husté na to, aby jimi mohl projít člověk, "
+    "a špatně hoří. Lze v nich najít mnoho barevných papoušků.")
+
+S("Ye wonder where did th' Pirates find all these riches...",
+    "Říkáš si, kde asi ti piráti našli všechno tohle bohatství...")
+
+S(
+  "The hyperbolic pirates have no use for treasure maps. However, they have found "
+  "out that a compass points to the center of the island. So they just go as "
+  "far towards the center as they can, and hide their treasure there.",
+  
+  "Mapy jsou hyperbolickým pirátům k ničemu. Zjistili ale, že kompas vždy ukazuje do středu ostrova. "
+  "A tak se prostě vydávají tak daleko do středu, jak to jen jde, a tam ukrývají své poklady.")
+
+S("Just a nasty shark.", "Obyčejný, nebezpečný žralok.")
+
+S("Parrots feel safe in the forests of Caribbean, so they "
+    "never leave them. But they will help the Pirates by attacking the intruders.",
+
+  "Papoušci se v karibských lesích cítí bezpečně, a tak je nikdy neopouštějí. "
+  "Pomáhají ale pirátům tím, že útočí na vetřelce.")
+
+S("Just a typical hyperbolic pirate.", "Typický hyperbolický pirát.")
+
+S(
+    "Normally, the power of most Orbs slowly fades away, even when "
+    "you are not actively using them. This Orb prevents this.\n\n"
+    
+    "When you have the Orb of Time, Orbs which are not active won't lose their power. "
+    "Orbs are considered active if they have a continuous power which has actually "
+    "affected something in the last turn.\n\n"
+    
+    "Orbs of Shielding remain active after being activated (even if you are no longer "
+    "attacked), and Orbs of Time have a bigger cap inside their native Caribbean than "
+    "outside.",
+    
+    "Síla většiny Sfér se většinou pomalu vytrácí, a to i tehdy, když je aktivně nepoužíváte. "
+    "Tato sféra tomu brání.\n\n"
+    
+    "Když máš Sféru Času, nebudou neaktivní Sféry ztrácet sílu. 'Aktivní Sféra' je taková Sféra, "
+    "která má stálý efekt a která v minulém kole něco skutečně ovlivnila.\n\n"
+    
+    "Sféry Štítu zůstávají trvale aktivní, jakmile jednou zablokují útok (i když na tebe právě nikdo "
+    "neútočí a Sféry Času mohou ve svém domovském Karibiku dosahovat vyšších hodnot síly než mimo něj.")
+
+// Achievements:
+
+// Parrot : Find and collect Pirate Treasure.
+// Caribbean Shark : Collect 10 Pirate Treasures.
+// Pirate : Collect 25 Pirate Treasures.
+// Master of Caribbean : Collect 50 Pirate Treasures.
+
+// Papoušek : Najdi a získej Pirátský poklad.
+// Karibský žralok : Získej 10 Pirátských pokladů.
+// Pirát : Získej 25 Pirátských pokladů.
+// Pán Karibiku : Získej 50 Pirátských pokladů.
+
+// Red Rock Valley
+
+N("Red Rock Valley", GEN_N, "Údolí červených skal", "Údolí červených skal", "Údolí červených skal", "v Údolí červených skal")
+
+N("Rock Snake", GEN_M, "Kamenný had", "Kamenní hadi", "Kamenného hada", "Kamenným hadem")
+N("Rock Snake Tail", GEN_O, "Ocas Kamenného hada", "Ocasy Kamenných hadů", "Ocas Kamenného hada", "Ocasem Kamenného hada")
+N("Red Troll", GEN_M, "Červený troll", "Červení trollové", "Červeného trolla", "Červeným trollem")
+N("Red Gem", GEN_O, "Červený drahokam", "Červené drahokamy", "Červený drahokam", "Červeným drahokamem")
+
+N("rock I", GEN_F, "skála I", "skály I", "skálu I", "skálou I")
+N("rock II", GEN_F, "skála II", "skály II", "skálu II", "skálou II")
+N("rock III", GEN_F, "skála III", "skály III", "skálu III", "skálou III")
+
+Orb("Space", "Prostoru")
+
+S("Not enough power for telekinesis!", "Nemáš dost síly na telekinezi!")
+
+S("This land contains high rock formations. Most of the valley is at level 0, "
+  "while items are found at level 3. It is impossible to gain two or more levels, "
+  "or to lose three levels, in a single move, (attacks are possible at any "
+  "difference, though). Kill Red Trolls and Rock Snakes to make a cell higher.",
+
+  "V tomto kraji se nacházejí vysoké skalní útvary. Většina údolí je na úrovni 0, "
+  "ale předměty se nacházejí pouze na úrovni 3. Jedním pohybem se můžete dostat "
+  "maximálně o jednu úroveň výš nebo o dvě úrovně níž, ale útočit je možné bez "
+  "ohledu na výškový rozdíl. Zabíjením Červených trollů a Skalních hadů můžete "
+  "pole posouvat nahoru.")
+
+S("A kind of Troll native to the Red Rock Valley.",
+  "Typ trolla, který se vyskytuje v Údolí červených skal.")
+
+S(
+  "Rock snakes are similar to Sandworms, but they move each turn. However, they "
+  "only move on the hexagonal cells. They are also somewhat longer than the Sandworms.",
+  
+  "Kamenní hadi jsou podobní Písečným červům, ale pohybují se v každém kole. Mohou se "
+  "však pohybovat pouze po šestiúhelníkových polích. Kromě toho jsou oproti Písečným "
+  "červům o něco delší.")
+
+S("A gem from the Red Rock Valley.", "Drahokam z Údolí červených skal.")
+
+S(
+    "This Orb is able to bring faraway items to your location, even if there are "
+    "monsters or barriers on the way. The cost of "
+    "bringing an item (in charges) equals the square of its distance to you. Contrary "
+    "to some other Orbs, usage is not allowed if you have not enough power left.",
+    
+  "Tato Sféra vám dokáže přinášet vzdálené předměty, a to i skrz netvory nebo bariéry. "
+  "Přinesení předmětu stojí tolik síly, kolik je druhá mocnina vzdálenosti předmětu. "
+  "Na rozdíl od některých jiných Sfér, Sféru Prostoru není možné použít, pokud vám už "
+  "nezbývá dostatečné množství síly.")
+
+// Climber : Find and collect a Red Gem.
+// Red Troll : Collect 10 Red Gems.
+// Rock Snake : Collect 25 Red Gems.
+// Master of Red Rock : Collect 50 Red Gems.
+
+// Horolezec : Najdi a získej Červený drahokam.
+// Červený troll : Získej 10 Červených drahokamů.
+// Kamenný had : Získej 25 Červených drahokamů.
+// Pán Červených skal: Získej 50 Červených drahokamů.
+
+// missing sentences
+
+S("%The1 drowns!", "%1 se utopi%l1!");
+S("%The1 falls!", "%1 spad%l1!");
+
+// these were missing from the translation for some reason
+
+S("Hell has these lakes everywhere... They are shaped like evil stars, and filled with burning sulphur.",
+  "Tato jezera se nacházejí po celém Pekle... Mají tvar zlých hvězd a jsou naplněna hořící sírou.")
+
+// Hardcore Mode
+
+S("hardcore mode", "hardcore mód");
+
+S("One wrong move and it is game over!", "Jediný špatný tah a hra končí!");
+S("Not so hardcore?", "Že bys nebyl zas až tak hardcore?");
+
+// Shoot'em up Mode
+
+S("shoot'em up mode", "mód střílečky");
+S("Welcome to the Shoot'em Up mode!", "Vítej v módu střílečky!");
+S("F/;/Space/Enter/KP5 = fire, WASD/IJKL/Numpad = move", "F/;/Space/Enter/KP5 = střelba, WASD/IJKL/Numpad = pohyb");
+
+N("Rogue", GEN_M, "Chytrák", "Chytráci", "Chytráka", "Chytrákem")
+N("Knife", GEN_O, "Nůž", "Nože", "Nůž", "Nožem")
+N("Flail", GEN_O, "Řemdih", "Řemdihy", "Řemdih", "Řemdihem")
+N("Fireball", GEN_F, "Ohnivá koule", "Ohnivé koule", "Ohnivou kouli", "Ohnivou koulí")
+N("Tongue", GEN_O, "Jazyk", "Jazyky", "Jazyk", "Jazykem")
+
+S("In the Shoot'em Up mode, you are armed with thrown Knives.",
+  "V módu střílečky jsi vyzbrojený vrhacími noži.")
+S("A simple, but effective, missile, used by rogues.",
+  "Prostá, ale efektivní vrhací zbraň, kterou používají lovci pokladů.")
+S("This attack is likely to hit the attacker.",
+  "Tento útok může velmi snadno zasáhnout i samotného útočníka.")
+S("This magical missile burns whatever it hits.", "Tato magická střela spálí všechno, co zasáhne.")
+S("Some monsters have long tongues, which allow them to attack enemies in nearby cells.",
+  "Někteří netvoři mají dlouhé jazyky, které jim umožňují útočit na sousední pole.")
+  
+// modes for the local highscores
+
+S(", m - mode: normal", ", m - normální mód")
+S(", m - mode: hardcore only", ", m - pouze hardcore mód")
+S(", m - mode: shoot'em up", "m - mód střílečky")
+
+// update description for Steam:
+
+// (Mód střílečky a dva nové kraje oproti neplacené verzi. Další kraje jsou v plánu!)
+
+S("You would get hurt!", "To by bolelo!")
+S("PARTIAL", "CZĘŚCIOWO")
+
+S("Cannot drop %the1 here!", "Tady nelze položit Mrtvou Sféru!");
+
+// Euclidean scores
+S(" (E:%1)", " (E:%1)");
+
+S("You cannot attack Rock Snakes directly!", "Na Kamenné hady nemůžeš útočit přímo!");
+
+S("\"I am lost...\"", "\"I am lost...\"");
+
+S("You are killed by %the1!", "Zabi%l1 tě %1!")
+
+// achievements from Version 7.0 which have not yet been translated
+
+// Hardcore : Získej Yendorskou sféru v hardcore módu
+// Mistr nožů : Získej Yendorskou sféru v módu střílečky
+
+// new menu for Version 7.1
+
+S("(v) menu", "(v) menu")
+S("return to the game", "vrať se do hry")
+S("or 'v' to see the main menu", "nebo stiskni 'v' pro hlavní menu")
+
+S("HyperRogue %1", "HyperRogue %1")
+S("basic configuration", "základní konfigurace")
+S("advanced configuration", "pokročilá konfigurace")
+S("local highscores", "lokální hi-score")
+S("help", "nápověda")
+S("restart game", "restartovat hru")
+S("special game modes", "speciální herní módy")
+S("save the game", "uložit a ukončit hru")
+S("quit the game", "ukončit hru")
+S("review your quest", "přehled úkolů")
+S("review the scene", "přehled scény")
+S("game over screen", "obrazovka konce hry")
+S("continue game", "pokračuj ve hře")
+S("play the game!", "hraj!")
+
+// fixed descriptions for Shmup achievements
+
+S("You have used less knives than ever before. Congratulations!",
+  "Použil jsi méně nožů než kdykoli předtím. Gratulujeme!")
+  
+S("You have improved both your real time and knife count. Congratulations!",
+  "Zlepšil jsi jak svůj čas, tak počet nožů. Gratulujeme!")
+  
+S("%1 knives (%2)", "nožů: %1 (%2)")
+
+// temporary
+S("No description yet." ,"Zatím bez popisu.")
+
+// special case when no Spice is visible
+S("The sandworm explodes!", "Písečný červ vybuchl!")
+
+// Ocean
+
+// achievements:
+// Došel jsi k Oceánu: Najdi a získej Jantar.
+// Albatros: Získej 10 Jantarů.
+// Jantarový albatros: Získej 25 Jantarů.
+// Pán přílivu: Získej 50 Jantarů.
+
+N("Ocean", GEN_O, "Oceán", "Oceány", "Oceán", "na Oceánu")
+
+S(
+    "You can collect some valuable Ambers on the coast, but beware the tides!\n\n"
+    "You can also take one of the boats and venture into the Ocean, "
+    "to find other coasts, dangerous whirlpools, and islands inhabited by Pirates.",
+
+  "Na pobřeží můžeš sbírat cenný Jantar, ale pozor na příliv a odliv!\n\n"
+  "Také si můžeš vzít člun a vyplout na Oceán, "
+  "kde najdeš další pobřeží, nebezpečné víry a ostrovy obývané piráty.")
+
+N("Albatross", GEN_O, "Albatros", "Albatrosové", "Albatrosa", "Albatrosem")
+
+S(
+  "Those large seabirds attack you for some reason. At least they are not "
+  "as fast as Eagles...",
+  "Tito velcí mořští ptáci na tebe z nějakého důvodu útočí. Aspoň že nejsou tak rychlí jako Orli...")
+
+N("stranded boat", GEN_O, "člun na mělčině", "čluny na mělčině", "člun na mělčině", "ve člunu na mělčině")
+
+S(
+  "This boat cannot go through the sand. But if you sit inside and "
+  "wait for the tide, you will be able to use it to travel through the Ocean.",
+
+  "Tento člun nemůže plout po písku. Ale pokud si do něj sedneš a počkáš na příliv, "
+  "můžeš na něm cestovat přes Oceán."
+  )    
+
+N("Ocean", GEN_O, "Oceán", "Oceány", "Oceán", "na Oceánu")
+
+N("Amber", GEN_O, "Jantar", "Jantary", "Jantar", "Jantarem")
+
+S(
+  "When the tide is away, beautiful ambers can be found on the hyperbolic beaches. "
+  "Perhaps there used to be a forest here?",
+  "Za odlivu můžeš na hyperbolické pláži najít krásné kusy jantaru."
+  "Možná tu kdysi býval les?")
+
+Orb("Air", "Vzduchu")
+
+S("This Orb allows you to blow your enemies away.\n\n"
+  "Click a monster to blow it one cell away. It cannot be used against mimics, ghosts, sharks and other monsters restricted to a specific terrain, and multi-tile monsters."
+,
+  "Tato sféra ti umožňuje odfouknout nepřátele daleko od tebe.\n\n"
+  "Kliknutím na netvora ho můžeš odfouknout o jedno pole od sebe. Tuto schopnost nelze použít na mimiky, duchy, žraloky a jiné netvory, kteří jsou omezení pouze na specifický terén nebo zabírají více než jedno pole."
+  )
+
+N("Sea Border", GEN_O, "Mořská hranice", "Mořské hranice", "Mořskou hranici", "na Mořské hranici")
+
+S("Border between seas.", "Hranice mezi moři.")
+
+// Whirlpool
+
+// achievements:
+// Útěk z Víru: Získej Perlu a unikni z Víru.
+// Vírový žralok: Získej 10 Perel.
+// Vírový pirát: Získej 25 Perel.
+// Pán Víru: Získej 50 Perel.
+
+N("Whirlpool", GEN_O, "Vír", "Víry", "Vír", "ve Víru")
+
+S(
+  "Many lost boats are spinning in this whirlpool. Some of them contain treasures "
+  "and Pirates.\n\n"
+  "Unmanned boats will go one cell clockwise in each turn. Sharks and manned boats "
+  "are only allowed to go with the current, that is, towards the center, or clockwise.",
+  
+  "V tomto víru se točí mnoho ztracených člunů. Na některých z nich se nachází poklad nebo piráti.\n\n"
+  "Čluny bez posádky se v každém kole posunou o jedno pole po směru hodinových ručiček. Žraloci a čluny s posádkou "
+  "se smějí pohybovat pouze po proudu, tedy do středu nebo po směru hodinových ručiček "
+  )
+
+N("Pearl", GEN_F, "Perla", "Perly", "Perlu", "Perlou")
+
+S(
+  "You do not know exactly why, but there are valuable pearls on many boats "
+  "in the whirlpool.",
+  "Nevíš tak úplně jistě proč, ale na mnoha člunech ve Víru jsou cenné perly."
+  )
+
+Orb("Water", "vody")
+
+S( "This Orb allows your boat to go against the current, "
+   "and also to go into the land, creating water on the way.",
+   "Tato Sféra tvému člunu umožňuje plout proti proudu. "
+   "Také můžeš vyplout na souš a přitom vytvářet vodu, kamkoli se vydáš.")
+
+S("You cannot go against the current!", "Nemůžeš plout proti proudu!")
+
+// Minefield
+
+// achievements:
+// Došel jsi na Minové pole: Získej Vejce Bombarďáka.
+// Minolovka: Získej 10 Vajec Bombarďáka.
+// Bombarďák: Získej 25 Vajec Bombarďáka.
+// Pán Minového pole: Získej 50 Vajec Bombarďáka.
+
+N("Minefield", GEN_N, "Minové pole", "Minová pole", "Minové pole", "v Minovém poli")
+N("minefield", GEN_N, "minové pole", "minová pole", "minové pole", "minovým polem")
+N("cell without mine", GEN_N, "pole bez miny", "pole bez min", "pole bez miny", "polem bez min")
+
+S(
+  "This minefield has been created by the Bomberbirds to protect their valuable eggs. "
+  "Mines explode when they are stepped on, creating fire all around them "
+  "(this fire never expires in the Minefield). If you don't step on a mine, you "
+  "know the number of mines in cells around you. These numbers are marked with "
+  "color codes on the cells you have visited.",
+  "Toto minové pole vytvořili ptáci Bombarďáci, aby ochránili svá cenná vejce. "
+  "Mina exploduje, když na ni někdo nebo něco šlápne, čímž zapálí oheň na svém poli a na všech sousedních polích "
+  "(v Minovém poli tento oheň nikdy neuhasne). A samozřejmě ji také odpálí jakýkoli oheň! Pokud "
+  "nešlápneš na minu, budeš vždy vědět, kolik min se nachází na polích okolo tebe. "
+  "Tento počet bude označený barevnými kódy na polích, která jsi už navštívil."
+  )
+
+N("Bomberbird", GEN_M, "Bombarďák", "Bombarďáci", "Bombarďáka", "Bombarďákem")
+
+S(
+    "Dark red birds who have created the minefield.\n\n"
+    "They create a mine on the spot where they are killed, provided "
+    "that the terrain is suitable. Also note that mines are triggered "
+    "by dead birds falling on them.",
+
+    "Tmavočervení ptáci, kteří vytvořili minové pole.\n\n"
+    "Když zemřou, vytvoří na poli, kam spadnou, minu, pokud to terén dovoluje. "
+    "Měj na paměti, že i pád mrtvého ptáka na minu stačí k tomu, aby ji odpálil!")
+
+N("Tame Bomberbird", GEN_M, "Ochočený Bombarďák", "Ochočení Bombarďáci", "Ochočeného Bombarďáka", "Ochočeným Bombarďákem")
+    
+S(
+  "This bomberbird will follow you at some distance, and attack your enemies. "
+  "You can kill it to place a mine.",
+
+  "Tento Bombarďák tě bude sledovat v určité vzdálenosti a útočit na tvé nepřátele. "
+  "Kromě toho ho můžeš zabít, a tím položit minu.")
+
+N("Bomberbird Egg", GEN_N, "Vejce Bombarďáka", "Vejce Bombarďáka", "Vejce Bombarďáka", "Vejcem Bombarďáka")
+
+S(
+  "Bomberbird eggs are big and tasty, and thus valuable. "
+  "They can hatch when left alone for some time (but this will never happen "
+  "if you are watching).",
+
+  "Vejce Bombarďáků jsou velká a chutná -- a tudíž i cenná. Mohou se vylíhnout, "
+  "když je necháš nějaký čas na pokoji (ale to se nikdy nestane, když se na ně díváš)."
+  )
+
+Orb("Friendship", "Přátelství")
+
+S("This Orb summons a friendly Bomberbird.",
+  "Tato sféra vyvolá přátelského Bombarďáka.")
+
+S("Nowhere to blow %the1!", "%a1 není kam odfouknout!")
+S("%The1 is immune to wind!", "%1 je imunní proti větru!")
+S("You blow %the1 away!", "Odfoukl jsi %a1!")
+
+S("WARNING: you are entering a minefield!", "VAROVÁNÍ: vstupuješ do minového pole!")
+S("No mines next to you.", "Ve tvé blízkosti se nenacházejí žádné miny.")
+S("A mine is next to you!", "Ve tvé blízkosti se nachází jedna mina!")
+S("Two mines next to you!", "Ve tvé blízkosti se nacházejí dvě miny!")
+S("Three mines next to you!", "Ve tvé blízkosti se nacházejí tři miny!")
+S("Four mines next to you!", "Ve tvé blízkosti se nacházejí čtyři miny!")
+S("Five mines next to you!", "Ve tvé blízkosti se nachází pět min!")
+S("Six mines next to you!", "Ve tvé blízkosti se nachází šest min!")
+S("Seven mines next to you!", "Ve tvé blízkosti se nachází sedm min!")
+
+S("Still confused? Read the FAQ on the HyperRogue website!\n\n", 
+  "Stále zmatení? Přečtěte si FAQ na webové stránce HyperRogue (prozatím pouze v angličtině)\n\n")
+
+S("You have to run away from the water!", "Musíš utéct před vodou!")
+
+// 7.2
+
+N("Palace", GEN_O, "Palác", "Paláce", "Palác", "v Paláci")
+N("palace wall", GEN_F, "zeď paláce", "zdi paláce", "zeď paláce", "zeď paláce")
+
+S("Apparently a princess is kept locked somewhere, but you won't ever find her in this hyperbolic palace. ",
+  "Někde je tu prý uvězněná princezna, ale tu v tomhle hyperbolickém paláci nikdy nenajdeš. ")
+
+S("Apparently a prince is kept locked somewhere, but you won't ever find him in this hyperbolic palace. ",
+  "Někde je tu prý uvězněný princ, ale toho v tomhle hyperbolickém paláci nikdy nenajdeš. ")
+  
+S("So better just to concentrate on collecting treasure. "
+  "Beware the traps, and the guards, who are hard to kill!",
+  
+  "Takže se raději soustřeď jen na sbírání pokladů. "
+  "Pozor na pasti a na stráže -- je těžké je zabít!"
+  )
+
+N("trapdoor", GEN_N, "propadlo", "propadla", "propadlo", "propadlem")
+S("This floor will fall after someone goes there. Go quickly!",
+  "Tato podlaha se propadne poté, co přes ni někdo projde. Běž rychle!")
+
+N("closed gate", GEN_F, "zavřená brána", "zavřené brány", "zavřenou bránu", "zavřenou bránou")
+N("open gate", GEN_F, "otevřená brána", "otevřené brány", "otevřenou bránu", "otevřenou bránou")
+N("closing plate", GEN_F, "zavírací deska", "zavírací desky", "zavírací desku", "zavírací deskou")
+N("opening plate", GEN_F, "otvírací deska", "otvírací desky", "otvírací desku", "otvírací deskou")
+
+S("Green pressure plates open all gates in radius 3 around them. "
+  "Similarly, red pressure plates close all gates in this radius.",
+  
+  "Zelené desky otevřou všechny brány v okruhu 3 polí, když na ně někdo šlápne. "
+  "Červené desky naopak všechny brány v tomto okruhu zavřou.")
+
+N("Hypersian Rug", GEN_O, "Hyperský koberec", "Hyperské koberce", "Hyperský koberec", "Hyperským kobercem")
+S("Nice, a hyperbolic rug! It will not fit very well on your flat Euclidean floor, but who cares?",
+  "Prima, hyperbolický koberec! Na tvoji placatou eukleidovskou podlahu moc dobře pasovat nebude, ale co?")
+
+Orb("the Frog", "Žáby")
+S("This Orb lets you jump to a place which is two cell away from you, in a single turn. "
+  "You can jump over water, chasms and fire, but not over walls.",
+  "Tato Sféra ti umožňuje skočit v jednom kole dvě pole daleko. "
+  "Můžeš skákat přes vodu, propasti a oheň, ale ne přes zdi.")
+S("Cannot jump through %the1!", "Nemůžeš skočit přes %a1!")
+S("You jump!", "Skočil jsi!")
+
+S("\n\nNote: when pushing %the1 off a heptagonal cell, you can control the pushing direction "
+  "by clicking left or right half of the heptagon.",
+  "\n\nPoznámka: Když tlačíš %a1 ze sedmiúhelníku, můžeš ovládat směr tlačení "
+  "tím, že klikneš na levou či pravou polovinu tohoto sedmiúhelníku."
+  )
+ 
+S(" With the keyboard, you can rotate the view for a similar effect (Page Up/Down).",
+  " Na klávesnici můžeš podobného efektu dosáhnout otočením hrací plochy (Page Up/Down).")
+
+N("Palace Guard", GEN_M, "Strážce Paláce", "Strážci Paláce", "Strážce Paláce", "Strážcem Paláce")
+
+S("You have to hit Palace Guards several times to kill them. After each hit, they "
+  "are pushed away and stunned for some time.",
+  "Na zabití Strážce Paláce potřebuješ několik útoků. Každý zásah Strážce "
+  "odstrčí dozadu a na chvíli ho omráčí.")
+
+N("Fat Guard", GEN_M, "Tlustý strážce", "Tlustí strážci", "Tlustého strážce", "Tlustým strážcem")
+
+S("Fat guards are too heavy to be pushed away by your hits.", 
+  "Tlustí strážci jsou příliš těžcí na to, aby je tvé zásahy dokázaly odstrčit.")
+
+N("Skeleton", GEN_M, "Kostlivec", "Kostlivci", "Kostlivce", "Kostlivcem")
+S("Skeletons work similar to Palace Guards, but they won't die no matter how many "
+  "times you hit them. Well, you have to be more creative...\n\n"
+  "Skeletons attacked outside of their native land, Palace, are stunned for a longer time.",
+  "Kostlivci fungují podobně jako Strážci Paláce, ale ať na ně zaútočíš, "
+  "kolikrát chceš, nikdy je nezabiješ. No, musíš být vynalézavější...\n\n"
+  "Mimo Palác, jejich rodný kraj, budou Kostlivci útokem omráčení na delší dobu."
+  )
+
+N("Vizier", GEN_M, "Vezír", "Vezírové", "Vezíra", "Vezírem")
+S("Viziers are neither pushed away nor stunned. However, you attack them automatically when "
+  "escaping from them.", 
+  "Vezíry nemůžeš odstrčit ani omráčit, ale automaticky na ně útočíš, když od nich utíkáš.")
+
+S("You stun %the1.", "Omráčil jsi %a1.")
+S("The gate is closing right on you! RUN!", "Brána se zavírá! UTÍKEJ!")
+S("%The1 is crushed!", "Brána rozdrtila %a1!")
+S("You hit %the1.", "Zasáhl jsi %a1.")
+S("Hit him by walking away from him.", "Zasáhni ho tak, že se pohneš směrem od něj.")
+S("Hmm, he has been training in the Emerald Mine. Interesting...", "Hmm, tak on trénoval ve Smaragdovém dole. Zajímavé...")
+
+// Reached the Palace: Find and collect a Hypersian Rug.
+// Palace Guard: Collect 10 Hypersian Rugs.
+// Vizier: Colect 25 Hypersian Rugs.
+// Prince: Colect 50 Hypersian Rugs.
+
+// Došel jsi do Paláce: Najdi a získej Hyperský koberec.
+// Strážce Paláce: Získej 10 Hyperských koberců.
+// Vezír: Získej 25 Hyperských koberců.
+// Princ: Získej 50 Hyperských koberců.
+
+// Living Fjord
+
+N("Living Fjord", GEN_O, "Živoucí fjord", "Živoucí fjordy", "Živoucí Fjord", "v Živoucím Fjordu")
+
+S("A coastal area, from where you can get both to the inland worlds and to the Ocean. "
+  "Each turn, each cell will become water or earth, based on the majority of cells around it. "
+  "Contrary to the Living Caves, this process is not affected by most items and monsters, "
+  "but elementals, dead Trolls, and cells outside of the Living Fjord have "
+  "a very powerful effect.",
+  "Pobřežní oblast, odkud se můžeš dostat jak do vnitrozemských světů, tak do Oceánu. "
+  "V každém kole se každé pole změní na vodu nebo na souš podle toho, kterého typu je většina polí kolem něj. "
+  "Na rozdíl od Živoucí jeskyně nemá většina předmětů a netvorů na tento proces žádný vliv, "
+  "ale elementálové, mrtví trollové a pole mimo Živoucí fjord mají "
+  "velmi silný efekt."
+  )
+
+N("Fjord Troll", GEN_M, "Fjordtroll", "Fjordtrollové", "Fjordtrolla", "Fjordtrollem")
+S("Fjord Trolls leave a wall when they die, causing the living fjord to rise around it. "
+  "Contrary to Rock Trolls, items around are not destroyed.",
+  "Fjordtrollové se po smrti promění v zeď, kolem které se zvedají vody Živoucího fjordu. "
+  "Fjordtrollové na rozdíl od Šutrollů neničí předměty kolem sebe."
+  )
+
+N("Viking", GEN_M, "Viking", "Vikingové", "Vikinga", "Vikingem")
+S("Mighty warriors from the Fjord, who can use boats.",
+  "Mocní válečníci z Fjordu, kteří se dokážou plavit na člunech.")
+
+N("Water Elemental", GEN_M, "Elementál Vody", "Elementálové Vody", "Elementála Vody", "Elementálem Vody")
+S("Wherever this powerful being goes, the living fjord "
+  "sinks below water, non-magical boats are destroyed, and fires are extinguished.\n\n"
+  "As a special case, you can attack the Water Elemental from the water, without drowning immediately.",
+  "Kamkoli se vydá tato mocná bytost, tam se Živoucí fjord potápí pod vodu, všechny čluny kromě magických "
+  "jsou zničeny a veškerý oheň je uhašen.\n\n"
+  "Na Elementála Vody můžeš zaútočit z vody, aniž by ses okamžitě utopil; to je speciální případ.")
+
+
+N("Garnet", GEN_O, "Granát", "Granáty", "Granát", "Granátem")
+S("Vikings believe that garnets improve their strength.",
+  "Vikingové věří, že granáty zvyšují jejich sílu.")
+
+Orb("the Fish", "Ryby")
+S("This Orb lets you dive into the water. While diving, you are able to see and collect underwater treasures, "
+  "while being invisible to monsters yourself. You are afraid of jumping into the water straight from a boat, so usually you won't do it.",
+  "Tato Sféra ti umožňuje potopit se pod vodu. Když jsi potopený, můžeš vidět a získávat podvodní poklady, "
+  "zatímco netvoři tě nevidí. Obvykle ale nebudeš skákat do vody přímo ze člunu -- to tě trochu děsí.")
+
+S("%The1 is washed away!", "Elementál Vody spláchl %a1!")
+S("%The1 is extinguished!", "Elementál Vody uhasil %a1!")
+
+// Reached the Living Fjord: Find and collect a Garnet.
+// Viking: Collect 10 Garnets.
+// Water Elemental: Colect 25 Garnets.
+// Master of the Fjord: Colect 50 Garnets.
+
+// Došel jsi do Živoucího fjordu: Najdi a získej Granát.
+// Viking: Získej 10 Granátů.
+// Elementál Vody: Získej 25 Granátů.
+// Pán Fjordu: Získej 50 Granátů.
+
+// implemented, not appears in the game yet
+
+Orb("Discord", "Nesváru")
+
+S("Causes most monsters to attack other monsters, not only you and your friends.",
+  "Díky této Sféře bude většina netvorů útočit nejen na tebe a na tvé kamarády, ale i na jiné netvory.")
+
+// Shmup Configuration
+
+S("forward", "dopředu")
+S("backward", "dozadu")
+S("turn left", "otočení vlevo")
+S("turn right", "otočení vpravo")
+S("move up", "nahoru")
+S("move right", "doprava")
+S("move down", "dolů")
+S("move left", "doleva")
+S("throw a knife", "házení nože")
+S("face the pointer", "otočení ke kurzoru")
+S("throw at the pointer", "házení na kurzor")
+S("drop Dead Orb", "položení Mrtvé sféry")
+S("center the map on me", "vycentrování mapy na postavě")
+S("activate Orb power", "aktivace schopnosti Sféry")
+
+S("pan up", "scrollování nahoru")
+S("pan right", "scrollování doprava")
+S("pan down", "scrollování dolů")
+S("pan left", "scrollování doleva")
+S("rotate left", "otočení vlevo")
+S("rotate right", "otočení vpravo")
+S("home", "vycentrování")
+
+S("do nothing", "nic")
+S("rotate view", "otočení hrací plochy")
+S("panning X", "scrollování ve směru X")
+S("panning Y", "scrollování ve směru Y")
+S("player 1 X", "hráč 1 X")
+S("player 1 Y", "hráč 1 Y")
+S("player 1 go", "hráč 1 pohyb")
+S("player 1 spin", "hráč 1 otáčení")
+S("player 2 X", "hráč 2 X")
+S("player 2 Y", "hráč 2 Y")
+S("player 2 go", "hráč 2 pohyb")
+S("player 2 spin", "hráč 2 otáčení")
+
+S("Joystick %1, axis %2", "Joystick %1, osa %2")
+S("one player", "jeden hráč")
+S("two players", "dva hráči")
+S("configure player 1", "konfigurace hráče 1")
+S("configure player 2", "konfigurace hráče 2")
+S("configure panning", "konfigurace scrollování")
+S("configure joystick axes", "konfigurace os joysticku")
+S("continue playing", "pokračuj ve hře")
+S("start playing in the shmup mode", "začni hrát v módu střílečky")
+S("return to the turn-based mode", "vrať se do módu na kola")
+S("save the configuration", "ulož konfiguraci")
+S("press a key to unassign", "stiskni klávesu, kterou chceš zrušit")
+S("press a key for '%1'", "stiskni klávesu pro '%1'")
+S("unassign a key", "zruš klávesu")
+
+// extra pattern modes
+
+S("explore the Emerald Pattern", "Zkoumání Smaragdového vzoru")
+S("explore the Palace Pattern (4 colors)", "Zkoumání Palácového vzoru (4 barvy)")
+S("explore the Palace Pattern (8 colors)", "Zkoumání Palácového vzoru (8 barev)")
+
+// extra flavor/Knight lines
+
+S("Kill a Vizier in the Palace to access Emerald Mine", "Zabij Vezíra v Paláci a dostaneš se do Smaragdového dolu")
+S("Collect 5 Emeralds to access Camelot", "Získej 5 Smaragdů a dostaneš se do Camelotu")
+S("Some lands unlock at specific treasures or kills", "Některé kraje se otevřou získáním určitých pokladů nebo zabitím určitých netvorů.")
+
+S("You will be fighting red rock snakes, too...", "Budeš bojovat i s kamennými hady...")
+
+S("\"The Red Rock Valley is dangerous, but beautiful.\"", 
+  "\"Údolí červených skal je nebezpečné, ale krásné.\"")
+S("\"Train in the Desert first!\"", "\"Nejdřív se natrénuj v Poušti!\"")
+S("\"I like collecting ambers at the beach.\"", "\"Rád sbírám Jantar na pláži.\"")
+S("\"Our Table seats %1 Knights!\"", "\"U našeho stolu sedí %1 rytířů!\"")
+S("\"There are %1 floor tiles inside our Table!\"", "\"Uvnitř našeho stolu je %1 dlaždic!\"")
+S("\"By now, you should have your own formula, you know?\"", "\"Teď už bys mě%l0 mít svůj vlastní vzorec, ne?\"")
+S("\"Have you tried to take a boat and go into the Ocean? Try it!\"", "\"Už jsi zkouše%l0 vzít člun a vyplout na Oceán?\"")
+
+//====================//
+// NEW IN VERSION 7.3 //
+//====================//
+
+// new name for 'Ivy D'
+
+N("Dead Ivy", GEN_M, "Mrtvý břečťan", "Mrtvé břečťany", "Mrtvý břečťan", "Mrtvým břečťanem")
+
+// new messages for living/nonliving monsters
+
+S("%The1 bites %the2!", "%1 kous%l1 %2!")
+S("%The1 attacks %the2!", "%1 útočí na %a2!")
+S("You destroy %the1 with a mental blast!", "Zniči%l0 jsi %a1 mentálním úderem!")
+S("The ivy kills %the1!", "Břečťan zabil %a1!")
+S("You destroy %the1.", "Zniči%l0 jsi %a1.")
+S("%The1 kills %the2!", "%1 zabi%l1 %a2!")
+S("%The1 sinks!", "%1 zmize%l1 pod vodou!");
+
+S("Cannot jump on %the1!", "Nemůžeš skočit na %1!")
+
+// Map Editor
+//============
+
+S("map editor", "mapový editor")
+S("You activate your terraforming powers!", "Aktivova%l0 jsi své terramorfické schopnosti!")
+S("Press F5 to clear the board.", "F5 vymaže desku.")
+S("Press F5 to restart the game normally.", "Stisknutím F5 restartuješ hru v normálním módu.")
+S("High quality shots not available on this platform", "HQ snímky nejsou na této platformě k dispozici")
+S("Saved the high quality shot to %1", "HQ snímek uložen do %1")
+S("Map saved to %1", "Mapa uložena do %1")
+S("Map loaded from %1", "Mapa načtena z %1")
+S("copying", "kopíruje")
+S("boundary", "hranice")
+S("clear monster", "vymazat netvore")
+S("use at your own risk!", "použití na vlastní nebezpečí!")
+
+// Note: in English, these have been arranged from longest to shortest.
+// This gives a somewhat nice effect on the top left corner of the screen.
+// You may want to aim for the same effect when translating
+
+S("0-9 = radius (%1)", "0-9 = poloměr (%1)")
+S("b = boundary", "c = kopírování")
+S("m = monsters", "i = předměty")
+S("w = walls",    "b = hranice")
+S("i = items",    "m = netvoři")
+S("l = lands",    "l = kraje")
+S("c = copy",     "w = zdi")
+
+// And this is from shortest to longest (bottom left corner)
+S("F1 = help",                "F1 = nápověda")
+S("F2 = save",                "F2 = uložení")
+S("F3 = load",                "F3 = nahrání")
+S("F5 = restart",             "F5 = restart")
+S("F6 = HQ shot",             "F6 = HQ snímek")
+S("F7 = player on/off",       "F7 = zapnout/vypnout hráče")
+S("ESC = return to the game", "ESC = návrat do hry")
+
+S(
+  "This mode allows you to edit the map.\n\n"
+  "NOTE: Use at your own risk. Combinations which never "
+  "appear in the real game may work in an undefined way "
+  "(do not work, look strangely, give strange messages, or crash the game).\n\n"
+  "To get the most of this editor, "
+  "some knowledge of inner workings of HyperRogue is required. "
+  "Each cell has four main fields: land type, wall type, monster type, item type. "
+  "The same wall type (especially \"none\", \"sea\", or \"bonfire\") may look or "
+  "work a bit differently, based on the land it is in. Sometimes an object may "
+  "appear twice on the list due to subtle differences (for example, Demons could "
+  "move next turn or not).\n\n"
+  "Press w, i, l, or m to choose which aspect of cells to change, "
+  "then just click on the cells and they will change. Press 'c' while "
+  "hovering over a cell to copy that cell, this copies all information about it. "
+  "When copying large areas or placing multi-tile monsters, it might be important where "
+  "on the cell you are clicking.\n\n"
+  "You can also press 0-9 to apply your changes to a greater radius. "
+  "This also affects the copy/paste feature, allowing to copy a larger area.\n\n"
+  "Press F2 to save the current map (and F3 to load it). If you try this after "
+  "a long game of HyperRogue (without using Orbs of Safety), the filesize will "
+  "be very large! "
+  "Note however that large structures, such as "
+  "Great Walls, large circles and horocycles, are destroyed by this.\n\n"
+  "Press 'b' to mark cells as boundaries. Such cells, and cells beyond "
+  "them, are not copied by the copy/paste feature, nor saved by the "
+  "save feature.\n\n",
+
+  "V tomto módu můžeš editovat mapup.\n\n"
+  "POZOR: Používej na vlastní nebezpečí. Kombinace, které se v normální hře "
+  "nikdy nevyskytují, mohou fungovat nedefinovaným způsobem "
+  "(nefungovat, divně vypadat, generovat podivné zprávy nebo způsobit spadnutí hry).\n\n"
+  "Abys z tohoto editoru získal co nejvíce, "
+  "musíš vědět něco o tom, jak HyperRogue funguje \"pod kapotou\". "
+  "Každé políčko má čtyři atributy: typ kraje, typ zdi, typ netvora, a typ předmětu. "
+  "Ten samý typ zdi (především \"nic\", \"moře\" nebo \"oheň\") může vypadat nebo se chovat "
+  "trochu jinak podle toho, ve kterém kraji se nachází. Některé položky "
+  "mohou být v seznamu dvakrát díky drobným rozdílům (například Čerti mají dvě formy podle toho, "
+  "zda se v příštím kole mají pohnout nebo ne).\n\n"
+  "Klávesami 'w', 'i', 'l' a 'm' udáváš, který aspekt políček chceš změnit; "
+  "pak na políčko jednoduše klikni, a ono se změní. Stiskem klávesy 'c' zkopíruješ "
+  "políčko pod kurzorem (zkopírují se všechny informace o tomto políčku). "
+  "Při kopírování nebo vkládání vícepolíčkových netvorů může být důležité, kam přesně v políčku klikáš.\n\n"
+  "Své změny můžeš také aplikovat na větší oblast pomocí kláves 0-9, které nastavují poloměr. "
+  "To také ovlivňuje kopírování/vkládání, což ti umožní kopírovat větší oblast.\n\n"
+  "F2 uloží současnou mapu (a F3 ji nahraje). Pokud to uděláš po dlouhé hře HyperRogue (kde jsi nepoužil Sféru Bezpečnosti), "
+  "bude vzniklý soubor hodně velký! "
+  "Ovšem pozor -- velké struktury, jako jsou Velké zdi, velké kruhy a horocykly budou uložením a nahráním mapy zničeny.\n\n"
+  "Klávesou 'b' můžeš políčka označit jako hraniční. Tato políčka a políčka za nimi nebudou při operacích kopírování a "
+  "vkládání kopírovány a nebudou ani uloženy.\n\n"
+  )
+
+// Princess Quest
+//================
+
+S(
+  "A mouse squeaks at you. It seems that it wants you to go somewhere. "
+  "That's interesting, what could you find here?\n\n"
+  "Note: in the part of the Palace that you are exploring during this "
+  "quest, the distribution of monsters, pressure plates, and items has been "
+  "changed somewhat, to make it a bit more suitable for less "
+  "experienced players. The number of monsters does not depend on the "
+  "number of Hypersian Rugs you have collected, and there are more "
+  "opening plates.\n\n"
+  "However, even with the normal distribution, it appears that it should be "
+  "always possible to reach your goal. If you want this challenge, "
+  "select it from the special game modes menu.",
+  
+  "Vykvíkla na tebe myška. Zdá se, že chce, aby ses někam vyda%l0. "
+  "To je zajímavé, copak tam asi najdeš?\n\n"
+  "Poznámka: V části Paláce, kterou budeš procházet při plnění této mise, "
+  "je poněkud upravené rozdělení netvorů, desek a předmětů, aby byla mise "
+  "o něco vhodnější i pro méně zkušené hráče. Počet netvorů nebude záviset na "
+  "počtu získaných Hyperských koberců a bude tu více otvíracích desek.\n\n"
+  "Nicméně, dosažení cíle by mělo být vždy možné i při normálním rozdělení. "
+  "Pokud si chceš tuto obtížnější misi vyzkoušet, vyber ji z menu speciálních herních módů.\n\n")
+
+S("\"When I visited the Palace, a mouse wanted me to go somewhere.\"",
+  "\"Když jsem navštívil Palác, byla tam myška, co chtěla, abych se někam vydal.\"")
+  
+S("\"I wonder what was there...\"", "\"Copak tam asi bylo...?\"")
+
+N("Mouse", GEN_F, "Myška", "Myška", "Myšku", "Myškou")
+
+S("You hear a distant squeak!", "V dálce slyšíš zapištění!")
+S("%The1 squeaks in a confused way.", "%1 zmateně piští.")
+S("%The1 squeaks gratefully!", "%1 vděčně piští!");
+S("%The1 squeaks hopelessly.", "%1 zdrceně piští.");
+S("%The1 squeaks in despair.", "%1 zoufale piští.");
+S("%The1 squeaks sadly.", "%1 smutně piští.");
+S("%The1 squeaks with hope!", "%1 nadějně piští!");
+S("%The1 squeaks happily!", "%1 šťastně piští!");
+S("%The1 squeaks excitedly!", "%1 vzrušeně piští!");
+
+N("giant rug", GEN_O, "obří koberec", "obří koberce", "obří koberec", "obřím kobercem")
+
+S("This is the biggest Hypersian Rug you have ever seen! "
+  "Unfortunately, it is too large to take it as a trophy.",
+  "Tohle je ten největší Hyperský koberec, jaký jsi kdy vidě%l0!  "
+  "Bohužel je ale příliš velký na to, aby sis ho moh%l0 vzít jako trofej.")
+  
+N("Prince", GEN_M, "Princ", "Princové", "Prince", "Princem")
+N("Princess", GEN_F, "Princezna", "Princezny", "Princeznu", "Princeznou")
+
+S("%1 takes %his1 revenge on %the2!", "%1 se mstí!")
+S("\"That should teach you to take me seriously!\"",
+  "\"To by tě mělo naučit brát mě vážně!\"")
+
+S("%The1 kisses you, and begs you to bring %him1 away from here.",
+  "%1 tě políbi%l1 a prosí tě, abys ji odsud odved%l0.")
+
+S("\"I want my revenge. Stun a guard and leave him for me!\"",
+  "Chci se pomstít. Omrač nějakého strážce a nech mi ho!\"")
+
+S("\"That felt great. Thanks!\"", "\"To byl skvělý pocit. Děkuji!\"")
+
+S("\"Bring me out of here please!\"", "Prosím tě, odveď mě odsud!\"")
+
+S("%The1 kisses you, and thanks you for saving %him1.",
+  "%1 tě políbi%l1 a děkuje ti, že jsi %ho1 zachránil.")
+  
+S("\"I have been trained to fight with a Hypersian scimitar, you know?\"",
+  "Jsem vycvičen%ý1 v boji s hyperskou šavlí, víš?\"")
+
+S("\"I would love to come to your world with you!\"", 
+  "Chtě%l1 bych se s tebou vrátit do tvého světa!\"")
+
+S("\"Straight lines stay close to each other forever, this is so romantic!\"", 
+  "\"Přímky, které navěky zůstávají blízko sebe, to je tak romantické!\"")
+
+S("\"Maps... Just like the world, but smaller... how is that even possible?!\"",
+  "\"Mapy... stejné jako svět, ale menší... jak je to vůbec možné?!\"")
+
+Orb("Love", "Lásky")
+S("Love takes time, but it heals all wounds, and transcends time and space.\n\n"
+  "The Orb of Love is worth 30$$$, if you end the game with it.\n",
+  
+  "Láska chce čas, ale zahojí všechny rány a překoná čas i prostor.\n\n"
+  "Sféra lásky má cenu 30$$$, pokud ji máš u sebe na konci hry.\n")
+
+// Princess Challenge:
+
+S("%1 Challenge", "Mise: %1")
+S("Save %the1 first to unlock this challenge!", "Pro aktivaci této mise musíš nejprve zachránit %a1!")
+S("Welcome to %the1 Challenge!", "Vítej v Misi: %1!")
+S("The more Hypersian Rugs you collect, the harder it is.", "Čím víc Hyperských koberců sebereš, tím obtížnější bude.")
+S("Follow the Mouse and escape with %the1!", "Následuj Myšku a uteč s %abl1!")
+S("Hardness frozen at %1.", "Obtížnost nastavená na: %1.");
+S("Congratulations! Your score is %1.", "Gratulujeme! Tvé skóre je %1.")
+
+S("u = undo",     "u = zpět")
+S("f = flip %1",     "f = překlopit %1")
+
+S("Failed to save map to %1", "Uložení mapy do %1 se nezdařilo")
+S("Failed to load map from %1", "Nahrání mapy z %1 se nezdařilo")
+S("save whom", "koho zachraňuješ")
+S("other", "další") // other keys in the main menu
+
+// VERSION 7.4
+
+// missing texts, refactored things, and rule changes
+//====================================================
+
+S("%The1 activates her Flash spell!", "%1 aktivova%l1 kouzlo Záblesk!")
+
+N("Fire", GEN_O, "Oheň", "Ohně", "Oheň", "Ohněm")
+S("This cell is on fire. Most beings and items cannot survive.",
+  "Toto políčko hoří. Většina tvorů a předmětů zde nepřežije.")
+
+N("Eternal Fire", GEN_O, "Věčný Oheň", "Věčné Ohně", "Věčný Oheň", "Věčným Ohněm")
+S("This fire never burns out.", "Tento oheň nikdy neuhasne.")
+
+S("Some rubble.", "Sutiny.")
+
+S("The Orb loses its power as it leaves the Land of Power!",
+  "Sféra opustila Kraj Moci a ztratila svou sílu!")
+
+S("%The1 fills the hole!", "%1 vyplni%l1 díru!")
+
+N("Tentacle+Ghost", GEN_M, "Chapadlo+Duch", "Chapadla+Duchové", "Chapadlo+Ducha", "Chapadlem+Duchem")
+
+// Land Overview
+//===============
+
+S("world overview", "přehled krajů")
+S("or 'o' to see the world overview", "nebo stiskni 'o' pro přehled krajů")
+
+S("forbidden to find in %the1", "zakázaná %abl1")
+S("too dangerous to use in %the1", "příliš nebezpečná %abl1")
+S("useless in %the1", "k ničemu %abl1")
+S("only native Orbs allowed in %the1", "%abl1 jsou povoleny pouze náležící Sféry")
+S("this Orb is never unlocked globally (only hubs)", "tato Sféra není nikdy odemčena globálně (pouze v centrálních krajích)")
+S("collect 25 %2 to unlock it in %the1", "získej 25x %2, abys ji odemkl %abl1")
+S("collect 3 %2 to unlock it in %the1", "získej 3x %2, abys ji odemkl %abl1")
+S("native in %the1 (collect 10 %2)", "standardní %abl1 (získej 10x %2)")
+S("native in %the1 (collect 1 %2)", "standardní %abl1 (získej 1x %2)")
+S("secondary in %the1 (collect 10 %3, or 25 %2)", "sekundární %abl1 (získej 10x %3 nebo 25x %2)")
+S("the native Orb of %the1", "standardní Sféra %abl1")
+S("this Orb appears on floors and is used by witches", "tato Sféra se objevuje na zemi a využívají ji čarodějnice czarownice")
+S("a prized Orb, it appears only in cabinets", "cenná Sféra, která se objevuje pouze ve vitrínách")
+S("this Orb never appears in %the1", "tato Sféra, se %abl1 nikdy neobjevuje")
+S("Hub Land: orbs appear here if unlocked in their native land", "Centrální kraj: Sféry se zde objevují, pokud jsi je odemkl v jejich rodné krajině")
+S("kill a monster, or collect 25 %2", "zabij netvora nebo získej 25x %2")
+
+S("Always available.\n", "Tento kraj je vždy k dispozici.\n")
+S("Treasure required: %1 $$$.\n", "Potřebuješ %1 $$$.\n")
+S("Accessible only from %the1.\n", "Tento kraj je dostupný pouze skrz %a1.\n")
+S("Accessible only from %the1 (until finished).\n", "Tento kraj je dostupný pouze skrz %a1 (dokud ho nedohraješ).\n")
+
+S("Accessible only from %the1 or %the2.\n", "Tento kraj je dostupný pouze skrz %a1 nebo %a2.\n")
+
+S("Kills required: %1.\n", "Potřebuješ zabít %1 nepřátel.\n")
+S("Finished lands required: %1 (collect 10 treasure)\n", 
+  "Potřebuješ dokončit %1 krajů (získat v nich 10 pokladů)\n")
+
+S("Treasure required: %1 x %2.\n", "Potřebuješ %1 x %2.\n")
+
+S("Alternatively: kill a %1.\n", "Alternativně: zabij %a1.\n")
+
+S("Kills required: any Elemental (Living Fjord/Dead Caves).\n",
+  "Potřebuješ zabít libovolného Elementála (Živoucí fjord/Mrtvé jeskyně).")
+
+S("Variants of %the1 are always available in the Random Pattern Mode.",
+  "Varianty kraje '%1' jsou vždy k dispozici v Módu náhodných vzorů.")
+  
+S("Variants of %the1 are available in the Random Pattern Mode after "
+  "getting a highscore of at least 10 %2.",
+  "Varianty kraje '%1' jsou dostupné v Módu náhodných vzorů po získání nejméně 10x %2.")
+
+S(" kills: %1", " zabito nepřátel: %1")
+S(" $$$: %1", " $$$: %1")
+S(" Hyperstone: %1/%2", " Hyperkamy: %1/%2")
+S(" Hell: %1/9", " Peklo: %1/9")
+
+// improved editor
+
+S("vector graphics editor -- press F1 for help", "editor vektorové grafiki -- nápovědu zobrazíš stiskem F1")
+S("pics to save/load:", "obrázky k uložení/nahrání:")
+S("level to save/load:", "mapa k uložení/nahrání:")
+
+S("F4 = extension", "F4 = rozšíření")
+S("Enter = back", "Enter = zpět")
+S("SPACE = map/graphics", "SPACE = mapa/grafika")
+
+S("Emerald Pattern", "Smaragdový vzor")
+S("Palace Pattern", "Palácový vzor")
+S("Zebra Pattern", "Vzor 'Zebra'")
+S("rotational symmetry", "rotační symetrie")
+S("symmetry 0-1", "symetrie 0-1")
+S("symmetry 0-2", "symetrie 0-2")
+S("symmetry 0-3", "symetrie 0-3")
+
+S("display pattern codes (full)", "zobraz kódy vzoru (úplné)")
+S("display pattern codes (simplified)", "zobraz kódy vzoru (zjednodušené)")
+S("display only hexagons", "zobraz pouze šestiúhelníky")
+S("display only heptagons", "zobraz pouze sedmiúhelníky")
+S("predesigned patterns", "předem vytvořené vzory")
+
+S("Gameboard", "Herní desky")
+S("random colors", "náhodné barvy")
+S("emerald pattern", "smaragdový vzor")
+S("four elements", "čtyři živly")
+S("eight domains", "osm domén")
+S("zebra pattern", "vzor 'zebra'")
+S("three stripes", "tři pásy")
+S("random black-and-white", "náhodný černobílý vzor")
+S("p = paint", "p = obarvit")
+S("r = regular", "r = vzory")
+
+S(
+   "In this mode you can draw your own player characters, "
+   "floors, monsters, and items. Press 'e' while hovering over "
+   "an object to edit it. Start drawing shapes with 'n', and "
+   "add extra vertices with 'a'. Press 0-9 to draw symmetric "
+   "pictures easily. More complex pictures can "
+   "be created by using several layers ('l'). See the edges of "
+   "the screen for more keys.",
+   
+   "V tomto módu si můžeš nakreslit vlastní postavy, podlahu, netvory "
+   "a předměty. Objekt můžeš editovat tak, že na něj najedeš myší a "
+   "stiskneš 'e'. 'n' začne kreslit tvar a 'a' přidává nové vrcholy. "
+   "Klávesy 0-9 umožňují snadnou kresbu symetrických obrázků. Složitější "
+   "obrázky je možné vytvořit s použitím ně kolika vrstev ('l'). Další "
+   "ovládací klávesy můžeš najít na okrajích obrazovky.")
+
+S(
+   "Press 'r' to choose a regular pattern. When a pattern is on, "
+   "editing a cell automatically edits all cells which are "
+   "equivalent according to this pattern. You can choose from "
+   "several patterns, and choose which symmetries matter "
+   "for equivalence. Also, you can press Space to switch between "
+   "the map and graphics editor quickly -- note that editing floors "
+   "with the graphics editor also adheres to the pattern.",
+   
+   "Stiskem klávesy 'r' můžeš vybrat pravidelný vzor. Když je vzor "
+   "zapnutý, editace buňky automaticky ovlivní i všechny ostatní buňky, "
+   "které jsou podle tohoto vzoru ekvivalentní. Můžeš si vybrat "
+   "z několika možných vzorů, a také to, které symetrie budou důležité "
+   "pro ekvivalenci. Také můžeš rychle přepínat mezerníkem mezi "
+   "editorem mapy a grafiky -- i editování podlahy grafickým editorem "
+   "se řídí pravidly vzoru.")
+
+S("monster", "netvor")
+S("item", "předmět")
+S("floor", "podlaha")
+S("hexagonal", "šestiúhelníky")
+S("heptagonal", "sedmiúhelníky")
+S("floor/pattern", "podlaha/vzor")
+
+S("l = layers: %1", "l = vrstvy: %1")
+S("1-9 = rotations: %1", "1-9 = rotace: %1")
+S("0 = symmetry", "0 = symetrie")
+S("0 = asymmetry", "0 = asymetrie")
+S("%1 vertices", "vrcholy: %1")
+S("a = add v", "a = přidej v")
+S("m = move v", "m = přesuň v")
+S("d = delete v", "d = vymaž v")
+S("c = readd v", "c = znovu přidej v")
+S("b = reorder", "b = změň uspořádání")
+S("t = shift", "t = přesuň")
+S("y = spin", "y = otoč")
+
+S("'n' to start", "n = start")
+S("z = zoom in", "z = přiblížení")
+S("o = zoom out", "o = oddálení")
+S("g = grid", "g = síť")
+S("e = edit this", "e = editace")
+
+S("x: %1", "x: %1")
+S("y: %1", "y: %1")
+S("z: %1", "z: %1")
+S("r: %1", "r: %1")
+S("ϕ: %1°", "ϕ: %1°")
+
+S("A fake Land with colored floors.",
+  "Falešný kraj s barevnou podlahou.")
+
+S("random pattern mode", "mód náhodných vzorů")
+
+// Ivory Tower
+//=============
+
+N("Ivory Tower", GEN_F, "Věž ze slonové kosti", "Věže ze slonové kosti", "Věž ze slonové kosti", "ve Věži ze slonové kosti")
+
+S(
+  "Powerful wizards claimed this part of the world, to perform their magical "
+  "experiments in peace and solitude. They have changed the direction of gravity, "
+  "to make it even harder for intruders to reach them.\n\n"
+  "Gravity works as follows: cells are unstable if they are empty, and there is "
+  "no cell immediately below them which contains a wall. It is impossible to move "
+  "from one unstable cell to another, except if moving down.",
+
+  "Tuto část světa si pro sebe zabrali mocní mágové, aby zde mohli v klidu a osamění "
+  "provádět své magické experimenty. Změnili směr gravitace, aby bylo pro vetřelce "
+  "ještě obtížnější se k nim dostat.\n\n"
+  "Gravitace funguje následovně: prázdné políčko, pod kterým není žádné políčko se zdí, "
+  "je 'nestabilní'. Není dovoleno pohybovat se z jednoho nestabilního políčka do druhého, "
+  "leda směrem dolů."
+  )
+
+N("Servant", GEN_M, "Služebník", "Služebníci", "Služebníka", "Služebníkem")
+S("A simple servant of the master of the Ivory Tower.",
+  "Prostý služebník pána Věže ze slonové kosti.")
+
+N("Gargoyle", GEN_O, "Chrlič", "Chrliče", "Chrlič", "Chrličem")
+N("stone gargoyle", GEN_O, "kamenný chrlič", "kamenné chrliče", "kamenného chrliče", "kamenným chrličem")
+N("stone gargoyle floor", GEN_F, "podlaha z chrliče", "podlahy z chrličů", "podlahu z chrliče", "podlahou z chrliče")
+N("stone gargoyle bridge", GEN_O, "most z chrliče", "mosty z chrličů", "most z chrliče", "mostem z chrliče")
+
+S(
+  "A being made of stone, who likes high buildings. It becomes normal stone when "
+  "killed, but only if next to something stable -- otherwise it falls.",
+  "Kamenná bytost, která má ráda vysoké budovy. Po smrti se promění v obyčejný kámen, "
+  "ale pouze tehdy, když je vedle něčeho stabilního -- jinak spadne.")
+
+N("Ivory Figurine", GEN_F, "Figurka", "Figurky", "Figurku", "Figurkou")
+
+S("A beautiful figurine, made of ivory. Figurines close to the base of the Tower "
+  "tend do disappear after you have collected many of them.",
+  "Nádherná figurka ze slonové kosti. Figurky poblíž základů Věže mají tendenci "
+  "mizet, pokud jich získáš hodně.")
+
+N("Platform", GEN_F, "Plošinka", "Plošinky", "Plošinku", "Plošinkou")
+S("You can stand here.", "Na této plošince můžeš stát.")
+
+N("ladder", GEN_O, "žebřík", "žebříky", "žebřík", "žebříkem")
+S("You can use this ladder to climb the Tower.",
+  "Po tomto žebříku můžeš lézt na Věž.")
+
+Orb("Matter", "Hmoty")
+
+S("This Orb allows to temporarily create impassable matter, either to block paths or "
+  "to build bridges across chasms and waters.",
+  "Tato Sféra ti umožňuje dočasně vytvářet neprostupnou hmotu, kterou můžeš zatarasit "
+  "cestu nebo využít jako most přes propasti nebo přes vodu.")
+  
+N("temporary wall", GEN_F, "dočasná zeď", "dočasné zdi", "dočasnou zeď", "dočasnou zdí")
+N("temporary floor", GEN_F, "dočasná podlaha", "dočasné podlahy", "dočasnou podlahu", "dočasnou podlahou")
+N("temporary bridge", GEN_O, "dočasný most", "dočasné mosty", "dočasný most", "dočasným mostem")
+
+S("This structure will disappear after some time.", "Tato struktura za nějaký čas zmizí.")
+
+S("Nothing to stand on here!", "Není tu na čem stát!")
+S("Gravity does not allow this!", "Tohle ti gravitace nedovolí!")
+
+// Elemental Planes
+//==================
+
+N("Elemental Planes", GEN_F, "Elementální roviny", "Elementální roviny", "Elementální roviny", "v Elementálních rovinách")
+N("Plane of Fire", GEN_F, "Rovina Ohně", "Roviny Ohně", "Rovinu Ohně", "v Rovině Ohně")
+N("Plane of Earth", GEN_F, "Rovina Země", "Roviny Země", "Rovinu Země", "v Rovině Země")
+N("Plane of Air", GEN_F, "Rovina Vzduchu", "Roviny Vzduchu", "Rovinu Vzduchu", "v Rovině Vzduchu")
+N("Plane of Water", GEN_F, "Rovina Vody", "Roviny Vody", "Rovinu Vody", "v Rovině Vody")
+
+S("The Elemental Planes are divided into four subzones: Planes of Fire, Water, Air, and Earth. "
+  "You need to collect a Shard from each Plane to construct an Elemental Gem. "
+  "It is dangerous to collect too many Shards of the same type without constructing a Gem.",
+  
+  "Elementální roviny se dělí na čtyři subzóny: Rovinu Ohně, Vody, Vzduchu a Země. "
+  "Musíš v každé z Rovin najít Úlomek, ze kterých pak vytvoříš Elementální drahokam. "
+  "Pozor, je nebezpečné mít příliš mnoho Úlomků stejného typu a nepoužít je k sestavení Drahokamu!"
+  )
+
+N("Fire Elemental", GEN_M, "Elementál Ohně", "Elementálové Ohně", "Elementála Ohně", "Elementálem Ohně")
+
+S("This monster leaves a trail of fire behind.", 
+  "Tento netvor za sebou zanechává ohnivou stopu.")
+
+N("Air Elemental", GEN_M, "Elementál Vzduchu", "Elementálové Vzduchu", "Elementála Vzduchu", "Elementálem Vzduchu")
+
+S("An Air Elemental looks like a live tornado. Once you are three (or less) cells from it, "
+  "it is impossible to move closer, due to strong winds. You can stand and wait, though. "
+  "This also affects most monsters.",
+  
+  "Elementál Vzduchu vypadá jako oživlé tornádo. Pokud jsi od něj tři nebo méně políček, "
+  "silný vítr ti brání v tom, aby ses k němu přiblížil. Můžeš ovšem stát a čekat. "
+  "Tento efekt také ovlivňuje většinu netvorů.")
+
+N("Fire Shard", GEN_O, "Úlomek Ohně", "Úlomky Ohně", "Úlomek Ohně", "Úlomkem Ohně")
+N("Air Shard", GEN_O, "Úlomek Vzduchu", "Úlomky Vzduchu", "Úlomek Vzduchu", "Úlomkem Vzduchu")
+N("Water Shard", GEN_O, "Úlomek Vody", "Úlomky Vody", "Úlomek Vody", "Úlomkem Vody")
+N("Earth Shard", GEN_O, "Úlomek Země", "Úlomky Země", "Úlomek Země", "Úlomkem Země")
+N("Elemental Gem", GEN_O, "Elementální drahokam", "Elementální drahokamy", "Elementální drahokam", "Elementálním drahokamem")
+
+Orb("Summoning", "Vyvolání")
+
+S(
+    "This orb allows you to summon monsters. Usually, they are either Elementals or "
+    "native creatures. While the monsters do not like being summoned, and will "
+    "attack you once they recover from summoning sickness, such summoning "
+    "often has its uses.",
+  "Tato Sféra ti umožňuje vyvolávat netvory. Obvykle se jedná buď o Elementály nebo "
+  "o domorodé obyvatele kraje, kde ji použiješ. Netvoři nejsou vyvoláním nijak nadšeni "
+  "a poté, co se zorientují, na tebe zaútočí, ale i tak má vyvolávání často své využití."
+  )
+
+N("limestone wall", GEN_F, "vápencová stěna", "vápencové stěny", "vápencovou stěnu", "vápencovou stěnou")
+
+S("Simply a wall. Mostly.", "Po prostu ściana. W zasadzie.")
+
+// Zebra
+//=======
+
+N("Zebra", GEN_F, "Zebra", "Zebry", "Zebru", "v Zebře")
+S("Everything in this Land has black and white stripes.",
+  "Všechno v tomto kraji má černé a bílé pruhy.")
+
+N("Striped Dog", GEN_M, "Pruhovaný pes", "Pruhovaní psi", "Pruhovaného psa", "Pruhovaným psem")
+S("A predator native to the Zebra.", "Predátor pocházející ze Zebry.")
+
+N("Onyx", GEN_O, "Onyx", "Onyxy", "Onyx", "Onyxem")
+S("A black gem with white stripes. It is beautiful.", "Černý drahokam s bílými pásky. Velice krásný.")
+
+// Crossroads III
+//================
+
+N("Crossroads III", GEN_F, "Křižovatka III", "Křižovatky III", "Křižovatku III", "na Křižovatc III")
+
+S("An alternate layout of the Crossroads. Great Walls cross here at right angles.",
+  "Alternativní uspořádání Křižovatky. Velké zdi se tu protínají v pravých úhlech.")
+
+// Steam achievements:
+
+/*
+		"NEW_ACHIEVEMENT_5_12_NAME"	"Došel jsi do Věže ze slonové kosti"
+		"NEW_ACHIEVEMENT_5_12_DESC"	"Najdi a získej Figurku."
+		"NEW_ACHIEVEMENT_5_13_NAME"	"Služebník"
+		"NEW_ACHIEVEMENT_5_13_DESC"	"Získej 10 Figurek."
+		"NEW_ACHIEVEMENT_5_14_NAME"	"Chrlič"
+		"NEW_ACHIEVEMENT_5_14_DESC"	"Získej 25 Figurek."
+		"NEW_ACHIEVEMENT_5_15_NAME"	"Pán Věže"
+		"NEW_ACHIEVEMENT_5_15_DESC"	"Získej 50 Figurek."
+		"NEW_ACHIEVEMENT_5_16_NAME"	"Došel jsi do Zebry"
+		"NEW_ACHIEVEMENT_5_16_DESC"	"Najdi a získej Onyx."
+		"NEW_ACHIEVEMENT_5_17_NAME"	"Pruhovaný pes"
+		"NEW_ACHIEVEMENT_5_17_DESC"	"Získej 10 Onyxů."
+		"NEW_ACHIEVEMENT_5_18_NAME"	"Skvrnitý pes"
+		"NEW_ACHIEVEMENT_5_18_DESC"	"Získej 25 Onyxů."
+		"NEW_ACHIEVEMENT_5_19_NAME"	"Kostkovaný pes"
+		"NEW_ACHIEVEMENT_5_19_DESC"	"Získej 50 Onyxů."
+		"NEW_ACHIEVEMENT_5_20_NAME"	"Elementalista"
+		"NEW_ACHIEVEMENT_5_20_DESC"	"Sestav Elementální drahokam."
+		"NEW_ACHIEVEMENT_5_21_NAME"	"Nižší elementál"
+		"NEW_ACHIEVEMENT_5_21_DESC"	"Sestav 10 Elementálních drahokamů."
+		"NEW_ACHIEVEMENT_5_22_NAME"	"Vyšší elementál"
+		"NEW_ACHIEVEMENT_5_22_DESC"	"Sestav 25 Elementálních drahokamů."
+		"NEW_ACHIEVEMENT_5_23_NAME"	"Pán elementů"
+		"NEW_ACHIEVEMENT_5_23_DESC"	"Sestav 50 Elementálních drahokamů."
+*/
+
+S("Cannot create temporary matter on a monster!", "Dočasnou hmotu nelze vytvořit na netvorovi!")
+S("Cannot create temporary matter on an item!", "Dočasnou hmotu nelze vytvořit na předmětu!")
+S("Cannot create temporary matter here!", "Zde nelze vytvořit dočasnou hmotu!")
+S("Cannot summon on a monster!", "Na políčko s netvorem nelze nic vyvolat!")
+S("No summoning possible here!", "Sem se nic vyvolat nedá!")
+
+S("You summon %the1!", "Vyvola%l1 jsi %a1!")
+
+S("F4 = file", "F4 = soubor")
+
+#undef Orb

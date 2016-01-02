@@ -1,6 +1,6 @@
 // #define CHECKTRANS
 
-#define NUMLAN 5
+#define NUMLAN 6
 
 #define GEN_M 0
 #define GEN_F 1
@@ -17,10 +17,17 @@ struct stringpar {
   stringpar(eItem i) { v= iinf[i].name; }  
   };
 
+const char *dnameof(eMonster m) { return minf[m].name; }
+const char *dnameof(eLand l) { return linf[l].name; }
+const char *dnameof(eWall w) { return winf[w].name; }
+const char *dnameof(eItem i) { return iinf[i].name; }
+
 void rep(string& pattern, string what, string to) {
-  size_t at = pattern.find(what);
-  if(at != string::npos)
-    pattern = pattern.replace(at, what.size(), to);
+  while(true) {
+    size_t at = pattern.find(what);
+    if(at == string::npos) break;
+      pattern = pattern.replace(at, what.size(), to);
+    }
   }
 
 typedef unsigned hashcode;
@@ -84,13 +91,18 @@ string choose4(int g, string a, string b, string c, string d) {
   }
 
 int playergender();
+int princessgender();
 int lang();
+
+#include <set>
+set<string> warnshown;
 
 void basicrep(string& x) { 
 
     const sentence *s = findInHashTable(x, all_sentences);
-    if(!s) {
+    if(!s && !warnshown.count(x)) {
       printf("WARNING: no translations for '%s'\n", x.c_str());
+      warnshown.insert(x);
       }
 
   int l = lang();
@@ -114,25 +126,6 @@ void basicrep(string& x) {
 void parrep(string& x, string w, stringpar p) {
   int l = lang();
   const fullnoun *N = findInHashTable(p.v, all_nouns);
-  if(l == 0) {
-    // proper names (R'Lyeh)
-    if(N && (N->english_grammar_flags & 1)) {
-      rep(x,"%"+w,p.v);
-      rep(x,"%the"+w, p.v);
-      rep(x,"%The"+w, p.v);
-      }
-    else {
-      rep(x,"%"+w,p.v);
-      rep(x,"%the"+w, "the " + p.v);
-      rep(x,"%The"+w, "The " + p.v);
-      }
-    // plural names (Crossroads)
-    if(N && (N->english_grammar_flags & 2))
-      rep(x,"%s"+w, "");
-    else 
-      rep(x,"%s"+w, "s");
-    return;
-    }
   if(l == 1) {
     if(N) {
       rep(x, "%"+w, N->n[0].nom);
@@ -140,11 +133,13 @@ void parrep(string& x, string w, stringpar p) {
       rep(x, "%a"+w, N->n[0].acc);
       rep(x, "%abl"+w, N->n[0].abl);
       rep(x, "%ł"+w, choose3(N->n[0].genus, "ł", "ła", "ło"));
+      rep(x, "%łem"+w, choose3(N->n[0].genus, "łem", "łam", "łom"));
       rep(x, "%ął"+w, choose3(N->n[0].genus, "ął", "ęła", "ęło"));
       rep(x, "%ya"+w, choose3(N->n[0].genus, "y", "a", "e"));
       rep(x, "%yą"+w, choose4(N->n[0].genus, "ego", "ą", "e", "y"));
       rep(x, "%oa"+w, choose3(N->n[0].genus, "", "a", "o"));
       rep(x, "%ymą"+w, choose3(N->n[0].genus, "ym", "ą", "ym"));
+      rep(x, "%go"+w, choose3(N->n[0].genus, "go", "ją", "je"));
       }
     else {
       rep(x,"%"+w, p.v);
@@ -154,7 +149,7 @@ void parrep(string& x, string w, stringpar p) {
       rep(x, "%ł"+w, choose3(0, "ł", "ła", "ło"));
       }
     }
-  if(lang() == 2) {
+  if(l == 2) {
     if(N) {
       rep(x, "%"+w, N->n[1].nom);
       rep(x, "%P"+w, N->n[1].nomp);
@@ -168,7 +163,7 @@ void parrep(string& x, string w, stringpar p) {
       rep(x, "%abl"+w, p.v);
       }
     }
-  if(lang() == 3) {
+  if(l == 3) {
     if(N) {
       rep(x, "%"+w, N->n[2].nom);
       rep(x, "%P"+w, N->n[2].nomp);
@@ -179,6 +174,8 @@ void parrep(string& x, string w, stringpar p) {
       rep(x, "%el"+w, choose3(N->n[2].genus, "el", "la", "lo"));
       rep(x, "%ůj"+w, choose4(N->n[2].genus, "ého", "ou", "é", "ůj"));
       rep(x, "%ým"+w, choose3(N->n[2].genus, "ým", "ou", "ým"));
+      rep(x, "%ho"+w, choose3(N->n[2].genus, "ho", "ji", "ho"));
+
       if(p.v == "Mirror Image")
         rep(x, "%s"+w, "se");
       if(p.v == "Mirage")
@@ -191,7 +188,7 @@ void parrep(string& x, string w, stringpar p) {
       rep(x, "%abl"+w, p.v);
       }
     }
-  if(lang() == 4) {
+  if(l == 4) {
     if(N) {
       rep(x, "%"+w, N->n[3].nom);
       rep(x, "%P"+w, N->n[3].nomp);
@@ -199,6 +196,7 @@ void parrep(string& x, string w, stringpar p) {
       rep(x, "%abl"+w, N->n[3].abl);
       rep(x, "%E"+w, choose3(N->n[3].genus, "", "а", "о"));
       rep(x, "%A"+w, choose3(N->n[3].genus, "ый", "ая", "ое"));
+      rep(x, "%c"+w, choose3(N->n[3].genus, "ся", "ась", ""));
       }
     else {
       rep(x,"%"+w,p.v);
@@ -207,6 +205,46 @@ void parrep(string& x, string w, stringpar p) {
       rep(x, "%abl"+w, p.v);
       }
     }
+  if(l == 5) {
+    if(N) {
+      rep(x, "%"+w, N->n[4].nom);
+      rep(x, "%P"+w, N->n[4].nomp);
+      rep(x, "%a"+w, N->n[4].acc);
+      rep(x, "%abl"+w, N->n[4].abl);
+      rep(x, "%Der"+w, choose3(N->n[4].genus, "Der", "Die", "Das"));
+      rep(x, "%der"+w, choose3(N->n[4].genus, "der", "die", "das"));
+      rep(x, "%den"+w, choose3(N->n[4].genus, "den", "die", "das"));
+      }
+    else {
+      rep(x,"%"+w,p.v);
+      rep(x, "%P"+w, p.v);
+      rep(x, "%a"+w, p.v);
+      rep(x, "%abl"+w, p.v);
+      rep(x, "%Der"+w, "The");
+      rep(x, "%der"+w, "the");
+      rep(x, "%den"+w, "the");
+      }
+    }
+  if(true) {
+    // proper names (R'Lyeh)
+    rep(x,"%"+w,p.v);
+    if(N && (N->english_grammar_flags & 1)) {
+      rep(x,"%the"+w, p.v);
+      rep(x,"%The"+w, p.v);
+      }
+    else {
+      rep(x,"%the"+w, "the " + p.v);
+      rep(x,"%The"+w, "The " + p.v);
+      rep(x,"%him"+w, princessgender() ? "her" : "him");
+      rep(x,"%his"+w, princessgender() ? "her" : "his");
+      }
+    // plural names (Crossroads)
+    if(N && (N->english_grammar_flags & 2))
+      rep(x,"%s"+w, "");
+    else 
+      rep(x,"%s"+w, "s");
+    }
+  return;
   }
 
 void postrep(string& s) {
@@ -227,6 +265,23 @@ string XLAT(string x, stringpar p1, stringpar p2) {
   basicrep(x);
   parrep(x,"1",p1.v);
   parrep(x,"2",p2.v);
+  postrep(x);
+  return x;
+  }
+string XLAT(string x, stringpar p1, stringpar p2, stringpar p3) { 
+  basicrep(x);
+  parrep(x,"1",p1.v);
+  parrep(x,"2",p2.v);
+  parrep(x,"3",p2.v);
+  postrep(x);
+  return x;
+  }
+string XLAT(string x, stringpar p1, stringpar p2, stringpar p3, stringpar p4) { 
+  basicrep(x);
+  parrep(x,"1",p1.v);
+  parrep(x,"2",p2.v);
+  parrep(x,"3",p2.v);
+  parrep(x,"4",p2.v);
   postrep(x);
   return x;
   }

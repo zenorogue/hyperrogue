@@ -25,13 +25,19 @@ struct heptagon {
   heptagon* move[7];
   // distance from the origin
   short distance;
-  // fjord/wineyard generator
-  short fjordval;
-  heptagon*& modmove(int i) { return move[fixrot(i)]; }
-  unsigned char& gspin(int i) { return spin[fixrot(i)]; }
+  // emerald/wineyard generator
+  short emeraldval;
+  // fifty generator
+  short fiftyval;
+  // zebra generator (1B actually)
+  short zebraval;
+  // central cell
   cell *c7;
   // associated generator of alternate structure, for Camelot and horocycles
   heptagon *alt;
+  // functions
+  heptagon*& modmove(int i) { return move[fixrot(i)]; }
+  unsigned char& gspin(int i) { return spin[fixrot(i)]; }
   };
 
 // the automaton is used to generate each heptagon in an unique way
@@ -65,14 +71,20 @@ heptagon *buildHeptagon(heptagon *parent, int d, hstate s, int pard = 0) {
   parent->move[d] = h; parent->spin[d] = pard;
   if(parent->c7) {
     h->c7 = newCell(7, h);
-    h->fjordval = fjord_heptagon(parent->fjordval, d);
+    h->emeraldval = emerald_heptagon(parent->emeraldval, d);
+    h->zebraval = zebra_heptagon(parent->zebraval, d);
+    if(parent == &origin)
+      h->fiftyval = fiftytable[0][d];
+    else
+      h->fiftyval = nextfiftyval(parent->fiftyval, parent->move[0]->fiftyval, d);
     }
   else {
     h->c7 = NULL;
-    h->fjordval = 0;
+    h->emeraldval = 0;
+    h->fiftyval = 0;
     }
-//generateFjordval(parent);
-//generateFjordval(h);
+//generateEmeraldval(parent);
+//generateEmeraldval(h);
   if(pard == 0) {
     if(parent->s == hsOrigin) h->distance = 2;
     else if(h->spin[0] == 5) 
@@ -92,7 +104,7 @@ void addSpin(heptagon *h, int d, heptagon *from, int rot, int spin) {
   h->spin[d] = fixrot(from->spin[rot] + spin);
   h->move[d]->move[fixrot(from->spin[rot] + spin)] = h;
   h->move[d]->spin[fixrot(from->spin[rot] + spin)] = d;
-//generateFjordval(h->move[d]); generateFjordval(h);
+//generateEmeraldval(h->move[d]); generateEmeraldval(h);
   }
 
 heptagon *createStep(heptagon *h, int d) {

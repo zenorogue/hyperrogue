@@ -1,4 +1,4 @@
-#define NUMLEADER 26
+#define NUMLEADER 40
 
 #define SCORE_UNKNOWN (-1)
 #define NO_SCORE_YET (-2)
@@ -8,11 +8,21 @@ int currentscore[NUMLEADER];
 const char* leadernames[NUMLEADER] = {
   "Score", "Diamonds", "Gold", "Spice", "Rubies", "Elixirs",
   "Shards", "Totems", "Daisies", "Statues", "Feathers", "Sapphires",
-  "Hyperstones", "Time to Win", "Turns to Win",
-  "Time to 10 Hyperstones-62", "Turns to 10 Hyperstones-62", "Orbs of Yendor",
+  "Hyperstones", "Time to Win-71", "Turns to Win-71",
+  "Time to 10 Hyperstones-73", "Turns to 10 Hyperstones-73", "Orbs of Yendor",
   "Fern Flowers", 
   "Royal Jellies", "Powerstones", "Silver", "Wine", "Emeralds", "Grimoires",
-  "Holy Grails"
+  "Holy Grails", "Red Gems", "Pirate Treasures",
+  "Shmup Score", "Shmup Time to Win", "Shmup Knife to Win",
+  "Bomberbird Eggs", // 31
+  "Ambers", // 32
+  "Pearls", // 33
+  "Hypersian Rugs", // 34
+  "Garnets", // 35
+  "Princess Challenge", // 36
+  "Ivory Figurines", // 37
+  "Elemental Gems", // 38
+  "Onyxes" // 39
   };
 
 bool haveLeaderboard(int id);
@@ -23,9 +33,11 @@ string achievementMessage[3];
 int achievementTimer;
 // vector<string> achievementsReceived;
 
-void achievement_log(const char* s, bool euclideanAchievement) {
+void achievement_log(const char* s, bool euclideanAchievement, bool shmupAchievement) {
   if(cheater) return;
   if(euclid != euclideanAchievement) return;
+  if(shmup::on != shmupAchievement) return;
+  if(randomPatternsMode) return;
   
   for(int i=0; i<size(achievementsReceived); i++)
     if(achievementsReceived[i] == s) return;
@@ -47,19 +59,21 @@ void achievement_log(const char* s, bool euclideanAchievement) {
   }
 
 #ifdef STEAM
+void improveItemScores();
 #include "hypersteam.cpp"
 #else
 #ifndef ANDROID
 void achievement_init() {}
 void achievement_close() {}
-void achievement_gain(const char* s, bool euclideanAchievement) {
-  achievement_log(s, euclideanAchievement);
+void achievement_gain(const char* s, bool euclideanAchievement, bool shmupAchievement) {
+  achievement_log(s, euclideanAchievement, shmupAchievement);
   }
 #endif
 #endif
 
 void achievement_collection(eItem it, int prevgold, int newgold) {
   if(cheater) return;
+  if(randomPatternsMode) return;
   int q = items[it];
 
   if(q == 1) {
@@ -82,6 +96,17 @@ void achievement_collection(eItem it, int prevgold, int newgold) {
     if(it == itEmerald) achievement_gain("EMERALD1");
     if(it == itSilver) achievement_gain("SILVER1");
     if(it == itGrimoire) achievement_gain("GRIMOIRE1");
+    if(it == itRedGem) achievement_gain("REDGEM1");
+    if(it == itPirate) achievement_gain("PIRATE1");
+    if(it == itCoast) achievement_gain("COAST1");
+    // if(it == itWhirlpool) achievement_gain("WHIRL1");
+    if(it == itBombEgg) achievement_gain("MINE1");
+    if(it == itPalace) achievement_gain("RUG1");
+    if(it == itFjord) achievement_gain("GARNET1");
+
+    if(it == itEdge) achievement_gain("TOWER1");
+    if(it == itElemental) achievement_gain("ELEMENT1");
+    if(it == itZebra) achievement_gain("ZEBRA1");
     }
 
   // 32
@@ -111,6 +136,17 @@ void achievement_collection(eItem it, int prevgold, int newgold) {
     if(it == itEmerald) achievement_gain("EMERALD2");
     if(it == itSilver) achievement_gain("SILVER2");
     if(it == itGrimoire) achievement_gain("GRIMOIRE2");
+    if(it == itRedGem) achievement_gain("REDGEM2");
+    if(it == itPirate) achievement_gain("PIRATE2");
+    if(it == itCoast) achievement_gain("COAST2");
+    if(it == itWhirlpool) achievement_gain("WHIRL2");
+    if(it == itBombEgg) achievement_gain("MINE2");
+    if(it == itPalace) achievement_gain("RUG2");
+    if(it == itFjord) achievement_gain("GARNET2");
+
+    if(it == itEdge) achievement_gain("TOWER2");
+    if(it == itElemental) achievement_gain("ELEMENT2");
+    if(it == itZebra) achievement_gain("ZEBRA2");
     }
 
   if(q == 25) {
@@ -133,6 +169,17 @@ void achievement_collection(eItem it, int prevgold, int newgold) {
     if(it == itEmerald) achievement_gain("EMERALD3");
     if(it == itSilver) achievement_gain("SILVER3");
     if(it == itGrimoire) achievement_gain("GRIMOIRE3");
+    if(it == itRedGem) achievement_gain("REDGEM3");
+    if(it == itPirate) achievement_gain("PIRATE3");
+    if(it == itCoast) achievement_gain("COAST3");
+    if(it == itWhirlpool) achievement_gain("WHIRL3");
+    if(it == itBombEgg) achievement_gain("MINE3");
+    if(it == itPalace) achievement_gain("RUG3");
+    if(it == itFjord) achievement_gain("GARNET3");
+
+    if(it == itEdge) achievement_gain("TOWER3");
+    if(it == itElemental) achievement_gain("ELEMENT3");
+    if(it == itZebra) achievement_gain("ZEBRA3");
     }
 
   if(q == 50) {
@@ -155,14 +202,30 @@ void achievement_collection(eItem it, int prevgold, int newgold) {
     if(it == itEmerald) achievement_gain("EMERALD4");
     if(it == itSilver) achievement_gain("SILVER4");
     if(it == itGrimoire) achievement_gain("GRIMOIRE4");
+    if(it == itRedGem) achievement_gain("REDGEM4");
+    if(it == itPirate) achievement_gain("PIRATE4");
+    if(it == itCoast) achievement_gain("COAST4");
+    if(it == itWhirlpool) achievement_gain("WHIRL4");
+    if(it == itBombEgg) achievement_gain("MINE4");
+    if(it == itPalace) achievement_gain("RUG4");
+    if(it == itFjord) achievement_gain("GARNET4");
+
+    if(it == itEdge) achievement_gain("TOWER4");
+    if(it == itElemental) achievement_gain("ELEMENT4");
+    if(it == itZebra) achievement_gain("ZEBRA4");
     }
   
-  if(it == itOrbYendor)
+  if(it == itOrbYendor) {
     achievement_gain("YENDOR2");
+    if(pureHardcore()) achievement_gain("HARDCORE");
+    if(shmup::on) achievement_gain("SHMUP", false, true);
+    }
   }
 
 void achievement_count(const string& s, int current, int prev) {
   if(cheater) return;
+  if(shmup::on) return;
+  if(randomPatternsMode) return;
   if(s == "GOLEM" && current >= 5)
     achievement_gain("GOLEM2");
   if(s == "GOLEM" && current >= 10)
@@ -204,6 +267,7 @@ int specific_what = 0;
 
 void improve_score(int i, eItem what) {
 #ifdef HAVE_ACHIEVEMENTS
+  if(haveLeaderboard(i)) updateHi(what, currentscore[i]);
   if(items[what] && haveLeaderboard(i)) {
     if(items[what] > currentscore[i] && currentscore[i] != SCORE_UNKNOWN) {
       specific_improved++; specific_what = what;
@@ -215,14 +279,16 @@ void improve_score(int i, eItem what) {
 #endif
   }
 
-void achievement_final(bool really_final) {
+void achievement_score(int cat, int number) {
 #ifdef HAVE_ACHIEVEMENTS
   if(cheater) return;
   if(euclid) return;
-  int total_improved = 0;
-  specific_improved = 0;
-  specific_what = 0;
-  
+  if(randomPatternsMode) return;
+  upload_score(cat, number);
+#endif
+  }
+
+void improveItemScores() {
   for(int i=1; i<=12; i++) improve_score(i, eItem(i));
   improve_score(17, itOrbYendor);
   improve_score(18, itFernFlower);
@@ -233,14 +299,39 @@ void achievement_final(bool really_final) {
   improve_score(23, itEmerald);
   improve_score(24, itGrimoire);
   improve_score(25, itHolyGrail);
+  improve_score(26, itRedGem);
+  improve_score(27, itPirate);
+  improve_score(31, itBombEgg);
+  improve_score(32, itCoast);
+  improve_score(33, itWhirlpool);
+  improve_score(34, itPalace);
+  improve_score(35, itFjord);
+  
+  improve_score(37, itEdge);
+  improve_score(38, itElemental);
+  improve_score(39, itZebra);
+  }
+
+void achievement_final(bool really_final) {
+#ifdef HAVE_ACHIEVEMENTS
+  if(cheater) return;
+  if(euclid) return;
+  if(randomPatternsMode) return;
+  int total_improved = 0;
+  specific_improved = 0;
+  specific_what = 0;
+  
+  if(!shmup::on) improveItemScores(); 
+  
+  int sid = shmup::on ? 28 : 0;
   
   int tg = gold();
-  if(tg && haveLeaderboard(0)) {
-    if(tg > currentscore[0] && currentscore[0] != SCORE_UNKNOWN) {
-      if(currentscore[0] < 0) total_improved += 2;
-      total_improved++; currentscore[0] = tg;
+  if(tg && haveLeaderboard(sid)) {
+    if(tg > currentscore[sid] && currentscore[sid] != SCORE_UNKNOWN) {
+      if(currentscore[sid] < 0) total_improved += 2;
+      total_improved++; currentscore[sid] = tg;
       }
-    upload_score(0, tg);
+    upload_score(sid, tg);
     }
   
   if(total_improved >= 2) {
@@ -264,11 +355,13 @@ void achievement_victory(bool hyper) {
 #ifdef HAVE_ACHIEVEMENTS
   if(cheater) return;
   if(euclid) return;
+  if(randomPatternsMode) return;
+  if(hyper && shmup::on) return;
 
   int t = savetime + time(NULL) - timerstart;
   
-  int ih1 = hyper ? 15 : 13;
-  int ih2 = hyper ? 16 : 14;
+  int ih1 = hyper ? 15 : shmup::on ? 29 : 13;
+  int ih2 = hyper ? 16 : shmup::on ? 30 : 14;
   
   int improved = 0;
   if(currentscore[ih1] == NO_SCORE_YET || currentscore[ih2] == NO_SCORE_YET)
@@ -291,12 +384,20 @@ void achievement_victory(bool hyper) {
       addMessage(XLAT("This has been recorded in the " LEADERFULL "."));
       addMessage(XLAT("The faster you get here, the better you are!"));
       }
-    else if(improved >= 3)
-      addMessage(XLAT("You have improved both your real time and turn count. Congratulations!"));
+    else if(improved >= 3) {
+      if(shmup::on)
+        addMessage(XLAT("You have improved both your real time and knife count. Congratulations!"));
+      else 
+        addMessage(XLAT("You have improved both your real time and turn count. Congratulations!"));
+      }
     else if(improved == 1)
       addMessage(XLAT("You have used less real time than ever before. Congratulations!"));
-    else if(improved == 2)
-      addMessage(XLAT("You have used less turns than ever before. Congratulations!"));
+    else if(improved == 2) {
+      if(shmup::on)
+        addMessage(XLAT("You have used less knives than ever before. Congratulations!"));
+      else
+        addMessage(XLAT("You have used less turns than ever before. Congratulations!"));
+      }
     }
   
   upload_score(ih1, t);

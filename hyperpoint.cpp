@@ -99,6 +99,8 @@ struct transmatrix {
 // identity matrix
 transmatrix Id = {{{1,0,0}, {0,1,0}, {0,0,1}}};
 
+transmatrix Mirror = {{{1,0,0}, {0,-1,0}, {0,0,1}}};
+
 hyperpoint operator * (const transmatrix& T, const hyperpoint& H) {
   hyperpoint z;
   for(int i=0; i<3; i++) {
@@ -141,6 +143,10 @@ transmatrix xpush(ld alpha) {
   return T;
   }
 
+double inverse_sinh(ld z) {
+  return log(z+sqrt(1+z*z));
+  }
+ 
 // push alpha units vertically
 transmatrix ypush(ld alpha) {
   if(euclid) return eupush(0, alpha);
@@ -205,8 +211,22 @@ transmatrix rgpushxto0(hyperpoint H) {
 // fix the matrix T so that it is indeed an isometry
 // (without using this, imprecision could accumulate)
 
+void display(const transmatrix& T);
+
 void fixmatrix(transmatrix& T) {
-  for(int x=0; x<3; x++) for(int y=0; y<=x; y++) {
+  if(euclid) {
+    for(int x=0; x<2; x++) for(int y=0; y<=x; y++) {
+      ld dp = 0;
+      for(int z=0; z<2; z++) dp += T[z][x] * T[z][y];
+      
+      if(y == x) dp = 1 - sqrt(1/dp);
+      
+      for(int z=0; z<2; z++) T[z][x] -= dp * T[z][y];
+      }
+    for(int x=0; x<2; x++) T[2][x] = 0;
+    T[2][2] = 1;
+    }
+  else for(int x=0; x<3; x++) for(int y=0; y<=x; y++) {
     ld dp = 0;
     for(int z=0; z<3; z++) dp += T[z][x] * T[z][y] * sig(z);
     
