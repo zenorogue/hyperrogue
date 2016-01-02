@@ -18,15 +18,60 @@
 [10] music/hr3-rlyeh.ogg
 # Hell [11]
 [11] music/hr3-hell.ogg
-# Cheaterland [12]
+# Cocytus [12]
 [12] music/hr3-icyland.ogg
 # Motion [13]
 [13] music/hr3-motion.ogg
 # Dry Forest [14]
 [14] music/hr3-jungle.ogg
-# Game Board [15]
-[15] music/hr3-laboratory.ogg
-# Barrier [01] (useless)
+# Emerald Mines [15]
+[15] music/hr3-caves.ogg
+# Vineyard [16]
+[16] music/hr3-laboratory.ogg
+# Dead Caves [17]
+[17] music/hr3-graveyard.ogg
+# Hive [18]
+[18] music/hr3-motion.ogg
+# Land of Power [19]
+[19] music/hr3-mirror.ogg
+# Camelot [20]
+[20] music/hr3-hell.ogg
+# Temple [21]
+[21] music/hr3-rlyeh.ogg
+# CR2 [22]
+[22] music/hr3-crossroads.ogg
+# Caribbean [23]
+[23] music/hr3-crossroads.ogg
+# Red Rock Valley [24]
+[24] music/hr3-desert.ogg
+# Minefield [25]
+[25] music/hr3-hell.ogg
+# Ocean [26]
+[26] music/hr3-caves.ogg
+# Whirlpool [27]
+[27] music/hr3-rlyeh.ogg
+# Palace [28]
+[28] music/hr3-crossroads.ogg
+# Living Fjord [39]
+[29] music/hr3-caves.ogg
+# Ivory Tower [30]
+[30] music/hr3-laboratory.ogg
+# Zebra [31]
+[31] music/hr3-motion.ogg
+# Elemental Fire [32]
+[32] music/hr3-hell.ogg
+# Elemental Air [33]
+[33] music/hr3-motion.ogg
+# Elemental Earth [34]
+[34] music/hr3-caves.ogg
+# Elemental Water [35]
+[35] music/hr3-crossroads.ogg
+# Crossroads III [36]
+[36] music/hr3-crossroads.ogg
+# Seawall [37] (useless)
+# Elemental Wall [38] (useless)
+# Canvas [39]
+[39] music/hr3-laboratory.ogg
 # None [00] (used when the window is out of focus)
 
 
