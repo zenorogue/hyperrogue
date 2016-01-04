@@ -7,4 +7,6 @@ export VERNUM=`grep "#define VERNUM " hyper.cpp | sed "s/#define VERNUM //" | se
 sed "s/\"ProductVersion\", \"\(.*\)\"/\"ProductVersion\", \"$VER\"/" -i hyper.rc
 sed "s/FILEVERSION   \(.*\)$/FILEVERSION     $VERNUM/" -i hyper.rc
 sed "s/PRODUCTVERSION\(.*\)$/PRODUCTVERSION  $VERNUM/" -i hyper.rc
+# Adjust it in configure.ac
+sed "s/AC_INIT.*/AC_INIT([hyperrogue], [$VER])/" -i configure.ac
 echo $VER
