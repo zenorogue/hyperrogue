@@ -7,6 +7,7 @@ config.guess
 config.sub
 config.log
 config.status
+configure
 depcomp
 Makefile
 install-sh
