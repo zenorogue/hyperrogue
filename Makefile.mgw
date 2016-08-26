@@ -1,5 +1,10 @@
+all: hyper.exe
+
+# for simplicity we use NOPNG here
+# you can also include savepng.c and remove -DNOPNG
+
 hyper.exe: hyper.cpp graph.cpp hyperpoint.cpp geometry.cpp cell.cpp heptagon.cpp game.cpp polygons.cpp classes.cpp hyper.res language-data.cpp
-	g++ -mwindows hyper.cpp hyper.res -o hyper.exe -lSDL -lSDL_mixer -lopengl32 SDL_ttf.dll SDL_gfx.dll -O3
+	g++ -mwindows hyper.cpp hyper.res -o hyper.exe -lSDL -lSDL_mixer -lopengl32 SDL_ttf.dll SDL_gfx.dll -O3 -DNOPNG
 
 hyper.res: hyper.rc hr-icon.ico
 	windres hyper.rc -O coff -o hyper.res

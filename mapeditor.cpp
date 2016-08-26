@@ -1,3 +1,6 @@
+// HyperRogue map editor
+// Copyright (C) 2011-2016 Zeno Rogue, see 'hyper.cpp' for details
+
 #include <map>
 #include <stdint.h>
 
@@ -9,6 +12,7 @@
 #endif
 
 namespace mapeditor {
+#ifndef MOBILE
   cell *modelcell[200];
   
   void clearModelCells() {
@@ -31,8 +35,10 @@ namespace mapeditor {
         c->mondir = (c2->mondir - patterndir(c2) + patterndir(c) + 7*6*5) % c->type;
       }
     }
+#endif
   }
 
+#ifndef MOBILE
 namespace mapstream {
   std::map<cell*, int> cellids;
   vector<cell*> cellbyid;
@@ -199,7 +205,7 @@ namespace mapstream {
     for(int i=0; i<size(cellbyid); i++) {
       cell *c = cellbyid[i];
       if(c->bardir != NODIR && c->bardir != NOBARRIERS) 
-        buildBarrier(c);
+        extendBarrier(c);
       }
 
     for(int d=BARLEV-1; d>=0; d--)
@@ -251,9 +257,136 @@ namespace mapstream {
     return true;
     }
   
-  }  
+  }
+#endif
 
 namespace mapeditor {
+
+  bool drawplayer = true;
+  char whichPattern = 0;
+  char whichShape = 0;
+  char whichCanvas = 0;
+
+    int nopattern(cell *c) {
+        if(isWarped(c) && !euclid) {
+            int u = ishept(c)?1:0;
+            int qhex = 0;
+            for(int v=0; v<c->type; v++) if(c->mov[v] && !isWarped(c->mov[v])) {
+                u += 2;
+                if(!ishept(c->mov[v])) qhex++;
+            }
+            if(u == 2 && qhex == 1) return 8;
+            if(u == 6 && qhex == 2) return 10;
+            return u;
+        }
+        return ishept(c) ? 1 : ishex1(c) ? 2 : 0; // 0 to 1
+    }
+    
+    bool reflectPatternAt(cell *c, char p = whichPattern) {
+        if(p == 'p' && polarb50(c)) return true;
+        if(p == 0 && nopattern(c) == 4) {
+            int d = patterndir(c);
+            return !isWarped(createMov(c, (d+1)%6));
+        }
+        return false;
+    }
+    
+    int downdir(cell *c, cellfunction *cf = coastvalEdge) {
+        cell *c2 = chosenDown(c, 1, 1, cf);
+        if(!c2) return 0;
+        return neighborId(c, c2);
+    }
+    
+    int patterndir(cell *c, char w) {
+        switch(w) {
+            case 'z': {
+                int t = zebra40(c);
+                
+                int t4 = t>>2, tcdir = 0;
+                
+                if(purehepta) tcdir = t^1;
+                
+                else if(t4 == 10) tcdir = t-20;
+                else if(t4 >= 4 && t4 < 7) tcdir = 40 + (t&3);
+                else if(t4 >= 1 && t4 < 4) tcdir = t+12;
+                else if(t4 >= 7 && t4 < 10) tcdir = t-24;
+                
+                for(int i=0; i<c->type; i++) if(c->mov[i] && zebra40(c->mov[i]) == tcdir)
+                    return i;
+                
+                // printf("fail to fintd %d -> %d\n", t, tcdir);
+                
+                return 0;
+            }
+                
+            case 'f': {
+                int t = emeraldval(c);
+                int tcdir = 0, tbest = (t&3);
+                for(int i=0; i<c->type; i++) {
+                    cell *c2 = c->mov[i];
+                    if(c2) {
+                        int t2 = emeraldval(c2);
+                        if((t&3) == (t2&3) && t2 > tbest)
+                            tbest = t2, tcdir = i;
+                    }
+                }
+                return tcdir;
+            }
+                
+            case 'p': {
+                int tcdir = -1, tbest = -1;
+                int pa = polara50(c);
+                int pb = polarb50(c);
+                for(int i=0; i<c->type; i++) {
+                    cell *c2 = c->mov[i];
+                    if(c2 && polara50(c2) == pa && polarb50(c2) == pb) {
+                        int t2 = fiftyval049(c2);
+                        if(t2 > tbest) tbest = t2, tcdir = i;
+                    }
+                }
+                return tcdir;
+            }
+                
+            case 'H':
+                return downdir(c);
+                
+            case 0: {
+                if(euclid) return 0;
+                int u = nopattern(c);
+                
+                if(u == 6)
+                    for(int i=1; i<c->type; i+=2) if(!isWarped(createMov(c,i)))
+                        return i;
+                
+                if(u == 2 || u == 3 || u == 8)
+                    for(int i=0; i<c->type; i++) if(!isWarped(createMov(c,i)))
+                        return i;
+                
+                if(u == 4 || u == 10)
+                    for(int i=0; i<c->type; i+=2) if(!isWarped(createMov(c,i)))
+                        return i;
+                
+                if(u == 6)
+                    for(int i=1; i<c->type; i+=2) if(!isWarped(createMov(c,i))) 
+                        return i;
+                
+                if(u == 5)
+                    for(int i=0; i<c->type; i++) if(!isWarped(createMov(c,(i+3)%7)) && !isWarped(createMov(c,(i+4)%7))) 
+                        return i;
+                
+                if(u == 9)
+                    for(int i=0; i<c->type; i++) if(!isWarped(createMov(c,(i+2)%7)) && !isWarped(createMov(c,(i+5)%7))) 
+                        return i;
+                
+                if(u == 7)
+                    for(int i=0; i<c->type; i++) if(!isWarped(createMov(c,(i+1)%7)) && !isWarped(createMov(c,(i+6)%7))) 
+                        return i;
+            }
+        }
+        return 0;
+    }
+    
+#ifndef MOBILE
   int paintwhat = 0;
   int painttype = 0;
   int radius = 0;
@@ -262,14 +395,13 @@ namespace mapeditor {
   
   int subscreen; //0=normal, 1=config, 2=patterns, 3=predesigned
 
-  char whichPattern;
   bool symRotation, sym01, sym02, sym03;
   int displaycodes;
-  char whichShape, whichCanvas;
   int subcanvas;
   int whichpart;
   
-  bool drawplayer = true;  
+  string infix;
+  
   cell *drawcell;
   
   const char *mapeditorhelp = 
@@ -367,11 +499,6 @@ namespace mapeditor {
   void checkUndo() {
     if(checkEq(undo[size(undo)-1])) undo.pop_back();
     }
-  
-  string actkeys = "-"
-    "abcdefghijklmnopqrstuvwxyz"
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-    "0123456789!@#$%^&*()_+=[{]}\\|;:'\",<.>/?`~";
   
   int itc(int k) {
     if(k == 0) return 0;
@@ -523,6 +650,22 @@ namespace mapeditor {
     displayButton(8, vid.yres-8-fs*3, XLAT("SPACE = map/graphics"), ' ', 0);
     displayButton(8, vid.yres-8-fs*2, XLAT("ESC = return to the game"), SDLK_ESCAPE, 0);
     }
+
+  void vpush(int i, const char *name) {
+    string s = XLATN(name);
+    if(infix != "") {
+      string t = "";
+      for(int i=0; i<size(s); i++) {
+        char c = s[i];
+        char tt = 0;
+        if(c >= 'a' && c <= 'z') tt += c - 32;
+        else if(c >= 'A' && c <= 'Z') tt += c;
+        if(tt) t += tt;
+        }
+      if(t.find(infix) == string::npos) return;
+      }
+    v.push_back(make_pair(s, i));
+    }
   
   void showMapEditor() {
   
@@ -544,22 +687,24 @@ namespace mapeditor {
 
       displayStat(14, XLAT("display only hexagons"), ONOFF(whichShape == '6'), '6');
       displayStat(15, XLAT("display only heptagons"), ONOFF(whichShape == '7'), '7');
+      displayStat(16, XLAT("display the triheptagonal grid"), ONOFF(whichShape == '8'), '8');
 
-      displayStat(17, XLAT("predesigned patterns"), "", 'r');
+      displayStat(18, XLAT("predesigned patterns"), "", 'r');
       }
     else if(subscreen == 3) {
       displayStat(2, XLAT("Gameboard"), "", 'g');
       displayStat(3, XLAT("random colors"), "", 'r');
+      displayStat(4, XLAT("rainbow landscape"), "", 'l');
 
-      displayStat(5, XLAT("emerald pattern"), "emerald", 'e');
+      displayStat(6, XLAT("emerald pattern"), "emerald", 'e');
 
-      displayStat(7, XLAT("four elements"), "palace", 'b');
-      displayStat(8, XLAT("eight domains"), "palace", 'a');
+      displayStat(8, XLAT("four elements"), "palace", 'b');
+      displayStat(9, XLAT("eight domains"), "palace", 'a');
 
-      displayStat(10, XLAT("zebra pattern"), "zebra", 'z');
-      displayStat(11, XLAT("three stripes"), "zebra", 'x');
+      displayStat(11, XLAT("zebra pattern"), "zebra", 'z');
+      displayStat(12, XLAT("three stripes"), "zebra", 'x');
 
-      displayStat(13, XLAT("random black-and-white"), "current", 'w');
+      displayStat(15, XLAT("random black-and-white"), "current", 'w');
       }
     else if(subscreen == 1 && painttype == 6) 
       drawColorDialog(paintwhat);
@@ -575,29 +720,24 @@ namespace mapeditor {
               m == moFlailBullet || m == moShadow || m == moAirball ||
               m == moWolfMoved || m == moGolemMoved ||
               m == moTameBomberbirdMoved || m == moKnightMoved ||
+              m == moDeadBug || m == moLightningBolt || m == moDeadBird ||
               m == moMouseMoved || m == moPrincessMoved || m == moPrincessArmedMoved) ;
-            else 
-            v.push_back(make_pair(XLATN(minf[i].name), i));
+            else vpush(i, minf[i].name);
             }
           break;
         case 1:
-          for(int i=0; i<ittypes; i++) {
-            v.push_back(make_pair(XLATN(iinf[i].name), i));
-            }
+          for(int i=0; i<ittypes; i++) vpush(i, iinf[i].name);
           break;
         case 2:
-          for(int i=0; i<landtypes; i++) {
-            v.push_back(make_pair(XLATN(linf[i].name), i));
-            }
+          for(int i=0; i<landtypes; i++) vpush(i, linf[i].name);
           break;
         case 3:
-          for(int i=0; i<walltypes; i++) {
-            if(i != waChasmD)
-              v.push_back(make_pair(XLATN(winf[i].name), i));
-            }
+          for(int i=0; i<walltypes; i++) if(i != waChasmD) vpush(i, winf[i].name);
           break;
         }
       // sort(v.begin(), v.end());
+      
+      if(infix != "") mouseovers = infix;
       
       int q = v.size();
       int percolumn = vid.yres / (vid.fsize+5) - 4;
@@ -607,7 +747,11 @@ namespace mapeditor {
         int x = 16 + (vid.xres * (i/percolumn)) / columns;
         int y = (vid.fsize+5) * (i % percolumn) + vid.fsize*2;
         
-        displayButton(x, y, v[i].first + ": " + actkeys[i], actkeys[i], 0);
+        int actkey = 1000 + i;
+        string vv = v[i].first;
+        if(i < 9) { vv += ": "; vv += ('1' + i); }
+        
+        displayButton(x, y, vv, actkey, 0);
         }
       }
     else {
@@ -713,7 +857,7 @@ namespace mapeditor {
       case 'H':
         return realpattern(c);
       }
-    return c->type-6; // 0 to 1
+    return nopattern(c);
     }
 
   int realpattern(cell *c) {
@@ -732,7 +876,7 @@ namespace mapeditor {
       case 'H': 
         return towerval(c);
       }
-    return c->type-6; // 0 to 2
+    return nopattern(c);
     }
 
   int cellShapeGroup() {
@@ -751,7 +895,7 @@ namespace mapeditor {
     }
   
   int drawcellShapeID() {
-    if(drawcell == cwt.c) return vid.female;
+    if(drawcell == cwt.c) return vid.cs.charid;
     if(drawcell->monst) return drawcell->monst;
     if(drawcell->item) return drawcell->item;
     return subpattern(drawcell);
@@ -768,63 +912,6 @@ namespace mapeditor {
     if(group != mapeditor::drawcellShapeGroup()) return false;
     if(group < 3) return id == drawcellShapeID();
     return subpatternShape(id) == subpattern(drawcell);
-    }
-  
-  bool reflectPatternAt(cell *c) {
-    return whichPattern == 'p' && polarb50(c);
-    }
-  
-  int patterndir(cell *c, char w) {
-    switch(w) {
-      case 'z': {
-        int t = zebra40(c);
-        
-        int t4 = t>>2, tcdir;
-        
-        if(t4 == 10) tcdir = 0;
-        else if(t4 >= 4 && t4 < 7) tcdir = 40 + (t&3);
-        else if(t4 >= 1 && t4 < 4) tcdir = t+12;
-        else if(t4 >= 7 && t4 < 10) tcdir = t-24;
-        
-        for(int i=0; i<c->type; i++) if(c->mov[i] && zebra40(c->mov[i]) == tcdir)
-          return i;
-        }
-      
-      case 'f': {
-        int t = emeraldval(c);
-        int tcdir, tbest = (t&3);
-        for(int i=0; i<c->type; i++) {
-          cell *c2 = c->mov[i];
-          if(c2) {
-            int t2 = emeraldval(c2);
-            if((t&3) == (t2&3) && t2 > tbest)
-              tbest = t2, tcdir = i;
-            }
-          }
-        return tcdir;
-        }
-      
-      case 'p': {
-        int tcdir = -1, tbest = -1;
-        int pa = polara50(c);
-        int pb = polarb50(c);
-        for(int i=0; i<c->type; i++) {
-          cell *c2 = c->mov[i];
-          if(c2 && polara50(c2) == pa && polarb50(c2) == pb) {
-            int t2 = fiftyval049(c2);
-            if(t2 > tbest) tbest = t2, tcdir = i;
-            }
-          }
-        return tcdir;
-        }
-      
-      case 'H': {
-        cell *c2 = chosenDown(c, 1, 1);
-        if(!c2) return 0;
-        return neighborId(c, c2);
-        }
-      }
-    return 0;
     }
   
   void spill(cell *c, int r, int cdir) {
@@ -846,7 +933,7 @@ namespace mapeditor {
         c->stuntime = 0;
         c->mondir = cdir;
         
-        if((isWorm(c) || isIvy(c)) && c->mov[cdir] && 
+        if((isWorm(c) || isIvy(c) || isMutantIvy(c)) && c->mov[cdir] && 
           !isWorm(c->mov[cdir]) && !isIvy(c->mov[cdir]))
           c->mondir = NODIR;
         break;
@@ -876,7 +963,7 @@ namespace mapeditor {
           if(hasTimeout(c))
             c->wparam = 10;
           else if(c->wall == waWaxWall)
-            c->landparam = rand() & 0xFFFFFF;
+            c->landparam = hrand(0xFFFFFF + 1);
           }
         else if(hasTimeout(c))
           c->wparam += spillinc();
@@ -937,7 +1024,7 @@ namespace mapeditor {
         }
       for(int i=0; i<c2->type; i++) {
         cell *c3 = c2->mov[i];
-        if(c3 && c3->aitmp != sval)
+        if(c3 && !eq(c3->aitmp, sval))
           c3->aitmp = sval, v.push_back(c3);
         }
       }
@@ -995,13 +1082,19 @@ namespace mapeditor {
       if(v == 2) cmode = emNormal;
       }
     else if(subscreen == 1) {
-      for(int z=0; z<size(v); z++) if(actkeys[z] == uni) {
+      if(uni >= '1' && uni <= '9') uni = 1000 + uni - '1';
+      if(sym == SDLK_RETURN || sym == '-') uni = 1000;
+      for(int z=0; z<size(v); z++) if(1000 + z == uni) {
         paintwhat = v[z].second;
         paintwhat_str = v[z].first;
         subscreen = 0;
         mousepressed = false;
         }
-      if(subscreen == 1 && uni != 0) cmode = emNormal;
+      if(uni >= 'A' && uni <= 'Z') infix += uni;
+      else if(uni >= 'a' && uni <= 'z') infix += uni-32;
+      else if(infix != "" && uni == 8) infix = infix.substr(0, size(infix)-1);
+      else if(infix != "" && uni != 0) infix = "";
+      else if(subscreen == 1 && uni != 0) cmode = emNormal;
       }
     else if(subscreen == 3) {
       if(uni >= 'a' && uni <= 'z') {
@@ -1023,7 +1116,7 @@ namespace mapeditor {
       else if(uni == '1') sym01 = !sym01;
       else if(uni == '2') sym02 = !sym02;
       else if(uni == '3') sym03 = !sym03;
-      else if(uni == '6' || uni == '7') {
+      else if(uni == '6' || uni == '7' || uni == '8') {
         if(whichShape == uni) whichShape = 0;
         else whichShape = uni;
         }
@@ -1046,10 +1139,10 @@ namespace mapeditor {
       if(uni == 'u') applyUndo();
       else if(uni == 'v' || sym == SDLK_F10 || sym == SDLK_ESCAPE) cmode = emNormal;
       else if(uni >= '0' && uni <= '9') radius = uni - '0';
-      else if(uni == 'm') subscreen = 1, painttype = 0;
-      else if(uni == 'i') subscreen = 1, painttype = 1;
-      else if(uni == 'l') subscreen = 1, painttype = 2;
-      else if(uni == 'w') subscreen = 1, painttype = 3;
+      else if(uni == 'm') subscreen = 1, painttype = 0, infix = "";
+      else if(uni == 'i') subscreen = 1, painttype = 1, infix = "";
+      else if(uni == 'l') subscreen = 1, painttype = 2, infix = "";
+      else if(uni == 'w') subscreen = 1, painttype = 3, infix = "";
       else if(uni == 'r') subscreen = 2;
       else if(uni == 't' && mouseover) {
         cwt.c = mouseover; playermoved = true;
@@ -1161,7 +1254,7 @@ namespace mapeditor {
   hyperpoint coldcenter = C0;
   
   void drawGrid() {
-    if(cmode == emDraw) {
+    if(cmode == emDraw && !inHighQual) {
       lalpha = 0x20;
       for(int d=0; d<84; d++) {
         transmatrix d2 = drawtrans * rgpushxto0(ccenter);
@@ -1169,19 +1262,37 @@ namespace mapeditor {
           lalpha = 0x40;
         else
           lalpha = 0x20;
-        drawline(d2 * C0, d2 * spin(M_PI*d/42)* xpush(1) * C0, 0xC0C0C0);
+        queueline(d2 * C0, d2 * spin(M_PI*d/42)* xpush(1) * C0, 0xC0C0C0);
         for(int u=2; u<=20; u++) {
           if(u % 5 == 0) lalpha = 0x40;
           else lalpha = 0x20;
-          drawline(
+          queueline(
             d2 * spin(M_PI*d/42)* xpush(u/20.) * C0, 
             d2 * spin(M_PI*(d+1)/42)* xpush(u/20.) * C0, 
             0xC0C0C0);
           }
         }
-      drawline(drawtrans*ccenter, drawtrans*coldcenter, 0xC0C0C0);
+      queueline(drawtrans*ccenter, drawtrans*coldcenter, 0xC0C0C0);
   
       lalpha = 0xFF;
+
+      int sg = drawcellShapeGroup();
+      
+      for(int i=0; i<USERSHAPEIDS; i++) if(editingShape(sg, i) && usershapes[sg][i]) {
+  
+        usershapelayer &ds(usershapes[sg][i]->d[mapeditor::dslayer]);
+  
+        for(int a=0; a<size(ds.list); a++) {
+          hyperpoint P2 = drawtrans * ds.list[a];
+    
+          int xc, yc, sc;
+          getcoord(P2, xc, yc, sc);
+          queuechr(xc, yc, sc, 10, 'x', 
+            a == 0 ? 0x00FF00 : 
+            a == size(ds.list)-1 ? 0xFF0000 :
+            0xFFFF00);
+          }
+        }
       }
     }
 
@@ -1201,7 +1312,7 @@ namespace mapeditor {
     switch(sg) {
       case 0:
         line1 = XLAT("character");
-        line2 = XLAT(vid.female ? "female" : "male");
+        line2 = csname(vid.cs);
         break;
       
       case 1:
@@ -1216,7 +1327,8 @@ namespace mapeditor {
       
       case 3:
         line1 = XLAT("floor");
-        line2 = XLAT(drawcell->type == 6 ? "hexagonal" : "heptagonal");
+        line2 = XLAT(ishept(drawcell) ? "heptagonal" : 
+          ishex1(drawcell) ? "hexagonal #1" : "hexagonal");
         break;
       
       default:
@@ -1274,14 +1386,20 @@ namespace mapeditor {
   
   void applyToShape(int sg, int id, int uni, hyperpoint mh) {
     bool haveshape = usershapes[sg][id];
+    bool xnew = false;
     if(!haveshape) {
       if(uni == 'n' || uni == 'u')
         initShape(sg, id);
-      else return;
+      else if(uni >= '0' && uni <= '9') {
+        initShape(sg, id);
+        xnew = true;
+        }
+      else 
+        return;
       }
 
     usershapelayer *dsCur = &usershapes[sg][id]->d[dslayer];
-    if(uni == 'n') {
+    if(uni == 'n' || xnew) {
       dsCur->list.clear();
       dsCur->list.push_back(mh);
       saveImages();
@@ -1319,26 +1437,71 @@ namespace mapeditor {
       saveImages();
       }
 
-    if(uni == 'L') {
-      if(!vid.female) loadShape(sg, id, shPBody, 2, 0);
-      else loadShape(sg, id, shFemaleBody, 2, 0);
+    if(uni == 'T') {
+      /* loadShape(sg, id, shFemaleBody, 1, 1);
+      loadShape(sg, id, shPKnife, 1, 2);
+      loadShape(sg, id, shFemaleDress, 1, 3);
+      loadShape(sg, id, shPrincessDress, 1, 4);
+      loadShape(sg, id, shBeautyHair, 1, 5);
+      loadShape(sg, id, shPFace, 1, 6);
+      loadShape(sg, id, shFlowerHair, 1, 7); */
 
-      loadShape(sg, id, shPSword, 1, 1);
+      /* loadShape(sg, id, shYeti, 1, 2);
+      loadShape(sg, id, shRatHead, 1, 3);
+      loadShape(sg, id, shRatTail, 1, 1);
+      loadShape(sg, id, shWolf1, 1, 4);
+      loadShape(sg, id, shWolf2, 1, 5);
+      loadShape(sg, id, shRatCape1, 1, 7);
+      loadShape(sg, id, shRatCape2, 1, 6); */
 
-      if(vid.female)
-        loadShape(sg, id, shFemaleDress, 2, 2);
-    
-      if(vid.female)
-        loadShape(sg, id, shFemaleHair, 2, 3);
-      else
-        loadShape(sg, id, shPHead, 2, 3);
+//    loadShape(sg, id, shTortoise[0][0], 1, 0);
+/*      loadShape(sg, id, shTentacleX, 1, 0);
+      loadShape(sg, id, shTentacle, 1, 1);
+      loadShape(sg, id, shJoint, 1, 2); */
       
-      loadShape(sg, id, shPFace, 2, 4); 
+      /* loadShape(3, 0, shTurtleFloor[0], 12, 0);
+      loadShape(3, 1, shTurtleFloor[1], 14, 0); */
+
+      // loadShape(sg, id, shDragonSegment, 2, 0);
+      loadShape(sg, id, shDragonSegment, 2, 1);
+      // loadShape(sg, id, shEyes, 2, 2);
+      
+      saveImages();
+      }
+
+    if(uni == 'K') {
+      if(vid.cs.charid >= 4) {
+        loadShape(sg, id, shCatBody, 2, 0);
+        loadShape(sg, id, shCatHead, 2, 1);
+        }
+      else {
+        if(!(vid.cs.charid&1)) loadShape(sg, id, shPBody, 2, 0);
+        else loadShape(sg, id, shFemaleBody, 2, 0);
+  
+        loadShape(sg, id, shPSword, 1, 1);
+  
+        if(vid.cs.charid&1)
+          loadShape(sg, id, shFemaleDress, 2, 2);
+
+        if(vid.cs.charid&1)
+          loadShape(sg, id, shPrincessDress, 1, 3);
+        else
+          loadShape(sg, id, shPrinceDress, 2, 3);
+      
+        if(vid.cs.charid&1)
+          loadShape(sg, id, shFemaleHair, 2, 4);
+        else
+          loadShape(sg, id, shPHead, 2, 4);
+        
+        loadShape(sg, id, shPFace, 2, 5); 
+        }
       
       // loadShape(sg, id, shWolf, 2, dslayer);
       
       saveImages();
       }
+
+    if(uni == '+') dsCur->rots++;
 
     if(uni >= '1' && uni <= '9') {
       dsCur->rots = uni - '0';
@@ -1372,7 +1535,8 @@ namespace mapeditor {
     hyperpoint h;
     for(int i=0; i<3; i++) {
       double d;
-      fscanf(f, "%lf", &d);
+      int err = fscanf(f, "%lf", &d);
+      if(err) printf("Warning: read error\n");
       h[i] = d;
       }
     return h;
@@ -1393,7 +1557,7 @@ namespace mapeditor {
       else return;
       }
   
-    dslayer &= 7;
+    dslayer %= USERLAYERS;
     hyperpoint mh = inverse(drawtrans) * mouseh;
     
     int sg = drawcellShapeGroup();
@@ -1404,7 +1568,8 @@ namespace mapeditor {
     if(uni == 'e') {
       drawcell = mouseover ? mouseover : cwt.c;
       }
-    if(uni == 'l') dslayer++;
+    if(uni == 'l') { dslayer++; dslayer %= USERLAYERS; }
+    if(uni == 'L') { dslayer--; if(dslayer < 0) dslayer += USERLAYERS; }
     
     if(uni == 'g') coldcenter = ccenter, ccenter = mh;
     
@@ -1467,12 +1632,17 @@ namespace mapeditor {
         addMessage(XLAT("Failed to load pictures from %1", picfile));
         return;
         }
-      char buf[200]; fgets(buf, 200, f);
-      int vernum; fscanf(f, "%x", &vernum);
+      int err;
+      char buf[200];
+      if(!fgets(buf, 200, f)) { 
+        addMessage(XLAT("Failed to load pictures from %1", picfile));
+        fclose(f); return; 
+        }
+      int vernum; err = fscanf(f, "%x", &vernum);
       printf("vernum = %x\n", vernum);
       while(true) {
         int i, j, l, sym, rots, color, siz;
-        int err = fscanf(f, "%d%d%d%d%d%x%d", &i, &j, &l, &sym, &rots, &color, &siz);
+        err = fscanf(f, "%d%d%d%d%d%x%d", &i, &j, &l, &sym, &rots, &color, &siz);
         if(i == -1 || err < 6) break;
         if(siz < 0 || siz > 1000) break;
         initShape(i, j);
@@ -1524,7 +1694,7 @@ namespace mapeditor {
     if(whichCanvas == 'g')
       return linf[laCanvas].color >> 2;
     if(whichCanvas == 'r')
-      return rand() & 0xFFFFFF;
+      return hrand(0xFFFFFF + 1);
     if(whichCanvas == 'e') {
       static unsigned int fcol[4] = { 0x404040, 0x800000, 0x008000, 0x000080 };
       int fv = emeraldval(c);
@@ -1565,6 +1735,21 @@ namespace mapeditor {
       static unsigned int fcol[2] = { 0x303030, 0xC0C0C0 };
       return fcol[randpattern(c, subcanvas) ? 1 : 0];
       }
+    if(whichCanvas == 'l') {
+      #ifdef CDATA
+          int col[4];
+          bool err = false;
+          for(int j=0; j<4; j++) {
+            col[j] = getCdata(c, j);
+            col[j] *= 3;
+            col[j] %= 240;
+            if(col[j] > 120) col[j] = 240 - col[j];
+            if(col[j] < -120) col[j] = -240 - col[j];
+            }
+          return (0x808080 + col[0] + (col[1] << 8) + (col[2] << 16)) >> (err?2:0);
+      #endif
+      }
     return linf[laCanvas].color >> 2;
     }
+#endif
   }

@@ -1,3 +1,7 @@
+// Hyperbolic Rogue language file generator
+
+// Copyright (C) 2011-2016 Zeno Rogue, see 'hyper.cpp' for details
+
 #define GEN_M 0
 #define GEN_F 1
 #define GEN_N 2
@@ -84,7 +88,7 @@ typedef unsigned hashcode;
 
 hashcode hashval;
 
-hashcode hash(const string& s) {
+hashcode langhash(const string& s) {
   hashcode r = 0;
   for(int i=0; i<size(s); i++) r = hashval * r + s[i];
   return r;
@@ -93,7 +97,7 @@ hashcode hash(const string& s) {
 map<hashcode, string> buildHashTable(set<string>& s) {
   map<hashcode, string> res;
   for(set<string>::iterator it = s.begin(); it != s.end(); it++) 
-    res[hash(*it)] = *it;
+    res[langhash(*it)] = *it;
   return res;
   }
 
@@ -122,6 +126,13 @@ const char* allstr[] = {
   };
 #endif
 
+void setstats(set<string>& s, const char* bn) {
+  int tlen=0, tc = 0;
+  for(set<string>::iterator it = s.begin(); it != s.end(); it++) 
+    tc++, tlen += it->size();
+  printf("// %-10s %5d %5d\n", bn, tc, tlen);
+  }
+
 int main() {
 
   nothe.insert("R'Lyeh");
@@ -130,7 +141,7 @@ int main() {
   plural.insert("Crossroads III");
   plural.insert("Elemental Planes");
   
-#define S(a,b) d[1].add(a,b);
+#define S(a,b) d[1].add(a,b); 
 #define N(a,b,c,d,e,f) \
   {noun n; n.genus = b; n.nom = c; n.nomp = d; n.acc = e; n.abl = f; nouns[1].add(a,n);}
 #include "language-pl.cpp"
@@ -177,7 +188,7 @@ int main() {
     string mis = "";
     for(int i=1; i<NUMLAN; i++) if(d[i].count(*x) == 0)
       mis += d[i]["EN"];
-    if(mis != "" && mis != "DE")
+    if(mis != "" && mis != "TR" && mis != "TRDE" && mis != "DE")
       printf("#warning Missing [%s]: %s\n", mis.c_str(), escape(*x, "?"));
     }
   
@@ -191,7 +202,7 @@ int main() {
     string mis = "";
     for(int i=1; i<NUMLAN; i++) if(nouns[i].count(*x) == 0)
       mis += d[i]["EN"];
-    if(mis != "" && mis != "DE")
+    if(mis != "" && mis != "TR" && mis != "TRDE" && mis != "DE")
       printf("#warning Missing [%s]: %s\n", mis.c_str(), escape(*x, "?"));
     }
 

@@ -1,3 +1,10 @@
+// Hyperbolic Rogue -- items, monsters, walls, lands, descriptions, etc.
+// Copyright (C) 2011-2016 Zeno Rogue, see 'hyper.cpp' for details
+
+#define GEN_M 0
+#define GEN_F 1
+#define GEN_N 2
+#define GEN_O 3
 
 // --- help ---
 
@@ -53,11 +60,15 @@ const char *trollhelp =
 const char *trollhelp2 =
   " Additionally, all items around the killed Troll will be destroyed.";
 
+const char *trollhelpX =
+  "There are several species of trolls living in the hyperbolic world. "
+  "Some of them leave this wall behind them when they die.";
+
 const char *camelothelp = 
   "The Knights of the Round Table are the greatest warriors of these lands. "
   "They are not very inventive with names though, as they call each of their "
   "castles Camelot. "
-  "You are probably worth of joining them, but they will surely give you "
+  "You are probably worthy of joining them, but they will surely give you "
   "some quest to prove yourself...\n\n"
   "Each castle contains a single treasure, the Holy Grail, in the center. "
   "The radius of the Round Table is usually 28, but after you find a Holy Grail "
@@ -158,10 +169,114 @@ const char *elemdesc =
   "You need to collect a Shard from each Plane to construct an Elemental Gem. "
   "It is dangerous to collect too many Shards of the same type without constructing a Gem.";
 
+const char *wildwestdesc = 
+  "Take a revolver, kill outlaws, collect bounties.\n\n"
+  "Note: since this land is anachronistic, it is not available in normal game. "
+  "It is only available in special modes.";
+
+const char *elecdesc = 
+  "Whenever after your move there is a connection between a charged and a "
+  "grounded cell, there is a short circuit. All cells on any "
+  "path connecting a charged and a grounded cell (without repeated cells, "
+  "or two consecutive grounded/charged cells) become damaged.\n\n"
+  
+  "Sandstone walls and most creatures are conductive. Great Walls are "
+  "isolators, but lands beyond them count as grounded.\n\n"
+  
+  "Fulgurite, the treasure, is created when you manage to short circuit "
+  "a sandstone wall, or a Rich Metal Beast.\n\n"
+  
+  "Trolls leave conductive rocks when killed, and Metal Beasts can only "
+  "be killed by electricity -- your attacks only stun them, or push "
+  "them away if already stunned.";
+
+const char *overdesc = 
+  "The Overgrown Woods are filled with mutant ivies! These plants "
+  "grow very fast. Each leaf, after being grown, can grow itself "
+  "on the next turn. However, each part is only able to grow "
+  "once in 16 turns. Outside of the Overgrown Woods, the Mutant Ivy "
+  "may grow only on hexagonal cells.\n\n"
+  "Maybe such fast growing plants could help you solve the problem "
+  "of hunger in your world? Kill the Mutant Ivies to collect Mutant Saplings.";
+
+const char *cleardesc = 
+  "A clearing in the Overgrown Woods. Obviously, this gives "
+  "the Mutant Ivies an infinite space to grow...\n\n"
+  "Mutant Fruits rot if they are not adjacent to a Mutant Ivy.";
+
+const char *winddesc = 
+  "Someone has put air fans in these plains, causing strong winds everywhere. "
+  "You think that the purpose is to harness the magical power of Air Elementals, but "
+  "you are not sure.\n\n"
+  "All cells except fans are grouped into three colors according to a pattern. "
+  "Wind blows counterclockwise around each group of cells of a single color. "
+  "Cells which are blocked by walls, or at distance at most 2 from an Air Elemental, "
+  "do not count for this.\n\n"
+  "It is illegal to move in a direction which is closer to incoming wind than to "
+  "outcoming wind. However, you can move two cells with the wind in a single turn, "
+  "and so can the birds.";
+
+const char *hauntdesc = 
+  "A dark forest filled with ghosts and graves. But there is also treasure hidden "
+  "deep within... But don't let greed make you stray from your path, as "
+  "you can get lost!\n\n"
+  "The Haunted Woods are bounded by a single equidistant curve. It is not a circle or horocycle.\n\n";
+
 const char *NODESC = "No description yet.";
+const char *GENDERSWITCH = NODESC;
+
 // --- monsters ---
 
-const int motypes = 102;
+const char *rosedesc =
+  "Each eight turns, each rosebush at distance at most 5 from you will "
+  "release a wave of alluring scent. Creatures on the frontwave "
+  "will move towards where the scent came from. Even if it causes them "
+  "to attack their friends or beautiful creatures, or move into water, fire, chasm, or thorns of the rosebush. "
+  "Ivies, Ghosts, Rock Snakes, Rose Ladies and Lords, and monsters restricted to a specific "
+  "terrain are immune to scents.";
+
+const char *warpdesc =
+  "This part of the world is warped, restricting the movement somewhat. "
+  "\"Diagonal\" movement and attacking between triangular cells is not allowed. "
+  "Flash, Storms, and Freedom spells ignore this, and Ghosts can move, attack, and "
+  "be attacked diagonally.";
+
+const char *warplanddesc =
+  "This land is warped. Ironically, the coast is completely straight...";
+
+const char *roselanddesc =
+  "This land is filled with beautiful, but dangerous, creatures and plants.";
+
+const char *dragondesc = 
+  "Dragons are powerful monsters. They are slow, but evil, "
+  "and love to pick on creatures who are even slower than "
+  "them. They must be stopped!\n\n"
+
+  "A Dragon moves each two turns. It may attack with all its segments, "
+  "or move its whole body forwards or "
+  "backwards, it may also move a frontal part backwards. To kill a Dragon, "
+  "you need to hit each of its segments. "
+  "The head will regenerate on the "
+  "turns the Dragon is not moving, so you will usually have to hit it with "
+  "your last attack; otherwise, if the head is healthy, it may breathe "
+  "fire (at range 3), losing the hitpoint. Killing the Dragon gives you "
+  "treasure.";
+
+const char *tortoisedesc = 
+  "Galápagos is the land of Tortoises. "
+  "They are very slow, which allows the Dragons to pick on them by "
+  "stealing and eating their young. Bring the Baby Tortoises back, "
+  "but, there is a catch: the Tortoises come in many varieties, depending "
+  "on the part of Galápagos they live in -- there are 21 binary environmental "
+  "factors, and thus "
+  "2097152 varieties. You'll have to find a "
+  "Tortoise which matches the baby exactly!\n\n"
+  "Tortoises move each 3 turns, and attacks only stun them.\n\n"
+  "Bringing back a Baby Tortoise counts as 5 $$$. The more factors agree in "
+  "the given location of Galápagos, the brighter it is shown on your screen."; 
+
+
+const int motypes = 125;
 
 struct monstertype {
   char  glyph;
@@ -181,7 +296,7 @@ const char *gargdesc =
     "killed, but only if next to something stable -- otherwise it falls.";
   
 monstertype minf[motypes] = {
-  { 0,   0,        "none"       , NULL},
+  { 0,   0,        "no monster"       , NULL},
   { 'Y', 0x4040FF, "Yeti"       ,
     "A big and quite intelligent monster living in the Icy Land."
   },
@@ -420,13 +535,64 @@ monstertype minf[motypes] = {
   "This also affects most monsters."},
   { 'D', 0xC06000, "Striped Dog", "A predator native to the Zebra."},
   { 'G', 0xFFFFFF, "Tentacle+Ghost", tentdes },
+  { 'B', 0x8080C0, "Metal Beast", elecdesc },
+  { 'B', 0xC060C0, "Rich Metal Beast", elecdesc },
+  { 'O', 0xA06020, "Outlaw", wildwestdesc },
+  { 'C', 0xC0C060, "Mutant Ivy", overdesc },
+  { 'T', 0x0080FF, "Storm Troll", elecdesc },
+  { 'T', 0x00C080, "Forest Troll", 
+    "Forest Trolls create an impassable wall when they die."
+    },
+  { 'F', 0xC35817, "Giant Fox", 
+    "What is freedom for you? A situation when you can walk wherever you want? "
+    "Or a situation when you do not have to work, since you have as much tasty food "
+    "as you want?\n\n"
+    "Well, this creature has chosen the second option. It won't be happy "
+    "if you destroy its prison.\n"
+    },
+  { 'C', 0x8080FF, "Wind Crow",
+    "A large bird who likes strong winds. Just as you, it can fly quickly in the wind."
+    },
+  { 'G', 0xC0FFC0, "Friendly Ghost", 
+    "Friendly ghosts are friendly beings who can go through any obstacles. However, "
+    "unlike most friends, they tend to fly away from you."
+    },
+  { 'R', 0x906030, "Ratling", 
+    "These warped humanoids are skilled warriors and sailors, and they "
+    "feel at home at the Warped Coast. Their battle experience has taught them "
+    "that enemies who wait without moving or attacking anything are the most deadly. "
+    "If they see such an enemy, they become extremely suspicious, and they also wait."
+    },
+  { 'F', 0xC00000, "False Princess", GENDERSWITCH },
+  { 'R', 0x500050, "Rose Lady", GENDERSWITCH },
+  { 'R', 0xF0A0D0, "Rose Beauty", GENDERSWITCH },
+  { 'R', 0x806040, "Ratling Avenger", 
+    "So, you have killed a Ratling on the unwarped sea? You will be punished for this! "
+    "Luckily, if you run away from the Warped Sea quickly, the Ratling Avengers will lose track of you."
+    },
+  { 'T', 0x487830, "Tortoise", tortoisedesc},
+  { 'D', 0xC03000, "Dragon", dragondesc},
+  { 'd', 0xC03000, "Dragon", dragondesc},
+  { 'N', 0x303030, "Nighthawk", NODESC},
+  { 'Y', 0xFF8000, "Yendorian Researcher", 
+    "These people study gravity and infinite trees. "
+    "They have no special features, other than wearing a strange hat."
+    },
+  { 'K', 0xA8A8A8, "Sparrowhawk", 
+    "A bird who hunts in the treetops of Yendorian Forest."
+    },
+  
   // shmup specials
   { '@', 0xC0C0C0, "Rogue", "In the Shoot'em Up mode, you are armed with thrown Knives."},
   { '*', 0xC0C0C0, "Knife", "A simple, but effective, missile, used by rogues."},
   { '*', 0xFF0000, "Flail", "This attack is likely to hit the attacker."},
   { '*', 0xFFFF00, "Fireball", "This magical missile burns whatever it hits."},
   { '*', 0xFFFF00, "Tongue", "Some monsters have long tongues, which allow them to attack enemies in nearby cells."},
-  { '*', 0xFFFFFF, "Airball", "This magical missile pushes back whatever it hits."}
+  { '*', 0xFFFFFF, "Airball", "This magical missile pushes back whatever it hits."},
+  // technical
+  { '?', 0x00C000, "dead bug", NODESC},
+  { '?', 0xFFFF00, "electric discharge", NODESC}, // appears as 'killed by electrocution'
+  { '?', 0xE06000, "dead bird", NODESC},
   };
 
 enum eMonster { 
@@ -462,15 +628,46 @@ enum eMonster {
   moPrincessArmed, moPrincessArmedMoved,
   moEdgeMonkey, moGargoyle, moFireElemental, moAirElemental,
   moOrangeDog, moTentacleGhost,
+  moMetalBeast, moMetalBeast2, moOutlaw, moMutant, 
+  moStormTroll, moForestTroll, 
+  moRedFox, moWindCrow, moFriendlyGhost, moRatling, moFalsePrincess, moRoseLady,
+  moRoseBeauty, moRatlingAvenger,
+  moTortoise, moDragonHead, moDragonTail,
+  moNighthawk, moLemur, moKestrel,
   // shmup specials
   moPlayer, moBullet, moFlailBullet, moFireball, moTongue, moAirball,
   // temporary
   moDeadBug, moLightningBolt, moDeadBird
   };
 
-// --- items ----
+struct genderswitch_t {
+  int gender;
+  eMonster m;
+  const char *name;
+  const char *desc;
+  };
 
-const int ittypes = 67;
+#define NUM_GS 6
+
+genderswitch_t genderswitch[NUM_GS] = {
+  { GEN_F, moFalsePrincess, "False Princess", 
+     "Don't be fooled by this red-haired girl, or you will be stabbed if you come too close!"},
+  { GEN_M, moFalsePrincess, "False Prince",   
+    "Don't be fooled by this red-haired boy, or you will be stabbed if you come too close!"},
+  { GEN_F, moRoseLady,      "Rose Lady",
+    "This false princess is immune to the alluring scent of roses."},
+  { GEN_M, moRoseLady,      "Rose Lord",
+    "This false prince is immune to the alluring scent of roses."},
+  { GEN_F, moRoseBeauty,    "Rose Beauty",
+    "She has flowers in her long fair hair. You could not bring yourself to attack such a beautiful woman."},
+  { GEN_M, moRoseBeauty,    "Handsome Gardener",
+    "Tall, strong, and holding a flower in his hand. You could "
+    "not bring yourself to attack such a handsome man."}
+  };
+
+// --- items ---
+
+const int ittypes = 92;
 
 struct itemtype {
   char  glyph;
@@ -480,7 +677,7 @@ struct itemtype {
   };
 
 itemtype iinf[ittypes] = {
-  { 0,   0,        "none",       NULL},
+  { 0,   0,        "no item",       NULL},
   { '*', 0xFFFFFF, "Ice Diamond", 
     "Cold white gems, found in the Icy Land."
     },
@@ -653,7 +850,7 @@ itemtype iinf[ittypes] = {
    "This Orb allows your boat to go against the current, "
    "and also to go into the land, creating water on the way."
     },
-  { 'o', 0xC00060, "Orb of Air", 
+  { 'o', 0xC0C0FF, "Orb of Air", 
     "This Orb allows you to blow your enemies away.\n\n"
     "Click a monster to blow it one cell away. It cannot be used against mimics, ghosts, sharks and other monsters restricted to a specific terrain, and multi-tile monsters."
     },
@@ -692,7 +889,109 @@ itemtype iinf[ittypes] = {
     },
   { 'o', 0x306090, "Orb of Matter", 
     "This Orb allows to temporarily create impassable matter, either to block paths or "
-    "to build bridges across chasms and waters."}
+    "to build bridges across chasms and waters."},
+  { '*', 0xF0F000, "Bounty", wildwestdesc},
+  { '[', 0xC0C0C0, "Revolver", wildwestdesc},
+  { '*', 0xF0F080, "Fulgurite", elecdesc},
+  { '%', 0xFFFFFF, "Mutant Sapling", overdesc},
+  { 'o', 0xA08000, "Orb of Stunning", 
+    "This Orb allows you to target monsters to stun them. "
+    "10 charges are used to stun for 5 turns. Does not "
+    "work against multi-tile monsters."},
+  { 'o', 0xC00000, "Orb of Luck", 
+    "This Orb allows you to find new lands more easily. "
+    "Lands where you have already collected less treasure, "
+    "and especially the Crossroads, are more likely to "
+    "spawn while you have this. Additionally, Orbs of Safety "
+    "are more likely to spawn in the Whirlpool."
+    },
+  { '%', 0xD03030, "Mutant Fruit", cleardesc},
+  { 'o', 0xC00000, "Orb of Freedom", 
+    "This orb is activated if you are unable to escape (radius 4) "
+    "without making illegal moves or "
+    "going through cells which are currently adjacent to enemy monsters. "
+    "Most game over situations are covered by this, but generally, "
+    "this orb is oversensitive...\n\n"
+    "When activated, it creates a Flash effect of radius 5."
+    },
+  { '%', 0x606060, "Black Lotus", 
+    "This beautiful flower is greatly prized by wizards, as it allows them to cast powerful magical spells "
+    "without preparation.\n"
+    },
+  { 'o', 0x505050, "Orb of Undeath", 
+    "Monsters slain by you in melee are turned into friendly ghosts, "
+    "Does not affect plants and friends."
+    },
+  { '*', 0x8080FF, "White Dove Feather", 
+    "This feather is truly beautiful and strong."
+    },
+  { 'o', 0xC00060, "Orb of Empathy", 
+    "This Orb lets your allies to share your Orb powers.\n\n"
+    "The following Orbs are affected:"
+    },
+  { '>', 0x0000FF, "strong wind", 
+    "In the Windy Plains, you can let the wind carry you, "
+    "causing you to move two cells with the wind in a single turn. "
+    "This cannot be done if you are standing at distance at most 2 "
+    "from the Air Elemental, or if any of the three cells on the way "
+    "has two wind directions.\n\n"
+    "Press 't' or click the destination to activate."
+    },
+  { 'x', 0xFF00FF, "buggy item", 
+    "Please report this as a bug."
+    },
+  { 'x', 0xFFFF00, "buggy item", 
+    "Please report this as a bug."
+    },
+  { '%', 0x744c7c / 4 + 0x800000, "Thornless Rose", 
+    "A big, beautiful, magical flower."
+    },
+  { '*', 0xFF40A0, "Coral", 
+    "Corals have a somewhat hyperbolic structure even in your home world, "
+    "but natural corals from the Warped Sea have truly beautiful shapes. "
+    "Ratlings know the value of corals, and thus keep them in boats for safety."
+    },
+  { 'o', 0x764e7c*2, "Orb of Beauty", 
+    "This Orb makes you stunningly beautiful. "
+    "Monsters which come next to you will be stunned for one turn. "
+    "Multi-tile monsters are not affected. Additionally, it makes you immune to "
+    "beauty."
+    },
+  { 'o', 0xFFFF80, "Orb of the Warp", 
+    "This Orb creates a warped zone of radius 5 around you, "
+    "and also allows you to move diagonally in warped zones."
+    },
+  { 'o', 0xFFFF80, "Orb of Energy", 
+    "This Orb halves the power usage of orbs which cost some "
+    "charges with each activation. It even affects the "
+    "one-shot orbs such as Flash or Teleport. If such an activation "
+    "normally costs x charges, it costs only x/2 (rounded up) "
+    "if you have an Orb of Energy."
+    },
+  { 't', 0x487830, "Baby Tortoise", tortoisedesc},
+  { 'o', 0x487830, "Orb of the Shell", 
+    "This Orb protects you from physical attacks. "
+    "It lasts for more turns than the Orb of Shielding, but "
+    "10 charges are lost whenever you are attacked. "
+    "It also does not protect you from fires, scents, and being eaten."
+    },
+
+  { '!', 0xc00000, "Apple", "A fruit from the Yendorian Forest."},
+  { '!', 0xFF6000, "Dragon Scale", 
+    "Dragon Scales are a prized material for armors. "
+    "They are also prized by collectors, who would like to boast "
+    "about how they have killed a Dragon.\n\n"
+    "Dragon Scales disappear after 500 turns."
+    },
+  { 'o', 0x900000, "Orb of Domination", 
+    "This Orb lets you ride Dragons and other worm-like creatures. "
+   "Simply move onto such a creature to ride them; while riding, you are protected from dangerous terrains "
+   "and partially from attacks (they cause you to lose half of your Domination power), "
+   "but you cannot collect items. When only one charge is left, "
+   "you have to dismount this turn -- be very careful to make this possible, "
+   "as your mount could attack you immediately!\n\n" "While riding, "
+   "click on a location to order your mount to move or attack there.",
+    }
   };
 
 enum eItem { itNone, itDiamond, itGold, itSpice, itRuby, itElixir, itShard, itBone, itHell, itStatue,
@@ -715,12 +1014,18 @@ enum eItem { itNone, itDiamond, itGold, itSpice, itRuby, itElixir, itShard, itBo
   itSavedPrincess, itOrbLove,
   itEdge, itZebra, 
   itFireShard, itAirShard, itEarthShard, itWaterShard,
-  itElemental, itOrbSummon, itOrbMatter
+  itElemental, itOrbSummon, itOrbMatter,
+  itBounty, itRevolver, itFulgurite, itMutant,
+  itOrbStunning, itOrbLuck, 
+  itMutant2, itOrbFreedom, itLotus, itOrbUndeath,
+  itWindstone, itOrbEmpathy, itStrongWind, itBuggy, itBuggy2,
+  itRose, itCoral, itOrbSkunk, itOrb37, itOrbEnergy,
+  itBabyTortoise, itOrbShell, itApple, itDragon, itOrbDomination
   };
 
 // --- wall types ---
 
-const int walltypes = 69;
+const int walltypes = 88;
 
 struct walltype {
   char  glyph;
@@ -736,7 +1041,7 @@ const char *thumpdesc = "A device that attracts sandworms and other enemies. You
 const char *twdesc = "This structure will disappear after some time.";
 
 walltype winf[walltypes] = {
-  { '.', 0xFF00FF, "none",        NULL},
+  { '.', 0xFF00FF, "no wall",        NULL},
   { '#', 0x8080FF, "ice wall",    
     "Ice Walls melt after some time has passed."
     },
@@ -745,7 +1050,7 @@ walltype winf[walltypes] = {
   { '+', 0x300090, "blue slime",   slimehelp },
   { '#', 0xA0D0A0, "living wall", cavehelp},
   { '.', 0x306060, "living floor",cavehelp},
-  { '#', 0xD03030, "dead troll",  trollhelp},
+  { '#', 0xD03030, "dead rock troll",  trollhelp},
   { '#', 0xCDA98F, "sand dune",   
   "A natural terrain feature of the Desert."
   },
@@ -816,7 +1121,7 @@ walltype winf[walltypes] = {
     "a water cell (and the boat will come with you)."
     },
   { '.', 0x00FF00, "island", cislandhelp},
-  { '.', 0x80C000, "island", cislandhelp},
+  { '.', 0x80C060, "island", cislandhelp},
   { '#', 0x006000, "tree", 
     "The forests of Caribbean are too dense to be traversed by humans, "
     "and they are hard to burn. Many colorful parrots can be found there."
@@ -835,14 +1140,14 @@ walltype winf[walltypes] = {
   { '+', 0xFFFFFF, "closed gate", gatedesc },
   { '-', 0x404040, "open gate", gatedesc },
   { '_', 0xC00000, "closing plate", gatedesc },
-  { '_', 0x00C000, "opening plate", gatedesc },
+  { '_', 0x00C050, "opening plate", gatedesc },
   { '_', 0x202020, "trapdoor", "This floor will fall after someone goes there. Go quickly!" },
   { '+', 0xFF0000, "giant rug", 
     "This is the biggest Hypersian Rug you have ever seen! "
     "Unfortunately, it is too large to take it as a trophy." },
   { '#', 0xfffff0, "platform", "You can stand here."},
   { '#', 0x909090, "stone gargoyle", gargdesc},
-  { '.', 0x909090, "stone gargoyle floor", gargdesc},
+  { '.', 0xB0B0B0, "stone gargoyle floor", gargdesc},
   { '.', 0x909090, "rubble", "Some rubble."},
   { '+', 0x804000, "ladder", 
     "You can use this ladder to climb the Tower."
@@ -859,12 +1164,36 @@ walltype winf[walltypes] = {
   { '.', 0x909090, "stone gargoyle bridge", gargdesc},
   { '#', 0x309060, "temporary wall", twdesc},
   { '.', 0x309060, "temporary floor", twdesc},
-  { '.', 0x309060, "temporary bridge", twdesc}
+  { '.', 0x309060, "temporary bridge", twdesc},
+  { '#', 0x3030FF, "charged wall", elecdesc},
+  { '#', 0xFF3030, "grounded wall", elecdesc},
+  { '#', 0xA0A060, "sandstone wall", elecdesc},
+  { '+', 0x704000, "saloon wall", wildwestdesc},
+  { '#', 0x90C0C0, "metal wall", elecdesc},
+  { '#', 0x607030, "dead troll",  trollhelpX},
+  { '+', 0xC0C0FF, "fan",  winddesc},
+  { '?', 0xFF00FF, "<temporary>",  NODESC},
+  { '?', 0xFF00FF, "<earth d",  NODESC},
+  { '?', 0xFF00FF, "<elemental tmp>",  NODESC},
+  { '?', 0xFF00FF, "<elemental d>",  NODESC},
+  { '+', 0x607030, "unnamed floor C",  NODESC},
+  { '+', 0xC0C0FF, "unnamed floor D",  NODESC},
+  { '#', 0x764e7c, "rosebush", roselanddesc},
+  { '#', 0xC0C000, "warp gate",
+    "This gate separates the warped area from the normal land."},
+  { '+', 0x804000, "trunk", "The skeleton of a tree."},
+  { '+', 0x804000, "solid branch", "Branches here could bear your weight easily."},
+  { '+', 0x804000, "weak branch", 
+    "Branches here will bear you weight, but if you use them to move (not fall) to an unstable place, they will break."},
+  { '+', 0x60C060, "canopy", 
+    "Only thin twigs and leaves here. They may bear fruits, but for you, these cells count "
+    "as unstable."
+    }
   };
 
 enum eWall { waNone, waIcewall, waBarrier, waFloorA, waFloorB, waCavewall, waCavefloor, waDeadTroll, waDune,
   waMirror, waCloud, waThumperOff, waFire, waAncientGrave, waFreshGrave, waColumn, waSulphurC, waSulphur,
-  waLake, waFrozenLake, waChasm, waChasmD, waDryTree, waWetTree, 
+  waLake, waFrozenLake, waChasm, waChasmD, waBigTree, waSmallTree, 
   waVinePlant, waVineHalfA, waVineHalfB, waPartialFire, 
   waDeadwall, waDeadfloor, waDeadfloor2, waWaxWall, waGlass, waCamelot, waRoundTable,
   waCamelotMoat,
@@ -879,14 +1208,16 @@ enum eWall { waNone, waIcewall, waBarrier, waFloorA, waFloorB, waCavewall, waCav
   waBonfireOff, waThumperOn, waEternalFire,
   waGargoyleBridge,
   waTempWall, waTempFloor, waTempBridge,
-  // temporary walls for various purposes
-  waTemporary, waEarthD, waElementalTmp, waElementalD
+  waCharged, waGrounded, waSandstone, waSaloon, waMetal,
+  waDeadTroll2, waFan,
+  waTemporary, waEarthD, waElementalTmp, waElementalD,
+  waFloorC, waFloorD, waRose, waWarpGate,
+  waTrunk, waSolidBranch, waWeakBranch, waCanopy
   };
 
 // --- land types ---
 
-const int numLands = 35;
-const int landtypes = numLands + 6;
+const int landtypes = 56;
 
 struct landtype {
   int color;
@@ -940,12 +1271,12 @@ landtype linf[landtypes] = {
     "the floor.\n"
     },
   { 0x008000, "Dry Forest", foresthelp},
-  { 0x0000C0, "Emerald Mine", 
+  { 0x60C060, "Emerald Mine", 
      "Evil people are mining for emeralds in this living cave. "
      "It does not grow naturally, but it is dug out in a regular "
      "pattern, which is optimal according to the evil engineers."
      },
-  { 0x421C52, "Vineyard", foresthelp},
+  { 0x421C52, "Vineyard", vinehelp},
   { 0x104040, "Dead Cave", deadcavehelp},
   { 0x705020, "Hive", hivehelp},
   { 0xFFFF00, "Land of Power", 
@@ -1004,6 +1335,26 @@ landtype linf[landtypes] = {
   { 0x4040C0, "Elemental Planes", elemdesc},
   { 0xE08020, "Canvas", "A fake Land with colored floors."},
   { 0x00C000, "Palace Quest", princessdesc}, // this is fake
+  { 0xD0D060, "Wild West", wildwestdesc},
+  { 0x80A080, "Land of Storms", elecdesc},
+  { 0x20A050, "Overgrown Woods", overdesc},
+  { 0x20D050, "Clearing", cleardesc},
+  { 0x303030, "Haunted Woods", hauntdesc},
+  { 0x303030, "Haunted Woods", hauntdesc},
+  { 0x303030, "Haunted Woods", hauntdesc},
+  { 0xC0C0FF, "Windy Plains", winddesc},
+  { 0x764e7c*2, "Rose Garden", roselanddesc},
+  { 0xFFD580, "Warped Coast", warplanddesc},
+  { 0xFFD580, "Warped Sea", warplanddesc},
+  { 0xC08080, "Crossroads IV", 
+    "An alternate layout of the Crossroads, without walls."
+    },
+  { 0xFFD580, "Yendorian Forest", 
+    "This forest was planted by one of the wizards from the Ivory Tower "
+    "to conduct experiments with gravity."
+    },
+  { 0x487830, "Galápagos", tortoisedesc},
+  { 0xD04000, "Dragon Chasms", dragondesc},
   };
 
 enum eLand { laNone, laBarrier, laCrossroads, laDesert, laIce, laCaves, laJungle, laAlchemist, laMirror, laGraveyard,
@@ -1011,8 +1362,14 @@ enum eLand { laNone, laBarrier, laCrossroads, laDesert, laIce, laCaves, laJungle
   laHive, laPower, laCamelot, laTemple, 
   laCrossroads2, laCaribbean, laRedRock, laMinefield, laOcean, laWhirlpool,
   laPalace, laLivefjord, 
-  laEdge, laZebra, laEFire, laEAir, laEEarth, laEWater, laCrossroads3,
-  laOceanWall, laElementalWall, laCanvas, laPrincessQuest };
+  laIvoryTower, laZebra, laEFire, laEAir, laEEarth, laEWater, laCrossroads3,
+  laOceanWall, laElementalWall, 
+  laCanvas, laPrincessQuest,
+  laWildWest, laStorms, laOvergrown, laClearing, 
+  laHaunted, laHauntedWall, laHauntedBorder,
+  laWhirlwind, laRose, laGridCoast, laGridSea, laCrossroads4,
+  laEndorian, laTortoise, laDragon
+  };
 
 // cell information for the game
 
@@ -1052,10 +1409,103 @@ struct gcell {
   // CR2 structure; 
   // hive Weird Rock color / pheromones;
   // Ocean/coast depth
-  union { int32_t landpar; float heat; } LHU;
+  union { int32_t landpar; float heat; char bytes[4]; } LHU;
   };
 
 #define landparam LHU.landpar
 
 #define NODIR 7
 #define NOBARRIERS 8
+
+#define LAND_OVER 44
+eLand land_over[LAND_OVER] = {
+  laIce, laCaves, laDesert, laMotion, laJungle, laAlchemist,
+  laCrossroads, 
+  laMirror, laMinefield, laZebra, laPalace, laPrincessQuest,
+  laOcean, laLivefjord, laGridCoast, laCaribbean, laWhirlpool, laRlyeh, laTemple,
+  laCrossroads2, 
+  laDryForest, laWineyard, laDeadCaves, laGraveyard, laHaunted, laHive, 
+  laRedRock, 
+  laIvoryTower, laEndorian,
+  laDragon, laTortoise,
+  laOvergrown, laClearing, laStorms, laWhirlwind, laRose,
+  laEmerald, laCamelot, laElementalWall, 
+  laHell, laCrossroads3, laCocytus, laPower, laCrossroads4
+  };
+
+#define LAND_EUC 42
+eLand land_euc[LAND_EUC] = {
+  laIce, laCaves, laDesert, laMotion, laJungle,
+  laCrossroads, 
+  laMirror, laMinefield, laAlchemist, laZebra, laPalace, laPrincessQuest,
+  laOcean, laLivefjord, laGridCoast, laCaribbean, laWhirlpool, laRlyeh, laTemple,
+  laElementalWall, 
+  laDryForest, laWineyard, laDeadCaves, laGraveyard, laHive, laRedRock, laIvoryTower, 
+  laOvergrown, laClearing, laStorms, laWhirlwind, laRose,
+  laEmerald, laCamelot, laDragon, laTortoise,
+  laHell, laCrossroads3, laCocytus, laPower,
+  laCrossroads4, 
+  laWildWest
+  };
+// MISSING: laCrossroads2
+
+#define LAND_HYP 39
+eLand land_hyp[LAND_HYP] = {
+  laHell, laCocytus, laGraveyard, 
+  laWineyard, laDryForest, laCaves, 
+  laPalace, laEmerald, laHive, laDeadCaves, laPower,
+  laOcean, laLivefjord, laRlyeh, laTemple, laIce, 
+  laDesert, laRedRock, 
+  laWhirlpool, laOvergrown, laClearing, laStorms,
+  laCaribbean, laJungle, laAlchemist, laMotion, laMirror, laMinefield,
+  laZebra, laElementalWall, laIvoryTower, laHaunted, laWhirlwind, laCrossroads,
+  laGridCoast, laRose, laDragon, laEndorian, laTortoise
+  };
+
+#define LAND_SCAPE 32
+eLand land_scape[LAND_SCAPE] = {
+  laHell, laCocytus, laGraveyard, 
+  laWineyard, laDryForest, laCaves, 
+  laPalace, laEmerald, laDeadCaves, laPower,
+  laOcean, laLivefjord, laRlyeh, laTemple, laIce, 
+  laDesert, laRedRock, 
+  laOvergrown, laStorms,
+  laJungle, laAlchemist, laMotion, laMirror, laMinefield,
+  laZebra, laWhirlwind, laCrossroads,
+  laGridCoast, laRose,
+  laCrossroads, laCrossroads2, laCrossroads3
+  };
+
+#define LAND_TAC 44
+
+struct landtacinfo { eLand l; int tries, multiplier; };
+
+landtacinfo land_tac[LAND_TAC] = {
+  {laIce, 10, 1}, {laDesert, 10, 1}, {laMotion, 10, 1}, {laCaves, 10, 1}, {laAlchemist, 10, 1},
+  {laJungle, 10, 1}, {laMirror, 10, 1}, {laZebra, 10, 1}, {laPalace, 10, 1}, 
+  {laOcean, 10, 1}, {laLivefjord, 10, 1}, {laGridCoast, 10, 1}, {laRlyeh, 10, 1}, {laHell, 10, 1}, 
+  {laElementalWall, 10, 1}, {laDryForest, 10, 1}, {laWineyard, 10, 1}, 
+  {laDeadCaves, 10, 1}, {laGraveyard, 10, 1}, 
+  {laHaunted, 10, 1}, 
+  {laIvoryTower, 10, 1}, {laEndorian, 10, 1},
+  {laEmerald, 10, 1},
+  {laCocytus, 10, 1}, 
+  
+  {laCaribbean, 5, 2}, {laWhirlpool, 5, 2}, {laTemple, 5, 2}, {laMinefield, 5, 2},
+  {laPower, 5, 2}, {laHive, 5, 2}, {laRedRock, 5, 2}, {laStorms, 5, 2}, {laOvergrown, 5, 2},
+  {laClearing, 5, 2},
+  {laWhirlwind, 5, 2}, {laRose, 5, 2}, {laDragon, 2, 5}, {laTortoise, 1, 10},
+  
+  {laCrossroads, 10, 1}, {laCrossroads2, 10, 1}, {laCrossroads3, 10, 1}, {laCrossroads4, 10, 1}, 
+  
+  {laCamelot, 1, 100},
+  {laWildWest, 10, 1}
+  };
+
+#define RANDLANDS 17
+eLand randlands[RANDLANDS] = {
+  laIce, laDesert, laCaves, laAlchemist, laGraveyard, laPower, laLivefjord, laZebra,
+  laRlyeh, laDryForest, laEmerald, laWineyard, laDeadCaves, laRedRock,
+  laOvergrown, laWildWest, laGridCoast
+  };
+

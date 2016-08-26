@@ -1,10 +1,17 @@
-// Hyperbolic Rogue
-// Copyright (C) 2011-2012 Zeno Rogue, see 'hyper.cpp' for details
+// Hyperbolic Rogue -- cells
+// Copyright (C) 2011-2016 Zeno Rogue, see 'hyper.cpp' for details
 
 // cells the game is played on
 
 int fix6(int a) { return (a+96)% 6; }
 int fix7(int a) { return (a+84)% 7; }
+
+int dirdiff(int dd, int t) {
+  dd %= t;
+  if(dd<0) dd += t;
+  if(t-dd < dd) dd = t-dd;
+  return dd;
+  }
 
 struct cell : gcell {
   char type; // 6 for hexagons, 7 for heptagons
@@ -38,6 +45,8 @@ void merge(cell *c, int d, cell *c2, int d2) {
 
 typedef unsigned short eucoord;
 
+#include <map>
+
 cell*& euclideanAtCreate(eucoord x, eucoord y);
 
 union heptacoder {
@@ -69,6 +78,13 @@ cell *createMov(cell *c, int d) {
     }
   
   if(c->mov[d]) return c->mov[d];
+  else if(purehepta) {
+    heptagon *h2 = createStep(c->master, d);
+    c->mov[d] = h2->c7;
+    c->spn[d] = c->master->spin[d];
+    h2->c7->mov[c->spn[d]] = c;
+    h2->c7->spn[c->spn[d]] = d;
+    }
   else if(c->type == 7) {
     cell *n = newCell(6, c->master);
 
@@ -203,11 +219,17 @@ cell*& euclideanAtCreate(eucoord x, eucoord y) {
 
 // initializer (also inits origin from heptagon.cpp)
 void initcells() {
+  DEBB(DF_INIT, (debugfile,"initcells\n"));
 
   origin.s = hsOrigin;
   origin.emeraldval = 98;
   origin.zebraval = 40;
   origin.fiftyval = 0;
+#ifdef CDATA
+  origin.rval0 = origin.rval1 = 0;
+  origin.cdata = NULL;
+#endif
+
   for(int i=0; i<7; i++) origin.move[i] = NULL;
   origin.alt = NULL;
   origin.distance = 0;
@@ -265,7 +287,7 @@ void clearfrom(heptagon *at) {
       }
     DEBMEM ( printf("at %p\n", at); )
     if(at->c7) {
-      for(int i=0; i<7; i++)
+      if(!purehepta) for(int i=0; i<7; i++)
         clearcell(at->c7->mov[i]);
       clearcell(at->c7);
       }
@@ -280,7 +302,7 @@ void verifycell(cell *c) {
   for(int i=0; i<t; i++) {
     cell *c2 = c->mov[i];
     if(c2) {
-      if(t == 7) verifycell(c2);
+      if(t == 7 && !purehepta) verifycell(c2);
       if(c2->mov[c->spn[i]] && c2->mov[c->spn[i]] != c) 
         printf("cell error %p %p\n", c, c2);
       }
@@ -316,31 +338,6 @@ bool ishex1(cell *c) {
     return z == 1;
     }
   else return c->type == 7;
-  }
-
-void clearMemory() {
-  extern void clearGameMemory();
-  clearGameMemory();
-  if(shmup::on) shmup::clearMemory();
-  cleargraphmemory();
-#ifndef MOBILE
-  mapeditor::clearModelCells();
-#endif
-  // EUCLIDEAN
-  if(euclid) { 
-    for(int y=0; y<256; y++) for(int x=0; x<256; x++)
-      if(euclidean[y][x]) { 
-        delete euclidean[y][x];
-        euclidean[y][x] = NULL;
-        }
-    }
-  else {
-    DEBMEM ( verifycells(&origin); )
-    clearfrom(&origin);
-    for(int i=0; i<size(allAlts); i++) clearfrom(allAlts[i]);
-    allAlts.clear();
-    }
-  DEBMEM ( printf("ok\n"); )
   }
 
 int emeraldval(cell *c) {
@@ -441,14 +438,21 @@ int cdist50(cell *c) {
     decodeMaster(c->master, x, y);
     int ix = short(x) + 99999 + short(y);
     int iy = short(y) + 99999;
-    char palacemap[3][10] = {
-      "012333321",
-      "112322232",
-      "222321123"
-      };
-    ix += (iy/3) * 3;
-    iy %= 3; ix %= 9;
-    return palacemap[iy][ix] - '0';
+    if(c->land == laPalace) {
+      char palacemap[3][10] = {
+        "012333321",
+        "112322232",
+        "222321123"
+        };
+      ix += (iy/3) * 3;
+      iy %= 3; ix %= 9;
+      return palacemap[iy][ix] - '0';
+      }
+    else {
+      const char *westmap = "0123333332112332223322233211233333322";
+      int id = ix + iy * 26 + 28;
+      return westmap[id % 37] - '0';
+      }
     }
   if(c->type == 7) return cdist50(fiftyval(c));
   int a0 = cdist50(createMov(c,0));
@@ -566,11 +570,33 @@ int zebra3(cell *c) {
     }
   }
 
+#define RPV_MODULO 5
+
+#define RPV_RAND 0
+#define RPV_ZEBRA 1
+#define RPV_EMERALD 2
+#define RPV_PALACE 3
+#define RPV_CYCLE 4
+
+int getCdata(cell *c, int j);
+
+// x mod 5 = pattern type
+// x mod (powers of 2) = pattern type specific
+// (x/5) mod 15 = picture for drawing floors
+// x mod 7 = chance of pattern-specific pic
+// whole = randomization
+
 bool randpattern(cell *c, int rval) {
   int i, sw=0;
-  switch(rval & 3) {
+  switch(rval%5) {
     case 0:
-      return rand() < rval;
+      if(rval&1) {
+        return hrandpos() < rval;
+        }
+      else {
+        int cd = getCdata(c, 0);
+        return !((cd/(((rval/2)&15)+1))&1);
+        }
     case 1:
       i = zebra40(c);
       if(i&1) { if(rval&4) sw^=1; i &= ~1; }
@@ -583,26 +609,58 @@ bool randpattern(cell *c, int rval) {
       i = emeraldval(c);
       if(i&1) { if(rval&4) sw^=1; i &= ~1; }
       if(i&2) { if(rval&8) sw^=1; i &= ~2; }
+      i >>= 2; i--;
       if(rval & (16<<i)) sw^=1;
       return sw;
     case 3:
       if(polara50(c)) { if(rval&4) sw^=1; }
       if(polarb50(c)) { if(rval&8) sw^=1; }
-      int i = fiftyval049(c); i += 6; i /= 7;
+      i = fiftyval049(c); i += 6; i /= 7;
       if(rval & (16<<i)) sw^=1;
+      return sw;
+    case 4:
+      i = (rval&3);
+      if(i == 1 && (celldist(c)&1)) sw ^= 1;
+      if(i == 2 && (celldist(c)&2)) sw ^= 1;
+      if(i == 3 && ((celldist(c)/3)&1)) sw ^= 1;
+      if(rval & (4<<towerval(c, celldist))) sw ^= 1;
       return sw;
     }
   return 0;
   }
 
+extern int randompattern[landtypes];
+
+string describeRPM(eLand l) {
+  int rval = randompattern[l];
+  switch(rval%5) {
+    case 0:
+      if(rval&1)
+        return "R:"+its(rval/(HRANDMAX/100))+"%";
+      else
+        return "Landscape/"+its(((rval/2)&15)+1);
+    case 1:
+      return "Z/"+its((rval>>2)&3)+"/"+its((rval>>4)&15);
+    case 2:
+      return "E/"+its((rval>>2)&3)+"/"+its((rval>>4)&2047);
+    case 3:
+      return "P/"+its((rval>>2)&3)+"/"+its((rval>>4)&255);
+    case 4:
+      return "C/"+its(rval&3)+"/"+its((rval>>2)&65535);
+    }
+  return "?";
+  }
+
 int randpatternCode(cell *c, int rval) {
-  switch(rval & 3) {
+  switch(rval % RPV_MODULO) {
     case 1:
       return zebra40(c);
     case 2:
       return emeraldval(c);
     case 3:
       return fiftyval049(c) + (polara50(c)?50:0) + (polarb50(c)?1000:0);
+    case 4:
+      return towerval(c, celldist) * 6 + celldist(c) % 6;
     }
   return 0;  
   }
@@ -616,14 +674,12 @@ void clearMemoRPM() {
     rpm_memoize[a][b][i] = 2;
   }
 
-extern int randompattern[landtypes];
-
 bool randpatternMajority(cell *c, int ival, int iterations) {
   int rval = 0;
   if(ival == 0) rval = randompattern[laCaves];
   if(ival == 1) rval = randompattern[laLivefjord];
   if(ival == 2) rval = randompattern[laEmerald];
-  if((rval&3) == 0) return randpattern(c, rval);
+  if(rval%RPV_MODULO == RPV_RAND) return randpattern(c, rval);
   int code = randpatternCode(c, rval);
   char& memo(rpm_memoize[ival][code][iterations]);
   if(memo < 2) return memo;
@@ -639,3 +695,247 @@ bool randpatternMajority(cell *c, int ival, int iterations) {
   // printf("%p] rval = %X code = %d iterations = %d result = %d\n", c, rval, code, iterations, memo);
   return memo;
   }
+
+#ifdef CDATA
+
+#include <map>
+map<heptagon*, int> spins;
+
+#define RVAL_MASK 0x10000000
+#define DATA_MASK 0x20000000
+
+struct cdata {
+  int val[4];
+  int bits;
+  };
+
+map<heptagon*, struct cdata> eucdata;
+cdata orig_cdata;
+
+void affect(cdata& d, short rv, signed char signum) {
+  if(rv&1) d.val[0]+=signum; else d.val[0]-=signum;
+  if(rv&2) d.val[1]+=signum; else d.val[1]-=signum;
+  if(rv&4) d.val[2]+=signum; else d.val[2]-=signum;
+  if(rv&8) d.val[3]+=signum; else d.val[3]-=signum;
+  int id = (rv>>4) & 63;
+  if(id < 32) 
+    d.bits ^= (1 << id);
+  }
+
+void setHeptagonRval(heptagon *h) {
+  if(!(h->rval0 || h->rval1)) {
+    h->rval0 = hrand(0x10000);
+    h->rval1 = hrand(0x10000);
+    }
+  }
+
+cdata *getHeptagonCdata(heptagon *h) {
+  if(h->cdata) return h->cdata;
+
+  if(h == &origin) {
+    return h->cdata = new cdata(orig_cdata);
+    }
+  
+  cdata mydata = *getHeptagonCdata(h->move[0]);
+
+  for(int di=3; di<5; di++) {
+    heptspin hs; hs.h = h; hs.spin = di;
+    int signum = +1;
+    while(true) {
+      heptspin hstab[15];
+      hstab[7] = hs;
+      
+      for(int i=8; i<12; i++) {
+        hstab[i] = hsspin(hstab[i-1], (i&1) ? 4 : 3);
+        hstab[i] = hsstep(hstab[i], 0);
+        hstab[i] = hsspin(hstab[i], (i&1) ? 3 : 4);
+        }
+
+      for(int i=6; i>=3; i--) {
+        hstab[i] = hsspin(hstab[i+1], (i&1) ? 3 : 4);
+        hstab[i] = hsstep(hstab[i], 0);
+        hstab[i] = hsspin(hstab[i], (i&1) ? 4 : 3);
+        }
+      
+      if(hstab[3].h->distance < hstab[7].h->distance) {
+        hs = hstab[3]; continue;
+        }
+
+      if(hstab[11].h->distance < hstab[7].h->distance) {
+        hs = hstab[11]; continue;
+        }
+      
+      int jj = 7;
+      for(int k=3; k<12; k++) if(hstab[k].h->distance < hstab[jj].h->distance) jj = k;
+      
+      int ties = 0, tiespos = 0;
+      for(int k=3; k<12; k++) if(hstab[k].h->distance == hstab[jj].h->distance) 
+        ties++, tiespos += (k-jj);
+        
+      // printf("ties=%d tiespos=%d jj=%d\n", ties, tiespos, jj);
+      if(ties == 2) jj += tiespos/2;
+      
+      if(jj&1) signum = -1;
+      hs = hstab[jj];
+      
+      break;
+      }
+    hs = hsstep(hsspin(hs, 3), 0);
+    setHeptagonRval(hs.h);
+    
+    affect(mydata, hs.spin ? hs.h->rval0 : hs.h->rval1, signum);
+
+    /* if(!(spins[hs.h] & hs.spin)) {
+      spins[hs.h] |= (1<<hs.spin);
+      int t = 0;
+      for(int k=0; k<7; k++) if(spins[hs.h] & (1<<k)) t++;
+      static bool wast[256];
+      if(!wast[spins[hs.h]]) {
+        printf("%p %4x\n", hs.h, spins[hs.h]);
+        wast[spins[hs.h]] = true;
+        }
+      } */
+    }
+
+  return h->cdata = new cdata(mydata);
+  }
+
+cdata *getEuclidCdata(heptagon *h) {
+  eucoord x, y;
+  if(eucdata.count(h)) return &(eucdata[h]);
+  decodeMaster(h, x, y);
+
+  if(x == 0 && y == 0) {
+    cdata xx;
+    for(int i=0; i<4; i++) xx.val[i] = 0;
+    xx.bits = 0;
+    return &(eucdata[h] = xx);
+    }
+  int ord = 1, bid = 0;
+  while(!((x|y)&ord)) ord <<= 1, bid++;
+  
+  for(int k=0; k<3; k++) {
+    eucoord x1 = x + (k<2 ? ord : 0);
+    eucoord y1 = y - (k>0 ? ord : 0);
+    if((x1&ord) || (y1&ord)) continue;
+    eucoord x2 = x - (k<2 ? ord : 0);
+    eucoord y2 = y + (k>0 ? ord : 0);
+
+    cdata *d1 = getEuclidCdata(encodeMaster(x1,y1));
+    cdata *d2 = getEuclidCdata(encodeMaster(x2,y2));
+    cdata xx;
+    double disp = pow(2, bid/2.) * 6;
+    
+    for(int i=0; i<4; i++) {
+      double dv = (d1->val[i] + d2->val[i])/2 + (hrand(1000) - hrand(1000))/1000. * disp;
+      xx.val[i] = floor(dv);
+      if(hrand(1000) / 1000. < dv - floor(dv)) xx.val[i]++;
+      }
+    xx.bits = 0;
+
+    for(int b=0; b<32; b++) {
+      bool gbit = ((hrand(2)?d1:d2)->bits >> b) & 1;
+      int flipchance = (1<<bid);
+      if(flipchance > 512) flipchance = 512;
+      if(hrand(1024) < flipchance) gbit = !gbit;
+      if(gbit) xx.bits |= (1<<b);
+      }
+    
+    return &(eucdata[h] = xx);
+    }
+  
+  // impossible!
+  return NULL;
+  }
+
+int getCdata(cell *c, int j) {
+  if(euclid) return getEuclidCdata(c->master)->val[j];
+  else if(c->type == 7) return getHeptagonCdata(c->master)->val[j]*3;
+  else {
+    int jj = 0;
+    for(int k=0; k<6; k++) if(c->mov[k] && c->mov[k]->type == 7)
+      jj += getHeptagonCdata(c->mov[k]->master)->val[j];
+    return jj;
+    }
+  }
+
+int getBits(cell *c) {
+  if(euclid) return getEuclidCdata(c->master)->bits;
+  else if(c->type == 7) return getHeptagonCdata(c->master)->bits;
+  else {
+    int b0 = getHeptagonCdata(createMov(c, 0)->master)->bits;
+    int b1 = getHeptagonCdata(createMov(c, 2)->master)->bits;
+    int b2 = getHeptagonCdata(createMov(c, 4)->master)->bits;
+    return (b0 & b1) | (b1 & b2) | (b2 & b0);
+    }
+  }
+
+eLand getCLand(cell *c) {
+  int b = getBits(c);
+  b = (b&31) ^ (b>>5);
+  return land_scape[b & 31];
+  }
+
+int celldistance(cell *c1, cell *c2) {
+  int d = 0;
+  cell *cl1=c1, *cr1=c1, *cl2=c2, *cr2=c2;
+  while(true) {
+    if(cl1 == cl2) return d;
+    if(cl1 == cr2) return d;
+    if(cr1 == cl2) return d;
+    if(cr1 == cr2) return d;
+        
+    if(isNeighbor(cl1, cl2)) return d+1;
+    if(isNeighbor(cl1, cr2)) return d+1;
+    if(isNeighbor(cr1, cl2)) return d+1;
+    if(isNeighbor(cr1, cr2)) return d+1;
+
+    forCellEx(c, cl2) if(isNeighbor(c, cr1)) return d+2;
+    forCellEx(c, cl1) if(isNeighbor(c, cr2)) return d+2;
+
+    int d1 = celldist(cl1), d2 = celldist(cl2);
+    
+    if(d1 >= d2) {
+      cl1 = chosenDown(cl1, -1, 0, celldist);
+//    cl1->item = eItem(rand() % 10);
+      cr1 = chosenDown(cr1,  1, 0, celldist);
+//    cr1->item = eItem(rand() % 10);
+      d++;
+      }
+    if(d1 <= d2) {
+      cl2 = chosenDown(cl2, -1, 0, celldist);
+//    cl2->item = eItem(rand() % 10);
+      cr2 = chosenDown(cr2,  1, 0, celldist);
+//    cr2->item = eItem(rand() % 10);
+      d++;
+      }
+    }
+  }
+
+void clearMemory() {
+  extern void clearGameMemory();
+  clearGameMemory();
+  if(shmup::on) shmup::clearMemory();
+  cleargraphmemory();
+#ifndef MOBILE
+  mapeditor::clearModelCells();
+#endif
+  // EUCLIDEAN
+  if(euclid) { 
+    for(int y=0; y<256; y++) for(int x=0; x<256; x++)
+      if(euclidean[y][x]) { 
+        delete euclidean[y][x];
+        euclidean[y][x] = NULL;
+        }
+    eucdata.clear();
+    }
+  else {
+    DEBMEM ( verifycells(&origin); )
+    clearfrom(&origin);
+    for(int i=0; i<size(allAlts); i++) clearfrom(allAlts[i]);
+    allAlts.clear();
+    }
+  DEBMEM ( printf("ok\n"); )
+  }
+
+#endif

@@ -15,6 +15,8 @@ struct heptagon;
 struct cell;
 cell *newCell(int type, heptagon *master);
 
+#define CDATA
+
 struct heptagon {
   // automaton state
   hstate s : 8;
@@ -31,6 +33,11 @@ struct heptagon {
   short fiftyval;
   // zebra generator (1B actually)
   short zebraval;
+#ifdef CDATA
+  // evolution data
+  short rval0, rval1;
+  struct cdata *cdata;
+#endif
   // central cell
   cell *c7;
   // associated generator of alternate structure, for Camelot and horocycles
@@ -73,6 +80,9 @@ heptagon *buildHeptagon(heptagon *parent, int d, hstate s, int pard = 0) {
     h->c7 = newCell(7, h);
     h->emeraldval = emerald_heptagon(parent->emeraldval, d);
     h->zebraval = zebra_heptagon(parent->zebraval, d);
+#ifdef CDATA
+    h->rval0 = h->rval1 = 0; h->cdata = NULL;
+#endif
     if(parent == &origin)
       h->fiftyval = fiftytable[0][d];
     else
@@ -86,14 +96,15 @@ heptagon *buildHeptagon(heptagon *parent, int d, hstate s, int pard = 0) {
 //generateEmeraldval(parent);
 //generateEmeraldval(h);
   if(pard == 0) {
-    if(parent->s == hsOrigin) h->distance = 2;
+    if(purehepta) h->distance = parent->distance + 1;
+    else if(parent->s == hsOrigin) h->distance = 2;
     else if(h->spin[0] == 5) 
       h->distance = parent->distance + 1;
     else if(h->spin[0] == 4 && h->move[0]->s == hsB)
       h->distance = createStep(h->move[0], (h->spin[0]+2)%7)->distance + 3;
     else h->distance = parent->distance + 2;
     }
-  else h->distance = parent->distance - 2;
+  else h->distance = parent->distance - (purehepta?1:2);
   return h;
   }
 
@@ -107,10 +118,12 @@ void addSpin(heptagon *h, int d, heptagon *from, int rot, int spin) {
 //generateEmeraldval(h->move[d]); generateEmeraldval(h);
   }
 
+extern int hrand(int);
+
 heptagon *createStep(heptagon *h, int d) {
   d = fixrot(d);
   if(h->s != hsOrigin && !h->move[0]) {
-    buildHeptagon(h, 0, hsA, 4);
+    buildHeptagon(h, 0, hsA, 3 + hrand(2));
     }
   if(h->move[d]) return h->move[d];
   if(h->s == hsOrigin) {

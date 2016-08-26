@@ -1,7 +1,14 @@
-#define NUMLEADER 40
+// Hyperbolic Rogue -- achievements
+// Copyright (C) 2011-2016 Zeno Rogue, see 'hyper.cpp' for details
+
+#define NUMLEADER 57
 
 #define SCORE_UNKNOWN (-1)
 #define NO_SCORE_YET (-2)
+
+bool offlineMode = false;
+
+int syncstate = 0;
 
 int currentscore[NUMLEADER];
 
@@ -9,7 +16,7 @@ const char* leadernames[NUMLEADER] = {
   "Score", "Diamonds", "Gold", "Spice", "Rubies", "Elixirs",
   "Shards", "Totems", "Daisies", "Statues", "Feathers", "Sapphires",
   "Hyperstones", "Time to Win-71", "Turns to Win-71",
-  "Time to 10 Hyperstones-73", "Turns to 10 Hyperstones-73", "Orbs of Yendor",
+  "Time to 10 Hyperstones-83", "Turns to 10 Hyperstones-83", "Orbs of Yendor",
   "Fern Flowers", 
   "Royal Jellies", "Powerstones", "Silver", "Wine", "Emeralds", "Grimoires",
   "Holy Grails", "Red Gems", "Pirate Treasures",
@@ -22,7 +29,24 @@ const char* leadernames[NUMLEADER] = {
   "Princess Challenge", // 36
   "Ivory Figurines", // 37
   "Elemental Gems", // 38
-  "Onyxes" // 39
+  "Onyxes", // 39
+  "Yendor Challenge", // 40
+  "Pure Tactics Mode", // 41
+  "Mutant Saplings", // 42
+  "Fulgurites", // 43
+  "Shmup Score 2p", // 44
+  "Coop Shmup Time to Win", // 45
+  "Black Lotuses", // 46
+  "Mutant Fruits", // 47
+  "White Dove Feathers", // 48
+  "Pure Tactics Mode (shmup)", // 49
+  "Pure Tactics Mode (2p)", // 50
+  "Corals", // 51
+  "Thornless Roses", // 52
+  "Chaos Mode", // 53
+  "Tortoise points", // 54
+  "Dragon Scales", // 55
+  "Apples", // 56
   };
 
 bool haveLeaderboard(int id);
@@ -33,11 +57,25 @@ string achievementMessage[3];
 int achievementTimer;
 // vector<string> achievementsReceived;
 
-void achievement_log(const char* s, bool euclideanAchievement, bool shmupAchievement) {
-  if(cheater) return;
-  if(euclid != euclideanAchievement) return;
-  if(shmup::on != shmupAchievement) return;
-  if(randomPatternsMode) return;
+bool wrongMode(char flags) {
+  if(cheater) return true;
+  if(purehepta != (flags == '7')) return true;
+  if(euclid != (flags == 'e')) return true;
+  if(shmup::on != (flags == 's')) return true;
+  if(randomPatternsMode) return true;
+  if(yendor::on) return true;
+  if(tactic::on) return true;
+  if(chaosmode != (flags == 'C')) return true;
+  return false;
+  }
+
+void achievement_log(const char* s, char flags) {
+
+#ifdef LOCAL
+  printf("achievement = %s [%d]\n", s, wrongMode(flags));
+#endif
+  
+  if(wrongMode(flags)) return;
   
   for(int i=0; i<size(achievementsReceived); i++)
     if(achievementsReceived[i] == s) return;
@@ -46,13 +84,13 @@ void achievement_log(const char* s, bool euclideanAchievement, bool shmupAchieve
 #ifndef ANDROID
   FILE *f = fopen(scorefile, "at");
   if(!f) return;
-  int t = time(NULL) - timerstart;
+  int t = (int) (time(NULL) - timerstart);
 
   time_t timer = time(NULL);
   char buf[128]; strftime(buf, 128, "%c", localtime(&timer));
 
-  fprintf(f, "ACHIEVEMENT %s turns: %d time: %d at: %d c: %d date: %s\n",
-    s, turncount, t, int(timerstart), achievement_certify(s, turncount, t, timerstart), buf);
+  fprintf(f, "ACHIEVEMENT %s turns: %d time: %d at: %d ver: %s c: %d date: %s\n",
+    s, turncount, t, int(timerstart), VER, anticheat::certify(s, turncount, t, (int) timerstart, 0), buf);
 
   fclose(f);
 #endif
@@ -65,8 +103,8 @@ void improveItemScores();
 #ifndef ANDROID
 void achievement_init() {}
 void achievement_close() {}
-void achievement_gain(const char* s, bool euclideanAchievement, bool shmupAchievement) {
-  achievement_log(s, euclideanAchievement, shmupAchievement);
+void achievement_gain(const char* s, char flags) {
+  achievement_log(s, flags);
   }
 #endif
 #endif
@@ -99,7 +137,7 @@ void achievement_collection(eItem it, int prevgold, int newgold) {
     if(it == itRedGem) achievement_gain("REDGEM1");
     if(it == itPirate) achievement_gain("PIRATE1");
     if(it == itCoast) achievement_gain("COAST1");
-    // if(it == itWhirlpool) achievement_gain("WHIRL1");
+    // if(it == itWhirlpool) achievement_gain("WHIRL1"); // requires escape
     if(it == itBombEgg) achievement_gain("MINE1");
     if(it == itPalace) achievement_gain("RUG1");
     if(it == itFjord) achievement_gain("GARNET1");
@@ -107,11 +145,23 @@ void achievement_collection(eItem it, int prevgold, int newgold) {
     if(it == itEdge) achievement_gain("TOWER1");
     if(it == itElemental) achievement_gain("ELEMENT1");
     if(it == itZebra) achievement_gain("ZEBRA1");
+
+    if(it == itMutant) achievement_gain("MUTANT1");
+    if(it == itFulgurite) achievement_gain("FULGUR1");
+
+    if(it == itMutant2) achievement_gain("FRUIT1");
+    if(it == itWindstone) achievement_gain("DOVE1");
+    if(it == itCoral) achievement_gain("CORAL1");
+    if(it == itRose) achievement_gain("ROSE1");
+    
+    if(it == itBabyTortoise) achievement_gain("TORTOISE1");
+    if(it == itDragon) achievement_gain("DRAGON1");
+    if(it == itApple) achievement_gain("APPLE1");
     }
 
   // 32
   if(it == itHolyGrail) {
-    if(q == 1) achievement_gain("GRAIL2");
+    if(q == 1) achievement_gain("GRAIL2"), achievement_gain("GRAILH", '7');
     if(q == 3) achievement_gain("GRAIL3");
     if(q == 8) achievement_gain("GRAIL4");
     }
@@ -147,6 +197,18 @@ void achievement_collection(eItem it, int prevgold, int newgold) {
     if(it == itEdge) achievement_gain("TOWER2");
     if(it == itElemental) achievement_gain("ELEMENT2");
     if(it == itZebra) achievement_gain("ZEBRA2");
+
+    if(it == itMutant) achievement_gain("MUTANT2");
+    if(it == itFulgurite) achievement_gain("FULGUR2");
+
+    if(it == itMutant2) achievement_gain("FRUIT2");
+    if(it == itWindstone) achievement_gain("DOVE2");
+    if(it == itCoral) achievement_gain("CORAL2");
+    if(it == itRose) achievement_gain("ROSE2");
+
+    if(it == itBabyTortoise) achievement_gain("TORTOISE2");
+    if(it == itDragon) achievement_gain("DRAGON2");
+    if(it == itApple) achievement_gain("APPLE2");
     }
 
   if(q == 25) {
@@ -180,6 +242,21 @@ void achievement_collection(eItem it, int prevgold, int newgold) {
     if(it == itEdge) achievement_gain("TOWER3");
     if(it == itElemental) achievement_gain("ELEMENT3");
     if(it == itZebra) achievement_gain("ZEBRA3");
+
+    if(it == itMutant) achievement_gain("MUTANT3");
+    if(it == itFulgurite) achievement_gain("FULGUR3");
+    
+    if(it == itMutant2) achievement_gain("FRUIT3");
+    if(it == itWindstone) achievement_gain("DOVE3");
+    if(it == itCoral) achievement_gain("CORAL3");
+    if(it == itRose) achievement_gain("ROSE3");
+
+    if(it == itFulgurite && pureHardcore() && elec::lightningfast == 0)
+      achievement_gain("HARDMETAL");
+
+    if(it == itBabyTortoise) achievement_gain("TORTOISE3");
+    if(it == itDragon) achievement_gain("DRAGON3");
+    if(it == itApple) achievement_gain("APPLE3");
     }
 
   if(q == 50) {
@@ -213,12 +290,24 @@ void achievement_collection(eItem it, int prevgold, int newgold) {
     if(it == itEdge) achievement_gain("TOWER4");
     if(it == itElemental) achievement_gain("ELEMENT4");
     if(it == itZebra) achievement_gain("ZEBRA4");
+
+    if(it == itMutant) achievement_gain("MUTANT4");
+    if(it == itFulgurite) achievement_gain("FULGUR4");
+
+    if(it == itMutant2) achievement_gain("FRUIT4");
+    if(it == itWindstone) achievement_gain("DOVE4");
+    if(it == itCoral) achievement_gain("CORAL4");
+    if(it == itRose) achievement_gain("ROSE4");
+
+    if(it == itBabyTortoise) achievement_gain("TORTOISE4");
+    if(it == itDragon) achievement_gain("DRAGON4");
+    if(it == itApple) achievement_gain("APPLE4");
     }
   
   if(it == itOrbYendor) {
     achievement_gain("YENDOR2");
     if(pureHardcore()) achievement_gain("HARDCORE");
-    if(shmup::on) achievement_gain("SHMUP", false, true);
+    if(shmup::on) achievement_gain("SHMUP", 's');
     }
   }
 
@@ -255,35 +344,42 @@ void achievement_count(const string& s, int current, int prev) {
   if(s == "LIGHTNING" && current-prev >= 10)
     achievement_gain("LIGHTNING3");
   if(s == "MIRAGE" && current >= 35)
-    achievement_gain("MIRAGE", true);
+    achievement_gain("MIRAGE", 'e');
   if(s == "ORB" && current >= 10)
     achievement_gain("ORB3");
   if(s == "BUG" && current >= 1000)
     achievement_gain("BUG3");
+  if(s == "ELEC" && current >= 10)
+    achievement_gain("ELEC3");
   }
 
 int specific_improved = 0;
 int specific_what = 0;
 
 void improve_score(int i, eItem what) {
+  if(offlineMode) return;
 #ifdef HAVE_ACHIEVEMENTS
   if(haveLeaderboard(i)) updateHi(what, currentscore[i]);
   if(items[what] && haveLeaderboard(i)) {
     if(items[what] > currentscore[i] && currentscore[i] != SCORE_UNKNOWN) {
       specific_improved++; specific_what = what;
-      currentscore[i] = items[what];
       }
-      
     upload_score(i, items[what]);
     }
 #endif
   }
 
 void achievement_score(int cat, int number) {
+  if(offlineMode) return;
 #ifdef HAVE_ACHIEVEMENTS
   if(cheater) return;
   if(euclid) return;
+  if(purehepta) return;
   if(randomPatternsMode) return;
+  if(shmup::on && cat != LB_PURE_TACTICS_SHMUP && cat != LB_PURE_TACTICS_COOP) return;
+  if(yendor::on && cat != LB_YENDOR_CHALLENGE) return;
+  if(tactic::on && cat != LB_PURE_TACTICS && cat != LB_PURE_TACTICS_SHMUP && cat != LB_PURE_TACTICS_COOP) 
+    return;
   upload_score(cat, number);
 #endif
   }
@@ -310,57 +406,98 @@ void improveItemScores() {
   improve_score(37, itEdge);
   improve_score(38, itElemental);
   improve_score(39, itZebra);
+
+  improve_score(42, itMutant);
+  improve_score(43, itFulgurite);
+
+  if(!isHaunted(cwt.c->land)) improve_score(46, itLotus);
+  improve_score(47, itMutant2);
+  improve_score(48, itWindstone);
+  
+  improve_score(51, itCoral);
+  improve_score(52, itRose);
+
+  improve_score(54, itBabyTortoise);
+  improve_score(55, itDragon);
+  improve_score(56, itApple);
   }
 
 void achievement_final(bool really_final) {
+  if(offlineMode) return;
 #ifdef HAVE_ACHIEVEMENTS
   if(cheater) return;
   if(euclid) return;
+  if(purehepta) return;
   if(randomPatternsMode) return;
+
+  if(tactic::on) {
+    tactic::record();
+    tactic::unrecord();
+    tactic::uploadScore();
+    return;
+    }
+  
+  if(yendor::on) return;
+  
+  if(shmup::on && chaosmode) return;
+  
   int total_improved = 0;
   specific_improved = 0;
   specific_what = 0;
   
-  if(!shmup::on) improveItemScores(); 
+  if(!shmup::on && !chaosmode) improveItemScores(); 
   
-  int sid = shmup::on ? 28 : 0;
+  int sid = chaosmode ? 53 : shmup::on ? (numplayers() > 1 ? 44 : 28) : 0;
   
   int tg = gold();
   if(tg && haveLeaderboard(sid)) {
     if(tg > currentscore[sid] && currentscore[sid] != SCORE_UNKNOWN) {
       if(currentscore[sid] < 0) total_improved += 2;
-      total_improved++; currentscore[sid] = tg;
+      total_improved++; // currentscore[sid] = tg;
       }
     upload_score(sid, tg);
     }
-  
+
   if(total_improved >= 2) {
-    addMessage(XLAT("Your total treasure has been recorded in the "LEADERFULL"."));
+#ifndef ANDROID  
+    addMessage(XLAT("Your total treasure has been recorded in the " LEADERFULL "."));
     addMessage(XLAT("Congratulations!"));
+#endif
     }
   else if(total_improved && specific_improved >= 2)
     addMessage(XLAT("You have improved your total high score and %1 specific high scores!", its(specific_improved)));
   else if(total_improved && specific_improved)
     addMessage(XLAT("You have improved your total and '%1' high score!", iinf[specific_what].name));
-  else if(total_improved)
-    addMessage(XLAT("You have improved your total high score on "LEADER". Congratulations!"));
+  else if(total_improved) {
+#ifndef ANDROID  
+    addMessage(XLAT("You have improved your total high score on " LEADER ". Congratulations!"));
+#endif
+    }
   else if(specific_improved >= 2)
     addMessage(XLAT("You have improved %1 of your specific high scores!", its(specific_improved)));
-  else if(specific_improved)
-    addMessage(XLAT("You have improved your '%1' high score on "LEADER"!", iinf[specific_what].name));
+  else if(specific_improved) {
+#ifndef ANDROID  
+    addMessage(XLAT("You have improved your '%1' high score on " LEADER "!", iinf[specific_what].name));
+#endif
+    }
 #endif
   }
 
 void achievement_victory(bool hyper) {
+  if(offlineMode) return;
 #ifdef HAVE_ACHIEVEMENTS
   if(cheater) return;
   if(euclid) return;
+  if(purehepta) return;
   if(randomPatternsMode) return;
   if(hyper && shmup::on) return;
+  if(yendor::on) return;
+  if(tactic::on) return;
+  if(chaosmode) return;
 
   int t = savetime + time(NULL) - timerstart;
   
-  int ih1 = hyper ? 15 : shmup::on ? 29 : 13;
+  int ih1 = hyper ? 15 : shmup::on ? (numplayers() > 1 ? 45 : 29) : 13;
   int ih2 = hyper ? 16 : shmup::on ? 30 : 14;
   
   int improved = 0;
@@ -368,11 +505,11 @@ void achievement_victory(bool hyper) {
     improved += 4;
     
   if(currentscore[ih1] < 0 || currentscore[ih1] > t) {
-    improved++; currentscore[ih1] = t;
+    improved++; // currentscore[ih1] = t;
     }
 
   if(currentscore[ih2] < 0 || currentscore[ih2] > turncount) {
-    improved+=2; currentscore[ih2] = turncount;
+    improved+=2; // currentscore[ih2] = turncount;
     }
 
   if(hyper)
@@ -381,7 +518,9 @@ void achievement_victory(bool hyper) {
   if(improved) {
     if(improved >= 4) {
       if(!hyper) addMessage(XLAT("This is your first victory!"));
+#ifndef ANDROID
       addMessage(XLAT("This has been recorded in the " LEADERFULL "."));
+#endif
       addMessage(XLAT("The faster you get here, the better you are!"));
       }
     else if(improved >= 3) {
@@ -407,18 +546,29 @@ void achievement_victory(bool hyper) {
 
 void achievement_pump();
 
+#ifndef HAVE_ACHIEVEMENTS
+void achievement_pump() {}
+#endif
+
 void achievement_display() {
-#ifdef HAVE_ACHIEVEMENTS
-  achievement_pump();
+  #ifdef HAVE_ACHIEVEMENTS
   if(achievementTimer) {
     int col = (ticks - achievementTimer);
     if(col > 5000) { achievementTimer = 0; return; }
     if(col > 2500) col = 5000 - col;
     col /= 10; col *= 0x10101;
     displayfr(vid.xres/2, vid.yres/4, 2, vid.fsize * 2, achievementMessage[0], col & 0xFFFF00, 8);
-    displayfr(vid.xres/2, vid.yres/4 + vid.fsize*2, 2, vid.fsize * 2, achievementMessage[1], col, 8);
-    displayfr(vid.xres/2, vid.yres/4 + vid.fsize*4, 2, vid.fsize, achievementMessage[2], col, 8);
-    }
+    int w = 2 * vid.fsize;
+#ifndef MOBILE
+    while(w>3 && textwidth(w, achievementMessage[1]) > vid.xres) w--;
 #endif
+    displayfr(vid.xres/2, vid.yres/4 + vid.fsize*2, 2, w, achievementMessage[1], col, 8);
+    w = vid.fsize;
+#ifndef MOBILE
+    while(w>3 && textwidth(w, achievementMessage[2]) > vid.xres) w--;
+#endif
+    displayfr(vid.xres/2, vid.yres/4 + vid.fsize*4, 2, w, achievementMessage[2], col, 8);
+    }
+  #endif
   }
 

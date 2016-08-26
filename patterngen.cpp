@@ -1,3 +1,7 @@
+// Hyperbolic Rogue pattern generator
+
+// Copyright (C) 2011-2016 Zeno Rogue, see 'hyper.cpp' for details
+
 void spill50(cell *c, eWall w, int r) {
   c->wall = w;
   if(r) for(int i=0; i<c->type; i++) spill50(createMov(c, i), w, r-1);

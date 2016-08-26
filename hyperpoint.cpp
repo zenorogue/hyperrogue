@@ -1,16 +1,42 @@
 // Hyperbolic Rogue
 // Copyright (C) 2011-2012 Zeno Rogue, see 'hyper.cpp' for details
 
+// basic utility functions
+
+#ifdef MOBILE
+typedef double ld;
+#else
+typedef long double ld;
+#endif
+
+template<class T> int size(const T& x) {return int(x.size()); }
+string its(int i) { char buf[64]; sprintf(buf, "%d", i); return buf; }
+string fts(float x) { char buf[64]; sprintf(buf, "%4.2f", x); return buf; }
+string fts4(float x) { char buf[64]; sprintf(buf, "%6.4f", x); return buf; }
+string cts(char c) { char buf[8]; buf[0] = c; buf[1] = 0; return buf; }
+string llts(long long i) {
+    // sprintf does not work on Windows IIRC
+    if(i < 0) return "-" + llts(-i);
+    if(i < 10) return its((int) i);
+    return llts(i/10) + its(i%10);
+}
+string itsh(int i) {static char buf[16]; sprintf(buf, "%03X", i); return buf; }
+
 // for the Euclidean mode...
 bool euclid = false;
+
+// for the pure heptagonal grid
+bool purehepta = false;
 
 // hyperbolic points and matrices
 
 // basic functions and types
 //===========================
 
+#ifdef SINHCOSH
 ld sinh(ld alpha) { return (exp(alpha) - exp(-alpha)) / 2; }
 ld cosh(ld alpha) { return (exp(alpha) + exp(-alpha)) / 2; }
+#endif
 
 ld squar(ld x) { return x*x; }
 
@@ -36,7 +62,7 @@ hyperpoint hpxyz(ld x, ld y, ld z) {
 
 hyperpoint hpxy(ld x, ld y) { 
   // EUCLIDEAN
-  return hpxyz(x,y, euclid ? 1 : 1+x*x+y*y);
+  return hpxyz(x,y, euclid ? 1 : sqrt(1+x*x+y*y));
   }
 
 // center of the pseudosphere
@@ -82,6 +108,44 @@ hyperpoint mid(const hyperpoint& H1, const hyperpoint& H2) {
   for(int c=0; c<3; c++) H3[c] /= Z;
   
   return H3;
+  }
+
+hyperpoint mid3(const hyperpoint& H1, const hyperpoint& H2, const hyperpoint& H3) {
+
+  hyperpoint Hx;
+  Hx[0] = H1[0] + H2[0] + H3[0];
+  Hx[1] = H1[1] + H2[1] + H3[1];
+  Hx[2] = H1[2] + H2[2] + H3[2];
+  
+  ld Z = 2;
+  
+  if(!euclid) { 
+    Z = intval(Hx, Hypc); 
+    Z = sqrt(-Z);
+    }
+  
+  for(int c=0; c<3; c++) Hx[c] /= Z;
+  
+  return Hx;
+  }
+
+hyperpoint mid4(const hyperpoint& H1, const hyperpoint& H2, const hyperpoint& H3, const hyperpoint& H4) {
+
+  hyperpoint Hx;
+  Hx[0] = H1[0] + H2[0] + H3[0] + H4[0];
+  Hx[1] = H1[1] + H2[1] + H3[1] + H4[1];
+  Hx[2] = H1[2] + H2[2] + H3[2] + H4[2];
+  
+  ld Z = 2;
+  
+  if(!euclid) { 
+    Z = intval(Hx, Hypc); 
+    Z = sqrt(-Z);
+    }
+  
+  for(int c=0; c<3; c++) Hx[c] /= Z;
+  
+  return Hx;
   }
 
 // matrices
@@ -267,4 +331,33 @@ transmatrix inverse(transmatrix T) {
     T2[j][i] = (T[(i+1)%3][(j+1)%3] * T[(i+2)%3][(j+2)%3] - T[(i+1)%3][(j+2)%3] * T[(i+2)%3][(j+1)%3]) / det;
 
   return T2;
+  }
+
+double hdist(hyperpoint h1, hyperpoint h2) {
+  hyperpoint mh = gpushxto0(h1) * h2;
+  return inverse_sinh(sqrt(mh[0]*mh[0]+mh[1]*mh[1]));
+  }
+
+namespace hyperpoint_vec {
+
+  hyperpoint operator * (double d, hyperpoint h) { 
+    return hpxyz(h[0]*d, h[1]*d, h[2]*d);
+    }
+  
+  hyperpoint operator * (hyperpoint h, double d) { 
+    return hpxyz(h[0]*d, h[1]*d, h[2]*d);
+    }
+  
+  hyperpoint operator / (hyperpoint h, double d) { 
+    return hpxyz(h[0]/d, h[1]/d, h[2]/d);
+    }
+  
+  hyperpoint operator + (hyperpoint h, hyperpoint h2) { 
+    return hpxyz(h[0]+h2[0], h[1]+h2[1], h[2]+h2[2]);
+    }
+  
+  hyperpoint operator - (hyperpoint h, hyperpoint h2) { 
+    return hpxyz(h[0]-h2[0], h[1]-h2[1], h[2]-h2[2]);
+    }
+  
   }

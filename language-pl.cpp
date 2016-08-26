@@ -1,3 +1,6 @@
+// HyperRogue Polish translation
+// Copyright (C) 2011-2016 Zeno Rogue, see 'hyper.cpp' for details
+
 // This translation file is encoded with UTF-8
 
 // Nouns.
@@ -82,7 +85,7 @@ N("Key", GEN_O, "Klucz", "Klucze", "Klucz", "Kluczem")
 N("Dead Orb", GEN_F, "Martwa Sfera", "Martwe Sfery", "Martwą Sferę", "Martwą Sferą")
 N("Fern Flower", GEN_O, "Kwiat Paproci", "Kwiaty Paproci", "Kwiat Paproci", "Kwiatem Paproci")
 // orbs: we are using a macro here
-#define Orb(E, P) N("Orb of "E, GEN_F, "Sfera "P, "Sfery "P, "Sferę "P, "Sferą "P)
+#define Orb(E, P) N("Orb of " E, GEN_F, "Sfera " P, "Sfery " P, "Sferę " P, "Sferą " P)
 Orb("Yendor", "Yendoru")
 Orb("Storms", "Burzy")
 Orb("Flash", "Błysku")
@@ -734,7 +737,7 @@ S("A beautiful gem from the Jungle.", "Piękny klejnot z Dżungli.")
 
 S(
  "A wonderful beverage, apparently obtained by mixing red and blue slime. You definitely feel more "
- "healthy after drinking it, but you still fell that one hit of a monster is enough to kill you.",
+ "healthy after drinking it, but you still feel that one hit of a monster is enough to kill you.",
  "Cudowny napój, powstały z mieszania czerwonej i niebieskiej mazi. Po jej wypiciu czujesz "
  "się zdecydowanie lepiej, ale wciąż jedno uderzenie potwora może Ciebie powalić.")
 
@@ -1268,6 +1271,7 @@ S("You can right click any element to get more information about it.\n\n",
   "Kliknij obiekt prawym przyciskiem myszy, by zobaczyć więcej informacji na jego temat.\n\n")
 
 S("TRANSLATIONWARNING", "")
+S("TRANSLATIONWARNING2", "")
 
 S("The Hyperbugs are fighting!", "Hiperinsekty ze sobą walczą!")
 
@@ -1289,7 +1293,7 @@ S(
   "The Knights of the Round Table are the greatest warriors of these lands. "
   "They are not very inventive with names though, as they call each of their "
   "castles Camelot. "
-  "You are probably worth of joining them, but they will surely give you "
+  "You are probably worthy of joining them, but they will surely give you "
   "some quest to prove yourself...\n\n"
   "Each castle contains a single treasure, the Holy Grail, in the center. "
   "The radius of the Round Table is usually 28, but after you find a Holy Grail "
@@ -2118,12 +2122,22 @@ S("player 2 X", "gracz 2 X")
 S("player 2 Y", "gracz 2 Y")
 S("player 2 go", "gracz 2 idź")
 S("player 2 spin", "gracz 2 obrót")
+S("player 3 X", "gracz 3 X")
+S("player 3 Y", "gracz 3 Y")
+S("player 3 go", "gracz 3 idź")
+S("player 3 spin", "gracz 3 obrót")
+S("player 4 X", "gracz 4 X")
+S("player 4 Y", "gracz 4 Y")
+S("player 4 go", "gracz 4 idź")
+S("player 4 spin", "gracz 4 obrót")
 
 S("Joystick %1, axis %2", "Joystick %1, oś %2")
 S("one player", "jeden gracz")
 S("two players", "dwóch graczy")
 S("configure player 1", "skonfiguruj gracza 1")
 S("configure player 2", "skonfiguruj gracza 2")
+S("configure player 3", "skonfiguruj gracza 3")
+S("configure player 4", "skonfiguruj gracza 4")
 S("configure panning", "skonfiguruj przewijanie")
 S("configure joystick axes", "skonfiguruj osie joysticka")
 S("continue playing", "kontynuuj grę")
@@ -2336,20 +2350,20 @@ S("%The1 kisses you, and begs you to bring %him1 away from here.",
   "%1 Ciebie pocałowa%ł1, i poprosi%ł1, byś %go1 gdzieś zabra%ł0.")
 
 S("\"I want my revenge. Stun a guard and leave him for me!\"",
-  "Chcę zemsty. Ogłusz strażnika i mi go zostaw!\"")
+  "\"Chcę zemsty. Ogłusz strażnika i mi go zostaw!\"")
 
 S("\"That felt great. Thanks!\"", "\"Wspaniałe uczucie. Dzięki!\"")
 
-S("\"Bring me out of here please!\"", "Proszę, zabierz mnie stąd!\"")
+S("\"Bring me out of here please!\"", "\"Proszę, zabierz mnie stąd!\"")
 
 S("%The1 kisses you, and thanks you for saving %him1.",
   "%1 Ciebie pocałowa%ł1, i podziękowa%ł1 za uratowanie %go1.")
   
 S("\"I have been trained to fight with a Hypersian scimitar, you know?\"",
-  "Trenowa%łem1 walkę hiperskim szamszirem, wiesz?\"")
+  "\"Trenowa%łem1 walkę hiperskim szamszirem, wiesz?\"")
 
 S("\"I would love to come to your world with you!\"", 
-  "Chcia%ł1bym wrócić z Tobą do Twojego świata!\"")
+  "\"Chcia%ł1bym wrócić z Tobą do Twojego świata!\"")
 
 S("\"Straight lines stay close to each other forever, this is so romantic!\"", 
   "\"Linie proste, co mogą zawsze być blisko siebie... Jakie to romantyczne!\"")
@@ -2610,6 +2624,8 @@ S("A beautiful figurine, made of ivory. Figurines close to the base of the Tower
   "zbierzesz dużo figurek.")
 
 N("Platform", GEN_F, "Platforma", "Platformy", "Platformę", "Platformą")
+N("platform", GEN_F, "platforma", "platformy", "platformę", "platformą")
+
 S("You can stand here.", "Możesz na niej stanąć.")
 
 N("ladder", GEN_F, "drabina", "drabiny", "drabinę", "drabiną")
@@ -2718,11 +2734,1039 @@ S("You summon %the1!", "Przywoła%łeś0 %a1!")
 
 S("F4 = file", "F4 = plik")
 
+// VERSION 8.0
+//=============
+
 S("The Air Elemental blows you away!", "Powietrzny Żywiołak Ciebie zdmuchnie!")
 
 // appended to cave troll description
 S(" Additionally, all items around the killed Troll will be destroyed.",
   " Dodatkowo, wszystkie przedmioty wokół zabitego Trolla ulegają zniszczeniu.")
 
-#undef Orb
+// 'dead cave troll' and 'dead troll' are separated now
 
+N("dead rock troll", GEN_M, "martwy skalny troll" ,"martwe skalne trolle", "martwego skalnego trolla", "martwym skalnym trollem")
+
+S("There are several species of trolls living in the hyperbolic world. "
+  "Some of them leave this wall behind them when they die.",
+  
+  "W hiperbolicznym świecie żyje kilka gatunków trolla. Niektóre z nich "
+  "zostawiają taką ścianę, gdy się je zabije.")
+
+// paper model creator
+//---------------------
+
+S("paper model creator", "kreator modeli papierowych")
+S("synchronize net and map", "synchronizuj siatkę z mapą")
+S("display the scope", "pokaż zasięg")
+S("create the model", "twórz model")
+S("back to HyperRogue", "powrót do HyperRogue")
+S("design the net", "projektuj siatkę")
+
+S("The paper model created as papermodel-*.bmp", "Model stworzony jako papermodel-*.bmp")
+S("Failed to load the file 'papermodeldata.txt'", "Nie udało się wczytać papermodeldata.txt")
+S("Could not save the paper model data", "Nie udało się zapisać danych do modelu")
+
+// pure tactics mode
+//-------------------
+
+S("pure tactics mode", "tryb taktyczny")
+S("Not available in the pure tactics mode!", "Niedostępne w trybie taktycznym!")
+S("\"The Knights of the Horocyclic Table salute you!\"", "\"Rycerze Horocyklicznego Stołu Cię pozdrawiają!\"")
+S("press 0 to leave this mode", "Wciśnij 0, by opuścić ten tryb")
+S("Collect %1x %2 to unlock", "Zbierz %1x %2 by odblokować")
+
+S(
+        "In the pure tactics mode, you concentrate on a specific land. "
+        "Your goal to obtain as high score as possible, without using "
+        "features of the other lands. You can then compare your score "
+        "with your friends!\n\n"
+        
+        "You need to be somewhat proficient in the normal game to "
+        "unlock the given land in this challenge "
+        "(collect 20 treasure in the given land, or 2 in case of Camelot).\n\n"
+        
+        "Since getting high scores in some lands is somewhat luck dependent, "
+        "you play each land N times, and your score is based on N consecutive "
+        "plays. The value of N depends on how 'fast' the land is to play, and "
+        "how random it is.\n\n"
+        
+        "In the Caribbean, you can access Orbs of Thorns, Aether, and "
+        "Space if you have ever collected 25 treasure in their native lands.\n\n"
+        
+        "The rate of treasure spawn is static in this mode. It is not "
+        "increased by killing monsters.\n\n"
+        
+        "Good luck, and have fun!",
+        
+        "W trybie taktycznym skupiasz się na jednej krainie. Twoim celem "
+        "jest zdobycie jak najwyższego wyniku, bez używania elementów "
+        "pozostałych krain. Możesz potem porównać wyniki ze znajomymi!\n\n"
+        
+        "Musisz sobie dobrze radzić w normalnej grze, by odblokować daną "
+        "krainę tutaj (zbierz 20 skarbów w danym świecie, albo 2 w przypadku "
+        "Camelot).\n\n"
+        
+        "Zdobywanie wysokich wyników w niektórych krainach jest zależne od "
+        "szczęścia, zatem grasz każdą krainę N razy, i Twój wynik jest oparty "
+        "na N kolejnych grach. Wartość N zależy od tego, jak szybka jest kraina, "
+        "i jak bardzo losowa.\n\n"
+        
+        "Na Karaibach masz dostęp do Sfery Cierni, Eteru, i Przestrzeni, jeżeli "
+        "kiedylkolwiek zebra%łeś0 25 skarbów w ich natywnych krainach.\n\n"
+        
+        "Szybkość generowania skarbów jest stała w tym trybie, nie powiększa "
+        "się wraz z zabijaniem potworów.\n\n"
+        
+        "Powodzenia, i miłej zabawy!")
+
+// Yendor Challenge
+//------------------
+
+S("Yendor Challenge", "Misja Yendor")
+S("Collect 10 treasures in various lands to unlock the challenges there",
+  "Zbieraj po 10 skarbów w różnych krainach, by odblokować tutejsze misje")
+  
+S("easy", "łatwe")
+S("challenge", "wyzwanie")
+
+S("Challenges do not get harder", "Misje nie stają się trudniejsze")
+S("Each challenge gets harder after each victory", "Każda misja staje się trudniejsza z każdym zwycięstwem")
+
+S(" (won!)", " (wygrane!)")
+S(" (won at level %1!)", " (wygrane na poziomie %1!)")
+S("(locked)", "(zablokowane)")
+
+S(
+    "There are many possible solutions to the Yendor Quest. In the Yendor "
+    "Challenge, you will try many of them!\n\n"    
+    "Each challenge takes part in a specific land, and you have to use what "
+    "you have available.\n\n"
+    
+    "You need to obtain an Orb of Yendor in the normal game to activate "
+    "this challenge, and (ever) collect 10 treasures in one or two lands "
+    "to activate a specific level.\n\n"
+    
+    "After you complete each challenge, you can try it again, on a harder "
+    "difficulty level.\n\n"
+    
+    "All the solutions showcased in the Yendor Challenge work in the normal "
+    "play too. However, passages to other lands, and (sometimes) some land features "
+    "are disabled in the Yendor "
+    "Challenge, so that you have to use the expected method. Also, "
+    "the generation rules are changed slightly for the Palace "
+    "and Minefield while you are looking for the Orb of Yendor, "
+    "to make the challenge more balanced "
+    "(but these changes are also active during the normal Yendor Quest).\n\n"
+    
+    "You get 1000 points for each challenge won, and 1 extra point for "
+    "each extra difficulty level.",
+    
+    "Jest dużo możliwych sposobów, by zdobyć Sferę Yendoru. W tej misji "
+    "spróbujesz wielu z nich!\n\n"
+    "Każda misja dzieje się w konkretnej krainie, i musisz użyć tego, "
+    "co jest dostepne.\n\n"
+    "Musisz zdobyć Sferę Yendoru w normalnej grze, by odblokować Misję Yendor, "
+    "i (kiedykolwiek) zdobyć 10 skarbów w jednym czy dwu światach, by uaktywnić "
+    "konkretną misję.\n\n"
+    
+    "Po ukończeniu każdej misji, możesz spróbować jescze raz, na trudniejszym poziomie.\n\n"
+    
+    "Wszystkie rozwiązania użyte w Misji Yendor działają w normalnej grze. Przejścia "
+    "do innych krain, i (czasami) niektóre inne elementy są wyłączone podczas Misji "
+    "Yendor, byś musia%ł0 użyć oczekiwanej metody. Reguły generowania krain są "
+    "lekko zmienione gdy szukasz Sfer Yendoru w Pałacu i na Polu Minowym, by "
+    "poprawić równowagę (te zmiany są też aktywne przy poszukiwaniu Sfery Yendoru "
+    "podczas normalnej gry).\n\n"
+    )
+
+S("Unlock this challenge by getting the Orb of Yendor!",
+  "Odblokuj Misję Yendor, zdobywając Sferę Yendoru!")
+  
+S("Collect 10 treasures in various lands to unlock the challenges there",
+  "Zdobywaj 10 skarbów w różnych krainach, by odblokowywać misje")
+
+// Wild West
+//-----------
+
+N("Wild West", GEN_O, "Dziki Zachód", "Dzikie Zachody", "Dziki Zachód", "na Dzikim Zachodzie")
+N("Outlaw", GEN_M, "Bandyta" ,"Bandyci", "Bandytę", "Bandytą")
+N("Bounty", GEN_F, "Nagroda", "Nagrody", "Nagrodę", "Nagrodą")
+N("saloon wall", GEN_F, "ściana salonu", "ściany salonu", "ścianę salonu", "ścianą salonu")
+N("Revolver", GEN_O, "Rewolwer", "Rewolwery", "Rewolwer", "Rewolwerem")
+
+S("%The1 shoots you!", "%1 do Ciebie strzeli%ł!")
+S("You shoot %the1!", "Zastrzeli%łeś0 %a1!")
+
+S(
+  "Take a revolver, kill outlaws, collect bounties.\n\n"
+  "Note: since this land is anachronistic, it is not available in normal game. "
+  "It is only available in special modes.",
+  
+  "Weź rewolwer, zabijaj bandytów i zgarniaj nagrody!\n\n"
+  "Uwaga: ta kraina jest anachronistyczna, także nie jest dostępna w normalnej "
+  "grze. Jest za to dostępna w specjalnych trybach.")
+
+// Land of Storms
+//----------------
+
+S(
+  "Whenever after your move there is a connection between a charged and a "
+  "grounded cell, there is a short circuit. All cells on any "
+  "path connecting a charged and a grounded cell (without repeated cells, "
+  "or two consecutive grounded/charged cells) become damaged.\n\n"
+  
+  "Sandstone walls and most creatures are conductive. Great Walls are "
+  "isolators, but lands beyond them count as grounded.\n\n"
+  
+  "Fulgurite, the treasure, is created when you manage to short circuit "
+  "a sandstone wall, or a Rich Metal Beast.\n\n"
+  
+  "Trolls leave conductive rocks when killed, and Metal Beasts can only "
+  "be killed by electricity -- your attacks only stun them, or push "
+  "them away if already stunned.",
+  
+  "Za każdym razem, gdy po Twoim ruchu jest połączenie między naładowanym a "
+  "uziemionym polem, następuje zwarcie. Wszystkie pola na dowolnej ścieżce "
+  "łączące pole naładowane z uziemionym (bez powtórzonych pól, i bez "
+  "dwóch sąsiednich naładowanych/uziemionych komórek) zostają uszkodzone.\n\n"
+  
+  "Piaskowe ściany i większość potworów przewodzi prąd. Wielkie ściany "
+  "są izolatorami, ale krainy za nimi liczą się jako uziemione.\n\n"
+  
+  "Fulguryt to skarb, który powstaje, gdy zwarcie zniszczy piaskową ścianę "
+  "albo Bogatego Stwora.\n\n"
+  
+  "Zabite trolle pozostawiają przewodzące ściany. Metalowe i Bogate Stwory można "
+  "zabić tylko elektrycznością -- Twoje ataki je ogłuszają, albo odpychają, "
+  "jeśli są już ogłuszone.")
+
+N("Land of Storms", GEN_F, "Kraina Burzy", "Krainy Burzy", "Krainę Burzy", "w Krainie Burzy")
+N("charged wall", GEN_F, "naładowana ściana", "naładoawne ściany", "naładowaną scianę", "naładowaną ścianą")
+N("grounded wall", GEN_F, "uziemiona ściana", "uziemione ściany", "uziemioną scianę", "uziemioną ścianą")
+N("metal wall", GEN_F, "metalowa ściana", "metalowe ściany", "metalową scianę", "metalową ścianą")
+N("sandstone wall", GEN_F, "piaskowa ściana", "piaskowe ściany", "piaskową scianę", "piaskową ścianą")
+N("Storm Troll", GEN_M, "Burzowy Troll", "Burzowe Trolle", "Burzowego Trolla", "Burzowym Trollem")
+N("Metal Beast", GEN_O, "Metalowy Stwór", "Metalowe Stwory", "Metalowego Stwora", "Metalowym Stworem")
+N("Rich Metal Beast", GEN_O, "Bogaty Stwór", "Bogate Stwory", "Bogatego Stwora", "Bogatym Stworem")
+N("electric discharge", GEN_N, "wyładowanie", "wyładowania", "wyładowanie", "wyładowaniem")
+
+S("There is a flash of thunder!", "Błyskawica!")
+
+Orb("Stunning", "Ogłuszania")
+
+S("This Orb allows you to target monsters to stun them. "
+  "10 charges are used to stun for 5 turns. Does not "
+  "work against multi-tile monsters.",
+  
+  "Ta sfera pozwala ogłuszać potwory na odległość. "
+  "10 ładunków = ogłuszenie na 5 tur. Nie działa "
+  "przeciwko potworom zajmującym wiele pól."
+  )
+
+S("You stun %the1!", "Ogłuszy%łeś0 %a1!")
+
+// Overgrown Woods
+//-----------------
+
+Orb("Luck", "Szczęścia")
+
+S("This Orb allows you to find new lands more easily. "
+  "Lands where you have already collected less treasure, "
+  "and especially the Crossroads, are more likely to "
+  "spawn while you have this. Additionally, Orbs of Safety "
+  "are more likely to spawn in the Whirlpool.",
+  
+  "Ta sfera pozwala łatwo znajdować nowe krainy. "
+  "Krainy, w których masz zebrane mniej skarbów, w "
+  "szczególności Skrzyżowania, jest łatwiej znaleźć, gdy "
+  "to masz. Dodatkowo, Sfery Bezpieczeństwa częściej "
+  "trafiają się w Wirze."
+  )    
+
+N("Overgrown Woods", GEN_O, "Przerośnięty Las", "Przerośnięte Lasy", "Przerośnięty Las", "w Przerośniętym Lesie")
+N("Mutant Ivy", GEN_O, "Zmutowany Bluszcz", "Zmutowane Bluszcze", "Zmutowany Bluszcz", "Zmutowanym Bluszczem")
+N("Mutant Sapling", GEN_F, "Zmutowana Sadzonka", "Zmutowane Sadzonki", "Zmutowaną Sadzonkę", "Zmutowaną Sadzonką")
+N("Forest Troll", GEN_M, "Leśny Troll", "Leśne Trolle", "Leśnego Trolla", "Leśnym Trollem")
+
+S("Forest Trolls create an impassable wall when they die.",
+  "Zabite Leśne Trolle pozostawiają ścianę.")
+
+S(
+  "The Overgrown Woods are filled with mutant ivies! These plants "
+  "grow very fast. Each leaf, after being grown, can grow itself "
+  "on the next turn. However, each part is only able to grow "
+  "once in 16 turns. Outside of the Overgrown Woods, the Mutant Ivy "
+  "may grow only on hexagonal cells.\n\n"
+  "Maybe such fast growing plants could help you solve the problem "
+  "of hunger in your world? Kill the Mutant Ivies to collect Mutant Saplings.",
+  
+  "Przerośnięty Las jest pełen zmutowanego bluszczu! Te rośliny rosną "
+  "bardzo szybko. Każdy liść może sam rosnąć w następnej turze po "
+  "wyrośnięciu, ale każda część rośliny może rosnąć tylko raz na 16 tur. "
+  "Poza Przerośniętym Lasem Zmutowany Bluszcz może rosnąć tylko na sześciokątach.\n\n"
+  "Może tak szybko rosnące rośliny pozwoliłyby Ci rozwiązać problem "
+  "głodu w Twoim świecie? Zabijaj Zmutowane Bluszcze, by zbierać sadzonki."
+  )
+
+S("Trees in this forest can be cut down. Big trees take two turns to cut down.",
+  "Drzewa w tym lesie można ścinać. Ścięcie dużego drzewa zajmuje dwie kolejki."
+  )
+
+S("Your power is drained by %the1!", "Twoja moc jest wyssana przez %a1!")
+
+S("Wow! That was close.", "Uff! Było blisko.");
+
+S("Collect four different Elemental Shards!", "Znajdź Okruch każdego żywiołu!")
+S("Unbalanced shards in your inventory are dangerous.", 
+  "Niebezpiecznie jest nosić niezrównoważone Okruchy.")
+S("You construct some Elemental Gems!", "Skonstruowa%łeś0 Kamień Zywiołów!")
+
+N("Fulgurite", GEN_O, "Fulguryt", "Fulguryty", "Fulguryt", "Fulgurytem")
+
+S("Alternatively: kill a %1 in %the2.\n", "Alternatywnie: zabij %a1 %abl2.\n")
+
+// VERSION 8.1
+//=============
+
+// extra config
+S("Prince", "Książę")
+S("Princess", "Księżniczka")
+S("cat" ,"kot")
+S("dog", "pies")
+S("dress color II", "kolor sukienki II")
+S("character", "postać")
+
+//missing texts
+S("%The1 hits %the2.", "%1 uderzy%ł1 %a2.")
+S("%The1 is destroyed by the Flash.", "Błysk zniszczył %a1.")
+
+// improved kill descriptions
+S("parts destroyed: %1", "części zniszczone: %1")
+S("friends killed: %1", "przyjaciele zabici: %1")
+S("monsters destroyed: %1", "potwory zniszczone: %1")
+S("friends destroyed: %1", "przyjaciele zniszczeni: %1")
+S("\n\nThis is a part of a monster. It does not count for your total kills.",
+  "\n\nTo jest część potwora. Nie liczy się do łącznych zabić.")
+S("\n\nThis is a friendly being. It does not count for your total kills.",
+  "\n\nTo jest przyjazne stworzenie. Nie liczy się do łącznych zabić.")
+
+// Overgrown Clearing
+//--------------------
+
+S("A clearing in the Overgrown Woods. Obviously, this gives "
+  "the Mutant Ivies an infinite space to grow...\n\n"
+  "Mutant Fruits rot if they are not adjacent to a Mutant Ivy.",
+  
+  "Polana w Przerośniętym Lesie. Oczywiście, pozwala to "
+  "Zmutowanym Bluszczom rosnąć w nieskończoność...\n\n"
+  "Zmutowane Owoce gniją, gdy nie sąsiadują ze Zmutowanym Bluszczem.")
+
+N("Clearing", GEN_F, "Polana", "Polany", "Polanę", "na Polanie")
+
+N("Mutant Fruit", GEN_O, "Zmutowany Owoc", "Zmutowane Owoce", "Zmutowany Owoc", "Zmutowanym Owocem")
+
+N("Giant Fox", GEN_O, "Wielki Lis", "Wielkie Lisy", "Wielkiego Lisa", "Wielkim Lisem")
+
+S(
+    "What is freedom for you? A situation when you can walk wherever you want? "
+    "Or a situation when you do not have to work, since you have as much tasty food "
+    "as you want?\n\n"
+    "Well, this creature has chosen the second option. It won't be happy "
+    "if you destroy its prison.\n",
+    
+    "Czym jest dla Ciebie wolność? Sytuacja, gdy możesz chodzić, gdzie chcesz? "
+    "Czy sytuacja, gdy nie musisz pracować, bo masz tyle jedzenia, ile zapragniesz?\n\n"
+    "To stworzenie wybrało drugą opcję. Nie będzie szczęśliwe, jak je uwolnisz "
+    "z więzienia."
+    )
+
+Orb("Freedom", "Wolności")
+
+S(
+    "This orb is activated if you are unable to escape (radius 4) "
+    "without making illegal moves or "
+    "going through cells which are currently adjacent to enemy monsters. "
+    "Most game over situations are covered by this, but generally, "
+    "this orb is oversensitive...\n\n"
+    "When activated, it creates a Flash effect of radius 5.",
+    
+    "Ta sfera aktywuje się, gdy nie możesz uciec (promień 4) bez "
+    "wykonywania nielegalnych ruchów, lub przechodzenia przez komórki "
+    "nie sąsiadujące z przeciwnikami. Większość sytuacji 'koniec gry' "
+    "jest pokrytych, ale zazwyczaj ta sfera jest nadwrażliwa...\n\n"
+    "Aktywacja powoduje efekt czaru Błysk w promieniu 5."
+  )
+
+S("Your %1 activates!", "Uruchomi%ł1 się Twoja %1!")
+
+// Haunted Woods
+//---------------
+
+S("You become a bit nervous...", "Czujesz się zagrożon%y0...")
+S("Better not to let your greed make you stray from your path.",
+  "Nie pozwól, by zgubiła Cię chciwość!")
+
+N("Haunted Woods", GEN_O, "Nawiedzony Las", "Nawiedzone Lasy", "Nawiedzony Las", "w Nawiedzonym Lesie")
+
+S(
+  "A dark forest filled with ghosts and graves. But there is also treasure hidden "
+  "deep within... But don't let greed make you stray from your path, as "
+  "you can get lost!\n\n"
+  "The Haunted Woods are bounded by a single equidistant curve. It is not a circle or horocycle.\n\n",
+
+  "Mroczny las, pełen duchów i grobów. Głęboko w środku są również skarby... "
+  "Ale nie pozwól, by zgubiła Cię chciwość!\n\n"
+  "Nawiedzony Las jest ograniczony jedną ekwidystantą.\n\n")
+  
+
+N("Black Lotus", GEN_O, "Czarny Lotos", "Czarne Lotosy", "Czarny Lotos", "Czarnym Lotosem")
+
+S(
+    "This beautiful flower is greatly prized by wizards, as it allows them to cast powerful magical spells "
+    "without preparation.\n", 
+
+    "Ten piękny kwiat ma wielką cenę wśród czarodziejów, bo pozwala im rzucać "
+    "silne czary bez przygotowania.\n"
+    )
+
+Orb("Undeath", "Nieumarłych")
+
+S(
+    "Monsters slain by you in melee are turned into friendly ghosts. "
+    "Does not affect plants and friends.",
+
+    "Potwory zabite przez Ciebie wręcz są zamieniane w przyjazne duchy. "
+    "Nie wpływa na rośliny i przyjaciół."
+    )
+
+N("Friendly Ghost", GEN_O, "Przyjazny Duch", "Przyjazne Duchy", "Przyjaznego Ducha", "Przyjaznym Duchem")
+
+S("Friendly ghosts are friendly beings who can go through any obstacles. However, "
+  "unlike most friends, they tend to fly away from you.",
+  
+  "Przyjazne duchy mogą przechodzić przez wszelkie przeszkody. Jednak, w przeciwieństwie "
+  "do większości pozostałych przyjaciół, mają zwyczaj odlatywać od Ciebie."
+   )
+
+// Windy Plains
+//--------------
+
+N("Windy Plains", GEN_F, "Wietrzna Równina", "Wietrzne Równiny", "Wietrzną Równinę", "na Wietrznej Równinie")
+
+N("fan", GEN_O, "Wentylator", "Wentylatory", "Wentylator", "Wentylatorem")
+
+S(
+  "Someone has put air fans in these plains, causing strong winds everywhere. "
+  "You think that the purpose is to harness the magical power of Air Elementals, but "
+  "you are not sure.\n\n"
+  "All cells except fans are grouped into three colors according to a pattern. "
+  "Wind blows counterclockwise around each group of cells of a single color. "
+  "Cells which are blocked by walls, or at distance at most 2 from an Air Elemental, "
+  "do not count for this.\n\n"
+  "It is illegal to move in a direction which is closer to incoming wind than to "
+  "outcoming wind. However, you can move two cells with the wind in a single turn, "
+  "and so can the birds.",
+  
+  "Ktoś porozstawiał wentylatory na tych równinach, powodując wszędzie silne wiatry. "
+  "Celem jest zapewne uzyskanie magicznych mocy Powietrznych Żywiołaków, ale nie "
+  "masz pewności.\n\n"
+  
+  "Wszystkie komórki poza wentylatorami są podzielone na trzy kolory, zgodnie z "
+  "regularnym wzorem. Wiatr wieje przeciwnie do ruchu wskazówek zegara wokół "
+  "każdej grupy pól jednego koloru. Pola zablokowane przez ściany, lub "
+  "w odległości co najwyżej 2 od Powietrznego Żywiołaka, nie liczą się tutaj.\n\n"
+  "Nie można ruszać się w kierunku który jest bliżej przychodzącego niż odchodzącego "
+  "wiatru. Możesz jednak się ruszyć o dwa pola z wiatrem w jednej kolejce. "
+  "Ptaki również tak mogą zrobić."
+  )
+
+N("White Dove Feather", GEN_N, "Gołębie Pióro", "Gołębie Pióra", "Gołębie Pióro", "Gołębim Piórem")
+S("This feather is truly beautiful and strong.",
+  "Pióro białego gołębia. Piękne i silne.")
+
+N("Wind Crow", GEN_F, "Wietrzna Wrona", "Wietrzne Wrony", "Wietrzną Wronę", "Wietrzną Wroną")
+S("A large bird who likes strong winds. Just as you, it can fly quickly in the wind.",
+  "Wielki ptak, lubiący silne wiatry. Tak jak Ty, może szybko latać z wiatrem."
+  )
+
+// Orb of Empathy replaces Orb of Air on the Beach
+Orb("Empathy", "Empatii")
+S(" %1", " %1")
+S(", %1", ", %1")
+
+S(  "This Orb lets your allies to share your Orb powers.\n\n"
+    "The following Orbs are affected:",
+    
+    "Ta sfera pozwala Ci dzielić się mocami Sfer z przyjaciółmi.\n\n"
+    "Następujące Sfery są dzielone:")
+
+N("strong wind", GEN_O, "silny wiatr", "silne wiatry", "silny wiatr", "silnym wiatrem")
+
+S(
+    "In the Windy Plains, you can let the wind carry you, "
+    "causing you to move two cells with the wind in a single turn. "
+    "This cannot be done if you are standing at distance at most 2 "
+    "from the Air Elemental, or if any of the three cells on the way "
+    "has two wind directions.\n\n"
+    "Press 't' or click the destination to activate.",
+    
+    "Na Wietrznej Równinie możesz pozwolić dać się nieść wiatrowi, "
+    "dzięki czemu ruszasz się 2 pola z wiatrem w jednej kolejce. "
+    "Jest to możliwe tylko, jeśli nie stoisz w odległości co najwyżej "
+    "2 od Powietrznego Żywiołaka, i żadne z trzech pól po drodze "
+    "nie ma wiatru w dwóch kierunkach.\n\n"
+    "Naciśnij 't' albo kliknij pole docelowe, by wykonać ten ruch."
+  )
+
+S("Return to the normal game", "Powrót do normalnej gry")
+S("three players", "trzech graczy")
+S("four players", "czterech graczy")
+S("key Orb power", "moc sfery jednym klawiszem")
+
+S("Orb power (target: mouse)", "moc sfery (cel: mysz)")
+S("Orb power (target: facing)", "moc sfery (cel: na wprost)")
+S("You cannot go against the wind!", "Nie możesz iść pod wiatr!")
+
+// VERSION 8.2
+//=============
+
+S("The ivy attacks %the1!", "Bluszcz zaatakował %a1!")
+
+// heptagonal mode
+//-----------------
+
+S("heptagonal mode", "tryb siedmiokątów")
+
+S("\n\n(For the heptagonal mode, the radius has been reduced to 2 for closing plates.)",
+  "\n\n(W trybie siedmiokątów promień działania dla płyt zamykających jest zmniejszony do 2.)")
+
+// Hypersian Rug mode
+//--------------------
+
+S("hypersian rug mode", "tryb hiperskiego dywanu")
+
+S(
+  "In this mode, HyperRogue is played on a 3D model of a part of the hyperbolic plane, "
+  "similar to one you get from the 'paper model creator' or by hyperbolic crocheting.\n\n"
+  "This requires some OpenGL extensions and may crash or not work correctly -- enabling "
+  "the 'render texture without OpenGL' options may be helpful in this case. Also the 'render once' option "
+  "will make the rendering faster, but the surface will be rendered only once, so "
+  "you won't be able to play a game on it.\n\n"
+  "Use arrow keys to rotate, Page Up/Down to zoom.",
+  
+  "W tym trybie można grać w HyperRogue na trójwymiarowym modelu części płaszczyzny "
+  "hiperbolicznej, podobnego do tego, który można otrzymać w kreatorze modeli "
+  "papierowych, albo poprzez hiperboliczne szydełkowanie.\n\n"
+  "Działanie wymaga pewnych rozszerzeń OpenGL, i może działać nieprawidłowo lub "
+  "powodować zatrzymanie gry -- w takim przypadku może być przydatne włączenie opcji "
+  "'renderuj bez OpenGL'. Opcja 'renderuj raz' spowoduje, że animacja będzie szybsza, "
+  "ale tekstura powierzchni zostanie narysowana tylko raz, zatem nie będzie możliwe "
+  "granie na niej na żywo.\n\nMożesz obracać model strzałkami, i go przybliżać i oddalać "
+  "klawiszami Page Up/Down.")
+  
+S("what's this?", "co to jest?")
+S("take me back", "powrót do menu")
+S("enable the Hypersian Rug mode", "włącz tryb hiperskiego dywanu")
+S("render the texture only once", "renderuj teksturę tylko raz")
+S("render texture without OpenGL", "renderuj teksturę bez OpenGL")
+S("texture size", "rozmiar tekstury")
+
+// Crossroads IV & Chaos Mode
+//----------------------------
+
+N("Crossroads IV", GEN_O, "Skrzyżowanie IV", "Skrzyżowania IV", "Skrzyżowanie IV", "na Skrzyżowaniu IV")
+
+S("Chaos mode", "tryb Chaosu")
+
+S("In the Chaos mode, lands change very often, and there are no walls between them. "
+  "Some lands are incompatible with this."
+  "\n\nYou need to reach Crossroads IV to unlock the Chaos mode."
+  ,
+  
+  "W trybie Chaosu krainy zmieniają się bardzo często, i nie ma między nimi "
+  "ścian. Niektóre krainy są niekompatybilne z tym trybem."
+  "\n\nMusisz dotrzeć do Skrzyżowania IV, by odblokować tryb Chaosu."
+)
+
+// Rose Garden
+//-------------
+
+N("Rose Garden", GEN_O, "Różany Ogród", "Różane Ogrody", "Różany Ogród", "w Różanym Ogrodzie")
+N("False Princess", GEN_F, "Fałszywa Księżniczka", "Fałszywe Księżniczki", "Fałszywą Księżniczkę", "Fałszywą Księżniczką")
+N("False Prince", GEN_M, "Fałszywy Książę", "Fałszywi Książęta", "Fałszywego Księcia", "Fałszywym Księciem")
+N("Rose Lady", GEN_F, "Różana Dama", "Różane Damy", "Różaną Damę", "Różaną Damą")
+N("Rose Lord", GEN_M, "Różany Pan", "Różani Panowie", "Różanego Pana", "Różanym Panem")
+N("Rose Beauty", GEN_F, "Różana Piękność", "Różane Piękności", "Różaną Piękność", "Różaną Piękność")
+N("Handsome Gardener", GEN_M, "Przystojny Ogrodnik", "Przystojni Ogrodnicy", "Przystojnego Ogrodnika", "Przystojnym Ogrodnikiem")
+N("rosebush", GEN_O, "krzak róży", "krzaki róży", "krzak róży", "krzakiem róży")
+
+Orb("Beauty", "Piękna")
+N("Thornless Rose", GEN_F, "Róża bez Kolców", "Róże bez Kolców", "Różę bez Kolców", "Różą bez Kolców")
+
+S("Don't be fooled by this red-haired girl, or you will be stabbed if you come too close!",
+  "Nie daj się zwieść tej rudowłosej, bo jak się za bardzo zbliżysz, możesz zostać ugodzon%y1 nożem!")
+S("Don't be fooled by this red-haired boy, or you will be stabbed if you come too close!",
+  "Nie daj się zwieść temu rudowłosemu, bo jak się za bardzo zbliżysz, możesz zostać ugodzon%y1 nożem!")
+S("This false princess is immune to the alluring scent of roses.",
+  "Ta fałszywa księżniczka jest niewrażliwa na zapach róż.")
+S("This false prince is immune to the alluring scent of roses.",
+  "Ten fałszywy książę jest niewrażliwy na zapach róż.")
+S("She has flowers in her long fair hair. You could not bring yourself to attack such a beautiful woman.",
+  "Ta ślicznotka ma kwiaty w swych jasnych, długich lokach. Nie jesteś w stanie zaatakować tak pięknej kobiety.")
+S("Tall, strong, and holding a flower in his hand. You could not bring yourself to attack such a handsome man.",
+  "Wysoki, silny, z kwiatkiem w dłoni. Nie jesteś w stanie zaatakować tak przystojnego mężczyzny.")
+
+S(  "This Orb makes you stunningly beautiful. "
+    "Monsters which come next to you will be stunned for one turn. "
+    "Multi-tile monsters are not affected. Additionally, it makes you immune to "
+    "beauty.",
+
+    "Dzięki tej Sferze stajesz się oszałamiająco piękn%y1. "
+    "Stworzenia, które wejdą na pole obok Ciebie, zostaną oszołomione na 1 kolejkę. "
+    "Nie działa to na stworzenia zajmujące wiele pól. Dodatkowo, stajesz się "
+    "niewrażliw%y1 na piękno.")
+
+S(  "A big, beautiful, magical flower.", "Duży, piękny, magiczny kwiat.")
+
+S("Don't be fooled by beauty, or you will be stabbed if you come too close!",
+  "Nie daj się zwieść urodzie, bo jak się za bardzo zbliżysz, możesz zostać ugodzon%y1 nożem!")
+
+  
+S(
+  "Each eight turns, each rosebush at distance at most 5 from you will "
+  "release a wave of alluring scent. Creatures on the frontwave "
+  "will move towards where the scent came from. Even if it causes them "
+  "to attack their friends or beautiful creatures, or move into water, fire, chasm, or thorns of the rosebush. "
+  "Ivies, Ghosts, Rock Snakes, Rose Ladies and Lords, and monsters restricted to a specific "
+  "terrain are immune to scents.",
+  
+  "Co 8 kolejek każdy krzak róży w promieniu 5 od Ciebie wysyła falę "
+  "uwodzicielskiego zapachu. Stworzenia na czole fali wykonają ruch "
+  "w kierunku źródła zapachu, nawet jeżeli by to spowodowało, że "
+  "zaatakują swoich przyjaciół lub piękne istoty, lin ruszą się do wody, ognia, przepaści, czy "
+  "wpadną na kolce róży. Bluszcz, duchy, skalne węże, Różowe Damy i Panowie, i potwory "
+  "żyjące w konkretnym terenie są odporne na zapachy.")
+
+S(
+  "This land is filled with beautiful, but dangerous, creatures and plants.",
+  
+  "Ta kraina pełna jest pięknych, lecz niebezpiecznych, stworzeń i roślin.")
+
+S("%The1 is killed by thorns!", "%1 wpad%ł1 na kolce i się zabi%ł1!");
+
+S("You just cannot stand in place, those roses smell too nicely.", "Nie możesz stać w miejscu, róże zbyt ładnie pachną.")
+S("Those roses smell too nicely. You have to come towards them.", "Te róże tak ładnie pachną. Musisz iść w ich kierunku.")
+
+// Warped Sea/Coast
+//------------------
+
+N("Warped Coast", GEN_O, "Zakrzywiony Brzeg", "Zakrzywiony Brzegi", "Zakrzywiony Brzeg", "na Zakrzywionym Brzegu")
+N("Warped Sea", GEN_F, "Zakrzywione Morze", "Zakrzywione Morza", "Zakrzywione Morze", "na Zakrzywionym Morzu")
+N("Ratling", GEN_M, "Szczurak", "Szczuraki", "Szczuraka", "Szczurakiem")
+N("Coral", GEN_O, "Koral", "Korale", "Koral", "Koralem")
+Orb("the Warp", "Zakrzywienia")
+
+S(
+  "This land is warped. Ironically, the coast is completely straight...",
+  "Ta kraina jest dziwnie zakrzywiona. Co ciekawe, brzeg jest prosty jak drut...")
+
+S(
+  "This part of the world is warped, restricting the movement somewhat. "
+  "\"Diagonal\" movement and attacking between triangular cells is not allowed. "
+  "Flash, Storms, and Freedom spells ignore this, and Ghosts can move, attack, and "
+  "be attacked diagonally.",
+  "Ta część świata jest zakrzywiona, co powoduje zmniejszenie możliwości ruchu. "
+  "Ruch i atakowanie \"po przekątnej\", czyli między trójkątami, są zabronione. "
+  "Czary Błysk, Burza, i Wolność ignorują to. Duchy mogą się ruszać, atakować "
+  "i być atakowane po przekątnej.")
+
+S( "This Orb creates a warped zone of radius 5 around you, "
+  "and also allows you to move diagonally in warped zones.",
+  
+  "Ta sfera tworzy wokół Ciebie w promieniu zakrzywioną przestrzeń, "
+  "a także pozwala Ci się poruszać po przekątnej w zakrzywionej przestrzeni.")
+
+S(  "Corals have a somewhat hyperbolic structure even in your home world, "
+    "but natural corals from the Warped Sea have truly beautiful shapes. "
+    "Ratlings know the value of corals, and thus keep them in boats for safety.",
+    
+    "Korale mają hiperboliczną strukturę nawet w świecie, z którego pochodzisz, "
+    "ale naturalne korale z Zakrzywionego Morza mają prawdziwie piękne kształty. "
+    "Szczuraki znają wartość korala, i dla bezpieczeństwa trzymają je na łódkach.")
+
+S(
+    "These warped humanoids are skilled warriors and sailors, and they "
+    "feel at home at the Warped Coast. Their battle experience has taught them "
+    "that enemies who wait without moving or attacking anything are the most deadly. "
+    "If they see such an enemy, they become extremely suspicious, and they also wait.",
+    
+    "Te człekokształtne stworzenia są zręczne na morzu i w walce, i na Zakrzywionym "
+    "Brzegu czują się jak w domu. Ich doświadczenie bitewne nauczyło je, że ci przeciwnicy, "
+    "którzy czekają, bez ruchu i bez ataku, są najbardziej niebezpieczni. Kiedy "
+    "widzą takiego przeciwnika, stają się bardzo podejrzliwe, i również czekają.")
+    
+
+S("hexagonal #1", "sześciokąt #1")
+S("You cannot move between the triangular cells here!", "Nie możesz przechodzić między trójkątami!")
+S("display the triheptagonal grid", "pokaż siatkę triheptagonalną")
+
+N("no wall", GEN_O, "brak ściany", "braki ściany", "braku ściany", "brakiem ściany")
+N("no monster", GEN_O, "brak potwora", "braki potwora", "braku potwora", "brakiem potwora")
+N("no item", GEN_O, "brak przedmiotu", "braki przedmiotu", "braku przedmiotu", "brakiem przedmiotu")
+
+S("\n\nA Ghost never moves to a cell which is adjacent to another Ghost of the same kind.",
+  "\n\nDuch nigdy nie wchodzi na pole sąsiadujące z innym Duchem tego samego typu.")
+
+S("You cannot attack diagonally!", "Nie możesz atakować po przekątnej!")
+
+// for later...
+//--------------
+
+Orb("Energy", "Energii")
+
+S(  "This Orb halves the power usage of orbs which cost some "
+    "charges with each activation. It even affects the "
+    "one-shot orbs such as Flash or Teleport. If such an activation "
+    "normally costs x charges, it costs only x/2 (rounded up) "
+    "if you have an Orb of Energy.",
+    
+    "Ta Sfera dwukrotnie zmniejsza zużycie mocy przez te Sfery, których "
+    "każda aktywacja kosztuje pewną liczbę ładunków. Działa nawet na "
+    "Sfery jednokrotnego użytku, jak Błysk czy Teleport. Jeśli normalnie "
+    "taka aktywacja kosztuje x ładunków, a masz Sferę Energii, to "
+    "będzie ona kosztowała x/2 ładunków (zaokrąglone w górę).")
+
+// missing....
+
+N("warp gate", GEN_F, "wrota zakrzywienia", "wrota zakrzywienia", "wrota zakrzywienia", "wrotami zakrzywienia")
+S("This gate separates the warped area from the normal land.", 
+  "Ta brama oddziela strefę zakrzywioną od normalnych krain.")
+S("You cannot move between the cells without dots here!", 
+  "Nie możesz poruszać się między polami bez kropek!")
+S("Those roses smell too nicely. You can only target cells closer to them!",
+  "Te róże tak ładnie pachną. Możesz celować tylko w pola bliżej nich!")
+S("You need to move to give space to %the1!",
+  "Musisz się ruszyć, by zrobić miejsce dla %a1!")
+// this should be genetive, but in Polish it's the same as %a1 for both Golem and Tame Bomberbird
+  
+N("Ratling Avenger", GEN_M, "Szczurak-Mściciel", "Szczuraki-Mściciele", "Szczuraka-Mściciela", "Szczurakiem-Mścicielem")
+
+S(
+  "So, you have killed a Ratling on the unwarped sea? You will be punished for this! "
+  "Luckily, if you run away from the Warped Sea quickly, the Ratling Avengers will lose track of you.",
+  
+  "Zabi%łeś0 Szczuraka na niezakrzywionym morzu? Mściciele Cię dosięgną! "
+  "Na szczęście, jeśli szybko uciekniesz z Zakrzywionego Morza, Szczuraki-Mściciele zgubią Twój ślad.")
+
+// VERSION 8.3
+//=============
+
+S("Kills required: %1 (%2).\n", "Wymagani pokonani przeciwnicy: %1 (%2).\n")
+
+S("\"Be careful in the Rose Garden! It is beautiful, but very dangerous!\"",
+  "\"Uważaj w Różanym Ogrodzie! Jest tam pięknie, ale bardzo niebezpiecznie!\"")
+
+S("\"Thank you very much for talking, and have a great rest of your day!\"",
+  "\"Dziękuję bardzo za rozmowę, życzę wspaniałej reszty dnia!\"")
+
+// Conformal/history mode
+
+S("conformal/history mode", "tryb konforemny/historii")
+S("Preparing the line (%1/1000)...", "Przygotowanie linii (%1/1000)...")
+S("Could not create an image of that size.", "Nie da się stworzyć obrazu tej wielkości.")
+S("Saved the band image as: ", "Zapisano obraz jako: ")
+S("right", "prawo")
+S("left", "lewo")
+S("up", "góra")
+S("down", "dół")
+S("counterclockwise", "antyzegarowo")
+S("clockwise", "zegarowo")
+S("zoom out", "oddalenie")
+S("zoom in", "zbliżenie")
+S("left to right", "w prawo")
+S("right to left", "w lewo")
+S("spin down", "obróć w dół")
+S("spin up", "obróć w górę")
+S("disk", "koło")
+S("half-plane", "półpłaszczyzna")
+S("band", "wstęga")
+S("polygonal", "wielokąt")
+S("polynomial", "wielomian")
+S("include history", "uwzględnij historię")
+S("model used", "użyty model")
+S("rotation", "obrót")
+
+S("coefficient", "współczynnik")
+S("which coefficient", "który współczynnik")
+S("polygon sides", "boki wielokąta")
+S("star factor", "współczynnik gwiazdki")
+S("degree of the approximation", "stopień przybliżenia")
+S("prepare the line animation", "przygotuj animację linii")
+S("animation speed", "prędkość animacji")
+S("render bands automatically", "automatycznie twórz wstęgi")
+S("band width", "szerokość wstęgi")
+S("length of a segment", "długość segmentu")
+S("spiral on rendering", "spirala przy renderowaniu")
+S("render now (length: %1)", "rysuj teraz (długość: %1)")
+S("exit this menu", "wyjdź")
+S("Enable cheat mode or GAME OVER to use this", "Dostępne tylko po końcu gry albo w trybie oszusta")
+
+// remember to note it's in English
+S("see http://www.roguetemple.com/z/hyper/conformal.php", "patrz http://www.roguetemple.com/z/hyper/conformal.php (po angielsku)")
+
+// Yendorian Forest
+
+N("Yendorian Forest", GEN_O, "Las Yendoriański", "Lasy Yendoriańskie", "Yendoriańskiego Lasu", "w Yendoriańskim Lesie")
+
+S(
+  "This forest was planted by one of the wizards from the Ivory Tower "
+  "to conduct experiments with gravity.",
+  
+  "Ten las został zasadzony przez jednego z czarodziejów z Wieży z Kości Słoniowej, "
+  "by przeprowadzać eksperymenty z grawitacją.")
+
+N("Yendorian Researcher", GEN_M, "Yendoriański Badacz", "Yendoriańscy Badacze", "Yendoriańskiego Badacza", "Yendoriańskim Badaczem")
+
+S(
+    "These people study gravity and infinite trees. "
+    "They have no special features, other than wearing a strange hat.",
+    
+  "Ci ludzie badają grawitację i drzewa nieskończone. Nie mają "
+  "szczególnych własności, oprócz swojego dziwnego nakrycia głowy.")
+  
+N("Sparrowhawk", GEN_M, "Krogulec", "Krogulce", "Krogulca", "Krogulcem")
+
+S("A bird who hunts in the treetops of the Yendorian Forest.",
+  "Ptak polujący w koronach drzew w lesie yendoriańskim.")
+
+N("Apple", GEN_N, "Jabłko", "Jabłka", "Jabłko", "Jabłkiem")
+
+S("A fruit from the Yendorian Forest.", "Owoc z Yendoriańskiego Lasu.")
+
+N("trunk", GEN_O, "pień", "pnie", "pień", "pniem")
+
+S("The skeleton of a tree.", "Szkielet drzewa.")
+
+N("solid branch", GEN_F, "solidna gałąź", "solidne gałęzie", "solidną gałąź", "solidną gałęzią")
+
+S("Branches here could bear your weight easily.",
+  "Te gałęzie z łatwością udźwigną Twój ciężar.")
+
+N("weak branch", GEN_F, "słaba gałąź", "słabe gałęzie", "słabą gałąź", "słabą gałęzią")
+  
+S("Branches here will bear you weight, but if you use them to move (not fall) to an unstable place, they will break.",
+  "Te gąłęzie udźwigną Twój ciężar, ale jeśli użyjesz ich, by się przemieścić (nie spaść) na niestabilną pozycję, złamią się.")
+
+N("canopy", GEN_N, "listowie", "listowia", "listowie", "listowiem")
+
+S(
+  "Only thin twigs and leaves here. They may bear fruits, but for you, these cells count as unstable.",
+  "Tu są jedynie cieniutkie gałązki i liście. Mogą tu rosnąć owoce, ale dla Ciebie te pola liczą się jako niestabilne.")
+
+// Dragon Chasm
+
+N("Dragon Chasms", GEN_F, "Smocze Otchłanie", "Smocze Otchłanie", "Smocze Otchłanie", "w Smoczych Otchłaniach")
+
+N("Dragon", GEN_M, "Smok", "Smoki", "Smoka", "Smokiem")
+
+N("Dragon Scale", GEN_F, "Smocza Łuska", "Smocze Łuski", "Smoczą Łuskę", "Smoczą Łuską")
+
+S(
+    "Dragon Scales are a prized material for armors. "
+    "They are also prized by collectors, who would like to boast "
+    "about how they have killed a Dragon.\n\n"
+    "Dragon Scales disappear after 500 turns.",
+
+    "Smocze łuski są cenionym materiałem na zbroje. "
+    "Są one również poszukiwane przez zbieraczy, którzy "
+    "lubią się przechwalać tym, ile smoków zabili.\n\n"
+    "Smocze łuski znikają po 500 kolejkach."
+    )
+
+S(
+    "Dragons are powerful monsters. They are slow, but evil, "
+    "and love to pick on creatures who are even slower than "
+    "them. They must be stopped!\n\n"
+
+    "A Dragon moves each two turns. It may attack with all its segments, "
+    "or move its whole body forwards or "
+    "backwards, it may also move a frontal part backwards. To kill a Dragon, "
+    "you need to hit each of its segments. "
+    "The head will regenerate on the "
+    "turns the Dragon is not moving, so you will usually have to hit it with "
+    "your last attack; otherwise, if the head is healthy, it may breathe "
+    "fire (at range 3), losing the hitpoint. Killing the Dragon "
+    "while still in the Dragon Chasms gives you treasure.",
+    
+    "Smoki to potężne bestie. Są powolne, ale bardzo złe, uwielbiają "
+    "znęcać się nad stworzeniami, które są od nich jeszcze wolniejsze. "
+    "Musisz je powstrzymać!\n\n"
+
+    "Smok rusza się co dwie kolejki. Może atakować każdym segmentem, "
+    "ruszyć całe swoje ciało do przodu lub do tyłu, albo ruszyć początkowy "
+    "fragment do tyłu. By pokonać Smoka, musisz uderzyć każdy z jego segmentów. "
+    "Głowa się regeneruje w kolejkach, podczas których Smok się nie rusza, "
+    "także zwykle musi być atakowana ostatnia; jeśli głowa jest zdrowa, "
+    "może zionąć ogniem (zasięg 3), tracąc punkt życia. Za pokonanie Smoka "
+    "(będąc wciąż w Smoczych Otchłaniach) dostajesz skarby."
+   )
+
+S("%The1 breathes fire at you!", "%1 zionął ogniem na Ciebie!")
+S("%The1 breathes fire!", "%1 zionął ogniem!")
+
+Orb("Domination", "Dominacji")
+
+S(
+    "This Orb lets you ride Dragons and other worm-like creatures. "
+   "Simply move onto such a creature to ride them; while riding, you are protected from dangerous terrains "
+   "and partially from attacks (they cause you to lose half of your Domination power), "
+   "but you cannot collect items. When only one charge is left, "
+   "you have to dismount this turn -- be very careful to make this possible, "
+   "as your mount could attack you immediately!\n\n" "While riding, "
+   "click on a location to order your mount to move or attack there.",
+   
+   "Ta Sfera pozwala Ci jeździć Smokami i innymi wężopodobnymi stworami. "
+   "Po prostu wykonaj ruch na pole z takim stworem, by go dosiąść. "
+   "Podczas jazdy jesteś chronion%y0 przed "
+   "niebezpiecznym terenem i częściowo przed atakami (które powodują utratę połowy "
+   "Twojej mocy Dominacji), ale nie możesz zbierać przedmiotów. Kiedy zostanie "
+   "tylko 1 ładunek, musisz natychmiast ssiąść -- zadbaj o to, by to było "
+   "możliwe, bez zostania zaatakowanym przez Twojego dawnego wierczhowca!\n\n"
+   "Podczas jazdy kliknij dowolne pole, by nakazać Twojemu wierzchowcowi "
+   "tam się ruszyć lub zaatakować."
+   )
+
+S("You command %the1!", "%1 przyjmuje Twój rozkaz.")
+S("You need to dismount %the1!", "Musisz opuścić %a1!")
+S("%The1 tries to dismount you!", "%1 próbuje Ciebie zdjąć!")
+
+S("Enemies killed: %1 (%2 types)", "Zabici przeciwnicy: %1 (%2 typów)")
+S(" kills: %1/%2", " zabicia: %1/%2")
+S("Different kills required: %1.\n", "Różnych zabitych przeciwników wymaganych: %1.\n")
+
+// Galapagos
+
+N("Galápagos", GEN_M, "Galápagos", "Galápagos", "Galápagos", "na Galápagos")
+
+N("Baby Tortoise", GEN_M, "Żółwik", "Żółwiki", "Żółwika", "Żółwikiem")
+
+Orb("the Shell", "Skorupy")
+
+S(
+    "This Orb protects you from physical attacks. "
+    "It lasts for more turns than the Orb of Shielding, but "
+    "10 charges are lost whenever you are attacked. "
+    "It also does not protect you from fires, scents, and being eaten.",
+    
+    "Ta Sfera chroni Ciebie przed fizycznymi atakami. "
+    "Działa dłużej niż Sfera Tarczy, ale każdy atak zabiera "
+    "10 ładunków. Nie chroni przed ogniem, zapachami, i byciem zjedzonym.")
+
+S(
+  "Galápagos is the land of Tortoises. "
+  "They are very slow, which allows the Dragons to pick on them by "
+  "stealing and eating their young. Bring the Baby Tortoises back, "
+  "but, there is a catch: the Tortoises come in many varieties, depending "
+  "on the part of Galápagos they live in -- there are 21 binary environmental "
+  "factors, and thus "
+  "2097152 varieties. You'll have to find a "
+  "Tortoise which matches the baby exactly!\n\n"
+  "Tortoises move each 3 turns, and attacks only stun them.\n\n"
+  "Bringing back a Baby Tortoise counts as 5 $$$. The more factors agree in "
+  "the given location of Galápagos, the brighter it is shown on your screen.",
+  
+  "Galápagos to kraina Żółwi. Żółwie są bardzo powolne, co pozwala Smokom znęcac się nad nimi -- "
+  "kradnąc i zjadając ich młode. Zwróć Żółwiki ich rodzinom, ale "
+  "jest jeden haczyk: w różnych częściach Galápagos żyje wiele odmian Żółwi -- "
+  "jest 21 binarnych czynników środowiskowych, co prowadzi do 2097152 odmian. "
+  "Musisz znaleźć Żółwia dokładnie pasującego do Żółwika!\n\n"
+  "Żówie ruszają się co 3 kolejki. Ataki powodują jedynie ogłuszenie.\n\n"
+  "Zwrócenie Żółwika liczy się jako 5 $$$. Im więcej czynników zgadza się "
+  "w danym miejscu, tym jaśniej jest ono narysowane na Twoim ekranie.")
+
+S("%The1 scares %the2 a bit!", "%1 troszkę przestraszy%ł1 %a2!")
+S("%The1 attacks your shell!", "%1 zaatakowa%ł1 Twoją skorupę!")
+
+S("Hyperstone Quest: collect at least 10 points in %the2",
+  "Misja Hiperkamień: zdobądź co najmniej 10 punktów %abl2")
+
+S("animals killed: %1", "zabitych zwierząt: %1")
+S("\n\nTortoises are not monsters! They are just annoyed. They do not count for your total kills.",
+  "\n\nŻółwie to nie potwory! Są tylko rozwścieczone. Nie liczą się do Twoich zabić.")
+
+S("Aww, poor %1... where is your family?", "Auu, biedny %1... gdzie Twoja rodzina?")
+S("You are now a tortoise hero!", "Jesteś żółwim bohaterem!")
+S("Find a %1 in %the2.", "Znajdź %a1 %abl2.")
+
+/*
+		"NEW_ACHIEVEMENT_6_27_NAME"	"Dragon Slayer"
+		"NEW_ACHIEVEMENT_6_27_DESC"	"Collect a Dragon Scale."
+		"NEW_ACHIEVEMENT_6_28_NAME"	"Dragon Lord"
+		"NEW_ACHIEVEMENT_6_28_DESC"	"Collect 10 Dragon Slayers."
+		"NEW_ACHIEVEMENT_6_29_NAME"	"Dragon Prince"
+		"NEW_ACHIEVEMENT_6_29_DESC"	"Collect 25 Dragon Scales."
+		"NEW_ACHIEVEMENT_6_30_NAME"	"Dragon King"
+		"NEW_ACHIEVEMENT_6_30_DESC"	"Collect 50 Dragon Scales."
+		"NEW_ACHIEVEMENT_6_31_NAME"	"Tortoise Hero"
+		"NEW_ACHIEVEMENT_6_31_DESC"	"Save two Baby Tortoises."
+		"NEW_ACHIEVEMENT_7_0_NAME"	"Tortoise Champion"
+		"NEW_ACHIEVEMENT_7_0_DESC"	"Save five Baby Tortoises."
+		"NEW_ACHIEVEMENT_7_1_NAME"	"Tortoise Ninja"
+		"NEW_ACHIEVEMENT_7_1_DESC"	"Save ten Baby Tortoises."
+		"NEW_ACHIEVEMENT_7_2_NAME"	"Reached the Yendorian Forest"
+		"NEW_ACHIEVEMENT_7_2_DESC"	"Find and collect an Apple."
+		"NEW_ACHIEVEMENT_7_3_NAME"	"Yendorian Researcher"
+		"NEW_ACHIEVEMENT_7_3_DESC"	"Collect 10 Apples."
+		"NEW_ACHIEVEMENT_7_4_NAME"	"Sparrowhawk"
+		"NEW_ACHIEVEMENT_7_4_DESC"	"Collect 25 Apples."
+		"NEW_ACHIEVEMENT_7_5_NAME"	"Yendorian Master"
+		"NEW_ACHIEVEMENT_7_5_DESC"	"Collect 50 Apples."
+*/
+
+S("(includes co-op)", "(zawiera co-op)")
+S("Revived!", "Wskrzeszono!")
+
+S("You hear a distant roar!", "Słyszysz odległy ryk!")
+
+S("turn count = %1 last exploration = %2 ghost timer = %3",
+  "kolejek = %1 eksploracja = %2 czaso-duchy = %3")
+
+S("You damage %the1 with a mental blast!", "Zrani%łeś0 %a1 mocą psychiczną!")
+
+S("You are now a tortoise heroine!", "Jesteś żółwią bohaterką!")
+
+S("Note: currently scores are saved only in the normal mode on Android",
+  "Uwaga: wyniki na Androidzie są zapisywane tylko w normalnym trybie")
+S("Note: you can play, but scores won't be saved on Android",
+  "Uwaga: możesz grać, ale wyniki nie będą zapisywane")
+S("settings set here won't be saved", "ustawienia ustawione tutaj się nie")
+S("-- use the Android menu instead", "zapiszą -- użyj menu Androida")
+
+S("summon Bonfire", "przywołaj ognisko")
+S("Hyperstone Quest", "Misja Hiperkamień")
+S("summon dead orbs", "przywołaj martwe sfery")
+S("summon a Monster", "przywołaj potwora")
+S("gain orb powers", "Moce sfer")
+S("summon a Golem", "przywołaj Golema")
+S("summon Thumpers", "przywołaj dudniki")
+S("summon Ivy", "przywołaj Bluszcz")
+S("lose all treasure", "utrata skarbów")
+S("gain kills", "zdobądź zabicia")
+S("Select the land ---", "Wybierz krainę ---")
+S("summon Mimics", "przywołaj Mimiki")
+S("summon orbs", "przwołaj sfery")
+S("deplete orb powers", "utrata mocy")
+S("Safety (quick save)", "Bezpieczeństwo (szybki save)")
+S("summon treasure", "przywołaj skarby")
+S("summon lots of treasure", "przywołaj dużo skarbów")
+S("--- and teleport there", "--- i się teleportuj")
+S("summon Sand Worm", "przywołaj Czerwia")
+S("summon Orb of Yendor", "przywołaj sferę Yendoru")
+S("rotate the character", "obróć postać")
+
+S("gain Orb of Yendor", "zdobądź sferę Yendoru")
+S("switch ghost timer", "przestaw czaso-duchy")
+S("switch web display", "przestaw strukturę")
+
+#undef Orb

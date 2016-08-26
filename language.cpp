@@ -1,11 +1,9 @@
+// Hyperbolic Rogue language support
+// Copyright (C) 2011-2016 Zeno Rogue, see 'hyper.cpp' for details
+
 // #define CHECKTRANS
 
 #define NUMLAN 6
-
-#define GEN_M 0
-#define GEN_F 1
-#define GEN_N 2
-#define GEN_O 3
 
 struct stringpar {
   string v;
@@ -30,13 +28,16 @@ void rep(string& pattern, string what, string to) {
     }
   }
 
+void reponce(string& pattern, string what, string to) {
+  size_t at = pattern.find(what);
+  if(at != string::npos)
+    pattern = pattern.replace(at, what.size(), to);
+  }
+
 typedef unsigned hashcode;
 
-// a quick hack to make this unambiguous on Android
-#define hash my_hash
-
 struct sentence {
-  hashcode hash;
+  hashcode langhash;
   const char* xlat[NUMLAN-1];
   };
 
@@ -46,14 +47,14 @@ struct noun {
   };
 
 struct fullnoun {
-  hashcode hash;
+  hashcode langhash;
   int english_grammar_flags;
   noun n[NUMLAN-1];
   };
 
 #include "language-data.cpp"
 
-hashcode hash(const string& s) {
+hashcode langhash(const string& s) {
   hashcode r = 0;
   for(int i=0; i<size(s); i++) r = hashval * r + s[i];
   return r;
@@ -61,14 +62,14 @@ hashcode hash(const string& s) {
 
 template<class T> const T* findInHashTableS(string s, const T *table, int size) {
   int b = 0, e = size;
-  hashcode h = hash(s);
+  hashcode h = langhash(s);
   while(b!=e) {
     int m = (b+e)>>1;
-    // printf("b=%d e=%d m=%d h=%x s=%x\n", b, e, m, table[m].hash, h);
-    if(table[m].hash >= h) e = m;
+    // printf("b=%d e=%d m=%d h=%x s=%x\n", b, e, m, table[m].langhash, h);
+    if(table[m].langhash >= h) e = m;
     else b = m+1;
     }
-  if(e != size && table[e].hash == h)
+  if(e != size && table[e].langhash == h)
     return &table[e];
   return NULL;
   }
@@ -116,7 +117,7 @@ void basicrep(string& x) {
     rep(x, "%ąłeś0", choose3(playergender(), "ąłeś", "ęłaś", "ęłoś"));
     rep(x, "%ógł0", choose3(playergender(), "ógł", "ogła", "ogło"));
     }
-
+  
   if(l == 3) {
     rep(x, "%l0", choose3(playergender(), "l", "la", "lo"));
     rep(x, "%d0", choose3(playergender(), "", "a", "o"));
@@ -211,9 +212,11 @@ void parrep(string& x, string w, stringpar p) {
       rep(x, "%P"+w, N->n[4].nomp);
       rep(x, "%a"+w, N->n[4].acc);
       rep(x, "%abl"+w, N->n[4].abl);
+      rep(x, "%d"+w, N->n[4].abl); // Dativ (which equals Ablative in German)
       rep(x, "%Der"+w, choose3(N->n[4].genus, "Der", "Die", "Das"));
       rep(x, "%der"+w, choose3(N->n[4].genus, "der", "die", "das"));
       rep(x, "%den"+w, choose3(N->n[4].genus, "den", "die", "das"));
+      rep(x, "%dem"+w, choose3(N->n[4].genus, "dem", "der", "dem"));
       }
     else {
       rep(x,"%"+w,p.v);
@@ -272,7 +275,7 @@ string XLAT(string x, stringpar p1, stringpar p2, stringpar p3) {
   basicrep(x);
   parrep(x,"1",p1.v);
   parrep(x,"2",p2.v);
-  parrep(x,"3",p2.v);
+  parrep(x,"3",p3.v);
   postrep(x);
   return x;
   }
@@ -280,8 +283,8 @@ string XLAT(string x, stringpar p1, stringpar p2, stringpar p3, stringpar p4) {
   basicrep(x);
   parrep(x,"1",p1.v);
   parrep(x,"2",p2.v);
-  parrep(x,"3",p2.v);
-  parrep(x,"4",p2.v);
+  parrep(x,"3",p3.v);
+  parrep(x,"4",p4.v);
   postrep(x);
   return x;
   }
@@ -301,4 +304,6 @@ string XLAT1(string x) {
     }
   return x;
   }
+
+string XLATT1(stringpar p) { return XLAT1(p.v); }
 

@@ -1,8 +1,11 @@
+// HyperRogue Turkish translation, by zulmetefza & Seyacim
+// Copyright (C) 2011-2016 Zeno Rogue, see 'hyper.cpp' for details
+
 // This translation file is encoded with UTF-8
 
 // Nouns.
 
-#define Orb(X,Y) N("Orb of "X, GEN_F, Y" Küresi", Y" Küreleri", Y" Küresini", Y" Küresiyle")
+#define Orb(X,Y) N("Orb of " X, GEN_F, Y " Küresi", Y " Küreleri", Y " Küresini", Y " Küresiyle")
 
 
 // For each noun, provide the type of the noun, and all the grammatical forms
@@ -682,7 +685,7 @@ S("A beautiful gem from the Jungle.", "Vahşi Ormandan elde edilmiş bir mücevh
 
 S(
  "A wonderful beverage, apparently obtained by mixing red and blue slime. You definitely feel more "
- "healthy after drinking it, but you still fell that one hit of a monster is enough to kill you.",
+ "healthy after drinking it, but you still feel that one hit of a monster is enough to kill you.",
  "Şahane bir içki, görünen o ki kırmızı ve mavi balçığın karıştırılmasıyla elde edilmiş. İçince daha sağlıklı hissediyorsun ama bir canavarın tek vuruşunun seni öldüreceğine de eminsin.")
 
 S("A piece of a magic mirror, or a mirage cloud, that can be used for magical purposes. Only mirrors and clouds "
@@ -1191,7 +1194,7 @@ S(
   "The Knights of the Round Table are the greatest warriors of these lands. "
   "They are not very inventive with names though, as they call each of their "
   "castles Camelot. "
-  "You are probably worth of joining them, but they will surely give you "
+  "You are probably worthy of joining them, but they will surely give you "
   "some quest to prove yourself...\n\n"
   "Each castle contains a single treasure, the Holy Grail, in the center. "
   "The radius of the Round Table is usually 28, but after you find a Holy Grail "
@@ -2639,8 +2642,313 @@ S("A coastal area, from where you can get both to the inland worlds and to the O
   "Ancak Yaşayan Fiyortların dışındaki hücreler, Unsurlar ve Ölü Trollerin etkisi çok güçlüdür."
   )
 
+// S("TRANSLATIONWARNING", "Uyarı: Türkçe çeviri henüz Sürüm 8.0' daki yeni özellikleri kapsamıyor.")
+// S("TRANSLATIONWARNING", "")
+
+
+
+// Also, as the game is constantly updated, the Steam version includes the newest features, such as new lands with new mechanics, or new game modes -- see [ http://www.roguetemple.com/z/hyper/gallery.php]Gallery[/url] for the current differences.
+
+//CORRECTION:
+N("great wall", GEN_F, "Yüksek Duvar", "Yüksek Duvarlar", "Yüksek Duvarı", "Yüksek Duvarda")
+// VERSION 8.0
+//=============
+
+S("The Air Elemental blows you away!", "Hava Unsuru seni uzağa uçuruyor!")
+
+// appended to cave troll description
+S(" Additionally, all items around the killed Troll will be destroyed.",
+  " Ayrıca, Trolün etrafındaki bütün eşyalar yok olur.")
+
+// 'dead cave troll' and 'dead troll' are separated now
+
+N("dead rock troll", GEN_M, "ölü mağara trolü" ,"ölü mağara trolleri", "ölü mağara trolünü", "ölü mağara trolüyle")
+
+S("There are several species of trolls living in the hyperbolic world. "
+  "Some of them leave this wall behind them when they die.",
+  
+  "Hiperbolik dünyada pek çok tür trol yaşar."
+  "Bazıları öldüğünde bu duvarı geride bırakır.")
+
+// paper model creator
+//---------------------
+
+S("paper model creator", "kâğıt modeli üreticisi")
+S("synchronize net and map", "haritayı ve ağı eşle")
+S("display the scope", "odağı göster")
+S("create the model", "modeli üret")
+S("back to HyperRogue", "HyperRogue'a geri dön")
+S("design the net", "ağı tasarla")
+
+S("The paper model created as papermodel-*.bmp", "Kâğıt model papermodel-*.bmp şeklinde üretildi")
+S("Failed to load the file 'papermodeldata.txt'", "papermodeldata.txt dosyası yüklenemedi")
+S("Could not save the paper model data", "Kâğıt modeli verisi kaydedilemedi")
+
+// pure tactics mode
+//-------------------
+
+S("pure tactics mode", "saf taktik modu")
+S("Not available in the pure tactics mode!", "Taktik modunda kullanılamaz!")
+S("\"The Knights of the Horocyclic Table salute you!\"", "\"Horosikıl Masa Şövalyeleri seni selamlıyor!\"")
+S("press 0 to leave this mode", "Bu moddan çıkmak için 0'a bas")
+S("Collect %1x %2 to unlock", " %1 tane %2 toplayarak aktifleştir")
+
+S(
+        "In the pure tactics mode, you concentrate on a specific land. "
+        "Your goal to obtain as high score as possible, without using "
+        "features of the other lands. You can then compare your score "
+        "with your friends!\n\n"
+        
+        "You need to be somewhat proficient in the normal game to "
+        "unlock the given land in this challenge "
+        "(collect 20 treasure in the given land, or 2 in case of Camelot).\n\n"
+        
+        "Since getting high scores in some lands is somewhat luck dependent, "
+        "you play each land N times, and your score is based on N consecutive "
+        "plays. The value of N depends on how 'fast' the land is to play, and "
+        "how random it is.\n\n"
+        
+        "In the Caribbean, you can access Orbs of Thorns, Aether, and "
+        "Space if you have ever collected 25 treasure in their native lands.\n\n"
+        
+        "The rate of treasure spawn is static in this mode. It is not "
+        "increased by killing monsters.\n\n"
+        
+        "Good luck, and have fun!",
+        
+        "Saf taktik modunda sadece tek bir diyara odaklanırsın. Amacın diğer diyarların özelliklerini hiç kullanmadan mümkün olduğunca yüksek puan yapmak. Sonra skorunu arkadaşlarınınkiyle karşılaştırabilirsin!\n\n "
+        
+        "Normal oyunda maharetini ispatlayarak belli bir diyarı bu modda açabilirsin. "
+        "(Belli bir diyarda 20 hazine toplamak, Kamelot için 2 hazine toplamak gibi).\n\n"
+        
+        "Yüksek skor almak şöyle böyle şansa bağlı olduğundan, her diyarı N defa oynarsın ve skorun bu ardarda N oyuna göre belirlenir. N'in değeri diyarın ne kadar hızlı oynandığına ve ne derece rassal olduğuna göre değişir.\n\n"
+        
+        "Karayiplerde, Diken Küresine, Ether'e ve Uzay'a eğer daha önce ilgili diyarlarda 25'er hazine topladıysan erişebilirsin.\n\n"
+        
+        "Hazine üretimi bu modda statiktir ve canavar öldürmekle artmaz.\n\n"
+        
+        "İyi şanslar ve iyi eğlenceler!")
+
+// Yendor Challenge
+//------------------
+
+S("Yendor Challenge", "Yendor Ek Görevi")
+//Görev?
+S("Collect 10 treasures in various lands to unlock the challenges there",
+  "Çeşitli diyarlarda 10 hazine toplayarak o diyarın özel görevini aktifleştirebilirsin")
+  
+S("easy", "kolay")
+S("challenge", " ek görev")
+
+S("Challenges do not get harder", "Ek görevler zorlaşmaz.")
+S("Each challenge gets harder after each victory", "Her zaferinden sonra ek görevler zorlaşır.")
+
+S(" (won!)", " (kazandın!)")
+S(" (won at level %1!)", " (%1. seviyede kazandın!)")
+S("(locked)", "(aktif değil)")
+
+S(
+    "There are many possible solutions to the Yendor Quest. In the Yendor "
+    "Challenge, you will try many of them!\n\n"    
+    "Each challenge takes part in a specific land, and you have to use what "
+    "you have available.\n\n"
+    
+    "You need to obtain an Orb of Yendor in the normal game to activate "
+    "this challenge, and (ever) collect 10 treasures in one or two lands "
+    "to activate a specific level.\n\n"
+    
+    "After you complete each challenge, you can try it again, on a harder "
+    "difficulty level.\n\n"
+    
+    "All the solutions showcased in the Yendor Challenge work in the normal "
+    "play too. However, passages to other lands, and (sometimes) some land features "
+    "are disabled in the Yendor "
+    "Challenge, so that you have to use the expected method. Also, "
+    "the generation rules are changed slightly for the Palace "
+    "and Minefield while you are looking for the Orb of Yendor, "
+    "to make the challenge more balanced "
+    "(but these changes are also active during the normal Yendor Quest).\n\n"
+    
+    "You get 1000 points for each challenge won, and 1 extra point for "
+    "each extra difficulty level.",
+    
+    "Yendor Görevinin bir sürü çözümü var. Yendor Ek Görevi'nde bunların pek çoğunu deneyeceksin!\n\n"
+    "Her görev belirli bir diyarda geçiyor ve elindekileri bütün verimliliğiyle kullanman gerekecek.\n\n"
+    "Bu görevi aktifleştirmek için normal oyunda bir kez Yendor'un Küresi'ni ele geçirmen gerekiyor. Ayrıca her hangi bir seviyeyi aktifleştirmek için ilgili diyar(lar)da 10 hazine toplamış olman gerekiyor.\n\n"
+    
+    "Ek görevi tamamladıktan sonra aynı görevi bir üst zorluk seviyesinde yeniden deneyebilirsin.\n\n"
+    
+    "Yendor Ek Görevi'ndeki bütün çözümler normal oyunda da işe yarar. Ancak, Yendor Ek görevinde, diğer diyarlara geçiş ve bazen diyarın bazı özellikleri devredışıdır, bu yüzden beklenen çözümü bulman beklenir. "
+    "Ayrıca,  Yendor'un Küresi'ni ararken görevin daha dengeli olması için Saray ve Mayın Tarlasındaki harita üretimi biraz değiştirilmiştir. (bu değişiklikler normal Yendor Görevi'nde de mevcuttur).\n\n"
+    "Her kazanılan ek görev için 1000 puan ve her fazladan zorluk seviyesi için 1 fazladan puan kazanırsın.\n\n"
+    )
+
+S("Unlock this challenge by getting the Orb of Yendor!",
+  "Yendor'un Küresi'ni alarak bu ek görevi aktif et!")
+  
+S("Collect 10 treasures in various lands to unlock the challenges there",
+  "Diyarlardaki ek görevleri aktif etmek için oralarda 10 hazine topla.")
+
+// Wild West
+//-----------
+
+N("Wild West", GEN_O, "Vahşi Batı", "Vahşi Batılar", "Vahşi Batıyı", "Vahşi Batıda")
+N("Outlaw", GEN_M, "Haydut" ,"Haydutlar", "Haydutu", "Haydutla")
+N("Bounty", GEN_F, "Ödül", "Ödüller", "Ödülü", "Ödülle")
+N("saloon wall", GEN_F, "bar duvarı", "bar duvarları", "bar duvarını", "bar duvarıyla")
+N("Revolver", GEN_O, "Altıpatlar", "Altıpatlarlar", "Altıpatları", "Altıpatlarla")
+
+S("%The1 shoots you!", "%1 sana ateş etti!")
+S("You shoot %the1!", "%1 düşmanına ateş ettin!")
+
+S(
+  "Take a revolver, kill outlaws, collect bounties.\n\n"
+  "Note: since this land is anachronistic, it is not available in normal game. "
+  "It is only available in special modes.",
+  
+  "Altıpatları al, haydutları öldür, başlarına konan ödülleri topla!\n\n"
+  "Not: Bu diyar anakronistik olduğu için, normal oyunda mevcut değil, sadece özel modlarda oynanabilir.")
+
+// Land of Storms
+//----------------
+
+S(
+  "Whenever after your move there is a connection between a charged and a "
+  "grounded cell, there is a short circuit. All cells on any "
+  "path connecting a charged and a grounded cell (without repeated cells, "
+  "or two consecutive grounded/charged cells) become damaged.\n\n"
+  
+  "Sandstone walls and most creatures are conductive. Great Walls are "
+  "isolators, but lands beyond them count as grounded.\n\n"
+  
+  "Fulgurite, the treasure, is created when you manage to short circuit "
+  "a sandstone wall, or a Rich Metal Beast.\n\n"
+  
+  "Trolls leave conductive rocks when killed, and Metal Beasts can only "
+  "be killed by electricity -- your attacks only stun them, or push "
+  "them away if already stunned.",
+  
+  "Hareketinden sonra, eğer yüklü ve topraklı bir hücre arasında bağlantı varsa, kısa devre olur."
+  "Yüklü ve topraklı hücrenin arasındaki bütün hücreler (tekrarlayan hücreler, yahut iki ardışık topraklı yahut yüklü hücre hariç) hasar görür.\n\n"
+  
+  "Kumtaşı duvarları ve çoğu yaratık iletkendir. Büyük Duvarlar yalıtkandır, ancak onlardan sonraki hücreler topraklanmış sayılır. \n\n"
+  
+  "Fulgurit, buradaki hazine, bir kumtaşı duvarını veya Zengin Metal Canavarını kısa devreye uğratmanla ortaya çıkar.\n\n"
+  
+  "Troller öldüklerinde artlarında iletken kayalar bırakırlar ve Metal Canavarlar sadece elektrik ile öldürülebilirler. Saldırıların metal canavarları sersemletir, yahut zaten sersemlemişlerse ittirir. ")
+
+
+N("Land of Storms", GEN_F, "Fırtına Diyarı", "Fırtına Diyarları", "Fırtına Diyarını", "Fırtına Diyarında")
+N("charged wall", GEN_F, "yüklü duvar", "yüklü duvarlar", "yüklü duvarı", "yüklü duvarla")
+N("grounded wall", GEN_F, "topraklı duvar", "topraklı duvarlar", "topraklı duvarı", "topraklı duvarla")
+N("metal wall", GEN_F, "metal duvar", "metal duvarlar", "metal duvarı", "metal duvarla")
+N("sandstone wall", GEN_F, "kumtaşı duvarı", "kumtaşı duvarları", "kumtaşı duvarını", "kumtaşı duvarla")
+N("Storm Troll", GEN_M, "Fırtına Trolü", "Fırtına Trolleri", "Fırtına Trolünü", "Fırtına Trolüyle")
+N("Metal Beast", GEN_O, "Metal Canavar", "Metal Canavarları", "Metal Canavarını", "Metal Canavarıyla")
+N("Rich Metal Beast", GEN_O, "Zengin Metal Canavar", "Zengin Metal Canavarları", "Zengin Metal Canavarını", "Zengin Metal Canavarıyla")
+N("electric discharge", GEN_N, "elektrik boşalımı", "elektrik boşalımları", "elektrik boşalımını", "elektrik boşalımıyla")
+
+S("There is a flash of thunder!", "Bir şimşek çaktı!")
+
+Orb("Stunning", "Sersemletme")
+
+S("This Orb allows you to target monsters to stun them. "
+  "10 charges are used to stun for 5 turns. Does not "
+  "work against multi-tile monsters.",
+  
+  "Bu Küre canavarları hedefleyerek sersemletmeni sağlar. 5 tur sersemletmek için 10 güç kullanır. Çokluhücre canavarlara karşı çalışmaz."
+  )
+
+S("You stun %the1!", "%a1! sersemlettin!")
+
+// Overgrown Woods
+//-----------------
+
+Orb("Luck", "Şans")
+
+S("This Orb allows you to find new lands more easily. "
+  "Lands where you have already collected less treasure, "
+  "and especially the Crossroads, are more likely to "
+  "spawn while you have this. Additionally, Orbs of Safety "
+  "are more likely to spawn in the Whirlpool.",
+  
+  "Bu küre yeni diyarlar bulmanı kolaylaştırır. Daha az hazine topladığın diyarlar ve özellikle Arayollar, bu küreyi elinde tutarken daha yüksek ihtimalle karşına çıkar. "
+  "Ayrıca, Güvenlik Kürelerinin Tayfun'da ortaya çıkma ihtimalini artırır."
+  )    
+
+N("Overgrown Woods", GEN_O, "Azman Orman", "Azman Ormanlar", "Azman Ormanı", "Azman Ormanda")
+N("Mutant Ivy", GEN_O, "Mutant Sarmaşık", "Mutant Sarmaşıklar", "Mutant Sarmaşığı", "Mutant Sarmaşıkla")
+N("Mutant Sapling", GEN_F, "Mutant Fidan", "Mutant Fidanlar", "Mutant Fidanı", "Mutant Fidanla")
+N("Forest Troll", GEN_M, "Orman Trolü", "Orman Trolleri", "Orman Trolünü", "Orman Trolüyle")
+
+S("Forest Trolls create an impassable wall when they die.",
+  "Orman Trolleri öldüklerinde artlarında aşılmaz bir duvar bırakır.")
+
+S(
+  "The Overgrown Woods are filled with mutant ivies! These plants "
+  "grow very fast. Each leaf, after being grown, can grow itself "
+  "on the next turn. However, each part is only able to grow "
+  "once in 16 turns. Outside of the Overgrown Woods, the Mutant Ivy "
+  "may grow only on hexagonal cells.\n\n"
+  "Maybe such fast growing plants could help you solve the problem "
+  "of hunger in your world? Kill the Mutant Ivies to collect Mutant Saplings.",
+  
+  "Azman Orman mutant sarmaşıklarla dolu! Bu bitkiler çok hızlı büyür. Her yaprak, büyüdükten sonra sıradaki tur kendi başına büyüyebilir."
+  " Ancak, her parça ancak 16 tur içinde bir kez büyüyebilir. Azman Orman dışındaki diyarlarda, Mutant Sarmaşık sadece altıgen hücrelerde büyüyebilir.\n\n"
+  "Belki bu kadar hızlı büyüyen bitkiler dünyandaki açlık sorununu çözebilir? Mutant Fidanları toplamak için Mutant Sarmaşıkları öldür.")
+
+S("Trees in this forest can be cut down. Big trees take two turns to cut down.",
+  "Bu ormandaki ağaçlar kesilebilir. Büyük ağaçların kesilmesi iki tur alır."
+  )
+
+/* ACHIEVEMENTS
+
+		"NEW_ACHIEVEMENT_5_24_NAME"	"Mutant Fidan"
+		"NEW_ACHIEVEMENT_5_24_DESC"	"Bir Mutant Fidan bul ve topla."
+		"NEW_ACHIEVEMENT_5_25_NAME"	"Orman Trolü"
+		"NEW_ACHIEVEMENT_5_25_DESC"	"10 Mutant Fidan topla."
+		"NEW_ACHIEVEMENT_5_26_NAME"	"Mutant Sarmaşık"
+		"NEW_ACHIEVEMENT_5_26_DESC"	"25 Mutant Fidan topla."
+		"NEW_ACHIEVEMENT_5_27_NAME"	"Sarmaşık Efendisi"
+		"NEW_ACHIEVEMENT_5_27_DESC"	"50 Mutant Fidan topla."
+		"NEW_ACHIEVEMENT_5_28_NAME"	"Şimşek Çakması"
+		"NEW_ACHIEVEMENT_5_28_DESC"	"Bir Fulgurit bul ve topla."
+		"NEW_ACHIEVEMENT_5_29_NAME"	"Fırtına Trolü"
+		"NEW_ACHIEVEMENT_5_29_DESC"	"10 Fulgurit topla."
+		"NEW_ACHIEVEMENT_5_30_NAME"	"Metal Canavarı"
+		"NEW_ACHIEVEMENT_5_30_DESC"	"25 Fulgurit topla."
+		"NEW_ACHIEVEMENT_5_31_NAME"	"Zengin Metal Canavarı"
+		"NEW_ACHIEVEMENT_5_31_DESC"	"50 Fulgurit topla."
+
+*/
+
+
 #undef Orb
 
-// S("TRANSLATIONWARNING", "Uyarı: Türkçe çeviri henüz Sürüm 7.4' daki yeni özellikleri kapsamıyor.")
-S("TRANSLATIONWARNING", "")
+S("TRANSLATIONWARNING", 
+  "ÇEVİRİ UYARISI: Türkçe çevirisi güncel değil -- 8.1'den sonra eklenen özellikleri")
 
+S("TRANSLATIONWARNING2", 
+  "çevirmek isterseniz lütfen zeno@attnam.com adresinden benimle iletişime geçin.")
+
+S("summon Bonfire", "Kampateşi çıkar")
+S("Hyperstone Quest", "Aşkıntaş Görevi")
+S("summon dead orbs", "ölü küre çıkar")
+S("summon a Monster", "Bir canavar çıkar")
+S("gain orb powers", "küre güçleri kazan")
+S("summon a Golem", "Golem çıkar")
+S("summon Thumpers", "Gümleyen çıkar")
+S("summon Ivy", "Sarmaşık çıkar")
+S("lose all treasure", "tüm hazineyi kaybet")
+S("gain kills", "leşler kazan.")
+S("Select the land ---", "Diyar seç ---")
+S("summon Mimics", "Taklitçiler çıkar")
+S("summon orbs", "küre çıkar")
+S("deplete orb powers", "küre güçlerini tüket")
+S("Safety (quick save)", "Güvenlik (hızlı kayıt)")
+S("summon treasure", "hazine çıkar")
+S("summon lots of treasure", "çok hazine çıkar")
+S("--- and teleport there", "--- ve oraya ışınlan.")
+S("summon Sand Worm", "Kumkurdu çıkar")
+S("summon Orb of Yendor", "Yendorun Küresini çıkar")
+S("rotate the character", "karakteri döndür")

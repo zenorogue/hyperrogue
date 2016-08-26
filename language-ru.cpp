@@ -1,3 +1,6 @@
+// HyperRogue Russian translation, by green orange <khadaev98@gmail.com>
+// Copyright (C) 2011-2016 Zeno Rogue, see 'hyper.cpp' for details
+
 // This translation file is encoded with UTF-8
 
 // Nouns.
@@ -82,7 +85,7 @@ N("Key", GEN_O, "Ключ", "Ключи", "Ключ", "Ключом")
 N("Dead Orb", GEN_F, "Мёртвая сфера", "Мёртвые сферы", "Мёртвую сферу", "Мёртвой сферой")
 N("Fern Flower", GEN_O, "Цветок папоротника", "Цветы папоротника", "Цветок папоротника", "Цветком папоротника")
 // orbs: we are using a macro here
-#define Orb(E, P) N("Orb of "E, GEN_F, "Сфера "P, "Сферы "P, "Сферу "P, "Сферой "P)
+#define Orb(E, P) N("Orb of " E, GEN_F, "Сфера " P, "Сферы " P, "Сферу " P, "Сферой " P)
 Orb("Yendor", "Йендора")
 Orb("Storms", "Бури")
 Orb("Flash", "Вспышки")
@@ -728,7 +731,7 @@ S("A beautiful gem from the Jungle.", "Прекрасный камень из Д
 
 S(
  "A wonderful beverage, apparently obtained by mixing red and blue slime. You definitely feel more "
- "healthy after drinking it, but you still fell that one hit of a monster is enough to kill you.",
+ "healthy after drinking it, but you still feel that one hit of a monster is enough to kill you.",
  "Чудесный напиток, полученный из синей и красной слизи. Вы чувствуете себя лучше, выпив его, "
  "но одного удара Вам всё ещё хватит, чтобы погибнуть.")
 
@@ -1261,7 +1264,7 @@ S(
   "The Knights of the Round Table are the greatest warriors of these lands. "
   "They are not very inventive with names though, as they call each of their "
   "castles Camelot. "
-  "You are probably worth of joining them, but they will surely give you "
+  "You are probably worthy of joining them, but they will surely give you "
   "some quest to prove yourself...\n\n"
   "Each castle contains a single treasure, the Holy Grail, in the center. "
   "The radius of the Round Table is usually 28, but after you find a Holy Grail "
@@ -2110,12 +2113,22 @@ S("player 2 X", "игрок 2 X")
 S("player 2 Y", "игрок 2 Y")
 S("player 2 go", "игрок 2 идёт")
 S("player 2 spin", "игрок 2 вертит")
+S("player 3 X", "игрок 3 X")
+S("player 3 Y", "игрок 3 Y")
+S("player 3 go", "игрок 3 идёт")
+S("player 3 spin", "игрок 3 вертит")
+S("player 4 X", "игрок 4 X")
+S("player 4 Y", "игрок 4 Y")
+S("player 4 go", "игрок 4 идёт")
+S("player 4 spin", "игрок 4 вертит")
  
 S("Joystick %1, axis %2", "Джойстик %1, ось %2")
 S("one player", "один игрок")
 S("two players", "два игрока")
 S("configure player 1", "настройки игрока 1")
 S("configure player 2", "настройки игрока 2")
+S("configure player 3", "настройки игрока 3")
+S("configure player 4", "настройки игрока 4")
 S("configure panning", "настройки прокрутки")
 S("configure joystick axes", "настройка джойстика")
 S("continue playing", "продолжить игру")
@@ -2371,7 +2384,7 @@ S("u = undo",     "u = отмена")
 S("f = flip %1",     "f = перевернуть %1")
 S("Failed to save map to %1", "Не удалось созранить карту в %1")
 S("Failed to load map from %1", "Не удалось загрузить карту из %1")
-S("save whom", "кого сохранить")
+S("save whom", "кого спасти")
 S("other", "другое") // other keys in the main menu
 
 // VERSION 7.4
@@ -2600,6 +2613,8 @@ S("A beautiful figurine, made of ivory. Figurines close to the base of the Tower
   "башни пропадают, когда Вы соберёте много их.")
  
 N("Platform", GEN_F, "Платформа", "Платформы", "Платформу", "Платформой")
+N("platform", GEN_F, "платформа", "платформы", "платформу", "платформой")
+
 S("You can stand here.", "Можно встать сюда.")
  
 N("ladder", GEN_F, "лестница", "лестницы", "лестницу", "лестницей")
@@ -2735,9 +2750,1146 @@ S("You summon %the1!", "Вы призвали %a1!")
 
 S("F4 = file", "F4 = файл")
 
-#undef Orb
+ 
+// VERSION 8.0
+//=============
+ 
+S("The Air Elemental blows you away!", "Воздушный элементаль сдул Вас!")
+ 
+// appended to cave troll description
+S(" Additionally, all items around the killed Troll will be destroyed.",
+  " Все предметы рядом с умершим троллем также уничтожаются.")
+ 
+// 'dead cave troll' and 'dead troll' are separated now
+ 
+N("dead rock troll", GEN_M, "мёртвый пещерный тролль" ,"мёртвые пещерные тролли", "мёртвого пещерного тролля", "мёртвым пещерным троллем")
+ 
+S("There are several species of trolls living in the hyperbolic world. "
+  "Some of them leave this wall behind them when they die.",
+ 
+  "В гиперболическом мире есть несколько видов троллей. "
+  "Некоторые из них при смерти превращаются в такую стену.")
+ 
+// paper model creator
+//---------------------
+ 
+S("paper model creator", "создатель бумажных моделей")
+S("synchronize net and map", "синхронизовать сеть и карту")
+S("display the scope", "показать охват")
+S("create the model", "создать модель")
+S("back to HyperRogue", "вернуться в игру")
+S("design the net", "разработать сеть")
+ 
+S("The paper model created as papermodel-*.bmp", "Модель сохранена как papermodel-*.bmp")
+S("Failed to load the file 'papermodeldata.txt'", "Невозможно загрузить файл papermodeldata.txt")
+S("Could not save the paper model data", "Не удалось сохранить модель")
+ 
+// pure tactics mode
+//-------------------
+ 
+S("pure tactics mode", "режим тактики")
+S("Not available in the pure tactics mode!", "Недоступно в тактическом режиме!")
+S("\"The Knights of the Horocyclic Table salute you!\"", "\"Рыцари Орициклического Стола поздравляют Вас!\"")
+S("press 0 to leave this mode", "Нажмите 0, чтобы выйти из режима")
+S("Collect %1x %2 to unlock", "Соберите %1x %2, чтобы разблокировать")
+ 
+S(
+        "In the pure tactics mode, you concentrate on a specific land. "
+        "Your goal to obtain as high score as possible, without using "
+        "features of the other lands. You can then compare your score "
+        "with your friends!\n\n"
+       
+        "You need to be somewhat proficient in the normal game to "
+        "unlock the given land in this challenge "
+        "(collect 20 treasure in the given land, or 2 in case of Camelot).\n\n"
+       
+        "Since getting high scores in some lands is somewhat luck dependent, "
+        "you play each land N times, and your score is based on N consecutive "
+        "plays. The value of N depends on how 'fast' the land is to play, and "
+        "how random it is.\n\n"
+       
+        "In the Caribbean, you can access Orbs of Thorns, Aether, and "
+        "Space if you have ever collected 25 treasure in their native lands.\n\n"
+       
+        "The rate of treasure spawn is static in this mode. It is not "
+        "increased by killing monsters.\n\n"
+       
+        "Good luck, and have fun!",
+       
+        "В тактическом режиме Вы концентрируетесь на одной земле. Цель - "
+        "максимизировать счёт,не используя особенности других земель. "
+        "Вы можете сравнить свои результаты с результатами друзей!\n\n"
+       
+        "Вы должны быть достаточно опытным в обычной игре, чтобы открыть "
+        "землю здесь (соберите в ней 20 сокровищ, или 2 в случае Камелота).\n\n"
+       
+        "Так как результаты в некоторых землях могут зависеть от случая, "
+        "Вам нужно сыграть N раз, и счёт зависит от "
+        "N последовательных игр. Значение N зависит от того, насколько быстро "
+        "проходит игра, и насколько она зависит от случая.\n\n"
+       
+        "На Карибах Вам доступны сферы Шипов, Эфира и Пространства, если "
+        "Вы собрали 25 сокровищ в их родных землях.\n\n"
+       
+        "Частота появления сокровищ здесь постоянна, она не зависит от количества "
+        "убитых монстров.\n\n"
+       
+        "Удачи и приятного времяпровождения!")
+ 
+// Yendor Challenge
+//------------------
+ 
+S("Yendor Challenge", "Миссия Йендора")
+S("Collect 10 treasures in various lands to unlock the challenges there",
+  "Собирайте 10 сокровищ в разных землях, чтобы разблокировать миссии здесь")
+ 
+S("easy", "легко")
+S("challenge", "испытание")
+ 
+S("Challenges do not get harder", "Сложность не меняется")
+S("Each challenge gets harder after each victory", "Миссия становится сложнее с каждой победой")
+ 
+S(" (won!)", " (победа!)")
+S(" (won at level %1!)", " (победа на уровне %1!)")
+S("(locked)", "(закрыто)")
+ 
+S(
+    "There are many possible solutions to the Yendor Quest. In the Yendor "
+    "Challenge, you will try many of them!\n\n"    
+    "Each challenge takes part in a specific land, and you have to use what "
+    "you have available.\n\n"
+   
+    "You need to obtain an Orb of Yendor in the normal game to activate "
+    "this challenge, and (ever) collect 10 treasures in one or two lands "
+    "to activate a specific level.\n\n"
+   
+    "After you complete each challenge, you can try it again, on a harder "
+    "difficulty level.\n\n"
+   
+    "All the solutions showcased in the Yendor Challenge work in the normal "
+    "play too. However, passages to other lands, and (sometimes) some land features "
+    "are disabled in the Yendor "
+    "Challenge, so that you have to use the expected method. Also, "
+    "the generation rules are changed slightly for the Palace "
+    "and Minefield while you are looking for the Orb of Yendor, "
+    "to make the challenge more balanced "
+    "(but these changes are also active during the normal Yendor Quest).\n\n"
+   
+    "You get 1000 points for each challenge won, and 1 extra point for "
+    "each extra difficulty level.",
+   
+    "Есть много способов достать сферу Йендора. В этой миссии "
+    "Вы можете попробовать все варианты!\n\n"
+    "Каждая миссия проходит в конкретных землях, и можно использовать лишь то, "
+    "что там есть.\n\n"
+    "Вы должны достать сферу Йендора в обычной игре, чтобы открыть этот режим, "
+    "и собрать 10 сокровищ в одной или двух землях, чтобы открыть конкретные уровни.\n\n"
+   
+    "Закончив определённую миссию, Вы можете попробовать её заново на большей сложности.\n\n"
+   
+    "Все решения, продемонстрированные в миссии Йендора, работают и в нормальной игре. "
+    "Выходы в другие земли и некоторые внутренние особенности здесь отключены, "
+    "что заставляет использовать предусмотренный способ. Правила генерации "
+    "во Дворце и на Минном поле немного изменены, пока Вы ищете Сферу, "
+    "но в нормальной игре эти изменения во время квеста тоже действуют.\n\n"
+    )
+ 
+S("Unlock this challenge by getting the Orb of Yendor!",
+  "Откройте этот режим, собрав сферу Йендора!")
+ 
+S("Collect 10 treasures in various lands to unlock the challenges there",
+  "Собирайте 10 сокровищ в разных землях, чтобы открыть миссии здесь")
+ 
+// Wild West
+//-----------
+ 
+N("Wild West", GEN_O, "Дикий Запад", "Дикие Запады", "Дикий Запад", "на Диком Западе")
+N("Outlaw", GEN_M, "Бандит" ,"Бандиты", "Бандита", "Бандитом")
+N("Bounty", GEN_F, "Награда", "Награды", "Награду", "Наградой")
+N("saloon wall", GEN_F, "стена салуна", "стены салунов", "стену салуна", "стеной салуна")
+N("Revolver", GEN_O, "Револьвер", "Револьверы", "Револьвер", "Револьвером")
+ 
+S("%The1 shoots you!", "%1 застрелит тебя!")
+S("You shoot %the1!", "Вы застрелили %a1!")
+ 
+S(
+  "Take a revolver, kill outlaws, collect bounties.\n\n"
+  "Note: since this land is anachronistic, it is not available in normal game. "
+  "It is only available in special modes.",
+ 
+  "Хватай револьвер, убивай бандитов, получай награды!\n\n"
+  "Замечание: Так как эта земля анахронистична, она не доступна в "
+  "нормальной игре. Только в специальных режимах.")
+ 
+// Land of Storms
+//----------------
+ 
+S(
+  "Whenever after your move there is a connection between a charged and a "
+  "grounded cell, there is a short circuit. All cells on any "
+  "path connecting a charged and a grounded cell (without repeated cells, "
+  "or two consecutive grounded/charged cells) become damaged.\n\n"
+ 
+  "Sandstone walls and most creatures are conductive. Great Walls are "
+  "isolators, but lands beyond them count as grounded.\n\n"
+ 
+  "Fulgurite, the treasure, is created when you manage to short circuit "
+  "a sandstone wall, or a Rich Metal Beast.\n\n"
+ 
+  "Trolls leave conductive rocks when killed, and Metal Beasts can only "
+  "be killed by electricity -- your attacks only stun them, or push "
+  "them away if already stunned.",
+ 
+  "После каждого Вашего хода, если есть соединение между заряженной и "
+  "заземлённой клеткой, возникает короткое замыкание. По всем клеткам на пути "
+  "между заряженной и заземлённой (без повторов, и без двух соседних "
+  "заряженных/заземлённых) проходит ток.\n\n"
+ 
+  "Стены из песчаника и большинство существ проводят ток. Великие стены -- "
+  "изоляторы, а все клетки между ними считаются заземлёнными.\n\n"
+ 
+  "Фульгурит, местное сокровище, появляется, если разрушить песчаник или "
+  "убить Богатого железного зверя.\n\n"
+ 
+  "Тролль при гибели превращается в проводящую стену. Железных зверей "
+  "можно убить только электричеством -- атаки только оглушают их, или толкают, "
+  "если уже оглушены.")
+ 
+N("Land of Storms", GEN_F, "Земля Бури", "Земли Бури", "Землю Бури", "в Земле Бури")
+N("charged wall", GEN_F, "заряженная стена", "заряженные стены", "заряженную стену", "заряженной стеной")
+N("grounded wall", GEN_F, "заземлённая стена", "заземлённые стены", "заземлённую стену", "заземлённой стеной")
+N("metal wall", GEN_F, "металлическая стена", "металлические стены", "металлическую стену", "металлической стеной")
+N("sandstone wall", GEN_F, "песчаниковая стена", "песчаниковые стены", "песчаниковую стену", "песчаниковой стеной")
+N("Storm Troll", GEN_M, "Тролль бури", "Тролли бури", "Тролля бури", "Троллем бури")
+N("Metal Beast", GEN_M, "Железный зверь", "Железные звери", "Железного зверя", "Железным зверем")
+N("Rich Metal Beast", GEN_M, "Богатый железный зверь", "Богатые железные звери", "Богатого железного зверя", "Богатым железным зверем")
+N("electric discharge", GEN_O, "разряд", "разряды", "разряд", "разрядом")
+
+ 
+S("There is a flash of thunder!", "Молния!")
+ 
+Orb("Stunning", "Оглушения")
+ 
+S("This Orb allows you to target monsters to stun them. "
+  "10 charges are used to stun for 5 turns. Does not "
+  "work against multi-tile monsters.",
+ 
+  "Эта сфера позволяет оглушать монстров. "
+  "10 зарядов = оглушения на 5 ходов. Не действует на "
+  "\"многоклеточных\" монстров."
+  )
+ 
+S("You stun %the1!", "Вы оглушили %a1!")
+ 
+// Overgrown Woods
+//-----------------
+ 
+Orb("Luck", "Удачи")
+ 
+S("This Orb allows you to find new lands more easily. "
+  "Lands where you have already collected less treasure, "
+  "and especially the Crossroads, are more likely to "
+  "spawn while you have this. Additionally, Orbs of Safety "
+  "are more likely to spawn in the Whirlpool.",
+ 
+  "Эта сфера позволяет с лёгкостью находить новые земли. "
+  "Земли, в которых Вы собрали мало сокровищ, и особенно "
+  "Перекрёстки, появляются чаще, пока у Вас есть "
+  "эта сфера. Кроме того, сферы Безопасности чаще находятся "
+  "в Водовороте."
+  )    
+ 
+N("Overgrown Woods", GEN_F, "Заросли", "Заросли", "Заросли", "в Зарослях")
+N("Mutant Ivy", GEN_O, "Плющ-мутант", "Плющи-мутанты", "Плюш-мутант", "Плющом-мутантом")
+N("Mutant Sapling", GEN_O, "Саженец-мутант", "Саженцы-мутанты", "Саженец-мутант", "Саженцем-мутантом")
+N("Forest Troll", GEN_M, "Лесной тролль", "Лесные тролли", "Лесного тролля", "Лесным троллем")
+ 
+S("Forest Trolls create an impassable wall when they die.",
+  "Лесные тролли превращаются в непроходимые стены, когда умирают.")
+ 
+S(
+  "The Overgrown Woods are filled with mutant ivies! These plants "
+  "grow very fast. Each leaf, after being grown, can grow itself "
+  "on the next turn. However, each part is only able to grow "
+  "once in 16 turns. Outside of the Overgrown Woods, the Mutant Ivy "
+  "may grow only on hexagonal cells.\n\n"
+  "Maybe such fast growing plants could help you solve the problem "
+  "of hunger in your world? Kill the Mutant Ivies to collect Mutant Saplings.",
+ 
+  "Заросли полны плющами-мутантами! Они растут очень быстро. "
+  "Каждый выросший побег может расти на следующем же ходу. "
+  "Но расти в следующий раз он сможет лишь через 16 ходов. "
+  "Вне Зарослей плющи-мутанты могут расти только на шестиугольниках.\n\n"
+  "Возможно, столь быстрый рост решит проблему голода в Вашем мире? "
+  "Убейте плющ, чтобы собрать саженец."
+  )
+ 
+S("Trees in this forest can be cut down. Big trees take two turns to cut down.",
+  "Вы можете рубить деревья в лесу. Большие деревья рубятся за два хода."
+  )
+ 
+/* ACHIEVEMENTS
+ 
+                "NEW_ACHIEVEMENT_5_24_NAME"     "Саженец-мутант"
+                "NEW_ACHIEVEMENT_5_24_DESC"     "Найдите и соберите саженец-мутант."
+                "NEW_ACHIEVEMENT_5_25_NAME"     "Лесной тролль"
+                "NEW_ACHIEVEMENT_5_25_DESC"     "Соберите 10 саженцев-мутантов."
+                "NEW_ACHIEVEMENT_5_26_NAME"     "Плющ-мутант"
+                "NEW_ACHIEVEMENT_5_26_DESC"     "Соберите 25 саженцев-мутантов."
+                "NEW_ACHIEVEMENT_5_27_NAME"     "Мастер Плюща"
+                "NEW_ACHIEVEMENT_5_27_DESC"     "Соберите 50 саженцев-мутантов."
+                "NEW_ACHIEVEMENT_5_28_NAME"     "Молния"
+                "NEW_ACHIEVEMENT_5_28_DESC"     "Найдите и соберите фульгурит."
+                "NEW_ACHIEVEMENT_5_29_NAME"     "Тролль бури"
+                "NEW_ACHIEVEMENT_5_29_DESC"     "Соберите 10 фульгуритов."
+                "NEW_ACHIEVEMENT_5_30_NAME"     "Железный зверь"
+                "NEW_ACHIEVEMENT_5_30_DESC"     "Соберите 25 фульгуритов."
+                "NEW_ACHIEVEMENT_5_31_NAME"     "Богатый железный зверь"
+                "NEW_ACHIEVEMENT_5_31_DESC"     "Соберите 50 фульгуритов."
+ 
+*/
+
+// N("Fulgurite", GEN_O, "Фульгурит", "Фульгурити", "Фульгурит", "Фульгуритем") // verify!
+
+S("Alternatively: kill a %1 in %the2.\n", "Альтернатива: убить %a1 %abl2.\n")
+
+S("Your power is drained by %the1!", "%1 уменьшил Вашу мощь!")
+ 
+S("Wow! That was close.", "Ох! Это было близко.");
+ 
+S("Collect four different Elemental Shards!", "Собери Осколки всех стихий!")
+S("Unbalanced shards in your inventory are dangerous.",
+  "Несбалансированность осколков в Вашем инвентаре опасна.")
+S("You construct some Elemental Gems!", "Вы создали Элементальный камень!")
+ 
+N("Fulgurite", GEN_O, "Фульгурит", "Фульгуриты", "Фульгурит", "Фульгуритом")
+ 
+S("Alternatively: kill a %1 in %the2.\n", "Альтернатива: убить %a1 %abl2.\n")
+ 
+// VERSION 8.1
+//=============
+ 
+// extra config
+S("Prince", "Принц")
+S("Princess", "Принцесса")
+S("cat" ,"кот")
+S("dog", "пёс")
+S("dress color II", "цвет одежды II")
+S("character", "персонаж")
+ 
+//missing texts
+S("%The1 hits %the2.", "%1 ударил%E1 %a2.")
+S("%The1 is destroyed by the Flash.", "Вспышка уничтожила %1.")
+ 
+// improved kill descriptions
+S("parts destroyed: %1", "уничтожено частей: %1")
+S("friends killed: %1", "убито союзников: %1")
+S("monsters destroyed: %1", "монстров уничтожено: %1")
+S("friends destroyed: %1", "союзников уничтожено: %1")
+S("\n\nThis is a part of a monster. It does not count for your total kills.",
+  "\n\nЭто лишь часть монстра. Не учитывается в количестве убийств.")
+S("\n\nThis is a friendly being. It does not count for your total kills.",
+  "\n\nЭто Ваш союзник. Не учитывается в количестве убийств.")
+ 
+// Overgrown Clearing
+//--------------------
+ 
+S("A clearing in the Overgrown Woods. Obviously, this gives "
+  "the Mutant Ivies an infinite space to grow...\n\n"
+  "Mutant Fruits rot if they are not adjacent to a Mutant Ivy.",
+ 
+  "Поляна в Зарослях. Представляет собой неограниченное пространство "
+  "для роста плющей-мутантов...\n\n"
+  "Мутировавшие фрукты гниют, если они не находятся рядом с плющом.")
+ 
+N("Clearing", GEN_F, "Поляна", "Поляны", "Поляну", "на Поляне")
+ 
+N("Mutant Fruit", GEN_O, "Фрукт-мутант", "Фрукты-мутанты",
+"Фрукт-мутант", "Фруктом-мутантом")
+ 
+N("Giant Fox", GEN_M, "Огромный лис", "Огромные лисы", "Огромного лиса", "Огромным лисом")
+ 
+S(
+    "What is freedom for you? A situation when you can walk wherever you want? "
+    "Or a situation when you do not have to work, since you have as much tasty food "
+    "as you want?\n\n"
+    "Well, this creature has chosen the second option. It won't be happy "
+    "if you destroy its prison.\n",
+   
+    "Что для Вас есть свобода? Когда можно идти, куда хочешь? "
+    "Или когда не надо работать, так как есть столько вкусной еды, "
+    "сколько хочешь?\n\n"
+    "Это существо выбрало второй вариант. Лис не будет рад, если Вы "
+    "разрушите его тюрьму.\n"
+    )
+ 
+Orb("Freedom", "Свободы")
+ 
+S(
+    "This orb is activated if you are unable to escape (radius 4) "
+    "without making illegal moves or "
+    "going through cells which are currently adjacent to enemy monsters. "
+    "Most game over situations are covered by this, but generally, "
+    "this orb is oversensitive...\n\n"
+    "When activated, it creates a Flash effect of radius 5.",
+   
+    "Эта сфера активируется, если Вам некуда идти (в радиусе 4), "
+    "не делая запрещённых ходов и не ходя на клетки, рядом с которыми "
+    "стоит монстр. Обычно игра кончается именно в такой ситуации, "
+    "хотя обратное верно далеко не всегда...\n\n"
+    "При активации создаёт Вспышку радиуса 5."
+  )
+ 
+S("Your %1 activates!", "Ваша %1 сработала!")
+ 
+// Haunted Woods
+//---------------
+ 
+S("You become a bit nervous...", "Вы начали нервничать...")
+S("Better not to let your greed make you stray from your path.",
+  "Лучше не идти на поводу у своей жадности!")
+ 
+N("Haunted Woods", GEN_O, "Лес с привидениями", "Леса с привидениями",
+"Лес с привидениями", "в Лесу с привидениями")
+ 
+S(
+  "A dark forest filled with ghosts and graves. But there is also treasure hidden "
+  "deep within... But don't let greed make you stray from your path, as "
+  "you can get lost!\n\n"
+  "The Haunted Woods are bounded by a single equidistant curve. It is not a circle or horocycle.\n\n",
+ 
+  "Мрачный лес, полный духов и надгробий. Но в глубине спрятаныi "
+  "сокровища... Но не будьте слишком жадными, а то потеряетесь!\n\n"
+  "Лес с привидениями ограничен одной эквидистантой.\n\n")
+ 
+ 
+N("Black Lotus", GEN_O, "Чёрный лотос", "Чёрные лотосы", "Чёрный лотос", "Чёрным лотосом")
+ 
+S(
+    "This beautiful flower is greatly prized by wizards, as it allows them to cast powerful magical spells "
+    "without preparation.\n",
+ 
+    "Этот прекрасный цветок очень ценится колдунами, так как позволяет "
+    "создавать мощные чары без подготовки.\n"
+    )
+ 
+Orb("Undeath", "Нежити")
+ 
+S(
+    "Monsters slain by you in melee are turned into friendly ghosts. "
+    "Does not affect plants and friends.",
+ 
+    "Убитые Вашими руками монстры превращаются в мирных призраков. "
+    "Не действует на растения и союзников."
+    )
+ 
+N("Friendly Ghost", GEN_M, "Дружественный дух", "Дружественные духи",
+"Дружественного духа", "Дружественным духом")
+ 
+S("Friendly ghosts are friendly beings who can go through any obstacles. However, "
+  "unlike most friends, they tend to fly away from you.",
+ 
+  "Дружественные духи могут проходить сквозь любые препятствия. "
+  "В отличие от других союзников, склонны улетать от Вас."
+   )
+ 
+// Windy Plains
+//--------------
+ 
+N("Windy Plains", GEN_F, "Ветреная равнина", "Ветреные равнины",
+"Ветреную равнину", "на Ветреной равнине")
+ 
+N("fan", GEN_O, "Вентилятор", "Вентиляторы", "Вентилятор", "Вентилятором")
+ 
+S(
+  "Someone has put air fans in these plains, causing strong winds everywhere. "
+  "You think that the purpose is to harness the magical power of Air Elementals, but "
+  "you are not sure.\n\n"
+  "All cells except fans are grouped into three colors according to a pattern. "
+  "Wind blows counterclockwise around each group of cells of a single color. "
+  "Cells which are blocked by walls, or at distance at most 2 from an Air Elemental, "
+  "do not count for this.\n\n"
+  "It is illegal to move in a direction which is closer to incoming wind than to "
+  "outcoming wind. However, you can move two cells with the wind in a single turn, "
+  "and so can the birds.",
+ 
+  "Кто-то расставил вентиляторы на этой равнине и вызвал сильные ветры. "
+  "Вам кажется, что кто-то хотел использовать силу Воздушных "
+  "Элементалей, но не уверены.\n\n"
+ 
+  "Все клетки, кроме вентиляторов, раскрашены в 3 цвета регулярным "
+  "образом. Ветер дует против часовой стрелки вокруг каждой группы "
+  "одноцветных клеток. Клетки, занятые стенами, или находящиеся на  "
+  "расстоянии не более 2 от Воздушного Элементаля, не учитываются.\n\n"
+  "Невозможно пойти в направлении, которое ближе ко входящему ветру, "
+  "чем к выходящему. Зато Вы можете пройти сразу 2 клетки в  "
+  "направлении ветра, и птицы тоже могут."
+  )
+ 
+N("White Dove Feather", GEN_N, "Голубиное перо", "Голубиные перья",
+  "Голубиное перо", "Голубиным пером")
+S("This feather is truly beautiful and strong.",
+  "Красивое и сильное голубиное перо.")
+
+N("Wind Crow", GEN_F, "Ветряная ворона", "Ветряные вороны", "Ветряную ворону", "Ветряной вороной")
+S("A large bird who likes strong winds. Just as you, it can fly quickly in the wind.",
+  "Большая птица, которая любит сильный ветер. Как и Вы, движется "
+  "быстрее с ветром."
+  )
+ 
+// Orb of Empathy replaces Orb of Air on the Beach
+Orb("Empathy", "Сочувствия")
+S(" %1", " %1")
+S(", %1", ", %1")
+ 
+S(  "This Orb lets your allies to share your Orb powers.\n\n"
+    "The following Orbs are affected:",
+   
+    "Эта сфера позволяет Вашим союзникам использовать силы Ваших сфер.\n\n"
+    "Действует на следующие сферы:")
+ 
+N("strong wind", GEN_O, "сильный ветер", "сильные ветры", "сильный ветер", "сильным ветром")
+ 
+S(
+    "In the Windy Plains, you can let the wind carry you, "
+    "causing you to move two cells with the wind in a single turn. "
+    "This cannot be done if you are standing at distance at most 2 "
+    "from the Air Elemental, or if any of the three cells on the way "
+    "has two wind directions.\n\n"
+    "Press 't' or click the destination to activate.",
+   
+    "На Ветреной равнине Вы можете позволить ветру унести Вас, "
+    "подвинувшись сразу на 2 клетки за 1 ход. Это невозможно, если Вы "
+    "стоите на расстоянии не более 2 от Воздушного элементаля, "
+    "или на одной из проходимых клеток более одного направления "
+    "ветра.\n\n"
+    "Нажмите 't' или кликните на клетку, чтобы это использовать."
+  )
+ 
+/*
+        "NEW_ACHIEVEMENT_6_3_NAME"  "Открыть Леса с привидениями"
+        "NEW_ACHIEVEMENT_6_3_DESC"  "Соберите Чёрный лотос и убегите."
+        "NEW_ACHIEVEMENT_6_4_NAME"  "Тёмный призрак"
+        "NEW_ACHIEVEMENT_6_4_DESC"  "Соберите 10 Чёрных лотосов и
+        убегите."
+        "NEW_ACHIEVEMENT_6_5_NAME"  "Выживальщик"
+        "NEW_ACHIEVEMENT_6_5_DESC"  "Соберите 25 Чёрных лотосов и
+        убегите."
+        "NEW_ACHIEVEMENT_6_6_NAME"  "Мастер привидений"
+        "NEW_ACHIEVEMENT_6_6_DESC"  "Соберите 50 Чёрных лотосов и
+        убегите."
+        "NEW_ACHIEVEMENT_6_7_NAME"  "Мастер выживания"
+        "NEW_ACHIEVEMENT_6_7_DESC"  "Получите достижение
+        'Выживальщик', не рубя деревьев, не используя сфер и не
+        привлекая монстров из других земель."
+        "NEW_ACHIEVEMENT_6_8_NAME"  "Открыть Ветреную равнину"
+        "NEW_ACHIEVEMENT_6_8_DESC"  "Соберите Голубиное перо."
+        "NEW_ACHIEVEMENT_6_9_NAME"  "Ветряная ворона"
+        "NEW_ACHIEVEMENT_6_9_DESC"  "Соберите 10 Голубиных перьев."
+        "NEW_ACHIEVEMENT_6_10_NAME" "Белый голубь"
+        "NEW_ACHIEVEMENT_6_10_DESC" "Соберите 25 Голубиных перьев."
+        "NEW_ACHIEVEMENT_6_11_NAME" "Мастер Ветреной равнины"
+        "NEW_ACHIEVEMENT_6_11_DESC" "Соберите 50 Голубиных перьев."
+        "NEW_ACHIEVEMENT_6_12_NAME" "Открыть Поляну"
+        "NEW_ACHIEVEMENT_6_12_DESC" "Соберите Фрукт-мутант."
+        "NEW_ACHIEVEMENT_6_13_NAME" "Красный лис"
+        "NEW_ACHIEVEMENT_6_13_DESC" "Соберите 10 Фруктов-мутантов."
+        "NEW_ACHIEVEMENT_6_14_NAME" "Огромный лис"
+        "NEW_ACHIEVEMENT_6_14_DESC" "Соберите 25 Фруктов-мутантов."
+        "NEW_ACHIEVEMENT_6_15_NAME" "Мастер Поляны"
+        "NEW_ACHIEVEMENT_6_15_DESC" "Соберите 50 Фруктов-мутантов."
+*/
+
+// VERSION 8.2
+//=============
+ 
+S("The ivy attacks %the1!", "Плющ атаковал %a1!")
+ 
+// heptagonal mode
+//-----------------
+ 
+S("heptagonal mode", "режим семиугольников")
+ 
+S("\n\n(For the heptagonal mode, the radius has been reduced to 2 for closing plates.)",
+  "\n\n(В режиме семиугольников радиус действия закрывающих плит уменьшен до 2.)")
+ 
+// Hypersian Rug mode
+//--------------------
+ 
+S("hypersian rug mode", "режим гиперсидского ковра")
+ 
+S(
+  "In this mode, HyperRogue is played on a 3D model of a part of the hyperbolic plane, "
+  "similar to one you get from the 'paper model creator' or by hyperbolic crocheting.\n\n"
+  "This requires some OpenGL extensions and may crash or not work correctly -- enabling "
+  "the 'render texture without OpenGL' options may be helpful in this case. Also the 'render once' option "
+  "will make the rendering faster, but the surface will be rendered only once, so "
+  "you won't be able to play a game on it.\n\n"
+  "Use arrow keys to rotate, Page Up/Down to zoom.",
+ 
+  "В этом режиме Вы играете в HyperRogue на трёхмерной модели гиперболической "
+  "плоскости, похожей на те, что можно получить в 'создателе бумажных моделей'\n\n"
+  "Это требует некоторых расширений OpenGL, может работать некорректно или вызывать "
+  "падение игры -- включение опции 'не использовать OpenGL' может помочь. "
+  "Опция 'отрисовать один раз' ускоряет отрисовку, "
+  "но играть в таком режиме невозможно.\n\n"
+  "Используйте стрелки для вращения, Page Up/Down для изменения масштаба.")
+ 
+S("what's this?", "что это?")
+S("take me back", "вернуться в меню")
+S("enable the Hypersian Rug mode", "включить режим гиперсидского ковра")
+S("render the texture only once", "отрисовать один раз")
+S("render texture without OpenGL", "не использовать OpenGL")
+S("texture size", "размер текстур")
+ 
+// Crossroads IV & Chaos Mode
+//----------------------------
+ 
+N("Crossroads IV", GEN_O, "Перекрёсток IV", "Перекрёстки IV", "Перекрёсток IV", "на Перекрёстке IV")
+ 
+S("Chaos mode", "режим Хаоса")
+ 
+S("In the Chaos mode, lands change very often, and there are no walls between them. "
+  "Some lands are incompatible with this."
+  "\n\nYou need to reach Crossroads IV to unlock the Chaos mode."
+  ,
+ 
+  "В режиме Хаоса земли меняются очень часто, и между ними нет стен. "
+  "Некоторые земли несовместимы с этим режимом."
+  "\n\nВы должны достичь Перекрёстка IV, чтобы открыть режим Хаоса."
+)
+ 
+// Rose Garden
+//-------------
+ 
+N("Rose Garden", GEN_O, "Розарий", "Розарии", "Розарий", "в Розарии")
+N("False Princess", GEN_F, "Ложная принцесса", "Ложные принцессы", "Ложную принцессу", "Ложной принцессой")
+N("False Prince", GEN_M, "Ложный принц", "Ложные принцы", "Ложного принца", "Ложным принцем")
+N("Rose Lady", GEN_F, "Розовая дама", "Розовые дамы", "Розовую даму", "Розовой дамой")
+N("Rose Lord", GEN_M, "Розовый лорд", "Розовые лорды", "Розового лорда", "Розовым лордом")
+N("Rose Beauty", GEN_F, "Розовая красотка", "Розовые красотки", "Розовую красотку", "Розовой красоткой")
+N("Handsome Gardener", GEN_M, "Красивый садовод", "Красивые садоводы", "Красивого садовника", "Красивым садовником")
+N("rosebush", GEN_O, "куст розы", "кусты розы", "куст розы", "кустом розы")
+ 
+Orb("Beauty", "красоты")
+N("Thornless Rose", GEN_F, "роза без шипов", "розы без шипов", "розу без шипов", "розой без шипов")
+ 
+S("Don't be fooled by this red-haired girl, or you will be stabbed if you come too close!",
+  "Не будьте обмануты этой рыжеволосой девушкой, у неё есть острый нож!")
+S("Don't be fooled by this red-haired boy, or you will be stabbed if you come too close!",
+  "Не будьте обмануты этим рыжеволосым парнем, у него есть острый нож!")
+S("This false princess is immune to the alluring scent of roses.",
+  "Эта ложная принцесса невосприимчива к ароматам роз.")
+S("This false prince is immune to the alluring scent of roses.",
+  "Этот ложный принц невосприимчив к ароматам роз.")
+S("She has flowers in her long fair hair. You could not bring yourself to attack such a beautiful woman.",
+  "В её длинные светлые локоны вплетены прекрасные цветы. Вы не можете ударить столь красивую девушку.")
+S("Tall, strong, and holding a flower in his hand. You could not bring yourself to attack such a handsome man.",
+  "Высокий, сильный, с прекрасным цветком в руках. Вы не можете ударить этого красавца.")
+ 
+S(  "This Orb makes you stunningly beautiful. "
+    "Monsters which come next to you will be stunned for one turn. "
+    "Multi-tile monsters are not affected. Additionally, it makes you immune to "
+    "beauty.",
+ 
+    "С этой сферой Вы становитесь ошеломляюще прекрасны. "
+    "Монстр, подошедший к Вам, застывает на один ход. "
+    "Не действует на монстров из нескольких клеток. Также Вы теперь можете "
+    "игнорировать красоту других.")
+ 
+S(  "A big, beautiful, magical flower.", "Большой прекрасный магический цветок.")
+ 
+S("Don't be fooled by beauty, or you will be stabbed if you come too close!",
+  "Не будьте обмануты красотой, если не хотите получить удар в спину!")
+ 
+ 
+S(
+  "Each eight turns, each rosebush at distance at most 5 from you will "
+  "release a wave of alluring scent. Creatures on the frontwave "
+  "will move towards where the scent came from. Even if it causes them "
+  "to attack their friends or beautiful creatures, or move into water, fire, chasm, or thorns of the rosebush. "
+  "Ivies, Ghosts, Rock Snakes, Rose Ladies and Lords, and monsters restricted to a specific "
+  "terrain are immune to scents.",
+ 
+  "Каждые 8 ходов каждый розовый куст на расстоянии не более 5 от Вас выпускает "
+  "волну манящего аромата. Все монстры на пути двигаются к кусту, даже если "
+  "им приходится атаковать союзника или прекрасное существо, пойти в воду, огонь, пропасть "
+  "или в шипы куста. Это не действует на призраков, плющи, каменных змей и "
+  "и монстров, ограниченных своей землёй.")
+ 
+S(
+  "This land is filled with beautiful, but dangerous, creatures and plants.",
+ 
+  "Эта земля полна прекрасными, но опасными существами и растениями.")
+ 
+S("%The1 is killed by thorns!", "%1 убит%E1 шипами!");
+ 
+S("You just cannot stand in place, those roses smell too nicely.", "Вы не можете устоять на месте, эти розы пахнут слишком прекрасно.")
+S("Those roses smell too nicely. You have to come towards them.", "Эти розы пахнут слишком прекрасно. Вы можете пойти лишь в сторону них.")
+ 
+// Warped Sea/Coast
+//------------------
+ 
+N("Warped Coast", GEN_O, "Искривлённый берег", "Искривлённые берега", "Искривлённый берег", "на Искривлённом берегу")
+N("Warped Sea", GEN_N, "Искривлённое море", "Искривлённые моря", "Искривлённое море", "в Искривлённом море")
+N("Ratling", GEN_M, "Крысолюд", "Крысолюди", "Крысолюда", "Крысолюдом")
+N("Coral", GEN_O, "Коралл", "Кораллы", "Коралл", "Кораллом")
+Orb("the Warp", "Искривления")
+ 
+S(
+  "This land is warped. Ironically, the coast is completely straight...",
+  "Эта земля искривлена. Зато берег абсолютно прямой...")
+ 
+S(
+  "This part of the world is warped, restricting the movement somewhat. "
+  "\"Diagonal\" movement and attacking between triangular cells is not allowed. "
+  "Flash, Storms, and Freedom spells ignore this, and Ghosts can move, attack, and "
+  "be attacked diagonally.",
+  "Это земля искривлена, и движения немного ограничены. "
+  "Ходы и атаки \"по-диагонали\" между треугольниками невозможны. "
+  "Заклинания Вспышки, Бури и Свободы игнорируют это. Духи также могут ходить, "
+  "атаковать и быть атакованными по-диагонали.")
+ 
+S( "This Orb creates a warped zone of radius 5 around you, "
+  "and also allows you to move diagonally in warped zones.",
+ 
+  "Эта сфера создаёт искривление в радиусе 5 клеток вокруг Вас, "
+  "и позволяет Вам ходить по-диагонали в искривлённых зонах.")
+ 
+S(  "Corals have a somewhat hyperbolic structure even in your home world, "
+    "but natural corals from the Warped Sea have truly beautiful shapes. "
+    "Ratlings know the value of corals, and thus keep them in boats for safety.",
+   
+    "Кораллы имеют структуру, похожую на гиперболическую, даже в Вашем обычном мире, "
+    "но настоящие кораллы из Искривлённого моря имеют действительно красивые формы. "
+    "Крысолюды знают цену кораллам и на всякий случай хранят из в лодках.")
+ 
+S(
+    "These warped humanoids are skilled warriors and sailors, and they "
+    "feel at home at the Warped Coast. Their battle experience has taught them "
+    "that enemies who wait without moving or attacking anything are the most deadly. "
+    "If they see such an enemy, they become extremely suspicious, and they also wait.",
+   
+    "Эти искривлённые гуманоиды -- опытные воины и мореходы, и чувствуют себя "
+    "как дома на Искривлённом берегу. Их боевой опыт говорит, что враги, которые "
+    "стоят на месте и никого не атакуют, наиболее опасны. Когда они видят такого врага, "
+    "Они становятся подозрительными и тоже стоят на месте.")
+   
+ 
+S("hexagonal #1", "шестиугольник #1")
+S("You cannot move between the triangular cells here!", "Вы не можете ходить между треугольниками!")
+S("display the triheptagonal grid", "показать трёх-семи-угольную сетку")
+ 
+N("no wall", GEN_O, "нет стены", "нет стены", "нет стены", "нет стены")
+N("no monster", GEN_O, "нет монстра", "нет монстра", "нет монстра", "нет монстра")
+N("no item", GEN_O, "нет предмета", "нет предмета", "нет предмета", "нет предмета")
+ 
+S("\n\nA Ghost never moves to a cell which is adjacent to another Ghost of the same kind.",
+  "\n\nПризрак не может ходить на клетку рядом с другим таким же призраком.")
+ 
+S("You cannot attack diagonally!", "Вы не можете атаковать по-диагонали!")
+ 
+// for later...
+//--------------
+ 
+Orb("Energy", "Energii")
+ 
+S(  "This Orb halves the power usage of orbs which cost some "
+    "charges with each activation. It even affects the "
+    "one-shot orbs such as Flash or Teleport. If such an activation "
+    "normally costs x charges, it costs only x/2 (rounded up) "
+    "if you have an Orb of Energy.",
+   
+    "Эта сфера уменьшает энергию, используемую другими сферами "
+    "при активации. Это работает даже для одноразовых сфер, например, "
+    "Вспышки или Телепорта. Если обычно использование стоило "
+    "x единиц энергии, то с этой сферой оно будет стоить "
+    "x/2 единиц (округлённое вверх).")
+ 
+/*
+ 
+        "NEW_ACHIEVEMENT_6_17_NAME" "Открыть Искривлённый берег"
+        "NEW_ACHIEVEMENT_6_17_DESC" "Соберите Коралл."
+        "NEW_ACHIEVEMENT_6_18_NAME" "Крысолюд"
+        "NEW_ACHIEVEMENT_6_18_DESC" "Соберите 10 Кораллов."
+        "NEW_ACHIEVEMENT_6_19_NAME" "Искривлённый крысолюд"
+        "NEW_ACHIEVEMENT_6_19_DESC" "Соберите 25 Кораллов."
+        "NEW_ACHIEVEMENT_6_20_NAME" "Мастер Кривизны"
+        "NEW_ACHIEVEMENT_6_20_DESC" "Соберите 50 Кораллов."
+        "NEW_ACHIEVEMENT_6_21_NAME" "Открыть Розарий"
+        "NEW_ACHIEVEMENT_6_21_DESC" "Соберите Розу без шипов."
+        "NEW_ACHIEVEMENT_6_22_NAME" "Ложная принцесса"
+        "NEW_ACHIEVEMENT_6_22_DESC" "Соберите 10 Роз без шипов."
+        "NEW_ACHIEVEMENT_6_23_NAME" "Розовая красотка"
+        "NEW_ACHIEVEMENT_6_23_DESC" "Соберите 25 Роз без шипов."
+        "NEW_ACHIEVEMENT_6_24_NAME" "Розовая дама"
+        "NEW_ACHIEVEMENT_6_24_DESC" "Соберите 50 Роз без шипов."
+        "NEW_ACHIEVEMENT_6_25_NAME" "Путешественник"
+        "NEW_ACHIEVEMENT_6_25_DESC" "Откройте Перекрёсток IV."
+        "NEW_ACHIEVEMENT_6_26_NAME" "Мастер хаоса"
+        "NEW_ACHIEVEMENT_6_26_DESC" "Соберите 300 $$$ в режиме Хаоса."
+ 
+*/
 
 //   "Skeletons attacked outside of their native land, Palace, are stunned for a longer time.",
 
-S("TRANSLATIONWARNING", "")
-// S("TRANSLATIONWARNING", "Warning: new features from 7.4 are not yet translated to Russian")
+S("TRANSLATIONWARNING2", "")
+S("TRANSLATIONWARNING", "") // Warning: new features from 8.1 are not yet translated to Russian")
+
+S("Return to the normal game", "Вернуться в обычную игру")
+S("three players", "три игрока")
+S("four players", "четыре игрока")
+S("key Orb power", "клавиша для силы сферы")
+
+S("Orb power (target: mouse)", "активировать сферу")
+S("Orb power (target: facing)", "клавиша для силы сферы")
+S("You cannot go against the wind!", "Nie możesz iść pod wiatr!")
+
+N("warp gate", GEN_F, "врата искривления", "врата искривления", "врата искривления", "вратами искривления")
+
+S("This gate separates the warped area from the normal land.", 
+
+  "Эти врата отделяют искривлённые земли от обычных.")
+
+S("You cannot move between the cells without dots here!", 
+
+  "Вы не можете ходить между полями без точек!")
+
+S("Those roses smell too nicely. You can only target cells closer to them!",
+
+  "Эти розы так прекрасно пахнут. Вы можете выбирать цель только ближе к ним!")
+
+S("You need to move to give space to %the1!",
+
+  "Вам нужно освободить место для %a1!")
+
+// in Russian it works too
+
+  
+
+N("Ratling Avenger", GEN_M, "Крысолюд-мститель", "Крысолюди-мстители", "Крысолюда-мстителя", "Крысолюдом-мстителем")
+
+
+
+S(
+
+  "So, you have killed a Ratling on the unwarped sea? You will be punished for this! "
+
+  "Luckily, if you run away from the Warped Sea quickly, the Ratling Avengers will lose track of you.",
+
+  
+
+  "Вы убили Крысолюда в неискривлённом море? Мститель до Вас доберётся!"
+
+  "К счастью, если достаточно далеко уйти от Искривлённого моря, он потеряет Ваш след.")
+
+
+ 
+// VERSION 8.3
+//=============
+ 
+S("Kills required: %1 (%2).\n", "Убить монстров необходимо: %1 (%2).\n")
+ 
+S("\"Be careful in the Rose Garden! It is beautiful, but very dangerous!\"",
+  "\"Будьте осторожны в Розарии! Там красиво, но очень опасно!\"")
+ 
+S("\"Thank you very much for talking, and have a great rest of your day!\"",
+  "\"Большое спасибо за беседу, удачного дня!\"")
+ 
+// Conformal/history mode
+ 
+S("conformal/history mode", "режим конформный/истории")
+S("Preparing the line (%1/1000)...", "Приготовление линии (%1/1000)...")
+S("Could not create an image of that size.", "Невозможно создать изображение такого размера.")
+S("Saved the band image as: ", "Изображение сохранено как: ")
+S("right", "право")
+S("left", "лево")
+S("up", "вверх")
+S("down", "вниз")
+S("counterclockwise", "против часовой стрелки")
+S("clockwise", "по часовой стрелке")
+S("zoom out", "отдалить")
+S("zoom in", "приблизить")
+S("left to right", "вправо")
+S("right to left", "влево")
+S("spin down", "вращать вниз")
+S("spin up", "вращать вверх")
+S("disk", "диск")
+S("half-plane", "полуплоскость")
+S("band", "лента")
+S("polygonal", "многоугольник")
+S("polynomial", "многочлен")
+S("include history", "включить историю")
+S("model used", "используемая модель")
+S("rotation", "поворот")
+ 
+S("coefficient", "коэффициент")
+S("which coefficient", "какой коэффициент")
+S("polygon sides", "стороны многоугольника")
+S("star factor", "коэффициент звезды")
+S("degree of the approximation", "степень приближения")
+S("prepare the line animation", "приготовить анимацию линии")
+S("animation speed", "скорость анимации")
+S("render bands automatically", "рисовать ленту автоматически")
+S("band width", "ширина ленты")
+S("length of a segment", "длина отрезка")
+S("spiral on rendering", "спираль отрисовки")
+S("render now (length: %1)", "рисуется сейчас (длина: %1)")
+S("exit this menu", "выход")
+S("Enable cheat mode or GAME OVER to use this", "Доступно только в конце игры и в режиме обманщика")
+ 
+// remember to note it's in English
+S("see http://www.roguetemple.com/z/hyper/conformal.php", "смотри http://www.roguetemple.com/z/hyper/conformal.php (по-английски))")
+ 
+// Yendorian Forest
+ 
+N("Yendorian Forest", GEN_O, "Йендорский Лес", "Йендорские Леса", "Йендорский Лес", "в Йендорском Лесу")
+ 
+S(
+  "This forest was planted by one of the wizards from the Ivory Tower "
+  "to conduct experiments with gravity.",
+ 
+  "Этот лес был создан одним из магов Башни из Слоновой Кости "
+  "для продолжения экспериментов с гравитацией.")
+ 
+N("Yendorian Researcher", GEN_M, "Йендорский исследователь", "Йендорские исследователи", "Йендорского исследователя", "Йендорским исследователем")
+ 
+S(
+    "These people study gravity and infinite trees. "
+    "They have no special features, other than wearing a strange hat.",
+   
+  "Эти люди изучают гравитацию и бесконечные деревья. Они ничем не "
+  "отличаются от обычных людей, кроме этих странных шляп.")
+ 
+N("Sparrowhawk", GEN_M, "Ястреб", "Ястребы", "Ястреба", "Ястребом")
+ 
+S("A bird who hunts in the treetops of the Yendorian Forest.",
+  "Эта птица охотится в Йендорском лесу.")
+ 
+N("Apple", GEN_N, "Яблоко", "Яблоки", "Яблоко", "Яблоком")
+ 
+S("A fruit from the Yendorian Forest.", "Фрукт из Йендорского леса.")
+ 
+N("trunk", GEN_O, "пень", "пни", "пень", "пнём")
+ 
+S("The skeleton of a tree.", "Скелет дерева.")
+
+N("solid branch", GEN_F, "толстая ветка", "толстые ветки", "толстую ветку", "толстой веткой")
+ 
+S("Branches here could bear your weight easily.",
+  "Эти ветви легко выдержат ваш вес.")
+
+N("weak branch", GEN_F, "тонкая ветка", "тонкие ветки", "тонкую ветку", "тонкой веткой")
+ 
+S("Branches here will bear you weight, but if you use them to move (not fall) to an unstable place, they will break.",
+  "Эти ветви выдерживают ваш вес, но если из использовать, чтобы пойти (не упасть) на что-то неустойчивое, они сломаются.")
+
+N("canopy", GEN_F, "листва", "листва", "листву", "листвой")
+ 
+S(
+  "Only thin twigs and leaves here. They may bear fruits, but for you, these cells count as unstable.",
+  "Здесь лишь тонкие веточки и листья. Они могут выдержать фрукт, но не ваш вес.")
+ 
+ 
+// Dragon Chasm
+ 
+N("Dragon Chasms", GEN_F, "Драконья бездна", "Драконьи бездны", "Драконью бездну", "в Драконьей бездне")
+ 
+N("Dragon", GEN_M, "Дракон", "Драконы", "Дракона", "Драконом")
+ 
+N("Dragon Scale", GEN_F, "чешуя дракона", "чешуи дракона", "чешую дракона", "чешуёй дракона")
+ 
+S(
+    "Dragon Scales are a prized material for armors. "
+    "They are also prized by collectors, who would like to boast "
+    "about how they have killed a Dragon."
+    "\n\nDragon Scales disappear after 500 turns."
+    ,
+ 
+    "Чешуя дракона -- ценный материал для брони. "
+    "Также они ценятся коллекционерами, которые хотели бы похвастаться, "
+    "как они убили дракона."
+    "\n\nЧешуя дракона исчезнет через 500 ходов."
+    )
+ 
+S(
+    "Dragons are powerful monsters. They are slow, but evil, "
+    "and love to pick on creatures who are even slower than "
+    "them. They must be stopped!\n\n"
+ 
+    "A Dragon moves each two turns. It may attack with all its segments, "
+    "or move its whole body forwards or "
+    "backwards, it may also move a frontal part backwards. To kill a Dragon, "
+    "you need to hit each of its segments. "
+    "The head will regenerate on the "
+    "turns the Dragon is not moving, so you will usually have to hit it with "
+    "your last attack; otherwise, if the head is healthy, it may breathe "
+    "fire (at range 3), losing the hitpoint. Killing the Dragon "
+    "while still in the Dragon Chasms gives you treasure.",
+   
+    "Драконы -- очень сильные существа. Они медленные, но злые, и любят "
+    "издеваться над существами, которые ещё медленнее. "
+    "Остановите их!\n\n"
+ 
+    "Дракон движется каждый второй ход. Он может атаковать любой своей частью, "
+    "либо передвинуться вперёд или назад, либо передвинуть переднюю "
+    "часть назад. Чтобы убить дракона, нужно ударить каждую его часть. "
+    "Голова регенерирует каждый ход, когда дракон не движется, "
+    "так что обычно её придётся бить последней; если голова здорова, "
+    "дракон может дышать огнём (дальность 3), тратя одну жизнь. За убийство дракона "
+    "в Драконьей бездне вы получите награду."
+   )
+ 
+S("%The1 breathes fire at you!", "%1 дышит огнём на вас!")
+S("%The1 breathes fire!", "%1 дышит огнём!")
+ 
+Orb("Domination", "Доминации")
+ 
+S(
+    "This Orb lets you ride Dragons and other worm-like creatures. "
+   "Simply move onto such a creature to ride them; while riding, you are protected from dangerous terrains "
+   "and partially from attacks (they cause you to lose half of your Domination power), "
+   "but you cannot collect items. When only one charge is left, "
+   "you have to dismount this turn -- be very careful to make this possible, "
+   "as your mount could attack you immediately!\n\n" "While riding, "
+   "click on a location to order your mount to move or attack there.",
+   
+   "Эта сфера позволяет вас ездить на драконах и других червеобразных существах. "
+   "Просто пойди на клетку с таким монстром, чтобы оседлать его. "
+   "Пока ты едешь на существе, на тебя не действуют никакие опасные объекты "
+   "и, частично, атаки (от которых вы теряете половину силы "
+   "этой сферы), но вы не можете собирать предметы. Когда остаётся "
+   "только один заряд, вы должны слезть с существа -- будьте осторожны, "
+   "ведь оно может сразу же атаковать вас!\n\n"
+   "Нажимайте на клетки, чтобы заставить существо туда пойти или атаковать."
+   )
+ 
+S("You command %the1!", "Вы оседлали %a1!.")
+S("You need to dismount %the1!", "Вы должны слезть с %a1!")
+S("%The1 tries to dismount you!", "%1 пробует сбросить вас!")
+ 
+S("Enemies killed: %1 (%2 types)", "Существ убито: %1 (%2 типов)")
+S(" kills: %1/%2", " убийств: %1/%2")
+S("Different kills required: %1.\n", "Необходимо убить различных существ: %1.\n")
+ 
+// Galapagos
+ 
+N("Galápagos", GEN_M, "Галапагосы", "Галапагосы", "Галапагосы", "на Галапагосах")
+ 
+N("Baby Tortoise", GEN_F, "Черепашка", "Черепашки", "Черепашку", "Черепашкой")
+ 
+Orb("the Shell", "Панциря")
+ 
+S(
+    "This Orb protects you from physical attacks. "
+    "It lasts for more turns than the Orb of Shielding, but "
+    "10 charges are lost whenever you are attacked. "
+    "It also does not protect you from fires, scents, and being eaten.",
+   
+    "Эта сфера защищает вас от физических атак. "
+    "Она действует дольше, чем сфера Щита, но теряет"
+    "10 зарядов при каждой атаке. "
+    "Не защищает от огня, запаха и съедения.")
+ 
+S(
+  "Galápagos is the land of Tortoises. "
+  "They are very slow, which allows the Dragons to pick on them by "
+  "stealing and eating their young. Bring the Baby Tortoises back, "
+  "but, there is a catch: the Tortoises come in many varieties, depending "
+  "on the part of Galápagos they live in -- there are 21 binary environmental "
+  "factors, and thus "
+  "2097152 varieties. You'll have to find a "
+  "Tortoise which matches the baby exactly!\n\n"
+  "Tortoises move each 3 turns, and attacks only stun them.\n\n"
+  "Bringing back a Baby Tortoise counts as 5 $$$. The more factors agree in "
+  "the given location of Galápagos, the brighter it is shown on your screen.",
+ 
+  "Галапагосы -- край черепах. Черепахи очень медленны, что позволяет драконам издеваться над ними -- "
+  "красть и поедать их детей. Отведи черепашку на родину! Но есть "
+  "проблема: здесь есть много разновидностей черепах, зависящих от места проживания -- "
+  "есть 21 различных параметров, что даёт 2097152 вариантов. "
+  "Найдите черепаху, точно соответствующую этому малышу!\n\n"
+  "Черепахи движутся каждый третий ход. Атаки только оглушают их.\n\n"
+  "Каждый приведённый черепашонок считается за 5 $$$. Чем больше параметров "
+  "совпадают в данной местности, тем светлее она показывается.")
+ 
+S("%The1 scares %the2 a bit!", "%1 немного пугает %a2!")
+S("%The1 attacks your shell!", "%1 атакует вашу раковину!")
+ 
+S("Hyperstone Quest: collect at least 10 points in %the2",
+  "Миссия Гиперкамней: собери не меньше 10 очков %abl2")
+ 
+S("animals killed: %1", "животных убито: %1")
+S("\n\nTortoises are not monsters! They are just annoyed. They do not count for your total kills.",
+  "\n\nЧерепашки -- не монстры! Хоть и раздражают. Они не считаются в количестве убийств.")
+ 
+S("Aww, poor %1... where is your family?", "Ох, бедный %1... Где его семья?")
+S("You are now a tortoise hero!", "Теперь вы -- черепаший герой!")
+S("Find a %1 in %the2.", "Найди %a1 %abl2.")
+ 
+/*
+        "NEW_ACHIEVEMENT_6_27_NAME" "Убийца драконов"
+        "NEW_ACHIEVEMENT_6_27_DESC" "Соберите Чешую дракона."
+        "NEW_ACHIEVEMENT_6_28_NAME" "Лорд Драконов"
+        "NEW_ACHIEVEMENT_6_28_DESC" "Соберите 10 Чешуй драконов."
+        "NEW_ACHIEVEMENT_6_29_NAME" "Принц Драконов"
+        "NEW_ACHIEVEMENT_6_29_DESC" "Соберите 25 Чешую драконов."
+        "NEW_ACHIEVEMENT_6_30_NAME" "Король Драконов"
+        "NEW_ACHIEVEMENT_6_30_DESC" "Соберите 50 Чешуй драконов."
+        "NEW_ACHIEVEMENT_6_31_NAME" "Черепаший герой"
+        "NEW_ACHIEVEMENT_6_31_DESC" "Спасите двух Черепашек."
+        "NEW_ACHIEVEMENT_7_0_NAME"  "Черепаший чемпион"
+        "NEW_ACHIEVEMENT_7_0_DESC"  "Спасите пять Черепашек."
+        "NEW_ACHIEVEMENT_7_1_NAME"  "Черепаший ниндзя"
+        "NEW_ACHIEVEMENT_7_1_DESC"  "Спасите 10 Черепашек."
+        "NEW_ACHIEVEMENT_7_2_NAME"  "Открыть Йендорский лес"
+        "NEW_ACHIEVEMENT_7_2_DESC"  "Найдите и соберите Яблоко."
+        "NEW_ACHIEVEMENT_7_3_NAME"  "Исследователь Йендора"
+        "NEW_ACHIEVEMENT_7_3_DESC"  "Соберите 10 яблок."
+        "NEW_ACHIEVEMENT_7_4_NAME"  "Ястреб"
+        "NEW_ACHIEVEMENT_7_4_DESC"  "Соберите 25 яблок."
+        "NEW_ACHIEVEMENT_7_5_NAME"  "Мастер Йендора"
+        "NEW_ACHIEVEMENT_7_5_DESC"  "Соберите 50 яблок."
+*/
+
+S("(includes co-op)", "(включая совместный режим)")
+S("Revived!", "Воскрешено!")
+S("turn count = %1 last exploration = %2 ghost timer = %3", "количество ходов = %1, последнее исследование = %2, отсчёт времени призраков = %3")
+S("You hear a distant roar!", "Вы слышите далёкий рёв!")
+
+S("summon Bonfire", "призвать Костры")
+S("Hyperstone Quest", "Миссия Гиперкамней")
+S("summon dead orbs", "призвать мёртвые сферы")
+S("summon a Monster", "призвать монстра")
+S("gain orb powers", "получить силу сфер")
+S("summon a Golem", "призвать Голема")
+S("summon Thumpers", "призвать Тамперы")
+S("summon Ivy", "призвать Плющ")
+S("lose all treasure", "потерять все сокровища")
+S("gain kills", "получить убийства")
+S("Select the land ---", "Выбрать землю ---")
+S("summon Mimics", "призвать двойников")
+S("summon orbs", "призвать сферы")
+S("deplete orb powers", "потерять силы сфер")
+S("Safety (quick save)", "Сохраниться")
+S("summon treasure", "призвать сокровища")
+S("summon lots of treasure", "призвать много сокровищ")
+S("--- and teleport there", "--- и телепортироваться туда")
+S("summon Sand Worm", "призвать Песчаного червя")
+S("summon Orb of Yendor", "призвать сферы Йендора")
+S("rotate the character", "повернуться")
+
+S("gain Orb of Yendor", "получить сферу Йендора")
+S("switch ghost timer", "переключить таймер призраков")
+S("switch web display", "переключить отображение сетки")
+S("You damage %the1 with a mental blast!", "Вы атаковали %a1 энергией мысли!")
+S("You are now a tortoise heroine!", "Теперь вы -- черепашья героиня!")
+S("Note: currently scores are saved only in the normal mode on Android",
+  "Важно: на Андроиде счёт записывается только в обычном режиме")
+S("Note: you can play, but scores won't be saved on Android",
+  "Важно: вы можете играть, но счёт не будет сохранён")
+S("settings set here won't be saved", "установленные настройки не будут сохранены")
+S("-- use the Android menu instead", "используйте меню Андроида")
+
+
+#undef Orb

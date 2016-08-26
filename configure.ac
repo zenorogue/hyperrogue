@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.68])
-AC_INIT([hyperrogue], [7.4h])
+AC_INIT([hyperrogue], [8.3j])
 AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 ${CXXFLAGS=""}
 AC_CONFIG_SRCDIR([hyperpoint.cpp])
@@ -43,7 +43,7 @@ AC_CHECK_HEADERS([SDL/SDL_mixer.h], [], AC_MSG_ERROR([SDL/SDL_mixer.h header was
 AC_CHECK_HEADERS([SDL/SDL_ttf.h], [], AS_IF( test ["${host_os#*mingw}" != "$host_os"], [] ,AC_MSG_ERROR([SDL/SDL_ttf.h header was not found])))
 
 # Checks for typedefs, structures, and compiler characteristics.
-AC_CHECK_HEADER_STDBOOL
+# AC_CHECK_HEADER_STDBOOL
 AC_C_INLINE
 AC_TYPE_SIZE_T
 

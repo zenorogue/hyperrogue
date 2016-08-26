@@ -1,3 +1,7 @@
+// HyperRogue patterns
+
+// Copyright (C) 2011-2016 Zeno Rogue, see 'hyper.cpp' for details
+
 // === EMERALD PATTERN ===
 
 // rules for the emeraldvalues of heptagons.

@@ -1,7 +1,15 @@
+// Hyperbolic Rogue
+
+// Copyright (C) 2011-2016 Zeno Rogue, see 'hyper.cpp' for details
+
+// implementation of the shoot'em up mode
+
 #include <map>
 
 const char *lastprofile = "";
 int lt = 0;
+
+#define MAXPLAYER 4
 
 #ifndef MOBILE
 void profile(const char *buf) {
@@ -11,11 +19,17 @@ void profile(const char *buf) {
   lastprofile = buf;
   }
 #endif
-                                                                             
+
+#define SCALE (crossf/hcrossf)
+#define SCALE2 (SCALE*SCALE)
+
 bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, int col);
-void drawPlayerEffects(const transmatrix& V, cell *c);
+void drawPlayerEffects(const transmatrix& V, cell *c, bool onPlayer);
 
 namespace shmup {
+
+eItem targetRangedOrbKey(orbAction a);
+eItem keyresult[4];
 
 long double fabsl(long double x) { return x>0?x:-x; }
 
@@ -23,14 +37,15 @@ enum pcmds {
   pcForward, pcBackward, pcTurnLeft, pcTurnRight,
   pcMoveUp, pcMoveRight, pcMoveDown, pcMoveLeft,
   pcFire, pcFace, pcFaceFire,
-  pcDrop, pcCenter, pcOrbPower
+  pcDrop, pcCenter, pcOrbPower, pcOrbKey
   };
   
-const char* playercmds[14] = {
+const char* playercmds[15] = {
   "forward", "backward", "turn left", "turn right",
   "move up", "move right", "move down", "move left", 
   "throw a knife", "face the pointer", "throw at the pointer", 
-  "drop Dead Orb", "center the map on me", "activate Orb power"
+  "drop Dead Orb", "center the map on me", "Orb power (target: mouse)",
+  "Orb power (target: facing)"
   };
 
 const char* pancmds[7] = {
@@ -38,7 +53,7 @@ const char* pancmds[7] = {
   "rotate left", "rotate right", "home"
   };
 
-#define SHMUPAXES 12
+#define SHMUPAXES 20
 
 const char* axemodes[SHMUPAXES] = { 
   "do nothing", 
@@ -52,11 +67,20 @@ const char* axemodes[SHMUPAXES] = {
   "player 2 X", 
   "player 2 Y", 
   "player 2 go", 
-  "player 2 spin"
+  "player 2 spin",
+  "player 3 X", 
+  "player 3 Y", 
+  "player 3 go", 
+  "player 3 spin",
+  "player 4 X", 
+  "player 4 Y", 
+  "player 4 go", 
+  "player 4 spin"
   };
 
 int players;
 int cpid; // player id -- an extra parameter for player-related functions
+int cpid_edit; // cpid currently being edited
 int centerplayer = -1;
 
 bool on = false, safety = false;
@@ -94,6 +118,7 @@ cell *findbaseAround(hyperpoint p, cell *around) {
 struct monster {
   eMonster type;
   cell *base;
+  cell *origin; // for tortoises
   transmatrix at;
   transmatrix pat;
   eMonster stk;
@@ -156,7 +181,7 @@ struct monster {
       // queuepoly(nat, shKnife, 0xFFFFFFC0);
 
       cell *c2 = findbaseAround(nat*C0, c);
-      if(c2 != c && !passable_for(type, c2, c, false)) {
+      if(c2 != c && !passable_for(type, c2, c, P_CHAIN | P_ONPLAYER)) {
         return false;
         }
       c = c2;
@@ -187,7 +212,7 @@ struct monster {
         if(0) printf("new dist: %lf\n", (double) intval(nat*C0, gmatrix[c2]*C0));
         }
       queuepoly(gmatrix[c2], shKnife, 0xFF0000FF);
-      if(c2 != c && !passable_for(type, c2, c, false))
+      if(c2 != c && !passable_for(type, c2, c, P_CHAIN))
         return false;
       c = c2;
       }
@@ -200,24 +225,25 @@ struct monster {
 
   };
 
-monster *pc[2], *mousetarget;
+monster *pc[MAXPLAYER], *mousetarget;
 
-int curtime, nextmove, invisible_at;
+int curtime, nextmove, nextdragon;
 
 bool isBullet(monster *m) { 
-  return 
-    m->type == moBullet || m->type == moFlailBullet || 
-    m->type == moFireball || m->type == moTongue || m->type == moAirball; 
+  return isBulletType(m->type);
   }
 bool isPlayer(monster *m) { return m->type == moPlayer; }
 bool isMonster(monster *m) { return m->type != moPlayer && m->type != moBullet; }
 
 void killMonster(monster* m) {
+#ifdef LOCAL
+  if(localKill(m)) return;
+#endif
   if(m->dead) return;
   m->dead = true;
   if(isBullet(m) || isPlayer(m)) return;
   m->stk = m->base->monst;
-  if(m->inBoat && isWatery(m->base) && !m->base->item) {
+  if(m->inBoat && isWatery(m->base)) {
     m->base->wall = waBoat;
     m->base->mondir = 0;
     m->inBoat = false;
@@ -280,7 +306,8 @@ void awakenMimics(monster *m, cell *c2) {
     if(isMimic(c->monst)) {
       // straight
       int i = 0;
-      if(m->type == moMirror) i++;
+      
+      // if(m->type == moMirror) i++;
       if(c->monst == moMirror) i++;
       
       transmatrix mirrortrans = Id;    
@@ -291,6 +318,19 @@ void awakenMimics(monster *m, cell *c2) {
       m2->type = c->monst;
       c->monst = moNone;
       m2->base = c;
+      
+      if(isBullet(m)) {
+        m2->parenttype = m2->type;
+        m2->type = m->type;
+        m2->vel = m->vel;
+        m2->parent = m->parent;
+        m2->pid = m->pid;
+        }
+      
+      if(m->type == moMirror) {
+        if(m2->type == moMirror) m2->type = moMirage;
+        else if(m2->type == moMirage) m2->type = moMirror;
+        }
       
       hyperpoint H = inverse(gmatrix[c2]) * gmatrix[c] * C0;
       
@@ -305,6 +345,9 @@ void awakenMimics(monster *m, cell *c2) {
         
       m2->at = inverse(gmatrix[c]) * m2->pat * mirrortrans;
       m2->pid = cpid;
+      
+      if(isBullet(m) && i == 1) m2->at = m2->at * spin(M_PI); // no idea why this
+      
       active.push_back(m2);
 
       // if you don't understand it, don't worry,
@@ -366,7 +409,13 @@ void killThePlayer(eMonster m) {
   pc[cpid]->dead = true;
   }
 
-#ifndef MOBILE
+monster *playerCrash(monster *who, hyperpoint where) {
+  for(int j=0; j<players; j++) if(pc[j]!=who) {
+    double d = intval(pc[j]->pat*C0, where);
+    if(d < 0.1 * SCALE2 || d > 100) return pc[j];
+    }
+  return NULL;
+  }
 
 void oceanCurrents(transmatrix& nat, monster *m, int delta) {
   cell *c = m->base;
@@ -378,9 +427,9 @@ void oceanCurrents(transmatrix& nat, monster *m, int delta) {
       double spd = 0;
       
       if(celldistAlt(c2) < celldistAlt(c)) 
-        spd = delta / 3000.;
-      else if(c2 == getWhirlpool(c, 1))
-        spd = delta / 900.;
+        spd = SCALE * delta / 3000.;
+      else if(c2 == whirlpool::get(c, 1))
+        spd = SCALE * delta / 900.;
         
       if(spd) {
         transmatrix goal = gmatrix[c2];
@@ -396,10 +445,69 @@ void oceanCurrents(transmatrix& nat, monster *m, int delta) {
     }
   }
 
-int actionspressed[64], axespressed[SHMUPAXES], lactionpressed[64];
+void airCurrents(transmatrix& nat, monster *m, int delta) {
+  cell *c = m->base;
+  if(c->land == laWhirlwind) {
+    whirlwind::calcdirs(c);
+    for(int i=0; i<whirlwind::qdirs; i++) {
+      cell *c2 = c->mov[whirlwind::dto[i]];
+      if(!c2 || !gmatrix.count(c2)) continue;
+      
+      double spd = SCALE * delta / 900.;
+        
+      if(spd) {
+        transmatrix goal = gmatrix[c2];
+
+        // transmatrix t = spintox(H) * xpush(delta/300.) * rspintox(H);
+
+        hyperpoint H = inverse(m->pat) * goal * C0;
+        nat = nat * rspintox(H);
+        nat = nat * xpush(spd);
+        nat = nat * spintox(H);
+        }
+      }
+    }
+  }
+
+void roseCurrents(transmatrix& nat, monster *m, int delta) {
+  if(ignoresSmell(m->type)) return;
+  cell *c = m->base;
+  
+  int qty = 0;
+
+  for(int i=0; i<c->type; i++) {
+    cell *c2 = c->mov[i];
+    if(c2 && rosedist(c2) == 2) qty++;
+    }
+  
+  for(int i=0; i<c->type; i++) {
+    cell *c2 = c->mov[i];
+    if(!c2 || !gmatrix.count(c2)) continue;
+    if(rosedist(c2) != 2) continue;
+    
+    double spd = SCALE * delta / 300. / qty;
+        
+    if(spd) {
+      transmatrix goal = gmatrix[c2];
+
+      // transmatrix t = spintox(H) * xpush(delta/300.) * rspintox(H);
+
+      hyperpoint H = inverse(m->pat) * goal * C0;
+      nat = nat * rspintox(H);
+      nat = nat * xpush(spd);
+      nat = nat * spintox(H);
+      }
+    }
+  }
+
+#ifndef MOBILE
+
+#define NUMACT 128
+
+int actionspressed[NUMACT], axespressed[SHMUPAXES], lactionpressed[NUMACT];
 
 void pressaction(int id) {
-  if(id >= 0 && id < 64)
+  if(id >= 0 && id < NUMACT)
     actionspressed[id]++;
   }
 
@@ -408,7 +516,7 @@ void handleInput(int delta) {
 
   Uint8 *keystate = SDL_GetKeyState(NULL);
 
-  for(int i=0; i<64; i++) 
+  for(int i=0; i<NUMACT; i++) 
     lactionpressed[i] = actionspressed[i],
     actionspressed[i] = 0;
 
@@ -442,7 +550,7 @@ void handleInput(int delta) {
   double panx = 
     actionspressed[49] - actionspressed[51] + axespressed[2] / 32000.0;
   double pany = 
-    actionspressed[48] - actionspressed[50] + axespressed[3] / 20000.0;
+    actionspressed[50] - actionspressed[48] + axespressed[3] / 20000.0;
     
   double panspin = actionspressed[52] - actionspressed[53] + axespressed[1] / 20000.0;
   
@@ -453,20 +561,33 @@ void handleInput(int delta) {
     playermoved = false;
     }
   }
-        
+
+hyperpoint keytarget(int i) {
+  double d = 2 + sin(curtime / 350.);
+  return pc[i]->pat * xpush(d) * C0;
+  }
+
+int tableid[4] = {1, 2, 4, 5};
+
+/* int charidof(int pid) {
+  if(players == 1) return bak_charid;
+  if(players == 2 || players == 4) return pid;
+  if(players == 3) return pid < 2 ? pid : 2+(bak_charid&1);
+  return 0;
+  } */
+
 void movePlayer(monster *m, int delta) {
   
   cpid = m->pid;
-  if(players > 1) vid.female = (cpid == 1);
   
   double mturn = 0, mgo = 0, mdx = 0, mdy = 0;
   
   bool shotkey = false, facemouse = false, dropgreen = false;
   
-  int b = 16*(cpid+1);
+  int b = 16*tableid[cpid];
     for(int i=0; i<8; i++) if(actionspressed[b+i]) playermoved = true;
   
-  int jb = 4*(cpid+1);
+  int jb = 4*tableid[cpid];
   for(int i=0; i<4; i++) if(axespressed[jb+i]) playermoved = true;
   
   mgo = actionspressed[b+pcForward] - actionspressed[b+pcBackward] + axespressed[jb+2]/30000.;
@@ -483,14 +604,21 @@ void movePlayer(monster *m, int delta) {
     targetRangedOrb(mouseover, roKeyboard);
     }
     
+  if(haveRangedOrb()) {
+    cwt.c = m->base;
+    if(actionspressed[b+pcOrbKey] && !lactionpressed[b+pcOrbKey])
+      keyresult[cpid] = targetRangedOrbKey(roKeyboard);
+    else
+      keyresult[cpid] = targetRangedOrbKey(roCheck);
+    }
+  else
+    keyresult[cpid] = itNone;
+    
   if(actionspressed[b+pcCenter]) {
     centerplayer = cpid; centerpc(100); playermoved = true; 
     }
   
   transmatrix nat = m->pat;
-  
-  if(m->base->land == laWhirlpool && !markOrb(itOrbWater)) 
-    oceanCurrents(nat, m, delta);
   
   // if(ka == b+pcOrbPower) dropgreen = true;
   
@@ -524,18 +652,27 @@ void movePlayer(monster *m, int delta) {
   if(playerturn[cpid] && canmove && !blown) nat = nat * spin(playerturn[cpid]);
   transmatrix nat0 = nat;
   
+  if(m->base->land == laWhirlpool && !markOrb(itOrbWater))
+    oceanCurrents(nat, m, delta);
+    
+  if(m->base->land == laWhirlwind)
+    airCurrents(nat, m, delta);
+    
+  if(rosedist(m->base) == 1)
+    roseCurrents(nat, m, delta);
+    
   if(mgo > 1) mgo = 1;
   if(mgo < -1) mgo = -1;
   if(!canmove) mgo = 0;
   
-  playergo[cpid] = mgo * delta / 600;
+  playergo[cpid] = mgo * SCALE * delta / 600;
   
   bool go = false; 
   
   cell *c2 = m->base;
   
   if(blown) {
-    playergo[cpid] = -delta / 1000.;
+    playergo[cpid] = -SCALE * delta / 1000.;
     playerturn[cpid] = 0;
     }
 
@@ -550,7 +687,7 @@ void movePlayer(monster *m, int delta) {
       M_PI/2.1, -M_PI/2.1
       };
 
-    if(playergo[cpid]) nat = nat0 * spin(span[igo]) * xpush(playergo[cpid]) * spin(-span[igo]);
+    if(playergo[cpid]) nat = nat * spin(span[igo]) * xpush(playergo[cpid]) * spin(-span[igo]);
 
     // spin(span[igo]) * xpush(playergo[cpid]) * spin(-span[igo]);
   
@@ -558,21 +695,17 @@ void movePlayer(monster *m, int delta) {
     
     // don't have several players in one spot
     // also don't let them run too far from each other!
-    monster* crashintomon = NULL;  
-    for(int j=0; j<players; j++) if(pc[j]!=m) {
-      double d = intval(pc[j]->pat*C0, nat*C0);
-      if(d < 0.1 || d > 100) crashintomon = pc[j];
-      }
+    monster* crashintomon = playerCrash(m, nat*C0);
     if(crashintomon) go = false;
   
     if(go && c2 != m->base) {
 
-      if(c2->wall == waLake && markOrb(itOrbWinter)) {
+      if(c2->wall == waLake && markOrb(itOrbWinter) && !nonAdjacent(c2, m->base)) {
         c2->wall = waFrozenLake;
         if(HEAT(c2) > .5) HEAT(c2) = .5;
         }
   
-      else if(c2->wall == waBigStatue && canPushStatueOn(m->base)) {
+      else if(c2->wall == waBigStatue && canPushStatueOn(m->base) && !nonAdjacent(c2, m->base)) {
         visibleFor(300);
         c2->wall = m->base->wall;
         if(cellUnstable(cwt.c))
@@ -580,7 +713,7 @@ void movePlayer(monster *m, int delta) {
         else
           m->base->wall = waBigStatue;
         }
-      else if(m->inBoat && !isWateryOrBoat(c2) && player_passable(c2, m->base, false)) {
+      else if(m->inBoat && !isWateryOrBoat(c2) && passable(c2, m->base, P_ISPLAYER | P_MIRROR)) {
         if(boatGoesThrough(c2) && markOrb(itOrbWater)) {
           c2->wall = isIcyLand(m->base) ? waLake : waSea;
           }
@@ -594,10 +727,11 @@ void movePlayer(monster *m, int delta) {
           m->inBoat = false;
           }
         }
-      else if(c2->wall == waThumperOn) {
+      else if(c2->wall == waThumperOn && !nonAdjacent(c2, m->base)) {
         int sd = dirfromto(c2, m->base);
         int subdir = 1;
         double bestd = 9999;
+        pushmonsters();
         for(int di=-1; di<2; di+=2) {
           cell *c = getMovR(c2, sd+di);
           if(!c) continue;
@@ -618,8 +752,15 @@ void movePlayer(monster *m, int delta) {
           go = false;
           }
         else pushThumper(c2, push.c);
+        popmonsters();
         }
-      else if((blown ? !blowable(c2, m->base) : !player_passable(c2, m->base, false)) && !(isWatery(c2) && m->inBoat))
+      else if(c2->wall == waRose && !nonAdjacent(m->base, c2)) {
+        m->dead = true;
+        go = false;
+        }
+      else if(
+        (blown ? !passable(c2, m->base, P_ISPLAYER | P_BLOW) : !passable(c2, m->base, P_ISPLAYER | P_MIRROR)) && 
+        !(isWatery(c2) && m->inBoat && !nonAdjacent(m->base,c2)))
         go = false;
       
       }
@@ -651,18 +792,18 @@ void movePlayer(monster *m, int delta) {
         roundTableMessage(c2);
       if(c2->wall == waCloud) {
         visibleFor(500);
-        createMirages(c2, 0, moMirage);
+        mirror::createMirages(c2, 0, moMirage);
         awakenMimics(m, c2);
         c2->wall = waNone;
-        items[itShard]++;
+        if(c2->land == laMirror) items[itShard]++;
         }
       if(c2->wall == waMirror) {
         visibleFor(500);
         cwt.c = c2;
-        createMirrors(c2, 0, moMirage);
+        mirror::createMirrors(c2, 0, moMirage);
         awakenMimics(m, c2);
         c2->wall = waNone;
-        items[itShard]++;
+        if(c2->land == laMirror) items[itShard]++;
         }
       if(c2->wall == waGlass && items[itOrbGhost]) {
         items[itOrbGhost] = 0;
@@ -674,7 +815,6 @@ void movePlayer(monster *m, int delta) {
       
       if(!nomine) {
         uncoverMines(c2,
-          items[itBombEgg] < 10 ? 0 :
           items[itBombEgg] < 20 ? 1 :
           items[itBombEgg] < 30 ? 2 :
           3
@@ -685,11 +825,16 @@ void movePlayer(monster *m, int delta) {
           }
         explodeMine(c2);
         }
+      
+      if(isWatery(c2) && isWatery(m->base) && m->inBoat)
+        moveItem(m->base, c2, true);
   
+      destroyWeakBranch(m->base, c2);
+
       if(c2->wall == waClosePlate || c2->wall == waOpenPlate)
         toggleGates(c2, c2->wall, 3);
   
-      if(c2->item == itOrbYendor && !checkYendor(c2, false)) 
+      if(c2->item == itOrbYendor && !yendor::check(c2, false)) 
         ;
       else collectItem(c2);
       }
@@ -763,21 +908,21 @@ void moveMimic(monster *m) {
   nat = nat * spin(playerturn[cpid]) * xpush(playergo[cpid]);
 
   cell *c2 = m->findbase(nat*C0);  
-  if(c2 != m->base && !player_passable(c2, m->base, false))
-    m->dead = true;
+  if(c2 != m->base && !passable(c2, m->base, P_ISPLAYER | P_MIRROR))
+    killMonster(m);
   else {
     m->rebasePat(nat);
     if(playerfire[cpid]) shootBullet(m);
     }  
 
   if(c2->wall == waCloud) {
-    createMirages(c2, 0, m->type);
+    mirror::createMirages(c2, 0, moMirage);
     awakenMimics(m, c2);
     c2->wall = waNone;
     }
 
   if(c2->wall == waMirror) {
-    createMirrors(c2, 0, m->type);
+    mirror::createMirrors(c2, 0, moMirage);
     awakenMimics(m, c2);
     c2->wall = waNone;
     }
@@ -794,13 +939,12 @@ monster *parentOrSelf(monster *m) {
   return m->parent ? m->parent : m;
   }
 
-bool bulletpassable(cell *c, cell *from) {
-  if(c != from && thruVine(c, from)) return false;
-  return eaglepassable(c, from) || c->wall == waRoundTable || 
-    isFire(c) || c->wall == waBonfireOff || 
-    cellHalfvine(c) || c->wall == waAncientGrave || c->wall == waFreshGrave;
+bool verifyTeleport() {
+  if(!on) return true;
+  if(playerCrash(pc[cpid], mouseh)) return false;
+  return true;
   }
-  
+
 void teleported() {
   monster *m = pc[cpid];
   m->base = cwt.c;
@@ -823,18 +967,60 @@ void shoot(eItem it, monster *m) {
   active.push_back(bullet);
   }
 
+#ifndef MOBILE
+eItem targetRangedOrbKey(orbAction a) {
+  hyperpoint h = mouseh;
+  cell *b = mouseover;
+  monster *mt = mousetarget;
+
+  mouseh = keytarget(cpid);
+  
+  mouseover = pc[cpid]->base;
+  
+  while(true) {
+    cell *c2 = findbaseAround(mouseh, mouseover);
+    if(c2 == mouseover) break;
+    mouseover = c2;
+    }
+  mousetarget = NULL;
+
+  for(int j=0; j<size(active); j++) {
+    monster* m2 = active[j];
+    if(m2->dead) continue;
+    if(!mousetarget || intval(mouseh, mousetarget->pat*C0) > intval(mouseh, m2->pat*C0))
+      mousetarget = m2;
+    }
+
+  eItem r = targetRangedOrb(mouseover, a);
+  // printf("A%d i %d h %p t %p ov %s => %s\n", a, cpid, mouseover, mousetarget, display(mouseh), dnameof(r));
+  
+  mouseh = h;
+  mousetarget = mt;
+  mouseover = b;
+  return r;
+  }
+#endif
+
 eItem targetRangedOrb(orbAction a) {
   if(!on) return itNone;
   monster *wpc = pc[cpid];
   if(a != roCheck && !wpc) return itNone;  
   
-  if(items[itOrbPsi] && shmup::mousetarget && intval(mouseh, shmup::mousetarget->pat*C0) < .1) {
+  if(items[itOrbPsi] && shmup::mousetarget && intval(mouseh, shmup::mousetarget->pat*C0) < SCALE2 * .1) {
     if(a == roCheck) return itOrbPsi;
     addMessage(XLAT("You kill %the1 with a mental blast!", mousetarget->type));
     killMonster(mousetarget);
     items[itOrbPsi] -= 30;
     if(items[itOrbPsi]<0) items[itOrbPsi] = 0;
     return itOrbPsi;
+    }
+  
+  if(items[itOrbStunning] && shmup::mousetarget && intval(mouseh, shmup::mousetarget->pat*C0) < SCALE2 * .1) {
+    if(a == roCheck) return itOrbStunning;
+    mousetarget->stunoff = curtime + 1000;
+    items[itOrbStunning] -= 10;
+    if(items[itOrbStunning]<0) items[itOrbStunning] = 0;
+    return itOrbStunning;
     }
   
   if(on && items[itOrbDragon]) {
@@ -858,13 +1044,17 @@ eItem targetRangedOrb(orbAction a) {
   return itNone;
   }
 
+int speedfactor() {
+  return items[itOrbSpeed]?2:1;
+  }
+
 void moveBullet(monster *m, int delta) {
-  vid.female = (m->pid == 1);
+  cpid = m->pid;
   m->findpat();
   transmatrix nat0 = m->pat;
   transmatrix nat = m->pat;
   if(m->type == moFlailBullet) {
-    m->vel -= delta / 600000.0;
+    m->vel -= delta  / speedfactor() / 600000.0;
     if(m->vel < 0 && m->parent) {
       // return to the flailer!
       nat = nat * rspintox(inverse(m->pat) * m->parent->pat * C0) * spin(M_PI);
@@ -878,28 +1068,40 @@ void moveBullet(monster *m, int delta) {
     m->vel = 1/200.;
   else if(m->type == moTongue) {
     m->vel = 1/1500.;
-    if(!m->parent || intval(nat*C0, m->parent->pat*C0) > 0.4)
+    if(!m->parent || intval(nat*C0, m->parent->pat*C0) > SCALE2 * 0.4)
       m->dead = true;
     }
-  nat = nat * xpush(delta * m->vel);
+  nat = nat * xpush(delta * SCALE * m->vel / speedfactor());
   cell *c2 = m->findbase(nat*C0);
 
   if(isActivable(c2)) activateActiv(c2, true);
   
   // knives break mirrors and clouds
-  if(c2->wall == waCloud || c2->wall == waMirror)
+  if(c2->wall == waCloud) {
+    mirror::createMirages(c2, 0, moMirage);
+    awakenMimics(m, c2);
     c2->wall = waNone;
+    }
+
+  if(c2->wall == waMirror) {
+    cwt.c = c2;
+    mirror::createMirrors(c2, 0, moMirage);
+    awakenMimics(m, c2);
+    c2->wall = waNone;
+    }
   
-  if(m->type != moTongue && !bulletpassable(c2, m->base)) {
+  bool godragon = m->type == moFireball && isDragon(c2->monst);
+  
+  if(m->type != moTongue && !(godragon || passable(c2, m->base, P_BULLET))) {
     m->dead = true;
     if(m->type != moAirball) killMonster(c2);
     // cell *c = m->base;
     if(m->parent && isPlayer(m->parent)) {
-      if(c2->wall == waDryTree) {
+      if(c2->wall == waBigTree) {
         addMessage(XLAT("You start cutting down the tree."));
-        c2->wall = waWetTree;
+        c2->wall = waSmallTree;
         }
-      else if(c2->wall == waWetTree) {
+      else if(c2->wall == waSmallTree) {
         addMessage(XLAT("You cut down the tree."));
         c2->wall = waNone;
         }
@@ -934,7 +1136,7 @@ void moveBullet(monster *m, int delta) {
     if(m->type == moAirball && m2->type == moAirball) continue;
     double d = intval(m2->pat*C0, m->pat*C0);
     
-    if(d < 0.1) {
+    if(d < SCALE2 * 0.1) {
       if(m->type == moAirball && isBlowableMonster(m2->type)) {
 
         if(m2->blowoff < curtime)
@@ -949,21 +1151,31 @@ void moveBullet(monster *m, int delta) {
         }
       // 
       if((m2->type == moPalace || m2->type == moFatGuard || m2->type == moSkeleton ||
-        m2->type == moVizier) && m2->hitpoints > 1) {
+        m2->type == moVizier || isMetalBeast(m2->type) || m2->type == moTortoise) && m2->hitpoints > 1) {
         m2->rebasePat(m2->pat * rspintox(inverse(m2->pat) * nat0 * C0));
-        if(m2->type != moSkeleton) m2->hitpoints--;
+        if(m2->type != moSkeleton && !isMetalBeast(m2->type)) 
+          m2->hitpoints--;
         m->dead = true;
         if(m2->type == moVizier) ;
         else if(m2->type == moFatGuard)
           m2->stunoff = curtime + 600;
+        else if(m2->type == moMetalBeast || m2->type == moMetalBeast2)
+          m2->stunoff = curtime + 3000;
+        else if(m2->type == moTortoise)
+          m2->stunoff = curtime + 3000;
         else if(m2->type == moSkeleton && m2->base->land != laPalace)
           m2->stunoff = curtime + 2100;
         else
           m2->stunoff = curtime + 900;
         continue;
         }
-      // Greater Demons not killable
-      if(m2->type == moGreater) {
+      // Greater Demons not killable conventionally
+      if(m2->type == moGreater && (m->type == moBullet || m->type == moFlailBullet || m->type == moTongue)) {
+        m->dead = true;
+        continue;
+        }
+      // Rose Beauties not killable conventionally
+      if(m2->type == moRoseBeauty && (m->type == moBullet || m->type == moFlailBullet || m->type == moTongue)) {
         m->dead = true;
         continue;
         }
@@ -992,14 +1204,27 @@ bool closer(monster *m1, monster *m2) {
   return intval(m1->pat*C0,  closerTo) < intval(m2->pat*C0, closerTo);
   }
 
+bool dragonbreath(cell *dragon) {
+  monster* bullet = new monster;
+  bullet->base = dragon;
+  bullet->at = rspintox(inverse(gmatrix[dragon]) * pc[hrand(numplayers())]->pat * C0);
+  bullet->type = moFireball;
+  bullet->parent = bullet;
+  active.push_back(bullet);
+  return true;
+  }
+
 void moveMonster(monster *m, int delta) {
 
-  bool stunned = (isStunnable(m->type) && m->stunoff > curtime) || m->blowoff > curtime;
+  bool stunned = m->stunoff > curtime || m->blowoff > curtime;
   
   if(stunned && cellUnstable(m->base))
     m->base->wall = waChasm;
   
   if(m->base->wall == waChasm && !survivesChasm(m->type))
+    killMonster(m);
+
+  if(m->base->wall == waRose && !survivesThorns(m->type))
     killMonster(m);
 
   if(isWatery(m->base) && !survivesWater(m->type) && !m->inBoat)
@@ -1019,7 +1244,7 @@ void moveMonster(monster *m, int delta) {
   
   bool direct = false;
   
-  double step = delta/1000.0;
+  double step = SCALE * delta/1000.0;
   if(m->type == moWitchSpeed)
     step *= 2;
   else if(m->type == moEagle)
@@ -1031,25 +1256,29 @@ void moveMonster(monster *m, int delta) {
     if(m->type == moGreaterM) m->type = moGreater;
     step /= 2;
     }
-  
+  else if(m->type == moMetalBeast || m->type == moMetalBeast2) 
+    step /= 2;
+  else if(m->type == moTortoise)
+    step /= 3;
+
   transmatrix nat = m->pat;
 
   if(stunned) {
     if(m->blowoff > curtime) {
-      step = -delta / 1000.;
+      step = SCALE * -delta / 1000.;
       }
-    else if(m->type == moFatGuard)
+    else if(m->type == moFatGuard || m->type == moTortoise)
       step = 0;
-    else step = -delta/2000.;
+    else step = SCALE * -delta/2000.;
     }
 
   else {
     
     if(m->type == moWitchFlash) for(int pid=0; pid<players; pid++) {
-      bool okay = intval(pc[pid]->pat*C0, m->pat*C0) < 2;
+      bool okay = intval(pc[pid]->pat*C0, m->pat*C0) < 2 * SCALE2;
       for(int i=0; i<size(active); i++) {
         monster *m2 = active[i];
-        if(m2 != m && isWitch(m2->type) && intval(m2->pat*C0, m->pat*C0) < 2)
+        if(m2 != m && isWitch(m2->type) && intval(m2->pat*C0, m->pat*C0) < 2 * SCALE2)
           okay = false;
         }
       if(okay) {
@@ -1084,8 +1313,7 @@ void moveMonster(monster *m, int delta) {
       cell *cnext = c;
       for(int i=0; i<c->type; i++) {
         cell *c2 = c->mov[i];
-        if(c2 && gmatrix.count(c2) && HEAT(c2) > HEAT(c) && isIcyLand(c2) &&
-          passable(c2, c, false, false, false))
+        if(c2 && gmatrix.count(c2) && HEAT(c2) > HEAT(c) && isIcyLand(c2) && passable(c2, c, 0))
           cnext = c2;
         }
       goal = gmatrix[cnext];
@@ -1107,7 +1335,7 @@ void moveMonster(monster *m, int delta) {
       for(int i=0; i<c->type; i++) {
         cell *c2 = c->mov[i];
         if(c2 && gmatrix.count(c2) && c2->pathdist < c->pathdist &&
-          passable_for(m->type, c2, c, false))
+          passable_for(m->type, c2, c, P_CHAIN | P_ONPLAYER))
           cnext = c2;
         }
       if(cnext == c) break;
@@ -1117,9 +1345,9 @@ void moveMonster(monster *m, int delta) {
     if(m->type == moHedge) {
       hyperpoint h = inverse(m->pat) * goal * C0;
       if(h[1] < 0)
-        nat = nat * spin(M_PI * delta / 3000);
+        nat = nat * spin(M_PI * delta / 3000 / speedfactor());
       else
-        nat = nat * spin(M_PI * -delta / 3000);
+        nat = nat * spin(M_PI * -delta / 3000 / speedfactor());
       m->rebasePat(nat);
       // at most 45 degrees
       if(h[0] < fabsl(h[1])) return;
@@ -1129,15 +1357,21 @@ void moveMonster(monster *m, int delta) {
       }
     }
   
-//if(c->land == laWhirlpool && (m->type == moShark || m->type == moCShark || m->type == moPirate))
-//  oceanCurrents(nat, m, delta);
-  
+  bool carried = false;
 
-  if(items[itOrbSpeed])
-    step /= 2;
+  if(c->land == laWhirlpool && (m->type == moShark || m->type == moCShark || m->type == moPirate))
+    oceanCurrents(nat, m, delta), carried = true;
+
+  if(m->base->land == laWhirlwind) 
+    airCurrents(nat, m, delta), carried = true;
+  
+  if(rosedist(m->base) == 1)
+    roseCurrents(nat, m, delta), carried = true;
+
+  step /= speedfactor();
   
   nat = nat * xpush(step); // * spintox(wherePC);
-  if(intval(nat*C0, goal*C0) >= intval(m->pat*C0, goal*C0) && !stunned) 
+  if(intval(nat*C0, goal*C0) >= intval(m->pat*C0, goal*C0) && !stunned && !carried) 
     return;
 
   monster* crashintomon = NULL;
@@ -1145,32 +1379,37 @@ void moveMonster(monster *m, int delta) {
   for(int j=0; j<size(active); j++) if(active[j]!=m && active[j]->type != moBullet) {
     monster* m2 = active[j];
     double d = intval(m2->pat*C0, nat*C0);
-    if(d < 0.1) crashintomon = active[j];
+    if(d < SCALE2 * 0.1) crashintomon = active[j];
     }
   
-  for(int i=0; i<players; i++) if(crashintomon == pc[i]) pc[i]->dead = true;
+  for(int i=0; i<players; i++) 
+    if(crashintomon == pc[i]) 
+      pc[i]->dead = true;
 
   else if(crashintomon && isMimic(crashintomon->type)) {
-    crashintomon->dead = true;
+    killMonster(crashintomon);
     crashintomon = NULL;
     }
   
-  else if(crashintomon && (isBug(m->type) || isBug(crashintomon->type)) && m->type != crashintomon->type &&
-    !isBullet(crashintomon)) {
-    crashintomon->dead = true;
+  else if(crashintomon && (
+    items[itOrbDiscord] ||
+       ((isBug(m->type) || isBug(crashintomon->type)) && m->type != crashintomon->type)) 
+    && !isBullet(crashintomon)) {
+    killMonster(crashintomon);
     crashintomon = NULL;
     }
   
   if(crashintomon) return;
 
   cell *c2 = m->findbase(nat*C0);
-  
+
   if(isPlayerOn(c2)) {
     bool usetongue = false;
     if(isSlimeMover(m->type) || m->type == moWaterElemental) usetongue = true;
     if(isWatery(c2) && !survivesWater(m->type) && !m->inBoat) usetongue = true;
     if(c2->wall == waChasm && !survivesChasm(m->type)) usetongue = true;
     if(isFire(c2) && !survivesFire(m->type) && !m->inBoat) usetongue = true;
+    if(isBird(m->type) && !passable_for(moEagle, c2, c, 0)) usetongue = true;
     if(usetongue) {
       if(curtime < m->nextshot) return;
       // m->nextshot = curtime + 25;
@@ -1185,13 +1424,18 @@ void moveMonster(monster *m, int delta) {
       }
     }
 
-  if(c2 != m->base && (c2->wall == waClosePlate || c2->wall == waOpenPlate))
+  if(!ignoresPlates(m->type)) destroyWeakBranch(m->base, c2);
+
+  if(c2 != m->base && (c2->wall == waClosePlate || c2->wall == waOpenPlate) && !ignoresPlates(m->type))
     toggleGates(c2, c2->wall, 3);
   
   if(c2 != m->base && c2->wall == waMineMine && !survivesMine(m->type)) {
     explodeMine(c2);
-    m->dead = true;
+    killMonster(m);
     }
+
+  if(c2 != m->base && c2->wall == waRose && !nonAdjacent(m->base, c2) && !survivesThorns(m->type))
+    killMonster(m);
 
   if(c2 != m->base && cellUnstable(m->base) && m->type != moEagle && m->type != moGhost)
     m->base->wall = waChasm;
@@ -1211,9 +1455,9 @@ void moveMonster(monster *m, int delta) {
       if(dirfromto(c3, c2) != -1 && c3->wall == waFreshGrave && gmatrix.count(c3)) {
         bool monstersNear = false;
         for(int i=0; i<size(active); i++) {
-          if(active[i] != m && intval(active[i]->pat*C0, gmatrix[c3]*C0) < .3)
+          if(active[i] != m && intval(active[i]->pat*C0, gmatrix[c3]*C0) < SCALE2 * .3)
             monstersNear = true;
-          if(active[i] != m && intval(active[i]->pat*C0, gmatrix[c2]*C0) < .3)
+          if(active[i] != m && intval(active[i]->pat*C0, gmatrix[c2]*C0) < SCALE2 * .3)
             monstersNear = true;
           }
         if(!monstersNear) {
@@ -1260,21 +1504,24 @@ void moveMonster(monster *m, int delta) {
         else
           m->base->wall = waBigStatue;
         }
-      if(passable_for(m->type, c2, m->base, false) && !isWatery(c2) && m->inBoat) {
+      if(passable_for(m->type, c2, m->base, P_CHAIN | P_ONPLAYER) && !isWatery(c2) && m->inBoat) {
         if(isWatery(m->base)) 
           m->base->wall = waBoat, m->base->mondir = dirfromto(m->base, c2);
         else if(boatStrandable(c2)) c2->wall = waStrandedBoat;
         else if(boatStrandable(m->base)) m->base->wall = waStrandedBoat;
         m->inBoat = false;
         }
+      if(isWatery(c2) && isWatery(m->base) && m->inBoat)
+        moveItem(m->base, c2, true);
       }
     if(c2->wall == waBoat && !m->inBoat) {
       m->inBoat = true; c2->wall = waSea;
       m->base = c2;
       }
     }
-
-  if(stunned ? blowable(c2, m->base) : passable_for(m->type, c2, m->base, false)) 
+  
+  if(!(m->type == moRoseBeauty && c2->land != laRose))
+  if(stunned ? passable(c2, m->base, P_BLOW) : passable_for(m->type, c2, m->base, P_CHAIN)) 
     m->rebasePat(nat);
 
   if(direct) {
@@ -1290,8 +1537,18 @@ void moveMonster(monster *m, int delta) {
       else
         m->nextshot = curtime + 100;
       }
+    if(m->type == moOutlaw && curtime >= m->nextshot) {
+      monster* bullet = new monster;
+      bullet->base = m->base;
+      bullet->at = m->at;
+      bullet->type = moBullet;
+      bullet->parent = m;
+      bullet->parenttype = moOutlaw;
+      active.push_back(bullet);
+      m->nextshot = curtime + 1500;
+      }
     for(int i=0; i<players; i++)
-    if((m->type == moAirElemental) && curtime >= m->nextshot && intval(m->pat*C0, pc[i]->pat*C0) < 2) {
+    if((m->type == moAirElemental) && curtime >= m->nextshot && intval(m->pat*C0, pc[i]->pat*C0) < SCALE2 * 2) {
       monster* bullet = new monster;
       bullet->base = m->base;
       bullet->at = m->at;
@@ -1301,8 +1558,14 @@ void moveMonster(monster *m, int delta) {
       m->nextshot = curtime + 1500;
       }
     for(int i=0; i<players; i++)
+      if(m->type == moTortoise && tortoise::seek() && !tortoise::diff(getBits(m->origin)) && intval(m->pat*C0, pc[i]->pat*C0) < SCALE2) {
+        items[itBabyTortoise] += 4;
+        m->dead = true;
+        addMessage(XLAT("You are now a tortoise hero!"));
+        }
+    for(int i=0; i<players; i++)
     if(m->type == moFlailer && curtime >= m->nextshot && 
-      intval(m->pat*C0, pc[i]->pat*C0) < 2) {
+      intval(m->pat*C0, pc[i]->pat*C0) < SCALE2 * 2) {
       m->nextshot = curtime + 3500;
       monster* bullet = new monster;
       bullet->base = m->base;
@@ -1319,8 +1582,6 @@ void moveMonster(monster *m, int delta) {
 #ifndef MOBILE
 void turn(int delta) {
 
-  bool b = vid.female;
-  
   if(delta > 1000) delta = 1000;
   
   if(delta > 200) { turn(200); delta -= 200; if(!delta) return; }
@@ -1343,14 +1604,15 @@ void turn(int delta) {
       monstersAt.erase(it);
       it = itplus;
       }
-    if(c->monst && !isIvy(c) && !isWorm(c)) {
+    if(c->monst && !isIvy(c) && !isWorm(c) && !isMutantIvy(c)) {
       monster *enemy = new monster;
       enemy->at = Id;
       enemy->base = c;
+      enemy->origin = c;
       enemy->type = c->monst;
       enemy->hitpoints = c->hitpoints;
       if(c->wall == waBoat && isLeader(c->monst)) 
-        enemy->inBoat = true, c->wall = waNone;
+        enemy->inBoat = true, c->wall = waSea;
       c->monst = moNone;
       active.push_back(enemy);
       }
@@ -1415,7 +1677,7 @@ void turn(int delta) {
         cell *c2 = c->mov[i];
         // printf("i=%d cd=%d\n", i, c->mov[i]->cpdist);
         if(c2 && c2->pathdist == INFD && gmatrix.count(c2) && 
-          (passable_for(eMonster(t), c, c2, false) || c->wall == waThumperOn)) {
+          (passable_for(eMonster(t), c, c2, P_CHAIN | P_ONPLAYER) || c->wall == waThumperOn)) {
           c2->pathdist = d+1;
           pathq.push_back(c2);
           }
@@ -1434,24 +1696,37 @@ void turn(int delta) {
   bool tick = curtime >= nextmove;
   keepLightning = ticks <= lightat + 1000;
   cwt.c = pc[0]->base;
-  bfs(tick); moverefresh();
+  bfs(); moverefresh();
   countLocalTreasure();
   pushmonsters();
-  processheat(delta / 350.0, tick);
+  if(items[itOrbFreedom])
+    for(int i=0; i<players; i++)
+      checkFreedom(pc[i]->base);
+  heat::processheat(delta / 350.0, tick);
   markOrb(itOrbSpeed);
+  
+  if(havedragon && curtime >= nextdragon) {
+    groupmove(moDragonHead, 0);
+    nextdragon = curtime + 1500;
+    }
+    
   if(tick) {
     nextmove += 1000;
     reduceOrbPowers();
-    if(!(items[itOrbSpeed] & 1)) {
+    if(!((items[itOrbSpeed]/players) & 1)) {
       moveworms();
       moveivy();
-      if(havehex) movehex();
+      movemutant();
+      if(havehex) movehex(false);
       wandering();
       livecaves();
-      dryforest();
-      if(havewhirlpool) movewhirlpool();
+      heat::dryforest();
+      if(havewhirlpool) whirlpool::move();
+      if(havewhirlwind) whirlwind::move();
+      buildRosemap();
       }
     }
+  if(elec::havecharge) elec::act();
   popmonsters();
   
   gmatrix.clear();
@@ -1459,13 +1734,6 @@ void turn(int delta) {
   canmove = true;
   
   for(int i=0; i<players; i++) {
-    if(pc[i]->dead && items[itOrbLife] && !items[itOrbShield]) {
-      items[itOrbLife]--;
-      items[itOrbShield] += 3;
-      items[itOrbGhost] += 3;
-      orbused[itOrbShield] = true;
-      }
-  
     if(pc[i]->dead && items[itOrbShield]) {
       pc[i]->dead = false;
       orbused[itOrbShield] = true;
@@ -1487,6 +1755,21 @@ void turn(int delta) {
       popmonsters();
       }
     
+    if(pc[i]->dead && items[itOrbShell]) {
+      pc[i]->dead = false;
+      useupOrb(itOrbShell, 10);
+      items[itOrbShield] = 1;
+      orbused[itOrbShield] = true;
+      }
+  
+    if(pc[i]->dead && items[itOrbLife]) {
+      items[itOrbLife]--;
+      items[itOrbShield] += 3;
+      items[itOrbGhost] += 3;
+      pc[i]->dead = false;
+      orbused[itOrbShield] = true;
+      }
+  
     if(pc[i]->dead && !lastdead)
       achievement_final(true);
     lastdead = pc[i]->dead;
@@ -1496,7 +1779,7 @@ void turn(int delta) {
   
   // deactivate all monsters
   for(int i=0; i<size(active); i++)
-    if(active[i]->dead && active[i] != pc[0] && active[i] != pc[1]) {
+    if(active[i]->dead && active[i]->type != moPlayer) {
       for(int j=0; j<size(active); j++) if(active[j]->parent == active[i])
         active[j]->parent = active[i]->parent;
       delete active[i];
@@ -1506,42 +1789,40 @@ void turn(int delta) {
   active.clear();
 
   if(safety) { 
-    safety = false;
     activateSafety(pc[0]->base->land);
+    safety = false;
     }
 
-  vid.female = b;
   }
 #endif
 
 void init() {
 
-  players = vid.scfg.players;
+  if(!safety)
+    players = vid.scfg.players;
 
-  pc[0] = new monster;
-  pc[0]->type = moPlayer;
-  pc[0]->pid = 0;
-  pc[0]->at = xpush(players == 2 ? -.3:0) * spin(players == 2 ? M_PI : 0) * Id;
-  pc[0]->base = cwt.c;
-  pc[0]->inBoat = (firstland == laCaribbean || firstland == laOcean || firstland == laLivefjord);
-  pc[0]->store();
+  for(int i=0; i<players; i++) pc[i] = NULL;
   
-  if(players == 2) {
-    pc[1] = new monster;
-    pc[1]->type = moPlayer;
-    pc[1]->pid = 1;
-    pc[1]->at = xpush(.3) * Id;
-    pc[1]->base = cwt.c;
-    pc[1]->inBoat = (firstland == laCaribbean || firstland == laOcean || firstland == laLivefjord);
-    pc[1]->store();
+  for(int i=0; i<players; i++) {
+    pc[i] = new monster;
+    pc[i]->type = moPlayer;
+    pc[i]->pid = i;
+    if(players == 1)
+      pc[i]->at = Id;
+    else
+      pc[i]->at = spin(2*M_PI*i/players) * xpush(firstland == laMotion ? .5 : .3) * Id;
+    pc[i]->base = cwt.c;
+    pc[i]->inBoat = (firstland == laCaribbean || firstland == laOcean || firstland == laLivefjord ||
+      firstland == laWhirlpool);
+    pc[i]->store();
     }
-  else pc[1] = NULL;
   
   if(!safety) {
     items[itOrbLife] = 3;
     addMessage(XLAT("Welcome to the Shoot'em Up mode!"));
     // addMessage(XLAT("F/;/Space/Enter/KP5 = fire, WASD/IJKL/Numpad = move"));
     }
+  else safety = false;
   }
 
 monster *getPlayer() {
@@ -1549,20 +1830,20 @@ monster *getPlayer() {
   }
 
 bool drawMonster(const transmatrix& V, cell *c) {
+#ifndef MOBILE
   gmatrix[c] = V;
 
   pair<mit, mit> p = 
     monstersAt.equal_range(c);
 
-  bool b = vid.female;
-
   for(mit it = p.first; it != p.second; it++) {
     monster* m = it->second;
     m->pat = V * m->at;
     
-    if(!outofmap(mouseh))
+    if(!outofmap(mouseh)) {
       if(!mousetarget || intval(mouseh, mousetarget->pat*C0) > intval(mouseh, m->pat*C0))
         mousetarget = m;
+      }
     
     if(m->inBoat) {
       if(m->type == moPlayer && items[itOrbWater]) {
@@ -1582,24 +1863,35 @@ bool drawMonster(const transmatrix& V, cell *c) {
 
     switch(m->type) {
       case moPlayer: 
-        drawPlayerEffects(m->pat, c);
-        cpid = m->pid; if(players == 2) vid.female = cpid;
+        drawPlayerEffects(m->pat, c, true);
+        cpid = m->pid; 
         if(mapeditor::drawplayer) drawMonsterType(moPlayer, c, m->pat, 0xFFFFFFC0);
-        vid.female = b;
+        
+        if(keyresult[cpid]) {
+          hyperpoint h = keytarget(cpid);
+          int xc, yc, sc;
+          getcoord(h, xc, yc, sc);
+          queuechr(xc, yc, 1, vid.fsize, '+', iinf[keyresult[cpid]].color);
+          }
         break;
       case moBullet: {
         int col;
+        cpid = m->pid;
         if(m->parenttype == moPlayer)
-          col = vid.swordcolor;
+          col = getcs().swordcolor;
         else
           col = (minf[m->parenttype].color << 8) | 0xFF;
-        queuepoly(m->pat * spin(curtime / 50.0), shKnife, col);
+        if(getcs().charid >= 4)
+          queuepoly(m->pat, shPHead, col);
+        else
+          queuepoly(m->pat * spin(curtime / 50.0), 
+            getcs().charid >= 4 ? shPHead : shKnife, col);
         break;
         }
       case moTongue:
         queuepoly(m->pat, shTongue, (minf[m->parenttype].color << 8) | 0xFF);
         break;
-      case moFireball:  case moAirball:
+      case moFireball:  case moAirball: case moLightningBolt:
         queuepoly(m->pat, shPHead, (minf[m->type].color << 8) | 0xFF);
         break;
       case moFlailBullet: 
@@ -1612,18 +1904,19 @@ bool drawMonster(const transmatrix& V, cell *c) {
           col = winf[c->wall].color;
           col |= (col >> 1);
           }
-        bool b = vid.female; cpid = m->pid; 
-        if(players == 2 && isMimic(m->type)) vid.female = cpid;
-        if(isStunnable(m->type) && m->stunoff > curtime)
+        cpid = m->pid; 
+        if(m->stunoff > curtime)
           c->stuntime = 1 + (m->stunoff - curtime-1)/300;
         if(hasHitpoints(m->type))
           c->hitpoints = m->hitpoints;
+        if(m->type == moTortoise) tortoise::emap[c] = m->origin;
         drawMonsterType(m->type, c, m->pat, col);
-        vid.female = b;
+        if(m->type == moTortoise) tortoise::emap.erase(c);
         break;
       }
     }
 
+#endif
   return false;
   }
 
@@ -1635,7 +1928,8 @@ void clearMemory() {
   gmatrix.clear();
   curtime = 0;
   nextmove = 0;
-  invisible_at = 0;
+  nextdragon = 0;
+  visibleAt = 0;
   }
 
 void initConfig() {
@@ -1718,6 +2012,11 @@ void initConfig() {
   vid.scfg.hataction[1][1][1] = 32 + 7;
   vid.scfg.hataction[1][1][2] = 32 + 5;
   vid.scfg.hataction[1][1][3] = 32 + 6;
+  
+  for(int i=0; i<4; i++) {
+    initcs(shmup::scs[i]); 
+    shmup::scs[i].charid = i&1;
+    }
 #endif
   }
 
@@ -1730,6 +2029,7 @@ bool playerInBoat(int i) {
   }
 
 void saveConfig(FILE *f) {
+#ifndef MOBILE
   fprintf(f, "%d %d", VERNUM, vid.scfg.players);
   for(int i=0; i<512; i++) fprintf(f, " %d", vid.scfg.keyaction[i]);
   for(int i=0; i<8; i++) for(int j=0; j<MAXBUTTON; j++) fprintf(f, " %d", vid.scfg.joyaction[i][j]);
@@ -1737,6 +2037,8 @@ void saveConfig(FILE *f) {
   for(int i=0; i<8; i++) for(int j=0; j<MAXHAT; j++) for(int k=0; k<4; k++)
     fprintf(f, " %d", vid.scfg.hataction[i][j][k]);
   fprintf(f, "\n");
+  for(int i=0; i<4; i++) savecs(f, scs[i]);
+#endif
   }
 
 void scanchar(FILE *f, char& c) {
@@ -1746,6 +2048,7 @@ void scanchar(FILE *f, char& c) {
   }
   
 void loadConfig(FILE *f) {
+#ifndef MOBILE
   int xvernum;
   int err = fscanf(f, "%d %d", &xvernum, &vid.scfg.players);
   if(err != 2) return;
@@ -1754,6 +2057,8 @@ void loadConfig(FILE *f) {
   for(int i=0; i<8; i++) for(int j=0; j<MAXAXE; j++) scanchar(f, vid.scfg.axeaction[i][j]);
   for(int i=0; i<8; i++) for(int j=0; j<MAXHAT; j++) for(int k=0; k<4; k++)
     scanchar(f, vid.scfg.hataction[i][j][k]);
+  for(int i=0; i<4; i++) loadcs(f, scs[i]);
+#endif
   }
 
 int shmupnumkeys;
@@ -1778,22 +2083,27 @@ string listkeys(int id) {
         }
   return lk;
 #endif
+#ifdef MOBILE
+  return "";
+#endif
   }
+
+#define SCJOY 16
 
 void showShmupConfig() {
 #ifndef MOBILE
 
   int sc = vid.scfg.subconfig;
 
-  if(sc == 1 || sc == 2) {
-    shmupnumkeys = 14;
+  if(sc == 1 || sc == 2 || sc == 4 || sc == 5) {
+    shmupnumkeys = 15;
     shmupcmdtable = shmup::playercmds;
     }
   else if(sc == 3) {
     shmupnumkeys = 7;
     shmupcmdtable = shmup::pancmds;
     }
-  else if(sc == 4) {
+  else if(sc == SCJOY) {
     getcstat = ' ';
     numaxeconfigs = 0;
     for(int j=0; j<numsticks; j++) {
@@ -1817,29 +2127,39 @@ void showShmupConfig() {
     int vy = vid.yres/2 - vid.fsize * 6;
     
     displayButton(vid.xres/2, vy, 
-      ifMousing("n", vid.scfg.players == 2 ? "two players" : "one player"), 'n', 8, 2);
+      ifMousing("n", 
+        vid.scfg.players == 2 ? "two players" : 
+        vid.scfg.players == 3 ? "three players" : 
+        vid.scfg.players == 4 ? "four players" : 
+        "one player"), 'n', 8, 2);
     displayButton(vid.xres/2, vy+vid.fsize*2, 
       ifMousing("1", "configure player 1"), '1', 8, 2);
     if(vid.scfg.players > 1)
       displayButton(vid.xres/2, vy+vid.fsize*3, 
         ifMousing("2", "configure player 2"), '2', 8, 2);
-    displayButton(vid.xres/2, vy+vid.fsize*5, 
+    if(vid.scfg.players > 2)
+      displayButton(vid.xres/2, vy+vid.fsize*4, 
+        ifMousing("3", "configure player 3"), '3', 8, 2);
+    if(vid.scfg.players > 3)
+      displayButton(vid.xres/2, vy+vid.fsize*5, 
+        ifMousing("4", "configure player 4"), '4', 8, 2);
+    displayButton(vid.xres/2, vy+vid.fsize*7, 
       ifMousing("p", "configure panning"), 'p', 8, 2);
     if(numsticks > 0) 
-      displayButton(vid.xres/2, vy+vid.fsize*7, 
+      displayButton(vid.xres/2, vy+vid.fsize*9, 
         ifMousing("j", "configure joystick axes"), 'j', 8, 2);
-    displayButton(vid.xres/2, vy+vid.fsize*9, 
+    displayButton(vid.xres/2, vy+vid.fsize*11, 
       ifMousing("s", 
         shmup::on && shmup::players == vid.scfg.players ?
           "continue playing"
         : "start playing in the shmup mode"), 's', 8, 2);
-    displayButton(vid.xres/2, vy+vid.fsize*10, 
+    displayButton(vid.xres/2, vy+vid.fsize*12, 
       ifMousing("t", "return to the turn-based mode"), 't', 8, 2);
-    displayButton(vid.xres/2, vy+vid.fsize*11, 
+    displayButton(vid.xres/2, vy+vid.fsize*13, 
       ifMousing("c", "save the configuration"), 'c', 8, 2);
     }
   
-  if(sc >= 1 && sc <= 3) {
+  if(sc >= 1 && sc <= 5) {
     getcstat = ' ';
 
     for(int i=0; i<shmupnumkeys; i++)
@@ -1868,7 +2188,9 @@ void handleConfig(int uni, int sym) {
     if(uni == '1') vid.scfg.subconfig = 1;
     else if(uni == '2') vid.scfg.subconfig = 2;
     else if(uni == 'p') vid.scfg.subconfig = 3;
-    else if(uni == 'j') vid.scfg.subconfig = 4;
+    else if(uni == '3') vid.scfg.subconfig = 4;
+    else if(uni == '4') vid.scfg.subconfig = 5;
+    else if(uni == 'j') vid.scfg.subconfig = 16;
     else if(uni == 's') {
       cmode = emNormal;
       if(!shmup::on) restartGame('s');
@@ -1881,9 +2203,24 @@ void handleConfig(int uni, int sym) {
     else if(uni == 'c')
       ::saveConfig();
     else if(uni == 'n')
-      vid.scfg.players = 1 + (vid.scfg.players&1);
+      vid.scfg.players = 1 + (vid.scfg.players&3);
+    else if(sym == SDLK_F1) {
+      lastmode = cmode;
+      cmode = emHelp;
+      help = 
+        "In the shmup (shoot'em up) mode, you can play a hyperbolic shoot'em up "
+        "game. The game is based on the usual turn-based grid-based HyperRogue, "
+        "but there are some changes. You fight by throwing knives, and you "
+        "have three extra lives. There are no friendly monsters, so Orbs of "
+        "Life and Friendship give you extra lives instead. Some other rules have been "
+        "adapted too.\n\n"
+        "It is possible for two players to play the shmup mode cooperatively "
+        "(locally). When playing together, lives, orbs, and treasures are shared, "
+        "knives recharge slower, orbs drain faster, and player characters are not "
+        "allowed to separate.";
+      }
     }
-  else if(sc == 4) {
+  else if(sc == SCJOY) {
     if(sym) {
       if(uni >= 'a' && uni < 'a' + numaxeconfigs) {
         (*axeconfigs[uni - 'a'])++;
@@ -1909,4 +2246,128 @@ void handleConfig(int uni, int sym) {
     }
 #endif
   }
+
+transmatrix calc_relative_matrix(cell *c, heptagon *h1) {
+  transmatrix gm = Id;
+  heptagon *h2 = c->master;
+  transmatrix where = Id;
+  for(int d=0; d<7; d++) if(h2->c7->mov[d] == c)
+    where = hexmove[d];
+  // always add to last!
+//bool hsol = false;
+//transmatrix sol;
+  while(h1 != h2) {
+    for(int d=0; d<7; d++) if(h2->move[d] == h1) {
+      int sp = h2->spin[d];
+      return gm * heptmove[sp] * spin(2*M_PI*d/7) * where;
+      }
+    if(h1->distance < h2->distance) {
+      int sp = h2->spin[0];
+      h2 = h2->move[0];
+      where = heptmove[sp] * where;
+      }
+    else {
+      int sp = h1->spin[0];
+      h1 = h1->move[0];
+      gm = gm * invheptmove[sp];
+      }
+    }
+/*if(hsol) {
+    transmatrix sol2 = gm * where;
+    for(int i=0; i<3; i++) for(int j=0; j<3; j++)
+      if(fabs(sol2[i][j]-sol[i][j] > 1e-3)) {
+        printf("ERROR\n");
+        display(sol);
+        display(sol2);
+        exit(1);
+        }
+    } */
+  return gm * where;
+  }
+
+transmatrix calc_relative_matrix_help(cell *c, heptagon *h1) {
+  transmatrix gm = Id;
+  heptagon *h2 = c->master;
+  transmatrix where = Id;
+  for(int d=0; d<7; d++) if(h2->c7->mov[d] == c)
+    where = hexmove[d];
+  // always add to last!
+  while(h1 != h2) {
+    for(int d=0; d<7; d++) if(h1->move[d] == h2) printf("(adj) ");
+    if(h1->distance < h2->distance) {
+      int sp = h2->spin[0];
+      printf("A%d ", sp);
+      h2 = h2->move[0];
+      where = heptmove[sp] * where;
+      }
+    else {
+      int sp = h1->spin[0];
+      printf("B%d ", sp);
+      h1 = h1->move[0];
+      gm = gm * invheptmove[sp];
+      }
+    }
+  printf("OK\n");
+  display(gm * where);
+  return gm * where;
+  }
+
+void virtualRebase(shmup::monster *m, bool tohex) {
+
+  while(true) {
+  
+    if(m->base->type == 6) {
+      cell *c7 = m->base->master->c7;
+      for(int d=0; d<7; d++) if(c7->mov[d] == m->base)
+        m->at = hexmove[d] * m->at;
+      m->base = c7;
+      }
+    
+    double currz = (m->at * C0)[2];
+    
+    heptagon *h = m->base->master;
+    
+    cell *newbase = NULL;
+    
+    transmatrix bestV;
+    
+    for(int d=0; d<7; d++) {
+      heptspin hs;
+      hs.h = h;
+      hs.spin = d;
+      heptspin hs2 = hsstep(hs, 0);
+      transmatrix V2 = spin(-hs2.spin*2*M_PI/7) * invheptmove[d];
+      double newz = (V2 *m->at * C0) [2];
+      if(newz < currz) {
+        currz = newz;
+        bestV = V2;
+        newbase = hs2.h->c7;
+        }
+      }
+    
+    if(!newbase) {
+      if(tohex) for(int d=0; d<7; d++) {
+        cell *c = createMov(m->base, d);
+        transmatrix V2 = spin(-m->base->spn[d]*2*M_PI/6) * invhexmove[d];
+        double newz = (V2 *m->at * C0) [2];
+        if(newz < currz) {
+          currz = newz;
+          bestV = V2;
+          newbase = c;
+          }
+        }
+      if(newbase) {
+        m->base = newbase;
+        m->at = bestV * m->at;
+        }
+      break;
+      }
+    
+    // printf("%p: rebase %p -> %p\n", m, m->base, newbase);
+    m->base = newbase;
+    m->at = bestV * m->at;
+    }
+
+  }
+
 }

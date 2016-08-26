@@ -15,13 +15,19 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-// disable for the Android version
+#ifdef LOCAL
+#define CDATA
+#endif
+
+#define VER "8.3j"
+#define VERNUM 8310
+#define VERNUM_HEX 0x8310
+
 #define ISANDROID 0
 #define ISMOBILE 0
 #define ISIOS 0
-#define VER "7.4h"
-#define VERNUM 7480
-#define VERNUM_HEX 0x7480
+
+#include <stdio.h>
 
 #include <SDL/SDL.h>
 
@@ -38,6 +44,9 @@
 
 using namespace std;
 
+FILE *debugfile;
+int debugflags;
+
 const char *scorefile = "hyperrogue.log";
 const char *conffile = "hyperrogue.ini";
 
@@ -47,25 +56,26 @@ string picfile = "hyperrogue.pic";
 const char *loadlevel = NULL;
 const char *musicfile = "";
 
-typedef long double ld;
+#ifdef LINUX
+#include <sys/resource.h>
 
-template<class T> int size(T& x) {return x.size(); }
-string its(int i) { char buf[64]; sprintf(buf, "%d", i); return buf; }
-string cts(char c) { char buf[8]; buf[0] = c; buf[1] = 0; return buf; }
-string llts(long long i) { 
-  // sprintf does not work on Windows IIRC
-  if(i < 0) return "-" + llts(-i);
-  if(i < 10) return its(i);
-  return llts(i/10) + its(i%10);
-  }
-string fts(float x) { char buf[64]; sprintf(buf, "%4.2f", x); return buf; }
-string fts4(float x) { char buf[64]; sprintf(buf, "%6.4f", x); return buf; }
-string itsh(int i) {static char buf[16]; sprintf(buf, "%03X", i); return buf; }
+void moreStack() {
+  const rlim_t kStackSize = 1 << 28; // 28;
+  struct rlimit rl;
+  int result;
 
-#undef DEBT
-void DEBT(const char *buf) {
-  printf("%4d %s\n", SDL_GetTicks(), buf);
+  result = getrlimit(RLIMIT_STACK, &rl);
+  if(result == 0) {
+    if(rl.rlim_cur < kStackSize) {
+      // rl.rlim_cur = 1 << 19; // kStackSize;
+      result = setrlimit(RLIMIT_STACK, &rl);
+      if (result != 0) {
+        fprintf(stderr, "setrlimit returned result = %d\n", result);
+        }
+      }
+    }
   }
+#endif
 
 string s0;
 void addMessage(string s, char spamtype = 0);
@@ -86,7 +96,14 @@ string commandline;
 #include "hyper.h"
 
 #include "cell.cpp"
+
+#include "flags.cpp"
+#include "yendor.cpp"
+#include "complex.cpp"
 #include "game.cpp"
+#include "landgen.cpp"
+#include "orbs.cpp"
+#include "system.cpp"
 
 // #include "patterngen.cpp"
 
@@ -98,6 +115,8 @@ string commandline;
 #include "mapeditor.cpp"
 #endif
 
+#include "netgen.cpp"
+
 #include "graph.cpp"
 
 #include "achievement.cpp"
@@ -106,14 +125,16 @@ string commandline;
 
 int main(int argc, char **argv) {
 
-  printf("HyperRogue by Zeno Rogue <zeno@attnam.com>, version "VER"\n");
+#ifdef LINUX
+  moreStack();
+#endif
+
+  printf("HyperRogue by Zeno Rogue <zeno@attnam.com>, version " VER "\n");
 
 #ifndef NOLICENSE
   printf("released under GNU General Public License version 2 and thus\n");
   printf("comes with absolutely no warranty; see COPYING for details\n");
 #endif
-
-  achievement_init();
 
   // printf("cell size = %d\n", int(sizeof(cell)));
   srand(time(NULL));
@@ -177,11 +198,43 @@ int main(int argc, char **argv) {
     else if(strcmp(argv[i], "-e") == 0) { commandline += "e"; }
     else if(strcmp(argv[i], "-a") == 0) { commandline += "a"; }
     else if(strcmp(argv[i], "-p") == 0) { commandline += "p"; }
+    else if(strcmp(argv[i], "-7") == 0) { commandline += "7"; }
+    else if(strcmp(argv[i], "-C") == 0) { commandline += "C"; }
     else if(strcmp(argv[i], "-o") == 0) { commandline += "o"; }
+    else if(strcmp(argv[i], "-o0") == 0) { commandline += char(200); }
+    else if(strcmp(argv[i], "-o1") == 0) { commandline += char(201); }
     else if(strcmp(argv[i], "-E") == 0) { commandline += "E"; }
     else if(strcmp(argv[i], "-S") == 0) { commandline += "S"; }
     else if(strcmp(argv[i], "-H") == 0) { commandline += "H"; }
-    else if(strcmp(argv[i], "-P") == 0) { commandline += "P"; }
+    else if(strcmp(argv[i], "-P1") == 0) { commandline += "P1"; }
+    else if(strcmp(argv[i], "-P2") == 0) { commandline += "P2"; }
+    else if(strcmp(argv[i], "-P3") == 0) { commandline += "P3"; }
+    else if(strcmp(argv[i], "-P4") == 0) { commandline += "P4"; }
+    else if(strcmp(argv[i], "-T") == 0) { commandline += "T"; }
+    else if(strcmp(argv[i], "-R") == 0) { commandline += "R"; }
+    else if(strcmp(argv[i], "-D") == 0) { commandline += "D"; }
+    else if(strcmp(argv[i], "-PM1") == 0) { pmodel = 1; }
+    else if(strcmp(argv[i], "-PM2") == 0) { pmodel = 2; }
+    else if(strcmp(argv[i], "-offline") == 0) offlineMode = true;
+    else if(strcmp(argv[i], "-debugf") == 0) {
+      debugfile = fopen("hyperrogue-debug.txt", "w");
+      debugflags = atoi(argv[i+1]);
+      i++;
+      }
+    else if(strcmp(argv[i], "-debuge") == 0) {
+      debugfile = stderr;
+      debugflags = atoi(argv[i+1]);
+      i++;
+      }
+#ifdef LOCAL
+    else if(strcmp(argv[i], "-auto") == 0) doAutoplay = true;
+#endif
+    else if(strcmp(argv[i], "-ch") == 0) { autocheat = true; }
+    else if(strcmp(argv[i], "-Y") == 0) { 
+      yendor::on = true;
+      yendor::challenge = atoi(argv[i+1]);
+      i++;
+      }
     else if(strcmp(argv[i], "-r") == 0) { 
       i++; 
       sscanf(argv[i], "%dx%dx%d", &clWidth, &clHeight, &clFont);
@@ -203,13 +256,25 @@ int main(int argc, char **argv) {
       printf("  -f, -w         - start in the fullscreen or windowed mode\n");
       printf("  -e, -a, -p     - start in the Escher, ASCII, or Plain mode\n");
       printf("  -r WxHxF       - use the given resolution and font size\n");
-      printf("  -o             - switch the OpenGL mode on or off\n");
+      printf("  -o             - switch the OpenGL mode\n");
+      printf("  -o0            - switch the OpenGL mode off\n");
+      printf("  -o1            - switch the OpenGL mode on\n");
       printf("  -W LAND        - start in the given land (cheat)\n");
+      printf("  -ch            - auto-enable cheat mode\n");
       printf("  -E             - switch Euclidean\n");
       printf("  -S             - switch Shmup\n");
-      printf("  -P             - switch Shmup number of players\n");
+      printf("  -Pn            - switch Shmup number of players (n=1..4)\n");
       printf("  -H             - switch Hardcore\n");
+      printf("  -T             - switch Tactical\n");
+      printf("  -7             - switch heptagonal mode\n");
+      printf("  -C             - switch Chaos mode\n");
+      printf("  -R             - switch Random Pattern\n");
+      printf("  -Y id          - switch Yendor, level id\n");
+      printf("  -D             - disable all the special game modes\n");
       printf("  -L             - list of features\n");
+      printf("  -debugf 7      - output debugging information to hyperrogue-debug.txt\n");
+      printf("  -debuge 7      - output debugging information to stderr\n");
+      printf("  -offline       - don't connect to Steam (for Steam versions)\n");
       exit(0);
       }
     else {
@@ -218,30 +283,22 @@ int main(int argc, char **argv) {
       }
     }
   
-  /* transmatrix T;
-  for(int a=0; a<3; a++) for(int b=0; b<3; b++)
-    T[a][b] = (10 + a*a + b*4 + (b==1?a:0)) / 20.;
-  display(T);
-  transmatrix T2 = inverse(T);
-  display(T2);
-  display(T*T2); */
-  
+  achievement_init();
+
   eLand f = firstland;
     
   // initlanguage();
   initgraph();
   loadsave();
+  precalc(); 
+  resetGL();
   initcells();
-  /* for(int uu=9; uu >= 0; uu--) {
-    printf("uu=%d\n", uu);
-    initgame(uu);
-    restartGame();
-    } */
   
   #ifdef BUILDZEBRA
   firstland = laCanvas;
-  shmup::on = false;
+  shmup::on = false; 
   #endif
+  shmup::safety = safety;
   initgame();
   #ifdef BUILDZEBRA
   zebraPattern();
@@ -258,20 +315,24 @@ int main(int argc, char **argv) {
   
   // verifyHell();
   // exit(1);
-
+  
   int t1 = SDL_GetTicks();
   
   // if(switchEuclid) restartGame('e');
   
   if(loadlevel) mapstream::loadMap(loadlevel);
-  
-  mainloop();
 
+#ifdef LOCAL  
+  // river();
+  autoplay();
+#endif
+  mainloop();
+  
   achievement_final(!items[itOrbSafety]);
   
   saveStats();
   int msec = SDL_GetTicks() - t1;
-  printf("frame : %f ms (%f fps)\n", 1.*msec/frames, 1000.*frames/msec);
+  DEBB(DF_INIT, (debugfile, "frame : %f ms (%f fps)\n", 1.*msec/frames, 1000.*frames/msec));
   offscreen.clear();  
   clearMemory();
   cleargraph();
