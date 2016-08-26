@@ -34,6 +34,8 @@ AC_CHECK_LIB([SDL_mixer], [main], [], AC_MSG_ERROR([SDL_mixer library was not fo
 AC_CHECK_LIB([SDL_gfx], [main], [], [AS_IF( test ["${host_os#*mingw}" != "$host_os"], [export wincppflags=$wincppflags" dll/SDL_gfx.dll" && AC_MSG_RESULT([Building for windows, ignoring])] ,AC_MSG_ERROR([SDL_gfx library was not found]))])
 # FIXME: Replace `main' with a function in `-lSDL_ttf':
 AC_CHECK_LIB([SDL_ttf], [main], [], [AS_IF( test ["${host_os#*mingw}" != "$host_os"], [export wincppflags=$wincppflags" dll/SDL_ttf.dll" && AC_MSG_RESULT([Building for windows, ignoring])] ,AC_MSG_ERROR([SDL_ttf library was not found]))])
+# Test for libpng
+AC_CHECK_LIB([png], [main], [], AC_MSG_ERROR([png library was not found]))
 
 # Checks for header files.
 AC_CHECK_HEADERS([stdlib.h unistd.h])

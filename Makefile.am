@@ -3,7 +3,7 @@ bin_PROGRAMS = hyperrogue
 hyperroguedir = $(datadir)/hyperrogue
 dist_hyperrogue_DATA = music/hyperrogue-music.txt DejaVuSans-Bold.ttf
 dist_doc_DATA = README.md
-hyperrogue_SOURCES = hyper.cpp
+hyperrogue_SOURCES = hyper.cpp savepng.c
 
 # Some definitions used in graph.cpp
 hyperrogue_CPPFLAGS = -DFONTDESTDIR=\"$(pkgdatadir)/DejaVuSans-Bold.ttf\" -DMUSICDESTDIR=\"$(pkgdatadir)/hyperrogue-music.txt\" -O2
@@ -25,6 +25,10 @@ langen_CXXFLAGS = -O0
 # Generation of language-data.cpp
 language-data.cpp: langen
 	./langen > language-data.cpp
+
+# Generation of savepng
+#noinst_PROGRAMS += savepng
+#savepng_SOURCES = savepng.c 
 
 # Local clean rules
 clean-local:
