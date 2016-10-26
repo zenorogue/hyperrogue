@@ -156,8 +156,8 @@ N("Land of Eternal Motion", GEN_O, "Kraj věčného pohybu", "Kraje věčného p
 N("Dry Forest", GEN_O, "Suchý hvozd", "Suché hvozdy", "Suchý hvozd", "v Suchém hvozdu")
 N("Game Board", GEN_F, "Herní deska", "Herní desky", "Herní desku", "na Herní desce")
 
-// GAMSE MESSAGES
-// ==============
+// GAME MESSAGES
+// =============
 
 // fighting messages
 
