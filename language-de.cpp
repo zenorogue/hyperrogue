@@ -27,7 +27,9 @@
 // (in Polish just 4 of 14 forms are used, and this is probably similar in other
 // languages).
 
-// monsters
+// MONSTERS
+// ========
+
 N("Yeti", GEN_M, "Yeti", "Yetis", "Yeti")
 N("Icewolf", GEN_M, "Eiswolf", "Eiswölfe", "Eiswolf")
 N("Ranger",  GEN_M, "Ranger", "Ranger", "Ranger")
@@ -68,7 +70,10 @@ N("Demon Shark", GEN_M, "Dämonenhai", "Dämonenhaie", "Dämonenhai")
 N("Fire Fairy", GEN_F, "Feuerfee", "Feuerfeen", "Feuerfee")
 N("Crystal Sage", GEN_M, "Kristall Weise", "Kristall Weisen", "Kristall Weise")
 N("Hedgehog Warrior", GEN_M, "Igelkrieger", "Igelkrieger", "Igelkrieger")
+
 // items
+// =====
+
 N("Ice Diamond", GEN_M, "Frostdiamant", "Frostdiamanten", "Frostdiamant")
 N("Gold", GEN_N, "Gold", "Gold", "Gold")
 N("Spice", GEN_N, "Spice", "Spice", "Spice")
@@ -84,7 +89,10 @@ N("Hyperstone", GEN_M, "Hyperstein", "Hypersteine", "Hyperstein")
 N("Key", GEN_M, "Schlüssel", "Schlüssel", "Schlüssel")
 N("Dead Orb", GEN_M, "Orb der Toten", "Orbs der Toten", "Orb der Toten")
 N("Fern Flower", GEN_M, "Farn", "Farn", "Farn")
-// orbs: we are using a macro here
+
+// ORBS: we are using a macro here
+// ===============================
+
 #define Orb(E, P) N("Orb of " E, GEN_M, "Orb " P, "Orbs " P, "Orb " P)
 Orb("Yendor", "des Yendor")
 Orb("Storms", "des Sturms")
@@ -96,7 +104,10 @@ Orb("Shielding", "der Abschirmung")
 Orb("Teleport", "der Teleportation")
 Orb("Safety", "der Geborgenheit")
 Orb("Thorns", "der Dornen")
-// terrain features
+
+// TERRAIN FEATURES
+// ================
+
 N("none", GEN_O, "keines", "keines", "keines")
 N("ice wall", GEN_F, "Eiswand", "Eiswände", "Eiswand")
 N("great wall", GEN_F, "Große Mauer", "Großen Mauern", "Große Mauer")
@@ -119,7 +130,10 @@ N("frozen lake", GEN_M, "Gefrorene See", "Gefrorene Seen", "Gefrorene See")
 N("chasm", GEN_M, "Abgrund", "Abgründe", "Abgrund")
 N("big tree", GEN_M, "Großer Baum", "Große Bäume", "Großer Baum")
 N("tree", GEN_M, "Baum", "Bäume", "Baum")
-// lands
+
+// LANDS
+// =====
+
 N("Great Wall", GEN_F, "Große Mauer", "Großen Mauern", "auf der Großen Mauer")
 N("Crossroads", GEN_F, "Kreuzung", "Kreuzungen", "an der Kreuzung")
 N("Desert", GEN_F, "Wüste", "Wüsten", "in der Wüste")
@@ -136,9 +150,11 @@ N("Land of Eternal Motion", GEN_N, "Land des endlosen Antriebs", "Länder des en
 N("Dry Forest", GEN_M, "Trockenwald", "Trockenwälder", "im Trockenwald")
 N("Game Board", GEN_N, "Spielbrett", "Spielbretter", "auf dem Spielbrett")
 
-// Game messages
+// GAME MESSAGES
+// =============
 
 // fighting messages
+// -----------------
 
 // For each English form, provide a Polish form. Player is referred to via %...0,
 // and objects are referred to via %...1 and %...2. For example, in Polish:
@@ -411,6 +427,7 @@ S("anti-aliasing disabled", "Anti-Aliasing deaktiviert")
 S("You activate your demonic powers!", "Du aktivierst deine dämonischen Kräfte!")
 
 // Steam achievement messages
+// --------------------------
 
 S("New Achievement:", "Neues Achievement:")
 S("Your total treasure has been recorded in the Steam Leaderboards.", "Deine Gesamtschätze wurden in die Steam Highscoreliste aufgenommen.")
@@ -428,7 +445,10 @@ S("You have improved both your real time and turn count. Congratulations!", "Du 
 S("You have used less real time than ever before. Congratulations!", "Du hast weniger Echtzeit als je zuvor benötigt. Gratulation!")
 S("You have used less turns than ever before. Congratulations!", "Du hast sowohl weniger Züge als je zuvor benötigt. Gratulation!")
 
-// help texts. These are separated into multiple lines just for convenience,
+// help texts
+// ----------
+
+// These are separated into multiple lines just for convenience,
 // you don't have to follow.
 
 S(
@@ -902,7 +922,9 @@ S("Choose from the lands visited this game.", "Wähle aus den Ländern, die dies
 S("Scores and achievements are not", "Im euklidischem Modus werden");
 S("saved in the Euclidean mode!", "Punkte und Achievements nicht gespeichert!");
 
-// Android buttons (some are not translated because there are no good short words in Polish)
+// Android buttons
+// ---------------
+
 S("MOVE", "VOR")
 S("BACK", "RÜCK")
 S("DRAG", "ZIEH")
@@ -949,6 +971,7 @@ S("Periodic Editor", "Periodischer Editor")
 S("Collect 60 $$$ to access even more lands", "Sammle 60 $$$ um noch mehr Länder zu besuchen.")
 
 // Emerald Mine
+// ------------
 
 N("Emerald Mine", GEN_F, "Smaragdmine", "Smaragdminen", "in der Smaragdmine")
 N("Pikeman", GEN_M, "Bergmann", "Bergmänner", "Bergmann")
@@ -1008,6 +1031,7 @@ S("%The1 is immune to mental blasts!", "%Der1 ist immun gegen mentale Korruption
 S("You kill %the1 with a mental blast!", "Du tötest %den1 %a1 mit mentaler Korruption!")
 
 // Vineyard
+// --------
 
 N("Vineyard", GEN_M, "Weingarten", "Weingärten", "im Weingarten")
 N("Vine Beast", GEN_F, "Rebenbestie", "Rebenbestien", "Rebenbestie")
@@ -1055,6 +1079,7 @@ S("You cannot attack through the Vine!",
 Orb("Aether", "des Äthers")
 
 // Dead Caves
+// ----------
 
 N("Dead Cave", GEN_F, "Tote Höhle", "Tote Höhlen", "in der Toten Höhle")
 N("Dark Troll", GEN_M, "Dunkle Troll", "Dunkle Trolle", "Dunklen Troll")
@@ -1085,6 +1110,8 @@ S(  "Somehow, this cave has not received the spark of Life yet.",
     "Diese Höhle wurde noch nicht vom Funken des Lebens berührt.")
 
 // Hive
+// ----
+
 N("Hive", GEN_N, "Nest", "Nest", "im Nest")
 N("Red Hyperbug", GEN_M, "Roter Hyperkäfer", "Rote Hyperkäfer", "Roten Hyperkäfer")
 N("Green Hyperbug", GEN_M, "Grüner Hyperkäfer", "Grüne Hyperkäfer", "Grünen Hyperkäfer")
@@ -1125,6 +1152,7 @@ S("This orb lets you go through living walls. It also has powers in some of the 
   "Dieser Orb erlaubt es dir, dich durch lebende Wände zu bewegen und er besitzt auch einige Kräfte in anderen Ländern.")
 
 // Land of Power
+// -------------
 
 N("Land of Power", GEN_N, "Land der Macht", "Länder der Macht", "im Land der Macht")
 N("Witch Apprentice", GEN_M, "Hexenlehrling", "Hexenlehrlinge", "Hexenlehrling")
@@ -1193,7 +1221,8 @@ S(
 
 Orb("Fire", "des Feuers")
 
-// achievements:
+// achievements
+// ------------
 
 // x "Head Witch", "Have 10 Orbs active at the same time."
 // "Enemy Number One", "Have an army of 1000 hyperbugs pursue you."
@@ -1240,6 +1269,7 @@ S("Cheat-changed the display.", "Anzeige durch Cheats geändert.")
 S("Dead floor, with some rubble.", "Toter Boden, mit etwas Geröll.")
 
 // Camelot
+// -------
 
 N("Camelot", GEN_N, "Camelot", "Camelot", "in Camelot")
 N("wall of Camelot", GEN_F, "Wand von Camelot", "Wände von Camelot", "Wand von Camelot")
@@ -1291,6 +1321,7 @@ S("\"Have you visited a temple in R'Lyeh?\"", "\"Warst du schon in einem der Tem
 S("\"Nice castle, eh?\"", "\"Nettes Schloss, nicht?\"")
 
 // Temple
+// ------
 
 N("Temple of Cthulhu", GEN_M, "Cthulhus Tempel", "Cthulhus Tempel", "in Cthulhus Tempel")
 N("big statue of Cthulhu", GEN_F, "große Cthulhu Statue", "große Cthulhu Statuen", "große Cthulhu Statue")
@@ -1340,6 +1371,7 @@ S("You already have this Grimoire! Seek new tomes in the inner circles.",
 S("You push %the1 behind you!", "Die schiebst %den1 %1 hinter dich.")
 
 // More texts
+// ----------
 
 S("Your total kills", "Deine Gesamtkills")
 
@@ -1435,6 +1467,7 @@ S("Shift+F, Shift+O, Shift+T, Shift+L, Shift+U, etc.",
   "Du kannst auch ALT im Spiel halten, um hohen Kontrast umzuschalten")
 
 // Crossroads II
+// -------------
 
 N("Crossroads II", GEN_N, "II. Kreuzung", "II. Kreuzungen", "auf der II. Kreuzung")
 
@@ -1445,6 +1478,7 @@ S(
   "Ein alternatives Layout der Kreuzung. Es ist beständiger und dichter, aber du findest Camelot hier nicht.")
 
 // Caribbean
+// ---------
 
 N("Caribbean", GEN_F, "Karibik", "Karibiken", "in der Karibik")
 
@@ -1530,7 +1564,8 @@ S(
     "Orbs der Abschirmung bleiben nach Aktivierung aktiv "
     "und Orbs der Zeit halten in der Karibik länger als an anderen Orten.")
 
-// Achievements:
+// Achievements
+// ------------
 
 // Parrot : Find and collect Pirate Treasure.
 // Caribbean Shark : Collect 10 Pirate Treasures.
@@ -1538,6 +1573,7 @@ S(
 // Master of Caribbean : Collect 50 Pirate Treasures.
 
 // Red Rock Valley
+// ---------------
 
 N("Red Rock Valley", GEN_N, "Rotfelsental", "Rotfelsentäler", "im Rotfelsental")
 
@@ -1593,6 +1629,7 @@ S(
 // Master of Red Rock : Collect 50 Red Gems.
 
 // missing sentences
+// -----------------
 
 S("%The1 drowns!", "%Der1 %1 ertrinkt!");
 S("%The1 falls!", "%Der1 %1 fällt!");
@@ -1603,6 +1640,7 @@ S("Hell has these lakes everywhere... They are shaped like evil stars, and fille
   "Diese Seen sind überall in der Hölle... Sie sehen aus wie böse Sterne, und sind voll mit brennendem Schwefel.")
 
 // Hardcore Mode
+// -------------
 
 S("hardcore mode", "Hardcore Modus");
 
@@ -1610,6 +1648,7 @@ S("One wrong move and it is game over!", "Eine falsche Bewegung kostet dich den 
 S("Not so hardcore?", "Doch nicht so hardcore?");
 
 // Shoot'em up Mode
+// ----------------
 
 S("shoot'em up mode", "Ballermodus");
 S("Welcome to the Shoot'em Up mode!", "Willkommen im Ballermodus!");
@@ -1632,16 +1671,19 @@ S("Some monsters have long tongues, which allow them to attack enemies in nearby
   "Manche Monster haben lange Zungen, mit denen sie Feinde in nahen Zellen angreifen können.")
 
 // modes for the local highscores
+// ------------------------------
 
 S(", m - mode: normal", ", m - Modus: Normal")
 S(", m - mode: hardcore only", ", m - Modus: Hardcore")
 S(", m - mode: shoot'em up", "m - Modus: Ballern")
 
-// update description for Steam:
+// update description for Steam
+// ----------------------------
 
 // (Shoot'em Up mode and two more lands than in the free version, and more are planned!)
 
-// missing lines:
+// missing lines
+// -------------
 
 S("You would get hurt!", "Du würdest dir wehtun!")
 S("PARTIAL", "TEILWEISE")
@@ -1649,6 +1691,8 @@ S("PARTIAL", "TEILWEISE")
 S("Cannot drop %the1 here!", "Du kannst %den1 %1 hier nicht fallenlassen!");
 
 // Euclidean scores
+// ----------------
+
 S(" (E:%1)", " (E:%1)");
 
 S("You cannot attack Rock Snakes directly!", "Du kannst Felsschlangen nicht direkt angreifen!");
@@ -1658,6 +1702,7 @@ S("\"I am lost...\"", "\"Ich bin verloren...\"");
 S("You are killed by %the1!", "%Der1 %1 hat dich getötet!")
 
 // new menu for Version 7.1
+// ------------------------
 
 S("(v) menu", "Menü - V")
 S("return to the game", "zurück zum Spiel")
@@ -1679,6 +1724,7 @@ S("continue game", "Weiter")
 S("play the game!", "Spielen!")
 
 // fixed descriptions for Shmup achievements
+// -----------------------------------------
 
 S("You have used less knives than ever before. Congratulations!",
   "Du hast weniger Messer als zuvor benutzt. Gratulation!")
@@ -1695,8 +1741,9 @@ S("No description yet." ,"Noch keine Beschreibung...")
 S("The sandworm explodes!", "Der Sandwurm explodiert!")
 
 // Ocean
+// -----
 
-// achievements:
+// achievements
 // Reached Ocean: Find and collect an Amber.
 // Albatross: Collect 10 Ambers.
 // Amber Albatross: Collect 25 Ambers.
@@ -1752,8 +1799,9 @@ N("Sea Border", GEN_F, "Seegrenze", "Seegrenzen", "Seegrenze")
 S("Border between seas.", "Eine Grenze zwischen Seen.")
 
 // Whirlpool
+// ---------
 
-// achievements:
+// achievements
 // Escaped Whirlpool: Collect a Pearl, and escape the Whirlpool.
 // Vortex Shark: Collect 10 Pearls.
 // Vortex Pirate: Collect 25 Pearls.
@@ -1790,8 +1838,9 @@ S( "This Orb allows your boat to go against the current, "
 S("You cannot go against the current!", "Du kannst nicht gegen die Strömung schwimmen!")
 
 // Minefield
+// ---------
 
-// achievements:
+// achievements
 // Reached Minefield: Collect a Bomberbird Egg.
 // Minesweeper: Collect 10 Bomberbird Eggs.
 // Bomberbird: Collect 25 Bomberbird Eggs.
@@ -1869,7 +1918,11 @@ S("Seven mines next to you!", "7 Minen um dich!")
 
 S("You have to run away from the water!", "Du musst vor dem Wasser fliehen!")
 
-// Version 7.2
+// VERSION 7.2
+// ===========
+
+// Palace
+// ------
 
 N("Palace", GEN_M, "Palast", "Paläste", "im Palast")
 N("palace wall", GEN_F, "Palastwand", "Palastwände", "Palastwand")
@@ -1961,6 +2014,7 @@ S("Hmm, he has been training in the Emerald Mine. Interesting...", "Er  hat in d
 // Prince: Colect 50 Hypersian Rugs.
 
 // Living Fjord
+// ------------
 
 N("Living Fjord", GEN_M, "Lebender Fjord", "Lebende Fjorde", "Lebender Fjord")
 
@@ -2005,7 +2059,7 @@ S("This Orb lets you dive into the water. While diving, you are able to see and 
   "Du hast Angst von einem Boot aus ins Meer zu springen daher tust du es meist nicht.")
 
 S("%The1 is washed away!", "%der1 %a1 wurde weggeschwemmt!")
-// %1 zosta%?1 zmyt%ya1!")
+
 S("%The1 is extinguished!", "%der1 %a1 wurde gelöscht!")
 
 // Reached the Living Fjord: Find and collect a Garnet.
@@ -2013,14 +2067,13 @@ S("%The1 is extinguished!", "%der1 %a1 wurde gelöscht!")
 // Water Elemental: Colect 25 Garnets.
 // Master of the Fjord: Colect 50 Garnets.
 
-// implemented, not appears in the game yet
-
 Orb("Discord", "des Zwiespalts")
 
 S("Causes most monsters to attack other monsters, not only you and your friends.",
   "Dieser Orb bringt die meisten Monster dazu auch andere Monster und nicht nur dich anzugreifen.")
 
 // Shmup Configuration
+// -------------------
 
 S("forward", "Vor")
 S("backward", "Zurück")
@@ -2074,10 +2127,12 @@ S("press a key for '%1'", "Drücke eine Taste für '%1'")
 S("unassign a key", "Taste entbinden")
 
 // extra pattern modes
+// -------------------
 
 S("explore the Emerald Pattern", "Erkunde das Smaragdmuster")
 
 // extra flavor/Knight lines
+// -------------------------
 
 S("Kill a Vizier in the Palace to access Emerald Mine", "Töte einen Wisier im Palast um Zugang zu den Smaragdminen zu erhalten")
 S("Collect 5 Emeralds to access Camelot", "Sammle 5 Smaragde um Zugang zu Camelot zu erhalten")
@@ -2094,9 +2149,8 @@ S("\"There are %1 floor tiles inside our Table!\"", "\"Es gibt %1 Bodenfliesen i
 S("\"By now, you should have your own formula, you know?\"", "\"Mittlerweile solltest du deine eigene Formel haben weißt du?\"")
 S("\"Have you tried to take a boat and go into the Ocean? Try it!\"", "\"Hast du schon versucht mit einem Boot auf den Ozean zu fahren?\"")
 
-//====================//
-// NEW IN VERSION 7.3 //
-//====================//
+// VERSION 7.3
+// ===========
 
 // new name for 'Ivy D'
 
@@ -2119,7 +2173,7 @@ S("explore the Palace Pattern (4 colors)", "Erkunde die Schlossstruktur (4 Farbe
 S("explore the Palace Pattern (8 colors)", "Erkunde die Schlossstruktur (8 Farben)")
 
 // Map Editor
-//============
+// ===========
 
 S("map editor", "Map Editor")
 S("You activate your terraforming powers!", "Du aktivierst deine terraforming Kräfte!")
@@ -2207,11 +2261,11 @@ S(
   )
 
 // Princess Quest
-//================
+// ===============
 
-// Saved the Princess - "Wybawca" - "Uratuj Ksi??niczk?."
-// Princess Challenge - "Misja Ksi??niczka" - "Zwyci?stwo w misji Ksi??niczka."
-// Martial Artist - "Sztuki walki" - "Pozwól nieuzbrojonej Ksi??niczce wygra? walk?"
+// Saved the Princess"
+// Princess Challenge"
+// Martial Artist"
 
 S(
   "A mouse squeaks at you. It seems that it wants you to go somewhere. "
@@ -2300,7 +2354,8 @@ S("Love takes time, but it heals all wounds, and transcends time and space.\n\n"
   "Liebe braucht Zeit, aber sie heilt alle Wunden und überschreitet die Grenzen von Raum und Zeit.\n\n"
   "Der Orb der Liebe ist 30$$$ wert wenn du das Spiel mit ihm beendest.\n")
 
-// Princess Challenge:
+// Princess Challenge
+// ------------------
 
 S("%1 Challenge", "Herausforderung %1")
 S("Save %the1 first to unlock this challenge!", "Rette zuerst %den1 %a1 um diese Herausforderung freizuschalten!")
@@ -2319,9 +2374,10 @@ S("save whom", "wen retten?")
 S("other", "Andere") // other keys in the main menu
 
 // VERSION 7.4
+// ===========
 
 // missing texts, refactored things, and rule changes
-//====================================================
+// --------------------------------------------------
 
 S("%The1 activates her Flash spell!", "%der1 %1 aktiviert den Blitzzauber!")
 
@@ -2342,7 +2398,7 @@ S("%The1 fills the hole!", "%Der1 %1 füllt das Loch!")
 N("Tentacle+Ghost", GEN_F, "Tentakel+Geist", "Tentakel+Geister", "Tentakel+Geist")
 
 // Land Overview
-//===============
+// -------------
 
 S("world overview", "Weltüberblick")
 S("or 'o' to see the world overview", "oder 'o' um einen Überblick über die Welt zu sehen")
@@ -2396,6 +2452,7 @@ S(" Hyperstone: %1/%2", " Hypersteine: %1/%2")
 S(" Hell: %1/9", " Hölle: %1/9")
 
 // improved editor
+// ---------------
 
 S("vector graphics editor -- press F1 for help", "Vektor Grafiken Editor -- drücke F1 um Hilfe zu erhalten")
 S("pics to save/load:", "Bilder zum speichern/laden:")
@@ -2500,7 +2557,7 @@ S("A fake Land with colored floors.",
 S("random pattern mode", "Zufallsmuster Modus")
 
 // Ivory Tower
-//=============
+// -----------
 
 N("Ivory Tower", GEN_M, "Elfenbeinturm", "Elfenbeintürme", "Elfenbeinturm")
 
@@ -2566,7 +2623,7 @@ S("Nothing to stand on here!", "Es gibt nichts worauf du stehen kannst!")
 S("Gravity does not allow this!", "Die Gravitation erlaubt das nicht!")
 
 // Elemental Planes
-//==================
+// ----------------
 
 N("Elemental Planes", GEN_F, "Elementare Ebene", "Elementare Ebene", "auf der Elementaren Ebene")
 N("Plane of Fire", GEN_F, "Feuerebene", "Feuerebenen", "Feuerebene ")
@@ -2621,7 +2678,7 @@ N("limestone wall", GEN_F, "Kalkstein Wand", "Kalkstein Wände", "Kalkstein Wand
 S("Simply a wall. Mostly.", "Eine einfache Wand. Größtenteils.")
 
 // Zebra
-//=======
+// -----
 
 N("Zebra", GEN_N, "Zebra", "Zebras", "in Zebra")
 S("Everything in this Land has black and white stripes.",
@@ -2634,7 +2691,7 @@ N("Onyx", GEN_M, "Onyx", "Onyxe", "Onyx")
 S("A black gem with white stripes. It is beautiful.", "Ein schwarzer Edelstein mit weißen Streifen. Er ist wunderschön.")
 
 // Crossroads III
-//================
+// --------------
 
 N("Crossroads III", GEN_F, "Kreuzung III", "Kreuzungen III", "an Kreuzung III")
 
@@ -2651,7 +2708,7 @@ S("You summon %the1!", "Du beschwörst %den1 %a1!")
 S("F4 = file", "F4 = Datei")
 
 // VERSION 8.0
-//=============
+// ============
 
 S("The Air Elemental blows you away!", "Der Luftelementar weht dich weg!")
 
@@ -2670,7 +2727,7 @@ S("There are several species of trolls living in the hyperbolic world. "
   "Manche von ihnen hinterlassen Wände wenn sie sterben.")
 
 // paper model creator
-//---------------------
+// --------------------
 
 S("paper model creator", "Papiermodell Schöpfer")
 S("synchronize net and map", "Synchronisier Netz und Karte")
@@ -2684,7 +2741,7 @@ S("Failed to load the file 'papermodeldata.txt'", "papermodeldata.txt konnte nic
 S("Could not save the paper model data", "Papiermodell konnte nicht gespeichert werden")
 
 // pure tactics mode
-//-------------------
+// ------------------
 
 S("pure tactics mode", "Strategiemodus")
 S("Not available in the pure tactics mode!", "Nicht verfügbar im Strategiemodus!")
@@ -2739,7 +2796,7 @@ S(
         "Viel Glück und Erfolg!")
 
 // Yendor Challenge
-//------------------
+// -----------------
 
 S("Yendor Challenge", "Yendor Herausforderung")
 S("Collect 10 treasures in various lands to unlock the challenges there",
@@ -2805,7 +2862,7 @@ S("Collect 10 treasures in various lands to unlock the challenges there",
   "Sammle 10 Schätze in den verschiedenen Ländern um Herausforderungen freizuschalten")
 
 // Wild West
-//-----------
+// ----------
 
 N("Wild West", GEN_M, "Wilder Westen", "Wilde Westen", "im Wilden Westen")
 N("Outlaw", GEN_M, "Bandit" ,"Banditen", "Bandit")
@@ -2825,7 +2882,7 @@ S(
   "Hinweis: Dieses Land ist nur in Spezialmodi verfügbar. ")
 
 // Land of Storms
-//----------------
+// ---------------
 
 S(
   "Whenever after your move there is a connection between a charged and a "
@@ -2884,7 +2941,7 @@ S("This Orb allows you to target monsters to stun them. "
 S("You stun %the1!", "Du betäubst %den1 %a1!")
 
 // Overgrown Woods
-//-----------------
+// ----------------
 
 Orb("Luck", "des Glücks")
 
@@ -2946,4 +3003,3 @@ S("TRANSLATIONWARNING", "VORSICHT: Die deutsche Übersetzung enthält keine")
 S("TRANSLATIONWARNING2", "Funktionen nach Version 8.1! (Arbeite dran <3)")
 
 #undef Orb
-

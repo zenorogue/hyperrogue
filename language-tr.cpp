@@ -3,17 +3,20 @@
 
 // This translation file is encoded with UTF-8
 
-// Nouns.
+// Nouns
 
 #define Orb(X,Y) N("Orb of " X, GEN_F, Y " Küresi", Y " Küreleri", Y " Küresini", Y " Küresiyle")
 
 
 // For each noun, provide the type of the noun, and all the grammatical forms
-// required by HyperRogue. For example, in Polish each noun can be 
-// masculine living (GEN_M), masculine object (GEN_O), 
+// required by HyperRogue. For example, in Polish each noun can be
+// masculine living (GEN_M), masculine object (GEN_O),
 // feminine (GEN_F), or neuter (GEN_N). The following forms are given:
 // nominative (referred to as %1), nominative plural (%P1), accusative (%a1).
 // Feel free to add more (or less) forms or types if needed.
+
+// MONSTERS
+// ========
 
 N("Yeti", GEN_M, "Yeti", "Yeti", "Yeti", "Yeti")
 N("Icewolf", GEN_M, "Buzkurdu", "Buzkurtları", "Buzkurdunu", "Buzkurduyla")
@@ -70,7 +73,10 @@ N("Hyperstone", GEN_O, "Aşkıntaş", "Aşkıntaşlar", "Aşkıntaşı", "Aşkı
 // N("Hyperstone", GEN_O, "Üstüntaş", "Üstüntaşlar", "Üstüntaşı", "Üstüntaşla")
 N("Key", GEN_O, "Anahtar", "Anahtarlar", "Anahtarı", "Anahtarla")
  N("Dead Orb", GEN_F, "Ölü Küre", "Ölü Küreler", "Ölü Küreyle", "Ölü Küreyi")
- 
+
+// ORBS
+// ====
+
 N("Orb of Yendor", GEN_F, "Yendor Küresi", "Yendor Küreleri", "Yendor Küresini", "Yendor Küresiyle")
 N("Orb of Storms", GEN_F, "Fırtına Küresi", "Fırtına Küreleri", "Fırtına Küresini", "Fırtına Küresiyle")
 N("Orb of Flash", GEN_F, "Şimşek Küresi", "Şimşek Küreleri", "Şimşek Küresini", "Şimşek Küresiyle")
@@ -83,6 +89,10 @@ N("Orb of Teleport", GEN_F, "Işınlanma Küresi", "Işınlanma Küreleri", "Iş
 N("Orb of Safety", GEN_F, "Güvenlik Küresi", "Güvenlik Küreleri", "Güvenlik Küresini", "Güvenlik Küresiyle")
 N("Orb of Thorns", GEN_F, "Diken Küresi", "Diken Küreleri", "Diken Küresini", "Diken Küresiyle")
  N("Fern Flower", GEN_O, "Eğreltiotu Çiçeği", "Eğreltiotu Çiçekleri", "Eğreltiotu Çiçeğini", "Eğreltiotu Çiçeğiyle")
+
+// TERRAIN FEATURES
+// ================
+
 N("none", GEN_O, "hiç", "hiçler", "hiçi", "hiçle")
 N("ice wall", GEN_F, "Buzdan Duvar", "Buzdan Duvarlar", "Buzdan Duvarı", "Buzdan Duvarda")
 N("great wall", GEN_F, "Çin Seddi", "Çin Setleri", "Çin Seddini", "Çin Seddinde")
@@ -105,7 +115,10 @@ N("frozen lake", GEN_N, "Donmuş Göl", "Donmuş Göller", "Donmuş Gölü", "Do
 N("chasm", GEN_N, "Uçurum", "Uçurumlar", "Uçurumu", "Uçurumda")
 N("big tree", GEN_N, "Büyük Ağaç", "Büyük Ağaçlar", "Büyük Ağacı", "Büyük Ağaçla")
 N("tree", GEN_N, "Ağaç", "Ağaçlar", "Ağacı", "Ağaçla")
-// "???"
+
+// LANDS
+// =====
+
 N("Great Wall", GEN_N, "Yüksek Duvar", "Yüksek Duvarlar", "Yüksek Duvarı", "Yüksek Duvarda")
 N("Crossroads", GEN_N, "Arayollar", "Arayollar", "Arayolları", "Arayollarda")
 N("Desert", GEN_F, "Çöl", "Çöller", "Çölü", "Çölde")
@@ -115,7 +128,6 @@ N("Jungle", GEN_F, "Vahşi Orman", "Vahşi Ormanlar", "Vahşi Ormanı", "Vahşi 
 N("Alchemist Lab", GEN_N, "Laboratuar", "Laboratuarlar", "Laboratuarı", "laboratuarda")
 N("Mirror Land", GEN_F, "Aynalar Diyarı", "Aynalar Diyarları", "Aynalar Diyarını", "Aynalar Diyarında")
 N("Graveyard", GEN_O, "Mezarlık", "Mezarlıklar", "Mezarlığı", "Mezarlıkta")
-// "R'Lyeh"
 N("R'Lyeh", GEN_N, "R'Lyeh", "R'Lyeh", "R'Lyeh", "R'Lyeh")
 N("Hell", GEN_N, "Cehennem", "Cehennemler", "Cehennemi", "Cehennemde")
 N("Cocytus", GEN_M, "Kokitos", "Kokitoslar", "Kokitosu", "Kokitosta")
@@ -123,9 +135,11 @@ N("Land of Eternal Motion", GEN_N, "Sonsuz Devinim Diyarı", "Sonsuz Devinim Diy
 N("Dry Forest", GEN_M, "Kara Orman", "Kara Ormanlar", "Kara Ormanı", "Kara Ormanda")
 N("Game Board", GEN_F, "Tahta", "Tahtalar", "Tahtayı", "Tahtada")
 
-// Game messages
+// GAME MESSAGES
+// =============
 
 // fighting messages
+// -----------------
 
 // ablative !
 
@@ -166,7 +180,7 @@ S("You activate the Lightning spell!", "Şimşek büyüsünü etkinleştirdin!")
 S("Ice below you is melting! RUN!", "Altındaki buz eriyor! KAÇ!")
 S("This spot will be burning soon! RUN!", "Bu nokta yakında yanacak! KAÇ!")
 S("The floor has collapsed! RUN!", "Zemin çöktü! KAÇ!")
-S("You need to find the right Key to unlock this Orb of Yendor!", 
+S("You need to find the right Key to unlock this Orb of Yendor!",
   "Bu Yendorun Küresinin kilidini açmak için bir anahtara ihtiyacın var!")
 S("You fall into a wormhole!", "Bir solucan deliğine düştün!")
 S("You activate %the1.", "%a1 aktifleştirdin.")
@@ -183,7 +197,8 @@ S("Good to know that your fighting skills serve you well in this strange world."
 S("You wonder where all these monsters go, after their death...", "Bütün bu canavarların ölümlerinden sonra nereye gittiklerini merak ediyorsun...")
 S("You feel that the souls of slain enemies pull you to the Graveyard...", "Katlettiğin düşmanların ruhlarının seni mezarlığa çektiğini hissediyorsun...")
 S("Wrong color!", "Yanlış renk!")
-//this one is a bit problematic
+
+// this one is a bit problematic
 S("You cannot move through %the1!", "%1 hücresinden geçemezsin!")
 // S("You cannot move through %the1!", "%abl1n geçemezsin!")
 S("%The1 would kill you there!", "%1 orada seni hemencecik öldürür!")
@@ -195,7 +210,8 @@ S("You have found the Key! Now unlock this Orb of Yendor!", "Anahtarı buldun! B
 S("This orb is dead...", "Bu küre ölü...")
 S("Another Dead Orb.", "Başka bir Ölü Küre.")
 S("You have found %the1!", "%a1 buldun!")
-//THIS ONE IS A BIT PROBLEMATIC
+
+// THIS ONE IS A BIT PROBLEMATIC
 S("You feel that %the2 become%s2 more dangerous.", "Topladığın her %abl1, ...")
 S("With each %1 you collect...", "%2 gittikçe daha tehlikeli bir hâl alıyor...")
 S("Are there any magical orbs in %the1?...", "%abl1 başka sihirli küre var mı?")
@@ -335,7 +351,7 @@ S("objects found: %1", "bulunan eşyalar: %1")
 S("orb power: %1", "küre gücü: %1")
 S(" (click to drop)", " (bırakmak için tıkla)")
 S("You can also scroll to the desired location and then press 't'.", "İstersen görüntüyü isteidğin yere çekip sonra 't'ye basabilirsin.")
-S("Thus, it is potentially useful for extremely long games, which would eat all the memory on your system otherwise.\n", 
+S("Thus, it is potentially useful for extremely long games, which would eat all the memory on your system otherwise.\n",
   "Yani, bu olası çok uzun, sistemin tüm hafızasını tüketecek oyunlarında yardımcı olabilir.")
 S("You can touch the Dead Orb in your inventory to drop it.", "Ölü Küreye dokunarak onu bırakabilirsin.")
 S("This might be useful for Android devices with limited memory.", "Bu, sınırlı hafızalı Android cihazları için kullanışlı olabilir.")
@@ -394,6 +410,7 @@ S("anti-aliasing disabled", "Anti-aliasing devredışı")
 S("You activate your demonic powers!", "Şeytani güçlerini aktifleştirdin!")
 
 // Steam messages
+// --------------
 
 S("New Achievement:", "Yeni Başarım:")
 S("Your total treasure has been recorded in the Steam Leaderboards.", "Toplam hazinen Steam Listelerine kaydedildi.")
@@ -412,7 +429,10 @@ S("You have improved both your real time and turn count. Congratulations!", "Hem
 S("You have used less real time than ever before. Congratulations!", "Bu her zamankinden daha az zaman aldı! Tebrikler!")
 S("You have used less turns than ever before. Congratulations!", "Her zamankinden daha az sayıda tur kullandın! Tebrikler! ")
 
-// help texts. These are separated into multiple lines just for convenience,
+// help texts
+// ----------
+
+// These are separated into multiple lines just for convenience,
 // you don't have to follow.
 
 S(
@@ -430,7 +450,7 @@ S(
  "You can fight most monsters by moving into their location. "
  "The monster could also kill you by moving into your location, but the game "
  "automatically cancels all moves which result in that.\n\n",
- 
+
  "Çoğu canavarın yerine ilerleyerek onu öldürebilirsin. Canavar da seni senin bulunduğun yere ilerleyerek öldürebilir, ama oyun böyle hamlelere zaten izin vermez.\n\n")
 
 S(
@@ -445,7 +465,7 @@ S("Move with mouse, num pad, qweadzxc, or hjklyubn. Wait by pressing 's' or '.'.
  "To save the game you need an Orb of Safety. Press 'v' for config, ESC for the quest status and menu.\n\n",
  "Fareyle, sayı tuşlarıyla, qweadzxc ile, veya hjklyubn ile hareket et.  's' ya da '.' ile bekle. "
  "Oklarla, PageUp/Down ile veya  Home/Space ile dünyayı çevirebilirsin. Oyunu kaydetmek için Güvenlik Küresine ihtiyacın var. Ayarlar için 'v'ye görev durumu ve menü için 'ESC'ye bas.\n\n")
- 
+
 S("See more on the website: ", "Daha fazlasını websitesinde görüntüleyin: ")
 
 S(
@@ -494,7 +514,7 @@ S(
  "point with mouse and: a - add point, m - move nearest point, d - delete nearest point, c - nearest point again, b - add after nearest\n\n"
  "s - save in C++ format (but cannot be loaded yet without editing source)\n\n"
  "z - zoom, o - Poincaré model\n",
- 
+
  "Bu modda, kendi karakterini ve zemini çizebilirsin. "
  "Aslında geliştirme amaçları için vri ama eğlence için de kullanabilirsin.\n\n"
  "f - zemin, p - oyuncu (katman eklemek için 'p'ye tekrar bas)\n\n"
@@ -542,7 +562,7 @@ S(
  "Even then, you will be able to slay this one, but more powerful demons will come...\n\n"
  "Each 10 lesser demons you kill, you become powerful enough to kill all the greater "
  "demons on the screen, effectively turning them into lesser demons.",
- 
+
  "Bu yaratıklar yavaştır ama çok güçlüdür. Senden bile. "
  "Bunları yenebilmek için öncesinde şeytanlarla savaşma konusunda tecrübeli olman gerekir. "
  "O zaman bile, bunu yenebilirsin, ama daha güçlü şeytanlar gelecektir...\n\n"
@@ -761,7 +781,7 @@ S("This orb lets you instantly move to a safe faraway location. Knowing the natu
 
 S("This orb allows attacking Hedgehog Warriors directly, as well as stabbing other monsters.\n",
   "Bu küre Kirpi Savaşçılara doğrudan saldırmaya ve diğer canavarları bıçaklamaya izin verir.\n")
- 
+
 S("This flower brings fortune to the person who finds it.\n",
   "Bu çiçek kendisini bulana şans getirir.\n")
 
@@ -904,6 +924,7 @@ S("Periodic Editor", "Periyodik Editör")
 S("Collect 60 $$$ to access even more lands", "Daha da fazla diyara ulaşmak için 60 $$$ toplayın.")
 
 // Emerald Mine
+// ------------
 
 N("Emerald Mine", GEN_F, "Zümrüt Madeni", "Zümrüt Madenleri", "Zümrüt Madenini", "Zümrüt Madeninde")
 N("Pikeman", GEN_M, "Mızraklı", "Mızraklılar", "Mızraklıyı", "Mızraklıyla")
@@ -936,7 +957,7 @@ S(
     "You cannot attack him directly, as the flail would still hit you then. "
     "Luckily, you have learned a trick: if you step away from him, "
     "he will hit himself with the flail!",
-    
+
     "Zümrüt Madeninin bu muhafızı kocaman bır topuz tutuyor. Ona doğrudan saldıramazsın, çünkü topuz sana yine de vurur. Çok şükür bir hile öğrendin: Eğer geriye doğru bir adım atarsan, muhafız topuzuyla kendisine vuracak!")
 
 S("A precious green gem from the Emerald Mines.", "Zümrüt Madenlerinden eğerli yeşil bir mücevher.")
@@ -954,6 +975,7 @@ S("%The1 is immune to mental blasts!", "%1 zihin patlamasından etkilenmez!")
 S("You kill %the1 with a mental blast!", "%a2 zihin patlamasıyla öldürdün!")
 
 // Vineyard
+// --------
 
 N("Vineyard", GEN_F, "Şaraplık", "Şaraplıklar", "Şaraplığı", "Şaraplıkta")
 N("Vine Beast", GEN_M, "Şarap Canavarı", "Şarap Canavarları", "Şarap Canavarını", "Şarap Canavarıyla")
@@ -965,7 +987,7 @@ N("Wine", GEN_N, "Şarap", "Şaraplar", "Şarabı", "Şarapla")
 S(  "This cell is partially on fire.", "Bu hücre kısmen alevler içinde.")
 
 S(
-  "The Vineyard is filled with vines. A very dense pattern of straight lines here...\n\n" 
+  "The Vineyard is filled with vines. A very dense pattern of straight lines here...\n\n"
   "Vine Beasts and Vine Spirits change vine cells to grass, and vice versa.",
   "Şaraplık şaraplarla dolu. Burada çok sık düz çizgiler var ...\n\n"
   "şŞarap Canavarları ve Şarap Özleri şarap hücrelerini çimene ve tam tersine çevirir.")
@@ -999,6 +1021,7 @@ S("You cannot attack through the Vine!",
 Orb("Aether", "Eter")
 
 // Dead Caves
+// ----------
 
 N("Dead Cave", GEN_F, "Ölü Mağara", "Ölü Mağaralar", "Ölü Mağarayı", "Ölü Mağarada")
 N("Dark Troll", GEN_M, "Kara Trol", "Kara Troller", "Kara Trolü", "Kara Trolle")
@@ -1017,7 +1040,7 @@ S(
     "It instantly destroys cave walls next to its path, and also leaves "
     "an impassable wall behind it. You suppose that this impassable wall helps it to "
     "escape from some threats. You hope you won't meet these threats...",
-    
+
     "Ölü Mağaralardan cansız bir mekanizma. Yoluna çıkan tüm mağara duvarlarını yıkar ve arkasında geçilemeyen bir duvar bırakır."
     "Bu duvarları birtakım tehditlerden kullanabileceğini düşünüyorsun. Aynı zamanda bu tehditlerle hiç karşılaşmayacağını da umuyorsun..")
 
@@ -1027,6 +1050,8 @@ S(  "Somehow, this cave has not received the spark of Life yet.",
     "Nasılsa bu mağaraya yaşamın ışığı hiç uğramamış.")
 
 // Hive
+// ----
+
 N("Hive", GEN_N, "Kovan", "Kovanlar", "Kovanı", "Kovanda")
 N("Red Hyperbug", GEN_M, "Kırmızı Aşkınböcek", "Kırmızı Aşkınböcekler", "Kırmızı Aşkınböceği", "Kırmızı Aşkınböcekle")
 N("Green Hyperbug", GEN_M, "Yeşil Aşkınböcek", "Yeşil Aşkınböcekler", "Yeşil Aşkınböceği", "Yeşil Aşkınböcekle")
@@ -1063,6 +1088,7 @@ S("This orb lets you go through living walls. It also has powers in some of the 
   "Bu küre yaşayan duvarların içinden geçebilmeni sağlar. Bazı başka diyarlarda da başka güçleri olabilir.")
 
 // Land of Power
+// -------------
 
 N("Land of Power", GEN_F, "Güç Diyarı", "Güç Diyarları", "Güç Diyarını", "Güç Diyarında")
 N("Witch Apprentice", GEN_F, "Cadı Kalfası", "Cadı Kalfaları", "Cadı Kalfasını", "Cadı Kalfasıyla")
@@ -1098,7 +1124,7 @@ S(  "A Witch with an Aether spell. She is able to move through fire and walls.",
 
 S(  "Somebody has summoned these evil constructs with a magical process.",
     "Birisi büyüyle işleyen bu mekanizmaları harekete geçirmiş.")
-    
+
 S(  "The Land of Power is filled with everburning fire, magical Orbs, and guarded by "
     "witches and golems. There are basic orbs lying everywhere, and more prized ones "
     "are kept in crystal cabinets.\n\n"
@@ -1125,7 +1151,8 @@ S(
 
 Orb("Fire", "Ateş")
 
-// achievements:
+// achievements
+// ------------
 
 // x "Head Witch", "Have 10 Orbs active at the same time."
 // "Enemy Number One", "Have an army of 1000 hyperbugs pursue you."
@@ -1134,7 +1161,7 @@ Orb("Fire", "Ateş")
 // x "Master Swordsman", "Defeat a Hedgehog Warrior, a Pikeman, and a Flail Guard at the same time."
 // x "Master of Melee", "Defeat five monsters in melee at the same time."
 
-// for collection achievements: 
+// for collection achievements:
 // provide the required cases for descriptions:
 // Spice, Royal Jelly, Silver, Powerstone, and Wine
 // achievement names:
@@ -1153,7 +1180,7 @@ S("%The1 tricks %the2.", "%1 %a2 kandırdı.")
 S("You trick %the1.", "%a1 kandırdın.")
 
 S(  "A Witch with a Flash spell. Very dangerous!\n\nLuckily, she never uses the spell if it "
-    "would kill her friends. She could destroy an Evil Golem, though.", 
+    "would kill her friends. She could destroy an Evil Golem, though.",
     "Işık büyüsü olan bir cadı. Çok tehlikeli!\n\n Çok şükür, büyüsünü büyüsü arkadaşlarını da öldürecekse hiç kullanmaz. Ama Şeytani Golemi de umursayacak değil tabi.")
 
 S("Your Aether powers are drained by %the1!", "Güçlerin %1 tarafından tüketiliyor!")
@@ -1182,6 +1209,7 @@ S("Date: %1 time: %2 s ", "Tarih: %1 zaman: %2 s ")
 S("distance: %1\n", "uzaklık: %1\n")
 
 // Camelot
+// -------
 
 N("Camelot", GEN_O, "Kamelot", "Kamelotlar", "Kamelotu", "Kamelotta")
 N("wall of Camelot", GEN_F, "Kamelot Duvarı", "Kamelot Duvarları", "Kamelot Duvarını", "Kamelot Duvarıyla")
@@ -1228,6 +1256,7 @@ S("\"Have you visited a temple in R'Lyeh?\"", "\"R'Lyeh'teki tapınağı ziyaret
 S("\"Nice castle, eh?\"", "\"Kalemiz güzel, değil mi?\"")
 
 // Temple
+// ------
 
 N("Temple of Cthulhu", GEN_F, "Cthulhu'nun Tapınağı", "Cthulhu'nun Tapınakları", "Cthulhu'nun Tapınağını", "Cthulhu'nun Tapınağında")
 N("big statue of Cthulhu", GEN_O, "Cthulhu'nun Putu", "Cthulhu'nun Putları", "Cthulhu'nun Putunu", "Cthulhu'nun Putuyla")
@@ -1240,7 +1269,7 @@ S("The temple of Cthulhu consists of many concentric circles of columns. "
   "which surely contain many interesting secrets.\n\n"
   "The circles in the temple of Cthulhu are actually horocycles. They are "
   "infinite, and there is an infinite number of them.",
-  
+
   "Cthulhu tapınağı çok sayıda eş merkezli dairesel sütunlardan oluşur. "
   "Burada iç dairelere yapılan bir haccın kendilerini Cthulhu'ya daha çok yaklaştırdığına inanan bir çok Müritle ve çok ilginç sırlar içeren Kara Kitaplarla karşılaşacaksın. \n\n"
   "Cthulhu Tapınağının merkezindeki daireler aslında horoçemberler. Onlar sonsuz ve onlardan sonsuz tane var."
@@ -1259,7 +1288,7 @@ S("These statues of Cthulhu are too large to carry, and they don't look too "
   "valuable anyway. Most monsters will never go through them... they probably have "
   "their reasons. But you can go! When you move into the cell containing "
   "a statue, you push the statue to the cell you left.\n",
-  
+
   "Cthulhu putları taşımak için fazla büyük, zaten çok değerli de gözükmüyorlar. Canavarların çoğu onların içinden geçmiyor, bunun bir sebebi olmalı. "
 "Ama sen bunların içinden geçebilirsin! Putun olduğu hücreye girdiğinde putu terkettiğin hücreye itersin. \n"
   )
@@ -1269,10 +1298,11 @@ S("These Cultists can push the statues, just like you.",
 
 S("You already have this Grimoire! Seek new tomes in the inner circles.",
   "Bu Kara Kitaptan elinde zaten var! Yeni ciltleri iç dairelerde ara.")
-  
+
 S("You push %the1 behind you!", "%a1 arkana ittin.")
 
 // More texts
+// ----------
 
 S("Your total kills", "Toplam leşler")
 
@@ -1284,7 +1314,7 @@ S(
 
   "Çoğu diyarda, orada yaşayan canavarları öldürmen daha çok hazineyle karşılaşmanı sağlar. Ayrıca 100 leş Mezarlık ve Kovana girmen için bir önkoşuldur. \n\n"
 "Dost yaratıklar ve canavarların parçaları (Sarmaşık gibi) litede gözükürt, ama toplam leşlere dahil edilmez.")
-  
+
 S("There must be some temples of Cthulhu in R'Lyeh...",
   "R'Lyeh'te Cthulhu'ya adanmış bazı tapınaklar olmalı...")
 
@@ -1293,7 +1323,7 @@ S("You overheard Hedgehog Warriors talking about emeralds...",
 
 S("You overhear miners talking about a castle...",
   "Madencilerin bir kale hakkında konuştuğunu duydun...")
-  
+
 S("A castle in the Crossroads...", "Arayollarda bir Kale...")
 
 S("You have to escape first!", "Önce kaçman gerekiyor!");
@@ -1306,8 +1336,6 @@ S("Congratulations! You have found the Holy Grail!",
   "Tebrikler! Kutsal Kâseyi buldun!")
 
 Orb("the Dragon", "Ejderha")
-
-
 
 S("This Orb allows you to throw fire, just like the Fire Cultists.\n\n"
   "Each fire drains 5 charges. You are not allowed to throw fire into adjacent cells.",
@@ -1350,7 +1378,7 @@ S("Cannot throw fire there!", "Oraya ateş atamazsın!")
 S("Illusions are targetted "
   "by most monsters, just like yourself, Thumpers, and your friends.",
   "İlüzyonlar tıpkı sen, Gümleyenler ve dostların gibi pek çok canavar tarafından saldırıya uğrayabilir.")
- 
+
 S("or ESC to see how it ended", "veya nasıl bittiğini görmek için ESC'ye bas")
 S("high contrast", "yüksek kontrast")
 S("draw the heptagons darker", "yedigenleri daha koyu çiz");
@@ -1363,18 +1391,18 @@ S("also hold Alt during the game to toggle high contrast",
   "ayrıca oyun sırasında Alt'a basılı tutarak yüksek kontrastı açıp kapatabilirsin.")
 
 // Crossroads II
+// -------------
 
 N("Crossroads II", GEN_N, "Arayollar 2", "Arayollar 2'ler", "Arayollar 2'yi", "Arayollar 2'de")
 
 S(
   "An alternate layout of the Crossroads. It is more dense and more regular, "
   "although you won't find the castle of Camelot here.",
-  
+
   "Arayolların alternatif bir versiyonu. Daha yoğun ve daha düzenli, ama Kamelot'un kalesini burada bulamazsın.")
 
 // Caribbean
-
-// 'Karaiby' is plural in Polish, should probably fix the grammar for this
+// ---------
 
 N("Caribbean", GEN_M, "Karayipler", "Karayip", "Karayipleri", "Karayiplerde")
 
@@ -1403,7 +1431,7 @@ S(
     "are so close. These small boats are enough for them.\n\n"
     "Boats allow you to go through water. If you are in a boat, you can move into "
     "a water cell (and the boat will come with you).",
-    
+
     "Hiperbolik korsanlar yakınlarda fethedilecek bir sürü toprak olduğundan devasa gemilere ihtiyaç duymuyor. "
     "Bu küçük kayıklar onlar için yeterli.\n\n"
     "Kayıklar suda ilerleyebilmeni sağlıyor. Eğer bir kayık içindeysen, bir su hücresine ilerleyebilirsin. (Ve kayık da seninle birlikte gelir). ")
@@ -1421,7 +1449,7 @@ S(
   "The hyperbolic pirates have no use for treasure maps. However, they have found "
   "out that a compass points to the center of the island. So they just go as "
   "far towards the center as they can, and hide their treasure there.",
-  
+
   "Hazine haritalarının hiperbolik korsanlar için bir değeri yok. "
   "Ancak, adanın ortasını gösteren bir pusula keşfettiler. "
   "Böylece, ortaya doğru olabildiğince ilerler ve hazinelerini orada saklarlar.")
@@ -1438,23 +1466,24 @@ S("Just a typical hyperbolic pirate.", "Sadece bildiğiniz bir hiperbolik korsan
 S(
     "Normally, the power of most Orbs slowly fades away, even when "
     "you are not actively using them. This Orb prevents this.\n\n"
-    
+
     "When you have the Orb of Time, Orbs which are not active won't lose their power. "
     "Orbs are considered active if they have a continuous power which has actually "
     "affected something in the last turn.\n\n"
-    
+
     "Orbs of Shielding remain active after being activated (even if you are no longer "
     "attacked), and Orbs of Time have a bigger cap inside their native Caribbean than "
     "outside.",
-    
+
     "Normalde Kürelerin güçleri ,onları aktif olarak kullanmadığında bile, yavaşça azalır. Bu Küre bunu engeller.\n\n"
-    
+
     "Zaman Küresine sahip olduğunda aktif olmayan küreler güçlerini kaybetmez. Sürekli gücü olan küreler eğer son turda bir şey etkiledilerse aktif sayılır.\n\n"
-    
+
     "Kalkan Küresi aktifleştirdikten sonra da (saldıraya uğramasan bile) aktif kalır.  "
     "Ayrıca Zaman Küresinin sınırı onların bulunduğu Karayiplerde daha fazladır.")
 
-// Achievements:
+// Achievements
+// ------------
 
 // Parrot : Find and collect Pirate Treasure.
 // Caribbean Shark : Collect 10 Pirate Treasures.
@@ -1467,6 +1496,7 @@ S(
 // Karayip Korsanı : 50 Korsan Hazinesi topla.
 
 // Red Rock Valley
+// ---------------
 
 N("Red Rock Valley", GEN_F, "Kızılkaya Vadisi", "Kızılkaya Vadileri", "Kızılkaya Vadisini", "Kızılkaya Vadisinde")
 
@@ -1497,7 +1527,7 @@ S("A kind of Troll native to the Red Rock Valley.",
 S(
   "Rock snakes are similar to Sandworms, but they move each turn. However, they "
   "only move on the hexagonal cells. They are also somewhat longer than the Sandworms.",
-  
+
   "Kaya yılanları her tur hareket etmesi hariç Kumkurtlarına benzer. Ayrıca, sadece altıgen hücrelerde hareket ederler. Kumkurtlarından bir nebze daha genişlerdir. ")
 
 S("A gem from the Red Rock Valley.", "Kızılkaya Vadisinden bir kızıl mücevher.")
@@ -1507,7 +1537,7 @@ S(
     "monsters or barriers on the way. The cost of "
     "bringing an item (in charges) equals the square of its distance to you. Contrary "
     "to some other Orbs, usage is not allowed if you have not enough power left.",
-    
+
   "Bu küre uzaktaki eşyaları , arada canavar yahut engeller olup olmadığı farketmeksizin, senin olduğun hücreye getirir. Bu işlem eşyanın uzaklığı kadar güç tüketir. Bazı Kürelerin aksine, güç yoksa bu küreyi kullanamazsın.")
 
 // Climber : Find and collect a Red Gem.
@@ -1531,6 +1561,7 @@ S("Hell has these lakes everywhere... They are shaped like evil stars, and fille
   "Cehennemde her yerde bunun gibi göller var. Şeytani star şeklinde ve yanan sülfürle dolu...")
 
 // Hardcore Mode
+// -------------
 
 S("hardcore mode", "Aşmış mod");
 
@@ -1538,6 +1569,7 @@ S("One wrong move and it is game over!", "Tek bir yanlış hamle ve oyun biter!"
 S("Not so hardcore?", "O kadar da aşmış değil?");
 
 // Shoot'em up Mode
+// ----------------
 
 S("shoot'em up mode", "tryb strzelanki");
 S("Welcome to the Shoot'em Up mode!", "Witaj w trybie strzelanki!");
@@ -1558,14 +1590,16 @@ S("This attack is likely to hit the attacker.",
 S("This magical missile burns whatever it hits.", "Bu büyülü saldırı değdiği şeyi yakar.")
 S("Some monsters have long tongues, which allow them to attack enemies in nearby cells.",
   "Bazı canavarlar uzun dillere sahip, böylece yakındaki hücrelere saldırabiliyorlar.")
-  
+
 // modes for the local highscores
+// ------------------------------
 
 S(", m - mode: normal", ", m - normal mod")
 S(", m - mode: hardcore only", ", m - aşmış mod")
 S(", m - mode: shoot'em up", "m - SHMUP modu")
 
-// update description for Steam:
+// update description for Steam
+// ----------------------------
 
 // (SHMUP modu ve bedava versiyonda olmayan iki yeni diyar, ve daha fazlası eklenecek!)
 
@@ -1575,6 +1609,8 @@ S("PARTIAL", "KISMÎ")
 S("Cannot drop %the1 here!", "Ölü Küreyi buraya bırakamazsın!");
 
 // Euclidean scores
+// ----------------
+
 S(" (E:%1)", " (Ö:%1)");
 
 S("You cannot attack Rock Snakes directly!", "Kaya Yılanlarına doğrudan saldıramazsın!");
@@ -1622,13 +1658,14 @@ S("continue game", "oyuna devam et")
 S("play the game!", "oyna!")
 
 // fixed descriptions for Shmup achievements
+// -----------------------------------------
 
 S("You have used less knives than ever before. Congratulations!",
   "Her zamankinden daha az bıçak kullandın. Tebrikler!")
-  
+
 S("You have improved both your real time and knife count. Congratulations!",
   "Hem toplam zamanını hem de bıçak sayını geliştirdin. Tebrikler!")
-  
+
 S("%1 knives (%2)", "bıçaklar: %1 (%2)")
 
 // temporary
@@ -1638,6 +1675,7 @@ S("No description yet." ,"Henüz bir açıklama yok.")
 S("The sandworm explodes!", "Kumkurdu patladı!")
 
 // Ocean
+// -----
 
 // achievements:
 // Reached Ocean: Find and collect an Amber.
@@ -1675,7 +1713,7 @@ S(
   "wait for the tide, you will be able to use it to travel through the Ocean.",
 
   "Bu bot kumda hareket edemez. Ama içine oturur ve dalgayı beklersen bunu OKyanus'ta seyahat etmek için kullanabilirsin."
-  )    
+  )
 
 N("Ocean", GEN_O, "Okyanus", "Okyanuslar", "Okyanusu", "Okyanusla")
 
@@ -1701,6 +1739,7 @@ N("Sea Border", GEN_O, "Deniz Sınırı", "Deniz Sınırları", "Deniz Sınırı
 S("Border between seas.", "Denizler arasındaki sınır.")
 
 // Whirlpool
+// ---------
 
 // achievements:
 // Escaped Whirlpool: Collect a Pearl, and escape the Whirlpool.
@@ -1720,7 +1759,7 @@ S(
   "and Pirates.\n\n"
   "Unmanned boats will go one cell clockwise in each turn. Sharks and manned boats "
   "are only allowed to go with the current, that is, towards the center, or clockwise.",
-  
+
   "Bu tayfunda pek çok kayıp kayık geziniyor. Bır kısmında hazineler yahut korsanlar var.\n\n"
   "İnsansız kayıklar her tur saat yönünde bir hücre hareket eder. Köpekbalıkları ve içinde insan olan kayıklar sadece akıntıyla -yani merkeze doğru- ya da saat yönünde hareket edebilir."
   )
@@ -1742,6 +1781,7 @@ S( "This Orb allows your boat to go against the current, "
 S("You cannot go against the current!", "Akıntıya karşı hareket edemezsin!")
 
 // Minefield
+// ---------
 
 // achievements:
 // Reached Minefield: Collect a Bomberbird Egg.
@@ -1784,7 +1824,7 @@ S(
     "Ayrıca dikkat, mayınlar, üzerine düşen ölü kuşlarla da tetiklenebilir.")
 
 N("Tame Bomberbird", GEN_O, "Sakin Bombacıkuş", "Sakin Bombacıkuşlar", "Sakin Bombacıkuşunu", "Sakin Bombacıkuşuyla")
-    
+
 S(
   "This bomberbird will follow you at some distance, and attack your enemies. "
   "You can kill it to place a mine.",
@@ -1821,12 +1861,19 @@ S("Five mines next to you!", "Yakınında beş mayın var!")
 S("Six mines next to you!", "Yakınında altı mayın var!")
 S("Seven mines next to you!", "Yakınında yedi mayın var!")
 
-S("Still confused? Read the FAQ on the HyperRogue website!\n\n", 
+S("Still confused? Read the FAQ on the HyperRogue website!\n\n",
   "Hâlâ karışık mı geliyor? HyperRogue vebsitesinden SSS'i okuyun! \n\n")
 
 S("You have to run away from the water!", "Sudan kaçmak zorundasın!")
 
 //N("Icewolf", GEN_M, "Buzkurdu", "Buzkurtları", "Buzkurdunu", "Buzkurduyla")
+
+// VERSION 7.2
+// ===========
+
+// Palace
+// ------
+
 N("Palace", GEN_O, "Saray", "Saraylar", "Sarayı", "Sarayda")
 N("palace wall", GEN_F, "Saray Duvarı", "Saray Duvarları", "Saray Duvarını", "Saray Duvarı")
 
@@ -1835,10 +1882,10 @@ S("Apparently a princess is kept locked somewhere, but you won't ever find her i
 
 S("Apparently a prince is kept locked somewhere, but you won't ever find him in this hyperbolic palace. ",
   "Görünen o ki, bir şehzade bir yerlerde saklı tutuluyor, ama bu hiperbolik sarayda onu bulman mümkün değil. ")
-  
+
 S("So better just to concentrate on collecting treasure. "
   "Beware the traps, and the guards, who are hard to kill!",
-  
+
   "Yani sadece hazineleri toplamaya odaklansan iyi olur. "
   "Tuzaklara dikkat! Öldürmesi pek zor olan muhafızlara da dikkat et!"
   )
@@ -1854,7 +1901,7 @@ N("opening plate", GEN_F, "açılan levha", "açılan levhalar", "açılan levha
 
 S("Green pressure plates open all gates in radius 3 around them. "
   "Similarly, red pressure plates close all gates in this radius.",
-  
+
   "Yeşil baskı levhaları 3 uzaklıktaki bütün kapıları açar. "
   "Aynı şekilde, kırmızı baskı levhaları bu komşuluktaki kapıları kapatır.")
 
@@ -1873,7 +1920,7 @@ S("\n\nNote: when pushing %the1 off a heptagonal cell, you can control the pushi
   "by clicking left or right half of the heptagon.",
   "\n\nNot:  %a1 bir yedigensel hücreden iterken, itmenin yönünü yedigenin sol ve sağ yarısına tıklayarak belirleyebilirsin."
   )
- 
+
 S(" With the keyboard, you can rotate the view for a similar effect (Page Up/Down).",
   " Klavyeyle görüntüyü döndürerek benzer bir etki yakalayabilirsin. (Page Up/Down).")
 
@@ -1885,7 +1932,7 @@ S("You have to hit Palace Guards several times to kill them. After each hit, the
 
 N("Fat Guard", GEN_M, "Şişman Muhafız", "Şişman Muhafızlar", "Şişman Muhafızı", "Şişman Muhafızla")
 
-S("Fat guards are too heavy to be pushed away by your hits.", 
+S("Fat guards are too heavy to be pushed away by your hits.",
   "Şişman Muhafızlar vuruşlarınla geriye itilmek için fazla ağır.")
 
 N("Skeleton", GEN_M, "Kościotrup", "Kościotrupy", "Kościotrupa", "Kościotrupem")
@@ -1898,7 +1945,7 @@ S("Skeletons work similar to Palace Guards, but they won't die no matter how man
 
 N("Vizier", GEN_M, "Vezir", "Vezirler", "Veziri", "Vezirler")
 S("Viziers are neither pushed away nor stunned. However, you attack them automatically when "
-  "escaping from them.", 
+  "escaping from them.",
   "Vezirler sersemlemez ve geriye itilmez, onlardan kaçarken otomatik olarak onlara saldırmış olursun.")
 
 S("You stun %the1.", "%a1 sersemlettin.")
@@ -1919,6 +1966,7 @@ S("Hmm, he has been training in the Emerald Mine. Interesting...", "Çok garip..
 // Şehzade: 50 Aşkınlı Kilim topla.
 
 // Living Fjord
+// ------------
 
 N("Living Fjord", GEN_O, "Yaşayan Fiyort", "Yaşayan Fiyortlar", "Yaşayan Fiyortu", "Yaşayan Fiyortta")
 
@@ -1975,14 +2023,13 @@ S("%The1 is extinguished!", "%1 söndü!")
 // Su Özütü: 25 Nartaşı topla.
 // Fiyort Efendisi: 50 Nartaşı topla.
 
-// implemented, not appears in the game yet
-
 Orb("Discord", "İhtilaf")
 
 S("Causes most monsters to attack other monsters, not only you and your friends.",
   "Çoğu canavarın sen ve dostların yanında diğer canavarlara da saldırmasına sebep olur.")
 
 // Shmup Configuration
+// -------------------
 
 S("forward", "ileri")
 S("backward", "geri")
@@ -2036,12 +2083,14 @@ S("press a key for '%1'", "'%1' için bir tuşa bas")
 S("unassign a key", "bir tuş atamasını iptal et")
 
 // extra pattern modes
+// -------------------
 
 S("explore the Emerald Pattern", "Zümrüt Dokusunu keşfet")
 // S("explore the Fifty Pattern (4 colors)", "50 Dokuyu keşfet (4 renk)")
 // S("explore the Fifty Pattern (8 colors)", "50 Dokuyu keşfet (8 renk)")
 
 // extra flavor/Knight lines
+// -------------------------
 
 S("Kill a Vizier in the Palace to access Emerald Mine", "Zümrüt Madenine ulaşmak için Saray'da bir Vezir öldür.")
 S("Collect 5 Emeralds to access Camelot", "Kamelot'a ulaşmak için 5 Zümrüt topla.")
@@ -2049,7 +2098,7 @@ S("Some lands unlock at specific treasures or kills", "Bazı diyarlara ulaşabil
 
 S("You will be fighting red rock snakes, too...", "Kızıl yılanlarla da savaşacaksın...")
 
-S("\"The Red Rock Valley is dangerous, but beautiful.\"", 
+S("\"The Red Rock Valley is dangerous, but beautiful.\"",
   "\"KızılKaya Vadisi tehlikeli ama manzara çok güzel.\"")
 S("\"Train in the Desert first!\"", "\"Önce Çöl'de kendini yetiştir!\"")
 S("\"I like collecting ambers at the beach.\"", "\"Sahilde Kehribarlar toplamayı seviyorum.\"")
@@ -2058,10 +2107,10 @@ S("\"There are %1 floor tiles inside our Table!\"", "\"Masamızın içinde %1 ze
 S("\"By now, you should have your own formula, you know?\"", "\"Şimdiye kadar kendi formülünü bulmalıydın değil mi?\"")
 S("\"Have you tried to take a boat and go into the Ocean? Try it!\"", "\"Bir kayığa binip Okyanus'a açılmayı denedin mi? Denemelisin!\"")
 
-//====================//
-// NEW IN VERSION 7.3 //
-//====================//
-//CORRECTION:
+// VERSION 7.3
+// ===========
+
+// CORRECTION:
 
 N("closing plate", GEN_F, "kapatma levhası", "kapatma levhaları", "kapatma levhasını", "kapatma levhasıyla")
 N("opening plate", GEN_F, "açma levhası", "açma levhaları", "açma levhasını", "açma levhasıyla")
@@ -2087,7 +2136,7 @@ S("explore the Palace Pattern (4 colors)", "Saray Dokusunu Keşfet (4 renk)")
 S("explore the Palace Pattern (8 colors)", "Saray Dokusunu Keşfet (8 renk)")
 
 // Map Editor
-//============
+// ===========
 
 S("map editor", "harita editörü")
 S("You activate your terraforming powers!", "Yerdüzenleyici güçlerini harekete geçirdin!")
@@ -2171,7 +2220,7 @@ S(
   )
 
 // Princess Quest
-//================
+// ===============
 
 // Saved the Princess - "Prensesi Kurtar" - "Prensesi kurtar."
 // Princess Challenge - "Prenses Görevi- "Prenses Görevini tamamla."
@@ -2189,7 +2238,7 @@ S(
   "However, even with the normal distribution, it appears that it should be "
   "always possible to reach your goal. If you want this challenge, "
   "select it from the special game modes menu.",
-  
+
   "Bir fare sana ciyakladı. Galiba senin bir yere gitmeni istiyor."
   "Gerçekten ilginç, burada ne bulabilirsin ki?\n\n"
   "W części Pałacu, którą zwiedzasz podczas tej misji, "
@@ -2199,7 +2248,7 @@ S(
 
 S("\"When I visited the Palace, a mouse wanted me to go somewhere.\"",
   "\"Sarayı ziyaret ettiğimde, bir fare benden bir yere gitmemi istedi.\"")
-  
+
 S("\"I wonder what was there...\"", "\"Orada ne olduğunu merak ediyorum...\"")
 
 N("Mouse", GEN_F, "Fare", "Fareler", "Fareyi", "Fareyle")
@@ -2220,7 +2269,7 @@ S("This is the biggest Hypersian Rug you have ever seen! "
   "Unfortunately, it is too large to take it as a trophy.",
   "Bu, gördüğün en büyük Aşkınlı Kilim! "
   "Maalesef yanında götüremeyeceğin kadar büyük.")
-  
+
 N("Prince", GEN_M, "Şehzade", "Şehzadeyi", "Şehzadeler", "Şehzadeyle")
 N("Princess", GEN_F, "Prenses", "Prensesi", "Prensesler", "Prensesle")
 
@@ -2240,14 +2289,14 @@ S("\"Bring me out of here please!\"", "Beni buradan çıkar lütfen!\"")
 
 S("%The1 kisses you, and thanks you for saving %him1.",
   "%1 seni öptü ve %go1 kurtardığın için sana teşekkür etti.")
-  
+
 S("\"I have been trained to fight with a Hypersian scimitar, you know?\"",
   "Hiç Aşkınlı Palasıyla savaşmak üzere eğitilmemiştim biliyor musun?\"")
 
-S("\"I would love to come to your world with you!\"", 
+S("\"I would love to come to your world with you!\"",
   "Senle beraber dünyana gelmeyi çok isterdim!\"")
 
-S("\"Straight lines stay close to each other forever, this is so romantic!\"", 
+S("\"Straight lines stay close to each other forever, this is so romantic!\"",
   "\"Doğrular birbirlerine hep yakın, bu çok romantik!\"")
 
 S("\"Maps... Just like the world, but smaller... how is that even possible?!\"",
@@ -2256,11 +2305,12 @@ S("\"Maps... Just like the world, but smaller... how is that even possible?!\"",
 Orb("Love", "Aşk")
 S("Love takes time, but it heals all wounds, and transcends time and space.\n\n"
   "The Orb of Love is worth 30$$$, if you end the game with it.\n",
-  
+
   "Aşk zaman alır, ama her yarayı iyileştirir ve zaman ve mekâna galip gelir.\n\n"
   "Aşk Küresi oyunu onunla bitirebilirsen 30$$$ eder.\n")
 
-// Princess Challenge:
+// Princess Challenge
+// ------------------
 
 S("%1 Challenge", "%1 Görevi")
 S("Save %the1 first to unlock this challenge!", "Bu görevi açmak için önce %a1 kurtar!")
@@ -2278,9 +2328,10 @@ S("f = flip %1",     "f = çevir %1")
 S("save whom", "kim kurtarılacak")
 
 // VERSION 7.4
+// ===========
 
 // missing texts, refactored things, and rule changes
-//====================================================
+// --------------------------------------------------
 
 S("%The1 activates her Flash spell!", "%1 Işık büyüsünü aktifleştirdi!")
 
@@ -2301,7 +2352,7 @@ S("%The1 fills the hole!", "%1 deliği dolduruyor!")
 N("Tentacle+Ghost", GEN_F, "Dokungaç&Hayalet", "Dokungaç&Hayaletler", "Dokungaç&Hayaleti", "Dokungaç&Hayaletle")
 
 // Land Overview
-//===============
+// -------------
 
 S("world overview", "dünya önizlemesi")
 S("or 'o' to see the world overview", "veya dünya önizlemesini görmek için 'o'ya basın.")
@@ -2331,7 +2382,7 @@ S("Accessible only from %the1 (until finished).\n", "Sadece %a1 erişilebilir. %
 S("Accessible only from %the1 or %the2.\n", "Sadece %a1 veya %a2 erişilebilir.\n")
 
 S("Kills required: %1.\n", "Gereken leşler: %1 $$$.\n")
-S("Finished lands required: %1 (collect 10 treasure)\n", 
+S("Finished lands required: %1 (collect 10 treasure)\n",
   "Gereken bitirilmiş diyarlar: %1 (10 hazine toplananlar)\n")
 
 S("Treasure required: %1 x %2.\n", "Gereken hazine: %1 tane %2.\n")
@@ -2343,7 +2394,7 @@ S("Kills required: any Elemental (Living Fjord/Dead Caves).\n",
 
 S("Variants of %the1 are always available in the Random Pattern Mode.",
   "%1 çeşitlemeleri Rastgele Doku Modunda her zaman mevcuttur.")
-  
+
 S("Variants of %the1 are available in the Random Pattern Mode after "
   "getting a highscore of at least 10 %2.",
   "%1 çeşitlemeleri Rastgele Doku Modunda en az on tane %2 skoru elde ederek açılır. ")
@@ -2354,6 +2405,7 @@ S(" Hyperstone: %1/%2", " Aşkıntaş: %1/%2")
 S(" Hell: %1/9", " Cehennem: %1/9")
 
 // improved editor
+// ---------------
 
 S("vector graphics editor -- press F1 for help", "vektör grafik editörü -- yardım için F1'e bas.")
 S("pics to save/load:", "kaydedilecek/yüklenecek resimler")
@@ -2396,7 +2448,7 @@ S(
    "pictures easily. More complex pictures can "
    "be created by using several layers ('l'). See the edges of "
    "the screen for more keys.",
-   
+
    "Bu modda kendi karakterlerini, zeminlerini, canavarlarını ve eşyalarını çizebilirsin. İşaretçiyi bir nesneye götür ve onu düzenlemek için 'e'ye bas. "
    "'n' ile şekiller çizmeye başlayabilir, 'a' ile yeni köşeler ekleyebilirsin. 0-9'a basarak simetrik resimleri daha kolay çizebilirsin. "
    "Daha karmaşık resimler için birden fazla atman gerekebilir ('l'). Ekranın kıyılarına bakara daha fazla tuşu öğrenebilirsin."
@@ -2410,7 +2462,7 @@ S(
    "for equivalence. Also, you can press Space to switch between "
    "the map and graphics editor quickly -- note that editing floors "
    "with the graphics editor also adheres to the pattern.",
-   
+
    "'r'ye basarak düzenli bir doku seçebilirsin. Bir doku aktifken, bir hücreyi değiştirmek o hücreye bu dokuda eşdeğer bütün hücreleri de değiştirir."
    " Birden çok doku seçebilirsin ve hangi simetrilerin eşdeğer olduğunu seçebilirsin. Ayrıca, Space'e basarak harita ve grafik editörü arasında hızlıca gidip gelebilirsin -- "
    "zeminin grafik editörüyle değiştirilmesinin dokuyu da değiştireceğini unutma.")
@@ -2453,7 +2505,7 @@ S("A fake Land with colored floors.",
 S("random pattern mode", "rastgele doku modu")
 
 // Ivory Tower
-//=============
+// -----------
 
 N("Ivory Tower", GEN_F, "Fildişi Kule", "Fildişi Kuleler", "Fildişi Kuleyi", "Fildişi Kulede")
 
@@ -2502,7 +2554,7 @@ Orb("Matter", "Madde")
 S("This Orb allows to temporarily create impassable matter, either to block paths or "
   "to build bridges across chasms and waters.",
   "Bu Küre, yolları tıkamak veya boşluklar ve su üzerine köprü kurmak için geçilemez madde oluşturmaya yarar. ")
-  
+
 N("temporary wall", GEN_F, "geçici duvar", "geçici duvarlar", "geçici duvarı", "geçici duvarla")
 N("temporary floor", GEN_F, "geçici zemin", "geçici zeminler", "geçici zemini", "geçici zeminle")
 N("temporary bridge", GEN_O, "geçici köprü", "geçici köprüler", "geçici köprüyü", "geçici köprüyle")
@@ -2513,7 +2565,7 @@ S("Nothing to stand on here!", "Burada duracağın bir şey yok!")
 S("Gravity does not allow this!", "Yerçekimi buna izin vermiyor!")
 
 // Elemental Planes
-//==================
+// ----------------
 
 N("Elemental Planes", GEN_F, "Unsur Düzlemleri", "Unsur Düzlemleri", "Unsur Düzlemlerini", "Unsur Düzlemlerinde")
 N("Plane of Fire", GEN_F, "Ateş Düzlemi", "Ateş Düzlemleri", "Ateş Düzlemini", "Ateş Düzleminde")
@@ -2524,14 +2576,14 @@ N("Plane of Water", GEN_F, "Su Düzlemi", "Su Düzlemleri", "Su Düzlemini", "Su
 S("The Elemental Planes are divided into four subzones: Planes of Fire, Water, Air, and Earth. "
   "You need to collect a Shard from each Plane to construct an Elemental Gem. "
   "It is dangerous to collect too many Shards of the same type without constructing a Gem.",
-  
+
   "Unsur Düzlemleri dört altalana ayrılır: Ateş, Su, Hava ve Toprak Düzlemleri. Bir Unsurtaşı yapmak için her dört düzlemden birer parça toplaman gerekiyor. "
 "Bir Unsurtaşı yapmadan aynı cins parçadan çok sayıda toplamak tehlikelidir."
   )
 
 N("Fire Elemental", GEN_M, "Ateş Unsuru", "Ateş Unsurları", "Ateş Unsurunu", "Ateş Unsuruyla")
 
-S("This monster leaves a trail of fire behind.", 
+S("This monster leaves a trail of fire behind.",
   "Bu canavar arkasında ateşten bir iz bırakıyor.")
 
 N("Air Elemental", GEN_M, "Hava Unsuru", "Hava Unsurları", "Hava Unsurunu", "Hava Unsuruyla")
@@ -2539,7 +2591,7 @@ N("Air Elemental", GEN_M, "Hava Unsuru", "Hava Unsurları", "Hava Unsurunu", "Ha
 S("An Air Elemental looks like a live tornado. Once you are three (or less) cells from it, "
   "it is impossible to move closer, due to strong winds. You can stand and wait, though. "
   "This also affects most monsters.",
-  
+
   "Hava Unsuru canlı bir hortuma benziyor. Eğer ondan üç ya da daha az uzaklıktaysan, güçlü rüzgârlardan ötürü daha fazla yakınlaşman mümkün değildir. Geçip gitmesini bekleyebilirsin elbette. Bu çoğu canavarı da etkiler. ")
 
 N("Fire Shard", GEN_M, "Ateş Parçası", "Ateş Parçaları", "Ateş Parçasını", "Ateş Parçasıyla")
@@ -2564,7 +2616,7 @@ N("limestone wall", GEN_F, "kireçtaşı duvar", "kireçtaşı duvarlar", "kire�
 S("Simply a wall. Mostly.", "Yalnızca bir duvar. Büyük ihtimalle.")
 
 // Zebra
-//=======
+// -----
 
 N("Zebra", GEN_F, "Zebra", "Zebralar", "Zebrayı", "Zebrada")
 S("Everything in this Land has black and white stripes.",
@@ -2577,7 +2629,7 @@ N("Onyx", GEN_O, "Akik", "Akikler", "Akiği", "Akikle")
 S("A black gem with white stripes. It is beautiful.", "Beyaz şeritli siyah bir mücevher. Çok güzel.")
 
 // Crossroads III
-//================
+// --------------
 
 N("Crossroads III", GEN_N, "Arayollar III", "Arayollar III", "Arayolları III", "Arayollarda III")
 
@@ -2622,7 +2674,7 @@ S("You summon %the1!", "%a1 çağırdın!")
 
 S("F4 = file", "F4 = dosya")
 
-//CORRECTION FOR ELEMENTALS
+// CORRECTION FOR ELEMENTALS
 
 N("Earth Elemental", GEN_M, "Toprak Unsuru", "Toprak Unsurları", "Toprak Unsurunu", "Toprak Unsuruyla")
 N("Water Elemental", GEN_M, "Su Unsuru", "Su Unsurları", "Su Unsurunu", "Su Unsuruyla")
@@ -2649,10 +2701,11 @@ S("A coastal area, from where you can get both to the inland worlds and to the O
 
 // Also, as the game is constantly updated, the Steam version includes the newest features, such as new lands with new mechanics, or new game modes -- see [ http://www.roguetemple.com/z/hyper/gallery.php]Gallery[/url] for the current differences.
 
-//CORRECTION:
+// CORRECTION:
 N("great wall", GEN_F, "Yüksek Duvar", "Yüksek Duvarlar", "Yüksek Duvarı", "Yüksek Duvarda")
+
 // VERSION 8.0
-//=============
+// ============
 
 S("The Air Elemental blows you away!", "Hava Unsuru seni uzağa uçuruyor!")
 
@@ -2666,12 +2719,12 @@ N("dead rock troll", GEN_M, "ölü mağara trolü" ,"ölü mağara trolleri", "�
 
 S("There are several species of trolls living in the hyperbolic world. "
   "Some of them leave this wall behind them when they die.",
-  
+
   "Hiperbolik dünyada pek çok tür trol yaşar."
   "Bazıları öldüğünde bu duvarı geride bırakır.")
 
 // paper model creator
-//---------------------
+// --------------------
 
 S("paper model creator", "kâğıt modeli üreticisi")
 S("synchronize net and map", "haritayı ve ağı eşle")
@@ -2685,7 +2738,7 @@ S("Failed to load the file 'papermodeldata.txt'", "papermodeldata.txt dosyası y
 S("Could not save the paper model data", "Kâğıt modeli verisi kaydedilemedi")
 
 // pure tactics mode
-//-------------------
+// ------------------
 
 S("pure tactics mode", "saf taktik modu")
 S("Not available in the pure tactics mode!", "Taktik modunda kullanılamaz!")
@@ -2698,45 +2751,45 @@ S(
         "Your goal to obtain as high score as possible, without using "
         "features of the other lands. You can then compare your score "
         "with your friends!\n\n"
-        
+
         "You need to be somewhat proficient in the normal game to "
         "unlock the given land in this challenge "
         "(collect 20 treasure in the given land, or 2 in case of Camelot).\n\n"
-        
+
         "Since getting high scores in some lands is somewhat luck dependent, "
         "you play each land N times, and your score is based on N consecutive "
         "plays. The value of N depends on how 'fast' the land is to play, and "
         "how random it is.\n\n"
-        
+
         "In the Caribbean, you can access Orbs of Thorns, Aether, and "
         "Space if you have ever collected 25 treasure in their native lands.\n\n"
-        
+
         "The rate of treasure spawn is static in this mode. It is not "
         "increased by killing monsters.\n\n"
-        
+
         "Good luck, and have fun!",
-        
+
         "Saf taktik modunda sadece tek bir diyara odaklanırsın. Amacın diğer diyarların özelliklerini hiç kullanmadan mümkün olduğunca yüksek puan yapmak. Sonra skorunu arkadaşlarınınkiyle karşılaştırabilirsin!\n\n "
-        
+
         "Normal oyunda maharetini ispatlayarak belli bir diyarı bu modda açabilirsin. "
         "(Belli bir diyarda 20 hazine toplamak, Kamelot için 2 hazine toplamak gibi).\n\n"
-        
+
         "Yüksek skor almak şöyle böyle şansa bağlı olduğundan, her diyarı N defa oynarsın ve skorun bu ardarda N oyuna göre belirlenir. N'in değeri diyarın ne kadar hızlı oynandığına ve ne derece rassal olduğuna göre değişir.\n\n"
-        
+
         "Karayiplerde, Diken Küresine, Ether'e ve Uzay'a eğer daha önce ilgili diyarlarda 25'er hazine topladıysan erişebilirsin.\n\n"
-        
+
         "Hazine üretimi bu modda statiktir ve canavar öldürmekle artmaz.\n\n"
-        
+
         "İyi şanslar ve iyi eğlenceler!")
 
 // Yendor Challenge
-//------------------
+// -----------------
 
 S("Yendor Challenge", "Yendor Ek Görevi")
 //Görev?
 S("Collect 10 treasures in various lands to unlock the challenges there",
   "Çeşitli diyarlarda 10 hazine toplayarak o diyarın özel görevini aktifleştirebilirsin")
-  
+
 S("easy", "kolay")
 S("challenge", " ek görev")
 
@@ -2749,17 +2802,17 @@ S("(locked)", "(aktif değil)")
 
 S(
     "There are many possible solutions to the Yendor Quest. In the Yendor "
-    "Challenge, you will try many of them!\n\n"    
+    "Challenge, you will try many of them!\n\n"
     "Each challenge takes part in a specific land, and you have to use what "
     "you have available.\n\n"
-    
+
     "You need to obtain an Orb of Yendor in the normal game to activate "
     "this challenge, and (ever) collect 10 treasures in one or two lands "
     "to activate a specific level.\n\n"
-    
+
     "After you complete each challenge, you can try it again, on a harder "
     "difficulty level.\n\n"
-    
+
     "All the solutions showcased in the Yendor Challenge work in the normal "
     "play too. However, passages to other lands, and (sometimes) some land features "
     "are disabled in the Yendor "
@@ -2768,16 +2821,16 @@ S(
     "and Minefield while you are looking for the Orb of Yendor, "
     "to make the challenge more balanced "
     "(but these changes are also active during the normal Yendor Quest).\n\n"
-    
+
     "You get 1000 points for each challenge won, and 1 extra point for "
     "each extra difficulty level.",
-    
+
     "Yendor Görevinin bir sürü çözümü var. Yendor Ek Görevi'nde bunların pek çoğunu deneyeceksin!\n\n"
     "Her görev belirli bir diyarda geçiyor ve elindekileri bütün verimliliğiyle kullanman gerekecek.\n\n"
     "Bu görevi aktifleştirmek için normal oyunda bir kez Yendor'un Küresi'ni ele geçirmen gerekiyor. Ayrıca her hangi bir seviyeyi aktifleştirmek için ilgili diyar(lar)da 10 hazine toplamış olman gerekiyor.\n\n"
-    
+
     "Ek görevi tamamladıktan sonra aynı görevi bir üst zorluk seviyesinde yeniden deneyebilirsin.\n\n"
-    
+
     "Yendor Ek Görevi'ndeki bütün çözümler normal oyunda da işe yarar. Ancak, Yendor Ek görevinde, diğer diyarlara geçiş ve bazen diyarın bazı özellikleri devredışıdır, bu yüzden beklenen çözümü bulman beklenir. "
     "Ayrıca,  Yendor'un Küresi'ni ararken görevin daha dengeli olması için Saray ve Mayın Tarlasındaki harita üretimi biraz değiştirilmiştir. (bu değişiklikler normal Yendor Görevi'nde de mevcuttur).\n\n"
     "Her kazanılan ek görev için 1000 puan ve her fazladan zorluk seviyesi için 1 fazladan puan kazanırsın.\n\n"
@@ -2785,12 +2838,12 @@ S(
 
 S("Unlock this challenge by getting the Orb of Yendor!",
   "Yendor'un Küresi'ni alarak bu ek görevi aktif et!")
-  
+
 S("Collect 10 treasures in various lands to unlock the challenges there",
   "Diyarlardaki ek görevleri aktif etmek için oralarda 10 hazine topla.")
 
 // Wild West
-//-----------
+// ----------
 
 N("Wild West", GEN_O, "Vahşi Batı", "Vahşi Batılar", "Vahşi Batıyı", "Vahşi Batıda")
 N("Outlaw", GEN_M, "Haydut" ,"Haydutlar", "Haydutu", "Haydutla")
@@ -2805,36 +2858,36 @@ S(
   "Take a revolver, kill outlaws, collect bounties.\n\n"
   "Note: since this land is anachronistic, it is not available in normal game. "
   "It is only available in special modes.",
-  
+
   "Altıpatları al, haydutları öldür, başlarına konan ödülleri topla!\n\n"
   "Not: Bu diyar anakronistik olduğu için, normal oyunda mevcut değil, sadece özel modlarda oynanabilir.")
 
 // Land of Storms
-//----------------
+// ---------------
 
 S(
   "Whenever after your move there is a connection between a charged and a "
   "grounded cell, there is a short circuit. All cells on any "
   "path connecting a charged and a grounded cell (without repeated cells, "
   "or two consecutive grounded/charged cells) become damaged.\n\n"
-  
+
   "Sandstone walls and most creatures are conductive. Great Walls are "
   "isolators, but lands beyond them count as grounded.\n\n"
-  
+
   "Fulgurite, the treasure, is created when you manage to short circuit "
   "a sandstone wall, or a Rich Metal Beast.\n\n"
-  
+
   "Trolls leave conductive rocks when killed, and Metal Beasts can only "
   "be killed by electricity -- your attacks only stun them, or push "
   "them away if already stunned.",
-  
+
   "Hareketinden sonra, eğer yüklü ve topraklı bir hücre arasında bağlantı varsa, kısa devre olur."
   "Yüklü ve topraklı hücrenin arasındaki bütün hücreler (tekrarlayan hücreler, yahut iki ardışık topraklı yahut yüklü hücre hariç) hasar görür.\n\n"
-  
+
   "Kumtaşı duvarları ve çoğu yaratık iletkendir. Büyük Duvarlar yalıtkandır, ancak onlardan sonraki hücreler topraklanmış sayılır. \n\n"
-  
+
   "Fulgurit, buradaki hazine, bir kumtaşı duvarını veya Zengin Metal Canavarını kısa devreye uğratmanla ortaya çıkar.\n\n"
-  
+
   "Troller öldüklerinde artlarında iletken kayalar bırakırlar ve Metal Canavarlar sadece elektrik ile öldürülebilirler. Saldırıların metal canavarları sersemletir, yahut zaten sersemlemişlerse ittirir. ")
 
 
@@ -2855,14 +2908,14 @@ Orb("Stunning", "Sersemletme")
 S("This Orb allows you to target monsters to stun them. "
   "10 charges are used to stun for 5 turns. Does not "
   "work against multi-tile monsters.",
-  
+
   "Bu Küre canavarları hedefleyerek sersemletmeni sağlar. 5 tur sersemletmek için 10 güç kullanır. Çokluhücre canavarlara karşı çalışmaz."
   )
 
 S("You stun %the1!", "%a1! sersemlettin!")
 
 // Overgrown Woods
-//-----------------
+// ----------------
 
 Orb("Luck", "Şans")
 
@@ -2871,10 +2924,10 @@ S("This Orb allows you to find new lands more easily. "
   "and especially the Crossroads, are more likely to "
   "spawn while you have this. Additionally, Orbs of Safety "
   "are more likely to spawn in the Whirlpool.",
-  
+
   "Bu küre yeni diyarlar bulmanı kolaylaştırır. Daha az hazine topladığın diyarlar ve özellikle Arayollar, bu küreyi elinde tutarken daha yüksek ihtimalle karşına çıkar. "
   "Ayrıca, Güvenlik Kürelerinin Tayfun'da ortaya çıkma ihtimalini artırır."
-  )    
+  )
 
 N("Overgrown Woods", GEN_O, "Azman Orman", "Azman Ormanlar", "Azman Ormanı", "Azman Ormanda")
 N("Mutant Ivy", GEN_O, "Mutant Sarmaşık", "Mutant Sarmaşıklar", "Mutant Sarmaşığı", "Mutant Sarmaşıkla")
@@ -2892,7 +2945,7 @@ S(
   "may grow only on hexagonal cells.\n\n"
   "Maybe such fast growing plants could help you solve the problem "
   "of hunger in your world? Kill the Mutant Ivies to collect Mutant Saplings.",
-  
+
   "Azman Orman mutant sarmaşıklarla dolu! Bu bitkiler çok hızlı büyür. Her yaprak, büyüdükten sonra sıradaki tur kendi başına büyüyebilir."
   " Ancak, her parça ancak 16 tur içinde bir kez büyüyebilir. Azman Orman dışındaki diyarlarda, Mutant Sarmaşık sadece altıgen hücrelerde büyüyebilir.\n\n"
   "Belki bu kadar hızlı büyüyen bitkiler dünyandaki açlık sorununu çözebilir? Mutant Fidanları toplamak için Mutant Sarmaşıkları öldür.")
@@ -2925,10 +2978,10 @@ S("Trees in this forest can be cut down. Big trees take two turns to cut down.",
 
 #undef Orb
 
-S("TRANSLATIONWARNING", 
+S("TRANSLATIONWARNING",
   "ÇEVİRİ UYARISI: Türkçe çevirisi güncel değil -- 8.1'den sonra eklenen özellikleri")
 
-S("TRANSLATIONWARNING2", 
+S("TRANSLATIONWARNING2",
   "çevirmek isterseniz lütfen zeno@attnam.com adresinden benimle iletişime geçin.")
 
 S("summon Bonfire", "Kampateşi çıkar")
