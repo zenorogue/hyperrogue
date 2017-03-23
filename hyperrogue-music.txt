@@ -96,6 +96,29 @@
 [54] music/hr3-crossroads.ogg
 # Dragon Chasms [55]
 [55] music/hr3-caves.ogg
+# Kraken [56]
+[56] music/hr3-rlyeh.ogg
+# Burial Grounds [57]
+[57] music/hr3-graveyard.ogg
+# Trollheim [58]
+[58] music/hr3-desert.ogg
+# Halloween [59]
+[59] music/hr3-graveyard.ogg
+# Dungeon [60]
+[60] music/hr3-desert.ogg
+# Lost Mountain [61]
+[61] music/hr3-rlyeh.ogg
+# Reptiles [62]
+[62] music/hr3-mirror.ogg
+# Prairie [63]
+[63] music/hr3-desert.ogg
+# Bull Dash [64]
+[64] music/hr3-mirror.ogg
+# Crossroads V [65]
+[65] music/hr3-crossroads.ogg
+# Cellular Automata [66]
+[66] music/hr3-laboratory.ogg
+
 # None [00] (used when the window is out of focus)
 
 
