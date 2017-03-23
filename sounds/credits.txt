@@ -1,0 +1,129 @@
+Sound Credits:
+
+Hydra Slayer sounds, by Brett Cornwall, under CC BY-SA 4.0
+==========================================================
+[ https://creativecommons.org/licenses/by-sa/4.0/ ]
+
+seen-eagle (hydras/hydra-vulture)
+seen-sandworm (hydras/hydra-ancient)
+seen-snake (hydras/hydra-arch)
+seen-dragon (hydras/hydra-dragon)
+seen-skeleton (elements/bone)
+seen-air (other/broomOfSpeed)
+seen-earth (other/wallcrush)
+
+die-vinebeast (hydras/hydra-ivy)
+die-vinespirit (elements/ash)
+die-troll (weapons/stone)
+die-bomberbird (potion/potion-decapitation)
+
+hit-sword1 (weapons/swordAttack-small)
+hit-sword2 (weapons/swordAttack-medium)
+hit-sword3 (weapons/swordAttack-heavy)
+hit-axe1 (weapons/axeAttack-light)
+hit-axe2 (weapons/axeAttack-medium)
+hit-axe3 (weapons/axeAttack-heavy)
+hit-crush1 (weapons/mushroomCrush-1)
+hit-crush2 (weapons/mushroomCrush-2)
+hit-crush3 (weapons/mushroomCrush-3)
+hit-rose (weapons/spearAttack-small)
+
+pickup-gold (elements/silver)
+pickup-winter (elements/frozen)
+pickup-potion (other/pickup-potion)
+pickup-scroll (other/pickup-scroll)
+pickup-gem (other/pickup-powder)
+pickup-speed (potion/potion-extreme-speed)
+pickup-discord (potion/potion-conflict)
+pickup-orb (potion/potion-weaponcharge)
+pickup-key (weapons/switchToSword)
+pickup-yendor (weapons/switchToShuriken)
+
+orb-teleport (other/teleport)
+orb-mind (other/stealsYourWeapon)
+orb-ranged (other/fingernailGrows)
+
+tada (other/tada)
+necromancy (potion/powder-fungalNecromancy)
+fire (elements/fire)
+storm (elements/storm)
+
+By Zeno Rogue, under CC BY-SA 4.0:
+==================================
+
+seen-wolf (woof)
+
+from Freesounds, Public Domain sounds:
+======================================
+[ https://creativecommons.org/publicdomain/zero/1.0/ ]
+
+seen-troll: https://www.freesound.org/people/Rocotilos/sounds/341489/
+seen-kraken: https://www.freesound.org/people/Kirat/sounds/158687/
+explosion: https://www.freesound.org/people/rendensh/sounds/105413/
+orb-frog: https://www.freesound.org/people/jeremysykes/sounds/344501/
+mousesqueak: https://www.freesound.org/people/AntumDeluge/sounds/188043/ (modified)
+click: https://www.freesound.org/people/KorgMS2000B/sounds/54406/
+pickup-mirror: https://www.freesound.org/people/wjl/sounds/267889/
+message-roar: https://www.freesound.org/people/JoelAudio/sounds/85568/
+opengate: https://www.freesound.org/people/Qat/sounds/107640/
+
+from Freesounds, under the CC BY 3.0 license: 
+=============================================
+[ https://creativecommons.org/licenses/by/3.0/ ]
+
+trapdoor: https://www.freesound.org/people/Jagadamba/sounds/258061/
+nervous: https://www.freesound.org/people/pfranzen/sounds/273720/
+splash2: https://www.freesound.org/people/Kayyy/sounds/61015/
+splash1: https://www.freesound.org/people/eddybennet/sounds/226381/
+seen-water: https://www.freesound.org/people/soundscalpel.com/sounds/110393/
+seen-ghost: https://www.freesound.org/people/ditroiamusic/sounds/180022/
+closegate: https://www.freesound.org/people/JavierZumer/sounds/257233/
+message-troll: https://www.freesound.org/people/daalvinz/sounds/364216/
+hit-orbsword: https://www.freesound.org/people/Vicces1212/sounds/123765/
+bull: https://www.freesound.org/people/confusion_music/sounds/103425/
+
+recorded by Tehora Rogue:
+=========================
+
+die-princess
+dzia-princess
+heal-princess
+hit-princess
+die-fairy
+seen-fairy
+seen-rosebeauty
+speak-princess
+
+recorded by Zeno Rogue:
+=======================
+
+die-prince
+dzia-prince
+heal-prince
+hit-prince
+seen-gardener
+seen-necromancer
+seen-vizier
+speak-prince
+
+recorded by KosGD:
+==================
+
+seen-cultist
+seen-cultistfire
+seen-cultistleader
+
+Sounds yet missing, might be added soon:
+========================================
+
+seen-avenger
+seen-leader
+seen-pyrocultist
+die-kraken
+die-dragon
+hit-vampire
+elementalgem
+levelup
+falldeath
+burndeath
+orb-safety
