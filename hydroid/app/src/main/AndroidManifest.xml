@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+      package="com.roguetemple.hyperroid"
+      android:versionCode="9403" android:versionName="9.4c"
+      android:installLocation="auto">
+<!--    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />         -->
+<!--    <uses-sdk android:minSdkVersion="9" android:targetSdkVersion="9" /> -->
+    <application android:label="@string/app_name"
+                 android:icon="@drawable/icon"
+                 android:allowBackup="true">
+               <activity android:label="@string/app_name"
+                  android:windowSoftInputMode="adjustResize"
+                  android:configChanges="orientation|keyboardHidden|screenSize"
+                  android:name=".HyperRogue"
+                  android:launchMode="singleTask" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+<activity android:label="HyperRogue Settings"
+                  android:windowSoftInputMode="adjustResize"
+                  android:configChanges="orientation|keyboardHidden|screenSize"
+                  android:name=".HyperSettings">
+        </activity>
+
+        <service android:name=".ForegroundService" >
+        </service>
+        
+       <provider
+         android:name=".HyperProvider"
+         android:authorities="com.roguetemple.hyperroid"
+         android:exported="true"/>
+    </application>
+</manifest> 

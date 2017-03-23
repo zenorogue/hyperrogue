@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/settings"
+        android:title="@string/title_settings"/>
+    <item android:id="@+id/log"
+        android:title="@string/title_log"/>
+    <item android:id="@+id/help" 
+        android:title="@string/title_help"/>
+    <item android:id="@+id/achieve"
+        android:title="@string/array_cheat_actionsa"/>
+    <item android:id="@+id/leader"
+        android:title="@string/array_cheat_actionsl"/>
+    <item android:id="@+id/share"
+        android:title="@string/title_share"/>
+    <item android:id="@+id/overview"
+        android:title="@string/title_overview"/>
+</menu>

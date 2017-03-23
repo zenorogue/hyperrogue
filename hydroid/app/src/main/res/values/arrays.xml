@@ -1,0 +1,293 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<string-array name="visionRange">
+	<item name="4">@string/array_visionRange4</item>
+	<item name="5">@string/array_visionRange5</item>
+	<item name="6">@string/array_visionRange6</item>
+	<item name="7">@string/array_visionRange7</item>
+	</string-array>
+	<string-array name="wallMode">
+	<item name="0">@string/array_wallMode0</item>
+	<item name="1">@string/array_wallMode1</item>
+	<item name="2">@string/array_wallMode2</item>
+	<item name="3">@string/array_wallMode3</item>
+	</string-array>
+	<string-array name="monsterMode">
+	<item name="0">@string/array_monsterMode0</item>
+	<item name="1">@string/array_monsterMode1</item>
+	<item name="2">@string/array_monsterMode2</item>
+	<item name="3">@string/array_monsterMode3</item>
+	</string-array>
+	<string-array name="visionRangeValues" translatable="false">
+	<item name="4">4</item>
+	<item name="5">5</item>
+	<item name="6">6</item>
+	<item name="7">7</item>
+	</string-array>
+	<string-array name="flashTimeValues" translatable="false">
+	<item name="0">0</item>
+	<item name="2">2</item>
+	<item name="4">4</item>
+	<item name="6">6</item>
+	<item name="8">8</item>
+	<item name="12">12</item>
+	<item name="16">16</item>
+	<item name="24">24</item>
+	<item name="32">32</item>
+	<item name="48">48</item>
+	<item name="64">64</item>
+	</string-array>
+	<string-array name="monsterModeValues" translatable="false">
+	<item name="0">0</item>
+	<item name="1">1</item>
+	<item name="2">2</item>
+	<item name="3">3</item>
+	</string-array>
+	<string-array name="wallModeValues" translatable="false">
+	<item name="0">0</item>
+	<item name="1">1</item>
+	<item name="2">2</item>
+	<item name="3">3</item>
+	</string-array>
+	<string-array name="hyperMode">
+	<item name="0">@string/array_hyperMode0</item>
+	<item name="5">@string/array_hyperMode5</item>
+	<item name="10">@string/array_hyperMode10</item>
+	<item name="20">@string/array_hyperMode20</item>
+	</string-array>
+	<string-array name="hyperModeValues" translatable="false">
+	<item name="0">0</item>
+	<item name="5">0.5</item>
+	<item name="10">1</item>
+	<item name="20">2</item>
+	</string-array>
+	<string-array name="fontSize">
+	<item name="25">@string/array_fontSize25</item>
+	<item name="50">@string/array_fontSize50</item>
+	<item name="75">@string/array_fontSize75</item>
+	<item name="100">@string/array_fontSize100</item>
+	<item name="150">@string/array_fontSize150</item>
+	<item name="200">@string/array_fontSize200</item>
+	<item name="300">@string/array_fontSize300</item>
+	<item name="400">@string/array_fontSize400</item>
+	</string-array>
+	<string-array name="flashTime">
+	<item name="0">@string/array_flashTime0</item>
+	<item name="2">@string/array_flashTime2</item>
+	<item name="4">@string/array_flashTime4</item>
+	<item name="6">@string/array_flashTime6</item>
+	<item name="8">@string/array_flashTime8</item>
+	<item name="12">@string/array_flashTime12</item>
+	<item name="16">@string/array_flashTime16</item>
+	<item name="24">@string/array_flashTime24</item>
+	<item name="32">@string/array_flashTime32</item>
+	<item name="48">@string/array_flashTime48</item>
+	<item name="64">@string/array_flashTime64</item>
+	</string-array>
+	<string-array name="fontSizeValues" translatable="false">
+	<item name="25">25</item>
+	<item name="50">50</item>
+	<item name="75">75</item>
+	<item name="100">100</item>
+	<item name="150">150</item>
+	<item name="200">200</item>
+	<item name="300">300</item>
+	<item name="400">400</item>
+	</string-array>
+	<string-array name="cheat_actions">
+        <item name="e">@string/array_cheat_actionse</item>
+        <item name="c">@string/array_cheat_actionsc</item>
+        <item name="7">@string/array_cheat_actions7</item>
+        <item name="y">@string/array_cheat_actionsy</item>
+        <item name="a">@string/array_cheat_actionsa</item>
+        <item name="l">@string/array_cheat_actionsl</item>
+        <item name=".">@string/array_cheat_actionsb</item>
+        <item name="S">@string/array_cheat_actionsS</item>
+        <item name="L">@string/array_cheat_actionsL</item>
+        <item name="U">@string/array_cheat_actionsU</item>
+        <item name="F">@string/array_cheat_actionsF</item>
+        <item name="C">@string/array_cheat_actionsC</item>
+        <item name="M">@string/array_cheat_actionsM</item>
+        <item name="G">@string/array_cheat_actionsG</item>
+        <item name="Z">@string/array_cheat_actionsZ</item>
+        <item name="J">@string/array_cheat_actionsJ</item>
+        <item name="P">@string/array_cheat_actionsP</item>
+        <item name="O">@string/array_cheat_actionsO</item>
+        <item name="D">@string/array_cheat_actionsD</item>
+        <item name="Y">@string/array_cheat_actionsY</item>
+        <item name="T">@string/array_cheat_actionsT</item>
+        <item name="Tx">@string/array_cheat_actionsTx</item>
+        <item name="W">@string/array_cheat_actionsW</item>
+        <item name="I">@string/array_cheat_actionsI</item>
+        <item name="E">@string/array_cheat_actionsE</item>
+        <item name="H">@string/array_cheat_actionsH</item>
+        <item name="B">@string/array_cheat_actionsB</item>
+        <item name="K">@string/array_cheat_actionsK</item>
+    </string-array>
+    <string-array name="cheat_action_values" translatable="false">
+        <item name="e">e</item>
+        <item name="c">c</item>
+        <item name="7">7</item>
+        <item name="y">y</item>
+        <item name="a">a</item>
+        <item name="l">l</item>
+        <item name=".">.</item>
+        <item name="S">S</item>
+        <item name="L">L</item>
+        <item name="U">U</item>
+        <item name="F">F</item>
+        <item name="C">C</item>
+        <item name="M">M</item>
+        <item name="G">G</item>
+        <item name="Z">Z</item>
+        <item name="J">J</item>
+        <item name="P">P</item>
+        <item name="O">O</item>
+        <item name="D">D</item>
+        <item name="Y">Y</item>
+        <item name="T">T</item>
+        <item name="Tx">Tx</item>
+        <item name="W">W</item>
+        <item name="I">I</item>
+        <item name="E">E</item>
+        <item name="H">H</item>
+        <item name="B">B</item>
+        <item name="K">K</item>
+    </string-array>
+    <string-array name="languageValues" translatable="false">
+        <item name="0">0</item>
+        <item name="1">1</item>
+        <item name="2">2</item>
+        <item name="3">3</item>
+        <item name="4">4</item>
+        <item name="5">5</item>
+    </string-array>
+    <string-array name="language" translatable="false">
+        <item name="0">EN</item>
+        <item name="1">PL</item>
+        <item name="2">TR (7.1)</item>
+        <item name="3">CZ</item>
+        <item name="4">RU</item>
+        <item name="5">DE (7.1, kein UI)</item>
+    </string-array>
+    <string-array name="characterValues" translatable="false">
+        <item name="0">male</item>
+        <item name="1">female</item>
+    </string-array>
+    <string-array name="character">
+        <item name="0">@string/array_character0</item>
+        <item name="1">@string/array_character1</item>
+    </string-array>
+
+    <string-array name="princessValues" translatable="false">
+        <item name="0">prince</item>
+        <item name="1">princess</item>
+    </string-array>
+    <string-array name="princess">
+        <item name="0">@string/array_prince0</item>
+        <item name="1">@string/array_prince1</item>
+    </string-array>
+
+    <string-array name="leaderboardNames">
+        <item name="0">@string/array_leaderboardNames0</item>
+        <item name="1">@string/array_leaderboardNames1</item>
+        <item name="3">@string/array_leaderboardNames3</item>
+        <item name="2">@string/array_leaderboardNames2</item>
+        <item name="4">@string/array_leaderboardNames4</item>
+        <item name="10">@string/array_leaderboardNames10</item>
+        <item name="6">@string/array_leaderboardNames6</item>
+        <item name="5">@string/array_leaderboardNames5</item>
+        <item name="31">@string/array_leaderboardNames31</item>
+        <item name="32">@string/array_leaderboardNames32</item>
+        <item name="33">@string/array_leaderboardNames33</item>
+        <item name="39">@string/array_leaderboardNames39</item>
+        <item name="34">@string/array_leaderboardNames34</item>
+        <item name="35">@string/array_leaderboardNames35</item>
+        <item name="9">@string/array_leaderboardNames9</item>
+        <item name="24">@string/array_leaderboardNames24</item>
+        <item name="18">@string/array_leaderboardNames18</item>
+        <item name="26">@string/array_leaderboardNames26</item>
+        <item name="27">@string/array_leaderboardNames27</item>
+        <item name="38">@string/array_leaderboardNames38</item>
+        <item name="37">@string/array_leaderboardNames37</item>
+        <item name="42">@string/array_leaderboardNames42</item>
+        <item name="43">@string/array_leaderboardNames43</item>
+        <item name="7">@string/array_leaderboardNames7</item>
+        <item name="22">@string/array_leaderboardNames22</item>
+        <item name="23">@string/array_leaderboardNames23</item>
+        <item name="21">@string/array_leaderboardNames21</item>
+        <item name="19">@string/array_leaderboardNames19</item>
+        <item name="8">@string/array_leaderboardNames8</item>
+        <item name="11">@string/array_leaderboardNames11</item>
+        <item name="20">@string/array_leaderboardNames20</item>
+        <item name="12">@string/array_leaderboardNames12</item>
+        <item name="14">@string/array_leaderboardNames14</item>
+        <item name="13">@string/array_leaderboardNames13</item>
+        <item name="16">@string/array_leaderboardNames16</item>
+        <item name="15">@string/array_leaderboardNames15</item>
+        <item name="25">@string/array_leaderboardNames25</item>
+        <item name="17">@string/array_leaderboardNames17</item>
+        <item name="46">@string/array_leaderboardNames46</item>
+        <item name="47">@string/array_leaderboardNames47</item>
+        <item name="48">@string/array_leaderboardNames48</item>
+        <item name="51">@string/array_leaderboardNames51</item>
+        <item name="52">@string/array_leaderboardNames52</item>
+        <item name="53">@string/array_leaderboardNames53</item>
+        <item name="54">@string/array_leaderboardNames54</item>
+        <item name="55">@string/array_leaderboardNames55</item>
+        <item name="56">@string/array_leaderboardNames56</item>
+        <item name="40">@string/array_cheat_actionsy</item>
+
+    </string-array>
+
+    <string-array name="leaderboardNamesOrder" translatable="false">
+        <item name="0">0</item>
+        <item name="1">1</item>
+        <item name="3">3</item>
+        <item name="2">2</item>
+        <item name="4">4</item>
+        <item name="10">10</item>
+        <item name="6">6</item>
+        <item name="5">5</item>
+        <item name="31">31</item>
+        <item name="32">32</item>
+        <item name="33">33</item>
+        <item name="39">39</item>
+        <item name="34">34</item>
+        <item name="35">35</item>
+        <item name="9">9</item>
+        <item name="24">24</item>
+        <item name="18">18</item>
+        <item name="26">26</item>
+        <item name="27">27</item>
+        <item name="38">38</item>
+        <item name="37">37</item>
+        <item name="42">42</item>
+        <item name="43">43</item>
+        <item name="7">7</item>
+        <item name="22">22</item>
+        <item name="23">23</item>
+        <item name="21">21</item>
+        <item name="19">19</item>
+        <item name="8">8</item>
+        <item name="11">11</item>
+        <item name="20">20</item>
+        <item name="12">12</item>
+        <item name="14">14</item>
+        <item name="13">13</item>
+        <item name="16">16</item>
+        <item name="15">15</item>
+        <item name="25">25</item>
+        <item name="17">17</item>
+        <item name="46">46</item>
+        <item name="47">47</item>
+        <item name="48">48</item>
+        <item name="51">51</item>
+        <item name="52">52</item>
+        <item name="53">53</item>
+        <item name="54">54</item>
+        <item name="55">55</item>
+        <item name="56">56</item>
+        <item name="40">40</item>
+    </string-array>
+</resources>

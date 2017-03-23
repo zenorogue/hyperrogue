@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="langcode">PL</string>
+    <string name="app_name">HyperRogue</string>
+    <string name="signinother">Porażka logowania</string>
+    <string name="app_id">480859409970</string>
+    <string name="signin_other_error">Był problem z logowaniem, spróbuj później.</string>
+    <string name="sharesam">udostępnij ekran i opis</string>
+    <string name="sharemsg">udostępnij sam opis</string>
+    <string name="copymsg">skopiuj opis</string>
+    <string name="sharehow">Co i jak udostępnić</string>
+    <string name="sharevia">Udsostępnij poprzez:</string>
+    <string name="copied">Skopiowano do Schowka</string>
+    <string name="yourwish">Twoje życzenie?</string>
+    <string name="notconnected">Nie podłączone!</string>
+    <string name="aboutgold">o HyperRogue Gold</string>
+    <string name="buy">kup</string>
+    <string name="info">info</string>
+    <string name="nothanks">nie dzięki</string>
+    <string name="goldfeatures">
+Kup HyperRogue Gold, by dostać następujące dodatkowe funkcje:\n\
+- osiągnięcia i rankingi\n\
+- częstsze aktualizacje (nowe krainy w planach!)\n\
+- tryb euklidesowy, by zobaczyć, dlaczego geometria ma znaczenie\n\
+- oszustwa\n\
+</string>
+
+    <string name="title_settings">Ustawienia</string>
+    <string name="title_log">Dziennik</string>
+    <string name="title_help">Pomoc</string>
+    <string name="title_quest">Misja/restart</string>
+    <string name="title_cheat">HyperRogue Gold</string>
+    <string name="title_share">Udostępnij wynik/ekran</string>
+    <string name="title_overview">przegląd krain</string>
+
+    <string name="title_gameservices">Połącz z Google Game Services</string>
+    <string name="summary_gameservices">Osiągnięcia i rankingi online</string>
+    <string name="title_language">Język</string>
+    <string name="summary_language">Wybierz język (language)</string>
+    <string name="title_character">Postać gracza</string>
+    <string name="summary_character">Mężczyzna albo kobieta</string>
+    <string name="title_hsightrange">Widoczność</string>
+    <string name="summary_hsightrange">mniejsza wartość = szybsza gra</string>
+    <string name="title_hwallmode">Tryb ścian</string>
+    <string name="summary_hwallmode">Jak pokazywać ściany?</string>
+    <string name="title_hmonmode">Tryb potworów</string>
+    <string name="summary_hmonmode">Jak pokazywać potwory i przedmioty?</string>
+    <string name="title_hypermode">model płaszczyzny hiperbolicznej</string>
+    <string name="summary_hypermode">Klein, Poincaré, ...</string>
+    <string name="title_fontsize">Wielkość czcionki</string>
+    <string name="title_flashtime">Szybkość tekstu</string>
+    <string name="summary_flashtime">jak długo pokazywać wiadomości</string>
+    <string name="title_revmove">Ruch odwrócony</string>
+    <string name="summary_revmove">klikaj za postacią</string>
+    <string name="title_nomusic">Graj bez muzyki</string>
+    <string name="summary_nomusic">wyłącz muzykę</string>
+    <string name="title_immersive">Fullscreen mode</string>
+    <string name="summary_immersive">swipe inward to display system bars</string>
+    <string name="title_usegl">Użyj OpenGL</string>
+    <string name="summary_usegl">OpenGL zazwyczaj działa lepiej</string>
+    <string name="title_website">Idź na stronę HyperRogue</string>
+    <string name="summary_website">zagraj również w szybką wersję na komputer!</string>
+
+    <string name="array_visionRange4">4 (bardzo ograniczona)</string>
+    <string name="array_visionRange5">5 (ograniczona)</string>
+    <string name="array_visionRange6">6 (trochę szybciej)</string>
+    <string name="array_visionRange7">7 (pełna)</string>
+    <string name="array_wallMode0">ASCII (szybkie)</string>
+    <string name="array_wallMode1">czarna</string>
+    <string name="array_wallMode2">prosta</string>
+    <string name="array_wallMode3">Escher (wolne)</string>
+    <string name="array_monsterMode0">ASCII (szybkie)</string>
+    <string name="array_monsterMode1">tylko przedmioty</string>
+    <string name="array_monsterMode2">przedmioty i potwory</string>
+    <string name="array_monsterMode3">wysoki kontrast</string>
+    <string name="array_hyperMode0">Klein (0)</string>
+    <string name="array_hyperMode5">pośredni (0.5)</string>
+    <string name="array_hyperMode10">Poincaré (1)</string>
+    <string name="array_hyperMode20">odległy (2)</string>
+    <string name="array_fontSize25">Malutka (25%)</string>
+    <string name="array_fontSize50">Mała (50%)</string>
+    <string name="array_fontSize75">Maława (75%)</string>
+    <string name="array_fontSize100">Normalna (100%)</string>
+    <string name="array_fontSize150">Duża (150%)</string>
+    <string name="array_fontSize200">Bardzo duża (200%)</string>
+    <string name="array_fontSize300">Wielka (300%)</string>
+    <string name="array_fontSize400">Ogromna (400%)</string>
+    <string name="array_flashTime0">natychmiastowy</string>
+    <string name="array_flashTime2">strasznie szybki (25%)</string>
+    <string name="array_flashTime4">bardzo szybki (50%)</string>
+    <string name="array_flashTime6">szybki (75%)</string>
+    <string name="array_flashTime8">dość szybki (100%)</string>
+    <string name="array_flashTime12">normalny (150%)</string>
+    <string name="array_flashTime16">raczej wolny (2x)</string>
+    <string name="array_flashTime24">wolny (3x)</string>
+    <string name="array_flashTime32">bardzo wolny (4x)</string>
+    <string name="array_flashTime48">naprawdę wolny (6x)</string>
+    <string name="array_flashTime64">strasznie wolny (8x)</string>
+    <string name="array_cheat_actionse">Tryb euklidesowy</string>
+    <string name="array_cheat_actionsa">Osiągnięcia</string>
+    <string name="array_cheat_actionsl">Rankingi</string>
+    <string name="array_cheat_actionsb">** oszustwa poniżej **</string>
+    <string name="array_cheat_actionsS">Bezpieczeństwo (szybki save)</string>
+    <string name="array_cheat_actionsL">Wybierz krainę ---</string>
+    <string name="array_cheat_actionsU">--- i się teleportuj</string>
+    <string name="array_cheat_actionsF">Moce sfer</string>
+    <string name="array_cheat_actionsC">Misja Hiperkamień</string>
+    <string name="array_cheat_actionsM">przywołaj Mimiki</string>
+    <string name="array_cheat_actionsG">przywołaj Golema</string>
+    <string name="array_cheat_actionsZ">obróć postać</string>
+    <string name="array_cheat_actionsJ">utrata skarbów</string>
+    <string name="array_cheat_actionsP">utrata mocy</string>
+    <string name="array_cheat_actionsO">przwołaj sfery</string>
+    <string name="array_cheat_actionsD">przywołaj martwe sfery</string>
+    <string name="array_cheat_actionsY">przywołaj sferę Yendoru</string>
+    <string name="array_cheat_actionsT">przywołaj skarby</string>
+    <string name="array_cheat_actionsTx">przywołaj dużo skarbów</string>
+    <string name="array_cheat_actionsW">przywołaj Czerwia</string>
+    <string name="array_cheat_actionsI">przywołaj Bluszcz</string>
+    <string name="array_cheat_actionsE">przywołaj potwora</string>
+    <string name="array_cheat_actionsH">przywołaj dudniki</string>
+    <string name="array_cheat_actionsB">przywołaj ognisko</string>
+    <string name="array_cheat_actionsK">zdobądź zabicia</string>
+    <string name="array_character0">mężczyzna</string>
+    <string name="array_character1">kobieta</string>
+    <string name="array_leaderboardNames0">Wynik</string>
+    <string name="array_leaderboardNames1">Diamenty</string>
+    <string name="array_leaderboardNames3">Przyprawa</string>
+    <string name="array_leaderboardNames2">Złoto</string>
+    <string name="array_leaderboardNames4">Rubiny</string>
+    <string name="array_leaderboardNames6">Odłamki</string>
+    <string name="array_leaderboardNames10">Pióra</string>
+    <string name="array_leaderboardNames5">Eliksiry</string>
+    <string name="array_leaderboardNames31">Jaja Bombardiera</string>
+    <string name="array_leaderboardNames32">Bursztyny</string>
+    <string name="array_leaderboardNames33">Perły</string>
+    <string name="array_leaderboardNames34">Hiperskie Dywany</string>
+    <string name="array_leaderboardNames35">Granaty</string>
+    <string name="array_leaderboardNames9">Statuetki</string>
+    <string name="array_leaderboardNames18">Kwiaty Paproci</string>
+    <string name="array_leaderboardNames26">Czerwone Kamienie</string>
+    <string name="array_leaderboardNames27">Skarby Piratów</string>
+    <string name="array_leaderboardNames7">Totemy</string>
+    <string name="array_leaderboardNames22">Wino</string>
+    <string name="array_leaderboardNames23">Szmaragdy</string>
+    <string name="array_leaderboardNames21">Srebro</string>
+    <string name="array_leaderboardNames19">Królewskie Mleczko</string>
+    <string name="array_leaderboardNames8">Czarcie Ziele</string>
+    <string name="array_leaderboardNames11">Szafiry</string>
+    <string name="array_leaderboardNames20">Kamienie Mocy</string>
+    <string name="array_leaderboardNames12">Hiperkamienie</string>
+    <string name="array_leaderboardNames14">Misja główna: liczba kolejek</string>
+    <string name="array_leaderboardNames13">Misja główna: czas rzeczywisty</string>
+    <string name="array_leaderboardNames16">Misja Hiperkamień: liczba kolejek</string>
+    <string name="array_leaderboardNames15">Misja Hiperkamień: czas rzeczywisty</string>
+    <string name="array_leaderboardNames17">Sfery Yendoru</string>
+    <string name="array_leaderboardNames24">Księgi</string>
+    <string name="array_leaderboardNames25">Święte Graale</string>
+
+    <string name="array_leaderboardNames39">Onyksy</string>
+    <string name="array_leaderboardNames38">Kamienie ywiow</string>
+    <string name="array_leaderboardNames37">Figurki</string>
+    <string name="array_leaderboardNames42">Zmutowane sadzonki</string>
+    <string name="array_leaderboardNames43">Fulguryty</string>
+
+    <string name="title_princess">kogo ratujemy</string>
+    <string name="array_prince0">Książę</string>
+    <string name="array_prince1">Księżniczka</string>
+
+    <string name="array_cheat_actions7">tryb siedmiokątów</string>
+    <string name="array_cheat_actionsy">Misja Yendor</string>
+    <string name="array_cheat_actionsc">tryb Chaosu</string>
+    <string name="array_leaderboardNames46">Czarne Lotosy</string>
+    <string name="array_leaderboardNames47">Zmutowane Owoce</string>
+    <string name="array_leaderboardNames48">Gołębie Pióra</string>
+    <string name="array_leaderboardNames51">Korale</string>
+    <string name="array_leaderboardNames52">Róże bez Kolców</string>
+    <string name="array_leaderboardNames53">tryb Chaosu</string>
+    <string name="array_leaderboardNames54">Żółwie Punkty</string>
+    <string name="array_leaderboardNames55">Smocze Łuski</string>
+    <string name="array_leaderboardNames56">Jabłka</string>
+
+</resources>
