@@ -1,7 +1,7 @@
 // HyperRogue paper model generator
 // Copyright (C) 2011-2016 Zeno Rogue, see 'hyper.cpp' for details
 
-#ifndef MOBILE
+#ifndef NOMODEL
 namespace netgen {
 
   // We need a two-dimensional vector class for this.
@@ -143,7 +143,7 @@ namespace netgen {
     
     loaded = true;
       
-    if(!created) return;
+    if(!created) { fclose(f); return; }
     
     for(int i=0; i<CELLS; i++) err = fscanf(f, "%d", &ct[i]);
 
@@ -227,7 +227,7 @@ namespace netgen {
     polyy[0] = int(v1.y);
     polyy[1] = int(v2.y);
     polyy[2] = int(v3.y);
-    filledPolygonColor(s, polyx, polyy, 3, col);
+    filledPolygonColorI(s, polyx, polyy, 3, col);
 #endif
     }
     
@@ -259,7 +259,7 @@ namespace netgen {
   
   int& hqpixel(hyperpoint h) {
     int hx, hy, hs;
-    getcoord(h, hx, hy, hs);
+    getcoord0(h, hx, hy, hs);
     return qpixel(hqsurface, hx, hy);
     }
   
@@ -644,20 +644,25 @@ namespace netgen {
             nei[i][e] >= 0 ? 0x808080 : 
             0xC0C0C0;
     
-          drawline(hvec(i, (e+ofs)%t), hvec(i, (e+1+ofs)%t), (col << 8) + 0xFF);
+          prettyline(hvec(i, (e+ofs)%t), hvec(i, (e+1+ofs)%t), (col << 8) + 0xFF, 3);
           }
         }
       }
     if(mode != 2) {
-      displayStat( 2, XLAT("synchronize net and map"), "", 's');
-      displayStat( 3, XLAT("display the scope"), "", 't');  
-      displayStat( 5, XLAT("create the model"), "", 'c');
-      displayStat( 7, XLAT("back to HyperRogue"), "", 'q');
-      displayStat( 9, XLAT("design the net"), "", 'd');
+      dialog::init("paper model creator");
+
+      dialog::addItem(XLAT("synchronize net and map"), 's');
+      dialog::addItem(XLAT("display the scope"), 't');  
+      dialog::addItem(XLAT("create the model"), 'c');
+      dialog::addItem(XLAT("back to HyperRogue"), 'q');
+      dialog::addItem(XLAT("design the net"), 'd');
+      
+      dialog::display();
       }
     }
   
-  void handleKey(int uni, int sym) {
+  void handleKey(int sym, int uni) {
+    dialog::handleNavigation(sym, uni);
 
     if(!loaded) { 
       loadData(); 
@@ -668,7 +673,7 @@ namespace netgen {
         }
       if(!created) {
         View = Id;
-        if(lcenterover) viewctr.h = lcenterover->master;
+        if(centerover) viewctr.h = centerover->master;
         else viewctr.h = cwt.c->master;
         playermoved = false;
         dataFromHR();
@@ -684,17 +689,17 @@ namespace netgen {
       }
     if(uni == 's') {
       View = Id;
-      if(lcenterover) viewctr.h = lcenterover->master;
+      if(centerover) viewctr.h = centerover->master;
       else viewctr.h = cwt.c->master;
       playermoved = false;
       }
-    if(uni == 'c') {
+    else if(uni == 'c') {
       createPapermodel();
       addMessage(XLAT("The paper model created as papermodel-*.bmp"));
       }
-    if(uni == 'd') designNet();
-    if(uni == 't') mode = 2;
-    if(uni == 'q' || sym == SDLK_ESCAPE)
+    else if(uni == 'd') designNet();
+    else if(uni == 't') mode = 2;
+    else if(uni || sym == SDLK_F10)
       cmode = emNormal;
     }
     

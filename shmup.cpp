@@ -4,58 +4,96 @@
 
 // implementation of the shoot'em up mode
 
-#include <map>
-
-const char *lastprofile = "";
-int lt = 0;
-
-#define MAXPLAYER 4
-
-#ifndef MOBILE
-void profile(const char *buf) {
-  int gt = SDL_GetTicks();
-  printf("%4d %s\n", gt - lt, lastprofile);
-  lt = gt;
-  lastprofile = buf;
-  }
+#ifdef MOBILE
+#define SHMUPTITLE "shoot'em up mode"
+#else
+#define SHMUPTITLE "shoot'em up and multiplayer"
 #endif
 
-#define SCALE (crossf/hcrossf)
-#define SCALE2 (SCALE*SCALE)
+#include <map>
 
-bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, int col);
-void drawPlayerEffects(const transmatrix& V, cell *c, bool onPlayer);
+extern int mousex, mousey;
+extern bool clicked;
 
-namespace shmup {
+// joysticks for controlling the mobile shmup mode
+namespace shmupballs {
+  int xmove, xfire, yb, rad;
 
-eItem targetRangedOrbKey(orbAction a);
-eItem keyresult[4];
+  void calc() {
+    rad = vid.radius * (vid.mobilecompasssize ? vid.mobilecompasssize : 14) / 100;
+    xmove = max(vid.xcenter - vid.radius - rad, rad);
+    xfire = min(vid.xcenter + vid.radius + rad, vid.xres - rad);
+    yb = vid.ycenter + vid.radius - rad;
+    }
+  }
 
-long double fabsl(long double x) { return x>0?x:-x; }
+namespace multi {
 
-enum pcmds {
-  pcForward, pcBackward, pcTurnLeft, pcTurnRight,
-  pcMoveUp, pcMoveRight, pcMoveDown, pcMoveLeft,
-  pcFire, pcFace, pcFaceFire,
-  pcDrop, pcCenter, pcOrbPower, pcOrbKey
-  };
+  int players = 1;
+  cellwalker player[MAXPLAYER];
+  vector<int> revive_queue; // queue for revival
   
-const char* playercmds[15] = {
-  "forward", "backward", "turn left", "turn right",
-  "move up", "move right", "move down", "move left", 
-  "throw a knife", "face the pointer", "throw at the pointer", 
-  "drop Dead Orb", "center the map on me", "Orb power (target: mouse)",
-  "Orb power (target: facing)"
-  };
+  cell *origpos[MAXPLAYER], *origtarget[MAXPLAYER];
 
-const char* pancmds[7] = {
-  "pan up", "pan right", "pan down", "pan left",
-  "rotate left", "rotate right", "home"
-  };
+  bool flipped[MAXPLAYER];
+  
+  int treasures[MAXPLAYER], kills[MAXPLAYER], deaths[MAXPLAYER];
+  
+  bool alwaysuse = false;
 
-#define SHMUPAXES 20
+  void recall() {
+    for(int i=0; i<numplayers(); i++) {
+        int idir = (3 * i) % cwt.c->type;
+        cell *c2 = cwt.c->mov[idir];
+        makeEmpty(c2);
+        if(!passable(c2, NULL, P_ISPLAYER)) c2 = cwt.c;
+        multi::player[i].c = c2;
+        multi::player[i].spin = 0;
+        
+        multi::flipped[i] = true;
+        multi::whereto[i].d = MD_UNDECIDED;
+        }
+    }
+  
+  transmatrix whereis[MAXPLAYER];
+  transmatrix crosscenter[MAXPLAYER];
+  double ccdist[MAXPLAYER];
+  cell *ccat[MAXPLAYER];
+  
+  bool combo[MAXPLAYER];
 
-const char* axemodes[SHMUPAXES] = { 
+  int cpid; // player id -- an extra parameter for player-related functions
+  int cpid_edit; // cpid currently being edited
+  
+  movedir whereto[MAXPLAYER]; // player's target cell  
+
+  double mdx[MAXPLAYER], mdy[MAXPLAYER]; // movement vector for the next move
+
+  const char* playercmds_shmup[15] = {
+    "forward", "backward", "turn left", "turn right",
+    "move up", "move right", "move down", "move left", 
+    "throw a knife", "face the pointer", "throw at the pointer", 
+    "drop Dead Orb", "center the map on me", "Orb power (target: mouse)",
+    "Orb power (target: facing)"
+    };
+  
+  const char* playercmds_turn[15] = {
+    "move up-right", "move up-left", "move down-right", "move down-left", 
+    "move up", "move right", "move down", "move left", 
+    "stay in place (left + right)", "cancel move", "leave the game", 
+    "drop Dead Orb (up + down)", "center the map on me", "",
+    ""
+    };
+  
+  const char* pancmds[7] = {
+    "pan up", "pan right", "pan down", "pan left",
+    "rotate left", "rotate right", "home"
+    };
+
+#define SHMUPAXES_BASE 4
+#define SHMUPAXES ((SHMUPAXES_BASE) + 4 * (MAXPLAYER))
+
+const char* axemodes[SHMUPAXES] = {
   "do nothing", 
   "rotate view",
   "panning X",
@@ -75,13 +113,786 @@ const char* axemodes[SHMUPAXES] = {
   "player 4 X", 
   "player 4 Y", 
   "player 4 go", 
-  "player 4 spin"
+  "player 4 spin",
+  "player 5 X", 
+  "player 5 Y", 
+  "player 5 go", 
+  "player 5 spin",
+  "player 6 X", 
+  "player 6 Y", 
+  "player 6 go", 
+  "player 6 spin",
+  "player 7 X", 
+  "player 7 Y", 
+  "player 7 go", 
+  "player 7 spin"
   };
 
-int players;
-int cpid; // player id -- an extra parameter for player-related functions
-int cpid_edit; // cpid currently being edited
 int centerplayer = -1;
+
+#ifndef NOCONFIG
+void saveConfig(FILE *f) {
+  fprintf(f, "%d %d %d", VERNUM, vid.scfg.players, alwaysuse);
+  for(int i=0; i<512; i++) fprintf(f, " %d", vid.scfg.keyaction[i]);
+  for(int i=0; i<MAXJOY; i++) for(int j=0; j<MAXBUTTON; j++) fprintf(f, " %d", vid.scfg.joyaction[i][j]);
+  for(int i=0; i<MAXJOY; i++) for(int j=0; j<MAXAXE; j++) fprintf(f, " %d", vid.scfg.axeaction[i][j]);
+  for(int i=0; i<MAXJOY; i++) for(int j=0; j<MAXAXE; j++) fprintf(f, " %d", vid.scfg.deadzoneval[i][j]);
+  for(int i=0; i<MAXJOY; i++) for(int j=0; j<MAXHAT; j++) for(int k=0; k<4; k++)
+    fprintf(f, " %d", vid.scfg.hataction[i][j][k]);
+  fprintf(f, "\n");
+  for(int i=0; i<MAXPLAYER; i++) savecs(f, scs[i], VERNUM);
+  }
+
+void scanchar(FILE *f, char& c) {
+  int i = c;
+  int err = fscanf(f, "%d", &i);
+  if(err == 1) c = i;
+  }
+  
+void loadConfig(FILE *f) {
+  int xvernum;
+  int err = fscanf(f, "%d %d", &xvernum, &vid.scfg.players);
+  if(vid.scfg.players < 1 || vid.scfg.players > MAXPLAYER)
+    vid.scfg.players = 1;
+  if(err != 2) return;
+  if(xvernum >= 8990) { int b=alwaysuse; err=fscanf(f, " %d", &b); alwaysuse = b; }
+  for(int i=0; i<512; i++) scanchar(f, vid.scfg.keyaction[i]);
+  for(int i=0; i<MAXJOY; i++) for(int j=0; j<MAXBUTTON; j++) scanchar(f, vid.scfg.joyaction[i][j]);
+  for(int i=0; i<MAXJOY; i++) for(int j=0; j<MAXAXE; j++) scanchar(f, vid.scfg.axeaction[i][j]);
+  
+  if(xvernum >= 9007)
+    for(int i=0; i<MAXJOY; i++) for(int j=0; j<MAXAXE; j++) err = fscanf(f, " %d", &vid.scfg.deadzoneval[i][j]);
+  for(int i=0; i<MAXJOY; i++) for(int j=0; j<MAXHAT; j++) for(int k=0; k<4; k++)
+    scanchar(f, vid.scfg.hataction[i][j][k]);
+  for(int i=0; i<(xvernum < 8990 ? 4 : 7); i++) loadcs(f, scs[i], xvernum);
+  }
+#endif
+
+int shmupnumkeys;
+const char** shmupcmdtable;
+
+char* axeconfigs[24]; int numaxeconfigs;
+int* dzconfigs[24];
+
+string listkeys(int id) {
+#ifndef MOBILE
+  string lk = "";
+  for(int i=0; i<512; i++)
+    if(vid.scfg.keyaction[i] == id)
+      lk = lk + " " + SDL_GetKeyName(SDLKey(i));
+  for(int i=0; i<numsticks; i++) for(int k=0; k<SDL_JoystickNumButtons(sticks[i]) && k<MAXBUTTON; k++)
+    if(vid.scfg.joyaction[i][k] == id) {
+      lk = lk + " " + cts('A'+i)+"-B"+its(k);
+      }
+  for(int i=0; i<numsticks; i++) for(int k=0; k<SDL_JoystickNumHats(sticks[i]) && k<MAXHAT; k++)
+    for(int d=0; d<4; d++)
+      if(vid.scfg.hataction[i][k][d] == id) {
+        lk = lk + " " + cts('A'+i)+"-"+"URDL"[d];
+        }
+  return lk;
+#endif
+#ifdef MOBILE
+  return "";
+#endif
+  }
+
+#define SCJOY 16
+
+string dsc(int id) {
+  char buf[64];
+  sprintf(buf, " (%d $$$, %d kills, %d deaths)", 
+    multi::treasures[id],
+    multi::kills[id],
+    multi::deaths[id]
+    );
+  return buf;
+  }
+
+void resetScores() {
+  for(int i=0; i<MAXPLAYER; i++)
+    multi::treasures[i] = multi::kills[i] = multi::deaths[i] = 0;
+  }
+ 
+bool shmupcfg;
+
+bool configdead;
+
+void showShmupConfig() {
+#ifndef MOBILE
+
+  int sc = vid.scfg.subconfig;
+
+  if(sc == 1 || sc == 2 || sc == 4 || sc == 5 || sc == 6 || sc == 7 || sc == 8) {
+    shmupnumkeys = 15;
+    shmupcmdtable = shmup::on ? playercmds_shmup : playercmds_turn;
+    }
+  else if(sc == 3) {
+    shmupnumkeys = 7;
+    shmupcmdtable = pancmds;
+    }
+  else if(sc == SCJOY) {
+    dialog::init();
+    getcstat = ' ';
+    numaxeconfigs = 0;
+    for(int j=0; j<numsticks; j++) {
+      for(int ax=0; ax<SDL_JoystickNumAxes(sticks[j]) && ax < MAXAXE; ax++) if(numaxeconfigs<24) {
+        int y = SDL_JoystickGetAxis(sticks[j], ax);
+        string buf = " ";
+        if(configdead)
+          buf += its(y);
+        else {
+          while(y >  10000) buf += "+", y -= 10000;
+          while(y < -10000) buf += "-", y += 10000;
+          if(y>0) buf += "+";
+          if(y<0) buf += "-";
+          }
+        axeconfigs[numaxeconfigs] = &(vid.scfg.axeaction[j][ax]);
+        dzconfigs[numaxeconfigs] = &(vid.scfg.deadzoneval[j][ax]);
+        char aa = *axeconfigs[numaxeconfigs];
+        string what = configdead ? its(vid.scfg.deadzoneval[j][ax]) : XLAT(axemodes[aa%SHMUPAXES]);
+        dialog::addSelItem(XLAT("Joystick %1, axis %2", cts('A'+j), its(ax)) + buf, 
+          what, 'a'+numaxeconfigs);
+        numaxeconfigs++;
+        }
+      }
+    
+    dialog::addBoolItem(XLAT("Configure dead zones"), (configdead), 'z');
+    dialog::display();
+    }
+  else if(sc == 0) {
+
+    dialog::init(SHMUPTITLE);
+
+    dialog::addItem(XLAT(
+        vid.scfg.players == 2 ? "two players" : 
+        vid.scfg.players == 3 ? "three players" : 
+        vid.scfg.players == 4 ? "four players" : 
+        vid.scfg.players == 5 ? "five players" : 
+        vid.scfg.players == 6 ? "six players" : 
+        vid.scfg.players == 7 ? "seven players" : 
+        "one player"), 'n');
+
+    dialog::addItem(XLAT(shmupcfg ? "shoot'em up mode" : "turn-based mode"), 's');
+    
+    dialog::addItem(XLAT(shmup::on == shmupcfg && players == vid.scfg.players ?
+          "continue playing"
+        : "start a new game"), '0');
+
+    if(shmupcfg || multi::alwaysuse || vid.scfg.players > 1)
+      dialog::addItem(XLAT("configure player 1") + dsc(0), '1');
+    else
+      dialog::addBreak(100);
+    if(vid.scfg.players > 1)
+      dialog::addItem(XLAT("configure player 2") + dsc(1), '2');
+    else if(vid.scfg.players == 1 && !shmupcfg)
+      dialog::addSelItem(XLAT("input"), XLAT(multi::alwaysuse ? "config" : "default"), 'a');
+    else
+      dialog::addBreak(100);
+    if(vid.scfg.players > 2)
+      dialog::addItem(XLAT("configure player 3") + dsc(2), '3');
+    else if(vid.scfg.players == 1 && !shmupcfg && !shmupcfg && !multi::alwaysuse)
+      dialog::addItem(XLAT("old style joystick configuration"), 'b');
+    else dialog::addBreak(100);
+    if(vid.scfg.players > 3)
+      dialog::addItem(XLAT("configure player 4") + dsc(3), '4');
+    else dialog::addBreak(100);
+      
+    if(vid.scfg.players > 4)
+      dialog::addItem(XLAT("configure player 5") + dsc(4), '5');
+    else dialog::addBreak(100);
+
+    if(vid.scfg.players > 5)
+      dialog::addItem(XLAT("configure player 6") + dsc(5), '6');
+    else dialog::addBreak(100);
+
+    if(vid.scfg.players > 6)
+      dialog::addItem(XLAT("configure player 7") + dsc(6), '7');
+    else dialog::addBreak(100);
+      
+    if(shmupcfg || multi::alwaysuse || vid.scfg.players > 1)
+      dialog::addItem(XLAT("configure panning"), 'p');
+    else dialog::addBreak(100);
+
+    if(numsticks > 0) {
+      if(shmupcfg || multi::alwaysuse || vid.scfg.players > 1) 
+        dialog::addItem(XLAT("configure joystick axes"), 'j');
+      else dialog::addBreak(100);
+      }
+
+    if(multi::players > 1) 
+      dialog::addItem(XLAT("reset per-player statistics"), 'r');
+    else dialog::addBreak(100);
+    
+    dialog::addBreak(50);
+
+#ifndef NOCONFIG
+    dialog::addItem(XLAT("save the configuration"), 'c');
+#endif
+
+    dialog::addItem(XLAT("help"), 'h');
+
+    dialog::addItem(XLAT("exit configuration"), 'v');
+    dialog::display();
+    }
+  
+  if(sc >= 1 && sc <= MAXPLAYER + 1) {
+
+    dialog::init(
+      XLAT(sc == 1 ? "configure player 1" :
+      sc == 2 ? "configure player 2" :
+      sc == 3 ? "configure panning" :
+      sc == 4 ? "configure player 3" :
+      sc == 5 ? "configure player 4" :
+      sc == 6 ? "configure player 5" :
+      sc == 7 ? "configure player 6" :
+      sc == 8 ? "configure player 7" : ""
+      ));
+
+    getcstat = ' ';
+
+    for(int i=0; i<shmupnumkeys; i++) if(shmupcmdtable[i][0])
+      dialog::addSelItem(XLAT(shmupcmdtable[i]), listkeys(16*sc+i),
+        vid.scfg.setwhat ? (vid.scfg.setwhat>1 && i == (vid.scfg.setwhat&15) ? '?' : 0) : 'a'+i);
+      else dialog::addBreak(100);
+
+    if(vid.scfg.setwhat == 1)
+      dialog::addItem(XLAT("press a key to unassign"), 0);
+    else if(vid.scfg.setwhat)
+      dialog::addItem(XLAT("press a key for '%1'", XLAT(shmupcmdtable[vid.scfg.setwhat&15])), 0);
+    else
+      dialog::addItem(XLAT("unassign a key"), 'z');
+    
+    dialog::display();
+    }
+#endif
+  }
+
+void handleConfig(int sym, int uni) {
+#ifndef MOBILE
+  if(!vid.scfg.setwhat) dialog::handleNavigation(sym, uni);
+  int sc = vid.scfg.subconfig;
+  if(sc == 0) {
+    if(uni == '1') vid.scfg.subconfig = 1;
+    else if(uni == '2') vid.scfg.subconfig = 2;
+    else if(uni == 'p') vid.scfg.subconfig = 3;
+    else if(uni == '3') vid.scfg.subconfig = 4;
+    else if(uni == '4') vid.scfg.subconfig = 5;
+    else if(uni == '5') vid.scfg.subconfig = 6;
+    else if(uni == '6') vid.scfg.subconfig = 7;
+    else if(uni == '7') vid.scfg.subconfig = 8;
+    else if(uni == 'j') vid.scfg.subconfig = SCJOY;
+    else if(uni == 'a') multi::alwaysuse = !multi::alwaysuse;
+    else if(uni == 'b') cmode = emJoyConfig;
+    else if(uni == 'r') 
+      for(int i=0; i<MAXPLAYER; i++) 
+        kills[i] = deaths[i] = treasures[i] = 0;
+    else if(uni == 's' || uni == 't') 
+      shmupcfg = !shmupcfg;
+#ifndef NOCONFIG
+    else if(uni == 'c')
+      ::saveConfig();
+#endif
+    else if(uni == 'n' || uni == 'N') {
+      vid.scfg.players += shiftmul > 0 ? 1 : -1;
+      vid.scfg.players %= MAXPLAYER;
+      if(vid.scfg.players <= 0) vid.scfg.players += MAXPLAYER;
+      }
+    else if(sym == SDLK_F1 || uni == '?' || uni == 'h') {
+      lastmode = cmode;
+      cmode = emHelp;
+
+      /* help = 
+        "In the shmup (shoot'em up) mode, you can play a hyperbolic shoot'em up "
+        "game. The game is based on the usual turn-based grid-based HyperRogue, "
+        "but there are some changes. You fight by throwing knives, and you "
+        "have three extra lives. There are no friendly monsters, so Orbs of "
+        "Life and Friendship give you extra lives instead. Some other rules have been "
+        "adapted too.\n\n"
+        "It is possible for two players to play the shmup mode cooperatively "
+        "(locally). When playing together, lives, orbs, and treasures are shared, "
+        "knives recharge slower, orbs drain faster, and player characters are not "
+        "allowed to separate."; */
+
+      help = 
+      XLAT(
+"Shmup (shoot'em up) mode: You can play a hyperbolic shoot'em up game. The game is based "
+"on the usual turn-based grid-based HyperRogue, but there are some changes. You fight by "
+"throwing knives, and you have three extra lives. There are no allies, so all Orbs "
+"related to allies give you extra lives instead (up to 5). Some other rules have been "
+"adapted too.\n\n");
+
+help += XLAT(
+"Multiplayer: Play cooperatively (locally); treasures, kills, and deaths are calculated "
+"for each player too, for more competitive play. Orbs and treasures are shared, orbs drain "
+"faster, knives recharge slower, and player characters are not allowed to separate.\n\n");
+
+help += XLAT(
+"Turn-based multiplayer: Turns are executed in parallel. A player can leave the game "
+"by pressing a designated key (useful when about to get killed or lost). The following "
+"Orbs work to bring such players back: ");
+
+help += XLATN(iinf[itOrbLife].name); help += ", ";
+help += XLATN(iinf[itOrbFriend].name); help += ", ";
+help += XLATN(iinf[itOrbUndeath].name); help += ", ";
+help += XLATN(iinf[itOrbTeleport].name); help += ", ";
+help += XLATN(iinf[itOrbSafety].name); help += "\n\n";
+
+help += XLAT("This menu can be also used to configure keys.\n\n");
+        
+      }
+    else if(uni || sym == SDLK_F10) {
+      cmode = emNormal;
+      if(shmup::on != shmupcfg) { restartGame('s'); resetScores(); }
+      else if(vid.scfg.players != players) { restartGame(); resetScores(); }
+      }
+    }
+  else if(sc == SCJOY) {
+    if(sym) {
+      char xuni = uni | 96;
+      if(xuni >= 'a' && xuni < 'a' + numaxeconfigs) {
+        if(configdead) {
+          int& dz = (*dzconfigs[xuni - 'a']);
+          dz += int(shiftmul * 100);
+          if(dz < 0) dz = 0;
+          if(dz > 65000) dz = 65000;
+          }
+        else {
+          int v = (*axeconfigs[xuni - 'a']);
+          v += (shiftmul>0?1:-1);
+          v += SHMUPAXES;
+          v %= SHMUPAXES;
+          (*axeconfigs[xuni - 'a']) = v;
+          }
+        }
+      else if(xuni == 'z')
+        configdead = !configdead;
+      else if(uni || sym == SDLK_F10)
+        vid.scfg.subconfig = 0;
+      }
+    }
+  else {
+    if(sym) {
+      if(vid.scfg.setwhat) {
+        vid.scfg.keyaction[sym] = vid.scfg.setwhat;
+        vid.scfg.setwhat = 0;
+        }
+      else if(uni >= 'a' && uni < 'a' + shmupnumkeys && shmupcmdtable[uni-'a'][0])
+        vid.scfg.setwhat = 16*sc+uni - 'a';
+      else if(uni == 'z')
+        vid.scfg.setwhat = 1;
+      else if(uni || sym == SDLK_F10)
+        vid.scfg.subconfig = 0;
+      }
+    }
+#endif
+  }
+
+#define NUMACT 128
+
+enum pcmds {
+  pcForward, pcBackward, pcTurnLeft, pcTurnRight,
+  pcMoveUp, pcMoveRight, pcMoveDown, pcMoveLeft,
+  pcFire, pcFace, pcFaceFire,
+  pcDrop, pcCenter, pcOrbPower, pcOrbKey
+  };
+  
+int actionspressed[NUMACT], axespressed[SHMUPAXES], lactionpressed[NUMACT];
+
+void pressaction(int id) {
+  if(id >= 0 && id < NUMACT)
+    actionspressed[id]++;
+  }
+
+void handleInput(int delta) {
+#ifndef MOBILE
+  double d = delta / 500.;
+
+  Uint8 *keystate = SDL_GetKeyState(NULL);
+
+  for(int i=0; i<NUMACT; i++) 
+    lactionpressed[i] = actionspressed[i],
+    actionspressed[i] = 0;
+
+  for(int i=0; i<SHMUPAXES; i++) axespressed[i] = 0;
+  
+  for(int i=0; i<SDLK_LAST; i++) if(keystate[i]) 
+    pressaction(vid.scfg.keyaction[i]);
+  
+  for(int j=0; j<numsticks; j++) {
+
+    for(int b=0; b<SDL_JoystickNumButtons(sticks[j]) && b<MAXBUTTON; b++)
+      if(SDL_JoystickGetButton(sticks[j], b))
+        pressaction(vid.scfg.joyaction[j][b]);
+
+    for(int b=0; b<SDL_JoystickNumHats(sticks[j]) && b<MAXHAT; b++) {
+      int stat = SDL_JoystickGetHat(sticks[j], b);
+      if(stat & SDL_HAT_UP) pressaction(vid.scfg.hataction[j][b][0]);
+      if(stat & SDL_HAT_RIGHT) pressaction(vid.scfg.hataction[j][b][1]);
+      if(stat & SDL_HAT_DOWN) pressaction(vid.scfg.hataction[j][b][2]);
+      if(stat & SDL_HAT_LEFT) pressaction(vid.scfg.hataction[j][b][3]);
+      }
+    
+    for(int b=0; b<SDL_JoystickNumAxes(sticks[j]) && b<MAXAXE; b++) {
+      int value = SDL_JoystickGetAxis(sticks[j], b);
+      int dz = vid.scfg.deadzoneval[j][b];
+      if(value > dz) value -= dz; else if(value < -dz) value += dz;
+      else value = 0;
+      axespressed[vid.scfg.axeaction[j][b] % SHMUPAXES] += value;
+      }
+    }
+
+  if(keystate[SDLK_LCTRL] || keystate[SDLK_RCTRL]) d /= 5;
+  
+  double panx = 
+    actionspressed[49] - actionspressed[51] + axespressed[2] / 32000.0;
+  double pany = 
+    actionspressed[50] - actionspressed[48] + axespressed[3] / 20000.0;
+    
+  double panspin = actionspressed[52] - actionspressed[53] + axespressed[1] / 20000.0;
+  
+  if(actionspressed[54]) { centerplayer = -1, playermoved = true; centerpc(100); }
+  
+  if(panx || pany || panspin) {
+    View = xpush(-panx * d) * ypush(-pany * d) * spin(panspin * d) * View;
+    playermoved = false;
+    }
+#endif
+  }
+
+int tableid[7] = {1, 2, 4, 5, 6, 7, 8};
+
+void initConfig() {
+  vid.scfg.players = 1;
+  
+  char* t = vid.scfg.keyaction;
+  
+  t['w'] = 16 + 0;
+  t['s'] = 16 + 1;
+  t['a'] = 16 + 2;
+  t['d'] = 16 + 3;
+
+#ifndef MOBILE
+  t[SDLK_KP8] = 16 + 4;
+  t[SDLK_KP6] = 16 + 5;
+  t[SDLK_KP2] = 16 + 6;
+  t[SDLK_KP4] = 16 + 7;
+#endif
+
+  t['f'] = 16 + pcFire;
+  t['g'] = 16 + pcFace;
+  t['h'] = 16 + pcFaceFire;
+  t['r'] = 16 + pcDrop;
+  t['t'] = 16 + pcOrbPower;
+  t['y'] = 16 + pcCenter;
+
+  t['i'] = 32 + 0;
+  t['k'] = 32 + 1;
+  t['j'] = 32 + 2;
+  t['l'] = 32 + 3;
+  t[';'] = 32 + 8;
+  t['\''] = 32 + 9;
+  t['p'] = 32 + 10;
+  t['['] = 32 + pcCenter;
+
+#ifndef MOBILE
+  t[SDLK_UP] = 48 ;
+  t[SDLK_RIGHT] = 48 + 1;
+  t[SDLK_DOWN] = 48 + 2;
+  t[SDLK_LEFT] = 48 + 3;
+  t[SDLK_PAGEUP] = 48 + 4;
+  t[SDLK_PAGEDOWN] = 48 + 5;
+  t[SDLK_HOME] = 48 + 6;
+#endif
+
+  vid.scfg.joyaction[0][0] = 16 + pcFire;
+  vid.scfg.joyaction[0][1] = 16 + pcOrbPower;
+  vid.scfg.joyaction[0][2] = 16 + pcDrop;
+  vid.scfg.joyaction[0][3] = 16 + pcCenter;
+  vid.scfg.joyaction[0][4] = 16 + pcFace;
+  vid.scfg.joyaction[0][5] = 16 + pcFaceFire;
+
+  vid.scfg.joyaction[1][0] = 32 + pcFire;
+  vid.scfg.joyaction[1][1] = 32 + pcOrbPower;
+  vid.scfg.joyaction[1][2] = 32 + pcDrop;
+  vid.scfg.joyaction[1][3] = 32 + pcCenter;
+  vid.scfg.joyaction[1][4] = 32 + pcFace;
+  vid.scfg.joyaction[1][5] = 32 + pcFaceFire;
+
+  vid.scfg.axeaction[0][0] = 4;
+  vid.scfg.axeaction[0][1] = 5;
+  vid.scfg.axeaction[0][3] = 2;
+  vid.scfg.axeaction[0][4] = 3;
+
+  vid.scfg.axeaction[1][0] = 8;
+  vid.scfg.axeaction[1][1] = 9;
+  
+  // ULRD
+  vid.scfg.hataction[0][0][0] = 16 + 0;
+  vid.scfg.hataction[0][0][1] = 16 + 3;
+  vid.scfg.hataction[0][0][2] = 16 + 1;
+  vid.scfg.hataction[0][0][3] = 16 + 2;
+  vid.scfg.hataction[0][1][0] = 16 + 4;
+  vid.scfg.hataction[0][1][1] = 16 + 7;
+  vid.scfg.hataction[0][1][2] = 16 + 5;
+  vid.scfg.hataction[0][1][3] = 16 + 6;
+
+  vid.scfg.hataction[1][0][0] = 32 + 0;
+  vid.scfg.hataction[1][0][1] = 32 + 3;
+  vid.scfg.hataction[1][0][2] = 32 + 1;
+  vid.scfg.hataction[1][0][3] = 32 + 2;
+  vid.scfg.hataction[1][1][0] = 32 + 4;
+  vid.scfg.hataction[1][1][1] = 32 + 7;
+  vid.scfg.hataction[1][1][2] = 32 + 5;
+  vid.scfg.hataction[1][1][3] = 32 + 6;
+
+  int charidtable[MAXPLAYER] = {0, 1, 4, 6, 2, 3, 0};
+    
+  for(int i=0; i<MAXPLAYER; i++) {
+    initcs(multi::scs[i]); 
+    multi::scs[i].charid = charidtable[i];
+    }
+  
+  multi::scs[0].uicolor = 0xC00000FF;
+  multi::scs[1].uicolor = 0x00C000FF;
+  multi::scs[2].uicolor = 0x0000C0FF;
+  multi::scs[3].uicolor = 0xC0C000FF;
+  multi::scs[4].uicolor = 0xC000C0FF;
+  multi::scs[5].uicolor = 0x00C0C0FF;
+  multi::scs[6].uicolor = 0xC0C0C0FF;
+  }
+
+  void leaveGame(int i) {
+    multi::player[i].c = NULL;
+    multi::deaths[i]++;
+    revive_queue.push_back(i);
+    checklastmove();
+    }
+
+  bool playerActive(int p) {
+    if(multi::players == 1 || shmup::on) return true;
+    return player[p].c;
+    }
+  
+  int activePlayers() {
+    int q = 0;
+    for(int i=0; i<players; i++) if(playerActive(i)) q++;
+    return q;
+    }
+  
+  cell *multiPlayerTarget(int i) {
+    cellwalker cwti = multi::player[i];
+    if(!cwti.c) return NULL;
+    int dir = multi::whereto[i].d;
+    if(dir == MD_UNDECIDED) return NULL;
+    if(dir == MD_USE_ORB) return multi::whereto[i].tgt;
+    if(dir >= 0) { cwspin(cwti, dir); cwstep(cwti); }
+    return cwti.c;
+    }
+  
+  void checklastmove() {
+    for(int i=0; i<numplayers(); i++) if(playerActive(i)) {
+      multi::cpid = i;
+      cwt = multi::player[i]; break;
+      }
+    if(multi::activePlayers() == 1) {
+      multi::checkonly = true;
+      checkmove();
+      multi::checkonly = false;
+      }
+    }
+
+  bool needinput = true;
+  
+  void handleMulti(int delta) {
+    multi::handleInput(delta);
+    
+    transmatrix bcwtV = cwtV;
+    cellwalker bcwt = cwt;
+    
+    bool alldecided = !needinput;
+    
+    if(multi::players == 1) {
+      multi::cpid = 0;
+      multi::whereis[0] = cwtV;
+      multi::player[0] = cwt;
+      }
+    
+    for(int i=0; i<numplayers(); i++) if(playerActive(i)) {
+    
+      using namespace multi;
+      
+  // todo refactor
+  
+      cpid = i;
+      
+      int b = 16*tableid[cpid];
+      for(int ik=0; ik<8; ik++) if(actionspressed[b+ik]) playermoved = true;
+      for(int ik=0; ik<16; ik++) if(actionspressed[b+ik] && !lactionpressed[b+ik]) 
+        multi::combo[i] = false;
+          
+      bool anypressed = false;
+      
+      int jb = 4*tableid[cpid];
+      for(int ik=0; ik<4; ik++) 
+        if(axespressed[jb+ik]) 
+          anypressed = true, playermoved = true, multi::combo[i] = false;
+      
+      double mdx = 
+        (actionspressed[b+0] + actionspressed[b+2] - actionspressed[b+1] - actionspressed[b+3]) * .7 +
+        actionspressed[b+pcMoveRight] - actionspressed[b+pcMoveLeft] + axespressed[jb]/30000.;
+      double mdy = 
+        (actionspressed[b+3] + actionspressed[b+2] - actionspressed[b+1] - actionspressed[b+0]) * .7 +
+        actionspressed[b+pcMoveDown] - actionspressed[b+pcMoveUp] + axespressed[jb+1]/30000.;
+      
+      if((actionspressed[b+pcMoveRight] && actionspressed[b+pcMoveLeft]) ||
+        (actionspressed[b+pcMoveUp] && actionspressed[b+pcMoveDown]))
+          multi::mdx[i] = multi::mdy[i] = 0;
+        
+      multi::mdx[i] = multi::mdx[i] * (1 - delta / 1000.) + mdx * delta / 2000.;
+      multi::mdy[i] = multi::mdy[i] * (1 - delta / 1000.) + mdy * delta / 2000.;
+  
+      if(mdx != 0 || mdy != 0) if(!multi::combo[i]) {
+        cwtV = multi::whereis[i]; cwt = multi::player[i];
+        flipplayer = multi::flipped[i];
+        multi::whereto[i] = vectodir(hpxy(multi::mdx[i], multi::mdy[i]));
+        }
+      
+      if(multi::actionspressed[b+pcFire] || 
+        (multi::actionspressed[b+pcMoveLeft] && multi::actionspressed[b+pcMoveRight]))
+        multi::combo[i] = true, multi::whereto[i].d = MD_WAIT;
+  
+      if(multi::actionspressed[b+pcFace])
+        multi::whereto[i].d = MD_UNDECIDED;
+      
+      cwt.c = multi::player[i].c;      
+      if(multi::ccat[i] && !multi::combo[i] && targetRangedOrb(multi::ccat[i], roMultiCheck)) {
+        multi::whereto[i].d = MD_USE_ORB;
+        multi::whereto[i].tgt = multi::ccat[i];
+        }
+
+      if(multi::actionspressed[b+pcFaceFire] && activePlayers() > 1) {
+        addMessage(XLAT("Left the game."));
+        multi::leaveGame(i);
+        }
+  
+      if(actionspressed[b+pcDrop] || 
+        (multi::actionspressed[b+pcMoveUp] && multi::actionspressed[b+pcMoveDown]))
+        multi::combo[i] = true, multi::whereto[i].d = MD_DROP;
+  
+      if(actionspressed[b+pcCenter]) {
+        centerplayer = cpid; centerpc(100); playermoved = true; 
+        }
+  
+      if(multi::whereto[i].d == MD_UNDECIDED) alldecided = false;
+      
+      for(int ik=0; ik<16; ik++) if(actionspressed[b+ik]) anypressed = true;
+
+      if(anypressed) alldecided = false, needinput = false;
+      else multi::mdx[i] = multi::mdy[i] = 0;
+      }
+      
+    cwtV = bcwtV;
+    cwt = bcwt;
+    
+    if(alldecided) {
+      flashMessages();
+      // check for crashes
+      needinput = true;
+
+      for(int i=0; i<numplayers(); i++) if(playerActive(i)) {
+        origpos[i] = player[i].c;
+        origtarget[i] = multiPlayerTarget(i);
+        }
+  
+      for(int i=0; i<numplayers(); i++) if(playerActive(i))
+      for(int j=0; j<numplayers(); j++) if(playerActive(j)) if(i != j) {
+        if(origtarget[i] == origtarget[j]) {
+          addMessage("Two players cannot move/attack the same location!");
+          return;
+          }
+/*      if(multiPlayerTarget(i) == multi::player[j].c) {
+          addMessage("Cannot move into the current location of another player!");
+          return;
+          }
+        if(celldistance(multiPlayerTarget(i), multiPlayerTarget(j)) > 8) {
+          addMessage("Players cannot get that far away!");
+          return;
+          } */
+        }
+  
+      if(multi::players == 1) {
+        if(movepcto(multi::whereto[0]))
+          multi::whereto[0].d = MD_UNDECIDED;
+        return;
+        }
+      
+      multi::cpid = 0;
+      if(multimove()) {
+        multi::aftermove = false;
+        monstersTurn();
+        checklastmove();
+        }
+      }
+    }
+  
+  void mousemovement(cell *c) {
+    if(!c) return;
+    int countplayers = 0;
+    int countplayers_undecided = 0;
+    for(int i=0; i<multi::players; i++)
+      if(multi::playerActive(i) && (playerpos(i) == c || isNeighbor(c, playerpos(i)))) {
+        countplayers++;
+        if(multi::whereto[i].d == MD_UNDECIDED) countplayers_undecided++;
+        }
+  
+    for(int i=0; i<multi::players; i++)
+      if(multi::playerActive(i) && (playerpos(i) == c || isNeighbor(c, playerpos(i)))) {
+        int& cdir = multi::whereto[i].d;
+        int scdir = cdir;
+        bool isUndecided = cdir == MD_UNDECIDED;
+        if(countplayers_undecided > 0 && ! isUndecided) continue;
+        if(playerpos(i) == c)
+          multi::whereto[i].d = MD_WAIT;
+        else {
+          for(int d=0; d<playerpos(i)->type; d++) {
+            cdir = d;
+            if(multi::multiPlayerTarget(i) == c) break;
+            cdir = scdir;
+            }
+          }
+        }
+    
+    needinput = 
+      ((countplayers == 2 && !countplayers_undecided) || countplayers_undecided >= 2);
+    }
+  
+  }
+
+/*
+const char *lastprofile = "";
+int lt = 0;
+
+void profile(const char *buf) {
+  int gt = SDL_GetTicks();
+  printf("%4d %s\n", gt - lt, lastprofile);
+  lt = gt;
+  lastprofile = buf;
+  }
+*/
+
+#define SCALE (crossf/hcrossf)
+#define SCALE2 (SCALE*SCALE)
+
+namespace shmup {
+
+transmatrix &ggmatrix(cell *c);
+
+using namespace multi;
+
+eItem targetRangedOrbKey(orbAction a);
+eItem keyresult[MAXPLAYER];
+
+ld fabsl(ld x) { return x>0?x:-x; }
 
 bool on = false, safety = false;
 
@@ -94,8 +905,6 @@ multimap<cell*, monster*> monstersAt;
 typedef multimap<cell*, monster*>::iterator mit;
 
 vector<monster*> active;
-
-map<cell*, transmatrix> gmatrix;
 
 cell *findbaseAround(hyperpoint p, cell *around) {
   cell *best = around;
@@ -110,32 +919,46 @@ cell *findbaseAround(hyperpoint p, cell *around) {
   return best;
   }
 
+cell *findbaseAroundRepeat(hyperpoint p, cell *around) {
+  while(true) {
+    cell *c = findbaseAround(p, around);
+    if(c == around) return c;
+    around = c;
+    }
+  }
+
+
 /* double distance(hyperpoint h) {
   h = spintox(h) * h;
-  return inverse_sinh(h[2]);
+  return asinh(h[2]);
   } */
 
 struct monster {
   eMonster type;
   cell *base;
-  cell *origin; // for tortoises
+  cell *torigin; 
+    // tortoises: origin
+    // butterflies: last position
   transmatrix at;
   transmatrix pat;
   eMonster stk;
   bool dead;
+  bool notpushed;
   bool inBoat;
   monster *parent; // who shot this missile
   eMonster parenttype; // type of the parent
   int nextshot;    // when will it be able to shot (players/flailers)
-  char pid;         // player ID
+  int pid;         // player ID
   char hitpoints;
   int stunoff;
   int blowoff;
-  double vel;      // velocity, for flail balls
+  double swordangle; // sword angle wrt at
+  double vel;        // velocity, for flail balls
+  double footphase;
   
   monster() { 
     dead = false; inBoat = false; parent = NULL; nextshot = 0; 
-    stunoff = 0; blowoff = 0;
+    stunoff = 0; blowoff = 0; footphase = 0;
     }
 
   void store() {
@@ -172,7 +995,7 @@ struct monster {
     
     transmatrix mat2 = spintox(mat*C0) * mat;
     
-    double d = 0, dist = inverse_sinh(mat2[0][2]);
+    double d = 0, dist = asinh(mat2[0][2]);
 
     while(d < dist) {
       d += spd;
@@ -198,7 +1021,7 @@ struct monster {
     
     transmatrix mat2 = spintox(mat*C0) * mat;
     
-    double d = 0, dist = inverse_sinh(mat2[0][2]);
+    double d = 0, dist = asinh(mat2[0][2]);
 
     while(d < dist) {
       d += spd;
@@ -225,7 +1048,7 @@ struct monster {
 
   };
 
-monster *pc[MAXPLAYER], *mousetarget;
+monster *pc[MAXPLAYER], *mousetarget, *lmousetarget;
 
 int curtime, nextmove, nextdragon;
 
@@ -235,9 +1058,13 @@ bool isBullet(monster *m) {
 bool isPlayer(monster *m) { return m->type == moPlayer; }
 bool isMonster(monster *m) { return m->type != moPlayer && m->type != moBullet; }
 
-void killMonster(monster* m) {
-#ifdef LOCAL
-  if(localKill(m)) return;
+void killMonster(monster* m, eMonster who_kills, int flags = 0) {
+  int tk = tkills();
+#ifdef ROGUEVIZ
+  if(m->type == moRogueviz) {
+    rogueviz::activate(m);
+    return;
+    }
 #endif
   if(m->dead) return;
   m->dead = true;
@@ -255,14 +1082,17 @@ void killMonster(monster* m) {
     m->inBoat = false;
     }
   m->base->monst = m->type;
-  killMonster(m->base);
+  killMonster(m->base, who_kills, flags);
   m->base->monst = m->stk;
+  if(multi::cpid >= 0)
+    multi::kills[multi::cpid] += tkills() - tk;
   }
 
 void pushmonsters() {
   for(int i=0; i<size(active); i++) {
     monster *m = active[i];
-    if(!isPlayer(m) && !m->dead) {
+    m->notpushed = isPlayer(m) || m->dead || (m->base->monst && m->base->monst != m->type);
+    if(!m->notpushed) {
       m->stk = m->base->monst;
       m->base->monst = m->type;
       }
@@ -272,16 +1102,16 @@ void pushmonsters() {
 void popmonsters() {
   for(int i=size(active)-1; i>=0; i--) {
     monster *m = active[i];
-    if(!isPlayer(m) && !m->dead) {
+    if(!m->notpushed) {
       if(m->type == m->base->monst)
         m->base->monst = m->stk;
       else {
         m->dead = true; // already killed
-        // also kill all the other monsters there
+        // also kill all the other monsters pushed there
         for(int j=0; j<i; j++) {
           monster *m2 = active[j];
-          if(m2->base == m->base && !isPlayer(m2) && !m2->dead) 
-            killMonster(m2);
+          if(m2->base == m->base && !m2->notpushed) 
+            killMonster(m2, moNone);
           }
         }
       }
@@ -297,8 +1127,8 @@ void degradeDemons() {
   }
 
 // we need these for the Mimics!
-double playerturn[4], playergo[4];
-bool playerfire[4];
+double playerturn[MAXPLAYER], playergo[MAXPLAYER];
+bool playerfire[MAXPLAYER];
 
 void awakenMimics(monster *m, cell *c2) {
   for(int i=0; i<size(dcal); i++) {
@@ -393,8 +1223,8 @@ void shootBullet(monster *m) {
     bullet->parenttype = m->type;
     active.push_back(bullet);
     }
-  
-/*   if(markOrb(itOrbTrickery)) {
+ 
+  if(markOrb(itOrbDash)) {
     monster* bullet = new monster;
     bullet->base = m->base;
     bullet->at = m->at * spin(M_PI);
@@ -402,7 +1232,7 @@ void shootBullet(monster *m) {
     bullet->parent = m;
     bullet->parenttype = m->type;
     active.push_back(bullet);
-    } */
+    }
   }
 
 void killThePlayer(eMonster m) {
@@ -500,74 +1330,10 @@ void roseCurrents(transmatrix& nat, monster *m, int delta) {
     }
   }
 
-#ifndef MOBILE
-
-#define NUMACT 128
-
-int actionspressed[NUMACT], axespressed[SHMUPAXES], lactionpressed[NUMACT];
-
-void pressaction(int id) {
-  if(id >= 0 && id < NUMACT)
-    actionspressed[id]++;
-  }
-
-void handleInput(int delta) {
-  double d = delta / 500.;
-
-  Uint8 *keystate = SDL_GetKeyState(NULL);
-
-  for(int i=0; i<NUMACT; i++) 
-    lactionpressed[i] = actionspressed[i],
-    actionspressed[i] = 0;
-
-  for(int i=0; i<SHMUPAXES; i++) axespressed[i] = 0;
-  
-  for(int i=0; i<SDLK_LAST; i++) if(keystate[i]) 
-    pressaction(vid.scfg.keyaction[i]);
-  
-  for(int j=0; j<numsticks; j++) {
-
-    for(int b=0; b<SDL_JoystickNumButtons(sticks[j]) && b<MAXBUTTON; b++)
-      if(SDL_JoystickGetButton(sticks[j], b))
-        pressaction(vid.scfg.joyaction[j][b]);
-
-    for(int b=0; b<SDL_JoystickNumHats(sticks[j]) && b<MAXHAT; b++) {
-      int stat = SDL_JoystickGetHat(sticks[j], b);
-      if(stat & SDL_HAT_UP) pressaction(vid.scfg.hataction[j][b][0]);
-      if(stat & SDL_HAT_RIGHT) pressaction(vid.scfg.hataction[j][b][1]);
-      if(stat & SDL_HAT_DOWN) pressaction(vid.scfg.hataction[j][b][2]);
-      if(stat & SDL_HAT_LEFT) pressaction(vid.scfg.hataction[j][b][3]);
-      }
-    
-    for(int b=0; b<SDL_JoystickNumAxes(sticks[j]) && b<MAXAXE; b++) {
-      int value = SDL_JoystickGetAxis(sticks[j], b);
-      axespressed[vid.scfg.axeaction[j][b] % SHMUPAXES] += value;
-      }
-    }
-
-  if(keystate[SDLK_LCTRL] || keystate[SDLK_RCTRL]) d /= 5;
-  
-  double panx = 
-    actionspressed[49] - actionspressed[51] + axespressed[2] / 32000.0;
-  double pany = 
-    actionspressed[50] - actionspressed[48] + axespressed[3] / 20000.0;
-    
-  double panspin = actionspressed[52] - actionspressed[53] + axespressed[1] / 20000.0;
-  
-  if(actionspressed[54]) { centerplayer = -1, playermoved = true; centerpc(100); }
-  
-  if(panx || pany || panspin) {
-    View = xpush(-panx * d) * ypush(-pany * d) * spin(panspin * d) * View;
-    playermoved = false;
-    }
-  }
-
 hyperpoint keytarget(int i) {
   double d = 2 + sin(curtime / 350.);
   return pc[i]->pat * xpush(d) * C0;
   }
-
-int tableid[4] = {1, 2, 4, 5};
 
 /* int charidof(int pid) {
   if(players == 1) return bak_charid;
@@ -576,8 +1342,62 @@ int tableid[4] = {1, 2, 4, 5};
   return 0;
   } */
 
+double getSwordSize() { return 0.7255; }
+double getHornsSize() { return 0.33; }
+
+hyperpoint swordpos(int id, bool rev, double frac) {
+  return pc[id]->pat * spin(pc[id]->swordangle) * xpush((rev?-frac:frac) * getSwordSize()) * C0;
+  }
+
+hyperpoint hornpos(int id) {
+  return pc[id]->pat * tC0(xpush(getHornsSize()));
+  }
+
+#define IGO 9
+
+double igospan[IGO] = { 0, 
+  M_PI/6, -M_PI/6, 
+  M_PI/4, -M_PI/4,
+  M_PI/3, -M_PI/3,
+  M_PI/2.1, -M_PI/2.1
+  };
+
+bool swordKills(eMonster m) {
+  return 
+    m != moHedge && m != moMetalBeast && m != moMetalBeast2
+    && m != moTortoise && m != moGreater && m != moRoseBeauty
+    && m != moReptile && !isBull(m) && m != moButterfly;
+  }
+
+bool hornKills(eMonster m) {
+  return 
+    m != moHedge && m != moMetalBeast && m != moMetalBeast2
+    && m != moTortoise && m != moGreater && m != moSkeleton
+    && m != moDraugr && m != moRoseBeauty
+    && m != moReptile && !isBull(m) && m != moButterfly && !isBulletType(m)
+    && m != moPalace && m != moFatGuard && m != moVizier;
+  }
+
+bool hornStuns(eMonster m) {
+  return !isBulletType(m) && m != moRoseBeauty;
+  }
+
+bool noncrashable(monster *m, monster *by) {
+  eMonster mt = m->type;
+  if(mt == moGreater) return true;
+  if(mt == moDraugr && by->type != moDraugr) return true;
+  if(isBull(mt)) return true;
+  if(mt == moReptile) return true;
+  if(mt == moRoseBeauty && by->type != moRoseLady) return true;
+  if(mt == moTortoise) return true;
+  if(mt == moSkeleton) return true;
+  return false;
+  }
+
+int bulltime[MAXPLAYER];
+
 void movePlayer(monster *m, int delta) {
-  
+
   cpid = m->pid;
   
   double mturn = 0, mgo = 0, mdx = 0, mdy = 0;
@@ -590,6 +1410,7 @@ void movePlayer(monster *m, int delta) {
   int jb = 4*tableid[cpid];
   for(int i=0; i<4; i++) if(axespressed[jb+i]) playermoved = true;
   
+#ifndef MOBILE
   mgo = actionspressed[b+pcForward] - actionspressed[b+pcBackward] + axespressed[jb+2]/30000.;
   mturn = actionspressed[b+pcTurnLeft] - actionspressed[b+pcTurnRight] + axespressed[jb+3]/30000.;
   mdx = actionspressed[b+pcMoveRight] - actionspressed[b+pcMoveLeft] + axespressed[jb]/30000.;
@@ -598,12 +1419,31 @@ void movePlayer(monster *m, int delta) {
   shotkey = actionspressed[b+pcFire] || actionspressed[b+pcFaceFire];
   facemouse = actionspressed[b+pcFace] || actionspressed[b+pcFaceFire];
   dropgreen = actionspressed[b+pcDrop];
+#endif
   
-  if(actionspressed[b+pcOrbPower] && !lactionpressed[b+pcOrbPower]) {
+#ifdef MOBILE
+  mdx = mdy = mgo = mturn = 0;
+  facemouse = shotkey = false;
+  dropgreen = getcstat == 'g';
+  using namespace shmupballs;
+
+  if(clicked && hypot(mousex - xfire, mousey - yb) < rad) {
+    shotkey = true;
+    mdx = (mousex - xfire) / (rad/2.);
+    mdy = (mousey - yb) / (rad/2.);
+    }
+  if(clicked && hypot(mousex - xmove, mousey - yb) < rad) {
+    mdx = (mousex - xmove) / (rad/2.);
+    mdy = (mousey - yb) / (rad/2.);
+    }
+  #endif
+  
+  if(actionspressed[b+pcOrbPower] && !lactionpressed[b+pcOrbPower] && mouseover) {
     cwt.c = m->base;
     targetRangedOrb(mouseover, roKeyboard);
     }
-    
+
+#ifndef MOBILE    
   if(haveRangedOrb()) {
     cwt.c = m->base;
     if(actionspressed[b+pcOrbKey] && !lactionpressed[b+pcOrbKey])
@@ -612,6 +1452,7 @@ void movePlayer(monster *m, int delta) {
       keyresult[cpid] = targetRangedOrbKey(roCheck);
     }
   else
+#endif
     keyresult[cpid] = itNone;
     
   if(actionspressed[b+pcCenter]) {
@@ -625,6 +1466,7 @@ void movePlayer(monster *m, int delta) {
   // if(mturn > 1) mturn = 1;
   // if(mturn < -1) mturn = -1;
   
+  
   playerturn[cpid] = mturn * delta / 150.0;
 
   double mdd = hypot(mdx, mdy);
@@ -637,6 +1479,7 @@ void movePlayer(monster *m, int delta) {
     mgo += mdd;
     }
 
+#ifndef MOBILE
   Uint8 *keystate = SDL_GetKeyState(NULL);
   bool forcetarget = (keystate[SDLK_RSHIFT] | keystate[SDLK_LSHIFT]);
   if(((mousepressed && !forcetarget) || facemouse) && delta > 0 && !outofmap(mouseh)) {
@@ -646,10 +1489,14 @@ void movePlayer(monster *m, int delta) {
     // nat = nat * spin(alpha);
     // mturn += alpha * 150. / delta;
     }
+#endif
 
   bool blown = m->blowoff > curtime;
-  
-  if(playerturn[cpid] && canmove && !blown) nat = nat * spin(playerturn[cpid]);
+    
+  if(playerturn[cpid] && canmove && !blown) {
+    m->swordangle -= playerturn[cpid];
+    nat = nat * spin(playerturn[cpid]);
+    }
   transmatrix nat0 = nat;
   
   if(m->base->land == laWhirlpool && !markOrb(itOrbWater))
@@ -676,18 +1523,16 @@ void movePlayer(monster *m, int delta) {
     playerturn[cpid] = 0;
     }
 
-  for(int igo=0; igo<9 && !go; igo++) {
+  m->footphase += playergo[cpid];
+
+  if(isReptile(m->base->wall)) m->base->wparam = reptilemax();
+    
+  for(int igo=0; igo<IGO && !go; igo++) {
   
     go = true;
     
-    double span[9] = { 0, 
-      M_PI/6, -M_PI/6, 
-      M_PI/4, -M_PI/4,
-      M_PI/3, -M_PI/3,
-      M_PI/2.1, -M_PI/2.1
-      };
-
-    if(playergo[cpid]) nat = nat * spin(span[igo]) * xpush(playergo[cpid]) * spin(-span[igo]);
+    if(playergo[cpid]) 
+      nat = nat * spin(igospan[igo]) * xpush(playergo[cpid]) * spin(-igospan[igo]);
 
     // spin(span[igo]) * xpush(playergo[cpid]) * spin(-span[igo]);
   
@@ -709,9 +1554,11 @@ void movePlayer(monster *m, int delta) {
         visibleFor(300);
         c2->wall = m->base->wall;
         if(cellUnstable(cwt.c))
-          m->base->wall = waChasm;
-        else
+          m->base->wall = waChasm; 
+        else {
           m->base->wall = waBigStatue;
+          animateMovement(c2, m->base, LAYER_BOAT);
+          }
         }
       else if(m->inBoat && !isWateryOrBoat(c2) && passable(c2, m->base, P_ISPLAYER | P_MIRROR)) {
         if(boatGoesThrough(c2) && markOrb(itOrbWater)) {
@@ -766,9 +1613,12 @@ void movePlayer(monster *m, int delta) {
       }
     }
   
+  if(!go || abs(playergo[cpid]) < 1e-3 || abs(playerturn[cpid]) > 1e-3) bulltime[cpid] = curtime;
+  
   if(go) {
     if(c2 != m->base) {
-      if(cellUnstable(m->base)) m->base->wall = waChasm;
+      if(cellUnstable(m->base) && !markOrb(itOrbAether))
+        doesFallSound(m->base);
     
       if(items[itOrbFire]) {
         visibleFor(800);
@@ -786,7 +1636,7 @@ void movePlayer(monster *m, int delta) {
         if(d >= 0 && earthMove(m->base, d)) markOrb(itOrbDigging);
         }
       
-      setdist(c2, 0, NULL);
+      cwt.c = c2; afterplayermoved();
       if(c2->item && c2->land == laAlchemist) c2->wall = m->base->wall;
       if(m->base->wall == waRoundTable)
         roundTableMessage(c2);
@@ -805,38 +1655,37 @@ void movePlayer(monster *m, int delta) {
         c2->wall = waNone;
         if(c2->land == laMirror) items[itShard]++;
         }
-      if(c2->wall == waGlass && items[itOrbGhost]) {
-        items[itOrbGhost] = 0;
+      if(c2->wall == waGlass && items[itOrbAether]) {
+        items[itOrbAether] = 0;
         addMessage(XLAT("Your Aether powers are drained by %the1!", c2->wall));
         }
       movecost(m->base, c2);
 
-      bool nomine = (c2->wall == waMineMine || c2->wall == waMineUnknown)  && markOrb(itOrbGhost);
+      bool nomine = (c2->wall == waMineMine || c2->wall == waMineUnknown)  && markOrb(itOrbAether);
       
       if(!nomine) {
         uncoverMines(c2,
           items[itBombEgg] < 20 ? 1 :
           items[itBombEgg] < 30 ? 2 :
-          3
+          3, 0
           );
         if(c2->wall == waMineMine && !markOrb(itOrbWinter)) {
           items[itOrbLife] = 0;
           m->dead = true;
           }
-        explodeMine(c2);
+        mayExplodeMine(c2, moPlayer);
         }
       
       if(isWatery(c2) && isWatery(m->base) && m->inBoat)
         moveItem(m->base, c2, true);
   
-      destroyWeakBranch(m->base, c2);
+      destroyWeakBranch(m->base, c2, moPlayer);
 
       if(c2->wall == waClosePlate || c2->wall == waOpenPlate)
-        toggleGates(c2, c2->wall, 3);
+        toggleGates(c2, c2->wall);
   
-      if(c2->item == itOrbYendor && !yendor::check(c2, false)) 
-        ;
-      else collectItem(c2);
+      if(c2->item == itOrbYendor) yendor::check(c2);
+      collectItem(c2);
       }
     }
 
@@ -852,7 +1701,7 @@ void movePlayer(monster *m, int delta) {
     m->inBoat = false;
     }
 
-  if(!markOrb(itOrbGhost)) {
+  if(!markOrb(itOrbAether)) {
     if(m->base->wall == waChasm || m->base->wall == waClosedGate)
       m->dead = true;
 
@@ -867,12 +1716,56 @@ void movePlayer(monster *m, int delta) {
   
   playerfire[cpid] = false;
   
+  if(items[itOrbHorns]) {
+    hyperpoint H = hornpos(cpid);
+
+    for(int j=0; j<size(active); j++) {
+      monster* m2 = active[j];
+      if(m2 == m) continue;
+      
+      double d = intval(m2->pat*C0, H);
+    
+      if(d < SCALE2 * 0.1) {
+        if(hornKills(m2->type))
+          killMonster(m2, moPlayer);
+        else if(hornStuns(m2->type))
+          m2->stunoff = max(m2->stunoff, curtime + 150);
+        }
+      }
+    }
+    
+  for(int b=0; b<2; b++) if(sword::orbcount(b)) {
+  
+    for(double d=0; d<=1.001; d += .1) {
+      hyperpoint H = swordpos(cpid, b, d);
+  
+      for(int j=0; j<size(active); j++) {
+        monster* m2 = active[j];
+        if(m2 == m) continue;
+        
+        double d = intval(m2->pat*C0, H);
+      
+        if(d < SCALE2 * 0.1) {
+          if(swordKills(m2->type) && !(isBullet(m2) && m2->pid == cpid))
+              killMonster(m2, moPlayer);
+        }
+      }
+  
+      cell *c3 = findbaseAroundRepeat(H, m->base);
+      if(c3->wall == waSmallTree || c3->wall == waBigTree || c3->wall == waBarrowDig || c3->wall == waCavewall ||
+        (c3->wall == waBarrowWall && items[itBarrow] >= 25))
+        c3->wall = waNone;
+      
+      else if(isWall(c3)) break;
+      }
+    }
+  
   if(shotkey && canmove && curtime >= m->nextshot) {
 
     visibleFor(500);
     if(items[itOrbFlash]) {
       pushmonsters();
-      killMonster(m->base);
+      killMonster(m->base, moNone);
       cwt.c = m->base;
       activateFlash();
       popmonsters();
@@ -881,7 +1774,7 @@ void movePlayer(monster *m, int delta) {
     
     if(items[itOrbLightning]) {
       pushmonsters();
-      killMonster(m->base);
+      killMonster(m->base, moLightningBolt);
       cwt.c = m->base;
       activateLightning();
       popmonsters();
@@ -898,18 +1791,22 @@ void movePlayer(monster *m, int delta) {
   if(dropgreen && m->base->item == itNone)
     dropGreenStone(m->base);
   }
-#endif
+
+monster *getPlayer() {
+  return pc[cpid];
+  }
 
 void moveMimic(monster *m) {
   transmatrix nat = m->pat;
   cpid = m->pid;
+  m->footphase = getPlayer()->footphase;
   
   // no need to care about Mirror images, as they already have their 'at' matrix reversed :|
   nat = nat * spin(playerturn[cpid]) * xpush(playergo[cpid]);
 
   cell *c2 = m->findbase(nat*C0);  
   if(c2 != m->base && !passable(c2, m->base, P_ISPLAYER | P_MIRROR))
-    killMonster(m);
+    killMonster(m, moNone);
   else {
     m->rebasePat(nat);
     if(playerfire[cpid]) shootBullet(m);
@@ -945,14 +1842,18 @@ bool verifyTeleport() {
   return true;
   }
 
+void destroyMimics() {
+  for(int i=0; i<size(active); i++)
+    if(isMimic(active[i]->type)) 
+      active[i]->dead = true;
+  }
+
 void teleported() {
   monster *m = pc[cpid];
   m->base = cwt.c;
   m->at = rgpushxto0(inverse(gmatrix[cwt.c]) * mouseh) * spin(rand() % 1000 * M_PI / 2000);
   m->findpat();
-  for(int i=0; i<size(active); i++)
-    if(isMimic(active[i]->type)) 
-      active[i]->dead = true;
+  destroyMimics();
   }
 
 void shoot(eItem it, monster *m) {
@@ -967,7 +1868,6 @@ void shoot(eItem it, monster *m) {
   active.push_back(bullet);
   }
 
-#ifndef MOBILE
 eItem targetRangedOrbKey(orbAction a) {
   hyperpoint h = mouseh;
   cell *b = mouseover;
@@ -987,7 +1887,10 @@ eItem targetRangedOrbKey(orbAction a) {
   for(int j=0; j<size(active); j++) {
     monster* m2 = active[j];
     if(m2->dead) continue;
-    if(!mousetarget || intval(mouseh, mousetarget->pat*C0) > intval(mouseh, m2->pat*C0))
+#ifdef ROGUEVIZ
+    if(rogueviz::virt(m2)) continue;
+#endif
+    if(!mousetarget || intval(mouseh, mousetarget->pat*C0) > intval(mouseh, m2->pat*C0)) 
       mousetarget = m2;
     }
 
@@ -999,7 +1902,6 @@ eItem targetRangedOrbKey(orbAction a) {
   mouseover = b;
   return r;
   }
-#endif
 
 eItem targetRangedOrb(orbAction a) {
   if(!on) return itNone;
@@ -1009,7 +1911,7 @@ eItem targetRangedOrb(orbAction a) {
   if(items[itOrbPsi] && shmup::mousetarget && intval(mouseh, shmup::mousetarget->pat*C0) < SCALE2 * .1) {
     if(a == roCheck) return itOrbPsi;
     addMessage(XLAT("You kill %the1 with a mental blast!", mousetarget->type));
-    killMonster(mousetarget);
+    killMonster(mousetarget, moNone);
     items[itOrbPsi] -= 30;
     if(items[itOrbPsi]<0) items[itOrbPsi] = 0;
     return itOrbPsi;
@@ -1053,6 +1955,9 @@ void moveBullet(monster *m, int delta) {
   m->findpat();
   transmatrix nat0 = m->pat;
   transmatrix nat = m->pat;
+
+  if(isReptile(m->base->wall)) m->base->wparam = reptilemax();
+    
   if(m->type == moFlailBullet) {
     m->vel -= delta  / speedfactor() / 600000.0;
     if(m->vel < 0 && m->parent) {
@@ -1094,15 +1999,15 @@ void moveBullet(monster *m, int delta) {
   
   if(m->type != moTongue && !(godragon || passable(c2, m->base, P_BULLET))) {
     m->dead = true;
-    if(m->type != moAirball) killMonster(c2);
+    if(m->type != moAirball) killMonster(c2, m->parent ? m->parent->type : moNone);
     // cell *c = m->base;
     if(m->parent && isPlayer(m->parent)) {
       if(c2->wall == waBigTree) {
-        addMessage(XLAT("You start cutting down the tree."));
+        addMessage(XLAT("You start chopping down the tree."));
         c2->wall = waSmallTree;
         }
       else if(c2->wall == waSmallTree) {
-        addMessage(XLAT("You cut down the tree."));
+        addMessage(XLAT("You chop down the tree."));
         c2->wall = waNone;
         }
       else if(isActivable(c2)) 
@@ -1139,8 +2044,11 @@ void moveBullet(monster *m, int delta) {
     if(d < SCALE2 * 0.1) {
       if(m->type == moAirball && isBlowableMonster(m2->type)) {
 
-        if(m2->blowoff < curtime)
-          m2->rebasePat(m2->pat * rspintox(inverse(m2->pat) * nat0 * C0));
+        if(m2->blowoff < curtime) {
+          hyperpoint h = inverse(m2->pat) * nat0 * C0;
+          m2->swordangle += atan2(h[1], h[0]);
+          m2->rebasePat(m2->pat * rspintox(h));
+          }
         m2->blowoff = curtime + 1000;
         continue;
         }
@@ -1151,15 +2059,18 @@ void moveBullet(monster *m, int delta) {
         }
       // 
       if((m2->type == moPalace || m2->type == moFatGuard || m2->type == moSkeleton ||
-        m2->type == moVizier || isMetalBeast(m2->type) || m2->type == moTortoise) && m2->hitpoints > 1) {
+        m2->type == moVizier || isMetalBeast(m2->type) || m2->type == moTortoise ||
+        m2->type == moReptile) && m2->hitpoints > 1) {
         m2->rebasePat(m2->pat * rspintox(inverse(m2->pat) * nat0 * C0));
-        if(m2->type != moSkeleton && !isMetalBeast(m2->type)) 
+        if(m2->type != moSkeleton && !isMetalBeast(m2->type) && m2->type != moReptile) 
           m2->hitpoints--;
         m->dead = true;
         if(m2->type == moVizier) ;
         else if(m2->type == moFatGuard)
           m2->stunoff = curtime + 600;
         else if(m2->type == moMetalBeast || m2->type == moMetalBeast2)
+          m2->stunoff = curtime + 3000;
+        else if(m2->type == moReptile)
           m2->stunoff = curtime + 3000;
         else if(m2->type == moTortoise)
           m2->stunoff = curtime + 3000;
@@ -1169,14 +2080,25 @@ void moveBullet(monster *m, int delta) {
           m2->stunoff = curtime + 900;
         continue;
         }
-      // Greater Demons not killable conventionally
-      if(m2->type == moGreater && (m->type == moBullet || m->type == moFlailBullet || m->type == moTongue)) {
+      // conventional missiles cannot hurt some monsters
+      bool conv = (m->type == moBullet || m->type == moFlailBullet || m->type == moTongue);
+
+      if(m2->type == moGreater && conv) {
         m->dead = true;
         continue;
         }
-      // Rose Beauties not killable conventionally
-      if(m2->type == moRoseBeauty && (m->type == moBullet || m->type == moFlailBullet || m->type == moTongue)) {
+      if(m2->type == moRoseBeauty && conv && !markOrb(itOrbBeauty)) {
         m->dead = true;
+        continue;
+        }
+      if(m2->type == moDraugr && conv) {
+        m->dead = true;
+        continue;
+        }
+      if(isBull(m2->type) && conv) {
+        m->dead = true;
+        // enrage herd bulls, awaken sleeping bulls
+        m2->type = moRagingBull;
         continue;
         }
       // Knights reflect bullets
@@ -1193,7 +2115,7 @@ void moveBullet(monster *m, int delta) {
       // Orb of Winter protects from fireballs
       if(m->type == moFireball && ((isPlayer(m2) && markOrb(itOrbWinter)) || m2->type == moWitchWinter)) 
         continue;
-      killMonster(m2);
+      killMonster(m2, m->parent ? m->parent->type : moNone);
       }
     }
   }
@@ -1205,44 +2127,51 @@ bool closer(monster *m1, monster *m2) {
   }
 
 bool dragonbreath(cell *dragon) {
+  int randplayer = hrand(numplayers());
   monster* bullet = new monster;
   bullet->base = dragon;
-  bullet->at = rspintox(inverse(gmatrix[dragon]) * pc[hrand(numplayers())]->pat * C0);
+  bullet->at = rspintox(inverse(gmatrix[dragon]) * pc[randplayer]->pat * C0);
   bullet->type = moFireball;
   bullet->parent = bullet;
+  bullet->pid = randplayer;
   active.push_back(bullet);
   return true;
   }
+
+#define CHARGING (-777)
+#define BULLSTUN (1500)
 
 void moveMonster(monster *m, int delta) {
 
   bool stunned = m->stunoff > curtime || m->blowoff > curtime;
   
   if(stunned && cellUnstable(m->base))
-    m->base->wall = waChasm;
+    doesFallSound(m->base);
+
+  if(isReptile(m->base->wall)) m->base->wparam = reptilemax();
   
-  if(m->base->wall == waChasm && !survivesChasm(m->type))
-    killMonster(m);
+  if(m->base->wall == waChasm && !survivesChasm(m->type) && m->type != moReptile)
+    killMonster(m, moNone, AF_FALL);
 
   if(m->base->wall == waRose && !survivesThorns(m->type))
-    killMonster(m);
+    killMonster(m, moNone);
 
-  if(isWatery(m->base) && !survivesWater(m->type) && !m->inBoat)
-    killMonster(m);
+  if(isWatery(m->base) && !survivesWater(m->type) && !m->inBoat && m->type != moReptile)
+    killMonster(m, moNone);
 
   if(isFire(m->base) && !survivesFire(m->type))
-    killMonster(m);
+    killMonster(m, moNone);
 
   if(m->base->wall == waClosedGate && !survivesWall(m->type))
-    killMonster(m);
+    killMonster(m, moNone);
 
   if(m->dead) return;
-  
-  
+    
   cell *c = m->base;
   transmatrix goal = gmatrix[c];
   
-  bool direct = false;
+  bool direct = false; // is there a direct path to the target?
+  int directi = 0; // which player has direct path (to set as pid in missiles)
   
   double step = SCALE * delta/1000.0;
   if(m->type == moWitchSpeed)
@@ -1260,6 +2189,17 @@ void moveMonster(monster *m, int delta) {
     step /= 2;
   else if(m->type == moTortoise)
     step /= 3;
+  else if(isBull(m->type))
+    step *= 1.5;
+  
+  if(items[itOrbBeauty]) {
+    bool nearplayer = false;
+    for(int pid=0; pid<players; pid++) {
+      double dist = intval(pc[pid]->pat*C0, m->pat*C0);
+      if(dist < SCALE2) nearplayer = true;
+      }
+    if(nearplayer) markOrb(itOrbBeauty), step /= 2;
+    }
 
   transmatrix nat = m->pat;
 
@@ -1267,12 +2207,24 @@ void moveMonster(monster *m, int delta) {
     if(m->blowoff > curtime) {
       step = SCALE * -delta / 1000.;
       }
-    else if(m->type == moFatGuard || m->type == moTortoise)
+    else if(m->type == moFatGuard || m->type == moTortoise || m->type == moRagingBull)
       step = 0;
+    else if(m->type == moReptile)
+      step = SCALE * -delta / 1000. * (m->stunoff - curtime) / 3000.;
     else step = SCALE * -delta/2000.;
     }
+  
+  else if(m->type == moRagingBull && m->stunoff == CHARGING) ;
 
   else {
+  
+    if(m->type == moSleepBull) {  
+      for(int j=0; j<size(active); j++) if(active[j]!=m && active[j]->type != moBullet) {
+        monster* m2 = active[j];
+        double d = intval(m2->pat*C0, nat*C0);
+        if(d < SCALE2*3 && m2->type == moPlayer) m->type = moRagingBull;
+        }
+      }
     
     if(m->type == moWitchFlash) for(int pid=0; pid<players; pid++) {
       bool okay = intval(pc[pid]->pat*C0, m->pat*C0) < 2 * SCALE2;
@@ -1284,7 +2236,7 @@ void moveMonster(monster *m, int delta) {
       if(okay) {
         addMessage(XLAT("%The1 activates her Flash spell!", m->type));
         pushmonsters();
-        activateFlashFrom(m->base);
+        activateFlashFrom(m->base, moWitchFlash, AF_MAGIC | AF_GETPLAYER | AF_MSG);
         popmonsters();
         m->type = moWitch;
         pc[pid]->dead = true;
@@ -1318,12 +2270,40 @@ void moveMonster(monster *m, int delta) {
         }
       goal = gmatrix[cnext];
       direct = true;
+      directi = 0;
+      }
+    else if(m->type == moHerdBull) {
+      cell *cnext = prairie::next(c);
+      if(cnext && gmatrix.count(cnext)) {
+        goal = gmatrix[cnext];
+        direct = true;
+        directi = 0;
+        }
+      else m->dead = true;
+      }
+    else if(m->type == moButterfly) {
+      int d = neighborId(m->base, m->torigin);
+      cell *cnext = NULL;
+      for(int u=2; u<m->base->type; u++) {
+        cell *c2 = createMov(m->base, (d+u) % m->base->type);
+        if(passable_for(m->type, c2, m->base, P_ONPLAYER)) {
+          cnext = c2;
+          break;
+          }
+        }
+
+      if(cnext && gmatrix.count(cnext)) {
+        goal = gmatrix[cnext];
+        direct = true;
+        directi = 0;
+        }
       }
     else if(!direct && !invismove) {
       for(int i=0; i<players; i++) 
         if(m->trackroute(pc[i]->pat, step) && (!direct || intval(pc[i]->pat*C0, m->pat*C0) < intval(goal*C0,m->pat*C0))) {
           goal = pc[i]->pat;
           direct = true;
+          directi = i;
           // m->trackrouteView(pc->pat, step);
           }
         }
@@ -1357,6 +2337,14 @@ void moveMonster(monster *m, int delta) {
       }
     }
   
+  if(m->type == moVampire) for(int i=0; i<players; i++) 
+  if(intval(m->pat*C0, pc[i]->pat*C0) < SCALE2 * 2) {
+    for(int i=0; i<ittypes; i++)
+      if(itemclass(eItem(i)) == IC_ORB && items[i] && items[itOrbTime] && !orbused[i])
+        orbused[i] = true;
+    step = 0;
+    }
+
   bool carried = false;
 
   if(c->land == laWhirlpool && (m->type == moShark || m->type == moCShark || m->type == moPirate))
@@ -1370,9 +2358,35 @@ void moveMonster(monster *m, int delta) {
 
   step /= speedfactor();
   
-  nat = nat * xpush(step); // * spintox(wherePC);
-  if(intval(nat*C0, goal*C0) >= intval(m->pat*C0, goal*C0) && !stunned && !carried) 
+  int igo = 0;
+  
+  transmatrix nat0 = nat;
+  
+  igo_retry:
+  
+  if(igo == IGO) {
+    if(m->type == moHerdBull) m->type = moRagingBull;
     return;
+    }
+  
+  if(igo == 1 && m->type == moRagingBull && m->stunoff == CHARGING) {
+    m->stunoff = curtime + BULLSTUN;
+    return;
+    }
+  
+  nat = nat0 * spin(igospan[igo]) * xpush(step) * spin(-igospan[igo]);; // * spintox(wherePC);
+
+  if(m->type != moRagingBull)
+  if(intval(nat*C0, goal*C0) >= intval(m->pat*C0, goal*C0) && !stunned && !carried) {
+    igo++; goto igo_retry; }
+
+  for(int i=0; i<multi::players; i++) for(int b=0; b<2; b++) if(sword::orbcount(b)) {  
+    hyperpoint H = swordpos(i, b, 1);
+    double d = intval(H, nat*C0);
+    if(d < SCALE2 * 0.12) { igo++; goto igo_retry; }
+    }
+
+  m->footphase += step;
 
   monster* crashintomon = NULL;
   
@@ -1387,21 +2401,30 @@ void moveMonster(monster *m, int delta) {
       pc[i]->dead = true;
 
   else if(crashintomon && isMimic(crashintomon->type)) {
-    killMonster(crashintomon);
+    killMonster(crashintomon, m->type);
     crashintomon = NULL;
     }
   
   else if(crashintomon && (
-    items[itOrbDiscord] ||
+    items[itOrbDiscord] || isBull(m->type) ||
        ((isBug(m->type) || isBug(crashintomon->type)) && m->type != crashintomon->type)) 
     && !isBullet(crashintomon)) {
-    killMonster(crashintomon);
-    crashintomon = NULL;
+    if(noncrashable(crashintomon, m)) {
+      if(isBull(crashintomon->type)) crashintomon->type = moRagingBull;
+      }
+    else {
+      killMonster(crashintomon, m->type, isBull(m->type) ? AF_BULL : 0);
+      crashintomon = NULL;
+      }
     }
   
-  if(crashintomon) return;
+  if(crashintomon) { igo++; goto igo_retry; }
 
   cell *c2 = m->findbase(nat*C0);
+
+  if(m->type == moButterfly && !passable_for(m->type, c2, m->base, P_CHAIN)) {
+    igo++; goto igo_retry;
+    }
 
   if(isPlayerOn(c2)) {
     bool usetongue = false;
@@ -1419,26 +2442,26 @@ void moveMonster(monster *m, int delta) {
       bullet->type = moTongue;
       bullet->parent = m;
       bullet->parenttype = m->type;
+      bullet->pid = whichPlayerOn(c2);
       active.push_back(bullet);
       return;
       }
     }
 
-  if(!ignoresPlates(m->type)) destroyWeakBranch(m->base, c2);
+  if(!ignoresPlates(m->type)) destroyWeakBranch(m->base, c2, m->type);
 
   if(c2 != m->base && (c2->wall == waClosePlate || c2->wall == waOpenPlate) && !ignoresPlates(m->type))
     toggleGates(c2, c2->wall, 3);
   
-  if(c2 != m->base && c2->wall == waMineMine && !survivesMine(m->type)) {
-    explodeMine(c2);
-    killMonster(m);
-    }
-
+  if(c2 != m->base && mayExplodeMine(c2, m->type)) 
+    killMonster(m, moNone);
+  
   if(c2 != m->base && c2->wall == waRose && !nonAdjacent(m->base, c2) && !survivesThorns(m->type))
-    killMonster(m);
+    killMonster(m, moNone);
+  
+  if(c2 != m->base && cellUnstable(m->base) && !ignoresPlates(m->type))
+    doesFallSound(m->base);
 
-  if(c2 != m->base && cellUnstable(m->base) && m->type != moEagle && m->type != moGhost)
-    m->base->wall = waChasm;
   if(c2 != m->base && m->type == moWitchFire) makeflame(m->base, 10, false);
   if(c2 != m->base && m->type == moFireElemental) makeflame(m->base, 20, false);
   if(c2 != m->base && m->type == moWaterElemental) placeWater(c2, m->base);
@@ -1447,8 +2470,22 @@ void moveMonster(monster *m, int delta) {
     if(d >= 0) earthMove(m->base, d);
     }
   
-  // to do necro
-
+  if(m->type == moReptile && c2 != m->base) {
+    if(c2->wall == waChasm) {
+      c2->wall = waReptile;
+      c2->wparam = reptilemax();
+      playSound(c, "click");
+      m->dead = true;
+      }
+    else if(isChasmy(c2) || isWatery(c2)) {
+      c2->wall = waReptileBridge;
+      c2->item = itNone;
+      c2->wparam = reptilemax();
+      playSound(c, "click");
+      m->dead = true;
+      }
+    }
+  
   if(c2 != m->base && m->type == moNecromancer && !c2->monst) {
     for(int i=0; i<m->base->type; i++) {
       cell *c3 = m->base->mov[i];
@@ -1468,6 +2505,7 @@ void moveMonster(monster *m, int delta) {
           undead->type = moZombie;
           undead->parent = m;
           undead->parenttype = m->type;
+          undead->pid = 0;
           undead->findpat();
           active.push_back(undead);
 
@@ -1478,6 +2516,7 @@ void moveMonster(monster *m, int delta) {
           undead->parent = m;
           undead->parenttype = m->type;
           undead->findpat();
+          undead->pid = 0;
           active.push_back(undead);
 
           c3->wall = waAncientGrave;
@@ -1503,6 +2542,7 @@ void moveMonster(monster *m, int delta) {
           m->base->wall = waChasm;
         else
           m->base->wall = waBigStatue;
+        animateMovement(c2, m->base, LAYER_BOAT);
         }
       if(passable_for(m->type, c2, m->base, P_CHAIN | P_ONPLAYER) && !isWatery(c2) && m->inBoat) {
         if(isWatery(m->base)) 
@@ -1520,9 +2560,16 @@ void moveMonster(monster *m, int delta) {
       }
     }
   
-  if(!(m->type == moRoseBeauty && c2->land != laRose))
-  if(stunned ? passable(c2, m->base, P_BLOW) : passable_for(m->type, c2, m->base, P_CHAIN)) 
-    m->rebasePat(nat);
+  if(!(m->type == moRoseBeauty && c2->land != laRose)) {
+    if(stunned ? passable(c2, m->base, P_BLOW) : passable_for(m->type, c2, m->base, P_CHAIN)) {
+      if(c2 != m->base && m->type == moButterfly) 
+        m->torigin = m->base;
+      m->rebasePat(nat);
+      if(m->type == moRagingBull && step > 1e-6) m->stunoff = CHARGING;
+      }
+    else if(m->type == moRagingBull && m->stunoff == CHARGING)
+      m->stunoff = curtime + BULLSTUN;
+    }
 
   if(direct) {
     if((m->type == moPyroCultist || m->type == moCrystalSage) && curtime >= m->nextshot) {
@@ -1532,6 +2579,7 @@ void moveMonster(monster *m, int delta) {
       bullet->type = moFireball;
       bullet->parent = m;
       active.push_back(bullet);
+      bullet->pid = directi;
       if(m->type == moPyroCultist) 
         m->type = moCultist;
       else
@@ -1544,6 +2592,7 @@ void moveMonster(monster *m, int delta) {
       bullet->type = moBullet;
       bullet->parent = m;
       bullet->parenttype = moOutlaw;
+      bullet->pid = directi;
       active.push_back(bullet);
       m->nextshot = curtime + 1500;
       }
@@ -1554,14 +2603,15 @@ void moveMonster(monster *m, int delta) {
       bullet->at = m->at;
       bullet->type = moAirball;
       bullet->parent = m;
+      bullet->pid = i;
       active.push_back(bullet);
       m->nextshot = curtime + 1500;
       }
     for(int i=0; i<players; i++)
-      if(m->type == moTortoise && tortoise::seek() && !tortoise::diff(getBits(m->origin)) && intval(m->pat*C0, pc[i]->pat*C0) < SCALE2) {
+      if(m->type == moTortoise && tortoise::seek() && !tortoise::diff(getBits(m->torigin)) && intval(m->pat*C0, pc[i]->pat*C0) < SCALE2) {
         items[itBabyTortoise] += 4;
         m->dead = true;
-        addMessage(XLAT("You are now a tortoise hero!"));
+        addMessage(XLAT(playergender() == GEN_F ? "You are now a tortoise heroine!" : "You are now a tortoise hero!"));
         }
     for(int i=0; i<players; i++)
     if(m->type == moFlailer && curtime >= m->nextshot && 
@@ -1573,15 +2623,19 @@ void moveMonster(monster *m, int delta) {
       bullet->type = moFlailBullet;
       bullet->parent = m;
       bullet->vel = 1/400.0;
+      bullet->pid = i;
       active.push_back(bullet);
       break;
       }
     }
   }
 
-#ifndef MOBILE
 void turn(int delta) {
 
+  lmousetarget = NULL;
+  if(mousetarget && intval(mouseh, mousetarget->pat*C0) < 0.1)
+    lmousetarget = mousetarget;
+  
   if(delta > 1000) delta = 1000;
   
   if(delta > 200) { turn(200); delta -= 200; if(!delta) return; }
@@ -1593,7 +2647,7 @@ void turn(int delta) {
   invismove = (curtime >= visibleAt) && markOrb(itOrbInvis);
 
   // detect active monsters
-  for(map<cell*, transmatrix>::iterator it = gmatrix.begin(); it != gmatrix.end(); it++) {
+  for(unordered_map<cell*, transmatrix>::iterator it = gmatrix.begin(); it != gmatrix.end(); it++) {
     cell *c = it->first;
     pair<mit, mit> p = 
       monstersAt.equal_range(c);
@@ -1604,11 +2658,16 @@ void turn(int delta) {
       monstersAt.erase(it);
       it = itplus;
       }
-    if(c->monst && !isIvy(c) && !isWorm(c) && !isMutantIvy(c)) {
+    if(c->monst && isMimic(c->monst)) c->monst = moNone;
+    // mimics are awakened by awakenMimics
+    if(c->monst && !isIvy(c) && !isWorm(c) && !isMutantIvy(c) && !isKraken(c->monst) && c->monst != moPrincess) {
+      // awaken as a monster
       monster *enemy = new monster;
       enemy->at = Id;
       enemy->base = c;
-      enemy->origin = c;
+      if(enemy->type == moButterfly)
+        enemy->torigin = createMov(c, (c->mondir + 419) % c->type);
+      enemy->torigin = c;
       enemy->type = c->monst;
       enemy->hitpoints = c->hitpoints;
       if(c->wall == waBoat && isLeader(c->monst)) 
@@ -1660,7 +2719,7 @@ void turn(int delta) {
     
     int pqs = size(pathq);
     for(int i=0; i<pqs; i++) {
-      pathq[i]->pathdist = INFD;
+      pathq[i]->pathdist = PINFD;
       }
     pathq.clear(); 
 
@@ -1673,10 +2732,11 @@ void turn(int delta) {
     for(qb=0; qb < size(pathq); qb++) {
       cell *c = pathq[qb];
       int d = c->pathdist;
+      if(d == PINFD-1) continue;
       for(int i=0; i<c->type; i++) {
         cell *c2 = c->mov[i];
         // printf("i=%d cd=%d\n", i, c->mov[i]->cpdist);
-        if(c2 && c2->pathdist == INFD && gmatrix.count(c2) && 
+        if(c2 && c2->pathdist == PINFD && gmatrix.count(c2) && 
           (passable_for(eMonster(t), c, c2, P_CHAIN | P_ONPLAYER) || c->wall == waThumperOn)) {
           c2->pathdist = d+1;
           pathq.push_back(c2);
@@ -1693,88 +2753,99 @@ void turn(int delta) {
         moveMonster(active[i], delta);
     }
   
-  bool tick = curtime >= nextmove;
-  keepLightning = ticks <= lightat + 1000;
-  cwt.c = pc[0]->base;
-  bfs(); moverefresh();
-  countLocalTreasure();
-  pushmonsters();
-  if(items[itOrbFreedom])
-    for(int i=0; i<players; i++)
-      checkFreedom(pc[i]->base);
-  heat::processheat(delta / 350.0, tick);
-  markOrb(itOrbSpeed);
-  
-  if(havedragon && curtime >= nextdragon) {
-    groupmove(moDragonHead, 0);
-    nextdragon = curtime + 1500;
-    }
+  if(shmup::on) {
+
+    bool tick = curtime >= nextmove;
+    keepLightning = ticks <= lightat + 1000;
+    cwt.c = pc[0]->base;
+    bfs(); moverefresh(tick);
+    countLocalTreasure();
+    pushmonsters();
+    if(items[itOrbFreedom])
+      for(int i=0; i<players; i++)
+        checkFreedom(pc[i]->base);
+    heat::processheat(delta / 350.0, tick);
+    markOrb(itOrbSpeed);
     
-  if(tick) {
-    nextmove += 1000;
-    reduceOrbPowers();
-    if(!((items[itOrbSpeed]/players) & 1)) {
-      moveworms();
-      moveivy();
-      movemutant();
-      if(havehex) movehex(false);
-      wandering();
-      livecaves();
-      heat::dryforest();
-      if(havewhirlpool) whirlpool::move();
-      if(havewhirlwind) whirlwind::move();
-      buildRosemap();
-      }
-    }
-  if(elec::havecharge) elec::act();
-  popmonsters();
-  
-  gmatrix.clear();
-  
-  canmove = true;
-  
-  for(int i=0; i<players; i++) {
-    if(pc[i]->dead && items[itOrbShield]) {
-      pc[i]->dead = false;
-      orbused[itOrbShield] = true;
+    if((havewhat&HF_DRAGON) && curtime >= nextdragon) {
+      groupmove(moDragonHead, 0);
+      nextdragon = curtime + 1500;
       }
   
-    if(pc[i]->dead && items[itOrbFlash]) {
-      pc[i]->dead = false;
-      pushmonsters();
-      killMonster(pc[i]->base);
-      activateFlash();
-      popmonsters();
+    if(tick) {
+      nextmove += 1000;
+      flashMessages();
+      reduceOrbPowers();
+      if(items[itOrbBull]) for(int p=0; p<players; p++) 
+        if(bulltime[p] < curtime - 600) orbbull::gainBullPowers();
+        
+      if(!((items[itOrbSpeed]/players) & 1)) {
+        if(havewhat&HF_KRAKEN) kraken::attacks(), groupmove(moKrakenH, 0);     
+        moveworms();
+        moveivy();
+        movemutant();
+        if(havewhat&HF_HEX) movehex(false);
+        wandering();
+        livecaves();
+        heat::dryforest();
+        if(havewhat&HF_WHIRLPOOL) whirlpool::move();
+        if(havewhat&HF_WHIRLWIND) whirlwind::move();
+        buildRosemap();
+        if(havewhat&HF_RIVER) prairie::move();
+        }
+      if(recallCell && !markOrb(itOrbRecall)) activateRecall();
       }
-      
-    if(pc[i]->dead && items[itOrbLightning]) {
-      pc[i]->dead = false;
-      pushmonsters();
-      killMonster(pc[i]->base);
-      activateLightning();
-      popmonsters();
-      }
+    if(elec::havecharge) elec::act();
+    popmonsters();
     
-    if(pc[i]->dead && items[itOrbShell]) {
-      pc[i]->dead = false;
-      useupOrb(itOrbShell, 10);
-      items[itOrbShield] = 1;
-      orbused[itOrbShield] = true;
-      }
-  
-    if(pc[i]->dead && items[itOrbLife]) {
-      items[itOrbLife]--;
-      items[itOrbShield] += 3;
-      items[itOrbGhost] += 3;
-      pc[i]->dead = false;
-      orbused[itOrbShield] = true;
-      }
-  
-    if(pc[i]->dead && !lastdead)
-      achievement_final(true);
-    lastdead = pc[i]->dead;
+    canmove = true;
+    
+    for(int i=0; i<players; i++) {
+      if(pc[i]->dead && items[itOrbShield]) {
+        pc[i]->dead = false;
+        orbused[itOrbShield] = true;
+        }
+    
+      if(pc[i]->dead && items[itOrbFlash]) {
+        pc[i]->dead = false;
+        pushmonsters();
+        killMonster(pc[i]->base, moNone);
+        activateFlash();
+        popmonsters();
+        }
+        
+      if(pc[i]->dead && items[itOrbLightning]) {
+        pc[i]->dead = false;
+        pushmonsters();
+        killMonster(pc[i]->base, moLightningBolt);
+        activateLightning();
+        popmonsters();
+        }
       
-    canmove = canmove && !pc[i]->dead;
+      if(pc[i]->dead && items[itOrbShell]) {
+        pc[i]->dead = false;
+        useupOrb(itOrbShell, 10);
+        items[itOrbShield] = 1;
+        orbused[itOrbShield] = true;
+        }
+    
+      if(pc[i]->dead && items[itOrbLife]) {
+        multi::deaths[i]++;
+        items[itOrbLife]--;
+        items[itOrbShield] += 3;
+        items[itOrbAether] += 3;
+        pc[i]->dead = false;
+        orbused[itOrbShield] = true;
+        }
+    
+      if(pc[i]->dead && !lastdead) {
+        multi::deaths[i]++;
+        achievement_final(true);
+        }
+      lastdead = pc[i]->dead;
+        
+      canmove = canmove && !pc[i]->dead;
+      }
     }
   
   // deactivate all monsters
@@ -1793,13 +2864,26 @@ void turn(int delta) {
     safety = false;
     }
 
-  }
+#ifdef ROGUEVIZ
+  rogueviz::turn(delta);
 #endif
+  }
+
+void recall() {
+  for(int i=0; i<players; i++) {
+    pc[i]->base = cwt.c;
+    if(players == 1)
+      pc[i]->at = Id;
+    else
+      pc[i]->at = spin(2*M_PI*i/players) * xpush(firstland == laMotion ? .5 : .3) * Id;
+    /* ggmatrix(cwt.c);
+    display(gmatrix[cwt.c]);
+    pc[i]->findpat(); */
+    }
+  destroyMimics();
+  }
 
 void init() {
-
-  if(!safety)
-    players = vid.scfg.players;
 
   for(int i=0; i<players; i++) pc[i] = NULL;
   
@@ -1825,27 +2909,38 @@ void init() {
   else safety = false;
   }
 
-monster *getPlayer() {
-  return pc[cpid];
+bool boatAt(cell *c) {
+  pair<mit, mit> p = 
+    monstersAt.equal_range(c);
+  for(mit it = p.first; it != p.second; it++) {
+    monster* m = it->second;
+    if(m->inBoat) return true;
+    }
+  return false;
   }
 
-bool drawMonster(const transmatrix& V, cell *c) {
-#ifndef MOBILE
-  gmatrix[c] = V;
+bool drawMonster(const transmatrix& V, cell *c, const transmatrix*& Vboat, transmatrix& Vboat0, ld zlev) {
 
-  pair<mit, mit> p = 
+   pair<mit, mit> p = 
     monstersAt.equal_range(c);
 
   for(mit it = p.first; it != p.second; it++) {
     monster* m = it->second;
-    m->pat = V * m->at;
+    m->pat = ggmatrix(m->base) * m->at;
+    transmatrix view = V * m->at;
     
     if(!outofmap(mouseh)) {
-      if(!mousetarget || intval(mouseh, mousetarget->pat*C0) > intval(mouseh, m->pat*C0))
+#ifdef ROGUEVIZ
+      if(rogueviz::virt(m)) ; else
+#endif
+      if(mapeditor::drawplayer || m->type != moPlayer)
+      if(!mousetarget || intval(mouseh, mousetarget->pat*C0) > intval(mouseh, m->pat*C0)) 
         mousetarget = m;
       }
     
     if(m->inBoat) {
+      view = m->pat;
+      Vboat = &(Vboat0 = view);
       if(m->type == moPlayer && items[itOrbWater]) {
         queuepoly(m->pat, shBoatOuter, watercolor(0));
         queuepoly(m->pat, shBoatInner, 0x0060C0FF);
@@ -1861,17 +2956,19 @@ bool drawMonster(const transmatrix& V, cell *c) {
         isBullet(m) ? 0x00FFFFFF :
         (isFriendly(m->type) || m->type == moPlayer) ? 0x00FF00FF : 0xFF0000FF;
 
+    int q = ptds.size();
+    if(q != size(ptds) && !m->inBoat) pushdown(c, q, view, zlev, true, false);
+
     switch(m->type) {
       case moPlayer: 
-        drawPlayerEffects(m->pat, c, true);
         cpid = m->pid; 
-        if(mapeditor::drawplayer) drawMonsterType(moPlayer, c, m->pat, 0xFFFFFFC0);
+        drawPlayerEffects(view, c, true);
+        if(m->inBoat) m->footphase = 0;
+        if(mapeditor::drawplayer) drawMonsterType(moPlayer, c, view, 0xFFFFFFC0, m->footphase);
         
         if(keyresult[cpid]) {
           hyperpoint h = keytarget(cpid);
-          int xc, yc, sc;
-          getcoord(h, xc, yc, sc);
-          queuechr(xc, yc, 1, vid.fsize, '+', iinf[keyresult[cpid]].color);
+          queuechr(h, vid.fsize, '+', iinf[keyresult[cpid]].color);
           }
         break;
       case moBullet: {
@@ -1881,24 +2978,42 @@ bool drawMonster(const transmatrix& V, cell *c) {
           col = getcs().swordcolor;
         else
           col = (minf[m->parenttype].color << 8) | 0xFF;
-        if(getcs().charid >= 4)
-          queuepoly(m->pat, shPHead, col);
-        else
-          queuepoly(m->pat * spin(curtime / 50.0), 
-            getcs().charid >= 4 ? shPHead : shKnife, col);
+        if(getcs().charid >= 4) {
+          queuepoly(mmscale(view, 1.15), shPHead, col);
+          ShadowV(view, shPHead);
+          }
+        else {
+          transmatrix t = view * spin(curtime / 50.0);
+          queuepoly(mmscale(t, 1.15), shKnife, col);
+          ShadowV(t, shKnife);
+          }
         break;
         }
-      case moTongue:
-        queuepoly(m->pat, shTongue, (minf[m->parenttype].color << 8) | 0xFF);
+      case moTongue: {
+        queuepoly(mmscale(view, 1.15), shTongue, (minf[m->parenttype].color << 8) | 0xFF);
+        ShadowV(view, shTongue);
         break;
-      case moFireball:  case moAirball: case moLightningBolt:
-        queuepoly(m->pat, shPHead, (minf[m->type].color << 8) | 0xFF);
+        }
+      case moFireball:  case moAirball: { // case moLightningBolt:
+        queuepoly(mmscale(view, 1.15), shPHead, (minf[m->type].color << 8) | 0xFF);
+        ShadowV(view, shPHead);
         break;
-      case moFlailBullet: 
-        queuepoly(m->pat * spin(curtime / 50.0), shFlailMissile, (minf[m->type].color << 8) | 0xFF);
+        }
+      case moFlailBullet: {
+        transmatrix t = view * spin(curtime / 50.0);
+        queuepoly(mmscale(t, 1.15), shFlailMissile, (minf[m->type].color << 8) | 0xFF);
+        ShadowV(view, shFlailMissile);
         break;
+        }
+
+#ifdef ROGUEVIZ      
+      case moRogueviz:
+        rogueviz::drawVertex(V, c, m);
+        break;
+#endif
 
       default:
+        if(m->inBoat) m->footphase = 0;
         int col = minf[m->type].color;
         if(m->type == moSlime) {
           col = winf[c->wall].color;
@@ -1909,14 +3024,13 @@ bool drawMonster(const transmatrix& V, cell *c) {
           c->stuntime = 1 + (m->stunoff - curtime-1)/300;
         if(hasHitpoints(m->type))
           c->hitpoints = m->hitpoints;
-        if(m->type == moTortoise) tortoise::emap[c] = m->origin;
-        drawMonsterType(m->type, c, m->pat, col);
+        if(m->type == moTortoise) tortoise::emap[c] = m->torigin;
+        drawMonsterType(m->type, c, view, col, m->footphase);
         if(m->type == moTortoise) tortoise::emap.erase(c);
         break;
       }
     }
 
-#endif
   return false;
   }
 
@@ -1932,94 +3046,6 @@ void clearMemory() {
   visibleAt = 0;
   }
 
-void initConfig() {
-#ifndef MOBILE
-  vid.scfg.players = 1;
-  
-  char* t = vid.scfg.keyaction;
-  
-  t['w'] = 16 + 0;
-  t['s'] = 16 + 1;
-  t['a'] = 16 + 2;
-  t['d'] = 16 + 3;
-
-  t[SDLK_KP8] = 16 + 4;
-  t[SDLK_KP6] = 16 + 5;
-  t[SDLK_KP2] = 16 + 6;
-  t[SDLK_KP4] = 16 + 7;
-
-  t['f'] = 16 + pcFire;
-  t['g'] = 16 + pcFace;
-  t['h'] = 16 + pcFaceFire;
-  t['r'] = 16 + pcDrop;
-  t['t'] = 16 + pcOrbPower;
-  t['y'] = 16 + pcCenter;
-
-  t['i'] = 32 + 0;
-  t['k'] = 32 + 1;
-  t['j'] = 32 + 2;
-  t['l'] = 32 + 3;
-  t[';'] = 32 + 8;
-  t['\''] = 32 + 9;
-  t['p'] = 32 + 10;
-  t['['] = 32 + pcCenter;
-
-  t[SDLK_UP] = 48 ;
-  t[SDLK_RIGHT] = 48 + 1;
-  t[SDLK_DOWN] = 48 + 2;
-  t[SDLK_LEFT] = 48 + 3;
-  t[SDLK_PAGEUP] = 48 + 4;
-  t[SDLK_PAGEDOWN] = 48 + 5;
-  t[SDLK_HOME] = 48 + 6;
-
-  vid.scfg.joyaction[0][0] = 16 + pcFire;
-  vid.scfg.joyaction[0][1] = 16 + pcOrbPower;
-  vid.scfg.joyaction[0][2] = 16 + pcDrop;
-  vid.scfg.joyaction[0][3] = 16 + pcCenter;
-  vid.scfg.joyaction[0][4] = 16 + pcFace;
-  vid.scfg.joyaction[0][5] = 16 + pcFaceFire;
-
-  vid.scfg.joyaction[1][0] = 32 + pcFire;
-  vid.scfg.joyaction[1][1] = 32 + pcOrbPower;
-  vid.scfg.joyaction[1][2] = 32 + pcDrop;
-  vid.scfg.joyaction[1][3] = 32 + pcCenter;
-  vid.scfg.joyaction[1][4] = 32 + pcFace;
-  vid.scfg.joyaction[1][5] = 32 + pcFaceFire;
-
-  vid.scfg.axeaction[0][0] = 4;
-  vid.scfg.axeaction[0][1] = 5;
-  vid.scfg.axeaction[0][3] = 2;
-  vid.scfg.axeaction[0][4] = 3;
-
-  vid.scfg.axeaction[1][0] = 8;
-  vid.scfg.axeaction[1][1] = 9;
-  
-  // ULRD
-  vid.scfg.hataction[0][0][0] = 16 + 0;
-  vid.scfg.hataction[0][0][1] = 16 + 3;
-  vid.scfg.hataction[0][0][2] = 16 + 1;
-  vid.scfg.hataction[0][0][3] = 16 + 2;
-  vid.scfg.hataction[0][1][0] = 16 + 4;
-  vid.scfg.hataction[0][1][1] = 16 + 7;
-  vid.scfg.hataction[0][1][2] = 16 + 5;
-  vid.scfg.hataction[0][1][3] = 16 + 6;
-
-  vid.scfg.hataction[1][0][0] = 32 + 0;
-  vid.scfg.hataction[1][0][1] = 32 + 3;
-  vid.scfg.hataction[1][0][2] = 32 + 1;
-  vid.scfg.hataction[1][0][3] = 32 + 2;
-  vid.scfg.hataction[1][1][0] = 32 + 4;
-  vid.scfg.hataction[1][1][1] = 32 + 7;
-  vid.scfg.hataction[1][1][2] = 32 + 5;
-  vid.scfg.hataction[1][1][3] = 32 + 6;
-  
-  for(int i=0; i<4; i++) {
-    initcs(shmup::scs[i]); 
-    shmup::scs[i].charid = i&1;
-    }
-#endif
-  }
-
 cell *playerpos(int i) {
   return pc[i]->base;
   }
@@ -2028,223 +3054,10 @@ bool playerInBoat(int i) {
   return pc[i]->inBoat;
   }
 
-void saveConfig(FILE *f) {
-#ifndef MOBILE
-  fprintf(f, "%d %d", VERNUM, vid.scfg.players);
-  for(int i=0; i<512; i++) fprintf(f, " %d", vid.scfg.keyaction[i]);
-  for(int i=0; i<8; i++) for(int j=0; j<MAXBUTTON; j++) fprintf(f, " %d", vid.scfg.joyaction[i][j]);
-  for(int i=0; i<8; i++) for(int j=0; j<MAXAXE; j++) fprintf(f, " %d", vid.scfg.axeaction[i][j]);
-  for(int i=0; i<8; i++) for(int j=0; j<MAXHAT; j++) for(int k=0; k<4; k++)
-    fprintf(f, " %d", vid.scfg.hataction[i][j][k]);
-  fprintf(f, "\n");
-  for(int i=0; i<4; i++) savecs(f, scs[i]);
-#endif
-  }
-
-void scanchar(FILE *f, char& c) {
-  int i = c;
-  int err = fscanf(f, "%d", &i);
-  if(err == 1) c = i;
-  }
-  
-void loadConfig(FILE *f) {
-#ifndef MOBILE
-  int xvernum;
-  int err = fscanf(f, "%d %d", &xvernum, &vid.scfg.players);
-  if(err != 2) return;
-  for(int i=0; i<512; i++) scanchar(f, vid.scfg.keyaction[i]);
-  for(int i=0; i<8; i++) for(int j=0; j<MAXBUTTON; j++) scanchar(f, vid.scfg.joyaction[i][j]);
-  for(int i=0; i<8; i++) for(int j=0; j<MAXAXE; j++) scanchar(f, vid.scfg.axeaction[i][j]);
-  for(int i=0; i<8; i++) for(int j=0; j<MAXHAT; j++) for(int k=0; k<4; k++)
-    scanchar(f, vid.scfg.hataction[i][j][k]);
-  for(int i=0; i<4; i++) loadcs(f, scs[i]);
-#endif
-  }
-
-int shmupnumkeys;
-const char** shmupcmdtable;
-
-char* axeconfigs[24]; int numaxeconfigs;
-
-string listkeys(int id) {
-#ifndef MOBILE
-  string lk = "";
-  for(int i=0; i<512; i++)
-    if(vid.scfg.keyaction[i] == id)
-      lk = lk + " " + SDL_GetKeyName(SDLKey(i));
-  for(int i=0; i<numsticks; i++) for(int k=0; k<SDL_JoystickNumButtons(sticks[i]) && k<MAXBUTTON; k++)
-    if(vid.scfg.joyaction[i][k] == id) {
-      lk = lk + " " + cts('A'+i)+"-B"+its(k);
-      }
-  for(int i=0; i<numsticks; i++) for(int k=0; k<SDL_JoystickNumHats(sticks[i]) && k<MAXHAT; k++)
-    for(int d=0; d<4; d++)
-      if(vid.scfg.hataction[i][k][d] == id) {
-        lk = lk + " " + cts('A'+i)+"-"+"URDL"[d];
-        }
-  return lk;
-#endif
-#ifdef MOBILE
-  return "";
-#endif
-  }
-
-#define SCJOY 16
-
-void showShmupConfig() {
-#ifndef MOBILE
-
-  int sc = vid.scfg.subconfig;
-
-  if(sc == 1 || sc == 2 || sc == 4 || sc == 5) {
-    shmupnumkeys = 15;
-    shmupcmdtable = shmup::playercmds;
-    }
-  else if(sc == 3) {
-    shmupnumkeys = 7;
-    shmupcmdtable = shmup::pancmds;
-    }
-  else if(sc == SCJOY) {
-    getcstat = ' ';
-    numaxeconfigs = 0;
-    for(int j=0; j<numsticks; j++) {
-      for(int ax=0; ax<SDL_JoystickNumAxes(sticks[j]) && ax < MAXAXE; ax++) if(numaxeconfigs<24) {
-        int y = SDL_JoystickGetAxis(sticks[j], ax);
-        string buf = " ";
-        while(y >  10000) buf += "+", y -= 10000;
-        while(y < -10000) buf += "-", y += 10000;
-        if(y>0) buf += "+";
-        if(y<0) buf += "-";
-        axeconfigs[numaxeconfigs] = &(vid.scfg.axeaction[j][ax]);
-        char aa = *axeconfigs[numaxeconfigs];
-        string what = XLAT(shmup::axemodes[aa%SHMUPAXES]);
-        displayStat(numaxeconfigs, XLAT("Joystick %1, axis %2", cts('A'+j), its(ax)) + buf, 
-          what, 'a'+numaxeconfigs);
-        numaxeconfigs++;
-        }
-      }
-    }
-  else if(sc == 0) {
-    int vy = vid.yres/2 - vid.fsize * 6;
-    
-    displayButton(vid.xres/2, vy, 
-      ifMousing("n", 
-        vid.scfg.players == 2 ? "two players" : 
-        vid.scfg.players == 3 ? "three players" : 
-        vid.scfg.players == 4 ? "four players" : 
-        "one player"), 'n', 8, 2);
-    displayButton(vid.xres/2, vy+vid.fsize*2, 
-      ifMousing("1", "configure player 1"), '1', 8, 2);
-    if(vid.scfg.players > 1)
-      displayButton(vid.xres/2, vy+vid.fsize*3, 
-        ifMousing("2", "configure player 2"), '2', 8, 2);
-    if(vid.scfg.players > 2)
-      displayButton(vid.xres/2, vy+vid.fsize*4, 
-        ifMousing("3", "configure player 3"), '3', 8, 2);
-    if(vid.scfg.players > 3)
-      displayButton(vid.xres/2, vy+vid.fsize*5, 
-        ifMousing("4", "configure player 4"), '4', 8, 2);
-    displayButton(vid.xres/2, vy+vid.fsize*7, 
-      ifMousing("p", "configure panning"), 'p', 8, 2);
-    if(numsticks > 0) 
-      displayButton(vid.xres/2, vy+vid.fsize*9, 
-        ifMousing("j", "configure joystick axes"), 'j', 8, 2);
-    displayButton(vid.xres/2, vy+vid.fsize*11, 
-      ifMousing("s", 
-        shmup::on && shmup::players == vid.scfg.players ?
-          "continue playing"
-        : "start playing in the shmup mode"), 's', 8, 2);
-    displayButton(vid.xres/2, vy+vid.fsize*12, 
-      ifMousing("t", "return to the turn-based mode"), 't', 8, 2);
-    displayButton(vid.xres/2, vy+vid.fsize*13, 
-      ifMousing("c", "save the configuration"), 'c', 8, 2);
-    }
-  
-  if(sc >= 1 && sc <= 5) {
-    getcstat = ' ';
-
-    for(int i=0; i<shmupnumkeys; i++)
-      displayStat(i, XLAT(shmupcmdtable[i]), listkeys(16*sc+i),
-        vid.scfg.setwhat ? (vid.scfg.setwhat>1 && i == (vid.scfg.setwhat&15) ? '?' : ' ') : 'a'+i);
-
-    displayStat(-2,
-      XLAT(sc == 1 ? "configure player 1" :
-      sc == 2 ? "configure player 2" :
-      "configure panning"), "", ' ');
-
-    if(vid.scfg.setwhat == 1)
-      displayStat(16, XLAT("press a key to unassign"), "", ' ');
-    else if(vid.scfg.setwhat)
-      displayStat(16, XLAT("press a key for '%1'", XLAT(shmupcmdtable[vid.scfg.setwhat&15])), "", ' ');
-    else
-      displayStat(16, XLAT("unassign a key"), "", 'z');
-    }
-#endif
-  }
-
-void handleConfig(int uni, int sym) {
-#ifndef MOBILE
-  int sc = vid.scfg.subconfig;
-  if(sc == 0) {
-    if(uni == '1') vid.scfg.subconfig = 1;
-    else if(uni == '2') vid.scfg.subconfig = 2;
-    else if(uni == 'p') vid.scfg.subconfig = 3;
-    else if(uni == '3') vid.scfg.subconfig = 4;
-    else if(uni == '4') vid.scfg.subconfig = 5;
-    else if(uni == 'j') vid.scfg.subconfig = 16;
-    else if(uni == 's') {
-      cmode = emNormal;
-      if(!shmup::on) restartGame('s');
-      else if(vid.scfg.players != shmup::players) restartGame();
-      }
-    else if(uni == 't') {
-      cmode = emNormal;
-      if(shmup::on) restartGame('s');
-      }
-    else if(uni == 'c')
-      ::saveConfig();
-    else if(uni == 'n')
-      vid.scfg.players = 1 + (vid.scfg.players&3);
-    else if(sym == SDLK_F1) {
-      lastmode = cmode;
-      cmode = emHelp;
-      help = 
-        "In the shmup (shoot'em up) mode, you can play a hyperbolic shoot'em up "
-        "game. The game is based on the usual turn-based grid-based HyperRogue, "
-        "but there are some changes. You fight by throwing knives, and you "
-        "have three extra lives. There are no friendly monsters, so Orbs of "
-        "Life and Friendship give you extra lives instead. Some other rules have been "
-        "adapted too.\n\n"
-        "It is possible for two players to play the shmup mode cooperatively "
-        "(locally). When playing together, lives, orbs, and treasures are shared, "
-        "knives recharge slower, orbs drain faster, and player characters are not "
-        "allowed to separate.";
-      }
-    }
-  else if(sc == SCJOY) {
-    if(sym) {
-      if(uni >= 'a' && uni < 'a' + numaxeconfigs) {
-        (*axeconfigs[uni - 'a'])++;
-        (*axeconfigs[uni - 'a']) %= SHMUPAXES;
-        }
-      else
-        vid.scfg.subconfig = 0;
-      }
-    }
-  else {
-    if(sym) {
-      if(vid.scfg.setwhat) {
-        vid.scfg.keyaction[sym] = vid.scfg.setwhat;
-        vid.scfg.setwhat = 0;
-        }
-      else if(uni >= 'a' && uni < 'a' + shmupnumkeys)
-        vid.scfg.setwhat = 16*sc+uni - 'a';
-      else if(uni == 'z')
-        vid.scfg.setwhat = 1;
-      else
-        vid.scfg.subconfig = 0;
-      }
-    }
-#endif
+void destroyBoats(cell *c) {
+  for(int i=0; i<size(active); i++)
+    if(active[i]->base == c && active[i]->inBoat)
+      active[i]->inBoat = false;
   }
 
 transmatrix calc_relative_matrix(cell *c, heptagon *h1) {
@@ -2258,16 +3071,16 @@ transmatrix calc_relative_matrix(cell *c, heptagon *h1) {
 //transmatrix sol;
   while(h1 != h2) {
     for(int d=0; d<7; d++) if(h2->move[d] == h1) {
-      int sp = h2->spin[d];
+      int sp = h2->spin(d);
       return gm * heptmove[sp] * spin(2*M_PI*d/7) * where;
       }
     if(h1->distance < h2->distance) {
-      int sp = h2->spin[0];
+      int sp = h2->spin(0);
       h2 = h2->move[0];
       where = heptmove[sp] * where;
       }
     else {
-      int sp = h1->spin[0];
+      int sp = h1->spin(0);
       h1 = h1->move[0];
       gm = gm * invheptmove[sp];
       }
@@ -2285,23 +3098,54 @@ transmatrix calc_relative_matrix(cell *c, heptagon *h1) {
   return gm * where;
   }
 
+    transmatrix ztmp;
+    
+transmatrix &ggmatrix(cell *c) {
+  transmatrix& t = gmatrix[c];
+  if(t[2][2] == 0) {
+    if(sphere && gmatrix0.count(c))
+      t = gmatrix[cwt.c] * inverse(gmatrix0[cwt.c]) * gmatrix0[c];
+    else if(sphere) {
+      printf("error: gmatrix0 not known\n");
+      exit(1);
+      }
+    else if(euclid) {
+      eucoord xh, yh, xc, yc;
+      decodeMaster(c->master, xh, yh);
+      decodeMaster(centerover->master, xc, yc);
+      short xd(xh-xc), yd(yh-yc);
+      t = gmatrix[centerover] * eumove(xd, yd);
+      /* printf("H[%d,%d] C[%d,%d] ", int(xh),int(yh), int(xc),int(yc));
+      printf("%d,%d t = \n", xd, yd); display(t);
+      printf("gmatrix0 = \n");
+      display(gmatrix0[c]); */
+      }
+    else {
+      t = 
+        View * spin(viewctr.spin * 2 * M_PI / S7) * calc_relative_matrix(c, viewctr.h);
+      if(purehepta) t = t * pispin;
+      }
+    }
+  return t;
+  }
+
 transmatrix calc_relative_matrix_help(cell *c, heptagon *h1) {
   transmatrix gm = Id;
   heptagon *h2 = c->master;
   transmatrix where = Id;
-  for(int d=0; d<7; d++) if(h2->c7->mov[d] == c)
+  if(!purehepta) for(int d=0; d<7; d++) if(h2->c7->mov[d] == c)
     where = hexmove[d];
   // always add to last!
   while(h1 != h2) {
     for(int d=0; d<7; d++) if(h1->move[d] == h2) printf("(adj) ");
     if(h1->distance < h2->distance) {
-      int sp = h2->spin[0];
+      int sp = h2->spin(0);
       printf("A%d ", sp);
       h2 = h2->move[0];
       where = heptmove[sp] * where;
       }
     else {
-      int sp = h1->spin[0];
+      int sp = h1->spin(0);
       printf("B%d ", sp);
       h1 = h1->move[0];
       gm = gm * invheptmove[sp];
@@ -2313,6 +3157,8 @@ transmatrix calc_relative_matrix_help(cell *c, heptagon *h1) {
   }
 
 void virtualRebase(shmup::monster *m, bool tohex) {
+
+  if(euclid || sphere) return;
 
   while(true) {
   
@@ -2346,9 +3192,9 @@ void virtualRebase(shmup::monster *m, bool tohex) {
       }
     
     if(!newbase) {
-      if(tohex) for(int d=0; d<7; d++) {
+      if(tohex && !purehepta) for(int d=0; d<7; d++) {
         cell *c = createMov(m->base, d);
-        transmatrix V2 = spin(-m->base->spn[d]*2*M_PI/6) * invhexmove[d];
+        transmatrix V2 = spin(-m->base->spn(d)*2*M_PI/6) * invhexmove[d];
         double newz = (V2 *m->at * C0) [2];
         if(newz < currz) {
           currz = newz;
@@ -2371,3 +3217,7 @@ void virtualRebase(shmup::monster *m, bool tohex) {
   }
 
 }
+
+#ifdef ROGUEVIZ
+#include "rogueviz.cpp"
+#endif

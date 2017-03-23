@@ -12,14 +12,16 @@
 #endif
 
 namespace mapeditor {
-#ifndef MOBILE
-  cell *modelcell[200];
+  int subcanvas;
+#ifndef NOEDIT
+  map<int, cell*> modelcell;
   
   void clearModelCells() {
-    for(int i=0; i<200; i++) modelcell[i] = NULL;
+    modelcell.clear();
     }
   
   void applyModelcell(cell *c) {
+    if(mapeditor::whichPattern == 'H') return;
     if(mapeditor::whichPattern == 'H') return;
     int i = realpattern(c);
     cell *c2 = modelcell[i];
@@ -38,7 +40,7 @@ namespace mapeditor {
 #endif
   }
 
-#ifndef MOBILE
+#ifndef NOEDIT
 namespace mapstream {
   std::map<cell*, int> cellids;
   vector<cell*> cellbyid;
@@ -83,7 +85,7 @@ namespace mapstream {
           cellids[c->mov[j]] < i) {
           int32_t i = cellids[c->mov[j]];
           save(i);
-          saveChar(c->spn[j]);
+          saveChar(c->spn(j));
           saveChar(j);
           break;
           }
@@ -167,7 +169,7 @@ namespace mapstream {
         // printf("%p:%d,%d -> %p\n", c2, dir, c);
         
         // spinval becomes xspinval
-        rspin = (c2->spn[dir] - loadChar() + 42) % c->type;
+        rspin = (c2->spn(dir) - loadChar() + 42) % c->type;
         }
       
       cellbyid.push_back(c);
@@ -251,7 +253,7 @@ namespace mapstream {
         ds.list.push_back(loadPoint());
       }
 
-    saveImages();
+    buildpolys();
     bfs();
     restartGraph();
     return true;
@@ -302,6 +304,8 @@ namespace mapeditor {
             case 'z': {
                 int t = zebra40(c);
                 
+                if(euclid) return (t*4) % 6;
+                
                 int t4 = t>>2, tcdir = 0;
                 
                 if(purehepta) tcdir = t^1;
@@ -321,6 +325,7 @@ namespace mapeditor {
                 
             case 'f': {
                 int t = emeraldval(c);
+                if(euclid) return 0;
                 int tcdir = 0, tbest = (t&3);
                 for(int i=0; i<c->type; i++) {
                     cell *c2 = c->mov[i];
@@ -386,7 +391,31 @@ namespace mapeditor {
         return 0;
     }
     
-#ifndef MOBILE
+  string infix;
+  
+  bool hasInfix(const string &s) {
+    if(infix == "") return true;
+    string t = "";
+    for(int i=0; i<size(s); i++) {
+      char c = s[i];
+      char tt = 0;
+      if(c >= 'a' && c <= 'z') tt += c - 32;
+      else if(c >= 'A' && c <= 'Z') tt += c;
+      if(tt) t += tt;
+      }
+    return t.find(infix) != string::npos;
+    }
+  
+  bool editInfix(int uni) {
+    if(uni >= 'A' && uni <= 'Z') infix += uni;
+    else if(uni >= 'a' && uni <= 'z') infix += uni-32;
+    else if(infix != "" && uni == 8) infix = infix.substr(0, size(infix)-1);
+    else if(infix != "" && uni != 0) infix = "";
+    else return false;
+    return true;
+    }
+    
+#ifndef NOEDIT
   int paintwhat = 0;
   int painttype = 0;
   int radius = 0;
@@ -397,10 +426,7 @@ namespace mapeditor {
 
   bool symRotation, sym01, sym02, sym03;
   int displaycodes;
-  int subcanvas;
   int whichpart;
-  
-  string infix;
   
   cell *drawcell;
   
@@ -508,12 +534,6 @@ namespace mapeditor {
     return 0x20;
     }
 
-  int colorhistory[10] = {
-    0x202020, 0x800000, 0x008000, 0x000080, 
-    0x404040, 0xC0C0C0, 0x804000, 0xC0C000,
-    0x408040, 0xFFD500
-    }, lch;
-  
   bool choosefile = false;
   bool editext = false;
 
@@ -581,89 +601,23 @@ namespace mapeditor {
       }
     }
   
-  void drawColorDialog(int color) {
-    for(int j=0; j<10; j++) {
-      int x = vid.xres / 2 + vid.fsize * 2 * (j-5);
-      int y = vid.yres / 2- 5 * vid.fsize;
-      
-      string s0 = ""; s0 += ('q'+j);
-
-      displayColorButton(x, y, s0, 'q'+j, 0, 0, colorhistory[j]);
-      }
-
-    for(int i=0; i<3; i++) for(int j=0; j<16; j++) {
-      int x = vid.xres / 2 + vid.fsize * 2 * (j-8);
-      int y = vid.yres / 2 + (i-1) * vid.fsize * 2;
-      
-      int p = color;
-      p &= ~ (0xFF << (8*i));
-      p |= (17*j) << (8*i);
-
-      char c0 = "0aA" [i]+j;
-      string s0 = ""; s0 += c0;
-              
-      displayColorButton(x, y, s0, c0, 0, 0, p);
-      }
-    
-    displayColorButton(vid.xres/2, vid.yres/2+vid.fsize * 4, "select this color", ' ', 8, 0, color);
-    }
-  
-  // 0: nothing happened, 1: color accepted, 2: break
-  int handleKeyColor(int uni, int& color) {
-    int i = 3;
-    int j = 0;
-    if(uni >= '0' && uni <= '0'+15)
-      i=0, j=uni-'0';
-    if(uni >= 'a' && uni <= 'a'+15)
-      i=1, j=uni-'a';
-    if(uni >= 'A' && uni <= 'A'+15)
-      i=2, j=uni-'A';
-      
-    if(i<3) {
-      color &= ~ (0xFF << (8*i));
-      color |= (17*j) << (8*i);
-      }
-    else if(uni == ' ') {
-      bool inHistory = false;
-      for(int i=0; i<10; i++) if(colorhistory[i] == paintwhat)
-        inHistory = true;
-      if(!inHistory) { colorhistory[lch] = paintwhat; lch++; lch %= 10; }
-      return 1;
-      }
-    else if(uni >= 'q' && uni <= 'z') {
-      color = colorhistory[uni - 'q'];
-      return 1;
-      }
-    else if(uni) return 2;
-    return 0;
-    }
-      
   void displayFunctionKeys() {
     int fs = vid.fsize + 5;
-    displayButton(8, vid.yres-8-fs*10, XLAT("F1 = help"), SDLK_F1, 0);
-    displayButton(8, vid.yres-8-fs*9, XLAT("F2 = save"), SDLK_F2, 0);
-    displayButton(8, vid.yres-8-fs*8, XLAT("F3 = load"), SDLK_F3, 0);
-    displayButton(8, vid.yres-8-fs*7, XLAT("F4 = file"), SDLK_F3, 0);
-    displayButton(8, vid.yres-8-fs*6, XLAT("F5 = restart"), SDLK_F5, 0);
-    displayButton(8, vid.yres-8-fs*5, XLAT("F6 = HQ shot"), SDLK_F6, 0);
-    displayButton(8, vid.yres-8-fs*4, XLAT("F7 = player on/off"), SDLK_F7, 0);
+    displayButton(8, vid.yres-8-fs*11, XLAT("F1 = help"), SDLK_F1, 0);
+    displayButton(8, vid.yres-8-fs*10, XLAT("F2 = save"), SDLK_F2, 0);
+    displayButton(8, vid.yres-8-fs*9, XLAT("F3 = load"), SDLK_F3, 0);
+    displayButton(8, vid.yres-8-fs*8, XLAT("F4 = file"), SDLK_F3, 0);
+    displayButton(8, vid.yres-8-fs*7, XLAT("F5 = restart"), SDLK_F5, 0);
+    displayButton(8, vid.yres-8-fs*6, XLAT("F6 = HQ shot"), SDLK_F6, 0);
+    displayButton(8, vid.yres-8-fs*5, XLAT("F7 = player on/off"), SDLK_F7, 0);
+    displayButton(8, vid.yres-8-fs*4, XLAT("F8 = SVG shot"), SDLK_F8, 0);
     displayButton(8, vid.yres-8-fs*3, XLAT("SPACE = map/graphics"), ' ', 0);
     displayButton(8, vid.yres-8-fs*2, XLAT("ESC = return to the game"), SDLK_ESCAPE, 0);
     }
 
   void vpush(int i, const char *name) {
     string s = XLATN(name);
-    if(infix != "") {
-      string t = "";
-      for(int i=0; i<size(s); i++) {
-        char c = s[i];
-        char tt = 0;
-        if(c >= 'a' && c <= 'z') tt += c - 32;
-        else if(c >= 'A' && c <= 'Z') tt += c;
-        if(tt) t += tt;
-        }
-      if(t.find(infix) == string::npos) return;
-      }
+    if(!hasInfix(s)) return;
     v.push_back(make_pair(s, i));
     }
   
@@ -672,42 +626,59 @@ namespace mapeditor {
     if(choosefile) { drawFileDialog(); return; }
   
     if(subscreen == 2) {
-      displayStat(2, XLAT("Emerald Pattern"), ONOFF(whichPattern == 'f'), 'f');
-      displayStat(3, XLAT("Palace Pattern"), ONOFF(whichPattern == 'p'), 'p');
-      displayStat(4, XLAT("Zebra Pattern"), ONOFF(whichPattern == 'z'), 'z');
+      dialog::init();
+
+      dialog::addBoolItem(XLAT(euclid ? "three colors" : "Emerald Pattern"), (whichPattern == 'f'), 'f');
+      dialog::addBoolItem(XLAT("Palace Pattern"), (whichPattern == 'p'), 'p');
+      dialog::addBoolItem(XLAT(euclid ? "three colors rotated" : "Zebra Pattern"), (whichPattern == 'z'), 'z');
+      dialog::addBoolItem(XLAT("field pattern"), (whichPattern == 'F'), 'F');
 
       if(whichPattern == 'f') symRotation = true;
-      displayStat(6, XLAT("rotational symmetry"), ONOFF(symRotation), '0');
-      displayStat(7, XLAT("symmetry 0-1"), ONOFF(sym01), '1');
-      displayStat(8, XLAT("symmetry 0-2"), ONOFF(sym02), '2');
-      displayStat(9, XLAT("symmetry 0-3"), ONOFF(sym03), '3');
+      if(whichPattern == 'F') ;
+      else if(!euclid) {
+        dialog::addBoolItem(XLAT("rotational symmetry"), (symRotation), '0');
+        dialog::addBoolItem(XLAT("symmetry 0-1"), (sym01), '1');
+        dialog::addBoolItem(XLAT("symmetry 0-2"), (sym02), '2');
+        dialog::addBoolItem(XLAT("symmetry 0-3"), (sym03), '3');
+        }
+      else
+        dialog::addBoolItem(XLAT("edit all three colors"), (symRotation), '0');
 
-      displayStat(11, XLAT("display pattern codes (full)"), ONOFF(displaycodes), 'd');
-      displayStat(12, XLAT("display pattern codes (simplified)"), ONOFF(displaycodes), 's');
+      dialog::addBoolItem(XLAT("display pattern codes (full)"), (displaycodes == 1), 'd');
+      dialog::addBoolItem(XLAT("display pattern codes (simplified)"), (displaycodes == 2), 's');
 
-      displayStat(14, XLAT("display only hexagons"), ONOFF(whichShape == '6'), '6');
-      displayStat(15, XLAT("display only heptagons"), ONOFF(whichShape == '7'), '7');
-      displayStat(16, XLAT("display the triheptagonal grid"), ONOFF(whichShape == '8'), '8');
+      dialog::addBoolItem(XLAT("display only hexagons"), (whichShape == '6'), '6');
+      dialog::addBoolItem(XLAT("display only heptagons"), (whichShape == '7'), '7');
+      dialog::addBoolItem(XLAT("display the triheptagonal grid"), (whichShape == '8'), '8');
 
-      displayStat(18, XLAT("predesigned patterns"), "", 'r');
+      dialog::addItem(XLAT("predesigned patterns"), 'r');
+      dialog::display();
       }
     else if(subscreen == 3) {
-      displayStat(2, XLAT("Gameboard"), "", 'g');
-      displayStat(3, XLAT("random colors"), "", 'r');
-      displayStat(4, XLAT("rainbow landscape"), "", 'l');
+      dialog::init("predesigned patterns");
+      dialog::addItem(XLAT("Gameboard"), 'g');
+      dialog::addItem(XLAT("random colors"), 'r');
+      dialog::addItem(XLAT("rainbow landscape"), 'l');
 
-      displayStat(6, XLAT("emerald pattern"), "emerald", 'e');
+      dialog::addSelItem(XLAT("emerald pattern"), "emerald", 'e');
 
-      displayStat(8, XLAT("four elements"), "palace", 'b');
-      displayStat(9, XLAT("eight domains"), "palace", 'a');
+      dialog::addSelItem(XLAT("four elements"), "palace", 'b');
+      dialog::addSelItem(XLAT("eight domains"), "palace", 'a');
 
-      displayStat(11, XLAT("zebra pattern"), "zebra", 'z');
-      displayStat(12, XLAT("three stripes"), "zebra", 'x');
+      dialog::addSelItem(XLAT("zebra pattern"), "zebra", 'z');
+      dialog::addSelItem(XLAT("four triangles"), "zebra", 't');
+      dialog::addSelItem(XLAT("three stripes"), "zebra", 'x');
 
-      displayStat(15, XLAT("random black-and-white"), "current", 'w');
+      dialog::addSelItem(XLAT("random black-and-white"), "current", 'w');
+
+      dialog::addSelItem(XLAT("field pattern C"), "field", 'C');
+      dialog::addSelItem(XLAT("field pattern D"), "field", 'D');
+      dialog::addSelItem(XLAT("field pattern N"), "field", 'N');
+      dialog::addSelItem(XLAT("field pattern S"), "field", 'S');
+      dialog::display();
       }
     else if(subscreen == 1 && painttype == 6) 
-      drawColorDialog(paintwhat);
+      dialog::drawColorDialog(paintwhat);
     else if(subscreen == 1) {
       v.clear();
       if(painttype == 4) painttype = 0;
@@ -810,11 +781,12 @@ namespace mapeditor {
       createMov(c1, i);
       int i0 = (42+cf*i+d1) % c1->type;
       int i1 = (i + d2) % c2->type;
-      spillCopy(c1->mov[i0], c1->spn[i0], c2->mov[i1], c2->spn[i1], r-1);
+      spillCopy(c1->mov[i0], c1->spn(i0), c2->mov[i1], c2->spn(i1), r-1);
       }
     }
   
   int subpatternEmerald(int i) {
+    if(euclid) return (symRotation && (i<3)) ? 0 : i;
     if((sym01?1:0)+(sym02?1:0)+(sym03?1:0) >= 2) i &= ~3;
     if(sym01 && (i&1)) i ^= 1;
     if(sym02 && (i&2)) i ^= 2;
@@ -823,6 +795,7 @@ namespace mapeditor {
     }
   
   int subpatternZebra(int i) {
+    if(euclid) return (symRotation && (i<3)) ? 0 : i;
     i = subpatternEmerald(i);
     if(symRotation) {
       if(i >= 8 && i < 12) i -= 4;
@@ -836,6 +809,7 @@ namespace mapeditor {
     }
 
   int subpatternPalace(int i) {
+    if(euclid) return i;
     i = subpatternEmerald(i);
     if(symRotation && i >= 3) i -= ((i/4-1) % 7) * 4;
     return i;
@@ -854,7 +828,11 @@ namespace mapeditor {
         if(polarb50(c)) i|=2;
         return subpatternPalace(i);
         }
+      case 'P':
+        return fiftyval(c);
       case 'H':
+        return realpattern(c);
+      case 'F':
         return realpattern(c);
       }
     return nopattern(c);
@@ -875,8 +853,17 @@ namespace mapeditor {
         }
       case 'H': 
         return towerval(c);
+      case 'F': {
+        pair<int, bool> p = fieldpattern::fieldval(c);
+        return 10*p.first + (p.second?6:7);
+        }
       }
     return nopattern(c);
+    }
+
+  int realpatternsh(cell *c) {
+    if(whichPattern == 'F') return nopattern(c);
+    else return realpattern(c);
     }
 
   int cellShapeGroup() {
@@ -939,6 +926,8 @@ namespace mapeditor {
         break;
       case 1:
         c->item = eItem(paintwhat);
+        if(c->item == itBabyTortoise)
+          tortoise::babymap[c] = getBits(c) ^ tortoise::getRandomBits();
         break;
       case 2: {
         eLand last = c->land;
@@ -980,7 +969,7 @@ namespace mapeditor {
       case 6:
         c->land = laCanvas;
         c->wall = waNone;
-        c->landparam = paintwhat;
+        c->landparam = paintwhat >> 8;
         break;
       case 4:
         c->wall = copywhat->wall;
@@ -995,7 +984,7 @@ namespace mapeditor {
         break;
       }
     checkUndo();
-    if(r) for(int i=0; i<c->type; i++) spill(createMov(c, i), r-1, c->spn[i]);
+    if(r) for(int i=0; i<c->type; i++) spill(createMov(c, i), r-1, c->spn(i));
     }
   
   void allInPattern(cell *c, int r, int cdir) {
@@ -1073,11 +1062,11 @@ namespace mapeditor {
     return true;
     }
   
-  void handleKey(int uni, int sym) {
-    if(choosefile && handleKeyFile(uni, sym)) ;
+  void handleKey(int sym, int uni) {
+    if(choosefile && handleKeyFile(sym, uni)) ;
     else if(subscreen == 1 && painttype == 6) {
       paintwhat_str = "paint";
-      int v = handleKeyColor(uni, paintwhat);
+      int v = dialog::handleKeyColor(sym, uni, paintwhat);
       if(v == 1) subscreen = 0;
       if(v == 2) cmode = emNormal;
       }
@@ -1090,14 +1079,12 @@ namespace mapeditor {
         subscreen = 0;
         mousepressed = false;
         }
-      if(uni >= 'A' && uni <= 'Z') infix += uni;
-      else if(uni >= 'a' && uni <= 'z') infix += uni-32;
-      else if(infix != "" && uni == 8) infix = infix.substr(0, size(infix)-1);
-      else if(infix != "" && uni != 0) infix = "";
-      else if(subscreen == 1 && uni != 0) cmode = emNormal;
+      if(editInfix(uni)) ;
+      else if(subscreen == 1 && uni != 0) cmode = emNormal;      
       }
     else if(subscreen == 3) {
-      if(uni >= 'a' && uni <= 'z') {
+      dialog::handleNavigation(sym, uni);
+      if((uni >= 'a' && uni <= 'z') || (uni >= 'A' && uni <= 'Z')) {
         whichCanvas = uni;
         subcanvas = rand();
         firstland = laCanvas; randomPatternsMode = false;
@@ -1106,7 +1093,8 @@ namespace mapeditor {
       else if(uni != 0) subscreen = 0;
       }
     else if(subscreen == 2) {
-      if(uni == 'f' || uni == 'p' || uni == 'z' || uni == 'H') {
+      dialog::handleNavigation(sym, uni);
+      if(uni == 'f' || uni == 'p' || uni == 'z' || uni == 'H' || uni == 'F') {
         if(whichPattern == uni) whichPattern = 0;
         else whichPattern = uni;
         clearModelCells();
@@ -1171,6 +1159,9 @@ namespace mapeditor {
       else if(sym == SDLK_F6) {
         saveHighQualityShot();
         }
+      else if(sym == SDLK_F8) {
+        svg::render();
+        }
       else if(sym == SDLK_F7) {
         drawplayer = !drawplayer;
         }
@@ -1214,7 +1205,7 @@ namespace mapeditor {
       
   int dslayer;
   bool coloring;
-  int colortouse = 0xC0C0C0;
+  int colortouse = 0xC0C0C0FF;
 
   transmatrix drawtrans;
 
@@ -1255,27 +1246,27 @@ namespace mapeditor {
   
   void drawGrid() {
     if(cmode == emDraw && !inHighQual) {
-      lalpha = 0x20;
+
       for(int d=0; d<84; d++) {
         transmatrix d2 = drawtrans * rgpushxto0(ccenter);
+        int lalpha;
         if(d % (84/drawcell->type) == 0)
           lalpha = 0x40;
         else
           lalpha = 0x20;
-        queueline(d2 * C0, d2 * spin(M_PI*d/42)* xpush(1) * C0, 0xC0C0C0);
+        int col = darkena(0xC0C0C0, 0, lalpha);
+        queueline(d2 * C0, d2 * spin(M_PI*d/42)* xpush(1) * C0, col);
         for(int u=2; u<=20; u++) {
           if(u % 5 == 0) lalpha = 0x40;
           else lalpha = 0x20;
           queueline(
             d2 * spin(M_PI*d/42)* xpush(u/20.) * C0, 
             d2 * spin(M_PI*(d+1)/42)* xpush(u/20.) * C0, 
-            0xC0C0C0);
+            darkena(0xC0C0C0, 0, lalpha));
           }
         }
-      queueline(drawtrans*ccenter, drawtrans*coldcenter, 0xC0C0C0);
+      queueline(drawtrans*ccenter, drawtrans*coldcenter, darkena(0xC0C0C0, 0, 0x20));
   
-      lalpha = 0xFF;
-
       int sg = drawcellShapeGroup();
       
       for(int i=0; i<USERSHAPEIDS; i++) if(editingShape(sg, i) && usershapes[sg][i]) {
@@ -1285,12 +1276,10 @@ namespace mapeditor {
         for(int a=0; a<size(ds.list); a++) {
           hyperpoint P2 = drawtrans * ds.list[a];
     
-          int xc, yc, sc;
-          getcoord(P2, xc, yc, sc);
-          queuechr(xc, yc, sc, 10, 'x', 
-            a == 0 ? 0x00FF00 : 
+          queuechr(P2, 10, 'x', 
+            darkena(a == 0 ? 0x00FF00 : 
             a == size(ds.list)-1 ? 0xFF0000 :
-            0xFFFF00);
+            0xFFFF00, 0, 0xFF));
           }
         }
       }
@@ -1299,7 +1288,7 @@ namespace mapeditor {
   void showDrawEditor() {
 
     if(coloring) {
-      drawColorDialog(colortouse);
+      dialog::drawColorDialog(colortouse);
       return;
       }
 
@@ -1376,13 +1365,14 @@ namespace mapeditor {
       displayfr(vid.xres-8, vid.yres-8-fs*6, 2, vid.fsize, XLAT("x: %1", fts4(mh[0])), 0xC0C0C0, 16);
       displayfr(vid.xres-8, vid.yres-8-fs*5, 2, vid.fsize, XLAT("y: %1", fts4(mh[1])), 0xC0C0C0, 16);
       displayfr(vid.xres-8, vid.yres-8-fs*4, 2, vid.fsize, XLAT("z: %1", fts4(mh[2])), 0xC0C0C0, 16);
-
-      displayfr(vid.xres-8, vid.yres-8-fs*2, 2, vid.fsize, XLAT("r: %1", fts4(inverse_sinh(sqrt(mh[0]*mh[0]+mh[1]*mh[1])))), 0xC0C0C0, 16);
+      displayfr(vid.xres-8, vid.yres-8-fs*2, 2, vid.fsize, XLAT("r: %1", fts4(hdist0(mh))), 0xC0C0C0, 16);
       displayfr(vid.xres-8, vid.yres-8-fs, 2, vid.fsize, XLAT("ϕ: %1°", fts4(-atan2(mh[1], mh[0]) * 360 / 2 / M_PI)), 0xC0C0C0, 16);
       }
     
     displayFunctionKeys();
     }
+  
+  bool rebuildPolys = false;
   
   void applyToShape(int sg, int id, int uni, hyperpoint mh) {
     bool haveshape = usershapes[sg][id];
@@ -1402,12 +1392,12 @@ namespace mapeditor {
     if(uni == 'n' || xnew) {
       dsCur->list.clear();
       dsCur->list.push_back(mh);
-      saveImages();
+      rebuildPolys = true;
       }
 
     if(uni == 'a' && haveshape) {
       dsCur->list.push_back(mh);
-      saveImages();
+      rebuildPolys = true;
       }
     
     if(uni == 'D') {
@@ -1434,7 +1424,7 @@ namespace mapeditor {
           i--;
           }
         }
-      saveImages();
+      rebuildPolys = true;
       }
 
     if(uni == 'T') {
@@ -1445,6 +1435,22 @@ namespace mapeditor {
       loadShape(sg, id, shBeautyHair, 1, 5);
       loadShape(sg, id, shPFace, 1, 6);
       loadShape(sg, id, shFlowerHair, 1, 7); */
+
+      // loadShape(sg, id, shPBody, 1, 0);
+      // loadShape(sg, id, shPHead, 1, 1);
+
+      /* loadShape(sg, id, shReptileFrontFoot, 1, 0);
+      loadShape(sg, id, shReptileRearFoot, 1, 1);
+      loadShape(sg, id, shReptileFrontLeg, 1, 2);
+      loadShape(sg, id, shReptileRearLeg, 1, 3);
+      loadShape(sg, id, shReptileBody, 2, 4);
+      loadShape(sg, id, shReptileHead, 2, 5);
+      loadShape(sg, id, shReptileTail, 2, 6); */
+
+      loadShape(sg, id, shTrylobite, 2, 0);
+
+      /* loadShape(sg, id, shYeti, 2, 0);
+      loadShape(sg, id, shHumanFoot, 1, 1); */
 
       /* loadShape(sg, id, shYeti, 1, 2);
       loadShape(sg, id, shRatHead, 1, 3);
@@ -1463,10 +1469,10 @@ namespace mapeditor {
       loadShape(3, 1, shTurtleFloor[1], 14, 0); */
 
       // loadShape(sg, id, shDragonSegment, 2, 0);
-      loadShape(sg, id, shDragonSegment, 2, 1);
       // loadShape(sg, id, shEyes, 2, 2);
       
-      saveImages();
+      // loadShape(sg, id, shFamiliarHead, 2, 0);
+      rebuildPolys = true;
       }
 
     if(uni == 'K') {
@@ -1483,10 +1489,12 @@ namespace mapeditor {
         if(vid.cs.charid&1)
           loadShape(sg, id, shFemaleDress, 2, 2);
 
-        if(vid.cs.charid&1)
+        /* if(vid.cs.charid&1)
           loadShape(sg, id, shPrincessDress, 1, 3);
         else
-          loadShape(sg, id, shPrinceDress, 2, 3);
+          loadShape(sg, id, shPrinceDress, 2, 3); */
+        
+        loadShape(sg, id, shRatCape2, 1, 3);
       
         if(vid.cs.charid&1)
           loadShape(sg, id, shFemaleHair, 2, 4);
@@ -1498,7 +1506,7 @@ namespace mapeditor {
       
       // loadShape(sg, id, shWolf, 2, dslayer);
       
-      saveImages();
+      rebuildPolys = true;
       }
 
     if(uni == '+') dsCur->rots++;
@@ -1506,20 +1514,20 @@ namespace mapeditor {
     if(uni >= '1' && uni <= '9') {
       dsCur->rots = uni - '0';
       if(dsCur->rots == 9) dsCur->rots = 21;
-      saveImages();
+      rebuildPolys = true;
       }
     if(uni == '0') {
       dsCur->sym = !dsCur->sym;
-      saveImages();
+      rebuildPolys = true;
       }
 
     if(uni == 't') {
       dsCur->shift = mh;
-      saveImages();
+      rebuildPolys = true;
       }
     if(uni == 'y') {
       dsCur->spin = mh;
-      saveImages();
+      rebuildPolys = true;
       }
 
 #define COLORKEY (-10000)    
@@ -1546,12 +1554,12 @@ namespace mapeditor {
     return XLAT("vector graphics editor");
     }
   
-  void drawHandleKey(int uni, int sym, double shiftmul) {
+  void drawHandleKey(int sym, int uni) {
 
-    if(choosefile && handleKeyFile(uni, sym)) return;
+    if(choosefile && handleKeyFile(sym, uni)) return;
   
     if(coloring) {
-      int v = handleKeyColor(uni, colortouse);
+      int v = dialog::handleKeyColor(sym, uni, colortouse);
       if(v == 2) { coloring = false; return; }
       else if(v == 1) { coloring = false; uni = COLORKEY; }
       else return;
@@ -1581,9 +1589,9 @@ namespace mapeditor {
         for(int l=0; l<USERLAYERS; l++) if(size(us->d[l].list)) {
           usershapelayer& ds(us->d[l]);
           printf("// %d %d %d [%06X]\n", i, j, l, ds.color);
-          for(int i=ds.sh.s; i < ds.sh.e; i++) {
-            printf("  hpcpush(hpxyz(%f,%f,%f));\n", double(hpc[i][0]), double(hpc[i][1]), double(hpc[i][2]));
-            }
+          printf(" ID, %d, %d, ", us->d[l].rots, us->d[l].sym?2:1); 
+          for(int i=0; i<size(us->d[l].list); i++) 
+            printf("%lf,%lf, ", double(us->d[l].list[i][0]), double(us->d[l].list[i][1]));
           printf("\n");
           }
         }
@@ -1661,7 +1669,7 @@ namespace mapeditor {
       fclose(f);
       addMessage(XLAT("Pictures loaded from %1", picfile));
       
-      saveImages();
+      buildpolys();
       }
     
     if(sym == SDLK_F7) {
@@ -1670,6 +1678,10 @@ namespace mapeditor {
     
     if(sym == SDLK_F6) {
       saveHighQualityShot();
+      }
+    
+    if(sym == SDLK_F8) {
+      svg::render();
       }
     
     if(sym == SDLK_F5) {
@@ -1688,11 +1700,42 @@ namespace mapeditor {
       }
 
     if(sym == SDLK_F10) cmode = emNormal;
+
+    if(rebuildPolys)
+      buildpolys(), rebuildPolys = false;
     }
+#endif
+
+  int canvasback = linf[laCanvas].color >> 2;
 
   int generateCanvas(cell *c) {
+    if(whichCanvas == 'C') {
+      using namespace fieldpattern;
+      int z = fp43.getdist(fieldval(c), make_pair(0,false));
+      if(z < fp43.circrad) return 0x00C000;
+      int z2 = fp43.getdist(fieldval(c), make_pair(fp43.otherpole,false));
+      if(z2 < fp43.disthep[fp43.otherpole] - fp43.circrad)
+        return 0x3000;
+      return 0x6000;
+      }
+    if(whichCanvas == 'D') {
+      using namespace fieldpattern;
+      int z = fp43.getdist(fieldval(c), make_pair(0,false));
+      return 255 * (fp43.maxdist+1-z) / fp43.maxdist;
+      }
+    if(whichCanvas == 'N') {
+      using namespace fieldpattern;
+      int z = fp43.getdist(fieldval(c), make_pair(0,false));
+      int z2 = fp43.getdist(fieldval(c), make_pair(fp43.otherpole,false));
+      if(z < z2) return 0x00C000;
+      if(z > z2) return 0xC00000;
+      return 0xCCCC00;
+      }
+    if(whichCanvas == 'S') {
+      return 0x3F1F0F * fieldpattern::subval(c).second + 0x000080;
+      }
     if(whichCanvas == 'g')
-      return linf[laCanvas].color >> 2;
+      return canvasback;
     if(whichCanvas == 'r')
       return hrand(0xFFFFFF + 1);
     if(whichCanvas == 'e') {
@@ -1727,6 +1770,12 @@ namespace mapeditor {
       int fv = zebra40(c);
       return fcol[fv&3];
       }
+    if(whichCanvas == 't') {
+      static unsigned int fcol[4] = { 0x804040, 0x408040, 0x404080, 0x808040 };
+      int fv = zebra40(c);
+      if(fv/4 == 4 || fv/4 == 6 || fv/4 == 5 || fv/4 == 10) fv ^= 2;
+      return fcol[fv&3];
+      }
     if(whichCanvas == 'x') {
       static unsigned int fcol[4] = { 0xC0C0C0, 0x800000, 0x008000, 0x000080 };
       return fcol[zebra3(c)];
@@ -1736,20 +1785,17 @@ namespace mapeditor {
       return fcol[randpattern(c, subcanvas) ? 1 : 0];
       }
     if(whichCanvas == 'l') {
-      #ifdef CDATA
-          int col[4];
-          bool err = false;
-          for(int j=0; j<4; j++) {
-            col[j] = getCdata(c, j);
-            col[j] *= 3;
-            col[j] %= 240;
-            if(col[j] > 120) col[j] = 240 - col[j];
-            if(col[j] < -120) col[j] = -240 - col[j];
-            }
-          return (0x808080 + col[0] + (col[1] << 8) + (col[2] << 16)) >> (err?2:0);
-      #endif
+      int col[4];
+      bool err = false;
+      for(int j=0; j<4; j++) {
+        col[j] = getCdata(c, j);
+        col[j] *= 3;
+        col[j] %= 240;
+        if(col[j] > 120) col[j] = 240 - col[j];
+        if(col[j] < -120) col[j] = -240 - col[j];
+        }
+      return (0x808080 + col[0] + (col[1] << 8) + (col[2] << 16)) >> (err?2:0);
       }
-    return linf[laCanvas].color >> 2;
+    return canvasback;
     }
-#endif
   }

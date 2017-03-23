@@ -52,6 +52,12 @@ struct fullnoun {
   noun n[NUMLAN-1];
   };
 
+#ifdef NOTRANS
+#define NUMEXTRA 3
+const char* natchars[NUMEXTRA] = {"°","é","á"};
+#endif
+
+#ifndef NOTRANS
 #include "language-data.cpp"
 
 hashcode langhash(const string& s) {
@@ -75,6 +81,7 @@ template<class T> const T* findInHashTableS(string s, const T *table, int size) 
   }
 
 #define findInHashTable(s,t) findInHashTableS(s, t, sizeof(t) / sizeof(t[0]))
+#endif
 
 string choose3(int g, string a, string b, string c) {
   if(g == GEN_M || g == GEN_O) return a;
@@ -100,11 +107,12 @@ set<string> warnshown;
 
 void basicrep(string& x) { 
 
-    const sentence *s = findInHashTable(x, all_sentences);
-    if(!s && !warnshown.count(x)) {
-      printf("WARNING: no translations for '%s'\n", x.c_str());
-      warnshown.insert(x);
-      }
+#ifndef NOTRANS
+  const sentence *s = findInHashTable(x, all_sentences);
+  if(!s && !warnshown.count(x)) {
+    printf("WARNING: no translations for '%s'\n", x.c_str());
+    warnshown.insert(x);
+    }
 
   int l = lang();
   if(l) {
@@ -122,9 +130,11 @@ void basicrep(string& x) {
     rep(x, "%l0", choose3(playergender(), "l", "la", "lo"));
     rep(x, "%d0", choose3(playergender(), "", "a", "o"));
     }
+#endif
   }
 
 void parrep(string& x, string w, stringpar p) {
+#ifndef NOTRANS
   int l = lang();
   const fullnoun *N = findInHashTable(p.v, all_nouns);
   if(l == 1) {
@@ -176,6 +186,7 @@ void parrep(string& x, string w, stringpar p) {
       rep(x, "%ůj"+w, choose4(N->n[2].genus, "ého", "ou", "é", "ůj"));
       rep(x, "%ým"+w, choose3(N->n[2].genus, "ým", "ou", "ým"));
       rep(x, "%ho"+w, choose3(N->n[2].genus, "ho", "ji", "ho"));
+      rep(x, "%ého"+w, choose3(N->n[2].genus, "ého", "ou", "ého"));
 
       if(p.v == "Mirror Image")
         rep(x, "%s"+w, "se");
@@ -198,6 +209,7 @@ void parrep(string& x, string w, stringpar p) {
       rep(x, "%E"+w, choose3(N->n[3].genus, "", "а", "о"));
       rep(x, "%A"+w, choose3(N->n[3].genus, "ый", "ая", "ое"));
       rep(x, "%c"+w, choose3(N->n[3].genus, "ся", "ась", ""));
+      rep(x, "%y"+w, choose3(N->n[3].genus, "ый", "ая", "ое"));
       }
     else {
       rep(x,"%"+w,p.v);
@@ -228,10 +240,21 @@ void parrep(string& x, string w, stringpar p) {
       rep(x, "%den"+w, "the");
       }
     }
+#endif
   if(true) {
     // proper names (R'Lyeh)
     rep(x,"%"+w,p.v);
-    if(N && (N->english_grammar_flags & 1)) {
+#ifdef NOTRANS
+    int flags = 0;
+    if(p.v == "R'Lyeh" || p.v == "Camelot")  flags = 1;
+    if(p.v == "Crossroads" || p.v == "Crossroads II" ||
+      p.v == "Crossroads III" || p.v == "Crossroads IV" ||
+      p.v == "Kraken Depths" || p.v == "Elemental Planes")
+      flags = 2;
+#else
+    int flags = N ? N->english_grammar_flags : 0;
+#endif
+    if(flags & 1) {
       rep(x,"%the"+w, p.v);
       rep(x,"%The"+w, p.v);
       }
@@ -242,7 +265,7 @@ void parrep(string& x, string w, stringpar p) {
       rep(x,"%his"+w, princessgender() ? "her" : "his");
       }
     // plural names (Crossroads)
-    if(N && (N->english_grammar_flags & 2))
+    if(flags & 2)
       rep(x,"%s"+w, "");
     else 
       rep(x,"%s"+w, "s");
@@ -288,20 +311,35 @@ string XLAT(string x, stringpar p1, stringpar p2, stringpar p3, stringpar p4) {
   postrep(x);
   return x;
   }
+string XLAT(string x, stringpar p1, stringpar p2, stringpar p3, stringpar p4, stringpar p5) { 
+  basicrep(x);
+  parrep(x,"1",p1.v);
+  parrep(x,"2",p2.v);
+  parrep(x,"3",p3.v);
+  parrep(x,"4",p4.v);
+  parrep(x,"5",p5.v);
+  postrep(x);
+  return x;
+  }
+
 
 string XLATN(string x) { 
+#ifndef NOTRANS
   if(lang()) {
     const fullnoun *N = findInHashTable(x, all_nouns);
     if(N) return N->n[lang()-1].nomp;
     }
+#endif
   return x;
   }
 
 string XLAT1(string x) { 
+#ifndef NOTRANS
   if(lang()) {
     const fullnoun *N = findInHashTable(x, all_nouns);
     if(N) return N->n[lang()-1].nom;
     }
+#endif
   return x;
   }
 

@@ -136,10 +136,13 @@ void setstats(set<string>& s, const char* bn) {
 int main() {
 
   nothe.insert("R'Lyeh");
+  nothe.insert("Camelot");
   plural.insert("Crossroads");
   plural.insert("Crossroads II");
   plural.insert("Crossroads III");
   plural.insert("Elemental Planes");
+  plural.insert("Crossroads IV");
+  plural.insert("Kraken Depths");
   
 #define S(a,b) d[1].add(a,b); 
 #define N(a,b,c,d,e,f) \
@@ -188,8 +191,8 @@ int main() {
     string mis = "";
     for(int i=1; i<NUMLAN; i++) if(d[i].count(*x) == 0)
       mis += d[i]["EN"];
-    if(mis != "" && mis != "TR" && mis != "TRDE" && mis != "DE")
-      printf("#warning Missing [%s]: %s\n", mis.c_str(), escape(*x, "?"));
+    if(mis != "")
+      printf("// #warning Missing [%s]: %s\n", mis.c_str(), escape(*x, "?"));
     }
   
   s.clear();
@@ -202,8 +205,8 @@ int main() {
     string mis = "";
     for(int i=1; i<NUMLAN; i++) if(nouns[i].count(*x) == 0)
       mis += d[i]["EN"];
-    if(mis != "" && mis != "TR" && mis != "TRDE" && mis != "DE")
-      printf("#warning Missing [%s]: %s\n", mis.c_str(), escape(*x, "?"));
+    if(mis != "")
+      printf("// #warning Missing [%s]: %s\n", mis.c_str(), escape(*x, "?"));
     }
 
 #ifdef CHECKALL

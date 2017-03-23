@@ -1,11 +1,6 @@
 // Hyperbolic Rogue -- items, monsters, walls, lands, descriptions, etc.
 // Copyright (C) 2011-2016 Zeno Rogue, see 'hyper.cpp' for details
 
-#define GEN_M 0
-#define GEN_F 1
-#define GEN_N 2
-#define GEN_O 3
-
 // --- help ---
 
 const char *wormdes = 
@@ -110,7 +105,7 @@ const char *foresthelp =
   "Trees catch fire on the next turn. The temperature of the grass cells "
   "rises once per turn for each fire nearby, and becomes fire itself "
   "when its temperature has risen 10 times.\n"
-  "You can also cut down the trees. Big trees take two turns to cut down.";
+  "You can also chop down the trees. Big trees take two turns to chop down.";
 
 const char *hivehelp =
   "The Hive is filled with Hyperbugs. They are huge insects which look a bit like "
@@ -216,13 +211,36 @@ const char *winddesc =
   "outcoming wind. However, you can move two cells with the wind in a single turn, "
   "and so can the birds.";
 
+const char *warningdesc = 
+  "Warnings are issued when you try to do something that appears dangerous, "
+  "like stepping on a known mine, or getting your boat destroyed by "
+  "a Kraken without having Orb of the Fish. In some cases the action "
+  "might actually be safe -- so you can ignore the warning and do it anyway, "
+  "simply by repeating the action.";
+
 const char *hauntdesc = 
   "A dark forest filled with ghosts and graves. But there is also treasure hidden "
   "deep within... But don't let greed make you stray from your path, as "
   "you can get lost!\n\n"
   "The Haunted Woods are bounded by a single equidistant curve. It is not a circle or horocycle.\n\n";
 
+const char *bulldashdesc = 
+  "Butterflies don't pursue you -- unless you get next to them, they just spin around the obstacles. "
+  "They cannot be killed conventionally, but you get treasure when a Raging Bull crashes into a Butterfly. ";
+
+const char *prairiedesc = 
+  "You can find safety in some places in the Prairie, but if you want treasures, "
+  "they can be found only on the other side of a giant herd of bulls.";
+  
+const char *cadesc = 
+  "A land for people wanting to experiment with cellular automata in the HyperRogue grid. "
+  "Rules can be given on the command line; the default rules are:\n"
+  "-c07 00100000 -c06 0010000 -c17 00011000 -c16 0001100 -caprob 0.3\n"
+  "(-c0 or -c1 can be given if the same rule is to be used for hexagonal "
+  "and heptagonal cells).";
+
 const char *NODESC = "No description yet.";
+const char *NODESCYET = "No description yet.";
 const char *GENDERSWITCH = NODESC;
 
 // --- monsters ---
@@ -259,8 +277,8 @@ const char *dragondesc =
   "The head will regenerate on the "
   "turns the Dragon is not moving, so you will usually have to hit it with "
   "your last attack; otherwise, if the head is healthy, it may breathe "
-  "fire (at range 3), losing the hitpoint. Killing the Dragon gives you "
-  "treasure.";
+  "fire (at range 3), losing the hitpoint. Killing the Dragon "
+  "while still in the Dragon Chasms gives you treasure.";
 
 const char *tortoisedesc = 
   "Galápagos is the land of Tortoises. "
@@ -275,8 +293,49 @@ const char *tortoisedesc =
   "Bringing back a Baby Tortoise counts as 5 $$$. The more factors agree in "
   "the given location of Galápagos, the brighter it is shown on your screen."; 
 
+const char *krakendesc =
+  "There are Krakens in your homeland too... huge sea monsters which "
+  "could easily destroy ships. The geometry of this strange world "
+  "prevents quick movement of huge objects, "
+  "so there are no large ships, only small boats, and "
+  "hyperbolic Krakens are relatively small too. Still, you suppose they might be "
+  "the widest creatures which could still move at considerable speed...\n\n"
+  
+  "Kraken heads can move only on hexagons. You need to attack all the tentacles to "
+  "kill the Kraken. A tentacle cannot attack if it has been attacked on the "
+  "same turn. When a Kraken attacks you while you are in a boat, it "
+  "destroys the boat, but does not kill you.";
 
-const int motypes = 125;
+const char *halloweendesc = 
+  "Halloween is a special land, that is available only in the spherical "
+  "or elliptic geometry (press 'o' to switch). You play on the surface of "
+  "a jack-o'-lantern, "
+  "and have to collect as many Treats as possible. Each Treat you collect "
+  "brings new monsters to fight, and new magical powers for you. You "
+  "have to fight the monsters while effectively managing your limited "
+  "resources.";
+
+const char *reptiledesc =
+  "These reptiles are quite strange creatures. They "
+  "spend most of their lives sleeping as floors "
+  "that other creatures can walk on. "
+  "Sometimes they wake up to hunt their prey, "
+  "but they will happily go back to sleep if they "
+  "happen to move into a hole on their way. "
+  "Your attacks do not kill the Reptiles, but "
+  "you can push and stun them.";
+
+const char *naturedesc = 
+  "This Orb allows you to grow like an Ivy. "
+  "The Ivy is always rooted in your current location; "
+  "moving among the Ivy cells will move the root. "
+  "Moving to a new location will cause the Ivy to grow "
+  ", if an Ivy could make that movement "
+  "(otherwise it breaks). "
+  "You can also target one of the cells adjacent to your ivy "
+  "(not to you) to grow or attack there.";
+
+const int motypes = 139;
 
 struct monstertype {
   char  glyph;
@@ -474,7 +533,7 @@ monstertype minf[motypes] = {
   { 'B', 0x909000, "Slime Beast", slimehelp},
   { '@', 0x8080FF, "Knight", camelothelp }, // knight moved
   { '@', 0x8B4513, "Illusion", 
-    "Illusions are targetted "
+    "Illusions are targeted "
     "by most monsters, just like yourself, Thumpers, and your friends."
     },
   { 'P', 0xD00000, "Pirate", 
@@ -526,7 +585,7 @@ monstertype minf[motypes] = {
   { 'P', 0xFF80FF, "Princess", princessdesc},
   { 'P', 0xFF80FF, "Prince", princessdesc},
   { 'P', 0xFF80FF, "Princess", princessdesc},
-  { 'S', 0xC0C0C0, "Servant", "A simple servant of the master of the Ivory Tower."},
+  { 'F', 0xD03000, "Familiar", "A simple servant of the master of the Ivory Tower."},
   { 'B', 0x707070, "Gargoyle", gargdesc},
   { 'E', 0xFF0000, "Fire Elemental", 
     "This monster leaves a trail of fire behind."},
@@ -573,7 +632,7 @@ monstertype minf[motypes] = {
   { 'T', 0x487830, "Tortoise", tortoisedesc},
   { 'D', 0xC03000, "Dragon", dragondesc},
   { 'd', 0xC03000, "Dragon", dragondesc},
-  { 'N', 0x303030, "Nighthawk", NODESC},
+  { 'F', 0x909090, "Gadfly", "Annoying insects. They can awaken Sleeping Bulls."},
   { 'Y', 0xFF8000, "Yendorian Researcher", 
     "These people study gravity and infinite trees. "
     "They have no special features, other than wearing a strange hat."
@@ -581,6 +640,39 @@ monstertype minf[motypes] = {
   { 'K', 0xA8A8A8, "Sparrowhawk", 
     "A bird who hunts in the treetops of Yendorian Forest."
     },
+  { 'K', 0xD0A0A0, "Kraken", krakendesc},
+  { 'K', 0xC07070, "Kraken Tentacle", krakendesc},
+  { 'D', 0xF09090, "Draugr",
+    "Animated corpses of ancient Viking warriors. They are immune to mundane weapons, "
+    "but they can be destroyed by your Orb of the Sword."
+    },
+  { 'C', 0xC08000, "Friendly Ivy", naturedesc },
+  { 'V', 0xC000C0, "Vampire Bat", 
+    "Vampire Bats don't attack normally, but they drain your magical powers if "
+    "they are at distance at most 2 from you."
+    },
+  { 'B', 0x404040, "Bat", 
+    "Someone has told you that one can get battle experience safely by "
+    "killing tons of essentially harmless creatures, such as Bats. But "
+    "does this make any sense?...\n\n"  
+    "It does not. Bats cannot hurt you, but may block your movement, or "
+    "toggle switches if they fall on them." },
+  { 'R', 0x8080C0, "Reptile", reptiledesc },
+  { 'B', 0x606020, "Herd Bull", 
+    "Herds of these Bulls are running long distances for some reason. They become Raging Bulls if something stops them." },
+  { 'B', 0xA03000, "Raging Bull", 
+    "Raging Bulls charge in a straight line: on heptagons, when they can choose one of two possible directions, "
+    "they choose one closer to your current location. In the case of a tie, the cell where more neighbors is "
+    "closer to your current location is chosen; if still a tie, past locations are considered. "
+    "They can attack you in any direction, and monsters on their way are attacked even if friendly. "
+    "When they crash into something, the obstacle is usually destroyed, and they are stunned for three turns, after "
+    "which they charge at you again (in any direction). "
+    "Raging Bulls cannot be killed or stunned conventionally."
+    },
+  { 'B', 0xB07000, "Sleeping Bull", 
+    "Sleeping bulls wake up when you get into distance of two cells from them."
+     },
+  { 'S', 0xFFD500, "Butterfly", bulldashdesc},
   
   // shmup specials
   { '@', 0xC0C0C0, "Rogue", "In the Shoot'em Up mode, you are armed with thrown Knives."},
@@ -593,6 +685,9 @@ monstertype minf[motypes] = {
   { '?', 0x00C000, "dead bug", NODESC},
   { '?', 0xFFFF00, "electric discharge", NODESC}, // appears as 'killed by electrocution'
   { '?', 0xE06000, "dead bird", NODESC},
+  { '?', 0xE06000, "Energy Sword", NODESC},
+  { '!', 0xFF0000, "Warning", warningdesc},
+  { '*', 0,        "vertex", "A vertex from rogueviz."}
   };
 
 enum eMonster { 
@@ -626,18 +721,23 @@ enum eMonster {
   moMouse, moMouseMoved, 
   moPrincess, moPrincessMoved, 
   moPrincessArmed, moPrincessArmedMoved,
-  moEdgeMonkey, moGargoyle, moFireElemental, moAirElemental,
+  moFamiliar, moGargoyle, moFireElemental, moAirElemental,
   moOrangeDog, moTentacleGhost,
   moMetalBeast, moMetalBeast2, moOutlaw, moMutant, 
   moStormTroll, moForestTroll, 
   moRedFox, moWindCrow, moFriendlyGhost, moRatling, moFalsePrincess, moRoseLady,
   moRoseBeauty, moRatlingAvenger,
   moTortoise, moDragonHead, moDragonTail,
-  moNighthawk, moLemur, moKestrel,
+  moGadfly, moResearcher, moSparrowhawk,
+  moKrakenH, moKrakenT, moDraugr, moFriendlyIvy,
+  moVampire, moBat, moReptile, 
+  moHerdBull, moRagingBull, moSleepBull,
+  moButterfly,
   // shmup specials
   moPlayer, moBullet, moFlailBullet, moFireball, moTongue, moAirball,
   // temporary
-  moDeadBug, moLightningBolt, moDeadBird
+  moDeadBug, moLightningBolt, moDeadBird, moEnergySword, moWarning,
+  moRogueviz
   };
 
 struct genderswitch_t {
@@ -667,7 +767,7 @@ genderswitch_t genderswitch[NUM_GS] = {
 
 // --- items ---
 
-const int ittypes = 92;
+const int ittypes = 110;
 
 struct itemtype {
   char  glyph;
@@ -694,7 +794,7 @@ itemtype iinf[ittypes] = {
     },
   { '!', 0xFFFF00, "Elixir of Life",
     "A wonderful beverage, apparently obtained by mixing red and blue slime. You definitely feel more "
-    "healthy after drinking it, but you still fell that one hit of a monster is enough to kill you."},
+    "healthy after drinking it, but you still feel that one hit of a monster is enough to kill you."},
   { '%', 0xFF00FF, "Shard",
     "A piece of a magic mirror, or a mirage cloud, that can be used for magical purposes. Only mirrors and clouds "
     "in the Land of Mirrors leave these."},
@@ -798,7 +898,7 @@ itemtype iinf[ittypes] = {
     "Each fire drains 5 charges. You are not allowed to throw fire into adjacent cells."
     },
   { 'o', 0x8B4513, "Orb of Trickery",
-    "This Orb allows you to create illusions of yourself. Illusions are targetted "
+    "This Orb allows you to create illusions of yourself. Illusions are targeted "
     "by most monsters, just like yourself, Thumpers, and your friends.\n\n"
     "Each illusion takes 5 charges to create, and one extra charge "
     "per turn. You can also click your illusion to take it away, restoring 4 charges.\n\n"
@@ -991,7 +1091,67 @@ itemtype iinf[ittypes] = {
    "you have to dismount this turn -- be very careful to make this possible, "
    "as your mount could attack you immediately!\n\n" "While riding, "
    "click on a location to order your mount to move or attack there.",
-    }
+    },
+  { 'o', 0xFFFF80, "Orb of the Sword", 
+    "This Orb gives you a weapon made of pure magical energy. You do not hold "
+    "it, it simply floats in the air next to you. When you go, the energy sword moves "
+    "with you, pointing at the same relative angle it pointed before -- you cannot "
+    "move or rotate it otherwise. Most monsters can be killed by moving the sword into them, "
+    "and won't move into the spot with the sword."
+    },
+  { 'x', 0x4040FF, "Sunken Treasure", 
+    "Cargo of a ship which was once destroyed by a Kraken." },
+  { 'o', 0xFF8040, "Orb of the Sword II", 
+    "An alternative version of Orb of the Sword. If you have both of them, "
+    "you have two energy swords, facing in opposite directions."
+    },
+  { '*', 0xFFFF80, "Ancient Jewelry", 
+    "Precious belongings of ancient Viking heroes. Your Orb of the Sword can be "
+    "used to dig these treasures out of the barrows."
+    },
+  { '!', 0xFFD700, "Golden Egg", 
+    "Trolls of Trollheim are descendants of a bridge Troll, who collected "
+    "payments from people crossing the bridge. One of them paid with "
+    "golden eggs. The bridge Troll found the eggs beautiful, but he quickly lost them. "
+    "Golden eggs are still revered by Trolls, and you can find them in their "
+    "caves."
+    },
+  { '!', 0xFF0000, "Warning", warningdesc
+    },
+  { 'o', 0x808080, "Orb of the Stone", 
+    "Trolls turn into stone walls when they die. When you have this Orb, "
+    "this happens to every monster you defeat. Statues created from this Orb "
+    "have slightly different properties than Trolls who petrify naturally."
+    },
+  { 'o', 0xC08000, "Orb of Nature", naturedesc },
+  { '%', 0x800080, "Treat", halloweendesc },
+  { '%', 0x30A030, "Slime Mold", 
+    "A very interesting species of slime mold."
+    },
+  { '*', 0xFF00FF, "Amethyst", "A beatiful purple gem from the Lost Mountain." },
+  { 'o', 0xC00040, "Orb of Recall", 
+    "When the charges on this Orb expire, "
+    "you will be automatically returned to the place where you have found it. "
+    "Extra Orbs of Recall delay this without changing the recall location. "
+    "Pick up an Orb of Safety causes an immediate recall."},
+  { ']', 0x8080FF, "Dodecahedron", 
+    "These dodecahedra made of a mysterious material are the Reptiles' favorite toy."
+    },
+  { 'o', 0x8080FF, "Orb of Vaulting", 
+    "This Orb allows you to jump over an adjacent monster, killing or stunning it. "
+    "You can only vault in a roughly straight line. "
+    "Target a cell on the other side to use it."
+    },
+  { '$', 0x80FF80, "Green Grass", prairiedesc },
+  { 'o', 0x8080FF, "Orb of Horns", 
+    "After you move while having this Orb, you immediately attack the next cell in the straight line "
+    "(or two cells, when moving on a heptagon). This attack is slightly stronger than your normal "
+    "attack: it can stun some of the monsters which cannot be killed or stunned normally."
+    },
+  { 'o', 0x8080FF, "Orb of the Bull", 
+    "You get the powers of Shield, Horns, and Thorns after you move two moves in a straight line "
+    "with this Orb." },
+  { '$', 0xC060C0, "Spinel", bulldashdesc },
   };
 
 enum eItem { itNone, itDiamond, itGold, itSpice, itRuby, itElixir, itShard, itBone, itHell, itStatue,
@@ -1000,32 +1160,43 @@ enum eItem { itNone, itDiamond, itGold, itSpice, itRuby, itElixir, itShard, itBo
   itOrbLightning, itOrbFlash, itOrbWinter, itOrbSpeed, itOrbLife, itOrbShield, itOrbDigging,
   itOrbTeleport, itOrbSafety,
   itOrbThorns, itFernFlower,
-  itWine, itOrbGhost, itSilver, itOrbPsi,
+  itWine, itOrbAether, itSilver, itOrbPsi,
   itRoyalJelly, itEmerald, itOrbInvis, itPower, itOrbFire,
   itHolyGrail, itGrimoire,
   itOrbDragon, itOrbIllusion,
   itPirate, itCompass,
-  itRedGem, itOrbPreserve, itOrbTelekinesis,
+  itRedGem, itOrbTime, itOrbSpace,
   itBombEgg, itCoast, itWhirlpool,
   itOrbFriend, itOrbWater, itOrbAir,
   itPalace, itOrbFrog,
   itFjord, itOrbFish,
   itOrbDiscord,
   itSavedPrincess, itOrbLove,
-  itEdge, itZebra, 
+  itIvory, itZebra, 
   itFireShard, itAirShard, itEarthShard, itWaterShard,
   itElemental, itOrbSummon, itOrbMatter,
   itBounty, itRevolver, itFulgurite, itMutant,
   itOrbStunning, itOrbLuck, 
   itMutant2, itOrbFreedom, itLotus, itOrbUndeath,
   itWindstone, itOrbEmpathy, itStrongWind, itBuggy, itBuggy2,
-  itRose, itCoral, itOrbSkunk, itOrb37, itOrbEnergy,
-  itBabyTortoise, itOrbShell, itApple, itDragon, itOrbDomination
+  itRose, itCoral, itOrbBeauty, itOrb37, itOrbEnergy,
+  itBabyTortoise, itOrbShell, itApple, itDragon, itOrbDomination,
+  itOrbSword,
+  itKraken, itOrbSword2, itBarrow,
+  itTrollEgg, itWarning,
+  itOrbStone, itOrbNature, itTreat,
+  itSlime, itAmethyst,
+  itOrbRecall, itDodeca,
+  itOrbDash,
+  itGreenGrass,
+  itOrbHorns,
+  itOrbBull,
+  itBull
   };
 
 // --- wall types ---
 
-const int walltypes = 88;
+const int walltypes = 96;
 
 struct walltype {
   char  glyph;
@@ -1105,7 +1276,7 @@ walltype winf[walltypes] = {
     "using an Orb of Aether, your Aether power will be completely drained."
     },
   { '#', 0xC0C0C0, "wall of Camelot", camelothelp },
-  { '#', 0xA06000, "Round Table", camelothelp },
+  { '+', 0xA06000, "Round Table", camelothelp },
   { '=', 0x0000A0, "moat of Camelot", camelothelp},
   { '+', 0x606060, "big statue of Cthulhu", 
     "These statues of Cthulhu are too large to carry, and they don't look too "
@@ -1168,7 +1339,7 @@ walltype winf[walltypes] = {
   { '#', 0x3030FF, "charged wall", elecdesc},
   { '#', 0xFF3030, "grounded wall", elecdesc},
   { '#', 0xA0A060, "sandstone wall", elecdesc},
-  { '+', 0x704000, "saloon wall", wildwestdesc},
+  { '#', 0x704000, "saloon wall", wildwestdesc},
   { '#', 0x90C0C0, "metal wall", elecdesc},
   { '#', 0x607030, "dead troll",  trollhelpX},
   { '+', 0xC0C0FF, "fan",  winddesc},
@@ -1182,13 +1353,28 @@ walltype winf[walltypes] = {
   { '#', 0xC0C000, "warp gate",
     "This gate separates the warped area from the normal land."},
   { '+', 0x804000, "trunk", "The skeleton of a tree."},
-  { '+', 0x804000, "solid branch", "Branches here could bear your weight easily."},
-  { '+', 0x804000, "weak branch", 
+  { '-', 0x402000, "solid branch", "Branches here could bear your weight easily."},
+  { ':', 0x804000, "weak branch", 
     "Branches here will bear you weight, but if you use them to move (not fall) to an unstable place, they will break."},
   { '+', 0x60C060, "canopy", 
     "Only thin twigs and leaves here. They may bear fruits, but for you, these cells count "
     "as unstable."
-    }
+    },
+  { '#', 0xD0C060, "barrow wall", "This wall is quite strong. You will need another way in."},
+  { '#', 0x90A060, "barrow", "Your Orb of the Sword can be used to dig here."},
+  { '#', 0xE0E0E0, "stone statue", "A petrified creature."},
+  { '.', 0xE8E8E8, "tower of Camelot", camelothelp},
+  { '-', 0x402000, "big bush", 
+    "You can hold this bush to climb the Lost Mountain. "
+    "Bushes block the movement of birds."
+    },
+  { ':', 0x804000, "small bush", 
+    "You can hold this bush to climb the Lost Mountain, "
+    "but it is not very strong -- it will get destroyed "
+    "if you climb from it into an unstable location. "
+    "Bushes block the movement of birds."},
+  { '.', 0xFFFF00, "Reptile floor", reptiledesc},
+  { '.', 0xFFFF00, "Reptile bridge", reptiledesc},
   };
 
 enum eWall { waNone, waIcewall, waBarrier, waFloorA, waFloorB, waCavewall, waCavefloor, waDeadTroll, waDune,
@@ -1212,12 +1398,16 @@ enum eWall { waNone, waIcewall, waBarrier, waFloorA, waFloorB, waCavewall, waCav
   waDeadTroll2, waFan,
   waTemporary, waEarthD, waElementalTmp, waElementalD,
   waFloorC, waFloorD, waRose, waWarpGate,
-  waTrunk, waSolidBranch, waWeakBranch, waCanopy
+  waTrunk, waSolidBranch, waWeakBranch, waCanopy,
+  waBarrowWall, waBarrowDig,
+  waPetrified, waTower,
+  waBigBush, waSmallBush,
+  waReptile, waReptileBridge
   };
 
 // --- land types ---
 
-const int landtypes = 56;
+const int landtypes = 67;
 
 struct landtype {
   int color;
@@ -1355,6 +1545,42 @@ landtype linf[landtypes] = {
     },
   { 0x487830, "Galápagos", tortoisedesc},
   { 0xD04000, "Dragon Chasms", dragondesc},
+  { 0xD04000, "Kraken Depths", 
+    "A long time ago, this was a trade route. But then, Krakens have risen out of the "
+    "depths. Many trading ships sank here. Legend says that you can uncover the secret "
+    "of a magical weapon spell somewhere in the depths...\n\n"
+    
+    "You can find Sunken Treasures here, but they won't appear until you have killed "
+    "a Kraken. You will also need Orb of the Fish to get the treasures, luckily you can "
+    "steal one from the Viking treasure hunters."
+    },
+  { 0x804020, "Burial Grounds", 
+    "Ancient Viking heroes were buried here. Their graves have barrows raised over "
+    "them, and are guarded by Draugar, animated corpses who are immune to mundane weapons. "
+    "You will need to use a magical weapon spell to defeat them, and to rob the "
+    "ancient jewelry buried in the graves."
+    },
+  { 0x90A548, "Trollheim", 
+    "Many clans of Trolls spend their lives in this kingdom. You can find many "
+    "statues of Trolls here. You suppose that they are not actually statues, but simply "
+    "elderly Trolls, who have petrified upon death. Or maybe you have killed "
+    "these Trolls yourself?"
+    },
+  { 0xFF7518, "Halloween", halloweendesc},
+  { 0x605040, "Dungeon", 
+    "The result of a collaboration of the Great Vizier and the Wizard of the Ivory Tower."
+    },
+  { 0x603000, "Lost Mountain", 
+    "Gravitational anomalies in the Jungle create mountains "
+    "overgrown with ivies and bushes. "
+    "Will you dare to climb the ivies to get the amethysts hidden above?\n\n"  
+    "Cells adjacent to Ivies count as stable (but Ivies "
+    "cannot climb themselves or other Ivies)."},
+  { 0xFFFF00, "Reptiles", reptiledesc},
+  { 0x0000D0, "Prairie", prairiedesc},
+  { 0x800080, "Bull Dash", bulldashdesc},
+  { 0xC000C0, "Crossroads V", "Extremely narrow Crossroads layout.\n"},
+  { 0xC0C0C0, "Cellular Automaton", cadesc}
   };
 
 enum eLand { laNone, laBarrier, laCrossroads, laDesert, laIce, laCaves, laJungle, laAlchemist, laMirror, laGraveyard,
@@ -1367,8 +1593,11 @@ enum eLand { laNone, laBarrier, laCrossroads, laDesert, laIce, laCaves, laJungle
   laCanvas, laPrincessQuest,
   laWildWest, laStorms, laOvergrown, laClearing, 
   laHaunted, laHauntedWall, laHauntedBorder,
-  laWhirlwind, laRose, laGridCoast, laGridSea, laCrossroads4,
-  laEndorian, laTortoise, laDragon
+  laWhirlwind, laRose, laWarpCoast, laWarpSea, laCrossroads4,
+  laEndorian, laTortoise, laDragon,
+  laKraken, laBurial, laTrollheim,
+  laHalloween, laDungeon, laMountain, laReptile,
+  laPrairie, laBull, laCrossroads5, laCA
   };
 
 // cell information for the game
@@ -1387,69 +1616,104 @@ struct gcell {
   unsigned ligon : 1;    // is it sparkling with lightning?
 
   unsigned 
-    pathdist : 5,       // player distance wrt usual movement
+    pathdist : 7,       // player distance wrt usual movement
     cpdist : 5, mpdist : 5; // current/minimum player distance
 
   unsigned mondir : 3,   // monster direction, for multi-tile monsters and graphics
     bardir : 4,         // barrier direction
     stuntime : 4,       // stun time left (for Palace Guards and Skeletons)
-    hitpoints : 3,      // hitpoints left (for Palace Guards)
-    landflags : 2;      // extra flags for land
+    hitpoints : 3;      // hitpoints left (for Palace Guards, also reused as cpid for mirrors)
   
-  char wparam;          // wall parameter, used for remaining power of Bonfires and Thumpers
-
-  // 'tmp' is used for:
-  // pathfinding algorithm used by monsters with atypical movement (which do not use pathdist)
-  // bugs' pathfinding algorithm
-  short aitmp;
-
+  unsigned landflags : 8;      // extra flags for land
+  
   // 'landparam' is used for: 
   // heat in Icy/Cocytus; 
   // heat in Dry (0..10); 
   // CR2 structure; 
   // hive Weird Rock color / pheromones;
-  // Ocean/coast depth
-  union { int32_t landpar; float heat; char bytes[4]; } LHU;
+  // Ocean/coast depth;
+  // Bomberbird Egg hatch time / mine marking;
+  // number of Ancient Jewelry;
+  // improved tracking in Trollheim
+  union { 
+    int32_t landpar; 
+    float heat; 
+    char bytes[4]; 
+    struct fieldinfo { 
+      uint16_t fieldval;
+      unsigned rval : 4;
+      unsigned flowerdist : 4;
+      unsigned walldist : 4;
+      unsigned walldist2 : 4;
+      } fi;
+  
+  } LHU;
   };
 
 #define landparam LHU.landpar
 
+#define fval LHU.fi.fieldval
+
 #define NODIR 7
 #define NOBARRIERS 8
 
-#define LAND_OVER 44
-eLand land_over[LAND_OVER] = {
+#define LAND_OVER 53
+#define LAND_OVERX 55
+
+eLand land_over[LAND_OVERX] = {
   laIce, laCaves, laDesert, laMotion, laJungle, laAlchemist,
   laCrossroads, 
-  laMirror, laMinefield, laZebra, laPalace, laPrincessQuest,
-  laOcean, laLivefjord, laGridCoast, laCaribbean, laWhirlpool, laRlyeh, laTemple,
+  laMirror, laMinefield, laPalace, laPrincessQuest, laZebra, laReptile, 
+  laOcean, laWarpCoast, laLivefjord, laKraken, laCaribbean, laWhirlpool, laRlyeh, laTemple,
+  laIvoryTower, laEndorian, laDungeon, laMountain, 
   laCrossroads2, 
   laDryForest, laWineyard, laDeadCaves, laGraveyard, laHaunted, laHive, 
   laRedRock, 
-  laIvoryTower, laEndorian,
   laDragon, laTortoise,
-  laOvergrown, laClearing, laStorms, laWhirlwind, laRose,
-  laEmerald, laCamelot, laElementalWall, 
-  laHell, laCrossroads3, laCocytus, laPower, laCrossroads4
+  laOvergrown, laClearing, laStorms, laWhirlwind, laRose, laBurial,
+  laEmerald, laCamelot, 
+  laPrairie, laBull, 
+  laElementalWall, laTrollheim,
+  laHell, laCrossroads3, laCocytus, laPower, laCrossroads4,
+  laCrossroads5,  
+  // EXTRA
+  laWildWest, laHalloween
   };
 
-#define LAND_EUC 42
+#define LAND_EUC 49
 eLand land_euc[LAND_EUC] = {
   laIce, laCaves, laDesert, laMotion, laJungle,
   laCrossroads, 
   laMirror, laMinefield, laAlchemist, laZebra, laPalace, laPrincessQuest,
-  laOcean, laLivefjord, laGridCoast, laCaribbean, laWhirlpool, laRlyeh, laTemple,
-  laElementalWall, 
+  laOcean, laLivefjord, laWarpCoast, laCaribbean, laKraken, laWhirlpool, laRlyeh, laTemple,
+  laElementalWall, laTrollheim,
   laDryForest, laWineyard, laDeadCaves, laGraveyard, laHive, laRedRock, laIvoryTower, 
-  laOvergrown, laClearing, laStorms, laWhirlwind, laRose,
+  laOvergrown, laClearing, laStorms, laWhirlwind, laRose, laBurial,
   laEmerald, laCamelot, laDragon, laTortoise,
   laHell, laCrossroads3, laCocytus, laPower,
   laCrossroads4, 
-  laWildWest
+  laWildWest,
+  laReptile, laMountain, laBull, laPrairie
   };
 // MISSING: laCrossroads2
 
-#define LAND_HYP 39
+#define LAND_SPH 39
+eLand land_sph[LAND_SPH] = {
+  laHalloween,
+  laIce, laCaves, laDesert, laMotion, laJungle,
+  laCrossroads, 
+  laMirror, laMinefield, laAlchemist, 
+  laLivefjord, laWarpCoast, laKraken, laRlyeh, 
+  laTrollheim,
+  laDryForest, laDeadCaves, laGraveyard, laHive, laRedRock, 
+  laOvergrown, laStorms, laWhirlwind, laRose, laBurial,
+  laEmerald, laDragon, laTortoise,
+  laHell, laCrossroads3, laCocytus, laPower, laElementalWall,
+  laCrossroads4,
+  laWildWest, laPalace, laBull, laPrairie, laCA
+  };
+
+#define LAND_HYP 47
 eLand land_hyp[LAND_HYP] = {
   laHell, laCocytus, laGraveyard, 
   laWineyard, laDryForest, laCaves, 
@@ -1458,8 +1722,14 @@ eLand land_hyp[LAND_HYP] = {
   laDesert, laRedRock, 
   laWhirlpool, laOvergrown, laClearing, laStorms,
   laCaribbean, laJungle, laAlchemist, laMotion, laMirror, laMinefield,
-  laZebra, laElementalWall, laIvoryTower, laHaunted, laWhirlwind, laCrossroads,
-  laGridCoast, laRose, laDragon, laEndorian, laTortoise
+  laZebra, laElementalWall, laIvoryTower, laHaunted, laWhirlwind, 
+  laWarpCoast, laRose, laDragon, laEndorian, 
+  laReptile, laDungeon, laMountain,
+  laTortoise,
+  laKraken, laBurial, laTrollheim, 
+  laPrairie, laBull,
+  // always must be last
+  laCrossroads
   };
 
 #define LAND_SCAPE 32
@@ -1472,29 +1742,32 @@ eLand land_scape[LAND_SCAPE] = {
   laOvergrown, laStorms,
   laJungle, laAlchemist, laMotion, laMirror, laMinefield,
   laZebra, laWhirlwind, laCrossroads,
-  laGridCoast, laRose,
+  laWarpCoast, laRose,
   laCrossroads, laCrossroads2, laCrossroads3
   };
 
-#define LAND_TAC 44
+#define LAND_TAC 50
 
 struct landtacinfo { eLand l; int tries, multiplier; };
 
 landtacinfo land_tac[LAND_TAC] = {
   {laIce, 10, 1}, {laDesert, 10, 1}, {laMotion, 10, 1}, {laCaves, 10, 1}, {laAlchemist, 10, 1},
   {laJungle, 10, 1}, {laMirror, 10, 1}, {laZebra, 10, 1}, {laPalace, 10, 1}, 
-  {laOcean, 10, 1}, {laLivefjord, 10, 1}, {laGridCoast, 10, 1}, {laRlyeh, 10, 1}, {laHell, 10, 1}, 
-  {laElementalWall, 10, 1}, {laDryForest, 10, 1}, {laWineyard, 10, 1}, 
+  {laOcean, 10, 1}, {laLivefjord, 10, 1}, {laWarpCoast, 10, 1}, {laRlyeh, 10, 1}, {laHell, 10, 1}, 
+  {laDryForest, 10, 1}, {laWineyard, 10, 1}, {laReptile, 10, 1},
   {laDeadCaves, 10, 1}, {laGraveyard, 10, 1}, 
   {laHaunted, 10, 1}, 
-  {laIvoryTower, 10, 1}, {laEndorian, 10, 1},
+  {laIvoryTower, 10, 1}, {laEndorian, 10, 1}, {laMountain, 5, 2}, {laDungeon, 5, 2},
   {laEmerald, 10, 1},
   {laCocytus, 10, 1}, 
   
-  {laCaribbean, 5, 2}, {laWhirlpool, 5, 2}, {laTemple, 5, 2}, {laMinefield, 5, 2},
+  {laCaribbean, 5, 2}, {laWhirlpool, 5, 2}, {laKraken, 5, 2}, 
+  {laTemple, 5, 2}, {laMinefield, 5, 2},
   {laPower, 5, 2}, {laHive, 5, 2}, {laRedRock, 5, 2}, {laStorms, 5, 2}, {laOvergrown, 5, 2},
   {laClearing, 5, 2},
   {laWhirlwind, 5, 2}, {laRose, 5, 2}, {laDragon, 2, 5}, {laTortoise, 1, 10},
+  {laBurial, 5, 2}, 
+  {laElementalWall, 10, 1}, {laTrollheim, 5, 2},
   
   {laCrossroads, 10, 1}, {laCrossroads2, 10, 1}, {laCrossroads3, 10, 1}, {laCrossroads4, 10, 1}, 
   
@@ -1506,6 +1779,6 @@ landtacinfo land_tac[LAND_TAC] = {
 eLand randlands[RANDLANDS] = {
   laIce, laDesert, laCaves, laAlchemist, laGraveyard, laPower, laLivefjord, laZebra,
   laRlyeh, laDryForest, laEmerald, laWineyard, laDeadCaves, laRedRock,
-  laOvergrown, laWildWest, laGridCoast
+  laOvergrown, laWildWest, laWarpCoast
   };
 

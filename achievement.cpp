@@ -1,7 +1,7 @@
 // Hyperbolic Rogue -- achievements
 // Copyright (C) 2011-2016 Zeno Rogue, see 'hyper.cpp' for details
 
-#define NUMLEADER 57
+#define NUMLEADER 69
 
 #define SCORE_UNKNOWN (-1)
 #define NO_SCORE_YET (-2)
@@ -16,7 +16,7 @@ const char* leadernames[NUMLEADER] = {
   "Score", "Diamonds", "Gold", "Spice", "Rubies", "Elixirs",
   "Shards", "Totems", "Daisies", "Statues", "Feathers", "Sapphires",
   "Hyperstones", "Time to Win-71", "Turns to Win-71",
-  "Time to 10 Hyperstones-83", "Turns to 10 Hyperstones-83", "Orbs of Yendor",
+  "Time to 10 Hyperstones-94", "Turns to 10 Hyperstones-94", "Orbs of Yendor",
   "Fern Flowers", 
   "Royal Jellies", "Powerstones", "Silver", "Wine", "Emeralds", "Grimoires",
   "Holy Grails", "Red Gems", "Pirate Treasures",
@@ -47,7 +47,22 @@ const char* leadernames[NUMLEADER] = {
   "Tortoise points", // 54
   "Dragon Scales", // 55
   "Apples", // 56
+  "Heptagonal Mode", // 57
+  "Sunken Treasures", // 58
+  "Ancient Jewelry", // 59
+  "Golden Eggs", // 60
+  "Multiplayer Score", // 61
+  "Statistics", // 62
+  "Halloween", // 63
+  "Amethysts", // 64
+  "Slime Molds", // 65
+  "Dodecahedra", // 66
+  "Green Grass", // 67
+  "Spinel" // 68
   };
+
+#define LB_STATISTICS 62
+#define LB_HALLOWEEN  63
 
 bool haveLeaderboard(int id);
 
@@ -59,13 +74,18 @@ int achievementTimer;
 
 bool wrongMode(char flags) {
   if(cheater) return true;
+  if(flags == 'x') return false;
   if(purehepta != (flags == '7')) return true;
   if(euclid != (flags == 'e')) return true;
+  if(sphere != (flags == 'E')) return true;
+  if((quotient == 1) != (flags == 'q')) return true;
+  if((quotient == 2) != (flags == 'Q')) return true;
   if(shmup::on != (flags == 's')) return true;
   if(randomPatternsMode) return true;
   if(yendor::on) return true;
   if(tactic::on) return true;
   if(chaosmode != (flags == 'C')) return true;
+  if((numplayers() > 1) != (flags == 'm')) return true;
   return false;
   }
 
@@ -80,10 +100,13 @@ void achievement_log(const char* s, char flags) {
   for(int i=0; i<size(achievementsReceived); i++)
     if(achievementsReceived[i] == s) return;
   achievementsReceived.push_back(s);
+  
+#ifndef NOSAVE
+  remove_emergency_save();
 
-#ifndef ANDROID
   FILE *f = fopen(scorefile, "at");
   if(!f) return;
+  
   int t = (int) (time(NULL) - timerstart);
 
   time_t timer = time(NULL);
@@ -101,6 +124,7 @@ void improveItemScores();
 #include "hypersteam.cpp"
 #else
 #ifndef ANDROID
+#ifndef IOS
 void achievement_init() {}
 void achievement_close() {}
 void achievement_gain(const char* s, char flags) {
@@ -108,11 +132,18 @@ void achievement_gain(const char* s, char flags) {
   }
 #endif
 #endif
+#endif
 
 void achievement_collection(eItem it, int prevgold, int newgold) {
   if(cheater) return;
   if(randomPatternsMode) return;
   int q = items[it];
+  
+  if(it == itTreat && q == 50) 
+    achievement_gain("HALLOWEEN1", 'E');
+
+  if(it == itTreat && q == 100) 
+    achievement_gain("HALLOWEEN2", 'E');
 
   if(q == 1) {
     if(it == itDiamond) achievement_gain("DIAMOND1");
@@ -142,7 +173,7 @@ void achievement_collection(eItem it, int prevgold, int newgold) {
     if(it == itPalace) achievement_gain("RUG1");
     if(it == itFjord) achievement_gain("GARNET1");
 
-    if(it == itEdge) achievement_gain("TOWER1");
+    if(it == itIvory) achievement_gain("TOWER1");
     if(it == itElemental) achievement_gain("ELEMENT1");
     if(it == itZebra) achievement_gain("ZEBRA1");
 
@@ -157,6 +188,17 @@ void achievement_collection(eItem it, int prevgold, int newgold) {
     if(it == itBabyTortoise) achievement_gain("TORTOISE1");
     if(it == itDragon) achievement_gain("DRAGON1");
     if(it == itApple) achievement_gain("APPLE1");
+
+    if(it == itKraken) achievement_gain("KRAKEN1");
+    if(it == itBarrow) achievement_gain("BARROW1");
+    if(it == itTrollEgg) achievement_gain("TROLL1");
+
+    if(it == itAmethyst) achievement_gain("MOUNT1");
+    if(it == itSlime) achievement_gain("DUNG1");
+    if(it == itDodeca) achievement_gain("DOD1");
+
+    if(it == itGreenGrass) achievement_gain("PRAIR1");
+    if(it == itBull) achievement_gain("BULL1");
     }
 
   // 32
@@ -194,7 +236,7 @@ void achievement_collection(eItem it, int prevgold, int newgold) {
     if(it == itPalace) achievement_gain("RUG2");
     if(it == itFjord) achievement_gain("GARNET2");
 
-    if(it == itEdge) achievement_gain("TOWER2");
+    if(it == itIvory) achievement_gain("TOWER2");
     if(it == itElemental) achievement_gain("ELEMENT2");
     if(it == itZebra) achievement_gain("ZEBRA2");
 
@@ -209,6 +251,17 @@ void achievement_collection(eItem it, int prevgold, int newgold) {
     if(it == itBabyTortoise) achievement_gain("TORTOISE2");
     if(it == itDragon) achievement_gain("DRAGON2");
     if(it == itApple) achievement_gain("APPLE2");
+
+    if(it == itKraken) achievement_gain("KRAKEN2");
+    if(it == itBarrow) achievement_gain("BARROW2");
+    if(it == itTrollEgg) achievement_gain("TROLL2");
+
+    if(it == itAmethyst) achievement_gain("MOUNT2");
+    if(it == itSlime) achievement_gain("DUNG2");
+    if(it == itDodeca) achievement_gain("DOD2");
+
+    if(it == itGreenGrass) achievement_gain("PRAIR2");
+    if(it == itBull) achievement_gain("BULL2");
     }
 
   if(q == 25) {
@@ -239,7 +292,7 @@ void achievement_collection(eItem it, int prevgold, int newgold) {
     if(it == itPalace) achievement_gain("RUG3");
     if(it == itFjord) achievement_gain("GARNET3");
 
-    if(it == itEdge) achievement_gain("TOWER3");
+    if(it == itIvory) achievement_gain("TOWER3");
     if(it == itElemental) achievement_gain("ELEMENT3");
     if(it == itZebra) achievement_gain("ZEBRA3");
 
@@ -257,6 +310,17 @@ void achievement_collection(eItem it, int prevgold, int newgold) {
     if(it == itBabyTortoise) achievement_gain("TORTOISE3");
     if(it == itDragon) achievement_gain("DRAGON3");
     if(it == itApple) achievement_gain("APPLE3");
+
+    if(it == itKraken) achievement_gain("KRAKEN3");
+    if(it == itBarrow) achievement_gain("BARROW3");
+    if(it == itTrollEgg) achievement_gain("TROLL3");
+
+    if(it == itAmethyst) achievement_gain("MOUNT3");
+    if(it == itSlime) achievement_gain("DUNG3");
+    if(it == itDodeca) achievement_gain("DOD3");
+
+    if(it == itGreenGrass) achievement_gain("PRAIR3");
+    if(it == itBull) achievement_gain("BULL3");
     }
 
   if(q == 50) {
@@ -287,7 +351,7 @@ void achievement_collection(eItem it, int prevgold, int newgold) {
     if(it == itPalace) achievement_gain("RUG4");
     if(it == itFjord) achievement_gain("GARNET4");
 
-    if(it == itEdge) achievement_gain("TOWER4");
+    if(it == itIvory) achievement_gain("TOWER4");
     if(it == itElemental) achievement_gain("ELEMENT4");
     if(it == itZebra) achievement_gain("ZEBRA4");
 
@@ -302,6 +366,17 @@ void achievement_collection(eItem it, int prevgold, int newgold) {
     if(it == itBabyTortoise) achievement_gain("TORTOISE4");
     if(it == itDragon) achievement_gain("DRAGON4");
     if(it == itApple) achievement_gain("APPLE4");
+
+    if(it == itKraken) achievement_gain("KRAKEN4");
+    if(it == itBarrow) achievement_gain("BARROW4");
+    if(it == itTrollEgg) achievement_gain("TROLL4");
+
+    if(it == itAmethyst) achievement_gain("MOUNT4");
+    if(it == itSlime) achievement_gain("DUNG4");
+    if(it == itDodeca) achievement_gain("DOD4");
+
+    if(it == itGreenGrass) achievement_gain("PRAIR4");
+    if(it == itBull) achievement_gain("BULL4");
     }
   
   if(it == itOrbYendor) {
@@ -323,6 +398,8 @@ void achievement_count(const string& s, int current, int prev) {
     achievement_gain("STABBER1");
   if(s == "STAB" && current >= 2)
     achievement_gain("STABBER2");
+  if(s == "SLASH" && current >= 2)
+    achievement_gain("SLASH2");
   if(s == "STAB" && current >= 4)
     achievement_gain("STABBER3");
   if(s == "MIRRORKILL" && current-prev >= 1)
@@ -374,6 +451,9 @@ void achievement_score(int cat, int number) {
 #ifdef HAVE_ACHIEVEMENTS
   if(cheater) return;
   if(euclid) return;
+  if(sphere && cat != LB_HALLOWEEN) return;
+  if(quotient) return;
+  if(elliptic && cat != LB_HALLOWEEN) return;
   if(purehepta) return;
   if(randomPatternsMode) return;
   if(shmup::on && cat != LB_PURE_TACTICS_SHMUP && cat != LB_PURE_TACTICS_COOP) return;
@@ -403,7 +483,7 @@ void improveItemScores() {
   improve_score(34, itPalace);
   improve_score(35, itFjord);
   
-  improve_score(37, itEdge);
+  improve_score(37, itIvory);
   improve_score(38, itElemental);
   improve_score(39, itZebra);
 
@@ -420,14 +500,34 @@ void improveItemScores() {
   improve_score(54, itBabyTortoise);
   improve_score(55, itDragon);
   improve_score(56, itApple);
+
+  improve_score(58, itKraken);
+  improve_score(59, itBarrow);
+  improve_score(60, itTrollEgg);
+  
+  improve_score(64, itAmethyst);
+  improve_score(65, itSlime);
+  improve_score(66, itDodeca);
+
+  improve_score(67, itGreenGrass);
+  improve_score(68, itBull);
   }
 
 void achievement_final(bool really_final) {
   if(offlineMode) return;
 #ifdef HAVE_ACHIEVEMENTS
+  upload_score(LB_STATISTICS, time(NULL));
   if(cheater) return;
+  
+  if(sphere && euclidland == laHalloween) {
+    if(shmup::on || chaosmode || purehepta || numplayers() > 1 || tactic::on || randomPatternsMode)
+      return;
+    achievement_score(LB_HALLOWEEN, items[itTreat]);
+    }
+  
   if(euclid) return;
-  if(purehepta) return;
+  if(sphere) return;
+  if(elliptic) return;
   if(randomPatternsMode) return;
 
   if(tactic::on) {
@@ -439,15 +539,24 @@ void achievement_final(bool really_final) {
   
   if(yendor::on) return;
   
-  if(shmup::on && chaosmode) return;
+  // no leaderboards for two special modes at once
+  int specials = 0;
+  if(shmup::on) specials++;
+  if(chaosmode) specials++;
+  if(purehepta) specials++;
+  if(specials > 1) return;
+  
+  if(numplayers() > 1 && chaosmode) return;
+  if(numplayers() > 1 && purehepta) return;
   
   int total_improved = 0;
   specific_improved = 0;
   specific_what = 0;
   
-  if(!shmup::on && !chaosmode) improveItemScores(); 
+  if(!shmup::on && !chaosmode && !purehepta && numplayers() == 1) improveItemScores(); 
   
-  int sid = chaosmode ? 53 : shmup::on ? (numplayers() > 1 ? 44 : 28) : 0;
+  int sid = purehepta ? 57 : chaosmode ? 53 : shmup::on ? (numplayers() > 1 ? 44 : 28) : 
+    (numplayers() > 1 ? 61 : 0);
   
   int tg = gold();
   if(tg && haveLeaderboard(sid)) {
@@ -488,6 +597,8 @@ void achievement_victory(bool hyper) {
 #ifdef HAVE_ACHIEVEMENTS
   if(cheater) return;
   if(euclid) return;
+  if(sphere) return;
+  if(quotient) return;
   if(purehepta) return;
   if(randomPatternsMode) return;
   if(hyper && shmup::on) return;
@@ -571,4 +682,8 @@ void achievement_display() {
     }
   #endif
   }
+
+bool isAscending(int i) { 
+  return i == 13 || i == 14 || i == 15 || i == 16 || i == 29 || i == 30 || i == 45;
+  };
 

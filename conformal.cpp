@@ -4,11 +4,10 @@
 
 namespace polygonal {
 
-  typedef long double ld;
-  typedef complex<long double> cld;
+  typedef complex<ld> cld;
 
   int SI = 4;
-  double STAR = 0;
+  ld  STAR = 0;
   
   int deg = 20;
 
@@ -55,7 +54,7 @@ namespace polygonal {
     }
   
   pair<ld, ld> compute(ld x, ld y, int prec) {
-    if(pmodel == 4) {
+    if(pmodel == mdPolynomial) {
       cld z(x,y);
       cld res (0,0);
       for(int i=maxcoef; i>=0; i--) { res += coef[i]; if(i) res *= z; }
@@ -77,28 +76,21 @@ namespace polygonal {
   pair<ld, ld> compute(ld x, ld y) { return compute(x,y,deg); }
 
   void drawBoundary(int color) {
-    #ifdef GL
-    if(vid.usingGL) {
-      qglcoords = 0;
-      glcolor(color);
-      int pts = 0;
-      for(int r=0; r<2000; r++) {
-        cld z = exp(cld(0, 2*M_PI * r / 2000.0));
-        pair<ld,ld> z2 = compute(real(z), imag(z), deg);
-        glcoords[pts][0] = vid.radius * z2.first;
-        glcoords[pts][1] = vid.radius * z2.second;
-        glcoords[pts][2] = vid.scrdist;
-        pts++;
-        }
-      
-      glVertexPointer(3, GL_FLOAT, 0, glcoords);
-      glEnableClientState(GL_VERTEX_ARRAY);
-      glDrawArrays(GL_LINE_LOOP, 0, pts);
-      return;
+    queuereset(mdDisk, PPR_CIRCLE);
+
+    for(int r=0; r<=2000; r++) {
+      cld z = exp(cld(0, 2*M_PI * r / 2000.0));
+      pair<ld,ld> z2 = compute(real(z), imag(z), deg);
+      hyperpoint h;
+      h[0] = z2.first * vid.radius;
+      h[1] = z2.second * vid.radius;
+      h[2] = vid.scrdist;
+      curvepoint(h);
       }
-    #endif
+    
+    queuecurve(color, 0, PPR_CIRCLE);
+    queuereset(pmodel, PPR_CIRCLE);
     }
-  
 
   }
 
@@ -247,7 +239,7 @@ namespace conformal {
   vector<cell*> movehistory;
   
   bool includeHistory;
-  double lvspeed = 1;
+  ld lvspeed = 1;
   int bandhalf = 200;
   int bandsegment = 16000;
   int rotation = 0;
@@ -368,10 +360,9 @@ namespace conformal {
         shmup::calc_relative_matrix(v[j+1]->base, v[j]->base->master) * 
         v[j+1]->at * C0;
         
-      int x, y, shift;
-      getcoord(next, x, y, shift);
-      
-      tpixels += x-vid.xcenter;
+      hyperpoint nextscr;
+      applymodel(next, nextscr);
+      tpixels += nextscr[0] * vid.radius;
       }
   
     vid.radius = rad;
@@ -447,7 +438,7 @@ namespace conformal {
           v[j+1]->at * C0;
           
         int x, y, shift;
-        getcoord(next, x, y, shift);
+        getcoord0(next, x, y, shift);
         
         int bwidth = x-bandhalf;
         
@@ -489,62 +480,83 @@ namespace conformal {
     }
 #endif
 
-  const char* directions[5][4] = {
+  const char* directions[MODELCOUNT][4] = {
      { "right", "up", "left", "down" },
      { "counterclockwise", "zoom out", "clockwise", "zoom in" },
      { "left to right", "spin down", "right to left", "spin up" },
      { "right", "up", "left", "down" },
+     { "right", "up", "left", "down" },
+     { "right", "up", "left", "down" },
+     { "right", "up", "left", "down" },
+     { "right", "up", "left", "down" },
      { "right", "up", "left", "down" }
      };
      
-  const char *modelnames[5] = {
-    "disk", "half-plane", "band", "polygonal", "polynomial"
+  const char *modelnames[MODELCOUNT] = {
+    "disk", "half-plane", "band", "polygonal", "polynomial",
+    "azimuthal equidistant", "azimuthal equi-area", 
+    "ball model", "hyperboloid"
     };
   
   void show() {
-    displayStat( 0, XLAT("conformal/history mode"), "", ' ');
+    dialog::init(XLAT("conformal/history mode"));
 
-    displayStat( 2, XLAT("include history"), ONOFF(includeHistory), 'i');
+    dialog::addBoolItem(XLAT("include history"), (includeHistory), 'i');
+    
+    bool notconformal = (pmodel >= 5 && pmodel <= 6) || abs(vid.alpha-1) > 1e-3;
 
-    displayStat( 4, XLAT("model used"), modelnames[pmodel], 'm');
-    displayStat( 5, XLAT("rotation"), directions[pmodel][rotation&3], 'r');
+    dialog::addSelItem(notconformal ? XLAT("model used (not conformal!)") : XLAT("model used"), XLAT(modelnames[pmodel]), 'm');
+    dialog::addSelItem(XLAT("rotation"), directions[pmodel][rotation&3], 'r');
 
     if(pmodel == 4) {
-      displayStat( 6, XLAT("coefficient"), 
-        fts4(real(polygonal::coef[polygonal::coefid]))+"+"+
-        fts4(imag(polygonal::coef[polygonal::coefid]))+"i", 'x');
-      displayStat( 7, XLAT("which coefficient"), its(polygonal::coefid), 'n');
+      dialog::addSelItem(XLAT("coefficient"), 
+        fts4(real(polygonal::coef[polygonal::coefid])), 'x');
+      dialog::addSelItem(XLAT("coefficient (imaginary)"), 
+        fts4(imag(polygonal::coef[polygonal::coefid])), 'y');
+      dialog::addSelItem(XLAT("which coefficient"), its(polygonal::coefid), 'n');
       }
 
     if(pmodel == 3) {
-      displayStat( 6, XLAT("polygon sides"), its(polygonal::SI), 'x');
-      displayStat( 7, XLAT("star factor"), fts(polygonal::STAR), 'y');
-      displayStat( 8, XLAT("degree of the approximation"), its(polygonal::deg), 'n');
+      dialog::addSelItem(XLAT("polygon sides"), its(polygonal::SI), 'x');
+      dialog::addSelItem(XLAT("star factor"), fts(polygonal::STAR), 'y');
+      dialog::addSelItem(XLAT("degree of the approximation"), its(polygonal::deg), 'n');
       }
     
-    displayStat(10, XLAT("prepare the line animation"), ONOFF(on), 'e');
-    if(on) displayStat(11, XLAT("animation speed"), fts(lvspeed), 'a');
+    dialog::addBoolItem(XLAT("prepare the line animation"), (on), 'e');
+    if(on) dialog::addSelItem(XLAT("animation speed"), fts(lvspeed), 'a');
     
 #ifndef MOBILE
-    displayStat(13, XLAT("render bands automatically"), ONOFF(autoband), 'o');
+    dialog::addBoolItem(XLAT("render bands automatically"), (autoband), 'o');
     if(autoband)
-      displayStat(14, XLAT("include history when auto-rendering"), ONOFF(autobandhistory), 'j');
+      dialog::addBoolItem(XLAT("include history when auto-rendering"), (autobandhistory), 'j');
     
     bool renderable = on && pmodel == 2;
     if(renderable || autoband) {
-      displayStat(15, XLAT("band width"), its(bandhalf*2), 'd');
-      displayStat(16, XLAT("length of a segment"), its(bandsegment), 's');
-      displayStat(17, XLAT("spiral on rendering"), ONOFF(dospiral), 'g');
+      dialog::addSelItem(XLAT("band width"), "2*"+its(bandhalf), 'd');
+      dialog::addSelItem(XLAT("length of a segment"), its(bandsegment), 's');
+      dialog::addBoolItem(XLAT("spiral on rendering"), (dospiral), 'g');
       if(renderable)
-        displayStat(18, XLAT("render now (length: %1)", its(measureLength())), "", 'f');
+        dialog::addItem(XLAT("render now (length: %1)", its(measureLength())), 'f');
       }
 #endif
       
-    displayStat(20, XLAT("exit this menu"), "", 'q');
+    dialog::addItem(XLAT("exit this menu"), 'q');
+    dialog::display();
     mouseovers = XLAT("see http://www.roguetemple.com/z/hyper/conformal.php");
     }
 
-  void handleKey(int uni, int sym) {
+  int ib = 0;
+  ld compbuf;
+  void applyIB() {
+    using namespace polygonal;
+    cld& tgt = coef[coefid];
+    if(ib == 1) tgt = cld(compbuf, imag(tgt));
+    if(ib == 2) tgt = cld(real(tgt), compbuf);
+    }
+    
+  void handleKey(int sym, int uni) {
+    dialog::handleNavigation(sym, uni);
+    ib = 0;
   
     if(uni == 'e') {
       if(on) clear();
@@ -559,38 +571,53 @@ namespace conformal {
       }
     else if(uni == 'o') 
       autoband = !autoband;
-    else if(uni == 'm') {
-      pmodel++;
-      pmodel %= 5;
-      if(pmodel == 3) polygonal::solve();
+    else if(uni == 'm' || uni == 'M') {
+
+      switchagain: {
+        pmodel = eModel((pmodel + (shiftmul > 0 ? 1 : -1) + MODELCOUNT) % MODELCOUNT);
+        if(sphere) 
+          if(pmodel == mdHalfplane || pmodel == mdBand || pmodel == mdEquidistant || pmodel == mdEquiarea)
+            goto switchagain;
+        }
+      if(pmodel == mdPolygonal) polygonal::solve();
       /* if(pmodel && vid.usingGL) {
         addMessage(XLAT("openGL mode disabled"));
         vid.usingGL = false;
         setvideomode();
         } */
       }
-    else if(sym == 'x' && pmodel == 3) { polygonal::SI += (shiftmul > 0 ? 1:-1); polygonal::solve(); }
-    else if(sym == 'y' && pmodel == 3) { polygonal::STAR += shiftmul/10; polygonal::solve(); }
-    else if(sym == 'n' && pmodel == 3) { polygonal::deg += (shiftmul>0?1:-1); 
-      if(polygonal::deg < 2) polygonal::deg = 2;
-      if(polygonal::deg > MSI-1) polygonal::deg = MSI-1;
+    else if(sym == 'x' && pmodel == mdPolygonal) 
+      dialog::editNumber(polygonal::SI, 3, 10, 1, 4, XLAT("polygon sides"), "");
+    else if(sym == 'y' && pmodel == mdPolygonal) 
+      dialog::editNumber(polygonal::STAR, -1, 1, .1, 0, XLAT("star factor"), "");
+    else if(sym == 'n' && pmodel == mdPolygonal) 
+      dialog::editNumber(polygonal::deg, 2, MSI-1, 1, 2, XLAT("degree of the approximation"), "");
+    else if(sym == 'x' && pmodel == mdPolynomial)  {
+      polygonal::maxcoef = max(polygonal::maxcoef, polygonal::coefid);
+      int ci = polygonal::coefid + 1;
+      compbuf = real(polygonal::coef[polygonal::coefid]);
+      dialog::editNumber(compbuf, -10, 10, .01/ci/ci, 0, XLAT("coefficient"), "");
+      ib = 1;
       }
-    else if(sym == 'x' && pmodel == 4) { 
-      int ci = polygonal::coefid;
-      polygonal::coef[polygonal::coefid] += polygonal::cld(shiftmul/100/ci/ci, 0); 
+    else if(sym == 'y' && pmodel == mdPolynomial) {
+      polygonal::maxcoef = max(polygonal::maxcoef, polygonal::coefid);
+      int ci = polygonal::coefid + 1;
+      compbuf = imag(polygonal::coef[polygonal::coefid]);
+      dialog::editNumber(compbuf, -10, 10, .01/ci/ci, 0, XLAT("coefficient (imaginary)"), "");
+      ib = 2;
       }
-    else if(sym == 'y' && pmodel == 4) { 
-      int ci = polygonal::coefid;
-      polygonal::coef[polygonal::coefid] += polygonal::cld(0, shiftmul/100/ci/ci); 
-      }
-    else if(sym == 'n' && pmodel == 4) { polygonal::coefid += (shiftmul>0?1:-1); polygonal::maxcoef = max(polygonal::maxcoef, polygonal::coefid); }
+    else if(sym == 'n' && pmodel == mdPolynomial)
+      dialog::editNumber(polygonal::coefid, 0, MSI-1, 1, 0, XLAT("which coefficient"), "");
     else if(sym == 'r') rotation += (shiftmul > 0 ? 1:3);
-    else if(sym == 'a') { lvspeed += shiftmul/10; }
-    else if(sym == 'd') { bandhalf += int(5 * shiftmul); if(bandhalf < 5) bandhalf = 5; }
-    else if(sym == 's') { bandsegment += int(500 * shiftmul); if(bandsegment < 500) bandsegment = 500; }
+    else if(sym == 'a') 
+      dialog::editNumber(lvspeed, -5, 5, .1, 1, XLAT("animation speed"), "");
+    else if(sym == 'd') 
+      dialog::editNumber(bandhalf, 5, 1000, 5, 200, XLAT("band width"), "");
+    else if(sym == 's') 
+      dialog::editNumber(bandsegment, 500, 32000, 500, 16000, XLAT("band segment"), "");
     else if(sym == 'g') { dospiral = !dospiral; }
 #ifndef MOBILE
-    else if(uni == 'f' && pmodel == 2 && on) createImage(dospiral);
+    else if(uni == 'f' && pmodel == mdBand && on) createImage(dospiral);
 #endif
     else if(sym == 'q' || sym == SDLK_ESCAPE || sym == '0') { cmode = emNormal; }
     else if(sym == 'i') { 
@@ -646,10 +673,10 @@ namespace conformal {
 #ifndef MOBILE
     if(celldist(cwt.c) <= 7) return;
     if(!autoband) return;
-    int spm = pmodel;
+    eModel spm = pmodel;
     bool ih = includeHistory;
     includeHistory = autobandhistory;
-    pmodel = 2;
+    pmodel = mdBand;
     create();
     createImage(dospiral);
     clear();

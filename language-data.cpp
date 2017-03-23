@@ -1,21 +1,602 @@
+// #warning Missing [TR]: "\n\n(For the heptagonal mode, the radius has been reduced to 2 for closing plates.)"
+// #warning Missing [TR]: "\n\nA Ghost never moves to a cell which is adjacent to another Ghost of the same kind."
+// #warning Missing [TRDE]: "\n\nAfter the Trolls leave, you have 750 turns to collect %the1, or it gets stolen."
+// #warning Missing [TRDE]: "\n\nEasy %1 might disappear when you collect more of its kind."
+// #warning Missing [TRDE]: "\n\nFast flying creatures may attack or go against gravity only in their first move."
+// #warning Missing [TR]: "\n\nOnce you collect 10 Bomberbird Eggs, stepping on a cell with no adjacent mines also reveals the adjacent cells. Collecting even more Eggs will increase the radius. Additionally, collecting 25 Bomberbird Eggs will reveal adjacent cells even in your future games."
+// #warning Missing [TRDE]: "\n\nSee sounds/credits.txt for credits for sound effects"
+// #warning Missing [TR]: "\n\nThis Orb is triggered on your first attack or illegal move."
+// #warning Missing [TR]: "\n\nThis Orb protects you from attacks, scents, and insulates you from electricity. It does not let you go through deadly terrain, but if you are attacked with fire, it lets you stay in place in it."
+// #warning Missing [TR]: "\n\nThis is a friendly being. It does not count for your total kills."
+// #warning Missing [TR]: "\n\nThis is a part of a monster. It does not count for your total kills."
+// #warning Missing [TR]: "\n\nTortoises are not monsters! They are just annoyed. They do not count for your total kills."
+// #warning Missing [TR]: "\nRanged Orbs can be targeted by clicking the desired location. "
+// #warning Missing [TR]: "\nRanged Orbs can be targeted by long touching the desired location."
+// #warning Missing [TR]: "\nRanged Orbs can be targeted by shift-clicking the desired location. "
+// #warning Missing [TR]: "\nRanged Orbs can be targeted by touching the desired location."
+// #warning Missing [TRDE]: "\nSpawn rate (as prize Orb): %1%/%2\n"
+// #warning Missing [TRDE]: "\nSpawn rate (in Hubs): %1%/%2\n"
+// #warning Missing [TRDE]: "\nSpecial conduct (still valid)\n"
+// #warning Missing [TRDE]: "\nSpecial conduct failed:\n"
+// #warning Missing [TR]: "\nThis is a ranged Orb. "
+// #warning Missing [TR]: "\nYou can never target cells which are adjacent to the player character, or ones out of the sight range."
+// #warning Missing [TR]: " %1"
+// #warning Missing [TRDE]: " (appears here)"
+// #warning Missing [TRDE]: " (increases treasure spawn)"
+// #warning Missing [TRDE]: " (local treasure)"
+// #warning Missing [TRDE]: " You need to go deep to collect lots of them."
+// #warning Missing [TR]: " kills: %1/%2"
+// #warning Missing [TR]: "\"Be careful in the Rose Garden! It is beautiful, but very dangerous!\""
+// #warning Missing [TRDE]: "\"It is not possession but the act of getting there, "
+// #warning Missing [TR]: "\"Thank you very much for talking, and have a great rest of your day!\""
+// #warning Missing [TRDE]: "\"There is no branch of mathematics, however abstract, "
+// #warning Missing [TRDE]: "\"There is no royal road to geometry.\""
+// #warning Missing [TRDE]: "\"We live in a beautiful and orderly world, "
+// #warning Missing [TR]: "%The1 attacks your shell!"
+// #warning Missing [TR]: "%The1 breathes fire at %the2!"
+// #warning Missing [TR]: "%The1 breathes fire at you!"
+// #warning Missing [TR]: "%The1 breathes fire!"
+// #warning Missing [TRDE]: "%The1 crashes into %the2!"
+// #warning Missing [TR]: "%The1 destroys your boat!"
+// #warning Missing [TR]: "%The1 hits %the2."
+// #warning Missing [TR]: "%The1 is destroyed by the Flash."
+// #warning Missing [TRDE]: "%The1 is destroyed!"
+// #warning Missing [TRDE]: "%The1 is filled!"
+// #warning Missing [TR]: "%The1 is killed by thorns!"
+// #warning Missing [TRDE]: "%The1 is protected from this kind of magic!"
+// #warning Missing [TRDE]: "%The1 says, \"I die, but my clan in Trollheim will avenge me!\""
+// #warning Missing [TR]: "%The1 scares %the2 a bit!"
+// #warning Missing [TR]: "%The1 suffocates!"
+// #warning Missing [TR]: "%The1 throws fire at %the2!"
+// #warning Missing [TR]: "%The1 tries to dismount you!"
+// #warning Missing [TRDE]: "%The1 wakes up %the2."
+// #warning Missing [TRDE]: "%The1 will be revivable at %2 $$$"
+// #warning Missing [TRDE]: "(You can also use right Shift)\n\n"
+// #warning Missing [TR]: "(includes co-op)"
+// #warning Missing [TRDE]: "+5 = move instantly"
+// #warning Missing [TR]: ", %1"
+// #warning Missing [TR]: "-- use the Android menu instead"
+// #warning Missing [TRDE]: "0 - return"
+// #warning Missing [TRDE]: "3D"
+// #warning Missing [TRDE]: "3D configuration"
+// #warning Missing [TRDE]: "A beatiful purple gem from the Lost Mountain."
+// #warning Missing [TR]: "A big, beautiful, magical flower."
+// #warning Missing [TR]: "A bird who hunts in the treetops of the Yendorian Forest."
+// #warning Missing [TR]: "A clearing in the Overgrown Woods. Obviously, this gives the Mutant Ivies an infinite space to grow...\n\nMutant Fruits rot if they are not adjacent to a Mutant Ivy."
+// #warning Missing [TR]: "A dark forest filled with ghosts and graves. But there is also treasure hidden deep within... But don't let greed make you stray from your path, as you can get lost!\n\nThe Haunted Woods are bounded by a single equidistant curve. It is not a circle or horocycle.\n\n"
+// #warning Missing [TR]: "A fruit from the Yendorian Forest."
+// #warning Missing [TRDE]: "A land for people wanting to experiment with cellular automata in the HyperRogue grid. Rules can be given on the command line; the default rules are:\n-c07 00100000 -c06 0010000 -c17 00011000 -c16 0001100 -caprob 0.3\n(-c0 or -c1 can be given if the same rule is to be used for hexagonal and heptagonal cells)."
+// #warning Missing [TR]: "A large bird who likes strong winds. Just as you, it can fly quickly in the wind."
+// #warning Missing [TR]: "A long time ago, this was a trade route. But then, Krakens have risen out of the depths. Many trading ships sank here. Legend says that you can uncover the secret of a magical weapon spell somewhere in the depths...\n\nYou can find Sunken Treasures here, but they won't appear until you have killed a Kraken. You will also need Orb of the Fish to get the treasures, luckily you can steal one from the Viking treasure hunters."
+// #warning Missing [TRDE]: "A magical energy sword. Don't waste its power!"
+// #warning Missing [TR]: "A petrified creature."
+// #warning Missing [TRDE]: "A very interesting species of slime mold."
+// #warning Missing [TRDE]: "Aethereal powers let you go through the holes."
+// #warning Missing [TRDE]: "After killing %the1, you feel able to reach the Elemental Planes!"
+// #warning Missing [TRDE]: "After you move while having this Orb, you immediately attack the next cell in the straight line (or two cells, when moving on a heptagon). This attack is slightly stronger than your normal attack: it can stun some of the monsters which cannot be killed or stunned normally."
+// #warning Missing [TR]: "Alternatively: kill a %1 in %the2.\n"
+// #warning Missing [TRDE]: "An alternate layout of the Crossroads, without walls."
+// #warning Missing [TR]: "An alternative version of Orb of the Sword. If you have both of them, you have two energy swords, facing in opposite directions."
+// #warning Missing [TR]: "Ancient Viking heroes were buried here. Their graves have barrows raised over them, and are guarded by Draugar, animated corpses who are immune to mundane weapons. You will need to use a magical weapon spell to defeat them, and to rob the ancient jewelry buried in the graves."
+// #warning Missing [TR]: "Animated corpses of ancient Viking warriors. They are immune to mundane weapons, but they can be destroyed by your Orb of the Sword."
+// #warning Missing [TRDE]: "Annoying insects. They can awaken Sleeping Bulls."
+// #warning Missing [TRDE]: "Another energy sword!"
+// #warning Missing [TRDE]: "Aquatic region -- accessible only from coastal regions and other aquatic regions.\n"
+// #warning Missing [TRDE]: "Avoid chopping trees, using Orbs, and non-graveyard monsters in the Haunted Woods."
+// #warning Missing [TRDE]: "Avoid escaping from a discharge (\"That was close\")."
+// #warning Missing [TR]: "Aww, poor %1... where is your family?"
+// #warning Missing [TR]: "Better not to let your greed make you stray from your path."
+// #warning Missing [TR]: "Bonus land, available only in some special modes.\n"
+// #warning Missing [TR]: "Branches here could bear your weight easily."
+// #warning Missing [TR]: "Branches here will bear you weight, but if you use them to move (not fall) to an unstable place, they will break."
+// #warning Missing [TRDE]: "Butterflies don't pursue you -- unless you get next to them, they just spin around the obstacles. They cannot be killed conventionally, but you get treasure when a Raging Bull crashes into a Butterfly. "
+// #warning Missing [TRDE]: "Camera level above the plane"
+// #warning Missing [TR]: "Cannot move into the current location of another player!"
+// #warning Missing [TR]: "Cannot push into another player!"
+// #warning Missing [TR]: "Cannot push into the same location!"
+// #warning Missing [TR]: "Cannot slash another player!"
+// #warning Missing [TRDE]: "Cannot use %the1 here!"
+// #warning Missing [TR]: "Cargo of a ship which was once destroyed by a Kraken."
+// #warning Missing [TR]: "Chaos mode"
+// #warning Missing [TRDE]: "Coastal region -- connects inland and aquatic regions.\n"
+// #warning Missing [TR]: "Collect four different Elemental Shards!"
+// #warning Missing [TRDE]: "Commanded %the1!"
+// #warning Missing [TR]: "Completing the quest in this land is not necessary for the Hyperstone Quest."
+// #warning Missing [TR]: "Corals have a somewhat hyperbolic structure even in your home world, but natural corals from the Warped Sea have truly beautiful shapes. Ratlings know the value of corals, and thus keep them in boats for safety."
+// #warning Missing [TR]: "Could not create an image of that size."
+// #warning Missing [TRDE]: "Cultists throw fire at you from distance!"
+// #warning Missing [TRDE]: "Defeat Flail Guards by moving away from them."
+// #warning Missing [TRDE]: "Demons are slow, but you'll need the experience against stronger ones..."
+// #warning Missing [TR]: "Different kills required: %1.\n"
+// #warning Missing [TR]: "Don't be fooled by beauty, or you will be stabbed if you come too close!"
+// #warning Missing [TR]: "Don't be fooled by this red-haired boy, or you will be stabbed if you come too close!"
+// #warning Missing [TR]: "Don't be fooled by this red-haired girl, or you will be stabbed if you come too close!"
+// #warning Missing [TRDE]: "Don't center on the player character."
+// #warning Missing [TR]: "Dragon Scales are a prized material for armors. They are also prized by collectors, who would like to boast about how they have killed a Dragon.\n\nDragon Scales disappear after 500 turns."
+// #warning Missing [PLTRCZRU]: "Dragons are powerful monsters. They are slow, but evil, and love to pick on creatures who are even slower than them. They must be stopped!\n\nA Dragon moves each two turns. It may attack with all its segments, or move its whole body forwards or backwards, it may also move a frontal part backwards. To kill a Dragon, you need to hit each of its segments. The head will regenerate on the turns the Dragon is not moving, so you will usually have to hit it with your last attack; otherwise, if the head is healthy, it may breathe fire (at range 3), losing the hitpoint. Killing the Dragon gives you treasure."
+// #warning Missing [TRDE]: "Dragons are powerful monsters. They are slow, but evil, and love to pick on creatures who are even slower than them. They must be stopped!\n\nA Dragon moves each two turns. It may attack with all its segments, or move its whole body forwards or backwards, it may also move a frontal part backwards. To kill a Dragon, you need to hit each of its segments. The head will regenerate on the turns the Dragon is not moving, so you will usually have to hit it with your last attack; otherwise, if the head is healthy, it may breathe fire (at range 3), losing the hitpoint. Killing the Dragon while still in the Dragon Chasms gives you treasure."
+// #warning Missing [TR]: "Each eight turns, each rosebush at distance at most 5 from you will release a wave of alluring scent. Creatures on the frontwave will move towards where the scent came from. Even if it causes them to attack their friends or beautiful creatures, or move into water, fire, chasm, or thorns of the rosebush. Ivies, Ghosts, Rock Snakes, Rose Ladies and Lords, and monsters restricted to a specific terrain are immune to scents."
+// #warning Missing [TR]: "Enable cheat mode or GAME OVER to use this"
+// #warning Missing [TR]: "Enemies killed: %1 (%2 types)"
+// #warning Missing [TRDE]: "Escher/3D"
+// #warning Missing [TRDE]: "Euclidean"
+// #warning Missing [TRDE]: "Euclidean/elliptic mode"
+// #warning Missing [TRDE]: "Extremely narrow Crossroads layout.\n"
+// #warning Missing [TRDE]: "F1 - help"
+// #warning Missing [TRDE]: "F8 = SVG shot"
+// #warning Missing [TR]: "Find a %1 in %the2."
+// #warning Missing [TRDE]: "Fire is extinguished!"
+// #warning Missing [TRDE]: "For some reason... cannot attack!"
+// #warning Missing [TR]: "Friendly ghosts are friendly beings who can go through any obstacles. However, unlike most friends, they tend to fly away from you."
+// #warning Missing [TR]: "Galápagos is the land of Tortoises. They are very slow, which allows the Dragons to pick on them by stealing and eating their young. Bring the Baby Tortoises back, but, there is a catch: the Tortoises come in many varieties, depending on the part of Galápagos they live in -- there are 21 binary environmental factors, and thus 2097152 varieties. You'll have to find a Tortoise which matches the baby exactly!\n\nTortoises move each 3 turns, and attacks only stun them.\n\nBringing back a Baby Tortoise counts as 5 $$$. The more factors agree in the given location of Galápagos, the brighter it is shown on your screen."
+// #warning Missing [TRDE]: "Ghosts can move through chasms!"
+// #warning Missing [TRDE]: "Good luck in the elliptic plane!"
+// #warning Missing [TRDE]: "Gravitational anomalies in the Jungle create mountains overgrown with ivies and bushes. Will you dare to climb the ivies to get the amethysts hidden above?\n\nCells adjacent to Ivies count as stable (but Ivies cannot climb themselves or other Ivies)."
+// #warning Missing [TRDE]: "Ground level below the plane"
+// #warning Missing [TRDE]: "Ground level is actually an equidistant surface, %1 absolute units below the plane P. Theoretically, this value affects the world -- for example, eagles could fly %2 times faster by flying above the ground level, on the plane P -- but the actual game mechanics are not affected. (Distances reported by the vector graphics editor are not about points on the ground level, but about the matching points on the plane P -- divide them by the factor above to get actual distances."
+// #warning Missing [TRDE]: "Halloween is a special land, that is available only in the spherical or elliptic geometry (press 'o' to switch). You play on the surface of a jack-o'-lantern, and have to collect as many Treats as possible. Each Treat you collect brings new monsters to fight, and new magical powers for you. You have to fight the monsters while effectively managing your limited resources."
+// #warning Missing [TRDE]: "Halloween mini-game"
+// #warning Missing [TRDE]: "Height of walls"
+// #warning Missing [TRDE]: "Herds of these Bulls are running long distances for some reason. They become Raging Bulls if something stops them."
+// #warning Missing [TRDE]: "High detail range"
+// #warning Missing [TRDE]: "Hint: magical powers from Treats expire after a number of uses."
+// #warning Missing [TRDE]: "Hint: press 1 2 3 4 to change the projection."
+// #warning Missing [TRDE]: "Hint: use arrow keys to scroll."
+// #warning Missing [TRDE]: "How long should the messages stay on the screen."
+// #warning Missing [TRDE]: "Human to wall ratio"
+// #warning Missing [TRDE]: "Humans are %1 absolute units high. Your head travels %2 times the distance travelled by your feet."
+// #warning Missing [TRDE]: "HyperRogue uses the Minkowski hyperboloid model internally. Klein and Poincaré models can be obtained by perspective, and the Gans model is obtained by orthogonal projection. See also the conformal mode (in the special modes menu) for more models."
+// #warning Missing [TR]: "Hyperstone Quest: collect at least 10 points in %the2"
+// #warning Missing [TRDE]: "If we are viewing an equidistant g absolute units below a plane, from a point c absolute units above the plane, this corresponds to viewing a Minkowski hyperboloid from a point tanh(g)/tanh(c) units below the center. This in turn corresponds to the Poincaré model for g=c, and Klein-Beltrami model for g=0."
+// #warning Missing [TR]: "In the Chaos mode, lands change very often, and there are no walls between them. Some lands are incompatible with this.\n\nYou need to reach Crossroads IV to unlock the Chaos mode."
+// #warning Missing [TR]: "In the Windy Plains, you can let the wind carry you, causing you to move two cells with the wind in a single turn. This cannot be done if you are standing at distance at most 2 from the Air Elemental, or if any of the three cells on the way has two wind directions.\n\nPress 't' or click the destination to activate."
+// #warning Missing [TR]: "In this mode, HyperRogue is played on a 3D model of a part of the hyperbolic plane, similar to one you get from the 'paper model creator' or by hyperbolic crocheting.\n\nThis requires some OpenGL extensions and may crash or not work correctly -- enabling the 'render texture without OpenGL' options may be helpful in this case. Also the 'render once' option will make the rendering faster, but the surface will be rendered only once, so you won't be able to play a game on it.\n\nUse arrow keys to rotate, Page Up/Down to zoom."
+// #warning Missing [TRDE]: "Killed %1 can be revived with Orb of the Love, after you collect 20 more $$$."
+// #warning Missing [TR]: "Kills required: %1 (%2).\n"
+// #warning Missing [TRDE]: "Klein model"
+// #warning Missing [TRDE]: "Known mines may be marked by pressing 'm'. Your allies won't step on marked mines."
+// #warning Missing [TRDE]: "Known mines may be marked by touching while in drag mode. Your allies won't step on marked mines."
+// #warning Missing [TR]: "Left the game."
+// #warning Missing [TRDE]: "Level of water bottom"
+// #warning Missing [TRDE]: "Level of water surface"
+// #warning Missing [TR]: "Many clans of Trolls spend their lives in this kingdom. You can find many statues of Trolls here. You suppose that they are not actually statues, but simply elderly Trolls, who have petrified upon death. Or maybe you have killed these Trolls yourself?"
+// #warning Missing [TRDE]: "Mid detail range"
+// #warning Missing [TR]: "Monsters slain by you in melee are turned into friendly ghosts. Does not affect plants and friends."
+// #warning Missing [PLTRCZRU]: "Move with mouse, num pad, qweadzxc, or hjklyubn. Wait by pressing 's' or '.'. Spin the world with arrows, PageUp/Down, and Home/Space. To save the game you need an Orb of Safety. Press 'v' for config, ESC for the quest status and menu.\n\n"
+// #warning Missing [DE]: "Move with mouse, num pad, qweadzxc, or hjklyubn. Wait by pressing 's' or '.'. Spin the world with arrows, PageUp/Down, and Home/Space. To save the game you need an Orb of Safety. Press 'v' for the main menu (configuration, special modes, etc.), ESC for the quest status.\n\n"
+// #warning Missing [TR]: "Multiplayer: Play cooperatively (locally); treasures, kills, and deaths are calculated for each player too, for more competitive play. Orbs and treasures are shared, orbs drain faster, knives recharge slower, and player characters are not allowed to separate.\n\n"
+// #warning Missing [TR]: "Note: currently scores are saved only in the normal mode on Android"
+// #warning Missing [TR]: "Note: you can play, but scores won't be saved on Android"
+// #warning Missing [TRDE]: "Objects at distance less than %1 absolute units from the center will be displayed with high detail, and at distance at least %2 with low detail."
+// #warning Missing [TR]: "Only thin twigs and leaves here. They may bear fruits, but for you, these cells count as unstable."
+// #warning Missing [TR]: "Orb power (target: facing)"
+// #warning Missing [TR]: "Orb power (target: mouse)"
+// #warning Missing [TRDE]: "Orbs of Safety always appear here, and may be used to escape.\n"
+// #warning Missing [TRDE]: "PICK"
+// #warning Missing [TR]: "Players cannot get that far away!"
+// #warning Missing [TRDE]: "Poincaré model"
+// #warning Missing [TR]: "Precious belongings of ancient Viking heroes. Your Orb of the Sword can be used to dig these treasures out of the barrows."
+// #warning Missing [TR]: "Preparing the line (%1/1000)..."
+// #warning Missing [TRDE]: "Press F1 or right-click things for help."
+// #warning Missing [TRDE]: "Press F1 or right-shift-click things for help."
+// #warning Missing [TR]: "Prince"
+// #warning Missing [TR]: "Princess"
+// #warning Missing [TRDE]: "Projection at the ground level"
+// #warning Missing [TRDE]: "Push Skeletons into the holes!"
+// #warning Missing [TRDE]: "Quite tough, for your first fight."
+// #warning Missing [TRDE]: "Raging Bulls charge in a straight line: on heptagons, when they can choose one of two possible directions, they choose one closer to your current location. In the case of a tie, the cell where more neighbors is closer to your current location is chosen; if still a tie, past locations are considered. They can attack you in any direction, and monsters on their way are attacked even if friendly. When they crash into something, the obstacle is usually destroyed, and they are stunned for three turns, after which they charge at you again (in any direction). Raging Bulls cannot be killed or stunned conventionally."
+// #warning Missing [TRDE]: "Reenter HyperRogue to apply this setting"
+// #warning Missing [TR]: "Return to the normal game"
+// #warning Missing [TR]: "Revived!"
+// #warning Missing [TRDE]: "Rock-III to wall ratio"
+// #warning Missing [TRDE]: "Rotate the camera in ball/hyperboloid model."
+// #warning Missing [TRDE]: "Rotate the camera. Can be used to obtain a first person perspective, or third person perspective when combined with Y shift."
+// #warning Missing [TRDE]: "Roughly 42% cells are on the edge of your sight range. Reducing the sight range makes HyperRogue work faster, but also makes the game effectively harder."
+// #warning Missing [TRDE]: "Saved the SVG shot to %1 (sightrange %2)"
+// #warning Missing [TR]: "Saved the band image as: "
+// #warning Missing [TRDE]: "Scale the displayed model."
+// #warning Missing [TR]: "She has flowers in her long fair hair. You could not bring yourself to attack such a beautiful woman."
+// #warning Missing [TR]: "Shmup (shoot'em up) mode: You can play a hyperbolic shoot'em up game. The game is based on the usual turn-based grid-based HyperRogue, but there are some changes. You fight by throwing knives, and you have three extra lives. There are no allies, so all Orbs related to allies give you extra lives instead (up to 5). Some other rules have been adapted too.\n\n"
+// #warning Missing [TRDE]: "Sleeping bulls wake up when you get into distance of two cells from them."
+// #warning Missing [TR]: "So, you have killed a Ratling on the unwarped sea? You will be punished for this! Luckily, if you run away from the Warped Sea quickly, the Ratling Avengers will lose track of you."
+// #warning Missing [TR]: "Someone has put air fans in these plains, causing strong winds everywhere. You think that the purpose is to harness the magical power of Air Elementals, but you are not sure.\n\nAll cells except fans are grouped into three colors according to a pattern. Wind blows counterclockwise around each group of cells of a single color. Cells which are blocked by walls, or at distance at most 2 from an Air Elemental, do not count for this.\n\nIt is illegal to move in a direction which is closer to incoming wind than to outcoming wind. However, you can move two cells with the wind in a single turn, and so can the birds."
+// #warning Missing [TRDE]: "Someone has told you that one can get battle experience safely by killing tons of essentially harmless creatures, such as Bats. But does this make any sense?...\n\nIt does not. Bats cannot hurt you, but may block your movement, or toggle switches if they fall on them."
+// #warning Missing [DE]: "TRANSLATIONWARNING"
+// #warning Missing [DE]: "TRANSLATIONWARNING2"
+// #warning Missing [TR]: "Tall, strong, and holding a flower in his hand. You could not bring yourself to attack such a handsome man."
+// #warning Missing [TRDE]: "The height of walls, in absolute units. For the current values of g and c, wall height of %1 absolute units corresponds to projection value of %2."
+// #warning Missing [TR]: "The ivy attacks %the1!"
+// #warning Missing [TRDE]: "The ratio of Rock III to walls is %1, so Rock III are %2 absolute units high. Length of paths on the Rock III level is %3 of the corresponding length on the ground level."
+// #warning Missing [TRDE]: "The result of a collaboration of the Great Vizier and the Wizard of the Ivory Tower."
+// #warning Missing [TRDE]: "The rug depicts a man in a deep dungeon, unable to leave."
+// #warning Missing [TR]: "The skeleton of a tree."
+// #warning Missing [TRDE]: "The tasty treat increases your protection."
+// #warning Missing [TR]: "There are Krakens in your homeland too... huge sea monsters which could easily destroy ships. The geometry of this strange world prevents quick movement of huge objects, so there are no large ships, only small boats, and hyperbolic Krakens are relatively small too. Still, you suppose they might be the widest creatures which could still move at considerable speed...\n\nKraken heads can move only on hexagons. You need to attack all the tentacles to kill the Kraken. A tentacle cannot attack if it has been attacked on the same turn. When a Kraken attacks you while you are in a boat, it destroys the boat, but does not kill you."
+// #warning Missing [TRDE]: "There are many lands in HyperRogue. Collect 10 treasure in the given land type to complete it; this enables you to find the magical Orbs of this land, and in some cases get access to new lands. At 25 treasures this type of Orbs starts appearing in other lands as well. Press 'o' to get the details of all the Lands.\n\n"
+// #warning Missing [TRDE]: "These dodecahedra made of a mysterious material are the Reptiles' favorite toy."
+// #warning Missing [TR]: "These people study gravity and infinite trees. They have no special features, other than wearing a strange hat."
+// #warning Missing [TRDE]: "These reptiles are quite strange creatures. They spend most of their lives sleeping as floors that other creatures can walk on. Sometimes they wake up to hunt their prey, but they will happily go back to sleep if they happen to move into a hole on their way. Your attacks do not kill the Reptiles, but you can push and stun them."
+// #warning Missing [TR]: "These warped humanoids are skilled warriors and sailors, and they feel at home at the Warped Coast. Their battle experience has taught them that enemies who wait without moving or attacking anything are the most deadly. If they see such an enemy, they become extremely suspicious, and they also wait."
+// #warning Missing [TRDE]: "This Orb allows you to grow like an Ivy. The Ivy is always rooted in your current location; moving among the Ivy cells will move the root. Moving to a new location will cause the Ivy to grow , if an Ivy could make that movement (otherwise it breaks). You can also target one of the cells adjacent to your ivy (not to you) to grow or attack there."
+// #warning Missing [TRDE]: "This Orb allows you to jump over an adjacent monster, killing or stunning it. You can only vault in a roughly straight line. Target a cell on the other side to use it."
+// #warning Missing [TR]: "This Orb creates a warped zone of radius 5 around you, and also allows you to move diagonally in warped zones."
+// #warning Missing [TR]: "This Orb gives you a weapon made of pure magical energy. You do not hold it, it simply floats in the air next to you. When you go, the energy sword moves with you, pointing at the same relative angle it pointed before -- you cannot move or rotate it otherwise. Most monsters can be killed by moving the sword into them, and won't move into the spot with the sword."
+// #warning Missing [TR]: "This Orb halves the power usage of orbs which cost some charges with each activation. It even affects the one-shot orbs such as Flash or Teleport. If such an activation normally costs x charges, it costs only x/2 (rounded up) if you have an Orb of Energy."
+// #warning Missing [TR]: "This Orb lets you ride Dragons and other worm-like creatures. Simply move onto such a creature to ride them; while riding, you are protected from dangerous terrains and partially from attacks (they cause you to lose half of your Domination power), but you cannot collect items. When only one charge is left, you have to dismount this turn -- be very careful to make this possible, as your mount could attack you immediately!\n\nWhile riding, click on a location to order your mount to move or attack there."
+// #warning Missing [TR]: "This Orb lets your allies to share your Orb powers.\n\nThe following Orbs are affected:"
+// #warning Missing [TR]: "This Orb makes you stunningly beautiful. Monsters which come next to you will be stunned for one turn. Multi-tile monsters are not affected. Additionally, it makes you immune to beauty."
+// #warning Missing [TR]: "This Orb protects you from physical attacks. It lasts for more turns than the Orb of Shielding, but 10 charges are lost whenever you are attacked. It also does not protect you from fires, scents, and being eaten."
+// #warning Missing [TR]: "This beautiful flower is greatly prized by wizards, as it allows them to cast powerful magical spells without preparation.\n"
+// #warning Missing [TR]: "This false prince is immune to the alluring scent of roses."
+// #warning Missing [TR]: "This false princess is immune to the alluring scent of roses."
+// #warning Missing [TR]: "This feather is truly beautiful and strong."
+// #warning Missing [TR]: "This forest was planted by one of the wizards from the Ivory Tower to conduct experiments with gravity."
+// #warning Missing [TR]: "This gate separates the warped area from the normal land."
+// #warning Missing [TR]: "This land is filled with beautiful, but dangerous, creatures and plants."
+// #warning Missing [TR]: "This land is warped. Ironically, the coast is completely straight..."
+// #warning Missing [TR]: "This menu can be also used to configure keys.\n\n"
+// #warning Missing [TR]: "This might be very useful for devices with limited memory."
+// #warning Missing [TR]: "This move appears dangerous -- are you sure?"
+// #warning Missing [TR]: "This orb is activated if you are unable to escape (radius 4) without making illegal moves or going through cells which are currently adjacent to enemy monsters. Most game over situations are covered by this, but generally, this orb is oversensitive...\n\nWhen activated, it creates a Flash effect of radius 5."
+// #warning Missing [TRDE]: "This parameter affects the ball model the same way as the projection parameter affects the disk model."
+// #warning Missing [TR]: "This part of the world is warped, restricting the movement somewhat. \"Diagonal\" movement and attacking between triangular cells is not allowed. Flash, Storms, and Freedom spells ignore this, and Ghosts can move, attack, and be attacked diagonally."
+// #warning Missing [TR]: "This wall is quite strong. You will need another way in."
+// #warning Missing [TR]: "Those roses smell too nicely. You can only target cells closer to them!"
+// #warning Missing [TR]: "Those roses smell too nicely. You have to come towards them."
+// #warning Missing [TR]: "Trolls of Trollheim are descendants of a bridge Troll, who collected payments from people crossing the bridge. One of them paid with golden eggs. The bridge Troll found the eggs beautiful, but he quickly lost them. Golden eggs are still revered by Trolls, and you can find them in their caves."
+// #warning Missing [TR]: "Trolls turn into stone walls when they die. When you have this Orb, this happens to every monster you defeat. Statues created from this Orb have slightly different properties than Trolls who petrify naturally."
+// #warning Missing [TR]: "Turn-based multiplayer: Turns are executed in parallel. A player can leave the game by pressing a designated key (useful when about to get killed or lost). The following Orbs work to bring such players back: "
+// #warning Missing [TR]: "Two players cannot move/attack the same location!"
+// #warning Missing [TR]: "Unavailable in the Chaos mode.\n"
+// #warning Missing [TR]: "Unavailable in the multiplayer mode.\n"
+// #warning Missing [TR]: "Unavailable in the shmup mode.\n"
+// #warning Missing [TR]: "Unbalanced shards in your inventory are dangerous."
+// #warning Missing [TRDE]: "Vampire Bats don't attack normally, but they drain your magical powers if they are at distance at most 2 from you."
+// #warning Missing [TRDE]: "Vampire Bats drain your magical powers!"
+// #warning Missing [TR]: "Warnings are issued when you try to do something that appears dangerous, like stepping on a known mine, or getting your boat destroyed by a Kraken without having Orb of the Fish. In some cases the action might actually be safe -- so you can ignore the warning and do it anyway, simply by repeating the action."
+// #warning Missing [TRDE]: "Watch the Minkowski hyperboloid or the hypersian rug mode with the red/cyan 3D glasses."
+// #warning Missing [TRDE]: "Welcome to Halloween!"
+// #warning Missing [TRDE]: "Welcome to HyperRogue!"
+// #warning Missing [TRDE]: "Welcome to Spherogue!"
+// #warning Missing [TRDE]: "Welcome to the Euclidean mode!"
+// #warning Missing [TRDE]: "Welcome to the Random Pattern mode!"
+// #warning Missing [TRDE]: "Welcome to the Yendor Challenge %1!"
+// #warning Missing [TR]: "What is freedom for you? A situation when you can walk wherever you want? Or a situation when you do not have to work, since you have as much tasty food as you want?\n\nWell, this creature has chosen the second option. It won't be happy if you destroy its prison.\n"
+// #warning Missing [TRDE]: "When the charges on this Orb expire, you will be automatically returned to the place where you have found it. Extra Orbs of Recall delay this without changing the recall location. Pick up an Orb of Safety causes an immediate recall."
+// #warning Missing [TR]: "Wow! That was close."
+// #warning Missing [TRDE]: "Y shift"
+// #warning Missing [TR]: "You are now a tortoise hero!"
+// #warning Missing [TR]: "You are now a tortoise heroine!"
+// #warning Missing [TRDE]: "You are playing %the1 in the Pure Tactics mode."
+// #warning Missing [TRDE]: "You are recalled!"
+// #warning Missing [TR]: "You become a bit nervous..."
+// #warning Missing [TRDE]: "You can find safety in some places in the Prairie, but if you want treasures, they can be found only on the other side of a giant herd of bulls."
+// #warning Missing [TRDE]: "You can hold this bush to climb the Lost Mountain, but it is not very strong -- it will get destroyed if you climb from it into an unstable location. Bushes block the movement of birds."
+// #warning Missing [TRDE]: "You can hold this bush to climb the Lost Mountain. Bushes block the movement of birds."
+// #warning Missing [TRDE]: "You cannot attack %the1!"
+// #warning Missing [TR]: "You cannot attack diagonally!"
+// #warning Missing [TR]: "You cannot go against the wind!"
+// #warning Missing [TR]: "You cannot move between the cells without dots here!"
+// #warning Missing [TR]: "You cannot move between the triangular cells here!"
+// #warning Missing [TR]: "You chop down %the1."
+// #warning Missing [TR]: "You collect %the1. (%2)"
+// #warning Missing [TR]: "You command %the1!"
+// #warning Missing [TR]: "You construct some Elemental Gems!"
+// #warning Missing [TR]: "You damage %the1 with a mental blast!"
+// #warning Missing [TRDE]: "You feel attuned to gravity, ready to face mountains and dungeons."
+// #warning Missing [TRDE]: "You feel even more attuned to the magic of this land!"
+// #warning Missing [TRDE]: "You feel something strange about gravity here..."
+// #warning Missing [TRDE]: "You feel that a magical weapon is waiting for you..."
+// #warning Missing [TRDE]: "You gain a protective Shell!"
+// #warning Missing [TRDE]: "You gain your protective Shell back!"
+// #warning Missing [TRDE]: "You get the powers of Shield, Horns, and Thorns after you move two moves in a straight line with this Orb."
+// #warning Missing [TRDE]: "You got Thorns! Stab monsters by moving around them."
+// #warning Missing [TRDE]: "You have enough treasure now to revive %the1!"
+// #warning Missing [TR]: "You hear a distant roar!"
+// #warning Missing [TR]: "You just cannot stand in place, those roses smell too nicely."
+// #warning Missing [TRDE]: "You leave %the1."
+// #warning Missing [TRDE]: "You may be unable to leave %the1 if you are not careful!\n"
+// #warning Missing [TR]: "You need to dismount %the1!"
+// #warning Missing [TR]: "You need to move to give space to %the1!"
+// #warning Missing [TRDE]: "You pierce %the1."
+// #warning Missing [TR]: "You slash %the1."
+// #warning Missing [TRDE]: "You vault over %the1!"
+// #warning Missing [TRDE]: "You will need more experience to defeat the Greater Demon!"
+// #warning Missing [TRDE]: "You'll need your magical sword against the Draugar!"
+// #warning Missing [TR]: "Your %1 activates!"
+// #warning Missing [TRDE]: "Your Orb of Recall is blocked by something big!"
+// #warning Missing [TR]: "Your Orb of the Sword can be used to dig here."
+// #warning Missing [TRDE]: "Your energy swords get stronger!"
+// #warning Missing [TR]: "Your mundane weapon cannot hurt %the1!"
+// #warning Missing [TR]: "Your power is drained by %the1!"
+// #warning Missing [TRCZRUDE]: "Zebra quotient"
+// #warning Missing [TRDE]: "all"
+// #warning Missing [TRDE]: "always available"
+// #warning Missing [TRDE]: "and not in a chaos without norms.\""
+// #warning Missing [TR]: "animals killed: %1"
+// #warning Missing [TR]: "azimuthal equi-area"
+// #warning Missing [TR]: "azimuthal equidistant"
+// #warning Missing [TR]: "background music"
+// #warning Missing [TRDE]: "ball model"
+// #warning Missing [TR]: "band"
+// #warning Missing [TR]: "band width"
+// #warning Missing [TRDE]: "by land"
+// #warning Missing [TRDE]: "by number"
+// #warning Missing [TRDE]: "camera rotation"
+// #warning Missing [TRDE]: "camera rotation in ball model"
+// #warning Missing [TRDE]: "cancel move"
+// #warning Missing [TR]: "cat"
+// #warning Missing [TRCZDE]: "cheats"
+// #warning Missing [TR]: "clockwise"
+// #warning Missing [TR]: "coefficient"
+// #warning Missing [TRDE]: "coefficient (imaginary)"
+// #warning Missing [TRRUDE]: "compass size"
+// #warning Missing [TRDE]: "configure input"
+// #warning Missing [TR]: "configure keys"
+// #warning Missing [TR]: "configure player 3"
+// #warning Missing [TR]: "configure player 4"
+// #warning Missing [TRRU]: "configure player 5"
+// #warning Missing [TRRU]: "configure player 6"
+// #warning Missing [TRRU]: "configure player 7"
+// #warning Missing [TR]: "conformal/history mode"
+// #warning Missing [TR]: "connected to Google Games"
+// #warning Missing [TR]: "counterclockwise"
+// #warning Missing [TR]: "degree of the approximation"
+// #warning Missing [TR]: "disk"
+// #warning Missing [TR]: "display the triheptagonal grid"
+// #warning Missing [TR]: "dog"
+// #warning Missing [TR]: "down"
+// #warning Missing [TRDE]: "draw circle around the target"
+// #warning Missing [TRDE]: "draw the grid"
+// #warning Missing [TR]: "dress color II"
+// #warning Missing [TRDE]: "drop Dead Orb (up + down)"
+// #warning Missing [TRDE]: "edit all three colors"
+// #warning Missing [TRDE]: "elliptic"
+// #warning Missing [TR]: "enable the Hypersian Rug mode"
+// #warning Missing [TRDE]: "exit 3D configuration"
+// #warning Missing [TR]: "exit this menu"
+// #warning Missing [TRDE]: "extra graphical effects"
+// #warning Missing [TRCZRUDE]: "field quotient"
+// #warning Missing [TRDE]: "first joystick position (movement)"
+// #warning Missing [TRDE]: "first on bottom"
+// #warning Missing [TRDE]: "first on top"
+// #warning Missing [TR]: "five players"
+// #warning Missing [TR]: "four players"
+// #warning Missing [TR]: "friends destroyed: %1"
+// #warning Missing [TR]: "friends killed: %1"
+// #warning Missing [TR]: "gain Orb of Yendor"
+// #warning Missing [TRDE]: "geometry"
+// #warning Missing [TRDE]: "gnomonic projection"
+// #warning Missing [TR]: "half-plane"
+// #warning Missing [TRCZDE]: "help for keyboard users"
+// #warning Missing [TR]: "heptagonal mode"
+// #warning Missing [TR]: "hexagonal #1"
+// #warning Missing [TRDE]: "hyperboloid model"
+// #warning Missing [TR]: "hypersian rug mode"
+// #warning Missing [TR]: "include history"
+// #warning Missing [TRDE]: "inventory/kill sorting"
+// #warning Missing [TRDE]: "joystick configuration"
+// #warning Missing [TR]: "key Orb power"
+// #warning Missing [TRDE]: "last on bottom"
+// #warning Missing [TRDE]: "last on top"
+// #warning Missing [TR]: "leaderboards/achievements"
+// #warning Missing [TRDE]: "leave the game"
+// #warning Missing [TR]: "left"
+// #warning Missing [TR]: "left to right"
+// #warning Missing [TR]: "length of a segment"
+// #warning Missing [TRCZDE]: "mark heptagons"
+// #warning Missing [TR]: "model used"
+// #warning Missing [TR]: "model used (not conformal!)"
+// #warning Missing [TR]: "monsters destroyed: %1"
+// #warning Missing [TRDE]: "move down-left"
+// #warning Missing [TRDE]: "move down-right"
+// #warning Missing [TRDE]: "move up-left"
+// #warning Missing [TRDE]: "move up-right"
+// #warning Missing [TRDE]: "movement animation speed"
+// #warning Missing [TR]: "movement color"
+// #warning Missing [TR]: "next page"
+// #warning Missing [TRDE]: "old style joystick configuration"
+// #warning Missing [TRDE]: "page"
+// #warning Missing [TRDE]: "parameters set correctly"
+// #warning Missing [TR]: "parts destroyed: %1"
+// #warning Missing [TRDE]: "plain/3D"
+// #warning Missing [TR]: "player"
+// #warning Missing [TR]: "player 3 X"
+// #warning Missing [TR]: "player 3 Y"
+// #warning Missing [TR]: "player 3 go"
+// #warning Missing [TR]: "player 3 spin"
+// #warning Missing [TR]: "player 4 X"
+// #warning Missing [TR]: "player 4 Y"
+// #warning Missing [TR]: "player 4 go"
+// #warning Missing [TR]: "player 4 spin"
+// #warning Missing [TRRU]: "player 5 X"
+// #warning Missing [TRRU]: "player 5 Y"
+// #warning Missing [TRRU]: "player 5 go"
+// #warning Missing [TRRU]: "player 5 spin"
+// #warning Missing [TRRU]: "player 6 X"
+// #warning Missing [TRRU]: "player 6 Y"
+// #warning Missing [TRRU]: "player 6 go"
+// #warning Missing [TRRU]: "player 6 spin"
+// #warning Missing [TRRU]: "player 7 X"
+// #warning Missing [TRRU]: "player 7 Y"
+// #warning Missing [TRRU]: "player 7 go"
+// #warning Missing [TRRU]: "player 7 spin"
+// #warning Missing [TR]: "polygon sides"
+// #warning Missing [TR]: "polygonal"
+// #warning Missing [TR]: "polynomial"
+// #warning Missing [TR]: "prepare the line animation"
+// #warning Missing [TRRUDE]: "projection"
+// #warning Missing [TRDE]: "projection in ball model"
+// #warning Missing [TRDE]: "rainbow landscape"
+// #warning Missing [TR]: "render bands automatically"
+// #warning Missing [TR]: "render now (length: %1)"
+// #warning Missing [TR]: "render texture without OpenGL"
+// #warning Missing [TR]: "render the texture only once"
+// #warning Missing [TRDE]: "reset per-player statistics"
+// #warning Missing [TRDE]: "return"
+// #warning Missing [TRDE]: "reverse pointer control"
+// #warning Missing [TR]: "right"
+// #warning Missing [TR]: "right to left"
+// #warning Missing [TR]: "rotation"
+// #warning Missing [TRDE]: "scrolling speed"
+// #warning Missing [TRDE]: "second joystick position (panning)"
+// #warning Missing [TR]: "see http://www.roguetemple.com/z/hyper/conformal.php"
+// #warning Missing [TRDE]: "select this color"
+// #warning Missing [TRDE]: "set 3D monsters or walls in basic config first"
+// #warning Missing [TR]: "settings set here won't be saved"
+// #warning Missing [TR]: "seven players"
+// #warning Missing [TRDE]: "shift+O to switch anti-aliasing"
+// #warning Missing [TR]: "shoot'em up and multiplayer"
+// #warning Missing [TRDE]: "sight range"
+// #warning Missing [TR]: "six players"
+// #warning Missing [TRDE]: "sound effects volume"
+// #warning Missing [TRDE]: "spherical"
+// #warning Missing [TR]: "spin down"
+// #warning Missing [TR]: "spin up"
+// #warning Missing [TR]: "spiral on rendering"
+// #warning Missing [TR]: "star factor"
+// #warning Missing [TR]: "start a new game"
+// #warning Missing [TRDE]: "stay in place (left + right)"
+// #warning Missing [TRDE]: "stereographic projection"
+// #warning Missing [TR]: "switch ghost timer"
+// #warning Missing [TR]: "switch web display"
+// #warning Missing [TR]: "take me back"
+// #warning Missing [TR]: "texture size"
+// #warning Missing [TRDE]: "three colors"
+// #warning Missing [TRDE]: "three colors rotated"
+// #warning Missing [TR]: "three players"
+// #warning Missing [TRDE]: "towards Gans model"
+// #warning Missing [TRDE]: "towards orthographic"
+// #warning Missing [TR]: "turn count = %1 last exploration = %2 ghost timer = %3"
+// #warning Missing [TR]: "turn-based mode"
+// #warning Missing [TR]: "up"
+// #warning Missing [TR]: "use default keys"
+// #warning Missing [TR]: "view your achievements"
+// #warning Missing [TR]: "visit the website"
+// #warning Missing [TR]: "what's this?"
+// #warning Missing [TR]: "which coefficient"
+// #warning Missing [TRDE]: "which grants the greatest enjoyment.\""
+// #warning Missing [TRDE]: "which may not some day be applied to phenomena of the real world.\""
+// #warning Missing [TR]: "zoom in"
+// #warning Missing [TR]: "zoom out"
+// #warning Missing [TRDE]: "Amethyst"
+// #warning Missing [TR]: "Ancient Jewelry"
+// #warning Missing [TR]: "Apple"
+// #warning Missing [TR]: "Baby Tortoise"
+// #warning Missing [TRDE]: "Bat"
+// #warning Missing [TR]: "Black Lotus"
+// #warning Missing [TRDE]: "Bull Dash"
+// #warning Missing [TR]: "Burial Grounds"
+// #warning Missing [TRDE]: "Butterfly"
+// #warning Missing [TRDE]: "Cellular Automaton"
+// #warning Missing [TR]: "Clearing"
+// #warning Missing [TR]: "Coral"
+// #warning Missing [TR]: "Crossroads IV"
+// #warning Missing [TRDE]: "Crossroads V"
+// #warning Missing [TRDE]: "Dodecahedron"
+// #warning Missing [TR]: "Dragon"
+// #warning Missing [TR]: "Dragon Chasms"
+// #warning Missing [TR]: "Dragon Scale"
+// #warning Missing [TR]: "Draugr"
+// #warning Missing [TRDE]: "Dungeon"
+// #warning Missing [TR]: "False Prince"
+// #warning Missing [TR]: "False Princess"
+// #warning Missing [TRDE]: "Familiar"
+// #warning Missing [TR]: "Friendly Ghost"
+// #warning Missing [TRDE]: "Friendly Ivy"
+// #warning Missing [TR]: "Fulgurite"
+// #warning Missing [TRDE]: "Gadfly"
+// #warning Missing [TR]: "Galápagos"
+// #warning Missing [TR]: "Giant Fox"
+// #warning Missing [TR]: "Golden Egg"
+// #warning Missing [TRDE]: "Green Grass"
+// #warning Missing [TRDE]: "Halloween"
+// #warning Missing [TR]: "Handsome Gardener"
+// #warning Missing [TR]: "Haunted Woods"
+// #warning Missing [TRDE]: "Herd Bull"
+// #warning Missing [TR]: "Kraken Depths"
+// #warning Missing [TRDE]: "Lost Mountain"
+// #warning Missing [TR]: "Mutant Fruit"
+// #warning Missing [TR]: "Orb of Beauty"
+// #warning Missing [TR]: "Orb of Domination"
+// #warning Missing [TR]: "Orb of Empathy"
+// #warning Missing [TR]: "Orb of Energy"
+// #warning Missing [TR]: "Orb of Freedom"
+// #warning Missing [TRDE]: "Orb of Horns"
+// #warning Missing [TRDE]: "Orb of Nature"
+// #warning Missing [TRDE]: "Orb of Recall"
+// #warning Missing [TR]: "Orb of Undeath"
+// #warning Missing [TRDE]: "Orb of Vaulting"
+// #warning Missing [TRDE]: "Orb of the Bull"
+// #warning Missing [TR]: "Orb of the Shell"
+// #warning Missing [TR]: "Orb of the Stone"
+// #warning Missing [TR]: "Orb of the Sword"
+// #warning Missing [TR]: "Orb of the Sword II"
+// #warning Missing [TR]: "Orb of the Warp"
+// #warning Missing [DE]: "Platform"
+// #warning Missing [TRDE]: "Prairie"
+// #warning Missing [TRDE]: "Raging Bull"
+// #warning Missing [TR]: "Ratling"
+// #warning Missing [TR]: "Ratling Avenger"
+// #warning Missing [TRDE]: "Reptile"
+// #warning Missing [TRDE]: "Reptile bridge"
+// #warning Missing [TRDE]: "Reptile floor"
+// #warning Missing [TRDE]: "Reptiles"
+// #warning Missing [TR]: "Rose Beauty"
+// #warning Missing [TR]: "Rose Garden"
+// #warning Missing [TR]: "Rose Lady"
+// #warning Missing [TR]: "Rose Lord"
+// #warning Missing [TRDE]: "Sleeping Bull"
+// #warning Missing [TRDE]: "Slime Mold"
+// #warning Missing [TR]: "Sparrowhawk"
+// #warning Missing [TRDE]: "Spinel"
+// #warning Missing [TR]: "Sunken Treasure"
+// #warning Missing [TR]: "Thornless Rose"
+// #warning Missing [TRDE]: "Treat"
+// #warning Missing [TR]: "Trollheim"
+// #warning Missing [TRDE]: "Vampire Bat"
+// #warning Missing [TR]: "Warped Coast"
+// #warning Missing [TR]: "Warped Sea"
+// #warning Missing [TR]: "White Dove Feather"
+// #warning Missing [TR]: "Wind Crow"
+// #warning Missing [TR]: "Windy Plains"
+// #warning Missing [TR]: "Yendorian Forest"
+// #warning Missing [TR]: "Yendorian Researcher"
+// #warning Missing [TR]: "barrow"
+// #warning Missing [TR]: "barrow wall"
+// #warning Missing [TRDE]: "big bush"
+// #warning Missing [TR]: "canopy"
+// #warning Missing [TR]: "fan"
+// #warning Missing [TR]: "no item"
+// #warning Missing [TR]: "no monster"
+// #warning Missing [TR]: "no wall"
+// #warning Missing [TR]: "platform"
+// #warning Missing [TR]: "rosebush"
+// #warning Missing [TRDE]: "small bush"
+// #warning Missing [TR]: "solid branch"
+// #warning Missing [TR]: "stone statue"
+// #warning Missing [TR]: "strong wind"
+// #warning Missing [TR]: "trunk"
+// #warning Missing [TR]: "warp gate"
+// #warning Missing [TR]: "weak branch"
 // DO NOT EDIT -- this file is generated automatically with langen
 
-#define NUMEXTRA 123
-const char* natchars[NUMEXTRA] = {"°","´","Á","Ä","Ç","É","Í","Î","Ö","Ú","Ü","ß","á","â","ä","ç","é","í","î","ó","ö","ú","ü","ý","ą","ć","Č","č","Ď","ď","Ę","ę","Ě","ě","ğ","İ","ı","Ł","ł","ń","ň","Ř","ř","Ś","ś","Ş","ş","Š","š","ť","ů","Ź","ź","Ż","ż","Ž","ž","ϕ","Ё","А","Б","В","Г","Д","Е","Ж","З","И","Й","К","Л","М","Н","О","П","Р","С","Т","У","Ф","Х","Ц","Ч","Ш","Щ","Ы","Ь","Э","Ю","Я","а","б","в","г","д","е","ж","з","и","й","к","л","м","н","о","п","р","с","т","у","ф","х","ц","ч","ш","щ","ъ","ы","ь","э","ю","я","ё",};
-//javastring = "°´ÁÄÇÉÍÎÖÚÜßáâäçéíîóöúüýąćČčĎďĘęĚěğİıŁłńňŘřŚśŞşŠšťůŹźŻżŽžϕЁАБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЫЬЭЮЯабвгдежзийклмнопрстуфхцчшщъыьэюяё";
+#define NUMEXTRA 127
+const char* natchars[NUMEXTRA] = {"°","´","Á","Ä","Ç","É","Í","Î","Ö","Ú","Ü","ß","á","â","ä","ç","è","é","ì","í","î","ó","ö","ø","ù","ú","ü","ý","ą","ć","Č","č","Ď","ď","Ę","ę","Ě","ě","ğ","İ","ı","Ł","ł","ń","ň","Ř","ř","Ś","ś","Ş","ş","Š","š","ť","ů","Ź","ź","Ż","ż","Ž","ž","ϕ","Ё","А","Б","В","Г","Д","Е","Ж","З","И","Й","К","Л","М","Н","О","П","Р","С","Т","У","Ф","Х","Ц","Ч","Ш","Щ","Ы","Ь","Э","Ю","Я","а","б","в","г","д","е","ж","з","и","й","к","л","м","н","о","п","р","с","т","у","ф","х","ц","ч","ш","щ","ъ","ы","ь","э","ю","я","ё",};
+//javastring = "°´ÁÄÇÉÍÎÖÚÜßáâäçèéìíîóöøùúüýąćČčĎďĘęĚěğİıŁłńňŘřŚśŞşŠšťůŹźŻżŽžϕЁАБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЫЬЭЮЯабвгдежзийклмнопрстуфхцчшщъыьэюяё";
 
 //statistics
-// total:   330 nouns,  1130 sentences
-// EN: 13816B nouns, 66373B sentences
-// PL: 17298B nouns, 69478B sentences
+// total:   376 nouns,  1427 sentences
+// EN: 15812B nouns, 84962B sentences
+// PL: 19548B nouns, 88833B sentences
 // TR: 15423B nouns, 57798B sentences
-// CZ: 17641B nouns, 74589B sentences
-// RU: 30447B nouns, 110543B sentences
-// DE: 13138B nouns, 58980B sentences
+// CZ: 19983B nouns, 95351B sentences
+// RU: 34504B nouns, 142384B sentences
+// DE: 17001B nouns, 81507B sentences
 // check hash: 6b8b4567
 hashcode hashval = 0x6b8b4567;
 
-sentence all_sentences[1130] = {
+sentence all_sentences[1427] = {
 /*MISSING*/   {0x0, { // ""
 /*MISSING*/    "",
 /*MISSING*/    "",
@@ -28,21 +609,14 @@ sentence all_sentences[1130] = {
 /*MISSING*/    "You cannot go against the wind!",
    "Nemůžeš jít proti větru!",
    "Nie możesz iść pod wiatr!",
-/*MISSING*/    "You cannot go against the wind!",
-    }},
-  {0x6c928f, { // "Trees in this forest can be cut down. Big trees take two turns to cut down."
-   "Drzewa w tym lesie można ścinać. Ścięcie dużego drzewa zajmuje dwie kolejki.",
-   "Bu ormandaki ağaçlar kesilebilir. Büyük ağaçların kesilmesi iki tur alır.",
-   "Stromy v tomto lese je možné kácet. Kácení velkých stromů trvá dvě kola.",
-   "Вы можете рубить деревья в лесу. Большие деревья рубятся за два хода.",
-   "Bäume in diesem Wald können gefällt warden. Große Bäume zu fällen dauert 2 Züge.",
+   "Du kannst nicht gegen den Wind laufen!",
     }},
   {0xbe8a00, { // "No summoning possible here!"
    "Przywołanie niemożliwe!",
    "Çağırmak burada mümkün değil!",
    "Sem se nic vyvolat nedá!",
    "Призыв невозможен!",
-   "Beschwören nicht möglich!",
+   "Beschwören hier nicht möglich!",
     }},
   {0xdae76d, { // "A creepy monster who follows you everywhere in the Graveyard."
    "Ten odrażający potwór chodzi za Tobą po cmentarzu!",
@@ -82,8 +656,8 @@ sentence all_sentences[1130] = {
   {0x28f16c6, { // "SORT"
    "SORT",
    "SIRALA",
-   "ŘAZ",
-   "СОРТИРОВКА",
+   "TŘÍDIT",
+   "СОРТИРУЙ",
    "SORT",
     }},
   {0x2a95fec, { // "save the game"
@@ -98,7 +672,28 @@ sentence all_sentences[1130] = {
 /*MISSING*/    "This forest was planted by one of the wizards from the Ivory Tower to conduct experiments with gravity.",
    "Tento les vysadil jeden z čarodějů z Věže ze slonové kosti, aby tu prováděl pokusy s gravitací.",
    "Этот лес был создан одним из магов Башни из Слоновой Кости для продолжения экспериментов с гравитацией.",
-/*MISSING*/    "This forest was planted by one of the wizards from the Ivory Tower to conduct experiments with gravity.",
+   "Dieser Wald wurde von einem der Zauberer des Elfenbeinturmes gepflanzt, um Experimente mit der Graviation durchzuführen.",
+    }},
+  {0x35292aa, { // "\nSpawn rate (in Hubs): %1%/%2\n"
+   "\nCzęstość występowania (w centrach): %1%/%2\n",
+/*MISSING*/    "\nSpawn rate (in Hubs): %1%/%2\n",
+   "\nFrekvence (v centrálních krajích): %1%/%2\n",
+   "\nЧастота появления (в Центрах): %1%/%2\n",
+/*MISSING*/    "\nSpawn rate (in Hubs): %1%/%2\n",
+    }},
+  {0x3762af5, { // "This Orb allows you to grow like an Ivy. The Ivy is always rooted in your current location; moving among the Ivy cells will move the root. Moving to a new location will cause the Ivy to grow , if an Ivy could make that movement (otherwise it breaks). You can also target one of the cells adjacent to your ivy (not to you) to grow or attack there."
+   "Ta Sfera pozwala Ci rosnąć jak bluszcz. Bluszcz jest zawsze ukorzeniony na Twojej pozycji; ruch w obrębie komórek bluszcza powoduje przemieszczenie korzenia. Bluszcz rośnie gdy ruszasz się na nową komórkę (o ile bluszcz mógłby tam urosnąć, w przeciwnym przypadku bluszcz się łamie). Możesz również wycelować w jedną z komórek sąsiadujących z Twoim bluszczem (nie z Tobą), by tam urosnąć lub zaatakować.",
+/*MISSING*/    "This Orb allows you to grow like an Ivy. The Ivy is always rooted in your current location; moving among the Ivy cells will move the root. Moving to a new location will cause the Ivy to grow , if an Ivy could make that movement (otherwise it breaks). You can also target one of the cells adjacent to your ivy (not to you) to grow or attack there.",
+   "Tato Sféra ti umožňuje růst, jako bys byl Břečťan. Kořen Břečťanu je vždy na políčku, kde se právě nacházíš; pohybem mezi políčky Břečťanu se tento kořen přesune. Pokud se pohneš na nové místo, Břečťan tam vyroste, ale jen pokud by normální Břečťan mohl provést takový tah (jinak se přetrhne). Můžeš také zacílovat jedno z políček, které sousedí se tvým Břečťanem (ale ne s tebou), a rozrůst se tam nebo tam zaútočit.",
+   "Эта сфера позволяет тебе расти как плющ. Корень плюща находится в твоей позиции; движение по клеткам плюща меняет корень. При движении в новую клетку плющ растёт, если может, иначе рвётся. Также вы можете выбрать клетку рядом со своим плющом, чтобы расти или атаковать туда.",
+/*MISSING*/    "This Orb allows you to grow like an Ivy. The Ivy is always rooted in your current location; moving among the Ivy cells will move the root. Moving to a new location will cause the Ivy to grow , if an Ivy could make that movement (otherwise it breaks). You can also target one of the cells adjacent to your ivy (not to you) to grow or attack there.",
+    }},
+  {0x38a34b8, { // "connected to Google Games"
+   "połączenie z Google Games",
+/*MISSING*/    "connected to Google Games",
+   "připojeno ke Google Games",
+   "подключено к Google Games",
+   "verbunden mit Google Games",
     }},
   {0x3c8943c, { // "%The1 sinks!"
    "%1 uton%ął1!",
@@ -119,7 +714,7 @@ sentence all_sentences[1130] = {
    "Bu küre şimşek büyüsünü kullanmaya yarar, senden her yöne doğru kıvılcımlar saçılır.",
    "Tuto sféru můžeš použít k seslání kouzla Blesk, které způsobí, že z tebe do všech směrů vyletí blesky.",
    "Эта сфера может использоваться для заклинания Молнии, которое бьёт молниями во всех направлениях.",
-   "Du kannst diesen Orb verwenden um einen Blitzzauber zu wirken, der Blitze in sämtliche Richtungen schießt.",
+   "Du kannst diesen Orb verwenden um einen Blitzzauber zu wirken, der Blitze von deiner Position aus in sämtliche Richtungen schießt.",
     }},
   {0x43fda2b, { // "distance: %1\n"
    "odległość: %1\n",
@@ -133,7 +728,14 @@ sentence all_sentences[1130] = {
 /*MISSING*/    "polygonal",
    "polygonální",
    "многоугольник",
-/*MISSING*/    "polygonal",
+   "polygonal",
+    }},
+  {0x50900d1, { // "Level of water bottom"
+   "Poziom dna wody",
+/*MISSING*/    "Level of water bottom",
+   "Úroveň dna",
+   "Уровень дна водоёма",
+/*MISSING*/    "Level of water bottom",
     }},
   {0x50fa0ab, { // "The floor has collapsed! RUN!"
    "Ziemia się zapadła! UCIEKAJ!",
@@ -149,6 +751,13 @@ sentence all_sentences[1130] = {
    "d = удалить v",
    "d = entfernen v",
     }},
+  {0x5a29c04, { // "reverse pointer control"
+   "odwrotne sterowanie",
+/*MISSING*/    "reverse pointer control",
+   "obrácené ovládání ukazatele",
+   "обратить управление",
+/*MISSING*/    "reverse pointer control",
+    }},
   {0x5e2554f, { // "Orb power gained!"
    "Zdobyta moc!",
    "Küre gücü kazandın!",
@@ -163,12 +772,33 @@ sentence all_sentences[1130] = {
    "цвет одежды",
    "Kleidungsfarbe",
     }},
+  {0x62ece6d, { // "select this color"
+   "wybierz ten kolor",
+/*MISSING*/    "select this color",
+   "vyber tuto barvu",
+   "выбрать этот цвет",
+/*MISSING*/    "select this color",
+    }},
+  {0x633ab9b, { // "which may not some day be applied to phenomena of the real world.\""
+   "zastosować do zjawisk w świecie rzeczywistym.\"",
+/*MISSING*/    "which may not some day be applied to phenomena of the real world.\"",
+   "které by jednoho dne nemohlo být možné aplikovat na jevy ve skutečném světě.\"",
+   "которая когда-нибудь не окажется применимой к явлениям действительного мира.\"",
+/*MISSING*/    "which may not some day be applied to phenomena of the real world.\"",
+    }},
   {0x64978a2, { // "The forests of Caribbean are too dense to be traversed by humans, and they are hard to burn. Many colorful parrots can be found there."
-   "Lasy na Karaibach są zbyt gęste, by mógł przez nie przejść człowiek, i trudno jest je spalić. Mieszka w nich dużo kolorowych papug.",
+   "Lasy na Karaibach są zbyt gęste, by mógł przez nie przejść człowiek i trudno jest je spalić. Mieszka w nich dużo kolorowych papug.",
    "Karayip Ormanları insanlar tarafından gezilmek için fazla yoğun, ve yanmaya da dirençli. Buralarda bir sürü, renkli papağana rastlayabilirsin.",
    "Karibské lesy jsou příliš husté na to, aby jimi mohl projít člověk, a špatně hoří. Lze v nich najít mnoho barevných papoušků.",
    "Карибские леса слишком плотны, чтобы сквозь них мог пройти человек, и их трудно поджечь. Много разноуветных попугаев живёт здесь.",
    "Die karibischen Wälder sind zu dicht um von Menschen durchquert zu werden, und brennen nur schwerlich. Es gibt hier aber viele, farbenfrohe Papageien.",
+    }},
+  {0x6a23894, { // "You chop down the tree."
+   "Ści%ąłeś0 drzewo.",
+   "Ağacı kestin.",
+   "Pokáce%l0 jsi strom.",
+   "Вы срубили дерево.",
+   "Du fällst den Baum.",
     }},
   {0x6bdb7af, { // "This has been recorded in the Google Leaderboards."
    "To zostało zapisane w Rankingach Google.",
@@ -182,7 +812,7 @@ sentence all_sentences[1130] = {
 /*MISSING*/    "texture size",
    "rozměr textury",
    "размер текстур",
-/*MISSING*/    "texture size",
+   "Texturgröße",
     }},
   {0x701c698, { // " [%1 turns]"
    " [kolejek: %1]",
@@ -196,7 +826,7 @@ sentence all_sentences[1130] = {
 /*MISSING*/    "band width",
    "šířka pásu",
    "ширина ленты",
-/*MISSING*/    "band width",
+   "Bandbreite",
     }},
   {0x73c4cb8, { // "Cannot throw fire there!"
    "Nie możesz tego podpalić!",
@@ -205,26 +835,33 @@ sentence all_sentences[1130] = {
    "Вы не можете кинуть огонь сюда!",
    "Du kannst dort kein Feuer hinwerfen!",
     }},
+  {0x758dc55, { // "\nThis is a ranged Orb. "
+   "\nDziałanie tej Sfery celujesz w konkretne miejsce.",
+/*MISSING*/    "\nThis is a ranged Orb. ",
+   "\nToto je sféra, kterou je třeba zacílit na určité políčko.",
+   "\nДействие этой сферы направляется на определённую клетку.",
+   "\nDies ist ein Distanzorb.",
+    }},
   {0x7bd70e6, { // "%The1 kisses you, and thanks you for saving %him1."
-   "%1 Ciebie pocałowa%ł1, i podziękowa%ł1 za uratowanie %go1.",
+   "%1 Cię pocałowa%ł1 i podziękowa%ł1 za uratowanie %go1.",
    "%1 seni öptü ve %go1 kurtardığın için sana teşekkür etti.",
    "%1 tě políbi%l1 a děkuje ti, že jsi %ho1 zachránil.",
    "%1 поцеловал%E1 тебя и поблагодарил%E1 за спасение.",
-   "%Der1 %1 küsst dich und dankt dir dafür %den1 gerettet zu haben.",
+   "%Der1 %1 küsst dich und dankt dir für die Rettung.",
     }},
   {0x7c046df, { // "exit this menu"
    "wyjdź",
 /*MISSING*/    "exit this menu",
    "ven z menu",
    "выход",
-/*MISSING*/    "exit this menu",
+   "Menü verlassen",
     }},
   {0x7d42ba2, { // "The Vineyard is filled with vines. A very dense pattern of straight lines here...\n\nVine Beasts and Vine Spirits change vine cells to grass, and vice versa."
    "Winnica jest wypełniona winoroślami. Bardzo gęsta siatka linii prostych...\n\nWinne Bestie i Duszki zmieniają winorośle w trawę i z powrotem.",
    "Şaraplık şaraplarla dolu. Burada çok sık düz çizgiler var ...\n\nşŞarap Canavarları ve Şarap Özleri şarap hücrelerini çimene ve tam tersine çevirir.",
    "Vinice je plná révy. Je tu velmi hustý vzor rovných čar...\n\nRévoví netvoři a Révoví duchové mění políčka s révou na trávu a obráceně.",
    "Виноградник полон виноградными лозами. Они образуют очень плотный узор из прямых...\n\nВинные звери и духи превращают траву в вино и наоборот.",
-   "Der Weingarten ist voller Reben. Ein dichtes Gitter aus lauter Geraden...\n\nRebenbestien und Rebenseelen verwandeln Zellen von Gras in Reben und umgekehrt.",
+   "Der Weingarten ist voller Reben. Ein sehr dichtes Netz aus Geraden...\n\nRebenbestien und Rebenseelen verwandeln Zellen von Gras in Reben und umgekehrt.",
     }},
   {0x7e94a1b, { // "automatic"
    "automatyczny",
@@ -266,7 +903,7 @@ sentence all_sentences[1130] = {
    "Yaşayan mağara duvarlarında yaşayabilen bir canavar.",
    "Netvor, který dokáže žít ve zdech Živoucí jeskyně.",
    "Этот монстр может жить внутри стен пещеры.",
-   "Ein Monster, das innerhalb der Lebenden Wände leben kann.",
+   "Ein Monster, das innerhalb der lebenden Wände leben kann.",
     }},
   {0x9104223, { // " (won at level %1!)"
    " (wygrane na poziomie %1!)",
@@ -276,11 +913,11 @@ sentence all_sentences[1130] = {
    " (Mit Level %1 gewonnen!)",
     }},
   {0x912bb24, { // "Tall, strong, and holding a flower in his hand. You could not bring yourself to attack such a handsome man."
-   "Wysoki, silny, z kwiatkiem w dłoni. Nie jesteś w stanie zaatakować tak przystojnego mężczyzny.",
+   "Wysoki, silny, z kwiatem w dłoni. Nie jesteś w stanie zaatakować tak przystojnego mężczyzny.",
 /*MISSING*/    "Tall, strong, and holding a flower in his hand. You could not bring yourself to attack such a handsome man.",
    "Vysoký, silný a s květinou v ruce. Na tak pohledného muže se nemůžeš přimět zaútočit.",
    "Высокий, сильный, с прекрасным цветком в руках. Вы не можете ударить этого красавца.",
-/*MISSING*/    "Tall, strong, and holding a flower in his hand. You could not bring yourself to attack such a handsome man.",
+   "Groß, kräftig und mit einer Blume in der Hand. Du kannst dich nicht dazu überwinden so einen hübschen Mann anzugreifen. ",
     }},
   {0x9384dee, { // "Collect treasure to access more different lands..."
    "Zbieraj skarby, by znaleźć nowe krainy...",
@@ -303,12 +940,26 @@ sentence all_sentences[1130] = {
    "Интересно, где Пираты нашли эти богатства...",
    "Du fragst dich, woher die Piraten all diese Schätze haben...",
     }},
+  {0x9a8ca13, { // "You feel even more attuned to the magic of this land!"
+   "Jesteś lepiej dostrojony do magii tego świata!",
+/*MISSING*/    "You feel even more attuned to the magic of this land!",
+   "Cítíš se ještě více přizpůsobený magii tohoto kraje!",
+   "Вы стали лучше чувствовать магию этой земли!",
+/*MISSING*/    "You feel even more attuned to the magic of this land!",
+    }},
+  {0x9abc85a, { // "player 7 spin"
+   "gracz 7 obrót",
+/*MISSING*/    "player 7 spin",
+   "hráč 7 otáčení",
+/*MISSING*/    "player 7 spin",
+   "Spieler 7 drehen",
+    }},
   {0x9ad48c4, { // "polynomial"
    "wielomian",
 /*MISSING*/    "polynomial",
    "polynomiální",
    "многочлен",
-/*MISSING*/    "polynomial",
+   "polynomisch",
     }},
   {0x9deb9ae, { // "%The1 is immune to wind!"
    "%1 jest odporn%ya1 na wiatr!",
@@ -338,12 +989,19 @@ sentence all_sentences[1130] = {
    "громкость фоновой музыки",
    "Hintergrundmusik",
     }},
+  {0xa7b9017, { // "3D configuration"
+   "konfiguracja 3D",
+/*MISSING*/    "3D configuration",
+   "3D konfigurace",
+   "конфигурация 3D",
+/*MISSING*/    "3D configuration",
+    }},
   {0xaadf0e6, { // "Viziers are neither pushed away nor stunned. However, you attack them automatically when escaping from them."
    "Wezyrowie ani nie są ogłuszani, ani odpychani, ale automatycznie ich atakujesz, gdy od nich uciekasz.",
    "Vezirler sersemlemez ve geriye itilmez, onlardan kaçarken otomatik olarak onlara saldırmış olursun.",
    "Vezíry nemůžeš odstrčit ani omráčit, ale automaticky na ně útočíš, když od nich utíkáš.",
    "Визиря нельзя ни оглушить, ни оттолкнуть. Вы атакуете его каждый раз, когда убегаете от него.",
-   "Wesire kannst du weder zurück stoßen noch betäuben. Jedoch greifst du sie automatisch an wenn du von ihnen fliehst.",
+   "Wesire kannst du weder zurückstoßen noch betäuben. Jedoch greifst du sie automatisch an wenn du von ihnen fliehst.",
     }},
   {0xab0d18e, { // "%The1 shows you two fingers."
    "%1 pokaza%ł1 Ci dwa palce.",
@@ -357,14 +1015,14 @@ sentence all_sentences[1130] = {
    "Mezarlıkta sık rastlanan bir canavar. Duvarlardan geçebilir.\n\nAyrıca amaçsızca gezinen hayaletler var. Uzunca bir süre (100 tur kadar) yeni diyarlar keşfetmediğinde karşına çıkarlar. Oyundaki herhangi bir yerde karşına çıkabilirler.",
    "Typický hřbitovní netvor, který dokáže procházet zdmi.\n\nExistují také bludní Duchové, kteří se objeví, pokud dlouho (přibližně 100 kol) neprozkoumáš žádné nové místo. Ti se mohou objevit kdekoli ve hře.",
    "Типичный для Кладбища монстр, умеющий проходить сквозь стены.\n\nТакже существуют блуждающие призраки. Они появляются, если Вы не исследуете новые места в течение большого времени (примерно 100 ходов). Они могут появиться в любом месте в игре",
-   "Ein Monster das vom Friedhof stammt und sich durch Wände bewegen kann.\n\nEs gibt auch Wandernde Geister, diese erscheinen wenn du dich lange (um die 100 Züge) am selben Ort aufhältst. Sie können überall auftauchen.",
+   "Ein Monster das vom Friedhof stammt und sich durch Wände bewegen kann.\n\nEs gibt auch umherirrende Geister. Diese erscheinen, wenn du dich lange (um die 100 Züge) am selben Ort aufhältst. Sie können überall im Spiel auftauchen.",
     }},
   {0xaeacc22, { // "This Orb allows you to blow your enemies away.\n\nClick a monster to blow it one cell away. It cannot be used against mimics, ghosts, sharks and other monsters restricted to a specific terrain, and multi-tile monsters."
-   "Ta Sfera pozwala Ci zdmuchnąć Twoich przeciwników.\n\nKliknij potwora, by go zdmuchnąć o jedno pole. Nie można używać przeciwko mimikom, duchom, i potworom zajmującym wiele pól.",
+   "Ta Sfera pozwala Ci zdmuchnąć Twoich przeciwników.\n\nKliknij potwora, by go zdmuchnąć o jedno pole. Nie można używać przeciwko mimikom, duchom i potworom zajmującym wiele pól.",
    "Bu Küre düşmanları rüzgârla uzağa ittirmene yarar.\n\nBir canavara tıklayarak onu rüzgârla bir hücre ittirebilirsin. Bu özellik, taklitçilere, hayaletlere, köpekbalıklarına, çok hücreli canavarlara ve belli bir araziye özgü canavarlara karşı kullanılamaz.",
    "Tato sféra ti umožňuje odfouknout nepřátele daleko od tebe.\n\nKliknutím na netvora ho můžeš odfouknout o jedno pole od sebe. Tuto schopnost nelze použít na mimiky, duchy, žraloky a jiné netvory, kteří jsou omezení pouze na specifický terén nebo zabírají více než jedno pole.",
    "Эта сфера позволяет Вам сдуват врагов вдаль.\n\nНажми на монстра, чтобы сдуть его на 1 клетку. Невозможно сдуть мимиков, духов, акул и других монстров, живущих на определённой территории, и монстров из нескольких частей.",
-   "Dieser Orb erlaubt es dir, deine Feinde wegzuwehen.\n\nKlicke auf ein Monster, um es eine Zelle wegzuwehen. Der Orb ist wirkungslos gegenüber Mimiken, Geistern, Haien, und anderen Monstern, die nur auf bestimmten Terrain leben können. Monster, die größer als eine Zelle sind, sind auch immun.",
+   "Dieser Orb erlaubt es dir, deine Feinde wegzuwehen.\n\nKlicke auf ein Monster, um es eine Zelle wegzuwehen. Der Orb ist wirkungslos gegenüber Mimiken, Geistern, Haien, und anderen Monstern, die nur auf bestimmtem Terrain leben können. Monster, die größer als eine Zelle sind, sind auch immun.",
     }},
   {0xaf55625, { // "m = move v"
    "m = przenieś v",
@@ -380,8 +1038,15 @@ sentence all_sentences[1130] = {
    "Заставьте его ударить самого себя, просто подойдя к нему.",
    "Bringe ihn dazu sich selbst zu treffen, indem du dich von ihm entfernst.",
     }},
+  {0xb8ac8d0, { // "You get the powers of Shield, Horns, and Thorns after you move two moves in a straight line with this Orb."
+   "Gdy ruszysz się 2 pola w linii prostej z tą Sferą, dostajesz moce Tarczy, Rogów i Cierni.",
+/*MISSING*/    "You get the powers of Shield, Horns, and Thorns after you move two moves in a straight line with this Orb.",
+   "Kdykoli se pohneš o dvě políčka rovně, získáš schopnosti Štítu, Rohů a Trnů.",
+   "Вы получаете силы Щита, Рогов и Шипов, если совершаете два хода в одном направлении.",
+/*MISSING*/    "You get the powers of Shield, Horns, and Thorns after you move two moves in a straight line with this Orb.",
+    }},
   {0xbe22143, { // "This orb allows you to instantly kill a non-adjacent enemy by clicking it. Each use drains 30 charges."
-   "Ta sfera pozwala natychmiastowo zabić niesąsiadującego przeciwnika (klikając go). Każde użycie zmniejsza poziom naładowania o 30.",
+   "Ta sfera pozwala natychmiastowo zabić niesąsiadującego przeciwnika (klikając go). Każde użycie zmniejsza poziom naładowania o 30 jednostek.",
    "Bu küre yakında olmayan herhangi bir düşmana tıklayarak onu öldürebilmene izin verir. Her kullanım 30 şarj götürür.",
    "Tato sféra ti umožňuje zabít kliknutím libovolného nepřítele, který není na sousedním políčku. Každé použití sníží náboj sféry o 30.",
    "Эта сфера позволит Вам убить любого врага, не стоящего рядом с Вами, просто кликнув по нему. Это действие тратит 30 зарядов.",
@@ -413,28 +1078,35 @@ sentence all_sentences[1130] = {
 /*MISSING*/    "\n\nA Ghost never moves to a cell which is adjacent to another Ghost of the same kind.",
    "\n\nDuch nikdy nevstoupí na políčko sousedící s jiným Duchem stejného typu.",
    "\n\nПризрак не может ходить на клетку рядом с другим таким же призраком.",
-/*MISSING*/    "\n\nA Ghost never moves to a cell which is adjacent to another Ghost of the same kind.",
+   "\n\nEin Geist bewegt sich niemals zu einer Zelle direkt neben einem anderen Geist derselben Art.",
     }},
   {0xc9b8ae4, { // "%The1 breathes fire!"
    "%1 zionął ogniem!",
 /*MISSING*/    "%The1 breathes fire!",
    "%1 chrlí oheň!",
    "%1 дышит огнём!",
-/*MISSING*/    "%The1 breathes fire!",
+   "%Der1 %1 speit Feuer!",
     }},
   {0xcd8ab74, { // "Each eight turns, each rosebush at distance at most 5 from you will release a wave of alluring scent. Creatures on the frontwave will move towards where the scent came from. Even if it causes them to attack their friends or beautiful creatures, or move into water, fire, chasm, or thorns of the rosebush. Ivies, Ghosts, Rock Snakes, Rose Ladies and Lords, and monsters restricted to a specific terrain are immune to scents."
-   "Co 8 kolejek każdy krzak róży w promieniu 5 od Ciebie wysyła falę uwodzicielskiego zapachu. Stworzenia na czole fali wykonają ruch w kierunku źródła zapachu, nawet jeżeli by to spowodowało, że zaatakują swoich przyjaciół lub piękne istoty, lin ruszą się do wody, ognia, przepaści, czy wpadną na kolce róży. Bluszcz, duchy, skalne węże, Różowe Damy i Panowie, i potwory żyjące w konkretnym terenie są odporne na zapachy.",
+   "Co 8 kolejek każdy krzak róży w promieniu 5 od Ciebie wysyła falę uwodzicielskiego zapachu. Stworzenia na czole fali wykonają ruch w kierunku źródła zapachu, nawet jeżeli by to spowodowało, że zaatakują swoich przyjaciół lub piękne istoty, wejdą w wodę, ogień, przepaść, czy wpadną na kolce róży. Bluszcz, duchy, skalne węże, Różane Damy i Panowie, a także potwory żyjące w konkretnym terenie są odporne na zapachy.",
 /*MISSING*/    "Each eight turns, each rosebush at distance at most 5 from you will release a wave of alluring scent. Creatures on the frontwave will move towards where the scent came from. Even if it causes them to attack their friends or beautiful creatures, or move into water, fire, chasm, or thorns of the rosebush. Ivies, Ghosts, Rock Snakes, Rose Ladies and Lords, and monsters restricted to a specific terrain are immune to scents.",
    "Každý růžový keřík ve vzdálenosti 5 nebo méně od tebe vypustí každých 8 kol vlnu vábivé vůně. Každý tvor zasažený touto vůní se musí pohybovat směrem k jejímu zdroji. A to i tehdy, pokud by díky tomu musel zaútočit na své kamarády nebo krásné tvory nebo musel vstoupit do vody, do ohně, do propasti nebo na trny růžového keříku. Břečťan, Kamenní hadi, Růžové dámy a pánové a netvoři omezení na určitý terén jsou vůči vůni imunní.",
    "Каждые 8 ходов каждый розовый куст на расстоянии не более 5 от Вас выпускает волну манящего аромата. Все монстры на пути двигаются к кусту, даже если им приходится атаковать союзника или прекрасное существо, пойти в воду, огонь, пропасть или в шипы куста. Это не действует на призраков, плющи, каменных змей и и монстров, ограниченных своей землёй.",
-/*MISSING*/    "Each eight turns, each rosebush at distance at most 5 from you will release a wave of alluring scent. Creatures on the frontwave will move towards where the scent came from. Even if it causes them to attack their friends or beautiful creatures, or move into water, fire, chasm, or thorns of the rosebush. Ivies, Ghosts, Rock Snakes, Rose Ladies and Lords, and monsters restricted to a specific terrain are immune to scents.",
+   "Alle acht Züge versprüht jeder Rosenbusch in einer Entfernung von maximal 5 Zellen von dir eine Wolke verführerischen Dufts. Wesen an der Wellenfront werden sich dorthin bewegen, wo der Duft herkommt. Auch wenn das sie dazu bringt, ihre Freunde oder schöne Wesen anzugreifen, oder sich in Wasser, Feuer, Abgründe oder Dornen der Rosenbüsche zu begeben. Efeue, Geister, Felsenschlangen, Rosendamen und -herren und Monster, die auf ein bestimmtes Gelände beschränkt sind, sind immun gegenüber dem Duft.",
     }},
   {0xcef9d5c, { // "You hear a distant roar!"
    "Słyszysz odległy ryk!",
 /*MISSING*/    "You hear a distant roar!",
    "Zaslechl jsi vzdálené zařvání!",
    "Вы слышите далёкий рёв!",
-/*MISSING*/    "You hear a distant roar!",
+   "Du hörst ein entferntes Brüllen!",
+    }},
+  {0xd0aa269, { // "Press F1 or right-click things for help."
+   "F1 lub klikaj prawym na elementach gry, by uzyskać pomoc.",
+/*MISSING*/    "Press F1 or right-click things for help.",
+   "Nápovědu můžeš zobrazit stiskem F1 nebo pravým kliknutím na různé věci.",
+   "Нажмите F1 или используйте правую кнопку мыши, чтобы открыть помощь.",
+/*MISSING*/    "Press F1 or right-click things for help.",
     }},
   {0xd10afc8, { // "\"The Knights of the Horocyclic Table salute you!\""
    "\"Rycerze Horocyklicznego Stołu Cię pozdrawiają!\"",
@@ -450,6 +1122,13 @@ sentence all_sentences[1130] = {
    "вторая страница [Пробел]",
    "Zweite Seite [LEER]",
     }},
+  {0xd1a5607, { // "Butterflies don't pursue you -- unless you get next to them, they just spin around the obstacles. They cannot be killed conventionally, but you get treasure when a Raging Bull crashes into a Butterfly. "
+   "Motylki nie gonią Cię -- kręcą się wokół przeszkód, chyba że jesteś na sąsiednim polu. Nie można ich zabić zwykłą bronią, ale zdobywasz skarb, gdy Wściekły Byk zderzy się z Motylkiem.",
+/*MISSING*/    "Butterflies don't pursue you -- unless you get next to them, they just spin around the obstacles. They cannot be killed conventionally, but you get treasure when a Raging Bull crashes into a Butterfly. ",
+   "Motýlci tě nepronásledují -- pokud se nedostaneš těsně vedle nich, budou prostě jen poletovat kolem překážek. Motýlky nelze zabít běžným způsobem, ale když do nich vrazí Vzteklý býk, dostaneš poklad.",
+   "Бабочки вас не трогают, пока вы не подойдёте прямо к ним, они просто вертятся вокруг препятствий. Их нельзя убить обычным образом, но вы получите сокровище, когда Бешеный бык врежется в Бабочку.",
+/*MISSING*/    "Butterflies don't pursue you -- unless you get next to them, they just spin around the obstacles. They cannot be killed conventionally, but you get treasure when a Raging Bull crashes into a Butterfly. ",
+    }},
   {0xd32734e, { // "Orbs of Yendor found: %1"
    "Znalezione Sfery Yendoru: %1",
    "Bulunan Yendor Küresi sayısı: %1",
@@ -458,7 +1137,7 @@ sentence all_sentences[1130] = {
    "Orbs von Yendor gefunden: %1",
     }},
   {0xd5882d0, { // "Cold blue gems, found in the Cocytus."
-   "Zimne niebieskie kamienie, znajdowane na zamarźniętym Kocycie.",
+   "Zimne niebieskie kamienie, znajdowane na zamarzniętym Kocycie.",
    "Mavi soğuk mücevherler sadece Kokitos'ta bulunabilir.",
    "Chladné modré drahokamy, které se nacházejí v Cocytu.",
    "Холодные голубые камни, найденные в Коците.",
@@ -469,21 +1148,21 @@ sentence all_sentences[1130] = {
    "Kokitos'ta, üzerinden geçilemeyen bir göl.",
    "Neprostupné jezero v Cocytu.",
    "Непроходимое озеро в Коците.",
-   "Ein undurchdringbarer See im Kokytos.",
+   "Ein undurchquerbarer See im Kokytos.",
     }},
   {0xdf22139, { // "You overheard Hedgehog Warriors talking about emeralds..."
-   "Podsłucha%łeś0 Jeże rozmawiające o szmaragdach...",
+   "Podsłucha%łeś0 Wojowników-Jeży rozmawiających o szmaragdach...",
    "Kirpi Savaşçıların zümrütler hakkında konuştuğunu duydun...",
    "Zaslechl jsi Ježčí válečníky, jak mluví o smaragdech...",
    "Вы слышите ежей-воинов, говорящих об изумрудах...",
-   "Du überhörst Igelkrieger, die über Smaragde sprechen...",
+   "Du hörst Igelkrieger über Smaragde sprechen...",
     }},
   {0xe38d258, { // "friends destroyed: %1"
    "przyjaciele zniszczeni: %1",
 /*MISSING*/    "friends destroyed: %1",
    "zničení kamarádi: %1",
    "союзников уничтожено: %1",
-/*MISSING*/    "friends destroyed: %1",
+   "zerstörte Freunde: %1",
     }},
   {0xe3f1e5c, { // "You activate the Flash spell!"
    "Aktywowa%łeś0 czar Błysk!",
@@ -497,7 +1176,7 @@ sentence all_sentences[1130] = {
    "Bu Küre canavarları hedefleyerek sersemletmeni sağlar. 5 tur sersemletmek için 10 güç kullanır. Çokluhücre canavarlara karşı çalışmaz.",
    "Tato Sféra ti umožňuje zacílit a omráčit netvory. Každé omráčení trvá 5 kol a stojí 10 nábojů. Tato Sféra nepůsobí na netvory, kteří zabírají více než jedno políčko.",
    "Эта сфера позволяет оглушать монстров. 10 зарядов = оглушения на 5 ходов. Не действует на \"многоклеточных\" монстров.",
-   "Dieser Orb erlaubt es dir Monster zu betäuben. 10 Ladungen betäuben für 5 Züge. Dies funktioniert nichtgegen große Monster die mehrere Felder bedecken.",
+   "Dieser Orb erlaubt es dir Monster zu betäuben. 10 Ladungen betäuben für 5 Züge. Dies funktioniert nicht gegen große Monster die mehrere Felder bedecken.",
     }},
   {0xee5743a, { // "Gravity does not allow this!"
    "Grawitacja nie pozwala!",
@@ -506,6 +1185,20 @@ sentence all_sentences[1130] = {
    "Гравитация не позволяет!",
    "Die Gravitation erlaubt das nicht!",
     }},
+  {0xefb46c9, { // "Raging Bulls charge in a straight line: on heptagons, when they can choose one of two possible directions, they choose one closer to your current location. In the case of a tie, the cell where more neighbors is closer to your current location is chosen; if still a tie, past locations are considered. They can attack you in any direction, and monsters on their way are attacked even if friendly. When they crash into something, the obstacle is usually destroyed, and they are stunned for three turns, after which they charge at you again (in any direction). Raging Bulls cannot be killed or stunned conventionally."
+   "Wściekłe Byki szarżują w linii prostej: na siedmiokątach, gdy mogą wybrać jeden z dwóch kierunków, wybierają pole bliższe Twojej obecnej pozycji. W przypadku remisu pole z większą liczbą sąsiadów bliżej Ciebie jest wybierane. W przypadku dalszego remisu, rozważane są Twoje wcześniejsze pozycje. Byki mogą atakować w dowolnym kierunku; potwory na ich drodze są atakowane nawet jak są przyjazne. Gdy Byk się z czymś zderzy, przeszkoda jest niszczona, i Byk jest ogłuszony na 3 kolejki, po czym szarżuje ponownie (w dowolnym kierunku). Wściekłego Byka nie można zabić ani ogłuszyć zwykłą bronią.",
+/*MISSING*/    "Raging Bulls charge in a straight line: on heptagons, when they can choose one of two possible directions, they choose one closer to your current location. In the case of a tie, the cell where more neighbors is closer to your current location is chosen; if still a tie, past locations are considered. They can attack you in any direction, and monsters on their way are attacked even if friendly. When they crash into something, the obstacle is usually destroyed, and they are stunned for three turns, after which they charge at you again (in any direction). Raging Bulls cannot be killed or stunned conventionally.",
+   "Vzteklí Býci útočí po přímce: na sedmiúhelníku, kde si mohou vybrat jeden ze dvou směrů, si vždy zvolí ten, který je blíž k tobě. Pokud je to nastejno, vyberou si políčko s větším počtem sousedů bližších ke tvé pozici, a pokud je to stále nerozhodně, vezmou v úvahu minulé lokace. Býci mohou útočit ve všech směrech a na netvory, kteří jim stojí v cestě, útočí i tehdy, když jsou přátelští. Když Býk do něčeho narazí, obvykle tím překážku zničí a bude na tři kola omráčený; potom opět vyrazí proti tobě (v libovolném směru). Vzteklého Býka nelze zabít ani omráčit běžnými prostředky.",
+   "Бешеные быки бегут по прямой: на семиугольниках, где есть выбор из двух направлений, они выбирают то, которое ближе к вам. В случае равенства выбирается клетка, у которой больше соседей ближе к вам. Если и здесь равенство, рассматриваются ваши предыдущие положения. Быки могут атаковать в любую сторону, и они атакуют всех на своём пути, даже дружественных существ. Когда бык врезается в препятствие, оно обычно разрушается, и бык оглушается на три хода, после чего снова направляется на вас (в любую сторону). Бешеного быка нельзя убить или оглушить обычным способом.",
+/*MISSING*/    "Raging Bulls charge in a straight line: on heptagons, when they can choose one of two possible directions, they choose one closer to your current location. In the case of a tie, the cell where more neighbors is closer to your current location is chosen; if still a tie, past locations are considered. They can attack you in any direction, and monsters on their way are attacked even if friendly. When they crash into something, the obstacle is usually destroyed, and they are stunned for three turns, after which they charge at you again (in any direction). Raging Bulls cannot be killed or stunned conventionally.",
+    }},
+  {0xf0f9157, { // "Quite tough, for your first fight."
+   "Jak na pierwszą walkę -- całkiem trudny przeciwnik.",
+/*MISSING*/    "Quite tough, for your first fight.",
+   "Na první bitku docela obtížný soupeř.",
+   "Довольно сложно для первого боя.",
+/*MISSING*/    "Quite tough, for your first fight.",
+    }},
   {0xf3f7810, { // "Score: "
    "Wynik: ",
    "Puan: ",
@@ -513,12 +1206,33 @@ sentence all_sentences[1130] = {
    "Очки: ",
    "Punkte: ",
     }},
+  {0xf582c14, { // " You need to go deep to collect lots of them."
+   "By zebrać ich dużo, musisz głęboko wejść w krainę.",
+/*MISSING*/    " You need to go deep to collect lots of them.",
+   "Abys jich získa%l0 hodně, musíš jít hluboko do tohoto kraje.",
+   "Вам нужно забраться глубже, чтобы собрать побольше их.",
+/*MISSING*/    " You need to go deep to collect lots of them.",
+    }},
+  {0xf764393, { // "Halloween is a special land, that is available only in the spherical or elliptic geometry (press 'o' to switch). You play on the surface of a jack-o'-lantern, and have to collect as many Treats as possible. Each Treat you collect brings new monsters to fight, and new magical powers for you. You have to fight the monsters while effectively managing your limited resources."
+   "Halloween to specjalna kraina, dostępna jedynie w geometrii sferycznej lub eliptycznej ('o' by zmienić). Grasz na powierzchni wydrążonej dyni, i musisz zdobyć jak najwięcej Cukierków. Każdy Cukierek przynosi nowe potwory do walki, i nowe magiczne moce. Walcz z potworami, efektywnie zarządzając swoimi ograniczonymi zasobami.",
+/*MISSING*/    "Halloween is a special land, that is available only in the spherical or elliptic geometry (press 'o' to switch). You play on the surface of a jack-o'-lantern, and have to collect as many Treats as possible. Each Treat you collect brings new monsters to fight, and new magical powers for you. You have to fight the monsters while effectively managing your limited resources.",
+   "Halloween je zvláštní kraj, který je k dispozici pouze ve sférické nebo eliptické geometrii (pro přepnutí použijte klávesu 'o'). Hraje se v něm na povrchu dýňové lucerny, kde musíš posbírat co nejvíce Pochoutek. Každá Pochoutka, kterou sebereš, vyvolá nové netvory, se kterými musíš bojovat, a dá ti nové magické schopnosti. Musíš bojovat s netvory a přitom efektivně spravovat své omezené zdroje.",
+   "Хэллоуин -- специальная земля, доступная только в сферической и эллиптической геометрии (нажмите 'o', чтобы переключить). Вы играете на поверхности хэллоуинской тыквы и собираете конфеты. Каждая конфета призывает новых монстров и даёт Вам новые силы. Сражайтесь с монстрами, грамотно распоряжаясь ограниченными ресурсами.",
+/*MISSING*/    "Halloween is a special land, that is available only in the spherical or elliptic geometry (press 'o' to switch). You play on the surface of a jack-o'-lantern, and have to collect as many Treats as possible. Each Treat you collect brings new monsters to fight, and new magical powers for you. You have to fight the monsters while effectively managing your limited resources.",
+    }},
+  {0xf87773a, { // "player 5 go"
+   "gracz 5 idź",
+/*MISSING*/    "player 5 go",
+   "hráč 5 pohyb",
+/*MISSING*/    "player 5 go",
+   "Spieler 5 los",
+    }},
   {0xf90bfdd, { // "You have improved your total high score on Steam. Congratulations!"
    "Poprawi%łeś0 swój ogólny najlepszy wynik na Steam. Gratulacje!",
    "Steam'deki toplam yüksek puanını artırdın. Tebrikler!",
    "Zlepši%l0 jsi své celkové nejvyšší skóre na Steamu. Gratulujeme!",
    "Вы увеличили свой общий счёт в Steam. Поздравляем!",
-   "Du hast deinen Gesamthighscore auf Steam verbessert! Gratulation!",
+   "Du hast deinen Gesamthighscore auf Steam verbessert! Glückwunsch!",
     }},
   {0xfb6fe2c, { // "hepta floor"
    "podłoga hepta",
@@ -534,8 +1248,22 @@ sentence all_sentences[1130] = {
    "%1 тает!",
    "%Der1 %1 schmilzt!",
     }},
+  {0x10344404, { // "towards Gans model"
+   "w stronę modelu Gansa",
+/*MISSING*/    "towards Gans model",
+   "směr ke Gansovu modelu",
+   "в сторону модели Ганса",
+/*MISSING*/    "towards Gans model",
+    }},
+  {0x106bda07, { // "Human to wall ratio"
+   "Stosunek człowieka do ścian",
+/*MISSING*/    "Human to wall ratio",
+   "Poměr člověka a zdi",
+   "Отношение высот человека и стены",
+/*MISSING*/    "Human to wall ratio",
+    }},
   {0x10960669, { // "Fjord Trolls leave a wall when they die, causing the living fjord to rise around it. Contrary to Rock Trolls, items around are not destroyed."
-   "Fjordtrolle zostawiają ścianę po zabiciu, co powoduje, że żywy fiord w okolicy się podnosi. W przeciwieństwie do Skalnych Trolli, Fjordtrolle nie niszczą przedmiotów wokół.",
+   "Fjordtrolle zostawiają ścianę po zabiciu, co powoduje, że żywy fiord w okolicy się podnosi. W przeciwieństwie do Skalnych Trolli Fjordtrolle nie niszczą przedmiotów wokół.",
    "Fiyort Trolleri öldüklerinde geriye bir duvar bırakıp cesetlerinin etrafına yaşayan fiyortun yükselmesine sebep olurlar. Kaya Trollerinin aksine etraflarındaki eşyalar yok olmaz.",
    "Fjordtrollové se po smrti promění v zeď, kolem které se zvedají vody Živoucího fjordu. Fjordtrollové na rozdíl od Šutrollů neničí předměty kolem sebe.",
    "Тролли фьорда превращаются в стену при смерти, вызывая рост живых фьордов вокруг. В отличие от горных троллей они не уничтожают предметы.",
@@ -553,28 +1281,28 @@ sentence all_sentences[1130] = {
 /*MISSING*/    "A big, beautiful, magical flower.",
    "Velká, krásná, magická květina.",
    "Большой прекрасный магический цветок.",
-/*MISSING*/    "A big, beautiful, magical flower.",
+   "Eine große, schöne, magische Blume.",
     }},
   {0x110781c5, { // "This structure will disappear after some time."
    "Ta konstrukcja zniknie za jakiś czas.",
    "Bu yapı bir süre sonra yok olacak.",
    "Tato struktura za nějaký čas zmizí.",
    "Эта конструкция пропадёт через некоторое время.",
-   "Dieses Gebilde wird nach einiger Zeit verschwinden.",
+   "Diese Struktur wird nach einiger Zeit verschwinden.",
     }},
   {0x1109d82c, { // "This Orb protects you from physical attacks. It lasts for more turns than the Orb of Shielding, but 10 charges are lost whenever you are attacked. It also does not protect you from fires, scents, and being eaten."
-   "Ta Sfera chroni Ciebie przed fizycznymi atakami. Działa dłużej niż Sfera Tarczy, ale każdy atak zabiera 10 ładunków. Nie chroni przed ogniem, zapachami, i byciem zjedzonym.",
+   "Ta Sfera chroni Cię przed fizycznymi atakami. Działa dłużej niż Sfera Tarczy, ale każdy atak zabiera 10 ładunków. Nie chroni przed ogniem, zapachami i byciem zjedzonym.",
 /*MISSING*/    "This Orb protects you from physical attacks. It lasts for more turns than the Orb of Shielding, but 10 charges are lost whenever you are attacked. It also does not protect you from fires, scents, and being eaten.",
    "Tato Sféra tě chrání před fyzickými útoky. Vydrží déle než Sféra Štítu, ale každý útok ti ubere 10 nábojů. Nechrání proti ohni, pachu a sežrání.",
    "Эта сфера защищает вас от физических атак. Она действует дольше, чем сфера Щита, но теряет10 зарядов при каждой атаке. Не защищает от огня, запаха и съедения.",
-/*MISSING*/    "This Orb protects you from physical attacks. It lasts for more turns than the Orb of Shielding, but 10 charges are lost whenever you are attacked. It also does not protect you from fires, scents, and being eaten.",
+   "Dieser Orb schützt dich vor physischen Angriffen. Es hält mehr Züge als der Orb der Abschirmung , aber immer wenn du angegriffen wirst, verlierst er 10 Ladungen. Er schützt dich nicht vor Feuer und Düften oder davor gefressen zu werden.",
     }},
   {0x11cfbf44, { // "People worshipping Cthulhu. This one is especially dangerous, as he is armed with a weapon which launches fire from afar."
-   "Wyznawcy cthulhu. Ten jest szczególnie niebezpieczny, bo może z odległości rozpalić ogień w Twojej okolicy.",
+   "Wyznawcy Cthulhu. Ten jest szczególnie niebezpieczny, bo może z odległości rozpalić ogień w Twojej okolicy.",
    "Cthulhu'ya tapan insanlar. Bu özellikle tehlikeli ve uzaktan ateş atabilmesini sağlayan bir silahı var.",
    "Lidé uctívající Cthulhua. Tenhle je zvlášť nebezpečný, protože je vybavený zbraní, která dokáže metat oheň na dálku.",
    "Люди, поклоняющиеся Ктулху. Этот особо опасен, так как он может кинуть в Вас огонь.",
-   "Anhänger Cthulhus. Dieser hier ist besonders gefährlich, er besitzt eine Waffe, die aus der Ferne Feuer schleudern kann.",
+   "Verehrer Cthulhus. Dieser ist besonders gefährlich, er besitzt eine Waffe, die aus der Ferne Feuer schleudern kann.",
     }},
   {0x122fca68, { // "Not enough power for telekinesis!"
    "Za mało mocy do telekinezy!",
@@ -582,6 +1310,13 @@ sentence all_sentences[1130] = {
    "Nemáš dost síly na telekinezi!",
    "Мало силы для телекинеза!",
    "Nicht genügend Kraft für Telekinese!",
+    }},
+  {0x1276d6f4, { // "use default keys"
+   "klawisze domyślne",
+/*MISSING*/    "use default keys",
+   "standardní klávesy",
+   "использовать клавиши по умолчанию",
+   "Standard-Tastenbelegung nutzen",
     }},
   {0x12b80d47, { // "To access Hell, collect 10 treasures each of 9 kinds..."
    "By dostać się do Piekła, znajdź po 10 skarbów każdego z 9 rodzajów...",
@@ -598,25 +1333,39 @@ sentence all_sentences[1130] = {
    "Statistiken nach %1 gespeichert",
     }},
   {0x12dc77a0, { // "Powerful wizards claimed this part of the world, to perform their magical experiments in peace and solitude. They have changed the direction of gravity, to make it even harder for intruders to reach them.\n\nGravity works as follows: cells are unstable if they are empty, and there is no cell immediately below them which contains a wall. It is impossible to move from one unstable cell to another, except if moving down."
-   "Część świata zajęta przez potężnych czarodziejów, w celu prowadzenia magicznych eksperymentów w spokoju i samotności. Zmienili oni kierunek grawitacji, by intruzom było jeszcze trudniej się do nich dostać.\n\nGrawitacja działa w sposób następujący: pole jest niestabilne, jeśli jest puste, i żadne pole bezpośrednio pod nim nie zawiera ściany. Nie można przejść z jednego niestabilnego pola na inne, chyba że w dół.",
+   "Część świata zajęta przez potężnych czarodziejów, w celu prowadzenia magicznych eksperymentów w spokoju i samotności. Zmienili oni kierunek grawitacji, by intruzom było jeszcze trudniej się do nich dostać.\n\nGrawitacja działa w sposób następujący: pole jest niestabilne, jeśli jest puste i żadne pole bezpośrednio pod nim nie zawiera ściany. Nie można przejść z jednego niestabilnego pola na inne, chyba że w dół.",
    "Güçlü büyücüler, dünyanın bu kısmını, büyüsel deneylerini sessiz sakin uygulayabilecekleri yer olarak seçtiler. Davetsiz misafirlerin, onlara ulaşabilmesini daha zor kılmak için yerçekiminin yönünü değiştirdiler.\n\nYerçekimi şu şekilde çalışır: Hücreler eğer boşlar ise dengesiz haldedirler ve hücrelerin hemen altında bulunan bir duvar yoktur. Bir dengesiz hücreden diğerine ilerlemek imkansızdır, aşağı doğru ilerlemek hariç.\n\n",
    "Tuto část světa si pro sebe zabrali mocní mágové, aby zde mohli v klidu a osamění provádět své magické experimenty. Změnili směr gravitace, aby bylo pro vetřelce ještě obtížnější se k nim dostat.\n\nGravitace funguje následovně: prázdné políčko, pod kterým není žádné políčko se zdí, je 'nestabilní'. Není dovoleno pohybovat se z jednoho nestabilního políčka do druhého, leda směrem dolů.",
    "Мощные колдуны создавали эту землю, чтобы проводить магические эксперименты в покое и уединении. Они изменили направление силы тяжести, чтобы сделать попадание сюда труднее.\n\nГравитация работает так: клетка нестабильна, если она пуста, и поле под ним не содердит стены. Нельзя перейти с одного нестабильного поля на другое, иначе как вниз.",
-   "Mächtige Zauberer haben diesen Teil der Welt für sich beansprucht um inRuhe und Frieden ihre magischen Experimente durchführen zu können. Sie haben die Gravitation in diesem Teil manipuliert um es Eindringlingen zu erschweren.\n\nDie Gravitation funktioniert wie folgt: Zellen sind instabil wenn sie  leer sind und sich unter ihnen keine Zelle mit Wand befindet.Es ist unmöglich sich von einer instabilen Zelle zu einer anderen zu bewegen außer wenn man sich nach unten bewegt.",
+   "Mächtige Zauberer haben diesen Teil der Welt für sich beansprucht um in Ruhe und Frieden ihre magischen Experimente durchführen zu können. Sie haben die Gravitation in diesem Land manipuliert um es Eindringlingen zu erschweren sie zu erreichen.\n\nDie Gravitation funktioniert wie folgt: Zellen sind instabil wenn sie leer sind und sich direkt unter ihnen keine Zelle mit Wand befindet. Es ist unmöglich sich von einer instabilen Zelle zu einer anderen zu bewegen außer wenn man sich nach unten bewegt.",
+    }},
+  {0x13116152, { // "A very interesting species of slime mold."
+   "Bardzo ciekawy gatunek śluzowca.",
+/*MISSING*/    "A very interesting species of slime mold.",
+   "Velice zajímavý druh hlenky.",
+   "Очень интересная разновидность слизня.",
+/*MISSING*/    "A very interesting species of slime mold.",
+    }},
+  {0x132b8912, { // "Objects at distance less than %1 absolute units from the center will be displayed with high detail, and at distance at least %2 with low detail."
+   "Obiekty w odległości bliższej niż %1 od środka będą rysowane z wieloma szczegółami, a dalszej niż %2 z niewieloma.",
+/*MISSING*/    "Objects at distance less than %1 absolute units from the center will be displayed with high detail, and at distance at least %2 with low detail.",
+   "Objekty ve vzdálenosti méně než %1 od středu budou zobrazovány s vysokými detaily, a objekty ve vzdálenosti méně než %2 se středními detaily.",
+   "Объекты на расстоянии меньше %1 единиц от центра изображены с большой детализацией, а дальше %2 -- с низкой.",
+/*MISSING*/    "Objects at distance less than %1 absolute units from the center will be displayed with high detail, and at distance at least %2 with low detail.",
     }},
   {0x13552e54, { // "%The1 breathes fire at you!"
    "%1 zionął ogniem na Ciebie!",
 /*MISSING*/    "%The1 breathes fire at you!",
    "%1 na tebe chrlí oheň!",
    "%1 дышит огнём на вас!",
-/*MISSING*/    "%The1 breathes fire at you!",
+   "%Der1 %1 speit Feuer auf dich!",
     }},
   {0x13b5fb7d, { // "distance between eyes"
    "odległość między oczami",
    "gözler arası uzaklık",
    "vzdálenost očí od sebe",
    "расстояние между глазами",
-   "Augen Abstand",
+   "Augenabstand",
     }},
   {0x13c016ae, { // "special features [Space]"
    "opcje specjalne [Space]",
@@ -630,17 +1379,24 @@ sentence all_sentences[1130] = {
 /*MISSING*/    "render now (length: %1)",
    "renderovat hned (délka: %1)",
    "рисуется сейчас (длина: %1)",
-/*MISSING*/    "render now (length: %1)",
+   "rendere jetzt (Länge: %1)",
+    }},
+  {0x13ef5280, { // "cheats"
+   "oszustwa",
+/*MISSING*/    "cheats",
+/*MISSING*/    "cheats",
+   "Читы",
+/*MISSING*/    "cheats",
     }},
   {0x14452571, { // "You destroy %the1 with a mental blast!"
    "Zniszczy%łeś0 %a1 mocą psychiczną!",
    "%a1 bir zihin patlamasıyla yok ettin!",
    "Zniči%l0 jsi %a1 mentálním úderem!",
    "Вы уничтожили %a1 силой мысли!",
-   "Du zerstörst %den1 %a1 mit mentaler Korruption!",
+   "Du zerstörst %den1 %a1 mit einem mentalen Stoß!",
     }},
   {0x15671397, { // "You feel great, like a true treasure hunter."
-   "Czujesz się świenie, jak prawdziwy łowca skarbów.",
+   "Czujesz się świetnie, jak prawdziwy łowca skarbów.",
    "Şahane hissediyorsun. Sanki gerçek bir hazine avcısı gibi.",
    "Cítíš se skvěle, jako pravý lovec pokladů.",
    "Вы чувствуете себя как прекрасный охотник за сокровищами.",
@@ -679,7 +1435,21 @@ sentence all_sentences[1130] = {
 /*MISSING*/    "what's this?",
    "co to je?",
    "что это?",
-/*MISSING*/    "what's this?",
+   "Was ist das?",
+    }},
+  {0x1697e08a, { // "Rotate the camera in ball/hyperboloid model."
+   "Obróć kamerę w modelu kuli/hiperboloidy.",
+/*MISSING*/    "Rotate the camera in ball/hyperboloid model.",
+   "Rotace kamery v modelu koule/hyperboloidu.",
+   "Поворачивает камеру в модели сферы/гиперболоида.",
+/*MISSING*/    "Rotate the camera in ball/hyperboloid model.",
+    }},
+  {0x16e1d6d8, { // "A magical energy sword. Don't waste its power!"
+   "Miecz energii. Nie zmarnuj jego mocy!",
+/*MISSING*/    "A magical energy sword. Don't waste its power!",
+   "Kouzelný energetický meč. Nepromarni jeho sílu!",
+   "Магический меч энергии. Не тратьте его мощь зря!",
+/*MISSING*/    "A magical energy sword. Don't waste its power!",
     }},
   {0x17160297, { // "Vikings believe that garnets improve their strength."
    "Wikingowie wierzą, że granaty dają im siłę.",
@@ -693,14 +1463,14 @@ sentence all_sentences[1130] = {
    "%1 %a2 pençeledi!",
    "%1 sek%l1 %a2!",
    "%1 атаковал%E1 %a2!",
-   "%Der1 %1 kratzt %den2 %a2!",
+   "%Der1 %1 zerkratzt %den2 %a2!",
     }},
   {0x179cd5f0, { // "Bomberbird eggs are big and tasty, and thus valuable. They can hatch when left alone for some time (but this will never happen if you are watching)."
    "Jaja Bombardierów są wartościowe, bo są duże i smaczne. Mogą się wykluć, gdy dasz im czas (ale nie stanie się to, jeżeli patrzysz).",
    "Bombacıkuş yumurtaları büyük ve lezzetlidir, bu sebeple değerlidir. Eğer yalnız bırakılırlarsa çatlayabilirler. (Ama bu sen izlerken olmaz.)",
    "Vejce Bombarďáků jsou velká a chutná -- a tudíž i cenná. Mohou se vylíhnout, když je necháš nějaký čas na pokoji (ale to se nikdy nestane, když se na ně díváš).",
    "Яйца бомбардиров большие и вкусные, и потому ценные. Если оставть их в покое, может вылупиться бомбардир (но этого не случится, пока Вы на них смотрите).",
-   "Bombenvogel Eier sind groß und schmackhaft, daher wertvoll. Sie können nach einiger Zeit schlüpfen (aber machen dies nie, wenn du zusiehst).",
+   "Bombenvogeleier sind groß und schmackhaft, daher wertvoll. Sie können nach einiger Zeit schlüpfen (aber machen dies nie, wenn du zusiehst).",
     }},
   {0x18dffecc, { // "Collect 5 Emeralds to access Camelot"
    "Zbierz 5 Szmaragdów, by dostać się do Camelot",
@@ -749,21 +1519,21 @@ sentence all_sentences[1130] = {
 /*MISSING*/    "This Orb lets your allies to share your Orb powers.\n\nThe following Orbs are affected:",
    "Tato Sféra ti umožňuje dělit se o moc tvých Sfér s kamarády.\n\nOvlivňuje následující Sféry:",
    "Эта сфера позволяет Вашим союзникам использовать силы Ваших сфер.\n\nДействует на следующие сферы:",
-/*MISSING*/    "This Orb lets your allies to share your Orb powers.\n\nThe following Orbs are affected:",
+   "Dieser Orb erlaubt es deinen Verbündeten deine Orbkräfte zu nutzen.\n\nDie folgenden Orbs sind betroffen:",
     }},
   {0x19a232a3, { // "A very cold land, full of ice walls. Your mere presence will cause these ice walls to melt, even if you don't want it."
    "Bardzo zimna kraina, pełna lodowych ścian. Wystarczy Twoja obecność, by te ściany się roztopiły. Nawet, jak tego nie chcesz.",
    "Buz duvarlarıyla dolu çok soğuk bir diyar. Sen istemesen de sadece varlığın bile duvarların erimesine sebep oluyor.",
    "Velmi chladný kraj plný ledových zdí. Tyto ledové zdi tají už tvou pouhou přítomností, ať už si to přeješ nebo ne.",
    "Очень холодная земля, полная ледяных стен. Они будут таять от Вашего присутствия, даже если Вы этого не хотите.",
-   "Ein ziemlich kaltes Land, voller Eiswände. Deine Gegenwart allein wird sie allerdings zum Schmelzen bringen, ob du willst oder nicht.",
+   "Ein ziemlich kaltes Land - voller Eiswände. Deine Gegenwart allein wird sie allerdings zum Schmelzen bringen, ob du willst oder nicht.",
     }},
   {0x19c78e5c, { // "gain kills"
    "zdobądź zabicia",
    "leşler kazan.",
    "získej zabité netvory",
    "получить убийства",
-/*MISSING*/    "gain kills",
+   "erhalte Tötungen",
     }},
   {0x19d3eb38, { // "No room to push %the1."
    "Brak miejsca, by popchnąć %a1.",
@@ -773,18 +1543,25 @@ sentence all_sentences[1130] = {
    "Kein Platz um %den1 %a1 zu schieben.",
     }},
   {0x1a0f587d, { // "The Air Elemental blows you away!"
-   "Powietrzny Żywiołak Ciebie zdmuchnie!",
+   "Powietrzny Żywiołak Cię zdmuchnie!",
    "Hava Unsuru seni uzağa uçuruyor!",
    "Elementál Vzduchu tě odfoukl!",
    "Воздушный элементаль сдул Вас!",
    "Der Luftelementar weht dich weg!",
     }},
   {0x1a161360, { // "This dangerous predator has killed many people, and has been sent to Cocytus."
-   "Ten niebezpieczny drapieżnik zabił wielu ludzi, i został zesłany do Kocytu.",
+   "Ten niebezpieczny drapieżnik zabił wielu ludzi i został zesłany do Kocytu.",
    "Bu tehlikeli yırtıcı çok kişiyi öldürdü ve Kokitos'a gönderildi.",
    "Tento nebezpečný predátor zabil spoustu lidí, a tak byl poslán do Cocytu.",
    "Этот опасный хищник убил немало людей и был отправлен в Коцит.",
-   "Dieser gefürchtete Jäger hat schon Viele das Leben gekostet, und wurde darum nach Kokytos entsandt.",
+   "Dieser gefürchtete Jäger hat schon viele das Leben gekostet und wurde nach Kokytos geschickt.",
+    }},
+  {0x1a16ff81, { // "drop Dead Orb (up + down)"
+   "połóż Martwą Sferę (góra+dół)",
+/*MISSING*/    "drop Dead Orb (up + down)",
+   "polož Mrtvou sféru (nahoru + dolů)",
+   "положить Мёртвую сферу (вверх + вниз)",
+/*MISSING*/    "drop Dead Orb (up + down)",
     }},
   {0x1a8dced2, { // "0 = Klein model, 1 = Poincaré model"
    "0 = model Kleina, 1 = model Poincaré",
@@ -821,6 +1598,13 @@ sentence all_sentences[1130] = {
    "скорость анимации",
    "Animationsgeschwindigkeit",
     }},
+  {0x1b9d6e68, { // "ball model"
+   "model kuli",
+/*MISSING*/    "ball model",
+   "model koule",
+   "модель сферы",
+/*MISSING*/    "ball model",
+    }},
   {0x1bf59600, { // "WARNING: you are entering a minefield!"
    "UWAGA: wchodzisz na pole minowe!",
    "UYARI: bir mayıntarlasına giriyorsun!",
@@ -829,11 +1613,11 @@ sentence all_sentences[1130] = {
    "ACHTUNG: Du betrittst ein Minenfeld!",
     }},
   {0x1c7e60fd, { // "That's all you need to unlock the Orb of Yendor! Well... as long as you are able to return to the Orb that this key unlocks...\n\nEach key unlocks only the Orb of Yendor which led you to it."
-   "To jest to, czego potrzebujesz, by otworzyć Sferę Yendoru! O ile umiesz do niej trafić...\nKażdy klucz otwiera tylko jedną Sferę, która Ciebie do niego doprowadziła.",
+   "To jest to, czego potrzebujesz, by otworzyć Sferę Yendoru! O ile umiesz do niej trafić...\nKażdy klucz otwiera tylko jedną Sferę, która Cię do niego doprowadziła.",
    "Yendorun Küresinin kilidini açmak için ihtiyacınız olan her şeyi tamamladın. Tabi... Önce Küreyr dönmen gerekiyor...\nHer anahtar seni ona yönlendiren yendorun küresini açacaktır.",
    "To je všechno, co potřebuješ k odemčení Yendorské sféry! No... pokud se tedy dokážeš vrátit ke sféře, kterou tenhle klíč odemyká...\nKaždý klíč odemyká pouze tu Yendorskou sféru, která tě k němu zavedla.",
    "Это всё, что Вам нужно, чтобы открыть Сферу Йендора! Ну, если Вы сможете к ней вернуться...\nКаждый ключ открывает лишь ту сферу, которая на него указывает.",
-   "Das ist alles, was du brauchst, um den Orb von Yendor zu öffnen! ...solange du wieder zurückfindest...\nJeder Schlüssel entsperrt nur den Orb von Yendor, der dich zu ihm geführt hat.",
+   "Das ist alles, was du brauchst, um den Orb von Yendor zu öffnen! ...solange du es schaffst, zu dem Orb zurückzufinden, zu dem dieser Schlüssel passt...\nJeder Schlüssel entsperrt nur den Orb von Yendor, der dich zu ihm geführt hat.",
     }},
   {0x1c8904a7, { // "weapon color"
    "kolor broni",
@@ -842,26 +1626,61 @@ sentence all_sentences[1130] = {
    "цвет оружия",
    "Waffenfarbe",
     }},
+  {0x1c893324, { // "Your energy swords get stronger!"
+   "Twoje ostrza energii stały się silniejsze!",
+/*MISSING*/    "Your energy swords get stronger!",
+   "Tvé energetické meče sílí!",
+   "Твои энергетические мечи стали сильнее!",
+/*MISSING*/    "Your energy swords get stronger!",
+    }},
+  {0x1c8ff97a, { // "Hint: magical powers from Treats expire after a number of uses."
+   "Wskazówka: magiczne moce Cukierków wyczerpują się po kilku użyciach.",
+/*MISSING*/    "Hint: magical powers from Treats expire after a number of uses.",
+   "Nápověda: magické schopnosti získané z Pochoutek zmizí po určitém počtu použití.",
+   "Подсказка: магические силы конфет пропадают после некоторого числа использований.",
+/*MISSING*/    "Hint: magical powers from Treats expire after a number of uses.",
+    }},
   {0x1cba92db, { // "summon orbs"
    "przwołaj sfery",
    "küre çıkar",
    "vyvolej sféry",
    "призвать сферы",
-/*MISSING*/    "summon orbs",
+   "rufe Orbs herbei",
+    }},
+  {0x1cc14d8a, { // "A long time ago, this was a trade route. But then, Krakens have risen out of the depths. Many trading ships sank here. Legend says that you can uncover the secret of a magical weapon spell somewhere in the depths...\n\nYou can find Sunken Treasures here, but they won't appear until you have killed a Kraken. You will also need Orb of the Fish to get the treasures, luckily you can steal one from the Viking treasure hunters."
+   "Dawno, dawno temu, to był szlak handlowy, ale Krakeny wypłynęły z głębin. Wiele statków handlowych zatonęła. Według legendy, gdzieś w głębinach ukryty jest sekret magicznej broni...\n\nMożesz tu znaleźć Zatopione Skarby, ale nie będą się one pojawiać, aż pokonasz Krakena. By wyłowić skarby, potrzebna jest Sfera Ryby. Na szczęście można ukraść ją od wikińskich łowców skarbów.",
+/*MISSING*/    "A long time ago, this was a trade route. But then, Krakens have risen out of the depths. Many trading ships sank here. Legend says that you can uncover the secret of a magical weapon spell somewhere in the depths...\n\nYou can find Sunken Treasures here, but they won't appear until you have killed a Kraken. You will also need Orb of the Fish to get the treasures, luckily you can steal one from the Viking treasure hunters.",
+   "Tohle byla kdysi dávno obchodní trasa. Jenomže potom se z hlubin vynořili Krakeni. Mnoho obchodních lodí se tu potopilo. Legenda praví, že kdesi v hlubinách můžete najít tajemství kouzla, které vytváří magickou zbraň...\n\nV Hlubinách lze najít Potopené poklady, ale ty se objeví teprve poté, co zabiješ alespoň jednoho Krakena. K získání pokladů budeš také potřebovat Sféru Ryby, ale ty se naštěstí dají ukrást vikingským lovcům pokladů.",
+   "Когда-то давно здесь были торговые пути. Но потом Кракены появились из глубин. Много торговых кораблей затонуло здесь. Легенды гласят, что где-то здесь можно найти тайны магического оружия...\n\nЗдесь можно найти затонувшие сокровища, но их нельзя найти, пока не убьёшь одного Кракена. Кроме того, чтобы до них добраться нужна Сфера Рыбы. К счастью, её можно украсть у Викингов, охотников за сокровищами.",
+   "Vor langer Zeit war dies eine Handelsroute. Dann aber stiegen Kraken aus den Tiefen empor. Viele Handelsschiffe versanken hier. Legenden behaupten, dass man das Geheimnis eines Zaubers für eine magische Waffe irgendwo in den Tiefen enthüllen kann...\n\nHier kannst du versunkene Schätze finden, aber erst nachdem du einen Kraken getötet hast. Du wirst auch den Orb des Fischs brauchen, um zu den Schätzen zu gelangen.  Glücklicherweise kannst du einen von den Wikinger-Schatzjägern stehlen.",
     }},
   {0x1cfc7dd3, { // "hexagonal #1"
    "sześciokąt #1",
 /*MISSING*/    "hexagonal #1",
    "šestiúhelníkový #1",
    "шестиугольник #1",
-/*MISSING*/    "hexagonal #1",
+   "hexagonal #1",
     }},
   {0x1cfcaab2, { // "These orbs can be found in the Graveyard. You think that they were once powerful magical orbs, but by now, their power is long gone. No way to use them, you could as well simply drop them...\n\n"
    "Na cmentarzu jest mnóstwo tych sfer. Chyba były to kiedyś potężne magiczne kule, ale ich moc dawno przeminęła. Nie ma jak ich użyć, także może lepiej je po prostu zostawić...\n\n",
    "Bu küreler Mezarlıkta bulunabilir. Eskiden kudretli sihrili kürelerdi, ama şimdi güçleri bitti. Onları kullanmanın bir yolu yok, bırakın gitsin...\n\n",
    "Tyto sféry můžeš najít na Hřbitově. Máš dojem, že to kdysi byly mocné magické sféry, ale jejich moc už je dávno pryč. Nedají se nijak použít, můžeš je rovnou zase položit...\n\n",
    "Эту сферу можно найти на Кладбище. Когда-то она обладала могущественной магией, но теперь её сила иссякла. Нет способа её использовать. Разве что просто бросить её...\n\n",
-   "Diese Orbs kannst du auf dem Friedhof finden. Du schätzt, sie waren einst mächtig, aber mittlerweile ist ihre Kraft verbraucht. Es gibt keinen Weg ihr Kraft wieder zu erwecken, du könntest die Orbs auch einfach dalassen...\n\n",
+   "Diese Orbs kannst du auf dem Friedhof finden. Du glaubst, dass sie einst mächtige magische Orbs waren, aber inzwischen ist ihre Kraft längst erloschen. Sie sind für dich nutzlos; du könntest sie auch einfach ablegen...\n\n",
+    }},
+  {0x1d1d9ed1, { // "field quotient"
+   "przestrzeń ilorazowa ciała",
+/*MISSING*/    "field quotient",
+/*MISSING*/    "field quotient",
+/*MISSING*/    "field quotient",
+/*MISSING*/    "field quotient",
+    }},
+  {0x1d35548f, { // "Level of water surface"
+   "Poziom powierzchni wody",
+/*MISSING*/    "Level of water surface",
+   "Úroveň vodní hladiny",
+   "Уровень поверхности воды",
+/*MISSING*/    "Level of water surface",
     }},
   {0x1d412462, { // " (touch to activate)"
    " (dotknij, by aktywować)",
@@ -871,7 +1690,7 @@ sentence all_sentences[1130] = {
    " (Zum Aktivieren tippen)",
     }},
   {0x1dd141d2, { // "A mine is next to you!"
-   "Jedna mina koło ciebie!",
+   "Jedna mina koło Ciebie!",
    "Yakınında bir mayın var!",
    "Ve tvé blízkosti se nachází jedna mina!",
    "Одна мина рядом с Вами!",
@@ -889,7 +1708,7 @@ sentence all_sentences[1130] = {
    "(Menü), ve ASCII modunu seçebilirsin. Bu mod daha hızlı çalışır. Aygıtınıza bağlı olarak OpenGL'yi açmak oyununuzu hızlandırabilir, yavaşlatabilir veya hatalara sebep olabilir.",
    "(tlačítko 'Menu') a zvolit ASCII mód, který je mnohem rychlejší. Zapnutí či vypnutí módu OpenGL může, v závislosti na tvém zařízení, hru zrychlit, zpomalit, nebo vyvolat grafické chyby.",
    "(Меню), выберите ASCII режим, который работает быстрее. В зависимости от Вашего устройства включите или выключите OpenGL. Он может быть как быстрее, так и медленнее. ",
-   "(Im Menü) Versuche den ASCII-Modus zu aktivieren - der läuft viel schneller!Je nach Gerät kann der OpenGL-Modus das Spiel beschleunigen, verlangsamen, oder Glitches hervorrufen.",
+   "(Im Menü) Versuche den ASCII-Modus zu aktivieren - der läuft viel schneller! Je nach Gerät kann der OpenGL-Modus das Spiel beschleunigen, verlangsamen, oder Bildfehler hervorrufen.",
     }},
   {0x1df00010, { // "openGL mode disabled"
    "wyłączono tryb OpenGL",
@@ -899,11 +1718,11 @@ sentence all_sentences[1130] = {
    "OpenGL deaktiviert",
     }},
   {0x1df9745d, { // "This guard of the Emerald Mine is wielding a huge flail. You cannot attack him directly, as the flail would still hit you then. Luckily, you have learned a trick: if you step away from him, he will hit himself with the flail!"
-   "Ten strażnik Kopalni Szmaragdów jest uzbrojony w wielki cep bojowy. Nie możesz go zaatakować bezpośrednio, bo cep by Ciebie uderzył. Na szczęście, znasz sztuczkę: jak się od niego odsuniesz, strażnik uderzy cepem samego siebie!",
+   "Ten strażnik Kopalni Szmaragdów jest uzbrojony w wielki cep bojowy. Nie możesz go zaatakować bezpośrednio, bo cep by Cię uderzył. Na szczęście, znasz sztuczkę: jak się od niego odsuniesz, strażnik uderzy cepem samego siebie!",
    "Zümrüt Madeninin bu muhafızı kocaman bır topuz tutuyor. Ona doğrudan saldıramazsın, çünkü topuz sana yine de vurur. Çok şükür bir hile öğrendin: Eğer geriye doğru bir adım atarsan, muhafız topuzuyla kendisine vuracak!",
    "Tento strážce Smaragdového dolu je vyzbrojen obrovským řemdihem. Nemůžeš na něj útočit přímo, protože by tě řemdih i tak zasáhl. Naštěstí ses naučil jeden trik: pokud se pohneš směrem od něj, zasáhne řemdihem sám sebe!",
    "Этот страж изумрудных шахт вооружён огромным цепом. Вы не можете атаковать его обычным путём, потому что тогда цеп убьёт Вас. К счастью, Вы знаете трюк: достаточно отойти от него, когда он замахивается, и он убьёт сам себя!",
-   "Dieser Wächter der Smaragdmine hat einen riesigen Flegel. Ihn direkt anzugreifen würde nichts bringen da der Flegel dich treffen würde.Glücklicherweise kennst du einen Trick:Wenn du dich von ihm entfernst, trifft er sich selbst!",
+   "Dieser Wächter der Smaragdmine hat einen riesigen Morgenstern. Ihn direkt anzugreifen würde nichts bringen da der Morgenstern dich treffen würde. Glücklicherweise kennst du einen Trick: Wenn du dich von ihm entfernst, trifft er sich selbst!",
     }},
   {0x1e3e87b7, { // "The Knights wish you luck!"
    "Rycerze życzą powodzenia!",
@@ -917,14 +1736,14 @@ sentence all_sentences[1130] = {
    "Bu güçlü yaratığın geçtiği her yerde Yaşayan Fiyort su altına gömülür, sihirli olmayan kayıklar yok olur ve ateşler söner. \n\n İstisna bir durum olarak Su Unsuruna suyun içerisinden anında boğulmadan vurursan onu öldürebilirsin. ",
    "Kamkoli se vydá tato mocná bytost, tam se Živoucí fjord potápí pod vodu, všechny čluny kromě magických jsou zničeny a veškerý oheň je uhašen.\n\nNa Elementála Vody můžeš zaútočit z vody, aniž by ses okamžitě utopil; to je speciální případ.",
    "Где бы ни шло это могущественное существо, фьорды расступаются перед ним, обычные лодки уничтожаются, огонь гаснет.\n\nОднако, если Вы атакуете его, находяст в воде, Вас не затянет сразу в воду.",
-   "Wohin auch immer sich dieses Wesen bewegt sinkt der lebende Fjord.Dadurch werden nicht magische Boote zerstört und Feuer gelöscht.\n\nDie Besonderheit ist du kannst das Wasserelementar vom Wasser aus angreifen ohne direkt zu ertrinken.",
+   "Wohin auch immer sich dieses Wesen bewegt sinkt der lebende Fjord. Dadurch werden nicht magische Boote zerstört und Feuer gelöscht.\n\nDie Besonderheit ist: du kannst den Wasserelementar vom Wasser aus angreifen ohne sofort zu ertrinken.",
     }},
   {0x1e9407e4, { // "Failed to load the file 'papermodeldata.txt'"
    "Nie udało się wczytać papermodeldata.txt",
    "papermodeldata.txt dosyası yüklenemedi",
    "Soubor 'papermodeldata.txt' se nepodařilo nahrát",
    "Невозможно загрузить файл papermodeldata.txt",
-   "papermodeldata.txt konnte nicht geladen warden.",
+   "papermodeldata.txt konnte nicht geladen werden.",
     }},
   {0x1ebefc13, { // "This Orb lets you jump to a place which is two cell away from you, in a single turn. You can jump over water, chasms and fire, but not over walls."
    "Ta Sfera pozwala na skok do miejsca odległego od Ciebie o dwa pola, w jednej kolejce. Możesz przeskoczyć wodę, przepaść i ogień, ale nie ścianę.",
@@ -940,6 +1759,13 @@ sentence all_sentences[1130] = {
    "Эта сфера позволяет проходить сквозь живые стены. Она имеет силу и в некоторых других землях.",
    "Dieser Orb erlaubt es dir, dich durch lebende Wände zu bewegen und er besitzt auch einige Kräfte in anderen Ländern.",
     }},
+  {0x1edbcc1a, { // "After you move while having this Orb, you immediately attack the next cell in the straight line (or two cells, when moving on a heptagon). This attack is slightly stronger than your normal attack: it can stun some of the monsters which cannot be killed or stunned normally."
+   "Po każdym ruchu z tą Sferą, natychmiast atakujesz kolejne pole w linii prostej (albo dwa pola, gdy jesteś na siedmiokącie). Ten atak jest trochę silniejszy od Twojego zwykłego ataku: niektóre potwory niewrażliwe na zwykły atak można w ten sposób ogłuszyć.",
+/*MISSING*/    "After you move while having this Orb, you immediately attack the next cell in the straight line (or two cells, when moving on a heptagon). This attack is slightly stronger than your normal attack: it can stun some of the monsters which cannot be killed or stunned normally.",
+   "Kdykoli se pohneš s touto Sférou, okamžitě zaútočíš na další políčko v řadě (nebo na dvě, pokud se pohneš na sedmiúhelník). Tento útok je o něco silnější než tvůj běžný útok: dokáže omráčit některé netvory, které nelze zabít ani omráčit běžným způsobem.",
+   "После хода с этой сферой вы сразу же атакуете следующую клетку прямой (или две клетки, если ходите на семиугольник). Эта атака немного сильнее обычной: она оглушает некоторых существ, которых нельзя убить или оглушить обычным ударом.",
+/*MISSING*/    "After you move while having this Orb, you immediately attack the next cell in the straight line (or two cells, when moving on a heptagon). This attack is slightly stronger than your normal attack: it can stun some of the monsters which cannot be killed or stunned normally.",
+    }},
   {0x1f3db1c6, { // "%The1 squeaks gratefully!"
    "%1 pisn%ął1 w podziękowaniu!",
    "%1 minnetle ciyaklıyor.",
@@ -952,14 +1778,21 @@ sentence all_sentences[1130] = {
    "Bu küre haritadaki balşka bir noktaya anında ışınlanmanızı sağlayacak. Işınlanmak için sadece yanında olmayan bir yere tıkla.",
    "Tato sféra ti umožňuje se okamžitě přemístit na jiné místo na mapě. Stačí, abys klikl na libovolné nesousední políčko.",
    "Эта сфера позволяет перемещаться в произвольное место. Просто кликните по не соседней с Вами клетке, чтобы телепортироваться туда.",
-   "Dieser Orb teleportiert dich an einen anderen Ort auf der Karte, klicke einfach einen Ort an der sich nicht neben dir befindet.",
+   "Dieser Orb versetzt dich an einen anderen Ort auf der Karte. Klicke einfach einen Ort an, der sich nicht neben dir befindet, um dorthin zu teleportieren.",
     }},
   {0x1f8ebbbf, { // "An ancient sunken city which can be reached only when the stars are right.\n\nYou can find Temples of Cthulhu in R'Lyeh once you collect five Statues of Cthulhu."
    "Prastare zatopione miasto, do którego można dostać się tylko, gdy gwiazdy są na swoich miejscach.\n\nPo znalezieniu 5 Statuetek Cthulhu możesz w R'Lyeh trafić na Świątynie Cthulhu.",
    "Sadece yıldızlar burayı işaret ettiğinde ulaşılabilecek batık bir antik şehir.\n\nCthulhu'nun tapınaklarını 5 Cthulhu heykeli topladıktan sonra bulabilirsin.",
    "Prastaré potopené město, kam se lze dostat pouze při správném postavení hvězd.\n\nPo znalezieniu 5 Statuetek Cthulhu możesz w R'Lyeh trafić na Świątynie Cthulhu.",
    "Этот древний затопленный город можно найти лишь тогда, когда на него укажут звёзды.\n\nВы сможете найти храмы Ктулху, как только соберёте 5 статуй Ктулху.",
-   "Eine antike, versunkene Stadt, die du nur erreichen kannst, wenn die Sterne günstig stehen.\n\nDer Tempel von Cthulhu befindet sich in R'Lyeh, sobald du fünf Statuen von Cthulhu gesammelt hast kannst du ihn betreten.",
+   "Eine antike, versunkene Stadt, die du nur erreichen kannst, wenn die Sterne günstig stehen.\n\nDer Tempel des Cthulhu befindet sich in R'Lyeh. Sobald du fünf Statuen von Cthulhu gesammelt hast, kannst du ihn finden.",
+    }},
+  {0x1f9a904e, { // "native to %the1 (collect 1 %2)"
+   "rodzima %abl1 (1x %2)",
+   "%abl1 bulunuyor (1 tane %2)",
+   "standardní %abl1 (získej 1x %2)",
+   "родная %abl1 (1x %2)",
+   "heimisch in %der1 (1x %2)",
     }},
   {0x1fe99f69, { // "video resolution"
    "rozdzielczość obrazu",
@@ -969,11 +1802,11 @@ sentence all_sentences[1130] = {
    "Videoauflösung",
     }},
   {0x1ff2a5f5, { // "Corals have a somewhat hyperbolic structure even in your home world, but natural corals from the Warped Sea have truly beautiful shapes. Ratlings know the value of corals, and thus keep them in boats for safety."
-   "Korale mają hiperboliczną strukturę nawet w świecie, z którego pochodzisz, ale naturalne korale z Zakrzywionego Morza mają prawdziwie piękne kształty. Szczuraki znają wartość korala, i dla bezpieczeństwa trzymają je na łódkach.",
+   "Korale mają hiperboliczną strukturę nawet w świecie, z którego pochodzisz, ale naturalne korale z Zakrzywionego Morza mają prawdziwie piękne kształty. Szczuraki znają wartość korali i dla bezpieczeństwa trzymają je na łódkach.",
 /*MISSING*/    "Corals have a somewhat hyperbolic structure even in your home world, but natural corals from the Warped Sea have truly beautiful shapes. Ratlings know the value of corals, and thus keep them in boats for safety.",
    "Korály mají do jisté míry hyperbolickou strukturu i ve tvém domovském světě, ale tvary přírodních korálů z Pokřiveného moře jsou skutečně nádherné. Krysáci znají hodnotu korálů, a kvůli bezpečnosti je přechovávají ve člunech.",
    "Кораллы имеют структуру, похожую на гиперболическую, даже в Вашем обычном мире, но настоящие кораллы из Искривлённого моря имеют действительно красивые формы. Крысолюды знают цену кораллам и на всякий случай хранят из в лодках.",
-/*MISSING*/    "Corals have a somewhat hyperbolic structure even in your home world, but natural corals from the Warped Sea have truly beautiful shapes. Ratlings know the value of corals, and thus keep them in boats for safety.",
+   "Korallen haben auch in deiner Welt eine etwas hyperbolische Struktur. Aber natürliche Korallen der Verzerrten See haben besonders schöne Formen. Rattenmenschen kennen den Wert der Korallen und bewahren sie daher zur Sicherheit in Booten auf.",
     }},
   {0x200536cf, { // "heptagonal game board"
    "plansza do gry z siedmiokątów",
@@ -987,7 +1820,7 @@ sentence all_sentences[1130] = {
 /*MISSING*/    "\n\nThis is a friendly being. It does not count for your total kills.",
    "\n\nToto je přátelská bytost. Nepočítá se do celkového počtu zabitých netvorů.",
    "\n\nЭто Ваш союзник. Не учитывается в количестве убийств.",
-/*MISSING*/    "\n\nThis is a friendly being. It does not count for your total kills.",
+   "\n\nDas ist ein freundliches Wesen. Es wird der Gesamtzahl deiner Tötungen nicht eingerechnet.",
     }},
   {0x207af4ad, { // "The inscriptions on the Statue of Cthulhu point you toward your destiny..."
    "Inskrypcje na Statui Cthulhu wskazują Ci Twoje Przeznaczenie...",
@@ -995,6 +1828,13 @@ sentence all_sentences[1130] = {
    "Nápis na Cthulhuově sošce tě směruje ke tvému osudu...",
    "Надписи на статуе Ктулху показывают Вам Вашу судьбу...",
    "Die Inschrift auf Cthulhus Statue zeigt dir den Weg zu deinem Schicksal...",
+    }},
+  {0x207f072a, { // "projection in ball model"
+   "projekcja w modelu kuli",
+/*MISSING*/    "projection in ball model",
+   "projekce v modelu koule",
+   "проекция в модели сферы",
+/*MISSING*/    "projection in ball model",
     }},
   {0x20861ec3, { // "Save %the1 first to unlock this challenge!"
    "Uratuj %a1, by mieć dostęp do tej misji!",
@@ -1011,7 +1851,7 @@ sentence all_sentences[1130] = {
    "Du kannst Sandwürmer nicht direkt angreifen!",
     }},
   {0x20cd7f3a, { // "%The1 would get you!"
-   "Dopad%ł1by Ciebie %1!",
+   "Dopad%ł1by Cię %1!",
    "%1 seni kapar!",
    "To by tě dosta%l1 %1!",
    "%1 уничтожит вас здесь!",
@@ -1036,7 +1876,14 @@ sentence all_sentences[1130] = {
    "Kumkurtlarını ve diğer düşmanları çağıracak bir aygıt. Sadece etkinleştirmen gerekiyor.",
    "Zařízení, které přitahuje písečné červy a jiné nepřátele. Aby začalo pracovat, musíš ho aktivovat.",
    "Этот аппарат привлекает песчаных червей и других врагов. Вам нужно активировать его.",
-   "Ein Gerät, das Sandwürmer und andere Feinde anzieht. Allerdings musst du es einschalten.",
+   "Ein Gerät, das Sandwürmer und andere Feinde anlockt. Es muss aktiviert werden.",
+    }},
+  {0x211b3e1f, { // "Another energy sword!"
+   "Jeszcze jeden miecz energii!",
+/*MISSING*/    "Another energy sword!",
+   "Další energetický meč!",
+   "Ещё один магический меч!",
+/*MISSING*/    "Another energy sword!",
     }},
   {0x21278f73, { // " Additionally, all items around the killed Troll will be destroyed."
    " Dodatkowo, wszystkie przedmioty wokół zabitego Trolla ulegają zniszczeniu.",
@@ -1059,6 +1906,20 @@ sentence all_sentences[1130] = {
    "Он тренировался в Изумрудной шахте. Хм, интересно...",
    "Er  hat in der Smaragdmine trainiert. Interessant...",
     }},
+  {0x2175c728, { // "hyperboloid model"
+   "model hiperboloidy",
+/*MISSING*/    "hyperboloid model",
+   "model hyperboloidu",
+   "модель гиперболоида",
+/*MISSING*/    "hyperboloid model",
+    }},
+  {0x21c93b56, { // "After killing %the1, you feel able to reach the Elemental Planes!"
+   "Po pokonaniu %a1 czujesz, że masz dostęp do Strefy Żywiołów!",
+/*MISSING*/    "After killing %the1, you feel able to reach the Elemental Planes!",
+   "Po zabití %a1 cítíš, že jsi schopen dosáhnout Elementálních rovin!",
+   "Победив %a1, ты чувствуешь, что можешь попасть в Плоскость стихий!",
+/*MISSING*/    "After killing %the1, you feel able to reach the Elemental Planes!",
+    }},
   {0x21d7b5ef, { // "(v) config"
    "(v) ust.",
    "(v) ayarlar",
@@ -1071,14 +1932,35 @@ sentence all_sentences[1130] = {
    "Aşkıntaş Görevi",
    "hyperkamový úkol",
    "Миссия Гиперкамней",
-/*MISSING*/    "Hyperstone Quest",
+   "Hyperstone-Herausforderung",
+    }},
+  {0x226c89da, { // "\nSpecial conduct (still valid)\n"
+   "\nDodatkowe wyzwanie (wciąż spełnione):",
+/*MISSING*/    "\nSpecial conduct (still valid)\n",
+   "\nZvláštní výzva (stále platná):",
+   "\nДополнительное условие (выполняется):",
+/*MISSING*/    "\nSpecial conduct (still valid)\n",
     }},
   {0x22843718, { // "A nasty predator from the Icy Land. Contrary to other monsters, it tracks its prey by their heat."
    "Niebezpieczny drapieżnik z Krainy Lodu. W przeciwieństwie do innych stworów, śledzi ofiarę po jej cieple.",
    "Buz Diyarlarında yaşayan hınzır bir yırtıcı. Diğer canavarların aksine, avını ısısıyla takip ediyor.",
    "Ošklivý predátor z Ledového kraje. Na rozdíl od jiných netvorů sleduje kořist pomocí tepla, které vydává.",
    "Мерзкий хищник из Ледяной земли. В отличие от остальных монстров он ищет свою жертву по её теплу.",
-   "Ein ziemlich fieser Jäger des Eisigen Landes. Anders als andere Monster, finden diese ihre Beute anhand ihrer Temperatur.",
+   "Ein scheußlicher Jäger des Eisigen Landes. Anders als andere Monster findet er seine Beute durch deren Wärme.",
+    }},
+  {0x22923e9b, { // "Cannot slash another player!"
+   "Nie możesz ciąć innego gracza!",
+/*MISSING*/    "Cannot slash another player!",
+   "Nemůžeš seknout jiného hráče!",
+   "Нельзя разрубить другого игрока!",
+   "Kann keinen anderen Spieler schlagen!",
+    }},
+  {0x229f917c, { // "You are recalled!"
+   "Wracasz!",
+/*MISSING*/    "You are recalled!",
+   "Vracíš se!",
+   "Вы вернулись!",
+/*MISSING*/    "You are recalled!",
     }},
   {0x22ccbba4, { // "throw a knife"
    "rzut nożem",
@@ -1099,7 +1981,7 @@ sentence all_sentences[1130] = {
    "Çölün içinde doğal bir kum oluşumu.",
    "Přírodní terénní prvek v Poušti.",
    "Натуральный ландшафт пустыни.",
-   "Eine natürliche Terrain Form der Wüste.",
+   "Ein natürliches Landschaftsmerkmal der Wüste.",
     }},
   {0x23234993, { // "Use arrow keys to choose the teleport location."
    "Użyj strzałek, by wybrać cel teleportacji.",
@@ -1107,6 +1989,20 @@ sentence all_sentences[1130] = {
    "Vyber cíl teleportace pomocí šipek.",
    "С помощью стрелок выберите место для телепортации.",
    "Benutze die Pfeiltasten um dein Teleportations Ziel zu wählen.",
+    }},
+  {0x23a89ce4, { // "Rotate the camera. Can be used to obtain a first person perspective, or third person perspective when combined with Y shift."
+   "Obróć kamerę. Można użyć do uzyskania perspektywy z pierwszej osoby, lub z trzeciej osoby po połączeniu z przesunięciem Y.",
+/*MISSING*/    "Rotate the camera. Can be used to obtain a first person perspective, or third person perspective when combined with Y shift.",
+   "Rotace kamery. Lze ji použít k získání perspektivy první osoby, nebo (v kombinaci s Y posuvem) třetí osoby.",
+   "Поворачивает камеру. Можно использовать, чтобы получить вид от первого лица или от третьего лица в сочетании со сдвигом по Y.",
+/*MISSING*/    "Rotate the camera. Can be used to obtain a first person perspective, or third person perspective when combined with Y shift.",
+    }},
+  {0x23c92250, { // "Cannot push into the same location!"
+   "Nie można pchać w to samo miejsce!",
+/*MISSING*/    "Cannot push into the same location!",
+   "Nemůžeš tlačit na stejné místo!",
+   "Нельзя толкать в оно и то же место!",
+   "Kann nicht auf dasselbe Feld ziehen!",
     }},
   {0x23e7d6ba, { // "You feel that %the2 become%s2 more dangerous."
    "Masz wrażenie, że %P2 staje się bardziej niebezpieczn%ya2.",
@@ -1130,7 +2026,7 @@ sentence all_sentences[1130] = {
    "Spieler 1 Y",
     }},
   {0x246929eb, { // "Many lost boats are spinning in this whirlpool. Some of them contain treasures and Pirates.\n\nUnmanned boats will go one cell clockwise in each turn. Sharks and manned boats are only allowed to go with the current, that is, towards the center, or clockwise."
-   "Dużo statków zagubiło się w tym wirze. Na niektórych z nich są skarby i Piraci.\n\nStatki bez załogi poruszają się o 1 pole w każdej kolejce, zgodnie z ruchem wskazówek zegara. Rekiny i statki z załogą mogą poruszać się tylko z prądem, czyli w kierunku środka wiru, albo zgodnie z ruchem wskazówek zegara.",
+   "Dużo statków zagubiło się w tym wirze. Na niektórych z nich są skarby i Piraci.\n\nStatki bez załogi poruszają się o 1 pole w każdej kolejce, zgodnie z ruchem wskazówek zegara. Rekiny i statki z załogą mogą poruszać się tylko z prądem, czyli w kierunku środka wiru albo zgodnie z ruchem wskazówek zegara.",
    "Bu tayfunda pek çok kayıp kayık geziniyor. Bır kısmında hazineler yahut korsanlar var.\n\nİnsansız kayıklar her tur saat yönünde bir hücre hareket eder. Köpekbalıkları ve içinde insan olan kayıklar sadece akıntıyla -yani merkeze doğru- ya da saat yönünde hareket edebilir.",
    "V tomto víru se točí mnoho ztracených člunů. Na některých z nich se nachází poklad nebo piráti.\n\nČluny bez posádky se v každém kole posunou o jedno pole po směru hodinových ručiček. Žraloci a čluny s posádkou se smějí pohybovat pouze po proudu, tedy do středu nebo po směru hodinových ručiček ",
    "Много лодок погибло в этом водовороте. В некоторых из них были ценности и Пираты.\n\nПустые лодки движутся на одну клетку по часовой стрелке каждые ход. Акулы и лодки с людьми движутся по течению, то есть к центру или по часовой стрелке.",
@@ -1155,7 +2051,7 @@ sentence all_sentences[1130] = {
 /*MISSING*/    "see http://www.roguetemple.com/z/hyper/conformal.php",
    "viz http://www.roguetemple.com/z/hyper/conformal.php (anglicky)",
    "смотри http://www.roguetemple.com/z/hyper/conformal.php (по-английски))",
-/*MISSING*/    "see http://www.roguetemple.com/z/hyper/conformal.php",
+   "siehe http://www.roguetemple.com/z/hyper/conformal.php (in Englisch)",
     }},
   {0x25615d28, { // "high contrast"
    "wysoki kontrast",
@@ -1169,14 +2065,21 @@ sentence all_sentences[1130] = {
    "Tebrikler!",
    "Gratulujeme!",
    "Поздравляем!",
-   "Gratulation!",
+   "Glückwunsch!",
     }},
   {0x2586ff41, { // "A mouse squeaks at you. It seems that it wants you to go somewhere. That's interesting, what could you find here?\n\nNote: in the part of the Palace that you are exploring during this quest, the distribution of monsters, pressure plates, and items has been changed somewhat, to make it a bit more suitable for less experienced players. The number of monsters does not depend on the number of Hypersian Rugs you have collected, and there are more opening plates.\n\nHowever, even with the normal distribution, it appears that it should be always possible to reach your goal. If you want this challenge, select it from the special game modes menu."
-   "Myszka piszczy na Ciebie. Wydaje się, że chce Ciebie gdzieś zaprowadzić. Ciekawe, co tam może być?\n\nW części Pałacu, którą zwiedzasz podczas tej misji, rozkład potworów, płyt, i przedmiotów został trochę zmieniony, by misja była bardziej odpowiednia dla mniej doświadczonych graczy. W szczególności, liczba potworów nie zależy od liczby zebranych Hiperskich Dywanów, i jest więcej płyt otwierających.\n\nJednak nawet przy normalnym rozkładzie wydaje się, że zawsze powinno być możliwe dotarcie do celu. Jeśli chcesz takiego wyzwania, wybierz je z menu specjalnych trybów gry.",
+   "Myszka piszczy na Ciebie. Wydaje się, że chce Cię gdzieś zaprowadzić. Ciekawe, co tam może być?\n\nW części Pałacu, którą zwiedzasz podczas tej misji, rozkład potworów, płyt i przedmiotów został trochę zmieniony, by misja była bardziej odpowiednia dla mniej doświadczonych graczy. W szczególności, liczba potworów nie zależy od liczby zebranych Hiperskich Dywanów i jest więcej płyt otwierających.\n\nJednak nawet przy normalnym rozkładzie wydaje się, że zawsze powinno być możliwe dotarcie do celu. Jeśli chcesz takiego wyzwania, wybierz je z menu specjalnych trybów gry.",
    "Bir fare sana ciyakladı. Galiba senin bir yere gitmeni istiyor.Gerçekten ilginç, burada ne bulabilirsin ki?\n\nW części Pałacu, którą zwiedzasz podczas tej misji, Not: Sarayın bu görev için hazırlanmış kısmında, canavarların dağılımı, baskı levhaları, ve eşyalar daha az deneyimli oyuncular düşünülerek bir nebze değiştirildi.Canavar sayısı topladığın Aşkınlı Kilim sayısına bağlı değil ve burada daha çok açma levhası var. \n\nYine de, normal dağılımla bile, bu görev her zaman tamamlanabilir. Eğer o görevi istiyorsan, özel oyun modları menüsünden onu seçebilirsin.",
    "Vykvíkla na tebe myška. Zdá se, že chce, aby ses někam vyda%l0. To je zajímavé, copak tam asi najdeš?\n\nPoznámka: V části Paláce, kterou budeš procházet při plnění této mise, je poněkud upravené rozdělení netvorů, desek a předmětů, aby byla mise o něco vhodnější i pro méně zkušené hráče. Počet netvorů nebude záviset na počtu získaných Hyperských koberců a bude tu více otvíracích desek.\n\nNicméně, dosažení cíle by mělo být vždy možné i při normálním rozdělení. Pokud si chceš tuto obtížnější misi vyzkoušet, vyber ji z menu speciálních herních módů.\n\n",
    "Мышка пищит на Вас. Как будто она хочет, чтобы Вы пошли куда-то. Интересно, что же там может быть?\n\nВ той части Дворца, которая будет доступна в Квесте, распределение монстров, плит и предметов немного изменено, чтобы подходить для не очень опытных игроков. Количество монстров не зависит от количества собранных сокровищ, и открывающих плит здесь больше.\n\nНо и при нормальном распределении Квест можно пройти. Если Вы хотите это сделать, выберите специальный режим в меню.",
-   "Eine Maus piepst dich an. Es scheint als wolle sie das du dich irgendwo hin begibst. Interessant, was du dort wohl findest?\n\nIn dem Teil des Palastes den du während dieser Quest erkundest wurde die Verteilung von Monstern, Druckplatten und Items etwas geändert Um es nicht so erfahrenen Spielern zu vereinfachen.Die Anzahl der Monster basiert nicht auf der Anzahl der Hypersischen Teppichein deinem Besitzt und es gibt mehr Öffnungsmechanismen.\n\nSelbst mit der normalen Monsterverteilung sollte es allerdingsmöglich sein immer das Ziel zu erreichen. Dieser Modus kann im Menü ausgewählt werden.",
+   "Eine Maus piepst dich an. Es scheint als wolle sie das du dich irgendwo hin begibst. Interessant, was du dort wohl findest?\n\nIn dem Teil des Palastes den du während dieser Quest erkundest wurde die Verteilung von Monstern, Druckplatten und Items etwas geändert um es nicht so erfahrenen Spielern zu vereinfachen. Die Anzahl der Monster basiert nicht auf der Anzahl der Hypersischen Teppiche in deinem Besitzt und es gibt mehr Öffnungsmechanismen.\n\nSelbst mit der normalen Monsterverteilung sollte es allerdings möglich sein immer das Ziel zu erreichen. Dieser Modus kann im Menü ausgewählt werden.",
+    }},
+  {0x25871fa3, { // "Known mines may be marked by touching while in drag mode. Your allies won't step on marked mines."
+   "Znane miny można oznaczać dotykając ich w trybie przeciągania. Twoi przyjaciele nie będą stawać na oznaczonych minach.",
+/*MISSING*/    "Known mines may be marked by touching while in drag mode. Your allies won't step on marked mines.",
+   "Políčka, která obsahují miny, je možné označit dotekem v módu tažení. Vaši spojenci na označené miny nevstoupí.",
+   "Известные мины можно помечать, кликая на них в режиме просмотра. Твои союзники не будут на них наступать.",
+/*MISSING*/    "Known mines may be marked by touching while in drag mode. Your allies won't step on marked mines.",
     }},
   {0x25903a7a, { // "or 't' to see the top scores"
    "lub 't' by zobaczyć najlepsze wyniki",
@@ -1186,25 +2089,53 @@ sentence all_sentences[1130] = {
    "oder 't' für die Highscore Liste",
     }},
   {0x25bb71f1, { // "This orb allows you to summon monsters. Usually, they are either Elementals or native creatures. While the monsters do not like being summoned, and will attack you once they recover from summoning sickness, such summoning often has its uses."
-   "Ta sfera pozwala Ci przywoływać potwory. Zwykle są to Żywiołaki albo stworzenia pochodzące z danej krainy. Stwory nie lubią być przywoływane, i będą atakować po wyjściu ze zmieszania wywołanego przywołaniem. Ale jednak takie przywoływanie ma pewne zastosowania.",
+   "Ta sfera pozwala Ci przywoływać potwory. Zwykle są to Żywiołaki albo stworzenia pochodzące z danej krainy. Stwory nie lubią być przywoływane i będą atakować po wyjściu ze zmieszania wywołanego przywołaniem. Ale jednak takie przywoływanie ma pewne zastosowania.",
    "Bu küre canavar çağırabilmeni sağlar. Genelde Özütler veya yerel canavarlar çağrılır.Canavarlar çağrılmaktan hoşlanmasalar ve çağrılma hastalıkları biter bitmez sana saldıracak olsalar da, yine de çağırmanın işe yaradığı yerler olabilir.",
    "Tato Sféra ti umožňuje vyvolávat netvory. Obvykle se jedná buď o Elementály nebo o domorodé obyvatele kraje, kde ji použiješ. Netvoři nejsou vyvoláním nijak nadšeni a poté, co se zorientují, na tebe zaútočí, ale i tak má vyvolávání často své využití.",
    "Эта сфера позволяет призывать монстров. Обычно это Элементали или родные для земли существа. Существа не нравится быть вызванным, и как только оно оправится от вызова, будет Вас атаковать.",
-   "Dieser Orb erlaubt es dir Monster zu beschwören. Diese sind meist Elementare, oder einheimische Monster. Auch wenn Monster nicht gerne beschworen werdenund sie dich angreifen sobald die Beschwörungsübelkeit vorüber isthaben Beschwörungen oft einen Nutzen.",
+   "Dieser Orb erlaubt es dir Monster zu beschwören. Diese sind meist Elementare, oder einheimische Monster. Auch wenn Monster nicht gerne beschworen werden und sie dich angreifen sobald die Beschwörungsübelkeit vorüber ist haben Beschwörungen oft einen Nutzen.",
     }},
   {0x2657f9d0, { // "three players"
    "trzech graczy",
 /*MISSING*/    "three players",
    "tři hráči",
    "три игрока",
-/*MISSING*/    "three players",
+   "drei Spieler",
+    }},
+  {0x2660b640, { // "Ground level is actually an equidistant surface, %1 absolute units below the plane P. Theoretically, this value affects the world -- for example, eagles could fly %2 times faster by flying above the ground level, on the plane P -- but the actual game mechanics are not affected. (Distances reported by the vector graphics editor are not about points on the ground level, but about the matching points on the plane P -- divide them by the factor above to get actual distances."
+   "Poziom podłoża jest w rzeczywistości ekwidystantną powierzchnią %1 jednostek pod płaszczyzną P. Teoretycznie, ta wartość wpływa na świat -- przykładowo, orły mogłyby latać %2 razy szybciej latając powyżej poziomu podłoża, na wysokości płaszczyzny P -- ale nie wpływa to na mechanikę gry w żaden sposób. (Odległości wyświetlane przez edytor grafiki dotyczą odległości między odpowiednimi punktami na płaszczyźnie P.",
+/*MISSING*/    "Ground level is actually an equidistant surface, %1 absolute units below the plane P. Theoretically, this value affects the world -- for example, eagles could fly %2 times faster by flying above the ground level, on the plane P -- but the actual game mechanics are not affected. (Distances reported by the vector graphics editor are not about points on the ground level, but about the matching points on the plane P -- divide them by the factor above to get actual distances.",
+   "Úroveň země je ve skutečnosti ekvidistantní plocha, která se nachází %1 absolutních jednotek pod rovinou P. Tato hodnota teoreticky ovlivňuje svět -- orli by například mohli létat %2-krát rychleji, kdyby létali nad úrovní země v rovině P -- ale herní mechaniky jako takové tím ovlivněny nejsou. (Vzdálenosti v editoru vektorové grafiky nejsou vzdálenosti bodů na úrovni země, ale odpovídajících bodů v rovině P -- skutečné vzdálenosti získáte jejich vydělením výše zmíněným faktorem.",
+   "Поверхность земли является эквидистантой на глубине  %1 единицу ниже плоскости P. Теоретически, это значение могло бы влиять на мир. Например, орлы могли бы летать в %2 раз быстрее, летая над уровнем земли, на плоскости P -- но механика игры не меняется. (Расстояния в редакторе векторной графики относятсяне к точкам на поверхности, а к их проекциям на плоскость P.)",
+/*MISSING*/    "Ground level is actually an equidistant surface, %1 absolute units below the plane P. Theoretically, this value affects the world -- for example, eagles could fly %2 times faster by flying above the ground level, on the plane P -- but the actual game mechanics are not affected. (Distances reported by the vector graphics editor are not about points on the ground level, but about the matching points on the plane P -- divide them by the factor above to get actual distances.",
+    }},
+  {0x2679cb12, { // "move up-left"
+   "ruch w górę-lewo",
+/*MISSING*/    "move up-left",
+   "pohyb doleva nahoru",
+   "ход вверх-влево",
+/*MISSING*/    "move up-left",
     }},
   {0x26a6b883, { // "up"
    "góra",
 /*MISSING*/    "up",
    "nahoru",
    "вверх",
-/*MISSING*/    "up",
+   "hoch",
+    }},
+  {0x26dfda10, { // " (increases treasure spawn)"
+   " (więcej skarbów)",
+/*MISSING*/    " (increases treasure spawn)",
+   " (zvyšuje výskyt pokladů)",
+   " (увеличивает генерацию сокровищ)",
+/*MISSING*/    " (increases treasure spawn)",
+    }},
+  {0x272520b2, { // "You feel attuned to gravity, ready to face mountains and dungeons."
+   "Jesteś dostrojon%ya1 do grawitacji, gotow%ya1 na góry i lochy.",
+/*MISSING*/    "You feel attuned to gravity, ready to face mountains and dungeons.",
+   "Cítíš se přizpůsoben%ý1 gravitaci, připraven%ý1 čelit horám a žalářům.",
+   "Вы привыкли к гравитации и готовы покорять горы и подземелья.",
+/*MISSING*/    "You feel attuned to gravity, ready to face mountains and dungeons.",
     }},
   {0x27440e71, { // "Cannot cast illusion on an item!"
    "Nie możesz rzucić iluzji na przedmiot!",
@@ -1225,21 +2156,28 @@ sentence all_sentences[1130] = {
 /*MISSING*/    "zoom in",
    "přiblížení",
    "приблизить",
-/*MISSING*/    "zoom in",
+   "hereinzoomen",
     }},
   {0x2839a534, { // "include history"
    "uwzględnij historię",
 /*MISSING*/    "include history",
    "včetně historie",
    "включить историю",
-/*MISSING*/    "include history",
+   "inklusive Vergangenheit",
+    }},
+  {0x28698d2f, { // "For some reason... cannot attack!"
+   "Z jakiegoś powodu... nie możesz atakować!",
+/*MISSING*/    "For some reason... cannot attack!",
+   "Z nějakého důvodu... nemůžeš útočit!",
+   "По какой-то причине... невозможно атаковать!",
+/*MISSING*/    "For some reason... cannot attack!",
     }},
   {0x28bfdd84, { // "You are now a tortoise heroine!"
    "Jesteś żółwią bohaterką!",
 /*MISSING*/    "You are now a tortoise heroine!",
    "Nyní jsi želví hrdinka!",
    "Теперь вы -- черепашья героиня!",
-/*MISSING*/    "You are now a tortoise heroine!",
+   "Du bist jetzt ein Held der Schildkröten!",
     }},
   {0x28d62052, { // "%1 turns (%2)"
    "kolejek: %1 (%2)",
@@ -1256,7 +2194,7 @@ sentence all_sentences[1130] = {
    "Du kannst hier keine Illusion erschaffen!",
     }},
   {0x291ece52, { // "Wine grown under hyperbolic sun would be extremely prized in your home location."
-   "Wino uprawiane pod hiperbolicznym słońcem, byłoby bardzo cenne w Twojej krainie.",
+   "Wino uprawiane pod hiperbolicznym słońcem, byłoby bardzo cenne w Twoim świecie.",
    "Hiperbolik güneşin altında oluşan şarap geldiğin yerde epey değerli olsa gerek.",
    "Víno vypěstované pod hyperbolickým sluncem by mělo ve tvé domovině velkou cenu.",
    "Вино, созревшее под гиперболическим солнцем, очень ценится на Вашей родине.",
@@ -1290,12 +2228,33 @@ sentence all_sentences[1130] = {
    "Некоторые существа имеют длинные языки, которые позволяют им атаковать врагов на соседних клетках.",
    "Manche Monster haben lange Zungen, mit denen sie Feinde in nahen Zellen angreifen können.",
     }},
+  {0x29ef900a, { // "Commanded %the1!"
+   "%1 dosta%ł1 rozkaz!",
+/*MISSING*/    "Commanded %the1!",
+   "%1 dosta%l1 rozkaz!",
+   "Прикажите %1!",
+/*MISSING*/    "Commanded %the1!",
+    }},
+  {0x2a0c0556, { // "plain/3D"
+   "prosty/3D",
+/*MISSING*/    "plain/3D",
+   "obyèejné/3D",
+   "простой/3D",
+/*MISSING*/    "plain/3D",
+    }},
   {0x2a0d1a68, { // "You need to find the right Key to unlock this Orb of Yendor!"
    "Potrzebujesz prawidłowego Klucza, by otworzyć Sferę Yendoru!",
    "Bu Yendorun Küresinin kilidini açmak için bir anahtara ihtiyacın var!",
    "Abys moh%l0 odemknout tuto Yendorskou sféru, musíš najít správný klíč!",
    "Вам нужен ключ, чтобы открыть сферу Йендора!",
    "Du musst den richtigen Schlüssel finden, um den Orb von Yendor zu öffnen!",
+    }},
+  {0x2a16fdee, { // "Reenter HyperRogue to apply this setting"
+   "Wyjdź i wróć do HyperRogue, by zastosować",
+/*MISSING*/    "Reenter HyperRogue to apply this setting",
+   "Toto nastavení se aplikuje po návratu do HyperRogue",
+   "Перезайдите в HyperRogue, чтобы применить эти настройки",
+/*MISSING*/    "Reenter HyperRogue to apply this setting",
     }},
   {0x2a3a4971, { // "gender"
    "płeć",
@@ -1323,7 +2282,7 @@ sentence all_sentences[1130] = {
    "Bu beyaz köpek hiç durmadan koşabilir. Sonsuz hareket diyarında yaşayabilen ve çoğalabilen tek canlıdır.",
    "Tento bílý pes dokáže neustále běžet. Je to jediný tvor, který dokáže přežít a rozmnožovat se v Kraji věčného pohybu.",
    "Эта белая собака способна всё время бежать. Это единственное существо, способное жить и размножаться в Земле вечного движения.",
-   "Dieser weiße Hund kann die ganze Zeit rennen! Es die einzige Kreatur, die im Land der Endlosen Antriebs überleben, und sich vermehren kann.",
+   "Dieser weiße Hund kann unablässig rennen. Er ist die einzige Kreatur, die im Land der ewigen Bewegung überleben und sich vermehren kann.",
     }},
   {0x2b02a473, { // "Kills: "
    "Zabicia: ",
@@ -1346,12 +2305,26 @@ sentence all_sentences[1130] = {
    "масштаб",
    "Skalierungsfaktor",
     }},
+  {0x2b7df8b3, { // "Saved the SVG shot to %1 (sightrange %2)"
+   "Zapisano zrzut SVG do %1 (zasięg %2)",
+/*MISSING*/    "Saved the SVG shot to %1 (sightrange %2)",
+   "Snímek SVG uložen do %1 (viditelnost %2)",
+   "SVG снимок сохранён в %1 (радиус %2)",
+/*MISSING*/    "Saved the SVG shot to %1 (sightrange %2)",
+    }},
   {0x2b9a4732, { // "%The1 stabs %the2."
    "%1 dźgn%ął1 %a2.",
    "%1 %2 bıçakladı.",
    "%1 probod%l1 %a2.",
    "%1 заколол%E1 %a2.",
    "%Der1 %1 ersticht %den2 %a2.",
+    }},
+  {0x2baa0061, { // "Unavailable in the Chaos mode.\n"
+   "Niedostępne w trybie Chaosu.\n",
+/*MISSING*/    "Unavailable in the Chaos mode.\n",
+   "Nedostupné v chaotickém módu.\n",
+   "Недоступно в режиме Хаоса.\n",
+   "Nicht im Chaos-Modus verfügbar.\n",
     }},
   {0x2bce410a, { // "press Space or Home to center on the PC"
    "naciśnij Space lub Home, by wycentrować na postaci",
@@ -1365,7 +2338,7 @@ sentence all_sentences[1130] = {
    "Aşkıntaş görevi tamamlandı.",
    "Hyperkamový úkol splněn!",
    "Миссия Гиперкамня закончена!",
-   "Hyperstein Quest abgeschlossen!",
+   "Hyperstein-Herausforderung abgeschlossen!",
     }},
   {0x2bf52a07, { // "You feel that %the1 slowly become%s1 dangerous..."
    "Masz wrażenie, że %P1 powoli staje się niebezpieczn%ya1...",
@@ -1374,12 +2347,33 @@ sentence all_sentences[1130] = {
    "Вы чувствуете, что %1 становится всё опаснее...",
    "Du spürst wie %der1 %1 langsam gefährlich wird...",
     }},
+  {0x2c6dc4f3, { // "You leave %the1."
+   "Zostawiasz %a1.",
+/*MISSING*/    "You leave %the1.",
+   "Položi%l0 jsi %a1.",
+   "Вы покинули %a1.",
+/*MISSING*/    "You leave %the1.",
+    }},
   {0x2c6ef3ab, { // "These fairies would rather burn the forest, than let you get some Fern Flowers. The forest is infinite, after all...\n\nFire Fairies transform into fires when they die."
-   "Rusałki wolą spalić las, niż pozwolić Ci zdobyć Kwiaty Paproci. W końcu las jest nieskończony...\n\nRusałki zamieniają się w ogień, gdy giną.",
+   "Wiły wolą spalić las, niż pozwolić Ci zdobyć Kwiaty Paproci. W końcu las jest nieskończony...\n\nWiły zamieniają się w ogień, gdy giną.",
    "Bu periler ormanı yakma pahasına, kimsenin Eğreltiotu Çiçeklerine dokunmasına izin vermezler.Sonuçta orman sonsuza kadar uzanıyor...\n\nAteş perileri öldüklerinde ateşe dönüşürler.",
    "Tito mužíčkové by raději spálili celý hvozd, než aby tě nechali sebrat nějaké Kapradinové květy. Konečně, hvozd je přece nekonečný...\n\nOhniví mužíčkové se promění v oheň, když zemřou.",
    "Эти феи скорее сожгут лес, чем позволят Вам собрать цветок папоротника. В конце концов, лес бесконечный...\n\nОни превращаются в огонь, когда умирают.",
-   "Diese Feen würden eher den ganzen Wald abfackeln, als dich Farn sammeln zu lassen. Der Wald ist schließlich grenzenlos...\n\nWenn Feuerfeen sterben werden sie selbst zu Feuer.",
+   "Diese Feen würden eher den ganzen Wald niederbrennen als dich Farnblüten sammeln zu lassen. Der Wald ist schließlich grenzenlos...\n\nWenn Feuerfeen sterben, werden sie selbst zu Feuer.",
+    }},
+  {0x2c99ab74, { // "Press F1 or right-shift-click things for help."
+   "F1 lub klikaj z prawym shiftem na elementach gry, by uzyskać pomoc.",
+/*MISSING*/    "Press F1 or right-shift-click things for help.",
+   "Nápovědu můžeš zobrazit stiskem F1 nebo kliknutím na věci s pravým shiftem.",
+   "FНажмите F1 или используйте правую кнопку мыши с Shift'ом, чтобы открыть помощь..",
+/*MISSING*/    "Press F1 or right-shift-click things for help.",
+    }},
+  {0x2cdaf58c, { // "Fire is extinguished!"
+   "Ogień zgasł!",
+/*MISSING*/    "Fire is extinguished!",
+   "Oheň je uhašen!",
+   "Огонь погас!",
+/*MISSING*/    "Fire is extinguished!",
     }},
   {0x2d4b9753, { // "\"I like collecting ambers at the beach.\""
    "\"Lubię zbierać bursztyny na plaży.\"",
@@ -1393,7 +2387,7 @@ sentence all_sentences[1130] = {
    "modunda kaydedilmeyecek!",
    "neukládají skóre a achievementy!",
    "сохраняются в евклидовом режиме!",
-   "Punkte und Achievements nicht gespeichert!",
+   "Punkte und Errungenschaften nicht gespeichert!",
     }},
   {0x2d5e09d9, { // "Your total treasure has been recorded in the Google Leaderboards."
    "Twój wynik został zapisany w rankingach Google.",
@@ -1407,7 +2401,7 @@ sentence all_sentences[1130] = {
 /*MISSING*/    "%The1 scares %the2 a bit!",
    "%1 trochu vyleka%l1 %a2!",
    "%1 немного пугает %a2!",
-/*MISSING*/    "%The1 scares %the2 a bit!",
+   "%Der1 %1 ängstigt %den2 %a2 ein wenig!",
     }},
   {0x2d7c2196, { // "create the model"
    "twórz model",
@@ -1430,6 +2424,13 @@ sentence all_sentences[1130] = {
    "экран конца игры",
    "Game Over Bildschirm",
     }},
+  {0x2e48d491, { // "Orbs of Safety always appear here, and may be used to escape.\n"
+   "Sfery Bezpieczeństwa zawsze można tu znaleźć, by stąd uciec.",
+/*MISSING*/    "Orbs of Safety always appear here, and may be used to escape.\n",
+   "Sféry Bezpečí se tu dají vždy najít a můžeš je použít k úniku.",
+   "Сфера безопасности всегда появляется здесь, и её можно использовать, чтобы уйти.",
+/*MISSING*/    "Orbs of Safety always appear here, and may be used to escape.\n",
+    }},
   {0x2e755a80, { // "Collect four different Elemental Shards!"
    "Znajdź Okruch każdego żywiołu!",
 /*MISSING*/    "Collect four different Elemental Shards!",
@@ -1451,15 +2452,22 @@ sentence all_sentences[1130] = {
    "Нет описания.",
    "Noch keine Beschreibung...",
     }},
+  {0x2ea8434f, { // "F8 = SVG shot"
+   "F8 = zrzut SVG",
+/*MISSING*/    "F8 = SVG shot",
+   "F8 = snímek SVG",
+   "F8 = снимок SVG",
+/*MISSING*/    "F8 = SVG shot",
+    }},
   {0x2ee79c64, { // "Enable cheat mode or GAME OVER to use this"
    "Dostępne tylko po końcu gry albo w trybie oszusta",
 /*MISSING*/    "Enable cheat mode or GAME OVER to use this",
    "Dostupné pouze v cheat módu nebo po skončení hry",
    "Доступно только в конце игры и в режиме обманщика",
-/*MISSING*/    "Enable cheat mode or GAME OVER to use this",
+   "Aktivere den Cheat-Modus oder GAME OVER um diese Funktion zu nutzen",
     }},
   {0x2f160195, { // "So better just to concentrate on collecting treasure. Beware the traps, and the guards, who are hard to kill!"
-   "Także lepiej się skoncentrować na szukaniu skarbów. Uwaga na pułapki, i trudnych do pokonania strażników!",
+   "Także lepiej się skoncentrować na szukaniu skarbów. Uwaga na pułapki i trudnych do pokonania strażników!",
    "Yani sadece hazineleri toplamaya odaklansan iyi olur. Tuzaklara dikkat! Öldürmesi pek zor olan muhafızlara da dikkat et!",
    "Takže se raději soustřeď jen na sbírání pokladů. Pozor na pasti a na stráže -- je těžké je zabít!",
    "Лучше сконцентрироваться на сборе сокровищ. Остерегайтесь ловушек и стражников, которых сложно убить!",
@@ -1484,7 +2492,7 @@ sentence all_sentences[1130] = {
 /*MISSING*/    "Find a %1 in %the2.",
    "Najdi %a1 %abl2.",
    "Найди %a1 %abl2.",
-/*MISSING*/    "Find a %1 in %the2.",
+   "Finde eine %a1 %abl2.",
     }},
   {0x2feee764, { // "design the net"
    "projektuj siatkę",
@@ -1512,7 +2520,7 @@ sentence all_sentences[1130] = {
 /*MISSING*/    "Hyperstone Quest: collect at least 10 points in %the2",
    "Hyperkamový úkol: získej nejméně 10 bodů %abl2",
    "Миссия Гиперкамней: собери не меньше 10 очков %abl2",
-/*MISSING*/    "Hyperstone Quest: collect at least 10 points in %the2",
+   "Hyperstein-Herausforderung: sammle mindestens 10 Punkte %abl2",
     }},
   {0x3038e1b0, { // "\"That should teach you to take me seriously!\""
    "\"Traktuj mnie poważnie! Niech to będzie dla Ciebie nauczką!\"",
@@ -1526,14 +2534,21 @@ sentence all_sentences[1130] = {
 /*MISSING*/    "turn count = %1 last exploration = %2 ghost timer = %3",
    "počet kol = %1 poslední zkoumání = %2 časovač duchů = %3",
    "количество ходов = %1, последнее исследование = %2, отсчёт времени призраков = %3",
-/*MISSING*/    "turn count = %1 last exploration = %2 ghost timer = %3",
+   "Zähler = %1 letzte Erkundung = %2 Geister-Zähler = %3",
+    }},
+  {0x309889bc, { // "camera rotation in ball model"
+   "obróć kamerę w modelu kuli",
+/*MISSING*/    "camera rotation in ball model",
+   "rotace kamery v modelu koule",
+   "поворот камеры в модели сферы",
+/*MISSING*/    "camera rotation in ball model",
     }},
   {0x30ade9f9, { // "Prince"
    "Książę",
 /*MISSING*/    "Prince",
    "Princ",
    "Принц",
-/*MISSING*/    "Prince",
+   "Prinz",
     }},
   {0x30ae5da6, { // "Some rubble."
    "Gruzy.",
@@ -1542,12 +2557,19 @@ sentence all_sentences[1130] = {
    "Щебень.",
    "Trümmer.",
     }},
+  {0x3187663a, { // "by number"
+   "liczba",
+/*MISSING*/    "by number",
+   "podle počtu",
+   "по количеству",
+/*MISSING*/    "by number",
+    }},
   {0x31ba02b2, { // "You can press 'g' or click them in the list to drop a Dead Orb."
    "Wciśnij 'g' lub kliknij Martwe Sfery na liście, by je porzucić.",
    "'g' ye basarak veya listede tıklayarak bir Ölü Küreyi bırakabilirsin.",
    "Mrtvou svéru můžeš položit stiskem klávesy 'g' nebo tím, že na ni klikneš v seznamu.",
    "Вы можете нажать 'g' либо кликнуть на сферу в списке, чтобы бросить её.",
-   "Du kannst 'g' drücken oder sie in der Liste anklicken um tote Orbs fallenzulassen.",
+   "Du kannst 'g' drücken oder sie in der Liste anklicken um tote Orbs abzulegen.",
     }},
   {0x31d0e1f7, { // "MENU"
    "MENU",
@@ -1561,7 +2583,7 @@ sentence all_sentences[1130] = {
    "Yendorun Küreleri için Cehennemi yahut Arayolları ara!",
    "Hledej Yendorské sféry v Pekle nebo na Křižovatce!",
    "Ищите сферы Йендора в Аду и на Перекрёстке!",
-   "Such die Orbs von Yendor in der Hölle oder auf der Kreuzung!",
+   "Such die Orbs von Yendor in der Hölle oder auf den Kreuzungen!",
     }},
   {0x322e00a2, { // "x: %1"
    "x: %1",
@@ -1569,6 +2591,13 @@ sentence all_sentences[1130] = {
    "x: %1",
    "x: %1",
    "x: %1",
+    }},
+  {0x32437fa4, { // "six players"
+   "sześciu graczy",
+/*MISSING*/    "six players",
+   "šest hráčů",
+   "шесть игроков",
+   "sechs Spieler",
     }},
   {0x328fdd3c, { // "DRAG"
    "DRAG",
@@ -1582,7 +2611,7 @@ sentence all_sentences[1130] = {
    "Diyar seç ---",
    "Vyber si kraj ---",
    "Выбрать землю ---",
-/*MISSING*/    "Select the land ---",
+   "Wähle das Land ---",
     }},
   {0x32ae3e1f, { // "Just a nasty shark."
    "Zwykły groźny rekin.",
@@ -1590,6 +2619,13 @@ sentence all_sentences[1130] = {
    "Obyčejný, nebezpečný žralok.",
    "Просто противная акула.",
    "Ist bloß ein fieser Hai.",
+    }},
+  {0x32b6d522, { // "Aquatic region -- accessible only from coastal regions and other aquatic regions.\n"
+   "Kraina morska -- dostępna jedynie zs krain przybrzeżnych i morskic.\n",
+/*MISSING*/    "Aquatic region -- accessible only from coastal regions and other aquatic regions.\n",
+   "Kraina morska -- dostępna jedynie zs krain przybrzeżnych i morskic.\n",
+   "Морской регион -- доступен только из прибрежных и других морских регионов.\n",
+/*MISSING*/    "Aquatic region -- accessible only from coastal regions and other aquatic regions.\n",
     }},
   {0x32c11e4f, { // "OFF"
    "WYŁ",
@@ -1619,12 +2655,12 @@ sentence all_sentences[1130] = {
    "Читы: ",
    "Cheats: ",
     }},
-  {0x336858f0, { // "Move with mouse, num pad, qweadzxc, or hjklyubn. Wait by pressing 's' or '.'. Spin the world with arrows, PageUp/Down, and Home/Space. To save the game you need an Orb of Safety. Press 'v' for config, ESC for the quest status and menu.\n\n"
-   "Ruszasz się myszą, klawiaturą numeryczną, qweadzxc, lub hjklyubn. Czekasz naciskając 's' lub '.'. Obracasz świat strzałkami, PgUp/Dn, lub Home/Space. Naciśnij 'v' by zmienić ustawienia, ESC by zobaczyć stan misji i menu.\n\n",
-   "Fareyle, sayı tuşlarıyla, qweadzxc ile, veya hjklyubn ile hareket et.  's' ya da '.' ile bekle. Oklarla, PageUp/Down ile veya  Home/Space ile dünyayı çevirebilirsin. Oyunu kaydetmek için Güvenlik Küresine ihtiyacın var. Ayarlar için 'v'ye görev durumu ve menü için 'ESC'ye bas.\n\n",
-   "Pohybuješ se pomocí myši, numerické klávesnice, kláves qweadzxc nebo kláves hjklyubn. Klávesy 's' nebo '.' ti umožňují čekat na místě. Šipky, klávesy PgUp/PgDn a Home nebo mezerník ti umožňují otáčet svět. Nastavení můžeš otevřít klávesou 'v', úkoly a menu klávesou ESC.\n\n",
-   "Двигайтесь с помощью мышки, нумпада, qweadzxc или hjklyubn. Ждите, нажимая 's' или '.'. Поворачивайте карту стрелками, PageUp/Down или Home/Space. Чтобы сохраниться, Вам нужна сфера безопасности. Нажмите 'v' для настроек, Esc для статуса квеста или меню.",
-   "Bewege dich mit der Maus, dem Numpad, QWEADZXC, oder HJKLYUBN. Warte mit S oder '.'. Drehe die Welt mit den Pfeiltasten, PgUp/PgDn, und Pos1/Space.Um zu speichern, benötigst du einen Orb der Geborgenheit. Drücke V für Einstellungen, ESC für den Quest-Status und das Menü.\n\n",
+  {0x338f9dd8, { // "This Orb allows you to create illusions of yourself. Illusions are targeted by most monsters, just like yourself, Thumpers, and your friends.\n\nEach illusion takes 5 charges to create, and one extra charge per turn. You can also click your illusion to take it away, restoring 4 charges.\n\nIf you have both Orb of Teleport and Orb of Trickery, Illusion is cast first -- you can then teleport on your Illusion to switch places with it."
+   "Ta sfera pozwala Ci tworzyć iluzje samego siebie. Większość potworów celuje w iluzje, podobnie jak w Ciebie, Dudniki i Twoich przyjaciół.\n\nKażda iluzja wymaga 5 ładunków do stworzenia i jednego dodatkowego ładunku na kolejkę. Możesz też kliknąć swoją iluzję, by ją zabrać, co przywraca 4 ładunki.\n\nJeśli masz zarówno Sferę Teleportacji jak i Sztuczek, Iluzja rzucana jest jako pierwsza -- możesz następnie teleportować się na swoją iluzję, by się z nią zamienić miejscami.",
+   "Bu Küre kendinin ilüzyonlarını çıkarmanı sağlar. İlüzyonlar tıpkı sen, Gümleyenler ve dostların gibi pek çok canavar tarafından saldırıya uğrayabilir.\n\nHer ilüzyonu çıkarması 5 şarj ve her ek tur bir şarj tüketir. İlüzyona tıklayarak onu yok edip, 4 şarjını geri alabilirsin. \n\nAynı anda hem Kandırma hem Işınlanma Küren varsa, önce İlüzyon uygulanır, sonra istersen ilüzyonuna tıklayarak onla yer değiştirebilirsin. ",
+   "Tato sféra ti umožňuje vytvářet své iluzorní dvojníky. Většina netvorů půjde po tvých iluzích, stejně jako jdou po tobě, po Tloucích a po tvých přátelích.\n\nStvoření každé iluze sníží náboj sféry o 5 a vyčerpává 1 náboj navíc za kolo. Můžeš také kliknout na svou iluzi a zrušit ji, čímž se náboj sféry zvýší o 4.\n\nPokud máš Sféru Teleportace a Sféru Klamu zároveň, nejprve použiješ Sféru Klamu -- poté se můžeš teleportovat na svou iluzi a vyměnit si s ní místo.",
+   "Эта сфера позволяет Вам создавать иллюзии. Их будут атаковать почти все монстры, так же как Вас, Тамперы и ваших союзников.\n\nКаждая иллюзия требует 5 зарядов для создания и по одному в каждый ход. Также Вы можете кликнуть на иллюзию, чтобы забрать её, потратив 3 заряда.\n\nЕсли у Вас есть сферы Хитрости и Телепорта, Иллюзия работает первой -- Вы можетепотом телепортироваться на неё, чтобы поменяться с ней местами.",
+   "Dieser Orb erlaubt es dir, Illusionen deiner selbst zu erschaffen. Diese werden von den meisten Monstern verfolgt.\n\nJede Illusion benötigt 5 Ladungen zum Erschaffen, plus eine Ladung pro Zug. Du kannst deine Illusion anklicken um sie zu entfernen, wofür du 4 Ladungen bekommst.\n\nBesitzt du einen Orb der Teleportation und einen des Truges, wird Illusion bevorzugt du kannst dich dann auf deine Illusion teleportieren, um die Plätze zu tauschen.",
     }},
   {0x339454d5, { // "player 2 go"
    "gracz 2 idź",
@@ -1640,6 +2676,13 @@ sentence all_sentences[1130] = {
    "Обычный гиперболический пират.",
    "Ist bloß ein typischer, hyperbolischer Pirat.",
     }},
+  {0x33d27403, { // "\n\nSee sounds/credits.txt for credits for sound effects"
+   "\n\nPodziękowania za efekty dźwiękowe w sounds/credits.txt",
+/*MISSING*/    "\n\nSee sounds/credits.txt for credits for sound effects",
+   "\n\nPodìkování za zvukové efekty najde v souboru sounds/credits.txt",
+   "\n\nБлагодарности за звуковые эффекты в sounds/credits.txt",
+/*MISSING*/    "\n\nSee sounds/credits.txt for credits for sound effects",
+    }},
   {0x33fb8e0b, { // "%The1 squeaks sadly."
    "%1 pisn%ął1 smutno.",
    "%1 üzüntüyle ciyaklıyor.",
@@ -1647,12 +2690,19 @@ sentence all_sentences[1130] = {
    "%1 пищит грустно.",
    "%Die1 %1 piepst traurig.",
     }},
+  {0x3403ba38, { // "model used (not conformal!)"
+   "użyty model (nie konforemny!)",
+/*MISSING*/    "model used (not conformal!)",
+   "použitý model (nekonformální!)",
+   "модель используется (не конформная!)",
+   "verwendetes Modell (nicht konform!)",
+    }},
   {0x3414b24b, { // "degree of the approximation"
    "stopień przybliżenia",
 /*MISSING*/    "degree of the approximation",
    "stupeň opień przybliżenia",
    "степень приближения",
-/*MISSING*/    "degree of the approximation",
+   "Grad der Näherung",
     }},
   {0x343f8bdc, { // "Dark red birds who have created the minefield.\n\nThey create a mine on the spot where they are killed, provided that the terrain is suitable. Also note that mines are triggered by dead birds falling on them."
    "Ciemnoczerwone ptaki, które stworzyły pole minowe.\n\nNa polu, na które spadły, powstaje mina, o ile teren jest odpowiedni. Pamiętaj, że mina wybucha, gdy spadnie na nią martwy ptak.",
@@ -1666,7 +2716,14 @@ sentence all_sentences[1130] = {
    "Bu sarı parlak mücevherler Arayollarda yeterince deneyim kazananlar tarafından bulunabilir.",
    "Tyto jasně žluté drahokamy mohou najít pouze ti, kdo ovládli celou Křižovatku.",
    "Эти ярко-жёлтые камни может найти лишь тот, кто стал мастером Перекрёстка.",
-   "Diese hellen, gelben Edelsteine können nur von denen gefunden werden, die die Kreuzung gemeistert haben.",
+   "Diese hellen, gelben Edelsteine können nur von denen gefunden werden, die die Kreuzungen gemeistert haben.",
+    }},
+  {0x35b1bb91, { // "rainbow landscape"
+   "tęczowy krajobraz",
+/*MISSING*/    "rainbow landscape",
+   "duhová krajina",
+   "радужный пейзаж",
+/*MISSING*/    "rainbow landscape",
     }},
   {0x35b618da, { // "second joystick: pan threshold"
    "dżojstik 2: próg przewijania",
@@ -1703,12 +2760,26 @@ sentence all_sentences[1130] = {
    "%1 убил%E1 %a2!",
    "%Der1 %1 tötet %den2 %a2!",
     }},
+  {0x36849629, { // "gnomonic projection"
+   "rzut gnomoniczny",
+/*MISSING*/    "gnomonic projection",
+   "gnómonická projekce",
+   "гномоническая проекция",
+/*MISSING*/    "gnomonic projection",
+    }},
+  {0x36cf01a9, { // "Ground level below the plane"
+   "Poziom podłoża pod płaszczyzną",
+/*MISSING*/    "Ground level below the plane",
+   "Úroveň země pod rovinou",
+   "Глубина уровня земли",
+/*MISSING*/    "Ground level below the plane",
+    }},
   {0x36f58dfe, { // "A tribe of men native to the Desert. They have even tamed the huge Sandworms, who won't attack them."
    "Plemię ludzi żyjących na Pustyni. Oswoili oni Pustynne Czerwie, dzięki czemu żyją razem pokojowo.",
    "Çölde yaşayan bir insan jabilesi. Büyük Kumkurtlarını evcilleştirip kendilerine saldırmamasını sağladılar.",
    "Kmen domorodců z Pouště. Dokázali dokonce zkrotit i obrovské Písečné červy, kteří na ně neútočí.",
    "Племя людей, живущих в пустыне. Они приручили песчаных червей, и те их не трогают.",
-   "Ein Menschenstamm, der in der Wüste lebt. Sie haben es sogar geschafft die Sandwürmer zu zähmen.",
+   "Ein Volk, das in der Wüste lebt. Sie haben es sogar geschafft, die riesigen Sandwürmer so zu zähmen, dass diese sie nicht angreifen.",
     }},
   {0x36fb778b, { // "The cloud turns into a bunch of images!"
    "Chmura zamienia się w obrazy!",
@@ -1724,6 +2795,20 @@ sentence all_sentences[1130] = {
    "сила сферы: %1",
    "Orb Kraft: %1",
     }},
+  {0x3804a2f2, { // "movement animation speed"
+   "prędkość animacji ruchu",
+/*MISSING*/    "movement animation speed",
+   "rychlost pohybových animací",
+   "скорость анимации движения",
+/*MISSING*/    "movement animation speed",
+    }},
+  {0x38b21089, { // "Height of walls"
+   "Wysokość ścian",
+/*MISSING*/    "Height of walls",
+   "Výška zdí",
+   "Высота стен",
+/*MISSING*/    "Height of walls",
+    }},
   {0x3908e6a3, { // "save the current config"
    "zapisz obecną konfigurację",
    "mevcut ayarları kaydet",
@@ -1736,14 +2821,14 @@ sentence all_sentences[1130] = {
 /*MISSING*/    "player 3 X",
    "hráč 3 X",
    "игрок 3 X",
-/*MISSING*/    "player 3 X",
+   "Spieler 3 X",
     }},
   {0x395bc20d, { // "player 3 Y"
    "gracz 3 Y",
 /*MISSING*/    "player 3 Y",
    "hráč 3 Y",
    "игрок 3 Y",
-/*MISSING*/    "player 3 Y",
+   "Spieler 3 Y",
     }},
   {0x39741514, { // "Choose from the lands visited this game."
    "Wybierz spośród odwiedzonych krain.",
@@ -1759,29 +2844,43 @@ sentence all_sentences[1130] = {
    "Файл конфигурации: %1",
    "Confiq Datei: %1",
     }},
-  {0x3a6b5d5c, { // "native in %the1 (collect 10 %2)"
-   "rodzima %abl1 (10x %2)",
-   "%abl1 bulunuyor (10 tane %2)",
-   "standardní %abl1 (získej 10x %2)",
-   "родная %abl1 (10x %2)",
-   "heimisch in %der1 (10x %2)",
+  {0x3b247efe, { // "configure keys"
+   "klawisze skonfigurowane",
+/*MISSING*/    "configure keys",
+   "konfigurace kláves",
+   "настроить клавиши",
+   "Tasten konfigurieren",
+    }},
+  {0x3b430e32, { // "Animated corpses of ancient Viking warriors. They are immune to mundane weapons, but they can be destroyed by your Orb of the Sword."
+   "Ożywione zwłoki starożytnych wikińskich wojowników. Draugry są odporne na zwyczajne bronie, ale mogą zostać zniszczone przy użyciu Sfery Ostrza.",
+/*MISSING*/    "Animated corpses of ancient Viking warriors. They are immune to mundane weapons, but they can be destroyed by your Orb of the Sword.",
+   "Oživlé mrtvoly dávných vikingských válečníků. Jsou imunní proti obyčejným zbraním, ale tvoje Sféra Meče je může zničit.",
+   "Оживлённые трупы древних викингских воинов. Драугров нельзя победить обычным оружием, но они уязвимы к Сфере Меча.",
+   "Untote Helden der alten Wikinger. Sie sind immun gegenüber irdischen Waffen, aber sie können durch deinen Orb des Schwertes zerstört werden.",
+    }},
+  {0x3b6161d4, { // "Humans are %1 absolute units high. Your head travels %2 times the distance travelled by your feet."
+   "Ludzie mają wysokość %1. Twoja głowa porusza się %2 razy szybciej niż Twoje nogi.",
+/*MISSING*/    "Humans are %1 absolute units high. Your head travels %2 times the distance travelled by your feet.",
+   "Lidé jsou vysocí %1 absolutních jednotek. Tvá hlava urazí %2-násobek vzdálenosti, kterou urazí tvé nohy.",
+   "Человек имеет рост %1. Ваша голова проходит расстояние в %2 раз больше, чем ноги.",
+/*MISSING*/    "Humans are %1 absolute units high. Your head travels %2 times the distance travelled by your feet.",
     }},
   {0x3b63146e, { // "You become a bit nervous..."
    "Czujesz się zagrożon%y0...",
 /*MISSING*/    "You become a bit nervous...",
    "Začínáš být trošku nervózní...",
    "Вы начали нервничать...",
-/*MISSING*/    "You become a bit nervous...",
+   "Du wirst ein wenig nervös...",
     }},
   {0x3b7bee06, { // "return to the game"
-   "wróć do gry",
+   "powrót do gry",
    "oyuna dön",
-   "vrať se do hry",
+   "návrat do hry",
    "вернуться в игру",
-   "zurück zum Spiel",
+   "zum Spiel zurückkehren",
     }},
   {0x3b960c12, { // "This cell is on fire. Most beings and items cannot survive."
-   "To pole się pali. Większość stworzeń i przedmiotów tu nie przeżyje.",
+   "To pole się pali. Większość stworzeń i przedmiotów tu nie przetrwa.",
    "Bu hücre yanıyor. Üzerindeki çoğu eşya ve canlı ölecek.",
    "Toto políčko hoří. Většina tvorů a předmětů zde nepřežije.",
    "Эта клетка в огне. Большинство существ и предметов не могут выжить.",
@@ -1795,11 +2894,11 @@ sentence all_sentences[1130] = {
    "i = Grenze",
     }},
   {0x3bae8fbf, { // "A Witch without any special powers. But watch out! She will pick up any basic Orbs on her path, and use their powers."
-   "Czarownica bez specjalnych mocy. Uważaj! Może ona podnieść dowolną podstawową Sferę na swojej drodze, i użyć jej mocy.",
+   "Czarownica bez specjalnych mocy. Uważaj! Może ona podnieść dowolną podstawową Sferę na swojej drodze i użyć jej mocy.",
    "Herhangi bir gücü olamyan bir Cadı. Ama dikkat! Yolunun üzerindeki herhangi bir Küreyi alıp güçlerini kullanabilir.",
    "Čarodějnice bez jakýchkoli zvláštních schopností. Ale pozor! Učednice sbírají jakékoli základní Sféry, na které narazí a používají jejich schopnosti.",
    "Ведьма без особых сил. Но будьте осторожны! Она может поднять сферу на своём пути и забрать её силу.",
-   "Eine Hexe ohne besondere Kräfte. Aber pass auf!Sie wird alle Orbs in ihrer Nähe aufheben, und verwenden.",
+   "Eine Hexe ohne besondere Kräfte. Aber pass auf! Sie wird alle Orbs in ihrer Nähe aufheben und verwenden.",
     }},
   {0x3c1727e4, { // "Four mines next to you!"
    "Cztery miny koło Ciebie!",
@@ -1815,6 +2914,13 @@ sentence all_sentences[1130] = {
    "Чем больше Вы нашли гиперсидских ковров, тем это сложнее.",
    "Je mehr Hypersische Teppiche du sammelst desto schwieriger wird es.",
     }},
+  {0x3c656179, { // "The tasty treat increases your protection."
+   "Pyszny Cukierek poprawia Twoją ochronę.",
+/*MISSING*/    "The tasty treat increases your protection.",
+   "Chutná Pochoutka zvyšuje tvou ochranu.",
+   "Вкусные конфетки улучшат Вашу защиту.",
+/*MISSING*/    "The tasty treat increases your protection.",
+    }},
   {0x3c8b2988, { // "NEW"
    "NOWA",
    "YENİ",
@@ -1827,7 +2933,7 @@ sentence all_sentences[1130] = {
 /*MISSING*/    "hypersian rug mode",
    "mód hyperského koberce",
    "режим гиперсидского ковра",
-/*MISSING*/    "hypersian rug mode",
+   "Hypersischer-Teppich-Modus",
     }},
   {0x3ced91b0, { // "When the tide is away, beautiful ambers can be found on the hyperbolic beaches. Perhaps there used to be a forest here?"
    "W czasie odpływu na hiperbolicznej plaży można znaleźć piękne bursztyny.",
@@ -1855,21 +2961,35 @@ sentence all_sentences[1130] = {
 /*MISSING*/    "This land is warped. Ironically, the coast is completely straight...",
    "Tento kraj je pokřivený. Ironií je, že pobřeží je absolutně rovné...",
    "Эта земля искривлена. Зато берег абсолютно прямой...",
-/*MISSING*/    "This land is warped. Ironically, the coast is completely straight...",
+   "Dieses Land ist verzerrt. Ironischerweise ist die Küste völlig gerade...",
+    }},
+  {0x3d4bdfb2, { // "\nSpawn rate (as prize Orb): %1%/%2\n"
+   "\nCzęstość występowania (jako nagroda): %1%/%2\n",
+/*MISSING*/    "\nSpawn rate (as prize Orb): %1%/%2\n",
+   "\nFrekvence (jako extra Sféra): %1%/%2\n",
+   "\nЧастота появления (как награда): %1%/%2\n",
+/*MISSING*/    "\nSpawn rate (as prize Orb): %1%/%2\n",
     }},
   {0x3db53675, { // "Some lands unlock at specific treasures or kills"
-   "Niektóre krainy otwierają się przy konkretnych skarbach",
+   "Niektóre krainy otwierają się dzięki konkretnym skarbom lub pokonanym potworom",
    "Bazı diyarlara ulaşabilmek için belirli öldürmeler ve hazineler gerekebilir.",
    "Některé kraje se otevřou získáním určitých pokladů nebo zabitím určitých netvorů.",
    "Для открытия некоторых земель нужно определённые сокровища или убитые враги.",
    "Manche Länder schaltest du durch bestimmte Anzahlen von Schätzen und Kills frei",
+    }},
+  {0x3ddd8b37, { // "Shmup (shoot'em up) mode: You can play a hyperbolic shoot'em up game. The game is based on the usual turn-based grid-based HyperRogue, but there are some changes. You fight by throwing knives, and you have three extra lives. There are no allies, so all Orbs related to allies give you extra lives instead (up to 5). Some other rules have been adapted too.\n\n"
+   "Strzelanka: grasz w hiperboliczną strzelankę, bazowaną na turowych zasadach HyperRogue, ale z pewnymi zmianami. Twoja broń to rzucane noże, masz 3 dodatkowe życia. Nie ma za to przyjaciół, zatem wszystkie Sfery ich dotyczące dają Ci dodatkowe życia (max 5). Niektóre z pozostałych reguł również zostały dostosowane.\n\n",
+/*MISSING*/    "Shmup (shoot'em up) mode: You can play a hyperbolic shoot'em up game. The game is based on the usual turn-based grid-based HyperRogue, but there are some changes. You fight by throwing knives, and you have three extra lives. There are no allies, so all Orbs related to allies give you extra lives instead (up to 5). Some other rules have been adapted too.\n\n",
+   "Mód střílečky: zde můžeš hrát hyperbolickou střílečku. Hra je založena na běžném HyperRogue (s koly a políčky), ale jsou tu určité změny. Bojuješ tak, že házíš nože, a máš tři životy navíc. Nemůžeš mít žádné kamarády, takže všechny Sféry, které s nimi souvisejí, ti místo toho přidávají životy navíc (maximum je 5). I některá další pravidla jsou adaptována.\n\n",
+   "Режим стрельбы: Вы можете играть в гиперболическую стрелялку, основанную на обычной HyperRogue. Ваше оружие -- метательные ножи, и вы начинаете с 3 дополнительными жизнями. Здесь нет союзников, и все сферы, с ними связанные, просто дают дополнительную жизнь (вплоть до 5). Некоторые другие правила также изменены.\n\n",
+   "Shmup-Modus (Ballermodus): Du kannst ein hyperbolisches Ballerspiel spielen. Das Spiel basiert auf dem gewohnten zug- und zellenbasierten HyperRogue, aber mit einigen Änderungen. Du kämpfst indem du Messer wirfst, und hast drei Extraleben. Es gibt keine Freunde, daher geben dir alle Orbs, die Freunde betreffen, stattdessen Extraleben (bis zu fünf). Einige andere Regeln wurden ebenfalls angepasst.\n\n",
     }},
   {0x3deb988c, { // "A magical being which copies your movements. You feel that it would be much more useful in an Euclidean space."
    "Magiczna istota kopiująca Twoje ruchy. W przestrzeni euklidesowej byłaby dużo bardziej przydatna.",
    "Hareketlerini taklit eden bir büyülü varlık. Bunların Öklid uzayında daha işe yarayacağını düşünmeden edemiyorsun .",
    "Magická bytost, která kopíruje tvé pohyby. Máš pocit, že v eukleidovském prostoru by byla mnohem užitečnější.",
    "Это магическое создание повторяет Ваши движения. Вы понимаете, что в евклидовом мире это куда полезнее.",
-   "Ein magisches Wesen, das deine Bewegungen kopiert.\nDu hast das Gefühl, als wäre es in einer euklidischen Umgebung viel nützlicher.",
+   "Ein magisches Wesen, das deine Bewegungen kopiert.\nDu hast das Gefühl, es wäre in einer euklidischen Umgebung viel nützlicher.",
     }},
   {0x3e374c5f, { // "Treasure required: %1 x %2.\n"
    "Wymagane skarby: %1 x %2.\n",
@@ -1877,6 +2997,13 @@ sentence all_sentences[1130] = {
    "Potřebuješ %1 x %2.\n",
    "Сокровищ собрано: %1 x %2.\n",
    "Benötigte Schätze: %1 x %2.\n",
+    }},
+  {0x3ee05d1b, { // "The rug depicts a man in a deep dungeon, unable to leave."
+   "Dywan przedstawia człowieka w głębokich lochach, niezdolnego do ucieczki.",
+/*MISSING*/    "The rug depicts a man in a deep dungeon, unable to leave.",
+   "Na tomto koberci je vyobrazen muž v hlubokém žaláři, který nemůže ven.",
+   "Ковёр изображает человека из глубокого подземелья, который не может сбежать.",
+/*MISSING*/    "The rug depicts a man in a deep dungeon, unable to leave.",
     }},
   {0x3eeaab06, { // "\"I have been trained to fight with a Hypersian scimitar, you know?\""
    "\"Trenowa%łem1 walkę hiperskim szamszirem, wiesz?\"",
@@ -1890,10 +3017,10 @@ sentence all_sentences[1130] = {
    "%1 %a2 kaldırdı!",
    "%1 sebrala %a2!",
    "%1 поднял%E1 %a2!",
-   "%Die1 %1 hebt %den2 %a2 auf!",
+   "Die %1 hebt %den2 %a2 auf!",
     }},
   {0x3f3ffe3e, { // "%The1 raises some undead!"
-   "%1 wzbudza umarłych!",
+   "%1 ożywia nieumarłych!",
    "%1 ölü çağırdı!",
    "%1 probudil nemrtvé!",
    "%1 восстал из мёртвых!",
@@ -1904,7 +3031,7 @@ sentence all_sentences[1130] = {
 /*MISSING*/    "You cannot move between the cells without dots here!",
    "Nie możesz tu przechodzić między polami bez kropek!",
    "Вы не можете ходить между полями без точек!",
-/*MISSING*/    "You cannot move between the cells without dots here!",
+   "Du kannst dich hier nicht zwischen Zellen ohne Punkte bewegen!",
     }},
   {0x4002fc3c, { // "\"Bring me out of here please!\""
    "\"Proszę, zabierz mnie stąd!\"",
@@ -1918,7 +3045,7 @@ sentence all_sentences[1130] = {
 /*MISSING*/    "\"Be careful in the Rose Garden! It is beautiful, but very dangerous!\"",
    "\"V Růžové zahradě si dávej pozor! Je pěkná, ale také pěkně nebezpečná!\"",
    "\"Будьте осторожны в Розарии! Там красиво, но очень опасно!\"",
-/*MISSING*/    "\"Be careful in the Rose Garden! It is beautiful, but very dangerous!\"",
+   "\"Sei vorsichtig im Rosengarten! Er ist schön, aber sehr gefährlich!\"",
     }},
   {0x408f8ba3, { // "New Achievement:"
    "Nowe osiągnięcie:",
@@ -1939,7 +3066,7 @@ sentence all_sentences[1130] = {
    "Gümleyen çıkar",
    "vyvolej Tlouky",
    "призвать Тамперы",
-/*MISSING*/    "summon Thumpers",
+   "rufe Stampfer herbei",
     }},
   {0x416f36a1, { // "special game modes"
    "specjalne tryby gry",
@@ -1956,11 +3083,11 @@ sentence all_sentences[1130] = {
    "Die Szene anzeigen",
     }},
   {0x419dd9a4, { // "The tentacles of Cthulhu are like sandworms, but longer. They also withdraw one cell at a time, instead of exploding instantly."
-   "Macki Cthulhu są podobne do Pustynnych Czerwi, ale dłuższe. W przeciwieństwie do nich, nie eksplodują po zablokowaniu, tylko cofają się pod ziemię, po 1 polu na kolejkę.",
+   "Macki Cthulhu są podobne do Pustynnych Czerwi, ale dłuższe. W przeciwieństwie do nich nie eksplodują po zablokowaniu, tylko cofają się pod ziemię, po 1 polu na kolejkę.",
    "Cthulhu'nun dokunaçları kumkurtları gibidir, ama daha uzundur. Ve birden patlamak yerine her seferinde bir hücregeri çekilirler.",
    "Cthulhuova chapadla jsou něco jako Píseční červi, ale delší. Kromě toho neexplodují okamžitě, ale ustupují políčko za políčkem.",
    "Щупальца Ктулху походи на песчаных червей, но длиннее. Они втягиваются по одной клетке, а не взрываются мгновенно.",
-   "Die Tentakel von Cthulhu sind wie Sandwürmer, nur länger. Anstatt zu explodieren ziehen sie sich zurück, eine Zelle nach der anderen.",
+   "Die Tentakel von Cthulhu sind wie Sandwürmer, aber länger. Anstatt zu explodieren ziehen sie sich zurück, eine Zelle nach der anderen.",
     }},
   {0x41a0800e, { // " $$$: %1"
    " $$$: %1",
@@ -1983,6 +3110,13 @@ sentence all_sentences[1130] = {
    "Фиктивная земля с разноцветным полом.",
    "Ein falsches Land mit farbigen Böden.",
     }},
+  {0x41ef5d8c, { // "You can hold this bush to climb the Lost Mountain, but it is not very strong -- it will get destroyed if you climb from it into an unstable location. Bushes block the movement of birds."
+   "Możesz złapać ten krzak, by się wspiąć na Zagubioną Górę, ale nie jest on zbyt wytrzymały -- zniszczy się, gdy wespniesz się z niego do niestabilnej pozycji. Krzaki blokują drogę ptakom.",
+/*MISSING*/    "You can hold this bush to climb the Lost Mountain, but it is not very strong -- it will get destroyed if you climb from it into an unstable location. Bushes block the movement of birds.",
+   "Tohoto keře se můžeš chytit při výstupu na Ztracenou horu, ale není příliš silný -- pokud z něj vylezeš na nestabilní lokaci, zničí se. Keře blokují pohyb ptáků.",
+   "Вы можете хвататься за этот куст, чтобы лезть на гору, но он не очень прочный: он развалится, если переместиться с него на нестабильную клетку. Блокирует перемещение птиц.",
+/*MISSING*/    "You can hold this bush to climb the Lost Mountain, but it is not very strong -- it will get destroyed if you climb from it into an unstable location. Bushes block the movement of birds.",
+    }},
   {0x4212ec3c, { // "c = readd v"
    "c = ponownie v",
    "c = yeniden ekle v",
@@ -1991,11 +3125,11 @@ sentence all_sentences[1130] = {
    "c = wiederhinzufügen v",
     }},
   {0x426c48b7, { // "The Alchemists produce magical potions from pools of blue and red slime. You can go through these pools, but you cannot move from a blue pool to a red pool, or vice versa. Pools containing items count as colorless, and they change color to the PC's previous color when the item is picked up. Slime beasts also have to keep to their own color, but when they are killed, they explode, destroying items and changing the color of the slime and slime beasts around them."
-   "Alchemicy produkują magiczne napoje z niebieskiej i czerwonej mazi. Możesz poruszać się poprzez maź, ale nie możesz przesunąć się z pola niebieskiego na czerwone, ani z powrotem. Pola zawierające przedmioty są bezbarwne, jak zabierzemy przedmiot, to zmieniają kolor na kolor pola, na którym gracz był wcześniej. Maziste Stwory również ograniczone są do swojego koloru. Gdy je zabijesz, eksplodują, niszcząc przedmioty i zmieniając kolor mazi wokół nich.\n",
+   "Alchemicy produkują magiczne napoje z niebieskiej i czerwonej mazi. Możesz poruszać się poprzez maź, ale nie możesz przesunąć się z pola niebieskiego na czerwone, ani z powrotem. Pola zawierające przedmioty są bezbarwne, po zebraniu przedmiotu zmieniają kolor na kolor pola, na którym gracz był wcześniej. Maziste Stwory również ograniczone są do swojego koloru. Zabijane eksplodują, niszcząc przedmioty i zmieniając kolor mazi wokół nich.\n",
    "Simyacılar mavi ve kırmızı balçık havuzlarından sihirli iksirler üretirler. Bu havuzlardan geçebilirsin, ama kırmızı bir havuzdan mavi bir havuza veya tam tersine geçemezsin. Balçık canavarları kendi renklerinde durmak zorundadır, Ama öldüklerinde patlarlar ve etrafındaki eşyaları yok eder, etraflarındaki balçığın ve canavarların rengini değiştirirler. \n",
    "Alchymisté vytvářejí magické lektvary z kaluží modrého a červeného slizu. Ty můžeš těmito kalužemi procházet, ale nemůžeš se pohnout z modré kaluže do červené nebo obráceně. Kaluže s předměty se berou jako bezbarvé a po sebrání předmětu změní barvu na tu, na které jste byl předtím. I Slizoví netvoři se mohou pohybovat jen v kalužích své vlastní barvy, ale když zemřou, vybuchnou, což zničí předměty v jejich blízkosti a změní barvu okolního slizu a Slizových netvorů.",
    "Алхимики создают магические зелья из красной и синей слизи. Вы можете перемещаться по этой слизи, но не можете перейти с красной на синюю и наоборот. Слизь, содержащая предметы, бесцветна и меняет свой цвет на Ваш, когда Вы собираете предмет. Живая слизь тоже двигается лишь по своему цвету, но при гибели меняет цвет всей слизи в радиусе 2 клеток на свой.\n",
-   "Die Alchemisten produzieren magische Tränke aus Lachen von blauem und rotem Schleim. Du kannst durch sie hindurchgehen, aber du kannst nicht von Blau zu Rot wechseln, oder von Rot zu Blau. Lachen mit Gegenständen darin sind farblos, und werden zu der Farbe, auf der du schreitest, sobald diese aufgehoben werden. Schleimmonster müssen auch auf ihrer Farbe bleiben, wenn sie allerdings sterben explodieren sie, zerstören Items und ändern die Farbe von Schleim und Schleimmonstern um sie herum.\n",
+   "Die Alchemisten produzieren magische Tränke aus Lachen von blauem und rotem Schleim. Du kannst durch sie hindurchgehen, aber du kannst nicht von Blau zu Rot wechseln oder umgekehrt. Lachen mit Gegenständen darin sind farblos und bekommen die Farbe, auf der du zuletzt warst, wenn du den Gegenstand aufhebst. Schleimmonster müssen auch auf ihrer Farbe bleiben. Wenn sie sterben, explodieren sie, zerstören Items und ändern die Farbe von Schleim und Schleimmonstern um sie herum.",
     }},
   {0x42a2a741, { // "first page [Space]"
    "pierwsza strona [Space]",
@@ -2016,21 +3150,21 @@ sentence all_sentences[1130] = {
 /*MISSING*/    " kills: %1/%2",
    " zabití: %1/%2",
    " убийств: %1/%2",
-/*MISSING*/    " kills: %1/%2",
+   " Tötungen: %1/%2",
     }},
   {0x43bec718, { // "four players"
    "czterech graczy",
 /*MISSING*/    "four players",
    "čtyři hráči",
    "четыре игрока",
-/*MISSING*/    "four players",
+   "vier Spieler",
     }},
   {0x43e793b1, { // "There are many possible solutions to the Yendor Quest. In the Yendor Challenge, you will try many of them!\n\nEach challenge takes part in a specific land, and you have to use what you have available.\n\nYou need to obtain an Orb of Yendor in the normal game to activate this challenge, and (ever) collect 10 treasures in one or two lands to activate a specific level.\n\nAfter you complete each challenge, you can try it again, on a harder difficulty level.\n\nAll the solutions showcased in the Yendor Challenge work in the normal play too. However, passages to other lands, and (sometimes) some land features are disabled in the Yendor Challenge, so that you have to use the expected method. Also, the generation rules are changed slightly for the Palace and Minefield while you are looking for the Orb of Yendor, to make the challenge more balanced (but these changes are also active during the normal Yendor Quest).\n\nYou get 1000 points for each challenge won, and 1 extra point for each extra difficulty level."
-   "Jest dużo możliwych sposobów, by zdobyć Sferę Yendoru. W tej misji spróbujesz wielu z nich!\n\nKażda misja dzieje się w konkretnej krainie, i musisz użyć tego, co jest dostepne.\n\nMusisz zdobyć Sferę Yendoru w normalnej grze, by odblokować Misję Yendor, i (kiedykolwiek) zdobyć 10 skarbów w jednym czy dwu światach, by uaktywnić konkretną misję.\n\nPo ukończeniu każdej misji, możesz spróbować jescze raz, na trudniejszym poziomie.\n\nWszystkie rozwiązania użyte w Misji Yendor działają w normalnej grze. Przejścia do innych krain, i (czasami) niektóre inne elementy są wyłączone podczas Misji Yendor, byś musia%ł0 użyć oczekiwanej metody. Reguły generowania krain są lekko zmienione gdy szukasz Sfer Yendoru w Pałacu i na Polu Minowym, by poprawić równowagę (te zmiany są też aktywne przy poszukiwaniu Sfery Yendoru podczas normalnej gry).\n\n",
+   "Jest dużo możliwych sposobów, by zdobyć Sferę Yendoru. W tej misji spróbujesz wielu z nich!\n\nKażda misja dzieje się w konkretnej krainie i musisz użyć tego, co jest dostepne.\n\nMusisz zdobyć Sferę Yendoru w normalnej grze, by odblokować Misję Yendor i (kiedykolwiek) zdobyć 10 skarbów w jednym czy dwu światach, by uaktywnić konkretną misję.\n\nPo ukończeniu każdej misji, możesz spróbować jescze raz, na trudniejszym poziomie.\n\nWszystkie rozwiązania użyte w Misji Yendor działają w normalnej grze. Przejścia do innych krain i (czasami) niektóre inne elementy są wyłączone podczas Misji Yendor, byś musia%ł0 użyć oczekiwanej metody. Reguły generowania krain są lekko zmienione, gdy szukasz Sfer Yendoru w Pałacu i na Polu Minowym, by poprawić równowagę (te zmiany są też aktywne przy poszukiwaniu Sfery Yendoru podczas normalnej gry).\n\n",
    "Yendor Görevinin bir sürü çözümü var. Yendor Ek Görevi'nde bunların pek çoğunu deneyeceksin!\n\nHer görev belirli bir diyarda geçiyor ve elindekileri bütün verimliliğiyle kullanman gerekecek.\n\nBu görevi aktifleştirmek için normal oyunda bir kez Yendor'un Küresi'ni ele geçirmen gerekiyor. Ayrıca her hangi bir seviyeyi aktifleştirmek için ilgili diyar(lar)da 10 hazine toplamış olman gerekiyor.\n\nEk görevi tamamladıktan sonra aynı görevi bir üst zorluk seviyesinde yeniden deneyebilirsin.\n\nYendor Ek Görevi'ndeki bütün çözümler normal oyunda da işe yarar. Ancak, Yendor Ek görevinde, diğer diyarlara geçiş ve bazen diyarın bazı özellikleri devredışıdır, bu yüzden beklenen çözümü bulman beklenir. Ayrıca,  Yendor'un Küresi'ni ararken görevin daha dengeli olması için Saray ve Mayın Tarlasındaki harita üretimi biraz değiştirilmiştir. (bu değişiklikler normal Yendor Görevi'nde de mevcuttur).\n\nHer kazanılan ek görev için 1000 puan ve her fazladan zorluk seviyesi için 1 fazladan puan kazanırsın.\n\n",
    "Je mnoho různých způsobů, jak získat Yendorskou Sféru. V Misi: Yendor si jich vyzkoušíš celou řadu!\n\nKaždá mise se odehrává v určitém kraji a ty musíš využít to, co tam máš k dispozici.\n\nAbys mohl hrát Misi: Yendor, musíš získat Yendorskou Sféru v normální hře; pro aktivaci konkrétních misí musíš také (alespoň jednou) získat 10 pokladů v jednom či dvou krajích.\n\nPo splnění každé mise se o ni můžeš pokusit znovu, na vyšší obtížnosti.\n\nVšechna řešení v Misi: Yendor fungují i v normální hře. Průchody do jiných krajin a (někdy) některé jejich prvky jsou však v Misi: Yendor vypnuty, takže musíte použít metodu, jaká se od vás očekává. Kromě toho se při hledání Yendorské sféry poněkud mění pravidla pro generování Paláce a Minového pole, aby byla mise více vyvážená, (tyto změny však platí i během normálního hledání Yendorské Sféry).\n\n",
    "Есть много способов достать сферу Йендора. В этой миссии Вы можете попробовать все варианты!\n\nКаждая миссия проходит в конкретных землях, и можно использовать лишь то, что там есть.\n\nВы должны достать сферу Йендора в обычной игре, чтобы открыть этот режим, и собрать 10 сокровищ в одной или двух землях, чтобы открыть конкретные уровни.\n\nЗакончив определённую миссию, Вы можете попробовать её заново на большей сложности.\n\nВсе решения, продемонстрированные в миссии Йендора, работают и в нормальной игре. Выходы в другие земли и некоторые внутренние особенности здесь отключены, что заставляет использовать предусмотренный способ. Правила генерации во Дворце и на Минном поле немного изменены, пока Вы ищете Сферу, но в нормальной игре эти изменения во время квеста тоже действуют.\n\n",
-   "Es gibt viele mögliche Lösungen für die Quest von Yendor. Während der Yendor Herausforderung wirst du viele davon ausprobieren!\n\nJede Herausforderung ist auf ein bestimmtes Land begrenzt und du musstnutzen was gegeben ist.\n\nZum freischalten dieser Herausforderung muss ein Orb von Yendor imim normalem Modus gesammelt werden sowie 10 Schätze in ein oder zweiLändern um bestimmte Level zu aktivieren.\n\nNach dem beenden einer Herausforderung kannst du eine schwierigere Version dieser spielen.\n\nAlle Lösungen der Yendor Herausforderung funktionieren auch im normalem Spiel. Allerdings sind Wege zu anderen Ländern in der Yendor Herausforderungdeaktiviert, somit bleiben weniger Lösungsmöglichkeiten. Außerdem kann verändert werden wie der Palast und das Minenfeldgeneriert warden um es einfacher zu machen einen Orb von Yendor zu finden(Diese Änderungen sind auch während des normalen Yendorquest aktiviert).\n\n",
+   "Es gibt viele mögliche Lösungen für die Quest von Yendor. Während der Yendor Herausforderung wirst du viele davon ausprobieren!\n\nJede Herausforderung ist auf ein bestimmtes Land begrenzt und du musst nutzen was gegeben ist.\n\nZum Freischalten dieser Herausforderung muss ein Orb von Yendor im normalem Modus gesammelt werden sowie 10 Schätze in ein oder zwei Ländern um bestimmte Level zu aktivieren.\n\nNach dem Beenden einer Herausforderung kannst du eine schwierigere Version dieser spielen.\n\nAlle Lösungen der Yendor-Herausforderung funktionieren auch im normalem Spiel. Allerdings sind Wege zu anderen Ländern in der Yendor-Herausforderung deaktiviert, somit bleiben weniger Lösungsmöglichkeiten. Außerdem kann verändert werden wie der Palast und das Minenfeld generiert werden um es einfacher zu machen einen Orb von Yendor zu finden. (Diese Änderungen sind auch während des normalen Yendorquest aktiviert).\n\n",
     }},
   {0x44057f41, { // "In most lands, more treasures are generated with each enemy native to this land you kill. Moreover, 100 kills is a requirement to enter the Graveyard and the Hive.\n\nFriendly creatures and parts of monsters (such as the Ivy) do appear in the list, but are not counted in the total kill count."
    "W większości krain, zabijanie przeciwników pochodzących z danej krainy powoduje, że generowane jest więcej skarbów. Ponadto, 100 zabić jest konieczne, by móc znaleźć Cmentarz i Mrowisko.\n\nPrzyjazne stworzenia i części potworów (jak np. Bluszcz) występują na liście, ale nie są liczone do łącznej liczby zabić.",
@@ -2040,18 +3174,25 @@ sentence all_sentences[1130] = {
    "In den meisten Ländern werden mehr Schätze generiert, je mehr Feinde du darin tötest. Darüber hinaus benötigst du 100 Kills für den Friedhof und das Nest.\n\nFreundliche Kreaturen und Monsterteile (z.B. Efeu) werden zwar gezeigt, zählen aber nicht zur Gesamt-Punktzahl.",
     }},
   {0x443579c7, { // "\"When I visited the Palace, a mouse wanted me to go somewhere.\""
-   "\"Kiedy byłem w Pałacu, mysz chciała, bym gdzieś poszedł.\"",
+   "\"Kiedy byłem w Pałacu, myszka chciała, bym gdzieś poszedł.\"",
    "\"Sarayı ziyaret ettiğimde, bir fare benden bir yere gitmemi istedi.\"",
    "\"Když jsem navštívil Palác, byla tam myška, co chtěla, abych se někam vydal.\"",
    "\"Когда я был во Дворце, мышь пыталась меня позвать куда-то.\"",
    "\"Als ich den Palast besuchte wollte eine Maus das ich irgendwo hingehe.\"",
     }},
   {0x44758caa, { // "Rangers take care of the magic mirrors in the Land of Mirrors. They know that rogues like to break these mirrors... so they will attack you!"
-   "Strażnicy chronią luster w Krainie Luster. Wiedzą, że złodzieje lubią rozbijać lustra... także spodziewaj się ataku!",
+   "Strażnicy chronią lustra w Krainie Luster. Wiedzą, że złodzieje lubią rozbijać lustra... także spodziewaj się ataku!",
    "Seyyahların aynalarını kıracağını bildiklerinden sana saldıracaklar!",
    "Strážci se starají o kouzelná zrcadla v Kraji zrcadel. Vědí, že lupiči jako ty rádi tato zrcadla rozbíjejí... a proto na tebe útočí!",
    "Странники охраняют магические зеркала. Они знают, что эти разбойники хотят разбить их зеркала и тут же нападают на Вас!",
-   "Ranger nehmen die beschützen die Zauberspiegel im Spiegelland. Sie wissen, dass Schurken wie du gerne die Spiegel zerbrechen, also greifen sie dich an!",
+   "Ranger beschützen die Zauberspiegel im Spiegelland. Sie wissen, dass Schurken wie du die Spiegel gerne zerbrechen - also greifen sie dich an!",
+    }},
+  {0x450c904d, { // "\"It is not possession but the act of getting there, "
+   "\"Nie posiadanie, ale proces docieranie na miejsce, ",
+/*MISSING*/    "\"It is not possession but the act of getting there, ",
+   "\"Ne vlastnictví, ale cesta k němu ",
+   "\"Это не владение, но процесс получения знания",
+/*MISSING*/    "\"It is not possession but the act of getting there, ",
     }},
   {0x451f3f10, { // "advanced configuration"
    "zaawansowana konfiguracja",
@@ -2065,14 +3206,21 @@ sentence all_sentences[1130] = {
 /*MISSING*/    "prepare the line animation",
    "připrav přímkovou animaci",
    "приготовить анимацию линии",
-/*MISSING*/    "prepare the line animation",
+   "bereite die Linien-Animation vor",
+    }},
+  {0x453c3739, { // "You got Thorns! Stab monsters by moving around them."
+   "Ciernie! Dźgaj potwory chodząc obok nich.",
+/*MISSING*/    "You got Thorns! Stab monsters by moving around them.",
+   "Získal jsi Trny! Nyní můžeš probodnout netvory tím, že kolem nich projdeš.",
+   "Вы получили Шипы! Колите монстров, ходя мимо них.",
+/*MISSING*/    "You got Thorns! Stab monsters by moving around them.",
     }},
   {0x457f1068, { // "Your total treasure has been recorded in the Steam Leaderboards."
    "Twój wynik został zapisany w rankingach Steam.",
    "Toplam hazinen Steam Listelerine kaydedildi.",
    "Tvůj celkový poklad byl zaznamenán na žebříčky na Steamu.",
    "Ваш общий результат занесён в таблицу Steam.",
-   "Deine Gesamtschätze wurden in die Steam Highscoreliste aufgenommen.",
+   "Deine Gesamtschätze wurden in die Steam-Bestenlisten aufgenommen.",
     }},
   {0x461e7611, { // "You cannot attack through the Vine!"
    "Nie możesz atakować poprzez winorośl!",
@@ -2095,12 +3243,26 @@ sentence all_sentences[1130] = {
    "Магия позволяет призывать этих дружелюбных созданий.",
    "Du kannst diese freundlichen Steinriesen mit einem Ritual beschwören.",
     }},
+  {0x4696bd7f, { // "start a new game"
+   "nowa gra",
+/*MISSING*/    "start a new game",
+   "nová hra",
+   "новая игра",
+   "neues Spiel starten",
+    }},
   {0x46bbc887, { // "This false princess is immune to the alluring scent of roses."
    "Ta fałszywa księżniczka jest niewrażliwa na zapach róż.",
 /*MISSING*/    "This false princess is immune to the alluring scent of roses.",
    "Tato falešná princezna je imunní vůči vábivé vůni růží.",
    "Эта ложная принцесса невосприимчива к ароматам роз.",
-/*MISSING*/    "This false princess is immune to the alluring scent of roses.",
+   "Diese falsche Prinzessin ist immun gegenüber dem verlockenden Duft der Rosen.",
+    }},
+  {0x46bd9565, { // "%The1 breathes fire at %the2!"
+   "%1 zieje ogniem w %a2!",
+/*MISSING*/    "%The1 breathes fire at %the2!",
+   "%1 chrlí oheň na %a2!",
+   "%1 дышит огнём на %a2!",
+   "%Der1 %1 spuckt Feuer auf %den2 %a2!",
     }},
   {0x47a46d50, { // "treasure collected"
    "zdobyte skarby",
@@ -2114,28 +3276,35 @@ sentence all_sentences[1130] = {
    "ölü küre çıkar",
    "vyvolej mrtvé sféry",
    "призвать мёртвые сферы",
-/*MISSING*/    "summon dead orbs",
+   "rufe tote Orbs herbei",
     }},
   {0x48142822, { // "This has been recorded in the Steam Leaderboards."
    "To zostało zapisane w Rankingach Steam.",
    "Bu Steam Listelerine kaydedildi.",
    "Bylo zaznamenáno na žebříčky Steamu.",
    "Это записано в таблицу рекордов Steam.",
-   "Dies wurde in den Steam Leaderboards vermerkt.",
+   "Dies wurde in den Steam-Bestenlisten vermerkt.",
     }},
   {0x483986df, { // "A land filled with huge ivy plants and dangerous animals."
    "Kraina pełna wielkiego pnącego bluszczu i niebezpiecznych bestii.",
    "Sarmaşık bitkileri ve tehlikeli hayvanlarla dolu bir diyar.",
    "Kraj plný obrovských rostlin břečťanu a nebezpečných zvířat.",
    "Земля, полная огромными плющами и опасными животными.",
-   "Ein Land voller Efeu und gefährlicher Tiere.",
+   "Ein Land voller riesiger Efeupflanzen und gefährlicher Tiere.",
+    }},
+  {0x4895a247, { // "Unavailable in the multiplayer mode.\n"
+   "Niedostępne w trybie wielu graczy.\n",
+/*MISSING*/    "Unavailable in the multiplayer mode.\n",
+   "Nedostupné v módu pro více hráčů.\n",
+   "Недоступно в режиме нескольких игроков.\n",
+   "Nicht im Mehrspieler-Modus verfügbar.\n",
     }},
   {0x489faba1, { // "Princess"
    "Księżniczka",
 /*MISSING*/    "Princess",
    "Princezna",
    "Принцесса",
-/*MISSING*/    "Princess",
+   "Prinzessin",
     }},
   {0x48aeb10a, { // "%The1 breaks the mirror!"
    "%1 rozbi%ł1 lustro!",
@@ -2156,14 +3325,21 @@ sentence all_sentences[1130] = {
    "%a1 düşürdün.",
    "Položi%l0 jsi %a1.",
    "Вы выкинули %a1.",
-   "Du lässt %den1 %a1.",
+   "Du legst %den1 %a1 ab.",
+    }},
+  {0x499be79c, { // "by land"
+   "kraina",
+/*MISSING*/    "by land",
+   "podle kraje",
+   "по земле",
+/*MISSING*/    "by land",
     }},
   {0x49a3ff8e, { // "summon treasure"
    "przywołaj skarby",
    "hazine çıkar",
    "vyvolej poklad",
    "призвать сокровища",
-/*MISSING*/    "summon treasure",
+   "rufe Schätze herbei",
     }},
   {0x4a1c9024, { // "ESC for menu/quest"
    "ESC - menu/misja",
@@ -2172,12 +3348,19 @@ sentence all_sentences[1130] = {
    "ESC - меню/миссия",
    "ESC für Menü/Quest",
     }},
+  {0x4ab7c698, { // "turn-based mode"
+   "gra turowa",
+/*MISSING*/    "turn-based mode",
+   "hra na kola",
+   "пошаговый режим",
+   "zugbasierter Modus",
+    }},
   {0x4af3c63d, { // "This Orb makes you stunningly beautiful. Monsters which come next to you will be stunned for one turn. Multi-tile monsters are not affected. Additionally, it makes you immune to beauty."
-   "Dzięki tej Sferze stajesz się oszałamiająco piękn%y1. Stworzenia, które wejdą na pole obok Ciebie, zostaną oszołomione na 1 kolejkę. Nie działa to na stworzenia zajmujące wiele pól. Dodatkowo, stajesz się niewrażliw%y1 na piękno.",
+   "Dzięki tej Sferze stajesz się oszałamiająco piękn%y0. Stworzenia, które wejdą na pole obok Ciebie, zostaną oszołomione na 1 kolejkę. Nie działa to na stworzenia zajmujące wiele pól. Dodatkowo, stajesz się niewrażliw%y0 na piękno.",
 /*MISSING*/    "This Orb makes you stunningly beautiful. Monsters which come next to you will be stunned for one turn. Multi-tile monsters are not affected. Additionally, it makes you immune to beauty.",
    "Tato Sféra ti dává omračující krásu. Netvoři, kteří vstoupí na políčko vedle tebe, budou na jedno kolo omráčeni. Netvoří, kteří zabírají více než jedno políčko, nejsou ovlivněni. Kromě toho ti tato Sféra poskytuje imunitu proti kráse.",
    "С этой сферой Вы становитесь ошеломляюще прекрасны. Монстр, подошедший к Вам, застывает на один ход. Не действует на монстров из нескольких клеток. Также Вы теперь можете игнорировать красоту других.",
-/*MISSING*/    "This Orb makes you stunningly beautiful. Monsters which come next to you will be stunned for one turn. Multi-tile monsters are not affected. Additionally, it makes you immune to beauty.",
+   "Dieser Orb macht dich atemberaubend schön. Monster, die sich dir nähern, werden für einen Zug betäubt. Monster, die sich über mehrere Zellen erstrecken, sind nicht betroffen. Außerdem macht er dich immun gegenüber 'Schönheit'.",
     }},
   {0x4b4fc4fd, { // "move right"
    "idź w prawo",
@@ -2207,6 +3390,13 @@ sentence all_sentences[1130] = {
    "F3 = загрузить",
    "F3 = Laden",
     }},
+  {0x4ca27502, { // "mark heptagons"
+   "oznaczenia na siedmiokątach",
+/*MISSING*/    "mark heptagons",
+/*MISSING*/    "mark heptagons",
+   "отметить семиугольники",
+/*MISSING*/    "mark heptagons",
+    }},
   {0x4cc25130, { // "You throw fire!"
    "Rzucasz ogniem!",
    "Ateş attın!",
@@ -2229,21 +3419,21 @@ sentence all_sentences[1130] = {
    "Shift zum Verringern, Strg zum feinen",
     }},
   {0x4d895a7a, { // "In the pure tactics mode, you concentrate on a specific land. Your goal to obtain as high score as possible, without using features of the other lands. You can then compare your score with your friends!\n\nYou need to be somewhat proficient in the normal game to unlock the given land in this challenge (collect 20 treasure in the given land, or 2 in case of Camelot).\n\nSince getting high scores in some lands is somewhat luck dependent, you play each land N times, and your score is based on N consecutive plays. The value of N depends on how 'fast' the land is to play, and how random it is.\n\nIn the Caribbean, you can access Orbs of Thorns, Aether, and Space if you have ever collected 25 treasure in their native lands.\n\nThe rate of treasure spawn is static in this mode. It is not increased by killing monsters.\n\nGood luck, and have fun!"
-   "W trybie taktycznym skupiasz się na jednej krainie. Twoim celem jest zdobycie jak najwyższego wyniku, bez używania elementów pozostałych krain. Możesz potem porównać wyniki ze znajomymi!\n\nMusisz sobie dobrze radzić w normalnej grze, by odblokować daną krainę tutaj (zbierz 20 skarbów w danym świecie, albo 2 w przypadku Camelot).\n\nZdobywanie wysokich wyników w niektórych krainach jest zależne od szczęścia, zatem grasz każdą krainę N razy, i Twój wynik jest oparty na N kolejnych grach. Wartość N zależy od tego, jak szybka jest kraina, i jak bardzo losowa.\n\nNa Karaibach masz dostęp do Sfery Cierni, Eteru, i Przestrzeni, jeżeli kiedylkolwiek zebra%łeś0 25 skarbów w ich natywnych krainach.\n\nSzybkość generowania skarbów jest stała w tym trybie, nie powiększa się wraz z zabijaniem potworów.\n\nPowodzenia, i miłej zabawy!",
+   "W trybie taktycznym skupiasz się na jednej krainie. Twoim celem jest zdobycie jak najwyższego wyniku, bez używania elementów pozostałych krain. Możesz potem porównać wyniki ze znajomymi!\n\nMusisz sobie dobrze radzić w normalnej grze, by odblokować daną krainę tutaj (zbierz 20 skarbów w danym świecie, albo 2 w przypadku Camelot).\n\nZdobywanie wysokich wyników w niektórych krainach jest zależne od szczęścia, zatem grasz każdą krainę N razy, a Twój wynik jest oparty na N kolejnych grach. Wartość N zależy od tego, jak 'szybko' gra się w krainie i jak bardzo jest losowa.\n\nNa Karaibach masz dostęp do Sfery Cierni, Eteru i Przestrzeni, jeżeli kiedylkolwiek zebra%łeś0 25 skarbów w ich natywnych krainach.\n\nSzybkość generowania skarbów jest stała w tym trybie, nie powiększa się wraz z zabijaniem potworów.\n\nPowodzenia i miłej zabawy!",
    "Saf taktik modunda sadece tek bir diyara odaklanırsın. Amacın diğer diyarların özelliklerini hiç kullanmadan mümkün olduğunca yüksek puan yapmak. Sonra skorunu arkadaşlarınınkiyle karşılaştırabilirsin!\n\n Normal oyunda maharetini ispatlayarak belli bir diyarı bu modda açabilirsin. (Belli bir diyarda 20 hazine toplamak, Kamelot için 2 hazine toplamak gibi).\n\nYüksek skor almak şöyle böyle şansa bağlı olduğundan, her diyarı N defa oynarsın ve skorun bu ardarda N oyuna göre belirlenir. N'in değeri diyarın ne kadar hızlı oynandığına ve ne derece rassal olduğuna göre değişir.\n\nKarayiplerde, Diken Küresine, Ether'e ve Uzay'a eğer daha önce ilgili diyarlarda 25'er hazine topladıysan erişebilirsin.\n\nHazine üretimi bu modda statiktir ve canavar öldürmekle artmaz.\n\nİyi şanslar ve iyi eğlenceler!",
    "V taktickém módu se soustředíš pouze na jeden specifický kraj. Tvým cílem  je získání co nejvyššího skóre, bez použití jakýchkoli prvků jiných krajů. Potom si své skóre můžeš porovnat s přáteli!\n\nAbys v tomto módu odemkl určitý kraj, musíš být alespoň trochu dobrý ve standardní hře (získat 20 pokladů v daném kraji, 2 v případě Camelotu).\n\nVzhledem k tomu, že získání vysokého skóre v některých krajích poněkud závisí na štěstí, budeš každý kraj hrát N-krát a tvé skóre bude založeno na N po sobě jdoucích hrách. Hodnota N se odvíjí od 'rychlosti' a náhodnosti daného kraje.\n\nV Karibiku budeš mít k dispozici Sféry Trnů, Éteru a Prostoru, pokud jsi někdy získal 25 pokladů v jejich rodných krajích.\n\nGenerování pokladů je v tomto módu statické. Nezvyšuje se zabíjením netvorů.\n\nHodně štěstí, a dobře se bavte!",
    "В тактическом режиме Вы концентрируетесь на одной земле. Цель - максимизировать счёт,не используя особенности других земель. Вы можете сравнить свои результаты с результатами друзей!\n\nВы должны быть достаточно опытным в обычной игре, чтобы открыть землю здесь (соберите в ней 20 сокровищ, или 2 в случае Камелота).\n\nТак как результаты в некоторых землях могут зависеть от случая, Вам нужно сыграть N раз, и счёт зависит от N последовательных игр. Значение N зависит от того, насколько быстро проходит игра, и насколько она зависит от случая.\n\nНа Карибах Вам доступны сферы Шипов, Эфира и Пространства, если Вы собрали 25 сокровищ в их родных землях.\n\nЧастота появления сокровищ здесь постоянна, она не зависит от количества убитых монстров.\n\nУдачи и приятного времяпровождения!",
-   "Im Strategiemodus konzentrierst du dich auf ein einziges Land.Das Ziel ist es eine möglichst hohe Punktzahl zu erreichen ohnefeatures anderer Länder zu nutzen. Du kannst deine Punktzahl mit denen deiner Freunde vergleichen!\n\nDu musst im normalen Spiel etwas erfahrener sein um das LandIn dieser Herausforderung freizuschalten. (Sammle 20 Schätze im jeweiligem Land, oder 2 im Fall von Camelot).\n\nDa die Punktzahl in manchen Ländern sehr glücksbasierend sein kann, wird jedes Land N mal gespielt und die Punktzahl basiert auf N DurchläufenDie Anzahl N hängt davon ab wie 'schnell' und zufällig das Land ist. \n\nIn der Karibik hast du Zugriff auf, den Orb der Dornen,  den Orb des Aether und den Orb des Raumes wenn zuvor 25 Schätze in ihren Heimatländern gesammelt wurden.\n\nDie Anzahl der Schätze in diesem Modus ist festgelegtund wird nicht durch das töten von Monstern erhöht.\n\nViel Glück und Erfolg!",
+   "Im Strategiemodus konzentrierst du dich auf ein einziges Land. Das Ziel ist es eine möglichst hohe Punktzahl zu erreichen ohne features anderer Länder zu nutzen. Du kannst deine Punktzahl mit denen deiner Freunde vergleichen!\n\nDu musst im normalen Spiel etwas erfahrener sein um das Land in dieser Herausforderung freizuschalten. (Sammle 20 Schätze im jeweiligem Land, oder 2 im Fall von Camelot).\n\nDa die Punktzahl in manchen Ländern sehr glücksbasierend sein kann, wird jedes Land N mal gespielt und die Punktzahl basiert auf N Durchläufen. Die Anzahl N hängt davon ab wie 'schnell' und zufällig das Land ist.\n\nIn der Karibik hast du Zugriff auf den Orb der Dornen, den Orb des Aether und den Orb des Raumes wenn zuvor 25 Schätze in ihren Heimatländern gesammelt wurden.\n\nDie Anzahl der Schätze in diesem Modus ist festgelegt und wird nicht durch das Töten von Monstern erhöht.\n\nViel Glück und Erfolg!",
     }},
   {0x4d8ebaab, { // "This gate separates the warped area from the normal land."
    "Ta brama oddziela strefę zakrzywioną od normalnych krain.",
 /*MISSING*/    "This gate separates the warped area from the normal land.",
    "Tato brána odděluje pokřivenou oblast od normálních krajů.",
    "Эти врата отделяют искривлённые земли от обычных.",
-/*MISSING*/    "This gate separates the warped area from the normal land.",
+   "Dieses Tor trennt den verzerrten Bereich vom normalen Land.",
     }},
   {0x4da1cb53, { // "Those large seabirds attack you for some reason. At least they are not as fast as Eagles..."
-   "Te wielkie morskie ptaki atakują Ciebie z jakiegoś powodu. Przynajmniej nie są tak szybkie, jak Orły...",
+   "Te wielkie morskie ptaki atakują Cię z jakiegoś powodu. Przynajmniej nie są tak szybkie, jak Orły...",
    "Bu iri denizkuşları sana nedense saldırıyor. En azından kartallar kadar hızlı değiller.",
    "Tito velcí mořští ptáci na tebe z nějakého důvodu útočí. Aspoň že nejsou tak rychlí jako Orli...",
    "Эти большие морские птицв почему-то атакуют Вас. Они хотя бы не такие быстрые, как Орлы...",
@@ -2254,14 +3444,21 @@ sentence all_sentences[1130] = {
 /*MISSING*/    "spin up",
    "otoč nahoru",
    "вращать вверх",
-/*MISSING*/    "spin up",
+   "herunterdrehen",
+    }},
+  {0x4dd6967c, { // "next page"
+   "kolejna strona",
+/*MISSING*/    "next page",
+   "další stránka",
+   "следующая страница",
+   "nächste Seite",
     }},
   {0x4e2aa36d, { // "In the Chaos mode, lands change very often, and there are no walls between them. Some lands are incompatible with this.\n\nYou need to reach Crossroads IV to unlock the Chaos mode."
-   "W trybie Chaosu krainy zmieniają się bardzo często, i nie ma między nimi ścian. Niektóre krainy są niekompatybilne z tym trybem.\n\nMusisz dotrzeć do Skrzyżowania IV, by odblokować tryb Chaosu.",
+   "W trybie Chaosu krainy zmieniają się bardzo często i nie ma między nimi ścian. Niektóre krainy są niekompatybilne z tym trybem.\n\nMusisz dotrzeć do Skrzyżowania IV, by odblokować tryb Chaosu.",
 /*MISSING*/    "In the Chaos mode, lands change very often, and there are no walls between them. Some lands are incompatible with this.\n\nYou need to reach Crossroads IV to unlock the Chaos mode.",
    "V chaotickém módu se kraje mění velice často a nejsou mezi nimi žádné stěny. Některé kraje nejsou s tímto módem kompatibilní.\n\nChaotický mód musíš odemknout tím, že dojdeš na Křižovatku IV.",
    "В режиме Хаоса земли меняются очень часто, и между ними нет стен. Некоторые земли несовместимы с этим режимом.\n\nВы должны достичь Перекрёстка IV, чтобы открыть режим Хаоса.",
-/*MISSING*/    "In the Chaos mode, lands change very often, and there are no walls between them. Some lands are incompatible with this.\n\nYou need to reach Crossroads IV to unlock the Chaos mode.",
+   "Im Chaos-Modus wechseln die Ländern sehr oft und es gibt keine Wände zwischen ihnen. Einige Länder sind damit inkompatibel.\n\nDu musst die Kreuzungen IV erreichen, um den Chaos-Modus freizuschalten.",
     }},
   {0x4e47b5a2, { // "0 = asymmetry"
    "0 = asymetria",
@@ -2277,6 +3474,27 @@ sentence all_sentences[1130] = {
    "Добро пожаловать в HyperRogue",
    "Willkommen bei HyperRogue",
     }},
+  {0x4eb120ee, { // "player 5 X"
+   "gracz 5 X",
+/*MISSING*/    "player 5 X",
+   "hráč 5 X",
+/*MISSING*/    "player 5 X",
+   "Spieler 5 X",
+    }},
+  {0x4eb120ef, { // "player 5 Y"
+   "gracz 5 Y",
+/*MISSING*/    "player 5 Y",
+   "hráč 5 Y",
+/*MISSING*/    "player 5 Y",
+   "Spieler 5 Y",
+    }},
+  {0x4f429a41, { // "draw the grid"
+   "rysowanie siatki",
+/*MISSING*/    "draw the grid",
+   "vykreslování møíky",
+   "рисовать сетку",
+/*MISSING*/    "draw the grid",
+    }},
   {0x4f9581a9, { // "hardcore mode"
    "tryb hardcore",
    "Aşmış mod",
@@ -2289,14 +3507,28 @@ sentence all_sentences[1130] = {
    "küre güçleri kazan",
    "získej moc sféry",
    "получить силу сфер",
-/*MISSING*/    "gain orb powers",
+   "erhalte Orbkräfte",
+    }},
+  {0x4fbeb090, { // "Trolls of Trollheim are descendants of a bridge Troll, who collected payments from people crossing the bridge. One of them paid with golden eggs. The bridge Troll found the eggs beautiful, but he quickly lost them. Golden eggs are still revered by Trolls, and you can find them in their caves."
+   "Trolle z Trollheim są potomkami Trolla, który pobierał myto od osób przechodzących mostem. Jeden z podróżnych zapłacił złotymi jajami. Jaja bardzo spodobały się naszemu Trollowi, ale szybko je zgubił. Trolle z Trollheim wciąż darzą złote jaja wielkim poważaniem i możesz znaleźć je w ich legowiskach.",
+/*MISSING*/    "Trolls of Trollheim are descendants of a bridge Troll, who collected payments from people crossing the bridge. One of them paid with golden eggs. The bridge Troll found the eggs beautiful, but he quickly lost them. Golden eggs are still revered by Trolls, and you can find them in their caves.",
+   "Trollové z Trollheimu jsou potomky trolla, který hlídal most a vybíral mýtné od těch, kdo po něm chtěli přejít. Jeden z nich zaplatil zlatými vejci. Trollovi tato vejce přišla moc krásná, ale rychle je ztratil. Trollové uctívají zlatá vejce dodnes a můžete je najít v jejich jeskyních.",
+   "Все тролли здесь -- потомки Тролля моста, собиравшего плату с людей, пересекавших мост. Один из них заплатил золотыми яйцами. Тролль счёл эти яйца прекрасными, но вскоре потерял. Тролли по-прежнему почитают Золотые яйца, и вы можете найти их в местных пещерах.",
+   "Die Trolle von Trollheim sind Nachfahren eines Brückentrolls, der Wegzölle von allen gesammelt hat, die die Brücke überquerten. Einer von ihnen bezahlte mit goldenen Eiern.Der Brückentroll fand die Eier sehr schön, aber verlor sie bald darauf. Die Eier werden von den Trollen noch immer verehrt, und du kannst sie in ihren Höhlen finden.",
     }},
   {0x4fd9ea92, { // "Alternatively: kill a %1 in %the2.\n"
    "Alternatywnie: zabij %a1 %abl2.\n",
 /*MISSING*/    "Alternatively: kill a %1 in %the2.\n",
    "Alternativně: zabij %a1 %abl2.\n",
    "Альтернатива: убить %a1 %abl2.\n",
-   "Alternativ: töte einen %a1.\n",
+   "Alternativ: töte einen %a1 %d2.\n",
+    }},
+  {0x4fdb418c, { // "High detail range"
+   "Zasięg wysokiego poziomu szczegółów",
+/*MISSING*/    "High detail range",
+   "Rozsah vysokých detailů",
+   "Зона высокой детализации",
+/*MISSING*/    "High detail range",
     }},
   {0x4ff0f741, { // "z = zoom in"
    "z = zbliżenie",
@@ -2312,12 +3544,19 @@ sentence all_sentences[1130] = {
    "играть заново",
    "Neustart",
     }},
+  {0x514c6466, { // "Killed %1 can be revived with Orb of the Love, after you collect 20 more $$$."
+   "Zabit%ya1 %1 może zostać przywrócona do życia Sferą Miłości, po zdobyciu 20 dodatkowych $$$.",
+/*MISSING*/    "Killed %1 can be revived with Orb of the Love, after you collect 20 more $$$.",
+   "Zabit%ého1 %a1 je možné oživit pomocí Sféry Lásky, ale předtím musíš získat ještě 20 $$$.",
+   "Убит%y1 %1 может быть оживлён при помощи Сферы любви, когда Вы соберёте ещё 20 $$$.",
+/*MISSING*/    "Killed %1 can be revived with Orb of the Love, after you collect 20 more $$$.",
+    }},
   {0x51679fa7, { // "display the triheptagonal grid"
    "pokaż siatkę triheptagonalną",
 /*MISSING*/    "display the triheptagonal grid",
    "zobraz triheptagonální mřížku",
    "показать трёх-семи-угольную сетку",
-/*MISSING*/    "display the triheptagonal grid",
+   "Zeige das tri-heptagonale Gitter an",
     }},
   {0x517de5e8, { // "random black-and-white"
    "losowy czarno-biały wzorek",
@@ -2333,6 +3572,13 @@ sentence all_sentences[1130] = {
    "эта сфера открывается только ы Центрах",
    "Dieser Orb wird niemals global freigeschaltet",
     }},
+  {0x51c52bbd, { // "Halloween mini-game"
+   "mini-gra Halloween",
+/*MISSING*/    "Halloween mini-game",
+   "mini-gra Halloween",
+   "мини-игра Хэллоуин",
+/*MISSING*/    "Halloween mini-game",
+    }},
   {0x520faa64, { // "Your total kills"
    "Łączne zabicia",
    "Toplam leşler",
@@ -2345,7 +3591,7 @@ sentence all_sentences[1130] = {
 /*MISSING*/    "Orb power (target: mouse)",
    "Použití Sféry (zaměření myší)",
    "активировать сферу",
-/*MISSING*/    "Orb power (target: mouse)",
+   "Orbkraft (Ziel: Maus)",
     }},
   {0x52db38db, { // "level to save/load:"
    "mapa do zapisu/wczytania:",
@@ -2355,7 +3601,7 @@ sentence all_sentences[1130] = {
    "Level zum speichern/laden:",
     }},
   {0x530987e8, { // "Dragons are powerful monsters. They are slow, but evil, and love to pick on creatures who are even slower than them. They must be stopped!\n\nA Dragon moves each two turns. It may attack with all its segments, or move its whole body forwards or backwards, it may also move a frontal part backwards. To kill a Dragon, you need to hit each of its segments. The head will regenerate on the turns the Dragon is not moving, so you will usually have to hit it with your last attack; otherwise, if the head is healthy, it may breathe fire (at range 3), losing the hitpoint. Killing the Dragon while still in the Dragon Chasms gives you treasure."
-   "Smoki to potężne bestie. Są powolne, ale bardzo złe, uwielbiają znęcać się nad stworzeniami, które są od nich jeszcze wolniejsze. Musisz je powstrzymać!\n\nSmok rusza się co dwie kolejki. Może atakować każdym segmentem, ruszyć całe swoje ciało do przodu lub do tyłu, albo ruszyć początkowy fragment do tyłu. By pokonać Smoka, musisz uderzyć każdy z jego segmentów. Głowa się regeneruje w kolejkach, podczas których Smok się nie rusza, także zwykle musi być atakowana ostatnia; jeśli głowa jest zdrowa, może zionąć ogniem (zasięg 3), tracąc punkt życia. Za pokonanie Smoka (będąc wciąż w Smoczych Otchłaniach) dostajesz skarby.",
+   "Smoki to potężne bestie. Są powolne, ale bardzo złe, uwielbiają znęcać się nad stworzeniami, które są od nich jeszcze wolniejsze. Musisz je powstrzymać!\n\nSmok rusza się co dwie kolejki. Może atakować każdym segmentem, ruszyć całe swoje ciało do przodu lub do tyłu albo ruszyć początkowy fragment do tyłu. By pokonać Smoka, musisz uderzyć każdy z jego segmentów. Głowa się regeneruje w kolejkach, podczas których Smok się nie rusza, także zwykle musi być atakowana ostatnia; jeśli głowa jest zdrowa, może zionąć ogniem (zasięg 3), tracąc punkt życia. Za pokonanie Smoka (będąc wciąż w Smoczych Otchłaniach) dostajesz skarby.",
 /*MISSING*/    "Dragons are powerful monsters. They are slow, but evil, and love to pick on creatures who are even slower than them. They must be stopped!\n\nA Dragon moves each two turns. It may attack with all its segments, or move its whole body forwards or backwards, it may also move a frontal part backwards. To kill a Dragon, you need to hit each of its segments. The head will regenerate on the turns the Dragon is not moving, so you will usually have to hit it with your last attack; otherwise, if the head is healthy, it may breathe fire (at range 3), losing the hitpoint. Killing the Dragon while still in the Dragon Chasms gives you treasure.",
    "Draci jsou mocní netvoři. Jsou pomalí, ale zlí, a moc rádi si dovolují na ty, kdo jsou ještě pomalejší než oni. Musíš je zastavit!\n\nDrak se pohybuje vždy jednou za dvě kola. Může zaútočit všemi svými segmenty, posunout celé své tělo dopředu nebo dozadu, nebo stáhnout dozadu přední část těla. Abys je zabil, musíš zasáhnout všechny jeho segmenty. Když se Drak nehýbe, jeho hlava automaticky zregeneruje, takže ji budeš obvykle musez zasáhnout posledním útokem; pokud je hlava zdravá, může drak chrlit oheň (na vzdálenost 3 polí), což jí vezme jeden život. Zabitím Draka v Dračích propastech získáš poklady.",
    "Драконы -- очень сильные существа. Они медленные, но злые, и любят издеваться над существами, которые ещё медленнее. Остановите их!\n\nДракон движется каждый второй ход. Он может атаковать любой своей частью, либо передвинуться вперёд или назад, либо передвинуть переднюю часть назад. Чтобы убить дракона, нужно ударить каждую его часть. Голова регенерирует каждый ход, когда дракон не движется, так что обычно её придётся бить последней; если голова здорова, дракон может дышать огнём (дальность 3), тратя одну жизнь. За убийство дракона в Драконьей бездне вы получите награду.",
@@ -2367,6 +3613,13 @@ sentence all_sentences[1130] = {
    "Papírový model byl vytvořen jako papermodel-*.bmp",
    "Модель сохранена как papermodel-*.bmp",
    "Das Papiermodell wurde als papermodel-*.bmp erzeugt",
+    }},
+  {0x537619eb, { // "Welcome to Halloween!"
+   "Witaj w Halloween!",
+/*MISSING*/    "Welcome to Halloween!",
+   "Vítejte v Halloweenu!",
+   "Добро пожаловать на Хэллоуин!",
+/*MISSING*/    "Welcome to Halloween!",
     }},
   {0x539a39d3, { // "This cell is partially on fire."
    "To pole częściowo się pali.",
@@ -2394,7 +3647,7 @@ sentence all_sentences[1130] = {
    " %1 tane %2 toplayarak aktifleştir",
    "Pro odemknutí získej %1x %2",
    "Соберите %1x %2, чтобы разблокировать",
-   "Sammle %1x %2 zum freischalten von",
+   "Sammle %1x %2 zum Freischalten",
     }},
   {0x5466eb5d, { // "c = copy"
    "b = brzeg",
@@ -2418,7 +3671,7 @@ sentence all_sentences[1130] = {
    "Datum: %1 Zeit: %2 s ",
     }},
   {0x54fb4344, { // "This boat cannot go through the sand. But if you sit inside and wait for the tide, you will be able to use it to travel through the Ocean."
-   "Ta łódka nie może pływać przez piasek. Ale jeśli w niej usiądziesz i poczekasz na przypływ, to będzie mogła płynąć przez Ocean.",
+   "Ta łódka nie może pływać przez piasek. Ale jeśli w niej usiądziesz i poczekasz na przypływ, będziesz móc płynąć przez Ocean.",
    "Bu bot kumda hareket edemez. Ama içine oturur ve dalgayı beklersen bunu OKyanus'ta seyahat etmek için kullanabilirsin.",
    "Tento člun nemůže plout po písku. Ale pokud si do něj sedneš a počkáš na příliv, můžeš na něm cestovat přes Oceán.",
    "Эта лодка не может пройти сквозь песок. Но если вы сядете внутрь и дождётесь прилива, Вы сможете ей воспользоваться.",
@@ -2436,14 +3689,21 @@ sentence all_sentences[1130] = {
    "Yüksek binaları seven taştan yapılmış bir yaratık. Öldürüldüğünde eğer durağan bir şeyin yanındaysa normal taş haline gelir, yoksa düşer.",
    "Kamenná bytost, která má ráda vysoké budovy. Po smrti se promění v obyčejný kámen, ale pouze tehdy, když je vedle něčeho stabilního -- jinak spadne.",
    "Существо из камня, выглядящее как высокое здание. Становится камнем, когда умирает, если рядом есть что-то стабильное -- иначе падает.",
-   "Ein Wesen aus Stein das hohe Gebäude mag. Es wird zu normalem Stein wenn es stirbt, vorausgesetzt es ist neben etwas stabilem. Ansonsten fällt es",
+   "Ein Wesen aus Stein das hohe Gebäude mag. Es wird zu normalem Stein wenn es stirbt, vorausgesetzt es ist neben etwas Stabilem. Ansonsten fällt es.",
     }},
   {0x55361341, { // "There are several species of trolls living in the hyperbolic world. Some of them leave this wall behind them when they die."
    "W hiperbolicznym świecie żyje kilka gatunków trolla. Niektóre z nich zostawiają taką ścianę, gdy się je zabije.",
    "Hiperbolik dünyada pek çok tür trol yaşar.Bazıları öldüğünde bu duvarı geride bırakır.",
    "V hyperbolickém světě žije několik druhů trollů. Někteří z nich se po smrti promění v tuto zeď.",
    "В гиперболическом мире есть несколько видов троллей. Некоторые из них при смерти превращаются в такую стену.",
-   "Es gibt mehrere verschiedene Trollgattungen in der hyperbolischen Welt.Manche von ihnen hinterlassen Wände wenn sie sterben.",
+   "Es gibt mehrere verschiedene Trollgattungen in der hyperbolischen Welt. Manche von ihnen hinterlassen Wände wenn sie sterben.",
+    }},
+  {0x556f6411, { // "This might be very useful for devices with limited memory."
+   "To może być bardzo przydatne na urządzeniach z ograniczoną pamięcią.",
+/*MISSING*/    "This might be very useful for devices with limited memory.",
+   "To může být velmi užitečné při hře na zařízeních s omezenou pamětí.",
+   "Это может быть полезно для устройств с ограниченной памятью.",
+   "Das kann sehr nützlich für Geräte mit begrenztem Speicher sein.",
     }},
   {0x5578b72d, { // "\"Our Table seats %1 Knights!\""
    "\"Przy naszym stole mieści się %1 Rycerzy!\"",
@@ -2459,6 +3719,20 @@ sentence all_sentences[1130] = {
    "предмет",
    "Item",
     }},
+  {0x55d8e966, { // "\nRanged Orbs can be targeted by shift-clicking the desired location. "
+   "\nRobi się to przez kliknięcie na celu z Shiftem.",
+/*MISSING*/    "\nRanged Orbs can be targeted by shift-clicking the desired location. ",
+   "\nTyto sféry lze zacílovat kliknutím na požadované políčko se stisknutou klávesou Shift.",
+   "\nВыбор цели сферы определяется щелчком мыши на цели с зажатым Shift'ом.",
+   "\nMit Distanzorbs kann per Shift-Klick auf die gewünschte Position gezielt werden. ",
+    }},
+  {0x55fa9e37, { // "Known mines may be marked by pressing 'm'. Your allies won't step on marked mines."
+   "Znane miny można oznaczać naciskając 'm'. Twoi przyjaciele nie będą stawać na oznaczonych minach.",
+/*MISSING*/    "Known mines may be marked by pressing 'm'. Your allies won't step on marked mines.",
+   "Políčka, která obsahují miny, je možné označit stiskem klávesy 'm'. Vaši spojenci na označené miny nevstoupí.",
+   "Известные мины можно помечать, нажимая 'm'. Твои союзники не будут на них наступать.",
+/*MISSING*/    "Known mines may be marked by pressing 'm'. Your allies won't step on marked mines.",
+    }},
   {0x562c1c2e, { // "You shoot %the1!"
    "Zastrzeli%łeś0 %a1!",
    "%1 düşmanına ateş ettin!",
@@ -2467,11 +3741,11 @@ sentence all_sentences[1130] = {
    "Du erschießt %den1 %a1!",
     }},
   {0x563373a5, { // "Kills required: any Elemental (Living Fjord/Dead Caves).\n"
-   "Wymagane zabicia: dowolny Żywiołak (Żywy Fjord/Martwa Jaskinia).",
+   "Wymagane zabicia: dowolny Żywiołak (Żywy Fiord/Martwa Jaskinia).",
    "Gereken leşler: Herhangi bir Özüt (Yaşayan Fiyort/Ölü Mağaralar).",
    "Potřebuješ zabít libovolného Elementála (Živoucí fjord/Mrtvé jeskyně).",
    "Требуется убить любого элементаля (Живой фьорд/Мёртвая пещера).",
-   "Benötigte Kills: beliebiges Elementar (Lebender Fjord/Tote Höhle).",
+   "Benötigte Kills: beliebiger Elementar (Lebender Fjord/Tote Höhle).",
     }},
   {0x564507de, { // "%The1 is frozen!"
    "%1 zamarzł%oa1!",
@@ -2485,14 +3759,21 @@ sentence all_sentences[1130] = {
    "R'Lyeh'e özgü bir mimari eser.",
    "Typický architektonický prvek R'Lyeh.",
    "Типичная архитектура Р'Льеха.",
-   "Ein Stück R'Lyeh typischer Architektur.",
+   "Ein Stück R'Lyeh-typischer Architektur.",
+    }},
+  {0x565a4f71, { // "%The1 wakes up %the2."
+   "%1 budzi %a2.",
+/*MISSING*/    "%The1 wakes up %the2.",
+   "%1 probudil %a2.",
+   "%1 разбудил%E1 %a2.",
+/*MISSING*/    "%The1 wakes up %the2.",
     }},
   {0x56675618, { // "summon Sand Worm"
    "przywołaj Czerwia",
    "Kumkurdu çıkar",
    "vyvolej Písečného červa",
    "призвать Песчаного червя",
-/*MISSING*/    "summon Sand Worm",
+   "rufe Sandwurm herbei",
     }},
   {0x5669c348, { // "\"Have you tried to take a boat and go into the Ocean? Try it!\""
    "\"Próbowa%łeś0 wziąć łódkę i płynąć na Ocean?\"",
@@ -2501,6 +3782,20 @@ sentence all_sentences[1130] = {
    "\"Вы пробовали взять лодку и уплыть в Океан?\"",
    "\"Hast du schon versucht mit einem Boot auf den Ozean zu fahren?\"",
     }},
+  {0x566c3369, { // "Move with mouse, num pad, qweadzxc, or hjklyubn. Wait by pressing 's' or '.'. Spin the world with arrows, PageUp/Down, and Home/Space. To save the game you need an Orb of Safety. Press 'v' for the main menu (configuration, special modes, etc.), ESC for the quest status.\n\n"
+   "Ruszasz się myszą, klawiaturą numeryczną, qweadzxc, lub hjklyubn. Czekasz naciskając 's' lub '.'. Obracasz świat strzałkami, PgUp/Dn, lub Home/Space. Naciśnij 'v' by przejść do menu (konfiguracja, tryby specjalne itd.), ESC by zobaczyć stan misji.\n\n",
+   "Fareyle, sayı tuşlarıyla, qweadzxc ile, veya hjklyubn ile hareket et.  's' ya da '.' ile bekle. Oklarla, PageUp/Down ile veya  Home/Space ile dünyayı çevirebilirsin. Oyunu kaydetmek için Güvenlik Küresine ihtiyacın var. Ayarlar için 'v'ye görev durumu ve menü için 'ESC'ye bas.\n\n",
+   "Pohybuješ se pomocí myši, numerické klávesnice, kláves qweadzxc nebo kláves hjklyubn. Klávesy 's' nebo '.' ti umožňují čekat na místě. Šipky, klávesy PgUp/PgDn a Home nebo mezerník ti umožňují otáčet svět. Nastavení můžeš otevřít klávesou 'v', úkoly a menu klávesou ESC.\n\n",
+   "Двигайтесь с помощью мышки, нумпада, qweadzxc или hjklyubn. Ждите, нажимая 's' или '.'. Поворачивайте карту стрелками, PageUp/Down или Home/Space. Чтобы сохраниться, Вам нужна сфера безопасности. Нажмите 'v' для настроек, Esc для статуса квеста или меню.",
+/*MISSING*/    "Move with mouse, num pad, qweadzxc, or hjklyubn. Wait by pressing 's' or '.'. Spin the world with arrows, PageUp/Down, and Home/Space. To save the game you need an Orb of Safety. Press 'v' for the main menu (configuration, special modes, etc.), ESC for the quest status.\n\n",
+    }},
+  {0x568338c0, { // "return"
+   "powót",
+/*MISSING*/    "return",
+   "návrat",
+   "вернуться",
+/*MISSING*/    "return",
+    }},
   {0x56ed7f64, { // "Finished lands required: %1 (collect 10 treasure)\n"
    "Wymagane ukończone krainy: %1 (zdobądź 10 skarbów)\n",
    "Gereken bitirilmiş diyarlar: %1 (10 hazine toplananlar)\n",
@@ -2508,12 +3803,19 @@ sentence all_sentences[1130] = {
    "Земель окончено: %1 (собрано 10 сокровищ)\n",
    "Abgeschlossene Länder benötigt: %1 (sammle 10 Schätze)\n",
     }},
+  {0x5789e8a3, { // "Camera level above the plane"
+   "Wysokość kamery nad płaszczyzną",
+/*MISSING*/    "Camera level above the plane",
+   "Výška kamery nad rovinou",
+   "Высота камеры над плоскостью",
+/*MISSING*/    "Camera level above the plane",
+    }},
   {0x57b2222c, { // "Those roses smell too nicely. You have to come towards them."
    "Te róże tak ładnie pachną. Musisz iść w ich kierunku.",
 /*MISSING*/    "Those roses smell too nicely. You have to come towards them.",
    "Ty růže příliš krásně voní. Musíš jít směrem k nim.",
    "Эти розы пахнут слишком прекрасно. Вы можете пойти лишь в сторону них.",
-/*MISSING*/    "Those roses smell too nicely. You have to come towards them.",
+   "Diese Rosen duften zu gut - du musst zu ihnen gehen.",
     }},
   {0x57d0af6b, { // "\"Straight lines stay close to each other forever, this is so romantic!\""
    "\"Linie proste, co mogą zawsze być blisko siebie... Jakie to romantyczne!\"",
@@ -2521,6 +3823,13 @@ sentence all_sentences[1130] = {
    "\"Přímky, které navěky zůstávají blízko sebe, to je tak romantické!\"",
    "\"Прямые линии остаются близко друг к другу... Как романтично!\"",
    "\"Grade Linien bleiben einander für immer nah, wie romantisch!\"",
+    }},
+  {0x57f5e809, { // "Cultists throw fire at you from distance!"
+   "Kultyści rzucają ogniem z odległości!",
+/*MISSING*/    "Cultists throw fire at you from distance!",
+   "Kultisté na tebe vrhají z dálky oheň!",
+   "Культисты кидают огонь издалека!",
+/*MISSING*/    "Cultists throw fire at you from distance!",
     }},
   {0x586df720, { // "\"There are %1 floor tiles inside our Table!\""
    "\"Nasz stół otacza %1 pól podłogi!\"",
@@ -2543,12 +3852,19 @@ sentence all_sentences[1130] = {
    "эта сфера появляется на земле и используется ведьмами",
    "Dieser Orb erscheint auf dem Boden und wird von Hexen genutzt",
     }},
+  {0x58d882b1, { // "player 6 go"
+   "gracz 6 idź",
+/*MISSING*/    "player 6 go",
+   "hráč 6 pohyb",
+/*MISSING*/    "player 6 go",
+   "Spieler 6 los",
+    }},
   {0x5918f7fc, { // "You have used less real time than ever before. Congratulations!"
-   "Zajęło to mniej czasu rzeczywistego, niż wcześniej. Gratulacje!",
+   "Zajęło to mniej czasu rzeczywistego niż wcześniej. Gratulacje!",
    "Bu her zamankinden daha az zaman aldı! Tebrikler!",
    "Spotřebova%l0 jsi méně reálného času než kdy předtím. Gratulujeme!",
    "Вы потратили меньше реального времени, чем раньше. Поздравляем!",
-   "Du hast weniger Echtzeit als je zuvor benötigt. Gratulation!",
+   "Du hast weniger Echtzeit als je zuvor benötigt. Glückwunsch!",
     }},
   {0x59236c0a, { // "u = undo"
    "u = cofnij",
@@ -2564,12 +3880,19 @@ sentence all_sentences[1130] = {
    "Вы должны бежать первым!",
    "Du musst zuerst entkommen!",
     }},
+  {0x5942af6b, { // "This menu can be also used to configure keys.\n\n"
+   "To menu może być też użyte do konfiguracji klawiszy.",
+/*MISSING*/    "This menu can be also used to configure keys.\n\n",
+   "Toto menu je také možné použít pro konfiguraci kláves.\n\n",
+   "В этом меню также можно поменять используемые клавиши\n\n.",
+   "Dieses Menü kann auch verwendet werden, um Tasten zu konfigurieren.",
+    }},
   {0x597d1896, { // "You are now a tortoise hero!"
    "Jesteś żółwim bohaterem!",
 /*MISSING*/    "You are now a tortoise hero!",
    "Nyní jsi želví hrdina!",
    "Теперь вы -- черепаший герой!",
-/*MISSING*/    "You are now a tortoise hero!",
+   "Du bist jetzt ein Held der Schildkröten!",
     }},
   {0x59ba4407, { // "the native Orb of %the1"
    "rodzima sfera %abl1",
@@ -2583,17 +3906,31 @@ sentence all_sentences[1130] = {
    "\"Bizden biri olmak için Kutsal Kâseyi bul!\"",
    "\"Najdi svatý grál a staneš se jedním z nás!\"",
    "\"Найди Святой Грааль, и станешь одним из нас!\"",
-   "\"Finde den Heiligen Gral, um einer von uns zu werden!\"",
+   "\"Finde den Heiligen Gral um einer von uns zu werden!\"",
+    }},
+  {0x59e46df2, { // "Sleeping bulls wake up when you get into distance of two cells from them."
+   "Byki się budzą, gdy się znajdziesz w promieniu dwóch pól od nich.",
+/*MISSING*/    "Sleeping bulls wake up when you get into distance of two cells from them.",
+   "Spící býci se probudí, když se přiblížíš na dvě políčka od nich.",
+   "Спящий бык проснётся, если подойти к нему на расстояние двух клеток.",
+/*MISSING*/    "Sleeping bulls wake up when you get into distance of two cells from them.",
+    }},
+  {0x59e8ecd2, { // "Players cannot get that far away!"
+   "Gracze nie mogą się tak oddalać!",
+/*MISSING*/    "Players cannot get that far away!",
+   "Hráči se nemohou vzdálit tak daleko!",
+   "Игроки не могут так сильно отдаляться друг от друга!",
+   "Spieler dürfen sich nicht so weit voneinander entfernen!",
     }},
   {0x59e98e29, { // "summon lots of treasure"
    "przywołaj dużo skarbów",
    "çok hazine çıkar",
    "vyvolej spoustu pokladů",
    "призвать много сокровищ",
-/*MISSING*/    "summon lots of treasure",
+   "rufe viele Schätze herbei",
     }},
   {0x5a519933, { // "A Witch with a Winter spell. She is able to move through fire."
-   "Czarownica z czarem Zima. Może przechodzić przez ogień.",
+   "Czarownica z czarem Zimy. Może przechodzić przez ogień.",
    "Kış büyüsü olan bir cadı. Ateşin içinde yürüyebilir.",
    "Čarodějnice s kouzlem Zimy. Dokáže se pohybovat skrz oheň.",
    "Ведьма с заклинанием зимы. Может проходить сквозь огонь.",
@@ -2604,7 +3941,7 @@ sentence all_sentences[1130] = {
 /*MISSING*/    "Those roses smell too nicely. You can only target cells closer to them!",
    "Ty růže příliš krásně voní. Můžeš zacílovat jenom políčka, která k nim jsou blíž!",
    "Эти розы так прекрасно пахнут. Вы можете выбирать цель только ближе к ним!",
-/*MISSING*/    "Those roses smell too nicely. You can only target cells closer to them!",
+   "Diese Rosen duften zu gut. Du kannst nur Zellen näher bei ihnen anvisieren!",
     }},
   {0x5a59bb53, { // "%The1 squeaks with hope!"
    "%1 pisn%ął1 z nadzieją!",
@@ -2612,6 +3949,13 @@ sentence all_sentences[1130] = {
    "%1 nadějně piští!",
    "%1 пищит с надеждой!",
    "%Die1 %1 piepst hoffnungsvoll!",
+    }},
+  {0x5a5bf35e, { // "This forest is quite dry. Beware the bushfires!\nTrees catch fire on the next turn. The temperature of the grass cells rises once per turn for each fire nearby, and becomes fire itself when its temperature has risen 10 times.\nYou can also chop down the trees. Big trees take two turns to chop down."
+   "Ta puszcza jest wyschnięta. Uważaj na pożary!\nSąsiednie drzewa zajmują się ogniem w następnej kolejce. Temperatura pola bez drzewa rośnie o 1 na kolejkę z każdym ogniem w sąsiedztwie i gdy wzrośnie do 10, to pole również staje się ogniem.\nMożesz też ścinać drzewa. Ścięcie dużego drzewa zajmuje dwie kolejki.",
+   "Bu orman epey kuru. Çalı yangınlarına dikkat et!\nAğaçlar her tur ateşe yakalanır. Çimen hücrelerinin ısısı her tur yakındaki ateşle bir artar ve sonra ısısı 10 kez yükselirse, kendisi ateş olur.\n Ağaçları kesebilirsin. Büyük ağaçları kesmesi 2 tur alır.\n ",
+   "Tento hvozd je velice suchý. Pozor na požáry!\nStromy začnou hořet jedno kolo poté, co se ocitnou v sousedství ohně. Teplota políček s trávou vzrůstá každé kolo o 1 za každé sousední políčko s ohněm a poté, co vzroste desetkrát, začne tráva hořet.\nStromy v Suchém hvozdu můžeš kácet. Pokácení velkých stromů trvá dvě kola.",
+   "Этот лес довольно сухой. Берегитесь лесных пожаров!\nДеревья загораются от огня на следующем шагу. Температура травы растёт на каждом шаге, после 10 шагов трава загорается.\nТакже Вы можете рубить деревья. Большие деревья требуют двух ударов.",
+   "Dieser Wald ist ziemlich trocken. Achtung - Waldbrände!\nBäume fangen im nächsten Zug Feuer. Die Temperatur von Gras steigt jeden Zug für jedes Feuer in der Nähe, und wird selbst zu Feuer wenn dies 10-mal geschehen ist.\nDu kannst auch Bäume fällen. Große Bäume zu fällen dauert zwei Züge.",
     }},
   {0x5a755a19, { // "pan right"
    "przewiń w prawo",
@@ -2621,32 +3965,32 @@ sentence all_sentences[1130] = {
    "Nach rechts schwenken",
     }},
   {0x5ac56465, { // "Ever wondered how some boardgame would look on the hyperbolic plane? I wondered about Go, so I have created this feature. Now you can try yourself!\nEnter = pick up an item (and score), space = clear an item\nOther keys place orbs and terrain features of various kinds\nIn the periodic editor, press 0-4 to switch walls in different ways\n"
-   "Zastanawia%łeś0 się może, jak jakaś gra planszowa wyglądałaby na płaszczyźnie hiperbolicznej? Ja się zastanawiałem nad Go, i postanowiłem to sprawdzić. Teraz Ty też możesz sprawdzić!\nEnter = podnieś przedmiot, space = zabierz przedmiot\nPozostałe klawisze kładą różnego rodzaju przedmioty\nW edytorze okresowym, klawisze 0-4 zmieniają ściany na różne sposoby",
+   "Zastanawia%łeś0 się może, jak jakaś gra planszowa wyglądałaby na płaszczyźnie hiperbolicznej? Ja się zastanawiałem nad Go i postanowiłem to sprawdzić. Teraz Ty też możesz sprawdzić!\nEnter = podnieś przedmiot, space = zabierz przedmiot\nPozostałe klawisze kładą różnego rodzaju przedmioty\nW edytorze okresowym, klawisze 0-4 zmieniają ściany na różne sposoby",
    "Hiç bir oyunun hiperbolik düzlemde nasıl görüneceğini merak ettin mi? Ben Go hakkında merak ettim ve bu özelliği geliştirdim. Sen de deneyebilirsin!\nEnter = bir itemi al (ve puan kazan), space = bir itemi temizle\nDiğer tuşlar küreler ve çeşitli arazi özellikleri eklemek için.\n",
    "Přemýšle%l0 jsi někdy o tom, jak by vypadala desková hra na hyperbolické rovině? Mě zajímalo Go, a tak jsem vytvořil tuhle funkci. Teď si to můžeš vyzkoušet i ty!\nEnter = seber předmět (a skóre), mezerník = vymaž předmět\nDalší klávesy umísťují sféry a nejrůznější terénní prvky\nStiskem kláves 0-4 můžete různě přepínat zdi\n",
    "Вы когда-нибудь думали о том, как выглядит настольная игра на гиперболической плоскости? Я думал про Го и создал этот режим. Теперь и Вы можете попробовать!\nEnter = поднять предмет, space = удалить предмет\nОстальные клавиши добавляют разные предметы или элементы ландшафта.\nВ периодическом редакторе клавиши 0-4 меняют местоположение стен разными способами.\n",
-   "Hast du dich je gewundert, wie ein Brettspiel auf einer hyperbolischen Ebene aussehen würde?Ich habe mich über Go gewundert und dieses Feature erstellt. Probiere es selbst!\nEnter = Gegenstand aufheben (und punkte), [LEER] = Gegenstand löschen\nAndere Tasten platzieren Orbs, Terrain und Anderes\nIm periodischen Editor kannst du 0-4 verwenden um die Wände zu verändern\n",
+   "Hast du dich je gewundert, wie ein Brettspiel auf einer hyperbolischen Ebene aussehen würde? Ich habe mich über Go gewundert und dieses Feature erstellt. Probiere es selbst!\nEnter = Gegenstand aufheben (und punkte), [LEER] = Gegenstand löschen\nAndere Tasten platzieren Orbs, Terrain und Anderes\nIm periodischen Editor kannst du 0-4 verwenden um die Wände zu verändern\n",
     }},
   {0x5aecc3d3, { // "--- and teleport there"
    "--- i się teleportuj",
    "--- ve oraya ışınlan.",
    "--- a teleportuj se tam",
    "--- и телепортироваться туда",
-/*MISSING*/    "--- and teleport there",
+   "--- und teleportiere dorthin",
     }},
   {0x5b5a7df7, { // "TRANSLATIONWARNING2"
 /*MISSING*/    "TRANSLATIONWARNING2",
    "çevirmek isterseniz lütfen zeno@attnam.com adresinden benimle iletişime geçin.",
 /*MISSING*/    "TRANSLATIONWARNING2",
 /*MISSING*/    "TRANSLATIONWARNING2",
-   "Funktionen nach Version 8.1! (Arbeite dran <3)",
+/*MISSING*/    "TRANSLATIONWARNING2",
     }},
   {0x5b8d82af, { // "What is freedom for you? A situation when you can walk wherever you want? Or a situation when you do not have to work, since you have as much tasty food as you want?\n\nWell, this creature has chosen the second option. It won't be happy if you destroy its prison.\n"
-   "Czym jest dla Ciebie wolność? Sytuacja, gdy możesz chodzić, gdzie chcesz? Czy sytuacja, gdy nie musisz pracować, bo masz tyle jedzenia, ile zapragniesz?\n\nTo stworzenie wybrało drugą opcję. Nie będzie szczęśliwe, jak je uwolnisz z więzienia.",
+   "Czym jest dla Ciebie wolność? Sytuacją, gdy możesz chodzić, gdzie chcesz? Czy sytuacją, gdy nie musisz pracować, bo masz tyle jedzenia, ile zapragniesz?\n\nTo stworzenie wybrało drugą opcję. Nie będzie szczęśliwe, jak je uwolnisz z więzienia.",
 /*MISSING*/    "What is freedom for you? A situation when you can walk wherever you want? Or a situation when you do not have to work, since you have as much tasty food as you want?\n\nWell, this creature has chosen the second option. It won't be happy if you destroy its prison.\n",
    "Co je pro tebe svoboda? To, že si můžeš chodit, kam chceš? Nebo to, že nemusíš pracovat, protože máš tolik dobrého jídla, kolik chceš?\n\nInu, tento tvor si vybral tu druhou možnost. Nebude rád, když zničíš jeho vězení.\n",
    "Что для Вас есть свобода? Когда можно идти, куда хочешь? Или когда не надо работать, так как есть столько вкусной еды, сколько хочешь?\n\nЭто существо выбрало второй вариант. Лис не будет рад, если Вы разрушите его тюрьму.\n",
-/*MISSING*/    "What is freedom for you? A situation when you can walk wherever you want? Or a situation when you do not have to work, since you have as much tasty food as you want?\n\nWell, this creature has chosen the second option. It won't be happy if you destroy its prison.\n",
+   "Was bedeutet Freiheit für dich? Eine Situation in der du gehen kannst wohin immer du willst? Oder eine Situation in der du nicht arbeiten musst und immer soviel leckeres Essen hast, wie du willst?\n\nWie auch immer, dieses Wesen wählte die zweite Option. Es wird nicht sehr glücklich sein, wenn du sein Gefängnis zerstörst.",
     }},
   {0x5bb92408, { // " (E:%1)"
    " (E:%1)",
@@ -2669,6 +4013,20 @@ sentence all_sentences[1130] = {
    "Огромный монстр из Живых пещер. Мёртвый тролль окружается камнями, вызывая рост скал вокруг себя.",
    "Ein großes Monster aus den Lebenden Höhlen. Ein toter Troll wird eins mit dem Gestein, was dazu führt, dass er von Wänden umgeben wird.",
     }},
+  {0x5bee3d6e, { // "Two players cannot move/attack the same location!"
+   "Dwóch graczy nie może celować w to samo miejsce!",
+/*MISSING*/    "Two players cannot move/attack the same location!",
+   "Dva hráči nemohou zacílovat stejnou lokaci!",
+   "Два игрока не могут ходить в одну клетку!",
+   "Zwei Spieler können nicht dieselbe Stelle anvisieren!",
+    }},
+  {0x5c032e2e, { // "Welcome to the Euclidean mode!"
+   "Witaj w trybie euklidesowym!",
+/*MISSING*/    "Welcome to the Euclidean mode!",
+   "Vítej v eukleidovském módu!",
+   "Добро пожаловать в евклидов режим!",
+/*MISSING*/    "Welcome to the Euclidean mode!",
+    }},
   {0x5c1d1ce9, { // "A kind of Troll native to the Red Rock Valley."
    "Ten rodzaj Trolla mieszka w Dolinie Czerwonej Skały.",
    "Kızılkaya Vadisinde yaşayan bir trol.",
@@ -2688,7 +4046,7 @@ sentence all_sentences[1130] = {
    "İki yansıma çarpıştı ve yok oldu!",
    "Dva tvoje obrazy se srazily a zmizely!",
    "Два Ваших двойника столкнулись и уничтожились!",
-   "Zwei %P1 stürzen gegeneinander!",
+   "Zwei deiner Abbilder stoßen zusammen und verschwinden!",
     }},
   {0x5c8258dc, { // "Cannot teleport on an item!"
    "Nie możesz teleportować się na przedmiot!",
@@ -2702,7 +4060,7 @@ sentence all_sentences[1130] = {
 /*MISSING*/    "switch web display",
    "přepni strukturu",
    "переключить отображение сетки",
-/*MISSING*/    "switch web display",
+   "wechsle die Web-Anzeige",
     }},
   {0x5cf476b5, { // "random colors"
    "losowe kolory",
@@ -2739,19 +4097,26 @@ sentence all_sentences[1130] = {
    "Типичный для Кладбища монстр.",
    "Ein typisches Friedhofsmonster.",
     }},
+  {0x5d93351f, { // "cancel move"
+   "anuluj ruch",
+/*MISSING*/    "cancel move",
+   "zruš pohyb",
+   "отмена хода",
+/*MISSING*/    "cancel move",
+    }},
   {0x5d94df20, { // "%The1 kisses you, and begs you to bring %him1 away from here."
-   "%1 Ciebie pocałowa%ł1, i poprosi%ł1, byś %go1 gdzieś zabra%ł0.",
+   "%1 Cię pocałowa%ł1 i poprosi%ł1, byś %go1 stąd zabra%ł0.",
    "%1 seni öpüyor ve sana %go1 buradan uzaklaştırman için yalvarıyor.",
    "%1 tě políbi%l1 a prosí tě, abys ji odsud odved%l0.",
    "%1 поцеловал%E1 тебя, и попросил%E1 увести отсюда.",
-   "%Der1 %1 küsst dich und bitten dich %den1 von hier weg zu bringen.",
+   "%Der1 %1 küsst dich und bittet dich %den1 von hier weg zu bringen.",
     }},
   {0x5dee2673, { // "The Elemental Planes are divided into four subzones: Planes of Fire, Water, Air, and Earth. You need to collect a Shard from each Plane to construct an Elemental Gem. It is dangerous to collect too many Shards of the same type without constructing a Gem."
-   "Strefa Żywiołów dzielą się na cztery podstrefy: Strefa Ognia, Wody, Powietrza, i Ziemi. Musisz znaleźć Okruch każdego żywiołu, by skonstruować Kamień Żywiołów. Jest niebezpiecznie zbierać wiele Okruchów tego samego żywiołu bez konstruowania Kamienia.",
+   "Strefa Żywiołów dzieli się na cztery podstrefy: Strefa Ognia, Wody, Powietrza i Ziemi. Musisz znaleźć Okruch każdego żywiołu, by skonstruować Kamień Żywiołów. Jest niebezpiecznie zbierać wiele Okruchów tego samego żywiołu bez konstruowania Kamienia.",
    "Unsur Düzlemleri dört altalana ayrılır: Ateş, Su, Hava ve Toprak Düzlemleri. Bir Unsurtaşı yapmak için her dört düzlemden birer parça toplaman gerekiyor. Bir Unsurtaşı yapmadan aynı cins parçadan çok sayıda toplamak tehlikelidir.",
    "Elementální roviny se dělí na čtyři subzóny: Rovinu Ohně, Vody, Vzduchu a Země. Musíš v každé z Rovin najít Úlomek, ze kterých pak vytvoříš Elementální drahokam. Pozor, je nebezpečné mít příliš mnoho Úlomků stejného typu a nepoužít je k sestavení Drahokamu!",
    "Есть четыре Плоскости Стихий: Плоскость Огня, Воды, Воздуха и Земли. Вам нужно собрать по Осколку из каждой, чтобы собрать камень стихий. Собирать много осколков, не собирая Камень, довольно опасно.",
-   "Die Elementare Ebene ist in 4 Zonen unterteilt: Die Feuerebene, die Erdebene, die Luftebene und die Wasserebene. Du brauchst eine Scherbe aus jeder Ebene um ein Elementjuwel herzustellen. Es ist äußerst gefährliche mehrere Scherben des selben Typs zu sammeln ohne ein Elementjuwel herzustellen.",
+   "Die Elementare Ebene ist in 4 Zonen unterteilt: Die Feuerebene, die Erdebene, die Luftebene und die Wasserebene. Du brauchst eine Scherbe aus jeder Ebene um ein Elementjuwel herzustellen. Es ist äußerst gefährlich mehrere Scherben desselben Typs zu sammeln ohne ein Elementjuwel herzustellen.",
     }},
   {0x5e1ee8f2, { // "boundary"
    "brzeg",
@@ -2765,7 +4130,7 @@ sentence all_sentences[1130] = {
    "Bu küre bir süreliğine daha hızlı hareket etmeye yarar.",
    "Tato sféra ti umožňuje pohybovat se po určitou dobu rychleji.",
    "Эта сфера ускорит Вас на некоторое время.",
-   "Du kannst diesen Orb verwenden um dich für einige Zeit schneller zu bewegen.",
+   "Du kannst diesen Orb verwenden, um dich für einige Zeit schneller zu bewegen.",
     }},
   {0x5ef47a97, { // "Your score: %1"
    "Twój wynik: %1",
@@ -2779,14 +4144,14 @@ sentence all_sentences[1130] = {
    "%1 Işık büyüsünü aktifleştirdi!",
    "%1 aktivova%l1 kouzlo Záblesk!",
    "%1 активировал%E1 заклинание вспышки!",
-   "%der1 %1 aktiviert den Blitzzauber!",
+   "%Der1 %1 aktiviert den Blitzzauber!",
     }},
   {0x5f22ded5, { // "These star-shaped flowers native to Hell are a valuable alchemical component."
-   "Ta piekielna roślina w kształcie gwiazdy jest cennym składnikiem alchemicznym.",
+   "Te piekielne rośliny w kształcie gwiazdy są cennym składnikiem alchemicznym.",
    "Cehennemde yetişen bu yıldız şekilli çiçekler değerli bir simya bileşeni.",
    "Tyto hvězdám podobné květiny z Pekla jsou cennou alchymistickou surovinou.",
    "Эти звездовидные цветы их Ада - важный алхимический компонент.",
-   "Diese sternförmigen Blumen, die aus der Hölle stammen, sind eine wertvolle alchemistische Komponente.",
+   "Diese sternförmigen Blumen aus der Hölle sind eine wertvolle alchemistische Zutat.",
     }},
   {0x5f53f87c, { // "press 0 to leave this mode"
    "Wciśnij 0, by opuścić ten tryb",
@@ -2814,7 +4179,7 @@ sentence all_sentences[1130] = {
 /*MISSING*/    "cat",
    "kočka",
    "кот",
-/*MISSING*/    "cat",
+   "Katze",
     }},
   {0x5ff087bd, { // "You have improved %1 of your specific high scores!"
    "Poprawi%łeś0 %1 z wyników szczegółowych!",
@@ -2822,6 +4187,13 @@ sentence all_sentences[1130] = {
    "Zlepši%l0 jsi %1 svých specifických nejvyšších skóre!",
    "Вы увеличили %1 отдельных результатов!!",
    "Du hast %1 deiner spezifischen Highscores verbessert!",
+    }},
+  {0x5ff8756f, { // "There are Krakens in your homeland too... huge sea monsters which could easily destroy ships. The geometry of this strange world prevents quick movement of huge objects, so there are no large ships, only small boats, and hyperbolic Krakens are relatively small too. Still, you suppose they might be the widest creatures which could still move at considerable speed...\n\nKraken heads can move only on hexagons. You need to attack all the tentacles to kill the Kraken. A tentacle cannot attack if it has been attacked on the same turn. When a Kraken attacks you while you are in a boat, it destroys the boat, but does not kill you."
+   "Tam, skąd pochodzisz, również są Krakeny... wielkie morskie potwory, które z łatwością mogą zatapiać statki. Geometria tego dziwnego świata powoduje, że wielkie obiekty nie mogą się szybko poruszać, nie ma tu zatem dużych statków, tylko małe łódki, i hiperboliczne Krakeny też są względnie małe. Wciąż one są chyba największymi stworzeniami, które wciąż mogą się poruszać z rozsądną prędkością...\n\nGłowa krakena porusza się tylko po sześciokątach. By pokonać Krakena, musisz zaatakować jego wszystkie macki. Macka nie atakuje, jeśli została zaatakowana w tej turze. Jeśli Kraken zaatakuje Cię, gdy jesteś na statku, zniszczy statek, ale Cię nie zabije.",
+/*MISSING*/    "There are Krakens in your homeland too... huge sea monsters which could easily destroy ships. The geometry of this strange world prevents quick movement of huge objects, so there are no large ships, only small boats, and hyperbolic Krakens are relatively small too. Still, you suppose they might be the widest creatures which could still move at considerable speed...\n\nKraken heads can move only on hexagons. You need to attack all the tentacles to kill the Kraken. A tentacle cannot attack if it has been attacked on the same turn. When a Kraken attacks you while you are in a boat, it destroys the boat, but does not kill you.",
+   "I ve tvé domovině existují Krakeni... obrovské mořské obludy, které dokážou snadno zničit lodě. Geometrie tohoto podivného světa brání rychlému pohybu velkých objektů, a tak tu nejsou žádné velké lodě, jen malé loďky, a i hyperboličtí Krakeni jsou relativně malí. I tak jsou to možná nejširší tvorové, kteří se stále dokážou pohybovat nějakou slušnou rychlostí...\n\nKrakení hlava se může pohybovat pouze po šestiúhelníkových políčcích. Abys Krakena zabil, musíš zasáhnout všechna jeho chapadla. Chapadlo nemůže zaútočit, pokud jsi ve stejném kole zaútočil ty na něj. Pokud jsi na loďce, Krakenův útok ji zničí, ale ty zůstaneš naživu.",
+   "На вашей родине тоже есть кракены... огромные морские существа, с лёгкостью уничтожающие большие корабли. Геометрия этого странного мира не позволяет большим объектам быстро двигаться, поэтому здесь нет больших кораблей, только маленькие лодки, и гиперболические кракены тоже довольно малы. Вероятно, это самые большие существа, способные двигаться с приличной скоростью...\n\nГолова кракена движется только по шестиугольникам. Чтобы убить кракена, нужно атаковать все его щупальца. Щупальце не может бить, если оно атаковано в этот же ход. Если кракен атакует вас, когда вы в лодке, он уничтожает лодку, но не бьёт вас.",
+   "In deiner Heimat gibt es auch Kraken - riesige Seeungeheuer, die leicht Schiffe zerstören könnten. Die Geometrie dieser seltsamen Welt verhindert schnelle Bewegungen von großen Objekten. Daher gibt es keine großen Schiffe, nur kleine Boote, und hyperbolische Kraken sind auch relativ klein. Dennoch - du nimmst an, das sie die ausgedehntesten Kreaturen sind, die sich noch mit größerer Geschwindigkeit bewegen können...\n\nKöpfe von Kraken können sich nur auf Sechsecken bewegen. Du musst alle Tentakel angreifen, um einen Kraken zu töten. Ein Tentakel kann nicht angreifen, wenn er im gleichen Zug attackiert wurde. Wenn ein Krake dich angreift, während du in einem Boot bist, zerstört er das Boot, tötet dich jedoch nicht.",
     }},
   {0x6038e891, { // "Simply a wall. Mostly."
    "Po prostu ściana. W zasadzie.",
@@ -2838,7 +4210,7 @@ sentence all_sentences[1130] = {
    "Zum Zeiger werfen",
     }},
   {0x60f5c677, { // "A Witch with a Fire spell. She will leave a trail of fire behind her."
-   "Czarownica z czarem Ogień. Zostawia za sobą płonącą ścieżkę.",
+   "Czarownica z czarem Ognia. Zostawia za sobą płonącą ścieżkę.",
    "Ateş büyüsü olan bir Cadı. Arkasında ateşten bir yol bırakır.",
    "Čarodějnice s kouzlem Ohně. Zanechává za sebou ohnivou stopu.",
    "Ведьма с заклинанием огня. Оставляет огненный след за собой.",
@@ -2856,14 +4228,14 @@ sentence all_sentences[1130] = {
 /*MISSING*/    "gain Orb of Yendor",
    "získej Yendorskou sféru",
    "получить сферу Йендора",
-/*MISSING*/    "gain Orb of Yendor",
+   "erhalte Orb von Yendor",
     }},
   {0x616acab2, { // "This Orb allows you to find new lands more easily. Lands where you have already collected less treasure, and especially the Crossroads, are more likely to spawn while you have this. Additionally, Orbs of Safety are more likely to spawn in the Whirlpool."
-   "Ta sfera pozwala łatwo znajdować nowe krainy. Krainy, w których masz zebrane mniej skarbów, w szczególności Skrzyżowania, jest łatwiej znaleźć, gdy to masz. Dodatkowo, Sfery Bezpieczeństwa częściej trafiają się w Wirze.",
+   "Ta sfera pozwala łatwo znajdować nowe krainy. Gdy ją masz, łatwiej znaleźć jest krainy, w których zebrane zostało mniej skarbów, w szczególności Skrzyżowania. Dodatkowo, Sfery Bezpieczeństwa częściej trafiają się w Wirze.",
    "Bu küre yeni diyarlar bulmanı kolaylaştırır. Daha az hazine topladığın diyarlar ve özellikle Arayollar, bu küreyi elinde tutarken daha yüksek ihtimalle karşına çıkar. Ayrıca, Güvenlik Kürelerinin Tayfun'da ortaya çıkma ihtimalini artırır.",
    "Tato Sféra ti umožňuje snadněji najít nové kraje. Dokud ji máš, budou se s větší pravděpodobností generovat kraje, ve kterých jsi získal méně pokladů, zvláště pak Křižovatky Kromě toho se ve Víru bude generovat více Sfér Bezpečí.",
    "Эта сфера позволяет с лёгкостью находить новые земли. Земли, в которых Вы собрали мало сокровищ, и особенно Перекрёстки, появляются чаще, пока у Вас есть эта сфера. Кроме того, сферы Безопасности чаще находятся в Водовороте.",
-   "Dieser Orb erlaubt es dir neue Länder leichter zu entdecken. Länder in denen du bisher weniger Schätze gesammelt hast und besonders Kreuzungen sind wahrscheinlicher anzutreffenso lange du ihn besitzt. Des weiteren sind Orbs der Geborgenheitwahrscheinlicher im Strudel zu finden.",
+   "Dieser Orb erlaubt es dir neue Länder leichter zu entdecken. Länder in denen du bisher weniger Schätze gesammelt hast und besonders Kreuzungen sind wahrscheinlicher anzutreffen so lange du ihn besitzt. Des weiteren sind Orbs der Geborgenheit wahrscheinlicher im Strudel zu finden.",
     }},
   {0x61be9d87, { // "or 'r' or F5 to restart"
    "lub 'r' lub F5, by zacząć od początku",
@@ -2886,6 +4258,13 @@ sentence all_sentences[1130] = {
    "Простой, но эффективный снаряд, используемый разбойниками.",
    "Eine einfache, aber effektive, Wurfwaffe. Schurken verwenden sie.",
     }},
+  {0x61fe2a59, { // "sound effects volume"
+   "głośność efektów dźwiękowych",
+/*MISSING*/    "sound effects volume",
+   "hlasitost zvukových efektù",
+   "громкость звуковых эффектов",
+/*MISSING*/    "sound effects volume",
+    }},
   {0x624e89f5, { // "%The1 eats %the2!"
    "%1 zjad%ł1 %a2!",
    "%1 %a2 yedi!",
@@ -2896,16 +4275,37 @@ sentence all_sentences[1130] = {
   {0x625c4a3c, { // "PLAY"
    "GRAJ",
    "OYNA",
-   "HRAJ",
-   "ИГРА",
+   "HRÁT",
+   "ИГРАЙ",
    "START",
+    }},
+  {0x62dd148b, { // "The height of walls, in absolute units. For the current values of g and c, wall height of %1 absolute units corresponds to projection value of %2."
+   "Wysokość ścian. Przy obecnych wartościach g i c, góra ściany na wysokości %1 odpowiada współczynnikowi projekcji %2.",
+/*MISSING*/    "The height of walls, in absolute units. For the current values of g and c, wall height of %1 absolute units corresponds to projection value of %2.",
+   "Výška zdí v absolutních jednotkách. Při současných hodnotách g a c odpovídá výška %1 absolutních jednotek projekční hodnotě %2.",
+   "Высота стен. При данных значениях g и c стена высоты в %1 единиц соответствует расстоянию на проекции в %2.",
+/*MISSING*/    "The height of walls, in absolute units. For the current values of g and c, wall height of %1 absolute units corresponds to projection value of %2.",
+    }},
+  {0x62f1f1e5, { // "Push Skeletons into the holes!"
+   "Wpychaj Szkielety do dziur!",
+/*MISSING*/    "Push Skeletons into the holes!",
+   "Strč Kostlivce do děr!",
+   "Сталкивайте скелетов в дырки!",
+/*MISSING*/    "Push Skeletons into the holes!",
     }},
   {0x631d6ba2, { // "Revived!"
    "Wskrzeszono!",
 /*MISSING*/    "Revived!",
    "Wskrzeszono!",
    "Воскрешено!",
-/*MISSING*/    "Revived!",
+   "Wiederbelebt!",
+    }},
+  {0x63355b1b, { // "You will need more experience to defeat the Greater Demon!"
+   "Musisz zdobyć doświadczenie, by pokonać Większego Demona!",
+/*MISSING*/    "You will need more experience to defeat the Greater Demon!",
+   "Na poražení Ďábla budeš potřebovat víc zkušeností!",
+   "Вам нужно больше опыта, чтобы победить Старшего демона!",
+/*MISSING*/    "You will need more experience to defeat the Greater Demon!",
     }},
   {0x6342c3b9, { // "l = lands"
    "c = kopia",
@@ -2926,7 +4326,35 @@ sentence all_sentences[1130] = {
 /*MISSING*/    "You cannot attack diagonally!",
    "Nemůžeš útočit úhlopříčně!",
    "Вы не можете атаковать по-диагонали!",
-/*MISSING*/    "You cannot attack diagonally!",
+   "Du kannst nicht diagonal angreifen!",
+    }},
+  {0x63fd6548, { // "stay in place (left + right)"
+   "stój w miejscu (lewo+prawo)",
+/*MISSING*/    "stay in place (left + right)",
+   "stát na místě (doleva + doprava)",
+   "стоять на месте (влево + вправо)",
+/*MISSING*/    "stay in place (left + right)",
+    }},
+  {0x64067fd0, { // "player 7 X"
+   "gracz 7 X",
+/*MISSING*/    "player 7 X",
+   "hráč 7 X",
+/*MISSING*/    "player 7 X",
+   "Spieler 7 X",
+    }},
+  {0x64067fd1, { // "player 7 Y"
+   "gracz 7 Y",
+/*MISSING*/    "player 7 Y",
+   "hráč 7 Y",
+/*MISSING*/    "player 7 Y",
+   "Spieler 7 Y",
+    }},
+  {0x644bdebd, { // "%The1 crashes into %the2!"
+   "%1 walnął w %a2!",
+/*MISSING*/    "%The1 crashes into %the2!",
+   "%1 narazil na %a2!",
+   "%1 врезал%c1 в %a2!",
+/*MISSING*/    "%The1 crashes into %the2!",
     }},
   {0x645dd0db, { // "Somebody has summoned these evil constructs with a magical process."
    "Wroga konstrukcja, tworzona poprzez magiczny proces.",
@@ -2947,7 +4375,21 @@ sentence all_sentences[1130] = {
 /*MISSING*/    "You cannot move between the triangular cells here!",
    "Tady se nemůžeš pohybovat mezi trojúhelníkovými políčky!",
    "Вы не можете ходить между треугольниками!",
-/*MISSING*/    "You cannot move between the triangular cells here!",
+   "Du kannst dich nicht zwischen den dreieckigen Zellen bewegen!",
+    }},
+  {0x65a3cf49, { // "You vault over %the1!"
+   "Szarżujesz!",
+/*MISSING*/    "You vault over %the1!",
+   "Přeskoči%l0 jsi %a1!",
+   "Вы совершили рывок!",
+/*MISSING*/    "You vault over %the1!",
+    }},
+  {0x65c2d2d6, { // "Projection at the ground level"
+   "Współczynnik rzutu na poziome podłoża",
+/*MISSING*/    "Projection at the ground level",
+   "Projekce na úrovni země",
+   "Проекция на поверхность земли",
+/*MISSING*/    "Projection at the ground level",
     }},
   {0x65f9fcde, { // "You push %the1."
    "Popchn%ąłeś0 %a1.",
@@ -2957,18 +4399,18 @@ sentence all_sentences[1130] = {
    "Du schiebst %den1 %a1.",
     }},
   {0x66e43c1f, { // "In this mode you can draw your own player characters, floors, monsters, and items. Press 'e' while hovering over an object to edit it. Start drawing shapes with 'n', and add extra vertices with 'a'. Press 0-9 to draw symmetric pictures easily. More complex pictures can be created by using several layers ('l'). See the edges of the screen for more keys."
-   "W tym trubie możesz narysować swoje postacie, podłogi, potwory, i przedmioty. Naciśnij 'e', gdy przesuwasz mysz ponad obiektem, by go edytować. Zaczynaj nowe kształty od 'n', dodawaj wierzchołki 'a'. Naciśnij 0-9 by łatwo rysować symetryczne obrazy. Bardziej złożone obrazy mogą być tworzone przy użyciu warstw ('l'). Pozostałe klawisze są wymienione na krawędziach ekranu.",
+   "W tym trybie możesz narysować swoje postacie, podłogi, potwory i przedmioty. Naciśnij 'e', gdy przesuwasz mysz ponad obiektem, by go edytować. Zaczynaj nowe kształty od 'n', dodawaj wierzchołki 'a'. Naciśnij 0-9 by łatwo rysować symetryczne obrazy. Bardziej złożone obrazy mogą być tworzone przy użyciu warstw ('l'). Pozostałe klawisze są wymienione na krawędziach ekranu.",
    "Bu modda kendi karakterlerini, zeminlerini, canavarlarını ve eşyalarını çizebilirsin. İşaretçiyi bir nesneye götür ve onu düzenlemek için 'e'ye bas. 'n' ile şekiller çizmeye başlayabilir, 'a' ile yeni köşeler ekleyebilirsin. 0-9'a basarak simetrik resimleri daha kolay çizebilirsin. Daha karmaşık resimler için birden fazla atman gerekebilir ('l'). Ekranın kıyılarına bakara daha fazla tuşu öğrenebilirsin.",
    "V tomto módu si můžeš nakreslit vlastní postavy, podlahu, netvory a předměty. Objekt můžeš editovat tak, že na něj najedeš myší a stiskneš 'e'. 'n' začne kreslit tvar a 'a' přidává nové vrcholy. Klávesy 0-9 umožňují snadnou kresbu symetrických obrázků. Složitější obrázky je možné vytvořit s použitím ně kolika vrstev ('l'). Další ovládací klávesy můžeš najít na okrajích obrazovky.",
    "В этом режиме можно нарисовать своего персонажа, пол, монстров, предметы. Нажмите 'e', держа мышь над объектом, чтобы его изменить. Добавляйте формы с 'n', вершины с 'a'. Нажмите 0-9 чтобы сделать симметричный узор. Более сложные фигуры могут состоять из нескольких слоёв ('l'). Остальные клавиши смотри в углах экрана.",
-   "In diesem Modus kannst du deine eigenen Charaktere, Böden, Monster und Items zeichnen. Drücke 'e' während du auf ein Objekt zeigst um es zu bearbeiten. Fang an Formen mit 'n' zu zeichnen und füg mit 'a'. weitere Eckpunkte hinzu. Drücke 0-9 um einfach symmetrisch zu zeichnen.Komplexere Bilder können durch mehrere Lagen ('l') erzeugt werden. Weitere Hotkeys stehen am Rand des Bildschirms.",
+   "In diesem Modus kannst du deine eigenen Charaktere, Böden, Monster und Items zeichnen. Drücke 'e' während du auf ein Objekt zeigst um es zu bearbeiten. Fang an Formen mit 'n' zu zeichnen und füg mit 'a'. weitere Eckpunkte hinzu. Drücke 0-9 um einfach symmetrisch zu zeichnen. Komplexere Bilder können durch mehrere Lagen ('l') erzeugt werden. Weitere Hotkeys stehen am Rand des Bildschirms.",
     }},
   {0x66eada42, { // "friends killed: %1"
    "przyjaciele zabici: %1",
 /*MISSING*/    "friends killed: %1",
    "zabití kamarádi: %1",
    "убито союзников: %1",
-/*MISSING*/    "friends killed: %1",
+   "getötete Freunde: %1",
     }},
   {0x6731c97f, { // "This Orb is able to bring faraway items to your location, even if there are monsters or barriers on the way. The cost of bringing an item (in charges) equals the square of its distance to you. Contrary to some other Orbs, usage is not allowed if you have not enough power left."
    "Ta Sfera może ściągać do Ciebie odległe przedmioty, nawet, jak po drodze są potwory lub inne przeszkody. Koszt ściągnięcia przedmiotu (w ładunkach) równy jest kwadratowi odległości. W przeciwieństwie do niektórych innych Sfer, nie możesz użyć Sfery Przestrzeni, jeśli nie masz wystarczająco dużo mocy.",
@@ -2976,6 +4418,13 @@ sentence all_sentences[1130] = {
    "Tato Sféra vám dokáže přinášet vzdálené předměty, a to i skrz netvory nebo bariéry. Přinesení předmětu stojí tolik síly, kolik je druhá mocnina vzdálenosti předmětu. Na rozdíl od některých jiných Sfér, Sféru Prostoru není možné použít, pokud vám už nezbývá dostatečné množství síly.",
    "Эта сфера может принести Вам предметы издалека, даже если на пути есть монстры или препятствия. Стоимость использования равна квадрату расстояния до предмета. В отличие от некоторых других сфер, она не может быть использована, если ей силы не хватает.",
    "Dieser Orb kann weit entfernte Gegenstände zu dir bringen, auch wenn Monster oder Barrieren im Weg sind. Die Kosten dafür ist die Distanz des Gegenstands zu dir zum Quadrat. Anders als ein paar andere Orbs kannst du diesen nicht benutzen, wenn er nicht genug Kraft hat.",
+    }},
+  {0x676ec0fa, { // "When the charges on this Orb expire, you will be automatically returned to the place where you have found it. Extra Orbs of Recall delay this without changing the recall location. Pick up an Orb of Safety causes an immediate recall."
+   "Kiedy skończą się ładunki tej Sfery, automatycznie wracasz do miejsca, w którym ją znalazłeś. Dodatkowe Sfery Powrotu opóźniają powrót bez zmiany miejsca powrotu, a Sfera Bezpieczeństwa powoduje natychmiastowy powrót.",
+/*MISSING*/    "When the charges on this Orb expire, you will be automatically returned to the place where you have found it. Extra Orbs of Recall delay this without changing the recall location. Pick up an Orb of Safety causes an immediate recall.",
+   "Když vyprší náboje této Sféry, automaticky se vrátíš tam, kde jsi ji našel. Pokud sebereš více Sfér Návratu, místo návratu se nezmění -- návrat se pouze oddálí. Pokud sebereš Sféru Bezpečnosti, vrátíš se okamžitě.",
+   "Когда заряды этой сферы заканчиваются, вы автоматически возвращаетесь в место, где вы её нашли. Дополнительные сферы откладывают этот момент, не меняя места возвращения, а Сфера Безопасности вызывает немедленное возвращение.",
+/*MISSING*/    "When the charges on this Orb expire, you will be automatically returned to the place where you have found it. Extra Orbs of Recall delay this without changing the recall location. Pick up an Orb of Safety causes an immediate recall.",
     }},
   {0x679cde87, { // "The Orb loses its power as it leaves the Land of Power!"
    "Sfera traci swą moc, gdy opuszcza Krainę Mocy!",
@@ -2990,6 +4439,13 @@ sentence all_sentences[1130] = {
    "scrollování doleva",
    "крутить влево",
    "Nach links schwenken",
+    }},
+  {0x67ef03c1, { // "second joystick position (panning)"
+   "pozycja drugiego joysticka (przesuwanie)",
+/*MISSING*/    "second joystick position (panning)",
+   "pozice druhého joysticku (přesouvání)",
+   "положение второго джойстика (обзор)",
+/*MISSING*/    "second joystick position (panning)",
     }},
   {0x6828d3e3, { // "Rock snakes are similar to Sandworms, but they move each turn. However, they only move on the hexagonal cells. They are also somewhat longer than the Sandworms."
    "Kamienne węże są podobne do Pustynnych Czerwi, ale wykonują ruch w każdej kolejce. Mogą jednak poruszać się tylko po sześciokątach. Są trochę dłuższe niż Pustynne Czerwie.",
@@ -3013,7 +4469,7 @@ sentence all_sentences[1130] = {
    "Anti-Aliasing deaktiviert",
     }},
   {0x68a71369, { // "You can fight most monsters by moving into their location. The monster could also kill you by moving into your location, but the game automatically cancels all moves which result in that.\n\n"
-   "Większość przeciwników zabijasz poprzez wejście na zajmowane przez nie pole. Przeciwnik może Ciebie zabić w ten sam sposób, ale gra automatycznie zabrania ruchów, które by do tego prowadziły.\n\n",
+   "Większość przeciwników zabijasz poprzez wejście na zajmowane przez nie pole. Przeciwnik może Cię zabić w ten sam sposób, ale gra automatycznie zabrania ruchów, które by do tego prowadziły.\n\n",
    "Çoğu canavarın yerine ilerleyerek onu öldürebilirsin. Canavar da seni senin bulunduğun yere ilerleyerek öldürebilir, ama oyun böyle hamlelere zaten izin vermez.\n\n",
    "Na většinu netvorů můžeš zaútočit tím, že se pohneš na jejich políčko. Netvor může zabít tebe, pokud se pohne na tvé políčko, ale hra automaticky zruší každý tah, který by vedl k takové situaci.\n\n",
    "Вы можете атаковать большинство монстров, просто передвигаясь на клетку с ними. Монстры могут атаковать Вас тем же способом, но игра сама блокирует ходы, приводящие к этому.\n\n",
@@ -3024,14 +4480,21 @@ sentence all_sentences[1130] = {
    "%1 görevine hoşgeldin!",
    "Vítej v Misi: %1!",
    "Спаси %a1!",
-   "Willkommen zu %der1 %a1 Herausforderung!",
+   "Willkommen zu der %a1-Herausforderung!",
+    }},
+  {0x68c82eb7, { // " (appears here)"
+   " (występuje tu)",
+/*MISSING*/    " (appears here)",
+   " (objevuje se zde)",
+   " (появляется здесь)",
+/*MISSING*/    " (appears here)",
     }},
   {0x68efc6fc, { // "model used"
    "użyty model",
 /*MISSING*/    "model used",
    "použitý model",
    "используемая модель",
-/*MISSING*/    "model used",
+   "verwendetes Modell",
     }},
   {0x691a64f3, { // "r = regular"
    "r = wzorki",
@@ -3059,7 +4522,14 @@ sentence all_sentences[1130] = {
 /*MISSING*/    "right to left",
    "zprava doleva",
    "влево",
-/*MISSING*/    "right to left",
+   "von rechts nach links",
+    }},
+  {0x6a04fee0, { // "Cannot use %the1 here!"
+   "Nie możesz tutaj tego użyć!",
+/*MISSING*/    "Cannot use %the1 here!",
+   "Tady to nemùe pouít!",
+   "Невозможно использовать %a1 here!",
+/*MISSING*/    "Cannot use %the1 here!",
     }},
   {0x6a077dec, { // "%The1 disperses the cloud!"
    "%1 rozprys%ł1 chmurę!",
@@ -3073,7 +4543,7 @@ sentence all_sentences[1130] = {
 /*MISSING*/    "render bands automatically",
    "renderovat pásy automaticky",
    "рисовать ленту автоматически",
-/*MISSING*/    "render bands automatically",
+   "rendere Bänder automatisch",
     }},
   {0x6ae460f4, { // "game design, programming, texts and graphics by Zeno Rogue <zeno@attnam.com>\n\n"
    "projekt, programowanie, teksty i grafika: Zeno Rogue <zeno@attnam.com>\n\n",
@@ -3087,7 +4557,7 @@ sentence all_sentences[1130] = {
    "Bu küre ışık büyüsünü kullanmaya yarar. Işık büyüsü, 2 hücre uzaklıktaki her şeyi yok eder.",
    "Tuto sféru můžeš použít k seslání kouzla Záblesk, které zničí téměř vše do vzdálenosti 2 políček od tebe.",
    "Эта сфера вызывает заклинание вспышки, уничтожающее почти всё в радиусе 2.",
-   "Du kannst diesen Orb verwenden um einen Lichtzauber zu wirken, der fast alles zerstört, was in einem Radius von 2 um dich ist.",
+   "Du kannst diesen Orb verwenden um einen Lichtzauber zu wirken, der nahezu alles um dich in einem Radius von 2 zerstört.",
     }},
   {0x6b41c58b, { // "You think about possible meanings."
    "Zastanawiasz się nad możliwymi znaczeniami.",
@@ -3117,6 +4587,13 @@ sentence all_sentences[1130] = {
    "Периодический редактор",
    "Periodischer Editor",
     }},
+  {0x6b63d613, { // "Rock-III to wall ratio"
+   "Stosunek skały-III do ścian",
+/*MISSING*/    "Rock-III to wall ratio",
+   "Poměr skály-III a zdí",
+   "Отношение высот Скалы-III и стены",
+/*MISSING*/    "Rock-III to wall ratio",
+    }},
   {0x6b728a57, { // "You collect your first %1!"
    "Znalaz%łeś0 pierwsz%yą1 %a1!",
    "%a1 topladın. Bu senin ilkin!",
@@ -3130,6 +4607,13 @@ sentence all_sentences[1130] = {
    "Magická bytost, které kopíruje tvé pohyby.",
    "Это магическое создание копирует Ваши движения.",
    "Ein magisches Wesen, das deine Bewegungen kopiert.",
+    }},
+  {0x6bc2888a, { // "geometry"
+   "geometria",
+/*MISSING*/    "geometry",
+   "geometrie",
+   "геометрия",
+/*MISSING*/    "geometry",
     }},
   {0x6bdbf93c, { // "exit configuration"
    "wyjdź z konfiguracji",
@@ -3145,6 +4629,13 @@ sentence all_sentences[1130] = {
    "l = земли",
    "l = Items",
     }},
+  {0x6cbed3c9, { // "3D"
+   "3D",
+/*MISSING*/    "3D",
+   "3D",
+   "3D",
+/*MISSING*/    "3D",
+    }},
   {0x6cc91767, { // "world overview"
    "przegląd krain",
    "dünya önizlemesi",
@@ -3157,7 +4648,7 @@ sentence all_sentences[1130] = {
 /*MISSING*/    "right",
    "doprava",
    "право",
-/*MISSING*/    "right",
+   "rechts",
     }},
   {0x6d034a95, { // "Hit him by walking away from him."
    "Odejdź od niego, by go trafić.",
@@ -3171,21 +4662,21 @@ sentence all_sentences[1130] = {
 /*MISSING*/    "%The1 is destroyed by the Flash.",
    "Záblesk zničil %a1.",
    "Вспышка уничтожила %1.",
-/*MISSING*/    "%The1 is destroyed by the Flash.",
+   "%Der1 %1 wird durch den Lichtblitz zerstört.",
     }},
   {0x6d5e942d, { // "Tiny droplets of magical water. You see images of yourself inside them. Go inside the cloud, to make these images help you."
    "Malutkie kropelki magicznej wody, w których widać Twój obraz. Wejdź do środka chmury, by te obrazy Ci pomogły.",
    "Ufak sihirli su damlaları. Kendi görüntünü içlerinde görüyorsun. Bu görüntülerin sana yardım etmesi için bulutun içine gir. ",
    "Maličké kapičky magické vody. Vidíš v nich své obrazy. Když vejdeš do oblaku, tyto obrazy ti pomohou.",
    "Крошечные капли магической жидкости. Вы видите в них свои отражения. Войдите в облако, чтобы создать двойников, помогающих Вам.",
-   "Kleine Tropfen aus magischem Wasser, in denen du dich selbst sehen kannst. Betritt den Dampf, um diese Bilder real werden zu lassen.",
+   "Kleine Tropfen magischen Wassers. Du siehst Abbilder von dir in ihnen. Gehe in die Wolke, um diese Bilder real werden zu lassen.",
     }},
   {0x6d696af0, { // "framerate limit"
    "ograniczenie na fps",
    "kare sayısı sınırı",
    "limit fps",
    "ограничение на fps",
-   "Framerate Limit",
+   "Framerate-Limit",
     }},
   {0x6d8c78c2, { // "Usually, you move by touching somewhere on the map; you can also touch one of the four buttons on the map corners to change this (to scroll the map or get information about map objects). You can also touch the numbers displayed to get their meanings.\n"
    "Zazwyczaj poruszasz się przez dotknięcie pola na mapie; możesz również dotknąć jednego z przycisków w rogach, by to zmienić (by przewijać mapę albo zdobyć informacje). Możesz też dotknąć liczb na ekranie, by poznać ich znaczenie.\n",
@@ -3206,14 +4697,14 @@ sentence all_sentences[1130] = {
 /*MISSING*/    "You need to move to give space to %the1!",
    "Musíš se pohnout, abys uděla%l0 místo pro %a1!",
    "Вам нужно освободить место для %a1!",
-/*MISSING*/    "You need to move to give space to %the1!",
+   "Du musst dich bewegen, um Platz für %den1 %a1 zu machen!",
     }},
   {0x6e1db4ec, { // "drop Dead Orb"
    "połóż Martwą Sferę",
    "Ölü Küreyi bırak",
    "položení Mrtvé sféry",
    "бросить мёртвую сферу",
-   "Toten Orb fallen lassen",
+   "Toten Orb ablegen",
     }},
   {0x6e262183, { // "\"Nice castle, eh?\""
    "\"Ładny zamek, co?\"",
@@ -3271,8 +4762,15 @@ sentence all_sentences[1130] = {
    "удалить монстра",
    "Monster entfernen",
     }},
+  {0x6fa9922a, { // "Klein model"
+   "model Kleina",
+/*MISSING*/    "Klein model",
+   "Kleinův model",
+   "модель Клейна",
+/*MISSING*/    "Klein model",
+    }},
   {0x6fabe1c6, { // "These sinister totems contain valuable gems."
-   "Ten złowieszczy totem zawiera cenne klejnoty.",
+   "Te złowieszcze totemy zawierają cenne klejnoty.",
    "Bu tekinsiz totemler değerli mücevherler içeriyor.",
    "Tyto zlověstné totemy obsahují cenné drahokamy.",
    "Этот зловещий тотем содержит ценные камни.",
@@ -3306,8 +4804,15 @@ sentence all_sentences[1130] = {
    "Ограничить fps, чтобы сохранить энергию ЦП",
    "Reduzieren des Framerate Limits spart CPU Energie",
     }},
+  {0x7091f735, { // "leaderboards/achievements"
+   "osiągnięcia i rankingi",
+/*MISSING*/    "leaderboards/achievements",
+   "leaderboardy/achievementy",
+   "таблицы рекордов и достижения",
+   "Bestenlisten/Errungenschaften",
+    }},
   {0x70ae47f3, { // "A Witch with an Aether spell. She is able to move through fire and walls."
-   "Czarownica z czarem Eter. Może przechodzić przez ogień i ściany.",
+   "Czarownica z czarem Eteru. Może przechodzić przez ogień i ściany.",
    "Eter büyüsü olan bir cadı. Duvarların ve ateşin içinden geçebilir.",
    "Čarodějnice s kouzlem Éteru. Dokáže procházet ohněm a zdmi.",
    "Ведьма с заклинанием эфира. Может проходить сквозь огонь и стены.",
@@ -3325,7 +4830,7 @@ sentence all_sentences[1130] = {
    "Bu harika Küre kilidini açmak için doğru anahtarı gerektirdiğinden, sadece bu hiperbolik evrende tamamen ustalaşmış kişilerce toplanabilir.Çok şükür, küreye dokununca psişik yeteneklerin sana anahtarın nerede olduğunu söyler.",
    "Tuto úžasnou sféru mohou sebrat jenom ti, kdo se stali skutečnými pány tohoto hyperbolického vesníru, protože na její odemčení potřebuješ správný klíč. Tvé psychické schopnosti ti naštěstí prozradí, kde se klíč nachází, jakmile se této sféry dotkneš.",
    "Эта прекрасная сфера может быть собрана лишь тем, кто по настоящему освоил гиперболическую вселенную, но Вам нужно найти ключ от неё. К счастью, Вы узнаете, где он лежит, как только дотронетесь до сферы.",
-   "Dieser wundervolle Orb kann nur von denen gesammelt werden, die dieses hyperbolische Universum komplett gemeistert haben, da du den richtigen Schlüssel benötigst, um ihre Macht zu entfesseln. Deine psychischen Fähigkeiten erlauben es dir, zu sehen, wo sich der Schlüssel befindet, nachdem du den Orb berührt hast.",
+   "Dieser wundervolle Orb kann nur von denen gesammelt werden, die dieses hyperbolische Universum wahrhaft gemeistert haben - denn du benötigst den richtigen Schlüssel, um ihn zu entsperren. Deine psychischen Fähigkeiten erlauben es dir glücklicherweise zu erkennen, wo sich der Schlüssel befindet, nachdem du den Orb berührt hast.",
     }},
   {0x711da86b, { // "\"I would like to congratulate you again!\""
    "\"Pragnę jeszcze raz Ci pogratulować!\"",
@@ -3353,7 +4858,7 @@ sentence all_sentences[1130] = {
 /*MISSING*/    "Monsters slain by you in melee are turned into friendly ghosts. Does not affect plants and friends.",
    "Netvoři, které zabiješ v boji na blízko, se promění v přátelské duchy. Nepůsobí na rostliny a přátelské netvory.",
    "Убитые Вашими руками монстры превращаются в мирных призраков. Не действует на растения и союзников.",
-/*MISSING*/    "Monsters slain by you in melee are turned into friendly ghosts. Does not affect plants and friends.",
+   "Monster, die du im Nahkampf getötet hast, werden in freundliche Geister verwandelt. Es hat keinen Effekt auf Pflanzen und Freunde.",
     }},
   {0x721a70de, { // "An Air Elemental looks like a live tornado. Once you are three (or less) cells from it, it is impossible to move closer, due to strong winds. You can stand and wait, though. This also affects most monsters."
    "Powietrzny Żywiołak wygląda jak żywa trąba powietrzna. Gdy znajdziesz się trzy lub mniej pól od niego, nie możesz się zbliżyć bardziej, ze względu na silny powiew. Możesz jednak stać w miejscu i czekać. Powietrzny Żywiołak wpływa także na potwory.",
@@ -3367,14 +4872,7 @@ sentence all_sentences[1130] = {
    "Pöfff, çok kolaydı... daha büyük bir kale bul!",
    "Ale no tak, tohle je příliš jednoduché... najdi si větší hrad!",
    "Ну давай, это слишком просто... Найди больший замок!",
-   "Komm schon, das ist viel zu einfach... such ein größeres Schloss!",
-    }},
-  {0x72aa1a4c, { // "native in %the1 (collect 1 %2)"
-   "rodzima %abl1 (1x %2)",
-   "%abl1 bulunuyor (1 tane %2)",
-   "standardní %abl1 (získej 1x %2)",
-   "родная %abl1 (1x %2)",
-   "heimisch in %der1 (1x %2)",
+   "Komm schon, das ist viel zu einfach... suche ein größeres Schloss!",
     }},
   {0x72f22ebb, { // "continue game"
    "kontynuuj grę",
@@ -3416,14 +4914,21 @@ sentence all_sentences[1130] = {
    "%a2 zihin patlamasıyla öldürdün!",
    "Zabi%l1 jsi %a2 mentálním útokem!",
    "Вы убили %a1 психическим взрывом!",
-   "Du tötest %den1 %a1 mit mentaler Korruption!",
+   "Du tötest %den1 %a1 mit einem mentalen Stoß!",
+    }},
+  {0x73962d4d, { // "You may be unable to leave %the1 if you are not careful!\n"
+   "Jeśli nie uważasz, możesz nie być w stanie stąd uciec!",
+/*MISSING*/    "You may be unable to leave %the1 if you are not careful!\n",
+   "Pokud si nedáš pozor, možná už se odsud nedostaneš!",
+   "Возможно, вы не сможете отсюда выбраться, если не будете осторожны!",
+/*MISSING*/    "You may be unable to leave %the1 if you are not careful!\n",
     }},
   {0x73fd37f2, { // "which coefficient"
    "który współczynnik",
 /*MISSING*/    "which coefficient",
    "kterů koeficient",
    "какой коэффициент",
-/*MISSING*/    "which coefficient",
+   "welcher Koeffizient",
     }},
   {0x741dafec, { // "Customize character"
    "pokoloruj postać",
@@ -3437,7 +4942,7 @@ sentence all_sentences[1130] = {
    "%2 gittikçe daha tehlikeli bir hâl alıyor...",
    "S každ%ým1 %abl1, který sebereš...",
    "С каждым собранным %abl1...",
-   "mit jedem gesammeltem %a1",
+   "Mit jedem gesammelten %d1...",
     }},
   {0x748de98c, { // " (press ESC for some hints about it)."
    " (naciśnij ESC by dostać wskazówki).",
@@ -3445,6 +4950,13 @@ sentence all_sentences[1130] = {
    " (stiskni ESC pro trochu nápovědy).",
    " (нажмите ESC, чтобы получить подсказки).",
    " (Drücke ESC für Hinweise).",
+    }},
+  {0x74ae0912, { // "leave the game"
+   "opuść grę",
+/*MISSING*/    "leave the game",
+   "vyskoč ze hry",
+   "покинуть игру",
+/*MISSING*/    "leave the game",
     }},
   {0x74bc9920, { // "You destroy %the1."
    "Zniszczy%łeś0 %a1.",
@@ -3454,11 +4966,11 @@ sentence all_sentences[1130] = {
    "Du zerstörst %den1 %a1.",
     }},
   {0x74c9faac, { // "%The1 tries to dismount you!"
-   "%1 próbuje Ciebie zdjąć!",
+   "%1 próbuje Cię zrzucić!",
 /*MISSING*/    "%The1 tries to dismount you!",
    "%1 se tě snaží shodit!",
    "%1 пробует сбросить вас!",
-/*MISSING*/    "%The1 tries to dismount you!",
+   "%Der1 %1 versucht dich abzuwerfen!",
     }},
   {0x75123c27, { // "%The1 fills the hole!"
    "%1 zatka%ł1 dziurę!",
@@ -3472,14 +4984,28 @@ sentence all_sentences[1130] = {
 /*MISSING*/    "enable the Hypersian Rug mode",
    "aktivuj mód hyperského koberce",
    "включить режим гиперсидского ковра",
-/*MISSING*/    "enable the Hypersian Rug mode",
+   "Aktiviere den Hypersischen-Teppich-Modus",
+    }},
+  {0x75875396, { // "This parameter affects the ball model the same way as the projection parameter affects the disk model."
+   "Ten parametr wpływa na model kuli w ten sam sposób, co projekcja wpływa na model dysku.",
+/*MISSING*/    "This parameter affects the ball model the same way as the projection parameter affects the disk model.",
+   "Tento parametr ovlivňuje model koule stejným způsobem jako projekce model disku.",
+   "Этот параметр влияет на модель сферы также, как параметр проекции влияет на модель диска.",
+/*MISSING*/    "This parameter affects the ball model the same way as the projection parameter affects the disk model.",
     }},
   {0x75c48ec5, { // "player 4 spin"
    "gracz 4 obrót",
 /*MISSING*/    "player 4 spin",
    "hráč 4 otáčení",
    "игрок 4 вертит",
-/*MISSING*/    "player 4 spin",
+   "Spieler 4 drehen",
+    }},
+  {0x75d73de0, { // "azimuthal equidistant"
+   "azymutalny, równe d",
+/*MISSING*/    "azimuthal equidistant",
+   "azimutální délkojevný",
+   "азимутальная, сохранение расстояний",
+   "mittabstandstreu azimutal",
     }},
   {0x7623ae12, { // "The ivy kills %the1!"
    "Bluszcz zabił %a1!",
@@ -3493,21 +5019,21 @@ sentence all_sentences[1130] = {
 /*MISSING*/    "The skeleton of a tree.",
    "Skelet stromu.",
    "Скелет дерева.",
-/*MISSING*/    "The skeleton of a tree.",
+   "Das Skelett eines Baumes.",
     }},
-  {0x76620884, { // "This forest is quite dry. Beware the bushfires!\nTrees catch fire on the next turn. The temperature of the grass cells rises once per turn for each fire nearby, and becomes fire itself when its temperature has risen 10 times.\nYou can also cut down the trees. Big trees take two turns to cut down."
-   "Ta puszcza jest wyschnięta. Uważaj na pożary!\nSąsiednie drzewa zajmują się ogniem w następnej kolejce. Temperatura pola bez drzewa rośnie o 1 na kolejkę z każdym ogniem w sąsiedztwie, i gdy wzrośnie do 10, to pole również staje się ogniem.\nMożesz też ścinać drzewa. Ścięcie dużego drzewa zajmuje dwie kolejki.",
-   "Bu orman epey kuru. Çalı yangınlarına dikkat et!\nAğaçlar her tur ateşe yakalanır. Çimen hücrelerinin ısısı her tur yakındaki ateşle bir artar ve sonra ısısı 10 kez yükselirse, kendisi ateş olur.\n Ağaçları kesebilirsin. Büyük ağaçları kesmesi 2 tur alır.\n ",
-   "Tento hvozd je velice suchý. Pozor na požáry!\nStromy začnou hořet jedno kolo poté, co se ocitnou v sousedství ohně. Teplota políček s trávou vzrůstá každé kolo o 1 za každé sousední políčko s ohněm a poté, co vzroste desetkrát, začne tráva hořet.\nStromy v Suchém hvozdu můžeš kácet. Pokácení velkých stromů trvá dvě kola.",
-   "Этот лес довольно сухой. Берегитесь лесных пожаров!\nДеревья загораются от огня на следующем шагу. Температура травы растёт на каждом шаге, после 10 шагов трава загорается.\nТакже Вы можете рубить деревья. Большие деревья требуют двух ударов.",
-   "Dieser Wald ist ziemlich trocken. Vorsicht, Waldbrand!\nBäume fangen im nächsten Zug Feuer. Die Temperatur von Gras steigt jeden Zug für jedes Feuer in der Nähe, und wird selbst zu Feuer wenn dies 10-mal geschehen ist.\nDu kannst auch die Bäume fällen. Große Bäume brauchen zwei Züge dafür.",
+  {0x766ddf1f, { // "Bonus land, available only in some special modes.\n"
+   "Kraina dodatkowa, dostępna tylko w niektórych trybach.\n",
+/*MISSING*/    "Bonus land, available only in some special modes.\n",
+   "Bonusový kraj, který je dostupný pouze v některých speciálních módech.\n",
+   "Дополнительная земля, доступна только в дополнительных режимах.\n",
+   "Bonusland, nur in einigen Spezialmodi verfügbar.\n",
     }},
   {0x76c3bfe1, { // "lose all treasure"
    "utrata skarbów",
    "tüm hazineyi kaybet",
    "zbav se všech pokladů",
    "потерять все сокровища",
-/*MISSING*/    "lose all treasure",
+   "verliere alle Schätze",
     }},
   {0x76ddb79b, { // "Mighty warriors from the Fjord, who can use boats."
    "Potężni wojownicy z Fiordu, używający łódek.",
@@ -3521,14 +5047,21 @@ sentence all_sentences[1130] = {
    "karakter",
    "postava",
    "персонаж",
-   "Character",
+   "Rolle",
+    }},
+  {0x77738337, { // "compass size"
+   "rozmiar kompasu",
+/*MISSING*/    "compass size",
+   "velikost kompasu",
+/*MISSING*/    "compass size",
+/*MISSING*/    "compass size",
     }},
   {0x77837aed, { // "\"I enjoy watching the hyperbug battles.\""
    "\"Lubię oglądać bitwy hiperinsektów.\"",
    "\"Aşkınböcek savaşlarını izlemek hoşuma gidiyor.\"",
    "\"Rád se dívám na bitvy Hyperhmyzáků.\"",
    "\"Мне нравится наблюдать за боями гипержуков.\"",
-   "\"Ich mag es, den Hyperkäfern beim kämpfen zuzusehen.\"",
+   "\"Ich mag es, den Hyperkäfern beim Kämpfen zuzusehen.\"",
     }},
   {0x77aad383, { // "vector graphics editor -- press F1 for help"
    "edytor grafiki -- wciśnij F1, by zobaczyć pomoc",
@@ -3538,11 +5071,11 @@ sentence all_sentences[1130] = {
    "Vektor Grafiken Editor -- drücke F1 um Hilfe zu erhalten",
     }},
   {0x77ac3c91, { // "A piece of a magic mirror, or a mirage cloud, that can be used for magical purposes. Only mirrors and clouds in the Land of Mirrors leave these."
-   "Odłamek szkła z magicznego lustra, albo fragment mirażowej chmury. Może zostać użyty do magii. Tylko lustra i chmury z Krainy Luster zostawiają odłamki.",
+   "Odłamek szkła z magicznego lustra albo fragment mirażowej chmury. Może zostać użyty do magii. Tylko lustra i chmury z Krainy Luster zostawiają odłamki.",
    "Sihirli aynanın veya yansı bulutunun bir parçası. Sihirli amaçlar için kullanılabilir. Sadece aynalar ve bulutlardan düşer.",
    "Kousek kouzelného zrcadla nebo oblaku přeludů, který je možné používat pro magické účely.Zanechávají je po sobě pouze zrcadla a oblaky v Kraji zrcadel.",
    "Часть магического зеркала или облака миражей. Может быть использовано в магических целях. Может быть получено только в Зеркальной земле.",
-   "Ein Stück eines Zauberspiegels oder einer Illusionswolke, das für magische Zwecke brauchbar ist. Zauberspiegel und Illusionswolken im Land der Spiegel hinterlassen diese.",
+   "Ein Stück eines Zauberspiegels oder einer Illusionswolke, das für magische Zwecke verwendet werden kann. Ausschließlich Zauberspiegel und Illusionswolken im Land der Spiegel hinterlassen so etwas.",
     }},
   {0x77b3f296, { // "eight domains"
    "osiem domen",
@@ -3558,33 +5091,40 @@ sentence all_sentences[1130] = {
    "Добро пожаловать в режим стрельбы!",
    "Willkommen im Ballermodus!",
     }},
-  {0x7824cc5a, { // "You start cutting down the tree."
-   "Zaczynasz ciąć drzewo.",
-   "Ağacı kesmeye başladın.",
-   "Zača%l0 jsi kácet strom.",
-   "Вы начали рубить дерево.",
-   "Du fängst an, den Baum zu fällen.",
+  {0x77d6ace1, { // "set 3D monsters or walls in basic config first"
+   "najpierw ustaw 3D potwory/ściany w konfiguracji podstawowej",
+/*MISSING*/    "set 3D monsters or walls in basic config first",
+   "nejprve musíš nastavit 3D netvory nebo zdi v základní konfiguraci",
+   "сначала выставлять монстров или стены в режиме 3D ",
+/*MISSING*/    "set 3D monsters or walls in basic config first",
     }},
   {0x784ca1bd, { // "%The1 is extinguished!"
    "%2 ugasi%ł2 %a1!",
    "%1 söndü!",
    "Elementál Vody uhasil %a1!",
    "%1 гаснет!",
-   "%der1 %a1 wurde gelöscht!",
+   "%Der1 %a1 wurde ausgelöscht!",
     }},
   {0x786da209, { // "It would be impolite to land on the table!"
    "Byłoby niegrzecznie wylądować na stole!",
    "Masaya çıkmak çok yakışıksız olur!",
    "Přístát na stole by bylo nezdvořilé!",
    "Было бы невежливо приземляться на стол!",
-   "Es wäre unhöflich, auf dem Tisch zu landen.",
+   "Es wäre unhöflich auf dem Tisch zu landen.",
+    }},
+  {0x787b6ed1, { // "This wall is quite strong. You will need another way in."
+   "Ściana kurhanu jest dosyć mocna, musisz poszukać innego wejścia.",
+/*MISSING*/    "This wall is quite strong. You will need another way in.",
+   "Tato stěna je velice pevná. Musíš najít jinou cestu dovnitř.",
+   "Эта стена довольно крепкая. Вам нужен другой путь.",
+   "Diese Wand ist sehr stabil - du brauchst einen anderen Weg hinein.",
     }},
   {0x78b4341e, { // "These statues of Cthulhu are too large to carry, and they don't look too valuable anyway. Most monsters will never go through them... they probably have their reasons. But you can go! When you move into the cell containing a statue, you push the statue to the cell you left.\n"
    "Te pomniki Cthulhu są za duże, by je nosić, zresztą i tak nie wyglądają na zbyt cenne. Potwory nigdy przez nie nie przechodzą... pewnie mają swoje powody. Ale Ty możesz przejść! Kiedy wchodzisz na pole z pomnikiem, automatycznie przesuwasz pomnik na pole, które opuści%łeś0.",
    "Cthulhu putları taşımak için fazla büyük, zaten çok değerli de gözükmüyorlar. Canavarların çoğu onların içinden geçmiyor, bunun bir sebebi olmalı. Ama sen bunların içinden geçebilirsin! Putun olduğu hücreye girdiğinde putu terkettiğin hücreye itersin. \n",
    "Tyto Cthulhuovy sochy jsou příliš velké na to, abys je unesl, a navíc ani nevypadají příliš cenné. Většina netvorů skrz ně nikdy nepůjde... asi mají své důvody. Ale ty přes ně chodit můžeš! Když vstoupíš na políčko se sochou, odstrčíš ji na to políčko, které jsi opusti%l0.",
    "Эти статуи Ктулху слишком велики, чтобы их забрать, да и не выглядят особо ценными.  Большинство монстров не может ходить через них, у них есть на то свои причины. Но Вы можете! Когда Вы ходите на клетку с памятником, он сдвигается на клетку, которую Вы покинули.",
-   "Diese Cthulhu Statuen sind zu groß um sie zu tragen und sehen sowieso nicht wertvoll aus. Die meisten Monster gehen nie an ihnen vorbei, dafür haben sie schon ihre Gründe. Du aber schon! Wenn du in die Zelle gehst, in der eine steht, schiebst du sie an deinen Ursprungsort.",
+   "Diese Cthulhu-Statuen sind zu groß um sie zu tragen - und sehen sowieso nicht sonderlich wertvoll aus. Die meisten Monster gehen nie an ihnen vorbei, dafür haben sie wohl ihre Gründe. Du aber schon! Wenn du in die Zelle gehst, in der eine steht, schiebst du sie an deinen Ursprungsort.",
     }},
   {0x7933ecb8, { // " for Android"
    " na Android",
@@ -3600,12 +5140,19 @@ sentence all_sentences[1130] = {
    "Убейте 100 врагов, чтобы открыть Кладбище",
    "Töte 100 Gegner um Zugang zum Friedhof zu erhalten",
     }},
+  {0x796f67a0, { // "Annoying insects. They can awaken Sleeping Bulls."
+   "Irytujące owady. Mogą budzić Śpiące Byki.",
+/*MISSING*/    "Annoying insects. They can awaken Sleeping Bulls.",
+   "Otravný hmyz. Dokáže probudit Spící Býky.",
+   "Надоедливые насекомые. Могут будить Спящих быков.",
+/*MISSING*/    "Annoying insects. They can awaken Sleeping Bulls.",
+    }},
   {0x79a71f0c, { // "monsters destroyed: %1"
    "potwory zniszczone: %1",
 /*MISSING*/    "monsters destroyed: %1",
    "zničení nepřátelé: %1",
    "монстров уничтожено: %1",
-/*MISSING*/    "monsters destroyed: %1",
+   "zerstörte Monster: %1",
     }},
   {0x79afcedc, { // "You cannot defeat the Greater Demon yet!"
    "Nie możesz jeszcze pokonać Wielkiego Demona!",
@@ -3613,6 +5160,13 @@ sentence all_sentences[1130] = {
    "Ďábla ještě porazit nemůžeš!",
    "Вы пока не можете победить Старшего демона!",
    "Du kannst den Mächtigen Dämon noch nicht besiegen!",
+    }},
+  {0x79c0f4f4, { // "%The1 is filled!"
+   "%1 zosta%ł1 zalan%1y!",
+/*MISSING*/    "%The1 is filled!",
+   "%1 je naplněn%1ý!",
+   "%1 наполнил%c1!",
+/*MISSING*/    "%The1 is filled!",
     }},
   {0x79c4823b, { // "hexagonal"
    "sześciokąt",
@@ -3647,7 +5201,7 @@ sentence all_sentences[1130] = {
 /*MISSING*/    ", %1",
    ", %1",
    ", %1",
-/*MISSING*/    ", %1",
+   ", %1",
     }},
   {0x7a696805, { // "w = walls"
    "w = ściany",
@@ -3668,14 +5222,14 @@ sentence all_sentences[1130] = {
 /*MISSING*/    "Chaos mode",
    "chaotický mód",
    "режим Хаоса",
-/*MISSING*/    "Chaos mode",
+   "Chaos-Modus",
     }},
   {0x7ad3304d, { // "length of a segment"
    "długość segmentu",
 /*MISSING*/    "length of a segment",
    "délka segmentu",
    "длина отрезка",
-/*MISSING*/    "length of a segment",
+   "Länge eines Segments",
     }},
   {0x7ae6977d, { // "Apparently a prince is kept locked somewhere, but you won't ever find him in this hyperbolic palace. "
    "Gdzieś tu jest uwięziony książę, ale w tym hiperbolicznym pałacu nigdy go nie znajdziesz. ",
@@ -3690,6 +5244,13 @@ sentence all_sentences[1130] = {
    "HQ snímky nejsou na této platformě k dispozici",
    "Скрины высокого качества недоступны на этой платформе",
    "HQ Screenshots sind auf diesem Gerät nicht verfügbar",
+    }},
+  {0x7b411bc8, { // "This Orb gives you a weapon made of pure magical energy. You do not hold it, it simply floats in the air next to you. When you go, the energy sword moves with you, pointing at the same relative angle it pointed before -- you cannot move or rotate it otherwise. Most monsters can be killed by moving the sword into them, and won't move into the spot with the sword."
+   "Ta Sfera daje Ci ostrze zbudowaną z czystej magicznej energii. Nie trzymasz go w ręce, po prostu unosi się ono w powietrzu obok Ciebie. Kiedy się poruszasz, ostrze energii porusza się razem z Tobą, pozostając skierowane pod tym samym kątem względem Twojego ruchu, co wcześniej -- nie możesz nim obracać ani poruszać w inny sposób. Większość potworów ginie, gdy uderzysz w nie ostrzem, nie wejdą one też na pole, na którym ostrze jest.",
+/*MISSING*/    "This Orb gives you a weapon made of pure magical energy. You do not hold it, it simply floats in the air next to you. When you go, the energy sword moves with you, pointing at the same relative angle it pointed before -- you cannot move or rotate it otherwise. Most monsters can be killed by moving the sword into them, and won't move into the spot with the sword.",
+   "Tato Sféra ti poskytne zbraň vyrobenou z čisté magické energie. Nedržíš ji -- prostě se jen vznáší ve vzduchu vedle tebe. Kamkoli půjdeš, energetický meč půjde s tebou a bude namířený ve stejném relativním úhlu -- jinak s ním nemůžeš pohybovat ani otáčet. Většinu netvorů lze zabít tím, že na jejich políčko posuneš meč, a samotní netvoři na políčko s mečem nevstoupí.",
+   "Эта сфера даёт вам меч из чистой магической энергии. Вы не несёте его, он сам летит за вами. Когда вы идёте, он движется за вами, оставаясь под тем же углом относительно вас -- вы не можете двигать или вращать его иначе. Большинство монстров можно убить, передвинув на их клетку меч, и они не могут пойти на клетку с мечом.",
+   "Dieser Orb stellt dir eine Waffe aus purer magischer Energie zur Verfügung. Du hältst dieses Schwert nicht; es schwebt einfach neben dir in der Luft. Wenn du dich bewegst, bewegt sich das Energieschwert mit dir, wobei es in dieselbe relative Richtung zeigt wie zuvor; du kannst es nicht in anderer Weise bewegen oder drehen. Die meisten Monster können getötet werden, indem das Schwert in sie hineinbewegt wird, und begeben sich nicht auf das Feld mit dem Schwert.",
     }},
   {0x7b5d1002, { // "F4 = extension"
    "F4 = rozszerzenie",
@@ -3712,6 +5273,13 @@ sentence all_sentences[1130] = {
    "показать коды узоров (упрощённые)",
    "Muster Codes anzeigen (vereinfacht)",
     }},
+  {0x7b98a273, { // "move down-left"
+   "ruch w dół-lewo",
+/*MISSING*/    "move down-left",
+   "pohyb doleva dolů",
+   "ход вниз-влево",
+/*MISSING*/    "move down-left",
+    }},
   {0x7bb124ed, { // "You need an Orb of Teleport to teleport."
    "Potrzebujesz Sfery Teleportacji, by to zrobić.",
    "Işınlanmak için Işınlanma Küresine ihtiyacın var.",
@@ -3726,12 +5294,26 @@ sentence all_sentences[1130] = {
    "Соберите хотя бы по 10 сокровищ 9 разных типов, чтобы попасть в Ад",
    "Sammle 9 verschiedene Schätze mindestens 10x um Zugang zur Hölle zu erhalten",
     }},
+  {0x7c18932f, { // "%The1 suffocates!"
+   "%1 się udusi%ł1!",
+/*MISSING*/    "%The1 suffocates!",
+   "%1 leknu%l1!",
+   "%1 задыхается!",
+   "%Der1 %1 erstickt!",
+    }},
+  {0x7c4d7cd4, { // "Welcome to HyperRogue!"
+   "Witaj w HyperRogue!",
+/*MISSING*/    "Welcome to HyperRogue!",
+   "Vítej v HyperRogue!",
+   "Добро пожаловать в HyperRogue!",
+/*MISSING*/    "Welcome to HyperRogue!",
+    }},
   {0x7c4edcbf, { // "Variants of %the1 are available in the Random Pattern Mode after getting a highscore of at least 10 %2."
    "Warianty krainy %1 są dostępne w trybie losowych wzorków po zdobyciu 10x %2.",
    "%1 çeşitlemeleri Rastgele Doku Modunda en az on tane %2 skoru elde ederek açılır. ",
    "Varianty kraje '%1' jsou dostupné v Módu náhodných vzorů po získání nejméně 10x %2.",
    "Варианты земли %1 доступны в редиме случайного узора при рекорде не менее 10x %2.",
-   "Varianten der %1 sind im Zufallsmuster Modus verfügbar, nachdem eine Punktzahl von 10x %2 erreicht wurde.",
+   "Varianten der %1 sind im Zufallsmuster-Modus verfügbar, nachdem eine Punktzahl von 10x %2 erreicht wurde.",
     }},
   {0x7c4f337d, { // "Unlock this challenge by getting the Orb of Yendor!"
    "Odblokuj Misję Yendor, zdobywając Sferę Yendoru!",
@@ -3745,17 +5327,17 @@ sentence all_sentences[1130] = {
    "Taklitçiler çıkar",
    "vyvolej Mimiky",
    "призвать двойников",
-/*MISSING*/    "summon Mimics",
+   "rufe Mimiken herbei",
     }},
   {0x7ce5604c, { // "player 3 go"
    "gracz 3 idź",
 /*MISSING*/    "player 3 go",
    "hráč 3 pohyb",
    "игрок 3 идёт",
-/*MISSING*/    "player 3 go",
+   "Spieler 3 los",
     }},
   {0x7d054f96, { // "You feel that the souls of slain enemies pull you to the Graveyard..."
-   "Czujesz, jak dusze pokonanych wrogów wołają Ciebie na Cmentarz...",
+   "Czujesz, jak dusze pokonanych wrogów wzywają Cię na Cmentarz...",
    "Katlettiğin düşmanların ruhlarının seni mezarlığa çektiğini hissediyorsun...",
    "Cítíš, že tě duše zabitých nepřátel táhnou na Hřbitov...",
    "Вы чувствуете, как души убитых врагов тянут Вас на Кладбище.",
@@ -3766,7 +5348,7 @@ sentence all_sentences[1130] = {
 /*MISSING*/    "left",
    "doleva",
    "лево",
-/*MISSING*/    "left",
+   "links",
     }},
   {0x7d14a77c, { // "Shift=random, Ctrl=mix"
    "Shift=losowo, Ctrl=miks",
@@ -3787,7 +5369,7 @@ sentence all_sentences[1130] = {
    "Altıpatları al, haydutları öldür, başlarına konan ödülleri topla!\n\nNot: Bu diyar anakronistik olduğu için, normal oyunda mevcut değil, sadece özel modlarda oynanabilir.",
    "Vezmi si revolver, zabíjej psance, sbírej odměny.\n\nPoznámka: tento kraj je anachronistický, a proto není k dispozici v normální hře. Je dostupný pouze ve speciálních módech.",
    "Хватай револьвер, убивай бандитов, получай награды!\n\nЗамечание: Так как эта земля анахронистична, она не доступна в нормальной игре. Только в специальных режимах.",
-   "Schnapp dir einen Revolver, erschieß Banditen und beanspruche das Kopfgeld!\n\nHinweis: Dieses Land ist nur in Spezialmodi verfügbar. ",
+   "Schnapp dir einen Revolver, erschieß Banditen und beanspruche das Kopfgeld!\n\nHinweis: Dieses Land ist nur in Spezialmodi verfügbar.",
     }},
   {0x7e9ca1ba, { // "Treasure required: %1 $$$.\n"
    "Wymagane skarby: %1 $$$.\n",
@@ -3796,6 +5378,20 @@ sentence all_sentences[1130] = {
    "Сокровищ нужно: %1 $$$.\n",
    "Schätze benötigt: %1 $$$.\n",
     }},
+  {0x7ec15097, { // "draw circle around the target"
+   "rysuj kółko wokół celu",
+/*MISSING*/    "draw circle around the target",
+   "nakresli kruh kolem cíle",
+   "нарисуйте кружок вокруг цели",
+/*MISSING*/    "draw circle around the target",
+    }},
+  {0x7f0e5193, { // "three colors rotated"
+   "trzy kolory obrócone",
+/*MISSING*/    "three colors rotated",
+   "tři barvy s otočkou",
+   "три цвета повёрнутые",
+/*MISSING*/    "three colors rotated",
+    }},
   {0x7f368ee4, { // "0-9 = radius (%1)"
    "0-9 = promień (%1)",
    "0-9 = promień (%1)",
@@ -3803,19 +5399,33 @@ sentence all_sentences[1130] = {
    "0-9 = радиус (%1)",
    "0-9 = Radius (%1)",
     }},
+  {0x7f386b21, { // "Scale the displayed model."
+   "Skaluj model na ekranie.",
+/*MISSING*/    "Scale the displayed model.",
+   "Změň měřítko zobrazeného modelu.",
+   "Масштаб отображаемой модели.",
+/*MISSING*/    "Scale the displayed model.",
+    }},
+  {0x7f406896, { // "last on top"
+   "ostatnie na górze",
+/*MISSING*/    "last on top",
+   "poslední nahoře",
+   "последние сверху",
+/*MISSING*/    "last on top",
+    }},
   {0x7f734e80, { // "Don't be fooled by beauty, or you will be stabbed if you come too close!"
-   "Nie daj się zwieść urodzie, bo jak się za bardzo zbliżysz, możesz zostać ugodzon%y1 nożem!",
+   "Nie daj się zwieść urodzie, bo jak się za bardzo zbliżysz, możesz zostać ugodzon%y0 nożem!",
 /*MISSING*/    "Don't be fooled by beauty, or you will be stabbed if you come too close!",
    "Nenech se oklamat krásou -- když se moc přiblížíš, můžeš dostat ránu nožem!",
    "Не будьте обмануты красотой, если не хотите получить удар в спину!",
-/*MISSING*/    "Don't be fooled by beauty, or you will be stabbed if you come too close!",
+   "Lass dich von Schönheit nicht täuschen - oder du wirst erstochen, wenn du zu nah kommst!",
     }},
   {0x7fef823d, { // "The Overgrown Woods are filled with mutant ivies! These plants grow very fast. Each leaf, after being grown, can grow itself on the next turn. However, each part is only able to grow once in 16 turns. Outside of the Overgrown Woods, the Mutant Ivy may grow only on hexagonal cells.\n\nMaybe such fast growing plants could help you solve the problem of hunger in your world? Kill the Mutant Ivies to collect Mutant Saplings."
    "Przerośnięty Las jest pełen zmutowanego bluszczu! Te rośliny rosną bardzo szybko. Każdy liść może sam rosnąć w następnej turze po wyrośnięciu, ale każda część rośliny może rosnąć tylko raz na 16 tur. Poza Przerośniętym Lasem Zmutowany Bluszcz może rosnąć tylko na sześciokątach.\n\nMoże tak szybko rosnące rośliny pozwoliłyby Ci rozwiązać problem głodu w Twoim świecie? Zabijaj Zmutowane Bluszcze, by zbierać sadzonki.",
    "Azman Orman mutant sarmaşıklarla dolu! Bu bitkiler çok hızlı büyür. Her yaprak, büyüdükten sonra sıradaki tur kendi başına büyüyebilir. Ancak, her parça ancak 16 tur içinde bir kez büyüyebilir. Azman Orman dışındaki diyarlarda, Mutant Sarmaşık sadece altıgen hücrelerde büyüyebilir.\n\nBelki bu kadar hızlı büyüyen bitkiler dünyandaki açlık sorununu çözebilir? Mutant Fidanları toplamak için Mutant Sarmaşıkları öldür.",
    "Prales je plný mutantních břečťanů! Tyto rostliny velice rychle rostou. Jakmile nějaký list vyroste, hned v následujícím kole může sám růst. Každá část však může vyrůst pouze jednou za 16 kol. Mimo Prales může Mutantní břečťan růst pouze na šestiúhelníkových políčkách.\n\nRostliny s takovou rychlostí růstu by ti možná mohly pomoci vyřešit problém s hladem ve tvém světě. Zabíjej Mutantní břečťany, abys získal Mutantní semenáčky.",
    "Заросли полны плющами-мутантами! Они растут очень быстро. Каждый выросший побег может расти на следующем же ходу. Но расти в следующий раз он сможет лишь через 16 ходов. Вне Зарослей плющи-мутанты могут расти только на шестиугольниках.\n\nВозможно, столь быстрый рост решит проблему голода в Вашем мире? Убейте плющ, чтобы собрать саженец.",
-   "Der Überwucherte Wald ist voll mit mutiertem Efeu! Diese Pflanzenwachsen sehr schnell. Jedes Blatt, nachdem es gewachsen ist kann imnächsten Zug selbst wachsen. Allerdings kann jeder Teil nur 1x alle 16Züge wachsen. Außerhalb des überwuchertem Walds wächst mutierter Efeunur auf hexagonalen Zellen.\n\nVielleicht können die schnell wachsenden Pflanzen das Hungerproblem indeiner Welt lösen? Töte mutierten Efeu um mutierte Sätzlinge zu erhalten.",
+   "Der verwilderte Wald ist voll mit mutiertem Efeu! Diese Pflanzen wachsen sehr schnell. Jedes Blatt kann, nachdem es gewachsen ist, im nächsten Zug selbst wachsen. Allerdings kann jeder Teil nur einmal alle 16 Züge austreiben. Außerhalb des verwilderten Walds wächst mutierter Efeu nur auf hexagonalen Zellen.\n\nVielleicht können die schnell wachsenden Pflanzen das Hungerproblem in deiner Welt lösen? Töte mutierten Efeu um mutierte Sätzlinge zu erhalten.",
     }},
   {0x800ee083, { // "%The1 drowns!"
    "%1 się utopi%ł1!",
@@ -3845,6 +5455,13 @@ sentence all_sentences[1130] = {
    "y: %1",
    "y: %1",
     }},
+  {0x8084c224, { // "A beatiful purple gem from the Lost Mountain."
+   "Piękny fioletowy kamień z Zagubionej Góry.",
+/*MISSING*/    "A beatiful purple gem from the Lost Mountain.",
+   "Krásný fialový kámen ze Ztracené hory.",
+   "Прекрасный фиолетовый камень с Потерянной горы.",
+/*MISSING*/    "A beatiful purple gem from the Lost Mountain.",
+    }},
   {0x8085a8a6, { // "Somehow, this cave has not received the spark of Life yet."
    "Dziwnym trafem, ta jaskinia jeszcze nie zdobyła iskry Życia.",
    "Nasılsa bu mağaraya yaşamın ışığı hiç uğramamış.",
@@ -3857,7 +5474,14 @@ sentence all_sentences[1130] = {
 /*MISSING*/    "spiral on rendering",
    "spirála při renderování",
    "спираль отрисовки",
-/*MISSING*/    "spiral on rendering",
+   "Spirale beim Rendering",
+    }},
+  {0x80a0bf53, { // "\n\nEasy %1 might disappear when you collect more of its kind."
+   "\n\nŁatw%ya1 %1 może zniknąć podczas gdy zbierasz je w innych miejscach.",
+/*MISSING*/    "\n\nEasy %1 might disappear when you collect more of its kind.",
+   "\n\nSnadn%ý1 %1 může zmizet, když jich sebereš více.",
+   "\n\nПростые %P1 могут исчезнуть, когда вы соберёте побольше их.",
+/*MISSING*/    "\n\nEasy %1 might disappear when you collect more of its kind.",
     }},
   {0x80b8c15c, { // "y = spin"
    "y = obróć",
@@ -3895,11 +5519,18 @@ sentence all_sentences[1130] = {
    "\"Ich frage mich was da war...\"",
     }},
   {0x81487f61, { // "Press 'r' to choose a regular pattern. When a pattern is on, editing a cell automatically edits all cells which are equivalent according to this pattern. You can choose from several patterns, and choose which symmetries matter for equivalence. Also, you can press Space to switch between the map and graphics editor quickly -- note that editing floors with the graphics editor also adheres to the pattern."
-   "Wciśnij 'r', by wybrać regularny wzorek. Gdy wzorek jest włączony, edytowanie pola automatycznie edytuje także wszystkie pola, które są mu równoważne ze względu na ten wzorek. Możesz wybrać jeden z kilku wzorków, i wybrać symetrie uwzględniane przy obliczaniu równoważności. Możesz też nacisnąć spację, by szybko się przenosić pomiędfzy edytorem map i edytorem grafiki -- edytowanie podłóg w edytorze grafiki również następuje zgodnie ze wzorkiem.",
+   "Wciśnij 'r', by wybrać regularny wzorek. Gdy wzorek jest włączony, edytowanie pola automatycznie edytuje także wszystkie pola, które są mu równoważne ze względu na ten wzorek. Możesz wybrać jeden z kilku wzorków i wybrać symetrie uwzględniane przy obliczaniu równoważności. Możesz też nacisnąć spację, by szybko się przenosić pomiędzy edytorem map i edytorem grafiki -- edytowanie podłóg w edytorze grafiki również następuje zgodnie ze wzorkiem.",
    "'r'ye basarak düzenli bir doku seçebilirsin. Bir doku aktifken, bir hücreyi değiştirmek o hücreye bu dokuda eşdeğer bütün hücreleri de değiştirir. Birden çok doku seçebilirsin ve hangi simetrilerin eşdeğer olduğunu seçebilirsin. Ayrıca, Space'e basarak harita ve grafik editörü arasında hızlıca gidip gelebilirsin -- zeminin grafik editörüyle değiştirilmesinin dokuyu da değiştireceğini unutma.",
    "Stiskem klávesy 'r' můžeš vybrat pravidelný vzor. Když je vzor zapnutý, editace buňky automaticky ovlivní i všechny ostatní buňky, které jsou podle tohoto vzoru ekvivalentní. Můžeš si vybrat z několika možných vzorů, a také to, které symetrie budou důležité pro ekvivalenci. Také můžeš rychle přepínat mezerníkem mezi editorem mapy a grafiky -- i editování podlahy grafickým editorem se řídí pravidly vzoru.",
    "Нажмите 'r', чтобы выбрать регулярный узор. Когда узор выбран, изменение клетки автоматически изменяет все эквивалентные, ей в этом узоре. Вы можете выбрать один из нескольких узоров и определить, какие симметрии важны для эквивалентности. Нажмите пробел, чтобы переключиться между картой и графическим редактором -- изменение пола влияет на узор.",
-   "Drücke 'r' um ein normales Muster zu wählen. Wenn ein Muster ausgewählt ist sorgt das ändern einer Zelle automatisch für die Änderung aller Zellen, die laut dem Muster gleich dieser sind. Du kannst aus mehreren Musternwählen und bestimmen welche Symmetrien als gleich zählen. Durch das drücken von LEER wird zwischen dem Karten und Grafikeditor gewechselt.Das ändern von Böden mit dem Grafikeditor wirkt sich auch auf das Muster aus.",
+   "Drücke 'r' um ein normales Muster zu wählen. Wenn ein Muster ausgewählt ist sorgt das ändern einer Zelle automatisch für die Änderung aller Zellen, die laut dem Muster gleich dieser sind. Du kannst aus mehreren Mustern wählen und bestimmen welche Symmetrien als gleich zählen. Durch das Drücken von LEER wird zwischen dem Karten und Grafikeditor gewechselt. Das ändern von Böden mit dem Grafikeditor wirkt sich auch auf das Muster aus.",
+    }},
+  {0x8161e570, { // "always available"
+   "zawsze dostępna",
+/*MISSING*/    "always available",
+   "vždy dostupná",
+   "всегда доступна",
+/*MISSING*/    "always available",
     }},
   {0x81b0724a, { // "hexa floor"
    "podłoga hex",
@@ -3920,7 +5551,14 @@ sentence all_sentences[1130] = {
    "Arayollarda bir Kale...",
    "O hradu na Křižovatce...",
    "О замке на перекрёстке...",
-   "Ein Schloss in der Kreuzung...",
+   "Ein Schloss in den Kreuzungen...",
+    }},
+  {0x81d98cfd, { // "Good luck in the elliptic plane!"
+   "Powodzenia na płasczyźnie eliptycznej!",
+/*MISSING*/    "Good luck in the elliptic plane!",
+   "Hodně štěstí v eliptické rovině!",
+   "Удачи на эллиптической плоскости!",
+/*MISSING*/    "Good luck in the elliptic plane!",
     }},
   {0x81f5d93f, { // "You will be fighting red rock snakes, too..."
    "Będziesz też walczyć z czerwonymi skalnymi wężami...",
@@ -3941,7 +5579,42 @@ sentence all_sentences[1130] = {
    "Arayolların alternatif bir versiyonu. Daha yoğun ve daha düzenli, ama Kamelot'un kalesini burada bulamazsın.",
    "Alternativní plán Křižovatky. Je hustší a pravidelnější, ale hrad Camelot tady nenajdete.",
    "Другая схема перекрёстка. Она плотнее и регулярнее обычной, но замок Камелот Вы здесь не найдёте.",
-   "Ein alternatives Layout der Kreuzung. Es ist beständiger und dichter, aber du findest Camelot hier nicht.",
+   "Ein alternatives Layout der Kreuzungen. Es ist beständiger und dichter, aber du findest Camelot hier nicht.",
+    }},
+  {0x827a3936, { // "You can hold this bush to climb the Lost Mountain. Bushes block the movement of birds."
+   "Możesz złapać ten krzak, by się wspiąć na Zagubioną Górę. Krzaki blokują drogę ptakom.",
+/*MISSING*/    "You can hold this bush to climb the Lost Mountain. Bushes block the movement of birds.",
+   "Tohoto keře se můžeš chytit při výstupu na Ztracenou horu. Keře blokují pohyb ptáků.",
+   "Вы можете хвататься за этот куст, чтобы лезть на гору. Блокирует перемещение птиц.",
+/*MISSING*/    "You can hold this bush to climb the Lost Mountain. Bushes block the movement of birds.",
+    }},
+  {0x82c80b61, { // "There are many lands in HyperRogue. Collect 10 treasure in the given land type to complete it; this enables you to find the magical Orbs of this land, and in some cases get access to new lands. At 25 treasures this type of Orbs starts appearing in other lands as well. Press 'o' to get the details of all the Lands.\n\n"
+   "W świecie HyperRogue jest wiele krain. Kraina jest zdobyta, gdy zbierzesz w niej 10 skarbów; gdy zdobędziesz krainę, możesz znaleźć magiczną Sferę tej krainy, i w niektórych przypadkach uzsykać dostęp do nowych krain. Gdy zbierzesz 25 skarbów, ten typ Sfer będzie się też pojawiał w innych krainach. Naciśnij '0', by obejrzeć szczegóły na temat wszystkich Krain.\n\n",
+/*MISSING*/    "There are many lands in HyperRogue. Collect 10 treasure in the given land type to complete it; this enables you to find the magical Orbs of this land, and in some cases get access to new lands. At 25 treasures this type of Orbs starts appearing in other lands as well. Press 'o' to get the details of all the Lands.\n\n",
+   "Svět HyperRogue sestává z mnoha krajů. Když v nějakém kraji získáš 10 pokladů, dobyješ ho; pak v něm můžeš najít magické Sféry, a někdy také získáš přístup k jiným krajům. Po získání 25 pokladů se tyto magické Sféry začnou objevovat i v jiných krajích. Detailní informace o všech krajích můžeš zobrazit stisknutím klávesy 'o'.\n\n",
+   "В HyperRogue много разных земель. Соберите 10 ценностей в земле, чтобы завершить её; это позволяет находить в ней магические Сферы, и иногда открывает другие земли. После сбора 25 ценностей сферы начинают появляться и в других землях. Нажмите 'o', чтобы узнать подробности о разных землях.\n\n",
+/*MISSING*/    "There are many lands in HyperRogue. Collect 10 treasure in the given land type to complete it; this enables you to find the magical Orbs of this land, and in some cases get access to new lands. At 25 treasures this type of Orbs starts appearing in other lands as well. Press 'o' to get the details of all the Lands.\n\n",
+    }},
+  {0x83095fd3, { // "player 6 spin"
+   "gracz 6 obrót",
+/*MISSING*/    "player 6 spin",
+   "hráč 6 otáčení",
+/*MISSING*/    "player 6 spin",
+   "Spieler 6 drehen",
+    }},
+  {0x830cc4a2, { // "\nRanged Orbs can be targeted by long touching the desired location."
+   "\nRobi się to przez długie dotknięcie celu.",
+/*MISSING*/    "\nRanged Orbs can be targeted by long touching the desired location.",
+   "\nTyto sféry lze zacílovat dlouhým stiskem požadovaného políčka.",
+   "\nВыбор цели сферы определяется долгим зажатием мыши на цели.",
+   "\nMit Distanzorbs kann durch langes Berühren der gewünschten Position gezielt werden.",
+    }},
+  {0x832fe3e8, { // "%The1 destroys your boat!"
+   "%1 zniszczy%ł1 Twój statek!",
+/*MISSING*/    "%The1 destroys your boat!",
+   "%1 zniči%l1 Tvou loďku!",
+   "%1 уничтожил%E1 твою лодку!",
+   "%Der1 %1 zerstört dein Boot!",
     }},
   {0x834fb047, { // "m = monsters"
    "m = potwory",
@@ -3985,6 +5658,13 @@ sentence all_sentences[1130] = {
    "Смотрите далее на сайте: ",
    "Mehr auf der Website: ",
     }},
+  {0x84a29ba6, { // "Trolls turn into stone walls when they die. When you have this Orb, this happens to every monster you defeat. Statues created from this Orb have slightly different properties than Trolls who petrify naturally."
+   "Gdy Trolle umierają, zamieniają się w kamień. Ta Sfera powoduje, że dzieje się to ze wszystkimi pokonanymi stworzeniami. Pomniki stworzone przez Sferę Kamienia mają inne własności niż Trolle spetryfikowane naturalnie.",
+/*MISSING*/    "Trolls turn into stone walls when they die. When you have this Orb, this happens to every monster you defeat. Statues created from this Orb have slightly different properties than Trolls who petrify naturally.",
+   "Když Troll zemře, promění se v kámen. Tato Sféra to samé provede s každým netvorem, kterého porazíš. Sochy vytvořené pomocí Sféry Kamene mají trochu jiné vlastnosti než přirozeně zkamenělí Trollové.",
+   "Умерший тролль превращается в камень. Если у вас есть та сфера, это происходит с каждым монстром, которого вы убиваете. Статуи, созданные этой сферой, немного отличаются от обычных окаменевших троллей.",
+   "Trolle werden zu Steinwänden, wenn sie sterben. Besitzt du diesen Orb, passiert das jedem Monster, das du besiegst. Statuen, die von diesem Orb erschaffen werden, haben etwas andere Eigenschaften als Trolle, die natürlich versteinern.",
+    }},
   {0x854f07d4, { // "A majestic bird, who is able to fly very fast."
    "Ten majestatyczny ptak bardzo szybko lata.",
    "Çok hızlı uçabilen görkemli bir kuş.",
@@ -3998,6 +5678,13 @@ sentence all_sentences[1130] = {
    "celkový počet zabitých nepřátel",
    "всего убийств",
    "Gesamt Kills",
+    }},
+  {0x8590511a, { // "Vampire Bats don't attack normally, but they drain your magical powers if they are at distance at most 2 from you."
+   "Nietoperze Wampiry nie atakują jak inne potwory. Zamiast tego, jeśli są w odległości co najwyżej 2, wysysają Twoje magiczne moce.",
+/*MISSING*/    "Vampire Bats don't attack normally, but they drain your magical powers if they are at distance at most 2 from you.",
+   "Vampýři neútočí normální způsobem, ale pokud se dostanou do vzdálenosti 2 a méně od tebe, vysávají ti tvé magické schopnosti.",
+   "Вампиры не атакуют Вас обычным образом, но они вытягивают из Вас магическую силу, если находятся на расстоянии не более 2.",
+/*MISSING*/    "Vampire Bats don't attack normally, but they drain your magical powers if they are at distance at most 2 from you.",
     }},
   {0x85c4a982, { // "GAME OVER"
    "KONIEC GRY",
@@ -4020,19 +5707,26 @@ sentence all_sentences[1130] = {
    "Не тот цвет!",
    "Falsche Farbe!",
     }},
+  {0x86794019, { // "camera rotation"
+   "obróć kamerę",
+/*MISSING*/    "camera rotation",
+   "rotace kamery",
+   "поворот камеры",
+/*MISSING*/    "camera rotation",
+    }},
   {0x86beece5, { // "rotate the character"
    "obróć postać",
    "karakteri döndür",
    "otoč postavu",
    "повернуться",
-/*MISSING*/    "rotate the character",
+   "drehe Spielfigur",
     }},
   {0x86c654bf, { // "You have to hit Palace Guards several times to kill them. After each hit, they are pushed away and stunned for some time."
    "Musisz uderzyć Strażnika kilka razy, by go zabić. Po każdym trafieniu strażnik jest odpychany i ogłuszony przez pewien czas.",
    "Saray Muhafızlarının ölmesi için onlara bir kaç kere vurmalısın. Her vuruştan sonra geri itilirler ve birkaç turluk sersemlerler.",
    "Na zabití Strážce Paláce potřebuješ několik útoků. Každý zásah Strážce odstrčí dozadu a na chvíli ho omráčí.",
    "Чтобы убить Дворцового стражника, его нужно ударить несколько раз. После каждого удара он отлетает на одну клетку назад и застывает на некоторое время.",
-   "Du musst Palastwachen mehrmals treffen um sie zu töten.Nach jedem Treffer werden sie zurück gestoßen und kurz betäubt.",
+   "Du musst Palastwachen mehrmals treffen um sie zu töten. Nach jedem Treffer werden sie zurückgestoßen und kurz betäubt.",
     }},
   {0x86c7da3b, { // "Return to the hyperbolic world"
    "powrót na hiperboloidę",
@@ -4062,6 +5756,13 @@ sentence all_sentences[1130] = {
    "SPACE = карта/графика",
    "SPACE = Karte/Grafiken",
     }},
+  {0x87432023, { // "%The1 is destroyed!"
+   "%1 zosta%ł1 zniszczon%ya1!",
+/*MISSING*/    "%The1 is destroyed!",
+   "%1 by%l1 zniče%n1!",
+   "%1 уничтожен%E1!",
+/*MISSING*/    "%The1 is destroyed!",
+    }},
   {0x877ac97d, { // "Cthulhu withdraws his tentacle!"
    "Cthulhu chowa swoją mackę!",
    "Cthulhu dokungacını çekti!",
@@ -4074,7 +5775,21 @@ sentence all_sentences[1130] = {
    "Bu kabinleri Cadılar Güçtaşlarını ve değerli Küreleri korumak için kullanıyorlar. Hırsızlara karşı kısmen korumalıdır, bildik saldırılarla kırılmak için fazlasıyla serttir ve eğer içindeki eşyayı Eter Küresi kullanarak çalmaya çalışırsan kürenin gücü bitecektir.",
    "Čarodějnice používají tyto vitríny k ochraně Mocikamů, a také dražších  typů Sfér. Vitríny jsou částečně chráněné proti zlodějům: jsou příliš odolné na to, aby se daly rozbít běžným útokem, a pokud se pokusíš předmět ukrást pomocí Sféry Éteru, zcela to vyčerpá její sílu.",
    "Ведьмы используют эти кристальные кабинеты для защиты Камней силы, как и самые ценные сферы. Они частично защищают их от воров: они достаточно прочны, чтобы выдерживать прямые атаки, и если Вы попробуете использовать сферу Эфира для проникновения в него, то сила сферы сразу иссякнет.",
-   "Hexen verwenden diese Kristallvitrinen um Machtsteine, und wertvolleOrbs zu schützen. Sie sind zu stark um von normalen Angriffen  zerschmettert zu werden und solltest du versuchen den Inhalt mit einem Orb des Äthers zu stehlen, wird seine ganze Kraft verbraucht.",
+   "Hexen verwenden diese Kristallvitrinen um Machtsteine, und wertvolle Orbs zu schützen. Sie sind zu stark um von normalen Angriffen zerschmettert zu werden und solltest du versuchen den Inhalt mit einem Orb des Äthers zu stehlen, wird seine ganze Kraft verbraucht.",
+    }},
+  {0x87ba9948, { // "\nRanged Orbs can be targeted by touching the desired location."
+   "\nRobi się to przez dotknięcie celu.",
+/*MISSING*/    "\nRanged Orbs can be targeted by touching the desired location.",
+   "\nTyto sféry můžete zacílovat tak, že se dotknete požadovaného políčka.",
+   "\nВыбор цели сферы определяется зажатием мыши на цели.",
+   "\nMit Distanzorbs kann durch Berühren der gewünschten Position gezielt werden.",
+    }},
+  {0x87c84244, { // "You start chopping down the tree."
+   "Zaczynasz ciąć drzewo.",
+   "Ağacı kesmeye başladın.",
+   "Zača%l0 jsi kácet strom.",
+   "Вы начали рубить дерево.",
+   "Du fängst an, den Baum zu fällen.",
     }},
   {0x87faf958, { // "Accessible only from %the1 (until finished).\n"
    "Kraina dostępna tylko poprzez %a1 (przed ukończeniem).\n",
@@ -4082,6 +5797,20 @@ sentence all_sentences[1130] = {
    "Tento kraj je dostupný pouze skrz %a1 (dokud ho nedohraješ).\n",
    "Доступно только из %a1 (пока не окончена).\n",
    "Nur von %der1 %a1 aus erreichbar (bis abgeschlossen).\n",
+    }},
+  {0x880f622a, { // "native to %the1 (collect 10 %2)"
+   "rodzima %abl1 (10x %2)",
+   "%abl1 bulunuyor (10 tane %2)",
+   "standardní %abl1 (získej 10x %2)",
+   "родная %abl1 (10x %2)",
+   "heimisch in %der1 (10x %2)",
+    }},
+  {0x8832d31f, { // "Don't center on the player character."
+   "Nie centruj na graczu.",
+/*MISSING*/    "Don't center on the player character.",
+   "Necentrovat na hráče.",
+   "Не центрировать на игроке.",
+/*MISSING*/    "Don't center on the player character.",
     }},
   {0x8882ea34, { // "This dangerous sea contains nasty sharks and pirates. "
    "Niebezpieczne morze, pełne rekinów i piratów.",
@@ -4123,7 +5852,7 @@ sentence all_sentences[1130] = {
    "\n\nNot:  %a1 bir yedigensel hücreden iterken, itmenin yönünü yedigenin sol ve sağ yarısına tıklayarak belirleyebilirsin.",
    "\n\nPoznámka: Když tlačíš %a1 ze sedmiúhelníku, můžeš ovládat směr tlačení tím, že klikneš na levou či pravou polovinu tohoto sedmiúhelníku.",
    "\n\nВажно: когда Вы толкаете %a1 с семиугольника, Вы можете выбирать направление движения, нажимая на соответствующую половину семиугольника.",
-   "\n\nHinweis: Wenn du %den1 %a1 von einer heptagonalen Zelle schiebst kannst du die Richtung bestimmenindem du die linke oder rechte Seite des Heptagon anklickst.",
+   "\n\nHinweis: Wenn du %den1 %a1 von einer heptagonalen Zelle schiebst kannst du die Richtung bestimmen, indem du die linke oder rechte Seite des Heptagon anklickst.",
     }},
   {0x89007bc0, { // "This Orb allows your boat to go against the current, and also to go into the land, creating water on the way."
    "Ta Sfera pozwala Twojemu statkowi płynąć pod prąd, a także płynąć przez ląd, tworząc wodę po drodze.",
@@ -4137,7 +5866,7 @@ sentence all_sentences[1130] = {
 /*MISSING*/    "Enemies killed: %1 (%2 types)",
    "Počet zabitých nepřátel: %1 (%2 typů)",
    "Существ убито: %1 (%2 типов)",
-/*MISSING*/    "Enemies killed: %1 (%2 types)",
+   "Getötete Feinde: %1 (%2 Arten)",
     }},
   {0x8920d8ac, { // "Three mines next to you!"
    "Trzy miny koło Ciebie!",
@@ -4151,45 +5880,52 @@ sentence all_sentences[1130] = {
    "Burada duracağın bir şey yok!",
    "Není tu na čem stát!",
    "Не на чем стоять!",
-   "Es gibt nichts worauf du stehen kannst!",
+   "Hier gibt es nichts worauf du stehen kannst!",
     }},
   {0x894b9946, { // "deplete orb powers"
    "utrata mocy",
    "küre güçlerini tüket",
    "zruš moc sféry",
    "потерять силы сфер",
-/*MISSING*/    "deplete orb powers",
+   "verbrauche Orbkräfte",
     }},
   {0x89658792, { // "You switch places with %the1."
    "Zamieniasz się miejscami z %abl1.",
    "%abl1 yer değiştirdin.",
    "Vyměni%l0 sis místo s %abl1.",
    "Вы поменялись местами с %abl1.",
-   "Du tauscht den Platz mit %dem1 %a1.",
+   "Du tauschst den Platz mit %dem1 %a1.",
     }},
   {0x896b50d1, { // "zoom out"
    "oddalenie",
 /*MISSING*/    "zoom out",
    "oddálení",
    "отдалить",
-/*MISSING*/    "zoom out",
+   "herauszoomen",
     }},
   {0x89842dfc, { // "kill a monster, or collect 25 %2"
-   "zabij potwora, lub znajdź 25x %2",
+   "zabij potwora lub znajdź 25x %2",
    "bir canavar öldür, ya da 25 tane %2 topla.",
    "zabij netvora nebo získej 25x %2",
    "убей монстра, или собери 25x %2",
    "töte ein Monster oder sammle 25x %2",
     }},
   {0x899a859f, { // "Don't be fooled by this red-haired boy, or you will be stabbed if you come too close!"
-   "Nie daj się zwieść temu rudowłosemu, bo jak się za bardzo zbliżysz, możesz zostać ugodzon%y1 nożem!",
+   "Nie daj się zwieść temu rudowłosemu, bo jak się za bardzo zbliżysz, możesz zostać ugodzon%ya1 nożem!",
 /*MISSING*/    "Don't be fooled by this red-haired boy, or you will be stabbed if you come too close!",
    "Nenech se oklamat tímto zrzavým chlapcem -- pokud se k němu příliš přiblížíš, bodne tě!",
    "Не будьте обмануты этим рыжеволосым парнем, у него есть острый нож!",
-/*MISSING*/    "Don't be fooled by this red-haired boy, or you will be stabbed if you come too close!",
+   "Lass dich von diesem rothaarigen Jungen nicht täuschen - oder du wirst erstochen, wenn du zu nah kommst!",
+    }},
+  {0x89adf1b4, { // "Avoid chopping trees, using Orbs, and non-graveyard monsters in the Haunted Woods."
+   "Unikaj ścinania drzew, używania Sfer, i potworów spoza Cmentarza.",
+/*MISSING*/    "Avoid chopping trees, using Orbs, and non-graveyard monsters in the Haunted Woods.",
+   "Nesmíš ve Strašidelném lese kácet stromy a používat Sféry nebo netvory, kteří nepocházejí ze Hřbitova.",
+   "Не рубить деревья, не использовать сферы или посторонних монстров в Лесу с привидениями.",
+/*MISSING*/    "Avoid chopping trees, using Orbs, and non-graveyard monsters in the Haunted Woods.",
     }},
   {0x89ca69da, { // "You can collect some valuable Ambers on the coast, but beware the tides!\n\nYou can also take one of the boats and venture into the Ocean, to find other coasts, dangerous whirlpools, and islands inhabited by Pirates."
-   "Możesz zbierać cenne bursztyny na plaży, ale uważaj na odpływy!\n\nMożesz też wziąć łódkę i popłynąć nią przez Ocean, by znaleźć inne brzegi, niebezpieczne wiry, i wyspy zamieszkane przez Piratów.",
+   "Możesz zbierać cenne bursztyny na plaży, ale uważaj na odpływy!\n\nMożesz też wziąć łódkę i popłynąć nią przez Ocean, by znaleźć inne brzegi, niebezpieczne wiry oraz wyspy zamieszkane przez Piratów.",
    "Kıyıdan çok değerli kehribarlar toplayabilirsin, ama dalgalara dikkat et!\n\nKayıklardan birini alıp , başka kıyılar, tehlikeli tayfunlar vekorsanların egemenliğindeki adalar bulmak için okyanusa açılabilirsin.",
    "Na pobřeží můžeš sbírat cenný Jantar, ale pozor na příliv a odliv!\n\nTaké si můžeš vzít člun a vyplout na Oceán, kde najdeš další pobřeží, nebezpečné víry a ostrovy obývané piráty.",
    "Вы модете найти ценный Янтарь не берегу, но остерегайтесь приливов!\n\nВы модете найти лодку и отправиться в Океан, чтобы найти другие берега, опасные Водовороты и острова, полные пиратов.",
@@ -4223,12 +5959,26 @@ sentence all_sentences[1130] = {
    "режим обманщика",
    "Cheats",
     }},
+  {0x8a57eb2e, { // "Your Orb of the Sword can be used to dig here."
+   "Możesz tu kopać przy użyciu Sfery Ostrza.",
+/*MISSING*/    "Your Orb of the Sword can be used to dig here.",
+   "Tvá Sféra Meče se dá použít k prokopání tohoto políčka.",
+   "Твоя Сфера меча может копать здесь.",
+   "Dein Orb des Schwertes kann verwendet werden, um hier zu graben.",
+    }},
   {0x8afa7d17, { // "An expensive metal from the Living Caves. For some reason gold prevents the living walls from growing close to it."
    "Drogocenny metal z Żyjących Jaskiń. Złoto utrudnia wzrost ścian wokół niego.",
    "Yaşayan Mağaralardan pahalı br metal. Anlaşılamayan bir sebeple altın yaşayan duvarları kendine yaklaştırmıyor.",
    "Valouny drahého kovu z Živoucí jeskyně. Zlato z nějakého důvodu zamezuje tomu, aby v jeho blízkosti rostly živoucí zdi.",
    "Драгоценный металл из Живых пещер. Он препятствует росту живых стен в клетку с ним.",
-   "Ein teures Metall aus den Lebenden Höhlen. Aus irgendeinem Grund verhindert Gold, dass Lebende Wände in seiner Nähe entstehen.",
+   "Ein teures Metall aus den Lebenden Höhlen. Aus irgendeinem Grund verhindert Gold, dass lebende Wände in seiner Nähe entstehen.",
+    }},
+  {0x8b0e56bc, { // "You have enough treasure now to revive %the1!"
+   "Masz dość skarbów, by przywrócić %a1 do życia!",
+/*MISSING*/    "You have enough treasure now to revive %the1!",
+   "Nyní máš dost pokladů na to, abys mohl oživit %a1!",
+   "У вас достаточно сокровищ, чтобы оживить %a1!",
+/*MISSING*/    "You have enough treasure now to revive %the1!",
     }},
   {0x8b48ef1f, { // "%The1 destroys %the2!"
    "%1 zniszczy%ł1 %a2!",
@@ -4249,28 +5999,21 @@ sentence all_sentences[1130] = {
 /*MISSING*/    "render the texture only once",
    "renderuj textury pouze jednou",
    "отрисовать один раз",
-/*MISSING*/    "render the texture only once",
+   "Rendere die Textur nur einmal",
     }},
   {0x8bf5eda5, { // "Dragon Scales are a prized material for armors. They are also prized by collectors, who would like to boast about how they have killed a Dragon.\n\nDragon Scales disappear after 500 turns."
    "Smocze łuski są cenionym materiałem na zbroje. Są one również poszukiwane przez zbieraczy, którzy lubią się przechwalać tym, ile smoków zabili.\n\nSmocze łuski znikają po 500 kolejkach.",
 /*MISSING*/    "Dragon Scales are a prized material for armors. They are also prized by collectors, who would like to boast about how they have killed a Dragon.\n\nDragon Scales disappear after 500 turns.",
    "Dračí šupiny jsou ceněným materiálem pro výrobu zbroje. Také si je cení sběratelé, kteří by se rádi chlubili tím, jak zabili Draka.\n\nDračí šupiny zmizí po uplynutí 500 kol.",
    "Чешуя дракона -- ценный материал для брони. Также они ценятся коллекционерами, которые хотели бы похвастаться, как они убили дракона.\n\nЧешуя дракона исчезнет через 500 ходов.",
-/*MISSING*/    "Dragon Scales are a prized material for armors. They are also prized by collectors, who would like to boast about how they have killed a Dragon.\n\nDragon Scales disappear after 500 turns.",
-    }},
-  {0x8ca02546, { // "Illusions are targetted by most monsters, just like yourself, Thumpers, and your friends."
-   "Większość potworów celuje w iluzje, podobnie jak w Ciebie, Dudniki i Twoich przyjaciół.",
-   "İlüzyonlar tıpkı sen, Gümleyenler ve dostların gibi pek çok canavar tarafından saldırıya uğrayabilir.",
-   "Většina netvorů půjde po tvých iluzích, stejně jako jdou po tobě, po Tloucích a po tvých přátelích.",
-   "Их будут атаковать почти все монстры, так же как Вас, Тамперы и ваших союзников.",
-   "Illusionen werden von den meisten Monstern verfolgt.",
+   "Drachenschuppen sind ein hochgeschätztes Material für Rüstungen. Sie werden auch von Sammlern begehrt, die gerne damit prahlen, wie sie einen Drachen getötet haben.\n\nDrachenschuppen verschwinden nach 500 Zügen.",
     }},
   {0x8cf7c8c6, { // "She has flowers in her long fair hair. You could not bring yourself to attack such a beautiful woman."
    "Ta ślicznotka ma kwiaty w swych jasnych, długich lokach. Nie jesteś w stanie zaatakować tak pięknej kobiety.",
 /*MISSING*/    "She has flowers in her long fair hair. You could not bring yourself to attack such a beautiful woman.",
    "Tato krasavice má ve svých dlouhých, světlých vlasech květiny. Na tak krásnou ženu se nemůžeš přimět zaútočit.",
    "В её длинные светлые локоны вплетены прекрасные цветы. Вы не можете ударить столь красивую девушку.",
-/*MISSING*/    "She has flowers in her long fair hair. You could not bring yourself to attack such a beautiful woman.",
+   "Sie trägt Blumen in ihrem langen blonden Haar. Du kannst dich nicht dazu überwinden so eine schöne Frau anzugreifen.",
     }},
   {0x8d0d3879, { // "Hyperbolic pirates do not need huge ships, since so many lands to conquest are so close. These small boats are enough for them.\n\nBoats allow you to go through water. If you are in a boat, you can move into a water cell (and the boat will come with you)."
    "Hiperboliczni piraci nie potrzebują dużych statków, skoro tyle lądów do zdobycia jest tak blisko. Wystarczą im małe łódki.\n\nŁódki pozwalają poruszać się przez wodę. Jeśli jesteś na łódce, możesz przejść na pole z wodą (a łódka przesunie się razem z Tobą).",
@@ -4321,12 +6064,19 @@ sentence all_sentences[1130] = {
    "Вы создали Элементальный камень!",
    "Du erstellst ein paar Elementjuwelen!",
     }},
+  {0x8e282708, { // "Completing the quest in this land is not necessary for the Hyperstone Quest."
+   "Wykonanie tego zadania nie jest konieczne do zdobycia Hiperkamieni.",
+/*MISSING*/    "Completing the quest in this land is not necessary for the Hyperstone Quest.",
+   "Splnění mise v tomto kraji není nezbytné pro Hyperkamovou misi.",
+   "Выполнение задания в этой земле не обязательно для квеста Гиперкамней.",
+   "Das Bestehen der Herausforderung dieses Landes ist keine Voraussetzung für die Hyperstein-Herausforderung.",
+    }},
   {0x8eb7812c, { // "(includes co-op)"
    "(zawiera co-op)",
 /*MISSING*/    "(includes co-op)",
    "(zawiera co-op)",
    "(включая совместный режим)",
-/*MISSING*/    "(includes co-op)",
+   "(enthält co-op)",
     }},
   {0x8f298833, { // "rotational symmetry"
    "symetria obrotowa",
@@ -4334,6 +6084,13 @@ sentence all_sentences[1130] = {
    "rotační symetrie",
    "вращательная симметрия",
    "drehende Symmetrie",
+    }},
+  {0x8f2c66ca, { // "Precious belongings of ancient Viking heroes. Your Orb of the Sword can be used to dig these treasures out of the barrows."
+   "Drogocenne przedmioty należące do starożytnych wikińskich bohaterów. Użyj Sfery Ostrza, by wykopać te skarby z kurhanów.",
+/*MISSING*/    "Precious belongings of ancient Viking heroes. Your Orb of the Sword can be used to dig these treasures out of the barrows.",
+   "Drahocenný majetel dávných vikingských hrdinů. Tvá Sféra Meče může tyto poklady vykopat z mohyl.",
+   "Драгоценности древних героев-викингов. Использую Сферу меча, чтобы добыть их из могилы.",
+   "Kostbares Eigentum der Helden der alten Wikinger. Dein Orb des Schwertes kann verwendet werden, um diese Schätze aus den Hügelgräbern herauszuholen.",
     }},
   {0x8f624b06, { // "message flash time"
    "czas pokazywania wiadomości",
@@ -4348,6 +6105,20 @@ sentence all_sentences[1130] = {
    "zobrazení na celou obrazovku",
    "полноэкранный режим",
    "Vollbild",
+    }},
+  {0x8fd09441, { // "This Orb allows you to jump over an adjacent monster, killing or stunning it. You can only vault in a roughly straight line. Target a cell on the other side to use it."
+   "Ta Sfera pozwala przeskoczyć sąsiadującego potwora, zabijając lub ogłuszając go. Możesz skakać tylko w linii prostej. Wyceluj w pole po drugiej stronie potwora, by użyć tej Sfery.",
+/*MISSING*/    "This Orb allows you to jump over an adjacent monster, killing or stunning it. You can only vault in a roughly straight line. Target a cell on the other side to use it.",
+   "Tato Sféra ti umožňuje přeskočit přes sousedního netvora, a tím ho zabít nebo omráčit. Vyběhnout můžeš pouze zhruba po přímce. Sféra se používá zacílováním políčka na druhé straně netvora.",
+   "Эта сфера позволяет прыгать через соседнего монстра, убивая или оглушая его. Можно прыгать только по примерно пряной линии. Выберите клетку на другой стороне, чтобы использовать сферу.",
+/*MISSING*/    "This Orb allows you to jump over an adjacent monster, killing or stunning it. You can only vault in a roughly straight line. Target a cell on the other side to use it.",
+    }},
+  {0x8fdb2403, { // "Herds of these Bulls are running long distances for some reason. They become Raging Bulls if something stops them."
+   "Stada tych Byków biegną długie dystansy z jakiegoś powodu. Gdy coś je zatrzyma, stają się Wściekłymi Bykami.",
+/*MISSING*/    "Herds of these Bulls are running long distances for some reason. They become Raging Bulls if something stops them.",
+   "Sáda těchto Býků z nějakého důvodu běhají na dlouhé vzdálenosti. Pokud je něco zastaví, promění se ve Vzteklé Býky.",
+   "Стада этих быков зачем-то пробегают огромные расстояния. Они становятся Бешеными быками, если что-то их остановит.",
+/*MISSING*/    "Herds of these Bulls are running long distances for some reason. They become Raging Bulls if something stops them.",
     }},
   {0x900ef316, { // "pan up"
    "przewiń w górę",
@@ -4382,7 +6153,7 @@ sentence all_sentences[1130] = {
    "R'Lyeh'te Cthulhu'ya adanmış bazı tapınaklar olmalı...",
    "Cthulhu musí mít V R'Lyeh nějaké Chrámy...",
    "В Р'Льехе должны быть храмы Ктулху...",
-   "Es muss doch ein paar Tempel von Cthulhu in R'Lyeh geben...",
+   "Es muss doch auch Tempel des Cthulhu in R'Lyeh geben...",
     }},
   {0x90e25cd6, { // "anti-aliasing enabled"
    "włączono anti-aliasing",
@@ -4403,14 +6174,14 @@ sentence all_sentences[1130] = {
 /*MISSING*/    "Branches here will bear you weight, but if you use them to move (not fall) to an unstable place, they will break.",
    "Tyto větve tvou váhu unesou, ale pokud se z nich pohneš (kromě pádu) na nestabilní políčko, zlomí se.",
    "Эти ветви выдерживают ваш вес, но если из использовать, чтобы пойти (не упасть) на что-то неустойчивое, они сломаются.",
-/*MISSING*/    "Branches here will bear you weight, but if you use them to move (not fall) to an unstable place, they will break.",
+   "Die Äste hier werden dein Gewicht tragen, aber wenn du sie nutzt um dich zu einem instabilen Platz zu bewegen (nicht fallen), werden sie brechen.",
     }},
   {0x90ee6489, { // "This Orb lets you ride Dragons and other worm-like creatures. Simply move onto such a creature to ride them; while riding, you are protected from dangerous terrains and partially from attacks (they cause you to lose half of your Domination power), but you cannot collect items. When only one charge is left, you have to dismount this turn -- be very careful to make this possible, as your mount could attack you immediately!\n\nWhile riding, click on a location to order your mount to move or attack there."
-   "Ta Sfera pozwala Ci jeździć Smokami i innymi wężopodobnymi stworami. Po prostu wykonaj ruch na pole z takim stworem, by go dosiąść. Podczas jazdy jesteś chronion%y0 przed niebezpiecznym terenem i częściowo przed atakami (które powodują utratę połowy Twojej mocy Dominacji), ale nie możesz zbierać przedmiotów. Kiedy zostanie tylko 1 ładunek, musisz natychmiast ssiąść -- zadbaj o to, by to było możliwe, bez zostania zaatakowanym przez Twojego dawnego wierczhowca!\n\nPodczas jazdy kliknij dowolne pole, by nakazać Twojemu wierzchowcowi tam się ruszyć lub zaatakować.",
+   "Ta Sfera pozwala Ci jeździć Smokami i innymi wężopodobnymi stworami. Po prostu wykonaj ruch na pole z takim stworem, by go dosiąść. Podczas jazdy jesteś chronion%y0 przed niebezpiecznym terenem i częściowo przed atakami (które powodują utratę połowy Twojej mocy Dominacji), ale nie możesz zbierać przedmiotów. Kiedy zostanie tylko 1 ładunek, musisz natychmiast zsiąść -- zadbaj o to, by to było możliwe bez zostania zaatakowanym przez Twojego dawnego wierzchowca!\n\nPodczas jazdy kliknij dowolne pole, by nakazać Twojemu wierzchowcowi tam się ruszyć lub zaatakować.",
 /*MISSING*/    "This Orb lets you ride Dragons and other worm-like creatures. Simply move onto such a creature to ride them; while riding, you are protected from dangerous terrains and partially from attacks (they cause you to lose half of your Domination power), but you cannot collect items. When only one charge is left, you have to dismount this turn -- be very careful to make this possible, as your mount could attack you immediately!\n\nWhile riding, click on a location to order your mount to move or attack there.",
    "Tato Sféra ti umožňuje jezdit na Dracích a jiných červovitých netvorech. Stačí se na ně pohnout, a můžeš nasednout; během jízdy jsi chráněn před nebezpečným terénem a částečně i před útoky (ty tě připraví o polovinu zbývající síly Dominance), nemůžeš ale sbírat předměty. Ve chvíli, kdy ti zbývá pouze jeden náboj, musíš v tomto kole sesednout -- dej si dobrý pozor, aby to bylo možné,  protože tvůj oř na tebe může okamžitě zaútočit!\n\n Během jízdy můžeš kliknutím nařizovat svému oři, kam se má pohnout nebo zaútočit.",
    "Эта сфера позволяет вас ездить на драконах и других червеобразных существах. Просто пойди на клетку с таким монстром, чтобы оседлать его. Пока ты едешь на существе, на тебя не действуют никакие опасные объекты и, частично, атаки (от которых вы теряете половину силы этой сферы), но вы не можете собирать предметы. Когда остаётся только один заряд, вы должны слезть с существа -- будьте осторожны, ведь оно может сразу же атаковать вас!\n\nНажимайте на клетки, чтобы заставить существо туда пойти или атаковать.",
-/*MISSING*/    "This Orb lets you ride Dragons and other worm-like creatures. Simply move onto such a creature to ride them; while riding, you are protected from dangerous terrains and partially from attacks (they cause you to lose half of your Domination power), but you cannot collect items. When only one charge is left, you have to dismount this turn -- be very careful to make this possible, as your mount could attack you immediately!\n\nWhile riding, click on a location to order your mount to move or attack there.",
+   "Diser Orb erlaubt es dir Drachen oder ondere wurmartige Wesen zu reiten. Tritt einfach auf solch ein Wesen um es zu reiten; während des Ritts bist du vor gefährlichen Gebieten und teilweise vor Angriffen (sie verursachen den Verlust der Hälfte deiner Kraft der Dominanz) geschützt. Jedoch kannst du keine Gegenstände sammeln. Sobald nur noch eine Ladung übrig ist, musst du in diesem Zug absteigen -- achte darauf dies zu ermöglichen, denn dein Reittier könnte dich unmittelbar angreifen!\n\nWährend du reitest, klicke auf eine Zelle um deinem Reittier zu befehlen dorthin zu gehen oder dort anzugreifen.",
     }},
   {0x91033a83, { // "You can stand here."
    "Możesz na niej stanąć.",
@@ -4424,14 +6195,21 @@ sentence all_sentences[1130] = {
 /*MISSING*/    "Different kills required: %1.\n",
    "Požadovaný počet typů zabitých nepřátel: %1.\n",
    "Необходимо убить различных существ: %1.\n",
-/*MISSING*/    "Different kills required: %1.\n",
+   "Verschiedene Tötungen erforderlich: %1.\n",
     }},
   {0x91f0ec0a, { // "clockwise"
    "zegarowo",
 /*MISSING*/    "clockwise",
    "po směru hodinových ručiček",
    "по часовой стрелке",
-/*MISSING*/    "clockwise",
+   "im Uhrzeigersinn",
+    }},
+  {0x920e4875, { // "Hint: press 1 2 3 4 to change the projection."
+   "Wskazówka: 1 2 3 4 zmienia rzut.",
+/*MISSING*/    "Hint: press 1 2 3 4 to change the projection.",
+   "Nápověda: Klávesy 1 2 3 4 mění projekci.",
+   "Подсказка: 1 2 3 4 -- сменить проекцию.",
+/*MISSING*/    "Hint: press 1 2 3 4 to change the projection.",
     }},
   {0x921e4397, { // "You hit %the1."
    "Trafi%łeś0 %a1.",
@@ -4445,7 +6223,14 @@ sentence all_sentences[1130] = {
    "Bu donmuş göl, Buz Diyarlarının korkunç bir versiyonu gibi. Şimdi, vücut ısın duvarları değil, yeri eritiyor.",
    "Toto zamrzlé jezero je pekelnou verzí Ledového kraje. Tady tvým tělesným teplem netají zdi, ale podlaha.",
    "Замёрзшее озеро - адский вариант Ледяной земли. Но сейчас тепло плавит пол, а не стены.",
-   "Dieser gefrorene See ist wie eine höllische Version des Eisigen Landes. Hier schmilzt deine Körperwärme den Boden, nicht die Wände.",
+   "Dieser gefrorene See ist eine höllische Version des Eisigen Landes. Hier schmilzt deine Körperwärme den Boden anstatt der Wände.",
+    }},
+  {0x924212cc, { // "five players"
+   "pięciu graczy",
+/*MISSING*/    "five players",
+   "pět hráčů",
+   "пять игроков",
+   "fünf Spieler",
     }},
   {0x92642dd1, { // "A Troll without the power of Life."
    "Troll bez mocy Życia.",
@@ -4462,7 +6247,7 @@ sentence all_sentences[1130] = {
    "oder ESC um zu sehen, wie alles endete",
     }},
   {0x92859386, { // "This orb can protect you from damage."
-   "Ta sfera chroni Ciebie przed obrażeniami od potworów.",
+   "Ta sfera chroni Cię przed obrażeniami od potworów.",
    "Bu küre seni hasardan korur.",
    "Tato sféra tě dokáže chránit před zraněním.",
    "Эта сфера защитит Вас от всех атак.",
@@ -4473,7 +6258,21 @@ sentence all_sentences[1130] = {
    "%a1 arkana ittin.",
    "Odstrčil jsi %a1 za sebe.",
    "Вы передвинули %a1 за себя.",
-   "Die schiebst %den1 %1 hinter dich.",
+   "Du schiebst %den1 %a1 hinter dich.",
+    }},
+  {0x92c84a71, { // "move up-right"
+   "ruch w górę-prawo",
+/*MISSING*/    "move up-right",
+   "pohyb doprava nahoru",
+   "ход вверх-вправо",
+/*MISSING*/    "move up-right",
+    }},
+  {0x92e9560d, { // "help for keyboard users"
+   "pomoc dla użytkowników klawiatury",
+/*MISSING*/    "help for keyboard users",
+/*MISSING*/    "help for keyboard users",
+   "помощь для пользователей клавиатуры",
+/*MISSING*/    "help for keyboard users",
     }},
   {0x92e9c33d, { // "Euclidean mode"
    "tryb euklidesowy",
@@ -4508,28 +6307,42 @@ sentence all_sentences[1130] = {
    "Yendorun Küresini çıkar",
    "vyvolej Yendorskou sféru",
    "призвать сферы Йендора",
-/*MISSING*/    "summon Orb of Yendor",
+   "rufe einen Orb von Yendor herbei",
     }},
   {0x93e87d87, { // "A rare and expensive substance found in the Desert. It is believed to extend life and raise special psychic powers."
    "Rzadka i droga substancja z Pustyni. Podobno wydłuża życie i daje moce psychiczne.",
    "Çölde bulunan ender ve pahalı bir katkı maddesi. Yaşamı uzattığına ve bazı özel psişik güçleri açığa çıkardığına inanılıyor.",
    "Drahá a vzácná látka, která se nachází v Poušti. Věří se, že prodlužuje život a zlepšuje zvláštní psychické schopnosti.",
    "Редкое и дорогое вещество из Пустыни. Говорят, продлевает срок жизни и даёт сверхспособности.",
-   "Eine seltene, teure Substanz aus der Wüste. Man sagt, es verlängert das Leben und verleiht besondere, psychische Kräfte.",
+   "Eine seltene und teure Substanz aus der Wüste. Man sagt, sie verlängert das Leben und verleiht besondere psychische Kräfte.",
+    }},
+  {0x93fe8846, { // "You chop down %the1."
+   "Ści%ąłeś0 %a1.",
+/*MISSING*/    "You chop down %the1.",
+   "Pokáce%l0 jsi %a1.",
+   "Вы срубили %a1.",
+   "Du hackst %den1 %a1 ab.",
     }},
   {0x940873d4, { // "This beautiful flower is greatly prized by wizards, as it allows them to cast powerful magical spells without preparation.\n"
-   "Ten piękny kwiat ma wielką cenę wśród czarodziejów, bo pozwala im rzucać silne czary bez przygotowania.\n",
+   "Ten piękny kwiat ma wysoką cenę wśród czarodziejów, bo pozwala im rzucać silne czary bez przygotowania.\n",
 /*MISSING*/    "This beautiful flower is greatly prized by wizards, as it allows them to cast powerful magical spells without preparation.\n",
    "Tento nádherný květ si velmi cení čarodějové, neboť jim umožňuje sesílat silná kouzla bez jakékoli přípravy.\n",
    "Этот прекрасный цветок очень ценится колдунами, так как позволяет создавать мощные чары без подготовки.\n",
-/*MISSING*/    "This beautiful flower is greatly prized by wizards, as it allows them to cast powerful magical spells without preparation.\n",
+   "Diese schöne Blume ist hochgeschätzt bei Zauberern, denn sie erlaubt es ihnen, ohne Vorbereitung machtvolle magische Zauber zu wirken.\n",
     }},
   {0x9447d99f, { // "A rare unliving construct from the Dead Caves. It instantly destroys cave walls next to its path, and also leaves an impassable wall behind it. You suppose that this impassable wall helps it to escape from some threats. You hope you won't meet these threats..."
-   "Rzadka konstrukcja z Martwych Jaskiń. Natychmiast niszczy skalne ściany przy jego trasie, i tworzy za sobą ścianę skały. Przypuszczasz, że ta ściana pomaga mu uciekać przed jakimiś zagrożeniami. Masz nadzieję, że nie spotkasz tych zagrożeń...",
+   "Rzadka konstrukcja z Martwych Jaskiń. Natychmiast niszczy skalne ściany przy jego trasie i tworzy za sobą ścianę skały. Przypuszczasz, że ta ściana pomaga mu uciekać przed jakimiś zagrożeniami. Masz nadzieję, że nie spotkasz tych zagrożeń...",
    "Ölü Mağaralardan cansız bir mekanizma. Yoluna çıkan tüm mağara duvarlarını yıkar ve arkasında geçilemeyen bir duvar bırakır.Bu duvarları birtakım tehditlerden kullanabileceğini düşünüyorsun. Aynı zamanda bu tehditlerle hiç karşılaşmayacağını da umuyorsun..",
    "Vzácný neživý konstrukt z Mrtvých jeskyní. Okamžitě ničí stěny jeskyně kolem své dráhy a zanechává za sebou neprostupnou zeď. Tato neprostupná zeď mu zřejmě umožňuje uniknout před nebezpečím. Doufáš, že na tato nebezpečí nenarazíš...",
    "Редкое неживое создание из Мёртвых пещер. Мгновенно разрушает стены на своём пути и оставляет стены за собой.",
    "Ein seltenes untotes Geschöpf aus den Toten Höhlen. Es zerstört unmittelbar alle Höhlenwände vor und neben sich und hinterlässt wiederum undurchdringbare Wände. Du vermutest, dass diese Wände ihm helfen sollen irgendwelchen Gefahren zu entkommen. Hoffentlich wirst du nicht sehen, wovor es flieht...",
+    }},
+  {0x9455bd4b, { // "Y shift"
+   "przesunięcie Y",
+/*MISSING*/    "Y shift",
+   "Y posuv",
+   "сдвиг по Y",
+/*MISSING*/    "Y shift",
     }},
   {0x949e4d00, { // "\"The Red Rock Valley is dangerous, but beautiful.\""
    "\"Dolina Czerwonej Skały jest piękna, choć niebezpieczna.\"",
@@ -4539,7 +6352,7 @@ sentence all_sentences[1130] = {
    "\"Das Rotfelsental ist gefährlich aber wunderschön.\"",
     }},
   {0x94f9c468, { // "Love takes time, but it heals all wounds, and transcends time and space.\n\nThe Orb of Love is worth 30$$$, if you end the game with it.\n"
-   "Miłość potrzebuje czasu, ale leczy wszelkie rany, i czas i przestrzeń nie są dla niej przeszkodami.\n\nSfera Miłości jest warta 30$$$, jeśli skończysz z nią grę.\n",
+   "Miłość potrzebuje czasu, ale leczy wszelkie rany; czas i przestrzeń nie są dla niej przeszkodami.\n\nSfera Miłości jest warta 30$$$, jeśli skończysz z nią grę.\n",
    "Aşk zaman alır, ama her yarayı iyileştirir ve zaman ve mekâna galip gelir.\n\nAşk Küresi oyunu onunla bitirebilirsen 30$$$ eder.\n",
    "Láska chce čas, ale zahojí všechny rány a překoná čas i prostor.\n\nSféra lásky má cenu 30$$$, pokud ji máš u sebe na konci hry.\n",
    "Любовь требует времени, но лечит все раны, и проходит сквозь время и пространство.\n\nСфера любви стоит 30$$$, если закончить игру с ней.\n",
@@ -4557,7 +6370,7 @@ sentence all_sentences[1130] = {
    "Ölü Küreye dokunarak onu bırakabilirsin.",
    "Mrtvou sféru ve svém inventáři můžeš položit tím, že se jí dotkneš.",
    "Коснитесь мёртвой сферы, чтобы собрать её.",
-   "Du kannst den toten Orb in deinem Inventar berühren, um ihn fallenzulassen..",
+   "Du kannst den toten Orb in deinem Inventar berühren, um ihn abzulegen.",
     }},
   {0x96103279, { // "F4 = file"
    "F4 = plik",
@@ -4571,7 +6384,7 @@ sentence all_sentences[1130] = {
 /*MISSING*/    "key Orb power",
    "moc sfery jednym klawiszem",
    "клавиша для силы сферы",
-/*MISSING*/    "key Orb power",
+   "Hauptkraft des Orb",
     }},
   {0x9653c1d0, { // "Wow! That was close."
    "Uff! Było blisko.",
@@ -4579,6 +6392,13 @@ sentence all_sentences[1130] = {
    "Uf! To bylo o chlup!",
    "Ох! Это было близко.",
    "Wow! Das war knapp.",
+    }},
+  {0x9657dce2, { // "elliptic"
+   "eliptyczna",
+/*MISSING*/    "elliptic",
+   "eliptická",
+   "эллиптическая",
+/*MISSING*/    "elliptic",
     }},
   {0x966f306e, { // "Failed to load map from %1"
    "Nie udało się wczytać %1",
@@ -4592,14 +6412,14 @@ sentence all_sentences[1130] = {
 /*MISSING*/    "This Orb creates a warped zone of radius 5 around you, and also allows you to move diagonally in warped zones.",
    "Tato Sféra kolem tebe vytvoří pokřivenou zónu o poloměru 5, a kromě toho ti také umožňuje úhlopříčný pohyb v pokřivených zónách.",
    "Эта сфера создаёт искривление в радиусе 5 клеток вокруг Вас, и позволяет Вам ходить по-диагонали в искривлённых зонах.",
-/*MISSING*/    "This Orb creates a warped zone of radius 5 around you, and also allows you to move diagonally in warped zones.",
+   "Dieser Orb erzeugt einen verzerrten Bereich vom Radius 5 um dich herum und erlaubt es dir dich diagonal in verzerrten Bereichen zu bewegen.",
     }},
   {0x96d4d8a4, { // "(v) menu"
    "(v) menu",
    "(v) menü",
    "(v) menu",
    "(v) меню",
-   "Menü - V",
+   "Menü - v",
     }},
   {0x97043e71, { // "Press Enter or F10 to quit"
    "Wciśnij Enter lub F10, by wyjść z gry",
@@ -4620,7 +6440,7 @@ sentence all_sentences[1130] = {
 /*MISSING*/    "coefficient",
    "koeficient",
    "коэффициент",
-/*MISSING*/    "coefficient",
+   "Koeffizient",
     }},
   {0x971caf7e, { // "light"
    "lekki",
@@ -4629,12 +6449,19 @@ sentence all_sentences[1130] = {
    "легкий",
    "einfach",
     }},
+  {0x9754bf46, { // "Unavailable in the shmup mode.\n"
+   "Niedostępne w trybie strzelanki.\n",
+/*MISSING*/    "Unavailable in the shmup mode.\n",
+   "Nedostupné v módu střílečky.\n",
+   "Недоступно в режиме стрельбы.\n",
+   "Nicht im shmup-Modus verfügbar.\n",
+    }},
   {0x975cfefc, { // "A fresh grave. Necromancers like those."
    "Świeży grób. Nekromanci to lubią.",
    "Taze bir mezar. Ölüçağıranlar bunu sever.",
    "Čerstvý hrob. Ty mají rádi nekromanceři.",
    "Свежая могила. Некроманты их любят.",
-   "Ein frisches Grab. Nekromanten mögen diese.",
+   "Ein frisches Grab. Totenbeschwörer mögen diese.",
     }},
   {0x975dd65d, { // "Orbs summoned!"
    "Sfery mocy przywołane!",
@@ -4650,6 +6477,13 @@ sentence all_sentences[1130] = {
    "Сложность заморожена на %1.",
    "Festgefroren: %1.",
     }},
+  {0x97b82241, { // "Cannot move into the current location of another player!"
+   "Nie możesz wejść na miejsce innego gracza!",
+/*MISSING*/    "Cannot move into the current location of another player!",
+   "Nemůžeš vstoupit na políčko obsazené jiným hráčem!",
+   "Нельзя пойти в клетку, занятую другим игроком!",
+   "Kann nicht auf die momentane Position eines anderen Spielers gehen!",
+    }},
   {0x97bc983b, { // "%The1 shoots you!"
    "%1 do Ciebie strzeli%ł!",
    "%1 sana ateş etti!",
@@ -4658,11 +6492,25 @@ sentence all_sentences[1130] = {
    "%Der1 %1 erschießt dich!",
     }},
   {0x97cc96e0, { // "A large bird who likes strong winds. Just as you, it can fly quickly in the wind."
-   "Wielki ptak, lubiący silne wiatry. Tak jak Ty, może szybko latać z wiatrem.",
+   "Wielki ptak, lubiący silne wiatry. Tak jak Ty może szybko latać z wiatrem.",
 /*MISSING*/    "A large bird who likes strong winds. Just as you, it can fly quickly in the wind.",
    "Welký pták, který má rád silný vítr. Dokáže v něm rychle létat, stejně jako ty.",
    "Большая птица, которая любит сильный ветер. Как и Вы, движется быстрее с ветром.",
-/*MISSING*/    "A large bird who likes strong winds. Just as you, it can fly quickly in the wind.",
+   "Ein großer Vogel, der starken Wind liebt. Wie du kann er schnell mit dem Wind fliegen.",
+    }},
+  {0x97e2cdae, { // "\n\nThis Orb is triggered on your first attack or illegal move."
+   "\n\nTa Sfera się aktywuje automatycznie, gdy wykonasz atak lub nielegalny ruch.",
+/*MISSING*/    "\n\nThis Orb is triggered on your first attack or illegal move.",
+   "\n\nTato sféra se aktivuje prvním útokem nebo ilegálním tahem.",
+   "\n\nЭта сфера срабатывает при атаке или невозможном ходе.",
+   "\n\nDieser Orb wird bei deiner ersten Attacke oder deinem ersten unerlaubten Zug ausgelöst.",
+    }},
+  {0x98012938, { // "\n\nFast flying creatures may attack or go against gravity only in their first move."
+   "\n\nSzybko latające stworzenia mogą atakować i poruszać się wbrew grawitacji tylko w swoim pierwszym ruchu.",
+/*MISSING*/    "\n\nFast flying creatures may attack or go against gravity only in their first move.",
+   "\n\nRychlí létající tvorové mohou útočit nebo se protivit gravitaci pouze při svém prvním pohybu.",
+   "\n\nБыстро летающие существа могут двигаться или атаковать против гравитации только первым своим ходом.",
+/*MISSING*/    "\n\nFast flying creatures may attack or go against gravity only in their first move.",
     }},
   {0x982b5c26, { // "Zebra Pattern"
    "Wzór Zebra",
@@ -4671,12 +6519,26 @@ sentence all_sentences[1130] = {
    "узор Зебра",
    "Zebramuster",
     }},
+  {0x982ba756, { // "Ancient Viking heroes were buried here. Their graves have barrows raised over them, and are guarded by Draugar, animated corpses who are immune to mundane weapons. You will need to use a magical weapon spell to defeat them, and to rob the ancient jewelry buried in the graves."
+   "Tu pochowano starożytnych wikińskich bohaterów. Nad ich grobami wzniesiono kurhany. Kurhany są strzeżone przez Draugry, ożywione zwłoki odporne na zwyczajne bronie. Potrzebujesz magicznej broni, by je pokonać i zrabować starożytną biżuterię zakopaną w kurhanach.",
+/*MISSING*/    "Ancient Viking heroes were buried here. Their graves have barrows raised over them, and are guarded by Draugar, animated corpses who are immune to mundane weapons. You will need to use a magical weapon spell to defeat them, and to rob the ancient jewelry buried in the graves.",
+   "Tady jsou pohřbeni dávní vikingští hrdinové. Nad jejich hroby jsou postaveny mohyly a střeží je Draugarové, oživlé mrtvoly imunní proti obyčejným zbraním. Pokud je chceš porazit a uloupit prastaré klenoty pohřbené v jejich hrobech, budeš si muset nějak vyčarovat magickou zbraň.",
+   "Древние герои Викингов похоронены здесь. Над их могилами построены курганы. охраняемые Драуграми -- живыми мертвецами, невосприимчивыми к обычному оружию. Вам нужно магическое оружие, чтобы победить их и добраться до драгоценностей, закопанных в курганах.",
+   "Die Helden der alten Wikinger wurden hier begraben. Über ihren Gräbern erheben sich Hügel, die von Draugar bewacht werden, Untote, die immun gegen irdische Waffen sind. Du wirst einen Zauber für eine magische Waffe brauchen, um sie zu besiegen und die in den Gräbern verborgenen antiken Juwelen zu rauben.",
+    }},
   {0x983cfb96, { // "dress color II"
    "kolor sukienki II",
 /*MISSING*/    "dress color II",
    "barva šatů II",
    "цвет одежды II",
-/*MISSING*/    "dress color II",
+   "Kleiderfarbe II",
+    }},
+  {0x98941047, { // "The ratio of Rock III to walls is %1, so Rock III are %2 absolute units high. Length of paths on the Rock III level is %3 of the corresponding length on the ground level."
+   "Iloraz Skały III do ściany to %1, czyli Skała III ma wysokość %2. Drogi na poziomie Skały III są %3 odpowiednich odległości na poziomie podłoża.",
+/*MISSING*/    "The ratio of Rock III to walls is %1, so Rock III are %2 absolute units high. Length of paths on the Rock III level is %3 of the corresponding length on the ground level.",
+   "Poměr Skály III a zdí je %1, takže Skála III je vysoká %2 absolutních jednotek. Délka cest na úrovni Skály III je %3-násobkem odpovídající délky na úrovni země..",
+   "Отношение высот скалы-III и стены равно %1, так что скала-III имеет высоту %2. Длина пути на такой высоте в %3 раз больше длины на уровне земли.",
+/*MISSING*/    "The ratio of Rock III to walls is %1, so Rock III are %2 absolute units high. Length of paths on the Rock III level is %3 of the corresponding length on the ground level.",
     }},
   {0x98d5754f, { // "As you leave, your powers are drained!"
    "Opuszczasz Krainę Mocy... Twoja moc znikła!",
@@ -4690,35 +6552,49 @@ sentence all_sentences[1130] = {
 /*MISSING*/    "Note: currently scores are saved only in the normal mode on Android",
    "Poznámka: na Androidu se skóre v tuto chvíli ukládají pouze v normálním módu",
    "Важно: на Андроиде счёт записывается только в обычном режиме",
-/*MISSING*/    "Note: currently scores are saved only in the normal mode on Android",
+   "Hinweis: aktuell werden bei Android Punktestände nur im Normalmodus gespeichert",
+    }},
+  {0x98f9d752, { // "three colors"
+   "trzy kolory",
+/*MISSING*/    "three colors",
+   "tři barvy",
+   "три цвета",
+/*MISSING*/    "three colors",
     }},
   {0x9908e6b5, { // "You have improved both your real time and knife count. Congratulations!"
    "Poprawi%łeś0 swój najlepszy czas rzeczywisty i liczbę noży. Gratulacje!",
    "Hem toplam zamanını hem de bıçak sayını geliştirdin. Tebrikler!",
    "Zlepšil jsi jak svůj čas, tak počet nožů. Gratulujeme!",
    "Вы улучшили результаты по реальному времени и количеству ножей. Поздравляем!",
-   "Du hast sowohl weniger Zeit sowie Messer als zuvor benutzt. Gratulation!",
+   "Du hast sowohl weniger Zeit sowie Messer als zuvor benutzt. Glückwunsch!",
     }},
   {0x996d58ad, { // "Could not create an image of that size."
    "Nie da się stworzyć obrazu tej wielkości.",
 /*MISSING*/    "Could not create an image of that size.",
    "Obrázek této velikosti nebylo možné vytvořit.",
    "Невозможно создать изображение такого размера.",
-/*MISSING*/    "Could not create an image of that size.",
+   "Konnte ein Bild dieser Größe nicht erzeugen.",
+    }},
+  {0x9972c6a9, { // "PICK"
+   "TEN",
+/*MISSING*/    "PICK",
+   "VYBRAT",
+   "ВЫБИРАЙ",
+/*MISSING*/    "PICK",
     }},
   {0x9990ffba, { // "You command %the1!"
    "%1 przyjmuje Twój rozkaz.",
 /*MISSING*/    "You command %the1!",
    "%1 přijímá tvůj rozkaz.",
    "Вы оседлали %a1!.",
-/*MISSING*/    "You command %the1!",
+   "Du befehligst %den1 %1!",
     }},
   {0x99efd678, { // "switch ghost timer"
    "przestaw czaso-duchy",
 /*MISSING*/    "switch ghost timer",
    "přepni časové duchy",
    "переключить таймер призраков",
-/*MISSING*/    "switch ghost timer",
+   "Geister-Zähler umschalten",
     }},
   {0x9a327390, { // "unassign a key"
    "odwiąż klawisz",
@@ -4732,7 +6608,7 @@ sentence all_sentences[1130] = {
 /*MISSING*/    "Return to the normal game",
    "Návrat do normální hry",
    "Вернуться в обычную игру",
-/*MISSING*/    "Return to the normal game",
+   "Kehre zum normalen Spiel zurück",
     }},
   {0x9aa13108, { // "Kills gained!"
    "Zdobyto trupy!",
@@ -4746,7 +6622,7 @@ sentence all_sentences[1130] = {
    "İntikam istiyorum! Bir muhafızı sersemlet ve onu bana bırak!\"",
    "Chci se pomstít. Omrač nějakého strážce a nech mi ho!\"",
    "Я хочу мстить! Оглуши стража и оставь его мне!\"",
-   "Ich will Rache. Betäube eine Wache und lass sie mir!\"",
+   "Ich will Rache. Betäube eine Wache und überlasse sie mir!\"",
     }},
   {0x9ab47466, { // "You can choose one of the several modes"
    "Możesz wybrać jeden z kilku trybów",
@@ -4795,7 +6671,7 @@ sentence all_sentences[1130] = {
 /*MISSING*/    "\"Thank you very much for talking, and have a great rest of your day!\"",
    "\"Moc ti děkuju za rozhovor a hezký zbytek dne!\"",
    "\"Большое спасибо за беседу, удачного дня!\"",
-/*MISSING*/    "\"Thank you very much for talking, and have a great rest of your day!\"",
+   "\"Vielen Dank für die Unterhaltung - hab einen schönen Tag!\"",
     }},
   {0x9b9bc969, { // "Abandon all hope, the gates of Hell are opened!"
    "Porzuć wszelką nadzieję, bramy Piekła są otwarte!",
@@ -4819,11 +6695,18 @@ sentence all_sentences[1130] = {
    "%Der1 %1 bewegt seinen Finger nach unten.",
     }},
   {0x9c38236e, { // "A Witch with a Flash spell. Very dangerous!\n\nLuckily, she never uses the spell if it would kill her friends. She could destroy an Evil Golem, though."
-   "Czarownica z czarem Błysk. Bardzo niebezpieczna!\n\nNa szczęście, nie użyje swojego czaru, jeśli by to zabiło jej przyjaciółki.",
+   "Czarownica z czarem Błysku. Bardzo niebezpieczna!\n\nNa szczęście, nie użyje swojego czaru, jeśli by to zabiło jej przyjaciółki.",
    "Işık büyüsü olan bir cadı. Çok tehlikeli!\n\n Çok şükür, büyüsünü büyüsü arkadaşlarını da öldürecekse hiç kullanmaz. Ama Şeytani Golemi de umursayacak değil tabi.",
    "Čarodějnice s kouzlem Záblesk. Velmi nebezpečná!\n\nNaštěstí toto kouzlo nepoužije,  pokud by to zabilo její přátele. Zlé golemy ale ničit může.",
    "Ведьма с заклинанием вспышки. Очень опасна!\n\nК счастью, она никогда не использует заклинание, ели оно убьёт других ведьм. Но големов она может и уничтожить.",
    "Eine Donnerhexe. Sehr gefährlich!\n\nGlücklicherweise setzt sie den Zauber nicht ein, wenn dies ihre Freunde gefährden würde. Sie kann allerdings böse Golems zerstören.",
+    }},
+  {0x9c5df18c, { // "\n\nOnce you collect 10 Bomberbird Eggs, stepping on a cell with no adjacent mines also reveals the adjacent cells. Collecting even more Eggs will increase the radius. Additionally, collecting 25 Bomberbird Eggs will reveal adjacent cells even in your future games."
+   "\n\nGdy zdobędziesz 10 Jaj Bombardiera, ruch na pole bez sąsiadujących min pokazuje także liczby na sąsiednich polach; jeszcze więcej jaj to większy promień. Dodatkowo, zebranie 25 Jaj Bombardiera powoduje pokazywanie sąsiednich pól nawet w kolejnych grach.",
+/*MISSING*/    "\n\nOnce you collect 10 Bomberbird Eggs, stepping on a cell with no adjacent mines also reveals the adjacent cells. Collecting even more Eggs will increase the radius. Additionally, collecting 25 Bomberbird Eggs will reveal adjacent cells even in your future games.",
+   "\n\nJakmile získáš 10 Vajec Bombarďáků, odhalí vstup na políčko bez sousedních min i všechna sousední políčka. Sebráním ještě většího počtu Vajec, se rozsah odhalování zvyšuje. Pokud sebereš 25 Vajec Bombarďáků, budou se navíc ve všech dalších hrách sousední políčka odhalovat automaticky.",
+   "\n\nЕсли вы собрали 10 яиц Бомбардира, наступая на клетку, вы получаете информацию обо всех соседних клетках; собирая больше яиц вы увеличиваете радиус обзора. Также, если собрать 25 яиц Бомбардира, то во всех следующих играх вы будете автоматически получать информацию о соседних клетках.",
+   "\n\nSobald du 10 Bombenvogeleier gesammelt hast, werden beim Betreten jeder Zelle, die nicht an eine Miene grenzt, auch alle Nachbarzellen aufgedeckt. Sammeln von noch mehr Eiern vergrößert den Radius.  Das Sammeln von 25 Bombenvogeleiern schaltet sogar das Aufdecken von Nachbarzellen in zukünftigen Spielen frei.",
     }},
   {0x9ca1dbd1, { // "cross display mode"
    "tryb pokazywania osi",
@@ -4844,28 +6727,28 @@ sentence all_sentences[1130] = {
    "%1 ezildi!",
    "Brána rozdrtila %a1!",
    "%1 разрушается",
-   "%der1 wurde zerquetscht!",
+   "%Der1 wurde zerquetscht!",
     }},
   {0x9d2b039f, { // "These huge monsters normally live below the sand, but your movements have disturbed them. They are too big to be slain with your weapons, but you can defeat them by making them unable to move. This also produces some Spice. They move two times slower than you."
    "Te wielkie stworzenia normalnie żyją pod pustynnym piaskiem, ale Twoja obecność na pustyni spowodowała ich wyjście na powierzchnię. Są za duże, byś m%ógł0 je zaatakować swoją bronią, ale zginą, jeśli nie będą mogły się ruszyć -- to produkuje także trochę Przyprawy. Czerwie ruszają się 2 razy wolniej od Ciebie.",
    "Normalde bu canavarlar yer altında yaşarlar ama hareketlerin onları rahatsız etti. Bıçağınla kesilmek için fazla iriler, ama onları hareket edemez hale getirerek yenebilirsin. Bu biraz Baharat da üretir. Senden iki kat yavaş hareket ederler.",
    "Tito obrovští netvoři normálně žijí pod pískem, ale tvé pohyby je vyrušily. Jsou tak velcí, že je nemůžeš zabít svými zbraněmi, ale můžeš je porazit tím, že jim znemožníš pohyb. Tím také vznikne nějaké Koření. Píseční červi se pohybují dvakrát pomaleji než ty.",
    "Эти огромные монстры обычно живут под огромным слоем песка, но Вы их потревожили. Они слишком велики, чтобы их можно было убить Вашим оружием, но они умирают, если не могут двигаться. Также они производят пряности. Они движутся в 2 раза медленнее Вас.",
-   "Diese riesigen Monster leben normalerweise unter dem Sand, aber deine Bewegungen haben sie geweckt. Sie sind zu groß, als dass du sie mit deinen Waffen erschlagen könntest, aber du kannst sie besiegen, indem du ihre Bewegung verhinderst. Dies produziert auch etwas Spice. Sie bewegen sich halb so schnell wie du.",
+   "Diese riesigen Monster leben normalerweise unter dem Sand, aber deine Bewegungen haben sie geweckt. Sie sind zu groß, als dass du sie mit deinen Waffen erschlagen könntest. Du kannst sie besiegen, indem du dafür sorgst, dass sie sich nicht mehr bewegen können. Dies produziert auch etwas Spice. Sie bewegen sich halb so schnell wie du.",
     }},
   {0x9d2f19ca, { // "-- use the Android menu instead"
    "zapiszą -- użyj menu Androida",
 /*MISSING*/    "-- use the Android menu instead",
    "-- použij menu Android",
    "используйте меню Андроида",
-/*MISSING*/    "-- use the Android menu instead",
+   "-- verwende dafür das Android-Menü",
     }},
   {0x9e0f4028, { // "(in the MENU). You can reduce the sight range, this should make the animations smoother."
-   "(w MENU). Możesz zmniejszyć zasięg widzenia, dzięki temu animacje będą płynniejsze.",
+   "(w MENU). Możesz zmniejszyć zasięg wzroku, co powinno poprawić płynność animacji.",
    "(MENÜDE). Görüş aralığını seçebilirsin. Bu animasyonları daha akıcı hâle getirebilir.",
-   "(v MENU). Můžeš snížit viditelnost - to by mělo vést k hladším animacím.",
-   "(в MENU). Вы можете уменьшить радиус обзора, что сделает анимацию более гладкой. ",
-   "(im Menü) kannst du die Sichtweite reduzieren, dies sollte die Animation flüssiger machen.",
+   "(v MENU). Můžete zredukovat dohled, což by mělo udělat animace hladšími.",
+   "(в МЕНЮ). Вы можете уменьшить радиус обзора, чтобы сделать анимацию более гладкой.",
+   "(im MENÜ). Du kannst die Sichtweite reduzieren, das sollte die Animationen glatter machen.",
     }},
   {0x9e7df098, { // "This is your first victory!"
    "To Twoje pierwsze zwycięstwo!",
@@ -4881,19 +6764,26 @@ sentence all_sentences[1130] = {
    "Используйти лестницу, чтобы забраться на Башню.",
    "Du kannst diese Leiter nutzen um den Turm zu erklimmen.",
     }},
+  {0x9ee91778, { // "move down-right"
+   "ruch w dół-prawo",
+/*MISSING*/    "move down-right",
+   "pohyb doprava dolů",
+   "ход вниз-вправо",
+/*MISSING*/    "move down-right",
+    }},
   {0x9f821b2e, { // "Your power is drained by %the1!"
    "Twoja moc jest wyssana przez %a1!",
 /*MISSING*/    "Your power is drained by %the1!",
    "%1 vysává tvou sílu!",
    "%1 уменьшил Вашу мощь!",
-   "Deine Kraft wird von %dem1 %a1 ausgesaugt!",
+   "Deine Kraft wird von %dem1 %d1 ausgesaugt!",
     }},
   {0x9fcff1d6, { // "This orb lets you instantly move to a safe faraway location. Knowing the nature of this strange world, you doubt that you will ever find the way back...\n\nYour game will be saved if you quit the game while the Orb of Safety is still powered.\n\nTechnical note: as it is virtually impossible to return, this Orb recycles memory used for the world so far (even if you do not use it to save the game). "
    "Ta sfera pozwala Ci natychmiast przenieść się do bezpiecznego miejsca. Znając naturę tego świata, zapewne nigdy nie trafisz z powrotem...\n\nJeśli wyjdziesz z gry podczas gdy Sfera Bezpieczeństwa wciąż ma moc, gra zostanie zapisana.\n\nUwaga techniczna: nawet jeśli nie zapiszesz gry, ta sfera czyści całą pamięć o świecie gry. ",
    "Bu küre seni güvenli bir uzak yere ışınlar. Bu dünyanın garip yapısını düşününce geri dönüp dönemeyeceğin belli değil...\n\nEğer Güvenlik Küresi hâlâ açıkken oyundan çıkarsan oyunun kaydedilecek.\n\nTeknik not: geri dönmek aslında tamamen imkânsız olduğundan, bu Küre sadece şimdiye kadar bu dünya için kullanılan hafızayı kullanır. (onu ounu kaydetmek için kullanmasanız da.) ",
    "Tato sféra ti umožňuje se okamžitě přemístit na bezpečné, vzdálené místo. Vzhledem k povaze tohoto podivného světa pochybuješ, že ještě někdy najdeš cestu zpátky...\n\nPokud před vypršením efektu Sféry bezpečnosti ukončíš hru, uloží se.\n\nTechnická poznámka: vzhledem k tomu, že návrat do jakéhokoli již navštíveného místa je stejně prakticky nemožný, použití Sféry bezpečnosti uvolní veškerou paměť, kterou herní svět až dosud využíval, a to i tehdy, pokud ji nepoužiješ k uložení hry.",
    "Эта сфера перемещает Вас в далёкое безопасное место, откуда Вы не вернётесь назад...\n\nПока сфера активна, при выходе из игры Ваша игра будет сохранена.\n\nТехнически, старый мир просто удаляется. ",
-   "Du kannst diesen Orb verwenden um dich an einen weit entfernten, sicheren Ort zu bewegen. Aufgrund der Gegebenheiten dieser Welt bezweifelst du, dass du je zurückfindest...\n\nDein Spiel wird gespeichert, wenn du es beendest während der Orb der Geborgenheit noch Kraft besitzt.\n\n(Technische Anmerkung: Da es wirklich unmöglich ist, zurückzukehren, lässt dieser Orb den Speicher, den die Welt bis jetzt braucht, neu durchlaufen - sogar wenn du sie nicht verwendest, um zu speichern.)",
+   "Dieser Orb versetzt dich augenblicklich an einen weit entfernten, sicheren Ort. In Anbetracht der Natur dieser Welt bezweifelst du, dass du je einen Weg zurückfindest...\n\nDein Spiel wird gespeichert wenn du es beendest während der Orb der Geborgenheit noch Kraft besitzt.\n\nTechnische Anmerkung: Da es wirklich unmöglich ist zurückzukehren, gibt dieser Orb den Speicher, den die Welt bis dahin belegt hat, frei (selbst wenn du das Spiel nicht speicherst.)",
     }},
   {0x9fe084e4, { // "You cannot attack %the1 directly!"
    "Nie możesz atakować %a1 wprost!",
@@ -4914,7 +6804,21 @@ sentence all_sentences[1130] = {
 /*MISSING*/    "Friendly ghosts are friendly beings who can go through any obstacles. However, unlike most friends, they tend to fly away from you.",
    "Přátelští duchové jsou přátelské bytosti, kteří dokážou procházet jakýmikoli překážkami. Na rozdíl od většiny tvých kamarádů ale mají tendenci létat pryč od tebe.",
    "Дружественные духи могут проходить сквозь любые препятствия. В отличие от других союзников, склонны улетать от Вас.",
-/*MISSING*/    "Friendly ghosts are friendly beings who can go through any obstacles. However, unlike most friends, they tend to fly away from you.",
+   "Freundliche Geister sind freundliche Wesen, die sich durch alle Hindernisse bewegen können. Aber anders als deine meisten Freunde neigen sie dazu von dir wegzufliegen.",
+    }},
+  {0xa0ecd1c7, { // "and not in a chaos without norms.\""
+   "a nie w chaosie bez reguł.\"",
+/*MISSING*/    "and not in a chaos without norms.\"",
+   "nikoli v chaosu, kde neplatí žádné normy.\"",
+   "а не в хаосе без правил.\"",
+/*MISSING*/    "and not in a chaos without norms.\"",
+    }},
+  {0xa11852fa, { // "\nYou can never target cells which are adjacent to the player character, or ones out of the sight range."
+   "\nNie możesz celować w pola obok postaci, ani poza zasięgiem wzroku.",
+/*MISSING*/    "\nYou can never target cells which are adjacent to the player character, or ones out of the sight range.",
+   "\nPolíčka, která sousedí s vaší postavou nebo jsou mimo váš dohled, nelze nikdy zacílit.",
+   "\nНельзя выбрать в качестве цели соседние с вами клетки или те, которые вы не видите.",
+   "\nDu kannst niemals auf Zellen, die der Spielfigur benachbart oder die nicht in Sichtweite sind, zielen.",
     }},
   {0xa16a5b13, { // "p = paint"
    "p = kolory",
@@ -4931,7 +6835,7 @@ sentence all_sentences[1130] = {
    "\"Ich bin verloren...\"",
     }},
   {0xa1aeb8a7, { // "You are killed by %the1!"
-   "Zabi%ł1 Ciebie %1!",
+   "Zabi%ł1 Cię %1!",
    "%1 tarafından öldürüldün!",
    "Zabi%l1 tě %1!",
    "Вас убил %1!",
@@ -4950,6 +6854,20 @@ sentence all_sentences[1130] = {
    "%1 vyděsi%l1 %a2!",
    "%1 пугает %a2!",
    "%Der1 %1 erschreckt %den2 %a2!",
+    }},
+  {0xa2298e28, { // "player 7 go"
+   "gracz 7 idź",
+/*MISSING*/    "player 7 go",
+   "hráč 7 pohyb",
+/*MISSING*/    "player 7 go",
+   "Spieler 7 los",
+    }},
+  {0xa25132c0, { // "Welcome to Spherogue!"
+   "Witaj w Sferogue!",
+/*MISSING*/    "Welcome to Spherogue!",
+   "Vítej ve Sférogue!",
+   "Добро пожаловать в Spherogue!",
+/*MISSING*/    "Welcome to Spherogue!",
     }},
   {0xa257a57d, { // "Press 'c' for credits."
    "Naciśnij 'c' by obejrzeć autorów",
@@ -4972,12 +6890,19 @@ sentence all_sentences[1130] = {
    "Соберите 60 $$$, чтобы открыть новые земли",
    "Sammle 60 $$$ um noch mehr Länder zu besuchen.",
     }},
+  {0xa2b6bab2, { // "Trees in this forest can be chopped down. Big trees take two turns to chop down."
+   "Drzewa w tym lesie można ścinać. Ścięcie dużego drzewa zajmuje dwie kolejki.",
+   "Bu ormandaki ağaçlar kesilebilir. Büyük ağaçların kesilmesi iki tur alır.",
+   "Stromy v tomto lese je možné kácet. Kácení velkých stromů trvá dvě kola.",
+   "Вы можете рубить деревья в лесу. Большие деревья рубятся за два хода.",
+   "Bäume in diesem Wald können gefällt werden. Große Bäume zu fällen dauert zwei Züge.",
+    }},
   {0xa2dc468c, { // "Aww, poor %1... where is your family?"
    "Auu, biedny %1... gdzie Twoja rodzina?",
 /*MISSING*/    "Aww, poor %1... where is your family?",
    "Á, chudáčku Želvičko... kdepak máš rodinu?",
    "Ох, бедный %1... Где его семья?",
-/*MISSING*/    "Aww, poor %1... where is your family?",
+   "Oh, du arme %1... wo ist deine Familie?",
     }},
   {0xa2ea7202, { // "%The1 squeaks excitedly!"
    "%1 się ekscytuje!",
@@ -4991,21 +6916,35 @@ sentence all_sentences[1130] = {
    "%1 çeşitlemeleri Rastgele Doku Modunda her zaman mevcuttur.",
    "Varianty kraje '%1' jsou vždy k dispozici v Módu náhodných vzorů.",
    "Варианты земли %1 всегда доступны в режиме случайного узора.",
-   "Varianten der %1 sind im Zufallsmuster Modus verfügbar.",
+   "Varianten der %1 sind im Zufallsmuster-Modus verfügbar.",
     }},
   {0xa367f3a9, { // "The hyperbolic pirates have no use for treasure maps. However, they have found out that a compass points to the center of the island. So they just go as far towards the center as they can, and hide their treasure there."
-   "Mapy są bezużyteczne dla hiperbolicznych piratów, ale zauważyli oni, że kompas zawsze wskazuje w kierunku środka wyspy. Zatem piraci po prostu idą tak daleko w stronę środka, jak mogą, i tam chowają swoje skarby.",
+   "Mapy są bezużyteczne dla hiperbolicznych piratów, ale zauważyli oni, że kompas zawsze wskazuje w kierunku środka wyspy. Zatem piraci po prostu idą tak daleko w stronę środka, jak mogą i tam chowają swoje skarby.",
    "Hazine haritalarının hiperbolik korsanlar için bir değeri yok. Ancak, adanın ortasını gösteren bir pusula keşfettiler. Böylece, ortaya doğru olabildiğince ilerler ve hazinelerini orada saklarlar.",
    "Mapy jsou hyperbolickým pirátům k ničemu. Zjistili ale, že kompas vždy ukazuje do středu ostrova. A tak se prostě vydávají tak daleko do středu, jak to jen jde, a tam ukrývají své poklady.",
    "Карты бесполезны для гиперболических пиратов, но они знают, что компас всегда показывает в центр острова. Так что они просто идут как можно дальше к центру острова и прячут там сокровища.",
-   "Die hyperbolischen Piraten haben für Schatzkarten keinen Gebrauch.Jedoch haben sie erfahren, dass ein Kompass in die Mitte einer Insel zeigtalso gehen sie so weit dort hin, wie sie können, und verstecken dort ihre Schätze.",
+   "Die hyperbolischen Piraten haben für Schatzkarten keinen Gebrauch. Jedoch haben sie erfahren, dass ein Kompass in die Mitte einer Insel zeigt. Also gehen sie so weit dort hin, wie sie können, und verstecken dort ihre Schätze.",
+    }},
+  {0xa3ced252, { // "movement color"
+   "kolor ruchu",
+/*MISSING*/    "movement color",
+   "barva pohybu",
+   "цвет хода",
+   "Richtungsmarker-Farbe",
+    }},
+  {0xa3de7c50, { // "Escher/3D"
+   "Escher/3D",
+/*MISSING*/    "Escher/3D",
+   "Escher/3D",
+   "Эшер/3D",
+/*MISSING*/    "Escher/3D",
     }},
   {0xa3f46380, { // "Activated the Hyperstone Quest!"
    "Aktywowałeś Misję Hiperkamień!",
    "Aşkıntaş Görevini etkinleştirdin!",
    "Aktivoval jsi Hyperkamový úkol!",
    "Активирована миссия Гиперкамней!",
-   "Hyperstein Quest aktiviert!",
+   "Hyperstein-Herausforderung aktiviert!",
     }},
   {0xa3f7444f, { // "You cannot target that close!"
    "Nie możesz celować tak blisko!",
@@ -5022,39 +6961,67 @@ sentence all_sentences[1130] = {
    "Dein Hirn dampft!",
     }},
   {0xa4a3cb42, { // "These Cultists can push the statues, just like you."
-   "Ci kultyści mogą przesuwać pomniki, tak samo jak Ty.",
+   "Ci kultyści mogą przesuwać pomniki tak samo jak Ty.",
    "Bu Müritler putları tıpkı senin gibi itebilir.",
    "Tito kultisté dokážou strkat sochy, stejně jako ty.",
    "Эти культисты могут двигать статуи,как и Вы.",
-   "Diese Anhänger können die Statuen schieben, genau wie du.",
+   "Diese Kultanhänger können die Statuen schieben, genau wie du.",
+    }},
+  {0xa51aefb4, { // "You collect %the1. (%2)"
+   "Znalaz%łeś0 %a1. (%2)",
+/*MISSING*/    "You collect %the1. (%2)",
+   "Získa%l0 jsi %a1. (%2)",
+   "Вы собрали %a1. (%2)",
+   "Du sammelst %den1 %a1. (%2)",
     }},
   {0xa52c28a0, { // "This land contains high rock formations. Most of the valley is at level 0, while items are found at level 3. It is impossible to gain two or more levels, or to lose three levels, in a single move, (attacks are possible at any difference, though). Kill Red Trolls and Rock Snakes to make a cell higher."
-   "W tej krainie są wysokie formacje skalne. Większość doliny jest na poziomie 0, a przedmioty można znaleźć na poziomie 3. Niemożliwe jest wzniesienie się na dwa lub więcej poziomów, lub obniżenie się o trzy poziomy, w jednym ruchu (ale atakować można przy każdej różnicy poziomów). Zabij Czerwonego Trolla albo Skalnego Węża, by podnieść poziom pola.",
+   "W tej krainie są wysokie formacje skalne. Większość doliny jest na poziomie 0, a przedmioty można znaleźć na poziomie 3. Niemożliwe jest wzniesienie się na dwa lub więcej poziomów lub obniżenie się o trzy poziomy w jednym ruchu (ale atakować można przy każdej różnicy poziomów). Zabij Czerwonego Trolla albo Skalnego Węża, by podnieść poziom pola.",
    "Bu diyar kaya oluşumları barındırır. Vadinin çoğu yükseklik 0'dadır, eşyalar ise yükseklik 3'te bulunabilir. Tek hamlede iki veya daha fazla yükseklik kazanamaz yahut üç veya daha fazla yükseklik kazanamazsın. (ama yükseklikler arası saldırılar mümkün). Kızıl Trolleri ve Kaya Yılanlarını öldürerek bir hücreyi yükseltebilirsin. ",
    "V tomto kraji se nacházejí vysoké skalní útvary. Většina údolí je na úrovni 0, ale předměty se nacházejí pouze na úrovni 3. Jedním pohybem se můžete dostat maximálně o jednu úroveň výš nebo o dvě úrovně níž, ale útočit je možné bez ohledu na výškový rozdíl. Zabíjením Červených trollů a Skalních hadů můžete pole posouvat nahoru.",
    "Эта земля содержт участки высоких скал. Большая часть долины находится на уровне 0, а все предметы лежат на уровне 3. Невозможно подняться на 2 или больше уровня или опуститься на 3 уровня за один ход, хотя атаковать можно всегда. Убейте Красного тролля или Каменную змею, чтобы сделать клетку выше.",
    "Dieses Land enthält hohe Felsformationen. Der Großteil des Tals ist auf Ebene 0, aber die meisten Gegenstände finden sich auf Ebene 3 (III). Es ist unmöglich mehr als eine Ebene aufzusteigen sowie alle 3 in einem Zug zu verlieren. Angriffe sind auf jeder Höhe möglich. Töte Rote Trolle und Felsschlangen, um eine Zelle zu erhöhen.",
+    }},
+  {0xa58e0943, { // "Welcome to the Yendor Challenge %1!"
+   "Witaj w Misji Yendor %1!",
+/*MISSING*/    "Welcome to the Yendor Challenge %1!",
+   "Vítej v Yendorské misi %1!",
+   "Добро пожаловать в миссию Йендора %1!",
+/*MISSING*/    "Welcome to the Yendor Challenge %1!",
     }},
   {0xa5b5aaa6, { // "People worshipping Cthulhu. They are very dangerous."
    "Wyznawcy Cthulhu, bardzo niebiezpieczni.",
    "Cthulhu'ya tapan insanlar. Çok tehlikeliler.",
    "Lidé uctívající Cthulhua. Jsou velmi nebezpeční.",
    "Люди, поклоняющиеся Ктулху. Они довольно опасны.",
-   "Anhänger Cthulhus. Sie sind sehr gefährlich.",
+   "Verehrer Cthulhus. Sie sind sehr gefährlich.",
     }},
   {0xa5d1bc77, { // "Branches here could bear your weight easily."
    "Te gałęzie z łatwością udźwigną Twój ciężar.",
 /*MISSING*/    "Branches here could bear your weight easily.",
    "Tyhle větve by snadno unesly tvou váhu.",
    "Эти ветви легко выдержат ваш вес.",
-/*MISSING*/    "Branches here could bear your weight easily.",
+   "Die Äste hier tragen dein Gewicht mit Leichtigkeit.",
+    }},
+  {0xa605f9d2, { // "\nSpecial conduct failed:\n"
+   "\nDodatkowe wyzwanie (przegrane):",
+/*MISSING*/    "\nSpecial conduct failed:\n",
+   "\nZvláštní výzva (neúspěšná):",
+   "\nДополнительное условие (нарушено):",
+/*MISSING*/    "\nSpecial conduct failed:\n",
+    }},
+  {0xa61bdb9e, { // "You are playing %the1 in the Pure Tactics mode."
+   "Grasz %a1 w trybie taktycznym.",
+/*MISSING*/    "You are playing %the1 in the Pure Tactics mode.",
+   "Právě hraješ %a1 v čistě taktickém módu.",
+   "Вы играете в %a1 в Тактическом режиме.",
+/*MISSING*/    "You are playing %the1 in the Pure Tactics mode.",
     }},
   {0xa63c8d96, { // "These warriors of the Forest wield exotic weapons called hedgehog blades. These blades protect them from a frontal attack, but they still can be 'stabbed' easily by moving from one place next to them to another."
-   "Ci wojownicy z Puszczy walczą egzotyczną bronią, Jeżowym Ostrzem. Ostrza te bronią je przed atakiem z frontu, ale za to możesz ich łatwo 'dźgnąć' poprzez przejście z jednego pola sąsiadującego z nimi na inne.",
+   "Ci wojownicy z Puszczy walczą egzotyczną bronią, Jeżowym Ostrzem. Ostrza te bronią przed atakiem z frontu, ale za to możesz ich łatwo 'dźgnąć' poprzez przejście z jednego pola sąsiadującego z nimi na inne.",
    "Ormandaki bu savaşçılar, adına kirpi bıçağı denen ilginç bıçaklar taşıyorlar. Bu bıçaklar onları önden gelen saldırılardan korur, ama hâlâ yanlarından geçerek öldürülebilirler.",
    "Tito válečníci z Hvozdu vládnou exotickými zbraněmi zvanými 'ježčí čepele'. Tyto čepele je chrání proti útoku zepředu, ale můžeš je snadno 'probodnout' tím, že se pohneš z jednoho políčka, které s nimi sousedí, na druhé.",
    "Эти лесные воители вооружены экзотическим оружием, называемым ежиным клинком. Клинки защищают их от прямых атак, но они могут быть 'заколоты', достаточно перейти с одной клетки рядом с нм на другую.",
-   "Diese Krieger besitzen exotische Waffen, die Igelklingen. Diese schützen sie vor frontalen Attacken, aber Igelkrieger können dennoch 'erstochen' werden indem du dich sie seitlich oder von hinten angreifst.",
+   "Diese Krieger des Waldes besitzen exotische Waffen, die Igelklingen. Diese schützen sie vor frontalen Angriffen - aber sie können dennoch 'erstochen' werden indem man sich direkt neben ihnen von einer Zelle auf eine andere bewegt.",
     }},
   {0xa690f718, { // "%The1 shows you a finger."
    "%1 pokaza%ł1 Ci palec.",
@@ -5071,11 +7038,11 @@ sentence all_sentences[1130] = {
    "Du kannst auf alles rechtsklicken, um Informationen darüber zu erhalten.\n\n",
     }},
   {0xa6ec396d, { // "Normally, the power of most Orbs slowly fades away, even when you are not actively using them. This Orb prevents this.\n\nWhen you have the Orb of Time, Orbs which are not active won't lose their power. Orbs are considered active if they have a continuous power which has actually affected something in the last turn.\n\nOrbs of Shielding remain active after being activated (even if you are no longer attacked), and Orbs of Time have a bigger cap inside their native Caribbean than outside."
-   "Zazwyczaj moc Sfer powoli wygasa, nawet gdy ich nie używasz aktywnie. Ta Sfera temu zapobiega.\n\nJeśli masz Sferę Czasu, nieaktywne sfery nie będą traciły mocy. Sfery są uważane za aktywne, jeśli mają ciągły efekt, który rzeczywiście na coś wpłynął w ostatniej turze.\n\nSfery Tarczy pozostają aktywne po aktywacji (nawet jeżeli nikt więcej nie atakuje), i Sfery Czasu mają większy limit na Karaibach niż poza nimi.",
+   "Zazwyczaj moc Sfer powoli wygasa, nawet gdy ich nie używasz aktywnie. Ta Sfera temu zapobiega.\n\nJeśli masz Sferę Czasu, nieaktywne sfery nie będą traciły mocy. Sfery są uważane za aktywne, jeśli mają ciągły efekt, który rzeczywiście na coś wpłynął w ostatniej turze.\n\nSfery Tarczy pozostają aktywne po aktywacji (nawet jeżeli nikt więcej nie atakuje), a Sfery Czasu mają większy limit na Karaibach niż poza nimi.",
    "Normalde Kürelerin güçleri ,onları aktif olarak kullanmadığında bile, yavaşça azalır. Bu Küre bunu engeller.\n\nZaman Küresine sahip olduğunda aktif olmayan küreler güçlerini kaybetmez. Sürekli gücü olan küreler eğer son turda bir şey etkiledilerse aktif sayılır.\n\nKalkan Küresi aktifleştirdikten sonra da (saldıraya uğramasan bile) aktif kalır.  Ayrıca Zaman Küresinin sınırı onların bulunduğu Karayiplerde daha fazladır.",
    "Síla většiny Sfér se většinou pomalu vytrácí, a to i tehdy, když je aktivně nepoužíváte. Tato sféra tomu brání.\n\nKdyž máš Sféru Času, nebudou neaktivní Sféry ztrácet sílu. 'Aktivní Sféra' je taková Sféra, která má stálý efekt a která v minulém kole něco skutečně ovlivnila.\n\nSféry Štítu zůstávají trvale aktivní, jakmile jednou zablokují útok (i když na tebe právě nikdo neútočí a Sféry Času mohou ve svém domovském Karibiku dosahovat vyšších hodnot síly než mimo něj.",
    "Обычно сила сфер угасает, даже если Вы не используете их. Сфера Времени препятствует этому.\n\nЕсли у Вас есть сфера Времени, неактивные сферы не теряют свою силу. Сфера считается активной, если она имеет постоянный эффект, проявившийся на последнем ходе.\n\nСфера Щита считается активной всегда (даже если Вы никого не атаковали). Сфера Времени имеет на Карибах больший эффект, чем в других местах.",
-   "Normalerweise schwindet die Kraft der meisten Orbs, sogar wenn du sie nicht einsetzt. Der Orb der Zeit verhindert dies.\n\nBesitzt du einen, verlieren inaktive Orbs keine Kraft. Orbs zählen als aktiv, wenn sie eine andauernde Kraft haben, die letzten Zug etwas beeinflusst hat.\n\nOrbs der Abschirmung bleiben nach Aktivierung aktiv und Orbs der Zeit halten in der Karibik länger als an anderen Orten.",
+   "Normalerweise schwindet die Kraft der meisten Orbs, sogar wenn du sie nicht einsetzt. Der Orb der Zeit verhindert dies.\n\nBesitzt du einen, verlieren inaktive Orbs keine Kraft. Orbs zählen als aktiv, wenn sie eine andauernde Kraft besitzen, die im letzten Zug etwas beeinflusst hat.\n\nOrbs der Abschirmung bleiben nach Aktivierung aktiv und Orbs der Zeit halten in der Karibik länger als an anderen Orten.",
     }},
   {0xa7088e66, { // " (won!)"
    " (wygrane!)",
@@ -5089,7 +7056,7 @@ sentence all_sentences[1130] = {
    "TEBRIKLER!",
    "GRATULUJEME!",
    "ПОЗДРАВЛЯЕМ!",
-   "GRATULATION!",
+   "GLÜCKWUNSCH!",
     }},
   {0xa7313705, { // "special thanks to the following people for their bug reports, feature requests, porting, and other help:\n\n%1\n\n"
    "Szczególne podziękowania dla poniższych osób za zgłoszone przez nich błędy, pomysły, porty i inną pomoc:\n\n%1\n\n",
@@ -5098,12 +7065,33 @@ sentence all_sentences[1130] = {
    "отдельное спасибо следующим людям за багрепорты, предложения и другую помощь:\n\n%1\n\n",
    "Besonderer Dank gebührt diesen Leuten für ihre Bug Reports, Feature-Anfragen, Ports, und andere Hilfe:\n\n%1\n\n",
     }},
+  {0xa757d525, { // "first joystick position (movement)"
+   "pozycja pierwszego joysticka (ruch)",
+/*MISSING*/    "first joystick position (movement)",
+   "pozice prvního joysticku (pohyb)",
+   "положение первого джойстика (движение)",
+/*MISSING*/    "first joystick position (movement)",
+    }},
+  {0xa768dbfc, { // "A land for people wanting to experiment with cellular automata in the HyperRogue grid. Rules can be given on the command line; the default rules are:\n-c07 00100000 -c06 0010000 -c17 00011000 -c16 0001100 -caprob 0.3\n(-c0 or -c1 can be given if the same rule is to be used for hexagonal and heptagonal cells)."
+   "Kraina dla tych, co chcą eksperymentować z automatami komórkowymi w siatce HyperRogue. Reguły można podawać w linii poleceń; domyślne to\n-c07 00100000 -c06 0010000 -c17 00011000 -c16 0001100 -caprob 0.3\n(można podać -c0 lub -c1 by dać te same reguły dla sześciokątów i siedmiokątów).",
+/*MISSING*/    "A land for people wanting to experiment with cellular automata in the HyperRogue grid. Rules can be given on the command line; the default rules are:\n-c07 00100000 -c06 0010000 -c17 00011000 -c16 0001100 -caprob 0.3\n(-c0 or -c1 can be given if the same rule is to be used for hexagonal and heptagonal cells).",
+   "Kraj pro ty, kdo by chtěli experimentovat s buněčnými automaty na mřížce HyperRogue. Pravidla lze zadávat v příkazové řádce; standardně jsou to\n-c07 00100000 -c06 0010000 -c17 00011000 -c16 0001100 -caprob 0.3\n(také lze zadat -c0 nebo -c1, pokud se má použít stejné pravidlo pro šestiúhelníky a sedmiúhelníky).",
+   "Земля для желающих поэкспериментировать с клеточными автоматами на сетке HyperRogue. Правила могут быть заданы в командной строке; правила по умолчанию:\n-c07 00100000 -c06 0010000 -c17 00011000 -c16 0001100 -caprob 0.3\n(можно использовать -c0 или -c1, если правила для шестиугольников и семиугольников совпадают).",
+/*MISSING*/    "A land for people wanting to experiment with cellular automata in the HyperRogue grid. Rules can be given on the command line; the default rules are:\n-c07 00100000 -c06 0010000 -c17 00011000 -c16 0001100 -caprob 0.3\n(-c0 or -c1 can be given if the same rule is to be used for hexagonal and heptagonal cells).",
+    }},
   {0xa7741462, { // "%1 knives (%2)"
    "noży: %1 (%2)",
    "bıçaklar: %1 (%2)",
    "nožů: %1 (%2)",
    "ножи: %1 (%2)",
    "%1 Messer (%2)",
+    }},
+  {0xa7b0f3df, { // "Welcome to the Random Pattern mode!"
+   "Witaj w trybie losowych wzorów!",
+/*MISSING*/    "Welcome to the Random Pattern mode!",
+   "Vítej v módu náhodných vzorů!",
+   "Добро пожаловать в режим случайных узоров!",
+/*MISSING*/    "Welcome to the Random Pattern mode!",
     }},
   {0xa7f306ff, { // "You have improved your '%1' high score on Google!"
    "Poprawi%łeś0 swój wynik w kategorii '%P1' na Google!",
@@ -5124,7 +7112,7 @@ sentence all_sentences[1130] = {
    "Bir canavar çıkar",
    "vyvolej netvora",
    "призвать монстра",
-/*MISSING*/    "summon a Monster",
+   "rufe ein Monster herbei",
     }},
   {0xa83688cc, { // "Cannot cast illusion on a monster!"
    "Nie możesz rzucić iluzji na potwora!",
@@ -5155,18 +7143,25 @@ sentence all_sentences[1130] = {
    "Beenden",
     }},
   {0xa87bb2fc, { // "Collect 30 $$$ to access more worlds"
-   "Znajdź 30 $$$ by iść do nowych krain",
+   "Znajdź 30 $$$, by iść do nowych krain",
    "30 $$$ toplayarak başka dünyalara eriş",
    "Další kraje zpřístupníš sesbíráním 30 $$$",
    "Соберите 30 $$$, чтобы открыть новые земли",
    "Sammle 30 $$$ um mehr Länder betreten zu können",
+    }},
+  {0xa87d300f, { // "An alternate layout of the Crossroads, without walls."
+   "Alternatywny układ Skrzyżowań, bez ścian.",
+/*MISSING*/    "An alternate layout of the Crossroads, without walls.",
+   "Alternativní verze Křižovatky bez zdí.",
+   "Другой вариант перекрёстка, без стен.",
+/*MISSING*/    "An alternate layout of the Crossroads, without walls.",
     }},
   {0xa91e5c94, { // "An ancient grave."
    "Stary grób.",
    "Antik bir mezar.",
    "Starý hrob.",
    "Старая могила.",
-   "Ein antikes Grab.",
+   "Ein altes Grab.",
     }},
   {0xa93109d6, { // "HyperRogue %1"
    "HyperRogue %1",
@@ -5208,7 +7203,7 @@ sentence all_sentences[1130] = {
 /*MISSING*/    "animals killed: %1",
    "zabitých zvířat: %1",
    "животных убито: %1",
-/*MISSING*/    "animals killed: %1",
+   "getötete Tiere: %1",
     }},
   {0xaa94065f, { // "SHARE"
    "SHARE",
@@ -5225,7 +7220,7 @@ sentence all_sentences[1130] = {
    "weiblich",
     }},
   {0xab720893, { // "You would be killed by %the1!"
-   "Zabi%ł1by Ciebie %1!",
+   "Zabi%ł1by Cię %1!",
    "%1 tarafından öldürülürsün!",
    "To by tě zabi%l1 %1!",
    "Вас убьёт %1!",
@@ -5238,12 +7233,26 @@ sentence all_sentences[1130] = {
    "С этим эликсиром Ваша жизнь будет долгой и процветающей...",
    "Mit diesem Elixir sollte dein Leben lang und wohlhabend sein...",
     }},
+  {0xab81bd79, { // "F1 - help"
+   "F1 - pomoc",
+/*MISSING*/    "F1 - help",
+   "F1 - nápověda",
+   "F1 - помощь",
+/*MISSING*/    "F1 - help",
+    }},
   {0xaba3926a, { // "This orb is activated if you are unable to escape (radius 4) without making illegal moves or going through cells which are currently adjacent to enemy monsters. Most game over situations are covered by this, but generally, this orb is oversensitive...\n\nWhen activated, it creates a Flash effect of radius 5."
-   "Ta sfera aktywuje się, gdy nie możesz uciec (promień 4) bez wykonywania nielegalnych ruchów, lub przechodzenia przez komórki nie sąsiadujące z przeciwnikami. Większość sytuacji 'koniec gry' jest pokrytych, ale zazwyczaj ta sfera jest nadwrażliwa...\n\nAktywacja powoduje efekt czaru Błysk w promieniu 5.",
+   "Ta sfera aktywuje się, gdy nie możesz uciec (promień 4) bez wykonywania nielegalnych ruchów lub przechodzenia przez komórki nie sąsiadujące z przeciwnikami. Pokrywa większość sytuacji 'koniec gry', ale zazwyczaj ta sfera jest nadwrażliwa...\n\nAktywacja powoduje efekt czaru Błysk w promieniu 5.",
 /*MISSING*/    "This orb is activated if you are unable to escape (radius 4) without making illegal moves or going through cells which are currently adjacent to enemy monsters. Most game over situations are covered by this, but generally, this orb is oversensitive...\n\nWhen activated, it creates a Flash effect of radius 5.",
    "Tato Sféra se aktivuje, pokud nemůžeš utéct (do vzdálenosti 4 políček), aniž bys provedl ilegální pohyby nebo prošel políčky, která momentálně sousedí s nepřátelskými netvory. To pokrývá většinu situací 'konec hry', ale obvykle tato Sféra reaguje poněkud přehnaně...\n\nPři aktivaci vytvoří efekt Záblesku s poloměrem 5 políček.",
    "Эта сфера активируется, если Вам некуда идти (в радиусе 4), не делая запрещённых ходов и не ходя на клетки, рядом с которыми стоит монстр. Обычно игра кончается именно в такой ситуации, хотя обратное верно далеко не всегда...\n\nПри активации создаёт Вспышку радиуса 5.",
-/*MISSING*/    "This orb is activated if you are unable to escape (radius 4) without making illegal moves or going through cells which are currently adjacent to enemy monsters. Most game over situations are covered by this, but generally, this orb is oversensitive...\n\nWhen activated, it creates a Flash effect of radius 5.",
+   "Dieser Orb wird aktiviert, wenn du nicht mehr entkommen kannst (Radius 4), ohne unerlaubte Züge zu machen oder Zellen zu überqueren, die sich neben einem feindlichen Monster befinden. Die meisten game-over-Situationen erfüllen diese Bedingung, aber im Allgemeinen ist dieser Orb überempfindlich...\n\nWenn er aktiviert wird, erzeugt er einen Lichtblitz vom Radius 5.",
+    }},
+  {0xabc14003, { // "parameters set correctly"
+   "parametry prawidłowe",
+/*MISSING*/    "parameters set correctly",
+   "správně nastavené parametry",
+   "параметры корректны",
+/*MISSING*/    "parameters set correctly",
     }},
   {0xac1227ad, { // "pan down"
    "przewiń w dół",
@@ -5257,7 +7266,7 @@ sentence all_sentences[1130] = {
    "Eter gücünün süresi bitti! KAÇ!",
    "Tvá síla Éteru vyprchala. UTÍKEJ!",
    "Ваша эфирная сила иссякает! БЕГИТЕ!",
-   "Deine Ätherkraft ist zu Ende! Renn!",
+   "Deine Ätherkraft ist zu Ende! Lauf!!!",
     }},
   {0xac35a37d, { // "You activate %the1."
    "Aktywowa%łeś0 %a1.",
@@ -5299,28 +7308,35 @@ sentence all_sentences[1130] = {
 /*MISSING*/    "%The1 hits %the2.",
    "%1 udeři%l1 %a2.",
    "%1 ударил%E1 %a2.",
-/*MISSING*/    "%The1 hits %the2.",
+   "%Der1 %1 schlägt %den2 %a2.",
     }},
   {0xaded0207, { // "Don't be fooled by this red-haired girl, or you will be stabbed if you come too close!"
-   "Nie daj się zwieść tej rudowłosej, bo jak się za bardzo zbliżysz, możesz zostać ugodzon%y1 nożem!",
+   "Nie daj się zwieść tej rudowłosej, bo jak się za bardzo zbliżysz, możesz zostać ugodzon%ya1 nożem!",
 /*MISSING*/    "Don't be fooled by this red-haired girl, or you will be stabbed if you come too close!",
    "Nenech se oklamat touto zrzavou dívkou -- pokud se k ní příliš přiblížíš, bodne tě!",
    "Не будьте обмануты этой рыжеволосой девушкой, у неё есть острый нож!",
-/*MISSING*/    "Don't be fooled by this red-haired girl, or you will be stabbed if you come too close!",
+   "Lass dich von diesem rothaarigen Mädchen nicht täuschen - oder du wirst erstochen, wenn du zu nah kommst!",
+    }},
+  {0xae23f5e8, { // "configure input"
+   "konfiguracja sterowania",
+/*MISSING*/    "configure input",
+   "konfigurace vstupu",
+   "настроить ввод",
+/*MISSING*/    "configure input",
     }},
   {0xae245bf3, { // "TRANSLATIONWARNING"
 /*MISSING*/    "TRANSLATIONWARNING",
    "ÇEVİRİ UYARISI: Türkçe çevirisi güncel değil -- 8.1'den sonra eklenen özellikleri",
 /*MISSING*/    "TRANSLATIONWARNING",
 /*MISSING*/    "TRANSLATIONWARNING",
-   "VORSICHT: Die deutsche Übersetzung enthält keine",
+/*MISSING*/    "TRANSLATIONWARNING",
     }},
   {0xae2cf6e1, { // "The temple of Cthulhu consists of many concentric circles of columns. You will surely encounter many Cultists there, who believe that a pilgrimage to the inner circles will bring them closer to Cthulhu himself, and Grimoires which surely contain many interesting secrets.\n\nThe circles in the temple of Cthulhu are actually horocycles. They are infinite, and there is an infinite number of them."
-   "Świątynia Cthulhu składa się z wielu koncentrycznych kręgów kolumn. Spotkasz tu wielu Kultystów, dla których pielgrzymka do wewnętrznych kręgów to szansa na bycie bliżej Cthulhu, i Księgi zawierające wiele interesujących sekretów.\n\nKręgi w Świątyni Cthulhu są właściwie horocyklami. Są nieskończone, i jest ich nieskończenie wiele.",
+   "Świątynia Cthulhu składa się z wielu koncentrycznych kręgów kolumn. Spotkasz tu wielu Kultystów, dla których pielgrzymka do wewnętrznych kręgów to szansa na bycie bliżej Cthulhu, a także Księgi zawierające wiele interesujących sekretów.\n\nKręgi w Świątyni Cthulhu są właściwie horocyklami. Są nieskończone i jest ich nieskończenie wiele.",
    "Cthulhu tapınağı çok sayıda eş merkezli dairesel sütunlardan oluşur. Burada iç dairelere yapılan bir haccın kendilerini Cthulhu'ya daha çok yaklaştırdığına inanan bir çok Müritle ve çok ilginç sırlar içeren Kara Kitaplarla karşılaşacaksın. \n\nCthulhu Tapınağının merkezindeki daireler aslında horoçemberler. Onlar sonsuz ve onlardan sonsuz tane var.",
    "Cthulhuův chrám sestává z mnoha soustředných kruhů sloupů. Jistě tu narazíš na mnoho Kultistů, kteří věří, že je vykonání pouti do vnitřních kruhů přivede blíž k samotnému Cthulhuovi a ke Grimoárům, které jistě obsahují mnoho zajímavých tajemství.\n\nKruhy v Cthulhuově chtámu jsou ve skutečnosti horocykly. Jsou nekonečně velké a je jich nekonečně mnoho.",
    "Храм Ктулху содержит много концентрических кругов колонн. Здесь Вы встретите культистов, верящих, что путешествие во внутренние круги храма приблизит их ко Ктулху, и найдёте Гримуары, содержащие весьма интересные секреты.\n\nКруги в храме на самом деле орициклы. Они бесконечны, и их число бесконечно.",
-   "Der Tempel von Cthulhu. Er besteht aus mehreren konzentrischen Kreisen mit Säulen. Du wirst sicherlich einige Anhänger Cthulhus hier finden. Diese glauben, eine Reise in die inneren Kreise bringt lässt sie mächtige Grimoires finden und bringt sie näher an Cthulhu.\n\nDie Kreise hier sind eigentlich Horozyklen. Unendlich groß und unendlich viele davon.",
+   "Der Tempel des Cthulhu. Er besteht aus vielen konzentrischen Kreisen von Säulen. Du wirst hier sicherlich vielen Anhängern Cthulhus begegnen. Sie glauben, dass eine Pilgerreise in die inneren Kreise sie näher zu Cthulhu bringt und man mächtige Grimoires finden kann, die viele Geheimnisse in sich bergen.\n\nDie Kreise hier sind eigentlich Horozykeln. Sie sind unendlich groß, und es gibt unendlich viele davon.",
     }},
   {0xae2d6177, { // "\"That felt great. Thanks!\""
    "\"Wspaniałe uczucie. Dzięki!\"",
@@ -5357,6 +7373,13 @@ sentence all_sentences[1130] = {
    "игрок 2 Y",
    "Spieler 2 Y",
     }},
+  {0xaf02ccc6, { // "Mid detail range"
+   "Zasięg średniego poziomu szczegółów",
+/*MISSING*/    "Mid detail range",
+   "Rozsah středních detailů",
+   "Зона средней детализации",
+/*MISSING*/    "Mid detail range",
+    }},
   {0xaf542723, { // "backward"
    "do tyłu",
    "geri",
@@ -5371,22 +7394,29 @@ sentence all_sentences[1130] = {
    "Вы не можете убить свою тень!",
    "Du kannst den Schatten nicht besiegen!",
     }},
+  {0xaf704be6, { // "Vampire Bats drain your magical powers!"
+   "Wampiry wysysają Twoje magiczne moce!",
+/*MISSING*/    "Vampire Bats drain your magical powers!",
+   "Vampýři ti vysávají magické schopnosti!",
+   "Вампиры высасывают из Вас силу!",
+/*MISSING*/    "Vampire Bats drain your magical powers!",
+    }},
   {0xaf9f8e73, { // "An alternate layout of the Crossroads. Great Walls cross here at right angles."
    "Alternatywny układ Skrzyżowania. Wielkie Ściany przecinają się tu pod kątami prostymi.",
    "Arayollar için bir alternatif düzen. Büyük Duvarlar burada dik açı yaparak kesişir.",
    "Alternativní uspořádání Křižovatky. Velké zdi se tu protínají v pravých úhlech.",
    "Альтернативный вариант Перекрёстка. Великие стены пересекаются под прямым углом.",
-   "Ein alternatives Layout der Kreuzung. Große Mauern kreuzen sich hier in rechten Winkeln.",
+   "Ein alternatives Layout der Kreuzungen. Große Mauern kreuzen sich hier in rechten Winkeln.",
     }},
   {0xafa28a3b, { // "Congratulations! Your score is %1."
    "Gratulacje! Twój wynik to %1.",
    "Tebrikler! Puanın: %1.",
    "Gratulujeme! Tvé skóre je %1.",
    "Поздравляем! Ваш результат: %1.",
-   "Gratulation! Deine Punktzahl beträgt %1.",
+   "Glückwunsch! Deine Punktzahl beträgt %1.",
     }},
   {0xafbe27dc, { // "A precious green gem from the Emerald Mines."
-   "Cenny klejnot z Kopalni Szmaragdów.",
+   "Cenny, zielony klejnot z Kopalni Szmaragdów.",
    "Zümrüt Madenlerinden eğerli yeşil bir mücevher.",
    "Cenný zelený drahokam ze Smaragdového dolu.",
    "Ценный зелёный камень из изумрудных шахт.",
@@ -5399,12 +7429,26 @@ sentence all_sentences[1130] = {
    "Зеркало разбилось!",
    "Der Spiegel zerbricht",
     }},
+  {0xb1009491, { // "player"
+   "gracz",
+/*MISSING*/    "player",
+   "hráč",
+   "игрок",
+   "Spieler",
+    }},
   {0xb185b26f, { // "Skeletons work similar to Palace Guards, but they won't die no matter how many times you hit them. Well, you have to be more creative...\n\nSkeletons attacked outside of their native land, Palace, are stunned for a longer time."
    "Kościotrupy działają podobnie do Strażników Pałacu, ale nie zabijesz ich, ilekolwiek byś ich atakowa%ł0. Wymyśl coś bardziej twórczego...\n\nKościotrup zaatakowany poza Pałacem będzie ogłuszony przez dłuższy czas.",
    "İskeletler Saray Muhafızlarına benzerdir, ama kaç sefer vurulurlarsa vurulsunlar ölmezler. Onları öldürmek için daha yaratıcı olmanız gerekiyor... \n\n Sarayın dışında darbe alan iskeletler daha uzun süre için sersemlerler.",
    "Kostlivci fungují podobně jako Strážci Paláce, ale ať na ně zaútočíš, kolikrát chceš, nikdy je nezabiješ. No, musíš být vynalézavější...\n\nMimo Palác, jejich rodný kraj, budou Kostlivci útokem omráčení na delší dobu.",
    "Скелет реагирует на удары как Дворцовый стражник, но сколько раз бы Вы его не ударили, он не умрёт. Хитрее надо быть...\n\nЕсли скелет атакован вне его родной земли, Дворца, он застывает на более долгое время.",
-   "Skelette ähneln den Palastwachen. Sie sterben zwar nicht egal wie oft du sie triffst,aber wenn du sie außerhalb des Palastes angreifst sind sie für lange Zeit betäubt \n\n",
+   "Skelette ähneln den Palastwachen. Sie sterben zwar nicht egal wie oft du sie triffst, aber wenn du sie außerhalb des Palastes angreifst sind sie für lange Zeit betäubt \n\n",
+    }},
+  {0xb1bbbfea, { // "You feel that a magical weapon is waiting for you..."
+   "Czujesz, że magiczna broń na Ciebie czeka...",
+/*MISSING*/    "You feel that a magical weapon is waiting for you...",
+   "Cítíš, že na tebe čeká magická zbraň...",
+   "Ты чувствуешь, что магическое оружие ждёт тебя...",
+/*MISSING*/    "You feel that a magical weapon is waiting for you...",
     }},
   {0xb1c9f938, { // "Six mines next to you!"
    "Sześć min koło Ciebie!",
@@ -5418,7 +7462,7 @@ sentence all_sentences[1130] = {
 /*MISSING*/    "rotation",
    "rotace",
    "поворот",
-/*MISSING*/    "rotation",
+   "Rotation",
     }},
   {0xb21f6237, { // "You feel more experienced in demon fighting!"
    "Jesteś bardziej doświadczony w walce z demonami!",
@@ -5455,6 +7499,20 @@ sentence all_sentences[1130] = {
    "Вы прыгнули!",
    "Du springst!",
     }},
+  {0xb2e991dc, { // "towards orthographic"
+   "w stronę rzutu ortogonalnego",
+/*MISSING*/    "towards orthographic",
+   "směr k ortografické projekci",
+   "в сторону ортогональной",
+/*MISSING*/    "towards orthographic",
+    }},
+  {0xb309a7f9, { // "Your mundane weapon cannot hurt %the1!"
+   "Twoja zwykła broń nie działa na %a1!",
+/*MISSING*/    "Your mundane weapon cannot hurt %the1!",
+   "%1 se nedá zranit tvou obyčejnou zbraní!",
+   "Обычное оружие не берёт %a1!",
+   "Deine irdische Waffe kann %den1 %a1 nicht verletzen!",
+    }},
   {0xb3145edc, { // "%The1 falls!"
    "%1 spad%ł1!",
    "%1 düştü!",
@@ -5474,7 +7532,7 @@ sentence all_sentences[1130] = {
 /*MISSING*/    "render texture without OpenGL",
    "renderuj textury bez OpenGL",
    "не использовать OpenGL",
-/*MISSING*/    "render texture without OpenGL",
+   "Rendere die Textur ohne OpenGL",
     }},
   {0xb3826405, { // "%The1 throws fire at you!"
    "%1 rzuca w Ciebie ogniem!",
@@ -5488,7 +7546,7 @@ sentence all_sentences[1130] = {
    "%1 zihin patlamasından etkilenmez!",
    "%1 je imunní proti mentálnímu útoku!",
    "%1 защищён%E1 от психических атак!",
-   "%Der1 ist immun gegen mentale Korruption!",
+   "%Der1 %1 ist immun gegen mentale Stöße!",
     }},
   {0xb3ce009a, { // "second joystick: panning speed"
    "dżojstik 2: prędkość przewijania",
@@ -5498,11 +7556,11 @@ sentence all_sentences[1130] = {
    "Joystick 2: Scrollgeschwindigkeit",
     }},
   {0xb3f93924, { // "These warped humanoids are skilled warriors and sailors, and they feel at home at the Warped Coast. Their battle experience has taught them that enemies who wait without moving or attacking anything are the most deadly. If they see such an enemy, they become extremely suspicious, and they also wait."
-   "Te człekokształtne stworzenia są zręczne na morzu i w walce, i na Zakrzywionym Brzegu czują się jak w domu. Ich doświadczenie bitewne nauczyło je, że ci przeciwnicy, którzy czekają, bez ruchu i bez ataku, są najbardziej niebezpieczni. Kiedy widzą takiego przeciwnika, stają się bardzo podejrzliwe, i również czekają.",
+   "Te człekokształtne stworzenia są zręczne na morzu i w walce, a na Zakrzywionym Brzegu czują się jak w domu. Ich doświadczenie bitewne nauczyło je, że ci przeciwnicy, którzy czekają bez ruchu i bez ataku, są najbardziej niebezpieczni. Kiedy widzą takiego przeciwnika, stają się bardzo podejrzliwe i również czekają.",
 /*MISSING*/    "These warped humanoids are skilled warriors and sailors, and they feel at home at the Warped Coast. Their battle experience has taught them that enemies who wait without moving or attacking anything are the most deadly. If they see such an enemy, they become extremely suspicious, and they also wait.",
    "Tito pokřivení humanoidé jsou dobrými válečníky i námořníky a na Pokřiveném pobřeží jsou jako doma. Jejich bojové zkušenosti je naučily, že nepřátelé, kteří čekají -- nehýbou se a neútočí -- jsou ti nejvražednější. Když takového nepřítele uvidí, začnou být velmi podezíraví a budou čekat také.",
    "Эти искривлённые гуманоиды -- опытные воины и мореходы, и чувствуют себя как дома на Искривлённом берегу. Их боевой опыт говорит, что враги, которые стоят на месте и никого не атакуют, наиболее опасны. Когда они видят такого врага, Они становятся подозрительными и тоже стоят на месте.",
-/*MISSING*/    "These warped humanoids are skilled warriors and sailors, and they feel at home at the Warped Coast. Their battle experience has taught them that enemies who wait without moving or attacking anything are the most deadly. If they see such an enemy, they become extremely suspicious, and they also wait.",
+   "Diese verzerrten Humanoiden sind geschickte Krieger und Segler, die sich an der Verzerrten Küste zu Hause fühlen. Ihre Kampferfahrung hat sie gelehrt, das Feinde, die warten ohne sich zu bewegen oder anzugreifen, die tödlichsten sind. Wenn sie solch einen Feind treffen, werden sie extrem misstrauisch und warten ebenfalls.",
     }},
   {0xb405f402, { // "g = grid"
    "g = siatka",
@@ -5530,7 +7588,7 @@ sentence all_sentences[1130] = {
 /*MISSING*/    "A bird who hunts in the treetops of the Yendorian Forest.",
    "Pták, který loví v korunách Yendorského lesa.",
    "Эта птица охотится в Йендорском лесу.",
-/*MISSING*/    "A bird who hunts in the treetops of the Yendorian Forest.",
+   "Ein Vogel welcher in den Baumwipfeln des Yendorianischen Waldes jagt.",
     }},
   {0xb45264c8, { // "Palace Pattern"
    "Pałacowy Wzór",
@@ -5539,12 +7597,19 @@ sentence all_sentences[1130] = {
    "Дворцовый узор",
    "Palastmuster",
     }},
+  {0xb4b7757a, { // "HyperRogue uses the Minkowski hyperboloid model internally. Klein and Poincaré models can be obtained by perspective, and the Gans model is obtained by orthogonal projection. See also the conformal mode (in the special modes menu) for more models."
+   "HyperRogue wewnętrznie używa modelu hiperboloidy Minkowskiego. Modele Kleina i Poincaré są uzyskiwane przez perspektywę, a model Gansa przez rzut ortogonalny. Więcej modeli w trybie konforemnym (w menu trybów specjalnych).",
+/*MISSING*/    "HyperRogue uses the Minkowski hyperboloid model internally. Klein and Poincaré models can be obtained by perspective, and the Gans model is obtained by orthogonal projection. See also the conformal mode (in the special modes menu) for more models.",
+   "HyperRogue interně používá model Minkowského hyperboloidu. Kleinův a Poincarého model lze získat pomocí perspektivy a Gansův model pomocí ortogonální projekce. Více modelů můžeš najít v konformálním módu (menu speciálních módů).",
+   "HyperRogue использует для расчётов модель Минковского. Модели Клейна и Пуанкаре получаются из неё перспективой, а модель Ганса -- ортогональной проекцией. Также смотрите конформный режим (в меню специальных режимов) для других моделей.",
+/*MISSING*/    "HyperRogue uses the Minkowski hyperboloid model internally. Klein and Poincaré models can be obtained by perspective, and the Gans model is obtained by orthogonal projection. See also the conformal mode (in the special modes menu) for more models.",
+    }},
   {0xb4f15d44, { // "Demons of Hell do not drown when they fall into the lake in Cocytus. They turn into demonic sharks, enveloped in a cloud of steam."
    "Demony nie topią się, gdy wpadną w jezioro Kocyt. Zamieniają się w demoniczne rekiny, otoczone chmurą pary.",
    "Cehennem Şeytanları Kokitos'ta göle düştüklerinde boğulmazlar.Bir buhar bulutuyla kaplı şeytanî köpekbalıklarına dönüşürler.",
    "Když pekelní démoni spadnou do jezera v Cocytu, neutopí se. Místo toho se promění v Ďábelské žraloky zahalené v oblaku páry.",
    "Демоны из Ада не тонут в озёрах Коцита. Они превращаются в демонических акул, окутанных облаками пара.",
-   "Dämonen aus der Hölle ertrinken nicht wenn sie in den See von Kokytos fallen, stattdessenwerden sie zu Dämonenhaien eingehüllt in eine Wolke aus Dampf.",
+   "Dämonen aus der Hölle ertrinken nicht, wenn sie in den See von Kokytos fallen. Stattdessen werden sie zu Dämonenhaien, eingehüllt in eine Wolke aus Dampf.",
     }},
   {0xb5149a1e, { // "You have found the Key! Now unlock this Orb of Yendor!"
    "Znalaz%łeś0 Klucz! Otwórz Sferę Yendoru!",
@@ -5572,7 +7637,7 @@ sentence all_sentences[1130] = {
    "\"Haritalar... Gerçek dünya gibi, ama daha küçük... bu nasıl mümkün olabilir?!\"",
    "\"Mapy... stejné jako svět, ale menší... jak je to vůbec možné?!\"",
    "\"Карты... как мир, только меньше... как это возможно?!\"",
-   "\"Katzen... Genau wie die Welt, nur kleiner... wie ist das möglich?!\"",
+   "\"Karten... Genau wie die Welt, nur kleiner... wie ist das möglich?!\"",
     }},
   {0xb620161f, { // "display only heptagons"
    "pokaż tylko siedmiokąty",
@@ -5593,21 +7658,28 @@ sentence all_sentences[1130] = {
 /*MISSING*/    "Only thin twigs and leaves here. They may bear fruits, but for you, these cells count as unstable.",
    "Tady jsou jen tenké větvičky a listy. Mohou nést ovoce, ale pro tebe se počítají jako nestabilní.",
    "Здесь лишь тонкие веточки и листья. Они могут выдержать фрукт, но не ваш вес.",
-/*MISSING*/    "Only thin twigs and leaves here. They may bear fruits, but for you, these cells count as unstable.",
+   "Hier sind nur dünne Zweige und Blätter. Sie mögen Früchte tragen, aber für dich sind diese Zellen instabil.",
+    }},
+  {0xb7879863, { // "Hint: use arrow keys to scroll."
+   "Wskazówka: przewijasz strzałkami.",
+/*MISSING*/    "Hint: use arrow keys to scroll.",
+   "Nápověda: šipkami můžeš scrollovat.",
+   "Подсказка: листайте экран стрелками.",
+/*MISSING*/    "Hint: use arrow keys to scroll.",
     }},
   {0xb792f8be, { // "The Grimoires contain many secrets of the Great Old Ones. Each new inner circle in the Temple of Cthulhu contains new Grimoires, with new secrets. You hope to read them when you return home, and to learn many things. The knowledge is valuable to you, but it is rather pointless to try to get several copies of the same Grimoire..."
-   "Te Księgi zawierają tajemnice Wielkich Przedwiecznych. Każdy krąg wewnętrzny w Świątyni Cthulhu zawiera nowe Księgi, z nowymi sekretami. Zamierzasz je przeczytać po powrocie do domu. Wiedza jest dla Ciebe wartościowa, ale nie ma sensu, by brać kilka kopii tej samej Księgi...",
+   "Te Księgi zawierają tajemnice Wielkich Przedwiecznych. Każdy krąg wewnętrzny w Świątyni Cthulhu zawiera nowe Księgi, z nowymi sekretami. Zamierzasz je przeczytać po powrocie do domu. Wiedza jest dla Ciebie wartościowa, ale nie ma sensu, by brać kilka kopii tej samej Księgi...",
    "Kara Kitaplar Eski Yücelere dair pek çok sır içerir. Cthulhu Tapınağındaki her iç daire yeni sırlar içeren yeni Kara Kitaplar içerir.Eve geri döndüğünde bunları okuyup pek çok şey öğrenmeyi umuyorsun. Bilgi senin için önemli, bu yüzden aynı Kara Kitaptan birden fazla almak çok anlamsız.",
    "Grimoáry obsahují mnoho tajemství Starých Velkých. Každý další vnitřní kruh Cthulhuova chrámu obsahuje nové Grimoáry s novými tajemstvími. Doufáš, že si je všechny přečteš, až se vrátíš domů, a že se naučíš mnoho věcí. Znalosti z Grimoárů jsou pro tebe cenné, ale nemá smysl snažit se získat několik kopií stejného Grimoáru...",
    "Гримуары содержат много секретов Великих предков Каждый новый круг Храма Ктулху содержит новые тома с новыми секретами. Вы можете принести их домой, прочитать и узнать много вещей.Знание ценно для Вас, но Вам не нужны копии одного Гримуара... ",
-   "Die Grimoires enthalten viele Geheimnisse der Weißen Alten. Jeder neue innere Kreis des Tempels von Cthulhu enthält neue Grimoires, mit mehr Geheimnissen. Das Wissen ist dir sehr kostbar, aber es wäre natürlich sinnlos, mehrmals dasselbe Grimoire aufzuheben...",
+   "Die Grimoires enthalten viele Geheimnisse der weisen Alten. Jeder neue innere Kreis des Tempels des Cthulhu enthält neue Grimoires mit mehr Geheimnissen. Das Wissen ist dir sehr kostbar, aber es wäre natürlich sinnlos, mehrmals das gleiche Grimoire aufzuheben...",
     }},
   {0xb7c225da, { // "The Necromancer's Totem contains hellish incantations..."
    "Totem Nekromanty zawiera piekielne inkantacje...",
    "Ölüçağıranın Totemi şeytani işlemelerle doluydu...",
    "Nekromancerův totem obsahuje pekelná zaklínání...",
    "Тотем некроманта содержит адские заклинания...",
-   "Das Nekromanten Totem enthält diabolische Zaubersprüche...",
+   "Das Totenbeschwörer-Totem enthält diabolische Zaubersprüche...",
     }},
   {0xb8041ec3, { // "t = shift"
    "t = przesuń",
@@ -5642,21 +7714,35 @@ sentence all_sentences[1130] = {
    "Ölüçağıranlar mezarlardan hayaletler ve hortlaklar çağırabilirler.",
    "Nekromanceři dokážou probouzet duchy a zombie z čerstvých hrobů.",
    "Некромант может призывать призраков и зомби из свежих могил.",
-   "Nekromanten können Geister und Zombies aus frischen Gräbern beschwören.",
+   "Totenbeschwörer können Geister und Zombies aus frischen Gräbern auferwecken.",
     }},
   {0xb8a07c50, { // "This Orb halves the power usage of orbs which cost some charges with each activation. It even affects the one-shot orbs such as Flash or Teleport. If such an activation normally costs x charges, it costs only x/2 (rounded up) if you have an Orb of Energy."
-   "Ta Sfera dwukrotnie zmniejsza zużycie mocy przez te Sfery, których każda aktywacja kosztuje pewną liczbę ładunków. Działa nawet na Sfery jednokrotnego użytku, jak Błysk czy Teleport. Jeśli normalnie taka aktywacja kosztuje x ładunków, a masz Sferę Energii, to będzie ona kosztowała x/2 ładunków (zaokrąglone w górę).",
+   "Ta Sfera dwukrotnie zmniejsza zużycie mocy przez te Sfery, których każda aktywacja kosztuje pewną liczbę ładunków. Działa nawet na Sfery jednokrotnego użytku jak Błysk czy Teleport. Jeśli normalnie taka aktywacja kosztuje x ładunków, a masz Sferę Energii, to będzie ona kosztowała x/2 ładunków (zaokrąglone w górę).",
 /*MISSING*/    "This Orb halves the power usage of orbs which cost some charges with each activation. It even affects the one-shot orbs such as Flash or Teleport. If such an activation normally costs x charges, it costs only x/2 (rounded up) if you have an Orb of Energy.",
    "Některé Sféry spotřebují každou aktivací nějaké množství nábojů. Sféra Energie snižuje toto množství na polovinu. Funguje dokonce i s jednorázovými Sférami, jako je Sféra Záblesku nebo Teleportace. Aktivace, která by normálně stála x nábojů bude se Sférou Energie stát pouze x/2 nábojů (zaokrouhleno nahoru).",
    "Эта сфера уменьшает энергию, используемую другими сферами при активации. Это работает даже для одноразовых сфер, например, Вспышки или Телепорта. Если обычно использование стоило x единиц энергии, то с этой сферой оно будет стоить x/2 единиц (округлённое вверх).",
-/*MISSING*/    "This Orb halves the power usage of orbs which cost some charges with each activation. It even affects the one-shot orbs such as Flash or Teleport. If such an activation normally costs x charges, it costs only x/2 (rounded up) if you have an Orb of Energy.",
+   "Dieser Orb halbiert den Kraftverbrauch von Orbs, die mit jeder Aktivierung Aufladungen verbrauchen. Es beeinflusst auch die einmalig aktivierbaren Orbs wie Lichtblitz oder Teleportation. Verbraucht eine Aktivierung normalerweise x Ladungen, dann verbraucht sie nur x/2 Ladungen (aufgerundet),  wenn du einen Orb der Energie besitzt.",
+    }},
+  {0xb8cfc315, { // "spherical"
+   "sferyczna",
+/*MISSING*/    "spherical",
+   "sférická",
+   "сферическая",
+/*MISSING*/    "spherical",
+    }},
+  {0xb8fdc440, { // "A petrified creature."
+   "Stworzenie zamienione w kamień.",
+/*MISSING*/    "A petrified creature.",
+   "Jakýsi tvor proměněný v kámen.",
+   "Окаменевшее существо.",
+   "Eine versteinerte Kreatur.",
     }},
   {0xb93299c8, { // "You have improved your total high score on Google. Congratulations!"
    "Poprawi%łeś0 swój ogólny najlepszy wynik na Google. Gratulacje!",
    "Google'daki toplam yüksek puanını artırdın. Tebrikler!",
    "Zlepši%l0 jsi své celkové nejvyšší skóre na Googleu. Gratulujeme!",
    "Вы поставили рекорд по общему счёту в таблицах Google. Поздравляем!",
-   "Du hast deinen Gesamtrekord auf Google verbessert! Gratulation!",
+   "Du hast deinen Gesamtrekord auf Google verbessert! Glückwunsch!",
     }},
   {0xb957e9ce, { // "You join %the1."
    "Połączy%łeś0 się z %abl1.",
@@ -5670,7 +7756,7 @@ sentence all_sentences[1130] = {
 /*MISSING*/    "take me back",
    "návrat do menu",
    "вернуться в меню",
-/*MISSING*/    "take me back",
+   "Bring mich zurück",
     }},
   {0xb9ce32c3, { // "Map loaded from %1"
    "Mapa wczytana z %1",
@@ -5679,47 +7765,82 @@ sentence all_sentences[1130] = {
    "Карта загружена из %1",
    "Karte von %1 geladen",
     }},
+  {0xb9e45a0e, { // "%The1 will be revivable at %2 $$$"
+   "%1 będzie mogła ożyć przy %2 $$$",
+/*MISSING*/    "%The1 will be revivable at %2 $$$",
+   "%a1 bude možné oživit na %2 $$$",
+   "%1 будет пригоден для возрождения при %2 $$$",
+/*MISSING*/    "%The1 will be revivable at %2 $$$",
+    }},
   {0xb9eae632, { // "%1 takes %his1 revenge on %the2!"
    "%1 się mści!",
    "%1 intikamını alıyor!",
    "%1 se mstí!",
    "%1 будет мстить!",
-   "%1 nimmt Rache an %der2!",
+   "%1 nimmt Rache an %dem2 %d2!",
     }},
   {0xb9f1b54e, { // "counterclockwise"
    "antyzegarowo",
 /*MISSING*/    "counterclockwise",
    "proti směru hodinových ručiček",
    "против часовой стрелки",
-/*MISSING*/    "counterclockwise",
+   "gegen den Uhrzeigersinn",
+    }},
+  {0xba0df93c, { // "Cannot push into another player!"
+   "Nie można pchać na innego gracza!",
+/*MISSING*/    "Cannot push into another player!",
+   "Nemůžeš tlačit do jiného hráče!",
+   "Нельзя толкать в другого игрока!",
+   "Kann nicht auf einen anderen Spieler ziehen!",
     }},
   {0xba80959f, { // "This orb can be used to summon friendly golems. It is used instantly when you pick it up."
    "Ta sfera przywołuje przyjazne golemy. Jest natychmiast używana w momencie podniesienia.",
    "Bu küre size dost golemler çağırmak için kullanılır. Onu eline aldığında anında kullanılır.",
    "Tuto sféru můžeš použít k vyvolání přátelských golemů. Použije se automaticky, jakmile ji sebereš.",
    "Эта сфера призывает дружественных големов. Она срабатывает, как только Вы её поднимаете.",
-   "Dieser Orb dient dazu verbündete Golems zu beschwören, er wird benutzt sobald du ihn aufhebst",
+   "Dieser Orb dient dazu verbündete Golems herbeizurufen. Er wird aktiviert, sobald du ihn aufhebst.",
     }},
   {0xbad9db6a, { // "You damage %the1 with a mental blast!"
    "Zrani%łeś0 %a1 mocą psychiczną!",
 /*MISSING*/    "You damage %the1 with a mental blast!",
    "Zrani%l0 jsi %a1 mentálním útokem!",
    "Вы атаковали %a1 энергией мысли!",
-/*MISSING*/    "You damage %the1 with a mental blast!",
+   "Du schädigst %den1 %a1 mit einem mentalen Stoß!",
+    }},
+  {0xbae8597e, { // "An alternative version of Orb of the Sword. If you have both of them, you have two energy swords, facing in opposite directions."
+   "Alternatywna wersja Sfery Ostrza. Jeśli masz obie, masz dwa ostrza energii, skierowane w przeciwnych kierunkach.",
+/*MISSING*/    "An alternative version of Orb of the Sword. If you have both of them, you have two energy swords, facing in opposite directions.",
+   "Alternativní verze Sféry Meče. Pokud máš obě zároveň, budeš mít dva energetické meče namířené do opačných směrů..",
+   "Другая версия Сферы меча. Если у вас есть обе, то вы имеете два меча, направленные в противоположные стороны.",
+   "Eine alternative Variante des Orbs des Schwertes. Wenn du beide Orbs besitzt, hast du zwei Energieschwerter, die in entgegengesetzte Richtungen zeigen.",
+    }},
+  {0xbb2abf97, { // "seven players"
+   "siedmiu graczy",
+/*MISSING*/    "seven players",
+   "sedm hráčů",
+   "семь игроков",
+   "sieben Spieler",
     }},
   {0xbb5ccdb9, { // "You can go inside the Magic Mirror, and produce some mirror images to help you."
    "Możesz wejść w Magiczne Lustro, by Twoje odbicia z niego wyszły i Ci pomogły.",
    "Sihirli aynanın içine girerek sana yardım etmesi için bazı yansımalar üretebilirsin.",
    "Do Kouzelného zrcadla můžeš vstoupit a vytvořit několik zrcadlových obrazů, které ti pomohou.",
    "Вы можете пройти в Магическое зеркало и создать отражения, которые будут Вам помогать.",
-   "Du kannst den Zauberspiegel betreten, um Trugbilder zu erzeugen, die dir helfen.",
+   "Du kannst den Zauberspiegel betreten, um Spiegelbilder zu erzeugen, die dir helfen.",
+    }},
+  {0xbbbed4ae, { // "Multiplayer: Play cooperatively (locally); treasures, kills, and deaths are calculated for each player too, for more competitive play. Orbs and treasures are shared, orbs drain faster, knives recharge slower, and player characters are not allowed to separate.\n\n"
+   "Wielu graczy: współpracujecie (lokalnie); można też współzawodniczyć o skarby i zabicia, które są liczone dla każdego gracza. Sfery i skarby są dzielone, sfery wyczerpują się szybciej, noże wracają wolniej, i gracze nie mogą się rozdzielać.\n\n",
+/*MISSING*/    "Multiplayer: Play cooperatively (locally); treasures, kills, and deaths are calculated for each player too, for more competitive play. Orbs and treasures are shared, orbs drain faster, knives recharge slower, and player characters are not allowed to separate.\n\n",
+   "Více hráčů: Zde může hrát několik hráčů kooperativně (lokálně); poklady, zabití netvoři a úmrtí se počítají pro každého hráče zvlášť, aby se dalo hrát kompetitivněji. Sféry a poklady se sdílejí, sféry se vyčerpávají rychleji, nože se dobíjejí pomaleji a postavy se nesmějí příliš vzdálit.\n\n",
+   "Мультиплеер: Играйте совместно (локально); сокровища, убийства и смерти считаются отдельно, сферы и сокровища складываются, сферы угасают быстрее, ножи восстанавливаются медленнее, игроки не могут сильно разделяться.\n\n",
+   "Mehrspieler: Spiele gemeinsam (lokal); Schätze, Tötungen und Tode werden für ein mehr wettstreitorientiertes Spiel zusätzlich für jeden Spieler einzeln berechnet.Orbs und Schätze werden miteinander geteilt; Orbs werden schneller verbraucht, Messer werden langsamer wiederaufgeladen, und die Spielfiguren dürfen sich nicht weit voneinander entfernen.\n\n",
     }},
   {0xbcd35cbc, { // "These people study gravity and infinite trees. They have no special features, other than wearing a strange hat."
-   "Ci ludzie badają grawitację i drzewa nieskończone. Nie mają szczególnych własności, oprócz swojego dziwnego nakrycia głowy.",
+   "Ci ludzie badają grawitację i drzewa nieskończone. Nie mają szczególnych własności poza swoim dziwnym nakryciem głowy.",
 /*MISSING*/    "These people study gravity and infinite trees. They have no special features, other than wearing a strange hat.",
    "Tito lidé studují gravitaci a nekonečné stromy. Kromě svých podivných čepic nemají žádné zvláštní schopnosti.",
    "Эти люди изучают гравитацию и бесконечные деревья. Они ничем не отличаются от обычных людей, кроме этих странных шляп.",
-/*MISSING*/    "These people study gravity and infinite trees. They have no special features, other than wearing a strange hat.",
+   "Diese Leute studieren die Gravitation und unendliche Bäume. Sie haben keine besonderen Eigenschaften außer dem Tragen eines seltsamen Hutes.",
     }},
   {0xbcf4a764, { // "There is not enough space!"
    "Nie ma miejsca!",
@@ -5728,12 +7849,19 @@ sentence all_sentences[1130] = {
    "Нет места!",
    "Zu wenig Platz!",
     }},
+  {0xbcf9f5e6, { // "You feel something strange about gravity here..."
+   "Czujesz coś dziwnego z grawitacją tutaj...",
+/*MISSING*/    "You feel something strange about gravity here...",
+   "Cítíš, že na zdejší gravitaci je cosi podivného...",
+   "Вы чувствуете, что с гравитацией здесь что-то не так...",
+/*MISSING*/    "You feel something strange about gravity here...",
+    }},
   {0xbcfaeaff, { // "A Witch with a Speed spell. She moves twice as fast as you. Unless you have an Orb of Speed too, of course!"
-   "Czarownica z czarem Szybkości. Rusza się dwa razy szybciej od Ciebie. Chyba że Ty też masz Sferę Szybkości!",
+   "Czarownica z czarem Szybkości. Rusza się dwa razy szybciej od Ciebie. Chyba, że Ty też masz Sferę Szybkości!",
    "Hız büyüsü olan bir Cadı. Senden iki kat hızlı hareket eder. Tabi senin de bir Hız Küren yoksa!",
    "Čarodějnice s kouzlem Rychlosti. Pohybuje se dvakrát rychleji než ty. Samozřejmě, pokud náhodou také nemáš Sféru Rychlosti!",
    "Ведьма с заклинанием скорость. Она движется в 2 раза быстрее Вас. Если у Вас нет того же заклинания, конечно!",
-   "Eine Geschwindigkeitshexe, sie bewegt sich doppelt so schnell wie du.Außer natürlich, du hast auch einen Orb der Geschwindigkeit!",
+   "Eine Geschwindigkeitshexe, sie bewegt sich doppelt so schnell wie du. Außer natürlich, du hast auch einen Orb der Geschwindigkeit!",
     }},
   {0xbd7bf660, { // "You cannot attack Tentacles directly!"
    "Nie możesz atakować Macek wprost!",
@@ -5742,12 +7870,26 @@ sentence all_sentences[1130] = {
    "Вы не можете атаковать щупальца Ктулху!",
    "Du kannst Tentakel nicht direkt angreifen!",
     }},
+  {0xbdca60db, { // "0 - return"
+   "0 - powrót",
+/*MISSING*/    "0 - return",
+   "0 - návrat",
+   "0 - вернуться",
+/*MISSING*/    "0 - return",
+    }},
   {0xbe010ea9, { // "only native Orbs allowed in %the1"
    "tylko rodzime sfery %abl1",
    "%abl1 sadece oraya özgü Küreler kullanılabilir.",
    "%abl1 jsou povoleny pouze náležící Sféry",
    "только родные сферы доступны %abl1",
    "Nur heimische Orbs in %der1 erlaubt",
+    }},
+  {0xbe125228, { // "You gain your protective Shell back!"
+   "Masz Skorupę z powrotem!",
+/*MISSING*/    "You gain your protective Shell back!",
+   "Získal jsi zpátky svůj ochranný Krunýř!",
+   "Вы вернули свою раковину!",
+/*MISSING*/    "You gain your protective Shell back!",
     }},
   {0xbe458555, { // "You have a vision of the future, fighting demons in Hell..."
    "Masz wizję przyszłości, w której walczysz z demonami w Piekle...",
@@ -5757,21 +7899,21 @@ sentence all_sentences[1130] = {
    "Du hast eine Vision, du wirst in der Zukunft Dämonen in der Hölle bekämpfen...",
     }},
   {0xbeae1fd0, { // "One of few things that does not cause the floor in the Land of Eternal Motion to collapse. Obviously they are quite valuable."
-   "Pióro Feniksa jest tak lekie, że podłoga z Krainy Wiecznego Ruchu pod nim nie spada. Takie pióra muszą być bardzo cenne.",
+   "Pióro Feniksa jest tak lekie, że podłoga z Krainy Wiecznego Ruchu pod nim się nie zapada. Takie pióra muszą być bardzo cenne.",
    "Hareketler Diyarında yerlerin çökmemesini sağlayan ender şeylerden biri. Bunlar, tabi ki epey değerli.",
    "Jedna z mála věcí, pod kterou se v Kraji věčného pohybu nepropadá země. Tato pírka jsou samozřejmě velice cenná.",
    "Единственная вещь, которую выдерживает пол в Земле вечного движения. Очевидно, довольно ценно.",
-   "Eines der wenigen Dinge, die den Boden im Land des Endlosen Antriebs nicht einstürzen lassen. Sie sind offensichtlich sehr wertvoll.",
+   "Eines der wenigen Dinge, die den Boden im Land der ewigen Bewegung nicht einstürzen lassen. Sie sind offensichtlich sehr wertvoll.",
     }},
   {0xbeb77adf, { // "You can walk on it... but beware."
    "Możesz tu przejść, ale uważaj!",
    "Üzerinde yürüyebilirsin. Ama dikkatli ol!",
    "Můžeš po něm chodit... ale pozor.",
    "Вы можете пойти сюда, но будьте осторожны!",
-   "Du kannst darauf gehen... aber pass auf.",
+   "Du kannst darauf gehen... aber Vorsicht.",
     }},
   {0xbec253f3, { // "You have been trapped in a strange, non-Euclidean world. Collect as much treasure as possible before being caught by monsters. The more treasure you collect, the more monsters come to hunt you, as long as you are in the same land type. The Orbs of Yendor are the ultimate treasure; get at least one of them to win the game!"
-   "Trafi%łeś0 do dziwnej, nieeuklidesowej krainy. Zdobądź jak najwięcej skarbów, zanim potwory Ciebie dopadną. Im więcej zdobędziesz skarbów, tym więcej potworów w danej krainie na Ciebie poluje. Sfery Yendora są skarbem ostatecznym: zdobądź Sferę Yendora, by wygrać grę!",
+   "Trafi%łeś0 do dziwnej, nieeuklidesowej krainy. Zdobądź jak najwięcej skarbów, zanim potwory Cię dopadną. Im więcej zdobędziesz skarbów, tym więcej potworów w danej krainie na Ciebie poluje. Sfery Yendoru są skarbem ostatecznym: zdobądź Sferę Yendoru, by wygrać grę!",
    "Garip ve Ökliddışı bir dünyada hapsoldun. Canavarlar tarafından yakalanmadan önce olabildiğince hazine topla.Aynı arazi tipinde daha fazla hazine topladıkça,daha fazla canavar sana saldıracak.Yendor'un küreleri nihai hazinelerdir, onlardan bir tane ile oyunu kazanabilirsin!",
    "Jsi uvězněn v podivném, neeukleidovském světě. Sesbírej co nejvíce pokladů, než tě dostanou netvoři. Čím víc pokladů sebereš, tím víc netvorů po tobě půjde, dokud budeš ve stejném typu kraje. Největším pokladem jsou Yendorské sféry: získáš-li alespoň jednu z nich, vyhraješ hru!",
    "Вы оказались заперты в странном неевклидовом мире. Соберите как можно больше сокровищ перед тем как Вас поймают монстры. Чем больше сокровищ Вы собираете, тем больше монстров на Вас охотится, пока Вы находитесь на одной территории. Сферы Йендора - уникальные сокровища; соберите хотя бы одну, чтобы выиграть!",
@@ -5782,7 +7924,14 @@ sentence all_sentences[1130] = {
 /*MISSING*/    "You just cannot stand in place, those roses smell too nicely.",
    "Nemůžeš zůstat na místě, ty růže příliš krásně voní.",
    "Вы не можете устоять на месте, эти розы пахнут слишком прекрасно.",
-/*MISSING*/    "You just cannot stand in place, those roses smell too nicely.",
+   "Du kannst einfach nicht stehen bleiben - diese Rosen duften zu gut.",
+    }},
+  {0xbf1a2063, { // "Warnings are issued when you try to do something that appears dangerous, like stepping on a known mine, or getting your boat destroyed by a Kraken without having Orb of the Fish. In some cases the action might actually be safe -- so you can ignore the warning and do it anyway, simply by repeating the action."
+   "Ostrzeżenia pokazują się, gdy próbujesz zrobić coś niebezpiecznego: stanąć na minie, spowodować zniszczenie łódki przez Krakena bez Sfery Ryby, itp. W niektórych przypadkach może to być bezpieczne -- także możesz zignorować ostrzeżenie, po prostu próbując wykonać akcję jeszcze raz.",
+/*MISSING*/    "Warnings are issued when you try to do something that appears dangerous, like stepping on a known mine, or getting your boat destroyed by a Kraken without having Orb of the Fish. In some cases the action might actually be safe -- so you can ignore the warning and do it anyway, simply by repeating the action.",
+   "Varování se objeví, když se pokusíte udělat něco, co vypadá nebezpečně, jako je šlápnutí na políčko, kde víte, že je mina, nebo riskování, že vám Kraken zničí loďku, když nemáte Sféru Ryby. V některých případech může být taková věc ve skutečnosti bezpečná -- a proto je možné opakováním akce varování ignorovat a stejně to udělat.",
+   "Предупреждения возникают, когда вы пытаетесь сделать что-то опасное: наступить на известную мину, позволить Кракену уничтожить вашу лодку без Сферы Рыбы, и т. п. Иногда эти действия на самом деле безопасны -- вы можете проигнорировать предупреждение, просто повторив действие.",
+   "Es werden Warnungen ausgegeben wenn du versuchst etwas zu tun das gefährlich scheint wieauf eine bekannte Mine treten oder wenn ein Krake dein Boot zerstören würde während du keinen Orb des Fischs besitzt. In einigen Fällen mag deine Aktion tatsächlich ungefährlich sein. Dann kannst du die Warnung ignorieren und es trotzdem tun, indem du die Aktion einfach wiederholst.",
     }},
   {0xbf2d0f78, { // "You feel that the stars are right, and you can access R'Lyeh!"
    "Gwiazdy są na miejscu, R'Lyeh czeka!",
@@ -5810,7 +7959,14 @@ sentence all_sentences[1130] = {
    "Buz Diyarlarında bulunan soğuk beyaz mücevherler.",
    "Chladné bílé drahokamy, které se nacházejí v Ledovém kraji.",
    "Холодные белые камни, найденные в Ледяной земле.",
-   "Kalte, weiße Edelsteine aus dem Eisigem Land.",
+   "Kalte weiße Edelsteine aus dem Eisigen Land.",
+    }},
+  {0xbfd31f6f, { // "You'll need your magical sword against the Draugar!"
+   "Potrzebujesz magicznego miecza przeciwko Draugrom!",
+/*MISSING*/    "You'll need your magical sword against the Draugar!",
+   "Proti Draugarům budeš potřebovat kouzelný meč!",
+   "Против Драугра Вам понадобится магический меч!",
+/*MISSING*/    "You'll need your magical sword against the Draugar!",
     }},
   {0xbfdce89a, { // "b = reorder"
    "b = kolejność",
@@ -5824,7 +7980,7 @@ sentence all_sentences[1130] = {
 /*MISSING*/    "This false prince is immune to the alluring scent of roses.",
    "Tento falešný princ je imunní vůči vábivé vůni růží.",
    "Этот ложный принц невосприимчив к ароматам роз.",
-/*MISSING*/    "This false prince is immune to the alluring scent of roses.",
+   "Dieser falsche Prinz ist immun gegenüber dem verlockenden Duft der Rosen.",
     }},
   {0xc03bfc26, { // "Teleported to %1!"
    "Przeniesiono w %abl1",
@@ -5833,6 +7989,13 @@ sentence all_sentences[1130] = {
    "Вы телепортированы %abl1",
    "Nach %1 teleportiert",
     }},
+  {0xc065f905, { // "Extremely narrow Crossroads layout.\n"
+   "Skrajnie wąski układ Skrzyżowań.",
+/*MISSING*/    "Extremely narrow Crossroads layout.\n",
+   "Velmi úzká verze Křižovatky.",
+   "Очень узкий вариант Перекрёстка.",
+/*MISSING*/    "Extremely narrow Crossroads layout.\n",
+    }},
   {0xc123b9e6, { // "A big and quite intelligent monster living in the Icy Land."
    "Duża i całkiem inteligentna bestia z Krainy Lodu.",
    "Buz Diyarlarında yaşayan büyük ve epey zeki bir canavar.",
@@ -5840,12 +8003,19 @@ sentence all_sentences[1130] = {
    "Большой и довольно умный монстр из Ледяной земли.",
    "Ein großes und äußerst intelligentes Monster das im Eisigem Land lebt.",
     }},
+  {0xc1661595, { // "How long should the messages stay on the screen."
+   "Jak długo wiadomości zostają na ekranie",
+/*MISSING*/    "How long should the messages stay on the screen.",
+   "Jak dlouho zùstanou zprávy na obrazovce",
+   "Как долго сообщения остаются на экране",
+/*MISSING*/    "How long should the messages stay on the screen.",
+    }},
   {0xc167cfca, { // "down"
    "dół",
 /*MISSING*/    "down",
    "dolů",
    "вниз",
-/*MISSING*/    "down",
+   "runter",
     }},
   {0xc1731760, { // "You take the Illusion away."
    "Zabierasz iluzję!",
@@ -5887,7 +8057,7 @@ sentence all_sentences[1130] = {
 /*MISSING*/    "conformal/history mode",
    "konformální mód / historie",
    "режим конформный/истории",
-/*MISSING*/    "conformal/history mode",
+   "konformer/historischer Modus",
     }},
   {0xc3cbae01, { // "draw the heptagons darker"
    "siedmiokąty ciemniejsze",
@@ -5901,14 +8071,14 @@ sentence all_sentences[1130] = {
 /*MISSING*/    "player 4 X",
    "hráč 4 X",
    "игрок 4 X",
-/*MISSING*/    "player 4 X",
+   "Spieler 4 X",
     }},
   {0xc406717e, { // "player 4 Y"
    "gracz 4 Y",
 /*MISSING*/    "player 4 Y",
    "hráč 4 Y",
    "игрок 4 Y",
-/*MISSING*/    "player 4 Y",
+   "Spieler 4 Y",
     }},
   {0xc4c1e40c, { // "F/;/Space/Enter/KP5 = fire, WASD/IJKL/Numpad = move"
    "F/;/Space/Enter/KP5 = strzał, WASD/IJKL/Numpad = ruch",
@@ -5938,12 +8108,19 @@ sentence all_sentences[1130] = {
    "Ледяные стены со временем могут таять.",
    "Eiswände schmelzen nach gewisser Zeit.",
     }},
+  {0xc5cc6605, { // "Zebra quotient"
+   "przestrzeń ilorazowa zebry",
+/*MISSING*/    "Zebra quotient",
+/*MISSING*/    "Zebra quotient",
+/*MISSING*/    "Zebra quotient",
+/*MISSING*/    "Zebra quotient",
+    }},
   {0xc6366bc3, { // "player 4 go"
    "gracz 4 idź",
 /*MISSING*/    "player 4 go",
    "hráč 4 pohyb",
    "игрок 4 идёт",
-/*MISSING*/    "player 4 go",
+   "Spieler 4 los",
     }},
   {0xc644756c, { // "Green pressure plates open all gates in radius 3 around them. Similarly, red pressure plates close all gates in this radius."
    "Zielone płyty otwierają wszystkie bramy w promieniu 3 wokół nich. Podobnie, czerwone płyty zamykają wszystkie bramy w tym promieniu.",
@@ -5966,6 +8143,13 @@ sentence all_sentences[1130] = {
    "Центр: сфера появвляется здесь, когда она разблокировна в своей родной земле",
    "Zentrum: Orbs erscheinen hier wenn sie in ihrem Heimatland freigeschaltet wurden",
     }},
+  {0xc70ad7ca, { // "%The1 is protected from this kind of magic!"
+   "Tego typu magia nie działa na %1!",
+/*MISSING*/    "%The1 is protected from this kind of magic!",
+   "%1 má ochranu proti tomuto typu magie!",
+   "%1 защищён от этого вида магии!",
+/*MISSING*/    "%The1 is protected from this kind of magic!",
+    }},
   {0xc71c7d9f, { // "Unlock the Orb of Yendor!"
    "Otwórz Sferę Yendoru!",
    "Yendor'un küresinin kilidini aç!",
@@ -5981,11 +8165,11 @@ sentence all_sentences[1130] = {
    "einfach",
     }},
   {0xc743921a, { // "Galápagos is the land of Tortoises. They are very slow, which allows the Dragons to pick on them by stealing and eating their young. Bring the Baby Tortoises back, but, there is a catch: the Tortoises come in many varieties, depending on the part of Galápagos they live in -- there are 21 binary environmental factors, and thus 2097152 varieties. You'll have to find a Tortoise which matches the baby exactly!\n\nTortoises move each 3 turns, and attacks only stun them.\n\nBringing back a Baby Tortoise counts as 5 $$$. The more factors agree in the given location of Galápagos, the brighter it is shown on your screen."
-   "Galápagos to kraina Żółwi. Żółwie są bardzo powolne, co pozwala Smokom znęcac się nad nimi -- kradnąc i zjadając ich młode. Zwróć Żółwiki ich rodzinom, ale jest jeden haczyk: w różnych częściach Galápagos żyje wiele odmian Żółwi -- jest 21 binarnych czynników środowiskowych, co prowadzi do 2097152 odmian. Musisz znaleźć Żółwia dokładnie pasującego do Żółwika!\n\nŻówie ruszają się co 3 kolejki. Ataki powodują jedynie ogłuszenie.\n\nZwrócenie Żółwika liczy się jako 5 $$$. Im więcej czynników zgadza się w danym miejscu, tym jaśniej jest ono narysowane na Twoim ekranie.",
+   "Galápagos to kraina Żółwi. Żółwie są bardzo powolne, co pozwala Smokom znęcac się nad nimi -- kradnąc i zjadając ich młode. Zwróć Żółwiki ich rodzinom, ale jest jeden haczyk: w różnych częściach Galápagos żyje wiele odmian Żółwi -- jest 21 binarnych czynników środowiskowych, co prowadzi do 2097152 odmian. Musisz znaleźć Żółwia dokładnie pasującego do Żółwika!\n\nŻówie ruszają się co trzy kolejki. Ataki powodują jedynie ogłuszenie.\n\nZwrócenie Żółwika liczy się jako 5 $$$. Im więcej czynników zgadza się w danym miejscu, tym jaśniej jest ono narysowane na Twoim ekranie.",
 /*MISSING*/    "Galápagos is the land of Tortoises. They are very slow, which allows the Dragons to pick on them by stealing and eating their young. Bring the Baby Tortoises back, but, there is a catch: the Tortoises come in many varieties, depending on the part of Galápagos they live in -- there are 21 binary environmental factors, and thus 2097152 varieties. You'll have to find a Tortoise which matches the baby exactly!\n\nTortoises move each 3 turns, and attacks only stun them.\n\nBringing back a Baby Tortoise counts as 5 $$$. The more factors agree in the given location of Galápagos, the brighter it is shown on your screen.",
    "Galapágy jsou zemí Želv. Želvy jsou velice pomalé, takže si na ně mohou dovolovat Draci, kteří kradou a požírají jejich mláďata. Ty jim můžeš jejich Želvičky přinést zpátky, ale je tu jeden háček: existuje mnoho typů Želv podle toho, ve které části Galapág žijí -- je tu celkem 21 binárních faktorů prostředí, a tedy 2 097 152 variant. Musíš najít takovou Želvu, která přesně odpovídá tvé Želvičce!\n\nŽelvy se pohybují vždy jednou za 3 kola a útoky je mohou pouze omráčit.\n\nVrácení Želvičky se počítá za 5 $$$. Čím více faktorů se v dané části Galapág shoduje, tím jasněji tato část vypadá na obrazovce.",
    "Галапагосы -- край черепах. Черепахи очень медленны, что позволяет драконам издеваться над ними -- красть и поедать их детей. Отведи черепашку на родину! Но есть проблема: здесь есть много разновидностей черепах, зависящих от места проживания -- есть 21 различных параметров, что даёт 2097152 вариантов. Найдите черепаху, точно соответствующую этому малышу!\n\nЧерепахи движутся каждый третий ход. Атаки только оглушают их.\n\nКаждый приведённый черепашонок считается за 5 $$$. Чем больше параметров совпадают в данной местности, тем светлее она показывается.",
-/*MISSING*/    "Galápagos is the land of Tortoises. They are very slow, which allows the Dragons to pick on them by stealing and eating their young. Bring the Baby Tortoises back, but, there is a catch: the Tortoises come in many varieties, depending on the part of Galápagos they live in -- there are 21 binary environmental factors, and thus 2097152 varieties. You'll have to find a Tortoise which matches the baby exactly!\n\nTortoises move each 3 turns, and attacks only stun them.\n\nBringing back a Baby Tortoise counts as 5 $$$. The more factors agree in the given location of Galápagos, the brighter it is shown on your screen.",
+   "Galápagos ist das Land der Schildkröten -- Sie sind sehr langsam, was es den Drachen ermöglicht sie zu schikanieren, indem sie die jungen Schilkröten stehlen oder fressen. Bring die Babyschildkröte zurück, aber es gibt einen Haken: es gibt viele Schildkrötenarten, abhängig von der Gegend Galápagos in der sie leben -- es gibt 21 binäre regionale Faktoren und somit 2097152 verschiedene Arten. Du musst eine Schildkröte finden, die exakt mit der Babyschildkröte übereinstimmt!\n\nSchildkröten bewegen sich alle 3 Züge und Angriffe betäuben sie nur.\n\nEine Babyschildkröte zurückzubringen zählt 5 $$$. Je mehr Faktoren in der aktuellen Region Galápagos übereinstimmen, umso heller erscheint sie auf dem Bildschirm.",
     }},
   {0xc829b82e, { // "monsters killed: %1"
    "pokonane potwory: %1",
@@ -6002,14 +8186,14 @@ sentence all_sentences[1130] = {
    "Nur Hexagone anzeigen",
     }},
   {0xc864fee0, { // "(press v) and change the wall/monster mode to ASCII, or change the resolution."
-   "(naciśnij 'v') i zmień tryb ścian/potworów na ASCII, albo zmień rozdzielczość.",
+   "(naciśnij 'v') i zmień tryb ścian/potworów na ASCII albo zmień rozdzielczość.",
    "('v'ye bas) ve duvar ve canavar modunu ASCII'ye çevir veya çözünnürlüğü değiştir.",
    "(stiskni 'v') a změň mód zdí/netvorů na ASCII, nebo změň rozlišení.",
    "(нажмите 'v') и поменяйте режим отображения стен/монстров на ASCII, или измените разрешение. ",
    "(drücke V) um den 'Wand/Monster'-Modus auf ASCII zu schalten, oder die  Auflösung zu ändern.",
     }},
   {0xc89e01f8, { // "Parrots feel safe in the forests of Caribbean, so they never leave them. But they will help the Pirates by attacking the intruders."
-   "Papugi czują się bezpiecznie w lasach Karaibów, i ich nie opuszczają, ale chętnie pomogą Piratom walczyć z najeźdźcami.",
+   "Papugi czują się bezpiecznie w lasach Karaibów i ich nie opuszczają, ale chętnie pomogą Piratom walczyć z najeźdźcami.",
    "Papağanlar Karayip Ormanlarında güvende hissederler, bu yüzden buraları hiç terketmezler. İçeriye girenlere saldırarak korsanlara da yardım etmiş olurlar. ",
    "Papoušci se v karibských lesích cítí bezpečně, a tak je nikdy neopouštějí. Pomáhají ale pirátům tím, že útočí na vetřelce.",
    "Попугаи чувствуют себя в безопасности в Карибских лесах и никогда их не покидают. Но они помогают пиратам, нападая на чужаков.",
@@ -6027,7 +8211,7 @@ sentence all_sentences[1130] = {
 /*MISSING*/    "Better not to let your greed make you stray from your path.",
    "Raději nedopusť, aby tě tvá chamtivost svedla z cesty!",
    "Лучше не идти на поводу у своей жадности!",
-/*MISSING*/    "Better not to let your greed make you stray from your path.",
+   "Lass dich besser nicht durch Gier von deinem Weg abbringen!",
     }},
   {0xc8c9f40a, { // "The gate is closing right on you! RUN!"
    "Brama leci na Ciebie! UCIEKAJ!",
@@ -6051,11 +8235,18 @@ sentence all_sentences[1130] = {
    "oder 'o' um einen Überblick über die Welt zu sehen",
     }},
   {0xc92c7dd1, { // "A coastal area, from where you can get both to the inland worlds and to the Ocean. Each turn, each cell will become water or earth, based on the majority of cells around it. Contrary to the Living Caves, this process is not affected by most items and monsters, but elementals, dead Trolls, and cells outside of the Living Fjord have a very powerful effect."
-   "Nadbrzeżny rejon, z którego możesz dostać się zarówno do krain wewnątrzlądowych, jak i na Ocean. W każdej kolejce, każde pole zmienia się w wodę lub ziemię, w zależności od większości pól wokół. W przeciwieństwie do Żywej Jaskini, na ten proces nie wpływa większość przedmiotów i stworzeń, ale żywiolaki, martwe Trolle, i pola poza granicą Żywego Fiordu mają bardzo silny efekt.",
+   "Nadbrzeżny rejon, z którego możesz dostać się zarówno do krain wewnątrzlądowych jak i na Ocean. W każdej kolejce, każde pole zmienia się w wodę lub ziemię w zależności od większości pól wokół. W przeciwieństwie do Żywej Jaskini na ten proces nie wpływa większość przedmiotów i stworzeń, ale żywiołaki, martwe Trolle i pola poza granicą Żywego Fiordu mają bardzo silny efekt.",
    "Sahil şeridinde bir bölge, buradan hem iç diyarlara hem de Okyanus'a geçebilirsin. Her tur, her hücre etrafındaki hücrelerin çoğunluğuna göre su veya toprak olacak. Yaşayan Mağaraların aksine, bu süreç eşyalar veya canavarlardan etkilenmez. Ancak Yaşayan Fiyortların dışındaki hücreler, Unsurlar ve Ölü Trollerin etkisi çok güçlüdür.",
    "Pobřežní oblast, odkud se můžeš dostat jak do vnitrozemských světů, tak do Oceánu. V každém kole se každé pole změní na vodu nebo na souš podle toho, kterého typu je většina polí kolem něj. Na rozdíl od Živoucí jeskyně nemá většina předmětů a netvorů na tento proces žádný vliv, ale elementálové, mrtví trollové a pole mimo Živoucí fjord mají velmi silný efekt.",
    "Прибрежный регион, из которого можно попасть как в наземные области, так и в Океан. Каждый ход каждая клетка становится сушей или водой, основываясь на том, каких соседей больше. В отличие от Живой пещеры этот процесс не зависит от объектов и монстров, за исключением Элементалей, мёртвых Троллей и клеток вне Живого фьорда - все они имеют очень сильный эффект.",
    "Ein Küstengebiet von dem aus du ins Inland sowie zum Ozean kommst. Jeden Zug wird aus jeder Zelle Wasser oder Erde basierend auf der Mehrzahl der Zellen um sie herum. Im Gegensatz zu den lebenden Höhlen wird dieser Prozess von den meisten Monstern und Items nicht beeinflusst, Elementare, tote Trolle und Zellen außerhalb des Fjords haben jedoch mächtige Effekte. ",
+    }},
+  {0xc97ce988, { // "You pierce %the1."
+   "Bodziesz %a1.",
+/*MISSING*/    "You pierce %the1.",
+   "Probodl jsi %a1.",
+   "Вы проткнули %a1.",
+/*MISSING*/    "You pierce %the1.",
     }},
   {0xc982a2f2, { // "You hear a distant squeak!"
    "Słyszysz odległy pisk!",
@@ -6069,7 +8260,7 @@ sentence all_sentences[1130] = {
 /*MISSING*/    "Saved the band image as: ",
    "Pásový obrázek uložen jako: ",
    "Изображение сохранено как: ",
-/*MISSING*/    "Saved the band image as: ",
+   "Bänderbild gespeichert als: ",
     }},
   {0xc9ca07d4, { // "F7 = player on/off"
    "F7 = gracz wł/wył",
@@ -6085,12 +8276,26 @@ sentence all_sentences[1130] = {
    "collect 3x %2, чтобы открыть её %abl1",
    "Sammle 3x %2 um es in  %der1 freizuschalten",
     }},
+  {0xca147bdd, { // "coefficient (imaginary)"
+   "współczynnik (część urojona)",
+/*MISSING*/    "coefficient (imaginary)",
+   "koeficient (imaginární část)",
+   "коэффициент (мнимый)",
+/*MISSING*/    "coefficient (imaginary)",
+    }},
   {0xca6326b7, { // "Press Enter or F10 to save"
    "Wciśnij Enter lub F10, by zapisać i wyjść",
    "Enter ya da F10 ile kayıt et",
    "Enter nebo F10: uložit hru",
    "Нажмите Enter или F10, чтобы сохраниться",
    "Drücke Enter oder F10 zum Speichern",
+    }},
+  {0xca67eb2d, { // "extra graphical effects"
+   "dodatkowe efekty graficzne",
+/*MISSING*/    "extra graphical effects",
+   "extra grafické efekty",
+   "дополнительные графические эффекты",
+/*MISSING*/    "extra graphical effects",
     }},
   {0xca7a1de8, { // "Cannot create temporary matter here!"
    "Nie można tu stworzyć tymczasowej materii!",
@@ -6099,15 +8304,29 @@ sentence all_sentences[1130] = {
    "Нельзя создать временную материю здесь!",
    "Hier kann keine temporäre Materie erzeugt werden!",
     }},
+  {0xca836329, { // "\nRanged Orbs can be targeted by clicking the desired location. "
+   "\nRobi się to przez kliknięcie na celu.",
+/*MISSING*/    "\nRanged Orbs can be targeted by clicking the desired location. ",
+   "\nTyto sféry lze zacílovat kliknutím na požadované políčko.",
+   "\nВыбор цели сферы определяется щелчком мыши на цели.",
+   "\nMit Distanzorbs kann per Klick auf die gewünschte Position gezielt werden. ",
+    }},
   {0xcabd677d, { // "\n\nThis is a part of a monster. It does not count for your total kills."
    "\n\nTo jest część potwora. Nie liczy się do łącznych zabić.",
 /*MISSING*/    "\n\nThis is a part of a monster. It does not count for your total kills.",
    "\n\nToto je část netvora. Nepočítá se do celkového počtu zabitých netvorů.",
    "\n\nЭто лишь часть монстра. Не учитывается в количестве убийств.",
-/*MISSING*/    "\n\nThis is a part of a monster. It does not count for your total kills.",
+   "\n\nDas ist ein Teil eines Monsters. Es wird der Gesamtzahl deiner Tötungen nicht eingerechnet.",
+    }},
+  {0xcae30e00, { // "+5 = move instantly"
+   "+5 = ruch natychmiastowy",
+/*MISSING*/    "+5 = move instantly",
+   "+5 = okamitý pohyb",
+   "+5 = мгновенный ход",
+/*MISSING*/    "+5 = move instantly",
     }},
   {0xcafe26a4, { // "This bomberbird will follow you at some distance, and attack your enemies. You can kill it to place a mine."
-   "Ten bombardier będzie latał za Tobą, i atakował Twoich wrogów. Możesz też go zabić, by podłożyć minę.",
+   "Ten bombardier będzie latał za Tobą i atakował Twoich wrogów. Możesz też go zabić, by podłożyć minę.",
    "Bu bombacıkuş seni belli bir mesafeden takip eder ve düşmanlarına saldırır. Onu öldürerek bir mayın döşeyebilirsin.",
    "Tento Bombarďák tě bude sledovat v určité vzdálenosti a útočit na tvé nepřátele. Kromě toho ho můžeš zabít, a tím položit minu.",
    "Этот бомбардир будет следовать за Вами и атаковать Ваших врагов. Можете его убить, чтобы оставить мину.",
@@ -6118,7 +8337,7 @@ sentence all_sentences[1130] = {
    "Eksenler klavye hareketine yardım eder.",
    "Osy pomáhají při pohybu pomocí klávesnice",
    "Оси помогают перемещаться с помощью клавиатуры",
-   "Die Achsen helfen mit der Tastatursteuerung",
+   "Die Achsen helfen bei der Tastatursteuerung",
     }},
   {0xcb0f63b8, { // "The higher the number, the smoother the animations in the game. If you find that animations are not smooth enough, you can try to change the options "
    "Im większa liczba, tym płynniejsze są animacje. Jeśli animacja nie jest dostatecznie płynna, spróbuj zmienić opcje",
@@ -6134,12 +8353,26 @@ sentence all_sentences[1130] = {
    "collect 25x %2, чтобы открыть её %abl1",
    "Sammle 25x %2 um es in %der1 freizuschalten",
     }},
+  {0xcb577ecd, { // "Many clans of Trolls spend their lives in this kingdom. You can find many statues of Trolls here. You suppose that they are not actually statues, but simply elderly Trolls, who have petrified upon death. Or maybe you have killed these Trolls yourself?"
+   "Wiele klanów Trolli żyje w tym królestwie. Można tu znaleźć mnóstwo pomników trolli, albo raczej nie pomników, tylko po prostu stare Trolle, które umierając zamieniły się kamień. A może to Trolle zabite przez Ciebie?",
+/*MISSING*/    "Many clans of Trolls spend their lives in this kingdom. You can find many statues of Trolls here. You suppose that they are not actually statues, but simply elderly Trolls, who have petrified upon death. Or maybe you have killed these Trolls yourself?",
+   "V tomto království tráví svůj život řada klanů Trollů. Také tu můžeš najít mnoho jejich soch. Říkáš si, že to asi nejsou sochy, ale prostě jen staří Trollové, kteří se po smrti proměnili v kámen. Nebo že by to byli Trollové, které jsi zabil ty?",
+   "Много кланов Троллей жило в этом королевстве. Вы можете найти много статуй Троллей здесь. Вы предполагаете, что это не статуи, а просто старые тролли, окаменевшие после смерти. Или это вы их убили?",
+   "Viele Troll-Clans verbringen ihr Leben in diesem Königreich. Du kannst hier viele Troll-Statuen finden. Du vermutest, dass es nicht wirklich Statuen sind, sondern einfach ältere Trolle, die bei ihrem Tode versteinert sind. Oder hast du diese Trolle selbst getötet?",
+    }},
+  {0xcb8232b7, { // "visit the website"
+   "idź na stronę HyperRogue",
+/*MISSING*/    "visit the website",
+   "navštiv webovou stránku",
+   "перейти на страницу HyperRogue",
+   "Webseite besuchen",
+    }},
   {0xcbd211bb, { // "\n\nTortoises are not monsters! They are just annoyed. They do not count for your total kills."
    "\n\nŻółwie to nie potwory! Są tylko rozwścieczone. Nie liczą się do Twoich zabić.",
 /*MISSING*/    "\n\nTortoises are not monsters! They are just annoyed. They do not count for your total kills.",
    "\n\nŽelvy nejsou netvoři! Jsou jenom podrážděné. Proto se nepočítají do celkového počtu zabitých nepřátel.",
    "\n\nЧерепашки -- не монстры! Хоть и раздражают. Они не считаются в количестве убийств.",
-/*MISSING*/    "\n\nTortoises are not monsters! They are just annoyed. They do not count for your total kills.",
+   "\n\nSchildkröten sind keine Monster! Sie sind nur verärgert. Sie werden nicht der Gesamtzahl von Tötungen angerechnet.",
     }},
   {0xcbe3ae13, { // ", you"
    ", Ty",
@@ -6149,11 +8382,11 @@ sentence all_sentences[1130] = {
    ", du",
     }},
   {0xcbf72793, { // "This part of the world is warped, restricting the movement somewhat. \"Diagonal\" movement and attacking between triangular cells is not allowed. Flash, Storms, and Freedom spells ignore this, and Ghosts can move, attack, and be attacked diagonally."
-   "Ta część świata jest zakrzywiona, co powoduje zmniejszenie możliwości ruchu. Ruch i atakowanie \"po przekątnej\", czyli między trójkątami, są zabronione. Czary Błysk, Burza, i Wolność ignorują to. Duchy mogą się ruszać, atakować i być atakowane po przekątnej.",
+   "Ta część świata jest zakrzywiona, co powoduje zmniejszenie możliwości ruchu. Ruch i atakowanie \"po przekątnej\", czyli między trójkątami, są zabronione. Czary Błysk, Burza i Wolność ignorują to. Duchy mogą się ruszać, atakować i być atakowane po przekątnej.",
 /*MISSING*/    "This part of the world is warped, restricting the movement somewhat. \"Diagonal\" movement and attacking between triangular cells is not allowed. Flash, Storms, and Freedom spells ignore this, and Ghosts can move, attack, and be attacked diagonally.",
    "Tato část světa je pokřivená, což poněkud omezuje pohyb. \"Úhlopříčný\" pohyb a útok mezi trojúhelníkovými políčky není možný. Kouzla Záblesku, Bouře a Svobody toto pravidlo ignorují a Duchové se mohou pohybovat a útočit úhlopříčně nebo být sami úhlopříčně napadeni.",
    "Это земля искривлена, и движения немного ограничены. Ходы и атаки \"по-диагонали\" между треугольниками невозможны. Заклинания Вспышки, Бури и Свободы игнорируют это. Духи также могут ходить, атаковать и быть атакованными по-диагонали.",
-/*MISSING*/    "This part of the world is warped, restricting the movement somewhat. \"Diagonal\" movement and attacking between triangular cells is not allowed. Flash, Storms, and Freedom spells ignore this, and Ghosts can move, attack, and be attacked diagonally.",
+   "Dieser Teil der Welt ist verzerrt, was die Bewegung etwas einschränkt. \"Diagonale\" Bewegung und Angriffe zwischen dreieckigen Zellen sind nicht erlaubt. Lichtblitz-, Sturm- und Freiheitszauber ignorieren das. Geister können sich diagonal bewegen und diagonal angegriffen werden.",
     }},
   {0xcc012b4d, { // "secondary in %the1 (collect 10 %3, or 25 %2)"
    "podrzędna %abl1 (10x %3, lub 25x %2)",
@@ -6174,7 +8407,14 @@ sentence all_sentences[1130] = {
 /*MISSING*/    "dog",
    "pes",
    "пёс",
-/*MISSING*/    "dog",
+   "Hund",
+    }},
+  {0xcc13ece6, { // "Ghosts can move through chasms!"
+   "Duchy przelatują nad dziurami!",
+/*MISSING*/    "Ghosts can move through chasms!",
+   "Duchové se mohou pohybovat přes propasti!",
+   "Призраки могут перелетать пропасти!",
+/*MISSING*/    "Ghosts can move through chasms!",
     }},
   {0xcc3fc29f, { // "configure joystick axes"
    "skonfiguruj osie joysticka",
@@ -6190,6 +8430,13 @@ sentence all_sentences[1130] = {
    "Рыцари смеются над Вашей неудачей!",
    "Die Ritter lachen dich aus weil du versagt hast!",
     }},
+  {0xccb41803, { // "These reptiles are quite strange creatures. They spend most of their lives sleeping as floors that other creatures can walk on. Sometimes they wake up to hunt their prey, but they will happily go back to sleep if they happen to move into a hole on their way. Your attacks do not kill the Reptiles, but you can push and stun them."
+   "Te jaszczurki to dosyć dziwne stwory. Większość życia spędzają śpiąc, tworząc podłogi, po których można chodzić. Czasami się budzą by zapolować, ale bardzo chętnie położą się znów do snu, jeśli natrafią na swojej drodze na dziurę. Twoje ataki nie zabijają jaszczurek, ale możesz je pchać i ogłuszać.",
+/*MISSING*/    "These reptiles are quite strange creatures. They spend most of their lives sleeping as floors that other creatures can walk on. Sometimes they wake up to hunt their prey, but they will happily go back to sleep if they happen to move into a hole on their way. Your attacks do not kill the Reptiles, but you can push and stun them.",
+   "Tyto Ještěrky jsou opravdu podivní tvorové. Vštšinu života tráví tím, že spí ve formě podlahy, po které jiní tvorové chodí. Někdy se probudí, aby lovily kořist, ale pokud po cestě náhodou šlápnou do díry, ochotně zase usnou. Tvé útoky nemohou Ještěrky zabít, můžeš je ale strkat a omračovat.",
+   "Эти ящерицы -- довольно странные существа. Они проводят большую часть жизни во сне, служа полом, по которому другие могут ходить. Иногда они просыпаются, чтобы поохотиться, но они с радостью вернутся ко сну, если найдут отверстие в полу на своём пути. Ваги атаки их не убивают, а только толкают и оглушают.",
+/*MISSING*/    "These reptiles are quite strange creatures. They spend most of their lives sleeping as floors that other creatures can walk on. Sometimes they wake up to hunt their prey, but they will happily go back to sleep if they happen to move into a hole on their way. Your attacks do not kill the Reptiles, but you can push and stun them.",
+    }},
   {0xcccdfec3, { // "You rejoin %the1."
    "Połączy%łeś0 się z %abl1.",
    "%abl1 bütünleştin.",
@@ -6197,15 +8444,29 @@ sentence all_sentences[1130] = {
    "Вы воссоединились с %abl1.",
    "Du stößt wieder zu %den1 %a1 hinzu",
     }},
+  {0xcdd4911e, { // "Euclidean"
+   "euklidesowa",
+/*MISSING*/    "Euclidean",
+   "eukleidovská",
+   "евклидова",
+/*MISSING*/    "Euclidean",
+    }},
+  {0xcddadaf6, { // "view your achievements"
+   "pokaż osiągnięcia",
+/*MISSING*/    "view your achievements",
+   "tvé achievementy",
+   "смотреть достижения",
+   "deine Errungenschaften ansehen",
+    }},
   {0xce3381e8, { // "spin down"
    "obróć w dół",
 /*MISSING*/    "spin down",
    "otoč dolů",
    "вращать вниз",
-/*MISSING*/    "spin down",
+   "hochdrehen",
     }},
   {0xce7f0820, { // "add credits for your translation here"
-   "Teksty i tłumaczenie: Zeno Rogue\n\n",
+   "Teksty i tłumaczenie: Zeno i Tehora Rogue\n\n",
    "Çeviri: zulmetefza & Seyacim\n\n",
    "Český překlad: Marek Čtrnáct <marek14@seznam.cz>\n\n",
    "Перевод: green orange <khadaev98@gmail.com>\n\n",
@@ -6216,7 +8477,7 @@ sentence all_sentences[1130] = {
    "Burası bir zemin parçasıydı...ta ki bir şey üzerinden geçene kadar.",
    "Tady byla podlaha... než po ní něco přešlo.",
    "Здесь был пол... пока кто-то не наступил не него.",
-   "Das war einst Boden... Dann ist was darauf gegangen.",
+   "Das war einmal Boden... bis etwas darauf gegangen ist.",
     }},
   {0xce8db891, { // "panning X"
    "przewiń X",
@@ -6232,6 +8493,13 @@ sentence all_sentences[1130] = {
    "крутить Y",
    "Y schwenken",
     }},
+  {0xcea95257, { // "Turn-based multiplayer: Turns are executed in parallel. A player can leave the game by pressing a designated key (useful when about to get killed or lost). The following Orbs work to bring such players back: "
+   "Turowo na wielu graczy: tury wykonujecie równolegle. Gracz może opuścić grę naciskając wyznaczony klawisz (użyteczne, gdy się zgubi lub by zaraz został zabity). Następujących Sfer można użyć, by taki gracz wrócił:",
+/*MISSING*/    "Turn-based multiplayer: Turns are executed in parallel. A player can leave the game by pressing a designated key (useful when about to get killed or lost). The following Orbs work to bring such players back: ",
+   "Hra pro více hráčů na kola: Všichni hráči odehrají své kolo současně. Hráči mohou opustit hru stisknutím specifické klávesy (hodí se, když jim hrozí, že se ztratí nebo je něco zabije). Tyto hráče je možné vrátit zpátky použitím následujících Sfér:",
+   "Пошаговый мультиплеер: ходы совершаются параллельно. Игрок может покинуть игру, нажав определённую клавишу (полезно, когда почти умер или потерялся). Следующие сферы могут вернуть игроков обратно:",
+   "Mehrspieler zugbasiert: Züge werden simultan ausgeführt. Ein Spieler kann das Spiel durch Drücken einer bestimmten Taste verlassen (nützlich wenn Gefahr droht getötet zu werden oder verlorenzugehen). Die folgenden Orbs können dazu verwendet werden solche Spieler zurückzubringen: ",
+    }},
   {0xcecd6064, { // "z: %1"
    "z: %1",
    "z: %1",
@@ -6244,28 +8512,28 @@ sentence all_sentences[1130] = {
 /*MISSING*/    "%The1 attacks your shell!",
    "%1 zaútoči%l1 na tvůj krunýř!",
    "%1 атакует вашу раковину!",
-/*MISSING*/    "%The1 attacks your shell!",
+   "%Der1 %1 attackiert deinen Panzer!",
     }},
   {0xcede212a, { // "heptagonal mode"
    "tryb siedmiokątów",
 /*MISSING*/    "heptagonal mode",
    "sedmiúhelníkový mód",
    "режим семиугольников",
-/*MISSING*/    "heptagonal mode",
+   "heptagonaler Modus",
     }},
   {0xcee13684, { // "%The1 is washed away!"
    "%2 zmy%ł2 %a1!",
    "%1 suya karışıp gitti!",
    "Elementál Vody spláchl %a1!",
    "%a1 смыло водой!",
-   "%der1 %a1 wurde weggeschwemmt!",
+   "%Der1 %a1 wurde weggeschwemmt!",
     }},
   {0xcef0ea3b, { // "%The1 pierces %the2!"
    "%1 przebi%ł1 %a2!",
    "%1 %a2 delip geçiyor!",
    "%1 probod%l1 %a2!",
    "%1 проколол%E1 %a2!",
-   "%Der1 durchdringt %den2 %a2!",
+   "%Der1 durchbohrt %den2 %a2!",
     }},
   {0xcf3aac29, { // "t/left/right - change display, up/down - scroll, s - sort by"
    "t/lewo/prawo - zmiana, góra/dół - przewijanie, s - sortowanie",
@@ -6275,14 +8543,14 @@ sentence all_sentences[1130] = {
    " T/Links/Rechts - Anzeige ändern, Oben/Unten - Scrollen, S - Sortieren nach",
     }},
   {0xcf65d6a2, { // "In the Windy Plains, you can let the wind carry you, causing you to move two cells with the wind in a single turn. This cannot be done if you are standing at distance at most 2 from the Air Elemental, or if any of the three cells on the way has two wind directions.\n\nPress 't' or click the destination to activate."
-   "Na Wietrznej Równinie możesz pozwolić dać się nieść wiatrowi, dzięki czemu ruszasz się 2 pola z wiatrem w jednej kolejce. Jest to możliwe tylko, jeśli nie stoisz w odległości co najwyżej 2 od Powietrznego Żywiołaka, i żadne z trzech pól po drodze nie ma wiatru w dwóch kierunkach.\n\nNaciśnij 't' albo kliknij pole docelowe, by wykonać ten ruch.",
+   "Na Wietrznej Równinie możesz pozwolić dać się nieść wiatrowi, dzięki czemu ruszasz się 2 pola z wiatrem w jednej kolejce. Jest to możliwe tylko, jeśli nie stoisz w odległości co najwyżej 2 od Powietrznego Żywiołaka i żadne z trzech pól po drodze nie ma wiatru w dwóch kierunkach.\n\nNaciśnij 't' albo kliknij pole docelowe, by wykonać ten ruch.",
 /*MISSING*/    "In the Windy Plains, you can let the wind carry you, causing you to move two cells with the wind in a single turn. This cannot be done if you are standing at distance at most 2 from the Air Elemental, or if any of the three cells on the way has two wind directions.\n\nPress 't' or click the destination to activate.",
    "Na Větrné pláni se můžeš nechat unášet větrem a pohybovat se o dvě políčka v jednom kole. Toto není možné, pokud se nacházíš ve vzdálenosti 2 nebo méně od Elementála vzduchu nebo pokud jsou na kterémkoli ze tří políček, kterými bys prošel, dva směry větru.\n\nPro unášení větrem stiskni klávesu 't' nebo klikni na cílové políčko.",
    "На Ветреной равнине Вы можете позволить ветру унести Вас, подвинувшись сразу на 2 клетки за 1 ход. Это невозможно, если Вы стоите на расстоянии не более 2 от Воздушного элементаля, или на одной из проходимых клеток более одного направления ветра.\n\nНажмите 't' или кликните на клетку, чтобы это использовать.",
-/*MISSING*/    "In the Windy Plains, you can let the wind carry you, causing you to move two cells with the wind in a single turn. This cannot be done if you are standing at distance at most 2 from the Air Elemental, or if any of the three cells on the way has two wind directions.\n\nPress 't' or click the destination to activate.",
+   "In den windigen Ebenen kannst du dich vom Wind tragen lassen, dann bewegst du dich mit dem Wind zwei Zellen in einem Zug. Dies gilt nicht, wenn du maximal 2 Zellen von einem Luftelementar entfernt bist, oder eine der drei Zellen in deinem Weg zwei Windrichtungen hat.\n\nDrücke 't' oder klicke auf dein Ziel zur Aktivierung.",
     }},
   {0xcfa35fb1, { // "The islands of Caribbean are infinite and circular, and the pirates probably have hidden their treasures somewhere far from the coast."
-   "Wyspy na Karaibach są okrągłe nieskończone... Skarby piratów są pewnie schowane gdzieś daleko od brzegu.",
+   "Wyspy na Karaibach są okrągłe i nieskończone... Skarby piratów są pewnie schowane gdzieś daleko od brzegu.",
    "Karayip Adaları sonsuz ve dairesel. Korsanlar hazinelerini büyük ihtimalle kıyılardan uzak yerlere saklıyordur.",
    "Karibské ostrovy jsou nekonečné a kulaté a piráti pravděpodobně ukryli své poklady kdesi daleko od pobřeží.",
    "Карибские острова бесконечные и круглые. Возможно, пираты прячут свои сокровища где-то вдали от берега.",
@@ -6293,7 +8561,14 @@ sentence all_sentences[1130] = {
    "Tebrikler! Kutsal Kâseyi buldun!",
    "Gratulujeme! Naš%el0 jsi Svatý grál!",
    "Поздравляем! Вы нашли святой Грааль!",
-   "Gratulation! Du hast den Heiligen Gral gefunden!",
+   "Glückwunsch! Du hast den Heiligen Gral gefunden!",
+    }},
+  {0xd0ab00e0, { // "Illusions are targeted by most monsters, just like yourself, Thumpers, and your friends."
+   "Większość potworów celuje w iluzje, podobnie jak w Ciebie, Dudniki i Twoich przyjaciół.",
+   "İlüzyonlar tıpkı sen, Gümleyenler ve dostların gibi pek çok canavar tarafından saldırıya uğrayabilir.",
+   "Většina netvorů půjde po tvých iluzích, stejně jako jdou po tobě, po Tloucích a po tvých přátelích.",
+   "Их будут атаковать почти все монстры, так же как Вас, Тамперы и ваших союзников.",
+   "Illusionen werden von den meisten Monstern verfolgt.",
     }},
   {0xd0d94ce6, { // "Nice, a hyperbolic rug! It will not fit very well on your flat Euclidean floor, but who cares?"
    "Jaki ładny hiperboliczny dywan! Nie będzie dobrze przylegał do Twojej płaskiej, euklidesowej podłogi, ale co z tego?",
@@ -6314,14 +8589,14 @@ sentence all_sentences[1130] = {
    "Aşkıntaş Görevi: %2'de en az 10 hazine topla.",
    "Hyperkamový úkol: sesbírej nejméně 10 pokladů %abl2",
    "Миссия Гиперкамня: соберите 10 драгоценностей в %abl2",
-   "Hyperstein Quest: Sammle 10 %1 %a2",
+   "Hyperstein-Herausforderung: Sammle 10 %P1 %a2",
     }},
   {0xd18ab005, { // "band"
    "wstęga",
 /*MISSING*/    "band",
    "pás",
    "лента",
-/*MISSING*/    "band",
+   "Band",
     }},
   {0xd1fc64ef, { // "You activate your demonic powers!"
    "Aktywowałeś moce demoniczne!",
@@ -6342,14 +8617,14 @@ sentence all_sentences[1130] = {
    "Bu küre her türlü duvarların ve çatlakların içinden geçmene izin verir.",
    "Tato sféra ti umožňuje procházet skrz libovolné zdi a přes propasti.",
    "Эта сфера позволяет ходить через все стены и пропасти.",
-   "Dieser Orb erlaubt es dir durch alle Wände und Abgründe zu schreiten.",
+   "Dieser Orb erlaubt es dir, alle Arten von Wänden und Abgründen zu passieren.",
     }},
   {0xd2995d4e, { // "This Orb allows you to throw fire, just like the Fire Cultists.\n\nEach fire drains 5 charges. You are not allowed to throw fire into adjacent cells."
-   "Ta sfera pozwala Ci rzucać ogniem, tak jak Ogniści Kultyści. \n\nKażdy rzucony ogień wymaga 5 ładunków. Nie możesz rzucać ogniem do sąsidenich komórek.",
+   "Ta sfera pozwala Ci rzucać ogniem tak jak Ogniści Kultyści. \n\nKażdy rzucony ogień wymaga 5 ładunków. Nie możesz rzucać ogniem do sąsiednich komórek.",
    "Bu Küre tıpkı Ateş Müritleri gibi ateş atabilmeni sağlar.\n\nHer ateş 5 şarj tüketir, bitişik hücrelere ateş atamazsın.",
    "Tato sféra ti umožňuje vrhat oheň jako Kultisté ohně.\n\nKaždé použití sníží náboj sféry o 5. Oheň nelze vrhnout na sousední políčko.",
    "Эта сфера позволит Вам кидать огонь, прямо как огненные культисты.\n\nКаждое использование тратит 5 зарядов. Вы не можете кинуть огонь на соседнюю клетку.",
-   "Dieser Orb erlaubt es dir, Feuer zu werfen.\n\nJedes Feuer verbraucht 5 Ladungen. Du darfst kein Feuer auf angrenzende Zellen werfen.",
+   "Dieser Orb erlaubt es dir, Feuer zu werfen.\n\nJedes Feuer verbraucht 5 Ladungen. Du kannst kein Feuer auf angrenzende Zellen werfen.",
     }},
   {0xd2c6cd03, { // "Scores and achievements are not"
    "Wyniki i osiągnięcia nie są",
@@ -6365,19 +8640,26 @@ sentence all_sentences[1130] = {
    "взгляните на гиперболоид!",
    "Du fängst an zu verstehen!",
     }},
+  {0xd305b3e9, { // "Avoid escaping from a discharge (\"That was close\")."
+   "Unikaj uciekania przed wyładowaniem (\"było blisko\").",
+/*MISSING*/    "Avoid escaping from a discharge (\"That was close\").",
+   "Nesmíš se vyhnout výboji (\"To bylo těsně\").",
+   "Не убегать из-под разряда (\"Это было близко\").",
+/*MISSING*/    "Avoid escaping from a discharge (\"That was close\").",
+    }},
   {0xd30ccbb8, { // "A simple servant of the master of the Ivory Tower."
    "Prosty sługa mistrza Wieży z Kości Słoniowej.",
    "Fildişi Kuledeki basit bir hizmetkâr.",
    "Prostý služebník pána Věže ze slonové kosti.",
    "Обычный слуга Хозяина башни из слоновой кости.",
-   "Ein Einfacher Diener des Meisters des Elfenbeinturms.",
+   "Ein einfacher Diener des Meisters des Elfenbeinturms.",
     }},
   {0xd33a9d85, { // "disk"
    "koło",
 /*MISSING*/    "disk",
    "disk",
    "диск",
-/*MISSING*/    "disk",
+   "Scheibe",
     }},
   {0xd3c0dbc4, { // "This attack is likely to hit the attacker."
    "Ten atak pewnie trafi w atakującego.",
@@ -6405,7 +8687,7 @@ sentence all_sentences[1130] = {
    "Kampateşi çıkar",
    "vyvolej ohniště",
    "призвать Костры",
-/*MISSING*/    "summon Bonfire",
+   "rufe Leuchtfeuer herbei",
     }},
   {0xd47953f4, { // "save the configuration"
    "zapis konfiguracji",
@@ -6413,6 +8695,13 @@ sentence all_sentences[1130] = {
    "ulož konfiguraci",
    "сохранить настройки",
    "Konfiguration speichern",
+    }},
+  {0xd49712c9, { // "exit 3D configuration"
+   "wyjdź z konfiguracji 3D",
+/*MISSING*/    "exit 3D configuration",
+   "opustit 3D konfiguraci",
+   "выйти из настроек 3D",
+/*MISSING*/    "exit 3D configuration",
     }},
   {0xd4d45743, { // "The sandworm explodes in a cloud of Spice!"
    "Czerw eksplodował! Chmura Przyprawy!",
@@ -6426,7 +8715,7 @@ sentence all_sentences[1130] = {
 /*MISSING*/    "\n\n(For the heptagonal mode, the radius has been reduced to 2 for closing plates.)",
    "\n\n(V sedmiúhelníkovém módu mají zavírací desky dosah pouze 2.)",
    "\n\n(В режиме семиугольников радиус действия закрывающих плит уменьшен до 2.)",
-/*MISSING*/    "\n\n(For the heptagonal mode, the radius has been reduced to 2 for closing plates.)",
+   "\n\n(Für den heptagonalen Modus wurde der Wirkradius von Schließmechanismen auf 2 reduziert.)",
     }},
   {0xd53e31f8, { // "This spot will be burning soon! RUN!"
    "To się zaraz zapali! UCIEKAJ!",
@@ -6457,11 +8746,11 @@ sentence all_sentences[1130] = {
    "\"Warst du schon in einem der Tempel in R'Lyeh?\"",
     }},
   {0xd5bce324, { // "This mode allows you to edit the map.\n\nNOTE: Use at your own risk. Combinations which never appear in the real game may work in an undefined way (do not work, look strangely, give strange messages, or crash the game).\n\nTo get the most of this editor, some knowledge of inner workings of HyperRogue is required. Each cell has four main fields: land type, wall type, monster type, item type. The same wall type (especially \"none\", \"sea\", or \"bonfire\") may look or work a bit differently, based on the land it is in. Sometimes an object may appear twice on the list due to subtle differences (for example, Demons could move next turn or not).\n\nPress w, i, l, or m to choose which aspect of cells to change, then just click on the cells and they will change. Press 'c' while hovering over a cell to copy that cell, this copies all information about it. When copying large areas or placing multi-tile monsters, it might be important where on the cell you are clicking.\n\nYou can also press 0-9 to apply your changes to a greater radius. This also affects the copy/paste feature, allowing to copy a larger area.\n\nPress F2 to save the current map (and F3 to load it). If you try this after a long game of HyperRogue (without using Orbs of Safety), the filesize will be very large! Note however that large structures, such as Great Walls, large circles and horocycles, are destroyed by this.\n\nPress 'b' to mark cells as boundaries. Such cells, and cells beyond them, are not copied by the copy/paste feature, nor saved by the save feature.\n\n"
-   "Ten tryb pozwala edytować mapę.\n\nUWAGA: używasz na własne ryzyko! Kombinacje, które nigdy nie pojawiają się w prawdziwej grze, mogą działać w sposód nieokreślone (nie działać, wyglądać dziwnie, produkować dziwne teksty, albo wywalać grę).\n\nBy wynieść najwięcej z tego edytora, przydatna jest pewna wiedza o działaniu HyperRogue. Każde pole ma cztery atrybuty: typ lądu, typ ściany, typ potwora, typ przedmiotu. Ten sam typ ściany (szczególnie \"nic\", \"morze\", albo \"ognisko\") może wyglądać albo działać różnie, w zależności od lądu, na którym się znajduje. Czasami obiekt może występować dwa razy na liście ze względu na subtelne różnice (na przykład, Demons mogą się ruszać w następnej turze albo nie).\n\nWciśnij w, i, l, m by wybrać, który atrybut zmienić, następnie klikaj pola i będą się zmieniać. Naciśnij 'c', gdy myszka jest nad polem, by kopiować to pole -- to kopiuje całą informację o tym polu. Kiedy kopiujesz albo stawiasz potwory wielopolowe, może mieć znaczenie punkt pola, w którym klikasz.\n\nMożesz też nacisnąć 0-9 by zastosować zmianę w większym promieniu. To wpływa również na kopiowanie/wklejanie, pozwalając na skopiowanie większego obszaru.\n\nWciśnij F2, by zapisać obecną mapę (i F3, by naładować). Jak spróbujesz to zrobić po długiej grze w HyperRogue (nie używającej Sfer Bezpieczeństwa), rozmiar pliku będzie bardzo duży! Uwaga: duże struktury, jak Wielkie Ściany i horocykle, są przez to niszczone.\n\nNaciśnij 'b' by zaznaczyć pole jako brzeg. Takie pola, i pola za nimi, nie są kopiowane funkcją copy/paste, ani też nie są zapisywane funkcją save.\n\n",
+   "Ten tryb pozwala edytować mapę.\n\nUWAGA: używasz na własne ryzyko! Kombinacje, które nigdy nie pojawiają się w prawdziwej grze, mogą działać w sposób nieokreślony (nie działać, wyglądać dziwnie, produkować dziwne teksty albo wywalać grę).\n\nBy wynieść najwięcej z tego edytora, przydatna jest pewna wiedza o działaniu HyperRogue. Każde pole ma cztery atrybuty: typ lądu, typ ściany, typ potwora, typ przedmiotu. Ten sam typ ściany (szczególnie \"nic\", \"morze\" albo \"ognisko\") może wyglądać albo działać różnie w zależności od lądu, na którym się znajduje. Czasami obiekt może występować dwa razy na liście ze względu na subtelne różnice (na przykład, Demony mogą się ruszać w następnej kolejce albo nie).\n\nWciśnij w, i, l, m by wybrać, który atrybut zmienić, następnie klikaj pola i będą się zmieniać. Naciśnij 'c', gdy myszka jest nad polem, by kopiować to pole -- to kopiuje całą informację o tym polu. Kiedy kopiujesz albo stawiasz potwory wielopolowe, może mieć znaczenie punkt pola, w którym klikasz.\n\nMożesz też nacisnąć 0-9 by zastosować zmianę w większym promieniu. To wpływa również na kopiowanie/wklejanie, pozwalając na skopiowanie większego obszaru.\n\nWciśnij F2, by zapisać obecną mapę (i F3, by naładować). Jak spróbujesz to zrobić po długiej grze w HyperRogue (nie używającej Sfer Bezpieczeństwa), rozmiar pliku będzie bardzo duży! Uwaga: duże struktury, jak Wielkie Ściany i horocykle, są przez to niszczone.\n\nNaciśnij 'b' by zaznaczyć pole jako brzeg. Takie pola i pola za nimi nie są kopiowane funkcją copy/paste, ani też nie są zapisywane funkcją save.\n\n",
    "Bu mod haritayı düzenlemeni sağlar..\n\nNOT: sorumluluk sende! Gerçek oyunda hiç karşına çıkmayacak kombinasyonlar bilinmeyen bir şekilde çalışabilir. (çalışmayabilir, garip gözükebilir, oyunu çökertebilir.).\n\nEditörü layığıyla kullanabilmek için HyperRogue'un iç dinamiklerine dair bilgi sahibi olman beklenir. Her hücre dört temel alana sahip: diyar tipi, duvar tipi, canavar tipi, eşya tipi.Aynı duvar tipi (özellikle \"hiç\", \"deniz\", ve \"kampateşi\") içinde bulunduğu diyara göre farklı gözükebilir ve farklı işlev edinebilir. Bazen bir eşya özel durumundan ötürü listede iki kez gözükebilir.(Meselâ şeytanın bir sonraki tur hareket edip edemeyeceği durumu).\n\nHücrelerin hangi özelliğini değiştirmek istedğinizi w, i, l ve m'ye basarak seç. İşaretçinin olduğu hücreyi başka yere kopyalamak için c'ye bas. Bu, hücreye dair bilgiyi de kopyalar. Çok hücreli canavarları kopyalarken hücrenin neresine bastığın sonucu değiştirebilir.\n\n Değişikliklerini daha büyük bir çapta uygulamak için 0-9'a basabilirsin.. Bu aynı zamanda, kopyala/yapıştır özelliğinin de çapını genişletir.\n\nMevcut haritayı kaydetmek için F2'ye bas (yüklemek için de F3'e bas). Eğer bunu Güvenlik Küresi kullanmadığınız bir oyunda denersen, dosya boyutu çok büyük olacaktır! Dikkat: Büyük yapılar, meselâ horosikıllar, büyük duvarlar, geniş çemberler bu özelliği kullanınca yok olurlar. \n\nHücreleri sınır olarak belirlemek için b'ye basın. Bu hücreler ve bu hücrelerin ötesindeki hücreler, kopyala/yapıştır ve kaydetme özelliğine dahil edilmezler. \n\n",
    "V tomto módu můžeš editovat mapup.\n\nPOZOR: Používej na vlastní nebezpečí. Kombinace, které se v normální hře nikdy nevyskytují, mohou fungovat nedefinovaným způsobem (nefungovat, divně vypadat, generovat podivné zprávy nebo způsobit spadnutí hry).\n\nAbys z tohoto editoru získal co nejvíce, musíš vědět něco o tom, jak HyperRogue funguje \"pod kapotou\". Každé políčko má čtyři atributy: typ kraje, typ zdi, typ netvora, a typ předmětu. Ten samý typ zdi (především \"nic\", \"moře\" nebo \"oheň\") může vypadat nebo se chovat trochu jinak podle toho, ve kterém kraji se nachází. Některé položky mohou být v seznamu dvakrát díky drobným rozdílům (například Čerti mají dvě formy podle toho, zda se v příštím kole mají pohnout nebo ne).\n\nKlávesami 'w', 'i', 'l' a 'm' udáváš, který aspekt políček chceš změnit; pak na políčko jednoduše klikni, a ono se změní. Stiskem klávesy 'c' zkopíruješ políčko pod kurzorem (zkopírují se všechny informace o tomto políčku). Při kopírování nebo vkládání vícepolíčkových netvorů může být důležité, kam přesně v políčku klikáš.\n\nSvé změny můžeš také aplikovat na větší oblast pomocí kláves 0-9, které nastavují poloměr. To také ovlivňuje kopírování/vkládání, což ti umožní kopírovat větší oblast.\n\nF2 uloží současnou mapu (a F3 ji nahraje). Pokud to uděláš po dlouhé hře HyperRogue (kde jsi nepoužil Sféru Bezpečnosti), bude vzniklý soubor hodně velký! Ovšem pozor -- velké struktury, jako jsou Velké zdi, velké kruhy a horocykly budou uložením a nahráním mapy zničeny.\n\nKlávesou 'b' můžeš políčka označit jako hraniční. Tato políčka a políčka za nimi nebudou při operacích kopírování a vkládání kopírovány a nebudou ani uloženy.\n\n",
    "В этом режиме можно редактировать карту.\n\nВНИМАНИЕ: используйте его на свой риск! Комбинации, которые не могут возникнуть в настоящей игре, могут иметь неопределённое поведение (не работать, выглядеть странно, выдавать странные сообщения, вызывать вылет игры).\n\nЧтобы пользоваться редактором, нужно немного представлять, как устроена игра HyperRogue. Каждая клетка содержит четыре основных элемента: тип земли, тип стены, тип монстратип предмета. некоторые типы стен (особенно \"ничего\", \"море\" и \"костёр\") могут выглядеть или работать немного по-разному в зависимости от земли, в которой они находятся. Иногда объект может находиться в списке в двух экземплярах в зависимости от разных вещей (например, будет ли Демон двигаться на следующий ход).\n\nНажмите w, i, l, m чтобы выбрать, какой атрибут клетки будете менять, нажмите на клетку, и она изменится. Нажмите 'c', когда мышка находится над клетко       , чтобы копировать клетку -- копируется вся информация о ней. Если Вы копируете или размещаете монстров из нескольких клеток, может иметь значение часть клетки, на которую Вы нажмёте.\n\nНажмите 0-9, чтобы применить изменения с большим радиусом. Это также влияет на копирование/вставку, копируя большую область.\n\nНажмите F2, чтобы сохранить текущую карту (и F3, чтобы загрузить). Если вы попробуете сделат это после долгой игры в HyperRogue (без сфер Безопасности), размер файла может быть очень велик! Большие структуры, такие как Великие стены и ороциклы, будут уничтожены.\n\nНажмите 'b', чтобы обозначить клетку как границу. Такие клетки, как и клетки за ними, не будут копироваться, вставляться и сохраняться.\n\n",
-   "Dieser Modus erlaubt es dir die Map zu bearbeiten.\n\nWARNUNG: Nutzen auf eigene Gefahr! Kombinationen die im Spiel selbst nicht vorkommenkönnen in skurrilen Situationen enden(funktioniert nicht, sieht komisch aus, erzeugt komische Meldungen, crasht das Spiel).\n\nUm das beste aus dem Editor rauszuholen ist etwas Wissen über Abläufe in HyperRogue nötig. Jede Zelle hat 4 Hauptarten: Landtyp, Wandtyp, Monstertyp und Itemart.Ein und die selbe Wand kann unterschiedlich aussehen und funktionieren, je nach dem auf welchem Land sie platziert ist.Manche Objekte können auch mehrmals Meldungen erzeugen.Drücke w, i, l oder m um zu bestimmen welchen Aspekt der Zelle du änderstdann klick einfach auf die Zelle und sie wird sich ändern. Drücke 'c' während du dich über einer Zelle befindest um diese zu kopieren.Beim kopieren von großen Gebieten und dem platzieren von großen Monstern kann es sehr wichtig sein wo man klickt.\n\nDurch das drücken von 0-9 werden die Änderungen in einem größerem Radius ausgeführt. Das ganze beeinflusst auch das kopieren und einfügen wodurch ein größerer Bereich kopiert werden kann.\n\nDrücke F2 um die Map zu speichern(und F3 um sie zu laden). Nach einer langen HyperRogue Sitzung (ohne den Orb der Geborgenheit zu nutzen)kann die Datei sehr groß sein! Allerdings werden große Strukturen,wie Große Mauern, große Kreise und sonstiges dadurch zerstört.\n\nDrücke 'b' um Zellen als Grenzen zu markieren. Solche Zellen, sowie Zellen hinter diesen können nicht kopiert oder gespeichert werden.\n\n",
+   "Dieser Modus erlaubt es dir die Map zu bearbeiten.\n\nWARNUNG: Benutzen auf eigene Gefahr! Kombinationen, die im Spiel selbst nicht vorkommen, können in skurrilen Situationen enden (funktioniert nicht, sieht komisch aus, erzeugt komische Meldungen, führt zum Absturz.\n\nUm das beste aus dem Editor rauszuholen ist etwas Wissen über Abläufe in HyperRogue nötig. Jede Zelle hat vier Hauptarten: Landtyp, Wandtyp, Monstertyp und Itemart. Ein und dieselbe Wand kann unterschiedlich aussehen und funktionieren, je nachdem auf welchem Land sie platziert ist. Manche Objekte können auch mehrmals Meldungen erzeugen. Drücke w, i, l oder m um zu bestimmen, welchen Aspekt der Zelle du änderst. Dann klick einfach auf die Zelle und sie wird sich ändern. Drücke 'c' während du dich über einer Zelle befindest um diese zu kopieren. Beim Kopieren von großen Gebieten und dem Platzieren von großen Monstern kann es sehr wichtig sein wo man klickt.\n\nDurch das Drücken von 0-9 werden die Änderungen in einem größerem Radius ausgeführt. Das Ganze beeinflusst auch das Kopieren und Einfügen, wodurch ein größerer Bereich kopiert werden kann.\n\nDrücke F2 um die Map zu speichern (und F3 um sie zu laden). Nach einer langen HyperRogue Sitzung (ohne den Orb der Geborgenheit zu nutzen) kann die Datei sehr groß sein! Allerdings werden große Strukturen, wie Große Mauern, große Kreise und Horozykeln dadurch zerstört.\n\nDrücke 'b' um Zellen als Grenzen zu markieren. Solche Zellen, sowie Zellen hinter diesen können nicht kopiert oder gespeichert werden.\n\n",
     }},
   {0xd5bf9cc8, { // "explore the Emerald Pattern"
    "Eksploracja Szmaragdowego Wzoru",
@@ -6478,7 +8767,7 @@ sentence all_sentences[1130] = {
    "Eckpunkte: %1",
     }},
   {0xd6623e59, { // "A Stone from the Land of Power. You are not sure what it is exactly, but as the Powerstones are kept in crystal cabinets, they are surely valuable."
-   "Kamień z Krainy Mocy. W sumie to nie wiesz, co to jest, ale trzymają te kamienie w kryształowych gablotach, także musi być bardzo cenny.",
+   "Kamień z Krainy Mocy. W sumie to nie wiesz, co to jest, ale trzymają te kamienie w kryształowych gablotach, także muszą być bardzo cenne.",
    "Güç Diyarından bir taş. Ne olduğuna tam olarak emin değilsin, ama bu taşlar kristal kabinlerde saklandığına göre çok değerli olmalılar.",
    "Kámen z Kraje Moci. Nejsi si jistý, co je přesně zač, ale když dávají Mocikamy do křišťálových vitrín, musejí mít jistě velkou cenu.",
    "Камень из Земли силы. Вы точно не знаете, что это такое, но раз они спрятаны в кристальных кабинетах, они довольно ценны.",
@@ -6497,6 +8786,13 @@ sentence all_sentences[1130] = {
    "e = editace",
    "e = изменить",
    "e = editieren",
+    }},
+  {0xd68ec8e1, { // "Demons are slow, but you'll need the experience against stronger ones..."
+   "Mniejsze Demony są powolne, ale musisz zdobyć doświadczenie przeciwko Większym...",
+/*MISSING*/    "Demons are slow, but you'll need the experience against stronger ones...",
+   "Čerti jsou pomalí, ale proti Ďáblům budeš potřebovat zkušenosti...",
+   "Демоны медленны, но Вам нужен опыт, чтобы сражаться против более сильных...",
+/*MISSING*/    "Demons are slow, but you'll need the experience against stronger ones...",
     }},
   {0xd693326f, { // "Forest Trolls create an impassable wall when they die."
    "Zabite Leśne Trolle pozostawiają ścianę.",
@@ -6524,14 +8820,21 @@ sentence all_sentences[1130] = {
    "Bu heykel, senin geldiğin dünyada bulunamayacak maddelerden yapılmış.",
    "Tato soška je vytvořena z materiálů, které se ve tvém světě nenacházejí.",
    "Эти статуи сделаны из материала, который не найдёшь в Вашем мире.",
-   "Diese Statue ist aus Materialien, die in deiner Welt nicht existieren.",
+   "Diese Statue besteht aus Materialien, die in deiner Welt nicht existieren.",
+    }},
+  {0xd75fc967, { // "Poincaré model"
+   "model Poincaré",
+/*MISSING*/    "Poincaré model",
+   "Poincarého model",
+   "модель Пуанкаре",
+/*MISSING*/    "Poincaré model",
     }},
   {0xd786c69d, { // "A beautiful figurine, made of ivory. Figurines close to the base of the Tower tend do disappear after you have collected many of them."
    "Piękna figurka z kości słoniowej. Figurki blisko podstawy Wieży znikają, gdy zbierzesz dużo figurek.",
    "Fildişinden yapılmış güzel bir biblo. Bunlardan çok sayıda topladığında, kulenin temeline yakın biblolar yok olmaya başlar.",
    "Nádherná figurka ze slonové kosti. Figurky poblíž základů Věže mají tendenci mizet, pokud jich získáš hodně.",
    "Чудесная фигурка из слоновой кости. Фигурки рядом с основанием башни пропадают, когда Вы соберёте много их.",
-   "Eine hübsche Figur aus Elfenbein. Figuren nah am Fuße des Turms neigen dazuzu verschwinden wenn du viele gesammelt hast.",
+   "Eine hübsche Figur aus Elfenbein. Figuren nah am Fuße des Turms neigen dazu zu verschwinden wenn du viele gesammelt hast.",
     }},
   {0xd7d9ba22, { // "plain"
    "prosty",
@@ -6559,14 +8862,14 @@ sentence all_sentences[1130] = {
    "Güvenlik (hızlı kayıt)",
    "Bezpečnost (rychlé uložení)",
    "Сохраниться",
-/*MISSING*/    "Safety (quick save)",
+   "Sicherheit (schnell speichern)",
     }},
   {0xd86b25e9, { // "or another key to continue"
    "lub inny klawisz, by kontynuować",
    "veya devam etmek için başka bir tuşa bas.",
    "jakákoli jiná klávesa: pokračovat",
    "либо другую клавишу, чтобы продолжить",
-   "oder eine beliebige andere Taste zum fortfahren",
+   "oder eine beliebige andere Taste zum Fortfahren.",
     }},
   {0xd87a76e8, { // "cells generated"
    "wygenerowane pola",
@@ -6576,11 +8879,18 @@ sentence all_sentences[1130] = {
    "Generierte Zellen",
     }},
   {0xd8b71c12, { // "These creatures are slow, but they often appear in large numbers."
-   "Te demony są powolne, ale często pojawiają się w dużych ilościach.",
+   "Te demony są powolne, ale często pojawiają się w dużych grupach.",
    "Bu yaratıklar yavaştır ama genellikle sürü halinde gezerler.",
    "Tito tvorové jsou pomalí, ale často se objevují ve velkém počtu.",
    "Эти существа медленны, но они берут количеством.",
    "Diese Monster sind langsam aber sie erscheinen oft in großen Gruppen.",
+    }},
+  {0xd8c4577a, { // "Your Orb of Recall is blocked by something big!"
+   "Coś dużego blokuje Twoją Sferę Powrotu!",
+/*MISSING*/    "Your Orb of Recall is blocked by something big!",
+   "Tvoji Sféru Návratu blokuje něco velikého!",
+   "Что-то большое блокирует вашу Сферу Возвращения!",
+/*MISSING*/    "Your Orb of Recall is blocked by something big!",
     }},
   {0xd8ca7331, { // "Collect more treasures, there are still more lands waiting..."
    "Zbieraj skarby, nowe krainy czekają...",
@@ -6603,26 +8913,40 @@ sentence all_sentences[1130] = {
    "цвет кожи",
    "Hautfarbe",
     }},
+  {0xd95bd05f, { // "player 6 X"
+   "gracz 6 X",
+/*MISSING*/    "player 6 X",
+   "hráč 6 X",
+/*MISSING*/    "player 6 X",
+   "Spieler 6 X",
+    }},
+  {0xd95bd060, { // "player 6 Y"
+   "gracz 6 Y",
+/*MISSING*/    "player 6 Y",
+   "hráč 6 Y",
+/*MISSING*/    "player 6 Y",
+   "Spieler 6 Y",
+    }},
   {0xd97c7d02, { // "This Orb allows to temporarily create impassable matter, either to block paths or to build bridges across chasms and waters."
    "Ta sfera pozwala tymczasowo stworzyć nieprzekraczalną barierę. Można to wykorzystać do blokowania tras lub do budowy mostów nad przepaściami i wodami.",
    "Bu Küre, yolları tıkamak veya boşluklar ve su üzerine köprü kurmak için geçilemez madde oluşturmaya yarar. ",
    "Tato Sféra ti umožňuje dočasně vytvářet neprostupnou hmotu, kterou můžeš zatarasit cestu nebo využít jako most přes propasti nebo přes vodu.",
    "Эта сфера позволяет временно создавать непроходимое вещество, чтобы блокировать пути или строить мосты через пропасть или воду.",
-   "Dieser Orb erlaubt es dir temporäre unpassierbare Materie zu erzeugen, um Pfade zu blockieren der Brücken über Wasser und Schluchten zu erzeugen.",
+   "Dieser Orb erlaubt es dir, unpassierbare temporäre Materie zu erzeugen, um Pfade zu blockieren oder Brücken über Wasser und Schluchten zu bauen.",
     }},
   {0xd987ce32, { // "All the monsters you kill are carried to this strange land, and buried. Careless Rogues are also carried here..."
    "Pochowane są tu wszystkie potwory, które zabijasz. A także poszukiwacze skarbów, którzy nie uważali...",
    "Öldürdüğünüz bütün canavarlar buraya taşındı ve gömüldü. Dikkatsiz Seyyahlar da buraya taşındı...",
    "Všichni netvoři, které zabiješ, jsou odneseni do tohoto podivného kraje, a tam pohřbeni. A také neopatrní lupiči...",
    "Все убитые Вами монстры похоронены здесь. И неосторожные охотники за сокровищами тоже...",
-   "Alle Monster, die du tötest, werden hier begraben. Genauso wie achtlose Schurken...",
+   "Alle Monster, die du tötest, werden hier begraben. Auch unvorsichtige Schurken landen hier...",
     }},
   {0xd9a6e92a, { // "Cannot drop %the1 here!"
-   "Nie możesz tu położyć Martwej Sfery!",
+   "Nie możesz tu położyć %a1!",
    "Ölü Küreyi buraya bırakamazsın!",
    "Tady nelze položit Mrtvou Sféru!",
    "Сюда нельзя положить мёртвую сферу!",
-   "Du kannst %den1 %1 hier nicht fallenlassen!",
+   "Du kannst %den1 %a1 hier nicht ablegen!",
     }},
   {0xd9b57a91, { // "turn right"
    "skręć w prawo",
@@ -6631,12 +8955,19 @@ sentence all_sentences[1130] = {
    "повернуть направо",
    "Nach rechts drehen",
     }},
+  {0xd9c1c404, { // "first on top"
+   "pierwsze na górze",
+/*MISSING*/    "first on top",
+   "první nahoře",
+   "первые сверху",
+/*MISSING*/    "first on top",
+    }},
   {0xd9c3c871, { // "This flower brings fortune to the person who finds it.\n"
-   "Ta roślina daje szczęście temu, kto je znajdzie.\n",
+   "Te rośliny dają szczęście temu, kto je znajdzie.\n",
    "Bu çiçek kendisini bulana şans getirir.\n",
    "Tato rostlina přináší štěstí tomu, kdo ji najde.\n",
    "Этот цветок приносит удачу тому, кто найдёт его.\n",
-   "Diese Blume bringt seinem Finder Glück.\n",
+   "Diese Blume bringt ihrem Finder Glück.\n",
     }},
   {0xda09920d, { // "'n' to start"
    "n = start",
@@ -6644,6 +8975,13 @@ sentence all_sentences[1130] = {
    "n = start",
    "n = начать",
    "n = start",
+    }},
+  {0xda0cf1c2, { // "sight range"
+   "zasięg wzroku",
+/*MISSING*/    "sight range",
+   "viditelnost",
+   "радиус зрения",
+/*MISSING*/    "sight range",
     }},
   {0xda2f2292, { // "You summon %the1!"
    "Przywoła%łeś0 %a1!",
@@ -6659,12 +8997,26 @@ sentence all_sentences[1130] = {
    "тяжёлый",
    "schwierig",
     }},
+  {0xda55b584, { // "first on bottom"
+   "pierwsze na dole",
+/*MISSING*/    "first on bottom",
+   "první dole",
+   "первые снизу",
+/*MISSING*/    "first on bottom",
+    }},
   {0xda753c45, { // "summon Ivy"
    "przywołaj Bluszcz",
    "Sarmaşık çıkar",
    "vyvolej Břečťan",
    "призвать Плющ",
-/*MISSING*/    "summon Ivy",
+   "rufe Efeu herbei",
+    }},
+  {0xda924f7c, { // "The result of a collaboration of the Great Vizier and the Wizard of the Ivory Tower."
+   "Efekt współpracy Wielkiego Wezyra i Czarodzieja z Wieży z Kości Słoniowej.",
+/*MISSING*/    "The result of a collaboration of the Great Vizier and the Wizard of the Ivory Tower.",
+   "Výsledek spolupráce Velkovezíra a Čaroděje z Věže ze slonové kosti.",
+   "Совместная разработка Великого визиря и Мага из Башни из слоновой кости.",
+/*MISSING*/    "The result of a collaboration of the Great Vizier and the Wizard of the Ivory Tower.",
     }},
   {0xdac95cba, { // "Treasure gained!"
    "Skarb zdobyty!",
@@ -6680,6 +9032,20 @@ sentence all_sentences[1130] = {
    "Не удалось сохранить модель",
    "Papiermodell konnte nicht gespeichert werden",
     }},
+  {0xdb6a8542, { // "old style joystick configuration"
+   "konfiguracja joysticka w starym stylu",
+/*MISSING*/    "old style joystick configuration",
+   "starý styl konfigurace joysticku",
+   "старый режим настройки джойстика",
+/*MISSING*/    "old style joystick configuration",
+    }},
+  {0xdb7f948a, { // "joystick configuration"
+   "konfiguracja joysticka",
+/*MISSING*/    "joystick configuration",
+   "konfigurace joysticku",
+   "настройка джойстика",
+/*MISSING*/    "joystick configuration",
+    }},
   {0xdb8c4eb4, { // "%The1 squeaks hopelessly."
    "%1 pisn%ął1 bez nadziei.",
    "%1 umutsuzca ciyaklıyor.",
@@ -6688,7 +9054,7 @@ sentence all_sentences[1130] = {
    "%Die1 %1 piepst hoffnungslos.",
     }},
   {0xdb96b407, { // "When you have this Orb, most monsters won't see you, unless you are standing still, attacking, or picking up items."
-   "Kiedy masz Sferę Niewidzialności, większość potworów Ciebie nie widzi, chyba że stoisz w miejscu, atakujesz, albo podnosisz przedmioty.",
+   "Kiedy masz Sferę Niewidzialności, większość potworów Cię nie widzi, chyba że stoisz w miejscu, atakujesz, albo podnosisz przedmioty.",
    "Bu küren varsa çoğu canavar seni beklemediğin, saldırmadığın yahut yerden bir şey almadığın sürece görmez.",
    "Dokud máš tuto Sféru, většina netvorů tě neuvidí, pokud nebudeš stát na místě, nezaútočíš nebo nesebereš předmět.",
    "Пока у Вас есть эта сфера, большинство монстров не видят Вас, если Вы не стоите рядом, не атакуете и не поднимаете предметы.",
@@ -6702,18 +9068,18 @@ sentence all_sentences[1130] = {
    " Hypersteine: %1/%2",
     }},
   {0xdbe7dca1, { // "Whenever after your move there is a connection between a charged and a grounded cell, there is a short circuit. All cells on any path connecting a charged and a grounded cell (without repeated cells, or two consecutive grounded/charged cells) become damaged.\n\nSandstone walls and most creatures are conductive. Great Walls are isolators, but lands beyond them count as grounded.\n\nFulgurite, the treasure, is created when you manage to short circuit a sandstone wall, or a Rich Metal Beast.\n\nTrolls leave conductive rocks when killed, and Metal Beasts can only be killed by electricity -- your attacks only stun them, or push them away if already stunned."
-   "Za każdym razem, gdy po Twoim ruchu jest połączenie między naładowanym a uziemionym polem, następuje zwarcie. Wszystkie pola na dowolnej ścieżce łączące pole naładowane z uziemionym (bez powtórzonych pól, i bez dwóch sąsiednich naładowanych/uziemionych komórek) zostają uszkodzone.\n\nPiaskowe ściany i większość potworów przewodzi prąd. Wielkie ściany są izolatorami, ale krainy za nimi liczą się jako uziemione.\n\nFulguryt to skarb, który powstaje, gdy zwarcie zniszczy piaskową ścianę albo Bogatego Stwora.\n\nZabite trolle pozostawiają przewodzące ściany. Metalowe i Bogate Stwory można zabić tylko elektrycznością -- Twoje ataki je ogłuszają, albo odpychają, jeśli są już ogłuszone.",
+   "Za każdym razem, gdy po Twoim ruchu jest połączenie między naładowanym a uziemionym polem, następuje zwarcie. Wszystkie pola na dowolnej ścieżce łączące pole naładowane z uziemionym (bez powtórzonych pól i bez dwóch sąsiednich naładowanych/uziemionych komórek) zostają uszkodzone.\n\nPiaskowe ściany i większość potworów przewodzi prąd. Wielkie ściany są izolatorami, ale krainy za nimi liczą się jako uziemione.\n\nFulguryt to skarb, który powstaje, gdy zwarcie zniszczy piaskową ścianę albo Bogatego Stwora.\n\nZabite trolle pozostawiają przewodzące ściany. Metalowe i Bogate Stwory można zabić tylko elektrycznością -- Twoje ataki je ogłuszają albo odpychają, jeśli są już ogłuszone.",
    "Hareketinden sonra, eğer yüklü ve topraklı bir hücre arasında bağlantı varsa, kısa devre olur.Yüklü ve topraklı hücrenin arasındaki bütün hücreler (tekrarlayan hücreler, yahut iki ardışık topraklı yahut yüklü hücre hariç) hasar görür.\n\nKumtaşı duvarları ve çoğu yaratık iletkendir. Büyük Duvarlar yalıtkandır, ancak onlardan sonraki hücreler topraklanmış sayılır. \n\nFulgurit, buradaki hazine, bir kumtaşı duvarını veya Zengin Metal Canavarını kısa devreye uğratmanla ortaya çıkar.\n\nTroller öldüklerinde artlarında iletken kayalar bırakırlar ve Metal Canavarlar sadece elektrik ile öldürülebilirler. Saldırıların metal canavarları sersemletir, yahut zaten sersemlemişlerse ittirir. ",
    "Po každém tvém tahu se zkontroluje, zda nevzniklo spojení mezi nějakým nabitým a uzemněným políčkem; pokud ano, dojde ke zkratu. Všechna políčka na jakékoli dráze spojující nabité a uzemněné políčko (pokud se na ní žádné políčko nevyskytuje dvakrát a pokud na ní nejsou dvě uzemněná/nabitá políčka za sebou, dostanou zásah.\n\nPískovcové zdi a většina bytostí je vodivá. Velké zdi jsou izolanty, ale kraje za nimi se počítají jako uzemněné.\n\nZdejší poklad, Fulgurit, vznikne, když se ti podaří zkratovat pískovcovou zeď nebo Bohatou bestii.\n\nTrollové se po smrti promění ve vodivé kameny a Kovové a Bohaté bestie je možné zabít pouze elektřinou -- tvé útoky je pouze omráčí nebo, pokud už omráčené jsou, odstrčí.",
    "После каждого Вашего хода, если есть соединение между заряженной и заземлённой клеткой, возникает короткое замыкание. По всем клеткам на пути между заряженной и заземлённой (без повторов, и без двух соседних заряженных/заземлённых) проходит ток.\n\nСтены из песчаника и большинство существ проводят ток. Великие стены -- изоляторы, а все клетки между ними считаются заземлёнными.\n\nФульгурит, местное сокровище, появляется, если разрушить песчаник или убить Богатого железного зверя.\n\nТролль при гибели превращается в проводящую стену. Железных зверей можно убить только электричеством -- атаки только оглушают их, или толкают, если уже оглушены.",
-   "Nach jedem Zug gibt es einen Kurzschluss, vorausgesetzt es gibt eine Verbindung zwischen einer geladenen und einer geerdeten Zelle. Alle Zellen auf einem Pfad der eine geladene mit einer geerdetenZelle verbindet werden beschädigt.\n\nSandsteinwände und die meisten Monster sind leitfähig. Große Mauernsind Isolatoren aber Zellen hinter ihnen zählen als geerdet.\n\nDer Schatz Fulgurit entsteht wenn eine Sandsteinwand oder einErgiebiges Metallbiest kurzgeschlossen wird. \n\nTrolle hinterlassen leitfähige Steine wenn sie sterben und MetallbiesterKönnen nur durch Elektrizität getötet werden -- Deine Angriffe könnenSie nur betäuben oder wegstoßen wenn sie bereits betäubt sind. ",
+   "Nach jedem Zug gibt es einen Kurzschluss, vorausgesetzt es gibt eine Verbindung zwischen einer geladenen und einer geerdeten Zelle. Alle Zellen auf einem Pfad der eine geladene mit einer geerdeten Zelle verbindet werden beschädigt.\n\nSandsteinwände und die meisten Monster sind leitfähig. Große Mauern sind Isolatoren aber Zellen hinter ihnen zählen als geerdet.\n\nDer Schatz Fulgurit entsteht wenn eine Sandsteinwand oder ein ergiebiges Metallbiest kurzgeschlossen wird.\n\nTrolle hinterlassen leitfähige Steine wenn sie sterben und Metallbiester können nur durch Elektrizität getötet werden -- Deine Angriffe können sie nur betäuben oder wegstoßen wenn sie bereits betäubt sind.",
     }},
   {0xdc1433e4, { // "A wonderful beverage, apparently obtained by mixing red and blue slime. You definitely feel more healthy after drinking it, but you still feel that one hit of a monster is enough to kill you."
-   "Cudowny napój, powstały z mieszania czerwonej i niebieskiej mazi. Po jej wypiciu czujesz się zdecydowanie lepiej, ale wciąż jedno uderzenie potwora może Ciebie powalić.",
+   "Cudowny napój, powstały z mieszania czerwonej i niebieskiej mazi. Po jego wypiciu czujesz się zdecydowanie lepiej, ale wciąż jedno uderzenie potwora może Cię powalić.",
    "Şahane bir içki, görünen o ki kırmızı ve mavi balçığın karıştırılmasıyla elde edilmiş. İçince daha sağlıklı hissediyorsun ama bir canavarın tek vuruşunun seni öldüreceğine de eminsin.",
    "Úžasný nápoj, prý vytvořený smísením červeného a modrého slizu. Po jeho vypití se rozhodně cítíš zdravější, ale pořád máš pocit, že by tě dokázal zabít jediný úder netvora.",
    "Чудесный напиток, полученный из синей и красной слизи. Вы чувствуете себя лучше, выпив его, но одного удара Вам всё ещё хватит, чтобы погибнуть.",
-   "Ein wundervolles Getränk, entstanden aus der Mischung blauen und roten Schleims. Du fühlst dich gesünder nach seinem Genuss und dennoch zerbrechlich genug, dass dich ein Schlag eines Monsters töten könnte. ",
+   "Ein wunderbares Getränk, anscheinend entstanden aus der Mischung von blauem und rotem Schleim. Du fühlst dich definitiv gesünder nach seinem Genuss, aber trotzdem ahnst du, dass ein Schlag eines Monsters ausreichen würde, dich zu töten.",
     }},
   {0xdc4798ed, { // "Seven mines next to you!"
    "Siedem min koło Ciebie!",
@@ -6721,6 +9087,13 @@ sentence all_sentences[1130] = {
    "Ve tvé blízkosti se nachází sedm min!",
    "Семь мин рядом с Вами!",
    "7 Minen um dich!",
+    }},
+  {0xdc55616f, { // "edit all three colors"
+   "edytuj wszystkie kolory",
+/*MISSING*/    "edit all three colors",
+   "edituj všechny tři barvy",
+   "редактировать три цвета",
+/*MISSING*/    "edit all three colors",
     }},
   {0xdc5d5d33, { // "face the pointer"
    "celuj we wskaźnik",
@@ -6734,7 +9107,7 @@ sentence all_sentences[1130] = {
 /*MISSING*/    "Orb power (target: facing)",
    "Použití Sféry (zaměření před postavou)",
    "клавиша для силы сферы",
-/*MISSING*/    "Orb power (target: facing)",
+   "Orbkraft (Ziel: Blickrichtung)",
     }},
   {0xdc994855, { // "Lots of treasure gained!"
    "Mnóstwo skarbów zdobyte!",
@@ -6755,14 +9128,14 @@ sentence all_sentences[1130] = {
    "Madenciler Yaşayan Mağarayla baş etmek için özel gereçlere sahipler. Öldüklerinde, bu gereçler aktifleşiyor ve etraflarındaki Yaşayan Mağarayı yok ediyor.",
    "Horníci mají speciální nástroje pro práci v Živoucí jeskyni. Když zemřou, jejich nástroje se aktivují a zničí živoucí jeskyni kolem nich.",
    "Шахтёры имеют специальные инструменты для копания Живой пещеры. При гибели они автоматически используются, уничтожая пещеру вокруг них.",
-   "Minenarbeiter haben spezielle Werkzeuge für den Umgang mit der Lebenden Höhle. Sterben sie, aktivieren sich diese Werkzeuge, was die Höhle um sie herum einstürzen lässt.",
+   "Minenarbeiter haben spezielle Werkzeuge für den Umgang mit der Lebenden Höhle. Sterben sie, aktivieren sich diese Werkzeuge, was die Höhle um sie herum zerstört.",
     }},
   {0xdcebb09e, { // "So, you have killed a Ratling on the unwarped sea? You will be punished for this! Luckily, if you run away from the Warped Sea quickly, the Ratling Avengers will lose track of you."
    "Zabi%łeś0 Szczuraka na niezakrzywionym morzu? Mściciele Cię dosięgną! Na szczęście, jeśli szybko uciekniesz z Zakrzywionego Morza, Szczuraki-Mściciele zgubią Twój ślad.",
 /*MISSING*/    "So, you have killed a Ratling on the unwarped sea? You will be punished for this! Luckily, if you run away from the Warped Sea quickly, the Ratling Avengers will lose track of you.",
    "Ty jsi zabi%l0 Krysáka na nepokřiveném moři? Za to zaplatíš! Krysáci mstitelé o tebe naštěstí ztratí zájem, pokud z Pokřiveného moře rychle utečeš.",
    "Вы убили Крысолюда в неискривлённом море? Мститель до Вас доберётся!К счастью, если достаточно далеко уйти от Искривлённого моря, он потеряет Ваш след.",
-/*MISSING*/    "So, you have killed a Ratling on the unwarped sea? You will be punished for this! Luckily, if you run away from the Warped Sea quickly, the Ratling Avengers will lose track of you.",
+   "Du hast also einen Rattenmenschen auf der unverzerrten See getötet? Dafür wirst du bestraft werden! Wenn du Glück hast und schnell von der Verzerrten See verschwindest, werden die Rattenmenschen-Rächer deine Spur verlieren.",
     }},
   {0xdcec3a85, { // "You have improved your total high score and %1 specific high scores!"
    "Poprawi%łeś0 swój ogólny najlepszy wynik oraz %1 z wyników szczegółowych!",
@@ -6776,7 +9149,7 @@ sentence all_sentences[1130] = {
 /*MISSING*/    "half-plane",
    "polorovina",
    "полуплоскость",
-/*MISSING*/    "half-plane",
+   "Halbebene",
     }},
   {0xdd0527d1, { // "help"
    "help",
@@ -6786,11 +9159,11 @@ sentence all_sentences[1130] = {
    "Hilfe",
     }},
   {0xdd22a807, { // "This being radiates an aura of wisdom. It is made of a beautiful crystal, you would love to take it home. But how is it going to defend itself? Better not to think of it, thinking causes your brain to go hot...\n\nCrystal Sages melt at -30 °C, and they can rise the temperature around you from afar."
-   "Ta istota promieniuje mądrością. Jest zrobiona z pięknego kryształu, na pewno bardzo cennego. Ciekawe, jak zamierza się przed Tobą bronić? Lepiej o tym nie myśleć, myślenie za bardzo Ciebie rozgrzewa...\n\nKryształowi Mędrcy topią się w -30 °C, i powodują wzrost temperatury wokół Ciebie.",
+   "Ta istota promieniuje mądrością. Jest zrobiona z pięknego kryształu, na pewno bardzo cennego. Ciekawe, jak zamierza się przed Tobą bronić? Lepiej o tym nie myśleć, myślenie za bardzo Cię rozgrzewa...\n\nKryształowi Mędrcy topią się w -30 °C i powodują wzrost temperatury wokół Ciebie.",
    "Muhteşem bir kristalden yapılmış, eve götürmeyi çok isterdin.Ama kendini nasıl savunacak? Düşünmesen daha iyi, sadece düşünmek bile beynini zorluyor. ...\n\nKristal Pirleri -30 °C'de erir ve etrfındaki ısıyı uzaktan artırabilir.",
    "Tato bytost vyzařuje auru moudrosti. Je vytvořená z krásného krystalu -- moc rád%d0 by sis ji vza%l0 domů. Ale jak se bude bránit? Raději na to nemyslet, z myšlení se ti zahřívá mozek...\n\nKřišťáloví mudrci tají při teplotě -30 °C a dokážou kolem tebe na dálku zvyšovat teplotu.",
    "Они излучают ауру мудрости. Они сделаны из красивых кристаллов, и Вы хотели бы забрать их домой. Но как он собирается защищать себя? Лучше не думайте об этом, мышление нагревает Ваш мозг...\n\nКристальные мудрецы тают при -30 °C, и они могут повысить температуру вокруг Вас издалека.",
-   "Dieses Wesen strahlt eine Aura aus Weisheit aus. Es besteht aus einem schönen Kristall, am liebsten würdest du es mit nach Hause nehmen... Nur, wie verteidigt es sich? Besser nicht daran denken... Denken verursacht Kopfschmerzen...\n\nKristallweisen schmelzen bei -30 °C, und können deine Temperatur aus der Ferne steigern.",
+   "Dieses Wesen strahlt eine Aura der Weisheit aus. Es besteht aus einem schönen Kristall, am liebsten würdest du es mit nach Hause nehmen... Nur, wie verteidigt es sich? Besser nicht daran denken... Denken lässt dein Gehirn heiß werden...\n\nKristallweisen schmelzen bei -30 °C. Sie können die Temperatur um dich herum aus der Ferne ansteigen lassen.",
     }},
   {0xdd31dce5, { // "That was not a challenge. Find a larger castle!"
    "To nie było wyzwanie. Znajdź większy zamek!",
@@ -6804,7 +9177,7 @@ sentence all_sentences[1130] = {
 /*MISSING*/    "settings set here won't be saved",
    "nastavení provedená zde nebudou uložena",
    "установленные настройки не будут сохранены",
-/*MISSING*/    "settings set here won't be saved",
+   "hier gemachte Einstellungen werden nicht gespeichert",
     }},
   {0xdd78d3c0, { // "symmetry 0-1"
    "symetria 0-1",
@@ -6827,26 +9200,40 @@ sentence all_sentences[1130] = {
    "симметрия 0-3",
    "Symmetrie 0-3",
     }},
+  {0xde221b93, { // "These dodecahedra made of a mysterious material are the Reptiles' favorite toy."
+   "Te dwunastościany zrobione z tajemniczego materiału to ulubiona zabawka Jaszczurek.",
+/*MISSING*/    "These dodecahedra made of a mysterious material are the Reptiles' favorite toy.",
+   "Tyto dvanáctistěny z jakéhosi tajemného materiálu jsou oblíbenou hračkou Ještěrek.",
+   "Эти додекаэдры из странного материала -- любимые игрушки ящериц.",
+/*MISSING*/    "These dodecahedra made of a mysterious material are the Reptiles' favorite toy.",
+    }},
   {0xdec03d1b, { // "In this mode, HyperRogue is played on a 3D model of a part of the hyperbolic plane, similar to one you get from the 'paper model creator' or by hyperbolic crocheting.\n\nThis requires some OpenGL extensions and may crash or not work correctly -- enabling the 'render texture without OpenGL' options may be helpful in this case. Also the 'render once' option will make the rendering faster, but the surface will be rendered only once, so you won't be able to play a game on it.\n\nUse arrow keys to rotate, Page Up/Down to zoom."
-   "W tym trybie można grać w HyperRogue na trójwymiarowym modelu części płaszczyzny hiperbolicznej, podobnego do tego, który można otrzymać w kreatorze modeli papierowych, albo poprzez hiperboliczne szydełkowanie.\n\nDziałanie wymaga pewnych rozszerzeń OpenGL, i może działać nieprawidłowo lub powodować zatrzymanie gry -- w takim przypadku może być przydatne włączenie opcji 'renderuj bez OpenGL'. Opcja 'renderuj raz' spowoduje, że animacja będzie szybsza, ale tekstura powierzchni zostanie narysowana tylko raz, zatem nie będzie możliwe granie na niej na żywo.\n\nMożesz obracać model strzałkami, i go przybliżać i oddalać klawiszami Page Up/Down.",
+   "W tym trybie można grać w HyperRogue na trójwymiarowym modelu części płaszczyzny hiperbolicznej, podobnym do tego, który można otrzymać w kreatorze modeli papierowych albo poprzez hiperboliczne szydełkowanie.\n\nDziałanie wymaga pewnych rozszerzeń OpenGL i może działać nieprawidłowo lub powodować zatrzymanie gry -- w takim przypadku może być przydatne włączenie opcji 'renderuj bez OpenGL'. Opcja 'renderuj raz' spowoduje, że animacja będzie szybsza, ale tekstura powierzchni zostanie narysowana tylko raz, zatem nie będzie możliwe granie na niej na żywo.\n\nMożesz obracać model strzałkami, a przybliżać i oddalać go klawiszami Page Up/Down.",
 /*MISSING*/    "In this mode, HyperRogue is played on a 3D model of a part of the hyperbolic plane, similar to one you get from the 'paper model creator' or by hyperbolic crocheting.\n\nThis requires some OpenGL extensions and may crash or not work correctly -- enabling the 'render texture without OpenGL' options may be helpful in this case. Also the 'render once' option will make the rendering faster, but the surface will be rendered only once, so you won't be able to play a game on it.\n\nUse arrow keys to rotate, Page Up/Down to zoom.",
    "V tomto módu můžete hrát HyperRogue na 3D modelu části hyperbolické roviny podobném tomu, co vytváří generátor papírových modelů nebo hyperbolické háčkování.\n\nJe k tomu zapotřebí OpenGL a je možné, že v tomto módu hra spadne nebo nepoběží správně -- v takovém případě může pomoci zapnout možnost 'renderuj textury bez OpenGL'. Kromě toho je možné renderování urychlit volbou 'renderuj jednou', ale v takovém případě bude povrch vygenerován pouze jednou, takže na něm není možné hrát.\n\nModel se otáčí šipkami a lze ho zoomovat klávesami Page Up/Down.",
    "В этом режиме Вы играете в HyperRogue на трёхмерной модели гиперболической плоскости, похожей на те, что можно получить в 'создателе бумажных моделей'\n\nЭто требует некоторых расширений OpenGL, может работать некорректно или вызывать падение игры -- включение опции 'не использовать OpenGL' может помочь. Опция 'отрисовать один раз' ускоряет отрисовку, но играть в таком режиме невозможно.\n\nИспользуйте стрелки для вращения, Page Up/Down для изменения масштаба.",
-/*MISSING*/    "In this mode, HyperRogue is played on a 3D model of a part of the hyperbolic plane, similar to one you get from the 'paper model creator' or by hyperbolic crocheting.\n\nThis requires some OpenGL extensions and may crash or not work correctly -- enabling the 'render texture without OpenGL' options may be helpful in this case. Also the 'render once' option will make the rendering faster, but the surface will be rendered only once, so you won't be able to play a game on it.\n\nUse arrow keys to rotate, Page Up/Down to zoom.",
+   "In diesem Modus wird HyperRogue auf einem 3D-Modell eines Teils einer hyperbolischen Ebene gespielt, ähnlich zu dem was man beim 'Papiermodell-Schöpfer' oder beim hyperbolischen Häkeln erhält.\n\nDieser Modus erfordert einige OpenGL-Erweiterungen und kann abstürzen oder fehlerhaft funktionieren -- das Einschalten der Option 'Rendere Textur ohne OpenGL' kann hilfreich sein. Auch die Option 'Rendere die Textur nur einmal' beschleunigt das Rendern, aber die Oberfläche wird nur einmal gerendert und du kannst darauf nicht spielen.\n\nVerwende die Pfeiltasten zum Rotieren, Bild auf/ab zum Zoomen.",
+    }},
+  {0xdec89004, { // "scrolling speed"
+   "prędkość przewijania",
+/*MISSING*/    "scrolling speed",
+   "rychlost scrollování",
+   "скорость прокрутки",
+/*MISSING*/    "scrolling speed",
     }},
   {0xded7510d, { // "The Knights of the Round Table are the greatest warriors of these lands. They are not very inventive with names though, as they call each of their castles Camelot. You are probably worthy of joining them, but they will surely give you some quest to prove yourself...\n\nEach castle contains a single treasure, the Holy Grail, in the center. The radius of the Round Table is usually 28, but after you find a Holy Grail successfully, each new castle (and each Round Table) you find will be bigger."
-   "Rycerze Okrągłego Stołu to najwięksi wojownicy tych krain. Niestety, nie są zbyt pomysłowi w nazywaniu, i każdy swój zamek nazywają Camelot. Prawdopodobnie nadajesz się, by stać się jednym z nich, ale na pewno dadzą Ci jakąś misję, byś pokaza%ł0 swoją wartość...\n\nKażdy zamek ma jeden skarb (Święty Graal) w samym środku. Promień Okrągłego Stołu to normalnie 28, ale z każdym znalezionym Śwętym Graalem każdy nowy zamek (i jego Okrągły Stół) będzie większy.",
+   "Rycerze Okrągłego Stołu to najwięksi wojownicy tych krain. Niestety, nie są zbyt pomysłowi w nazywaniu i każdy swój zamek nazywają Camelot. Prawdopodobnie nadajesz się, by stać się jednym z nich, ale na pewno dadzą Ci jakąś misję, byś pokaza%ł0 swoją wartość...\n\nKażdy zamek ma jeden skarb (Święty Graal) w samym środku. Promień Okrągłego Stołu to normalnie 28, ale z każdym znalezionym Śwętym Graalem każdy nowy zamek (i jego Okrągły Stół) będzie większy.",
    "Yuvarlak masa Şövalyeleri bu toprakların en müthiş savaşçıları. Kalelerine Kamelot demelerine bakılırsa, isimlerle araları pek iyi değil herhalde. Aralarına katılmaya büyük ihtimalle layıksın, ama yine de sana kendini kanıtlamak için bir görev verecekler... \n\n Her kale merkezinde tek bir hazineyi, Kutsal Kâseyi barındırıyor. Yuvarlak masanın çapı genelde 28'dir, ama Kutsal Kâseyi bir kez bulduğunda, karşılaştığın her yeni kale (ve her yuvarlak masa) eskisinden daha büyük olacak.",
    "Rytíři Kulatého stolu jsou největší bojovníci těchto krajů. Ale nemají zrovna talent na vymýšlení jmen, protože všem svým hradům říkají Camelot. Pravděpodobně jsi hoden toho, aby ses k nim připojil, ale určitě budeš muset splnit nějaký úkol, abys jim to dokázal...\n\nNa každém hradě je jeden poklad (Svatý grál), který se nachází v jeho středu. Poloměr Kulatého stolu je obvykle 28, ale poté, co najdeš Svatý grál, bude každý další hrad (a každý další Kulatý stůl) větší a větší.",
    "Рыцари Круглого стола - величайшие воины этой земли. Они не очень изобретательны и называют каждый свой замок Камелот. Возможно, Вам стоит встретиться с ними, и они дадут Вам задание.\n\nКаждый замок содержит одно сокровище (Святой Грааль) в центре. Обычно радиус круглого стола равен 28, но с каждым новым Граалем радиус становится всё больше.",
-   "Die Ritter der Tafelrunde sind die größten Krieger dieser Lande. Sie sind nur nicht sehr einfallsreich was Namen angeht, alle ihre Schlösser heißen Camelot.Bevor du ihnen beitreten kannst wirst du ihnen beweisen müssen das du ihrer würdig bist.\n\nIn der Mitte jedes Schlosses befindet sich ein einziger Schatz, der heilige Gral. Der Radius einer Tafelrunde ist normalerweise 28, allerdings wächst diese sowie das Schloss mit jedem heiligem Gral den du sammelst.",
+   "Die Ritter der Tafelrunde sind die größten Krieger dieses Landes. Sie sind nur nicht sehr einfallsreich was Namen angeht, alle ihre Schlösser heißen Camelot. Bevor du ihnen beitreten kannst, wirst du ihnen beweisen müssen dass du ihrer würdig bist.\n\nIn der Mitte jedes Schlosses befindet sich ein einziger Schatz, der Heilige Gral. Der Radius einer Tafelrunde ist normalerweise 28, allerdings wächst dieser sowie das Schloss mit jedem Heiligem Gral den du sammelst.",
     }},
   {0xdeed1b81, { // "paper model creator"
    "kreator modeli papierowych",
    "kâğıt modeli üreticisi",
    "generátor papírových modelů",
    "создатель бумажных моделей",
-   "Papiermodell Schöpfer",
+   "Papiermodell-Schöpfer",
     }},
   {0xdef3113d, { // "hair color"
    "kolor włosów",
@@ -6860,7 +9247,7 @@ sentence all_sentences[1130] = {
 /*MISSING*/    "The ivy attacks %the1!",
    "Břečťan zaútočil na %a1!",
    "Плющ атаковал %a1!",
-/*MISSING*/    "The ivy attacks %the1!",
+   "Der Efeu greift %den1 %a1 an!",
     }},
   {0xdf6b66d1, { // "frames per second"
    "klatki na sekundę",
@@ -6868,6 +9255,13 @@ sentence all_sentences[1130] = {
    "snímky za sekundu",
    "кадров в секунду",
    "FPS",
+    }},
+  {0xdf88bdd4, { // "shift+O to switch anti-aliasing"
+   "shift+O by przełączyć antialiasing",
+/*MISSING*/    "shift+O to switch anti-aliasing",
+   "Stiskem Shift+O se přepíná antialiasing",
+   "shift+O включает сглаживание",
+/*MISSING*/    "shift+O to switch anti-aliasing",
     }},
   {0xdf9236a7, { // "This magical missile burns whatever it hits."
    "Ten magiczny pocisk pali to, w co trafi.",
@@ -6909,7 +9303,7 @@ sentence all_sentences[1130] = {
 /*MISSING*/    " %1",
    " %1",
    " %1",
-/*MISSING*/    " %1",
+   " %1",
     }},
   {0xe08be549, { // "Still confused? Read the FAQ on the HyperRogue website!\n\n"
    "Coś jest niejasne? Przeczytaj FAQ na stronie HyperRogue! (po angielsku)\n\n",
@@ -6930,21 +9324,21 @@ sentence all_sentences[1130] = {
    "Balçık %abl1 etkileşime girdi!",
    "Sliz reaguje s %abl1!",
    "Слизь реагирует с %abl1!",
-   "Der Schleim reagiert mit %dem %1!",
+   "Der Schleim reagiert mit %dem %d1!",
     }},
   {0xe0dd1448, { // "This land is filled with beautiful, but dangerous, creatures and plants."
    "Ta kraina pełna jest pięknych, lecz niebezpiecznych, stworzeń i roślin.",
 /*MISSING*/    "This land is filled with beautiful, but dangerous, creatures and plants.",
    "Tento kraj je plný krásných, ale nebezpečných tvorů a rostlin.",
    "Эта земля полна прекрасными, но опасными существами и растениями.",
-/*MISSING*/    "This land is filled with beautiful, but dangerous, creatures and plants.",
+   "Dieses Land ist voller schöner, aber gefährlicher Wesen und Pflanzen.",
     }},
   {0xe15c3d8f, { // "You have used less knives than ever before. Congratulations!"
-   "Zużyłeś mniej noży, niż kiedykolwiek wcześniej. Gratulacje!",
+   "Zużyłeś mniej noży niż kiedykolwiek wcześniej. Gratulacje!",
    "Her zamankinden daha az bıçak kullandın. Tebrikler!",
    "Použil jsi méně nožů než kdykoli předtím. Gratulujeme!",
    "Вы использовали меньше ножей, чем раньше. Поздравляем!",
-   "Du hast weniger Messer als zuvor benutzt. Gratulation!",
+   "Du hast weniger Messer als zuvor benutzt. Glückwunsch!",
     }},
   {0xe16601a8, { // "This is the biggest Hypersian Rug you have ever seen! Unfortunately, it is too large to take it as a trophy."
    "To jest największy hiperski dywan, jaki kiedykolwiek widzia%łeś0! Niestety, jest za duży, by wziąć go jako zdobycz.",
@@ -6974,10 +9368,17 @@ sentence all_sentences[1130] = {
    "Сферы Йендора получены!",
    "Orb von Yendor erhalten!",
     }},
+  {0xe21bf3fa, { // "Aethereal powers let you go through the holes."
+   "Moc Eteru pozwala Ci przechodzić przez dziury.",
+/*MISSING*/    "Aethereal powers let you go through the holes.",
+   "Síla Éteru ti umožňuje pohybovat se přes díry.",
+   "Силы эфира позволяют ходить сквозь пропасти.",
+/*MISSING*/    "Aethereal powers let you go through the holes.",
+    }},
   {0xe21cf668, { // "shoot'em up mode"
+   "strzelanka",
    "tryb strzelanki",
-   "tryb strzelanki",
-   "mód střílečky",
+   "střílečka",
    "режим стрельбы",
    "Ballermodus",
     }},
@@ -7037,6 +9438,20 @@ sentence all_sentences[1130] = {
    "Вы смотрите на ваше драгоценное сокровище.",
    "Du betrachtest deine kostbaren Schätze.",
     }},
+  {0xe32a6ab7, { // "page"
+   "strona",
+/*MISSING*/    "page",
+   "stránka",
+   "страница",
+/*MISSING*/    "page",
+    }},
+  {0xe3441b20, { // "Euclidean/elliptic mode"
+   "tryb euklidesowy/eliptyczny",
+/*MISSING*/    "Euclidean/elliptic mode",
+   "Eukleidovský/eliptický mód",
+   "евклидов/эллиптический режим",
+/*MISSING*/    "Euclidean/elliptic mode",
+    }},
   {0xe35613f4, { // "floor"
    "podłoga",
    "zemin",
@@ -7049,7 +9464,7 @@ sentence all_sentences[1130] = {
    " Klavyeyle görüntüyü döndürerek benzer bir etki yakalayabilirsin. (Page Up/Down).",
    " Na klávesnici můžeš podobného efektu dosáhnout otočením hrací plochy (Page Up/Down).",
    " На клавиатуре пользуйтесь поворотом поля для того же эффекта (Page Up/Down).",
-   "Du kannst die Ansicht mit der Tastatur für ändern, dies erzeugt einen ähnlichen Effekt (Page Up/Down).",
+   " Du kannst die Ansicht mit der Tastatur rotieren; dies erzeugt einen ähnlichen Effekt (Bild auf/ab).",
     }},
   {0xe3fc1d5c, { // "configure player 1"
    "skonfiguruj gracza 1",
@@ -7070,14 +9485,49 @@ sentence all_sentences[1130] = {
 /*MISSING*/    "configure player 3",
    "konfigurace hráče 3",
    "настройки игрока 3",
-/*MISSING*/    "configure player 3",
+   "Spieler 3 konfigurieren",
     }},
   {0xe3fc1d5f, { // "configure player 4"
    "skonfiguruj gracza 4",
 /*MISSING*/    "configure player 4",
    "konfigurace hráče 4",
    "настройки игрока 4",
-/*MISSING*/    "configure player 4",
+   "Spieler 4 konfigurieren",
+    }},
+  {0xe3fc1d60, { // "configure player 5"
+   "konfiguruj gracza 5",
+/*MISSING*/    "configure player 5",
+   "konfigurace hráče 5",
+/*MISSING*/    "configure player 5",
+   "Spieler 5 konfigurieren",
+    }},
+  {0xe3fc1d61, { // "configure player 6"
+   "konfiguruj gracza 6",
+/*MISSING*/    "configure player 6",
+   "konfigurace hráče 6",
+/*MISSING*/    "configure player 6",
+   "Spieler 6 konfigurieren",
+    }},
+  {0xe3fc1d62, { // "configure player 7"
+   "konfiguruj gracza 7",
+/*MISSING*/    "configure player 7",
+   "konfigurace hráče 7",
+/*MISSING*/    "configure player 7",
+   "Spieler 7 konfigurieren",
+    }},
+  {0xe45854fb, { // "You can find safety in some places in the Prairie, but if you want treasures, they can be found only on the other side of a giant herd of bulls."
+   "Są na Prerii miejsca bezpieczne, ale jeśli szukasz skarbów, możesz je znaleźć tylko po drugiej stronie wielkiego stada biegnących byków.",
+/*MISSING*/    "You can find safety in some places in the Prairie, but if you want treasures, they can be found only on the other side of a giant herd of bulls.",
+   "Na některých místech Prérie je bezpečno, ale pokud chceš poklady, musíš je hledat na druhé straně obrovského stáda býků.",
+   "В некоторых местах Прерии весьма безопасно, но если вы хотите сокровищ, их можно найти лишь на другой стороне от огромных стад быков.",
+/*MISSING*/    "You can find safety in some places in the Prairie, but if you want treasures, they can be found only on the other side of a giant herd of bulls.",
+    }},
+  {0xe469319b, { // "which grants the greatest enjoyment.\""
+   "sprawia największą przyjemność.\"",
+/*MISSING*/    "which grants the greatest enjoyment.\"",
+   "poskytuje největší potěšení.\"",
+   "который приносит большое удовольствие.\"",
+/*MISSING*/    "which grants the greatest enjoyment.\"",
     }},
   {0xe50afb4c, { // "Gameboard"
    "Plansza",
@@ -7105,14 +9555,28 @@ sentence all_sentences[1130] = {
    "Vahşi Ormanda büyüyen devasa bir bitki. Her sarmaşığın bir sürü dalı vardır ve senin her hareketinle bir dal büyür. Dallar saatyönü sırasında büyür. Kökün kendisi savunmasızdır. \n",
    "Obrovská rostlina, která roste v Džungli. Každý Břečťan má mnoho větví, a po každém tvém pohybu jedna z nich povyroste. Větve rostou v pořadí po směru hodinových ručiček. Kořen Břečťanu je také zranitelný.",
    "Огромное растение, растущее в Джунглях. Каждый плющ имеет много побегов, и один из них растёт каждый ход. Побеги растут по часовой стрелке. Корень плюща - самое уязвимое место.\n",
-   "Eine riesige Pflanze, die im Dschungel wächst. Jeder Efeu hat viele Zweige, und jedes Mal, wenn du dich bewegst, wächst einer. Sie wachsen im Uhrzeigersinn. Die Wurzel selbst ist verwundbar.\n",
+   "Eine riesige Pflanze, die im Dschungel wächst. Jeder Efeu hat viele Zweige, und jedes Mal, wenn du dich bewegst, wächst einer. Sie wachsen im Uhrzeigersinn. Die Wurzel selbst ist verwundbar.",
+    }},
+  {0xe5905e88, { // "Roughly 42% cells are on the edge of your sight range. Reducing the sight range makes HyperRogue work faster, but also makes the game effectively harder."
+   "Około 42% pól jest na brzegu Twojego pola widzenia. Zmniejszenie zasięgu sprawia, że HyperRogue działa szybciej, ale rozgrywka jest trudniejsza.",
+/*MISSING*/    "Roughly 42% cells are on the edge of your sight range. Reducing the sight range makes HyperRogue work faster, but also makes the game effectively harder.",
+   "Zhruba 42% políček se nachází na poloměru tvého dohledu. Pokud snížíš dohled, bude HyperRogue běhat rychleji, ale také se tím ztíží.",
+   "Примерно 42% клеток находятся в радиусе видимости. Уменьшение радиуса обзора ускоряет работу HyperRogue, но заметно усложняет игру.",
+/*MISSING*/    "Roughly 42% cells are on the edge of your sight range. Reducing the sight range makes HyperRogue work faster, but also makes the game effectively harder.",
+    }},
+  {0xe59fd741, { // "azimuthal equi-area"
+   "azymutalny, równe pola",
+/*MISSING*/    "azimuthal equi-area",
+   "azimutální plochojevný",
+   "азимутальная, сохранение площадей",
+   "flächentreu azimutal",
     }},
   {0xe61f191b, { // "You overhear miners talking about a castle..."
    "Podsłucha%łeś0 górników rozmawiających o zamku...",
    "Madencilerin bir kale hakkında konuştuğunu duydun...",
    "Zaslechl jsi Horníky, jak mluví o nějakém hradu...",
    "Вы слышите шахтёров, говорящих о замке...",
-   "Du hörst Minenarbeiter die über ein Schloss sprechen...",
+   "Du hörst Minenarbeiter über ein Schloss sprechen...",
     }},
   {0xe629d1bd, { // "You summon a sandworm!"
    "Przywoła%łeś0 Czerwia!",
@@ -7156,6 +9620,13 @@ sentence all_sentences[1130] = {
    "Неизвестно, почему, но этих жемчужин довольно много в лодках в этом водовороте.",
    "Du weißt nicht genau warum, aber es gibt schöne Perlen auf vielen Booten im Strudel.",
     }},
+  {0xe7ab2a66, { // "Gravitational anomalies in the Jungle create mountains overgrown with ivies and bushes. Will you dare to climb the ivies to get the amethysts hidden above?\n\nCells adjacent to Ivies count as stable (but Ivies cannot climb themselves or other Ivies)."
+   "Anomalia grawitacyjna w Dżungli stworzyła górę porośniętą bluszczem i krzakami. Czy odważysz się wspiąć po bluszczu, by zdobyć ukryte na niej ametysty?\n\nPola sąsiadujące z Bluszczem liczą się jako stabilne (ale Bluszcz nie może się wspinać po samym sobie ani po innych bluszczach).",
+/*MISSING*/    "Gravitational anomalies in the Jungle create mountains overgrown with ivies and bushes. Will you dare to climb the ivies to get the amethysts hidden above?\n\nCells adjacent to Ivies count as stable (but Ivies cannot climb themselves or other Ivies).",
+   "Gravitační anomálie v Džungli vytvářejí hory zarostlé břečťanem a keři. Odvážíš se vylézt na břečťany, abys získal ametysty ukryté nahoře?\n\nVšechny políčka, která sousedí s Břečťanem, se berou jako stabilní (Břečťan ale nemůže šplhat po sobě ani po jiných Břečťanech).",
+   "Гравитационная аномалия в Джунглях создала гору, заросшую плющом и кустами. Рискнёте ли вы продраться через плющ и найти спрятанные здесь аметисты?\n\nКлетки рядом с плющом считаются стабильными (однако плющ не может расти вдоль себя или другого плюща.",
+/*MISSING*/    "Gravitational anomalies in the Jungle create mountains overgrown with ivies and bushes. Will you dare to climb the ivies to get the amethysts hidden above?\n\nCells adjacent to Ivies count as stable (but Ivies cannot climb themselves or other Ivies).",
+    }},
   {0xe7b428d4, { // "F2 = save"
    "F2 = zapisz",
    "F2 = kaydet",
@@ -7163,26 +9634,47 @@ sentence all_sentences[1130] = {
    "F2 = записать",
    "F2 = Speichern",
     }},
+  {0xe86acfd5, { // "\n\nThis Orb protects you from attacks, scents, and insulates you from electricity. It does not let you go through deadly terrain, but if you are attacked with fire, it lets you stay in place in it."
+   "\n\nTa Sfera chroni Cię przed atakami, zapachami, i izoluje od elektryczności. Nie pozwala iść przez zabójczy teren, ale jeśli zostaniesz zaatakowan%y0 ogniem, możesz stać w miejscu.",
+/*MISSING*/    "\n\nThis Orb protects you from attacks, scents, and insulates you from electricity. It does not let you go through deadly terrain, but if you are attacked with fire, it lets you stay in place in it.",
+   "\n\nTato sféra te chrání před útoky a pachy a izoluje tě před elektřinou. Neumožňuje procházet smrtícím terénem, ale pokud na tebe někdo zaútočí ohněm, můžeš v něm zůstat stát.",
+   "\n\nЭта сфера защищает вас от атак, запахов, изолирует от электричества. Она не позволяет вам пойти в опасную клетку, но если вы атакованы огнём, вы можете стоять на месте.",
+   "\n\nDieser Orb schützt dich vor Angriffen, Düften, und isoliert dich gegenüber Elektrizität. Er lässt dich nicht durch tödliches Terrain laufen, aber wenn du mit Feuer angegriffen wirst, kannst du darin stehen bleiben.",
+    }},
   {0xe89063bd, { // "You need to dismount %the1!"
    "Musisz opuścić %a1!",
 /*MISSING*/    "You need to dismount %the1!",
    "Musíš seskočit!",
    "Вы должны слезть с %a1!",
-/*MISSING*/    "You need to dismount %the1!",
+   "Du musst von %dem1 %a1 absteigen!",
+    }},
+  {0xe8dc5933, { // "\"We live in a beautiful and orderly world, "
+   "\"Żyjemy w pięknym i uporządkowanym świecie, ",
+/*MISSING*/    "\"We live in a beautiful and orderly world, ",
+   "\"Žijeme v krásném a uspořádaném světě, ",
+   "\"Мы живём в прекрасном и упорядоченном мире, ",
+/*MISSING*/    "\"We live in a beautiful and orderly world, ",
     }},
   {0xe8f470be, { // "Your total wealth"
    "Twoje łączne bogactwo",
    "Toplam servetiniz",
    "Tvé celkové bohatství",
    "Ваше богатство",
-   "Dein Gesamt Reichtum",
+   "Dein Gesamtvermögen",
     }},
   {0xe966825b, { // "A beautiful gem from the Jungle."
    "Piękny klejnot z Dżungli.",
    "Vahşi Ormandan elde edilmiş bir mücevher.",
    "Nádherný drahokam z Džungle.",
    "Прекрасный камень из Джунглей.",
-   "Ein schöner Edelstein aus dem Urwald.",
+   "Ein schöner Edelstein aus dem Dschungel.",
+    }},
+  {0xe96dc1b1, { // "all"
+   "wszystko",
+/*MISSING*/    "all",
+   "vše",
+   "все",
+/*MISSING*/    "all",
     }},
   {0xe970675e, { // "date"
    "data",
@@ -7191,19 +9683,26 @@ sentence all_sentences[1130] = {
    "дата",
    "Datum",
     }},
+  {0xe990670b, { // "background music"
+   "muzyka w tle",
+/*MISSING*/    "background music",
+   "hudba",
+   "фоновая музыка",
+   "Hintergrundmusik",
+    }},
   {0xe9914d4e, { // "polygon sides"
    "boki wielokąta",
 /*MISSING*/    "polygon sides",
    "strany mnohoúhelníku",
    "стороны многоугольника",
-/*MISSING*/    "polygon sides",
+   "Polygon-Seiten",
     }},
   {0xe9e88caa, { // "A clearing in the Overgrown Woods. Obviously, this gives the Mutant Ivies an infinite space to grow...\n\nMutant Fruits rot if they are not adjacent to a Mutant Ivy."
-   "Polana w Przerośniętym Lesie. Oczywiście, pozwala to Zmutowanym Bluszczom rosnąć w nieskończoność...\n\nZmutowane Owoce gniją, gdy nie sąsiadują ze Zmutowanym Bluszczem.",
+   "Polana w Przerośniętym Lesie. Oczywiście, pozwala Zmutowanym Bluszczom rosnąć w nieskończoność...\n\nZmutowane Owoce gniją, gdy nie sąsiadują ze Zmutowanym Bluszczem.",
 /*MISSING*/    "A clearing in the Overgrown Woods. Obviously, this gives the Mutant Ivies an infinite space to grow...\n\nMutant Fruits rot if they are not adjacent to a Mutant Ivy.",
    "Mýtina v Pralese. Mutantní břečťan tu samozřejmě má nekonečný prostor k růstu...\n\nMutantní ovoce shnije, pokud se nenachází vedle Mutantního břečťanu.",
    "Поляна в Зарослях. Представляет собой неограниченное пространство для роста плющей-мутантов...\n\nМутировавшие фрукты гниют, если они не находятся рядом с плющом.",
-/*MISSING*/    "A clearing in the Overgrown Woods. Obviously, this gives the Mutant Ivies an infinite space to grow...\n\nMutant Fruits rot if they are not adjacent to a Mutant Ivy.",
+   "Eine Lichtung in den verwilderten Wäldern. Offensichtlich gibt sie den mutierten Efeuen unbegrenzten Platz zu wachsen...\n\nMutierte Früchte verfaulen, wenn sie sich nicht direkt neben einem mutierten Efeu befinden.",
     }},
   {0xe9f539aa, { // "display pattern codes (full)"
    "pokaż kody wzorku (pełne)",
@@ -7220,11 +9719,11 @@ sentence all_sentences[1130] = {
    "Spieler 1 los",
     }},
   {0xea811d40, { // "This Orb lets you dive into the water. While diving, you are able to see and collect underwater treasures, while being invisible to monsters yourself. You are afraid of jumping into the water straight from a boat, so usually you won't do it."
-   "Ta Sfera pozwala Ci nurkować. Podczas nurkowania możesz widzieć i zbierać podwodne skarby, a potwory Ciebie nie widzą. Boisz się wyskakiwać do wody z łódki, także raczej tego nie zrobisz.",
+   "Ta Sfera pozwala Ci nurkować. Podczas nurkowania możesz widzieć i zbierać podwodne skarby, a potwory Cię nie widzą. Boisz się wyskakiwać do wody z łódki, także raczej tego nie zrobisz.",
    "Bu Küre suya dalabilmeni sağlar. Suyun altındayken suyun altını görebilir ve sualtı hazinelerini toplayabilirsin. Bunu yaparken canavarlar seni göremez.Korkun sebebiyle bir kayıktan suya genelde doğrudan atlayamıyorsun.",
    "Tato Sféra ti umožňuje potopit se pod vodu. Když jsi potopený, můžeš vidět a získávat podvodní poklady, zatímco netvoři tě nevidí. Obvykle ale nebudeš skákat do vody přímo ze člunu -- to tě trochu děsí.",
    "Эта сфера позволяет нырять. Когда Вы ныряете, Вы видите и можете собирать подводные ценности, а враги Вас не видят. Но Вы боитесь прягать из лодки прямо в воду.",
-   "Dieser Orb erlaubt es dir zu tauchen. Während du tauchst kannst du versunkene Schätze sammeln, dabei bist du für Monster unsichtbar.Du hast Angst von einem Boot aus ins Meer zu springen daher tust du es meist nicht.",
+   "Dieser Orb erlaubt es dir zu tauchen. Während du tauchst kannst du versunkene Schätze sammeln, dabei bist du für Monster unsichtbar. Du hast Angst von einem Boot aus ins Meer zu springen daher tust du es meist nicht.",
     }},
   {0xeaaeb0a1, { // "+5 = center instantly, -5 = do not center the map"
    "+5 = centruj natychmiast, -5 = nie centruj",
@@ -7233,19 +9732,12 @@ sentence all_sentences[1130] = {
    "+5 = центрировать сразу, -5 = не центрировать",
    "+5 = sofort zentrieren, -5 = nicht zentrieren",
     }},
-  {0xeab584e4, { // "This Orb allows you to create illusions of yourself. Illusions are targetted by most monsters, just like yourself, Thumpers, and your friends.\n\nEach illusion takes 5 charges to create, and one extra charge per turn. You can also click your illusion to take it away, restoring 4 charges.\n\nIf you have both Orb of Teleport and Orb of Trickery, Illusion is cast first -- you can then teleport on your Illusion to switch places with it."
-   "Ta sfera pozwala Ci tworzyć iluzje samego siebie. Większość potworów celuje w iluzje, podobnie jak w Ciebie, Dudniki i Twoich przyjaciół.\n\nKażda iluzja wymaga 5 ładunków do stworzenia, i jednego dodatkowego ładunku na kolejkę. Możesz też kliknąć swoją iluzję by ją zabrać, co przywraca 4 ładunki.\n\nJeśli masz zarówno Sferę Teleportacji, jak i Sztuczek, Iluzja rzucana jest jako pierwsza -- możesz następnie teleportować się na swoją iluzję, by się z nią zamienić miejscami.",
-   "Bu Küre kendinin ilüzyonlarını çıkarmanı sağlar. İlüzyonlar tıpkı sen, Gümleyenler ve dostların gibi pek çok canavar tarafından saldırıya uğrayabilir.\n\nHer ilüzyonu çıkarması 5 şarj ve her ek tur bir şarj tüketir. İlüzyona tıklayarak onu yok edip, 4 şarjını geri alabilirsin. \n\nAynı anda hem Kandırma hem Işınlanma Küren varsa, önce İlüzyon uygulanır, sonra istersen ilüzyonuna tıklayarak onla yer değiştirebilirsin. ",
-   "Tato sféra ti umožňuje vytvářet své iluzorní dvojníky. Většina netvorů půjde po tvých iluzích, stejně jako jdou po tobě, po Tloucích a po tvých přátelích.\n\nStvoření každé iluze sníží náboj sféry o 5 a vyčerpává 1 náboj navíc za kolo. Můžeš také kliknout na svou iluzi a zrušit ji, čímž se náboj sféry zvýší o 4.\n\nPokud máš Sféru Teleportace a Sféru Klamu zároveň, nejprve použiješ Sféru Klamu -- poté se můžeš teleportovat na svou iluzi a vyměnit si s ní místo.",
-   "Эта сфера позволяет Вам создавать иллюзии. Их будут атаковать почти все монстры, так же как Вас, Тамперы и ваших союзников.\n\nКаждая иллюзия требует 5 зарядов для создания и по одному в каждый ход. Также Вы можете кликнуть на иллюзию, чтобы забрать её, потратив 3 заряда.\n\nЕсли у Вас есть сферы Хитрости и Телепорта, Иллюзия работает первой -- Вы можетепотом телепортироваться на неё, чтобы поменяться с ней местами.",
-   "Dieser Orb erlaubt es dir, Illusionen deiner selbst zu erschaffen. Diese werden von den meisten Monstern verfolgt.\n\nJede Illusion benötigt 5 Ladungen zum Erschaffen, plus eine Ladung pro Zug. Du kannst deine Illusion anklicken um sie zu entfernen, wofür du 4 Ladungen bekommst.\n\nBesitzt du einen Orb der Teleportation und einen des Truges, wird Illusion bevorzugtdu kannst dich dann auf deine Illusion teleportieren, um die Plätze zu tauschen.",
-    }},
   {0xeb30aac0, { // "A fruit from the Yendorian Forest."
    "Owoc z Yendoriańskiego Lasu.",
 /*MISSING*/    "A fruit from the Yendorian Forest.",
    "Ovoce z Yendorského lesa.",
    "Фрукт из Йендорского леса.",
-/*MISSING*/    "A fruit from the Yendorian Forest.",
+   "Eine Frucht des Yendorianischen Waldes.",
     }},
   {0xeb9ca8cf, { // "see the help screen"
    "obejrzyj ekran pomocy",
@@ -7255,7 +9747,7 @@ sentence all_sentences[1130] = {
    "siehe Hilfe Bildschirm",
     }},
   {0xebaeb90b, { // "The Hive is filled with Hyperbugs. They are huge insects which look a bit like ants, a bit like bees, and a bit like roaches. They live in circular nests, and an army of Hyperbugs will attack any intruder, including you and enemy Hyperbugs. Will you manage to get to the heart of such a nest, and get the precious Royal Jelly?"
-   "Mrowisko jest wypełnione Hiperinsektami. Te wielkie owady wyglądają trochę jak mrówki, trochę jak pszczoły, trochę jak karaluchy. Żyją w okrągłych gniazdach, i atakują każdego najeźdźcę, łącznie z Tobą i wrogimi hiperinsektami. Czy uda Ci się dotrzeć do serca roju, i zdobyć cenne królewskie mleczko?",
+   "Mrowisko jest wypełnione Hiperinsektami. Te wielkie owady wyglądają trochę jak mrówki, trochę jak pszczoły, trochę jak karaluchy. Żyją w okrągłych gniazdach, i atakują każdego najeźdźcę, łącznie z Tobą i wrogimi hiperinsektami. Czy uda Ci się dotrzeć do serca roju i zdobyć cenne królewskie mleczko?",
    "Kovan aşkın böceklerle dolu. Aşkınböcekler biraz arıya biraz karıncaya biraz da hamamböceğine benzeyen kocaman böcekler. Dairesel kovanlarda yaşıyorlar ve yaklaşan düşman aşkınböceklerineve sana saldıracaklardır. Kovanın merkezine ulaşıp Müthiş Jöleyi ele geçirebilecek misin ?",
    "Úl je plný Hyperhmyzáků. Tento obří hmyz vypadá trochu jako mravenci, trochu jako včely a trochu jako švábi. Žijí v kruhových úlech a jejich armáda zaútočí na každého vetřelce včetně tebe a nepřátelských Hyperhmyzáků. Dokážeš se dostat do srdce takového kruhového úlu a získat vzácnou Mateří kašičku?",
    "Улей населён гипержуками. Эти огромные насекомые выглядят немного как муравьи, немного как пчёлы и немного как тараканы. Они живут в круглых гнёздах, и их армия готова напасть на любого нарушителя, включая Вас и жуков другого цвета. Хотите ли Вы добраться до центра такого гнезда и забрать ценное маточное молочко?",
@@ -7266,7 +9758,7 @@ sentence all_sentences[1130] = {
 /*MISSING*/    "Your %1 activates!",
    "Tvoje %1 se aktivovala!",
    "Ваша %1 сработала!",
-/*MISSING*/    "Your %1 activates!",
+   "Dein %1 aktiviert sich!",
     }},
   {0xebd2779b, { // "this Orb never appears in %the1"
    "ta Sfera nie pojawia się %abl1",
@@ -7294,7 +9786,7 @@ sentence all_sentences[1130] = {
    "Bu diyar diğer diyarlara kolay geçiş için var. Arayollardan başka diyarları bulması çok kolay. Bu demektir ki, burada başka diyarlardan canavarlar bulman çok olası!\n\nEğer hazineleri kendi yerlerinde yeterince topladıysan, Arayollarda sihirli eşyalar bulabilirsin. Ayanalar Diyarından yansımalar ve bulutlar, diğer diyarlardan sihirli küreler gelebilir.\n\nÖzel bir hazine, Aşkıntaş, sadece Arayollarda bulnabilir, ama öncesinde diğer her hazine çeşidinden 10'ar tane bulman gerekiyor.",
    "Tento kraj je rychlou branou do jiných krajů. Na Křižovatce je velmi snadné najít jiné kraje. Což znamená, že tu najdeš i netvory z většiny jiných krajů!\n\nNa Křižovatce můžeš najít magické předměty, pokud jsi v jejich krajích nalez%l0 dost pokladů. Můžeš tu najít zrcadla a oblaky z Kraje zrcadel a magické sféry z jiných typů krajů.\n\nNa Křižovatce můžeš najít zvláštní poklad -- Hyperkam -- ale pouze poté, co najdeš 10 kusů od všech ostatních pokladů.",
    "Эта земля - кратчайший путь в любую другую. Здесь очень легко найти любую другую землю, и здесь можно встретить монстров изо всех земель!\n\nКак только Вы набираете достаточно сокровищ в некоторой земле, её магические предметы становятся доступны здесь. В Зеркальной земле это зеркала и миражи, в остальных - сферы.\n\nСвой сокровище, Гиперкамень, появится лишь после того, как Вы соберёте по 10 сокровищ каждого типа.",
-   "Dieses Land ist gut um schnell andere Länder zu erreichen. Es ist sehr einfach, diese von hier aus zu finden. Das bedeutet, dass hier auch Monster aus den meisten anderen Ländern sein können!\n\nSolange du genug Schätze in den Ländern gefunden hast, erscheinen magische Gegenstände in der Kreuzung. Spiegel und Wolken stammen aus dem Spiegelland, Orbs aus anderen Länder.\n\nEin besonderer Schatz, der Hyperstein, kann hier gefunden werden aber du musst erst 10 von allen anderen Schätzen haben.",
+   "Dieses Land ist eine schnelle Verbindung zu anderen Ländern. Es ist sehr einfach, an den Kreuzungen andere Länder zu finden. Das heißt, dass du hier auch Monstern aus den meisten anderen Ländern begegnen wirst!\n\nSobald du genug Schätze in den jeweiligen Ländern gefunden hast, erscheinen deren magische Gegenstände auf den Kreuzungen. Spiegel und Wolken stammen aus dem Spiegelland, andere magische Orbs aus anderen Ländern.\n\nEin besonderer Schatz, der Hyperstein, kann auf den Kreuzungen gefunden werden. Aber du musst zuerst 10 von allen anderen Schätzen gesammelt haben.",
     }},
   {0xec251dd1, { // "HELP"
    "POMOC",
@@ -7304,11 +9796,11 @@ sentence all_sentences[1130] = {
    "HILFE",
     }},
   {0xec5728d2, { // "A nasty creature native to the Living Caves. They don't like you for some reason."
-   "Brzydki stwór z Żywych Jaskiń. Jakoś Ciebie nie lubi.",
+   "Brzydki stwór z Żywych Jaskiń. Jakoś Cię nie lubi.",
    "Yaşayan Mağaralarda yaşayan iğrenç bir yaratık. Nedense seni hiç sevmiyor.",
    "Hnusná potvora žijící v Živoucích jeskyních. Z nějakého důvodu tě nemají rády.",
    "Противное существо из Живых пещер. По каким-то причинам не любит людей.",
-   "Ein fieses Geschöpf, das in den Lebenden Höhlen haust. Irgendwie können sie dich nicht leiden.",
+   "Ein grässliches Geschöpf, das in den Lebenden Höhlen haust. Irgendwie können diese Kreaturen dich nicht leiden.",
     }},
   {0xec6ad5de, { // "Two mines next to you!"
    "Dwie miny koło Ciebie!",
@@ -7318,11 +9810,11 @@ sentence all_sentences[1130] = {
    "2 Minen um dich!",
     }},
   {0xec94383d, { // "This orb can be used to invoke a wall of ice. It also protects you from fires."
-   "Ta sfera zostawia za Tobą ścianę lodu, a także chroni Ciebie przed ogniem.",
+   "Ta sfera zostawia za Tobą ścianę lodu, a także chroni Cię przed ogniem.",
    "Bu küre bir buz duvarı oluşturmaya yarar. Aynı zamanda seni ateşten korur",
    "Tuto sféru můžeš použít k vytvoření ledové zdi. Kromě toho tě chrání před ohněm.",
    "Эта сфера создаёт за Вами стену льда. Также защищает Вас от огня.",
-   "Du kannst diesen Orb verwenden um einen Eiszauber zu wirken, der eine Wand aus Eis hervorruft. Des weiteren beschützt er dich auch vor Feuer.",
+   "Du kannst diesen Orb verwenden um einen Eiszauber zu wirken, der eine Wand aus Eis erschafft. Er schützt dich auch vor Feuer.",
     }},
   {0xecb8ebbf, { // "Nowhere to blow %the1!"
    "Nie ma gdzie zdmuchnąć %a1!",
@@ -7357,7 +9849,7 @@ sentence all_sentences[1130] = {
 /*MISSING*/    "Preparing the line (%1/1000)...",
    "Připravuji přímku (%1/1000)...",
    "Приготовление линии (%1/1000)...",
-/*MISSING*/    "Preparing the line (%1/1000)...",
+   "Vorbereitung der Strecke (%1/1000)...",
     }},
   {0xed5e21dc, { // "items only"
    "tylko przedmioty",
@@ -7365,6 +9857,13 @@ sentence all_sentences[1130] = {
    "pouze předměty",
    "только предметы",
    "nur Items",
+    }},
+  {0xed787b62, { // "last on bottom"
+   "ostatnie na dole",
+/*MISSING*/    "last on bottom",
+   "poslední dole",
+   "последние снизу",
+/*MISSING*/    "last on bottom",
     }},
   {0xedc17179, { // "Stab them by walking around them."
    "Przejdź wokół, by dźgnąć.",
@@ -7374,7 +9873,7 @@ sentence all_sentences[1130] = {
    "Erstich sie, indem du um sie herumgehst.",
     }},
   {0xee0610ec, { // "This minefield has been created by the Bomberbirds to protect their valuable eggs. Mines explode when they are stepped on, creating fire all around them (this fire never expires in the Minefield). If you don't step on a mine, you know the number of mines in cells around you. These numbers are marked with color codes on the cells you have visited."
-   "To pole minowe zostało stworzone przez ptaki, Bombardiery, w celu ochrony ich jaj. Miny eksplodują, gdy ktoś na nich stanie, tworząc ogień wokół (ten ogień nigdy nie na Polu Minowym). Jeśli uda Ci się nie stanąć na minę, to poznajesz liczbę min na polach wokół siebie. Te liczby są oznaczone kolorowymi kropkami na odwiedzonych polach.",
+   "To pole minowe zostało stworzone przez ptaki, Bombardiery, w celu ochrony ich jaj. Miny eksplodują, gdy ktoś na nich stanie, tworząc ogień wokół (ten ogień nigdy nie wygasa na Polu Minowym). Jeśli uda Ci się nie stanąć na minę, to poznajesz liczbę min na polach wokół siebie. Te liczby są oznaczone kolorowymi kropkami na odwiedzonych polach.",
    "Bu mayıntarlası Bombacıkuşlar tarafından değerli yumurtalarını korumak için düzenlenmiş.Mayınlar üzerine basınca etrafında ateş çıkararak patlıyor(Mayıntarlasında bu ateş zamanla sönmez). Eğer bir mayına basmazsan, etrafındaki mayın sayısını bilebilirsin.Bu sayılar daha önce ziyaret ettiğin hücrelerde farklı renk kodlarıyla işaretlidir.",
    "Toto minové pole vytvořili ptáci Bombarďáci, aby ochránili svá cenná vejce. Mina exploduje, když na ni někdo nebo něco šlápne, čímž zapálí oheň na svém poli a na všech sousedních polích (v Minovém poli tento oheň nikdy neuhasne). A samozřejmě ji také odpálí jakýkoli oheň! Pokud nešlápneš na minu, budeš vždy vědět, kolik min se nachází na polích okolo tebe. Tento počet bude označený barevnými kódy na polích, která jsi už navštívil.",
    "Минное поле было создано птицами Бомбардирами, чтобы охранять их ценные яйца. Мина взрывается, когда Вы наступаете на неё, и создаёт огонь вокруг Вас (огонь здесь горит вечно). Если Вы не наступили на мину, то Вы знаете, сеолько мин рядом с Вами. Эти числа кодируются цветами клеток, на которых Вы были.",
@@ -7394,19 +9893,40 @@ sentence all_sentences[1130] = {
    "Ваши глаза сверкают, когда Вы смотрите на свои драгоценности.",
    "Deine Augen strahlen als du die Schätze erblickst.",
     }},
+  {0xee6664b5, { // " (local treasure)"
+   " (lokalny skarb)",
+/*MISSING*/    " (local treasure)",
+   " (místní poklad)",
+   " (местное сокровище)",
+/*MISSING*/    " (local treasure)",
+    }},
+  {0xee761f21, { // "%The1 says, \"I die, but my clan in Trollheim will avenge me!\""
+   "%1 mówi: \"Ja umieram, ale mój klan w Trollheim mnie pomści!\"",
+/*MISSING*/    "%The1 says, \"I die, but my clan in Trollheim will avenge me!\"",
+   "1 říká: \"Já umírám, ale můj klan v Trollheimu mě pomstí!\"",
+   "%1 говорит: \"Я умираю, но мой клан в Тролльхейме отомстит за меня!\"",
+/*MISSING*/    "%The1 says, \"I die, but my clan in Trollheim will avenge me!\"",
+    }},
+  {0xeebcc20e, { // "Someone has told you that one can get battle experience safely by killing tons of essentially harmless creatures, such as Bats. But does this make any sense?...\n\nIt does not. Bats cannot hurt you, but may block your movement, or toggle switches if they fall on them."
+   "Ktoś powiedział, że można bezpiecznie zdobyć doświadczenie w walce poprzez zabicie dużej liczby właściwie niegroźnych stworzeń, jak na przykład Nietoperzy. Ale czy to ma jakiś sens?...\n\nNie ma. Nietoperze nie mogą Ci nic zrobić, ale blokują Twój ruch, i mogą przestawiać przełączniki, gdy na nie spadną.",
+/*MISSING*/    "Someone has told you that one can get battle experience safely by killing tons of essentially harmless creatures, such as Bats. But does this make any sense?...\n\nIt does not. Bats cannot hurt you, but may block your movement, or toggle switches if they fall on them.",
+   "Někdo ti řekl, že zabitím spousty v podstatě neškodných tvorů, jako jsou Netopýři, můžeš bezpečně získat bojové zkušenosti. Ale dává to nějaký smysl...?\n\nNe, nedává. Netopýři ti nemohou ublížit, ale mohou blokovat tvůj pohyb nebo přepínat vypínače, když na ně spadnou.",
+   "Кто-то сказал, что можно получить боевой опыт абсолютно безопасно, убивая тысячи абсолютно безобидных существ, например, Летучих мышей. Но какой в этом смысл?...\n\nДа никакого. Летучие мыши не наносят вам вреда, но могут мешать движению, а также падать на переключатели.",
+/*MISSING*/    "Someone has told you that one can get battle experience safely by killing tons of essentially harmless creatures, such as Bats. But does this make any sense?...\n\nIt does not. Bats cannot hurt you, but may block your movement, or toggle switches if they fall on them.",
+    }},
   {0xeedc6223, { // "parts destroyed: %1"
    "części zniszczone: %1",
 /*MISSING*/    "parts destroyed: %1",
    "zničené části: %1",
    "уничтожено частей: %1",
-/*MISSING*/    "parts destroyed: %1",
+   "zerstörte Teile: %1",
     }},
   {0xef22263e, { // "player 3 spin"
    "gracz 3 obrót",
 /*MISSING*/    "player 3 spin",
    "hráč 3 otáčení",
    "игрок 3 вертит",
-/*MISSING*/    "player 3 spin",
+   "Spieler 3 drehen",
     }},
   {0xef2df1f4, { // "! (version %1)\n\n"
    "! (wersja %1)\n\n",
@@ -7420,7 +9940,7 @@ sentence all_sentences[1130] = {
 /*MISSING*/    "star factor",
    "zhvězdění",
    "коэффициент звезды",
-/*MISSING*/    "star factor",
+   "Sternfaktor",
     }},
   {0xefe5ded9, { // "triangular game board"
    "plansza do gry z trójkątów",
@@ -7455,7 +9975,7 @@ sentence all_sentences[1130] = {
    "diğer",
    "další",
    "другое",
-   "Andere",
+   "andere",
     }},
   {0xf0b074f1, { // "You have found %the1!"
    "Znalaz%łeś0 %a1!",
@@ -7469,21 +9989,28 @@ sentence all_sentences[1130] = {
    "İstersen görüntüyü isteidğin yere çekip sonra 't'ye basabilirsin.",
    "Také můžeš posunout obraz do požadované lokace a stisknout 't'.",
    "Вы также можете пролистать в нужное месть и нажать 't'.",
-   "Du kannst auch an die gewünschte Position scrollen und T drücken.",
+   "Du kannst auch an die gewünschte Position scrollen und 't' drücken.",
+    }},
+  {0xf0fb16c4, { // "Left the game."
+   "Opuszczono grę.",
+/*MISSING*/    "Left the game.",
+   "Opuštění hry.",
+   "Выйти из игры.",
+   "Spiel verlassen.",
+    }},
+  {0xf130cd50, { // "Cargo of a ship which was once destroyed by a Kraken."
+   "Ładunek statku zatopionego dawno temu przez Krakena.",
+/*MISSING*/    "Cargo of a ship which was once destroyed by a Kraken.",
+   "Náklad z lodi, kterou kdysi zničil Kraken.",
+   "Груз корабля, когда-то уничтоженного Кракеном.",
+   "Ladung eines Schiffes, das einst von einem Kraken zerstört wurde.",
     }},
   {0xf15919d5, { // "You have used less turns than ever before. Congratulations!"
-   "Zajęło to mniej kolejek, niż kiedykolwiek wcześniej. Gratulacje!",
+   "Zajęło to mniej kolejek niż kiedykolwiek wcześniej. Gratulacje!",
    "Her zamankinden daha az sayıda tur kullandın! Tebrikler! ",
    "Spotřebova%l0 jsi méně kol než kdy předtím. Gratulujeme!",
    "Вы потратили меньше ходов, чем раньше. Поздравляем!",
-   "Du hast sowohl weniger Züge als je zuvor benötigt. Gratulation!",
-    }},
-  {0xf16947da, { // "You cut down the tree."
-   "Ści%ąłeś0 drzewo.",
-   "Ağacı kestin.",
-   "Pokáce%l0 jsi strom.",
-   "Вы срубили дерево.",
-   "Du fällst den Baum.",
+   "Du hast sowohl weniger Züge als je zuvor benötigt. Glückwunsch!",
     }},
   {0xf1a528d4, { // "Emerald Pattern"
    "Szmaragdowy Wzór",
@@ -7498,6 +10025,13 @@ sentence all_sentences[1130] = {
    "Aktivova%l0 jsi kouzlo Blesk!",
    "Вы активировали заклинание молнии!",
    "Du aktivierst den Donner Zauber!",
+    }},
+  {0xf1e162a7, { // "stereographic projection"
+   "rzut stereograficzny",
+/*MISSING*/    "stereographic projection",
+   "stereografická projekce",
+   "стереографическая проекция",
+/*MISSING*/    "stereographic projection",
     }},
   {0xf201e5f2, { // "Orb power depleted!"
    "Zabrano sfery mocy!",
@@ -7525,7 +10059,14 @@ sentence all_sentences[1130] = {
    "Golem çıkar",
    "vyvolej golema",
    "призвать Голема",
-/*MISSING*/    "summon a Golem",
+   "rufe einen Golem herbei",
+    }},
+  {0xf265ee4b, { // "\"There is no royal road to geometry.\""
+   "W geometrii nie ma specjalnych dróg dla królów.\"",
+/*MISSING*/    "\"There is no royal road to geometry.\"",
+   "Není žádná královská cesta ke geometrii.\"",
+   "\"Нет царских путей к геометрии.\"",
+/*MISSING*/    "\"There is no royal road to geometry.\"",
     }},
   {0xf28650d8, { // "The faster you get here, the better you are!"
    "Im szybciej to osiągniesz, tym lepiej!",
@@ -7533,6 +10074,13 @@ sentence all_sentences[1130] = {
    "Čím rychleji se sem dostaneš, tím lepší jsi!",
    "Чем быстрее, тем лучше!",
    "Je schneller du es hierher schaffst, desto besser bist du!",
+    }},
+  {0xf2d2d33a, { // "Defeat Flail Guards by moving away from them."
+   "Wojownika z Cepem pokonujesz odchodząc od niego.",
+/*MISSING*/    "Defeat Flail Guards by moving away from them.",
+   "Strážce s řemdihem porazíš tím, že se pohneš směrem od něj.",
+   "Поразите Воина с цепом, убегая от него.",
+/*MISSING*/    "Defeat Flail Guards by moving away from them.",
     }},
   {0xf2d8259d, { // "[+] keep the window size, [-] use the screen resolution"
    "[+] zachowaj rozmiar okna, [-] użyj rozdzielczości ekranu",
@@ -7553,7 +10101,7 @@ sentence all_sentences[1130] = {
 /*MISSING*/    "left to right",
    "zleva doprava",
    "вправо",
-/*MISSING*/    "left to right",
+   "von links nach rechts",
     }},
   {0xf385bf50, { // "random pattern mode"
    "tryb losowych wzorów",
@@ -7570,18 +10118,32 @@ sentence all_sentences[1130] = {
    "Nur von %der1 %a1 oder %der %a2 aus erreichbar.\n",
     }},
   {0xf3b20816, { // "\"Train in the Desert first!\""
-   "\"Potrenuj najpierw na Pustynni!\"",
+   "\"Potrenuj najpierw na Pustyni!\"",
    "\"Önce Çöl'de kendini yetiştir!\"",
    "\"Nejdřív se natrénuj v Poušti!\"",
    "\"Потренируйтесь сначала в Пустыне!\"",
    "\"Trainier zuerst in der Wüste!\"",
     }},
+  {0xf3f04786, { // "%The1 throws fire at %the2!"
+   "%1 rzuca ogniem w %a2!",
+/*MISSING*/    "%The1 throws fire at %the2!",
+   "%1 hází oheň na %a2!",
+   "%1 кидает огонь в %a2!",
+   "%Der1 %1 wirft Feuer auf %den2 %a2!",
+    }},
+  {0xf472ee24, { // "(You can also use right Shift)\n\n"
+   "(Możesz też użyć prawego Shifta)\n\n",
+/*MISSING*/    "(You can also use right Shift)\n\n",
+   "(Také lze použít pravý Shift)\n\n",
+   "(Также можно использовать правый Shift)\n\n",
+/*MISSING*/    "(You can also use right Shift)\n\n",
+    }},
   {0xf4ca290b, { // "A hot land, full of sand dunes, mysterious Spice, and huge and dangerous sand worms."
-   "Gorąca ziemia, pełna wydm, tajemniczej Przyprawy, i wielkich Pustynnych Czerwi.",
+   "Gorąca ziemia, pełna wydm, tajemniczej Przyprawy i wielkich Pustynnych Czerwi.",
    "Kum tepeleri, gizemli Baharat ve devasa Kumkurtlarıyla dolu sıcak bir diyar.",
    "Horký kraj plný písečných dun, tajemného Koření a obrovských a nebezpečných Písečných červů.",
    "Жаркая земля, полная песчаных дюн, загадочных специй и огромных опасных червей.",
-   "Ein heißes Land, voller Sanddünen, geheimnisvollem Spice, und riesigen sowie gefährlichen Sandwürmern.",
+   "Ein heißes Land voller Sanddünen, geheimnisvollem Spice, und riesigen und gefährlichen Sandwürmern.",
     }},
   {0xf4e796f2, { // "You summon a golem!"
    "Przywoła%łeś0 Golema!",
@@ -7590,12 +10152,19 @@ sentence all_sentences[1130] = {
    "Вы призвали голема!",
    "Du beschwörst einen Golem!",
     }},
+  {0xf4fb4209, { // "reset per-player statistics"
+   "zresetuj statystyki graczy",
+/*MISSING*/    "reset per-player statistics",
+   "Vyresetovat hráčské statistiky",
+   "очистить статистику по игрокам",
+/*MISSING*/    "reset per-player statistics",
+    }},
   {0xf541b622, { // "or 'v' to see the main menu"
    "lub 'v' by zobaczyć menu",
    "veya ana menüyü görmek için 'v'ye bas.",
    "nebo stiskni 'v' pro hlavní menu",
    "или 'v', чтобы открыть главное меню",
-   "oder V um das Menü einzublenden",
+   "oder v um das Menü einzublenden",
     }},
   {0xf5440591, { // "joystick mode: automatic (release the joystick to move)"
    "tryb dżojstika: automatyczny (puść by ruszyć)",
@@ -7603,6 +10172,13 @@ sentence all_sentences[1130] = {
    "mód joysticku: automatický (pohybuješ se uvolněním joysticku)",
    "Режим джойстика: авто (опустите джойстик для перемещения)",
    "Joystick: Automatisch (loslassen zum bewegen)",
+    }},
+  {0xf54446a7, { // "projection"
+   "rzut",
+/*MISSING*/    "projection",
+   "projekce",
+/*MISSING*/    "projection",
+/*MISSING*/    "projection",
     }},
   {0xf565d694, { // "Challenges do not get harder"
    "Misje nie stają się trudniejsze",
@@ -7612,7 +10188,7 @@ sentence all_sentences[1130] = {
    "Herausforderungen werden nicht schwieriger",
     }},
   {0xf58afff6, { // "You have improved your total and '%1' high score!"
-   "Poprawi%łeś0 swój wynik ogólny, oraz swój wynik w kategorii '%P1!'",
+   "Poprawi%łeś0 swój wynik ogólny oraz swój wynik w kategorii '%P1!'",
    "Toplam yüksek puanını ve '%P1!' puanını artırdın!",
    "Zlepši%l0 jsi své celkové nejvyšší skóre a své nejvyšší skóre v kategorii '%P1!'",
    "Вы подняли свой общий результат и '%1'!",
@@ -7625,6 +10201,13 @@ sentence all_sentences[1130] = {
    "спроектированные узоры",
    "Vorgefertigte Muster",
     }},
+  {0xf5eadca0, { // "Coastal region -- connects inland and aquatic regions.\n"
+   "Kraina przybrzeżna -- łączy krainy lądowe i morskie.\n",
+/*MISSING*/    "Coastal region -- connects inland and aquatic regions.\n",
+   "Pobřežní kraj -- spojuje vnitrozemské a mořské kraje.\n",
+   "Прибрежный регион -- соединяет наземные и морские регионы.\n",
+/*MISSING*/    "Coastal region -- connects inland and aquatic regions.\n",
+    }},
   {0xf5fc270a, { // "f = flip %1"
    "f = odbicie %1",
    "f = çevir %1",
@@ -7633,11 +10216,18 @@ sentence all_sentences[1130] = {
    "f = kippen %1",
     }},
   {0xf6297cf7, { // "These creatures are slow, but very powerful... more powerful than you. You need some more experience in demon fighting before you will be able to defeat them. Even then, you will be able to slay this one, but more powerful demons will come...\n\nEach 10 lesser demons you kill, you become powerful enough to kill all the greater demons on the screen, effectively turning them into lesser demons."
-   "Te demony są powolne, ale bardzo silne... silniejsze od Ciebie. Potrzebujesz zdobyć trochę doświadczenia, zanim będziesz w stanie je pokonać. Nawet wtedy, przyjdą jeszcze silniejsze demony...\n\nZa każdym razem, gdy pokonasz 10 mniejszych demonów, stajesz się dostatecznie silny, by pokonać wszystkie Wielkie Demony na ekranie. Stają się one w tym momencie Mniejszymi Demonami.",
+   "Te demony są powolne, ale bardzo silne... silniejsze od Ciebie. Potrzebujesz zdobyć trochę doświadczenia, zanim będziesz w stanie je pokonać. Nawet wtedy przyjdą jeszcze silniejsze demony...\n\nZa każdym razem, gdy pokonasz 10 mniejszych demonów, stajesz się dostatecznie silny, by pokonać wszystkie Wielkie Demony na ekranie. Stają się one w tym momencie Mniejszymi Demonami.",
    "Bu yaratıklar yavaştır ama çok güçlüdür. Senden bile. Bunları yenebilmek için öncesinde şeytanlarla savaşma konusunda tecrübeli olman gerekir. O zaman bile, bunu yenebilirsin, ama daha güçlü şeytanlar gelecektir...\n\nÖldürdüğün her 10 küçük şeytan için, ekrandaki bütün Büyük Şeytanları -sanki onlar da küçükmüş gibi- öldürebilirsin.",
    "Tito tvorové jsou pomalí, ale velmi silní... silnější než ty. Abys je mohl porazit, musíš mít větší zkušenosti v boji proti démonům. I pak budeš sice schopný zabít tohoto Ďábla, ale přijdou ještě silnější...\n\nZa každých 10 Čertů, které zabiješ, získáš dost síly na to, abys mohl zabít všechny Ďábly na obrazovce -- v podstatě se promění v Čerty.",
    "Эти существа медленны, но очень сильны... гораздо сильнее Вас. Вам нужно набраться опыта в битве с демонами.\n\nКогда Вы убьёте 10 младших демонов, Вы станете достаточно сильны, чтобы побеждать старших, которые тут же сами станут младшими, но потом придут новые старшие демоны...",
-   "Diese Kreaturen sind langsam, aber sehr mächtig... mächtiger als du. Du brauchst Erfahrung im Kampf gegen Dämonen, bevor du sie besiegen kannst. Sogar dann kannst du vielleicht diesen töten, aber es werden stärkere Dämonen kommen...\n\nJedes Mal, wenn du 10 schwache Dämonen tötest, wirst du stark genug, um alle mächtigen Dämonen auf dem Bildschirm zu töten (du verwandelst sie in schwache Dämonen). ",
+   "Diese Kreaturen sind langsam, aber sehr mächtig... mächtiger als du. Du brauchst Erfahrung im Kampf gegen Dämonen, bevor du sie besiegen kannst. Trotzdem bist du in der Lage, diesen zu töten, aber es werden stärkere Dämonen kommen...\n\nJedes Mal, wenn du 10 gewöhnliche Dämonen getötet hast, wirst du stark genug, um alle mächtigen Dämonen auf dem Bildschirm zu töten, indem du sie in gewöhnliche Dämonen verwandelst.",
+    }},
+  {0xf67f9ac8, { // "You cannot attack %the1!"
+   "Nie możesz zaatakować %a1!",
+/*MISSING*/    "You cannot attack %the1!",
+   "Nemůžeš útočit na %a1!",
+   "Вы не можете атаковать %a1!",
+/*MISSING*/    "You cannot attack %the1!",
     }},
   {0xf698e17d, { // "You cannot attack Rock Snakes directly!"
    "Nie możesz atakować Skalnych Węży bezpośrednio!",
@@ -7645,6 +10235,13 @@ sentence all_sentences[1130] = {
    "Na Kamenné hady nemůžeš útočit přímo!",
    "Вы не можете атаковать Каменную змею!",
    "Du kannst Felsschlangen nicht direkt angreifen!",
+    }},
+  {0xf6a96efd, { // "inventory/kill sorting"
+   "sortowanie skarbów/potworów",
+/*MISSING*/    "inventory/kill sorting",
+   "řazení inventáře/netvorů",
+   "сортировать предметы/монстров",
+/*MISSING*/    "inventory/kill sorting",
     }},
   {0xf6c1527a, { // "treasure collected: %1"
    "zdobyte skarby: %1",
@@ -7658,7 +10255,7 @@ sentence all_sentences[1130] = {
    "Masanın üstüne çıktın!",
    "Přeskočil jsi stůl!",
    "Вы запрыгнули на стол!",
-   "Du kannst nicht über den Tisch springen!",
+   "Du springst über den Tisch!",
     }},
   {0xf7467711, { // "A heap of wood that can be used to start a fire. Everything is already here, you just need to touch it to fire it."
    "Stos drewna. Wszystko gotowe, wystarczy podpalić.",
@@ -7679,7 +10276,14 @@ sentence all_sentences[1130] = {
    "Aynalar ve yansımalarla dolu garip bir diyar, ayna korucuları tarafından korunuyor.",
    "Podivný kraj se zrcadly a přeludy, který chrání Zrcadloví strážci.",
    "Странная земля с зеркалами и миражами, защищёнными Странниками.",
-   "Ein seltsames Land voller Zauberspiegel und Trugbilder, die von den Rangern geschützt werden.",
+   "Ein seltsames Land voller Spiegel und Illusionswolken, die von den Rangern geschützt werden.",
+    }},
+  {0xf7b278b8, { // "\"There is no branch of mathematics, however abstract, "
+   "\"Nie ma na tyle abstrakcyjnej gałęzi matematyki, by się nie dało jej ",
+/*MISSING*/    "\"There is no branch of mathematics, however abstract, ",
+   "\"Není žádné matematické odvětví, jakkoli abstraktní, ",
+   "\"Нет ни одной области математики, как бы абстрактна она ни была, ",
+/*MISSING*/    "\"There is no branch of mathematics, however abstract, ",
     }},
   {0xf7d5e5f2, { // "turn left"
    "skręć w lewo",
@@ -7702,19 +10306,26 @@ sentence all_sentences[1130] = {
    "Вы призвали тамперы!",
    "Du beschwörst ein paar Stampfer!",
     }},
+  {0xf88f8da1, { // "You gain a protective Shell!"
+   "Zdobył%eś0 ochronną Skorupę!",
+/*MISSING*/    "You gain a protective Shell!",
+   "Získa%l0 jsi ochranný Krunýř!",
+   "Вы получили защитную раковину!",
+/*MISSING*/    "You gain a protective Shell!",
+    }},
   {0xf893311c, { // "%The1 is killed by thorns!"
    "%1 wpad%ł1 na kolce i się zabi%ł1!",
 /*MISSING*/    "%The1 is killed by thorns!",
    "%1 se nabod%l na trny!",
    "%1 убит%E1 шипами!",
-/*MISSING*/    "%The1 is killed by thorns!",
+   "%Der1 %1 wurde von den Dornen getötet!",
     }},
   {0xf89cf7e3, { // "A dark forest filled with ghosts and graves. But there is also treasure hidden deep within... But don't let greed make you stray from your path, as you can get lost!\n\nThe Haunted Woods are bounded by a single equidistant curve. It is not a circle or horocycle.\n\n"
-   "Mroczny las, pełen duchów i grobów. Głęboko w środku są również skarby... Ale nie pozwól, by zgubiła Cię chciwość!\n\nNawiedzony Las jest ograniczony jedną ekwidystantą.\n\n",
+   "Mroczny las, pełen duchów i grobów. Głęboko w środku są również skarby... Ale nie pozwól, by zgubiła Cię chciwość!\n\nNawiedzony Las jest ograniczony jedną ekwidystantą. Nie jest kołem ani horocyklem.\n\n",
 /*MISSING*/    "A dark forest filled with ghosts and graves. But there is also treasure hidden deep within... But don't let greed make you stray from your path, as you can get lost!\n\nThe Haunted Woods are bounded by a single equidistant curve. It is not a circle or horocycle.\n\n",
    "Temný hvozd plný duchů a hrobů. Ale hluboko uvnitř se skrývá poklad... Nedopusť však, aby tě tvá chamtivost svedla z cesty, protože tu můžeš zabloudit!\n\nStrašidelný hvozd je ohraničený jednou ekvidistantou. Není to kruh ani horocyklus.\n\n",
    "Мрачный лес, полный духов и надгробий. Но в глубине спрятаныi сокровища... Но не будьте слишком жадными, а то потеряетесь!\n\nЛес с привидениями ограничен одной эквидистантой.\n\n",
-/*MISSING*/    "A dark forest filled with ghosts and graves. But there is also treasure hidden deep within... But don't let greed make you stray from your path, as you can get lost!\n\nThe Haunted Woods are bounded by a single equidistant curve. It is not a circle or horocycle.\n\n",
+   "Ein dunkler Wald voller Geister und Gräber. Doch in seinen Tiefen sind auch Schätze versteckt... Aber lass dich nicht durch Gier von deinem Weg abbringen, du könntest dich verlaufen!\n\nDer verwunschene Wald ist begrenzt durch eine einzige äquidisdante Kurve. Diese ist kein Kreis und kein Horozykel.\n\n",
     }},
   {0xf8abf46f, { // "The Knights congratulate you on your success!"
    "Rycerze gratulują Ci sukcesu!",
@@ -7731,11 +10342,11 @@ sentence all_sentences[1130] = {
    "VOR",
     }},
   {0xf927dd7c, { // "Someone has put air fans in these plains, causing strong winds everywhere. You think that the purpose is to harness the magical power of Air Elementals, but you are not sure.\n\nAll cells except fans are grouped into three colors according to a pattern. Wind blows counterclockwise around each group of cells of a single color. Cells which are blocked by walls, or at distance at most 2 from an Air Elemental, do not count for this.\n\nIt is illegal to move in a direction which is closer to incoming wind than to outcoming wind. However, you can move two cells with the wind in a single turn, and so can the birds."
-   "Ktoś porozstawiał wentylatory na tych równinach, powodując wszędzie silne wiatry. Celem jest zapewne uzyskanie magicznych mocy Powietrznych Żywiołaków, ale nie masz pewności.\n\nWszystkie komórki poza wentylatorami są podzielone na trzy kolory, zgodnie z regularnym wzorem. Wiatr wieje przeciwnie do ruchu wskazówek zegara wokół każdej grupy pól jednego koloru. Pola zablokowane przez ściany, lub w odległości co najwyżej 2 od Powietrznego Żywiołaka, nie liczą się tutaj.\n\nNie można ruszać się w kierunku który jest bliżej przychodzącego niż odchodzącego wiatru. Możesz jednak się ruszyć o dwa pola z wiatrem w jednej kolejce. Ptaki również tak mogą zrobić.",
+   "Ktoś porozstawiał wentylatory na tych równinach, powodując wszędzie silne wiatry. Celem jest zapewne uzyskanie magicznych mocy Powietrznych Żywiołaków, ale nie masz pewności.\n\nWszystkie komórki poza wentylatorami są podzielone na trzy kolory, zgodnie z regularnym wzorem. Wiatr wieje przeciwnie do ruchu wskazówek zegara wokół każdej grupy pól jednego koloru. Pola zablokowane przez ściany lub w odległości co najwyżej 2 od Powietrznego Żywiołaka, nie liczą się tutaj.\n\nNie można ruszać się w kierunku który jest bliżej przychodzącego niż odchodzącego wiatru. Możesz jednak się ruszyć o dwa pola z wiatrem w jednej kolejce. Ptaki również tak mogą zrobić.",
 /*MISSING*/    "Someone has put air fans in these plains, causing strong winds everywhere. You think that the purpose is to harness the magical power of Air Elementals, but you are not sure.\n\nAll cells except fans are grouped into three colors according to a pattern. Wind blows counterclockwise around each group of cells of a single color. Cells which are blocked by walls, or at distance at most 2 from an Air Elemental, do not count for this.\n\nIt is illegal to move in a direction which is closer to incoming wind than to outcoming wind. However, you can move two cells with the wind in a single turn, and so can the birds.",
    "Někdo umístil na tuto pláň větráky, díky kterým tu všude vanou silné větry. Myslíš si, že jejich účelem je zkrotit magickou moc Elementálů vzduchu, ale s jistotou to nevíš.\n\nVšechna políčka s výjimkou větráků jsou rozdělena na tři barvy podle určitého vzoru. Vítr vane proti směru hodinových ručiček kolem každé skupiny stejnobarevných políček. Políčka zablokovaná zdmi nebo políčka ve vzdálenosti 2 nebo méně od Elementála vzduchu se nepočítají.\n\nNení možné pohybovat se směrem, který je víc proti větru než po větru. Při pohybu po větru se však můžeš (stejně jako libovolný typ ptáka) pohnout o dvě políčka v jediném kole.",
    "Кто-то расставил вентиляторы на этой равнине и вызвал сильные ветры. Вам кажется, что кто-то хотел использовать силу Воздушных Элементалей, но не уверены.\n\nВсе клетки, кроме вентиляторов, раскрашены в 3 цвета регулярным образом. Ветер дует против часовой стрелки вокруг каждой группы одноцветных клеток. Клетки, занятые стенами, или находящиеся на  расстоянии не более 2 от Воздушного Элементаля, не учитываются.\n\nНевозможно пойти в направлении, которое ближе ко входящему ветру, чем к выходящему. Зато Вы можете пройти сразу 2 клетки в  направлении ветра, и птицы тоже могут.",
-/*MISSING*/    "Someone has put air fans in these plains, causing strong winds everywhere. You think that the purpose is to harness the magical power of Air Elementals, but you are not sure.\n\nAll cells except fans are grouped into three colors according to a pattern. Wind blows counterclockwise around each group of cells of a single color. Cells which are blocked by walls, or at distance at most 2 from an Air Elemental, do not count for this.\n\nIt is illegal to move in a direction which is closer to incoming wind than to outcoming wind. However, you can move two cells with the wind in a single turn, and so can the birds.",
+   "Jemand hat Ventilatoren in diese Ebenen gebracht, die überall starke Winde hervorrufen. Du vermutest, sie sollen die magische Kraft der Luftelementare zügeln, aber du bist dir nicht sicher.\n\nAlle Zellen außer den Ventilatoren unterteilen sich einem Muster entsprechend in drei Farben. Der Wind weht gegen den Uhrzeigersinn in jeder Gruppe von Zellen mit einer Farbe. Zellen, die durch Wände blockiert oder nicht mehr als 2 Zellen von einem Luftelementar entfernt sind, sind dabei ausgenommen.\n\nEs ist unzulässig in eine Richtung zu gehen, die näher am einströmenden als am ausströmenden Wind liegt. Aber du kannst in einem Zug zwei Zellen mit dem Wind gehen, genau wie die Vögel.",
     }},
   {0xf9555116, { // "No mines next to you."
    "Nie ma min obok Ciebie.",
@@ -7749,7 +10360,7 @@ sentence all_sentences[1130] = {
 /*MISSING*/    "Note: you can play, but scores won't be saved on Android",
    "Poznámka: můžeš hrát, ale tvé skóre se neuloží",
    "Важно: вы можете играть, но счёт не будет сохранён",
-/*MISSING*/    "Note: you can play, but scores won't be saved on Android",
+   "Hinweis: du kannst spielen, aber bei Android werden keine Punktestände gespeichert",
     }},
   {0xfa0c015f, { // "use at your own risk!"
    "używasz na własne ryzyko!",
@@ -7759,7 +10370,7 @@ sentence all_sentences[1130] = {
    "Benutzen auf eigene Gefahr!",
     }},
   {0xfa396010, { // "The Land of Power is filled with everburning fire, magical Orbs, and guarded by witches and golems. There are basic orbs lying everywhere, and more prized ones are kept in crystal cabinets.\n\nWitches are allowed to use all the powers of the basic orbs against intruders. These powers never expire, but a Witch can use only one power at a time (not counting Orbs of Life).\n\nWitches and Golems don't pursue you into other Lands. Also, most Orb powers are drained when you leave the Land of Power."
-   "Kraina Mocy jest wypełniona wiecznie płonącym ogniem, magicznymi Sferami, i strzeżona przez Czarownice i golemy. Podstawowe Sfery walają się wszędzie, a te bardziej cenne są trzymane w kryształowych gablotach.\n\nCzarownice używają wszystkich mocy podstawowych Sfer przeciwko intruzom. Ich moce nigdy nie przemijają, ale Czarownica może używać naraz tylko jednej mocy (nie licząc Sfer Życia).\n\nCzarownice i Golemy nie gonią Ciebie do innych krain. Większość Sfer traci swoją moc, gdy opuszczasz Krainę Mocy.",
+   "Kraina Mocy jest wypełniona wiecznie płonącym ogniem, magicznymi Sferami, i strzeżona przez Czarownice i golemy. Podstawowe Sfery walają się wszędzie, a te bardziej cenne są trzymane w kryształowych gablotach.\n\nCzarownice używają wszystkich mocy podstawowych Sfer przeciwko intruzom. Ich moce nigdy nie przemijają, ale Czarownica może używać naraz tylko jednej mocy (nie licząc Sfer Życia).\n\nCzarownice i Golemy nie gonią Cię do innych krain. Większość Sfer traci swoją moc, gdy opuszczasz Krainę Mocy.",
    "Güç Diyarı sönmeyen ateşle, büyülü Kürelerle dolu ve cadılar ve golemler ile korunuyor. Her yerde temel Küreler var ve daha değerliler de kristal kabinlerde korunuyor. \n\nCadılar bu kürelerin gücünü olası işgalcilere karşı kullanabilirler. Bu güçlerin süresi bitmez ama Yaşam Küresi hariç cadılar aynı anda sadece birini kullanabilir. \n\nCadılar ve Golemler seni diğer diyarlara kadar takip etmezler. Ayrıca çoğu kürenin gücü Güç Diyarını terkettiğinde biter.",
    "Kraj Moci je plný věčně planoucích ohňů a magických Sfér a střeží ho čarodějnice a golemové. Základní Sféry se válejí všude kolem a ty cennější jsou schované v křišťálových vitrínách.\n\nČarodějnice mohou v boji proti vetřelcům používat všechny základní sféry. Jejich síla se nikdy nevyčerpá, ale každá Čarodějnice může mít vždy pouze jednu schopnost (Sféry Života se nepočítají).\n\nČarodějnice a golemové tě nikdy nebudou pronásledovat do jiných Krajů. Kromě toho většina sfér při opuštění Kraje Moci svou sílu ztratí.",
    "Земля силы полна вечно горящими огнями и магическими сферами и защищена ведьмами и големами. Все обычные сферы есть здесь, и наиболее ценные из них защищены кристальными кабинетами.\n\nВедьмы способны использовать силы сфер против нарушителей. Эти силы действуют бесконечно, но каждая ведьма может использовать лишь Одну (не считая сферы жизни).\n\nВедьмы и големы не покидают эту землю. Когда вы уходите из неё, силы некоторых Ваших сфер покидают Вас.",
@@ -7770,10 +10381,10 @@ sentence all_sentences[1130] = {
 /*MISSING*/    "This feather is truly beautiful and strong.",
    "Pero bílé holubice. Opravdu nádherné a silné.",
    "Красивое и сильное голубиное перо.",
-/*MISSING*/    "This feather is truly beautiful and strong.",
+   "Diese Feder ist wahrlich schön und stark.",
     }},
   {0xfafa0222, { // "%The1 would kill you there!"
-   "%1 by Ciebie zabi%ł1!",
+   "Zabi%ł1by Ciebie %1!",
    "%1 orada seni hemencecik öldürür!",
    "Tam by tě zabi%l1 %1!",
    "%1 убьёт Вас здесь!",
@@ -7798,7 +10409,7 @@ sentence all_sentences[1130] = {
    " (bırakmak için tıkla)",
    " (polož kliknutím)",
    " (нажмите, чтобы бросить)",
-   " (Klicke zum Fallenlassen)",
+   " (Klicke zum Ablegen)",
     }},
   {0xfc0a5900, { // "synchronize net and map"
    "synchronizuj siatkę z mapą",
@@ -7814,6 +10425,13 @@ sentence all_sentences[1130] = {
    "Вы призвали монстра!",
    "Du beschwörst ein Monster!",
     }},
+  {0xfc66f74c, { // "player 5 spin"
+   "gracz 5 obrót",
+/*MISSING*/    "player 5 spin",
+   "hráč 5 otáčení",
+/*MISSING*/    "player 5 spin",
+   "Spieler 5 drehen",
+    }},
   {0xfc89b511, { // "EN"
    "PL",
    "TR",
@@ -7826,14 +10444,35 @@ sentence all_sentences[1130] = {
 /*MISSING*/    "Kills required: %1 (%2).\n",
    "Nutno zabít nepřátel: %1 (%2).\n",
    "Убить монстров необходимо: %1 (%2).\n",
-/*MISSING*/    "Kills required: %1 (%2).\n",
+   "Notwendige Tötungen: %1 (%2).\n",
+    }},
+  {0xfcd24c71, { // "If we are viewing an equidistant g absolute units below a plane, from a point c absolute units above the plane, this corresponds to viewing a Minkowski hyperboloid from a point tanh(g)/tanh(c) units below the center. This in turn corresponds to the Poincaré model for g=c, and Klein-Beltrami model for g=0."
+   "Jeśli ekwidystantną powierzchnię g jednostek pod płaszczyzną oglądamy z punktu na wysokości c, odpowiada to oglądaniu hiperboloidy Monkowskiego z punktu tanh(g)/tanh(c) poniżej jej środka. To z kolei odpowiada modelowi Poincaré dla g=c, i Kleina-Beltramiego dla g=0.",
+/*MISSING*/    "If we are viewing an equidistant g absolute units below a plane, from a point c absolute units above the plane, this corresponds to viewing a Minkowski hyperboloid from a point tanh(g)/tanh(c) units below the center. This in turn corresponds to the Poincaré model for g=c, and Klein-Beltrami model for g=0.",
+   "Díváme-li se na ekvidistantní plochu, která se nachází g absolutních jednotek pod rovinou, z bodu, který je c absolutních jednotek nad rovinou, je to ekvivalentní tomu, když se díváme na Minkowskiho hyperboloid z bodu, který je tanh(g)/tanh(c) jednotek pod jeho středem. To pak odpovídá Poincarého modelu, když je g=c, a Klein-Beltramiho modelu, když je g=0.",
+   "Если мы смотрим на эквидистанту на глубине g единиц из точки на высоте c единиц, это соответствует гиперболоиду Минковского, на который мы смотрим из точки на tanh(g)/tanh(c) единиц ниже центра. То есть это соответствует модели Пуанкаре при g=c, и Клейна-Бельтрами -- при g=0.",
+/*MISSING*/    "If we are viewing an equidistant g absolute units below a plane, from a point c absolute units above the plane, this corresponds to viewing a Minkowski hyperboloid from a point tanh(g)/tanh(c) units below the center. This in turn corresponds to the Poincaré model for g=c, and Klein-Beltrami model for g=0.",
+    }},
+  {0xfd264e48, { // "Watch the Minkowski hyperboloid or the hypersian rug mode with the red/cyan 3D glasses."
+   "Oglądaj hiperboloidę Minkowskiego albo tryb hiperskiego dywanu przez czerwono-turkusowe okulary 3D.",
+/*MISSING*/    "Watch the Minkowski hyperboloid or the hypersian rug mode with the red/cyan 3D glasses.",
+   "Sleduj Minkowského hyperboloid nebo mód hyperského koberce s pomocí červenomodrých 3D brýlí.",
+   "Смотреть гиперболоид Минковского или режим гиперсидского через красно-голубые 3D очки.",
+/*MISSING*/    "Watch the Minkowski hyperboloid or the hypersian rug mode with the red/cyan 3D glasses.",
+    }},
+  {0xfd2f1f8a, { // "This move appears dangerous -- are you sure?"
+   "Ten ruch wygląda na niebezpieczny -- na pewno?",
+/*MISSING*/    "This move appears dangerous -- are you sure?",
+   "Tento tah vypadá nebezpečně -- určitě ho chceš udělat?",
+   "Этот ход выглядит опасным -- вы уверены?",
+   "Dieser Zug scheint gefährlich zu sein - bist du sicher?",
     }},
   {0xfd351e0b, { // "This giant ape thinks that you are an enemy."
    "Ta małpa uważa, że jesteś jej przeciwnikiem.",
    "Bu devasa maymun senin bir düşman olduğunu düşünüyor.",
    "Tato obrovská opice si myslí, že jsi její nepřítel.",
    "Эта огромная обезьяна считает Вас своим врагом.",
-   "Dieser Riesenaffe glaubt, du bist sein Feind.",
+   "Dieser riesige Affe glaubt, dass du ein Feind bist.",
     }},
   {0xfd4f8051, { // "The Knights stare at you!"
    "Rycerze gapią się na Ciebie ze zdziwieniem!",
@@ -7857,11 +10496,11 @@ sentence all_sentences[1130] = {
    "Charakter",
     }},
   {0xfe662a68, { // "Cannot jump on %the1!"
-   "Nemůžeš skočit na %1!",
+   "Nie możesz skoczyć na %1!",
    "%1 hücresine atlayamazsın!",
    "Nemůžeš skočit na %1!",
    "Нельзя прыгнуть на %1!",
-   "Du kannst nicht auf %den1 %1!",
+   "Du kannst nicht auf %den1 %a1 springen!",
     }},
   {0xfe6ce188, { // "Each challenge gets harder after each victory"
    "Każda misja staje się trudniejsza z każdym zwycięstwem",
@@ -7871,18 +10510,25 @@ sentence all_sentences[1130] = {
    "Die Schwierigkeit einer Herausforderung steigt nach jedem Sieg.",
     }},
   {0xfe879321, { // "A land where you cannot stop, because every piece of floor is extremely unstable. Only monsters who can run forever are able to survive there, and only phoenix feathers are so light that they do not disturb the floor.\n"
-   "Kraina, w której nie możesz przestać się ruszać, bo grunt jest wszędzie bardzo niestabilny. Jedynie stworzenia będące w stanie wiecznie się ruszać mogą tu przeżyć, i jedynie pióra feniksa są na tyle lekkie, by nie zaburzyć podłogi.",
+   "Kraina, w której nie możesz przestać się ruszać, bo grunt jest wszędzie bardzo niestabilny. Jedynie stworzenia będące w stanie wiecznie się ruszać mogą tu przeżyć i jedynie pióra feniksa są na tyle lekkie, by nie zaburzyć podłogi.",
    "Duramayacağınız bir diyar...Çünkü zeminin her noktası oldukça kırılgan. Sadece sonsuza kadar koşabilen canavarlar burada yaşayabilirler ve anka telekleri öyle hafiftir ki, zemine zarar vermezler.",
    "Kraj, ve kterém se nemůžeš zastavit, protože každý kousek podlahy je nesmírně nestabilní. Mohou tu přežít pouze netvoři, kteří dokážou věčně běžet, a pouze fénixova pírka jsou tak lehká, že nenaruší podlahu.",
    "Земля, в которой нельзя остановиться, потому что пол крайне неустойчив. Лишь монстры, способные всегда бежать, могут здесь выжить, и лишь перья феникса столь легки, что не тревожат землю.\n",
-   "Ein Land, in dem du nicht stehen bleiben darfst, denn jedes Stück Boden ist extrem instabil. Nur Monster die ewig laufen können sind in der Lage hier zu überleben. Nur Phönixfedern sind leicht genug, den Boden nicht zu erschüttern.\n",
+   "Ein Land, in dem du nicht stehen bleiben darfst, denn jedes Stück Boden ist extrem instabil. Nur Monster, die ewig laufen können, sind in der Lage hier zu überleben. Nur Phönixfedern sind leicht genug, den Boden nicht zu beeinflussen.\n",
     }},
   {0xfe8aaa55, { // "continue playing"
    "kontynuuj grę",
    "oyuna devam et",
    "pokračuj ve hře",
    "продолжить игру",
-   "Weiterspielen",
+   "Spiel fortsetzen",
+    }},
+  {0xfeafb644, { // "shoot'em up and multiplayer"
+   "strzelanka / wielu graczy",
+/*MISSING*/    "shoot'em up and multiplayer",
+   "střílečka / více hráčů",
+   "стрельба / игроки",
+   "shmup und Mehrspieler",
     }},
   {0xfebfb8a6, { // "move left"
    "idź w lewo",
@@ -7898,19 +10544,33 @@ sentence all_sentences[1130] = {
    "(нажмите ESC во время игры, чтобы посмотреть ваши миссии)",
    "(Drücke ESC während des Spiels, um deine aktuelle Quest anzuzeigen)",
     }},
+  {0xfec941a9, { // "\n\nAfter the Trolls leave, you have 750 turns to collect %the1, or it gets stolen."
+   "\n\nGdy Trolle wyruszą, masz 750 kolejek na zebranie skarbów -- jeśli tego nie zrobisz, %P1 zostaną ukradzione.",
+/*MISSING*/    "\n\nAfter the Trolls leave, you have 750 turns to collect %the1, or it gets stolen.",
+   "\n\nKdyž Trollové odejdou, máš 750 kol na získání pokladu -- jinak ho něco ukradne.",
+   "\n\nКогда тролли уйдут, у вас будет 750 ходов, чтобы собрать %a1, иначе украдут.",
+/*MISSING*/    "\n\nAfter the Trolls leave, you have 750 turns to collect %the1, or it gets stolen.",
+    }},
   {0xfefe0ac5, { // "This cave contains walls which are somehow living. After each turn, each cell counts the number of living wall and living floor cells around it, and if it is currently of a different type than the majority of cells around it, it switches. Items count as three floor cells, and dead Trolls count as five wall cells. Some foreign monsters also count as floor or wall cells.\n"
-   "Ściany tej jaskini sa żywe. W każdej kolejce, każde pole liczy, ile wokół niego jest pól ściany i pól ziemi, i jeśli jest innego typu niż większość pól wokół niego, to zmienia typ na przeciwny. Przedmioty liczą się jako 3 pola ziemi, martwe Trolle jako 5 pól ściany. Niektóre potwory z innych krain również liczą się jako ziemia lub ściana.\n",
+   "Ściany tej jaskini sa żywe. W każdej kolejce każde pole liczy, ile wokół niego jest pól ściany i pól ziemi i jeśli jest innego typu niż większość pól wokół niego, to zmienia typ na przeciwny. Przedmioty liczą się jako 3 pola ziemi, martwe Trolle jako 5 pól ściany. Niektóre potwory z innych krain również liczą się jako ziemia lub ściana.\n",
    "Bu mağara nasılsa yaşayan duvarlarla kaplıdır. Her tur her hücre çevresindeki yaşayan zemin ve yaşayan duvar hücrelerini sayar ve eğer çevresindeki çoğunluktan farklı bir türdeyse çoğunluğa dönüşür. Eşyalar üç zemin hücresi, ölü Troller beş duvar hücresi olarak sayılır.\n",
    "Zdi této jeskyně jsou, kdovíjak, živé. Po každém kole každé políčko spočítá počet políček s živoucími zdmi a políček s živoucími podlahami kolem sebe a pokud má jiný typ než většina jeho sousedů, změní se ze zdi na podlahu nebo opačně. Předměty se počítají jako tři políčka podlahy, mrtví Šutrollové jako pět políček zdí. Někteří cizí netvoři se také počítají jako podlaha nebo zeď.\n",
    "В этой пещере даже стены живые. Каждый ход каждая клетка считает количество клеток живого пола и живых стен среди соседних, и если клеток другого типа больше, она меняет тип. Предметы считаются за 3 клетки пола, мёртвые тролли - за 5 клеток стен.Некоторые монстры из других земель тоже могут считаться за пол или стены.\n",
-   "Diese Höhle enthält Wände die leben. Nach jedem Zug zählt jede Zelle die Zahl von lebenden Wänden und Böden um sich ab und wenn sie der Minderheit entspricht, wechselt sie. Gegenstände zählen als drei Böden, und tote Trolle zählen als fünf Wände. Manche fremden Monster zählen auch als Böden oder Wände.\n",
+   "Diese Höhle enthält Wände, die auf irgendeine Art leben. Nach jedem Zug zählt jede Zelle die Zahl von lebenden Wänden und Böden um sich herum. Wenn sie von anderer Art als die Mehrzahl der umgebenden Zellen ist, wandelt sie sich um. Gegenstände zählen als drei Böden; tote Trolle zählen als fünf Wände. Manche fremde Monster zählen auch als Böden oder Wände.\n",
     }},
   {0xff26e9bf, { // "You have improved both your real time and turn count. Congratulations!"
    "Poprawi%łeś0 swój najlepszy czas rzeczywisty i liczbę ruchów. Gratulacje!",
    "Hem gerçek zamanını hem de tur sayını geliştirdin! Tebrikler! ",
    "Zlepši%l0 jsi svůj reálný čas i svůj počet kol. Gratulujeme!",
    "Вы улучшили результаты по реальному времени и по числу ходов! Поздравляем",
-   "Du hast sowohl weniger Echtzeit als auch Züge als je zuvor benötigt. Gratulation!",
+   "Du hast sowohl weniger Echtzeit als auch Züge als je zuvor benötigt. Glückwunsch!",
+    }},
+  {0xffa845cd, { // "You slash %the1."
+   "Poci%ąłeś0 %a1.",
+/*MISSING*/    "You slash %the1.",
+   "Sek%l0 jsi %a1.",
+   "Вы разрубили %a1.",
+   "Du schlägst %den1 %a1.",
     }},
   {0xffb51405, { // "review your quest"
    "przegląd misji",
@@ -7928,7 +10588,7 @@ sentence all_sentences[1130] = {
     }},
   };
 
-fullnoun all_nouns[330] = {
+fullnoun all_nouns[376] = {
 /*MISSING*/   {0x0, 0, { // """"
     {2/*MISSING*/ , ""/*MISSING*/ , ""/*MISSING*/ , ""/*MISSING*/ , ""},
     {2/*MISSING*/ , ""/*MISSING*/ , ""/*MISSING*/ , ""/*MISSING*/ , ""},
@@ -7955,14 +10615,14 @@ fullnoun all_nouns[330] = {
     {0, "Su Unsuru", "Su Unsurları", "Su Unsurunu", "Su Unsuruyla"},
     {0, "Elementál Vody", "Elementálové Vody", "Elementála Vody", "Elementálem Vody"},
     {0, "Водный элементаль", "Водные элементали", "Водного элементаля", "Водным элементалем"},
-    {2, "Wasserelementar", "Wasserelementar", "Wasserelementar", "Wasserelementar"},
+    {0, "Wasserelementar", "Wasserelementare", "Wasserelementar", "Wasserelementar"},
     }},
   {0x1e6876e, 0, { // ""False Prince""
     {0, "Fałszywy Książę", "Fałszywi Książęta", "Fałszywego Księcia", "Fałszywym Księciem"},
     {0/*MISSING*/ , "False Prince"/*MISSING*/ , "False Prince"/*MISSING*/ , "False Prince"/*MISSING*/ , "False Prince"},
     {0, "Falešný princ", "Falešní princové", "Falešného prince", "Falešným princem"},
     {0, "Ложный принц", "Ложные принцы", "Ложного принца", "Ложным принцем"},
-    {0/*MISSING*/ , "False Prince"/*MISSING*/ , "False Prince"/*MISSING*/ , "False Prince"/*MISSING*/ , "False Prince"},
+    {0, "Falscher Prinz", "Falsche Prinzen", "Falschen Prinz", "Falschen Prinz"},
     }},
   {0x2d68a1c, 0, { // ""Orb of Thorns""
     {1, "Sfera Cierni", "Sfery Cierni", "Sferę Cierni", "Sferą Cierni"},
@@ -7971,26 +10631,40 @@ fullnoun all_nouns[330] = {
     {1, "Сфера Шипов", "Сферы Шипов", "Сферу Шипов", "Сферой Шипов"},
     {0, "Orb der Dornen", "Orbs der Dornen", "Orb der Dornen", "Orb der Dornen"},
     }},
+  {0x3bf4992, 0, { // ""Cellular Automaton""
+    {0, "Automat Komórkowy", "Automaty Komórkowe", "Automat Komórkowy", "w Automacie Komórkowym"},
+    {0/*MISSING*/ , "Cellular Automaton"/*MISSING*/ , "Cellular Automaton"/*MISSING*/ , "Cellular Automaton"/*MISSING*/ , "Cellular Automaton"},
+    {0, "Buněčný automat", "Buněčné automaty", "Buněčný automat", "v Buněčném automatu"},
+    {3, "Клеточный автомат", "Клеточные автоматы", "Клеточный автомат", "в Клеточном автомате"},
+    {0/*MISSING*/ , "Cellular Automaton"/*MISSING*/ , "Cellular Automaton"/*MISSING*/ , "Cellular Automaton"/*MISSING*/ , "Cellular Automaton"},
+    }},
   {0x594962b, 0, { // ""Platform""
     {1, "Platforma", "Platformy", "Platformę", "Platformą"},
     {1, "Platform", "Platformlar", "Platformu", "Platformla"},
     {1, "Plošinka", "Plošinky", "Plošinku", "Plošinkou"},
     {1, "Платформа", "Платформы", "Платформу", "Платформой"},
-    {1, "Plattform", "Plattformen", "Plattform", "Plattform"},
+    {0/*MISSING*/ , "Platform"/*MISSING*/ , "Platform"/*MISSING*/ , "Platform"/*MISSING*/ , "Platform"},
     }},
   {0x59bc9da, 0, { // ""Galápagos""
     {0, "Galápagos", "Galápagos", "Galápagos", "na Galápagos"},
     {0/*MISSING*/ , "Galápagos"/*MISSING*/ , "Galápagos"/*MISSING*/ , "Galápagos"/*MISSING*/ , "Galápagos"},
     {1, "Galapágy", "Galapágy", "Galapágy", "na Galapágách"},
     {0, "Галапагосы", "Галапагосы", "Галапагосы", "на Галапагосах"},
-    {0/*MISSING*/ , "Galápagos"/*MISSING*/ , "Galápagos"/*MISSING*/ , "Galápagos"/*MISSING*/ , "Galápagos"},
+    {0, "Galápagos", "Galápagos", "in Galápagos", "in Galápagos"},
     }},
   {0x72878ed, 0, { // ""dead troll""
     {0, "martwy troll", "martwe trolle", "martwego trolla", "martwym trollem"},
     {0, "Ölü Trol", "Ölü Troller", "Ölü Trolü", "Ölü Trolle"},
     {0, "mrtvý troll", "mrtví trollové", "mrtvého trolla", "mrtvým trollem"},
     {0, "мёртвый тролль", "мёртвые тролли", "мёртвого тролля", "мёртвым троллем"},
-    {0, "Toter Troll", "Tote Trolle", "Toten Troll", "Toten Troll"},
+    {0, "toter Troll", "toten Trolle", "toten Troll", "toten Troll"},
+    }},
+  {0x73dabf9, 0, { // ""Crossroads V""
+    {3, "Skrzyżowanie V", "Skrzyżowania V", "Skrzyżowanie V", "na Skrzyżowaniu V"},
+    {0/*MISSING*/ , "Crossroads V"/*MISSING*/ , "Crossroads V"/*MISSING*/ , "Crossroads V"/*MISSING*/ , "Crossroads V"},
+    {3, "Křižovatka V", "Křižovatky V", "Křižovatku V", "na Křižovatce V"},
+    {3, "Перекрёсток V", "Перекрёстки V", "Перекрёсток V", "на Перекрёстке V"},
+    {0/*MISSING*/ , "Crossroads V"/*MISSING*/ , "Crossroads V"/*MISSING*/ , "Crossroads V"/*MISSING*/ , "Crossroads V"},
     }},
   {0x7486caa, 0, { // ""Ruby""
     {3, "Rubin", "Rubiny", "Rubin", "Rubinem"},
@@ -8012,6 +10686,13 @@ fullnoun all_nouns[330] = {
     {1, "Sféra Ohně", "Sféry Ohně", "Sféru Ohně", "Sférou Ohně"},
     {1, "Сфера Огня", "Сферы Огня", "Сферу Огня", "Сферой Огня"},
     {0, "Orb des Feuers", "Orbs des Feuers", "Orb des Feuers", "Orb des Feuers"},
+    }},
+  {0x982eac3, 0, { // ""Reptile""
+    {1, "Jaszczurka", "Jaszczurki", "Jaszczurkę", "Jaszczurką"},
+    {0/*MISSING*/ , "Reptile"/*MISSING*/ , "Reptile"/*MISSING*/ , "Reptile"/*MISSING*/ , "Reptile"},
+    {1, "Ještěrka", "Ještěrky", "Ještěrku", "Ještěrce"},
+    {1, "Ящерица", "Ящерицы", "Ящерицу", "Ящерицей"},
+    {0/*MISSING*/ , "Reptile"/*MISSING*/ , "Reptile"/*MISSING*/ , "Reptile"/*MISSING*/ , "Reptile"},
     }},
   {0xa2dba6e, 0, { // ""Onyx""
     {3, "Onyks", "Onyksy", "Onyks", "Onyksem"},
@@ -8074,7 +10755,14 @@ fullnoun all_nouns[330] = {
     {0/*MISSING*/ , "Dragon Scale"/*MISSING*/ , "Dragon Scale"/*MISSING*/ , "Dragon Scale"/*MISSING*/ , "Dragon Scale"},
     {1, "Dračí šupina", "Dračí šupiny", "Dračí šupinu", "Dračí šupinou"},
     {1, "чешуя дракона", "чешуи дракона", "чешую дракона", "чешуёй дракона"},
-    {0/*MISSING*/ , "Dragon Scale"/*MISSING*/ , "Dragon Scale"/*MISSING*/ , "Dragon Scale"/*MISSING*/ , "Dragon Scale"},
+    {1, "Drachenschuppe", "Drachenschuppen", "Drachenschuppe", "Drachenschuppe"},
+    }},
+  {0xf6089ad, 0, { // ""Draugr""
+    {0, "Draugr", "Draugry", "Draugra", "Draugrem"},
+    {0/*MISSING*/ , "Draugr"/*MISSING*/ , "Draugr"/*MISSING*/ , "Draugr"/*MISSING*/ , "Draugr"},
+    {0, "Draugr", "Draugrové", "Draugra", "Draugrem"},
+    {0, "Драугр", "Драугры", "Драугра", "Драугром"},
+    {0, "Draugr", "Draugar", "Draugr", "Draugr"},
     }},
   {0x10ddbfc9, 0, { // ""Orb of the Mind""
     {1, "Sfera Psychiki", "Sfery Psychiki", "Sferę Psychiki", "Sferą Psychiki"},
@@ -8102,7 +10790,7 @@ fullnoun all_nouns[330] = {
     {0, "Yansı", "Yansılar", "Yansıyı", "Yansıyla"},
     {3, "Přelud", "Přeludy", "Přelud", "Přeludem"},
     {3, "Мираж", "Миражи", "Мираж", "Миражом"},
-    {1, "Illusion", "Illusionen", "Illusion", "Illusion"},
+    {1, "Spiegelung", "Spiegelungen", "Spiegelung", "Spiegelung"},
     }},
   {0x13f7d362, 0, { // ""Viking""
     {0, "Wiking", "Wikingowie", "Wikinga", "Wikingiem"},
@@ -8118,6 +10806,13 @@ fullnoun all_nouns[330] = {
     {0, "Зелёный гипержук", "Зелёные гипержуки", "Зелёного гипержука", "Зелёным гипержуком"},
     {0, "Grüner Hyperkäfer", "Grüne Hyperkäfer", "Grünen Hyperkäfer", "Grünen Hyperkäfer"},
     }},
+  {0x144bd658, 0, { // ""big bush""
+    {3, "duży krzak", "duże krzaki", "duży krzak", "dużym krzakiem"},
+    {0/*MISSING*/ , "big bush"/*MISSING*/ , "big bush"/*MISSING*/ , "big bush"/*MISSING*/ , "big bush"},
+    {3, "velký keř", "velké keře", "velký keř", "velkým keřem"},
+    {3, "большой куст", "большие кусты", "большой куст", "большим кустом"},
+    {0/*MISSING*/ , "big bush"/*MISSING*/ , "big bush"/*MISSING*/ , "big bush"/*MISSING*/ , "big bush"},
+    }},
   {0x145a3ea0, 0, { // ""wall of Camelot""
     {1, "ściana Camelot", "ściany Camelot", "ścianę Camelot", "ścianą Camelot"},
     {1, "Kamelot Duvarı", "Kamelot Duvarları", "Kamelot Duvarını", "Kamelot Duvarıyla"},
@@ -8132,12 +10827,26 @@ fullnoun all_nouns[330] = {
     {2, "Щупальце", "Щупальца", "Щупальце", "Щупальцем"},
     {1, "Tentakel", "Tentakel", "Tentakel", "Tentakel"},
     }},
+  {0x14f61189, 0, { // ""small bush""
+    {3, "krzaczek", "krzaczki", "krzaczek", "krzaczkiem"},
+    {0/*MISSING*/ , "small bush"/*MISSING*/ , "small bush"/*MISSING*/ , "small bush"/*MISSING*/ , "small bush"},
+    {3, "małý keřík", "małé keříky", "małý keřík", "małým keříkem"},
+    {3, "маленький куст", "маленькие кусты", "маленький куст", "маленьким кустом"},
+    {0/*MISSING*/ , "small bush"/*MISSING*/ , "small bush"/*MISSING*/ , "small bush"/*MISSING*/ , "small bush"},
+    }},
   {0x151e041d, 0, { // ""island""
     {1, "wyspa", "wyspy", "wyspę", "wyspą"},
     {1, "ada", "adalar", "adayı", "adayla"},
     {3, "ostrov", "ostrovy", "ostrov", "ostrovem"},
     {3, "остров", "острова", "остров", "островом"},
     {1, "Insel", "Inseln", "Insel", "Insel"},
+    }},
+  {0x15d403e8, 0, { // ""Reptiles""
+    {3, "Jaszczurki", "Jaszczurki", "Jaszczurki", "na Jaszczurkach"},
+    {0/*MISSING*/ , "Reptiles"/*MISSING*/ , "Reptiles"/*MISSING*/ , "Reptiles"/*MISSING*/ , "Reptiles"},
+    {3, "Ještěrky", "Ještěrky", "Ještěrky", "na Ještěrkách"},
+    {3, "Ящерицы", "Ящерицы", "Ящериц", "на Ящерицах"},
+    {0/*MISSING*/ , "Reptiles"/*MISSING*/ , "Reptiles"/*MISSING*/ , "Reptiles"/*MISSING*/ , "Reptiles"},
     }},
   {0x1648dfe3, 0, { // ""Orb of Teleport""
     {1, "Sfera Teleportacji", "Sfery Teleportacji", "Sferę Teleportacji", "Sferą Teleportacji"},
@@ -8158,7 +10867,7 @@ fullnoun all_nouns[330] = {
     {0/*MISSING*/ , "Yendorian Researcher"/*MISSING*/ , "Yendorian Researcher"/*MISSING*/ , "Yendorian Researcher"/*MISSING*/ , "Yendorian Researcher"},
     {0, "Yendorský badatel", "Yendorští badatelé", "Yendorského badatele", "Yendorským badatelem"},
     {0, "Йендорский исследователь", "Йендорские исследователи", "Йендорского исследователя", "Йендорским исследователем"},
-    {0/*MISSING*/ , "Yendorian Researcher"/*MISSING*/ , "Yendorian Researcher"/*MISSING*/ , "Yendorian Researcher"/*MISSING*/ , "Yendorian Researcher"},
+    {0, "Yendorianischer Forscher", "Yendorianische Forscher", "Yendorianischen Forscher", "Yendorianischen Forscher"},
     }},
   {0x18630997, 0, { // ""Orb of Speed""
     {1, "Sfera Szybkości", "Sfery Szybkości", "Sferę Szybkości", "Sferą Szybkości"},
@@ -8174,12 +10883,26 @@ fullnoun all_nouns[330] = {
     {1, "дюна", "дюны", "дюну", "дюной"},
     {1, "Sanddüne", "Sanddünen", "Sanddüne", "Sanddüne"},
     }},
+  {0x19468c49, 0, { // ""Lost Mountain""
+    {1, "Zagubiona Góra", "Zagubione Góry", "Zagubioną Górą", "na Zagubionej Górze"},
+    {0/*MISSING*/ , "Lost Mountain"/*MISSING*/ , "Lost Mountain"/*MISSING*/ , "Lost Mountain"/*MISSING*/ , "Lost Mountain"},
+    {1, "Ztracená hora", "Ztracené hory", "Ztracenou horu", "na Ztracené hoře"},
+    {1, "Потерянная гора", "Потерянные горы", "Потерянную гору", "на Потерянной горе"},
+    {0/*MISSING*/ , "Lost Mountain"/*MISSING*/ , "Lost Mountain"/*MISSING*/ , "Lost Mountain"/*MISSING*/ , "Lost Mountain"},
+    }},
   {0x194752fa, 0, { // ""Friendly Ghost""
     {3, "Przyjazny Duch", "Przyjazne Duchy", "Przyjaznego Ducha", "Przyjaznym Duchem"},
     {0/*MISSING*/ , "Friendly Ghost"/*MISSING*/ , "Friendly Ghost"/*MISSING*/ , "Friendly Ghost"/*MISSING*/ , "Friendly Ghost"},
     {0, "Přátelský duch", "Přátelští duchové", "Přátelského ducha", "Přátelským duchem"},
     {0, "Дружественный дух", "Дружественные духи", "Дружественного духа", "Дружественным духом"},
-    {0/*MISSING*/ , "Friendly Ghost"/*MISSING*/ , "Friendly Ghost"/*MISSING*/ , "Friendly Ghost"/*MISSING*/ , "Friendly Ghost"},
+    {0, "Freundlicher Geist", "Freundliche Geister", "Freundlichen Geist", "Freundlichen Geist"},
+    }},
+  {0x19640701, 0, { // ""Raging Bull""
+    {0, "Wściekły Byk", "Wściekłe Byki", "Wściekłego Byka", "Wściekłym Bykiem"},
+    {0/*MISSING*/ , "Raging Bull"/*MISSING*/ , "Raging Bull"/*MISSING*/ , "Raging Bull"/*MISSING*/ , "Raging Bull"},
+    {0, "Vzteklý Býk", "Vzteklí Býci", "Vzteklého Býka", "Vzteklým Býkem"},
+    {0, "Бешеный бык", "Бешеные быки", "Бешеного быка", "Бешеным быком"},
+    {0/*MISSING*/ , "Raging Bull"/*MISSING*/ , "Raging Bull"/*MISSING*/ , "Raging Bull"/*MISSING*/ , "Raging Bull"},
     }},
   {0x1a404e9f, 0, { // ""Vine Spirit""
     {0, "Winny Duszek", "Winne Duszki", "Winnego Duszka", "Winnym Duszkiem"},
@@ -8193,14 +10916,14 @@ fullnoun all_nouns[330] = {
     {0, "Sarmaşık D", "sarmaşıklar D", "Sarmaşığı D", "Sarmaşıkla D"},
     {3, "Břečťan D", "Břečťany D", "Břečťan D", "Břečťanem D"},
     {3, "Плющ D", "Плющи D", "Плющ D", "Плющом D"},
-    {0, "Efeu D", "Efeu D", "Efeu D", "Efeu D"},
+    {0, "Efeu D", "Efeue D", "Efeu D", "Efeu D"},
     }},
   {0x1c2a099a, 0, { // ""Ivy N""
     {0, "Bluszcz N", "Bluszcze N", "Bluszcz N", "Bluszczem N"},
     {0, "sarmaşık N", "Sarmaşıklar N", "Sarmaşığı N", "Sarmaşıkla N"},
     {3, "Břečťan N", "Břečťany N", "Břečťan N", "Břečťanem N"},
     {3, "Плющ N", "Плющи N", "Плющ N", "Плющом N"},
-    {0, "Efeu N", "Efeu N", "Efeu N", "Efeu N"},
+    {0, "Efeu N", "Efeue N", "Efeu N", "Efeu N"},
     }},
   {0x1d4ed559, 0, { // ""Pirate""
     {0, "Pirat", "Piraci", "Pirata", "Piratem"},
@@ -8214,7 +10937,7 @@ fullnoun all_nouns[330] = {
     {1, "Sütun", "Sütunlar", "Sütunu", "Sütunla"},
     {3, "sloup", "sloupy", "sloup", "sloupem"},
     {1, "колонна", "колонны", "колонну", "колонной"},
-    {0, "Riss", "Risse", "Riss", "Riss"},
+    {1, "Säule", "Säulen", "Säule", "Säule"},
     }},
   {0x1e704a9a, 0, { // ""Red Troll""
     {0, "Czerwony Troll", "Czerwone Trolle", "Czerwonego Trolla", "Czerwonym Trollem"},
@@ -8230,12 +10953,19 @@ fullnoun all_nouns[330] = {
     {1, "Земля силы", "Земли силы", "Землю силы", "в Земле силы"},
     {2, "Land der Macht", "Länder der Macht", "im Land der Macht", "im Land der Macht"},
     }},
+  {0x1eeb8385, 0, { // ""Amethyst""
+    {3, "Ametyst", "Ametysty", "Ametyst", "Ametystem"},
+    {0/*MISSING*/ , "Amethyst"/*MISSING*/ , "Amethyst"/*MISSING*/ , "Amethyst"/*MISSING*/ , "Amethyst"},
+    {3, "Ametyst", "Ametysty", "Ametyst", "Ametystem"},
+    {3, "Аметист", "Аметисты", "Аметист", "Аметистом"},
+    {0/*MISSING*/ , "Amethyst"/*MISSING*/ , "Amethyst"/*MISSING*/ , "Amethyst"/*MISSING*/ , "Amethyst"},
+    }},
   {0x214d9df6, 0, { // ""Ivy Branch""
     {1, "Gałąź Bluszczu", "Gałęzie Bluszczu", "Gałąź Bluszczu", "Gałęzią Bluszczu"},
     {1, "Sarmaşık Dalı", "Sarmaşık Dalları", "Sarmaşık Dalını", "Sarmaşık Dalıyla"},
     {1, "Větev břečťanu", "Větve břečťanu", "Větev břečťanu", "Větví břečťanu"},
     {1, "Ветвь плюща", "Ветви плюща", "Ветвь плюща", "Ветвью плюща"},
-    {0, "Efeu Zweig", "Efeu Zweige", "Efeu Zweig", "Efeu Zweig"},
+    {0, "Efeuzweig", "Efeuzweige", "Efeuzweig", "Efeuzweig"},
     }},
   {0x22d86d83, 0, { // ""Tame Bomberbird""
     {3, "Oswojony Bombardier", "Oswojone Bombardiery", "Oswojonego Bombardiera", "Oswojonym Bombardierem"},
@@ -8277,21 +11007,21 @@ fullnoun all_nouns[330] = {
     {0/*MISSING*/ , "Orb of Energy"/*MISSING*/ , "Orb of Energy"/*MISSING*/ , "Orb of Energy"/*MISSING*/ , "Orb of Energy"},
     {1, "Sféra Energie", "Sféry Energie", "Sféru Energie", "Sférou Energie"},
     {1, "Сфера Energii", "Сферы Energii", "Сферу Energii", "Сферой Energii"},
-    {0/*MISSING*/ , "Orb of Energy"/*MISSING*/ , "Orb of Energy"/*MISSING*/ , "Orb of Energy"/*MISSING*/ , "Orb of Energy"},
+    {0, "Orb der Energie", "Orbs der Energie", "Orb der Energie", "Orb der Energie"},
     }},
   {0x27627e19, 0, { // ""stone gargoyle floor""
     {1, "podłoga z rzygacza", "podłogi z rzygacza", "podłogę z rzygacza", "podłogą z rzygacza"},
     {1, "taş çörten zemini", "taş çörten zeminleri", "taş çörten zeminini", "taş çörten zeminiyle"},
     {1, "podlaha z chrliče", "podlahy z chrličů", "podlahu z chrliče", "podlahou z chrliče"},
     {3, "пол с горгульей", "полы с горгульями", "пол с горгульей", "полом с горгульей"},
-    {0, "Steingargoyle Boden", "Steingargoyle Böden", "Steingargoyle Boden", "Steingargoyle Boden"},
+    {0, "Steingargoyle-Boden", "Steingargoyle-Böden", "Steingargoyle-Boden", "Steingargoyle-Boden"},
     }},
   {0x295eca8f, 0, { // ""Orb of the Fish""
     {1, "Sfera Ryby", "Sfery Ryby", "Sferę Ryby", "Sferą Ryby"},
     {1, "Balık Küresi", "Balık Küreleri", "Balık Küresini", "Balık Küresiyle"},
     {1, "Sféra Ryby", "Sféry Ryby", "Sféru Ryby", "Sférou Ryby"},
     {1, "Сфера Рыбы", "Сферы Рыбы", "Сферу Рыбы", "Сферой Рыбы"},
-    {0, "Orb des Fisches", "Orbs des Fisches", "Orb des Fisches", "Orb des Fisches"},
+    {0, "Orb des Fischs", "Orbs des Fischs", "Orb des Fischs", "Orb des Fischs"},
     }},
   {0x2aa339b0, 0, { // ""Evil Golem""
     {0, "Zły Golem", "Złe Golemy", "Złego Golema", "Złym Golemem"},
@@ -8312,7 +11042,7 @@ fullnoun all_nouns[330] = {
     {0/*MISSING*/ , "no item"/*MISSING*/ , "no item"/*MISSING*/ , "no item"/*MISSING*/ , "no item"},
     {3, "žádný předmět", "žádné předměty", "žádný předmět", "žádným předmětem"},
     {3, "нет предмета", "нет предмета", "нет предмета", "нет предмета"},
-    {0/*MISSING*/ , "no item"/*MISSING*/ , "no item"/*MISSING*/ , "no item"/*MISSING*/ , "no item"},
+    {0, "kein Gegenstand", "keine Gegenstände", "keinen Gegenstand", "keinen Gegenstand"},
     }},
   {0x2c05e0f6, 0, { // ""Sand Worm W""
     {0, "Pustynny Czerw W", "Pustynne Czerwie W", "Pustynnego Czerwia W", "Pustynnym Czerwiem W"},
@@ -8326,7 +11056,7 @@ fullnoun all_nouns[330] = {
     {0, "Ateş Müridi", "Ateş Müritleri", "Ateş Müridini", "Ateş Müritle"},
     {0, "Kultista ohně", "Kultisté ohně", "Kultistu ohně", "Kultistou ohně"},
     {0, "Огненный культист", "Огненные культисты", "Огненного культиста", "Огненным культистом"},
-    {0, "Anhänger des Feuers", "Anhänger des Feuers", "Anhänger des Feuers", "Anhänger des Feuers"},
+    {0, "Feuerkultist", "Feuerkultisten", "Feuerkultisten", "Feuerkultisten"},
     }},
   {0x2c23322d, 0, { // ""Royal Jelly""
     {2, "Królewskie Mleczko", "Królewskie Mleczka", "Królewskie Mleczko", "Królewskim Mleczkiem"},
@@ -8340,14 +11070,14 @@ fullnoun all_nouns[330] = {
     {0, "Ölüçağıran", "Ölüçağıranlar", "Ölüçağıranı", "Ölüçağıranla"},
     {0, "Nekromancer", "Nekromanceři", "Nekromancera", "Nekromancerem"},
     {0, "Некромант", "Некроманты", "Некроманта", "Некромантом"},
-    {0, "Nekromant", "Nekromanten", "Nekromant", "Nekromant"},
+    {0, "Totenbeschwörer", "Totenbeschwörer", "Totenbeschwörer", "Totenbeschwörer"},
     }},
   {0x3063d2f6, 0, { // ""Orb of Domination""
     {1, "Sfera Dominacji", "Sfery Dominacji", "Sferę Dominacji", "Sferą Dominacji"},
     {0/*MISSING*/ , "Orb of Domination"/*MISSING*/ , "Orb of Domination"/*MISSING*/ , "Orb of Domination"/*MISSING*/ , "Orb of Domination"},
     {1, "Sféra Dominance", "Sféry Dominance", "Sféru Dominance", "Sférou Dominance"},
     {1, "Сфера Доминации", "Сферы Доминации", "Сферу Доминации", "Сферой Доминации"},
-    {0/*MISSING*/ , "Orb of Domination"/*MISSING*/ , "Orb of Domination"/*MISSING*/ , "Orb of Domination"/*MISSING*/ , "Orb of Domination"},
+    {0, "Orb der Dominanz", "Orbs der Dominanz", "Orb der Dominanz", "Orb der Dominanz"},
     }},
   {0x309f6294, 0, { // ""grounded wall""
     {1, "uziemiona ściana", "uziemione ściany", "uziemioną scianę", "uziemioną ścianą"},
@@ -8375,14 +11105,14 @@ fullnoun all_nouns[330] = {
     {0, "Toprak Unsuru", "Toprak Unsurları", "Toprak Unsurunu", "Toprak Unsuruyla"},
     {0, "Elementál Země", "Elementálové Země", "Elementála Země", "Elementálem Země"},
     {0, "Земной элементаль", "Земные элементали", "Земного элементаля", "Земным элементалем"},
-    {2, "Erdelementar", "Erdelementare", "Erdelementar", "Erdelementar"},
+    {0, "Erdelementar", "Erdelementare", "Erdelementar", "Erdelementar"},
     }},
   {0x318d9d8d, 0, { // ""Land of Eternal Motion""
     {2, "Kraina Wiecznego Ruchu", "Kraina Wiecznego Ruchu", "Krainę Wiecznego Ruchu", "w Krainie Wiecznego Ruchu"},
     {2, "Sonsuz Devinim Diyarı", "Sonsuz Devinim Diyarları", "Sonsuz Devinim Diyarını", "Sonsuz Devinim Diyarında"},
     {3, "Kraj věčného pohybu", "Kraje věčného pohybu", "Kraj věčného pohybu", "v Kraji věčného pohybu"},
     {1, "Земля Вечного Движения", "Земли Вечного Движения", "Землю Вечного Движения", "в Земле Вечного Движения"},
-    {2, "Land des endlosen Antriebs", "Länder des endlosen Antriebs", "im Land des endlosen Antriebs", "im Land des endlosen Antriebs"},
+    {2, "Land der ewigen Bewegung", "Länder der ewigen Bewegung", "im Land der ewigen Bewegung", "im Land der ewigen Bewegung"},
     }},
   {0x331fcbb5, 0, { // ""stone gargoyle""
     {0, "kamienny rzygacz", "kamienne rzygacze", "kamiennego rzygacza", "kamiennym rzygaczem"},
@@ -8390,6 +11120,13 @@ fullnoun all_nouns[330] = {
     {3, "kamenný chrlič", "kamenné chrliče", "kamenného chrliče", "kamenným chrličem"},
     {1, "каменная горгулья", "каменные горгульи", "каменную горгулью", "каменной горгульей"},
     {0, "Steingargoyle", "Steingargoyles", "Steingargoyle", "Steingargoyle"},
+    }},
+  {0x33878aca, 0, { // ""Ancient Jewelry""
+    {1, "Starożytna Biżuteria", "Starożytna Biżuteria", "Starożytną Biżuterię", "Starożytną Biżuterią"},
+    {0/*MISSING*/ , "Ancient Jewelry"/*MISSING*/ , "Ancient Jewelry"/*MISSING*/ , "Ancient Jewelry"/*MISSING*/ , "Ancient Jewelry"},
+    {3, "Dávný šperk", "Dávné šperky", "Dávný šperk", "Dávným šperkem"},
+    {1, "Древняя драгоценность", "Древние драгоценности", "Древнюю драгоценность", "Древней драгоценностью"},
+    {1, "Antike Juwelen", "Antike Juwelen", "Antiken Juwelen", "Antiken Juwelen"},
     }},
   {0x338f38ab, 0, { // ""Rock Snake Tail""
     {3, "Ogon Węża", "Ogony Węża", "Ogon Węża", "Ogonem Węża"},
@@ -8431,14 +11168,14 @@ fullnoun all_nouns[330] = {
     {0/*MISSING*/ , "Giant Fox"/*MISSING*/ , "Giant Fox"/*MISSING*/ , "Giant Fox"/*MISSING*/ , "Giant Fox"},
     {1, "Obří liška", "Obří lišky", "Obří lišku", "Obří liškou"},
     {0, "Огромный лис", "Огромные лисы", "Огромного лиса", "Огромным лисом"},
-    {0/*MISSING*/ , "Giant Fox"/*MISSING*/ , "Giant Fox"/*MISSING*/ , "Giant Fox"/*MISSING*/ , "Giant Fox"},
+    {0, "Riesenfuchs", "Riesenfüchse", "Riesenfuchs", "Riesenfuchs"},
     }},
   {0x3ab53b1b, 0, { // ""Orb of Undeath""
     {1, "Sfera Nieumarłych", "Sfery Nieumarłych", "Sferę Nieumarłych", "Sferą Nieumarłych"},
     {0/*MISSING*/ , "Orb of Undeath"/*MISSING*/ , "Orb of Undeath"/*MISSING*/ , "Orb of Undeath"/*MISSING*/ , "Orb of Undeath"},
     {1, "Sféra Nemrtvých", "Sféry Nemrtvých", "Sféru Nemrtvých", "Sférou Nemrtvých"},
     {1, "Сфера Нежити", "Сферы Нежити", "Сферу Нежити", "Сферой Нежити"},
-    {0/*MISSING*/ , "Orb of Undeath"/*MISSING*/ , "Orb of Undeath"/*MISSING*/ , "Orb of Undeath"/*MISSING*/ , "Orb of Undeath"},
+    {0, "Orb der Untoten", "Orbs der Untoten", "Orb der Untoten", "Orb der Untoten"},
     }},
   {0x3b4c9ee0, 0, { // ""weird rock""
     {2, "dziwna skała", "dziwne skały", "dziwną skałę", "dziwną skałą"},
@@ -8459,7 +11196,7 @@ fullnoun all_nouns[330] = {
     {0/*MISSING*/ , "Thornless Rose"/*MISSING*/ , "Thornless Rose"/*MISSING*/ , "Thornless Rose"/*MISSING*/ , "Thornless Rose"},
     {1, "Růže bez trnů", "Růže bez trnů", "Růži bez trnů", "Růží bez trnů"},
     {1, "роза без шипов", "розы без шипов", "розу без шипов", "розой без шипов"},
-    {0/*MISSING*/ , "Thornless Rose"/*MISSING*/ , "Thornless Rose"/*MISSING*/ , "Thornless Rose"/*MISSING*/ , "Thornless Rose"},
+    {1, "Rose ohne Dornen", "Rosen ohne Dornen", "Rose ohne Dornen", "Rose ohne Dornen"},
     }},
   {0x3d400c71, 0, { // ""Thumper""
     {3, "Dudnik", "Dudniki", "Dudnik", "Dudnikiem"},
@@ -8467,6 +11204,13 @@ fullnoun all_nouns[330] = {
     {3, "Tlouk", "Tlouky", "Tlouk", "Tloukem"},
     {3, "Тампер", "Тамперы", "Тампер", "Тампером"},
     {0, "Stampfer", "Stampfer", "Stampfer", "Stampfer"},
+    }},
+  {0x3dd9fb5f, 0, { // ""barrow""
+    {3, "kurhan", "kurhany", "kurhan", "kurhanem"},
+    {0/*MISSING*/ , "barrow"/*MISSING*/ , "barrow"/*MISSING*/ , "barrow"/*MISSING*/ , "barrow"},
+    {1, "mohyla", "mohyly", "mohylu", "mohylou"},
+    {3, "курган", "курганы", "курган", "курганом"},
+    {3, "Hügelgrab", "Hügelgräber", "Hügelgrab", "Hügelgrab"},
     }},
   {0x3ec5a2f2, 0, { // ""Orb of Safety""
     {1, "Sfera Bezpieczeństwa", "Sfery Bezpieczeństwa", "Sferę Bezpieczeństwa", "Sferą Bezpieczeństwa"},
@@ -8480,7 +11224,7 @@ fullnoun all_nouns[330] = {
     {1, "Ölü Küre", "Ölü Küreler", "Ölü Küreyle", "Ölü Küreyi"},
     {1, "Mrtvá sféra", "Mrtvé sféry", "Mrtvou sféru", "Mrtvou sférou"},
     {1, "Мёртвая сфера", "Мёртвые сферы", "Мёртвую сферу", "Мёртвой сферой"},
-    {0, "Orb der Toten", "Orbs der Toten", "Orb der Toten", "Orb der Toten"},
+    {0, "toter Orb", "toten Orbs", "toten Orb", "toten Orb"},
     }},
   {0x3ee8eeb4, 0, { // ""Orb of Discord""
     {1, "Sfera Niezgody", "Sfery Niezgody", "Sferę Niezgody", "Sferą Niezgody"},
@@ -8508,7 +11252,7 @@ fullnoun all_nouns[330] = {
     {0/*MISSING*/ , "Baby Tortoise"/*MISSING*/ , "Baby Tortoise"/*MISSING*/ , "Baby Tortoise"/*MISSING*/ , "Baby Tortoise"},
     {1, "Želvička", "Želvičky", "Želvičku", "Želvičkou"},
     {1, "Черепашка", "Черепашки", "Черепашку", "Черепашкой"},
-    {0/*MISSING*/ , "Baby Tortoise"/*MISSING*/ , "Baby Tortoise"/*MISSING*/ , "Baby Tortoise"/*MISSING*/ , "Baby Tortoise"},
+    {0, "Babyschildkröte", "Babyschildkröten", "Babyschildkröte", "Babyschildkröte"},
     }},
   {0x4290380f, 0, { // ""minefield""
     {2, "pole minowe", "pola minowe", "pole minowe", "polem minowym"},
@@ -8529,14 +11273,28 @@ fullnoun all_nouns[330] = {
     {1, "Kırmızı Balçık", "Kırmızı Balçıklar", "Kırmızı Balçığı", "Kırmızı Balçıkta"},
     {3, "červený sliz", "červené slizy", "červený sliz", "červeným slizem"},
     {1, "красная слизь", "красная слизь", "красную слизь", "красной слизью"},
-    {0, "Rotem Schleim", "Rotem Schleim", "Roten Schleim", "Roten Schleim"},
+    {0, "Roter Schleim", "Roten Schleime", "Roten Schleim", "Roten Schleim"},
+    }},
+  {0x4435c8e0, 0, { // ""Orb of Horns""
+    {1, "Sfera Rogów", "Sfery Rogów", "Sferę Rogów", "Sferą Rogów"},
+    {0/*MISSING*/ , "Orb of Horns"/*MISSING*/ , "Orb of Horns"/*MISSING*/ , "Orb of Horns"/*MISSING*/ , "Orb of Horns"},
+    {1, "Sféra Rohů", "Sféry Rohů", "Sféru Rohů", "Sférou Rohů"},
+    {1, "Сфера Рогов", "Сферы Рогов", "Сферу Рогов", "Сферой Рогов"},
+    {0/*MISSING*/ , "Orb of Horns"/*MISSING*/ , "Orb of Horns"/*MISSING*/ , "Orb of Horns"/*MISSING*/ , "Orb of Horns"},
     }},
   {0x44c19f73, 2, { // ""Crossroads""
     {2, "Skrzyżowanie", "Skrzyżowanie", "Skrzyżowanie", "na Skrzyżowaniu"},
     {2, "Arayollar", "Arayollar", "Arayolları", "Arayollarda"},
     {1, "Křižovatka", "Křižovatky", "Křižovatku", "na Křižovatce"},
     {3, "Перекрёсток", "Перекрёстки", "Перекрёсток", "на Перекрёстке"},
-    {1, "Kreuzung", "Kreuzungen", "an der Kreuzung", "an der Kreuzung"},
+    {1, "Kreuzungen", "Kreuzungen", "auf den Kreuzungen", "auf den Kreuzungen"},
+    }},
+  {0x45a84b21, 0, { // ""Gadfly""
+    {0, "Giez", "Gzy", "Gza", "Gzem"},
+    {0/*MISSING*/ , "Gadfly"/*MISSING*/ , "Gadfly"/*MISSING*/ , "Gadfly"/*MISSING*/ , "Gadfly"},
+    {0, "Ovád", "Ovádi", "Ováda", "Ovádem"},
+    {0, "Овод", "Оводы", "Овода", "Оводом"},
+    {0/*MISSING*/ , "Gadfly"/*MISSING*/ , "Gadfly"/*MISSING*/ , "Gadfly"/*MISSING*/ , "Gadfly"},
     }},
   {0x45f826dd, 0, { // ""Orb of Yendor""
     {1, "Sfera Yendoru", "Sfery Yendoru", "Sferę Yendoru", "Sferą Yendoru"},
@@ -8550,7 +11308,7 @@ fullnoun all_nouns[330] = {
     {0/*MISSING*/ , "Orb of the Warp"/*MISSING*/ , "Orb of the Warp"/*MISSING*/ , "Orb of the Warp"/*MISSING*/ , "Orb of the Warp"},
     {1, "Sféra Pokřivení", "Sféry Pokřivení", "Sféru Pokřivení", "Sférou Pokřivení"},
     {1, "Сфера Искривления", "Сферы Искривления", "Сферу Искривления", "Сферой Искривления"},
-    {0/*MISSING*/ , "Orb of the Warp"/*MISSING*/ , "Orb of the Warp"/*MISSING*/ , "Orb of the Warp"/*MISSING*/ , "Orb of the Warp"},
+    {0, "Orb der Verzerrung", "Orbs der Verzerrung", "Orb der Verzerrung", "Orb der Verzerrung"},
     }},
   {0x489faba1, 0, { // ""Princess""
     {1, "Księżniczka", "Księżniczki", "Księżniczkę", "Księżniczką"},
@@ -8564,7 +11322,7 @@ fullnoun all_nouns[330] = {
     {0, "Canlı Sarmaşık", "Canlı Sarmaşıklar", "Canlı Sarmaşığı", "Canlı Sarmaşığıyla"},
     {3, "Aktivní břečťan", "Aktivní břečťany", "Aktivní břečťan", "Aktivním břečťanem"},
     {3, "Активный плющ", "Активные плющи", "Активный плющ", "Активным плющом"},
-    {0, "Lebender Efeu", "Lebende Efeu", "Lebenden Efeu", "Lebenden Efeu"},
+    {0, "Lebender Efeu", "Lebende Efeue", "Lebenden Efeu", "Lebenden Efeu"},
     }},
   {0x49886610, 0, { // ""dead floor""
     {1, "martwa ziemia", "martwe ziemie", "martwą ziemię", "martwą ziemią"},
@@ -8606,35 +11364,35 @@ fullnoun all_nouns[330] = {
     {0/*MISSING*/ , "Orb of Freedom"/*MISSING*/ , "Orb of Freedom"/*MISSING*/ , "Orb of Freedom"/*MISSING*/ , "Orb of Freedom"},
     {1, "Sféra Svobody", "Sféry Svobody", "Sféru Svobody", "Sférou Svobody"},
     {1, "Сфера Свободы", "Сферы Свободы", "Сферу Свободы", "Сферой Свободы"},
-    {0/*MISSING*/ , "Orb of Freedom"/*MISSING*/ , "Orb of Freedom"/*MISSING*/ , "Orb of Freedom"/*MISSING*/ , "Orb of Freedom"},
+    {0, "Orb der Freiheit", "Orbs der Freiheit", "Orb der Freiheit", "Orb der Freiheit"},
     }},
   {0x4df3f5d0, 0, { // ""Cultist""
     {0, "Kultysta", "Kultyści", "Kultystę", "Kultystą"},
     {0, "Mürit", "Müritler", "Müridi", "Müritle"},
     {0, "Kultista", "Kultisté", "Kultistu", "Kultistou"},
     {0, "Культист", "Культисты", "Культиста", "Культистом"},
-    {0, "Anhänger", "Anhänger", "Anhänger", "Anhänger"},
+    {0, "Kultanhänger", "Kultanhänger", "Kultanhänger", "Kultanhänger"},
     }},
   {0x4fc909c3, 0, { // ""no monster""
     {3, "brak potwora", "braki potwora", "braku potwora", "brakiem potwora"},
     {0/*MISSING*/ , "no monster"/*MISSING*/ , "no monster"/*MISSING*/ , "no monster"/*MISSING*/ , "no monster"},
     {0, "žádný netvor", "žádní netvoři", "žádného netvora", "žádným netvorem"},
     {3, "нет монстра", "нет монстра", "нет монстра", "нет монстра"},
-    {0/*MISSING*/ , "no monster"/*MISSING*/ , "no monster"/*MISSING*/ , "no monster"/*MISSING*/ , "no monster"},
+    {2, "kein Monster", "keine Monster", "kein Monster", "kein Monster"},
     }},
   {0x4fd9547e, 0, { // ""big statue of Cthulhu""
     {3, "pomnik Cthulhu", "pomniki Cthulhu", "pomnik Cthulhu", "pomnikiem Cthulhu"},
     {3, "Cthulhu'nun Putu", "Cthulhu'nun Putları", "Cthulhu'nun Putunu", "Cthulhu'nun Putuyla"},
     {1, "Cthulhuova socha", "Cthulhuovy sochy", "Cthulhuovu sochu", "Cthulhuovou sochou"},
     {3, "памятник Ктулху", "памятники Ктулху", "памятник Ктулху", "памятником Ктулху"},
-    {1, "große Cthulhu Statue", "große Cthulhu Statuen", "große Cthulhu Statue", "große Cthulhu Statue"},
+    {1, "große Statue des Cthulhu", "großen Statuen des Cthulhu", "großen Statue des Cthulhu", "großen Statue des Cthulhu"},
     }},
   {0x4fe64013, 0, { // ""Mutant Sapling""
     {1, "Zmutowana Sadzonka", "Zmutowane Sadzonki", "Zmutowaną Sadzonkę", "Zmutowaną Sadzonką"},
     {1, "Mutant Fidan", "Mutant Fidanlar", "Mutant Fidanı", "Mutant Fidanla"},
     {3, "Mutantní semenáček", "Mutantní semenáčky", "Mutantní semenáček", "Mutantním semenáčkem"},
     {3, "Саженец-мутант", "Саженцы-мутанты", "Саженец-мутант", "Саженцем-мутантом"},
-    {0, "Mutierter Sätzling", "Mutierte Sätzlinge", "Mutierter Sätzling", "Mutierter Sätzling"},
+    {0, "Mutierter Sätzling", "Mutierte Sätzlinge", "Mutierten Sätzling", "Mutierten Sätzling"},
     }},
   {0x5212cc51, 0, { // ""sandstone wall""
     {1, "piaskowa ściana", "piaskowe ściany", "piaskową scianę", "piaskową ścianą"},
@@ -8648,21 +11406,21 @@ fullnoun all_nouns[330] = {
     {3, "Ölüçağıran Totemi", "Ölüçağıran Totemleri", "Ölüçağıran Totemini", "Ölüçağıran Totemiyle"},
     {3, "Nekromancerův totem", "Nekromancerovy totemy", "Nekromancerův totem", "Nekromancerovým totemem"},
     {3, "Тотем некроманта", "Тотемы некроманта", "Тотем некроманта", "Тотемом некроманта"},
-    {2, "Nekromanten Totem", "Nekromanten Totem", "Nekromanten Totem", "Nekromanten Totem"},
+    {2, "Totenbeschwörer-Totem", "Totenbeschwörer-Totems", "Totenbeschwörer-Totem", "Totenbeschwörer-Totem"},
     }},
   {0x52e162a1, 0, { // ""Ratling Avenger""
     {0, "Szczurak-Mściciel", "Szczuraki-Mściciele", "Szczuraka-Mściciela", "Szczurakiem-Mścicielem"},
     {0/*MISSING*/ , "Ratling Avenger"/*MISSING*/ , "Ratling Avenger"/*MISSING*/ , "Ratling Avenger"/*MISSING*/ , "Ratling Avenger"},
     {0, "Krysák mstitel", "Krysáci mstitelé", "Krysáka mstitele", "Krysákem mstitelem"},
     {0, "Крысолюд-мститель", "Крысолюди-мстители", "Крысолюда-мстителя", "Крысолюдом-мстителем"},
-    {0/*MISSING*/ , "Ratling Avenger"/*MISSING*/ , "Ratling Avenger"/*MISSING*/ , "Ratling Avenger"/*MISSING*/ , "Ratling Avenger"},
+    {0, "Rattenmenschen-Rächer", "Rattenmenschen-Rächer", "Rattenmenschen-Rächer", "Rattenmenschen-Rächer"},
     }},
   {0x532d17d5, 0, { // ""Bomberbird Egg""
     {2, "Jajo Bombardiera", "Jaja Bombardiera", "Jajo Bombardiera", "Jajem Bombardiera"},
     {2, "Bombacıkuş Yumurtası", "Bombacıkuş Yumurtaları", "Bombacıkuş Yumurtasını", "Bombacıkuş Yumurtasıyla"},
     {2, "Vejce Bombarďáka", "Vejce Bombarďáka", "Vejce Bombarďáka", "Vejcem Bombarďáka"},
     {2, "Яйцо бомбардира", "Яйца бомбардира", "Яйцо бомбардира", "Яйцом бомбардира"},
-    {2, "Bombenvogel Ei", "Bombenvogel Eier", "Bombenvogel Ei", "Bombenvogel Ei"},
+    {2, "Bombenvogelei", "Bombenvogeleier", "Bombenvogelei", "Bombenvogelei"},
     }},
   {0x54279e12, 0, { // ""Ivory Tower""
     {1, "Wieża z Kości Słoniowej", "Wieże z Kości Słoniowej", "Wieżą z Kości Słoniowej", "na Wieży z Kości Słoniowej"},
@@ -8732,7 +11490,7 @@ fullnoun all_nouns[330] = {
     {0/*MISSING*/ , "Rose Lord"/*MISSING*/ , "Rose Lord"/*MISSING*/ , "Rose Lord"/*MISSING*/ , "Rose Lord"},
     {1, "Růžový pán", "Rúžoví pánové", "Růžového pána", "Růžovým pánem"},
     {0, "Розовый лорд", "Розовые лорды", "Розового лорда", "Розовым лордом"},
-    {0/*MISSING*/ , "Rose Lord"/*MISSING*/ , "Rose Lord"/*MISSING*/ , "Rose Lord"/*MISSING*/ , "Rose Lord"},
+    {0, "Rosenherr", "Rosenherren", "Rosenherr", "Rosenherr"},
     }},
   {0x5e748a12, 0, { // ""Gargoyle""
     {0, "Rzygacz", "Rzygacze", "Rzygacza", "Rzygaczem"},
@@ -8746,14 +11504,14 @@ fullnoun all_nouns[330] = {
     {0/*MISSING*/ , "platform"/*MISSING*/ , "platform"/*MISSING*/ , "platform"/*MISSING*/ , "platform"},
     {1, "plošinka", "plošinky", "plošinku", "plošinkou"},
     {1, "платформа", "платформы", "платформу", "платформой"},
-    {0/*MISSING*/ , "platform"/*MISSING*/ , "platform"/*MISSING*/ , "platform"/*MISSING*/ , "platform"},
+    {1, "Plattform", "Plattformen", "Plattform", "Plattform"},
     }},
   {0x5f9e644d, 0, { // ""Jungle""
     {1, "Dżungla", "Dżungla", "Dżunglę", "w Dżungli"},
     {1, "Vahşi Orman", "Vahşi Ormanlar", "Vahşi Ormanı", "Vahşi Ormanda"},
     {1, "Džungle", "Džungle", "Džungli", "v džungli"},
     {2, "Джунгли", "Джунгли", "Джунгли", "в Джунглях"},
-    {0, "Urwald", "Urwälder", "im Urwald", "im Urwald"},
+    {0, "Dschungel", "Dschungel", "im Dschungel", "im Dschungel"},
     }},
   {0x60737bbc, 0, { // ""Winter Witch""
     {1, "Czarownica Zimy", "Czarownice Zimy", "Czarownicę Zimy", "Czarownicą Zimy"},
@@ -8761,6 +11519,13 @@ fullnoun all_nouns[330] = {
     {1, "Čarodějnice Zimy", "Čarodějnice Zimy", "Čarodějnici Zimy", "Čarodějnicí Zimy"},
     {1, "Ведьма зимы", "Ведьмы зимы", "Ведьму зимы", "Ведьмой зимы"},
     {1, "Frosthexe", "Frosthexen", "Frosthexe", "Frosthexe"},
+    }},
+  {0x60ea65ce, 0, { // ""Reptile bridge""
+    {3, "Jaszczurzy most", "Jaszczurze mosty", "Jaszczurzy most", "Jaszczurzym mostem"},
+    {0/*MISSING*/ , "Reptile bridge"/*MISSING*/ , "Reptile bridge"/*MISSING*/ , "Reptile bridge"/*MISSING*/ , "Reptile bridge"},
+    {3, "Ještěrčí most", "Ještěrčí mosty", "Ještěrčí most", "Ještěrčím mostem"},
+    {3, "Ящеричный мост", "Ящеричные мосты", "Ящеричный мост", "Ящеричным мостом"},
+    {0/*MISSING*/ , "Reptile bridge"/*MISSING*/ , "Reptile bridge"/*MISSING*/ , "Reptile bridge"/*MISSING*/ , "Reptile bridge"},
     }},
   {0x63e60e0f, 0, { // ""Emerald Mine""
     {1, "Kopalnia Szmaragdów", "Kopalnia Szmaragdów", "Kopalnię Szmaragdów", "w Kopalni Szmaragdów"},
@@ -8802,7 +11567,14 @@ fullnoun all_nouns[330] = {
     {1, "kapatma levhası", "kapatma levhaları", "kapatma levhasını", "kapatma levhasıyla"},
     {1, "zavírací deska", "zavírací desky", "zavírací desku", "zavírací deskou"},
     {1, "закрывающая плита", "закрывающие плиты", "закрывающую плиту", "закрывающей плитой"},
-    {0, "Schließmechanismus", "Schließmechanismen", "Schließsmechanismus", "Schließsmechanismus"},
+    {0, "Schließmechanismus", "Schließmechanismen", "Schließmechanismus", "Schließmechanismus"},
+    }},
+  {0x65eeb55f, 0, { // ""Friendly Ivy""
+    {3, "Przyjazny Bluszcz", "Przyjazne Bluszcze", "Przyjazny Bluszcz", "Przyjaznym Bluszczem"},
+    {0/*MISSING*/ , "Friendly Ivy"/*MISSING*/ , "Friendly Ivy"/*MISSING*/ , "Friendly Ivy"/*MISSING*/ , "Friendly Ivy"},
+    {3, "Přátelský břečťan", "Přátelské břečťany", "Přátelský břečťan", "Přátelským břečťanem"},
+    {3, "Ручной плющ", "Ручные плющи", "Ручной плющ", "Ручным плющом"},
+    {0/*MISSING*/ , "Friendly Ivy"/*MISSING*/ , "Friendly Ivy"/*MISSING*/ , "Friendly Ivy"/*MISSING*/ , "Friendly Ivy"},
     }},
   {0x66adb446, 0, { // ""tree""
     {2, "drzewo", "drzewa", "drzewo", "drzewem"},
@@ -8823,21 +11595,21 @@ fullnoun all_nouns[330] = {
     {0, "Şeritli Köpek", "Şeritli Köpekler", "Şeritli Köpeği", "Şeritli Köpekle"},
     {0, "Pruhovaný pes", "Pruhovaní psi", "Pruhovaného psa", "Pruhovaným psem"},
     {0, "Полосатый пёс", "Полосатые псы", "Полосатого пса", "Полосатым псом"},
-    {0, "Gestreifter Hund", "Gestreifte Hunde", "Gestreifter Hund", "Gestreifter Hund"},
+    {0, "Gestreifter Hund", "Gestreifte Hunde", "Gestreiften Hund", "Gestreiften Hund"},
     }},
   {0x682e01d4, 2, { // ""Crossroads III""
     {2, "Skrzyżowanie III", "Skrzyżowania III", "Skrzyżowanie III", "na Skrzyżowaniu III"},
     {2, "Arayollar III", "Arayollar III", "Arayolları III", "Arayollarda III"},
     {1, "Křižovatka III", "Křižovatky III", "Křižovatku III", "na Křižovatc III"},
     {3, "Перекрёсток III", "Перекрёстки III", "Перекрёсток III", "на Перекрёстке III"},
-    {1, "Kreuzung III", "Kreuzungen III", "an Kreuzung III", "an Kreuzung III"},
+    {1, "Kreuzungen III", "Kreuzungen III", "auf den Kreuzungen III", "auf den Kreuzungen III"},
     }},
   {0x6867efd1, 0, { // ""Lesser Demon""
     {0, "Mniejszy Demon", "Mniejsze Demony", "Mniejszego Demona", "Mniejszym Demonem"},
     {0, "Küçük Şeytan", "Küçük Şeytanlar", "Küçük Şeytanı", "Küçük Şeytanla"},
     {0, "Čert", "Čerti", "Čerta", "Čertem"},
     {0, "Младший демон", "Младшие демоны", "Младшего демона", "Младшим демоном"},
-    {0, "Schwacher Dämon", "Schwachen Dämonen", "Schwache Dämon", "Schwache Dämon"},
+    {0, "Gewöhnliche Dämon", "Gewöhnlichen Dämonen", "Gewöhnlichen Dämon", "Gewöhnlichen Dämon"},
     }},
   {0x6a3f72bc, 0, { // ""Round Table""
     {3, "Okrągły Stół", "Okrągłe Stoły", "Okrągły Stół", "Okrągłym Stołem"},
@@ -8851,14 +11623,14 @@ fullnoun all_nouns[330] = {
     {0/*MISSING*/ , "canopy"/*MISSING*/ , "canopy"/*MISSING*/ , "canopy"/*MISSING*/ , "canopy"},
     {1, "koruna", "koruny", "korunu", "korunou"},
     {1, "листва", "листва", "листву", "листвой"},
-    {0/*MISSING*/ , "canopy"/*MISSING*/ , "canopy"/*MISSING*/ , "canopy"/*MISSING*/ , "canopy"},
+    {2, "Kronendach", "Kronendächer", "Kronendach", "Kronendach"},
     }},
   {0x6af295a7, 0, { // ""rosebush""
     {3, "krzak róży", "krzaki róży", "krzak róży", "krzakiem róży"},
     {0/*MISSING*/ , "rosebush"/*MISSING*/ , "rosebush"/*MISSING*/ , "rosebush"/*MISSING*/ , "rosebush"},
     {3, "růžový keřík", "růžové keříky", "růžový keřík", "růžovým keříkem"},
     {3, "куст розы", "кусты розы", "куст розы", "кустом розы"},
-    {0/*MISSING*/ , "rosebush"/*MISSING*/ , "rosebush"/*MISSING*/ , "rosebush"/*MISSING*/ , "rosebush"},
+    {0, "Rosenbusch", "Rosenbüsche", "Rosenbusch", "Rosenbusch"},
     }},
   {0x6bd7c035, 0, { // ""Sea Border""
     {3, "Granica morska", "Granice morskie", "Granicy morskiej", "na Granicy morskiej"},
@@ -8879,14 +11651,35 @@ fullnoun all_nouns[330] = {
     {3, "Azman Orman", "Azman Ormanlar", "Azman Ormanı", "Azman Ormanda"},
     {3, "Prales", "Pralesy", "Prales", "v Pralese"},
     {1, "Заросли", "Заросли", "Заросли", "в Зарослях"},
-    {0, "Überwucherter Wald", "Überwucherte Wälder", "Überwucherter Wald", "Überwucherter Wald"},
+    {0, "Verwilderter Wald", "Verwilderte Wälder", "im Verwilderten Wald", "im Verwilderten Wald"},
     }},
   {0x6c49496c, 0, { // ""Yendorian Forest""
     {3, "Las Yendoriański", "Lasy Yendoriańskie", "Yendoriańskiego Lasu", "w Yendoriańskim Lesie"},
     {0/*MISSING*/ , "Yendorian Forest"/*MISSING*/ , "Yendorian Forest"/*MISSING*/ , "Yendorian Forest"/*MISSING*/ , "Yendorian Forest"},
     {3, "Yendorský les", "Yendorské lesy", "Yendorský les", "v Yendorském lese"},
     {3, "Йендорский Лес", "Йендорские Леса", "Йендорский Лес", "в Йендорском Лесу"},
-    {0/*MISSING*/ , "Yendorian Forest"/*MISSING*/ , "Yendorian Forest"/*MISSING*/ , "Yendorian Forest"/*MISSING*/ , "Yendorian Forest"},
+    {3, "Yendorianischer Wald", "Yendorianische Wälder", "im Yendorianischen Wald", "im Yendorianischen Wald"},
+    }},
+  {0x6c8e75d1, 0, { // ""Burial Grounds""
+    {3, "Kurhany", "Kurhany", "Kurhany", "w Kurhanach"},
+    {0/*MISSING*/ , "Burial Grounds"/*MISSING*/ , "Burial Grounds"/*MISSING*/ , "Burial Grounds"/*MISSING*/ , "Burial Grounds"},
+    {2, "Pohřebiště", "Pohřebiště", "Pohřebiště", "na Pohřebišti"},
+    {3, "Курганы", "Курганы", "Курганы", "в Курганах"},
+    {1, "Begräbnisstätten", "Begräbnisstätten", "in den Begräbnisstätten", "in den Begräbnisstätten"},
+    }},
+  {0x6d5cef1f, 0, { // ""Bull Dash""
+    {1, "Kraina Byków", "Krainy Byków", "Krainę Byków", "w Krainie Byków"},
+    {0/*MISSING*/ , "Bull Dash"/*MISSING*/ , "Bull Dash"/*MISSING*/ , "Bull Dash"/*MISSING*/ , "Bull Dash"},
+    {3, "Býčí kraj", "Býčí kraje", "Býčí kraj", "v Býčím kraji"},
+    {1, "Земля быков", "Земли быков", "Землю быков", "на Земле быков"},
+    {0/*MISSING*/ , "Bull Dash"/*MISSING*/ , "Bull Dash"/*MISSING*/ , "Bull Dash"/*MISSING*/ , "Bull Dash"},
+    }},
+  {0x6d815a1e, 0, { // ""Orb of the Stone""
+    {1, "Sfera Kamienia", "Sfery Kamienia", "Sferę Kamienia", "Sferą Kamienia"},
+    {0/*MISSING*/ , "Orb of the Stone"/*MISSING*/ , "Orb of the Stone"/*MISSING*/ , "Orb of the Stone"/*MISSING*/ , "Orb of the Stone"},
+    {1, "Sféra Kamene", "Sféry Kamene", "Sféru Kamene", "Sférou Kamene"},
+    {1, "Сфера Камня", "Сферы Камня", "Сферу Камня", "Сферой Камня"},
+    {0, "Orb des Steines", "Orbs des Steines", "Orb des Steines", "Orb des Steines"},
     }},
   {0x6df7abdd, 0, { // ""Fire Elemental""
     {0, "Ognisty Żywiołak", "Ogniste Żywiołaki", "Ognistego Żywiołaka", "Ognistym Żywiołakiem"},
@@ -8944,12 +11737,19 @@ fullnoun all_nouns[330] = {
     {1, "Плоскость Воздуха", "Плоскости Воздуха", "Плоскость Воздуха", "в Плоскости Воздуха"},
     {1, "Luftebene", "Luftebenen", "Luftebene", "Luftebene"},
     }},
+  {0x739ca4ff, 0, { // ""Orb of Nature""
+    {1, "Sfera Natury", "Sfery Natury", "Sferę Natury", "Sferą Natury"},
+    {0/*MISSING*/ , "Orb of Nature"/*MISSING*/ , "Orb of Nature"/*MISSING*/ , "Orb of Nature"/*MISSING*/ , "Orb of Nature"},
+    {1, "Sféra Přírody", "Sféry Přírody", "Sféru Přírody", "Sférou Přírody"},
+    {1, "Сфера Природы", "Сферы Природы", "Сферу Природы", "Сферой Природы"},
+    {0/*MISSING*/ , "Orb of Nature"/*MISSING*/ , "Orb of Nature"/*MISSING*/ , "Orb of Nature"/*MISSING*/ , "Orb of Nature"},
+    }},
   {0x74510512, 0, { // ""blue slime""
-    {1, "niebieska maź", "Niebieskie mazie", "niebieską maź", "niebieską mazią"},
+    {1, "niebieska maź", "niebieskie mazie", "niebieską maź", "niebieską mazią"},
     {1, "Mavi Balçık", "Mavi Balçıklar", "Mavi Balçığı", "Mavi Balçıkta"},
     {3, "modrý sliz", "modré slizy", "modrý sliz", "modrým slizem"},
     {1, "синяя слизь", "синяя слизь", "синюю слизь", "синей слизью"},
-    {0, "Blauer Schleim", "Blauer Schleim", "Blauer Schleim", "Blauer Schleim"},
+    {0, "Blauer Schleim", "Blauen Schleime", "Blauen Schleim", "Blauen Schleim"},
     }},
   {0x74fc70a9, 0, { // ""cell without mine""
     {2, "pole bez miny", "pola bez min", "pole bez min", "polem bez min"},
@@ -8991,14 +11791,21 @@ fullnoun all_nouns[330] = {
     {0/*MISSING*/ , "Mutant Fruit"/*MISSING*/ , "Mutant Fruit"/*MISSING*/ , "Mutant Fruit"/*MISSING*/ , "Mutant Fruit"},
     {2, "Mutantní ovoce", "Mutantní ovoce", "Mutantní ovoce", "Mutantní ovoce"},
     {3, "Фрукт-мутант", "Фрукты-мутанты", "Фрукт-мутант", "Фруктом-мутантом"},
-    {0/*MISSING*/ , "Mutant Fruit"/*MISSING*/ , "Mutant Fruit"/*MISSING*/ , "Mutant Fruit"/*MISSING*/ , "Mutant Fruit"},
+    {1, "Mutierte Frucht", "Mutierte Früchte", "Mutierte Frucht", "Mutierte Frucht"},
     }},
   {0x78391eaf, 0, { // ""Desert Man""
     {0, "Człowiek Pustyni", "Ludzie Pustyni", "Człowieka Pustyni", "Człowiekiem Pustyni"},
     {0, "Bedevi", "Bedeviler", "Bedeviyi", "Bedeviyle"},
     {0, "Pouštní muž", "Pouštní muži", "Pouštního muže", "Pouštním mužem"},
     {0, "Человек пустыни", "Люди пустыни", "Человека пустыни", "Человеком пустыни"},
-    {0, "Wüstenläufer", "Wüstenläufer", "Wüstenläufer", "Wüstenläufer"},
+    {0, "Wüstenmann", "Wüstenmänner", "Wüstenmann", "Wüstenmann"},
+    }},
+  {0x786f5e72, 0, { // ""Dungeon""
+    {3, "Loch", "Lochy", "Loch", "w Lochu"},
+    {0/*MISSING*/ , "Dungeon"/*MISSING*/ , "Dungeon"/*MISSING*/ , "Dungeon"/*MISSING*/ , "Dungeon"},
+    {3, "Žalář", "Žaláře", "Žalář", "v Žaláři"},
+    {2, "Подземелье", "Подземелья", "Подземелье", "в Подземелье"},
+    {0/*MISSING*/ , "Dungeon"/*MISSING*/ , "Dungeon"/*MISSING*/ , "Dungeon"/*MISSING*/ , "Dungeon"},
     }},
   {0x796d5023, 0, { // ""rock II""
     {1, "skała II", "skały II", "skałę II", "skałą II"},
@@ -9012,14 +11819,14 @@ fullnoun all_nouns[330] = {
     {3, "Eğreltiotu Çiçeği", "Eğreltiotu Çiçekleri", "Eğreltiotu Çiçeğini", "Eğreltiotu Çiçeğiyle"},
     {3, "Kapradinový květ", "Kapradinové květy", "Kapradinový květ", "Kapradinové květy"},
     {3, "Цветок папоротника", "Цветы папоротника", "Цветок папоротника", "Цветком папоротника"},
-    {0, "Farn", "Farn", "Farn", "Farn"},
+    {0, "Farnblüte", "Farnblüten", "Farnblüte", "Farnblüte"},
     }},
   {0x79cad766, 0, { // ""Rose Garden""
     {3, "Różany Ogród", "Różane Ogrody", "Różany Ogród", "w Różanym Ogrodzie"},
     {0/*MISSING*/ , "Rose Garden"/*MISSING*/ , "Rose Garden"/*MISSING*/ , "Rose Garden"/*MISSING*/ , "Rose Garden"},
     {1, "Růžová zahrada", "Růžové zahrady", "Růžovou zahradu", "v Růžové zahradě"},
     {3, "Розарий", "Розарии", "Розарий", "в Розарии"},
-    {0/*MISSING*/ , "Rose Garden"/*MISSING*/ , "Rose Garden"/*MISSING*/ , "Rose Garden"/*MISSING*/ , "Rose Garden"},
+    {0, "Rosengarten", "Rosengärten", "im Rosengarten", "im Rosengarten"},
     }},
   {0x7af26a7f, 0, { // ""closed gate""
     {1, "zamknięta brama", "zamknięte bramy", "zamkniętą bramę", "zamkniętą bramą"},
@@ -9040,7 +11847,7 @@ fullnoun all_nouns[330] = {
     {0/*MISSING*/ , "Handsome Gardener"/*MISSING*/ , "Handsome Gardener"/*MISSING*/ , "Handsome Gardener"/*MISSING*/ , "Handsome Gardener"},
     {1, "Pohledný zahradník", "Pohlední zahradníci", "Pohledného zahradníka", "Pohledným zahradníkem"},
     {0, "Красивый садовод", "Красивые садоводы", "Красивого садовника", "Красивым садовником"},
-    {0/*MISSING*/ , "Handsome Gardener"/*MISSING*/ , "Handsome Gardener"/*MISSING*/ , "Handsome Gardener"/*MISSING*/ , "Handsome Gardener"},
+    {0, "Hübscher Gärtner", "Hübsche Gärtner", "Hübschen Gärtner", "Hübschen Gärtner"},
     }},
   {0x7ce94873, 0, { // ""Bounty""
     {1, "Nagroda", "Nagrody", "Nagrodę", "Nagrodą"},
@@ -9054,7 +11861,21 @@ fullnoun all_nouns[330] = {
     {0/*MISSING*/ , "Orb of Empathy"/*MISSING*/ , "Orb of Empathy"/*MISSING*/ , "Orb of Empathy"/*MISSING*/ , "Orb of Empathy"},
     {1, "Sféra Empatie", "Sféry Empatie", "Sféru Empatie", "Sférou Empatie"},
     {1, "Сфера Сочувствия", "Сферы Сочувствия", "Сферу Сочувствия", "Сферой Сочувствия"},
-    {0/*MISSING*/ , "Orb of Empathy"/*MISSING*/ , "Orb of Empathy"/*MISSING*/ , "Orb of Empathy"/*MISSING*/ , "Orb of Empathy"},
+    {0, "Orb der Empathie", "Orbs der Empathie", "Orb der Empathie", "Orb der Empathie"},
+    }},
+  {0x7fc6879d, 0, { // ""Bat""
+    {3, "Nietoperz", "Nietoperze", "Nietoperza", "Nietoperzem"},
+    {0/*MISSING*/ , "Bat"/*MISSING*/ , "Bat"/*MISSING*/ , "Bat"/*MISSING*/ , "Bat"},
+    {0, "Netopýr", "Netopýři", "Netopýra", "Netopýrem"},
+    {1, "Летучая мышь", "Летучие мыши", "Летучую мышь", "Летучей мышью"},
+    {0/*MISSING*/ , "Bat"/*MISSING*/ , "Bat"/*MISSING*/ , "Bat"/*MISSING*/ , "Bat"},
+    }},
+  {0x8056e574, 0, { // ""Prairie""
+    {1, "Preria", "Prerie", "Prerię", "na Prerii"},
+    {0/*MISSING*/ , "Prairie"/*MISSING*/ , "Prairie"/*MISSING*/ , "Prairie"/*MISSING*/ , "Prairie"},
+    {1, "Prérie", "Prérii", "Prérii", "na Prérii"},
+    {1, "Прерия", "Прерии", "Прерию", "в Прерии"},
+    {0/*MISSING*/ , "Prairie"/*MISSING*/ , "Prairie"/*MISSING*/ , "Prairie"/*MISSING*/ , "Prairie"},
     }},
   {0x85a9052d, 0, { // ""Ranger""
     {0, "Strażnik", "Strażnicy", "Strażnika", "Strażnikiem"},
@@ -9068,14 +11889,14 @@ fullnoun all_nouns[330] = {
     {2, "Arayollar 2", "Arayollar 2'ler", "Arayollar 2'yi", "Arayollar 2'de"},
     {2, "Křižovatka II", "Křižovatky II", "Křižovatku II", "na Křižovatce II"},
     {2, "Перекрёсток II", "Перекрёстки II", "Перекрёсток II", "на Перекрёстке II"},
-    {2, "II. Kreuzung", "II. Kreuzungen", "auf der II. Kreuzung", "auf der II. Kreuzung"},
+    {2, "Kreuzungen II", "Kreuzungen II", "auf den Kreuzungen II", "auf den Kreuzungen II"},
     }},
-  {0x864ac84a, 0, { // ""Crossroads IV""
+  {0x864ac84a, 2, { // ""Crossroads IV""
     {3, "Skrzyżowanie IV", "Skrzyżowania IV", "Skrzyżowanie IV", "na Skrzyżowaniu IV"},
     {0/*MISSING*/ , "Crossroads IV"/*MISSING*/ , "Crossroads IV"/*MISSING*/ , "Crossroads IV"/*MISSING*/ , "Crossroads IV"},
     {3, "Křižovatka IV", "Křižovatky IV", "Křižovatku IV", "na Křižovatce IV"},
     {3, "Перекрёсток IV", "Перекрёстки IV", "Перекрёсток IV", "на Перекрёстке IV"},
-    {0/*MISSING*/ , "Crossroads IV"/*MISSING*/ , "Crossroads IV"/*MISSING*/ , "Crossroads IV"/*MISSING*/ , "Crossroads IV"},
+    {1, "Kreuzungen IV", "Kreuzungen IV", "auf den Kreuzungen IV", "auf den Kreuzungen IV"},
     }},
   {0x8818aa45, 0, { // ""Water Shard""
     {3, "Okruch Wody", "Okruchy Wody", "Okruch Wody", "Okruchem Wody"},
@@ -9110,7 +11931,7 @@ fullnoun all_nouns[330] = {
     {0/*MISSING*/ , "Haunted Woods"/*MISSING*/ , "Haunted Woods"/*MISSING*/ , "Haunted Woods"/*MISSING*/ , "Haunted Woods"},
     {3, "Strašidelný hvozd", "Strašidelné hvozdy", "Strašidelný hvozd", "ve Strašidelném hvozdu"},
     {3, "Лес с привидениями", "Леса с привидениями", "Лес с привидениями", "в Лесу с привидениями"},
-    {0/*MISSING*/ , "Haunted Woods"/*MISSING*/ , "Haunted Woods"/*MISSING*/ , "Haunted Woods"/*MISSING*/ , "Haunted Woods"},
+    {0, "Verwunschener Wald", "Verwunschene Wälder", "im Verwunschenen Wald", "im Verwunschenen Wald"},
     }},
   {0x892e723f, 0, { // ""Ice Sapphire""
     {3, "Lodowy Szafir", "Lodowe Szafiry", "Lodowy Szafir", "Lodowym Szafirem"},
@@ -9119,12 +11940,26 @@ fullnoun all_nouns[330] = {
     {3, "Ледяной сапфир", "Ледяные сапфиры", "Ледяной сапфир", "Ледяным сапфиром"},
     {0, "Frostsaphir", "Frostsaphire", "Frostsaphir", "Frostsaphir"},
     }},
+  {0x89b196d4, 0, { // ""Dodecahedron""
+    {3, "Dwunastościan", "Dwunastościany", "Dwunastościan", "Dwunastościanem"},
+    {0/*MISSING*/ , "Dodecahedron"/*MISSING*/ , "Dodecahedron"/*MISSING*/ , "Dodecahedron"/*MISSING*/ , "Dodecahedron"},
+    {3, "Dvanáctistěn", "Dvanáctistěny", "Dvanáctistěn", "Dvanáctistěnem"},
+    {3, "Додекаэдр", "Додекаэдры", "Додекаэдр", "Додекаэдром"},
+    {0/*MISSING*/ , "Dodecahedron"/*MISSING*/ , "Dodecahedron"/*MISSING*/ , "Dodecahedron"/*MISSING*/ , "Dodecahedron"},
+    }},
+  {0x8b1cc002, 0, { // ""Slime Mold""
+    {3, "Śluzowiec", "Śluzowce", "Śluzowiec", "Śluzowcem"},
+    {0/*MISSING*/ , "Slime Mold"/*MISSING*/ , "Slime Mold"/*MISSING*/ , "Slime Mold"/*MISSING*/ , "Slime Mold"},
+    {1, "Hlenka", "Hlenky", "Hlenku", "Hlenkou"},
+    {0, "Слизень", "Слизни", "Слизня", "Слизнем"},
+    {0/*MISSING*/ , "Slime Mold"/*MISSING*/ , "Slime Mold"/*MISSING*/ , "Slime Mold"/*MISSING*/ , "Slime Mold"},
+    }},
   {0x8d8bfe35, 0, { // ""Clearing""
     {1, "Polana", "Polany", "Polanę", "na Polanie"},
     {0/*MISSING*/ , "Clearing"/*MISSING*/ , "Clearing"/*MISSING*/ , "Clearing"/*MISSING*/ , "Clearing"},
     {1, "Mýtina", "Mýtiny", "Mítinu", "na Mýtině"},
     {1, "Поляна", "Поляны", "Поляну", "на Поляне"},
-    {0/*MISSING*/ , "Clearing"/*MISSING*/ , "Clearing"/*MISSING*/ , "Clearing"/*MISSING*/ , "Clearing"},
+    {1, "Lichtung", "Lichtungen", "auf der Lichtung", "auf der Lichtung"},
     }},
   {0x8dd246a8, 0, { // ""Ice Shark""
     {0, "Lodowy Rekin", "Lodowe Rekiny", "Lodowego Rekina", "Lodowym Rekinem"},
@@ -9132,6 +11967,20 @@ fullnoun all_nouns[330] = {
     {0, "Ledový žralok", "Ledoví žraloci", "Ledového žraloka", "Ledovým žralokem"},
     {1, "Ледяная акула", "Ледяные акулы", "Ледяную акулу", "Ледяной акулой"},
     {0, "Frosthai", "Frosthaie", "Frosthai", "Frosthai"},
+    }},
+  {0x8e69ee81, 0, { // ""Orb of Recall""
+    {1, "Sfera Powrotu", "Sfery Powrotu", "Sferę Powrotu", "Sferą Powrotu"},
+    {0/*MISSING*/ , "Orb of Recall"/*MISSING*/ , "Orb of Recall"/*MISSING*/ , "Orb of Recall"/*MISSING*/ , "Orb of Recall"},
+    {1, "Sféra Návratu", "Sféry Návratu", "Sféru Návratu", "Sférou Návratu"},
+    {1, "Сфера Возвращения", "Сферы Возвращения", "Сферу Возвращения", "Сферой Возвращения"},
+    {0/*MISSING*/ , "Orb of Recall"/*MISSING*/ , "Orb of Recall"/*MISSING*/ , "Orb of Recall"/*MISSING*/ , "Orb of Recall"},
+    }},
+  {0x8e8a4b25, 0, { // ""Halloween""
+    {3, "Halloween", "Halloween", "Halloween", "w Halloween"},
+    {0/*MISSING*/ , "Halloween"/*MISSING*/ , "Halloween"/*MISSING*/ , "Halloween"/*MISSING*/ , "Halloween"},
+    {3, "Halloween", "Halloweeny", "Halloween", "v Halloweenu"},
+    {3, "Хэллоуин", "Хэллоуин", "Хэллоуин", "в Хэллоуине"},
+    {0/*MISSING*/ , "Halloween"/*MISSING*/ , "Halloween"/*MISSING*/ , "Halloween"/*MISSING*/ , "Halloween"},
     }},
   {0x90992e59, 0, { // ""Air Elemental""
     {0, "Powietrzny Żywiołak", "Powietrzne Żywiołaki", "Powietrznego Żywiołaka", "Powietrznym Żywiołakiem"},
@@ -9147,8 +11996,15 @@ fullnoun all_nouns[330] = {
     {1, "Великая стена", "Великие стены", "Великую стену", "на Великой стене"},
     {1, "Große Mauer", "Großen Mauern", "auf der Großen Mauer", "auf der Großen Mauer"},
     }},
+  {0x91835dc5, 0, { // ""Familiar""
+    {0, "Chowaniec", "Chowańce", "Chowańca", "Chowańcem"},
+    {0/*MISSING*/ , "Familiar"/*MISSING*/ , "Familiar"/*MISSING*/ , "Familiar"/*MISSING*/ , "Familiar"},
+    {0, "Pomocník", "Pomocníci", "Pomocníka", "Pomocníkem"},
+    {0, "Знакомый", "Знакомые", "Знакомого", "Знакомым"},
+    {0/*MISSING*/ , "Familiar"/*MISSING*/ , "Familiar"/*MISSING*/ , "Familiar"/*MISSING*/ , "Familiar"},
+    }},
   {0x921a3033, 0, { // ""Fire Fairy""
-    {1, "Ognista Rusałka", "Ogniste Rusałki", "Ognistą Rusałkę", "Ognistą Rusałką"},
+    {1, "Ognista Wiła", "Ogniste Wiły", "Ognistą Wiłę", "Ognistą Wiłą"},
     {1, "Ateş Perisi", "Ateş Perileri", "Ateş Perisini", "Ateş Perisiyle"},
     {0, "Ohnivý mužíček", "Ohniví mužíčci", "Ohnivého mužíčka", "Ohnivým mužíčkem"},
     {1, "Огненная фея", "Огненный феи", "Огненную фею", "Огненной феей"},
@@ -9181,6 +12037,13 @@ fullnoun all_nouns[330] = {
     {3, "Svatý grál", "Svaté grály", "Svatý grál", "Svatým grálem"},
     {3, "Святой Грааль", "Святые Граали", "Святой Грааль", "Святым Граалем"},
     {0, "Heiliger Gral", "Heilige Grale", "Heiligen Gral", "Heiligen Gral"},
+    }},
+  {0x934bf032, 0, { // ""Orb of the Bull""
+    {1, "Sfera Byka", "Sfery Byka", "Sferę Byka", "Sferą Byka"},
+    {0/*MISSING*/ , "Orb of the Bull"/*MISSING*/ , "Orb of the Bull"/*MISSING*/ , "Orb of the Bull"/*MISSING*/ , "Orb of the Bull"},
+    {1, "Sféra Býka", "Sféry Býka", "Sféru Býka", "Sférou Býka"},
+    {1, "Сфера Быка", "Сферы Быка", "Сферу Быка", "Сферой Быка"},
+    {0/*MISSING*/ , "Orb of the Bull"/*MISSING*/ , "Orb of the Bull"/*MISSING*/ , "Orb of the Bull"/*MISSING*/ , "Orb of the Bull"},
     }},
   {0x93fdcaec, 0, { // ""Tongue""
     {3, "Język", "Języki", "Język", "Językiem"},
@@ -9327,14 +12190,14 @@ fullnoun all_nouns[330] = {
     {0/*MISSING*/ , "White Dove Feather"/*MISSING*/ , "White Dove Feather"/*MISSING*/ , "White Dove Feather"/*MISSING*/ , "White Dove Feather"},
     {2, "Holubičí pero", "Holubičí pera", "Holubičí pero", "Holubičím perem"},
     {2, "Голубиное перо", "Голубиные перья", "Голубиное перо", "Голубиным пером"},
-    {0/*MISSING*/ , "White Dove Feather"/*MISSING*/ , "White Dove Feather"/*MISSING*/ , "White Dove Feather"/*MISSING*/ , "White Dove Feather"},
+    {1, "Feder der weißen Taube", "Federn der weißen Taube", "Feder der weißen Taube", "Feder der weißen Taube"},
     }},
   {0xa7abedd3, 0, { // ""Flail Guard""
     {0, "Strażnik z cepem", "Strażnicy z cepami", "Strażnika z cepem", "Strażnikiem z cepem"},
     {0, "Topuz Muhafızı", "Topuz Muhafızları", "Topuz Muhafızını", "Topuz Muhafazıyla"},
     {0, "Strážce s řemdihem", "Strážci s řemdihy", "Strážce s řemdihem", "Strážcem s řemdihem"},
     {0, "Воин с цепом", "Воины с цепом", "Воина с цепом", "Воином с цепом"},
-    {0, "Flegelwächter", "Flegelwächter", "Flegelwächter", "Flegelwächter"},
+    {0, "Morgenstern-Wächter", "Morgenstern-Wächter", "Morgenstern-Wächter", "Morgenstern-Wächter"},
     }},
   {0xa92b4827, 0, { // ""Dark Troll""
     {0, "Mroczny Troll", "Mroczne Trolle", "Mrocznego Trolla", "Mrocznym Trollem"},
@@ -9349,6 +12212,13 @@ fullnoun all_nouns[330] = {
     {3, "člun na mělčině", "čluny na mělčině", "člun na mělčině", "ve člunu na mělčině"},
     {1, "лодка на мели", "лодки на мели", "лодку на мели", "в лодке на мели"},
     {2, "gestrandetes Boot", "gestrandete Boote", "gestrandete Boot", "gestrandete Boot"},
+    }},
+  {0xa9f08e70, 0, { // ""Sleeping Bull""
+    {0, "Śpiący Byk", "Śpiące Byki", "Śpiącego Byka", "Śpiącym Bykiem"},
+    {0/*MISSING*/ , "Sleeping Bull"/*MISSING*/ , "Sleeping Bull"/*MISSING*/ , "Sleeping Bull"/*MISSING*/ , "Sleeping Bull"},
+    {0, "Spící Býk", "Spící Býci", "Spícího Býka", "Spícím Býkem"},
+    {0, "Спящий бык", "Спящие быки", "Спящего быка", "Спящим быком"},
+    {0/*MISSING*/ , "Sleeping Bull"/*MISSING*/ , "Sleeping Bull"/*MISSING*/ , "Sleeping Bull"/*MISSING*/ , "Sleeping Bull"},
     }},
   {0xa9f73f16, 0, { // ""rock I""
     {1, "skała I", "skały I", "skałę I", "skałą I"},
@@ -9383,7 +12253,14 @@ fullnoun all_nouns[330] = {
     {0, "Ölü Sarmaşık", "Ölü Sarmaşıklar", "Ölü Sarmaşığı", "Ölü Sarmaşıkla"},
     {0, "Mrtvý břečťan", "Mrtvé břečťany", "Mrtvý břečťan", "Mrtvým břečťanem"},
     {3, "Мёртвый плющ", "Мёртвые плющи", "Мёртвый плющ", "Мёртвым плющом"},
-    {0, "Toter Efeu", "Tote Efeu", "Toter Efeu", "Toter Efeu"},
+    {0, "Toter Efeu", "Tote Efeue", "Toten Efeu", "Toten Efeu"},
+    }},
+  {0xad8cbc5b, 0, { // ""Butterfly""
+    {0, "Motylek", "Motylki", "Motylka", "Motylkiem"},
+    {0/*MISSING*/ , "Butterfly"/*MISSING*/ , "Butterfly"/*MISSING*/ , "Butterfly"/*MISSING*/ , "Butterfly"},
+    {0, "Motýlek", "Motýlci", "Motýlka", "Motýlkem"},
+    {1, "Бабочка", "Бабочки", "Бабочку", "Бабочкой"},
+    {0/*MISSING*/ , "Butterfly"/*MISSING*/ , "Butterfly"/*MISSING*/ , "Butterfly"/*MISSING*/ , "Butterfly"},
     }},
   {0xade3ee7a, 0, { // ""Orb of Love""
     {1, "Sfera Miłości", "Sfery Miłości", "Sferę Miłości", "Sferą Miłości"},
@@ -9397,7 +12274,7 @@ fullnoun all_nouns[330] = {
     {3, "Sonsuz Ateş", "Sonsuz Ateşler", "Sonsuz Ateşi", "Sonsuz Ateşle"},
     {3, "Věčný Oheň", "Věčné Ohně", "Věčný Oheň", "Věčným Ohněm"},
     {3, "Вечный огонь", "Вечные огни", "Вечный огонь", "Вечным огнём"},
-    {2, "Ewiges Feuer", "Ewiges Feuer", "Ewiges Feuer", "Ewiges Feuer"},
+    {2, "Ewiges Feuer", "Ewige Feuer", "Ewige Feuer", "Ewige Feuer"},
     }},
   {0xaf24c8c9, 0, { // ""Orb of Shielding""
     {1, "Sfera Tarczy", "Sfery Tarczy", "Sferę Tarczy", "Sferą Tarczy"},
@@ -9405,6 +12282,13 @@ fullnoun all_nouns[330] = {
     {1, "Sféra Štítu", "Sféry Štítu", "Sféru Štítu", "Sférou Štítu"},
     {1, "Сфера Щита", "Сферы Щита", "Сферу Щита", "Сферой Щита"},
     {0, "Orb der Abschirmung", "Orbs der Abschirmung", "Orb der Abschirmung", "Orb der Abschirmung"},
+    }},
+  {0xaf37b549, 0, { // ""Green Grass""
+    {1, "Zielona Trawa", "Zielone Trawy", "Zieloną Trawę", "Zieloną Trawą"},
+    {0/*MISSING*/ , "Green Grass"/*MISSING*/ , "Green Grass"/*MISSING*/ , "Green Grass"/*MISSING*/ , "Green Grass"},
+    {1, "Zelená Tráva", "Zelené Trávy", "Zelenou Trávu", "Zelenou Trávou"},
+    {1, "Зелёная трава", "Зелёные травы", "Зелёную траву", "Зелёной травой"},
+    {0/*MISSING*/ , "Green Grass"/*MISSING*/ , "Green Grass"/*MISSING*/ , "Green Grass"/*MISSING*/ , "Green Grass"},
     }},
   {0xb005fb30, 0, { // ""Orb of Flash""
     {1, "Sfera Błysku", "Sfery Błysku", "Sferę Błysku", "Sferą Błysku"},
@@ -9460,7 +12344,7 @@ fullnoun all_nouns[330] = {
     {0/*MISSING*/ , "Ratling"/*MISSING*/ , "Ratling"/*MISSING*/ , "Ratling"/*MISSING*/ , "Ratling"},
     {0, "Krysák", "Krysáci", "Krysáka", "Krysákem"},
     {0, "Крысолюд", "Крысолюди", "Крысолюда", "Крысолюдом"},
-    {0/*MISSING*/ , "Ratling"/*MISSING*/ , "Ratling"/*MISSING*/ , "Ratling"/*MISSING*/ , "Ratling"},
+    {0, "Rattenmensch", "Rattenmenschen", "Rattenmensch", "Rattenmensch"},
     }},
   {0xb4fd21ea, 0, { // ""ladder""
     {1, "drabina", "drabiny", "drabinę", "drabiną"},
@@ -9481,7 +12365,7 @@ fullnoun all_nouns[330] = {
     {0/*MISSING*/ , "Rose Beauty"/*MISSING*/ , "Rose Beauty"/*MISSING*/ , "Rose Beauty"/*MISSING*/ , "Rose Beauty"},
     {1, "Růžová kráska", "Růžové krásky", "Růžovou krásku", "Růžovou krásku"},
     {1, "Розовая красотка", "Розовые красотки", "Розовую красотку", "Розовой красоткой"},
-    {0/*MISSING*/ , "Rose Beauty"/*MISSING*/ , "Rose Beauty"/*MISSING*/ , "Rose Beauty"/*MISSING*/ , "Rose Beauty"},
+    {1, "Rosenschönheit", "Rosenschönheiten", "Rosenschönheit", "Rosenschönheit"},
     }},
   {0xb675c845, 0, { // ""Plane of Earth""
     {1, "Strefa Ziemi", "Strefy Ziemi", "Strefę Ziemi", "w Strefie Ziemi"},
@@ -9495,21 +12379,21 @@ fullnoun all_nouns[330] = {
     {0, "Buz Piri", "Buz Pirleri", "Buz Pirini", "Buz Piriyle"},
     {0, "Křišťálový mudrc", "Křišťáloví mudrci", "Křišťálového mudrce", "Křišťálovým mudrcem"},
     {0, "Кристальный мудрец", "Кристальные мудрецы", "Кристального мудреца", "Кристальным мудрецом"},
-    {0, "Kristall Weise", "Kristall Weisen", "Kristall Weise", "Kristall Weise"},
+    {0, "Kristallweise", "Kristallweisen", "Kristallweisen", "Kristallweisen"},
     }},
   {0xb7d5f347, 0, { // ""Cult Leader""
     {0, "Przywódca Kultu", "Przywódcy Kultu", "Przywódcę Kultu", "Przywódcą Kultu"},
     {0, "Kült Lideri", "Kült Liderleri", "Kült Liderini", "Kült Lideriyle"},
     {0, "Vůdce kultu", "Vůdcové kultu", "Vůdce kultu", "Vůdcem kultu"},
     {0, "Лидер культа", "Лидеры культа", "Лидера культа", "Лидером культа"},
-    {0, "Anführer des Kultes", "Anführer des Kultes", " Anführer des Kultes", " Anführer des Kultes"},
+    {0, "Anführer des Kultes", "Anführer des Kultes", "Anführer des Kultes", "Anführer des Kultes"},
     }},
   {0xb80cce44, 0, { // ""trunk""
     {3, "pień", "pnie", "pień", "pniem"},
     {0/*MISSING*/ , "trunk"/*MISSING*/ , "trunk"/*MISSING*/ , "trunk"/*MISSING*/ , "trunk"},
     {3, "kmen", "kmeny", "kmen", "kmenem"},
     {3, "пень", "пни", "пень", "пнём"},
-    {0/*MISSING*/ , "trunk"/*MISSING*/ , "trunk"/*MISSING*/ , "trunk"/*MISSING*/ , "trunk"},
+    {0, "Baumstamm", "Baumstämme", "Baumstamm", "Baumstamm"},
     }},
   {0xb819b29d, 0, { // ""Fire Witch""
     {1, "Czarownica Ognia", "Czarownice Ognia", "Czarownicę Ognia", "Czarownicą Ognia"},
@@ -9544,7 +12428,7 @@ fullnoun all_nouns[330] = {
     {0/*MISSING*/ , "Orb of the Shell"/*MISSING*/ , "Orb of the Shell"/*MISSING*/ , "Orb of the Shell"/*MISSING*/ , "Orb of the Shell"},
     {1, "Sféra Krunýře", "Sféry Krunýře", "Sféru Krunýře", "Sférou Krunýře"},
     {1, "Сфера Панциря", "Сферы Панциря", "Сферу Панциря", "Сферой Панциря"},
-    {0/*MISSING*/ , "Orb of the Shell"/*MISSING*/ , "Orb of the Shell"/*MISSING*/ , "Orb of the Shell"/*MISSING*/ , "Orb of the Shell"},
+    {0, "Orb des Panzers", "Orbs des Panzers", "Orb des Panzers", "Orb des Panzers"},
     }},
   {0xbc651aba, 0, { // ""Orb of Storms""
     {1, "Sfera Burzy", "Sfery Burzy", "Sferę Burzy", "Sferą Burzy"},
@@ -9553,7 +12437,7 @@ fullnoun all_nouns[330] = {
     {1, "Сфера Бури", "Сферы Бури", "Сферу Бури", "Сферой Бури"},
     {0, "Orb des Sturms", "Orbs des Sturms", "Orb des Sturms", "Orb des Sturms"},
     }},
-  {0xbda6c7e3, 0, { // ""Camelot""
+  {0xbda6c7e3, 1, { // ""Camelot""
     {3, "Camelot", "Camelot", "Camelot", "w Camelot"},
     {3, "Kamelot", "Kamelotlar", "Kamelotu", "Kamelotta"},
     {3, "Camelot", "Cameloty", "Camelotu", "v Camelotu"},
@@ -9565,14 +12449,21 @@ fullnoun all_nouns[330] = {
     {0/*MISSING*/ , "weak branch"/*MISSING*/ , "weak branch"/*MISSING*/ , "weak branch"/*MISSING*/ , "weak branch"},
     {1, "tenká větev", "tenké větve", "tenkou větev", "tenkou větví"},
     {1, "тонкая ветка", "тонкие ветки", "тонкую ветку", "тонкой веткой"},
-    {0/*MISSING*/ , "weak branch"/*MISSING*/ , "weak branch"/*MISSING*/ , "weak branch"/*MISSING*/ , "weak branch"},
+    {0, "schwacher Ast", "schwachen Äste", "schwachen Ast", "schwachen Ast"},
     }},
   {0xbe4d2c8c, 0, { // ""stone gargoyle bridge""
     {3, "most z rzygacza", "mosty z rzygacza", "most z rzygacza", "mostem z rzygacza"},
     {3, "taş çörten köprüsü", "taş çörten köprüleri", "taş çörten köprüsünü", "taş çörten köprüsüyle"},
     {3, "most z chrliče", "mosty z chrličů", "most z chrliče", "mostem z chrliče"},
     {3, "мост с горгульей", "мосты с горгульями", "мост с горгульей", "мостом с горгульями"},
-    {1, "Steingargoyle Brücke", "Steingargoyle Brücken", "Steingargoyle Brücke", "Steingargoyle Brücke"},
+    {1, "Steingargoyle-Brücke", "Steingargoyle-Brücken", "Steingargoyle-Brücke", "Steingargoyle-Brücke"},
+    }},
+  {0xc040393b, 0, { // ""barrow wall""
+    {1, "ściana kurhanu", "ściany kurhanu", "ścianę kurhanu", "ścianą kurhanu"},
+    {0/*MISSING*/ , "barrow wall"/*MISSING*/ , "barrow wall"/*MISSING*/ , "barrow wall"/*MISSING*/ , "barrow wall"},
+    {1, "stěna mohyly", "stěny mohyly", "stěně mohyly", "stěnou mohyly"},
+    {1, "стена кургана", "стены кургана", "стену кургана", "стеной кургана"},
+    {1, "Hügelwand", "Hügelwände", "Hügelwand", "Hügelwand"},
     }},
   {0xc0576c8e, 0, { // ""Ivy Root""
     {0, "Korzeń Bluszczu", "Korzenie Bluszczu", "Korzeń Bluszczu", "Korzeniem Bluszczu"},
@@ -9593,28 +12484,49 @@ fullnoun all_nouns[330] = {
     {0/*MISSING*/ , "Orb of Beauty"/*MISSING*/ , "Orb of Beauty"/*MISSING*/ , "Orb of Beauty"/*MISSING*/ , "Orb of Beauty"},
     {1, "Sféra Krásy", "Sféry Krásy", "Sféru Krásy", "Sférou Krásy"},
     {1, "Сфера красоты", "Сферы красоты", "Сферу красоты", "Сферой красоты"},
-    {0/*MISSING*/ , "Orb of Beauty"/*MISSING*/ , "Orb of Beauty"/*MISSING*/ , "Orb of Beauty"/*MISSING*/ , "Orb of Beauty"},
+    {0, "Orb der Schönheit", "Orbs der Schönheit", "Orb der Schönheit", "Orb der Schönheit"},
     }},
   {0xc66ea1de, 0, { // ""Parrot""
     {1, "Papuga", "Papugi", "Papugę", "Papugą"},
     {1, "Papağan", "Papağanlar", "Papağanı", "Papağanla"},
     {0, "Papoušek", "Papoušci", "Papouška", "Papouškem"},
     {0, "Попугай", "Попугаи", "Попугая", "Попугаем"},
-    {1, "Papagei", "Papageien", "Papagei", "Papagei"},
+    {0, "Papagei", "Papageien", "Papagei", "Papagei"},
+    }},
+  {0xc6e66c93, 0, { // ""Vampire Bat""
+    {0, "Wampir", "Wampiry", "Wampira", "Wampirem"},
+    {0/*MISSING*/ , "Vampire Bat"/*MISSING*/ , "Vampire Bat"/*MISSING*/ , "Vampire Bat"/*MISSING*/ , "Vampire Bat"},
+    {0, "Vampýr", "Vampýři", "Vampýra", "Vampýrem"},
+    {0, "Вампир", "Вампиры", "Вампира", "Вампиром"},
+    {0/*MISSING*/ , "Vampire Bat"/*MISSING*/ , "Vampire Bat"/*MISSING*/ , "Vampire Bat"/*MISSING*/ , "Vampire Bat"},
+    }},
+  {0xc875735e, 2, { // ""Kraken Depths""
+    {1, "Głębiny Krakenów", "Głębiny Krakenów", "Głębiny Krakenów", "w Głębinach Krakenów"},
+    {0/*MISSING*/ , "Kraken Depths"/*MISSING*/ , "Kraken Depths"/*MISSING*/ , "Kraken Depths"/*MISSING*/ , "Kraken Depths"},
+    {1, "Krakení hlubiny", "Krakení hlubiny", "Krakení hlubiny", "v Krakeních hlubinách"},
+    {1, "Глубины кракенов", "Глубины кракенов", "Глубины кракенов", "в Глубинах кракенов"},
+    {1, "Krakentiefen", "Krakentiefen", "in den Krakentiefen", "in den Krakentiefen"},
     }},
   {0xc8c66d41, 0, { // ""Coral""
     {3, "Koral", "Korale", "Koral", "Koralem"},
     {0/*MISSING*/ , "Coral"/*MISSING*/ , "Coral"/*MISSING*/ , "Coral"/*MISSING*/ , "Coral"},
     {3, "Korál", "Korály", "Korál", "Korálem"},
     {3, "Коралл", "Кораллы", "Коралл", "Кораллом"},
-    {0/*MISSING*/ , "Coral"/*MISSING*/ , "Coral"/*MISSING*/ , "Coral"/*MISSING*/ , "Coral"},
+    {3, "Koralle", "Korallen", "Koralle", "Koralle"},
     }},
   {0xc93e7fe9, 0, { // ""giant rug""
     {3, "wielki dywan", "wielkie dywany", "wielki dywan", "wielkim dywanem"},
     {3, "devasa kilim", "devasa kilimler", "devasa kilimi", "devasa kilimle"},
     {3, "obří koberec", "obří koberce", "obří koberec", "obřím kobercem"},
     {3, "огромный ковёр", "огромные ковры", "огромный ковёр", "огромным ковром"},
-    {3, "Riesiger Teppich", "Riesige Teppiche", "Riesiger Teppich", "Riesiger Teppich"},
+    {3, "Riesiger Teppich", "Riesige Teppiche", "Riesigen Teppich", "Riesigen Teppich"},
+    }},
+  {0xc956dc2a, 0, { // ""Trollheim""
+    {3, "Trollheim", "Trollheim", "Trollheim", "w Trollheim"},
+    {0/*MISSING*/ , "Trollheim"/*MISSING*/ , "Trollheim"/*MISSING*/ , "Trollheim"/*MISSING*/ , "Trollheim"},
+    {3, "Trollheim", "Trollheimy", "Trollheim", "v Trollheimu"},
+    {3, "Тролльхейм", "Тролльхеймы", "Тролльхейм", "в Тролльхейме"},
+    {3, "Trollheim", "Trollheim", "Trollheim", "Trollheim"},
     }},
   {0xc9a76da2, 0, { // ""Phoenix Feather""
     {2, "Pióro Feniksa", "Pióra Feniksa", "Pióro Feniksa", "Piórem Feniksa"},
@@ -9622,6 +12534,13 @@ fullnoun all_nouns[330] = {
     {2, "Fénixovo pírko", "Fénixova pírka", "Fénixovo pírko", "Fénixovým pírkem"},
     {2, "Перо феникса", "Перья феникса", "Перо феникса", "Пером феникса"},
     {1, "Phönixfeder", "Phönixfedern", "Phönixfeder", "Phönixfeder"},
+    }},
+  {0xc9e27f87, 0, { // ""Reptile floor""
+    {1, "Jaszczurza podłoga", "Jaszczurze podłogi", "Jaszczurzą podłogę", "Jaszczurzą podłogą"},
+    {0/*MISSING*/ , "Reptile floor"/*MISSING*/ , "Reptile floor"/*MISSING*/ , "Reptile floor"/*MISSING*/ , "Reptile floor"},
+    {1, "Ještěrčí podlaha", "Ještěrščí podlahy", "Ještěrčí podlahu", "Ještěrčí podlahou"},
+    {3, "Ящеричный пол", "Ящеричные полы", "Ящеричный пол", "Ящеричным полом"},
+    {0/*MISSING*/ , "Reptile floor"/*MISSING*/ , "Reptile floor"/*MISSING*/ , "Reptile floor"/*MISSING*/ , "Reptile floor"},
     }},
   {0xca5028f9, 0, { // ""Hyperstone""
     {3, "Hiperkamień", "Hiperkamienie", "Hiperkamień", "Hiperkamieniem"},
@@ -9642,7 +12561,14 @@ fullnoun all_nouns[330] = {
     {0, "Koşan Köpek", "Koşan Köpekler", "Koşan Köpeği", "Koşan Köpekle"},
     {0, "Běžící pes", "Běžící psi", "Běžícího psa", "Běžícím psem"},
     {1, "Бегущая собака", "Бегущие собаки", "Бегущую собаку", "Бегущей собакой"},
-    {0, "Streuner", "Streuner", "Streuner", "Streuner"},
+    {0, "Laufhund", "Laufhunde", "Laufhund", "Laufhund"},
+    }},
+  {0xcba185cf, 0, { // ""stone statue""
+    {3, "kamienny pomnik", "kamienne pomniki", "kamienny pomnik", "kamiennym pomnikiem"},
+    {0/*MISSING*/ , "stone statue"/*MISSING*/ , "stone statue"/*MISSING*/ , "stone statue"/*MISSING*/ , "stone statue"},
+    {1, "kamenná socha", "kamenné sochy", "kamennou sochu", "kamennou sochou"},
+    {1, "каменная статуя", "каменные статуи", "каменную статую", "каменной статуей"},
+    {1, "Steinstatue", "Steinstatuen", "Steinstatue", "Steinstatue"},
     }},
   {0xcbe8c992, 0, { // ""Dry Forest""
     {0, "Puszcza", "Puszcza", "Puszczę", "w Puszczy"},
@@ -9657,6 +12583,13 @@ fullnoun all_nouns[330] = {
     {1, "otevřená brána", "otevřené brány", "otevřenou bránu", "otevřenou bránou"},
     {3, "открытый проход", "открытые проходы", "открытый проход", "открытым проходом"},
     {2, "Offenes Tor", "Offene Tor", "Offenes Tor", "Offenes Tor"},
+    }},
+  {0xcd5954e2, 0, { // ""Treat""
+    {3, "Cukierek", "Cukierki", "Cukierka", "Cukierkiem"},
+    {0/*MISSING*/ , "Treat"/*MISSING*/ , "Treat"/*MISSING*/ , "Treat"/*MISSING*/ , "Treat"},
+    {1, "Pochoutka", "Pochoutky", "Pochutku", "Pochoutkou"},
+    {1, "конфета", "конфеты", "конфету", "конфетой"},
+    {0/*MISSING*/ , "Treat"/*MISSING*/ , "Treat"/*MISSING*/ , "Treat"/*MISSING*/ , "Treat"},
     }},
   {0xcdca3c6e, 0, { // ""Fat Guard""
     {0, "Gruby Strażnik", "Grubi Strażnicy", "Grubego Strażnika", "Grubym Strażnikiem"},
@@ -9677,7 +12610,7 @@ fullnoun all_nouns[330] = {
     {0/*MISSING*/ , "Warped Coast"/*MISSING*/ , "Warped Coast"/*MISSING*/ , "Warped Coast"/*MISSING*/ , "Warped Coast"},
     {2, "Pokřivené pobřeží", "Pokřivená pobřeží", "Pokřivené pobřeží", "na Pokřiveném pobřeží"},
     {3, "Искривлённый берег", "Искривлённые берега", "Искривлённый берег", "на Искривлённом берегу"},
-    {0/*MISSING*/ , "Warped Coast"/*MISSING*/ , "Warped Coast"/*MISSING*/ , "Warped Coast"/*MISSING*/ , "Warped Coast"},
+    {1, "Verzerrte Küste", "Verzerrte Küsten", "an der Verzerrten Küste", "an der Verzerrten Küste"},
     }},
   {0xcf0a2594, 0, { // ""Outlaw""
     {0, "Bandyta", "Bandyci", "Bandytę", "Bandytą"},
@@ -9719,7 +12652,7 @@ fullnoun all_nouns[330] = {
     {0, "ölü mağara trolü", "ölü mağara trolleri", "ölü mağara trolünü", "ölü mağara trolüyle"},
     {0, "mrtvý Šutroll", "mrtví Šutrollové", "mrtvého Šutrolla", "mrtvým Šutrollem"},
     {0, "мёртвый пещерный тролль", "мёртвые пещерные тролли", "мёртвого пещерного тролля", "мёртвым пещерным троллем"},
-    {0, "toter Felsentroll", "tote Felsentrolle", "toter Felsentroll", "toter Felsentroll"},
+    {0, "toter Felsentroll", "tote Felsentrolle", "toten Felsentroll", "toten Felsentroll"},
     }},
   {0xd234e251, 0, { // ""living wall""
     {1, "żywa ściana", "żywe ściany", "żywą ścianę", "żywą ścianą"},
@@ -9747,7 +12680,7 @@ fullnoun all_nouns[330] = {
     {0/*MISSING*/ , "no wall"/*MISSING*/ , "no wall"/*MISSING*/ , "no wall"/*MISSING*/ , "no wall"},
     {1, "žádné stěna", "žádné stěny", "žádnou stěnu", "žádnou stěnou"},
     {3, "нет стены", "нет стены", "нет стены", "нет стены"},
-    {0/*MISSING*/ , "no wall"/*MISSING*/ , "no wall"/*MISSING*/ , "no wall"/*MISSING*/ , "no wall"},
+    {1, "keine Wand", "keine Wände", "keine Wand", "keine Wand"},
     }},
   {0xd491de5e, 0, { // ""Pearl""
     {1, "Perła", "Perły", "Perłę", "Perłą"},
@@ -9761,7 +12694,7 @@ fullnoun all_nouns[330] = {
     {0/*MISSING*/ , "Windy Plains"/*MISSING*/ , "Windy Plains"/*MISSING*/ , "Windy Plains"/*MISSING*/ , "Windy Plains"},
     {1, "Větrná pláň", "Větrné pláně", "Větrnou pláň", "na Větrné pláni"},
     {1, "Ветреная равнина", "Ветреные равнины", "Ветреную равнину", "на Ветреной равнине"},
-    {0/*MISSING*/ , "Windy Plains"/*MISSING*/ , "Windy Plains"/*MISSING*/ , "Windy Plains"/*MISSING*/ , "Windy Plains"},
+    {1, "Windige Ebenen", "Windige Ebenen", "in den Windigen Ebenen", "in den Windigen Ebenen"},
     }},
   {0xd614f371, 0, { // ""Sand Worm Tail""
     {0, "Ogon Czerwia", "Ogony Czerwia", "Ogon Czerwia", "Ogonem Czerwia"},
@@ -9775,7 +12708,7 @@ fullnoun all_nouns[330] = {
     {0/*MISSING*/ , "Dragon"/*MISSING*/ , "Dragon"/*MISSING*/ , "Dragon"/*MISSING*/ , "Dragon"},
     {0, "Drak", "Draci", "Draka", "Drakem"},
     {0, "Дракон", "Драконы", "Дракона", "Драконом"},
-    {0/*MISSING*/ , "Dragon"/*MISSING*/ , "Dragon"/*MISSING*/ , "Dragon"/*MISSING*/ , "Dragon"},
+    {0, "Drachen", "Drachen", "Drachen", "Drachen"},
     }},
   {0xd6acd1c8, 0, { // ""none""
     {3, "nic", "nic", "niczego", "niczym"},
@@ -9784,19 +12717,26 @@ fullnoun all_nouns[330] = {
     {2, "ничто", "ничто", "ничего", "ничем"},
     {3, "keines", "keines", "keines", "keines"},
     }},
+  {0xd6eceeba, 0, { // ""Orb of the Sword II""
+    {1, "Sfera Ostrza II", "Sfery Ostrza II", "Sferę Ostrza II", "Sferą Ostrza II"},
+    {0/*MISSING*/ , "Orb of the Sword II"/*MISSING*/ , "Orb of the Sword II"/*MISSING*/ , "Orb of the Sword II"/*MISSING*/ , "Orb of the Sword II"},
+    {1, "Sféra Meče II", "Sféry Meče II", "Sféru Meče II", "Sférou Meče II"},
+    {1, "Сфера Меча II", "Сферы Меча II", "Сферу Меча II", "Сферой Меча II"},
+    {0, "Orb des Schwertes II", "Orbs des Schwertes II", "Orb des Schwertes II", "Orb des Schwertes II"},
+    }},
   {0xd7fe2ac7, 0, { // ""Wind Crow""
     {1, "Wietrzna Wrona", "Wietrzne Wrony", "Wietrzną Wronę", "Wietrzną Wroną"},
     {0/*MISSING*/ , "Wind Crow"/*MISSING*/ , "Wind Crow"/*MISSING*/ , "Wind Crow"/*MISSING*/ , "Wind Crow"},
     {1, "Větrná vrána", "Větrné vrány", "Větrnou vránu", "Větrnou vránou"},
     {1, "Ветряная ворона", "Ветряные вороны", "Ветряную ворону", "Ветряной вороной"},
-    {0/*MISSING*/ , "Wind Crow"/*MISSING*/ , "Wind Crow"/*MISSING*/ , "Wind Crow"/*MISSING*/ , "Wind Crow"},
+    {1, "Windkrähe", "Windkrähen", "Windkrähe", "Windkrähe"},
     }},
   {0xd7fe825d, 0, { // ""Dormant Ivy""
     {0, "Uśpiony Bluszcz", "Uśpione Bluszcze", "Uśpiony Bluszcz", "Uśpionym Bluszczem"},
     {0, "Uyuyan Sarmaşık", "Uyuyan Sarmaşıklar", "Uyuyan Sarmaşığı", "Uyuyan Sarmaşıkla"},
     {0, "Neaktivní břečťan", "Neaktivní břečťany", "Neaktivní břečťan", "Neaktivním břečťanem"},
     {3, "Спящий плющ", "Спящие плющи", "Спящий плющ", "Спящим плющом"},
-    {0, "Ruhender Efeu", "Ruhende Efeu", "Ruhenden Efeu", "Ruhenden Efeu"},
+    {0, "Ruhender Efeu", "Ruhende Efeue", "Ruhenden Efeu", "Ruhenden Efeu"},
     }},
   {0xd8b8981e, 0, { // ""Elemental Gem""
     {3, "Kamień Żywiołów", "Kamienie Żywiołów", "Kamień Żywiołów", "Kamieniem Żywiołów"},
@@ -9827,7 +12767,7 @@ fullnoun all_nouns[330] = {
     {0, "Orb der Erde", "Orbs der Erde", "Orb der Erde", "Orb der Erde"},
     }},
   {0xdc6e66c3, 0, { // ""Tentacle (withdrawing)""
-    {1, "Macka (uciekająca)", "Macki (uciekające)", "Mackę (uciekającą)", "Macką (uciekającą"},
+    {1, "Macka (uciekająca)", "Macki (uciekające)", "Mackę (uciekającą)", "Macką (uciekającą)"},
     {1, "Dokunaç (geri çekiliyor)", "Dokunaçlar (geri çekiliyor)", "Dokunacı (geri çekiliyor)", "Dokunaçla (geri çekiliyor)"},
     {1, "Chapadlo (ustupující)", "Chapadla (ustupující)", "Chapadlo (ustupující)", "Chapadlem (ustupujícím)"},
     {2, "Щупальце (исчезает)", "Щупальца(исчезает)", "Щупальце(исчезает)", "Щупальцем(исчезает)"},
@@ -9838,14 +12778,14 @@ fullnoun all_nouns[330] = {
     {1, "Cthulhu'nun Tapınağı", "Cthulhu'nun Tapınakları", "Cthulhu'nun Tapınağını", "Cthulhu'nun Tapınağında"},
     {3, "Cthulhuův chrám", "Cthulhuovy chrámy", "Cthulhuův chrám", "v Cthulhuově chrámu"},
     {3, "Храм Ктулху", "Храмы Ктулху", "Храм Ктулху", "в Храме Ктулху"},
-    {0, "Cthulhus Tempel", "Cthulhus Tempel", "in Cthulhus Tempel", "in Cthulhus Tempel"},
+    {0, "Tempel des Cthulhu", "Tempel des Cthulhu", "im Tempel des Cthulhu", "im Tempel des Cthulhu"},
     }},
   {0xdf01075f, 0, { // ""Cloud of Mirage""
     {1, "Chmura Mirażowa", "Chmury Mirażowe", "Chmurę Mirażową", "Chmurą Mirażową"},
     {1, "Bulut Yansısı", "Bulut Yansıları", "Bulut Yansısını", "Bulut Yansısıyla"},
     {3, "Oblak přeludů", "Oblaky přeludů", "Oblak přeludů", "Oblakem přeludů"},
     {2, "Облако миражей", "Облака миражей", "Облако миражей", "Облаком миражей"},
-    {1, "Illusions Wolke", "Illusions Wolken", "Illusions Wolke", "Illusions Wolke"},
+    {1, "Illusionswolke", "Illusionswolken", "Illusionswolke", "Illusionswolke"},
     }},
   {0xdfd173e9, 0, { // ""Illusion""
     {1, "Iluzja", "Iluzje", "Iluzję", "Iluzją"},
@@ -9901,7 +12841,14 @@ fullnoun all_nouns[330] = {
     {0/*MISSING*/ , "Rose Lady"/*MISSING*/ , "Rose Lady"/*MISSING*/ , "Rose Lady"/*MISSING*/ , "Rose Lady"},
     {1, "Růžová paní", "Růžové paní", "Růžovou dámu", "Růžovou paní"},
     {1, "Розовая дама", "Розовые дамы", "Розовую даму", "Розовой дамой"},
-    {0/*MISSING*/ , "Rose Lady"/*MISSING*/ , "Rose Lady"/*MISSING*/ , "Rose Lady"/*MISSING*/ , "Rose Lady"},
+    {1, "Rosendame", "Rosendamen", "Rosendame", "Rosendame"},
+    }},
+  {0xe6a497fc, 0, { // ""Herd Bull""
+    {0, "Stadny Byk", "Stadne Byki", "Stadnego Byka", "Stadnym Bykiem"},
+    {0/*MISSING*/ , "Herd Bull"/*MISSING*/ , "Herd Bull"/*MISSING*/ , "Herd Bull"/*MISSING*/ , "Herd Bull"},
+    {0, "Stádový Býk", "Stádoví Býci", "Stádového Býka", "Stádovým Býkem"},
+    {0, "Стадный бык", "Стадные быки", "Стадного быка", "Стадным быком"},
+    {0/*MISSING*/ , "Herd Bull"/*MISSING*/ , "Herd Bull"/*MISSING*/ , "Herd Bull"/*MISSING*/ , "Herd Bull"},
     }},
   {0xe6de3079, 0, { // ""Vine Beast""
     {0, "Winny Stwór", "Winne Stwory", "Winnego Stwora", "Winnym Stworem"},
@@ -9938,6 +12885,13 @@ fullnoun all_nouns[330] = {
     {1, "Сфера Невидимости", "Сферы Невидимости", "Сферу Невидимости", "Сферой Невидимости"},
     {0, "Orb der Transparenz", "Orbs der Transparenz", "Orb der Transparenz", "Orb der Transparenz"},
     }},
+  {0xea69ead7, 0, { // ""Sunken Treasure""
+    {3, "Zatopiony Skarb", "Zatopione Skarby", "Zatopiony Skarb", "Zatopionym Skarbem"},
+    {0/*MISSING*/ , "Sunken Treasure"/*MISSING*/ , "Sunken Treasure"/*MISSING*/ , "Sunken Treasure"/*MISSING*/ , "Sunken Treasure"},
+    {3, "Potopený poklad", "Potopené poklady", "Potopený poklad", "Potopeným pokladem"},
+    {3, "Затонувшее сокровище", "Затонувшие сокровища", "Затонувшее сокровище", "Затонувшим сокровищем"},
+    {0, "Versunkener Schatz", "Versunkene Schätze", "Versunkenen Schatz", "Versunkenen Schatz"},
+    }},
   {0xebfa53de, 0, { // ""chasm""
     {2, "przepaść", "przepaści", "przepaść", "przepaścią"},
     {2, "Uçurum", "Uçurumlar", "Uçurumu", "Uçurumda"},
@@ -9964,14 +12918,14 @@ fullnoun all_nouns[330] = {
     {1, "Balçık Canavarı", "Balçık Canavarları", "Balçık Canavarını", "Balçık Canavarıyla"},
     {0, "Slizový netvor", "Slizoví netvoři", "Slizového netvora", "Slizovým netvorem"},
     {1, "Живая слизь", "Живая слизь", "Живую слизь", "Живой слизью"},
-    {1, "Schleim Bestie", "Schleim Bestien", "Schleim Bestie", "Schleim Bestie"},
+    {1, "Schleimbestie", "Schleimbestien", "Schleimbestie", "Schleimbestie"},
     }},
   {0xecbb1f9a, 0, { // ""Dragon Chasms""
     {1, "Smocze Otchłanie", "Smocze Otchłanie", "Smocze Otchłanie", "w Smoczych Otchłaniach"},
     {0/*MISSING*/ , "Dragon Chasms"/*MISSING*/ , "Dragon Chasms"/*MISSING*/ , "Dragon Chasms"/*MISSING*/ , "Dragon Chasms"},
     {1, "Dračí propasti", "Dračí propasti", "Dračí propasti", "v Dračích propastech"},
     {1, "Драконья бездна", "Драконьи бездны", "Драконью бездну", "в Драконьей бездне"},
-    {0/*MISSING*/ , "Dragon Chasms"/*MISSING*/ , "Dragon Chasms"/*MISSING*/ , "Dragon Chasms"/*MISSING*/ , "Dragon Chasms"},
+    {1, "Drachenschluchten", "Drachenschluchten", "in den Drachenschluchten", "in den Drachenschluchten"},
     }},
   {0xed9fa709, 0, { // ""Yeti""
     {0, "Yeti", "Yeti", "Yeti", "Yeti"},
@@ -9985,7 +12939,7 @@ fullnoun all_nouns[330] = {
     {0/*MISSING*/ , "Black Lotus"/*MISSING*/ , "Black Lotus"/*MISSING*/ , "Black Lotus"/*MISSING*/ , "Black Lotus"},
     {3, "Černý lotos", "Černé lotosy", "Černý lotos", "Černým lotosem"},
     {3, "Чёрный лотос", "Чёрные лотосы", "Чёрный лотос", "Чёрным лотосом"},
-    {0/*MISSING*/ , "Black Lotus"/*MISSING*/ , "Black Lotus"/*MISSING*/ , "Black Lotus"/*MISSING*/ , "Black Lotus"},
+    {0, "Schwarzer Lotus", "Schwarze Lotus", "Schwarzen Lotus", "Schwarzen Lotus"},
     }},
   {0xee28d696, 0, { // ""Spice""
     {1, "Przyprawa", "Przyprawy", "Przyprawę", "Przyprawą"},
@@ -10013,7 +12967,7 @@ fullnoun all_nouns[330] = {
     {0/*MISSING*/ , "Sparrowhawk"/*MISSING*/ , "Sparrowhawk"/*MISSING*/ , "Sparrowhawk"/*MISSING*/ , "Sparrowhawk"},
     {0, "Krahujec", "Krahujci", "Krahujce", "Krahujcem"},
     {0, "Ястреб", "Ястребы", "Ястреба", "Ястребом"},
-    {0/*MISSING*/ , "Sparrowhawk"/*MISSING*/ , "Sparrowhawk"/*MISSING*/ , "Sparrowhawk"/*MISSING*/ , "Sparrowhawk"},
+    {0, "Sperber", "Sperber", "Sperber", "Sperber"},
     }},
   {0xef8d54c7, 0, { // ""Graveyard""
     {3, "Cmentarz", "Cmentarz", "Cmentarz", "na Cmentarzu"},
@@ -10055,14 +13009,14 @@ fullnoun all_nouns[330] = {
     {3, "Mutant Sarmaşık", "Mutant Sarmaşıklar", "Mutant Sarmaşığı", "Mutant Sarmaşıkla"},
     {3, "Mutantní břečťan", "Mutantní břečťany", "Mutantní břečťan", "Mutantním břečťanem"},
     {3, "Плющ-мутант", "Плющи-мутанты", "Плюш-мутант", "Плющом-мутантом"},
-    {0, "Mutierter Efeu", "Mutierter Efeu", "Mutierter Efeu", "Mutierter Efeu"},
+    {0, "Mutierter Efeu", "Mutierte Efeue", "Mutierten Efeu", "Mutierten Efeu"},
     }},
   {0xf125c9ed, 0, { // ""temporary floor""
     {1, "tymczasowa podłoga", "tymczasowe podłogi", "tymczasową podłogę", "tymczasową podłogą"},
     {1, "geçici zemin", "geçici zeminler", "geçici zemini", "geçici zeminle"},
     {1, "dočasná podlaha", "dočasné podlahy", "dočasnou podlahu", "dočasnou podlahou"},
     {3, "временный пол", "временные полы", "временный пол", "временным полом"},
-    {0, "temporärer Boden", "temporäre Böden", "temporärer Boden", "temporärer Boden"},
+    {0, "temporärer Boden", "temporäre Böden", "temporären Boden", "temporären Boden"},
     }},
   {0xf28de481, 0, { // ""Orb of Luck""
     {1, "Sfera Szczęścia", "Sfery Szczęścia", "Sferę Szczęścia", "Sferą Szczęścia"},
@@ -10078,12 +13032,26 @@ fullnoun all_nouns[330] = {
     {0, "Синий гипержук", "Синие гипержуки", "Синего гипержука", "Синим гипержуком"},
     {0, "Blauer Hyperkäfer", "Blaue Hyperkäfer", "Blauen Hyperkäfer", "Blauen Hyperkäfer"},
     }},
+  {0xf342c876, 0, { // ""Golden Egg""
+    {2, "Złote Jajo", "Złote Jaja", "Złote Jajo", "Złotym Jajem"},
+    {0/*MISSING*/ , "Golden Egg"/*MISSING*/ , "Golden Egg"/*MISSING*/ , "Golden Egg"/*MISSING*/ , "Golden Egg"},
+    {2, "Zlaté vejce", "Zlatá vejce", "Zlaté vejce", "Zlatým vejcem"},
+    {2, "Золотое яйцо", "Золотые яйца", "Золотое яйцо", "Золотым яйцом"},
+    {2, "Goldenes Ei", "Goldene Eier", "Goldene Ei", "Goldene Ei"},
+    }},
   {0xf358ed0c, 0, { // ""Elixir of Life""
     {3, "Eliksir Życia", "Eliksiry Życia", "Eliksir Życia", "Eliksirem Życia"},
     {3, "Yaşam İksiri", "Yaşam İksirleri", "Yaşam İksirini", "Yaşam İksiriyle"},
     {3, "Elixír života", "Elixíry života", "Elixír života", "Elixírem života"},
     {3, "Эликсир жизни", "Эликсиры жизни", "Эликсир жизни", "Эликсиром жизни"},
     {2, "Lebenselixir", "Lebenselixir", "Lebenselixir", "Lebenselixir"},
+    }},
+  {0xf3926b40, 0, { // ""Orb of Vaulting""
+    {1, "Sfera Przeskoku", "Sfery Przeskoku", "Sferę Przeskoku", "Sferą Przeskoku"},
+    {0/*MISSING*/ , "Orb of Vaulting"/*MISSING*/ , "Orb of Vaulting"/*MISSING*/ , "Orb of Vaulting"/*MISSING*/ , "Orb of Vaulting"},
+    {1, "Sféra Přeskoku", "Sféry Přeskoku", "Sféru Přeskoku", "Sférou Přeskoku"},
+    {1, "Сфера Рывка", "Сферы Рывка", "Сферу Рывка", "Сферой Рывка"},
+    {0/*MISSING*/ , "Orb of Vaulting"/*MISSING*/ , "Orb of Vaulting"/*MISSING*/ , "Orb of Vaulting"/*MISSING*/ , "Orb of Vaulting"},
     }},
   {0xf3b4b660, 0, { // ""Red Gem""
     {3, "Czerwony Kamień", "Czerwone Kamienie", "Czerwony Kamień", "Czerwonym Kamieniem"},
@@ -10097,7 +13065,7 @@ fullnoun all_nouns[330] = {
     {0/*MISSING*/ , "strong wind"/*MISSING*/ , "strong wind"/*MISSING*/ , "strong wind"/*MISSING*/ , "strong wind"},
     {3, "silný vítr", "silné větry", "silný vítr", "silným větrem"},
     {3, "сильный ветер", "сильные ветры", "сильный ветер", "сильным ветром"},
-    {0/*MISSING*/ , "strong wind"/*MISSING*/ , "strong wind"/*MISSING*/ , "strong wind"/*MISSING*/ , "strong wind"},
+    {0, "starker Wind", "starke Winde", "starken Wind", "starken Wind"},
     }},
   {0xf3f23cda, 0, { // ""Orb of Air""
     {1, "Sfera Powietrza", "Sfery Powietrza", "Sferę Powietrza", "Sferą Powietrza"},
@@ -10125,7 +13093,7 @@ fullnoun all_nouns[330] = {
     {0/*MISSING*/ , "Warped Sea"/*MISSING*/ , "Warped Sea"/*MISSING*/ , "Warped Sea"/*MISSING*/ , "Warped Sea"},
     {1, "Pokřivené moře", "Pokřivená moře", "Pokřivené moře", "na Pokřiveném moři"},
     {2, "Искривлённое море", "Искривлённые моря", "Искривлённое море", "в Искривлённом море"},
-    {0/*MISSING*/ , "Warped Sea"/*MISSING*/ , "Warped Sea"/*MISSING*/ , "Warped Sea"/*MISSING*/ , "Warped Sea"},
+    {1, "Verzerrte See", "Verzerrten Seen", "auf der Verzerrten See", "auf der Verzerrten See"},
     }},
   {0xf6fecf4f, 0, { // ""Flash Witch""
     {1, "Czarownica Błysku", "Czarownice Błysku", "Czarownicę Błysku", "Czarownicą Błysku"},
@@ -10141,12 +13109,19 @@ fullnoun all_nouns[330] = {
     {2, "Волшебное зеркало", "Волшебные зеркала", "Волшебное зеркало", "Волшебным зеркалом"},
     {0, "Zauberspiegel", "Zauberspiegel", "Zauberspiegel", "Zauberspiegel"},
     }},
+  {0xf7a1921e, 0, { // ""Orb of the Sword""
+    {1, "Sfera Ostrza", "Sfery Ostrza", "Sferę Ostrza", "Sferą Ostrza"},
+    {0/*MISSING*/ , "Orb of the Sword"/*MISSING*/ , "Orb of the Sword"/*MISSING*/ , "Orb of the Sword"/*MISSING*/ , "Orb of the Sword"},
+    {1, "Sféra Meče", "Sféry Meče", "Sféru Meče", "Sférou Meče"},
+    {1, "Сфера Меча", "Сферы Меча", "Сферу Меча", "Сферой Меча"},
+    {0, "Orb des Schwertes", "Orbs des Schwertes", "Orb des Schwertes", "Orb des Schwertes"},
+    }},
   {0xf7f22746, 0, { // ""False Princess""
     {1, "Fałszywa Księżniczka", "Fałszywe Księżniczki", "Fałszywą Księżniczkę", "Fałszywą Księżniczką"},
     {0/*MISSING*/ , "False Princess"/*MISSING*/ , "False Princess"/*MISSING*/ , "False Princess"/*MISSING*/ , "False Princess"},
     {1, "Falešná princezna", "Falešné princezny", "Falešnou princeznu", "Falešnou princeznou"},
     {1, "Ложная принцесса", "Ложные принцессы", "Ложную принцессу", "Ложной принцессой"},
-    {0/*MISSING*/ , "False Princess"/*MISSING*/ , "False Princess"/*MISSING*/ , "False Princess"/*MISSING*/ , "False Princess"},
+    {1, "Falsche Prinzessin", "Falsche Prinzessinen", "Falsche Prinzessin", "Falsche Prinzessin"},
     }},
   {0xf8c01ee7, 0, { // ""Goblin""
     {0, "Goblin", "Gobliny", "Goblina", "Goblinem"},
@@ -10167,7 +13142,7 @@ fullnoun all_nouns[330] = {
     {2, "Yansıma", "Yansımalar", "Yansımayı", "Yansımayla"},
     {3, "Zrcadlový obraz", "Zrcadlové obrazy", "Zrcadlový obraz", "Zrcadlovým obrazem"},
     {2, "Зеркальное отражение", "Зеркальные отражения", "Зеркальное отражение", "Зеркальным отражением"},
-    {2, "Trugbild", "Trugbilder", "Trugbild", "Trugbild"},
+    {2, "Spiegelbild", "Spiegelbilder", "Spiegelbild", "Spiegelbild"},
     }},
   {0xf9db8922, 0, { // ""Compass""
     {0, "Kompas", "Kompasy", "Kompas", "Kompasem"},
@@ -10181,7 +13156,7 @@ fullnoun all_nouns[330] = {
     {0/*MISSING*/ , "solid branch"/*MISSING*/ , "solid branch"/*MISSING*/ , "solid branch"/*MISSING*/ , "solid branch"},
     {1, "pevná větev", "pevné větve", "pevnou větev", "pevnou větví"},
     {1, "толстая ветка", "толстые ветки", "толстую ветку", "толстой веткой"},
-    {0/*MISSING*/ , "solid branch"/*MISSING*/ , "solid branch"/*MISSING*/ , "solid branch"/*MISSING*/ , "solid branch"},
+    {0, "solider Ast", "solide Äste", "soliden Ast", "soliden Ast"},
     }},
   {0xfa0b397e, 0, { // ""Ocean""
     {3, "Ocean", "Oceany", "Ocean", "na Oceanie"},
@@ -10195,7 +13170,7 @@ fullnoun all_nouns[330] = {
     {0/*MISSING*/ , "warp gate"/*MISSING*/ , "warp gate"/*MISSING*/ , "warp gate"/*MISSING*/ , "warp gate"},
     {1, "křivá brána", "křivé brány", "křivou bránu", "křivou branou"},
     {1, "врата искривления", "врата искривления", "врата искривления", "вратами искривления"},
-    {0/*MISSING*/ , "warp gate"/*MISSING*/ , "warp gate"/*MISSING*/ , "warp gate"/*MISSING*/ , "warp gate"},
+    {2, "verzerrtes Tor", "verzerrte Tore", "verzerrte Tor", "verzerrte Tor"},
     }},
   {0xfcb2047b, 0, { // ""Revolver""
     {3, "Rewolwer", "Rewolwery", "Rewolwer", "Rewolwerem"},
@@ -10209,21 +13184,28 @@ fullnoun all_nouns[330] = {
     {3, "Zengin Metal Canavar", "Zengin Metal Canavarları", "Zengin Metal Canavarını", "Zengin Metal Canavarıyla"},
     {1, "Bohatá bestie", "Bohaté bestie", "Bohatou bestii", "Bohatou bestií"},
     {0, "Богатый железный зверь", "Богатые железные звери", "Богатого железного зверя", "Богатым железным зверем"},
-    {2, "Ergiebiges Metallbiest", "Ergiebige Metallbiester", "Ergiebiges Metallbiest", "Ergiebiges Metallbiest"},
+    {2, "Ergiebiges Metallbiest", "Ergiebige Metallbiester", "Ergiebige Metallbiest", "Ergiebige Metallbiest"},
     }},
   {0xfec6df36, 0, { // ""Flail""
     {3, "Cep", "Cepy", "Cep", "Cepem"},
     {0, "Topuz", "Topuzlar", "Topuzu", "Topuzla"},
     {3, "Řemdih", "Řemdihy", "Řemdih", "Řemdihem"},
     {3, "Цеп", "Цепы", "Цеп", "Цепом"},
-    {0, "Flegel", "Flegel", "Flegel", "Flegel"},
+    {0, "Morgenstern", "Morgensterne", "Morgenstern", "Morgenstern"},
+    }},
+  {0xff0c4ea1, 0, { // ""Spinel""
+    {3, "Spinel", "Spinele", "Spinel", "Spinelem"},
+    {0/*MISSING*/ , "Spinel"/*MISSING*/ , "Spinel"/*MISSING*/ , "Spinel"/*MISSING*/ , "Spinel"},
+    {3, "Spinel", "Spinely", "Spinel", "Spinelem"},
+    {1, "Шпинель", "Шпинели", "Шпинель", "Шпинелью"},
+    {0/*MISSING*/ , "Spinel"/*MISSING*/ , "Spinel"/*MISSING*/ , "Spinel"/*MISSING*/ , "Spinel"},
     }},
   {0xff1eb57a, 0, { // ""Apple""
     {2, "Jabłko", "Jabłka", "Jabłko", "Jabłkiem"},
     {0/*MISSING*/ , "Apple"/*MISSING*/ , "Apple"/*MISSING*/ , "Apple"/*MISSING*/ , "Apple"},
     {2, "Jablko", "Jablka", "Jablko", "Jablkem"},
     {2, "Яблоко", "Яблоки", "Яблоко", "Яблоком"},
-    {0/*MISSING*/ , "Apple"/*MISSING*/ , "Apple"/*MISSING*/ , "Apple"/*MISSING*/ , "Apple"},
+    {0, "Apfel", "Äpfel", "Apfel", "Apfel"},
     }},
   {0xff6e2c87, 0, { // ""Albatross""
     {3, "Albatros", "Albatrosy", "Albatrosa", "Albatrosem"},
@@ -10237,6 +13219,6 @@ fullnoun all_nouns[330] = {
     {0/*MISSING*/ , "fan"/*MISSING*/ , "fan"/*MISSING*/ , "fan"/*MISSING*/ , "fan"},
     {3, "Větrák", "Větráky", "Větrák", "Větrákem"},
     {3, "Вентилятор", "Вентиляторы", "Вентилятор", "Вентилятором"},
-    {0/*MISSING*/ , "fan"/*MISSING*/ , "fan"/*MISSING*/ , "fan"/*MISSING*/ , "fan"},
+    {0, "Ventilator", "Ventilatoren", "Ventilator", "Ventilator"},
     }},
   };

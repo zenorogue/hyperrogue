@@ -186,8 +186,8 @@ S("You fall into a wormhole!", "Bir solucan deliğine düştün!")
 S("You activate %the1.", "%a1 aktifleştirdin.")
 S("No room to push %the1.", "%a1 itmek için yeterince yer yok.")
 S("You push %the1.", "%a1 ittirdin.")
-S("You start cutting down the tree.", "Ağacı kesmeye başladın.")
-S("You cut down the tree.", "Ağacı kestin.")
+S("You start chopping down the tree.", "Ağacı kesmeye başladın.")
+S("You chop down the tree.", "Ağacı kestin.")
 S("You cannot attack Sandworms directly!", "Kumkurduna doğrudan saldıramazsınız!")
 S("You cannot attack Tentacles directly!", "Dokungaçlara doğrudan saldıramazsın!")
 S("You cannot defeat the Shadow!", "gölgeyi henüz yenemezsiniz!")
@@ -462,7 +462,7 @@ S(
 " (haritayı çevirmek ya da haritadaki nesneler hakkında bilgi almak için). Gösterilen numaralara dokunarak da anlamlarını görebilirsin. \n")
 
 S("Move with mouse, num pad, qweadzxc, or hjklyubn. Wait by pressing 's' or '.'. Spin the world with arrows, PageUp/Down, and Home/Space. "
- "To save the game you need an Orb of Safety. Press 'v' for config, ESC for the quest status and menu.\n\n",
+ "To save the game you need an Orb of Safety. Press 'v' for the main menu (configuration, special modes, etc.), ESC for the quest status.\n\n",
  "Fareyle, sayı tuşlarıyla, qweadzxc ile, veya hjklyubn ile hareket et.  's' ya da '.' ile bekle. "
  "Oklarla, PageUp/Down ile veya  Home/Space ile dünyayı çevirebilirsin. Oyunu kaydetmek için Güvenlik Küresine ihtiyacın var. Ayarlar için 'v'ye görev durumu ve menü için 'ESC'ye bas.\n\n")
 
@@ -592,7 +592,7 @@ S(
  "Trees catch fire on the next turn. The temperature of the grass cells "
  "rises once per turn for each fire nearby, and becomes fire itself "
  "when its temperature has risen 10 times.\n"
- "You can also cut down the trees. Big trees take two turns to cut down.",
+ "You can also chop down the trees. Big trees take two turns to chop down.",
  "Bu orman epey kuru. Çalı yangınlarına dikkat et!\n"
  "Ağaçlar her tur ateşe yakalanır. Çimen hücrelerinin ısısı her tur yakındaki ateşle bir artar ve sonra ısısı 10 kez yükselirse, kendisi ateş olur.\n "
  "Ağaçları kesebilirsin. Büyük ağaçları kesmesi 2 tur alır.\n ")
@@ -1349,7 +1349,7 @@ Orb("Trickery", "Kandırma")
 
 N("Illusion", GEN_F, "İlüzyon", "İlüzyonlar", "İlüzyonu", "İlüzyonla")
 
-S("This Orb allows you to create illusions of yourself. Illusions are targetted "
+S("This Orb allows you to create illusions of yourself. Illusions are targeted "
   "by most monsters, just like yourself, Thumpers, and your friends.\n\n"
   "Each illusion takes 5 charges to create, and one extra charge "
   "per turn. You can also click your illusion to take it away, restoring 4 charges.\n\n"
@@ -1375,7 +1375,7 @@ S("Cannot cast illusion here!", "Burada ilüzyon oluşturamazsın!")
 S("Cannot cast illusion on a monster!", "Bir canavarın üzerinde ilüzyon oluşturamazsın!")
 S("Cannot throw fire there!", "Oraya ateş atamazsın!")
 
-S("Illusions are targetted "
+S("Illusions are targeted "
   "by most monsters, just like yourself, Thumpers, and your friends.",
   "İlüzyonlar tıpkı sen, Gümleyenler ve dostların gibi pek çok canavar tarafından saldırıya uğrayabilir.")
 
@@ -2364,8 +2364,8 @@ S("only native Orbs allowed in %the1", "%abl1 sadece oraya özgü Küreler kulla
 S("this Orb is never unlocked globally (only hubs)", "bu Küre hiç tüm dünya için aktif edilmedi (sadece yerelde)")
 S("collect 25 %2 to unlock it in %the1", "%abl1 onu aktif etmek için 25 tane %2 topla.")
 S("collect 3 %2 to unlock it in %the1", "%abl1 onu aktif etmek için 3 tane %2 topla.")
-S("native in %the1 (collect 10 %2)", "%abl1 bulunuyor (10 tane %2)")
-S("native in %the1 (collect 1 %2)", "%abl1 bulunuyor (1 tane %2)")
+S("native to %the1 (collect 10 %2)", "%abl1 bulunuyor (10 tane %2)")
+S("native to %the1 (collect 1 %2)", "%abl1 bulunuyor (1 tane %2)")
 S("secondary in %the1 (collect 10 %3, or 25 %2)", "%abl1 ikincil olarak bulunuyor (10 tane %3, veya 25 tane %2)")
 S("the native Orb of %the1", "%abl1 doğal olarak bulunan Küre")
 S("this Orb appears on floors and is used by witches", "Bu Küre zeminlerde bulunur ve cadılarca kullanılır.")
@@ -2950,7 +2950,7 @@ S(
   " Ancak, her parça ancak 16 tur içinde bir kez büyüyebilir. Azman Orman dışındaki diyarlarda, Mutant Sarmaşık sadece altıgen hücrelerde büyüyebilir.\n\n"
   "Belki bu kadar hızlı büyüyen bitkiler dünyandaki açlık sorununu çözebilir? Mutant Fidanları toplamak için Mutant Sarmaşıkları öldür.")
 
-S("Trees in this forest can be cut down. Big trees take two turns to cut down.",
+S("Trees in this forest can be chopped down. Big trees take two turns to chop down.",
   "Bu ormandaki ağaçlar kesilebilir. Büyük ağaçların kesilmesi iki tur alır."
   )
 

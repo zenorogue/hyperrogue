@@ -15,46 +15,17 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#ifdef LOCAL
-#define CDATA
-#endif
-
-#define VER "8.3j"
-#define VERNUM 8310
-#define VERNUM_HEX 0x8310
-
 #define ISANDROID 0
 #define ISMOBILE 0
 #define ISIOS 0
+#define USE_SDL
+#define USE_COMMANDLINE
 
-#include <stdio.h>
-
-#include <SDL/SDL.h>
-
-#ifndef MAC
-#undef main
+#ifdef STEAM
+#define NOLICENSE
 #endif
 
-#include <SDL/SDL_ttf.h>
-#include <math.h>
-#include <time.h>
-#include <vector>
-#include <string>
-#include <algorithm>
-
-using namespace std;
-
-FILE *debugfile;
-int debugflags;
-
-const char *scorefile = "hyperrogue.log";
-const char *conffile = "hyperrogue.ini";
-
-string levelfile = "hyperrogue.lev";
-string picfile = "hyperrogue.pic";
-
-const char *loadlevel = NULL;
-const char *musicfile = "";
+#include "init.cpp"
 
 #ifdef LINUX
 #include <sys/resource.h>
@@ -77,58 +48,29 @@ void moreStack() {
   }
 #endif
 
-string s0;
-void addMessage(string s, char spamtype = 0);
+eLand readland(const char *s) {
+  string ss = s;
+  if(ss == "II") return laCrossroads2;
+  if(ss == "III") return laCrossroads3;
+  if(ss == "IV") return laCrossroads4;
+  if(ss == "V") return laCrossroads5;
+  for(int l=0; l<landtypes; l++) if(strstr(linf[l].name, s) != NULL) {
+    return eLand(l);
+    break;
+    }
+  return laNone;
+  }
 
-int clWidth, clHeight, clFont;
-string commandline;
+eItem readItem(const char *s) {
+  string ss = s;
+  for(int i=0; i<ittypes; i++) if(strstr(iinf[i].name, s) != NULL) {
+    return eItem(i);
+    break;
+    }
+  return itNone;
+  }
 
-#include "hyperpoint.cpp"
-#include "patterns.cpp"
-#include "heptagon.cpp"
-#include "classes.cpp"
-#include "language.cpp"
-
-#ifdef STEAM
-#define NOLICENSE
-#endif
-
-#include "hyper.h"
-
-#include "cell.cpp"
-
-#include "flags.cpp"
-#include "yendor.cpp"
-#include "complex.cpp"
-#include "game.cpp"
-#include "landgen.cpp"
-#include "orbs.cpp"
-#include "system.cpp"
-
-// #include "patterngen.cpp"
-
-#include "geometry.cpp"
-
-#include "polygons.cpp"
-
-#ifndef MOBILE
-#include "mapeditor.cpp"
-#endif
-
-#include "netgen.cpp"
-
-#include "graph.cpp"
-
-#include "achievement.cpp"
-
-#include <unistd.h>
-
-int main(int argc, char **argv) {
-
-#ifdef LINUX
-  moreStack();
-#endif
-
+void initializeCLI() {
   printf("HyperRogue by Zeno Rogue <zeno@attnam.com>, version " VER "\n");
 
 #ifndef NOLICENSE
@@ -136,208 +78,290 @@ int main(int argc, char **argv) {
   printf("comes with absolutely no warranty; see COPYING for details\n");
 #endif
 
-  // printf("cell size = %d\n", int(sizeof(cell)));
-  srand(time(NULL));
-  shrand(time(NULL));
-  
   #ifdef FHS
-  char sbuf[640], cbuf[640];
+  static string sbuf, cbuf;
   if(getenv("HOME")) {
-    snprintf(sbuf, 640, "%s/.%s", getenv("HOME"), scorefile); scorefile = sbuf;
-    snprintf(cbuf, 640, "%s/.%s", getenv("HOME"), conffile); conffile = cbuf;
+    sbuf = getenv("HOME"); sbuf += "/."; sbuf += scorefile;
+    cbuf = getenv("HOME"); cbuf += "/."; cbuf += conffile;
+    scorefile = sbuf.c_str();
+    conffile = cbuf.c_str();
     }
   #endif
+  }
 
-  for(int i=1; i<argc; i++) {
-    if(strcmp(argv[i], "-c") == 0 && i != argc-1) {conffile = argv[i+1]; i++;}
-    else if(strcmp(argv[i], "-s") == 0 && i != argc-1) {scorefile = argv[i+1]; i++;}
-    else if(strcmp(argv[i], "-m") == 0 && i != argc-1) {musicfile = argv[i+1]; i++;}
-    else if(strcmp(argv[i], "-lev") == 0 && i != argc-1) {levelfile = argv[i+1]; i++;}
-    else if(strcmp(argv[i], "-pic") == 0 && i != argc-1) {picfile = argv[i+1]; i++;}
-    else if(strcmp(argv[i], "-load") == 0 && i != argc-1) {loadlevel = argv[i+1]; i++;}
-//  else if(strcmp(argv[i], "-P") == 0 && i != argc-1) {par = atoi(argv[i+1]); i++;}
-    else if(strcmp(argv[i], "-W") == 0 && i != argc-1) {
-      for(int l=0; l<landtypes; l++) if(strstr(linf[l].name, argv[i+1]) != NULL) {
-        firstland = euclidland = eLand(l);
-        break;
-        }
-      i++;
-      }
-    else if(strcmp(argv[i], "-L") == 0) {
-      printf("Treasures:\n");
-      for(int i=1; i<ittypes; i++) 
-        if(itemclass(eItem(i)) == IC_TREASURE)
-          printf("    %s\n", iinf[i].name);
-      printf("\n");
-      printf("Orbs:\n");
-      for(int i=1; i<ittypes; i++) 
-        if(itemclass(eItem(i)) == IC_ORB)
-          printf("    %s\n", iinf[i].name);
-      printf("\n");
-      printf("Other items:\n");
-      for(int i=1; i<ittypes; i++) 
-        if(itemclass(eItem(i)) == IC_OTHER)
-          printf("    %s\n", iinf[i].name);
-      printf("\n");
-      printf("Monsters:\n");
-      for(int i=1; i<motypes; i++) 
-        printf("    %s\n", minf[i].name);
-      printf("\n");
-      printf("Lands:\n");
-      for(int i=1; i<landtypes; i++) 
-        printf("    %s\n", linf[i].name);
-      printf("\n");
-      printf("Walls:\n");
-      for(int i=0; i<walltypes; i++) 
-        printf("    %s\n", winf[i].name);
-      printf("\n");
-      exit(0);
-      }
-    else if(strcmp(argv[i], "-f") == 0) { commandline += "f"; }
-    else if(strcmp(argv[i], "-w") == 0) { commandline += "w"; }
-    else if(strcmp(argv[i], "-e") == 0) { commandline += "e"; }
-    else if(strcmp(argv[i], "-a") == 0) { commandline += "a"; }
-    else if(strcmp(argv[i], "-p") == 0) { commandline += "p"; }
-    else if(strcmp(argv[i], "-7") == 0) { commandline += "7"; }
-    else if(strcmp(argv[i], "-C") == 0) { commandline += "C"; }
-    else if(strcmp(argv[i], "-o") == 0) { commandline += "o"; }
-    else if(strcmp(argv[i], "-o0") == 0) { commandline += char(200); }
-    else if(strcmp(argv[i], "-o1") == 0) { commandline += char(201); }
-    else if(strcmp(argv[i], "-E") == 0) { commandline += "E"; }
-    else if(strcmp(argv[i], "-S") == 0) { commandline += "S"; }
-    else if(strcmp(argv[i], "-H") == 0) { commandline += "H"; }
-    else if(strcmp(argv[i], "-P1") == 0) { commandline += "P1"; }
-    else if(strcmp(argv[i], "-P2") == 0) { commandline += "P2"; }
-    else if(strcmp(argv[i], "-P3") == 0) { commandline += "P3"; }
-    else if(strcmp(argv[i], "-P4") == 0) { commandline += "P4"; }
-    else if(strcmp(argv[i], "-T") == 0) { commandline += "T"; }
-    else if(strcmp(argv[i], "-R") == 0) { commandline += "R"; }
-    else if(strcmp(argv[i], "-D") == 0) { commandline += "D"; }
-    else if(strcmp(argv[i], "-PM1") == 0) { pmodel = 1; }
-    else if(strcmp(argv[i], "-PM2") == 0) { pmodel = 2; }
-    else if(strcmp(argv[i], "-offline") == 0) offlineMode = true;
-    else if(strcmp(argv[i], "-debugf") == 0) {
-      debugfile = fopen("hyperrogue-debug.txt", "w");
-      debugflags = atoi(argv[i+1]);
-      i++;
-      }
-    else if(strcmp(argv[i], "-debuge") == 0) {
-      debugfile = stderr;
-      debugflags = atoi(argv[i+1]);
-      i++;
-      }
-#ifdef LOCAL
-    else if(strcmp(argv[i], "-auto") == 0) doAutoplay = true;
+int arg::readCommon() {
+  if(argis("-c")) { PHASE(1); shift(); conffile = args(); }
+  else if(argis("-s")) { PHASE(1); shift(); scorefile = args(); }
+  else if(argis("-m")) { PHASE(1); shift(); musicfile = args(); }
+  else if(argis("-se")) { PHASE(1); shift(); wheresounds = args(); }
+#ifndef NOEDIT
+  else if(argis("-lev")) { shift(); levelfile = args(); }
+  else if(argis("-pic")) { shift(); picfile = args(); }
+  else if(argis("-load")) { PHASE(3); shift(); mapstream::loadMap(loadlevel); }
 #endif
-    else if(strcmp(argv[i], "-ch") == 0) { autocheat = true; }
-    else if(strcmp(argv[i], "-Y") == 0) { 
-      yendor::on = true;
-      yendor::challenge = atoi(argv[i+1]);
-      i++;
-      }
-    else if(strcmp(argv[i], "-r") == 0) { 
-      i++; 
-      sscanf(argv[i], "%dx%dx%d", &clWidth, &clHeight, &clFont);
-      }    
-    else if(strcmp(argv[i], "--version") == 0 || strcmp(argv[i], "-v") == 0) {
-      printf("HyperRogue version " VER "\n");
-      exit(0);
-      }
-    else if(strcmp(argv[i], "--help") == 0 || strcmp(argv[i], "-h") == 0) {
-      printf("Press F1 while playing to get ingame options.\n\n");
-      printf("HyperRogue accepts the following command line options:\n");
-      printf("  -c FILE        - use the specified configuration file\n");
-      printf("  -s FILE        - use the specified highscore file\n");
-      printf("  -m FILE        - use the specified soundtrack (music)\n");
-      printf("  -lev FILE      - use the specified filename for the map editor (without loading)\n");
-      printf("  -load FILE     - use the specified filename for the map editor\n");
-      printf("  --version, -v  - show the version number\n");
-      printf("  --help, -h     - show the commandline options\n");
-      printf("  -f, -w         - start in the fullscreen or windowed mode\n");
-      printf("  -e, -a, -p     - start in the Escher, ASCII, or Plain mode\n");
-      printf("  -r WxHxF       - use the given resolution and font size\n");
-      printf("  -o             - switch the OpenGL mode\n");
-      printf("  -o0            - switch the OpenGL mode off\n");
-      printf("  -o1            - switch the OpenGL mode on\n");
-      printf("  -W LAND        - start in the given land (cheat)\n");
-      printf("  -ch            - auto-enable cheat mode\n");
-      printf("  -E             - switch Euclidean\n");
-      printf("  -S             - switch Shmup\n");
-      printf("  -Pn            - switch Shmup number of players (n=1..4)\n");
-      printf("  -H             - switch Hardcore\n");
-      printf("  -T             - switch Tactical\n");
-      printf("  -7             - switch heptagonal mode\n");
-      printf("  -C             - switch Chaos mode\n");
-      printf("  -R             - switch Random Pattern\n");
-      printf("  -Y id          - switch Yendor, level id\n");
-      printf("  -D             - disable all the special game modes\n");
-      printf("  -L             - list of features\n");
-      printf("  -debugf 7      - output debugging information to hyperrogue-debug.txt\n");
-      printf("  -debuge 7      - output debugging information to stderr\n");
-      printf("  -offline       - don't connect to Steam (for Steam versions)\n");
-      exit(0);
-      }
-    else {
-      printf("Unknown option: %s\n", argv[i]);
+  else if(argis("-canvas")) {
+    firstland = euclidland = laCanvas;
+    shift();
+    if(args()[1] == 0) mapeditor::whichCanvas = args()[0];
+    else mapeditor::canvasback = strtol(args(), NULL, 16);
+    }
+  else if(argis("-back")) {
+    shift(); backcolor = strtol(args(), NULL, 16);
+    }
+  else if(argis("-W2")) {
+    shift(); cheatdest = readland(args()); autocheat = true;
+    }
+  else if(argis("-W")) {
+    shift(); firstland = euclidland = readland(args());
+    }
+  else if(argis("-I")) {
+    PHASE(3) cheater++; timerghost = false;
+    shift(); eItem i = readItem(args());
+    shift(); items[i] = argi(); 
+    }
+  else if(argis("-L")) {
+    printf("Treasures:\n");
+    for(int i=1; i<ittypes; i++) 
+      if(itemclass(eItem(i)) == IC_TREASURE)
+        printf("    %s\n", iinf[i].name);
+    printf("\n");
+    printf("Orbs:\n");
+    for(int i=1; i<ittypes; i++) 
+      if(itemclass(eItem(i)) == IC_ORB)
+        printf("    %s\n", iinf[i].name);
+    printf("\n");
+    printf("Other items:\n");
+    for(int i=1; i<ittypes; i++) 
+      if(itemclass(eItem(i)) == IC_OTHER)
+        printf("    %s\n", iinf[i].name);
+    printf("\n");
+    printf("Monsters:\n");
+    for(int i=1; i<motypes; i++) 
+      printf("    %s\n", minf[i].name);
+    printf("\n");
+    printf("Lands:\n");
+    for(int i=1; i<landtypes; i++) 
+      printf("    %s\n", linf[i].name);
+    printf("\n");
+    printf("Walls:\n");
+    for(int i=0; i<walltypes; i++) 
+      printf("    %s\n", winf[i].name);
+    printf("\n");
+    exit(0);
+    }
+
+  else if(argis("-wm")) { PHASE(2); vid.wallmode = argi(); }
+  else if(argis("-mm")) { PHASE(2); vid.monmode = argi(); }
+
+#define TOGGLE(x, param) \
+else if(args()[0] == '-' && args()[1] == x && !args()[2]) { PHASE(2); param = !param; } \
+else if(args()[0] == '-' && args()[1] == x && args()[2] == '1') { PHASE(2); param = true; } \
+else if(args()[0] == '-' && args()[1] == x && args()[2] == '0') { PHASE(2); param = false; }
+
+  TOGGLE('o', vid.usingGL)
+  TOGGLE('C', chaosmode)
+  TOGGLE('7', purehepta)
+  TOGGLE('f', vid.full)
+  TOGGLE('T', tactic::on)
+  TOGGLE('S', shmup::on)
+  TOGGLE('H', hardcore)
+  TOGGLE('R', randomPatternsMode)
+  
+  else if(argis("-geo")) { PHASE(2); shift(); geometry = targetgeometry = (eGeometry) argi(); }
+  else if(argis("-qs")) {
+    autocheat = true;
+    shift(); fp43.qpaths.push_back(args());
+    }
+  else if(argis("-fix")) {
+    fixseed = true; autocheat = true;
+    }
+  else if(argis("-qpar")) { 
+    int p;
+    shift(); sscanf(args(), "%d,%d,%d", 
+      &p, &quotientspace::rvadd, &quotientspace::rvdir
+      );
+    autocheat = true;
+    fp43.init(p); 
+    }
+  else if(argis("-cs")) {
+    shift(); 
+    fieldpattern::matrix M = fp43.strtomatrix(args());
+    fieldpattern::subpathid = fp43.matcode[M];
+    fieldpattern::subpathorder = fp43.order(M);
+    autocheat = true;
+    }
+  else if(argis("-csp")) {
+    autocheat = true;
+    fp43.findsubpath();
+    }
+  else if(argis("-fi")) {
+    fieldpattern::info();
+    exit(0);
+    } 
+  else if(argis("-P")) { 
+    PHASE(2); shift(); 
+    vid.scfg.players = argi(); 
+    }
+  else if(argis("-PM")) { 
+    PHASE(2); shift(); pmodel = eModel(argi());
+    }
+  else if(argis("-offline")) offlineMode = true;
+  else if(argis("-debugf")) {
+    debugfile = fopen("hyperrogue-debug.txt", "w");
+    shift(); debugflags = argi();
+    }
+  else if(argis("-debuge")) {
+    debugfile = stderr;
+    shift(); debugflags = argi();
+    }
+  else if(argis("-ch")) { autocheat = true; }
+  else if(argis("-zoom") && curphase == 2) { 
+    PHASE(2); shift(); vid.scale = argf();
+    }
+  else if(argis("-zoom") && curphase == 3) { 
+    PHASE(3); shift(); vid.scale = argf();
+    }
+  else if(argis("-Y")) { 
+    yendor::on = true;
+    shift(); yendor::challenge = argi();
+    }
+  else if(argis("-r")) { 
+    PHASE(2);
+    shift(); 
+    int clWidth=0, clHeight=0, clFont=0;
+    sscanf(args(), "%dx%dx%d", &clWidth, &clHeight, &clFont);
+    if(clWidth) vid.xres = clWidth;
+    if(clHeight) vid.yres = clHeight;
+    if(clFont) vid.fsize = clFont;
+    }    
+  else if(argis("--version") || argis("-v")) {
+    printf("HyperRogue version " VER "\n");
+    exit(0);
+    }
+  else if(argis("--run")) {
+    PHASE(3); mainloop(); quitmainloop = false;
+    }
+  else if(argis("--draw")) {
+    PHASE(3); drawscreen();
+    }
+  else if(argis("--exit")) {
+    PHASE(3); printf("Success.\n");
+    exit(0);
+    }
+  else if(argis("-gencells")) {
+    PHASE(3); shift(); 
+    printf("Generating %d cells...\n", argi());
+    celllister cl(cwt.c, 50, argi(), NULL);
+    printf("Cells generated: %d\n", size(cl.lst));
+    for(int i=0; i<size(cl.lst); i++)
+      setdist(cl.lst[i], 7, NULL);
+    }
+  else if(argis("-sr")) {    
+    if(curphase == 1) PHASE(2);
+    shift(); sightrange = argi();
+    }
+  else if(argis("-pngshot")) {
+    PHASE(3); shift(); 
+    printf("saving PNG screenshot to %s\n", args());
+    saveHighQualityShot(args());
+    }
+  else if(argis("-svgsize")) {
+    shift(); sscanf(args(), "%d/%d", &svg::svgsize, &svg::divby);
+    }
+  else if(argis("-pngsize")) {
+    shift(); sscanf(args(), "%d", &pngres);
+    }
+  else if(argis("-svggamma")) {
+    shift(); svg::gamma = argf();
+    }
+  else if(argis("-svgshot")) {
+    PHASE(3); shift(); 
+    printf("saving SVG screenshot to %s\n", args());
+    svg::render(args());
+    }
+  else if(argis("--help") || argis("-h")) {
+    printf("Press F1 while playing to get ingame options.\n\n");
+    printf("HyperRogue accepts the following command line options:\n");
+    printf("  -c FILE        - use the specified configuration file\n");
+    printf("  -s FILE        - use the specified highscore file\n");
+    printf("  -m FILE        - use the specified soundtrack (music)\n");
+    printf("  -se DIR        - the directory containing sound effects\n");
+    printf("  -lev FILE      - use the specified filename for the map editor (without loading)\n");
+    printf("  -load FILE     - use the specified filename for the map editor\n");
+    printf("  -canvas COLOR  - set background color or pattern code for the canvas\n");
+    printf("  --version, -v  - show the version number\n");
+    printf("  --help, -h     - show the commandline options\n");
+    printf("  -f*            - toggle fullscreen mode\n");
+    printf("  -wm n, -mm n   - start in the given wallmode or monmode\n");
+    printf("  -r WxHxF       - use the given resolution and font size\n");
+    printf("  -o*            - toggle the OpenGL mode\n");
+    printf("  -W LAND        - start in the given land (cheat)\n");
+    printf("  -W2 LAND       - make the given land easy to find (also turns on autocheat)\n");
+    printf("  -ch            - auto-enable cheat mode\n");
+    printf("  -geo n         - switch geometry (1=Euclidean, 2=spherical, 3=elliptic, 4/5=quotient)\n");
+    printf("  -qs <desc>     - fieldpattern: quotient by the given <desc> (must be followed by qpar)\n");
+    printf("  -qpar <prime>  - fieldpattern: use the given prime instead of 43\n");
+    printf("  -cs <desc>     - fieldpattern: set subpath to the given <desc> (cannot be followed by qpar)\n");
+    printf("  -csp           - fieldpattern: find the subpath of order <prime> (cannot be followed by qpar)\n");
+    printf("  -S*            - toggle Shmup\n");
+    printf("  -P n           - switch Shmup number of players (n=1..7)\n");
+    printf("  -PM            - switch the model index\n");
+    printf("  -H*            - toggle Hardcore\n");
+    printf("  -T*            - toggle Tactical\n");
+    printf("  -7*            - toggle heptagonal mode\n");
+    printf("  -C*            - toggle Chaos mode\n");
+    printf("  -R*            - toggle Random Pattern\n");
+    printf("  -Y id          - enable Yendor, level id\n");
+    printf("  -D             - disable all the special game modes\n");
+    printf("  -L             - list of features\n");
+    printf("  -debugf 7      - output debugging information to hyperrogue-debug.txt\n");
+    printf("  -debuge 7      - output debugging information to stderr\n");
+    printf("  -offline       - don't connect to Steam (for Steam versions)\n");
+    printf("  -I ITEM n      - start with n of ITEM (activates cheat and disables ghosts)\n");
+    printf("  -fix           - fix the seed\n");
+    printf("Toggles: -o0 disables, -o1 enables, -o switches");
+    printf("Not all options are documented, see hyper.cpp");
+    exit(0);
+    }
+  else if(ca::readArg()) ;
+  else return 1;
+  return 0;
+  }
+
+int main(int argc, char **argv) {
+#ifndef WEB
+  #ifdef LINUX
+    moreStack();
+  #endif
+  arg::init(argc, argv);
+  initializeCLI();
+#endif
+  initAll();
+  arg::read(3);
+  mainloop();
+  finishAll();  
+  profile_info();
+  return 0;
+  }
+
+#ifdef USE_COMMANDLINE
+namespace arg {
+  int argc; char **argv;
+  
+  void read(int phase) { 
+    curphase = phase;
+    while(argc) {
+      int r;
+      r = readCommon(); if(r == 2) return; if(r == 0) { lshift(); continue; }
+#ifdef LOCAL
+      r = readLocal(); if(r == 2) return; if(r == 0) { lshift(); continue; }
+#endif
+#ifdef ROGUEVIZ
+      r = rogueviz::readArgs(); if(r == 2) return; if(r == 0) { lshift(); continue; }
+#endif
+      printf("Unknown option: %s\n", args());
       exit(3);
       }
     }
-  
-  achievement_init();
-
-  eLand f = firstland;
-    
-  // initlanguage();
-  initgraph();
-  loadsave();
-  precalc(); 
-  resetGL();
-  initcells();
-  
-  #ifdef BUILDZEBRA
-  firstland = laCanvas;
-  shmup::on = false; 
-  #endif
-  shmup::safety = safety;
-  initgame();
-  #ifdef BUILDZEBRA
-  zebraPattern();
-  #endif
-  
-  if(!shmup::on) {
-    restoreGolems(items[itOrbLife], moGolem); items[itOrbLife] = 0;
-    restoreGolems(items[itOrbFriend], moTameBomberbird); items[itOrbFriend] = 0;
-    restoreGolems(kills[moPrincessMoved], moPrincess, princess::saveHP); kills[moPrincessMoved] = 0;
-    restoreGolems(kills[moPrincessArmedMoved], moPrincessArmed, princess::saveArmedHP); kills[moPrincessArmedMoved] = 0;
-    }
-  
-  firstland = f;
-  
-  // verifyHell();
-  // exit(1);
-  
-  int t1 = SDL_GetTicks();
-  
-  // if(switchEuclid) restartGame('e');
-  
-  if(loadlevel) mapstream::loadMap(loadlevel);
-
-#ifdef LOCAL  
-  // river();
-  autoplay();
-#endif
-  mainloop();
-  
-  achievement_final(!items[itOrbSafety]);
-  
-  saveStats();
-  int msec = SDL_GetTicks() - t1;
-  DEBB(DF_INIT, (debugfile, "frame : %f ms (%f fps)\n", 1.*msec/frames, 1000.*frames/msec));
-  offscreen.clear();  
-  clearMemory();
-  cleargraph();
-  
-  achievement_close();
-  
-  return 0;
   }
+#endif

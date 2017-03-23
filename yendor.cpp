@@ -5,7 +5,7 @@
 // Yendor Quest, together with the Yendor Challenge
 // also, the Pure Tactics Mode
 
-#define MODECODES 38
+#define MODECODES 254
 
 int hiitemsMax(eItem it) {
   int mx = 0;
@@ -50,7 +50,7 @@ namespace yendor {
   int challenge; // id of the challenge
   int lastchallenge;
   
-  #define YENDORLEVELS 27
+  #define YENDORLEVELS 29
 
   int bestscore[MODECODES][YENDORLEVELS];
 
@@ -69,6 +69,7 @@ namespace yendor {
   #define YF_START_AL   2048
   #define YF_START_CR   4096
   #define YF_CHAOS      8192
+  #define YF_RECALL     16384
   
   #define YF_START_ANY  (YF_START_AL|YF_START_CR)
   
@@ -103,14 +104,26 @@ namespace yendor {
     {laWildWest,  0},
     {laWhirlwind, YF_NEAR_TENT},
     {laHell,      YF_CHAOS | YF_DEAD},
-    {laDragon,    YF_DEAD}
+    {laDragon,    YF_DEAD},
+    {laReptile,   0},
+    {laTortoise,  YF_RECALL},
     };
+  
+  int tscorelast;
 
   void uploadScore() {
     int tscore = 0;
     for(int i=1; i<YENDORLEVELS; i++)
       if(bestscore[0][i]) tscore += 999 + bestscore[0][i];
     // printf("Yendor score = %d\n", tscore);
+
+    if(tscore > tscorelast) {
+      tscorelast = tscore;
+      if(tscore >= 1000) achievement_gain("YENDC1", 'x');
+      if(tscore >= 5000) achievement_gain("YENDC2", 'x');
+      if(tscore >= 15000) achievement_gain("YENDC3", 'x');
+      }
+
     achievement_score(LB_YENDOR_CHALLENGE, tscore);
     }
     
@@ -134,7 +147,8 @@ namespace yendor {
   
   vector<yendorinfo> yi;
   
-  int yii = 0;
+#define NOYENDOR 999999
+  int yii = NOYENDOR;
   
   int hardness() {
     int thf = 0;
@@ -156,11 +170,10 @@ namespace yendor {
     return ysUntouched;
     }
   
-  bool check(cell *yendor, bool checkonly) {
+  bool check(cell *yendor) {
     int byi = size(yi);
     for(int i=0; i<size(yi); i++) if(yi[i].path[0] == yendor) byi = i;
-    if(byi < size(yi) && yi[byi].found) return true;
-    if(checkonly) return false;
+    if(byi < size(yi) && yi[byi].found) return false;
     if(byi == size(yi)) {
       yendorinfo nyi;
       nyi.path[0] = yendor;
@@ -241,7 +254,7 @@ namespace yendor {
       generating = false;
   
       for(int b=10; b>=5; b--) setdist(key, b, nyi.path[YDIST-2]);
-      
+
       for(int i=-1; i<key->type; i++) {
         cell *c2 = i >= 0 ? key->mov[i] : key;
         checkTide(c2);
@@ -257,6 +270,7 @@ namespace yendor {
             c2->wall = waBoat, c2->monst = moPirate, c2->item = itOrbWater;
           else c2->wall = waNone;
           }
+        if(c2->wall == waReptile) c2->wall = waNone;
         if(c2->wall == waMineMine || c2->wall == waMineUnknown) 
           c2->wall = waMineOpen;
         if(c2->wall == waTrapdoor && i == -1)
@@ -269,14 +283,20 @@ namespace yendor {
         if(isGravityLand(c2->land) && key->land == c2->land &&
           c2->landparam < key->landparam && c2->wall != waTrunk)
             c2->wall = waPlatform;
+        if(c2->land == laReptile && i >= 0)
+          c2->wall = waChasm;
         }
       key->item = itKey;
   
       yi.push_back(nyi);
       }
-    yii = byi;
     addMessage(XLAT("You need to find the right Key to unlock this Orb of Yendor!"));
-    achievement_gain("YENDOR1");
+    if(yii != byi) {
+      yii = byi;
+      achievement_gain("YENDOR1");
+      playSound(yendor, "pickup-yendor");
+      return true;
+      }
     return false;
     }
   
@@ -314,6 +334,16 @@ namespace yendor {
         if(clev().flags & YF_DEAD)   items[itGreenStone] = 100;
         if(clev().flags & YF_DEAD5)  items[itGreenStone] = 5;
         }
+      if(clev().flags & YF_RECALL) {
+        int yq = items[itOrbYendor];
+        items[itOrbRecall] = 60 - yq;
+        items[itOrbTime] = 60 - yq;
+        items[itOrbEnergy] = 60 - yq;
+        items[itOrbTeleport] = 60 - yq;
+        items[itOrbSpace] = 60 - yq;
+        items[itOrbDash] = 60 - yq;
+        items[itOrbFrog] = 60 - yq;
+        }
       nexttostart = laNone;
       }
     
@@ -321,7 +351,7 @@ namespace yendor {
       cell *c2 = cwt.c->mov[0];
       c2->land = firstland;
       if(firstland == laRlyeh) c2->wall = waNone;
-      yendor::check(c2, false);
+      yendor::check(c2);
       if(clev().flags & YF_NEAR_IVY)
         nexttostart = laJungle;
       if(clev().flags & YF_NEAR_TENT)
@@ -354,6 +384,7 @@ namespace yendor {
       makeEmpty(c2);
       c2->item = itOrbYendor;
       nexttostart = laNone;
+      if(clev().flags & YF_RECALL) recallCell = cwt.c;
       }
     }
   
@@ -368,6 +399,7 @@ namespace yendor {
     if((ylev.flags & YF_NEAR_TENT) && hiitemsMax(itStatue) < 10) return false;
     if((ylev.flags & YF_CHAOS) && !chaosUnlocked) return false;
     if((ylev.flags & (YF_DEAD|YF_DEAD5)) && hiitemsMax(itBone) < 10) return false;
+    if((ylev.flags & YF_RECALL) && hiitemsMax(itSlime) < 10) return false;
     return true;
     }
   
@@ -380,13 +412,13 @@ namespace yendor {
   void showMenu() {
     int s = vid.fsize;
     vid.fsize = vid.fsize * 4/5;
-    displayStatHelp(-8, XLAT("Yendor Challenge"));
+    dialog::init(XLAT("Yendor Challenge"), iinf[itOrbYendor].color, 150, 100);
 
     for(int i=1; i<YENDORLEVELS; i++) {
       string s;
       yendorlevel& ylev(levels[i]);
       
-      if(levelUnlocked(i)) {
+      if(autocheat || levelUnlocked(i)) {
       
         s = XLATT1(ylev.l);
         
@@ -399,6 +431,7 @@ namespace yendor {
           if(ylev.flags & YF_NEAR_RED) { s += "+"; s += XLATT1(laRedRock); }
           if(ylev.flags & YF_START_AL) { s += "+"; s += XLATT1(laAlchemist); }
           if(ylev.flags & YF_DEAD) { s += "+"; s += XLATT1(itGreenStone); }
+          if(ylev.flags & YF_RECALL) { s += "+"; s += XLATT1(itOrbRecall); }
           }
         }
 
@@ -412,13 +445,16 @@ namespace yendor {
       else if(bestscore[modecode()][i])
         v = XLAT(" (won at level %1!)", its(bestscore[modecode()][i]));
       
-      displayStat(i-6, s, v, 'a' + i-1);
+      dialog::addSelItem(s, v, 'a' + i-1);
       }
 
-    displayStat(YENDORLEVELS+1-6, XLAT("Return to the normal game"), "", '0');
-    displayStat(YENDORLEVELS+1-5, XLAT(
+    dialog::addBreak(60);
+    dialog::addItem(XLAT("Return to the normal game"), '0');
+    dialog::addSelItem(XLAT(
       easy ? "Challenges do not get harder" : "Each challenge gets harder after each victory"),
       " " + XLAT(easy ? "easy" : "challenge"), '1');
+    
+    dialog::display();
     
     int yc = getcstat - 'a' + 1;
     if(yc > 0 && yc < YENDORLEVELS) {
@@ -463,10 +499,11 @@ namespace yendor {
     "You get 1000 points for each challenge won, and 1 extra point for "
     "each extra difficulty level.";
 
-  void handleKey(int uni, int sym) {
+  void handleKey(int sym, int uni) {
+    dialog::handleNavigation(sym, uni);
     if(uni >= 'a' && uni < 'a'+YENDORLEVELS-1) {
       challenge = uni-'a' + 1;
-      if(levelUnlocked(challenge)) {
+      if(levelUnlocked(challenge) || autocheat) {
         restartGame(yendor::on ? 0 : 'y');
         cmode = emNormal;
         }
@@ -522,6 +559,7 @@ namespace tactic {
   
   bool tacticUnlocked(int i) {
     eLand l = land_tac[i].l;
+    if(autocheat) return true;
     if(l == laWildWest) return true;
     return hiitemsMax(treasureType(l)) * landMultiplier(l) >= 20;
     }
@@ -552,11 +590,20 @@ namespace tactic {
     unrecord(lasttactic);
     }
   
+  int tscorelast;
+
   void uploadScoreCode(int code, int lb) {
     int tscore = 0;
     for(int i=0; i<landtypes; i++) 
       tscore += recordsum[code][i] * tacmultiplier(eLand(i));
     // printf("PTM score = %d\n", tscore);
+    
+    if(code == 0 && tscore > tscorelast) {
+      tscorelast = tscore;
+      if(tscore >= 1000) achievement_gain("PTM1", 'x');
+      if(tscore >= 5000) achievement_gain("PTM2", 'x');
+      if(tscore >= 15000) achievement_gain("PTM3", 'x');
+      }
     achievement_score(lb, tscore);
     }
 
@@ -565,22 +612,41 @@ namespace tactic {
     uploadScoreCode(2, LB_PURE_TACTICS_SHMUP);
     uploadScoreCode(4, LB_PURE_TACTICS_COOP);
     }
+  
+  int nl;
+  
+  eLand getLandById(int i) {
+    return
+      sphere ? land_sph[i] :
+      euclid ? land_euc[i] :
+      land_tac[i].l;
+    }
 
   void showMenu() {
     mouseovers = XLAT("pure tactics mode") + " - " + mouseovers;
 
-    int nl = LAND_TAC; 
+    nl = LAND_TAC; 
     
-    int vf = min((vid.yres-64) / nl, vid.xres/40);
+    if(euclid) nl = LAND_EUC;
+    if(sphere) nl = LAND_SPH;
+
+    int nlm;
+    int ofs = dialog::handlePage(nl, nlm, nl/2);
+        
+    int vf = min((vid.yres-64-vid.fsize) / nlm, vid.xres/40);
     
     int xr = vid.xres / 64;
     
     if(on) record(firstland, items[treasureType(firstland)]);
     
     int xc = modecode();
+    
+    getcstat = SDLK_ESCAPE;
 
     for(int i=0; i<nl; i++) {
-      eLand l = land_tac[i].l;
+      int i1 = i + ofs;
+      eLand l = getLandById(i1);
+
       int i0 = 56 + i * vf;
       int col;
       
@@ -588,36 +654,32 @@ namespace tactic {
 
       if(!ch) continue;
       
-      bool unlocked = tacticUnlocked(i);
+      bool unlocked = tacticUnlocked(i1);
       
       if(unlocked) col = linf[l].color; else col = 0x202020;
       
-      if(displayfr(xr*1, i0, 1, vf-4, XLAT1(linf[l].name), col, 0) && unlocked) {
-        getcstat = 1000 + i;
+      if(displayfrZ(xr*1, i0, 1, vf-4, XLAT1(linf[l].name), col, 0) && unlocked) {
+        getcstat = 1000 + i1;
         }
         
-      if(unlocked) {
+      if(unlocked || autocheat) {
         for(int ii=0; ii<ch; ii++)
-          if(displayfr(xr*(24+2*ii), i0, 1, (vf-4)*4/5, lsc[xc][l][ii] >= 0 ? its(lsc[xc][l][ii]) : "-", col, 16)) 
-            getcstat = 1000 + i;
+          if(displayfrZ(xr*(24+2*ii), i0, 1, (vf-4)*4/5, lsc[xc][l][ii] >= 0 ? its(lsc[xc][l][ii]) : "-", col, 16)) 
+            getcstat = 1000 + i1;
 
-        if(displayfr(xr*(24+2*10), i0, 1, (vf-4)*4/5, 
+        if(displayfrZ(xr*(24+2*10), i0, 1, (vf-4)*4/5, 
           its(recordsum[xc][l]) + " x" + its(tacmultiplier(l)), col, 0)) 
-            getcstat = 1000 + i;
+            getcstat = 1000 + i1;
         }
       else {
         int m = landMultiplier(l);
-        displayfr(xr*26, i0, 1, (vf-4)*4/5, 
+        displayfrZ(xr*26, i0, 1, (vf-4)*4/5, 
           XLAT("Collect %1x %2 to unlock", its((20+m-1)/m), treasureType(l)), 
           col, 0);
         }
       }
     
-    if(on || ISIOS) {
-      int i0 = 56 + nl * vf;
-      if(displayfr(xr*24, i0, 1, vf-4, "press 0 to leave this mode", 0xFFD500, 8))
-        getcstat = '0';
-      }
+    dialog::displayPageButtons(3, true);
 
     uploadScore();
     if(on) unrecord(firstland);
@@ -635,9 +697,9 @@ namespace tactic {
       }
     }
 
-  void handleKey(int uni, int sym) {
+  void handleKey(int sym, int uni) {
     if(uni >= 1000 && uni < 1000 + LAND_TAC) {
-      firstland = land_tac[uni - 1000].l;
+      firstland = euclidland = getLandById(uni - 1000);
       restartGame(tactic::on ? 0 : 't');
       cmode = emNormal;
       }
@@ -646,7 +708,7 @@ namespace tactic {
       firstland = laIce;
       if(tactic::on) restartGame('t');
       }
-    else if(uni == '2' || sym == SDLK_F1) {
+    else if(sym == SDLK_F1) {
       lastmode = cmode;
       cmode = emHelp;
       help = 
@@ -673,27 +735,124 @@ namespace tactic {
         "Good luck, and have fun!";
         
       }
-    else if(uni) cmode = emNormal;
+    else if(dialog::handlePageButtons(uni)) ;
+    else if(uni || sym == SDLK_F10) cmode = emNormal;
     }
   };
 
+int modecodetable[42][6] = {
+  {  0, 38, 39, 40, 41, 42}, // softcore hyperbolic
+  {  7, 43, 44, 45, 46, 47}, // hardcore hyperbolic
+  {  2,  4,  9, 11, 48, 49}, // shmup hyperbolic
+  { 13, 50, 51, 52, 53, 54}, // softcore heptagonal hyperbolic
+  { 16, 55, 56, 57, 58, 59}, // hardcore heptagonal hyperbolic
+  { 14, 15, 17, 18, 60, 61}, // shmup heptagonal hyperbolic
+  {  1, 62, 63, 64, 65, 66}, // softcore euclidean
+  {  8, 67, 68, 69, 70, 71}, // hardcore euclidean
+  {  3,  5, 10, 12, 72, 73}, // shmup euclidean
+  {110,111,112,113,114,115}, // softcore spherical
+  {116,117,118,119,120,121}, // hardcore spherical
+  {122,123,124,125,126,127}, // shmup spherical
+  {128,129,130,131,132,133}, // softcore heptagonal spherical
+  {134,135,136,137,138,139}, // hardcore heptagonal spherical
+  {140,141,142,143,144,145}, // shmup heptagonal spherical
+  {146,147,148,149,150,151}, // softcore elliptic
+  {152,153,154,155,156,157}, // hardcore elliptic
+  {158,159,160,161,162,163}, // shmup elliptic
+  {164,165,166,167,168,169}, // softcore heptagonal elliptic
+  {170,171,172,173,174,175}, // hardcore heptagonal elliptic
+  {176,177,178,179,180,181}, // shmup heptagonal elliptic
+  { 19, 74, 75, 76, 77, 78}, // softcore hyperbolic chaosmode
+  { 26, 79, 80, 81, 82, 83}, // hardcore hyperbolic chaosmode
+  { 21, 23, 28, 30, 84, 85}, // shmup hyperbolic chaosmode
+  { 32, 86, 87, 88, 89, 90}, // softcore heptagonal hyperbolic chaosmode
+  { 35, 91, 92, 93, 94, 95}, // hardcore heptagonal hyperbolic chaosmode
+  { 33, 34, 36, 37, 96, 97}, // shmup heptagonal hyperbolic chaosmode
+  { 20, 98, 99,100,101,102}, // softcore euclidean chaosmode
+  { 27,103,104,105,106,107}, // hardcore euclidean chaosmode
+  { 22, 24, 29, 31,108,109}, // shmup euclidean chaosmode
+  {182,183,184,185,186,187}, // softcore spherical chaosmode
+  {188,189,190,191,192,193}, // hardcore spherical chaosmode
+  {194,195,196,197,198,199}, // shmup spherical chaosmode
+  {200,201,202,203,204,205}, // softcore heptagonal spherical chaosmode
+  {206,207,208,209,210,211}, // hardcore heptagonal spherical chaosmode
+  {212,213,214,215,216,217}, // shmup heptagonal spherical chaosmode
+  {218,219,220,221,222,223}, // softcore elliptic chaosmode
+  {224,225,226,227,228,229}, // hardcore elliptic chaosmode
+  {230,231,232,233,234,235}, // shmup elliptic chaosmode
+  {236,237,238,239,240,241}, // softcore heptagonal elliptic chaosmode
+  {242,243,244,245,246,247}, // hardcore heptagonal elliptic chaosmode
+  {248,249,250,251,252,253}, // shmup heptagonal elliptic chaosmode
+  };
+// unused code: 25
+int newmodecode = 254;
+
 int modecode() {
-  int xcode = 0;
-  if(euclid) xcode += 1;
-  if(shmup::on) {
-    if(numplayers() == 1) xcode += 2;
-    if(numplayers() == 2) xcode += 4;
-    if(numplayers() == 3) xcode += 9;
-    if(numplayers() == 4) xcode += 11;
-    }
-  if(pureHardcore() && !shmup::on) xcode += 7;
+#ifndef NOSAVE
   if(anticheat::tampered || cheater) return 6;
-  if(purehepta) {
-    if(xcode > 6) xcode--;
-    xcode /= 2;
-    xcode += 13;
+  if(quotient) return 6;
+#endif
+  int xcode = 0;
+
+  if(shmup::on) xcode += 2;
+  else if(pureHardcore()) xcode ++;
+  
+  if(euclid) xcode += 6;
+  else if(purehepta) xcode += 3;
+  
+  if(sphere) {
+    xcode += 9;
+    if(elliptic) xcode += 6;
+    if(purehepta) xcode += 3;
     }
-  if(chaosmode && !yendor::on && cmode != emYendor) xcode += 19;
-  return xcode;
+  
+  if(chaosmode) xcode += 21;
+  
+  int np = numplayers()-1; if(np<0 || np>5) np=5;
+  
+  return modecodetable[xcode][np];
   }
 
+void buildmodetable() {
+  bool codeused[600];
+  for(int q=0; q<600; q++) codeused[q] = 0;
+  
+  codeused[6] = true; // cheater
+  
+  printf("int modecodetable[42][6] = {\n");
+  
+  for(int b=0; b<42; b++) {
+    extern bool hardcore;
+    hardcore = (b%3 == 1);
+    shmup::on = (b%3 == 2);
+    purehepta = (b/3)%7 == 1 || (b/3)%7 == 4 || (b/3)%7 == 6;
+    geometry = gNormal;
+    if((b/3)%7 == 2) geometry = gEuclid;
+    if((b/3)%7 >= 3) geometry = gSphere;
+    if((b/3)%7 >= 5) geometry = gElliptic;
+    chaosmode = b >= 21;
+    printf("  {");
+    for(int p=0; p<6; p++) {
+      multi::players = p+1;
+      if(p) printf(","); 
+      int mc = modecode();
+      if(codeused[mc]) mc = newmodecode++;
+      codeused[mc] = true;
+      printf("%3d", mc);
+      }
+    printf("}, //");
+    if(hardcore) printf(" hardcore");
+    else if(shmup::on) printf(" shmup");
+    else printf(" softcore");
+    if(purehepta) printf(" heptagonal");
+    if(euclid) printf(" euclidean");
+    else if(elliptic) printf(" elliptic");
+    else if(sphere) printf(" spherical");
+    else printf(" hyperbolic");
+    if(chaosmode) printf(" chaosmode");
+    printf("\n");
+    }
+  printf("  }\n");
+  for(int i=0; i<newmodecode; i++) if(!codeused[i]) printf("// unused code: %d\n", i);
+  printf("int newmodecode = %d;\n", newmodecode);
+  }

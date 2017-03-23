@@ -15,6 +15,7 @@ namespace whirlwind {
       decodeMaster(c->master, x, y);
       return 1+((((signed short)(y)+int(50000))/3)%3);
       }
+    if(sphere) return getHemisphere(c, 0) > 0 ? 1 : 2;
     return zebra3(c);
     }
 
@@ -126,10 +127,12 @@ namespace whirlwind {
       }
     for(int i=0; i<z-1; i++) {
       moveItem(whirlline[i], whirlline[i+1], true);
+      if(whirlline[i]->item)
+        animateMovement(whirlline[i+1], whirlline[i], LAYER_BOAT);
       }
     for(int i=0; i<z; i++) 
-      if(whirlline[i] == cwt.c && cwt.c->item)
-        collectItem(cwt.c, true);
+      if(isPlayerOn(whirlline[i]) && whirlline[i]->item)
+        collectItem(whirlline[i], true);
     }
   
   void move() {
@@ -174,7 +177,7 @@ namespace whirlwind {
 
 namespace elec { 
 
-  bool havecharge, havethunder;
+  bool havecharge, haveelec, havethunder;
   bool afterOrb; // extra charge from the Orb of Lightning
 
   enum eCharge {
@@ -193,7 +196,7 @@ namespace elec {
     if(c->wall == waCharged) return ecCharged;
     if(c->wall == waSea || c->wall == waGrounded) return ecGrounded;
     if(c->wall == waSandstone || c->wall == waDeadTroll || 
-      c->wall == waDeadTroll2 ||
+      c->wall == waDeadTroll2 || 
       c->wall == waVinePlant ||
       c->wall == waMetal || isAlchAny(c)) 
         return c->land == laStorms ? ecConductor : ecGrounded; 
@@ -202,20 +205,18 @@ namespace elec {
     if(c->wall == waChasm)
       return ecIsolator;
 
-    if(shmup::on ? isPlayerOn(c) : (c == cwt.c || c == stalemate::moveto || (items[itOrbEmpathy] && isFriendly(c)))) {
+    if(shmup::on ? isPlayerOn(c) : (isPlayerOn(c) || stalemate::isMoveto(c) || (items[itOrbEmpathy] && isFriendly(c)))) {
       if(items[itOrbShield]) return ecIsolator;
-      if(ao) return ecIsolator;
-      if(!items[itOrbGhost]) return c->land == laStorms ? ecConductor : ecGrounded;
+      if(afterOrb) return ecIsolator;
+      if(!items[itOrbAether]) return c->land == laStorms ? ecConductor : ecGrounded;
       }
     
     // if(c->monst && stalemate::moveto) printf("%p: isKilled = %d\n", c, stalemate::isKilled(c));
 
-    if(
-      (
-        c->monst || (shmup::on ? isPlayerOn(c) : c == cwt.c) || 
-        c == stalemate::moveto || c == stalemate::pushto)
+    else if(
+      (c->monst || stalemate::isPushto(c))
       && 
-      (c == stalemate::pushto || !stalemate::isKilled(c)) 
+      (stalemate::isPushto(c) || !stalemate::isKilled(c)) 
       && 
       c->monst != moGhost && c->monst != moIvyDead && c->monst != moIvyNext 
       && !(isDragon(c->monst) && !c->hitpoints)
@@ -323,15 +324,17 @@ namespace elec {
     if(c->monst) {
       if(c->monst == moMetalBeast2 && !c->item)
         c->item = itFulgurite;
-      killMonster(c);
+      killMonster(c, moLightningBolt);
       }
     if(isPlayerOn(c)) {
       killThePlayerAt(moLightningBolt, c, 0);
       }
     if(c->wall == waSandstone)
-      c->wall = waNone, c->item = itFulgurite;
+      c->wall = waNone, c->item = itFulgurite,
+      drawParticles(c, winf[waSandstone].color, 16);
     if(c->wall == waDeadTroll) c->wall = waCavefloor;
     if(c->wall == waDeadTroll2 || isAlchAny(c) || c->wall == waVinePlant)
+      drawParticles(c, winf[c->wall].color, 16),
       c->wall = waNone;
     /* if(c->wall == waCharged)
       c->wall = waMetal; */
@@ -357,6 +360,7 @@ namespace elec {
   
   void init() {
     chargecells.clear();
+    if(!haveelec && !afterOrb) return;
     sval++;
     for(int i=0; i<size(dcal); i++) listChargedCells(dcal[i]);
     
@@ -384,6 +388,7 @@ namespace elec {
   void fire() {
     if(havethunder) {
       addMessage(XLAT("There is a flash of thunder!"));
+      playSound(NULL, "storm");
       drawLightning();
       for(int i=2; i<size(charges); i++) if(charges[i].fire)
         affect(charges[i].c);
@@ -427,8 +432,9 @@ namespace elec {
 
   void act() {
     int k = tkills();
-    if(cwt.c->land == laStorms && !afterOrb) 
-      markOrb(itOrbShield), markOrb(itOrbGhost);
+    for(int i=0; i<numplayers(); i++)
+      if(multi::playerActive(i) && playerpos(i)->land == laStorms && !afterOrb) 
+        markOrb(itOrbShield), markOrb(itOrbAether);
     builder b;
     fire();
     if(!afterOrb)
@@ -444,8 +450,9 @@ namespace elec {
       }
     if(lightningfast > 1) return;
     builder b; 
-    if(elec::affected(cwt.c)) 
-      lightningfast = 1;
+    for(int i=0; i<numplayers(); i++)
+      if(multi::playerActive(i) && elec::affected(playerpos(i))) 
+        lightningfast = 1;
     }
 
   
@@ -469,6 +476,8 @@ namespace princess {
   bool gotoPrincess = false;
 
   int saveHP = 0, saveArmedHP = 0;
+  
+  int reviveAt;
   
   struct info {
     int id;         // id of this info
@@ -536,6 +545,7 @@ namespace princess {
     if(c->land != laPalace) return OUT_OF_PALACE;
     else if(euclid) return celldistAlt(c);
     else if(!c->master->alt) return OUT_OF_PRISON;
+    else if(quotient || sphere) return OUT_OF_PRISON;
     else return celldistAlt(c);
     }
   
@@ -551,6 +561,7 @@ namespace princess {
     c->stuntime = 0;
     c->hitpoints = palaceHP();
     drawFlash(c);
+    playSound(c, princessgender() ? "heal-princess" : "heal-prince");
 
     info *inf = NULL;
     for(int i=0; i<size(infos); i++) 
@@ -618,6 +629,7 @@ namespace princess {
     info *i = getPrisonInfo(c);
     int d = dist(c);
 
+    playSound(c, "mousesqueak", 40);
     if(!i)
        addMessage(XLAT("%The1 squeaks in a confused way.", m));
     else if(i->bestdist >= 6)
@@ -642,6 +654,7 @@ namespace princess {
   
     static int msgid = 0;
   
+    playSound(c, princessgender() ? "speak-princess" : "speak-prince");
     retry:
     if(msgid >= 32) msgid = 0;  
     
@@ -870,7 +883,7 @@ namespace whirlpool {
     if(i == c->type) return NULL;
     if(d>d2) next = -next;
     for(int j=1; j<c->type; j++) {
-      cell *c2 = c->mov[(i+42+next*j) % c->type];
+      cell *c2 = c->mov[(i+420+next*j) % c->type];
       if(celldistAlt(c2) == d) return c2;
       }
     return NULL;
@@ -917,13 +930,15 @@ namespace whirlpool {
   
   void whirlMove(cell *wto, cell *wfrom) {
     // monsters don't move
-    if(wfrom && (wfrom == cwt.c || wfrom->monst))
+    if(wfrom && (isPlayerOn(wfrom) || wfrom->monst))
       return;
     // disappear
     if(!wto) { wfrom->wall = waSea; wfrom->item = itNone; }
     
     if(wfrom && wto && wfrom->wall == waBoat && wto->wall == waSea && !wto->monst) {
       wfrom->wall = waSea; wto->wall = waBoat;
+      wto->mondir = neighborId(wto, wfrom);
+      animateMovement(wfrom, wto, LAYER_BOAT);
       }
     
     if(wfrom && wto && wfrom->item && !wto->item && wfrom->wall != waBoat) {
@@ -992,23 +1007,32 @@ namespace mirror {
   void createMM(cellwalker& cw, eMonster type) {
     if(type == moLightningBolt)
       castLightningBolt(cw);
-    else if(cw.c->monst == moNone && cellMirrorable(cw.c) && cw.c != cwt.c)  {
+    else if(cw.c->monst == moNone && cellMirrorable(cw.c) && !isPlayerOn(cw.c))  {
       cw.c->monst = type;
       cw.c->mondir = cw.spin;
+      cw.c->hitpoints = multi::cpid;
       }
+    }
+  
+  inline eMonster switchtype(eMonster m) { 
+    return (m == moMirror) ? moMirage : moMirror;
+    }
+  
+  inline eMonster switchtypeif(eMonster m, bool b) { 
+    if(!b) return m;
+    return (m == moMirror) ? moMirage : moMirror;
     }
   
   void createMirrors(cell *c, int dir, eMonster type) {
     cellwalker C(c, dir);
     
-    if(type == moMirror) type = moMirage;
-    else if(type == moMirage) type = moMirror;
+    type = switchtype(type);
   
     for(int i=0; i<c->type; i++) {
       cwstep(C);
       if(C.c->type == c->type) {
         cwspin(C, i);
-        createMM(C, type);
+        createMM(C, switchtypeif(type, C.mirrored));
         cwspin(C, -i);
         }
       cwstep(C);
@@ -1056,13 +1080,13 @@ namespace mirror {
     }
   
   void spin(int d) {
-  
     for(int i=0; i<size(mirrors); i++) {
       cell *c = mirrors[i];
+      if(c->hitpoints != multi::cpid) continue;
       if(c->monst == moMirror) 
-        mirrors[i]->mondir = (mirrors[i]->mondir - d + 42) % mirrors[i]->type;
+        mirrors[i]->mondir = (mirrors[i]->mondir - d + 420) % mirrors[i]->type;
       if(c->monst == moMirage)
-        mirrors[i]->mondir = (mirrors[i]->mondir + d + 42) % mirrors[i]->type;
+        mirrors[i]->mondir = (mirrors[i]->mondir + d + 420) % mirrors[i]->type;
       }
   
     }
@@ -1091,13 +1115,14 @@ namespace mirror {
     mirrors2.clear();
     for(int i=0; i<size(mirrors); i++) {
       cell *c = mirrors[i];
+      if(c->hitpoints != multi::cpid) continue;
       eMonster m = c->monst;
       if(isMimic(m)) {
         if(m == moMirage) nummirage++;
         int dir = c->mondir;
         cell *c2 = c->mov[dir];
         if(c2 && !isMimic(c2) && canAttack(c,m,c2,c2->monst, 0))
-          killWithMessage(c2, true, m);
+          attackMonster(c2, AF_MSG | AF_ORSTUN, m);
         if(c2->wall == waBigTree)
           c2->wall = waSmallTree;
         else if(c2->wall == waSmallTree)
@@ -1113,12 +1138,14 @@ namespace mirror {
         if(c2->monst == moGreaterM) {
           c2->monst = moLesserM; continue;
           }
-        if(c2 == cwt.c) {
+        if(isPlayerOn(c2)) {
           addMessage(XLAT("You join %the1.", m));
+          playSound(c2, "click");
           continue;
           }
         if(isMimic(c2)) {
           addMessage(XLAT("Two of your images crash and disappear!"));
+          playSound(c2, "click");
           c2->monst = moNone;
           continue;
           }
@@ -1128,18 +1155,25 @@ namespace mirror {
           }
         c->monst = m; moveMonster(c2, c);
         empathyMove(c, c2, dir);
-        mirrors2.push_back(c2);      
+        mirrors2.push_back(c2);
+        if(c->mirror(dir) && isMimic(c2->monst)) 
+          c2->monst = switchtype(c2->monst);
         }
       }
     for(int i=0; i<size(mirrors2); i++) {
       cell *c = mirrors2[i];
+      if(c->hitpoints != multi::cpid) continue;
       eMonster m = c->monst;
       if(c->wall == waMirror) {
         addMessage(XLAT("%The1 breaks the mirror!", m));
+        drawParticles(c, winf[c->wall].color, 16);
+        playSound(c, "pickup-mirror", 50);
         createMirrors(c, c->mondir, m);
         c->wall = waNone;
         }
       if(c->wall == waCloud) {
+        playSound(c, "pickup-mirror", 50);
+        drawParticles(c, winf[c->wall].color, 16);
         addMessage(XLAT("%The1 disperses the cloud!", m));
         createMirages(c, c->mondir, m);
         c->wall = waNone;
@@ -1147,6 +1181,11 @@ namespace mirror {
       }
     achievement_count("MIRRORKILL", tkills(), tk);
     achievement_count("MIRAGE", nummirage, 0);
+    }
+
+  void spingo(int d, bool fwd) {
+    if(multi::players > 1) spin(d);
+    go(fwd);
     }
 
   }
@@ -1181,7 +1220,7 @@ namespace hive {
   int bugcount[BUGCOLORS];
   
   bool isBugEnemy(cell *c, int k) {
-    if(c == cwt.c && !invismove) return true;
+    if(isPlayerOn(c) && !invismove) return true;
     if(!c->monst) return false;
     if(c->monst == moBug0+k) return false;
     if(isIvy(c)) return false;
@@ -1367,7 +1406,7 @@ namespace hive {
         if(isBug(killed)) battlecount++;
         else if(!fightspam(c2))
           addMessage(XLAT("%The1 fights with %the2!", c->monst, c2->monst));
-        killOrStunMonster(c2);
+        attackMonster(c2, AF_ORSTUN, c->monst);
         // killMonster(c);
         if(isBug(killed)) {
           c2->monst = moDeadBug, deadbug.push_back(c2);
@@ -1483,7 +1522,7 @@ namespace hive {
       int d = b.dist[0];
       if(d <= 1 && c->wall == waNone)
         c->item = itRoyalJelly;
-      c->bardir = NOBARRIERS;
+      preventbarriers(c);
       if(d == 9 || d == 6 || d == 3)
         c->barleft = eLand(d/3),
         c->barright = eLand(k);
@@ -1512,6 +1551,9 @@ namespace heat {
     }
   
   double celsius(cell *c) { return absheat(c) * 60; }
+  
+  // adjust to the improved heat transfer algorithm in 9.4
+  const float FIX94 = 1.5;
   
   void processheat(double rate = 1, bool tick = true) {
     if(markOrb(itOrbSpeed)) rate /= 2;
@@ -1547,22 +1589,30 @@ namespace heat {
     
     for(int i=0; i<numplayers(); i++) {
       cell *c = playerpos(i);
+      if(!c) continue;
       double xrate = (c->land == laCocytus && shmup::on) ? rate/3 : rate;
       if(purehepta) xrate *= 1.7;
+      if(!shmup::on) xrate /= FIX94;
       if(isIcyLand(c))
         HEAT(c) += (markOrb(itOrbWinter) ? -1.2 : 1.2) * xrate;
       }
     
     vinefires.clear();
     rosefires.clear();
+        
+    vector<cell*>& allcells = quotient ? quotientspace::allcells : dcal;
+
+    int dcs = size(allcells);
     
-    int dcs = size(dcal);
+    vector<ld> hmods(dcs, 0);
+    
     for(int i=0; i<dcs; i++) {
       bool readd = false;
-      cell *c = dcal[i];
+      cell *c = allcells[i];
       double xrate = (c->land == laCocytus && shmup::on) ? rate/3 : rate;
       if(purehepta) xrate *= 1.7;
-      if(c->cpdist > 8) break;
+      if(!shmup::on) xrate /= FIX94;
+      if(c->cpdist > 7 && !quotient) break;
   
       if(hasTimeout(c)) {
         if(tick) useup(c);
@@ -1584,7 +1634,8 @@ namespace heat {
             vinefires.push_back(c2);
           if(c2 && c2->wall == waSmallTree && c2->land != laDryForest)
             vinefires.push_back(c2);
-          if(c2 && (c2->wall == waWeakBranch || c2->wall == waCanopy || c2->wall == waTrunk || c2->wall == waSolidBranch))
+          if(c2 && (c2->wall == waWeakBranch || c2->wall == waCanopy || c2->wall == waTrunk || c2->wall == waSolidBranch ||
+            c2->wall == waBigBush || c2->wall == waSmallBush))
             vinefires.push_back(c2);
           if(c2 && c2->wall == waBonfireOff) activateActiv(c2, false);
           // both halfvines have to be near fire at once
@@ -1603,37 +1654,41 @@ namespace heat {
           }
         }
       if(isIcyLand(c)) {
-        if(c->monst == moRanger) HEAT(c) += 3 * xrate;
-        if(c->monst == moDesertman) HEAT(c) += 4 * xrate;
-        if(c->monst == moMonkey) HEAT(c) += xrate;
-        if(c->wall == waDeadTroll) HEAT(c) -= 2 * xrate;
-        if(c->wall == waDeadTroll2) HEAT(c) -= 1.5 * xrate;
-        if(c->wall == waBigStatue) HEAT(c) -= .5 * xrate;
-        if(c->monst == moLesser || c->monst == moLesserM || c->monst == moGreater || c->monst == moGreaterM)
-          HEAT(c) += (c->land == laCocytus ? 1.5 : 10) * xrate;
-        if(c->monst == moGreaterShark)
-          HEAT(c) += 2 * xrate;
-        if(c->monst == moCultist) HEAT(c) += 3 * xrate;
-        if(c->monst == moCultistLeader) HEAT(c) += 4 * xrate;
-        if(c->monst == moPyroCultist) HEAT(c) += 6 * xrate;
-        if(c->monst == moFireFairy) HEAT(c) += 6 * xrate;
-        if(c->monst == moFireElemental) HEAT(c) += 8 * xrate;
-        if(isDragon(c->monst)) HEAT(c) += 2 * xrate;
-        if(c->monst == moGhost) HEAT(c) -= xrate;
-        if(c->monst == moWaterElemental) HEAT(c) -= xrate;
-        if(isFire(c)) HEAT(c) += 4 * xrate;
-        if(isPrincess(c->monst)) HEAT(c) += (markEmpathy(itOrbWinter) ? -1.2 : 1.2) * xrate;
-        
-        forCellEx(ct, c) if(!isIcyLand(ct) && isFire(ct)) 
-          HEAT(c) += xrate*.1;
-        
         ld hmod = 0;
 
+        if(c->monst == moRanger) hmod += 3 * xrate;
+        if(c->monst == moDesertman) hmod += 4 * xrate;
+        if(c->monst == moMonkey) hmod += xrate;
+        if(c->wall == waDeadTroll) hmod -= 2 * xrate;
+        if(c->wall == waDeadTroll2) hmod -= 1.5 * xrate;
+        if(c->wall == waBigStatue) hmod -= .5 * xrate;
+        if(c->monst == moLesser || c->monst == moLesserM || c->monst == moGreater || c->monst == moGreaterM)
+          hmod += (c->land == laCocytus ? 1.5 : 10) * xrate;
+        if(c->monst == moGreaterShark)
+          hmod += 2 * xrate;
+        if(c->monst == moCultist) hmod += 3 * xrate;
+        if(c->monst == moCultistLeader) hmod += 4 * xrate;
+        if(c->monst == moPyroCultist) hmod += 6 * xrate;
+        if(c->monst == moFireFairy) hmod += 6 * xrate;
+        if(c->monst == moFireElemental) hmod += 8 * xrate;
+        if(isDragon(c->monst)) hmod += 2 * xrate;
+        if(c->monst == moGhost) hmod -= xrate;
+        if(c->monst == moFriendlyGhost) hmod -= xrate;
+        if(c->monst == moSkeleton) hmod -= .2 * xrate;
+        if(c->monst == moDraugr) hmod -= .75 * xrate;
+        if(c->monst == moWaterElemental) hmod -= xrate;
+        if(c->monst == moAirElemental) hmod -= .4 * xrate;
+        if(isFire(c)) hmod += 4 * xrate;
+        if(isPrincess(c->monst)) hmod += (markEmpathy(itOrbWinter) ? -1.2 : 1.2) * xrate;
+        
+        forCellEx(ct, c) if(!isIcyLand(ct) && isFire(ct)) 
+          hmod += xrate*.1;
+        
         for(int j=0; j<c->type; j++) if(c->mov[j]) {
           if(!isIcyLand(c->mov[j])) {
             // make sure that we can still enter Cocytus,
             // it won't heat up right away even without Orb of Winter or Orb of Speed
-            if(c->mov[j] == cwt.c && (c->land == laIce || markOrb(itOrbWinter))) 
+            if(isPlayerOn(c->mov[j]) && (c->land == laIce || markOrb(itOrbWinter))) 
               hmod += (markOrb(itOrbWinter) ? -1.2 : 1.2) / 4;
             continue;
             }
@@ -1641,34 +1696,40 @@ namespace heat {
           hdiff /= 10;
           if(shmup::on && (c->land == laCocytus || c->mov[j]->land == laCocytus))
             hdiff /= 3;
-          if(c->mov[j]->cpdist <= 7)
-            HEAT(c->mov[j]) -= hdiff * rate;
-          else
-            hdiff = -HEAT(c) / 30;
+          // if(c->mov[j]->cpdist > 7 && !quotient) hdiff += -HEAT(c) / 30;
           hmod += hdiff;
           }
         
-        HEAT(c) += hmod * rate;
-        if(c->monst == moCrystalSage && HEAT(c) >= SAGEMELT) {
-          addMessage(XLAT("%The1 melts away!", c->monst));
-          killWithMessage(c, false);
-          }
+        hmods[i] = hmod * rate;
         }
       
-      if(readd || HEAT(c)) 
+      if((readd || HEAT(c)) && !quotient) 
         offscreen.push_back(c);
+
       }
     
+    #define MELTCOLOR 0xA04040
+    
     for(int i=0; i<dcs; i++) {
-      cell *c = dcal[i];
-      if(c->wall == waIcewall && HEAT(c) > .4) c->wall = waNone, kills[0]++;
-      if(c->wall == waFrozenLake && HEAT(c) > (c->land == laCocytus ? .6 : .4)) c->wall = waLake, kills[0]++;
+      cell *c = allcells[i];
+      HEAT(c) += hmods[i] * rate;
+      if(c->monst == moCrystalSage && HEAT(c) >= SAGEMELT) {
+        addMessage(XLAT("%The1 melts away!", c->monst));
+        fallMonster(c);
+        }
+      if(c->wall == waIcewall && HEAT(c) > .4) 
+        drawParticles(c, MELTCOLOR, 4, 60),
+        c->wall = waNone, kills[0]++;
+      if(c->wall == waFrozenLake && HEAT(c) > (c->land == laCocytus ? .6 : .4)) 
+        drawParticles(c, MELTCOLOR, 4, 60),
+        playSound(c, "trapdoor", 50),
+        c->wall = waLake, kills[0]++;
   
       if(c->wall == waLake && HEAT(c) < (c->land == laCocytus ? -.4 : .4) && c->monst != moGreaterShark) {
         c->wall = waFrozenLake;
         if(c->monst == moShark || c->monst == moCShark) {
           addMessage(XLAT("%The1 is frozen!", c->monst));
-          killWithMessage(c, false);
+          fallMonster(c);
           }
         }
       }
@@ -1680,6 +1741,8 @@ namespace heat {
       else if(c->wall == waVinePlant || c->wall == waSmallTree || c->wall == waSaloon || c->wall == waRose)
         makeflame(c, 6, false);
       else if(c->wall == waSolidBranch || c->wall == waTrunk || c->wall == waWeakBranch || c->wall == waCanopy)
+        makeflame(c, 6, false);
+      else if(c->wall == waBigBush || c->wall == waSmallBush)
         makeflame(c, 6, false);
       else if(cellHalfvine(c)) destroyHalfvine(c, waPartialFire, 6);
       }
@@ -1697,10 +1760,11 @@ namespace heat {
     }
   
   void dryforest() {
-    int dcs = size(dcal);
+    vector<cell*>& allcells = quotient ? quotientspace::allcells : dcal;
+    int dcs = size(allcells);
     for(int i=0; i<dcs; i++) {
-      cell *c = dcal[i];
-      if(c->cpdist > 8) break;
+      cell *c = allcells[i];
+      if(!quotient && c->cpdist > 8) break;
       if(c->land != laDryForest) continue;
       
       for(int j=0; j<c->type; j++) if(c->mov[j]) {
@@ -1711,8 +1775,8 @@ namespace heat {
       }
   
     for(int i=0; i<dcs; i++) {
-      cell *c = dcal[i];
-      if(c->cpdist > 8) break;
+      cell *c = allcells[i];
+      if(!quotient && c->cpdist > 8) break;
       if(c->land != laDryForest) continue;
       if((c->wall == waBigTree || c->wall == waSmallTree || isFire(c)) && c->landparam >= 1)
         c->wall = waEternalFire;
@@ -1725,15 +1789,16 @@ bool gardener = false;
 bool lifebrought = false; // was Life brought to the Dead Caves?
 
 void livecaves() {
-  int dcs = size(dcal);
+  vector<cell*>& allcells = quotient ? quotientspace::allcells : dcal;
+  int dcs = size(allcells);
   
   vector<cell*> bringlife;
   
   for(int i=0; i<dcs; i++) {
-    cell *c = dcal[i];
-    if(c->cpdist > 8) break;
+    cell *c = allcells[i];
+    if(!quotient && c->cpdist > 8) break;
     
-    if(c->wall == waCavefloor || c->wall == waCavewall) {
+    if(c->wall == waCavefloor || c->wall == waCavewall || c->wall == waDeadTroll) {
       c->aitmp = 0;
       if(c->monst == moDarkTroll) c->monst = moTroll;
       if(c->item || c->monst || c->cpdist == 0) continue;
@@ -1749,9 +1814,13 @@ void livecaves() {
         else if(c->mov[j]->wall == waGargoyleBridge) c->aitmp--;
         else if(c->mov[j]->wall == waDeadTroll) c->aitmp -= 5;
         else if(c->mov[j]->wall == waDeadTroll2) c->aitmp -= 3;
+        else if(c->mov[j]->wall == waPetrified) c->aitmp -= 2;
         else if(c->mov[j]->wall == waVinePlant) c->aitmp--;
         else if(chaosmode && c->mov[j]->land != laCaves && c->mov[j]->land != laEmerald) ;
+        else if(c->mov[j]->land == laTrollheim) ; // trollheim floor does not count
         else if(c->mov[j]->wall != waBarrier) c->aitmp += 5;
+        
+        if(sword::at(c)) c->aitmp += 500;
 
         if(c->mov[j]->cpdist == 0 && markOrb(itOrbDigging)) c->aitmp+=100;
         if(items[itOrbEmpathy] && isFriendly(c->mov[j]) && markEmpathy(itOrbDigging))
@@ -1764,7 +1833,9 @@ void livecaves() {
         if(c->mov[j]->monst == moGhost) c->aitmp += 10;
         if(c->mov[j]->monst == moTentacleGhost) c->aitmp += 10;
         if(c->mov[j]->monst == moFriendlyGhost) c->aitmp += 10;
+        if(c->mov[j]->monst == moSkeleton) c->aitmp ++;
         if(c->mov[j]->monst == moGargoyle) c->aitmp--;
+        if(c->mov[j]->monst == moDraugr) c->aitmp--;
         if(isDragon(c->mov[j]->monst)) c->aitmp++;
         if(c->mov[j]->monst == moNecromancer) c->aitmp += 10;
         if(c->mov[j]->monst == moWormtail) c->aitmp++;
@@ -1793,17 +1864,19 @@ void livecaves() {
           ;
         else if(c2->wall == waDeadTroll || c2->wall == waDeadTroll2 || c2->wall == waThumperOn || isFire(c2) || snakelevel(c2))
           c->aitmp -= 10;
+        else if(c2->wall == waPetrified)
+          c->aitmp -= 10;
         if(c2->wall == waBigStatue)
           c->aitmp -= 10;
         if(c2->wall == waSea || c2->wall == waBoat)
           c->aitmp += (c2->land == laLivefjord ? 1 : 100);
         if(c2->monst == moWaterElemental)
           c->aitmp += 1000;
-        if(c2 == cwt.c && c2->wall == waBoat && markOrb(itOrbWater))
+        if(isPlayerOn(c2) && c2->wall == waBoat && markOrb(itOrbWater))
           c->aitmp += 1000;
         if(c2->monst == moEarthElemental)
           c->aitmp -= 1000;
-        if(c2 == cwt.c && markOrb(itOrbDigging))
+        if(isPlayerOn(c2) && markOrb(itOrbDigging))
           c->aitmp -= 1000;
         if(items[itOrbEmpathy] && isFriendly(c2) && markEmpathy(itOrbDigging))
           c->aitmp -= 1000;
@@ -1824,8 +1897,9 @@ void livecaves() {
     }
 
   for(int i=0; i<dcs; i++) {
-    cell *c = dcal[i];
-    if(c->cpdist > 8) break;
+    cell *c = allcells[i];
+    if(!quotient && c->cpdist > 8) break;
+
     if(c->wall == waCavefloor || c->wall == waCavewall) {
   //  if(c->land != laCaves) continue;
   //  if(c->wall == waThumper || c->wall == waBonfire) continue;
@@ -1866,7 +1940,7 @@ void livecaves() {
     if(c->item == itGreenStone) c->item = itOrbLife;
     if(c->monst == moEarthElemental) {
       addMessage(XLAT("%The1 is destroyed by the forces of Life!", c->monst));
-      killWithMessage(c, false);
+      fallMonster(c);
       c->item = itOrbDigging;
       }
     }
@@ -1965,14 +2039,17 @@ namespace dragon {
     int maxlen = 1000;
     while(maxlen-->0) {
       cell *c2 = c->mov[c->mondir];
-      if(c2 == cwt.c) mountmove(c, c->mondir, true);
+      mountmove(c, c->mondir, true, c2);
       c->monst = c2->monst;
       c->hitpoints = c2->hitpoints;
+      animateMovement(c2, c, LAYER_BIG);
       c->stuntime = 2;
       if(c2->mondir == NODIR) { c->mondir = NODIR; c2->monst = moNone; return; }
       c = c2;
       }
     }
+  
+  bool dragbugs = false;
   
   cell *findhead(cell *c) {
     cell *cor = c;
@@ -1981,10 +2058,23 @@ namespace dragon {
     if(maxlen--<0) return c;
     if(c->monst == moDragonHead) return c;
     for(int i=0; i<c->type; i++)
-      if(c->mov[i] && isDragon(c->mov[i]->monst) && c->mov[i]->mondir == c->spn[i]) {
+      if(c->mov[i] && isDragon(c->mov[i]->monst) && c->mov[i]->mondir == c->spn(i)) {
         c = c->mov[i]; goto findhead;
         }
-    printf("dragon bug #3 (%p -> %p)\n", cor, c); return c;
+    printf("dragon bug #3 (%p -> %p)\n", cor, c); 
+    dragbugs = true;
+    c->monst = moDragonHead; return c;
+    }
+  
+  void validate(const char *where) {
+    dragbugs = false;
+    for(int i=0; i<size(dcal); i++)
+      if(dcal[i]->monst == moDragonTail)
+        findhead(dcal[i]);
+    if(dragbugs) {
+      printf("DRAGON BUG in %s\n", where);
+      exit(1);
+      }
     }
   
   int bodypart(cell *c, cell *head) {
@@ -2004,15 +2094,21 @@ namespace dragon {
     return 0;
     }
   
-  void kill(cell *c) {
+  void kill(cell *c, eMonster who) {
     int delay = false;
     kills[moDragonHead]++;
     int penalty = 0;
     int maxlen = 1000;
     while(maxlen-->0) {
       makeflame(c, 5, false);
+      eMonster m = c->monst;
+      drawFireParticles(c, 16);
       c->monst = moNone;
-      if(c->wall == waFire) {
+      if(checkOrb(who, itOrbUndeath)) 
+        c->monst = moFriendlyGhost;
+      if(checkOrb(who, itOrbStone)) 
+        c->wparam = m, c->wall = waPetrified;
+      else if(c->wall == waFire) {
         if(delay) delay = false;
         else {
           if(c->land != laDragon) penalty += 3;
@@ -2047,20 +2143,29 @@ namespace dragon {
   #define SWAPBITFIELD(x,y,t) { t bak=x; x=y; y=bak; }
   
   void pullfront(cell *c, cell *until) {
-    cell *buffer = c;
     int maxlen = 1000;
+    static vector<cell*> allcells;
+    allcells.clear();
     while(maxlen-->0) {
-      SWAPBITFIELD(c->monst, buffer->monst, eMonster);
-      SWAPBITFIELD(c->hitpoints, buffer->hitpoints, int);
-      if(c == cwt.c) cwt.c = buffer;
-      else if(buffer == cwt.c) mountmove(c, c->mondir, true);
+      allcells.push_back(c);
+      // SWAPBITFIELD(c->monst, buffer->monst, eMonster);
+      // SWAPBITFIELD(c->hitpoints, buffer->hitpoints, int);
       c->stuntime = 2;
       if(c == until) {
-        while(true) {
-          if(c->mondir == NODIR) return;
+        for(int i=size(allcells)-2; i>=0; i--) {
+          cell *cmt = allcells[i+1];
+          cell *cft = allcells[i];
+          cmt->hitpoints = cft->hitpoints;
+          cmt->monst = cft->monst;
+          cft->monst = moNone;
+          mountmove(cmt, cmt->mondir, true, cft);
+          animateMovement(cft, cmt, LAYER_BIG);
+          }
+        while(c->mondir != NODIR) {
           c = c->mov[c->mondir];
           c->stuntime = 2;
           }
+        break;
         }
       if(c->mondir == NODIR) { printf("dragon bug\n"); break; }
       c = c->mov[c->mondir];
@@ -2099,4 +2204,526 @@ namespace dragon {
     return false;
     }
 
+  }
+
+namespace sword {
+  int angle[MAXPLAYER];
+
+  cell *pos(cell *c, int s) {
+    int t = c->type;
+    s *= 2;
+    s += S42/t;
+    s %= S84;
+    if(s<0) s += S84;
+    s /= (S84/t);
+    return c->mov[s];
+    }
+  
+  eItem orbof(bool rev) { return rev ? itOrbSword2 : itOrbSword; }
+  int orbcount(bool rev) { return items[orbof(rev)]; }
+  
+  cell *pos(int id, bool rev) {
+    if(!orbcount(rev)) return NULL;
+    return pos(playerpos(id), angle[id] + (rev ? S21 : 0));
+    }
+  
+  bool at(cell *where, bool noplayer) {
+    if(noplayer) return false;
+    if(!orbcount(0) && !orbcount(1)) return false;
+    for(int i=0; i<numplayers(); i++) if(multi::playerActive(i)) for(int b=0; b<2; b++)
+      if(pos(i,b) == where) return true;
+    return false;
+    }
+  
+  bool near(cell *where) {
+    if(at(where, false)) return true;
+    forCellEx(w2, where) if(at(w2, false)) return true;
+    return false;
+    }
+
+  // from c1 to c2
+  int shift(cell *c1, cell *c2, int angle) {
+    if(!c1 || !c2) return 0;
+    int s1 = neighborId(c1, c2);
+    int s2 = neighborId(c2, c1);
+    if(s1 < 0 || s2 < 0) return angle;
+    if(c1->mirror(s1))
+      return ((s2*S42/c2->type - angle + s1*S42/c1->type) + S21) % S42;
+    else
+      return ((s2*S42/c2->type - s1*S42/c1->type) + S21 + angle) % S42;
+    }
+
+  void shuffle() {
+    for(int i=0; i<MAXPLAYER; i++)
+      sword::angle[i] = euclid ? S7*hrand(6) : purehepta ? 3*hrand(S14)+1 : hrand(S42);
+    }
+  };
+
+namespace kraken {
+
+  cell *head(cell *c) {
+    if(c->monst == moKrakenH) return c;
+    if(c->monst == moKrakenT) return c->mov[c->mondir];
+    return NULL;
+    }
+ 
+  void kill(cell *c, eMonster who) {
+    drawParticles(c, minf[moKrakenH].color, 16);
+    c->monst = moNone;
+    if(checkOrb(who, itOrbUndeath)) c->monst = moFriendlyGhost;
+    if(c->land == laKraken && !c->item) c->item = itKraken;
+    kills[moKrakenH]++;
+    if(checkOrb(who, itOrbStone)) c->wall = waNone;
+    for(int i=0; i<c->type; i++)
+      if(c->mov[i]->monst == moKrakenT) {
+        drawParticles(c, minf[moKrakenT].color, 16);
+        c->mov[i]->monst = moNone;
+        if(checkOrb(who, itOrbStone)) {
+          if(isWatery(c->mov[i]))
+            c->mov[i]->wall = waNone;
+          else
+            c->mov[i]->wall = waPetrified, c->mov[i]->wparam = moKrakenT;
+          }
+        }
+    }
+  
+  int totalhp(cell *c) {
+    int total = 0;
+    for(int i=0; i<c->type; i++)
+      if(c->mov[i]->monst == moKrakenT)
+        total += c->mov[i]->hitpoints;
+    return total;
+    }
+  
+  void trymove(cell *c);
+  
+  void sleep(cell *c) {
+    if(c->monst == moKrakenT) c = c->mov[c->mondir];
+    c->stuntime = 1;
+    forCellEx(c2, c) c2->stuntime = 1;
+    }
+  
+  void attacks() {
+    bool offboat[MAXPLAYER];
+    for(int i=0; i<MAXPLAYER; i++) offboat[i] = false;
+    for(int i=0; i<size(dcal); i++) {
+      cell *c = dcal[i];
+      if(c->monst == moKrakenT && !c->stuntime) forCellEx(c2, c) {
+        bool dboat = false;
+        if(c2->monst && canAttack(c, moKrakenT, c2, c2->monst, AF_ONLY_FBUG)) {
+          attackMonster(c2, AF_ORSTUN | AF_MSG, c->monst);
+          sleep(c);
+          }
+        else for(int i=0; i<numplayers(); i++) if(playerpos(i) == c2) {
+          if(isPlayerInBoatOn(c2, i)) {
+            addMessage(XLAT("%The1 destroys your boat!", moKrakenH));
+            dboat = true;
+            offboat[i] = true;
+            }
+          else if(offboat[i]) ;
+          else killThePlayer(moKrakenH, i, 0);
+          sleep(c);
+          }
+        if(dboat) destroyBoats(c2, c, true);
+        }
+      }
+    for(int i=0; i<size(dcal); i++) {
+      cell *c = dcal[i];
+      if(c->monst == moKrakenH && !c->stuntime && !isWateryOrBoat(c)) {
+        int qdir = 0;
+        cell *ctab[7];
+        forCellEx(c2, c) if(isWatery(c2)) ctab[qdir++] = c2;
+        random_shuffle(ctab, ctab+qdir);
+        while(qdir--) trymove(ctab[qdir]);
+        }
+      }
+    }
+
+  // c is the tentacle which will be the head after the move
+  void trymove(cell *c) {
+    if(pseudohept(c)) return;
+    cell *c2 = c->mov[c->mondir];
+    if(!isWatery(c)) return;
+    if(againstCurrent(c, c2)) return;
+    forCellIdEx(c3, i, c) {
+      if(c3->monst && c3 != c2 && !(c3->mondir >= 0 && c3->mondir < c3->type &&
+        c3->mov[c3->mondir] == c2))
+        return;
+      if(isPlayerOn(c3)) return;
+      if(sword::at(c3)) return;
+      if(!passable(c3, c, P_FISH | P_MONSTER)) return;
+      }
+    if(c2->stuntime) return;
+    int hpcount[10];
+    forCellIdEx(c3, i, c2) {
+      hpcount[i] = c3->hitpoints;
+      c3->monst = moNone;
+      }
+    c->monst = moKrakenH;
+    vector<pair<cell*, cell*> > acells;
+    acells.push_back(make_pair(c2, c));
+    forCellIdEx(c3, i, c) {
+      c3->monst = moKrakenT, c3->mondir = c->spn(i),
+      c3->aitmp = sval;
+      int i0 = (i+c->spn(c->mondir)-c->mondir+99) % c2->type;
+      c3->hitpoints = hpcount[i0];
+      acells.push_back(make_pair(c2->mov[i0], c3));
+      if(c3->wall == waBoat) {
+        addMessage(XLAT("%The1 destroys %the2!", moKrakenH, waBoat));
+        c3->wall = waSea;
+        }
+      if(c3->wall == waStrandedBoat) {
+        addMessage(XLAT("%The1 destroys %the2!", moKrakenH, waBoat));
+        c3->wall = waNone;
+        }
+      }
+    
+    while(size(acells)) {
+      // bool found = false;
+      for(int i=0; i<size(acells); i++) {
+        /* bool noconflict = true;
+        for(int j=0; j<size(acells); j++) 
+          if(acells[i].second == acells[j].first)
+            noconflict = false; */
+        /* if(noconflict) */ {
+          // found = true;
+          indAnimateMovement(acells[i].first, acells[i].second, LAYER_BIG);
+          acells[i] = acells[size(acells)-1];
+          acells.resize(size(acells)-1);
+          i--;
+          }
+        }
+      }
+    commitAnimations(LAYER_BIG);
+    sleep(c);
+    c->aitmp = sval;
+    return;
+    }
+  
+  }
+
+bool barrierhept(cell *c) {
+  return c->bardir != NOBARRIERS && c->bardir != NODIR;
+  }
+
+namespace prairie {
+
+  using namespace fieldpattern;
+  
+  int getfval(cell *c3) {
+    if(barrierhept(c3)) return btspin(fieldval(c3).first, c3->bardir)+1;
+    return 0;
+    }
+
+  void spread(cell *c, cell *from) {
+    int rd;
+    
+    c->LHU.fi.flowerdist = 8;
+    c->LHU.fi.walldist = 8;
+    c->LHU.fi.walldist2 = 8;
+    
+    if(euclid) {
+      eucoord x, y;
+      decodeMaster(c->master, x, y);
+      c->LHU.fi.rval = (y&15);
+      }
+    else if(sphere) {
+      c->LHU.fi.rval = celldistance(c, cwt.c) + 8 - (purehepta ? 2 : 3);
+      }
+    else {
+      if(!from) {
+        for(int i=0; i<size(fp43.matrices); i++)
+          if(fp43.distflower[i] == 0)
+            c->fval = fp43.inverses[i]+1;
+        }
+      else if(from && from->land == laPrairie && from->fval)
+        c->fval = from->fval;
+      else {
+        forCellEx(c2, c) if(c2->land == laPrairie && c2->fval)
+          c->fval = c2->fval;
+        if(!c->fval) forCellEx(c2, c) if(!c->fval) c->fval = getfval(c2);
+        if(!c->fval) forCellEx(c2, c) forCellEx(c3, c2) if(!c->fval) c->fval = getfval(c3);
+        if(!c->fval) {
+  
+          int barclose = 0;
+  
+          forCellEx(c2, c) if(barrierhept(c2)) barclose++;
+  
+          forCellEx(c2, c) forCellEx(c3, c2)
+          if(barrierhept(c3)) barclose++;
+    
+          printf("c = %p bc = %d\n", c, barclose);
+        
+          raiseBuggyGeneration(c, "could not set river fval");
+          }
+        }
+      pair<int,bool> fv = fieldpattern::fieldval(c);
+      fv = fp43.gmul(fv, fp43.inverses[c->fval-1]);
+      
+      rd = fp43.getdist(fv, fp43.distriver);
+      int rl = fp43.getdist(fv, fp43.distriverleft);
+      int rr = fp43.getdist(fv, fp43.distriverright);
+
+      c->LHU.fi.flowerdist = fp43.getdist(fv, fp43.distflower);
+      c->LHU.fi.walldist   = fp43.getdist(fv, fp43.distwall);
+      c->LHU.fi.walldist2  = fp43.getdist(fv, fp43.distwall2);
+
+      c->LHU.fi.rval = 0;
+      if(rd <= 7 && rl < rr) 
+        c->LHU.fi.rval = 8 + rd;
+      if(rd <= 7 && rl > rr) 
+        c->LHU.fi.rval = 7 - rd;
+      }
+    
+    if(c->LHU.fi.flowerdist == 0 && c->type != 6) c->item = itOrbSafety;
+    
+    if(c->LHU.fi.walldist == 0) c->wall = waBarrier;
+
+    if(0) if(c->type == 7) for(int i=0; i<7; i++) {
+      eItem m = fp43.markers[fieldpattern::btspin(c->master->fieldval,i)];
+      if(m) {
+        if(c->item) c->item = itBuggy2;
+        else c->item = m, c->mondir = i;
+        if(c->wall == waSea) c->wall = waBoat;
+        }
+      }
+    }
+  
+  #define RLOW (sphere?(purehepta?7:6):purehepta?4:2)
+  #define RHIGH (sphere?(purehepta?8:9):purehepta?11:13)
+  
+  bool isriver(cell *c) {
+    return c->land == laPrairie && c->LHU.fi.rval <= RHIGH && c->LHU.fi.rval >= RLOW;
+    }
+
+  bool mainriver(cell *c) {
+    return c->LHU.fi.rval <= 8 && c->LHU.fi.rval >= 7;
+    }
+
+  bool nearriver(cell *c) {
+    return c->LHU.fi.rval == RHIGH+1 || c->LHU.fi.rval == RLOW-1;
+    }
+
+  cell *enter;
+  
+  bool opposite(cell *c) {
+    return (c->LHU.fi.rval ^ enter->LHU.fi.rval) & 8;
+    }
+
+  bool isleft(cell *c) {
+    return c->LHU.fi.rval & 8;
+    }
+
+  int towerleft(cell *c) { 
+    return c->LHU.fi.rval;
+    }
+  
+  int towerright(cell *c) { 
+    return 15^c->LHU.fi.rval;
+    }
+  
+  cell *next(cell *c, int pv=1) {
+    for(int i=0; i<c->type; i++) {
+      cell *c1 = createMov(c, i);
+      cell *c2 = createMov(c, (i+pv+c->type)%c->type);
+      if(c1 && c1->LHU.fi.rval == c->LHU.fi.rval)
+      if(c2 && c2->LHU.fi.rval == c->LHU.fi.rval+1)
+      if(isNeighbor(c1,c2))
+        return c1;
+      }
+    return NULL;
+    }
+  
+  cell *prev(cell *c) { return next(c, -1); }
+  
+  int beastdist(cell *c, int dir) { 
+    cell *cx = c; int n=0;
+    while(true) { 
+      if(cx->monst == moHerdBull) return n;
+      cx = next(cx, dir); 
+      n++; 
+      if(!cx || n >= 1000) return 1000; 
+      }
+    }
+  
+  vector<cell*> beaststogen;
+    
+  void generateBeast(cell *c) {
+    int beastdistance = min(beastdist(c, 1), beastdist(c, -1));
+    if(hrand(1000) >= 15 * beastdistance + 2 * items[itGreenGrass]) return;
+    c->monst = moHerdBull;
+    cell *c2 = prev(c);
+    if(c2) c->mondir = neighborId(c, c2);
+    }   
+
+  void moveAt(cell *c) {
+    if(eq(c->aitmp, sval)) return;
+    vector<cell*> whirlline;
+    whirlline.push_back(c);
+    c->aitmp = sval; 
+    cell *c2 = prev(c);
+    while(c2 && !eq(c2->aitmp, sval)) {
+      whirlline.push_back(c2), c2->aitmp = sval;
+      c2 = prev(c2);
+      // in sphere/quotient geometries, never break before a bull
+      if((sphere || quotient) && !c2->monst) break;
+      }
+    reverse(whirlline.begin(), whirlline.end());
+    c2 = next(c); 
+    while(c2 && !eq(c2->aitmp, sval)) whirlline.push_back(c2), c2->aitmp = sval, c2 = next(c2);
+    int qty = size(whirlline);
+    // for(int i=0; i<qty; i++) whirlline[i]->aitmp = sval;
+    if(shmup::on) {
+      for(int i=0; i<qty; i++) if(whirlline[i]->cpdist <= 7) {
+        generateBeast(whirlline[i]);
+        break;
+        }
+      }
+    else {
+      c2 = whirlline[qty-1];
+      if(c2->monst == moHerdBull) c2->monst = moNone;
+      if(!shmup::on) for(int q=qty-2; q>=0; q--) {
+        cell *cp = whirlline[q];
+        cell *cn = whirlline[q+1];
+        if(cp->monst == moHerdBull && !cp->stuntime) {
+          forCellEx(c2, cp) {
+            int flags = AF_GETPLAYER | AF_BULL | AF_ORSTUN;
+            if(c2 != cn) flags |= AF_ONLY_FBUG;
+            if(canAttack(c, moHerdBull, c2, c2->monst, flags))
+              attackMonster(c2, flags | AF_MSG, moHerdBull);
+            }
+              
+          if(!cn->monst && !isPlayerOn(cn) && passable_for(cp->monst, cn, cp, P_DEADLY))
+            moveMonster(cn, cp);
+          else {
+            playSound(NULL, "hit-axe"+pick123());
+            beastcrash(cn, cp);
+            cp->monst = moRagingBull;
+            cp->stuntime = 3;
+            cp->mondir = NODIR;
+            }
+          }
+        }
+      if(!sphere && !quotient) generateBeast(whirlline[0]); 
+      }
+    }
+          
+  void move() {
+    sval++;
+    for(int i=0; i<size(dcal); i++) {
+      cell *c = dcal[i];
+      if(isriver(c)) moveAt(c);
+      }
+    for(int i=0; i<size(beaststogen); i++)
+      generateBeast(beaststogen[i]);
+    beaststogen.clear();
+    }
+  
+  vector<cell*> tchoices;
+  
+  cell *lasttreasure;
+  
+  // vector<cell*> orbs;
+  
+  bool thisriver(cell *c) {
+    forCellEx(c2, c) if(c2->mpdist < c->mpdist && !isriver(c2)) return false;
+    forCellEx(c2, c) if(c2->mpdist < c->mpdist) return thisriver(c2);
+    return true;
+    }
+  
+  void generateTreasure(cell *c) { 
+//    if(nearriver(c) && op
+    if(enter && nearriver(c) && opposite(c) && thisriver(c)) {
+      int hr = hrand(100);
+      if(hr == 0 && items[itGreenGrass] >= 10) {
+        c->item = itOrbBull;
+        // orbs.push_back(c); 
+        }
+      else if(hr < 1+PRIZEMUL) {
+        placePrizeOrb(c);
+        // if(c->item) orbs.push_back(c);
+        }
+      else tchoices.push_back(c);
+      } 
+    }
+  
+  void treasures() {
+    if(enter && !isriver(cwt.c)) enter = NULL;
+    else if(!enter && isriver(cwt.c)) enter = cwt.c;
+    if(size(tchoices)) {
+      if(lasttreasure && lasttreasure->item == itGreenGrass) {
+        if(celldistance(lasttreasure, cwt.c) >= (purehepta ? 7 : 10)) {
+          lasttreasure->item = itNone;
+          forCellEx(c2, lasttreasure) if(c2->item == itGreenGrass) c2->item = itNone;
+          }
+        else { tchoices.clear(); return; }
+        }
+      if(size(tchoices) < 3) { tchoices.clear(); return; }
+      lasttreasure = tchoices[hrand(size(tchoices))];
+      lasttreasure->item = itGreenGrass;
+      for(int i=0; i<size(tchoices); i++) if(isNeighbor(tchoices[i], lasttreasure))
+        tchoices[i]->item = itGreenGrass;
+      tchoices.clear();
+      }
+    }  
+  }
+
+namespace ca {
+  ld prob = .2;
+  string carule[8][2];
+  
+  void init() {
+    // hexagonal variant of Game of Life, as suggested by Wikipedia
+    for(int i=0; i<8; i++) 
+      carule[i][0] = "00100000",
+      carule[i][1] = "00011000";
+    }
+
+#ifdef USE_COMMANDLINE
+  bool readArg() {
+    using namespace arg;
+    if(argis("-caprob")) {
+      shift(); prob = argf();
+      return true;
+      }
+    if(args()[0] != '-') return false;
+    if(args()[1] != 'c') return false;
+    int livedead = args()[2] - '0';
+    if(livedead < 0 || livedead > 1) return false;
+    int nei = -1;
+    if(args()[3]) {
+      nei = args()[3] - '0';
+      if(nei < 0 || nei > 7) return false;
+      if(args()[4]) return false;
+      }
+    shift();
+    string s = args(); s += "00000000";
+    if(nei == -1) for(int i=0; i<8; i++)
+      carule[i][livedead] = s;
+    else 
+      carule[nei][livedead] = s;
+    return true;
+    }
+#endif
+  
+  void simulate() {
+    if(cwt.c->land != laCA) return;
+    vector<cell*>& allcells = quotient ? quotientspace::allcells : dcal;
+    int dcs = size(allcells);
+    bool willlive[dcs];
+    for(int i=0; i<dcs; i++) {
+      cell *c = allcells[i];
+      if(c->land != laCA) return;
+      int nei = 0, live = 0;
+      forCellEx(c2, c) if(c2->land == laCA) {
+        nei++; if(c2->wall == waFloorA) live++;
+        }
+      int welive = 0; if(c->wall == waFloorA) welive++;
+      willlive[i] = carule[nei][welive][live] == '1';
+      }
+    for(int i=0; i<dcs; i++) {
+      cell *c = allcells[i];
+      c->wall = willlive[i] ? waFloorA : waNone;
+      }
+    }
   }

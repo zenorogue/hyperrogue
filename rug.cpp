@@ -3,7 +3,7 @@
 
 // implementation of the Hypersian Rug mode
 
-#ifndef MOBILE
+#ifndef NORUG
 
 #define TEXTURESIZE (texturesize)
 #define HTEXTURESIZE (texturesize/2)
@@ -54,6 +54,7 @@ struct rugpoint {
   double x1, y1;
   bool valid;
   bool inqueue;
+  double dist;
   hyperpoint h;
   hyperpoint flat;
   vector<edge> edges;
@@ -72,13 +73,9 @@ vector<triangle> triangles;
 // construct the graph
 //---------------------
 
-map<cell*, hyperpoint> gmatrix;
-
-void buildVertexInfo(cell *c, transmatrix V) { if(genrug) gmatrix[c] = V*C0; }
-
 int hyprand;
 
-rugpoint *addRugpoint(hyperpoint h) {
+rugpoint *addRugpoint(hyperpoint h, double dist) {
   rugpoint *m = new rugpoint;
   m->h = h;
   
@@ -89,14 +86,15 @@ rugpoint *addRugpoint(hyperpoint h) {
     hpxyz(h[0], h[1], (h[2]-1) * (rand() % 1000 - rand() % 1000) / 1000);
   m->valid = false;
   m->inqueue = false;
+  m->dist = dist;
   points.push_back(m);
   return m;
   }
 
-rugpoint *findRugpoint(hyperpoint h) {
+rugpoint *findRugpoint(hyperpoint h, double dist) {
   for(int i=0; i<size(points); i++) 
     if(intval(points[i]->h, h) < 1e-5) return points[i];
-  return addRugpoint(h);
+  return addRugpoint(h, dist);
   }
 
 void addNewEdge(rugpoint *e1, rugpoint *e2) {
@@ -116,9 +114,9 @@ void addTriangle(rugpoint *t1, rugpoint *t2, rugpoint *t3) {
   }
 
 void addTriangle1(rugpoint *t1, rugpoint *t2, rugpoint *t3) {
-  rugpoint *t12 = findRugpoint(mid(t1->h, t2->h));
-  rugpoint *t23 = findRugpoint(mid(t2->h, t3->h));
-  rugpoint *t31 = findRugpoint(mid(t3->h, t1->h));
+  rugpoint *t12 = findRugpoint(mid(t1->h, t2->h), (t1->dist+ t2->dist)/2);
+  rugpoint *t23 = findRugpoint(mid(t2->h, t3->h), (t1->dist+ t2->dist)/2);
+  rugpoint *t31 = findRugpoint(mid(t3->h, t1->h), (t1->dist+ t2->dist)/2);
   addTriangle(t1,  t12, t31);
   addTriangle(t12, t2,  t23);
   addTriangle(t23, t3,  t31);
@@ -140,7 +138,7 @@ void buildRug() {
  
   for(int i=0; i<size(dcal); i++)
     if(gmatrix.count(dcal[i])) 
-      vptr[dcal[i]] = addRugpoint(gmatrix[dcal[i]]);
+      vptr[dcal[i]] = addRugpoint(gmatrix[dcal[i]]*C0, dcal[i]->cpdist);
 
   for(int i=0; i<size(dcal); i++) {
     cell *c = dcal[i];
@@ -232,7 +230,9 @@ void preset(rugpoint *m) {
       // m->h = a->h + (b->h-a->h) * az - ah * ort
       hyperpoint res = a->flat + (b->flat-a->flat) * az - ah * ort;
       
-      for(int i=0; i<3; i++) h[i] += res[i]; q++;
+      for(int i=0; i<3; i++) h[i] += res[i];
+      
+      q++;
       }
     }
     
@@ -255,7 +255,7 @@ void subdivide() {
     rugpoint *m = points[i];
     for(int j=0; j<size(m->edges); j++) {
       rugpoint *m2 = m->edges[j].target;
-      rugpoint *mm = addRugpoint(mid(m->h, m2->h));
+      rugpoint *mm = addRugpoint(mid(m->h, m2->h), (m->dist+m2->dist)/2);
       using namespace hyperpoint_vec;
       mm->flat = (m->flat + m2->flat) / 2;
       mm->valid = true; qvalid++;
@@ -334,6 +334,8 @@ void drawTriangle(triangle& t) {
   rugpoint& m2 = *t.m[1];
   rugpoint& m3 = *t.m[2];
   if(!m1.valid || !m2.valid || !m3.valid) return;
+  if(m1.dist >= sightrange+.51 || m2.dist >= sightrange+.51 || m3.dist >= sightrange+.51)
+    return;
   dt++;
   double x1, y1, z1;
   double x2, y2, z2;
@@ -376,6 +378,7 @@ Uint32 *expanded_data;
 void initTexture() {
 
   if(!rendernogl) {
+#ifndef PANDORA
     FramebufferName = 0;
     glGenFramebuffers(1, &FramebufferName);
     glBindFramebuffer(GL_FRAMEBUFFER, FramebufferName);
@@ -400,6 +403,7 @@ void initTexture() {
       addMessage("Failed to initialize the framebuffer");
       rugged = false;
       }  
+#endif
     }
   else {
     texture = SDL_CreateRGBSurface(SDL_SWSURFACE,TEXTURESIZE,TEXTURESIZE,32,0,0,0,0);  
@@ -430,6 +434,7 @@ void prepareTexture() {
     glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, TEXTURESIZE, TEXTURESIZE, 0, GL_BGRA, GL_UNSIGNED_BYTE, expanded_data );    
     }
   else { 
+#ifndef PANDORA
     glBindFramebuffer(GL_FRAMEBUFFER, FramebufferName);
     glViewport(0,0,TEXTURESIZE,TEXTURESIZE);
   
@@ -438,7 +443,8 @@ void prepareTexture() {
     drawthemap();
     if(!renderonce) queueline(C0, mouseh, 0xFF00FF);
     drawqueue();  
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);    
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+#endif
     }
   vid = svid;
   if(!rendernogl) glViewport(0,0,vid.xres,vid.yres);
@@ -451,9 +457,11 @@ void closeTexture() {
     delete[] expanded_data;
     }
   else {
+#ifndef PANDORA
     glDeleteTextures(1, &renderedTexture);
     glDeleteRenderbuffers(1, &depth_stencil_rb);
     glDeleteFramebuffers(1, &FramebufferName);
+#endif
     }
   }
 
@@ -489,6 +497,7 @@ void drawRugScene() {
   glDisable(GL_BLEND);
   glEnable(GL_TEXTURE_2D);
   glEnable(GL_DEPTH_TEST);
+  glDepthFunc(GL_LESS);
   
   xview = vid.xres/(vid.radius*scale);
   yview = vid.yres/(vid.radius*scale);
@@ -563,7 +572,6 @@ void init() {
   if(renderonce) prepareTexture();
   if(!rugged) return;
   
-  gmatrix.clear();
   genrug = true;
   drawthemap();
   genrug = false;
@@ -581,7 +589,6 @@ void close() {
   triangles.clear();
   for(int i=0; i<size(points); i++) delete points[i];
   points.clear();
-  gmatrix.clear();
   pqueue = queue<rugpoint*> ();
   }
 
@@ -637,16 +644,22 @@ hyperpoint gethyper(ld x, ld y) {
   }
 
 void show() {
-  displayStat( 0, XLAT("hypersian rug mode"), "", ' ');
-  displayStat( 2, XLAT("what's this?"), "", 'h');
-  displayStat( 3, XLAT("take me back"), "", 'q');
-  displayStat( 4, XLAT("enable the Hypersian Rug mode"), "", 'u');
-  displayStat( 6, XLAT("render the texture only once"), ONOFF(renderonce), 'o');
-  displayStat( 7, XLAT("render texture without OpenGL"), ONOFF(rendernogl), 'g');  
-  displayStat( 8, XLAT("texture size"), its(texturesize)+"x"+its(texturesize), 's');
+  dialog::init(XLAT("hypersian rug mode"), iinf[itPalace].color, 150, 100);
+
+  dialog::addItem(XLAT("what's this?"), 'h');
+  dialog::addItem(XLAT("take me back"), 'q');
+  dialog::addItem(XLAT("enable the Hypersian Rug mode"), 'u');
+  dialog::addBoolItem(XLAT("render the texture only once"), (renderonce), 'o');
+  dialog::addBoolItem(XLAT("render texture without OpenGL"), (rendernogl), 'g');  
+  dialog::addSelItem(XLAT("texture size"), its(texturesize)+"x"+its(texturesize), 's');
+  dialog::display();
   }
 
-void handleKey(int uni, int sym) {
+void handleKey(int sym, int uni) {
+#ifdef PANDORA
+  rendernogl = true;
+#endif
+  dialog::handleNavigation(sym, uni);
 
   if(uni == 'h') {
     lastmode = cmode;
@@ -661,19 +674,24 @@ void handleKey(int uni, int sym) {
       "Use arrow keys to rotate, Page Up/Down to zoom.";
     }
   else if(uni == 'u') {
+    if(sphere) restartGame('E');
+    if(euclid) restartGame('e');
     rug::init();
     cmode = emNormal;
     }
-  else if(uni == 'q')
-    cmode = emChangeMode;
   else if(uni == 'o')
     renderonce = !renderonce;
+#ifndef PANDORA
   else if(uni == 'g')
     rendernogl = !rendernogl;
+#endif
   else if(uni == 's') {
-    texturesize = 2*texturesize;
+    texturesize *= 2;
     if(texturesize == 8192) texturesize = 128;
+    dialog::scaleLog();
     }
+  else if(uni || sym == SDLK_F10)
+    cmode = emChangeMode;
   }
 
 void select() {

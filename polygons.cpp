@@ -41,7 +41,7 @@
 #endif
 #endif
 
-#define QHPC 16000
+#define QHPC 32000
 
 int qhpc, prehpc;
 
@@ -51,27 +51,31 @@ bool first;
 
 bool fatborder;
 
-void hpcpush(const hyperpoint& h) { 
-  if(vid.usingGL && !first && intval(hpc[qhpc-1], h) > 0.25) {
-    hyperpoint md = mid(hpc[qhpc-1], h);
-    hpcpush(md);
-    }
-  first = false;
-  hpc[qhpc++] = h;
-  }
+#define PSHIFT 0
+// #define STLSORT
+
+#define NEWSHAPE (-13.5)
+#define WOLF (-15.5)
+
+extern long double polydata[];
 
 struct hpcshape {
   int s, e, prio;
   };
 
+hpcshape *last = NULL;
+
 struct qpoly {
       transmatrix V;
-      int start, end;
+      GLfloat *tab;
+      int curveindex;
+      int cnt;
       int outline;
       };
 
 struct qline {
       hyperpoint H1, H2;
+      int prf;
       };
       
 #define MAXQCHR 16
@@ -79,26 +83,77 @@ struct qline {
 struct qchr {
       char str[MAXQCHR];
       int x, y, shift, size, frame;
+      int align;
       };
       
 struct qcir {
       int x, y, size;
       };
-      
+
+enum eKind { pkPoly, pkLine, pkString, pkCircle, pkShape, pkResetModel };
+
 struct polytodraw {
-  int prio, kind, col;
+  eKind kind;
+  int prio, col;
   union {
-    qpoly poly;
-    qline line;
-    qchr  chr;
-    qcir  cir;
+    qpoly  poly;
+    qline  line;
+    qchr   chr;
+    qcir   cir;
     } u;
+#ifdef ROGUEVIZ
+  string* info;
+  polytodraw() { info = NULL; }
+#endif
   };
 
 vector<polytodraw> ptds;
 
+polytodraw& lastptd() { return ptds[size(ptds)-1]; }
+
+polytodraw& nextptd() { ptds.resize(size(ptds)+1); return lastptd(); }
+
 bool ptdsort(const polytodraw& p1, const polytodraw& p2) {
   return p1.prio < p2.prio;
+  }
+
+void hpcpush(hyperpoint h) { 
+  if(sphere) h = mid(h,h);
+  if(vid.usingGL && !first && intval(hpc[qhpc-1], h) > (sphere ? .01 : 0.25)) {
+    hyperpoint md = mid(hpc[qhpc-1], h);
+    hpcpush(md);
+    }
+  first = false;
+  hpc[qhpc++] = h;
+  }
+
+#define SIDE_SLEV 0
+#define SIDE_WALL 3
+#define SIDE_LAKE 4
+#define SIDE_LTOB 5
+#define SIDE_BTOI 6
+#define SIDE_WTS3 7
+#define SIDEPARS 8
+
+bool validsidepar[SIDEPARS];
+
+void chasmifyPoly(double fac, double fac2, int k) {
+  for(int i=qhpc-1; i >= last->s; i--) {
+    hyperpoint H;
+    for(int j=0; j<3; j++) {
+      H[j] = hpc[i][j] * fac;
+      hpc[i][j] *= fac2;
+      }
+    hpc[qhpc++] = H;
+    }
+  hpc[qhpc++] = hpc[last->s];
+  }
+
+void shift(hpcshape& sh, double dx, double dy, double dz) {
+  hyperpoint H = hpxyz(dx, dy, dz);
+  transmatrix m = rgpushxto0(H);
+  for(int i=sh.s; i<sh.e; i++) 
+    hpc[i] = m * hpc[i];
   }
 
 #ifndef MOBILE
@@ -112,11 +167,25 @@ vector<polytodraw*> ptds2;
 
 GLuint shapebuffer;
 
+#define POLYMAX 60000
+GLfloat glcoords[POLYMAX][3];
+int qglcoords;
+
+extern void glcolor(int color);
+#endif
+
+GLfloat *currentvertices;
+
+void activateVertexArray(GLfloat *f, int qty) {
+  currentvertices = f;
+  glEnableClientState(GL_VERTEX_ARRAY);
+  glVertexPointer(3, GL_FLOAT, 0, f);
+  }
+
+
 GLfloat *ourshape = NULL;
 
 void initPolyForGL() {
-  if(GL_initialized) return;
-  GL_initialized = true;
   
   if(ourshape) delete[] ourshape;
   ourshape = new GLfloat[3 * qhpc];
@@ -129,75 +198,321 @@ void initPolyForGL() {
     ourshape[id++] = hpc[i][1];
     ourshape[id++] = hpc[i][2];
     }
-
-#define GLF
-#ifdef GLF
-  glVertexPointer(3, GL_FLOAT, 0, ourshape);
-
-#else
-  glGenBuffers(1, &shapebuffer);
-  glBindBuffer(GL_ARRAY_BUFFER, shapebuffer); 
-  glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*qhpc*3, ourshape, GL_STATIC_DRAW);
   
-  glEnableVertexAttribArray(0);
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*) 0);
-#endif
-
+  currentvertices = NULL;
   }
-#endif
+
+void activateShapes() {
+  if(currentvertices != ourshape) {
+    activateVertexArray(ourshape, qhpc);
+    }
+  }
+
+void activateGlcoords() {
+  activateVertexArray(glcoords[0], qglcoords);
+  }
+
 
 #ifdef GFX
+#define POLYMAX 60000
 #define USEPOLY
 #endif
 
-#define POLYMAX 60000
 int polyi;
 
-#ifdef GL
-GLfloat glcoords[POLYMAX][3];
-int qglcoords;
-extern void glcolor(int color);
+int polyx[POLYMAX], polyxr[POLYMAX], polyy[POLYMAX];
+
+hyperpoint gltopoint(GLfloat t[3]) {
+  hyperpoint h;
+  h[0] = t[0]; h[1] = t[1]; h[2] = t[2];
+  return h;
+  }
+
+void addpoint(const hyperpoint& H) {
+  if(vid.usingGL) {
+    if(polyi >= POLYMAX) return;
+    if(pmodel) {
+      hyperpoint Hscr;
+      applymodel(H, Hscr);
+      glcoords[qglcoords][0] = Hscr[0] * vid.radius;
+      glcoords[qglcoords][1] = Hscr[1] * vid.radius;
+      glcoords[qglcoords][2] = Hscr[2] * vid.radius;
+      }
+    else if(euclid) {
+      for(int i=0; i<3; i++) glcoords[qglcoords][i] = H[i];
+  
+      glcoords[qglcoords][2] *= EUCSCALE;
+      glcoords[qglcoords][2] += vid.alpha;
+      // glcoords[qglcoords][2] = 1; // EUCSCALE;
+      }
+    else {
+      for(int i=0; i<3; i++) glcoords[qglcoords][i] = H[i];
+      glcoords[qglcoords][2] += vid.alpha;
+      }
+    qglcoords++;
+    }
+  else {
+    if(polyi >= POLYMAX) return;
+    hyperpoint Hscr;
+    applymodel(H, Hscr);
+    ld x = vid.xcenter + Hscr[0] * vid.radius;
+    ld y = vid.ycenter + Hscr[1] * vid.radius;
+
+    if(x < -vid.xres) x = -vid.xres;
+    if(y < -vid.yres) y = -vid.yres;
+    if(x > 2*vid.xres) x = 2*vid.xres;
+    if(y > 2*vid.yres) y = 2*vid.yres;
+
+    ld xe = Hscr[2] * vid.radius * vid.eye;
+    polyx[polyi] = x-xe;
+    polyxr[polyi] = x+xe;
+    polyy[polyi] = y;
+    polyi++;
+    }
+  }
+
+void addpoly(const transmatrix& V, GLfloat *tab, int cnt) {
+  while(cnt--) {
+    addpoint(V*gltopoint(tab));
+    tab += 3;
+    }
+  }
+
+#ifdef GFX
+#ifndef MOBILE
+void aapolylineColor(SDL_Surface *s, int*x, int *y, int polyi, int col) {
+  for(int i=1; i<polyi; i++)
+    aalineColor(s, x[i-1], y[i-1], x[i], y[i], col);
+  }
+
+void polylineColor(SDL_Surface *s, int *x, int *y, int polyi, int col) {
+  for(int i=1; i<polyi; i++)
+    lineColor(s, x[i-1], y[i-1], x[i], y[i], col);
+  }
+
+void filledPolygonColorI(SDL_Surface *s, int* polyx, int *polyy, int polyi, int col) {
+  Sint16 spolyx[polyi], spolyy[polyi];
+  for(int i=0; i<polyi; i++) spolyx[i] = polyx[i], spolyy[i] = polyy[i];
+  filledPolygonColor(s, spolyx, spolyy, polyi, col);
+  }
+
+#endif
 #endif
 
-#ifdef MOBILE
-short polyx[POLYMAX], polyy[POLYMAX];
-#else
-Sint16 polyx[POLYMAX], polyxr[POLYMAX], polyy[POLYMAX];
+void glcolor2(int color) {
+  unsigned char *c = (unsigned char*) (&color);
+  glColor4f(c[3] / 255.0, c[2] / 255.0, c[1]/255.0, c[0] / 255.0);
+  }
+
+void glapplymatrix(const transmatrix& V) {
+  GLfloat mat[16];
+  int id = 0;
+  
+  for(int y=0; y<3; y++) {
+    for(int x=0; x<3; x++) mat[id++] = V[x][y];
+    mat[id++] = 0;
+    }
+  {for(int x=0; x<3; x++) mat[id++] = 0;} mat[id++] = 1;
+  
+  if(euclid) {
+    /* mat[2] = 0; mat[6] = 0; mat[10] = -zz; 
+    mat[12] = mat[8]; mat[13] = mat[9]; mat[14] = EUCSCALE+zz; */
+    // mat[8] = mat[9] = 0;
+    // mat[11] = -EUCSCALE;
+    for(int i=2; i<16; i+=4) mat[i] *= EUCSCALE;
+    }
+  
+  mat[14] = GLfloat(vid.alpha);
+
+  if(mat[10] + vid.alpha < 0 && !sphere && !euclid) {
+    for(int i=0; i<3; i++)
+    for(int j=0; j<16; j+=4)
+      mat[j+i] = -mat[j+i];
+    }
+  
+  glMultMatrixf(mat);
+  }
+
+void gldraw(int useV, const transmatrix& V, int ps, int pq, int col, int outline) {
+  for(int ed = vid.goteyes ? -1 : 0; ed<2; ed+=2) {
+    if(ed) selectEyeGL(ed);
+    
+    if(useV == 1) {
+      glMatrixMode(GL_MODELVIEW);
+      glPushMatrix();
+      glapplymatrix(V);
+      }
+      
+    if(useV == 2) {
+      glMatrixMode(GL_MODELVIEW);
+      glPushMatrix();
+      GLfloat mat[16] = {
+        1, 0, 0, 0,
+        0, 1, 0, 0,
+        0, 0, 1, 0,
+        0, 0, 0, 1
+        };
+      mat[8] += ed * vid.eye;
+      glMultMatrixf(mat);
+      }
+      
+    if(col) {
+      glEnable(GL_STENCIL_TEST);
+ 
+      glColorMask( GL_FALSE,GL_FALSE,GL_FALSE,GL_FALSE );
+      glStencilOp( GL_INVERT, GL_INVERT, GL_INVERT);
+      glStencilFunc( GL_ALWAYS, 0x1, 0x1 );
+      glColor4f(1,1,1,1);
+      glDrawArrays(GL_TRIANGLE_FAN, ps, pq);
+ 
+      selectEyeMask(ed);
+ 
+      glcolor2(col);
+      glStencilOp( GL_ZERO, GL_ZERO, GL_ZERO);
+      glStencilFunc( GL_EQUAL, 1, 1);
+      glDrawArrays(GL_TRIANGLE_FAN, ps, pq);
+      glDisable(GL_STENCIL_TEST);
+      }
+    
+    if(outline) {
+      glcolor2(outline);
+      glDrawArrays(GL_LINE_STRIP, ps, pq);
+      }
+ 
+    if(useV) glPopMatrix();
+    }
+  }
+
+void drawpolyline(const transmatrix& V, GLfloat* tab, int cnt, int col, int outline) {
+#ifdef GL
+  if(vid.usingGL) {
+    if(pmodel == mdDisk) {    
+      const int pq = cnt;
+      if(currentvertices != tab)
+        activateVertexArray(tab, pq);
+      const int ps=0;
+      gldraw(1, V, ps, pq, col, outline);    
+      }
+    else {
+      qglcoords = 0;
+      addpoly(V, tab, cnt);
+      activateGlcoords();    
+      gldraw(2, Id, 0, qglcoords, col, outline);
+      }
+    return;
+    }
 #endif
+  
+  polyi = 0;
+  addpoly(V, tab, cnt);
+
+#ifdef MOBILE
+
+#ifdef ANDROID
+#define ANDROIDGD
+#endif
+
+#ifdef FAKEMOBILE
+#define ANDROIDGD
+#endif
+
+#ifdef ANDROIDGD
+  gdpush(1); gdpush(col); gdpush(outline); gdpush(polyi);
+  for(int i=0; i<polyi; i++) gdpush(polyx[i]), gdpush(polyy[i]);
+#endif
+
+#else
+
+#ifdef GFX
+  filledPolygonColorI(s, polyx, polyy, polyi, col);
+#ifndef MOBILE
+  if(svg::in) svg::polygon(polyx, polyy, polyi, col, outline);
+#endif
+  if(vid.goteyes) filledPolygonColorI(aux, polyxr, polyy, polyi, col);
+  
+  (vid.usingAA?aapolylineColor:polylineColor)(s, polyx, polyy, polyi, outline);
+  if(vid.goteyes) aapolylineColor(aux, polyxr, polyy, polyi, outline);
+  
+  if(vid.xres >= 2000 || fatborder) {
+    int xmi = 3000, xma = -3000;
+    for(int t=0; t<polyi; t++) xmi = min(xmi, polyx[t]), xma = max(xma, polyx[t]);
+    
+    if(xma > xmi + 20) for(int x=-1; x<2; x++) for(int y=-1; y<=2; y++) if(x*x+y*y == 1) {
+      for(int t=0; t<polyi; t++) polyx[t] += x, polyy[t] += y;
+      aapolylineColor(s, polyx, polyy, polyi, outline);
+      for(int t=0; t<polyi; t++) polyx[t] -= x, polyy[t] -= y;
+      }
+    }
+#endif
+#endif
+  }
+
+vector<float> prettylinepoints;
+
+void prettypoint(const hyperpoint& h) {
+  for(int i=0; i<3; i++) prettylinepoints.push_back(h[i]);
+  }
+
+void prettylinesub(const hyperpoint& h1, const hyperpoint& h2, int lev) {
+  if(lev) {
+    hyperpoint h3 = midz(h1, h2);
+    prettylinesub(h1, h3, lev-1);
+    prettylinesub(h3, h2, lev-1);
+    }
+  else prettypoint(h2);
+  }
+
+void prettyline(hyperpoint h1, hyperpoint h2, int col, int lev) {
+  prettylinepoints.clear();
+  prettypoint(h1);
+  prettylinesub(h1, h2, lev);
+  drawpolyline(Id, &prettylinepoints[0], size(prettylinepoints)/3, 0, col);
+  }
+
+vector<GLfloat> curvedata;
+int curvestart = 0;
 
 void drawqueue() {
 #ifdef USEPOLY
 
   int siz = size(ptds);
 
+  setcameraangle(true);
+
 #ifdef GL
-  if(vid.usingGL) {
-    initPolyForGL();
-    glVertexPointer(3, GL_FLOAT, 0, ourshape);
+  if(vid.usingGL) 
     glClear(GL_STENCIL_BUFFER_BIT);
-    }
 #endif
   
+  profile_start(3);
 #ifdef STLSORT
   sort(ptds.begin(), ptds.end(), ptdsort);
   
 #else
   
-  int qp[64];
-  for(int a=0; a<64; a++) qp[a] = 0;
+  int qp[PPR_MAX];
+  for(int a=0; a<PPR_MAX; a++) qp[a] = 0;
   
   for(int i = 0; i<siz; i++) {
+    if(ptds[i].prio < 0 || ptds[i].prio >= PPR_MAX) {
+      printf("Illegal priority %d of kind %d\n", ptds[i].prio, ptds[i].kind);
+      ptds[i].prio = rand() % PPR_MAX;
+      }
     qp[ptds[i].prio]++;
     }
   
-  qp[0]--;
-  for(int a=1; a<64; a++) qp[a] += qp[a-1];
+  int total = 0;
+  for(int a=0; a<PPR_MAX; a++) {
+    int b = qp[a];
+    qp[a] = total; total += b;
+    }
   
   ptds2.resize(siz);
   
-  for(int i = 0; i<siz; i++) ptds2[qp[ptds[i].prio]--] = &ptds[i];
+  for(int i = 0; i<siz; i++) ptds2[qp[ptds[i].prio]++] = &ptds[i];
 
 #endif
+  profile_stop(3);
 
 #ifndef MOBILE
   if(vid.goteyes && !vid.usingGL) {
@@ -217,169 +532,56 @@ void drawqueue() {
 #endif
   
   for(int i=0; i<siz; i++) {
-  
+
 #ifdef STLSORT
     polytodraw& ptd (ptds[i]);
 #else
     polytodraw& ptd (*ptds2[i]);
 #endif
 
+#ifdef ROGUEVIZ
+    svg::info = ptd.info;
+#endif
+
     // if(ptd.prio == 46) printf("eye size %d\n", polyi);
-
-    if(ptd.kind == 1) {
-      extern int pmodel;
-
-#ifdef GL
-      if(vid.usingGL && pmodel == 0) {
-
-#ifdef GLF
-        glEnableClientState(GL_VERTEX_ARRAY);
-#else
-        glBindBuffer(GL_ARRAY_BUFFER, shapebuffer);
-#endif
-        
-        unsigned char *c = (unsigned char*) (&ptd.col);
-
-        GLfloat mat[16];
-        int id = 0;
-        
-        for(int y=0; y<3; y++) {
-          for(int x=0; x<3; x++) mat[id++] = ptd.u.poly.V[x][y];
-          mat[id++] = 0;
-          }
-        for(int x=0; x<3; x++) mat[id++] = 0; mat[id++] = 1;
-        
-        if(euclid) {
-          mat[2] = 0; mat[6] = 0; mat[10] = 0; 
-          mat[12] = mat[8]; mat[13] = mat[9]; mat[14] = EUCSCALE;
-          mat[8] = mat[9] = 0;
-          }
-        
-        for(int ed = vid.goteyes ? -1 : 0; ed<2; ed+=2) {
-          if(ed) selectEyeGL(ed);
-          
-          glMatrixMode(GL_MODELVIEW);
-          glPushMatrix();
-          glMultMatrixf(mat);
-          
-          glEnable(GL_STENCIL_TEST);
-
-          glColorMask( GL_FALSE,GL_FALSE,GL_FALSE,GL_FALSE );
-          glStencilOp( GL_INVERT, GL_INVERT, GL_INVERT);
-          glStencilFunc( GL_ALWAYS, 0x1, 0x1 );
-          glColor4f(1,1,1,1);
-          glDrawArrays(GL_TRIANGLE_FAN, ptd.u.poly.start, ptd.u.poly.end-ptd.u.poly.start);
     
-          selectEyeMask(ed);
-
-          glColor4f(c[3] / 255.0, c[2] / 255.0, c[1]/255.0, c[0]/255.0);
-          glStencilOp( GL_ZERO, GL_ZERO, GL_ZERO);
-          glStencilFunc( GL_EQUAL, 1, 1);
-          glDrawArrays(GL_TRIANGLE_FAN, ptd.u.poly.start, ptd.u.poly.end-ptd.u.poly.start);
-          
-          glDisable(GL_STENCIL_TEST);
-          if(ptd.u.poly.outline == 0)
-            glColor4f(0, 0, 0, 1);
-          else {
-            unsigned char *c = (unsigned char*) (&ptd.u.poly.outline);
-            glColor4f(c[3] / 255.0, c[2] / 255.0, c[1]/255.0, c[0]/255.0);
-            }
-          glDrawArrays(GL_LINE_LOOP, ptd.u.poly.start, ptd.u.poly.end-ptd.u.poly.start);
-  
-          glPopMatrix();
-          }
-        
-        continue;
-        }
-
-      if(vid.usingGL) {
-        qglcoords = 0;
-        for(int i=ptd.u.poly.start; i<ptd.u.poly.end-1; i++) 
-          drawline(ptd.u.poly.V*hpc[i], ptd.u.poly.V*hpc[i+1], -1);
-        glVertexPointer(3, GL_FLOAT, 0, glcoords);
-        glEnableClientState(GL_VERTEX_ARRAY);
-
-        glEnable(GL_STENCIL_TEST);
-
-        glColorMask( GL_FALSE,GL_FALSE,GL_FALSE,GL_FALSE );
-        glStencilOp( GL_INVERT, GL_INVERT, GL_INVERT);
-        glStencilFunc( GL_ALWAYS, 0x1, 0x1 );
-        glColor4f(1,1,1,1);
-        glDrawArrays(GL_TRIANGLE_FAN, 0, qglcoords);
-
-        glColorMask( GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE );
-        unsigned char *c = (unsigned char*) (&ptd.col);
-        glColor4f(c[3] / 255.0, c[2] / 255.0, c[1]/255.0, c[0]/255.0);
-        glStencilOp( GL_ZERO, GL_ZERO, GL_ZERO);
-        glStencilFunc( GL_EQUAL, 1, 1);
-        glDrawArrays(GL_TRIANGLE_FAN, 0, qglcoords); 
-
-        glDisable(GL_STENCIL_TEST);
-
-        if(ptd.u.poly.outline == 0)
-          glColor4f(0, 0, 0, 1);
-        else {
-          unsigned char *c = (unsigned char*) (&ptd.u.poly.outline);
-          glColor4f(c[3] / 255.0, c[2] / 255.0, c[1]/255.0, c[0]/255.0);
-          }
-        glDrawArrays(GL_LINE_LOOP, 0, qglcoords);
-        continue;
-        }
-      
-      polyi = 0;
-      for(int i=ptd.u.poly.start; i<ptd.u.poly.end-1; i++) 
-        drawline(ptd.u.poly.V*hpc[i], ptd.u.poly.V*hpc[i+1], -1);
-      if(polyi < 3) continue;
-
-#ifdef MOBILE
-
-#ifdef ANDROID
-      gdpush(1); gdpush(ptd.col); gdpush(polyi);
-      for(int i=0; i<polyi; i++) gdpush(polyx[i]), gdpush(polyy[i]);
-#endif
-
-#else
-
-#ifdef GFX
-      filledPolygonColor(s, polyx, polyy, polyi, ptd.col);
-      if(vid.goteyes) filledPolygonColor(aux, polyxr, polyy, polyi, ptd.col);
-      (vid.usingAA?aapolygonColor:polygonColor)(s, polyx, polyy, polyi, ptd.u.poly.outline);
-      
-      if(vid.xres >= 2000 || fatborder) {
-        Sint16 xmi = 3000, xma = -3000;
-        for(int t=0; t<polyi; t++) xmi = min(xmi, polyx[t]), xma = max(xma, polyx[t]);
-        
-        if(xma > xmi + 20) for(int x=-1; x<2; x++) for(int y=-1; y<=2; y++) if(x*x+y*y == 1) {
-          for(int t=0; t<polyi; t++) polyx[t] += x, polyy[t] += y;
-          aapolygonColor(s, polyx, polyy, polyi, 0xFF);
-          for(int t=0; t<polyi; t++) polyx[t] -= x, polyy[t] -= y;
-          }
-        }
-      if(vid.goteyes) aapolygonColor(aux, polyxr, polyy, polyi, 0xFF);
-#endif
-#endif
-#endif
+    if(ptd.kind == pkResetModel) {
+      pmodel = eModel(ptd.col);
+      continue;
       }
-    else if(ptd.kind == 2) {
-      lalpha = ptd.col & 0xFF;
-      drawline(ptd.u.line.H1, ptd.u.line.H2, ptd.col);
-      lalpha = 0xFF;
+
+    if(ptd.kind == pkPoly) {
+      if(ptd.u.poly.curveindex >= 0)
+        ptd.u.poly.tab = &curvedata[ptd.u.poly.curveindex];
+      drawpolyline(ptd.u.poly.V, ptd.u.poly.tab, ptd.u.poly.cnt, ptd.col, ptd.u.poly.outline);
       }
-    else if(ptd.kind == 3) {
+    else if(ptd.kind == pkLine) {
+      prettyline(ptd.u.line.H1, ptd.u.line.H2, ptd.col, ptd.u.line.prf);
+      }
+    else if(ptd.kind == pkString) {
       qchr& q(ptd.u.chr);
 #ifndef MOBILE
-      if(q.frame) {
-        displaystr(q.x-q.frame, q.y, q.shift, q.size, q.str, 0, 8);
-        displaystr(q.x+q.frame, q.y, q.shift, q.size, q.str, 0, 8);
-        displaystr(q.x, q.y-q.frame, q.shift, q.size, q.str, 0, 8);
-        displaystr(q.x, q.y+q.frame, q.shift, q.size, q.str, 0, 8);
+      if(svg::in) 
+        svg::text(q.x, q.y, q.size, q.str, q.frame, ptd.col, q.align);
+      else {
+        if(q.frame) {
+          displaystr(q.x-q.frame, q.y, q.shift, q.size, q.str, 0, q.align);
+          displaystr(q.x+q.frame, q.y, q.shift, q.size, q.str, 0, q.align);
+          displaystr(q.x, q.y-q.frame, q.shift, q.size, q.str, 0, q.align);
+          displaystr(q.x, q.y+q.frame, q.shift, q.size, q.str, 0, q.align);
+          }
+        displaystr(q.x, q.y, q.shift, q.size, q.str, ptd.col, q.align);
         }
-      displaystr(q.x, q.y, q.shift, q.size, q.str, ptd.col, 8);
 #else
-      displayfr(q.x, q.y, q.frame, q.size, q.str, ptd.col, 8);
+      displayfr(q.x, q.y, q.frame, q.size, q.str, ptd.col, q.align);
 #endif
       }
-    else if(ptd.kind == 4) {
+    else if(ptd.kind == pkCircle) {
+#ifndef MOBILE
+      if(svg::in) 
+        svg::circle(ptd.u.cir.x, ptd.u.cir.y, ptd.u.cir.size, ptd.col);
+      else
+#endif
       drawCircle(ptd.u.cir.x, ptd.u.cir.y, ptd.u.cir.size, ptd.col);
       }
     }
@@ -401,10 +603,16 @@ void drawqueue() {
 
 #endif
 #endif
+
+  setcameraangle(false);
+  curvedata.clear(); curvestart = 0;
   }
 
 hpcshape 
+  shFloorSide[SIDEPARS][2], shSemiFloorSide[SIDEPARS], shTriheptaSide[SIDEPARS][2], shMFloorSide[SIDEPARS][2],
   shFloor[2], shBFloor[2], shMFloor2[2], shMFloor3[2], shMFloor4[2],
+  shCircleFloor,
+  shFloorShadow[2], shTriheptaFloorShadow[2], shTriheptaEucShadow[3],
   shWall[2], shMineMark[2], shFan,
   shStarFloor[2], shCloudFloor[2], shTriFloor[2], shZebra[5],
   shTower[11],
@@ -413,54 +621,82 @@ hpcshape
   shEmeraldFloor[6],
   shFeatherFloor[3], shDemonFloor[2], shCrossFloor[2], shMFloor[2], shCaveFloor[3],
   shSemiFeatherFloor[2], shPowerFloor[3],
-  shSemiFloor[2], shSemiBFloor[2], 
+  shSemiFloor[2], shSemiBFloor[2], shSemiFloorShadow,
   shDesertFloor[2], shRedRockFloor[3][2],
-  shPalaceFloor[2], shNewFloor[2], 
+  shPalaceFloor[2], shNewFloor[2], shTrollFloor[2],
+  shLeafFloor[2],
+  shBarrowFloor[3],
   shTriheptaFloor[11], shTriheptaFloor2[2], shTriheptaEuc[3],
   shCross, shGiantStar[2], shLake, shMirror,
-  shGem[2], shStar, shDisk, shRing, 
+  shGem[2], shStar, shDisk, shDiskT, shDiskS, shDiskM, shDiskSq, shRing,   
+  shEgg,
   shSpikedRing, shTargetRing, shSawRing, shGearRing, shPeaceRing, shHeptaRing,
+  shSpearRing,
   shDaisy, shTriangle, shNecro, shStatue, shKey,
   shGun,
-  shFigurine,
+  shFigurine, shTreat,
   shElementalShard,
-  shBranch, shIBranch, shTentacle, shTentacleX, shILeaf[2], 
+  // shBranch, 
+  shIBranch, shTentacle, shTentacleX, shILeaf[2], 
   shMovestar,
   shWolf, shYeti, shDemon, shGDemon, shEagle, shGargoyleWings, shGargoyleBody,
+  shDogBody, shDogHead, shDogFrontLeg, shDogRearLeg, shDogFrontPaw, shDogRearPaw,
+  shDogTorso,
   shHawk,
-  shCatBody, shCatLegs, shCatHead,
-  shTrylobite, shTrylobiteHead,
+  shCatBody, shCatLegs, shCatHead, shFamiliarHead, shFamiliarEye,
   shWolf1, shWolf2, shWolf3,
   shDogStripes,
   shPBody, shPSword, shPKnife,
+  shHumanFoot, shHumanLeg, shHumanGroin, shHumanNeck, shSkeletalFoot, shYetiFoot,
+  shMagicSword, shSeaTentacle, shKrakenHead, shKrakenEye, shKrakenEye2,
+  shArrow,
   shPHead, shPFace, shGolemhead, shHood, shArmor, 
   shAztecHead, shAztecCap,
   shSabre, shTurban1, shTurban2, shVikingHelmet,
   shWestHat1, shWestHat2, shGunInHand,
-  shKnightArmor, shKnightCloak,
+  shKnightArmor, shKnightCloak, shWightCloak,
   shGhost, shEyes, shSlime, shJoint, shWormHead, shTentHead, shShark,
   shHedgehogBlade, shHedgehogBladePlayer,
   shWolfBody, shWolfHead, shWolfLegs, shWolfEyes,
+  shWolfFrontLeg, shWolfRearLeg, shWolfFrontPaw, shWolfRearPaw,
   shBigHepta, shBigTriangle, shBigHex, shBigHexTriangle, shBigHexTriangleRev,
   shFemaleBody, shFemaleHair, shFemaleDress, shWitchDress,
   shWitchHair, shBeautyHair, shFlowerHair, shFlowerHand, shSuspenders,
-  shBugBody, shBugArmor,
+  shBugBody, shBugArmor, shBugLeg, shBugAntenna,
   shPickAxe, shPike, shFlailBall, shFlailTrunk, shFlailChain,
   shBook, shBookCover, shGrail,
   shBoatOuter, shBoatInner, shCompass1, shCompass2, shCompass3,
   shKnife, shTongue, shFlailMissile,
   shPirateHook, shPirateHood, shEyepatch, shPirateX,
-  shScratch, shHeptaMarker,
+  // shScratch, 
+  shHeptaMarker,
   shSkeletonBody, shSkull, shSkullEyes, shFatBody, shWaterElemental,
   shPalaceGate, shFishTail,
   shMouse, shMouseLegs, shMouseEyes,
   shPrincessDress, shPrinceDress,
+  shWizardCape1, shWizardCape2,
   shBigCarpet1, shBigCarpet2, shBigCarpet3,
   shGoatHead, shRose, shThorns,
   shRatHead, shRatTail, shRatEyes, shRatCape1, shRatCape2,
+  shWizardHat1, shWizardHat2,
   shTortoise[13][6],
-  shDragonLegs, shDragonTail, shDragonHead, shDragonSegment, shDragonNostril, shDragonWings, shDragonEyes,
-  shSolidBranch, shWeakBranch, shBead0, shBead1;
+  shDragonLegs, shDragonTail, shDragonHead, shDragonSegment, shDragonNostril, 
+  shDragonWings, 
+  shSolidBranch, shWeakBranch, shBead0, shBead1,
+  shBatWings, shBatBody, shBatMouth, shBatFang, shBatEye,
+  shParticle[16],
+  shReptile[5][4],
+  shReptileBody, shReptileHead, shReptileFrontFoot, shReptileRearFoot,
+  shReptileFrontLeg, shReptileRearLeg, shReptileTail, shReptileEye,
+
+  shTrylobite, shTrylobiteHead, shTrylobiteBody,
+  shTrylobiteFrontLeg, shTrylobiteRearLeg, shTrylobiteFrontClaw, shTrylobiteRearClaw,
+  
+  shBullBody, shBullHead, shBullHorn, shBullRearHoof, shBullFrontHoof,
+  
+  shButterflyBody, shButterflyWing, shGadflyBody, shGadflyWing, shGadflyEye,
+
+  shDodeca;
 
 #define USERLAYERS 8
 #define USERSHAPEGROUPS 8
@@ -483,9 +719,9 @@ usershape *usershapes[USERSHAPEGROUPS][USERSHAPEIDS];
 
 void drawTentacle(hpcshape &h, ld rad, ld var, ld divby) {
   for(int i=0; i<=20; i++)
-    hpcpush(ddi(21, rad + var * sin(i * M_PI/divby)) * ddi(0, crossf * i/20.) * C0);
+    hpcpush(ddi(S21, rad + var * sin(i * M_PI/divby)) * ddi(0, crossf * i/20.) * C0);
   for(int i=20; i>=0; i--)
-    hpcpush(ddi(63, rad - var * sin(i * M_PI/divby)) * ddi(0, crossf * i/20.) * C0);
+    hpcpush(ddi(S21*3, rad - var * sin(i * M_PI/divby)) * ddi(0, crossf * i/20.) * C0);
   }
 
 hyperpoint hpxd(ld d, ld x, ld y, ld z) {
@@ -508,83 +744,41 @@ hyperpoint turtlevertex(int u, double x, double y, double z) {
   }
 
 
-void drawDemon(ld d) {
-  hpcpush(hpxyzsc(0.098330,0.005996,1.004841));
-  hpcpush(hpxyzsc(0.098350,0.015592,1.004946));
-  hpcpush(hpxyzsc(0.097179,0.027594,1.005090));
-  hpcpush(hpxyzsc(0.088731,0.041967,1.004806));
-  hpcpush(hpxyzsc(0.082695,0.047939,1.004558));
-  hpcpush(hpxyzsc(0.070682,0.061098,1.004355));
-  hpcpush(hpxyzsc(0.075191,0.124914,1.010573));
-  hpcpush(hpxyzsc(0.083954,0.132624,1.012244));
-  hpcpush(hpxyzsc(0.097611,0.134215,1.013677));
-  hpcpush(hpxyzsc(0.112530,0.132100,1.014945));
-  hpcpush(hpxyzsc(0.126233,0.127459,1.015963));
-  hpcpush(hpxyzsc(0.148804,0.116829,1.017738));
-  hpcpush(hpxyzsc(0.170177,0.098653,1.019163));
-  hpcpush(hpxyzsc(0.175203,0.092537,1.019441));
-  hpcpush(hpxyzsc(0.167872,0.107389,1.019663));
-  hpcpush(hpxyzsc(0.150410,0.125752,1.019037));
-  hpcpush(hpxyzsc(0.132974,0.139130,1.018351));
-  hpcpush(hpxyzsc(0.093435,0.163511,1.017578));
-  hpcpush(hpxyzsc(0.064916,0.165353,1.015655));
-  hpcpush(hpxyzsc(0.042697,0.159810,1.013589));
-  hpcpush(hpxyzsc(0.026717,0.148159,1.011269));
-  hpcpush(hpxyzsc(0.018123,0.130482,1.008640));
-  hpcpush(hpxyzsc(0.016784,0.095911,1.004729));
-  hpcpush(hpxyzsc(0.020324,0.078904,1.003314));
-  hpcpush(hpxyzsc(0.017909,0.070441,1.002638));
-  hpcpush(hpxyzsc(0.013123,0.065613,1.002236));
-  hpcpush(hpxyzsc(0.000000,0.063197,1.001995));
-  hpcpush(hpxyzsc(-0.015494,0.057207,1.001755));
-  hpcpush(hpxyzsc(-0.032146,0.038099,1.001242));
-  hpcpush(hpxyzsc(-0.063226,0.021473,1.002227));
-  hpcpush(hpxyzsc(-0.122974,0.008439,1.007568));
-  hpcpush(hpxyzsc(-0.197385,0.012337,1.019369));
-  hpcpush(hpxyzsc(-0.283101,0.000000,1.039301));
-  hpcpush(hpxyzsc(-0.283101,-0.000000,1.039301));
-  hpcpush(hpxyzsc(-0.197385,-0.012337,1.019369));
-  hpcpush(hpxyzsc(-0.122974,-0.008439,1.007568));
-  hpcpush(hpxyzsc(-0.063226,-0.021473,1.002227));
-  hpcpush(hpxyzsc(-0.032146,-0.038099,1.001242));
-  hpcpush(hpxyzsc(-0.015494,-0.057207,1.001755));
-  hpcpush(hpxyzsc(0.000000,-0.063197,1.001995));
-  hpcpush(hpxyzsc(0.013123,-0.065613,1.002236));
-  hpcpush(hpxyzsc(0.017909,-0.070441,1.002638));
-  hpcpush(hpxyzsc(0.020324,-0.078904,1.003314));
-  hpcpush(hpxyzsc(0.016784,-0.095911,1.004729));
-  hpcpush(hpxyzsc(0.018123,-0.130482,1.008640));
-  hpcpush(hpxyzsc(0.026717,-0.148159,1.011269));
-  hpcpush(hpxyzsc(0.042697,-0.159810,1.013589));
-  hpcpush(hpxyzsc(0.064916,-0.165353,1.015655));
-  hpcpush(hpxyzsc(0.093435,-0.163511,1.017578));
-  hpcpush(hpxyzsc(0.132974,-0.139130,1.018351));
-  hpcpush(hpxyzsc(0.150410,-0.125752,1.019037));
-  hpcpush(hpxyzsc(0.167872,-0.107389,1.019663));
-  hpcpush(hpxyzsc(0.175203,-0.092537,1.019441));
-  hpcpush(hpxyzsc(0.170177,-0.098653,1.019163));
-  hpcpush(hpxyzsc(0.148804,-0.116829,1.017738));
-  hpcpush(hpxyzsc(0.126233,-0.127459,1.015963));
-  hpcpush(hpxyzsc(0.112530,-0.132100,1.014945));
-  hpcpush(hpxyzsc(0.097611,-0.134215,1.013677));
-  hpcpush(hpxyzsc(0.083954,-0.132624,1.012244));
-  hpcpush(hpxyzsc(0.075191,-0.124914,1.010573));
-  hpcpush(hpxyzsc(0.070682,-0.061098,1.004355));
-  hpcpush(hpxyzsc(0.082695,-0.047939,1.004558));
-  hpcpush(hpxyzsc(0.088731,-0.041967,1.004806));
-  hpcpush(hpxyzsc(0.097179,-0.027594,1.005090));
-  hpcpush(hpxyzsc(0.098350,-0.015592,1.004946));
-  hpcpush(hpxyzsc(0.098330,-0.005996,1.004841));
-  hpcpush(hpxyzsc(0.098330,0.005996,1.004841));
-  }
-
-hpcshape *last = NULL;
-
 void bshape(hpcshape& sh, int p) {
   if(last) last->e = qhpc;
   last = &sh;
   last->s = qhpc, last->prio = p;
   first = true; 
+  }
+
+hyperpoint spfix(int rots, hyperpoint h) {
+  if(!sphere) return h;
+  if(rots != 7) return h;
+  double d = atan2(h[0], h[1]);
+  return spin(M_PI + M_PI * 4/35 * d) * h;
+  }
+
+void bshape(hpcshape& sh, int p, double shzoom, int shapeid) {
+  bshape(sh, p);
+  int whereis = 0;
+  while(polydata[whereis] != NEWSHAPE || polydata[whereis+1] != shapeid-1) whereis++;
+  int rots = polydata[whereis+2]; int sym = polydata[whereis+3];
+  whereis += 4;
+  int qty = 0;
+  while(polydata[whereis + 2*qty] != NEWSHAPE) qty++;
+  double shzoomx = shzoom;
+  double shzoomy = shzoom;
+  if(shzoom == WOLF) shzoomx = 1.5 * (purehepta ? crossf / hcrossf : 1), shzoomy = 1.6 * (purehepta ? crossf / hcrossf : 1);
+  int rots2 = rots;
+  if(rots == 7) rots2 = S7;
+  for(int r=0; r<rots2; r++) {
+    for(int i=0; i<qty; i++)
+      hpcpush(spin(2*M_PI*r/rots2) * spfix(rots, hpxy(polydata[whereis+2*i] * shzoomx, polydata[whereis+2*i+1] * shzoomy)));
+    if(sym == 2)
+    for(int i=qty-1; i>=0; i--)
+      hpcpush(spin(2*M_PI*r/rots2) * spfix(rots, hpxy(polydata[whereis+2*i] * shzoomx, -polydata[whereis+2*i+1] * shzoomy)));
+    }
+  hpcpush(spfix(rots, hpxy(polydata[whereis] * shzoomx, polydata[whereis+1] * shzoomy)));
   }
 
 void copyshape(hpcshape& sh, hpcshape& orig, int p) {
@@ -608,9330 +802,7 @@ void bshapeend() {
   last = NULL;
   }
 
-hyperpoint hwolf(double x, double y, double z) {
-  hyperpoint H = hpxyz(1.5*x * (crossf/hcrossf), 1.6*y * (crossf/hcrossf), z);
-  H = mid(H,H);
-  return H;
-  }
-
-void buildpolys() {
-
-  DEBB(DF_INIT, (debugfile,"buildpolys\n"));
-
-  qhpc = 0;
-
-  bshape(shMovestar, 0);
-  for(int i=0; i<8; i++) {
-    hpcpush(spin(M_PI * i/4) * xpush(crossf) * spin(M_PI * i/4) * C0);
-    hpcpush(spin(M_PI * i/4 + M_PI/8) * xpush(crossf/4) * spin(M_PI * i/4 + M_PI/8) * C0);
-    }
-  
-  // floors
-  scalef = purehepta ? crossf / hcrossf * .88 : 1;
-  
-  bshape(shStarFloor[0], 10);
-  hpcpush(hpxyzsc(0.267355,0.153145,1.046390));
-  hpcpush(hpxyzsc(0.158858,0.062321,1.014455));
-  hpcpush(hpxyzsc(0.357493,-0.060252,1.063688));
-  hpcpush(hpxyzsc(0.266305,-0.154963,1.046390));
-  hpcpush(hpxyzsc(0.133401,-0.106414,1.014455));
-  hpcpush(hpxyzsc(0.126567,-0.339724,1.063688));
-  hpcpush(hpxyzsc(-0.001050,-0.308108,1.046390));
-  hpcpush(hpxyzsc(-0.025457,-0.168736,1.014455));
-  hpcpush(hpxyzsc(-0.230926,-0.279472,1.063688));
-  hpcpush(hpxyzsc(-0.267355,-0.153145,1.046390));
-  hpcpush(hpxyzsc(-0.158858,-0.062321,1.014455));
-  hpcpush(hpxyzsc(-0.357493,0.060252,1.063688));
-  hpcpush(hpxyzsc(-0.266305,0.154963,1.046390));
-  hpcpush(hpxyzsc(-0.133401,0.106414,1.014455));
-  hpcpush(hpxyzsc(-0.126567,0.339724,1.063688));
-  hpcpush(hpxyzsc(0.001050,0.308108,1.046390));
-  hpcpush(hpxyzsc(0.025457,0.168736,1.014455));
-  hpcpush(hpxyzsc(0.230926,0.279472,1.063688));
-  hpcpush(hpxyzsc(0.267355,0.153145,1.046390));
-
-  bshape(shStarFloor[1], 10);
-  hpcpush(hpxyzsc(-0.012640,0.255336,1.032161));
-  hpcpush(hpxyzsc(0.152259,0.386185,1.082738));
-  hpcpush(hpxyzsc(0.223982,0.275978,1.061288));
-  hpcpush(hpxyzsc(0.191749,0.169082,1.032161));
-  hpcpush(hpxyzsc(0.396864,0.121741,1.082738));
-  hpcpush(hpxyzsc(0.355418,-0.003047,1.061288));
-  hpcpush(hpxyzsc(0.251747,-0.044494,1.032161));
-  hpcpush(hpxyzsc(0.342622,-0.234376,1.082738));
-  hpcpush(hpxyzsc(0.219218,-0.279777,1.061288));
-  hpcpush(hpxyzsc(0.122175,-0.224565,1.032161));
-  hpcpush(hpxyzsc(0.030378,-0.414004,1.082738));
-  hpcpush(hpxyzsc(-0.082058,-0.345829,1.061288));
-  hpcpush(hpxyzsc(-0.099398,-0.235534,1.032161));
-  hpcpush(hpxyzsc(-0.304740,-0.281878,1.082738));
-  hpcpush(hpxyzsc(-0.321543,-0.151465,1.061288));
-  hpcpush(hpxyzsc(-0.246122,-0.069141,1.032161));
-  hpcpush(hpxyzsc(-0.410384,0.062508,1.082738));
-  hpcpush(hpxyzsc(-0.318899,0.156955,1.061288));
-  hpcpush(hpxyzsc(-0.207511,0.149317,1.032161));
-  hpcpush(hpxyzsc(-0.207000,0.359824,1.082738));
-  hpcpush(hpxyzsc(-0.076118,0.347185,1.061288));
-  hpcpush(hpxyzsc(-0.012640,0.255336,1.032161));
-
-  bshape(shCloudFloor[0], 10);
-  hpcpush(hpxyzsc(-0.249278,0.146483,1.040960));
-  hpcpush(hpxyzsc(-0.242058,0.146003,1.039187));
-  hpcpush(hpxyzsc(-0.209868,0.146655,1.032256));
-  hpcpush(hpxyzsc(-0.180387,0.151575,1.027382));
-  hpcpush(hpxyzsc(-0.148230,0.165669,1.024411));
-  hpcpush(hpxyzsc(-0.131141,0.187345,1.025815));
-  hpcpush(hpxyzsc(-0.127578,0.219788,1.031786));
-  hpcpush(hpxyzsc(-0.130923,0.255428,1.040377));
-  hpcpush(hpxyzsc(-0.116050,0.294689,1.048956));
-  hpcpush(hpxyzsc(-0.093271,0.316597,1.053059));
-  hpcpush(hpxyzsc(-0.050041,0.330532,1.054398));
-  hpcpush(hpxyzsc(-0.007791,0.309060,1.046699));
-  hpcpush(hpxyzsc(0.017835,0.271341,1.036313));
-  hpcpush(hpxyzsc(0.017835,0.271341,1.036313));
-  hpcpush(hpxyzsc(0.002219,0.289123,1.040960));
-  hpcpush(hpxyzsc(0.005414,0.282630,1.039187));
-  hpcpush(hpxyzsc(0.022073,0.255079,1.032256));
-  hpcpush(hpxyzsc(0.041075,0.232008,1.027382));
-  hpcpush(hpxyzsc(0.069359,0.211206,1.024411));
-  hpcpush(hpxyzsc(0.096675,0.207244,1.025815));
-  hpcpush(hpxyzsc(0.126553,0.220380,1.031786));
-  hpcpush(hpxyzsc(0.155745,0.241096,1.040377));
-  hpcpush(hpxyzsc(0.197183,0.247847,1.048956));
-  hpcpush(hpxyzsc(0.227545,0.239074,1.053059));
-  hpcpush(hpxyzsc(0.261229,0.208602,1.054398));
-  hpcpush(hpxyzsc(0.263758,0.161278,1.046699));
-  hpcpush(hpxyzsc(0.243906,0.120225,1.036313));
-  hpcpush(hpxyzsc(0.243906,0.120225,1.036313));
-  hpcpush(hpxyzsc(0.251497,0.142640,1.040960));
-  hpcpush(hpxyzsc(0.247471,0.136627,1.039187));
-  hpcpush(hpxyzsc(0.231941,0.108424,1.032256));
-  hpcpush(hpxyzsc(0.221462,0.080432,1.027382));
-  hpcpush(hpxyzsc(0.217589,0.045537,1.024411));
-  hpcpush(hpxyzsc(0.227816,0.019899,1.025815));
-  hpcpush(hpxyzsc(0.254131,0.000592,1.031786));
-  hpcpush(hpxyzsc(0.286668,-0.014331,1.040377));
-  hpcpush(hpxyzsc(0.313233,-0.046842,1.048956));
-  hpcpush(hpxyzsc(0.320816,-0.077523,1.053059));
-  hpcpush(hpxyzsc(0.311269,-0.121929,1.054398));
-  hpcpush(hpxyzsc(0.271550,-0.147783,1.046699));
-  hpcpush(hpxyzsc(0.226071,-0.151116,1.036313));
-  hpcpush(hpxyzsc(0.226071,-0.151116,1.036313));
-  hpcpush(hpxyzsc(0.249278,-0.146483,1.040960));
-  hpcpush(hpxyzsc(0.242058,-0.146003,1.039187));
-  hpcpush(hpxyzsc(0.209868,-0.146655,1.032256));
-  hpcpush(hpxyzsc(0.180387,-0.151575,1.027382));
-  hpcpush(hpxyzsc(0.148230,-0.165669,1.024411));
-  hpcpush(hpxyzsc(0.131141,-0.187345,1.025815));
-  hpcpush(hpxyzsc(0.127578,-0.219788,1.031786));
-  hpcpush(hpxyzsc(0.130923,-0.255428,1.040377));
-  hpcpush(hpxyzsc(0.116050,-0.294689,1.048956));
-  hpcpush(hpxyzsc(0.093271,-0.316597,1.053059));
-  hpcpush(hpxyzsc(0.050041,-0.330532,1.054398));
-  hpcpush(hpxyzsc(0.007791,-0.309060,1.046699));
-  hpcpush(hpxyzsc(-0.017835,-0.271341,1.036313));
-  hpcpush(hpxyzsc(-0.017835,-0.271341,1.036313));
-  hpcpush(hpxyzsc(-0.002219,-0.289123,1.040960));
-  hpcpush(hpxyzsc(-0.005414,-0.282630,1.039187));
-  hpcpush(hpxyzsc(-0.022073,-0.255079,1.032256));
-  hpcpush(hpxyzsc(-0.041075,-0.232008,1.027382));
-  hpcpush(hpxyzsc(-0.069359,-0.211206,1.024411));
-  hpcpush(hpxyzsc(-0.096675,-0.207244,1.025815));
-  hpcpush(hpxyzsc(-0.126553,-0.220380,1.031786));
-  hpcpush(hpxyzsc(-0.155745,-0.241096,1.040377));
-  hpcpush(hpxyzsc(-0.197183,-0.247847,1.048956));
-  hpcpush(hpxyzsc(-0.227545,-0.239074,1.053059));
-  hpcpush(hpxyzsc(-0.261229,-0.208602,1.054398));
-  hpcpush(hpxyzsc(-0.263758,-0.161278,1.046699));
-  hpcpush(hpxyzsc(-0.243906,-0.120225,1.036313));
-  hpcpush(hpxyzsc(-0.243906,-0.120225,1.036313));
-  hpcpush(hpxyzsc(-0.251497,-0.142640,1.040960));
-  hpcpush(hpxyzsc(-0.247471,-0.136627,1.039187));
-  hpcpush(hpxyzsc(-0.231941,-0.108424,1.032256));
-  hpcpush(hpxyzsc(-0.221462,-0.080432,1.027382));
-  hpcpush(hpxyzsc(-0.217589,-0.045537,1.024411));
-  hpcpush(hpxyzsc(-0.227816,-0.019899,1.025815));
-  hpcpush(hpxyzsc(-0.254131,-0.000592,1.031786));
-  hpcpush(hpxyzsc(-0.286668,0.014331,1.040377));
-  hpcpush(hpxyzsc(-0.313233,0.046842,1.048956));
-  hpcpush(hpxyzsc(-0.320816,0.077523,1.053059));
-  hpcpush(hpxyzsc(-0.311269,0.121929,1.054398));
-  hpcpush(hpxyzsc(-0.271550,0.147783,1.046699));
-  hpcpush(hpxyzsc(-0.226071,0.151116,1.036313));
-  hpcpush(hpxyzsc(-0.226071,0.151116,1.036313));
-  hpcpush(hpxyzsc(-0.249278,0.146483,1.040960));
-
-  bshape(shCloudFloor[1], 10);
-  hpcpush(hpxyzsc(-0.216129,0.195545,1.041609));
-  hpcpush(hpxyzsc(-0.209066,0.211647,1.043314));
-  hpcpush(hpxyzsc(-0.195698,0.234578,1.045622));
-  hpcpush(hpxyzsc(-0.193583,0.272597,1.054411));
-  hpcpush(hpxyzsc(-0.202572,0.304529,1.064788));
-  hpcpush(hpxyzsc(-0.198965,0.336605,1.073727));
-  hpcpush(hpxyzsc(-0.167757,0.354608,1.074192));
-  hpcpush(hpxyzsc(-0.132750,0.357613,1.070285));
-  hpcpush(hpxyzsc(-0.104720,0.351753,1.065221));
-  hpcpush(hpxyzsc(-0.079702,0.340062,1.059242));
-  hpcpush(hpxyzsc(-0.064640,0.331114,1.055374));
-  hpcpush(hpxyzsc(-0.040288,0.308007,1.047135));
-  hpcpush(hpxyzsc(-0.023142,0.289269,1.041255));
-  hpcpush(hpxyzsc(0.018129,0.290897,1.041609));
-  hpcpush(hpxyzsc(0.035122,0.295414,1.043314));
-  hpcpush(hpxyzsc(0.061385,0.299260,1.045622));
-  hpcpush(hpxyzsc(0.092428,0.321310,1.054411));
-  hpcpush(hpxyzsc(0.111789,0.348249,1.064788));
-  hpcpush(hpxyzsc(0.139116,0.365426,1.073727));
-  hpcpush(hpxyzsc(0.172649,0.352252,1.074192));
-  hpcpush(hpxyzsc(0.196825,0.326757,1.070285));
-  hpcpush(hpxyzsc(0.209719,0.301188,1.065221));
-  hpcpush(hpxyzsc(0.216178,0.274339,1.059242));
-  hpcpush(hpxyzsc(0.218573,0.256983,1.055374));
-  hpcpush(hpxyzsc(0.215691,0.223538,1.047135));
-  hpcpush(hpxyzsc(0.211731,0.198449,1.041255));
-  hpcpush(hpxyzsc(0.238736,0.167197,1.041609));
-  hpcpush(hpxyzsc(0.252862,0.156728,1.043314));
-  hpcpush(hpxyzsc(0.272244,0.138593,1.045622));
-  hpcpush(hpxyzsc(0.308838,0.128071,1.054411));
-  hpcpush(hpxyzsc(0.341971,0.129729,1.064788));
-  hpcpush(hpxyzsc(0.372439,0.119075,1.073727));
-  hpcpush(hpxyzsc(0.383047,0.084643,1.074192));
-  hpcpush(hpxyzsc(0.378187,0.049846,1.070285));
-  hpcpush(hpxyzsc(0.366236,0.023822,1.065221));
-  hpcpush(hpxyzsc(0.349271,0.002033,1.059242));
-  hpcpush(hpxyzsc(0.337196,-0.010661,1.055374));
-  hpcpush(hpxyzsc(0.309250,-0.029260,1.047135));
-  hpcpush(hpxyzsc(0.287166,-0.041807,1.041255));
-  hpcpush(hpxyzsc(0.279570,-0.082405,1.041609));
-  hpcpush(hpxyzsc(0.280192,-0.099977,1.043314));
-  hpcpush(hpxyzsc(0.278098,-0.126438,1.045622));
-  hpcpush(hpxyzsc(0.292688,-0.161608,1.054411));
-  hpcpush(hpxyzsc(0.314642,-0.186479,1.064788));
-  hpcpush(hpxyzsc(0.325308,-0.216943,1.073727));
-  hpcpush(hpxyzsc(0.305002,-0.246704,1.074192));
-  hpcpush(hpxyzsc(0.274767,-0.264600,1.070285));
-  hpcpush(hpxyzsc(0.246970,-0.271482,1.065221));
-  hpcpush(hpxyzsc(0.219356,-0.271804,1.059242));
-  hpcpush(hpxyzsc(0.201903,-0.270277,1.055374));
-  hpcpush(hpxyzsc(0.169937,-0.260025,1.047135));
-  hpcpush(hpxyzsc(0.146359,-0.250582,1.041255));
-  hpcpush(hpxyzsc(0.109882,-0.269955,1.041609));
-  hpcpush(hpxyzsc(0.096532,-0.281398,1.043314));
-  hpcpush(hpxyzsc(0.074538,-0.296258,1.045622));
-  hpcpush(hpxyzsc(0.056137,-0.329594,1.054411));
-  hpcpush(hpxyzsc(0.050381,-0.362264,1.064788));
-  hpcpush(hpxyzsc(0.033214,-0.389598,1.073727));
-  hpcpush(hpxyzsc(-0.002715,-0.392278,1.074192));
-  hpcpush(hpxyzsc(-0.035559,-0.379797,1.070285));
-  hpcpush(hpxyzsc(-0.058270,-0.362355,1.065221));
-  hpcpush(hpxyzsc(-0.075738,-0.340967,1.059242));
-  hpcpush(hpxyzsc(-0.085427,-0.326369,1.055374));
-  hpcpush(hpxyzsc(-0.097341,-0.294985,1.047135));
-  hpcpush(hpxyzsc(-0.104659,-0.270663,1.041255));
-  hpcpush(hpxyzsc(-0.142549,-0.254223,1.041609));
-  hpcpush(hpxyzsc(-0.159819,-0.250920,1.043314));
-  hpcpush(hpxyzsc(-0.185150,-0.242990,1.045622));
-  hpcpush(hpxyzsc(-0.222686,-0.249388,1.054411));
-  hpcpush(hpxyzsc(-0.251818,-0.265258,1.064788));
-  hpcpush(hpxyzsc(-0.283891,-0.268878,1.073727));
-  hpcpush(hpxyzsc(-0.308388,-0.242459,1.074192));
-  hpcpush(hpxyzsc(-0.319108,-0.208999,1.070285));
-  hpcpush(hpxyzsc(-0.319631,-0.180367,1.065221));
-  hpcpush(hpxyzsc(-0.313800,-0.153375,1.059242));
-  hpcpush(hpxyzsc(-0.308428,-0.136699,1.055374));
-  hpcpush(hpxyzsc(-0.291320,-0.107816,1.047135));
-  hpcpush(hpxyzsc(-0.276867,-0.086930,1.041255));
-  hpcpush(hpxyzsc(-0.287638,-0.047056,1.041609));
-  hpcpush(hpxyzsc(-0.295823,-0.031495,1.043314));
-  hpcpush(hpxyzsc(-0.305417,-0.006746,1.045622));
-  hpcpush(hpxyzsc(-0.333822,0.018612,1.054411));
-  hpcpush(hpxyzsc(-0.364393,0.031493,1.064788));
-  hpcpush(hpxyzsc(-0.387221,0.054313,1.073727));
-  hpcpush(hpxyzsc(-0.381839,0.089937,1.074192));
-  hpcpush(hpxyzsc(-0.362362,0.119180,1.070285));
-  hpcpush(hpxyzsc(-0.340304,0.137441,1.065221));
-  hpcpush(hpxyzsc(-0.315564,0.149712,1.059242));
-  hpcpush(hpxyzsc(-0.299177,0.155909,1.055374));
-  hpcpush(hpxyzsc(-0.265929,0.160541,1.047135));
-  hpcpush(hpxyzsc(-0.240588,0.162264,1.041255));
-  hpcpush(hpxyzsc(-0.216129,0.195545,1.041609));
-
-  scalef = crossf / hcrossf;
-
-  bshape(shCrossFloor[0], 10);
-  hpcpush(hpxyzsc(-0.283927,0.089050,1.043333));
-  hpcpush(hpxyzsc(-0.363031,0.095818,1.068163));
-  hpcpush(hpxyzsc(-0.386170,0.136539,1.080634));
-  hpcpush(hpxyzsc(-0.370773,0.209082,1.086825));
-  hpcpush(hpxyzsc(-0.207773,0.157096,1.033368));
-  hpcpush(hpxyzsc(-0.213111,0.255207,1.053825));
-  hpcpush(hpxyzsc(-0.045690,0.195109,1.019880));
-  hpcpush(hpxyzsc(-0.053263,0.305287,1.046918));
-  hpcpush(hpxyzsc(0.090089,0.277990,1.041823));
-  hpcpush(hpxyzsc(0.219083,0.201363,1.043333));
-  hpcpush(hpxyzsc(0.264497,0.266484,1.068163));
-  hpcpush(hpxyzsc(0.311331,0.266164,1.080634));
-  hpcpush(hpxyzsc(0.366457,0.216558,1.086825));
-  hpcpush(hpxyzsc(0.239936,0.101388,1.033368));
-  hpcpush(hpxyzsc(0.327571,0.056956,1.053825));
-  hpcpush(hpxyzsc(0.191815,-0.057986,1.019880));
-  hpcpush(hpxyzsc(0.291017,-0.106516,1.046918));
-  hpcpush(hpxyzsc(0.195702,-0.217014,1.041823));
-  hpcpush(hpxyzsc(0.064844,-0.290413,1.043333));
-  hpcpush(hpxyzsc(0.098534,-0.362303,1.068163));
-  hpcpush(hpxyzsc(0.074839,-0.402702,1.080634));
-  hpcpush(hpxyzsc(0.004316,-0.425640,1.086825));
-  hpcpush(hpxyzsc(-0.032163,-0.258485,1.033368));
-  hpcpush(hpxyzsc(-0.114460,-0.312163,1.053825));
-  hpcpush(hpxyzsc(-0.146125,-0.137124,1.019880));
-  hpcpush(hpxyzsc(-0.237755,-0.198770,1.046918));
-  hpcpush(hpxyzsc(-0.285791,-0.060975,1.041823));
-  hpcpush(hpxyzsc(-0.283927,0.089050,1.043333));
-
-  bshape(shCrossFloor[1], 10);
-  hpcpush(hpxyzsc(-0.254099,-0.080041,1.034878));
-  hpcpush(hpxyzsc(-0.326144,-0.061810,1.053656));
-  hpcpush(hpxyzsc(-0.326144,0.061810,1.053656));
-  hpcpush(hpxyzsc(-0.254099,0.080041,1.034878));
-  hpcpush(hpxyzsc(-0.221007,0.148758,1.034878));
-  hpcpush(hpxyzsc(-0.251672,0.216452,1.053656));
-  hpcpush(hpxyzsc(-0.155023,0.293527,1.053656));
-  hpcpush(hpxyzsc(-0.095849,0.248567,1.034878));
-  hpcpush(hpxyzsc(-0.021492,0.265539,1.034878));
-  hpcpush(hpxyzsc(0.012314,0.331721,1.053656));
-  hpcpush(hpxyzsc(0.132834,0.304213,1.053656));
-  hpcpush(hpxyzsc(0.134577,0.229917,1.034878));
-  hpcpush(hpxyzsc(0.194207,0.182364,1.034878));
-  hpcpush(hpxyzsc(0.267027,0.197197,1.053656));
-  hpcpush(hpxyzsc(0.320664,0.085820,1.053656));
-  hpcpush(hpxyzsc(0.263664,0.038135,1.034878));
-  hpcpush(hpxyzsc(0.263664,-0.038135,1.034878));
-  hpcpush(hpxyzsc(0.320664,-0.085820,1.053656));
-  hpcpush(hpxyzsc(0.267027,-0.197197,1.053656));
-  hpcpush(hpxyzsc(0.194207,-0.182364,1.034878));
-  hpcpush(hpxyzsc(0.134577,-0.229917,1.034878));
-  hpcpush(hpxyzsc(0.132834,-0.304213,1.053656));
-  hpcpush(hpxyzsc(0.012314,-0.331721,1.053656));
-  hpcpush(hpxyzsc(-0.021492,-0.265539,1.034878));
-  hpcpush(hpxyzsc(-0.095849,-0.248567,1.034878));
-  hpcpush(hpxyzsc(-0.155023,-0.293527,1.053656));
-  hpcpush(hpxyzsc(-0.251672,-0.216452,1.053656));
-  hpcpush(hpxyzsc(-0.221007,-0.148758,1.034878));
-  hpcpush(hpxyzsc(-0.254099,-0.080041,1.034878));
-  
-  bshape(shChargedFloor[2], 10);
-  hpcpush(hpxyzsc(0.259904,0.175997,1.048105));
-  hpcpush(hpxyzsc(0.266043,0.049579,1.035971));
-  hpcpush(hpxyzsc(0.315948,0.019620,1.048908));
-  hpcpush(hpxyzsc(0.201609,-0.012441,1.020197));
-  hpcpush(hpxyzsc(0.286297,-0.066513,1.042300));
-  hpcpush(hpxyzsc(0.279241,-0.164471,1.051202));
-  hpcpush(hpxyzsc(0.022466,-0.313082,1.048105));
-  hpcpush(hpxyzsc(-0.090085,-0.255189,1.035971));
-  hpcpush(hpxyzsc(-0.140983,-0.283428,1.048908));
-  hpcpush(hpxyzsc(-0.111579,-0.168378,1.020197));
-  hpcpush(hpxyzsc(-0.200750,-0.214684,1.042300));
-  hpcpush(hpxyzsc(-0.282056,-0.159594,1.051202));
-  hpcpush(hpxyzsc(-0.282370,0.137085,1.048105));
-  hpcpush(hpxyzsc(-0.175958,0.205610,1.035971));
-  hpcpush(hpxyzsc(-0.174965,0.263809,1.048908));
-  hpcpush(hpxyzsc(-0.090030,0.180819,1.020197));
-  hpcpush(hpxyzsc(-0.085547,0.281196,1.042300));
-  hpcpush(hpxyzsc(0.002815,0.324065,1.051202));
-  hpcpush(hpxyzsc(0.259904,0.175997,1.048105));
-  
-  bshape(shChargedFloor[0], 10);
-  hpcpush(hpxyzsc(0.000420,-0.165342,1.013577));
-  hpcpush(hpxyzsc(0.154528,-0.281262,1.050232));
-  hpcpush(hpxyzsc(-0.003359,-0.311544,1.047412));
-  hpcpush(hpxyzsc(-0.120635,-0.166812,1.020970));
-  hpcpush(hpxyzsc(-0.177022,-0.273052,1.051615));
-  hpcpush(hpxyzsc(-0.276778,-0.195332,1.055822));
-  hpcpush(hpxyzsc(-0.143400,0.082307,1.013577));
-  hpcpush(hpxyzsc(-0.320844,0.006806,1.050232));
-  hpcpush(hpxyzsc(-0.268126,0.158681,1.047412));
-  hpcpush(hpxyzsc(-0.084146,0.187879,1.020970));
-  hpcpush(hpxyzsc(-0.147959,0.289831,1.051615));
-  hpcpush(hpxyzsc(-0.030774,0.337362,1.055822));
-  hpcpush(hpxyzsc(0.142980,0.083035,1.013577));
-  hpcpush(hpxyzsc(0.166316,0.274456,1.050232));
-  hpcpush(hpxyzsc(0.271485,0.152863,1.047412));
-  hpcpush(hpxyzsc(0.204781,-0.021067,1.020970));
-  hpcpush(hpxyzsc(0.324980,-0.016780,1.051615));
-  hpcpush(hpxyzsc(0.307551,-0.142030,1.055822));
-  hpcpush(hpxyzsc(0.000420,-0.165342,1.013577));
-
-  bshape(shChargedFloor[1], 10);
-  hpcpush(hpxyzsc(0.374086,-0.003058,1.067684));
-  hpcpush(hpxyzsc(0.231873,-0.155490,1.038240));
-  hpcpush(hpxyzsc(0.424384,-0.155026,1.097331));
-  hpcpush(hpxyzsc(0.230848,-0.294379,1.067684));
-  hpcpush(hpxyzsc(0.023004,-0.278232,1.038240));
-  hpcpush(hpxyzsc(0.143395,-0.428454,1.097331));
-  hpcpush(hpxyzsc(-0.086223,-0.364026,1.067684));
-  hpcpush(hpxyzsc(-0.203188,-0.191460,1.038240));
-  hpcpush(hpxyzsc(-0.245573,-0.379247,1.097331));
-  hpcpush(hpxyzsc(-0.338367,-0.159555,1.067684));
-  hpcpush(hpxyzsc(-0.276375,0.039485,1.038240));
-  hpcpush(hpxyzsc(-0.449620,-0.044460,1.097331));
-  hpcpush(hpxyzsc(-0.335713,0.165065,1.067684));
-  hpcpush(hpxyzsc(-0.141446,0.240697,1.038240));
-  hpcpush(hpxyzsc(-0.315094,0.323807,1.097331));
-  hpcpush(hpxyzsc(-0.080261,0.365387,1.067684));
-  hpcpush(hpxyzsc(0.099994,0.260660,1.038240));
-  hpcpush(hpxyzsc(0.056705,0.448240,1.097331));
-  hpcpush(hpxyzsc(0.235630,0.290566,1.067684));
-  hpcpush(hpxyzsc(0.266137,0.084340,1.038240));
-  hpcpush(hpxyzsc(0.385803,0.235140,1.097331));
-  hpcpush(hpxyzsc(0.374086,-0.003058,1.067684));
-
-  bshape(shChargedFloor[3], 12); // purehepta variant
-  hpcpush(hpxyz(-0.560276,0.275068,1.178801));
-  hpcpush(hpxyz(-0.432169,0.356327,1.146184));
-  hpcpush(hpxyz(-0.232687,0.234741,1.053208));
-  hpcpush(hpxyz(-0.397991,0.569704,1.217768));
-  hpcpush(hpxyz(-0.256078,0.505042,1.149193));
-  hpcpush(hpxyz(-0.134269,0.609543,1.178801));
-  hpcpush(hpxyz(0.009134,0.560049,1.146184));
-  hpcpush(hpxyz(0.038450,0.328280,1.053208));
-  hpcpush(hpxyz(0.197269,0.666366,1.217768));
-  hpcpush(hpxyz(0.235196,0.515098,1.149193));
-  hpcpush(hpxyz(0.392845,0.485020,1.178801));
-  hpcpush(hpxyz(0.443559,0.342043,1.146184));
-  hpcpush(hpxyz(0.280633,0.174618,1.053208));
-  hpcpush(hpxyz(0.643981,0.261241,1.217768));
-  hpcpush(hpxyz(0.549363,0.137275,1.149193));
-  hpcpush(hpxyz(0.624138,-0.004733,1.178801));
-  hpcpush(hpxyz(0.543975,-0.133528,1.146184));
-  hpcpush(hpxyz(0.311494,-0.110535,1.053208));
-  hpcpush(hpxyz(0.605762,-0.340604,1.217768));
-  hpcpush(hpxyz(0.449848,-0.343919,1.149193));
-  hpcpush(hpxyz(0.385443,-0.490922,1.178801));
-  hpcpush(hpxyz(0.234766,-0.508550,1.146184));
-  hpcpush(hpxyz(0.107793,-0.312453,1.053208));
-  hpcpush(hpxyz(0.111392,-0.685967,1.217768));
-  hpcpush(hpxyz(0.011588,-0.566135,1.149193));
-  hpcpush(hpxyz(-0.143498,-0.607437,1.178801));
-  hpcpush(hpxyz(-0.251226,-0.500624,1.146184));
-  hpcpush(hpxyz(-0.177078,-0.279087,1.053208));
-  hpcpush(hpxyz(-0.466859,-0.514783,1.217768));
-  hpcpush(hpxyz(-0.435397,-0.362040,1.149193));
-  hpcpush(hpxyz(-0.564383,-0.266539,1.178801));
-  hpcpush(hpxyz(-0.548040,-0.115717,1.146184));
-  hpcpush(hpxyz(-0.328606,-0.035563,1.053208));
-  hpcpush(hpxyz(-0.693555,0.044043,1.217768));
-  hpcpush(hpxyz(-0.554520,0.114679,1.149193));
-  hpcpush(hpxyz(-0.560276,0.275068,1.178801));
-
-  
-  bshape(shSStarFloor[0], 10);
-  hpcpush(hpxyzsc(-0.261229,0.272221,1.068805));
-  hpcpush(hpxyzsc(-0.023065,0.198020,1.019678));
-  hpcpush(hpxyzsc(0.105136,0.362341,1.068805));
-  hpcpush(hpxyzsc(0.159958,0.118984,1.019678));
-  hpcpush(hpxyzsc(0.366364,0.090120,1.068805));
-  hpcpush(hpxyzsc(0.183022,-0.079035,1.019678));
-  hpcpush(hpxyzsc(0.261229,-0.272221,1.068805));
-  hpcpush(hpxyzsc(0.023065,-0.198020,1.019678));
-  hpcpush(hpxyzsc(-0.105136,-0.362341,1.068805));
-  hpcpush(hpxyzsc(-0.159958,-0.118984,1.019678));
-  hpcpush(hpxyzsc(-0.366364,-0.090120,1.068805));
-  hpcpush(hpxyzsc(-0.183022,0.079035,1.019678));
-  hpcpush(hpxyzsc(-0.261229,0.272221,1.068805));
-
-  bshape(shSStarFloor[1], 10);
-  hpcpush(hpxyzsc(-0.236325,0.100575,1.032456));
-  hpcpush(hpxyzsc(-0.439825,0.136330,1.100923));
-  hpcpush(hpxyzsc(-0.334057,0.279698,1.090791));
-  hpcpush(hpxyzsc(-0.068714,0.247473,1.032456));
-  hpcpush(hpxyzsc(-0.167640,0.428869,1.100923));
-  hpcpush(hpxyzsc(0.010395,0.435566,1.090791));
-  hpcpush(hpxyzsc(0.150640,0.208020,1.032456));
-  hpcpush(hpxyzsc(0.230782,0.398461,1.100923));
-  hpcpush(hpxyzsc(0.347020,0.263443,1.090791));
-  hpcpush(hpxyzsc(0.256559,0.011923,1.032456));
-  hpcpush(hpxyzsc(0.455420,0.068004,1.100923));
-  hpcpush(hpxyzsc(0.422332,-0.107057,1.090791));
-  hpcpush(hpxyzsc(0.169283,-0.193152,1.032456));
-  hpcpush(hpxyzsc(0.337117,-0.313662,1.100923));
-  hpcpush(hpxyzsc(0.179619,-0.396941,1.090791));
-  hpcpush(hpxyzsc(-0.045466,-0.252780,1.032456));
-  hpcpush(hpxyzsc(-0.035041,-0.459134,1.100923));
-  hpcpush(hpxyzsc(-0.198351,-0.387921,1.090791));
-  hpcpush(hpxyzsc(-0.225979,-0.122059,1.032456));
-  hpcpush(hpxyzsc(-0.380813,-0.258869,1.100923));
-  hpcpush(hpxyzsc(-0.426958,-0.086788,1.090791));
-  hpcpush(hpxyzsc(-0.236325,0.100575,1.032456));
-
-  bshape(shOverFloor[0], 10);
-  hpcpush(hpxyzsc(0.260902,0.180699,1.049153));
-  hpcpush(hpxyzsc(0.278422,0.058159,1.039664));
-  hpcpush(hpxyzsc(0.257517,-0.080799,1.035782));
-  hpcpush(hpxyzsc(0.198743,-0.215550,1.042094));
-  hpcpush(hpxyzsc(0.062950,-0.080317,1.005193));
-  hpcpush(hpxyzsc(0.110388,-0.278019,1.043782));
-  hpcpush(hpxyzsc(-0.043099,-0.182658,1.017458));
-  hpcpush(hpxyzsc(0.026039,-0.316297,1.049153));
-  hpcpush(hpxyzsc(-0.088844,-0.270200,1.039664));
-  hpcpush(hpxyzsc(-0.198733,-0.182616,1.035782));
-  hpcpush(hpxyzsc(-0.286043,-0.064341,1.042094));
-  hpcpush(hpxyzsc(-0.101031,-0.014358,1.005193));
-  hpcpush(hpxyzsc(-0.295966,0.043411,1.043782));
-  hpcpush(hpxyzsc(-0.136637,0.128654,1.017458));
-  hpcpush(hpxyzsc(-0.286941,0.135599,1.049153));
-  hpcpush(hpxyzsc(-0.189578,0.212041,1.039664));
-  hpcpush(hpxyzsc(-0.058784,0.263416,1.035782));
-  hpcpush(hpxyzsc(0.087300,0.279891,1.042094));
-  hpcpush(hpxyzsc(0.038081,0.094675,1.005193));
-  hpcpush(hpxyzsc(0.185578,0.234609,1.043782));
-  hpcpush(hpxyzsc(0.179736,0.054004,1.017458));
-  hpcpush(hpxyzsc(0.260902,0.180699,1.049153));
-
-  bshape(shOverFloor[1], 10);
-  if(purehepta) {
-    hpcpush(hpxyz(-0.586767,0.283785,1.193662));
-    hpcpush(hpxyz(-0.323522,0.218875,1.073579));
-    hpcpush(hpxyz(-0.576300,0.603001,1.302203));
-    hpcpush(hpxyz(-0.137153,0.295524,1.051734));
-    hpcpush(hpxyz(-0.383052,0.684221,1.270782));
-    hpcpush(hpxyz(-0.143971,0.635690,1.193662));
-    hpcpush(hpxyz(-0.030589,0.389406,1.073579));
-    hpcpush(hpxyz(0.112129,0.826534,1.302203));
-    hpcpush(hpxyz(0.145536,0.291487,1.051734));
-    hpcpush(hpxyz(0.296116,0.726087,1.270782));
-    hpcpush(hpxyz(0.407238,0.508907,1.193662));
-    hpcpush(hpxyz(0.285377,0.266706,1.073579));
-    hpcpush(hpxyz(0.716122,0.427670,1.302203));
-    hpcpush(hpxyz(0.318634,0.067954,1.051734));
-    hpcpush(hpxyz(0.752304,0.221195,1.270782));
-    hpcpush(hpxyz(0.651788,-0.001093,1.193662));
-    hpcpush(hpxyz(0.386449,-0.056828,1.073579));
-    hpcpush(hpxyz(0.780861,-0.293239,1.302203));
-    hpcpush(hpxyz(0.251794,-0.206749,1.051734));
-    hpcpush(hpxyz(0.641991,-0.450262,1.270782));
-    hpcpush(hpxyz(0.405529,-0.510270,1.193662));
-    hpcpush(hpxyz(0.196517,-0.337570,1.073579));
-    hpcpush(hpxyz(0.257595,-0.793333,1.302203));
-    hpcpush(hpxyz(-0.004652,-0.325766,1.051734));
-    hpcpush(hpxyz(0.048246,-0.782662,1.270782));
-    hpcpush(hpxyz(-0.146102,-0.635204,1.193662));
-    hpcpush(hpxyz(-0.141397,-0.364115,1.073579));
-    hpcpush(hpxyz(-0.459644,-0.696031,1.302203));
-    hpcpush(hpxyz(-0.257595,-0.199475,1.051734));
-    hpcpush(hpxyz(-0.581829,-0.525702,1.270782));
-    hpcpush(hpxyz(-0.587715,-0.281816,1.193662));
-    hpcpush(hpxyz(-0.372836,-0.116473,1.073579));
-    hpcpush(hpxyz(-0.830762,-0.074604,1.302203));
-    hpcpush(hpxyz(-0.316564,0.077025,1.051734));
-    hpcpush(hpxyz(-0.773775,0.127123,1.270782));
-    hpcpush(hpxyz(-0.586767,0.283785,1.193662));
-    }
-  else {  
-    hpcpush(hpxyzsc(-0.437062,0.198802,1.109299));
-    hpcpush(hpxyzsc(-0.261731,0.160454,1.046063));
-    hpcpush(hpxyzsc(-0.401949,0.300851,1.118961));
-    hpcpush(hpxyzsc(-0.208814,0.204608,1.041858));
-    hpcpush(hpxyzsc(-0.296258,0.393467,1.114713));
-    hpcpush(hpxyzsc(-0.159132,0.277743,1.049983));
-    hpcpush(hpxyzsc(-0.117073,0.465660,1.109299));
-    hpcpush(hpxyzsc(-0.037739,0.304671,1.046063));
-    hpcpush(hpxyzsc(-0.015396,0.501834,1.118961));
-    hpcpush(hpxyzsc(0.029775,0.290828,1.041858));
-    hpcpush(hpxyzsc(0.122911,0.476946,1.114713));
-    hpcpush(hpxyzsc(0.117931,0.297584,1.049983));
-    hpcpush(hpxyzsc(0.291073,0.381866,1.109299));
-    hpcpush(hpxyzsc(0.214672,0.219465,1.046063));
-    hpcpush(hpxyzsc(0.382750,0.324926,1.118961));
-    hpcpush(hpxyzsc(0.245943,0.158049,1.041858));
-    hpcpush(hpxyzsc(0.449525,0.201275,1.114713));
-    hpcpush(hpxyzsc(0.306189,0.093339,1.049983));
-    hpcpush(hpxyzsc(0.480036,0.010519,1.109299));
-    hpcpush(hpxyzsc(0.305430,-0.031003,1.046063));
-    hpcpush(hpxyzsc(0.492678,-0.096658,1.118961));
-    hpcpush(hpxyzsc(0.276911,-0.093744,1.041858));
-    hpcpush(hpxyzsc(0.437638,-0.225960,1.114713));
-    hpcpush(hpxyzsc(0.263881,-0.181193,1.049983));
-    hpcpush(hpxyzsc(0.307522,-0.368749,1.109299));
-    hpcpush(hpxyzsc(0.166193,-0.258125,1.046063));
-    hpcpush(hpxyzsc(0.231609,-0.445457,1.118961));
-    hpcpush(hpxyzsc(0.099359,-0.274946,1.041858));
-    hpcpush(hpxyzsc(0.096200,-0.483043,1.114713));
-    hpcpush(hpxyzsc(0.022865,-0.319282,1.049983));
-    hpcpush(hpxyzsc(-0.096563,-0.470341,1.109299));
-    hpcpush(hpxyzsc(-0.098190,-0.290874,1.046063));
-    hpcpush(hpxyzsc(-0.203866,-0.458817,1.118961));
-    hpcpush(hpxyzsc(-0.153012,-0.249108,1.041858));
-    hpcpush(hpxyzsc(-0.317678,-0.376384,1.114713));
-    hpcpush(hpxyzsc(-0.235369,-0.216946,1.049983));
-    hpcpush(hpxyzsc(-0.427934,-0.217757,1.109299));
-    hpcpush(hpxyzsc(-0.288635,-0.104588,1.046063));
-    hpcpush(hpxyzsc(-0.485826,-0.126679,1.118961));
-    hpcpush(hpxyzsc(-0.290162,-0.035687,1.041858));
-    hpcpush(hpxyzsc(-0.492338,0.013699,1.114713));
-    hpcpush(hpxyzsc(-0.316365,0.048755,1.049983));
-    hpcpush(hpxyzsc(-0.437062,0.198802,1.109299));
-    }
-  bshape(shOverFloor[2], 10);
-  hpcpush(hpxyz(0.008833,-0.299167,1.000000));
-  hpcpush(hpxyz(-0.020500,-0.148834,1.000000));
-  hpcpush(hpxyz(-0.121333,-0.290000,1.000000));
-  hpcpush(hpxyz(-0.119500,-0.128667,1.000000));
-  hpcpush(hpxyz(-0.236833,-0.279000,1.000000));
-  hpcpush(hpxyz(-0.254669,-0.157233,1.000000));
-  hpcpush(hpxyz(-0.139144,-0.056663,1.000000));
-  hpcpush(hpxyz(-0.311814,-0.039922,1.000000));
-  hpcpush(hpxyz(-0.171179,0.039157,1.000000));
-  hpcpush(hpxyz(-0.360038,0.065604,1.000000));
-  hpcpush(hpxyz(-0.263503,0.141934,1.000000));
-  hpcpush(hpxyz(-0.118644,0.092170,1.000000));
-  hpcpush(hpxyz(-0.190481,0.250078,1.000000));
-  hpcpush(hpxyz(-0.051679,0.167823,1.000000));
-  hpcpush(hpxyz(-0.123205,0.344604,1.000000));
-  hpcpush(hpxyz(-0.008833,0.299167,1.000000));
-  hpcpush(hpxyz(0.020500,0.148834,1.000000));
-  hpcpush(hpxyz(0.121333,0.290000,1.000000));
-  hpcpush(hpxyz(0.119500,0.128667,1.000000));
-  hpcpush(hpxyz(0.236833,0.279000,1.000000));
-  hpcpush(hpxyz(0.254669,0.157233,1.000000));
-  hpcpush(hpxyz(0.139144,0.056663,1.000000));
-  hpcpush(hpxyz(0.311814,0.039922,1.000000));
-  hpcpush(hpxyz(0.171179,-0.039157,1.000000));
-  hpcpush(hpxyz(0.360038,-0.065604,1.000000));
-  hpcpush(hpxyz(0.263503,-0.141934,1.000000));
-  hpcpush(hpxyz(0.118644,-0.092170,1.000000));
-  hpcpush(hpxyz(0.190481,-0.250078,1.000000));
-  hpcpush(hpxyz(0.051679,-0.167823,1.000000));
-  hpcpush(hpxyz(0.123205,-0.344604,1.000000));
-  hpcpush(hpxyz(0.008833,-0.299167,1.000000));
-
-  bshape(shTriFloor[0], 10);
-  hpcpush(hpxyzsc(-0.353692,0.244649,1.088554));
-  hpcpush(hpxyzsc(0.388718,0.183982,1.088554));
-  hpcpush(hpxyzsc(-0.035026,-0.428630,1.088554));
-  hpcpush(hpxyzsc(-0.353692,0.244649,1.088554));
-
-  bshape(shTriFloor[1], 10);
-  hpcpush(hpxyzsc(-0.352357,0.009788,1.060307));
-  hpcpush(hpxyzsc(-0.212038,0.281586,1.060307));
-  hpcpush(hpxyzsc(0.087949,0.341344,1.060307));
-  hpcpush(hpxyzsc(0.321709,0.144063,1.060307));
-  hpcpush(hpxyzsc(0.313216,-0.161700,1.060307));
-  hpcpush(hpxyzsc(0.068864,-0.345700,1.060307));
-  hpcpush(hpxyzsc(-0.227343,-0.269381,1.060307));
-  hpcpush(hpxyzsc(-0.352357,0.009788,1.060307));
-
-  bshape(shFeatherFloor[0], 10);
-  hpcpush(hpxyzsc(0.227689,0.169556,1.039515));
-  hpcpush(hpxyzsc(0.333673,0.157023,1.065830));
-  hpcpush(hpxyzsc(0.251378,0.091850,1.035194));
-  hpcpush(hpxyzsc(0.316741,0.073094,1.051507));
-  hpcpush(hpxyzsc(0.260919,0.038655,1.034202));
-  hpcpush(hpxyzsc(0.306256,0.038890,1.046568));
-  hpcpush(hpxyzsc(0.231096,-0.033702,1.026909));
-  hpcpush(hpxyzsc(0.255955,-0.043464,1.033152));
-  hpcpush(hpxyzsc(0.226427,-0.077082,1.028208));
-  hpcpush(hpxyzsc(0.266494,-0.101752,1.039891));
-  hpcpush(hpxyzsc(0.217364,-0.144909,1.033560));
-  hpcpush(hpxyzsc(0.223207,-0.194093,1.042830));
-  hpcpush(hpxyzsc(0.158549,-0.144135,1.022699));
-  hpcpush(hpxyzsc(0.179022,-0.208053,1.036984));
-  hpcpush(hpxyzsc(0.105573,-0.172756,1.020289));
-  hpcpush(hpxyzsc(0.120828,-0.236822,1.034739));
-  hpcpush(hpxyzsc(0.033598,-0.201587,1.020669));
-  hpcpush(hpxyzsc(0.067872,-0.281182,1.040995));
-  hpcpush(hpxyzsc(0.032995,-0.281963,1.039515));
-  hpcpush(hpxyzsc(-0.030851,-0.367481,1.065830));
-  hpcpush(hpxyzsc(-0.046145,-0.263624,1.035194));
-  hpcpush(hpxyzsc(-0.095069,-0.310853,1.051507));
-  hpcpush(hpxyzsc(-0.096984,-0.245290,1.034202));
-  hpcpush(hpxyzsc(-0.119449,-0.284670,1.046568));
-  hpcpush(hpxyzsc(-0.144735,-0.183285,1.026909));
-  hpcpush(hpxyzsc(-0.165618,-0.199931,1.033152));
-  hpcpush(hpxyzsc(-0.179968,-0.157551,1.028208));
-  hpcpush(hpxyzsc(-0.221367,-0.179914,1.039891));
-  hpcpush(hpxyzsc(-0.234177,-0.115788,1.033560));
-  hpcpush(hpxyzsc(-0.279693,-0.096256,1.042830));
-  hpcpush(hpxyzsc(-0.204099,-0.065240,1.022699));
-  hpcpush(hpxyzsc(-0.269690,-0.051011,1.036984));
-  hpcpush(hpxyzsc(-0.202398,-0.005051,1.020289));
-  hpcpush(hpxyzsc(-0.265508,0.013771,1.034739));
-  hpcpush(hpxyzsc(-0.191378,0.071697,1.020669));
-  hpcpush(hpxyzsc(-0.277447,0.081813,1.040995));
-  hpcpush(hpxyzsc(-0.260684,0.112407,1.039515));
-  hpcpush(hpxyzsc(-0.302822,0.210458,1.065830));
-  hpcpush(hpxyzsc(-0.205233,0.171775,1.035194));
-  hpcpush(hpxyzsc(-0.221672,0.237759,1.051507));
-  hpcpush(hpxyzsc(-0.163935,0.206635,1.034202));
-  hpcpush(hpxyzsc(-0.186807,0.245781,1.046568));
-  hpcpush(hpxyzsc(-0.086362,0.216986,1.026909));
-  hpcpush(hpxyzsc(-0.090337,0.243396,1.033152));
-  hpcpush(hpxyzsc(-0.046459,0.234632,1.028208));
-  hpcpush(hpxyzsc(-0.045127,0.281667,1.039891));
-  hpcpush(hpxyzsc(0.016813,0.260697,1.033560));
-  hpcpush(hpxyzsc(0.056486,0.290349,1.042830));
-  hpcpush(hpxyzsc(0.045550,0.209375,1.022699));
-  hpcpush(hpxyzsc(0.090668,0.259064,1.036984));
-  hpcpush(hpxyzsc(0.096825,0.177807,1.020289));
-  hpcpush(hpxyzsc(0.144680,0.223051,1.034739));
-  hpcpush(hpxyzsc(0.157781,0.129890,1.020669));
-  hpcpush(hpxyzsc(0.209575,0.199370,1.040995));
-  hpcpush(hpxyzsc(0.227689,0.169556,1.039515));
-
-  bshape(shFeatherFloor[1], 10);
-  if(purehepta) {
-    hpcpush(hpxyz(-0.130677,0.632450,1.190407));
-    hpcpush(hpxyz(-0.089355,0.521394,1.131299));
-    hpcpush(hpxyz(-0.043946,0.681315,1.210835));
-    hpcpush(hpxyz(0.018619,0.527506,1.130756));
-    hpcpush(hpxyz(0.055053,0.679188,1.210094));
-    hpcpush(hpxyz(0.097948,0.501131,1.122820));
-    hpcpush(hpxyz(0.149721,0.584970,1.168163));
-    hpcpush(hpxyz(0.203217,0.443040,1.112466));
-    hpcpush(hpxyz(0.242077,0.549815,1.166575));
-    hpcpush(hpxyz(0.310522,0.431044,1.132353));
-    hpcpush(hpxyz(0.352912,0.566221,1.202145));
-    hpcpush(hpxyz(0.412994,0.496494,1.190407));
-    hpcpush(hpxyz(0.351930,0.394945,1.131299));
-    hpcpush(hpxyz(0.505274,0.459152,1.210835));
-    hpcpush(hpxyz(0.424030,0.314338,1.130756));
-    hpcpush(hpxyz(0.565336,0.380425,1.210094));
-    hpcpush(hpxyz(0.452869,0.235871,1.122820));
-    hpcpush(hpxyz(0.550697,0.247666,1.168163));
-    hpcpush(hpxyz(0.473086,0.117349,1.112466));
-    hpcpush(hpxyz(0.580795,0.153540,1.166575));
-    hpcpush(hpxyz(0.530611,0.025976,1.132353));
-    hpcpush(hpxyz(0.662726,0.077115,1.202145));
-    hpcpush(hpxyz(0.645672,-0.013333,1.190407));
-    hpcpush(hpxyz(0.528205,-0.028906,1.131299));
-    hpcpush(hpxyz(0.674012,-0.108763,1.210835));
-    hpcpush(hpxyz(0.510138,-0.135533,1.130756));
-    hpcpush(hpxyz(0.649909,-0.204806,1.210094));
-    hpcpush(hpxyz(0.466771,-0.207004,1.122820));
-    hpcpush(hpxyz(0.536987,-0.276135,1.168163));
-    hpcpush(hpxyz(0.386712,-0.296708,1.112466));
-    hpcpush(hpxyz(0.482163,-0.358353,1.166575));
-    hpcpush(hpxyz(0.351139,-0.398653,1.132353));
-    hpcpush(hpxyz(0.473494,-0.470059,1.202145));
-    hpcpush(hpxyz(0.392146,-0.513119,1.190407));
-    hpcpush(hpxyz(0.306731,-0.430990,1.131299));
-    hpcpush(hpxyz(0.335206,-0.594777,1.210835));
-    hpcpush(hpxyz(0.212101,-0.483345,1.130756));
-    hpcpush(hpxyz(0.245088,-0.635814,1.210094));
-    hpcpush(hpxyz(0.129185,-0.494001,1.122820));
-    hpcpush(hpxyz(0.118915,-0.592001,1.168163));
-    hpcpush(hpxyz(0.009135,-0.487338,1.112466));
-    hpcpush(hpxyz(0.020452,-0.600400,1.166575));
-    hpcpush(hpxyz(-0.092747,-0.523088,1.132353));
-    hpcpush(hpxyz(-0.072289,-0.663270,1.202145));
-    hpcpush(hpxyz(-0.156674,-0.626517,1.190407));
-    hpcpush(hpxyz(-0.145718,-0.508530,1.131299));
-    hpcpush(hpxyz(-0.256018,-0.632911,1.210835));
-    hpcpush(hpxyz(-0.245652,-0.467188,1.130756));
-    hpcpush(hpxyz(-0.344290,-0.588041,1.210094));
-    hpcpush(hpxyz(-0.305680,-0.409005,1.122820));
-    hpcpush(hpxyz(-0.388703,-0.462078,1.168163));
-    hpcpush(hpxyz(-0.375320,-0.310992,1.112466));
-    hpcpush(hpxyz(-0.456660,-0.390333,1.166575));
-    hpcpush(hpxyz(-0.466794,-0.253627,1.132353));
-    hpcpush(hpxyz(-0.563636,-0.357024,1.202145));
-    hpcpush(hpxyz(-0.587515,-0.268134,1.190407));
-    hpcpush(hpxyz(-0.488438,-0.203136,1.131299));
-    hpcpush(hpxyz(-0.654455,-0.194451,1.210835));
-    hpcpush(hpxyz(-0.518424,-0.099229,1.130756));
-    hpcpush(hpxyz(-0.674410,-0.097461,1.210094));
-    hpcpush(hpxyz(-0.510362,-0.016020,1.122820));
-    hpcpush(hpxyz(-0.603619,0.015799,1.168163));
-    hpcpush(hpxyz(-0.477152,0.099537,1.112466));
-    hpcpush(hpxyz(-0.589897,0.113663,1.166575));
-    hpcpush(hpxyz(-0.489335,0.206820,1.132353));
-    hpcpush(hpxyz(-0.630555,0.218068,1.202145));
-    hpcpush(hpxyz(-0.575945,0.292159,1.190407));
-    hpcpush(hpxyz(-0.463354,0.255223,1.131299));
-    hpcpush(hpxyz(-0.560074,0.390435,1.210835));
-    hpcpush(hpxyz(-0.400812,0.343452,1.130756));
-    hpcpush(hpxyz(-0.496686,0.466509,1.210094));
-    hpcpush(hpxyz(-0.330730,0.389028,1.122820));
-    hpcpush(hpxyz(-0.363998,0.481779,1.168163));
-    hpcpush(hpxyz(-0.219678,0.435112,1.112466));
-    hpcpush(hpxyz(-0.278930,0.532068,1.166575));
-    hpcpush(hpxyz(-0.143397,0.511527,1.132353));
-    hpcpush(hpxyz(-0.222652,0.628950,1.202145));
-    hpcpush(hpxyz(-0.130677,0.632450,1.190407));
-  } else {  
-    hpcpush(hpxyzsc(-0.097861,0.337622,1.059984));
-    hpcpush(hpxyzsc(-0.034295,0.357645,1.062585));
-    hpcpush(hpxyzsc(-0.014623,0.326578,1.052077));
-    hpcpush(hpxyzsc(0.024557,0.373262,1.067674));
-    hpcpush(hpxyzsc(0.063328,0.316638,1.050843));
-    hpcpush(hpxyzsc(0.088328,0.358219,1.065890));
-    hpcpush(hpxyzsc(0.111793,0.286773,1.046297));
-    hpcpush(hpxyzsc(0.146987,0.328271,1.062717));
-    hpcpush(hpxyzsc(0.170806,0.287930,1.054551));
-    hpcpush(hpxyzsc(0.191056,0.303731,1.062429));
-    hpcpush(hpxyzsc(0.202948,0.287015,1.059984));
-    hpcpush(hpxyzsc(0.258236,0.249801,1.062585));
-    hpcpush(hpxyzsc(0.246211,0.215050,1.052077));
-    hpcpush(hpxyzsc(0.307139,0.213526,1.067674));
-    hpcpush(hpxyzsc(0.287042,0.147909,1.050843));
-    hpcpush(hpxyzsc(0.335138,0.154288,1.065890));
-    hpcpush(hpxyzsc(0.293910,0.091397,1.046297));
-    hpcpush(hpxyzsc(0.348297,0.089755,1.062717));
-    hpcpush(hpxyzsc(0.331608,0.045980,1.054551));
-    hpcpush(hpxyzsc(0.356588,0.039999,1.062429));
-    hpcpush(hpxyzsc(0.350933,0.020280,1.059984));
-    hpcpush(hpxyzsc(0.356310,-0.046149,1.062585));
-    hpcpush(hpxyzsc(0.321644,-0.058414,1.052077));
-    hpcpush(hpxyzsc(0.358439,-0.107000,1.067674));
-    hpcpush(hpxyzsc(0.294608,-0.132199,1.050843));
-    hpcpush(hpxyzsc(0.329582,-0.165824,1.065890));
-    hpcpush(hpxyzsc(0.254707,-0.172803,1.046297));
-    hpcpush(hpxyzsc(0.287333,-0.216349,1.062717));
-    hpcpush(hpxyzsc(0.242703,-0.230594,1.054551));
-    hpcpush(hpxyzsc(0.253601,-0.253853,1.062429));
-    hpcpush(hpxyzsc(0.234659,-0.261726,1.059984));
-    hpcpush(hpxyzsc(0.186075,-0.307347,1.062585));
-    hpcpush(hpxyzsc(0.154871,-0.287892,1.052077));
-    hpcpush(hpxyzsc(0.139827,-0.346952,1.067674));
-    hpcpush(hpxyzsc(0.080328,-0.312758,1.050843));
-    hpcpush(hpxyzsc(0.075845,-0.361068,1.065890));
-    hpcpush(hpxyzsc(0.023704,-0.306879,1.046297));
-    hpcpush(hpxyzsc(0.010001,-0.359537,1.062717));
-    hpcpush(hpxyzsc(-0.028963,-0.333526,1.054551));
-    hpcpush(hpxyzsc(-0.040352,-0.356548,1.062429));
-    hpcpush(hpxyzsc(-0.058319,-0.346647,1.059984));
-    hpcpush(hpxyzsc(-0.124278,-0.337107,1.062585));
-    hpcpush(hpxyzsc(-0.128522,-0.300581,1.052077));
-    hpcpush(hpxyzsc(-0.184077,-0.325642,1.067674));
-    hpcpush(hpxyzsc(-0.194441,-0.257805,1.050843));
-    hpcpush(hpxyzsc(-0.235006,-0.284420,1.065890));
-    hpcpush(hpxyzsc(-0.225148,-0.209869,1.046297));
-    hpcpush(hpxyzsc(-0.274862,-0.231987,1.062717));
-    hpcpush(hpxyzsc(-0.278819,-0.185306,1.054551));
-    hpcpush(hpxyzsc(-0.303920,-0.190756,1.062429));
-    hpcpush(hpxyzsc(-0.307381,-0.170536,1.059984));
-    hpcpush(hpxyzsc(-0.341047,-0.113018,1.062585));
-    hpcpush(hpxyzsc(-0.315136,-0.086927,1.052077));
-    hpcpush(hpxyzsc(-0.369368,-0.059118,1.067674));
-    hpcpush(hpxyzsc(-0.322791,-0.008719,1.050843));
-    hpcpush(hpxyzsc(-0.368892,0.006402,1.065890));
-    hpcpush(hpxyzsc(-0.304459,0.045177,1.046297));
-    hpcpush(hpxyzsc(-0.352748,0.070255,1.062717));
-    hpcpush(hpxyzsc(-0.318719,0.102453,1.054551));
-    hpcpush(hpxyzsc(-0.338629,0.118680,1.062429));
-    hpcpush(hpxyzsc(-0.324979,0.133993,1.059984));
-    hpcpush(hpxyzsc(-0.301001,0.196175,1.062585));
-    hpcpush(hpxyzsc(-0.264446,0.192185,1.052077));
-    hpcpush(hpxyzsc(-0.276517,0.251924,1.067674));
-    hpcpush(hpxyzsc(-0.208074,0.246932,1.050843));
-    hpcpush(hpxyzsc(-0.224995,0.292403,1.065890));
-    hpcpush(hpxyzsc(-0.154507,0.266203,1.046297));
-    hpcpush(hpxyzsc(-0.165008,0.319593,1.062717));
-    hpcpush(hpxyzsc(-0.118617,0.313063,1.054551));
-    hpcpush(hpxyzsc(-0.118344,0.338747,1.062429));
-    hpcpush(hpxyzsc(-0.097861,0.337622,1.059984));
-    }
-
-  bshape(shFeatherFloor[2], 10); // Euclidean variant
-  hpcpush(hpxyz(0.004667,-0.288667,1.000000));
-  hpcpush(hpxyz(-0.019167,-0.217167,1.000000));
-  hpcpush(hpxyz(-0.088833,-0.303333,1.000000));
-  hpcpush(hpxyz(-0.090667,-0.187833,1.000000));
-  hpcpush(hpxyz(-0.153000,-0.235500,1.000000));
-  hpcpush(hpxyz(-0.171333,-0.132833,1.000000));
-  hpcpush(hpxyz(-0.233667,-0.211667,1.000000));
-  hpcpush(hpxyz(-0.247659,-0.148375,1.000000));
-  hpcpush(hpxyz(-0.197655,-0.091984,1.000000));
-  hpcpush(hpxyz(-0.307111,-0.074735,1.000000));
-  hpcpush(hpxyz(-0.208002,-0.015397,1.000000));
-  hpcpush(hpxyz(-0.280449,0.014752,1.000000));
-  hpcpush(hpxyz(-0.200704,0.081962,1.000000));
-  hpcpush(hpxyz(-0.300142,0.096528,1.000000));
-  hpcpush(hpxyz(-0.252326,0.140292,1.000000));
-  hpcpush(hpxyz(-0.178488,0.125182,1.000000));
-  hpcpush(hpxyz(-0.218278,0.228599,1.000000));
-  hpcpush(hpxyz(-0.117335,0.172436,1.000000));
-  hpcpush(hpxyz(-0.127449,0.250252,1.000000));
-  hpcpush(hpxyz(-0.029370,0.214796,1.000000));
-  hpcpush(hpxyz(-0.066475,0.308195,1.000000));
-  hpcpush(hpxyz(-0.004667,0.288667,1.000000));
-  hpcpush(hpxyz(0.019167,0.217167,1.000000));
-  hpcpush(hpxyz(0.088833,0.303333,1.000000));
-  hpcpush(hpxyz(0.090667,0.187833,1.000000));
-  hpcpush(hpxyz(0.153000,0.235500,1.000000));
-  hpcpush(hpxyz(0.171333,0.132833,1.000000));
-  hpcpush(hpxyz(0.233667,0.211667,1.000000));
-  hpcpush(hpxyz(0.247659,0.148375,1.000000));
-  hpcpush(hpxyz(0.197655,0.091984,1.000000));
-  hpcpush(hpxyz(0.307111,0.074735,1.000000));
-  hpcpush(hpxyz(0.208002,0.015397,1.000000));
-  hpcpush(hpxyz(0.280449,-0.014752,1.000000));
-  hpcpush(hpxyz(0.200704,-0.081962,1.000000));
-  hpcpush(hpxyz(0.300142,-0.096528,1.000000));
-  hpcpush(hpxyz(0.252326,-0.140292,1.000000));
-  hpcpush(hpxyz(0.178488,-0.125182,1.000000));
-  hpcpush(hpxyz(0.218278,-0.228599,1.000000));
-  hpcpush(hpxyz(0.117335,-0.172436,1.000000));
-  hpcpush(hpxyz(0.127449,-0.250252,1.000000));
-  hpcpush(hpxyz(0.029370,-0.214796,1.000000));
-  hpcpush(hpxyz(0.066475,-0.308195,1.000000));
-  hpcpush(hpxyz(0.004667,-0.288667,1.000000));
-  
-  bshape(shNewFloor[0], 10);
-  hpcpush(hpxyzsc(-0.243151,-0.202057,1.048785));
-  hpcpush(hpxyzsc(-0.249456,-0.026167,1.030977));
-  hpcpush(hpxyzsc(-0.208097,0.124704,1.029007));
-  hpcpush(hpxyzsc(-0.053410,0.311604,1.048785));
-  hpcpush(hpxyzsc(0.102066,0.229119,1.030977));
-  hpcpush(hpxyzsc(0.212045,0.117865,1.029007));
-  hpcpush(hpxyzsc(0.296562,-0.109547,1.048785));
-  hpcpush(hpxyzsc(0.147390,-0.202952,1.030977));
-  hpcpush(hpxyzsc(-0.003949,-0.242569,1.029007));
-  hpcpush(hpxyzsc(-0.243151,-0.202057,1.048785));
-
-  bshape(shNewFloor[1], 10);
-  hpcpush(hpxyzsc(-0.343473,0.068811,1.059580));
-  hpcpush(hpxyzsc(-0.371524,0.213003,1.087842));
-  hpcpush(hpxyzsc(-0.243649,0.253621,1.060042));
-  hpcpush(hpxyzsc(-0.160353,0.311441,1.059580));
-  hpcpush(hpxyzsc(-0.065108,0.423274,1.087842));
-  hpcpush(hpxyzsc(0.046377,0.348623,1.060042));
-  hpcpush(hpxyzsc(0.143516,0.319550,1.059580));
-  hpcpush(hpxyzsc(0.290335,0.314811,1.087842));
-  hpcpush(hpxyzsc(0.301479,0.181104,1.060042));
-  hpcpush(hpxyzsc(0.339315,0.087031,1.059580));
-  hpcpush(hpxyzsc(0.427150,-0.030712,1.087842));
-  hpcpush(hpxyzsc(0.329562,-0.122790,1.060042));
-  hpcpush(hpxyzsc(0.279603,-0.211024,1.059580));
-  hpcpush(hpxyzsc(0.242312,-0.353108,1.087842));
-  hpcpush(hpxyzsc(0.109478,-0.334220,1.060042));
-  hpcpush(hpxyzsc(0.009344,-0.350173,1.059580));
-  hpcpush(hpxyzsc(-0.124991,-0.409606,1.087842));
-  hpcpush(hpxyzsc(-0.193046,-0.293976,1.060042));
-  hpcpush(hpxyzsc(-0.267951,-0.225635,1.059580));
-  hpcpush(hpxyzsc(-0.398174,-0.157663,1.087842));
-  hpcpush(hpxyzsc(-0.350202,-0.032362,1.060042));
-  hpcpush(hpxyzsc(-0.343473,0.068811,1.059580));
-
-  bshape(shTriheptaFloor[0], 10);
-  hpcpush(hpxyzsc(-0.139445,0.241954,1.038261));
-  hpcpush(hpxyzsc(0.279261,-0.000214,1.038261));
-  hpcpush(hpxyzsc(-0.139816,-0.241740,1.038261));
-  hpcpush(hpxyzsc(-0.139445,0.241954,1.038261));
-
-  bshape(shTriheptaFloor[1], 10);
-  hpcpush(hpxyzsc(0.555765,-0.002168,1.144063));
-  hpcpush(hpxyzsc(0.344819,-0.435866,1.144063));
-  hpcpush(hpxyzsc(-0.125783,-0.541348,1.144063));
-  hpcpush(hpxyzsc(-0.501667,-0.239184,1.144063));
-  hpcpush(hpxyzsc(-0.499786,0.243091,1.144063));
-  hpcpush(hpxyzsc(-0.121556,0.542313,1.144063));
-  hpcpush(hpxyzsc(0.348209,0.433163,1.144063));
-  hpcpush(hpxyzsc(0.555765,-0.002168,1.144063));
-
-  bshape(shTriheptaFloor[2], 10);
-  hpcpush(hpxyzsc(0.276938,-0.000093,1.037639));
-  hpcpush(hpxyzsc(-0.141904,0.242007,1.038607));
-  hpcpush(hpxyzsc(-0.293711,0.146334,1.052464));
-  hpcpush(hpxyzsc(-0.293711,-0.146334,1.052464));
-  hpcpush(hpxyzsc(-0.141904,-0.242007,1.038607));
-  hpcpush(hpxyzsc(0.276938,0.000093,1.037639));
-  hpcpush(hpxyzsc(0.276938,-0.000093,1.037639));
-
-  bshape(shTriheptaFloor[3], 10);
-  hpcpush(hpxyzsc(-0.351825,0.160017,1.072094));
-  hpcpush(hpxyzsc(-0.123908,0.541824,1.144083));
-  hpcpush(hpxyzsc(0.350858,0.435495,1.145756));
-  hpcpush(hpxyzsc(0.559842,-0.000857,1.146047));
-  hpcpush(hpxyzsc(0.559842,0.000857,1.146047));
-  hpcpush(hpxyzsc(0.350858,-0.435495,1.145756));
-  hpcpush(hpxyzsc(-0.123908,-0.541824,1.144083));
-  hpcpush(hpxyzsc(-0.351825,-0.160017,1.072094));
-  hpcpush(hpxyzsc(-0.351825,0.160017,1.072094));
-
-
-  bshape(shTriheptaFloor[4], 10);
-  hpcpush(hpxyzsc(0.267620,0.003973,1.035199));
-  hpcpush(hpxyzsc(-0.007632,0.337777,1.055534));
-  hpcpush(hpxyzsc(-0.271967,0.165630,1.049476));
-  hpcpush(hpxyzsc(-0.292806,-0.156142,1.053620));
-  hpcpush(hpxyzsc(-0.141920,-0.243873,1.039045));
-  hpcpush(hpxyzsc(0.267620,0.003973,1.035199));
-
-  bshape(shTriheptaFloor[5], 10);
-  hpcpush(hpxyzsc(0.376029,0.016747,1.068494));
-  hpcpush(hpxyzsc(0.233909,-0.274206,1.062969));
-  hpcpush(hpxyzsc(-0.115849,-0.540138,1.142440));
-  hpcpush(hpxyzsc(-0.486044,-0.233574,1.136132));
-  hpcpush(hpxyzsc(-0.486044,0.233574,1.136132));
-  hpcpush(hpxyzsc(-0.115849,0.540138,1.142440));
-  hpcpush(hpxyzsc(0.233909,0.274206,1.062969));
-  hpcpush(hpxyzsc(0.376029,-0.016747,1.068494));
-  hpcpush(hpxyzsc(0.376029,0.016747,1.068494));
-
-  bshape(shTriheptaFloor[6], 10);
-  hpcpush(hpxyzsc(0.136841,-0.241418,1.037790));
-  hpcpush(hpxyzsc(-0.007877,-0.337310,1.055386));
-  hpcpush(hpxyzsc(-0.282188,-0.183806,1.055185));
-  hpcpush(hpxyzsc(-0.282188,0.183806,1.055185));
-  hpcpush(hpxyzsc(-0.007877,0.337310,1.055386));
-  hpcpush(hpxyzsc(0.136841,0.241418,1.037790));
-  hpcpush(hpxyzsc(0.136841,-0.241418,1.037790));
-
-  bshape(shTriheptaFloor[7], 10);
-  hpcpush(hpxyzsc(0.562869,0.005892,1.147544));
-  hpcpush(hpxyzsc(0.346218,0.424587,1.140238));
-  hpcpush(hpxyzsc(-0.098836,0.362115,1.068127));
-  hpcpush(hpxyzsc(-0.344149,0.171831,1.071431));
-  hpcpush(hpxyzsc(-0.344149,-0.171831,1.071431));
-  hpcpush(hpxyzsc(-0.098836,-0.362115,1.068127));
-  hpcpush(hpxyzsc(0.346218,-0.424587,1.140238));
-  hpcpush(hpxyzsc(0.562869,-0.005892,1.147544));
-  hpcpush(hpxyzsc(0.562869,0.005892,1.147544));
-
-  bshape(shTriheptaFloor[9], 10);
-  hpcpush(hpxyzsc(0.384569,0.008580,1.071432));
-  hpcpush(hpxyzsc(0.234427,0.298447,1.069592));
-  hpcpush(hpxyzsc(-0.070055,0.365304,1.066937));
-  hpcpush(hpxyzsc(-0.492813,0.235557,1.139452));
-  hpcpush(hpxyzsc(-0.492813,-0.235557,1.139452));
-  hpcpush(hpxyzsc(-0.070055,-0.365304,1.066937));
-  hpcpush(hpxyzsc(0.234427,-0.298447,1.069592));
-  hpcpush(hpxyzsc(0.384569,-0.008580,1.071432));
-  hpcpush(hpxyzsc(0.384569,0.008580,1.071432));
-
-  bshape(shTriheptaFloor[10], 10);
-  hpcpush(hpxyzsc(0.286495,0.001984,1.040232));
-  hpcpush(hpxyzsc(-0.014828,0.337687,1.055581));
-  hpcpush(hpxyzsc(-0.282562,0.156802,1.050918));
-  hpcpush(hpxyzsc(-0.282562,-0.156802,1.050918));
-  hpcpush(hpxyzsc(-0.014828,-0.337687,1.055581));
-  hpcpush(hpxyzsc(0.286495,-0.001984,1.040232));
-  hpcpush(hpxyzsc(0.286495,0.001984,1.040232));
-
-
-  bshape(shTriheptaFloor2[0], 10);
-  hpcpush(hpxyzsc(-0.134870,0.238185,1.036784));
-  hpcpush(hpxyzsc(-0.014606,0.184459,1.016975));
-  hpcpush(hpxyzsc(0.080296,0.256902,1.035590));
-  hpcpush(hpxyzsc(0.180115,0.200011,1.035590));
-  hpcpush(hpxyzsc(0.166151,0.081439,1.016975));
-  hpcpush(hpxyzsc(0.273667,0.005344,1.036784));
-  hpcpush(hpxyzsc(0.273709,-0.002291,1.036784));
-  hpcpush(hpxyzsc(0.167049,-0.079580,1.016975));
-  hpcpush(hpxyzsc(0.182335,-0.197990,1.035590));
-  hpcpush(hpxyzsc(0.083157,-0.255990,1.035590));
-  hpcpush(hpxyzsc(-0.012547,-0.184610,1.016975));
-  hpcpush(hpxyzsc(-0.132205,-0.239675,1.036784));
-  hpcpush(hpxyzsc(-0.138839,-0.235894,1.036784));
-  hpcpush(hpxyzsc(-0.152443,-0.104878,1.016975));
-  hpcpush(hpxyzsc(-0.262632,-0.058912,1.035590));
-  hpcpush(hpxyzsc(-0.263272,0.055979,1.035590));
-  hpcpush(hpxyzsc(-0.153603,0.103171,1.016975));
-  hpcpush(hpxyzsc(-0.141462,0.234330,1.036784));
-  hpcpush(hpxyzsc(-0.134870,0.238185,1.036784));
-
-  bshape(shTriheptaFloor2[1], 10);
-  hpcpush(hpxyzsc(-0.499701,-0.228679,1.141050));
-  hpcpush(hpxyzsc(-0.472331,-0.116951,1.112104));
-  hpcpush(hpxyzsc(-0.361356,-0.069085,1.065529));
-  hpcpush(hpxyzsc(-0.361356,0.069085,1.065529));
-  hpcpush(hpxyzsc(-0.472331,0.116951,1.112104));
-  hpcpush(hpxyzsc(-0.499701,0.228679,1.141050));
-  hpcpush(hpxyzsc(-0.490347,0.248103,1.141050));
-  hpcpush(hpxyzsc(-0.385929,0.296366,1.112104));
-  hpcpush(hpxyzsc(-0.279315,0.239446,1.065529));
-  hpcpush(hpxyzsc(-0.171289,0.325594,1.065529));
-  hpcpush(hpxyzsc(-0.203058,0.442201,1.112104));
-  hpcpush(hpxyzsc(-0.132770,0.533261,1.141050));
-  hpcpush(hpxyzsc(-0.111752,0.538058,1.141050));
-  hpcpush(hpxyzsc(-0.008915,0.486513,1.112104));
-  hpcpush(hpxyzsc(0.013056,0.367669,1.065529));
-  hpcpush(hpxyzsc(0.147763,0.336923,1.065529));
-  hpcpush(hpxyzsc(0.219122,0.434465,1.112104));
-  hpcpush(hpxyzsc(0.334140,0.436286,1.141050));
-  hpcpush(hpxyzsc(0.350995,0.422845,1.141050));
-  hpcpush(hpxyzsc(0.374813,0.310306,1.112104));
-  hpcpush(hpxyzsc(0.295596,0.219030,1.065529));
-  hpcpush(hpxyzsc(0.355546,0.094543,1.065529));
-  hpcpush(hpxyzsc(0.476299,0.099568,1.112104));
-  hpcpush(hpxyzsc(0.549435,0.010779,1.141050));
-  hpcpush(hpxyzsc(0.549435,-0.010779,1.141050));
-  hpcpush(hpxyzsc(0.476299,-0.099568,1.112104));
-  hpcpush(hpxyzsc(0.355546,-0.094543,1.065529));
-  hpcpush(hpxyzsc(0.295596,-0.219030,1.065529));
-  hpcpush(hpxyzsc(0.374813,-0.310306,1.112104));
-  hpcpush(hpxyzsc(0.350995,-0.422845,1.141050));
-  hpcpush(hpxyzsc(0.334140,-0.436286,1.141050));
-  hpcpush(hpxyzsc(0.219122,-0.434465,1.112104));
-  hpcpush(hpxyzsc(0.147763,-0.336923,1.065529));
-  hpcpush(hpxyzsc(0.013056,-0.367669,1.065529));
-  hpcpush(hpxyzsc(-0.008915,-0.486513,1.112104));
-  hpcpush(hpxyzsc(-0.111752,-0.538058,1.141050));
-  hpcpush(hpxyzsc(-0.132770,-0.533261,1.141050));
-  hpcpush(hpxyzsc(-0.203058,-0.442201,1.112104));
-  hpcpush(hpxyzsc(-0.171289,-0.325594,1.065529));
-  hpcpush(hpxyzsc(-0.279315,-0.239446,1.065529));
-  hpcpush(hpxyzsc(-0.385929,-0.296366,1.112104));
-  hpcpush(hpxyzsc(-0.490347,-0.248103,1.141050));
-  hpcpush(hpxyzsc(-0.499701,-0.228679,1.141050));
-
-  bshape(shTriheptaEuc[0], 10);
-  hpcpush(hpxyzsc(-0.232333,-0.000167,1.000000));
-  hpcpush(hpxyzsc(0.116022,0.201290,1.000000));
-  hpcpush(hpxyzsc(0.116311,-0.201123,1.000000));
-  hpcpush(hpxyzsc(-0.232333,-0.000167,1.000000));
-
-  bshape(shTriheptaEuc[1], 10);
-  hpcpush(hpxyzsc(0.002000,-0.439500,1.000000));
-  hpcpush(hpxyzsc(-0.379618,-0.221482,1.000000));
-  hpcpush(hpxyzsc(-0.381618,0.218018,1.000000));
-  hpcpush(hpxyzsc(-0.002000,0.439500,1.000000));
-  hpcpush(hpxyzsc(0.379618,0.221482,1.000000));
-  hpcpush(hpxyzsc(0.381618,-0.218018,1.000000));
-  hpcpush(hpxyzsc(0.002000,-0.439500,1.000000));
-
-  bshape(shTriheptaEuc[2], 10);
-  hpcpush(hpxyzsc(-0.121167,-0.214667,1.000000));
-  hpcpush(hpxyzsc(-0.125324,0.212267,1.000000));
-  hpcpush(hpxyzsc(0.246490,0.002400,1.000000));
-  hpcpush(hpxyzsc(-0.121167,-0.214667,1.000000));
-
-  bshape(shPalaceFloor[0], 10);
-  hpcpush(hpxyzsc(0.118361,0.205152,1.027666));
-  hpcpush(hpxyzsc(0.273318,0.190450,1.054028));
-  hpcpush(hpxyzsc(0.273318,-0.190450,1.054028));
-  hpcpush(hpxyzsc(0.118361,-0.205152,1.027666));
-  hpcpush(hpxyzsc(0.118486,-0.205080,1.027666));
-  hpcpush(hpxyzsc(0.028276,-0.331925,1.054028));
-  hpcpush(hpxyzsc(-0.301594,-0.141475,1.054028));
-  hpcpush(hpxyzsc(-0.236847,0.000072,1.027666));
-  hpcpush(hpxyzsc(-0.236847,-0.000072,1.027666));
-  hpcpush(hpxyzsc(-0.301594,0.141475,1.054028));
-  hpcpush(hpxyzsc(0.028276,0.331925,1.054028));
-  hpcpush(hpxyzsc(0.118486,0.205080,1.027666));
-  hpcpush(hpxyzsc(0.118361,0.205152,1.027666));
-
-  bshape(shPalaceFloor[1], 10);
-  hpcpush(hpxyzsc(-0.225907,0.287688,1.064800));
-  hpcpush(hpxyzsc(0.084073,0.355992,1.064800));
-  hpcpush(hpxyzsc(0.330745,0.156227,1.064800));
-  hpcpush(hpxyzsc(0.328359,-0.161181,1.064800));
-  hpcpush(hpxyzsc(0.078712,-0.357216,1.064800));
-  hpcpush(hpxyzsc(-0.230206,-0.284260,1.064800));
-  hpcpush(hpxyzsc(-0.365775,0.002749,1.064800));
-  hpcpush(hpxyzsc(-0.225907,0.287688,1.064800));
-  
-  bshape(shPalaceGate, 13);
-  hpcpush(hpxyzsc(-0.219482,-0.025012,1.024108));
-  hpcpush(hpxyzsc(0.135153,-0.049012,1.010281));
-  hpcpush(hpxyzsc(0.135153,0.049012,1.010281));
-  hpcpush(hpxyzsc(-0.219482,0.025012,1.024108));
-  hpcpush(hpxyzsc(-0.219482,-0.025012,1.024108));  
-
-  bshape(shSemiFeatherFloor[0], 10);
-  hpcpush(hpxyzsc(-0.213723,0.142000,1.032396));
-  hpcpush(hpxyzsc(-0.217805,0.186740,1.040342));
-  hpcpush(hpxyzsc(-0.168303,0.178633,1.029677));
-  hpcpush(hpxyzsc(-0.165430,0.203978,1.033912));
-  hpcpush(hpxyzsc(-0.105630,0.181755,1.021857));
-  hpcpush(hpxyzsc(-0.121309,0.236968,1.034828));
-  hpcpush(hpxyzsc(-0.041402,0.211323,1.022923));
-  hpcpush(hpxyzsc(-0.057879,0.276895,1.039240));
-  hpcpush(hpxyzsc(-0.017811,0.253866,1.031874));
-  hpcpush(hpxyzsc(0.017667,0.368934,1.066032));
-  hpcpush(hpxyzsc(0.047389,0.274022,1.037947));
-  hpcpush(hpxyzsc(0.080505,0.307761,1.049380));
-  hpcpush(hpxyzsc(0.077701,0.240665,1.031483));
-  hpcpush(hpxyzsc(0.118416,0.268671,1.042212));
-  hpcpush(hpxyzsc(0.146146,0.160920,1.023354));
-  hpcpush(hpxyzsc(0.177400,0.199591,1.035040));
-  hpcpush(hpxyzsc(0.182840,0.137845,1.025881));
-  hpcpush(hpxyzsc(0.210035,0.188620,1.039082));
-  hpcpush(hpxyzsc(0.224749,0.113626,1.031224));
-  hpcpush(hpxyzsc(0.281767,0.097057,1.043462));
-  hpcpush(hpxyzsc(0.212978,0.071571,1.024930));
-  hpcpush(hpxyzsc(0.267866,0.042710,1.036135));
-  hpcpush(hpxyzsc(0.209124,0.016525,1.021766));
-  hpcpush(hpxyzsc(0.255362,-0.017839,1.032244));
-  hpcpush(hpxyzsc(0.214280,-0.046220,1.023744));
-  hpcpush(hpxyzsc(0.270979,-0.083301,1.039408));
-  hpcpush(hpxyzsc(0.265581,-0.128638,1.042632));
-  hpcpush(hpxyzsc(0.025000,0.006441,1.000333));
-  hpcpush(hpxyzsc(-0.213723,0.142000,1.032396));
-
-  bshape(shSemiFeatherFloor[1], 10);
-  hpcpush(hpxyzsc(-0.260056,0.104281,1.038510));
-  hpcpush(hpxyzsc(0.016285,-0.045687,1.001176));
-  hpcpush(hpxyzsc(0.294213,-0.200108,1.061416));
-  hpcpush(hpxyzsc(0.203762,-0.171240,1.034815));
-  hpcpush(hpxyzsc(0.218578,-0.231670,1.049499));
-  hpcpush(hpxyzsc(0.162724,-0.207729,1.034229));
-  hpcpush(hpxyzsc(0.184841,-0.241991,1.045335));
-  hpcpush(hpxyzsc(0.080474,-0.212574,1.025507));
-  hpcpush(hpxyzsc(0.082238,-0.239152,1.031483));
-  hpcpush(hpxyzsc(0.040630,-0.227735,1.026408));
-  hpcpush(hpxyzsc(0.050962,-0.289632,1.042345));
-  hpcpush(hpxyzsc(-0.023848,-0.250638,1.031207));
-  hpcpush(hpxyzsc(-0.047106,-0.286037,1.041171));
-  hpcpush(hpxyzsc(-0.055913,-0.224791,1.026478));
-  hpcpush(hpxyzsc(-0.096323,-0.258790,1.037425));
-  hpcpush(hpxyzsc(-0.110786,-0.189815,1.023867));
-  hpcpush(hpxyzsc(-0.154769,-0.220600,1.035673));
-  hpcpush(hpxyzsc(-0.166545,-0.156525,1.025786));
-  hpcpush(hpxyzsc(-0.220248,-0.191486,1.041718));
-  hpcpush(hpxyzsc(-0.226246,-0.155963,1.037069));
-  hpcpush(hpxyzsc(-0.331380,-0.170431,1.067173));
-  hpcpush(hpxyzsc(-0.264008,-0.097302,1.038830));
-  hpcpush(hpxyzsc(-0.308875,-0.070140,1.048963));
-  hpcpush(hpxyzsc(-0.282501,-0.040835,1.039940));
-  hpcpush(hpxyzsc(-0.303566,-0.023046,1.045315));
-  hpcpush(hpxyzsc(-0.264959,0.005751,1.034522));
-  hpcpush(hpxyzsc(-0.231085,0.042569,1.027235));
-  hpcpush(hpxyzsc(-0.257805,0.048589,1.033840));
-  hpcpush(hpxyzsc(-0.232591,0.068009,1.028943));
-  hpcpush(hpxyzsc(-0.260056,0.104281,1.038510));
-
-  bshape(shDemonFloor[1], 10);
-  hpcpush(hpxyzsc(-0.226625,-0.098204,1.030050));
-  hpcpush(hpxyzsc(-0.248360,-0.079830,1.033468));
-  hpcpush(hpxyzsc(-0.282817,-0.064277,1.041209));
-  hpcpush(hpxyzsc(-0.267165,-0.033078,1.035602));
-  hpcpush(hpxyzsc(-0.265427,-0.008890,1.034665));
-  hpcpush(hpxyzsc(-0.192052,-0.006156,1.018294));
-  hpcpush(hpxyzsc(-0.183253,-0.047966,1.017783));
-  hpcpush(hpxyzsc(-0.143185,-0.036403,1.010855));
-  hpcpush(hpxyzsc(-0.143048,-0.019396,1.010366));
-  hpcpush(hpxyzsc(-0.166019,-0.021973,1.013926));
-  hpcpush(hpxyzsc(-0.166019,0.021973,1.013926));
-  hpcpush(hpxyzsc(-0.143048,0.019396,1.010366));
-  hpcpush(hpxyzsc(-0.143185,0.036403,1.010855));
-  hpcpush(hpxyzsc(-0.183253,0.047966,1.017783));
-  hpcpush(hpxyzsc(-0.192052,0.006156,1.018294));
-  hpcpush(hpxyzsc(-0.265427,0.008890,1.034665));
-  hpcpush(hpxyzsc(-0.267165,0.033078,1.035602));
-  hpcpush(hpxyzsc(-0.282817,0.064277,1.041209));
-  hpcpush(hpxyzsc(-0.248360,0.079830,1.033468));
-  hpcpush(hpxyzsc(-0.226625,0.098204,1.030050));
-  hpcpush(hpxyzsc(-0.218077,0.115953,1.030050));
-  hpcpush(hpxyzsc(-0.217264,0.144403,1.033468));
-  hpcpush(hpxyzsc(-0.226587,0.181040,1.041209));
-  hpcpush(hpxyzsc(-0.192436,0.188254,1.035602));
-  hpcpush(hpxyzsc(-0.172442,0.201977,1.034665));
-  hpcpush(hpxyzsc(-0.124555,0.146314,1.018294));
-  hpcpush(hpxyzsc(-0.151758,0.113367,1.017783));
-  hpcpush(hpxyzsc(-0.117735,0.089250,1.010855));
-  hpcpush(hpxyzsc(-0.104354,0.099746,1.010366));
-  hpcpush(hpxyzsc(-0.120690,0.116099,1.013926));
-  hpcpush(hpxyzsc(-0.086332,0.143499,1.013926));
-  hpcpush(hpxyzsc(-0.074024,0.123933,1.010366));
-  hpcpush(hpxyzsc(-0.060813,0.134643,1.010855));
-  hpcpush(hpxyzsc(-0.076756,0.173179,1.017783));
-  hpcpush(hpxyzsc(-0.114930,0.153990,1.018294));
-  hpcpush(hpxyzsc(-0.158541,0.213062,1.034665));
-  hpcpush(hpxyzsc(-0.140713,0.229501,1.035602));
-  hpcpush(hpxyzsc(-0.126080,0.261191,1.041209));
-  hpcpush(hpxyzsc(-0.092436,0.243949,1.033468));
-  hpcpush(hpxyzsc(-0.064519,0.238411,1.030050));
-  hpcpush(hpxyzsc(-0.045313,0.242795,1.030050));
-  hpcpush(hpxyzsc(-0.022563,0.259897,1.033468));
-  hpcpush(hpxyzsc(0.000268,0.290029,1.041209));
-  hpcpush(hpxyzsc(0.027202,0.267827,1.035602));
-  hpcpush(hpxyzsc(0.050396,0.260751,1.034665));
-  hpcpush(hpxyzsc(0.036734,0.188606,1.018294));
-  hpcpush(hpxyzsc(-0.005985,0.189332,1.017783));
-  hpcpush(hpxyzsc(-0.003629,0.147695,1.010855));
-  hpcpush(hpxyzsc(0.012921,0.143777,1.010366));
-  hpcpush(hpxyzsc(0.015520,0.166746,1.013926));
-  hpcpush(hpxyzsc(0.058365,0.156967,1.013926));
-  hpcpush(hpxyzsc(0.050741,0.135145,1.010366));
-  hpcpush(hpxyzsc(0.067352,0.131495,1.010855));
-  hpcpush(hpxyzsc(0.087541,0.167986,1.017783));
-  hpcpush(hpxyzsc(0.048737,0.185867,1.018294));
-  hpcpush(hpxyzsc(0.067730,0.256794,1.034665));
-  hpcpush(hpxyzsc(0.091698,0.253106,1.035602));
-  hpcpush(hpxyzsc(0.125598,0.261424,1.041209));
-  hpcpush(hpxyzsc(0.133094,0.224370,1.033468));
-  hpcpush(hpxyzsc(0.146171,0.199090,1.030050));
-  hpcpush(hpxyzsc(0.161573,0.186808,1.030050));
-  hpcpush(hpxyzsc(0.189128,0.179684,1.033468));
-  hpcpush(hpxyzsc(0.226921,0.180621,1.041209));
-  hpcpush(hpxyzsc(0.226355,0.145720,1.035602));
-  hpcpush(hpxyzsc(0.235285,0.123174,1.034665));
-  hpcpush(hpxyzsc(0.170362,0.088874,1.018294));
-  hpcpush(hpxyzsc(0.144294,0.122726,1.017783));
-  hpcpush(hpxyzsc(0.113211,0.094924,1.010855));
-  hpcpush(hpxyzsc(0.120466,0.079542,1.010366));
-  hpcpush(hpxyzsc(0.140044,0.091830,1.013926));
-  hpcpush(hpxyzsc(0.159111,0.052236,1.013926));
-  hpcpush(hpxyzsc(0.137297,0.044591,1.010366));
-  hpcpush(hpxyzsc(0.144800,0.029328,1.010855));
-  hpcpush(hpxyzsc(0.185917,0.036295,1.017783));
-  hpcpush(hpxyzsc(0.175703,0.077782,1.018294));
-  hpcpush(hpxyzsc(0.242999,0.107155,1.034665));
-  hpcpush(hpxyzsc(0.255059,0.086117,1.035602));
-  hpcpush(hpxyzsc(0.282698,0.064799,1.041209));
-  hpcpush(hpxyzsc(0.258402,0.035835,1.033468));
-  hpcpush(hpxyzsc(0.246791,0.009850,1.030050));
-  hpcpush(hpxyzsc(0.246791,-0.009850,1.030050));
-  hpcpush(hpxyzsc(0.258402,-0.035835,1.033468));
-  hpcpush(hpxyzsc(0.282698,-0.064799,1.041209));
-  hpcpush(hpxyzsc(0.255059,-0.086117,1.035602));
-  hpcpush(hpxyzsc(0.242999,-0.107155,1.034665));
-  hpcpush(hpxyzsc(0.175703,-0.077782,1.018294));
-  hpcpush(hpxyzsc(0.185917,-0.036295,1.017783));
-  hpcpush(hpxyzsc(0.144800,-0.029328,1.010855));
-  hpcpush(hpxyzsc(0.137297,-0.044591,1.010366));
-  hpcpush(hpxyzsc(0.159111,-0.052236,1.013926));
-  hpcpush(hpxyzsc(0.140044,-0.091830,1.013926));
-  hpcpush(hpxyzsc(0.120466,-0.079542,1.010366));
-  hpcpush(hpxyzsc(0.113211,-0.094924,1.010855));
-  hpcpush(hpxyzsc(0.144294,-0.122726,1.017783));
-  hpcpush(hpxyzsc(0.170362,-0.088874,1.018294));
-  hpcpush(hpxyzsc(0.235285,-0.123174,1.034665));
-  hpcpush(hpxyzsc(0.226355,-0.145720,1.035602));
-  hpcpush(hpxyzsc(0.226921,-0.180621,1.041209));
-  hpcpush(hpxyzsc(0.189128,-0.179684,1.033468));
-  hpcpush(hpxyzsc(0.161573,-0.186808,1.030050));
-  hpcpush(hpxyzsc(0.146171,-0.199090,1.030050));
-  hpcpush(hpxyzsc(0.133094,-0.224370,1.033468));
-  hpcpush(hpxyzsc(0.125598,-0.261424,1.041209));
-  hpcpush(hpxyzsc(0.091698,-0.253106,1.035602));
-  hpcpush(hpxyzsc(0.067730,-0.256794,1.034665));
-  hpcpush(hpxyzsc(0.048737,-0.185867,1.018294));
-  hpcpush(hpxyzsc(0.087541,-0.167986,1.017783));
-  hpcpush(hpxyzsc(0.067352,-0.131495,1.010855));
-  hpcpush(hpxyzsc(0.050741,-0.135145,1.010366));
-  hpcpush(hpxyzsc(0.058365,-0.156967,1.013926));
-  hpcpush(hpxyzsc(0.015520,-0.166746,1.013926));
-  hpcpush(hpxyzsc(0.012921,-0.143777,1.010366));
-  hpcpush(hpxyzsc(-0.003629,-0.147695,1.010855));
-  hpcpush(hpxyzsc(-0.005985,-0.189332,1.017783));
-  hpcpush(hpxyzsc(0.036734,-0.188606,1.018294));
-  hpcpush(hpxyzsc(0.050396,-0.260751,1.034665));
-  hpcpush(hpxyzsc(0.027202,-0.267827,1.035602));
-  hpcpush(hpxyzsc(0.000268,-0.290029,1.041209));
-  hpcpush(hpxyzsc(-0.022563,-0.259897,1.033468));
-  hpcpush(hpxyzsc(-0.045313,-0.242795,1.030050));
-  hpcpush(hpxyzsc(-0.064519,-0.238411,1.030050));
-  hpcpush(hpxyzsc(-0.092436,-0.243949,1.033468));
-  hpcpush(hpxyzsc(-0.126080,-0.261191,1.041209));
-  hpcpush(hpxyzsc(-0.140713,-0.229501,1.035602));
-  hpcpush(hpxyzsc(-0.158541,-0.213062,1.034665));
-  hpcpush(hpxyzsc(-0.114930,-0.153990,1.018294));
-  hpcpush(hpxyzsc(-0.076756,-0.173179,1.017783));
-  hpcpush(hpxyzsc(-0.060813,-0.134643,1.010855));
-  hpcpush(hpxyzsc(-0.074024,-0.123933,1.010366));
-  hpcpush(hpxyzsc(-0.086332,-0.143499,1.013926));
-  hpcpush(hpxyzsc(-0.120690,-0.116099,1.013926));
-  hpcpush(hpxyzsc(-0.104354,-0.099746,1.010366));
-  hpcpush(hpxyzsc(-0.117735,-0.089250,1.010855));
-  hpcpush(hpxyzsc(-0.151758,-0.113367,1.017783));
-  hpcpush(hpxyzsc(-0.124555,-0.146314,1.018294));
-  hpcpush(hpxyzsc(-0.172442,-0.201977,1.034665));
-  hpcpush(hpxyzsc(-0.192436,-0.188254,1.035602));
-  hpcpush(hpxyzsc(-0.226587,-0.181040,1.041209));
-  hpcpush(hpxyzsc(-0.217264,-0.144403,1.033468));
-  hpcpush(hpxyzsc(-0.218077,-0.115953,1.030050));
-  hpcpush(hpxyzsc(-0.226625,-0.098204,1.030050));
-
-  bshape(shDemonFloor[0], 10);
-  hpcpush(hpxyzsc(-0.301493,-0.143505,1.054273));
-  hpcpush(hpxyzsc(-0.286951,-0.089187,1.044172));
-  hpcpush(hpxyzsc(-0.265835,-0.083073,1.038060));
-  hpcpush(hpxyzsc(-0.254617,-0.091662,1.035969));
-  hpcpush(hpxyzsc(-0.235025,-0.098559,1.031964));
-  hpcpush(hpxyzsc(-0.212515,-0.090006,1.026286));
-  hpcpush(hpxyzsc(-0.195614,-0.068094,1.021226));
-  hpcpush(hpxyzsc(-0.191005,-0.038201,1.018795));
-  hpcpush(hpxyzsc(-0.190797,-0.019695,1.018230));
-  hpcpush(hpxyzsc(-0.209527,-0.022317,1.021959));
-  hpcpush(hpxyzsc(-0.209825,-0.043455,1.022700));
-  hpcpush(hpxyzsc(-0.217026,-0.061116,1.025103));
-  hpcpush(hpxyzsc(-0.229748,-0.071561,1.028545));
-  hpcpush(hpxyzsc(-0.245216,-0.072048,1.032144));
-  hpcpush(hpxyzsc(-0.259160,-0.060979,1.034834));
-  hpcpush(hpxyzsc(-0.268975,-0.048441,1.036674));
-  hpcpush(hpxyzsc(-0.279355,-0.049976,1.039489));
-  hpcpush(hpxyzsc(-0.293619,-0.069848,1.044553));
-  hpcpush(hpxyzsc(-0.299119,-0.088435,1.047517));
-  hpcpush(hpxyzsc(-0.309915,-0.111622,1.052856));
-  hpcpush(hpxyzsc(-0.326351,-0.118070,1.058511));
-  hpcpush(hpxyzsc(-0.344537,-0.119314,1.064397));
-  hpcpush(hpxyzsc(-0.371612,-0.115703,1.073072));
-  hpcpush(hpxyzsc(-0.386986,-0.108411,1.077734));
-  hpcpush(hpxyzsc(-0.395533,-0.101984,1.080207));
-  hpcpush(hpxyzsc(-0.372081,-0.100489,1.071701));
-  hpcpush(hpxyzsc(-0.352370,-0.089767,1.064059));
-  hpcpush(hpxyzsc(-0.339559,-0.070299,1.058415));
-  hpcpush(hpxyzsc(-0.338745,-0.051606,1.057077));
-  hpcpush(hpxyzsc(-0.343230,-0.037106,1.057915));
-  hpcpush(hpxyzsc(-0.346305,-0.026537,1.058599));
-  hpcpush(hpxyzsc(-0.349398,-0.006643,1.059303));
-  hpcpush(hpxyzsc(-0.344437,0.011923,1.057724));
-  hpcpush(hpxyzsc(-0.344437,-0.011923,1.057724));
-  hpcpush(hpxyzsc(-0.349398,0.006643,1.059303));
-  hpcpush(hpxyzsc(-0.346305,0.026537,1.058599));
-  hpcpush(hpxyzsc(-0.343230,0.037106,1.057915));
-  hpcpush(hpxyzsc(-0.338745,0.051606,1.057077));
-  hpcpush(hpxyzsc(-0.339559,0.070299,1.058415));
-  hpcpush(hpxyzsc(-0.352370,0.089767,1.064059));
-  hpcpush(hpxyzsc(-0.372081,0.100489,1.071701));
-  hpcpush(hpxyzsc(-0.395533,0.101984,1.080207));
-  hpcpush(hpxyzsc(-0.386986,0.108411,1.077734));
-  hpcpush(hpxyzsc(-0.371612,0.115703,1.073072));
-  hpcpush(hpxyzsc(-0.344537,0.119314,1.064397));
-  hpcpush(hpxyzsc(-0.326351,0.118070,1.058511));
-  hpcpush(hpxyzsc(-0.309915,0.111622,1.052856));
-  hpcpush(hpxyzsc(-0.299119,0.088435,1.047517));
-  hpcpush(hpxyzsc(-0.293619,0.069848,1.044553));
-  hpcpush(hpxyzsc(-0.279355,0.049976,1.039489));
-  hpcpush(hpxyzsc(-0.268975,0.048441,1.036674));
-  hpcpush(hpxyzsc(-0.259160,0.060979,1.034834));
-  hpcpush(hpxyzsc(-0.245216,0.072048,1.032144));
-  hpcpush(hpxyzsc(-0.229748,0.071561,1.028545));
-  hpcpush(hpxyzsc(-0.217026,0.061116,1.025103));
-  hpcpush(hpxyzsc(-0.209825,0.043455,1.022700));
-  hpcpush(hpxyzsc(-0.209527,0.022317,1.021959));
-  hpcpush(hpxyzsc(-0.190797,0.019695,1.018230));
-  hpcpush(hpxyzsc(-0.191005,0.038201,1.018795));
-  hpcpush(hpxyzsc(-0.195614,0.068094,1.021226));
-  hpcpush(hpxyzsc(-0.212515,0.090006,1.026286));
-  hpcpush(hpxyzsc(-0.235025,0.098559,1.031964));
-  hpcpush(hpxyzsc(-0.254617,0.091662,1.035969));
-  hpcpush(hpxyzsc(-0.265835,0.083073,1.038060));
-  hpcpush(hpxyzsc(-0.286951,0.089187,1.044172));
-  hpcpush(hpxyzsc(-0.301493,0.143505,1.054273));
-  hpcpush(hpxyzsc(0.026467,0.332853,1.054273));
-  hpcpush(hpxyzsc(0.066237,0.293100,1.044172));
-  hpcpush(hpxyzsc(0.060974,0.271757,1.038060));
-  hpcpush(hpxyzsc(0.047927,0.266336,1.035969));
-  hpcpush(hpxyzsc(0.032158,0.252817,1.031964));
-  hpcpush(hpxyzsc(0.028310,0.229046,1.026286));
-  hpcpush(hpxyzsc(0.038836,0.203454,1.021226));
-  hpcpush(hpxyzsc(0.062419,0.184516,1.018795));
-  hpcpush(hpxyzsc(0.078342,0.175083,1.018230));
-  hpcpush(hpxyzsc(0.085437,0.192614,1.021959));
-  hpcpush(hpxyzsc(0.067279,0.203441,1.022700));
-  hpcpush(hpxyzsc(0.055584,0.218508,1.025103));
-  hpcpush(hpxyzsc(0.052900,0.234748,1.028545));
-  hpcpush(hpxyzsc(0.060213,0.248387,1.032144));
-  hpcpush(hpxyzsc(0.076771,0.254928,1.034834));
-  hpcpush(hpxyzsc(0.092536,0.257159,1.036674));
-  hpcpush(hpxyzsc(0.096397,0.266917,1.039489));
-  hpcpush(hpxyzsc(0.086320,0.289205,1.044553));
-  hpcpush(hpxyzsc(0.072972,0.303262,1.047517));
-  hpcpush(hpxyzsc(0.058290,0.324205,1.052856));
-  hpcpush(hpxyzsc(0.060924,0.341663,1.058511));
-  hpcpush(hpxyzsc(0.068939,0.358035,1.064397));
-  hpcpush(hpxyzsc(0.085604,0.379677,1.073072));
-  hpcpush(hpxyzsc(0.099606,0.389345,1.077734));
-  hpcpush(hpxyzsc(0.109446,0.393534,1.080207));
-  hpcpush(hpxyzsc(0.099014,0.372476,1.071701));
-  hpcpush(hpxyzsc(0.098444,0.350045,1.064059));
-  hpcpush(hpxyzsc(0.108898,0.329216,1.058415));
-  hpcpush(hpxyzsc(0.124681,0.319165,1.057077));
-  hpcpush(hpxyzsc(0.139480,0.315799,1.057915));
-  hpcpush(hpxyzsc(0.150171,0.313177,1.058599));
-  hpcpush(hpxyzsc(0.168947,0.305909,1.059303));
-  hpcpush(hpxyzsc(0.182544,0.292330,1.057724));
-  hpcpush(hpxyzsc(0.161893,0.304253,1.057724));
-  hpcpush(hpxyzsc(0.180452,0.299267,1.059303));
-  hpcpush(hpxyzsc(0.196134,0.286640,1.058599));
-  hpcpush(hpxyzsc(0.203750,0.278693,1.057915));
-  hpcpush(hpxyzsc(0.214064,0.267559,1.057077));
-  hpcpush(hpxyzsc(0.230660,0.258917,1.058415));
-  hpcpush(hpxyzsc(0.253926,0.260278,1.064059));
-  hpcpush(hpxyzsc(0.273066,0.271987,1.071701));
-  hpcpush(hpxyzsc(0.286087,0.291550,1.080207));
-  hpcpush(hpxyzsc(0.287380,0.280934,1.077734));
-  hpcpush(hpxyzsc(0.286008,0.263974,1.073072));
-  hpcpush(hpxyzsc(0.275598,0.238721,1.064397));
-  hpcpush(hpxyzsc(0.265427,0.223593,1.058511));
-  hpcpush(hpxyzsc(0.251625,0.212583,1.052856));
-  hpcpush(hpxyzsc(0.226146,0.214827,1.047517));
-  hpcpush(hpxyzsc(0.207299,0.219357,1.044553));
-  hpcpush(hpxyzsc(0.182958,0.216941,1.039489));
-  hpcpush(hpxyzsc(0.176438,0.208718,1.036674));
-  hpcpush(hpxyzsc(0.182389,0.193949,1.034834));
-  hpcpush(hpxyzsc(0.185004,0.176339,1.032144));
-  hpcpush(hpxyzsc(0.176847,0.163187,1.028545));
-  hpcpush(hpxyzsc(0.161441,0.157392,1.025103));
-  hpcpush(hpxyzsc(0.142545,0.159986,1.022700));
-  hpcpush(hpxyzsc(0.124090,0.170298,1.021959));
-  hpcpush(hpxyzsc(0.112455,0.155388,1.018230));
-  hpcpush(hpxyzsc(0.128586,0.146315,1.018795));
-  hpcpush(hpxyzsc(0.156778,0.135360,1.021226));
-  hpcpush(hpxyzsc(0.184205,0.139040,1.026286));
-  hpcpush(hpxyzsc(0.202867,0.154258,1.031964));
-  hpcpush(hpxyzsc(0.206690,0.174674,1.035969));
-  hpcpush(hpxyzsc(0.204861,0.188683,1.038060));
-  hpcpush(hpxyzsc(0.220714,0.203913,1.044172));
-  hpcpush(hpxyzsc(0.275026,0.189348,1.054273));
-  hpcpush(hpxyzsc(0.275026,-0.189348,1.054273));
-  hpcpush(hpxyzsc(0.220714,-0.203913,1.044172));
-  hpcpush(hpxyzsc(0.204861,-0.188683,1.038060));
-  hpcpush(hpxyzsc(0.206690,-0.174674,1.035969));
-  hpcpush(hpxyzsc(0.202867,-0.154258,1.031964));
-  hpcpush(hpxyzsc(0.184205,-0.139040,1.026286));
-  hpcpush(hpxyzsc(0.156778,-0.135360,1.021226));
-  hpcpush(hpxyzsc(0.128586,-0.146315,1.018795));
-  hpcpush(hpxyzsc(0.112455,-0.155388,1.018230));
-  hpcpush(hpxyzsc(0.124090,-0.170298,1.021959));
-  hpcpush(hpxyzsc(0.142545,-0.159986,1.022700));
-  hpcpush(hpxyzsc(0.161441,-0.157392,1.025103));
-  hpcpush(hpxyzsc(0.176847,-0.163187,1.028545));
-  hpcpush(hpxyzsc(0.185004,-0.176339,1.032144));
-  hpcpush(hpxyzsc(0.182389,-0.193949,1.034834));
-  hpcpush(hpxyzsc(0.176438,-0.208718,1.036674));
-  hpcpush(hpxyzsc(0.182958,-0.216941,1.039489));
-  hpcpush(hpxyzsc(0.207299,-0.219357,1.044553));
-  hpcpush(hpxyzsc(0.226146,-0.214827,1.047517));
-  hpcpush(hpxyzsc(0.251625,-0.212583,1.052856));
-  hpcpush(hpxyzsc(0.265427,-0.223593,1.058511));
-  hpcpush(hpxyzsc(0.275598,-0.238721,1.064397));
-  hpcpush(hpxyzsc(0.286008,-0.263974,1.073072));
-  hpcpush(hpxyzsc(0.287380,-0.280934,1.077734));
-  hpcpush(hpxyzsc(0.286087,-0.291550,1.080207));
-  hpcpush(hpxyzsc(0.273066,-0.271987,1.071701));
-  hpcpush(hpxyzsc(0.253926,-0.260278,1.064059));
-  hpcpush(hpxyzsc(0.230660,-0.258917,1.058415));
-  hpcpush(hpxyzsc(0.214064,-0.267559,1.057077));
-  hpcpush(hpxyzsc(0.203750,-0.278693,1.057915));
-  hpcpush(hpxyzsc(0.196134,-0.286640,1.058599));
-  hpcpush(hpxyzsc(0.180452,-0.299267,1.059303));
-  hpcpush(hpxyzsc(0.161893,-0.304253,1.057724));
-  hpcpush(hpxyzsc(0.182544,-0.292330,1.057724));
-  hpcpush(hpxyzsc(0.168947,-0.305909,1.059303));
-  hpcpush(hpxyzsc(0.150171,-0.313177,1.058599));
-  hpcpush(hpxyzsc(0.139480,-0.315799,1.057915));
-  hpcpush(hpxyzsc(0.124681,-0.319165,1.057077));
-  hpcpush(hpxyzsc(0.108898,-0.329216,1.058415));
-  hpcpush(hpxyzsc(0.098444,-0.350045,1.064059));
-  hpcpush(hpxyzsc(0.099014,-0.372476,1.071701));
-  hpcpush(hpxyzsc(0.109446,-0.393534,1.080207));
-  hpcpush(hpxyzsc(0.099606,-0.389345,1.077734));
-  hpcpush(hpxyzsc(0.085604,-0.379677,1.073072));
-  hpcpush(hpxyzsc(0.068939,-0.358035,1.064397));
-  hpcpush(hpxyzsc(0.060924,-0.341663,1.058511));
-  hpcpush(hpxyzsc(0.058290,-0.324205,1.052856));
-  hpcpush(hpxyzsc(0.072972,-0.303262,1.047517));
-  hpcpush(hpxyzsc(0.086320,-0.289205,1.044553));
-  hpcpush(hpxyzsc(0.096397,-0.266917,1.039489));
-  hpcpush(hpxyzsc(0.092536,-0.257159,1.036674));
-  hpcpush(hpxyzsc(0.076771,-0.254928,1.034834));
-  hpcpush(hpxyzsc(0.060213,-0.248387,1.032144));
-  hpcpush(hpxyzsc(0.052900,-0.234748,1.028545));
-  hpcpush(hpxyzsc(0.055584,-0.218508,1.025103));
-  hpcpush(hpxyzsc(0.067279,-0.203441,1.022700));
-  hpcpush(hpxyzsc(0.085437,-0.192614,1.021959));
-  hpcpush(hpxyzsc(0.078342,-0.175083,1.018230));
-  hpcpush(hpxyzsc(0.062419,-0.184516,1.018795));
-  hpcpush(hpxyzsc(0.038836,-0.203454,1.021226));
-  hpcpush(hpxyzsc(0.028310,-0.229046,1.026286));
-  hpcpush(hpxyzsc(0.032158,-0.252817,1.031964));
-  hpcpush(hpxyzsc(0.047927,-0.266336,1.035969));
-  hpcpush(hpxyzsc(0.060974,-0.271757,1.038060));
-  hpcpush(hpxyzsc(0.066237,-0.293100,1.044172));
-  hpcpush(hpxyzsc(0.026467,-0.332853,1.054273));
-  hpcpush(hpxyzsc(-0.301493,-0.143505,1.054273));
-
-  bshape(shCaveFloor[0], 10);
-  hpcpush(hpxyzsc(-0.234236,0.156157,1.038870));
-  hpcpush(hpxyzsc(-0.104249,0.246637,1.035228));
-  hpcpush(hpxyzsc(-0.046397,0.291271,1.042589));
-  hpcpush(hpxyzsc(0.016871,0.307576,1.046369));
-  hpcpush(hpxyzsc(0.102393,0.312431,1.052662));
-  hpcpush(hpxyzsc(0.175295,0.270792,1.050741));
-  hpcpush(hpxyzsc(0.252411,0.200098,1.050595));
-  hpcpush(hpxyzsc(0.252354,0.124776,1.038870));
-  hpcpush(hpxyzsc(0.265719,-0.033037,1.035228));
-  hpcpush(hpxyzsc(0.275447,-0.105454,1.042589));
-  hpcpush(hpxyzsc(0.257933,-0.168399,1.046369));
-  hpcpush(hpxyzsc(0.219377,-0.244891,1.052662));
-  hpcpush(hpxyzsc(0.146865,-0.287206,1.050741));
-  hpcpush(hpxyzsc(0.047084,-0.318643,1.050595));
-  hpcpush(hpxyzsc(-0.018118,-0.280933,1.038870));
-  hpcpush(hpxyzsc(-0.161470,-0.213601,1.035228));
-  hpcpush(hpxyzsc(-0.229049,-0.185817,1.042589));
-  hpcpush(hpxyzsc(-0.274804,-0.139177,1.046369));
-  hpcpush(hpxyzsc(-0.321770,-0.067540,1.052662));
-  hpcpush(hpxyzsc(-0.322160,0.016414,1.050741));
-  hpcpush(hpxyzsc(-0.299495,0.118545,1.050595));
-  hpcpush(hpxyzsc(-0.234236,0.156157,1.038870));
-
-  bshape(shCaveFloor[1], 10);
-  hpcpush(hpxyzsc(-0.275790,0.020429,1.037534));
-  hpcpush(hpxyzsc(-0.270081,0.108032,1.041448));
-  hpcpush(hpxyzsc(-0.241466,0.175612,1.043621));
-  hpcpush(hpxyzsc(-0.155980,0.228358,1.037534));
-  hpcpush(hpxyzsc(-0.083930,0.278515,1.041448));
-  hpcpush(hpxyzsc(-0.013253,0.298278,1.043621));
-  hpcpush(hpxyzsc(0.081286,0.264329,1.037534));
-  hpcpush(hpxyzsc(0.165423,0.239270,1.041448));
-  hpcpush(hpxyzsc(0.224940,0.196335,1.043621));
-  hpcpush(hpxyzsc(0.257342,0.101255,1.037534));
-  hpcpush(hpxyzsc(0.290208,0.019850,1.041448));
-  hpcpush(hpxyzsc(0.293748,-0.053452,1.043621));
-  hpcpush(hpxyzsc(0.239614,-0.138066,1.037534));
-  hpcpush(hpxyzsc(0.196461,-0.214518,1.041448));
-  hpcpush(hpxyzsc(0.141358,-0.262989,1.043621));
-  hpcpush(hpxyzsc(0.041452,-0.273421,1.037534));
-  hpcpush(hpxyzsc(-0.045225,-0.287349,1.041448));
-  hpcpush(hpxyzsc(-0.117477,-0.274489,1.043621));
-  hpcpush(hpxyzsc(-0.187924,-0.202884,1.037534));
-  hpcpush(hpxyzsc(-0.252856,-0.143801,1.041448));
-  hpcpush(hpxyzsc(-0.287850,-0.079294,1.043621));
-  hpcpush(hpxyzsc(-0.275790,0.020429,1.037534));
-
-  bshape(shCaveFloor[2], 10); // Euclidean variant
-  hpcpush(hpxyz(-0.240110,-0.132397,1.000000));
-  hpcpush(hpxyz(-0.245549,-0.126958,1.000000));
-  hpcpush(hpxyz(-0.248269,-0.113359,1.000000));
-  hpcpush(hpxyz(-0.250989,-0.099760,1.000000));
-  hpcpush(hpxyz(-0.253709,-0.081628,1.000000));
-  hpcpush(hpxyz(-0.253709,-0.073469,1.000000));
-  hpcpush(hpxyz(-0.253709,-0.058057,1.000000));
-  hpcpush(hpxyz(-0.253709,-0.039018,1.000000));
-  hpcpush(hpxyz(-0.253709,0.039018,1.000000));
-  hpcpush(hpxyz(-0.253709,0.058057,1.000000));
-  hpcpush(hpxyz(-0.253709,0.073469,1.000000));
-  hpcpush(hpxyz(-0.253709,0.081628,1.000000));
-  hpcpush(hpxyz(-0.250989,0.099760,1.000000));
-  hpcpush(hpxyz(-0.248269,0.113359,1.000000));
-  hpcpush(hpxyz(-0.245549,0.126958,1.000000));
-  hpcpush(hpxyz(-0.240110,0.132397,1.000000));
-  hpcpush(hpxyz(-0.234714,0.141743,1.000000));
-  hpcpush(hpxyz(-0.232723,0.149173,1.000000));
-  hpcpush(hpxyz(-0.222306,0.158328,1.000000));
-  hpcpush(hpxyz(-0.211889,0.167483,1.000000));
-  hpcpush(hpxyz(-0.197546,0.178904,1.000000));
-  hpcpush(hpxyz(-0.190480,0.182984,1.000000));
-  hpcpush(hpxyz(-0.177133,0.190690,1.000000));
-  hpcpush(hpxyz(-0.160645,0.200209,1.000000));
-  hpcpush(hpxyz(-0.093064,0.239227,1.000000));
-  hpcpush(hpxyz(-0.076576,0.248747,1.000000));
-  hpcpush(hpxyz(-0.063229,0.256453,1.000000));
-  hpcpush(hpxyz(-0.056163,0.260532,1.000000));
-  hpcpush(hpxyz(-0.039100,0.267243,1.000000));
-  hpcpush(hpxyz(-0.025963,0.271687,1.000000));
-  hpcpush(hpxyz(-0.012826,0.276131,1.000000));
-  hpcpush(hpxyz(-0.005396,0.274140,1.000000));
-  hpcpush(hpxyz(0.005396,0.274140,1.000000));
-  hpcpush(hpxyz(0.012826,0.276131,1.000000));
-  hpcpush(hpxyz(0.025963,0.271687,1.000000));
-  hpcpush(hpxyz(0.039100,0.267243,1.000000));
-  hpcpush(hpxyz(0.056163,0.260532,1.000000));
-  hpcpush(hpxyz(0.063229,0.256453,1.000000));
-  hpcpush(hpxyz(0.076576,0.248747,1.000000));
-  hpcpush(hpxyz(0.093064,0.239227,1.000000));
-  hpcpush(hpxyz(0.160645,0.200209,1.000000));
-  hpcpush(hpxyz(0.177133,0.190690,1.000000));
-  hpcpush(hpxyz(0.190480,0.182984,1.000000));
-  hpcpush(hpxyz(0.197546,0.178904,1.000000));
-  hpcpush(hpxyz(0.211889,0.167483,1.000000));
-  hpcpush(hpxyz(0.222306,0.158328,1.000000));
-  hpcpush(hpxyz(0.232723,0.149173,1.000000));
-  hpcpush(hpxyz(0.234714,0.141743,1.000000));
-  hpcpush(hpxyz(0.240110,0.132397,1.000000));
-  hpcpush(hpxyz(0.245549,0.126958,1.000000));
-  hpcpush(hpxyz(0.248269,0.113359,1.000000));
-  hpcpush(hpxyz(0.250989,0.099760,1.000000));
-  hpcpush(hpxyz(0.253709,0.081628,1.000000));
-  hpcpush(hpxyz(0.253709,0.073469,1.000000));
-  hpcpush(hpxyz(0.253709,0.058057,1.000000));
-  hpcpush(hpxyz(0.253709,0.039018,1.000000));
-  hpcpush(hpxyz(0.253709,-0.039018,1.000000));
-  hpcpush(hpxyz(0.253709,-0.058057,1.000000));
-  hpcpush(hpxyz(0.253709,-0.073469,1.000000));
-  hpcpush(hpxyz(0.253709,-0.081628,1.000000));
-  hpcpush(hpxyz(0.250989,-0.099760,1.000000));
-  hpcpush(hpxyz(0.248269,-0.113359,1.000000));
-  hpcpush(hpxyz(0.245549,-0.126958,1.000000));
-  hpcpush(hpxyz(0.240110,-0.132397,1.000000));
-  hpcpush(hpxyz(0.234714,-0.141743,1.000000));
-  hpcpush(hpxyz(0.232723,-0.149173,1.000000));
-  hpcpush(hpxyz(0.222306,-0.158328,1.000000));
-  hpcpush(hpxyz(0.211889,-0.167483,1.000000));
-  hpcpush(hpxyz(0.197546,-0.178904,1.000000));
-  hpcpush(hpxyz(0.190480,-0.182984,1.000000));
-  hpcpush(hpxyz(0.177133,-0.190690,1.000000));
-  hpcpush(hpxyz(0.160645,-0.200209,1.000000));
-  hpcpush(hpxyz(0.093064,-0.239227,1.000000));
-  hpcpush(hpxyz(0.076576,-0.248747,1.000000));
-  hpcpush(hpxyz(0.063229,-0.256453,1.000000));
-  hpcpush(hpxyz(0.056163,-0.260532,1.000000));
-  hpcpush(hpxyz(0.039100,-0.267243,1.000000));
-  hpcpush(hpxyz(0.025963,-0.271687,1.000000));
-  hpcpush(hpxyz(0.012826,-0.276131,1.000000));
-  hpcpush(hpxyz(0.005396,-0.274140,1.000000));
-  hpcpush(hpxyz(-0.005396,-0.274140,1.000000));
-  hpcpush(hpxyz(-0.012826,-0.276131,1.000000));
-  hpcpush(hpxyz(-0.025963,-0.271687,1.000000));
-  hpcpush(hpxyz(-0.039100,-0.267243,1.000000));
-  hpcpush(hpxyz(-0.056163,-0.260532,1.000000));
-  hpcpush(hpxyz(-0.063229,-0.256453,1.000000));
-  hpcpush(hpxyz(-0.076576,-0.248747,1.000000));
-  hpcpush(hpxyz(-0.093064,-0.239227,1.000000));
-  hpcpush(hpxyz(-0.160645,-0.200209,1.000000));
-  hpcpush(hpxyz(-0.177133,-0.190690,1.000000));
-  hpcpush(hpxyz(-0.190480,-0.182984,1.000000));
-  hpcpush(hpxyz(-0.197546,-0.178904,1.000000));
-  hpcpush(hpxyz(-0.211889,-0.167483,1.000000));
-  hpcpush(hpxyz(-0.222306,-0.158328,1.000000));
-  hpcpush(hpxyz(-0.232723,-0.149173,1.000000));
-  hpcpush(hpxyz(-0.234714,-0.141743,1.000000));
-  hpcpush(hpxyz(-0.240110,-0.132397,1.000000));
-  
-  bshape(shDesertFloor[0], 10);
-  hpcpush(hpxyzsc(-0.122282,0.287492,1.047666));
-  hpcpush(hpxyzsc(-0.111151,0.302069,1.050524));
-  hpcpush(hpxyzsc(-0.092261,0.322915,1.054887));
-  hpcpush(hpxyzsc(-0.071518,0.368383,1.068092));
-  hpcpush(hpxyzsc(-0.014386,0.321713,1.050574));
-  hpcpush(hpxyzsc(0.014126,0.287661,1.040648));
-  hpcpush(hpxyzsc(0.052673,0.283918,1.040857));
-  hpcpush(hpxyzsc(0.144166,0.292263,1.051761));
-  hpcpush(hpxyzsc(0.201841,0.240906,1.048225));
-  hpcpush(hpxyzsc(0.236802,0.171166,1.041812));
-  hpcpush(hpxyzsc(0.187940,0.142834,1.027484));
-  hpcpush(hpxyzsc(0.179062,0.090148,1.019897));
-  hpcpush(hpxyzsc(0.306355,-0.036347,1.046506));
-  hpcpush(hpxyzsc(0.310117,-0.037847,1.047666));
-  hpcpush(hpxyzsc(0.317175,-0.054775,1.050524));
-  hpcpush(hpxyzsc(0.325783,-0.081557,1.054887));
-  hpcpush(hpxyzsc(0.354788,-0.122255,1.068092));
-  hpcpush(hpxyzsc(0.285805,-0.148398,1.050574));
-  hpcpush(hpxyzsc(0.242058,-0.156064,1.040648));
-  hpcpush(hpxyzsc(0.219544,-0.187575,1.040857));
-  hpcpush(hpxyzsc(0.181024,-0.270983,1.051761));
-  hpcpush(hpxyzsc(0.107711,-0.295252,1.048225));
-  hpcpush(hpxyzsc(0.029834,-0.290659,1.041812));
-  hpcpush(hpxyzsc(0.029728,-0.234177,1.027484));
-  hpcpush(hpxyzsc(-0.011460,-0.200146,1.019897));
-  hpcpush(hpxyzsc(-0.184655,-0.247137,1.046506));
-  hpcpush(hpxyzsc(-0.187835,-0.249645,1.047666));
-  hpcpush(hpxyzsc(-0.206024,-0.247294,1.050524));
-  hpcpush(hpxyzsc(-0.233522,-0.241358,1.054887));
-  hpcpush(hpxyzsc(-0.283270,-0.246127,1.068092));
-  hpcpush(hpxyzsc(-0.271419,-0.173315,1.050574));
-  hpcpush(hpxyzsc(-0.256185,-0.131597,1.040648));
-  hpcpush(hpxyzsc(-0.272216,-0.096343,1.040857));
-  hpcpush(hpxyzsc(-0.325190,-0.021280,1.051761));
-  hpcpush(hpxyzsc(-0.309551,0.054346,1.048225));
-  hpcpush(hpxyzsc(-0.266635,0.119493,1.041812));
-  hpcpush(hpxyzsc(-0.217668,0.091343,1.027484));
-  hpcpush(hpxyzsc(-0.167602,0.109998,1.019897));
-  hpcpush(hpxyzsc(-0.121700,0.283485,1.046506));
-  hpcpush(hpxyzsc(-0.122282,0.287492,1.047666));
-  
-  bshape(shDesertFloor[1], 10);
-  hpcpush(hpxyzsc(-0.336141,-0.153280,1.066061));
-  hpcpush(hpxyzsc(-0.336530,-0.140779,1.064458));
-  hpcpush(hpxyzsc(-0.323000,-0.116492,1.057308));
-  hpcpush(hpxyzsc(-0.295897,-0.085654,1.046371));
-  hpcpush(hpxyzsc(-0.271537,-0.031871,1.036701));
-  hpcpush(hpxyzsc(-0.271537,0.031871,1.036701));
-  hpcpush(hpxyzsc(-0.295897,0.085654,1.046371));
-  hpcpush(hpxyzsc(-0.323000,0.116492,1.057308));
-  hpcpush(hpxyzsc(-0.336530,0.140779,1.064458));
-  hpcpush(hpxyzsc(-0.336141,0.153280,1.066061));
-  hpcpush(hpxyzsc(-0.329419,0.167237,1.066061));
-  hpcpush(hpxyzsc(-0.319889,0.175335,1.064458));
-  hpcpush(hpxyzsc(-0.292464,0.179900,1.057308));
-  hpcpush(hpxyzsc(-0.251456,0.177937,1.046371));
-  hpcpush(hpxyzsc(-0.194218,0.192425,1.036701));
-  hpcpush(hpxyzsc(-0.144383,0.232167,1.036701));
-  hpcpush(hpxyzsc(-0.117521,0.284746,1.046371));
-  hpcpush(hpxyzsc(-0.110310,0.325163,1.057308));
-  hpcpush(hpxyzsc(-0.099757,0.350884,1.064458));
-  hpcpush(hpxyzsc(-0.089741,0.358374,1.066061));
-  hpcpush(hpxyzsc(-0.074639,0.361821,1.066061));
-  hpcpush(hpxyzsc(-0.062365,0.359418,1.064458));
-  hpcpush(hpxyzsc(-0.041697,0.340824,1.057308));
-  hpcpush(hpxyzsc(-0.017664,0.307538,1.046371));
-  hpcpush(hpxyzsc(0.029351,0.271821,1.036701));
-  hpcpush(hpxyzsc(0.091494,0.257638,1.036701));
-  hpcpush(hpxyzsc(0.149350,0.269418,1.046371));
-  hpcpush(hpxyzsc(0.185445,0.288980,1.057308));
-  hpcpush(hpxyzsc(0.212135,0.296766,1.064458));
-  hpcpush(hpxyzsc(0.224235,0.293605,1.066061));
-  hpcpush(hpxyzsc(0.236346,0.283946,1.066061));
-  hpcpush(hpxyzsc(0.242121,0.272853,1.064458));
-  hpcpush(hpxyzsc(0.240469,0.245100,1.057308));
-  hpcpush(hpxyzsc(0.229430,0.205557,1.046371));
-  hpcpush(hpxyzsc(0.230819,0.146530,1.036701));
-  hpcpush(hpxyzsc(0.258475,0.089101,1.036701));
-  hpcpush(hpxyzsc(0.303758,0.051213,1.046371));
-  hpcpush(hpxyzsc(0.341557,0.035189,1.057308));
-  hpcpush(hpxyzsc(0.364285,0.019177,1.064458));
-  hpcpush(hpxyzsc(0.369358,0.007745,1.066061));
-  hpcpush(hpxyzsc(0.369358,-0.007745,1.066061));
-  hpcpush(hpxyzsc(0.364285,-0.019177,1.064458));
-  hpcpush(hpxyzsc(0.341557,-0.035189,1.057308));
-  hpcpush(hpxyzsc(0.303758,-0.051213,1.046371));
-  hpcpush(hpxyzsc(0.258475,-0.089101,1.036701));
-  hpcpush(hpxyzsc(0.230819,-0.146530,1.036701));
-  hpcpush(hpxyzsc(0.229430,-0.205557,1.046371));
-  hpcpush(hpxyzsc(0.240469,-0.245100,1.057308));
-  hpcpush(hpxyzsc(0.242121,-0.272853,1.064458));
-  hpcpush(hpxyzsc(0.236346,-0.283946,1.066061));
-  hpcpush(hpxyzsc(0.224235,-0.293605,1.066061));
-  hpcpush(hpxyzsc(0.212135,-0.296766,1.064458));
-  hpcpush(hpxyzsc(0.185445,-0.288980,1.057308));
-  hpcpush(hpxyzsc(0.149350,-0.269418,1.046371));
-  hpcpush(hpxyzsc(0.091494,-0.257638,1.036701));
-  hpcpush(hpxyzsc(0.029351,-0.271821,1.036701));
-  hpcpush(hpxyzsc(-0.017664,-0.307538,1.046371));
-  hpcpush(hpxyzsc(-0.041697,-0.340824,1.057308));
-  hpcpush(hpxyzsc(-0.062365,-0.359418,1.064458));
-  hpcpush(hpxyzsc(-0.074639,-0.361821,1.066061));
-  hpcpush(hpxyzsc(-0.089741,-0.358374,1.066061));
-  hpcpush(hpxyzsc(-0.099757,-0.350884,1.064458));
-  hpcpush(hpxyzsc(-0.110310,-0.325163,1.057308));
-  hpcpush(hpxyzsc(-0.117521,-0.284746,1.046371));
-  hpcpush(hpxyzsc(-0.144383,-0.232167,1.036701));
-  hpcpush(hpxyzsc(-0.194218,-0.192425,1.036701));
-  hpcpush(hpxyzsc(-0.251456,-0.177937,1.046371));
-  hpcpush(hpxyzsc(-0.292464,-0.179900,1.057308));
-  hpcpush(hpxyzsc(-0.319889,-0.175335,1.064458));
-  hpcpush(hpxyzsc(-0.329419,-0.167237,1.066061));
-  hpcpush(hpxyzsc(-0.336141,-0.153280,1.066061));
-
-  double shexf = purehepta ? crossf* .55 : hexf;
-    
-  bshape(shFloor[0], 11);
-  for(int t=0; t<=6; t++) hpcpush(ddi(7 + t*14, shexf*.8) * C0);
-
-  bshape(shFloor[1], 11);
-  for(int t=0; t<=7; t++) hpcpush(ddi(t*12, shexf*.94) * C0);
-  
-  for(int d=0; d<2; d++) {
-    bshape(shSemiFloor[d], 11);
-    for(int t=0; t<=4; t++) hpcpush(ddi(7 + (3+3*d+t%4)*14, shexf*.8) * C0);
-    }
-
-  bshape(shMFloor[0], 12);
-  for(int t=0; t<=6; t++) hpcpush(ddi(7 + t*14, shexf*.7) * C0);
-
-  bshape(shMFloor[1], 12);
-  for(int t=0; t<=7; t++) hpcpush(ddi(t*12, shexf*.8) * C0);
-  
-  bshape(shMFloor2[0], 13);
-  for(int t=0; t<=6; t++) hpcpush(ddi(7 + t*14, shexf*.6) * C0);
-
-  bshape(shMFloor2[1], 13);
-  for(int t=0; t<=7; t++) hpcpush(ddi(t*12, shexf*.7) * C0);
-  
-  bshape(shMFloor3[0], 14);
-  for(int t=0; t<=6; t++) hpcpush(ddi(7 + t*14, shexf*.5) * C0);
-
-  bshape(shMFloor3[1], 14);
-  for(int t=0; t<=7; t++) hpcpush(ddi(t*12, shexf*.6) * C0);
-  
-  bshape(shMFloor4[0], 15);
-  for(int t=0; t<=6; t++) hpcpush(ddi(7 + t*14, shexf*.4) * C0);
-
-  bshape(shMFloor4[1], 15);
-  for(int t=0; t<=7; t++) hpcpush(ddi(t*12, shexf*.5) * C0);
-
-  bshape(shBigCarpet1, 14);
-//for(int t=0; t<=7; t++) hpcpush(ddi(t*12, -shexf*3.5) * C0);  
-  for(int t=0; t<=7; t++) hpcpush(ddi(t*12, -shexf*2.1) * C0);  
-
-  bshape(shBigCarpet2, 15);
-//for(int t=0; t<=7; t++) hpcpush(ddi(t*12, -shexf*3.4) * C0);
-  for(int t=0; t<=7; t++) hpcpush(ddi(t*12, -shexf*1.9) * C0);
-
-  bshape(shBigCarpet3, 16);
-//for(int t=0; t<=7; t++) hpcpush(ddi(t*12, -shexf*3.4) * C0);
-  for(int t=0; t<=7; t++) hpcpush(ddi(t*12*3, -shexf*1.7) * C0);
-
-  bshape(shBFloor[0], 16);
-  for(int t=0; t<=6; t++) hpcpush(ddi(7 + t*14, shexf*.1) * C0);
-
-  bshape(shBFloor[1], 16);
-  for(int t=0; t<=7; t++) hpcpush(ddi(t*12, shexf*.1) * C0);
-  
-  bshape(shMineMark[0], 50);
-  for(int t=0; t<=6; t++) hpcpush(ddi(7 + t*14, shexf*.1) * C0);
-
-  bshape(shMineMark[1], 50);
-  for(int t=0; t<=7; t++) hpcpush(ddi(t*12, shexf*.1) * C0);
-  
-  for(int d=0; d<2; d++) {
-    bshape(shSemiBFloor[d], 11);
-    for(int t=0; t<=4; t++) hpcpush(ddi(7 + (3+3*d+t%4)*14, shexf*.1) * C0);
-    }
-
-  // walls etc
-  
-  bshape(shGiantStar[1], 12);
-  for(int t=0; t<=7; t++) hpcpush(ddi(t*36, -shexf*2.4) * C0);
-
-  bshape(shGiantStar[0], 12);
-  for(int t=0; t<=6; t++) {
-    hpcpush(ddi(t*14, -shexf*2.4) * C0);
-    hpcpush(ddi(t*14+7, shexf*1.5) * C0);
-    }
-  hpcpush(ddi(0, -shexf*2.4) * C0);
-  
-  bshape(shPowerFloor[0], 12);
-  hpcpush(hpxyzsc(0.188696,0.349290,1.075923));
-  hpcpush(hpxyzsc(0.246724,0.011920,1.030056));
-  hpcpush(hpxyzsc(0.208146,-0.338061,1.075923));
-  hpcpush(hpxyzsc(-0.113039,-0.219629,1.030056));
-  hpcpush(hpxyzsc(-0.396842,-0.011229,1.075923));
-  hpcpush(hpxyzsc(-0.133685,0.207709,1.030056));
-  hpcpush(hpxyzsc(0.188696,0.349290,1.075923));
-
-  bshape(shPowerFloor[1], 12);
-  hpcpush(hpxyzsc(0.563851,-0.000804,1.148010));
-  hpcpush(hpxyzsc(0.151110,-0.073482,1.014019));
-  hpcpush(hpxyzsc(0.350926,-0.441337,1.148010));
-  hpcpush(hpxyzsc(0.036765,-0.163958,1.014019));
-  hpcpush(hpxyzsc(-0.126252,-0.549535,1.148010));
-  hpcpush(hpxyzsc(-0.105265,-0.130970,1.014019));
-  hpcpush(hpxyzsc(-0.508361,-0.243921,1.148010));
-  hpcpush(hpxyzsc(-0.168028,0.000641,1.014019));
-  hpcpush(hpxyzsc(-0.507663,0.245370,1.148010));
-  hpcpush(hpxyzsc(-0.104263,0.131769,1.014019));
-  hpcpush(hpxyzsc(-0.124685,0.549893,1.148010));
-  hpcpush(hpxyzsc(0.038015,0.163673,1.014019));
-  hpcpush(hpxyzsc(0.352184,0.440335,1.148010));
-  hpcpush(hpxyzsc(0.151666,0.072327,1.014019));
-  hpcpush(hpxyzsc(0.563851,-0.000804,1.148010));
-
-  bshape(shMirror, 13);
-  if(purehepta) {
-    for(int t=0; t<=7; t++) hpcpush(ddi(t*12, shexf*.8) * C0);
-    }
-  else {
-    for(int t=0; t<=6; t++) hpcpush(ddi(7 + t*14, shexf*.7) * C0);
-    }
-
-  bshape(shWall[0], 13);
-  for(int t=0; t<=6; t++) {
-    hpcpush(ddi(7 + t*14, shexf*.8) * C0);
-    hpcpush(ddi(14 + t*14, shexf*.2) * C0);
-    }
-  
-  bshape(shFan, 13);
-  hpcpush(hpxyzsc(0.107525,0.021206,1.005988));
-  hpcpush(hpxyzsc(0.174486,0.023794,1.015387));
-  hpcpush(hpxyzsc(0.248649,0.075227,1.033192));
-  hpcpush(hpxyzsc(0.288526,0.125253,1.048301));
-  hpcpush(hpxyzsc(0.316075,0.194021,1.066559));
-  hpcpush(hpxyzsc(0.330682,0.132382,1.061544));
-  hpcpush(hpxyzsc(0.308763,0.072356,1.049081));
-  hpcpush(hpxyzsc(0.265689,0.011475,1.034757));
-  hpcpush(hpxyzsc(0.200080,-0.044306,1.020782));
-  hpcpush(hpxyzsc(0.135111,-0.076768,1.012002));
-  hpcpush(hpxyzsc(0.072127,-0.082517,1.005988));
-  hpcpush(hpxyzsc(0.107849,-0.139212,1.015387));
-  hpcpush(hpxyzsc(0.189473,-0.177723,1.033192));
-  hpcpush(hpxyzsc(0.252735,-0.187244,1.048301));
-  hpcpush(hpxyzsc(0.326065,-0.176718,1.066559));
-  hpcpush(hpxyzsc(0.279987,-0.220188,1.061544));
-  hpcpush(hpxyzsc(0.217044,-0.231219,1.049081));
-  hpcpush(hpxyzsc(0.142783,-0.224356,1.034757));
-  hpcpush(hpxyzsc(0.061670,-0.195428,1.020782));
-  hpcpush(hpxyzsc(0.001072,-0.155394,1.012002));
-  hpcpush(hpxyzsc(-0.035398,-0.103723,1.005988));
-  hpcpush(hpxyzsc(-0.066637,-0.163006,1.015387));
-  hpcpush(hpxyzsc(-0.059176,-0.252950,1.033192));
-  hpcpush(hpxyzsc(-0.035791,-0.312497,1.048301));
-  hpcpush(hpxyzsc(0.009990,-0.370739,1.066559));
-  hpcpush(hpxyzsc(-0.050695,-0.352570,1.061544));
-  hpcpush(hpxyzsc(-0.091720,-0.303575,1.049081));
-  hpcpush(hpxyzsc(-0.122907,-0.235831,1.034757));
-  hpcpush(hpxyzsc(-0.138411,-0.151122,1.020782));
-  hpcpush(hpxyzsc(-0.134039,-0.078626,1.012002));
-  hpcpush(hpxyzsc(-0.107525,-0.021206,1.005988));
-  hpcpush(hpxyzsc(-0.174486,-0.023794,1.015387));
-  hpcpush(hpxyzsc(-0.248649,-0.075227,1.033192));
-  hpcpush(hpxyzsc(-0.288526,-0.125253,1.048301));
-  hpcpush(hpxyzsc(-0.316075,-0.194021,1.066559));
-  hpcpush(hpxyzsc(-0.330682,-0.132382,1.061544));
-  hpcpush(hpxyzsc(-0.308763,-0.072356,1.049081));
-  hpcpush(hpxyzsc(-0.265689,-0.011475,1.034757));
-  hpcpush(hpxyzsc(-0.200080,0.044306,1.020782));
-  hpcpush(hpxyzsc(-0.135111,0.076768,1.012002));
-  hpcpush(hpxyzsc(-0.072127,0.082517,1.005988));
-  hpcpush(hpxyzsc(-0.107849,0.139212,1.015387));
-  hpcpush(hpxyzsc(-0.189473,0.177723,1.033192));
-  hpcpush(hpxyzsc(-0.252735,0.187244,1.048301));
-  hpcpush(hpxyzsc(-0.326065,0.176718,1.066559));
-  hpcpush(hpxyzsc(-0.279987,0.220188,1.061544));
-  hpcpush(hpxyzsc(-0.217044,0.231219,1.049081));
-  hpcpush(hpxyzsc(-0.142783,0.224356,1.034757));
-  hpcpush(hpxyzsc(-0.061670,0.195428,1.020782));
-  hpcpush(hpxyzsc(-0.001072,0.155394,1.012002));
-  hpcpush(hpxyzsc(0.035398,0.103723,1.005988));
-  hpcpush(hpxyzsc(0.066637,0.163006,1.015387));
-  hpcpush(hpxyzsc(0.059176,0.252950,1.033192));
-  hpcpush(hpxyzsc(0.035791,0.312497,1.048301));
-  hpcpush(hpxyzsc(-0.009990,0.370739,1.066559));
-  hpcpush(hpxyzsc(0.050695,0.352570,1.061544));
-  hpcpush(hpxyzsc(0.091720,0.303575,1.049081));
-  hpcpush(hpxyzsc(0.122907,0.235831,1.034757));
-  hpcpush(hpxyzsc(0.138411,0.151122,1.020782));
-  hpcpush(hpxyzsc(0.134039,0.078626,1.012002));
-  hpcpush(hpxyzsc(0.107525,0.021206,1.005988));
-    
-  bshape(shWall[1], 13);
-  for(int t=0; t<=7; t++) hpcpush(ddi(t*36, shexf*.94) * C0);
-
-  bshape(shCross, 13);
-  for(int i=0; i<=84; i+=7)
-    hpcpush(ddi(i, shexf * (i%3 ? 0.8 : 0.3)) * C0);
-  
-  // items
-  
-  bshape(shDaisy, 21);
-  for(int t=0; t<=6; t++) {
-    hpcpush(ddi(t*14, shexf*.8*3/4) * C0);
-    hpcpush(ddi(t*14+7, shexf*-.5*3/4) * C0);
-    }
-  hpcpush(ddi(0, shexf*.6) * C0);
-
-  bshape(shTriangle, 21);
-  for(int t=0; t<=4; t++) {
-    hpcpush(ddi(t*28, shexf*.5) * C0);
-    }
-
-  bshape(shGem[0], 21);
-  for(int t=0; t<=6; t++) {
-    hpcpush(ddi(7 + t*14, shexf*.4) * C0);
-    hpcpush(ddi(14 + t*14, shexf*.1) * C0);
-    }
-  
-  bshape(shGem[1], 21);
-  for(int t=0; t<=7; t++) hpcpush(ddi(t*36, shexf*.5) * C0);
-
-  bshape(shElementalShard, 21);
-  hpcpush(hpxyzsc(-0.345978,0.004270,1.058168));
-  hpcpush(hpxyzsc(-0.054981,0.027419,1.001886));
-  hpcpush(hpxyzsc(-0.063949,0.034031,1.002620));
-  hpcpush(hpxyzsc(-0.078659,0.057318,1.004725));
-  hpcpush(hpxyzsc(-0.103108,0.086449,1.009012));
-  hpcpush(hpxyzsc(-0.130880,0.100059,1.013480));
-  hpcpush(hpxyzsc(-0.157829,0.107491,1.018069));
-  hpcpush(hpxyzsc(-0.173912,0.106860,1.020620));
-  hpcpush(hpxyzsc(-0.191566,0.100397,1.023121));
-  hpcpush(hpxyzsc(-0.200633,0.095930,1.024430));
-  hpcpush(hpxyzsc(-0.216136,0.090593,1.027094));
-  hpcpush(hpxyzsc(-0.200642,0.111259,1.025980));
-  hpcpush(hpxyzsc(-0.173354,0.128719,1.023045));
-  hpcpush(hpxyzsc(-0.141916,0.144399,1.020290));
-  hpcpush(hpxyzsc(-0.106497,0.138938,1.015207));
-  hpcpush(hpxyzsc(-0.079427,0.124373,1.010830));
-  hpcpush(hpxyzsc(-0.053552,0.106563,1.007087));
-  hpcpush(hpxyzsc(-0.030995,0.078798,1.003579));
-  hpcpush(hpxyzsc(-0.024668,0.068596,1.002653));
-  hpcpush(hpxyzsc(-0.027285,0.085742,1.004040));
-  hpcpush(hpxyzsc(-0.033561,0.111171,1.006720));
-  hpcpush(hpxyzsc(-0.036750,0.137167,1.010032));
-  hpcpush(hpxyzsc(-0.035531,0.165577,1.014238));
-  hpcpush(hpxyzsc(-0.023882,0.199023,1.019892));
-  hpcpush(hpxyzsc(-0.002982,0.230118,1.026140));
-  hpcpush(hpxyzsc(0.021321,0.244715,1.029728));
-  hpcpush(hpxyzsc(0.012442,0.234213,1.027137));
-  hpcpush(hpxyzsc(-0.002073,0.208126,1.021431));
-  hpcpush(hpxyzsc(-0.005433,0.188040,1.017540));
-  hpcpush(hpxyzsc(-0.004352,0.170363,1.014417));
-  hpcpush(hpxyzsc(0.001158,0.155057,1.011951));
-  hpcpush(hpxyzsc(0.002408,0.141554,1.009972));
-  hpcpush(hpxyzsc(0.008798,0.125672,1.007904));
-  hpcpush(hpxyzsc(0.018292,0.110314,1.006232));
-  hpcpush(hpxyzsc(0.026174,0.100337,1.005362));
-  hpcpush(hpxyzsc(0.176687,0.297491,1.058168));
-  hpcpush(hpxyzsc(0.051236,0.033906,1.001886));
-  hpcpush(hpxyzsc(0.061446,0.038366,1.002620));
-  hpcpush(hpxyzsc(0.088968,0.039461,1.004725));
-  hpcpush(hpxyzsc(0.126421,0.046070,1.009012));
-  hpcpush(hpxyzsc(0.152094,0.063316,1.013480));
-  hpcpush(hpxyzsc(0.172004,0.082938,1.018069));
-  hpcpush(hpxyzsc(0.179499,0.097182,1.020620));
-  hpcpush(hpxyzsc(0.182729,0.115702,1.023121));
-  hpcpush(hpxyzsc(0.183395,0.125788,1.024430));
-  hpcpush(hpxyzsc(0.186524,0.141882,1.027094));
-  hpcpush(hpxyzsc(0.196674,0.118132,1.025980));
-  hpcpush(hpxyzsc(0.198151,0.085770,1.023045));
-  hpcpush(hpxyzsc(0.196011,0.050703,1.020290));
-  hpcpush(hpxyzsc(0.173572,0.022760,1.015207));
-  hpcpush(hpxyzsc(0.147423,0.006599,1.010830));
-  hpcpush(hpxyzsc(0.119062,-0.006904,1.007087));
-  hpcpush(hpxyzsc(0.083739,-0.012556,1.003579));
-  hpcpush(hpxyzsc(0.071740,-0.012935,1.002653));
-  hpcpush(hpxyzsc(0.087898,-0.019242,1.004040));
-  hpcpush(hpxyzsc(0.113057,-0.026521,1.006720));
-  hpcpush(hpxyzsc(0.137165,-0.036757,1.010032));
-  hpcpush(hpxyzsc(0.161159,-0.052018,1.014238));
-  hpcpush(hpxyzsc(0.184300,-0.078830,1.019892));
-  hpcpush(hpxyzsc(0.200779,-0.112477,1.026140));
-  hpcpush(hpxyzsc(0.201269,-0.140822,1.029728));
-  hpcpush(hpxyzsc(0.196613,-0.127882,1.027137));
-  hpcpush(hpxyzsc(0.181278,-0.102268,1.021431));
-  hpcpush(hpxyzsc(0.165564,-0.089315,1.017540));
-  hpcpush(hpxyzsc(0.149715,-0.081413,1.014417));
-  hpcpush(hpxyzsc(0.133704,-0.078531,1.011951));
-  hpcpush(hpxyzsc(0.121386,-0.072862,1.009972));
-  hpcpush(hpxyzsc(0.104436,-0.070455,1.007904));
-  hpcpush(hpxyzsc(0.086388,-0.070998,1.006232));
-  hpcpush(hpxyzsc(0.073808,-0.072835,1.005362));
-  hpcpush(hpxyzsc(0.169291,-0.301761,1.058168));
-  hpcpush(hpxyzsc(0.003745,-0.061325,1.001886));
-  hpcpush(hpxyzsc(0.002503,-0.072397,1.002620));
-  hpcpush(hpxyzsc(-0.010310,-0.096779,1.004725));
-  hpcpush(hpxyzsc(-0.023313,-0.132518,1.009012));
-  hpcpush(hpxyzsc(-0.021214,-0.163375,1.013480));
-  hpcpush(hpxyzsc(-0.014176,-0.190429,1.018069));
-  hpcpush(hpxyzsc(-0.005587,-0.204042,1.020620));
-  hpcpush(hpxyzsc(0.008837,-0.216099,1.023121));
-  hpcpush(hpxyzsc(0.017239,-0.221719,1.024430));
-  hpcpush(hpxyzsc(0.029612,-0.232476,1.027094));
-  hpcpush(hpxyzsc(0.003968,-0.229391,1.025980));
-  hpcpush(hpxyzsc(-0.024797,-0.214489,1.023045));
-  hpcpush(hpxyzsc(-0.054095,-0.195102,1.020290));
-  hpcpush(hpxyzsc(-0.067075,-0.161698,1.015207));
-  hpcpush(hpxyzsc(-0.067996,-0.130972,1.010830));
-  hpcpush(hpxyzsc(-0.065511,-0.099659,1.007087));
-  hpcpush(hpxyzsc(-0.052744,-0.066242,1.003579));
-  hpcpush(hpxyzsc(-0.047072,-0.055661,1.002653));
-  hpcpush(hpxyzsc(-0.060613,-0.066501,1.004040));
-  hpcpush(hpxyzsc(-0.079496,-0.084650,1.006720));
-  hpcpush(hpxyzsc(-0.100415,-0.100410,1.010032));
-  hpcpush(hpxyzsc(-0.125628,-0.113559,1.014238));
-  hpcpush(hpxyzsc(-0.160419,-0.120194,1.019892));
-  hpcpush(hpxyzsc(-0.197797,-0.117641,1.026140));
-  hpcpush(hpxyzsc(-0.222590,-0.103893,1.029728));
-  hpcpush(hpxyzsc(-0.209056,-0.106331,1.027137));
-  hpcpush(hpxyzsc(-0.179206,-0.105858,1.021431));
-  hpcpush(hpxyzsc(-0.160131,-0.098725,1.017540));
-  hpcpush(hpxyzsc(-0.145363,-0.088950,1.014417));
-  hpcpush(hpxyzsc(-0.134862,-0.076526,1.011951));
-  hpcpush(hpxyzsc(-0.123793,-0.068692,1.009972));
-  hpcpush(hpxyzsc(-0.113234,-0.055216,1.007904));
-  hpcpush(hpxyzsc(-0.104681,-0.039315,1.006232));
-  hpcpush(hpxyzsc(-0.099981,-0.027501,1.005362));
-  hpcpush(hpxyzsc(-0.345978,0.004270,1.058168));
-  
-  bshape(shStar, 21);
-  for(int t=0; t<84; t+=6) {
-    hpcpush(ddi(t,   shexf*.2) * C0);
-    hpcpush(ddi(t+3,   shexf*.6) * C0);
-    }
-
-  bshape(shDisk, 21);
-  for(int i=0; i<=84; i+=3)
-    hpcpush(ddi(i, crossf * .2) * C0);
-  
-  bshape(shRing, 21);
-  for(int i=0; i<=84; i+=3)
-    hpcpush(ddi(i, crossf * .25) * C0);
-  for(int i=84; i>=0; i--)
-    hpcpush(ddi(i, crossf * .30) * C0);
-  hpcpush(ddi(0, crossf * .25) * C0);
-  
-  bshape(shSpikedRing, 21);
-  for(int i=0; i<=84; i+=3)
-    hpcpush(ddi(i, crossf * .25) * C0);
-  for(int i=84; i>=0; i--)
-    hpcpush(ddi(i, crossf * (i&1?.35:.30)) * C0);
-  hpcpush(ddi(0, crossf * .25) * C0);
-  
-  bshape(shTargetRing, 21);
-  for(int i=0; i<=84; i+=3)
-    hpcpush(ddi(i, crossf * .25) * C0);
-  for(int i=84; i>=0; i--)
-    hpcpush(ddi(i, crossf * (i >= 36 && i <= 48 ?.36:.30)) * C0);
-  hpcpush(ddi(0, crossf * .25) * C0);
-  
-  bshape(shSawRing, 21);
-  for(int i=0; i<=84; i+=3)
-    hpcpush(ddi(i, crossf * .25) * C0);
-  for(int i=84; i>=0; i--)
-    hpcpush(ddi(i, crossf * (.3 + (i&3) * .02)) * C0);
-  hpcpush(ddi(0, crossf * .25) * C0);
-  
-  bshape(shGearRing, 21);
-  for(int i=0; i<=84; i+=3)
-    hpcpush(ddi(i, crossf * .25) * C0);
-  for(int i=84; i>=0; i--)
-    hpcpush(ddi(i, crossf * ((i%6<3)?.3:.36)) * C0);
-  hpcpush(ddi(0, crossf * .25) * C0);
-  
-  bshape(shPeaceRing, 21);
-  for(int i=0; i<=84; i+=3)
-    hpcpush(ddi(i, crossf * .25) * C0);
-  for(int i=84; i>=0; i--)
-    hpcpush(ddi(i, crossf * (i%28 < 7?.36 : .3)) * C0);
-  hpcpush(ddi(0, crossf * .25) * C0);
-  
-  bshape(shHeptaRing, 21);
-  for(int i=0; i<=84; i+=3)
-    hpcpush(ddi(i, crossf * .25) * C0);
-  for(int i=84; i>=0; i--)
-    hpcpush(ddi(i, crossf * (i%12 < 3?.4 : .27)) * C0);
-  hpcpush(ddi(0, crossf * .25) * C0);
-  
-  bshape(shCompass1, 21);
-  for(int i=0; i<=84; i+=3)
-    hpcpush(ddi(i, crossf * .35) * C0);
-  
-  bshape(shCompass2, 22);
-  for(int i=0; i<=84; i+=3)
-    hpcpush(ddi(i, crossf * .3) * C0);
-  
-  bshape(shCompass3, 23);
-  hpcpush(ddi(0, crossf * .29) * C0);
-  hpcpush(ddi(21, crossf * .04) * C0);
-  hpcpush(ddi(-21, crossf * .04) * C0);
-  
-  bshape(shNecro, 21);
-    hpcpush(hpxyzsc(-0.280120,0.002558,1.038496));
-  hpcpush(hpxyzsc(-0.252806,0.037921,1.032157));
-  hpcpush(hpxyzsc(-0.063204,0.010733,1.002053));
-  hpcpush(hpxyzsc(0.000000,0.061995,1.001920));
-  hpcpush(hpxyzsc(0.057203,0.013109,1.001721));
-  hpcpush(hpxyzsc(0.155766,0.023121,1.012323));
-  hpcpush(hpxyzsc(0.174234,0.055215,1.016566));
-  hpcpush(hpxyzsc(0.256152,0.057064,1.033862));
-  hpcpush(hpxyzsc(0.286380,0.030821,1.040655));
-  hpcpush(hpxyzsc(0.251170,0.025243,1.031370));
-  hpcpush(hpxyzsc(0.227431,0.033740,1.026091));
-  hpcpush(hpxyzsc(0.210837,0.017363,1.022132));
-  hpcpush(hpxyzsc(0.227179,0.007489,1.025508));
-  hpcpush(hpxyzsc(0.245429,0.020138,1.029874));
-  hpcpush(hpxyzsc(0.286335,0.028248,1.040570));
-  hpcpush(hpxyzsc(0.289108,0.001285,1.040954));
-  hpcpush(hpxyzsc(0.189404,0.003690,1.017786));
-  hpcpush(hpxyzsc(0.186892,0.025821,1.017642));
-  hpcpush(hpxyzsc(0.176349,0.017145,1.015575));
-  hpcpush(hpxyzsc(0.184160,0.011050,1.016876));
-  hpcpush(hpxyzsc(0.177605,0.006124,1.015668));
-  hpcpush(hpxyzsc(0.184138,0.001228,1.016813));
-  hpcpush(hpxyzsc(0.184138,-0.001228,1.016813));
-  hpcpush(hpxyzsc(0.177605,-0.006124,1.015668));
-  hpcpush(hpxyzsc(0.184160,-0.011050,1.016876));
-  hpcpush(hpxyzsc(0.176349,-0.017145,1.015575));
-  hpcpush(hpxyzsc(0.186892,-0.025821,1.017642));
-  hpcpush(hpxyzsc(0.189404,-0.003690,1.017786));
-  hpcpush(hpxyzsc(0.289108,-0.001285,1.040954));
-  hpcpush(hpxyzsc(0.286335,-0.028248,1.040570));
-  hpcpush(hpxyzsc(0.245429,-0.020138,1.029874));
-  hpcpush(hpxyzsc(0.227179,-0.007489,1.025508));
-  hpcpush(hpxyzsc(0.210837,-0.017363,1.022132));
-  hpcpush(hpxyzsc(0.227431,-0.033740,1.026091));
-  hpcpush(hpxyzsc(0.251170,-0.025243,1.031370));
-  hpcpush(hpxyzsc(0.286380,-0.030821,1.040655));
-  hpcpush(hpxyzsc(0.256152,-0.057064,1.033862));
-  hpcpush(hpxyzsc(0.174234,-0.055215,1.016566));
-  hpcpush(hpxyzsc(0.155766,-0.023121,1.012323));
-  hpcpush(hpxyzsc(0.057203,-0.013109,1.001721));
-  hpcpush(hpxyzsc(0.000000,-0.061995,1.001920));
-  hpcpush(hpxyzsc(-0.063204,-0.010733,1.002053));
-  hpcpush(hpxyzsc(-0.252806,-0.037921,1.032157));
-  hpcpush(hpxyzsc(-0.280120,-0.002558,1.038496));
-  hpcpush(hpxyzsc(-0.280120,0.002558,1.038496));
-
-  bshape(shFigurine, 21);
-  hpcpush(hpxyzsc(-0.105008,0.082180,1.008851));
-  hpcpush(hpxyzsc(-0.018191,0.040930,1.001003));
-  hpcpush(hpxyzsc(-0.011407,0.123195,1.007625));
-  hpcpush(hpxyzsc(0.041081,0.123243,1.008403));
-  hpcpush(hpxyzsc(0.040941,0.038667,1.001584));
-  hpcpush(hpxyzsc(0.070555,0.027312,1.002858));
-  hpcpush(hpxyzsc(0.086601,0.059253,1.005490));
-  hpcpush(hpxyzsc(0.134876,0.073153,1.011703));
-  hpcpush(hpxyzsc(0.190524,0.064273,1.020015));
-  hpcpush(hpxyzsc(0.211472,0.036778,1.022777));
-  hpcpush(hpxyzsc(0.211472,-0.036778,1.022777));
-  hpcpush(hpxyzsc(0.190524,-0.064273,1.020015));
-  hpcpush(hpxyzsc(0.134876,-0.073153,1.011703));
-  hpcpush(hpxyzsc(0.086601,-0.059253,1.005490));
-  hpcpush(hpxyzsc(0.070555,-0.027312,1.002858));
-  hpcpush(hpxyzsc(0.040941,-0.038667,1.001584));
-  hpcpush(hpxyzsc(0.041081,-0.123243,1.008403));
-  hpcpush(hpxyzsc(-0.011407,-0.123195,1.007625));
-  hpcpush(hpxyzsc(-0.018191,-0.040930,1.001003));
-  hpcpush(hpxyzsc(-0.105008,-0.082180,1.008851));
-  hpcpush(hpxyzsc(-0.105008,0.082180,1.008851));
-
-  bshape(shStatue, 21);
-  hpcpush(hpxyzsc(-0.047663,0.032172,1.001652));
-  hpcpush(hpxyzsc(-0.047670,0.034561,1.001732));
-  hpcpush(hpxyzsc(-0.054881,0.039371,1.002278));
-  hpcpush(hpxyzsc(-0.080231,0.043109,1.004139));
-  hpcpush(hpxyzsc(-0.103440,0.045706,1.006374));
-  hpcpush(hpxyzsc(-0.148323,0.042552,1.011835));
-  hpcpush(hpxyzsc(-0.188278,0.031995,1.018073));
-  hpcpush(hpxyzsc(-0.239693,0.002510,1.028328));
-  hpcpush(hpxyzsc(-0.257087,-0.036727,1.033171));
-  hpcpush(hpxyzsc(-0.283314,-0.026921,1.039708));
-  hpcpush(hpxyzsc(-0.290985,0.034764,1.042056));
-  hpcpush(hpxyzsc(-0.262852,0.081663,1.037189));
-  hpcpush(hpxyzsc(-0.198209,0.104714,1.024818));
-  hpcpush(hpxyzsc(-0.140842,0.107775,1.015604));
-  hpcpush(hpxyzsc(-0.088218,0.099094,1.008763));
-  hpcpush(hpxyzsc(-0.057645,0.088869,1.005595));
-  hpcpush(hpxyzsc(-0.035877,0.075342,1.003476));
-  hpcpush(hpxyzsc(-0.023854,0.060828,1.002132));
-  hpcpush(hpxyzsc(-0.022642,0.053625,1.001693));
-  hpcpush(hpxyzsc(-0.011901,0.044034,1.001040));
-  hpcpush(hpxyzsc(-0.007144,0.050008,1.001275));
-  hpcpush(hpxyzsc(-0.010953,0.056452,1.001652));
-  hpcpush(hpxyzsc(-0.009270,0.058147,1.001732));
-  hpcpush(hpxyzsc(-0.010967,0.066646,1.002278));
-  hpcpush(hpxyzsc(-0.026249,0.087215,1.004139));
-  hpcpush(hpxyzsc(-0.040824,0.105462,1.006374));
-  hpcpush(hpxyzsc(-0.074791,0.134969,1.011835));
-  hpcpush(hpxyzsc(-0.110509,0.155757,1.018073));
-  hpcpush(hpxyzsc(-0.167714,0.171263,1.028328));
-  hpcpush(hpxyzsc(-0.207758,0.155818,1.033171));
-  hpcpush(hpxyzsc(-0.219370,0.181297,1.039708));
-  hpcpush(hpxyzsc(-0.181176,0.230339,1.042056));
-  hpcpush(hpxyzsc(-0.128120,0.243609,1.037189));
-  hpcpush(hpxyzsc(-0.066111,0.214199,1.024818));
-  hpcpush(hpxyzsc(-0.023382,0.175799,1.015604));
-  hpcpush(hpxyzsc(0.007691,0.132449,1.008763));
-  hpcpush(hpxyzsc(0.022079,0.103601,1.005595));
-  hpcpush(hpxyzsc(0.027906,0.078644,1.003476));
-  hpcpush(hpxyzsc(0.026145,0.059880,1.002132));
-  hpcpush(hpxyzsc(0.021909,0.053929,1.001693));
-  hpcpush(hpxyzsc(0.022722,0.039552,1.001040));
-  hpcpush(hpxyzsc(0.030310,0.040413,1.001275));
-  hpcpush(hpxyzsc(0.032172,0.047663,1.001652));
-  hpcpush(hpxyzsc(0.034561,0.047670,1.001732));
-  hpcpush(hpxyzsc(0.039371,0.054881,1.002278));
-  hpcpush(hpxyzsc(0.043109,0.080231,1.004139));
-  hpcpush(hpxyzsc(0.045706,0.103440,1.006374));
-  hpcpush(hpxyzsc(0.042552,0.148323,1.011835));
-  hpcpush(hpxyzsc(0.031995,0.188278,1.018073));
-  hpcpush(hpxyzsc(0.002510,0.239693,1.028328));
-  hpcpush(hpxyzsc(-0.036727,0.257087,1.033171));
-  hpcpush(hpxyzsc(-0.026921,0.283314,1.039708));
-  hpcpush(hpxyzsc(0.034764,0.290985,1.042056));
-  hpcpush(hpxyzsc(0.081663,0.262852,1.037189));
-  hpcpush(hpxyzsc(0.104714,0.198209,1.024818));
-  hpcpush(hpxyzsc(0.107775,0.140842,1.015604));
-  hpcpush(hpxyzsc(0.099094,0.088218,1.008763));
-  hpcpush(hpxyzsc(0.088869,0.057645,1.005595));
-  hpcpush(hpxyzsc(0.075342,0.035877,1.003476));
-  hpcpush(hpxyzsc(0.060828,0.023854,1.002132));
-  hpcpush(hpxyzsc(0.053625,0.022642,1.001693));
-  hpcpush(hpxyzsc(0.044034,0.011901,1.001040));
-  hpcpush(hpxyzsc(0.050008,0.007144,1.001275));
-  hpcpush(hpxyzsc(0.056452,0.010953,1.001652));
-  hpcpush(hpxyzsc(0.058147,0.009270,1.001732));
-  hpcpush(hpxyzsc(0.066646,0.010967,1.002278));
-  hpcpush(hpxyzsc(0.087215,0.026249,1.004139));
-  hpcpush(hpxyzsc(0.105462,0.040824,1.006374));
-  hpcpush(hpxyzsc(0.134969,0.074791,1.011835));
-  hpcpush(hpxyzsc(0.155757,0.110509,1.018073));
-  hpcpush(hpxyzsc(0.171263,0.167714,1.028328));
-  hpcpush(hpxyzsc(0.155818,0.207758,1.033171));
-  hpcpush(hpxyzsc(0.181297,0.219370,1.039708));
-  hpcpush(hpxyzsc(0.230339,0.181176,1.042056));
-  hpcpush(hpxyzsc(0.243609,0.128120,1.037189));
-  hpcpush(hpxyzsc(0.214199,0.066111,1.024818));
-  hpcpush(hpxyzsc(0.175799,0.023382,1.015604));
-  hpcpush(hpxyzsc(0.132449,-0.007691,1.008763));
-  hpcpush(hpxyzsc(0.103601,-0.022079,1.005595));
-  hpcpush(hpxyzsc(0.078644,-0.027906,1.003476));
-  hpcpush(hpxyzsc(0.059880,-0.026145,1.002132));
-  hpcpush(hpxyzsc(0.053929,-0.021909,1.001693));
-  hpcpush(hpxyzsc(0.039552,-0.022722,1.001040));
-  hpcpush(hpxyzsc(0.040413,-0.030310,1.001275));
-  hpcpush(hpxyzsc(0.047663,-0.032172,1.001652));
-  hpcpush(hpxyzsc(0.047670,-0.034561,1.001732));
-  hpcpush(hpxyzsc(0.054881,-0.039371,1.002278));
-  hpcpush(hpxyzsc(0.080231,-0.043109,1.004139));
-  hpcpush(hpxyzsc(0.103440,-0.045706,1.006374));
-  hpcpush(hpxyzsc(0.148323,-0.042552,1.011835));
-  hpcpush(hpxyzsc(0.188278,-0.031995,1.018073));
-  hpcpush(hpxyzsc(0.239693,-0.002510,1.028328));
-  hpcpush(hpxyzsc(0.257087,0.036727,1.033171));
-  hpcpush(hpxyzsc(0.283314,0.026921,1.039708));
-  hpcpush(hpxyzsc(0.290985,-0.034764,1.042056));
-  hpcpush(hpxyzsc(0.262852,-0.081663,1.037189));
-  hpcpush(hpxyzsc(0.198209,-0.104714,1.024818));
-  hpcpush(hpxyzsc(0.140842,-0.107775,1.015604));
-  hpcpush(hpxyzsc(0.088218,-0.099094,1.008763));
-  hpcpush(hpxyzsc(0.057645,-0.088869,1.005595));
-  hpcpush(hpxyzsc(0.035877,-0.075342,1.003476));
-  hpcpush(hpxyzsc(0.023854,-0.060828,1.002132));
-  hpcpush(hpxyzsc(0.022642,-0.053625,1.001693));
-  hpcpush(hpxyzsc(0.011901,-0.044034,1.001040));
-  hpcpush(hpxyzsc(0.007144,-0.050008,1.001275));
-  hpcpush(hpxyzsc(0.010953,-0.056452,1.001652));
-  hpcpush(hpxyzsc(0.009270,-0.058147,1.001732));
-  hpcpush(hpxyzsc(0.010967,-0.066646,1.002278));
-  hpcpush(hpxyzsc(0.026249,-0.087215,1.004139));
-  hpcpush(hpxyzsc(0.040824,-0.105462,1.006374));
-  hpcpush(hpxyzsc(0.074791,-0.134969,1.011835));
-  hpcpush(hpxyzsc(0.110509,-0.155757,1.018073));
-  hpcpush(hpxyzsc(0.167714,-0.171263,1.028328));
-  hpcpush(hpxyzsc(0.207758,-0.155818,1.033171));
-  hpcpush(hpxyzsc(0.219370,-0.181297,1.039708));
-  hpcpush(hpxyzsc(0.181176,-0.230339,1.042056));
-  hpcpush(hpxyzsc(0.128120,-0.243609,1.037189));
-  hpcpush(hpxyzsc(0.066111,-0.214199,1.024818));
-  hpcpush(hpxyzsc(0.023382,-0.175799,1.015604));
-  hpcpush(hpxyzsc(-0.007691,-0.132449,1.008763));
-  hpcpush(hpxyzsc(-0.022079,-0.103601,1.005595));
-  hpcpush(hpxyzsc(-0.027906,-0.078644,1.003476));
-  hpcpush(hpxyzsc(-0.026145,-0.059880,1.002132));
-  hpcpush(hpxyzsc(-0.021909,-0.053929,1.001693));
-  hpcpush(hpxyzsc(-0.022722,-0.039552,1.001040));
-  hpcpush(hpxyzsc(-0.030310,-0.040413,1.001275));
-  hpcpush(hpxyzsc(-0.032172,-0.047663,1.001652));
-  hpcpush(hpxyzsc(-0.034561,-0.047670,1.001732));
-  hpcpush(hpxyzsc(-0.039371,-0.054881,1.002278));
-  hpcpush(hpxyzsc(-0.043109,-0.080231,1.004139));
-  hpcpush(hpxyzsc(-0.045706,-0.103440,1.006374));
-  hpcpush(hpxyzsc(-0.042552,-0.148323,1.011835));
-  hpcpush(hpxyzsc(-0.031995,-0.188278,1.018073));
-  hpcpush(hpxyzsc(-0.002510,-0.239693,1.028328));
-  hpcpush(hpxyzsc(0.036727,-0.257087,1.033171));
-  hpcpush(hpxyzsc(0.026921,-0.283314,1.039708));
-  hpcpush(hpxyzsc(-0.034764,-0.290985,1.042056));
-  hpcpush(hpxyzsc(-0.081663,-0.262852,1.037189));
-  hpcpush(hpxyzsc(-0.104714,-0.198209,1.024818));
-  hpcpush(hpxyzsc(-0.107775,-0.140842,1.015604));
-  hpcpush(hpxyzsc(-0.099094,-0.088218,1.008763));
-  hpcpush(hpxyzsc(-0.088869,-0.057645,1.005595));
-  hpcpush(hpxyzsc(-0.075342,-0.035877,1.003476));
-  hpcpush(hpxyzsc(-0.060828,-0.023854,1.002132));
-  hpcpush(hpxyzsc(-0.053625,-0.022642,1.001693));
-  hpcpush(hpxyzsc(-0.044034,-0.011901,1.001040));
-  hpcpush(hpxyzsc(-0.050008,-0.007144,1.001275));
-  hpcpush(hpxyzsc(-0.056452,-0.010953,1.001652));
-  hpcpush(hpxyzsc(-0.058147,-0.009270,1.001732));
-  hpcpush(hpxyzsc(-0.066646,-0.010967,1.002278));
-  hpcpush(hpxyzsc(-0.087215,-0.026249,1.004139));
-  hpcpush(hpxyzsc(-0.105462,-0.040824,1.006374));
-  hpcpush(hpxyzsc(-0.134969,-0.074791,1.011835));
-  hpcpush(hpxyzsc(-0.155757,-0.110509,1.018073));
-  hpcpush(hpxyzsc(-0.171263,-0.167714,1.028328));
-  hpcpush(hpxyzsc(-0.155818,-0.207758,1.033171));
-  hpcpush(hpxyzsc(-0.181297,-0.219370,1.039708));
-  hpcpush(hpxyzsc(-0.230339,-0.181176,1.042056));
-  hpcpush(hpxyzsc(-0.243609,-0.128120,1.037189));
-  hpcpush(hpxyzsc(-0.214199,-0.066111,1.024818));
-  hpcpush(hpxyzsc(-0.175799,-0.023382,1.015604));
-  hpcpush(hpxyzsc(-0.132449,0.007691,1.008763));
-  hpcpush(hpxyzsc(-0.103601,0.022079,1.005595));
-  hpcpush(hpxyzsc(-0.078644,0.027906,1.003476));
-  hpcpush(hpxyzsc(-0.059880,0.026145,1.002132));
-  hpcpush(hpxyzsc(-0.053929,0.021909,1.001693));
-  hpcpush(hpxyzsc(-0.039552,0.022722,1.001040));
-  hpcpush(hpxyzsc(-0.040413,0.030310,1.001275));
-  hpcpush(hpxyzsc(-0.047663,0.032172,1.001652));
-  
-  bshape(shBook, 21);
-  hpcpush(hpxyzsc(-0.123296,-0.203475,1.027912));
-  hpcpush(hpxyzsc( 0.123296,-0.203475,1.027912));
-  hpcpush(hpxyzsc( 0.123296, 0.203475,1.027912));
-  hpcpush(hpxyzsc(-0.123296, 0.203475,1.027912));
-  hpcpush(hpxyzsc(-0.123296,-0.203475,1.027912));
-  
-  bshape(shBookCover, 22);
-  hpcpush(hpxyzsc(0.018255,-0.016768,1.000307));
-  hpcpush(hpxyzsc(0.010865,-0.065298,1.002189));
-  hpcpush(hpxyzsc(0.044639,-0.075918,1.003871));
-  hpcpush(hpxyzsc(0.027526,-0.106818,1.006065));
-  hpcpush(hpxyzsc(-0.029540,-0.088203,1.004317));
-  hpcpush(hpxyzsc(-0.023649,-0.007425,1.000307));
-  hpcpush(hpxyzsc(-0.061983,0.023240,1.002189));
-  hpcpush(hpxyzsc(-0.088066,-0.000700,1.003871));
-  hpcpush(hpxyzsc(-0.106270,0.029571,1.006065));
-  hpcpush(hpxyzsc(-0.061616,0.069684,1.004317));
-  hpcpush(hpxyzsc(0.005394,0.024193,1.000307));
-  hpcpush(hpxyzsc(0.051117,0.042059,1.002189));
-  hpcpush(hpxyzsc(0.043427,0.076618,1.003871));
-  hpcpush(hpxyzsc(0.078744,0.077247,1.006065));
-  hpcpush(hpxyzsc(0.091156,0.018519,1.004317));
-  hpcpush(hpxyzsc(0.018255,-0.016768,1.000307));
-  
-  bshape(shGrail, 21);
-  hpcpush(hpxyzsc(-0.154537,0.122394,1.019246));
-  hpcpush(hpxyzsc(-0.142973,0.123252,1.017660));
-  hpcpush(hpxyzsc(-0.138296,0.095461,1.014021));
-  hpcpush(hpxyzsc(-0.123926,0.072898,1.010283));
-  hpcpush(hpxyzsc(-0.107625,0.065300,1.007892));
-  hpcpush(hpxyzsc(-0.067188,0.057589,1.003908));
-  hpcpush(hpxyzsc(-0.040655,0.052612,1.002208));
-  hpcpush(hpxyzsc(-0.037133,0.069475,1.003098));
-  hpcpush(hpxyzsc(-0.021657,0.101065,1.005327));
-  hpcpush(hpxyzsc(0.003631,0.129510,1.008358));
-  hpcpush(hpxyzsc(0.040272,0.153766,1.012554));
-  hpcpush(hpxyzsc(0.087340,0.161149,1.016660));
-  hpcpush(hpxyzsc(0.127500,0.154732,1.019901));
-  hpcpush(hpxyzsc(0.161853,0.141932,1.022908));
-  hpcpush(hpxyzsc(0.184896,0.152194,1.028275));
-  hpcpush(hpxyzsc(0.189249,0.157707,1.029896));
-  hpcpush(hpxyzsc(0.189249,-0.157707,1.029896));
-  hpcpush(hpxyzsc(0.184896,-0.152194,1.028275));
-  hpcpush(hpxyzsc(0.161853,-0.141932,1.022908));
-  hpcpush(hpxyzsc(0.127500,-0.154732,1.019901));
-  hpcpush(hpxyzsc(0.087340,-0.161149,1.016660));
-  hpcpush(hpxyzsc(0.040272,-0.153766,1.012554));
-  hpcpush(hpxyzsc(0.003631,-0.129510,1.008358));
-  hpcpush(hpxyzsc(-0.021657,-0.101065,1.005327));
-  hpcpush(hpxyzsc(-0.037133,-0.069475,1.003098));
-  hpcpush(hpxyzsc(-0.040655,-0.052612,1.002208));
-  hpcpush(hpxyzsc(-0.067188,-0.057589,1.003908));
-  hpcpush(hpxyzsc(-0.107625,-0.065300,1.007892));
-  hpcpush(hpxyzsc(-0.123926,-0.072898,1.010283));
-  hpcpush(hpxyzsc(-0.138296,-0.095461,1.014021));
-  hpcpush(hpxyzsc(-0.142973,-0.123252,1.017660));
-  hpcpush(hpxyzsc(-0.154537,-0.122394,1.019246));
-  hpcpush(hpxyzsc(-0.154537,0.122394,1.019246));  
-  
-  bshape(shGun, 21);
-  hpcpush(hpxyzsc(-0.139431,-0.044738,1.010664));
-  hpcpush(hpxyzsc(-0.115996,-0.007279,1.006731));
-  hpcpush(hpxyzsc(-0.057715,-0.031033,1.002145));
-  hpcpush(hpxyzsc(-0.045084,-0.014605,1.001122));
-  hpcpush(hpxyzsc(-0.066569,-0.008222,1.002247));
-  hpcpush(hpxyzsc(-0.070986,0.003205,1.002521));
-  hpcpush(hpxyzsc(-0.070744,0.009636,1.002546));
-  hpcpush(hpxyzsc(-0.066988,0.002251,1.002244));
-  hpcpush(hpxyzsc(-0.058525,-0.008510,1.001747));
-  hpcpush(hpxyzsc(-0.045683,-0.008971,1.001083));
-  hpcpush(hpxyzsc(-0.043249,-0.008257,1.000969));
-  hpcpush(hpxyzsc(-0.031506,0.005726,1.000513));
-  hpcpush(hpxyzsc(-0.020012,0.013281,1.000288));
-  hpcpush(hpxyzsc(0.001173,0.003679,1.000007));
-  hpcpush(hpxyzsc(0.012717,-0.007112,1.000106));
-  hpcpush(hpxyzsc(0.093390,0.118437,1.011311));
-  hpcpush(hpxyzsc(0.127945,0.108856,1.014012));
-  hpcpush(hpxyzsc(-0.004226,-0.087963,1.003870));
-  hpcpush(hpxyzsc(-0.020241,-0.089138,1.004169));
-  hpcpush(hpxyzsc(-0.029416,-0.102578,1.005678));
-  hpcpush(hpxyzsc(-0.027650,-0.127629,1.008491));
-  hpcpush(hpxyzsc(-0.035592,-0.124229,1.008315));
-  hpcpush(hpxyzsc(-0.041465,-0.103099,1.006155));
-  hpcpush(hpxyzsc(-0.041059,-0.088601,1.004757));
-  hpcpush(hpxyzsc(-0.139431,-0.044738,1.010664));
-  
-  bshape(shKey, 21);
-  hpcpush(hpxyzsc(-0.280212,-0.017913,1.038672));
-  hpcpush(hpxyzsc(-0.279685,0.060299,1.040125));
-  hpcpush(hpxyzsc(-0.258790,0.115302,1.039359));
-  hpcpush(hpxyzsc(-0.228319,0.104699,1.031063));
-  hpcpush(hpxyzsc(-0.239075,0.056623,1.029739));
-  hpcpush(hpxyzsc(-0.213944,0.046023,1.023665));
-  hpcpush(hpxyzsc(-0.200310,0.089579,1.023791));
-  hpcpush(hpxyzsc(-0.168273,0.078609,1.017101));
-  hpcpush(hpxyzsc(-0.179201,0.040504,1.016737));
-  hpcpush(hpxyzsc(-0.150719,0.029171,1.011715));
-  hpcpush(hpxyzsc(-0.146064,0.060860,1.012442));
-  hpcpush(hpxyzsc(-0.115859,0.053102,1.008089));
-  hpcpush(hpxyzsc(-0.119288,0.019279,1.007274));
-  hpcpush(hpxyzsc(-0.087371,0.011969,1.003881));
-  hpcpush(hpxyzsc(-0.080285,0.050328,1.004479));
-  hpcpush(hpxyzsc(-0.068304,0.065908,1.004495));
-  hpcpush(hpxyzsc(-0.052728,0.079091,1.004508));
-  hpcpush(hpxyzsc(-0.033525,0.083811,1.004066));
-  hpcpush(hpxyzsc(-0.007181,0.087363,1.003835));
-  hpcpush(hpxyzsc(0.025157,0.089847,1.004343));
-  hpcpush(hpxyzsc(0.044329,0.082667,1.004390));
-  hpcpush(hpxyzsc(0.061077,0.068263,1.004186));
-  hpcpush(hpxyzsc(0.074262,0.055098,1.004266));
-  hpcpush(hpxyzsc(0.088682,0.034754,1.004526));
-  hpcpush(hpxyzsc(0.093450,0.008387,1.004392));
-  hpcpush(hpxyzsc(0.092228,-0.005989,1.004262));
-  hpcpush(hpxyzsc(0.092278,-0.023968,1.004535));
-  hpcpush(hpxyzsc(0.085107,-0.045550,1.004648));
-  hpcpush(hpxyzsc(0.070661,-0.058685,1.004210));
-  hpcpush(hpxyzsc(0.045297,-0.040529,1.001846));
-  hpcpush(hpxyzsc(0.057205,-0.014301,1.001737));
-  hpcpush(hpxyzsc(0.057207,0.015494,1.001755));
-  hpcpush(hpxyzsc(0.041704,0.039321,1.001641));
-  hpcpush(hpxyzsc(0.023823,0.048837,1.001475));
-  hpcpush(hpxyzsc(0.003575,0.058394,1.001710));
-  hpcpush(hpxyzsc(-0.021441,0.050029,1.001480));
-  hpcpush(hpxyzsc(-0.047692,0.040538,1.001957));
-  hpcpush(hpxyzsc(-0.054813,0.017874,1.001661));
-  hpcpush(hpxyzsc(-0.054802,-0.010722,1.001558));
-  hpcpush(hpxyzsc(-0.036924,-0.039306,1.001453));
-  hpcpush(hpxyzsc(-0.020254,-0.052421,1.001578));
-  hpcpush(hpxyzsc(0.011915,-0.056002,1.001638));
-  hpcpush(hpxyzsc(0.034561,-0.047670,1.001732));
-  hpcpush(hpxyzsc(0.045297,-0.040529,1.001846));
-  hpcpush(hpxyzsc(0.070661,-0.058685,1.004210));
-  hpcpush(hpxyzsc(0.055051,-0.068215,1.003835));
-  hpcpush(hpxyzsc(0.033505,-0.080172,1.003768));
-  hpcpush(hpxyzsc(0.011971,-0.088587,1.003988));
-  hpcpush(hpxyzsc(-0.010772,-0.087369,1.003867));
-  hpcpush(hpxyzsc(-0.035904,-0.080185,1.003852));
-  hpcpush(hpxyzsc(-0.061039,-0.063432,1.003867));
-  hpcpush(hpxyzsc(-0.071750,-0.041854,1.003444));
-  hpcpush(hpxyzsc(-0.082525,-0.015548,1.003520));
-  hpcpush(hpxyzsc(-0.280212,-0.017913,1.038672));
-  hpcpush(hpxyzsc(-0.280212,-0.017913,1.038672));
-
-  for(int i=1; i<=3; i++) for(int j=0; j<2; j++) {
-    zoomShape(shDesertFloor[j], shRedRockFloor[i-1][j], 1 - .1 * i, 11+i);
-    }
-    
-  // monsters
-  
-  bshape(shTentacleX, 31);
-  drawTentacle(shTentacleX, crossf * .25, crossf * .1, 10);
-
-  bshape(shBranch, 32);
-  hpcpush(ddi(21, crossf/5) * C0);
-  hpcpush(ddi(21, -crossf/5) * C0);
-  hpcpush(ddi(21, -crossf/5) * ddi(0, crossf) * C0);
-  hpcpush(ddi(21, crossf/5) * ddi(0, crossf) * C0);
-  
-  bshape(shIBranch, 32);
-  drawTentacle(shIBranch, crossf * .1, crossf * .2, 5);
-
-  bshape(shTentacle, 32);
-  drawTentacle(shTentacle, crossf * .2, crossf * .1, 10);
-  
-  copyshape(shJoint, shDisk, 33);
-
-  bshape(shGhost, 33);
-  hpcpush(hpxyzsc(-0.312167,0.001301,1.047592));
-  hpcpush(hpxyzsc(-0.185499,0.015970,1.017185));
-  hpcpush(hpxyzsc(-0.273136,0.038290,1.037338));
-  hpcpush(hpxyzsc(-0.184484,0.043046,1.017786));
-  hpcpush(hpxyzsc(-0.296331,0.093578,1.047172));
-  hpcpush(hpxyzsc(-0.174561,0.070070,1.017537));
-  hpcpush(hpxyzsc(-0.222751,0.104454,1.029820));
-  hpcpush(hpxyzsc(-0.162371,0.098407,1.017864));
-  hpcpush(hpxyzsc(-0.272077,0.156217,1.048060));
-  hpcpush(hpxyzsc(-0.140182,0.126656,1.017690));
-  hpcpush(hpxyzsc(-0.161729,0.148045,1.023755));
-  hpcpush(hpxyzsc(-0.119271,0.146323,1.017662));
-  hpcpush(hpxyzsc(-0.231927,0.213686,1.048548));
-  hpcpush(hpxyzsc(-0.001244,0.218928,1.023685));
-  hpcpush(hpxyzsc(0.016184,0.220354,1.024118));
-  hpcpush(hpxyzsc(0.031094,0.216414,1.023622));
-  hpcpush(hpxyzsc(0.045998,0.212585,1.023381));
-  hpcpush(hpxyzsc(0.064748,0.211675,1.024206));
-  hpcpush(hpxyzsc(0.079530,0.201310,1.023157));
-  hpcpush(hpxyzsc(0.094597,0.199151,1.024016));
-  hpcpush(hpxyzsc(0.110770,0.190424,1.023978));
-  hpcpush(hpxyzsc(0.123174,0.181651,1.023801));
-  hpcpush(hpxyzsc(0.132996,0.171528,1.023284));
-  hpcpush(hpxyzsc(0.149284,0.160480,1.023738));
-  hpcpush(hpxyzsc(0.156499,0.147805,1.022907));
-  hpcpush(hpxyzsc(0.171645,0.135575,1.023642));
-  hpcpush(hpxyzsc(0.180157,0.119276,1.023075));
-  hpcpush(hpxyzsc(0.188931,0.106895,1.023290));
-  hpcpush(hpxyzsc(0.197759,0.093283,1.023626));
-  hpcpush(hpxyzsc(0.201351,0.080789,1.023264));
-  hpcpush(hpxyzsc(0.209030,0.067188,1.023820));
-  hpcpush(hpxyzsc(0.212718,0.052246,1.023708));
-  hpcpush(hpxyzsc(0.215145,0.037308,1.023562));
-  hpcpush(hpxyzsc(0.217714,0.026126,1.023759));
-  hpcpush(hpxyzsc(0.217612,0.014922,1.023512));
-  hpcpush(hpxyzsc(0.217612,-0.014922,1.023512));
-  hpcpush(hpxyzsc(0.217714,-0.026126,1.023759));
-  hpcpush(hpxyzsc(0.215145,-0.037308,1.023562));
-  hpcpush(hpxyzsc(0.212718,-0.052246,1.023708));
-  hpcpush(hpxyzsc(0.209030,-0.067188,1.023820));
-  hpcpush(hpxyzsc(0.201351,-0.080789,1.023264));
-  hpcpush(hpxyzsc(0.197759,-0.093283,1.023626));
-  hpcpush(hpxyzsc(0.188931,-0.106895,1.023290));
-  hpcpush(hpxyzsc(0.180157,-0.119276,1.023075));
-  hpcpush(hpxyzsc(0.171645,-0.135575,1.023642));
-  hpcpush(hpxyzsc(0.156499,-0.147805,1.022907));
-  hpcpush(hpxyzsc(0.149284,-0.160480,1.023738));
-  hpcpush(hpxyzsc(0.132996,-0.171528,1.023284));
-  hpcpush(hpxyzsc(0.123174,-0.181651,1.023801));
-  hpcpush(hpxyzsc(0.110770,-0.190424,1.023978));
-  hpcpush(hpxyzsc(0.094597,-0.199151,1.024016));
-  hpcpush(hpxyzsc(0.079530,-0.201310,1.023157));
-  hpcpush(hpxyzsc(0.064748,-0.211675,1.024206));
-  hpcpush(hpxyzsc(0.045998,-0.212585,1.023381));
-  hpcpush(hpxyzsc(0.031094,-0.216414,1.023622));
-  hpcpush(hpxyzsc(0.016184,-0.220354,1.024118));
-  hpcpush(hpxyzsc(-0.001244,-0.218928,1.023685));
-  hpcpush(hpxyzsc(-0.231927,-0.213686,1.048548));
-  hpcpush(hpxyzsc(-0.119271,-0.146323,1.017662));
-  hpcpush(hpxyzsc(-0.161729,-0.148045,1.023755));
-  hpcpush(hpxyzsc(-0.140182,-0.126656,1.017690));
-  hpcpush(hpxyzsc(-0.272077,-0.156217,1.048060));
-  hpcpush(hpxyzsc(-0.162371,-0.098407,1.017864));
-  hpcpush(hpxyzsc(-0.222751,-0.104454,1.029820));
-  hpcpush(hpxyzsc(-0.174561,-0.070070,1.017537));
-  hpcpush(hpxyzsc(-0.296331,-0.093578,1.047172));
-  hpcpush(hpxyzsc(-0.184484,-0.043046,1.017786));
-  hpcpush(hpxyzsc(-0.273136,-0.038290,1.037338));
-  hpcpush(hpxyzsc(-0.185499,-0.015970,1.017185));
-  hpcpush(hpxyzsc(-0.312167,-0.001301,1.047592));
-  hpcpush(hpxyzsc(-0.312167,0.001301,1.047592));
-
-  bshape(shILeaf[0], 33);
-  for(int t=0; t<=6; t++) {
-    hpcpush(ddi(7 + t*14, shexf*.7) * C0);
-    hpcpush(ddi(14 + t*14, shexf*.15) * C0);
-    }
-
-  bshape(shILeaf[1], 33);
-  for(int t=0; t<=7; t++) hpcpush(ddi(t*36, shexf*.8) * C0);
-
-  bshape(shGargoyleWings, 35);
-  hpcpush(hpxyzsc(0.042241,0.002223,1.000894));
-  hpcpush(hpxyzsc(0.041129,-0.007781,1.000876));
-  hpcpush(hpxyzsc(0.045593,-0.034473,1.001632));
-  hpcpush(hpxyzsc(0.066799,-0.059006,1.003964));
-  hpcpush(hpxyzsc(0.116090,-0.071440,1.009247));
-  hpcpush(hpxyzsc(0.169203,-0.075077,1.016989));
-  hpcpush(hpxyzsc(0.154517,-0.085096,1.015439));
-  hpcpush(hpxyzsc(0.124220,-0.116387,1.014385));
-  hpcpush(hpxyzsc(0.104146,-0.144461,1.015734));
-  hpcpush(hpxyzsc(0.082994,-0.176082,1.018770));
-  hpcpush(hpxyzsc(0.049446,-0.209023,1.022808));
-  hpcpush(hpxyzsc(0.004505,-0.235397,1.027342));
-  hpcpush(hpxyzsc(-0.039494,-0.248247,1.031109));
-  hpcpush(hpxyzsc(-0.071220,-0.256618,1.034855));
-  hpcpush(hpxyzsc(-0.116784,-0.264180,1.040879));
-  hpcpush(hpxyzsc(-0.160337,-0.264954,1.046857));
-  hpcpush(hpxyzsc(-0.177592,-0.262973,1.049140));
-  hpcpush(hpxyzsc(-0.159002,-0.255539,1.044309));
-  hpcpush(hpxyzsc(-0.137018,-0.243463,1.038291));
-  hpcpush(hpxyzsc(-0.124173,-0.222383,1.031927));
-  hpcpush(hpxyzsc(-0.128481,-0.203992,1.028650));
-  hpcpush(hpxyzsc(-0.160238,-0.194091,1.031188));
-  hpcpush(hpxyzsc(-0.184305,-0.194482,1.035274));
-  hpcpush(hpxyzsc(-0.160187,-0.190645,1.030536));
-  hpcpush(hpxyzsc(-0.117943,-0.174106,1.021872));
-  hpcpush(hpxyzsc(-0.108751,-0.156961,1.018069));
-  hpcpush(hpxyzsc(-0.107466,-0.136571,1.014988));
-  hpcpush(hpxyzsc(-0.120870,-0.120870,1.014504));
-  hpcpush(hpxyzsc(-0.143330,-0.104138,1.015573));
-  hpcpush(hpxyzsc(-0.156871,-0.097484,1.016913));
-  hpcpush(hpxyzsc(-0.143266,-0.095138,1.014680));
-  hpcpush(hpxyzsc(-0.119536,-0.087138,1.010882));
-  hpcpush(hpxyzsc(-0.103741,-0.071392,1.007898));
-  hpcpush(hpxyzsc(-0.091360,-0.051251,1.005472));
-  hpcpush(hpxyzsc(-0.083500,-0.032287,1.003999));
-  hpcpush(hpxyzsc(-0.077900,-0.015580,1.003151));
-  hpcpush(hpxyzsc(-0.077900,0.015580,1.003151));
-  hpcpush(hpxyzsc(-0.083500,0.032287,1.003999));
-  hpcpush(hpxyzsc(-0.091360,0.051251,1.005472));
-  hpcpush(hpxyzsc(-0.103741,0.071392,1.007898));
-  hpcpush(hpxyzsc(-0.119536,0.087138,1.010882));
-  hpcpush(hpxyzsc(-0.143266,0.095138,1.014680));
-  hpcpush(hpxyzsc(-0.156871,0.097484,1.016913));
-  hpcpush(hpxyzsc(-0.143330,0.104138,1.015573));
-  hpcpush(hpxyzsc(-0.120870,0.120870,1.014504));
-  hpcpush(hpxyzsc(-0.107466,0.136571,1.014988));
-  hpcpush(hpxyzsc(-0.108751,0.156961,1.018069));
-  hpcpush(hpxyzsc(-0.117943,0.174106,1.021872));
-  hpcpush(hpxyzsc(-0.160187,0.190645,1.030536));
-  hpcpush(hpxyzsc(-0.184305,0.194482,1.035274));
-  hpcpush(hpxyzsc(-0.160238,0.194091,1.031188));
-  hpcpush(hpxyzsc(-0.128481,0.203992,1.028650));
-  hpcpush(hpxyzsc(-0.124173,0.222383,1.031927));
-  hpcpush(hpxyzsc(-0.137018,0.243463,1.038291));
-  hpcpush(hpxyzsc(-0.159002,0.255539,1.044309));
-  hpcpush(hpxyzsc(-0.177592,0.262973,1.049140));
-  hpcpush(hpxyzsc(-0.160337,0.264954,1.046857));
-  hpcpush(hpxyzsc(-0.116784,0.264180,1.040879));
-  hpcpush(hpxyzsc(-0.071220,0.256618,1.034855));
-  hpcpush(hpxyzsc(-0.039494,0.248247,1.031109));
-  hpcpush(hpxyzsc(0.004505,0.235397,1.027342));
-  hpcpush(hpxyzsc(0.049446,0.209023,1.022808));
-  hpcpush(hpxyzsc(0.082994,0.176082,1.018770));
-  hpcpush(hpxyzsc(0.104146,0.144461,1.015734));
-  hpcpush(hpxyzsc(0.124220,0.116387,1.014385));
-  hpcpush(hpxyzsc(0.154517,0.085096,1.015439));
-  hpcpush(hpxyzsc(0.169203,0.075077,1.016989));
-  hpcpush(hpxyzsc(0.116090,0.071440,1.009247));
-  hpcpush(hpxyzsc(0.066799,0.059006,1.003964));
-  hpcpush(hpxyzsc(0.045593,0.034473,1.001632));
-  hpcpush(hpxyzsc(0.041129,0.007781,1.000876));
-  hpcpush(hpxyzsc(0.042241,-0.002223,1.000894));
-  hpcpush(hpxyzsc(0.042241,0.002223,1.000894));
-
-  bshape(shGargoyleBody, 33);
-  hpcpush(hpxyzsc(0.128302,-0.002231,1.008200));
-  hpcpush(hpxyzsc(0.128305,-0.010041,1.008247));
-  hpcpush(hpxyzsc(0.136196,-0.021211,1.009455));
-  hpcpush(hpxyzsc(0.146366,-0.031284,1.011139));
-  hpcpush(hpxyzsc(0.164504,-0.042525,1.014332));
-  hpcpush(hpxyzsc(0.161107,-0.043633,1.013834));
-  hpcpush(hpxyzsc(0.143009,-0.042456,1.011066));
-  hpcpush(hpxyzsc(0.127212,-0.033477,1.008615));
-  hpcpush(hpxyzsc(0.114839,-0.025644,1.006899));
-  hpcpush(hpxyzsc(0.108151,-0.046828,1.006921));
-  hpcpush(hpxyzsc(0.094666,-0.021161,1.004694));
-  hpcpush(hpxyzsc(0.081255,-0.022262,1.003543));
-  hpcpush(hpxyzsc(0.068979,-0.022251,1.002623));
-  hpcpush(hpxyzsc(0.057838,-0.028919,1.002089));
-  hpcpush(hpxyzsc(0.082541,-0.093696,1.007766));
-  hpcpush(hpxyzsc(0.108462,-0.117407,1.012694));
-  hpcpush(hpxyzsc(0.080377,-0.111634,1.009417));
-  hpcpush(hpxyzsc(0.074909,-0.139757,1.012494));
-  hpcpush(hpxyzsc(0.066894,-0.095881,1.006811));
-  hpcpush(hpxyzsc(0.056798,-0.077958,1.004641));
-  hpcpush(hpxyzsc(0.043402,-0.066772,1.003166));
-  hpcpush(hpxyzsc(0.031144,-0.056726,1.002092));
-  hpcpush(hpxyzsc(0.011119,-0.053373,1.001485));
-  hpcpush(hpxyzsc(-0.024478,-0.070096,1.002753));
-  hpcpush(hpxyzsc(-0.007782,-0.046693,1.001120));
-  hpcpush(hpxyzsc(-0.062361,-0.071270,1.004474));
-  hpcpush(hpxyzsc(-0.041154,-0.050052,1.002097));
-  hpcpush(hpxyzsc(-0.097005,-0.068015,1.006994));
-  hpcpush(hpxyzsc(-0.066772,-0.043402,1.003166));
-  hpcpush(hpxyzsc(-0.120555,-0.063626,1.009248));
-  hpcpush(hpxyzsc(-0.092454,-0.038987,1.005021));
-  hpcpush(hpxyzsc(-0.144240,-0.068206,1.012649));
-  hpcpush(hpxyzsc(-0.151438,-0.125638,1.019175));
-  hpcpush(hpxyzsc(-0.186951,-0.141902,1.027174));
-  hpcpush(hpxyzsc(-0.209987,-0.145636,1.032136));
-  hpcpush(hpxyzsc(-0.230971,-0.155113,1.037983));
-  hpcpush(hpxyzsc(-0.216796,-0.137756,1.032462));
-  hpcpush(hpxyzsc(-0.243372,-0.131308,1.037531));
-  hpcpush(hpxyzsc(-0.209646,-0.120603,1.028833));
-  hpcpush(hpxyzsc(-0.188968,-0.119230,1.024658));
-  hpcpush(hpxyzsc(-0.167228,-0.113356,1.020203));
-  hpcpush(hpxyzsc(-0.164543,-0.052609,1.014811));
-  hpcpush(hpxyzsc(-0.121573,-0.023422,1.007635));
-  hpcpush(hpxyzsc(-0.142949,-0.011168,1.010227));
-  hpcpush(hpxyzsc(-0.187169,-0.007845,1.017396));
-  hpcpush(hpxyzsc(-0.243507,-0.003382,1.029226));
-  hpcpush(hpxyzsc(-0.243507,0.003382,1.029226));
-  hpcpush(hpxyzsc(-0.187169,0.007845,1.017396));
-  hpcpush(hpxyzsc(-0.142949,0.011168,1.010227));
-  hpcpush(hpxyzsc(-0.121573,0.023422,1.007635));
-  hpcpush(hpxyzsc(-0.164543,0.052609,1.014811));
-  hpcpush(hpxyzsc(-0.167228,0.113356,1.020203));
-  hpcpush(hpxyzsc(-0.188968,0.119230,1.024658));
-  hpcpush(hpxyzsc(-0.209646,0.120603,1.028833));
-  hpcpush(hpxyzsc(-0.243372,0.131308,1.037531));
-  hpcpush(hpxyzsc(-0.216796,0.137756,1.032462));
-  hpcpush(hpxyzsc(-0.230971,0.155113,1.037983));
-  hpcpush(hpxyzsc(-0.209987,0.145636,1.032136));
-  hpcpush(hpxyzsc(-0.186951,0.141902,1.027174));
-  hpcpush(hpxyzsc(-0.151438,0.125638,1.019175));
-  hpcpush(hpxyzsc(-0.144240,0.068206,1.012649));
-  hpcpush(hpxyzsc(-0.092454,0.038987,1.005021));
-  hpcpush(hpxyzsc(-0.120555,0.063626,1.009248));
-  hpcpush(hpxyzsc(-0.066772,0.043402,1.003166));
-  hpcpush(hpxyzsc(-0.097005,0.068015,1.006994));
-  hpcpush(hpxyzsc(-0.041154,0.050052,1.002097));
-  hpcpush(hpxyzsc(-0.062361,0.071270,1.004474));
-  hpcpush(hpxyzsc(-0.007782,0.046693,1.001120));
-  hpcpush(hpxyzsc(-0.024478,0.070096,1.002753));
-  hpcpush(hpxyzsc(0.011119,0.053373,1.001485));
-  hpcpush(hpxyzsc(0.031144,0.056726,1.002092));
-  hpcpush(hpxyzsc(0.043402,0.066772,1.003166));
-  hpcpush(hpxyzsc(0.056798,0.077958,1.004641));
-  hpcpush(hpxyzsc(0.066894,0.095881,1.006811));
-  hpcpush(hpxyzsc(0.074909,0.139757,1.012494));
-  hpcpush(hpxyzsc(0.080377,0.111634,1.009417));
-  hpcpush(hpxyzsc(0.108462,0.117407,1.012694));
-  hpcpush(hpxyzsc(0.082541,0.093696,1.007766));
-  hpcpush(hpxyzsc(0.057838,0.028919,1.002089));
-  hpcpush(hpxyzsc(0.068979,0.022251,1.002623));
-  hpcpush(hpxyzsc(0.081255,0.022262,1.003543));
-  hpcpush(hpxyzsc(0.094666,0.021161,1.004694));
-  hpcpush(hpxyzsc(0.108151,0.046828,1.006921));
-  hpcpush(hpxyzsc(0.114839,0.025644,1.006899));
-  hpcpush(hpxyzsc(0.127212,0.033477,1.008615));
-  hpcpush(hpxyzsc(0.143009,0.042456,1.011066));
-  hpcpush(hpxyzsc(0.161107,0.043633,1.013834));
-  hpcpush(hpxyzsc(0.164504,0.042525,1.014332));
-  hpcpush(hpxyzsc(0.146366,0.031284,1.011139));
-  hpcpush(hpxyzsc(0.136196,0.021211,1.009455));
-  hpcpush(hpxyzsc(0.128305,0.010041,1.008247));
-  hpcpush(hpxyzsc(0.128302,0.002231,1.008200));
-  hpcpush(hpxyzsc(0.128302,-0.002231,1.008200));
-
-  bshape(shDogStripes, 34);
-  hpcpush(hpxyzsc(-0.147497,-0.001105,1.010820));
-  hpcpush(hpxyzsc(-0.159242,0.009400,1.012643));
-  hpcpush(hpxyzsc(-0.153105,0.023214,1.011919));
-  hpcpush(hpxyzsc(-0.135232,0.011039,1.009163));
-  hpcpush(hpxyzsc(-0.110779,0.007165,1.006143));
-  hpcpush(hpxyzsc(-0.119793,0.067901,1.009436));
-  hpcpush(hpxyzsc(-0.099799,0.063959,1.007001));
-  hpcpush(hpxyzsc(-0.090296,0.011012,1.004129));
-  hpcpush(hpxyzsc(-0.047281,0.012095,1.001190));
-  hpcpush(hpxyzsc(-0.058915,0.070478,1.004210));
-  hpcpush(hpxyzsc(-0.041289,0.078174,1.003900));
-  hpcpush(hpxyzsc(-0.021982,0.013189,1.000329));
-  hpcpush(hpxyzsc(0.011539,0.012638,1.000146));
-  hpcpush(hpxyzsc(-0.001651,0.079245,1.003136));
-  hpcpush(hpxyzsc(0.011562,0.089191,1.004036));
-  hpcpush(hpxyzsc(0.034627,0.013741,1.000694));
-  hpcpush(hpxyzsc(0.043979,0.012094,1.001040));
-  hpcpush(hpxyzsc(0.052798,0.032449,1.001918));
-  hpcpush(hpxyzsc(0.058855,0.029703,1.002171));
-  hpcpush(hpxyzsc(0.077053,0.029170,1.003388));
-  hpcpush(hpxyzsc(0.066006,0.005501,1.002191));
-  hpcpush(hpxyzsc(0.066006,-0.005501,1.002191));
-  hpcpush(hpxyzsc(0.077053,-0.029170,1.003388));
-  hpcpush(hpxyzsc(0.058855,-0.029703,1.002171));
-  hpcpush(hpxyzsc(0.052798,-0.032449,1.001918));
-  hpcpush(hpxyzsc(0.043979,-0.012094,1.001040));
-  hpcpush(hpxyzsc(0.034627,-0.013741,1.000694));
-  hpcpush(hpxyzsc(0.011562,-0.089191,1.004036));
-  hpcpush(hpxyzsc(-0.001651,-0.079245,1.003136));
-  hpcpush(hpxyzsc(0.011539,-0.012638,1.000146));
-  hpcpush(hpxyzsc(-0.021982,-0.013189,1.000329));
-  hpcpush(hpxyzsc(-0.041289,-0.078174,1.003900));
-  hpcpush(hpxyzsc(-0.058915,-0.070478,1.004210));
-  hpcpush(hpxyzsc(-0.047281,-0.012095,1.001190));
-  hpcpush(hpxyzsc(-0.090296,-0.011012,1.004129));
-  hpcpush(hpxyzsc(-0.099799,-0.063959,1.007001));
-  hpcpush(hpxyzsc(-0.119793,-0.067901,1.009436));
-  hpcpush(hpxyzsc(-0.110779,-0.007165,1.006143));
-  hpcpush(hpxyzsc(-0.135232,-0.011039,1.009163));
-  hpcpush(hpxyzsc(-0.153105,-0.023214,1.011919));
-  hpcpush(hpxyzsc(-0.159242,-0.009400,1.012643));
-  hpcpush(hpxyzsc(-0.147497,0.001105,1.010820));
-  hpcpush(hpxyzsc(-0.147497,-0.001105,1.010820));
-
-  bshape(shWolf, 33);
-  /*
-  hpcpush(hpxyzsc(-0.310601,0.000000,1.047126));
-  hpcpush(hpxyzsc(-0.158251,0.009739,1.012491));
-  hpcpush(hpxyzsc(-0.149626,0.045009,1.012133));
-  hpcpush(hpxyzsc(-0.173168,0.066320,1.017047));
-  hpcpush(hpxyzsc(-0.250414,0.056912,1.032447));
-  hpcpush(hpxyzsc(-0.242122,0.064314,1.030902));
-  hpcpush(hpxyzsc(-0.253563,0.065926,1.033751));
-  hpcpush(hpxyzsc(-0.241104,0.075740,1.031440));
-  hpcpush(hpxyzsc(-0.249897,0.082453,1.034044));
-  hpcpush(hpxyzsc(-0.237118,0.081982,1.030993));
-  hpcpush(hpxyzsc(-0.246310,0.097762,1.034517));
-  hpcpush(hpxyzsc(-0.230366,0.088118,1.029968));
-  hpcpush(hpxyzsc(-0.210870,0.082352,1.025304));
-  hpcpush(hpxyzsc(-0.194727,0.083100,1.022166));
-  hpcpush(hpxyzsc(-0.180298,0.087679,1.019899));
-  hpcpush(hpxyzsc(-0.162032,0.087154,1.016784));
-  hpcpush(hpxyzsc(-0.135091,0.081542,1.012373));
-  hpcpush(hpxyzsc(-0.116083,0.068924,1.009072));
-  hpcpush(hpxyzsc(-0.106144,0.066340,1.007803));
-  hpcpush(hpxyzsc(-0.084057,0.063643,1.005543));
-  hpcpush(hpxyzsc(-0.061108,0.071892,1.004441));
-  hpcpush(hpxyzsc(-0.044295,0.077815,1.004001));
-  hpcpush(hpxyzsc(-0.021516,0.077698,1.003245));
-  hpcpush(hpxyzsc(0.000000,0.078872,1.003106));
-  hpcpush(hpxyzsc(0.025203,0.099613,1.005265));
-  hpcpush(hpxyzsc(0.040964,0.113252,1.007226));
-  hpcpush(hpxyzsc(0.067885,0.127285,1.010351));
-  hpcpush(hpxyzsc(0.086481,0.135203,1.012798));
-  hpcpush(hpxyzsc(0.104129,0.144556,1.015746));
-  hpcpush(hpxyzsc(0.097579,0.132951,1.013508));
-  hpcpush(hpxyzsc(0.112604,0.134635,1.015286));
-  hpcpush(hpxyzsc(0.098603,0.124167,1.012492));
-  hpcpush(hpxyzsc(0.118341,0.115901,1.013626));
-  hpcpush(hpxyzsc(0.094688,0.115325,1.011072));
-  hpcpush(hpxyzsc(0.079806,0.108826,1.009065));
-  hpcpush(hpxyzsc(0.065011,0.097516,1.006845));
-  hpcpush(hpxyzsc(0.053964,0.082746,1.004868));
-  hpcpush(hpxyzsc(0.049028,0.066966,1.003438));
-  hpcpush(hpxyzsc(0.045353,0.053708,1.002468));
-  hpcpush(hpxyzsc(0.046494,0.040534,1.001901));
-  hpcpush(hpxyzsc(0.051260,0.033378,1.001869));
-  hpcpush(hpxyzsc(0.059646,0.029823,1.002221));
-  hpcpush(hpxyzsc(0.069275,0.029860,1.002841));
-  hpcpush(hpxyzsc(0.077732,0.029897,1.003462));
-  hpcpush(hpxyzsc(0.081360,0.028715,1.003715));
-  hpcpush(hpxyzsc(0.092268,0.021569,1.004479));
-  hpcpush(hpxyzsc(0.102040,0.020408,1.005400));
-  hpcpush(hpxyzsc(0.108180,0.020434,1.006042));
-  hpcpush(hpxyzsc(0.123078,0.030166,1.007997));
-  hpcpush(hpxyzsc(0.100952,0.042063,1.005963));
-  hpcpush(hpxyzsc(0.125691,0.043508,1.008807));
-  hpcpush(hpxyzsc(0.144550,0.044944,1.011393));
-  hpcpush(hpxyzsc(0.154674,0.041409,1.012738));
-  hpcpush(hpxyzsc(0.177755,0.029421,1.016102));
-  hpcpush(hpxyzsc(0.154429,0.012160,1.011927));
-  hpcpush(hpxyzsc(0.146841,0.019417,1.010910));
-  hpcpush(hpxyzsc(0.132964,0.013296,1.008889));
-  hpcpush(hpxyzsc(0.143007,0.009695,1.010220));
-  hpcpush(hpxyzsc(0.154429,0.012160,1.011927));
-  hpcpush(hpxyzsc(0.177755,0.029421,1.016102));
-  hpcpush(hpxyzsc(0.184262,0.025797,1.017162));
-  hpcpush(hpxyzsc(0.185576,0.025809,1.017401));
-  hpcpush(hpxyzsc(0.190852,0.025857,1.018378));
-  hpcpush(hpxyzsc(0.194828,0.025895,1.019131));
-  hpcpush(hpxyzsc(0.201483,0.024722,1.020395));
-  hpcpush(hpxyzsc(0.205462,0.019804,1.021081));
-  hpcpush(hpxyzsc(0.210828,0.016122,1.022110));
-  hpcpush(hpxyzsc(0.210793,0.009920,1.022024));
-  hpcpush(hpxyzsc(0.217604,0.013678,1.023493));
-  hpcpush(hpxyzsc(0.208083,0.007432,1.021447));
-  hpcpush(hpxyzsc(0.208083,-0.007432,1.021447));
-  hpcpush(hpxyzsc(0.217604,-0.013678,1.023493));
-  hpcpush(hpxyzsc(0.210793,-0.009920,1.022024));
-  hpcpush(hpxyzsc(0.210828,-0.016122,1.022110));
-  hpcpush(hpxyzsc(0.205462,-0.019804,1.021081));
-  hpcpush(hpxyzsc(0.201483,-0.024722,1.020395));
-  hpcpush(hpxyzsc(0.194828,-0.025895,1.019131));
-  hpcpush(hpxyzsc(0.190852,-0.025857,1.018378));
-  hpcpush(hpxyzsc(0.185576,-0.025809,1.017401));
-  hpcpush(hpxyzsc(0.184262,-0.025797,1.017162));
-  hpcpush(hpxyzsc(0.177755,-0.029421,1.016102));
-  hpcpush(hpxyzsc(0.154429,-0.012160,1.011927));
-  hpcpush(hpxyzsc(0.143007,-0.009695,1.010220));
-  hpcpush(hpxyzsc(0.132964,-0.013296,1.008889));
-  hpcpush(hpxyzsc(0.146841,-0.019417,1.010910));
-  hpcpush(hpxyzsc(0.154429,-0.012160,1.011927));
-  hpcpush(hpxyzsc(0.177755,-0.029421,1.016102));
-  hpcpush(hpxyzsc(0.154674,-0.041409,1.012738));
-  hpcpush(hpxyzsc(0.144550,-0.044944,1.011393));
-  hpcpush(hpxyzsc(0.125691,-0.043508,1.008807));
-  hpcpush(hpxyzsc(0.100952,-0.042063,1.005963));
-  hpcpush(hpxyzsc(0.123078,-0.030166,1.007997));
-  hpcpush(hpxyzsc(0.108180,-0.020434,1.006042));
-  hpcpush(hpxyzsc(0.102040,-0.020408,1.005400));
-  hpcpush(hpxyzsc(0.092268,-0.021569,1.004479));
-  hpcpush(hpxyzsc(0.081360,-0.028715,1.003715));
-  hpcpush(hpxyzsc(0.077732,-0.029897,1.003462));
-  hpcpush(hpxyzsc(0.069275,-0.029860,1.002841));
-  hpcpush(hpxyzsc(0.059646,-0.029823,1.002221));
-  hpcpush(hpxyzsc(0.051260,-0.033378,1.001869));
-  hpcpush(hpxyzsc(0.046494,-0.040534,1.001901));
-  hpcpush(hpxyzsc(0.045353,-0.053708,1.002468));
-  hpcpush(hpxyzsc(0.049028,-0.066966,1.003438));
-  hpcpush(hpxyzsc(0.053964,-0.082746,1.004868));
-  hpcpush(hpxyzsc(0.065011,-0.097516,1.006845));
-  hpcpush(hpxyzsc(0.079806,-0.108826,1.009065));
-  hpcpush(hpxyzsc(0.094688,-0.115325,1.011072));
-  hpcpush(hpxyzsc(0.118341,-0.115901,1.013626));
-  hpcpush(hpxyzsc(0.098603,-0.124167,1.012492));
-  hpcpush(hpxyzsc(0.112604,-0.134635,1.015286));
-  hpcpush(hpxyzsc(0.097579,-0.132951,1.013508));
-  hpcpush(hpxyzsc(0.104129,-0.144556,1.015746));
-  hpcpush(hpxyzsc(0.086481,-0.135203,1.012798));
-  hpcpush(hpxyzsc(0.067885,-0.127285,1.010351));
-  hpcpush(hpxyzsc(0.040964,-0.113252,1.007226));
-  hpcpush(hpxyzsc(0.025203,-0.099613,1.005265));
-  hpcpush(hpxyzsc(0.000000,-0.078872,1.003106));
-  hpcpush(hpxyzsc(-0.021516,-0.077698,1.003245));
-  hpcpush(hpxyzsc(-0.044295,-0.077815,1.004001));
-  hpcpush(hpxyzsc(-0.061108,-0.071892,1.004441));
-  hpcpush(hpxyzsc(-0.084057,-0.063643,1.005543));
-  hpcpush(hpxyzsc(-0.106144,-0.066340,1.007803));
-  hpcpush(hpxyzsc(-0.116083,-0.068924,1.009072));
-  hpcpush(hpxyzsc(-0.135091,-0.081542,1.012373));
-  hpcpush(hpxyzsc(-0.162032,-0.087154,1.016784));
-  hpcpush(hpxyzsc(-0.180298,-0.087679,1.019899));
-  hpcpush(hpxyzsc(-0.194727,-0.083100,1.022166));
-  hpcpush(hpxyzsc(-0.210870,-0.082352,1.025304));
-  hpcpush(hpxyzsc(-0.230366,-0.088118,1.029968));
-  hpcpush(hpxyzsc(-0.246310,-0.097762,1.034517));
-  hpcpush(hpxyzsc(-0.237118,-0.081982,1.030993));
-  hpcpush(hpxyzsc(-0.249897,-0.082453,1.034044));
-  hpcpush(hpxyzsc(-0.241104,-0.075740,1.031440));
-  hpcpush(hpxyzsc(-0.253563,-0.065926,1.033751));
-  hpcpush(hpxyzsc(-0.242122,-0.064314,1.030902));
-  hpcpush(hpxyzsc(-0.250414,-0.056912,1.032447));
-  hpcpush(hpxyzsc(-0.173168,-0.066320,1.017047));
-  hpcpush(hpxyzsc(-0.149626,-0.045009,1.012133));
-  hpcpush(hpxyzsc(-0.158251,-0.009739,1.012491));
-  hpcpush(hpxyzsc(-0.310601,-0.000000,1.047126));
-  hpcpush(hpxyzsc(-0.310601,0.000000,1.047126));
-  */
-  hpcpush(hpxyzsc(-0.310601,0.000000,1.047126));
-  hpcpush(hpxyzsc(-0.158251,0.009739,1.012491));
-  hpcpush(hpxyzsc(-0.149626,0.045009,1.012133));
-  hpcpush(hpxyzsc(-0.173168,0.066320,1.017047));
-  hpcpush(hpxyzsc(-0.250414,0.056912,1.032447));
-  hpcpush(hpxyzsc(-0.242122,0.064314,1.030902));
-  hpcpush(hpxyzsc(-0.253563,0.065926,1.033751));
-  hpcpush(hpxyzsc(-0.241104,0.075740,1.031440));
-  hpcpush(hpxyzsc(-0.249897,0.082453,1.034044));
-  hpcpush(hpxyzsc(-0.237118,0.081982,1.030993));
-  hpcpush(hpxyzsc(-0.246310,0.097762,1.034517));
-  hpcpush(hpxyzsc(-0.230366,0.088118,1.029968));
-  hpcpush(hpxyzsc(-0.210870,0.082352,1.025304));
-  hpcpush(hpxyzsc(-0.194727,0.083100,1.022166));
-  hpcpush(hpxyzsc(-0.180298,0.087679,1.019899));
-  hpcpush(hpxyzsc(-0.162032,0.087154,1.016784));
-  hpcpush(hpxyzsc(-0.135091,0.081542,1.012373));
-  hpcpush(hpxyzsc(-0.116083,0.068924,1.009072));
-  hpcpush(hpxyzsc(-0.106144,0.066340,1.007803));
-  hpcpush(hpxyzsc(-0.084057,0.063643,1.005543));
-  hpcpush(hpxyzsc(-0.061108,0.071892,1.004441));
-  hpcpush(hpxyzsc(-0.044295,0.077815,1.004001));
-  hpcpush(hpxyzsc(-0.021516,0.077698,1.003245));
-  hpcpush(hpxyzsc(0.000000,0.078872,1.003106));
-  hpcpush(hpxyzsc(0.025203,0.099613,1.005265));
-  hpcpush(hpxyzsc(0.040964,0.113252,1.007226));
-  hpcpush(hpxyzsc(0.067885,0.127285,1.010351));
-  hpcpush(hpxyzsc(0.086481,0.135203,1.012798));
-  hpcpush(hpxyzsc(0.104129,0.144556,1.015746));
-  hpcpush(hpxyzsc(0.097579,0.132951,1.013508));
-  hpcpush(hpxyzsc(0.112604,0.134635,1.015286));
-  hpcpush(hpxyzsc(0.098603,0.124167,1.012492));
-  hpcpush(hpxyzsc(0.118341,0.115901,1.013626));
-  hpcpush(hpxyzsc(0.094688,0.115325,1.011072));
-  hpcpush(hpxyzsc(0.079806,0.108826,1.009065));
-  hpcpush(hpxyzsc(0.065011,0.097516,1.006845));
-  hpcpush(hpxyzsc(0.053964,0.082746,1.004868));
-  hpcpush(hpxyzsc(0.049028,0.066966,1.003438));
-  hpcpush(hpxyzsc(0.045353,0.053708,1.002468));
-  hpcpush(hpxyzsc(0.046494,0.040534,1.001901));
-  hpcpush(hpxyzsc(0.051260,0.033378,1.001869));
-  hpcpush(hpxyzsc(0.059646,0.029823,1.002221));
-  hpcpush(hpxyzsc(0.069275,0.029860,1.002841));
-  hpcpush(hpxyzsc(0.077732,0.029897,1.003462));
-  hpcpush(hpxyzsc(0.081360,0.028715,1.003715));
-  hpcpush(hpxyzsc(0.066249,0.039649,1.002976));
-  hpcpush(hpxyzsc(0.106662,0.046229,1.006734));
-  hpcpush(hpxyzsc(0.146020,0.025919,1.010937));
-  hpcpush(hpxyzsc(0.159666,0.028110,1.013056));
-  hpcpush(hpxyzsc(0.172131,0.020186,1.014907));
-  hpcpush(hpxyzsc(0.172077,0.013438,1.014786));
-  hpcpush(hpxyzsc(0.168613,0.007837,1.014146));
-  hpcpush(hpxyzsc(0.168613,-0.007837,1.014146));
-  hpcpush(hpxyzsc(0.172077,-0.013438,1.014786));
-  hpcpush(hpxyzsc(0.172131,-0.020186,1.014907));
-  hpcpush(hpxyzsc(0.159666,-0.028110,1.013056));
-  hpcpush(hpxyzsc(0.146020,-0.025919,1.010937));
-  hpcpush(hpxyzsc(0.106662,-0.046229,1.006734));
-  hpcpush(hpxyzsc(0.066249,-0.039649,1.002976));
-  hpcpush(hpxyzsc(0.081360,-0.028715,1.003715));
-  hpcpush(hpxyzsc(0.077732,-0.029897,1.003462));
-  hpcpush(hpxyzsc(0.069275,-0.029860,1.002841));
-  hpcpush(hpxyzsc(0.059646,-0.029823,1.002221));
-  hpcpush(hpxyzsc(0.051260,-0.033378,1.001869));
-  hpcpush(hpxyzsc(0.046494,-0.040534,1.001901));
-  hpcpush(hpxyzsc(0.045353,-0.053708,1.002468));
-  hpcpush(hpxyzsc(0.049028,-0.066966,1.003438));
-  hpcpush(hpxyzsc(0.053964,-0.082746,1.004868));
-  hpcpush(hpxyzsc(0.065011,-0.097516,1.006845));
-  hpcpush(hpxyzsc(0.079806,-0.108826,1.009065));
-  hpcpush(hpxyzsc(0.094688,-0.115325,1.011072));
-  hpcpush(hpxyzsc(0.118341,-0.115901,1.013626));
-  hpcpush(hpxyzsc(0.098603,-0.124167,1.012492));
-  hpcpush(hpxyzsc(0.112604,-0.134635,1.015286));
-  hpcpush(hpxyzsc(0.097579,-0.132951,1.013508));
-  hpcpush(hpxyzsc(0.104129,-0.144556,1.015746));
-  hpcpush(hpxyzsc(0.086481,-0.135203,1.012798));
-  hpcpush(hpxyzsc(0.067885,-0.127285,1.010351));
-  hpcpush(hpxyzsc(0.040964,-0.113252,1.007226));
-  hpcpush(hpxyzsc(0.025203,-0.099613,1.005265));
-  hpcpush(hpxyzsc(0.000000,-0.078872,1.003106));
-  hpcpush(hpxyzsc(-0.021516,-0.077698,1.003245));
-  hpcpush(hpxyzsc(-0.044295,-0.077815,1.004001));
-  hpcpush(hpxyzsc(-0.061108,-0.071892,1.004441));
-  hpcpush(hpxyzsc(-0.084057,-0.063643,1.005543));
-  hpcpush(hpxyzsc(-0.106144,-0.066340,1.007803));
-  hpcpush(hpxyzsc(-0.116083,-0.068924,1.009072));
-  hpcpush(hpxyzsc(-0.135091,-0.081542,1.012373));
-  hpcpush(hpxyzsc(-0.162032,-0.087154,1.016784));
-  hpcpush(hpxyzsc(-0.180298,-0.087679,1.019899));
-  hpcpush(hpxyzsc(-0.194727,-0.083100,1.022166));
-  hpcpush(hpxyzsc(-0.210870,-0.082352,1.025304));
-  hpcpush(hpxyzsc(-0.230366,-0.088118,1.029968));
-  hpcpush(hpxyzsc(-0.246310,-0.097762,1.034517));
-  hpcpush(hpxyzsc(-0.237118,-0.081982,1.030993));
-  hpcpush(hpxyzsc(-0.249897,-0.082453,1.034044));
-  hpcpush(hpxyzsc(-0.241104,-0.075740,1.031440));
-  hpcpush(hpxyzsc(-0.253563,-0.065926,1.033751));
-  hpcpush(hpxyzsc(-0.242122,-0.064314,1.030902));
-  hpcpush(hpxyzsc(-0.250414,-0.056912,1.032447));
-  hpcpush(hpxyzsc(-0.173168,-0.066320,1.017047));
-  hpcpush(hpxyzsc(-0.149626,-0.045009,1.012133));
-  hpcpush(hpxyzsc(-0.158251,-0.009739,1.012491));
-  hpcpush(hpxyzsc(-0.310601,0.000000,1.047126));
-  hpcpush(hpxyzsc(-0.310601,0.000000,1.047126));
-  
-  bshape(shWolf1, 55);
-  hpcpush(hpxyzsc(0.121226,-0.019639,1.007513));
-  hpcpush(hpxyzsc(0.119731,-0.021190,1.007365));
-  hpcpush(hpxyzsc(0.117841,-0.022233,1.007165));
-  hpcpush(hpxyzsc(0.115725,-0.022676,1.006929));
-  hpcpush(hpxyzsc(0.113570,-0.022480,1.006679));
-  hpcpush(hpxyzsc(0.111568,-0.021661,1.006438));
-  hpcpush(hpxyzsc(0.109897,-0.020293,1.006225));
-  hpcpush(hpxyzsc(0.108705,-0.018496,1.006061));
-  hpcpush(hpxyzsc(0.108099,-0.016432,1.005960));
-  hpcpush(hpxyzsc(0.108131,-0.014283,1.005931));
-  hpcpush(hpxyzsc(0.108800,-0.012240,1.005976));
-  hpcpush(hpxyzsc(0.110046,-0.010484,1.006091));
-  hpcpush(hpxyzsc(0.111757,-0.009172,1.006267));
-  hpcpush(hpxyzsc(0.113783,-0.008421,1.006488));
-  hpcpush(hpxyzsc(0.115942,-0.008296,1.006733));
-  hpcpush(hpxyzsc(0.118044,-0.008810,1.006982));
-  hpcpush(hpxyzsc(0.119902,-0.009915,1.007211));
-  hpcpush(hpxyzsc(0.121349,-0.011516,1.007402));
-  hpcpush(hpxyzsc(0.122258,-0.013468,1.007536));
-  hpcpush(hpxyzsc(0.122549,-0.015598,1.007602));
-  hpcpush(hpxyzsc(0.122194,-0.017718,1.007594));
-  hpcpush(hpxyzsc(0.121226,-0.019639,1.007513));
-
-  bshape(shWolf2, 55);
-  hpcpush(hpxyzsc(0.110896,0.008835,1.006169));
-  hpcpush(hpxyzsc(0.109780,0.010595,1.006064));
-  hpcpush(hpxyzsc(0.109236,0.012605,1.006028));
-  hpcpush(hpxyzsc(0.109313,0.014686,1.006064));
-  hpcpush(hpxyzsc(0.110004,0.016653,1.006170));
-  hpcpush(hpxyzsc(0.111247,0.018331,1.006336));
-  hpcpush(hpxyzsc(0.112933,0.019572,1.006547));
-  hpcpush(hpxyzsc(0.114911,0.020264,1.006785));
-  hpcpush(hpxyzsc(0.117005,0.020346,1.007027));
-  hpcpush(hpxyzsc(0.119030,0.019812,1.007254));
-  hpcpush(hpxyzsc(0.120806,0.018708,1.007444));
-  hpcpush(hpxyzsc(0.122174,0.017133,1.007581));
-  hpcpush(hpxyzsc(0.123014,0.015226,1.007653));
-  hpcpush(hpxyzsc(0.123250,0.013158,1.007653));
-  hpcpush(hpxyzsc(0.122862,0.011111,1.007581));
-  hpcpush(hpxyzsc(0.121884,0.009268,1.007443));
-  hpcpush(hpxyzsc(0.120403,0.007792,1.007252));
-  hpcpush(hpxyzsc(0.118550,0.006815,1.007026));
-  hpcpush(hpxyzsc(0.116491,0.006423,1.006783));
-  hpcpush(hpxyzsc(0.114408,0.006652,1.006545));
-  hpcpush(hpxyzsc(0.112486,0.007480,1.006334));
-  hpcpush(hpxyzsc(0.110896,0.008835,1.006169));
-
-  bshape(shWolf3, 55);
-  hpcpush(hpxyzsc(0.157399,-0.008998,1.012351));
-  hpcpush(hpxyzsc(0.154869,-0.009703,1.011968));
-  hpcpush(hpxyzsc(0.152240,-0.009639,1.011568));
-  hpcpush(hpxyzsc(0.149747,-0.008812,1.011188));
-  hpcpush(hpxyzsc(0.147612,-0.007296,1.010862));
-  hpcpush(hpxyzsc(0.146023,-0.005225,1.010619));
-  hpcpush(hpxyzsc(0.145123,-0.002783,1.010479));
-  hpcpush(hpxyzsc(0.144991,-0.000188,1.010456));
-  hpcpush(hpxyzsc(0.145638,0.002331,1.010552));
-  hpcpush(hpxyzsc(0.147008,0.004549,1.010758));
-  hpcpush(hpxyzsc(0.148979,0.006269,1.011056));
-  hpcpush(hpxyzsc(0.151375,0.007339,1.011419));
-  hpcpush(hpxyzsc(0.153983,0.007663,1.011815));
-  hpcpush(hpxyzsc(0.156573,0.007212,1.012209));
-  hpcpush(hpxyzsc(0.158913,0.006027,1.012566));
-  hpcpush(hpxyzsc(0.160796,0.004213,1.012854));
-  hpcpush(hpxyzsc(0.162055,0.001931,1.013048));
-  hpcpush(hpxyzsc(0.162577,-0.000616,1.013130));
-  hpcpush(hpxyzsc(0.162316,-0.003201,1.013093));
-  hpcpush(hpxyzsc(0.161296,-0.005596,1.012940));
-  hpcpush(hpxyzsc(0.159607,-0.007588,1.012686));
-  hpcpush(hpxyzsc(0.157399,-0.008998,1.012351));
-
-  bshape(shHawk, 33);
-  hpcpush(hpxyzsc(0.142456,-0.001557,1.010097));
-  hpcpush(hpxyzsc(0.116236,0.010199,1.006784));
-  hpcpush(hpxyzsc(0.104323,0.033324,1.005979));
-  hpcpush(hpxyzsc(0.091361,0.040882,1.004997));
-  hpcpush(hpxyzsc(0.082569,0.043693,1.004354));
-  hpcpush(hpxyzsc(0.074592,0.041969,1.003656));
-  hpcpush(hpxyzsc(0.061035,0.040602,1.002683));
-  hpcpush(hpxyzsc(0.050686,0.036782,1.001959));
-  hpcpush(hpxyzsc(0.044666,0.030442,1.001460));
-  hpcpush(hpxyzsc(0.036067,0.018664,1.000824));
-  hpcpush(hpxyzsc(0.027492,0.024803,1.000685));
-  hpcpush(hpxyzsc(0.023952,0.039607,1.001071));
-  hpcpush(hpxyzsc(0.029039,0.130828,1.008940));
-  hpcpush(hpxyzsc(0.010152,0.198985,1.019656));
-  hpcpush(hpxyzsc(-0.016340,0.244502,1.029586));
-  hpcpush(hpxyzsc(-0.044325,0.274285,1.037881));
-  hpcpush(hpxyzsc(-0.071191,0.291142,1.043950));
-  hpcpush(hpxyzsc(-0.095838,0.290953,1.045867));
-  hpcpush(hpxyzsc(-0.163452,0.314668,1.061005));
-  hpcpush(hpxyzsc(-0.126557,0.290164,1.048910));
-  hpcpush(hpxyzsc(-0.115484,0.276976,1.044056));
-  hpcpush(hpxyzsc(-0.097565,0.262090,1.038369));
-  hpcpush(hpxyzsc(-0.139857,0.285325,1.049271));
-  hpcpush(hpxyzsc(-0.169577,0.286959,1.054088));
-  hpcpush(hpxyzsc(-0.204455,0.287946,1.060526));
-  hpcpush(hpxyzsc(-0.165758,0.267094,1.048244));
-  hpcpush(hpxyzsc(-0.137259,0.245199,1.038731));
-  hpcpush(hpxyzsc(-0.122713,0.231981,1.033864));
-  hpcpush(hpxyzsc(-0.105482,0.206850,1.026603));
-  hpcpush(hpxyzsc(-0.103989,0.192625,1.023679));
-  hpcpush(hpxyzsc(-0.136578,0.214149,1.031753));
-  hpcpush(hpxyzsc(-0.178626,0.222509,1.039912));
-  hpcpush(hpxyzsc(-0.216644,0.228276,1.048353));
-  hpcpush(hpxyzsc(-0.178075,0.209345,1.037080));
-  hpcpush(hpxyzsc(-0.154479,0.186094,1.028832));
-  hpcpush(hpxyzsc(-0.140331,0.166218,1.023387));
-  hpcpush(hpxyzsc(-0.129767,0.146790,1.019013));
-  hpcpush(hpxyzsc(-0.125089,0.126774,1.015736));
-  hpcpush(hpxyzsc(-0.125855,0.112996,1.014203));
-  hpcpush(hpxyzsc(-0.151531,0.130982,1.019862));
-  hpcpush(hpxyzsc(-0.179485,0.133004,1.024649));
-  hpcpush(hpxyzsc(-0.192671,0.128132,1.026421));
-  hpcpush(hpxyzsc(-0.161665,0.115486,1.019545));
-  hpcpush(hpxyzsc(-0.138366,0.095450,1.014029));
-  hpcpush(hpxyzsc(-0.128650,0.083339,1.011680));
-  hpcpush(hpxyzsc(-0.121392,0.069153,1.009712));
-  hpcpush(hpxyzsc(-0.120756,0.059987,1.009049));
-  hpcpush(hpxyzsc(-0.121451,0.047500,1.008467));
-  hpcpush(hpxyzsc(-0.122143,0.035028,1.008041));
-  hpcpush(hpxyzsc(-0.141470,0.038442,1.010689));
-  hpcpush(hpxyzsc(-0.175470,0.051892,1.016603));
-  hpcpush(hpxyzsc(-0.204042,0.065126,1.022680));
-  hpcpush(hpxyzsc(-0.234854,0.089092,1.031065));
-  hpcpush(hpxyzsc(-0.277604,0.102438,1.042860));
-  hpcpush(hpxyzsc(-0.297591,0.091976,1.047387));
-  hpcpush(hpxyzsc(-0.278633,0.079023,1.041096));
-  hpcpush(hpxyzsc(-0.292616,0.065802,1.044009));
-  hpcpush(hpxyzsc(-0.251306,0.044753,1.032065));
-  hpcpush(hpxyzsc(-0.294009,0.035431,1.042927));
-  hpcpush(hpxyzsc(-0.266622,0.025835,1.035256));
-  hpcpush(hpxyzsc(-0.301490,0.006576,1.044481));
-  hpcpush(hpxyzsc(-0.301490,-0.006576,1.044481));
-  hpcpush(hpxyzsc(-0.266622,-0.025835,1.035256));
-  hpcpush(hpxyzsc(-0.294009,-0.035431,1.042927));
-  hpcpush(hpxyzsc(-0.251306,-0.044753,1.032065));
-  hpcpush(hpxyzsc(-0.292616,-0.065802,1.044009));
-  hpcpush(hpxyzsc(-0.278633,-0.079023,1.041096));
-  hpcpush(hpxyzsc(-0.297591,-0.091976,1.047387));
-  hpcpush(hpxyzsc(-0.277604,-0.102438,1.042860));
-  hpcpush(hpxyzsc(-0.234854,-0.089092,1.031065));
-  hpcpush(hpxyzsc(-0.204042,-0.065126,1.022680));
-  hpcpush(hpxyzsc(-0.175470,-0.051892,1.016603));
-  hpcpush(hpxyzsc(-0.141470,-0.038442,1.010689));
-  hpcpush(hpxyzsc(-0.122143,-0.035028,1.008041));
-  hpcpush(hpxyzsc(-0.121451,-0.047500,1.008467));
-  hpcpush(hpxyzsc(-0.120756,-0.059987,1.009049));
-  hpcpush(hpxyzsc(-0.121392,-0.069153,1.009712));
-  hpcpush(hpxyzsc(-0.128650,-0.083339,1.011680));
-  hpcpush(hpxyzsc(-0.138366,-0.095450,1.014029));
-  hpcpush(hpxyzsc(-0.161665,-0.115486,1.019545));
-  hpcpush(hpxyzsc(-0.192671,-0.128132,1.026421));
-  hpcpush(hpxyzsc(-0.179485,-0.133004,1.024649));
-  hpcpush(hpxyzsc(-0.151531,-0.130982,1.019862));
-  hpcpush(hpxyzsc(-0.125855,-0.112996,1.014203));
-  hpcpush(hpxyzsc(-0.125089,-0.126774,1.015736));
-  hpcpush(hpxyzsc(-0.129767,-0.146790,1.019013));
-  hpcpush(hpxyzsc(-0.140331,-0.166218,1.023387));
-  hpcpush(hpxyzsc(-0.154479,-0.186094,1.028832));
-  hpcpush(hpxyzsc(-0.178075,-0.209345,1.037080));
-  hpcpush(hpxyzsc(-0.216644,-0.228276,1.048353));
-  hpcpush(hpxyzsc(-0.178626,-0.222509,1.039912));
-  hpcpush(hpxyzsc(-0.136578,-0.214149,1.031753));
-  hpcpush(hpxyzsc(-0.103989,-0.192625,1.023679));
-  hpcpush(hpxyzsc(-0.105482,-0.206850,1.026603));
-  hpcpush(hpxyzsc(-0.122713,-0.231981,1.033864));
-  hpcpush(hpxyzsc(-0.137259,-0.245199,1.038731));
-  hpcpush(hpxyzsc(-0.165758,-0.267094,1.048244));
-  hpcpush(hpxyzsc(-0.204455,-0.287946,1.060526));
-  hpcpush(hpxyzsc(-0.169577,-0.286959,1.054088));
-  hpcpush(hpxyzsc(-0.139857,-0.285325,1.049271));
-  hpcpush(hpxyzsc(-0.097565,-0.262090,1.038369));
-  hpcpush(hpxyzsc(-0.115484,-0.276976,1.044056));
-  hpcpush(hpxyzsc(-0.126557,-0.290164,1.048910));
-  hpcpush(hpxyzsc(-0.163452,-0.314668,1.061005));
-  hpcpush(hpxyzsc(-0.095838,-0.290953,1.045867));
-  hpcpush(hpxyzsc(-0.071191,-0.291142,1.043950));
-  hpcpush(hpxyzsc(-0.044325,-0.274285,1.037881));
-  hpcpush(hpxyzsc(-0.016340,-0.244502,1.029586));
-  hpcpush(hpxyzsc(0.010152,-0.198985,1.019656));
-  hpcpush(hpxyzsc(0.029039,-0.130828,1.008940));
-  hpcpush(hpxyzsc(0.023952,-0.039607,1.001071));
-  hpcpush(hpxyzsc(0.027492,-0.024803,1.000685));
-  hpcpush(hpxyzsc(0.036067,-0.018664,1.000824));
-  hpcpush(hpxyzsc(0.044666,-0.030442,1.001460));
-  hpcpush(hpxyzsc(0.050686,-0.036782,1.001959));
-  hpcpush(hpxyzsc(0.061035,-0.040602,1.002683));
-  hpcpush(hpxyzsc(0.074592,-0.041969,1.003656));
-  hpcpush(hpxyzsc(0.082569,-0.043693,1.004354));
-  hpcpush(hpxyzsc(0.091361,-0.040882,1.004997));
-  hpcpush(hpxyzsc(0.104323,-0.033324,1.005979));
-  hpcpush(hpxyzsc(0.116236,-0.010199,1.006784));
-  hpcpush(hpxyzsc(0.142456,0.001557,1.010097));
-  hpcpush(hpxyzsc(0.142456,-0.001557,1.010097));
-  
-  bshape(shEagle, 33);
-  hpcpush(hpxyzsc(-0.153132,0.000000,1.011657));
-  hpcpush(hpxyzsc(-0.151960,0.025529,1.011802));
-  hpcpush(hpxyzsc(-0.192201,0.028337,1.018697));
-  hpcpush(hpxyzsc(-0.204119,0.019793,1.020812));
-  hpcpush(hpxyzsc(-0.201539,0.029674,1.020538));
-  hpcpush(hpxyzsc(-0.208386,0.038452,1.022205));
-  hpcpush(hpxyzsc(-0.200321,0.038333,1.020587));
-  hpcpush(hpxyzsc(-0.199208,0.050730,1.020910));
-  hpcpush(hpxyzsc(-0.192349,0.039456,1.019095));
-  hpcpush(hpxyzsc(-0.149495,0.034031,1.011685));
-  hpcpush(hpxyzsc(-0.148542,0.057225,1.012590));
-  hpcpush(hpxyzsc(-0.089847,0.025157,1.004343));
-  hpcpush(hpxyzsc(-0.048881,0.038151,1.001921));
-  hpcpush(hpxyzsc(0.002416,0.130440,1.008474));
-  hpcpush(hpxyzsc(-0.028450,0.202864,1.020766));
-  hpcpush(hpxyzsc(-0.044701,0.209848,1.022758));
-  hpcpush(hpxyzsc(-0.044823,0.216644,1.024180));
-  hpcpush(hpxyzsc(-0.039848,0.217916,1.024244));
-  hpcpush(hpxyzsc(-0.028602,0.216381,1.023542));
-  hpcpush(hpxyzsc(-0.018604,0.210847,1.022156));
-  hpcpush(hpxyzsc(-0.016122,0.210828,1.022110));
-  hpcpush(hpxyzsc(-0.014922,0.217612,1.023512));
-  hpcpush(hpxyzsc(-0.025023,0.231467,1.026744));
-  hpcpush(hpxyzsc(-0.035205,0.241403,1.029327));
-  hpcpush(hpxyzsc(-0.041644,0.248604,1.031280));
-  hpcpush(hpxyzsc(-0.041754,0.254318,1.032677));
-  hpcpush(hpxyzsc(-0.034211,0.258480,1.033432));
-  hpcpush(hpxyzsc(-0.021481,0.253982,1.031973));
-  hpcpush(hpxyzsc(-0.011317,0.243946,1.029387));
-  hpcpush(hpxyzsc(0.001251,0.232708,1.026720));
-  hpcpush(hpxyzsc(0.008728,0.224428,1.024912));
-  hpcpush(hpxyzsc(0.009969,0.223059,1.024624));
-  hpcpush(hpxyzsc(0.011289,0.238321,1.028068));
-  hpcpush(hpxyzsc(0.003802,0.261058,1.033521));
-  hpcpush(hpxyzsc(-0.005116,0.280126,1.038507));
-  hpcpush(hpxyzsc(-0.007740,0.296717,1.043121));
-  hpcpush(hpxyzsc(0.001286,0.290619,1.041375));
-  hpcpush(hpxyzsc(0.012793,0.280166,1.038584));
-  hpcpush(hpxyzsc(0.022854,0.264095,1.034538));
-  hpcpush(hpxyzsc(0.028906,0.241303,1.029108));
-  hpcpush(hpxyzsc(0.031328,0.234335,1.027567));
-  hpcpush(hpxyzsc(0.032584,0.234354,1.027611));
-  hpcpush(hpxyzsc(0.034119,0.252735,1.032007));
-  hpcpush(hpxyzsc(0.032108,0.286405,1.040701));
-  hpcpush(hpxyzsc(0.030917,0.292424,1.042338));
-  hpcpush(hpxyzsc(0.039807,0.285067,1.040600));
-  hpcpush(hpxyzsc(0.050896,0.264659,1.035681));
-  hpcpush(hpxyzsc(0.058073,0.246178,1.031492));
-  hpcpush(hpxyzsc(0.063739,0.221211,1.026156));
-  hpcpush(hpxyzsc(0.083520,0.165812,1.017089));
-  hpcpush(hpxyzsc(0.083035,0.146532,1.014084));
-  hpcpush(hpxyzsc(0.075285,0.129928,1.011212));
-  hpcpush(hpxyzsc(0.066581,0.122266,1.009645));
-  hpcpush(hpxyzsc(0.055484,0.112174,1.007800));
-  hpcpush(hpxyzsc(0.044365,0.087531,1.004803));
-  hpcpush(hpxyzsc(0.034631,0.065680,1.002753));
-  hpcpush(hpxyzsc(0.034631,0.065680,1.002753));
-  hpcpush(hpxyzsc(0.026221,0.053634,1.001781));
-  hpcpush(hpxyzsc(0.022616,0.041661,1.001123));
-  hpcpush(hpxyzsc(0.021411,0.033306,1.000784));
-  hpcpush(hpxyzsc(0.022591,0.024969,1.000567));
-  hpcpush(hpxyzsc(0.026158,0.021402,1.000571));
-  hpcpush(hpxyzsc(0.028538,0.020215,1.000611));
-  hpcpush(hpxyzsc(0.034494,0.017842,1.000754));
-  hpcpush(hpxyzsc(0.040463,0.020231,1.001023));
-  hpcpush(hpxyzsc(0.042853,0.021427,1.001147));
-  hpcpush(hpxyzsc(0.044051,0.022621,1.001225));
-  hpcpush(hpxyzsc(0.051232,0.023829,1.001595));
-  hpcpush(hpxyzsc(0.058426,0.023847,1.001989));
-  hpcpush(hpxyzsc(0.064425,0.020282,1.002278));
-  hpcpush(hpxyzsc(0.068025,0.015514,1.002431));
-  hpcpush(hpxyzsc(0.071634,0.011939,1.002634));
-  hpcpush(hpxyzsc(0.089791,0.002394,1.004026));
-  hpcpush(hpxyzsc(0.089791,-0.002394,1.004026));
-  hpcpush(hpxyzsc(0.071634,-0.011939,1.002634));
-  hpcpush(hpxyzsc(0.068025,-0.015514,1.002431));
-  hpcpush(hpxyzsc(0.064425,-0.020282,1.002278));
-  hpcpush(hpxyzsc(0.058426,-0.023847,1.001989));
-  hpcpush(hpxyzsc(0.051232,-0.023829,1.001595));
-  hpcpush(hpxyzsc(0.044051,-0.022621,1.001225));
-  hpcpush(hpxyzsc(0.042853,-0.021427,1.001147));
-  hpcpush(hpxyzsc(0.040463,-0.020231,1.001023));
-  hpcpush(hpxyzsc(0.034494,-0.017842,1.000754));
-  hpcpush(hpxyzsc(0.028538,-0.020215,1.000611));
-  hpcpush(hpxyzsc(0.026158,-0.021402,1.000571));
-  hpcpush(hpxyzsc(0.022591,-0.024969,1.000567));
-  hpcpush(hpxyzsc(0.021411,-0.033306,1.000784));
-  hpcpush(hpxyzsc(0.022616,-0.041661,1.001123));
-  hpcpush(hpxyzsc(0.026221,-0.053634,1.001781));
-  hpcpush(hpxyzsc(0.034631,-0.065680,1.002753));
-  hpcpush(hpxyzsc(0.034631,-0.065680,1.002753));
-  hpcpush(hpxyzsc(0.044365,-0.087531,1.004803));
-  hpcpush(hpxyzsc(0.055484,-0.112174,1.007800));
-  hpcpush(hpxyzsc(0.066581,-0.122266,1.009645));
-  hpcpush(hpxyzsc(0.075285,-0.129928,1.011212));
-  hpcpush(hpxyzsc(0.083035,-0.146532,1.014084));
-  hpcpush(hpxyzsc(0.083520,-0.165812,1.017089));
-  hpcpush(hpxyzsc(0.063739,-0.221211,1.026156));
-  hpcpush(hpxyzsc(0.058073,-0.246178,1.031492));
-  hpcpush(hpxyzsc(0.050896,-0.264659,1.035681));
-  hpcpush(hpxyzsc(0.039807,-0.285067,1.040600));
-  hpcpush(hpxyzsc(0.030917,-0.292424,1.042338));
-  hpcpush(hpxyzsc(0.032108,-0.286405,1.040701));
-  hpcpush(hpxyzsc(0.034119,-0.252735,1.032007));
-  hpcpush(hpxyzsc(0.032584,-0.234354,1.027611));
-  hpcpush(hpxyzsc(0.031328,-0.234335,1.027567));
-  hpcpush(hpxyzsc(0.028906,-0.241303,1.029108));
-  hpcpush(hpxyzsc(0.022854,-0.264095,1.034538));
-  hpcpush(hpxyzsc(0.012793,-0.280166,1.038584));
-  hpcpush(hpxyzsc(0.001286,-0.290619,1.041375));
-  hpcpush(hpxyzsc(-0.007740,-0.296717,1.043121));
-  hpcpush(hpxyzsc(-0.005116,-0.280126,1.038507));
-  hpcpush(hpxyzsc(0.003802,-0.261058,1.033521));
-  hpcpush(hpxyzsc(0.011289,-0.238321,1.028068));
-  hpcpush(hpxyzsc(0.009969,-0.223059,1.024624));
-  hpcpush(hpxyzsc(0.008728,-0.224428,1.024912));
-  hpcpush(hpxyzsc(0.001251,-0.232708,1.026720));
-  hpcpush(hpxyzsc(-0.011317,-0.243946,1.029387));
-  hpcpush(hpxyzsc(-0.021481,-0.253982,1.031973));
-  hpcpush(hpxyzsc(-0.034211,-0.258480,1.033432));
-  hpcpush(hpxyzsc(-0.041754,-0.254318,1.032677));
-  hpcpush(hpxyzsc(-0.041644,-0.248604,1.031280));
-  hpcpush(hpxyzsc(-0.035205,-0.241403,1.029327));
-  hpcpush(hpxyzsc(-0.025023,-0.231467,1.026744));
-  hpcpush(hpxyzsc(-0.014922,-0.217612,1.023512));
-  hpcpush(hpxyzsc(-0.016122,-0.210828,1.022110));
-  hpcpush(hpxyzsc(-0.018604,-0.210847,1.022156));
-  hpcpush(hpxyzsc(-0.028602,-0.216381,1.023542));
-  hpcpush(hpxyzsc(-0.039848,-0.217916,1.024244));
-  hpcpush(hpxyzsc(-0.044823,-0.216644,1.024180));
-  hpcpush(hpxyzsc(-0.044701,-0.209848,1.022758));
-  hpcpush(hpxyzsc(-0.028450,-0.202864,1.020766));
-  hpcpush(hpxyzsc(0.002416,-0.130440,1.008474));
-  hpcpush(hpxyzsc(-0.048881,-0.038151,1.001921));
-  hpcpush(hpxyzsc(-0.089847,-0.025157,1.004343));
-  hpcpush(hpxyzsc(-0.148542,-0.057225,1.012590));
-  hpcpush(hpxyzsc(-0.149495,-0.034031,1.011685));
-  hpcpush(hpxyzsc(-0.192349,-0.039456,1.019095));
-  hpcpush(hpxyzsc(-0.199208,-0.050730,1.020910));
-  hpcpush(hpxyzsc(-0.200321,-0.038333,1.020587));
-  hpcpush(hpxyzsc(-0.208386,-0.038452,1.022205));
-  hpcpush(hpxyzsc(-0.201539,-0.029674,1.020538));
-  hpcpush(hpxyzsc(-0.204119,-0.019793,1.020812));
-  hpcpush(hpxyzsc(-0.192201,-0.028337,1.018697));
-  hpcpush(hpxyzsc(-0.151960,-0.025529,1.011802));
-  hpcpush(hpxyzsc(-0.153132,-0.000000,1.011657));
-  hpcpush(hpxyzsc(-0.153132,0.000000,1.011657));
-
-  bshape(shSlime, 33);
-  for(int i=0; i<=84; i++)
-    hpcpush(ddi(i, crossf * (0.7 + .2 * sin(i * M_PI * 2 / 84 * 9))) * C0);
-
-  bshape(shTentHead, 33);
-  hpcpush(hpxyzsc(-0.153133,-0.001215,1.011658));
-  hpcpush(hpxyzsc(-0.153144,0.008508,1.011694));
-  hpcpush(hpxyzsc(-0.148132,0.023070,1.011175));
-  hpcpush(hpxyzsc(-0.142123,0.052233,1.011399));
-  hpcpush(hpxyzsc(-0.146204,0.068228,1.012932));
-  hpcpush(hpxyzsc(-0.177590,0.085095,1.019205));
-  hpcpush(hpxyzsc(-0.224851,0.089187,1.028840));
-  hpcpush(hpxyzsc(-0.262047,0.120747,1.040792));
-  hpcpush(hpxyzsc(-0.255264,0.167153,1.045514));
-  hpcpush(hpxyzsc(-0.229967,0.174723,1.040871));
-  hpcpush(hpxyzsc(-0.184192,0.147855,1.027515));
-  hpcpush(hpxyzsc(-0.138732,0.121544,1.016867));
-  hpcpush(hpxyzsc(-0.108401,0.118145,1.012773));
-  hpcpush(hpxyzsc(-0.102300,0.123003,1.012717));
-  hpcpush(hpxyzsc(-0.091928,0.154439,1.016023));
-  hpcpush(hpxyzsc(-0.090798,0.199010,1.023645));
-  hpcpush(hpxyzsc(-0.056384,0.229293,1.027499));
-  hpcpush(hpxyzsc(-0.011331,0.246774,1.030061));
-  hpcpush(hpxyzsc(0.024027,0.255446,1.032390));
-  hpcpush(hpxyzsc(0.073005,0.235380,1.029919));
-  hpcpush(hpxyzsc(0.151935,0.187094,1.028634));
-  hpcpush(hpxyzsc(0.146867,0.164292,1.023993));
-  hpcpush(hpxyzsc(0.094648,0.162253,1.017489));
-  hpcpush(hpxyzsc(0.044142,0.175341,1.016215));
-  hpcpush(hpxyzsc(-0.003641,0.148054,1.010907));
-  hpcpush(hpxyzsc(-0.002399,0.100774,1.005068));
-  hpcpush(hpxyzsc(0.047859,0.071788,1.003715));
-  hpcpush(hpxyzsc(0.098991,0.082090,1.008235));
-  hpcpush(hpxyzsc(0.151038,0.106832,1.016969));
-  hpcpush(hpxyzsc(0.199477,0.131730,1.028175));
-  hpcpush(hpxyzsc(0.255339,0.129594,1.040189));
-  hpcpush(hpxyzsc(0.264313,0.081720,1.037564));
-  hpcpush(hpxyzsc(0.226731,0.063886,1.027370));
-  hpcpush(hpxyzsc(0.168813,0.041592,1.015001));
-  hpcpush(hpxyzsc(0.128034,0.026573,1.008513));
-  hpcpush(hpxyzsc(0.108135,0.002403,1.005832));
-  hpcpush(hpxyzsc(0.108135,-0.002403,1.005832));
-  hpcpush(hpxyzsc(0.128034,-0.026573,1.008513));
-  hpcpush(hpxyzsc(0.168813,-0.041592,1.015001));
-  hpcpush(hpxyzsc(0.226731,-0.063886,1.027370));
-  hpcpush(hpxyzsc(0.264313,-0.081720,1.037564));
-  hpcpush(hpxyzsc(0.255339,-0.129594,1.040189));
-  hpcpush(hpxyzsc(0.199477,-0.131730,1.028175));
-  hpcpush(hpxyzsc(0.151038,-0.106832,1.016969));
-  hpcpush(hpxyzsc(0.098991,-0.082090,1.008235));
-  hpcpush(hpxyzsc(0.047859,-0.071788,1.003715));
-  hpcpush(hpxyzsc(-0.002399,-0.100774,1.005068));
-  hpcpush(hpxyzsc(-0.003641,-0.148054,1.010907));
-  hpcpush(hpxyzsc(0.044142,-0.175341,1.016215));
-  hpcpush(hpxyzsc(0.094648,-0.162253,1.017489));
-  hpcpush(hpxyzsc(0.146867,-0.164292,1.023993));
-  hpcpush(hpxyzsc(0.151935,-0.187094,1.028634));
-  hpcpush(hpxyzsc(0.073005,-0.235380,1.029919));
-  hpcpush(hpxyzsc(0.024027,-0.255446,1.032390));
-  hpcpush(hpxyzsc(-0.011331,-0.246774,1.030061));
-  hpcpush(hpxyzsc(-0.056384,-0.229293,1.027499));
-  hpcpush(hpxyzsc(-0.090798,-0.199010,1.023645));
-  hpcpush(hpxyzsc(-0.091928,-0.154439,1.016023));
-  hpcpush(hpxyzsc(-0.102300,-0.123003,1.012717));
-  hpcpush(hpxyzsc(-0.108401,-0.118145,1.012773));
-  hpcpush(hpxyzsc(-0.138732,-0.121544,1.016867));
-  hpcpush(hpxyzsc(-0.184192,-0.147855,1.027515));
-  hpcpush(hpxyzsc(-0.229967,-0.174723,1.040871));
-  hpcpush(hpxyzsc(-0.255264,-0.167153,1.045514));
-  hpcpush(hpxyzsc(-0.262047,-0.120747,1.040792));
-  hpcpush(hpxyzsc(-0.224851,-0.089187,1.028840));
-  hpcpush(hpxyzsc(-0.177590,-0.085095,1.019205));
-  hpcpush(hpxyzsc(-0.146204,-0.068228,1.012932));
-  hpcpush(hpxyzsc(-0.142123,-0.052233,1.011399));
-  hpcpush(hpxyzsc(-0.148132,-0.023070,1.011175));
-  hpcpush(hpxyzsc(-0.153144,-0.008508,1.011694));
-  hpcpush(hpxyzsc(-0.153133,0.001215,1.011658));
-  hpcpush(hpxyzsc(-0.153133,-0.001215,1.011658));
-  
-  bshape(shWormHead, 33);
-  hpcpush(hpxyzsc(-0.212131,-0.004962,1.022264));
-  hpcpush(hpxyzsc(-0.213579,0.021110,1.022771));
-  hpcpush(hpxyzsc(-0.208766,0.057162,1.023157));
-  hpcpush(hpxyzsc(-0.193784,0.094408,1.022969));
-  hpcpush(hpxyzsc(-0.171245,0.126572,1.022421));
-  hpcpush(hpxyzsc(-0.149103,0.156559,1.023104));
-  hpcpush(hpxyzsc(-0.121949,0.182923,1.023881));
-  hpcpush(hpxyzsc(-0.099674,0.199349,1.024536));
-  hpcpush(hpxyzsc(-0.073594,0.213299,1.025140));
-  hpcpush(hpxyzsc(-0.039892,0.220654,1.024831));
-  hpcpush(hpxyzsc(0.000000,0.225787,1.025173));
-  hpcpush(hpxyzsc(0.051224,0.223636,1.025981));
-  hpcpush(hpxyzsc(0.099986,0.207472,1.026178));
-  hpcpush(hpxyzsc(0.126101,0.189776,1.025630));
-  hpcpush(hpxyzsc(0.144643,0.172075,1.024954));
-  hpcpush(hpxyzsc(0.260938,0.181352,1.049275));
-  hpcpush(hpxyzsc(0.170506,0.139392,1.023964));
-  hpcpush(hpxyzsc(0.241779,0.141997,1.038567));
-  hpcpush(hpxyzsc(0.188983,0.108168,1.023433));
-  hpcpush(hpxyzsc(0.239385,0.101327,1.033234));
-  hpcpush(hpxyzsc(0.202657,0.079571,1.023426));
-  hpcpush(hpxyzsc(0.238058,0.069276,1.030277));
-  hpcpush(hpxyzsc(0.208736,0.055911,1.023082));
-  hpcpush(hpxyzsc(0.237283,0.040175,1.028551));
-  hpcpush(hpxyzsc(0.212303,0.028555,1.022687));
-  hpcpush(hpxyzsc(0.235548,0.015035,1.027477));
-  hpcpush(hpxyzsc(0.216200,0.001243,1.023105));
-  hpcpush(hpxyzsc(0.216200,-0.001243,1.023105));
-  hpcpush(hpxyzsc(0.235548,-0.015035,1.027477));
-  hpcpush(hpxyzsc(0.212303,-0.028555,1.022687));
-  hpcpush(hpxyzsc(0.237283,-0.040175,1.028551));
-  hpcpush(hpxyzsc(0.208736,-0.055911,1.023082));
-  hpcpush(hpxyzsc(0.238058,-0.069276,1.030277));
-  hpcpush(hpxyzsc(0.202657,-0.079571,1.023426));
-  hpcpush(hpxyzsc(0.239385,-0.101327,1.033234));
-  hpcpush(hpxyzsc(0.188983,-0.108168,1.023433));
-  hpcpush(hpxyzsc(0.241779,-0.141997,1.038567));
-  hpcpush(hpxyzsc(0.170506,-0.139392,1.023964));
-  hpcpush(hpxyzsc(0.260938,-0.181352,1.049275));
-  hpcpush(hpxyzsc(0.144643,-0.172075,1.024954));
-  hpcpush(hpxyzsc(0.126101,-0.189776,1.025630));
-  hpcpush(hpxyzsc(0.099986,-0.207472,1.026178));
-  hpcpush(hpxyzsc(0.051224,-0.223636,1.025981));
-  hpcpush(hpxyzsc(0.000000,-0.225787,1.025173));
-  hpcpush(hpxyzsc(-0.039892,-0.220654,1.024831));
-  hpcpush(hpxyzsc(-0.073594,-0.213299,1.025140));
-  hpcpush(hpxyzsc(-0.099674,-0.199349,1.024536));
-  hpcpush(hpxyzsc(-0.121949,-0.182923,1.023881));
-  hpcpush(hpxyzsc(-0.149103,-0.156559,1.023104));
-  hpcpush(hpxyzsc(-0.171245,-0.126572,1.022421));
-  hpcpush(hpxyzsc(-0.193784,-0.094408,1.022969));
-  hpcpush(hpxyzsc(-0.208766,-0.057162,1.023157));
-  hpcpush(hpxyzsc(-0.213579,-0.021110,1.022771));
-  hpcpush(hpxyzsc(-0.212131,0.004962,1.022264));
-  hpcpush(hpxyzsc(-0.212131,-0.004962,1.022264));
-  
-  // bodyparts
-
-  bshape(shWaterElemental, 41);
-  hpcpush(hpxyzsc(0.033277,-0.002494,1.000557));
-  hpcpush(hpxyzsc(0.030600,0.009657,1.000515));
-  hpcpush(hpxyzsc(0.028387,0.043359,1.001342));
-  hpcpush(hpxyzsc(0.023906,0.062967,1.002266));
-  hpcpush(hpxyzsc(0.019706,0.086354,1.003915));
-  hpcpush(hpxyzsc(0.012812,0.106509,1.005738));
-  hpcpush(hpxyzsc(0.005882,0.110737,1.006130));
-  hpcpush(hpxyzsc(-0.011019,0.128245,1.008250));
-  hpcpush(hpxyzsc(-0.022186,0.143031,1.010421));
-  hpcpush(hpxyzsc(-0.030554,0.165535,1.014069));
-  hpcpush(hpxyzsc(-0.031448,0.191850,1.018722));
-  hpcpush(hpxyzsc(-0.019105,0.210887,1.022173));
-  hpcpush(hpxyzsc(-0.011140,0.218374,1.023627));
-  hpcpush(hpxyzsc(0.003294,0.228201,1.025713));
-  hpcpush(hpxyzsc(0.022226,0.229526,1.026244));
-  hpcpush(hpxyzsc(0.030754,0.226143,1.025713));
-  hpcpush(hpxyzsc(0.045164,0.218293,1.024545));
-  hpcpush(hpxyzsc(0.048550,0.213967,1.023787));
-  hpcpush(hpxyzsc(0.049437,0.209816,1.022970));
-  hpcpush(hpxyzsc(0.066512,0.191298,1.020303));
-  hpcpush(hpxyzsc(0.088299,0.195587,1.022766));
-  hpcpush(hpxyzsc(0.104559,0.227968,1.030971));
-  hpcpush(hpxyzsc(0.106012,0.240682,1.034005));
-  hpcpush(hpxyzsc(0.089373,0.265934,1.038609));
-  hpcpush(hpxyzsc(0.046213,0.273931,1.037870));
-  hpcpush(hpxyzsc(0.013854,0.270257,1.035968));
-  hpcpush(hpxyzsc(-0.022699,0.280947,1.038964));
-  hpcpush(hpxyzsc(-0.082207,0.292512,1.045142));
-  hpcpush(hpxyzsc(-0.094232,0.286583,1.044514));
-  hpcpush(hpxyzsc(-0.060514,0.273212,1.038416));
-  hpcpush(hpxyzsc(-0.030455,0.255305,1.032525));
-  hpcpush(hpxyzsc(-0.028453,0.245093,1.029990));
-  hpcpush(hpxyzsc(-0.035130,0.238686,1.028691));
-  hpcpush(hpxyzsc(-0.050479,0.236064,1.028725));
-  hpcpush(hpxyzsc(-0.095235,0.239928,1.032780));
-  hpcpush(hpxyzsc(-0.156131,0.242848,1.040842));
-  hpcpush(hpxyzsc(-0.180731,0.231002,1.042126));
-  hpcpush(hpxyzsc(-0.161568,0.228039,1.038319));
-  hpcpush(hpxyzsc(-0.140105,0.226302,1.034815));
-  hpcpush(hpxyzsc(-0.114110,0.211717,1.028516));
-  hpcpush(hpxyzsc(-0.104006,0.203643,1.025811));
-  hpcpush(hpxyzsc(-0.096764,0.190676,1.022605));
-  hpcpush(hpxyzsc(-0.097207,0.178784,1.020496));
-  hpcpush(hpxyzsc(-0.104028,0.166435,1.019079));
-  hpcpush(hpxyzsc(-0.109337,0.160521,1.018686));
-  hpcpush(hpxyzsc(-0.119778,0.153916,1.018841));
-  hpcpush(hpxyzsc(-0.145551,0.154306,1.022250));
-  hpcpush(hpxyzsc(-0.196422,0.144903,1.029358));
-  hpcpush(hpxyzsc(-0.238648,0.130576,1.036341));
-  hpcpush(hpxyzsc(-0.251825,0.121707,1.038378));
-  hpcpush(hpxyzsc(-0.243461,0.108932,1.034959));
-  hpcpush(hpxyzsc(-0.227615,0.116160,1.032135));
-  hpcpush(hpxyzsc(-0.199823,0.119359,1.026731));
-  hpcpush(hpxyzsc(-0.155889,0.119514,1.019110));
-  hpcpush(hpxyzsc(-0.126863,0.107638,1.013746));
-  hpcpush(hpxyzsc(-0.121879,0.082303,1.010756));
-  hpcpush(hpxyzsc(-0.130612,0.062191,1.010409));
-  hpcpush(hpxyzsc(-0.149053,0.051540,1.012360));
-  hpcpush(hpxyzsc(-0.176729,0.044071,1.016452));
-  hpcpush(hpxyzsc(-0.213072,0.040955,1.023268));
-  hpcpush(hpxyzsc(-0.257325,0.030738,1.033035));
-  hpcpush(hpxyzsc(-0.282810,0.025058,1.039524));
-  hpcpush(hpxyzsc(-0.296088,0.010521,1.042966));
-  hpcpush(hpxyzsc(-0.296088,-0.010521,1.042966));
-  hpcpush(hpxyzsc(-0.282810,-0.025058,1.039524));
-  hpcpush(hpxyzsc(-0.257325,-0.030738,1.033035));
-  hpcpush(hpxyzsc(-0.213072,-0.040955,1.023268));
-  hpcpush(hpxyzsc(-0.176729,-0.044071,1.016452));
-  hpcpush(hpxyzsc(-0.149053,-0.051540,1.012360));
-  hpcpush(hpxyzsc(-0.130612,-0.062191,1.010409));
-  hpcpush(hpxyzsc(-0.121879,-0.082303,1.010756));
-  hpcpush(hpxyzsc(-0.126863,-0.107638,1.013746));
-  hpcpush(hpxyzsc(-0.155889,-0.119514,1.019110));
-  hpcpush(hpxyzsc(-0.199823,-0.119359,1.026731));
-  hpcpush(hpxyzsc(-0.227615,-0.116160,1.032135));
-  hpcpush(hpxyzsc(-0.243461,-0.108932,1.034959));
-  hpcpush(hpxyzsc(-0.251825,-0.121707,1.038378));
-  hpcpush(hpxyzsc(-0.238648,-0.130576,1.036341));
-  hpcpush(hpxyzsc(-0.196422,-0.144903,1.029358));
-  hpcpush(hpxyzsc(-0.145551,-0.154306,1.022250));
-  hpcpush(hpxyzsc(-0.119778,-0.153916,1.018841));
-  hpcpush(hpxyzsc(-0.109337,-0.160521,1.018686));
-  hpcpush(hpxyzsc(-0.104028,-0.166435,1.019079));
-  hpcpush(hpxyzsc(-0.097207,-0.178784,1.020496));
-  hpcpush(hpxyzsc(-0.096764,-0.190676,1.022605));
-  hpcpush(hpxyzsc(-0.104006,-0.203643,1.025811));
-  hpcpush(hpxyzsc(-0.114110,-0.211717,1.028516));
-  hpcpush(hpxyzsc(-0.140105,-0.226302,1.034815));
-  hpcpush(hpxyzsc(-0.161568,-0.228039,1.038319));
-  hpcpush(hpxyzsc(-0.180731,-0.231002,1.042126));
-  hpcpush(hpxyzsc(-0.156131,-0.242848,1.040842));
-  hpcpush(hpxyzsc(-0.095235,-0.239928,1.032780));
-  hpcpush(hpxyzsc(-0.050479,-0.236064,1.028725));
-  hpcpush(hpxyzsc(-0.035130,-0.238686,1.028691));
-  hpcpush(hpxyzsc(-0.028453,-0.245093,1.029990));
-  hpcpush(hpxyzsc(-0.030455,-0.255305,1.032525));
-  hpcpush(hpxyzsc(-0.060514,-0.273212,1.038416));
-  hpcpush(hpxyzsc(-0.094232,-0.286583,1.044514));
-  hpcpush(hpxyzsc(-0.082207,-0.292512,1.045142));
-  hpcpush(hpxyzsc(-0.022699,-0.280947,1.038964));
-  hpcpush(hpxyzsc(0.013854,-0.270257,1.035968));
-  hpcpush(hpxyzsc(0.046213,-0.273931,1.037870));
-  hpcpush(hpxyzsc(0.089373,-0.265934,1.038609));
-  hpcpush(hpxyzsc(0.106012,-0.240682,1.034005));
-  hpcpush(hpxyzsc(0.104559,-0.227968,1.030971));
-  hpcpush(hpxyzsc(0.088299,-0.195587,1.022766));
-  hpcpush(hpxyzsc(0.066512,-0.191298,1.020303));
-  hpcpush(hpxyzsc(0.049437,-0.209816,1.022970));
-  hpcpush(hpxyzsc(0.048550,-0.213967,1.023787));
-  hpcpush(hpxyzsc(0.045164,-0.218293,1.024545));
-  hpcpush(hpxyzsc(0.030754,-0.226143,1.025713));
-  hpcpush(hpxyzsc(0.022226,-0.229526,1.026244));
-  hpcpush(hpxyzsc(0.003294,-0.228201,1.025713));
-  hpcpush(hpxyzsc(-0.011140,-0.218374,1.023627));
-  hpcpush(hpxyzsc(-0.019105,-0.210887,1.022173));
-  hpcpush(hpxyzsc(-0.031448,-0.191850,1.018722));
-  hpcpush(hpxyzsc(-0.030554,-0.165535,1.014069));
-  hpcpush(hpxyzsc(-0.022186,-0.143031,1.010421));
-  hpcpush(hpxyzsc(-0.011019,-0.128245,1.008250));
-  hpcpush(hpxyzsc(0.005882,-0.110737,1.006130));
-  hpcpush(hpxyzsc(0.012812,-0.106509,1.005738));
-  hpcpush(hpxyzsc(0.019706,-0.086354,1.003915));
-  hpcpush(hpxyzsc(0.023906,-0.062967,1.002266));
-  hpcpush(hpxyzsc(0.028387,-0.043359,1.001342));
-  hpcpush(hpxyzsc(0.030600,-0.009657,1.000515));
-  hpcpush(hpxyzsc(0.033277,0.002494,1.000557));
-  hpcpush(hpxyzsc(0.033277,-0.002494,1.000557));
-  
-  bshape(shMouse, 42);
-  hpcpush(hpxyzsc(-0.180666,0.000000,1.016189));
-  hpcpush(hpxyzsc(-0.063349,-0.003586,1.002011));
-  hpcpush(hpxyzsc(-0.052534,-0.013134,1.001465));
-  hpcpush(hpxyzsc(-0.040561,-0.021474,1.001053));
-  hpcpush(hpxyzsc(-0.020260,-0.026219,1.000549));
-  hpcpush(hpxyzsc(-0.001191,-0.028595,1.000409));
-  hpcpush(hpxyzsc(0.025033,-0.026225,1.000657));
-  hpcpush(hpxyzsc(0.045342,-0.015512,1.001148));
-  hpcpush(hpxyzsc(0.056152,-0.020310,1.001781));
-  hpcpush(hpxyzsc(0.077865,-0.014375,1.003130));
-  hpcpush(hpxyzsc(0.094893,-0.002402,1.004495));
-  hpcpush(hpxyzsc(0.101018,-0.000000,1.005089));
-  hpcpush(hpxyzsc(0.101018,0.000000,1.005089));
-  hpcpush(hpxyzsc(0.094893,0.002402,1.004495));
-  hpcpush(hpxyzsc(0.077865,0.014375,1.003130));
-  hpcpush(hpxyzsc(0.056152,0.020310,1.001781));
-  hpcpush(hpxyzsc(0.045342,0.015512,1.001148));
-  hpcpush(hpxyzsc(0.025033,0.026225,1.000657));
-  hpcpush(hpxyzsc(-0.001191,0.028595,1.000409));
-  hpcpush(hpxyzsc(-0.020260,0.026219,1.000549));
-  hpcpush(hpxyzsc(-0.040561,0.021474,1.001053));
-  hpcpush(hpxyzsc(-0.052534,0.013134,1.001465));
-  hpcpush(hpxyzsc(-0.063349,0.003586,1.002011));
-  hpcpush(hpxyzsc(-0.180666,-0.000000,1.016189));
-  hpcpush(hpxyzsc(-0.180666,0.000000,1.016189));
-
-  bshape(shMouseLegs, 41);
-  hpcpush(hpxyzsc(-0.033372,-0.005959,1.000574));
-  hpcpush(hpxyzsc(-0.047793,-0.037040,1.001826));
-  hpcpush(hpxyzsc(-0.003572,-0.011907,1.000077));
-  hpcpush(hpxyzsc(0.033422,-0.039390,1.001333));
-  hpcpush(hpxyzsc(0.026209,-0.004765,1.000355));
-  hpcpush(hpxyzsc(0.026209,0.004765,1.000355));
-  hpcpush(hpxyzsc(0.033422,0.039390,1.001333));
-  hpcpush(hpxyzsc(-0.003572,0.011907,1.000077));
-  hpcpush(hpxyzsc(-0.047793,0.037040,1.001826));
-  hpcpush(hpxyzsc(-0.033372,0.005959,1.000574));
-  hpcpush(hpxyzsc(-0.033372,-0.005959,1.000574));
-
-  bshape(shMouseEyes, 43);
-  hpcpush(hpxyzsc(0.073016,-0.011970,1.002734));
-  hpcpush(hpxyzsc(0.065770,-0.013154,1.002247));
-  hpcpush(hpxyzsc(0.065764,-0.008370,1.002195));
-  hpcpush(hpxyzsc(0.071797,-0.003590,1.002581));
-  hpcpush(hpxyzsc(0.071797,0.003590,1.002581));
-  hpcpush(hpxyzsc(0.065764,0.008370,1.002195));
-  hpcpush(hpxyzsc(0.065770,0.013154,1.002247));
-  hpcpush(hpxyzsc(0.073016,0.011970,1.002734));
-  hpcpush(hpxyzsc(0.073016,-0.011970,1.002734));
-
-  bshape(shPBody, 41);
-  hpcpush(hpxyzsc(-0.127943,0.000000,1.008151));
-  hpcpush(hpxyzsc(-0.121732,0.008437,1.007417));
-  hpcpush(hpxyzsc(-0.120752,0.047093,1.008364));
-  hpcpush(hpxyzsc(-0.114785,0.065246,1.008679));
-  hpcpush(hpxyzsc(-0.096531,0.082051,1.007993));
-  hpcpush(hpxyzsc(-0.079664,0.100183,1.008158));
-  hpcpush(hpxyzsc(-0.087015,0.156872,1.015963));
-  hpcpush(hpxyzsc(-0.090442,0.188317,1.021588));
-  hpcpush(hpxyzsc(-0.085023,0.215058,1.026391));
-  hpcpush(hpxyzsc(-0.078296,0.241201,1.031653));
-  hpcpush(hpxyzsc(-0.070101,0.263835,1.036592));
-  hpcpush(hpxyzsc(-0.062700,0.273833,1.038709));
-  hpcpush(hpxyzsc(-0.053763,0.276497,1.038913));
-  hpcpush(hpxyzsc(-0.030638,0.274461,1.037433));
-  hpcpush(hpxyzsc(-0.015319,0.275737,1.037432));
-  hpcpush(hpxyzsc(0.001277,0.277150,1.037696));
-  hpcpush(hpxyzsc(0.020384,0.271369,1.036367));
-  hpcpush(hpxyzsc(0.038101,0.262896,1.034681));
-  hpcpush(hpxyzsc(0.045596,0.255842,1.033215));
-  hpcpush(hpxyzsc(0.062388,0.263558,1.036029));
-  hpcpush(hpxyzsc(0.085371,0.258660,1.036433));
-  hpcpush(hpxyzsc(0.084235,0.228817,1.029297));
-  hpcpush(hpxyzsc(0.071073,0.213220,1.024946));
-  hpcpush(hpxyzsc(0.048603,0.218088,1.024658));
-  hpcpush(hpxyzsc(0.042541,0.228972,1.026761));
-  hpcpush(hpxyzsc(0.028749,0.228742,1.026231));
-  hpcpush(hpxyzsc(0.011222,0.224439,1.024938));
-  hpcpush(hpxyzsc(-0.012498,0.229969,1.026178));
-  hpcpush(hpxyzsc(-0.026261,0.230095,1.026466));
-  hpcpush(hpxyzsc(-0.024880,0.217700,1.023725));
-  hpcpush(hpxyzsc(-0.022225,0.198787,1.019809));
-  hpcpush(hpxyzsc(-0.020850,0.180288,1.016336));
-  hpcpush(hpxyzsc(-0.021870,0.150662,1.011522));
-  hpcpush(hpxyzsc(-0.022997,0.136774,1.009572));
-  hpcpush(hpxyzsc(-0.004819,0.120485,1.007244));
-  hpcpush(hpxyzsc(0.007204,0.104455,1.005466));
-  hpcpush(hpxyzsc(0.016748,0.083741,1.003640));
-  hpcpush(hpxyzsc(0.026225,0.054833,1.001846));
-  hpcpush(hpxyzsc(0.033323,0.030943,1.001033));
-  hpcpush(hpxyzsc(0.034483,0.001189,1.000595));
-  hpcpush(hpxyzsc(0.034483,-0.001189,1.000595));
-  hpcpush(hpxyzsc(0.034483,0.001189,1.000595));
-  hpcpush(hpxyzsc(0.034483,-0.001189,1.000595));
-  hpcpush(hpxyzsc(0.033323,-0.030943,1.001033));
-  hpcpush(hpxyzsc(0.026225,-0.054833,1.001846));
-  hpcpush(hpxyzsc(0.016748,-0.083741,1.003640));
-  hpcpush(hpxyzsc(0.007204,-0.104455,1.005466));
-  hpcpush(hpxyzsc(-0.004819,-0.120485,1.007244));
-  hpcpush(hpxyzsc(-0.022997,-0.136774,1.009572));
-  hpcpush(hpxyzsc(-0.021870,-0.150662,1.011522));
-  hpcpush(hpxyzsc(-0.020850,-0.180288,1.016336));
-  hpcpush(hpxyzsc(-0.022225,-0.198787,1.019809));
-  hpcpush(hpxyzsc(-0.024880,-0.217700,1.023725));
-  hpcpush(hpxyzsc(-0.026261,-0.230095,1.026466));
-  hpcpush(hpxyzsc(-0.012498,-0.229969,1.026178));
-  hpcpush(hpxyzsc(0.011222,-0.224439,1.024938));
-  hpcpush(hpxyzsc(0.028749,-0.228742,1.026231));
-  hpcpush(hpxyzsc(0.042541,-0.228972,1.026761));
-  hpcpush(hpxyzsc(0.048603,-0.218088,1.024658));
-  hpcpush(hpxyzsc(0.071073,-0.213220,1.024946));
-  hpcpush(hpxyzsc(0.084235,-0.228817,1.029297));
-  hpcpush(hpxyzsc(0.085371,-0.258660,1.036433));
-  hpcpush(hpxyzsc(0.062388,-0.263558,1.036029));
-  hpcpush(hpxyzsc(0.045596,-0.255842,1.033215));
-  hpcpush(hpxyzsc(0.038101,-0.262896,1.034681));
-  hpcpush(hpxyzsc(0.020384,-0.271369,1.036367));
-  hpcpush(hpxyzsc(0.001277,-0.277150,1.037696));
-  hpcpush(hpxyzsc(-0.015319,-0.275737,1.037432));
-  hpcpush(hpxyzsc(-0.030638,-0.274461,1.037433));
-  hpcpush(hpxyzsc(-0.053763,-0.276497,1.038913));
-  hpcpush(hpxyzsc(-0.062700,-0.273833,1.038709));
-  hpcpush(hpxyzsc(-0.070101,-0.263835,1.036592));
-  hpcpush(hpxyzsc(-0.078296,-0.241201,1.031653));
-  hpcpush(hpxyzsc(-0.085023,-0.215058,1.026391));
-  hpcpush(hpxyzsc(-0.090442,-0.188317,1.021588));
-  hpcpush(hpxyzsc(-0.087015,-0.156872,1.015963));
-  hpcpush(hpxyzsc(-0.079664,-0.100183,1.008158));
-  hpcpush(hpxyzsc(-0.096531,-0.082051,1.007993));
-  hpcpush(hpxyzsc(-0.114785,-0.065246,1.008679));
-  hpcpush(hpxyzsc(-0.120752,-0.047093,1.008364));
-  hpcpush(hpxyzsc(-0.121732,-0.008437,1.007417));
-  hpcpush(hpxyzsc(-0.127943,-0.000000,1.008151));
-  hpcpush(hpxyzsc(-0.127943,0.000000,1.008151));
-
-  bshape(shYeti, 41);
-  hpcpush(hpxyzsc(-0.146785,0.001213,1.010716));
-  hpcpush(hpxyzsc(-0.119261,0.012047,1.007158));
-  hpcpush(hpxyzsc(-0.134264,0.022982,1.009235));
-  hpcpush(hpxyzsc(-0.116850,0.026502,1.007153));
-  hpcpush(hpxyzsc(-0.128124,0.037470,1.008871));
-  hpcpush(hpxyzsc(-0.114489,0.040975,1.007366));
-  hpcpush(hpxyzsc(-0.134526,0.049690,1.010231));
-  hpcpush(hpxyzsc(-0.108483,0.056652,1.007461));
-  hpcpush(hpxyzsc(-0.124869,0.072739,1.010388));
-  hpcpush(hpxyzsc(-0.100038,0.069906,1.007420));
-  hpcpush(hpxyzsc(-0.116319,0.082393,1.010108));
-  hpcpush(hpxyzsc(-0.086776,0.085571,1.007399));
-  hpcpush(hpxyzsc(-0.105410,0.095717,1.010086));
-  hpcpush(hpxyzsc(-0.078461,0.101396,1.008185));
-  hpcpush(hpxyzsc(-0.084756,0.111394,1.009749));
-  hpcpush(hpxyzsc(-0.078850,0.123734,1.010706));
-  hpcpush(hpxyzsc(-0.094972,0.127846,1.012603));
-  hpcpush(hpxyzsc(-0.081624,0.138883,1.012892));
-  hpcpush(hpxyzsc(-0.102733,0.139423,1.014886));
-  hpcpush(hpxyzsc(-0.083221,0.154204,1.015236));
-  hpcpush(hpxyzsc(-0.115566,0.148760,1.017588));
-  hpcpush(hpxyzsc(-0.081064,0.167041,1.017091));
-  hpcpush(hpxyzsc(-0.093630,0.170012,1.018661));
-  hpcpush(hpxyzsc(-0.081530,0.184060,1.020061));
-  hpcpush(hpxyzsc(-0.104404,0.190164,1.023261));
-  hpcpush(hpxyzsc(-0.078114,0.195904,1.021998));
-  hpcpush(hpxyzsc(-0.088688,0.211101,1.025880));
-  hpcpush(hpxyzsc(-0.074815,0.211977,1.024954));
-  hpcpush(hpxyzsc(-0.081589,0.225940,1.028448));
-  hpcpush(hpxyzsc(-0.067678,0.226847,1.027638));
-  hpcpush(hpxyzsc(-0.091419,0.248863,1.034548));
-  hpcpush(hpxyzsc(-0.059306,0.244796,1.031234));
-  hpcpush(hpxyzsc(-0.060896,0.256271,1.034110));
-  hpcpush(hpxyzsc(-0.051997,0.257446,1.033916));
-  hpcpush(hpxyzsc(-0.058919,0.276663,1.039237));
-  hpcpush(hpxyzsc(-0.042072,0.270280,1.036736));
-  hpcpush(hpxyzsc(-0.042449,0.288141,1.041550));
-  hpcpush(hpxyzsc(-0.020355,0.268437,1.035603));
-  hpcpush(hpxyzsc(-0.007716,0.290637,1.041407));
-  hpcpush(hpxyzsc(0.001272,0.268323,1.035374));
-  hpcpush(hpxyzsc(0.017995,0.289206,1.041136));
-  hpcpush(hpxyzsc(0.021598,0.265534,1.034879));
-  hpcpush(hpxyzsc(0.038374,0.277573,1.038518));
-  hpcpush(hpxyzsc(0.037997,0.257112,1.033223));
-  hpcpush(hpxyzsc(0.048725,0.280810,1.039821));
-  hpcpush(hpxyzsc(0.050653,0.254534,1.033128));
-  hpcpush(hpxyzsc(0.069009,0.269645,1.038013));
-  hpcpush(hpxyzsc(0.085977,0.273328,1.040241));
-  hpcpush(hpxyzsc(0.075050,0.258222,1.035525));
-  hpcpush(hpxyzsc(0.097049,0.259223,1.037601));
-  hpcpush(hpxyzsc(0.103016,0.248003,1.035431));
-  hpcpush(hpxyzsc(0.079575,0.241251,1.031763));
-  hpcpush(hpxyzsc(0.091636,0.222186,1.028476));
-  hpcpush(hpxyzsc(0.070376,0.232494,1.029080));
-  hpcpush(hpxyzsc(0.072102,0.205119,1.023363));
-  hpcpush(hpxyzsc(0.060388,0.237778,1.029653));
-  hpcpush(hpxyzsc(0.058115,0.195365,1.020561));
-  hpcpush(hpxyzsc(0.045217,0.237388,1.028784));
-  hpcpush(hpxyzsc(0.037611,0.234439,1.027802));
-  hpcpush(hpxyzsc(0.034796,0.213746,1.023180));
-  hpcpush(hpxyzsc(0.023715,0.225917,1.025476));
-  hpcpush(hpxyzsc(0.027226,0.204191,1.020997));
-  hpcpush(hpxyzsc(0.012420,0.214873,1.022900));
-  hpcpush(hpxyzsc(0.020917,0.189485,1.018009));
-  hpcpush(hpxyzsc(0.003700,0.197357,1.019296));
-  hpcpush(hpxyzsc(0.009817,0.182844,1.016626));
-  hpcpush(hpxyzsc(-0.011065,0.188106,1.017598));
-  hpcpush(hpxyzsc(0.003663,0.168520,1.014107));
-  hpcpush(hpxyzsc(-0.023305,0.180308,1.016393));
-  hpcpush(hpxyzsc(-0.004879,0.164654,1.013477));
-  hpcpush(hpxyzsc(-0.034247,0.170012,1.014927));
-  hpcpush(hpxyzsc(-0.004861,0.153136,1.011669));
-  hpcpush(hpxyzsc(-0.027964,0.151980,1.011870));
-  hpcpush(hpxyzsc(-0.003639,0.146787,1.010722));
-  hpcpush(hpxyzsc(-0.015710,0.131722,1.008760));
-  hpcpush(hpxyzsc(0.010889,0.136717,1.009361));
-  hpcpush(hpxyzsc(-0.003615,0.120484,1.007239));
-  hpcpush(hpxyzsc(0.027708,0.116858,1.007186));
-  hpcpush(hpxyzsc(0.007202,0.103229,1.005340));
-  hpcpush(hpxyzsc(0.034761,0.089899,1.004634));
-  hpcpush(hpxyzsc(0.015548,0.082525,1.003520));
-  hpcpush(hpxyzsc(0.044270,0.074183,1.003725));
-  hpcpush(hpxyzsc(0.021490,0.069245,1.002625));
-  hpcpush(hpxyzsc(0.051357,0.054940,1.002824));
-  hpcpush(hpxyzsc(0.027405,0.050043,1.001626));
-  hpcpush(hpxyzsc(0.053662,0.034582,1.002036));
-  hpcpush(hpxyzsc(0.034521,0.033331,1.001151));
-  hpcpush(hpxyzsc(0.060848,0.029827,1.002293));
-  hpcpush(hpxyzsc(0.041653,0.017851,1.001026));
-  hpcpush(hpxyzsc(0.065617,0.015510,1.002271));
-  hpcpush(hpxyzsc(0.051204,0.004763,1.001321));
-  hpcpush(hpxyzsc(0.051204,-0.004763,1.001321));
-  hpcpush(hpxyzsc(0.065617,-0.015510,1.002271));
-  hpcpush(hpxyzsc(0.041653,-0.017851,1.001026));
-  hpcpush(hpxyzsc(0.060848,-0.029827,1.002293));
-  hpcpush(hpxyzsc(0.034521,-0.033331,1.001151));
-  hpcpush(hpxyzsc(0.053662,-0.034582,1.002036));
-  hpcpush(hpxyzsc(0.027405,-0.050043,1.001626));
-  hpcpush(hpxyzsc(0.051357,-0.054940,1.002824));
-  hpcpush(hpxyzsc(0.021490,-0.069245,1.002625));
-  hpcpush(hpxyzsc(0.044270,-0.074183,1.003725));
-  hpcpush(hpxyzsc(0.015548,-0.082525,1.003520));
-  hpcpush(hpxyzsc(0.034761,-0.089899,1.004634));
-  hpcpush(hpxyzsc(0.007202,-0.103229,1.005340));
-  hpcpush(hpxyzsc(0.027708,-0.116858,1.007186));
-  hpcpush(hpxyzsc(-0.003615,-0.120484,1.007239));
-  hpcpush(hpxyzsc(0.010889,-0.136717,1.009361));
-  hpcpush(hpxyzsc(-0.015710,-0.131722,1.008760));
-  hpcpush(hpxyzsc(-0.003639,-0.146787,1.010722));
-  hpcpush(hpxyzsc(-0.027964,-0.151980,1.011870));
-  hpcpush(hpxyzsc(-0.004861,-0.153136,1.011669));
-  hpcpush(hpxyzsc(-0.034247,-0.170012,1.014927));
-  hpcpush(hpxyzsc(-0.004879,-0.164654,1.013477));
-  hpcpush(hpxyzsc(-0.023305,-0.180308,1.016393));
-  hpcpush(hpxyzsc(0.003663,-0.168520,1.014107));
-  hpcpush(hpxyzsc(-0.011065,-0.188106,1.017598));
-  hpcpush(hpxyzsc(0.009817,-0.182844,1.016626));
-  hpcpush(hpxyzsc(0.003700,-0.197357,1.019296));
-  hpcpush(hpxyzsc(0.020917,-0.189485,1.018009));
-  hpcpush(hpxyzsc(0.012420,-0.214873,1.022900));
-  hpcpush(hpxyzsc(0.027226,-0.204191,1.020997));
-  hpcpush(hpxyzsc(0.023715,-0.225917,1.025476));
-  hpcpush(hpxyzsc(0.034796,-0.213746,1.023180));
-  hpcpush(hpxyzsc(0.037611,-0.234439,1.027802));
-  hpcpush(hpxyzsc(0.045217,-0.237388,1.028784));
-  hpcpush(hpxyzsc(0.058115,-0.195365,1.020561));
-  hpcpush(hpxyzsc(0.060388,-0.237778,1.029653));
-  hpcpush(hpxyzsc(0.072102,-0.205119,1.023363));
-  hpcpush(hpxyzsc(0.070376,-0.232494,1.029080));
-  hpcpush(hpxyzsc(0.091636,-0.222186,1.028476));
-  hpcpush(hpxyzsc(0.079575,-0.241251,1.031763));
-  hpcpush(hpxyzsc(0.103016,-0.248003,1.035431));
-  hpcpush(hpxyzsc(0.097049,-0.259223,1.037601));
-  hpcpush(hpxyzsc(0.075050,-0.258222,1.035525));
-  hpcpush(hpxyzsc(0.085977,-0.273328,1.040241));
-  hpcpush(hpxyzsc(0.069009,-0.269645,1.038013));
-  hpcpush(hpxyzsc(0.050653,-0.254534,1.033128));
-  hpcpush(hpxyzsc(0.048725,-0.280810,1.039821));
-  hpcpush(hpxyzsc(0.037997,-0.257112,1.033223));
-  hpcpush(hpxyzsc(0.038374,-0.277573,1.038518));
-  hpcpush(hpxyzsc(0.021598,-0.265534,1.034879));
-  hpcpush(hpxyzsc(0.017995,-0.289206,1.041136));
-  hpcpush(hpxyzsc(0.001272,-0.268323,1.035374));
-  hpcpush(hpxyzsc(-0.007716,-0.290637,1.041407));
-  hpcpush(hpxyzsc(-0.020355,-0.268437,1.035603));
-  hpcpush(hpxyzsc(-0.042449,-0.288141,1.041550));
-  hpcpush(hpxyzsc(-0.042072,-0.270280,1.036736));
-  hpcpush(hpxyzsc(-0.058919,-0.276663,1.039237));
-  hpcpush(hpxyzsc(-0.051997,-0.257446,1.033916));
-  hpcpush(hpxyzsc(-0.060896,-0.256271,1.034110));
-  hpcpush(hpxyzsc(-0.059306,-0.244796,1.031234));
-  hpcpush(hpxyzsc(-0.091419,-0.248863,1.034548));
-  hpcpush(hpxyzsc(-0.067678,-0.226847,1.027638));
-  hpcpush(hpxyzsc(-0.081589,-0.225940,1.028448));
-  hpcpush(hpxyzsc(-0.074815,-0.211977,1.024954));
-  hpcpush(hpxyzsc(-0.088688,-0.211101,1.025880));
-  hpcpush(hpxyzsc(-0.078114,-0.195904,1.021998));
-  hpcpush(hpxyzsc(-0.104404,-0.190164,1.023261));
-  hpcpush(hpxyzsc(-0.081530,-0.184060,1.020061));
-  hpcpush(hpxyzsc(-0.093630,-0.170012,1.018661));
-  hpcpush(hpxyzsc(-0.081064,-0.167041,1.017091));
-  hpcpush(hpxyzsc(-0.115566,-0.148760,1.017588));
-  hpcpush(hpxyzsc(-0.083221,-0.154204,1.015236));
-  hpcpush(hpxyzsc(-0.102733,-0.139423,1.014886));
-  hpcpush(hpxyzsc(-0.081624,-0.138883,1.012892));
-  hpcpush(hpxyzsc(-0.094972,-0.127846,1.012603));
-  hpcpush(hpxyzsc(-0.078850,-0.123734,1.010706));
-  hpcpush(hpxyzsc(-0.084756,-0.111394,1.009749));
-  hpcpush(hpxyzsc(-0.078461,-0.101396,1.008185));
-  hpcpush(hpxyzsc(-0.105410,-0.095717,1.010086));
-  hpcpush(hpxyzsc(-0.086776,-0.085571,1.007399));
-  hpcpush(hpxyzsc(-0.116319,-0.082393,1.010108));
-  hpcpush(hpxyzsc(-0.100038,-0.069906,1.007420));
-  hpcpush(hpxyzsc(-0.124869,-0.072739,1.010388));
-  hpcpush(hpxyzsc(-0.108483,-0.056652,1.007461));
-  hpcpush(hpxyzsc(-0.134526,-0.049690,1.010231));
-  hpcpush(hpxyzsc(-0.114489,-0.040975,1.007366));
-  hpcpush(hpxyzsc(-0.128124,-0.037470,1.008871));
-  hpcpush(hpxyzsc(-0.116850,-0.026502,1.007153));
-  hpcpush(hpxyzsc(-0.134264,-0.022982,1.009235));
-  hpcpush(hpxyzsc(-0.119261,-0.012047,1.007158));
-  hpcpush(hpxyzsc(-0.146785,-0.001213,1.010716));
-  hpcpush(hpxyzsc(-0.146785,0.001213,1.010716));
-  
-  bshape(shKnife, 42);
-  hpcpush(hpxyzsc(-0.086373,0.015595,1.003844));
-  hpcpush(hpxyzsc(-0.063364,0.015542,1.002126));
-  hpcpush(hpxyzsc(-0.061008,0.033495,1.002419));
-  hpcpush(hpxyzsc(-0.041796,0.037020,1.001557));
-  hpcpush(hpxyzsc(-0.038168,0.021470,1.000958));
-  hpcpush(hpxyzsc(0.085206,0.028802,1.004037));
-  hpcpush(hpxyzsc(0.158634,0.003661,1.012511));
-  hpcpush(hpxyzsc(0.158634,-0.003661,1.012511));
-  hpcpush(hpxyzsc(0.085206,-0.028802,1.004037));
-  hpcpush(hpxyzsc(-0.038168,-0.021470,1.000958));
-  hpcpush(hpxyzsc(-0.041796,-0.037020,1.001557));
-  hpcpush(hpxyzsc(-0.061008,-0.033495,1.002419));
-  hpcpush(hpxyzsc(-0.063364,-0.015542,1.002126));
-  hpcpush(hpxyzsc(-0.086373,-0.015595,1.003844));
-  hpcpush(hpxyzsc(-0.086373,0.015595,1.003844));
-  
-  bshape(shTongue, 42);
-  hpcpush(hpxyzsc(-0.036955,0.001192,1.000683));
-  hpcpush(hpxyzsc(-0.036957,-0.007153,1.000708));
-  hpcpush(hpxyzsc(-0.048967,-0.028663,1.001608));
-  hpcpush(hpxyzsc(-0.061094,-0.050313,1.003127));
-  hpcpush(hpxyzsc(-0.064717,-0.050336,1.003355));
-  hpcpush(hpxyzsc(-0.049075,-0.055059,1.002716));
-  hpcpush(hpxyzsc(-0.022708,-0.058563,1.001971));
-  hpcpush(hpxyzsc(0.011941,-0.053734,1.001514));
-  hpcpush(hpxyzsc(0.029846,-0.044173,1.001420));
-  hpcpush(hpxyzsc(0.046581,-0.033443,1.001643));
-  hpcpush(hpxyzsc(0.062159,-0.015540,1.002050));
-  hpcpush(hpxyzsc(0.066968,-0.005979,1.002258));
-  hpcpush(hpxyzsc(0.066968,0.005979,1.002258));
-  hpcpush(hpxyzsc(0.062159,0.015540,1.002050));
-  hpcpush(hpxyzsc(0.046581,0.033443,1.001643));
-  hpcpush(hpxyzsc(0.029846,0.044173,1.001420));
-  hpcpush(hpxyzsc(0.011941,0.053734,1.001514));
-  hpcpush(hpxyzsc(-0.022708,0.058563,1.001971));
-  hpcpush(hpxyzsc(-0.049075,0.055059,1.002716));
-  hpcpush(hpxyzsc(-0.064717,0.050336,1.003355));
-  hpcpush(hpxyzsc(-0.061094,0.050313,1.003127));
-  hpcpush(hpxyzsc(-0.048967,0.028663,1.001608));
-  hpcpush(hpxyzsc(-0.036957,0.007153,1.000708));
-  hpcpush(hpxyzsc(-0.036955,-0.001192,1.000683));
-  hpcpush(hpxyzsc(-0.036955,0.001192,1.000683));  
-  
-  bshape(shFlailMissile, 42);
-  hpcpush(hpxyzsc(-0.064558,0.008369,1.002117));
-  hpcpush(hpxyzsc(-0.038156,0.011924,1.000799));
-  hpcpush(hpxyzsc(-0.059223,0.027026,1.002117));
-  hpcpush(hpxyzsc(-0.032946,0.022641,1.000799));
-  hpcpush(hpxyzsc(-0.048626,0.043281,1.002117));
-  hpcpush(hpxyzsc(-0.024809,0.031346,1.000799));
-  hpcpush(hpxyzsc(-0.033708,0.055691,1.002117));
-  hpcpush(hpxyzsc(-0.014468,0.037266,1.000799));
-  hpcpush(hpxyzsc(-0.015796,0.063153,1.002117));
-  hpcpush(hpxyzsc(-0.002840,0.039875,1.000799));
-  hpcpush(hpxyzsc(0.003521,0.065003,1.002117));
-  hpcpush(hpxyzsc(0.009039,0.038940,1.000799));
-  hpcpush(hpxyzsc(0.022524,0.061077,1.002117));
-  hpcpush(hpxyzsc(0.020115,0.034546,1.000799));
-  hpcpush(hpxyzsc(0.039526,0.051724,1.002117));
-  hpcpush(hpxyzsc(0.029404,0.027082,1.000799));
-  hpcpush(hpxyzsc(0.053016,0.037776,1.002117));
-  hpcpush(hpxyzsc(0.036081,0.017212,1.000799));
-  hpcpush(hpxyzsc(0.061796,0.020471,1.002117));
-  hpcpush(hpxyzsc(0.039551,0.005812,1.000799));
-  hpcpush(hpxyzsc(0.065084,0.001347,1.002117));
-  hpcpush(hpxyzsc(0.039507,-0.006104,1.000799));
-  hpcpush(hpxyzsc(0.062590,-0.017897,1.002117));
-  hpcpush(hpxyzsc(0.035953,-0.017477,1.000799));
-  hpcpush(hpxyzsc(0.054534,-0.035550,1.002117));
-  hpcpush(hpxyzsc(0.029204,-0.027298,1.000799));
-  hpcpush(hpxyzsc(0.041632,-0.050045,1.002117));
-  hpcpush(hpxyzsc(0.019860,-0.034693,1.000799));
-  hpcpush(hpxyzsc(0.025031,-0.060093,1.002117));
-  hpcpush(hpxyzsc(0.008752,-0.039006,1.000799));
-  hpcpush(hpxyzsc(0.006207,-0.064801,1.002117));
-  hpcpush(hpxyzsc(-0.003134,-0.039853,1.000799));
-  hpcpush(hpxyzsc(-0.013170,-0.063752,1.002117));
-  hpcpush(hpxyzsc(-0.014742,-0.037158,1.000799));
-  hpcpush(hpxyzsc(-0.031376,-0.057038,1.002117));
-  hpcpush(hpxyzsc(-0.025040,-0.031162,1.000799));
-  hpcpush(hpxyzsc(-0.046794,-0.045256,1.002117));
-  hpcpush(hpxyzsc(-0.033112,-0.022397,1.000799));
-  hpcpush(hpxyzsc(-0.058054,-0.029452,1.002117));
-  hpcpush(hpxyzsc(-0.038243,-0.011642,1.000799));
-  hpcpush(hpxyzsc(-0.064156,-0.011032,1.002117));
-  hpcpush(hpxyzsc(-0.039976,0.000147,1.000799));
-  hpcpush(hpxyzsc(-0.064558,0.008369,1.002117));
-  
-  bshape(shPSword, 42);
-  hpcpush(hpxyzsc(0.093822,0.244697,1.033769));
-  hpcpush(hpxyzsc(0.105758,0.251015,1.036433));
-  hpcpush(hpxyzsc(0.110908,0.249862,1.036693));
-  hpcpush(hpxyzsc(0.110690,0.245554,1.035640));
-  hpcpush(hpxyzsc(0.113376,0.247134,1.036306));
-  hpcpush(hpxyzsc(0.117228,0.245924,1.036446));
-  hpcpush(hpxyzsc(0.127263,0.237981,1.035775));
-  hpcpush(hpxyzsc(0.131886,0.226997,1.033887));
-  hpcpush(hpxyzsc(0.116494,0.231721,1.033085));
-  hpcpush(hpxyzsc(0.106117,0.231182,1.031846));
-  hpcpush(hpxyzsc(0.105927,0.226986,1.030894));
-  hpcpush(hpxyzsc(0.263283,-0.174653,1.048724));
-  hpcpush(hpxyzsc(0.086104,0.209645,1.025361));
-  hpcpush(hpxyzsc(0.079571,0.202657,1.023426));
-  hpcpush(hpxyzsc(0.074206,0.190462,1.020677));
-  hpcpush(hpxyzsc(0.068951,0.179766,1.018366));
-  hpcpush(hpxyzsc(0.065727,0.200902,1.022097));
-  hpcpush(hpxyzsc(0.068444,0.209067,1.023911));
-  hpcpush(hpxyzsc(0.077641,0.221653,1.027209));
-  hpcpush(hpxyzsc(0.086737,0.227526,1.029219));
-  hpcpush(hpxyzsc(0.086260,0.248631,1.034049));
-  hpcpush(hpxyzsc(0.086431,0.252937,1.035107));
-  hpcpush(hpxyzsc(0.093822,0.244697,1.033769));
-
-  bshape(shPKnife, 40);
-  hpcpush(hpxyzsc(0.070235,0.261061,1.035898));
-  hpcpush(hpxyzsc(0.085110,0.243297,1.032685));
-  hpcpush(hpxyzsc(0.100384,0.253764,1.036568));
-  hpcpush(hpxyzsc(0.115592,0.241462,1.035212));
-  hpcpush(hpxyzsc(0.106046,0.228043,1.031139));
-  hpcpush(hpxyzsc(0.193021,0.140235,1.028068));
-  hpcpush(hpxyzsc(0.223042,0.069158,1.026903));
-  hpcpush(hpxyzsc(0.217457,0.064184,1.025382));
-  hpcpush(hpxyzsc(0.149083,0.101106,1.016095));
-  hpcpush(hpxyzsc(0.073293,0.198875,1.022214));
-  hpcpush(hpxyzsc(0.059119,0.191168,1.019823));
-  hpcpush(hpxyzsc(0.049288,0.208259,1.022644));
-  hpcpush(hpxyzsc(0.061401,0.222183,1.026224));
-  hpcpush(hpxyzsc(0.046445,0.239874,1.029415));
-  hpcpush(hpxyzsc(0.070235,0.261061,1.035898));
-
-  bshape(shPirateHook, 42);
-  hpcpush(hpxyzsc(0.025637,0.290334,1.041610));
-  hpcpush(hpxyzsc(0.015893,0.212083,1.022366));
-  hpcpush(hpxyzsc(0.070681,0.208634,1.023975));
-  hpcpush(hpxyzsc(0.078764,0.213716,1.025611));
-  hpcpush(hpxyzsc(0.092820,0.214478,1.026945));
-  hpcpush(hpxyzsc(0.128742,0.099394,1.013141));
-  hpcpush(hpxyzsc(0.114620,0.096368,1.011150));
-  hpcpush(hpxyzsc(0.104002,0.089501,1.009370));
-  hpcpush(hpxyzsc(0.096284,0.072719,1.007253));
-  hpcpush(hpxyzsc(0.093155,0.050966,1.005622));
-  hpcpush(hpxyzsc(0.099066,0.033609,1.005457));
-  hpcpush(hpxyzsc(0.110446,0.021946,1.006320));
-  hpcpush(hpxyzsc(0.127291,0.014728,1.008176));
-  hpcpush(hpxyzsc(0.145718,0.008586,1.010598));
-  hpcpush(hpxyzsc(0.167517,0.008308,1.013968));
-  hpcpush(hpxyzsc(0.156477,0.015183,1.012282));
-  hpcpush(hpxyzsc(0.140613,0.023565,1.010113));
-  hpcpush(hpxyzsc(0.132241,0.028989,1.009122));
-  hpcpush(hpxyzsc(0.118961,0.034720,1.007649));
-  hpcpush(hpxyzsc(0.108990,0.048739,1.007102));
-  hpcpush(hpxyzsc(0.107378,0.058592,1.007454));
-  hpcpush(hpxyzsc(0.115339,0.077749,1.009628));
-  hpcpush(hpxyzsc(0.131027,0.084323,1.012066));
-  hpcpush(hpxyzsc(0.151797,0.088283,1.015301));
-  hpcpush(hpxyzsc(0.113111,0.234773,1.033398));
-  hpcpush(hpxyzsc(0.104917,0.253698,1.037001));
-  hpcpush(hpxyzsc(0.105424,0.258064,1.038129));
-  hpcpush(hpxyzsc(0.096993,0.264198,1.038850));
-  hpcpush(hpxyzsc(0.089213,0.264464,1.038220));
-  hpcpush(hpxyzsc(0.087585,0.273426,1.040400));
-  hpcpush(hpxyzsc(0.080433,0.279698,1.041489));
-  hpcpush(hpxyzsc(0.072806,0.281526,1.041421));
-  hpcpush(hpxyzsc(0.025637,0.290334,1.041610));
-  
-  bshape(shSabre, 42);
-  hpcpush(hpxyzsc(0.052478,0.211644,1.023497));
-  hpcpush(hpxyzsc(0.042242,0.185536,1.017943));
-  hpcpush(hpxyzsc(0.057979,0.181601,1.018008));
-  hpcpush(hpxyzsc(0.068086,0.204991,1.023062));
-  hpcpush(hpxyzsc(0.085295,0.201073,1.023575));
-  hpcpush(hpxyzsc(0.100829,0.193318,1.023493));
-  hpcpush(hpxyzsc(0.113718,0.184489,1.023215));
-  hpcpush(hpxyzsc(0.125735,0.178476,1.023554));
-  hpcpush(hpxyzsc(0.134891,0.170005,1.023278));
-  hpcpush(hpxyzsc(0.144264,0.162907,1.023402));
-  hpcpush(hpxyzsc(0.152391,0.155912,1.023490));
-  hpcpush(hpxyzsc(0.160192,0.146346,1.023269));
-  hpcpush(hpxyzsc(0.166733,0.136894,1.023005));
-  hpcpush(hpxyzsc(0.180659,0.123243,1.023634));
-  hpcpush(hpxyzsc(0.189268,0.108634,1.023535));
-  hpcpush(hpxyzsc(0.197644,0.091550,1.023447));
-  hpcpush(hpxyzsc(0.204992,0.075866,1.023610));
-  hpcpush(hpxyzsc(0.207394,0.063057,1.023224));
-  hpcpush(hpxyzsc(0.213308,0.045015,1.023487));
-  hpcpush(hpxyzsc(0.215741,0.031014,1.023477));
-  hpcpush(hpxyzsc(0.216495,0.013402,1.023254));
-  hpcpush(hpxyzsc(0.217512,-0.002957,1.023387));
-  hpcpush(hpxyzsc(0.216708,-0.025412,1.023527));
-  hpcpush(hpxyzsc(0.215602,-0.037833,1.023677));
-  hpcpush(hpxyzsc(0.209033,-0.050943,1.022883));
-  hpcpush(hpxyzsc(0.249210,-0.008237,1.030618));
-  hpcpush(hpxyzsc(0.247115,0.012233,1.030153));
-  hpcpush(hpxyzsc(0.246190,0.028812,1.030262));
-  hpcpush(hpxyzsc(0.239192,0.052194,1.029533));
-  hpcpush(hpxyzsc(0.237023,0.067663,1.029931));
-  hpcpush(hpxyzsc(0.231339,0.087245,1.030111));
-  hpcpush(hpxyzsc(0.221702,0.107109,1.029866));
-  hpcpush(hpxyzsc(0.215996,0.124316,1.030587));
-  hpcpush(hpxyzsc(0.206323,0.141806,1.030863));
-  hpcpush(hpxyzsc(0.194941,0.164879,1.032079));
-  hpcpush(hpxyzsc(0.173125,0.180454,1.030794));
-  hpcpush(hpxyzsc(0.158905,0.191858,1.030563));
-  hpcpush(hpxyzsc(0.143293,0.202073,1.030226));
-  hpcpush(hpxyzsc(0.128179,0.215193,1.030892));
-  hpcpush(hpxyzsc(0.111272,0.224403,1.030892));
-  hpcpush(hpxyzsc(0.090433,0.232613,1.030673));
-  hpcpush(hpxyzsc(0.079164,0.234740,1.030228));
-  hpcpush(hpxyzsc(0.083027,0.256039,1.035591));
-  hpcpush(hpxyzsc(0.071081,0.264147,1.036738));
-  hpcpush(hpxyzsc(0.060044,0.234679,1.028921));
-  hpcpush(hpxyzsc(0.052478,0.211644,1.023497));
-
-  bshape(shHedgehogBlade, 42);
-  hpcpush(hpxyzsc(0.117178,0.032617,1.007370));
-  hpcpush(hpxyzsc(0.102699,0.066452,1.007454));
-  hpcpush(hpxyzsc(0.056807,0.109987,1.007633));
-  hpcpush(hpxyzsc(0.052506,0.272774,1.037864));
-  hpcpush(hpxyzsc(0.079931,0.279758,1.041467));
-  hpcpush(hpxyzsc(0.082589,0.170109,1.017722));
-//hpcpush(hpxyzsc(0.173109,0.220554,1.038562));
-  hpcpush(hpxyzsc(0.139258,0.126935,1.017598));
-  hpcpush(hpxyzsc(0.240653,0.136967,1.037629));
-  hpcpush(hpxyzsc(0.177567,0.067821,1.017905));
-  hpcpush(hpxyzsc(0.273978,0.042249,1.037713));
-  hpcpush(hpxyzsc(0.187242,-0.000000,1.017379));
-  hpcpush(hpxyzsc(0.187242,0.000000,1.017379));
-  hpcpush(hpxyzsc(0.273978,-0.042249,1.037713));
-  hpcpush(hpxyzsc(0.177567,-0.067821,1.017905));
-  hpcpush(hpxyzsc(0.240653,-0.136967,1.037629));
-  hpcpush(hpxyzsc(0.139258,-0.126935,1.017598));
-//hpcpush(hpxyzsc(0.173109,-0.220554,1.038562));
-  hpcpush(hpxyzsc(0.082589,-0.170109,1.017722));
-  hpcpush(hpxyzsc(0.079931,-0.279758,1.041467));
-  hpcpush(hpxyzsc(0.052506,-0.272774,1.037864));
-  hpcpush(hpxyzsc(0.056807,-0.109987,1.007633));
-  hpcpush(hpxyzsc(0.102699,-0.066452,1.007454));
-  hpcpush(hpxyzsc(0.117178,-0.032617,1.007370));
-  hpcpush(hpxyzsc(0.117178,0.032617,1.007370));
-  
-  bshape(shHedgehogBladePlayer, 42);
-  hpcpush(hpxyzsc(0.117178,0.032617,1.007370));
-  hpcpush(hpxyzsc(0.102699,0.066452,1.007454));
-  hpcpush(hpxyzsc(0.056807,0.109987,1.007633));
-  hpcpush(hpxyzsc(0.052506,0.272774,1.037864));
-  hpcpush(hpxyzsc(0.079931,0.279758,1.041467));
-  hpcpush(hpxyzsc(0.082589,0.170109,1.017722));
-  hpcpush(hpxyzsc(0.173109,0.220554,1.038562));
-  hpcpush(hpxyzsc(0.139258,0.126935,1.017598));
-  hpcpush(hpxyzsc(0.240653,0.136967,1.037629));
-  hpcpush(hpxyzsc(0.177567,0.067821,1.017905));
-  hpcpush(hpxyzsc(0.273978,0.042249,1.037713));
-  hpcpush(hpxyzsc(0.187242,-0.000000,1.017379));
-  hpcpush(hpxyzsc(0.187242,0.000000,1.017379));
-  hpcpush(hpxyzsc(0.273978,-0.042249,1.037713));
-  hpcpush(hpxyzsc(0.177567,-0.067821,1.017905));
-  hpcpush(hpxyzsc(0.240653,-0.136967,1.037629));
-  hpcpush(hpxyzsc(0.139258,-0.126935,1.017598));
-  hpcpush(hpxyzsc(0.173109,-0.220554,1.038562));
-  hpcpush(hpxyzsc(0.082589,-0.170109,1.017722));
-  hpcpush(hpxyzsc(0.079931,-0.279758,1.041467));
-  hpcpush(hpxyzsc(0.052506,-0.272774,1.037864));
-  hpcpush(hpxyzsc(0.056807,-0.109987,1.007633));
-  hpcpush(hpxyzsc(0.102699,-0.066452,1.007454));
-  hpcpush(hpxyzsc(0.117178,-0.032617,1.007370));
-  hpcpush(hpxyzsc(0.117178,0.032617,1.007370));
-  
-  bshape(shFemaleBody, 41);
-  hpcpush(hpxyzsc(-0.091723,0.073620,1.006893));
-  hpcpush(hpxyzsc(-0.089581,0.094424,1.008435));
-  hpcpush(hpxyzsc(-0.082621,0.117856,1.010305));
-  hpcpush(hpxyzsc(-0.070099,0.258731,1.035304));
-  hpcpush(hpxyzsc(-0.058825,0.268551,1.037102));
-  hpcpush(hpxyzsc(-0.003834,0.273475,1.036727));
-  hpcpush(hpxyzsc(0.040760,0.263668,1.034979));
-  hpcpush(hpxyzsc(0.077891,0.260490,1.036302));
-  hpcpush(hpxyzsc(0.085895,0.233685,1.030527));
-  hpcpush(hpxyzsc(0.064882,0.210867,1.024048));
-  hpcpush(hpxyzsc(0.037427,0.217075,1.023974));
-  hpcpush(hpxyzsc(0.011258,0.226410,1.025372));
-  hpcpush(hpxyzsc(-0.037448,0.218444,1.024266));
-  hpcpush(hpxyzsc(-0.026537,0.112181,1.006622));
-  hpcpush(hpxyzsc(-0.015609,0.091250,1.004276));
-  hpcpush(hpxyzsc(0.007196,0.086357,1.003748));
-  hpcpush(hpxyzsc(0.019189,0.083950,1.003701));
-  hpcpush(hpxyzsc(0.027568,0.077909,1.003409));
-  hpcpush(hpxyzsc(0.033526,0.068249,1.002887));
-  hpcpush(hpxyzsc(0.034689,0.059808,1.002387));
-  hpcpush(hpxyzsc(0.037035,0.046593,1.001770));
-  hpcpush(hpxyzsc(0.029813,0.028620,1.000854));
-  hpcpush(hpxyzsc(0.017865,0.010719,1.000217));
-  hpcpush(hpxyzsc(0.010716,0.003572,1.000064));
-  hpcpush(hpxyzsc(0.010716,-0.003572,1.000064));
-  hpcpush(hpxyzsc(0.017865,-0.010719,1.000217));
-  hpcpush(hpxyzsc(0.029813,-0.028620,1.000854));
-  hpcpush(hpxyzsc(0.037035,-0.046593,1.001770));
-  hpcpush(hpxyzsc(0.034689,-0.059808,1.002387));
-  hpcpush(hpxyzsc(0.033526,-0.068249,1.002887));
-  hpcpush(hpxyzsc(0.027568,-0.077909,1.003409));
-  hpcpush(hpxyzsc(0.019189,-0.083950,1.003701));
-  hpcpush(hpxyzsc(0.007196,-0.086357,1.003748));
-  hpcpush(hpxyzsc(-0.015609,-0.091250,1.004276));
-  hpcpush(hpxyzsc(-0.026537,-0.112181,1.006622));
-  hpcpush(hpxyzsc(-0.037448,-0.218444,1.024266));
-  hpcpush(hpxyzsc(0.011258,-0.226410,1.025372));
-  hpcpush(hpxyzsc(0.037427,-0.217075,1.023974));
-  hpcpush(hpxyzsc(0.064882,-0.210867,1.024048));
-  hpcpush(hpxyzsc(0.085895,-0.233685,1.030527));
-  hpcpush(hpxyzsc(0.077891,-0.260490,1.036302));
-  hpcpush(hpxyzsc(0.040760,-0.263668,1.034979));
-  hpcpush(hpxyzsc(-0.003834,-0.273475,1.036727));
-  hpcpush(hpxyzsc(-0.058825,-0.268551,1.037102));
-  hpcpush(hpxyzsc(-0.070099,-0.258731,1.035304));
-  hpcpush(hpxyzsc(-0.082621,-0.117856,1.010305));
-  hpcpush(hpxyzsc(-0.089581,-0.094424,1.008435));
-  hpcpush(hpxyzsc(-0.091723,-0.073620,1.006893));
-  hpcpush(hpxyzsc(-0.091723,0.073620,1.006893));
-
-  bshape(shFemaleDress, 42);
-  hpcpush(hpxyzsc(-0.094893,0.000000,1.004492));
-  hpcpush(hpxyzsc(-0.098831,0.051826,1.006207));
-  hpcpush(hpxyzsc(-0.095833,0.099473,1.009494));
-  hpcpush(hpxyzsc(-0.087712,0.125476,1.011651));
-  hpcpush(hpxyzsc(-0.020535,0.119586,1.007334));
-  hpcpush(hpxyzsc(-0.012011,0.093684,1.004451));
-  hpcpush(hpxyzsc(0.001200,0.088788,1.003935));
-  hpcpush(hpxyzsc(0.021589,0.083958,1.003751));
-  hpcpush(hpxyzsc(0.033549,0.073088,1.003228));
-  hpcpush(hpxyzsc(0.041871,0.056227,1.002454));
-  hpcpush(hpxyzsc(0.039397,0.035815,1.001416));
-  hpcpush(hpxyzsc(0.030996,0.021459,1.000710));
-  hpcpush(hpxyzsc(0.019057,0.011911,1.000252));
-  hpcpush(hpxyzsc(0.010716,-0.001191,1.000058));
-  hpcpush(hpxyzsc(0.010716,0.001191,1.000058));
-  hpcpush(hpxyzsc(0.019057,-0.011911,1.000252));
-  hpcpush(hpxyzsc(0.030996,-0.021459,1.000710));
-  hpcpush(hpxyzsc(0.039397,-0.035815,1.001416));
-  hpcpush(hpxyzsc(0.041871,-0.056227,1.002454));
-  hpcpush(hpxyzsc(0.033549,-0.073088,1.003228));
-  hpcpush(hpxyzsc(0.021589,-0.083958,1.003751));
-  hpcpush(hpxyzsc(0.001200,-0.088788,1.003935));
-  hpcpush(hpxyzsc(-0.012011,-0.093684,1.004451));
-  hpcpush(hpxyzsc(-0.020535,-0.119586,1.007334));
-  hpcpush(hpxyzsc(-0.087712,-0.125476,1.011651));
-  hpcpush(hpxyzsc(-0.095833,-0.099473,1.009494));
-  hpcpush(hpxyzsc(-0.098831,-0.051826,1.006207));
-  hpcpush(hpxyzsc(-0.094893,-0.000000,1.004492));
-  hpcpush(hpxyzsc(-0.094893,0.000000,1.004492));
-
-  bshape(shDemon, 43);
-  drawDemon(1);
-  
-  bshape(shTrylobite, 33);
-  hpcpush(hpxyzsc(-0.145203,-0.004468,1.010497));
-  hpcpush(hpxyzsc(-0.144076,0.007818,1.010356));
-  hpcpush(hpxyzsc(-0.163334,0.030206,1.013701));
-  hpcpush(hpxyzsc(-0.213613,0.048344,1.023703));
-  hpcpush(hpxyzsc(-0.244836,0.053029,1.030901));
-  hpcpush(hpxyzsc(-0.230982,0.060844,1.028132));
-  hpcpush(hpxyzsc(-0.188498,0.063955,1.019618));
-  hpcpush(hpxyzsc(-0.146444,0.055895,1.012211));
-  hpcpush(hpxyzsc(-0.100275,0.031197,1.005499));
-  hpcpush(hpxyzsc(-0.083512,0.040086,1.004281));
-  hpcpush(hpxyzsc(-0.073567,0.085828,1.006369));
-  hpcpush(hpxyzsc(-0.071617,0.153304,1.014215));
-  hpcpush(hpxyzsc(-0.088919,0.211605,1.026004));
-  hpcpush(hpxyzsc(-0.114353,0.253615,1.037977));
-  hpcpush(hpxyzsc(-0.085940,0.254429,1.035432));
-  hpcpush(hpxyzsc(-0.060908,0.240247,1.030256));
-  hpcpush(hpxyzsc(-0.032564,0.204365,1.021188));
-  hpcpush(hpxyzsc(-0.014542,0.164439,1.013534));
-  hpcpush(hpxyzsc(-0.005571,0.106972,1.005721));
-  hpcpush(hpxyzsc(0.014454,0.048921,1.001300));
-  hpcpush(hpxyzsc(0.090242,0.051248,1.005371));
-  hpcpush(hpxyzsc(0.093652,0.070239,1.006829));
-  hpcpush(hpxyzsc(0.090579,0.133073,1.012874));
-  hpcpush(hpxyzsc(0.075196,0.187429,1.020188));
-  hpcpush(hpxyzsc(0.049574,0.233224,1.028033));
-  hpcpush(hpxyzsc(0.018120,0.279734,1.038547));
-  hpcpush(hpxyzsc(0.039746,0.297527,1.044080));
-  hpcpush(hpxyzsc(0.094039,0.267387,1.039394));
-  hpcpush(hpxyzsc(0.134354,0.217902,1.032246));
-  hpcpush(hpxyzsc(0.162119,0.165496,1.026485));
-  hpcpush(hpxyzsc(0.180861,0.108966,1.022049));
-  hpcpush(hpxyzsc(0.190803,0.067342,1.020265));
-  hpcpush(hpxyzsc(0.197519,0.039279,1.020077));
-  hpcpush(hpxyzsc(0.197519,-0.039279,1.020077));
-  hpcpush(hpxyzsc(0.190803,-0.067342,1.020265));
-  hpcpush(hpxyzsc(0.180861,-0.108966,1.022049));
-  hpcpush(hpxyzsc(0.162119,-0.165496,1.026485));
-  hpcpush(hpxyzsc(0.134354,-0.217902,1.032246));
-  hpcpush(hpxyzsc(0.094039,-0.267387,1.039394));
-  hpcpush(hpxyzsc(0.039746,-0.297527,1.044080));
-  hpcpush(hpxyzsc(0.018120,-0.279734,1.038547));
-  hpcpush(hpxyzsc(0.049574,-0.233224,1.028033));
-  hpcpush(hpxyzsc(0.075196,-0.187429,1.020188));
-  hpcpush(hpxyzsc(0.090579,-0.133073,1.012874));
-  hpcpush(hpxyzsc(0.093652,-0.070239,1.006829));
-  hpcpush(hpxyzsc(0.090242,-0.051248,1.005371));
-  hpcpush(hpxyzsc(0.014454,-0.048921,1.001300));
-  hpcpush(hpxyzsc(-0.005571,-0.106972,1.005721));
-  hpcpush(hpxyzsc(-0.014542,-0.164439,1.013534));
-  hpcpush(hpxyzsc(-0.032564,-0.204365,1.021188));
-  hpcpush(hpxyzsc(-0.060908,-0.240247,1.030256));
-  hpcpush(hpxyzsc(-0.085940,-0.254429,1.035432));
-  hpcpush(hpxyzsc(-0.114353,-0.253615,1.037977));
-  hpcpush(hpxyzsc(-0.088919,-0.211605,1.026004));
-  hpcpush(hpxyzsc(-0.071617,-0.153304,1.014215));
-  hpcpush(hpxyzsc(-0.073567,-0.085828,1.006369));
-  hpcpush(hpxyzsc(-0.083512,-0.040086,1.004281));
-  hpcpush(hpxyzsc(-0.100275,-0.031197,1.005499));
-  hpcpush(hpxyzsc(-0.146444,-0.055895,1.012211));
-  hpcpush(hpxyzsc(-0.188498,-0.063955,1.019618));
-  hpcpush(hpxyzsc(-0.230982,-0.060844,1.028132));
-  hpcpush(hpxyzsc(-0.244836,-0.053029,1.030901));
-  hpcpush(hpxyzsc(-0.213613,-0.048344,1.023703));
-  hpcpush(hpxyzsc(-0.163334,-0.030206,1.013701));
-  hpcpush(hpxyzsc(-0.144076,-0.007818,1.010356));
-  hpcpush(hpxyzsc(-0.145203,0.004468,1.010497));
-  hpcpush(hpxyzsc(-0.145203,-0.004468,1.010497));
-
-  bshape(shTrylobiteHead, 43);
-  hpcpush(hpxyzsc(0.163308,-0.016778,1.013386));
-  hpcpush(hpxyzsc(0.168997,-0.026860,1.014535));
-  hpcpush(hpxyzsc(0.195236,-0.040394,1.019681));
-  hpcpush(hpxyzsc(0.207912,-0.056192,1.022930));
-  hpcpush(hpxyzsc(0.226552,-0.084534,1.028821));
-  hpcpush(hpxyzsc(0.231600,-0.120884,1.033563));
-  hpcpush(hpxyzsc(0.228729,-0.159657,1.038175));
-  hpcpush(hpxyzsc(0.218914,-0.192826,1.041684));
-  hpcpush(hpxyzsc(0.203437,-0.228441,1.045740));
-  hpcpush(hpxyzsc(0.166197,-0.269785,1.049002));
-  hpcpush(hpxyzsc(0.139999,-0.283413,1.048772));
-  hpcpush(hpxyzsc(0.152680,-0.284851,1.050929));
-  hpcpush(hpxyzsc(0.201083,-0.275346,1.056527));
-  hpcpush(hpxyzsc(0.227316,-0.252447,1.056126));
-  hpcpush(hpxyzsc(0.248761,-0.221374,1.053987));
-  hpcpush(hpxyzsc(0.263269,-0.190328,1.051444));
-  hpcpush(hpxyzsc(0.275789,-0.170944,1.051324));
-  hpcpush(hpxyzsc(0.294151,-0.143655,1.052218));
-  hpcpush(hpxyzsc(0.304263,-0.111677,1.051213));
-  hpcpush(hpxyzsc(0.315665,-0.074073,1.051252));
-  hpcpush(hpxyzsc(0.322577,-0.045594,1.051730));
-  hpcpush(hpxyzsc(0.278615,-0.033977,1.038644));
-  hpcpush(hpxyzsc(0.269353,-0.055455,1.037124));
-  hpcpush(hpxyzsc(0.251793,-0.049681,1.032409));
-  hpcpush(hpxyzsc(0.255151,-0.016935,1.032177));
-  hpcpush(hpxyzsc(0.277445,-0.035105,1.038368));
-  hpcpush(hpxyzsc(0.322577,-0.045594,1.051730));
-  hpcpush(hpxyzsc(0.322577,0.045594,1.051730));
-  hpcpush(hpxyzsc(0.277445,0.035105,1.038368));
-  hpcpush(hpxyzsc(0.255151,0.016935,1.032177));
-  hpcpush(hpxyzsc(0.251793,0.049681,1.032409));
-  hpcpush(hpxyzsc(0.269353,0.055455,1.037124));
-  hpcpush(hpxyzsc(0.278615,0.033977,1.038644));
-  hpcpush(hpxyzsc(0.322577,0.045594,1.051730));
-  hpcpush(hpxyzsc(0.315665,0.074073,1.051252));
-  hpcpush(hpxyzsc(0.304263,0.111677,1.051213));
-  hpcpush(hpxyzsc(0.294151,0.143655,1.052218));
-  hpcpush(hpxyzsc(0.275789,0.170944,1.051324));
-  hpcpush(hpxyzsc(0.263269,0.190328,1.051444));
-  hpcpush(hpxyzsc(0.248761,0.221374,1.053987));
-  hpcpush(hpxyzsc(0.227316,0.252447,1.056126));
-  hpcpush(hpxyzsc(0.201083,0.275346,1.056527));
-  hpcpush(hpxyzsc(0.152680,0.284851,1.050929));
-  hpcpush(hpxyzsc(0.139999,0.283413,1.048772));
-  hpcpush(hpxyzsc(0.166197,0.269785,1.049002));
-  hpcpush(hpxyzsc(0.203437,0.228441,1.045740));
-  hpcpush(hpxyzsc(0.218914,0.192826,1.041684));
-  hpcpush(hpxyzsc(0.228729,0.159657,1.038175));
-  hpcpush(hpxyzsc(0.231600,0.120884,1.033563));
-  hpcpush(hpxyzsc(0.226552,0.084534,1.028821));
-  hpcpush(hpxyzsc(0.207912,0.056192,1.022930));
-  hpcpush(hpxyzsc(0.195236,0.040394,1.019681));
-  hpcpush(hpxyzsc(0.168997,0.026860,1.014535));
-  hpcpush(hpxyzsc(0.163308,0.016778,1.013386));
-  hpcpush(hpxyzsc(0.163308,-0.016778,1.013386));
-  
-  
-  bshape(shGoatHead, 43);
-  hpcpush(hpxyzsc(0.098234,-0.008161,1.004847));
-  hpcpush(hpxyzsc(0.097458,-0.016878,1.004880));
-  hpcpush(hpxyzsc(0.085163,-0.036297,1.004276));
-  hpcpush(hpxyzsc(0.074171,-0.049357,1.003961));
-  hpcpush(hpxyzsc(0.064423,-0.056062,1.003640));
-  hpcpush(hpxyzsc(0.071545,-0.060919,1.004405));
-  hpcpush(hpxyzsc(0.090299,-0.086141,1.007757));
-  hpcpush(hpxyzsc(0.099873,-0.119956,1.012109));
-  hpcpush(hpxyzsc(0.098555,-0.155296,1.016774));
-  hpcpush(hpxyzsc(0.084548,-0.179003,1.019407));
-  hpcpush(hpxyzsc(0.066861,-0.191576,1.020378));
-  hpcpush(hpxyzsc(0.016947,-0.207877,1.021519));
-  hpcpush(hpxyzsc(-0.036121,-0.216389,1.023782));
-  hpcpush(hpxyzsc(-0.071628,-0.210733,1.024470));
-  hpcpush(hpxyzsc(-0.053640,-0.210686,1.023360));
-  hpcpush(hpxyzsc(-0.029915,-0.199910,1.020225));
-  hpcpush(hpxyzsc(-0.013982,-0.189736,1.017937));
-  hpcpush(hpxyzsc(0.018469,-0.168500,1.014265));
-  hpcpush(hpxyzsc(0.033113,-0.153873,1.012311));
-  hpcpush(hpxyzsc(0.045027,-0.132252,1.009712));
-  hpcpush(hpxyzsc(0.044982,-0.113169,1.007388));
-  hpcpush(hpxyzsc(0.039048,-0.095429,1.005302));
-  hpcpush(hpxyzsc(0.028215,-0.083777,1.003900));
-  hpcpush(hpxyzsc(0.018818,-0.079369,1.003321));
-  hpcpush(hpxyzsc(0.005692,-0.074475,1.002786));
-  hpcpush(hpxyzsc(-0.012112,-0.070532,1.002557));
-  hpcpush(hpxyzsc(-0.028520,-0.067591,1.002687));
-  hpcpush(hpxyzsc(-0.047548,-0.063966,1.003171));
-  hpcpush(hpxyzsc(-0.060278,-0.061572,1.003705));
-  hpcpush(hpxyzsc(-0.079475,-0.058008,1.004829));
-  hpcpush(hpxyzsc(-0.093451,-0.049712,1.005587));
-  hpcpush(hpxyzsc(-0.106876,-0.031455,1.006187));
-  hpcpush(hpxyzsc(-0.109804,-0.016063,1.006139));
-  hpcpush(hpxyzsc(-0.108918,-0.001180,1.005915));
-  hpcpush(hpxyzsc(-0.108918,0.001180,1.005915));
-  hpcpush(hpxyzsc(-0.109804,0.016063,1.006139));
-  hpcpush(hpxyzsc(-0.106876,0.031455,1.006187));
-  hpcpush(hpxyzsc(-0.093451,0.049712,1.005587));
-  hpcpush(hpxyzsc(-0.079475,0.058008,1.004829));
-  hpcpush(hpxyzsc(-0.060278,0.061572,1.003705));
-  hpcpush(hpxyzsc(-0.047548,0.063966,1.003171));
-  hpcpush(hpxyzsc(-0.028520,0.067591,1.002687));
-  hpcpush(hpxyzsc(-0.012112,0.070532,1.002557));
-  hpcpush(hpxyzsc(0.005692,0.074475,1.002786));
-  hpcpush(hpxyzsc(0.018818,0.079369,1.003321));
-  hpcpush(hpxyzsc(0.028215,0.083777,1.003900));
-  hpcpush(hpxyzsc(0.039048,0.095429,1.005302));
-  hpcpush(hpxyzsc(0.044982,0.113169,1.007388));
-  hpcpush(hpxyzsc(0.045027,0.132252,1.009712));
-  hpcpush(hpxyzsc(0.033113,0.153873,1.012311));
-  hpcpush(hpxyzsc(0.018469,0.168500,1.014265));
-  hpcpush(hpxyzsc(-0.013982,0.189736,1.017937));
-  hpcpush(hpxyzsc(-0.029915,0.199910,1.020225));
-  hpcpush(hpxyzsc(-0.053640,0.210686,1.023360));
-  hpcpush(hpxyzsc(-0.071628,0.210733,1.024470));
-  hpcpush(hpxyzsc(-0.036121,0.216389,1.023782));
-  hpcpush(hpxyzsc(0.016947,0.207877,1.021519));
-  hpcpush(hpxyzsc(0.066861,0.191576,1.020378));
-  hpcpush(hpxyzsc(0.084548,0.179003,1.019407));
-  hpcpush(hpxyzsc(0.098555,0.155296,1.016774));
-  hpcpush(hpxyzsc(0.099873,0.119956,1.012109));
-  hpcpush(hpxyzsc(0.090299,0.086141,1.007757));
-  hpcpush(hpxyzsc(0.071545,0.060919,1.004405));
-  hpcpush(hpxyzsc(0.064423,0.056062,1.003640));
-  hpcpush(hpxyzsc(0.074171,0.049357,1.003961));
-  hpcpush(hpxyzsc(0.085163,0.036297,1.004276));
-  hpcpush(hpxyzsc(0.097458,0.016878,1.004880));
-  hpcpush(hpxyzsc(0.098234,0.008161,1.004847));
-  hpcpush(hpxyzsc(0.098234,-0.008161,1.004847));
-  
-  bshape(shRatHead, 43);
-  hpcpush(hpxyzsc(-0.090184,-0.008907,1.004098));
-  hpcpush(hpxyzsc(-0.129484,-0.042417,1.009240));
-  hpcpush(hpxyzsc(-0.081266,-0.032284,1.003816));
-  hpcpush(hpxyzsc(-0.111639,-0.081497,1.009507));
-  hpcpush(hpxyzsc(-0.058974,-0.047847,1.002879));
-  hpcpush(hpxyzsc(-0.078109,-0.104889,1.008515));
-  hpcpush(hpxyzsc(-0.040051,-0.058964,1.002537));
-  hpcpush(hpxyzsc(-0.041269,-0.117115,1.007680));
-  hpcpush(hpxyzsc(-0.011126,-0.071203,1.002593));
-  hpcpush(hpxyzsc(-0.008915,-0.108094,1.005865));
-  hpcpush(hpxyzsc(0.030035,-0.061182,1.002320));
-  hpcpush(hpxyzsc(0.022272,-0.092430,1.004510));
-  hpcpush(hpxyzsc(0.060095,-0.052305,1.003169));
-  hpcpush(hpxyzsc(0.060130,-0.071265,1.004338));
-  hpcpush(hpxyzsc(0.098049,-0.038997,1.005552));
-  hpcpush(hpxyzsc(0.091380,-0.059063,1.005902));
-  hpcpush(hpxyzsc(0.122724,-0.037933,1.008216));
-  hpcpush(hpxyzsc(0.121640,-0.052450,1.008736));
-  hpcpush(hpxyzsc(0.144106,-0.030162,1.010780));
-  hpcpush(hpxyzsc(0.151996,-0.021235,1.011708));
-  hpcpush(hpxyzsc(0.154245,-0.011177,1.011888));
-  hpcpush(hpxyzsc(0.156503,-0.004472,1.012182));
-  hpcpush(hpxyzsc(0.171370,-0.056003,1.016122));
-  hpcpush(hpxyzsc(0.162163,-0.001118,1.013064));
-  hpcpush(hpxyzsc(0.162163,0.001118,1.013064));
-  hpcpush(hpxyzsc(0.171370,0.056003,1.016122));
-  hpcpush(hpxyzsc(0.156503,0.004472,1.012182));
-  hpcpush(hpxyzsc(0.154245,0.011177,1.011888));
-  hpcpush(hpxyzsc(0.151996,0.021235,1.011708));
-  hpcpush(hpxyzsc(0.144106,0.030162,1.010780));
-  hpcpush(hpxyzsc(0.121640,0.052450,1.008736));
-  hpcpush(hpxyzsc(0.122724,0.037933,1.008216));
-  hpcpush(hpxyzsc(0.091380,0.059063,1.005902));
-  hpcpush(hpxyzsc(0.098049,0.038997,1.005552));
-  hpcpush(hpxyzsc(0.060130,0.071265,1.004338));
-  hpcpush(hpxyzsc(0.060095,0.052305,1.003169));
-  hpcpush(hpxyzsc(0.022272,0.092430,1.004510));
-  hpcpush(hpxyzsc(0.030035,0.061182,1.002320));
-  hpcpush(hpxyzsc(-0.008915,0.108094,1.005865));
-  hpcpush(hpxyzsc(-0.011126,0.071203,1.002593));
-  hpcpush(hpxyzsc(-0.041269,0.117115,1.007680));
-  hpcpush(hpxyzsc(-0.040051,0.058964,1.002537));
-  hpcpush(hpxyzsc(-0.078109,0.104889,1.008515));
-  hpcpush(hpxyzsc(-0.058974,0.047847,1.002879));
-  hpcpush(hpxyzsc(-0.111639,0.081497,1.009507));
-  hpcpush(hpxyzsc(-0.081266,0.032284,1.003816));
-  hpcpush(hpxyzsc(-0.129484,0.042417,1.009240));
-  hpcpush(hpxyzsc(-0.090184,0.008907,1.004098));
-  hpcpush(hpxyzsc(-0.090184,-0.008907,1.004098));
-
-  bshape(shRatEyes, 44);
-  hpcpush(hpxyzsc(0.080137,0.021147,1.003429));
-  hpcpush(hpxyzsc(0.090197,0.025612,1.004386));
-  hpcpush(hpxyzsc(0.090206,0.032296,1.004580));
-  hpcpush(hpxyzsc(0.082388,0.035627,1.004020));
-  hpcpush(hpxyzsc(0.075685,0.033390,1.003416));
-  hpcpush(hpxyzsc(0.073440,0.021142,1.002916));
-  hpcpush(hpxyzsc(0.077903,0.018919,1.003208));
-  hpcpush(hpxyzsc(0.079019,0.018920,1.003296));
-  hpcpush(hpxyzsc(0.079019,-0.018920,1.003296));
-  hpcpush(hpxyzsc(0.077903,-0.018919,1.003208));
-  hpcpush(hpxyzsc(0.073440,-0.021142,1.002916));
-  hpcpush(hpxyzsc(0.075685,-0.033390,1.003416));
-  hpcpush(hpxyzsc(0.082388,-0.035627,1.004020));
-  hpcpush(hpxyzsc(0.090206,-0.032296,1.004580));
-  hpcpush(hpxyzsc(0.090197,-0.025612,1.004386));
-  hpcpush(hpxyzsc(0.080137,-0.021147,1.003429));
-  hpcpush(hpxyzsc(0.080137,0.021147,1.003429));
-  
-  bshape(shRatTail, 40);
-  hpcpush(hpxyzsc(0.004445,-0.016668,1.000149));
-  hpcpush(hpxyzsc(-0.024450,-0.015559,1.000420));
-  hpcpush(hpxyzsc(-0.035572,-0.023344,1.000905));
-  hpcpush(hpxyzsc(-0.050044,-0.032251,1.001771));
-  hpcpush(hpxyzsc(-0.054504,-0.037819,1.002198));
-  hpcpush(hpxyzsc(-0.066777,-0.046744,1.003317));
-  hpcpush(hpxyzsc(-0.074613,-0.059022,1.004515));
-  hpcpush(hpxyzsc(-0.079088,-0.062380,1.005060));
-  hpcpush(hpxyzsc(-0.092563,-0.079180,1.007391));
-  hpcpush(hpxyzsc(-0.103821,-0.090424,1.009433));
-  hpcpush(hpxyzsc(-0.120815,-0.112985,1.013589));
-  hpcpush(hpxyzsc(-0.144731,-0.135755,1.019498));
-  hpcpush(hpxyzsc(-0.195993,-0.131788,1.027512));
-  hpcpush(hpxyzsc(-0.233493,-0.084599,1.030377));
-  hpcpush(hpxyzsc(-0.240035,-0.011269,1.028467));
-  hpcpush(hpxyzsc(-0.210229,0.059584,1.023595));
-  hpcpush(hpxyzsc(-0.186362,0.085322,1.020789));
-  hpcpush(hpxyzsc(-0.185130,0.072930,1.019604));
-  hpcpush(hpxyzsc(-0.197514,0.038156,1.020033));
-  hpcpush(hpxyzsc(-0.204332,-0.020209,1.020862));
-  hpcpush(hpxyzsc(-0.188533,-0.069578,1.019993));
-  hpcpush(hpxyzsc(-0.161255,-0.075029,1.015693));
-  hpcpush(hpxyzsc(-0.129508,-0.050240,1.009602));
-  hpcpush(hpxyzsc(-0.108106,-0.023404,1.006099));
-  hpcpush(hpxyzsc(-0.076781,0.007789,1.002974));
-  hpcpush(hpxyzsc(-0.031123,0.024454,1.000783));
-  hpcpush(hpxyzsc(-0.003334,0.018891,1.000184));
-  hpcpush(hpxyzsc(0.008889,0.012223,1.000114));
-  hpcpush(hpxyzsc(0.014445,0.002222,1.000107));
-  hpcpush(hpxyzsc(0.004445,-0.016668,1.000149));  
-
-  bshape(shRatCape1, 46);
-  hpcpush(hpxyzsc(0.111734,-0.044549,1.007209));
-  hpcpush(hpxyzsc(0.085077,-0.064302,1.005670));
-  hpcpush(hpxyzsc(0.076126,-0.069355,1.005289));
-  hpcpush(hpxyzsc(0.063009,-0.072447,1.004599));
-  hpcpush(hpxyzsc(0.060184,-0.075301,1.004635));
-  hpcpush(hpxyzsc(-0.016803,-0.045427,1.001172));
-  hpcpush(hpxyzsc(-0.084897,-0.004966,1.003610));
-  hpcpush(hpxyzsc(-0.084897,0.004966,1.003610));
-  hpcpush(hpxyzsc(-0.016803,0.045427,1.001172));
-  hpcpush(hpxyzsc(0.060184,0.075301,1.004635));
-  hpcpush(hpxyzsc(0.063009,0.072447,1.004599));
-  hpcpush(hpxyzsc(0.076126,0.069355,1.005289));
-  hpcpush(hpxyzsc(0.085077,0.064302,1.005670));
-  hpcpush(hpxyzsc(0.111734,0.044549,1.007209));
-  hpcpush(hpxyzsc(0.111734,-0.044549,1.007209));
-
-  bshape(shRatCape2, 45);
-  hpcpush(hpxyzsc(0.064357,-0.017052,1.002214));
-  hpcpush(hpxyzsc(0.062169,-0.036861,1.002608));
-  hpcpush(hpxyzsc(0.052288,-0.064948,1.003470));
-  hpcpush(hpxyzsc(0.041296,-0.082593,1.004254));
-  hpcpush(hpxyzsc(0.029743,-0.094738,1.004918));
-  hpcpush(hpxyzsc(0.018182,-0.103582,1.005515));
-  hpcpush(hpxyzsc(0.004409,-0.109669,1.006005));
-  hpcpush(hpxyzsc(-0.009371,-0.114663,1.006596));
-  hpcpush(hpxyzsc(-0.023159,-0.116896,1.007075));
-  hpcpush(hpxyzsc(-0.035856,-0.120805,1.007909));
-  hpcpush(hpxyzsc(-0.044697,-0.123606,1.008601));
-  hpcpush(hpxyzsc(-0.052994,-0.126412,1.009351));
-  hpcpush(hpxyzsc(-0.066282,-0.129803,1.010565));
-  hpcpush(hpxyzsc(-0.068502,-0.130927,1.010858));
-  hpcpush(hpxyzsc(-0.077943,-0.135432,1.012135));
-  hpcpush(hpxyzsc(-0.089059,-0.138844,1.013513));
-  hpcpush(hpxyzsc(-0.103549,-0.143972,1.015603));
-  hpcpush(hpxyzsc(-0.118107,-0.151931,1.018348));
-  hpcpush(hpxyzsc(-0.142204,-0.155536,1.021965));
-  hpcpush(hpxyzsc(-0.155133,-0.156245,1.023952));
-  hpcpush(hpxyzsc(-0.189079,-0.160076,1.030231));
-  hpcpush(hpxyzsc(-0.172777,-0.122777,1.022216));
-  hpcpush(hpxyzsc(-0.163406,-0.078103,1.016269));
-  hpcpush(hpxyzsc(-0.158135,-0.020458,1.012633));
-  hpcpush(hpxyzsc(-0.158135,0.020458,1.012633));
-  hpcpush(hpxyzsc(-0.163406,0.078103,1.016269));
-  hpcpush(hpxyzsc(-0.172777,0.122777,1.022216));
-  hpcpush(hpxyzsc(-0.189079,0.160076,1.030231));
-  hpcpush(hpxyzsc(-0.155133,0.156245,1.023952));
-  hpcpush(hpxyzsc(-0.142204,0.155536,1.021965));
-  hpcpush(hpxyzsc(-0.118107,0.151931,1.018348));
-  hpcpush(hpxyzsc(-0.103549,0.143972,1.015603));
-  hpcpush(hpxyzsc(-0.089059,0.138844,1.013513));
-  hpcpush(hpxyzsc(-0.077943,0.135432,1.012135));
-  hpcpush(hpxyzsc(-0.068502,0.130927,1.010858));
-  hpcpush(hpxyzsc(-0.066282,0.129803,1.010565));
-  hpcpush(hpxyzsc(-0.052994,0.126412,1.009351));
-  hpcpush(hpxyzsc(-0.044697,0.123606,1.008601));
-  hpcpush(hpxyzsc(-0.035856,0.120805,1.007909));
-  hpcpush(hpxyzsc(-0.023159,0.116896,1.007075));
-  hpcpush(hpxyzsc(-0.009371,0.114663,1.006596));
-  hpcpush(hpxyzsc(0.004409,0.109669,1.006005));
-  hpcpush(hpxyzsc(0.018182,0.103582,1.005515));
-  hpcpush(hpxyzsc(0.029743,0.094738,1.004918));
-  hpcpush(hpxyzsc(0.041296,0.082593,1.004254));
-  hpcpush(hpxyzsc(0.052288,0.064948,1.003470));
-  hpcpush(hpxyzsc(0.062169,0.036861,1.002608));
-  hpcpush(hpxyzsc(0.064357,0.017052,1.002214));
-  hpcpush(hpxyzsc(0.064357,-0.017052,1.002214));
-  
-  bshape(shKnightArmor, 42);
-  hpcpush(hpxyzsc(-0.129512,-0.004842,1.008363));
-  hpcpush(hpxyzsc(-0.129934,0.057074,1.010020));
-  hpcpush(hpxyzsc(-0.089756,0.104311,1.009424));
-  hpcpush(hpxyzsc(-0.099124,0.177184,1.020402));
-  hpcpush(hpxyzsc(-0.086054,0.237913,1.031508));
-  hpcpush(hpxyzsc(-0.019952,0.218220,1.023727));
-  hpcpush(hpxyzsc(-0.020812,0.167721,1.014181));
-  hpcpush(hpxyzsc(-0.024311,0.143434,1.010527));
-  hpcpush(hpxyzsc(0.006041,0.122026,1.007436));
-  hpcpush(hpxyzsc(0.026372,0.079117,1.003471));
-  hpcpush(hpxyzsc(0.032239,0.044179,1.001494));
-  hpcpush(hpxyzsc(0.034575,0.016691,1.000737));
-  hpcpush(hpxyzsc(0.034565,0.003576,1.000604));
-  hpcpush(hpxyzsc(0.034565,-0.003576,1.000604));
-  hpcpush(hpxyzsc(0.034575,-0.016691,1.000737));
-  hpcpush(hpxyzsc(0.032239,-0.044179,1.001494));
-  hpcpush(hpxyzsc(0.026372,-0.079117,1.003471));
-  hpcpush(hpxyzsc(0.006041,-0.122026,1.007436));
-  hpcpush(hpxyzsc(-0.024311,-0.143434,1.010527));
-  hpcpush(hpxyzsc(-0.020812,-0.167721,1.014181));
-  hpcpush(hpxyzsc(-0.019952,-0.218220,1.023727));
-  hpcpush(hpxyzsc(-0.086054,-0.237913,1.031508));
-  hpcpush(hpxyzsc(-0.099124,-0.177184,1.020402));
-  hpcpush(hpxyzsc(-0.089756,-0.104311,1.009424));
-  hpcpush(hpxyzsc(-0.129934,-0.057074,1.010020));
-  hpcpush(hpxyzsc(-0.129512,0.004842,1.008363));
-  hpcpush(hpxyzsc(-0.129512,-0.004842,1.008363));
-  
-  bshape(shKnightCloak, 43);
-  hpcpush(hpxyzsc(-0.000015,0.003765,1.000007));
-  hpcpush(hpxyzsc(0.007931,-0.006370,1.000052));
-  hpcpush(hpxyzsc(0.020079,-0.026681,1.000557));
-  hpcpush(hpxyzsc(0.029245,-0.044814,1.001431));
-  hpcpush(hpxyzsc(0.027073,-0.059250,1.002120));
-  hpcpush(hpxyzsc(0.023423,-0.078357,1.003339));
-  hpcpush(hpxyzsc(0.002361,-0.116363,1.006750));
-  hpcpush(hpxyzsc(-0.019415,-0.136638,1.009478));
-  hpcpush(hpxyzsc(-0.058154,-0.153287,1.013350));
-  hpcpush(hpxyzsc(-0.094935,-0.166174,1.018149));
-  hpcpush(hpxyzsc(-0.136465,-0.178800,1.024984));
-  hpcpush(hpxyzsc(-0.161844,-0.181507,1.029144));
-  hpcpush(hpxyzsc(-0.184577,-0.179578,1.032626));
-  hpcpush(hpxyzsc(-0.162984,-0.162667,1.026170));
-  hpcpush(hpxyzsc(-0.150295,-0.135739,1.020301));
-  hpcpush(hpxyzsc(-0.152621,-0.120097,1.018684));
-  hpcpush(hpxyzsc(-0.161098,-0.102831,1.018100));
-  hpcpush(hpxyzsc(-0.167882,-0.095516,1.018483));
-  hpcpush(hpxyzsc(-0.184530,-0.081393,1.020135));
-  hpcpush(hpxyzsc(-0.163316,-0.053335,1.014651));
-  hpcpush(hpxyzsc(-0.149316,-0.029081,1.011504));
-  hpcpush(hpxyzsc(-0.143262,-0.011700,1.010278));
-  hpcpush(hpxyzsc(-0.140925,0.006746,1.009904));
-  hpcpush(hpxyzsc(-0.140925,-0.006746,1.009904));
-  hpcpush(hpxyzsc(-0.143262,0.011700,1.010278));
-  hpcpush(hpxyzsc(-0.149316,0.029081,1.011504));
-  hpcpush(hpxyzsc(-0.163316,0.053335,1.014651));
-  hpcpush(hpxyzsc(-0.184530,0.081393,1.020135));
-  hpcpush(hpxyzsc(-0.167882,0.095516,1.018483));
-  hpcpush(hpxyzsc(-0.161098,0.102831,1.018100));
-  hpcpush(hpxyzsc(-0.152621,0.120097,1.018684));
-  hpcpush(hpxyzsc(-0.150295,0.135739,1.020301));
-  hpcpush(hpxyzsc(-0.162984,0.162667,1.026170));
-  hpcpush(hpxyzsc(-0.184577,0.179578,1.032626));
-  hpcpush(hpxyzsc(-0.161844,0.181507,1.029144));
-  hpcpush(hpxyzsc(-0.136465,0.178800,1.024984));
-  hpcpush(hpxyzsc(-0.094935,0.166174,1.018149));
-  hpcpush(hpxyzsc(-0.058154,0.153287,1.013350));
-  hpcpush(hpxyzsc(-0.019415,0.136638,1.009478));
-  hpcpush(hpxyzsc(0.002361,0.116363,1.006750));
-  hpcpush(hpxyzsc(0.023423,0.078357,1.003339));
-  hpcpush(hpxyzsc(0.027073,0.059250,1.002120));
-  hpcpush(hpxyzsc(0.029245,0.044814,1.001431));
-  hpcpush(hpxyzsc(0.020079,0.026681,1.000557));
-  hpcpush(hpxyzsc(0.007931,0.006370,1.000052));
-  hpcpush(hpxyzsc(-0.000015,-0.003765,1.000007));
-  hpcpush(hpxyzsc(-0.000015,0.003765,1.000007));
-  
-  bshape(shPrincessDress, 43);
-  hpcpush(hpxyzsc(0.041877,-0.057431,1.002523));
-  hpcpush(hpxyzsc(0.046812,-0.078020,1.004131));
-  hpcpush(hpxyzsc(0.028859,-0.096196,1.005031));
-  hpcpush(hpxyzsc(-0.001205,-0.110866,1.006128));
-  hpcpush(hpxyzsc(-0.053233,-0.116144,1.008128));
-  hpcpush(hpxyzsc(-0.110022,-0.122246,1.013434));
-  hpcpush(hpxyzsc(-0.181271,-0.133766,1.025062));
-  hpcpush(hpxyzsc(-0.221411,-0.145062,1.034440));
-  hpcpush(hpxyzsc(-0.252155,-0.156465,1.043103));
-  hpcpush(hpxyzsc(-0.285822,-0.165961,1.053203));
-  hpcpush(hpxyzsc(-0.259590,-0.116944,1.039742));
-  hpcpush(hpxyzsc(-0.258096,-0.089439,1.036635));
-  hpcpush(hpxyzsc(-0.246236,-0.031569,1.030354));
-  hpcpush(hpxyzsc(-0.247436,0.011362,1.030220));
-  hpcpush(hpxyzsc(-0.253890,0.054586,1.033170));
-  hpcpush(hpxyzsc(-0.268619,0.095109,1.039809));
-  hpcpush(hpxyzsc(-0.277680,0.121972,1.044980));
-  hpcpush(hpxyzsc(-0.286489,0.138666,1.049430));
-  hpcpush(hpxyzsc(-0.295278,0.151594,1.053646));
-  hpcpush(hpxyzsc(-0.248719,0.149489,1.041253));
-  hpcpush(hpxyzsc(-0.200432,0.139924,1.029442));
-  hpcpush(hpxyzsc(-0.139171,0.124392,1.017272));
-  hpcpush(hpxyzsc(-0.102260,0.110782,1.011301));
-  hpcpush(hpxyzsc(-0.077429,0.101626,1.008128));
-  hpcpush(hpxyzsc(0.041877,-0.057431,1.002523));  
-  
-  bshape(shPrinceDress, 42);
-  hpcpush(hpxyzsc(-0.123399,0.032664,1.008114));
-  hpcpush(hpxyzsc(-0.122325,0.049657,1.008677));
-  hpcpush(hpxyzsc(-0.121280,0.064278,1.009376));
-  hpcpush(hpxyzsc(-0.114003,0.076406,1.009373));
-  hpcpush(hpxyzsc(-0.098124,0.089645,1.008794));
-  hpcpush(hpxyzsc(-0.084789,0.101747,1.008733));
-  hpcpush(hpxyzsc(-0.081167,0.105396,1.008809));
-  hpcpush(hpxyzsc(-0.080113,0.115314,1.009810));
-  hpcpush(hpxyzsc(-0.099259,0.181148,1.021111));
-  hpcpush(hpxyzsc(-0.053980,0.166846,1.015259));
-  hpcpush(hpxyzsc(-0.018484,0.187307,1.017559));
-  hpcpush(hpxyzsc(-0.015849,0.154831,1.012039));
-  hpcpush(hpxyzsc(-0.013334,0.134548,1.009099));
-  hpcpush(hpxyzsc(0.006043,0.123271,1.007587));
-  hpcpush(hpxyzsc(0.021636,0.096161,1.004846));
-  hpcpush(hpxyzsc(0.031121,0.067030,1.002727));
-  hpcpush(hpxyzsc(0.038206,0.038206,1.001459));
-  hpcpush(hpxyzsc(0.038163,0.017889,1.000888));
-  hpcpush(hpxyzsc(0.038163,-0.017889,1.000888));
-  hpcpush(hpxyzsc(0.038206,-0.038206,1.001459));
-  hpcpush(hpxyzsc(0.031121,-0.067030,1.002727));
-  hpcpush(hpxyzsc(0.021636,-0.096161,1.004846));
-  hpcpush(hpxyzsc(0.006043,-0.123271,1.007587));
-  hpcpush(hpxyzsc(-0.013334,-0.134548,1.009099));
-  hpcpush(hpxyzsc(-0.015849,-0.154831,1.012039));
-  hpcpush(hpxyzsc(-0.018484,-0.187307,1.017559));
-  hpcpush(hpxyzsc(-0.053980,-0.166846,1.015259));
-  hpcpush(hpxyzsc(-0.099259,-0.181148,1.021111));
-  hpcpush(hpxyzsc(-0.080113,-0.115314,1.009810));
-  hpcpush(hpxyzsc(-0.081167,-0.105396,1.008809));
-  hpcpush(hpxyzsc(-0.084789,-0.101747,1.008733));
-  hpcpush(hpxyzsc(-0.098124,-0.089645,1.008794));
-  hpcpush(hpxyzsc(-0.114003,-0.076406,1.009373));
-  hpcpush(hpxyzsc(-0.121280,-0.064278,1.009376));
-  hpcpush(hpxyzsc(-0.122325,-0.049657,1.008677));
-  hpcpush(hpxyzsc(-0.123399,-0.032664,1.008114));
-  hpcpush(hpxyzsc(-0.123399,0.032664,1.008114));
-
-  bshape(shArmor, 42);
-  hpcpush(hpxyzsc(-0.131705,0.010875,1.008694));
-  hpcpush(hpxyzsc(-0.133453,0.061874,1.010761));
-  hpcpush(hpxyzsc(-0.093134,0.099182,1.009213));
-  hpcpush(hpxyzsc(-0.097643,0.135480,1.013849));
-  hpcpush(hpxyzsc(-0.010956,0.158255,1.012504));
-  hpcpush(hpxyzsc(0.016844,0.113094,1.006516));
-  hpcpush(hpxyzsc(0.022740,0.084974,1.003861));
-  hpcpush(hpxyzsc(-0.062459,0.086481,1.005674));
-  hpcpush(hpxyzsc(-0.061152,0.076740,1.004803));
-  hpcpush(hpxyzsc(0.063569,0.076763,1.004954));
-  hpcpush(hpxyzsc(0.074360,0.065964,1.004928));
-  hpcpush(hpxyzsc(0.083920,0.049153,1.004718));
-  hpcpush(hpxyzsc(0.088667,0.032352,1.004444));
-  hpcpush(hpxyzsc(0.092226,0.002395,1.004247));
-  hpcpush(hpxyzsc(0.057196,0.007150,1.001660));
-  hpcpush(hpxyzsc(0.054891,0.041765,1.002376));
-  hpcpush(hpxyzsc(0.039313,0.039313,1.001544));
-  hpcpush(hpxyzsc(0.039313,-0.039313,1.001544));
-  hpcpush(hpxyzsc(0.054891,-0.041765,1.002376));
-  hpcpush(hpxyzsc(0.057196,-0.007150,1.001660));
-  hpcpush(hpxyzsc(0.092226,-0.002395,1.004247));
-  hpcpush(hpxyzsc(0.088667,-0.032352,1.004444));
-  hpcpush(hpxyzsc(0.083920,-0.049153,1.004718));
-  hpcpush(hpxyzsc(0.074360,-0.065964,1.004928));
-  hpcpush(hpxyzsc(0.063569,-0.076763,1.004954));
-  hpcpush(hpxyzsc(-0.061152,-0.076740,1.004803));
-  hpcpush(hpxyzsc(-0.062459,-0.086481,1.005674));
-  hpcpush(hpxyzsc(0.022740,-0.084974,1.003861));
-  hpcpush(hpxyzsc(0.016844,-0.113094,1.006516));
-  hpcpush(hpxyzsc(-0.010956,-0.158255,1.012504));
-  hpcpush(hpxyzsc(-0.097643,-0.135480,1.013849));
-  hpcpush(hpxyzsc(-0.093134,-0.099182,1.009213));
-  hpcpush(hpxyzsc(-0.133453,-0.061874,1.010761));
-  hpcpush(hpxyzsc(-0.131705,-0.010875,1.008694));
-  hpcpush(hpxyzsc(-0.131705,0.010875,1.008694));
-
-  bshape(shTurban1, 44);
-  hpcpush(hpxyzsc(-0.072384,-0.002801,1.002620));
-  hpcpush(hpxyzsc(-0.075078,0.020302,1.003020));
-  hpcpush(hpxyzsc(-0.067673,0.048512,1.003461));
-  hpcpush(hpxyzsc(-0.046761,0.065782,1.003252));
-  hpcpush(hpxyzsc(-0.011565,0.081749,1.003403));
-  hpcpush(hpxyzsc(0.024684,0.095470,1.004850));
-  hpcpush(hpxyzsc(0.076082,0.087352,1.006687));
-  hpcpush(hpxyzsc(0.102859,0.061877,1.007179));
-  hpcpush(hpxyzsc(0.113555,0.034171,1.007007));
-  hpcpush(hpxyzsc(0.113555,-0.034171,1.007007));
-  hpcpush(hpxyzsc(0.102859,-0.061877,1.007179));
-  hpcpush(hpxyzsc(0.076082,-0.087352,1.006687));
-  hpcpush(hpxyzsc(0.024684,-0.095470,1.004850));
-  hpcpush(hpxyzsc(-0.011565,-0.081749,1.003403));
-  hpcpush(hpxyzsc(-0.046761,-0.065782,1.003252));
-  hpcpush(hpxyzsc(-0.067673,-0.048512,1.003461));
-  hpcpush(hpxyzsc(-0.075078,-0.020302,1.003020));
-  hpcpush(hpxyzsc(-0.072384,0.002801,1.002620));
-  hpcpush(hpxyzsc(-0.072384,-0.002801,1.002620));
-
-  bshape(shTurban2, 45);
-  hpcpush(hpxyzsc(-0.041779,0.001538,1.000874));
-  hpcpush(hpxyzsc(-0.029927,0.025572,1.000774));
-  hpcpush(hpxyzsc(-0.001577,0.046885,1.001100));
-  hpcpush(hpxyzsc(0.030017,0.051171,1.001758));
-  hpcpush(hpxyzsc(0.051757,0.039557,1.002120));
-  hpcpush(hpxyzsc(0.066202,0.014187,1.002289));
-  hpcpush(hpxyzsc(0.066202,-0.014187,1.002289));
-  hpcpush(hpxyzsc(0.051757,-0.039557,1.002120));
-  hpcpush(hpxyzsc(0.030017,-0.051171,1.001758));
-  hpcpush(hpxyzsc(-0.001577,-0.046885,1.001100));
-  hpcpush(hpxyzsc(-0.029927,-0.025572,1.000774));
-  hpcpush(hpxyzsc(-0.041779,-0.001538,1.000874));
-  hpcpush(hpxyzsc(-0.041779,0.001538,1.000874));
-
-  bshape(shWestHat1, 44);
-  hpcpush(hpxyzsc(-0.070542,-0.002276,1.002488));
-  hpcpush(hpxyzsc(-0.070545,0.013654,1.002578));
-  hpcpush(hpxyzsc(-0.066000,0.034138,1.002757));
-  hpcpush(hpxyzsc(-0.045518,0.059173,1.002783));
-  hpcpush(hpxyzsc(-0.034143,0.070563,1.003068));
-  hpcpush(hpxyzsc(-0.006832,0.091098,1.004164));
-  hpcpush(hpxyzsc(0.029616,0.093405,1.004789));
-  hpcpush(hpxyzsc(0.047849,0.088862,1.005080));
-  hpcpush(hpxyzsc(0.077446,0.054668,1.004483));
-  hpcpush(hpxyzsc(0.086570,0.045563,1.004774));
-  hpcpush(hpxyzsc(0.100276,0.031906,1.005521));
-  hpcpush(hpxyzsc(0.111711,0.004560,1.006231));
-  hpcpush(hpxyzsc(0.111711,-0.004560,1.006231));
-  hpcpush(hpxyzsc(0.100276,-0.031906,1.005521));
-  hpcpush(hpxyzsc(0.086570,-0.045563,1.004774));
-  hpcpush(hpxyzsc(0.077446,-0.054668,1.004483));
-  hpcpush(hpxyzsc(0.047849,-0.088862,1.005080));
-  hpcpush(hpxyzsc(0.029616,-0.093405,1.004789));
-  hpcpush(hpxyzsc(-0.006832,-0.091098,1.004164));
-  hpcpush(hpxyzsc(-0.034143,-0.070563,1.003068));
-  hpcpush(hpxyzsc(-0.045518,-0.059173,1.002783));
-  hpcpush(hpxyzsc(-0.066000,-0.034138,1.002757));
-  hpcpush(hpxyzsc(-0.070545,-0.013654,1.002578));
-  hpcpush(hpxyzsc(-0.070542,0.002276,1.002488));
-  hpcpush(hpxyzsc(-0.070542,-0.002276,1.002488));
-
-  bshape(shWestHat2, 45);
-  hpcpush(hpxyzsc(-0.018184,0.011365,1.000230));
-  hpcpush(hpxyzsc(-0.018185,0.020458,1.000375));
-  hpcpush(hpxyzsc(-0.002273,0.031826,1.000509));
-  hpcpush(hpxyzsc(0.022743,0.047761,1.001398));
-  hpcpush(hpxyzsc(0.054614,0.045512,1.002524));
-  hpcpush(hpxyzsc(0.065995,0.029584,1.002612));
-  hpcpush(hpxyzsc(0.081957,0.009106,1.003394));
-  hpcpush(hpxyzsc(0.081957,-0.009106,1.003394));
-  hpcpush(hpxyzsc(0.065995,-0.029584,1.002612));
-  hpcpush(hpxyzsc(0.054614,-0.045512,1.002524));
-  hpcpush(hpxyzsc(0.022743,-0.047761,1.001398));
-  hpcpush(hpxyzsc(-0.002273,-0.031826,1.000509));
-  hpcpush(hpxyzsc(-0.018185,-0.020458,1.000375));
-  hpcpush(hpxyzsc(-0.018184,-0.011365,1.000230));
-  hpcpush(hpxyzsc(-0.018184,0.011365,1.000230));
-  
-  bshape(shGunInHand, 45);
-  hpcpush(hpxyzsc(0.048306,0.216227,1.024250));
-  hpcpush(hpxyzsc(0.048215,0.197453,1.020447));
-  hpcpush(hpxyzsc(0.165920,0.170529,1.027915));
-  hpcpush(hpxyzsc(0.173217,0.189384,1.032410));
-  hpcpush(hpxyzsc(0.103628,0.207255,1.026496));
-  hpcpush(hpxyzsc(0.108418,0.221449,1.029949));
-  hpcpush(hpxyzsc(0.089975,0.230705,1.030204));
-  hpcpush(hpxyzsc(0.073629,0.211684,1.024808));
-  hpcpush(hpxyzsc(0.048306,0.216227,1.024250));
-
-  bshape(shVikingHelmet, 44);
-  hpcpush(hpxyzsc(-0.068191,-0.016749,1.002462));
-  hpcpush(hpxyzsc(-0.064642,-0.037110,1.002774));
-  hpcpush(hpxyzsc(-0.055059,-0.049075,1.002716));
-  hpcpush(hpxyzsc(-0.040676,-0.057425,1.002473));
-  hpcpush(hpxyzsc(-0.027503,-0.060986,1.002235));
-  hpcpush(hpxyzsc(-0.030377,-0.140951,1.010342));
-  hpcpush(hpxyzsc(-0.026834,-0.154904,1.012282));
-  hpcpush(hpxyzsc(-0.003670,-0.166357,1.013750));
-  hpcpush(hpxyzsc(0.018370,-0.168999,1.014346));
-  hpcpush(hpxyzsc(0.055380,-0.175984,1.016876));
-  hpcpush(hpxyzsc(0.082350,-0.161012,1.016222));
-  hpcpush(hpxyzsc(0.068527,-0.152961,1.013949));
-  hpcpush(hpxyzsc(0.031640,-0.146029,1.011101));
-  hpcpush(hpxyzsc(0.008493,-0.138308,1.009555));
-  hpcpush(hpxyzsc(-0.002413,-0.117054,1.006830));
-  hpcpush(hpxyzsc(-0.004785,-0.069381,1.002415));
-  hpcpush(hpxyzsc(0.017935,-0.063369,1.002166));
-  hpcpush(hpxyzsc(0.049033,-0.046641,1.002287));
-  hpcpush(hpxyzsc(0.032200,-0.027430,1.000894));
-  hpcpush(hpxyzsc(0.032200,0.027430,1.000894));
-  hpcpush(hpxyzsc(0.049033,0.046641,1.002287));
-  hpcpush(hpxyzsc(0.017935,0.063369,1.002166));
-  hpcpush(hpxyzsc(-0.004785,0.069381,1.002415));
-  hpcpush(hpxyzsc(-0.002413,0.117054,1.006830));
-  hpcpush(hpxyzsc(0.008493,0.138308,1.009555));
-  hpcpush(hpxyzsc(0.031640,0.146029,1.011101));
-  hpcpush(hpxyzsc(0.068527,0.152961,1.013949));
-  hpcpush(hpxyzsc(0.082350,0.161012,1.016222));
-  hpcpush(hpxyzsc(0.055380,0.175984,1.016876));
-  hpcpush(hpxyzsc(0.018370,0.168999,1.014346));
-  hpcpush(hpxyzsc(-0.003670,0.166357,1.013750));
-  hpcpush(hpxyzsc(-0.026834,0.154904,1.012282));
-  hpcpush(hpxyzsc(-0.030377,0.140951,1.010342));
-  hpcpush(hpxyzsc(-0.027503,0.060986,1.002235));
-  hpcpush(hpxyzsc(-0.040676,0.057425,1.002473));
-  hpcpush(hpxyzsc(-0.055059,0.049075,1.002716));
-  hpcpush(hpxyzsc(-0.064642,0.037110,1.002774));
-  hpcpush(hpxyzsc(-0.068191,0.016749,1.002462));
-  hpcpush(hpxyzsc(-0.068191,-0.016749,1.002462));
-
-  bshape(shHood, 43);
-  hpcpush(hpxyzsc(-0.289108,0.001285,1.040954));
-  hpcpush(hpxyzsc(-0.253872,0.006315,1.031742));
-  hpcpush(hpxyzsc(-0.239738,0.013807,1.028428));
-  hpcpush(hpxyzsc(-0.225917,0.023715,1.025476));
-  hpcpush(hpxyzsc(-0.220610,0.037392,1.024728));
-  hpcpush(hpxyzsc(-0.239040,0.055357,1.029662));
-  hpcpush(hpxyzsc(-0.278480,0.068016,1.040278));
-  hpcpush(hpxyzsc(-0.290572,0.069737,1.043693));
-  hpcpush(hpxyzsc(-0.249897,0.082453,1.034044));
-  hpcpush(hpxyzsc(-0.220651,0.087759,1.027808));
-  hpcpush(hpxyzsc(-0.204652,0.097335,1.025357));
-  hpcpush(hpxyzsc(-0.243692,0.127587,1.037142));
-  hpcpush(hpxyzsc(-0.294677,0.136206,1.051374));
-  hpcpush(hpxyzsc(-0.303482,0.130064,1.053099));
-  hpcpush(hpxyzsc(-0.255520,0.152279,1.043302));
-  hpcpush(hpxyzsc(-0.227045,0.154340,1.037001));
-  hpcpush(hpxyzsc(-0.176957,0.161897,1.028360));
-  hpcpush(hpxyzsc(-0.131265,0.160986,1.021346));
-  hpcpush(hpxyzsc(-0.098249,0.157199,1.017037));
-  hpcpush(hpxyzsc(-0.054857,0.153598,1.013214));
-  hpcpush(hpxyzsc(-0.031595,0.149471,1.011603));
-  hpcpush(hpxyzsc(-0.001208,0.130439,1.008472));
-  hpcpush(hpxyzsc(0.016853,0.115564,1.006796));
-  hpcpush(hpxyzsc(0.028853,0.106995,1.006121));
-  hpcpush(hpxyzsc(0.043228,0.096063,1.005533));
-  hpcpush(hpxyzsc(0.053964,0.082746,1.004868));
-  hpcpush(hpxyzsc(0.056228,0.064603,1.003661));
-  hpcpush(hpxyzsc(0.063348,0.049005,1.003202));
-  hpcpush(hpxyzsc(0.054927,0.048957,1.002703));
-  hpcpush(hpxyzsc(0.014325,0.070433,1.002580));
-  hpcpush(hpxyzsc(-0.046699,0.077832,1.004111));
-  hpcpush(hpxyzsc(-0.088908,0.061274,1.005813));
-  hpcpush(hpxyzsc(-0.081520,0.052748,1.004703));
-  hpcpush(hpxyzsc(-0.044233,0.068142,1.003294));
-  hpcpush(hpxyzsc(0.011920,0.059602,1.001846));
-  hpcpush(hpxyzsc(0.086263,0.037141,1.004401));
-  hpcpush(hpxyzsc(0.086263,-0.037141,1.004401));
-  hpcpush(hpxyzsc(0.011920,-0.059602,1.001846));
-  hpcpush(hpxyzsc(-0.044233,-0.068142,1.003294));
-  hpcpush(hpxyzsc(-0.081520,-0.052748,1.004703));
-  hpcpush(hpxyzsc(-0.088908,-0.061274,1.005813));
-  hpcpush(hpxyzsc(-0.046699,-0.077832,1.004111));
-  hpcpush(hpxyzsc(0.014325,-0.070433,1.002580));
-  hpcpush(hpxyzsc(0.054927,-0.048957,1.002703));
-  hpcpush(hpxyzsc(0.063348,-0.049005,1.003202));
-  hpcpush(hpxyzsc(0.056228,-0.064603,1.003661));
-  hpcpush(hpxyzsc(0.053964,-0.082746,1.004868));
-  hpcpush(hpxyzsc(0.043228,-0.096063,1.005533));
-  hpcpush(hpxyzsc(0.028853,-0.106995,1.006121));
-  hpcpush(hpxyzsc(0.016853,-0.115564,1.006796));
-  hpcpush(hpxyzsc(-0.001208,-0.130439,1.008472));
-  hpcpush(hpxyzsc(-0.031595,-0.149471,1.011603));
-  hpcpush(hpxyzsc(-0.054857,-0.153598,1.013214));
-  hpcpush(hpxyzsc(-0.098249,-0.157199,1.017037));
-  hpcpush(hpxyzsc(-0.131265,-0.160986,1.021346));
-  hpcpush(hpxyzsc(-0.176957,-0.161897,1.028360));
-  hpcpush(hpxyzsc(-0.227045,-0.154340,1.037001));
-  hpcpush(hpxyzsc(-0.255520,-0.152279,1.043302));
-  hpcpush(hpxyzsc(-0.303482,-0.130064,1.053099));
-  hpcpush(hpxyzsc(-0.294677,-0.136206,1.051374));
-  hpcpush(hpxyzsc(-0.243692,-0.127587,1.037142));
-  hpcpush(hpxyzsc(-0.204652,-0.097335,1.025357));
-  hpcpush(hpxyzsc(-0.220651,-0.087759,1.027808));
-  hpcpush(hpxyzsc(-0.249897,-0.082453,1.034044));
-  hpcpush(hpxyzsc(-0.290572,-0.069737,1.043693));
-  hpcpush(hpxyzsc(-0.278480,-0.068016,1.040278));
-  hpcpush(hpxyzsc(-0.239040,-0.055357,1.029662));
-  hpcpush(hpxyzsc(-0.220610,-0.037392,1.024728));
-  hpcpush(hpxyzsc(-0.225917,-0.023715,1.025476));
-  hpcpush(hpxyzsc(-0.239738,-0.013807,1.028428));
-  hpcpush(hpxyzsc(-0.253872,-0.006315,1.031742));
-  hpcpush(hpxyzsc(-0.289108,-0.001285,1.040954));
-  hpcpush(hpxyzsc(-0.289108,0.001285,1.040954));
-
-  bshape(shPirateX, 21);
-  hpcpush(hpxyzsc(-0.217493,-0.115996,1.029931));
-  hpcpush(hpxyzsc(-0.119624,-0.071774,1.009684));
-  hpcpush(hpxyzsc(-0.076312,-0.023848,1.003191));
-  hpcpush(hpxyzsc(-0.076312,0.023848,1.003191));
-  hpcpush(hpxyzsc(-0.119624,0.071774,1.009684));
-  hpcpush(hpxyzsc(-0.217493,0.115996,1.029931));
-  hpcpush(hpxyzsc(-0.115996,0.217493,1.029931));
-  hpcpush(hpxyzsc(-0.071774,0.119624,1.009684));
-  hpcpush(hpxyzsc(-0.023848,0.076312,1.003191));
-  hpcpush(hpxyzsc(0.023848,0.076312,1.003191));
-  hpcpush(hpxyzsc(0.071774,0.119624,1.009684));
-  hpcpush(hpxyzsc(0.115996,0.217493,1.029931));
-  hpcpush(hpxyzsc(0.217493,0.115996,1.029931));
-  hpcpush(hpxyzsc(0.119624,0.071774,1.009684));
-  hpcpush(hpxyzsc(0.076312,0.023848,1.003191));
-  hpcpush(hpxyzsc(0.076312,-0.023848,1.003191));
-  hpcpush(hpxyzsc(0.119624,-0.071774,1.009684));
-  hpcpush(hpxyzsc(0.217493,-0.115996,1.029931));
-  hpcpush(hpxyzsc(0.115996,-0.217493,1.029931));
-  hpcpush(hpxyzsc(0.071774,-0.119624,1.009684));
-  hpcpush(hpxyzsc(0.023848,-0.076312,1.003191));
-  hpcpush(hpxyzsc(-0.023848,-0.076312,1.003191));
-  hpcpush(hpxyzsc(-0.071774,-0.119624,1.009684));
-  hpcpush(hpxyzsc(-0.115996,-0.217493,1.029931));
-  hpcpush(hpxyzsc(-0.217493,-0.115996,1.029931));
-  
-  bshape(shPirateHood, 47);
-  hpcpush(hpxyzsc(0.028515,-0.002137,1.000409));
-  hpcpush(hpxyzsc(0.030041,0.018069,1.000614));
-  hpcpush(hpxyzsc(0.041515,0.042413,1.001760));
-  hpcpush(hpxyzsc(0.018125,0.065806,1.002327));
-  hpcpush(hpxyzsc(-0.016208,0.072033,1.002722));
-  hpcpush(hpxyzsc(-0.045904,0.078062,1.004092));
-  hpcpush(hpxyzsc(-0.082076,0.083600,1.006839));
-  hpcpush(hpxyzsc(-0.135647,0.084840,1.012718));
-  hpcpush(hpxyzsc(-0.187346,0.092498,1.021594));
-  hpcpush(hpxyzsc(-0.230428,0.116494,1.032796));
-  hpcpush(hpxyzsc(-0.151031,0.111393,1.017457));
-  hpcpush(hpxyzsc(-0.111628,0.086283,1.009904));
-  hpcpush(hpxyzsc(-0.087869,0.069439,1.006252));
-  hpcpush(hpxyzsc(-0.097756,0.014558,1.004872));
-  hpcpush(hpxyzsc(-0.097756,-0.014558,1.004872));
-  hpcpush(hpxyzsc(-0.087869,-0.069439,1.006252));
-  hpcpush(hpxyzsc(-0.111628,-0.086283,1.009904));
-  hpcpush(hpxyzsc(-0.151031,-0.111393,1.017457));
-  hpcpush(hpxyzsc(-0.230428,-0.116494,1.032796));
-  hpcpush(hpxyzsc(-0.187346,-0.092498,1.021594));
-  hpcpush(hpxyzsc(-0.135647,-0.084840,1.012718));
-  hpcpush(hpxyzsc(-0.082076,-0.083600,1.006839));
-  hpcpush(hpxyzsc(-0.045904,-0.078062,1.004092));
-  hpcpush(hpxyzsc(-0.016208,-0.072033,1.002722));
-  hpcpush(hpxyzsc(0.018125,-0.065806,1.002327));
-  hpcpush(hpxyzsc(0.041515,-0.042413,1.001760));
-  hpcpush(hpxyzsc(0.030041,-0.018069,1.000614));
-  hpcpush(hpxyzsc(0.028515,0.002137,1.000409));
-  hpcpush(hpxyzsc(0.028515,-0.002137,1.000409));
-
-  bshape(shEyepatch, 46);
-  hpcpush(hpxyzsc(0.029860,-0.048970,1.001643));
-  hpcpush(hpxyzsc(0.063361,0.014346,1.002108));
-  hpcpush(hpxyzsc(0.059794,0.031093,1.002268));
-  hpcpush(hpxyzsc(0.017892,-0.040556,1.000982));
-  hpcpush(hpxyzsc(0.029860,-0.048970,1.001643));
-
-  bshape(shPHead, 44);
-  hpcpush(hpxyzsc(0.060794,0.001192,1.001847));
-  hpcpush(hpxyzsc(0.058426,0.023847,1.001989));
-  hpcpush(hpxyzsc(0.050054,0.030986,1.001731));
-  hpcpush(hpxyzsc(0.042896,0.038130,1.001646));
-  hpcpush(hpxyzsc(0.044109,0.042917,1.001892));
-  hpcpush(hpxyzsc(0.032180,0.050058,1.001769));
-  hpcpush(hpxyzsc(0.017884,0.059612,1.001935));
-  hpcpush(hpxyzsc(0.005963,0.064401,1.002089));
-  hpcpush(hpxyzsc(-0.009546,0.068015,1.002356));
-  hpcpush(hpxyzsc(-0.022689,0.070455,1.002736));
-  hpcpush(hpxyzsc(-0.044247,0.070556,1.003462));
-  hpcpush(hpxyzsc(-0.053847,0.068206,1.003769));
-  hpcpush(hpxyzsc(-0.047819,0.065752,1.003300));
-  hpcpush(hpxyzsc(-0.040573,0.056087,1.002393));
-  hpcpush(hpxyzsc(-0.040563,0.053686,1.002261));
-  hpcpush(hpxyzsc(-0.053753,0.053753,1.002885));
-  hpcpush(hpxyzsc(-0.067016,0.056246,1.003820));
-  hpcpush(hpxyzsc(-0.090053,0.054032,1.005499));
-  hpcpush(hpxyzsc(-0.097365,0.051688,1.006057));
-  hpcpush(hpxyzsc(-0.072989,0.046665,1.003746));
-  hpcpush(hpxyzsc(-0.065710,0.040621,1.002979));
-  hpcpush(hpxyzsc(-0.063272,0.034621,1.002598));
-  hpcpush(hpxyzsc(-0.064461,0.031037,1.002556));
-  hpcpush(hpxyzsc(-0.074098,0.028683,1.003152));
-  hpcpush(hpxyzsc(-0.094756,0.031185,1.004963));
-  hpcpush(hpxyzsc(-0.113149,0.027685,1.006762));
-  hpcpush(hpxyzsc(-0.114376,0.026487,1.006868));
-  hpcpush(hpxyzsc(-0.088611,0.020357,1.004125));
-  hpcpush(hpxyzsc(-0.087387,0.017956,1.003972));
-  hpcpush(hpxyzsc(-0.103257,0.018010,1.005478));
-  hpcpush(hpxyzsc(-0.127970,0.014487,1.008259));
-  hpcpush(hpxyzsc(-0.164656,0.006098,1.013484));
-  hpcpush(hpxyzsc(-0.174996,0.001224,1.015197));
-  hpcpush(hpxyzsc(-0.174996,-0.001224,1.015197));
-  hpcpush(hpxyzsc(-0.164656,-0.006098,1.013484));
-  hpcpush(hpxyzsc(-0.127970,-0.014487,1.008259));
-  hpcpush(hpxyzsc(-0.103257,-0.018010,1.005478));
-  hpcpush(hpxyzsc(-0.087387,-0.017956,1.003972));
-  hpcpush(hpxyzsc(-0.088611,-0.020357,1.004125));
-  hpcpush(hpxyzsc(-0.114376,-0.026487,1.006868));
-  hpcpush(hpxyzsc(-0.113149,-0.027685,1.006762));
-  hpcpush(hpxyzsc(-0.094756,-0.031185,1.004963));
-  hpcpush(hpxyzsc(-0.074098,-0.028683,1.003152));
-  hpcpush(hpxyzsc(-0.064461,-0.031037,1.002556));
-  hpcpush(hpxyzsc(-0.063272,-0.034621,1.002598));
-  hpcpush(hpxyzsc(-0.065710,-0.040621,1.002979));
-  hpcpush(hpxyzsc(-0.072989,-0.046665,1.003746));
-  hpcpush(hpxyzsc(-0.097365,-0.051688,1.006057));
-  hpcpush(hpxyzsc(-0.090053,-0.054032,1.005499));
-  hpcpush(hpxyzsc(-0.067016,-0.056246,1.003820));
-  hpcpush(hpxyzsc(-0.053753,-0.053753,1.002885));
-  hpcpush(hpxyzsc(-0.040563,-0.053686,1.002261));
-  hpcpush(hpxyzsc(-0.040573,-0.056087,1.002393));
-  hpcpush(hpxyzsc(-0.047819,-0.065752,1.003300));
-  hpcpush(hpxyzsc(-0.053847,-0.068206,1.003769));
-  hpcpush(hpxyzsc(-0.044247,-0.070556,1.003462));
-  hpcpush(hpxyzsc(-0.022689,-0.070455,1.002736));
-  hpcpush(hpxyzsc(-0.009546,-0.068015,1.002356));
-  hpcpush(hpxyzsc(0.005963,-0.064401,1.002089));
-  hpcpush(hpxyzsc(0.017884,-0.059612,1.001935));
-  hpcpush(hpxyzsc(0.032180,-0.050058,1.001769));
-  hpcpush(hpxyzsc(0.044109,-0.042917,1.001892));
-  hpcpush(hpxyzsc(0.042896,-0.038130,1.001646));
-  hpcpush(hpxyzsc(0.050054,-0.030986,1.001731));
-  hpcpush(hpxyzsc(0.058426,-0.023847,1.001989));
-  hpcpush(hpxyzsc(0.060794,-0.001192,1.001847));
-  hpcpush(hpxyzsc(0.060794,0.001192,1.001847));
-
-  shGolemhead = shDisk; shGolemhead.prio = 43;
-
-  bshape(shFemaleHair, 44);
-  hpcpush(hpxyzsc(-0.185924,0.002463,1.017140));
-  hpcpush(hpxyzsc(-0.273576,0.019176,1.036924));
-  hpcpush(hpxyzsc(-0.186050,0.025874,1.017489));
-  hpcpush(hpxyzsc(-0.268509,0.057538,1.037019));
-  hpcpush(hpxyzsc(-0.183840,0.054288,1.018206));
-  hpcpush(hpxyzsc(-0.258480,0.097250,1.037434));
-  hpcpush(hpxyzsc(-0.174976,0.069005,1.017535));
-  hpcpush(hpxyzsc(-0.246145,0.133329,1.038443));
-  hpcpush(hpxyzsc(0.029891,0.058585,1.002161));
-  hpcpush(hpxyzsc(0.045415,0.043025,1.001955));
-  hpcpush(hpxyzsc(0.051358,0.025082,1.001632));
-  hpcpush(hpxyzsc(0.051358,-0.025082,1.001632));
-  hpcpush(hpxyzsc(0.045415,-0.043025,1.001955));
-  hpcpush(hpxyzsc(0.029891,-0.058585,1.002161));
-  hpcpush(hpxyzsc(-0.246145,-0.133329,1.038443));
-  hpcpush(hpxyzsc(-0.174976,-0.069005,1.017535));
-  hpcpush(hpxyzsc(-0.258480,-0.097250,1.037434));
-  hpcpush(hpxyzsc(-0.183840,-0.054288,1.018206));
-  hpcpush(hpxyzsc(-0.268509,-0.057538,1.037019));
-  hpcpush(hpxyzsc(-0.186050,-0.025874,1.017489));
-  hpcpush(hpxyzsc(-0.273576,-0.019176,1.036924));
-  hpcpush(hpxyzsc(-0.185924,-0.002463,1.017140));
-  hpcpush(hpxyzsc(-0.185924,0.002463,1.017140));
-  
-  bshape(shWitchHair, 44);
-  hpcpush(hpxyzsc(0.042269,0.051167,1.002200));
-  hpcpush(hpxyzsc(0.042269,0.051167,1.002200));
-  hpcpush(hpxyzsc(0.034481,0.055615,1.002139));
-  hpcpush(hpxyzsc(0.030032,0.057839,1.002121));
-  hpcpush(hpxyzsc(0.018910,0.063403,1.002186));
-  hpcpush(hpxyzsc(0.007787,0.066742,1.002255));
-  hpcpush(hpxyzsc(0.003337,0.068971,1.002381));
-  hpcpush(hpxyzsc(0.001112,0.068971,1.002376));
-  hpcpush(hpxyzsc(-0.012240,0.074551,1.002850));
-  hpcpush(hpxyzsc(-0.021146,0.079021,1.003340));
-  hpcpush(hpxyzsc(-0.037870,0.091333,1.004876));
-  hpcpush(hpxyzsc(-0.055771,0.111541,1.007746));
-  hpcpush(hpxyzsc(-0.067005,0.126193,1.010156));
-  hpcpush(hpxyzsc(-0.069311,0.140857,1.012247));
-  hpcpush(hpxyzsc(-0.077214,0.151072,1.014290));
-  hpcpush(hpxyzsc(-0.082864,0.156769,1.015600));
-  hpcpush(hpxyzsc(-0.088523,0.162478,1.016974));
-  hpcpush(hpxyzsc(-0.102090,0.169403,1.019372));
-  hpcpush(hpxyzsc(-0.110020,0.172889,1.020782));
-  hpcpush(hpxyzsc(-0.119120,0.178681,1.022798));
-  hpcpush(hpxyzsc(-0.129367,0.183363,1.024870));
-  hpcpush(hpxyzsc(-0.140780,0.188082,1.027226));
-  hpcpush(hpxyzsc(-0.152182,0.189382,1.029089));
-  hpcpush(hpxyzsc(-0.126986,0.173060,1.022778));
-  hpcpush(hpxyzsc(-0.121256,0.166166,1.020938));
-  hpcpush(hpxyzsc(-0.116681,0.160437,1.019487));
-  hpcpush(hpxyzsc(-0.116640,0.155895,1.018778));
-  hpcpush(hpxyzsc(-0.116591,0.150223,1.017920));
-  hpcpush(hpxyzsc(-0.121038,0.142332,1.017305));
-  hpcpush(hpxyzsc(-0.128936,0.141269,1.018126));
-  hpcpush(hpxyzsc(-0.136844,0.140209,1.019012));
-  hpcpush(hpxyzsc(-0.150448,0.140343,1.020946));
-  hpcpush(hpxyzsc(-0.156128,0.140403,1.021807));
-  hpcpush(hpxyzsc(-0.165232,0.140504,1.023251));
-  hpcpush(hpxyzsc(-0.168638,0.139407,1.023657));
-  hpcpush(hpxyzsc(-0.173187,0.138325,1.024269));
-  hpcpush(hpxyzsc(-0.178884,0.137257,1.025104));
-  hpcpush(hpxyzsc(-0.182300,0.136163,1.025560));
-  hpcpush(hpxyzsc(-0.184589,0.136190,1.025973));
-  hpcpush(hpxyzsc(-0.171969,0.131506,1.023165));
-  hpcpush(hpxyzsc(-0.159432,0.130240,1.020971));
-  hpcpush(hpxyzsc(-0.143544,0.130087,1.018591));
-  hpcpush(hpxyzsc(-0.127691,0.127691,1.016174));
-  hpcpush(hpxyzsc(-0.106186,0.112892,1.011939));
-  hpcpush(hpxyzsc(-0.102795,0.109500,1.011216));
-  hpcpush(hpxyzsc(-0.096004,0.098237,1.009390));
-  hpcpush(hpxyzsc(-0.092611,0.091496,1.008439));
-  hpcpush(hpxyzsc(-0.086977,0.082517,1.007161));
-  hpcpush(hpxyzsc(-0.085842,0.078039,1.006707));
-  hpcpush(hpxyzsc(-0.084699,0.070211,1.006034));
-  hpcpush(hpxyzsc(-0.084690,0.066860,1.005804));
-  hpcpush(hpxyzsc(-0.088036,0.063519,1.005875));
-  hpcpush(hpxyzsc(-0.092499,0.059066,1.006004));
-  hpcpush(hpxyzsc(-0.096971,0.056845,1.006298));
-  hpcpush(hpxyzsc(-0.107054,0.055757,1.007258));
-  hpcpush(hpxyzsc(-0.120527,0.055799,1.008782));
-  hpcpush(hpxyzsc(-0.137414,0.055859,1.010942));
-  hpcpush(hpxyzsc(-0.158884,0.054826,1.014027));
-  hpcpush(hpxyzsc(-0.171350,0.051517,1.015881));
-  hpcpush(hpxyzsc(-0.163386,0.047001,1.014349));
-  hpcpush(hpxyzsc(-0.144148,0.045815,1.011374));
-  hpcpush(hpxyzsc(-0.132862,0.042427,1.009679));
-  hpcpush(hpxyzsc(-0.121600,0.037930,1.008080));
-  hpcpush(hpxyzsc(-0.112608,0.033448,1.006876));
-  hpcpush(hpxyzsc(-0.103624,0.023399,1.005627));
-  hpcpush(hpxyzsc(-0.098017,0.014480,1.004897));
-  hpcpush(hpxyzsc(-0.093538,0.007795,1.004395));
-  hpcpush(hpxyzsc(-0.093538,-0.007795,1.004395));
-  hpcpush(hpxyzsc(-0.098017,-0.014480,1.004897));
-  hpcpush(hpxyzsc(-0.103624,-0.023399,1.005627));
-  hpcpush(hpxyzsc(-0.112608,-0.033448,1.006876));
-  hpcpush(hpxyzsc(-0.121600,-0.037930,1.008080));
-  hpcpush(hpxyzsc(-0.132862,-0.042427,1.009679));
-  hpcpush(hpxyzsc(-0.144148,-0.045815,1.011374));
-  hpcpush(hpxyzsc(-0.163386,-0.047001,1.014349));
-  hpcpush(hpxyzsc(-0.171350,-0.051517,1.015881));
-  hpcpush(hpxyzsc(-0.158884,-0.054826,1.014027));
-  hpcpush(hpxyzsc(-0.137414,-0.055859,1.010942));
-  hpcpush(hpxyzsc(-0.120527,-0.055799,1.008782));
-  hpcpush(hpxyzsc(-0.107054,-0.055757,1.007258));
-  hpcpush(hpxyzsc(-0.096971,-0.056845,1.006298));
-  hpcpush(hpxyzsc(-0.092499,-0.059066,1.006004));
-  hpcpush(hpxyzsc(-0.088036,-0.063519,1.005875));
-  hpcpush(hpxyzsc(-0.084690,-0.066860,1.005804));
-  hpcpush(hpxyzsc(-0.084699,-0.070211,1.006034));
-  hpcpush(hpxyzsc(-0.085842,-0.078039,1.006707));
-  hpcpush(hpxyzsc(-0.086977,-0.082517,1.007161));
-  hpcpush(hpxyzsc(-0.092611,-0.091496,1.008439));
-  hpcpush(hpxyzsc(-0.096004,-0.098237,1.009390));
-  hpcpush(hpxyzsc(-0.102795,-0.109500,1.011216));
-  hpcpush(hpxyzsc(-0.106186,-0.112892,1.011939));
-  hpcpush(hpxyzsc(-0.127691,-0.127691,1.016174));
-  hpcpush(hpxyzsc(-0.143544,-0.130087,1.018591));
-  hpcpush(hpxyzsc(-0.159432,-0.130240,1.020971));
-  hpcpush(hpxyzsc(-0.171969,-0.131506,1.023165));
-  hpcpush(hpxyzsc(-0.184589,-0.136190,1.025973));
-  hpcpush(hpxyzsc(-0.182300,-0.136163,1.025560));
-  hpcpush(hpxyzsc(-0.178884,-0.137257,1.025104));
-  hpcpush(hpxyzsc(-0.173187,-0.138325,1.024269));
-  hpcpush(hpxyzsc(-0.168638,-0.139407,1.023657));
-  hpcpush(hpxyzsc(-0.165232,-0.140504,1.023251));
-  hpcpush(hpxyzsc(-0.156128,-0.140403,1.021807));
-  hpcpush(hpxyzsc(-0.150448,-0.140343,1.020946));
-  hpcpush(hpxyzsc(-0.136844,-0.140209,1.019012));
-  hpcpush(hpxyzsc(-0.128936,-0.141269,1.018126));
-  hpcpush(hpxyzsc(-0.121038,-0.142332,1.017305));
-  hpcpush(hpxyzsc(-0.116591,-0.150223,1.017920));
-  hpcpush(hpxyzsc(-0.116640,-0.155895,1.018778));
-  hpcpush(hpxyzsc(-0.116681,-0.160437,1.019487));
-  hpcpush(hpxyzsc(-0.121256,-0.166166,1.020938));
-  hpcpush(hpxyzsc(-0.126986,-0.173060,1.022778));
-  hpcpush(hpxyzsc(-0.152182,-0.189382,1.029089));
-  hpcpush(hpxyzsc(-0.140780,-0.188082,1.027226));
-  hpcpush(hpxyzsc(-0.129367,-0.183363,1.024870));
-  hpcpush(hpxyzsc(-0.119120,-0.178681,1.022798));
-  hpcpush(hpxyzsc(-0.110020,-0.172889,1.020782));
-  hpcpush(hpxyzsc(-0.102090,-0.169403,1.019372));
-  hpcpush(hpxyzsc(-0.088523,-0.162478,1.016974));
-  hpcpush(hpxyzsc(-0.082864,-0.156769,1.015600));
-  hpcpush(hpxyzsc(-0.077214,-0.151072,1.014290));
-  hpcpush(hpxyzsc(-0.069311,-0.140857,1.012247));
-  hpcpush(hpxyzsc(-0.067005,-0.126193,1.010156));
-  hpcpush(hpxyzsc(-0.055771,-0.111541,1.007746));
-  hpcpush(hpxyzsc(-0.037870,-0.091333,1.004876));
-  hpcpush(hpxyzsc(-0.021146,-0.079021,1.003340));
-  hpcpush(hpxyzsc(-0.012240,-0.074551,1.002850));
-  hpcpush(hpxyzsc(0.001112,-0.068971,1.002376));
-  hpcpush(hpxyzsc(0.003337,-0.068971,1.002381));
-  hpcpush(hpxyzsc(0.007787,-0.066742,1.002255));
-  hpcpush(hpxyzsc(0.018910,-0.063403,1.002186));
-  hpcpush(hpxyzsc(0.030032,-0.057839,1.002121));
-  hpcpush(hpxyzsc(0.034481,-0.055615,1.002139));
-  hpcpush(hpxyzsc(0.042269,-0.051167,1.002200));
-  hpcpush(hpxyzsc(0.042269,-0.051167,1.002200));
-  hpcpush(hpxyzsc(0.042269,0.051167,1.002200));
-  
-  bshape(shBeautyHair, 44);
-  hpcpush(hpxyzsc(0.058945,0.017795,1.001894));
-  hpcpush(hpxyzsc(0.051157,0.031139,1.001792));
-  hpcpush(hpxyzsc(0.040039,0.047824,1.001943));
-  hpcpush(hpxyzsc(0.025588,0.066752,1.002552));
-  hpcpush(hpxyzsc(0.003338,0.077896,1.003035));
-  hpcpush(hpxyzsc(-0.020043,0.090192,1.004259));
-  hpcpush(hpxyzsc(-0.047936,0.104790,1.006618));
-  hpcpush(hpxyzsc(-0.074808,0.118352,1.009754));
-  hpcpush(hpxyzsc(-0.100655,0.127497,1.013108));
-  hpcpush(hpxyzsc(-0.120982,0.135545,1.016371));
-  hpcpush(hpxyzsc(-0.144880,0.150496,1.021587));
-  hpcpush(hpxyzsc(-0.177054,0.171415,1.029918));
-  hpcpush(hpxyzsc(-0.211757,0.182315,1.038306));
-  hpcpush(hpxyzsc(-0.246928,0.194584,1.048254));
-  hpcpush(hpxyzsc(-0.271704,0.197499,1.054907));
-  hpcpush(hpxyzsc(-0.287220,0.201397,1.059743));
-  hpcpush(hpxyzsc(-0.306370,0.203099,1.065416));
-  hpcpush(hpxyzsc(-0.328100,0.204919,1.072213));
-  hpcpush(hpxyzsc(-0.355070,0.210497,1.081843));
-  hpcpush(hpxyzsc(-0.372314,0.211094,1.087740));
-  hpcpush(hpxyzsc(-0.378552,0.212500,1.090164));
-  hpcpush(hpxyzsc(-0.378552,0.212500,1.090164));
-  hpcpush(hpxyzsc(-0.320256,0.184807,1.066170));
-  hpcpush(hpxyzsc(-0.386076,0.179705,1.086899));
-  hpcpush(hpxyzsc(-0.320758,0.158088,1.062016));
-  hpcpush(hpxyzsc(-0.391464,0.152879,1.084719));
-  hpcpush(hpxyzsc(-0.322452,0.125779,1.058204));
-  hpcpush(hpxyzsc(-0.394332,0.119109,1.081520));
-  hpcpush(hpxyzsc(-0.330437,0.101761,1.058085));
-  hpcpush(hpxyzsc(-0.401200,0.089027,1.081151));
-  hpcpush(hpxyzsc(-0.345683,0.069823,1.060364));
-  hpcpush(hpxyzsc(-0.404521,0.060100,1.080393));
-  hpcpush(hpxyzsc(-0.352724,0.045808,1.061373));
-  hpcpush(hpxyzsc(-0.410490,0.028908,1.081359));
-  hpcpush(hpxyzsc(-0.357430,0.017184,1.062098));
-  hpcpush(hpxyzsc(-0.411658,0.001156,1.081417));
-  hpcpush(hpxyzsc(-0.411658,-0.001156,1.081417));
-  hpcpush(hpxyzsc(-0.357430,-0.017184,1.062098));
-  hpcpush(hpxyzsc(-0.410490,-0.028908,1.081359));
-  hpcpush(hpxyzsc(-0.352724,-0.045808,1.061373));
-  hpcpush(hpxyzsc(-0.404521,-0.060100,1.080393));
-  hpcpush(hpxyzsc(-0.345683,-0.069823,1.060364));
-  hpcpush(hpxyzsc(-0.401200,-0.089027,1.081151));
-  hpcpush(hpxyzsc(-0.330437,-0.101761,1.058085));
-  hpcpush(hpxyzsc(-0.394332,-0.119109,1.081520));
-  hpcpush(hpxyzsc(-0.322452,-0.125779,1.058204));
-  hpcpush(hpxyzsc(-0.391464,-0.152879,1.084719));
-  hpcpush(hpxyzsc(-0.320758,-0.158088,1.062016));
-  hpcpush(hpxyzsc(-0.386076,-0.179705,1.086899));
-  hpcpush(hpxyzsc(-0.320256,-0.184807,1.066170));
-  hpcpush(hpxyzsc(-0.378552,-0.212500,1.090164));
-  hpcpush(hpxyzsc(-0.378552,-0.212500,1.090164));
-  hpcpush(hpxyzsc(-0.372314,-0.211094,1.087740));
-  hpcpush(hpxyzsc(-0.355070,-0.210497,1.081843));
-  hpcpush(hpxyzsc(-0.328100,-0.204919,1.072213));
-  hpcpush(hpxyzsc(-0.306370,-0.203099,1.065416));
-  hpcpush(hpxyzsc(-0.287220,-0.201397,1.059743));
-  hpcpush(hpxyzsc(-0.271704,-0.197499,1.054907));
-  hpcpush(hpxyzsc(-0.246928,-0.194584,1.048254));
-  hpcpush(hpxyzsc(-0.211757,-0.182315,1.038306));
-  hpcpush(hpxyzsc(-0.177054,-0.171415,1.029918));
-  hpcpush(hpxyzsc(-0.144880,-0.150496,1.021587));
-  hpcpush(hpxyzsc(-0.120982,-0.135545,1.016371));
-  hpcpush(hpxyzsc(-0.100655,-0.127497,1.013108));
-  hpcpush(hpxyzsc(-0.074808,-0.118352,1.009754));
-  hpcpush(hpxyzsc(-0.047936,-0.104790,1.006618));
-  hpcpush(hpxyzsc(-0.020043,-0.090192,1.004259));
-  hpcpush(hpxyzsc(0.003338,-0.077896,1.003035));
-  hpcpush(hpxyzsc(0.025588,-0.066752,1.002552));
-  hpcpush(hpxyzsc(0.040039,-0.047824,1.001943));
-  hpcpush(hpxyzsc(0.051157,-0.031139,1.001792));
-  hpcpush(hpxyzsc(0.058945,-0.017795,1.001894));
-  hpcpush(hpxyzsc(0.058945,0.017795,1.001894));
-
-  bshape(shFlowerHair, 46);
-  hpcpush(hpxyzsc(0.020097,0.000230,1.000202));
-  hpcpush(hpxyzsc(0.021808,-0.003455,1.000244));
-  hpcpush(hpxyzsc(0.020624,-0.006537,1.000234));
-  hpcpush(hpxyzsc(0.019055,-0.009617,1.000228));
-  hpcpush(hpxyzsc(0.015358,-0.012872,1.000201));
-  hpcpush(hpxyzsc(0.012065,-0.013813,1.000168));
-  hpcpush(hpxyzsc(0.008195,-0.014555,1.000139));
-  hpcpush(hpxyzsc(0.003932,-0.016068,1.000137));
-  hpcpush(hpxyzsc(-0.000938,-0.021248,1.000226));
-  hpcpush(hpxyzsc(-0.002329,-0.026069,1.000342));
-  hpcpush(hpxyzsc(0.002252,-0.033451,1.000562));
-  hpcpush(hpxyzsc(0.008397,-0.038528,1.000777));
-  hpcpush(hpxyzsc(0.015533,-0.040713,1.000949));
-  hpcpush(hpxyzsc(0.022307,-0.039801,1.001040));
-  hpcpush(hpxyzsc(0.025990,-0.038478,1.001077));
-  hpcpush(hpxyzsc(0.033367,-0.034670,1.001157));
-  hpcpush(hpxyzsc(0.040526,-0.034537,1.001417));
-  hpcpush(hpxyzsc(0.044375,-0.037666,1.001692));
-  hpcpush(hpxyzsc(0.044527,-0.043667,1.001943));
-  hpcpush(hpxyzsc(0.042949,-0.047912,1.002068));
-  hpcpush(hpxyzsc(0.039234,-0.053495,1.002198));
-  hpcpush(hpxyzsc(0.029716,-0.058642,1.002159));
-  hpcpush(hpxyzsc(0.021226,-0.055470,1.001762));
-  hpcpush(hpxyzsc(0.017392,-0.050791,1.001440));
-  hpcpush(hpxyzsc(0.019179,-0.044419,1.001170));
-  hpcpush(hpxyzsc(0.021725,-0.039990,1.001035));
-  hpcpush(hpxyzsc(0.023868,-0.037880,1.001002));
-  hpcpush(hpxyzsc(0.027754,-0.035204,1.001004));
-  hpcpush(hpxyzsc(0.031261,-0.031751,1.000992));
-  hpcpush(hpxyzsc(0.033036,-0.026932,1.000908));
-  hpcpush(hpxyzsc(0.029413,-0.020135,1.000635));
-  hpcpush(hpxyzsc(0.024802,-0.016233,1.000439));
-  hpcpush(hpxyzsc(0.015732,-0.014421,1.000228));
-  hpcpush(hpxyzsc(0.010520,-0.013800,1.000151));
-  hpcpush(hpxyzsc(0.005700,-0.012410,1.000093));
-  hpcpush(hpxyzsc(-0.002576,-0.008288,1.000038));
-  hpcpush(hpxyzsc(-0.006404,-0.003621,1.000027));
-  hpcpush(hpxyzsc(-0.005985,0.000626,1.000018));
-  hpcpush(hpxyzsc(-0.005985,-0.000626,1.000018));
-  hpcpush(hpxyzsc(-0.006404,0.003621,1.000027));
-  hpcpush(hpxyzsc(-0.002576,0.008288,1.000038));
-  hpcpush(hpxyzsc(0.005700,0.012410,1.000093));
-  hpcpush(hpxyzsc(0.010520,0.013800,1.000151));
-  hpcpush(hpxyzsc(0.015732,0.014421,1.000228));
-  hpcpush(hpxyzsc(0.024802,0.016233,1.000439));
-  hpcpush(hpxyzsc(0.029413,0.020135,1.000635));
-  hpcpush(hpxyzsc(0.033036,0.026932,1.000908));
-  hpcpush(hpxyzsc(0.031261,0.031751,1.000992));
-  hpcpush(hpxyzsc(0.027754,0.035204,1.001004));
-  hpcpush(hpxyzsc(0.023868,0.037880,1.001002));
-  hpcpush(hpxyzsc(0.021725,0.039990,1.001035));
-  hpcpush(hpxyzsc(0.019179,0.044419,1.001170));
-  hpcpush(hpxyzsc(0.017392,0.050791,1.001440));
-  hpcpush(hpxyzsc(0.021226,0.055470,1.001762));
-  hpcpush(hpxyzsc(0.029716,0.058642,1.002159));
-  hpcpush(hpxyzsc(0.039234,0.053495,1.002198));
-  hpcpush(hpxyzsc(0.042949,0.047912,1.002068));
-  hpcpush(hpxyzsc(0.044527,0.043667,1.001943));
-  hpcpush(hpxyzsc(0.044375,0.037666,1.001692));
-  hpcpush(hpxyzsc(0.040526,0.034537,1.001417));
-  hpcpush(hpxyzsc(0.033367,0.034670,1.001157));
-  hpcpush(hpxyzsc(0.025990,0.038478,1.001077));
-  hpcpush(hpxyzsc(0.022307,0.039801,1.001040));
-  hpcpush(hpxyzsc(0.015533,0.040713,1.000949));
-  hpcpush(hpxyzsc(0.008397,0.038528,1.000777));
-  hpcpush(hpxyzsc(0.002252,0.033451,1.000562));
-  hpcpush(hpxyzsc(-0.002329,0.026069,1.000342));
-  hpcpush(hpxyzsc(-0.000938,0.021248,1.000226));
-  hpcpush(hpxyzsc(0.003932,0.016068,1.000137));
-  hpcpush(hpxyzsc(0.008195,0.014555,1.000139));
-  hpcpush(hpxyzsc(0.012065,0.013813,1.000168));
-  hpcpush(hpxyzsc(0.015358,0.012872,1.000201));
-  hpcpush(hpxyzsc(0.019055,0.009617,1.000228));
-  hpcpush(hpxyzsc(0.020624,0.006537,1.000234));
-  hpcpush(hpxyzsc(0.021808,0.003455,1.000244));
-  hpcpush(hpxyzsc(0.020097,-0.000230,1.000202));
-  hpcpush(hpxyzsc(0.020097,0.000230,1.000202));
-
-  bshape(shSuspenders, 43);
-  hpcpush(hpxyzsc(0.036850,0.051150,1.001985));
-  hpcpush(hpxyzsc(0.021480,0.095281,1.004759));
-  hpcpush(hpxyzsc(-0.084982,0.100985,1.008672));
-  hpcpush(hpxyzsc(-0.108740,0.081693,1.009207));
-  hpcpush(hpxyzsc(0.027517,0.075948,1.003257));
-  hpcpush(hpxyzsc(0.036300,0.051700,1.001993));
-  hpcpush(hpxyzsc(0.036300,-0.051700,1.001993));
-  hpcpush(hpxyzsc(0.027517,-0.075948,1.003257));
-  hpcpush(hpxyzsc(-0.108740,-0.081693,1.009207));
-  hpcpush(hpxyzsc(-0.084982,-0.100985,1.008672));
-  hpcpush(hpxyzsc(0.021480,-0.095281,1.004759));
-  hpcpush(hpxyzsc(0.036850,-0.051150,1.001985));
-  hpcpush(hpxyzsc(0.036850,0.051150,1.001985));
-
-  
-  bshape(shFlowerHand, 40);
-  hpcpush(hpxyzsc(0.061138,-0.276481,1.039317));
-  hpcpush(hpxyzsc(0.048889,-0.207664,1.022504));
-  hpcpush(hpxyzsc(0.042675,-0.208468,1.022389));
-  hpcpush(hpxyzsc(0.039268,-0.207720,1.022101));
-  hpcpush(hpxyzsc(0.038317,-0.207150,1.021949));
-  hpcpush(hpxyzsc(0.033960,-0.205835,1.021529));
-  hpcpush(hpxyzsc(0.033484,-0.205550,1.021456));
-  hpcpush(hpxyzsc(0.030231,-0.202307,1.020707));
-  hpcpush(hpxyzsc(0.026503,-0.198784,1.019910));
-  hpcpush(hpxyzsc(0.023404,-0.193050,1.018732));
-  hpcpush(hpxyzsc(0.022285,-0.187206,1.017616));
-  hpcpush(hpxyzsc(0.021521,-0.179639,1.016235));
-  hpcpush(hpxyzsc(0.020958,-0.172845,1.015044));
-  hpcpush(hpxyzsc(0.023051,-0.166988,1.014109));
-  hpcpush(hpxyzsc(0.024435,-0.164584,1.013748));
-  hpcpush(hpxyzsc(0.024074,-0.158566,1.012780));
-  hpcpush(hpxyzsc(0.023202,-0.156760,1.012478));
-  hpcpush(hpxyzsc(0.022528,-0.155715,1.012302));
-  hpcpush(hpxyzsc(0.021101,-0.154869,1.012141));
-  hpcpush(hpxyzsc(0.019476,-0.153262,1.011864));
-  hpcpush(hpxyzsc(0.034413,-0.155043,1.012533));
-  hpcpush(hpxyzsc(0.037623,-0.155021,1.012644));
-  hpcpush(hpxyzsc(0.041825,-0.151082,1.012213));
-  hpcpush(hpxyzsc(0.047419,-0.144756,1.011535));
-  hpcpush(hpxyzsc(0.046987,-0.139992,1.010844));
-  hpcpush(hpxyzsc(0.047408,-0.139933,1.010855));
-  hpcpush(hpxyzsc(0.048335,-0.144628,1.011560));
-  hpcpush(hpxyzsc(0.055494,-0.149173,1.012587));
-  hpcpush(hpxyzsc(0.060644,-0.151807,1.013273));
-  hpcpush(hpxyzsc(0.063735,-0.150949,1.013335));
-  hpcpush(hpxyzsc(0.077598,-0.145147,1.013454));
-  hpcpush(hpxyzsc(0.076489,-0.147136,1.013657));
-  hpcpush(hpxyzsc(0.075355,-0.148340,1.013747));
-  hpcpush(hpxyzsc(0.075002,-0.149527,1.013895));
-  hpcpush(hpxyzsc(0.074673,-0.151502,1.014164));
-  hpcpush(hpxyzsc(0.076027,-0.157381,1.015160));
-  hpcpush(hpxyzsc(0.078039,-0.159310,1.015613));
-  hpcpush(hpxyzsc(0.081710,-0.164363,1.016706));
-  hpcpush(hpxyzsc(0.083094,-0.171043,1.017920));
-  hpcpush(hpxyzsc(0.084506,-0.178519,1.019319));
-  hpcpush(hpxyzsc(0.085090,-0.184437,1.020420));
-  hpcpush(hpxyzsc(0.083740,-0.190792,1.021476));
-  hpcpush(hpxyzsc(0.081158,-0.195197,1.022100));
-  hpcpush(hpxyzsc(0.078954,-0.199202,1.022700));
-  hpcpush(hpxyzsc(0.078578,-0.199606,1.022750));
-  hpcpush(hpxyzsc(0.074763,-0.202061,1.022946));
-  hpcpush(hpxyzsc(0.074012,-0.202870,1.023051));
-  hpcpush(hpxyzsc(0.070951,-0.204520,1.023163));
-  hpcpush(hpxyzsc(0.064751,-0.205449,1.022938));
-  hpcpush(hpxyzsc(0.072719,-0.274864,1.039634));
-  hpcpush(hpxyzsc(0.061138,-0.276481,1.039317));
-
-  bshape(shPFace, 45);
-  hpcpush(hpxyzsc(0.011878,-0.000000,1.000071));
-  hpcpush(hpxyzsc(0.011880,0.010692,1.000128));
-  hpcpush(hpxyzsc(0.014262,0.022581,1.000357));
-  hpcpush(hpxyzsc(0.015455,0.027343,1.000493));
-  hpcpush(hpxyzsc(0.017842,0.034494,1.000754));
-  hpcpush(hpxyzsc(0.021425,0.041659,1.001097));
-  hpcpush(hpxyzsc(0.025005,0.044056,1.001282));
-  hpcpush(hpxyzsc(0.029785,0.047656,1.001578));
-  hpcpush(hpxyzsc(0.032176,0.048860,1.001710));
-  hpcpush(hpxyzsc(0.036964,0.051273,1.001996));
-  hpcpush(hpxyzsc(0.044133,0.048905,1.002167));
-  hpcpush(hpxyzsc(0.046519,0.046519,1.002162));
-  hpcpush(hpxyzsc(0.051292,0.041749,1.002185));
-  hpcpush(hpxyzsc(0.056061,0.034591,1.002167));
-  hpcpush(hpxyzsc(0.060844,0.028632,1.002258));
-  hpcpush(hpxyzsc(0.064425,0.020282,1.002278));
-  hpcpush(hpxyzsc(0.064417,0.016701,1.002212));
-  hpcpush(hpxyzsc(0.069220,0.009548,1.002438));
-  hpcpush(hpxyzsc(0.075246,0.003583,1.002833));
-  hpcpush(hpxyzsc(0.077662,0.001195,1.003012));
-  hpcpush(hpxyzsc(0.080082,-0.000000,1.003201));
-  hpcpush(hpxyzsc(0.080082,0.000000,1.003201));
-  hpcpush(hpxyzsc(0.077662,-0.001195,1.003012));
-  hpcpush(hpxyzsc(0.075246,-0.003583,1.002833));
-  hpcpush(hpxyzsc(0.069220,-0.009548,1.002438));
-  hpcpush(hpxyzsc(0.064417,-0.016701,1.002212));
-  hpcpush(hpxyzsc(0.064425,-0.020282,1.002278));
-  hpcpush(hpxyzsc(0.060844,-0.028632,1.002258));
-  hpcpush(hpxyzsc(0.056061,-0.034591,1.002167));
-  hpcpush(hpxyzsc(0.051292,-0.041749,1.002185));
-  hpcpush(hpxyzsc(0.046519,-0.046519,1.002162));
-  hpcpush(hpxyzsc(0.044133,-0.048905,1.002167));
-  hpcpush(hpxyzsc(0.036964,-0.051273,1.001996));
-  hpcpush(hpxyzsc(0.032176,-0.048860,1.001710));
-  hpcpush(hpxyzsc(0.029785,-0.047656,1.001578));
-  hpcpush(hpxyzsc(0.025005,-0.044056,1.001282));
-  hpcpush(hpxyzsc(0.021425,-0.041659,1.001097));
-  hpcpush(hpxyzsc(0.017842,-0.034494,1.000754));
-  hpcpush(hpxyzsc(0.015455,-0.027343,1.000493));
-  hpcpush(hpxyzsc(0.014262,-0.022581,1.000357));
-  hpcpush(hpxyzsc(0.011880,-0.010692,1.000128));
-  hpcpush(hpxyzsc(0.011878,0.000000,1.000071));
-  hpcpush(hpxyzsc(0.011878,-0.000000,1.000071));
-
-  bshape(shEyes, 46);
-  hpcpush(hpxyzsc(0.070467,0.026276,1.002824));
-  hpcpush(hpxyzsc(0.054837,0.027418,1.001878));
-  hpcpush(hpxyzsc(0.040494,0.034539,1.001415));
-  hpcpush(hpxyzsc(0.034561,0.047670,1.001732));
-  hpcpush(hpxyzsc(0.032259,0.070492,1.003000));
-  hpcpush(hpxyzsc(0.044434,0.096073,1.005587));
-  hpcpush(hpxyzsc(0.065124,0.106127,1.007722));
-  hpcpush(hpxyzsc(0.089628,0.109007,1.009909));
-  hpcpush(hpxyzsc(0.110425,0.098291,1.010868));
-  hpcpush(hpxyzsc(0.121434,0.088647,1.011239));
-  hpcpush(hpxyzsc(0.124892,0.073965,1.010479));
-  hpcpush(hpxyzsc(0.123474,0.064158,1.009635));
-  hpcpush(hpxyzsc(0.117069,0.050690,1.008104));
-  hpcpush(hpxyzsc(0.113313,0.047013,1.007497));
-  hpcpush(hpxyzsc(0.098463,0.037224,1.005525));
-  hpcpush(hpxyzsc(0.081366,0.029914,1.003751));
-  hpcpush(hpxyzsc(0.070467,0.026276,1.002824));
-  hpcpush(hpxyzsc(0.070467,-0.026276,1.002824));
-  hpcpush(hpxyzsc(0.081366,-0.029914,1.003751));
-  hpcpush(hpxyzsc(0.098463,-0.037224,1.005525));
-  hpcpush(hpxyzsc(0.113313,-0.047013,1.007497));
-  hpcpush(hpxyzsc(0.117069,-0.050690,1.008104));
-  hpcpush(hpxyzsc(0.123474,-0.064158,1.009635));
-  hpcpush(hpxyzsc(0.124892,-0.073965,1.010479));
-  hpcpush(hpxyzsc(0.121434,-0.088647,1.011239));
-  hpcpush(hpxyzsc(0.110425,-0.098291,1.010868));
-  hpcpush(hpxyzsc(0.089628,-0.109007,1.009909));
-  hpcpush(hpxyzsc(0.065124,-0.106127,1.007722));
-  hpcpush(hpxyzsc(0.044434,-0.096073,1.005587));
-  hpcpush(hpxyzsc(0.032259,-0.070492,1.003000));
-  hpcpush(hpxyzsc(0.034561,-0.047670,1.001732));
-  hpcpush(hpxyzsc(0.040494,-0.034539,1.001415));
-  hpcpush(hpxyzsc(0.054837,-0.027418,1.001878));
-  hpcpush(hpxyzsc(0.070467,-0.026276,1.002824));
-  hpcpush(hpxyzsc(0.070467,0.026276,1.002824));
-  
-  copyshape(shDragonEyes, shEyes, 35);
-  
-  bshape(shShark, 47);
-  hpcpush(hpxyzsc(-0.254548,0.002533,1.031892));
-  hpcpush(hpxyzsc(-0.295445,0.115041,1.049058));
-  hpcpush(hpxyzsc(-0.214304,0.034887,1.023300));
-  hpcpush(hpxyzsc(-0.113418,0.026545,1.006761));
-  hpcpush(hpxyzsc(-0.034699,0.062219,1.002534));
-  hpcpush(hpxyzsc(-0.010782,0.079071,1.003179));
-  hpcpush(hpxyzsc(0.009598,0.087578,1.003874));
-  hpcpush(hpxyzsc(0.037297,0.096250,1.005313));
-  hpcpush(hpxyzsc(-0.001207,0.119535,1.007120));
-  hpcpush(hpxyzsc(-0.032645,0.120908,1.007812));
-  hpcpush(hpxyzsc(-0.002431,0.144615,1.010406));
-  hpcpush(hpxyzsc(0.027983,0.145997,1.010989));
-  hpcpush(hpxyzsc(0.058411,0.137510,1.011099));
-  hpcpush(hpxyzsc(0.096163,0.115639,1.011247));
-  hpcpush(hpxyzsc(0.130542,0.089062,1.012410));
-  hpcpush(hpxyzsc(0.175135,0.075234,1.018004));
-  hpcpush(hpxyzsc(0.227410,0.066590,1.027691));
-  hpcpush(hpxyzsc(0.215688,0.036156,1.023635));
-  hpcpush(hpxyzsc(0.187577,0.041958,1.018305));
-  hpcpush(hpxyzsc(0.184662,0.017235,1.017053));
-  hpcpush(hpxyzsc(0.208627,0.008693,1.021568));
-  hpcpush(hpxyzsc(0.214217,0.028645,1.023088));
-  hpcpush(hpxyzsc(0.229902,0.056533,1.027643));
-  hpcpush(hpxyzsc(0.249359,0.045568,1.031628));
-  hpcpush(hpxyzsc(0.259206,0.035577,1.033660));
-  hpcpush(hpxyzsc(0.276638,0.026895,1.037908));
-  hpcpush(hpxyzsc(0.302288,0.020758,1.044897));
-  hpcpush(hpxyzsc(0.330687,0.013175,1.053341));
-  hpcpush(hpxyzsc(0.348759,-0.003993,1.059079));
-  hpcpush(hpxyzsc(0.348759,0.003993,1.059079));
-  hpcpush(hpxyzsc(0.330687,-0.013175,1.053341));
-  hpcpush(hpxyzsc(0.302288,-0.020758,1.044897));
-  hpcpush(hpxyzsc(0.276638,-0.026895,1.037908));
-  hpcpush(hpxyzsc(0.259206,-0.035577,1.033660));
-  hpcpush(hpxyzsc(0.249359,-0.045568,1.031628));
-  hpcpush(hpxyzsc(0.229902,-0.056533,1.027643));
-  hpcpush(hpxyzsc(0.214217,-0.028645,1.023088));
-  hpcpush(hpxyzsc(0.208627,-0.008693,1.021568));
-  hpcpush(hpxyzsc(0.184662,-0.017235,1.017053));
-  hpcpush(hpxyzsc(0.187577,-0.041958,1.018305));
-  hpcpush(hpxyzsc(0.215688,-0.036156,1.023635));
-  hpcpush(hpxyzsc(0.227410,-0.066590,1.027691));
-  hpcpush(hpxyzsc(0.175135,-0.075234,1.018004));
-  hpcpush(hpxyzsc(0.130542,-0.089062,1.012410));
-  hpcpush(hpxyzsc(0.096163,-0.115639,1.011247));
-  hpcpush(hpxyzsc(0.058411,-0.137510,1.011099));
-  hpcpush(hpxyzsc(0.027983,-0.145997,1.010989));
-  hpcpush(hpxyzsc(-0.002431,-0.144615,1.010406));
-  hpcpush(hpxyzsc(-0.032645,-0.120908,1.007812));
-  hpcpush(hpxyzsc(-0.001207,-0.119535,1.007120));
-  hpcpush(hpxyzsc(0.037297,-0.096250,1.005313));
-  hpcpush(hpxyzsc(0.009598,-0.087578,1.003874));
-  hpcpush(hpxyzsc(-0.010782,-0.079071,1.003179));
-  hpcpush(hpxyzsc(-0.034699,-0.062219,1.002534));
-  hpcpush(hpxyzsc(-0.113418,-0.026545,1.006761));
-  hpcpush(hpxyzsc(-0.214304,-0.034887,1.023300));
-  hpcpush(hpxyzsc(-0.295445,-0.115041,1.049058));
-  hpcpush(hpxyzsc(-0.254548,-0.002533,1.031892));
-  hpcpush(hpxyzsc(-0.254548,0.002533,1.031892));
-
-  bshape(shBugBody, 33);
-  hpcpush(hpxyzsc(-0.036973,0.000272,1.000683));
-  hpcpush(hpxyzsc(-0.037088,0.049282,1.001900));
-  hpcpush(hpxyzsc(-0.103861,0.110700,1.011455));
-  hpcpush(hpxyzsc(-0.187497,0.070862,1.019891));
-  hpcpush(hpxyzsc(-0.199435,0.092353,1.023867));
-  hpcpush(hpxyzsc(-0.102619,0.135884,1.014394));
-  hpcpush(hpxyzsc(-0.010856,0.052276,1.001424));
-  hpcpush(hpxyzsc(0.027094,0.127840,1.008502));
-  hpcpush(hpxyzsc(-0.010117,0.161004,1.012929));
-  hpcpush(hpxyzsc(-0.122621,0.155285,1.019387));
-  hpcpush(hpxyzsc(-0.129838,0.187041,1.025593));
-  hpcpush(hpxyzsc(-0.003559,0.192507,1.018367));
-  hpcpush(hpxyzsc(0.048774,0.146275,1.011818));
-  hpcpush(hpxyzsc(0.045625,0.106117,1.006649));
-  hpcpush(hpxyzsc(0.010970,0.038441,1.000799));
-  hpcpush(hpxyzsc(0.089547,0.116575,1.010746));
-  hpcpush(hpxyzsc(0.094553,0.161297,1.017328));
-  hpcpush(hpxyzsc(0.079585,0.174794,1.018276));
-  hpcpush(hpxyzsc(0.010872,0.213071,1.022505));
-  hpcpush(hpxyzsc(0.019129,0.245278,1.029819));
-  hpcpush(hpxyzsc(0.122810,0.186751,1.024675));
-  hpcpush(hpxyzsc(0.134973,0.146945,1.019711));
-  hpcpush(hpxyzsc(0.133411,0.118806,1.015831));
-  hpcpush(hpxyzsc(0.060081,0.038600,1.002547));
-  hpcpush(hpxyzsc(0.122451,0.041792,1.008336));
-  hpcpush(hpxyzsc(0.137147,0.087747,1.013168));
-  hpcpush(hpxyzsc(0.150029,0.114701,1.017676));
-  hpcpush(hpxyzsc(0.172516,0.135274,1.023748));
-  hpcpush(hpxyzsc(0.194165,0.144658,1.028896));
-  hpcpush(hpxyzsc(0.206227,0.137750,1.030293));
-  hpcpush(hpxyzsc(0.191047,0.128830,1.026205));
-  hpcpush(hpxyzsc(0.173558,0.119946,1.022012));
-  hpcpush(hpxyzsc(0.156400,0.103721,1.017457));
-  hpcpush(hpxyzsc(0.146061,0.085696,1.014237));
-  hpcpush(hpxyzsc(0.131320,0.034801,1.009186));
-  hpcpush(hpxyzsc(0.128188,0.004402,1.008192));
-  hpcpush(hpxyzsc(0.128188,-0.004402,1.008192));
-  hpcpush(hpxyzsc(0.131320,-0.034801,1.009186));
-  hpcpush(hpxyzsc(0.146061,-0.085696,1.014237));
-  hpcpush(hpxyzsc(0.156400,-0.103721,1.017457));
-  hpcpush(hpxyzsc(0.173558,-0.119946,1.022012));
-  hpcpush(hpxyzsc(0.191047,-0.128830,1.026205));
-  hpcpush(hpxyzsc(0.206227,-0.137750,1.030293));
-  hpcpush(hpxyzsc(0.194165,-0.144658,1.028896));
-  hpcpush(hpxyzsc(0.172516,-0.135274,1.023748));
-  hpcpush(hpxyzsc(0.150029,-0.114701,1.017676));
-  hpcpush(hpxyzsc(0.137147,-0.087747,1.013168));
-  hpcpush(hpxyzsc(0.122451,-0.041792,1.008336));
-  hpcpush(hpxyzsc(0.060081,-0.038600,1.002547));
-  hpcpush(hpxyzsc(0.133411,-0.118806,1.015831));
-  hpcpush(hpxyzsc(0.134973,-0.146945,1.019711));
-  hpcpush(hpxyzsc(0.122810,-0.186751,1.024675));
-  hpcpush(hpxyzsc(0.019129,-0.245278,1.029819));
-  hpcpush(hpxyzsc(0.010872,-0.213071,1.022505));
-  hpcpush(hpxyzsc(0.079585,-0.174794,1.018276));
-  hpcpush(hpxyzsc(0.094553,-0.161297,1.017328));
-  hpcpush(hpxyzsc(0.089547,-0.116575,1.010746));
-  hpcpush(hpxyzsc(0.010970,-0.038441,1.000799));
-  hpcpush(hpxyzsc(0.045625,-0.106117,1.006649));
-  hpcpush(hpxyzsc(0.048774,-0.146275,1.011818));
-  hpcpush(hpxyzsc(-0.003559,-0.192507,1.018367));
-  hpcpush(hpxyzsc(-0.129838,-0.187041,1.025593));
-  hpcpush(hpxyzsc(-0.122621,-0.155285,1.019387));
-  hpcpush(hpxyzsc(-0.010117,-0.161004,1.012929));
-  hpcpush(hpxyzsc(0.027094,-0.127840,1.008502));
-  hpcpush(hpxyzsc(-0.010856,-0.052276,1.001424));
-  hpcpush(hpxyzsc(-0.102619,-0.135884,1.014394));
-  hpcpush(hpxyzsc(-0.199435,-0.092353,1.023867));
-  hpcpush(hpxyzsc(-0.187497,-0.070862,1.019891));
-  hpcpush(hpxyzsc(-0.103861,-0.110700,1.011455));
-  hpcpush(hpxyzsc(-0.037088,-0.049282,1.001900));
-  hpcpush(hpxyzsc(-0.036973,-0.000272,1.000683));
-  hpcpush(hpxyzsc(-0.036973,0.000272,1.000683));
-
-  bshape(shBugArmor, 34);
-  hpcpush(hpxyzsc(-0.257478,-0.001337,1.032616));
-  hpcpush(hpxyzsc(-0.204917,0.009783,1.020827));
-  hpcpush(hpxyzsc(-0.203815,0.017248,1.020705));
-  hpcpush(hpxyzsc(-0.113586,0.008028,1.006462));
-  hpcpush(hpxyzsc(-0.187093,0.033579,1.017905));
-  hpcpush(hpxyzsc(-0.182177,0.042285,1.017338));
-  hpcpush(hpxyzsc(-0.170953,0.054731,1.015982));
-  hpcpush(hpxyzsc(-0.148063,0.061036,1.012743));
-  hpcpush(hpxyzsc(-0.114175,0.062548,1.008439));
-  hpcpush(hpxyzsc(-0.089190,0.053147,1.005375));
-  hpcpush(hpxyzsc(-0.055805,0.032092,1.002070));
-  hpcpush(hpxyzsc(-0.046611,0.046680,1.002173));
-  hpcpush(hpxyzsc(-0.034899,0.056544,1.002205));
-  hpcpush(hpxyzsc(-0.026686,0.062743,1.002322));
-  hpcpush(hpxyzsc(-0.011200,0.065507,1.002206));
-  hpcpush(hpxyzsc(0.015073,0.067380,1.002381));
-  hpcpush(hpxyzsc(0.038084,0.055978,1.002289));
-  hpcpush(hpxyzsc(0.058951,0.034968,1.002346));
-  hpcpush(hpxyzsc(0.080396,0.053686,1.004662));
-  hpcpush(hpxyzsc(0.091257,0.062541,1.006101));
-  hpcpush(hpxyzsc(0.107216,0.066788,1.007946));
-  hpcpush(hpxyzsc(0.136013,0.061816,1.011099));
-  hpcpush(hpxyzsc(0.150105,0.048890,1.012384));
-  hpcpush(hpxyzsc(0.154042,0.040462,1.012604));
-  hpcpush(hpxyzsc(0.173238,0.060925,1.016722));
-  hpcpush(hpxyzsc(0.190355,0.071679,1.020477));
-  hpcpush(hpxyzsc(0.214645,0.070389,1.025196));
-  hpcpush(hpxyzsc(0.221506,0.066951,1.026424));
-  hpcpush(hpxyzsc(0.203766,0.058557,1.022228));
-  hpcpush(hpxyzsc(0.189101,0.049201,1.018911));
-  hpcpush(hpxyzsc(0.181298,0.037761,1.017003));
-  hpcpush(hpxyzsc(0.177552,0.025312,1.015955));
-  hpcpush(hpxyzsc(0.177715,0.016710,1.015806));
-  hpcpush(hpxyzsc(0.176915,-0.004189,1.015537));
-  hpcpush(hpxyzsc(0.176915,0.004189,1.015537));
-  hpcpush(hpxyzsc(0.177715,-0.016710,1.015806));
-  hpcpush(hpxyzsc(0.177552,-0.025312,1.015955));
-  hpcpush(hpxyzsc(0.181298,-0.037761,1.017003));
-  hpcpush(hpxyzsc(0.189101,-0.049201,1.018911));
-  hpcpush(hpxyzsc(0.203766,-0.058557,1.022228));
-  hpcpush(hpxyzsc(0.221506,-0.066951,1.026424));
-  hpcpush(hpxyzsc(0.214645,-0.070389,1.025196));
-  hpcpush(hpxyzsc(0.190355,-0.071679,1.020477));
-  hpcpush(hpxyzsc(0.173238,-0.060925,1.016722));
-  hpcpush(hpxyzsc(0.154042,-0.040462,1.012604));
-  hpcpush(hpxyzsc(0.150105,-0.048890,1.012384));
-  hpcpush(hpxyzsc(0.136013,-0.061816,1.011099));
-  hpcpush(hpxyzsc(0.107216,-0.066788,1.007946));
-  hpcpush(hpxyzsc(0.091257,-0.062541,1.006101));
-  hpcpush(hpxyzsc(0.080396,-0.053686,1.004662));
-  hpcpush(hpxyzsc(0.058951,-0.034968,1.002346));
-  hpcpush(hpxyzsc(0.038084,-0.055978,1.002289));
-  hpcpush(hpxyzsc(0.015073,-0.067380,1.002381));
-  hpcpush(hpxyzsc(-0.011200,-0.065507,1.002206));
-  hpcpush(hpxyzsc(-0.026686,-0.062743,1.002322));
-  hpcpush(hpxyzsc(-0.034899,-0.056544,1.002205));
-  hpcpush(hpxyzsc(-0.046611,-0.046680,1.002173));
-  hpcpush(hpxyzsc(-0.055805,-0.032092,1.002070));
-  hpcpush(hpxyzsc(-0.089190,-0.053147,1.005375));
-  hpcpush(hpxyzsc(-0.114175,-0.062548,1.008439));
-  hpcpush(hpxyzsc(-0.148063,-0.061036,1.012743));
-  hpcpush(hpxyzsc(-0.170953,-0.054731,1.015982));
-  hpcpush(hpxyzsc(-0.182177,-0.042285,1.017338));
-  hpcpush(hpxyzsc(-0.187093,-0.033579,1.017905));
-  hpcpush(hpxyzsc(-0.113586,-0.008028,1.006462));
-  hpcpush(hpxyzsc(-0.203815,-0.017248,1.020705));
-  hpcpush(hpxyzsc(-0.204917,-0.009783,1.020827));
-  hpcpush(hpxyzsc(-0.257478,0.001337,1.032616));
-  hpcpush(hpxyzsc(-0.257478,-0.001337,1.032616));
-
-  bshape(shCatBody, 33);
-  hpcpush(hpxyzsc(-0.308099,0.007958,1.046417));
-  hpcpush(hpxyzsc(-0.308099,0.007958,1.046417));
-  hpcpush(hpxyzsc(-0.300981,0.013629,1.044402));
-  hpcpush(hpxyzsc(-0.295063,0.015888,1.042744));
-  hpcpush(hpxyzsc(-0.298642,0.024981,1.043940));
-  hpcpush(hpxyzsc(-0.279731,0.016988,1.038527));
-  hpcpush(hpxyzsc(-0.280962,0.032854,1.039240));
-  hpcpush(hpxyzsc(-0.262156,0.019210,1.033970));
-  hpcpush(hpxyzsc(-0.263366,0.031649,1.034584));
-  hpcpush(hpxyzsc(-0.244692,0.020297,1.029702));
-  hpcpush(hpxyzsc(-0.245893,0.032711,1.030307));
-  hpcpush(hpxyzsc(-0.229645,0.022514,1.026277));
-  hpcpush(hpxyzsc(-0.228517,0.031520,1.026262));
-  hpcpush(hpxyzsc(-0.206622,0.019090,1.021302));
-  hpcpush(hpxyzsc(-0.211256,0.034835,1.022664));
-  hpcpush(hpxyzsc(-0.195179,0.021313,1.019092));
-  hpcpush(hpxyzsc(-0.200928,0.032553,1.020506));
-  hpcpush(hpxyzsc(-0.182636,0.024650,1.016840));
-  hpcpush(hpxyzsc(-0.187230,0.036998,1.018049));
-  hpcpush(hpxyzsc(-0.166723,0.024617,1.014102));
-  hpcpush(hpxyzsc(-0.172450,0.042553,1.015652));
-  hpcpush(hpxyzsc(-0.157684,0.035786,1.012988));
-  hpcpush(hpxyzsc(-0.164538,0.051488,1.014753));
-  hpcpush(hpxyzsc(-0.148670,0.046949,1.012081));
-  hpcpush(hpxyzsc(-0.155517,0.061536,1.013890));
-  hpcpush(hpxyzsc(-0.140794,0.054753,1.011346));
-  hpcpush(hpxyzsc(-0.141981,0.068196,1.012329));
-  hpcpush(hpxyzsc(-0.125033,0.058051,1.009457));
-  hpcpush(hpxyzsc(-0.125087,0.071478,1.010325));
-  hpcpush(hpxyzsc(-0.112675,0.059126,1.008063));
-  hpcpush(hpxyzsc(-0.113871,0.078147,1.009492));
-  hpcpush(hpxyzsc(-0.099238,0.065787,1.007063));
-  hpcpush(hpxyzsc(-0.099290,0.080325,1.008122));
-  hpcpush(hpxyzsc(-0.089161,0.065756,1.006118));
-  hpcpush(hpxyzsc(-0.086969,0.080279,1.006980));
-  hpcpush(hpxyzsc(-0.080217,0.066848,1.005437));
-  hpcpush(hpxyzsc(-0.073560,0.083591,1.006180));
-  hpcpush(hpxyzsc(-0.063470,0.067924,1.004312));
-  hpcpush(hpxyzsc(-0.055703,0.086897,1.005313));
-  hpcpush(hpxyzsc(-0.048978,0.070128,1.003652));
-  hpcpush(hpxyzsc(-0.045663,0.085757,1.004709));
-  hpcpush(hpxyzsc(-0.036721,0.067879,1.002974));
-  hpcpush(hpxyzsc(-0.028944,0.082379,1.003805));
-  hpcpush(hpxyzsc(-0.024473,0.063406,1.002307));
-  hpcpush(hpxyzsc(-0.016698,0.085718,1.003806));
-  hpcpush(hpxyzsc(-0.012236,0.066743,1.002300));
-  hpcpush(hpxyzsc(-0.001113,0.080128,1.003206));
-  hpcpush(hpxyzsc(0.005561,0.062283,1.001953));
-  hpcpush(hpxyzsc(0.014465,0.073436,1.002797));
-  hpcpush(hpxyzsc(0.017795,0.058945,1.001894));
-  hpcpush(hpxyzsc(0.026707,0.073445,1.003049));
-  hpcpush(hpxyzsc(0.030032,0.057839,1.002121));
-  hpcpush(hpxyzsc(0.042293,0.070117,1.003347));
-  hpcpush(hpxyzsc(0.044501,0.055626,1.002534));
-  hpcpush(hpxyzsc(0.053427,0.064557,1.003505));
-  hpcpush(hpxyzsc(0.054515,0.046727,1.002574));
-  hpcpush(hpxyzsc(0.072375,0.056786,1.004222));
-  hpcpush(hpxyzsc(0.070112,0.038951,1.003211));
-  hpcpush(hpxyzsc(0.082394,0.040084,1.004189));
-  hpcpush(hpxyzsc(0.070104,0.032270,1.002974));
-  hpcpush(hpxyzsc(0.077909,0.026712,1.003386));
-  hpcpush(hpxyzsc(0.075671,0.020031,1.003059));
-  hpcpush(hpxyzsc(0.089069,0.014474,1.004063));
-  hpcpush(hpxyzsc(0.075666,0.011127,1.002920));
-  hpcpush(hpxyzsc(0.085713,0.005566,1.003682));
-  hpcpush(hpxyzsc(0.077896,-0.001113,1.003030));
-  hpcpush(hpxyzsc(0.077896,0.001113,1.003030));
-  hpcpush(hpxyzsc(0.085713,-0.005566,1.003682));
-  hpcpush(hpxyzsc(0.075666,-0.011127,1.002920));
-  hpcpush(hpxyzsc(0.089069,-0.014474,1.004063));
-  hpcpush(hpxyzsc(0.075671,-0.020031,1.003059));
-  hpcpush(hpxyzsc(0.077909,-0.026712,1.003386));
-  hpcpush(hpxyzsc(0.070104,-0.032270,1.002974));
-  hpcpush(hpxyzsc(0.082394,-0.040084,1.004189));
-  hpcpush(hpxyzsc(0.070112,-0.038951,1.003211));
-  hpcpush(hpxyzsc(0.072375,-0.056786,1.004222));
-  hpcpush(hpxyzsc(0.054515,-0.046727,1.002574));
-  hpcpush(hpxyzsc(0.053427,-0.064557,1.003505));
-  hpcpush(hpxyzsc(0.044501,-0.055626,1.002534));
-  hpcpush(hpxyzsc(0.042293,-0.070117,1.003347));
-  hpcpush(hpxyzsc(0.030032,-0.057839,1.002121));
-  hpcpush(hpxyzsc(0.026707,-0.073445,1.003049));
-  hpcpush(hpxyzsc(0.017795,-0.058945,1.001894));
-  hpcpush(hpxyzsc(0.014465,-0.073436,1.002797));
-  hpcpush(hpxyzsc(0.005561,-0.062283,1.001953));
-  hpcpush(hpxyzsc(-0.001113,-0.080128,1.003206));
-  hpcpush(hpxyzsc(-0.012236,-0.066743,1.002300));
-  hpcpush(hpxyzsc(-0.016698,-0.085718,1.003806));
-  hpcpush(hpxyzsc(-0.024473,-0.063406,1.002307));
-  hpcpush(hpxyzsc(-0.028944,-0.082379,1.003805));
-  hpcpush(hpxyzsc(-0.036721,-0.067879,1.002974));
-  hpcpush(hpxyzsc(-0.045663,-0.085757,1.004709));
-  hpcpush(hpxyzsc(-0.048978,-0.070128,1.003652));
-  hpcpush(hpxyzsc(-0.055703,-0.086897,1.005313));
-  hpcpush(hpxyzsc(-0.063470,-0.067924,1.004312));
-  hpcpush(hpxyzsc(-0.073560,-0.083591,1.006180));
-  hpcpush(hpxyzsc(-0.080217,-0.066848,1.005437));
-  hpcpush(hpxyzsc(-0.086969,-0.080279,1.006980));
-  hpcpush(hpxyzsc(-0.089161,-0.065756,1.006118));
-  hpcpush(hpxyzsc(-0.099290,-0.080325,1.008122));
-  hpcpush(hpxyzsc(-0.099238,-0.065787,1.007063));
-  hpcpush(hpxyzsc(-0.113871,-0.078147,1.009492));
-  hpcpush(hpxyzsc(-0.112675,-0.059126,1.008063));
-  hpcpush(hpxyzsc(-0.125087,-0.071478,1.010325));
-  hpcpush(hpxyzsc(-0.125033,-0.058051,1.009457));
-  hpcpush(hpxyzsc(-0.141981,-0.068196,1.012329));
-  hpcpush(hpxyzsc(-0.140794,-0.054753,1.011346));
-  hpcpush(hpxyzsc(-0.155517,-0.061536,1.013890));
-  hpcpush(hpxyzsc(-0.148670,-0.046949,1.012081));
-  hpcpush(hpxyzsc(-0.164538,-0.051488,1.014753));
-  hpcpush(hpxyzsc(-0.157684,-0.035786,1.012988));
-  hpcpush(hpxyzsc(-0.172450,-0.042553,1.015652));
-  hpcpush(hpxyzsc(-0.166723,-0.024617,1.014102));
-  hpcpush(hpxyzsc(-0.187230,-0.036998,1.018049));
-  hpcpush(hpxyzsc(-0.182636,-0.024650,1.016840));
-  hpcpush(hpxyzsc(-0.200928,-0.032553,1.020506));
-  hpcpush(hpxyzsc(-0.195179,-0.021313,1.019092));
-  hpcpush(hpxyzsc(-0.211256,-0.034835,1.022664));
-  hpcpush(hpxyzsc(-0.206622,-0.019090,1.021302));
-  hpcpush(hpxyzsc(-0.228517,-0.031520,1.026262));
-  hpcpush(hpxyzsc(-0.229645,-0.022514,1.026277));
-  hpcpush(hpxyzsc(-0.245893,-0.032711,1.030307));
-  hpcpush(hpxyzsc(-0.244692,-0.020297,1.029702));
-  hpcpush(hpxyzsc(-0.263366,-0.031649,1.034584));
-  hpcpush(hpxyzsc(-0.262156,-0.019210,1.033970));
-  hpcpush(hpxyzsc(-0.280962,-0.032854,1.039240));
-  hpcpush(hpxyzsc(-0.279731,-0.016988,1.038527));
-  hpcpush(hpxyzsc(-0.298642,-0.024981,1.043940));
-  hpcpush(hpxyzsc(-0.295063,-0.015888,1.042744));
-  hpcpush(hpxyzsc(-0.300981,-0.013629,1.044402));
-  hpcpush(hpxyzsc(-0.308099,-0.007958,1.046417));
-  hpcpush(hpxyzsc(-0.308099,-0.007958,1.046417));
-  hpcpush(hpxyzsc(-0.308099,0.007958,1.046417));
-
-  bshape(shCatLegs, 32);
-  hpcpush(hpxyzsc(-0.109115,0.005511,1.005951));
-  hpcpush(hpxyzsc(-0.150780,0.114748,1.017793));
-  hpcpush(hpxyzsc(-0.148046,0.122540,1.018299));
-  hpcpush(hpxyzsc(-0.141908,0.125278,1.017759));
-  hpcpush(hpxyzsc(-0.131832,0.124077,1.016255));
-  hpcpush(hpxyzsc(-0.123409,0.117322,1.014394));
-  hpcpush(hpxyzsc(-0.088085,0.011561,1.003939));
-  hpcpush(hpxyzsc(0.010990,0.019783,1.000256));
-  hpcpush(hpxyzsc(0.040802,0.111378,1.007010));
-  hpcpush(hpxyzsc(0.045231,0.116940,1.007830));
-  hpcpush(hpxyzsc(0.050761,0.119177,1.008355));
-  hpcpush(hpxyzsc(0.057933,0.115867,1.008356));
-  hpcpush(hpxyzsc(0.060111,0.105884,1.007385));
-  hpcpush(hpxyzsc(0.025279,0.006595,1.000341));
-  hpcpush(hpxyzsc(0.025279,-0.006595,1.000341));
-  hpcpush(hpxyzsc(0.060111,-0.105884,1.007385));
-  hpcpush(hpxyzsc(0.057933,-0.115867,1.008356));
-  hpcpush(hpxyzsc(0.050761,-0.119177,1.008355));
-  hpcpush(hpxyzsc(0.045231,-0.116940,1.007830));
-  hpcpush(hpxyzsc(0.040802,-0.111378,1.007010));
-  hpcpush(hpxyzsc(0.010990,-0.019783,1.000256));
-  hpcpush(hpxyzsc(-0.088085,-0.011561,1.003939));
-  hpcpush(hpxyzsc(-0.123409,-0.117322,1.014394));
-  hpcpush(hpxyzsc(-0.131832,-0.124077,1.016255));
-  hpcpush(hpxyzsc(-0.141908,-0.125278,1.017759));
-  hpcpush(hpxyzsc(-0.148046,-0.122540,1.018299));
-  hpcpush(hpxyzsc(-0.150780,-0.114748,1.017793));
-  hpcpush(hpxyzsc(-0.109115,-0.005511,1.005951));
-  hpcpush(hpxyzsc(-0.109115,0.005511,1.005951));
-
-  bshape(shCatHead, 34);
-  hpcpush(hpxyzsc(0.073175,-0.000000,1.002674));
-  hpcpush(hpxyzsc(0.058843,0.007699,1.001759));
-  hpcpush(hpxyzsc(0.074280,0.010454,1.002809));
-  hpcpush(hpxyzsc(0.062705,0.019251,1.002149));
-  hpcpush(hpxyzsc(0.077045,0.019811,1.003159));
-  hpcpush(hpxyzsc(0.068229,0.032464,1.002850));
-  hpcpush(hpxyzsc(0.084236,0.031933,1.004050));
-  hpcpush(hpxyzsc(0.077073,0.043491,1.003908));
-  hpcpush(hpxyzsc(0.091431,0.037454,1.004869));
-  hpcpush(hpxyzsc(0.083718,0.051773,1.004833));
-  hpcpush(hpxyzsc(0.098645,0.047394,1.005971));
-  hpcpush(hpxyzsc(0.091478,0.058965,1.005905));
-  hpcpush(hpxyzsc(0.106417,0.052933,1.007038));
-  hpcpush(hpxyzsc(0.101443,0.057888,1.006798));
-  hpcpush(hpxyzsc(0.102568,0.063416,1.007245));
-  hpcpush(hpxyzsc(0.104266,0.073373,1.008095));
-  hpcpush(hpxyzsc(0.106515,0.080576,1.008880));
-  hpcpush(hpxyzsc(0.110984,0.086689,1.009868));
-  hpcpush(hpxyzsc(0.121624,0.100063,1.012327));
-  hpcpush(hpxyzsc(0.122097,0.085081,1.011013));
-  hpcpush(hpxyzsc(0.122586,0.070680,1.009962));
-  hpcpush(hpxyzsc(0.128687,0.065724,1.010386));
-  hpcpush(hpxyzsc(0.135350,0.060217,1.010913));
-  hpcpush(hpxyzsc(0.142646,0.069664,1.012522));
-  hpcpush(hpxyzsc(0.138114,0.054141,1.010944));
-  hpcpush(hpxyzsc(0.151534,0.058070,1.013082));
-  hpcpush(hpxyzsc(0.145904,0.047529,1.011705));
-  hpcpush(hpxyzsc(0.161578,0.049801,1.014193));
-  hpcpush(hpxyzsc(0.155386,0.040920,1.012827));
-  hpcpush(hpxyzsc(0.167717,0.041514,1.014816));
-  hpcpush(hpxyzsc(0.160393,0.029313,1.013205));
-  hpcpush(hpxyzsc(0.171614,0.030448,1.015076));
-  hpcpush(hpxyzsc(0.164858,0.020469,1.013705));
-  hpcpush(hpxyzsc(0.171594,0.021588,1.014845));
-  hpcpush(hpxyzsc(0.176845,0.069851,1.017916));
-  hpcpush(hpxyzsc(0.174963,0.020486,1.015397));
-  hpcpush(hpxyzsc(0.183057,0.072113,1.019171));
-  hpcpush(hpxyzsc(0.178894,0.017169,1.016021));
-  hpcpush(hpxyzsc(0.191443,0.058820,1.019858));
-  hpcpush(hpxyzsc(0.181703,0.013295,1.016461));
-  hpcpush(hpxyzsc(0.183949,0.005541,1.016793));
-  hpcpush(hpxyzsc(0.183949,-0.005541,1.016793));
-  hpcpush(hpxyzsc(0.181703,-0.013295,1.016461));
-  hpcpush(hpxyzsc(0.191443,-0.058820,1.019858));
-  hpcpush(hpxyzsc(0.178894,-0.017169,1.016021));
-  hpcpush(hpxyzsc(0.183057,-0.072113,1.019171));
-  hpcpush(hpxyzsc(0.174963,-0.020486,1.015397));
-  hpcpush(hpxyzsc(0.176845,-0.069851,1.017916));
-  hpcpush(hpxyzsc(0.171594,-0.021588,1.014845));
-  hpcpush(hpxyzsc(0.164858,-0.020469,1.013705));
-  hpcpush(hpxyzsc(0.171614,-0.030448,1.015076));
-  hpcpush(hpxyzsc(0.160393,-0.029313,1.013205));
-  hpcpush(hpxyzsc(0.167717,-0.041514,1.014816));
-  hpcpush(hpxyzsc(0.155386,-0.040920,1.012827));
-  hpcpush(hpxyzsc(0.161578,-0.049801,1.014193));
-  hpcpush(hpxyzsc(0.145904,-0.047529,1.011705));
-  hpcpush(hpxyzsc(0.151534,-0.058070,1.013082));
-  hpcpush(hpxyzsc(0.138114,-0.054141,1.010944));
-  hpcpush(hpxyzsc(0.142646,-0.069664,1.012522));
-  hpcpush(hpxyzsc(0.135350,-0.060217,1.010913));
-  hpcpush(hpxyzsc(0.128687,-0.065724,1.010386));
-  hpcpush(hpxyzsc(0.122586,-0.070680,1.009962));
-  hpcpush(hpxyzsc(0.122097,-0.085081,1.011013));
-  hpcpush(hpxyzsc(0.121624,-0.100063,1.012327));
-  hpcpush(hpxyzsc(0.110984,-0.086689,1.009868));
-  hpcpush(hpxyzsc(0.106515,-0.080576,1.008880));
-  hpcpush(hpxyzsc(0.104266,-0.073373,1.008095));
-  hpcpush(hpxyzsc(0.102568,-0.063416,1.007245));
-  hpcpush(hpxyzsc(0.101443,-0.057888,1.006798));
-  hpcpush(hpxyzsc(0.106417,-0.052933,1.007038));
-  hpcpush(hpxyzsc(0.091478,-0.058965,1.005905));
-  hpcpush(hpxyzsc(0.098645,-0.047394,1.005971));
-  hpcpush(hpxyzsc(0.083718,-0.051773,1.004833));
-  hpcpush(hpxyzsc(0.091431,-0.037454,1.004869));
-  hpcpush(hpxyzsc(0.077073,-0.043491,1.003908));
-  hpcpush(hpxyzsc(0.084236,-0.031933,1.004050));
-  hpcpush(hpxyzsc(0.068229,-0.032464,1.002850));
-  hpcpush(hpxyzsc(0.077045,-0.019811,1.003159));
-  hpcpush(hpxyzsc(0.062705,-0.019251,1.002149));
-  hpcpush(hpxyzsc(0.074280,-0.010454,1.002809));
-  hpcpush(hpxyzsc(0.058843,-0.007699,1.001759));
-  hpcpush(hpxyzsc(0.073175,0.000000,1.002674));
-  hpcpush(hpxyzsc(0.073175,-0.000000,1.002674));
-
-  bshape(shWolfBody, 33);
-  hpcpush(hwolf(-0.311492,0.001303,1.047391));
-  hpcpush(hwolf(-0.165080,0.009783,1.013581));
-  hpcpush(hwolf(-0.195342,0.027200,1.019264));
-  hpcpush(hwolf(-0.153616,0.025603,1.012054));
-  hpcpush(hwolf(-0.173302,0.051622,1.016218));
-  hpcpush(hwolf(-0.128440,0.037563,1.008914));
-  hpcpush(hwolf(-0.152961,0.068527,1.013949));
-  hpcpush(hwolf(-0.107392,0.045853,1.006795));
-  hpcpush(hwolf(-0.121764,0.090105,1.011408));
-  hpcpush(hwolf(-0.079263,0.050440,1.004404));
-  hpcpush(hwolf(-0.084555,0.086971,1.007330));
-  hpcpush(hwolf(-0.043029,0.046615,1.002010));
-  hpcpush(hwolf(-0.049440,0.102497,1.006454));
-  hpcpush(hwolf(-0.020293,0.047747,1.001345));
-  hpcpush(hwolf(-0.012028,0.101033,1.005163));
-  hpcpush(hwolf(0.009546,0.047732,1.001184));
-  hpcpush(hwolf(0.027630,0.091298,1.004539));
-  hpcpush(hwolf(0.043025,0.045415,1.001955));
-  hpcpush(hwolf(0.071007,0.077024,1.005472));
-  hpcpush(hwolf(0.071856,0.028742,1.002990));
-  hpcpush(hwolf(0.113578,0.045915,1.007476));
-  hpcpush(hwolf(0.090012,0.007201,1.004069));
-  hpcpush(hwolf(0.090012,-0.007201,1.004069));
-  hpcpush(hwolf(0.113578,-0.045915,1.007476));
-  hpcpush(hwolf(0.071856,-0.028742,1.002990));
-  hpcpush(hwolf(0.071007,-0.077024,1.005472));
-  hpcpush(hwolf(0.043025,-0.045415,1.001955));
-  hpcpush(hwolf(0.027630,-0.091298,1.004539));
-  hpcpush(hwolf(0.009546,-0.047732,1.001184));
-  hpcpush(hwolf(-0.012028,-0.101033,1.005163));
-  hpcpush(hwolf(-0.020293,-0.047747,1.001345));
-  hpcpush(hwolf(-0.049440,-0.102497,1.006454));
-  hpcpush(hwolf(-0.043029,-0.046615,1.002010));
-  hpcpush(hwolf(-0.084555,-0.086971,1.007330));
-  hpcpush(hwolf(-0.079263,-0.050440,1.004404));
-  hpcpush(hwolf(-0.121764,-0.090105,1.011408));
-  hpcpush(hwolf(-0.107392,-0.045853,1.006795));
-  hpcpush(hwolf(-0.152961,-0.068527,1.013949));
-  hpcpush(hwolf(-0.128440,-0.037563,1.008914));
-  hpcpush(hwolf(-0.173302,-0.051622,1.016218));
-  hpcpush(hwolf(-0.153616,-0.025603,1.012054));
-  hpcpush(hwolf(-0.195342,-0.027200,1.019264));
-  hpcpush(hwolf(-0.165080,-0.009783,1.013581));
-  hpcpush(hwolf(-0.311492,-0.001303,1.047391));
-  hpcpush(hwolf(-0.311492,0.001303,1.047391));
-
-  bshape(shWolfHead, 34);
-  hpcpush(hwolf(0.183292,0.002460,1.016662));
-  hpcpush(hwolf(0.178071,0.011053,1.015791));
-  hpcpush(hwolf(0.185996,0.019708,1.017341));
-  hpcpush(hwolf(0.170281,0.015926,1.014519));
-  hpcpush(hwolf(0.170341,0.024510,1.014700));
-  hpcpush(hwolf(0.158693,0.019531,1.012702));
-  hpcpush(hwolf(0.158807,0.032983,1.013068));
-  hpcpush(hwolf(0.147214,0.020683,1.010989));
-  hpcpush(hwolf(0.142274,0.036481,1.010729));
-  hpcpush(hwolf(0.135869,0.025475,1.009510));
-  hpcpush(hwolf(0.129693,0.037575,1.009075));
-  hpcpush(hwolf(0.118394,0.028994,1.007401));
-  hpcpush(hwolf(0.114793,0.043501,1.007507));
-  hpcpush(hwolf(0.102362,0.033719,1.005791));
-  hpcpush(hwolf(0.100073,0.053051,1.006394));
-  hpcpush(hwolf(0.087692,0.037239,1.004528));
-  hpcpush(hwolf(0.080602,0.063760,1.005267));
-  hpcpush(hwolf(0.065828,0.032315,1.002685));
-  hpcpush(hwolf(0.008362,0.058537,1.001747));
-  hpcpush(hwolf(0.046539,0.014320,1.001185));
-  hpcpush(hwolf(0.028597,0.008341,1.000444));
-  hpcpush(hwolf(0.051325,-0.000000,1.001316));
-  hpcpush(hwolf(0.051325,0.000000,1.001316));
-  hpcpush(hwolf(0.028597,-0.008341,1.000444));
-  hpcpush(hwolf(0.046539,-0.014320,1.001185));
-  hpcpush(hwolf(0.008362,-0.058537,1.001747));
-  hpcpush(hwolf(0.065828,-0.032315,1.002685));
-  hpcpush(hwolf(0.080602,-0.063760,1.005267));
-  hpcpush(hwolf(0.087692,-0.037239,1.004528));
-  hpcpush(hwolf(0.100073,-0.053051,1.006394));
-  hpcpush(hwolf(0.102362,-0.033719,1.005791));
-  hpcpush(hwolf(0.114793,-0.043501,1.007507));
-  hpcpush(hwolf(0.118394,-0.028994,1.007401));
-  hpcpush(hwolf(0.129693,-0.037575,1.009075));
-  hpcpush(hwolf(0.135869,-0.025475,1.009510));
-  hpcpush(hwolf(0.142274,-0.036481,1.010729));
-  hpcpush(hwolf(0.147214,-0.020683,1.010989));
-  hpcpush(hwolf(0.158807,-0.032983,1.013068));
-  hpcpush(hwolf(0.158693,-0.019531,1.012702));
-  hpcpush(hwolf(0.170341,-0.024510,1.014700));
-  hpcpush(hwolf(0.170281,-0.015926,1.014519));
-  hpcpush(hwolf(0.185996,-0.019708,1.017341));
-  hpcpush(hwolf(0.178071,-0.011053,1.015791));
-  hpcpush(hwolf(0.183292,-0.002460,1.016662));
-  hpcpush(hwolf(0.183292,0.002460,1.016662));
-
-  bshape(shWolfLegs, 32);
-  hpcpush(hwolf(-0.139559,-0.001214,1.009692));
-  hpcpush(hwolf(-0.139599,0.016995,1.009840));
-  hpcpush(hwolf(-0.228445,0.053973,1.027181));
-  hpcpush(hwolf(-0.209280,0.056057,1.023201));
-  hpcpush(hwolf(-0.216331,0.065024,1.025196));
-  hpcpush(hwolf(-0.204121,0.065966,1.022750));
-  hpcpush(hwolf(-0.204581,0.081084,1.023928));
-  hpcpush(hwolf(-0.194817,0.069489,1.021167));
-  hpcpush(hwolf(-0.113487,0.036219,1.007071));
-  hpcpush(hwolf(-0.008338,0.022632,1.000291));
-  hpcpush(hwolf(0.076062,0.091757,1.007077));
-  hpcpush(hwolf(0.081210,0.107875,1.009075));
-  hpcpush(hwolf(0.084610,0.090653,1.007659));
-  hpcpush(hwolf(0.099450,0.094598,1.009376));
-  hpcpush(hwolf(0.089336,0.078471,1.007045));
-  hpcpush(hwolf(0.105258,0.072592,1.008141));
-  hpcpush(hwolf(0.083028,0.062572,1.005390));
-  hpcpush(hwolf(0.025016,0.001191,1.000314));
-  hpcpush(hwolf(0.025016,-0.001191,1.000314));
-  hpcpush(hwolf(0.083028,-0.062572,1.005390));
-  hpcpush(hwolf(0.105258,-0.072592,1.008141));
-  hpcpush(hwolf(0.089336,-0.078471,1.007045));
-  hpcpush(hwolf(0.099450,-0.094598,1.009376));
-  hpcpush(hwolf(0.084610,-0.090653,1.007659));
-  hpcpush(hwolf(0.081210,-0.107875,1.009075));
-  hpcpush(hwolf(0.076062,-0.091757,1.007077));
-  hpcpush(hwolf(-0.008338,-0.022632,1.000291));
-  hpcpush(hwolf(-0.113487,-0.036219,1.007071));
-  hpcpush(hwolf(-0.194817,-0.069489,1.021167));
-  hpcpush(hwolf(-0.204581,-0.081084,1.023928));
-  hpcpush(hwolf(-0.204121,-0.065966,1.022750));
-  hpcpush(hwolf(-0.216331,-0.065024,1.025196));
-  hpcpush(hwolf(-0.209280,-0.056057,1.023201));
-  hpcpush(hwolf(-0.228445,-0.053973,1.027181));
-  hpcpush(hwolf(-0.139599,-0.016995,1.009840));
-  hpcpush(hwolf(-0.139559,0.001214,1.009692));
-  hpcpush(hwolf(-0.139559,-0.001214,1.009692));
-
-  // group 2 layer 3
-
-  bshape(shWolfEyes, 35);
-  hpcpush(hwolf(0.172835,0.002452,1.014829));
-  hpcpush(hwolf(0.156071,0.002439,1.012109));
-  hpcpush(hwolf(0.154815,0.012190,1.011986));
-  hpcpush(hwolf(0.138338,0.016989,1.009666));
-  hpcpush(hwolf(0.135790,0.008487,1.009213));
-  hpcpush(hwolf(0.147155,0.006081,1.010788));
-  hpcpush(hwolf(0.153518,0.004874,1.011727));
-  hpcpush(hwolf(0.156070,-0.000000,1.012106));
-  hpcpush(hwolf(0.156070,0.000000,1.012106));
-  hpcpush(hwolf(0.153518,-0.004874,1.011727));
-  hpcpush(hwolf(0.147155,-0.006081,1.010788));
-  hpcpush(hwolf(0.135790,-0.008487,1.009213));
-  hpcpush(hwolf(0.138338,-0.016989,1.009666));
-  hpcpush(hwolf(0.154815,-0.012190,1.011986));
-  hpcpush(hwolf(0.156071,-0.002439,1.012109));
-  hpcpush(hwolf(0.172835,-0.002452,1.014829));
-  hpcpush(hwolf(0.172835,0.002452,1.014829));
-  
-  // Witch's Dress
-
-  bshape(shWitchDress, 42);
-  hpcpush(hpxyzsc(0.039326,-0.001751,1.000774));
-  hpcpush(hpxyzsc(0.041168,0.053278,1.002264));
-  hpcpush(hpxyzsc(0.035516,0.073044,1.003293));
-  hpcpush(hpxyzsc(0.024685,0.088439,1.004207));
-  hpcpush(hpxyzsc(0.009671,0.096889,1.004729));
-  hpcpush(hpxyzsc(-0.002313,0.097795,1.004773));
-  hpcpush(hpxyzsc(-0.008219,0.099482,1.004970));
-  hpcpush(hpxyzsc(-0.016102,0.107500,1.005890));
-  hpcpush(hpxyzsc(-0.016016,0.108729,1.006021));
-  hpcpush(hpxyzsc(-0.022078,0.163499,1.013518));
-  hpcpush(hpxyzsc(-0.052858,0.141939,1.011405));
-  hpcpush(hpxyzsc(-0.084069,0.161675,1.016468));
-  hpcpush(hpxyzsc(-0.098088,0.129874,1.013158));
-  hpcpush(hpxyzsc(-0.108494,0.122098,1.013252));
-  hpcpush(hpxyzsc(-0.117272,0.122997,1.014338));
-  hpcpush(hpxyzsc(-0.128424,0.129237,1.016462));
-  hpcpush(hpxyzsc(-0.140905,0.138269,1.019300));
-  hpcpush(hpxyzsc(-0.152175,0.151195,1.022750));
-  hpcpush(hpxyzsc(-0.161208,0.157511,1.025084));
-  hpcpush(hpxyzsc(-0.178346,0.167608,1.029514));
-  hpcpush(hpxyzsc(-0.195945,0.176675,1.034219));
-  hpcpush(hpxyzsc(-0.219689,0.185527,1.040521));
-  hpcpush(hpxyzsc(-0.234056,0.190460,1.044537));
-  hpcpush(hpxyzsc(-0.219683,0.178715,1.039326));
-  hpcpush(hpxyzsc(-0.211330,0.162725,1.034959));
-  hpcpush(hpxyzsc(-0.206261,0.134376,1.029855));
-  hpcpush(hpxyzsc(-0.201753,0.102919,1.025328));
-  hpcpush(hpxyzsc(-0.205795,0.072925,1.023557));
-  hpcpush(hpxyzsc(-0.213892,0.049798,1.023831));
-  hpcpush(hpxyzsc(-0.218429,0.022623,1.023828));
-  hpcpush(hpxyzsc(-0.219265,0.011429,1.023820));
-  hpcpush(hpxyzsc(-0.219265,-0.011429,1.023820));
-  hpcpush(hpxyzsc(-0.218429,-0.022623,1.023828));
-  hpcpush(hpxyzsc(-0.213892,-0.049798,1.023831));
-  hpcpush(hpxyzsc(-0.205795,-0.072925,1.023557));
-  hpcpush(hpxyzsc(-0.201753,-0.102919,1.025328));
-  hpcpush(hpxyzsc(-0.206261,-0.134376,1.029855));
-  hpcpush(hpxyzsc(-0.211330,-0.162725,1.034959));
-  hpcpush(hpxyzsc(-0.219683,-0.178715,1.039326));
-  hpcpush(hpxyzsc(-0.234056,-0.190460,1.044537));
-  hpcpush(hpxyzsc(-0.219689,-0.185527,1.040521));
-  hpcpush(hpxyzsc(-0.195945,-0.176675,1.034219));
-  hpcpush(hpxyzsc(-0.178346,-0.167608,1.029514));
-  hpcpush(hpxyzsc(-0.161208,-0.157511,1.025084));
-  hpcpush(hpxyzsc(-0.152175,-0.151195,1.022750));
-  hpcpush(hpxyzsc(-0.140905,-0.138269,1.019300));
-  hpcpush(hpxyzsc(-0.128424,-0.129237,1.016462));
-  hpcpush(hpxyzsc(-0.117272,-0.122997,1.014338));
-  hpcpush(hpxyzsc(-0.108494,-0.122098,1.013252));
-  hpcpush(hpxyzsc(-0.098088,-0.129874,1.013158));
-  hpcpush(hpxyzsc(-0.084069,-0.161675,1.016468));
-  hpcpush(hpxyzsc(-0.052858,-0.141939,1.011405));
-  hpcpush(hpxyzsc(-0.022078,-0.163499,1.013518));
-  hpcpush(hpxyzsc(-0.016016,-0.108729,1.006021));
-  hpcpush(hpxyzsc(-0.016102,-0.107500,1.005890));
-  hpcpush(hpxyzsc(-0.008219,-0.099482,1.004970));
-  hpcpush(hpxyzsc(-0.002313,-0.097795,1.004773));
-  hpcpush(hpxyzsc(0.009671,-0.096889,1.004729));
-  hpcpush(hpxyzsc(0.024685,-0.088439,1.004207));
-  hpcpush(hpxyzsc(0.035516,-0.073044,1.003293));
-  hpcpush(hpxyzsc(0.041168,-0.053278,1.002264));
-  hpcpush(hpxyzsc(0.039326,0.001751,1.000774));
-  hpcpush(hpxyzsc(0.039326,-0.001751,1.000774));
-
-  // Pick Axe
-
-  bshape(shPickAxe, 40);
-  hpcpush(hpxyzsc(0.064364,0.237609,1.029855));
-  hpcpush(hpxyzsc(0.183353,-0.046466,1.017732));
-  hpcpush(hpxyzsc(0.171819,-0.050455,1.015907));
-  hpcpush(hpxyzsc(0.142623,-0.056105,1.011676));
-  hpcpush(hpxyzsc(0.122591,-0.057865,1.009147));
-  hpcpush(hpxyzsc(0.106467,-0.058329,1.007342));
-  hpcpush(hpxyzsc(0.118180,-0.067773,1.009237));
-  hpcpush(hpxyzsc(0.135948,-0.071025,1.011695));
-  hpcpush(hpxyzsc(0.161536,-0.071733,1.015500));
-  hpcpush(hpxyzsc(0.188994,-0.071278,1.020196));
-  hpcpush(hpxyzsc(0.212623,-0.063402,1.024318));
-  hpcpush(hpxyzsc(0.239189,-0.047822,1.029319));
-  hpcpush(hpxyzsc(0.248564,-0.040034,1.031206));
-  hpcpush(hpxyzsc(0.265990,-0.019250,1.034950));
-  hpcpush(hpxyzsc(0.272276,0.000110,1.036405));
-  hpcpush(hpxyzsc(0.269338,0.000001,1.035637));
-  hpcpush(hpxyzsc(0.247284,-0.019782,1.030311));
-  hpcpush(hpxyzsc(0.224346,-0.034255,1.025429));
-  hpcpush(hpxyzsc(0.208443,-0.042147,1.022362));
-  hpcpush(hpxyzsc(0.086124,0.253692,1.035267));
-  hpcpush(hpxyzsc(0.064364,0.237609,1.029855));
-  
-  bshape(shPike, 40);
-  hpcpush(hpxyzsc(0.096293,0.278465,1.042504));
-  hpcpush(hpxyzsc(0.083339,-0.050087,1.004716));
-  hpcpush(hpxyzsc(0.079276,-0.383984,1.074117));
-  hpcpush(hpxyzsc(0.095192,-0.378226,1.073367));
-  hpcpush(hpxyzsc(0.073482,-0.534658,1.136336));
-  hpcpush(hpxyzsc(0.070202,-0.534586,1.136094));
-  hpcpush(hpxyzsc(0.045864,-0.377144,1.069739));
-  hpcpush(hpxyzsc(0.061795,-0.383600,1.072832));
-  hpcpush(hpxyzsc(0.062148,-0.049623,1.003157));
-  hpcpush(hpxyzsc(0.069133,0.279061,1.040507));
-  hpcpush(hpxyzsc(0.096293,0.278465,1.042504));
-
-  bshape(shFlailBall, 46);
-  hpcpush(hpxyzsc(-0.152664,-0.216202,1.034432));
-  hpcpush(hpxyzsc(-0.169658,-0.186257,1.031250));
-  hpcpush(hpxyzsc(-0.175291,-0.180580,1.031182));
-  hpcpush(hpxyzsc(-0.179213,-0.204880,1.036385));
-  hpcpush(hpxyzsc(-0.180636,-0.179891,1.031983));
-  hpcpush(hpxyzsc(-0.208327,-0.205555,1.041947));
-  hpcpush(hpxyzsc(-0.195199,-0.172755,1.033415));
-  hpcpush(hpxyzsc(-0.194159,-0.164682,1.031900));
-  hpcpush(hpxyzsc(-0.215525,-0.177426,1.038235));
-  hpcpush(hpxyzsc(-0.196845,-0.160074,1.031684));
-  hpcpush(hpxyzsc(-0.233600,-0.155277,1.038595));
-  hpcpush(hpxyzsc(-0.200041,-0.144144,1.029949));
-  hpcpush(hpxyzsc(-0.193092,-0.139738,1.028013));
-  hpcpush(hpxyzsc(-0.215936,-0.131441,1.031458));
-  hpcpush(hpxyzsc(-0.191101,-0.134685,1.026966));
-  hpcpush(hpxyzsc(-0.209451,-0.103230,1.026901));
-  hpcpush(hpxyzsc(-0.180537,-0.121970,1.023460));
-  hpcpush(hpxyzsc(-0.172894,-0.124532,1.022448));
-  hpcpush(hpxyzsc(-0.180135,-0.101552,1.021157));
-  hpcpush(hpxyzsc(-0.167729,-0.122842,1.021383));
-  hpcpush(hpxyzsc(-0.154066,-0.088606,1.015671));
-  hpcpush(hpxyzsc(-0.151375,-0.122930,1.018836));
-  hpcpush(hpxyzsc(-0.148774,-0.130514,1.019396));
-  hpcpush(hpxyzsc(-0.135083,-0.110267,1.015089));
-  hpcpush(hpxyzsc(-0.144329,-0.133463,1.019138));
-  hpcpush(hpxyzsc(-0.109150,-0.122417,1.013361));
-  hpcpush(hpxyzsc(-0.134514,-0.146301,1.019558));
-  hpcpush(hpxyzsc(-0.138895,-0.153179,1.021154));
-  hpcpush(hpxyzsc(-0.114703,-0.151023,1.017824));
-  hpcpush(hpxyzsc(-0.138521,-0.158550,1.021923));
-  hpcpush(hpxyzsc(-0.108526,-0.179203,1.021710));
-  hpcpush(hpxyzsc(-0.142650,-0.174484,1.025082));
-  hpcpush(hpxyzsc(-0.150697,-0.175461,1.026400));
-  hpcpush(hpxyzsc(-0.134343,-0.193130,1.027301));
-  hpcpush(hpxyzsc(-0.154679,-0.179212,1.027639));
-  hpcpush(hpxyzsc(-0.152664,-0.216202,1.034432));
-
-  bshape(shFlailTrunk, 40);
-  hpcpush(hpxyzsc(0.051293,0.275700,1.038577));
-  hpcpush(hpxyzsc(0.057876,0.280376,1.040173));
-  hpcpush(hpxyzsc(0.067059,0.283710,1.041628));
-  hpcpush(hpxyzsc(0.073576,0.283978,1.042141));
-  hpcpush(hpxyzsc(0.077320,0.279640,1.041238));
-  hpcpush(hpxyzsc(0.147958,-0.151688,1.022204));
-  hpcpush(hpxyzsc(0.141932,-0.161853,1.022908));
-  hpcpush(hpxyzsc(0.138281,-0.166934,1.023224));
-  hpcpush(hpxyzsc(0.129252,-0.166536,1.021979));
-  hpcpush(hpxyzsc(0.118813,-0.160892,1.019805));
-  hpcpush(hpxyzsc(0.112195,-0.152881,1.017821));
-  hpcpush(hpxyzsc(0.051293,0.275700,1.038577));
-
-  // group 2 layer 7
-
-  bshape(shFlailChain, 38);
-  hpcpush(hpxyzsc(0.124731,-0.149526,1.018781));
-  hpcpush(hpxyzsc(0.117490,-0.160203,1.019543));
-  hpcpush(hpxyzsc(0.106751,-0.149132,1.016679));
-  hpcpush(hpxyzsc(0.095911,-0.162180,1.017596));
-  hpcpush(hpxyzsc(0.085170,-0.151131,1.014936));
-  hpcpush(hpxyzsc(0.074321,-0.161824,1.015732));
-  hpcpush(hpxyzsc(0.062353,-0.149567,1.013044));
-  hpcpush(hpxyzsc(0.052646,-0.162759,1.014526));
-  hpcpush(hpxyzsc(0.041822,-0.150522,1.012129));
-  hpcpush(hpxyzsc(0.032058,-0.161359,1.013442));
-  hpcpush(hpxyzsc(0.023596,-0.147919,1.011156));
-  hpcpush(hpxyzsc(0.013752,-0.158813,1.012626));
-  hpcpush(hpxyzsc(0.005196,-0.149008,1.011054));
-  hpcpush(hpxyzsc(-0.004760,-0.161206,1.012922));
-  hpcpush(hpxyzsc(-0.014646,-0.148927,1.011135));
-  hpcpush(hpxyzsc(-0.027247,-0.159995,1.013085));
-  hpcpush(hpxyzsc(-0.039846,-0.148910,1.011811));
-  hpcpush(hpxyzsc(-0.052728,-0.162603,1.014505));
-  hpcpush(hpxyzsc(-0.066903,-0.150243,1.013434));
-  hpcpush(hpxyzsc(-0.077482,-0.162849,1.016131));
-  hpcpush(hpxyzsc(-0.093362,-0.150445,1.015554));
-  hpcpush(hpxyzsc(-0.104284,-0.165774,1.018998));
-  hpcpush(hpxyzsc(-0.117892,-0.153274,1.018524));
-  hpcpush(hpxyzsc(-0.131957,-0.166335,1.022292));
-  hpcpush(hpxyzsc(-0.144633,-0.153714,1.022031));
-  hpcpush(hpxyzsc(-0.156334,-0.168243,1.026034));
-  hpcpush(hpxyzsc(-0.173918,-0.153010,1.026479));
-  hpcpush(hpxyzsc(-0.173894,-0.147770,1.025707));
-  hpcpush(hpxyzsc(-0.156165,-0.131894,1.020678));
-  hpcpush(hpxyzsc(-0.144597,-0.145973,1.020890));
-  hpcpush(hpxyzsc(-0.131802,-0.132992,1.017378));
-  hpcpush(hpxyzsc(-0.117856,-0.145631,1.017398));
-  hpcpush(hpxyzsc(-0.104131,-0.132849,1.014146));
-  hpcpush(hpxyzsc(-0.093350,-0.147924,1.015183));
-  hpcpush(hpxyzsc(-0.077354,-0.135296,1.012071));
-  hpcpush(hpxyzsc(-0.066892,-0.147748,1.013067));
-  hpcpush(hpxyzsc(-0.052601,-0.135298,1.010481));
-  hpcpush(hpxyzsc(-0.039846,-0.148910,1.011811));
-  hpcpush(hpxyzsc(-0.027144,-0.137836,1.009820));
-  hpcpush(hpxyzsc(-0.014646,-0.148927,1.011135));
-  hpcpush(hpxyzsc(-0.004647,-0.136736,1.009316));
-  hpcpush(hpxyzsc(0.005196,-0.149008,1.011054));
-  hpcpush(hpxyzsc(0.013843,-0.139323,1.009754));
-  hpcpush(hpxyzsc(0.023585,-0.150350,1.011514));
-  hpcpush(hpxyzsc(0.032171,-0.137084,1.009865));
-  hpcpush(hpxyzsc(0.041833,-0.148099,1.011772));
-  hpcpush(hpxyzsc(0.052770,-0.136144,1.010604));
-  hpcpush(hpxyzsc(0.062353,-0.149567,1.013044));
-  hpcpush(hpxyzsc(0.074434,-0.137691,1.012175));
-  hpcpush(hpxyzsc(0.085181,-0.148721,1.014581));
-  hpcpush(hpxyzsc(0.096024,-0.138086,1.014046));
-  hpcpush(hpxyzsc(0.106739,-0.151540,1.017034));
-  hpcpush(hpxyzsc(0.117580,-0.140943,1.016705));
-  hpcpush(hpxyzsc(0.124720,-0.151933,1.019136));
-  hpcpush(hpxyzsc(0.124731,-0.149526,1.018781));
-
-  bshape(shBoatOuter, 12);
-
-  hpcpush(hpxyzsc(-0.254359,0.147192,1.042288));
-  hpcpush(hpxyzsc(-0.147845,0.149087,1.021805));
-  hpcpush(hpxyzsc(0.030409,0.144749,1.010879));
-  hpcpush(hpxyzsc(0.120225,0.127586,1.015250));
-  hpcpush(hpxyzsc(0.172686,0.119265,1.021785));
-  hpcpush(hpxyzsc(0.208240,0.105375,1.026873));
-  hpcpush(hpxyzsc(0.245303,0.092783,1.033819));
-  hpcpush(hpxyzsc(0.286782,0.068466,1.042560));
-  hpcpush(hpxyzsc(0.309035,0.045638,1.047657));
-  hpcpush(hpxyzsc(0.335671,0.021145,1.055046));
-  hpcpush(hpxyzsc(0.352147,0.009337,1.060233));
-  hpcpush(hpxyzsc(0.357212,0.006689,1.061906));
-  hpcpush(hpxyzsc(0.357212,-0.006689,1.061906));
-  hpcpush(hpxyzsc(0.352147,-0.009337,1.060233));
-  hpcpush(hpxyzsc(0.335671,-0.021145,1.055046));
-  hpcpush(hpxyzsc(0.309035,-0.045638,1.047657));
-  hpcpush(hpxyzsc(0.286782,-0.068466,1.042560));
-  hpcpush(hpxyzsc(0.245303,-0.092783,1.033819));
-  hpcpush(hpxyzsc(0.208240,-0.105375,1.026873));
-  hpcpush(hpxyzsc(0.172686,-0.119265,1.021785));
-  hpcpush(hpxyzsc(0.120225,-0.127586,1.015250));
-  hpcpush(hpxyzsc(0.030409,-0.144749,1.010879));
-  hpcpush(hpxyzsc(-0.147845,-0.149087,1.021805));
-  hpcpush(hpxyzsc(-0.254359,-0.147192,1.042288));
-  hpcpush(hpxyzsc(-0.254359,0.147192,1.042288));
-
-  bshape(shBoatInner, 13);
-
-  hpcpush(hpxyzsc(-0.229820,0.121893,1.033284));
-  hpcpush(hpxyzsc(0.022940,0.117115,1.007096));
-  hpcpush(hpxyzsc(0.169024,0.090064,1.018175));
-  hpcpush(hpxyzsc(0.256702,0.052103,1.033736));
-  hpcpush(hpxyzsc(0.299070,-0.000000,1.043764));
-  hpcpush(hpxyzsc(0.299070,0.000000,1.043764));
-  hpcpush(hpxyzsc(0.256702,-0.052103,1.033736));
-  hpcpush(hpxyzsc(0.169024,-0.090064,1.018175));
-  hpcpush(hpxyzsc(0.022940,-0.117115,1.007096));
-  hpcpush(hpxyzsc(-0.229820,-0.121893,1.033284));
-  hpcpush(hpxyzsc(-0.229820,0.121893,1.033284));
-  
-  bshape(shScratch, 17);
-  hpcpush(hpxyzsc(-0.028983,0.241948,1.029261));
-  hpcpush(hpxyzsc(-0.028983,-0.241948,1.029261));
-  hpcpush(hpxyzsc(-0.028983,0.241948,1.029261));  
-
-  bshape(shHeptaMarker, 17);
-  for(int t=0; t<=7; t++) hpcpush(ddi(t*12, shexf*.2) * C0);
-  
-  bshape(shBigHepta, 11);
-  for(int t=0; t<=7; t++) hpcpush(ddi(t*12, -shexf*1.5) * C0);
-  
-  bshape(shBigHex, 11);
-  for(int t=0; t<=6; t++) hpcpush(ddi(t*14, -shexf*1.3) * C0);
-  
-  bshape(shBigTriangle, 11);
-  for(int t=0; t<=3; t++) hpcpush(ddi(t*28, -shexf*1.5) * C0);
-  
-  bshape(shBigHexTriangleRev, 11);
-  for(int t=0; t<=3; t++) hpcpush(ddi(t*28, -shexf*1.3) * C0);
-  
-  bshape(shBigHexTriangle, 11);
-  for(int t=0; t<=3; t++) hpcpush(ddi(14+t*28, -shexf*1.3) * C0);
-
-  bshape(shSkeletonBody, 41);
-  hpcpush(hpxyzsc(0.001190,0.001190,1.000001));
-  hpcpush(hpxyzsc(0.001193,-0.042936,1.000922));
-  hpcpush(hpxyzsc(-0.004786,-0.070589,1.002500));
-  hpcpush(hpxyzsc(-0.016803,-0.088814,1.004077));
-  hpcpush(hpxyzsc(-0.036099,-0.097467,1.005387));
-  hpcpush(hpxyzsc(-0.038444,-0.087700,1.004574));
-  hpcpush(hpxyzsc(-0.028752,-0.074277,1.003167));
-  hpcpush(hpxyzsc(-0.022672,-0.042958,1.001179));
-  hpcpush(hpxyzsc(-0.022648,-0.027416,1.000632));
-  hpcpush(hpxyzsc(-0.044152,-0.020286,1.001180));
-  hpcpush(hpxyzsc(-0.046994,-0.100012,1.006087));
-  hpcpush(hpxyzsc(-0.031489,-0.240575,1.029013));
-  hpcpush(hpxyzsc(0.044046,-0.236589,1.028550));
-  hpcpush(hpxyzsc(0.052529,-0.220120,1.025286));
-  hpcpush(hpxyzsc(0.068888,-0.219190,1.026055));
-  hpcpush(hpxyzsc(0.079398,-0.230631,1.029318));
-  hpcpush(hpxyzsc(0.083186,-0.263635,1.037508));
-  hpcpush(hpxyzsc(0.062603,-0.265745,1.036600));
-  hpcpush(hpxyzsc(0.048239,-0.255158,1.033166));
-  hpcpush(hpxyzsc(-0.048471,-0.265315,1.035732));
-  hpcpush(hpxyzsc(-0.068926,-0.105203,1.007878));
-  hpcpush(hpxyzsc(-0.070637,-0.026339,1.002838));
-  hpcpush(hpxyzsc(-0.085171,-0.020393,1.003828));
-  hpcpush(hpxyzsc(-0.085171,0.020393,1.003828));
-  hpcpush(hpxyzsc(-0.070637,0.026339,1.002838));
-  hpcpush(hpxyzsc(-0.068926,0.105203,1.007878));
-  hpcpush(hpxyzsc(-0.048471,0.265315,1.035732));
-  hpcpush(hpxyzsc(0.048239,0.255158,1.033166));
-  hpcpush(hpxyzsc(0.062603,0.265745,1.036600));
-  hpcpush(hpxyzsc(0.083186,0.263635,1.037508));
-  hpcpush(hpxyzsc(0.079398,0.230631,1.029318));
-  hpcpush(hpxyzsc(0.068888,0.219190,1.026055));
-  hpcpush(hpxyzsc(0.052529,0.220120,1.025286));
-  hpcpush(hpxyzsc(0.044046,0.236589,1.028550));
-  hpcpush(hpxyzsc(-0.031489,0.240575,1.029013));
-  hpcpush(hpxyzsc(-0.046994,0.100012,1.006087));
-  hpcpush(hpxyzsc(-0.044152,0.020286,1.001180));
-  hpcpush(hpxyzsc(-0.022648,0.027416,1.000632));
-  hpcpush(hpxyzsc(-0.022672,0.042958,1.001179));
-  hpcpush(hpxyzsc(-0.028752,0.074277,1.003167));
-  hpcpush(hpxyzsc(-0.038444,0.087700,1.004574));
-  hpcpush(hpxyzsc(-0.036099,0.097467,1.005387));
-  hpcpush(hpxyzsc(-0.016803,0.088814,1.004077));
-  hpcpush(hpxyzsc(-0.004786,0.070589,1.002500));
-  hpcpush(hpxyzsc(0.001193,0.042936,1.000922));
-  hpcpush(hpxyzsc(0.001190,-0.001190,1.000001));
-  hpcpush(hpxyzsc(0.001190,0.001190,1.000001));
-
-  bshape(shSkull, 42);
-  hpcpush(hpxyzsc(-0.120823,0.019332,1.007458));
-  hpcpush(hpxyzsc(-0.089124,0.061424,1.005841));
-  hpcpush(hpxyzsc(-0.035904,0.063430,1.002653));
-  hpcpush(hpxyzsc(0.019074,0.032188,1.000700));
-  hpcpush(hpxyzsc(0.022631,0.004764,1.000267));
-  hpcpush(hpxyzsc(0.022631,-0.004764,1.000267));
-  hpcpush(hpxyzsc(0.019074,-0.032188,1.000700));
-  hpcpush(hpxyzsc(-0.035904,-0.063430,1.002653));
-  hpcpush(hpxyzsc(-0.089124,-0.061424,1.005841));
-  hpcpush(hpxyzsc(-0.120823,-0.019332,1.007458));
-  hpcpush(hpxyzsc(-0.120823,0.019332,1.007458));
-
-  bshape(shSkullEyes, 43);
-  hpcpush(hpxyzsc(-0.001191,0.010716,1.000058));
-  hpcpush(hpxyzsc(-0.016673,0.009527,1.000184));
-  hpcpush(hpxyzsc(-0.016682,0.025023,1.000452));
-  hpcpush(hpxyzsc(-0.002382,0.022631,1.000259));
-  hpcpush(hpxyzsc(0.001191,0.023823,1.000284));
-  hpcpush(hpxyzsc(0.001191,-0.023823,1.000284));
-  hpcpush(hpxyzsc(-0.002382,-0.022631,1.000259));
-  hpcpush(hpxyzsc(-0.016682,-0.025023,1.000452));
-  hpcpush(hpxyzsc(-0.016673,-0.009527,1.000184));
-  hpcpush(hpxyzsc(-0.001191,-0.010716,1.000058));
-  hpcpush(hpxyzsc(-0.001191,0.010716,1.000058));
-  
-  bshape(shFishTail, 30);
-  hpcpush(hpxyzsc(-0.003571,0.001190,1.000007));
-  hpcpush(hpxyzsc(-0.007145,0.015481,1.000145));
-  hpcpush(hpxyzsc(-0.015500,0.035769,1.000760));
-  hpcpush(hpxyzsc(-0.031072,0.053778,1.001927));
-  hpcpush(hpxyzsc(-0.047927,0.064702,1.003236));
-  hpcpush(hpxyzsc(-0.062478,0.073291,1.004627));
-  hpcpush(hpxyzsc(-0.083262,0.082055,1.006810));
-  hpcpush(hpxyzsc(-0.098001,0.082272,1.008153));
-  hpcpush(hpxyzsc(-0.111474,0.073912,1.008905));
-  hpcpush(hpxyzsc(-0.123761,0.063094,1.009603));
-  hpcpush(hpxyzsc(-0.129971,0.059519,1.010166));
-  hpcpush(hpxyzsc(-0.138754,0.057206,1.011200));
-  hpcpush(hpxyzsc(-0.148852,0.053684,1.012442));
-  hpcpush(hpxyzsc(-0.164257,0.053935,1.014835));
-  hpcpush(hpxyzsc(-0.177269,0.054165,1.017034));
-  hpcpush(hpxyzsc(-0.191786,0.054443,1.019679));
-  hpcpush(hpxyzsc(-0.214728,0.056179,1.024336));
-  hpcpush(hpxyzsc(-0.227189,0.058994,1.027178));
-  hpcpush(hpxyzsc(-0.237162,0.065598,1.029829));
-  hpcpush(hpxyzsc(-0.240110,0.069505,1.030768));
-  hpcpush(hpxyzsc(-0.248932,0.077474,1.033426));
-  hpcpush(hpxyzsc(-0.262350,0.087023,1.037497));
-  hpcpush(hpxyzsc(-0.271446,0.092626,1.040318));
-  hpcpush(hpxyzsc(-0.278978,0.094284,1.042458));
-  hpcpush(hpxyzsc(-0.283499,0.094500,1.043696));
-  hpcpush(hpxyzsc(-0.277139,0.087653,1.041388));
-  hpcpush(hpxyzsc(-0.269286,0.078221,1.038573));
-  hpcpush(hpxyzsc(-0.253927,0.055864,1.033247));
-  hpcpush(hpxyzsc(-0.247700,0.034122,1.030786));
-  hpcpush(hpxyzsc(-0.243240,0.018905,1.029331));
-  hpcpush(hpxyzsc(-0.241745,0.005036,1.028818));
-  hpcpush(hpxyzsc(-0.241745,-0.005036,1.028818));
-  hpcpush(hpxyzsc(-0.243240,-0.018905,1.029331));
-  hpcpush(hpxyzsc(-0.247700,-0.034122,1.030786));
-  hpcpush(hpxyzsc(-0.253927,-0.055864,1.033247));
-  hpcpush(hpxyzsc(-0.269286,-0.078221,1.038573));
-  hpcpush(hpxyzsc(-0.277139,-0.087653,1.041388));
-  hpcpush(hpxyzsc(-0.283499,-0.094500,1.043696));
-  hpcpush(hpxyzsc(-0.278978,-0.094284,1.042458));
-  hpcpush(hpxyzsc(-0.271446,-0.092626,1.040318));
-  hpcpush(hpxyzsc(-0.262350,-0.087023,1.037497));
-  hpcpush(hpxyzsc(-0.248932,-0.077474,1.033426));
-  hpcpush(hpxyzsc(-0.240110,-0.069505,1.030768));
-  hpcpush(hpxyzsc(-0.237162,-0.065598,1.029829));
-  hpcpush(hpxyzsc(-0.227189,-0.058994,1.027178));
-  hpcpush(hpxyzsc(-0.214728,-0.056179,1.024336));
-  hpcpush(hpxyzsc(-0.191786,-0.054443,1.019679));
-  hpcpush(hpxyzsc(-0.177269,-0.054165,1.017034));
-  hpcpush(hpxyzsc(-0.164257,-0.053935,1.014835));
-  hpcpush(hpxyzsc(-0.148852,-0.053684,1.012442));
-  hpcpush(hpxyzsc(-0.138754,-0.057206,1.011200));
-  hpcpush(hpxyzsc(-0.129971,-0.059519,1.010166));
-  hpcpush(hpxyzsc(-0.123761,-0.063094,1.009603));
-  hpcpush(hpxyzsc(-0.111474,-0.073912,1.008905));
-  hpcpush(hpxyzsc(-0.098001,-0.082272,1.008153));
-  hpcpush(hpxyzsc(-0.083262,-0.082055,1.006810));
-  hpcpush(hpxyzsc(-0.062478,-0.073291,1.004627));
-  hpcpush(hpxyzsc(-0.047927,-0.064702,1.003236));
-  hpcpush(hpxyzsc(-0.031072,-0.053778,1.001927));
-  hpcpush(hpxyzsc(-0.015500,-0.035769,1.000760));
-  hpcpush(hpxyzsc(-0.007145,-0.015481,1.000145));
-  hpcpush(hpxyzsc(-0.003571,-0.001190,1.000007));
-  hpcpush(hpxyzsc(-0.003571,0.001190,1.000007));
-
-  bshape(shFatBody, 41);
-  hpcpush(hpxyzsc(-0.158280,0.010638,1.012505));
-  hpcpush(hpxyzsc(-0.153491,0.063014,1.013672));
-  hpcpush(hpxyzsc(-0.143004,0.090522,1.014221));
-  hpcpush(hpxyzsc(-0.130133,0.119287,1.015463));
-  hpcpush(hpxyzsc(-0.120336,0.139833,1.016875));
-  hpcpush(hpxyzsc(-0.108707,0.144976,1.016285));
-  hpcpush(hpxyzsc(-0.103459,0.149545,1.016399));
-  hpcpush(hpxyzsc(-0.088463,0.147968,1.014751));
-  hpcpush(hpxyzsc(-0.090694,0.183338,1.020705));
-  hpcpush(hpxyzsc(-0.069574,0.274320,1.039275));
-  hpcpush(hpxyzsc(-0.026928,0.273931,1.037190));
-  hpcpush(hpxyzsc(0.000335,0.278791,1.038135));
-  hpcpush(hpxyzsc(0.049634,0.254674,1.033113));
-  hpcpush(hpxyzsc(0.064323,0.261140,1.035535));
-  hpcpush(hpxyzsc(0.085998,0.258714,1.036498));
-  hpcpush(hpxyzsc(0.084852,0.235757,1.030913));
-  hpcpush(hpxyzsc(0.075972,0.211105,1.024860));
-  hpcpush(hpxyzsc(0.051782,0.222035,1.025661));
-  hpcpush(hpxyzsc(-0.009808,0.219631,1.023882));
-  hpcpush(hpxyzsc(-0.037620,0.215354,1.023617));
-  hpcpush(hpxyzsc(-0.020675,0.185577,1.017284));
-  hpcpush(hpxyzsc(-0.021056,0.141669,1.010205));
-  hpcpush(hpxyzsc(0.007264,0.129328,1.008354));
-  hpcpush(hpxyzsc(0.036658,0.102338,1.005891));
-  hpcpush(hpxyzsc(0.051136,0.057412,1.002951));
-  hpcpush(hpxyzsc(0.056061,-0.003004,1.001575));
-  hpcpush(hpxyzsc(0.056061,0.003004,1.001575));
-  hpcpush(hpxyzsc(0.051136,-0.057412,1.002951));
-  hpcpush(hpxyzsc(0.036658,-0.102338,1.005891));
-  hpcpush(hpxyzsc(0.007264,-0.129328,1.008354));
-  hpcpush(hpxyzsc(-0.021056,-0.141669,1.010205));
-  hpcpush(hpxyzsc(-0.020675,-0.185577,1.017284));
-  hpcpush(hpxyzsc(-0.037620,-0.215354,1.023617));
-  hpcpush(hpxyzsc(-0.009808,-0.219631,1.023882));
-  hpcpush(hpxyzsc(0.051782,-0.222035,1.025661));
-  hpcpush(hpxyzsc(0.075972,-0.211105,1.024860));
-  hpcpush(hpxyzsc(0.084852,-0.235757,1.030913));
-  hpcpush(hpxyzsc(0.085998,-0.258714,1.036498));
-  hpcpush(hpxyzsc(0.064323,-0.261140,1.035535));
-  hpcpush(hpxyzsc(0.049634,-0.254674,1.033113));
-  hpcpush(hpxyzsc(0.000335,-0.278791,1.038135));
-  hpcpush(hpxyzsc(-0.026928,-0.273931,1.037190));
-  hpcpush(hpxyzsc(-0.069574,-0.274320,1.039275));
-  hpcpush(hpxyzsc(-0.090694,-0.183338,1.020705));
-  hpcpush(hpxyzsc(-0.088463,-0.147968,1.014751));
-  hpcpush(hpxyzsc(-0.103459,-0.149545,1.016399));
-  hpcpush(hpxyzsc(-0.108707,-0.144976,1.016285));
-  hpcpush(hpxyzsc(-0.120336,-0.139833,1.016875));
-  hpcpush(hpxyzsc(-0.130133,-0.119287,1.015463));
-  hpcpush(hpxyzsc(-0.143004,-0.090522,1.014221));
-  hpcpush(hpxyzsc(-0.153491,-0.063014,1.013672));
-  hpcpush(hpxyzsc(-0.158280,-0.010638,1.012505));
-  
-  bshape(shZebra[0], 10);
-  hpcpush(hpxyzsc(-0.307697,-0.214329,1.067995));
-  hpcpush(hpxyzsc(-0.339462,0.159309,1.067995));
-  hpcpush(hpxyzsc(-0.031766,0.373637,1.067995));
-  hpcpush(hpxyzsc(0.307697,0.214329,1.067995));
-  hpcpush(hpxyzsc(0.339462,-0.159309,1.067995));
-  hpcpush(hpxyzsc(0.031766,-0.373637,1.067995));
-  hpcpush(hpxyzsc(-0.307697,-0.214329,1.067995));
-
-  bshape(shZebra[1], 10);
-  hpcpush(hpxyzsc(-0.192992,-0.168975,1.032375));
-  hpcpush(hpxyzsc(-0.238865,0.204661,1.048305));
-  hpcpush(hpxyzsc(-0.080551,0.254199,1.034942));
-  hpcpush(hpxyzsc(0.347359,0.222111,1.081662));
-  hpcpush(hpxyzsc(0.392920,-0.180638,1.089503));
-  hpcpush(hpxyzsc(0.019691,-0.156962,1.012435));
-  hpcpush(hpxyzsc(-0.192992,-0.168975,1.032375));
-
-  bshape(shZebra[2], 10);
-  hpcpush(hpxyzsc(-0.255158,0.223637,1.055992));
-  hpcpush(hpxyzsc(-0.114892,0.277358,1.044092));
-  hpcpush(hpxyzsc(0.260873,0.219611,1.056543));
-  hpcpush(hpxyzsc(0.444210,0.107854,1.099525));
-  hpcpush(hpxyzsc(0.255129,-0.352141,1.090456));
-  hpcpush(hpxyzsc(-0.058563,-0.195290,1.020572));
-  hpcpush(hpxyzsc(-0.205857,-0.164479,1.034133));
-  hpcpush(hpxyzsc(-0.255158,0.223637,1.055992));
-
-  bshape(shZebra[3], 10);
-  hpcpush(hpxyzsc(0.248469,0.308508,1.075599));
-  hpcpush(hpxyzsc(0.257329,0.012990,1.032660));
-  hpcpush(hpxyzsc(0.288207,-0.281417,1.078081));
-  hpcpush(hpxyzsc(0.038093,-0.236115,1.028203));
-  hpcpush(hpxyzsc(-0.209655,-0.205481,1.042198));
-  hpcpush(hpxyzsc(-0.224279,0.047025,1.025920));
-  hpcpush(hpxyzsc(-0.253191,0.302526,1.075001));
-  hpcpush(hpxyzsc(-0.002290,0.296336,1.042986));
-  hpcpush(hpxyzsc(0.248469,0.308508,1.075599));
-
-  bshape(shZebra[4], 10); // for purehepta
-  hpcpush(hpxyz(0.623738,-0.009789,1.178620));
-  hpcpush(hpxyz(0.462499,-0.298584,1.141516));
-  hpcpush(hpxyz(0.351221,-0.619633,1.227722));
-  hpcpush(hpxyz(-0.099397,-0.442426,1.098008));
-  hpcpush(hpxyz(-0.571648,-0.361506,1.207256));
-  hpcpush(hpxyz(-0.537598,0.000000,1.135346));
-  hpcpush(hpxyz(-0.571648,0.361506,1.207256));
-  hpcpush(hpxyz(-0.099397,0.442426,1.098008));
-  hpcpush(hpxyz(0.351221,0.619633,1.227722));
-  hpcpush(hpxyz(0.462499,0.298584,1.141516));
-  hpcpush(hpxyz(0.623738,0.009789,1.178620));
-  hpcpush(hpxyz(0.623738,-0.009789,1.178620));
-
-  bshape(shEmeraldFloor[0], 10); // 4
-  hpcpush(hpxyzsc(-0.056700,0.289325,1.042556));
-  hpcpush(hpxyzsc(0.003114,0.299067,1.043768));
-  hpcpush(hpxyzsc(0.041221,0.283536,1.040237));
-  hpcpush(hpxyzsc(0.125459,0.234982,1.034870));
-  hpcpush(hpxyzsc(0.181143,0.183624,1.032730));
-  hpcpush(hpxyzsc(0.228595,0.105917,1.031249));
-  hpcpush(hpxyzsc(0.268750,0.012281,1.035557));
-  hpcpush(hpxyzsc(0.313793,-0.081056,1.051207));
-  hpcpush(hpxyzsc(0.306997,-0.188603,1.062929));
-  hpcpush(hpxyzsc(0.262425,-0.286297,1.072769));
-  hpcpush(hpxyzsc(0.218519,-0.355547,1.083588));
-  hpcpush(hpxyzsc(0.153244,-0.376219,1.079363));
-  hpcpush(hpxyzsc(0.046875,-0.364611,1.065429));
-  hpcpush(hpxyzsc(-0.019398,-0.349785,1.059588));
-  hpcpush(hpxyzsc(-0.083546,-0.322881,1.054150));
-  hpcpush(hpxyzsc(-0.141981,-0.272036,1.046022));
-  hpcpush(hpxyzsc(-0.195959,-0.227784,1.044167));
-  hpcpush(hpxyzsc(-0.221863,-0.171718,1.038610));
-  hpcpush(hpxyzsc(-0.239605,-0.111801,1.034365));
-  hpcpush(hpxyzsc(-0.260405,-0.063040,1.035270));
-  hpcpush(hpxyzsc(-0.276108,0.051160,1.038679));
-  hpcpush(hpxyzsc(-0.250004,0.138005,1.039975));
-  hpcpush(hpxyzsc(-0.184725,0.213503,1.039089));
-  hpcpush(hpxyzsc(-0.125567,0.259839,1.040809));
-  hpcpush(hpxyzsc(-0.056700,0.289325,1.042556));
-
-  bshape(shEmeraldFloor[1], 10); // 12
-  hpcpush(hpxyzsc(-0.012456,-0.282668,1.039258));
-  hpcpush(hpxyzsc(0.093943,-0.261125,1.037792));
-  hpcpush(hpxyzsc(0.176033,-0.224423,1.039881));
-  hpcpush(hpxyzsc(0.251304,-0.129592,1.039205));
-  hpcpush(hpxyzsc(0.253408,0.003018,1.031613));
-  hpcpush(hpxyzsc(0.205115,0.151740,1.032035));
-  hpcpush(hpxyzsc(0.136504,0.257503,1.041605));
-  hpcpush(hpxyzsc(0.050478,0.321171,1.051522));
-  hpcpush(hpxyzsc(-0.024338,0.351747,1.060339));
-  hpcpush(hpxyzsc(-0.113671,0.338793,1.061933));
-  hpcpush(hpxyzsc(-0.199507,0.312663,1.066565));
-  hpcpush(hpxyzsc(-0.289397,0.244537,1.069368));
-  hpcpush(hpxyzsc(-0.318919,0.189505,1.066593));
-  hpcpush(hpxyzsc(-0.296780,0.103663,1.048248));
-  hpcpush(hpxyzsc(-0.266492,-0.004074,1.034908));
-  hpcpush(hpxyzsc(-0.225121,-0.113729,1.031316));
-  hpcpush(hpxyzsc(-0.162566,-0.195216,1.031764));
-  hpcpush(hpxyzsc(-0.093623,-0.256862,1.036698));
-  hpcpush(hpxyzsc(-0.073239,-0.271190,1.038705));
-  hpcpush(hpxyzsc(-0.012456,-0.282668,1.039258));
-
-  bshape(shEmeraldFloor[2], 10); // 16
-  hpcpush(hpxyzsc(0.142342,0.315002,1.058058));
-  hpcpush(hpxyzsc(0.192633,0.259152,1.050841));
-  hpcpush(hpxyzsc(0.232117,0.228558,1.051721));
-  hpcpush(hpxyzsc(0.263994,0.150040,1.045086));
-  hpcpush(hpxyzsc(0.283920,0.084560,1.042958));
-  hpcpush(hpxyzsc(0.289892,-0.010808,1.041227));
-  hpcpush(hpxyzsc(0.297148,-0.086089,1.046761));
-  hpcpush(hpxyzsc(0.297551,-0.165417,1.056361));
-  hpcpush(hpxyzsc(0.290991,-0.200376,1.060578));
-  hpcpush(hpxyzsc(0.258510,-0.274435,1.068710));
-  hpcpush(hpxyzsc(0.200576,-0.292802,1.061114));
-  hpcpush(hpxyzsc(0.137570,-0.326255,1.060833));
-  hpcpush(hpxyzsc(0.057449,-0.363515,1.065572));
-  hpcpush(hpxyzsc(0.007219,-0.381780,1.070424));
-  hpcpush(hpxyzsc(-0.042563,-0.362309,1.064462));
-  hpcpush(hpxyzsc(-0.099799,-0.296581,1.047817));
-  hpcpush(hpxyzsc(-0.126618,-0.259997,1.040976));
-  hpcpush(hpxyzsc(-0.164471,-0.210125,1.034989));
-  hpcpush(hpxyzsc(-0.206762,-0.179726,1.036847));
-  hpcpush(hpxyzsc(-0.255672,-0.132984,1.040698));
-  hpcpush(hpxyzsc(-0.278657,-0.105484,1.043445));
-  hpcpush(hpxyzsc(-0.292210,-0.086272,1.045385));
-  hpcpush(hpxyzsc(-0.317777,-0.034598,1.049847));
-  hpcpush(hpxyzsc(-0.332027,0.039956,1.054438));
-  hpcpush(hpxyzsc(-0.311197,0.107127,1.052768));
-  hpcpush(hpxyzsc(-0.293985,0.148441,1.052835));
-  hpcpush(hpxyzsc(-0.261872,0.181378,1.049512));
-  hpcpush(hpxyzsc(-0.161843,0.220098,1.036647));
-  hpcpush(hpxyzsc(-0.080956,0.253464,1.034794));
-  hpcpush(hpxyzsc(-0.028510,0.284753,1.040143));
-  hpcpush(hpxyzsc(0.013578,0.313129,1.047967));
-  hpcpush(hpxyzsc(0.055797,0.341483,1.058170));
-  hpcpush(hpxyzsc(0.142342,0.315002,1.058058));
-
-  bshape(shEmeraldFloor[3], 10); // 20
-  hpcpush(hpxyzsc(-0.163082,-0.220437,1.036913));
-  hpcpush(hpxyzsc(-0.210355,-0.178152,1.037298));
-  hpcpush(hpxyzsc(-0.270116,-0.134375,1.044519));
-  hpcpush(hpxyzsc(-0.286296,-0.068967,1.042460));
-  hpcpush(hpxyzsc(-0.322640,0.023933,1.051033));
-  hpcpush(hpxyzsc(-0.303410,0.080931,1.048145));
-  hpcpush(hpxyzsc(-0.256143,0.157047,1.044161));
-  hpcpush(hpxyzsc(-0.191383,0.193946,1.036457));
-  hpcpush(hpxyzsc(-0.112200,0.248267,1.036448));
-  hpcpush(hpxyzsc(-0.006180,0.297906,1.043449));
-  hpcpush(hpxyzsc(0.045011,0.314576,1.049278));
-  hpcpush(hpxyzsc(0.123367,0.290642,1.048662));
-  hpcpush(hpxyzsc(0.173268,0.251704,1.045647));
-  hpcpush(hpxyzsc(0.226704,0.200367,1.044769));
-  hpcpush(hpxyzsc(0.274509,0.112459,1.043073));
-  hpcpush(hpxyzsc(0.272693,0.041554,1.037347));
-  hpcpush(hpxyzsc(0.266634,-0.039227,1.035680));
-  hpcpush(hpxyzsc(0.245934,-0.087769,1.033531));
-  hpcpush(hpxyzsc(0.206654,-0.145971,1.031510));
-  hpcpush(hpxyzsc(0.168911,-0.181347,1.030251));
-  hpcpush(hpxyzsc(0.113778,-0.241571,1.035037));
-  hpcpush(hpxyzsc(0.060166,-0.287358,1.042207));
-  hpcpush(hpxyzsc(-0.030419,-0.300995,1.044760));
-  hpcpush(hpxyzsc(-0.106762,-0.252814,1.036973));
-  hpcpush(hpxyzsc(-0.163082,-0.220437,1.036913));
-
-  bshape(shEmeraldFloor[4], 10); // 28
-  hpcpush(hpxyzsc(-0.121227,-0.290032,1.048244));
-  hpcpush(hpxyzsc(-0.211853,-0.226567,1.047003));
-  hpcpush(hpxyzsc(-0.271304,-0.142026,1.045838));
-  hpcpush(hpxyzsc(-0.291031,-0.001756,1.041490));
-  hpcpush(hpxyzsc(-0.289025,0.081565,1.044121));
-  hpcpush(hpxyzsc(-0.274404,0.151774,1.048014));
-  hpcpush(hpxyzsc(-0.270636,0.184903,1.052346));
-  hpcpush(hpxyzsc(-0.177964,0.228844,1.041173));
-  hpcpush(hpxyzsc(-0.109553,0.258706,1.038716));
-  hpcpush(hpxyzsc(-0.046057,0.288157,1.041708));
-  hpcpush(hpxyzsc(0.012352,0.334753,1.054615));
-  hpcpush(hpxyzsc(0.093790,0.294439,1.046657));
-  hpcpush(hpxyzsc(0.113901,0.258432,1.039115));
-  hpcpush(hpxyzsc(0.169445,0.181108,1.030297));
-  hpcpush(hpxyzsc(0.201022,0.133994,1.028768));
-  hpcpush(hpxyzsc(0.217873,0.089759,1.027388));
-  hpcpush(hpxyzsc(0.229954,0.028756,1.026502));
-  hpcpush(hpxyzsc(0.219894,-0.023561,1.024162));
-  hpcpush(hpxyzsc(0.191854,-0.102714,1.023405));
-  hpcpush(hpxyzsc(0.155541,-0.176809,1.027353));
-  hpcpush(hpxyzsc(0.124174,-0.224046,1.032287));
-  hpcpush(hpxyzsc(0.061461,-0.284240,1.041427));
-  hpcpush(hpxyzsc(0.004090,-0.327127,1.052154));
-  hpcpush(hpxyzsc(-0.121227,-0.290032,1.048244));
-
-  bshape(shEmeraldFloor[5], 10); // 36
-  hpcpush(hpxyzsc(-0.123950,0.204444,1.028183));
-  hpcpush(hpxyzsc(-0.062627,0.216559,1.025095));
-  hpcpush(hpxyzsc(0.004307,0.251676,1.031193));
-  hpcpush(hpxyzsc(0.053230,0.277691,1.039204));
-  hpcpush(hpxyzsc(0.104981,0.268275,1.040669));
-  hpcpush(hpxyzsc(0.179487,0.211716,1.037805));
-  hpcpush(hpxyzsc(0.219611,0.155886,1.035630));
-  hpcpush(hpxyzsc(0.242732,0.098595,1.033750));
-  hpcpush(hpxyzsc(0.253441,0.041064,1.032433));
-  hpcpush(hpxyzsc(0.251167,-0.002564,1.031063));
-  hpcpush(hpxyzsc(0.258569,-0.050639,1.034129));
-  hpcpush(hpxyzsc(0.241512,-0.095904,1.033211));
-  hpcpush(hpxyzsc(0.224178,-0.142437,1.034671));
-  hpcpush(hpxyzsc(0.200723,-0.160460,1.032491));
-  hpcpush(hpxyzsc(0.160438,-0.177252,1.028182));
-  hpcpush(hpxyzsc(0.098857,-0.201735,1.024924));
-  hpcpush(hpxyzsc(0.042704,-0.222826,1.025415));
-  hpcpush(hpxyzsc(-0.046440,-0.220643,1.025105));
-  hpcpush(hpxyzsc(-0.121819,-0.210954,1.029243));
-  hpcpush(hpxyzsc(-0.193674,-0.181500,1.034626));
-  hpcpush(hpxyzsc(-0.240226,-0.152286,1.039663));
-  hpcpush(hpxyzsc(-0.288784,-0.106825,1.046331));
-  hpcpush(hpxyzsc(-0.312611,-0.056858,1.049266));
-  hpcpush(hpxyzsc(-0.322108,0.009276,1.050638));
-  hpcpush(hpxyzsc(-0.323420,0.074633,1.053646));
-  hpcpush(hpxyzsc(-0.320770,0.110549,1.055990));
-  hpcpush(hpxyzsc(-0.238954,0.181091,1.043980));
-  hpcpush(hpxyzsc(-0.123950,0.204444,1.028183));
-
-  bshape(shRoseFloor[2], 10); // purehepta
-  hpcpush(hpxyz(-0.548465,-0.132422,1.148194));
-  hpcpush(hpxyz(-0.551824,-0.102571,1.146748));
-  hpcpush(hpxyz(-0.528982,-0.047757,1.132300));
-  hpcpush(hpxyz(-0.442542,-0.018200,1.093698));
-  hpcpush(hpxyz(-0.315538,-0.004582,1.048611));
-  hpcpush(hpxyz(-0.315538,0.004582,1.048611));
-  hpcpush(hpxyz(-0.442542,0.018200,1.093698));
-  hpcpush(hpxyz(-0.528982,0.047757,1.132300));
-  hpcpush(hpxyz(-0.551824,0.102571,1.146748));
-  hpcpush(hpxyz(-0.548465,0.132422,1.148194));
-  hpcpush(hpxyz(-0.551606,0.118662,1.148194));
-  hpcpush(hpxyz(-0.541680,0.147014,1.146748));
-  hpcpush(hpxyz(-0.497317,0.186489,1.132300));
-  hpcpush(hpxyz(-0.406613,0.175614,1.093698));
-  hpcpush(hpxyz(-0.286278,0.132778,1.048611));
-  hpcpush(hpxyz(-0.282302,0.141035,1.048611));
-  hpcpush(hpxyz(-0.390819,0.208410,1.093698));
-  hpcpush(hpxyz(-0.455875,0.272545,1.132300));
-  hpcpush(hpxyz(-0.452673,0.331841,1.146748));
-  hpcpush(hpxyz(-0.436694,0.357279,1.148194));
-  hpcpush(hpxyz(-0.445494,0.346243,1.148194));
-  hpcpush(hpxyz(-0.424250,0.367482,1.146748));
-  hpcpush(hpxyz(-0.367153,0.383798,1.132300));
-  hpcpush(hpxyz(-0.290150,0.334645,1.093698));
-  hpcpush(hpxyz(-0.200317,0.243841,1.048611));
-  hpcpush(hpxyz(-0.193152,0.249555,1.048611));
-  hpcpush(hpxyz(-0.261691,0.357341,1.093698));
-  hpcpush(hpxyz(-0.292476,0.443351,1.132300));
-  hpcpush(hpxyz(-0.263864,0.495385,1.146748));
-  hpcpush(hpxyz(-0.238431,0.511371,1.148194));
-  hpcpush(hpxyz(-0.251147,0.505247,1.148194));
-  hpcpush(hpxyz(-0.222791,0.515165,1.146748));
-  hpcpush(hpxyz(-0.164270,0.505092,1.132300));
-  hpcpush(hpxyz(-0.116219,0.427396,1.093698));
-  hpcpush(hpxyz(-0.074681,0.306607,1.048611));
-  hpcpush(hpxyz(-0.065746,0.308647,1.048611));
-  hpcpush(hpxyz(-0.080731,0.435496,1.093698));
-  hpcpush(hpxyz(-0.071149,0.526346,1.132300));
-  hpcpush(hpxyz(-0.022793,0.560813,1.146748));
-  hpcpush(hpxyz(0.007057,0.564181,1.148194));
-  hpcpush(hpxyz(-0.007057,0.564181,1.148194));
-  hpcpush(hpxyz(0.022793,0.560813,1.146748));
-  hpcpush(hpxyz(0.071149,0.526346,1.132300));
-  hpcpush(hpxyz(0.080731,0.435496,1.093698));
-  hpcpush(hpxyz(0.065746,0.308647,1.048611));
-  hpcpush(hpxyz(0.074681,0.306607,1.048611));
-  hpcpush(hpxyz(0.116219,0.427396,1.093698));
-  hpcpush(hpxyz(0.164270,0.505092,1.132300));
-  hpcpush(hpxyz(0.222791,0.515165,1.146748));
-  hpcpush(hpxyz(0.251147,0.505247,1.148194));
-  hpcpush(hpxyz(0.238431,0.511371,1.148194));
-  hpcpush(hpxyz(0.263864,0.495385,1.146748));
-  hpcpush(hpxyz(0.292476,0.443351,1.132300));
-  hpcpush(hpxyz(0.261691,0.357341,1.093698));
-  hpcpush(hpxyz(0.193152,0.249555,1.048611));
-  hpcpush(hpxyz(0.200317,0.243841,1.048611));
-  hpcpush(hpxyz(0.290150,0.334645,1.093698));
-  hpcpush(hpxyz(0.367153,0.383798,1.132300));
-  hpcpush(hpxyz(0.424250,0.367482,1.146748));
-  hpcpush(hpxyz(0.445494,0.346243,1.148194));
-  hpcpush(hpxyz(0.436694,0.357279,1.148194));
-  hpcpush(hpxyz(0.452673,0.331841,1.146748));
-  hpcpush(hpxyz(0.455875,0.272545,1.132300));
-  hpcpush(hpxyz(0.390819,0.208410,1.093698));
-  hpcpush(hpxyz(0.282302,0.141035,1.048611));
-  hpcpush(hpxyz(0.286278,0.132778,1.048611));
-  hpcpush(hpxyz(0.406613,0.175614,1.093698));
-  hpcpush(hpxyz(0.497317,0.186489,1.132300));
-  hpcpush(hpxyz(0.541680,0.147014,1.146748));
-  hpcpush(hpxyz(0.551606,0.118662,1.148194));
-  hpcpush(hpxyz(0.548465,0.132422,1.148194));
-  hpcpush(hpxyz(0.551824,0.102571,1.146748));
-  hpcpush(hpxyz(0.528982,0.047757,1.132300));
-  hpcpush(hpxyz(0.442542,0.018200,1.093698));
-  hpcpush(hpxyz(0.315538,0.004582,1.048611));
-  hpcpush(hpxyz(0.315538,-0.004582,1.048611));
-  hpcpush(hpxyz(0.442542,-0.018200,1.093698));
-  hpcpush(hpxyz(0.528982,-0.047757,1.132300));
-  hpcpush(hpxyz(0.551824,-0.102571,1.146748));
-  hpcpush(hpxyz(0.548465,-0.132422,1.148194));
-  hpcpush(hpxyz(0.551606,-0.118662,1.148194));
-  hpcpush(hpxyz(0.541680,-0.147014,1.146748));
-  hpcpush(hpxyz(0.497317,-0.186489,1.132300));
-  hpcpush(hpxyz(0.406613,-0.175614,1.093698));
-  hpcpush(hpxyz(0.286278,-0.132778,1.048611));
-  hpcpush(hpxyz(0.282302,-0.141035,1.048611));
-  hpcpush(hpxyz(0.390819,-0.208410,1.093698));
-  hpcpush(hpxyz(0.455875,-0.272545,1.132300));
-  hpcpush(hpxyz(0.452673,-0.331841,1.146748));
-  hpcpush(hpxyz(0.436694,-0.357279,1.148194));
-  hpcpush(hpxyz(0.445494,-0.346243,1.148194));
-  hpcpush(hpxyz(0.424250,-0.367482,1.146748));
-  hpcpush(hpxyz(0.367153,-0.383798,1.132300));
-  hpcpush(hpxyz(0.290150,-0.334645,1.093698));
-  hpcpush(hpxyz(0.200317,-0.243841,1.048611));
-  hpcpush(hpxyz(0.193152,-0.249555,1.048611));
-  hpcpush(hpxyz(0.261691,-0.357341,1.093698));
-  hpcpush(hpxyz(0.292476,-0.443351,1.132300));
-  hpcpush(hpxyz(0.263864,-0.495385,1.146748));
-  hpcpush(hpxyz(0.238431,-0.511371,1.148194));
-  hpcpush(hpxyz(0.251147,-0.505247,1.148194));
-  hpcpush(hpxyz(0.222791,-0.515165,1.146748));
-  hpcpush(hpxyz(0.164270,-0.505092,1.132300));
-  hpcpush(hpxyz(0.116219,-0.427396,1.093698));
-  hpcpush(hpxyz(0.074681,-0.306607,1.048611));
-  hpcpush(hpxyz(0.065746,-0.308647,1.048611));
-  hpcpush(hpxyz(0.080731,-0.435496,1.093698));
-  hpcpush(hpxyz(0.071149,-0.526346,1.132300));
-  hpcpush(hpxyz(0.022793,-0.560813,1.146748));
-  hpcpush(hpxyz(-0.007057,-0.564181,1.148194));
-  hpcpush(hpxyz(0.007057,-0.564181,1.148194));
-  hpcpush(hpxyz(-0.022793,-0.560813,1.146748));
-  hpcpush(hpxyz(-0.071149,-0.526346,1.132300));
-  hpcpush(hpxyz(-0.080731,-0.435496,1.093698));
-  hpcpush(hpxyz(-0.065746,-0.308647,1.048611));
-  hpcpush(hpxyz(-0.074681,-0.306607,1.048611));
-  hpcpush(hpxyz(-0.116219,-0.427396,1.093698));
-  hpcpush(hpxyz(-0.164270,-0.505092,1.132300));
-  hpcpush(hpxyz(-0.222791,-0.515165,1.146748));
-  hpcpush(hpxyz(-0.251147,-0.505247,1.148194));
-  hpcpush(hpxyz(-0.238431,-0.511371,1.148194));
-  hpcpush(hpxyz(-0.263864,-0.495385,1.146748));
-  hpcpush(hpxyz(-0.292476,-0.443351,1.132300));
-  hpcpush(hpxyz(-0.261691,-0.357341,1.093698));
-  hpcpush(hpxyz(-0.193152,-0.249555,1.048611));
-  hpcpush(hpxyz(-0.200317,-0.243841,1.048611));
-  hpcpush(hpxyz(-0.290150,-0.334645,1.093698));
-  hpcpush(hpxyz(-0.367153,-0.383798,1.132300));
-  hpcpush(hpxyz(-0.424250,-0.367482,1.146748));
-  hpcpush(hpxyz(-0.445494,-0.346243,1.148194));
-  hpcpush(hpxyz(-0.436694,-0.357279,1.148194));
-  hpcpush(hpxyz(-0.452673,-0.331841,1.146748));
-  hpcpush(hpxyz(-0.455875,-0.272545,1.132300));
-  hpcpush(hpxyz(-0.390819,-0.208410,1.093698));
-  hpcpush(hpxyz(-0.282302,-0.141035,1.048611));
-  hpcpush(hpxyz(-0.286278,-0.132778,1.048611));
-  hpcpush(hpxyz(-0.406613,-0.175614,1.093698));
-  hpcpush(hpxyz(-0.497317,-0.186489,1.132300));
-  hpcpush(hpxyz(-0.541680,-0.147014,1.146748));
-  hpcpush(hpxyz(-0.551606,-0.118662,1.148194));
-  hpcpush(hpxyz(-0.548465,-0.132422,1.148194));
-  
-  bshape(shRoseFloor[0], 10);
-  hpcpush(hpxyz(0.264832,-0.019358,1.034655));
-  hpcpush(hpxyz(0.272178,-0.037378,1.037052));
-  hpcpush(hpxyz(0.276373,-0.078165,1.040429));
-  hpcpush(hpxyz(0.266115,-0.117875,1.041495));
-  hpcpush(hpxyz(0.242680,-0.150883,1.040028));
-  hpcpush(hpxyz(0.209916,-0.171773,1.036133));
-  hpcpush(hpxyz(0.181695,-0.180720,1.032314));
-  hpcpush(hpxyz(0.145686,-0.180823,1.026607));
-  hpcpush(hpxyz(0.099010,-0.173709,1.019793));
-  hpcpush(hpxyz(0.080081,-0.167628,1.017110));
-  hpcpush(hpxyz(0.071976,-0.220677,1.026586));
-  hpcpush(hpxyz(0.055614,-0.256642,1.033904));
-  hpcpush(hpxyz(0.042043,-0.264568,1.035260));
-  hpcpush(hpxyz(0.010906,-0.279995,1.038516));
-  hpcpush(hpxyz(-0.019644,-0.286339,1.040373));
-  hpcpush(hpxyz(-0.054597,-0.283522,1.040848));
-  hpcpush(hpxyz(-0.091229,-0.258700,1.036942));
-  hpcpush(hpxyz(-0.116444,-0.237228,1.034329));
-  hpcpush(hpxyz(-0.130501,-0.207658,1.029637));
-  hpcpush(hpxyz(-0.140731,-0.154944,1.021672));
-  hpcpush(hpxyz(-0.136597,-0.109083,1.015164));
-  hpcpush(hpxyz(-0.128765,-0.083983,1.011748));
-  hpcpush(hpxyz(-0.118905,-0.052948,1.008435));
-  hpcpush(hpxyz(-0.101590,-0.027009,1.005510));
-  hpcpush(hpxyz(-0.093459,-0.015558,1.004478));
-  hpcpush(hpxyz(-0.103528,-0.017996,1.005506));
-  hpcpush(hpxyz(-0.124791,-0.033412,1.008310));
-  hpcpush(hpxyz(-0.146258,-0.066451,1.012821));
-  hpcpush(hpxyz(-0.157241,-0.103135,1.017527));
-  hpcpush(hpxyz(-0.159819,-0.147005,1.023305));
-  hpcpush(hpxyz(-0.149180,-0.219672,1.034655));
-  hpcpush(hpxyz(-0.168459,-0.217024,1.037052));
-  hpcpush(hpxyz(-0.205879,-0.200263,1.040429));
-  hpcpush(hpxyz(-0.235140,-0.171525,1.041495));
-  hpcpush(hpxyz(-0.252009,-0.134725,1.040028));
-  hpcpush(hpxyz(-0.253718,-0.095906,1.036133));
-  hpcpush(hpxyz(-0.247356,-0.066992,1.032314));
-  hpcpush(hpxyz(-0.229440,-0.035756,1.026607));
-  hpcpush(hpxyz(-0.199941,0.001110,1.019793));
-  hpcpush(hpxyz(-0.185211,0.014462,1.017110));
-  hpcpush(hpxyz(-0.227100,0.048006,1.026586));
-  hpcpush(hpxyz(-0.250065,0.080157,1.033904));
-  hpcpush(hpxyz(-0.250144,0.095874,1.035260));
-  hpcpush(hpxyz(-0.247936,0.130553,1.038516));
-  hpcpush(hpxyz(-0.238155,0.160182,1.040373));
-  hpcpush(hpxyz(-0.218238,0.189043,1.040848));
-  hpcpush(hpxyz(-0.178426,0.208356,1.036942));
-  hpcpush(hpxyz(-0.147224,0.219458,1.034329));
-  hpcpush(hpxyz(-0.114586,0.216846,1.029637));
-  hpcpush(hpxyz(-0.063820,0.199349,1.021672));
-  hpcpush(hpxyz(-0.026170,0.172838,1.015164));
-  hpcpush(hpxyz(-0.008349,0.153505,1.011748));
-  hpcpush(hpxyz(0.013598,0.129449,1.008435));
-  hpcpush(hpxyz(0.027404,0.101484,1.005510));
-  hpcpush(hpxyz(0.033256,0.088717,1.004478));
-  hpcpush(hpxyz(0.036179,0.098656,1.005506));
-  hpcpush(hpxyz(0.033459,0.124778,1.008310));
-  hpcpush(hpxyz(0.015581,0.159888,1.012821));
-  hpcpush(hpxyz(-0.010697,0.187742,1.017527));
-  hpcpush(hpxyz(-0.047400,0.211909,1.023305));
-  hpcpush(hpxyz(-0.115652,0.239030,1.034655));
-  hpcpush(hpxyz(-0.103718,0.254402,1.037052));
-  hpcpush(hpxyz(-0.070493,0.278428,1.040429));
-  hpcpush(hpxyz(-0.030975,0.289400,1.041495));
-  hpcpush(hpxyz(0.009329,0.285609,1.040028));
-  hpcpush(hpxyz(0.043802,0.267679,1.036133));
-  hpcpush(hpxyz(0.065661,0.247713,1.032314));
-  hpcpush(hpxyz(0.083755,0.216579,1.026607));
-  hpcpush(hpxyz(0.100932,0.172599,1.019793));
-  hpcpush(hpxyz(0.105129,0.153166,1.017110));
-  hpcpush(hpxyz(0.155124,0.172671,1.026586));
-  hpcpush(hpxyz(0.194451,0.176484,1.033904));
-  hpcpush(hpxyz(0.208101,0.168694,1.035260));
-  hpcpush(hpxyz(0.237030,0.149443,1.038516));
-  hpcpush(hpxyz(0.257799,0.126158,1.040373));
-  hpcpush(hpxyz(0.272836,0.094478,1.040848));
-  hpcpush(hpxyz(0.269655,0.050344,1.036942));
-  hpcpush(hpxyz(0.263668,0.017771,1.034329));
-  hpcpush(hpxyz(0.245087,-0.009188,1.029637));
-  hpcpush(hpxyz(0.204551,-0.044405,1.021672));
-  hpcpush(hpxyz(0.162768,-0.063755,1.015164));
-  hpcpush(hpxyz(0.137114,-0.069522,1.011748));
-  hpcpush(hpxyz(0.105307,-0.076501,1.008435));
-  hpcpush(hpxyz(0.074185,-0.074475,1.005510));
-  hpcpush(hpxyz(0.060203,-0.073158,1.004478));
-  hpcpush(hpxyz(0.067349,-0.080660,1.005506));
-  hpcpush(hpxyz(0.091331,-0.091366,1.008310));
-  hpcpush(hpxyz(0.130677,-0.093437,1.012821));
-  hpcpush(hpxyz(0.167938,-0.084607,1.017527));
-  hpcpush(hpxyz(0.207219,-0.064905,1.023305));
-  hpcpush(hpxyz(0.264832,-0.019358,1.034655));
-
-  bshape(shRoseFloor[1], 10);
-  hpcpush(hpxyzsc(0.372919,0.175334,1.081578));
-  hpcpush(hpxyzsc(0.377019,0.163872,1.081202));
-  hpcpush(hpxyzsc(0.375818,0.147479,1.078420));
-  hpcpush(hpxyzsc(0.369194,0.127784,1.073607));
-  hpcpush(hpxyzsc(0.350154,0.106817,1.064903));
-  hpcpush(hpxyzsc(0.321073,0.087366,1.053907));
-  hpcpush(hpxyzsc(0.290798,0.067704,1.043622));
-  hpcpush(hpxyzsc(0.264404,0.056694,1.035917));
-  hpcpush(hpxyzsc(0.272461,0.048502,1.037587));
-  hpcpush(hpxyzsc(0.305905,0.057526,1.047324));
-  hpcpush(hpxyzsc(0.332293,0.060486,1.055499));
-  hpcpush(hpxyzsc(0.365740,0.053423,1.066124));
-  hpcpush(hpxyzsc(0.392326,0.029151,1.074602));
-  hpcpush(hpxyzsc(0.394325,0.004706,1.074949));
-  hpcpush(hpxyzsc(0.394325,-0.004706,1.074949));
-  hpcpush(hpxyzsc(0.392326,-0.029151,1.074602));
-  hpcpush(hpxyzsc(0.365740,-0.053423,1.066124));
-  hpcpush(hpxyzsc(0.332293,-0.060486,1.055499));
-  hpcpush(hpxyzsc(0.305905,-0.057526,1.047324));
-  hpcpush(hpxyzsc(0.272461,-0.048502,1.037587));
-  hpcpush(hpxyzsc(0.264404,-0.056694,1.035917));
-  hpcpush(hpxyzsc(0.290798,-0.067704,1.043622));
-  hpcpush(hpxyzsc(0.321073,-0.087366,1.053907));
-  hpcpush(hpxyzsc(0.350154,-0.106817,1.064903));
-  hpcpush(hpxyzsc(0.369194,-0.127784,1.073607));
-  hpcpush(hpxyzsc(0.375818,-0.147479,1.078420));
-  hpcpush(hpxyzsc(0.377019,-0.163872,1.081202));
-  hpcpush(hpxyzsc(0.372919,-0.175334,1.081578));
-  hpcpush(hpxyzsc(0.369593,-0.182241,1.081578));
-  hpcpush(hpxyzsc(0.363188,-0.192593,1.081202));
-  hpcpush(hpxyzsc(0.349622,-0.201875,1.078420));
-  hpcpush(hpxyzsc(0.330094,-0.208976,1.073607));
-  hpcpush(hpxyzsc(0.301830,-0.207162,1.064903));
-  hpcpush(hpxyzsc(0.268491,-0.196554,1.053907));
-  hpcpush(hpxyzsc(0.234242,-0.185142,1.043622));
-  hpcpush(hpxyzsc(0.209178,-0.171372,1.035917));
-  hpcpush(hpxyzsc(0.207797,-0.182778,1.037587));
-  hpcpush(hpxyzsc(0.235704,-0.203299,1.047324));
-  hpcpush(hpxyzsc(0.254471,-0.222085,1.055499));
-  hpcpush(hpxyzsc(0.269803,-0.252638,1.066124));
-  hpcpush(hpxyzsc(0.267402,-0.288558,1.074602));
-  hpcpush(hpxyzsc(0.249537,-0.305362,1.074949));
-  hpcpush(hpxyzsc(0.242179,-0.311230,1.074949));
-  hpcpush(hpxyzsc(0.221821,-0.324908,1.074602));
-  hpcpush(hpxyzsc(0.186267,-0.319255,1.066124));
-  hpcpush(hpxyzsc(0.159892,-0.297510,1.055499));
-  hpcpush(hpxyzsc(0.145753,-0.275033,1.047324));
-  hpcpush(hpxyzsc(0.131956,-0.243259,1.037587));
-  hpcpush(hpxyzsc(0.120528,-0.242067,1.035917));
-  hpcpush(hpxyzsc(0.128377,-0.269567,1.043622));
-  hpcpush(hpxyzsc(0.131881,-0.305497,1.053907));
-  hpcpush(hpxyzsc(0.134805,-0.340361,1.064903));
-  hpcpush(hpxyzsc(0.130283,-0.368319,1.073607));
-  hpcpush(hpxyzsc(0.119015,-0.385778,1.078420));
-  hpcpush(hpxyzsc(0.106947,-0.396938,1.081202));
-  hpcpush(hpxyzsc(0.095430,-0.400879,1.081578));
-  hpcpush(hpxyzsc(0.087955,-0.402585,1.081578));
-  hpcpush(hpxyzsc(0.075869,-0.404031,1.081202));
-  hpcpush(hpxyzsc(0.060154,-0.399212,1.078420));
-  hpcpush(hpxyzsc(0.042427,-0.388372,1.073607));
-  hpcpush(hpxyzsc(0.026222,-0.365144,1.064903));
-  hpcpush(hpxyzsc(0.013730,-0.332464,1.053907));
-  hpcpush(hpxyzsc(0.001298,-0.298572,1.043622));
-  hpcpush(hpxyzsc(-0.003563,-0.270391,1.035917));
-  hpcpush(hpxyzsc(-0.013342,-0.276422,1.037587));
-  hpcpush(hpxyzsc(-0.011986,-0.311036,1.047324));
-  hpcpush(hpxyzsc(-0.014973,-0.337421,1.055499));
-  hpcpush(hpxyzsc(-0.029301,-0.368458,1.066124));
-  hpcpush(hpxyzsc(-0.058881,-0.388977,1.074602));
-  hpcpush(hpxyzsc(-0.083158,-0.385486,1.074949));
-  hpcpush(hpxyzsc(-0.092333,-0.383392,1.074949));
-  hpcpush(hpxyzsc(-0.115721,-0.376003,1.074602));
-  hpcpush(hpxyzsc(-0.133468,-0.344682,1.066124));
-  hpcpush(hpxyzsc(-0.132912,-0.310503,1.055499));
-  hpcpush(hpxyzsc(-0.124154,-0.285434,1.047324));
-  hpcpush(hpxyzsc(-0.107914,-0.254837,1.037587));
-  hpcpush(hpxyzsc(-0.114108,-0.245159,1.035917));
-  hpcpush(hpxyzsc(-0.130715,-0.268441,1.043622));
-  hpcpush(hpxyzsc(-0.156621,-0.293583,1.053907));
-  hpcpush(hpxyzsc(-0.182055,-0.317606,1.064903));
-  hpcpush(hpxyzsc(-0.206733,-0.331503,1.073607));
-  hpcpush(hpxyzsc(-0.227408,-0.333578,1.078420));
-  hpcpush(hpxyzsc(-0.243658,-0.331102,1.081202));
-  hpcpush(hpxyzsc(-0.253920,-0.324554,1.081578));
-  hpcpush(hpxyzsc(-0.259914,-0.319774,1.081578));
-  hpcpush(hpxyzsc(-0.268581,-0.311226,1.081202));
-  hpcpush(hpxyzsc(-0.274611,-0.295935,1.078420));
-  hpcpush(hpxyzsc(-0.277189,-0.275316,1.073607));
-  hpcpush(hpxyzsc(-0.269132,-0.248165,1.064903));
-  hpcpush(hpxyzsc(-0.251371,-0.218022,1.053907));
-  hpcpush(hpxyzsc(-0.232624,-0.187171,1.043622));
-  hpcpush(hpxyzsc(-0.213621,-0.165800,1.035917));
-  hpcpush(hpxyzsc(-0.224435,-0.161915,1.037587));
-  hpcpush(hpxyzsc(-0.250651,-0.184557,1.047324));
-  hpcpush(hpxyzsc(-0.273142,-0.198672,1.055499));
-  hpcpush(hpxyzsc(-0.306341,-0.206821,1.066124));
-  hpcpush(hpxyzsc(-0.340826,-0.196488,1.074602));
-  hpcpush(hpxyzsc(-0.353233,-0.175331,1.074949));
-  hpcpush(hpxyzsc(-0.357317,-0.166852,1.074949));
-  hpcpush(hpxyzsc(-0.366122,-0.143960,1.074602));
-  hpcpush(hpxyzsc(-0.352699,-0.110556,1.066124));
-  hpcpush(hpxyzsc(-0.325630,-0.089681,1.055499));
-  hpcpush(hpxyzsc(-0.300570,-0.080898,1.047324));
-  hpcpush(hpxyzsc(-0.266523,-0.074518,1.037587));
-  hpcpush(hpxyzsc(-0.262818,-0.063641,1.035917));
-  hpcpush(hpxyzsc(-0.291375,-0.065173,1.043622));
-  hpcpush(hpxyzsc(-0.327184,-0.060595,1.053907));
-  hpcpush(hpxyzsc(-0.361824,-0.055687,1.064903));
-  hpcpush(hpxyzsc(-0.388076,-0.045058,1.073607));
-  hpcpush(hpxyzsc(-0.402589,-0.030187,1.078420));
-  hpcpush(hpxyzsc(-0.410784,-0.015939,1.081202));
-  hpcpush(hpxyzsc(-0.412063,-0.003833,1.081578));
-  hpcpush(hpxyzsc(-0.412063,0.003833,1.081578));
-  hpcpush(hpxyzsc(-0.410784,0.015939,1.081202));
-  hpcpush(hpxyzsc(-0.402589,0.030187,1.078420));
-  hpcpush(hpxyzsc(-0.388076,0.045058,1.073607));
-  hpcpush(hpxyzsc(-0.361824,0.055687,1.064903));
-  hpcpush(hpxyzsc(-0.327184,0.060595,1.053907));
-  hpcpush(hpxyzsc(-0.291375,0.065173,1.043622));
-  hpcpush(hpxyzsc(-0.262818,0.063641,1.035917));
-  hpcpush(hpxyzsc(-0.266523,0.074518,1.037587));
-  hpcpush(hpxyzsc(-0.300570,0.080898,1.047324));
-  hpcpush(hpxyzsc(-0.325630,0.089681,1.055499));
-  hpcpush(hpxyzsc(-0.352699,0.110556,1.066124));
-  hpcpush(hpxyzsc(-0.366122,0.143960,1.074602));
-  hpcpush(hpxyzsc(-0.357317,0.166852,1.074949));
-  hpcpush(hpxyzsc(-0.353233,0.175331,1.074949));
-  hpcpush(hpxyzsc(-0.340826,0.196488,1.074602));
-  hpcpush(hpxyzsc(-0.306341,0.206821,1.066124));
-  hpcpush(hpxyzsc(-0.273142,0.198672,1.055499));
-  hpcpush(hpxyzsc(-0.250651,0.184557,1.047324));
-  hpcpush(hpxyzsc(-0.224435,0.161915,1.037587));
-  hpcpush(hpxyzsc(-0.213621,0.165800,1.035917));
-  hpcpush(hpxyzsc(-0.232624,0.187171,1.043622));
-  hpcpush(hpxyzsc(-0.251371,0.218022,1.053907));
-  hpcpush(hpxyzsc(-0.269132,0.248165,1.064903));
-  hpcpush(hpxyzsc(-0.277189,0.275316,1.073607));
-  hpcpush(hpxyzsc(-0.274611,0.295935,1.078420));
-  hpcpush(hpxyzsc(-0.268581,0.311226,1.081202));
-  hpcpush(hpxyzsc(-0.259914,0.319774,1.081578));
-  hpcpush(hpxyzsc(-0.253920,0.324554,1.081578));
-  hpcpush(hpxyzsc(-0.243658,0.331102,1.081202));
-  hpcpush(hpxyzsc(-0.227408,0.333578,1.078420));
-  hpcpush(hpxyzsc(-0.206733,0.331503,1.073607));
-  hpcpush(hpxyzsc(-0.182055,0.317606,1.064903));
-  hpcpush(hpxyzsc(-0.156621,0.293583,1.053907));
-  hpcpush(hpxyzsc(-0.130715,0.268441,1.043622));
-  hpcpush(hpxyzsc(-0.114108,0.245159,1.035917));
-  hpcpush(hpxyzsc(-0.107914,0.254837,1.037587));
-  hpcpush(hpxyzsc(-0.124154,0.285434,1.047324));
-  hpcpush(hpxyzsc(-0.132912,0.310503,1.055499));
-  hpcpush(hpxyzsc(-0.133468,0.344682,1.066124));
-  hpcpush(hpxyzsc(-0.115721,0.376003,1.074602));
-  hpcpush(hpxyzsc(-0.092333,0.383392,1.074949));
-  hpcpush(hpxyzsc(-0.083158,0.385486,1.074949));
-  hpcpush(hpxyzsc(-0.058881,0.388977,1.074602));
-  hpcpush(hpxyzsc(-0.029301,0.368458,1.066124));
-  hpcpush(hpxyzsc(-0.014973,0.337421,1.055499));
-  hpcpush(hpxyzsc(-0.011986,0.311036,1.047324));
-  hpcpush(hpxyzsc(-0.013342,0.276422,1.037587));
-  hpcpush(hpxyzsc(-0.003563,0.270391,1.035917));
-  hpcpush(hpxyzsc(0.001298,0.298572,1.043622));
-  hpcpush(hpxyzsc(0.013730,0.332464,1.053907));
-  hpcpush(hpxyzsc(0.026222,0.365144,1.064903));
-  hpcpush(hpxyzsc(0.042427,0.388372,1.073607));
-  hpcpush(hpxyzsc(0.060154,0.399212,1.078420));
-  hpcpush(hpxyzsc(0.075869,0.404031,1.081202));
-  hpcpush(hpxyzsc(0.087955,0.402585,1.081578));
-  hpcpush(hpxyzsc(0.095430,0.400879,1.081578));
-  hpcpush(hpxyzsc(0.106947,0.396938,1.081202));
-  hpcpush(hpxyzsc(0.119015,0.385778,1.078420));
-  hpcpush(hpxyzsc(0.130283,0.368319,1.073607));
-  hpcpush(hpxyzsc(0.134805,0.340361,1.064903));
-  hpcpush(hpxyzsc(0.131881,0.305497,1.053907));
-  hpcpush(hpxyzsc(0.128377,0.269567,1.043622));
-  hpcpush(hpxyzsc(0.120528,0.242067,1.035917));
-  hpcpush(hpxyzsc(0.131956,0.243259,1.037587));
-  hpcpush(hpxyzsc(0.145753,0.275033,1.047324));
-  hpcpush(hpxyzsc(0.159892,0.297510,1.055499));
-  hpcpush(hpxyzsc(0.186267,0.319255,1.066124));
-  hpcpush(hpxyzsc(0.221821,0.324908,1.074602));
-  hpcpush(hpxyzsc(0.242179,0.311230,1.074949));
-  hpcpush(hpxyzsc(0.249537,0.305362,1.074949));
-  hpcpush(hpxyzsc(0.267402,0.288558,1.074602));
-  hpcpush(hpxyzsc(0.269803,0.252638,1.066124));
-  hpcpush(hpxyzsc(0.254471,0.222085,1.055499));
-  hpcpush(hpxyzsc(0.235704,0.203299,1.047324));
-  hpcpush(hpxyzsc(0.207797,0.182778,1.037587));
-  hpcpush(hpxyzsc(0.209178,0.171372,1.035917));
-  hpcpush(hpxyzsc(0.234242,0.185142,1.043622));
-  hpcpush(hpxyzsc(0.268491,0.196554,1.053907));
-  hpcpush(hpxyzsc(0.301830,0.207162,1.064903));
-  hpcpush(hpxyzsc(0.330094,0.208976,1.073607));
-  hpcpush(hpxyzsc(0.349622,0.201875,1.078420));
-  hpcpush(hpxyzsc(0.363188,0.192593,1.081202));
-  hpcpush(hpxyzsc(0.369593,0.182241,1.081578));
-  hpcpush(hpxyzsc(0.372919,0.175334,1.081578));
-
-  bshape(shTurtleFloor[0], 10);
-  hpcpush(hpxyz(0.112369,0.059775,1.008067));
-  hpcpush(hpxyz(0.111167,0.006757,1.006183));
-  hpcpush(hpxyz(0.119117,0.006652,1.007091));
-  hpcpush(hpxyz(0.119333,0.067428,1.009350));
-  hpcpush(hpxyz(0.214640,0.118987,1.029674));
-  hpcpush(hpxyz(0.262563,0.053738,1.035291));
-  hpcpush(hpxyz(0.262563,-0.053738,1.035291));
-  hpcpush(hpxyz(0.214640,-0.118987,1.029674));
-  hpcpush(hpxyz(0.119333,-0.067428,1.009350));
-  hpcpush(hpxyz(0.119117,-0.006652,1.007091));
-  hpcpush(hpxyz(0.111167,-0.006757,1.006183));
-  hpcpush(hpxyz(0.112369,-0.059775,1.008067));
-  hpcpush(hpxyz(0.107951,-0.067427,1.008067));
-  hpcpush(hpxyz(0.061436,-0.092895,1.006183));
-  hpcpush(hpxyz(0.065320,-0.099833,1.007091));
-  hpcpush(hpxyz(0.118061,-0.069632,1.009350));
-  hpcpush(hpxyz(0.210366,-0.126391,1.029674));
-  hpcpush(hpxyz(0.177820,-0.200517,1.035291));
-  hpcpush(hpxyz(0.084743,-0.254256,1.035291));
-  hpcpush(hpxyz(0.004275,-0.245377,1.029674));
-  hpcpush(hpxyz(0.001272,-0.137060,1.009350));
-  hpcpush(hpxyz(0.053798,-0.106485,1.007091));
-  hpcpush(hpxyz(0.049732,-0.099652,1.006183));
-  hpcpush(hpxyz(0.004418,-0.127202,1.008067));
-  hpcpush(hpxyz(-0.004418,-0.127202,1.008067));
-  hpcpush(hpxyz(-0.049732,-0.099652,1.006183));
-  hpcpush(hpxyz(-0.053798,-0.106485,1.007091));
-  hpcpush(hpxyz(-0.001272,-0.137060,1.009350));
-  hpcpush(hpxyz(-0.004275,-0.245377,1.029674));
-  hpcpush(hpxyz(-0.084743,-0.254256,1.035291));
-  hpcpush(hpxyz(-0.177820,-0.200517,1.035291));
-  hpcpush(hpxyz(-0.210366,-0.126391,1.029674));
-  hpcpush(hpxyz(-0.118061,-0.069632,1.009350));
-  hpcpush(hpxyz(-0.065320,-0.099833,1.007091));
-  hpcpush(hpxyz(-0.061436,-0.092895,1.006183));
-  hpcpush(hpxyz(-0.107951,-0.067427,1.008067));
-  hpcpush(hpxyz(-0.112369,-0.059775,1.008067));
-  hpcpush(hpxyz(-0.111167,-0.006757,1.006183));
-  hpcpush(hpxyz(-0.119117,-0.006652,1.007091));
-  hpcpush(hpxyz(-0.119333,-0.067428,1.009350));
-  hpcpush(hpxyz(-0.214640,-0.118987,1.029674));
-  hpcpush(hpxyz(-0.262563,-0.053738,1.035291));
-  hpcpush(hpxyz(-0.262563,0.053738,1.035291));
-  hpcpush(hpxyz(-0.214640,0.118987,1.029674));
-  hpcpush(hpxyz(-0.119333,0.067428,1.009350));
-  hpcpush(hpxyz(-0.119117,0.006652,1.007091));
-  hpcpush(hpxyz(-0.111167,0.006757,1.006183));
-  hpcpush(hpxyz(-0.112369,0.059775,1.008067));
-  hpcpush(hpxyz(-0.107951,0.067427,1.008067));
-  hpcpush(hpxyz(-0.061436,0.092895,1.006183));
-  hpcpush(hpxyz(-0.065320,0.099833,1.007091));
-  hpcpush(hpxyz(-0.118061,0.069632,1.009350));
-  hpcpush(hpxyz(-0.210366,0.126391,1.029674));
-  hpcpush(hpxyz(-0.177820,0.200517,1.035291));
-  hpcpush(hpxyz(-0.084743,0.254256,1.035291));
-  hpcpush(hpxyz(-0.004275,0.245377,1.029674));
-  hpcpush(hpxyz(-0.001272,0.137060,1.009350));
-  hpcpush(hpxyz(-0.053798,0.106485,1.007091));
-  hpcpush(hpxyz(-0.049732,0.099652,1.006183));
-  hpcpush(hpxyz(-0.004418,0.127202,1.008067));
-  hpcpush(hpxyz(0.004418,0.127202,1.008067));
-  hpcpush(hpxyz(0.049732,0.099652,1.006183));
-  hpcpush(hpxyz(0.053798,0.106485,1.007091));
-  hpcpush(hpxyz(0.001272,0.137060,1.009350));
-  hpcpush(hpxyz(0.004275,0.245377,1.029674));
-  hpcpush(hpxyz(0.084743,0.254256,1.035291));
-  hpcpush(hpxyz(0.177820,0.200517,1.035291));
-  hpcpush(hpxyz(0.210366,0.126391,1.029674));
-  hpcpush(hpxyz(0.118061,0.069632,1.009350));
-  hpcpush(hpxyz(0.065320,0.099833,1.007091));
-  hpcpush(hpxyz(0.061436,0.092895,1.006183));
-  hpcpush(hpxyz(0.107951,0.067427,1.008067));
-  hpcpush(hpxyz(0.112369,0.059775,1.008067));
-
-  bshape(shTurtleFloor[1], 10);
-  hpcpush(hpxyzsc(0.299631,0.136858,1.052857));
-  hpcpush(hpxyzsc(0.313974,0.087924,1.051813));
-  hpcpush(hpxyzsc(0.223968,0.016894,1.024913));
-  hpcpush(hpxyzsc(0.122331,0.014981,1.007566));
-  hpcpush(hpxyzsc(0.111796,0.050597,1.007501));
-  hpcpush(hpxyzsc(0.106729,0.040319,1.006487));
-  hpcpush(hpxyzsc(0.112168,0.004682,1.006282));
-  hpcpush(hpxyzsc(0.235569,0.008771,1.027409));
-  hpcpush(hpxyzsc(0.315941,0.071298,1.051143));
-  hpcpush(hpxyzsc(0.418977,0.047086,1.085246));
-  hpcpush(hpxyzsc(0.473946,0.006115,1.106645));
-  hpcpush(hpxyzsc(0.473946,-0.006115,1.106645));
-  hpcpush(hpxyzsc(0.418977,-0.047086,1.085246));
-  hpcpush(hpxyzsc(0.315941,-0.071298,1.051143));
-  hpcpush(hpxyzsc(0.235569,-0.008771,1.027409));
-  hpcpush(hpxyzsc(0.112168,-0.004682,1.006282));
-  hpcpush(hpxyzsc(0.106729,-0.040319,1.006487));
-  hpcpush(hpxyzsc(0.111796,-0.050597,1.007501));
-  hpcpush(hpxyzsc(0.122331,-0.014981,1.007566));
-  hpcpush(hpxyzsc(0.223968,-0.016894,1.024913));
-  hpcpush(hpxyzsc(0.313974,-0.087924,1.051813));
-  hpcpush(hpxyzsc(0.299631,-0.136858,1.052857));
-  hpcpush(hpxyzsc(0.293817,-0.148931,1.052857));
-  hpcpush(hpxyzsc(0.264502,-0.190655,1.051813));
-  hpcpush(hpxyzsc(0.152850,-0.164572,1.024913));
-  hpcpush(hpxyzsc(0.087985,-0.086302,1.007566));
-  hpcpush(hpxyzsc(0.109262,-0.055859,1.007501));
-  hpcpush(hpxyzsc(0.098067,-0.058306,1.006487));
-  hpcpush(hpxyzsc(0.073596,-0.084777,1.006282));
-  hpcpush(hpxyzsc(0.153732,-0.178706,1.027409));
-  hpcpush(hpxyzsc(0.252729,-0.202559,1.051143));
-  hpcpush(hpxyzsc(0.298041,-0.298212,1.085246));
-  hpcpush(hpxyzsc(0.300282,-0.366733,1.106645));
-  hpcpush(hpxyzsc(0.290719,-0.374359,1.106645));
-  hpcpush(hpxyzsc(0.224415,-0.356927,1.085246));
-  hpcpush(hpxyzsc(0.141243,-0.291466,1.051143));
-  hpcpush(hpxyzsc(0.140017,-0.189644,1.027409));
-  hpcpush(hpxyzsc(0.066275,-0.090616,1.006282));
-  hpcpush(hpxyzsc(0.035022,-0.108583,1.006487));
-  hpcpush(hpxyzsc(0.030146,-0.118952,1.007501));
-  hpcpush(hpxyzsc(0.064560,-0.104983,1.007566));
-  hpcpush(hpxyzsc(0.126434,-0.185638,1.024913));
-  hpcpush(hpxyzsc(0.127018,-0.300295,1.051813));
-  hpcpush(hpxyzsc(0.079816,-0.319591,1.052857));
-  hpcpush(hpxyzsc(0.066753,-0.322572,1.052857));
-  hpcpush(hpxyzsc(0.015854,-0.325667,1.051813));
-  hpcpush(hpxyzsc(-0.033368,-0.222112,1.024913));
-  hpcpush(hpxyzsc(-0.012616,-0.122598,1.007566));
-  hpcpush(hpxyzsc(0.024451,-0.120252,1.007501));
-  hpcpush(hpxyzsc(0.015558,-0.113025,1.006487));
-  hpcpush(hpxyzsc(-0.020395,-0.110398,1.006282));
-  hpcpush(hpxyzsc(-0.043868,-0.231614,1.027409));
-  hpcpush(hpxyzsc(-0.000793,-0.323885,1.051143));
-  hpcpush(hpxyzsc(-0.047326,-0.418950,1.085246));
-  hpcpush(hpxyzsc(-0.099501,-0.463424,1.106645));
-  hpcpush(hpxyzsc(-0.111425,-0.460703,1.106645));
-  hpcpush(hpxyzsc(-0.139136,-0.397994,1.085246));
-  hpcpush(hpxyzsc(-0.139814,-0.292155,1.051143));
-  hpcpush(hpxyzsc(-0.060970,-0.227711,1.027409));
-  hpcpush(hpxyzsc(-0.029524,-0.108314,1.006282));
-  hpcpush(hpxyzsc(-0.063057,-0.095082,1.006487));
-  hpcpush(hpxyzsc(-0.074205,-0.097735,1.007501));
-  hpcpush(hpxyzsc(-0.041826,-0.115931,1.007566));
-  hpcpush(hpxyzsc(-0.066308,-0.214594,1.024913));
-  hpcpush(hpxyzsc(-0.155586,-0.286537,1.051813));
-  hpcpush(hpxyzsc(-0.200101,-0.261664,1.052857));
-  hpcpush(hpxyzsc(-0.210577,-0.253310,1.052857));
-  hpcpush(hpxyzsc(-0.244732,-0.215445,1.051813));
-  hpcpush(hpxyzsc(-0.194458,-0.112397,1.024913));
-  hpcpush(hpxyzsc(-0.103717,-0.066575,1.007566));
-  hpcpush(hpxyzsc(-0.078772,-0.094092,1.007501));
-  hpcpush(hpxyzsc(-0.078666,-0.082634,1.006487));
-  hpcpush(hpxyzsc(-0.099028,-0.052886,1.006282));
-  hpcpush(hpxyzsc(-0.208434,-0.110112,1.027409));
-  hpcpush(hpxyzsc(-0.253718,-0.201319,1.051143));
-  hpcpush(hpxyzsc(-0.357055,-0.224210,1.085246));
-  hpcpush(hpxyzsc(-0.424357,-0.211147,1.106645));
-  hpcpush(hpxyzsc(-0.429664,-0.200128,1.106645));
-  hpcpush(hpxyzsc(-0.397915,-0.139364,1.085246));
-  hpcpush(hpxyzsc(-0.315588,-0.072844,1.051143));
-  hpcpush(hpxyzsc(-0.216046,-0.094307,1.027409));
-  hpcpush(hpxyzsc(-0.103091,-0.044449,1.006282));
-  hpcpush(hpxyzsc(-0.113653,-0.009982,1.006487));
-  hpcpush(hpxyzsc(-0.122678,-0.002921,1.007501));
-  hpcpush(hpxyzsc(-0.116716,-0.039581,1.007566));
-  hpcpush(hpxyzsc(-0.209118,-0.081955,1.024913));
-  hpcpush(hpxyzsc(-0.321030,-0.057011,1.051813));
-  hpcpush(hpxyzsc(-0.329339,-0.006700,1.052857));
-  hpcpush(hpxyzsc(-0.329339,0.006700,1.052857));
-  hpcpush(hpxyzsc(-0.321030,0.057011,1.051813));
-  hpcpush(hpxyzsc(-0.209118,0.081955,1.024913));
-  hpcpush(hpxyzsc(-0.116716,0.039581,1.007566));
-  hpcpush(hpxyzsc(-0.122678,0.002921,1.007501));
-  hpcpush(hpxyzsc(-0.113653,0.009982,1.006487));
-  hpcpush(hpxyzsc(-0.103091,0.044449,1.006282));
-  hpcpush(hpxyzsc(-0.216046,0.094307,1.027409));
-  hpcpush(hpxyzsc(-0.315588,0.072844,1.051143));
-  hpcpush(hpxyzsc(-0.397915,0.139364,1.085246));
-  hpcpush(hpxyzsc(-0.429664,0.200128,1.106645));
-  hpcpush(hpxyzsc(-0.424357,0.211147,1.106645));
-  hpcpush(hpxyzsc(-0.357055,0.224210,1.085246));
-  hpcpush(hpxyzsc(-0.253718,0.201319,1.051143));
-  hpcpush(hpxyzsc(-0.208434,0.110112,1.027409));
-  hpcpush(hpxyzsc(-0.099028,0.052886,1.006282));
-  hpcpush(hpxyzsc(-0.078666,0.082634,1.006487));
-  hpcpush(hpxyzsc(-0.078772,0.094092,1.007501));
-  hpcpush(hpxyzsc(-0.103717,0.066575,1.007566));
-  hpcpush(hpxyzsc(-0.194458,0.112397,1.024913));
-  hpcpush(hpxyzsc(-0.244732,0.215445,1.051813));
-  hpcpush(hpxyzsc(-0.210577,0.253310,1.052857));
-  hpcpush(hpxyzsc(-0.200101,0.261664,1.052857));
-  hpcpush(hpxyzsc(-0.155586,0.286537,1.051813));
-  hpcpush(hpxyzsc(-0.066308,0.214594,1.024913));
-  hpcpush(hpxyzsc(-0.041826,0.115931,1.007566));
-  hpcpush(hpxyzsc(-0.074205,0.097735,1.007501));
-  hpcpush(hpxyzsc(-0.063057,0.095082,1.006487));
-  hpcpush(hpxyzsc(-0.029524,0.108314,1.006282));
-  hpcpush(hpxyzsc(-0.060970,0.227711,1.027409));
-  hpcpush(hpxyzsc(-0.139814,0.292155,1.051143));
-  hpcpush(hpxyzsc(-0.139136,0.397994,1.085246));
-  hpcpush(hpxyzsc(-0.111425,0.460703,1.106645));
-  hpcpush(hpxyzsc(-0.099501,0.463424,1.106645));
-  hpcpush(hpxyzsc(-0.047326,0.418950,1.085246));
-  hpcpush(hpxyzsc(-0.000793,0.323885,1.051143));
-  hpcpush(hpxyzsc(-0.043868,0.231614,1.027409));
-  hpcpush(hpxyzsc(-0.020395,0.110398,1.006282));
-  hpcpush(hpxyzsc(0.015558,0.113025,1.006487));
-  hpcpush(hpxyzsc(0.024451,0.120252,1.007501));
-  hpcpush(hpxyzsc(-0.012616,0.122598,1.007566));
-  hpcpush(hpxyzsc(-0.033368,0.222112,1.024913));
-  hpcpush(hpxyzsc(0.015854,0.325667,1.051813));
-  hpcpush(hpxyzsc(0.066753,0.322572,1.052857));
-  hpcpush(hpxyzsc(0.079816,0.319591,1.052857));
-  hpcpush(hpxyzsc(0.127018,0.300295,1.051813));
-  hpcpush(hpxyzsc(0.126434,0.185638,1.024913));
-  hpcpush(hpxyzsc(0.064560,0.104983,1.007566));
-  hpcpush(hpxyzsc(0.030146,0.118952,1.007501));
-  hpcpush(hpxyzsc(0.035022,0.108583,1.006487));
-  hpcpush(hpxyzsc(0.066275,0.090616,1.006282));
-  hpcpush(hpxyzsc(0.140017,0.189644,1.027409));
-  hpcpush(hpxyzsc(0.141243,0.291466,1.051143));
-  hpcpush(hpxyzsc(0.224415,0.356927,1.085246));
-  hpcpush(hpxyzsc(0.290719,0.374359,1.106645));
-  hpcpush(hpxyzsc(0.300282,0.366733,1.106645));
-  hpcpush(hpxyzsc(0.298041,0.298212,1.085246));
-  hpcpush(hpxyzsc(0.252729,0.202559,1.051143));
-  hpcpush(hpxyzsc(0.153732,0.178706,1.027409));
-  hpcpush(hpxyzsc(0.073596,0.084777,1.006282));
-  hpcpush(hpxyzsc(0.098067,0.058306,1.006487));
-  hpcpush(hpxyzsc(0.109262,0.055859,1.007501));
-  hpcpush(hpxyzsc(0.087985,0.086302,1.007566));
-  hpcpush(hpxyzsc(0.152850,0.164572,1.024913));
-  hpcpush(hpxyzsc(0.264502,0.190655,1.051813));
-  hpcpush(hpxyzsc(0.293817,0.148931,1.052857));
-  hpcpush(hpxyzsc(0.299631,0.136858,1.052857));
-  
-  bshape(shTurtleFloor[2], 10); // purehepta
-  hpcpush(hpxyz(-0.558425,-0.248734,1.172052));
-  hpcpush(hpxyz(-0.539322,-0.019784,1.136336));
-  hpcpush(hpxyz(-0.279489,-0.005033,1.038335));
-  hpcpush(hpxyz(-0.252876,-0.100862,1.036397));
-  hpcpush(hpxyz(-0.234059,-0.088782,1.030857));
-  hpcpush(hpxyz(-0.261386,0.010296,1.033648));
-  hpcpush(hpxyz(-0.261386,-0.010296,1.033648));
-  hpcpush(hpxyz(-0.234059,0.088782,1.030857));
-  hpcpush(hpxyz(-0.252876,0.100862,1.036397));
-  hpcpush(hpxyz(-0.279489,0.005033,1.038335));
-  hpcpush(hpxyz(-0.539322,0.019784,1.136336));
-  hpcpush(hpxyz(-0.558425,0.248734,1.172052));
-  hpcpush(hpxyz(-0.542640,0.281511,1.172052));
-  hpcpush(hpxyz(-0.351729,0.409324,1.136336));
-  hpcpush(hpxyz(-0.178193,0.215375,1.038335));
-  hpcpush(hpxyz(-0.236523,0.134820,1.036397));
-  hpcpush(hpxyz(-0.215346,0.127640,1.030857));
-  hpcpush(hpxyz(-0.154922,0.210780,1.033648));
-  hpcpush(hpxyz(-0.171022,0.197940,1.033648));
-  hpcpush(hpxyz(-0.076521,0.238350,1.030857));
-  hpcpush(hpxyz(-0.078809,0.260593,1.036397));
-  hpcpush(hpxyz(-0.170324,0.221651,1.038335));
-  hpcpush(hpxyz(-0.320794,0.433994,1.136336));
-  hpcpush(hpxyz(-0.153704,0.591677,1.172052));
-  hpcpush(hpxyz(-0.118236,0.599772,1.172052));
-  hpcpush(hpxyz(0.100722,0.530202,1.136336));
-  hpcpush(hpxyz(0.057286,0.273601,1.038335));
-  hpcpush(hpxyz(-0.042063,0.268980,1.036397));
-  hpcpush(hpxyz(-0.034473,0.247947,1.030857));
-  hpcpush(hpxyz(0.068202,0.252542,1.033648));
-  hpcpush(hpxyz(0.048126,0.257124,1.033648));
-  hpcpush(hpxyz(0.138639,0.208435,1.030857));
-  hpcpush(hpxyz(0.154603,0.224092,1.036397));
-  hpcpush(hpxyz(0.067099,0.271362,1.038335));
-  hpcpush(hpxyz(0.139298,0.521398,1.136336));
-  hpcpush(hpxyz(0.366759,0.489075,1.172052));
-  hpcpush(hpxyz(0.395202,0.466393,1.172052));
-  hpcpush(hpxyz(0.477328,0.251828,1.136336));
-  hpcpush(hpxyz(0.249627,0.125800,1.038335));
-  hpcpush(hpxyz(0.184071,0.200593,1.036397));
-  hpcpush(hpxyz(0.172359,0.181544,1.030857));
-  hpcpush(hpxyz(0.239968,0.104135,1.033648));
-  hpcpush(hpxyz(0.231033,0.122688,1.033648));
-  hpcpush(hpxyz(0.249401,0.021565,1.030857));
-  hpcpush(hpxyz(0.271596,0.018845,1.036397));
-  hpcpush(hpxyz(0.253994,0.116731,1.038335));
-  hpcpush(hpxyz(0.494496,0.216178,1.136336));
-  hpcpush(hpxyz(0.611045,0.018190,1.172052));
-  hpcpush(hpxyz(0.611045,-0.018190,1.172052));
-  hpcpush(hpxyz(0.494496,-0.216178,1.136336));
-  hpcpush(hpxyz(0.253994,-0.116731,1.038335));
-  hpcpush(hpxyz(0.271596,-0.018845,1.036397));
-  hpcpush(hpxyz(0.249401,-0.021565,1.030857));
-  hpcpush(hpxyz(0.231033,-0.122688,1.033648));
-  hpcpush(hpxyz(0.239968,-0.104135,1.033648));
-  hpcpush(hpxyz(0.172359,-0.181544,1.030857));
-  hpcpush(hpxyz(0.184071,-0.200593,1.036397));
-  hpcpush(hpxyz(0.249627,-0.125800,1.038335));
-  hpcpush(hpxyz(0.477328,-0.251828,1.136336));
-  hpcpush(hpxyz(0.395202,-0.466393,1.172052));
-  hpcpush(hpxyz(0.366759,-0.489075,1.172052));
-  hpcpush(hpxyz(0.139298,-0.521398,1.136336));
-  hpcpush(hpxyz(0.067099,-0.271362,1.038335));
-  hpcpush(hpxyz(0.154603,-0.224092,1.036397));
-  hpcpush(hpxyz(0.138639,-0.208435,1.030857));
-  hpcpush(hpxyz(0.048126,-0.257124,1.033648));
-  hpcpush(hpxyz(0.068202,-0.252542,1.033648));
-  hpcpush(hpxyz(-0.034473,-0.247947,1.030857));
-  hpcpush(hpxyz(-0.042063,-0.268980,1.036397));
-  hpcpush(hpxyz(0.057286,-0.273601,1.038335));
-  hpcpush(hpxyz(0.100722,-0.530202,1.136336));
-  hpcpush(hpxyz(-0.118236,-0.599772,1.172052));
-  hpcpush(hpxyz(-0.153704,-0.591677,1.172052));
-  hpcpush(hpxyz(-0.320794,-0.433994,1.136336));
-  hpcpush(hpxyz(-0.170324,-0.221651,1.038335));
-  hpcpush(hpxyz(-0.078809,-0.260593,1.036397));
-  hpcpush(hpxyz(-0.076521,-0.238350,1.030857));
-  hpcpush(hpxyz(-0.171022,-0.197940,1.033648));
-  hpcpush(hpxyz(-0.154922,-0.210780,1.033648));
-  hpcpush(hpxyz(-0.215346,-0.127640,1.030857));
-  hpcpush(hpxyz(-0.236523,-0.134820,1.036397));
-  hpcpush(hpxyz(-0.178193,-0.215375,1.038335));
-  hpcpush(hpxyz(-0.351729,-0.409324,1.136336));
-  hpcpush(hpxyz(-0.542640,-0.281511,1.172052));
-  hpcpush(hpxyz(-0.558425,-0.248734,1.172052));
-
-  bshape(shAztecHead, 44);
-  hpcpush(hpxyzsc(0.074692,0.000429,1.002786));
-  hpcpush(hpxyzsc(0.066283,-0.019417,1.002382));
-  hpcpush(hpxyzsc(0.046672,-0.015897,1.001215));
-  hpcpush(hpxyzsc(0.034348,-0.045854,1.001640));
-  hpcpush(hpxyzsc(0.010851,-0.055008,1.001571));
-  hpcpush(hpxyzsc(-0.020151,-0.062581,1.002159));
-  hpcpush(hpxyzsc(-0.045128,-0.057532,1.002670));
-  hpcpush(hpxyzsc(-0.068539,-0.044938,1.003353));
-  hpcpush(hpxyzsc(-0.083393,-0.018981,1.003651));
-  hpcpush(hpxyzsc(-0.086999,-0.006818,1.003800));
-  hpcpush(hpxyzsc(-0.086999,0.006818,1.003800));
-  hpcpush(hpxyzsc(-0.083393,0.018981,1.003651));
-  hpcpush(hpxyzsc(-0.068539,0.044938,1.003353));
-  hpcpush(hpxyzsc(-0.045128,0.057532,1.002670));
-  hpcpush(hpxyzsc(-0.020151,0.062581,1.002159));
-  hpcpush(hpxyzsc(0.010851,0.055008,1.001571));
-  hpcpush(hpxyzsc(0.034348,0.045854,1.001640));
-  hpcpush(hpxyzsc(0.046672,0.015897,1.001215));
-  hpcpush(hpxyzsc(0.066283,0.019417,1.002382));
-  hpcpush(hpxyzsc(0.074692,-0.000429,1.002786));
-  hpcpush(hpxyzsc(0.074692,0.000429,1.002786));
-
-  bshape(shAztecCap, 45);
-// 1 114 5 [000000]
-  hpcpush(hpxyzsc(0.001102,0.007720,1.000030));
-  hpcpush(hpxyzsc(0.005712,-0.021311,1.000243));
-  hpcpush(hpxyzsc(-0.006877,-0.046748,1.001116));
-  hpcpush(hpxyzsc(-0.027647,-0.060816,1.002229));
-  hpcpush(hpxyzsc(-0.056423,-0.068486,1.003929));
-  hpcpush(hpxyzsc(-0.093017,-0.074757,1.007095));
-  hpcpush(hpxyzsc(-0.122525,-0.080547,1.010693));
-  hpcpush(hpxyzsc(-0.133671,-0.117082,1.015665));
-  hpcpush(hpxyzsc(-0.101438,-0.158050,1.017482));
-  hpcpush(hpxyzsc(-0.077029,-0.154904,1.014854));
-  hpcpush(hpxyzsc(-0.062688,-0.128399,1.010157));
-  hpcpush(hpxyzsc(-0.047439,-0.156234,1.013242));
-  hpcpush(hpxyzsc(-0.091646,-0.199265,1.023770));
-  hpcpush(hpxyzsc(-0.164679,-0.177117,1.028829));
-  hpcpush(hpxyzsc(-0.182172,-0.095454,1.020930));
-  hpcpush(hpxyzsc(-0.158692,-0.051866,1.013841));
-  hpcpush(hpxyzsc(-0.134446,-0.013804,1.009092));
-  hpcpush(hpxyzsc(-0.129636,-0.010802,1.008426));
-  hpcpush(hpxyzsc(-0.117269,-0.007091,1.006878));
-  hpcpush(hpxyzsc(-0.117269,0.007091,1.006878));
-  hpcpush(hpxyzsc(-0.129636,0.010802,1.008426));
-  hpcpush(hpxyzsc(-0.134446,0.013804,1.009092));
-  hpcpush(hpxyzsc(-0.158692,0.051866,1.013841));
-  hpcpush(hpxyzsc(-0.182172,0.095454,1.020930));
-  hpcpush(hpxyzsc(-0.164679,0.177117,1.028829));
-  hpcpush(hpxyzsc(-0.091646,0.199265,1.023770));
-  hpcpush(hpxyzsc(-0.047439,0.156234,1.013242));
-  hpcpush(hpxyzsc(-0.062688,0.128399,1.010157));
-  hpcpush(hpxyzsc(-0.077029,0.154904,1.014854));
-  hpcpush(hpxyzsc(-0.101438,0.158050,1.017482));
-  hpcpush(hpxyzsc(-0.133671,0.117082,1.015665));
-  hpcpush(hpxyzsc(-0.122525,0.080547,1.010693));
-  hpcpush(hpxyzsc(-0.093017,0.074757,1.007095));
-  hpcpush(hpxyzsc(-0.056423,0.068486,1.003929));
-  hpcpush(hpxyzsc(-0.027647,0.060816,1.002229));
-  hpcpush(hpxyzsc(-0.006877,0.046748,1.001116));
-  hpcpush(hpxyzsc(0.005712,0.021311,1.000243));
-  hpcpush(hpxyzsc(0.001102,-0.007720,1.000030));
-  hpcpush(hpxyzsc(0.001102,0.007720,1.000030));
-
-  bshape(shDragonFloor[0], 14);
-  hpcpush(hpxyz(-0.137150,-0.234461,1.036235));
-  hpcpush(hpxyz(-0.227787,-0.028743,1.026018));
-  hpcpush(hpxyz(-0.260021,-0.029555,1.033675));
-  hpcpush(hpxyz(-0.301991,-0.109956,1.050376));
-  hpcpush(hpxyz(-0.386143,-0.013264,1.072046));
-  hpcpush(hpxyz(-0.386143,0.013264,1.072046));
-  hpcpush(hpxyz(-0.301991,0.109956,1.050376));
-  hpcpush(hpxyz(-0.260021,0.029555,1.033675));
-  hpcpush(hpxyz(-0.227787,0.028743,1.026018));
-  hpcpush(hpxyz(-0.137150,0.234461,1.036235));
-  hpcpush(hpxyz(-0.134475,0.236006,1.036235));
-  hpcpush(hpxyz(0.089001,0.211641,1.026018));
-  hpcpush(hpxyz(0.104415,0.239962,1.033675));
-  hpcpush(hpxyz(0.055771,0.316510,1.050376));
-  hpcpush(hpxyz(0.181585,0.341042,1.072046));
-  hpcpush(hpxyz(0.204558,0.327778,1.072046));
-  hpcpush(hpxyz(0.246220,0.206554,1.050376));
-  hpcpush(hpxyz(0.155606,0.210407,1.033675));
-  hpcpush(hpxyz(0.138785,0.182898,1.026018));
-  hpcpush(hpxyz(0.271624,0.001544,1.036235));
-  hpcpush(hpxyz(0.271624,-0.001544,1.036235));
-  hpcpush(hpxyz(0.138785,-0.182898,1.026018));
-  hpcpush(hpxyz(0.155606,-0.210407,1.033675));
-  hpcpush(hpxyz(0.246220,-0.206554,1.050376));
-  hpcpush(hpxyz(0.204558,-0.327778,1.072046));
-  hpcpush(hpxyz(0.181585,-0.341042,1.072046));
-  hpcpush(hpxyz(0.055771,-0.316510,1.050376));
-  hpcpush(hpxyz(0.104415,-0.239962,1.033675));
-  hpcpush(hpxyz(0.089001,-0.211641,1.026018));
-  hpcpush(hpxyz(-0.134475,-0.236006,1.036235));
-  hpcpush(hpxyz(-0.137150,-0.234461,1.036235));
-
-  bshape(shDragonFloor[1], 14);
-  hpcpush(hpxyzsc(0.205492,0.081657,1.024156));
-  hpcpush(hpxyzsc(0.333919,0.017825,1.054428));
-  hpcpush(hpxyzsc(0.361617,0.020628,1.063575));
-  hpcpush(hpxyzsc(0.363346,0.130144,1.071895));
-  hpcpush(hpxyzsc(0.529009,0.017851,1.131446));
-  hpcpush(hpxyzsc(0.529009,-0.017851,1.131446));
-  hpcpush(hpxyzsc(0.363346,-0.130144,1.071895));
-  hpcpush(hpxyzsc(0.361617,-0.020628,1.063575));
-  hpcpush(hpxyzsc(0.333919,-0.017825,1.054428));
-  hpcpush(hpxyzsc(0.205492,-0.081657,1.024156));
-  hpcpush(hpxyzsc(0.191964,-0.109748,1.024156));
-  hpcpush(hpxyzsc(0.222131,-0.249955,1.054428));
-  hpcpush(hpxyzsc(0.241592,-0.269862,1.063575));
-  hpcpush(hpxyzsc(0.328294,-0.202932,1.071895));
-  hpcpush(hpxyzsc(0.343788,-0.402466,1.131446));
-  hpcpush(hpxyzsc(0.315875,-0.424726,1.131446));
-  hpcpush(hpxyzsc(0.124792,-0.365219,1.071895));
-  hpcpush(hpxyzsc(0.209337,-0.295585,1.063575));
-  hpcpush(hpxyzsc(0.194259,-0.272182,1.054428));
-  hpcpush(hpxyzsc(0.064280,-0.211572,1.024156));
-  hpcpush(hpxyzsc(0.033883,-0.218510,1.024156));
-  hpcpush(hpxyzsc(-0.056926,-0.329513,1.054428));
-  hpcpush(hpxyzsc(-0.060356,-0.357141,1.063575));
-  hpcpush(hpxyzsc(0.046029,-0.383196,1.071895));
-  hpcpush(hpxyzsc(-0.100312,-0.519718,1.131446));
-  hpcpush(hpxyzsc(-0.135119,-0.511773,1.131446));
-  hpcpush(hpxyzsc(-0.207734,-0.325277,1.071895));
-  hpcpush(hpxyzsc(-0.100578,-0.347960,1.063575));
-  hpcpush(hpxyzsc(-0.091682,-0.321580,1.054428));
-  hpcpush(hpxyzsc(-0.125336,-0.182169,1.024156));
-  hpcpush(hpxyzsc(-0.149712,-0.162730,1.024156));
-  hpcpush(hpxyzsc(-0.293117,-0.160941,1.054428));
-  hpcpush(hpxyzsc(-0.316856,-0.175485,1.063575));
-  hpcpush(hpxyzsc(-0.270896,-0.274906,1.071895));
-  hpcpush(hpxyzsc(-0.468875,-0.245612,1.131446));
-  hpcpush(hpxyzsc(-0.484366,-0.213445,1.131446));
-  hpcpush(hpxyzsc(-0.383831,-0.040394,1.071895));
-  hpcpush(hpxyzsc(-0.334756,-0.138314,1.063575));
-  hpcpush(hpxyzsc(-0.308584,-0.128823,1.054428));
-  hpcpush(hpxyzsc(-0.220571,-0.015589,1.024156));
-  hpcpush(hpxyzsc(-0.220571,0.015589,1.024156));
-  hpcpush(hpxyzsc(-0.308584,0.128823,1.054428));
-  hpcpush(hpxyzsc(-0.334756,0.138314,1.063575));
-  hpcpush(hpxyzsc(-0.383831,0.040394,1.071895));
-  hpcpush(hpxyzsc(-0.484366,0.213445,1.131446));
-  hpcpush(hpxyzsc(-0.468875,0.245612,1.131446));
-  hpcpush(hpxyzsc(-0.270896,0.274906,1.071895));
-  hpcpush(hpxyzsc(-0.316856,0.175485,1.063575));
-  hpcpush(hpxyzsc(-0.293117,0.160941,1.054428));
-  hpcpush(hpxyzsc(-0.149712,0.162730,1.024156));
-  hpcpush(hpxyzsc(-0.125336,0.182169,1.024156));
-  hpcpush(hpxyzsc(-0.091682,0.321580,1.054428));
-  hpcpush(hpxyzsc(-0.100578,0.347960,1.063575));
-  hpcpush(hpxyzsc(-0.207734,0.325277,1.071895));
-  hpcpush(hpxyzsc(-0.135119,0.511773,1.131446));
-  hpcpush(hpxyzsc(-0.100312,0.519718,1.131446));
-  hpcpush(hpxyzsc(0.046029,0.383196,1.071895));
-  hpcpush(hpxyzsc(-0.060356,0.357141,1.063575));
-  hpcpush(hpxyzsc(-0.056926,0.329513,1.054428));
-  hpcpush(hpxyzsc(0.033883,0.218510,1.024156));
-  hpcpush(hpxyzsc(0.064280,0.211572,1.024156));
-  hpcpush(hpxyzsc(0.194259,0.272182,1.054428));
-  hpcpush(hpxyzsc(0.209337,0.295585,1.063575));
-  hpcpush(hpxyzsc(0.124792,0.365219,1.071895));
-  hpcpush(hpxyzsc(0.315875,0.424726,1.131446));
-  hpcpush(hpxyzsc(0.343788,0.402466,1.131446));
-  hpcpush(hpxyzsc(0.328294,0.202932,1.071895));
-  hpcpush(hpxyzsc(0.241592,0.269862,1.063575));
-  hpcpush(hpxyzsc(0.222131,0.249955,1.054428));
-  hpcpush(hpxyzsc(0.191964,0.109748,1.024156));
-  hpcpush(hpxyzsc(0.205492,0.081657,1.024156));
-
-  bshape(shDragonFloor[2], 10);
-  hpcpush(hpxyz(-0.255833,0.146834,1.000000));
-  hpcpush(hpxyz(-0.186167,0.179834,1.000000));
-  hpcpush(hpxyz(-0.195333,0.112000,1.000000));
-  hpcpush(hpxyz(-0.079833,0.097334,1.000000));
-  hpcpush(hpxyz(-0.072500,0.183500,1.000000));
-  hpcpush(hpxyz(-0.178833,0.280667,1.000000));
-  hpcpush(hpxyz(-0.166000,0.339334,1.000000));
-  hpcpush(hpxyz(-0.089000,0.326500,1.000000));
-  hpcpush(hpxyz(-0.079833,0.258667,1.000000));
-  hpcpush(hpxyz(-0.000755,0.294975,1.000000));
-  hpcpush(hpxyz(0.062657,0.251142,1.000000));
-  hpcpush(hpxyz(-0.000672,0.225164,1.000000));
-  hpcpush(hpxyz(0.044377,0.117804,1.000000));
-  hpcpush(hpxyz(0.122666,0.154537,1.000000));
-  hpcpush(hpxyz(0.153648,0.295208,1.000000));
-  hpcpush(hpxyz(0.210872,0.313427,1.000000));
-  hpcpush(hpxyz(0.238258,0.240326,1.000000));
-  hpcpush(hpxyz(0.184095,0.198471,1.000000));
-  hpcpush(hpxyz(0.255078,0.148141,1.000000));
-  hpcpush(hpxyz(0.248824,0.071308,1.000000));
-  hpcpush(hpxyz(0.194662,0.113164,1.000000));
-  hpcpush(hpxyz(0.124210,0.020471,1.000000));
-  hpcpush(hpxyz(0.195166,-0.028963,1.000000));
-  hpcpush(hpxyz(0.332481,0.014541,1.000000));
-  hpcpush(hpxyz(0.376872,-0.025907,1.000000));
-  hpcpush(hpxyz(0.327258,-0.086174,1.000000));
-  hpcpush(hpxyz(0.263929,-0.060196,1.000000));
-  hpcpush(hpxyz(0.255833,-0.146834,1.000000));
-  hpcpush(hpxyz(0.186167,-0.179834,1.000000));
-  hpcpush(hpxyz(0.195333,-0.112000,1.000000));
-  hpcpush(hpxyz(0.079833,-0.097334,1.000000));
-  hpcpush(hpxyz(0.072500,-0.183500,1.000000));
-  hpcpush(hpxyz(0.178833,-0.280667,1.000000));
-  hpcpush(hpxyz(0.166000,-0.339334,1.000000));
-  hpcpush(hpxyz(0.089000,-0.326500,1.000000));
-  hpcpush(hpxyz(0.079833,-0.258667,1.000000));
-  hpcpush(hpxyz(0.000755,-0.294975,1.000000));
-  hpcpush(hpxyz(-0.062657,-0.251142,1.000000));
-  hpcpush(hpxyz(0.000672,-0.225164,1.000000));
-  hpcpush(hpxyz(-0.044377,-0.117804,1.000000));
-  hpcpush(hpxyz(-0.122666,-0.154537,1.000000));
-  hpcpush(hpxyz(-0.153648,-0.295208,1.000000));
-  hpcpush(hpxyz(-0.210872,-0.313427,1.000000));
-  hpcpush(hpxyz(-0.238258,-0.240326,1.000000));
-  hpcpush(hpxyz(-0.184095,-0.198471,1.000000));
-  hpcpush(hpxyz(-0.255078,-0.148141,1.000000));
-  hpcpush(hpxyz(-0.248824,-0.071308,1.000000));
-  hpcpush(hpxyz(-0.194662,-0.113164,1.000000));
-  hpcpush(hpxyz(-0.124210,-0.020471,1.000000));
-  hpcpush(hpxyz(-0.195166,0.028963,1.000000));
-  hpcpush(hpxyz(-0.332481,-0.014541,1.000000));
-  hpcpush(hpxyz(-0.376872,0.025907,1.000000));
-  hpcpush(hpxyz(-0.327258,0.086174,1.000000));
-  hpcpush(hpxyz(-0.263929,0.060196,1.000000));
-  hpcpush(hpxyz(-0.255833,0.146834,1.000000));
-
-  /*
-  bshape(shTower[0], 10); // 1
-  hpcpush(hpxyzsc(-0.286251,0.206460,1.060455));
-  hpcpush(hpxyzsc(-0.228388,0.237443,1.052872));
-  hpcpush(hpxyzsc(-0.159130,0.310692,1.059175));
-  hpcpush(hpxyzsc(-0.101028,0.374054,1.072438));
-  hpcpush(hpxyzsc(0.075166,0.301721,1.047227));
-  hpcpush(hpxyzsc(0.296628,0.282561,1.080661));
-  hpcpush(hpxyzsc(0.392862,0.273630,1.108699));
-  hpcpush(hpxyzsc(0.406414,0.155729,1.090607));
-  hpcpush(hpxyzsc(0.351704,0.039501,1.060781));
-  hpcpush(hpxyzsc(0.238677,-0.090994,1.032108));
-  hpcpush(hpxyzsc(0.117245,-0.194511,1.025466));
-  hpcpush(hpxyzsc(0.021470,-0.256598,1.032620));
-  hpcpush(hpxyzsc(-0.009932,-0.269112,1.035625));
-  hpcpush(hpxyzsc(-0.142800,-0.030207,1.010596));
-  hpcpush(hpxyzsc(-0.286251,0.206460,1.060455));
-
-  bshape(shTower[1], 10); // 2
-  hpcpush(hpxyzsc(0.250672,0.215566,1.053236));
-  hpcpush(hpxyzsc(-0.010561,0.166674,1.013850));
-  hpcpush(hpxyzsc(-0.188122,0.172750,1.032101));
-  hpcpush(hpxyzsc(-0.277968,0.195647,1.056193));
-  hpcpush(hpxyzsc(-0.273175,-0.294725,1.077723));
-  hpcpush(hpxyzsc(-0.058073,-0.278517,1.039685));
-  hpcpush(hpxyzsc(0.114633,-0.264898,1.040823));
-  hpcpush(hpxyzsc(0.214865,-0.223092,1.046870));
-  hpcpush(hpxyzsc(0.318979,-0.166948,1.062835));
-  hpcpush(hpxyzsc(0.348056,-0.154771,1.070092));
-  hpcpush(hpxyzsc(0.250672,0.215566,1.053236));
-
-  bshape(shTower[2], 10); // 4
-  hpcpush(hpxyzsc(-0.305085,0.182715,1.061349));
-  hpcpush(hpxyzsc(-0.141572,-0.249919,1.040434));
-  hpcpush(hpxyzsc(-0.082532,-0.256373,1.035634));
-  hpcpush(hpxyzsc(0.011916,-0.200378,1.019948));
-  hpcpush(hpxyzsc(0.107643,-0.130975,1.014269));
-  hpcpush(hpxyzsc(0.197879,-0.052950,1.020764));
-  hpcpush(hpxyzsc(0.275493,0.054106,1.038665));
-  hpcpush(hpxyzsc(0.346502,0.177608,1.073130));
-  hpcpush(hpxyzsc(0.365290,0.224553,1.088054));
-  hpcpush(hpxyzsc(-0.042684,0.405864,1.080068));
-  hpcpush(hpxyzsc(-0.305085,0.182715,1.061349));
-
-  bshape(shTower[3], 10); // 5
-  hpcpush(hpxyzsc(-0.244566,0.213804,1.051439));
-  hpcpush(hpxyzsc(-0.121406,0.179228,1.023163));
-  hpcpush(hpxyzsc(0.102781,0.233054,1.031929));
-  hpcpush(hpxyzsc(0.137859,0.248290,1.039545));
-  hpcpush(hpxyzsc(0.219219,0.271805,1.059214));
-  hpcpush(hpxyzsc(0.439787,-0.128376,1.099951));
-  hpcpush(hpxyzsc(0.327884,-0.165668,1.065342));
-  hpcpush(hpxyzsc(0.191605,-0.198467,1.037353));
-  hpcpush(hpxyzsc(-0.015788,-0.263051,1.034140));
-  hpcpush(hpxyzsc(-0.162942,-0.274063,1.049600));
-  hpcpush(hpxyzsc(-0.284113,-0.264520,1.072703));
-  hpcpush(hpxyzsc(-0.360780,-0.248815,1.091820));
-  hpcpush(hpxyzsc(-0.244566,0.213804,1.051439));
-
-  bshape(shTower[4], 10); // 8
-  hpcpush(hpxyzsc(0.571958,-0.279170,1.185357));
-  hpcpush(hpxyzsc(0.393753,-0.334598,1.125610));
-  hpcpush(hpxyzsc(0.230386,-0.380872,1.094596));
-  hpcpush(hpxyzsc(0.040909,-0.353244,1.061346));
-  hpcpush(hpxyzsc(-0.132206,-0.325608,1.059953));
-  hpcpush(hpxyzsc(-0.193426,-0.301627,1.062258));
-  hpcpush(hpxyzsc(-0.209589,-0.285475,1.060860));
-  hpcpush(hpxyzsc(-0.184256,0.133876,1.025609));
-  hpcpush(hpxyzsc(-0.122720,0.103535,1.012808));
-  hpcpush(hpxyzsc(0.028404,0.096630,1.005059));
-  hpcpush(hpxyzsc(0.131561,0.118840,1.015594));
-  hpcpush(hpxyzsc(0.206961,0.143553,1.031233));
-  hpcpush(hpxyzsc(0.285398,0.171884,1.054038));
-  hpcpush(hpxyzsc(0.311736,0.188934,1.064366));
-  hpcpush(hpxyzsc(0.427540,-0.043657,1.088437));
-  hpcpush(hpxyzsc(0.571958,-0.279170,1.185357));
-
-  bshape(shTower[5], 10); // 10
-  hpcpush(hpxyzsc(-0.311898,0.273433,1.082611));
-  hpcpush(hpxyzsc(-0.241832,0.284721,1.067496));
-  hpcpush(hpxyzsc(-0.093134,0.385666,1.075831));
-  hpcpush(hpxyzsc(-0.048259,0.410019,1.081871));
-  hpcpush(hpxyzsc(-0.034956,0.418726,1.084690));
-  hpcpush(hpxyzsc(0.323554,0.088209,1.054736));
-  hpcpush(hpxyzsc(0.281449,-0.050570,1.040082));
-  hpcpush(hpxyzsc(0.166974,-0.175799,1.028973));
-  hpcpush(hpxyzsc(0.053476,-0.232832,1.028139));
-  hpcpush(hpxyzsc(-0.046497,-0.270575,1.037002));
-  hpcpush(hpxyzsc(-0.167112,-0.296403,1.056306));
-  hpcpush(hpxyzsc(-0.182433,-0.298027,1.059293));
-  hpcpush(hpxyzsc(-0.237210,-0.011802,1.027817));
-  hpcpush(hpxyzsc(-0.311898,0.273433,1.082611));
-
-  bshape(shTower[6], 10); // 12
-  hpcpush(hpxyzsc(0.591895,-0.274213,1.193957));
-  hpcpush(hpxyzsc(0.451640,-0.046334,1.098237));
-  hpcpush(hpxyzsc(0.339584,0.178653,1.071090));
-  hpcpush(hpxyzsc(0.075724,0.130436,1.011310));
-  hpcpush(hpxyzsc(-0.048271,0.097633,1.005914));
-  hpcpush(hpxyzsc(-0.223763,-0.157117,1.036704));
-  hpcpush(hpxyzsc(-0.073558,-0.240165,1.031062));
-  hpcpush(hpxyzsc(0.043434,-0.280964,1.039628));
-  hpcpush(hpxyzsc(0.298734,-0.305291,1.087403));
-  hpcpush(hpxyzsc(0.591895,-0.274213,1.193957));
-
-  bshape(shTower[7], 10); // 16
-  hpcpush(hpxyzsc(0.078002,0.370221,1.069181));
-  hpcpush(hpxyzsc(0.413248,0.133206,1.090192));
-  hpcpush(hpxyzsc(0.355187,0.048021,1.062292));
-  hpcpush(hpxyzsc(0.239656,-0.028483,1.028711));
-  hpcpush(hpxyzsc(0.091569,-0.106563,1.009822));
-  hpcpush(hpxyzsc(-0.053014,-0.170046,1.015739));
-  hpcpush(hpxyzsc(-0.148171,-0.179787,1.026780));
-  hpcpush(hpxyzsc(-0.226021,0.273779,1.061151));
-  hpcpush(hpxyzsc(0.078002,0.370221,1.069181));
-
-  bshape(shTower[8], 10); // 17
-  hpcpush(hpxyzsc(0.533180,-0.117639,1.139351));
-  hpcpush(hpxyzsc(0.378296,-0.199392,1.087596));
-  hpcpush(hpxyzsc(0.209814,-0.236744,1.048842));
-  hpcpush(hpxyzsc(0.054537,-0.276614,1.038985));
-  hpcpush(hpxyzsc(-0.034481,-0.273513,1.037303));
-  hpcpush(hpxyzsc(-0.160263,-0.038320,1.013485));
-  hpcpush(hpxyzsc(-0.297354,0.194169,1.061189));
-  hpcpush(hpxyzsc(-0.193697,0.211849,1.040384));
-  hpcpush(hpxyzsc(-0.063165,0.262989,1.035931));
-  hpcpush(hpxyzsc(0.036923,0.306670,1.046618));
-  hpcpush(hpxyzsc(0.097986,0.358635,1.066874));
-  hpcpush(hpxyzsc(0.135238,0.379300,1.078034));
-  hpcpush(hpxyzsc(0.318600,0.124720,1.056911));
-  hpcpush(hpxyzsc(0.533180,-0.117639,1.139351));
-
-  bshape(shTower[9], 10); // 18
-  hpcpush(hpxyzsc(-0.217261,0.132486,1.031870));
-  hpcpush(hpxyzsc(0.024523,0.407718,1.080202));
-  hpcpush(hpxyzsc(0.145333,0.449681,1.106045));
-  hpcpush(hpxyzsc(0.484226,0.101907,1.115733));
-  hpcpush(hpxyzsc(0.321456,-0.134096,1.058922));
-  hpcpush(hpxyzsc(-0.036797,-0.295091,1.043280));
-  hpcpush(hpxyzsc(-0.180549,-0.344274,1.072904));
-  hpcpush(hpxyzsc(-0.259938,-0.172378,1.047512));
-  hpcpush(hpxyzsc(-0.217261,0.132486,1.031870));
-
-  bshape(shTower[10], 10); // 20
-  hpcpush(hpxyzsc(-0.174062,-0.167910,1.028830));
-  hpcpush(hpxyzsc(-0.295951,0.239183,1.069951));
-  hpcpush(hpxyzsc(-0.212854,0.268510,1.057074));
-  hpcpush(hpxyzsc(-0.079667,0.325104,1.054533));
-  hpcpush(hpxyzsc(-0.024447,0.357384,1.062224));
-  hpcpush(hpxyzsc(0.004880,0.379437,1.069577));
-  hpcpush(hpxyzsc(0.047240,0.411450,1.082369));
-  hpcpush(hpxyzsc(0.404628,0.134398,1.087100));
-  hpcpush(hpxyzsc(0.279121,0.016611,1.038357));
-  hpcpush(hpxyzsc(0.142934,-0.078661,1.013221));
-  hpcpush(hpxyzsc(0.031621,-0.149237,1.011569));
-  hpcpush(hpxyzsc(-0.095567,-0.210063,1.026284));
-  hpcpush(hpxyzsc(-0.174062,-0.167910,1.028830));
-
-  bshape(shTower[11], 10); // 21
-  hpcpush(hpxyzsc(-0.261640,0.232003,1.059378));
-  hpcpush(hpxyzsc(-0.114066,0.222344,1.030751));
-  hpcpush(hpxyzsc(0.070087,0.311006,1.049589));
-  hpcpush(hpxyzsc(0.146439,0.385502,1.081691));
-  hpcpush(hpxyzsc(0.156417,0.393458,1.085944));
-  hpcpush(hpxyzsc(0.321239,0.151530,1.061205));
-  hpcpush(hpxyzsc(0.513393,-0.077506,1.126756));
-  hpcpush(hpxyzsc(0.367820,-0.144703,1.075282));
-  hpcpush(hpxyzsc(0.183543,-0.172959,1.031311));
-  hpcpush(hpxyzsc(0.022726,-0.215721,1.023256));
-  hpcpush(hpxyzsc(-0.158572,-0.235502,1.039522));
-  hpcpush(hpxyzsc(-0.259609,-0.221068,1.056536));
-  hpcpush(hpxyzsc(-0.283069,-0.211523,1.060599));
-  hpcpush(hpxyzsc(-0.261640,0.232003,1.059378));
-  */
-  
-  bshape(shTower[0], 10); // 4
-  hpcpush(hpxyzsc(-0.343678,0.205736,1.077238));
-  hpcpush(hpxyzsc(-0.313502,-0.269598,1.082112));
-  hpcpush(hpxyzsc(0.053446,-0.276534,1.038907));
-  hpcpush(hpxyzsc(0.316036,-0.088255,1.052458));
-  hpcpush(hpxyzsc(0.415175,0.117882,1.089159));
-  hpcpush(hpxyzsc(-0.013091,0.329953,1.053110));
-  hpcpush(hpxyzsc(-0.343678,0.205736,1.077238));
-
-  bshape(shTower[1], 10); // 5
-  hpcpush(hpxyzsc(-0.311517,0.177757,1.062375));
-  hpcpush(hpxyzsc(-0.277989,0.198280,1.056689));
-  hpcpush(hpxyzsc(-0.192835,0.277382,1.055522));
-  hpcpush(hpxyzsc(-0.118766,0.352616,1.066979));
-  hpcpush(hpxyzsc(0.340632,0.220226,1.079134));
-  hpcpush(hpxyzsc(0.346703,0.158836,1.070248));
-  hpcpush(hpxyzsc(0.324069,0.046483,1.052227));
-  hpcpush(hpxyzsc(0.255673,-0.074052,1.034820));
-  hpcpush(hpxyzsc(0.185700,-0.149283,1.027993));
-  hpcpush(hpxyzsc(0.033206,-0.246367,1.030436));
-  hpcpush(hpxyzsc(-0.096570,-0.283752,1.043954));
-  hpcpush(hpxyzsc(-0.194307,-0.258126,1.050897));
-  hpcpush(hpxyzsc(-0.265575,-0.226804,1.059231));
-  hpcpush(hpxyzsc(-0.285480,-0.219017,1.062764));
-  hpcpush(hpxyzsc(-0.311517,0.177757,1.062375));
-
-  bshape(shTower[2], 10); // 6
-  hpcpush(hpxyzsc(-0.287245,0.124770,1.047892));
-  hpcpush(hpxyzsc(-0.224066,0.141558,1.034526));
-  hpcpush(hpxyzsc(-0.131929,0.201218,1.028540));
-  hpcpush(hpxyzsc(-0.078630,0.261221,1.036542));
-  hpcpush(hpxyzsc(-0.020026,0.337507,1.055610));
-  hpcpush(hpxyzsc(0.318283,0.112649,1.055459));
-  hpcpush(hpxyzsc(0.303068,-0.062313,1.046773));
-  hpcpush(hpxyzsc(0.276375,-0.100467,1.042342));
-  hpcpush(hpxyzsc(0.222744,-0.146642,1.034949));
-  hpcpush(hpxyzsc(0.008616,-0.304232,1.045290));
-  hpcpush(hpxyzsc(-0.058987,-0.274278,1.038609));
-  hpcpush(hpxyzsc(-0.112858,-0.303563,1.051136));
-  hpcpush(hpxyzsc(-0.233080,-0.305264,1.071220));
-  hpcpush(hpxyzsc(-0.372515,-0.347162,1.122180));
-  hpcpush(hpxyzsc(-0.287245,0.124770,1.047892));
-
-  bshape(shTower[3], 10); // 8
-  hpcpush(hpxyzsc(-0.276471,0.193549,1.055413));
-  hpcpush(hpxyzsc(-0.248272,0.167366,1.043863));
-  hpcpush(hpxyzsc(-0.131672,0.161485,1.021477));
-  hpcpush(hpxyzsc(-0.029928,0.144574,1.010840));
-  hpcpush(hpxyzsc(0.145677,0.141539,1.020419));
-  hpcpush(hpxyzsc(0.244238,0.160944,1.041900));
-  hpcpush(hpxyzsc(0.278308,0.181096,1.053685));
-  hpcpush(hpxyzsc(0.290850,-0.178199,1.056574));
-  hpcpush(hpxyzsc(0.244356,-0.239966,1.057021));
-  hpcpush(hpxyzsc(0.158564,-0.296188,1.054927));
-  hpcpush(hpxyzsc(0.052883,-0.325301,1.052909));
-  hpcpush(hpxyzsc(-0.059036,-0.324976,1.053136));
-  hpcpush(hpxyzsc(-0.156078,-0.299394,1.055461));
-  hpcpush(hpxyzsc(-0.222738,-0.269837,1.059445));
-  hpcpush(hpxyzsc(-0.251922,-0.245775,1.060127));
-  hpcpush(hpxyzsc(-0.276471,0.193549,1.055413));
-
-  bshape(shTower[4], 10); // 9
-  hpcpush(hpxyzsc(-0.311686,0.135147,1.056131));
-  hpcpush(hpxyzsc(-0.107931,0.170082,1.020087));
-  hpcpush(hpxyzsc(-0.054960,0.232687,1.028185));
-  hpcpush(hpxyzsc(0.094837,0.235522,1.031729));
-  hpcpush(hpxyzsc(0.206298,0.281848,1.059244));
-  hpcpush(hpxyzsc(0.350261,-0.169080,1.072973));
-  hpcpush(hpxyzsc(0.258249,-0.214408,1.054828));
-  hpcpush(hpxyzsc(0.149756,-0.245358,1.040494));
-  hpcpush(hpxyzsc(0.010018,-0.258374,1.032888));
-  hpcpush(hpxyzsc(-0.164035,-0.248262,1.043332));
-  hpcpush(hpxyzsc(-0.260903,-0.226907,1.058091));
-  hpcpush(hpxyzsc(-0.329503,-0.207534,1.073146));
-  hpcpush(hpxyzsc(-0.311686,0.135147,1.056131));
-
-  bshape(shTower[5], 10); // 10
-  hpcpush(hpxyzsc(-0.278494,0.161752,1.050582));
-  hpcpush(hpxyzsc(-0.132974,0.168104,1.022713));
-  hpcpush(hpxyzsc(-0.045035,0.201619,1.021116));
-  hpcpush(hpxyzsc(0.004416,0.226141,1.025261));
-  hpcpush(hpxyzsc(0.097798,0.196263,1.023760));
-  hpcpush(hpxyzsc(0.208310,0.187256,1.038488));
-  hpcpush(hpxyzsc(0.213133,0.158213,1.034629));
-  hpcpush(hpxyzsc(0.255407,-0.229136,1.057230));
-  hpcpush(hpxyzsc(0.150044,-0.303075,1.055636));
-  hpcpush(hpxyzsc(0.021265,-0.309104,1.046899));
-  hpcpush(hpxyzsc(-0.124340,-0.302692,1.052180));
-  hpcpush(hpxyzsc(-0.340803,-0.287456,1.094887));
-  hpcpush(hpxyzsc(-0.338423,-0.172501,1.069713));
-  hpcpush(hpxyzsc(-0.278494,0.161752,1.050582));
-
-  bshape(shTower[6], 10); // 10
-  hpcpush(hpxyzsc(-0.033122,-0.384901,1.072029));
-  hpcpush(hpxyzsc(0.122565,-0.232523,1.033968));
-  hpcpush(hpxyzsc(0.222346,-0.147072,1.034924));
-  hpcpush(hpxyzsc(0.293004,-0.141494,1.051604));
-  hpcpush(hpxyzsc(0.228575,0.266628,1.059876));
-  hpcpush(hpxyzsc(0.142937,0.283066,1.049074));
-  hpcpush(hpxyzsc(0.030023,0.299757,1.044392));
-  hpcpush(hpxyzsc(-0.078299,0.271316,1.039107));
-  hpcpush(hpxyzsc(-0.144933,0.245692,1.039889));
-  hpcpush(hpxyzsc(-0.207818,0.168012,1.035093));
-  hpcpush(hpxyzsc(-0.262782,0.117599,1.040617));
-  hpcpush(hpxyzsc(-0.313780,0.032325,1.048572));
-  hpcpush(hpxyzsc(-0.338217,-0.056491,1.057157));
-  hpcpush(hpxyzsc(-0.334152,-0.102325,1.059305));
-  hpcpush(hpxyzsc(-0.033122,-0.384901,1.072029));
-
-  bshape(shTower[7], 10); // purehepta 7
-  hpcpush(hpxyz(-0.547921,0.434077,1.220098));
-  hpcpush(hpxyz(-0.432932,0.444800,1.176978));
-  hpcpush(hpxyz(-0.319705,0.505720,1.165317));
-  hpcpush(hpxyz(-0.203488,0.623669,1.195981));
-  hpcpush(hpxyz(-0.096990,0.678123,1.212129));
-  hpcpush(hpxyz(0.227072,0.612087,1.194241));
-  hpcpush(hpxyz(0.575897,0.612804,1.306593));
-  hpcpush(hpxyz(0.593166,0.304792,1.201975));
-  hpcpush(hpxyz(0.552524,0.120670,1.148844));
-  hpcpush(hpxyz(0.446203,-0.067415,1.097106));
-  hpcpush(hpxyz(0.274469,-0.190444,1.054326));
-  hpcpush(hpxyz(0.132895,-0.256501,1.040891));
-  hpcpush(hpxyz(-0.012450,-0.301315,1.044483));
-  hpcpush(hpxyz(-0.125769,-0.381194,1.077556));
-  hpcpush(hpxyz(-0.269514,-0.401566,1.110807));
-  hpcpush(hpxyz(-0.392905,-0.383183,1.140703));
-  hpcpush(hpxyz(-0.443645,-0.375389,1.156606));
-  hpcpush(hpxyz(-0.432392,-0.062656,1.091278));
-  hpcpush(hpxyz(-0.461638,0.244209,1.128161));
-  hpcpush(hpxyz(-0.547921,0.434077,1.220098));
-
-  bshape(shTower[8], 10); // purehepta 11
-  hpcpush(hpxyz(-0.471133,0.305753,1.146931));
-  hpcpush(hpxyz(-0.159124,0.299060,1.055821));
-  hpcpush(hpxyz(0.208647,0.436673,1.110953));
-  hpcpush(hpxyz(0.398417,0.636059,1.250323));
-  hpcpush(hpxyz(0.544645,0.255027,1.166909));
-  hpcpush(hpxyz(0.777805,-0.085301,1.269747));
-  hpcpush(hpxyz(0.517790,-0.221942,1.147765));
-  hpcpush(hpxyz(0.294745,-0.374429,1.107733));
-  hpcpush(hpxyz(0.158715,-0.473212,1.117640));
-  hpcpush(hpxyz(-0.080020,-0.462822,1.104811));
-  hpcpush(hpxyz(-0.384068,-0.511651,1.187137));
-  hpcpush(hpxyz(-0.395566,-0.095237,1.079603));
-  hpcpush(hpxyz(-0.471133,0.305753,1.146931));
-
-  bshape(shTower[9], 10); // purehepta 15
-  hpcpush(hpxyz(0.449766,-0.690111,1.295586));
-  hpcpush(hpxyz(-0.024136,-0.595991,1.164383));
-  hpcpush(hpxyz(-0.057829,-0.383939,1.072732));
-  hpcpush(hpxyz(-0.467634,-0.413702,1.178911));
-  hpcpush(hpxyz(-0.438668,-0.055072,1.093372));
-  hpcpush(hpxyz(-0.463281,0.296832,1.141376));
-  hpcpush(hpxyz(-0.494437,0.335413,1.164891));
-  hpcpush(hpxyz(-0.124821,0.618109,1.182218));
-  hpcpush(hpxyz(0.139228,0.529058,1.139862));
-  hpcpush(hpxyz(0.413839,0.480139,1.183975));
-  hpcpush(hpxyz(0.501877,0.230248,1.142320));
-  hpcpush(hpxyz(0.624273,-0.003880,1.178869));
-  hpcpush(hpxyz(0.739892,-0.031980,1.244372));
-  hpcpush(hpxyz(0.559897,-0.339843,1.195399));
-  hpcpush(hpxyz(0.449766,-0.690111,1.295586));
-
-  bshape(shTower[10], 10); // Euclidean
-  hpcpush(hpxyz(0.250000,-0.210000,1.000000));
-  hpcpush(hpxyz(-0.250000,-0.210000,1.000000));
-  hpcpush(hpxyz(-0.250000,0.210000,1.000000));
-  hpcpush(hpxyz(0.250000,0.210000,1.000000));
-  hpcpush(hpxyz(0.250000,-0.210000,1.000000));
-  
-  for(int u=0; u<=2; u+=2) {
-  
-  int sh = u==0?24: 27;
-  
-  bshape(shTortoise[0][0+u], sh+1);
-  hpcpush(turtlevertex(u,0.130604,0.040186,1.009293));
-  hpcpush(turtlevertex(u,0.114944,0.065842,1.008736));
-  hpcpush(turtlevertex(u,0.093777,0.101592,1.009512));
-  hpcpush(turtlevertex(u,0.054693,0.123896,1.009129));
-  hpcpush(turtlevertex(u,0.014512,0.136188,1.009335));
-  hpcpush(turtlevertex(u,-0.039114,0.147516,1.011578));
-  hpcpush(turtlevertex(u,-0.099597,0.137646,1.014330));
-  hpcpush(turtlevertex(u,-0.136732,0.127766,1.017359));
-  hpcpush(turtlevertex(u,-0.168324,0.108850,1.019893));
-  hpcpush(turtlevertex(u,-0.193220,0.085376,1.022068));
-  hpcpush(turtlevertex(u,-0.210135,0.041577,1.022685));
-  hpcpush(turtlevertex(u,-0.210135,-0.041577,1.022685));
-  hpcpush(turtlevertex(u,-0.193220,-0.085376,1.022068));
-  hpcpush(turtlevertex(u,-0.168324,-0.108850,1.019893));
-  hpcpush(turtlevertex(u,-0.136732,-0.127766,1.017359));
-  hpcpush(turtlevertex(u,-0.099597,-0.137646,1.014330));
-  hpcpush(turtlevertex(u,-0.039114,-0.147516,1.011578));
-  hpcpush(turtlevertex(u,0.014512,-0.136188,1.009335));
-  hpcpush(turtlevertex(u,0.054693,-0.123896,1.009129));
-  hpcpush(turtlevertex(u,0.093777,-0.101592,1.009512));
-  hpcpush(turtlevertex(u,0.114944,-0.065842,1.008736));
-  hpcpush(turtlevertex(u,0.130604,-0.040186,1.009293));
-  hpcpush(turtlevertex(u,0.130604,0.040186,1.009293));
-
-  bshape(shTortoise[1][0+u], sh+2);
-  hpcpush(turtlevertex(u,0.115992,0.041266,1.007550));
-  hpcpush(turtlevertex(u,0.089260,0.093723,1.008341));
-  hpcpush(turtlevertex(u,0.044488,0.044488,1.001977));
-  hpcpush(turtlevertex(u,0.044488,-0.044488,1.001977));
-  hpcpush(turtlevertex(u,0.089260,-0.093723,1.008341));
-  hpcpush(turtlevertex(u,0.115992,-0.041266,1.007550));
-  hpcpush(turtlevertex(u,0.115992,0.041266,1.007550));
-
-  bshape(shTortoise[2][0+u], sh+2);
-  hpcpush(turtlevertex(u,0.034470,0.042254,1.001486));
-  hpcpush(turtlevertex(u,-0.004448,0.060054,1.001812));
-  hpcpush(turtlevertex(u,-0.037810,0.044482,1.001703));
-  hpcpush(turtlevertex(u,-0.037810,-0.044482,1.001703));
-  hpcpush(turtlevertex(u,-0.004448,-0.060054,1.001812));
-  hpcpush(turtlevertex(u,0.034470,-0.042254,1.001486));
-  hpcpush(turtlevertex(u,0.034470,0.042254,1.001486));
-                                
-  bshape(shTortoise[3][0+u], sh+2);
-  hpcpush(turtlevertex(u,-0.048945,0.046720,1.002287));
-  hpcpush(turtlevertex(u,-0.085793,0.061280,1.005542));
-  hpcpush(turtlevertex(u,-0.121603,0.039047,1.008123));
-  hpcpush(turtlevertex(u,-0.121603,-0.039047,1.008123));
-  hpcpush(turtlevertex(u,-0.085793,-0.061280,1.005542));
-  hpcpush(turtlevertex(u,-0.048945,-0.046720,1.002287));
-  hpcpush(turtlevertex(u,-0.048945,0.046720,1.002287));
-
-  bshape(shTortoise[4][0+u], sh+2);
-  hpcpush(turtlevertex(u,-0.131730,0.040189,1.009439));
-  hpcpush(turtlevertex(u,-0.184061,0.083052,1.020184));
-  hpcpush(turtlevertex(u,-0.200961,0.041539,1.020838));
-  hpcpush(turtlevertex(u,-0.200961,-0.041539,1.020838));
-  hpcpush(turtlevertex(u,-0.184061,-0.083052,1.020184));
-  hpcpush(turtlevertex(u,-0.131730,-0.040189,1.009439));
-  hpcpush(turtlevertex(u,-0.131730,0.040189,1.009439));
-
-  bshape(shTortoise[5][0+u], sh+2);
-  hpcpush(turtlevertex(u,0.080316,0.097049,1.007903));
-  hpcpush(turtlevertex(u,0.035588,0.048934,1.001829));
-  hpcpush(turtlevertex(u,0.000000,0.067856,1.002300));
-  hpcpush(turtlevertex(u,0.004461,0.123805,1.007645));
-  hpcpush(turtlevertex(u,0.041274,0.119361,1.007944));
-  hpcpush(turtlevertex(u,0.080316,0.097049,1.007903));
-
-  bshape(shTortoise[6][0+u], sh+2);
-  hpcpush(turtlevertex(u,-0.046728,0.055629,1.002636));
-  hpcpush(turtlevertex(u,-0.011124,0.067858,1.002361));
-  hpcpush(turtlevertex(u,-0.010038,0.122683,1.007548));
-  hpcpush(turtlevertex(u,-0.034616,0.137349,1.009982));
-  hpcpush(turtlevertex(u,-0.079314,0.123998,1.010775));
-  hpcpush(turtlevertex(u,-0.077994,0.071309,1.005569));
-  hpcpush(turtlevertex(u,-0.046728,0.055629,1.002636));
-
-  bshape(shTortoise[7][0+u], sh+2);
-  hpcpush(turtlevertex(u,-0.090293,0.070228,1.006521));
-  hpcpush(turtlevertex(u,-0.091619,0.118434,1.011148));
-  hpcpush(turtlevertex(u,-0.129870,0.117555,1.015227));
-  hpcpush(turtlevertex(u,-0.171553,0.086337,1.018275));
-  hpcpush(turtlevertex(u,-0.128389,0.052472,1.009573));
-  hpcpush(turtlevertex(u,-0.090293,0.070228,1.006521));
-
-  bshape(shTortoise[8][0+u], sh);
-  hpcpush(turtlevertex(u,0.117447,0.019850,1.007069));
-  hpcpush(turtlevertex(u,0.124690,0.033104,1.008287));
-  hpcpush(turtlevertex(u,0.143100,0.043648,1.011129));
-  hpcpush(turtlevertex(u,0.156518,0.044798,1.013166));
-  hpcpush(turtlevertex(u,0.172226,0.045964,1.015763));
-  hpcpush(turtlevertex(u,0.185156,0.042131,1.017869));
-  hpcpush(turtlevertex(u,0.198679,0.033298,1.020089));
-  hpcpush(turtlevertex(u,0.209415,0.022219,1.021934));
-  hpcpush(turtlevertex(u,0.213376,0.015559,1.022630));
-  hpcpush(turtlevertex(u,0.213376,-0.015559,1.022630));
-  hpcpush(turtlevertex(u,0.209415,-0.022219,1.021934));
-  hpcpush(turtlevertex(u,0.198679,-0.033298,1.020089));
-  hpcpush(turtlevertex(u,0.185156,-0.042131,1.017869));
-  hpcpush(turtlevertex(u,0.172226,-0.045964,1.015763));
-  hpcpush(turtlevertex(u,0.156518,-0.044798,1.013166));
-  hpcpush(turtlevertex(u,0.143100,-0.043648,1.011129));
-  hpcpush(turtlevertex(u,0.124690,-0.033104,1.008287));
-  hpcpush(turtlevertex(u,0.117447,-0.019850,1.007069));
-  hpcpush(turtlevertex(u,0.117447,0.019850,1.007069));
-
-  bshape(shTortoise[12][0+u], sh+2);
-  hpcpush(turtlevertex(u,0.189028,0.011641,1.017776));
-  hpcpush(turtlevertex(u,0.192981,0.013309,1.018538));
-  hpcpush(turtlevertex(u,0.193557,0.019966,1.018755));
-  hpcpush(turtlevertex(u,0.189620,0.027168,1.018182));
-  hpcpush(turtlevertex(u,0.183986,0.028817,1.017193));
-  hpcpush(turtlevertex(u,0.175528,0.022149,1.015530));
-  hpcpush(turtlevertex(u,0.174396,0.017163,1.015238));
-  hpcpush(turtlevertex(u,0.180574,0.010524,1.016227));
-  hpcpush(turtlevertex(u,0.189028,0.011641,1.017776));
-
-  bshape(shTortoise[9][0+u], sh);
-  hpcpush(turtlevertex(u,0.091033,0.091033,1.008253));
-  hpcpush(turtlevertex(u,0.098877,0.108268,1.010692));
-  hpcpush(turtlevertex(u,0.113462,0.128959,1.014645));
-  hpcpush(turtlevertex(u,0.125832,0.141353,1.017750));
-  hpcpush(turtlevertex(u,0.137077,0.147622,1.020089));
-  hpcpush(turtlevertex(u,0.124211,0.147500,1.018423));
-  hpcpush(turtlevertex(u,0.127683,0.159881,1.020718));
-  hpcpush(turtlevertex(u,0.114214,0.153579,1.018151));
-  hpcpush(turtlevertex(u,0.114888,0.166505,1.020256));
-  hpcpush(turtlevertex(u,0.101432,0.158522,1.017555));
-  hpcpush(turtlevertex(u,0.098764,0.173114,1.019668));
-  hpcpush(turtlevertex(u,0.089226,0.164043,1.017286));
-  hpcpush(turtlevertex(u,0.085437,0.178641,1.019417));
-  hpcpush(turtlevertex(u,0.079119,0.147726,1.013944));
-  hpcpush(turtlevertex(u,0.066181,0.103132,1.007480));
-  hpcpush(turtlevertex(u,0.091033,0.091033,1.008253));
-
-  bshape(shTortoise[10][0+u], sh);
-  hpcpush(turtlevertex(u,-0.127294,0.114564,1.014558));
-  hpcpush(turtlevertex(u,-0.165450,0.169906,1.027736));
-  hpcpush(turtlevertex(u,-0.170219,0.186962,1.031470));
-  hpcpush(turtlevertex(u,-0.172820,0.171706,1.029247));
-  hpcpush(turtlevertex(u,-0.183575,0.171299,1.031040));
-  hpcpush(turtlevertex(u,-0.183400,0.159430,1.029103));
-  hpcpush(turtlevertex(u,-0.197560,0.157378,1.031406));
-  hpcpush(turtlevertex(u,-0.192844,0.145469,1.028761));
-  hpcpush(turtlevertex(u,-0.208144,0.141739,1.031220));
-  hpcpush(turtlevertex(u,-0.185331,0.134128,1.025835));
-  hpcpush(turtlevertex(u,-0.168270,0.122731,1.021459));
-  hpcpush(turtlevertex(u,-0.149026,0.105814,1.016566));
-  hpcpush(turtlevertex(u,-0.127294,0.114564,1.014558));
-
-  bshape(shTortoise[11][0+u], sh);
-  hpcpush(turtlevertex(u,-0.198773,0.054968,1.021045));
-  hpcpush(turtlevertex(u,-0.210619,0.042791,1.022835));
-  hpcpush(turtlevertex(u,-0.215140,0.036691,1.023539));
-  hpcpush(turtlevertex(u,-0.225922,0.025041,1.025509));
-  hpcpush(turtlevertex(u,-0.241923,0.019510,1.029032));
-  hpcpush(turtlevertex(u,-0.258017,0.015079,1.032860));
-  hpcpush(turtlevertex(u,-0.278275,0.012318,1.038070));
-  hpcpush(turtlevertex(u,-0.288758,0.012335,1.040929));
-  hpcpush(turtlevertex(u,-0.296937,0.009542,1.043198));
-  hpcpush(turtlevertex(u,-0.302208,0.005056,1.044680));
-  hpcpush(turtlevertex(u,-0.305142,0.000562,1.045520));
-  hpcpush(turtlevertex(u,-0.305142,-0.000562,1.045520));
-  hpcpush(turtlevertex(u,-0.302208,-0.005056,1.044680));
-  hpcpush(turtlevertex(u,-0.296937,-0.009542,1.043198));
-  hpcpush(turtlevertex(u,-0.288758,-0.012335,1.040929));
-  hpcpush(turtlevertex(u,-0.278275,-0.012318,1.038070));
-  hpcpush(turtlevertex(u,-0.258017,-0.015079,1.032860));
-  hpcpush(turtlevertex(u,-0.241923,-0.019510,1.029032));
-  hpcpush(turtlevertex(u,-0.225922,-0.025041,1.025509));
-  hpcpush(turtlevertex(u,-0.215140,-0.036691,1.023539));
-  hpcpush(turtlevertex(u,-0.210619,-0.042791,1.022835));
-  hpcpush(turtlevertex(u,-0.198773,-0.054968,1.021045));
-  hpcpush(turtlevertex(u,-0.198773,0.054968,1.021045));
-  
-  bshape(shTortoise[0][1+u], sh+1);
-  hpcpush(turtlevertex(u,-0.215020,0.032895,1.023384));
-  hpcpush(turtlevertex(u,-0.196018,0.086615,1.022705));
-  hpcpush(turtlevertex(u,-0.144388,0.137555,1.019691));
-  hpcpush(turtlevertex(u,-0.039214,0.155679,1.012805));
-  hpcpush(turtlevertex(u,0.055338,0.132276,1.010227));
-  hpcpush(turtlevertex(u,0.091306,0.105859,1.009724));
-  hpcpush(turtlevertex(u,0.110754,0.069544,1.008515));
-  hpcpush(turtlevertex(u,0.130081,0.057985,1.010091));
-  hpcpush(turtlevertex(u,0.148913,0.053201,1.012425));
-  hpcpush(turtlevertex(u,0.153797,0.043848,1.012707));
-  hpcpush(turtlevertex(u,0.153797,-0.043848,1.012707));
-  hpcpush(turtlevertex(u,0.148913,-0.053201,1.012425));
-  hpcpush(turtlevertex(u,0.130081,-0.057985,1.010091));
-  hpcpush(turtlevertex(u,0.110754,-0.069544,1.008515));
-  hpcpush(turtlevertex(u,0.091306,-0.105859,1.009724));
-  hpcpush(turtlevertex(u,0.055338,-0.132276,1.010227));
-  hpcpush(turtlevertex(u,-0.039214,-0.155679,1.012805));
-  hpcpush(turtlevertex(u,-0.144388,-0.137555,1.019691));
-  hpcpush(turtlevertex(u,-0.196018,-0.086615,1.022705));
-  hpcpush(turtlevertex(u,-0.215020,-0.032895,1.023384));
-  hpcpush(turtlevertex(u,-0.215020,0.032895,1.023384));
-
-  bshape(shTortoise[1][1+u], sh+2);
-  hpcpush(turtlevertex(u,0.054487,0.011120,1.001545));
-  hpcpush(turtlevertex(u,0.041149,0.044485,1.001834));
-  hpcpush(turtlevertex(u,0.072368,0.053441,1.004038));
-  hpcpush(turtlevertex(u,0.083644,0.089220,1.007450));
-  hpcpush(turtlevertex(u,0.117129,0.046852,1.007926));
-  hpcpush(turtlevertex(u,0.117129,-0.046852,1.007926));
-  hpcpush(turtlevertex(u,0.083644,-0.089220,1.007450));
-  hpcpush(turtlevertex(u,0.072368,-0.053441,1.004038));
-  hpcpush(turtlevertex(u,0.041149,-0.044485,1.001834));
-  hpcpush(turtlevertex(u,0.054487,-0.011120,1.001545));
-  hpcpush(turtlevertex(u,0.054487,0.011120,1.001545));
-
-  bshape(shTortoise[2][1+u], sh+2);
-  hpcpush(turtlevertex(u,0.040018,0.014451,1.000905));
-  hpcpush(turtlevertex(u,0.031130,0.038913,1.001241));
-  hpcpush(turtlevertex(u,-0.001112,0.058940,1.001736));
-  hpcpush(turtlevertex(u,-0.035584,0.044480,1.001621));
-  hpcpush(turtlevertex(u,-0.020005,0.023339,1.000472));
-  hpcpush(turtlevertex(u,-0.020005,-0.023339,1.000472));
-  hpcpush(turtlevertex(u,-0.035584,-0.044480,1.001621));
-  hpcpush(turtlevertex(u,-0.001112,-0.058940,1.001736));
-  hpcpush(turtlevertex(u,0.031130,-0.038913,1.001241));
-  hpcpush(turtlevertex(u,0.040018,-0.014451,1.000905));
-  hpcpush(turtlevertex(u,0.040018,0.014451,1.000905));
-
-  bshape(shTortoise[3][1+u], sh+2);
-  hpcpush(turtlevertex(u,-0.040020,0.018898,1.000979));
-  hpcpush(turtlevertex(u,-0.050063,0.050063,1.002503));
-  hpcpush(turtlevertex(u,-0.077977,0.064609,1.005114));
-  hpcpush(turtlevertex(u,-0.119364,0.042391,1.007990));
-  hpcpush(turtlevertex(u,-0.106982,0.020059,1.005906));
-  hpcpush(turtlevertex(u,-0.106982,-0.020059,1.005906));
-  hpcpush(turtlevertex(u,-0.119364,-0.042391,1.007990));
-  hpcpush(turtlevertex(u,-0.077977,-0.064609,1.005114));
-  hpcpush(turtlevertex(u,-0.050063,-0.050063,1.002503));
-  hpcpush(turtlevertex(u,-0.040020,-0.018898,1.000979));
-  hpcpush(turtlevertex(u,-0.040020,0.018898,1.000979));
-
-  bshape(shTortoise[4][1+u], sh+2);
-  hpcpush(turtlevertex(u,-0.122687,0.014499,1.007602));
-  hpcpush(turtlevertex(u,-0.129484,0.042417,1.009240));
-  hpcpush(turtlevertex(u,-0.152149,0.067124,1.013733));
-  hpcpush(turtlevertex(u,-0.178269,0.069514,1.018141));
-  hpcpush(turtlevertex(u,-0.197514,0.038156,1.020033));
-  hpcpush(turtlevertex(u,-0.184908,0.021292,1.017175));
-  hpcpush(turtlevertex(u,-0.184908,-0.021292,1.017175));
-  hpcpush(turtlevertex(u,-0.197514,-0.038156,1.020033));
-  hpcpush(turtlevertex(u,-0.178269,-0.069514,1.018141));
-  hpcpush(turtlevertex(u,-0.152149,-0.067124,1.013733));
-  hpcpush(turtlevertex(u,-0.129484,-0.042417,1.009240));
-  hpcpush(turtlevertex(u,-0.122687,-0.014499,1.007602));
-  hpcpush(turtlevertex(u,-0.122687,0.014499,1.007602));
-
-  bshape(shTortoise[5][1+u], sh+2);
-  hpcpush(turtlevertex(u,0.076947,0.093675,1.007321));
-  hpcpush(turtlevertex(u,0.060121,0.066801,1.004030));
-  hpcpush(turtlevertex(u,0.032253,0.052271,1.001884));
-  hpcpush(turtlevertex(u,-0.001112,0.070086,1.002454));
-  hpcpush(turtlevertex(u,0.006682,0.095775,1.004598));
-  hpcpush(turtlevertex(u,0.003346,0.123804,1.007640));
-  hpcpush(turtlevertex(u,0.040155,0.118235,1.007766));
-  hpcpush(turtlevertex(u,0.076947,0.093675,1.007321));
-
-  bshape(shTortoise[6][1+u], sh+2);
-  hpcpush(turtlevertex(u,0.000000,0.100251,1.005013));
-  hpcpush(turtlevertex(u,-0.006693,0.126054,1.007936));
-  hpcpush(turtlevertex(u,-0.027911,0.136208,1.009620));
-  hpcpush(turtlevertex(u,-0.074828,0.122851,1.010293));
-  hpcpush(turtlevertex(u,-0.057958,0.095854,1.006254));
-  hpcpush(turtlevertex(u,-0.076880,0.072423,1.005562));
-  hpcpush(turtlevertex(u,-0.042276,0.057852,1.002564));
-  hpcpush(turtlevertex(u,-0.013350,0.070089,1.002542));
-  hpcpush(turtlevertex(u,0.000000,0.100251,1.005013));
-
-  bshape(shTortoise[7][1+u], sh+2);
-  hpcpush(turtlevertex(u,-0.079176,0.091443,1.007289));
-  hpcpush(turtlevertex(u,-0.091663,0.126316,1.012106));
-  hpcpush(turtlevertex(u,-0.123093,0.116379,1.014246));
-  hpcpush(turtlevertex(u,-0.172636,0.078471,1.017822));
-  hpcpush(turtlevertex(u,-0.145392,0.072696,1.013126));
-  hpcpush(turtlevertex(u,-0.120531,0.056917,1.008844));
-  hpcpush(turtlevertex(u,-0.090297,0.071346,1.006600));
-  hpcpush(turtlevertex(u,-0.079176,0.091443,1.007289));
-
-  bshape(shTortoise[8][1+u], sh);
-  hpcpush(turtlevertex(u,0.122997,0.015995,1.007663));
-  hpcpush(turtlevertex(u,0.146947,0.015468,1.010857));
-  hpcpush(turtlevertex(u,0.167654,0.014386,1.014059));
-  hpcpush(turtlevertex(u,0.182833,0.016067,1.016704));
-  hpcpush(turtlevertex(u,0.199210,0.019976,1.019845));
-  hpcpush(turtlevertex(u,0.209990,0.025554,1.022130));
-  hpcpush(turtlevertex(u,0.220813,0.031704,1.024580));
-  hpcpush(turtlevertex(u,0.229392,0.037861,1.026671));
-  hpcpush(turtlevertex(u,0.242002,0.041263,1.029693));
-  hpcpush(turtlevertex(u,0.255227,0.041328,1.032884));
-  hpcpush(turtlevertex(u,0.264456,0.039696,1.035139));
-  hpcpush(turtlevertex(u,0.275450,0.036391,1.037881));
-  hpcpush(turtlevertex(u,0.283564,0.030262,1.039867));
-  hpcpush(turtlevertex(u,0.289940,0.019068,1.041359));
-  hpcpush(turtlevertex(u,0.293428,0.010660,1.042216));
-  hpcpush(turtlevertex(u,0.293428,-0.010660,1.042216));
-  hpcpush(turtlevertex(u,0.289940,-0.019068,1.041359));
-  hpcpush(turtlevertex(u,0.283564,-0.030262,1.039867));
-  hpcpush(turtlevertex(u,0.275450,-0.036391,1.037881));
-  hpcpush(turtlevertex(u,0.264456,-0.039696,1.035139));
-  hpcpush(turtlevertex(u,0.255227,-0.041328,1.032884));
-  hpcpush(turtlevertex(u,0.242002,-0.041263,1.029693));
-  hpcpush(turtlevertex(u,0.229392,-0.037861,1.026671));
-  hpcpush(turtlevertex(u,0.220813,-0.031704,1.024580));
-  hpcpush(turtlevertex(u,0.209990,-0.025554,1.022130));
-  hpcpush(turtlevertex(u,0.199210,-0.019976,1.019845));
-  hpcpush(turtlevertex(u,0.182833,-0.016067,1.016704));
-  hpcpush(turtlevertex(u,0.167654,-0.014386,1.014059));
-  hpcpush(turtlevertex(u,0.146947,-0.015468,1.010857));
-  hpcpush(turtlevertex(u,0.122997,-0.015995,1.007663));
-  hpcpush(turtlevertex(u,0.122997,0.015995,1.007663));
-
-  bshape(shTortoise[12][1+u], sh+2);
-  hpcpush(turtlevertex(u,0.268412,0.011184,1.035456));
-  hpcpush(turtlevertex(u,0.273055,0.015108,1.036719));
-  hpcpush(turtlevertex(u,0.274235,0.022946,1.037175));
-  hpcpush(turtlevertex(u,0.265563,0.028513,1.035054));
-  hpcpush(turtlevertex(u,0.260944,0.029615,1.033909));
-  hpcpush(turtlevertex(u,0.255733,0.024010,1.032461));
-  hpcpush(turtlevertex(u,0.255715,0.017308,1.032323));
-  hpcpush(turtlevertex(u,0.255713,0.016191,1.032304));
-  hpcpush(turtlevertex(u,0.268412,0.011184,1.035456));
-
-  bshape(shTortoise[9][1+u], sh);
-  hpcpush(turtlevertex(u,0.057351,0.106430,1.007282));
-  hpcpush(turtlevertex(u,0.077464,0.149395,1.014061));
-  hpcpush(turtlevertex(u,0.093278,0.183779,1.021017));
-  hpcpush(turtlevertex(u,0.107707,0.228249,1.031357));
-  hpcpush(turtlevertex(u,0.112041,0.215164,1.029004));
-  hpcpush(turtlevertex(u,0.126140,0.219908,1.031635));
-  hpcpush(turtlevertex(u,0.127627,0.204537,1.028652));
-  hpcpush(turtlevertex(u,0.142352,0.211574,1.032002));
-  hpcpush(turtlevertex(u,0.109929,0.173777,1.020923));
-  hpcpush(turtlevertex(u,0.072799,0.098720,1.007495));
-  hpcpush(turtlevertex(u,0.057351,0.106430,1.007282));
-
-  bshape(shTortoise[10][1+u], sh);
-  hpcpush(turtlevertex(u,-0.136932,0.091981,1.013514));
-  hpcpush(turtlevertex(u,-0.259079,0.148132,1.043583));
-  hpcpush(turtlevertex(u,-0.268509,0.159166,1.047583));
-  hpcpush(turtlevertex(u,-0.266397,0.150469,1.045757));
-  hpcpush(turtlevertex(u,-0.274082,0.151224,1.047850));
-  hpcpush(turtlevertex(u,-0.268499,0.144503,1.045453));
-  hpcpush(turtlevertex(u,-0.277008,0.143964,1.047597));
-  hpcpush(turtlevertex(u,-0.270075,0.137129,1.044866));
-  hpcpush(turtlevertex(u,-0.278972,0.133484,1.046730));
-  hpcpush(turtlevertex(u,-0.265628,0.133017,1.043193));
-  hpcpush(turtlevertex(u,-0.150766,0.083180,1.014716));
-  hpcpush(turtlevertex(u,-0.136932,0.091981,1.013514));
-
-  bshape(shTortoise[11][1+u], sh);
-  hpcpush(turtlevertex(u,-0.188793,-0.018459,1.017833));
-  hpcpush(turtlevertex(u,-0.214469,-0.012848,1.022821));
-  hpcpush(turtlevertex(u,-0.236108,-0.035186,1.028098));
-  hpcpush(turtlevertex(u,-0.268017,-0.009275,1.035335));
-  hpcpush(turtlevertex(u,-0.280049,-0.007050,1.038497));
-  hpcpush(turtlevertex(u,-0.280049,0.007050,1.038497));
-  hpcpush(turtlevertex(u,-0.268017,0.009275,1.035335));
-  hpcpush(turtlevertex(u,-0.236108,0.035186,1.028098));
-  hpcpush(turtlevertex(u,-0.214469,0.012848,1.022821));
-  hpcpush(turtlevertex(u,-0.188793,0.018459,1.017833));
-  hpcpush(turtlevertex(u,-0.188793,-0.018459,1.017833));
-  }
-
-  for(int v=0; v<13; v++) for(int z=0; z<2; z++)
-    copyshape(shTortoise[v][4+z], shTortoise[v][2+z], shTortoise[v][2+z].prio + (44-28));
-
-  bshape(shDragonSegment, 33);
-  if(purehepta) {
-    hpcpush(hpxyz(-0.203174,0.011881,1.020500));
-    hpcpush(hpxyz(-0.186616,-0.109701,1.023162));
-    hpcpush(hpxyz(-0.119110,-0.176468,1.022413));
-    hpcpush(hpxyz(0.041364,-0.257437,1.033433));
-    hpcpush(hpxyz(0.024528,-0.167332,1.014200));
-    hpcpush(hpxyz(0.168002,-0.237034,1.041350));
-    hpcpush(hpxyz(0.122445,-0.154843,1.019298));
-    hpcpush(hpxyz(0.293732,-0.215965,1.064387));
-    hpcpush(hpxyz(0.243967,-0.121295,1.036452));
-    hpcpush(hpxyz(0.379618,-0.208934,1.089845));
-    hpcpush(hpxyz(0.352319,-0.102369,1.065180));
-    hpcpush(hpxyz(0.499801,-0.217583,1.138922));
-    hpcpush(hpxyz(0.458633,-0.130186,1.107832));
-    hpcpush(hpxyz(0.629571,-0.201212,1.198685));
-    hpcpush(hpxyz(0.600616,-0.112655,1.171935));
-    hpcpush(hpxyz(0.808599,-0.206589,1.302502));
-    hpcpush(hpxyz(0.759781,-0.121862,1.261791));
-    hpcpush(hpxyz(0.966786,-0.214338,1.407343));
-    hpcpush(hpxyz(0.904584,-0.144299,1.356132));
-    hpcpush(hpxyz(1.120205,-0.210597,1.516314));
-    hpcpush(hpxyz(1.072776,-0.124515,1.471853));
-    hpcpush(hpxyz(1.265050,-0.194962,1.624304));
-    hpcpush(hpxyz(1.187624,-0.110483,1.556489));
-    hpcpush(hpxyz(1.448051,-0.152371,1.766372));
-    hpcpush(hpxyz(1.331387,-0.062841,1.666295));
-    hpcpush(hpxyz(1.531624,-0.093190,1.831545));
-    hpcpush(hpxyz(1.375131,-0.019085,1.700397));
-    hpcpush(hpxyz(1.375131,0.019085,1.700397));
-    hpcpush(hpxyz(1.531624,0.093190,1.831545));
-    hpcpush(hpxyz(1.331387,0.062841,1.666295));
-    hpcpush(hpxyz(1.448051,0.152371,1.766372));
-    hpcpush(hpxyz(1.187624,0.110483,1.556489));
-    hpcpush(hpxyz(1.265050,0.194962,1.624304));
-    hpcpush(hpxyz(1.072776,0.124515,1.471853));
-    hpcpush(hpxyz(1.120205,0.210597,1.516314));
-    hpcpush(hpxyz(0.904584,0.144299,1.356132));
-    hpcpush(hpxyz(0.966786,0.214338,1.407343));
-    hpcpush(hpxyz(0.759781,0.121862,1.261791));
-    hpcpush(hpxyz(0.808599,0.206589,1.302502));
-    hpcpush(hpxyz(0.600616,0.112655,1.171935));
-    hpcpush(hpxyz(0.629571,0.201212,1.198685));
-    hpcpush(hpxyz(0.458633,0.130186,1.107832));
-    hpcpush(hpxyz(0.499801,0.217583,1.138922));
-    hpcpush(hpxyz(0.352319,0.102369,1.065180));
-    hpcpush(hpxyz(0.379618,0.208934,1.089845));
-    hpcpush(hpxyz(0.243967,0.121295,1.036452));
-    hpcpush(hpxyz(0.293732,0.215965,1.064387));
-    hpcpush(hpxyz(0.122445,0.154843,1.019298));
-    hpcpush(hpxyz(0.168002,0.237034,1.041350));
-    hpcpush(hpxyz(0.024528,0.167332,1.014200));
-    hpcpush(hpxyz(0.041364,0.257437,1.033433));
-    hpcpush(hpxyz(-0.119110,0.176468,1.022413));
-    hpcpush(hpxyz(-0.186616,0.109701,1.023162));
-    hpcpush(hpxyz(-0.203174,-0.011881,1.020500));
-    hpcpush(hpxyz(-0.203174,0.011881,1.020500));
-    }
-  else {
-    hpcpush(hpxyzsc(-0.007346,-0.123992,1.007685));
-    hpcpush(hpxyzsc(0.122987,-0.173919,1.022435));
-    hpcpush(hpxyzsc(0.061557,-0.116488,1.008642));
-    hpcpush(hpxyzsc(0.202542,-0.163574,1.033334));
-    hpcpush(hpxyzsc(0.147987,-0.118203,1.017778));
-    hpcpush(hpxyzsc(0.282832,-0.158128,1.051189));
-    hpcpush(hpxyzsc(0.213251,-0.117597,1.029226));
-    hpcpush(hpxyzsc(0.363492,-0.156273,1.075429));
-    hpcpush(hpxyzsc(0.302775,-0.112860,1.050909));
-    hpcpush(hpxyzsc(0.441499,-0.158901,1.104613));
-    hpcpush(hpxyzsc(0.388517,-0.109014,1.078346));
-    hpcpush(hpxyzsc(0.509440,-0.155192,1.132967));
-    hpcpush(hpxyzsc(0.465857,-0.105710,1.108240));
-    hpcpush(hpxyzsc(0.586378,-0.160120,1.170247));
-    hpcpush(hpxyzsc(0.536831,-0.108756,1.140182));
-    hpcpush(hpxyzsc(0.666714,-0.160638,1.212564));
-    hpcpush(hpxyzsc(0.614597,-0.110994,1.179003));
-    hpcpush(hpxyzsc(0.707340,-0.118674,1.230615));
-    hpcpush(hpxyzsc(0.642298,-0.079128,1.191137));
-    hpcpush(hpxyzsc(0.729313,-0.077848,1.240144));
-    hpcpush(hpxyzsc(0.661282,-0.043253,1.199652));
-    hpcpush(hpxyzsc(0.733677,-0.031495,1.240675));
-    hpcpush(hpxyzsc(0.672818,-0.004657,1.205282));
-    hpcpush(hpxyzsc(0.672818,0.004657,1.205282));
-    hpcpush(hpxyzsc(0.733677,0.031495,1.240675));
-    hpcpush(hpxyzsc(0.661282,0.043253,1.199652));
-    hpcpush(hpxyzsc(0.729313,0.077848,1.240144));
-    hpcpush(hpxyzsc(0.642298,0.079128,1.191137));
-    hpcpush(hpxyzsc(0.707340,0.118674,1.230615));
-    hpcpush(hpxyzsc(0.614597,0.110994,1.179003));
-    hpcpush(hpxyzsc(0.666714,0.160638,1.212564));
-    hpcpush(hpxyzsc(0.536831,0.108756,1.140182));
-    hpcpush(hpxyzsc(0.586378,0.160120,1.170247));
-    hpcpush(hpxyzsc(0.465857,0.105710,1.108240));
-    hpcpush(hpxyzsc(0.509440,0.155192,1.132967));
-    hpcpush(hpxyzsc(0.388517,0.109014,1.078346));
-    hpcpush(hpxyzsc(0.441499,0.158901,1.104613));
-    hpcpush(hpxyzsc(0.302775,0.112860,1.050909));
-    hpcpush(hpxyzsc(0.363492,0.156273,1.075429));
-    hpcpush(hpxyzsc(0.213251,0.117597,1.029226));
-    hpcpush(hpxyzsc(0.282832,0.158128,1.051189));
-    hpcpush(hpxyzsc(0.147987,0.118203,1.017778));
-    hpcpush(hpxyzsc(0.202542,0.163574,1.033334));
-    hpcpush(hpxyzsc(0.061557,0.116488,1.008642));
-    hpcpush(hpxyzsc(0.122987,0.173919,1.022435));
-    hpcpush(hpxyzsc(-0.007346,0.123992,1.007685));
-    hpcpush(hpxyzsc(-0.007346,-0.123992,1.007685));
-    }
-  
-  bshape(shSolidBranch, 20);
-  hpcpush(hpxyzsc(0.128555,0.209748,1.029816));
-  hpcpush(hpxyzsc(0.199690,0.215574,1.042280));
-  hpcpush(hpxyzsc(0.254193,0.204038,1.051782));
-  hpcpush(hpxyzsc(0.210912,0.198439,1.041087));
-  hpcpush(hpxyzsc(0.140478,0.162954,1.022882));
-  hpcpush(hpxyzsc(0.065662,0.046742,1.003243));
-  hpcpush(hpxyzsc(0.052259,0.011119,1.001426));
-  hpcpush(hpxyzsc(0.052259,-0.011119,1.001426));
-  hpcpush(hpxyzsc(0.065662,-0.046742,1.003243));
-  hpcpush(hpxyzsc(0.140478,-0.162954,1.022882));
-  hpcpush(hpxyzsc(0.210912,-0.198439,1.041087));
-  hpcpush(hpxyzsc(0.254193,-0.204038,1.051782));
-  hpcpush(hpxyzsc(0.199690,-0.215574,1.042280));
-  hpcpush(hpxyzsc(0.128555,-0.209748,1.029816));
-  hpcpush(hpxyzsc(0.117369,-0.216206,1.029816));
-  hpcpush(hpxyzsc(0.086848,-0.280723,1.042280));
-  hpcpush(hpxyzsc(0.049606,-0.322157,1.051782));
-  hpcpush(hpxyzsc(0.066397,-0.281875,1.041087));
-  hpcpush(hpxyzsc(0.070884,-0.203135,1.022882));
-  hpcpush(hpxyzsc(0.007649,-0.080236,1.003243));
-  hpcpush(hpxyzsc(-0.016500,-0.050818,1.001426));
-  hpcpush(hpxyzsc(-0.035759,-0.039699,1.001426));
-  hpcpush(hpxyzsc(-0.073311,-0.033494,1.003243));
-  hpcpush(hpxyzsc(-0.211362,-0.040180,1.022882));
-  hpcpush(hpxyzsc(-0.277309,-0.083436,1.041087));
-  hpcpush(hpxyzsc(-0.303799,-0.118118,1.051782));
-  hpcpush(hpxyzsc(-0.286537,-0.065149,1.042280));
-  hpcpush(hpxyzsc(-0.245924,-0.006458,1.029816));
-  hpcpush(hpxyzsc(-0.245924,0.006458,1.029816));
-  hpcpush(hpxyzsc(-0.286537,0.065149,1.042280));
-  hpcpush(hpxyzsc(-0.303799,0.118118,1.051782));
-  hpcpush(hpxyzsc(-0.277309,0.083436,1.041087));
-  hpcpush(hpxyzsc(-0.211362,0.040180,1.022882));
-  hpcpush(hpxyzsc(-0.073311,0.033494,1.003243));
-  hpcpush(hpxyzsc(-0.035759,0.039699,1.001426));
-  hpcpush(hpxyzsc(-0.016500,0.050818,1.001426));
-  hpcpush(hpxyzsc(0.007649,0.080236,1.003243));
-  hpcpush(hpxyzsc(0.070884,0.203135,1.022882));
-  hpcpush(hpxyzsc(0.066397,0.281875,1.041087));
-  hpcpush(hpxyzsc(0.049606,0.322157,1.051782));
-  hpcpush(hpxyzsc(0.086848,0.280723,1.042280));
-  hpcpush(hpxyzsc(0.117369,0.216206,1.029816));
-  hpcpush(hpxyzsc(0.128555,0.209748,1.029816));
-
-  bshape(shWeakBranch, 20);
-  hpcpush(hpxyzsc(0.022229,0.026675,1.000603));
-  hpcpush(hpxyzsc(0.044472,0.022236,1.001235));
-  hpcpush(hpxyzsc(0.075677,0.026710,1.003215));
-  hpcpush(hpxyzsc(0.114862,0.037915,1.007289));
-  hpcpush(hpxyzsc(0.161146,0.053715,1.014324));
-  hpcpush(hpxyzsc(0.167896,0.039176,1.014753));
-  hpcpush(hpxyzsc(0.135065,0.017860,1.009238));
-  hpcpush(hpxyzsc(0.127177,0.003347,1.008060));
-  hpcpush(hpxyzsc(0.127177,-0.003347,1.008060));
-  hpcpush(hpxyzsc(0.135065,-0.017860,1.009238));
-  hpcpush(hpxyzsc(0.167896,-0.039176,1.014753));
-  hpcpush(hpxyzsc(0.161146,-0.053715,1.014324));
-  hpcpush(hpxyzsc(0.114862,-0.037915,1.007289));
-  hpcpush(hpxyzsc(0.075677,-0.026710,1.003215));
-  hpcpush(hpxyzsc(0.044472,-0.022236,1.001235));
-  hpcpush(hpxyzsc(0.022229,-0.026675,1.000603));
-  hpcpush(hpxyzsc(0.011987,-0.032588,1.000603));
-  hpcpush(hpxyzsc(-0.002979,-0.049632,1.001235));
-  hpcpush(hpxyzsc(-0.014707,-0.078893,1.003215));
-  hpcpush(hpxyzsc(-0.024595,-0.118431,1.007289));
-  hpcpush(hpxyzsc(-0.034054,-0.166414,1.014324));
-  hpcpush(hpxyzsc(-0.050021,-0.164990,1.014753));
-  hpcpush(hpxyzsc(-0.052066,-0.125900,1.009238));
-  hpcpush(hpxyzsc(-0.060690,-0.111812,1.008060));
-  hpcpush(hpxyzsc(-0.066487,-0.108465,1.008060));
-  hpcpush(hpxyzsc(-0.083000,-0.108040,1.009238));
-  hpcpush(hpxyzsc(-0.117875,-0.125814,1.014753));
-  hpcpush(hpxyzsc(-0.127092,-0.112699,1.014324));
-  hpcpush(hpxyzsc(-0.090267,-0.080515,1.007289));
-  hpcpush(hpxyzsc(-0.060970,-0.052183,1.003215));
-  hpcpush(hpxyzsc(-0.041493,-0.027396,1.001235));
-  hpcpush(hpxyzsc(-0.034215,-0.005913,1.000603));
-  hpcpush(hpxyzsc(-0.034215,0.005913,1.000603));
-  hpcpush(hpxyzsc(-0.041493,0.027396,1.001235));
-  hpcpush(hpxyzsc(-0.060970,0.052183,1.003215));
-  hpcpush(hpxyzsc(-0.090267,0.080515,1.007289));
-  hpcpush(hpxyzsc(-0.127092,0.112699,1.014324));
-  hpcpush(hpxyzsc(-0.117875,0.125814,1.014753));
-  hpcpush(hpxyzsc(-0.083000,0.108040,1.009238));
-  hpcpush(hpxyzsc(-0.066487,0.108465,1.008060));
-  hpcpush(hpxyzsc(-0.060690,0.111812,1.008060));
-  hpcpush(hpxyzsc(-0.052066,0.125900,1.009238));
-  hpcpush(hpxyzsc(-0.050021,0.164990,1.014753));
-  hpcpush(hpxyzsc(-0.034054,0.166414,1.014324));
-  hpcpush(hpxyzsc(-0.024595,0.118431,1.007289));
-  hpcpush(hpxyzsc(-0.014707,0.078893,1.003215));
-  hpcpush(hpxyzsc(-0.002979,0.049632,1.001235));
-  hpcpush(hpxyzsc(0.011987,0.032588,1.000603));
-  hpcpush(hpxyzsc(0.022229,0.026675,1.000603));
-
-  bshape(shDragonWings, 35);
-  hpcpush(hpxyzsc(0.122700,0.018517,1.007670));
-  hpcpush(hpxyzsc(0.114272,0.053018,1.007903));
-  hpcpush(hpxyzsc(0.089169,0.100403,1.008976));
-  hpcpush(hpxyzsc(0.057758,0.136154,1.010878));
-  hpcpush(hpxyzsc(-0.006949,0.158795,1.012553));
-  hpcpush(hpxyzsc(-0.095746,0.184719,1.021415));
-  hpcpush(hpxyzsc(-0.062179,0.148185,1.012830));
-  hpcpush(hpxyzsc(-0.123227,0.161622,1.020444));
-  hpcpush(hpxyzsc(-0.083331,0.114547,1.009983));
-  hpcpush(hpxyzsc(-0.148338,0.120521,1.018101));
-  hpcpush(hpxyzsc(-0.091130,0.073903,1.006860));
-  hpcpush(hpxyzsc(-0.172062,0.072792,1.017302));
-  hpcpush(hpxyzsc(-0.108240,0.034096,1.006419));
-  hpcpush(hpxyzsc(-0.179205,0.026589,1.016278));
-  hpcpush(hpxyzsc(-0.114815,0.000267,1.006570));
-  hpcpush(hpxyzsc(-0.114815,-0.000267,1.006570));
-  hpcpush(hpxyzsc(-0.179205,-0.026589,1.016278));
-  hpcpush(hpxyzsc(-0.108240,-0.034096,1.006419));
-  hpcpush(hpxyzsc(-0.172062,-0.072792,1.017302));
-  hpcpush(hpxyzsc(-0.091130,-0.073903,1.006860));
-  hpcpush(hpxyzsc(-0.148338,-0.120521,1.018101));
-  hpcpush(hpxyzsc(-0.083331,-0.114547,1.009983));
-  hpcpush(hpxyzsc(-0.123227,-0.161622,1.020444));
-  hpcpush(hpxyzsc(-0.062179,-0.148185,1.012830));
-  hpcpush(hpxyzsc(-0.095746,-0.184719,1.021415));
-  hpcpush(hpxyzsc(-0.006949,-0.158795,1.012553));
-  hpcpush(hpxyzsc(0.057758,-0.136154,1.010878));
-  hpcpush(hpxyzsc(0.089169,-0.100403,1.008976));
-  hpcpush(hpxyzsc(0.114272,-0.053018,1.007903));
-  hpcpush(hpxyzsc(0.122700,-0.018517,1.007670));
-  hpcpush(hpxyzsc(0.122700,0.018517,1.007670));
-
-  bshape(shDragonLegs, 32);
-  hpcpush(hpxyzsc(0.134917,-0.000905,1.009061));
-  hpcpush(hpxyzsc(0.124854,0.043901,1.008720));
-  hpcpush(hpxyzsc(0.099656,0.088037,1.008802));
-  hpcpush(hpxyzsc(0.061927,0.126507,1.009871));
-  hpcpush(hpxyzsc(-0.022131,0.207886,1.021619));
-  hpcpush(hpxyzsc(-0.080657,0.255286,1.035218));
-  hpcpush(hpxyzsc(0.215933,0.322901,1.072796));
-  hpcpush(hpxyzsc(0.307187,0.312641,1.091837));
-  hpcpush(hpxyzsc(0.266293,0.353495,1.093559));
-  hpcpush(hpxyzsc(0.332413,0.379096,1.119916));
-  hpcpush(hpxyzsc(0.261603,0.390908,1.105100));
-  hpcpush(hpxyzsc(0.296236,0.449480,1.135688));
-  hpcpush(hpxyzsc(0.224166,0.406153,1.102366));
-  hpcpush(hpxyzsc(0.235023,0.466366,1.128155));
-  hpcpush(hpxyzsc(0.183625,0.408492,1.095712));
-  hpcpush(hpxyzsc(-0.160855,0.327637,1.064528));
-  hpcpush(hpxyzsc(-0.192176,0.275601,1.054935));
-  hpcpush(hpxyzsc(-0.152760,0.194158,1.030065));
-  hpcpush(hpxyzsc(-0.049616,0.086549,1.004964));
-  hpcpush(hpxyzsc(-0.073488,0.043239,1.003628));
-  hpcpush(hpxyzsc(-0.075888,0.011802,1.002945));
-  hpcpush(hpxyzsc(-0.075888,-0.011802,1.002945));
-  hpcpush(hpxyzsc(-0.073488,-0.043239,1.003628));
-  hpcpush(hpxyzsc(-0.049616,-0.086549,1.004964));
-  hpcpush(hpxyzsc(-0.152760,-0.194158,1.030065));
-  hpcpush(hpxyzsc(-0.192176,-0.275601,1.054935));
-  hpcpush(hpxyzsc(-0.160855,-0.327637,1.064528));
-  hpcpush(hpxyzsc(0.183625,-0.408492,1.095712));
-  hpcpush(hpxyzsc(0.235023,-0.466366,1.128155));
-  hpcpush(hpxyzsc(0.224166,-0.406153,1.102366));
-  hpcpush(hpxyzsc(0.296236,-0.449480,1.135688));
-  hpcpush(hpxyzsc(0.261603,-0.390908,1.105100));
-  hpcpush(hpxyzsc(0.332413,-0.379096,1.119916));
-  hpcpush(hpxyzsc(0.266293,-0.353495,1.093559));
-  hpcpush(hpxyzsc(0.307187,-0.312641,1.091837));
-  hpcpush(hpxyzsc(0.215933,-0.322901,1.072796));
-  hpcpush(hpxyzsc(-0.080657,-0.255286,1.035218));
-  hpcpush(hpxyzsc(-0.022131,-0.207886,1.021619));
-  hpcpush(hpxyzsc(0.061927,-0.126507,1.009871));
-  hpcpush(hpxyzsc(0.099656,-0.088037,1.008802));
-  hpcpush(hpxyzsc(0.124854,-0.043901,1.008720));
-  hpcpush(hpxyzsc(0.134917,0.000905,1.009061));
-  hpcpush(hpxyzsc(0.134917,-0.000905,1.009061));
-
-  bshape(shDragonTail, 32);
-  if(purehepta) {
-    hpcpush(hpxyz(0.363554,-0.008229,1.064067));
-    hpcpush(hpxyz(0.128365,-0.123955,1.015796));
-    hpcpush(hpxyz(-0.098304,-0.247909,1.034951));
-    hpcpush(hpxyz(-0.020731,-0.079043,1.003333));
-    hpcpush(hpxyz(-0.237275,-0.091634,1.031841));
-    hpcpush(hpxyz(-0.207909,-0.172106,1.035783));
-    hpcpush(hpxyz(-0.358930,-0.064586,1.064426));
-    hpcpush(hpxyz(-0.336385,-0.155676,1.066485));
-    hpcpush(hpxyz(-0.534253,-0.055873,1.135142));
-    hpcpush(hpxyz(-0.485229,-0.140288,1.120325));
-    hpcpush(hpxyz(-0.721828,-0.084122,1.236168));
-    hpcpush(hpxyz(-0.668232,-0.161876,1.213564));
-    hpcpush(hpxyz(-0.941472,-0.144105,1.380991));
-    hpcpush(hpxyz(-0.866272,-0.216238,1.340592));
-    hpcpush(hpxyz(-1.272595,-0.235195,1.635486));
-    hpcpush(hpxyz(-1.430879,-0.234454,1.761359));
-    hpcpush(hpxyz(-1.594270,-0.145883,1.887586));
-    hpcpush(hpxyz(-1.654478,-0.053066,1.933937));
-    hpcpush(hpxyz(-1.654478,0.053066,1.933937));
-    hpcpush(hpxyz(-1.594270,0.145883,1.887586));
-    hpcpush(hpxyz(-1.430879,0.234454,1.761359));
-    hpcpush(hpxyz(-1.272595,0.235195,1.635486));
-    hpcpush(hpxyz(-0.866272,0.216238,1.340592));
-    hpcpush(hpxyz(-0.941472,0.144105,1.380991));
-    hpcpush(hpxyz(-0.668232,0.161876,1.213564));
-    hpcpush(hpxyz(-0.721828,0.084122,1.236168));
-    hpcpush(hpxyz(-0.485229,0.140288,1.120325));
-    hpcpush(hpxyz(-0.534253,0.055873,1.135142));
-    hpcpush(hpxyz(-0.336385,0.155676,1.066485));
-    hpcpush(hpxyz(-0.358930,0.064586,1.064426));
-    hpcpush(hpxyz(-0.207909,0.172106,1.035783));
-    hpcpush(hpxyz(-0.237275,0.091634,1.031841));
-    hpcpush(hpxyz(-0.020731,0.079043,1.003333));
-    hpcpush(hpxyz(-0.098304,0.247909,1.034951));
-    hpcpush(hpxyz(0.128365,0.123955,1.015796));
-    hpcpush(hpxyz(0.363554,0.008229,1.064067));
-    hpcpush(hpxyz(0.363554,-0.008229,1.064067));
-  } else {  
-    hpcpush(hpxyzsc(-0.778183,-0.033498,1.267553));
-    hpcpush(hpxyzsc(-0.773667,-0.113471,1.269424));
-    hpcpush(hpxyzsc(-0.718901,-0.170803,1.243379));
-    hpcpush(hpxyzsc(-0.626330,-0.194636,1.195898));
-    hpcpush(hpxyzsc(-0.662726,-0.150620,1.209087));
-    hpcpush(hpxyzsc(-0.561857,-0.166840,1.159103));
-    hpcpush(hpxyzsc(-0.594130,-0.120798,1.169437));
-    hpcpush(hpxyzsc(-0.492551,-0.149697,1.124729));
-    hpcpush(hpxyzsc(-0.515916,-0.118685,1.131484));
-    hpcpush(hpxyzsc(-0.385534,-0.144280,1.081413));
-    hpcpush(hpxyzsc(-0.422856,-0.102151,1.090524));
-    hpcpush(hpxyzsc(-0.286384,-0.135043,1.048929));
-    hpcpush(hpxyzsc(-0.334390,-0.084182,1.057782));
-    hpcpush(hpxyzsc(-0.207305,-0.108259,1.026984));
-    hpcpush(hpxyzsc(-0.268575,-0.064828,1.037466));
-    hpcpush(hpxyzsc(-0.167373,-0.087126,1.017647));
-    hpcpush(hpxyzsc(-0.211574,-0.057493,1.023752));
-    hpcpush(hpxyzsc(-0.167164,-0.050378,1.015126));
-    hpcpush(hpxyzsc(-0.104898,-0.050168,1.006737));
-    hpcpush(hpxyzsc(-0.043224,-0.045499,1.001967));
-    hpcpush(hpxyzsc(0.038675,-0.050050,1.001998));
-    hpcpush(hpxyzsc(0.061460,-0.050078,1.003138));
-    hpcpush(hpxyzsc(-0.018255,-0.125501,1.008010));
-    hpcpush(hpxyzsc(0.206740,-0.025268,1.021460));
-    hpcpush(hpxyzsc(0.268300,-0.004626,1.035377));
-    hpcpush(hpxyzsc(0.268300,0.004626,1.035377));
-    hpcpush(hpxyzsc(0.206740,0.025268,1.021460));
-    hpcpush(hpxyzsc(-0.018255,0.125501,1.008010));
-    hpcpush(hpxyzsc(0.061460,0.050078,1.003138));
-    hpcpush(hpxyzsc(0.038675,0.050050,1.001998));
-    hpcpush(hpxyzsc(-0.043224,0.045499,1.001967));
-    hpcpush(hpxyzsc(-0.104898,0.050168,1.006737));
-    hpcpush(hpxyzsc(-0.167164,0.050378,1.015126));
-    hpcpush(hpxyzsc(-0.211574,0.057493,1.023752));
-    hpcpush(hpxyzsc(-0.167373,0.087126,1.017647));
-    hpcpush(hpxyzsc(-0.268575,0.064828,1.037466));
-    hpcpush(hpxyzsc(-0.207305,0.108259,1.026984));
-    hpcpush(hpxyzsc(-0.334390,0.084182,1.057782));
-    hpcpush(hpxyzsc(-0.286384,0.135043,1.048929));
-    hpcpush(hpxyzsc(-0.422856,0.102151,1.090524));
-    hpcpush(hpxyzsc(-0.385534,0.144280,1.081413));
-    hpcpush(hpxyzsc(-0.515916,0.118685,1.131484));
-    hpcpush(hpxyzsc(-0.492551,0.149697,1.124729));
-    hpcpush(hpxyzsc(-0.594130,0.120798,1.169437));
-    hpcpush(hpxyzsc(-0.561857,0.166840,1.159103));
-    hpcpush(hpxyzsc(-0.662726,0.150620,1.209087));
-    hpcpush(hpxyzsc(-0.626330,0.194636,1.195898));
-    hpcpush(hpxyzsc(-0.718901,0.170803,1.243379));
-    hpcpush(hpxyzsc(-0.773667,0.113471,1.269424));
-    hpcpush(hpxyzsc(-0.778183,0.033498,1.267553));
-    hpcpush(hpxyzsc(-0.778183,-0.033498,1.267553));
-    }
-
-  bshape(shDragonNostril, 35);
-  hpcpush(hpxyzsc(-0.196345,-0.030293,1.019543));
-  hpcpush(hpxyzsc(-0.173587,-0.042557,1.015846));
-  hpcpush(hpxyzsc(-0.146359,-0.027931,1.011040));
-  hpcpush(hpxyzsc(-0.175798,-0.019035,1.015513));
-  hpcpush(hpxyzsc(-0.196345,-0.030293,1.019543));
-
-  bshape(shDragonHead, 34);
-  hpcpush(hpxyzsc(-0.234288,-0.029286,1.027496));
-  hpcpush(hpxyzsc(-0.210215,-0.057331,1.023463));
-  hpcpush(hpxyzsc(-0.171514,-0.080712,1.017807));
-  hpcpush(hpxyzsc(-0.173633,-0.053770,1.016386));
-  hpcpush(hpxyzsc(-0.129710,-0.093928,1.012742));
-  hpcpush(hpxyzsc(-0.135211,-0.068164,1.011399));
-  hpcpush(hpxyzsc(-0.091567,-0.108317,1.010008));
-  hpcpush(hpxyzsc(-0.094829,-0.085904,1.008153));
-  hpcpush(hpxyzsc(-0.053575,-0.123893,1.009069));
-  hpcpush(hpxyzsc(-0.056851,-0.099211,1.006516));
-  hpcpush(hpxyzsc(-0.016761,-0.149729,1.011286));
-  hpcpush(hpxyzsc(-0.015612,-0.119318,1.007214));
-  hpcpush(hpxyzsc(0.010056,-0.149722,1.011196));
-  hpcpush(hpxyzsc(0.034683,-0.163345,1.013846));
-  hpcpush(hpxyzsc(0.042545,-0.170178,1.015269));
-  hpcpush(hpxyzsc(0.097987,-0.213995,1.027324));
-  hpcpush(hpxyzsc(0.128990,-0.241008,1.036689));
-  hpcpush(hpxyzsc(0.156615,-0.250811,1.042801));
-  hpcpush(hpxyzsc(0.192347,-0.250392,1.048663));
-  hpcpush(hpxyzsc(0.215391,-0.242742,1.051340));
-  hpcpush(hpxyzsc(0.241399,-0.208378,1.049617));
-  hpcpush(hpxyzsc(0.244430,-0.187586,1.046391));
-  hpcpush(hpxyzsc(0.234221,-0.201248,1.046595));
-  hpcpush(hpxyzsc(0.205478,-0.215695,1.043430));
-  hpcpush(hpxyzsc(0.188163,-0.216501,1.040326));
-  hpcpush(hpxyzsc(0.172921,-0.200046,1.034370));
-  hpcpush(hpxyzsc(0.159959,-0.174604,1.027654));
-  hpcpush(hpxyzsc(0.152696,-0.138100,1.020974));
-  hpcpush(hpxyzsc(0.161616,-0.121212,1.020202));
-  hpcpush(hpxyzsc(0.207372,-0.122845,1.028637));
-  hpcpush(hpxyzsc(0.171669,-0.100982,1.019641));
-  hpcpush(hpxyzsc(0.218526,-0.090114,1.027557));
-  hpcpush(hpxyzsc(0.180599,-0.077400,1.019121));
-  hpcpush(hpxyzsc(0.232188,-0.067628,1.028827));
-  hpcpush(hpxyzsc(0.196472,-0.059503,1.020853));
-  hpcpush(hpxyzsc(0.244802,-0.047381,1.030618));
-  hpcpush(hpxyzsc(0.210112,-0.035955,1.022467));
-  hpcpush(hpxyzsc(0.244719,-0.029321,1.029926));
-  hpcpush(hpxyzsc(0.215818,-0.023605,1.023296));
-  hpcpush(hpxyzsc(0.241204,-0.016907,1.028817));
-  hpcpush(hpxyzsc(0.212345,-0.008988,1.022336));
-  hpcpush(hpxyzsc(0.244667,-0.001127,1.029497));
-  hpcpush(hpxyzsc(0.244667,0.001127,1.029497));
-  hpcpush(hpxyzsc(0.212345,0.008988,1.022336));
-  hpcpush(hpxyzsc(0.241204,0.016907,1.028817));
-  hpcpush(hpxyzsc(0.215818,0.023605,1.023296));
-  hpcpush(hpxyzsc(0.244719,0.029321,1.029926));
-  hpcpush(hpxyzsc(0.210112,0.035955,1.022467));
-  hpcpush(hpxyzsc(0.244802,0.047381,1.030618));
-  hpcpush(hpxyzsc(0.196472,0.059503,1.020853));
-  hpcpush(hpxyzsc(0.232188,0.067628,1.028827));
-  hpcpush(hpxyzsc(0.180599,0.077400,1.019121));
-  hpcpush(hpxyzsc(0.218526,0.090114,1.027557));
-  hpcpush(hpxyzsc(0.171669,0.100982,1.019641));
-  hpcpush(hpxyzsc(0.207372,0.122845,1.028637));
-  hpcpush(hpxyzsc(0.161616,0.121212,1.020202));
-  hpcpush(hpxyzsc(0.152696,0.138100,1.020974));
-  hpcpush(hpxyzsc(0.159959,0.174604,1.027654));
-  hpcpush(hpxyzsc(0.172921,0.200046,1.034370));
-  hpcpush(hpxyzsc(0.188163,0.216501,1.040326));
-  hpcpush(hpxyzsc(0.205478,0.215695,1.043430));
-  hpcpush(hpxyzsc(0.234221,0.201248,1.046595));
-  hpcpush(hpxyzsc(0.244430,0.187586,1.046391));
-  hpcpush(hpxyzsc(0.241399,0.208378,1.049617));
-  hpcpush(hpxyzsc(0.215391,0.242742,1.051340));
-  hpcpush(hpxyzsc(0.192347,0.250392,1.048663));
-  hpcpush(hpxyzsc(0.156615,0.250811,1.042801));
-  hpcpush(hpxyzsc(0.128990,0.241008,1.036689));
-  hpcpush(hpxyzsc(0.097987,0.213995,1.027324));
-  hpcpush(hpxyzsc(0.042545,0.170178,1.015269));
-  hpcpush(hpxyzsc(0.034683,0.163345,1.013846));
-  hpcpush(hpxyzsc(0.010056,0.149722,1.011196));
-  hpcpush(hpxyzsc(-0.015612,0.119318,1.007214));
-  hpcpush(hpxyzsc(-0.016761,0.149729,1.011286));
-  hpcpush(hpxyzsc(-0.056851,0.099211,1.006516));
-  hpcpush(hpxyzsc(-0.053575,0.123893,1.009069));
-  hpcpush(hpxyzsc(-0.094829,0.085904,1.008153));
-  hpcpush(hpxyzsc(-0.091567,0.108317,1.010008));
-  hpcpush(hpxyzsc(-0.135211,0.068164,1.011399));
-  hpcpush(hpxyzsc(-0.129710,0.093928,1.012742));
-  hpcpush(hpxyzsc(-0.173633,0.053770,1.016386));
-  hpcpush(hpxyzsc(-0.171514,0.080712,1.017807));
-  hpcpush(hpxyzsc(-0.210215,0.057331,1.023463));
-  hpcpush(hpxyzsc(-0.234288,0.029286,1.027496));
-  hpcpush(hpxyzsc(-0.234288,-0.029286,1.027496));
-  
-
-  bshape(shRose, 21);
-  for(int t=0; t<84; t++) 
-    hpcpush(spin(M_PI * t / 42.0) * xpush(crossf * (0.2 + .15 * sin(M_PI * t / 42 * 3))) * C0);
-
-  bshape(shThorns, 15);
-  for(int t=0; t<60; t++) 
-    hpcpush(spin(M_PI * t / 30.0) * xpush(crossf * ((t&1) ? 0.3 : 0.6)) * C0);
-
-  bshape(shBead0, 20);
-  hpcpush(hpxyz(0.340267,-0.226747,1.080368));
-  hpcpush(hpxyz(0.208689,-0.202368,1.041395));
-  hpcpush(hpxyz(0.208689,0.202368,1.041395));
-  hpcpush(hpxyz(0.340267,0.226747,1.080368));
-  hpcpush(hpxyz(0.340267,-0.226747,1.080368));
-
-  bshape(shBead1, 20);
-  hpcpush(hpxyz(-0.186883,0.074525,1.020039));
-  hpcpush(hpxyz(-0.165331,0.041449,1.014422));
-  hpcpush(hpxyz(-0.154901,0.003708,1.011933));
-  hpcpush(hpxyz(-0.156520,-0.035345,1.012792));
-  hpcpush(hpxyz(-0.170044,-0.072239,1.016924));
-  hpcpush(hpxyz(-0.194272,-0.103696,1.023960));
-  hpcpush(hpxyz(-0.227049,-0.126921,1.033276));
-  hpcpush(hpxyz(-0.265465,-0.139850,1.044045));
-  hpcpush(hpxyz(-0.306106,-0.141335,1.055309));
-  hpcpush(hpxyz(-0.345360,-0.131244,1.066067));
-  hpcpush(hpxyz(-0.379739,-0.110473,1.075363));
-  hpcpush(hpxyz(-0.406190,-0.080868,1.082372));
-  hpcpush(hpxyz(-0.422362,-0.045059,1.086471));
-  hpcpush(hpxyz(-0.426817,-0.006228,1.087295));
-  hpcpush(hpxyz(-0.419160,0.032174,1.084772));
-  hpcpush(hpxyz(-0.400071,0.066735,1.079125));
-  hpcpush(hpxyz(-0.371247,0.094385,1.070856));
-  hpcpush(hpxyz(-0.335248,0.112667,1.060700));
-  hpcpush(hpxyz(-0.295273,0.119955,1.049560));
-  hpcpush(hpxyz(-0.254875,0.115604,1.038424));
-  hpcpush(hpxyz(-0.217642,0.099998,1.028284));
-  hpcpush(hpxyz(-0.186883,0.074525,1.020039));
-
-  bshapeend();
-
-  prehpc = qhpc;
-  DEBB(DF_INIT, (debugfile,"hpc = %d\n", qhpc));
-  }
-
-void initShape(int sg, int id) {
-
-  if(!usershapes[sg][id]) {
-    usershape *us = new usershape;
-    usershapes[sg][id] = us;
-
-    for(int i=0; i<USERLAYERS; i++) {
-      us->d[i].sh.prio = (sg >= 3 ? 1:50) + i;
-
-      us->d[i].rots = 1;
-      us->d[i].sym = 0;
-      us->d[i].shift = C0;
-      us->d[i].spin = Cx1;
-      us->d[i].color = 0;
-      }
-    }
-  }
+transmatrix shadowmulmatrix;
 
 void pushShape(const usershapelayer& ds) {
 
@@ -9953,8 +824,746 @@ void pushShape(const usershapelayer& ds) {
   hpcpush(T * ds.list[0]);
   }
 
-void saveImages() {
-  qhpc = prehpc;
+void buildpolys() {
+
+  geom3::compute();
+  DEBB(DF_INIT, (debugfile,"buildpolys\n"));
+
+  // printf("crossf = %f euclid = %d sphere = %d\n", float(crossf), euclid, sphere);
+  qhpc = 0;
+
+  bshape(shMovestar, PPR_MOVESTAR);
+  for(int i=0; i<8; i++) {
+    hpcpush(spin(M_PI * i/4) * xpush(crossf) * spin(M_PI * i/4) * C0);
+    hpcpush(spin(M_PI * i/4 + M_PI/8) * xpush(crossf/4) * spin(M_PI * i/4 + M_PI/8) * C0);
+    }
+  
+  // scales
+  scalef = purehepta ? crossf / hcrossf : 1;
+  double scalef2 = purehepta ? crossf / hcrossf * .88 : 1;
+  
+  double spzoom = sphere ? 1.4375 : 1;
+  
+  double spzoom6 = sphere ? 1.2375 : 1;
+  double spzoom7 = sphere ? .8 : 1;
+  double spzoomd7 = (purehepta && sphere) ? 1 : spzoom7;
+
+#define SHADMUL 1.3
+  
+  // procedural floors
+  double shexf = purehepta ? crossf* .55 : hexf;    
+  
+  bshape(shTriheptaFloor[0], PPR_FLOOR);
+  for(int t=0; t<=3; t++) hpcpush(ddi(t*S28, scalef*spzoom6*.2776) * C0);
+
+  bshape(shTriheptaFloor[1], PPR_FLOOR);
+  for(int t=0; t<=S7; t++) hpcpush(ddi(t*12, sphere ? .54 : scalef*spzoom6*.5273) * C0);
+
+  bshape(shTriheptaFloorShadow[0], PPR_FLOOR);
+  for(int t=0; t<=3; t++) hpcpush(ddi(t*S28, scalef*spzoom6*.2776*SHADMUL) * C0);
+
+  bshape(shTriheptaFloorShadow[1], PPR_FLOOR);
+  for(int t=0; t<=S7; t++) hpcpush(ddi(t*12, sphere ? .54 : scalef*spzoom6*.5273*SHADMUL) * C0);
+
+  bshape(shFloor[0], PPR_FLOOR);
+  for(int t=0; t<=6; t++) hpcpush(ddi(S7 + t*S14, shexf*.8*spzoom) * C0);
+
+  bshape(shCircleFloor, PPR_FLOOR);
+  for(int t=0; t<=84; t+=2) hpcpush(ddi(t, shexf*.7*spzoom) * C0);
+
+  bshape(shFloor[1], PPR_FLOOR);
+  for(int t=0; t<=S7; t++) hpcpush(ddi(t*12, shexf*.94) * C0);
+
+  for(int i=0; i<3; i++) for(int j=0; j<3; j++) shadowmulmatrix[i][j] =
+    i==2&&j==2 ? 1:
+    i==j ? SHADMUL:
+    0;
+  
+  bshape(shFloorShadow[0], PPR_FLOOR);
+  for(int t=0; t<=6; t++) hpcpush(ddi(S7 + t*S14, shexf*.8*spzoom*SHADMUL) * C0);
+
+  bshape(shFloorShadow[1], PPR_FLOOR);
+  for(int t=0; t<=S7; t++) hpcpush(ddi(t*12, shexf*.94*SHADMUL) * C0);
+  
+  // sidewalls for the 3D mode
+  for(int k=0; k<SIDEPARS; k++) {
+    double dlow=1, dhi=1;
+    if(k==SIDE_WALL) dhi = geom3::WALL;
+    else if(k==SIDE_LAKE) dlow = geom3::LAKE;
+    else if(k==SIDE_LTOB) dlow = geom3::BOTTOM, dhi = geom3::LAKE;
+    else if(k==SIDE_BTOI) dlow = geom3::INFDEEP, dhi = geom3::BOTTOM;
+    else if(k==SIDE_WTS3) dlow = geom3::SLEV[3], dhi = geom3::WALL;
+    else dlow = geom3::SLEV[k-SIDE_SLEV], dhi = geom3::SLEV[k-SIDE_SLEV+1];
+    
+    validsidepar[k] = (dlow > 0 && dhi > 0) || (dlow < 0 && dhi < 0);
+
+    bshape(shFloorSide[k][0], PPR_LAKEWALL);
+    for(int t=0; t<=1; t++) hpcpush(ddi(t*S14-S7, shexf*.8*spzoom) * C0);
+    chasmifyPoly(dlow, dhi, k);
+    
+    bshape(shFloorSide[k][1], PPR_LAKEWALL);
+    for(int t=0; t<=1; t++) hpcpush(ddi(t*12-6, shexf*.94) * C0);
+    chasmifyPoly(dlow, dhi, k);
+
+    bshape(shSemiFloorSide[k], PPR_LAKEWALL);
+    for(int t=0; t<=3; t+=3) hpcpush(ddi(S7 + (3+t)*S14, shexf*.8*spzoom) * C0);
+    chasmifyPoly(dlow, dhi, k);
+
+    bshape(shTriheptaSide[k][0], PPR_LAKEWALL);
+    for(int t=0; t<=1; t++) hpcpush(ddi(t*S28-S14, scalef*spzoom6*.2776) * C0);
+    chasmifyPoly(dlow, dhi, k);
+  
+    bshape(shTriheptaSide[k][1], PPR_LAKEWALL);
+    for(int t=0; t<=1; t++) hpcpush(ddi(t*12-6, sphere ?.54 : scalef*spzoom6*.5273) * C0);
+    chasmifyPoly(dlow, dhi, k);
+
+    bshape(shMFloorSide[k][0], PPR_LAKEWALL);
+    for(int t=0; t<=1; t++) hpcpush(ddi(t*S14-S7, shexf*.7*spzoom) * C0);
+    chasmifyPoly(dlow, dhi, k);
+
+    bshape(shMFloorSide[k][1], PPR_LAKEWALL);
+    for(int t=0; t<=1; t++) hpcpush(ddi(t*12-6, shexf*.8) * C0);
+    chasmifyPoly(dlow, dhi, k);
+    }
+
+  for(int d=0; d<2; d++) {
+    bshape(shSemiFloor[d], PPR_FLOOR);
+    for(int t=0; t<=4; t++) hpcpush(ddi(S7 + (3+3*d+t%4)*S14, shexf*.8*spzoom) * C0);
+    }
+
+  bshape(shMFloor[0], PPR_FLOORa);
+  for(int t=0; t<=6; t++) hpcpush(ddi(S7 + t*S14, shexf*.7*spzoom) * C0);
+
+  bshape(shMFloor[1], PPR_FLOORa);
+  for(int t=0; t<=S7; t++) hpcpush(ddi(t*12, shexf*.8) * C0);
+
+  bshape(shMFloor2[0], PPR_FLOORb);
+  for(int t=0; t<=6; t++) hpcpush(ddi(S7 + t*S14, shexf*.6*spzoom) * C0);
+
+  bshape(shMFloor2[1], PPR_FLOORb);
+  for(int t=0; t<=S7; t++) hpcpush(ddi(t*12, shexf*.7) * C0);
+  
+  bshape(shMFloor3[0], PPR_FLOORc);
+  for(int t=0; t<=6; t++) hpcpush(ddi(S7 + t*S14, shexf*.5*spzoom) * C0);
+
+  bshape(shMFloor3[1], PPR_FLOORc);
+  for(int t=0; t<=S7; t++) hpcpush(ddi(t*12, shexf*.6) * C0);
+  
+  bshape(shMFloor4[0], PPR_FLOORd);
+  for(int t=0; t<=6; t++) hpcpush(ddi(S7 + t*S14, shexf*.4*spzoom) * C0);
+
+  bshape(shMFloor4[1], PPR_FLOORd);
+  for(int t=0; t<=S7; t++) hpcpush(ddi(t*12, shexf*.5) * C0);
+
+  bshape(shBigCarpet1, PPR_GFLOORa);
+//for(int t=0; t<=7; t++) hpcpush(ddi(t*12, -shexf*3.5) * C0);  
+  for(int t=0; t<=S7; t++) hpcpush(ddi(t*12, -shexf*2.1) * C0);  
+
+  bshape(shBigCarpet2, PPR_GFLOORb);
+//for(int t=0; t<=7; t++) hpcpush(ddi(t*12, -shexf*3.4) * C0);
+  for(int t=0; t<=S7; t++) hpcpush(ddi(t*12, -shexf*1.9) * C0);
+
+  bshape(shBigCarpet3, PPR_GFLOORc);
+//for(int t=0; t<=7; t++) hpcpush(ddi(t*12, -shexf*3.4) * C0);
+  for(int t=0; t<=S7; t++) hpcpush(ddi(t*12*3, -shexf*1.7) * C0);
+
+  bshape(shBFloor[0], PPR_BFLOOR);
+  for(int t=0; t<=6; t++) hpcpush(ddi(S7 + t*S14, shexf*.1) * C0);
+
+  bshape(shBFloor[1], PPR_BFLOOR);
+  for(int t=0; t<=S7; t++) hpcpush(ddi(t*12, shexf*.1) * C0);
+  
+  bshape(shMineMark[0], PPR_MINEMARK);
+  for(int t=0; t<=6; t++) hpcpush(ddi(S7 + t*S14, shexf*.1) * C0);
+
+  bshape(shMineMark[1], PPR_MINEMARK);
+  for(int t=0; t<=S7; t++) hpcpush(ddi(t*12, shexf*.1) * C0);
+  
+  for(int d=0; d<2; d++) {
+    bshape(shSemiBFloor[d], PPR_BFLOOR);
+    for(int t=0; t<=4; t++) hpcpush(ddi(S7 + (3+3*d+t%4)*S14, shexf*.1) * C0);
+    }
+
+  // walls etc
+  
+  bshape(shGiantStar[1], PPR_GFLOORa);
+  for(int t=0; t<=S7; t++) hpcpush(ddi(t*36, -shexf*2.4) * C0);
+
+  bshape(shGiantStar[0], PPR_GFLOORa);
+  for(int t=0; t<=6; t++) {
+    hpcpush(ddi(t*S14, -shexf*2.4) * C0);
+    hpcpush(ddi(t*S14+S7, shexf*1.5) * C0);
+    }
+  hpcpush(ddi(0, -shexf*2.4) * C0);
+  
+  bshape(shMirror, PPR_WALL);
+  if(purehepta) {
+    for(int t=0; t<=S7; t++) hpcpush(ddi(t*12, shexf*.8) * C0);
+    }
+  else {
+    for(int t=0; t<=6; t++) hpcpush(ddi(S7 + t*S14, shexf*.7) * C0);
+    }
+
+  bshape(shWall[0], PPR_WALL);
+  for(int t=0; t<=6; t++) {
+    hpcpush(ddi(S7 + t*S14, shexf*.8) * C0);
+    hpcpush(ddi(S14 + t*S14, shexf*.2) * C0);
+    }
+  
+  bshape(shWall[1], PPR_WALL);
+  for(int t=0; t<=S7; t++) hpcpush(ddi(t*36, shexf*.94) * C0);
+
+  bshape(shCross, PPR_WALL);
+  for(int i=0; i<=S84; i+=S7)
+    hpcpush(ddi(i, shexf * (i%3 ? 0.8 : 0.3)) * C0);
+
+// items
+  
+  bshape(shGem[0], PPR_ITEM);
+  for(int t=0; t<=6; t++) {
+    hpcpush(ddi(S7 + t*S14, shexf*.4) * C0);
+    hpcpush(ddi(S14 + t*S14, shexf*.1) * C0);
+    }
+  
+  bshape(shGem[1], PPR_ITEM);
+  for(int t=0; t<=S7; t++) hpcpush(ddi(t*36, shexf*.5) * C0);
+
+  bshape(shStar, PPR_ITEM);
+  for(int t=0; t<S84; t+=6) {
+    hpcpush(ddi(t,   shexf*.2) * C0);
+    hpcpush(ddi(t+3,   shexf*.6) * C0);
+    }
+
+  bshape(shDaisy, PPR_ITEM);
+  for(int t=0; t<=6; t++) {
+    hpcpush(ddi(t*S14, shexf*.8*3/4) * C0);
+    hpcpush(ddi(t*S14+S7, shexf*-.5*3/4) * C0);
+    }
+  hpcpush(ddi(0, shexf*.6) * C0);
+
+  bshape(shTriangle, PPR_ITEM);
+  for(int t=0; t<=4; t++) {
+    hpcpush(ddi(t*S28, shexf*.5) * C0);
+    }
+
+  bshape(shDisk, PPR_ITEM);
+  for(int i=0; i<=S84; i+=3)
+    hpcpush(ddi(i, crossf * .2) * C0);
+
+  bshape(shDiskT, PPR_ITEM);
+  for(int i=0; i<=S84; i+=S28)
+    hpcpush(ddi(i, crossf * .2) * C0);
+
+  bshape(shDiskS, PPR_ITEM);
+  for(int i=0; i<=S84; i+=S21) {
+    hpcpush(ddi(i, crossf * .2) * C0);
+    hpcpush(ddi(i+S21/3, crossf * .1) * C0);
+    hpcpush(ddi(i+S21-S21/3, crossf * .1) * C0);
+    }
+
+  bshape(shDiskM, PPR_ITEM);
+  for(int i=0; i<=S84; i+=3) {
+    hpcpush(ddi(i, crossf * .1) * C0);
+    }
+
+  bshape(shDiskSq, PPR_ITEM);
+  for(int i=0; i<=S84; i+=21) {
+    hpcpush(ddi(i, crossf * .15) * C0);
+    }
+
+  bshape(shEgg, PPR_ITEM);
+  for(int i=0; i<=S84; i+=3)
+    hpcpush(hpxy(sin(i*2*M_PI/S84)*.15, cos(i*2*M_PI/S84)*.11));
+  
+  bshape(shRing, PPR_ITEM);
+  for(int i=0; i<=S84; i+=3)
+    hpcpush(ddi(i, crossf * .25) * C0);
+  for(int i=S84; i>=0; i--)
+    hpcpush(ddi(i, crossf * .30) * C0);
+  hpcpush(ddi(0, crossf * .25) * C0);
+  
+  bshape(shSpikedRing, PPR_ITEM);
+  for(int i=0; i<=S84; i+=3)
+    hpcpush(ddi(i, crossf * .25) * C0);
+  for(int i=S84; i>=0; i--)
+    hpcpush(ddi(i, crossf * (i&1?.35:.30)) * C0);
+  hpcpush(ddi(0, crossf * .25) * C0);
+  
+  bshape(shTargetRing, PPR_ITEM);
+  for(int i=0; i<=S84; i+=3)
+    hpcpush(ddi(i, crossf * .25) * C0);
+  for(int i=S84; i>=0; i--)
+    hpcpush(ddi(i, crossf * (i >= S42-6 && i <= S42+6 ?.36:.30)) * C0);
+  hpcpush(ddi(0, crossf * .25) * C0);
+  
+  bshape(shSpearRing, PPR_ITEM);
+  for(int i=0; i<=S84; i+=3)
+    hpcpush(ddi(i, crossf * .25) * C0);
+  for(int i=S84; i>=0; i--) {
+    int d = i - S42;
+    if(d<0) d = -d;
+    d = 8 - 2 * d;
+    if(d<0) d = 0;
+    hpcpush(ddi(i, crossf * (.3 + .04 * d)) * C0);
+    }
+  hpcpush(ddi(0, crossf * .25) * C0);
+  
+  bshape(shSawRing, PPR_ITEM);
+  for(int i=0; i<=S84; i+=3)
+    hpcpush(ddi(i, crossf * .25) * C0);
+  for(int i=S84; i>=0; i--)
+    hpcpush(ddi(i, crossf * (.3 + (i&3) * .02)) * C0);
+  hpcpush(ddi(0, crossf * .25) * C0);
+  
+  bshape(shGearRing, PPR_ITEM);
+  for(int i=0; i<=S84; i+=3)
+    hpcpush(ddi(i, crossf * .25) * C0);
+  for(int i=S84; i>=0; i--)
+    hpcpush(ddi(i, crossf * ((i%6<3)?.3:.36)) * C0);
+  hpcpush(ddi(0, crossf * .25) * C0);
+  
+  bshape(shPeaceRing, PPR_ITEM);
+  for(int i=0; i<=S84; i+=3)
+    hpcpush(ddi(i, crossf * .25) * C0);
+  for(int i=S84; i>=0; i--)
+    hpcpush(ddi(i, crossf * (i%28 < 7?.36 : .3)) * C0);
+  hpcpush(ddi(0, crossf * .25) * C0);
+  
+  bshape(shHeptaRing, PPR_ITEM);
+  for(int i=0; i<=S84; i+=3)
+    hpcpush(ddi(i, crossf * .25) * C0);
+  for(int i=S84; i>=0; i--)
+    hpcpush(ddi(i, crossf * (i%12 < 3?.4 : .27)) * C0);
+  hpcpush(ddi(0, crossf * .25) * C0);
+  
+  bshape(shCompass1, PPR_ITEM);
+  for(int i=0; i<=S84; i+=3)
+    hpcpush(ddi(i, crossf * .35) * C0);
+  
+  bshape(shCompass2, PPR_ITEMa);
+  for(int i=0; i<=S84; i+=3)
+    hpcpush(ddi(i, crossf * .3) * C0);
+  
+  bshape(shCompass3, PPR_ITEMb);
+  hpcpush(ddi(0, crossf * .29) * C0);
+  hpcpush(ddi(S21, crossf * .04) * C0);
+  hpcpush(ddi(-S21, crossf * .04) * C0);
+  
+  /* bshape(shBranch, 32);
+  hpcpush(ddi(21, crossf/5) * C0);
+  hpcpush(ddi(21, -crossf/5) * C0);
+  hpcpush(ddi(21, -crossf/5) * ddi(0, crossf) * C0);
+  hpcpush(ddi(21, crossf/5) * ddi(0, crossf) * C0); */
+  
+  bshape(shILeaf[0], PPR_ONTENTACLE);
+  for(int t=0; t<=6; t++) {
+    hpcpush(ddi(S7 + t*S14, shexf*.7) * C0);
+    hpcpush(ddi(S14 + t*S14, shexf*.15) * C0);
+    }
+
+  bshape(shILeaf[1], PPR_ONTENTACLE);
+  for(int t=0; t<=S7; t++) hpcpush(ddi(t*36, shexf*.8) * C0);
+
+  bshape(shSlime, 33);
+  for(int i=0; i<=S84; i++)
+    hpcpush(ddi(i, crossf * (0.7 + .2 * sin(i * M_PI * 2 / S84 * 9))) * C0);
+
+  bshape(shHeptaMarker, PPR_HEPTAMARK);
+  for(int t=0; t<=S7; t++) hpcpush(ddi(t*12, shexf*.2) * C0);
+  
+  bshape(shBigHepta, PPR_FLOOR);
+  for(int t=0; t<=S7; t++) hpcpush(ddi(t*12, -shexf*1.5) * C0);
+  
+  bshape(shBigHex, PPR_FLOOR);
+  for(int t=0; t<=6; t++) hpcpush(ddi(t*S14, -shexf*1.3) * C0);
+  
+  bshape(shBigTriangle, PPR_FLOOR);
+  for(int t=0; t<=3; t++) hpcpush(ddi(t*S28, -shexf*1.5) * C0);
+  
+  bshape(shBigHexTriangleRev, PPR_FLOOR);
+  for(int t=0; t<=3; t++) hpcpush(ddi(t*S28, -shexf*1.3) * C0);
+  
+  bshape(shBigHexTriangle, PPR_FLOOR);
+  for(int t=0; t<=3; t++) hpcpush(ddi(S14+t*S28, -shexf*1.3) * C0);
+  
+  bshape(shRose, PPR_ITEM);
+  for(int t=0; t<S84; t++) 
+    hpcpush(spin(M_PI * t / (S42+.0)) * xpush(crossf * (0.2 + .15 * sin(M_PI * t / (S42+.0) * 3))) * C0);
+
+  bshape(shThorns, PPR_THORNS);
+  for(int t=0; t<60; t++) 
+    hpcpush(spin(M_PI * t / 30.0) * xpush(crossf * ((t&1) ? 0.3 : 0.6)) * C0);
+    
+  for(int i=0; i<16; i++) {
+    bshape(shParticle[i], PPR_PARTICLE);
+    for(int t=0; t<6; t++) 
+      hpcpush(spin(M_PI * t * 2 / 6 + M_PI * 2/6 * hrand(100) / 150.) * xpush(0.03 + hrand(100) * 0.0003) * C0);
+    hpc[qhpc++] = hpc[last->s];
+    }
+  
+  // hand-drawn shapes
+
+  // floors:
+  bshape(shStarFloor[0], PPR_FLOOR, scalef2*spzoom6, 1);
+  bshape(shStarFloor[1], PPR_FLOOR, scalef2*spzoomd7, 2);
+  bshape(shCloudFloor[0], PPR_FLOOR, scalef2*spzoom6, 3);
+  bshape(shCloudFloor[1], PPR_FLOOR, scalef2*spzoomd7, 4);
+  bshape(shCrossFloor[0], PPR_FLOOR, scalef*spzoom6, 5);
+  bshape(shCrossFloor[1], PPR_FLOOR, scalef*spzoomd7, 6);
+  bshape(shChargedFloor[0], PPR_FLOOR, scalef*spzoom6, 8);
+  bshape(shChargedFloor[1], PPR_FLOOR, scalef*spzoomd7, 9);
+  bshape(shChargedFloor[2], PPR_FLOOR, scalef*spzoom6, 7);
+  bshape(shChargedFloor[3], 12, spzoomd7 * (sphere&&purehepta?.9:1), 10); // purehepta variant
+  bshape(shSStarFloor[0], PPR_FLOOR, scalef*spzoom6, 11);
+  bshape(shSStarFloor[1], PPR_FLOOR, scalef*spzoomd7, 12);
+  bshape(shOverFloor[0], PPR_FLOOR, scalef*spzoom, 13);
+  if(purehepta) bshape(shOverFloor[1], PPR_FLOOR, sphere ? .83 : 1, 14);
+  else bshape(shOverFloor[1], PPR_FLOOR, scalef*spzoom7, 15);
+  bshape(shOverFloor[2], PPR_FLOOR, 1*spzoom7, 16);
+  bshape(shTriFloor[0], PPR_FLOOR, scalef*spzoom6, 17);
+  bshape(shTriFloor[1], PPR_FLOOR, scalef*spzoomd7, 18);
+  bshape(shFeatherFloor[0], PPR_FLOOR, scalef*spzoom6, 19);
+  if(purehepta) bshape(shFeatherFloor[1], PPR_FLOOR, sphere ? .83 : 1, 20);
+  else bshape(shFeatherFloor[1], PPR_FLOOR, scalef*spzoom7, 21);
+  bshape(shFeatherFloor[2], PPR_FLOOR, 1, 22);  // Euclidean variant
+  bshape(shBarrowFloor[0], PPR_FLOOR, spzoom6, 23);
+  bshape(shBarrowFloor[1], PPR_FLOOR, (sphere&&purehepta?.9:1) * spzoomd7, 24);
+  bshape(shBarrowFloor[2], PPR_FLOOR, sphere?.9:1, 25);
+  bshape(shNewFloor[0], PPR_FLOOR, scalef*spzoom6, 26);
+  bshape(shNewFloor[1], PPR_FLOOR, scalef*spzoomd7, 27);
+  bshape(shTrollFloor[0], PPR_FLOOR, 1*spzoom6, 28);
+  bshape(shTrollFloor[1], PPR_FLOOR, 1*spzoomd7, 29);
+
+  bshape(shLeafFloor[0], PPR_FLOOR_DRAGON, 1*spzoom6, 313);
+  bshape(shLeafFloor[1], PPR_FLOOR_DRAGON, 1*spzoomd7, 314);
+  
+  bshape(shTriheptaFloor[2], PPR_FLOOR,  scalef, 32);
+  bshape(shTriheptaFloor[3], PPR_FLOOR,  scalef, 33);
+  bshape(shTriheptaFloor[4], PPR_FLOOR,  scalef, 34);
+  bshape(shTriheptaFloor[5], PPR_FLOOR,  scalef, 35);
+  bshape(shTriheptaFloor[6], PPR_FLOOR,  scalef, 36);
+  bshape(shTriheptaFloor[7], PPR_FLOOR,  scalef, 37);
+  bshape(shTriheptaFloor[9], PPR_FLOOR,  scalef, 38);
+  bshape(shTriheptaFloor[10], PPR_FLOOR,  scalef, 39);
+  bshape(shTriheptaFloor2[0], PPR_FLOOR,  scalef, 40);
+  bshape(shTriheptaFloor2[1], PPR_FLOOR,  scalef, 41);
+  bshape(shSemiFloorShadow, PPR_FLOOR, scalef, 263);
+  bshape(shTriheptaEuc[0], PPR_FLOOR,  scalef, 42);
+  bshape(shTriheptaEuc[1], PPR_FLOOR,  scalef, 43);
+  bshape(shTriheptaEuc[2], PPR_FLOOR,  scalef, 44);
+  bshape(shTriheptaEucShadow[0], PPR_FLOOR,  scalef*SHADMUL, 42);
+  bshape(shTriheptaEucShadow[1], PPR_FLOOR,  scalef*SHADMUL, 43);
+  bshape(shTriheptaEucShadow[2], PPR_FLOOR,  scalef*SHADMUL, 44);
+  bshape(shPalaceFloor[0], PPR_FLOOR,  scalef*spzoom6, 45);
+  bshape(shPalaceFloor[1], PPR_FLOOR,  scalef*spzoomd7, 46);
+  bshape(shPalaceGate, PPR_STRUCT1, scalef, 47);
+  bshape(shSemiFeatherFloor[0], PPR_FLOOR,  scalef*spzoom6, 48);
+  bshape(shSemiFeatherFloor[1], PPR_FLOOR,  scalef*spzoom6, 49);
+  bshape(shDemonFloor[1], PPR_FLOOR,  scalef*spzoomd7, 50);
+  bshape(shDemonFloor[0], PPR_FLOOR,  scalef*spzoom6, 51);
+  bshape(shCaveFloor[0], PPR_FLOOR,  scalef*spzoom6, 52);
+  bshape(shCaveFloor[1], PPR_FLOOR,  scalef*spzoomd7, 53);
+  bshape(shCaveFloor[2], PPR_FLOOR,  1, 54);  // Euclidean variant
+  bshape(shDesertFloor[0], PPR_FLOOR,  scalef*spzoom6, 55);
+  bshape(shDesertFloor[1], PPR_FLOOR,  scalef*spzoomd7, 56);
+  for(int i=1; i<=3; i++) for(int j=0; j<2; j++) 
+    zoomShape(shDesertFloor[j], shRedRockFloor[i-1][j], 1 - .1 * i, PPR_FLOORa+i);
+  bshape(shPowerFloor[0], PPR_FLOOR_DRAGON, scalef*spzoom6, 57);
+  bshape(shPowerFloor[1], PPR_FLOOR_DRAGON, scalef*spzoomd7, 58);
+  bshape(shRoseFloor[2], PPR_FLOOR,  1, 173); // purehepta
+  bshape(shRoseFloor[0], PPR_FLOOR,  1, 174);
+  bshape(shRoseFloor[1], PPR_FLOOR,  scalef, 175);
+  bshape(shTurtleFloor[0], PPR_FLOOR,  1, 176);
+  bshape(shTurtleFloor[1], PPR_FLOOR,  scalef, 177);
+  bshape(shTurtleFloor[2], PPR_FLOOR,  sphere && purehepta ? .9 : 1, 178); // purehepta
+  bshape(shDragonFloor[0], PPR_FLOOR_DRAGON, 1, 181);
+  bshape(shDragonFloor[1], PPR_FLOOR_DRAGON, scalef, 182);
+  bshape(shDragonFloor[2], PPR_FLOOR,  1, 183);
+  bshape(shZebra[0], PPR_FLOOR,  scalef, 162);
+  bshape(shZebra[1], PPR_FLOOR,  scalef, 163);
+  bshape(shZebra[2], PPR_FLOOR,  scalef, 164);
+  bshape(shZebra[3], PPR_FLOOR,  scalef, 165);
+  bshape(shZebra[4], PPR_FLOOR,  1, 166); // for purehepta
+  bshape(shEmeraldFloor[0], PPR_FLOOR,  scalef, 167); // 4
+  bshape(shEmeraldFloor[1], PPR_FLOOR,  scalef, 168); // 12
+  bshape(shEmeraldFloor[2], PPR_FLOOR,  scalef, 169); // 16
+  bshape(shEmeraldFloor[3], PPR_FLOOR,  scalef, 170); // 20
+  bshape(shEmeraldFloor[4], PPR_FLOOR,  scalef, 171); // 28
+  bshape(shEmeraldFloor[5], PPR_FLOOR,  scalef, 172); // 36
+  bshape(shTower[0], PPR_FLOOR_TOWER,  scalef, 196); // 4
+  bshape(shTower[1], PPR_FLOOR_TOWER,  scalef, 197); // 5
+  bshape(shTower[2], PPR_FLOOR_TOWER,  scalef, 198); // 6
+  bshape(shTower[3], PPR_FLOOR_TOWER,  scalef, 199); // 8
+  bshape(shTower[4], PPR_FLOOR_TOWER,  scalef, 200); // 9
+  bshape(shTower[5], PPR_FLOOR_TOWER,  scalef, 201); // 10
+  bshape(shTower[6], PPR_FLOOR_TOWER,  scalef, 202); // 10
+  bshape(shTower[7], PPR_FLOOR_TOWER,  1, 203); // purehepta 7
+  bshape(shTower[8], PPR_FLOOR_TOWER,  1, 204); // purehepta 11
+  bshape(shTower[9], PPR_FLOOR_TOWER,  1, 205); // purehepta 15
+  bshape(shTower[10], PPR_FLOOR_TOWER,  1, 206);  // Euclidean
+  
+  // structures & walls
+  bshape(shBoatOuter, PPR_STRUCT0, scalef, 154);
+  bshape(shBoatInner, PPR_STRUCT1, scalef, 155);
+  bshape(shSolidBranch, PPR_STRUCT0, scalef, 235);
+  bshape(shWeakBranch, PPR_STRUCT0, scalef, 236);
+  bshape(shFan, PPR_WALL, scalef, 59);
+
+  // items:
+  bshape(shElementalShard, PPR_ITEM, scalef, 60);
+  bshape(shNecro, PPR_ITEM, scalef, 61);
+  bshape(shFigurine, PPR_ITEM, scalef, 62);
+  bshape(shStatue, PPR_ITEM, scalef, 63);
+  bshape(shBook, PPR_ITEM, scalef, 64);
+  bshape(shBookCover, PPR_ITEMa, scalef, 65);
+  bshape(shGrail, PPR_ITEM, scalef, 66);
+  bshape(shGun, PPR_ITEM, scalef, 67);
+  bshape(shKey, PPR_ITEM, scalef, 68);
+  bshape(shPirateX, PPR_ITEM, scalef, 124);
+  bshape(shTreat, PPR_ITEM, scalef, 253);
+
+  // first layer monsters
+  bshape(shTentacleX, PPR_TENTACLE0);
+  drawTentacle(shTentacleX, crossf * .25, crossf * .1, 10);
+  bshape(shIBranch, PPR_TENTACLE1);
+  drawTentacle(shIBranch, crossf * .1, crossf * .2, 5);
+  bshape(shTentacle, PPR_TENTACLE1);
+  drawTentacle(shTentacle, crossf * .2, crossf * .1, 10);
+  copyshape(shJoint, shDisk, PPR_ONTENTACLE);
+  bshape(shTentHead, PPR_ONTENTACLE, scalef, 79);
+  bshape(shWormHead, PPR_ONTENTACLE, scalef, 80);
+  if(purehepta) bshape(shDragonSegment, PPR_TENTACLE1, 1, 233);
+  else bshape(shDragonSegment, PPR_TENTACLE1, scalef, 234);
+  bshape(shDragonWings, PPR_ONTENTACLE, scalef, 237);
+  bshape(shDragonLegs, PPR_TENTACLE0, scalef, 238);
+  if(purehepta) bshape(shDragonTail, PPR_TENTACLE1, 1, 239);
+  else bshape(shDragonTail, PPR_TENTACLE1, scalef, 240);
+  bshape(shDragonNostril, PPR_ONTENTACLE_EYES, scalef, 241);
+  bshape(shDragonHead, PPR_ONTENTACLE, scalef, 242);
+  if(purehepta) bshape(shSeaTentacle, PPR_TENTACLE1, 1, 245);
+  else bshape(shSeaTentacle, PPR_TENTACLE1, 1, 246);  
+  ld ksc = purehepta ? 1.8 : 1.5;  
+  bshape(shKrakenHead, PPR_ONTENTACLE, ksc, 247);
+  bshape(shKrakenEye, PPR_ONTENTACLE_EYES, ksc, 248);
+  bshape(shKrakenEye2, PPR_ONTENTACLE_EYES2, ksc, 249);
+
+  // monsters
+  bshape(shGhost, PPR_MONSTER_BODY, scalef, 69);
+  bshape(shGargoyleWings, PPR_MONSTER_CLOAK, scalef, 70);
+  bshape(shGargoyleBody, PPR_MONSTER_BODY, scalef, 71);
+  bshape(shDogStripes, PPR_MONSTER_ARMOR1, scalef, 72);
+  bshape(shWolf, PPR_MONSTER_BODY, scalef, 73);
+  bshape(shWolf1, PPR_MONSTER_EYE0, scalef, 74);
+  bshape(shWolf2, PPR_MONSTER_EYE0, scalef, 75);
+  bshape(shWolf3, PPR_MONSTER_EYE0, scalef, 76);
+  bshape(shHawk, PPR_MONSTER_BODY, scalef, 77);
+  bshape(shEagle, PPR_MONSTER_BODY, scalef, 78);
+  bshape(shWaterElemental, PPR_MONSTER_BODY, scalef, 81);
+  bshape(shMouse, PPR_MONSTER_BODY, scalef, 82);
+  bshape(shMouseLegs, PPR_MONSTER_LEG, scalef, 83);
+  bshape(shMouseEyes, PPR_MONSTER_EYE0, scalef, 84);
+
+  bshape(shHumanFoot, PPR_MONSTER_FOOT, scalef, 259);
+  bshape(shHumanLeg, PPR_MONSTER_LEG, scalef, 260);
+  bshape(shHumanGroin, PPR_MONSTER_GROIN, scalef, 261);
+  bshape(shHumanNeck, PPR_MONSTER_NECK, scalef, 262);
+  bshape(shSkeletalFoot, PPR_MONSTER_FOOT, scalef, 264);
+  bshape(shYetiFoot, PPR_MONSTER_FOOT, scalef, 276);
+
+  for(int i=0; i<5; i++)
+    for(int j=0; j<4; j++)
+      bshape(shReptile[i][j], j >= 2 ? PPR_LIZEYE : PPR_FLOOR_DRAGON, scalef, 277+i*4+j);
+    
+  shift(shReptile[1][2], 0.316534, -0.136547, 1.057752);
+  shift(shReptile[1][3], 0.340722, -0.059946, 1.058152);
+
+  shift(shReptile[2][2], -0.124134, -0.286631, 1.047648);
+  shift(shReptile[2][3], -0.054108, -0.298966, 1.045136);
+
+  shift(shReptile[3][2], -0.229759, 0.191918, 1.043849);
+  shift(shReptile[3][3], -0.173583, 0.236900, 1.042234);
+
+  shift(shReptile[4][2], 0.05, 0, 1.00124921972503929);
+  shift(shReptile[4][3], -0.05, 0, 1.00124921972503929);
+
+  bshape(shReptileBody, PPR_MONSTER_BODY, scalef, 297);
+  bshape(shReptileHead, PPR_MONSTER_HEAD, scalef, 298);
+  bshape(shReptileFrontFoot, PPR_MONSTER_FOOT, scalef, 299);
+  bshape(shReptileRearFoot, PPR_MONSTER_FOOT, scalef, 300);
+  bshape(shReptileFrontLeg, PPR_MONSTER_LEG, scalef, 301);
+  bshape(shReptileRearLeg, PPR_MONSTER_LEG, scalef, 302);
+  bshape(shReptileTail, PPR_MONSTER_BODY, scalef, 303);
+  bshape(shReptileEye, PPR_MONSTER_EYE0, scalef, 304);  
+  bshape(shDodeca, PPR_ITEM, scalef, 305);  
+
+  bshape(shPBody, PPR_MONSTER_BODY, scalef, 85);
+  bshape(shYeti, PPR_MONSTER_BODY, scalef, 86);
+  bshape(shPSword, PPR_MONSTER_WPN, scalef, 90);
+  bshape(shPKnife, PPR_MONSTER_WPN, scalef, 91);
+  bshape(shPirateHook, PPR_MONSTER_WPN, scalef, 92);
+  bshape(shSabre, PPR_MONSTER_WPN, scalef, 93);
+  bshape(shHedgehogBlade, PPR_MONSTER_WPN, scalef, 94);
+  bshape(shHedgehogBladePlayer, PPR_MONSTER_WPN, scalef, 95);
+  bshape(shFemaleBody, PPR_MONSTER_BODY, scalef, 96);
+  bshape(shFemaleDress, PPR_MONSTER_ARMOR0, scalef, 97);
+  bshape(shDemon, PPR_MONSTER_HAIR, scalef, 98);
+
+  bshape(shTrylobite, PPR_MONSTER_BODY, scalef, 99);
+  bshape(shTrylobiteHead, PPR_MONSTER_HEAD, scalef, 100);
+  bshape(shTrylobiteBody, PPR_MONSTER_BODY, scalef, 308);
+  bshape(shTrylobiteFrontClaw, PPR_MONSTER_FOOT, scalef, 309);
+  bshape(shTrylobiteRearClaw, PPR_MONSTER_FOOT, scalef, 310);
+  bshape(shTrylobiteFrontLeg, PPR_MONSTER_LEG, scalef, 311);
+  bshape(shTrylobiteRearLeg, PPR_MONSTER_LEG, scalef, 312);
+
+  bshape(shBullBody, PPR_MONSTER_BODY, scalef, 315);
+  bshape(shBullHorn, PPR_MONSTER_HEAD, scalef, 316);
+  bshape(shBullRearHoof, PPR_MONSTER_FOOT, scalef, 317);
+  bshape(shBullFrontHoof, PPR_MONSTER_FOOT, scalef, 318);
+  bshape(shBullHead, PPR_MONSTER_HEAD, scalef, 319);
+
+  bshape(shButterflyBody, PPR_MONSTER_BODY, scalef, 320);
+  bshape(shButterflyWing, PPR_MONSTER_BODY, scalef, 321);
+
+  bshape(shGadflyBody, PPR_MONSTER_BODY, scalef * 1.5, 322);
+  bshape(shGadflyWing, PPR_MONSTER_BODY, scalef * 1.5, 323);
+  bshape(shGadflyEye, PPR_MONSTER_BODY, scalef * 1.5, 324);
+
+  bshape(shGoatHead, PPR_MONSTER_HAIR, scalef, 101);
+  bshape(shRatHead, PPR_MONSTER_HEAD, scalef, 102);
+  bshape(shRatEyes, PPR_MONSTER_EYE0, scalef, 103);  
+  bshape(shRatTail, PPR_MONSTER_LEG, scalef, 104);
+  bshape(shRatCape1, PPR_MONSTER_HOODCLOAK2, scalef, 105);
+  bshape(shRatCape2, PPR_MONSTER_HOODCLOAK1, scalef, 106);
+  bshape(shKnightArmor, PPR_MONSTER_ARMOR0, scalef, 107);
+  bshape(shWightCloak, PPR_MONSTER_CLOAK, scalef, 108);
+  bshape(shKnightCloak, PPR_MONSTER_CLOAK, scalef, 109);
+  bshape(shPrincessDress, PPR_MONSTER_ARMOR1, scalef, 110);
+  bshape(shWizardCape1, PPR_MONSTER_HOODCLOAK1, 1, 111);
+  bshape(shWizardCape2, PPR_MONSTER_HOODCLOAK2, 1, 112);
+  bshape(shPrinceDress, PPR_MONSTER_ARMOR0, scalef, 113);
+  bshape(shArmor, PPR_MONSTER_HAT0, scalef, 114);
+  bshape(shTurban1, PPR_MONSTER_HAT0, scalef, 115);
+  bshape(shTurban2, PPR_MONSTER_HAT1, scalef, 116);
+  bshape(shWizardHat1, PPR_MONSTER_HAT0, 1, 117);
+  bshape(shWizardHat2, PPR_MONSTER_HAT1, 1, 118);
+  bshape(shWestHat1, PPR_MONSTER_HAT0, scalef, 119);
+  bshape(shWestHat2, PPR_MONSTER_HAT1, scalef, 120);
+  bshape(shGunInHand, PPR_MONSTER_WPN, scalef, 121);
+  bshape(shVikingHelmet, PPR_MONSTER_HAT0, scalef, 122);
+  bshape(shHood, PPR_MONSTER_HAT0, scalef, 123);
+  bshape(shPirateHood, PPR_MONSTER_HAT0, scalef, 125);
+  bshape(shEyepatch, PPR_MONSTER_HAT1, scalef, 126);
+  bshape(shPHead, PPR_MONSTER_HEAD, scalef, 127);
+  shGolemhead = shDisk; shGolemhead.prio = PPR_MONSTER_HEAD;
+  bshape(shFemaleHair, PPR_MONSTER_HAIR, scalef, 128);
+  bshape(shWitchHair, PPR_MONSTER_HAIR, scalef, 129);
+  bshape(shBeautyHair, PPR_MONSTER_HAIR, scalef, 130);
+  bshape(shFlowerHair, PPR_MONSTER_HAT0, scalef, 131);
+  bshape(shSuspenders, PPR_MONSTER_ARMOR1, scalef, 132);
+  bshape(shFlowerHand, PPR_MONSTER_WPN, scalef, 133);
+  bshape(shPFace, PPR_MONSTER_FACE, scalef, 134);
+  bshape(shEyes, PPR_MONSTER_EYE0, scalef, 135);
+  bshape(shShark, PPR_MONSTER_BODY, scalef, 136);
+  bshape(shBugBody, PPR_MONSTER_BODY, scalef, 137);
+  bshape(shBugArmor, PPR_MONSTER_ARMOR0, scalef, 138);
+  bshape(shBugLeg, PPR_MONSTER_BODY, scalef, 306);
+  bshape(shBugAntenna, PPR_MONSTER_BODY, scalef, 307);
+  bshape(shCatBody, PPR_MONSTER_BODY, scalef, 139);
+  bshape(shCatLegs, PPR_MONSTER_LEG, scalef, 140);
+  bshape(shFamiliarHead, PPR_MONSTER_HEAD, scalef, 141);
+  bshape(shFamiliarEye, PPR_MONSTER_EYE1, scalef, 142);
+  bshape(shCatHead, PPR_MONSTER_HEAD, scalef, 143);
+  bshape(shWolfBody, PPR_MONSTER_BODY, WOLF, 144);
+  bshape(shWolfHead, PPR_MONSTER_HEAD, WOLF, 145);
+  bshape(shWolfLegs, PPR_MONSTER_LEG, WOLF, 146);
+  bshape(shWolfEyes, PPR_MONSTER_EYE0, WOLF, 147);
+  bshape(shWitchDress, PPR_MONSTER_ARMOR0, scalef, 148);
+  bshape(shPickAxe, PPR_MONSTER_WPN, scalef, 149);
+  bshape(shPike, PPR_MONSTER_WPN, scalef, 150);
+  bshape(shFlailBall, PPR_MONSTER_WPN, scalef, 151);
+  bshape(shFlailTrunk, PPR_MONSTER_WPN, scalef, 152);
+  bshape(shFlailChain, PPR_MONSTER_SUBWPN, scalef, 153);
+  // bshape(shScratch, 17, scalef, 156);
+  bshape(shSkeletonBody, PPR_MONSTER_BODY, scalef, 157);
+  bshape(shSkull, PPR_MONSTER_HEAD, scalef, 158);
+  bshape(shSkullEyes, PPR_MONSTER_EYE0, scalef, 159);
+  bshape(shFishTail, PPR_MONSTER_LEG, scalef, 160);
+  bshape(shFatBody, PPR_MONSTER_BODY, scalef, 161);
+  bshape(shAztecHead, PPR_MONSTER_HEAD, scalef, 179);
+  bshape(shAztecCap, PPR_MONSTER_HAT0, scalef, 180); // 1 114 5 [000000]
+  bshape(shBatWings, PPR_MONSTER_LEG, scalef, 254);
+  bshape(shBatBody, PPR_MONSTER_BODY, scalef, 255);
+  bshape(shBatMouth, PPR_MONSTER_EYE0, scalef, 256);
+  bshape(shBatFang, PPR_MONSTER_EYE1, scalef, 257);
+  bshape(shBatEye, PPR_MONSTER_EYE0, scalef, 258);
+  
+  bshape(shDogBody, PPR_MONSTER_BODY, scalef, 265);
+  bshape(shDogHead, PPR_MONSTER_HEAD, scalef, 266);
+  bshape(shDogTorso, PPR_MONSTER_BODY, scalef, 267);
+  bshape(shDogFrontPaw, PPR_MONSTER_FOOT, scalef, 268);
+  bshape(shDogRearPaw, PPR_MONSTER_FOOT, scalef, 269);
+  bshape(shDogFrontLeg, PPR_MONSTER_LEG, scalef, 270);
+  bshape(shDogRearLeg, PPR_MONSTER_LEG, scalef, 271);
+
+  bshape(shWolfFrontPaw, PPR_MONSTER_FOOT, scalef, 272);
+  bshape(shWolfRearPaw, PPR_MONSTER_FOOT, scalef, 273);
+  bshape(shWolfFrontLeg, PPR_MONSTER_LEG, scalef, 274);
+  bshape(shWolfRearLeg, PPR_MONSTER_LEG, scalef, 275);
+  
+  // missiles
+  bshape(shKnife, PPR_MISSILE, scalef, 87);
+  bshape(shTongue, PPR_MISSILE, scalef, 88);
+  bshape(shFlailMissile, PPR_MISSILE, scalef, 89);
+
+  for(int u=0; u<=2; u+=2) {
+  
+    int sh = u ? PPR_ITEM : PPR_MONSTER_LEG;
+    int uz = u?2:1;
+  
+    bshape(shTortoise[0][0+u], sh+1, scalef/uz, 207);
+    bshape(shTortoise[1][0+u], sh+2, scalef/uz, 208);
+    bshape(shTortoise[2][0+u], sh+2, scalef/uz, 209);
+    bshape(shTortoise[3][0+u], sh+2, scalef/uz, 210);
+    bshape(shTortoise[4][0+u], sh+2, scalef/uz, 211);
+    bshape(shTortoise[5][0+u], sh+2, scalef/uz, 212);
+    bshape(shTortoise[6][0+u], sh+2, scalef/uz, 213);
+    bshape(shTortoise[7][0+u], sh+2, scalef/uz, 214);
+    bshape(shTortoise[8][0+u], sh, scalef/uz, 215);
+    bshape(shTortoise[9][0+u], sh, scalef/uz, 217);
+    bshape(shTortoise[10][0+u], sh, scalef/uz, 218);
+    bshape(shTortoise[11][0+u], sh, scalef/uz, 219);
+    bshape(shTortoise[12][0+u], sh+2, scalef/uz, 216);
+    
+    bshape(shTortoise[0][1+u], sh+1, scalef/uz, 220);
+    bshape(shTortoise[1][1+u], sh+2, scalef/uz, 221);
+    bshape(shTortoise[2][1+u], sh+2, scalef/uz, 222);
+    bshape(shTortoise[3][1+u], sh+2, scalef/uz, 223);
+    bshape(shTortoise[4][1+u], sh+2, scalef/uz, 224);
+    bshape(shTortoise[5][1+u], sh+2, scalef/uz, 225);
+    bshape(shTortoise[6][1+u], sh+2, scalef/uz, 226);
+    bshape(shTortoise[7][1+u], sh+2, scalef/uz, 227);
+    bshape(shTortoise[8][1+u], sh, scalef/uz, 228);
+    bshape(shTortoise[9][1+u], sh, scalef/uz, 230);
+    bshape(shTortoise[10][1+u], sh, scalef/uz, 231);
+    bshape(shTortoise[11][1+u], sh, scalef/uz, 232);
+    bshape(shTortoise[12][1+u], sh+2, scalef/uz, 229);
+    }
+
+  for(int v=0; v<13; v++) for(int z=0; z<2; z++)
+    copyshape(shTortoise[v][4+z], shTortoise[v][2+z], shTortoise[v][2+z].prio + (PPR_CARRIED-PPR_ITEM));
+
+  if(purehepta) bshape(shMagicSword, PPR_MAGICSWORD, 1, 243);
+  else bshape(shMagicSword, PPR_MAGICSWORD, 1, 244);
+  
+  bshape(shBead0, 20, 1, 250);
+  bshape(shBead1, 20, 1, 251);
+  bshape(shArrow, PPR_ARROW, 1, 252);
+  
+  bshapeend();
+
+  prehpc = qhpc;
+  DEBB(DF_INIT, (debugfile,"hpc = %d\n", qhpc));
   
   for(int i=0; i<USERSHAPEGROUPS; i++) for(int j=0; j<USERSHAPEIDS; j++) {
     usershape *us = usershapes[i][j];
@@ -9971,9 +1580,25 @@ void saveImages() {
   if(qhpc != qhpc0)
     printf("qhpc = %d (%d+%d)\n", qhpc0 = qhpc, prehpc, qhpc-prehpc);
 
-  #ifdef GL
-  GL_initialized = false;
-  #endif
+  initPolyForGL();
+  }
+
+void initShape(int sg, int id) {
+
+  if(!usershapes[sg][id]) {
+    usershape *us = new usershape;
+    usershapes[sg][id] = us;
+
+    for(int i=0; i<USERLAYERS; i++) {
+      us->d[i].sh.prio = (sg >= 3 ? 1:50) + i;
+
+      us->d[i].rots = 1;
+      us->d[i].sym = 0;
+      us->d[i].shift = C0;
+      us->d[i].spin = Cx1;
+      us->d[i].color = 0;
+      }
+    }
   }
 
 int poly_outline;
@@ -9982,11 +1607,13 @@ unsigned char& part(int& col, int i) {
   unsigned char* c = (unsigned char*) &col; return c[i];
   }
 
-void queuepoly(const transmatrix& V, const hpcshape& h, int col) {
-  polytodraw ptd;
-  ptd.kind = 1;
+void queuepolyat(const transmatrix& V, const hpcshape& h, int col, int prio) {
+  polytodraw& ptd = nextptd();
+  ptd.kind = pkPoly;
   ptd.u.poly.V = V;
-  ptd.u.poly.start = h.s, ptd.u.poly.end = h.e;
+  ptd.u.poly.cnt = h.e-h.s;
+  ptd.u.poly.tab = &ourshape[3*h.s];
+  ptd.u.poly.curveindex = -1;
   if(cblind) {
     // protanopia
     /* int r = (56 * part(col,3) + 43 * part(col,2)) / 100;
@@ -10002,60 +1629,1003 @@ void queuepoly(const transmatrix& V, const hpcshape& h, int col) {
     part(col,2) = part(col,3) = (part(col,2) * 2 + part(col,3) + 1)/3;
     }
   ptd.col = (darkened(col >> 8) << 8) + (col & 0xFF);
-  ptd.prio = h.prio;
+  ptd.prio = prio << PSHIFT;
   ptd.u.poly.outline = poly_outline;
-  ptds.push_back(ptd);
   }
 
-void queueline(const hyperpoint& H1, const hyperpoint& H2, int col) {
-  polytodraw ptd;
-  ptd.kind = 2;
+void addfloats(vector<GLfloat>& v, hyperpoint h) {
+  for(int i=0; i<3; i++) v.push_back(h[i]);
+  }
+
+void queuereset(eModel md, int prio) {
+  polytodraw& ptd = nextptd();
+  ptd.kind = pkResetModel;
+  ptd.col = md;
+  ptd.prio = prio << PSHIFT;
+  }
+
+void queuetable(const transmatrix& V, GLfloat *f, int cnt, int linecol, int fillcol, int prio) {
+  polytodraw& ptd = nextptd();
+  ptd.kind = pkPoly;
+  ptd.u.poly.V = V;
+  ptd.u.poly.cnt = cnt;
+  ptd.u.poly.tab = f;
+  ptd.u.poly.curveindex = -1;
+  ptd.col = fillcol;
+  ptd.prio = prio << PSHIFT;
+  ptd.u.poly.outline = linecol;
+  }
+
+void queuepoly(const transmatrix& V, const hpcshape& h, int col) {
+  queuepolyat(V,h,col,h.prio);
+  }
+
+void queuepolyb(const transmatrix& V, const hpcshape& h, int col, int b) {
+  queuepolyat(V,h,col,h.prio+b);
+  }
+
+struct qfloorinfo {
+  bool special;
+  transmatrix spin;
+  const hpcshape *shape;
+  };
+
+qfloorinfo qfi;
+
+int chasmg;
+
+bool isSpecial(const hpcshape &h) {
+  return
+    &h != &shFloor[0] && 
+    &h != &shFloor[1] && 
+    &h != &shTriheptaFloor[0] && 
+    &h != &shTriheptaFloor[1] && 
+    &h != &shTriheptaEuc[0] && 
+    &h != &shTriheptaEuc[1];
+  }
+
+void qfloor0(cell *c, const transmatrix& V, const hpcshape& h, int col) {
+  extern bool wmspatial;
+  if(chasmg == 2) ;
+  else if(chasmg && wmspatial) {
+    if(detaillevel == 0) return;
+    queuepolyat(V,h, c->land == laCocytus ? 0x080808FF : 0x101010FF, PPR_LAKEBOTTOM);
+    }
+  else 
+    queuepoly(V,h,col);
+  }
+  
+void qfloor(cell *c, const transmatrix& V, const hpcshape& h, int col) {
+  qfloor0(c, V, h, col);  
+  qfi.special = isSpecial(h);
+  qfi.shape = &h, qfi.spin = Id; 
+  }
+
+void qfloor(cell *c, const transmatrix& V, const transmatrix& Vspin, const hpcshape& h, int col) {
+  qfloor0(c, V*Vspin, h, col);  
+  qfi.special = isSpecial(h);
+  qfi.shape = &h, qfi.spin = Vspin;
+  }
+
+void curvepoint(const hyperpoint& H1) {
+  curvedata.push_back(H1[0]);
+  curvedata.push_back(H1[1]);
+  curvedata.push_back(H1[2]);
+  }
+
+void queuecurve(int linecol, int fillcol, int prio) {
+  queuetable(Id, &curvedata[curvestart], (size(curvedata)-curvestart)/3, linecol, fillcol, prio);
+  lastptd().u.poly.curveindex = curvestart;
+  curvestart = size(curvedata);
+  }
+
+void queueline(const hyperpoint& H1, const hyperpoint& H2, int col, int prf = 0, int prio = PPR_LINE) {
+  polytodraw& ptd = nextptd();
+  ptd.kind = pkLine;
   ptd.u.line.H1 = H1;
   ptd.u.line.H2 = H2;
-  fixcolor(col);
-  ptd.col = col;
-  ptd.prio = 61;
-  ptds.push_back(ptd);
+  ptd.u.line.prf = prf;
+  ptd.col = (darkened(col >> 8) << 8) + (col & 0xFF);
+  ptd.prio = prio << PSHIFT;
   }
 
-void queuestr(int x, int y, int shift, int size, string str, int col, int frame = 0) {
-  polytodraw ptd;
-  ptd.kind = 3;
+void queuestr(int x, int y, int shift, int size, string str, int col, int frame = 0, int align = 8) {
+  polytodraw& ptd = nextptd();
+  ptd.kind = pkString;
   ptd.u.chr.x = x;
   ptd.u.chr.y = y;
   int ss = (int) str.size(); if(ss>=MAXQCHR) ss=MAXQCHR-1;
-  for(int i=0; i<ss; i++) ptd.u.chr.str[i] = str[i]; ptd.u.chr.str[ss] = 0;
+  {for(int i=0; i<ss; i++) ptd.u.chr.str[i] = str[i];} ptd.u.chr.str[ss] = 0;
+  ptd.u.chr.align = align;
   ptd.u.chr.shift = shift;
   ptd.u.chr.size = size;
-  ptd.col = col;
+  ptd.col = darkened(col);
   ptd.u.chr.frame = frame;
-  ptd.prio = 63;
-  ptds.push_back(ptd);
+  ptd.prio = PPR_TEXT << PSHIFT;
   }
 
-void queuechr(int x, int y, int shift, int size, char chr, int col, int frame = 0) {
-  polytodraw ptd;
-  ptd.kind = 3;
+void queuechr(int x, int y, int shift, int size, char chr, int col, int frame = 0, int align = 8) {
+  polytodraw& ptd = nextptd();
+  ptd.kind = pkString;
   ptd.u.chr.x = x;
   ptd.u.chr.y = y;
   ptd.u.chr.str[0] = chr;
   ptd.u.chr.str[1] = 0;
   ptd.u.chr.shift = shift;
   ptd.u.chr.size = size;
+  ptd.u.chr.align = align;
   ptd.col = col;
   ptd.u.chr.frame = frame;
-  ptd.prio = 62;
-  ptds.push_back(ptd);
+  ptd.prio = PPR_TEXT << PSHIFT;
   }
 
-void queuecircle(int x, int y, int size, int color) {
-  polytodraw ptd;
-  ptd.kind = 4;
+void queuecircle(int x, int y, int size, int color, int prio = PPR_CIRCLE) {
+  polytodraw& ptd = nextptd();
+  ptd.kind = pkCircle;
   ptd.u.cir.x = x;
   ptd.u.cir.y = y;
   ptd.u.cir.size = size;
   ptd.col = color;
-  ptd.prio = 61;
-  ptds.push_back(ptd);
+  ptd.prio = prio << PSHIFT;
   }
+
+#ifdef MOBILE
+namespace svg {
+  bool in = false;
+  }
+#endif
+
+#ifndef MOBILE
+// svg renderer
+namespace svg {
+  FILE *f;
+  bool in = false;
+  
+  ld cta(int col) {
+    // col >>= 24;
+    col &= 0xFF;
+    return col / 255.0;
+    }
+  
+  bool invisible(int col) { return (col & 0xFF) == 0; }
+  
+  ld gamma = .5;
+  
+  void fixgamma(unsigned int& color) {
+    unsigned char *c = (unsigned char*) (&color);
+    for(int i=1; i<4; i++) c[i] = 255 * pow(c[i] / 255.0, gamma);
+    }
+  
+  int svgsize;
+  int divby = 10;
+  
+  const char* coord(int val) {
+    static char buf[10][20];
+    static int id;
+    id++; id %= 10;
+    if(divby == 1) {
+      sprintf(buf[id], "%d", val); return buf[id];
+      }
+    else if(divby <= 10) {
+      sprintf(buf[id], "%.1f", val*1./divby); return buf[id];
+      }
+    else {
+      sprintf(buf[id], "%.2f", val*1./divby); return buf[id];
+      }
+    }
+  
+  char* stylestr(unsigned int fill, unsigned int stroke, ld width=1) {
+    fixgamma(fill);
+    fixgamma(stroke);
+    static char buf[600];
+    // printf("fill = %08X stroke = %08x\n", fill, stroke);
+  
+    if(stroke == 0xFF00FF) {
+      stroke = 0x000000FF;
+      
+      if(fill == 0x332a22ff) fill = 0x000000FF;
+      else if(fill == 0x686868FF) fill = 0x000000FF;
+      else if(fill == 0xd0d0d0FF) fill = 0x000000FF;
+      else fill = 0xFFFFFFFF;
+      }
+    
+    sprintf(buf, "style=\"stroke:#%06x;stroke-opacity:%.3" PLDF ";stroke-width:%" PLDF "px;fill:#%06x;fill-opacity:%.3" PLDF "\"",
+      (stroke>>8) & 0xFFFFFF, cta(stroke),
+      width/divby,
+      (fill>>8) & 0xFFFFFF, cta(fill)
+      );
+    return buf;
+    }
+  
+  void circle(int x, int y, int size, int col) {
+    int ba = (backcolor << 8) + 0xFF;
+    if(!invisible(col))
+    fprintf(f, "<circle cx='%s' cy='%s' r='%s' %s/>\n",
+      coord(x), coord(y), coord(size), stylestr(ba, col));
+    }
+  
+  string *info;
+  
+  void startstring() {
+    if(info) fprintf(f, "<a xlink:href=\"%s\" xlink:show=\"replace\">", info->c_str());
+    }
+
+  void stopstring() {
+    if(info) fprintf(f, "</a>");
+    }
+
+  void text(int x, int y, int size, const string& str, bool frame, int col, int align) {
+
+    double dfc = (x - vid.xcenter) * (x - vid.xcenter) + 
+      (y - vid.ycenter) * (y - vid.ycenter);
+    dfc /= vid.radius;
+    dfc /= vid.radius;
+    // 0 = center, 1 = edge
+    dfc = 1 - dfc;
+    
+    col = 0xFF + (col << 8);
+
+    if(!invisible(col)) {
+      startstring();
+      fprintf(f, "<text x='%s' y='%s' font-family='Times' text-anchor='%s' font-size='%s' %s>%s</text>",
+        coord(x), coord(y+size/2), 
+        align == 8 ? "middle" :
+        align < 8 ? "start" :
+        "end",
+        coord(size), stylestr(col, frame ? 0x0000000FF : 0, (1<<sightrange)*dfc/40), str.c_str());
+      stopstring();
+      fprintf(f, "\n");
+      }
+    }
+  
+  void polygon(int *polyx, int *polyy, int polyi, int col, int outline) {
+  
+    if(invisible(col) && invisible(outline)) return;
+    double dfc = 0.8;
+    if(!pmodel && !euclid) {
+      int avgx = 0, avgy = 0;
+      for(int i=0; i<polyi; i++) 
+        avgx += polyx[i],
+        avgy += polyy[i];
+      avgx /= polyi;
+      avgy /= polyi;
+      dfc = (avgx - vid.xcenter) * (avgx - vid.xcenter) + 
+        (avgy - vid.ycenter) * (avgy - vid.ycenter);
+      dfc /= vid.radius;
+      dfc /= vid.radius;
+      // 0 = center, 1 = edge
+      dfc = 1 - dfc;
+      
+      if(dfc < 0) dfc = 1;
+      }
+    
+    startstring();
+    for(int i=0; i<polyi; i++) {
+      if(i == 0)
+        fprintf(f, "<path d=\"M ");
+      else
+        fprintf(f, " L ");
+      fprintf(f, "%s %s", coord(polyx[i]), coord(polyy[i]));
+      }
+    
+    fprintf(f, "\" %s/>", stylestr(col, outline, vid.radius*dfc/256));
+    stopstring();
+    fprintf(f, "\n");
+    }
+  
+  void render(const char *fname) {
+
+    if(cheater) doOvergenerate();
+
+    dynamicval<videopar> v(vid, vid);
+    dynamicval<bool> v2(in, true);
+    dynamicval<int> v4(cheater, 0);
+    
+    vid.usingGL = false;
+    vid.xres = vid.yres = svgsize ? svgsize : min(1 << (sightrange+7), 16384);
+    calcparam();
+#ifdef ROGUEVIZ
+    rogueviz::fixparam();
+#endif
+    inHighQual = true; 
+    darken = 0;
+    
+    time_t timer;
+    timer = time(NULL);
+
+    char buf[128]; strftime(buf, 128, "svgshot-%y%m%d-%H%M%S.svg", localtime(&timer));
+    if(!fname) fname = buf;
+
+    f = fopen(fname, "wt");
+    fprintf(f, "<svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" width=\"%s\" height=\"%s\">\n", coord(vid.xres), coord(vid.yres));
+    drawfullmap();
+    fprintf(f, "</svg>\n");
+    fclose(f);
+    addMessage(XLAT("Saved the SVG shot to %1 (sightrange %2)", fname, its(sightrange)));
+    }
+  }
+#endif
+
+void getcoord0(const hyperpoint& h, int& xc, int &yc, int &sc) {
+  hyperpoint hscr;
+  applymodel(h, hscr);
+  xc = vid.xcenter + vid.radius * hscr[0];
+  yc = vid.ycenter + vid.radius * hscr[1];
+  sc = vid.eye * vid.radius * hscr[2];
+  }
+
+void queuechr(const hyperpoint& h, int size, char chr, int col, int frame = 0) {
+  int xc, yc, sc; getcoord0(h, xc, yc, sc);
+  queuechr(xc, yc, sc, size, chr, col, frame);
+  }
+  
+void queuechr(const transmatrix& V, double size, char chr, int col, int frame = 0) {
+  int xc, yc, sc; getcoord0(tC0(V), xc, yc, sc);
+  int xs, ys, ss; getcoord0(V * xpush0(.5), xs, ys, ss);  
+  queuechr(xc, yc, sc, int(sqrt(squar(xc-xs)+squar(yc-ys)) * size), chr, col, frame);
+  }
+  
+void queuestr(const hyperpoint& h, int size, const string& chr, int col, int frame = 0) {
+  int xc, yc, sc; getcoord0(h, xc, yc, sc);
+  queuestr(xc, yc, sc, size, chr, col, frame);
+  }
+  
+void queuestr(const transmatrix& V, double size, const string& chr, int col, int frame = 0, int align = 8) {
+  int xc, yc, sc; getcoord0(tC0(V), xc, yc, sc);
+  int xs, ys, ss;  getcoord0(V * xpush0(.5), xs, ys, ss); 
+  queuestr(xc, yc, sc, int(sqrt(squar(xc-xs)+squar(yc-ys)) * size), chr, col, frame, align);
+  }
+  
+void queuecircle(const transmatrix& V, double size, int col) {
+  int xc, yc, sc; getcoord0(tC0(V), xc, yc, sc);
+  int xs, ys, ss; getcoord0(V * xpush0(.5), xs, ys, ss);  
+  queuecircle(xc, yc, int(sqrt(squar(xc-xs)+squar(yc-ys)) * size), col);
+  }
+
+long double polydata[] = {
+// shStarFloor[0] (6x1)
+NEWSHAPE,0,6,1, 0.267355,0.153145, 0.158858,0.062321, 0.357493,-0.060252,
+// shStarFloor[1] (7x1)
+NEWSHAPE,1,7,1, -0.012640,0.255336, 0.152259,0.386185, 0.223982,0.275978,
+// shCloudFloor[0] (6x1)
+NEWSHAPE,2,6,1, -0.249278,0.146483, -0.242058,0.146003, -0.209868,0.146655, -0.180387,0.151575, -0.148230,0.165669, -0.131141,0.187345, -0.127578,0.219788, -0.130923,0.255428, -0.116050,0.294689, -0.093271,0.316597, -0.050041,0.330532, -0.007791,0.309060, 0.017835,0.271341, 0.017835,0.271341,
+// shCloudFloor[1] (7x1)
+NEWSHAPE,3,7,1, -0.216129,0.195545, -0.209066,0.211647, -0.195698,0.234578, -0.193583,0.272597, -0.202572,0.304529, -0.198965,0.336605, -0.167757,0.354608, -0.132750,0.357613, -0.104720,0.351753, -0.079702,0.340062, -0.064640,0.331114, -0.040288,0.308007, -0.023142,0.289269,
+// shCrossFloor[0] (3x1)
+NEWSHAPE,4,3,1, -0.283927,0.089050, -0.363031,0.095818, -0.386170,0.136539, -0.370773,0.209082, -0.207773,0.157096, -0.213111,0.255207, -0.045690,0.195109, -0.053263,0.305287, 0.090089,0.277990,
+// shCrossFloor[1] (7x2)
+NEWSHAPE,5,7,2, -0.254099,-0.080041, -0.326144,-0.061810,
+// shChargedFloor[2] (3x1)
+NEWSHAPE,6,3,1, 0.259904,0.175997, 0.266043,0.049579, 0.315948,0.019620, 0.201609,-0.012441, 0.286297,-0.066513, 0.279241,-0.164471,
+// shChargedFloor[0] (3x1)
+NEWSHAPE,7,3,1, 0.000420,-0.165342, 0.154528,-0.281262, -0.003359,-0.311544, -0.120635,-0.166812, -0.177022,-0.273052, -0.276778,-0.195332,
+// shChargedFloor[1] (7x1)
+NEWSHAPE,8,7,1, 0.374086,-0.003058, 0.231873,-0.155490, 0.424384,-0.155026,
+// shChargedFloor[3] (7x1)
+NEWSHAPE,9,7,1, -0.560276,0.275068, -0.432169,0.356327, -0.232687,0.234741, -0.397991,0.569704, -0.256078,0.505042,
+// shSStarFloor[0] (6x1)
+NEWSHAPE,10,6,1, -0.261229,0.272221, -0.023065,0.198020,
+// shSStarFloor[1] (7x1)
+NEWSHAPE,11,7,1, -0.236325,0.100575, -0.439825,0.136330, -0.334057,0.279698,
+// shOverFloor[0] (3x1)
+NEWSHAPE,12,3,1, 0.260902,0.180699, 0.278422,0.058159, 0.257517,-0.080799, 0.198743,-0.215550, 0.062950,-0.080317, 0.110388,-0.278019, -0.043099,-0.182658,
+// shOverFloor[1] (7x1)
+NEWSHAPE,13,7,1, -0.586767,0.283785, -0.323522,0.218875, -0.576300,0.603001, -0.137153,0.295524, -0.383052,0.684221,
+// shOverFloor[1] (7x1)
+NEWSHAPE,14,7,1, -0.437062,0.198802, -0.261731,0.160454, -0.401949,0.300851, -0.208814,0.204608, -0.296258,0.393467, -0.159132,0.277743,
+// shOverFloor[2] (6x1)
+NEWSHAPE,15,6,1, 0.008833,-0.299167, -0.020500,-0.148834, -0.121333,-0.290000, -0.119500,-0.128667, -0.236833,-0.279000,
+// shTriFloor[0] (3x1)
+NEWSHAPE,16,3,1, -0.353692,0.244649,
+// shTriFloor[1] (7x1)
+NEWSHAPE,17,7,1, -0.352357,0.009788,
+// shFeatherFloor[0] (3x1)
+NEWSHAPE,18,3,1, 0.227689,0.169556, 0.333673,0.157023, 0.251378,0.091850, 0.316741,0.073094, 0.260919,0.038655, 0.306256,0.038890, 0.231096,-0.033702, 0.255955,-0.043464, 0.226427,-0.077082, 0.266494,-0.101752, 0.217364,-0.144909, 0.223207,-0.194093, 0.158549,-0.144135, 0.179022,-0.208053, 0.105573,-0.172756, 0.120828,-0.236822, 0.033598,-0.201587, 0.067872,-0.281182,
+// shFeatherFloor[1] (7x1)
+NEWSHAPE,19,7,1, -0.130677,0.632450, -0.089355,0.521394, -0.043946,0.681315, 0.018619,0.527506, 0.055053,0.679188, 0.097948,0.501131, 0.149721,0.584970, 0.203217,0.443040, 0.242077,0.549815, 0.310522,0.431044, 0.352912,0.566221,
+// shFeatherFloor[1] (7x1)
+NEWSHAPE,20,7,1, -0.097861,0.337622, -0.034295,0.357645, -0.014623,0.326578, 0.024557,0.373262, 0.063328,0.316638, 0.088328,0.358219, 0.111793,0.286773, 0.146987,0.328271, 0.170806,0.287930, 0.191056,0.303731,
+// shFeatherFloor[2] (6x1)
+NEWSHAPE,21,6,1, 0.004667,-0.288667, -0.019167,-0.217167, -0.088833,-0.303333, -0.090667,-0.187833, -0.153000,-0.235500, -0.171333,-0.132833, -0.233667,-0.211667,
+// shBarrowFloor[0] (6x2)
+NEWSHAPE,22,6,2, 0.272054,0.153801, 0.270633,0.093140, 0.239314,0.098622, 0.185341,0.089779, 0.198868,0.083706, 0.239635,0.081872, 0.256105,0.076570, 0.277257,0.058659,
+// shBarrowFloor[1] (7x2)
+NEWSHAPE,23,7,2, 0.298659,0.140526, 0.320688,0.102373, 0.327535,0.088055, 0.293375,0.066852, 0.270939,0.063345, 0.242988,0.065298, 0.250251,0.054365, 0.285707,0.056115, 0.321178,0.061438, 0.343446,0.057906, 0.382513,0.007427,
+// shBarrowFloor[2] (7x2)
+NEWSHAPE,24,7,2, 0.506507,0.238008, 0.558886,0.149881, 0.443577,0.020402, 0.572763,0.108813, 0.630577,0.009183,
+// shNewFloor[0] (3x1)
+NEWSHAPE,25,3,1, -0.243151,-0.202057, -0.249456,-0.026167, -0.208097,0.124704,
+// shNewFloor[1] (7x1)
+NEWSHAPE,26,7,1, -0.343473,0.068811, -0.371524,0.213003, -0.243649,0.253621,
+// shTrollFloor[0] (3x1)
+NEWSHAPE,27,3,1, -0.262252,-0.145851, -0.264695,-0.107665, -0.284349,-0.038417, -0.297250,0.003588, -0.274408,0.048950, -0.266188,0.105083, -0.261804,0.148400, -0.241599,0.174935, -0.209702,0.203376, -0.168334,0.233368, -0.124537,0.231186, -0.074296,0.239577, -0.051790,0.275001, -0.021701,0.311779,
+// shTrollFloor[1] (7x2)
+NEWSHAPE,28,7,2, -0.319274,-0.152751, -0.312576,-0.088525, -0.288942,-0.033872,
+// shTriheptaFloor[0] (3x1)
+NEWSHAPE,29,3,1, -0.139445,0.241954,
+// shTriheptaFloor[1] (7x1)
+NEWSHAPE,30,7,1, 0.555765,-0.002168,
+// shTriheptaFloor[2] (1x2)
+NEWSHAPE,31,1,2, 0.276938,-0.000093, -0.141904,0.242007, -0.293711,0.146334,
+// shTriheptaFloor[3] (1x2)
+NEWSHAPE,32,1,2, -0.351825,0.160017, -0.123908,0.541824, 0.350858,0.435495, 0.559842,-0.000857,
+// shTriheptaFloor[4] (1x1)
+NEWSHAPE,33,1,1, 0.267620,0.003973, -0.007632,0.337777, -0.271967,0.165630, -0.292806,-0.156142, -0.141920,-0.243873,
+// shTriheptaFloor[5] (1x2)
+NEWSHAPE,34,1,2, 0.376029,0.016747, 0.233909,-0.274206, -0.115849,-0.540138, -0.486044,-0.233574,
+// shTriheptaFloor[6] (1x2)
+NEWSHAPE,35,1,2, 0.136841,-0.241418, -0.007877,-0.337310, -0.282188,-0.183806,
+// shTriheptaFloor[7] (1x2)
+NEWSHAPE,36,1,2, 0.562869,0.005892, 0.346218,0.424587, -0.098836,0.362115, -0.344149,0.171831,
+// shTriheptaFloor[9] (1x2)
+NEWSHAPE,37,1,2, 0.384569,0.008580, 0.234427,0.298447, -0.070055,0.365304, -0.492813,0.235557,
+// shTriheptaFloor[10] (1x2)
+NEWSHAPE,38,1,2, 0.286495,0.001984, -0.014828,0.337687, -0.282562,0.156802,
+// shTriheptaFloor2[0] (3x1)
+NEWSHAPE,39,3,1, -0.134870,0.238185, -0.014606,0.184459, 0.080296,0.256902, 0.180115,0.200011, 0.166151,0.081439, 0.273667,0.005344,
+// shTriheptaFloor2[1] (7x2)
+NEWSHAPE,40,7,2, -0.499701,-0.228679, -0.472331,-0.116951, -0.361356,-0.069085,
+// shTriheptaEuc[0] (3x1)
+NEWSHAPE,41,3,1, -0.232333,-0.000167,
+// shTriheptaEuc[1] (6x1)
+NEWSHAPE,42,6,1, 0.002000,-0.439500,
+// shTriheptaEuc[2] (3x1)
+NEWSHAPE,43,3,1, -0.121167,-0.214667,
+// shPalaceFloor[0] (3x2)
+NEWSHAPE,44,3,2, 0.118361,0.205152, 0.273318,0.190450,
+// shPalaceFloor[1] (7x1)
+NEWSHAPE,45,7,1, -0.225907,0.287688,
+// shPalaceGate (1x2)
+NEWSHAPE,46,1,2, -0.219482,-0.025012, 0.135153,-0.049012,
+// shSemiFeatherFloor[0] (1x1)
+NEWSHAPE,47,1,1, -0.213723,0.142000, -0.217805,0.186740, -0.168303,0.178633, -0.165430,0.203978, -0.105630,0.181755, -0.121309,0.236968, -0.041402,0.211323, -0.057879,0.276895, -0.017811,0.253866, 0.017667,0.368934, 0.047389,0.274022, 0.080505,0.307761, 0.077701,0.240665, 0.118416,0.268671, 0.146146,0.160920, 0.177400,0.199591, 0.182840,0.137845, 0.210035,0.188620, 0.224749,0.113626, 0.281767,0.097057, 0.212978,0.071571, 0.267866,0.042710, 0.209124,0.016525, 0.255362,-0.017839, 0.214280,-0.046220, 0.270979,-0.083301, 0.265581,-0.128638, 0.025000,0.006441,
+// shSemiFeatherFloor[1] (1x1)
+NEWSHAPE,48,1,1, -0.260056,0.104281, 0.016285,-0.045687, 0.294213,-0.200108, 0.203762,-0.171240, 0.218578,-0.231670, 0.162724,-0.207729, 0.184841,-0.241991, 0.080474,-0.212574, 0.082238,-0.239152, 0.040630,-0.227735, 0.050962,-0.289632, -0.023848,-0.250638, -0.047106,-0.286037, -0.055913,-0.224791, -0.096323,-0.258790, -0.110786,-0.189815, -0.154769,-0.220600, -0.166545,-0.156525, -0.220248,-0.191486, -0.226246,-0.155963, -0.331380,-0.170431, -0.264008,-0.097302, -0.308875,-0.070140, -0.282501,-0.040835, -0.303566,-0.023046, -0.264959,0.005751, -0.231085,0.042569, -0.257805,0.048589, -0.232591,0.068009,
+// shDemonFloor[1] (7x2)
+NEWSHAPE,49,7,2, -0.226625,-0.098204, -0.248360,-0.079830, -0.282817,-0.064277, -0.267165,-0.033078, -0.265427,-0.008890, -0.192052,-0.006156, -0.183253,-0.047966, -0.143185,-0.036403, -0.143048,-0.019396, -0.166019,-0.021973,
+// shDemonFloor[0] (3x2)
+NEWSHAPE,50,3,2, -0.301493,-0.143505, -0.286951,-0.089187, -0.265835,-0.083073, -0.254617,-0.091662, -0.235025,-0.098559, -0.212515,-0.090006, -0.195614,-0.068094, -0.191005,-0.038201, -0.190797,-0.019695, -0.209527,-0.022317, -0.209825,-0.043455, -0.217026,-0.061116, -0.229748,-0.071561, -0.245216,-0.072048, -0.259160,-0.060979, -0.268975,-0.048441, -0.279355,-0.049976, -0.293619,-0.069848, -0.299119,-0.088435, -0.309915,-0.111622, -0.326351,-0.118070, -0.344537,-0.119314, -0.371612,-0.115703, -0.386986,-0.108411, -0.395533,-0.101984, -0.372081,-0.100489, -0.352370,-0.089767, -0.339559,-0.070299, -0.338745,-0.051606, -0.343230,-0.037106, -0.346305,-0.026537, -0.349398,-0.006643, -0.344437,0.011923,
+// shCaveFloor[0] (3x1)
+NEWSHAPE,51,3,1, -0.234236,0.156157, -0.104249,0.246637, -0.046397,0.291271, 0.016871,0.307576, 0.102393,0.312431, 0.175295,0.270792, 0.252411,0.200098,
+// shCaveFloor[1] (7x1)
+NEWSHAPE,52,7,1, -0.275790,0.020429, -0.270081,0.108032, -0.241466,0.175612,
+// shCaveFloor[2] (6x2)
+NEWSHAPE,53,6,2, -0.240110,-0.132397, -0.245549,-0.126958, -0.248269,-0.113359, -0.250989,-0.099760, -0.253709,-0.081628, -0.253709,-0.073469, -0.253709,-0.058057, -0.253709,-0.039018,
+// shDesertFloor[0] (3x1)
+NEWSHAPE,54,3,1, -0.122282,0.287492, -0.111151,0.302069, -0.092261,0.322915, -0.071518,0.368383, -0.014386,0.321713, 0.014126,0.287661, 0.052673,0.283918, 0.144166,0.292263, 0.201841,0.240906, 0.236802,0.171166, 0.187940,0.142834, 0.179062,0.090148, 0.306355,-0.036347,
+// shDesertFloor[1] (7x2)
+NEWSHAPE,55,7,2, -0.336141,-0.153280, -0.336530,-0.140779, -0.323000,-0.116492, -0.295897,-0.085654, -0.271537,-0.031871,
+// shPowerFloor[0] (3x1)
+NEWSHAPE,56,3,1, 0.188696,0.349290, 0.246724,0.011920,
+// shPowerFloor[1] (7x1)
+NEWSHAPE,57,7,1, 0.563851,-0.000804, 0.151110,-0.073482,
+// shFan (6x1)
+NEWSHAPE,58,6,1, 0.107525,0.021206, 0.174486,0.023794, 0.248649,0.075227, 0.288526,0.125253, 0.316075,0.194021, 0.330682,0.132382, 0.308763,0.072356, 0.265689,0.011475, 0.200080,-0.044306, 0.135111,-0.076768,
+// shElementalShard (3x1)
+NEWSHAPE,59,3,1, -0.345978,0.004270, -0.054981,0.027419, -0.063949,0.034031, -0.078659,0.057318, -0.103108,0.086449, -0.130880,0.100059, -0.157829,0.107491, -0.173912,0.106860, -0.191566,0.100397, -0.200633,0.095930, -0.216136,0.090593, -0.200642,0.111259, -0.173354,0.128719, -0.141916,0.144399, -0.106497,0.138938, -0.079427,0.124373, -0.053552,0.106563, -0.030995,0.078798, -0.024668,0.068596, -0.027285,0.085742, -0.033561,0.111171, -0.036750,0.137167, -0.035531,0.165577, -0.023882,0.199023, -0.002982,0.230118, 0.021321,0.244715, 0.012442,0.234213, -0.002073,0.208126, -0.005433,0.188040, -0.004352,0.170363, 0.001158,0.155057, 0.002408,0.141554, 0.008798,0.125672, 0.018292,0.110314, 0.026174,0.100337,
+// shNecro (1x2)
+NEWSHAPE,60,1,2, -0.280120,0.002558, -0.252806,0.037921, -0.063204,0.010733, 0.000000,0.061995, 0.057203,0.013109, 0.155766,0.023121, 0.174234,0.055215, 0.256152,0.057064, 0.286380,0.030821, 0.251170,0.025243, 0.227431,0.033740, 0.210837,0.017363, 0.227179,0.007489, 0.245429,0.020138, 0.286335,0.028248, 0.289108,0.001285, 0.189404,0.003690, 0.186892,0.025821, 0.176349,0.017145, 0.184160,0.011050, 0.177605,0.006124, 0.184138,0.001228,
+// shFigurine (1x2)
+NEWSHAPE,61,1,2, -0.105008,0.082180, -0.018191,0.040930, -0.011407,0.123195, 0.041081,0.123243, 0.040941,0.038667, 0.070555,0.027312, 0.086601,0.059253, 0.134876,0.073153, 0.190524,0.064273, 0.211472,0.036778,
+// shStatue (8x1)
+NEWSHAPE,62,8,1, -0.047663,0.032172, -0.047670,0.034561, -0.054881,0.039371, -0.080231,0.043109, -0.103440,0.045706, -0.148323,0.042552, -0.188278,0.031995, -0.239693,0.002510, -0.257087,-0.036727, -0.283314,-0.026921, -0.290985,0.034764, -0.262852,0.081663, -0.198209,0.104714, -0.140842,0.107775, -0.088218,0.099094, -0.057645,0.088869, -0.035877,0.075342, -0.023854,0.060828, -0.022642,0.053625, -0.011901,0.044034, -0.007144,0.050008,
+// shBook (2x1)
+NEWSHAPE,63,2,1, -0.123296,-0.203475, 0.123296,-0.203475,
+// shBookCover (3x1)
+NEWSHAPE,64,3,1, 0.018255,-0.016768, 0.010865,-0.065298, 0.044639,-0.075918, 0.027526,-0.106818, -0.029540,-0.088203,
+// shGrail (1x2)
+NEWSHAPE,65,1,2, -0.154537,0.122394, -0.142973,0.123252, -0.138296,0.095461, -0.123926,0.072898, -0.107625,0.065300, -0.067188,0.057589, -0.040655,0.052612, -0.037133,0.069475, -0.021657,0.101065, 0.003631,0.129510, 0.040272,0.153766, 0.087340,0.161149, 0.127500,0.154732, 0.161853,0.141932, 0.184896,0.152194, 0.189249,0.157707,
+// shGun (1x1)
+NEWSHAPE,66,1,1, -0.139431,-0.044738, -0.115996,-0.007279, -0.057715,-0.031033, -0.045084,-0.014605, -0.066569,-0.008222, -0.070986,0.003205, -0.070744,0.009636, -0.066988,0.002251, -0.058525,-0.008510, -0.045683,-0.008971, -0.043249,-0.008257, -0.031506,0.005726, -0.020012,0.013281, 0.001173,0.003679, 0.012717,-0.007112, 0.093390,0.118437, 0.127945,0.108856, -0.004226,-0.087963, -0.020241,-0.089138, -0.029416,-0.102578, -0.027650,-0.127629, -0.035592,-0.124229, -0.041465,-0.103099, -0.041059,-0.088601,
+// shKey (1x1)
+NEWSHAPE,67,1,1, -0.280212,-0.017913, -0.279685,0.060299, -0.258790,0.115302, -0.228319,0.104699, -0.239075,0.056623, -0.213944,0.046023, -0.200310,0.089579, -0.168273,0.078609, -0.179201,0.040504, -0.150719,0.029171, -0.146064,0.060860, -0.115859,0.053102, -0.119288,0.019279, -0.087371,0.011969, -0.080285,0.050328, -0.068304,0.065908, -0.052728,0.079091, -0.033525,0.083811, -0.007181,0.087363, 0.025157,0.089847, 0.044329,0.082667, 0.061077,0.068263, 0.074262,0.055098, 0.088682,0.034754, 0.093450,0.008387, 0.092228,-0.005989, 0.092278,-0.023968, 0.085107,-0.045550, 0.070661,-0.058685, 0.045297,-0.040529, 0.057205,-0.014301, 0.057207,0.015494, 0.041704,0.039321, 0.023823,0.048837, 0.003575,0.058394, -0.021441,0.050029, -0.047692,0.040538, -0.054813,0.017874, -0.054802,-0.010722, -0.036924,-0.039306, -0.020254,-0.052421, 0.011915,-0.056002, 0.034561,-0.047670, 0.045297,-0.040529, 0.070661,-0.058685, 0.055051,-0.068215, 0.033505,-0.080172, 0.011971,-0.088587, -0.010772,-0.087369, -0.035904,-0.080185, -0.061039,-0.063432, -0.071750,-0.041854, -0.082525,-0.015548, -0.280212,-0.017913,
+// shGhost (1x2)
+NEWSHAPE,68,1,2, -0.312167,0.001301, -0.185499,0.015970, -0.273136,0.038290, -0.184484,0.043046, -0.296331,0.093578, -0.174561,0.070070, -0.222751,0.104454, -0.162371,0.098407, -0.272077,0.156217, -0.140182,0.126656, -0.161729,0.148045, -0.119271,0.146323, -0.231927,0.213686, -0.001244,0.218928, 0.016184,0.220354, 0.031094,0.216414, 0.045998,0.212585, 0.064748,0.211675, 0.079530,0.201310, 0.094597,0.199151, 0.110770,0.190424, 0.123174,0.181651, 0.132996,0.171528, 0.149284,0.160480, 0.156499,0.147805, 0.171645,0.135575, 0.180157,0.119276, 0.188931,0.106895, 0.197759,0.093283, 0.201351,0.080789, 0.209030,0.067188, 0.212718,0.052246, 0.215145,0.037308, 0.217714,0.026126, 0.217612,0.014922,
+// shGargoyleWings (1x2)
+NEWSHAPE,69,1,2, 0.042241,0.002223, 0.041129,-0.007781, 0.045593,-0.034473, 0.066799,-0.059006, 0.116090,-0.071440, 0.169203,-0.075077, 0.154517,-0.085096, 0.124220,-0.116387, 0.104146,-0.144461, 0.082994,-0.176082, 0.049446,-0.209023, 0.004505,-0.235397, -0.039494,-0.248247, -0.071220,-0.256618, -0.116784,-0.264180, -0.160337,-0.264954, -0.177592,-0.262973, -0.159002,-0.255539, -0.137018,-0.243463, -0.124173,-0.222383, -0.128481,-0.203992, -0.160238,-0.194091, -0.184305,-0.194482, -0.160187,-0.190645, -0.117943,-0.174106, -0.108751,-0.156961, -0.107466,-0.136571, -0.120870,-0.120870, -0.143330,-0.104138, -0.156871,-0.097484, -0.143266,-0.095138, -0.119536,-0.087138, -0.103741,-0.071392, -0.091360,-0.051251, -0.083500,-0.032287, -0.077900,-0.015580,
+// shGargoyleBody (1x2)
+NEWSHAPE,70,1,2, 0.128302,-0.002231, 0.128305,-0.010041, 0.136196,-0.021211, 0.146366,-0.031284, 0.164504,-0.042525, 0.161107,-0.043633, 0.143009,-0.042456, 0.127212,-0.033477, 0.114839,-0.025644, 0.108151,-0.046828, 0.094666,-0.021161, 0.081255,-0.022262, 0.068979,-0.022251, 0.057838,-0.028919, 0.082541,-0.093696, 0.108462,-0.117407, 0.080377,-0.111634, 0.074909,-0.139757, 0.066894,-0.095881, 0.056798,-0.077958, 0.043402,-0.066772, 0.031144,-0.056726, 0.011119,-0.053373, -0.024478,-0.070096, -0.007782,-0.046693, -0.062361,-0.071270, -0.041154,-0.050052, -0.097005,-0.068015, -0.066772,-0.043402, -0.120555,-0.063626, -0.092454,-0.038987, -0.144240,-0.068206, -0.151438,-0.125638, -0.186951,-0.141902, -0.209987,-0.145636, -0.230971,-0.155113, -0.216796,-0.137756, -0.243372,-0.131308, -0.209646,-0.120603, -0.188968,-0.119230, -0.167228,-0.113356, -0.164543,-0.052609, -0.121573,-0.023422, -0.142949,-0.011168, -0.187169,-0.007845, -0.243507,-0.003382,
+// shDogStripes (1x2)
+NEWSHAPE,71,1,2, -0.147497,-0.001105, -0.159242,0.009400, -0.153105,0.023214, -0.135232,0.011039, -0.110779,0.007165, -0.119793,0.067901, -0.099799,0.063959, -0.090296,0.011012, -0.047281,0.012095, -0.058915,0.070478, -0.041289,0.078174, -0.021982,0.013189, 0.011539,0.012638, -0.001651,0.079245, 0.011562,0.089191, 0.034627,0.013741, 0.043979,0.012094, 0.052798,0.032449, 0.058855,0.029703, 0.077053,0.029170, 0.066006,0.005501,
+// shWolf (1x2)
+NEWSHAPE,72,1,2, -0.310601,0.000000, -0.158251,0.009739, -0.149626,0.045009, -0.173168,0.066320, -0.250414,0.056912, -0.242122,0.064314, -0.253563,0.065926, -0.241104,0.075740, -0.249897,0.082453, -0.237118,0.081982, -0.246310,0.097762, -0.230366,0.088118, -0.210870,0.082352, -0.194727,0.083100, -0.180298,0.087679, -0.162032,0.087154, -0.135091,0.081542, -0.116083,0.068924, -0.106144,0.066340, -0.084057,0.063643, -0.061108,0.071892, -0.044295,0.077815, -0.021516,0.077698, 0.000000,0.078872, 0.025203,0.099613, 0.040964,0.113252, 0.067885,0.127285, 0.086481,0.135203, 0.104129,0.144556, 0.097579,0.132951, 0.112604,0.134635, 0.098603,0.124167, 0.118341,0.115901, 0.094688,0.115325, 0.079806,0.108826, 0.065011,0.097516, 0.053964,0.082746, 0.049028,0.066966, 0.045353,0.053708, 0.046494,0.040534, 0.051260,0.033378, 0.059646,0.029823, 0.069275,0.029860, 0.077732,0.029897, 0.081360,0.028715, 0.066249,0.039649, 0.106662,0.046229, 0.146020,0.025919, 0.159666,0.028110, 0.172131,0.020186, 0.172077,0.013438, 0.168613,0.007837,
+// shWolf1 (1x1)
+NEWSHAPE,73,1,1, 0.121226,-0.019639, 0.119731,-0.021190, 0.117841,-0.022233, 0.115725,-0.022676, 0.113570,-0.022480, 0.111568,-0.021661, 0.109897,-0.020293, 0.108705,-0.018496, 0.108099,-0.016432, 0.108131,-0.014283, 0.108800,-0.012240, 0.110046,-0.010484, 0.111757,-0.009172, 0.113783,-0.008421, 0.115942,-0.008296, 0.118044,-0.008810, 0.119902,-0.009915, 0.121349,-0.011516, 0.122258,-0.013468, 0.122549,-0.015598, 0.122194,-0.017718,
+// shWolf2 (1x1)
+NEWSHAPE,74,1,1, 0.110896,0.008835, 0.109780,0.010595, 0.109236,0.012605, 0.109313,0.014686, 0.110004,0.016653, 0.111247,0.018331, 0.112933,0.019572, 0.114911,0.020264, 0.117005,0.020346, 0.119030,0.019812, 0.120806,0.018708, 0.122174,0.017133, 0.123014,0.015226, 0.123250,0.013158, 0.122862,0.011111, 0.121884,0.009268, 0.120403,0.007792, 0.118550,0.006815, 0.116491,0.006423, 0.114408,0.006652, 0.112486,0.007480,
+// shWolf3 (1x1)
+NEWSHAPE,75,1,1, 0.157399,-0.008998, 0.154869,-0.009703, 0.152240,-0.009639, 0.149747,-0.008812, 0.147612,-0.007296, 0.146023,-0.005225, 0.145123,-0.002783, 0.144991,-0.000188, 0.145638,0.002331, 0.147008,0.004549, 0.148979,0.006269, 0.151375,0.007339, 0.153983,0.007663, 0.156573,0.007212, 0.158913,0.006027, 0.160796,0.004213, 0.162055,0.001931, 0.162577,-0.000616, 0.162316,-0.003201, 0.161296,-0.005596, 0.159607,-0.007588,
+// shHawk (1x2)
+NEWSHAPE,76,1,2, 0.142456,-0.001557, 0.116236,0.010199, 0.104323,0.033324, 0.091361,0.040882, 0.082569,0.043693, 0.074592,0.041969, 0.061035,0.040602, 0.050686,0.036782, 0.044666,0.030442, 0.036067,0.018664, 0.027492,0.024803, 0.023952,0.039607, 0.029039,0.130828, 0.010152,0.198985, -0.016340,0.244502, -0.044325,0.274285, -0.071191,0.291142, -0.095838,0.290953, -0.163452,0.314668, -0.126557,0.290164, -0.115484,0.276976, -0.097565,0.262090, -0.139857,0.285325, -0.169577,0.286959, -0.204455,0.287946, -0.165758,0.267094, -0.137259,0.245199, -0.122713,0.231981, -0.105482,0.206850, -0.103989,0.192625, -0.136578,0.214149, -0.178626,0.222509, -0.216644,0.228276, -0.178075,0.209345, -0.154479,0.186094, -0.140331,0.166218, -0.129767,0.146790, -0.125089,0.126774, -0.125855,0.112996, -0.151531,0.130982, -0.179485,0.133004, -0.192671,0.128132, -0.161665,0.115486, -0.138366,0.095450, -0.128650,0.083339, -0.121392,0.069153, -0.120756,0.059987, -0.121451,0.047500, -0.122143,0.035028, -0.141470,0.038442, -0.175470,0.051892, -0.204042,0.065126, -0.234854,0.089092, -0.277604,0.102438, -0.297591,0.091976, -0.278633,0.079023, -0.292616,0.065802, -0.251306,0.044753, -0.294009,0.035431, -0.266622,0.025835, -0.301490,0.006576,
+// shEagle (1x2)
+NEWSHAPE,77,1,2, -0.153132,0.000000, -0.151960,0.025529, -0.192201,0.028337, -0.204119,0.019793, -0.201539,0.029674, -0.208386,0.038452, -0.200321,0.038333, -0.199208,0.050730, -0.192349,0.039456, -0.149495,0.034031, -0.148542,0.057225, -0.089847,0.025157, -0.048881,0.038151, 0.002416,0.130440, -0.028450,0.202864, -0.044701,0.209848, -0.044823,0.216644, -0.039848,0.217916, -0.028602,0.216381, -0.018604,0.210847, -0.016122,0.210828, -0.014922,0.217612, -0.025023,0.231467, -0.035205,0.241403, -0.041644,0.248604, -0.041754,0.254318, -0.034211,0.258480, -0.021481,0.253982, -0.011317,0.243946, 0.001251,0.232708, 0.008728,0.224428, 0.009969,0.223059, 0.011289,0.238321, 0.003802,0.261058, -0.005116,0.280126, -0.007740,0.296717, 0.001286,0.290619, 0.012793,0.280166, 0.022854,0.264095, 0.028906,0.241303, 0.031328,0.234335, 0.032584,0.234354, 0.034119,0.252735, 0.032108,0.286405, 0.030917,0.292424, 0.039807,0.285067, 0.050896,0.264659, 0.058073,0.246178, 0.063739,0.221211, 0.083520,0.165812, 0.083035,0.146532, 0.075285,0.129928, 0.066581,0.122266, 0.055484,0.112174, 0.044365,0.087531, 0.034631,0.065680, 0.034631,0.065680, 0.026221,0.053634, 0.022616,0.041661, 0.021411,0.033306, 0.022591,0.024969, 0.026158,0.021402, 0.028538,0.020215, 0.034494,0.017842, 0.040463,0.020231, 0.042853,0.021427, 0.044051,0.022621, 0.051232,0.023829, 0.058426,0.023847, 0.064425,0.020282, 0.068025,0.015514, 0.071634,0.011939, 0.089791,0.002394,
+// shTentHead (1x2)
+NEWSHAPE,78,1,2, -0.153133,-0.001215, -0.153144,0.008508, -0.148132,0.023070, -0.142123,0.052233, -0.146204,0.068228, -0.177590,0.085095, -0.224851,0.089187, -0.262047,0.120747, -0.255264,0.167153, -0.229967,0.174723, -0.184192,0.147855, -0.138732,0.121544, -0.108401,0.118145, -0.102300,0.123003, -0.091928,0.154439, -0.090798,0.199010, -0.056384,0.229293, -0.011331,0.246774, 0.024027,0.255446, 0.073005,0.235380, 0.151935,0.187094, 0.146867,0.164292, 0.094648,0.162253, 0.044142,0.175341, -0.003641,0.148054, -0.002399,0.100774, 0.047859,0.071788, 0.098991,0.082090, 0.151038,0.106832, 0.199477,0.131730, 0.255339,0.129594, 0.264313,0.081720, 0.226731,0.063886, 0.168813,0.041592, 0.128034,0.026573, 0.108135,0.002403,
+// shWormHead (1x2)
+NEWSHAPE,79,1,2, -0.212131,-0.004962, -0.213579,0.021110, -0.208766,0.057162, -0.193784,0.094408, -0.171245,0.126572, -0.149103,0.156559, -0.121949,0.182923, -0.099674,0.199349, -0.073594,0.213299, -0.039892,0.220654, 0.000000,0.225787, 0.051224,0.223636, 0.099986,0.207472, 0.126101,0.189776, 0.144643,0.172075, 0.260938,0.181352, 0.170506,0.139392, 0.241779,0.141997, 0.188983,0.108168, 0.239385,0.101327, 0.202657,0.079571, 0.238058,0.069276, 0.208736,0.055911, 0.237283,0.040175, 0.212303,0.028555, 0.235548,0.015035, 0.216200,0.001243,
+// shWaterElemental (1x2)
+NEWSHAPE,80,1,2, 0.033277,-0.002494, 0.030600,0.009657, 0.028387,0.043359, 0.023906,0.062967, 0.019706,0.086354, 0.012812,0.106509, 0.005882,0.110737, -0.011019,0.128245, -0.022186,0.143031, -0.030554,0.165535, -0.031448,0.191850, -0.019105,0.210887, -0.011140,0.218374, 0.003294,0.228201, 0.022226,0.229526, 0.030754,0.226143, 0.045164,0.218293, 0.048550,0.213967, 0.049437,0.209816, 0.066512,0.191298, 0.088299,0.195587, 0.104559,0.227968, 0.106012,0.240682, 0.089373,0.265934, 0.046213,0.273931, 0.013854,0.270257, -0.022699,0.280947, -0.082207,0.292512, -0.094232,0.286583, -0.060514,0.273212, -0.030455,0.255305, -0.028453,0.245093, -0.035130,0.238686, -0.050479,0.236064, -0.095235,0.239928, -0.156131,0.242848, -0.180731,0.231002, -0.161568,0.228039, -0.140105,0.226302, -0.114110,0.211717, -0.104006,0.203643, -0.096764,0.190676, -0.097207,0.178784, -0.104028,0.166435, -0.109337,0.160521, -0.119778,0.153916, -0.145551,0.154306, -0.196422,0.144903, -0.238648,0.130576, -0.251825,0.121707, -0.243461,0.108932, -0.227615,0.116160, -0.199823,0.119359, -0.155889,0.119514, -0.126863,0.107638, -0.121879,0.082303, -0.130612,0.062191, -0.149053,0.051540, -0.176729,0.044071, -0.213072,0.040955, -0.257325,0.030738, -0.282810,0.025058, -0.296088,0.010521,
+// shMouse (1x2)
+NEWSHAPE,81,1,2, -0.180666,0.000000, -0.063349,-0.003586, -0.052534,-0.013134, -0.040561,-0.021474, -0.020260,-0.026219, -0.001191,-0.028595, 0.025033,-0.026225, 0.045342,-0.015512, 0.056152,-0.020310, 0.077865,-0.014375, 0.094893,-0.002402, 0.101018,-0.000000,
+// shMouseLegs (1x2)
+NEWSHAPE,82,1,2, -0.033372,-0.005959, -0.047793,-0.037040, -0.003572,-0.011907, 0.033422,-0.039390, 0.026209,-0.004765,
+// shMouseEyes (1x2)
+NEWSHAPE,83,1,2, 0.073016,-0.011970, 0.065770,-0.013154, 0.065764,-0.008370, 0.071797,-0.003590,
+// shPBody (1x2)
+NEWSHAPE,84,1,2, -0.127943,0.000000, -0.121732,0.008437, -0.120752,0.047093, -0.114785,0.065246, -0.096531,0.082051, -0.079664,0.100183, -0.087015,0.156872, -0.090442,0.188317, -0.085023,0.215058, -0.078296,0.241201, -0.070101,0.263835, -0.062700,0.273833, -0.053763,0.276497, -0.030638,0.274461, -0.015319,0.275737, 0.001277,0.277150, 0.020384,0.271369, 0.038101,0.262896, 0.045596,0.255842, 0.062388,0.263558, 0.085371,0.258660, 0.084235,0.228817, 0.071073,0.213220, 0.048603,0.218088, 0.042541,0.228972, 0.028749,0.228742, 0.011222,0.224439, -0.012498,0.229969, -0.026261,0.230095, -0.024880,0.217700, -0.022225,0.198787, -0.020850,0.180288, -0.021870,0.150662, -0.022997,0.136774, -0.004819,0.120485, 0.007204,0.104455, 0.016748,0.083741, 0.026225,0.054833, 0.033323,0.030943, 0.034483,0.001189, 0.034483,-0.001189,
+// shYeti (1x2)
+NEWSHAPE,85,1,2, -0.146785,0.001213, -0.119261,0.012047, -0.134264,0.022982, -0.116850,0.026502, -0.128124,0.037470, -0.114489,0.040975, -0.134526,0.049690, -0.108483,0.056652, -0.124869,0.072739, -0.100038,0.069906, -0.116319,0.082393, -0.086776,0.085571, -0.105410,0.095717, -0.078461,0.101396, -0.084756,0.111394, -0.078850,0.123734, -0.094972,0.127846, -0.081624,0.138883, -0.102733,0.139423, -0.083221,0.154204, -0.115566,0.148760, -0.081064,0.167041, -0.093630,0.170012, -0.081530,0.184060, -0.104404,0.190164, -0.078114,0.195904, -0.088688,0.211101, -0.074815,0.211977, -0.081589,0.225940, -0.067678,0.226847, -0.091419,0.248863, -0.059306,0.244796, -0.060896,0.256271, -0.051997,0.257446, -0.058919,0.276663, -0.042072,0.270280, -0.042449,0.288141, -0.020355,0.268437, -0.007716,0.290637, 0.001272,0.268323, 0.017995,0.289206, 0.021598,0.265534, 0.038374,0.277573, 0.037997,0.257112, 0.048725,0.280810, 0.050653,0.254534, 0.069009,0.269645, 0.085977,0.273328, 0.075050,0.258222, 0.097049,0.259223, 0.103016,0.248003, 0.079575,0.241251, 0.091636,0.222186, 0.070376,0.232494, 0.072102,0.205119, 0.060388,0.237778, 0.058115,0.195365, 0.045217,0.237388, 0.037611,0.234439, 0.034796,0.213746, 0.023715,0.225917, 0.027226,0.204191, 0.012420,0.214873, 0.020917,0.189485, 0.003700,0.197357, 0.009817,0.182844, -0.011065,0.188106, 0.003663,0.168520, -0.023305,0.180308, -0.004879,0.164654, -0.034247,0.170012, -0.004861,0.153136, -0.027964,0.151980, -0.003639,0.146787, -0.015710,0.131722, 0.010889,0.136717, -0.003615,0.120484, 0.027708,0.116858, 0.007202,0.103229, 0.034761,0.089899, 0.015548,0.082525, 0.044270,0.074183, 0.021490,0.069245, 0.051357,0.054940, 0.027405,0.050043, 0.053662,0.034582, 0.034521,0.033331, 0.060848,0.029827, 0.041653,0.017851, 0.065617,0.015510, 0.051204,0.004763,
+// shKnife (1x2)
+NEWSHAPE,86,1,2, -0.086373,0.015595, -0.063364,0.015542, -0.061008,0.033495, -0.041796,0.037020, -0.038168,0.021470, 0.085206,0.028802, 0.158634,0.003661,
+// shTongue (1x2)
+NEWSHAPE,87,1,2, -0.036955,0.001192, -0.036957,-0.007153, -0.048967,-0.028663, -0.061094,-0.050313, -0.064717,-0.050336, -0.049075,-0.055059, -0.022708,-0.058563, 0.011941,-0.053734, 0.029846,-0.044173, 0.046581,-0.033443, 0.062159,-0.015540, 0.066968,-0.005979,
+// shFlailMissile (21x1)
+NEWSHAPE,88,21,1, -0.064558,0.008369, -0.038156,0.011924,
+// shPSword (1x1)
+NEWSHAPE,89,1,1, 0.093822,0.244697, 0.105758,0.251015, 0.110908,0.249862, 0.110690,0.245554, 0.113376,0.247134, 0.117228,0.245924, 0.127263,0.237981, 0.131886,0.226997, 0.116494,0.231721, 0.106117,0.231182, 0.105927,0.226986, 0.263283,-0.174653, 0.086104,0.209645, 0.079571,0.202657, 0.074206,0.190462, 0.068951,0.179766, 0.065727,0.200902, 0.068444,0.209067, 0.077641,0.221653, 0.086737,0.227526, 0.086260,0.248631, 0.086431,0.252937,
+// shPKnife (1x1)
+NEWSHAPE,90,1,1, 0.070235,0.261061, 0.085110,0.243297, 0.100384,0.253764, 0.115592,0.241462, 0.106046,0.228043, 0.193021,0.140235, 0.223042,0.069158, 0.217457,0.064184, 0.149083,0.101106, 0.073293,0.198875, 0.059119,0.191168, 0.049288,0.208259, 0.061401,0.222183, 0.046445,0.239874,
+// shPirateHook (1x1)
+NEWSHAPE,91,1,1, 0.025637,0.290334, 0.015893,0.212083, 0.070681,0.208634, 0.078764,0.213716, 0.092820,0.214478, 0.128742,0.099394, 0.114620,0.096368, 0.104002,0.089501, 0.096284,0.072719, 0.093155,0.050966, 0.099066,0.033609, 0.110446,0.021946, 0.127291,0.014728, 0.145718,0.008586, 0.167517,0.008308, 0.156477,0.015183, 0.140613,0.023565, 0.132241,0.028989, 0.118961,0.034720, 0.108990,0.048739, 0.107378,0.058592, 0.115339,0.077749, 0.131027,0.084323, 0.151797,0.088283, 0.113111,0.234773, 0.104917,0.253698, 0.105424,0.258064, 0.096993,0.264198, 0.089213,0.264464, 0.087585,0.273426, 0.080433,0.279698, 0.072806,0.281526,
+// shSabre (1x1)
+NEWSHAPE,92,1,1, 0.052478,0.211644, 0.042242,0.185536, 0.057979,0.181601, 0.068086,0.204991, 0.085295,0.201073, 0.100829,0.193318, 0.113718,0.184489, 0.125735,0.178476, 0.134891,0.170005, 0.144264,0.162907, 0.152391,0.155912, 0.160192,0.146346, 0.166733,0.136894, 0.180659,0.123243, 0.189268,0.108634, 0.197644,0.091550, 0.204992,0.075866, 0.207394,0.063057, 0.213308,0.045015, 0.215741,0.031014, 0.216495,0.013402, 0.217512,-0.002957, 0.216708,-0.025412, 0.215602,-0.037833, 0.209033,-0.050943, 0.249210,-0.008237, 0.247115,0.012233, 0.246190,0.028812, 0.239192,0.052194, 0.237023,0.067663, 0.231339,0.087245, 0.221702,0.107109, 0.215996,0.124316, 0.206323,0.141806, 0.194941,0.164879, 0.173125,0.180454, 0.158905,0.191858, 0.143293,0.202073, 0.128179,0.215193, 0.111272,0.224403, 0.090433,0.232613, 0.079164,0.234740, 0.083027,0.256039, 0.071081,0.264147, 0.060044,0.234679,
+// shHedgehogBlade (1x2)
+NEWSHAPE,93,1,2, 0.117178,0.032617, 0.102699,0.066452, 0.056807,0.109987, 0.052506,0.272774, 0.079931,0.279758, 0.082589,0.170109, 0.139258,0.126935, 0.240653,0.136967, 0.177567,0.067821, 0.273978,0.042249, 0.187242,-0.000000,
+// shHedgehogBladePlayer (1x2)
+NEWSHAPE,94,1,2, 0.117178,0.032617, 0.102699,0.066452, 0.056807,0.109987, 0.052506,0.272774, 0.079931,0.279758, 0.082589,0.170109, 0.173109,0.220554, 0.139258,0.126935, 0.240653,0.136967, 0.177567,0.067821, 0.273978,0.042249, 0.187242,-0.000000,
+// shFemaleBody (1x2)
+NEWSHAPE,95,1,2, -0.091723,0.073620, -0.089581,0.094424, -0.082621,0.117856, -0.070099,0.258731, -0.058825,0.268551, -0.003834,0.273475, 0.040760,0.263668, 0.077891,0.260490, 0.085895,0.233685, 0.064882,0.210867, 0.037427,0.217075, 0.011258,0.226410, -0.037448,0.218444, -0.026537,0.112181, -0.015609,0.091250, 0.007196,0.086357, 0.019189,0.083950, 0.027568,0.077909, 0.033526,0.068249, 0.034689,0.059808, 0.037035,0.046593, 0.029813,0.028620, 0.017865,0.010719, 0.010716,0.003572,
+// shFemaleDress (1x2)
+NEWSHAPE,96,1,2, -0.094893,0.000000, -0.098831,0.051826, -0.095833,0.099473, -0.087712,0.125476, -0.020535,0.119586, -0.012011,0.093684, 0.001200,0.088788, 0.021589,0.083958, 0.033549,0.073088, 0.041871,0.056227, 0.039397,0.035815, 0.030996,0.021459, 0.019057,0.011911, 0.010716,-0.001191,
+// shDemon (1x2)
+NEWSHAPE,97,1,2, 0.098330,0.005996, 0.098350,0.015592, 0.097179,0.027594, 0.088731,0.041967, 0.082695,0.047939, 0.070682,0.061098, 0.075191,0.124914, 0.083954,0.132624, 0.097611,0.134215, 0.112530,0.132100, 0.126233,0.127459, 0.148804,0.116829, 0.170177,0.098653, 0.175203,0.092537, 0.167872,0.107389, 0.150410,0.125752, 0.132974,0.139130, 0.093435,0.163511, 0.064916,0.165353, 0.042697,0.159810, 0.026717,0.148159, 0.018123,0.130482, 0.016784,0.095911, 0.020324,0.078904, 0.017909,0.070441, 0.013123,0.065613, 0.000000,0.063197, -0.015494,0.057207, -0.032146,0.038099, -0.063226,0.021473, -0.122974,0.008439, -0.197385,0.012337, -0.283101,0.000000,
+// shTrylobite (1x2)
+NEWSHAPE,98,1,2, -0.145203,-0.004468, -0.144076,0.007818, -0.163334,0.030206, -0.213613,0.048344, -0.244836,0.053029, -0.230982,0.060844, -0.188498,0.063955, -0.146444,0.055895, -0.100275,0.031197, -0.083512,0.040086, -0.073567,0.085828, -0.071617,0.153304, -0.088919,0.211605, -0.114353,0.253615, -0.085940,0.254429, -0.060908,0.240247, -0.032564,0.204365, -0.014542,0.164439, -0.005571,0.106972, 0.014454,0.048921, 0.090242,0.051248, 0.093652,0.070239, 0.090579,0.133073, 0.075196,0.187429, 0.049574,0.233224, 0.018120,0.279734, 0.039746,0.297527, 0.094039,0.267387, 0.134354,0.217902, 0.162119,0.165496, 0.180861,0.108966, 0.190803,0.067342, 0.197519,0.039279,
+// shTrylobiteHead (1x2)
+NEWSHAPE,99,1,2, 0.163308,-0.016778, 0.168997,-0.026860, 0.195236,-0.040394, 0.207912,-0.056192, 0.226552,-0.084534, 0.231600,-0.120884, 0.228729,-0.159657, 0.218914,-0.192826, 0.203437,-0.228441, 0.166197,-0.269785, 0.139999,-0.283413, 0.152680,-0.284851, 0.201083,-0.275346, 0.227316,-0.252447, 0.248761,-0.221374, 0.263269,-0.190328, 0.275789,-0.170944, 0.294151,-0.143655, 0.304263,-0.111677, 0.315665,-0.074073, 0.322577,-0.045594, 0.278615,-0.033977, 0.269353,-0.055455, 0.251793,-0.049681, 0.255151,-0.016935, 0.277445,-0.035105, 0.322577,-0.045594,
+// shGoatHead (1x2)
+NEWSHAPE,100,1,2, 0.098234,-0.008161, 0.097458,-0.016878, 0.085163,-0.036297, 0.074171,-0.049357, 0.064423,-0.056062, 0.071545,-0.060919, 0.090299,-0.086141, 0.099873,-0.119956, 0.098555,-0.155296, 0.084548,-0.179003, 0.066861,-0.191576, 0.016947,-0.207877, -0.036121,-0.216389, -0.071628,-0.210733, -0.053640,-0.210686, -0.029915,-0.199910, -0.013982,-0.189736, 0.018469,-0.168500, 0.033113,-0.153873, 0.045027,-0.132252, 0.044982,-0.113169, 0.039048,-0.095429, 0.028215,-0.083777, 0.018818,-0.079369, 0.005692,-0.074475, -0.012112,-0.070532, -0.028520,-0.067591, -0.047548,-0.063966, -0.060278,-0.061572, -0.079475,-0.058008, -0.093451,-0.049712, -0.106876,-0.031455, -0.109804,-0.016063, -0.108918,-0.001180,
+// shRatHead (1x2)
+NEWSHAPE,101,1,2, -0.090184,-0.008907, -0.129484,-0.042417, -0.081266,-0.032284, -0.111639,-0.081497, -0.058974,-0.047847, -0.078109,-0.104889, -0.040051,-0.058964, -0.041269,-0.117115, -0.011126,-0.071203, -0.008915,-0.108094, 0.030035,-0.061182, 0.022272,-0.092430, 0.060095,-0.052305, 0.060130,-0.071265, 0.098049,-0.038997, 0.091380,-0.059063, 0.122724,-0.037933, 0.121640,-0.052450, 0.144106,-0.030162, 0.151996,-0.021235, 0.154245,-0.011177, 0.156503,-0.004472, 0.171370,-0.056003, 0.162163,-0.001118,
+// shRatEyes (1x2)
+NEWSHAPE,102,1,2, 0.080137,0.021147, 0.090197,0.025612, 0.090206,0.032296, 0.082388,0.035627, 0.075685,0.033390, 0.073440,0.021142, 0.077903,0.018919, 0.079019,0.018920,
+// shRatTail (1x1)
+NEWSHAPE,103,1,1, 0.004445,-0.016668, -0.024450,-0.015559, -0.035572,-0.023344, -0.050044,-0.032251, -0.054504,-0.037819, -0.066777,-0.046744, -0.074613,-0.059022, -0.079088,-0.062380, -0.092563,-0.079180, -0.103821,-0.090424, -0.120815,-0.112985, -0.144731,-0.135755, -0.195993,-0.131788, -0.233493,-0.084599, -0.240035,-0.011269, -0.210229,0.059584, -0.186362,0.085322, -0.185130,0.072930, -0.197514,0.038156, -0.204332,-0.020209, -0.188533,-0.069578, -0.161255,-0.075029, -0.129508,-0.050240, -0.108106,-0.023404, -0.076781,0.007789, -0.031123,0.024454, -0.003334,0.018891, 0.008889,0.012223, 0.014445,0.002222,
+// shRatCape1 (1x2)
+NEWSHAPE,104,1,2, 0.111734,-0.044549, 0.085077,-0.064302, 0.076126,-0.069355, 0.063009,-0.072447, 0.060184,-0.075301, -0.016803,-0.045427, -0.084897,-0.004966,
+// shRatCape2 (1x2)
+NEWSHAPE,105,1,2, 0.064357,-0.017052, 0.062169,-0.036861, 0.052288,-0.064948, 0.041296,-0.082593, 0.029743,-0.094738, 0.018182,-0.103582, 0.004409,-0.109669, -0.009371,-0.114663, -0.023159,-0.116896, -0.035856,-0.120805, -0.044697,-0.123606, -0.052994,-0.126412, -0.066282,-0.129803, -0.068502,-0.130927, -0.077943,-0.135432, -0.089059,-0.138844, -0.103549,-0.143972, -0.118107,-0.151931, -0.142204,-0.155536, -0.155133,-0.156245, -0.189079,-0.160076, -0.172777,-0.122777, -0.163406,-0.078103, -0.158135,-0.020458,
+// shKnightArmor (1x2)
+NEWSHAPE,106,1,2, -0.129512,-0.004842, -0.129934,0.057074, -0.089756,0.104311, -0.099124,0.177184, -0.086054,0.237913, -0.019952,0.218220, -0.020812,0.167721, -0.024311,0.143434, 0.006041,0.122026, 0.026372,0.079117, 0.032239,0.044179, 0.034575,0.016691, 0.034565,0.003576,
+// shWightCloak (1x2)
+NEWSHAPE,107,1,2, 0.033830,0.001771, 0.026266,-0.078450, -0.008137,-0.128166, -0.032077,-0.140784, -0.061416,-0.142096, -0.077813,-0.152253, -0.102686,-0.173285, -0.116436,-0.179982, -0.137144,-0.175455, -0.139446,-0.169272, -0.128291,-0.167777, -0.112415,-0.158387, -0.104516,-0.150085, -0.097005,-0.138640, -0.104605,-0.128377, -0.121858,-0.124995, -0.135777,-0.130025, -0.150982,-0.138470, -0.176251,-0.152351, -0.204651,-0.170039, -0.236443,-0.182657, -0.260761,-0.182008, -0.289038,-0.169599, -0.291713,-0.160123, -0.281530,-0.160333, -0.264828,-0.166999, -0.240959,-0.155502, -0.221286,-0.138182, -0.212055,-0.124802, -0.216004,-0.111599, -0.222140,-0.093865, -0.234242,-0.103510, -0.254816,-0.119994, -0.273521,-0.124945, -0.297868,-0.118456, -0.319582,-0.099338, -0.332300,-0.085506, -0.342656,-0.077867, -0.331725,-0.075650, -0.311338,-0.089299, -0.296662,-0.091450, -0.273246,-0.082737, -0.257713,-0.072665, -0.235809,-0.054595, -0.224729,-0.037162, -0.184572,-0.005059,
+// shKnightCloak (1x2)
+NEWSHAPE,108,1,2, -0.000015,0.003765, 0.007931,-0.006370, 0.020079,-0.026681, 0.029245,-0.044814, 0.027073,-0.059250, 0.023423,-0.078357, 0.002361,-0.116363, -0.019415,-0.136638, -0.058154,-0.153287, -0.094935,-0.166174, -0.136465,-0.178800, -0.161844,-0.181507, -0.184577,-0.179578, -0.162984,-0.162667, -0.150295,-0.135739, -0.152621,-0.120097, -0.161098,-0.102831, -0.167882,-0.095516, -0.184530,-0.081393, -0.163316,-0.053335, -0.149316,-0.029081, -0.143262,-0.011700, -0.140925,0.006746,
+// shPrincessDress (1x1)
+NEWSHAPE,109,1,1, 0.041877,-0.057431, 0.046812,-0.078020, 0.028859,-0.096196, -0.001205,-0.110866, -0.053233,-0.116144, -0.110022,-0.122246, -0.181271,-0.133766, -0.221411,-0.145062, -0.252155,-0.156465, -0.285822,-0.165961, -0.259590,-0.116944, -0.258096,-0.089439, -0.246236,-0.031569, -0.247436,0.011362, -0.253890,0.054586, -0.268619,0.095109, -0.277680,0.121972, -0.286489,0.138666, -0.295278,0.151594, -0.248719,0.149489, -0.200432,0.139924, -0.139171,0.124392, -0.102260,0.110782, -0.077429,0.101626,
+// shWizardCape1 (1x2)
+NEWSHAPE,110,1,2, -0.091286,0.091286, -0.084762,0.158069, -0.029729,0.155508, -0.011369,0.043203,
+// shWizardCape2 (1x2)
+NEWSHAPE,111,1,2, -0.006827,0.072824, -0.050157,0.100313, -0.075330,0.109571, -0.119046,0.123624, -0.167718,0.126363, -0.212240,0.126882, -0.252517,0.122784,
+// shPrinceDress (1x2)
+NEWSHAPE,112,1,2, -0.123399,0.032664, -0.122325,0.049657, -0.121280,0.064278, -0.114003,0.076406, -0.098124,0.089645, -0.084789,0.101747, -0.081167,0.105396, -0.080113,0.115314, -0.099259,0.181148, -0.053980,0.166846, -0.018484,0.187307, -0.015849,0.154831, -0.013334,0.134548, 0.006043,0.123271, 0.021636,0.096161, 0.031121,0.067030, 0.038206,0.038206, 0.038163,0.017889,
+// shArmor (1x2)
+NEWSHAPE,113,1,2, -0.131705,0.010875, -0.133453,0.061874, -0.093134,0.099182, -0.097643,0.135480, -0.010956,0.158255, 0.016844,0.113094, 0.022740,0.084974, -0.062459,0.086481, -0.061152,0.076740, 0.063569,0.076763, 0.074360,0.065964, 0.083920,0.049153, 0.088667,0.032352, 0.092226,0.002395, 0.057196,0.007150, 0.054891,0.041765, 0.039313,0.039313,
+// shTurban1 (1x2)
+NEWSHAPE,114,1,2, -0.072384,-0.002801, -0.075078,0.020302, -0.067673,0.048512, -0.046761,0.065782, -0.011565,0.081749, 0.024684,0.095470, 0.076082,0.087352, 0.102859,0.061877, 0.113555,0.034171,
+// shTurban2 (1x2)
+NEWSHAPE,115,1,2, -0.041779,0.001538, -0.029927,0.025572, -0.001577,0.046885, 0.030017,0.051171, 0.051757,0.039557, 0.066202,0.014187,
+// shWizardHat1 (1x2)
+NEWSHAPE,116,1,2, -0.040934,0.027289, -0.043234,0.054612, -0.034198,0.107155, -0.011421,0.141617, 0.029596,0.077405, 0.031831,0.025010, 0.036377,0.011368,
+// shWizardHat2 (1x2)
+NEWSHAPE,117,1,2, 0.018184,0.011365, 0.009094,0.038652, -0.006823,0.052309, -0.063734,0.045524, -0.102563,0.029629, -0.134711,0.020549, -0.169382,0.006867,
+// shWestHat1 (1x2)
+NEWSHAPE,118,1,2, -0.070542,-0.002276, -0.070545,0.013654, -0.066000,0.034138, -0.045518,0.059173, -0.034143,0.070563, -0.006832,0.091098, 0.029616,0.093405, 0.047849,0.088862, 0.077446,0.054668, 0.086570,0.045563, 0.100276,0.031906, 0.111711,0.004560,
+// shWestHat2 (1x2)
+NEWSHAPE,119,1,2, -0.018184,0.011365, -0.018185,0.020458, -0.002273,0.031826, 0.022743,0.047761, 0.054614,0.045512, 0.065995,0.029584, 0.081957,0.009106,
+// shGunInHand (1x1)
+NEWSHAPE,120,1,1, 0.048306,0.216227, 0.048215,0.197453, 0.165920,0.170529, 0.173217,0.189384, 0.103628,0.207255, 0.108418,0.221449, 0.089975,0.230705, 0.073629,0.211684,
+// shVikingHelmet (1x2)
+NEWSHAPE,121,1,2, -0.068191,-0.016749, -0.064642,-0.037110, -0.055059,-0.049075, -0.040676,-0.057425, -0.027503,-0.060986, -0.030377,-0.140951, -0.026834,-0.154904, -0.003670,-0.166357, 0.018370,-0.168999, 0.055380,-0.175984, 0.082350,-0.161012, 0.068527,-0.152961, 0.031640,-0.146029, 0.008493,-0.138308, -0.002413,-0.117054, -0.004785,-0.069381, 0.017935,-0.063369, 0.049033,-0.046641, 0.032200,-0.027430,
+// shHood (1x2)
+NEWSHAPE,122,1,2, -0.289108,0.001285, -0.253872,0.006315, -0.239738,0.013807, -0.225917,0.023715, -0.220610,0.037392, -0.239040,0.055357, -0.278480,0.068016, -0.290572,0.069737, -0.249897,0.082453, -0.220651,0.087759, -0.204652,0.097335, -0.243692,0.127587, -0.294677,0.136206, -0.303482,0.130064, -0.255520,0.152279, -0.227045,0.154340, -0.176957,0.161897, -0.131265,0.160986, -0.098249,0.157199, -0.054857,0.153598, -0.031595,0.149471, -0.001208,0.130439, 0.016853,0.115564, 0.028853,0.106995, 0.043228,0.096063, 0.053964,0.082746, 0.056228,0.064603, 0.063348,0.049005, 0.054927,0.048957, 0.014325,0.070433, -0.046699,0.077832, -0.088908,0.061274, -0.081520,0.052748, -0.044233,0.068142, 0.011920,0.059602, 0.086263,0.037141,
+// shPirateX (4x2)
+NEWSHAPE,123,4,2, -0.217493,-0.115996, -0.119624,-0.071774, -0.076312,-0.023848,
+// shPirateHood (1x2)
+NEWSHAPE,124,1,2, 0.028515,-0.002137, 0.030041,0.018069, 0.041515,0.042413, 0.018125,0.065806, -0.016208,0.072033, -0.045904,0.078062, -0.082076,0.083600, -0.135647,0.084840, -0.187346,0.092498, -0.230428,0.116494, -0.151031,0.111393, -0.111628,0.086283, -0.087869,0.069439, -0.097756,0.014558,
+// shEyepatch (1x1)
+NEWSHAPE,125,1,1, 0.029860,-0.048970, 0.063361,0.014346, 0.059794,0.031093, 0.017892,-0.040556,
+// shPHead (1x2)
+NEWSHAPE,126,1,2, 0.060794,0.001192, 0.058426,0.023847, 0.050054,0.030986, 0.042896,0.038130, 0.044109,0.042917, 0.032180,0.050058, 0.017884,0.059612, 0.005963,0.064401, -0.009546,0.068015, -0.022689,0.070455, -0.044247,0.070556, -0.053847,0.068206, -0.047819,0.065752, -0.040573,0.056087, -0.040563,0.053686, -0.053753,0.053753, -0.067016,0.056246, -0.090053,0.054032, -0.097365,0.051688, -0.072989,0.046665, -0.065710,0.040621, -0.063272,0.034621, -0.064461,0.031037, -0.074098,0.028683, -0.094756,0.031185, -0.113149,0.027685, -0.114376,0.026487, -0.088611,0.020357, -0.087387,0.017956, -0.103257,0.018010, -0.127970,0.014487, -0.164656,0.006098, -0.174996,0.001224,
+// shFemaleHair (1x2)
+NEWSHAPE,127,1,2, -0.185924,0.002463, -0.273576,0.019176, -0.186050,0.025874, -0.268509,0.057538, -0.183840,0.054288, -0.258480,0.097250, -0.174976,0.069005, -0.246145,0.133329, 0.029891,0.058585, 0.045415,0.043025, 0.051358,0.025082,
+// shWitchHair (1x2)
+NEWSHAPE,128,1,2, 0.042269,0.051167, 0.042269,0.051167, 0.034481,0.055615, 0.030032,0.057839, 0.018910,0.063403, 0.007787,0.066742, 0.003337,0.068971, 0.001112,0.068971, -0.012240,0.074551, -0.021146,0.079021, -0.037870,0.091333, -0.055771,0.111541, -0.067005,0.126193, -0.069311,0.140857, -0.077214,0.151072, -0.082864,0.156769, -0.088523,0.162478, -0.102090,0.169403, -0.110020,0.172889, -0.119120,0.178681, -0.129367,0.183363, -0.140780,0.188082, -0.152182,0.189382, -0.126986,0.173060, -0.121256,0.166166, -0.116681,0.160437, -0.116640,0.155895, -0.116591,0.150223, -0.121038,0.142332, -0.128936,0.141269, -0.136844,0.140209, -0.150448,0.140343, -0.156128,0.140403, -0.165232,0.140504, -0.168638,0.139407, -0.173187,0.138325, -0.178884,0.137257, -0.182300,0.136163, -0.184589,0.136190, -0.171969,0.131506, -0.159432,0.130240, -0.143544,0.130087, -0.127691,0.127691, -0.106186,0.112892, -0.102795,0.109500, -0.096004,0.098237, -0.092611,0.091496, -0.086977,0.082517, -0.085842,0.078039, -0.084699,0.070211, -0.084690,0.066860, -0.088036,0.063519, -0.092499,0.059066, -0.096971,0.056845, -0.107054,0.055757, -0.120527,0.055799, -0.137414,0.055859, -0.158884,0.054826, -0.171350,0.051517, -0.163386,0.047001, -0.144148,0.045815, -0.132862,0.042427, -0.121600,0.037930, -0.112608,0.033448, -0.103624,0.023399, -0.098017,0.014480, -0.093538,0.007795,
+// shBeautyHair (1x2)
+NEWSHAPE,129,1,2, 0.058945,0.017795, 0.051157,0.031139, 0.040039,0.047824, 0.025588,0.066752, 0.003338,0.077896, -0.020043,0.090192, -0.047936,0.104790, -0.074808,0.118352, -0.100655,0.127497, -0.120982,0.135545, -0.144880,0.150496, -0.177054,0.171415, -0.211757,0.182315, -0.246928,0.194584, -0.271704,0.197499, -0.287220,0.201397, -0.306370,0.203099, -0.328100,0.204919, -0.355070,0.210497, -0.372314,0.211094, -0.378552,0.212500, -0.378552,0.212500, -0.320256,0.184807, -0.386076,0.179705, -0.320758,0.158088, -0.391464,0.152879, -0.322452,0.125779, -0.394332,0.119109, -0.330437,0.101761, -0.401200,0.089027, -0.345683,0.069823, -0.404521,0.060100, -0.352724,0.045808, -0.410490,0.028908, -0.357430,0.017184, -0.411658,0.001156,
+// shFlowerHair (1x2)
+NEWSHAPE,130,1,2, 0.020097,0.000230, 0.021808,-0.003455, 0.020624,-0.006537, 0.019055,-0.009617, 0.015358,-0.012872, 0.012065,-0.013813, 0.008195,-0.014555, 0.003932,-0.016068, -0.000938,-0.021248, -0.002329,-0.026069, 0.002252,-0.033451, 0.008397,-0.038528, 0.015533,-0.040713, 0.022307,-0.039801, 0.025990,-0.038478, 0.033367,-0.034670, 0.040526,-0.034537, 0.044375,-0.037666, 0.044527,-0.043667, 0.042949,-0.047912, 0.039234,-0.053495, 0.029716,-0.058642, 0.021226,-0.055470, 0.017392,-0.050791, 0.019179,-0.044419, 0.021725,-0.039990, 0.023868,-0.037880, 0.027754,-0.035204, 0.031261,-0.031751, 0.033036,-0.026932, 0.029413,-0.020135, 0.024802,-0.016233, 0.015732,-0.014421, 0.010520,-0.013800, 0.005700,-0.012410, -0.002576,-0.008288, -0.006404,-0.003621, -0.005985,0.000626,
+// shSuspenders (1x2)
+NEWSHAPE,131,1,2, 0.036850,0.051150, 0.021480,0.095281, -0.084982,0.100985, -0.108740,0.081693, 0.027517,0.075948, 0.036300,0.051700,
+// shFlowerHand (1x1)
+NEWSHAPE,132,1,1, 0.061138,-0.276481, 0.048889,-0.207664, 0.042675,-0.208468, 0.039268,-0.207720, 0.038317,-0.207150, 0.033960,-0.205835, 0.033484,-0.205550, 0.030231,-0.202307, 0.026503,-0.198784, 0.023404,-0.193050, 0.022285,-0.187206, 0.021521,-0.179639, 0.020958,-0.172845, 0.023051,-0.166988, 0.024435,-0.164584, 0.024074,-0.158566, 0.023202,-0.156760, 0.022528,-0.155715, 0.021101,-0.154869, 0.019476,-0.153262, 0.034413,-0.155043, 0.037623,-0.155021, 0.041825,-0.151082, 0.047419,-0.144756, 0.046987,-0.139992, 0.047408,-0.139933, 0.048335,-0.144628, 0.055494,-0.149173, 0.060644,-0.151807, 0.063735,-0.150949, 0.077598,-0.145147, 0.076489,-0.147136, 0.075355,-0.148340, 0.075002,-0.149527, 0.074673,-0.151502, 0.076027,-0.157381, 0.078039,-0.159310, 0.081710,-0.164363, 0.083094,-0.171043, 0.084506,-0.178519, 0.085090,-0.184437, 0.083740,-0.190792, 0.081158,-0.195197, 0.078954,-0.199202, 0.078578,-0.199606, 0.074763,-0.202061, 0.074012,-0.202870, 0.070951,-0.204520, 0.064751,-0.205449, 0.072719,-0.274864,
+// shPFace (1x2)
+NEWSHAPE,133,1,2, 0.011878,-0.000000, 0.011880,0.010692, 0.014262,0.022581, 0.015455,0.027343, 0.017842,0.034494, 0.021425,0.041659, 0.025005,0.044056, 0.029785,0.047656, 0.032176,0.048860, 0.036964,0.051273, 0.044133,0.048905, 0.046519,0.046519, 0.051292,0.041749, 0.056061,0.034591, 0.060844,0.028632, 0.064425,0.020282, 0.064417,0.016701, 0.069220,0.009548, 0.075246,0.003583, 0.077662,0.001195, 0.080082,-0.000000,
+// shEyes (1x2)
+NEWSHAPE,134,1,2, 0.070467,0.026276, 0.054837,0.027418, 0.040494,0.034539, 0.034561,0.047670, 0.032259,0.070492, 0.044434,0.096073, 0.065124,0.106127, 0.089628,0.109007, 0.110425,0.098291, 0.121434,0.088647, 0.124892,0.073965, 0.123474,0.064158, 0.117069,0.050690, 0.113313,0.047013, 0.098463,0.037224, 0.081366,0.029914, 0.070467,0.026276,
+// shShark (1x2)
+NEWSHAPE,135,1,2, -0.254548,0.002533, -0.295445,0.115041, -0.214304,0.034887, -0.113418,0.026545, -0.034699,0.062219, -0.010782,0.079071, 0.009598,0.087578, 0.037297,0.096250, -0.001207,0.119535, -0.032645,0.120908, -0.002431,0.144615, 0.027983,0.145997, 0.058411,0.137510, 0.096163,0.115639, 0.130542,0.089062, 0.175135,0.075234, 0.227410,0.066590, 0.215688,0.036156, 0.187577,0.041958, 0.184662,0.017235, 0.208627,0.008693, 0.214217,0.028645, 0.229902,0.056533, 0.249359,0.045568, 0.259206,0.035577, 0.276638,0.026895, 0.302288,0.020758, 0.330687,0.013175, 0.348759,-0.003993,
+// shBugBody (1x2)
+NEWSHAPE,136,1,2, -0.036973,0.000272, -0.037088,0.049282, -0.103861,0.110700, -0.187497,0.070862, -0.199435,0.092353, -0.102619,0.135884, -0.010856,0.052276, 0.027094,0.127840, -0.010117,0.161004, -0.122621,0.155285, -0.129838,0.187041, -0.003559,0.192507, 0.048774,0.146275, 0.045625,0.106117, 0.010970,0.038441, 0.089547,0.116575, 0.094553,0.161297, 0.079585,0.174794, 0.010872,0.213071, 0.019129,0.245278, 0.122810,0.186751, 0.134973,0.146945, 0.133411,0.118806, 0.060081,0.038600, 0.122451,0.041792, 0.137147,0.087747, 0.150029,0.114701, 0.172516,0.135274, 0.194165,0.144658, 0.206227,0.137750, 0.191047,0.128830, 0.173558,0.119946, 0.156400,0.103721, 0.146061,0.085696, 0.131320,0.034801, 0.128188,0.004402,
+// shBugArmor (1x2)
+NEWSHAPE,137,1,2, -0.257478,-0.001337, -0.204917,0.009783, -0.203815,0.017248, -0.113586,0.008028, -0.187093,0.033579, -0.182177,0.042285, -0.170953,0.054731, -0.148063,0.061036, -0.114175,0.062548, -0.089190,0.053147, -0.055805,0.032092, -0.046611,0.046680, -0.034899,0.056544, -0.026686,0.062743, -0.011200,0.065507, 0.015073,0.067380, 0.038084,0.055978, 0.058951,0.034968, 0.080396,0.053686, 0.091257,0.062541, 0.107216,0.066788, 0.136013,0.061816, 0.150105,0.048890, 0.154042,0.040462, 0.173238,0.060925, 0.190355,0.071679, 0.214645,0.070389, 0.221506,0.066951, 0.203766,0.058557, 0.189101,0.049201, 0.181298,0.037761, 0.177552,0.025312, 0.177715,0.016710, 0.176915,-0.004189,
+// shCatBody (1x2)
+NEWSHAPE,138,1,2, -0.308099,0.007958, -0.308099,0.007958, -0.300981,0.013629, -0.295063,0.015888, -0.298642,0.024981, -0.279731,0.016988, -0.280962,0.032854, -0.262156,0.019210, -0.263366,0.031649, -0.244692,0.020297, -0.245893,0.032711, -0.229645,0.022514, -0.228517,0.031520, -0.206622,0.019090, -0.211256,0.034835, -0.195179,0.021313, -0.200928,0.032553, -0.182636,0.024650, -0.187230,0.036998, -0.166723,0.024617, -0.172450,0.042553, -0.157684,0.035786, -0.164538,0.051488, -0.148670,0.046949, -0.155517,0.061536, -0.140794,0.054753, -0.141981,0.068196, -0.125033,0.058051, -0.125087,0.071478, -0.112675,0.059126, -0.113871,0.078147, -0.099238,0.065787, -0.099290,0.080325, -0.089161,0.065756, -0.086969,0.080279, -0.080217,0.066848, -0.073560,0.083591, -0.063470,0.067924, -0.055703,0.086897, -0.048978,0.070128, -0.045663,0.085757, -0.036721,0.067879, -0.028944,0.082379, -0.024473,0.063406, -0.016698,0.085718, -0.012236,0.066743, -0.001113,0.080128, 0.005561,0.062283, 0.014465,0.073436, 0.017795,0.058945, 0.026707,0.073445, 0.030032,0.057839, 0.042293,0.070117, 0.044501,0.055626, 0.053427,0.064557, 0.054515,0.046727, 0.072375,0.056786, 0.070112,0.038951, 0.082394,0.040084, 0.070104,0.032270, 0.077909,0.026712, 0.075671,0.020031, 0.089069,0.014474, 0.075666,0.011127, 0.085713,0.005566, 0.077896,-0.001113,
+// shCatLegs (1x2)
+NEWSHAPE,139,1,2, -0.109115,0.005511, -0.150780,0.114748, -0.148046,0.122540, -0.141908,0.125278, -0.131832,0.124077, -0.123409,0.117322, -0.088085,0.011561, 0.010990,0.019783, 0.040802,0.111378, 0.045231,0.116940, 0.050761,0.119177, 0.057933,0.115867, 0.060111,0.105884, 0.025279,0.006595,
+// shFamiliarHead (1x2)
+NEWSHAPE,140,1,2, 0.257493,0.002498, 0.199698,0.024419, 0.214773,0.038961, 0.175084,0.036275, 0.196857,0.052339, 0.156515,0.045663, 0.174175,0.068554, 0.133862,0.047313, 0.150572,0.078274, 0.111906,0.056441, 0.131266,0.089711, 0.081753,0.056166, 0.087456,0.089841, 0.065143,0.061409, -0.058696,0.149969, 0.038088,0.015520, 0.004420,0.018600, 0.032174,0.003509,
+// shFamiliarEye (1x1)
+NEWSHAPE,141,1,1, 0.155427,0.038018, 0.200883,0.012345, 0.144081,0.014520,
+// shCatHead (1x2)
+NEWSHAPE,142,1,2, 0.073175,-0.000000, 0.058843,0.007699, 0.074280,0.010454, 0.062705,0.019251, 0.077045,0.019811, 0.068229,0.032464, 0.084236,0.031933, 0.077073,0.043491, 0.091431,0.037454, 0.083718,0.051773, 0.098645,0.047394, 0.091478,0.058965, 0.106417,0.052933, 0.101443,0.057888, 0.102568,0.063416, 0.104266,0.073373, 0.106515,0.080576, 0.110984,0.086689, 0.121624,0.100063, 0.122097,0.085081, 0.122586,0.070680, 0.128687,0.065724, 0.135350,0.060217, 0.142646,0.069664, 0.138114,0.054141, 0.151534,0.058070, 0.145904,0.047529, 0.161578,0.049801, 0.155386,0.040920, 0.167717,0.041514, 0.160393,0.029313, 0.171614,0.030448, 0.164858,0.020469, 0.171594,0.021588, 0.176845,0.069851, 0.174963,0.020486, 0.183057,0.072113, 0.178894,0.017169, 0.191443,0.058820, 0.181703,0.013295, 0.183949,0.005541,
+// shWolfBody (1x2)
+NEWSHAPE,143,1,2, -0.311492,0.001303, -0.165080,0.009783, -0.195342,0.027200, -0.153616,0.025603, -0.173302,0.051622, -0.128440,0.037563, -0.152961,0.068527, -0.107392,0.045853, -0.121764,0.090105, -0.079263,0.050440, -0.084555,0.086971, -0.043029,0.046615, -0.049440,0.102497, -0.020293,0.047747, -0.012028,0.101033, 0.009546,0.047732, 0.027630,0.091298, 0.043025,0.045415, 0.071007,0.077024, 0.071856,0.028742, 0.113578,0.045915, 0.090012,0.007201,
+// shWolfHead (1x2)
+NEWSHAPE,144,1,2, 0.183292,0.002460, 0.178071,0.011053, 0.185996,0.019708, 0.170281,0.015926, 0.170341,0.024510, 0.158693,0.019531, 0.158807,0.032983, 0.147214,0.020683, 0.142274,0.036481, 0.135869,0.025475, 0.129693,0.037575, 0.118394,0.028994, 0.114793,0.043501, 0.102362,0.033719, 0.100073,0.053051, 0.087692,0.037239, 0.080602,0.063760, 0.065828,0.032315, 0.008362,0.058537, 0.046539,0.014320, 0.028597,0.008341, 0.051325,-0.000000,
+// shWolfLegs (1x2)
+NEWSHAPE,145,1,2, -0.139559,-0.001214, -0.139599,0.016995, -0.228445,0.053973, -0.209280,0.056057, -0.216331,0.065024, -0.204121,0.065966, -0.204581,0.081084, -0.194817,0.069489, -0.113487,0.036219, -0.008338,0.022632, 0.076062,0.091757, 0.081210,0.107875, 0.084610,0.090653, 0.099450,0.094598, 0.089336,0.078471, 0.105258,0.072592, 0.083028,0.062572, 0.025016,0.001191,
+// shWolfEyes (1x2)
+NEWSHAPE,146,1,2, 0.172835,0.002452, 0.156071,0.002439, 0.154815,0.012190, 0.138338,0.016989, 0.135790,0.008487, 0.147155,0.006081, 0.153518,0.004874, 0.156070,-0.000000,
+// shWitchDress (1x2)
+NEWSHAPE,147,1,2, 0.039326,-0.001751, 0.041168,0.053278, 0.035516,0.073044, 0.024685,0.088439, 0.009671,0.096889, -0.002313,0.097795, -0.008219,0.099482, -0.016102,0.107500, -0.016016,0.108729, -0.022078,0.163499, -0.052858,0.141939, -0.084069,0.161675, -0.098088,0.129874, -0.108494,0.122098, -0.117272,0.122997, -0.128424,0.129237, -0.140905,0.138269, -0.152175,0.151195, -0.161208,0.157511, -0.178346,0.167608, -0.195945,0.176675, -0.219689,0.185527, -0.234056,0.190460, -0.219683,0.178715, -0.211330,0.162725, -0.206261,0.134376, -0.201753,0.102919, -0.205795,0.072925, -0.213892,0.049798, -0.218429,0.022623, -0.219265,0.011429,
+// shPickAxe (1x1)
+NEWSHAPE,148,1,1, 0.064364,0.237609, 0.183353,-0.046466, 0.171819,-0.050455, 0.142623,-0.056105, 0.122591,-0.057865, 0.106467,-0.058329, 0.118180,-0.067773, 0.135948,-0.071025, 0.161536,-0.071733, 0.188994,-0.071278, 0.212623,-0.063402, 0.239189,-0.047822, 0.248564,-0.040034, 0.265990,-0.019250, 0.272276,0.000110, 0.269338,0.000001, 0.247284,-0.019782, 0.224346,-0.034255, 0.208443,-0.042147, 0.086124,0.253692,
+// shPike (1x1)
+NEWSHAPE,149,1,1, 0.096293,0.278465, 0.083339,-0.050087, 0.079276,-0.383984, 0.095192,-0.378226, 0.073482,-0.534658, 0.070202,-0.534586, 0.045864,-0.377144, 0.061795,-0.383600, 0.062148,-0.049623, 0.069133,0.279061,
+// shFlailBall (1x1)
+NEWSHAPE,150,1,1, -0.152664,-0.216202, -0.169658,-0.186257, -0.175291,-0.180580, -0.179213,-0.204880, -0.180636,-0.179891, -0.208327,-0.205555, -0.195199,-0.172755, -0.194159,-0.164682, -0.215525,-0.177426, -0.196845,-0.160074, -0.233600,-0.155277, -0.200041,-0.144144, -0.193092,-0.139738, -0.215936,-0.131441, -0.191101,-0.134685, -0.209451,-0.103230, -0.180537,-0.121970, -0.172894,-0.124532, -0.180135,-0.101552, -0.167729,-0.122842, -0.154066,-0.088606, -0.151375,-0.122930, -0.148774,-0.130514, -0.135083,-0.110267, -0.144329,-0.133463, -0.109150,-0.122417, -0.134514,-0.146301, -0.138895,-0.153179, -0.114703,-0.151023, -0.138521,-0.158550, -0.108526,-0.179203, -0.142650,-0.174484, -0.150697,-0.175461, -0.134343,-0.193130, -0.154679,-0.179212,
+// shFlailTrunk (1x1)
+NEWSHAPE,151,1,1, 0.051293,0.275700, 0.057876,0.280376, 0.067059,0.283710, 0.073576,0.283978, 0.077320,0.279640, 0.147958,-0.151688, 0.141932,-0.161853, 0.138281,-0.166934, 0.129252,-0.166536, 0.118813,-0.160892, 0.112195,-0.152881,
+// shFlailChain (1x1)
+NEWSHAPE,152,1,1, 0.124731,-0.149526, 0.117490,-0.160203, 0.106751,-0.149132, 0.095911,-0.162180, 0.085170,-0.151131, 0.074321,-0.161824, 0.062353,-0.149567, 0.052646,-0.162759, 0.041822,-0.150522, 0.032058,-0.161359, 0.023596,-0.147919, 0.013752,-0.158813, 0.005196,-0.149008, -0.004760,-0.161206, -0.014646,-0.148927, -0.027247,-0.159995, -0.039846,-0.148910, -0.052728,-0.162603, -0.066903,-0.150243, -0.077482,-0.162849, -0.093362,-0.150445, -0.104284,-0.165774, -0.117892,-0.153274, -0.131957,-0.166335, -0.144633,-0.153714, -0.156334,-0.168243, -0.173918,-0.153010, -0.173894,-0.147770, -0.156165,-0.131894, -0.144597,-0.145973, -0.131802,-0.132992, -0.117856,-0.145631, -0.104131,-0.132849, -0.093350,-0.147924, -0.077354,-0.135296, -0.066892,-0.147748, -0.052601,-0.135298, -0.039846,-0.148910, -0.027144,-0.137836, -0.014646,-0.148927, -0.004647,-0.136736, 0.005196,-0.149008, 0.013843,-0.139323, 0.023585,-0.150350, 0.032171,-0.137084, 0.041833,-0.148099, 0.052770,-0.136144, 0.062353,-0.149567, 0.074434,-0.137691, 0.085181,-0.148721, 0.096024,-0.138086, 0.106739,-0.151540, 0.117580,-0.140943, 0.124720,-0.151933,
+// shBoatOuter (1x2)
+NEWSHAPE,153,1,2, -0.254359,0.147192, -0.147845,0.149087, 0.030409,0.144749, 0.120225,0.127586, 0.172686,0.119265, 0.208240,0.105375, 0.245303,0.092783, 0.286782,0.068466, 0.309035,0.045638, 0.335671,0.021145, 0.352147,0.009337, 0.357212,0.006689,
+// shBoatInner (1x2)
+NEWSHAPE,154,1,2, -0.229820,0.121893, 0.022940,0.117115, 0.169024,0.090064, 0.256702,0.052103, 0.299070,-0.000000,
+// shScratch (1x2)
+NEWSHAPE,155,1,2, -0.028983,0.241948,
+// shSkeletonBody (1x2)
+NEWSHAPE,156,1,2, 0.001190,0.001190, 0.001193,-0.042936, -0.004786,-0.070589, -0.016803,-0.088814, -0.036099,-0.097467, -0.038444,-0.087700, -0.028752,-0.074277, -0.022672,-0.042958, -0.022648,-0.027416, -0.044152,-0.020286, -0.046994,-0.100012, -0.031489,-0.240575, 0.044046,-0.236589, 0.052529,-0.220120, 0.068888,-0.219190, 0.079398,-0.230631, 0.083186,-0.263635, 0.062603,-0.265745, 0.048239,-0.255158, -0.048471,-0.265315, -0.068926,-0.105203, -0.070637,-0.026339, -0.085171,-0.020393,
+// shSkull (1x2)
+NEWSHAPE,157,1,2, -0.120823,0.019332, -0.089124,0.061424, -0.035904,0.063430, 0.019074,0.032188, 0.022631,0.004764,
+// shSkullEyes (1x2)
+NEWSHAPE,158,1,2, -0.001191,0.010716, -0.016673,0.009527, -0.016682,0.025023, -0.002382,0.022631, 0.001191,0.023823,
+// shFishTail (1x2)
+NEWSHAPE,159,1,2, -0.003571,0.001190, -0.007145,0.015481, -0.015500,0.035769, -0.031072,0.053778, -0.047927,0.064702, -0.062478,0.073291, -0.083262,0.082055, -0.098001,0.082272, -0.111474,0.073912, -0.123761,0.063094, -0.129971,0.059519, -0.138754,0.057206, -0.148852,0.053684, -0.164257,0.053935, -0.177269,0.054165, -0.191786,0.054443, -0.214728,0.056179, -0.227189,0.058994, -0.237162,0.065598, -0.240110,0.069505, -0.248932,0.077474, -0.262350,0.087023, -0.271446,0.092626, -0.278978,0.094284, -0.283499,0.094500, -0.277139,0.087653, -0.269286,0.078221, -0.253927,0.055864, -0.247700,0.034122, -0.243240,0.018905, -0.241745,0.005036,
+// shFatBody (1x2)
+NEWSHAPE,160,1,2, -0.158280,0.010638, -0.153491,0.063014, -0.143004,0.090522, -0.130133,0.119287, -0.120336,0.139833, -0.108707,0.144976, -0.103459,0.149545, -0.088463,0.147968, -0.090694,0.183338, -0.069574,0.274320, -0.026928,0.273931, 0.000335,0.278791, 0.049634,0.254674, 0.064323,0.261140, 0.085998,0.258714, 0.084852,0.235757, 0.075972,0.211105, 0.051782,0.222035, -0.009808,0.219631, -0.037620,0.215354, -0.020675,0.185577, -0.021056,0.141669, 0.007264,0.129328, 0.036658,0.102338, 0.051136,0.057412, 0.056061,-0.003004,
+// shZebra[0] (6x1)
+NEWSHAPE,161,6,1, -0.307697,-0.214329,
+// shZebra[1] (1x1)
+NEWSHAPE,162,1,1, -0.192992,-0.168975, -0.238865,0.204661, -0.080551,0.254199, 0.347359,0.222111, 0.392920,-0.180638, 0.019691,-0.156962,
+// shZebra[2] (1x1)
+NEWSHAPE,163,1,1, -0.255158,0.223637, -0.114892,0.277358, 0.260873,0.219611, 0.444210,0.107854, 0.255129,-0.352141, -0.058563,-0.195290, -0.205857,-0.164479,
+// shZebra[3] (1x1)
+NEWSHAPE,164,1,1, 0.248469,0.308508, 0.257329,0.012990, 0.288207,-0.281417, 0.038093,-0.236115, -0.209655,-0.205481, -0.224279,0.047025, -0.253191,0.302526, -0.002290,0.296336,
+// shZebra[4] (1x1)
+NEWSHAPE,165,1,1, 0.623738,-0.009789, 0.462499,-0.298584, 0.351221,-0.619633, -0.099397,-0.442426, -0.571648,-0.361506, -0.537598,0.000000, -0.571648,0.361506, -0.099397,0.442426, 0.351221,0.619633, 0.462499,0.298584, 0.623738,0.009789,
+// shEmeraldFloor[0] (1x1)
+NEWSHAPE,166,1,1, -0.056700,0.289325, 0.003114,0.299067, 0.041221,0.283536, 0.125459,0.234982, 0.181143,0.183624, 0.228595,0.105917, 0.268750,0.012281, 0.313793,-0.081056, 0.306997,-0.188603, 0.262425,-0.286297, 0.218519,-0.355547, 0.153244,-0.376219, 0.046875,-0.364611, -0.019398,-0.349785, -0.083546,-0.322881, -0.141981,-0.272036, -0.195959,-0.227784, -0.221863,-0.171718, -0.239605,-0.111801, -0.260405,-0.063040, -0.276108,0.051160, -0.250004,0.138005, -0.184725,0.213503, -0.125567,0.259839,
+// shEmeraldFloor[1] (1x1)
+NEWSHAPE,167,1,1, -0.012456,-0.282668, 0.093943,-0.261125, 0.176033,-0.224423, 0.251304,-0.129592, 0.253408,0.003018, 0.205115,0.151740, 0.136504,0.257503, 0.050478,0.321171, -0.024338,0.351747, -0.113671,0.338793, -0.199507,0.312663, -0.289397,0.244537, -0.318919,0.189505, -0.296780,0.103663, -0.266492,-0.004074, -0.225121,-0.113729, -0.162566,-0.195216, -0.093623,-0.256862, -0.073239,-0.271190,
+// shEmeraldFloor[2] (1x1)
+NEWSHAPE,168,1,1, 0.142342,0.315002, 0.192633,0.259152, 0.232117,0.228558, 0.263994,0.150040, 0.283920,0.084560, 0.289892,-0.010808, 0.297148,-0.086089, 0.297551,-0.165417, 0.290991,-0.200376, 0.258510,-0.274435, 0.200576,-0.292802, 0.137570,-0.326255, 0.057449,-0.363515, 0.007219,-0.381780, -0.042563,-0.362309, -0.099799,-0.296581, -0.126618,-0.259997, -0.164471,-0.210125, -0.206762,-0.179726, -0.255672,-0.132984, -0.278657,-0.105484, -0.292210,-0.086272, -0.317777,-0.034598, -0.332027,0.039956, -0.311197,0.107127, -0.293985,0.148441, -0.261872,0.181378, -0.161843,0.220098, -0.080956,0.253464, -0.028510,0.284753, 0.013578,0.313129, 0.055797,0.341483,
+// shEmeraldFloor[3] (1x1)
+NEWSHAPE,169,1,1, -0.163082,-0.220437, -0.210355,-0.178152, -0.270116,-0.134375, -0.286296,-0.068967, -0.322640,0.023933, -0.303410,0.080931, -0.256143,0.157047, -0.191383,0.193946, -0.112200,0.248267, -0.006180,0.297906, 0.045011,0.314576, 0.123367,0.290642, 0.173268,0.251704, 0.226704,0.200367, 0.274509,0.112459, 0.272693,0.041554, 0.266634,-0.039227, 0.245934,-0.087769, 0.206654,-0.145971, 0.168911,-0.181347, 0.113778,-0.241571, 0.060166,-0.287358, -0.030419,-0.300995, -0.106762,-0.252814,
+// shEmeraldFloor[4] (1x1)
+NEWSHAPE,170,1,1, -0.121227,-0.290032, -0.211853,-0.226567, -0.271304,-0.142026, -0.291031,-0.001756, -0.289025,0.081565, -0.274404,0.151774, -0.270636,0.184903, -0.177964,0.228844, -0.109553,0.258706, -0.046057,0.288157, 0.012352,0.334753, 0.093790,0.294439, 0.113901,0.258432, 0.169445,0.181108, 0.201022,0.133994, 0.217873,0.089759, 0.229954,0.028756, 0.219894,-0.023561, 0.191854,-0.102714, 0.155541,-0.176809, 0.124174,-0.224046, 0.061461,-0.284240, 0.004090,-0.327127,
+// shEmeraldFloor[5] (1x1)
+NEWSHAPE,171,1,1, -0.123950,0.204444, -0.062627,0.216559, 0.004307,0.251676, 0.053230,0.277691, 0.104981,0.268275, 0.179487,0.211716, 0.219611,0.155886, 0.242732,0.098595, 0.253441,0.041064, 0.251167,-0.002564, 0.258569,-0.050639, 0.241512,-0.095904, 0.224178,-0.142437, 0.200723,-0.160460, 0.160438,-0.177252, 0.098857,-0.201735, 0.042704,-0.222826, -0.046440,-0.220643, -0.121819,-0.210954, -0.193674,-0.181500, -0.240226,-0.152286, -0.288784,-0.106825, -0.312611,-0.056858, -0.322108,0.009276, -0.323420,0.074633, -0.320770,0.110549, -0.238954,0.181091,
+// shRoseFloor[2] (14x2)
+NEWSHAPE,172,14,2, -0.548465,-0.132422, -0.551824,-0.102571, -0.528982,-0.047757, -0.442542,-0.018200, -0.315538,-0.004582,
+// shRoseFloor[0] (3x1)
+NEWSHAPE,173,3,1, 0.264832,-0.019358, 0.272178,-0.037378, 0.276373,-0.078165, 0.266115,-0.117875, 0.242680,-0.150883, 0.209916,-0.171773, 0.181695,-0.180720, 0.145686,-0.180823, 0.099010,-0.173709, 0.080081,-0.167628, 0.071976,-0.220677, 0.055614,-0.256642, 0.042043,-0.264568, 0.010906,-0.279995, -0.019644,-0.286339, -0.054597,-0.283522, -0.091229,-0.258700, -0.116444,-0.237228, -0.130501,-0.207658, -0.140731,-0.154944, -0.136597,-0.109083, -0.128765,-0.083983, -0.118905,-0.052948, -0.101590,-0.027009, -0.093459,-0.015558, -0.103528,-0.017996, -0.124791,-0.033412, -0.146258,-0.066451, -0.157241,-0.103135, -0.159819,-0.147005,
+// shRoseFloor[1] (7x2)
+NEWSHAPE,174,7,2, 0.372919,0.175334, 0.377019,0.163872, 0.375818,0.147479, 0.369194,0.127784, 0.350154,0.106817, 0.321073,0.087366, 0.290798,0.067704, 0.264404,0.056694, 0.272461,0.048502, 0.305905,0.057526, 0.332293,0.060486, 0.365740,0.053423, 0.392326,0.029151, 0.394325,0.004706,
+// shTurtleFloor[0] (6x2)
+NEWSHAPE,175,6,2, 0.112369,0.059775, 0.111167,0.006757, 0.119117,0.006652, 0.119333,0.067428, 0.214640,0.118987, 0.262563,0.053738,
+// shTurtleFloor[1] (7x2)
+NEWSHAPE,176,7,2, 0.299631,0.136858, 0.313974,0.087924, 0.223968,0.016894, 0.122331,0.014981, 0.111796,0.050597, 0.106729,0.040319, 0.112168,0.004682, 0.235569,0.008771, 0.315941,0.071298, 0.418977,0.047086, 0.473946,0.006115,
+// shTurtleFloor[2] (7x2)
+NEWSHAPE,177,7,2, -0.558425,-0.248734, -0.539322,-0.019784, -0.279489,-0.005033, -0.252876,-0.100862, -0.234059,-0.088782, -0.261386,0.010296,
+// shAztecHead (1x2)
+NEWSHAPE,178,1,2, 0.074692,0.000429, 0.066283,-0.019417, 0.046672,-0.015897, 0.034348,-0.045854, 0.010851,-0.055008, -0.020151,-0.062581, -0.045128,-0.057532, -0.068539,-0.044938, -0.083393,-0.018981, -0.086999,-0.006818,
+// shAztecCap (1x2)
+NEWSHAPE,179,1,2, 0.001102,0.007720, 0.005712,-0.021311, -0.006877,-0.046748, -0.027647,-0.060816, -0.056423,-0.068486, -0.093017,-0.074757, -0.122525,-0.080547, -0.133671,-0.117082, -0.101438,-0.158050, -0.077029,-0.154904, -0.062688,-0.128399, -0.047439,-0.156234, -0.091646,-0.199265, -0.164679,-0.177117, -0.182172,-0.095454, -0.158692,-0.051866, -0.134446,-0.013804, -0.129636,-0.010802, -0.117269,-0.007091,
+// shDragonFloor[0] (3x2)
+NEWSHAPE,180,3,2, -0.137150,-0.234461, -0.227787,-0.028743, -0.260021,-0.029555, -0.301991,-0.109956, -0.386143,-0.013264,
+// shDragonFloor[1] (7x2)
+NEWSHAPE,181,7,2, 0.205492,0.081657, 0.333919,0.017825, 0.361617,0.020628, 0.363346,0.130144, 0.529009,0.017851,
+// shDragonFloor[2] (6x1)
+NEWSHAPE,182,6,1, -0.255833,0.146834, -0.186167,0.179834, -0.195333,0.112000, -0.079833,0.097334, -0.072500,0.183500, -0.178833,0.280667, -0.166000,0.339334, -0.089000,0.326500, -0.079833,0.258667,
+// shTower[0] (1x1)
+NEWSHAPE,183,1,1, -0.286251,0.206460, -0.228388,0.237443, -0.159130,0.310692, -0.101028,0.374054, 0.075166,0.301721, 0.296628,0.282561, 0.392862,0.273630, 0.406414,0.155729, 0.351704,0.039501, 0.238677,-0.090994, 0.117245,-0.194511, 0.021470,-0.256598, -0.009932,-0.269112, -0.142800,-0.030207,
+// shTower[1] (1x1)
+NEWSHAPE,184,1,1, 0.250672,0.215566, -0.010561,0.166674, -0.188122,0.172750, -0.277968,0.195647, -0.273175,-0.294725, -0.058073,-0.278517, 0.114633,-0.264898, 0.214865,-0.223092, 0.318979,-0.166948, 0.348056,-0.154771,
+// shTower[2] (1x1)
+NEWSHAPE,185,1,1, -0.305085,0.182715, -0.141572,-0.249919, -0.082532,-0.256373, 0.011916,-0.200378, 0.107643,-0.130975, 0.197879,-0.052950, 0.275493,0.054106, 0.346502,0.177608, 0.365290,0.224553, -0.042684,0.405864,
+// shTower[3] (1x1)
+NEWSHAPE,186,1,1, -0.244566,0.213804, -0.121406,0.179228, 0.102781,0.233054, 0.137859,0.248290, 0.219219,0.271805, 0.439787,-0.128376, 0.327884,-0.165668, 0.191605,-0.198467, -0.015788,-0.263051, -0.162942,-0.274063, -0.284113,-0.264520, -0.360780,-0.248815,
+// shTower[4] (1x1)
+NEWSHAPE,187,1,1, 0.571958,-0.279170, 0.393753,-0.334598, 0.230386,-0.380872, 0.040909,-0.353244, -0.132206,-0.325608, -0.193426,-0.301627, -0.209589,-0.285475, -0.184256,0.133876, -0.122720,0.103535, 0.028404,0.096630, 0.131561,0.118840, 0.206961,0.143553, 0.285398,0.171884, 0.311736,0.188934, 0.427540,-0.043657,
+// shTower[5] (1x1)
+NEWSHAPE,188,1,1, -0.311898,0.273433, -0.241832,0.284721, -0.093134,0.385666, -0.048259,0.410019, -0.034956,0.418726, 0.323554,0.088209, 0.281449,-0.050570, 0.166974,-0.175799, 0.053476,-0.232832, -0.046497,-0.270575, -0.167112,-0.296403, -0.182433,-0.298027, -0.237210,-0.011802,
+// shTower[6] (1x1)
+NEWSHAPE,189,1,1, 0.591895,-0.274213, 0.451640,-0.046334, 0.339584,0.178653, 0.075724,0.130436, -0.048271,0.097633, -0.223763,-0.157117, -0.073558,-0.240165, 0.043434,-0.280964, 0.298734,-0.305291,
+// shTower[7] (1x1)
+NEWSHAPE,190,1,1, 0.078002,0.370221, 0.413248,0.133206, 0.355187,0.048021, 0.239656,-0.028483, 0.091569,-0.106563, -0.053014,-0.170046, -0.148171,-0.179787, -0.226021,0.273779,
+// shTower[8] (1x1)
+NEWSHAPE,191,1,1, 0.533180,-0.117639, 0.378296,-0.199392, 0.209814,-0.236744, 0.054537,-0.276614, -0.034481,-0.273513, -0.160263,-0.038320, -0.297354,0.194169, -0.193697,0.211849, -0.063165,0.262989, 0.036923,0.306670, 0.097986,0.358635, 0.135238,0.379300, 0.318600,0.124720,
+// shTower[9] (1x1)
+NEWSHAPE,192,1,1, -0.217261,0.132486, 0.024523,0.407718, 0.145333,0.449681, 0.484226,0.101907, 0.321456,-0.134096, -0.036797,-0.295091, -0.180549,-0.344274, -0.259938,-0.172378,
+// shTower[10] (1x1)
+NEWSHAPE,193,1,1, -0.174062,-0.167910, -0.295951,0.239183, -0.212854,0.268510, -0.079667,0.325104, -0.024447,0.357384, 0.004880,0.379437, 0.047240,0.411450, 0.404628,0.134398, 0.279121,0.016611, 0.142934,-0.078661, 0.031621,-0.149237, -0.095567,-0.210063,
+// shTower[11] (1x1)
+NEWSHAPE,194,1,1, -0.261640,0.232003, -0.114066,0.222344, 0.070087,0.311006, 0.146439,0.385502, 0.156417,0.393458, 0.321239,0.151530, 0.513393,-0.077506, 0.367820,-0.144703, 0.183543,-0.172959, 0.022726,-0.215721, -0.158572,-0.235502, -0.259609,-0.221068, -0.283069,-0.211523,
+// shTower[0] (1x1)
+NEWSHAPE,195,1,1, -0.343678,0.205736, -0.313502,-0.269598, 0.053446,-0.276534, 0.316036,-0.088255, 0.415175,0.117882, -0.013091,0.329953,
+// shTower[1] (1x1)
+NEWSHAPE,196,1,1, -0.311517,0.177757, -0.277989,0.198280, -0.192835,0.277382, -0.118766,0.352616, 0.340632,0.220226, 0.346703,0.158836, 0.324069,0.046483, 0.255673,-0.074052, 0.185700,-0.149283, 0.033206,-0.246367, -0.096570,-0.283752, -0.194307,-0.258126, -0.265575,-0.226804, -0.285480,-0.219017,
+// shTower[2] (1x1)
+NEWSHAPE,197,1,1, -0.287245,0.124770, -0.224066,0.141558, -0.131929,0.201218, -0.078630,0.261221, -0.020026,0.337507, 0.318283,0.112649, 0.303068,-0.062313, 0.276375,-0.100467, 0.222744,-0.146642, 0.008616,-0.304232, -0.058987,-0.274278, -0.112858,-0.303563, -0.233080,-0.305264, -0.372515,-0.347162,
+// shTower[3] (1x1)
+NEWSHAPE,198,1,1, -0.276471,0.193549, -0.248272,0.167366, -0.131672,0.161485, -0.029928,0.144574, 0.145677,0.141539, 0.244238,0.160944, 0.278308,0.181096, 0.290850,-0.178199, 0.244356,-0.239966, 0.158564,-0.296188, 0.052883,-0.325301, -0.059036,-0.324976, -0.156078,-0.299394, -0.222738,-0.269837, -0.251922,-0.245775,
+// shTower[4] (1x1)
+NEWSHAPE,199,1,1, -0.311686,0.135147, -0.107931,0.170082, -0.054960,0.232687, 0.094837,0.235522, 0.206298,0.281848, 0.350261,-0.169080, 0.258249,-0.214408, 0.149756,-0.245358, 0.010018,-0.258374, -0.164035,-0.248262, -0.260903,-0.226907, -0.329503,-0.207534,
+// shTower[5] (1x1)
+NEWSHAPE,200,1,1, -0.278494,0.161752, -0.132974,0.168104, -0.045035,0.201619, 0.004416,0.226141, 0.097798,0.196263, 0.208310,0.187256, 0.213133,0.158213, 0.255407,-0.229136, 0.150044,-0.303075, 0.021265,-0.309104, -0.124340,-0.302692, -0.340803,-0.287456, -0.338423,-0.172501,
+// shTower[6] (1x1)
+NEWSHAPE,201,1,1, -0.033122,-0.384901, 0.122565,-0.232523, 0.222346,-0.147072, 0.293004,-0.141494, 0.228575,0.266628, 0.142937,0.283066, 0.030023,0.299757, -0.078299,0.271316, -0.144933,0.245692, -0.207818,0.168012, -0.262782,0.117599, -0.313780,0.032325, -0.338217,-0.056491, -0.334152,-0.102325,
+// shTower[7] (1x1)
+NEWSHAPE,202,1,1, -0.547921,0.434077, -0.432932,0.444800, -0.319705,0.505720, -0.203488,0.623669, -0.096990,0.678123, 0.227072,0.612087, 0.575897,0.612804, 0.593166,0.304792, 0.552524,0.120670, 0.446203,-0.067415, 0.274469,-0.190444, 0.132895,-0.256501, -0.012450,-0.301315, -0.125769,-0.381194, -0.269514,-0.401566, -0.392905,-0.383183, -0.443645,-0.375389, -0.432392,-0.062656, -0.461638,0.244209,
+// shTower[8] (1x1)
+NEWSHAPE,203,1,1, -0.471133,0.305753, -0.159124,0.299060, 0.208647,0.436673, 0.398417,0.636059, 0.544645,0.255027, 0.777805,-0.085301, 0.517790,-0.221942, 0.294745,-0.374429, 0.158715,-0.473212, -0.080020,-0.462822, -0.384068,-0.511651, -0.395566,-0.095237,
+// shTower[9] (1x1)
+NEWSHAPE,204,1,1, 0.449766,-0.690111, -0.024136,-0.595991, -0.057829,-0.383939, -0.467634,-0.413702, -0.438668,-0.055072, -0.463281,0.296832, -0.494437,0.335413, -0.124821,0.618109, 0.139228,0.529058, 0.413839,0.480139, 0.501877,0.230248, 0.624273,-0.003880, 0.739892,-0.031980, 0.559897,-0.339843,
+// shTower[10] (2x1)
+NEWSHAPE,205,2,1, 0.250000,-0.210000, -0.250000,-0.210000,
+// shTortoise[0][0+u] (1x2)
+NEWSHAPE,206,1,2, 0.130604,0.040186, 0.114944,0.065842, 0.093777,0.101592, 0.054693,0.123896, 0.014512,0.136188, -0.039114,0.147516, -0.099597,0.137646, -0.136732,0.127766, -0.168324,0.108850, -0.193220,0.085376, -0.210135,0.041577,
+// shTortoise[1][0+u] (1x2)
+NEWSHAPE,207,1,2, 0.115992,0.041266, 0.089260,0.093723, 0.044488,0.044488,
+// shTortoise[2][0+u] (1x2)
+NEWSHAPE,208,1,2, 0.034470,0.042254, -0.004448,0.060054, -0.037810,0.044482,
+// shTortoise[3][0+u] (1x2)
+NEWSHAPE,209,1,2, -0.048945,0.046720, -0.085793,0.061280, -0.121603,0.039047,
+// shTortoise[4][0+u] (1x2)
+NEWSHAPE,210,1,2, -0.131730,0.040189, -0.184061,0.083052, -0.200961,0.041539,
+// shTortoise[5][0+u] (1x1)
+NEWSHAPE,211,1,1, 0.080316,0.097049, 0.035588,0.048934, 0.000000,0.067856, 0.004461,0.123805, 0.041274,0.119361,
+// shTortoise[6][0+u] (1x1)
+NEWSHAPE,212,1,1, -0.046728,0.055629, -0.011124,0.067858, -0.010038,0.122683, -0.034616,0.137349, -0.079314,0.123998, -0.077994,0.071309,
+// shTortoise[7][0+u] (1x1)
+NEWSHAPE,213,1,1, -0.090293,0.070228, -0.091619,0.118434, -0.129870,0.117555, -0.171553,0.086337, -0.128389,0.052472,
+// shTortoise[8][0+u] (1x2)
+NEWSHAPE,214,1,2, 0.117447,0.019850, 0.124690,0.033104, 0.143100,0.043648, 0.156518,0.044798, 0.172226,0.045964, 0.185156,0.042131, 0.198679,0.033298, 0.209415,0.022219, 0.213376,0.015559,
+// shTortoise[12][0+u] (1x1)
+NEWSHAPE,215,1,1, 0.189028,0.011641, 0.192981,0.013309, 0.193557,0.019966, 0.189620,0.027168, 0.183986,0.028817, 0.175528,0.022149, 0.174396,0.017163, 0.180574,0.010524,
+// shTortoise[9][0+u] (1x1)
+NEWSHAPE,216,1,1, 0.091033,0.091033, 0.098877,0.108268, 0.113462,0.128959, 0.125832,0.141353, 0.137077,0.147622, 0.124211,0.147500, 0.127683,0.159881, 0.114214,0.153579, 0.114888,0.166505, 0.101432,0.158522, 0.098764,0.173114, 0.089226,0.164043, 0.085437,0.178641, 0.079119,0.147726, 0.066181,0.103132,
+// shTortoise[10][0+u] (1x1)
+NEWSHAPE,217,1,1, -0.127294,0.114564, -0.165450,0.169906, -0.170219,0.186962, -0.172820,0.171706, -0.183575,0.171299, -0.183400,0.159430, -0.197560,0.157378, -0.192844,0.145469, -0.208144,0.141739, -0.185331,0.134128, -0.168270,0.122731, -0.149026,0.105814,
+// shTortoise[11][0+u] (1x2)
+NEWSHAPE,218,1,2, -0.198773,0.054968, -0.210619,0.042791, -0.215140,0.036691, -0.225922,0.025041, -0.241923,0.019510, -0.258017,0.015079, -0.278275,0.012318, -0.288758,0.012335, -0.296937,0.009542, -0.302208,0.005056, -0.305142,0.000562,
+// shTortoise[0][1+u] (1x2)
+NEWSHAPE,219,1,2, -0.215020,0.032895, -0.196018,0.086615, -0.144388,0.137555, -0.039214,0.155679, 0.055338,0.132276, 0.091306,0.105859, 0.110754,0.069544, 0.130081,0.057985, 0.148913,0.053201, 0.153797,0.043848,
+// shTortoise[1][1+u] (1x2)
+NEWSHAPE,220,1,2, 0.054487,0.011120, 0.041149,0.044485, 0.072368,0.053441, 0.083644,0.089220, 0.117129,0.046852,
+// shTortoise[2][1+u] (1x2)
+NEWSHAPE,221,1,2, 0.040018,0.014451, 0.031130,0.038913, -0.001112,0.058940, -0.035584,0.044480, -0.020005,0.023339,
+// shTortoise[3][1+u] (1x2)
+NEWSHAPE,222,1,2, -0.040020,0.018898, -0.050063,0.050063, -0.077977,0.064609, -0.119364,0.042391, -0.106982,0.020059,
+// shTortoise[4][1+u] (1x2)
+NEWSHAPE,223,1,2, -0.122687,0.014499, -0.129484,0.042417, -0.152149,0.067124, -0.178269,0.069514, -0.197514,0.038156, -0.184908,0.021292,
+// shTortoise[5][1+u] (1x1)
+NEWSHAPE,224,1,1, 0.076947,0.093675, 0.060121,0.066801, 0.032253,0.052271, -0.001112,0.070086, 0.006682,0.095775, 0.003346,0.123804, 0.040155,0.118235,
+// shTortoise[6][1+u] (1x1)
+NEWSHAPE,225,1,1, 0.000000,0.100251, -0.006693,0.126054, -0.027911,0.136208, -0.074828,0.122851, -0.057958,0.095854, -0.076880,0.072423, -0.042276,0.057852, -0.013350,0.070089,
+// shTortoise[7][1+u] (1x1)
+NEWSHAPE,226,1,1, -0.079176,0.091443, -0.091663,0.126316, -0.123093,0.116379, -0.172636,0.078471, -0.145392,0.072696, -0.120531,0.056917, -0.090297,0.071346,
+// shTortoise[8][1+u] (1x2)
+NEWSHAPE,227,1,2, 0.122997,0.015995, 0.146947,0.015468, 0.167654,0.014386, 0.182833,0.016067, 0.199210,0.019976, 0.209990,0.025554, 0.220813,0.031704, 0.229392,0.037861, 0.242002,0.041263, 0.255227,0.041328, 0.264456,0.039696, 0.275450,0.036391, 0.283564,0.030262, 0.289940,0.019068, 0.293428,0.010660,
+// shTortoise[12][1+u] (1x1)
+NEWSHAPE,228,1,1, 0.268412,0.011184, 0.273055,0.015108, 0.274235,0.022946, 0.265563,0.028513, 0.260944,0.029615, 0.255733,0.024010, 0.255715,0.017308, 0.255713,0.016191,
+// shTortoise[9][1+u] (1x1)
+NEWSHAPE,229,1,1, 0.057351,0.106430, 0.077464,0.149395, 0.093278,0.183779, 0.107707,0.228249, 0.112041,0.215164, 0.126140,0.219908, 0.127627,0.204537, 0.142352,0.211574, 0.109929,0.173777, 0.072799,0.098720,
+// shTortoise[10][1+u] (1x1)
+NEWSHAPE,230,1,1, -0.136932,0.091981, -0.259079,0.148132, -0.268509,0.159166, -0.266397,0.150469, -0.274082,0.151224, -0.268499,0.144503, -0.277008,0.143964, -0.270075,0.137129, -0.278972,0.133484, -0.265628,0.133017, -0.150766,0.083180,
+// shTortoise[11][1+u] (1x2)
+NEWSHAPE,231,1,2, -0.188793,-0.018459, -0.214469,-0.012848, -0.236108,-0.035186, -0.268017,-0.009275, -0.280049,-0.007050,
+// shDragonSegment (1x2)
+NEWSHAPE,232,1,2, -0.203174,0.011881, -0.186616,-0.109701, -0.119110,-0.176468, 0.041364,-0.257437, 0.024528,-0.167332, 0.168002,-0.237034, 0.122445,-0.154843, 0.293732,-0.215965, 0.243967,-0.121295, 0.379618,-0.208934, 0.352319,-0.102369, 0.499801,-0.217583, 0.458633,-0.130186, 0.629571,-0.201212, 0.600616,-0.112655, 0.808599,-0.206589, 0.759781,-0.121862, 0.966786,-0.214338, 0.904584,-0.144299, 1.120205,-0.210597, 1.072776,-0.124515, 1.265050,-0.194962, 1.187624,-0.110483, 1.448051,-0.152371, 1.331387,-0.062841, 1.531624,-0.093190, 1.375131,-0.019085,
+// shDragonSegment (1x2)
+NEWSHAPE,233,1,2, -0.007346,-0.123992, 0.122987,-0.173919, 0.061557,-0.116488, 0.202542,-0.163574, 0.147987,-0.118203, 0.282832,-0.158128, 0.213251,-0.117597, 0.363492,-0.156273, 0.302775,-0.112860, 0.441499,-0.158901, 0.388517,-0.109014, 0.509440,-0.155192, 0.465857,-0.105710, 0.586378,-0.160120, 0.536831,-0.108756, 0.666714,-0.160638, 0.614597,-0.110994, 0.707340,-0.118674, 0.642298,-0.079128, 0.729313,-0.077848, 0.661282,-0.043253, 0.733677,-0.031495, 0.672818,-0.004657,
+// shSolidBranch (3x2)
+NEWSHAPE,234,3,2, 0.128555,0.209748, 0.199690,0.215574, 0.254193,0.204038, 0.210912,0.198439, 0.140478,0.162954, 0.065662,0.046742, 0.052259,0.011119,
+// shWeakBranch (3x2)
+NEWSHAPE,235,3,2, 0.022229,0.026675, 0.044472,0.022236, 0.075677,0.026710, 0.114862,0.037915, 0.161146,0.053715, 0.167896,0.039176, 0.135065,0.017860, 0.127177,0.003347,
+// shDragonWings (1x2)
+NEWSHAPE,236,1,2, 0.122700,0.018517, 0.114272,0.053018, 0.089169,0.100403, 0.057758,0.136154, -0.006949,0.158795, -0.095746,0.184719, -0.062179,0.148185, -0.123227,0.161622, -0.083331,0.114547, -0.148338,0.120521, -0.091130,0.073903, -0.172062,0.072792, -0.108240,0.034096, -0.179205,0.026589, -0.114815,0.000267,
+// shDragonLegs (1x2)
+NEWSHAPE,237,1,2, 0.134917,-0.000905, 0.124854,0.043901, 0.099656,0.088037, 0.061927,0.126507, -0.022131,0.207886, -0.080657,0.255286, 0.215933,0.322901, 0.307187,0.312641, 0.266293,0.353495, 0.332413,0.379096, 0.261603,0.390908, 0.296236,0.449480, 0.224166,0.406153, 0.235023,0.466366, 0.183625,0.408492, -0.160855,0.327637, -0.192176,0.275601, -0.152760,0.194158, -0.049616,0.086549, -0.073488,0.043239, -0.075888,0.011802,
+// shDragonTail (1x2)
+NEWSHAPE,238,1,2, 0.363554,-0.008229, 0.128365,-0.123955, -0.098304,-0.247909, -0.020731,-0.079043, -0.237275,-0.091634, -0.207909,-0.172106, -0.358930,-0.064586, -0.336385,-0.155676, -0.534253,-0.055873, -0.485229,-0.140288, -0.721828,-0.084122, -0.668232,-0.161876, -0.941472,-0.144105, -0.866272,-0.216238, -1.272595,-0.235195, -1.430879,-0.234454, -1.594270,-0.145883, -1.654478,-0.053066,
+// shDragonTail (1x2)
+NEWSHAPE,239,1,2, -0.778183,-0.033498, -0.773667,-0.113471, -0.718901,-0.170803, -0.626330,-0.194636, -0.662726,-0.150620, -0.561857,-0.166840, -0.594130,-0.120798, -0.492551,-0.149697, -0.515916,-0.118685, -0.385534,-0.144280, -0.422856,-0.102151, -0.286384,-0.135043, -0.334390,-0.084182, -0.207305,-0.108259, -0.268575,-0.064828, -0.167373,-0.087126, -0.211574,-0.057493, -0.167164,-0.050378, -0.104898,-0.050168, -0.043224,-0.045499, 0.038675,-0.050050, 0.061460,-0.050078, -0.018255,-0.125501, 0.206740,-0.025268, 0.268300,-0.004626,
+// shDragonNostril (1x1)
+NEWSHAPE,240,1,1, -0.196345,-0.030293, -0.173587,-0.042557, -0.146359,-0.027931, -0.175798,-0.019035,
+// shDragonHead (1x2)
+NEWSHAPE,241,1,2, -0.234288,-0.029286, -0.210215,-0.057331, -0.171514,-0.080712, -0.173633,-0.053770, -0.129710,-0.093928, -0.135211,-0.068164, -0.091567,-0.108317, -0.094829,-0.085904, -0.053575,-0.123893, -0.056851,-0.099211, -0.016761,-0.149729, -0.015612,-0.119318, 0.010056,-0.149722, 0.034683,-0.163345, 0.042545,-0.170178, 0.097987,-0.213995, 0.128990,-0.241008, 0.156615,-0.250811, 0.192347,-0.250392, 0.215391,-0.242742, 0.241399,-0.208378, 0.244430,-0.187586, 0.234221,-0.201248, 0.205478,-0.215695, 0.188163,-0.216501, 0.172921,-0.200046, 0.159959,-0.174604, 0.152696,-0.138100, 0.161616,-0.121212, 0.207372,-0.122845, 0.171669,-0.100982, 0.218526,-0.090114, 0.180599,-0.077400, 0.232188,-0.067628, 0.196472,-0.059503, 0.244802,-0.047381, 0.210112,-0.035955, 0.244719,-0.029321, 0.215818,-0.023605, 0.241204,-0.016907, 0.212345,-0.008988, 0.244667,-0.001127,
+// shMagicSword (1x2)
+NEWSHAPE,242,1,2, 0.460244,0.025013, 0.556616,0.025533, 0.591538,0.202368, 0.654732,0.232324, 0.666558,0.078727, 0.994985,0.063137, 1.388046,0.051648, 1.514842,0.013406,
+// shMagicSword (1x2)
+NEWSHAPE,243,1,2, 0.273115,0.018516, 0.287601,0.032471, 0.306938,0.020928, 0.314379,0.046575, 0.307461,0.086182, 0.300388,0.102458, 0.332095,0.095887, 0.346420,0.056176, 0.351178,0.028094, 0.752221,0.023027, 0.794417,0.005175,
+// shSeaTentacle (1x1)
+NEWSHAPE,244,1,1, -2.153013,0.033944, -1.647254,0.158902, -1.268813,0.296141, -1.133858,0.242342, -1.041458,0.212975, -0.932914,0.195867, -0.909023,0.199004, -0.754650,0.193789, -0.634570,0.185783, -0.489278,0.166282, -0.343249,0.107130, -0.220848,0.062181, -0.137036,0.039277, 0.019954,0.022781, 0.115439,-0.000192, -0.000098,-0.050493, -0.084985,-0.057626, -0.203684,-0.064431, -0.328103,-0.033983, -0.463800,-0.046175, -0.786647,-0.048919, -1.118381,-0.076511, -1.227766,-0.140168, -1.234647,-0.210899, -1.233924,-0.265574, -1.626076,-0.134736, -2.146445,-0.014522,
+// shSeaTentacle (1x1)
+NEWSHAPE,245,1,1, -0.581517,0.000237, -0.270972,0.171843, -0.213352,0.119030, -0.161150,0.092951, -0.114611,0.074683, -0.047157,0.071482, 0.019130,0.078297, 0.104805,0.092171, 0.193609,0.071644, 0.240320,0.035980, 0.258904,-0.018841, 0.253114,-0.070738, 0.241935,-0.086882, 0.221553,-0.081501, 0.224073,-0.073361, 0.208946,-0.042488, 0.169897,-0.033591, 0.117246,-0.046730, 0.027793,-0.098385, -0.054463,-0.112917, -0.147724,-0.107183, -0.203144,-0.111772, -0.254451,-0.143591, -0.272922,-0.167873,
+// shKrakenHead (1x2)
+NEWSHAPE,246,1,2, -0.532637,0.022779, -0.550265,0.061628, -0.524692,0.130147, -0.455350,0.206917, -0.377664,0.268147, -0.273227,0.272552, -0.185554,0.237075, -0.136140,0.194766, -0.126552,0.184923, -0.116668,0.169553, -0.101930,0.146766, -0.075415,0.127121, -0.041274,0.120227, 0.113990,0.136127,
+// shKrakenEye (1x1)
+NEWSHAPE,247,1,1, 0.130451,0.002988, 0.151783,0.013236, 0.171439,0.034011, 0.184575,0.063992, 0.184241,0.085007, 0.167638,0.109355, 0.149908,0.128805, 0.112562,0.135825, 0.088512,0.122949, 0.067899,0.104186, 0.055509,0.067503, 0.062374,0.041655, 0.071027,0.024842, 0.081064,0.012305, 0.095177,0.004604, 0.116385,0.000336, 0.124753,0.002566,
+// shKrakenEye2 (1x1)
+NEWSHAPE,248,1,1, 0.172608,0.075020, 0.173285,0.064902, 0.164089,0.049576, 0.147378,0.049339, 0.135325,0.053681, 0.128076,0.066823, 0.128055,0.080938, 0.137094,0.092105, 0.146798,0.094361, 0.154590,0.091353, 0.165226,0.082730,
+// shBead0 (1x2)
+NEWSHAPE,249,1,2, 0.340267,-0.226747, 0.208689,-0.202368,
+// shBead1 (1x1)
+NEWSHAPE,250,1,1, -0.186883,0.074525, -0.165331,0.041449, -0.154901,0.003708, -0.156520,-0.035345, -0.170044,-0.072239, -0.194272,-0.103696, -0.227049,-0.126921, -0.265465,-0.139850, -0.306106,-0.141335, -0.345360,-0.131244, -0.379739,-0.110473, -0.406190,-0.080868, -0.422362,-0.045059, -0.426817,-0.006228, -0.419160,0.032174, -0.400071,0.066735, -0.371247,0.094385, -0.335248,0.112667, -0.295273,0.119955, -0.254875,0.115604, -0.217642,0.099998,
+// shArrow (1x2)
+NEWSHAPE,251,1,2, -0.053383,0.030028, 0.040021,0.022234, 0.033369,0.056728, 0.101370,0.001114,
+// shTreat
+NEWSHAPE,252,3,2, 0.220188,0.075636, 0.089347,0.084922, 0.109762,0.055626, 0.120125,0.037135, 0.127589,0.018676, 0.128473,0.010613, 
+// shBatWings
+NEWSHAPE,253,1,2, 0.063731,-0.043246, 0.124072,-0.170024, 0.084056,-0.324550, -0.103512,-0.366996, -0.074400,-0.297599, -0.108529,-0.230913, -0.086972,-0.144190, -0.118951,-0.109801, -0.072887,-0.059221, -0.167080,-0.022888, 
+// shBatBody
+NEWSHAPE,254,1, 2, -0.061429,-0.022752, -0.059165,-0.038685, -0.141985,-0.103054, -0.043229,-0.050055, 0.029576,-0.056876, 0.080137,-0.153405, -0.107472,-0.114332, 0.084857,-0.172008, -0.094609,-0.230753, 0.085016,-0.193009, 0.060443,-0.299888, -0.096263,-0.356877, 0.086368,-0.322128, 0.128679,-0.167743, 0.068287,-0.038696, 0.148735,-0.073224, 0.174190,-0.061883, 0.183380,-0.032092, 0.157798,-0.016009, 0.118603,-0.015966, 
+// shBatMouth
+NEWSHAPE,255, 1, 2, 0.065982,0.006826, 0.081971,0.027324, 0.091097,0.002277, 
+// shBatFang
+NEWSHAPE,256, 1, 1, 0.084220,0.016514, 0.054588,0.011372, 0.088636,0.006606, 
+// shBatEye
+NEWSHAPE,257, 1, 1, 0.100828,0.030855, 0.108021,0.024250, 0.106903,0.014878, 0.099146,0.009915, 
+
+// shHumanFoot
+NEWSHAPE,258, 1, 1, -0.091073,0.081161, -0.071926,0.092823, -0.046931,0.094885, -0.019968,0.097943, -0.001122,0.092149, 0.011212,0.084470, 0.010501,0.070502, -0.001155,0.056218, -0.018631,0.051502, -0.070956,0.049847, -0.086365,0.056093, -0.094267,0.064719, 
+// shHumanLeg
+NEWSHAPE,259, 1, 1, -0.085549,0.082560, -0.066987,0.087728, -0.050005,0.088432, -0.036738,0.073722, -0.033485,0.056714, -0.050113,0.042534, -0.076986,0.046956, -0.086334,0.058587, 
+// shHumanGroin
+NEWSHAPE,260, 1, 2, -0.092531,0.043227, -0.077988,0.087426, -0.048692,0.113964, -0.022425,0.100486, 0.002705,0.048193, 
+// shHumanNeck
+NEWSHAPE,261, 1, 2, -0.035947,0.023404, -0.011281,0.043922, 0.017582,0.045486, 0.031600,0,
+// shSemiFloorShadow
+NEWSHAPE,262, 1, 2, -0.317691,0.208329, 0.065767,0.397781, 
+// shSkeletalFoot
+NEWSHAPE,263, 1, 1, -0.082697,0.087468, -0.071752,0.102240, -0.048756,0.105169, 0.005645,0.101864, 0.009206,0.097754, 0.005659,0.094999, -0.043535,0.093347, -0.043804,0.090603, 0.007314,0.087046, 0.010873,0.084038, 0.005962,0.079364, -0.043239,0.079083, -0.045150,0.075798, 0.004608,0.072508, 0.010903,0.067865, 0.006269,0.060184, -0.065401,0.062704, -0.079938,0.072088, 
+// shDogBody
+NEWSHAPE,264, 1, 2, -0.310601,0.000000, -0.158251,0.009739, -0.149626,0.045009, -0.173168,0.066320, -0.250414,0.056912, -0.242122,0.064314, -0.253563,0.065926, -0.241104,0.075740, -0.249897,0.082453, -0.237118,0.081982, -0.246310,0.097762, -0.230366,0.088118, -0.210870,0.082352, -0.194727,0.083100, -0.180298,0.087679, -0.162032,0.087154, -0.135091,0.081542, -0.116083,0.068924, -0.106144,0.066340, -0.084057,0.063643, -0.061108,0.071892, -0.044295,0.077815, -0.021516,0.077698, 0.000000,0.078872, 0.025203,0.099613, 0.040964,0.113252, 0.067885,0.127285, 0.086481,0.135203, 0.104129,0.144556, 0.097579,0.132951, 0.112604,0.134635, 0.098603,0.124167, 0.118341,0.115901, 0.094688,0.115325, 0.079806,0.108826, 0.065011,0.097516, 0.053964,0.082746, 0.049028,0.066966, 0.045353,0.053708, 0.046494,0.040534, 0.051260,0.033378, 0.074561,0.026708, 0.111469,0.022294, 
+// shDogHead
+NEWSHAPE,265, 1, 2, 0.063398,0.010010, 0.064517,0.018910, 0.069275,0.029860, 0.077732,0.029897, 0.081360,0.028715, 0.066249,0.039649, 0.106662,0.046229, 0.146020,0.025919, 0.159666,0.028110, 0.172131,0.020186, 0.172077,0.013438, 0.168613,0.007837, 
+// shDogTorso
+NEWSHAPE,266, 1, 2, -0.310601,0.000000, -0.158251,0.009739, -0.149626,0.045009, -0.116083,0.068924, -0.106144,0.066340, -0.084057,0.063643, -0.061108,0.071892, -0.044295,0.077815, -0.021516,0.077698, 0.000000,0.078872, 0.036721,0.067879, 0.045353,0.053708, 0.046494,0.040534, 0.051260,0.033378, 0.074561,0.026708, 0.111469,0.022294, 
+// shDogFrontPaw
+NEWSHAPE,267, 1, 1, -0.021458,0.071528, 0.056770,0.096454, 0.086625,0.096557, 0.094338,0.086062, 0.091509,0.069458, 0.029143,0.047289, -0.007695,0.037376, -0.024745,0.050039, 
+// shDogRearPaw
+NEWSHAPE,268, 1, 1, -0.120244,0.033095, -0.181823,0.053216, -0.199420,0.068325, -0.189994,0.093330, -0.169179,0.099289, -0.138237,0.080730, -0.088688,0.049026, -0.094739,0.030294, -0.102488,0.029755, 
+// shDogFrontLeg
+NEWSHAPE,269, 1, 1, 0.050083,0.064552, 0.044492,0.047829, 0.018900,0.044470, 0.002224,0.057826, 0.003338,0.075664, 0.020042,0.089074, 0.034520,0.086856, 0.040087,0.084629, 0.052335,0.076832, 
+// shDogRearLeg
+NEWSHAPE,270, 1, 1, -0.147691,0.079440, -0.120617,0.078177, -0.102586,0.061329, -0.100284,0.036771, -0.112610,0.034564, -0.133966,0.033491, -0.153171,0.040249, -0.157810,0.067153, 
+// shWolfFrontPaw
+NEWSHAPE,271, 1, 1, 0.044056,0.084808, 0.114167,0.147973, 0.121635,0.170511, 0.126416,0.144158, 0.148897,0.151675, 0.134077,0.125212, 0.157522,0.115923, 0.123842,0.098410, 0.074868,0.045141, 0.056665,0.043462, 0.046213,0.055016, 0.039626,0.070996, 
+// shWolfRearPaw
+NEWSHAPE,272, 1, 1, -0.228714,0.033559, -0.341382,0.086496, -0.314606,0.087990, -0.326169,0.109775, -0.303428,0.105707, -0.309485,0.135882, -0.287964,0.110057, -0.198121,0.069332, -0.187804,0.046735, -0.200044,0.035736, -0.213491,0.031344, 
+// shWolfFrontLeg
+NEWSHAPE,273, 1, 1, 0.043124,0.086241, 0.073285,0.082608, 0.078919,0.072022, 0.084577,0.049131, 0.058349,0.030045, 0.038327,0.023872, 0.019412,0.043794, 0.027622,0.072180, 
+// shWolfRearLeg
+NEWSHAPE,274, 1, 1, -0.209981,0.074314, -0.168422,0.064352, -0.158696,0.031877, -0.173682,0.018683, -0.192122,0.019786, -0.221918,0.028600, -0.240782,0.055614, -0.225734,0.072687, 
+// shYetiFoot
+NEWSHAPE,275, 1, 1, -0.099231,0.063552, -0.100435,0.085928, -0.045726,0.113758, -0.046823,0.105908, 0.034547,0.103641, -0.006678,0.083479, 0.042290,0.067886, -0.004448,0.057826, 0.046713,0.042264, -0.033354,0.037802, -0.081272,0.036739, 
+// shReptile[0][0]
+NEWSHAPE,276, 1, 1, 0.090249,0.427619, 0.102783,0.400499, 0.097688,0.364242, 0.106494,0.395874, 0.118188,0.369310, 0.102003,0.349554, 0.121343,0.363844, 0.129595,0.344141, 0.050755,0.267910, 0.107545,0.210120, 0.150912,0.140416, 0.255007,0.145856, 0.355391,0.087396, 0.387934,-0.018561, 0.265842,0.036925, 0.166743,0.002095, 0.169740,-0.118507, 0.146633,-0.140697, 0.157984,-0.178391, 0.257462,-0.153233, 0.319288,-0.224253, 0.313778,-0.230037, 0.281806,-0.195398, 0.314350,-0.232830, 0.311017,-0.237877, 0.273849,-0.204157, 0.310236,-0.238328, 0.307024,-0.245388, 0.281006,-0.229176, 0.167306,-0.280766, 0.112967,-0.233534, 0.089715,-0.085063, -0.011303,-0.178784, -0.006646,-0.301030, -0.074700,-0.338239, -0.065767,-0.372645, -0.089284,-0.428388, -0.106500,-0.417504, -0.093817,-0.389881, -0.108182,-0.416394, -0.135701,-0.402089, -0.116982,-0.374103, -0.139952,-0.401941, -0.154418,-0.393114, -0.130692,-0.334127, -0.065484,-0.273054, -0.031231,-0.116890, -0.096759,-0.068310, -0.263995,-0.141107, -0.398301,-0.030205, -0.393023,0.021064, -0.260404,0.062755, -0.134384,0.029318, -0.088701,0.042159, -0.093602,0.150729, -0.164204,0.145885, -0.192717,0.119533, -0.206386,0.125176, -0.192110,0.146432, -0.210532,0.126947, -0.226982,0.141915, -0.205723,0.164601, -0.231744,0.143851, -0.246721,0.154465, -0.207322,0.234994, -0.133376,0.235522, -0.064416,0.257637, -0.025934,0.154919, 0.085583,0.151110, 0.022816,0.207531, 0.001449,0.284211, 0.083710,0.351486,
+NEWSHAPE,277, 1, 1, -0.339796,-0.018091, -0.324230,-0.054118, -0.300845,-0.078303, -0.253695,-0.085627, -0.202022,-0.073590, -0.135132,-0.044392, -0.056765,-0.035787, -0.007858,-0.040002, 0.072987,-0.013217, 0.141559,0.023233, 0.223733,0.073816, 0.295586,0.074474, 0.330901,0.047755, 0.298595,0.086679, 0.251202,0.098051, 0.201763,0.089397, 0.132153,0.064910, 0.068866,0.028372, 0.002275,0.007722, -0.055689,0.000427, -0.161069,0.003444, -0.241590,0.005109, -0.274421,0.003951,
+NEWSHAPE,278, 1, 1, -0.252522,-0.071341, -0.245933,-0.086380, -0.256407,-0.108129, -0.279152,-0.101371, -0.287975,-0.089716, -0.287044,-0.071382, -0.264154,-0.060260,
+NEWSHAPE,279, 1, 1, -0.258740,0.011957, -0.254596,-0.009727, -0.273495,-0.033201, -0.294516,-0.034869, -0.307872,-0.015362, -0.306068,0.008710, -0.288916,0.020706,
+
+// shReptile[1][0]
+NEWSHAPE,280, 1, 1,  0.267913,-0.363961, 0.103423,-0.407902, 0.029926,-0.285688, 0.004562,-0.182498, -0.089218,-0.185966, -0.096986,-0.367985, -0.248327,-0.455994, -0.256139,-0.447327, -0.237682,-0.433175, -0.257547,-0.445407, -0.265780,-0.439947, -0.250475,-0.422667, -0.268312,-0.437951, -0.275164,-0.436243, -0.203450,-0.358525, -0.187185,-0.110088, -0.484119,-0.068248, -0.424486,0.012521, -0.323946,-0.003100, -0.200798,0.033484, -0.244734,0.222076, -0.357719,0.170021, -0.365522,0.192816, -0.333464,0.208694, -0.367623,0.196994, -0.371956,0.213819, -0.339807,0.232001, -0.373008,0.216200, -0.376113,0.227855, -0.287818,0.311052, -0.201927,0.336476, -0.162665,0.301719, -0.123143,0.195801, -0.085354,0.085987, 0.106772,0.103301, 0.235043,0.288663, 0.398887,0.202650, 0.392371,0.193980, 0.362197,0.205391, 0.393392,0.192794, 0.388672,0.184045, 0.354985,0.191178, 0.388962,0.181776, 0.383857,0.173107, 0.273977,0.186438, 0.201147,0.007597, 0.385514,-0.014104, 0.452378,-0.139100, 0.441679,-0.165374, 0.286863,-0.196581, 0.154996,-0.121531, 0.112780,-0.178884, 0.130676,-0.244138, 0.233120,-0.294200, 0.242235,-0.311655, 0.187156,-0.319959, 0.242817,-0.315142, 0.253181,-0.338344, 0.193625,-0.348671, 0.254919,-0.341938,
+NEWSHAPE,281, 1, 1, 0.326447,-0.044290, 0.268772,-0.053597, 0.235899,-0.055845, 0.171515,-0.048557, 0.088801,-0.018246, 0.037774,0.004993, -0.027541,0.016777, -0.088937,0.009667, -0.172537,-0.011240, -0.219668,-0.017765, -0.282928,-0.032376, -0.337206,-0.032470, -0.385877,-0.034804, -0.440028,-0.044474, -0.371779,-0.058999, -0.311902,-0.066325, -0.248815,-0.064253, -0.177727,-0.063011, -0.059856,-0.073519, 0.027306,-0.080984, 0.112403,-0.081788, 0.185321,-0.082903, 0.246089,-0.091503, 0.280118,-0.131876, 0.327222,-0.147933, 0.374578,-0.123044, 0.364318,-0.067249, 
+NEWSHAPE,282, 7, 1, 0.027415,-0.009216, 
+NEWSHAPE,283, 7, 1, 0.023426,0.005270, 
+// shReptile[2][0]
+NEWSHAPE,284, 1, 1, 0.264174,-0.393902, 0.220100,-0.344820, 0.196314,-0.232131, 0.044844,-0.186655, 0.015265,-0.205081, -0.003936,-0.333213, -0.136120,-0.408084, -0.149930,-0.405620, -0.177207,-0.243366, -0.085946,-0.199911, -0.087381,-0.147154, -0.302464,-0.169877, -0.302092,-0.297549, -0.327187,-0.293024, -0.330841,-0.249219, -0.329911,-0.292299, -0.353906,-0.290880, -0.354914,-0.247858, -0.357304,-0.291341, -0.377715,-0.287105, -0.387134,-0.104888, -0.106049,-0.041562, -0.095545,0.040016, -0.302051,0.163655, -0.332611,0.319950, -0.310541,0.349402, -0.289857,0.281329, -0.303842,0.352541, -0.278525,0.372081, -0.261882,0.313955, -0.275092,0.376585, -0.247719,0.398573, -0.239799,0.336833, -0.214496,0.215823, -0.168074,0.170579, -0.067435,0.196926, 0.028714,0.266822, 0.015830,0.400766, 0.131125,0.319617, 0.148574,0.162459, 0.283651,0.088527, 0.295994,0.169290, 0.331188,0.179878, 0.329752,0.145196, 0.335770,0.181014, 0.363641,0.191082, 0.365077,0.157473, 0.367064,0.192650, 0.395018,0.204633, 0.405110,0.041551, 0.311991,0.015994, 0.195242,0.016634, 0.122740,-0.085748, 0.261020,-0.098708, 0.286694,-0.182139, 0.332188,-0.307144, 0.306926,-0.340004, 0.279202,-0.289607, 0.302360,-0.343229, 0.284083,-0.365340, 0.252717,-0.314768, 0.279532,-0.371945,
+NEWSHAPE,285, 1, 1, -0.127096,-0.255815, -0.091894,-0.241092, -0.073203,-0.219108, -0.050918,-0.160430, -0.046653,-0.121421, -0.028140,-0.044121, -0.017641,0.026545, 0.022513,0.133022, 0.050663,0.193120, 0.058157,0.270962, 0.054214,0.311270, 0.046360,0.353789, 0.068493,0.316069, 0.093492,0.242457, 0.080840,0.108339, 0.056390,0.006556, 0.031831,-0.062813, -0.001836,-0.143721, -0.034334,-0.239758, -0.041121,-0.297513, -0.071677,-0.333221, -0.108488,-0.343266, -0.135448,-0.293017, 
+NEWSHAPE,286, 7, 1, -0.021896,-0.012396, 
+NEWSHAPE,287, 7, 1, -0.023484,-0.012828, 
+// shReptile[3][0]
+NEWSHAPE,288, 1, 1, 0.276554,-0.041210, 0.310457,0.039428, 0.287105,0.072645, 0.169859,-0.000837, 0.151648,-0.089695, 0.191477,-0.149470, 0.280888,-0.183226, 0.341099,-0.338656, 0.273683,-0.366029, 0.209539,-0.273223, 0.105852,-0.172588, -0.061113,-0.279714, -0.013642,-0.342451, -0.058157,-0.375558, -0.090346,-0.316684, -0.061781,-0.378853, -0.101453,-0.409200, -0.128968,-0.341003, -0.106321,-0.412460, -0.147327,-0.447396, -0.196876,-0.316767, -0.070150,-0.182145, -0.133594,-0.036417, -0.294753,-0.151579, -0.409075,-0.148250, -0.444408,-0.105385, -0.374677,-0.113506, -0.443332,-0.098946, -0.434173,-0.078381, -0.367706,-0.088453, -0.432558,-0.074716, -0.428663,-0.053306, -0.293683,-0.069123, -0.141662,0.058415, -0.281560,0.174905, -0.249829,0.284696, -0.226324,0.297042, -0.119112,0.263418, -0.075663,0.144858, -0.021279,0.097533, 0.064463,0.189563, 0.011865,0.335469, -0.005820,0.393456, 0.044789,0.390508, 0.065571,0.321367, 0.047251,0.390455, 0.090068,0.386431, 0.103507,0.317601, 0.093275,0.386149, 0.130199,0.386756, 0.148881,0.163862, 0.089483,0.079942, 0.135587,0.047323, 0.293067,0.168426, 0.408382,0.092603, 0.384168,0.007719, 0.315700,-0.045433, 0.346149,0.015698, 0.313006,-0.045307, 0.295254,-0.041824, 0.326732,0.017229, 0.292941,-0.042281, 
+NEWSHAPE,289, 1, 1, -0.130824,0.101694, -0.057151,-0.007670, 0.115177,-0.160650, 0.211980,-0.236858, 0.296693,-0.311866, 0.232978,-0.219581, 0.138912,-0.105664, -0.002855,0.058899, -0.100445,0.121752, -0.136992,0.183934, -0.144345,0.222791, -0.168225,0.256064, -0.232048,0.242113, -0.236767,0.213008, -0.234529,0.179695, -0.198210,0.146185, -0.167694,0.143175, 
+NEWSHAPE,290, 7, 1, -0.019211,0.011243, 
+NEWSHAPE,291, 7, 1, -0.017430,0.009904, 
+// shReptile[4][0]
+NEWSHAPE,292, 3, 1, 0.000458,0.307912, 0.204532,0.422468, 0.260617,0.384080, 0.177355,0.114658, 0.351515,0.031931, 0.411778,0.098785, 0.502998,0.070318, 0.433450,0.021025, 0.502176,0.057577, 0.563080,-0.085829, 0.478445,-0.055947, 0.558143,-0.094808, 0.534739,-0.111613, 0.420992,-0.057813,
+NEWSHAPE,293, 3, 1, -0.169183,-0.225979, -0.187272,-0.078673, -0.281255,0.003711, -0.095795,0.040777, 
+NEWSHAPE,294, 7, 1, -0.019211,0.011243, 
+NEWSHAPE,295, 7, 1, -0.017430,0.009904, 
+
+// shReptileBody
+NEWSHAPE,296, 1, 1, 0.207893,0.052816, 0.154587,0.095216, 0.118624,0.121981, 0.077111,0.131872, 0.011141,0.103613, -0.040061,0.066768, -0.052300,0.056751, -0.041318,0.136239, -0.097277,0.126349, -0.146652,0.094036, -0.214827,0.059612, -0.280943,0.028321, -0.353759,-0.002290, -0.410588,-0.042794, -0.446484,-0.083934, -0.379856,-0.069065, -0.301215,-0.057970, -0.243697,-0.056411, -0.176013,-0.072872, -0.133073,-0.090579, -0.099458,-0.115103, -0.065944,-0.139713, -0.052291,-0.050065, 0.014488,-0.109218, 0.077073,-0.123987, 0.130941,-0.109677, 0.162455,-0.085149, 0.218159,-0.035985,
+// shReptileHead
+NEWSHAPE,297, 1, 2, 0.471485,-0.015757, 0.288467,-0.098421, 0.170941,-0.033237, 
+// shReptileFrontFoot
+NEWSHAPE,298, 1, 1, 0.250278,0.167235, 0.238951,0.195456, 0.195709,0.200188, 0.240500,0.197580, 0.232498,0.224361, 0.186427,0.225955, 0.227016,0.226262, 0.227409,0.260408, 0.102772,0.258192, 0.080173,0.252350, 0.059570,0.224171, 0.051410,0.202351, 0.074841,0.180175, 0.114709,0.161348, 
+// shReptileRearFoot
+NEWSHAPE,299, 1, 1, -0.067876,0.206615, -0.114088,0.181539, -0.272616,0.185109, -0.253628,0.222368, -0.216050,0.219537, -0.249625,0.225089, -0.240714,0.244505, -0.205182,0.244381, -0.232919,0.248821, -0.217457,0.272915, -0.099816,0.264976, -0.065058,0.238612, 
+// shReptileFrontLeg
+NEWSHAPE,300, 1, 1, 0.047213,0.212458, 0.077946,0.248522, 0.130365,0.256196, 0.141554,0.241207, 0.148626,0.179026, 0.127519,0.104028, 0.091374,0.056830, 0.045625,0.063430, 0.028944,0.082379, 0.036887,0.150900,
+// shReptileRearLeg
+NEWSHAPE,301, 1, 1, -0.098128,0.262832, -0.068071,0.236831, -0.053685,0.166798, -0.046188,0.128123, -0.056603,0.055942, -0.108486,0.050024, -0.124961,0.087637, -0.134873,0.130635, -0.145563,0.191132, -0.140577,0.221299, -0.120741,0.249057,
+// shReptileTail
+NEWSHAPE,302, 1, 1, -0.419630,-0.067234, -0.351432,-0.034342, -0.278537,-0.003397, -0.200906,0.024692, -0.083503,0.034515, 0.041138,0.030019, 0.138446,0.017864, 0.197445,0.006731, 0.094656,-0.005568, 0.007778,0.003333, -0.085713,-0.003339, -0.197452,-0.013463, -0.280927,-0.023788,
+// shReptileEye
+NEWSHAPE,303, 1, 1, 0.288102,0.032160, 0.268177,0.043655, 0.265884,0.058115, 0.276356,0.070881, 0.290293,0.073602, 0.310905,0.064370, 0.308359,0.045081, 
+
+// shDodeca,
+NEWSHAPE,304, 5, 2, 0.123140,0.087570, 0.151044,0.006085, 0.141348,0.003141, 0.091602,0.003971, 0.064937,0.045676, 0.057217,0.044013, 0.086006,0.002395, 0.086006,-0.002395,
+// shBugLeg
+NEWSHAPE,305, 1, 1, -0.188132,0.071590, -0.106107,0.109975, -0.020337,0.032429, -0.010997,-0.052235, 0.027591,-0.128573, -0.009955,-0.162603, -0.123175,-0.156466, -0.129658,-0.186975, -0.003881,-0.192409, 0.048636,-0.145908, 0.045758,-0.106953, 0.012643,-0.040678, 0.031326,0.003847, 0.131788,0.118499, 0.134832,0.147039, 0.121802,0.186319, 0.018400,0.244215, 0.011672,0.216213, 0.079288,0.174654, 0.095323,0.160720, 0.088932,0.115998, 0.010444,0.037927, -0.102392,0.137814, 
+// shBugAntenna
+NEWSHAPE,306, 1, 2, -0.037388,-0.035738, 0.121931,-0.041931, 0.148538,-0.114729, 0.171226,-0.135647, 0.193388,-0.143787, 0.206926,-0.136091, 0.172174,-0.118855, 0.163075,-0.108717, 0.147190,-0.083002, 0.129680,-0.024281, 
+
+// shTrylobiteBody
+NEWSHAPE, 307, 1, 2, 0.196119,0.032415, 0.090349,0.051694, 0.014858,0.048341, -0.084517,0.042642, -0.099309,0.031132, -0.146522,0.055533, -0.190296,0.065896, -0.234005,0.061772, -0.245550,0.053775, -0.212120,0.048191, -0.163612,0.030837, -0.143014,0.007540, 
+// shTrylobiteFrontClaw
+NEWSHAPE, 308, 1, 1, 0.162924,0.164217, 0.134529,0.219357, 0.096861,0.266620, 0.040792,0.297621, 0.018375,0.280440, 0.073270,0.189478, 0.089713,0.132980, 0.111928,0.119234, 0.144100,0.124454, 
+// shTrylobiteRearClaw
+NEWSHAPE, 309, 1, 1, -0.014785,0.165073, -0.030220,0.198964, -0.060610,0.240281, -0.086102,0.254842, -0.112355,0.254248, -0.091511,0.215066, -0.070034,0.152230, -0.057129,0.134268, -0.041113,0.127236, -0.022776,0.135081, 
+// shTrylobiteFrontLeg
+NEWSHAPE, 310, 1, 1, 0.196620,0.034345, 0.161944,0.165955, 0.131681,0.185106, 0.105471,0.183927, 0.090859,0.133459, 0.094842,0.063710, 0.082033,0.026880, 0.114740,0.000635, 0.168794,0.000330, 
+// shTrylobiteRearLeg
+NEWSHAPE, 311, 1, 1, 0.014403,0.049247, -0.005676,0.101370, -0.014283,0.164470, -0.036662,0.174292, -0.054954,0.173745, -0.070446,0.153946, -0.074749,0.083574, -0.082124,0.043654, -0.052716,0.016562, -0.009043,0.013419, 
+// shLeafFloor,
+NEWSHAPE, 312, 3, 1, -0.124709,0.213831, -0.127071,0.274094, -0.099723,0.369490, -0.023215,0.462261, 0.072785,0.531016, 0.152171,0.570046, 0.244072,0.583021, 0.278329,0.581281, 0.289459,0.567347, 0.241111,0.530198, 0.189086,0.449607, 0.153336,0.354939, 0.133803,0.281218, 0.127619,0.205626, 0.145868,0.133361, 0.140560,0.107526, 0.106341,0.086253, 0.061487,0.046396, 0.029920,0.018377, 0.013295,0.007733, 0.050569,0.013990, 0.166612,0.102510, 
+// shLeafFloor,
+NEWSHAPE, 313, 1, 1, 0, 0,
+
+// shBullBody
+NEWSHAPE, 314, 1, 2, -0.399002,0.000618, -0.412389,-0.011435, -0.383217,-0.004139, -0.396241,-0.020642, -0.365704,-0.007876, -0.335517,-0.003463, -0.306649,-0.005631, -0.286501,-0.014485, -0.270113,-0.034709, -0.263139,-0.079331, -0.257114,-0.110215, -0.247630,-0.125790, -0.231094,-0.131733, -0.215499,-0.134849, -0.198771,-0.130780, -0.184961,-0.120425, -0.176890,-0.110874, -0.170135,-0.107553, -0.128764,-0.126896, -0.138805,-0.126406, -0.089067,-0.151289, -0.099830,-0.154113, -0.066698,-0.158059, -0.043468,-0.159303, -0.027802,-0.156801, -0.033201,-0.163796, -0.009201,-0.151129, 0.003865,-0.145169, 0.002259,-0.154029, 0.022833,-0.142371, 0.035183,-0.139200, 0.057625,-0.133866, 0.085702,-0.138411, 0.106606,-0.143670, 0.123715,-0.148158, 0.139656,-0.143049, 0.152591,-0.131020, 0.170000,-0.108676, 0.194767,-0.076789, 0.218502,-0.057643, 
+// shBullHorn
+NEWSHAPE, 315, 1, 1, 0.321702,-0.078714, 0.329603,-0.122456, 0.342058,-0.140037, 0.360561,-0.149754, 0.379070,-0.152553, 0.395131,-0.150636, 0.423718,-0.142016, 0.448897,-0.133266, 0.441750,-0.150756, 0.426899,-0.163295, 0.403192,-0.169643, 0.371044,-0.173385, 0.345193,-0.167994, 0.313418,-0.152134, 0.303510,-0.135781, 0.297242,-0.118441, 0.292244,-0.102342, 0.308799,-0.096856, 
+// shBullRearHoof
+NEWSHAPE, 316, 1, 1, -0.218107,-0.148042, -0.243390,-0.132449, -0.246496,-0.105156, -0.238188,-0.090308, -0.226562,-0.085665, -0.207006,-0.088878, -0.189916,-0.100015, -0.189059,-0.127164, -0.196081,-0.138609, 
+// shBullFrontHoof
+NEWSHAPE, 317, 1, 1, 0.110547,-0.088215, 0.135310,-0.087225, 0.144428,-0.099644, 0.144636,-0.125576, 0.135691,-0.137934, 0.121038,-0.142332, 0.104105,-0.138807, 0.088308,-0.128550, 0.088231,-0.113919, 0.096026,-0.102725,
+// shBullHead
+NEWSHAPE, 318, 1, 2, 0.334622,-0.050250, 0.307607,-0.096839, 0.281739,-0.111332, 0.258180,-0.106443, 0.236906,-0.077841, 0.214842,-0.061865, 0.184962,-0.040355, 0.198626,-0.028054, 0.195166,-0.013460, 0.181470,-0.002240, 
+
+// shButterflyBody
+NEWSHAPE, 319, 1, 2, 0.176732,-0.004396, 0.195200,-0.015935, 0.201979,-0.028577, 0.202087,-0.043427, 0.198784,-0.050031, 0.198704,-0.041226, 0.196945,-0.030227, 0.190734,-0.019233, 0.170044,-0.008793, 0.163946,-0.020339, 0.151703,-0.020894, 0.140009,-0.012649, 0.122852,-0.026418, 0.108465,-0.031392, 0.017314,-0.028016, 0.000470,-0.019079, -0.088765,-0.013614, -0.095608,-0.005678, 
+// shButterflyWing
+NEWSHAPE, 320, 1, 2, 0.101344,-0.004988, 0.178342,-0.088519, 0.202439,-0.133112, 0.222376,-0.199882, 0.236304,-0.245909, 0.228546,-0.251735, 0.203290,-0.253007, 0.178432,-0.236979, 0.151432,-0.218854, 0.124491,-0.196352, 0.092144,-0.173026, 0.066111,-0.165612, 0.055720,-0.012369, 0.055445,-0.104987, 0.048098,-0.123101, 0.031857,-0.142619, 0.017719,-0.157675, -0.015575,-0.171093, -0.037946,-0.176348, -0.059503,-0.171340, -0.086100,-0.144824, -0.102753,-0.105546, -0.111188,-0.079719, -0.110326,-0.064989, -0.025725,-0.012627, -0.023585,-0.006998, 
+
+// shGadflyBody
+NEWSHAPE, 321, 1, 2, 0.170044,-0.008793, 0.163946,-0.020339, 0.151703,-0.020894, 0.140009,-0.012649, 0.122852,-0.026418, 0.108465,-0.031392, 0.017314,-0.028016, 0.000470,-0.019079, 
+// shGadflyWing
+NEWSHAPE, 322, 1, 2, 0.130571,-0.024552, -0.001114,-0.108092, -0.042319,-0.085751, -0.047826,-0.042265, 0.091301,-0.002227, 0.124928,-0.003346, 
+// shGadflyEye
+NEWSHAPE, 323, 1, 1, 0.168968,-0.004476, 0.175788,-0.012316, 0.172390,-0.020150, 0.165580,-0.020138, 0.161038,-0.013420, 0.161033,-0.007828, 
+
+
+NEWSHAPE
+};
 

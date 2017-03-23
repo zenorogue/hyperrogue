@@ -8,6 +8,7 @@ bool cblind;
 bool autocheat;
 
 int truelotus;
+int gamecount;
 
 time_t timerstart, savetime;
 bool timerstopped;
@@ -25,26 +26,28 @@ void initgame() {
     firstland = safetyland;
     }
   
-  if(tactic::on && euclid) euclidland = firstland;
+  if(tactic::on && (euclid || sphere)) euclidland = firstland;
   
   if(firstland == laNone || firstland == laBarrier)
     firstland = laCrossroads;
 
+  if(firstland == laCrossroads5 && !tactic::on) firstland = laCrossroads2; // could not fit!
   if(firstland == laOceanWall) firstland = laOcean; 
   if(firstland == laHauntedWall) firstland = laGraveyard; 
+  if(firstland == laMountain && !tactic::on) firstland = laJungle;
   if(isGravityLand(firstland) && !tactic::on) firstland = laCrossroads;
   
-  cwt.c = origin.c7; cwt.spin = 0;
-  cwt.c->land = euclid ? euclidland : firstland;
+  cwt.c = origin.c7; cwt.spin = 0; cwt.mirrored = false;
+  cwt.c->land = (euclid || sphere) ? euclidland : firstland;
   
   chaosAchieved = false;
 
   if(firstland == laElementalWall) cwt.c->land = randomElementalLand();
   
-  if(tactic::on && (isGravityLand(firstland) || firstland == laOcean))
+  if(tactic::on && (isGravityLand(firstland) || firstland == laOcean) && firstland != laMountain)
     cwt.c->land = purehepta ? laCrossroads : laCrossroads2;
   createMov(cwt.c, 0);
-
+  
   setdist(cwt.c, BARLEV, NULL);
 
   if((tactic::on || yendor::on) && isCyclic(firstland)) {
@@ -64,9 +67,9 @@ void initgame() {
     }
 
   if(tactic::on && firstland == laCaribbean) {
-    if(hiitemsMax(itRedGem) >= 25) items[itRedGem] = 25;
-    if(hiitemsMax(itFernFlower) >= 25) items[itFernFlower] = 25;
-    if(hiitemsMax(itWine) >= 25) items[itWine] = 25;
+    if(hiitemsMax(itRedGem) >= 25) items[itRedGem] = min(hiitemsMax(itRedGem), 50);
+    if(hiitemsMax(itFernFlower) >= 25) items[itFernFlower] = min(hiitemsMax(itFernFlower), 50);
+    if(hiitemsMax(itWine) >= 25) items[itWine] = min(hiitemsMax(itWine), 50);
     }
   
   if(tactic::on && tactic::trailer)
@@ -90,29 +93,69 @@ void initgame() {
   if(cwt.c->land == laCrossroads2) {
     cwt.c->landparam = 12;
     createMov(cwt.c, 0)->landparam = 44;
+    createMov(cwt.c, 0)->land = laCrossroads2;
     }
+    
+  for(int i=0; i<numplayers(); i++) sword::angle[i] = 11;
 
+  if(!safety) multi::players = vid.scfg.players;
+  if(multi::players < 1 || multi::players > MAXPLAYER)
+    multi::players = 1;
+  multi::whereto[0].d = MD_UNDECIDED;
+  multi::cpid = 0;
+
+  if(shmup::on) shmup::init();
+  
   // extern int sightrange; sightrange = 9;
   // cwt.c->land = laHell; items[itHell] = 10;
   for(int i=BARLEV; i>=0; i--) {
-    if(tactic::trailer) safety = true;
+    if(tactic::trailer && cwt.c->land != laClearing) safety = true;
     setdist(cwt.c, i, NULL);
     if(tactic::trailer) safety = false;
-    verifycells(&origin);
+    
+    if(sphere) verifyDodecahedron();
+    else verifycells(&origin);
+    }
+  
+  if(quotient && generateAll(firstland)) {
+    for(int i=0; i<size(quotientspace::allcells); i++)
+      setdist(quotientspace::allcells[i], 8, NULL);
+    }
+
+  
+  if(multi::players > 1 && !shmup::on) for(int i=0; i<numplayers(); i++) {
+    int idir = (3 * i) % cwt.c->type;
+    multi::player[i].c = cwt.c->mov[idir];
+    // special case -- otherwise they land on a wall
+    if(firstland == laCrossroads2 && i == 1)
+      multi::player[1].c = cwt.c;
+    if(firstland == laCrossroads2 && i == 6)
+      multi::player[6].c = createMov(createMov(cwt.c, 0), 3);
+    setdist(cwt.c->mov[idir], 0, cwt.c);
+    multi::player[i].spin = 0;
+    multi::flipped[i] = true;
+    multi::whereto[i].d = MD_UNDECIDED;
     }
     
   if(tactic::on && tactic::trailer)
     items[treasureType(firstland)] = 15;
   
   yendor::init(3);
-  makeEmpty(cwt.c);
+  multi::revive_queue.clear();
   
-  if(shmup::on) shmup::init();
+  if(multi::players > 1 && !shmup::on) {
+    for(int i=0; i<numplayers(); i++) 
+      makeEmpty(playerpos(i));
+    }
+  else {
+    for(int i=0; i<numplayers(); i++) 
+      makeEmpty(cwt.c);
+    }
   
   if(!safety) {
     usedSafety = false;
     timerstart = time(NULL); turncount = 0; rosewave = 0; rosephase = 0;
-    mapeditor::whichPattern = 0;
+    if(!quotient) mapeditor::whichPattern = 0;
     mapeditor::whichShape = 0;
     noiseuntil = 0;
     sagephase = 0; hardcoreAt = 0;
@@ -127,7 +170,8 @@ void initgame() {
     if(!randomPatternsMode && !tactic::on && !yendor::on) {
       if(firstland != (princess::challenge ? laPalace : laIce)) cheater++;
       }
-    if(princess::challenge) {
+    if(tactic::trailer) ;
+    else if(princess::challenge) {
       kills[moVizier] = 1;
       princess::forceMouse = true;
       if(yendor::everwon)
@@ -141,25 +185,55 @@ void initgame() {
           items[i] = 10;
       kills[moYeti] = 1000;
       } */
-    if(ISANDROID && yendor::on && modecode() != 0)
-        addMessage(XLAT("Note: currently scores are saved only in the normal mode on Android"));
-    if(ISANDROID && tactic::on)
-        addMessage(XLAT("Note: you can play, but scores won't be saved on Android"));
+    
+    else if(randomPatternsMode)
+      addMessage(XLAT("Welcome to the Random Pattern mode!"));
+    else if(tactic::on)
+      addMessage(XLAT("You are playing %the1 in the Pure Tactics mode.", firstland));
+    else if(yendor::on)
+      addMessage(XLAT("Welcome to the Yendor Challenge %1!", its(yendor::challenge)));
+    else if(shmup::on) ; // welcome message given elsewhere
+    else if(euclid)
+      addMessage(XLAT("Welcome to the Euclidean mode!"));
+    else if(sphere && euclidland == laHalloween)
+      addMessage(XLAT("Welcome to Halloween!"));
+    else if(elliptic)
+      addMessage(XLAT("Good luck in the elliptic plane!"));
+    else if(sphere)
+      addMessage(XLAT("Welcome to Spherogue!"));
+#ifdef ROGUEVIZ
+    else if(rogueviz::on)
+      addMessage(XLAT("Welcome to RogueViz!"));
+#endif
+    else {
+      addMessage(XLAT("Welcome to HyperRogue!"));
+#ifndef MOBILE
+#ifdef IOS
+      addMessage(XLAT("Press F1 or right-shift-click things for help."));
+#else
+      addMessage(XLAT("Press F1 or right-click things for help."));
+#endif
+#endif
+      }
     }
   else {
     usedSafety = true;
     safety = false;
     }
   
-  haverose = false; hadrose = false; rosemap.clear();
+  havewhat = hadwhat = 0; rosemap.clear();
   
   elec::lightningfast = 0;
   
+  lastsafety = gold();
   bfs();
   }
 
-#define MAXBOX 250
-#define POSSCORE 210 // update this when new boxes are added!
+bool havesave = true;
+
+#ifndef NOSAVE
+#define MAXBOX 300
+#define POSSCORE 258 // update this when new boxes are added!
 
 struct score {
   string ver;
@@ -171,6 +245,7 @@ bool saving, loading, loadingHi;
 
 string boxname[MAXBOX];
 bool fakebox[MAXBOX];
+bool monsbox[MAXBOX];
 
 void applyBox(int& t) {
   if(saving) savebox[boxid++] = t;
@@ -181,12 +256,14 @@ void applyBox(int& t) {
 void applyBoxNum(int& i, string name = "") {
   fakebox[boxid] = (name == "");
   boxname[boxid] = name;
+  monsbox[boxid] = false;
   applyBox(i);
   }
 
 void applyBoxBool(bool& b, string name = "") {
   int i = b;
   applyBoxNum(i, name);
+  monsbox[boxid] = false;
   b = i;
   }
 
@@ -207,6 +284,7 @@ int applyBoxLoad(string name = "") {
 void applyBoxI(eItem it, bool f = false) {
   boxname[boxid] = iinf[it].name;
   fakebox[boxid] = f;
+  monsbox[boxid] = false;
   if(loadingHi) { 
     updateHi(it, savebox[boxid++]); 
     }
@@ -216,6 +294,7 @@ void applyBoxI(eItem it, bool f = false) {
 void applyBoxM(eMonster m, bool f = false) {
   fakebox[boxid] = f;
   boxname[boxid] = minf[m].name;
+  monsbox[boxid] = true;
   applyBox(kills[m]);
   }
 
@@ -231,7 +310,7 @@ void applyBoxes() {
   applyBoxNum(turncount, "turn count");
   applyBoxNum(cellcount, "cells generated");
 
-  if(!saving) timerstart = time(NULL);
+  if(loading) timerstart = time(NULL);
   
   for(int i=0; i<itOrbLightning; i++) 
     if(i == 0) items[i] = 0, applyBoxI(itFernFlower);
@@ -240,7 +319,8 @@ void applyBoxes() {
   for(int i=0; i<43; i++) {
     if(loading) kills[i] = 0;
     bool fake = 
-      i == moLesserM || i == moNone || i == moWolfMoved || i == moTentacletail;
+      i == moLesserM || i == moNone || i == moWolfMoved || i == moTentacletail ||
+      i == moIvyNext;
     if(i == moWormtail) applyBoxM(moCrystalSage);
     else if(i == moWormwait) applyBoxM(moFireFairy);
     else if(i == moTentacleEscaping) applyBoxM(moMiner);
@@ -252,17 +332,20 @@ void applyBoxes() {
     }
     
   if(saving) {
-    applyBoxSave((int) (savetime + timer - timerstart), "time played");
+    int totaltime = savetime;
+    if(!timerstopped) totaltime += timer - timerstart;
+    applyBoxSave((int) totaltime, "time played");
     }
   else if(loading) savetime = applyBoxLoad("time played");
-  else boxid++;
+  else boxname[boxid] = "time played", boxid++;
   
   if(saving) savecount++; 
   applyBoxNum(savecount, "number of saves"); 
   if(saving) savecount--;
   applyBoxNum(cheater, "number of cheats");
   
-  if(saving) applyBoxSave(items[itOrbSafety] ? safetyland : cwt.c->land, "current land");
+  fakebox[boxid] = true;
+  if(saving) applyBoxSave(items[itOrbSafety] ? safetyland : cwt.c->land, "");
   else if(loading) firstland = safetyland = eLand(applyBoxLoad());
   else lostin = eLand(savebox[boxid++]);
   
@@ -275,7 +358,7 @@ void applyBoxes() {
   applyBoxI(itPower);
   applyBoxI(itOrbFire, true);
   applyBoxI(itOrbInvis, true);
-  applyBoxI(itOrbGhost, true);
+  applyBoxI(itOrbAether, true);
   applyBoxI(itOrbPsi, true);
   applyBoxM(moBug0);
   applyBoxM(moBug1);
@@ -302,20 +385,21 @@ void applyBoxes() {
   applyBoxM(moCShark);
   applyBoxM(moParrot);
   applyBoxI(itPirate);
-  applyBoxI(itOrbPreserve, true);
+  applyBoxI(itOrbTime, true);
   
   applyBoxM(moHexSnake);
   applyBoxM(moRedTroll);
   applyBoxI(itRedGem);
-  applyBoxI(itOrbTelekinesis, true);
+  applyBoxI(itOrbSpace, true);
   
-  applyBoxBool(euclid, "Euclidean");
+  int geo = geometry;
+  applyBoxNum(geo, ""); geometry = eGeometry(geo);
   applyBoxBool(hardcore, "hardcore");
-  applyBoxNum(hardcoreAt, "hardcoreAt");
+  applyBoxNum(hardcoreAt, "");
   applyBoxBool(shmup::on, "shmup");
   if(saving) applyBoxSave(euclidland, "euclid land");
   else if(loading) euclidland = eLand(applyBoxLoad("euclid land"));
-  else boxid++;
+  else fakebox[boxid++] = true;
   
   applyBoxI(itCoast);
   applyBoxI(itWhirlpool);
@@ -329,8 +413,8 @@ void applyBoxes() {
   
   applyBoxI(itPalace);
   applyBoxI(itFjord);
-  applyBoxI(itOrbFrog);
-  applyBoxI(itOrbDiscord);
+  applyBoxI(itOrbFrog, true);
+  applyBoxI(itOrbDiscord, true);
   applyBoxM(moPalace);
   applyBoxM(moFatGuard);
   applyBoxM(moSkeleton);
@@ -340,15 +424,15 @@ void applyBoxes() {
   applyBoxM(moWaterElemental);
   
   applyBoxI(itSavedPrincess);
-  applyBoxI(itOrbLove);
+  applyBoxI(itOrbLove, true);
   applyBoxM(moPrincess);
-  applyBoxM(moPrincessMoved); // live Princess for Safety
-  applyBoxM(moPrincessArmedMoved); // live Princess for Safety
+  applyBoxM(moPrincessMoved, false); // live Princess for Safety
+  applyBoxM(moPrincessArmedMoved, false); // live Princess for Safety
   applyBoxM(moMouse);
-  applyBoxNum(princess::saveArmedHP, "save armed HP");
-  applyBoxNum(princess::saveHP, "save HP");
+  applyBoxNum(princess::saveArmedHP, "");
+  applyBoxNum(princess::saveHP, "");
   
-  applyBoxI(itEdge);
+  applyBoxI(itIvory);
   applyBoxI(itElemental);
   applyBoxI(itZebra);
   applyBoxI(itFireShard);
@@ -358,11 +442,11 @@ void applyBoxes() {
   
   applyBoxM(moAirElemental);
   applyBoxM(moFireElemental);
-  applyBoxM(moEdgeMonkey);
+  applyBoxM(moFamiliar);
   applyBoxM(moGargoyle);
   applyBoxM(moOrangeDog);
-  applyBoxI(itOrbSummon);
-  applyBoxI(itOrbMatter);
+  applyBoxI(itOrbSummon, true);
+  applyBoxI(itOrbMatter, true);
 
   applyBoxM(moForestTroll);
   applyBoxM(moStormTroll);
@@ -373,11 +457,11 @@ void applyBoxes() {
   applyBoxI(itMutant);
   applyBoxI(itFulgurite);
   applyBoxI(itBounty);
-  applyBoxI(itOrbLuck);
+  applyBoxI(itOrbLuck, true);
   applyBoxI(itOrbStunning, true);
   
-  applyBoxBool(tactic::on, "tactic ON");
-  applyBoxNum(elec::lightningfast, "lightningfast");
+  applyBoxBool(tactic::on, "");
+  applyBoxNum(elec::lightningfast, "");
   
   // if(savebox[boxid]) printf("lotus = %d (lost = %d)\n", savebox[boxid], isHaunted(lostin));
   if(loadingHi && isHaunted(lostin)) boxid++;
@@ -394,7 +478,7 @@ void applyBoxes() {
   else applyBoxNum(truelotus, "lotus/escape");
   applyBoxBool(purehepta, "heptagons only"); 
   applyBoxI(itRose);
-  applyBoxI(itOrbSkunk, true);
+  applyBoxI(itOrbBeauty, true);
   applyBoxI(itCoral);
   applyBoxI(itOrb37, true);
   applyBoxI(itOrbEnergy, true);
@@ -403,22 +487,69 @@ void applyBoxes() {
   applyBoxM(moRoseLady);
   applyBoxM(moRoseBeauty);
   applyBoxBool(chaosmode, "Chaos mode");
-  applyBoxNum(shmup::players, "shmup players");
+  applyBoxNum(multi::players, "shmup players");
+  if(multi::players < 1 || multi::players > MAXPLAYER)
+    multi::players = 1;
   applyBoxM(moRatlingAvenger);
   // printf("applybox %d\n", shmup::players); 
   
   applyBoxI(itApple);
-  applyBoxM(moKestrel);
-  applyBoxM(moLemur);
+  applyBoxM(moSparrowhawk);
+  applyBoxM(moResearcher);
   applyBoxI(itDragon);
   applyBoxM(moDragonHead);
   applyBoxI(itOrbDomination, true);
   applyBoxI(itBabyTortoise);
-  applyBoxNum(tortoise::seekbits, "tortoise bits");
+  applyBoxNum(tortoise::seekbits, "");
   applyBoxM(moTortoise);
   applyBoxI(itOrbShell, true);
-
+  
   applyBoxNum(safetyseed);
+
+  // (+18)
+  for(int i=0; i<6; i++) {
+    applyBoxNum(multi::treasures[i]);
+    applyBoxNum(multi::kills[i]);
+    applyBoxNum(multi::deaths[i]);
+    }
+  // (+8)
+  applyBoxM(moDragonTail);
+  applyBoxI(itKraken);
+  applyBoxM(moKrakenH);
+  applyBoxM(moKrakenT);
+  applyBoxI(itOrbSword, true);
+  applyBoxI(itBarrow);
+  applyBoxM(moDraugr);
+  applyBoxI(itOrbSword2, true);
+  applyBoxI(itTrollEgg);
+  applyBoxI(itOrbStone, true);
+  
+  bool sph;
+  sph = false; applyBoxBool(sph, "sphere"); if(sph) geometry = gSphere;
+  sph = false; applyBoxBool(sph, "elliptic"); if(sph) geometry = gElliptic;
+  applyBox(princess::reviveAt);
+  
+  applyBoxI(itDodeca);
+  applyBoxI(itAmethyst);
+  applyBoxI(itSlime);
+  applyBoxI(itOrbNature, true);
+  applyBoxI(itOrbDash, true); 
+  // itOrbRecall should not be here
+  applyBoxM(moBat);
+  applyBoxM(moReptile);
+  applyBoxM(moFriendlyIvy);
+  
+  applyBoxI(itGreenGrass);
+  applyBoxI(itBull);
+  applyBoxI(itOrbHorns, true);
+  applyBoxI(itOrbBull, true);
+  applyBoxM(moSleepBull);
+  applyBoxM(moRagingBull);
+  applyBoxM(moHerdBull);
+  applyBoxM(moButterfly);
+  applyBoxM(moGadfly);
+  
+  if(POSSCORE != boxid) printf("ERROR: %d boxes\n", boxid);
   }
 
 void saveBox() {
@@ -432,26 +563,22 @@ void loadBox() {
 
 void loadBoxHigh() {
 
-  int sp = shmup::players;
-  int son = shmup::on;
-  bool euc = euclid;
-  bool cha = chaosmode;
-  bool ph = purehepta;
-  
-  euclid = savebox[116];
-  shmup::on = savebox[119];
-  purehepta = savebox[186];
-  chaosmode = savebox[196];
-  shmup::players = savebox[197];
+  dynamicval<int> sp1(multi::players, savebox[197]);
+  dynamicval<eGeometry> sp2(geometry, (eGeometry) savebox[116]);
+  dynamicval<bool> sp3(shmup::on, savebox[119]);
+  dynamicval<bool> sp4(chaosmode, savebox[196]);
+  dynamicval<bool> sp5(purehepta, savebox[186]);
+  if(savebox[238]) geometry = gSphere;
+  if(savebox[239]) geometry = gElliptic;
 
-  if(shmup::on && !shmup::players) ;
+  if(multi::players < 1 || multi::players > MAXPLAYER)
+    multi::players = 1;
+
+  if(shmup::on && multi::players == 1) ;
   else {
     // have boxid
     boxid = 0; loadingHi = true; applyBoxes(); loadingHi = false;
     }
-
-  purehepta = ph; chaosmode = cha; euclid = euc; shmup::on = son; shmup::players = sp;
-
   }
 
 // certify that saves and achievements were received
@@ -473,11 +600,27 @@ namespace anticheat {
 
 long long saveposition = -1;
 
+#include <unistd.h>
+#include <sys/types.h>
+
+void remove_emergency_save() {
+#ifndef WINDOWS
+  if(saveposition >= 0) { 
+/*    if(!timerghost) 
+      addMessage(XLAT("Emergency truncate to ") + its(saveposition)); */
+    if(truncate(scorefile, saveposition)) {}
+    saveposition = -1;
+    }
+#endif
+  }
+
 void saveStats(bool emergency = false) {
   DEBB(DF_INIT, (debugfile,"saveStats [%s]\n", scorefile));
-#ifndef ANDROID
 
+  if(autocheat) return;
   if(randomPatternsMode) return;
+  
+  remove_emergency_save();
 
   FILE *f = fopen(scorefile, "at");
   
@@ -487,16 +630,12 @@ void saveStats(bool emergency = false) {
     return;
     }
 
-  if(saveposition >= 0) { 
-//  addMessage(XLAT("Emergency seek to ") + its(saveposition));
-    fseek(f, saveposition, SEEK_SET); saveposition = -1;
-    }
   if(emergency) {
     saveposition = ftell(f);
-//  addMessage(XLAT("Emergency save at ") + its(saveposition));
+//  if(!timerghost) addMessage(XLAT("Emergency save at ") + its(saveposition));
     }
   
-  if(showoff) return;
+  if(showoff) { fclose(f); return; }
   
   time_t timer;
   timer = time(NULL);
@@ -558,11 +697,13 @@ void saveStats(bool emergency = false) {
   fprintf(f, "Total wealth: %d\n", gold());
   fprintf(f, "Total enemies killed: %d\n", tkills());
   fprintf(f, "cells generated: %d\n", cellcount);
+  if(pureHardcore()) fprintf(f, "Pure hardcore mode\n");
   if(purehepta) fprintf(f, "Heptagons only mode\n");
   if(chaosmode) fprintf(f, "Chaos mode\n");
-  if(shmup::on) fprintf(f, "Shoot-em up mode (%d players)\n", shmup::players);
+  if(shmup::on) fprintf(f, "Shoot-em up mode\n");
+  if(multi::players > 1) fprintf(f, "Multi-player (%d players)\n", multi::players);
   fprintf(f, "Number of cells explored, by distance from the player:\n"); 
-  for(int i=0; i<10; i++) fprintf(f, " %d", explore[i]); fprintf(f, "\n");
+  {for(int i=0; i<10; i++) fprintf(f, " %d", explore[i]);} fprintf(f, "\n");
 /*for(int j=0; j<landtypes; j++) {
     bool haveland = false;
     for(int i=0; i<10; i++) 
@@ -590,15 +731,12 @@ void saveStats(bool emergency = false) {
   
 #ifndef MOBILE
   DEBB(DF_INIT, (debugfile, "Game statistics saved to %s\n", scorefile));
-  addMessage(XLAT("Game statistics saved to %1", scorefile));
+  if(!tactic::trailer)
+    addMessage(XLAT("Game statistics saved to %1", scorefile));
 #endif
   fclose(f);
-#endif
   }
 
-bool havesave = true;
-
-#ifndef ANDROID
 // load the save
 void loadsave() {
   DEBB(DF_INIT, (debugfile,"loadSave\n"));
@@ -606,6 +744,8 @@ void loadsave() {
   for(int xc=0; xc<MODECODES; xc++)
   for(int i=0; i<landtypes; i++) for(int j=0; j<MAXTAC; j++)
     tactic::lsc[xc][i][j] = -1;
+  
+  gamecount = 0;
 
   FILE *f = fopen(scorefile, "rt");
   havesave = f;
@@ -617,7 +757,9 @@ void loadsave() {
     char buf[120];
     if(fgets(buf, 120, f) == NULL) break;
     if(buf[0] == 'H' && buf[1] == 'y') {
-      if(fscanf(f, "%s", buf) <= 0) break; sc.ver = buf;
+      gamecount++;
+      if(fscanf(f, "%s", buf) <= 0) break;
+      sc.ver = buf;
       if(sc.ver < "4.4" || sc.ver == "CHEATER!") { ok = false; continue; }
       ok = true;
       for(int i=0; i<MAXBOX; i++) {
@@ -661,16 +803,20 @@ void loadsave() {
 
     if(buf[0] == 'Y' && buf[1] == 'E' && buf[2] == 'N') {
       char buf1[80], ver[10];
-      int cid, oy, won, tc, t, ts, cert;
+      int cid, oy, won, tc, t, ts, cert=0;
       sscanf(buf, "%70s%10s%d%d%d%d%d%d%d",
         buf1, ver, &cid, &oy, &won, &tc, &t, &ts, &cert);
             
       if(won) for(int xc=0; xc<MODECODES; xc++)
       if(anticheat::check(cert, ver, won ? "WON" : "LOST", tc, t, ts, xc*999 + cid + 256 * oy)) {
+        if(xc == 19 && cid == 25) xc = 0;
         if(cid > 0 && cid < YENDORLEVELS) 
-        if(!(ver < string("8.0f") && oy > 1 && cid == 15)) {
+        if(!(ver < string("8.0f") && oy > 1 && cid == 15)) 
+        if(!(ver < string("9.3b") && oy > 1 && (cid == 27 || cid == 28))) 
+          {
           yendor::bestscore[xc][cid] = max(yendor::bestscore[xc][cid], oy);
           }
+        break;
         }
       }
 
@@ -701,14 +847,25 @@ void loadsave() {
 void restartGame(char switchWhat) {
   DEBB(DF_INIT, (debugfile,"restartGame\n"));
   achievement_final(true);
+#ifndef NOSAVE
   saveStats();
+#endif
   for(int i=0; i<ittypes; i++) items[i] = 0;
-  for(int i=0; i<motypes; i++) kills[i] = 0;
+  lastkills = 0; for(int i=0; i<motypes; i++) kills[i] = 0;
   for(int i=0; i<10; i++) explore[i] = 0;
   for(int i=0; i<10; i++) for(int l=0; l<landtypes; l++)
     exploreland[i][l] = 0;
-  anticheat::tampered = false; achievementsReceived.clear();
+
+  for(int i=0; i<numplayers(); i++)
+    if(multi::playerActive(i)) 
+      multi::deaths[i]++;
+
+#ifndef NOSAVE
+  anticheat::tampered = false; 
+#endif
+  achievementsReceived.clear();
   princess::saved = false;
+  princess::reviveAt = 0;
   princess::forceVizier = false;
   princess::forceMouse = false;
   knighted = 0;
@@ -716,20 +873,22 @@ void restartGame(char switchWhat) {
   cellcount = 0;
   clearMemory();
   if(switchWhat == 'C') {
-    euclid = yendor::on = tactic::on = princess::challenge = false;
+    geometry = gNormal;
+    yendor::on = tactic::on = princess::challenge = false;
+    resetGeometry();
     chaosmode = !chaosmode;
     }
   if(switchWhat == '7') {
-    if(euclid) euclid = false;
+    if(euclid) geometry = gNormal;
     purehepta = !purehepta;
-    extern void precalc(); extern void resetGL();
-    precalc(); resetGL();
+    resetGeometry();
     }
-  if(switchWhat == 'e') {
-    extern void precalc(); extern void resetGL();
-    if(chaosmode) chaosmode = false;
-    if(purehepta) { purehepta = false; precalc(); resetGL(); }
-    euclid = !euclid;
+  if(switchWhat == 'g') {
+    if(geometry == targetgeometry) geometry = gNormal;
+    else geometry = targetgeometry;
+    if(chaosmode && geometry != gNormal) chaosmode = false;
+    if(purehepta && euclid) purehepta = false;
+    resetGeometry();
     }
   if(switchWhat == 'y') {
     yendor::on = !yendor::on;
@@ -794,11 +953,12 @@ void clearGameMemory() {
   DEBB(DF_INIT, (debugfile,"clearGameMemory\n"));
   pathq.clear();
   dcal.clear();
-  yendor::yii = 0; yendor::yi.clear();
+  yendor::yii = NOYENDOR; yendor::yi.clear();
   clearshadow();
   offscreen.clear();  
   princess::clear();
   buggycells.clear();
+  mirrors.clear();
   clearing::bpdata.clear();
   tortoise::emap.clear();
   tortoise::babymap.clear();
@@ -808,6 +968,15 @@ void clearGameMemory() {
   conformal::findhistory.clear();
   conformal::movehistory.clear();
   conformal::includeHistory = false;
+  #endif
+  recallCell = NULL;
+  prairie::lasttreasure = NULL;
+  prairie::enter = NULL;
+  prairie::tchoices.clear();
+  prairie::beaststogen.clear();
+  butterflies.clear();
+  #ifdef ROGUEVIZ
+  rogueviz::close();
   #endif
   }
 
@@ -835,7 +1004,12 @@ eItem randomTreasure2(int cv) {
     if(itemclass(i) != IC_TREASURE) continue;
     int q = 2*items[i];
     if(a == lt) q -= (2*cv-1);
-    if(a == itEmerald && bearsCamelot(cwt.c->land)) q -= 5;
+    if(a == itEmerald && bearsCamelot(cwt.c->land)) q -= 8;
+    if(a == itElixir && isCrossroads(cwt.c->land)) q -= 7;
+    if(a == itIvory && isCrossroads(cwt.c->land)) q -= 6;
+    if(a == itPalace && isCrossroads(cwt.c->land)) q -= 5;
+    if(a == itIvory && cwt.c->land == laJungle) q -= 5;
+    if(a == itIvory && cwt.c->land == laPalace) q -= 5;
     if(q < bq) bq = q, cq = 0;
     if(q == bq) { cq++; if(hrand(cq) == 0) best = i; }
     }
@@ -844,10 +1018,20 @@ eItem randomTreasure2(int cv) {
 
 bool isTechnicalLand(eLand l) {
   return l == laNone || l == laOceanWall || l == laBarrier || l == laCanvas ||
-    l == laHauntedWall || l == laHauntedBorder;
+    l == laHauntedWall || l == laHauntedBorder || l == laCA;
+  }
+
+eLand cheatdest;
+
+void cheatMoveTo(eLand l) {
+  cheatdest = l;
+  if(l == laCrossroads5) l = laCrossroads;
+  activateSafety(l);
+  cheatdest = laNone;
   }
 
 bool applyCheat(char u, cell *c = NULL) {
+
   if(u == 'M' && cwt.c->type == 6) {
     addMessage(XLAT("You summon some Mirages!"));
     cheater++;
@@ -877,7 +1061,7 @@ bool applyCheat(char u, cell *c = NULL) {
     }
   if(u == 'C') {
     cheater++; 
-    activateSafety(laCrossroads);
+    cheatMoveTo(laCrossroads);
     addMessage(XLAT("Activated the Hyperstone Quest!"));
 
     for(int t=1; t<ittypes; t++) 
@@ -932,11 +1116,7 @@ bool applyCheat(char u, cell *c = NULL) {
     return true;
     }
   if(u == 'R'-64) buildRosemap();
-  if(u == 'D'-64) {
-    mapeditor::drawplayer = !mapeditor::drawplayer;
-    return true;
-    }
-#ifndef MOBILE
+#ifndef NOEDIT
   if(u == 'A') {
     lastexplore = turncount;
     cmode = emMapEditor;
@@ -986,7 +1166,7 @@ bool applyCheat(char u, cell *c = NULL) {
     addMessage(XLAT("You summon an Ivy!"));
     cheater++;
     int i = cwt.spin;
-    int j = cwt.c->spn[i];
+    int j = cwt.c->spn(i);
     cell* c = cwt.c->mov[i]->mov[(j+3)%cwt.c->mov[i]->type];
     if(passable(c, NULL, 0)) buildIvy(c, 0, 1);
     return true;
@@ -1037,8 +1217,9 @@ bool applyCheat(char u, cell *c = NULL) {
     return true;
     }
   if(u == 'Z') {
-    cwt.spin++; flipplayer = false;
-    cwt.spin %= cwt.c->type;
+    flipplayer = false;
+    mirror::spin(1);
+    cwspin(cwt, 1);
     return true;
     }
   if(u == 'J') {
@@ -1058,14 +1239,14 @@ bool applyCheat(char u, cell *c = NULL) {
     }
   if(u == 'S') {
     canmove = true;
-    activateSafety(cwt.c->land);
+    cheatMoveTo(cwt.c->land);
     items[itOrbSafety] += 3;
     cheater++; addMessage(XLAT("Activated Orb of Safety!"));
     return true;
     }
   if(u == 'U') {
     canmove = true;
-    activateSafety(firstland);
+    cheatMoveTo(firstland);
     cheater++; addMessage(XLAT("Teleported to %1!", firstland));
     return true;
     }
@@ -1090,15 +1271,39 @@ bool applyCheat(char u, cell *c = NULL) {
     cwt.c->mov[i]->item = itOrbYendor;
     return true;
     }
+  if(u == 'B'-64) {
+    int i = cwt.spin;
+    sword::angle[0]++;
+    cwt.c->mov[i]->item = hrand(2) ? itOrbSword2 : itOrbSword;
+    return true;
+    }
   if(u == 'X'-64) {
-    items[itEdge] = 12345;
+    items[itOrbNature] += 50;
     cheater++;
+    return true;
+    }
+  if(u == 'V'-64) {
+    viewdists = !viewdists;
+    return true;
+    }
+  if(u == 'L'-64) {
+    cell *c = mouseover;
+    describeCell(c);
+    printf("Neighbors:"); for(int i=0; i<c->type; i++) printf("%p ",  c->mov[i]);
+    printf("Barrier: dir=%d left=%d right=%d\n",
+      c->bardir, c->barleft, c->barright);
     return true;
     }
   if(u == 'C'-64) {
     cblind = !cblind;
     return true;
     }
+#ifdef LOCAL
+  if(u == 'D'-64) {
+    cheater = 0; autocheat = 0;
+    return true;
+    }
+#endif
   return false;
   }
 
