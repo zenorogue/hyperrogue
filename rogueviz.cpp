@@ -1234,6 +1234,7 @@ void showMenu() {
   dialog::addBoolItem(XLAT("show labels"), showlabels, 'l');
   dialog::addBoolItem(XLAT("mark special vertices"), specialmark, 'x');
   dialog::addSelItem(XLAT("background color"), itsh(backcolor), 'b');
+  dialog::addSelItem(XLAT("gamma value for edges"), fts(ggamma), 'g');
 
   dialog::addBreak(50);
   dialog::addItem(XLAT("exit menu"), 'v');
@@ -1250,11 +1251,11 @@ void handleMenu(int sym, int uni) {
   else if(uni == 'l') showlabels = !showlabels;
   else if(uni == 'x') specialmark = !specialmark;
   else if(uni == 'b') backcolor ^= 0xFFFFFF;
+  else if(uni == 'g') 
+    dialog::editNumber(ggamma, 0, 5, .01, 0.5, XLAT("gamma value for edges"), "");
   else if(uni) cmode = emNormal;
   }
 
 void processKey(int sym, int uni) { }
 
-
 };
-
