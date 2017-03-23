@@ -8306,7 +8306,9 @@ void handlekey(int sym, int uni, extra& ev) {
   else if(cmode == emOverview) handleOverview(sym, uni);
   else if(cmode == emPickEuclidean) handleEuclidean(sym, uni);
 #ifdef MOBILE
+#ifdef HAVE_ACHIEVEMENTS
   else if(cmode == emLeader) leader::handleKey(sym, uni);
+#endif
 #endif
   else if(cmode == emColor) dialog::handleColor(sym, uni);
   else if(cmode == emNumber) dialog::handleNumber(sym, uni);      

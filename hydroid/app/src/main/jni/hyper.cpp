@@ -1,11 +1,5 @@
-// Hyperbolic Rogue for Android
-// Copyright (C) 2012-2016 Zeno Rogue
-// number of times compiled since Oct 30: LOTS+5
-// Wed Mar 8, 23:16:40
-// Wed Mar 9, 01:14:57
-// Web Mar 9, ~12:30
-// Web Mar 10, 16:43:30
-// it took 20 minutes to compile. Now it takes just 5 minutes for an unknown reason!
+// HyperRogue for Android
+// Copyright (C) 2012-2017 Zeno Rogue
 
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -43,7 +37,7 @@ const char *scorefile, *conffile;
 
 bool settingsChanged = false;
 
-#include "/home/eryx/proj/rogue/hyper/init.cpp"
+#include "../../../../../init.cpp"
 
 JNIEnv *whatever;
 
@@ -299,6 +293,9 @@ void uploadAll(JNIEnv *env, jobject thiz) {
   env->DeleteLocalRef(cls);
   }
 
+void achievement_init() {}
+void achievement_close() {}
+void achievement_gain(const char* s, char flags) {}
 
 #include <unistd.h>
 

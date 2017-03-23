@@ -1559,7 +1559,9 @@ void displayMenus() {
   if(cmode == emHelp) showHelp();
   if(cmode == em3D) show3D();
 #ifdef MOBILE
+#ifdef HAVE_ACHIEVEMENTS
   if(cmode == emLeader) leader::showMenu();
+#endif
 #endif
 #ifdef ROGUEVIZ
   if(cmode == emRogueviz) rogueviz::showMenu();

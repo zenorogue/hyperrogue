@@ -534,8 +534,4 @@ void mobile_draw(MOBPAR_FORMAL) {
   #endif
   }
 
-#ifdef MOBILE
-#include "google-games.cpp"
-#endif
-
 #endif

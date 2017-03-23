@@ -332,7 +332,6 @@ public class HyperRogue extends Activity {
           fl.addView(glview, lp);      
           }
 
-        if(running) connectGames();
     }
 
     MediaPlayer backgroundmusic;
