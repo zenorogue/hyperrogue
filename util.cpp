@@ -4,6 +4,14 @@
 // basic utility functions
 
 #ifdef MOBWEB
+#define MWP
+#endif
+
+#ifdef PANDORA
+#define MWP
+#endif
+
+#ifdef MWP
 typedef double ld;
 #define LDF "%lf"
 #define PLDF "lf"

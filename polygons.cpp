@@ -1793,7 +1793,7 @@ namespace svg {
   
   void fixgamma(unsigned int& color) {
     unsigned char *c = (unsigned char*) (&color);
-    for(int i=1; i<4; i++) c[i] = 255 * pow(c[i] / 255.0, gamma);
+    for(int i=1; i<4; i++) c[i] = 255 * pow(float(c[i] / 255.0), float(gamma));
     }
   
   int svgsize;

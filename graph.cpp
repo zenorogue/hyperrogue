@@ -7883,8 +7883,13 @@ void initgraph() {
   vid.monmode = 2;
   vid.wallmode = 3;
 #else
+#ifdef PANDORA
+  vid.monmode = 2;
+  vid.wallmode = 3;
+#else
   vid.monmode = 4;
   vid.wallmode = 5;
+#endif
 #endif
 
   vid.particles = 1;
