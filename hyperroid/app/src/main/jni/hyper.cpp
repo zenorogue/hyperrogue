@@ -25,6 +25,8 @@
 #define ANDROID
 #endif
 
+#define ANDROIDSHARE
+
 #define MOBPAR_FORMAL JNIEnv *env, jobject thiz
 #define MOBPAR_ACTUAL env, thiz
 

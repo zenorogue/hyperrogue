@@ -5,6 +5,7 @@
 #define MOBPAR_FORMAL int
 #define MOBPAR_ACTUAL 0
 #define FAKEMOBILE
+#define ANDROIDSHARE
 #define MIX_MAX_VOLUME 128
 
 const char *scorefile = "fakemobile_score.txt";
@@ -89,6 +90,10 @@ bool currentlyConnected() { return false; }
 void viewAchievements() { printf("view Achievements\n"); }
 void viewLeaderboard(string id) { printf("view Leaderboard :: %s\n", id.c_str()); }
 void switchGoogleConnection() { printf("sgc\n"); }
+
+void shareScore(int) {
+  printf("share\n");
+  }
 
 int main(int argc, char **argv) {
 

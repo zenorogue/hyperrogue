@@ -220,10 +220,12 @@ void showMainMenu() {
 #endif
   
 #ifdef MOBILE
+#ifdef HAVE_ACHIEVEMENTS
   dialog::addItem(XLAT("leaderboards/achievements"), '3'); 
 #endif
+#endif
 
-#ifdef ANDROID
+#ifdef ANDROIDSHARE
   dialog::addItem("SHARE", 's'-96);
 #endif
   
@@ -279,10 +281,12 @@ void handleMenuKey(int sym, int uni) {
     achievement_final(false);
     }
 #ifdef MOBILE
+#ifdef HAVE_ACHIEVEMENTS
   else if(sym == '3') {
     achievement_final(false);
     cmode = emLeader;
     }
+#endif
 #endif
 #ifdef ROGUEVIZ
   else if(uni == 'g') cmode = emRogueviz;

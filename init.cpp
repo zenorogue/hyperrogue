@@ -1,6 +1,6 @@
-#define VER "9.4c"
-#define VERNUM 9403
-#define VERNUM_HEX 0x9403
+#define VER "9.4d"
+#define VERNUM 9404
+#define VERNUM_HEX 0x9404
 
 #define GEN_M 0
 #define GEN_F 1
@@ -224,7 +224,7 @@ string buildScoreDescription() {
   char buf2[128];
   
   s += XLAT("HyperRogue for Android");
-  s += " ("VER"), http://www.roguetemple.com/z/hyper.php\n";
+  s += " ("VER"), http://www.roguetemple.com/z/hyper/\n";
   s += XLAT("Date: %1 time: %2 s ", buf, its(savetime + time(NULL) - timerstart));
   s += XLAT("distance: %1\n", its(celldist(cwt.c)));
   // s += buf2;
@@ -294,7 +294,7 @@ void handleclick(MOBPAR_FORMAL) {
 
     if(buttonclicked || outofmap(mouseh)) {
       
-      if(andmode == 0 && getcstat == 'g' && !shmup::on) {
+      if(andmode == 0 && getcstat == 'g' && !shmup::on && (cmode == emNormal || cmode == emQuit)) {
         movepcto(MD_DROP);
         getcstat = 0;
         }
@@ -362,6 +362,10 @@ void handleclick(MOBPAR_FORMAL) {
 int touchedAt;
 
 int getticks();
+
+#ifdef ANDROIDSHARE
+void shareScore(MOBPAR_FORMAL);
+#endif
 
 void mobile_draw(MOBPAR_FORMAL) {
 
@@ -454,8 +458,8 @@ void mobile_draw(MOBPAR_FORMAL) {
   
   if(inslider) keyreact = true;
 
-#ifdef ANDROID
-  if(getcstat == 's'-96) {
+#ifdef ANDROIDSHARE
+  if(getcstat == 's'-96 && keyreact) {
     cmode = canmove ? emQuit : emNormal;
     shareScore(MOBPAR_ACTUAL);
     cmode = emNormal;

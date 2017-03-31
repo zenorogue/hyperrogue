@@ -1796,6 +1796,21 @@ namespace mapeditor {
         }
       return (0x808080 + col[0] + (col[1] << 8) + (col[2] << 16)) >> (err?2:0);
       }
+    if(whichCanvas == 'd') {
+      int col[4];
+      bool err = false;
+      for(int j=0; j<4; j++) {
+        col[j] = getCdata(c, j);
+        col[j] *= 3;
+        col[j] %= 240;
+        if(col[j] > 120) col[j] = 240 - col[j];
+        if(col[j] < -120) col[j] = -240 - col[j];
+        }
+      col[0] /= 8;
+      col[1] /= 8;
+      col[2] /= 8;
+      return (0x101010 + col[0] + (col[1] << 8) + (col[2] << 16)) >> (err?2:0);
+      }
     return canvasback;
     }
   }

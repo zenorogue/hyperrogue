@@ -1886,7 +1886,7 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, int col, dou
     return false;
     }
   
-  else if(m == moGolem) {
+  else if(m == moGolem || m == moGolemMoved) {
     ShadowV(V, shPBody);
     otherbodyparts(V, darkena(col, 1, 0XC0), m, footphase);
     queuepoly(VBODY, shPBody, darkena(col, 0, 0XC0));
@@ -1947,7 +1947,7 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, int col, dou
       }    
     }
 
-  else if(m == moWolf || m == moRedFox) {
+  else if(m == moWolf || m == moRedFox || m == moWolfMoved) {
     ShadowV(V, shWolfBody);
     if(mmspatial || footphase)
       animallegs(VALEGS, moWolf, darkena(col, 0, 0xFF), footphase);
@@ -2033,7 +2033,7 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, int col, dou
   else if(m == moShark || m == moGreaterShark || m == moCShark)
     queuepoly(VFISH, shShark, darkena(col, 0, 0xFF));
   else if(m == moEagle || m == moParrot || m == moBomberbird || m == moAlbatross || 
-    m == moTameBomberbird || m == moWindCrow) {
+    m == moTameBomberbird || m == moWindCrow || m == moTameBomberbirdMoved) {
     ShadowV(V, shEagle);
     queuepoly(VBIRD, shEagle, darkena(col, 0, 0xFF));
     }
@@ -3052,9 +3052,14 @@ void drawMobileArrow(cell *c, transmatrix V) {
   // int col = getcs().uicolor;
   // col -= (col & 0xFF) >> 1;
   
+  int dir = neighborId(cwt.c, c);
+  bool invalid = !legalmoves[dir];
+  
   int col = cellcolor(c);
   if(col == OUTLINE_NONE) col = 0xC0C0C0FF;
   col -= (col & 0xFF) >> 1;
+  if(invalid) col -= (col & 0xFF) >> 1;
+  if(invalid) col -= (col & 0xFF) >> 1;
   
   poly_outline = OUTLINE_NONE;
   transmatrix m2 = Id;
@@ -5237,7 +5242,9 @@ void drawMarkers() {
     using namespace shmupballs;
     calc();
     queuecircle(xmove, yb, rad, 0xFF0000FF);
-    queuecircle(xmove, yb, rad*SKIPFAC, 0xFF0000FF);
+    queuecircle(xmove, yb, rad*SKIPFAC, 
+      legalmoves[7] ? 0xFF0000FF : 0xFF000080
+      );
     forCellAll(c2, cwt.c) IG(c2) drawMobileArrow(c2, Gm(c2));
     }
 #endif
@@ -5394,7 +5401,7 @@ string buildHelpText() {
   h += XLAT("(You can also use right Shift)\n\n");
 #endif
   h += XLAT("See more on the website: ") 
-    + "http//roguetemple.com/z/hyper.php\n\n";
+    + "http//roguetemple.com/z/hyper/\n\n";
     
   
   h += XLAT("Still confused? Read the FAQ on the HyperRogue website!\n\n");
@@ -6224,6 +6231,9 @@ void drawthemap() {
   modist = 1e20; mouseover = NULL; 
   modist2 = 1e20; mouseover2 = NULL; 
   mouseovers = XLAT("Press F1 or right click for help");
+#ifdef ROGUEVIZ
+  if(rogueviz::on) mouseovers = " ";
+#endif
   centdist = 1e20; centerover = NULL; 
 
   for(int i=0; i<multi::players; i++) {
@@ -6741,7 +6751,7 @@ void showGameover() {
   #ifndef MOBILE
   dialog::addItem(quitsaves() ? "save" : "quit", SDLK_F10);
   #endif
-  #ifdef ANDROID
+  #ifdef ANDROIDSHARE
   dialog::addItem("SHARE", 's'-96);
   #endif
   

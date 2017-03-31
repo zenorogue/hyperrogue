@@ -249,7 +249,7 @@ public class HyperRogue extends Activity {
      void openWebsite() {
       Runnable r = new Runnable() {
         public void run() {
-          String url = "http://roguetemple.com/z/hyper.php";
+          String url = "http://roguetemple.com/z/hyper/";
           Intent i = new Intent(Intent.ACTION_VIEW);
           i.setData(Uri.parse(url));
           startActivity(i);

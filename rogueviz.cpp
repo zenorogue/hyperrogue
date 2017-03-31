@@ -30,7 +30,7 @@ bool specialmark = false;
 const char *fname;
 const char *cfname;
 
-enum eVizkind { kNONE, kAnyGraph, kTree, kSpiral, kSAG };
+enum eVizkind { kNONE, kAnyGraph, kTree, kSpiral, kSAG, kCollatz };
 eVizkind kind;
 
 bool on;
@@ -55,6 +55,58 @@ colorpair parse(const string& s) {
   colorpair cp;
   cp.shade = 0; cp.color2 = 0;
   sscanf(s.c_str(), "%x:%c%x", &cp.color1, &cp.shade, &cp.color2);
+  return cp;
+  }
+
+int nh = 0;
+int hues[256*6];
+
+void buildhue() {
+  unsigned mh = 193;
+  for(unsigned y=0; y<=mh; y++)
+    hues[nh++] = (int) (0xFF + 0x1000000*mh + (unsigned) 0x10000 * y);
+  for(unsigned y=0; y<=mh; y++)
+    hues[nh++] = (int) (0xFF + 0x1010000*mh - 0x1000000 * y);
+  for(unsigned y=0; y<=mh; y++)
+    hues[nh++] = (int) (0xFF + 0x0010000*mh + 0x100 * y);
+  for(unsigned y=0; y<=mh; y++)
+    hues[nh++] = (int) (0xFF + 0x0010100*mh - 0x10000 * y);
+  for(unsigned y=0; y<=mh; y++)
+    hues[nh++] = (int) (0xFF + 0x0000100*mh + 0x1000000 * y);
+  for(unsigned y=0; y<=mh; y++)
+    hues[nh++] = (int) (0xFF + 0x1000100*mh - 0x100 * y);
+  }
+
+int perturb(int c) {
+  if(nh == 0) buildhue();
+  int hueid = 0;
+  for(int t=0; t<nh; t++) if(hues[t] == c) hueid = t;
+  hueid += rand() % 50;
+  hueid -= rand() % 50;
+  if(hueid<0) hueid += nh;
+  hueid %= nh;
+  return hues[hueid];
+  /*
+  int part[4];
+  for(int u=0; u<=3; u++) {
+    part[u] = (c >> (8*u)) & 0xFF;
+    }
+  int 
+  if(part[1] == 255 && part[2] == 0) 
+    int k = 
+    k += rand() % 16;
+    k -= rand() % 16;
+    if(k<0) k=-k;
+    if(k>255) k = 255-(k-255);
+    c &=~ (0xFF << (8*u));
+    c |= k << (8*u);
+    } */
+  return c;
+  }
+
+colorpair perturb(colorpair cp) {
+  cp.color1 = perturb(cp.color1);
+  cp.color2 = perturb(cp.color2);
   return cp;
   }
 
@@ -187,6 +239,24 @@ namespace spiral {
     }
   }
 
+namespace collatz {
+
+  double s2, s3, p2, p3;
+  
+  void start() {
+    init(); kind = kCollatz;
+    vdata.resize(1);
+    vertexdata& vd = vdata[0];    
+    createViz(0, cwt.c, Id);    
+    virtualRebase(vd.m, true);
+    vd.cp = dftcolor;
+    vd.data = 0;
+    addedge(0, 0, 0, false);
+    vd.name = "1";    
+    storeall();
+    }  
+  }
+
 int readLabel(FILE *f) {
   char xlabel[10000];
   if(fscanf(f, "%9500s", xlabel) <= 0) return -1;
@@ -310,11 +380,12 @@ namespace tree {
       }
     readnode(f, -1);
     fclose(f);
+    int N = size(vdata);
+    printf("N = %d\n", N);
     printf("Assigning spos/epos...\n");
     spos(0, 0);
-    printf("Creating vertices...\n");
     xpos *= 6;
-    int N = size(vdata);
+    printf("Creating vertices...\n");
     for(int i=0; i<N; i++) {
       treevertex& lv = tol[i];
       vertexdata& vd = vdata[i];
@@ -882,7 +953,7 @@ void drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
   if(!gmatrix.count(m->base)) printf("base not in gmatrix\n");
 
   int lid = shmup::lmousetarget ? shmup::lmousetarget->pid : -2;
-
+  
   if(!leftclick) for(int j=0; j<size(vd.edges); j++) {
     edgeinfo *ei = vd.edges[j].second;
     if(!ei->visible) continue;
@@ -929,15 +1000,25 @@ void drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
         display(shmup::calc_gmatrix(vd2.m->base));
         } */
       
-      if(ei->orig && ei->orig->cpdist >= 3) ei->orig = NULL;
-      if(!ei->orig) {
-        ei->orig = cwt.c;
-        ei->prec.clear();
-        transmatrix T = inverse(shmup::ggmatrix(ei->orig));
-        storeline(ei->prec, T*h1, T*h2);
+      int col = 
+        ((hilite ? 0xFF0000 : backcolor ? 0x808080 : 0xFFFFFF) << 8) + xlalpha;
+      
+      if(pmodel) {
+        queueline(h1, h2, col, 2);
+        lastptd().prio = PPR_STRUCT0;
         }
-      queuetable(shmup::ggmatrix(ei->orig), &ei->prec[0], size(ei->prec)/3, ((hilite ? 0xFF0000 : backcolor ? 0x808080 : 0xFFFFFF) << 8) + xlalpha, 0,
-        PPR_STRUCT0);
+      else {
+      
+        if(ei->orig && ei->orig->cpdist >= 3) ei->orig = NULL;
+        if(!ei->orig) {
+          ei->orig = cwt.c;
+          ei->prec.clear();
+          transmatrix T = inverse(shmup::ggmatrix(ei->orig));
+          storeline(ei->prec, T*h1, T*h2);
+          }
+        queuetable(shmup::ggmatrix(ei->orig), &ei->prec[0], size(ei->prec)/3, col, 0,
+          PPR_STRUCT0);
+        }
       }
 /*
     */
@@ -962,6 +1043,66 @@ void drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
     if(doshow) queuestr(V2, (svg::in ? .28 : .2) * crossf / hcrossf, vd.name, backcolor ? 0x000000 : 0xFFFF00, svg::in ? 0 : 1);
     lastptd().info = vd.info;
     }
+
+  if(kind == kCollatz) {
+    if(vd.data == 2) {
+      // doubler vertex
+      string s = vd.name;
+      colorpair cp = vd.cp;
+      vd.data = 20;
+      int i0 = size(vdata);
+      vdata.resize(i0+1);
+      vertexdata& vdn = vdata[i0];
+      createViz(i0, m->base, m->at * spin(collatz::s2) * xpush(collatz::p2));          
+      virtualRebase(vdn.m, true);
+      vdn.cp = perturb(cp);
+      vdn.data = 0;
+      addedge(i, i0, 0, false);
+      vdn.m->store();
+      int carry = 0;
+      string s2 = s;
+      for(int i=size(s2)-1; i>=0; i--) {
+        int x = 2*(s2[i] - '0') + carry;
+        carry = x>=10;
+        if(carry) x-=10;
+        s2[i] = '0'+x;
+        }
+      if(carry) s2 = "1" + s2;
+      vdn.name = s2;
+      
+      int m3 = 0;
+      for(int i=0; i<size(s); i++) m3 += s[i] - '0';
+      
+      if(m3 % 3 == 2 && s != "2" && s != "1") {
+        vdata.resize(i0+2);
+        vertexdata& vdn = vdata[i0+1];
+        createViz(i0+1, m->base, m->at * spin(collatz::s3) * xpush(collatz::p3));          
+        virtualRebase(vdn.m, true);
+        vdn.cp = perturb(cp);
+        vdn.data = 0;
+        addedge(i, i0+1, 0, false);
+        vdn.m->store();
+        int carry = -1;
+        string s2 = s;
+        for(int i=size(s2)-1; i>=0; i--) {
+          carry += 2 * (s2[i] - '0');
+          int ncarry = 0;
+          while(carry % 3) carry += 10, ncarry--;
+          if(carry >= 30) carry -= 30, ncarry += 3;
+          s2[i] = '0'+carry/3;
+          carry = ncarry;
+          }
+        if(s2[0] == '0') s2 = s2.substr(1);
+        vdn.name = s2;
+        vdn.cp = perturb(vdn.cp);
+        }
+      }
+    else if(vd.data < 2) {
+      vd.data++;
+      fixmatrix(vd.m->at);
+      }
+    }
+
   }
 
 bool virt(shmup::monster *m) {
@@ -1165,6 +1306,13 @@ int readArgs() {
 
 // example commandline:
 // -spiral 2,10000 -spiraledge 0,2 -spiraledge 1,1 -lab -spiralcolor 2 FF4040FF
+
+  else if(argis("-collatz")) {
+    PHASE(3); 
+    using namespace collatz; 
+    shift(); sscanf(args(), "%lf,%lf,%lf,%lf", &s2, &p2, &s3, &p3);
+    start();
+    }
 
   else if(argis("-spiral")) {
     PHASE(3); 

@@ -5282,6 +5282,8 @@ void activateSafety(eLand l) {
   restartGraph();  
   }
 
+bool legalmoves[8];
+
 bool hasSafeOrb(cell *c) {
   return 
     c->item == itOrbSafety ||
@@ -5299,15 +5301,20 @@ void checkmove() {
   // do not activate orbs!
   for(int i=0; i<ittypes; i++) orbusedbak[i] = orbused[i];
 
+  for(int i=0; i<8; i++) legalmoves[i] = false;
+
   canmove = false;
   items[itWarning]+=2;
-  if(movepcto(-1, 0, true)) canmove = true;
-  if(!canmove)
+  if(movepcto(-1, 0, true)) canmove = legalmoves[7] = true;
+  
+  if(ISMOBILE || !canmove)
     for(int i=0; i<cwt.c->type; i++) 
-      if(movepcto(1, -1, true)) canmove = true;
-  if(!canmove)
+      if(movepcto(1, -1, true)) 
+        canmove = legalmoves[cwt.spin] = true;
+  if(ISMOBILE || !canmove)
     for(int i=0; i<cwt.c->type; i++) 
-      if(movepcto(1, 1, true)) canmove = true;
+      if(movepcto(1, 1, true)) 
+        canmove = legalmoves[cwt.spin] = true;
   if(kills[moPlayer]) canmove = false;
   if(!canmove)
     achievement_final(true);
