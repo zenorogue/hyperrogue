@@ -184,7 +184,11 @@ void initAudio() {
 
 map<string, Mix_Chunk*> chunks;
 
+#ifdef SOUNDDESTDIR
+string wheresounds = SOUNDDESTDIR;
+#else
 string wheresounds = "sounds/";
+#endif
 
 void playSound(cell *c, const string& fname, int vol) {
   if(effvolume == 0) return;

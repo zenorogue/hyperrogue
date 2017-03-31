@@ -6,7 +6,7 @@ dist_doc_DATA = README.md
 hyperrogue_SOURCES = hyper.cpp savepng.c
 
 # Some definitions used in graph.cpp
-hyperrogue_CPPFLAGS = -DFONTDESTDIR=\"$(pkgdatadir)/DejaVuSans-Bold.ttf\" -DMUSICDESTDIR=\"$(pkgdatadir)/hyperrogue-music.txt\" -O2
+hyperrogue_CPPFLAGS = -DFONTDESTDIR=\"$(pkgdatadir)/DejaVuSans-Bold.ttf\" -DMUSICDESTDIR=\"$(pkgdatadir)/hyperrogue-music.txt\" -DSOUNDDESTDIR=\"$(pkgdatadir)/sound/\" -O2
 
 # Musicdir
 musicdir=$(datadir)/hyperrogue/music
