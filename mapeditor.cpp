@@ -659,6 +659,8 @@ namespace mapeditor {
       dialog::addItem(XLAT("Gameboard"), 'g');
       dialog::addItem(XLAT("random colors"), 'r');
       dialog::addItem(XLAT("rainbow landscape"), 'l');
+      dialog::addItem(XLAT("dark rainbow landscape"), 'd');
+      dialog::addItem(XLAT("football"), 'F');
 
       dialog::addSelItem(XLAT("emerald pattern"), "emerald", 'e');
 
@@ -675,6 +677,7 @@ namespace mapeditor {
       dialog::addSelItem(XLAT("field pattern D"), "field", 'D');
       dialog::addSelItem(XLAT("field pattern N"), "field", 'N');
       dialog::addSelItem(XLAT("field pattern S"), "field", 'S');
+
       dialog::display();
       }
     else if(subscreen == 1 && painttype == 6) 
@@ -1810,6 +1813,9 @@ namespace mapeditor {
       col[1] /= 8;
       col[2] /= 8;
       return (0x101010 + col[0] + (col[1] << 8) + (col[2] << 16)) >> (err?2:0);
+      }
+    if(whichCanvas == 'F') {
+      return ishept(c) ? 0x202020 : 0xC0C0C0;
       }
     return canvasback;
     }

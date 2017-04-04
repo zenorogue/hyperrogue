@@ -115,12 +115,10 @@ struct celllister {
 
 // -- hrmap ---
 
-#include <typeinfo>
-
 struct hrmap {
   virtual heptagon *getOrigin() { return NULL; }
   virtual cell *gamestart() { return getOrigin()->c7; }
-  virtual ~hrmap() { printf("removing %s\n", typeid(this).name()); };
+  virtual ~hrmap() { };
   virtual vector<cell*>& allcells() { return dcal; }
   virtual void verify() { }
   };
