@@ -93,7 +93,7 @@ typedef int cellfunction(cell*);
 int towerval(cell *c, cellfunction* cf = &coastvalEdge);
 #define HRANDMAX 0x7FFFFFFF
 int hrandpos(); // 0 to HRANDMAX
-void restartGame(char switchWhat = 0);
+void restartGame(char switchWhat = 0, bool push = false);
 int landMultiplier(eLand l);
 eItem treasureType(eLand l);
 void buildBarrier(cell *c, int d, eLand l = laNone);
@@ -833,6 +833,7 @@ namespace dialog {
   int handlePage(int& nl, int& nlm, int perpage);
   void displayPageButtons(int i, bool pages);
   bool handlePageButtons(int uni);
+  extern bool sidedialog;
   }
 
 void checkStunKill(cell *dest);
@@ -1120,3 +1121,9 @@ namespace arg {
   }
 
 extern bool generatingEquidistant;
+
+void clearfrom(heptagon *at);
+void clearHexes(heptagon *at);
+void verifycells(heptagon *at);
+int zebra40(cell *c);
+cell *createMov(cell *c, int d);
