@@ -155,7 +155,7 @@ namespace mapstream {
       int rspin;
       
       if(size(cellbyid) == 0) {
-        c = origin.c7;
+        c = currentmap->gamestart();
         rspin = 0;
         }
       else {
@@ -202,7 +202,7 @@ namespace mapstream {
     int32_t whereami = loadInt();
     if(whereami >= 0 && whereami < size(cellbyid))
       cwt.c = cellbyid[whereami];
-    else cwt.c = origin.c7;
+    else cwt.c = currentmap->gamestart();
 
     for(int i=0; i<size(cellbyid); i++) {
       cell *c = cellbyid[i];

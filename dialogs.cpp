@@ -167,13 +167,20 @@ namespace dialog {
     addBreak(brk);
     }
 
+  int dcenter, dwidth;
+
+  bool sidedialog;
+
   int displayLong(string str, int siz, int y, bool measure) {
 
     int last = 0;
     int lastspace = 0;
     
-    int xs = vid.xres * 618/1000;
-    int xo = vid.xres * 186/1000;
+    int xs, xo;
+    if(sidescreen)
+      xs = dwidth - vid.fsize, xo = vid.xres + vid.fsize;
+    else
+      xs = vid.xres * 618/1000, xo = vid.xres * 186/1000;
     
     for(int i=0; i<=size(str); i++) {
       int ls = 0;
@@ -196,7 +203,7 @@ namespace dialog {
     y += siz/2;
     return y;
     }
-  
+
   int tothei, dialogwidth, dfsize, dfspace, leftwidth, rightwidth, innerwidth, itemx, keyx, valuex;
   
   string highlight_text;
@@ -223,9 +230,9 @@ namespace dialog {
     
     int fwidth = innerwidth + leftwidth + rightwidth;
     dialogwidth = max(dialogwidth, fwidth);
-    itemx  = (vid.xres - fwidth) / 2 + leftwidth;
-    keyx   = (vid.xres - fwidth) / 2 + leftwidth - dfsize/2;
-    valuex = (vid.xres - fwidth) / 2 + leftwidth + innerwidth + dfsize/2;
+    itemx  = dcenter - fwidth / 2 + leftwidth;
+    keyx   = dcenter - fwidth / 2 + leftwidth - dfsize/2;
+    valuex = dcenter - fwidth / 2 + leftwidth + innerwidth + dfsize/2;
     }
 
   void display() {
@@ -238,7 +245,16 @@ namespace dialog {
     dfsize *= 3;
     #endif
     dfspace = dfsize * 5/4;
+    
+    dcenter = vid.xres/2;
+    dwidth = vid.xres;
     measure();
+    
+    if(sidescreen) {
+      dwidth = vid.xres - vid.yres;
+      dcenter = (vid.xres + dwidth) / 2;
+      }
+    
     while(tothei > vid.yres - 5 * vid.fsize) {
       int adfsize = int(dfsize * sqrt((vid.yres - 5. * vid.fsize) / tothei));
       if(adfsize < dfsize-1) dfsize = adfsize + 1;
@@ -246,7 +262,7 @@ namespace dialog {
       dfspace = dfsize * 5/4;
       measure();
       }
-    while(dialogwidth > vid.xres) {
+    while(dialogwidth > dwidth) {
       int adfsize = int(dfsize * sqrt(vid.xres * 1. / dialogwidth));
       if(adfsize < dfsize-1) dfsize = adfsize + 1;
       else dfsize--; // keep dfspace
@@ -267,7 +283,7 @@ namespace dialog {
       tothei += dfspace * I.scale / 100;
       int mid = (top + tothei) / 2;
       if(I.type == diTitle || I.type == diInfo) {
-        displayfr(vid.xres/2, mid, 2, dfsize * I.scale/100, I.body, I.color, 8);
+        displayfr(dcenter, mid, 2, dfsize * I.scale/100, I.body, I.color, 8);
         }
       else if(I.type == diItem) {
         bool xthis = (mousey >= top && mousey < tothei);
@@ -291,9 +307,15 @@ namespace dialog {
         }      
       else if(I.type == diSlider) {
         bool xthis = (mousey >= top && mousey < tothei);
-        displayfr(vid.xres*1/4, mid, 2, dfsize * I.scale/100, "(", I.color, 16);
-        displayfr(vid.xres*1/4 + double(vid.xres/2 * I.param), mid, 2, dfsize * I.scale/100, "#", I.color, 8);
-        displayfr(vid.xres*3/4, mid, 2, dfsize * I.scale/100, ")", I.color, 0);
+        int sl, sr;
+        if(sidescreen)
+          sl = vid.yres + vid.fsize*2, sr = vid.xres - vid.fsize*2;
+        else
+          sl = vid.xres/4, sr = vid.xres*3/4;
+        int sw = sr-sl;
+        displayfr(sl, mid, 2, dfsize * I.scale/100, "(", I.color, 16);
+        displayfr(sl + double(sw * I.param), mid, 2, dfsize * I.scale/100, "#", I.color, 8);
+        displayfr(sr, mid, 2, dfsize * I.scale/100, ")", I.color, 0);
         if(xthis) getcstat = I.key, inslider = true;
         }
       }
@@ -480,11 +502,13 @@ namespace dialog {
     ne.scale = ne.inverse_scale = identity;
     ne.intval = NULL;
     ne.positive = false;
+    sidedialog = false;
     }
 
   void editNumber(int& x, int vmin, int vmax, int step, int dft, string title, string help) {
     editNumber(ne.intbuf, vmin, vmax, step, dft, title, help);
     ne.intbuf = x; ne.intval = &x; ne.s = its(x);
+    sidedialog = true;
     }
   
   string disp(ld x) { if(ne.intval) return its((int) (x+.5)); else return fts(x); }

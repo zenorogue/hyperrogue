@@ -276,7 +276,7 @@ namespace conformal {
       m->at = Id;
       m->base = c;
       v.push_back(m);
-      if(c == origin.c7) break;
+      if(c == currentmap->gamestart()) break;
       for(int i=0; i<c->type; i++)
         if(celldist(c->mov[i]) < celldist(c)) {
           c = c->mov[i];
@@ -586,12 +586,18 @@ namespace conformal {
         setvideomode();
         } */
       }
-    else if(sym == 'x' && pmodel == mdPolygonal) 
+    else if(sym == 'x' && pmodel == mdPolygonal) {
       dialog::editNumber(polygonal::SI, 3, 10, 1, 4, XLAT("polygon sides"), "");
-    else if(sym == 'y' && pmodel == mdPolygonal) 
+      dialog::sidedialog = true;
+      }
+    else if(sym == 'y' && pmodel == mdPolygonal) {
       dialog::editNumber(polygonal::STAR, -1, 1, .1, 0, XLAT("star factor"), "");
-    else if(sym == 'n' && pmodel == mdPolygonal) 
+      dialog::sidedialog = true;
+      }
+    else if(sym == 'n' && pmodel == mdPolygonal) {
       dialog::editNumber(polygonal::deg, 2, MSI-1, 1, 2, XLAT("degree of the approximation"), "");
+      dialog::sidedialog = true;
+      }
     else if(sym == 'x' && pmodel == mdPolynomial)  {
       polygonal::maxcoef = max(polygonal::maxcoef, polygonal::coefid);
       int ci = polygonal::coefid + 1;

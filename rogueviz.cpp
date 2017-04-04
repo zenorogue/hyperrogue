@@ -1399,8 +1399,10 @@ void handleMenu(int sym, int uni) {
   else if(uni == 'l') showlabels = !showlabels;
   else if(uni == 'x') specialmark = !specialmark;
   else if(uni == 'b') backcolor ^= 0xFFFFFF;
-  else if(uni == 'g') 
+  else if(uni == 'g') {
     dialog::editNumber(ggamma, 0, 5, .01, 0.5, XLAT("gamma value for edges"), "");
+    dialog::sidedialog = true;
+    }
   else if(uni) cmode = emNormal;
   }
 

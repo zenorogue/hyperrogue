@@ -1,9 +1,10 @@
-                    
 // Hyperbolic Rogue -- cells
 // Copyright (C) 2011-2016 Zeno Rogue, see 'hyper.cpp' for details
 
 // cells the game is played on
 
+#define DEBMEM(x) // { x fflush(stdout); }
+                    
 int fix6(int a) { return (a+96)% 6; }
 int fix7(int a) { return (a+420)%S7; }
 
@@ -61,7 +62,259 @@ typedef unsigned short eucoord;
 
 #include <map>
 
+struct cdata {
+  int val[4];
+  int bits;
+  };
+
+// list all cells in distance at most maxdist, or until when maxcount cells are reached
+
+struct celllister {
+  vector<cell*> lst;
+  vector<int> tmps;
+  vector<int> dists;
+  
+  bool listed(cell *c) {
+    return c->aitmp >= 0 && c->aitmp < size(lst) && lst[c->aitmp] == c;
+    }
+  
+  void add(cell *c, int d) {
+    if(listed(c)) return;
+    c->aitmp = size(lst);
+    tmps.push_back(c->aitmp);
+    lst.push_back(c);
+    dists.push_back(d);
+    }
+  
+  int getdist(cell *c) { return dists[c->aitmp]; }
+  
+  ~celllister() {
+    for(int i=0; i<size(lst); i++) lst[i]->aitmp = tmps[i];
+    }
+  
+  celllister(cell *orig, int maxdist, int maxcount, cell *breakon) {
+    lst.clear();
+    tmps.clear();
+    dists.clear();
+    add(orig, 0);
+    cell *last = orig;
+    for(int i=0; i<size(lst); i++) {
+      cell *c = lst[i];
+      if(maxdist) forCellCM(c2, c) {
+        add(c2, dists[i]+1);
+        if(c2 == breakon) return;
+        }
+      if(c == last) {
+        if(size(lst) >= maxcount || dists[i]+1 == maxdist) break;
+        last = lst[size(lst)-1];
+        maxdist--;
+        }
+      }
+    }
+  };
+
+// -- hrmap ---
+
+#include <typeinfo>
+
+struct hrmap {
+  virtual heptagon *getOrigin() { return NULL; }
+  virtual cell *gamestart() { return getOrigin()->c7; }
+  virtual ~hrmap() { printf("removing %s\n", typeid(this).name()); };
+  virtual vector<cell*>& allcells() { return dcal; }
+  virtual void verify() { }
+  };
+
+hrmap *currentmap;
+vector<hrmap*> allmaps;
+
+// --- auxiliary hyperbolic map for horocycles ---
+struct hrmap_alternate : hrmap {
+  heptagon *origin;
+  hrmap_alternate(heptagon *o) { origin = o; }
+  ~hrmap_alternate() { clearfrom(origin); }
+  };
+
+// --- hyperbolic geometry ---
+
+struct hrmap_hyperbolic : hrmap {
+  heptagon *origin;
+  hrmap_hyperbolic() {
+    origin = new heptagon;
+    heptagon& h = *origin;
+    h.s = hsOrigin;
+    h.emeraldval = 98;
+    h.zebraval = 40;
+    h.fiftyval = 0;
+    h.fieldval = 0;
+    h.rval0 = h.rval1 = 0;
+    h.cdata = NULL;
+    for(int i=0; i<7; i++) h.move[i] = NULL;
+    h.spintable = 0;
+    h.alt = NULL;
+    h.distance = 0;
+    h.c7 = newCell(7, origin);
+    }
+  heptagon *getOrigin() { return origin; }
+  ~hrmap_hyperbolic() {
+    DEBMEM ( verifycells(origin); )
+    clearfrom(origin);
+    }
+  void verify() { verifycells(origin); }
+  };
+
+// --- spherical geometry ---
+
+int spherecells() {
+  if(S7 == 5) return (elliptic?6:12);
+  if(S7 == 4) return (elliptic?3:6);
+  if(S7 == 3) return 4;
+  if(S7 == 2) return (elliptic?1:2);
+  if(S7 == 1) return 1;
+  return 12;
+  }
+  
+struct hrmap_spherical : hrmap {
+  heptagon *dodecahedron[12];
+
+  hrmap_spherical() {
+    for(int i=0; i<spherecells(); i++) {
+      heptagon& h = *(dodecahedron[i] = new heptagon);
+      h.s = hsOrigin;
+      h.emeraldval = i;
+      h.zebraval = i;
+      h.fiftyval = i;
+      h.rval0 = h.rval1 = 0;
+      h.alt = NULL;
+      h.cdata = NULL;
+      h.spintable = 0;
+      for(int i=0; i<S7; i++) h.move[i] = NULL;
+      h.c7 = newCell(S7, &h);
+      }
+   for(int i=0; i<S7; i++) {
+      dodecahedron[0]->move[i] = dodecahedron[i+1];
+      dodecahedron[0]->setspin(i, 0);
+      dodecahedron[i+1]->move[0] = dodecahedron[0];
+      dodecahedron[i+1]->setspin(0, i);
+      
+      dodecahedron[i+1]->move[1] = dodecahedron[(i+S7-1)%S7+1];
+      dodecahedron[i+1]->setspin(1, S7-1);
+      dodecahedron[i+1]->move[S7-1] = dodecahedron[(i+1)%S7+1];
+      dodecahedron[i+1]->setspin(S7-1, 1);
+      
+      if(S7 == 5 && elliptic) {
+        dodecahedron[i+1]->move[2] = dodecahedron[(i+2)%S7+1];
+        dodecahedron[i+1]->setspin(2, 3 + 8);
+        dodecahedron[i+1]->move[3] = dodecahedron[(i+3)%S7+1];
+        dodecahedron[i+1]->setspin(3, 2 + 8);
+        }
+
+      else if(S7 == 5) {
+        dodecahedron[6]->move[i] = dodecahedron[7+i];
+        dodecahedron[6]->setspin(i, 0);
+        dodecahedron[7+i]->move[0] = dodecahedron[6];
+        dodecahedron[7+i]->setspin(0, i);
+  
+        dodecahedron[i+7]->move[1] = dodecahedron[(i+4)%5+7];
+        dodecahedron[i+7]->setspin(1, 4);
+        dodecahedron[i+7]->move[4] = dodecahedron[(i+1)%5+7];
+        dodecahedron[i+7]->setspin(4, 1);
+        
+        dodecahedron[i+1]->move[2] = dodecahedron[7+(10-i)%5];
+        dodecahedron[i+1]->setspin(2, 2);
+        dodecahedron[7+(10-i)%5]->move[2] = dodecahedron[1+i];
+        dodecahedron[7+(10-i)%5]->setspin(2, 2);
+  
+        dodecahedron[i+1]->move[3] = dodecahedron[7+(9-i)%5];
+        dodecahedron[i+1]->setspin(3, 3);
+        dodecahedron[7+(9-i)%5]->move[3] = dodecahedron[i+1];
+        dodecahedron[7+(9-i)%5]->setspin(3, 3);
+        }
+      if(S7 == 4) {
+        dodecahedron[5]->move[3-i] = dodecahedron[i+1];
+        dodecahedron[5]->setspin(3-i, 2);
+        dodecahedron[i+1]->move[2] = dodecahedron[5];
+        dodecahedron[i+1]->setspin(2, 3-i);
+        }
+      }
+    }
+
+  heptagon *getOrigin() { return dodecahedron[0]; }
+
+   ~hrmap_spherical() {
+    for(int i=0; i<spherecells(); i++) clearHexes(dodecahedron[i]);
+    for(int i=0; i<spherecells(); i++) delete dodecahedron[i];
+    }    
+
+  void verify() {
+    for(int i=0; i<spherecells(); i++) for(int k=0; k<S7; k++) {
+      heptspin hs;
+      hs.h = dodecahedron[i];
+      hs.spin = k;
+      hs = hsstep(hs, 0);
+      hs = hsspin(hs, S7-1);
+      hs = hsstep(hs, 0);
+      hs = hsspin(hs, S7-1);
+      hs = hsstep(hs, 0);
+      hs = hsspin(hs, S7-1);
+      if(hs.h != dodecahedron[i]) printf("error %d,%d\n", i, k);
+      }
+    for(int i=0; i<spherecells(); i++) verifycells(dodecahedron[i]);
+    }
+  };
+
+heptagon *getDodecahedron(int i) {
+  hrmap_spherical *s = dynamic_cast<hrmap_spherical*> (currentmap);
+  if(!s) return NULL;
+  return s->dodecahedron[i];
+  }
+
+// --- euclidean geometry ---
+
 cell*& euclideanAtCreate(eucoord x, eucoord y);
+
+struct hrmap_euclidean : hrmap {
+
+  cell *gamestart() {
+    return euclideanAtCreate(0,0);
+    }
+
+  struct euclideanSlab {
+    cell* a[256][256];
+    euclideanSlab() {
+      for(int y=0; y<256; y++) for(int x=0; x<256; x++)
+        a[y][x] = NULL;
+      }
+    ~euclideanSlab() {
+      for(int y=0; y<256; y++) for(int x=0; x<256; x++)
+        if(a[y][x]) delete a[y][x];
+      }
+    };
+  
+  euclideanSlab* euclidean[256][256];
+  
+  hrmap_euclidean() {
+    for(int y=0; y<256; y++) for(int x=0; x<256; x++)
+      euclidean[y][x] = NULL;
+    }
+  
+  cell*& at(eucoord x, eucoord y) {
+    euclideanSlab*& slab = euclidean[y>>8][x>>8];
+    if(!slab) slab = new hrmap_euclidean::euclideanSlab;
+    return slab->a[y&255][x&255];
+    }
+  
+  map<heptagon*, struct cdata> eucdata;
+
+  ~hrmap_euclidean() {
+    for(int y=0; y<256; y++) for(int x=0; x<256; x++)
+      if(euclidean[y][x]) { 
+        delete euclidean[y][x];
+        euclidean[y][x] = NULL;
+        }
+    eucdata.clear();
+    }
+  };
 
 union heptacoder {
   heptagon *h;
@@ -78,6 +331,145 @@ heptagon* encodeMaster(eucoord x, eucoord y) {
   u.c.x = x; u.c.y = y;
   return u.h;
   }
+
+// --- quotient geometry ---
+
+namespace quotientspace {
+  struct code {
+    int c[8];
+    };
+  
+  bool operator == (const code& c1, const code &c2) {
+    for(int i=0; i<8; i++) if(c1.c[i] != c2.c[i]) return false;
+    return true;
+    }
+
+  bool operator < (const code& c1, const code &c2) {
+    for(int i=0; i<8; i++) if(c1.c[i] != c2.c[i]) return c1.c[i] < c2.c[i];
+    return false;
+    }  
+
+  int cod(heptagon *h) {
+    return zebra40(h->c7);
+    }
+  
+  code get(heptspin hs) {
+    code res;
+    res.c[0] = cod(hs.h);
+    for(int i=1; i<8; i++) {
+      res.c[i] = cod(hsstep(hs, 0).h);
+      hs = hsspin(hs, 1);
+      }
+    return res;
+    }
+  
+  int rvadd = 0, rvdir = 1;
+  
+  int rv(int x) { return (rvadd+x*rvdir) % 7; }
+  
+struct hrmap_quotient : hrmap {
+
+  hrmap_hyperbolic base;
+  
+  vector<cell*> celllist;
+  
+  cell *origin;
+  
+  map<quotientspace::code, int> reachable;
+  vector<heptspin> bfsq;
+  
+  vector<int> connections;
+  
+  void add(const heptspin& hs) {
+    code g = get(hs);
+    if(!reachable.count(g)) {
+      reachable[g] = bfsq.size();
+      bfsq.push_back(hs);
+      add(hsspin(hs, 1));
+      }
+    }
+
+  vector<heptagon*> allh;
+  
+  hrmap_quotient() {
+  
+    if(quotient == 2) {
+      connections = fp43.connections;
+      }
+    else {
+      heptspin hs; hs.h = base.origin; hs.spin = 0;
+      reachable.clear();
+      bfsq.clear();
+      connections.clear();
+      add(hs);
+
+      for(int i=0; i<(int)bfsq.size(); i++) {
+        hs = hsstep(bfsq[i], 0);
+        add(hs);
+        connections.push_back(reachable[get(hs)]);
+        }
+
+      }
+    
+    int TOT = connections.size() / 7;
+    printf("heptagons = %d\n", TOT);
+    printf("all cells = %d\n", TOT*10/3);
+    if(!TOT) exit(1);
+    allh.resize(TOT);
+    for(int i=0; i<TOT; i++) allh[i] = new heptagon;
+    // heptagon *oldorigin = origin;
+    allh[0]->alt = base.origin;
+  
+    for(int i=0; i<TOT; i++) {
+      heptagon *h = allh[i];
+      if(i) {
+        h->alt = NULL;
+        }
+      if(true) {
+        h->s = hsOrigin;
+        h->emeraldval = 0;
+        h->zebraval = 0;
+        h->fiftyval = 0;
+        h->fieldval = 7*i;
+        h->rval0 = h->rval1 = 0; h->cdata = NULL;
+        h->distance = 0;
+        h->c7 = newCell(7, h);
+        }
+      for(int j=0; j<7; j++) {
+        h->move[rv(j)] = allh[connections[i*7+j]/7];
+        h->setspin(rv(j), rv(connections[i*7+j]%7));
+        }
+      }
+  
+    for(int i=0; i<TOT; i++) {
+      generateAlts(allh[i]);
+      allh[i]->emeraldval = allh[i]->alt->emeraldval;
+      allh[i]->zebraval = allh[i]->alt->zebraval;
+      allh[i]->fiftyval = allh[i]->alt->fiftyval;
+      allh[i]->distance = allh[i]->alt->distance;
+      /* for(int j=0; j<7; j++)
+        allh[i]->move[j]->alt = createStep(allh[i]->alt, j); */
+      }    
+    
+    celllister cl(gamestart(), 100, 100000000, NULL);
+    celllist = cl.lst;
+    }
+
+  heptagon *getOrigin() { return allh[0]; }
+
+  ~hrmap_quotient() {
+    for(int i=0; i<size(allh); i++) {
+      clearHexes(allh[i]);
+      delete allh[i];
+      }
+    }
+  
+  vector<cell*>& allcells() { return celllist; }
+  };
+
+  };
+
+// --- general ---
 
 // very similar to createMove in heptagon.cpp
 cell *createMov(cell *c, int d) {
@@ -193,32 +585,17 @@ void eumerge(cell* c1, cell *c2, int s1, int s2) {
   c2->mov[s2] = c1; tsetspin(c2->spintable, s2, s1);
   }       
 
-struct euclideanSlab {
-  cell* a[256][256];
-  euclideanSlab() {
-    for(int y=0; y<256; y++) for(int x=0; x<256; x++)
-      a[y][x] = NULL;
-    }
-  ~euclideanSlab() {
-    for(int y=0; y<256; y++) for(int x=0; x<256; x++)
-      if(a[y][x]) delete a[y][x];
-    }
-  };
-
-euclideanSlab* euclidean[256][256];
-
 //  map<pair<eucoord, eucoord>, cell*> euclidean;
 
 cell*& euclideanAt(eucoord x, eucoord y) {
-  euclideanSlab*& slab(euclidean[y>>8][x>>8]);
-  if(!slab) slab = new euclideanSlab;
-  return slab->a[y&255][x&255];
+  hrmap_euclidean* euc = dynamic_cast<hrmap_euclidean*> (currentmap);
+  return euc->at(x, y);
   }
 
 cell*& euclideanAtCreate(eucoord x, eucoord y) {
-  cell*& c ( euclideanAt(x,y) );
+  cell*& c = euclideanAt(x,y);
   if(!c) {
-    c = newCell(6, &origin);
+    c = newCell(6, NULL);
     c->master = encodeMaster(x,y);
     euclideanAt(x,y) = c;
     eumerge(c, euclideanAt(x+1,y), 0, 3);
@@ -231,103 +608,19 @@ cell*& euclideanAtCreate(eucoord x, eucoord y) {
   return c;
   }
 
-int spherecells() {
-  if(S7 == 5) return (elliptic?6:12);
-  if(S7 == 4) return (elliptic?3:6);
-  if(S7 == 3) return 4;
-  if(S7 == 2) return (elliptic?1:2);
-  if(S7 == 1) return 1;
-  return 12;
-  }
-
 // initializer (also inits origin from heptagon.cpp)
 void initcells() {
   DEBB(DF_INIT, (debugfile,"initcells\n"));
   
-  if(sphere) {
-    for(int i=0; i<spherecells(); i++) {
-      heptagon& h = dodecahedron[i];
-      h.s = hsOrigin;
-      h.emeraldval = i;
-      h.zebraval = i;
-      h.fiftyval = i;
-      h.rval0 = h.rval1 = 0;
-      h.alt = NULL;
-      h.cdata = NULL;
-      h.spintable = 0;
-      for(int i=0; i<S7; i++) h.move[i] = NULL;
-      h.c7 = newCell(S7, &h);
-      }
-   for(int i=0; i<S7; i++) {
-      dodecahedron[0].move[i] = &dodecahedron[i+1];
-      dodecahedron[0].setspin(i, 0);
-      dodecahedron[i+1].move[0] = &dodecahedron[0];
-      dodecahedron[i+1].setspin(0, i);
-      
-      dodecahedron[i+1].move[1] = &dodecahedron[(i+S7-1)%S7+1];
-      dodecahedron[i+1].setspin(1, S7-1);
-      dodecahedron[i+1].move[S7-1] = &dodecahedron[(i+1)%S7+1];
-      dodecahedron[i+1].setspin(S7-1, 1);
-      
-      if(S7 == 5 && elliptic) {
-        dodecahedron[i+1].move[2] = &dodecahedron[(i+2)%S7+1];
-        dodecahedron[i+1].setspin(2, 3 + 8);
-        dodecahedron[i+1].move[3] = &dodecahedron[(i+3)%S7+1];
-        dodecahedron[i+1].setspin(3, 2 + 8);
-        }
-
-      else if(S7 == 5) {
-        dodecahedron[6].move[i] = &dodecahedron[7+i];
-        dodecahedron[6].setspin(i, 0);
-        dodecahedron[7+i].move[0] = &dodecahedron[6];
-        dodecahedron[7+i].setspin(0, i);
+  if(euclid) currentmap = new hrmap_euclidean;
+  else if(sphere) currentmap = new hrmap_spherical;
+  else if(quotient) currentmap = new quotientspace::hrmap_quotient;
+  else currentmap = new hrmap_hyperbolic;
   
-        dodecahedron[i+7].move[1] = &dodecahedron[(i+4)%5+7];
-        dodecahedron[i+7].setspin(1, 4);
-        dodecahedron[i+7].move[4] = &dodecahedron[(i+1)%5+7];
-        dodecahedron[i+7].setspin(4, 1);
-        
-        dodecahedron[i+1].move[2] = &dodecahedron[7+(10-i)%5];
-        dodecahedron[i+1].setspin(2, 2);
-        dodecahedron[7+(10-i)%5].move[2] = &dodecahedron[1+i];
-        dodecahedron[7+(10-i)%5].setspin(2, 2);
+  allmaps.push_back(currentmap);
   
-        dodecahedron[i+1].move[3] = &dodecahedron[7+(9-i)%5];
-        dodecahedron[i+1].setspin(3, 3);
-        dodecahedron[7+(9-i)%5].move[3] = &dodecahedron[i+1];
-        dodecahedron[7+(9-i)%5].setspin(3, 3);
-        }
-      if(S7 == 4) {
-        dodecahedron[5].move[3-i] = &dodecahedron[i+1];
-        dodecahedron[5].setspin(3-i, 2);
-        dodecahedron[i+1].move[2] = &dodecahedron[5];
-        dodecahedron[i+1].setspin(2, 3-i);
-        }
-      }
-    }
-  else {
-    origin.s = hsOrigin;
-    origin.emeraldval = 98;
-    origin.zebraval = 40;
-    origin.fiftyval = 0;
-    origin.fieldval = 0;
-    origin.rval0 = origin.rval1 = 0;
-    origin.cdata = NULL;
-    for(int i=0; i<7; i++) origin.move[i] = NULL;
-    origin.spintable = 0;
-    origin.alt = NULL;
-    origin.distance = 0;
-    if(euclid)
-      origin.c7 = euclideanAtCreate(0,0);
-    else
-      origin.c7 = newCell(7, &origin);
-    }
-
-  if(quotient) quotientspace::build();
-  // origin.emeraldval = 
+  // origin->emeraldval = 
   }
-
-#define DEBMEM(x) // { x fflush(stdout); }
 
 void clearcell(cell *c) {
   if(!c) return;
@@ -380,7 +673,7 @@ void clearfrom(heptagon *at) {
       at->move[i] = NULL;
       }
     clearHexes(at);
-    if(at != &origin) delete at;
+    delete at;
     }
 //printf("maxq = %d\n", maxq);
   }
@@ -400,11 +693,12 @@ void verifycell(cell *c) {
   }
 
 void verifycells(heptagon *at) {
-  for(int i=0; i<7; i++) if(at->move[i] && at->move[i]->move[at->spin(i)] && at->move[i]->move[at->spin(i)] != at) {
+  for(int i=0; i<S7; i++) if(at->move[i] && at->move[i]->move[at->spin(i)] && at->move[i]->move[at->spin(i)] != at) {
     printf("hexmix error %p [%d s=%d] %p %p\n", at, i, at->spin(i), at->move[i], at->move[i]->move[at->spin(i)]);
     }
-  if(!sphere && !quotient) for(int i=0; i<7; i++) if(at->move[i] && at->spin(i) == 0 && at->move[i] != &origin)
-    verifycells(at->move[i]);
+  if(!sphere && !quotient) 
+    for(int i=0; i<7; i++) if(at->move[i] && at->spin(i) == 0 && at->s != hsOrigin)
+      verifycells(at->move[i]);
   verifycell(at->c7);
   }
 
@@ -807,12 +1101,6 @@ map<heptagon*, int> spins;
 #define RVAL_MASK 0x10000000
 #define DATA_MASK 0x20000000
 
-struct cdata {
-  int val[4];
-  int bits;
-  };
-
-map<heptagon*, struct cdata> eucdata;
 cdata orig_cdata;
 
 void affect(cdata& d, short rv, signed char signum) {
@@ -835,9 +1123,9 @@ void setHeptagonRval(heptagon *h) {
 cdata *getHeptagonCdata(heptagon *h) {
   if(h->cdata) return h->cdata;
 
-  if(sphere || quotient) h = &origin;
+  if(sphere || quotient) h = currentmap->gamestart()->master;
 
-  if(h == &origin) {
+  if(h == currentmap->gamestart()->master) {
     return h->cdata = new cdata(orig_cdata);
     }
   
@@ -907,14 +1195,15 @@ cdata *getHeptagonCdata(heptagon *h) {
 
 cdata *getEuclidCdata(heptagon *h) {
   eucoord x, y;
-  if(eucdata.count(h)) return &(eucdata[h]);
+  hrmap_euclidean* euc = dynamic_cast<hrmap_euclidean*> (currentmap);
+  if(euc->eucdata.count(h)) return &(euc->eucdata[h]);
   decodeMaster(h, x, y);
 
   if(x == 0 && y == 0) {
     cdata xx;
     for(int i=0; i<4; i++) xx.val[i] = 0;
     xx.bits = 0;
-    return &(eucdata[h] = xx);
+    return &(euc->eucdata[h] = xx);
     }
   int ord = 1, bid = 0;
   while(!((x|y)&ord)) ord <<= 1, bid++;
@@ -946,7 +1235,7 @@ cdata *getEuclidCdata(heptagon *h) {
       if(gbit) xx.bits |= (1<<b);
       }
     
-    return &(eucdata[h] = xx);
+    return &(euc->eucdata[h] = xx);
     }
   
   // impossible!
@@ -980,52 +1269,6 @@ eLand getCLand(cell *c) {
   b = (b&31) ^ (b>>5);
   return land_scape[b & 31];
   }
-
-// list all cells in distance at most maxdist, or until when maxcount cells are reached
-
-struct celllister {
-  vector<cell*> lst;
-  vector<int> tmps;
-  vector<int> dists;
-  
-  bool listed(cell *c) {
-    return c->aitmp >= 0 && c->aitmp < size(lst) && lst[c->aitmp] == c;
-    }
-  
-  void add(cell *c, int d) {
-    if(listed(c)) return;
-    c->aitmp = size(lst);
-    tmps.push_back(c->aitmp);
-    lst.push_back(c);
-    dists.push_back(d);
-    }
-  
-  int getdist(cell *c) { return dists[c->aitmp]; }
-  
-  ~celllister() {
-    for(int i=0; i<size(lst); i++) lst[i]->aitmp = tmps[i];
-    }
-  
-  celllister(cell *orig, int maxdist, int maxcount, cell *breakon) {
-    lst.clear();
-    tmps.clear();
-    dists.clear();
-    add(orig, 0);
-    cell *last = orig;
-    for(int i=0; i<size(lst); i++) {
-      cell *c = lst[i];
-      if(maxdist) forCellCM(c2, c) {
-        add(c2, dists[i]+1);
-        if(c2 == breakon) return;
-        }
-      if(c == last) {
-        if(size(lst) >= maxcount || dists[i]+1 == maxdist) break;
-        last = lst[size(lst)-1];
-        maxdist--;
-        }
-      }
-    }
-  };
 
 cell *heptatdir(cell *c, int d) {
   if(d&1) {
@@ -1098,6 +1341,9 @@ int celldistance(cell *c1, cell *c2) {
     forCellEx(c, cl2) if(isNeighbor(c, cr1)) return d+2;
     forCellEx(c, cl1) if(isNeighbor(c, cr2)) return d+2;
 
+    forCellEx(ca, cl2) forCellEx(cb, cr1) if(isNeighbor(ca, cb)) return d+3;
+    forCellEx(ca, cl1) forCellEx(cb, cr2) if(isNeighbor(ca, cb)) return d+3;
+
     int d1 = celldist(cl1), d2 = celldist(cl2);
     
     if(d1 >= d2) {
@@ -1117,28 +1363,9 @@ int celldistance(cell *c1, cell *c2) {
     }
   }
 
-void clearHyperbolicMemory() {
-  DEBMEM ( verifycells(&origin); )
-  clearfrom(&origin);
-  for(int i=0; i<size(allAlts); i++) clearfrom(allAlts[i]);
-  allAlts.clear();
-  }
-
 void clearCellMemory() {
-  // EUCLIDEAN
-  if(sphere) {
-    for(int i=0; i<spherecells(); i++) clearHexes(&dodecahedron[i]);
-    }
-  else if(quotient) quotientspace::clear();
-  else if(euclid) {
-    for(int y=0; y<256; y++) for(int x=0; x<256; x++)
-      if(euclidean[y][x]) { 
-        delete euclidean[y][x];
-        euclidean[y][x] = NULL;
-        }
-    eucdata.clear();
-    }
-  else clearHyperbolicMemory();
+  for(int i=0; i<size(allmaps); i++) delete allmaps[i];
+  allmaps.clear();
   }
 
 void clearMemory() {
@@ -1151,22 +1378,6 @@ void clearMemory() {
 #endif
   clearCellMemory();
   DEBMEM ( printf("ok\n"); )
-  }
-
-void verifyDodecahedron() {
-  for(int i=0; i<spherecells(); i++) for(int k=0; k<S7; k++) {
-    heptspin hs;
-    hs.h = &dodecahedron[i];
-    hs.spin = k;
-    hs = hsstep(hs, 0);
-    hs = hsspin(hs, S7-1);
-    hs = hsstep(hs, 0);
-    hs = hsspin(hs, S7-1);
-    hs = hsstep(hs, 0);
-    hs = hsspin(hs, S7-1);
-    if(hs.h != &dodecahedron[i]) printf("error %d,%d\n", i, k);
-    }
-  for(int i=0; i<spherecells(); i++) verifycells(&dodecahedron[i]);
   }
 
 int getHemisphere(cell *c, int which) {
@@ -1184,136 +1395,6 @@ int getHemisphere(cell *c, int which) {
     for(int i=0; i<6; i+=2) 
       score += getHemisphere(c->mov[i], which);
     return score/3;
-    }
-  }
-
-namespace quotientspace {
-
-  vector<cell*> allcells;
-  
-  struct code {
-    int c[8];
-    };
-  
-  bool operator == (const code& c1, const code &c2) {
-    for(int i=0; i<8; i++) if(c1.c[i] != c2.c[i]) return false;
-    return true;
-    }
-
-  bool operator < (const code& c1, const code &c2) {
-    for(int i=0; i<8; i++) if(c1.c[i] != c2.c[i]) return c1.c[i] < c2.c[i];
-    return false;
-    }
-  
-  map<code, int> reachable;
-  vector<heptspin> bfsq;
-  
-  int cod(heptagon *h) {
-    return zebra40(h->c7);
-    }
-  
-  code get(heptspin hs) {
-    code res;
-    res.c[0] = cod(hs.h);
-    for(int i=1; i<8; i++) {
-      res.c[i] = cod(hsstep(hs, 0).h);
-      hs = hsspin(hs, 1);
-      }
-    return res;
-    }
-  
-  vector<int> connections;
-  
-  int rvadd = 0, rvdir = 1;
-  
-  int rv(int x) { return (rvadd+x*rvdir) % 7; } // if(x) return 7-x; else return x; }
-  
-  void add(const heptspin& hs) {
-    code g = get(hs);
-    if(!reachable.count(g)) {
-      reachable[g] = bfsq.size();
-      bfsq.push_back(hs);
-      add(hsspin(hs, 1));
-      }
-    }
-
-  vector<heptagon*> allh;
-  
-  void clear() {
-    clearfrom(origin.alt);
-    for(int i=0; i<size(allh); i++) {
-      clearHexes(allh[i]);
-      if(i) delete allh[i];
-      }
-    allh.clear();
-    allcells.clear();
-    }
-  
-  void build() {
-  
-    if(quotient == 2) {
-      connections = fp43.connections;
-      }
-    else {
-      heptspin hs; hs.h = &origin; hs.spin = 0;
-      reachable.clear();
-      bfsq.clear();
-      connections.clear();
-      add(hs);
-
-      for(int i=0; i<(int)bfsq.size(); i++) {
-        hs = hsstep(bfsq[i], 0);
-        add(hs);
-        connections.push_back(reachable[get(hs)]);
-        }
-
-      }
-    
-    clearHyperbolicMemory();
-    origin.c7 = newCell(7, &origin);
-
-    int TOT = connections.size() / 7;
-    printf("heptagons = %d\n", TOT);
-    printf("all cells = %d\n", TOT*10/3);
-    if(!TOT) exit(1);
-    allh.resize(TOT);
-    for(int i=0; i<TOT; i++) allh[i] = i==0 ? &origin : new heptagon;
-    origin.alt = new heptagon;
-    *origin.alt = origin;
-    for(int i=0; i<7; i++) origin.alt->move[i] = NULL;
-    origin.alt->c7 = newCell(7, origin.alt);
-  
-    for(int i=0; i<TOT; i++) {
-      heptagon *h = allh[i];
-      if(i) {
-        h->alt = NULL;
-        h->s = hsOrigin;
-        h->emeraldval = 0;
-        h->zebraval = 0;
-        h->fiftyval = 0;
-        h->fieldval = 7*i;
-        h->rval0 = h->rval1 = 0; h->cdata = NULL;
-        h->distance = 0;
-        h->c7 = newCell(7, h);
-        }
-      for(int j=0; j<7; j++) {
-        h->move[rv(j)] = allh[connections[i*7+j]/7];
-        h->setspin(rv(j), rv(connections[i*7+j]%7));
-        }
-      }
-  
-    for(int i=0; i<TOT; i++) {
-      generateAlts(allh[i]);
-      allh[i]->emeraldval = allh[i]->alt->emeraldval;
-      allh[i]->zebraval = allh[i]->alt->zebraval;
-      allh[i]->fiftyval = allh[i]->alt->fiftyval;
-      allh[i]->distance = allh[i]->alt->distance;
-      /* for(int j=0; j<7; j++)
-        allh[i]->move[j]->alt = createStep(allh[i]->alt, j); */
-      }    
-    
-    celllister cl(origin.c7, 100, 100000000, NULL);
-    allcells = cl.lst;
     }
   }
 

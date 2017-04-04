@@ -37,7 +37,7 @@ void initgame() {
   if(firstland == laMountain && !tactic::on) firstland = laJungle;
   if(isGravityLand(firstland) && !tactic::on) firstland = laCrossroads;
   
-  cwt.c = origin.c7; cwt.spin = 0; cwt.mirrored = false;
+  cwt.c = currentmap->gamestart(); cwt.spin = 0; cwt.mirrored = false;
   cwt.c->land = (euclid || sphere) ? euclidland : firstland;
   
   chaosAchieved = false;
@@ -113,13 +113,12 @@ void initgame() {
     setdist(cwt.c, i, NULL);
     if(tactic::trailer) safety = false;
     
-    if(sphere) verifyDodecahedron();
-    else verifycells(&origin);
+    currentmap->verify();
     }
   
   if(quotient && generateAll(firstland)) {
-    for(int i=0; i<size(quotientspace::allcells); i++)
-      setdist(quotientspace::allcells[i], 8, NULL);
+    for(int i=0; i<size(currentmap->allcells()); i++)
+      setdist(currentmap->allcells()[i], 8, NULL);
     }
 
   
@@ -844,34 +843,85 @@ void loadsave() {
   }
 #endif
 
-void restartGame(char switchWhat) {
+namespace gamestack {
+
+  struct gamedata {
+    hrmap *hmap;
+    cellwalker cwt;
+    heptspin viewctr;
+    transmatrix View;
+    eGeometry geometry;
+    };
+
+  vector<gamedata> gd;
+  
+  bool pushed() { return size(gd); }
+  
+  void push() {
+    if(geometry) {
+      printf("ERROR: push implemented only in non-hyperbolic geometry\n");
+      exit(1);
+      }
+    gamedata gdn;
+    gdn.hmap = currentmap;
+    gdn.cwt = cwt;
+    gdn.viewctr = viewctr;
+    gdn.View = View;
+    gdn.geometry = geometry;
+    gd.push_back(gdn);
+    }
+    
+  void pop() {
+    gamedata& gdn = gd[size(gd)-1];
+    currentmap = gdn.hmap;
+    cwt = gdn.cwt;
+    viewctr = gdn.viewctr;
+    View = gdn.View;
+    geometry = gdn.geometry;
+    resetGeometry();
+    gd.pop_back();
+    bfs();
+    }
+  
+  };
+
+void restartGame(char switchWhat, bool push) {
   DEBB(DF_INIT, (debugfile,"restartGame\n"));
-  achievement_final(true);
-#ifndef NOSAVE
-  saveStats();
-#endif
-  for(int i=0; i<ittypes; i++) items[i] = 0;
-  lastkills = 0; for(int i=0; i<motypes; i++) kills[i] = 0;
-  for(int i=0; i<10; i++) explore[i] = 0;
-  for(int i=0; i<10; i++) for(int l=0; l<landtypes; l++)
-    exploreland[i][l] = 0;
-
-  for(int i=0; i<numplayers(); i++)
-    if(multi::playerActive(i)) 
-      multi::deaths[i]++;
-
-#ifndef NOSAVE
-  anticheat::tampered = false; 
-#endif
-  achievementsReceived.clear();
-  princess::saved = false;
-  princess::reviveAt = 0;
-  princess::forceVizier = false;
-  princess::forceMouse = false;
-  knighted = 0;
-  // items[itGreenStone] = 100;
-  cellcount = 0;
-  clearMemory();
+  
+  if(push)
+    gamestack::push();
+  else if(gamestack::pushed()) {
+    gamestack::pop();
+    return;
+    }
+  else {
+    achievement_final(true);
+  #ifndef NOSAVE
+    saveStats();
+  #endif
+    for(int i=0; i<ittypes; i++) items[i] = 0;
+    lastkills = 0; for(int i=0; i<motypes; i++) kills[i] = 0;
+    for(int i=0; i<10; i++) explore[i] = 0;
+    for(int i=0; i<10; i++) for(int l=0; l<landtypes; l++)
+      exploreland[i][l] = 0;
+  
+    for(int i=0; i<numplayers(); i++)
+      if(multi::playerActive(i)) 
+        multi::deaths[i]++;
+  
+  #ifndef NOSAVE
+    anticheat::tampered = false; 
+  #endif
+    achievementsReceived.clear();
+    princess::saved = false;
+    princess::reviveAt = 0;
+    princess::forceVizier = false;
+    princess::forceMouse = false;
+    knighted = 0;
+    // items[itGreenStone] = 100;
+    cellcount = 0;
+    clearMemory();
+    }
   if(switchWhat == 'C') {
     geometry = gNormal;
     yendor::on = tactic::on = princess::challenge = false;
@@ -1187,14 +1237,13 @@ bool applyCheat(char u, cell *c = NULL) {
     return true;
     }
   if(u == 'E'-64) {
-    addMessage(XLAT("You summon many monsters!"));
-    cheater++;
-    for(int i=0; i<cwt.c->type; i++) {
-      cell *c2 = cwt.c->mov[i];
-      if(passable(c2, NULL, P_MONSTER)) {
-        eMonster mo[2] = { moRedTroll, moDarkTroll };
-        c2->monst = mo[hrand(2)];
-        }
+    if(geometry) {
+      restartGame(0, false);
+      }
+    else {
+      euclidland = cwt.c->land;
+      printf("target geometry = %d\n", targetgeometry);
+      restartGame('g', true);
       }
     return true;
     }
@@ -1299,6 +1348,10 @@ bool applyCheat(char u, cell *c = NULL) {
     return true;
     }
 #ifdef LOCAL
+  if(u == 'K'-64) {
+    printf("viewctr = %p.%d\n", viewctr.h, viewctr.spin);
+    display(View);
+    }
   if(u == 'D'-64) {
     cheater = 0; autocheat = 0;
     return true;

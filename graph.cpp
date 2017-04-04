@@ -2821,7 +2821,12 @@ bool bugsNearby(cell *c, int dist = 2) {
 
 int minecolors[8] = {
   0xFFFFFF, 0xF0, 0xF060, 0xF00000, 
-  0x60, 0x600000, 0x00C0C0, 0
+  0x60, 0x600000, 0x00C0C0, 0x000000
+  };
+
+int distcolors[8] = {
+  0xFFFFFF, 0xF0, 0xF060, 0xF00000, 
+  0xA0A000, 0xA000A0, 0x00A0A0, 0xFFD500
   };
 
 const char* minetexts[8] = {
@@ -3011,6 +3016,8 @@ void viewBuggyCells(cell *c, transmatrix V) {
 transmatrix pushone() { return euclid ? eupush(1, 0) : xpush(sphere?.5 : 1); }
 
 void drawMovementArrows(cell *c, transmatrix V) {
+
+  if(viewdists) return;
 
   for(int d=0; d<8; d++) {
   
@@ -3725,7 +3732,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
   ivoryz = isGravityLand(c->land);
 
   transmatrix& gm = gmatrix[c];
-  bool orig = (gm[2][2] == 0 || fabs(gm[2][2]-1) >= fabs(V[2][2]-1)) - 1e-8;
+  bool orig = (gm[2][2] == 0 || fabs(gm[2][2]-1) >= fabs(V[2][2]-1) - 1e-8);
 
   if(sphere && vid.alpha > 1) {
      long double d = V[2][2];
@@ -3735,7 +3742,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
   if(sphere && vid.alpha <= 1) {
     if(V[2][2] < -.8) return;
     }
-
+  
   if(orig) gm = V;
 
   ld dist0 = hdist0(tC0(V)) - 1e-6;
@@ -3859,6 +3866,19 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
     int wcol, fcol, asciicol;
     
     setcolors(c, wcol, fcol);
+
+    if(viewdists) {
+      int cd = celldistance(c, cwt.c);
+      string label = its(cd);
+      // string label = its(fieldpattern::getriverdistleft(c)) + its(fieldpattern::getriverdistright(c));
+      int dc = distcolors[cd&7];
+      wcol = gradient(wcol, dc, 0, .4, 1);
+      fcol = gradient(fcol, dc, 0, .4, 1);
+      /* queuepolyat(V, shFloor[ct6], darkena(gradient(0, distcolors[cd&7], 0, .25, 1), fd, 0xC0),
+        PPR_TEXT); */
+      queuestr(V, (cd > 9 ? .6 : 1) * .2, label, 0xFF000000 + distcolors[cd&7], 1);
+      }
+
     asciicol = wcol;
     
     if(c->land == laNone && c->wall == waNone) 
@@ -4316,12 +4336,6 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
 
 #ifndef NOEDIT
 
-      if(viewdists) {
-        string label = its(celldistance(c, cwt.c));
-        // string label = its(fieldpattern::getriverdistleft(c)) + its(fieldpattern::getriverdistright(c));
-        queuestr(V, .5, label, 0xFFFFFFFF);
-        }
-
       if(cmode == emMapEditor && mapeditor::displaycodes) {
 
         int labeli = mapeditor::displaycodes == 1 ? mapeditor::realpattern(c) : mapeditor::subpattern(c);
@@ -4353,7 +4367,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         queuestr(V, .6, buf, col);
 #endif
         }
-      
+
       if(realred(c->wall) && !wmspatial) {
         int s = snakelevel(c);
         if(s >= 1)
@@ -5859,6 +5873,8 @@ void describeMouseover() {
     if(webdisplay & 8) {
 
       out += " LP:" + itsh(c->landparam)+"/"+its(turncount);
+
+      out += " CD:" + its(celldist(c));
       
       out += " D:" + its(c->mpdist);
       
@@ -6375,6 +6391,8 @@ void centerpc(ld aspd) {
 
 void drawmovestar(double dx, double dy) {
 
+  if(viewdists) return;
+
   DEBB(DF_GRAPH, (debugfile,"draw movestar\n"));
   if(!playerfound) return;
   
@@ -6574,6 +6592,8 @@ void checkpanjoy(double t) {
 
 int realradius;
 
+bool sidescreen;
+
 void calcparam() {
   DEBB(DF_GRAPH, (debugfile,"calc param\n"));
   vid.xcenter = vid.xres / 2;
@@ -6585,9 +6605,17 @@ void calcparam() {
   
   realradius = min(realradius, vid.radius);
   
+  sidescreen = false;
+  
   if(vid.xres < vid.yres) {
     vid.radius = int(vid.scale * vid.xcenter) - (ISIOS ? 10 : 2);
     vid.ycenter = vid.yres - realradius - vid.fsize - (ISIOS ? 10 : 0);
+    }
+  else {
+    if(vid.xres >= vid.yres * 4/3 && dialog::sidedialog && cmode == emNumber) 
+      sidescreen = true;
+    if(viewdists && cmode == emNormal && vid.xres >= vid.yres * 4/3) sidescreen = true;
+    if(sidescreen) vid.xcenter = vid.yres/2;
     }
 
   ld eye = vid.eye; if(pmodel || rug::rugged) eye = 0;
@@ -7069,6 +7097,42 @@ void drawStats() {
 #ifdef ROGUEVIZ
   if(rogueviz::on) return;
 #endif
+  if(viewdists && sidescreen) {
+    dialog::init("");
+    int qty[64];
+    vector<cell*>& ac = currentmap->allcells();
+    for(int i=0; i<64; i++) qty[i] = 0;
+    for(int i=0; i<size(ac); i++) {
+      int d = celldistance(ac[i], cwt.c);
+      if(d >= 0 && d < 64) qty[d]++;
+      }
+    if(geometry == gNormal)
+      for(int i=purehepta?6:8; i<=15; i++) 
+        qty[i] = 
+          purehepta ?
+            3*qty[i-1] - qty[i-2]
+          : qty[i-1] + qty[i-2] + qty[i-3] - qty[i-4];
+    if(geometry == gEuclid)
+      for(int i=8; i<=15; i++) qty[i] = 6*i;
+    for(int i=0; i<64; i++) if(qty[i])
+      dialog::addInfo(its(qty[i]), distcolors[i&7]);
+    if(geometry == gNormal && !purehepta) {
+      dialog::addBreak(200);
+      dialog::addInfo("a(d+4) = a(d+3) + a(d+2) + a(d+1) - a(d)", 0xFFFFFF);
+      dialog::addInfo("a(d) ~ 1.72208^d", 0xFFFFFF);
+      }
+    if(geometry == gNormal && purehepta) {
+      dialog::addBreak(200);
+      dialog::addInfo("a(d+2) = 3a(d+1) - a(d+2)", 0xFFFFFF);
+      dialog::addInfo("a(d) ~ 2.61803^d", 0xFFFFFF);
+      }
+    if(geometry == gEuclid) {
+      dialog::addBreak(300);
+      dialog::addInfo("a(n) = 6n", 0xFFFFFF);
+      }
+    dialog::display();
+    }
+  if(sidescreen) return;
   instat = false;
   bool portrait = vid.xres < vid.yres;
   int colspace = portrait ? (vid.yres - vid.xres - vid.fsize*3) : (vid.xres - vid.yres - 16) / 2;
@@ -7402,7 +7466,8 @@ void drawscreen() {
   if(cmode != emNormal && cmode != emDraw && cmode != emCustomizeChar) darken = 2;
   if(cmode == emQuit && !canmove) darken = 0;
   if(cmode == emOverview) darken = 16;
-  if(cmode == emNumber && dialog::lastmode == em3D) darken = 0;
+  
+  if(sidescreen) darken = 0;
 
 #ifndef NOEDIT
   if(cmode == emMapEditor && !mapeditor::subscreen && !mapeditor::choosefile) darken = 0;
@@ -7581,17 +7646,20 @@ void setvideomode() {
 
 void restartGraph() {
   DEBB(DF_INIT, (debugfile,"restartGraph\n"));
-  if(euclid) {
-    centerover = euclideanAtCreate(0,0);
-    }
-  else {
-    viewctr.h = &origin;
-    viewctr.spin = 0;
-    viewctr.mirrored = false;
-    }
+  
   View = Id;
   webdisplay = 0;
-  if(sphere) View = spin(-M_PI/2);
+  if(currentmap) {
+    if(euclid) {
+      centerover = euclideanAtCreate(0,0);
+      }
+    else {
+      viewctr.h = currentmap->getOrigin();
+      viewctr.spin = 0;
+      viewctr.mirrored = false;
+      }
+    if(sphere) View = spin(-M_PI/2);
+    }
   }
 
 void resetview() {

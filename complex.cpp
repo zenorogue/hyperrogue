@@ -1600,7 +1600,7 @@ namespace heat {
     vinefires.clear();
     rosefires.clear();
         
-    vector<cell*>& allcells = quotient ? quotientspace::allcells : dcal;
+    vector<cell*>& allcells = currentmap->allcells();
 
     int dcs = size(allcells);
     
@@ -1760,7 +1760,7 @@ namespace heat {
     }
   
   void dryforest() {
-    vector<cell*>& allcells = quotient ? quotientspace::allcells : dcal;
+    vector<cell*>& allcells = currentmap->allcells();
     int dcs = size(allcells);
     for(int i=0; i<dcs; i++) {
       cell *c = allcells[i];
@@ -1789,7 +1789,7 @@ bool gardener = false;
 bool lifebrought = false; // was Life brought to the Dead Caves?
 
 void livecaves() {
-  vector<cell*>& allcells = quotient ? quotientspace::allcells : dcal;
+  vector<cell*>& allcells = currentmap->allcells();
   int dcs = size(allcells);
   
   vector<cell*> bringlife;
@@ -2708,7 +2708,7 @@ namespace ca {
   
   void simulate() {
     if(cwt.c->land != laCA) return;
-    vector<cell*>& allcells = quotient ? quotientspace::allcells : dcal;
+    vector<cell*>& allcells = currentmap->allcells();
     int dcs = size(allcells);
     bool willlive[dcs];
     for(int i=0; i<dcs; i++) {

@@ -95,11 +95,6 @@ hstate transition(hstate s, int dir) {
   return hsError;
   }
 
-heptagon dodecahedron[12];
-#define origin (dodecahedron[0])
-
-vector<heptagon*> allAlts;
-
 // create h->move[d] if not created yet
 heptagon *createStep(heptagon *h, int d);
 
@@ -118,7 +113,7 @@ heptagon *buildHeptagon(heptagon *parent, int d, hstate s, int pard = 0) {
     h->zebraval = zebra_heptagon(parent->zebraval, d);
     h->fieldval = fp43.connections[fieldpattern::btspin(parent->fieldval, d)];
     h->rval0 = h->rval1 = 0; h->cdata = NULL;
-    if(parent == &origin || parent == origin.alt)
+    if(parent->s == hsOrigin)
       h->fiftyval = fiftytable[0][d];
     else
       h->fiftyval = nextfiftyval(parent->fiftyval, parent->move[0]->fiftyval, d);
@@ -211,7 +206,7 @@ heptspin hsspin(const heptspin &hs, int val) {
 
 // display the coordinates of the heptagon
 void backtrace(heptagon *pos) {
-  if(pos == &origin) return;
+  if(pos->s == hsOrigin) return;
   backtrace(pos->move[0]);
   printf(" %d", pos->spin(0));
   }

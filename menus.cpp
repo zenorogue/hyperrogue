@@ -374,6 +374,7 @@ void projectionDialog() {
 //  "to the eye. "
     "See also the conformal mode (in the special modes menu) "
     "for more models."));
+  dialog::sidedialog = true;
   }
 
 void handleVisual1(int sym, int uni) {
@@ -392,6 +393,7 @@ void handleVisual1(int sym, int uni) {
     dialog::editNumber(vid.scale, .001, 1000, .1, 1, XLAT("scale factor"), 
       XLAT("Scale the displayed model."));
     dialog::scaleLog();
+    dialog::sidedialog = true;
     }
   
   if(xuni == 'a') dialog::editNumber(vid.sspeed, -5, 5, 1, 0, 
@@ -671,6 +673,8 @@ void handle3D(int sym, int uni) {
     pmodel = (pmodel == mdHyperboloid ? mdDisk : mdHyperboloid);
 
   else if(uni) cmode = emVisual2;
+  
+  if(cmode == emNumber) dialog::sidedialog = true;
   }
 
 void showVisual2() {
@@ -777,11 +781,13 @@ void handleVisual2(int sym, int uni) {
   if(xuni == 'f') 
     dialog::editNumber(vid.framelimit, 5, 300, 10, 300, XLAT("framerate limit"), "");
   
-  if(xuni == 'a') 
+  if(xuni == 'a') {
     dialog::editNumber(sightrange, 4, cheater ? 10 : 7, 1, 7, XLAT("sight range"), 
       XLAT("Roughly 42% cells are on the edge of your sight range. Reducing "
       "the sight range makes HyperRogue work faster, but also makes "
       "the game effectively harder."));
+    dialog::sidedialog = true;
+    }
 
   if(xuni == 'r') revcontrol = !revcontrol;
   if(xuni == 'd') vid.drawmousecircle = !vid.drawmousecircle;
@@ -791,10 +797,12 @@ void handleVisual2(int sym, int uni) {
     dialog::editNumber(fontscale, 0, 400, 10, 100, XLAT("font scale"), "");
 #endif
 
-  if(xuni == 'e') 
+  if(xuni == 'e') {
     dialog::editNumber(vid.eye, -10, 10, 0.01, 0, XLAT("distance between eyes"),
       XLAT("Watch the Minkowski hyperboloid or the hypersian rug mode with the "
       "red/cyan 3D glasses."));
+    dialog::sidedialog = true;
+    }
 
 #ifdef STEAM
   if(xuni == 'l') vid.steamscore = vid.steamscore^1;
@@ -843,6 +851,7 @@ void showChangeMode() {
   dialog::addBoolItem(XLAT("paper model creator"), (false), 'n');
 #endif
   dialog::addBoolItem(XLAT("conformal/history mode"), (conformal::on), 'a');
+  dialog::addBoolItem(XLAT("expansion"), viewdists, 'x');
   
   dialog::addBreak(50);
   
@@ -886,6 +895,10 @@ void handleChangeMode(int sym, int uni) {
   else if(xuni == 'e') {
     cmode = emPickEuclidean;
   }
+  else if(xuni == 'x') {
+    viewdists = !viewdists;
+    cmode = emNormal;
+    }
   else if(xuni == 't') {
     clearMessages();
     cmode = emTactic;

@@ -348,9 +348,9 @@ bool pseudohept(cell *c) {
   if(purehepta) {
     if(sphere) 
       return 
-        c->master == &dodecahedron[3] ||
-        c->master == &dodecahedron[5] ||
-        c->master == &dodecahedron[6];
+        c->master == getDodecahedron(3) ||
+        c->master == getDodecahedron(5) ||
+        c->master == getDodecahedron(6);
     int z = zebra40(c);
     return z == 5 || z == 8 || z == 15;
     }

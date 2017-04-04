@@ -4895,7 +4895,7 @@ void setdist(cell *c, int d, cell *from) {
           c->monst = moMonkey;
         else if(hrand(80000) < 5 + items[itRuby] + hard)
           c->monst = moEagle;
-        else if(ishept(c) && c != origin.c7 && hrand(4000) < 300 + items[itRuby] && !c->monst) {
+        else if(ishept(c) && c != currentmap->gamestart() && hrand(4000) < 300 + items[itRuby] && !c->monst) {
           int hardchance = items[itRuby] + hard;
           if(hardchance > 25) hardchance = 25;
           bool hardivy = hrand(100) < hardchance;
@@ -5224,7 +5224,7 @@ bool haveOrbPower() {
     if(itemclass(c->item) == IC_ORB) return true;
     }
   else if(sphere) for(int i=0; i<spherecells(); i++) {
-    cell *c = dodecahedron[i].c7;
+    cell *c = getDodecahedron(i)->c7;
     if(itemclass(c->item) == IC_ORB) return true;
     forCellEx(c2, c) if(itemclass(c2->item) == IC_ORB) return true;
     }
@@ -5233,7 +5233,7 @@ bool haveOrbPower() {
 
 bool haveKraken() {
   for(int i=0; i<spherecells(); i++) {
-    cell *c = dodecahedron[i].c7;
+    cell *c = getDodecahedron(i)->c7;
     if(c->monst == moKrakenH || c->monst == moKrakenT) return true;
     }
   return false;
@@ -5617,7 +5617,7 @@ heptagon *createAlternateMap(cell *c, int rad, hstate firststate, int special) {
     }
   
   heptagon *alt = new heptagon;
-  allAlts.push_back(alt);
+  allmaps.push_back(new hrmap_alternate(alt));
 //printf("new alt {%p}\n", alt);
   alt->s = firststate;
   alt->emeraldval = 0;

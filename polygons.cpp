@@ -1961,8 +1961,8 @@ void queuechr(const hyperpoint& h, int size, char chr, int col, int frame = 0) {
   
 void queuechr(const transmatrix& V, double size, char chr, int col, int frame = 0) {
   int xc, yc, sc; getcoord0(tC0(V), xc, yc, sc);
-  int xs, ys, ss; getcoord0(V * xpush0(.5), xs, ys, ss);  
-  queuechr(xc, yc, sc, int(sqrt(squar(xc-xs)+squar(yc-ys)) * size), chr, col, frame);
+  int xs, ys, ss; getcoord0(V * xpush0(.5), xs, ys, ss);
+  queuechr(xc, yc, sc, int(sqrt(squar(xc-xs)+squar(yc-ys)) * scalef * size), chr, col, frame);
   }
   
 void queuestr(const hyperpoint& h, int size, const string& chr, int col, int frame = 0) {
