@@ -170,7 +170,7 @@ void addedge(int i, int j, edgeinfo *ei) {
     vd.cp = colorpair(0x400000FF);
     vd.virt = ei;
     
-    createViz(id, origin.c7, rgpushxto0(h));
+    createViz(id, currentmap->gamestart(), rgpushxto0(h));
     
     addedge(i, id, ei);
     addedge(id, j, ei);
@@ -290,7 +290,7 @@ void readAnyGraph(string fn) {
 
     transmatrix h = spin(alpha * 2 * M_PI / 360) * xpush(r);
 
-    createViz(id, origin.c7, h);
+    createViz(id, currentmap->gamestart(), h);
     }
   fclose(f);
   
@@ -1234,7 +1234,7 @@ void rvvideo(const char *fname) {
   for(int i=0; i<1050; i++) {
     char buf[500];
     snprintf(buf, 500, fname, i);
-    shmup::pc[0]->base = origin.c7;
+    shmup::pc[0]->base = currentmap->gamestart();
     shmup::pc[0]->at = spin(i * 2 * M_PI / 1000.) * xpush(1.7);
     if(i == 0) drawthemap();
     shmup::turn(100);
