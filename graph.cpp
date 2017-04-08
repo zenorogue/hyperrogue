@@ -94,6 +94,8 @@ charstyle& getcs() {
     return vid.cs;
   }
 
+bool camelotcheat;
+
 int playergender() {
   return (getcs().charid&1) ? GEN_F : GEN_M; 
   }
@@ -3263,8 +3265,15 @@ void setcolors(cell *c, int& wcol, int &fcol) {
 
   if(c->land == laCamelot) {
     int d = showoff ? 0 : ((euclid||c->master->alt) ? celldistAltRelative(c) : 0);
-    if(d < 0)
+#ifdef TOUR
+    if(!tour::on) camelotcheat = false;
+    if(camelotcheat) 
+        fcol = (d&1) ? 0xC0C0C0 : 0x606060;
+    else 
+#endif
+    if(d < 0) {
       fcol = 0xA0A0A0;
+      }
     else {
       // a nice floor pattern
       int v = emeraldval(c);
@@ -4336,7 +4345,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
 
 #ifndef NOEDIT
 
-      if(cmode == emMapEditor && mapeditor::displaycodes) {
+      if(mapeditor::displaycodes) {
 
         int labeli = mapeditor::displaycodes == 1 ? mapeditor::realpattern(c) : mapeditor::subpattern(c);
         
@@ -5416,7 +5425,11 @@ string buildHelpText() {
 #endif
   h += XLAT("See more on the website: ") 
     + "http//roguetemple.com/z/hyper/\n\n";
-    
+  
+#ifdef TOUR
+  h += XLAT("Try the Tutorial to help with understanding the "
+    "geometry of HyperRogue (menu -> special modes).\n\n");
+#endif
   
   h += XLAT("Still confused? Read the FAQ on the HyperRogue website!\n\n");
   
@@ -6250,6 +6263,9 @@ void drawthemap() {
 #ifdef ROGUEVIZ
   if(rogueviz::on) mouseovers = " ";
 #endif
+#ifdef TOUR
+  if(tour::on) mouseovers = tour::tourhelp;
+#endif
   centdist = 1e20; centerover = NULL; 
 
   for(int i=0; i<multi::players; i++) {
@@ -6282,6 +6298,10 @@ void drawthemap() {
   
   #ifdef ROGUEVIZ
   rogueviz::drawExtra();
+  #endif
+
+  #ifdef TOUR
+  if(tour::on) tour::presentation(2);
   #endif
   
   profile_stop(1);
@@ -6612,9 +6632,9 @@ void calcparam() {
     vid.ycenter = vid.yres - realradius - vid.fsize - (ISIOS ? 10 : 0);
     }
   else {
-    if(vid.xres >= vid.yres * 4/3 && dialog::sidedialog && cmode == emNumber) 
+    if(vid.xres >= vid.yres * 5/4-16 && dialog::sidedialog && cmode == emNumber) 
       sidescreen = true;
-    if(viewdists && cmode == emNormal && vid.xres >= vid.yres * 4/3) sidescreen = true;
+    if(viewdists && cmode == emNormal && vid.xres > vid.yres) sidescreen = true;
     if(sidescreen) vid.xcenter = vid.yres/2;
     }
 
@@ -6689,6 +6709,9 @@ string timeline() {
 void showGameover() {
 
   dialog::init(
+#ifdef TOUR
+    tour::on ? (canmove ? XLAT("Tutorial") : XLAT("GAME OVER")) :
+#endif
     cheater ? XLAT("It is a shame to cheat!") : 
     showoff ? XLAT("Showoff mode") :
     canmove && princess::challenge ? XLAT("%1 Challenge", moPrincess) :
@@ -6699,7 +6722,8 @@ void showGameover() {
   dialog::addInfo(XLAT("Your score: %1", its(gold())));
   dialog::addInfo(XLAT("Enemies killed: %1", its(tkills())));
 
-  if(items[itOrbYendor]) {
+  if(tour::on) ;
+  else if(items[itOrbYendor]) {
     dialog::addInfo(XLAT("Orbs of Yendor found: %1", its(items[itOrbYendor])), iinf[itOrbYendor].color);
     dialog::addInfo(XLAT("CONGRATULATIONS!"), iinf[itOrbYendor].color);
     }
@@ -6728,6 +6752,9 @@ void showGameover() {
     timerstart = time(NULL);
   
   if(princess::challenge) ;
+#ifdef TOUR
+  else if(tour::on) ;
+#endif
   else if(tkills() < 100)
     dialog::addInfo(XLAT("Defeat 100 enemies to access the Graveyard"));
   else if(kills[moVizier] == 0 && (items[itFernFlower] < 5 || items[itGold] < 5))
@@ -6773,15 +6800,40 @@ void showGameover() {
       }
 
   dialog::addBreak(100);
-  dialog::addItem(canmove ? "continue" : "see how it ended", SDLK_ESCAPE);
-  dialog::addItem("main menu", 'v');
-  dialog::addItem("restart", SDLK_F5);
-  #ifndef MOBILE
-  dialog::addItem(quitsaves() ? "save" : "quit", SDLK_F10);
-  #endif
-  #ifdef ANDROIDSHARE
-  dialog::addItem("SHARE", 's'-96);
-  #endif
+  
+  bool intour = false;
+  
+#ifdef TOUR
+  intour = tour::on;
+#endif
+
+  if(intour) {
+    if(canmove) {
+      dialog::addItem("spherical geometry", '1');
+      dialog::addItem("Euclidean geometry", '2');
+      dialog::addItem("more curved hyperbolic geometry", '3');
+      }
+    dialog::addItem("teleport away", '4');
+    if(canmove) {
+      dialog::addItem("slide-specific command", '5');
+      dialog::addItem("static mode", '6');
+      dialog::addItem("enable/disable texts", '7');
+      dialog::addItem("next slide", SDLK_RETURN);
+      dialog::addItem("previous slide", SDLK_BACKSPACE);
+      }
+    dialog::addItem("main menu", 'v');
+    }
+  else {
+    dialog::addItem(canmove ? "continue" : "see how it ended", SDLK_ESCAPE);
+    dialog::addItem("main menu", 'v');
+    dialog::addItem("restart", SDLK_F5);
+    #ifndef MOBILE
+    dialog::addItem(quitsaves() ? "save" : "quit", SDLK_F10);
+    #endif
+    #ifdef ANDROIDSHARE
+    dialog::addItem("SHARE", 's'-96);
+    #endif
+    }
   
   dialog::display();
 
@@ -7118,12 +7170,12 @@ void drawStats() {
       dialog::addInfo(its(qty[i]), distcolors[i&7]);
     if(geometry == gNormal && !purehepta) {
       dialog::addBreak(200);
-      dialog::addInfo("a(d+4) = a(d+3) + a(d+2) + a(d+1) - a(d)", 0xFFFFFF);
+      dialog::addHelp("a(d+4) = a(d+3) + a(d+2) + a(d+1) - a(d)");
       dialog::addInfo("a(d) ~ 1.72208^d", 0xFFFFFF);
       }
     if(geometry == gNormal && purehepta) {
       dialog::addBreak(200);
-      dialog::addInfo("a(d+2) = 3a(d+1) - a(d+2)", 0xFFFFFF);
+      dialog::addHelp("a(d+2) = 3a(d+1) - a(d+2)");
       dialog::addInfo("a(d) ~ 2.61803^d", 0xFFFFFF);
       }
     if(geometry == gEuclid) {
@@ -7572,8 +7624,12 @@ void drawscreen() {
     }
 
   #ifndef MOBILE
-  if(cmode == emNormal || cmode == emVisual1 || cmode == emVisual2 || cmode == emChangeMode )
-    displayButton(vid.xres-8, vid.yres-vid.fsize, XLAT("(v) menu"), 'v', 16);
+  if(cmode == emNormal || cmode == emVisual1 || cmode == emVisual2 || cmode == emChangeMode ) {
+    if(tour::on) 
+      displayButton(vid.xres-8, vid.yres-vid.fsize, XLAT("(ESC) tour menu"), SDLK_ESCAPE, 16);
+    else
+      displayButton(vid.xres-8, vid.yres-vid.fsize, XLAT("(v) menu"), 'v', 16);
+    }
   #endif  
 
   if(cmode == emQuit) {
@@ -8320,6 +8376,10 @@ void handleKeyNormal(int sym, int uni, extra& ev) {
   }
 
 void handlekey(int sym, int uni, extra& ev) {
+
+#ifdef TOUR
+  if(tour::on && tour::handleKeyTour(sym, uni)) return;
+#endif
 
   if(((cmode == emNormal && canmove) || (cmode == emQuit && !canmove) || cmode == emDraw || cmode == emMapEditor) && DEFAULTCONTROL && !rug::rugged) {
 #ifndef PANDORA

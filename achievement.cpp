@@ -84,6 +84,7 @@ bool wrongMode(char flags) {
   if(randomPatternsMode) return true;
   if(yendor::on) return true;
   if(tactic::on) return true;
+  if(tour::on) return true;
   if(chaosmode != (flags == 'C')) return true;
   if((numplayers() > 1) != (flags == 'm')) return true;
   return false;
@@ -516,8 +517,9 @@ void improveItemScores() {
 void achievement_final(bool really_final) {
   if(offlineMode) return;
 #ifdef HAVE_ACHIEVEMENTS
-  upload_score(LB_STATISTICS, time(NULL));
+  // upload_score(LB_STATISTICS, time(NULL));
   if(cheater) return;
+  if(tour::on) return;
   
   if(sphere && euclidland == laHalloween) {
     if(shmup::on || chaosmode || purehepta || numplayers() > 1 || tactic::on || randomPatternsMode)

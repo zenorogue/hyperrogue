@@ -1,6 +1,6 @@
-#define VER "9.4e"
-#define VERNUM 9405
-#define VERNUM_HEX 0x9405
+#define VER "9.4f"
+#define VERNUM 9406
+#define VERNUM_HEX 0x9406
 
 #define GEN_M 0
 #define GEN_F 1
@@ -162,6 +162,9 @@ const char *loadlevel = NULL;
 #include "graph.cpp"
 #include "sound.cpp"
 #include "achievement.cpp"
+#ifdef TOUR
+#include "tour.cpp"
+#endif
 #ifndef MOBILE
 #include <unistd.h>
 #endif

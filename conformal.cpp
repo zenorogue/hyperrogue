@@ -106,14 +106,24 @@ namespace spiral {
 
   int CX, CY, SX, SY, Yshift;
   
-  SDL_Surface *band, *out;
+  vector<SDL_Surface*> band;
+  SDL_Surface *out;
   
   bool displayhelp = true;
   
+  int& bandpixel(int x, int y) {
+    int i = 0;
+    while(i < size(band) && x >= band[i]->w)
+      x -= band[i]->w, i++;
+    return qpixel(band[i], x, y);
+    }
+  
   void precompute() {
   
-    CX = band->w;
-    CY = band->h;
+    CX = 0;
+    for(int i=0; i<size(band); i++) CX += band[i]->w;
+    if(CX == 0) { printf("ERROR: no CX\n"); return; }
+    CY = band[0]->h;
     SX = out->w;
     SY = out->h;
 
@@ -151,11 +161,11 @@ namespace spiral {
       cy -= d * CY; cx -= d * Yshift;
       if(cy<0) cy += CY, cx += Yshift;
       cx %= CX; if(cx<0) cx += CX;
-      qpixel(out, x, y) = qpixel(band, cx, cy);
+      qpixel(out, x, y) = bandpixel(cx, cy);
       }
     }
 
-  void loop(SDL_Surface *_band) {
+  void loop(vector<SDL_Surface*> _band) {
 
     bool saveGL = vid.usingGL;
     if(saveGL) { vid.usingGL = false; setvideomode(); }
@@ -163,6 +173,7 @@ namespace spiral {
     band = _band;
     out = s;
     precompute();
+    if(CX == 0) return;
     shiftx = shifty = 0;
     velx=1; vely=1;
     bool dosave = false;
@@ -399,6 +410,8 @@ namespace conformal {
     
     int xpos = 0;
     
+    vector<SDL_Surface*> bands;
+    
     SDL_Surface *band = SDL_CreateRGBSurface(SDL_SWSURFACE, min(len, bandsegment), bandfull,32,0,0,0,0);
     
     if(!band) {
@@ -451,14 +464,13 @@ namespace conformal {
           char buf[128];
           sprintf(buf, "bandmodel-%s-%03d" IMAGEEXT, timebuf, segid++);
 
-          if(dospiral) {
-            swap(vid.xres, vid2.xres); swap(vid.yres, vid2.yres); s = sav;
-            spiral::loop(band);
-            swap(vid.xres, vid2.xres); swap(vid.yres, vid2.yres); s = bbuf;
-            }
-
           IMAGESAVE(band, buf);
-          SDL_FreeSurface(band);
+
+          if(dospiral) 
+            bands.push_back(band);
+          else 
+            SDL_FreeSurface(band);
+
           len -= bandsegment; xpos -= bandsegment;
           band = SDL_CreateRGBSurface(SDL_SWSURFACE, min(len, bandsegment), bandfull,32,0,0,0,0);
           goto drawsegment;
@@ -470,12 +482,22 @@ namespace conformal {
     char buf[128];
     sprintf(buf, "bandmodel-%s-%03d" IMAGEEXT, timebuf, segid++);
     IMAGESAVE(band, buf);
+    addMessage(XLAT("Saved the band image as: ") + buf);
+
+    if(dospiral) 
+      bands.push_back(band);
+    else 
+      SDL_FreeSurface(band);
+
     SDL_FreeSurface(sav);
     s = sav; vid = vid2; sightrange = ssr; cheater = sch;
     if(includeHistory) restoreBack();
-    if(dospiral) spiral::loop(band);
-    addMessage(XLAT("Saved the band image as: ") + buf);
-    SDL_FreeSurface(band);
+    
+    if(dospiral) {
+      spiral::loop(bands);
+      for(int i=0; i<size(bands); i++) SDL_FreeSurface(bands[i]);
+      }
+
     inHighQual = false;
     }
 #endif

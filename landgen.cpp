@@ -1582,6 +1582,13 @@ eLand getNewLand(eLand old) {
   // return landtab[items[itStrongWind]++ % 10];
   // if(old != laPrairie) return laRiver;
   
+  #ifdef TOUR
+  if(tour::on) {
+    eLand l = tour::getNext(old);
+    if(l) return l;
+    }
+  #endif
+  
 #ifdef LOCAL
   extern bool doAutoplay;
   if(doAutoplay) 
@@ -2680,6 +2687,14 @@ void setLandQuotient(cell *c) {
     setland(c, eLand(laEFire + (fv%4)));
   }
 
+bool quickfind(eLand l) {
+  if(l == cheatdest) return true;
+#ifdef TOUR
+  if(tour::on && tour::quickfind(l)) return true;
+#endif
+  return false;
+  }
+
 void setLandSphere(cell *c) {
   if(euclidland == laWarpCoast)
     setland(c, getHemisphere(c, 0) > 0 ? laWarpCoast : laWarpSea);
@@ -2908,7 +2923,7 @@ void buildBigStuff(cell *c, cell *from) {
     }
       
   if((!chaosmode) && bearsCamelot(c->land) && c->type == 7 && 
-    (cheatdest == laCamelot || (hrand(2000) < 200 && 
+    (quickfind(laCamelot) || (hrand(2000) < 200 && 
     items[itEmerald] >= 5 && !tactic::on))) {
     int rtr = newRoundTableRadius();
     heptagon *alt = createAlternateMap(c, rtr+14, hsOrigin);
@@ -2923,18 +2938,18 @@ void buildBigStuff(cell *c, cell *from) {
     // buildbigstuff
 
     if(c->land == laRlyeh && c->type == 7 && 
-      (cheatdest == laTemple || (hrand(2000) < 100 && 
+      (quickfind(laTemple) || (hrand(2000) < 100 && 
       items[itStatue] >= 5 && !randomPatternsMode && 
       !tactic::on && !yendor::on)))
       createAlternateMap(c, 2, hsA);
 
     if(c->land == laJungle && c->type == 7 && 
-      (cheatdest == laMountain || (hrand(2000) < 100 && 
+      (quickfind(laMountain) || (hrand(2000) < 100 && 
       !randomPatternsMode && !tactic::on && !yendor::on && landUnlocked(laMountain))))
       createAlternateMap(c, 2, hsA);
 
     if(c->land == laOvergrown && c->type == 7 && 
-      (cheatdest == laClearing || (hrand(2000) < 25 && 
+      (quickfind(laClearing) || (hrand(2000) < 25 && 
       !randomPatternsMode && items[itMutant] >= 5 &&
       !tactic::on && !yendor::on))) {
       heptagon *h = createAlternateMap(c, 2, hsA);
@@ -2947,7 +2962,7 @@ void buildBigStuff(cell *c, cell *from) {
       }
 
     if(c->land == laOcean && c->type == 7 && deepOcean && !generatingEquidistant && 
-      (cheatdest == laWhirlpool || (
+      (quickfind(laWhirlpool) || (
         hrand(2000) < (purehepta ? 500 : 1000) && !tactic::on && !yendor::on)))
       createAlternateMap(c, 2, hsA);
 
@@ -3555,6 +3570,7 @@ void setdist(cell *c, int d, cell *from) {
             }
           c->wparam = 1 + hrand(reptilemax());
           }
+        // c->wall = waReptile; c->wparam = 100;
         }
 
       if(c->land == laBurial) {
@@ -4659,7 +4675,10 @@ void setdist(cell *c, int d, cell *from) {
           c->monst = moTortoise;
           c->hitpoints = 3;
           }
-        if((tactic::on || euclid) && hrand(4000) < 50 + items[itBabyTortoise]*2 && !safety) {
+        
+        int chance = 50 + items[itBabyTortoise]*2;
+        if(quickfind(laTortoise)) chance += 150;
+        if((tactic::on || euclid) && hrand(4000) < chance && !safety) {
           c->item = itBabyTortoise;
           tortoise::babymap[c] = getBits(c) ^ tortoise::getRandomBits();
           }
@@ -4885,7 +4904,7 @@ void setdist(cell *c, int d, cell *from) {
       if(c->land == laBurial && !safety) {
         if(hrand(15000) < 5 + 3 * items[itBarrow] + 4 * hard)
           c->monst = moDraugr;
-        else if(hrand(5000) < 20)
+        else if(hrand(5000) < 20 + (quickfind(laBurial) ? 40 : 0))
           c->item = itOrbSword;
         }
       if(c->land == laJungle) {

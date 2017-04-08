@@ -1127,3 +1127,24 @@ void clearHexes(heptagon *at);
 void verifycells(heptagon *at);
 int zebra40(cell *c);
 cell *createMov(cell *c, int d);
+
+#ifndef MOBWEB
+#ifndef TOUR
+#define TOUR
+#endif
+#endif
+
+#ifdef TOUR
+namespace tour {
+  extern bool on;
+  extern string tourhelp;
+  
+  bool handleKeyTour(int sym, int uni);
+  void presentation(int mode);
+  int getid();
+  
+  eLand getNext(eLand old);
+  bool quickfind(eLand next);
+  void start();
+  };
+#endif

@@ -2,7 +2,7 @@
 # set the version numbers in hyper.rc automatically
 export VER=`grep "#define VER " hyper.cpp | sed "s/#define VER \"//" | sed "s/\"//"`
 #export VERNUM=`grep "#define VERNUM " hyper.cpp | sed "s/#define VERNUM //" | sed "s/^\(.\)\(.\)\(.\)\(.\)$/\1.\2.\4.\3/"`
-VERNUM=9,4,0,4
+VERNUM=9,4,0,6
 #VERNUM=8.1.7.0
 #echo $VERNUM
 sed "s/\"ProductVersion\", \"\(.*\)\"/\"ProductVersion\", \"$VER\"/" -i hyper.rc

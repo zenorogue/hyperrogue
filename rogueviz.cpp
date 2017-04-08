@@ -1194,6 +1194,7 @@ void readcolor(const char *cfname) {
   }
 
 void init() {
+  if(on) return;
   on = autocheat = true; 
 #ifndef WEB
   mapeditor::drawplayer = false;
@@ -1216,6 +1217,7 @@ void close() {
   vdata.clear();
   labeler.clear();
   legend.clear();
+  on = false;
   }
 
 void turn(int delta) {

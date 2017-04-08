@@ -58,6 +58,8 @@ namespace dialog {
     if(k == SDLK_F5) return "F5";
     if(k == SDLK_F10) return "F10";
     if(k == SDLK_HOME) return "Home";
+    if(k == SDLK_BACKSPACE) return "Backspace";
+    if(k == SDLK_RETURN) return "Enter";
     if(k == 32) return "space";
     if(k >= 1 && k <= 26) { string s = "Ctrl+"; s += (k+64); return s; }
     if(k < 128) { string s; s += k; return s; }
@@ -178,7 +180,7 @@ namespace dialog {
     
     int xs, xo;
     if(sidescreen)
-      xs = dwidth - vid.fsize, xo = vid.xres + vid.fsize;
+      xs = dwidth - vid.fsize*2, xo = vid.yres + vid.fsize;
     else
       xs = vid.xres * 618/1000, xo = vid.xres * 186/1000;
     
@@ -252,7 +254,7 @@ namespace dialog {
     
     if(sidescreen) {
       dwidth = vid.xres - vid.yres;
-      dcenter = (vid.xres + dwidth) / 2;
+      dcenter = vid.xres - dwidth / 2;
       }
     
     while(tothei > vid.yres - 5 * vid.fsize) {

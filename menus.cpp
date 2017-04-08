@@ -819,6 +819,10 @@ void showChangeMode() {
   
   // gameplay modes
 
+#ifdef TOUR
+  dialog::addBoolItem(XLAT("tutorial"), tour::on, 'T');
+#endif
+
   dialog::addBoolItem(XLAT("Euclidean/elliptic mode"), (euclid || sphere), 'e');
   dialog::addBoolItem(XLAT(SHMUPTITLE), (shmup::on || multi::players > 1), 's');
   if(!shmup::on) dialog::addSelItem(XLAT("hardcore mode"),
@@ -862,8 +866,6 @@ void showChangeMode() {
 void handleChangeMode(int sym, int uni) {
   dialog::handleNavigation(sym, uni);    
   char xuni = uni;
-  
-  if((uni >= 'A' && uni <= 'Z') || (uni >= 1 && uni <= 26)) xuni |= 96;
   
   if(xuni == 'v' || sym == SDLK_F2 || sym == SDLK_ESCAPE) cmode = emNormal;
   
@@ -923,6 +925,12 @@ void handleChangeMode(int sym, int uni) {
       restartGame('7');
   else if(uni == 'a')
       cmode = emConformal;
+#ifdef TOUR
+  else if(uni == 'T') {
+    cmode = emNormal;
+    tour::start();
+    }
+#endif
   else if(uni == 'C') {
     if(!chaosmode) {
       cmode = emHelp;
