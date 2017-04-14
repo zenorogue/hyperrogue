@@ -1,0 +1,1635 @@
+2011.11.07 ??:?? version 1.0
+- Icy Lands
+- ASCII graphics
+
+2011.11.08 ??:?? version 1.1
+- blog post: http://zenorogue.blogspot.com/2011/11/hyperrogue-11.html
+- I have added some keys to control the visual presentation. 
+- I have also added an option of a 3D view using red and cyan glasses. 
+
+2012.03.12 ??:?? version 2.0
+- blog post: http://zenorogue.blogspot.com/2012/03/7drlc-hyperrogue-ii.html
+- There are seven types of lands for you to travel, each with specific monsters, treasures, and terrain features.
+- You can also find some magical orbs, which give you temporary magical powers.
+- The game also became more user friendly. You get tooltips and help, and a configuration screen, instead of having to press strange keys.
+
+2012.03.16 ??:?? version 2.1
+- The game should no longer crash when moving in certain directions while having mirror images.
+- Living Caves now include Seeps and are thus now more challenging.
+- You can no longer deactivate an ivy plant by cutting out an active branch next to the root.
+- Shield protection from a sandworm is now less weird.
+- Slime colors are now named correctly.
+- Some sanity checks added just in case.
+
+2012.04.23 ??:?? version 3.0
+- blog post: http://zenorogue.blogspot.com/2012/04/hyperrogue-iii.html
+- graphics
+- the Land of Eternal Motion
+- Graveyard
+- R'Lyeh
+- Hell
+- Yendor Quest
+- balance improvements
+
+2012.05.03 ??:?? version 3.1
+- This version contains many optimizations, which make the animations much smoother. 
+- Android port
+- "dead ivy" shows correctly
+- necromancy bugfix
+- restarting after finding the Orb of Yendor no longer crashes the game
+- help fits better on the screen
+- you can right click the framerate for hints about improving it
+
+2012.05.04 ??:?? version 3.2
+- blog post: http://zenorogue.blogspot.com/2012/05/hyperrogue-bugfix-32.html
+- The big white X which appears during the final quest should no longer disappear randomly (thanks to ortoslon for reporting this).
+- Using the anaglyph mode ("distance between eyes") no longer causes the letters to disappear. 
+
+2012.05.05 ??:?? version 3.3
+- blog post: http://zenorogue.blogspot.com/2012/05/7drl-reviews-and-hyperrogue-version-33.html
+- This update is rather minor. Some descriptions are improved; they are now more accurate and detailed. Made it clear that there are actually many Orbs of Yendor. Cultists in the Icy Lands produce more heat now. HyperRogue should now work correctly in a resolutions with height greater than width (not only on Android).
+- The Android version gets a "share" function, which allows you to share a short description of your character (together with a screenshot). Your characters are be no longer destined to be lost without any trace. 
+
+2012.05.13 ??:?? version 3.5
+- blog post: http://zenorogue.blogspot.com/2012/05/hyperrogue-35-and-osx.html
+- a bug with the Cultists' ranged attack in R'Lyeh, which was not working as intended
+- OSX binary by Konstantin Stupnik
+
+2012.06.10 ??:?? version 3.6
+- Ivy plants were supposed to be a prominent feature of Jungle, but they were rather something that you see from time to time, and you should run away from, because there was no reason to fight them. This is changed. Jungle got rebalanced.
+- Wandering monsters. It is no longer safe to just stay in one place and wait for monsters. (As a counterbalance there are less "stationary" monsters)
+- A high score list. Accessible via ESC-t. You no longer have to remember your best scores :) (it uses the same log file as previous versions, but unfortunately is unable to read their scores)
+- The Land of Eternal Motion now has its own Orb (rather than pretending that it has falled through a huge hole). This new Orb is also expected to improve the performance on devices with low memory.
+- You no longer get 1000 points for the Orb of Yendor, only 50. The motivation here is that you should be able to play HyperRogue in two ways: as a completionist (aim to get the Orb of Yendor to win the game) or as a perfectionist (get a high score), and the quest for Orb of Yendor should not get into the perfectionist's way.
+- You can now switch places with golems (previously it was quite easy to kill them, or to lose because of being blocked by them... I have decided that the game would be better without such problems)
+- I have tried to actually play with the wersdzxc keyboard layout and found it very awkward, so switched to qweadzxc; also the quit/restart keys got changed to prevent confusion
+- removed the Rangers from crossroads (creatures native to all lands appear on the Crossroads, so there is no need to make it even harder by adding Rangers; the screenshot above still has them...)
+- running dogs no longer look as if they appeared from nowhere (I think it got broken in some earlier version)
+- you are now allowed to get an Orb of Shielding even if there are monsters nearby 
+
+2012.06.28 ??:?? version 3.7
+- HyperRogue looks better on Windows now, as it has an icon, and version information.
+- You can now disable the red axes which show you where directional keys will take you. By default, they disappear automatically if using a mouse, and reappear when using keyboard (they are useful only for keyboard users). 
+- In the Android version, there was a bug with panning ("DRAG"), which caused the display to disappear when trying to do panning. Also panning is faster now (i.e., more fps). 
+
+2013.08.02 ??:?? version 3.8
+- the window is resizable, instead of having a fixed list of resolutions
+- exits cleanly in case of errors, such as the missing font file or unability to initialize SDL
+- fixed a crash bug with wandering worms
+- mousing over "help" in the config menu lists the hidden features, such as the graphics editor or the showoff mode
+- some command line options are added (try --help)
+- the SDL.dll file has been updated to a more recent version (screen size is now detected correctly) 
+
+2013.10.11 ??:?? version 4.0
+- music by Neon Corridor
+- Ivies have been greatly improved: they shrink if an active branch sees no good move (except at the root), they are now active as long as there is at least one segment in view, and they no longer go to the Alchemist Lab (as this caused bugs). Also, if you cut an active Ivy just after root or another branching point, it immediately regrows and spins (previously it regrew without spinning at the root, and caused bugs at other branching points)
+- Worms are now active as long as there is at least one segment in view, they now destroy walls and thumpers around them when they explode (so if you find a good place for killing worms, it is hard to use it more than once), and worms and tentacles can go to other lands now, except Motion and Alchemist (but worms produce spice on explosion only in the Desert)
+- After getting 10 Demon Daisies, Crossroads get a unique treasure to be found (Hyperstones), so the player has some point to spend time there (should be fun, since you are likely to meet almost all monsters and orbs on the Crossroads)
+- the cheat mode has been extended (press F2 F4 to start cheating, then press shift+letter for various effects)
+- Cocytus works now (but is still available only via cheating or by getting an insane score)
+- if you collect a lot of items in a single land, this increases the spawning rate of wandering monsters in all lands, so you are no longer relatively safe by walking at the edge
+- when used on a location containing both an item and a monster, context help now shows information about the monster
+- added some flavor messages, and replaced "ESC to quit" with "ESC for menu/quest", to make it more clear to the players that there is more about the game than hunting for treasure
+- pressing F1 or right clicking while looking at the context help now displays the general help screen
+- Fixed the Crossroads description (there are no longer Crossroad Rangers and big holes in the ground)
+- improved the general help screen
+- improved the handling of non-qwerty keyboards (movement is done according to the QWERTY layout as previously, but other menus take the layout into account correctly)
+- Alchemist Lab: the description is more detailed now, killing lots of slimes no longer degenerates the Alchemist's Lab into pure treasure, slime beasts now destroy items around them when killed, and dead orbs no longer cause the slime to spill
+- Living Caves: Foreign monsters and objects affect the Living Caves now, and cave trolls now destroy items around them when killed
+- Graveyard: killing graveyard monsters slowly increases the initial monster rate in the graveyard (so grinding for Dead Orbs is harder), and necromancers can go outside the Graveyard now
+- renamed Icy Lands and Living Caves to singular (for better grammar) 
+
+2013.12.10 ??:?? version 4.1
+- In the Android version, the Android-standard menu for user settings (which are saved now), and the game log is available from the menu. (This was actually done in version 4.0b, but not announced here.)
+- Added tags to the OGG files. (Actually this was already done in "hyperrogue-40t.zip", but not announced here.)
+- An option to reduce the framerate limit to conserve CPU energy. Also framerate is reduced in non-game screens and when the app is not in focus. (Thanks to Damyan Ivanov for suggesting this!) Unfortunately desktop only, for now (on Android the framerate is low even with full CPU usage, at least on my devices).
+- Alchemist's lab fixes: all monsters (except eagles and ghosts) now adhere to the rules. Fixed a bug with pushing Thumpers through. Mimics and mirrors no longer damage the slime colors. Worms and Ivies can enter the Alchemist's Lab now. Flash/lightning spells now copy the slime color under PC when used in the Alchemist's Lab (thus allowing easy travel). (Thanks to Andrew Farnsley for mentioning this and several other bugs!)
+- The Jungle is easier now. (Previously, either a single ivy with 7 branches, or two ivies next to each other with 5 and 4 branches, were generated; the ivy got less branches if the required cell was blocked. Now, the harder case only happens in 25% cases (instead of 50%), and the ivy is not generated at all if some of the locations for branches are blocked by other ivies.)
+- The greater demon description now explains the mechanics is more detail. Mimics and mirrors no longer kill greater demons (they turn them to lesser demons instead).
+- Fixed a minor bug with Thumper power draining incorrectly, and a bug with bonfire power draining twice as fast as stated.
+- Eagles and ghosts no longer fall or collapse tiles in the Land of Eternal Motion. Also, Eagles now actually fly (i.e., can go through lakes, chasms, and slime).
+- The Esc-screen now displays the last messages (scrollable with the arrow keys).
+- Contributors are now listed in the Credits section in Help.
+- Added missing license files to the package.
+- Fixed the filename in hyperrogue-music.txt for Cocytus. 
+
+2013.12.17 ??:?? version 4.2
+- OpenGL
+- fixed a crash bug with Ivy
+- a better looking Wolf
+
+2014.01.17 ??:?? version 4.3
+- Pandora version
+- You can now actually control the whole game with keyboard (well, except the graphical editor and the help which you get when you right-click the framerate). When panning with arrows, a cursor appears, and you can press F1 for more information about that location, or 't' to teleport (if allowed).
+- Keys 't' and 'g' now display messages if you have no respective Orb.
+- You can now use a joystick to move. If you have two joysticks, the second one can be used for panning. There are two modes of joystick movement (press 'p' to switch).
+- Right Shift and Right Ctrl change the meaning of mouse presses (useful with touchscreens and mice with too few buttons).
+- Anti-aliasing can be enabled/disabled in the config file.
+- Window caption was missing.
+- You can now press the middle button to pan (a quite fun feature that was previously available only on Android), or use the mousewheel for far movement (down) or panning (up). 
+
+2014.03.02 ??:?? version 4.4
+- Orb of Safety saving
+- Orb of Lightning's animation has been moved to Orb of Safety
+- Orbs of Lightning use a new sparkling animation
+
+2014.08.04 ??:?? 
+- HyperRogue for jailbroken iOS
+
+2015.01.28 ??:?? version 5.0
+- Cocytus
+- Dry Forest
+- localization 
+- many other improvements to the user interface, game balance, and gameplay
+
+2015.02.06 ??:?? version 5.3
+- Euclidean mode
+
+2015.02.22 ??:?? version 6.0
+- Vineyard
+- Dead Cave
+- Hive
+- Emerald Mine
+- Land of Power
+- One new achievement (not included ones related to the new lands).
+- The Lightning spell now react a bit differently to some types of obstacles.
+- Fixed anomalous Great Walls.
+- Fixed slime spilling through monsters.
+- Changed how Orb of Digging works, and renamed Orb of Earth.
+- Worms explode on death, as they were supposed to.
+- You no longer generate that much heat when entering a cold land.
+- No more plus signs when slime spills into the Graveyard.
+- The graphics editor supports 't', 'y' keys for moving and rotating shapes (not documented).
+- Internal changes in the grammar/translation system. 
+
+2015.??.?? ??:?? version 6.0x
+- a bug with rings.
+- better coloring of Emerald mines.
+- "You can right click any element to get more information about it."
+- Hives renamed to nests.
+- Silver sign.
+- Power is drained when teleporting out of the Land of Power.
+- Bugs related to saving fixed. 
+
+2015.??.?? ??:?? version 6.1
+- most monsters now target your friends and hyperbugs (previously they only targetted you (unless invisible) and Thumpers), also fixed a bug with Invisibility
+- running dogs (and other monsters in LoEM) now try to run away (in a roughly straight line) even if they have no target, instead of just falling
+- some halfvine bugs should be fixed (both graphical and logical)
+- changed the ASCII symbols a bit
+- changed the colors a bit (Miner's pick axe and Hedgehog Warrior's body is brighter)
+- you no longer produce chasms when using Orb of Aether in the LoEM
+- ruby achievements should be working again 
+
+2015.03.04 ??:?? version 6.2
+- Camelot
+- Temple of Cthulhu
+- Distance calculated better in the logfile.
+- Stabbing achievements are fixed.
+- Extra messages when finding treasures.
+- The display of the player changed a bit in the cheat mode.
+- Better facing for Golems.
+- Starting location has been fixed for the Vineyard, Land of Power, and Emerald Cave in the Euclidean mode (anyway, these three lands have maps which are strongly based on the hyperbolic geometry, so they don't look that interesting the Euclidean mode).
+- Structure display cheat (ctrl+C). Treasure cheat (shift+T) improved. 
+
+2015.??.?? ??:?? version 6.2a
+- Russian translation.
+- Added info about wandering Ghosts to the Ghost description.
+- Worm explosion destroys big statues.
+- Cult leaders appear in R'Lyeh now, to prevent the player from camping in Temples.
+- No GAME OVER if you can still mindblast someone.
+- time recount
+- You can no longer use Knights for the Golem achievements.
+- Fixed the message when Knights are killed by monsters.
+- More cloak colors. Cloak color is saved.
+- Removed the Thorn power when getting the Holy Grail (it was likely to cause you to kill Knights).
+- Fixed a possible crash with Knight outside of Camelot (it seems very hard to make him leave Camelot, but anyway).
+
+2015.??.?? ??:?? version 6.2b
+- updated the Turkish translation, language is now also selectable in Steam. 
+
+2015.??.?? ??:?? version 6.3
+- new Orb types to the new lands (Temple and Camelot). Orb of Dragon allows one to throw fire just like the Cultists, while Orb of Trickery allows the player to place illusions of themselves. Additionally, more monsters now take invisibility/friends/illusions into account. Also, the Russian translation is ready (and French and German translations are coming). 
+
+2015.??.?? ??:?? version 6.4
+- Golems (and Knights) now act after enemies, not before them. This has been changed because previously sometimes a move was judged as invalid (i.e., lead to death) even though actually a Golem would kill the responsible enemy first. Additionally, Golems will follow the player again (they just go straight towards the player without any pathfinding, though).
+- You can now press ESC in the GAME OVER screen to see the circumstances clearly (for example, to take a screenshot of your last epic battle).
+- For items and monsters, there is a 'high contrast' option which adds a bright border to them. Rather ugly, but effective. You can also press ALT during the game to achieve the same effect.
+- Since heptagons often give a tactical advantage, there is also an option to display heptagons darker.
+- Finally, there is an option to require pressing Shift to target the Orbs with ranged powers (Teleport, Trickery, the Mind, and the Dragon). 
+
+2015.??.?? ??:?? version 6.4a
+- HyperRogue 6.4a disables the useless "ESC for menu/quest", and fixes the Miner/Slime interaction. 
+
+2015.04.07 ??:?? version 6.5
+- blog post: http://zenorogue.blogspot.com/2015/04/hyperrogue-65.html
+- Hyperbugs no longer die on attack. Also, they are more likely to target you if you have collected lots of Royal Jellies. This should make it somewhat harder to achieve very high scores there (I think there is no need to remove any scores, but I can remove your score if you want).
+- Fire Cultist attack now causes books to burn (not that it matters much...). On the other hand, some orbs are now invulnerable to fire (previously one specific orb did not burn, which was intentional, but it happened in one specific situation, which was misleading).
+- Sometimes scores were not submitted to the Steam Leaderboards due to connection problems, hopefully it should be more robust now.
+- The local scoreboard (ESC-t) has been improved: more types of scores can be checked, and you can press 't' to ask for a specific score type easily. Additionally, Miner kills and some Orbs are saved now (they were not saved previously).
+- Some minor problems with the Euclidean mode have been fixed: Great Walls disappearing when using Orb of Safety on the Crossroads; Orb of Winter graphics; scrolling and rotation (arrows, Page Up, Page Down) are working correctly now.
+- Using an Orb of Safety in Camelot/Temple no longer causes a crash (it was possible only in the Cheat mode, anyway).
+- One bug in the Polish translation fixed. 
+
+2015.05.13 ??:?? version 6.6
+- blog post: http://zenorogue.blogspot.com/2015/05/hyperrogue-66-and-desura.html
+- Some bugs related to Mimics (Mirages and Mirror Images) have been fixed: they are now destroyed when they stray too far away, when you teleport, or when they attack an Ivy. (If they were not destroyed in these situations, it could potentially lead to weird behavior.) Also, they no longer change their direction without a reason in the Alchemist Lab.
+- Walls left by killed Vine Beasts are now more visible in the Hive.
+- Shift-clicking on a cell now does nothing if it is impossible to cast a spell from a ranged Orb at the given location.
+- HyperRogue's log file has been improved a bit. The implementation is much more clean, and it lists achievements gained, and data proving that the scores have been achieved in an official paid version of HyperRogue. This could be potentially used to prevent some forms of cheating by tampering with saved games (although it is possible to cheat anyway, just a bit harder). 
+
+2015.06.04 18:11 version 7.0
+- posted on the blog: http://zenorogue.blogspot.com/2015/06/hyperrogue-pirates-rocks-and-knives.html
+- shoot'em up mode
+- Caribbean
+- Red Rock Valley
+- Crossroads II
+- Hardcore mode, which disables the checkmate rule. No achievements yet.
+- Fixed the temperatures: melting points for Sages and Frozen Lakes are as expected now. Also, Wolves no longer leave Icy Lands/Cocytus, and heat is transferred correctly between Icy Lands and Cocytus (just a small effect, though).
+- Refactored monster movement a bit, for the purpose of Shmup mode. Hopefully this does break anything (though that I see that Vine Spirits no longer camp near to Wines).
+- Jungle and the Land of Mirrors will no longer appear next to the Land of Eternal Motion, to prevent Eagles from attacking you there by surprise.
+- Demon Daisy generation rate is fixed.
+- More monster types in the Crossroads.
+- Pheromones restricted.
+- You can no longer go over the cap with orb powers received from the Orb of Yendor/Holy Grail (otherwise Orb of Space could allow some exploits by bringing lots of Orb of Yendor together and unlocking them all at once).
+- Talking to knights outside of Camelot no longer crashes the game.
+- A message is now given when trying to attack an escaping Tentacle (just like for other cases of Tentacles).
+- You can no longer drop Dead Orbs while moving through a wall.
+- Headers should now be always shown in the local scoreboard.
+- Local highscores are now available for other game modes (Euclidean, hardcore only, and Shmup).
+- (technical) Stats for translations, some comments (just a few) added to the source.
+- big statues are no longer so cold
+
+2015.06.04 23:35 version 7.0a
+- fixed Orb of Safety in the shmup mode
+- fixed euclidean Camelot
+- monsters now can drown in the sea
+- Winter Witches and fire-resistant orbs should no longer burn in certain situations
+- top text brighter in Red Rock Valley
+
+2015.06.05 11:15 version 7.0b
+- removed spam for snakes on water, they can no longer go over LoEM
+- fixed the music file
+- added the missing line "You are killed by..." to the translation
+
+2015.06.06 11:57 version 7.0c
+- Added some markers for heptagons
+- Made Compasses not appear in there is another one in radius 2
+- Fixed buggy Camelots appearing next to Caribbean.
+- Fixed Orbs of Space not triggering the Game Over after you execute your only move which was moving a treasure.
+- Fixed Orbs of Yendor not moved correctly with OoS/boats.
+
+2015.06.08 10:03 version 7.0d
+- Fixed the starting land.
+- Fixed the mimics' target markers.
+- Fixed the Hyperstone Quest message ordering.
+- RRV was too dark in non-Escher modes; also brightened the Vineyard and Dead Caves, and made Fire in RRV look better.
+
+2015.06.13 13:52 version 7.0f
+- Running Dog are generated on chasms again (and thus their trails look correctly)
+- Red/dark trolls no longer do almost exactly the same.
+- Eagle attack has been fixed (do not kill the player on their second move in the Hardcore mode, and no "confused" message in non-hardcore)
+- Rock Snakes now attack Golems, Hyperbugs, and Illusions
+- Fixed some bugs with the Shmup mode: Orb of Yendor could be collected without the Key; Orb power is drained quickly when you have an Orb of Speed (just as in the normal HR); picking up items while using an Orb of Invisibility turned you visible just for a single frame; Orb of Shielding were not consumed if you also had Orb of Time
+- added the achievements for collecting the Orb of Yendor in the new modes (hardcore, shmup)
+- added the leaderboards for the shmup mode. Total treasure is counted, and for winners, time and the number of knife throws are recorded (I think it is feasible to win with the perfect score of 0 knife throws)
+- added a new emoticon "pirate" and some backgrounds, for Steam
+
+2015.06.19 23:26 version 7.0g
+- Burning tentacle spam removed.
+- The shmup welcome message is translated.
+- The "evil stars" (in hellish lakes) no longer can cover a passable spot, and the frequency of lakes has been reduced slightly, to make the Yendor quest easier.
+
+2015.06.20 13:22 version 7.0h
+- Fixed a bug which could have caused the game to start in the purple land and cheat mode.
+
+2015.06.21 14:50 version 7.0i
+- Fixed moving the Key with the Orb of Space.
+- You can now target with mouse and use joystick in the shmup mode. You can now rotate instantly with mouse/joystick, while it was impossible before, but I think it is better that way. 
+
+2015.07.17 16:27 version 7.0j
+- You can no longer attack trees while in a dangerous terrain (fire/chasm/etc).
+- On your last turn of Aether, you are now allowed whenever the destination is passable (up/down rocks, switch slime colors, through halfvine cells).
+- Fixed a bug which gave back 3 lives and 'welcome to shmup' on using Safety.
+- The path to the Key is now generated with more details, hopefully this fixes the various problems mentioned the archmageomega.
+- Fixed two minor bugs in the Polish translation.
+
+2015.07.20 ???? version 7.1
+- Ocean
+- Minefield
+- Version 7.1 also has some other features. Press 'v' or click the 'menu' button to see the new main menu, which conveniently lists all the features of HyperRogue. Also, a FAQ (Frequently Asked Questions) written by Fulgur14 is now available on the website. These two features should make it easier to fully enjoy HyperRogue. Also, the shmup mode correctly says that the number of knifes is counted (not the number of turns), fires are burning off and heat dissipates even offscreen (previously, many of the speed runs abused the fact that heat did not dissipate offscreen), Fire Cultists can attack more terrain types, another message is used for Sandworm explosions when you see no spice created, and a bug which caused the Icy Land to become too hot in the shmup mode has been fixed.
+- Also, the German translation should be available soon. Have fun! 
+
+2015.07.23 13:01 version 7.1a/b
+- "(v) menu" instead of "(v) config"
+- blow into water/fire/mines
+- the PC could just stand in place during high tide and not drown
+- fixed the "escaped Whirlpool" achievement
+- fixed the Restart key
+- in the very unlikely scenario when the Key is generated in the Whirlpool, it is protected by a Pirate party with Orbs of Water, so it hopefully does not run away and you can escape the Whirlpool
+
+2015.07.23 13:01 version 7.1c
+- you can no longer use Orb of Air against sharks, seeps, and other restricted monsters.
+- but you can use Orb of Air to blow monsters into chasms.
+- made the Ocean less bright in the plain mode (still brighter than LoEM), and the Minefield slightly brighter (to make it more different from the Land of Mirrors). Also, made the fire graphically calmer in the Land of Power.
+- Orb of Aether now protects you from mine explosions, but also makes you unable to detect mines.
+- for thematic reasons, R'Lyeh is now more likely to be adjacent to Ocean (and less likely elsewhere).
+- Fixed the Hyperstone Quest message to include new lands.
+- Two new achievements added ("Black Mark" and "Nasty Pet")
+- Fixed a bug with Space/Safety (the game was trying to calculate the cost after Safety acted -- this is fixed, hopefully this fixes the crash too)
+- Fixed a bug with Crossroads II/Ocean border
+- mine marks now appear above the PC/monsters.
+
+2015.07.24 11:11 version 7.1d
+- bug with Crossroads II generation which also caused the game to stop generating lands
+- saving the new treasures/kills
+- Euclidean mode supports the new land, as well as the gameboard modes (pick the gameboard mode you want, and then pick Euclidean mode, to activate an Euclidean gameboard).
+
+2015.07.24 13:22 version 7.1e
+- collecting OoY works.
+
+2015.07.25 00:24 version 7.1f
+- Tame Bomberbirds now fly over chasms
+- Forgetting old kills during saving, this is fixed. 
+
+2015.08.04 00:24 version 7.1f
+- the German translation is finally there, also the Russian and Turkish translations are updated to 7.1 (German achievements and some in other languages are still missing)
+- the Graveyard no longer appears next to Red Rock Valley, Dry Forest, or the Emerald Mine (as the Graveyard pattern benefits the Hedgehog Warriors and Rock Snakes too much)
+- mine count messages are translated now
+- fixed the minefield display in the ASCII mode (@ and monsters were not displayed)
+- minefield should now work correctly in the shmup mode
+- monster names are now translated in the shmup mode
+- a bug which caused weird things to happen in the shmup mode after leaving the game and returning should be fixed
+
+2015.08.11 ????? version 7.2
+- blog post http://zenorogue.blogspot.com/2015/08/hyperrogue-7.html
+- Palace
+- Living Fjord
+- coop shmup
+- Also, the shmup mode has received some more improvements. Coop required keys to be configurable, so you can redefine your keys and joysticks now (only in the shmup mode, but not only when playing with two players). Moreover, you no longer move slower when going backwards, and you can choose to use either the forward-backward-turn left-turn right, or the up-down-left-right cotntrol with the keyboard. 
+- You no longer break mirrors or cut trees while using an Orb of Aether
+- LoEM now appears as a basic land. Red Rock Valley and Cocytus are more likely to appear next to similar lands. The special border generation rules for R'Lyeh are disabled once you have found enough treasure thren, so you can escape more easily.
+- Tame Bomberbirds should be saved now with Orb of Safety. Orb of Friendship now works as a bonus life in the shmup mode.
+- Water and red rock are now displayed correctly in the Hive.
+- Red Trolls now work correctly in the Minefield.
+- Pikemen did not kill the PC by moving next to them in the hardcore mode.
+- Bonfires on the coast are now extinguished during the tide.
+- Fixed a bug which sometimes made it impossible to light bonfires in the Icy Land.
+- Fixed a bug with Orb of Aether still draining power while using Orb of Time.
+- Fire Cultists (and Orb of Dragon in general) can now destroy stranded boats
+- Flavor messages for killing monsters were shown only when killing directly. 
+
+2015.08.12 09:35 version 7.2a
+- skipping a turn with the mouse
+- nerfed the frequency/duration of the Orb of the Fish
+- fixed the reference in the pushing description (Thumper/Guard/Skeleton)
+- added a comment that Skeletons are stunned for a longer time outside of the Palace 
+
+2015.08.12 16:27 version 7.2b
+
+- you no longer activate pressure plates while using an Orb of Aether
+- Fire Cultists will just wait if they cannot fire at your current location (e.g., a Palace gate)
+- fixed the weird facing direction
+- updated the Czech and Russian translations, also fixed some minor text problems 
+
+2015.08.15 11:44 version 7.2c
+- the Orb of Thorns now stuns and damages the stunnable monsters. 
+
+2015.08.19 21:13 version 7.2d
+- I have added a map editor. It is activated with Shift+A from the cheat mode, and allows you to place arbitrary monsters, walls, items and lands. It is somewhat ugly for now, and it is probably possible to crash the game by creating illegal configurations, but it should be useful for testing, and better for drawing new ideas for maps than the game board mode. (Maybe some save map feature for next versions?)
+- a typo in the Land of Power
+- Fjord-related things in the shmup mode: Water Elemental did not move at all, Vikings use boats correctly now, land monsters no longer run into the water to catch you when you are on the boat
+- worms now prevent gates from closing 
+
+2015.08.23 02:21 version 7.2e
+
+- sharks now see you when you are diving (actually also parrots and all monsters restricted to specific wall type -- too many special cases otherwise)
+- fixed the unlocking rule for Orb of the Frog
+- the Orb of the Frog / Orb of Safety crash should be fixed
+- Orb of the Frog + Orb of Aether = jump through walls (and even through worms and other monsters, even if Orb of Aether does not normally allow that)
+- Orb of Teleport now works together with Fish/Winter/Aether to teleport you into dangerous terrain
+- fixed the single weird beach which sometimes appears near Sea Border
+- Earth Elemental now knows that it can go through sea in the Fjord
+- worm explosions no longer extinguish eternal fires
+- empty cells will no longer be colored weirdly in Minefield and Caribbean
+- wandering ghosts now appear correctly in the shmup mode
+- Turkish translation updated
+- map editor: 'copy' feature for the map editor (you can copy larger circles by setting the radius); removed chasmD; fixed Shift+A moving in gameboard; more vertical space in the list
+- fixed the bugs with Discord/worms (ivies already worked correctly, but I forgot to prevent monsters from attacking enemy worms)
+- slightly improved the programming in some places, which also fixed many small details: red rock/halfvine interaction, rubble is now rock level 1, discord/Flash Witch, monster pathfinding in RRV, no longer can blow into monsters in water/air, chasms in palace treated as chasms, slightly changed OoWater/Slime/Icy interaction
+
+2015.08.23 20:15 version 7.2f
+- pathfinding was not working correctly with chasms in LoEM and Palace
+- rubble is displayed correctly again
+- also, Orb of the Frog/Fish are translated now, and fixed a minor error in Turkish translation.
+
+2015.08.25 ??:?? version 7.3
+- blog post: http://zenorogue.blogspot.com/2015/08/hyperrogue-73-edit-map-and-save-princess.html
+- Princess Quest
+- The Map Editor has already been present in the late patches to 7.2, but it is better now. Activate it from the "special game modes" menu (or by Shift+A in the cheat mode). There, you can place walls, items and monsters, copy parts of the map, save high quality screenshots (to BMP), and even save/load the map to a file! 
+- Refactored monster movement. This means that Rock Snakes and mimics activate plates now (they did not previously), and monsters' special movement effects (for example, Pikeman attack and trails) are now activated by the Orb of Air.
+- Messages are now different based on whether the monster is living or not (you no longer "kill" Skeletons).
+- Rock Snakes are now generated correctly. Also fixed a small bug with worm/gate interaction.
+- Activating the Cheat mode while already in Cheat mode now disables it instead (simply restarting the game sometimes does not work, so this should make it easier)
+- Activating the Gameboard mode no longer clears the map automatically, so you can use it to view the patterns in alternate ways (triangular/heptagonal boards, Emerald/Fifty codes). Press F5 if you want to clear the board.
+- Help in the map editor, ability to set rotation by clicking on a specific point of the cell. Mines shown. Some crashes caused by illegal combinations are removed. 
+
+2015.08.26 11:23 Version 7.3a
+- fixed the Princess Challenge achievement
+- fixed the Gameboard mode
+- the Princess Challenge unlocking should now honor Steam achievements, so it should be available even if you unlocked it on a different computer
+- fixed minor grammar errors, added some missing lines ("cannot jump on" and "b=boundary"), added the Czech translation 
+
+2015.08.26 20:27 Version 7.3b
+- The 'second joystick' no longer does panning by default, as it causes problems with some gamepads.
+- the Russian translation has been updated.
+- the Prince/Princess setting (in "customize character") is saved. Also, selecting "customize character" no longer automatically randomizes everything.
+- the message 'You are entering the minefield' should no longer appear when you are actually leaving it. 
+
+2015.08.28 01:57 Version 7.3c
+- The Princess is now able to use boats. (Although probably it is safer to try one from Fjord, not one from a coast...)
+- Princess now keeps her HP after using Orb of Safety.
+- You can now jump over a Mouse. Jumping/teleporting into mirrors/cabinets/etc. activates their effects.
+- Gates now also crush items when closing, and are completely destroyed with Flash even if only one half is in the area. Also, they should no longer be generated if the other half would be in a different land.
+- Map Editor: added an undo feature, and a possibility to flip while copying large areas. It is also no longer possible to rotate regions so that hexagons/heptagons do not match.
+- Skeletons are now marked as non-living (they sink, not drown).
+- Fixed some text/translation errors. 
+
+2015.08.29 11:11 Version 7.3d
+- Golems, Mice, and Knights are moving again.
+- Eagles no longer make extra moves after moving next to PC.
+- Ghosts are no longer allowed to move next to each other, so being attacked by two of them at once is no longer almost surely fatal.
+- Gameboard cells are no longer black if no gameboard mode is enabled.
+- Bonfires are now lighted by nearby fires.
+- Save/load map no longer crashes when a file is missing (or another error).
+- (Android) Loading a game should no longer cause new items/monsters not to appear. 
+
+2015.09.01 17:43 Version 7.3e
+- stunning a monster on the Palace trapdoor no longer gives you the Death Runner achievement.
+- Princess Challenge should now be available immediately after unlocking.
+- High quality screenshots should now work on Windows.
+- Fixed some errors in translations. (Also finally added the translated achievement names)
+- Albatross kills are counted now.
+- (Android) The rare Android crash should be fixed now. 
+
+2015.09.01 23:24 Version 7.3f
+- fixed the Euclidean mode
+
+2015.09.05 13:13 Version 7.3g [shmup fixes]
+- Leaders/Pirates/Vikings did not move.
+- Save shmup config works correctly now (well, it did work correctly before, but it did not load).
+- Boats are now stranded instead of disappearing in Fjord/Ocean coast.
+- You now lose life immediately if your terrain becomes dangerous (tide comes, a gate is dropped on you, etc.).
+- Tide, ghost spawn, and heat transfer in Cocytus are somewhat slower now.
+- Orb of Air works nicely now.
+- Clicking to use orb powers should no longer crash the game.
+- Visited lands are recorded, so you can play them in the Euclidean mode later.
+- Female cheaters now have a different "goat" head design. (To make her more different in the coop shmup) 
+
+2015.09.05 21:20 version 7.3h
+- The Turkish translation has been updated, and some other minor errors have been fixed.
+- You can now frog-jump over the sulphur lakes.
+- The 'hardness frozen' message no longer appears outside of Princess Challenge.
+- Rock Snakes should now attack other beings correctly (lots of special cases here, and hard to make it work in a way which makes sense ;) the one moved to should be eaten completely, and whether the snake had succeeded to move or not, all the other adjacent snake's enemies (including those on heptagons) are attacked for 1HP).
+
+2015.09.08 15:18 version 7.3i
+- panning was not available in the map editor
+- zelda's pattern is now available to play with (see the Suggestions thread)
+- view range accessible with panning increased a bit in the cheat mode (including the map editor)
+- in the map editor, you can now play with temperatures/timeouts by (shift)-clicking again (although this is ugly and undocumented for now)
+
+2015.10.02 ??:?? version 7.4
+- Ivory Tower
+- Elemental Planes
+- Zebra
+- Crossroads III
+- World Overview
+- Random Pattern Mode
+- There are also some interesting changes for the more creative players! Map editor, vector graphics editor, pattern modes, and gameboard modes known from the previous versions have been merged into one. That is, while in the map editor, you can press 'r' to choose one of the patterns -- when you edit some cell, all the other cells which are equivalent according to this pattern will be changed too! You can pick one of the three implemented patterns (Emerald, Palace, Zebra), and choose which symmetries are taken into account for equivalence. You can also press 'p' to paint the cells with any color; there are also some predesigned patterns available, including the old pattern and Gameboard modes, and options to draw only hexagons or only heptagons. You can press Space to switch between the map editor and vector graphics editor, which now allows not only to edit the player character and floors, but also items and monsters; moreover, if you are editing floors and a pattern is selected, this will affect floors according to this pattern -- which allows to draw more complex tesselations, like the Sunflower picture or Zebra patter above. You can also save and load your pictures now (pictures are also automatically saved when a map is saved), and last but not least, you can now select a file when saving and loading. 
+- Also, there have been some balance changes. In the patches to 7.3, Eagles and Ghosts have been weakened. In 7.4, it is no longer possible to use Orb of Space to bring Orbs from the Land of Power (most of the power is lost, as if you tried to bring them out normally), and the Orb of Time + Orb of Shielding combination has been weakened somewhat. Ghosts can now go through Tentacles. Please inform me if you have abused these, and want to reset your score in the Leaderboards. 
+- Some things were refactored (mostly regarding monster movement, setting things of fire, and temporarily activable objects), which should hopefully make some things work in a more uniform way, make easier to introduce new features in the future, and hopefully did not break anything. 
+- It is now easier to navigate around obstacles in the shmup mode. Also, you can now select push direction when pushing thumpers in the shmup mode.
+- Hardcore mode: monsters can now kill you in the LoEM, and being stuck on dangerous terrain (fire, chasm, etc..) in hardcore mode kills you now.
+- Ivy no longer drowns.
+- You no longer can control where the key spawns by moving Orb of Space.
+- An unarmed Princess no longer can kill a skeleton.
+- If you have a highscore of at least 25 Bomberbird Eggs, the Minefield reveals nearby cells right from the start.
+- Thumper interacts better with palace features now.
+- Cutting trees works better with Mimics now (mimics cut trees when you move, and attack when you cut trees)
+- When Orb of Space is used in the Alchemist lab, it sets the color of the target cell (just like normally)
+- Some typos and missing messages. Translations are not done yet. 
+
+2015.10.04 ??:?? version 7.4a
+- the Windows version was not uploaded to Steam
+- 'o' in overview
+- Sunflower has been added as a level which you can load 
+
+2015.10.04 16:45 version 7.4b
+- Unlock status is now displayed correctly in the Zebra and Elemental Planes.
+- minor text errors fixed, Czech translation added
+- the game turning itself off while out of focus works again
+- in Crossroads III, Great Walls are no longer so completely filled with crossing Great Walls 
+
+2015.10.06 10:54 version 7.4c
+- Hex Snakes no longer stand in place when the player is invisible.
+- Onyx is no longer so dark in the stats.
+- In the shmup mode, heating Icy Land while standing on the outside works correctly now.
+- In the shmup mode, water elemental works correctly now.
+- cheating while Steam was still initializing had a chance to submit false scores to the Leaderboards, this is fixed now (probably that's why Fulgur14 got 10 Elemental Gems)
+- When a Key is generated in the Ivory Tower, is rests on a platform.
+- Improved the tesselation in the Ivory Tower, and also the Running/Striped Dog picture.
+- Water elementals no longer can go through eternal fires (to make them consistent with Orb of Water and their AI). To make the difference clear, all Eternal Fires now cycle colors slowly.
+- Russian translation updated. 
+
+2015.10.06 22:23 version 7.4d
+- I have added something temporarily which broke the Princess Quest, this is fixed. 
+
+2015.10.07 23:25 version 7.4e
+- Fire sometimes burned for incorrectly long time, this should be fixed now.
+- Improved the Orb of Summoning.
+- Switched the native Orbs for Zebra and Palace. Orb of the Frog still appears as a secondary orb in Palace, though (and is actually more frequent there than the Orb of Discord).
+- Under the effect of Orb of Discord: Vizier/Flail Guard no longer commits suicide; enemies don't attack stunned enemies (just like they don't finish off the Princess).
+- Orb of Shielding is now marked as useless in LoEM.
+- Placed the new lands from 7.4 in the correct place in the Overview.
+- Exiting the Help screen now brings you back to the previous screen.
+- Princess Quest now works in Euclidean.
+- Cheating using World Overview: you can now press Shift to remove treasures/orb powers instead of adding them; game over state is updated correctly
+- Fixed some things in the Russian translation. 
+
+2015.10.08 09:50 version 7.4f
+- Orb of Shielding is no longer marked as useless in LoEM
+- Air Elementals now do something interesting in the Shmup mode (shoot Airballs)
+- Page Up/Down keys now disable auto-rotation in the Ivory Tower
+- Stunned Hyperbugs no longer move 
+
+2015.10.15 17:02 version 7.4g
+- Random number generator has been improved. AFAICT previously the differenes in RNG on Windows and Linux caused the Windows version to create too much Eagles, so if you thought that Jungle was too hard, it could be better now.
+- The Hive have been tweaked slightly. In particular, if you have lots of royal jelly, Blue Hyperbugs appear starting more frequently (while Red and Green hyperbugs can be summoned with Orb of Summoning). Also, lots of Hyperbugs appear if you have multiple Orbs of Yendor, so you can no longer get Orbs of Yendor that easily as Vipul did.
+- The Cave Troll description mentions that they destroy nearby items on death.
+- Fixed a bug which caused the maximum scores in the Overview to be incorrectly read from the local score file. It takes some time to download the scores from Steam, which probably caused the behavior mentioned by green orange.
+- Whirlpool and Caribbean sometimes appeared as unlocked incorrectly in the Overview.
+- Tweaked the Hyperstones: there are not so many hyperstones now (the amount is based on the total number of kills, but this number is much larger now than when hyperstones were originally introduced...). Monsters can be generated on hyperstones. Crossroads III have hyperstones and monsters as they should. Some new monsters can now be generated in the Crossroads during the Hyperstone Quest.
+- Also, limited the spawn rate of Gold, as otherwise no walls are generated in the Living Cave.
+- Orb of Air is marked as useless in the Alchemist lab (since it does not work against slime -
+- it is useful against foreign monsters, or as a colorless cell, but there are too many prize orbs in Alchemist Lab anyway).
+- Tame Bomberbirds can no longer navigate boats.
+- Mines in the Hive are no longer invisible.
+- The Graveyard Shadow is now female if the PC is female.
+- Bomberbirds are now restored correctly by Orbs of Safety in the Ocean.
+- Wolves are now displayed as facing the hottest adjacent cell (unless next to the player).
+- Mines now explode when a Gargoyle is killed above them.
+- Fixed a crash which sometimes happened with mimics in the shmup mode.
+- Fixed some texts in the Polish translation. 
+
+2015.10.20 version 7.4h
+- Mine explosions now destroy dead trolls/gargoyles (but if the explosion kills the troll, the body is still left).
+- Fixed a bug which caused some monsters to attack golems/discorded enemies several times
+- Alt no longer highlights monsters while in menus. Also, Alt makes the background darker, for better visibility. The extra info text for Minefield/Hive is no longer displayed while in menus.
+- In the Quest Status/Game Over Screen, arrows, page up/down, and mousewheel now correctly scroll the last messages, and if you have pressed ESC while in the Game Over Screen, it won't be redisplayed if you start scrolling the map.
+- Turkish translation updated. 
+
+2015.11.03 ??:?? version 8.0
+- blog post: http://zenorogue.blogspot.com/2015/11/hyperrogue-80-on-steam-and-hyperrogue.html
+- Overgrown Woods
+- Land of Storms
+- Pure Tactics Mode
+- Yendor Challenge
+- Wild West
+- paper model creator added (as discussed in the last post).
+- You can now find Orb of Yendor as a prize orb in the Whirlpool (it is possible to retrieve it), and trapdoors have been slightly tweaked in the Palace while you are on the Yendor quest.
+- Fjord Trolls (as well as two new species of Troll) now create different walls than Cave Trolls, with a bit different properties.
+- Multi-HP monsters generated in the Crossroads now work correctly.
+- A bit more Pirates in the Ocean.
+- Added help text to Euclidean and Shmup modes. It is now easier to exit the Euclidean menu.
+- Added ranged orb text to more orbs.
+- You no longer get three lives by picking up an Orb of Safety in the shump mode.
+- Monsters pushed off Rock III with Orb of Air/pushing attack are now killed (except birds and skeletons). You can now also use the Orb of the Frog to jump on high rocks.
+- Improvements in the Random Pattern Mode. The Emerald-based random patterns have been improved. Added patterns based on circles. Floor pictures are now randomly assigned (Zebra/Emerald/Tower pattern are used only when the underlying pattern matches). Codes are displayed on the screen, allowing you to recognize the underlying pattern (and potentially share with the developer).
+- Coordinates are given when cheat mode is on in Euclidean.
+- fixed the scrolling in the quit screen (sometimes the messages were already scrolled when the game ended, which could cause you to miss the final message in Princess Challenge/Hardcore)
+- Orb of Storms now kills sharks in adjacent cells 
+
+2015.11.04 21:23 version 8.0a
+- Added missing text to translations.
+- Added the Czech translation.
+- Added non-dry description for the trees.
+- Stunned Pikemen and Flail Guards can be attacked normally now (but stunned Flail Guards don't hit themselves).
+- Mutant Ivies interact with Vines (just like normal Ivies).
+- balanced the Great Walls in the Land of Storms (generated horocycles made great walls less likely to appear).
+- fixed the Camelot bug mentioned by tricosahedron above
+
+2015.11.05 09:58 version 8.0b
+- Sorry, you were not sure about the Golems and I could not see how a Golem attack could prevent Mutant Ivies from growing, so I have assumed that it was false ;) In fact Mutant Ivies did not attack Golems (and other enemies), which was clearly wrong. Fixed in 8.0b. 
+
+2015.11.05 12:32 version 8.0c
+- fixed the pause screen clicking
+- updated the Russian translation
+- Orbs and Hyperstones incorrectly appeared in the pure tactics mode in Ivory Tower/Ocean, this is fixed
+
+2015.11.06 01:30 version 8.0d
+- Orb of Aether is again affected by Orb of Time; also, previously Orb of Time drained at full speed while you had an Orb of Shield (which is not protected from draining)
+- Pure tactic and Yendor Challenge now have separate scoreboards in case if you enable shmup, coop shmup, and/or Euclidean mode (local only)
+- Attacks of mimics which cause stunning now work correctly
+- Fixed the whirlpool and Camelot glitches mentioned by Vipul
+- Key in the Ocean appears on a small island again (I like the idea of having to fish for it... but I think it is better with an island after all)
+
+2015.11.08 17:11 version 8.0e
+- Yendor Challenges and Pure Tactics Mode now actually work in Euclidean. Also, the Euclidean Yendor Challenge is less stupid than before (the path is no longer in one of the cardinal directions)
+- also, separate local scoreboards are added for hardcore Yendor/PTM
+- Yendor challenge scores included only wins from the current version, this is fixed
+- the second Whirlpool bug shown by Vipul above should be fixed
+- the Minefield Yendor Challenge now finishes in the Icy Land (so that it is no longer impossible that the Key is unreachable)
+- The Living Fjord has been added to the Yendor Challenge (monster generation rules on the path are tweaked)
+- Runs with score 0 are no longer counted for the Pure Tactics Mode (this change works retroactively)
+- Orb of Aether and Shield are now always marked as used in the Land of Storms (not a proper fix, but it should be good enough for now)
+- Subtle color changes have been added to the Ocean coast
+- the troll from the Living Caves is now named consistently
+
+2015.11.09 18:08 version 8.0f
+- Global high scores are now displayed in the pure tactics menu.
+- 'pure tactics mode' title
+- Orb of Discord now works in the shmup mode.
+- Pirates/vikings now can carry items on their boats (invisible to the player, though).
+- Turn-based elements worked incorrectly in coop shmup while carrying an Orb of Speed, this is fixed (they worked in turns where OoS had an even number of charges, but in coop, OoS drops by two charges per turn, causing weird effects).
+- Save fixes: the number of saves is now recorded correctly, also fixed the possibly buggy reading of saves from an old version, and enabled the save tampering protection.
+- Leaderboard entries updated to contain the data related to the newer lands.
+- fixed Tirear's bug with incorrectly named treasures.
+- Fixed the Orb of Space multiplying powerstones. Also, the Orb of Space is now drained when it is used on a glass cabinet.
+- mines outside of the Minefield now blink.
+- if you collect a huge amount of Ambers, Albatrosses are generated on the open sea (all scores in the pure tactics mode for Ocean have been removed).
+- In some cases, monster generation was not affected by Orbs of Yendor collected, potentially allowing collecting many OoY easily -- this should be fixed (sharks in Cocytus, sharks/parrots in the Caribbean, pirates/sharks in the open Ocean, seeps everywhere, vikings/water elementals in the Living Fjord, Albatross on the coast, Tower and RRV monsters).
+- danger is now affected not only by collected Orbs of Yendor, but also by paths you have walked without collecting the Orb of Yendor -- this is to prevent strategies such as bringing many OoY together, and then unlocking all of them together. (This kicks in after walking more than two paths, and is nullified by taking an Orb of Safety.)
+
+2015.11.10 00:50 version 8.0g
+- Scores for Yendor/PTM got missing in the last update, this should be fixed.
+- Scores for the PTM removed due to the balance change update when you play in PTM (not only when you raise your score, as in 8.0f).
+- Fixed a bug with Yendor hardness (an uninitialized variable sometimes caused an extreme spike of difficulty after touching an Orb of Yendor).
+
+2015.11.10 01:48 version 8.0h
+- Magic Mirror now appears as the Mirror Land reward in the World Overview
+- after 8.0g PTM scores disappeared in Linux, this is fixed
+- higher level victories in the Ocean Yendor Challenge are nullified (if obtained in version < 8.0f)
+- Mutant Saplings generated while the land was still easy should now disappear when it becomes tougher (just like bomberbird eggs, but without hatching)
+- made the Overgrown Woods a bit easier (it seems it was too hard) -
+- by halving the effect of collected Saplings on tree density
+- obsolete scores by other players no longer appear in the in-game PTM highscore
+
+2015.11.12 01:41 version 8.0i
+- Two new achievements.
+- You can now attack Viziers in the extra turn given to you by the Orb of Speed.
+- Flail Guards now kill themselves if they try to attack an Illusion.
+- Shmup fixes: Metal Beasts are no longer killed by your attacks, Thumpers can no longer be pushed into monsters.
+- Individual scores are now displayed in Yendor Challenge (as well as in PTM).
+- Your scores in Yendor/PTM are downloaded from Steam, so you can finish some lands/challenges on one computer, and some on another. (In case of PTM, this is just the sum for each land, not the whole history.)
+- Added some texts to translations.
+
+2015.11.14 13:17 version 8.0j
+- One possible cause of Storms-related crashes fixed.
+- In the Ivory Tower challenge, Great Walls are no longer generated inside the Ivory Tower.
+- No more missing Great Walls on the barriers separating Elemental planes.
+- Whirpool now gets harder with more Orbs of Yendor collected.
+- Magic Boat direction fixed.
+- Added some texts to translations. Added some translated achievement names.
+- The Android version should be also updated soon.
+
+2015.11.21 21:35 version 8.0k
+- The problems with the leaderboards should be fixed.
+- You no longer count as conductor outside of Land of Storms (this bug nearly caused a gameover in Sprite Guard's video).
+- Winter Witches were not placed correctly as guards for the Land of Power -- Evil Golems were created, causing weird messages about burning and sometimes a possibility to enter without any orbs
+- Setting a frozen lake in Icy Land on fire turned it to fire, instead of hot water -- this is fixed.
+- Using some ranged Orbs now disables your invisibility for one or more turns.
+
+2015.11.23 15:46 version 8.0l
+- Fixed the cheats: Shift+C, Ctrl+A.
+- Friends no longer keep attacking stunned metal beasts.
+- Added "You construct some Elemental Gems!" to translations.
+- Activating Map Editor (via menu or Shift+A) resets the ghost timer.
+- Reflected lightnings no longer destroy the boat you are on.
+- Orb of Aether was not considered "used" while you were standing inside a wall.
+- Greater Demons now can be killed with fireballs in the shmup mode.
+- In the coop shmup mode, both players can detect mines now.
+- Hyperstone Quest information in the ESC screen is not displayed correctly.
+
+2015.12.05 14:45 version 8.0m
+- Thanks to TheGons, The German translation has been updated to 8.0!
+- For consistency with other Trolls, Dark Trolls now create "rubble" when killed (this should not affect pure Dead Caves, but it has some interactions)
+- For some people, Whirlpool Yendor challenge appeared as completed incorrectly -- this should be fixed
+- Camelot is now allowed to appear in Crossroads III
+- The unlocked status for Orb of Trickery/Love is now displayed correctly in the World Overview
+- Demon sharks and Aether/Winter Witches sometimes generated the confused message (or killed the player in Hardcore mode) incorrectly, this is fixed
+- Keys no longer appear on unstable floors in the Zebra ("gargoyle floor" is used to stabilize the Key)
+- You no longer can kill a Hedgehog Warrior if this allows a Pikeman to kill you
+- Wandering monsters should no longer start stunned in some situations (such as after killing Mutant Ivy in the same location)
+- In the Wild West, if you try to move in the given direction and cannot because of an Outlaw, you shoot him automatically (useful for keyboard players)
+- Chasm cells now count as isolators
+- You can no longer continue standing on a Trapdoor/LoEM after your Orb of Aether expires 
+
+2015.12.23 ??:?? version 8.1
+- blog post: http://zenorogue.blogspot.com/2015/12/hyperrogue-81-happy-holidays.html
+- Clearing
+- Haunted Woods
+- Also, there have been some improvements to the Shmup mode. Separate scoreboards have been added for coop shmup, pure tactics mode (single and two-player shmup). Since four players are supported now, all player characters can now be customized separately, and some new characters have been added (cat, dog, and Prince/Princess if you have completed the quest -- these new characters work in the normal mode too). You can assign a key for targetting special orb powers (previously you could only target with the mouse, which was inconvenient in multiplayer).
+- new shapes for Orbs (so that it is easier to tell them apart)
+- four new Yendor challenges
+- more shmup bugfixes: all players get boats in the tactical Whirlpool; missiles destroyed with Orb of Flash no longer appear in your kill list; Hedgehog rotation and missiles are now affected by the Orb of Speed in the shmup mode; "pan up/pan down" commands work as expected
+- Red/Dark Trolls no longer turn into rocks when killed in an unstable land
+- fixed the description of Palace (did not choose prince/princess correctly)
+- in the kill list, different messages are displayed when hovering over friends, constructs, and monster parts
+- fixed yet another inconsistency in the sealing of Land of Power
+- a smaller font is used for the list of items collected; more space for items in portrait mode
+- fixed unlocking information in the description for Temple etc.
+- Graveyard did become (very slightly) harder when monsters were killed -- this effect is removed
+- slime no longer spills against wind
+- when entering the Elemental Planes, you can enter planes based on the types of elementals you have killed
+- monsters in the Ivory Tower no longer can stay in midair when they can't reach you
+- added the Icy Lands as a prerequisite for Cocytus -- thus, each basic land now has an advanced version
+
+2015.12.24 01:07 version 8.1a
+- Clearing used an incorrect description
+- Wind crow kills counted double, and bomberbird kills did not count at all
+- The 't' key did leak to the gameover screen when it caused a gameover
+- Orb of Air was incorrectly also unlocked by the Ocean
+- Weird numbers were shown for the new Yendor challenges
+- graphical effects of the Orbs were displayed on the bugs and friends even without Empathy
+- Steam leaderboards for shmup/coop did not work; also reduced shmup chances to 5 in the LoEM
+- fixed yet another Space/Safety crash
+- Freedom and feathers blowing away should not work in the shmup mode; also Empathy and Undeath are now counted as bonus lives
+- Fixed some text errors, added Czech translation
+- using Safety in the coop shmup LoEM no longer causes you to die (due to starting on the same cell)
+
+2015.12.24 08:49 version 8.1b
+- The list of orbs for Empathy is now comma-separated
+- 0 to exit Yendor Challenge was working incorrectly
+- more shmup/coop PTM fixes: scores were copied from the normal mode; incorrect values; changed the number of tries for all lands to 3 (possibly to be increased later)
+- "three players" and "four players" are now displayed correctly
+- fixed Clearing in the PTM
+
+2015.12.25 14:57 version 8.1c
+- Fixed the multiplayer leaderboards.
+- All Ghosts destroy living cave now (including Tentacle+Ghosts and Friendly Ghosts).
+- Updated the Russian translation, added one missing line to translations.
+
+2015.12.28 12:30 version 8.1d
+- using the Orb of Safety during the Princess Quest was buggy (as seen in Sprite Guard's video, now the Princess automatically becomes saved in this case (so the quest is completed either by using Orb of Safety or leaving the Palace)
+- when a Guard was stunned and falled into a chasm, the Princess sometimes followed
+- removed the buggy condition (collect 10 Bounty) for unlocking the Wild West Yendor Challenge
+- fixed the removal of Black Lotuses (close to the edge with high Black Lotus count)
+- it was possible to get Cocytus adjacent to Icy/Hell even without Diamonds
+- Overgrown Woods are now more likely to be adjacent to Jungle
+- the edge of the Clearing now uses small trees (this is slightly more interesting because of interaction with fire)
+- fixed the 't' key (and the mouse button) in the Game Over screen
+- items, monsters, and mines (mines in radius 3) should not appear when using Orb of Safety -- in some cases this was not working correctly
+- fixed the Master Survivalist achievement
+- fixed some typos and non-translated texts
+
+2015.12.30 18:45 version 8.1e
+- double Ivy Roots no longer appear at low counts of Ruby (to make Jungle more friendly to newbies, and also to make the Jungle YC easier)
+- added a new achievement ("There and Back Again")
+- Orb of Aether draining away was not working correctly (you could still sit in a wall)
+- killing a Dark Troll on rubble in the Dead Cave no longer creates a wall (that was changed unintentionally in one of the recent releases; killing a Red Troll on rubble, or a Dark Troll on rubble outside of Dead Cave, still creates a wall though)
+- in the portrait mode, treasures are no longer listed over Hyperbug counts, and treasures/kills are resized if they don't fit in the given space
+- resize the achievement description if it is too long
+- advanced versions of lands are more likely to appear next to basic versions (this effect was already there, but now it is stronger)
+- the description of Clearing clearly mentions that it is only accessible from Overgrown Woods
+- Rock Snakes and Red Trolls killed in sea in the Living Fjord created too many levels of rock
+- when loading a save with negative saved Princess count, this count is removed (hopefully should no longer appear in new versions)
+
+2015.12.31 22:52 version 8.1f
+- the "not dipping" rule has been changed in the following way: previously, it was hard to find lots of treasures in land A while being in another land (e.g., Crossroads) where you have less treasures; now, this also happens when you are close to another land (distance <= 3). This was changed because it was far too easy to just wait for the White Dove Feathers in a place where you could easily escape to another land
+- removed spam messages when Hyperbugs are fighting offscreen monsters, Metal Beasts/Skeletons or Ivies
+- rock snakes are now wind resistant and wind blocking
+
+2016.01.01 13:03 version 8.1g
+- fixed random crash bugs
+- (The most frequent one seemed to be caused by generating a Palace close to a horocycle from another land, e.g., Land of Storms.)
+
+2016.01.04 23:50 version 8.1h
+- Rock snakes were rarely generated incorrectly (two snakes crossed, through rocks, etc.).
+- Jungle, R'Lyeh, Cocytus, and Hell no longer generate the player in the middle of ivy/lake.
+- disabled the new "no dipping" rule for Hyperstones.
+- only escaped Black Lotuses count for the overview highscores (and thus also PTM) now.
+
+2016.01.08 01:10 version 8.1i
+- winds caused by Air Elementals now respond immediately to Orb effects (like, say, killing the Air Elemental)
+- Friendly Ghosts and Ghosts on Tentacles should now be able to attack and be attacked through vine
+- fixed the Camelot/PTM problems reported by tricosahedron
+- some more rare crash bugs should be fixed. Also, "buggy items" now appear instead of weird treasures such as Pirate Treasure in the case of bugs in generation
+- hypersian rug mode preview
+
+2016.02.16 23:09 version 8.1j
+- (j was skipped due to some naming inconsistencies with the Android version)
+- fixes the bugs introduced in 8.1i: dropping the Dead Orbs, invisible lightnings, weird lakes appearing in the Caribbean
+- Refactored the movement routines. Please report if something could move somewhere but it cannot now, or vice versa (but from my tests, it appears that everything works correctly).
+- Enabled the Orb of Empathy + Orb of Water combo.
+- Lines are now drawn together with polygons (previously, the game was drawing polygons from the previous frame) -- movement should look slightly nicer now, this also fixes the "lines under polygons in the Hypersian Rug" problem reported by tricosahedron.
+- added some config the Hypersian Rug mode -- if the default settings do not work, one can now play with a (slightly worse) variant. Also mouse should be read correctly now.
+- added a cheat option to disable timer ghosts.
+- yet another preview -- added a mode where you play on a pure heptagonal grid. Not all lands work correctly with this mode yet (heat disperses too fast, CR2 and CR3/Elemental are not generated correctly, hex-only rules). Also, some incomplete features are available in the cheat/mapedit mode.
+
+2016.02.17 11:23 version 8.1l
+- Collecting mirrors has been fixed
+- Some graphical glitches have been fixed (orb/gun targetting cursor, pattern codes, Yendor/Caribbean numbers, grid, ASCII lines, circles, alpha for lines)
+- wandering monsters no longer appear after the game over in the shmup mode
+
+2016.02.17 14:08 version 8.1m
+- fixed some more graphical glitches (too large walls/items when starting in Euclidean, sometimes letters became transparent, circle around the map was not shown, crash reported by Patashu)
+- "heptagon only" mode is now saved correctly (and its scores do not count)
+- the Zebra pattern worked incorrectly in the graphics editor
+- added the option to use the {3,7} grid to the map editor
+
+2016.02.19 14:20 version 8.1n
+- fixed the knives going through water, fire, against gravity, and against wind.
+- fixed the problems with rendering the Hypersian Rug without OpenGL (mirror image, graphical artifacts).
+- there may be still some further tuning but all lands should work in the "heptagons only" mode, except the Clearing and RRV. (Well, RRV works without Rock Snakes)
+
+2016.02.19 22:11 version 8.1o
+- fixed the crash bug when generating Elemental Planes / Crossroads IV, introduced in 8.1n (worked only in the heptagon only mode)
+- RRV sometimes generated Yetis when it failed to generate a rock snake, this is fixed
+- shape/pattern from the Map Editor is now reset when a new game is started
+- extra line in the ghost description describing the "non-adjacent" behavior
+- even Clearing and RRV now work reasonably in the heptagon only mode. Also, the Knights give the correct numbers in the heptagon only mode
+- fixed the name of the grid in the map editor to "triheptagonal"
+
+2016.03.08 ??:?? version 8.2
+- Warped Coast
+- Rose Garden
+- Crossroads IV
+- heptagonal mode
+- chaos mode
+- Hypersian Rug mode
+- new floor graphics for Euclidean/heptagonal mode
+- pure heptagonal mode fixes/balances: compass earlier, weakened closing plates, balanced the Princess Quest, sealands should no longer be generated on beaches
+- activating the Palace Quest in the Overview while cheating teleports you to Princess (instead of an empty land)
+- fixed the mirrors in shmup mode: shards taken outside of mirror land no longer count, knives breaking mirrors/mirages are mirrored now, mirrors/mirages created by mirrors worked incorrectly
+- birds now can fly over the Red Rock Valley
+- friendly creatures are now better at stabbing
+- in the map editor, hotkeys were replaced by searching for a given word
+- you can no longer push thumper on a boat
+- Hypersian Rug mode: Home/End keys
+- Crossroads in PTM didn't mirrors
+- slight color changes, to help the colorblind people 
+
+2016.03.13 18:56 version 8.2a
+- after using Orb of Safety in the Hive, no nests appear nearby
+- after applying Orb of Space to Orb of Life or Orb of Friendship, you have to move to make space for your buddy
+- saved games in shmup mode did not remember the number of players
+- the highscores shown in the World Overview are now based on the special mode you are playing (to unlock special features, a highscore in any mode is sufficient)
+- new lands from 8.2 did not show correctly as unlocked in the World Overview
+- typos fixed
+- navigating the Ocean in the heptagonal mode caused crashes, these should be fixed now
+- slightly changed the rules of the Living Caves in the Chaos mode (empty cells outside of the land no longer count as 5 floors)
+- a new graphic for heptagonal mirrors in the heptagonal mode
+- highlighting (Alt/high contrast) now highlights mirrors
+- fixed some graphics which were drawn incorrectly in the heptagonal mode
+- the bug with teleporting Ratlings and confused birds should be fixed
+- the generator is more careful not to generate things outside of their lands (ivies, rock formations, red gems)
+- the weird movement of boats with Orb of the Warp is fixed
+- the message "You cannot move between the triangular cells here" is replaced in the heptagonal mode
+- when under influence of a rosebush, ranged orbs can be targeted only towards the rosebush
+- balancing the Warped Coast: collecting Corals did not increase the number of Ratlings on the seas; Ratlings now avoid Corals so that they won't bring treasure to you; Ratling Avengers now sometimes appear if you kill Ratlings close to the open sea
+
+2016.03.15 11:27 version 8.2b
+- nest radius is reduced in the Chaos mode, to make the Hive more dangerous and not cover the whole FOV
+- the effect of Demon Daisies on the generation on demons in the Chaos mode is now 4x normal (normally, demon generation is intentionally low to help you with doing the Yendor Quest in Hell -- this is irrelevant in the Chaos mode, and moreover, there should be no safe lands in the Chaos mode)
+- previously treasures in land B on the edge of your sight range were despawned if you were in land A, and you had more than 20 treasures in land B than in A -- this number is changed to 10 in the Chaos Mode, to encourage collecting treasures more evenly
+- additionally, treasures are despawned and no new White Dove Feathers appear if the ghost timer is high, to prevent some exploits (not only in Chaos mode)
+- the basic radius of mine uncovering is increased in the shmup mode
+- a bug caused the game to stop generating Great Walls sometimes
+- monsters should no longer decide to kill their friends if they are forced to move by dangerous terrain
+- offscreen monster movement (usually Hyperbug) sometimes caused a crash
+- no monsters were generated in the Chaotic Temple of Cthulhu
+
+2016.03.16 03:18 version 8.2c
+- sometimes a row of Temple tiles was generated next to a Great Wall
+- in Chaos mode, only 25% boundaries of Warped Sea/Warped Coast/Elemental Planes lead to another subland now; also, R'Lyeh's non-Ocean boundaries are unlocked after collecting just one Statue
+- Ice Wolves should no longer move if all their possible moves decrease heat
+- monsters no longer try to get into the space on the other side of a half-vine from the PC
+- Mutant Ivies under influence of Orb of Discord no longer attack themselves (or other Mutant Ivies)
+- some more bugs exposed by the Chaos mode fixed (caused by Hyperbugs moving offscreen, or genrating multi-tile monsters crashing into each other)
+
+2016.03.16 16:18 version 8.2d
+- rose scent now respects the rules of the Alchemist Lab
+- theme messages regarding Camelot no longer appear in the Chaos mode
+- improved the generation of wandering pirate/restricted monsters
+- changed the color of Cocytus in non-Escher chaos mode to make it easier to tell from the Icy Land
+- changed the color of Emerald Mine in the Land Overview to emerald
+
+2016.03.18 17:20 version 8.2e
+- Orbs of Aether and Shielding now make you ignore the scent.
+- Air currents (caused by both Windy Plains and Air Elementals) now always prevent the spread of scent.
+- Fixed Sharks (and some other creatures) being stuck diagonally adjacent to the player in a warped zone. Also "confused" messages should no longer appear for some monsters there.
+- In the shoot'em up mode, the default radius of mine uncovering is now 1. Also, Orb of Teleport takes care not to send two players too close or too far from each other, and the issue with birds being confused by PCs on boats should be fixed.
+- Holes ('???') in the Ocean should be fixed now.
+- In the special mode menu, it is clearly shown that shmup mode includes co-op.
+- The PC now dies in the situation from snowyowl0's screenshot (too complicated to create a warning that spreading slime in the Land of Storms carelessly leads to being electrocuted immediately)
+- Some extra diagnostic options have been added.
+
+2016.03.18 21:18 version 8.2f
+- Aether/Shielding should protect from rosebushes correctly now.
+- Boats should no longer overwrite warp gates in the Warped Sea.
+- Killing Miners now helps with high rock formations.
+- Cocytus/Icy Land is now affected by fires on adjacent cells.
+
+2016.03.19 21:21 version 8.2g
+- Did I miss the patch that made Orb Of Aether stop allowing you to ignore rock heights? 
+- I've got Ivory Towers displaying odd behavior because they're spawning Crossroads IVs inside of them, and they don't know how to handle them. 
+- (also Crossroads IV should no longer appear in the Haunted Woods).
+
+2016.04.03 12:57 version 8.2i
+- fixed the "Rogue kills Vizier" message
+- shift+K in the debug mode no longer kills you
+- when Orbs of Water were generated as prize orbs, only boat was generated without Orb
+- also, fixed the stranded boat graphics in the Hive
+- centering for coop games with 3 or 4 players should work better now
+- add the Warped Coast to the random pattern mode
+- experimental preview: Fractal landscape generation
+- preview: conformal mode
+
+2016.04.05 02:28 version 8.2j
+- air elementals' whirlwind disappear immediately on kill
+- images created by the new mode (as well as the map editor and the paper model creator) are now created in the PNG format instead of BMP (under Windows/Linux) [EDIT: does not work on Windows yet -- going back to BMP for now]
+- drawing with SDL_gfx instead of OpenGL (which is used when rendering PNGs) is now supported under Linux
+- half-plane and band models now work with OpenGL (and thus they have better fps)
+- inspired by simon_clarkstone's comment above, the path taken by the character is now displayed on the map when history display is active, and there is an option to automatically render a band .png when the player picks up an Orb of Safety or ends the run. Also, progress messages are now shown while working
+- if band/half-plane model is chosen and we are on the beach/Ivory Tower or in a horocycle, the display is rotated based on the special direction and the rotation chosen in the bandmode menu. (In case if the special direction is not obvious in the normal game, this works only in the cheat mode.) This looks nicely in the half-plane model, where horocycles centered at the "ideal point above in the infinity" are represented as vertical straight lines.
+
+2016.04.24 02:20 version 8.2k
+- I seem to be getting a strange behavior accessing Ivory Tower. Gravity does not rotate the view, and some X's appear on cells around the player. Is this intended? Running 8.2j on Windows 10. 
+- For the Android version, the fullscreen mode is now optional, and fixed the bug with the display of ASCII characters. 
+
+2016.05.04 21:07 version 8.2l
+- saving to PNG now works in Windows
+- killing red trolls in the Ivory Tower now generates "dead trolls", while killing rock snakes generates platforms
+- press 'i' while in the basic config to quickly increase the "distance from hyperboloid" parameter and decrease zoom at the same time (as the parameters approach infinity, we get the Gans model); also the game reacts quicker to parameter changes
+- 'polygonal' and 'polynomial' models added to the conformal/history mode: polygonal renders the map in a shape of a regular polygon or a star (they work best with the "high quality screenshot" option from the map editor)
+
+2016.05.20 19:06 version 8.3
+- blog post: https://steamcommunity.com/linkfilter/?url=http://zenorogue.blogspot.com/2016/05/hyperrogue-83.html
+- Yendorian Forest
+- Dragons
+- Galapagos
+- history/conformal mode released officially
+- Killing Rock Snakes in the Whirlpool no longer creates terrain
+- Fixed Servants in the shmup mode; also Lightning and Flash should now auto-activate
+- It is now allowed to enable cheat mode in PTM (but only if no treasures yet)
+- A command line option to automatically turn cheat on
+- A new floor pattern for the Rose Garden
+- Extra texts for the Knights of Camelot
+- Minor improvements in the Vector Graphics Editor: vertices of the current layer are now marked, Shift+L to go back to the previous layer, '+' to increase the number of rotational symmetry, it is now possible to set rotations and symmetries before pressing 'n'
+- Since Sandworms and (non-withdrawing) Tentacles attack by moving into the target's location and eating them, they won't be able to do this if they cannot move there. Rock Snakes and withdrawing Tentacles attack all adjacent cells, without movement -- Tentacles did not work correctly in the hardcore mode, this is fixed.
+- Princess Challenge now unlocks immediately when it should (not after restarting) 
+
+2016.05.20 19:06 version 8.3a
+- adds the Czech translation, fixes some texts, and makes the Dragon Chasms Yendor Challenge a bit harder.
+
+2016.05.21 00:26 version 8.3b
+- kill/killtype count should be fixed.
+- Land of Storms should be fixed.
+- Sorted the Land Overview a bit.
+- wandering Sparrowhawks have been added. [Removed the top scores from the Leaderboards: tricosahedron's 125, Vipul's 50 something and Deathroll's 46]
+- Dragon Scales now disappear after 500 turns.
+- Stunned Tortoises now display only the shell.
+
+2016.05.21 23:18 version 8.3c
+- Land of Storms should be fixed (hopefully for real this time).
+- fixed the description of the Vineyard.
+- the cheat counter is now raised when you click on things in the World Overview in the cheat mode.
+
+2016.05.23 01:19 version 8.3d
+- updated the Russian translation
+- added a message
+- enabling the cheat mode should disable reloading the save
+- while looking for the ghost bug, I have found that the ghost timer is reset if you scroll (without moving) -- this is fixed. Not sure if this has anything to do with the reported bug, but you can now enable the cheat mode and press Ctrl+G to verify the number of turns.
+- the Hypersian Rug mode is now sensitive to the "eye distance" parameter
+- cheat count is now increased if you use some of the "cheat only" things from the conformal menu
+- Also, I have configured the Steam cloud, so your local scores and saves should be automatically transferred between computers.
+
+2016.05.23 22:27 version 8.3e
+- fixed some problems with the graphics editor (Shift+L working incorrectly, crash bug on using L too many times, vertices were drawn incorrectly)
+- Crossroads IV should no longer spawn in Galapagos
+- fixed some minor texts missing from translations
+
+2016.05.27 12:42 version 8.3f
+- fixed the Yendorian Forest generated empty when bordering Crossroads IV
+- Crossroads IV should no longer intersect Haunted Woods
+- it is now a bit easier to exit the Graveyard (previously Haunted Woods made Great Walls less likely to spawn)
+- Friendly Ghosts of stunned monsters no longer start stunned
+- Stabbing attacks, and attacks against Viziers, now can produce Friendly Ghosts (but not Flail Guards, since they kill themselves)
+- Dry Forest and Dragon Chasms no longer can be adjacent
+- Orb of the Mind can now be used to damage a Dragon
+- fixed the interaction of Time and Domination and Energy
+- female PCs are now called heroines, not heroes
+- fixed the Nasty Pet achievement
+- friends are no longer said to "kill" the Dragon if then only damage it
+- you can no longer push Thumpers and Big Statues even if you would be attacked by a Tentacle/Sandworm
+- antialiasing glitches reported by Patashu should be fixed
+- the source code missed some auxiliary files and the Makefiles were outdated
+
+2016.05.27 20:29 version 8.3g
+- fixed a crash bug with "tortoise heroine"
+- fixed two minor bugs in the Polish translation
+- dragon floor files are now displayed above other floors
+- killing an Albatross now reduces your charges of Orb of Luck slightly
+- map editor a bit more resilient when placing dragons (but still can crash)
+
+2016.06.02 01:10 version 8.3h
+- monsters with non-standard movement abilities tried to path through other monsters (e.g. Leaders tried to go through Tentacles) -- this is fixed, they only path through the PC and allies, except non-Dragon mounted worms. Also, they now try a bit harder to find the path
+- scent-resistant creatures were still unable to attack against rose (bug affected both Rose Ladies and the player with Orb of Beauty)
+- Mutant Ivy no longer moves on you if you have Orb of Shielding
+- leaving the Yendor Challenge no longer leaves you in the cheat mode
+- fixed orbs' appearance as prize orbs in some lands: Orb of Domination is considered useless in most lands, Orb of Luck is useless in Endorian and Galapagos, Orbs of Fire and Dragon are dangerous in Yendorian Forest, most offensive orbs are forbidden in Galapagos but Orb of Fish is actually useful
+- fixed some subtleties which caused HyperRogue not to compile under C++11 ('C++11 requires a space between literal and string macro' and 'cannot bind bitfield')
+- fixed the tortoise hero crash in Polish
+- immediate reaction to baby tortoise
+
+2016.06.08 01:34 version 8.3i
+- Cheats ('c') appears in the menu if you are in the cheat mode. This menu allows you to do cheating with mouse only
+- some Yendor challenges set your treasure high scores while they should not (I think they would reset on game restart, but not on Android)
+- fixed a problem which caused incorrect grounding of the Ivory Tower under some compilers
+- rosebush scent no longer breaks your multiplayer shmup game by crashing the players into each other (without possibility of splitting)
+- tides are now shown correctly in high quality shots (previously the state when the cell was last seen was shown), updated the image on site
+- the main menu (and most of the things from there) are ported to the Android version (and the upcoming iOS version), replacing most of the items in the current Android menu
+- some source files missed license headers
+
+2016.06.23 00:09 version 8.3j
+- Fixed bugs with breaking weak branches (they were not broken in the shmup mode, but they were broken by flying/aethereal creatures).
+- Orb of Aether now allows you to fly in the Ivory Tower/Yendorian Forest. Also it works correctly with Empathy.
+- When you reload the game after using the Orb of Safety, you will be brought back to exactly the same place now.
+- Added some missing lines to Czech/Russian.
+- The description of a Dragon now mentions that you have to kill it in the Dragon Chasms to get treasure.
+- Fixed a typo in the description of Elixir of Life.
+- Fixed an unitialized variable which caused a crash when running langen on some systems. Also renamed the function/field "hash" because this name causes problems on newer compilers.
+- Improved the German translation (work in progress).
+- Also, the iOS version of HyperRogue (8.3i) is released on the AppStore! ( AppStore link: https://itunes.apple.com/us/app/hyperrogue/id1122485103 blog post: http://zenorogue.blogspot.com/2016/06/hyperrogue-is-now-available-in-ios-app.html ) 
+
+2016.08.03 ??:?? version 9.0
+- Kraken Depths
+- Burial Grounds
+- Trollheim
+- turn-based multiplayer
+- [UI] In previous versions, keyboard movement was somewhat risky -- sometimes it was hard to tell which key moves where. As shown on the screenshot above, HyperRogue can now display arrows -- these correspond to movement keys.
+- Cleaning the kill list: first monsters, then parts, then friends. As for monster parts, the number of Dragon/Kraken parts destroyed is now counted, and Mutant Ivy kill count now counts only ones killed directly (for consistency with normal Ivies -- the counts were not right in the Clearing anyway, where the actual counts would reach billions easily)
+- some mechanics were not appropriately explained in their descriptions: auto-triggering Orbs (Flash/Lightning), targettable Orbs (it was not made clear that they cannot be targetted at too close or too far ranges), auto-explore radius for the Minefield
+- More information about lands. For land with unlock requirements, the progress of unlocking is shown. Also it is clear which lands are not available in special modes, and which quests are optional for Hyperstone Quest.
+- The option to show heptagons did not work in some lands, and was confusing in some other lands -- now, it marks heptagons with dots (as it previously worked in the Red Rock Valley)
+- version number now always shown in the bottom left corner (useful when you watch recordings of HyperRogue)
+- A slight change to the Minefield: you can now mark mines by hovering over a cell and pressing 'm'. This also happens automatically if you know all mines adjacent to some cell. Marking mines prevents your allies from going there, and gives you a warning when you try to step on a marked cell. Cells where a monster moved, or cells with items, are marked safe (and mines set on items explode immediately now, so you can always be sure that cells with items are safe).
+- Warnings. The checkmate rule works well to protect you from most stupid mistakes, but there are some mistakes where it does not help because the actual death would happen on the next turn -- like stepping on a known mine, or moving under attack of a Kraken, in a boat (this does not kill you immediately, it just destroys your boat). Such moves could be fatal or not, and it is hard to check what is the case -- for example, if you step on a mine while escaping from an adjacent Water Elemental, the Water Elemental will catch up and extinguish the fires immediately -- so only a very basic check is made, and you can ignore the warning by repeating the action. 
+- [bugfixes] Crystal Sages, Dragons, and Fire Cultists can attack all targets now (not only the player)
+- fish could not go through sunken items
+- fixed the bug with Orb of the Fish not letting one to stay in place in Cocytus
+- Orb of Time did not work with Orbs of Aether and Thorns
+- Shadows now actually attack (previously they only affected the checkmate rule)
+- no more burning/sinking/falling messages for the Shadow
+- The log file now mentions if the game was played in pure hardcore mode
+- mouse can now step on mines (without triggering them)
+- the Orb of Lightning did not reflect off walls correctly
+- improved pathfinding for monsters -- it seems they no longer act strangely in tight corridors
+- Crossroads IV no longer appear in incomplete Rlyeh
+- allies were not killed by Rosebushes
+- Bomberbirds did not explode when killed by Rosebushes
+- in the Shmup mode, monsters are now less likely to get stuck
+- Ghosts no longer fall off cliffs and die
+- Yendorian trees are now burned by lightning (also Orb of Storms is now marked as dangerous there)
+- Rich Metal Beasts killed by Orb of Storms now also produces Fulgurite in shmup
+- movement to Orb of the Shell is now possible even if under attack
+- some monsters with non-standard movement abilities moved unpredictably (i.e., based on the internal representation) -- now they move randomly
+- fixed a bug with Ocean generation in the pure heptagonal mode
+- Water Elementals now destroy manned boats in the shmup mode
+- Sharks (except Demon Sharks) now suffocate when stranded on land
+- monsters at unstable locations in the Ivory Tower can now falling into dangerous terrain, or into other monsters attacking them
+- adjusted temperature and livecave value of some monsters
+- Friendly Ghosts no longer ride boats; they are generated from Dragon and Pikeman kills 
+- [fixes] a new icon!
+- added a leaderboard for the heptagonal mode
+- replaced Servant (from the Ivory Tower) with Familiar, and added Familiar as the seventh choice for the player character (no gameplay changes), also changed the music in the Ivory Tower
+- new graphics for Eggs, sadly they are not triangular anymore
+- pressing Shift now cycles in the reverse direction in more contexts (shift+N to reduce the number of players, shift+M to go back in conformal models)
+- display colors in char config; also the movement star color can be configured now
+- bugcounts and minecounts are no longer displayed when you are in a menu
+- the menu for selecting the score to display works better now: some Orbs which were there are removed; pressing keys no longer does weird things, but rather allows you to search for a specific entry (just like in the Map Editor)
+- two new models added to the conformal menu (the models are not conformal, but they fit there)
+- translation fixes: conformal models' names, Dragon description, Polish translation
+- not crash on very long pathnames
+- improved wall display in Hive/Dragon
+- draw multiple Flash effects
+- quit from menu sends achievements
+- graphical effect for the Orb of Beauty
+- Unlocking rules were not shown for Crossroads II
+- 'chop down' used for trees 
+
+2016.08.04 11:35 version 9.0a
+- updated the names for the config options ("mark heptagons", "help for keyboard users" -- to disable the arrow markers permanently switch "help for keyboard users" to OFF)
+- fixed the incorrent requirement shown for treasure-based unlocks ("required 10 spice (0/3)")
+- added the missing requirements for Kraken Depths and Burial Grounds (as Fulgur14 said, these lands unlock together with their crucial Orb)
+- the buggy mine symbol displayed was hopefully fixed
+- fixed typo "targetted"
+- leaderboards seem to be fixed
+
+2016.08.05 03:15 version 9.0b
+- hopefully fixed the problem with "???" land
+- removed a potential cause of the slowdown
+- fixed the Necromancer not moving (no idea about the Cultist)
+- treasure leaderboards worked in heptagonal/multiplayer modes while they should not
+- fixed a rare crash (Lancer moving on the edge of generated area)
+- fixed the mouse control in azimuthal models
+- mouse control in multiplayer
+- does the update help with the music problems? (I have updated the SDL_mixer libraries in the Windows package, and increased the chunksize parameter)
+
+2016.08.06 12:20 version 9.0c
+- updated the PL/CZ/RU translations
+- Orb of Empathy now mentions that it works with Orb of the Stone
+- Cultists no longer do nothing when at distance < 4
+- fixed attacking Ghosts over Trees
+- fixed Sharks moving against current
+- fixed the requirements displayed in the description of R'Lyeh and Burial Grounds
+- fixed monster fight messages ("X attacks Y")
+- fixed the game not registering game over after using up orbs
+- fixed the Hyperstone quest log
+- fixed enabling/disabling the shmup mode
+- unlock messages for Trollheim / Orb of the Sword / Elemental Plains (actually added in the previous update)
+- fixed treasure count displayed on collection of mirror shards, elemental shards, elemental gems, and ancient jewelry
+- fixed misleading messages when attacking Dragons or Krakens
+- energy sword now destroys vines, for consistency
+- energy sword now can destroy the Shadow for one turn
+- Air Elemental didn't blow when it did not move
+- player did not break weak branches
+- fixed the unnecessary messages "You cannot target that close!" etc. displayed when having orbs
+- troll nests in Trollheim should no longer appear too close to Great Walls
+- greatly reduced the frequency of prize orbs in the Burial Grounds (e.g. Flash appeared way too often)
+- previously trying to turn off the hardcore mode after game over did nothing -- now it starts a new non-hardcore game
+- the hardcore turn-based multiplayer mode should work now
+- fixed some achievement names and descriptions, updated the PL/CZ/RU translations
+
+2016.08.06 17:16 version 9.0d
+- mirror shards were collected twice
+- prize mirrors did not appear in the Crossroads and some other lands
+- mine marking is now documented
+- added achievement "heptagonal knight"
+- more minor updates to translations
+- Baby Tortoises are no longer left behind when playing in Chaos mode
+
+2016.08.06 21:49 version 9.0e
+- the bugs reported by tricosahedron should be fixed (slowdown was because of Knights making sure that they don't get electrocuted, also another useless expensive call was removed, and crash was caused by Pikemen moving on the edge of the visible area).
+- Also Orb of Winter is now correctly categorized in Dragon Chasms.
+
+2016.08.26 11:49 version 9.0f
+- Fixed the bug with Rock Snakes disabling the generation of complex structures
+- Empathy+Aether no longer lets Knights or your friends to go through the Round Table (previously Empathy was enough to let Knights in)
+- Each Elemental Plane is now likely to appear next to the other land when the given Elemental appears. Also Trollheim is now likely to appear next to other Troll lands
+- Coastal and aquatic lands have a line explaining their connection rules in the description
+- Orbs of Fish are no longer marked as useless in Kraken Depths
+- Mines are now highlighted automatically only for the cell you are on
+- Fixed some missing fight messages (when stabbing, approaching, or when special movement monsters attacked your friends)
+- Tame Bomberbirds no longer die immediately when hatched on a boat
+- Moved the Ivory Tower and the Zebra in the Overview
+- No more "You collect the Grimoire (N+1)" messages if you don't actually collect it
+- Ancient Jewelry now gets stolen if you dig it out, and go away without collecting it
+- Ancient Jewelry is now protected from the Orb of Space (not sure about balance but surely it was buggy; also it is now destroyed by Water Elementals for technical reasons)
+- Trollheim sometimes generated nests on Great Walls incorrectly
+- Golden Eggs from Trollheim get stolen 750 turns after the Trolls leave, to prevent strategies where you defeat many nests then collect the eggs easily
+- fixed orb ordering for Orb of the Stone
+- Orb of Luck should no longer appear in Crossroads variants in the Pure Tactics Mode
+- Slime Beasts did not target your allies if they were on a different color but adjacent to their color (and similar for other monsters with special movement rules)
+- just for fun: Orb of Nature, which turns you into an Ivy -- cheat mode only for now (press Ctrl+X in the cheat mode to get it), no special ideas for the land for it yet
+
+2016.09.01 13:25 version 9.0g
+- a leaderboard has been added for multiplayer turn-based score.
+- Fixed the problem of ghosts not appearing (the flag was not set correctly after loading a saved game)
+- It was possible to move a big statue even though it would cause you to be eaten by a Tentacle
+- Aether did not let you pass through walls
+- Fixed problems with times recorded in the local highscore file: one problem was that the time was doubled on game over (more precisely, if you started/loaded the game at time x, had game over at time y, and quit at time z, the result was (y-x)+(z-x) instead of (y-x)), and the other problem was that time was reset when looking at the local highscore file. (I have not tried to fix the old times)
+- the screen no longer moves while you are in the overview (previously it moved and did not stop)
+- the message when the dragon breathes at a location with no monster is no longer "The dragon breathes fire at no monster".
+- Input config now appears in the advanced config menu, and shmup/multiplayer in the special modes menu (both lead to the same menu which works as previously, but I think it is more intuitive that way)
+- Fixed problems with joystick control (turn-based configured joystick movement was buggy; moved the old style joystick configuration to the input config menu; also added dead zones as requested by Arcanacra)
+- Added an option to display a circle over the current cell targeted by the mouse (this feature was already there in mobile -- now you can choose whether you want it); also added the sight range and reverse control options from the mobile version
+- Also, it is now shown where will the pushed thumper/monster go (with extra arrows or circle)
+- Improved the Help screen. Now, it explains that you should aim for 10 or 25 treasures, and that you can use 'o' for the Overview. Pressing F1 now always shows the general help (context help is only shown if you press F1 after scrolling). Welcome messages are given in all modes, and they point to F1 in the standard mode.
+- Multiple messages with the same body are now collapsed.
+
+2016.09.01 15:44 version 9.0h
+- The mirror images are trying to turn to face the mouse cursor and it seems to cause them to spin uncontrollably quite often. It's just a graphical bug as far as I can see with no effect on gameplay, but it's quite unpleasant. 
+
+2016.09.18 21:56 version 9.0i
+- Version 9.0i brings a major overhaul of all menus. The new menus should look better, and adjust to the screen size better (especially mobile). The color dialog has been improved, and it is now used when you edit the colors of your character. Most numerical options are replaced with subdialogs when you can enter the numbers directly, or adjust them with arrows or sliders; and some help is provided for some of the less clear numbers.
+- 'switch places' message is no longer shown if the monster is destroyed
+- the message '... is destroyed' is now shown if the switched monster is destroyed for some weird reason (like, if its place switching is impossible because of gravity, as probably happened for wonderfullizardofoz)
+- Orb of the Warp now destroys half-vines
+- dead Forest Trolls in the Overgrown Woods get back their old color, as they were hard to distinguish from trees
+- sandworm attacks did nothing to the player in the hardcore mode
+- checkmate rule did partially take your waning shield into account, even if it was about to run out
+- Orb of Beauty now kills bird sover dangerous terrain
+- monsters stunned while in an unstable location in the gravity lands are now killed immediately (weird in some cases, but I don't see a good rule here)
+- fixed Orb of the Frog causing unwanted jumps in the turn-based multiplayer/configured input
+- the hypersian rug mode is now affected by the "sight range" parameter (previously cells outside of the "sight range" were drawn black, now they are not drawn at all)
+- Scores obtained in other modes are no longer counted in indices in the local scoreboard. Also scores are now sorted correctly.
+
+2016.09.19 13:37 version 9.0j
+- prince(ss) challenge description is no longer unstable while in multiplayer
+- in the special modes menu, the multiplayer item is listed as "on" iff either in multiplayer or in shmup (previously only shmup was considered)
+- menu items are now selected on mouse-up, not mouse-down; also sliders no longer can trigger immediately
+- menus can be navigated with arrows now
+
+2016.09.22 16:50 version 9.0k
+- Right click no longer causes movement.
+- Your last click no longer activates option on the game over screen. Also clicking during the game over screen is no longer understood as trying to move.
+- Fixed the structure display (cheat Ctrl+W) in the heptagonal mode.
+- preview: a "spherical mode" is added
+
+2016.09.25 21:19 version 9.0l
+- The "(v) menu" button did not work. Also buttons on the ESC-screen now respond to clicks.
+- Fixed warnings issued incorrectly when using the mouse, or ones associated with Krakens.
+- Renamed the "dist from hyperboloid ctr" parameter to "projection", also provided the proper names in the spherical mode.
+- Improvements to the spherical mode: Ghosts no longer spawn, but treasures and orbs do. Improved the generation algorithm for several lands (Warped Coast, Palace, Elemental Planes, Crossroads, Crossroads IV, Land of Storms). When looking from the outside (projection>1), arrows look correctly now, and tiles that you do not see should disappear more correctly. Fixed the ivy/worm graphics. In general, it makes more sense as a game now.
+- it was impossible to return to the PTM game after viewing the PTM table (using the mouse) -- fixed
+
+2016.09.26 10:28 version 9.0m
+- fix some problems with the generation of Ocean.
+- elliptic geometry is added
+
+2016.09.30 18:09 version 9.0n
+- The issues reported by _monad should be fixed in 9.0n (regarding elliptic)
+- Polish and Czech translations are updated (new help/welcome messages, new geometries)
+- Orb of the Sword now works correctly in elliptic
+- both charges are now generated in the elliptic Land of Storms
+
+2016.10.01 01:31 version 9.0o
+- updates the Russian translation. Also the welcome message is now translated if you are using the default Steam language
+- Spherical/elliptic scores should no longer be submitted to the leaderboards
+- Pressing Space (centering) in the elliptic mode works correctly now
+
+2016.10.06 20:17 version 9.0p
+- The kraken bug should be hopefully fixed.
+- The bug with dragon-riding cats/dogs/familiars should be fixed.
+- Activating the Hypersian Rug option while in spherical now takes you to the "projection" parameter setting.
+- Some bugs with mobile versions should be fixed (once released)
+
+2016.10.13 11:48 version 9.0c
+- fixed the dog stripes
+- fixed dropping dead orbs by clicking
+- fixed some missing translations (in Polish for now)
+- map/graphics editor can now output in the SVG (vector-based) format
+
+2016.10.28 22:36 version 9.1
+- Halloween mini-game
+- Major overhaul of the user interface. Most of this has been actually done in patch 9.0i. The new menus should look better, and adjust to the screen size better (especially mobile). The color dialog has been improved, and it is now used when you edit the colors of your character. Most numerical options are replaced with subdialogs when you can enter the numbers directly, or adjust them with arrows or sliders; and some help is provided for some of the less clear numbers. In 9.1, additionally pressing F5 or F10 while in good game won't stop immediately (ESC screen will be shown first).
+- Improvements to the Prince(ss) quest. Some bugs were fixed (jealousy did not work, monsters tended to just stay in place after hitting the Princess -- now they ignore her while she is stunned, and also the stun time is extended). If you have saved the Princess successfully, but she dies later, you can revive her with Orb of Love after you collect 20 $$$ more.
+- Orb power is now drained after the monsters move, not immediately after the movement (so Shielding at 1 charge will still defend you for the next turn, and Aether at 1 charge will let you move once more) -- this should be much more intuitive, especially with Orb of Time. Also fixed some bugs with Orb of Time (Thorns or Aether were considered to be used even though they were not). Also fixed Ghosts and Rock Snakes, who did not work correctly with Orb of the Shell/hardcore mode.
+- Knights of Camelot now quote Euclid, Lobachevsky, Gauss, and Escher.
+- As a reference to Deadly Rooms of Death, Goblins are now afraid of energy swords, and won't step on cells adjacent to them.
+- You can now change the projection quickly by pressing number keys. This is useful on the sphere, and also if you want to see the different models of hyperbolic plane quickly. 1 (orthographic or Gans model), 2, 3 (stereographic or Poincaré), 4 (gnomonic or Klein). 
+
+2016.10.29 16:18 version 9.1a
+- Just two shots are given for Orb of the Dragon in the Halloween. (Please tell me if you have been abusing this and your score should be deleted)
+- Halloween mini-game should appear in the main menu only close to Halloween (otherwise press Ctrl+Y in the main menu, or special modes -> euclidean/elliptic -> spherical -> Halloween).
+- Updated Russian and Czech translations to 9.1, German translation to 8.3, and some fixes in the Polish translation (thanks to green orange, Fulgur14, Michael Heerdegen, and Tehora).
+- Searching for things by name in the map editor now works according to the translation.
+- Aether now makes you non-conductive as it should.
+
+2016.10.30 18:47 version 9.1b
+- fixed Orb of the Speed (something got messed up in the orb order changes in 9.1)
+- mine will be automatically marked if you detect it from outside the minefield
+- checkmate rule did not expect Flash Witches to attack if the only monster in their range was killed
+- Flash Witches did not actually attack the player (in Hardcore/Orb of the Shell cases)
+
+2016.11.06 15:19 version 9.1c
+- fixed the message "Vizier kills the Rogue" when the Rogue kills the Vizier
+- The message "a magical weapon is waiting for you" now appears after collecting 10 sunken treasure
+- fixed the problem with Orbs of Air and Mind used against the Kraken. (blowing off tentacles, blasting the head, message when blasting a tentacle)
+- fixed the issues with wandering monster generation in the Ivory Tower (Apples could bring extra monsters, Familiars were not generated).
+- fixed the auto-reveal in the Minefield at 20+ eggs
+- the Orb of Dragon was considered "useless" in lands without worm-like creatures -- this was supposed to be the Orb of Domination
+- fixed the message when using Orb of Space while standing on a Compass
+- High contrast/Alt mode now highlights only active Ivy branches
+- Zombies in Halloween are now darker.
+- Fixed the PC facing after using Orb of the Frog or the strong wind.
+
+2016.11.20 20:44 version 9.1d
+- preview: 3D display
+- grid improvements
+- key '4' fixed, also '5', '6', and '7' can be used to switch other display options
+- fixed the calculation of distances in spherical mode
+- Improved the ASCII display for Krakens and Dragons (previously the wound status was not shown), Tortoises, and stunned monsters.
+- setting fullscreen always works as if keypressed now
+- score is now displayed correctly in Halloween
+- goblins will no longer move senselessly when they can't reach you
+- "Native to Camelot" instead of "Native in the Camelot"
+- fixed Palace description
+- fixed Orb of Time + Orb of the Sword II
+- Prize orbs now appear in the Red Rock Valley. Also Orbs of Space are more frequent there now.
+- Orb of the Aether now allows you to move against the wind (as expected).
+
+
+2016.11.22 11:44 version 9.1e
+- fixed the rosewave colors broken in the last update, Onyxes no longer change colors
+- ASCII mode fixes: using distinct ASCII symbols for weak/solid/trunk in the Yendorian forest; quicker start-up and better letter sizes
+- Chaos mode fixes: Orb of the Dragon appeared too fast, Troll nests appeared with way too low probability
+- 3D mode fixes: red outlines are no longer displayed on chasms; changed the vertical alignment of in-wall items and monsters, Ancient Jewelry is now somewhat transparent
+
+2016.11.27 00:06 version 9.1f
+- simple 3D effects to the monsters. This feature is activated from the "basic config", "monster display mode".
+- Also, humanoids have LEGS now! They are visible in the 3D monster mode, or the shmup mode, where the legs of humanoids and dog-like creatures are animated.
+- Wall and monster shadows added
+- If you press F10 and it would cause the game to be saved, no more asking for confirmation. Also, in the ESC menu, "save" is shown instead of "quit" in this case
+- Removed minus signs displayed in the Yendorian Forest
+- Mimics were not displayed correctly for the Familiar PC
+- Fixed incorrectly colored floors under bonfires etc. in the Icy Lands, and under Thumpers
+- Onyx fixed to look as before
+- Fixed sulphur spikes on the Chaos/CR4 borders
+- Shmup mode fixes: birds no longer collapse trapdoors; Vampire Bats now work; fixed crashes associated with displaying Familiars, offscreen Mirrors, and targetting Orbs in some cases; Orb of the Sword blocked your knives, and spinned uncontrollably when blown away by an Air Elemental
+- Fixed the incorrect message "%The1 is destroyed!" when destroying halfvines with Orb of the Warp
+
+2016.12.01 17:43 version 9.2
+- blog post: https://steamcommunity.com/linkfilter/?url=http://zenorogue.blogspot.com/2016/12/hyperrogue-92-3d-hyperbolic-animations.html
+- Escher 3D mode
+- sound effects
+- animated movement
+- particle effects
+- fixed golem heads
+- Trolls now have bigger feet
+- Steps are bigger now
+- Legs are no longer animated when riding boats or worms
+- Centering animation is smoother
+- Fixed the shadow of Sparrowhawk
+- When using Orb of the Fish, there are no legs, and the fishtail is animated
+- 3D effects for the water, improved chasms
+- Characters in the gravity lands are now displayed skewed due to gravity
+- Friendly ghosts are now colored brightly
+- Improved the 3D levels for worms and wormriders
+- The 3D graphics now works with half-plane and band models
+- Fixed mounting tentacles: when escaping, don't go to the root immediately, and monsters are attacked on the way; a Ghost can no longer move to player's position and vice versa
+- Ghost timer disable cheat (ctrl+G) now also disables the Orb power caps
+- Minor translation fixes
+- Mousewheel now allows to quickly scroll multiple-choice option items, and to give orb powers in the cheater's overview
+- Fixed minor problems with moving things (on boats, or using Orb of Space)
+- Shmup mode: items moved in boats are visible, don't see items in water if you are fish in boat
+- Boats in the Whirlpool no longer face weird directions
+- shift+5 cycles wallmodes backward
+- Fixed the stalemate calculation for Outlaws
+
+2016.12.03 14:23 version 9.2a
+- gameplay: mimics are now able to kill Rose Beauties
+- control: numpad keys no longer switch graphical modes; fixed the 's' key setting the scrolling speed instead of saving config
+- movement animation for switching place with golem, Windy Plains items, and magical boats
+- particle effects when walls melt, and fire-related particle effects
+- sand dunes and trees are now pyramidal in Escher/3D
+- items under half-vines are moved to be roughly centered in the grassy part
+- leg movement while riding boats was not disabled in non-3D modes
+- animations for falling floors, and falling and sinking monsters
+
+2016.12.04 02:29 version 9.2b
+- Fixed the shape of trees in the Warped Coast
+- Animated movement for Orb of the Frog and strong wind
+- Striped Dogs, Palace Guards, and Draugar still had particles while falling -- disabled.
+- Shmup mode fixes: Orb of Beauty works now, and shakes when entering a boat fixes
+- Removed incorrect particle effects from thumpers and bonfires
+- All unstable floor graphics are very thin now, and falling animations made (mostly) accurate. Different z-level is used for the bottoms of water bodies, and for chasms. For chasms, it actually corresponds accurately to infinite depth :)
+
+2016.12.06 23:36 version 9.2c
+- In the Advanced config, there is now a submenu where you can configure the 3D parameters. Also added an option to remove faraway details in this menu, and things over other things should be placed mostly correctly.
+- Improved the performance of graphics rendering (also, it seems the Windows version has been recently compiling without optimizations)
+- Fixed the graphics in 3D heptagonal warp.
+- Heptagonal wind is now slower.
+- Solid branches in the Yendorian Forest are now darker (solid branches should be green and weak branches should be red, but that wouldn't look well)
+- Added particle effects for small branches breaking.
+- Fixed stabbing by friendly monsters.
+- Red/dark trolls produce particles if they don't affect the terrain. If a wall created from a monster death falls, its falling is animated.
+
+2016.12.06 23:26 version 9.2d
+- fixed boat graphics
+- a crash with dragons in the shmup mode
+- a bug with configuring keyboard (it was impossible to set arrows because they were interpreted as menu navigation).
+
+2016.12.07 21:50 version 9.2e
+- Now it can now be precisely configured at what distance we have "high", "medium", or "low" 3D detail. The default is the "high" detail level everywhere, which also gives more details than previously (and there is no longer a hidden dependence even if the option is off). (On mobile the defaults will be lower)
+- collecting 10 hyperstones in spherical mode will no longer produce weird scores in the leaderboards
+- Water Elementals were not disallowed to enter Zebra and LoEM (only player's magical boat was)
+- a separating wall is now drawn if a body of water appears next to a chasm (as happens often in the Elemental Planes)
+- when targetting orbs, circle markers and particle effects are shown (thanks to a previous bug which created excessively many unintended particles when targetting Orb of the Dragon)
+- circle markers are now drawn both on the ground and high level, to make it more clear what is targetted
+
+2016.12.10 21:33 version 9.2f
+- Assigned sounds to some more events. Recorded new voices with Tehora, mostly for the Prince(ss).
+- Orb of Aether no longer loses power needlessly with the Orb of Time.
+- Fixed Viziers and Flail Guards killing themselves with Orb of Discord.
+- Halloween holes display fixed.
+- Fixed the save/quit option in the (v) main menu.
+- Fixed the ASCII mode.
+- Fixed trees displayed very badly in low-detail.
+- Sand Worms and Tentacles no longer have a joint on the cell where they're coming out of the ground, and a particle animation is added at that location.
+- Ocean walls look like buoys now in 3D Escher mode (but mechanics have not changed yet)
+- Fixed graphical glitches on krakens and other multitile monsters not at the ground level
+
+2016.12.11 11:46 version 9.2g
+- fixed characters riding dragons not displayed
+- Tentacles still did have the last joint
+
+2016.12.13 23:03 version 9.2h
+- Redesigned the display of items and kills
+- Fixed the bug with cells incorrectly marken as attacked while skipping turns with the Sword (this problem caused Draugar to be confused)
+- Circular markers etc. are no longer displayed while in menus
+
+2016.12.14 02:30 version 9.2i
+- fixed the rightclick/mouseover disappearing
+
+2016.12.17 03:46 version 9.2j
+- items/kills can be sorted according to one of several orderings (choose in the basic config)
+- tuned the item/kill display (extra markers for native items/monsters, demons, no numbers for non-items, etc.)
+- fixed shift+5 (change wall mode)
+- friends set on fire will no longer try to escape through walls
+- Towers of Camelot are done a bit differently now (the guards stand on Towers [level 3] which give better 3D, protect them from fire, and let them talk and fight)
+
+2016.12.27 20:53 version 9.2k
+- fixed the arrow navigation in menus
+- fixed the following bugs with Orb of Time: Orb of Sword was not considered used when chopping plants; Orb of Empathy was always considered used if you had an ally nearby; with Empathy+Aether both were considered used even when they were not. (I feel it is a bit strange that the Orb of the Sword has an effect of blocking monsters' movement and that effect is not counted for Orb of Time, but I think it is fine as it is)
+
+2017.01.05 17:58 version 9.3
+- blog post: http://zenorogue.blogspot.com/2017/01/hyperrogue-93-three-new-lands-and.html
+- online version
+- Reptiles
+- Dungeon
+- Lost Mountain
+- Columns now appear on the coasts of R'Lyeh so that you know where you are
+- The World Overview and PTM now have two pages (but you can also view everything on the single page). Also a help screen is added for the World Overview.
+- Separate pathfinding for slow monster, ivies, and worms
+- Orbs of Yendor no longer block movement
+- Smoother movement when scrolling animations are disabled
+- Treasure cheat now gives Elixirs, Ivory, and Rugs quickly in the Crossroads, to make it easier to reach the halfplane lands
+- Animated leg movement for Hyperbugs and Metal Beasts (not very visible for Metal Beasts though)
+- A sound added when attacking with the magic sword, and removed when using the strong wind
+- Dash/frog/strong wind now kills flail guards, pikemen, and hedgehog warriors if appropriate.
+- Fixes in the Euclidean mode: removed trees in the Clearing, fixed heptagonal shadows (e.g. of the hexagonal columns in R'Lyeh), regular patterns in the map editor now work, and the lines are shown in the correct position
+- minor bugfixes: stun stars appear above heads; a graphical glitch with Yendorian Forest adjacent to CR4; in the Map Editor, only the currently set "display codes" option is highlighted; "You are now a tortoise heroine!" (not "hero") in shmup
+
+2017.01.07 23:53 version 9.3a
+- updated the Czech and Russian translations
+- added achievements for PTM and Yendor Challenge (1000/5000/15000 points)
+- added two new Yendor challenges
+- quick-land-teleport cheat works better now
+- added Reptiles and Lost Mountain to the Euclidean mode
+- the Pure Tactic Mode for Dungeon works now
+- renamed "Orb of Dash" to "Orb of Vaulting"
+- added translations for "small bush"
+- the close button now quits the game again (or asks for confirmation if it thinks that confirmation is needed)
+- mousewheel now can be used to scrolls big lists in menus
+- fixed the typo in achievement "Mountain Climber"
+- fixed mouse direction interpretation while Alt-highlight is on
+- fixed the display of World Overview in high resolutions
+- fixed monster nativity info in Living Caves
+
+2017.01.10 17:16 version 9.3b
+- Reptiles, Haunted Woods, Galapagos difficulty now depends on the number of Orbs of Yendor. High scores for the Galapagos YC have been reset (scores of Vipul and tricosahedron are removed, but they should be back when they relogin into YC)
+- Flavor messages for unlocking Mountain and Dungeon
+- Reptiles now has the requirement of 10 Elixirs, instead of the Ivory Tower
+- Fixed two separate descriptions (one incomplete) for Orb of Nature/Friendly Ivy
+- A sound for tricking Flail Guards
+- Mousewheel now scrolls down immetiately even if it overscrolled up too much
+- Fixed the Orb of Shielding allowing to stay in place in fire
+- Pushing off heptagons using the keyboard worked weirdly -- fixed. (There is a direction indicator for keyboard users, and mouse users can enable the "draw mouse circle" option in the Advanced config to have an indicator.)
+- It was intentional that Reptiles can climb up and down Red Rock III, but suicides were not -- fixed, also added stuntimes to reflect that climbing is hard for them.
+
+2017.01.10 18:04 version 9.3c
+- fixed the falling animations
+
+2017.01.16 17:42 version 9.3d
+- Collecting 25 pieces of Ancient Jewelry allows your orb-swords to chop through barrow walls (I think PTM is more interesting this way)
+- Added sounds for Orb of the Sword used against barrows and plants.
+- Reptile bridges (which are created when a reptile moves over water) no longer catch fire. Using fire on reptile no longer creates bridges. Items under reptile bridges are destroyed. Kills no longer raise drastically when mousing with Dragon over a reptile floor.
+- Land description mentions explicitly that Whirlpool can be left with Orbs of Safety, as otherwise players with previous experience with trap lands would expect the same of Whirlpool (I am not sure whether a warning should be given for trap lands)
+- Fixed movement animation for heptagonal Krakens (previously crashed the game).
+- Key to Yendor can no longer generate on a Reptile; also generates on a lone floor in Reptiles now.
+- Sightrange in the cheat mode can be set a bit over 10 now. Also "overgenerate" option is added to the sightrange dialog, which makes sure that everything you see is fully generated. Sightrange is reset back to 7 if cheat mode is off.
+- Targetted orb (and summoned monster) are now marked with '!' in the list. Orbs with power < 10 have a slightly bigger number so that you can see that they are running out.
+- Dead Orbs are now correctly shown to always appear in the Haunted Woods. (Orbs of Safety are forbidden, but other Orbs do appear in general.)
+- Flavor messages when collecting items no longer appears on non-pickupable Grimoires, and they do appear on Mirror shards. Also a different message is now used instead of "That was easy" if your first monster was tough.
+- Eagles no longer can make an extra move after attacking an ally and moving into its position.
+- Fixed a bug with checkmate rule not working correctly with Orb of the Sword's in-transit cell.
+- [shmup] Orb of Yendor was not collectable
+- [shmup] Reptiles did not work correctly, also the 9.3 orbs did not work correctly (Nature gives you life, and Vaulting lets you shoot another missile backwards)
+- [shmup] the game no longer crashes when a monster's missile hits a monster in shmup (such kills are credited to the player who caused the monster to shoot)
+- [shmup] fixed Orb of Recall
+
+2017.01.21 16:51 version 9.3e
+- selecting princess quest in the cheater's overview now moves you to the Princess immediately (no need to press Space)
+- fixed the message about Swords when getting 25 of not-jewelry, and added a special message the first time you collect 25
+- extra information about the high-scoring game was not uploaded to Steam
+- Chaos Yendor challenge should be fixed (previously played game should be already counted when you log in)
+- '8' no longer switches colors when playing on the numpad
+
+2017.01.22 21:47 version 9.3f
+- added some sounds for Cultists (thanks KosGD!)
+- fixed the problem with reassigning the Yendor challenge in 9.3e
+- help now mentions that right Shift can be used instead of right click (to help OSX users)
+
+2017.01.31 23:34 version 9.3g
+- added a new geometry to the geometry menu (the Zebra quotient space -- quotient spaces based on other patterns would be harder to add)
+- mouse movement in elliptic geometry should be fixed
+- added the predesigned pattern 'four triangles' to the map editor
+- fix isNative for Palace
+- Mobile versions: touching the item/monster glyphs for extra information should be fixed
+
+2017.02.01 16:16 version 9.3h
+- the problems with sightrange should be fixed
+- middle mouse button no longer moves (only pans)
+- fixed improper click detection in the World Overview (and possibly other situations)
+- marked Orb of Luck as useless in some lands, and Orb of Nature as useless in the Vineyard
+- fixed bugs related to the interactions of Orb of Nature with: Life/Friendship, Domination (two bugs), Frog/Vaulting/strongwind, Teleport, Recall (in all cases the friendly ivy is destroyed)
+- also fixed the interaction of Life/Friendship and Domination
+- Orb of Discord now does the default orb pickup sound (instead of silence)
+
+2017.02.10 16:57 version 9.3i
+- fixes in the shmup mode: fixed sharks (and other monsters on different levels) in 3D looking weird; Orb of Frog (and possibly some other orbs) crashing the game in multiplayer shmup; plate-related sounds were not played; falling animations and sounds; tuned the Reptiles a bit
+- fixed the gnomonic projection in the spherical geometry
+- implemented the Zebra quotient space in a more elegant and stable way
+- [Android,iOS] a compass has been added so that you can move without obscuring the display
+- [iOS] fixed the musical glitch
+- [Android] possibly fixed the startup crash in new versions of Android
+
+2017.03.05 21:11 version 9.4
+- a new land: Prairie
+- a new land: Bull Dash
+- a new land: Crossroads V
+- new parameters for 3D (Y shift and rotation angle)
+- new models: ball model, hyperboloid model; models are now sensitive to eyedistance
+- redone the commandline parameters
+- special conducts now explained in the help
+- Orbs frequency changed
+- achievement for killing the Sandworm in the Zebra Quotient geometry
+- mirrors now appear in the Windy Plains as advertised
+- fixed the orthogonal projection in elliptic geometry
+- shmup: Draugar no longer killable with knives
+- shmup: not conventionally killable monsters can no longer be killed by being crashed into
+- "%the1" in the Golden Egg description
+- fix the ghost/Shield bug
+- Orb of Storm no longer kills you in some cases (in hardcore) in the Land of Storms
+- shmup: fixed the list of monsters killable by Orb of the Sword in shmup
+- fixed the mousecircle -- shows the movement target as intended (not the cell under the cursor)
+- fixed the movement compass in the mobile versions: colors of arrows correspond to features, mousecircle highligts target correctly, the compass disappears when you long touch to target orbs
+- refactoring: geometry, line graphics
+
+2017.03.09 13:12 version 9.4a
+- further improvements to the command line
+- darkening more
+- improvements to svg output
+- fixed the crash bug after Prairie
+- removed the Prairie from the chaos mode
+- added summoning rules for Prairie, Bull Dash, Zebra and Land of Mirrors
+- Euclidean and spherical versions of the Prairie
+- fixed the monster generation in quotient Palace
+- improved the heat transfer algorithm (Icy/Cocytus). In the previous algorithm, the sequential processing of cells (outwards from the player) caused the heat to transfer differently from and to the PC. Additionally, walls now melt after the monster movement, to make the monster movement more predictable. The effect seems noticeable.
+- in the field quotient space, effects such as heat transfer, fire spreading, and livecaves/livefjord CA now happen in the whole world instead of just in the view range. (So if you wait in place long enough, the whole Icy Lands will burn eventually.)
+- CA experimentation land
+- added sounds for Bulls waking up and crashing
+- music was not declared for CR5
+- fixed achievements in Google Games; fixed login to Google Games in Android
+- fixed keyboard support in the Android version
+- compass can be resized in mobile versions
+- updated the German translation (a small bit)
+
+2017.03.10 16:31 version 9.4b
+- updated Czech and Russian translations.
+- CA fixes: no more ghosts, help text, visible in the land list for finite geometries without enabling the cheat mode, CA mark
+- fixed a bug which sometimes caused Great Walls to appear inside lands adjacent to Graveyard/Ocean even if they should not (e.g., Ivory Tower)
+
+2017.03.25 02:06 version 9.4c
+- some fixes to the Polish translation
+- Vine Spirits are now destroyed when the vine containing them is destroyed
+- Vine Spirits and Slime Beasts no longer can travel from half-vine cells to slime cells and vice versa (and similarly for seeps/walls)
+- added a command line option for sound directory
+- RogueViz
+
+2017.03.31 21:35 version 9.4d
+- [mobile] changing the character gender
+- [Android] fixed the "share" button in the Android version
+- [all] [mobile] fixed the website link to go directly to .../hyper/
+- [all] offscreen wolves and some other monsters were not drawn in some situations
+- [mobile] movement compass arrows are now darkened for illegal moves
+- RogueViz: Collatz visualization and some other improvements
+- dialogs are drawn to the side if screen space allows
+
+2017.04.08 01:20 version 9.4e
+- the Leaderboards are fixed
+- Ctrl+E cheat moves to target geometry and back
+- expansion (in "special modes") allows you to compare the expansion rates for various geometries
+- fixed a bug with calculating the distance between arbitrary cells, and optimized this routine
+
+2017.04.08 16:25 version 9.4f
+- removed the unintended distance from origin from the expansion mode
+- the spiral renderer now renders the whole path even if multiple PNGs had to be created
+- the Tutorial (in "special modes") points the player to many basic things about the game, or interesting things about hyperbolic geometry
+
+2017.04.14 18:56 version 9.4g
+- a new floor pattern for Bull Dash (inspired by "Seven Butterflies Pattern" by Doug Dunham, in turn inspired by Escher)
+- limit polygonal sides to 3
+- fixed a bug with heat in the shmup mode
+- fixed a bug with mouse control in non-disk models; the band mode is no longer in vertical mirror image
+- in the line animation, arrow keys now control the speed
+- CR4 no longer appear in the Canvas if you have >= 200 treasure
+- [tutorial] fixed a crash when clearing the map after using '3' (pure heptagonal map)
+- [tutorial] disabled Orbs of Safety as they were somewhat incompatible
+- [tutorial] added a slide about the shoot'em up mode
+- [tutorial] improved some of the texts
+- [tutorial] disabled changing the geometry in slides/lands which do not support this
+- [tutorial] Aether or Flash is given if you cannot teleport away from the current situation (or when you press the cheat key twice)
+- [tutorial] added a warning if the player is trying to go to an unexpected land
+- [technical] fixed the weird numbering of shapes in polygons.cpp; minor improvements to RogueViz
