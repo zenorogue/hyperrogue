@@ -1493,6 +1493,7 @@ void showDemo() {
   dialog::addBreak(50);
 
   dialog::addItem(XLAT("play"), 'f');
+  dialog::addItem(XLAT("tutorial"), 't');
   dialog::addItem(XLAT("help"), 'h'); dialog::lastItem().keycaption += " / F1";
   dialog::addItem(XLAT("toggle high detail"), 'a');
   dialog::addBreak(100);
@@ -1519,6 +1520,11 @@ void handleDemoKey(int sym, int uni) {
     firstland = laIce;
     if(tactic::on) restartGame('t');
     else restartGame();
+    cmode = emNormal;
+    }
+  else if(sym == 't') {
+    firstland = laIce;
+    if(!tour::on) restartGame('T');
     cmode = emNormal;
     }
   else if(sym == 't') {

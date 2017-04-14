@@ -219,6 +219,7 @@ namespace shmup {
   extern bool on;
   extern bool safety;
   extern int curtime;
+  void clearMonsters();
   void clearMemory();
   void init();
   void teleported();
@@ -1141,6 +1142,7 @@ namespace tour {
   
   bool handleKeyTour(int sym, int uni);
   void presentation(int mode);
+  void checkGoodLand(eLand l);
   int getid();
   
   eLand getNext(eLand old);

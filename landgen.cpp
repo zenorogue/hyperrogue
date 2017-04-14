@@ -2868,7 +2868,8 @@ void buildBigStuff(cell *c, cell *from) {
     !isSealand(c->land) && !isHaunted(c->land) && !isGravityLand(c->land) && 
     (c->land != laRlyeh || rlyehComplete()) &&
     c->land != laTortoise && c->land != laPrairie && c->land && 
-    !(c->land == laGraveyard && !deepOcean)
+    !(c->land == laGraveyard && !deepOcean) 
+    && c->land != laCanvas
     ) {
     buildBarrierNowall(c, laCrossroads4) ;
     }

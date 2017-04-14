@@ -5392,6 +5392,9 @@ void movecost(cell* from, cell *to) {
       addMessage(XLAT("As you leave, your powers are drained!"));
     }
   
+  if(from->land != to->land && tour::on)
+    tour::checkGoodLand(to->land);
+  
   if(to->land ==laCrossroads4 && !chaosUnlocked) {
     achievement_gain("CR4");
     chaosUnlocked = true;
@@ -5570,6 +5573,10 @@ bool collectItem(cell *c2, bool telekinesis) {
     playSound(c2, "pickup-orb"); // TODO summon
     if(shmup::on) gainLife();
     else placeGolem(cwt.c, c2, moTameBomberbird);
+    }
+  else if(tour::on && (c2->item == itOrbSafety || c2->item == itOrbRecall)) {
+    addMessage(XLAT("This Orb is not compatible with the Tutorial."));
+    return true;
     }
   else if(c2->item == itOrbSafety) {
     playSound(c2, "pickup-orb"); // TODO safety
@@ -6988,6 +6995,7 @@ void moveItem (cell *from, cell *to, bool activateYendor) {
   }
 
 void fixWormBug(cell *c) {
+  if(conformal::includeHistory) return;
   printf("worm bug!\n");
   if(c->monst == moWormtail) c->monst = moWormwait;
   if(c->monst == moTentacletail || c->monst == moTentacleGhost) c->monst = moTentacle;

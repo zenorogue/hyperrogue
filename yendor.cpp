@@ -789,7 +789,7 @@ int newmodecode = 254;
 
 int modecode() {
 #ifndef NOSAVE
-  if(anticheat::tampered || cheater) return 6;
+  if(anticheat::tampered || cheater || tour::on) return 6;
   if(quotient) return 6;
 #endif
   int xcode = 0;

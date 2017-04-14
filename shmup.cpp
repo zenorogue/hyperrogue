@@ -3034,11 +3034,16 @@ bool drawMonster(const transmatrix& V, cell *c, const transmatrix*& Vboat, trans
   return false;
   }
 
-void clearMemory() {
+void clearMonsters() {
   for(mit it = monstersAt.begin(); it != monstersAt.end(); it++)
     delete(it->second);
   for(int i=0; i<size(active); i++) delete active[i];
   monstersAt.clear();
+  active.clear();
+  }
+
+void clearMemory() {
+  clearMonsters();
   gmatrix.clear();
   curtime = 0;
   nextmove = 0;

@@ -178,8 +178,11 @@ void addedge(int i, int j, edgeinfo *ei) {
   else addedge0(i, j, ei);
   }
 
+vector<edgeinfo*> edgeinfos;
+
 void addedge(int i, int j, double wei, bool subdiv) {
   edgeinfo *ei = new edgeinfo;
+  edgeinfos.push_back(ei);
   ei->i = i;
   ei->j = j;
   ei->weight = wei;
@@ -263,59 +266,67 @@ int readLabel(FILE *f) {
   return getid(xlabel);
   }
 
-void readAnyGraph(string fn) {
-  init(); kind = kAnyGraph;
-  FILE *f = fopen((fn + "-coordinates.txt").c_str(), "rt");
-  if(!f) {
-    printf("Missing file: %s-coordinates.txt\n", fname);
-    exit(1);
-    }
-  printf("Reading coordinates...\n");
-  char buf[100];  
-  double x; int N;
-  int err;
-  err = fscanf(f, "%s%s%s%s%d%lf%lf%lf", buf, buf, buf, buf, &N, &x, &x, &x);
-  if(err < 8) { printf("Error: incorrect format of the first line\n"); exit(1); }
-  vdata.resize(N);
-  while(true) {
-    int id = readLabel(f);
-    if(id < 0) break;
-    vertexdata& vd(vdata[id]);
-    vd.name = its(id);
-    vd.cp = colorpair(dftcolor);
-    
-    double r, alpha;
-    int err = fscanf(f, "%lf%lf", &r, &alpha);
-    if(err < 2) { printf("Error: incorrect format of r/alpha\n"); exit(1); }
+namespace anygraph {
+  double R, alpha, T;
+  vector<pair<double, double> > coords;
 
-    transmatrix h = spin(alpha * 2 * M_PI / 360) * xpush(r);
-
-    createViz(id, currentmap->gamestart(), h);
-    }
-  fclose(f);
+  void read(string fn, bool subdiv = true) {
+    init(); kind = kAnyGraph;
+    FILE *f = fopen((fn + "-coordinates.txt").c_str(), "rt");
+    if(!f) {
+      printf("Missing file: %s-coordinates.txt\n", fname);
+      exit(1);
+      }
+    printf("Reading coordinates...\n");
+    char buf[100];  
+    int N;
+    int err;
+    err = fscanf(f, "%s%s%s%s%d%lf%lf%lf", buf, buf, buf, buf, &N, 
+      &anygraph::R, &anygraph::alpha, &anygraph::T);
+    if(err < 8) { printf("Error: incorrect format of the first line\n"); exit(1); }
+    vdata.reserve(N);
+    while(true) {
+      int id = readLabel(f);
+      if(id < 0) break;
+      vertexdata& vd(vdata[id]);
+      vd.name = its(id);
+      vd.cp = colorpair(dftcolor);
+      
+      double r, alpha;
+      int err = fscanf(f, "%lf%lf", &r, &alpha);
+      coords.push_back(make_pair(r, alpha));
+      if(err < 2) { printf("Error: incorrect format of r/alpha\n"); exit(1); }
   
-  f = fopen((fn + "-links.txt").c_str(), "rt");
-  if(!f) {
-    printf("Missing file: %s-links.txt\n", fname);
-    exit(1);
+      transmatrix h = spin(alpha * 2 * M_PI / 360) * xpush(r);
+      
+      createViz(id, currentmap->gamestart(), h);
+      }
+    fclose(f);
+    
+    f = fopen((fn + "-links.txt").c_str(), "rt");
+    if(!f) {
+      printf("Missing file: %s-links.txt\n", fname);
+      exit(1);
+      }
+    printf("Reading links...\n");
+    int qlink = 0;
+    while(true) {
+      int i = readLabel(f), j = readLabel(f);
+      if(i == -1 || j == -1) break;
+      addedge(i, j, 0, subdiv);
+      if(qlink % 10000 == 0) printf("%d\n", qlink);
+      qlink++;
+      }
+    fclose(f);
+  
+    printf("Rebasing...\n");
+    for(int i=0; i<size(vdata); i++) {
+      if(i % 10000 == 0) printf("%d/%d\n", i, size(vdata));
+      if(vdata[i].m) virtualRebase(vdata[i].m, true);
+      }
+    printf("Done.\n");
     }
-  printf("Reading links...\n");
-  int qlink = 0;
-  while(true) {
-    int i = readLabel(f), j = readLabel(f);
-    if(i == -1 || j == -1) break;
-    addedge(i, j, 0, true);
-    if(qlink % 10000 == 0) printf("%d\n", qlink);
-    qlink++;
-    }
-  fclose(f);
-
-  printf("Rebasing...\n");
-  for(int i=0; i<size(vdata); i++) {
-    if(i % 10000 == 0) printf("%d/%d\n", i, size(vdata));
-    if(vdata[i].m) virtualRebase(vdata[i].m, true);
-    }
-  printf("Done.\n");
+  
   }
 
 namespace tree {
@@ -1217,6 +1228,9 @@ void close() {
   vdata.clear();
   labeler.clear();
   legend.clear();
+  for(int i=0; i<size(edgeinfos); i++) delete edgeinfos[i];
+  edgeinfos.clear();
+  anygraph::coords.clear();
   on = false;
   }
 
@@ -1300,7 +1314,7 @@ int readArgs() {
 // this visualizes the data from: https://hpi.de/friedrich/research/hyperbolic
 
   else if(argis("-graph")) {
-    PHASE(3); shift(); readAnyGraph(args());
+    PHASE(3); shift(); anygraph::read(args());
     }
   
 // draw spirals 

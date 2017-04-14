@@ -20,6 +20,7 @@ namespace polygonal {
   int maxcoef, coefid;
   
   void solve() {
+    if(SI < 3) SI = 3;
     for(int i=0; i<MSI; i++) ans[i] = cos(M_PI / SI);
     for(int i=0; i<MSI; i++)
       for(int j=0; j<MSI; j++) {

@@ -1609,7 +1609,7 @@ namespace heat {
     for(int i=0; i<dcs; i++) {
       bool readd = false;
       cell *c = allcells[i];
-      double xrate = (c->land == laCocytus && shmup::on) ? rate/3 : rate;
+      double xrate = (c->land == laCocytus && shmup::on) ? 1/3. : 1;
       if(purehepta) xrate *= 1.7;
       if(!shmup::on) xrate /= FIX94;
       if(c->cpdist > 7 && !quotient) break;
@@ -1689,7 +1689,7 @@ namespace heat {
             // make sure that we can still enter Cocytus,
             // it won't heat up right away even without Orb of Winter or Orb of Speed
             if(isPlayerOn(c->mov[j]) && (c->land == laIce || markOrb(itOrbWinter))) 
-              hmod += (markOrb(itOrbWinter) ? -1.2 : 1.2) / 4;
+              hmod += (markOrb(itOrbWinter) ? -1.2 : 1.2) / 4 * xrate;
             continue;
             }
           ld hdiff = absheat(c->mov[j]) - absheat(c);
@@ -1700,7 +1700,7 @@ namespace heat {
           hmod += hdiff;
           }
         
-        hmods[i] = hmod * rate;
+        hmods[i] = hmod;
         }
       
       if((readd || HEAT(c)) && !quotient) 
@@ -2061,8 +2061,10 @@ namespace dragon {
       if(c->mov[i] && isDragon(c->mov[i]->monst) && c->mov[i]->mondir == c->spn(i)) {
         c = c->mov[i]; goto findhead;
         }
-    printf("dragon bug #3 (%p -> %p)\n", cor, c); 
-    dragbugs = true;
+    if(!conformal::includeHistory) {
+      printf("dragon bug #3 (%p -> %p)\n", cor, c); 
+      dragbugs = true;
+      }
     c->monst = moDragonHead; return c;
     }
   
@@ -2130,7 +2132,7 @@ namespace dragon {
     int maxlen = 1000;
     while(maxlen-->0) {
       if(!isDragon(c->monst)) {
-        printf("dragon bug #4\n");
+        if(!conformal::includeHistory) printf("dragon bug #4\n");
         return total; 
         }
       total += c->hitpoints;
@@ -2169,7 +2171,10 @@ namespace dragon {
         }
       if(c->mondir == NODIR) { printf("dragon bug\n"); break; }
       c = c->mov[c->mondir];
-      if(!c) { printf("dragon bug #2\n"); break; }
+      if(!c) { 
+        if(!conformal::includeHistory) printf("dragon bug #2\n"); 
+        break; 
+        }
       }
     }
   

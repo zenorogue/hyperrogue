@@ -107,7 +107,6 @@ struct celllister {
       if(c == last) {
         if(size(lst) >= maxcount || dists[i]+1 == maxdist) break;
         last = lst[size(lst)-1];
-        maxdist--;
         }
       }
     }
@@ -137,7 +136,9 @@ struct hrmap_alternate : hrmap {
 
 struct hrmap_hyperbolic : hrmap {
   heptagon *origin;
+  bool ispurehepta;
   hrmap_hyperbolic() {
+    // printf("Creating hyperbolic map: %p\n", this);
     origin = new heptagon;
     heptagon& h = *origin;
     h.s = hsOrigin;
@@ -151,11 +152,14 @@ struct hrmap_hyperbolic : hrmap {
     h.spintable = 0;
     h.alt = NULL;
     h.distance = 0;
+    ispurehepta = purehepta;
     h.c7 = newCell(7, origin);
     }
   heptagon *getOrigin() { return origin; }
   ~hrmap_hyperbolic() {
     DEBMEM ( verifycells(origin); )
+    // printf("Deleting hyperbolic map: %p\n", this);
+    dynamicval<bool> ph(purehepta, ispurehepta);
     clearfrom(origin);
     }
   void verify() { verifycells(origin); }
@@ -174,8 +178,10 @@ int spherecells() {
   
 struct hrmap_spherical : hrmap {
   heptagon *dodecahedron[12];
+  bool ispurehepta;
 
   hrmap_spherical() {
+    ispurehepta = purehepta;
     for(int i=0; i<spherecells(); i++) {
       heptagon& h = *(dodecahedron[i] = new heptagon);
       h.s = hsOrigin;
@@ -239,7 +245,8 @@ struct hrmap_spherical : hrmap {
 
   heptagon *getOrigin() { return dodecahedron[0]; }
 
-   ~hrmap_spherical() {
+  ~hrmap_spherical() {
+    dynamicval<bool> ph(purehepta, ispurehepta);
     for(int i=0; i<spherecells(); i++) clearHexes(dodecahedron[i]);
     for(int i=0; i<spherecells(); i++) delete dodecahedron[i];
     }    

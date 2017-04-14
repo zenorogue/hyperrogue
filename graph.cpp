@@ -930,13 +930,13 @@ void ghcheck(hyperpoint &ret, const hyperpoint &H) {
 
 hyperpoint gethyper(ld x, ld y) {
 
-  if(pmodel) {
-    ghx = x, ghy = y;
-    return ghpm;
-    }
-  
   ld hx = (x - vid.xcenter) / vid.radius;
   ld hy = (y - vid.ycenter) / vid.radius;
+  
+  if(pmodel) {
+    ghx = hx, ghy = hy;
+    return ghpm;
+    }
   
   if(euclid)
     return hpxy(hx * (EUCSCALE + vid.alphax), hy * (EUCSCALE + vid.alphax));
@@ -1014,6 +1014,7 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
     double d = hdist0(H);
 
     ballmodel(ret, alpha, d, zl);
+    ghcheck(ret,H);
     
     return;
     }
@@ -1026,6 +1027,8 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
     ret[0] = H[0] / 3;
     ret[1] = (1 - H[2]) / 3 * cb + H[1] / 3 * sb;
     ret[2] = H[1] / 3 * cb - (1 - H[2]) / 3 * sb;
+
+    ghcheck(ret,H);
     return;
     }
   
@@ -1115,7 +1118,7 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
     } */
   
   ret[0] = x0/M_PI*2;
-  ret[1] = y0/M_PI*2;
+  ret[1] = -y0/M_PI*2;
   ret[2] = 0; 
 
   if(zlev != 1 && vid.goteyes) 
@@ -4323,6 +4326,9 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       else if(c->land == laRose)
         qfloor(c, Vf, shOverFloor[ECT], darkena(fcol, fd, 0xFF));
 
+      else if(c->land == laBull)
+        qfloor(c, Vf, (eoh ? shFloor : shButterflyFloor)[ct6], darkena(fcol, fd, 0xFF));
+
       else if(c->land == laDryForest)
         qfloor(c, Vf, (eoh ? shStarFloor : shDesertFloor)[ct6], darkena(fcol, fd, 0xFF));
 
@@ -6813,7 +6819,12 @@ void showGameover() {
       dialog::addItem("Euclidean geometry", '2');
       dialog::addItem("more curved hyperbolic geometry", '3');
       }
-    dialog::addItem("teleport away", '4');
+    if(!items[itOrbTeleport])
+      dialog::addItem("teleport away", '4');
+    else if(!items[itOrbAether])
+      dialog::addItem("move through walls", '4');
+    else
+      dialog::addItem("flash", '4');
     if(canmove) {
       dialog::addItem("slide-specific command", '5');
       dialog::addItem("static mode", '6');
@@ -6821,6 +6832,8 @@ void showGameover() {
       dialog::addItem("next slide", SDLK_RETURN);
       dialog::addItem("previous slide", SDLK_BACKSPACE);
       }
+    else
+      dialog::addBreak(200);
     dialog::addItem("main menu", 'v');
     }
   else {
@@ -8383,20 +8396,43 @@ void handlekey(int sym, int uni, extra& ev) {
 
   if(((cmode == emNormal && canmove) || (cmode == emQuit && !canmove) || cmode == emDraw || cmode == emMapEditor) && DEFAULTCONTROL && !rug::rugged) {
 #ifndef PANDORA
-    if(sym == SDLK_RIGHT) 
-      View = xpush(-0.2*shiftmul) * View, playermoved = false, didsomething = true;
-    if(sym == SDLK_LEFT) 
-      View = xpush(+0.2*shiftmul) * View, playermoved = false, didsomething = true;
-    if(sym == SDLK_UP) 
-      View = ypush(+0.2*shiftmul) * View, playermoved = false, didsomething = true;
-    if(sym == SDLK_DOWN) 
-      View = ypush(-0.2*shiftmul) * View, playermoved = false, didsomething = true;
+    if(sym == SDLK_RIGHT) { 
+      if(conformal::on)
+        conformal::lvspeed += 0.1 * shiftmul;
+      else
+        View = xpush(-0.2*shiftmul) * View, playermoved = false, didsomething = true;
+      }
+    if(sym == SDLK_LEFT) {
+      if(conformal::on)
+        conformal::lvspeed -= 0.1 * shiftmul;
+      else
+        View = xpush(+0.2*shiftmul) * View, playermoved = false, didsomething = true;
+      }
+    if(sym == SDLK_UP) {
+      if(conformal::on)
+        conformal::lvspeed += 0.1 * shiftmul;
+      else
+        View = ypush(+0.2*shiftmul) * View, playermoved = false, didsomething = true;
+      }
+    if(sym == SDLK_DOWN) {
+      if(conformal::on)
+        conformal::lvspeed -= 0.1 * shiftmul;
+      else
+        View = ypush(-0.2*shiftmul) * View, playermoved = false, didsomething = true;
+      }
 #endif
     if(sym == SDLK_PAGEUP) {
-      View = spin(M_PI/S21*shiftmul) * View, didsomething = true;
+      if(conformal::on)
+        conformal::rotation++;
+      else
+        View = spin(M_PI/S21*shiftmul) * View, didsomething = true;
       }
-    if(sym == SDLK_PAGEDOWN) 
-      View = spin(-M_PI/S21*shiftmul) * View, didsomething = true;
+    if(sym == SDLK_PAGEDOWN) {
+      if(conformal::on)
+        conformal::rotation++;
+      else
+        View = spin(-M_PI/S21*shiftmul) * View, didsomething = true;
+      }
     
     if(sym == SDLK_PAGEUP || sym == SDLK_PAGEDOWN) 
       if(isGravityLand(cwt.c->land)) playermoved = false;

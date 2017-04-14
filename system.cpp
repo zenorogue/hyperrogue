@@ -864,6 +864,7 @@ namespace gamestack {
     heptspin viewctr;
     transmatrix View;
     eGeometry geometry;
+    bool shmup;
     bool hepta;
     };
 
@@ -882,6 +883,7 @@ namespace gamestack {
     gdn.viewctr = viewctr;
     gdn.View = View;
     gdn.geometry = geometry;
+    gdn.shmup = shmup::on;
     gdn.hepta = purehepta;
     gd.push_back(gdn);
     }
@@ -894,6 +896,8 @@ namespace gamestack {
     View = gdn.View;
     geometry = gdn.geometry;
     purehepta = gdn.hepta;
+    if(shmup::on) shmup::clearMonsters();
+    shmup::on = gdn.shmup;
     resetGeometry();
     gd.pop_back();
     bfs();
