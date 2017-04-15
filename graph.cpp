@@ -6728,8 +6728,10 @@ void showGameover() {
   dialog::addInfo(XLAT("Your score: %1", its(gold())));
   dialog::addInfo(XLAT("Enemies killed: %1", its(tkills())));
 
-  if(tour::on) ;
-  else if(items[itOrbYendor]) {
+#ifdef TOUR
+  if(tour::on) ; else 
+#endif
+  if(items[itOrbYendor]) {
     dialog::addInfo(XLAT("Orbs of Yendor found: %1", its(items[itOrbYendor])), iinf[itOrbYendor].color);
     dialog::addInfo(XLAT("CONGRATULATIONS!"), iinf[itOrbYendor].color);
     }
@@ -7638,9 +7640,11 @@ void drawscreen() {
 
   #ifndef MOBILE
   if(cmode == emNormal || cmode == emVisual1 || cmode == emVisual2 || cmode == emChangeMode ) {
+#ifdef TOUR
     if(tour::on) 
       displayButton(vid.xres-8, vid.yres-vid.fsize, XLAT("(ESC) tour menu"), SDLK_ESCAPE, 16);
     else
+#endif
       displayButton(vid.xres-8, vid.yres-vid.fsize, XLAT("(v) menu"), 'v', 16);
     }
   #endif  

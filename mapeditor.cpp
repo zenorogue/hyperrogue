@@ -13,6 +13,8 @@
 
 namespace mapeditor {
   int subcanvas;
+  int displaycodes;
+
 #ifndef NOEDIT
   map<int, cell*> modelcell;
   
@@ -425,7 +427,6 @@ namespace mapeditor {
   int subscreen; //0=normal, 1=config, 2=patterns, 3=predesigned
 
   bool symRotation, sym01, sym02, sym03;
-  int displaycodes;
   int whichpart;
   
   cell *drawcell;

@@ -5,6 +5,7 @@
 #define NOGFX
 #define NOPNG
 #define DEMO
+#define TOUR
 
 #ifdef FAKEWEB
 void mainloopiter();
@@ -16,6 +17,8 @@ template<class A, class B, class C> void emscripten_set_main_loop(A a, B b, C c)
 void initweb();
 
 void loadCompressedChar(int &otwidth, int &otheight, int *tpix);
+
+const char *wheresounds;
 
 #include "hyper.cpp"
 

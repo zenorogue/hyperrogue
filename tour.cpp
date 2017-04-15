@@ -42,10 +42,15 @@ static struct { const char *name; int id; int legal; const char *help; } slides[
     }, 
   {"Hypersian Rug model", 21, LEGAL_HYPERBOLIC,
     "New players think that the action of HyperRogue takes place on a sphere. "
+#ifdef WEB
+    "This is not true -- try the Turorial in the native desktop version shows "
+    "the surface HyperRogue actually takes place on."
+#else
     "This is not true -- the next slide will show the surface HyperRogue "
     "actually takes place on.\n\n"
     "Use arrow keys to rotate the model, and Page Up/Down to zoom.\n\n"
     "If you do not see anything, press '5' to try a safer renderer."
+#endif
     }, 
   {"Expansion", 22, LEGAL_ANY,
     "The next slide shows the number of cells in distance 1, 2, 3, ... from you. "
@@ -205,6 +210,7 @@ static struct { const char *name; int id; int legal; const char *help; } slides[
     "The following slide is a visualization of the Collatz conjecture. "
     "Press '5' for a spiral rendering of the Collatz conjecture visualization."},
 #endif
+#ifndef WEB
   {"Shoot'em up mode", 52, LEGAL_NONE,
     "In the shoot'em up mode, space and time is continuous. "
     "You attack by throwing knives. "
@@ -212,6 +218,7 @@ static struct { const char *name; int id; int legal; const char *help; } slides[
     "There are other special modes too which change the gameplay or "
     "focus on a particular challenge."
     },
+#endif
   {"THE END", 99, LEGAL_ANY,
     "This tour shows just a small part of what you can see in the world of HyperRogue. "
     "For example, "
@@ -275,6 +282,7 @@ void presentation(int mode) {
   // Hypersian Rug  
   if(id == 21) {
     static int wm, mm;
+#ifndef WEB
     if(mode == 1) {
       rug::init();
       wm = vid.wallmode;
@@ -292,6 +300,7 @@ void presentation(int mode) {
       rug::rendernogl = !rug::rendernogl;
       rug::init();
       }
+#endif
     }
   
   // Expansion

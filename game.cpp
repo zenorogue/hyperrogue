@@ -5392,8 +5392,10 @@ void movecost(cell* from, cell *to) {
       addMessage(XLAT("As you leave, your powers are drained!"));
     }
   
+#ifdef TOUR
   if(from->land != to->land && tour::on)
     tour::checkGoodLand(to->land);
+#endif
   
   if(to->land ==laCrossroads4 && !chaosUnlocked) {
     achievement_gain("CR4");
@@ -5574,10 +5576,12 @@ bool collectItem(cell *c2, bool telekinesis) {
     if(shmup::on) gainLife();
     else placeGolem(cwt.c, c2, moTameBomberbird);
     }
+#ifdef TOUR
   else if(tour::on && (c2->item == itOrbSafety || c2->item == itOrbRecall)) {
     addMessage(XLAT("This Orb is not compatible with the Tutorial."));
     return true;
     }
+#endif
   else if(c2->item == itOrbSafety) {
     playSound(c2, "pickup-orb"); // TODO safety
     items[c2->item] += 7;
