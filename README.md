@@ -1,6 +1,6 @@
 
 # HyperRogue
-**Current version: 8.3j**
+**Current version: 9.4g**
 
 ## The game ##
 You are a lone outsider in a strange, non-Euclidean world. You can move with the numpad, vi keys (hjklyubn), or mouse. You can also skip turns by pressing ".".
