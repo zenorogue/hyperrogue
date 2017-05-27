@@ -60,8 +60,6 @@ void merge(cell *c, int d, cell *c2, int d2, bool mirrored = false) {
 
 typedef unsigned short eucoord;
 
-#include <map>
-
 struct cdata {
   int val[4];
   int bits;
@@ -653,7 +651,6 @@ void clearHexes(heptagon *at) {
     }
   }
 
-#include <queue>
 void clearfrom(heptagon *at) {
   queue<heptagon*> q;
   q.push(at);
@@ -767,6 +764,7 @@ int celldist(cell *c) {
     decodeMaster(c->master, x, y);
     return eudist(x, y);
     }
+  if(sphere) return celldistance(c, currentmap->gamestart());
   if(c->type == 7) return c->master->distance;
   int dx[3];
   for(int u=0; u<3; u++)
@@ -1100,7 +1098,6 @@ bool randpatternMajority(cell *c, int ival, int iterations) {
   return memo;
   }
 
-#include <map>
 map<heptagon*, int> spins;
 
 #define RVAL_MASK 0x10000000

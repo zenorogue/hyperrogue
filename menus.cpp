@@ -6,6 +6,8 @@
 #define BLACKISH 0x404040
 #define REDDISH 0x400000
 
+ld whatever = 0;
+
 void showOverview() {
   DEBB(DF_GRAPH, (debugfile,"show overview\n"));
   mouseovers = XLAT("world overview");
@@ -166,7 +168,7 @@ void handleOverview(int sym, int uni) {
       "mousewheel to gain or lose treasures and orbs quickly (Ctrl = precise, Shift = reverse).";
     }
   else if(dialog::handlePageButtons(uni)) ;
-  else if(uni) cmode = emNormal;
+  else if(doexiton(sym, uni)) cmode = emNormal;
   }
 
 bool checkHalloweenDate() {
@@ -291,7 +293,7 @@ void handleMenuKey(int sym, int uni) {
 #ifdef ROGUEVIZ
   else if(uni == 'g') cmode = emRogueviz;
 #endif
-  else if(uni || sym == SDLK_F10) {
+  else if(doexiton(sym, uni)) {
     cmode = emNormal;
     msgs.clear();
     }
@@ -310,6 +312,10 @@ void showVisual1() {
   dialog::addSelItem(XLAT("movement animation speed"), fts(vid.mspeed), 'r');
   dialog::addSelItem(XLAT("projection"), fts(vid.alpha), 'p');
   dialog::addSelItem(XLAT("scale factor"), fts(vid.scale), 'z');
+  
+#ifdef LOCAL
+  dialog::addSelItem(XLAT("whatever"), fts(whatever), 'j');
+#endif
 
   const char *wdmodes[6] = {"ASCII", "black", "plain", "Escher", "plain/3D", "Escher/3D"};
   const char *mdmodes[6] = {"ASCII", "items only", "items and monsters", "high contrast",
@@ -377,6 +383,54 @@ void projectionDialog() {
   dialog::sidedialog = true;
   }
 
+void switchFullscreen() {
+  vid.full = !vid.full;
+#ifdef ANDROID
+  addMessage(XLAT("Reenter HyperRogue to apply this setting"));
+  settingsChanged = true;
+#endif
+#ifndef NOSDL
+  if(true) {
+    vid.xres = vid.full ? vid.xscr : 9999;
+    vid.yres = vid.full ? vid.yscr : 9999;
+    extern bool setfsize;
+    setfsize = true;
+    }
+  setvideomode();
+#endif
+  }
+
+void switchGL() {
+  vid.usingGL = !vid.usingGL;
+  if(vid.usingGL) addMessage(XLAT("openGL mode enabled"));
+  if(!vid.usingGL) addMessage(XLAT("openGL mode disabled"));
+#ifndef ANDROID
+  if(!vid.usingGL) addMessage(XLAT("shift+O to switch anti-aliasing"));
+#endif
+#ifdef ANDROID
+  settingsChanged = true;
+#else
+#ifndef NOSDL
+  setvideomode();
+#endif
+#endif
+  }
+
+void switchHardcore() {
+  if(hardcore && !canmove) { 
+    restartGame();
+    hardcore = false;
+    cmode = emNormal;
+    }
+  else if(hardcore && canmove) { hardcore = false; }
+  else { hardcore = true; canmove = true; hardcoreAt = turncount; }
+  if(hardcore)
+      addMessage("One wrong move, and it is game over!");
+  else
+      addMessage("Not so hardcore?");
+  if(pureHardcore()) cmode = emNormal;
+  }
+
 void handleVisual1(int sym, int uni) {
   dialog::handleNavigation(sym, uni);
     
@@ -388,7 +442,13 @@ void handleVisual1(int sym, int uni) {
   
   if(xuni == '6') vid.grid = !vid.grid;
   if(xuni == 'u') vid.particles = !vid.particles;
-      
+
+  if(xuni == 'j') {
+    dialog::editNumber(whatever, -10, 10, 1, 0, XLAT("whatever"), 
+      XLAT("Whatever."));
+    dialog::sidedialog = true;
+    }
+
   if(xuni == 'z') {
     dialog::editNumber(vid.scale, .001, 1000, .1, 1, XLAT("scale factor"), 
       XLAT("Scale the displayed model."));
@@ -408,22 +468,7 @@ void handleVisual1(int sym, int uni) {
     glyphsortorder = eGlyphsortorder((glyphsortorder+6+(shiftmul>0?1:-1)) % gsoMAX);
     }
   
-  if(xuni == 'f') {
-    vid.full = !vid.full;
-#ifdef ANDROID
-    addMessage(XLAT("Reenter HyperRogue to apply this setting"));
-    settingsChanged = true;
-#endif
-#ifndef MOBILE
-    if(true) {
-      vid.xres = vid.full ? vid.xscr : 9999;
-      vid.yres = vid.full ? vid.yscr : 9999;
-      extern bool setfsize;
-      setfsize = true;
-      }
-    setvideomode();
-#endif
-    }
+  if(xuni == 'f') switchFullscreen();
   
   if(xuni == 'v') cmode = emNormal;
   if(sym == SDLK_F2) cmode = emVisual2;
@@ -502,7 +547,7 @@ void handleJoystickConfig(int sym, int uni) {
     cmode = emShmupConfig;
   
   if(sym == SDLK_F10) cmode = emNormal;
-  if(uni) cmode = emShmupConfig;
+  if(doexiton(sym, uni)) cmode = emShmupConfig;
   }
 
 void show3D() {
@@ -672,7 +717,7 @@ void handle3D(int sym, int uni) {
   else if(uni == 'M') 
     pmodel = (pmodel == mdHyperboloid ? mdDisk : mdHyperboloid);
 
-  else if(uni) cmode = emVisual2;
+  else if(doexiton(sym, uni)) cmode = emVisual2;
   
   if(cmode == emNumber) dialog::sidedialog = true;
   }
@@ -717,6 +762,9 @@ void showVisual2() {
   dialog::addSelItem(XLAT("compass size"), its(vid.mobilecompasssize), 'c');
 #endif
 
+  dialog::addSelItem(XLAT("aura brightness"), its(vid.aurastr), 'z');
+  dialog::addSelItem(XLAT("aura smoothening factor"), its(vid.aurasmoothen), 'x');
+
   dialog::addBreak(50);
   dialog::addItem(XLAT("exit configuration"), 'v');
 #ifndef NOCONFIG
@@ -725,7 +773,6 @@ void showVisual2() {
 
   dialog::display();
   }
-
 
 void handleVisual2(int sym, int uni) {
   dialog::handleNavigation(sym, uni);
@@ -746,21 +793,7 @@ void handleVisual2(int sym, int uni) {
     lastmode = cmode, cmode = emHelp;
 
 #ifndef ONEGRAPH
-  if(xuni == 'o' && shiftmul > 0) {
-    vid.usingGL = !vid.usingGL;
-    if(vid.usingGL) addMessage(XLAT("openGL mode enabled"));
-    if(!vid.usingGL) addMessage(XLAT("openGL mode disabled"));
-#ifndef ANDROID
-    if(!vid.usingGL) addMessage(XLAT("shift+O to switch anti-aliasing"));
-#endif
-#ifdef ANDROID
-    settingsChanged = true;
-#else
-#ifndef FAKEMOBILE
-    setvideomode();
-#endif
-#endif
-    }
+  if(xuni == 'o' && shiftmul > 0) switchGL();
 
 #ifndef MOBILE
   if(xuni == 'o' && shiftmul < 0 && !vid.usingGL) {
@@ -796,6 +829,11 @@ void handleVisual2(int sym, int uni) {
   if(xuni =='b') 
     dialog::editNumber(fontscale, 0, 400, 10, 100, XLAT("font scale"), "");
 #endif
+
+  if(xuni =='z') 
+    dialog::editNumber(vid.aurastr, 0, 256, 10, 128, XLAT("aura brightness"), "");
+  if(xuni =='x') 
+    dialog::editNumber(vid.aurasmoothen, 1, 180, 1, 5, XLAT("aura smoothening factor"), "");
 
   if(xuni == 'e') {
     dialog::editNumber(vid.eye, -10, 10, 0.01, 0, XLAT("distance between eyes"),
@@ -976,26 +1014,14 @@ void handleChangeMode(int sym, int uni) {
   else if(xuni == 'n')
     cmode = emNetgen;
 #endif
-  else if(xuni == 'h' && !shmup::on) {
-    if(hardcore && !canmove) { 
-      restartGame();
-      hardcore = false;
-      cmode = emNormal;
-      }
-    else if(hardcore && canmove) { hardcore = false; }
-    else { hardcore = true; canmove = true; hardcoreAt = turncount; }
-    if(hardcore)
-        addMessage("One wrong move, and it is game over!");
-    else
-        addMessage("Not so hardcore?");
-    if(pureHardcore()) cmode = emNormal;
-    }
+  else if(xuni == 'h' && !shmup::on) 
+    switchHardcore();
   else if(xuni == 'r') {
     firstland = laIce;
     restartGame('r');
     cmode = emNormal;
     }
-  else if(uni || sym == SDLK_F10)
+  else if(doexiton(sym, uni))
     cmode = emMenu;
   }
 
@@ -1204,7 +1230,7 @@ void handleEuclidean(int sym, int uni) {
     cmode = emHelp;
     lastmode = emPickEuclidean;
     }
-  else if(uni || sym == SDLK_F10) cmode = emNormal;
+  else if(doexiton(sym, uni)) cmode = emNormal;
   }
 
 #ifdef MOBILE
@@ -1299,7 +1325,7 @@ void shiftScoreDisplay(int delta) {
   if(fakescore()) shiftScoreDisplay(delta);
   }
 
-void handleScoreKeys(int sym) {
+void handleScoreKeys(int sym, int uni) {
 #ifndef MOBILE
   if(sym == SDLK_LEFT || sym == SDLK_KP4 || sym == 'h' || sym == 'a')
     shiftScoreDisplay(-1);
@@ -1316,7 +1342,7 @@ void handleScoreKeys(int sym) {
     scorefrom++;
   else if(sym == 's') sortScores(); 
   else if(sym == 'm') { scoremode++; scoremode %= 3; }
-  else if(sym != 0) cmode = emNormal;
+  else if(doexiton(sym, uni)) cmode = emNormal;
 #else
   static int scoredragx, scoredragy;
   extern bool clicked, lclicked;
@@ -1356,7 +1382,7 @@ void handleScoreKeys(int sym) {
         
 bool monsterpage = false;
 
-void handlePickScoreKeys(int uni) {
+void handlePickScoreKeys(int sym, int uni) {
   extern int andmode;
   andmode = 2;
   if(uni == 'm') monsterpage = !monsterpage; else
@@ -1366,7 +1392,7 @@ void handlePickScoreKeys(int uni) {
     scoredisplay = pickscore_options[uni - 1000].second;
     }
   else if(mapeditor::editInfix(uni)) ;
-  else if(uni) cmode = emScores;
+  else if(doexiton(sym, uni)) cmode = emScores;
   }
         
 void showPickScores() {
@@ -1415,6 +1441,12 @@ void showPickScores() {
 void showHelp() {
     
     getcstat = SDLK_ESCAPE;
+    if(help == "HELPFUN") {
+      help_delegate();
+      dialog::display();
+      return;
+      }
+
     if(help == "@") help = buildHelpText();
     
     string help2;
@@ -1440,7 +1472,7 @@ void handleHelp(int sym, int uni) {
     help = "@";
   else if(uni == 'c')
     help = buildCredits();
-  else if(sym != 0 && sym != SDLK_F12)
+  else if(doexiton(sym, uni))
     cmode = lastmode;
   }
 
@@ -1571,6 +1603,7 @@ void displayMenus() {
   if(cmode == emVisual2) showVisual2();
   if(cmode == emColor) dialog::drawColorDialog(*dialog::colorPointer);
   if(cmode == emNumber) dialog::drawNumberDialog();
+  if(cmode == emLinepattern) linepatterns::showMenu();
 
 #ifndef NOMODEL
   if(cmode == emNetgen) netgen::show();

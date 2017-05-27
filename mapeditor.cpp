@@ -417,6 +417,8 @@ namespace mapeditor {
     return true;
     }
     
+  int subscreen; //0=normal, 1=config, 2=patterns, 3=predesigned
+
 #ifndef NOEDIT
   int paintwhat = 0;
   int painttype = 0;
@@ -424,8 +426,6 @@ namespace mapeditor {
   string paintwhat_str = "clear monster";
   cell *copywhat = NULL; int copydir; bool copyflip;
   
-  int subscreen; //0=normal, 1=config, 2=patterns, 3=predesigned
-
   bool symRotation, sym01, sym02, sym03;
   int whichpart;
   
@@ -651,6 +651,7 @@ namespace mapeditor {
       dialog::addBoolItem(XLAT("display only hexagons"), (whichShape == '6'), '6');
       dialog::addBoolItem(XLAT("display only heptagons"), (whichShape == '7'), '7');
       dialog::addBoolItem(XLAT("display the triheptagonal grid"), (whichShape == '8'), '8');
+      dialog::addItem(XLAT("line patterns"), 'l');
 
       dialog::addItem(XLAT("predesigned patterns"), 'r');
       dialog::display();
@@ -1027,7 +1028,7 @@ namespace mapeditor {
     string& s(cmode == emDraw ? picfile : levelfile);
     int i = size(s) - (editext?0:4);
     if(uni > 2000) sym = uni - 2000;
-    if(sym == SDLK_RETURN || sym == SDLK_ESCAPE) {
+    if(sym == SDLK_RETURN || sym == SDLK_KP_ENTER || sym == SDLK_ESCAPE) {
       choosefile = false;
       return true;
       }
@@ -1076,7 +1077,7 @@ namespace mapeditor {
       }
     else if(subscreen == 1) {
       if(uni >= '1' && uni <= '9') uni = 1000 + uni - '1';
-      if(sym == SDLK_RETURN || sym == '-') uni = 1000;
+      if(sym == SDLK_RETURN || sym == SDLK_KP_ENTER || sym == '-' || sym == SDLK_KP_MINUS) uni = 1000;
       for(int z=0; z<size(v); z++) if(1000 + z == uni) {
         paintwhat = v[z].second;
         paintwhat_str = v[z].first;
@@ -1116,6 +1117,9 @@ namespace mapeditor {
       else if(uni == 'd') displaycodes = displaycodes == 1 ? 0 : 1;
       else if(uni == 's') displaycodes = displaycodes == 2 ? 0 : 2;
       
+      else if(uni == 'l')
+        cmode = emLinepattern; 
+
       else if(uni == 'r') 
         subscreen = 3;
       
@@ -1805,7 +1809,7 @@ namespace mapeditor {
       bool err = false;
       for(int j=0; j<4; j++) {
         col[j] = getCdata(c, j);
-        col[j] *= 3;
+        col[j] *= 6;
         col[j] %= 240;
         if(col[j] > 120) col[j] = 240 - col[j];
         if(col[j] < -120) col[j] = -240 - col[j];
@@ -1815,9 +1819,286 @@ namespace mapeditor {
       col[2] /= 8;
       return (0x101010 + col[0] + (col[1] << 8) + (col[2] << 16)) >> (err?2:0);
       }
+    if(whichCanvas == 'h') {
+      int col[4];
+      bool err = false;
+      for(int j=0; j<4; j++) {
+        col[j] = getCdata(c, j);
+        col[j] *= 6;
+        col[j] %= 240;
+        if(col[j] > 120) col[j] = 240 - col[j];
+        if(col[j] < -120) col[j] = -240 - col[j];
+        }
+      col[0] /= 4;
+      col[1] /= 4;
+      col[2] /= 4;
+      return (0x202020 + col[0] + (col[1] << 8) + (col[2] << 16)) >> (err?2:0);
+      }
     if(whichCanvas == 'F') {
       return ishept(c) ? 0x202020 : 0xC0C0C0;
       }
     return canvasback;
     }
   }
+
+namespace linepatterns {
+
+  int lessalpha(int col, int m) {
+    part(col, 0) /= m;
+    return col;
+    }
+  
+  int lessalphaif(int col, bool b) {
+    return b?lessalpha(col, 4):col;
+    }
+    
+  int lessalphaif(int col, bool b1, bool b2) {
+    if(b1) col = lessalpha(col, 2);
+    if(b2) col = lessalpha(col, 2);
+    return col;
+    }
+    
+  struct {
+    int id;
+    const char *lpname;
+    int color;
+    } patterns[] = {
+
+    {patTriNet, "triangle grid: not rings", (int) 0xFFFFFF00},
+    {patTriRings, "triangle grid: rings", (int) 0xFFFFFF00},
+    {patHepta, "heptagonal grid", (int) 0x0000C000},
+    {patRhomb, "rhombic tesselation", (int) 0x0000C000},
+    {patTrihepta, "triheptagonal tesselation", (int) 0x0000C000},
+    {patNormal, "normal tesselation", (int) 0x0000C000},
+    {patBigTriangles, "big triangular grid", (int) 0x00606000},
+    
+    {patTree, "underlying tree", (int) 0x00d0d000},
+    {patAltTree, "circle/horocycle tree", (int) 0xd000d000},
+
+    {patZebraTriangles, "zebra triangles", (int) 0x40FF4000},
+    {patZebraLines, "zebra lines", (int) 0xFF000000},
+    {patVine, "vineyard pattern", (int) 0x8438A400},
+    {patPalacelike, "firewall line", (int) 0xFF400000},
+    {patPalace, "firewall line: Palace", (int) 0xFFD50000},
+    {patPower, "firewall line: Power", (int) 0xFFFF0000},
+    {0, NULL, 0}
+    };
+
+  void clearAll() {
+    for(int k=0; patterns[k].lpname; k++) patterns[k].color &= ~255;
+    }
+
+  bool any() {
+    for(int k=0; patterns[k].lpname; k++) if(patterns[k].color & 255) return true;
+    return false;
+    }
+
+  void setColor(ePattern id, int col) {
+    for(int k=0; patterns[k].lpname; k++)
+      if(patterns[k].id == id) patterns[k].color = col;
+    }
+  
+  void switchAlpha(ePattern id, int col) {
+    for(int k=0; patterns[k].lpname; k++)
+      if(patterns[k].id == id) patterns[k].color ^= col;
+    }
+  
+  void drawAll() {
+
+    if(any()) for(map<cell*, transmatrix>::iterator it = gmatrix.begin(); it != gmatrix.end(); it++) {
+      cell *c = it->first;
+      transmatrix& V = it->second;
+      
+      for(int k=0; patterns[k].lpname; k++) {
+        int col = patterns[k].color;
+        if(!(col & 255)) continue;
+        int id = patterns[k].id;
+        
+        switch(id) {
+
+#define col1 \
+  lessalphaif(col, behindsphere(V))
+
+#define col2 \
+  lessalphaif(col, behindsphere(V), behindsphere(gmatrix[c2]))
+
+          case patZebraTriangles:
+            if(zebra40(c) / 4 == 10) {
+              bool all = true;
+              hyperpoint tri[3];
+              for(int i=0; i<3; i++) {
+                cell *c2 = createMov(c, i*2);
+                if(!gmatrix.count(c2)) all = false;
+                else tri[i] = tC0(gmatrix[c2]);
+                }
+              
+              if(all) for(int i=0; i<3; i++)
+                queueline(tri[i], tri[(i+1)%3], col, 3);
+              }
+            break;
+          
+          case patZebraLines:
+            if(!pseudohept(c)) for(int i=0; i<c->type; i+=2) {
+              cell *c2 = createMov(c, i);
+              int fv1 = zebra40(c);
+              if(fv1/4 == 4 || fv1/4 == 6 || fv1/4 == 5 || fv1/4 == 10) fv1 ^= 2;
+              int fv2 = zebra40(c2);
+              if(fv2/4 == 4 || fv2/4 == 6 || fv2/4 == 5 || fv2/4 == 10) fv2 ^= 2;
+              if((fv1&1) == (fv2&1)) continue;
+              
+              double x = sphere?.3651:euclid?.2611:.2849;
+
+              queueline(V * ddspin(c,i,-S14) * xpush0(x), 
+                V * ddspin(c,i,+S14) * xpush0(x), 
+                col, 1);
+              }
+            break;
+          
+          case patNormal: {
+            double x = sphere?.401:euclid?.3 : .328;
+            if(euclid || !pseudohept(c)) for(int t=0; t<c->type; t++) 
+              if(euclid ? c->mov[t]<c : (((t^1)&1) || c->mov[t] < c))
+                queueline(V * ddspin(c,t,-S7) * xpush0(x), 
+                    V * ddspin(c,t,+S7) * xpush0(x), 
+                    col1, 1);
+            break;
+            }
+          
+          case patTrihepta:
+            if(!pseudohept(c)) for(int i=0; i<6; i++) {
+              cell *c2 = c->mov[i];
+              if(!c2 || !pseudohept(c2)) continue;
+              double x = sphere?.3651:euclid?.2611:.2849;
+              queueline(V * ddspin(c,i,-S14) * xpush0(x), 
+                V * ddspin(c,i,+S14) * xpush0(x), 
+                col2, 1);
+              }
+            break;
+          
+          case patTriNet:
+            forCellEx(c2, c) if(c2 > c) if(gmatrix.count(c2)) if(celldist(c) != celldist(c2)) {
+              queueline(it->second*C0, gmatrix[c2]*C0, 
+                darkena(backcolor ^ 0xFFFFFF, 0, col2),
+                2);
+              }
+            break;
+
+          case patTriRings:
+            forCellEx(c2, c) if(c2 > c) if(gmatrix.count(c2) && celldist(c) == celldist(c2)) 
+              queueline(it->second*C0, gmatrix[c2]*C0, 
+                darkena(backcolor ^ 0xFFFFFF, 0, col2),
+                2);
+            break;
+
+          case patHepta:
+            forCellEx(c2, c) if(c2 > c) if(gmatrix.count(c2) && pseudohept(c) == pseudohept(c2)) 
+              queueline(it->second*C0, gmatrix[c2]*C0, 
+                darkena(backcolor ^ 0xFFFFFF, 0, col2),
+                2);
+            break;
+
+          case patRhomb:
+            forCellEx(c2, c) if(c2 > c) if(gmatrix.count(c2) && pseudohept(c) != pseudohept(c2)) 
+              queueline(it->second*C0, gmatrix[c2]*C0, 
+                darkena(backcolor ^ 0xFFFFFF, 0, col2),
+                2);
+            break;
+          
+          case patPalace: {
+            int a = polarb50(c);
+            if(pseudohept(c)) for(int i=0; i<7; i++) {
+                cell *c1 = createMov(c, (i+3) % 7);
+                cell *c2 = createMov(c, (i+4) % 7);
+                if(polarb50(c1) != a && polarb50(c2) != a)
+                    queueline(V * ddspin(c,i,84*5/14) * xpush0(tessf/2),
+                              V * ddspin(c,i,84*9/14) * xpush0(tessf/2),
+                                        col, 1);
+                }
+            break;
+            }
+          
+          case patPalacelike:
+            if(pseudohept(c)) for(int i=0; i<7; i++) 
+              queueline(V * ddspin(c,i,84*5/14) * xpush0(tessf/2),
+                        V * ddspin(c,i,84*9/14) * xpush0(tessf/2),
+                                  col1, 1);
+            break;
+          
+          case patBigTriangles: {
+            if(pseudohept(c) && !euclid) for(int i=0; i<S7; i++) 
+              if(c->master->move[i] < c->master) {
+                cell *c2 = c->master->move[i]->c7;
+                queueline(tC0(V), V*xspinpush0((purehepta?M_PI:0) -2*M_PI*i/S7, tessf), col2, 2);
+                }
+            break;
+            }
+            
+          case patTree:
+            if(c->type != 6 && !euclid) 
+              queueline(tC0(V), V*ddi0(purehepta?S42:0, tessf), col1, 2);
+            break;
+          
+          case patAltTree:
+            if(c->type != 6 && !euclid && c->master->alt) {
+              for(int i=0; i<S7; i++)
+                if(c->master->move[i] && c->master->move[i]->alt == c->master->alt->move[0])
+                  queueline(tC0(V), V*xspinpush0((purehepta?M_PI:0) -2*M_PI*i/S7, tessf), col, 2);
+              }
+            break;
+          
+          case patVine: {
+            int p = emeraldval(c);
+            double hdist = hdist0(heptmove[0] * heptmove[2] * C0);
+            if(pseudohept(c) && (p/4 == 10 || p/4 == 8))
+            for(int i=0; i<S7; i++) if(c->mov[i] && emeraldval(c->mov[i]) == p-4) {
+              queueline(tC0(V), V*tC0(heptmove[i]), col, 2);
+              queueline(tC0(V), V*tC0(spin(-i * ALPHA) * xpush(-hdist/2)), col, 2);
+              }
+            break;
+            }
+          
+          case patPower: {
+            int a = emeraldval(c);
+            if(pseudohept(c) && a/4 == 8) for(int i=0; i<7; i++) {
+                heptagon *h1 = c->master->move[(i+1)%7];
+                heptagon *h2 = c->master->move[(i+6)%7];
+                if(!h1 || !h2) continue;
+                if(emeraldval(h1->c7)/4 == 8 && emeraldval(h2->c7)/4 == 8)
+                    queueline(V * ddspin(c,i,84*5/14) * xpush0(tessf/2),
+                              V * ddspin(c,i,84*9/14) * xpush0(tessf/2),
+                                        col, 1);
+                }
+            break;
+            }
+          }
+        }
+      }
+    }
+#undef col1
+#undef col2
+  
+  int numpat = 0;
+  
+  void showMenu() {
+    dialog::init(XLAT("line patterns"));
+    
+    for(numpat=0; patterns[numpat].lpname; numpat++)
+      dialog::addColorItem(XLAT(patterns[numpat].lpname), patterns[numpat].color, 'a'+numpat);
+  
+    dialog::addBreak(50);
+    dialog::addItem(XLAT("exit menu"), 'v');
+    
+    dialog::addBreak(50);
+    dialog::addInfo("change the alpha parameter to show the lines");
+  
+    dialog::display();
+    }
+  
+  void handleMenu(int sym, int uni) {
+    dialog::handleNavigation(sym, uni);
+    if(uni >= 'a' && uni < 'a' + numpat)
+      dialog::openColorDialog(patterns[uni - 'a'].color, NULL);
+    else if(doexiton(sym,uni)) cmode = emNormal;
+    }
+  
+  };

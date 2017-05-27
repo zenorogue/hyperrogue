@@ -10,8 +10,6 @@
 #define SHMUPTITLE "shoot'em up and multiplayer"
 #endif
 
-#include <map>
-
 extern int mousex, mousey;
 extern bool clicked;
 
@@ -175,7 +173,7 @@ char* axeconfigs[24]; int numaxeconfigs;
 int* dzconfigs[24];
 
 string listkeys(int id) {
-#ifndef MOBILE
+#ifndef NOSDL
   string lk = "";
   for(int i=0; i<512; i++)
     if(vid.scfg.keyaction[i] == id)
@@ -191,7 +189,7 @@ string listkeys(int id) {
         }
   return lk;
 #endif
-#ifdef MOBILE
+#ifdef NOSDL
   return "";
 #endif
   }
@@ -218,7 +216,7 @@ bool shmupcfg;
 bool configdead;
 
 void showShmupConfig() {
-#ifndef MOBILE
+#ifndef NOSDL
 
   int sc = vid.scfg.subconfig;
 
@@ -368,7 +366,7 @@ void showShmupConfig() {
   }
 
 void handleConfig(int sym, int uni) {
-#ifndef MOBILE
+#ifndef NOSDL
   if(!vid.scfg.setwhat) dialog::handleNavigation(sym, uni);
   int sc = vid.scfg.subconfig;
   if(sc == 0) {
@@ -466,7 +464,7 @@ help += XLAT("This menu can be also used to configure keys.\n\n");
         }
       else if(xuni == 'z')
         configdead = !configdead;
-      else if(uni || sym == SDLK_F10)
+      else if(doexiton(sym, uni))
         vid.scfg.subconfig = 0;
       }
     }
@@ -504,7 +502,7 @@ void pressaction(int id) {
   }
 
 void handleInput(int delta) {
-#ifndef MOBILE
+#ifndef NOSDL
   double d = delta / 500.;
 
   Uint8 *keystate = SDL_GetKeyState(NULL);
@@ -566,10 +564,10 @@ void initConfig() {
   
   char* t = vid.scfg.keyaction;
   
-  t['w'] = 16 + 0;
-  t['s'] = 16 + 1;
-  t['a'] = 16 + 2;
-  t['d'] = 16 + 3;
+  t['w'] = 16 + 4;
+  t['s'] = 16 + 5;
+  t['a'] = 16 + 6;
+  t['d'] = 16 + 7;
 
 #ifndef MOBILE
   t[SDLK_KP8] = 16 + 4;
@@ -585,10 +583,10 @@ void initConfig() {
   t['t'] = 16 + pcOrbPower;
   t['y'] = 16 + pcCenter;
 
-  t['i'] = 32 + 0;
-  t['k'] = 32 + 1;
-  t['j'] = 32 + 2;
-  t['l'] = 32 + 3;
+  t['i'] = 32 + 4;
+  t['k'] = 32 + 5;
+  t['j'] = 32 + 6;
+  t['l'] = 32 + 7;
   t[';'] = 32 + 8;
   t['\''] = 32 + 9;
   t['p'] = 32 + 10;
@@ -1402,7 +1400,8 @@ void movePlayer(monster *m, int delta) {
   
   double mturn = 0, mgo = 0, mdx = 0, mdy = 0;
   
-  bool shotkey = false, facemouse = false, dropgreen = false;
+  bool shotkey = false, dropgreen = false, facemouse = false;
+  if(facemouse) ;
   
   int b = 16*tableid[cpid];
     for(int i=0; i<8; i++) if(actionspressed[b+i]) playermoved = true;
@@ -1479,7 +1478,7 @@ void movePlayer(monster *m, int delta) {
     mgo += mdd;
     }
 
-#ifndef MOBILE
+#ifndef NOSDL
   Uint8 *keystate = SDL_GetKeyState(NULL);
   bool forcetarget = (keystate[SDLK_RSHIFT] | keystate[SDLK_LSHIFT]);
   if(((mousepressed && !forcetarget) || facemouse) && delta > 0 && !outofmap(mouseh)) {
@@ -1693,6 +1692,10 @@ void movePlayer(monster *m, int delta) {
   else m->rebasePat(nat0);
 
   if(m->base->wall == waBoat && !m->inBoat) {
+    m->inBoat = true; m->base->wall = waSea;
+    }
+  
+  if(m->base->wall == waStrandedBoat && !m->inBoat && markOrb(itOrbWater)) {
     m->inBoat = true; m->base->wall = waSea;
     }
 
@@ -2923,9 +2926,12 @@ bool drawMonster(const transmatrix& V, cell *c, const transmatrix*& Vboat, trans
 
    pair<mit, mit> p = 
     monstersAt.equal_range(c);
+   
+  vector<monster*> monsters;
 
   for(mit it = p.first; it != p.second; it++) {
     monster* m = it->second;
+    if(c != m->base) continue; // may happen in RogueViz Collatz
     m->pat = ggmatrix(m->base) * m->at;
     transmatrix view = V * m->at;
     
@@ -3162,8 +3168,20 @@ transmatrix calc_relative_matrix_help(cell *c, heptagon *h1) {
   }
 
 void virtualRebase(shmup::monster *m, bool tohex) {
-
-  if(euclid || sphere) return;
+  
+  if(euclid || sphere) {
+    again:
+    forCellCM(c2, m->base) {
+      transmatrix newat = inverse(ggmatrix(c2)) * ggmatrix(m->base) * m->at;
+      if(hypot(tC0(newat)[0], tC0(newat)[1])
+        < hypot(tC0(m->at)[0], tC0(m->at)[1])) {
+        m->at = newat;
+        m->base = c2;
+        goto again;
+        }
+      }
+    return;
+    }
 
   while(true) {
   
@@ -3187,15 +3205,16 @@ void virtualRebase(shmup::monster *m, bool tohex) {
       hs.h = h;
       hs.spin = d;
       heptspin hs2 = hsstep(hs, 0);
-      transmatrix V2 = spin(-hs2.spin*2*M_PI/7) * invheptmove[d];
-      double newz = (V2 *m->at * C0) [2];
+      transmatrix V2 = spin((purehepta?M_PI:0)-hs2.spin*2*M_PI/7) * invheptmove[d];
+      if(purehepta) V2 = V2 * spin(M_PI);
+      double newz = (V2 * m->at * C0) [2];
       if(newz < currz) {
         currz = newz;
         bestV = V2;
         newbase = hs2.h->c7;
         }
       }
-    
+
     if(!newbase) {
       if(tohex && !purehepta) for(int d=0; d<7; d++) {
         cell *c = createMov(m->base, d);

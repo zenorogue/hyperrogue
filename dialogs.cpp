@@ -19,7 +19,7 @@ namespace dialog {
     };
 
 #ifdef MENU_SCALING
-#ifndef MOBILE
+#ifndef NOSDL
   void handleZooming(SDL_Event &ev) {
     using namespace zoom;
     if(zoomoff || (cmode != emOverview && cmode != emTactic)) { 
@@ -109,6 +109,7 @@ namespace dialog {
     it.color = it.colorv = value >> 8;
     it.colors = it.color ^ 0x404040;
     it.colorc = it.color ^ 0x808080;
+    it.colork = 0x808080;
     it.scale = 100;
     items.push_back(it);
     }
@@ -382,6 +383,8 @@ namespace dialog {
   
   unsigned int *palette;
   
+  int colorp = 0;
+  
   void drawColorDialog(int color) {
     int ash = 8;
     
@@ -410,11 +413,13 @@ namespace dialog {
 
     for(int i=0; i<4; i++) {
       int y = vid.yres / 2 + (2-i) * vid.fsize * 2;
+      
+      int col = ((i==colorp) && !mousing) ? 0xFFD500 : 0xFFFFFF;
 
-      displayColorButton(vid.xres / 4, y, "(", 0, 16, 0, 0xFFFFFF);
+      displayColorButton(vid.xres / 4, y, "(", 0, 16, 0, col);
       string rgt = ") "; rgt += "ABGR" [i];
-      displayColorButton(vid.xres * 3/4, y, rgt, 0, 0, 0, 0xFFFFFF);
-      displayColorButton(vid.xres /4 + vid.xres * ((color >> (8*i)) & 0xFF) / 510, y, "#", 0, 8, 0, 0xFFFFFF);
+      displayColorButton(vid.xres * 3/4, y, rgt, 0, 0, 0, col);
+      displayColorButton(vid.xres /4 + vid.xres * ((color >> (8*i)) & 0xFF) / 510, y, "#", 0, 8, 0, col);
       
       if(mousey >= y - vid.fsize && mousey < y + vid.fsize)
         getcstat = 'A' + i, inslider = true;
@@ -445,6 +450,20 @@ namespace dialog {
       }
     else if(palette && uni >= 'a' && uni < 'a'+(int) palette[0]) {
       color = palette[1 + uni - 'a'];
+      }
+    else if(sym == SDLK_DOWN || sym == SDLK_KP2) {
+      colorp = (colorp-1) & 3;
+      }
+    else if(sym == SDLK_UP || sym == SDLK_KP8) {
+      colorp = (colorp+1) & 3;
+      }
+    else if(sym == SDLK_LEFT || sym == SDLK_KP4) {
+      unsigned char* pts = (unsigned char*) &color;
+      pts[colorp] -= abs(shiftmul) < .6 ? 1 : 17;
+      }
+    else if(sym == SDLK_RIGHT || sym == SDLK_KP6) {
+      unsigned char* pts = (unsigned char*) &color;
+      pts[colorp] += abs(shiftmul) < .6 ? 1 : 17;
       }
     else if(uni || sym == SDLK_F10) return 2;
     return 0;
@@ -564,6 +583,8 @@ namespace dialog {
       *ne.editwhat = fontscale = 50, affect('v');
 #endif
 
+    // if(ne.editwhat == &whatever) resetGeometry();
+
     if(ne.intval == &sightrange && sightrange < 4) 
       *ne.editwhat = sightrange = 4, affect('v');
     
@@ -677,7 +698,12 @@ namespace dialog {
       affect('v');
       }
     else if(uni == 500) {
-      ld d = (mousex - vid.xres/4 + .0) / (vid.xres/2);
+      int sl, sr;
+      if(sidescreen)
+        sl = vid.yres + vid.fsize*2, sr = vid.xres - vid.fsize*2;
+      else
+        sl = vid.xres/4, sr = vid.xres*3/4;
+      ld d = (mousex - sl + .0) / (sr-sl);
       *ne.editwhat = 
         ne.inverse_scale(d * (ne.scale(ne.vmax) - ne.scale(ne.vmin)) + ne.scale(ne.vmin));
       affect('v');
@@ -696,7 +722,7 @@ namespace dialog {
       vid.scale *= d;
       ne.s = fts(vid.alpha);
       }
-    else if(uni) {
+    else if(doexiton(sym, uni)) {
       cmode = lastmode;
       }
     }

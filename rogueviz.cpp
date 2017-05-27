@@ -27,10 +27,14 @@ void init();
 bool showlabels = false;
 bool specialmark = false;
 
-const char *fname;
-const char *cfname;
+bool rog3 = false;
 
-enum eVizkind { kNONE, kAnyGraph, kTree, kSpiral, kSAG, kCollatz };
+string fname;
+
+// const char *fname;
+// const char *cfname;
+
+enum eVizkind { kNONE, kAnyGraph, kTree, kSpiral, kSAG, kCollatz, kFullNet };
 eVizkind kind;
 
 bool on;
@@ -245,14 +249,15 @@ namespace spiral {
 namespace collatz {
 
   double s2, s3, p2, p3;
+  double cshift = -1;
   
   void start() {
     init(); kind = kCollatz;
     vdata.resize(1);
-    vertexdata& vd = vdata[0];    
-    createViz(0, cwt.c, Id);    
+    vertexdata& vd = vdata[0];
+    createViz(0, cwt.c, xpush(cshift));
     virtualRebase(vd.m, true);
-    vd.cp = dftcolor;
+    vd.cp = perturb(dftcolor);
     vd.data = 0;
     addedge(0, 0, 0, false);
     vd.name = "1";    
@@ -270,11 +275,12 @@ namespace anygraph {
   double R, alpha, T;
   vector<pair<double, double> > coords;
 
-  void read(string fn, bool subdiv = true) {
+  void read(string fn, bool subdiv = true, bool doRebase = true) {
     init(); kind = kAnyGraph;
+    fname = fn;
     FILE *f = fopen((fn + "-coordinates.txt").c_str(), "rt");
     if(!f) {
-      printf("Missing file: %s-coordinates.txt\n", fname);
+      printf("Missing file: %s-coordinates.txt\n", fname.c_str());
       exit(1);
       }
     printf("Reading coordinates...\n");
@@ -305,7 +311,7 @@ namespace anygraph {
     
     f = fopen((fn + "-links.txt").c_str(), "rt");
     if(!f) {
-      printf("Missing file: %s-links.txt\n", fname);
+      printf("Missing file: %s-links.txt\n", fname.c_str());
       exit(1);
       }
     printf("Reading links...\n");
@@ -319,12 +325,14 @@ namespace anygraph {
       }
     fclose(f);
   
-    printf("Rebasing...\n");
-    for(int i=0; i<size(vdata); i++) {
-      if(i % 10000 == 0) printf("%d/%d\n", i, size(vdata));
-      if(vdata[i].m) virtualRebase(vdata[i].m, true);
+    if(doRebase) {
+      printf("Rebasing...\n");
+      for(int i=0; i<size(vdata); i++) {
+        if(i % 10000 == 0) printf("%d/%d\n", i, size(vdata));
+        if(vdata[i].m) virtualRebase(vdata[i].m, true);
+        }
+      printf("Done.\n");
       }
-    printf("Done.\n");
     }
   
   }
@@ -380,11 +388,12 @@ namespace tree {
     tol[at].epos = ++xpos;
     }
     
-  void read(const char *fname) {
+  void read(const char *fn) {
+    fname = fn;
     init(); kind = kTree;
     printf("Reading the tree of life...\n");
-    FILE *f = fopen(fname, "rt");
-    if(!f) { printf("Failed to open tree file: %s\n", fname); exit(1); }
+    FILE *f = fopen(fname.c_str(), "rt");
+    if(!f) { printf("Failed to open tree file: %s\n", fname.c_str()); exit(1); }
     if(fgetc(f) != '(') {
       printf("Error: bad format\n");
       exit(1);
@@ -425,7 +434,11 @@ namespace tree {
     }
   }
 
+ld maxweight;
+
 namespace sag {
+
+  int sagpar = 0;
 
   enum eSagmode { sagOff, sagHC, sagSA };
   
@@ -566,6 +579,8 @@ namespace sag {
     if(s == 3) s = 2;
     if(s == 4) s = 5;
     
+    if((sagpar&1) && (s == 2 || s == 3 || s == 4)) return;
+    
     if(s == 5) sid2 = hrand(numsnake);
     
     else {
@@ -633,9 +648,9 @@ namespace sag {
     cost = 0; for(int i=0; i<N; i++) cost += costat(i, i);
     }
   
-  void loadsnake(const char *fname) {
-    printf("Loading the sag from: %s\n", fname);
-    FILE *sf = fopen(fname, "rt");
+  void loadsnake(const string& fname) {
+    printf("Loading the sag from: %s\n", fname.c_str());
+    FILE *sf = fopen(fname.c_str(), "rt");
     if(!sf) { printf("Failed to open file.\n"); exit(1); }
     if(sf) while(true) {
       string lab;
@@ -677,6 +692,9 @@ namespace sag {
   int ipturn = 100;
   int numiter = 0;
   
+  int hightemp = 10;
+  int lowtemp = -15;
+  
   void dofullsa(int satime) {
     sagmode = sagSA;
     enable_snake();
@@ -686,7 +704,7 @@ namespace sag {
       int t2 = SDL_GetTicks();
       double d = (t2-t1) / (1000. * satime);
       if(d > 1) break;
-      temperature = 10 - (d*25);
+      temperature = hightemp - (d*(hightemp-lowtemp));
       chgs.clear();
       for(int i=0; i<50000; i++) {
         numiter++;
@@ -773,6 +791,7 @@ namespace sag {
     }
   
   void readsag(const char *fname) {
+    maxweight = 0;
     FILE *f = fopen(fname, "rt");
     if(!f) { printf("Failed to open SAG file: %s\n", fname); exit(1); }
     // while(fgetc(f) != 10 && fgetc(f) != 13 && !feof(f)) ;
@@ -805,10 +824,11 @@ namespace sag {
   
   ld edgepower=1, edgemul=1;
 
-  void read(const char *fname) {
+  void read(const char *fn) {
+    fname = fn;
     init(); kind = kSAG;
     temperature = 0; sagmode = sagOff;
-    readsag(fname);
+    readsag(fname.c_str());
 
     N = size(vdata);
     // totwei.resize(N);
@@ -827,7 +847,7 @@ namespace sag {
       ei.visible = ei.weight >= 0.1;
       // (ei.weight >= maxwei[ei.i] / 5 || ei.weight >= maxwei[ei.j] / 5);
 
-      ei.weight2 = pow(ei.weight, edgepower) * edgemul;
+      ei.weight2 = pow((double) ei.weight, (double) edgepower) * edgemul;
       // LANG:: pow(ei.weight, .4) / 50;      
       
       // ei.weight2 = 0; int w = ei.weight; while(w) { w >>= 1; ei.weight2++; }      
@@ -942,18 +962,26 @@ void queuedisk(const transmatrix& V, const colorpair& cp, bool legend) {
     poly_outline = 0x606060FF;
   else
     poly_outline = 0x000000FF;
-  queuepoly(V, shDisk, cp.color1);
+  
+  if(rog3) {
+    int p = poly_outline; poly_outline = OUTLINE_TRANS; 
+    queuepolyat(V, shDisk, 0x80, PPR_MONSTER_SHADOW); 
+    poly_outline = p; 
+    queuepolyat(mscale(V, geom3::BODY), shDisk, cp.color1, PPR_MONSTER_HEAD);
+    }
+  else {
+    queuepoly(V, shDisk, cp.color1);
+    }
   if(cp.shade == 't') queuepoly(V, shDiskT, cp.color2);
   if(cp.shade == 's') queuepoly(V, shDiskS, cp.color2);
   if(cp.shade == 'q') queuepoly(V, shDiskSq, cp.color2);
   if(cp.shade == 'm') queuepoly(V, shDiskM, cp.color2);
   }
 
-ld maxweight;
-
 ld ggamma = .5;
 
 void drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
+  if(m->dead) return;
   int i = m->pid;
   vertexdata& vd = vdata[i];
   
@@ -990,7 +1018,7 @@ void drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
         if(ei->weight2 > maxweight) maxweight = ei->weight2;
         xlalpha = int(pow(ei->weight2/ maxweight, ggamma) * 255);
         }
-      else xlalpha = int(pow(.5, ggamma) * 255);
+      else xlalpha = int(pow(ld(.5), ggamma) * 255);
       
       if(svg::in && xlalpha < 16) continue;
 
@@ -1022,7 +1050,7 @@ void drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
       
         if(ei->orig && ei->orig->cpdist >= 3) ei->orig = NULL;
         if(!ei->orig) {
-          ei->orig = cwt.c;
+          ei->orig = euclid ? cwt.c : viewctr.h->c7; // cwt.c;
           ei->prec.clear();
           transmatrix T = inverse(shmup::ggmatrix(ei->orig));
           storeline(ei->prec, T*h1, T*h2);
@@ -1043,7 +1071,7 @@ void drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
   
   if(showlabels) {
     bool doshow = true;
-    if(kind == kTree && i > 0) {
+    if(kind == kTree && i > 0 && !vd.virt) {
       vertexdata& vdp = vdata[vd.data];
       hyperpoint h2 = shmup::ggmatrix(vdp.m->base) * vdp.m->at * C0;
       if(hdist(h2, V * m->at * C0) < 0.1) doshow = false;
@@ -1056,7 +1084,8 @@ void drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
     }
 
   if(kind == kCollatz) {
-    if(vd.data == 2) {
+    if(c->cpdist > 7 && euclid) ;
+    else if(vd.data == 2) {
       // doubler vertex
       string s = vd.name;
       colorpair cp = vd.cp;
@@ -1064,7 +1093,8 @@ void drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
       int i0 = size(vdata);
       vdata.resize(i0+1);
       vertexdata& vdn = vdata[i0];
-      createViz(i0, m->base, m->at * spin(collatz::s2) * xpush(collatz::p2));          
+      createViz(i0, m->base, m->at * spin(collatz::s2) * xpush(collatz::p2));
+      
       virtualRebase(vdn.m, true);
       vdn.cp = perturb(cp);
       vdn.data = 0;
@@ -1124,7 +1154,32 @@ bool virt(shmup::monster *m) {
 
 vector<int> legend;
 
+vector<cell*> named;
+
 void drawExtra() {
+  
+  if(kind == kFullNet) {
+    for(map<cell*, transmatrix>::iterator it = gmatrix.begin(); it != gmatrix.end(); it++) {
+      cell *c = it->first;
+      c->wall = waChasm;
+      }
+
+    for(map<cell*, transmatrix>::iterator it = gmatrix.begin(); it != gmatrix.end(); it++) {
+      cell *c = it->first;
+      bool draw = true;
+      for(int i=0; i<size(named); i++) if(named[i] == c) draw = false;
+      if(draw && gmatrix.count(c))
+        queuepolyat(it->second, shDisk, dftcolor, PPR_LINE);
+      }
+    
+    for(int i=0; i<size(named); i++) if(gmatrix.count(named[i])) {
+      string s = ""; s += 'A'+i;
+      queuestr(gmatrix[named[i]], 1, s, backcolor ? 0 : 0xFFFFFF, 1);
+      }
+    
+    canmove = true; items[itOrbAether] = true;
+    }
+  
   for(int i=0; i<size(legend); i++) {
     int k = legend[i];
     vertexdata& vd = vdata[k];
@@ -1206,7 +1261,7 @@ void readcolor(const char *cfname) {
 
 void init() {
   if(on) return;
-  on = autocheat = true; 
+  autocheat = true; 
 #ifndef WEB
   mapeditor::drawplayer = false;
   firstland = euclidland = laCanvas;
@@ -1215,6 +1270,7 @@ void init() {
   firstland = euclidland = laCanvas;
   restartGame();
 #endif
+  on = true;
   items[itOrbLife] = 0;
   timerghost = false;
 
@@ -1225,12 +1281,15 @@ void init() {
   }
 
 void close() { 
+  for(int i=0; i<size(vdata); i++)
+    if(vdata[i].m) vdata[i].m->dead = true;
   vdata.clear();
   labeler.clear();
   legend.clear();
   for(int i=0; i<size(edgeinfos); i++) delete edgeinfos[i];
   edgeinfos.clear();
   anygraph::coords.clear();
+  sag::sagedges.clear();
   on = false;
   }
 
@@ -1241,17 +1300,157 @@ void turn(int delta) {
   }
 
 void fixparam() {
-  if((svg::in || inHighQual) && size(legend)) vid.xres = vid.xres * 22/16;
-  while(vid.xres & 15) vid.xres++;
+  if((svg::in || inHighQual) && size(legend) && pngformat == 0) vid.xres = vid.xres * 22/16;
   if(size(legend)) vid.xcenter = vid.ycenter;
   }
 
 void rvvideo(const char *fname) {
-  for(int i=0; i<1050; i++) {
+  if(kind == kCollatz) {
+    pngformat = 2;
+    sightrange = 12;
+    overgenerate = true;
+    dronemode = true; vid.camera_angle = -45; rog3 = true; mapeditor::whichShape = '8';
+    vid.aurastr = 512;
+    long long reached = 763ll;
+    while(reached < (1ll<<60)) {
+      if(reached%3 == 2 && (2*reached-1) % 9 && hrand(100) < 50)
+        reached = (2*reached-1) / 3;
+      else reached *= 2;
+      }
+    printf("reached = %Ld\n", reached);
+    vector<string> seq;
+    while(reached>1) { 
+      seq.push_back(llts(reached));
+      if(reached&1) reached += (reached>>1)+1;
+      else reached >>= 1;
+      }
+    // seq.push_back("1");
+    reverse(seq.begin(), seq.end());
+    
+    int id = 0;
+    int next = 0;
+    
+    int steps = 0;
+    while(true) {
+      steps++;
+      if(isnan(View[0][0])) exit(1);
+      shmup::turn(100);
+      drawthemap();
+      centerpc(100); optimizeview();
+      fixmatrix(View);
+      bfs(); setdist(cwt.c, 0, NULL);
+      vertexdata& vd = vdata[id];
+      for(int e=0; e<size(vd.edges); e++) {
+        int id2 = vd.edges[e].first;
+        if(vdata[id2].name == seq[next]) {
+          id = id2; next++;
+          cwt.c = shmup::pc[0]->base = vdata[id2].m->base;
+          if(next == size(seq)) goto found;
+          }
+        }
+      }
+    
+    found:
+    printf("steps = %d\n", steps);
+    conformal::create(), conformal::rotation = 1;
+    // pmodel = mdBand;
+
+#define STORYCOUNT 24
+#define T(m,ss) (60*24*(m)+24*(ss))
+#define FRAMECOUNT T(4,55)
+
+printf("framecount = %d\n", FRAMECOUNT);
+
+struct storydata { int s; int e; const char *text; } story[] = {
+  {T(0,14), T(0,17), "I am flying above a tree of numbers."},
+  {T(0,17), T(0,20), "It starts with the number 1."},
+  {T(0,20), T(0,23), "Each number n branches left to 2n."},
+  {T(0,23), T(0,28), "And it branches right to (2n-1)/3 if possible."},
+
+  {T(1, 8), T(1,11), "What I am flying above is not a plane."},
+  {T(1,11), T(1,14), "It is not a sphere either."},
+  {T(1,14), T(1,17), "To be honest, the space I live in..."},
+  {T(1,17), T(1,20), "...is not even Euclidean."},
+  
+  {T(2,12), T(2,15), "Look, angles of a triangle add up to..."},
+  {T(2,15), T(2,18), "...less than 180 degrees in this world."},
+  {T(2,18), T(2,21), "6/7 of 180 degrees, to be exact."},
+  {T(2,21), T(2,24), "Do you see the regular heptagons?"},
+  {T(2,36), T(2,42), "And all these lines are straight."},
+  
+  {T(3, 8), T(3,11), "Lots of space in my world."},
+  {T(3,11), T(3,14), "In 105 steps from the root..."},
+  {T(3,14), T(3,17), "...there are trillions of numbers."},
+  {T(3,17), T(3,20), "That would not fit in your world."},
+
+  {T(4,0),  T(4,3),  "Is every positive number somewhere in the tree?"},
+  {T(4,3),  T(4,6),  "Your mathematicians do not know this yet."},
+  {T(4,6),  T(4,10), "Will you find the answer?"},
+  
+  {T(4,44), T(4,54), "music: Ambient Flow, by Indjenuity"},
+  
+  {T(2,6),  T(2,27), "@triangles"},
+  {T(2,27), T(2,42), "@network"},
+  
+  {0, T(0,7), "@fi"},
+  {T(4,48), T(4,55), "@fo"},
+  
+  {0,0,NULL}
+  };
+
+    int drawtris=0, drawnet=0;
+        
+    for(int i=0; i<FRAMECOUNT; i++) {
+      const char *caption = NULL;
+      int fade = 255;
+      
+      bool dt = false, dn = false;
+      
+      for(int j=0; story[j].text; j++) if(i >= story[j].s && i <= story[j].e) {
+        if(story[j].text[0] != '@')
+          caption = story[j].text;
+        else if(story[j].text[1] == 't')
+          dt = true;
+        else if(story[j].text[1] == 'n')
+          dn = true;
+        else if(story[j].text[2] == 'i')
+          fade = 255 * (i - story[j].s) / (story[j].e-story[j].s);
+        else if(story[j].text[2] == 'o')
+          fade = 255 * (story[j].e - i) / (story[j].e-story[j].s);
+        }
+      
+      if(dt && drawtris < 255) drawtris++;
+      else if(drawtris && !dt) drawtris--;
+
+      linepatterns::setColor(linepatterns::patZebraTriangles, 0x40FF4000 + drawtris);
+      
+      if(dn && drawnet < 255) drawnet++;
+      else if(drawnet && !dn) drawnet--;
+
+      linepatterns::setColor(linepatterns::patZebraLines, 0xFF000000 + drawnet);
+      
+      vid.grid = drawnet;
+      
+      conformal::phase = 1 + (size(conformal::v)-3) * i * .95 / FRAMECOUNT;
+      conformal::movetophase();
+
+      char buf[500];
+      snprintf(buf, 500, fname, i);
+      
+      if(i == 0) drawthemap();
+      shmup::turn(100);
+      printf("%s\n", buf);
+      pngres = 1080;
+      saveHighQualityShot(buf, caption, fade);
+      }
+  
+    return;
+    }
+  for(int i=0; i<1800; i++) {
     char buf[500];
     snprintf(buf, 500, fname, i);
     shmup::pc[0]->base = currentmap->gamestart();
-    shmup::pc[0]->at = spin(i * 2 * M_PI / 1000.) * xpush(1.7);
+    shmup::pc[0]->at = spin(i * 2 * M_PI / (58*30.)) * xpush(1.7);
     if(i == 0) drawthemap();
     shmup::turn(100);
     if(i == 0) drawthemap();
@@ -1263,7 +1462,7 @@ void rvvideo(const char *fname) {
 
 int readArgs() {
   using namespace arg;
-
+           
 // options before reading
   if(0) ;
   else if(argis("-dftcolor")) {
@@ -1285,7 +1484,17 @@ int readArgs() {
     shift(); sag::edgepower = argf();
     shift(); sag::edgemul = argf();
     }
+// (1) configure temperature (high, low)
+  else if(argis("-sagtemp")) {
+    shift(); sag::hightemp = argf();
+    shift(); sag::lowtemp = argf();
+    }
 // (2) read the edge data
+  else if(argis("-sagpar")) {
+    PHASE(3);
+    shift();
+    sag::sagpar = argi();
+    }
   else if(argis("-sag")) {
     PHASE(3); 
     shift(); sag::read(args());
@@ -1338,6 +1547,17 @@ int readArgs() {
     spiral::place(N, mul);
     }
 
+  else if(argis("-nogui")) {
+    noGUI = true;
+    }
+
+  else if(argis("-net")) {
+    PHASE(3);
+    init(); kind = kFullNet;
+    linepatterns::setColor(linepatterns::patTriNet, 0x30);
+    linepatterns::setColor(linepatterns::patTriRings, 0xFF);
+    }
+
   else if(argis("-spiraledge")) {
     PHASE(3); 
     ld shft = 1;
@@ -1365,6 +1585,15 @@ int readArgs() {
     }
   else if(argis("-lab")) {
     showlabels = true;
+    }
+  else if(argis("-rog3")) {
+    rog3 = true;
+    }
+  else if(argis("-cshift")) {
+    shift(); collatz::cshift = argf();
+    }
+  else if(argis("-rvwarp")) {
+    mapeditor::whichShape = '8';
     }
   else if(argis("-lq")) {
     shift(); linequality = argf();
@@ -1399,6 +1628,7 @@ void showMenu() {
   dialog::addBoolItem(XLAT("mark special vertices"), specialmark, 'x');
   dialog::addSelItem(XLAT("background color"), itsh(backcolor), 'b');
   dialog::addSelItem(XLAT("gamma value for edges"), fts(ggamma), 'g');
+  dialog::addBoolItem(XLAT("vertices in 3D"), rog3, '3');
 
   dialog::addBreak(50);
   dialog::addItem(XLAT("exit menu"), 'v');
@@ -1407,21 +1637,50 @@ void showMenu() {
   }
 
 void handleMenu(int sym, int uni) {
+  dialog::handleNavigation(sym, uni);
   if(uni == 't')
-    dialog::editNumber(sag::temperature, -10, 15, 1, 0, XLAT("temperature"), "");
+    dialog::editNumber(sag::temperature, sag::lowtemp, sag::hightemp, 1, 0, XLAT("temperature"), "");
   else if(uni == 'm') {
     sag::sagmode = sag::eSagmode( (1+sag::sagmode) % 3 );
     }
   else if(uni == 'l') showlabels = !showlabels;
+  else if(uni == '3') rog3 = !rog3;
   else if(uni == 'x') specialmark = !specialmark;
   else if(uni == 'b') backcolor ^= 0xFFFFFF;
   else if(uni == 'g') {
     dialog::editNumber(ggamma, 0, 5, .01, 0.5, XLAT("gamma value for edges"), "");
     dialog::sidedialog = true;
     }
-  else if(uni) cmode = emNormal;
+  else if(uni == 'z') {
+    for(int i=0; i<size(named)-1; i++) if(named[i] == cwt.c)
+      swap(named[i], named[i+1]);
+    if(!size(named) || named[size(named)-1] != cwt.c) named.push_back(cwt.c);
+    printf("named = %d\n", size(named));
+    cmode = emNormal;
+    }
+  else if(doexiton(sym, uni)) cmode = emNormal;
   }
 
 void processKey(int sym, int uni) { }
+
+string help() {
+  string ret = 
+    "This is RogueViz, a visualization engine based on HyperRogue.\n\nUse WASD to move, v for menu.\n\n"
+    "Read more about RogueViz on : http://roguetemple.com/z/hyper/rogueviz.php\n\n";
+  if(kind == kAnyGraph)
+    ret += "Current visualization: any graph\n\n" + fname;
+  if(kind == kTree)
+    ret += "Current visualization: tree\n\n" + fname;
+  if(kind == kSpiral)
+    ret += "Current visualization: spiral\n\n";
+  if(kind == kSAG)
+    ret += "Current visualization: SAG\n\n" + fname;
+  if(kind == kCollatz)
+    ret += "Current visualization: Collatz conjecture\n\n";
+  if(kind == kFullNet)
+    ret += "Current visualization: full net\n\n";
+  return ret;
+  }
+  
 
 };

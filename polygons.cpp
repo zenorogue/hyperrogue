@@ -1,46 +1,6 @@
 // HyperRogue, shapes used for the vector graphics
 // Copyright (C) 2011-2016 Zeno Rogue, see 'hyper.cpp' for details
 
-#ifdef GFX
-#ifndef MOBILE
-#include <SDL/SDL_gfxPrimitives.h>
-#endif
-#endif
-
-#ifdef WINDOWS
-#include <GL/glew.h>
-#else
-
-#define GL_GLEXT_PROTOTYPES 1
-#ifndef MOBILE
-#ifdef GL
-#ifdef MAC
-#include <OpenGL/gl.h>
-#include <OpenGL/glu.h>
-#else
-#include <GL/gl.h>
-#include <GL/glu.h>
-#endif
-
-#ifdef MAC
-#include <OpenGL/glext.h>
-#else
-#include <GL/glext.h>
-#endif
-#endif
-#endif
-
-#ifdef ANDROID
-#ifndef FAKE
-#ifdef GL
-#include <GLES/gl.h>
-#include <GLES/glext.h>
-#include <GLES2/gl2.h>
-#endif
-#endif
-#endif
-#endif
-
 #define QHPC 32000
 
 int qhpc, prehpc;
@@ -278,8 +238,7 @@ void addpoly(const transmatrix& V, GLfloat *tab, int cnt) {
     }
   }
 
-#ifdef GFX
-#ifndef MOBILE
+#ifdef SDLGFX
 void aapolylineColor(SDL_Surface *s, int*x, int *y, int polyi, int col) {
   for(int i=1; i<polyi; i++)
     aalineColor(s, x[i-1], y[i-1], x[i], y[i], col);
@@ -295,8 +254,6 @@ void filledPolygonColorI(SDL_Surface *s, int* polyx, int *polyy, int polyi, int 
   for(int i=0; i<polyi; i++) spolyx[i] = polyx[i], spolyy[i] = polyy[i];
   filledPolygonColor(s, spolyx, spolyy, polyi, col);
   }
-
-#endif
 #endif
 
 void glcolor2(int color) {
@@ -423,11 +380,12 @@ void drawpolyline(const transmatrix& V, GLfloat* tab, int cnt, int col, int outl
 
 #else
 
-#ifdef GFX
-  filledPolygonColorI(s, polyx, polyy, polyi, col);
 #ifndef MOBILE
   if(svg::in) svg::polygon(polyx, polyy, polyi, col, outline);
 #endif
+
+#ifdef SDLGFX
+  filledPolygonColorI(s, polyx, polyy, polyi, col);
   if(vid.goteyes) filledPolygonColorI(aux, polyxr, polyy, polyi, col);
   
   (vid.usingAA?aapolylineColor:polylineColor)(s, polyx, polyy, polyi, outline);
@@ -514,7 +472,7 @@ void drawqueue() {
 #endif
   profile_stop(3);
 
-#ifndef MOBILE
+#ifndef NOSDL
   if(vid.goteyes && !vid.usingGL) {
 
     if(aux && (aux->w != s->w || aux->h != s->h))
@@ -586,7 +544,7 @@ void drawqueue() {
       }
     }
 
-#ifndef MOBILE  
+#ifndef NOSDL
   if(vid.goteyes && !vid.usingGL) {
     int qty = s->w * s->h;
     int *a = (int*) s->pixels;
@@ -854,11 +812,13 @@ void buildpolys() {
   // procedural floors
   double shexf = purehepta ? crossf* .55 : hexf;    
   
+  double p = -.006;
+  
   bshape(shTriheptaFloor[0], PPR_FLOOR);
-  for(int t=0; t<=3; t++) hpcpush(ddi(t*S28, scalef*spzoom6*.2776) * C0);
+  for(int t=0; t<=3; t++) hpcpush(ddi(t*S28, scalef*spzoom6*(.2776+p)) * C0);
 
   bshape(shTriheptaFloor[1], PPR_FLOOR);
-  for(int t=0; t<=S7; t++) hpcpush(ddi(t*12, sphere ? .54 : scalef*spzoom6*.5273) * C0);
+  for(int t=0; t<=S7; t++) hpcpush(ddi(t*12, sphere ? .54 : scalef*spzoom6*(.5273-2*p)) * C0);
 
   bshape(shTriheptaFloorShadow[0], PPR_FLOOR);
   for(int t=0; t<=3; t++) hpcpush(ddi(t*S28, scalef*spzoom6*.2776*SHADMUL) * C0);
@@ -1872,12 +1832,21 @@ namespace svg {
 
     if(!invisible(col)) {
       startstring();
+      string str2 = "";
+      for(int i=0; i<(int) str.size(); i++)
+        if(str[i] == '&')
+          str2 += "&amp;";
+        else if(str[i] == '<')
+          str2 += "&lt;";
+        else if(str[i] == '>')
+          str2 += "&gt;";
+        else str2 += str[i];
       fprintf(f, "<text x='%s' y='%s' font-family='Times' text-anchor='%s' font-size='%s' %s>%s</text>",
-        coord(x), coord(y+size/2), 
+        coord(x), coord(y+size*.4), 
         align == 8 ? "middle" :
         align < 8 ? "start" :
         "end",
-        coord(size), stylestr(col, frame ? 0x0000000FF : 0, (1<<sightrange)*dfc/40), str.c_str());
+        coord(size), stylestr(col, frame ? 0x0000000FF : 0, (1<<sightrange)*dfc/40), str2.c_str());
       stopstring();
       fprintf(f, "\n");
       }

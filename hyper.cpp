@@ -93,7 +93,9 @@ int arg::readCommon() {
   if(argis("-c")) { PHASE(1); shift(); conffile = args(); }
   else if(argis("-s")) { PHASE(1); shift(); scorefile = args(); }
   else if(argis("-m")) { PHASE(1); shift(); musicfile = args(); }
+#ifdef SDLAUDIO
   else if(argis("-se")) { PHASE(1); shift(); wheresounds = args(); }
+#endif
 #ifndef NOEDIT
   else if(argis("-lev")) { shift(); levelfile = args(); }
   else if(argis("-pic")) { shift(); picfile = args(); }
@@ -150,24 +152,32 @@ int arg::readCommon() {
     exit(0);
     }
 
-  else if(argis("-wm")) { PHASE(2); vid.wallmode = argi(); }
-  else if(argis("-mm")) { PHASE(2); vid.monmode = argi(); }
+  else if(argis("-wm")) { PHASEFROM(2); vid.wallmode = argi(); }
+  else if(argis("-mm")) { PHASEFROM(2); vid.monmode = argi(); }
 
-#define TOGGLE(x, param) \
-else if(args()[0] == '-' && args()[1] == x && !args()[2]) { PHASE(2); param = !param; } \
-else if(args()[0] == '-' && args()[1] == x && args()[2] == '1') { PHASE(2); param = true; } \
-else if(args()[0] == '-' && args()[1] == x && args()[2] == '0') { PHASE(2); param = false; }
+#define TOGGLE(x, param, act) \
+else if(args()[0] == '-' && args()[1] == x && !args()[2]) { if(curphase == 3) {act;} else {PHASE(2); param = !param;} } \
+else if(args()[0] == '-' && args()[1] == x && args()[2] == '1') { if(curphase == 3 && !param) {act;} else {PHASE(2); param = true;} } \
+else if(args()[0] == '-' && args()[1] == x && args()[2] == '0') { if(curphase == 3 && param) {act;} else {PHASE(2); param = false;} }
 
-  TOGGLE('o', vid.usingGL)
-  TOGGLE('C', chaosmode)
-  TOGGLE('7', purehepta)
-  TOGGLE('f', vid.full)
-  TOGGLE('T', tactic::on)
-  TOGGLE('S', shmup::on)
-  TOGGLE('H', hardcore)
-  TOGGLE('R', randomPatternsMode)
+  TOGGLE('o', vid.usingGL, switchGL())
+  TOGGLE('C', chaosmode, restartGame('C'))
+  TOGGLE('7', purehepta, restartGame('7'))
+  TOGGLE('f', vid.full, switchFullscreen())
+  TOGGLE('T', tactic::on, restartGame('t'))
+  TOGGLE('S', shmup::on, restartGame('s'))
+  TOGGLE('H', hardcore, switchHardcore())
+  TOGGLE('R', randomPatternsMode, restartGame('r'))
   
-  else if(argis("-geo")) { PHASE(2); shift(); geometry = targetgeometry = (eGeometry) argi(); }
+  else if(argis("-geo")) { 
+    if(curphase == 3) {
+      shift(); targetgeometry = (eGeometry) argi();
+      restartGame('g');
+      }
+    else {      
+      PHASE(2); shift(); geometry = targetgeometry = (eGeometry) argi();
+      }
+    }
   else if(argis("-qs")) {
     autocheat = true;
     shift(); fp43.qpaths.push_back(args());
@@ -203,7 +213,7 @@ else if(args()[0] == '-' && args()[1] == x && args()[2] == '0') { PHASE(2); para
     vid.scfg.players = argi(); 
     }
   else if(argis("-PM")) { 
-    PHASE(2); shift(); pmodel = eModel(argi());
+    PHASEFROM(2); shift(); pmodel = eModel(argi());
     }
   else if(argis("-offline")) offlineMode = true;
   else if(argis("-debugf")) {
@@ -215,18 +225,15 @@ else if(args()[0] == '-' && args()[1] == x && args()[2] == '0') { PHASE(2); para
     shift(); debugflags = argi();
     }
   else if(argis("-ch")) { autocheat = true; }
-  else if(argis("-zoom") && curphase == 2) { 
-    PHASE(2); shift(); vid.scale = argf();
-    }
-  else if(argis("-zoom") && curphase == 3) { 
-    PHASE(3); shift(); vid.scale = argf();
+  else if(argis("-zoom")) { 
+    PHASEFROM(2); shift(); vid.scale = argf();
     }
   else if(argis("-Y")) { 
     yendor::on = true;
     shift(); yendor::challenge = argi();
     }
   else if(argis("-r")) { 
-    PHASE(2);
+    PHASEFROM(2);
     shift(); 
     int clWidth=0, clHeight=0, clFont=0;
     sscanf(args(), "%dx%dx%d", &clWidth, &clHeight, &clFont);
@@ -266,20 +273,27 @@ else if(args()[0] == '-' && args()[1] == x && args()[2] == '0') { PHASE(2); para
       setdist(cl.lst[i], 7, NULL);
     }
   else if(argis("-sr")) {    
-    if(curphase == 1) PHASE(2);
+    PHASEFROM(2);
     shift(); sightrange = argi();
     }
+#ifndef NOSDL
   else if(argis("-pngshot")) {
     PHASE(3); shift(); 
     printf("saving PNG screenshot to %s\n", args());
     saveHighQualityShot(args());
     }
+#endif
   else if(argis("-svgsize")) {
     shift(); sscanf(args(), "%d/%d", &svg::svgsize, &svg::divby);
     }
+#ifndef NOPNG
   else if(argis("-pngsize")) {
     shift(); sscanf(args(), "%d", &pngres);
     }
+  else if(argis("-pngformat")) {
+    shift(); sscanf(args(), "%d", &pngformat);
+    }
+#endif
   else if(argis("-svggamma")) {
     shift(); svg::gamma = argf();
     }

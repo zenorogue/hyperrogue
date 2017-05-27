@@ -1,31 +1,5 @@
-// definitions
-
-// disable this if you have no access to SDL_gfx
-#ifndef STEAM
-#define GFX
-#endif
-
-#define GL
-
-#define PSEUDOKEY_WHEELDOWN 2501
-#define PSEUDOKEY_WHEELUP 2502
-
-#ifdef NOGFX
-#undef GFX
-#endif
-
-#ifdef MAC
-#define NOPNG
-#endif
-
 // scale the Euclidean
 #define EUCSCALE 2.3
-
-#ifndef MOBILE
-#ifndef NOAUDIO
-#define SDLAUDIO
-#endif
-#endif
 
 #define NUMWITCH 7
 
@@ -273,7 +247,6 @@ int darkened(int c);
 extern int getcstat;
 bool displaychr(int x, int y, int shift, int size, char chr, int col);
 bool displayfr(int x, int y, int b, int size, const string &s, int color, int align);
-void saveHighQualityShot(const char *fname = NULL);
 
 bool outofmap(hyperpoint h);
 void applymodel(hyperpoint H, hyperpoint& Hscr);
@@ -282,16 +255,18 @@ void fixcolor(int& col);
 int displaydir(cell *c, int d);
 hyperpoint gethyper(ld x, ld y);
 void resetview(); extern heptspin viewctr; extern cell *centerover;
-#ifndef MOBILE
-int& qpixel(SDL_Surface *surf, int x, int y);
-#endif
 void drawthemap();
 void drawfullmap();
 bool displaystr(int x, int y, int shift, int size, const char *str, int color, int align);
 
 extern int darken;
-void setvideomode();
 void calcparam();
+
+#ifdef USE_SDL
+int& qpixel(SDL_Surface *surf, int x, int y);
+void setvideomode();
+void saveHighQualityShot(const char *fname = NULL, const char *caption = NULL, int fade = 255);
+#endif
 
 #ifndef NOCONFIG
 void saveConfig();
@@ -299,18 +274,21 @@ void saveConfig();
 
 extern hyperpoint mouseh;
 
-extern int webdisplay;
-
 extern hyperpoint ccenter;
 extern ld crad;
 
 extern bool mousepressed, anyshiftclick;
 extern string help;
 
+extern function<void()> help_delegate;
+
+#define HELPFUN(x) (help_delegate = x, "HELPFUN")
+
 struct videopar {
   ld scale, eye, alpha, sspeed, mspeed, yshift, camera_angle;
   ld ballangle, ballproj;
   int mobilecompasssize;
+  int aurastr, aurasmoothen;
 
   bool full;
   bool goteyes;  // for rendering
@@ -376,7 +354,8 @@ enum emtype {emNormal, emHelp,
   emCheatMenu, emLeader,
   emJoyConfig,
   emColor, emNumber,
-  em3D, emRogueviz
+  em3D, emRogueviz,
+  emLinepattern
   };
  
 extern emtype cmode, lastmode;
@@ -420,13 +399,18 @@ namespace conformal {
   extern vector<pair<cell*, eItem> > findhistory;  
   extern vector<cell*> movehistory;
   extern bool includeHistory;
+  extern int rotation;
   
   void create();
   void clear();
   void handleKey();
   void show();
   void apply();
+  void movetophase();
   void renderAutoband();
+
+  extern vector<shmup::monster*> v;
+  extern double phase;
   }
   
 namespace polygonal {
@@ -673,10 +657,6 @@ int getGhostcount();
 void raiseBuggyGeneration(cell *c, const char *s);
 void verifyMutantAround(cell *c);
 
-#ifdef MOBILE
-#define NOPNG
-#endif
-
 // #define NOPNG
 
 #ifdef NOPNG
@@ -810,6 +790,7 @@ namespace dialog {
   void addSelItem(string body, string value, int key);
   void addBoolItem(string body, bool value, int key);
   void addColorItem(string body, int value, int key);
+  void openColorDialog(int& col, unsigned int *pal);
   void addHelp(string body);
   void addInfo(string body, int color = 0xC0C0C0);
   void addItem(string body, int key);
@@ -1113,6 +1094,7 @@ namespace arg {
 
 // an useful macro
 #define PHASE(x) { if(arg::curphase > x) phaseerror(x); else if(arg::curphase < x) return 2; }
+#define PHASEFROM(x) { if(arg::curphase < x) return 2; }
   
   void read(int phase);
   
@@ -1139,14 +1121,74 @@ cell *createMov(cell *c, int d);
 namespace tour {
   extern bool on;
   extern string tourhelp;
+  extern string slidecommand;
   
   bool handleKeyTour(int sym, int uni);
-  void presentation(int mode);
+
+  enum presmode { 
+    pmStartAll = 0,
+    pmStart = 1, pmFrame = 2, pmStop = 3, pmKey = 4, pmRestart = 5,
+    pmGeometry = 11, pmGeometryReset = 13, pmGeometryStart = 15
+    };
+
+  void presentation(presmode mode);
   void checkGoodLand(eLand l);
   int getid();
   
-  eLand getNext(eLand old);
-  bool quickfind(eLand next);
+  extern function<eLand(eLand)> getNext;
+  extern function<bool(eLand)> quickfind;
+  extern function<bool(eLand)> showland;
+
   void start();
   };
 #endif
+
+namespace rogueviz {
+  extern bool rog3;
+  extern bool rvwarp;
+  };
+
+extern bool doCross;
+void optimizeview();
+
+#ifndef NOPNG
+extern int pngres;
+extern int pngformat;
+#endif
+
+extern bool noGUI;
+extern bool dronemode;
+
+extern ld whatever;
+
+namespace linepatterns {
+
+  enum ePattern {
+    patPalacelike,
+    patPalace,
+    patZebraTriangles,
+    patZebraLines,
+    patTriNet,
+    patTriRings,
+    patHepta,
+    patRhomb,
+    patTree,
+    patAltTree,
+    patVine,
+    patPower,
+    patNormal,
+    patTrihepta,
+    patBigTriangles
+    };
+  
+  void clearAll();
+  void setColor(ePattern id, int col);
+  void drawAll();
+  };
+
+transmatrix ddspin(cell *c, int d, int bonus = 0);
+bool doexiton(int sym, int uni);
+void switchFullscreen();
+string turnstring(int i);
+int celldistance(cell *c1, cell *c2);
+bool behindsphere(const transmatrix& V);

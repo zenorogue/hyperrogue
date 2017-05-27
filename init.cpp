@@ -1,6 +1,6 @@
-#define VER "9.4g"
-#define VERNUM 9407
-#define VERNUM_HEX 0x9407
+#define VER "9.4i"
+#define VERNUM 9409
+#define VERNUM_HEX 0x9409
 
 #define GEN_M 0
 #define GEN_F 1
@@ -9,6 +9,7 @@
 
 #ifdef MOBILE
 #define MOBWEB
+#define EXTERNALFONT
 #endif
 
 #ifdef WEB
@@ -35,12 +36,69 @@
 #define NOTRANS
 #endif
 
+#ifndef STEAM
+#define GFX
+#endif
+
+#define GL
+
+#define PSEUDOKEY_WHEELDOWN 2501
+#define PSEUDOKEY_WHEELUP 2502
+
+#ifdef NOGFX
+#undef GFX
+#endif
+
+#ifdef MAC
+#define NOPNG
+#endif
+
+#ifndef MOBILE
+#ifndef NOAUDIO
+#define SDLAUDIO
+#endif
+#endif
+
+#ifdef MOBILE
+#define NOTTF
+#endif
 
 #ifdef MOBILE
 #define EXTRALICENSE "\n\nHyperRogue soundtrack by Shawn Parrotte (http://www.shawnparrotte.com), under the Creative Commons BY-SA 3.0 license, http://creativecommons.org/licenses/by-sa/3.0/"
 #undef XEXTRALICENSE
 
-#ifndef FAKEMOBILE
+int fontscale = 100;
+bool buttonclicked;
+void gdpush(int t);
+#endif
+
+#include <stdio.h>
+
+#ifdef NOSDL
+#undef USE_SDL
+#endif
+
+#ifdef USE_SDL
+#include <SDL/SDL.h>
+
+#ifndef MAC
+#undef main
+#endif
+
+#ifdef SDLAUDIO
+#include <SDL/SDL_mixer.h>
+#endif
+
+#ifndef NOTTF
+#include <SDL/SDL_ttf.h>
+#endif
+
+#ifdef GFX
+#define SDLGFX
+#include <SDL/SDL_gfxPrimitives.h>
+#endif
+
+#else
 #define SDLK_F1  (123001)
 #define SDLK_F2  (123002)
 #define SDLK_F3  (123003)
@@ -48,6 +106,8 @@
 #define SDLK_F5  (123005)
 #define SDLK_F6  (123006)
 #define SDLK_F7  (123007)
+#define SDLK_F8  (123008)
+#define SDLK_F9  (123009)
 #define SDLK_F10 (123010)
 #define SDLK_ESCAPE (123099)
 #define SDLK_F12 (123012)
@@ -70,38 +130,68 @@
 #define SDLK_KP8 (123038)
 #define SDLK_KP9 (123039)
 #define SDLK_KP_PERIOD (123051)
+#define SDLK_KP_MINUS  (123053)
 #define SDLK_DELETE (123052)
 #define SDLK_DELETE (123052)
+#define SDLK_KP_ENTER (123054)
+#define SDLK_BACKSPACE (123055)
+#ifndef FAKEMOBILE
+typedef int SDL_Event;
+#endif
+#define NOSDL
+#define NOTTF
+#define NOPNG
+#undef GFX
+#define NOMODEL
+#define NORUG
+#define NOEDIT
+#define NOAUDIO
+#undef SDLAUDIO
 #endif
 
-int fontscale = 100;
-bool buttonclicked;
-void gdpush(int t);
-#endif
+#ifdef GL
 
-// desktop
+#ifdef WINDOWS
+  #include <GL/glew.h>
+#else
+  #define GL_GLEXT_PROTOTYPES 1
+  #ifndef MOBILE
+      #ifdef MAC
+        #include <OpenGL/gl.h>
+        #include <OpenGL/glu.h>
+      #else
+        #include <GL/gl.h>
+        #include <GL/glu.h>
+        #endif
 
-#include <stdio.h>
+      #ifdef MAC
+        #include <OpenGL/glext.h>
+      #else
+        #include <GL/glext.h>
+        #endif
+      #endif
 
-#ifdef USE_SDL
-#include <SDL/SDL.h>
+  #ifdef ANDROID
+    #ifndef FAKE
+        #include <GLES/gl.h>
+        #include <GLES/glext.h>
+        #include <GLES2/gl2.h>
+      #endif
+    #endif
+  #endif
 
-#ifndef MAC
-#undef main
-#endif
-
-#include <SDL/SDL_ttf.h>
 #endif
 
 #include <cmath>
 #include <time.h>
 #include <vector>
-#include <string>
 #include <algorithm>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <string>
 #include <map>
+#include <queue>
 
 #ifdef USE_UNORDERED_MAP
 #include <unordered_map>
@@ -182,6 +272,7 @@ void initAll() {
   eLand f = firstland;
   
   // initlanguage();
+  cmode = emNormal;
   initgraph();
 #ifndef NOSAVE
   loadsave();
@@ -474,7 +565,7 @@ void mobile_draw(MOBPAR_FORMAL) {
   if((cmode == emQuit && !canmove && keyreact && lclicked && !clicked) && !buttonclicked) {
     cmode = emNormal; printf("back to quit\n");
     }
-  else if(cmode == emScores) handleScoreKeys(0);
+  else if(cmode == emScores) handleScoreKeys(0, 0);
   else if(getcstat && keyreact) {
 
     if(cmode == (canmove ? emQuit : emNormal)) 
@@ -541,4 +632,8 @@ void mobile_draw(MOBPAR_FORMAL) {
   #endif
   }
 
+#endif
+
+#ifdef NOAUDIO
+void playSound(cell*, const string &s, int vol) { printf("play sound: %s vol %d\n", s.c_str(), vol); }
 #endif

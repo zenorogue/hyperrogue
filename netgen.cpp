@@ -699,7 +699,7 @@ namespace netgen {
       }
     else if(uni == 'd') designNet();
     else if(uni == 't') mode = 2;
-    else if(uni || sym == SDLK_F10)
+    else if(doexiton(sym, uni))
       cmode = emNormal;
     }
     

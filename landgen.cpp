@@ -1597,12 +1597,21 @@ eLand getNewLand(eLand old) {
   if(doCross) {
     whichnow++;
     eLand tabb[30] = {
-      laIce, laRedRock, laCaribbean, laWarpCoast, laWhirlwind, laPower,
+/*      laIce, laRedRock, laCaribbean, laWarpCoast, laWhirlwind, laPower,
       laMirror, laPalace, laLivefjord, laAlchemist, laCocytus, 
       laHell, laJungle, laCaves, laDesert, laRlyeh, laStorms,
       laGraveyard, laMotion, laDryForest, laDragon, laZebra, laIvoryTower,
       laTrollheim, laOvergrown, laBurial, laRose, laHive, laEmerald,
-      laEmerald
+      laEmerald */
+      laIce, laPalace, laDryForest, laRedRock, laWhirlwind,
+      laAlchemist, laWarpCoast, laOvergrown,
+      laEmerald, laWhirlwind,
+      laIce, laRedRock, laWarpCoast, laPalace, laWhirlwind,
+      laAlchemist, laDryForest, laOvergrown,
+      laEmerald, laDesert,
+      laIce, laRedRock, laWarpCoast, laPalace, laWhirlwind,
+      laAlchemist, laDryForest, laOvergrown,
+      laEmerald, laDesert,
       };
     return tabb[whichnow%30];
     }
@@ -4151,7 +4160,7 @@ void setdist(cell *c, int d, cell *from) {
             if(k>=4) buildRedWall(c, 20);
             }
           }
-        else if(ishept(c) && hrand(100) < 8 && !c->monst) {
+        else if(ishept(c) && hrand(100) < (doCross?20:8) && !c->monst) {
           buildRedWall(c, 80);
           int i = hrand(7);
           buildRedWall(createMovR(c, i), 33);
@@ -4260,7 +4269,7 @@ void setdist(cell *c, int d, cell *from) {
       }
 
     if(d == 8 && c->land == laOvergrown) {
-      if(hrand(15000) < 20 + (2 * items[itMutant] + hard) && !safety) {
+      if(hrand(doCross ?450:15000) < 20 + (2 * items[itMutant] + hard) && !safety) {
         c->item = itMutant;
         c->landparam = items[itMutant] + 5 + hrand(11);
         c->wall = waNone;
@@ -4773,7 +4782,7 @@ void setdist(cell *c, int d, cell *from) {
           c->mondir = NODIR;
         }
       if(c->land == laRedRock) {
-        if(hrand(16000) < 30+items[itRedGem]+hard && !pseudohept(c) && !c->monst && !c->wall) {
+        if(hrand((doCross && celldist(c) <= 5) ?450:16000) < 30+items[itRedGem]+hard && !pseudohept(c) && !c->monst && !c->wall) {
           int i = -1;
           for(int t=0; t<6; t++) if(c->mov[t]->mpdist > c->mpdist && !pseudohept(c->mov[t]))
             i = t;
@@ -4942,7 +4951,7 @@ void setdist(cell *c, int d, cell *from) {
       if(c->land == laWhirlwind) {
         if(hrand(4500) < items[itWindstone] + hard)
           c->monst = moWindCrow;
-        if(hrand(30000) < items[itWindstone] + hard - 5)
+        if(hrand(doCross?3000:30000) < items[itWindstone] + hard - 5)
           c->monst = moAirElemental;
         }
     

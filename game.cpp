@@ -6013,6 +6013,32 @@ void roundTableMessage(cell *c2) {
     }
   }
 
+long long circlesize[100], disksize[100];
+
+void computeSizes() {
+  circlesize[0] = 1;
+  
+  if(!purehepta) {
+    circlesize[1] = 1*7;
+    circlesize[2] = 2*7;
+    circlesize[3] = 4*7;
+    circlesize[4] = 7*7;
+    for(int i=5; i<100; i++) 
+      circlesize[i] = circlesize[i-1] + circlesize[i-2] + circlesize[i-3] - circlesize[i-4];
+    }
+  else {
+    // actually these are each second Fibonacci number
+    circlesize[1] = 1*7;
+    circlesize[2] = 3*7;
+    for(int i=3; i<100; i++) 
+      circlesize[i] = 3*circlesize[i-1] - circlesize[i-2];
+    }
+    
+  disksize[0] = 0;
+  for(int i=1; i<100; i++) 
+    disksize[i] = disksize[i-1] + circlesize[i-1];
+  }
+
 void knightFlavorMessage(cell *c2) {
 
   if(!euclid && !c2->master->alt) {
@@ -6025,28 +6051,7 @@ void knightFlavorMessage(cell *c2) {
     return;
     }
 
-  long long tab[100], sum[100];
-  tab[0] = 1;
-  
-  if(!purehepta) {
-    tab[1] = 1*7;
-    tab[2] = 2*7;
-    tab[3] = 4*7;
-    tab[4] = 7*7;
-    for(int i=5; i<100; i++) 
-      tab[i] = tab[i-1] + tab[i-2] + tab[i-3] - tab[i-4];
-    }
-  else {
-    // actually these are each second Fibonacci number
-    tab[1] = 1*7;
-    tab[2] = 3*7;
-    for(int i=3; i<100; i++) 
-      tab[i] = 3*tab[i-1] - tab[i-2];
-    }
-    
-  sum[0] = 0;
-  for(int i=1; i<100; i++) 
-    sum[i] = sum[i-1] + tab[i-1];
+  computeSizes();
 
   bool grailfound = grailWasFound(c2);
   int rad = roundTableRadius(c2);
@@ -6083,12 +6088,12 @@ void knightFlavorMessage(cell *c2) {
     }
   else if(msgid == 8) {
     if(rad <= 76)
-      addMessage(XLAT("\"Our Table seats %1 Knights!\"", llts(tab[rad])));
+      addMessage(XLAT("\"Our Table seats %1 Knights!\"", llts(circlesize[rad])));
     else
       addMessage(XLAT("\"By now, you should have your own formula, you know?\""));
     }
   else if(msgid == 9 && rad <= 76) {
-      addMessage(XLAT("\"There are %1 floor tiles inside our Table!\"", llts(sum[rad])));
+      addMessage(XLAT("\"There are %1 floor tiles inside our Table!\"", llts(disksize[rad])));
     }
   else if(msgid == 10 && !items[itPirate] && !items[itWhirlpool]) {
     addMessage(XLAT("\"Have you tried to take a boat and go into the Ocean? Try it!\""));

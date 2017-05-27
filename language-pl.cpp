@@ -4940,6 +4940,8 @@ S("field quotient", "przestrzeń ilorazowa ciała")
 		"NEW_ACHIEVEMENT_8_18_DESC"	"Defeat a Sandworm in the Zebra Quotient geometry."
 */
 
+N("Tortoise", GEN_M, "Żółw", "Żółwie", "Żółwia", "Żółwiem")
+
 #undef Orb
 
 

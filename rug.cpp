@@ -690,7 +690,7 @@ void handleKey(int sym, int uni) {
     if(texturesize == 8192) texturesize = 128;
     dialog::scaleLog();
     }
-  else if(uni || sym == SDLK_F10)
+  else if(doexiton(sym, uni))
     cmode = emChangeMode;
   }
 

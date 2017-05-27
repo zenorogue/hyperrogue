@@ -520,7 +520,7 @@ namespace yendor {
       cmode = emHelp;
       help = chelp;
       }
-    else if(uni) cmode = emNormal;
+    else if(doexiton(sym, uni)) cmode = emNormal;
     }
   };
 
@@ -736,7 +736,7 @@ namespace tactic {
         
       }
     else if(dialog::handlePageButtons(uni)) ;
-    else if(uni || sym == SDLK_F10) cmode = emNormal;
+    else if(doexiton(sym, uni)) cmode = emNormal;
     }
   };
 

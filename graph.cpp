@@ -30,34 +30,22 @@ int detaillevel = 0;
 
 // #define PANDORA
 
-#ifndef MOBILE
-#include <SDL/SDL.h>
-
-#ifdef SDLAUDIO
-#include <SDL/SDL_mixer.h>
-#endif
-
-#ifndef MAC
-#undef main
-#endif
-
-#include <SDL/SDL_ttf.h>
-#endif
-
 int colorbar;
 #define COLORBAR "###"
 
-#ifndef MOBILE
+#ifndef NOSDL
 SDL_Surface *s;
-TTF_Font *font[256];
 SDL_Joystick* sticks[8];
 int numsticks;
+
+#ifndef NOTTF
+TTF_Font *font[256];
+#endif
 #endif
 
 ld shiftmul = 1;
 
 bool inHighQual; // taking high quality screenshot
-int webdisplay = 0;
 
 // R:239, G:208, B:207 
 
@@ -138,6 +126,10 @@ int ZZ;
 
 string help;
 
+#ifndef OLDCOMPILE
+function<void()> help_delegate;
+#endif
+
 int andmode = 0;
 
 int darken = 0;
@@ -155,7 +147,7 @@ bool doHighlight() {
   return (hiliteclick && darken < 2) ? !mmhigh : mmhigh;
   }
 
-#ifndef MOBILE
+#ifndef NOSDL
 int& qpixel(SDL_Surface *surf, int x, int y) {
   if(x<0 || y<0 || x >= surf->w || y >= surf->h) return ZZ;
   char *p = (char*) surf->pixels;
@@ -172,7 +164,10 @@ int qpixel3(SDL_Surface *surf, int x, int y) {
   int *pi = (int*) (p);
   return pi[0];
   }
+#endif
 
+#ifndef EXTERNALFONT
+#ifndef NOTTF
 void loadfont(int siz) {
   if(!font[siz]) {
 #ifdef WEB
@@ -192,13 +187,14 @@ void loadfont(int siz) {
       }
     }
   }
+#endif
 
 int gl_width(int size, const char *s);
 
 int textwidth(int siz, const string &str) {
   if(size(str) == 0) return 0;
 
-#ifdef WEB
+#ifdef NOTTF
   return gl_width(siz, str.c_str());
 
 #else
@@ -371,7 +367,11 @@ void setGLProjection() {
 
 void buildpolys();
 
-#ifndef MOBILE
+#ifdef MOBILE
+#define EXTERNALFONT
+#endif
+
+#ifndef EXTERNALFONT
 
 struct glfont_t {
   GLuint * textures;                                  // Holds The Texture Id's   
@@ -400,6 +400,18 @@ void glError(const char* GLcall, const char* file, const int line) {
   }
 #define GLERR(call) glError(call, __FILE__, __LINE__)
 
+#ifdef NOTTF
+#define FIXEDSIZE
+#endif
+
+#ifdef CREATEFONT
+#define FIXEDSIZE
+#endif
+
+#ifdef FIXEDSIZE
+#include "nofont.cpp"
+#endif
+
 void init_glfont(int size) {
   if(glfont[size]) return;
   DEBB(DF_INIT, (debugfile,"init GL font: %d\n", size));
@@ -412,7 +424,7 @@ void init_glfont(int size) {
 //f.list_base = glGenLists(128);
   glGenTextures( 128+NUMEXTRA, f.textures );
 
-#ifndef WEB
+#ifndef NOTTF
   loadfont(size);
   if(!font[size]) return;
 
@@ -426,9 +438,10 @@ void init_glfont(int size) {
  
   for(int ch=1;ch<128+NUMEXTRA;ch++) {
   
-#ifdef WEB
     if(ch<32) continue;
-    int otwidth, otheight, tpix[3000], tpixindex = 0;    
+
+#ifdef NOTTF
+    int otwidth, otheight, tpix[3000], tpixindex = 0;
     loadCompressedChar(otwidth, otheight, tpix);
 
 #else
@@ -442,6 +455,9 @@ void init_glfont(int size) {
       txt = TTF_RenderUTF8_Blended(font[size], natchars[ch-128], white);
       }
     if(txt == NULL) continue;
+#ifdef CREATEFONT
+    generateFont(ch, txt);
+#endif
 
     int otwidth = txt->w;
     int otheight = txt->h;
@@ -450,14 +466,14 @@ void init_glfont(int size) {
     int twidth = next_p2( otwidth );
     int theight = next_p2( otheight );
 
-#ifdef WEB
+#ifdef NOTTF
     int expanded_data[twidth * theight];
 #else
     Uint16 expanded_data[twidth * theight];
 #endif
 
     for(int j=0; j <theight;j++) for(int i=0; i < twidth; i++) {
-#ifdef WEB
+#ifdef NOTTF
       expanded_data[(i+j*twidth)] = (i>=otwidth || j>=otheight) ? 0 : tpix[tpixindex++];
 #else
       expanded_data[(i+j*twidth)] = 
@@ -481,7 +497,7 @@ void init_glfont(int size) {
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
    
     glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, twidth, theight, 0,
-#ifdef WEB
+#ifdef NOTTF
       GL_RGBA, GL_UNSIGNED_BYTE, 
 #else
       GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE, 
@@ -515,7 +531,7 @@ void init_glfont(int size) {
     glEndList(); */
     //glPopMatrix();
 
-#ifndef WEB
+#ifndef NOTTF
     SDL_FreeSurface(txt);    
 #endif
     }
@@ -542,13 +558,13 @@ int gl_width(int size, const char *s) {
   int gsiz = size;
   if(size > vid.fsize || size > 72) gsiz = 72;
 
-#ifdef WEB
+#ifdef FIXEDSIZE
   gsiz = 36;
 #endif
 
   init_glfont(gsiz);
 
-#ifndef WEB
+#ifndef NOTTF
   if(!font[gsiz]) return 0;
 #endif
 
@@ -565,27 +581,16 @@ int gl_width(int size, const char *s) {
 
 bool gl_print(int x, int y, int shift, int size, const char *s, int color, int align) {
 
-  // printf("gl_print: %s\n", s.c_str());
-  
-  // We Want A Coordinate System Where Distance Is Measured In Window Pixels.
-  
-  /*
-  glMatrixMode(GL_PROJECTION);
-  glPushMatrix();
-  glLoadIdentity();
-  gluOrtho2D(0, 0, vid.xscr, vid.yscr); */
-  
   int gsiz = size;
   if(size > vid.fsize || size > 72) gsiz = 72;
-  // if(size >= 36) gsiz = 72;
 
-#ifdef WEB
+#ifdef FIXEDSIZE
   gsiz = 36;
 #endif
   
   init_glfont(gsiz);
 
-#ifndef WEB
+#ifndef NOTTF
   if(!font[gsiz]) return false;
 #endif
 
@@ -677,13 +682,12 @@ bool gl_print(int x, int y, int shift, int size, const char *s, int color, int a
   glDisable(GL_TEXTURE_2D);
   
   return clicked;
-  // printf("gl_print ok\n");
   }
 #endif
 
 void resetGL() {
   DEBB(DF_INIT, (debugfile,"reset GL\n"));
-#ifndef MOBILE
+#ifndef EXTERNALFONT
   for(int i=0; i<128; i++) if(glfont[i]) {
     delete glfont[i];
     glfont[i] = NULL;
@@ -696,20 +700,22 @@ void resetGL() {
 
 #ifndef MOBILE
 bool displaystr(int x, int y, int shift, int size, const char *str, int color, int align) {
+
   if(strlen(str) == 0) return false;
 
   if(size < 4 || size > 255) {
-    // printf("size = %d\n", size);
     return false;
     }
-  
-#ifdef WEB
-  return gl_print(x, y, shift, size, str, color, align);
-#endif
   
 #ifdef GL
   if(vid.usingGL) return gl_print(x, y, shift, size, str, color, align);
 #endif
+
+#ifdef NOTTF
+  static bool towarn = true;
+  if(towarn) towarn = false, printf("WARNING: NOTTF works only with OpenGL!\n");
+  return false;
+#else
   
   SDL_Color col;
   col.r = (color >> 16) & 255;
@@ -753,6 +759,7 @@ bool displaystr(int x, int y, int shift, int size, const char *str, int color, i
   SDL_FreeSurface(txt);
   
   return clicked;
+#endif
   }
                   
 bool displaystr(int x, int y, int shift, int size, const string &s, int color, int align) {
@@ -928,6 +935,14 @@ void ghcheck(hyperpoint &ret, const hyperpoint &H) {
     }
   }
 
+void camrotate(ld& hx, ld& hy) {
+  ld cam = vid.camera_angle * M_PI / 180;
+  GLfloat cc = cos(cam);
+  GLfloat ss = sin(cam);
+  ld ux = hx, uy = hy * cc + ss, uz = cc - ss * hy;
+  hx = ux / uz, hy = uy / uz;
+  }
+
 hyperpoint gethyper(ld x, ld y) {
 
   ld hx = (x - vid.xcenter) / vid.radius;
@@ -940,6 +955,8 @@ hyperpoint gethyper(ld x, ld y) {
   
   if(euclid)
     return hpxy(hx * (EUCSCALE + vid.alphax), hy * (EUCSCALE + vid.alphax));
+    
+  if(vid.camera_angle) camrotate(hx, hy);
   
   ld hr = hx*hx+hy*hy;
   
@@ -1033,9 +1050,23 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
     }
   
   if(pmodel == mdDisk) {
-    ret[0] = H[0] / tz;
-    ret[1] = H[1] / tz;
-    ret[2] = (1 - vid.beta / tz);
+  
+    if(!vid.camera_angle) {
+      ret[0] = H[0] / tz;    
+      ret[1] = H[1] / tz;
+      ret[2] = (1 - vid.beta / tz);
+      }
+    else {
+      ld tx = H[0];
+      ld ty = H[1];
+      ld cam = vid.camera_angle * M_PI / 180;
+      GLfloat cc = cos(cam);
+      GLfloat ss = sin(cam);
+      ld ux = tx, uy = ty * cc - ss * tz, uz = tz * cc + ss * ty;
+      ret[0] = ux / uz;
+      ret[1] = uy / uz;
+      ret[2] = 1 - vid.beta / uz;
+      }
     return;
     }
 
@@ -1311,7 +1342,7 @@ int displaydir(cell *c, int d) {
     return S42 - d * S84 / c->type;
   }
 
-transmatrix ddspin(cell *c, int d, int bonus = 0) {
+transmatrix ddspin(cell *c, int d, int bonus) {
   int hdir = displaydir(c, d) + bonus;
   return getspinmatrix(hdir);
   }
@@ -2444,7 +2475,7 @@ bool applyAnimation(cell *c, transmatrix& V, double& footphase, int layer) {
   ld R = hdist0(tC0(a.wherenow));
   aspd *= (1+R+(shmup::on?1:0));
   
-  if(R < aspd || isnan(R) || isnan(aspd) || R > 10) {
+  if(R < aspd || std::isnan(R) || std::isnan(aspd) || R > 10) {
     animations[layer].erase(c);
     return false;
     }
@@ -2777,6 +2808,146 @@ cell *straightDownSeek;
 
 int keycelldist;
 
+#define AURA 180
+
+int aurac[AURA+1][4];
+
+bool haveaura() {
+  return pmodel == mdDisk && !sphere && !euclid && vid.aurastr>0 && 
+    !svg::in && (inHighQual || vid.usingGL);
+  }
+  
+void clearaura() {
+  if(!haveaura()) return;
+  for(int a=0; a<AURA; a++) for(int b=0; b<4; b++) 
+    aurac[a][b] = 0;
+  }
+
+void addaura(const hyperpoint& h, int col, int fd) {
+  if(!haveaura()) return;
+  int r = int(2*AURA + atan2(h[0], h[1]) * AURA / 2 / M_PI) % AURA; 
+  aurac[r][3] += ((128 * 128 / vid.aurastr) << (fd + darken));
+  aurac[r][0] += (col>>16)&255;
+  aurac[r][1] += (col>>8)&255;
+  aurac[r][2] += (col>>0)&255;
+  }
+  
+void sumaura(int v) {
+  int auc[AURA];
+  for(int t=0; t<AURA; t++) auc[t] = aurac[t][v];
+  int val = 0;
+  if(vid.aurasmoothen < 1) vid.aurasmoothen = 1;
+  if(vid.aurasmoothen > AURA) vid.aurasmoothen = AURA;
+  int SMO = vid.aurasmoothen;
+  for(int t=0; t<SMO; t++) val += auc[t];
+  for(int t=0; t<AURA; t++) {
+    int tt = (t + SMO/2) % AURA;
+    aurac[tt][v] = val;
+    val -= auc[t];
+    val += auc[(t+SMO) % AURA];
+    }  
+  aurac[AURA][v] = aurac[0][v];
+  }
+  
+void drawaura() {
+  if(!haveaura()) return;
+  
+  for(int v=0; v<4; v++) sumaura(v);
+
+#ifndef NOSDL
+  if(!vid.usingGL) {
+    SDL_LockSurface(s);
+    for(int y=0; y<vid.yres; y++)
+    for(int x=0; x<vid.xres; x++) {
+
+      ld hx = (x * 1. - vid.xcenter) / vid.radius;
+      ld hy = (y * 1. - vid.ycenter) / vid.radius;
+  
+      if(vid.camera_angle) camrotate(hx, hy);
+      
+      ld fac = sqrt(hx*hx+hy*hy);
+      if(fac < 1) continue;
+      ld dd = log((fac - .99999) / .00001);
+      ld cmul = 1 - dd/10.;
+      if(cmul>1) cmul=1;
+      if(cmul<0) cmul=0;
+      
+      ld alpha = AURA * atan2(hx,hy) / (2 * M_PI);
+      if(alpha<0) alpha += AURA;
+      if(alpha >= AURA) alpha -= AURA;
+      
+      int rm = int(alpha);
+      double fr = alpha-rm;
+      
+      if(rm<0 || rm >= AURA) continue;
+      
+      int& p = qpixel(s, x, y);
+      for(int c=0; c<3; c++) {
+        double c1 = aurac[rm][2-c] / (aurac[rm][3]+.1);
+        double c2 = aurac[rm+1][2-c] / (aurac[rm+1][3]+.1);
+        const ld one = 1;
+        part(p, c) = int(255 * min(one, cmul * (c1 + fr * (c2-c1)))); 
+        }
+      }
+    SDL_UnlockSurface(s);
+    return;
+    }
+#endif
+
+#ifdef GL
+  setcameraangle(true);
+  
+  glEnableClientState(GL_COLOR_ARRAY);
+  float coltab[4][4];
+  glColorPointer(4, GL_FLOAT, 0, coltab); 
+  activateGlcoords();
+  
+  float cx[AURA+1][11][5];
+
+  double facs[11] = {1, 1.01, 1.02, 1.04, 1.08, 1.70, 1.95, 1.5, 2, 6, 10};
+  double cmul[11] = {1,   .8,  .7,  .6,  .5,  .16,  .12,  .08,  .07,  .06, 0};
+  double d2[11] = {0, 2, 4, 6.5, 7, 7.5, 8, 8.5, 9, 9.5, 10};
+
+  for(int d=0; d<11; d++) {
+    double dd = d2[d];
+    cmul[d] = (1- dd/10.);
+    facs[d] = .99999 +  .00001 * exp(dd);
+    }
+  facs[10] = 10;
+  
+  for(int r=0; r<=AURA; r++) for(int z=0; z<11; z++) {
+    float rr = (M_PI * 2 * r) / AURA;
+    float rad = vid.radius * facs[z];
+    int rm = r % AURA;
+    cx[r][z][0] = rad * sin(rr);
+    cx[r][z][1] = rad * cos(rr);
+    cx[r][z][2] = cmul[z] * aurac[rm][0] / (aurac[rm][3]+.1); 
+    cx[r][z][3] = cmul[z] * aurac[rm][1] / (aurac[rm][3]+.1); 
+    cx[r][z][4] = cmul[z] * aurac[rm][2] / (aurac[rm][3]+.1);                                   
+    }
+  
+  for(int u=0; u<4; u++) glcoords[u][2] = vid.scrdist;
+  for(int u=0; u<4; u++) coltab[u][3] = 1;
+
+  for(int r=0; r<AURA; r++) for(int z=0;z<10;z++) {
+    for(int c=0; c<4; c++) {
+      int br = (c == 1 || c == 2) ? r+1 : r;
+      int bz = (c == 3 || c == 2) ? z+1 : z;
+      glcoords[c][0] = cx[br][bz][0]; 
+      glcoords[c][1] = cx[br][bz][1];   
+      coltab[c][0] = cx[br][bz][2]; 
+      coltab[c][1] = cx[br][bz][3]; 
+      coltab[c][2] = cx[br][bz][4]; 
+      }
+      
+    glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+    }
+
+  glDisableClientState(GL_COLOR_ARRAY);
+  setcameraangle(false);
+#endif
+  }
+
 void drawCircle(int x, int y, int size, int color) {
   if(size < 0) size = -size;
   #ifdef GL
@@ -2804,13 +2975,15 @@ void drawCircle(int x, int y, int size, int color) {
 #ifdef MOBILE
   gdpush(4); gdpush(color); gdpush(x); gdpush(y); gdpush(size);
 #else
-#ifdef GFX
+#ifdef SDLGFX
   (vid.usingAA?aacircleColor:circleColor) (s, x, y, size, color);
 #else
+#ifndef NOSDL
   int pts = size * 4;
   if(pts > 1500) pts = 1500;
   for(int r=0; r<pts; r++)
     qpixel(s, x + int(size * sin(r)), y + int(size * cos(r))) = color;
+#endif
 #endif
 #endif
   }
@@ -3128,7 +3301,7 @@ ld wavefun(ld x) {
   else return 0; */
   }
 
-void setcolors(cell *c, int& wcol, int &fcol) {
+void  setcolors(cell *c, int& wcol, int &fcol) {
 
   wcol = fcol = winf[c->wall].color;
 
@@ -3738,6 +3911,20 @@ bool allemptynear(cell *c) {
   return true;
   }
 
+bool behindsphere(const transmatrix& V) {
+  if(!sphere) return false;
+
+  if(vid.alpha > 1) {
+     if(V[2][2] > -1/vid.alpha) return true;
+     }  
+  
+  if(vid.alpha <= 1) {
+    if(V[2][2] < -.8) return true;
+    }
+  
+  return false;
+  }
+
 void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
 
   qfi.shape = NULL; qfi.special = false;
@@ -3746,17 +3933,10 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
   transmatrix& gm = gmatrix[c];
   bool orig = (gm[2][2] == 0 || fabs(gm[2][2]-1) >= fabs(V[2][2]-1) - 1e-8);
 
-  if(sphere && vid.alpha > 1) {
-     long double d = V[2][2];
-     if(d > -1/vid.alpha) return;
-     }  
-  
-  if(sphere && vid.alpha <= 1) {
-    if(V[2][2] < -.8) return;
-    }
-  
   if(orig) gm = V;
 
+  if(behindsphere(V)) return;
+  
   ld dist0 = hdist0(tC0(V)) - 1e-6;
   if(dist0 < geom3::highdetail) detaillevel = 2;
   else if(dist0 < geom3::middetail) detaillevel = 1;
@@ -3775,30 +3955,6 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
   viewBuggyCells(c,V);
   
   if(conformal::on || inHighQual) checkTide(c);
-  
-  if(!euclid) {
-    // draw a web-like map
-    if(webdisplay & 1) {
-      if(c->type == 6) {
-        for(int a=0; a<3; a++)
-        queueline(V*Crad[a*S7], V*Crad[a*S7+S42/2], darkena(0xd0d0, 0, 0xFF), 2);
-        }
-      else {
-        for(int a=0; a<S7; a++)
-        queueline(tC0(V), V*Crad[(3*S7+a*6)%S42], darkena(0xd0d0, 0, 0xFF), 2);
-        }
-      }
-  
-    if(webdisplay & 2) if(c->type != 6) {
-      queueline(tC0(V), V*ddi0(purehepta?S42:0, tessf), darkena(0xd0d0, 0, 0xFF), 2);
-      }
-    
-    if(webdisplay & 4) if(c->type != 6 && !euclid && c->master->alt) {
-      for(int i=0; i<S7; i++)
-        if(c->master->move[i] && c->master->move[i]->alt == c->master->alt->move[0])
-          queueline(tC0(V), V*xspinpush0((purehepta?M_PI:0) -2*M_PI*i/S7, tessf), darkena(0xd000d0, 0, 0xFF), 2);
-      }
-    }
   
   // save the player's view center
   if(isPlayerOn(c) && !shmup::on) {
@@ -3878,6 +4034,8 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
     int wcol, fcol, asciicol;
     
     setcolors(c, wcol, fcol);
+    // addaura(tC0(V), wcol);
+    int zcol = fcol;
 
     if(viewdists) {
       int cd = celldistance(c, cwt.c);
@@ -4502,6 +4660,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       
       else if(c->wall == waSulphurC) {
         if(drawstar(c)) {
+          zcol = wcol;
           if(wmspatial) 
             queuepolyat(mscale(V, geom3::HELLSPIKE), shGiantStar[ct6], darkena(wcol, 0, 0x40), PPR_HELLSPIKE);
           else
@@ -4522,6 +4681,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         ;
       
       else if(c->wall == waRose) {
+        zcol = wcol;
         wcol <<= 1;
         if(c->cpdist > 5)
           wcol = 0xC0C0C0;
@@ -4575,6 +4735,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         }
 
       else if(highwall(c)) {
+        zcol = wcol;
         int wcol0 = wcol;
         int starcol = wcol;        
         if(c->wall == waWarpGate) starcol = 0;
@@ -4671,9 +4832,11 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           drawParticle(c, wcol, 75);
         }
       
-      else if(c->wall == waFreshGrave || c->wall == waAncientGrave)
+      else if(c->wall == waFreshGrave || c->wall == waAncientGrave) {
+        zcol = wcol;
         queuepoly(V, shCross, darkena(wcol, 0, 0xFF));
-
+        }
+        
       else if(xch == '+' && c->wall == waGiantRug) {
         queuepoly(V, shBigCarpet1, darkena(0xC09F00, 0, 0xFF));
         queuepoly(V, shBigCarpet2, darkena(0x600000, 0, 0xFF));
@@ -4798,6 +4961,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       it == itKey ? &shKey : 
       it == itRevolver ? &shGun :
       NULL;
+     
 
     if(c->land == laWhirlwind && c->wall != waBoat) {
       double footphase = 0;
@@ -4829,7 +4993,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
     if(c == mapeditor::drawcell && mapeditor::drawcellShapeGroup() == 2)
       mapeditor::drawtrans = V;
 #endif
-      
+
     if(!mmitem && it)
       error = true;
     
@@ -4926,6 +5090,9 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       queuepolyat(V, shDisk, 0xC0404040, PPR_SWORDMARK);
       }
     
+    if(c->wall == waChasm) zcol = 0;
+    addaura(tC0(V), zcol, fd);
+
     int ad = airdist(c);
     if(ad == 1 || ad == 2) {
 
@@ -5378,6 +5545,11 @@ string buildCredits();
 
 string buildHelpText() {
   DEBB(DF_GRAPH, (debugfile,"buildHelpText\n"));
+
+#ifdef ROGUEVIZ  
+  if(rogueviz::on) return rogueviz::help();
+#endif
+  
   string h;
   h += XLAT("Welcome to HyperRogue");
 #ifdef ANDROID  
@@ -5635,6 +5807,46 @@ void buteol(string& s, int current, int req) {
 
 string generateHelpForMonster(eMonster m) {
   string s = helptitle(XLATN(minf[m].name), minf[m].color);
+  
+  if(m == moPlayer) {
+#ifdef TOUR
+    if(tour::on)
+      return s+XLAT(
+        "A tourist from another world. They mutter something about the 'tutorial', "
+        "and claim that they are here just to learn, and to leave without any treasures. "
+        "Do not kill them!"
+        );
+#endif
+    s += XLAT(
+        "This monster has come from another world, presumably to steal our treasures. "
+        "Not as fast as an Eagle, not as resilient as the guards from the Palace, "
+        "and not as huge as the Mutant Ivy from the Clearing; however, "
+        "they are very dangerous because of their intelligence, "
+        "and access to magical powers.\n\n");
+    
+    if(cheater)
+      s += XLAT("Actually, their powers appear god-like...\n\n");
+    
+    else if(!hardcore)
+      s += XLAT(
+       "Rogues will never make moves which result in their immediate death. "
+       "Even when cornered, they are able to instantly teleport back to their "
+       "home world at any moment, taking the treasures forever... but "
+       "at least they will not steal anything further!\n\n"
+       );
+    
+    if(!euclid)
+      s += XLAT(
+        "Despite this intelligence, Rogues appear extremely surprised "
+        "by the most basic facts about geometry. They must come from "
+        "some really strange world.\n\n"
+        );
+    
+    if(shmup::on)
+      s += XLAT("In the Shoot'em Up mode, you are armed with thrown Knives.");
+    
+    return s;
+    }
 
   s += XLAT(minf[m].help);      
   if(m == moPalace || m == moSkeleton)
@@ -5831,6 +6043,11 @@ string generateHelpForLand(eLand l) {
 
 bool instat;
 
+string turnstring(int i) {
+  if(i == 1) return XLAT("1 turn");
+  else return XLAT("%1 turns", its(i));
+  }
+
 void describeMouseover() {
   DEBB(DF_GRAPH, (debugfile,"describeMouseover\n"));
 
@@ -5859,9 +6076,9 @@ void describeMouseover() {
         int t = 1;
         for(; t < 1000 && b == (c->landparam >= tide[(turncount+t-1) % tidalsize]); t++) ;
         if(b)
-          out += " (" + its(t) + " turns to surface)";
+          out += " (" + turnstring(t) + XLAT(" to surface") + ")";
         else 
-          out += " (" + its(t) + " turns to submerge)";
+          out += " (" + turnstring(t) + XLAT(" to submerge") + ")";
         }
       }
 
@@ -5889,7 +6106,8 @@ void describeMouseover() {
     /* out += " DP=" + its(celldistance(c, cwt.c));
     out += " DO=" + its(celldist(c));
     out += " PD=" + its(c->pathdist); */
-    if(webdisplay & 8) {
+
+    if(false) {
 
       out += " LP:" + itsh(c->landparam)+"/"+its(turncount);
 
@@ -5970,10 +6188,10 @@ void describeMouseover() {
     
     if(isActivable(c)) out += XLAT(" (touch to activate)");
     
-    if(hasTimeout(c)) out += XLAT(" [%1 turns]", its(c->wparam));
+    if(hasTimeout(c)) out += XLAT(" [" + turnstring(c->wparam) + "]");
     
     if(isReptile(c->wall))
-      out += XLAT(" [%1 turns]", its((unsigned char) c->wparam));
+      out += XLAT(" [" + turnstring((unsigned char) c->wparam) + "]");
   
     if(c->monst) {
       out += ", "; out += XLAT1(minf[c->monst].name); 
@@ -5999,7 +6217,7 @@ void describeMouseover() {
       if(!c->monst) help = generateHelpForItem(c->item);
       }
     
-    if(isPlayerOn(c) && !shmup::on) out += XLAT(", you");
+    if(isPlayerOn(c) && !shmup::on) out += XLAT(", you"), help = generateHelpForMonster(moPlayer);
 
     if(shmup::mousetarget && intval(mouseh, tC0(shmup::mousetarget->pat)) < .1) {
       out += ", "; 
@@ -6012,7 +6230,7 @@ void describeMouseover() {
 #endif
       {
         out += XLAT1(minf[shmup::mousetarget->type].name);
-        help = XLAT(minf[shmup::mousetarget->type].help);
+        help = generateHelpForMonster(shmup::mousetarget->type);
         }
 /*    char buf[64];
       sprintf(buf, "%Lf", intval(mouseh, shmup::mousetarget->pat*C0));
@@ -6302,12 +6520,14 @@ void drawthemap() {
       hsOrigin, ypush(vid.yshift) * sphereflip * View);
     }
   
+  linepatterns::drawAll();
+  
   #ifdef ROGUEVIZ
   rogueviz::drawExtra();
   #endif
 
   #ifdef TOUR
-  if(tour::on) tour::presentation(2);
+  if(tour::on) tour::presentation(tour::pmFrame);
   #endif
   
   profile_stop(1);
@@ -6348,7 +6568,7 @@ void drawthemap() {
       }
     }
 
-  #ifndef MOBILE
+  #ifndef NOSDL
   Uint8 *keystate = SDL_GetKeyState(NULL);
   lmouseover = mouseover;
   bool useRangedOrb = (!(vid.shifttarget & 1) && haveRangedOrb() && lmouseover && lmouseover->cpdist > 1) || (keystate[SDLK_RSHIFT] | keystate[SDLK_LSHIFT]);
@@ -6620,6 +6840,8 @@ int realradius;
 
 bool sidescreen;
 
+bool dronemode;
+
 void calcparam() {
   DEBB(DF_GRAPH, (debugfile,"calc param\n"));
   vid.xcenter = vid.xres / 2;
@@ -6643,6 +6865,8 @@ void calcparam() {
     if(viewdists && cmode == emNormal && vid.xres > vid.yres) sidescreen = true;
     if(sidescreen) vid.xcenter = vid.yres/2;
     }
+  
+  if(dronemode) { vid.ycenter -= vid.radius; vid.ycenter += vid.fsize/2; vid.ycenter += vid.fsize/2; vid.radius *= 2; }
 
   ld eye = vid.eye; if(pmodel || rug::rugged) eye = 0;
   vid.beta = 1 + vid.alpha + eye;
@@ -6816,6 +7040,7 @@ void showGameover() {
 #endif
 
   if(intour) {
+#ifdef TOUR
     if(canmove) {
       dialog::addItem("spherical geometry", '1');
       dialog::addItem("Euclidean geometry", '2');
@@ -6828,7 +7053,8 @@ void showGameover() {
     else
       dialog::addItem("flash", '4');
     if(canmove) {
-      dialog::addItem("slide-specific command", '5');
+      if(tour::slidecommand != "") 
+        dialog::addItem(tour::slidecommand, '5');
       dialog::addItem("static mode", '6');
       dialog::addItem("enable/disable texts", '7');
       dialog::addItem("next slide", SDLK_RETURN);
@@ -6837,6 +7063,7 @@ void showGameover() {
     else
       dialog::addBreak(200);
     dialog::addItem("main menu", 'v');
+#endif
     }
   else {
     dialog::addItem(canmove ? "continue" : "see how it ended", SDLK_ESCAPE);
@@ -7355,7 +7582,7 @@ XLAT(
 #endif
   }
 
-#ifndef MOBILE
+#ifndef NOSDL
 
 #ifndef NOPNG
 void IMAGESAVE(SDL_Surface *s, const char *fname) {
@@ -7366,10 +7593,11 @@ void IMAGESAVE(SDL_Surface *s, const char *fname) {
 #endif
 
 int pngres = 2000;
+int pngformat = 0;
 
-void saveHighQualityShot(const char *fname) {
+void saveHighQualityShot(const char *fname, const char *caption, int fade) {
 
-#ifndef GFX
+#ifndef SDLGFX
   addMessage(XLAT("High quality shots not available on this platform"));
   return;
 #endif
@@ -7384,7 +7612,16 @@ void saveHighQualityShot(const char *fname) {
   dynamicval<videopar> v(vid, vid);
   dynamicval<bool> v2(inHighQual, true);
   dynamicval<int> v4(cheater, 0);
+  
   vid.xres = vid.yres = pngres;
+  if(pngformat == 1) vid.xres = vid.yres * 4/3;
+  if(pngformat == 2) vid.xres = vid.yres * 16/9;
+  if(pngformat == 3) {
+    vid.xres = vid.yres * 22/16;
+    while(vid.xres & 15) vid.xres++;
+    }
+  printf("format = %d, %d x %d\n", pngformat, vid.xres, vid.yres);
+
   vid.usingGL = false;
   // if(vid.pmodel == 0) vid.scale = 0.99;
   calcparam();
@@ -7392,14 +7629,30 @@ void saveHighQualityShot(const char *fname) {
   rogueviz::fixparam();
   #endif
 
+  printf("format = %d, %d x %d\n", pngformat, vid.xres, vid.yres);
+
   dynamicval<SDL_Surface*> v5(s, SDL_CreateRGBSurface(SDL_SWSURFACE,vid.xres,vid.yres,32,0,0,0,0));
 
   darken = 0;
-
-  for(int i=0; i<(fname?1:2); i++) {
-    SDL_FillRect(s, NULL, fname ? backcolor : i ? 0xFFFFFF : 0);
-    drawfullmap();
   
+  int numi = (fname?1:2);
+
+  for(int i=0; i<numi; i++) {
+    SDL_FillRect(s, NULL, numi==1 ? backcolor : i ? 0xFFFFFF : 0);
+    drawfullmap();
+    
+    if(fade < 255) 
+      for(int y=0; y<vid.yres; y++)
+      for(int x=0; x<vid.xres; x++) {
+        int& p = qpixel(s, x, y);
+        for(int i=0; i<3; i++) {
+          part(p,i) = (part(p,i) * fade + 127) / 255;
+          }
+        }
+
+    if(caption)
+      displayfr(vid.xres/2, vid.fsize+vid.fsize/4, 3, vid.fsize*2, caption, 0xFFFFFF, 8);
+
     char buf[128]; strftime(buf, 128, "bigshota-%y%m%d-%H%M%S" IMAGEEXT, localtime(&timer));
     buf[7] += i;
     if(!fname) fname = buf;
@@ -7454,7 +7707,7 @@ void drawfullmap() {
       else if(vid.grid) // mark the edge
         rad /= sqrt(vid.alphax*vid.alphax - 1);
       }
-    queuecircle(vid.xcenter, vid.ycenter, rad, 
+    if(!haveaura()) queuecircle(vid.xcenter, vid.ycenter, rad, 
       svg::in ? 0x808080FF : darkena(0xFF, 0, 0xFF), 
       vid.usingGL ? PPR_CIRCLE : PPR_OUTCIRCLE);
     if(pmodel == mdBall) ballgeometry();
@@ -7479,6 +7732,7 @@ void drawfullmap() {
     for(int t=0; t<ls; t++) queueline(View * lines[t].P1, View * lines[t].P2, lines[t].col >> (darken+1));
     } */
 
+  clearaura();
   drawthemap();
   #ifndef NORUG
   if(!inHighQual) {
@@ -7499,6 +7753,7 @@ void drawfullmap() {
     }
   #endif
   profile_start(2);
+  drawaura();
   drawqueue();
   profile_stop(2);
   }
@@ -7520,7 +7775,7 @@ void drawscreen() {
 #endif
   if(cmode != emHelp) help = "@";
   
-  #ifndef MOBILE
+  #ifndef NOSDL
   // SDL_LockSurface(s);
   // unsigned char *b = (unsigned char*) s->pixels;
   // int n = vid.xres * vid.yres * 4;
@@ -7653,21 +7908,20 @@ void drawscreen() {
     if(canmove) showGameover();
     }
 
-  #ifndef MOBILE
   // SDL_UnlockSurface(s);
 
   DEBT("swapbuffers");
+#ifndef NOSDL
 #ifdef GL
   if(vid.usingGL) SDL_GL_SwapBuffers(); else
 #endif
   SDL_UpdateRect(s, 0, 0, vid.xres, vid.yres);
+#endif
   
 //printf("\ec");
-
-  #endif
   }
 
-#ifndef MOBILE
+#ifndef NOSDL
 bool setfsize = true;
 
 void setvideomode() {
@@ -7721,7 +7975,7 @@ void restartGraph() {
   DEBB(DF_INIT, (debugfile,"restartGraph\n"));
   
   View = Id;
-  webdisplay = 0;
+  linepatterns::clearAll();
   if(currentmap) {
     if(euclid) {
       centerover = euclideanAtCreate(0,0);
@@ -7845,7 +8099,7 @@ void saveConfig() {
     float(vid.ballangle), float(vid.ballproj)
     );
 
-  fprintf(f, "%d\n", vid.mobilecompasssize);
+  fprintf(f, "%d %d %d\n", vid.mobilecompasssize, vid.aurastr, vid.aurasmoothen);
 
   }
     
@@ -7974,7 +8228,7 @@ void loadConfig() {
     
     readf(f, vid.yshift); readf(f, vid.camera_angle); readf(f, vid.ballangle); readf(f, vid.ballproj);
 
-    err=fscanf(f, "%d\n", &vid.mobilecompasssize);
+    err=fscanf(f, "%d%d%d\n", &vid.mobilecompasssize, &vid.aurastr, &vid.aurasmoothen);
   
     fclose(f);
     DEBB(DF_INIT, (debugfile,"Loaded configuration: %s\n", conffile));
@@ -7987,7 +8241,7 @@ void loadConfig() {
   }
 #endif
 
-#ifndef MOBILE
+#ifndef NOSDL
 void initJoysticks() {
   DEBB(DF_INIT, (debugfile,"init joysticks\n"));
   numsticks = SDL_NumJoysticks();
@@ -8012,6 +8266,8 @@ void closeJoysticks() {
   }
 #endif
 
+bool noGUI = false;
+
 void initgraph() {
 
   DEBB(DF_INIT, (debugfile,"initgraph\n"));
@@ -8029,6 +8285,8 @@ void initgraph() {
   vid.yshift = 0;
   vid.camera_angle = 0;
   vid.ballproj = 1;
+  vid.aurastr = 128;
+  vid.aurasmoothen = 5;
 
 #ifdef ANDROID
   vid.monmode = 2;
@@ -8085,8 +8343,15 @@ void initgraph() {
   initgeo();
 
   buildpolys();
+  
+  if(noGUI) {
+#ifdef USE_COMMANDLINE
+    arg::read(2);
+#endif
+    return;
+    }
 
-  #ifndef MOBILE  
+  #ifndef NOSDL
   if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK) == -1)
   {
     printf("Failed to initialize video.\n");
@@ -8114,7 +8379,7 @@ void initgraph() {
   arg::read(2);
 #endif
 
-  #ifndef MOBILE  
+  #ifndef NOSDL
   setvideomode();
   if(!s) {
     printf("Failed to initialize graphics.\n");
@@ -8124,10 +8389,12 @@ void initgraph() {
   SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL);
   SDL_EnableUNICODE(1);
   
+#ifndef NOTTF
   if(TTF_Init() != 0) {
     printf("Failed to initialize TTF.\n");
     exit(2);
     }
+#endif
   
   initJoysticks();
 
@@ -8170,6 +8437,13 @@ bool didsomething;
 
 bool quitmainloop = false;
 
+bool doexiton(int sym, int uni) {
+  if(sym == SDLK_ESCAPE) return true;
+  if(sym == SDLK_F10) return true;
+  if(uni != 0) return true;
+  return false;
+  }
+
 void handleKeyQuit(int sym, int uni) {
   dialog::handleNavigation(sym, uni);
   // ignore the camera movement keys
@@ -8180,7 +8454,7 @@ void handleKeyQuit(int sym, int uni) {
     sym = 0;
 #endif
 
-  if(sym == SDLK_RETURN || sym == SDLK_F10) quitmainloop = true;
+  if(sym == SDLK_RETURN || sym == SDLK_KP_ENTER || sym == SDLK_F10) quitmainloop = true;
   else if(uni == 'r' || sym == SDLK_F5) {
     restartGame(), cmode = emNormal;
     msgs.clear();
@@ -8201,7 +8475,7 @@ void handleKeyQuit(int sym, int uni) {
     }
   #endif
   
-  else if((sym != 0 && sym != SDLK_F12) && !didsomething) {
+  else if(doexiton(sym, uni) && !didsomething) {
     cmode = emNormal;
     msgscroll = 0;
     msgs.clear();
@@ -8318,7 +8592,7 @@ void handleKeyNormal(int sym, int uni, extra& ev) {
     }
   
   if(!canmove) {
-    if(sym == SDLK_RETURN) quitmainloop = true;
+    if(sym == SDLK_RETURN || sym == SDLK_KP_ENTER) quitmainloop = true;
     else if(uni == 'r') restartGame();
 #ifndef NOSAVE
     else if(uni == 't') {
@@ -8354,7 +8628,7 @@ void handleKeyNormal(int sym, int uni, extra& ev) {
     cmode = emVisual1;
     }
 
-#ifndef MOBILE
+#ifndef NOSDL
 #ifdef PANDORA
   if(ev.type == SDL_MOUSEBUTTONUP && sym == 0 && !rightclick) 
 #else
@@ -8398,7 +8672,7 @@ void handlekey(int sym, int uni, extra& ev) {
   if(tour::on && tour::handleKeyTour(sym, uni)) return;
 #endif
 
-  if(((cmode == emNormal && canmove) || (cmode == emQuit && !canmove) || cmode == emDraw || cmode == emMapEditor) && DEFAULTCONTROL && !rug::rugged) {
+  if(((cmode == emNormal && canmove) || (cmode == emQuit && !canmove) || cmode == emDraw || (cmode == emMapEditor && !mapeditor::subscreen)) && DEFAULTCONTROL && !rug::rugged) {
 #ifndef PANDORA
     if(sym == SDLK_RIGHT) { 
       if(conformal::on)
@@ -8442,7 +8716,7 @@ void handlekey(int sym, int uni, extra& ev) {
       if(isGravityLand(cwt.c->land)) playermoved = false;
     }
   
-#ifndef MOBILE
+#ifndef NOSDL
   if(sym == SDLK_F7 && !vid.usingGL) {
 
     time_t timer;
@@ -8479,9 +8753,9 @@ void handlekey(int sym, int uni, extra& ev) {
 #endif
 #ifndef NOSAVE
 #ifndef MOBILE
-  else if(cmode == emScores) handleScoreKeys(sym);
+  else if(cmode == emScores) handleScoreKeys(sym, uni);
 #endif
-  else if(cmode == emPickScores) handlePickScoreKeys(uni);
+  else if(cmode == emPickScores) handlePickScoreKeys(sym, uni);
 #endif
   else if(cmode == emConformal) conformal::handleKey(sym, uni);
   else if(cmode == emYendor) yendor::handleKey(sym, uni);
@@ -8501,9 +8775,12 @@ void handlekey(int sym, int uni, extra& ev) {
 #ifdef ROGUEVIZ
   else if(cmode == emRogueviz) rogueviz::handleMenu(sym, uni);
 #endif
+  else if(cmode == emLinepattern) linepatterns::handleMenu(sym, uni);
   }
 
-#ifndef MOBILE
+#ifdef NOSDL
+void mainloopiter() { printf("(compiled without SDL -- no action)\n"); quitmainloop = true; }
+#else
 
 // Warning: a very long function! todo: refactor
 
@@ -8702,6 +8979,10 @@ void mainloopiter() {
       uni = ev.key.keysym.unicode;
       if(ev.key.keysym.mod & (KMOD_LSHIFT | KMOD_RSHIFT)) shiftmul = -1;
       if(ev.key.keysym.mod & (KMOD_LCTRL | KMOD_RCTRL)) shiftmul /= 10;
+      if(sym == SDLK_RETURN && (ev.key.keysym.mod & (KMOD_LALT | KMOD_RALT))) {
+        sym = 0; uni = 0;
+        switchFullscreen();
+        }
       }
     
     dialog::handleZooming(ev);
@@ -8815,10 +9096,10 @@ void mainloopiter() {
 
     }
   }
+#endif
 
 void mainloop() {
   lastt = 0;
-  cmode = emNormal;
 #ifdef WEB
   initweb();
   emscripten_set_main_loop(mainloopiter, 0, true);
@@ -8826,19 +9107,22 @@ void mainloop() {
   while(!quitmainloop) mainloopiter();
 #endif
   }
-#endif
 
-#ifndef MOBILE
 void cleargraph() {
   DEBB(DF_INIT, (debugfile,"clear graph\n"));
+#ifndef NOTTF
   for(int i=0; i<256; i++) if(font[i]) TTF_CloseFont(font[i]);
+#endif
+#ifndef EXTERNALFONT
   for(int i=0; i<128; i++) if(glfont[i]) delete glfont[i];
+#endif
+#ifndef NOSDL
 #ifndef SIMULATE_JOYSTICK
   closeJoysticks();
 #endif
   SDL_Quit();
-  }
 #endif
+  }
 
 void cleargraphmemory() {
   DEBB(DF_INIT, (debugfile,"clear graph memory\n"));

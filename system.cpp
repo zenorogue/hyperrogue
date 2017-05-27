@@ -13,7 +13,7 @@ int gamecount;
 time_t timerstart, savetime;
 bool timerstopped;
 int savecount;
-bool showoff = false;
+bool showoff = false, doCross = false;
 
 // initialize the game
 void initgame() {
@@ -116,6 +116,15 @@ void initgame() {
     currentmap->verify();
     }
   
+  if(doCross) {
+    for(int i=0; i<ittypes; i++) if(itemclass(eItem(i)) == IC_TREASURE) items[i] = 50;
+    for(int i=0; i<motypes; i++) kills[i] = 30;
+    items[itSavedPrincess] = 0;
+    kills[moPrincessMoved] = 0;
+    kills[moPrincessArmedMoved] = 0;
+    kills[moPlayer] = 0;
+    }
+  
   if(quotient && generateAll(firstland)) {
     for(int i=0; i<size(currentmap->allcells()); i++)
       setdist(currentmap->allcells()[i], 8, NULL);
@@ -142,7 +151,7 @@ void initgame() {
   yendor::init(3);
   multi::revive_queue.clear();
 #ifdef TOUR
-  if(tour::on) tour::presentation(5);
+  if(tour::on) tour::presentation(tour::pmRestart);
 #endif
   
   if(multi::players > 1 && !shmup::on) {
@@ -1330,8 +1339,7 @@ bool applyCheat(char u, cell *c = NULL) {
     return true;
     }
   if(u == 'W'-64) {
-    webdisplay++;
-    cheater++; addMessage(XLAT("Cheat-changed the display.", firstland));
+    cmode = emLinepattern;
     return true;
     }
   if(u == 'G'-64) {

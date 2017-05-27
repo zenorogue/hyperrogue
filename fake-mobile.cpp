@@ -21,10 +21,6 @@ const char *conffile = "fakemobile_config.txt";
 
 #undef main
 
-void playSound(cell *, const string &s, int vol) {
-  printf("play sound: %s vol %d\n", s.c_str(), vol);
-  }
-
 SDL_Surface *s;
 
 int gdpos = 0;

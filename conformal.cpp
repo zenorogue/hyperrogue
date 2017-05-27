@@ -95,7 +95,7 @@ namespace polygonal {
 
   }
 
-#ifndef MOBILE
+#ifndef NOSDL
 namespace spiral {
 
   typedef long double ld;
@@ -230,7 +230,7 @@ namespace conformal {
   int lastprogress;
 
   void progress(string str) {
-#ifndef MOBILE
+#ifndef NOSDL
     int tick = SDL_GetTicks();
     if(tick > lastprogress + 250) {
       lastprogress = tick;
@@ -330,18 +330,11 @@ namespace conformal {
     phase = 0;
     }
   
-  void apply() {
-    int t = ticks;
-    phase += (t-llv) * lvspeed / 400.;
-    llv = t;
-    
-    int siz = size(v);
-    
-    while(phase < 1) phase += siz - 2;
-    while(phase >= siz-1) phase -= siz - 2;
+  void movetophase() {
     
     int ph = int(phase);
-    if(ph<1 || ph >= siz-1) return;
+    int siz = size(v);
+    if(ph<0 || ph >= siz-1) return;
     
     viewctr.h = v[ph]->base->master;
     viewctr.spin = 0;
@@ -357,6 +350,19 @@ namespace conformal {
   
     View = spin(M_PI/2 * rotation) * xpush(-(phase-ph) * hdist(now, next)) * View;
     playermoved = false;
+    }
+  
+  void apply() {
+    int t = ticks;
+    phase += (t-llv) * lvspeed / 400.;
+    llv = t;
+    
+    int siz = size(v);
+    
+    while(phase < 1) phase += siz - 2;
+    while(phase >= siz-1) phase -= siz - 2;
+    
+    movetophase();
     }
   
   int measureLength() {
@@ -384,7 +390,7 @@ namespace conformal {
   void restore();
   void restoreBack();
 
-#ifndef MOBILE
+#ifndef NOSDL
   void createImage(bool dospiral) {
     int segid = 1;
     inHighQual = true;
@@ -548,7 +554,7 @@ namespace conformal {
     dialog::addBoolItem(XLAT("prepare the line animation"), (on), 'e');
     if(on) dialog::addSelItem(XLAT("animation speed"), fts(lvspeed), 'a');
     
-#ifndef MOBILE
+#ifndef NOSDL
     dialog::addBoolItem(XLAT("render bands automatically"), (autoband), 'o');
     if(autoband)
       dialog::addBoolItem(XLAT("include history when auto-rendering"), (autobandhistory), 'j');
@@ -645,7 +651,7 @@ namespace conformal {
     else if(sym == 's') 
       dialog::editNumber(bandsegment, 500, 32000, 500, 16000, XLAT("band segment"), "");
     else if(sym == 'g') { dospiral = !dospiral; }
-#ifndef MOBILE
+#ifndef NOSDL
     else if(uni == 'f' && pmodel == mdBand && on) createImage(dospiral);
 #endif
     else if(sym == 'q' || sym == SDLK_ESCAPE || sym == '0') { cmode = emNormal; }
@@ -699,7 +705,7 @@ namespace conformal {
     }
   
   void renderAutoband() {
-#ifndef MOBILE
+#ifndef NOSDL
     if(celldist(cwt.c) <= 7) return;
     if(!autoband) return;
     eModel spm = pmodel;
