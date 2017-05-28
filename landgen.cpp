@@ -3229,6 +3229,8 @@ bool redtrolls(cell *c) {
   return cd < 32; */
   }
 
+bool reptilecheat = false;
+
 eMonster pickTroll(cell *c) { 
   if(redtrolls(c))
     return pick(moTroll,moDarkTroll,moRedTroll);
@@ -3580,7 +3582,9 @@ void setdist(cell *c, int d, cell *from) {
             }
           c->wparam = 1 + hrand(reptilemax());
           }
-        // c->wall = waReptile; c->wparam = 100;
+        if(reptilecheat) {
+          c->wall = waReptile; c->wparam = 100;
+          }
         }
 
       if(c->land == laBurial) {
