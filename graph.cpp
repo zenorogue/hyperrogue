@@ -2088,6 +2088,16 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, int col, dou
       queuepoly(VBODY * Mirror, shPKnife, 0xFFFFFFFF);
       }
 
+    if(girl) {
+      queuepoly(VBODY, shFemaleDress,  evil ? 0xC000C0FF : 0x00C000FF);
+      if(vid.cs.charid < 2) 
+        queuepoly(VBODY, shPrincessDress, evil ? 0xC040C0C0 : 0x8080FFC0);
+      }
+    else {
+      if(vid.cs.charid < 2) 
+        queuepoly(VBODY, shPrinceDress,  evil ? 0x802080FF : 0x404040FF);
+      }    
+
     if(m == moRoseLady) {
 //    queuepoly(V, girl ? shGoatHead : shDemon,  0x800000FF);
       queuepoly(VHEAD, girl ? shFemaleHair : shPHead,  evil ? 0x500050FF : 0x332A22FF);
@@ -2108,16 +2118,6 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, int col, dou
         evil ? 0xC00000FF : 0x332A22FF);
       }
     queuepoly(VHEAD, shPFace,  facecolor);
-
-    if(girl) {
-      queuepoly(VBODY, shFemaleDress,  evil ? 0xC000C0FF : 0x00C000FF);
-      if(vid.cs.charid < 2) 
-        queuepoly(VBODY, shPrincessDress, evil ? 0xC040C0C0 : 0x8080FFC0);
-      }
-    else {
-      if(vid.cs.charid < 2) 
-        queuepoly(VBODY, shPrinceDress,  evil ? 0x802080FF : 0x404040FF);
-      }    
     }
 
   else if(m == moWolf || m == moRedFox || m == moWolfMoved) {
