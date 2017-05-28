@@ -1951,6 +1951,7 @@ void livecaves() {
 namespace tortoise {
   map<cell*, cell*> emap;
   map<cell*, int> babymap;
+  int last;
   
   enum tflag {
     tfShell, tfScute0, tfScute1, tfScute2, tfScute3,

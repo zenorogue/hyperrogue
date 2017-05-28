@@ -46,6 +46,7 @@ TTF_Font *font[256];
 ld shiftmul = 1;
 
 bool inHighQual; // taking high quality screenshot
+bool auraNOGL;    // aura without GL
 
 // R:239, G:208, B:207 
 
@@ -126,7 +127,7 @@ int ZZ;
 
 string help;
 
-#ifndef OLDCOMPILE
+#ifndef NOLAMBDAS
 function<void()> help_delegate;
 #endif
 
@@ -1696,6 +1697,142 @@ bool drawstar(cell *c) {
   return true;
   }
 
+bool drawItemType(eItem it, cell *c, const transmatrix& V, int icol, int ticks, bool hidden) {
+  char xch = iinf[it].glyph;
+  int ct6 = c ? c->type-6 : 0;
+  hpcshape *xsh = 
+    (it == itPirate || it == itKraken) ? &shPirateX :
+    (it == itBuggy || it == itBuggy2) ? &shPirateX :
+    it == itHolyGrail ? &shGrail :
+    isElementalShard(it) ? &shElementalShard :
+    (it == itBombEgg || it == itTrollEgg) ? &shEgg :
+    it == itDodeca ? &shDodeca :
+    xch == '*' ? &shGem[ct6] : 
+    it == itTreat ? &shTreat :
+    it == itSlime ? &shEgg :
+    xch == '%' ? &shDaisy : xch == '$' ? &shStar : xch == ';' ? &shTriangle :
+    xch == '!' ? &shTriangle : it == itBone ? &shNecro : it == itStatue ? &shStatue :
+    it == itIvory ? &shFigurine : 
+    xch == '?' ? &shBookCover : 
+    it == itKey ? &shKey : 
+    it == itRevolver ? &shGun :
+    NULL;
+   
+  if(c && doHighlight()) {
+    int k = itemclass(it);
+    if(k == IC_TREASURE)
+      poly_outline = OUTLINE_TREASURE;
+    else if(k == IC_ORB)
+      poly_outline = OUTLINE_ORB;
+    else
+      poly_outline = OUTLINE_OTHER;
+    }
+  
+  if(c && conformal::includeHistory && eq(c->aitmp, sval)) poly_outline = OUTLINE_DEAD;
+    
+  if(!mmitem && it) return true;
+  
+  else if(it == itSavedPrincess) {
+    drawMonsterType(moPrincess, c, V, icol, 0);
+    return false;
+    }
+  
+  else if(it == itStrongWind) {
+    queuepoly(V * spin(ticks / 750.), shFan, darkena(icol, 0, 255));
+    }
+
+  else if(it == itWarning) {
+    queuepoly(V * spin(ticks / 750.), shTriangle, darkena(icol, 0, 255));
+    }
+    
+  else if(it == itBabyTortoise) {
+    int bits = c ? tortoise::babymap[c] : tortoise::last;
+    int over = c && c->monst == moTortoise;
+    tortoise::draw(V * spin(ticks / 5000.) * ypush(crossf*.15), bits, over ? 4 : 2, 0);
+    // queuepoly(V, shHeptaMarker, darkena(tortoise::getMatchColor(bits), 0, 0xC0));
+    }
+  
+  else if(it == itCompass) {
+    transmatrix V2;
+    if(euclid) V2 = V * spin(M_PI/2); // todo incorrect
+    else V2 = V * rspintox(inverse(V) * pirateCoords);
+    V2 = V2 * spin(M_PI * sin(ticks/100.) / 30);
+    queuepoly(V2, shCompass1, 0xFF8080FF);
+    queuepoly(V2, shCompass2, 0xFFFFFFFF);
+    queuepoly(V2, shCompass3, 0xFF0000FF);
+    queuepoly(V2 * pispin, shCompass3, 0x000000FF);
+    xsh = NULL;
+    }
+
+  else if(it == itPalace) {
+    transmatrix V2 = V * spin(ticks / 1500.);
+    queuepoly(V2, shMFloor3[ct6], 0xFFD500FF);
+    queuepoly(V2, shMFloor4[ct6], darkena(icol, 0, 0xFF));
+    queuepoly(V2, shGem[ct6], 0xFFD500FF);
+    xsh = NULL;
+    }
+  
+  else if(drawUserShape(V, 2, it, darkena(icol, 0, 0xFF))) ;
+  
+  else if(it == itRose) {
+    for(int u=0; u<4; u++)
+      queuepoly(V * spin(ticks / 1500.) * spin(2*M_PI / 3 / 4 * u), shRose, darkena(icol, 0, hidden ? 0x30 : 0xA0));
+    }
+
+  else if(it == itBarrow && c) {
+    for(int i = 0; i<c->landparam; i++)
+      queuepolyat(V * spin(2 * M_PI * i / c->landparam) * xpush(.15) * spin(ticks / 1500.), *xsh, darkena(icol, 0, hidden ? 0x40 : 
+        (highwall(c) && wmspatial) ? 0x60 : 0xFF),
+        PPR_HIDDEN);
+
+//      queuepoly(V*spin(M_PI+(1-2*ang)*2*M_PI/S84), shMagicSword, darkena(0xC00000, 0, 0x80 + 0x70 * sin(ticks / 200.0)));
+    }
+    
+  else if(xsh) {
+    if(it == itFireShard) icol = firecolor(100);
+    if(it == itWaterShard) icol = watercolor(100) >> 8;
+    
+    if(it == itZebra) icol = 0xFFFFFF;
+    if(it == itLotus) icol = 0x101010;
+    
+    transmatrix V2 = V * spin(ticks / 1500.);
+  
+    if(xsh == &shBookCover && mmitem)
+      queuepoly(V2, shBook, 0x805020FF);
+
+    queuepoly(V2, *xsh, darkena(icol, 0, hidden ? (it == itKraken ? 0xC0 : 0x40) : 0xF0));
+
+    if(it == itZebra)
+      queuepolyat(V * spin(ticks / 1500. + M_PI/(ct6+6)), *xsh, darkena(0x202020, 0, hidden ? 0x40 : 0xF0), PPR_ITEMb);
+    }
+  
+  else if(xch == 'o') {
+    if(it == itOrbFire) icol = firecolor(100);
+    queuepoly(V, shDisk, darkena(icol, 0, hidden ? 0x20 : 0xC0));
+    if(it == itOrbFire) icol = firecolor(200);
+    if(it == itOrbFriend || it == itOrbDiscord) icol = 0xC0C0C0;
+    if(it == itOrbFrog) icol = 0xFF0000;
+    if(it == itOrbDash) icol = 0xFF0000;
+    if(it == itOrbFreedom) icol = 0xC0FF00;
+    if(it == itOrbAir) icol = 0xFFFFFF;
+    if(it == itOrbUndeath) icol = minf[moFriendlyGhost].color;
+    if(it == itOrbRecall) icol = 0x101010;
+    hpcshape& sh = 
+      isRangedOrb(it) ? shTargetRing :
+      isOffensiveOrb(it) ? shSawRing :
+      isFriendOrb(it) ? shPeaceRing :
+      isUtilityOrb(it) ? shGearRing :
+      isDirectionalOrb(it) ? shSpearRing :
+      it == itOrb37 ? shHeptaRing :
+      shRing;
+    queuepoly(V * spin(ticks / 1500.), sh, darkena(icol, 0, int(0x80 + 0x70 * sin(ticks / 300.))));
+    }
+
+  else if(it) return true;
+
+  return false;
+  }
+
 bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, int col, double footphase) {
 
   char xch = minf[m].glyph;
@@ -1712,9 +1849,9 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, int col, dou
     drawStunStars(V, where->stuntime);
     
   if(m == moTortoise) {
-    int bits = where ? tortoise::getb(where) : 0;
+    int bits = where ? tortoise::getb(where) : tortoise::last;
     tortoise::draw(V, bits, 0, where ? where->stuntime : 0);
-    if(tortoise::seek() && !tortoise::diff(bits))
+    if(tortoise::seek() && !tortoise::diff(bits) && where)
       queuepoly(V, shRing, darkena(0xFFFFFF, 0, 0x80 + 0x70 * sin(ticks / 200.0)));
     }
     
@@ -2109,7 +2246,7 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, int col, dou
     queuepoly(VBIRD, shGargoyleBody, darkena(col, 0, 0xFF));
     }
   else if(m == moZombie) {
-    int c = darkena(col, where->land == laHalloween ? 1 : 0, 0xFF);
+    int c = darkena(col, where && where->land == laHalloween ? 1 : 0, 0xFF);
     otherbodyparts(V, c, m, footphase);
     ShadowV(V, shPBody);
     queuepoly(VBODY, shPBody, c);
@@ -2136,7 +2273,7 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, int col, dou
       if(m == moFatGuard) {
         queuepoly(VBODY, shFatBody, darkena(0xC06000, 0, 0xFF));
         col = 0xFFFFFF;
-        if(where && where->hitpoints >= 3)
+        if(!where || where->hitpoints >= 3)
           queuepoly(VBODY, shKnightCloak, darkena(0xFFC0C0, 1, 0xFF));
         }
       else {
@@ -2148,7 +2285,7 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, int col, dou
             darkena(0x00FF00, 1, 0xFF));
         }
       queuepoly(VHEAD, shTurban1, darkena(col, 1, 0xFF));
-      if(where && where->hitpoints >= 2)
+      if(!where || where->hitpoints >= 2)
         queuepoly(VHEAD, shTurban2, darkena(col, 0, 0xFF));
       }
       
@@ -2264,9 +2401,9 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, int col, dou
   else if(m == moRatling || m == moRatlingAvenger) {
     otherbodyparts(V, darkena(col, 0, 0xFF), m, footphase);
     ShadowV(V, shYeti);
+    queuepoly(VLEG, shRatTail, darkena(col, 0, 0xFF));
     queuepoly(VBODY, shYeti, darkena(col, 1, 0xFF));
     queuepoly(VHEAD, shRatHead, darkena(col, 0, 0xFF));
-    queuepoly(VLEG, shRatTail, darkena(col, 0, 0xFF));
 
     float t = sin(ticks / 1000.0 + (where ? where->cpdist : 0));
     int eyecol = t > 0.92 ? 0xFF0000 : 0;
@@ -2313,7 +2450,7 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, int col, dou
     // queuepoly(V, shSkull, 0xC06020D0);
     //queuepoly(V, shSkullEyes, 0x000000D0);
 //  queuepoly(V, shWightCloak, 0xC0A080A0);
-    int b = where->cpdist;
+    int b = where ? where->cpdist : 0;
     b--;
     if(b < 0) b = 0;
     if(b > 6) b = 6;
@@ -2401,7 +2538,7 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, int col, dou
     queuepoly(VHEAD, shFemaleHair, darkena(col, 0, 0x80));
     queuepoly(VHEAD, shPFace, darkena(col, 0, 0x80));
     }        
-  else if(xch == 'd' || xch == 'D') {
+  else if((xch == 'd' || xch == 'D') && m != moDragonHead && m != moDragonTail) {
     otherbodyparts(V, darkena(col, 0, 0xC0), m, footphase);
     queuepoly(VBODY, shPBody, darkena(col, 1, 0xC0));
     ShadowV(V, shPBody);
@@ -2428,22 +2565,45 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, int col, dou
     }
   else if(isWitch(m)) {
     otherbodyparts(V, darkena(col, 1, 0xFF), m, footphase);
-    int c = 0xFF;
-    if(m == moWitchGhost) c = 0x85 + 120 * sin(ticks / 160.0);
-    if(m == moWitchWinter) drawWinter(V, 0);
-    if(m == moWitchFlash) drawFlash(V);
-    if(m == moWitchSpeed) drawSpeed(V);
+    int cc = 0xFF;
+    if(m == moWitchGhost) cc = 0x85 + 120 * sin(ticks / 160.0);
+    if(m == moWitchWinter && where) drawWinter(V, 0);
+    if(m == moWitchFlash && where) drawFlash(V);
+    if(m == moWitchSpeed && where) drawSpeed(V);
     if(m == moWitchFire) col = firecolor(0);
     ShadowV(V, shFemaleBody);
-    queuepoly(VBODY, shFemaleBody, darkena(col, 0, c));
+    queuepoly(VBODY, shFemaleBody, darkena(col, 0, cc));
 //    queuepoly(cV2, ct, shPSword, darkena(col, 0, 0XFF));
 //    queuepoly(V, shHood, darkena(col, 0, 0XC0));
     if(m == moWitchFire) col = firecolor(100);
-    queuepoly(VHEAD, shWitchHair, darkena(col, 1, c));
+    queuepoly(VHEAD, shWitchHair, darkena(col, 1, cc));
     if(m == moWitchFire) col = firecolor(200);
-    queuepoly(VHEAD, shPFace, darkena(col, 0, c));
+    queuepoly(VHEAD, shPFace, darkena(col, 0, cc));
     if(m == moWitchFire) col = firecolor(300);
     queuepoly(VBODY, shWitchDress, darkena(col, 1, 0XC0));
+    }
+
+  // just for the HUD glyphs...
+  else if(isIvy(m) || isMutantIvy(m) || m == moFriendlyIvy) {
+    queuepoly(V, shILeaf[0], darkena(col, 0, 0xFF));
+    }
+  else if(m == moWorm || m == moWormwait || m == moHexSnake) {
+    queuepoly(V, shWormHead, darkena(col, 0, 0xFF));
+    queuepolyat(V, shEyes, 0xFF, PPR_ONTENTACLE_EYES);
+    }
+  else if(m == moDragonHead) {
+    queuepoly(V, shDragonHead, darkena(col, 0, 0xFF));
+    queuepolyat(V, shEyes, 0xFF, PPR_ONTENTACLE_EYES);          
+    int noscolor = 0xFF0000FF;
+    queuepoly(V, shDragonNostril, noscolor);
+    queuepoly(V * Mirror, shDragonNostril, noscolor);
+    }
+  else if(m == moDragonTail) {
+    queuepoly(V, shDragonSegment, darkena(col, 0, 0xFF));
+    }
+  else if(m == moTentacle || m == moTentaclewait || m == moTentacleEscaping) {
+    queuepoly(V, shTentHead, darkena(col, 0, 0xFF));
+    ShadowV(V, shTentHead, PPR_GIANTSHADOW);
     }
 
   else return true;
@@ -2813,8 +2973,7 @@ int keycelldist;
 int aurac[AURA+1][4];
 
 bool haveaura() {
-  return pmodel == mdDisk && !sphere && !euclid && vid.aurastr>0 && 
-    !svg::in && (inHighQual || vid.usingGL);
+  return pmodel == mdDisk && !sphere && !euclid && vid.aurastr>0 && !svg::in && (auraNOGL || vid.usingGL);
   }
   
 void clearaura() {
@@ -4942,141 +5101,26 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       }
     
     // treasure
-    
-    char xch = iinf[it].glyph;
-    hpcshape *xsh = 
-      (it == itPirate || it == itKraken) ? &shPirateX :
-      (it == itBuggy || it == itBuggy2) ? &shPirateX :
-      it == itHolyGrail ? &shGrail :
-      isElementalShard(it) ? &shElementalShard :
-      (it == itBombEgg || it == itTrollEgg) ? &shEgg :
-      it == itDodeca ? &shDodeca :
-      xch == '*' ? &shGem[ct6] : 
-      it == itTreat ? &shTreat :
-      it == itSlime ? &shEgg :
-      xch == '%' ? &shDaisy : xch == '$' ? &shStar : xch == ';' ? &shTriangle :
-      xch == '!' ? &shTriangle : it == itBone ? &shNecro : it == itStatue ? &shStatue :
-      it == itIvory ? &shFigurine : 
-      xch == '?' ? &shBookCover : 
-      it == itKey ? &shKey : 
-      it == itRevolver ? &shGun :
-      NULL;
-     
-
     if(c->land == laWhirlwind && c->wall != waBoat) {
       double footphase = 0;
       Vboat = &(Vboat0 = *Vboat);
       applyAnimation(c, Vboat0, footphase, LAYER_BOAT);
       }
     
-    if(it && cellHalfvine(c)) {
-      int i =-1;
-      for(int t=0;t<6; t++) if(c->mov[t] && c->mov[t]->wall == c->wall)
-        i = t;
-
-      Vboat = &(Vboat0 = *Vboat * ddspin(c, i) * xpush(-.13));
-      }
-    
-    if(doHighlight()) {
-      int k = itemclass(it);
-      if(k == IC_TREASURE)
-        poly_outline = OUTLINE_TREASURE;
-      else if(k == IC_ORB)
-        poly_outline = OUTLINE_ORB;
-      else
-        poly_outline = OUTLINE_OTHER;
-      }
-    
-    if(conformal::includeHistory && eq(c->aitmp, sval)) poly_outline = OUTLINE_DEAD;
-      
 #ifndef NOEDIT
     if(c == mapeditor::drawcell && mapeditor::drawcellShapeGroup() == 2)
       mapeditor::drawtrans = V;
 #endif
 
-    if(!mmitem && it)
-      error = true;
-    
-    else if(it == itBabyTortoise) {
-      int bits = tortoise::babymap[c];
-      int over = c->monst == moTortoise;
-      tortoise::draw(*Vboat * spin(ticks / 5000.) * ypush(crossf*.15), bits, over ? 4 : 2, 0);
-      // queuepoly(V, shHeptaMarker, darkena(tortoise::getMatchColor(bits), 0, 0xC0));
+    if(it && cellHalfvine(c)) {
+      int i =-1;
+      for(int t=0;t<6; t++) if(c->mov[t] && c->mov[t]->wall == c->wall)
+        i = t;
+  
+      Vboat = &(Vboat0 = *Vboat * ddspin(c, i) * xpush(-.13));
       }
     
-    else if(it == itCompass) {
-      if(euclid) Vboat0 = (*Vdp) * spin(M_PI/2); // todo incorrect
-      else Vboat0 = *Vboat * rspintox(inverse(*Vboat) * pirateCoords);
-      Vboat0 = Vboat0 * spin(M_PI * sin(ticks/100.) / 30);
-      queuepoly(Vboat0, shCompass1, 0xFF8080FF);
-      queuepoly(Vboat0, shCompass2, 0xFFFFFFFF);
-      queuepoly(Vboat0, shCompass3, 0xFF0000FF);
-      queuepoly(Vboat0 * pispin, shCompass3, 0x000000FF);
-      xsh = NULL;
-      }
-
-    else if(it == itPalace) {
-      Vboat0 = *Vboat * spin(ticks / 1500.);
-      queuepoly(Vboat0, shMFloor3[ct6], 0xFFD500FF);
-      queuepoly(Vboat0, shMFloor4[ct6], darkena(icol, 0, 0xFF));
-      queuepoly(Vboat0, shGem[ct6], 0xFFD500FF);
-      xsh = NULL;
-      }
-    
-    else if(drawUserShape(*Vboat, 2, it, darkena(icol, 0, 0xFF))) ;
-    
-    else if(it == itRose) {
-      for(int u=0; u<4; u++)
-        queuepoly(*Vboat * spin(ticks / 1500.) * spin(2*M_PI / 3 / 4 * u), shRose, darkena(icol, 0, hidden ? 0x30 : 0xA0));
-      }
-
-    else if(it == itBarrow) {
-      for(int i = 0; i<c->landparam; i++)
-        queuepolyat(*Vboat * spin(2 * M_PI * i / c->landparam) * xpush(.15) * spin(ticks / 1500.), *xsh, darkena(icol, 0, hidden ? 0x40 : 
-          (highwall(c) && wmspatial) ? 0x60 : 0xFF),
-          PPR_HIDDEN);
-
-//      queuepoly(V*spin(M_PI+(1-2*ang)*2*M_PI/S84), shMagicSword, darkena(0xC00000, 0, 0x80 + 0x70 * sin(ticks / 200.0)));
-      }
-      
-    else if(xsh) {
-      if(it == itFireShard) icol = firecolor(100);
-      if(it == itWaterShard) icol = watercolor(100) >> 8;
-      
-      if(it == itZebra) icol = 0xFFFFFF;
-      if(it == itLotus) icol = 0x101010;
-    
-      queuepoly(*Vboat * spin(ticks / 1500.), *xsh, darkena(icol, 0, hidden ? (it == itKraken ? 0xC0 : 0x40) : 0xF0));
-
-      if(xsh == &shBookCover && mmitem)
-        queuepoly(*Vboat * spin(ticks / 1500.), shBook, 0x805020FF);
-      if(it == itZebra)
-        queuepolyat(*Vboat * spin(ticks / 1500. + M_PI/c->type), *xsh, darkena(0x202020, 0, hidden ? 0x40 : 0xF0), PPR_ITEMb);
-      }
-    
-    else if(xch == 'o') {
-      if(it == itOrbFire) icol = firecolor(100);
-      queuepoly(*Vboat, shDisk, darkena(icol, 0, hidden ? 0x20 : 0xC0));
-      if(it == itOrbFire) icol = firecolor(200);
-      if(it == itOrbFriend || it == itOrbDiscord) icol = 0xC0C0C0;
-      if(it == itOrbFrog) icol = 0xFF0000;
-      if(it == itOrbDash) icol = 0xFF0000;
-      if(it == itOrbFreedom) icol = 0xC0FF00;
-      if(it == itOrbAir) icol = 0xFFFFFF;
-      if(it == itOrbUndeath) icol = minf[moFriendlyGhost].color;
-      if(it == itOrbRecall) icol = 0x101010;
-      hpcshape& sh = 
-        isRangedOrb(it) ? shTargetRing :
-        isOffensiveOrb(it) ? shSawRing :
-        isFriendOrb(it) ? shPeaceRing :
-        isUtilityOrb(it) ? shGearRing :
-        isDirectionalOrb(it) ? shSpearRing :
-        it == itOrb37 ? shHeptaRing :
-        shRing;
-      queuepoly(*Vboat * spin(ticks / 1500.), sh, darkena(icol, 0, int(0x80 + 0x70 * sin(ticks / 300.))));
-      }
-
-    else if(it) error = true;
+    error |= drawItemType(it, c, *Vboat, icol, ticks, hidden);
 
     if(true) {
       int q = ptds.size();
@@ -7257,6 +7301,7 @@ int subclass(int i) {
 #define GLYPH_INPORTRAIT 128
 #define GLYPH_LOCAL2     256
 #define GLYPH_TARGET     512
+#define GLYPH_INSQUARE   1024
 
 eGlyphsortorder glyphsortorder;
   
@@ -7297,6 +7342,13 @@ void preparesort() {
 
 int glyphsortkey = 0;
 
+int glyphcorner(int i) {
+  if(i < ittypes)
+    return itemclass(eItem(i)) == IC_ORB ? 2 : 0;
+  else
+    return 1;
+  }
+
 bool glyphsort(int i, int j) {
   if(subclass(i) != subclass(j))
     return subclass(i) < subclass(j);
@@ -7321,10 +7373,11 @@ int glyphflags(int gid) {
     eItem i = eItem(gid);
     if(itemclass(i) == IC_NAI) f |= GLYPH_NONUMBER;
     if(isElementalShard(i)) {
-      f |= GLYPH_LOCAL;
+      f |= GLYPH_LOCAL | GLYPH_INSQUARE;
       if(i == localshardof(cwt.c->land)) f |= GLYPH_LOCAL2;
       }
-    if(i == treasureType(cwt.c->land)) f |= GLYPH_LOCAL | GLYPH_LOCAL2 | GLYPH_IMPORTANT;
+    if(i == treasureType(cwt.c->land)) 
+      f |= GLYPH_LOCAL | GLYPH_LOCAL2 | GLYPH_IMPORTANT | GLYPH_INSQUARE;
     if(i == itHolyGrail) {
       if(items[i] >= 3) f |= GLYPH_MARKOVER;
       }
@@ -7333,7 +7386,7 @@ int glyphflags(int gid) {
       else if(items[i] < 10) f |= GLYPH_MARKTODO;
       }
     else {
-      f |= GLYPH_IMPORTANT;
+      f |= GLYPH_IMPORTANT | GLYPH_INSQUARE;
       if(itemclass(i) == IC_ORB && items[i] < 10) f |= GLYPH_RUNOUT;
       }
     if(i == orbToTarget) f |= GLYPH_TARGET;
@@ -7341,28 +7394,74 @@ int glyphflags(int gid) {
     }
   else {
     eMonster m = eMonster(gid-ittypes);
-    if(m == moLesser) f |= GLYPH_IMPORTANT | GLYPH_DEMON | GLYPH_INPORTRAIT;
+    if(m == moLesser) f |= GLYPH_IMPORTANT | GLYPH_DEMON | GLYPH_INPORTRAIT | GLYPH_INSQUARE;
     int isnat = isNative(cwt.c->land, m);
-    if(isnat) f |= GLYPH_LOCAL | GLYPH_IMPORTANT | GLYPH_INPORTRAIT;
+    if(isnat) f |= GLYPH_LOCAL | GLYPH_IMPORTANT | GLYPH_INPORTRAIT | GLYPH_INSQUARE;
     if(isnat == 2) f |= GLYPH_LOCAL2;
     if(m == monsterToSummon) f |= GLYPH_TARGET;
     }
   return f;
   }
 
-bool displayglyph(int cx, int cy, int buttonsize, char glyph, int color, int qty, int flags) {
+transmatrix atscreenpos(ld x, ld y, ld size) {
+  transmatrix V = Id;
+
+  // V[0][2] += (x - vid.xcenter) / vid.radius * (1+vid.alphax);
+  // V[1][2] += (y - vid.ycenter) / vid.radius * (1+vid.alphax);
+  // V[2][2] = size / vid.radius * 5;
+
+  V[0][2] += (x - vid.xcenter);
+  V[1][2] += (y - vid.ycenter);
+  V[0][0] = size * 1.2;
+  V[1][1] = size * 1.2;
+  V[2][2] = vid.scrdist;
+
+  return V;
+  }
+
+bool displayglyph(int cx, int cy, int buttonsize, char glyph, int color, int qty, int flags, int id) {
     
   bool b =
     mousex >= cx && mousex < cx+buttonsize && mousey >= cy-buttonsize/2 && mousey <= cy-buttonsize/2+buttonsize;
 
   int glsize = buttonsize;
   if(glyph == '%' || glyph == 'M' || glyph == 'W') glsize = glsize*4/5;
-
-  if(glyph == '*')
+  
+  if(vid.graphglyph) {
+    ptds.clear();
+    poly_outline = OUTLINE_NONE;
+    if(id >= ittypes) {
+      eMonster m = eMonster(id - ittypes);
+      int bsize = buttonsize;
+      if(m == moKrakenH) bsize /= 2;
+      if(m == moSlime) bsize = (2*bsize+1)/3;
+      transmatrix V = atscreenpos(cx+buttonsize/2, cy, bsize);
+      int mcol = color;
+      mcol -= (color & 0xFCFCFC) >> 2;
+      drawMonsterType(m, NULL, V, mcol, 0);
+      }
+    else {
+      eItem it = eItem(id);
+      int bsize = buttonsize;
+      if(glyph =='*') bsize *= 2;
+      if(glyph == '$') bsize = (bsize*5+2)/3;
+      if(glyph == 'o') bsize *= 2;
+      if(glyph == 't') bsize = bsize*5/2;
+      if(it == itWarning) bsize *= 2;
+      if(it == itBombEgg || it == itTrollEgg || it == itDodeca) bsize = bsize*3/2;
+      transmatrix V = atscreenpos(cx+buttonsize/2, cy, bsize);
+      int icol = color;
+      icol -= (color & 0xFCFCFC) >> 2;
+      int ic = itemclass(it);
+      drawItemType(it, NULL, V, icol, (ic == IC_ORB || ic == IC_NAI) ? ticks*2 : (glyph == 't' && qty%5) ? ticks/2 : 0, false);
+      }
+    quickqueue();
+    }
+  else if(glyph == '*')
     displaychr(cx + buttonsize/2, cy+buttonsize/4, 0, glsize*3/2, glyph, darkenedby(color, b?0:1));
   else
     displaychr(cx + buttonsize/2, cy, 0, glsize, glyph, darkenedby(color, b?0:1));
-
+  
   string fl = "";
   string str = its(qty);
 
@@ -7385,6 +7484,54 @@ bool displayglyph(int cx, int cy, int buttonsize, char glyph, int color, int qty
     displayfr(cx + buttonsize, cy + buttonsize/2 - bsize/2, 1, bsize, str, color, 16);
 
   return b;
+  }
+
+void displayglyph2(int cx, int cy, int buttonsize, int i) {
+      
+  char glyph = i < ittypes ? iinf[i].glyph : minf[i-ittypes].glyph;
+  int color = i < ittypes ? iinf[i].color : minf[i-ittypes].color;
+  int imp = glyphflags(i);
+
+  if(displayglyph(cx, cy, buttonsize, glyph, color, ikmerge(i), imp, i)) {
+    instat = true;
+    getcstat = SDLK_F1;
+    if(i < ittypes) {
+      eItem it = eItem(i);
+      int t = itemclass(it);
+      if(t == IC_TREASURE)
+        mouseovers = XLAT("treasure collected: %1", it);
+      if(t == IC_OTHER)
+        mouseovers = XLAT("objects found: %1", it);
+      if(t == IC_NAI)
+        mouseovers = XLAT("%1", it);
+      if(t == IC_ORB)
+        mouseovers = XLAT("orb power: %1", eItem(i));
+      if(it == itGreenStone) {
+        mouseovers += XLAT(" (click to drop)");
+        getcstat = 'g';
+        }
+      if(imp & GLYPH_LOCAL) mouseovers += XLAT(" (local treasure)");
+      help = generateHelpForItem(it);
+      }
+    else {
+      eMonster m = eMonster(i-ittypes);
+      if(isMonsterPart(m))
+        mouseovers = s0 + XLAT("parts destroyed: %1", m);
+      else if(isFriendly(m) && isNonliving(m))
+        mouseovers = s0 + XLAT("friends destroyed: %1", m);
+      else if(isFriendly(m))
+        mouseovers = s0 + XLAT("friends killed: %1", m);
+      else if(isNonliving(m))
+        mouseovers = s0 + XLAT("monsters destroyed: %1", m);
+      else if(m == moTortoise)
+        mouseovers = s0 + XLAT("animals killed: %1", m);
+      else 
+        mouseovers = s0 + XLAT("monsters killed: %1", m);
+      if(imp & GLYPH_LOCAL2) mouseovers += XLAT(" (killing increases treasure spawn)");
+      else if(imp & GLYPH_LOCAL) mouseovers += XLAT(" (appears here)");
+      help = generateHelpForMonster(m);
+      }
+    }
   }
 
 void drawStats() {
@@ -7427,6 +7574,51 @@ void drawStats() {
     dialog::display();
     }
   if(sidescreen) return;
+  
+  if(vid.xres > vid.yres * 85/100 && vid.yres > vid.xres * 85/100) {
+    int bycorner[4];
+    for(int u=0; u<4; u++) bycorner[u] = 0;
+    for(int i=0; i<glyphs; i++) if(ikmerge(i) && (glyphflags(i) & GLYPH_INSQUARE))
+      bycorner[glyphcorner(i)]++;
+    updatesort();
+    stable_sort(glyphorder, glyphorder+glyphs, glyphsort);
+    int rad = min(vid.xres, vid.yres) / 2;
+    for(int cor=0; cor<3; cor++) {
+      for(int a=5; a<41; a++) {
+        int s = min(vid.xres, vid.yres) / a;
+        int spots = 0;
+        for(int u=vid.fsize; u<vid.xres/2-s; u += s)
+        for(int v=vid.fsize; v<vid.yres/2-s; v += s)
+          if(hypot(vid.xres/2-u-s, vid.yres/2-v-s) > rad) {
+            spots++;
+            }
+        if(spots >= bycorner[cor] && spots >= 3) {
+          int next = 0;
+          vector<int> glyphstoshow;
+          for(int i=0; i<glyphs; i++) {
+            int g = glyphorder[i];
+            if(ikmerge(g) && (glyphflags(g) & GLYPH_INSQUARE) && glyphcorner(g) == cor)
+              glyphstoshow.push_back(g);
+            }
+          for(int u=vid.fsize; u<vid.xres/2-s; u += s)
+          for(int v=vid.fsize; v<vid.yres/2-s; v += s)
+            if(hypot(vid.xres/2-u-s, vid.yres/2-v-s) > rad) {
+              if(next >= size(glyphstoshow)) break;
+
+              int cx = u;
+              int cy = v + s/2;
+              if(cor&1) cx = vid.xres-1-s-cx;
+              if(cor&2) cy = vid.yres-1-cy;
+    
+              displayglyph2(cx, cy, s, glyphstoshow[next++]);
+              }
+          break;
+          }
+        }
+      }
+    return;
+    }
+  
   instat = false;
   bool portrait = vid.xres < vid.yres;
   int colspace = portrait ? (vid.yres - vid.xres - vid.fsize*3) : (vid.xres - vid.yres - 16) / 2;
@@ -7484,49 +7676,7 @@ void drawStats() {
 
     rowid[z]++; if(rowid[z] >= rows) rowid[z] = 0, colid[z]++;
     
-    char glyph = i < ittypes ? iinf[i].glyph : minf[i-ittypes].glyph;
-    int color = i < ittypes ? iinf[i].color : minf[i-ittypes].color;
-    
-    if(displayglyph(cx, cy, buttonsize, glyph, color, ikmerge(i), imp)) {
-      instat = true;
-      getcstat = SDLK_F1;
-      if(i < ittypes) {
-        eItem it = eItem(i);
-        int t = itemclass(it);
-        if(t == IC_TREASURE)
-          mouseovers = XLAT("treasure collected: %1", it);
-        if(t == IC_OTHER)
-          mouseovers = XLAT("objects found: %1", it);
-        if(t == IC_NAI)
-          mouseovers = XLAT("%1", it);
-        if(t == IC_ORB)
-          mouseovers = XLAT("orb power: %1", eItem(i));
-        if(it == itGreenStone) {
-          mouseovers += XLAT(" (click to drop)");
-          getcstat = 'g';
-          }
-        if(imp & GLYPH_LOCAL) mouseovers += XLAT(" (local treasure)");
-        help = generateHelpForItem(it);
-        }
-      else {
-        eMonster m = eMonster(i-ittypes);
-        if(isMonsterPart(m))
-          mouseovers = s0 + XLAT("parts destroyed: %1", m);
-        else if(isFriendly(m) && isNonliving(m))
-          mouseovers = s0 + XLAT("friends destroyed: %1", m);
-        else if(isFriendly(m))
-          mouseovers = s0 + XLAT("friends killed: %1", m);
-        else if(isNonliving(m))
-          mouseovers = s0 + XLAT("monsters destroyed: %1", m);
-        else if(m == moTortoise)
-          mouseovers = s0 + XLAT("animals killed: %1", m);
-        else 
-          mouseovers = s0 + XLAT("monsters killed: %1", m);
-        if(imp & GLYPH_LOCAL2) mouseovers += XLAT(" (killing increases treasure spawn)");
-        else if(imp & GLYPH_LOCAL) mouseovers += XLAT(" (appears here)");
-        help = generateHelpForMonster(m);
-        }
-      }
+    displayglyph2(cx, cy, buttonsize, i);    
     }
 
   string s0;
@@ -7612,6 +7762,7 @@ void saveHighQualityShot(const char *fname, const char *caption, int fade) {
   dynamicval<videopar> v(vid, vid);
   dynamicval<bool> v2(inHighQual, true);
   dynamicval<int> v4(cheater, 0);
+  dynamicval<bool> v6(auraNOGL, fname ? true : false);
   
   vid.xres = vid.yres = pngres;
   if(pngformat == 1) vid.xres = vid.yres * 4/3;
@@ -8099,7 +8250,7 @@ void saveConfig() {
     float(vid.ballangle), float(vid.ballproj)
     );
 
-  fprintf(f, "%d %d %d\n", vid.mobilecompasssize, vid.aurastr, vid.aurasmoothen);
+  fprintf(f, "%d %d %d %d\n", vid.mobilecompasssize, vid.aurastr, vid.aurasmoothen, vid.graphglyph);
 
   }
     
@@ -8120,7 +8271,7 @@ void saveConfig() {
   fprintf(f, "revcontrol, drawmousecircle, sight range, movement animation speed, sound effect volume, particle effects\n");
   fprintf(f, "3D parameters, sort order\n");
   fprintf(f, "yhsift, camera angle, ball angle, ball projection\n");
-  fprintf(f, "compass size\n");
+  fprintf(f, "compass size, aura strength, aura smoothen factor, graphical glyphs\n");
   
   fclose(f);
 #ifndef MOBILE
@@ -8228,7 +8379,7 @@ void loadConfig() {
     
     readf(f, vid.yshift); readf(f, vid.camera_angle); readf(f, vid.ballangle); readf(f, vid.ballproj);
 
-    err=fscanf(f, "%d%d%d\n", &vid.mobilecompasssize, &vid.aurastr, &vid.aurasmoothen);
+    err=fscanf(f, "%d%d%d%d\n", &vid.mobilecompasssize, &vid.aurastr, &vid.aurasmoothen, &vid.graphglyph);
   
     fclose(f);
     DEBB(DF_INIT, (debugfile,"Loaded configuration: %s\n", conffile));
@@ -8287,6 +8438,7 @@ void initgraph() {
   vid.ballproj = 1;
   vid.aurastr = 128;
   vid.aurasmoothen = 5;
+  vid.graphglyph = 1;
 
 #ifdef ANDROID
   vid.monmode = 2;

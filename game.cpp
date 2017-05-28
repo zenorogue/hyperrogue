@@ -5736,6 +5736,7 @@ bool collectItem(cell *c2, bool telekinesis) {
     babymap.erase(c2);
     int bold = seekbits;
     seekbits = bnew;
+    last = seekbits;
     if(seek()) {
       cell *c = passable(cwt.c, NULL, 0) ? cwt.c : c2;
       c->item = itBabyTortoise;

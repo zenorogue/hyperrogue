@@ -293,6 +293,7 @@ struct videopar {
   bool full;
   bool goteyes;  // for rendering
   bool goteyes2; // for choosing colors
+  int graphglyph; // graphical glyphs
   bool darkhepta;
   int shifttarget;
   
@@ -1192,3 +1193,4 @@ void switchFullscreen();
 string turnstring(int i);
 int celldistance(cell *c1, cell *c2);
 bool behindsphere(const transmatrix& V);
+extern hyperpoint pirateCoords;

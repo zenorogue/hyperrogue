@@ -328,6 +328,7 @@ void showVisual1() {
     };
 
 
+  dialog::addSelItem(XLAT("items/kills mode"), XLAT(vid.graphglyph ? "images" : "letters"), 'd');
   dialog::addBoolItem(XLAT("mark heptagons"), (vid.darkhepta), '7');
   dialog::addBoolItem(XLAT("draw the grid"), (vid.grid), '6');
   dialog::addBoolItem(XLAT("extra graphical effects"), (vid.particles), 'u');
@@ -442,6 +443,8 @@ void handleVisual1(int sym, int uni) {
   
   if(xuni == '6') vid.grid = !vid.grid;
   if(xuni == 'u') vid.particles = !vid.particles;
+  
+  if(xuni == 'd') vid.graphglyph = !vid.graphglyph;
 
   if(xuni == 'j') {
     dialog::editNumber(whatever, -10, 10, 1, 0, XLAT("whatever"), 

@@ -430,6 +430,73 @@ void prettyline(hyperpoint h1, hyperpoint h2, int col, int lev) {
 vector<GLfloat> curvedata;
 int curvestart = 0;
 
+void drawqueueitem(polytodraw& ptd) {
+#ifdef ROGUEVIZ
+  svg::info = ptd.info;
+#endif
+
+  // if(ptd.prio == 46) printf("eye size %d\n", polyi);
+  
+  if(ptd.kind == pkResetModel) {
+    pmodel = eModel(ptd.col);
+    return;
+    }
+
+  if(ptd.kind == pkPoly) {
+    if(ptd.u.poly.curveindex >= 0)
+      ptd.u.poly.tab = &curvedata[ptd.u.poly.curveindex];
+    drawpolyline(ptd.u.poly.V, ptd.u.poly.tab, ptd.u.poly.cnt, ptd.col, ptd.u.poly.outline);
+    }
+  else if(ptd.kind == pkLine) {
+    prettyline(ptd.u.line.H1, ptd.u.line.H2, ptd.col, ptd.u.line.prf);
+    }
+  else if(ptd.kind == pkString) {
+    qchr& q(ptd.u.chr);
+#ifndef MOBILE
+    if(svg::in) 
+      svg::text(q.x, q.y, q.size, q.str, q.frame, ptd.col, q.align);
+    else {
+      if(q.frame) {
+        displaystr(q.x-q.frame, q.y, q.shift, q.size, q.str, 0, q.align);
+        displaystr(q.x+q.frame, q.y, q.shift, q.size, q.str, 0, q.align);
+        displaystr(q.x, q.y-q.frame, q.shift, q.size, q.str, 0, q.align);
+        displaystr(q.x, q.y+q.frame, q.shift, q.size, q.str, 0, q.align);
+        }
+      displaystr(q.x, q.y, q.shift, q.size, q.str, ptd.col, q.align);
+      }
+#else
+    displayfr(q.x, q.y, q.frame, q.size, q.str, ptd.col, q.align);
+#endif
+    }
+  else if(ptd.kind == pkCircle) {
+#ifndef MOBILE
+    if(svg::in) 
+      svg::circle(ptd.u.cir.x, ptd.u.cir.y, ptd.u.cir.size, ptd.col);
+    else
+#endif
+    drawCircle(ptd.u.cir.x, ptd.u.cir.y, ptd.u.cir.size, ptd.col);
+    }
+
+#ifndef NOSDL
+  if(vid.goteyes && !vid.usingGL) {
+    int qty = s->w * s->h;
+    int *a = (int*) s->pixels;
+    int *b = (int*) aux->pixels;
+    SDL_LockSurface(aux);
+    while(qty) {
+      *a = ((*a) & 0xFF0000) | ((*b) & 0x00FFFF);
+      a++; b++; qty--;
+      }
+    SDL_UnlockSurface(aux);
+    }
+  }
+
+void quickqueue() {
+  int siz = size(ptds);
+  setcameraangle(false);
+  for(int i=0; i<siz; i++) drawqueueitem(ptds[i]);
+  }
+
 void drawqueue() {
 #ifdef USEPOLY
 
@@ -490,71 +557,12 @@ void drawqueue() {
 #endif
   
   for(int i=0; i<siz; i++) {
-
 #ifdef STLSORT
     polytodraw& ptd (ptds[i]);
 #else
     polytodraw& ptd (*ptds2[i]);
 #endif
-
-#ifdef ROGUEVIZ
-    svg::info = ptd.info;
-#endif
-
-    // if(ptd.prio == 46) printf("eye size %d\n", polyi);
-    
-    if(ptd.kind == pkResetModel) {
-      pmodel = eModel(ptd.col);
-      continue;
-      }
-
-    if(ptd.kind == pkPoly) {
-      if(ptd.u.poly.curveindex >= 0)
-        ptd.u.poly.tab = &curvedata[ptd.u.poly.curveindex];
-      drawpolyline(ptd.u.poly.V, ptd.u.poly.tab, ptd.u.poly.cnt, ptd.col, ptd.u.poly.outline);
-      }
-    else if(ptd.kind == pkLine) {
-      prettyline(ptd.u.line.H1, ptd.u.line.H2, ptd.col, ptd.u.line.prf);
-      }
-    else if(ptd.kind == pkString) {
-      qchr& q(ptd.u.chr);
-#ifndef MOBILE
-      if(svg::in) 
-        svg::text(q.x, q.y, q.size, q.str, q.frame, ptd.col, q.align);
-      else {
-        if(q.frame) {
-          displaystr(q.x-q.frame, q.y, q.shift, q.size, q.str, 0, q.align);
-          displaystr(q.x+q.frame, q.y, q.shift, q.size, q.str, 0, q.align);
-          displaystr(q.x, q.y-q.frame, q.shift, q.size, q.str, 0, q.align);
-          displaystr(q.x, q.y+q.frame, q.shift, q.size, q.str, 0, q.align);
-          }
-        displaystr(q.x, q.y, q.shift, q.size, q.str, ptd.col, q.align);
-        }
-#else
-      displayfr(q.x, q.y, q.frame, q.size, q.str, ptd.col, q.align);
-#endif
-      }
-    else if(ptd.kind == pkCircle) {
-#ifndef MOBILE
-      if(svg::in) 
-        svg::circle(ptd.u.cir.x, ptd.u.cir.y, ptd.u.cir.size, ptd.col);
-      else
-#endif
-      drawCircle(ptd.u.cir.x, ptd.u.cir.y, ptd.u.cir.size, ptd.col);
-      }
-    }
-
-#ifndef NOSDL
-  if(vid.goteyes && !vid.usingGL) {
-    int qty = s->w * s->h;
-    int *a = (int*) s->pixels;
-    int *b = (int*) aux->pixels;
-    SDL_LockSurface(aux);
-    while(qty) {
-      *a = ((*a) & 0xFF0000) | ((*b) & 0x00FFFF);
-      a++; b++; qty--;
-      }
-    SDL_UnlockSurface(aux);
+    drawqueueitem(ptd);
     }
 
   if(vid.goteyes && vid.usingGL) selectEyeGL(0), selectEyeMask(0);
