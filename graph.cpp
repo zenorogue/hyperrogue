@@ -7412,9 +7412,10 @@ transmatrix atscreenpos(ld x, ld y, ld size) {
 
   V[0][2] += (x - vid.xcenter);
   V[1][2] += (y - vid.ycenter);
-  V[0][0] = size * 1.2;
-  V[1][1] = size * 1.2;
+  V[0][0] = size * 2 * crossf / hcrossf;
+  V[1][1] = size * 2 * crossf / hcrossf;
   V[2][2] = vid.scrdist;
+  if(euclid) V[2][2] /= EUCSCALE;
 
   return V;
   }
@@ -7433,7 +7434,8 @@ bool displayglyph(int cx, int cy, int buttonsize, char glyph, int color, int qty
     if(id >= ittypes) {
       eMonster m = eMonster(id - ittypes);
       int bsize = buttonsize;
-      if(m == moKrakenH) bsize /= 2;
+      if(m == moKrakenH) bsize /= 3;
+      if(m == moKrakenT || m == moDragonTail) bsize /= 2;
       if(m == moSlime) bsize = (2*bsize+1)/3;
       transmatrix V = atscreenpos(cx+buttonsize/2, cy, bsize);
       int mcol = color;
@@ -7445,7 +7447,7 @@ bool displayglyph(int cx, int cy, int buttonsize, char glyph, int color, int qty
       int bsize = buttonsize;
       if(glyph =='*') bsize *= 2;
       if(glyph == '$') bsize = (bsize*5+2)/3;
-      if(glyph == 'o') bsize *= 2;
+      if(glyph == 'o') bsize = (bsize*3+1)/2;
       if(glyph == 't') bsize = bsize*5/2;
       if(it == itWarning) bsize *= 2;
       if(it == itBombEgg || it == itTrollEgg || it == itDodeca) bsize = bsize*3/2;
@@ -7453,7 +7455,7 @@ bool displayglyph(int cx, int cy, int buttonsize, char glyph, int color, int qty
       int icol = color;
       icol -= (color & 0xFCFCFC) >> 2;
       int ic = itemclass(it);
-      drawItemType(it, NULL, V, icol, (ic == IC_ORB || ic == IC_NAI) ? ticks*2 : (glyph == 't' && qty%5) ? ticks/2 : 0, false);
+      drawItemType(it, NULL, V, icol, (ic == IC_ORB || ic == IC_NAI) ? ticks*2 : ((glyph == 't' && qty%5) || it == itOrbYendor) ? ticks/2 : 0, false);
       }
     quickqueue();
     }

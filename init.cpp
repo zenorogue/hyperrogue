@@ -1,6 +1,6 @@
-#define VER "9.4i"
-#define VERNUM 9409
-#define VERNUM_HEX 0x9409
+#define VER "9.4j"
+#define VERNUM 9410
+#define VERNUM_HEX 0x9410
 
 #define GEN_M 0
 #define GEN_F 1
@@ -180,6 +180,12 @@ typedef int SDL_Event;
     #endif
   #endif
 
+#endif
+
+#ifdef NOLAMBDAS
+#undef TOUR
+#else
+#include <functional>
 #endif
 
 #include <cmath>
