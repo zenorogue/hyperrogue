@@ -469,12 +469,12 @@ slide slides[] = {
       }
     },
   {"Half-plane model", 47, LEGAL_HYPERBOLIC,
-    "The game is normally displayed in the so called PoincarÇ disk model, "
+    "The game is normally displayed in the so called Poincar√© disk model, "
     "which is a kind of a map of the infinite hyperbolic world. "
     "There are many projections of Earth, but since Earth is curved, "
     "all of them have to distort distances or angles in some way -- "
     "the same is true in hyperbolic geometry. "
-    "The next slide shows another model, called the PoincarÇ upper half-plane model. In this model, "
+    "The next slide shows another model, called the Poincar√© upper half-plane model. In this model, "
     "horocycles centered at one specific ideal point are drawn as straight lines.",
     [] (presmode mode) {
       if(mode == 1) 
@@ -554,10 +554,10 @@ slide slides[] = {
     "This is applied in HyperRogue to create landscapes, such as the chasms in the "
     "land of Reptiles or the Dragon Chasms, which you should find quickly. "
     "Also in the Dragon Chasms, you can find a Baby Tortoise, and try to find "
-    "a matching adult tortoise in the Gal†pagos. "
+    "a matching adult tortoise in the Gal√°pagos. "
     "There are over two millions of species, but since there is so much space in "
     "hyperbolic geometry, finding a matching tortoise is possible. The brighter "
-    "the color in Gal†pagos is, the more aspects of the tortoises in the given "
+    "the color in Gal√°pagos is, the more aspects of the tortoises in the given "
     "area are matching.",
     [] (presmode mode) {
       slidecommand = "create a baby tortoise";
@@ -578,15 +578,15 @@ slide slides[] = {
       SHOWLAND ( l == laCrossroads || l == laReptile || l == laDragon || l == laTortoise );
       }
     },
-  {"PoincarÇ Ball model", 41, LEGAL_HYPERBOLIC,
-    "The PoincarÇ disk model is a model of a hyperbolic *plane* -- you "
+  {"Poincar√© Ball model", 41, LEGAL_HYPERBOLIC,
+    "The Poincar√© disk model is a model of a hyperbolic *plane* -- you "
     "might wonder why are the walls rendered in 3D then.\n\n"
     "HyperRogue actually assumes that the floor level is an equidistant surface "
     "in a three-dimensional hyperbolic world, and the camera is placed above the "
     "plane that the surface is equidistant to (which boils down to showing "
-    "the floor level in PoincarÇ disk model).\n\n"
-    "This is shown on the next slide, in the PoincarÇ ball model, which is "
-    "the 3D analog of the PoincarÇ disk model.",
+    "the floor level in Poincar√© disk model).\n\n"
+    "This is shown on the next slide, in the Poincar√© ball model, which is "
+    "the 3D analog of the Poincar√© disk model.",
     [] (presmode mode) {
       if(mode == 1) pmodel = mdBall;
       if(mode == 3) pmodel = mdDisk;
@@ -610,7 +610,7 @@ slide slides[] = {
     },
   {"Gans model", 44, LEGAL_ANY,
     "Yet another model, which corresponds to orthographic projection of the "
-    "sphere. PoincarÇ disk model, Beltrami-Klein model, and the Gans "
+    "sphere. Poincar√© disk model, Beltrami-Klein model, and the Gans "
     "model are all obtained by looking at either the hyperboloid model or an "
     "equidistant surface from various distances.",
     [] (presmode mode) {
