@@ -1101,6 +1101,7 @@ namespace mirror {
     }
   
   void destroyStray() {
+    if(geometry == gQuotient2) return;
     for(int i=0; i<size(mirrors2); i++) {
       cell *c = mirrors2[i];
       if(c->cpdist > 7 && isMimic(c)) {

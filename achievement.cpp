@@ -519,7 +519,7 @@ void improveItemScores() {
 void achievement_final(bool really_final) {
   if(offlineMode) return;
 #ifdef HAVE_ACHIEVEMENTS
-  // upload_score(LB_STATISTICS, time(NULL));
+  upload_score(LB_STATISTICS, time(NULL));
   if(cheater) return;
 #ifdef TOUR
   if(tour::on) return;
@@ -599,6 +599,7 @@ void achievement_final(bool really_final) {
   }
 
 void achievement_victory(bool hyper) {
+  DEBB(DF_STEAM, (debugfile,"achievement_victory\n"))
   if(offlineMode) return;
 #ifdef HAVE_ACHIEVEMENTS
   if(cheater) return;
@@ -611,6 +612,7 @@ void achievement_victory(bool hyper) {
   if(yendor::on) return;
   if(tactic::on) return;
   if(chaosmode) return;
+  DEBB(DF_STEAM, (debugfile,"after checks\n"))
 
   int t = savetime + time(NULL) - timerstart;
   
@@ -656,6 +658,7 @@ void achievement_victory(bool hyper) {
       }
     }
   
+  DEBB(DF_STEAM, (debugfile, "uploading scores\n"))
   upload_score(ih1, t);
   upload_score(ih2, turncount);
 #endif

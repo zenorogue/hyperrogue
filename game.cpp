@@ -2738,6 +2738,12 @@ void bfs() {
   buildAirmap();
   
   if(overgenerate) doOvergenerate();
+  
+  if(geometry == gQuotient2) {
+    mirrors.clear();
+    for(cell *c: currentmap->allcells())
+      if(isMimic(c)) mirrors.push_back(c);
+    }
   }
 
 bool makeEmpty(cell *c) {

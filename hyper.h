@@ -213,6 +213,9 @@ namespace shmup {
   bool playerInBoat(int i);
   void destroyBoats(cell *c);
   bool boatAt(cell *c);
+  
+  void virtualRebase(cell*& base, transmatrix& at, bool tohex);
+  void virtualRebase(shmup::monster *m, bool tohex);
   }
 
 // graph
@@ -753,7 +756,8 @@ bool hasSafeOrb(cell *c);
 void placeWater(cell *c, cell *c2);
 bool againstCurrent(cell *w, cell *from);
 
-#define DEFAULTCONTROL (multi::players == 1 && !shmup::on && !multi::alwaysuse)      
+#define DEFAULTCONTROL (multi::players == 1 && !shmup::on && !multi::alwaysuse)
+#define DEFAULTNOR(sym) (DEFAULTCONTROL || multi::notremapped(sym))
 
 extern bool timerghost;
 
@@ -1194,3 +1198,4 @@ string turnstring(int i);
 int celldistance(cell *c1, cell *c2);
 bool behindsphere(const transmatrix& V);
 extern hyperpoint pirateCoords;
+

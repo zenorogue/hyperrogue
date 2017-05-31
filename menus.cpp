@@ -861,7 +861,7 @@ void showChangeMode() {
   // gameplay modes
 
 #ifdef TOUR
-  dialog::addBoolItem(XLAT("tutorial"), tour::on, 'T');
+  dialog::addBoolItem(XLAT("Tutorial"), tour::on, 'T');
 #endif
 
   dialog::addBoolItem(XLAT("Euclidean/elliptic mode"), (euclid || sphere), 'e');
@@ -1212,6 +1212,8 @@ void handleEuclidean(int sym, int uni) {
     if(landvisited[euclidland] && euclidland != laOceanWall) {
       if(targetgeometry != geometry)
         restartGame('g');
+      else
+        restartGame(tactic::on ? 't' : 0);
       // disable PTM if chosen a land from the Euclidean menu
       if(tactic::on) restartGame('t');
       cmode = emNormal;

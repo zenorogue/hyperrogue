@@ -5691,8 +5691,7 @@ namespace halloween {
 
   cell *farempty(bool lastresort = false) {
     int maxdist = 0;
-    cell* validcells[100];
-    int qvc = 0;
+    vector<cell*> validcells;
     int firstfar1 = 0;
     for(int i=1; i<size(dcal); i++) {
       bool okay = 
@@ -5701,12 +5700,13 @@ namespace halloween {
         okay = dcal[i]->wall != waChasm && !isMultitile(dcal[i]->monst);
       if(okay) {
         if(dcal[i]->cpdist > maxdist) 
-          firstfar1 = qvc,
+          firstfar1 = size(validcells),
           maxdist = dcal[i]->cpdist; 
-        validcells[qvc++] = dcal[i];
+        validcells.push_back(dcal[i]);
         }
       }
     
+    int qvc = size(validcells);
     if(qvc == firstfar1) return farempty(true);
     
     return validcells[firstfar1 + hrand(qvc - firstfar1)];

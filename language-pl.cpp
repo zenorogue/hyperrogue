@@ -4940,7 +4940,505 @@ S("field quotient", "przestrzeń ilorazowa ciała")
 		"NEW_ACHIEVEMENT_8_18_DESC"	"Defeat a Sandworm in the Zebra Quotient geometry."
 */
 
+// additional texts for 9.4k
+
 N("Tortoise", GEN_M, "Żółw", "Żółwie", "Żółwia", "Żółwiem")
+S("line patterns", "wzory linii")
+S("1 turn", "1 kolejka")
+S("%1 turns", "kolejek: %1")
+S("items/kills mode", "tryb rzeczy/zabić")
+S("images", "obrazki")
+S("letters", "literki")
+S("input", "sterowanie")
+S("default", "domyślne")
+S("config", "ustawione")
+S("expansion", "rozszerzanie")
+
+S("continue", "kontynuuj")
+S("main menu", "menu główne")
+S("restart", "nowa gra")
+S("quit", "koniec")
+S("exit menu", "wyjdź z menu")
+
+S(
+  "A tourist from another world. They mutter something about the 'tutorial', "
+  "and claim that they are here just to learn, and to leave without any treasures. "
+  "Do not kill them!",
+  
+  "Turyst%aka0 z innego świata. Coś mamrocze o 'podręczniku', i że "
+  "się tylko uczy, że nie jest tu po skarby. Nie zabijać!")
+
+S(
+  "This monster has come from another world, presumably to steal our treasures. "
+  "Not as fast as an Eagle, not as resilient as the guards from the Palace, "
+  "and not as huge as the Mutant Ivy from the Clearing; however, "
+  "they are very dangerous because of their intelligence, "
+  "and access to magical powers.\n\n",
+
+  "Ten potwór przybył z innego świata, prawdopodobnie po nasze skarby. "
+  "Nie taki szybki jak Orzeł, nie taki odporny jak strażnicy Pałacu, "
+  "i nie taki wielki jak Zmutowany Bluszcz z Polany; jest jednak "
+  "bardzo niebezpieczny ze względu na inteligencję i "
+  "dostęp do mocy magicznych.\n\n"
+  )
+
+S(
+  "Actually, their powers appear god-like...\n\n",
+  "Jego moce wyglądają właściwie na boskie...\n\n"
+  )
+
+S(
+  "Rogues will never make moves which result in their immediate death. "
+  "Even when cornered, they are able to instantly teleport back to their "
+  "home world at any moment, taking the treasures forever... but "
+  "at least they will not steal anything further!\n\n",
+  
+  "Cwaniacy nigdy nie robią ruchów, po których by zostali od razu zabici. "
+  "Nawet gdy się ich otoczy, są zdolni natychmiast teleportować się "
+  "i wrócić do świata, skąd pochodzą, zabierając skarby na zawsze... "
+  "ale przynajmniej nie ukradną już nic więcej!\n\n")
+
+S(
+  "Despite this intelligence, Rogues appear extremely surprised "
+  "by the most basic facts about geometry. They must come from "
+  "some really strange world.\n\n",
+  
+  "Mimo ich inteligencji Cwaniacy wyglądają na szalenie zdziwionych "
+  "nawet najprostszymi faktami geometrycznymi. Muszą pochodzić z jakiegoś "
+  "bardzo dziwnego świata.")  
+
+S("change the alpha parameter to show the lines",
+  "zmień parametr alfa by linie były widoczne")
+
+S("triangle grid: not rings", "trójkątna siatka: nie pierścienie")
+S("triangle grid: rings", "trójkątna siatka: pierścienie")
+S("heptagonal grid", "siatka siedmiokątna")
+S("rhombic tesselation", "posadzka rombowa")
+S("triheptagonal tesselation", "posadzka trójkątno-siedmiokątna")
+S("normal tesselation", "zwykła posadzka")
+S("big triangular grid", "duża siatka trójkątna")
+S("underlying tree", "drzewo bazowe")
+S("circle/horocycle tree", "drzewo bazowe dla kół/horocykli")
+S("zebra triangles", "zebra: trójkąty")
+S("zebra lines", "zebra: linie")
+S("vineyard pattern", "wzór winnicy")
+S("firewall lines", "linie ścian ognia")
+S("firewall lines: Palace", "linie ścian ognia: Pałac")
+S("firewall lines: Power", "linie ścian ognia: Moc")
+
+S("(ESC) tour menu", "(ESC) menu ucznia")
+S("Try the Tutorial to help with understanding the "
+  "geometry of HyperRogue (menu -> special modes).\n\n",
+  "Uruchom Podręcznik, by zrozumieć geometrię HyperRogue (menu -> tryby specjalne.\n\n")
+
+S("Tutorial", "Podręcznik")
+S("spherical geometry", "geometria sferyczna")
+S("Euclidean geometry", "geometria euklidesowa")
+S("more curved hyperbolic geometry", "większa krzywizna")
+S("teleport away", "uciekaj stąd (teleport)")
+S("Shift-click a location to teleport there.", "Shift-kliknij pole, by tam się teleportować.")
+S("Click a location to teleport there.", "Kliknij pole, by tam się teleportować.")
+
+S("move through walls", "przechodź przez ściany")
+S("flash", "błysk")
+S("static mode", "tryb statyczny")
+S("Static mode enabled.", "Tryb statyczny włączony.")
+S("Static mode disabled.", "Tryb statyczny wyłączony.")
+S("enable/disable texts", "włącz/wyłącz teksty")
+S("Help texts disabled.", "Teksty pomocy wyłączone.")
+S("next slide", "kolejny slajd")
+S("previous slide", "poprzedni slajd")
+
+S("This tutorial is different than most other game tutorials -- "
+  "you are not forced to do anything, and you can go wherever you want.\n\n"
+  "However, %the1 is not what we are talking about now. "
+  "We will not explain this land at the moment, and you could ponentially "
+  "get lost there.\n\n"
+  "Remember that you can get to the next slide by pressing Enter.",
+  
+  "Ten podręcznik jest inny niż większość innych -- "
+  "nie masz obowiązku robić tego co tutorial chce, możesz iść dokąd chcesz.\n\n"
+  "Ale %1 nie jest miejscem, o którym teraz mówimy. Nie wyjaśnimy go, "
+  "i potencjalnie możesz się zgubić.\n\n"
+  "Naciśnij Enter by przejść do kolejnego slajdu.")
+
+S("Introduction", "Wstęp")
+S("Welcome to the HyperRogue tutorial!", "Witaj w podręczniku HyperRogue!")
+S(
+  "This tutorial is mostly aimed to show what is "
+  "special about the geometry used by HyperRogue. "
+  "It also shows the basics of gameplay, and "
+  "how is it affected by geometry.\n\n"
+  "You decide when you want to stop playing with the "
+  "current \"slide\" and go to the next one, by pressing Enter. You can also "
+  "press ESC to see a "
+  "menu with other options.",
+  
+  "Zadaniem tego podręcznika jest pokazanie szczególnych własności "
+  "geometrii używanej przez HyperRogue; są też pokazane podstawy "
+  "rozgrywki, i jak geometria na nie wpływa.\n\n"
+  "Ty decydujesz, kiedy chcesz skończyć bawić się obecnym \"slajdem\" "
+  "i przejść do kolejnego, naciskając Enter. Naciśnij ESC by zobaczyć "
+  "pozostałe opcje.")
+
+S("Basics of gameplay", "Podstawy rozgrywki")
+S("gain Ice Diamonds", "daj Lodowe Diamenty")
+S("The game starts in the Icy Lands. Collect the Ice Diamonds "
+  "(press F1 if you do not know how to move). "
+  "After you collect many of them, monsters will start to pose a challenge.\n"
+  "As is typical in roguelikes and other games based on tactical skill rather "
+  "than story, if you lose, you have to start a new one from the start. "
+  "However, in this tutorial, you can simply press '4' "
+  "to teleport away from a bad situation."
+  "In general, the tutorial is rigged to show you what it "
+  "wants -- for example, in this slide, you can press '5' to get "
+  "lots of Ice Diamonds quickly.",
+  "Gra rozpoczyna się w Lodowej Krainie. Zbieraj Lodowe Diamenty "
+  "(naciśnij F1 jeśli nie wiesz jak się ruszać). "
+  "Po zebraniu wielu Diamentów ataki potworów staną się "
+  "wyzwaniem. Zgodnie z konwencjami gier roguelike, "
+  "jeśli przegrasz, zaczynasz od początku; "
+  "w tym podręczniku jednak wystarczy nacisnąć '4', "
+  "by uciec ze złej sytuacji. Podręcznik jest "
+  "podkręcony tak, by pokazać to co chce -- "
+  "na przykład tutaj możesz nacisnąć '5' by "
+  "zdobyć szybko dużo diamentów.")
+
+S("Hypersian Rug model", "Model Hiperskiego Dywanu")
+S(
+  "New players think that the action of HyperRogue takes place on a sphere. "
+#ifdef MOBWEB
+  "This is not true -- the Tutorial in the native desktop version shows "
+  "the surface HyperRogue actually takes place on.",
+#else
+  "This is not true -- the next slide will show the surface HyperRogue "
+  "actually takes place on.\n\n"
+  "Use arrow keys to rotate the model, and Page Up/Down to zoom.\n\n"
+  "If you do not see anything, press '5' to try a safer renderer.",
+#endif
+  
+
+  "Nowi gracze myślą, że akcja HyperRogue toczy się na sferze. "
+#ifdef MOBWEB
+  "To nieprawda -- Podręcznik w komputerowej wersji wykonywalnej "
+  "pokazuje powierzchnię, na której w rzeczywistości toczy się rozgrywka."
+#else
+  "To nieprawda -- kolejny slajd pokazuje powierzchnię, "
+  "na której toczy się gra. "
+  "Obracaj modelem strzałkami, Page Up/Down by skalować.\n\n"
+  "Jeśli nic nie widzisz, naciśnij '5' dla bezpieczniejszego renderera."
+#endif
+  )
+
+S("Expansion", "Ekspansja")
+S(
+  "The next slide shows the number of cells in distance 1, 2, 3, ... from you. "
+  "It grows exponentially: there are more than 10^100 cells "
+  "in radius 1000 around you, and you will move further away during the game!\n\n"
+  "This is extremely important in the design of HyperRogue. "
+  "HyperRogue has many navigational puzzles -- what would be simple in Euclidean world "
+  "is extremely tricky "
+  "in hyperbolic geometry (you want to reach a specific location 20 cells away, "
+  "which of the thousands of possible directions should you take?); however, other things virtually impossible in Euclidean "
+  "world become easy in HyperRogue. "
+  "HyperRogue had to be specially designed so that it is impossible to grind the "
+  "infinite world. There are almost no permanent upgrades; collecting treasures "
+  "brings you benefits, but trying to get too many of the same kind is extremely dangerous.",
+  
+  "Kolejny slajd pokazuje liczbę pól w odległości 1, 2, 3, ... od Ciebie. "
+  "Rośnie ona wykładniczo: jest ponad 10^100 pól w promieniu 1000 od Ciebie, "
+  "i w trakcie gry będziesz odchodzić dalej!\n\n"
+  "Jest to bardzo ważne dla designu HyperRogue. Są tu zagadki nawigacyjne -- "
+  "coś co by było proste w świecie euklidesowej wymaga przemyślenia "
+  "w geometrii hiperbolicznej (chcesz dostać się do miejsca 20 pól od Ciebie, "
+  "który z tysiąca możliwych kierunków wybrać?); z kolei inne rzeczy stają się "
+  "tu łatwe. Gra HyperRogue jest zaprojektowana tak, by nie dało się "
+  "'grindować' nieskończonego świata -- prawie nie ma permanentnych ulepszeń, "
+  "zbieranie skarbów przynosi pożytki, ale zdobycie wielu jednego rodzaju "
+  "jest skrajnie niebezpieczne.")
+
+S("Tiling and Tactics", "Posadzka i taktyka")
+S(
+  "The tactics of fighting simple monsters, such as the Yetis from the Icy Lands, "
+  "might appear shallow, but hyperbolic geometry is essential even there. "
+  "In the next slide, you are attacked by two monsters at once. "
+  "You can make them line up simply by "
+  "running away in a straight line. "
+  "Press '2' to try the same in the Euclidean world -- it is impossible.",
+  "Taktyka walki z prostymi potworami, jak Yeti z Krainy Lodu, może się "
+  "wydawać płytka, ale geometria hiperboliczna jest istotna nawet tu. "
+  "W następnym slajdzie atakują Cię 2 potwory naraz. Możesz uciec po prostu "
+  "odchodząc od nich w linii prostej. Naciśnij '2', by spróbować tego "
+  "w świecie euklidesowym -- jest to niemożliwe.")
+
+S("Straight Lines", "Linie proste")
+S("Hyperbolic geometry has been discovered by the 19th century mathematicians who "
+  "wondered about the nature of paralellness. Take a line L and a point A. "
+  "Can a world exist where there is more than one line passing through A "
+  "which does not cross L?\n\n"
+  "The Icy Land will be very dangerous if you have lots of Ice Diamonds -- "
+  "lots of Yetis and Ice Wolves hunting you! But the other lands, where "
+  "you have no treasures yet, will still be (relatively) safe.\n\n"
+  "Wander further, and you should find Crossroads quickly -- "
+  "the Great Walls are straight lines, and indeed, they work differently than in "
+  "Euclidean. On the other side of Great Walls, you see other lands -- "
+  "there are about 50 lands in HyperRogue, based "
+  "on different mechanics and aspects of hyperbolic geometry.",
+  
+  "Geometria hiperboliczna została odkryta przez dziewiętnastowiecznych matematyków "
+  "zainteresowanych naturą równoległości. Weź linię prostą L i punkt A. Czy może "
+  "istnieć świat, w którym jest więcej niż jedna linia prosta przechodząca przez A, "
+  "ale nie przecinająca L?\n\n"
+  "Kraina Lodu jest bardzo niebezpieczna, gdy masz mnóstwo Diamentów. "
+  "Ale inne krainy, w których jeszcze nie masz skarbów, są w miarę bezpieczne.\n\n"
+  "Zwiedzaj dalej, a szybko znajdziesz Skrzyżowanie -- jego ściany są "
+  "liniami prostymi, i działają inaczej niż w geometrii euklidesowej. "
+  "Po drugiej stronie Wielkich Ścian widzisz inne krainy -- jest ich około 50, "
+  "opartych na róznych aspektach geometrii hiperbolicznej.")
+
+S("Running Dogs", "Biegnące Psy")
+S(
+  "To learn more about straight lines, "
+  "wander further, and you should find the Land of Eternal Motion. "
+  "Try to run in a straight line, with a Running Dog next to you. "
+  "Even though the Running Dog runs at the same speed as you, "
+  "it will appear to go slower -- this is because you are running "
+  "in a straight line, and the Running Dog has to run in a curve "
+  "called an equidistant.\n\n"
+#ifdef MAC
+ "Remember that you can click with right Shift on anything to get more information.",
+#else
+  "Remember that you can right click on anything to get more information.",
+#endif
+  "By dowiedzieć się więcej o liniach prostych, "
+  "podróżuj dalej, aż znajdziesz Krainę Wiecznego Ruchu. "
+  "Biegnij w linii prostej z Psem biegnącym obok. "
+  "Mimo że Pies biegnie z tą samą prędkością, nie będzie "
+  "w stanie Cię dogonić -- ponieważ Ty ruszasz się w linii prostej, "
+  "a Pies biegnie po krzywej zwanej ekwidystantą.\n\n"
+#ifdef MAC
+ "Pamiętaj, że możesz klikać z prawym Shiftem na różnych elementach gry, by dowiedzieć się o nich więcej."
+#else
+ "Pamiętaj, że możesz klikać prawym przyciskiem na różnych elementach gry, by dowiedzieć się o nich więcej."
+#endif
+  )
+
+S("Equidistants", "Ekwidystanty")
+S(
+  "Equidistants are curves which are at some fixed distance from a "
+  "straight line. Some lands in HyperRogue are based on equidistants; "
+  "you should see them after wandering a bit more.\n\n"
+  "This tutorial gives you freedom to go wherever you choose, "
+  "but we do not recommend going deep into the Dungeon or the Ocean -- "
+  "getting back might be difficult.",
+  
+  "Ekwidystanty to krzywe w stałej odległości od linii prostej. "
+  "Niektóre krainy w grze są oparte na ekwidystantach; "
+  "po krótkiej podróży je zobaczysz.\n\n"
+  "Ten podręcznik pozwala Ci się ruszać dokąd chcesz, "
+  "ale nie polecamy zagłębiać się w Lochy ani w Ocean -- "
+  "powrót może być trudny.")
+
+S("Circles", "Koła")
+S(
+  "Circles are strange in hyperbolic geometry too. "
+  "Look for the Castle of Camelot in the Crossroads; "
+  "the Round Table inside is a circle of radius 28. "
+  "Finding its center is a difficult challenge.\n\n"
+  "Press '5' to cheat by seeing the smaller circles too.\n\n"
+  "Note: Camelot and some other lands are unlocked earlier in the Tutorial than in a real game.",
+
+  "Koła również są dziwne w geometrii hiperbolicznej. "
+  "Szukaj zamku Camelot na Skrzyżowaniu; Okrągły Stół "
+  "jest kołem o promieniu 28. Znalezienie jego środka "
+  "to trudne wyzwanie.\n\n"
+  "Naciśnij '5' by oszukać -- zobaczyć mniejsze okręgi.\n\n"
+  "Uwaga: Camelot i niektóre inne krainy w tym podręczniku są pokazywane wcześniej "
+  "niż w normalnej grze.")
+
+S("Horocycles", "Horocykle")
+S("Horocycles are similar to circles, but you cannot reach their center at all -- "
+  "they can be understood as limit circles of infinite radius centered in some point "
+  "in infinity (also called an ideal point).\n\n"
+  "Go to R'Lyeh, and you should quickly find a Temple of Cthulhu there. "
+  "Each circle of columns is actually a horocycle. Horocycles in a given "
+  "temple are concentric, and there is an infinite number of them.",
+
+  "Horocykle są podobne do okręgów, ale nie możesz dotrzeć do ich środka -- "
+  "są to graniczne okręgi o nieskończonym promieniu, których środek jest w nieskończoności "
+  "(takie punkty nazywamy punktami idealnymi).\n\n"
+  "Idź do R'Lyeh, i szybko znajdziesz Świątynię Cthulhu.  Każdy krąg kolumn "
+  "jest horocyklem. Horocykle w danej świątyni są współśrodkowe, i jest ich "
+  "nieskończenie wiele.")
+
+S("Half-plane model", "Model półpłaszczyzny")
+S("The game is normally displayed in the so called Poincaré disk model, "
+  "which is a kind of a map of the infinite hyperbolic world. "
+  "There are many projections of Earth, but since Earth is curved, "
+  "all of them have to distort distances or angles in some way -- "
+  "the same is true in hyperbolic geometry. "
+  "The next slide shows another model, called the Poincaré upper half-plane model. In this model, "
+  "horocycles centered at one specific ideal point are drawn as straight lines.",
+  
+  "Gra jest normalnie w tak zwanym modelu Poincaré, rodzaju mapy nieskończonego "
+  "hiperbolicznego świata. Istnieje wiele rodzajów rzutu Ziemi, ale "
+  "ze względu na jej krzywiznę, każdy z nich przekłamuje odległości czy kąty "
+  "w jakiś sposób -- to samo dzieje się w geometrii hiperbolicznej. "
+  "Następny slajd pokazuje inny model, model półpłaszczyzny. "
+  "W tym modelu horocykle o środku w danym punkcie idealnym wyglądają jak linie "
+  "poziome.")
+
+S("Curvature", "Krzywizna")
+S("gain Orb of the Sword", "zdobądź Sferę Ostrza")
+S(
+  "Now, go to the Burial Grounds and find an Orb of the Sword. The Sword appears to "
+  "always be facing in the same direction whatever you do, and it appears that "
+  "you have to rotate the sword to excavate the treasures; "
+  "yet, it is possible to excavate them! You migth have already noticed "
+  "that the world rotates after you move around a loop and return to an old "
+  "place.\n\n"
+  "This is related to the fact that the world of HyperRogue is curved, and "
+  "the sum of angles in a triangle is not equal to 180 degrees.",
+
+  "Teraz idź do Kurhanów i znajdź Sferę Ostrza. Ostrze wygląda jakby zawsze było "
+  "skierowane w tą samą stronę, a wydaje się, że do wykopania skarbów trzeba "
+  "je obrócić. Jednak wykopanie skarbów jest możliwe! Być może już zauważy%łeś0, "
+  "że świat się obraca, gdy zrobisz pętlę.\n\n"
+  "Jest to związane z zakrzywieniem świata HyperRogue, i tym, że suma kątów "
+  "trójkąta nie jest równa 180 stopni.")
+
+S("Periodic patterns", "Wzory okresowe")
+S("Hyperbolic geometry yields much more interesting periodic patterns "
+  "than Euclidean.",
+  "W geometrii hiperbolicznej są dużo bardziej ciekawe regularne wzory "
+  "niż w euklidesowej.")
+
+S("Periodic patterns: application", "Zastosowanie wzorów okresowych")
+S("Many lands in HyperRogue are based around periodic patterns. "
+  "For example, both Zebra and Windy Plains are based on the pattern "
+  "shown in the previous slide. "
+  "Such lands often have tree-like nature.",
+  "Wiele krain jest opartych na okresowych wzorach. Na przykład Zebra "
+  "i Wietrzna Równina są obie oparte na wzorze z poprzedniego slajdu. "
+  "Krainy takie mają zwykle drzewiastą strukturę.")
+
+S("Fractal landscapes", "Fraktalne krajobrazy")
+S("On the following slide, the colors change smoothly in the whole infinite world. "
+  "Again, this works better than in Euclidean geometry.",
+  "Na kolejnym slajdzie kolory się płynnie zmieniają w nieskończonym świecie. "
+  "To również działa lepiej niż w geometrii euklidesowej.")
+
+S("Fractal landscapes: application", "Zastosowanie fraktalnych krajobrazów")
+S("create a baby tortoise", "stwórz żółwika")
+S(
+  "This is applied in HyperRogue to create landscapes, such as the chasms in the "
+  "land of Reptiles or the Dragon Chasms, which you should find quickly. "
+  "Also in the Dragon Chasms, you can find a Baby Tortoise, and try to find "
+  "a matching adult tortoise in the Galápagos. "
+  "There are over two millions of species, but since there is so much space in "
+  "hyperbolic geometry, finding a matching tortoise is possible. The brighter "
+  "the color in Galápagos is, the more aspects of the tortoises in the given "
+  "area are matching.",
+  
+  "Jest to używane w grze do stworzenia krajobrazów, jak przepaści w "
+  "Jaszczurkach lub Smoczych Otchłaniach, które niedł↓go znajdziesz. "
+  "W Smoczych Otchłaniach możesz znaleźć Żółwika, i poszukać "
+  "pasującego dorosłego żółwia w Galápagos. Jest ponad 2 miliony gatunków, "
+  "ale ze względu na ilość miejsca w geometrii hiperbolicznej, znalezienie "
+  "pasującego żółwia jest możliwe. Im jaśniejszy kolor w Galápagos, tym "
+  "więcej aspektów żółwika pasuje do żółwii z danego terenu.")
+
+S("Poincaré Ball model", "Model kuli")
+S(
+    "The Poincaré disk model is a model of a hyperbolic *plane* -- you "
+    "might wonder why are the walls rendered in 3D then.\n\n"
+    "HyperRogue actually assumes that the floor level is an equidistant surface "
+    "in a three-dimensional hyperbolic world, and the camera is placed above the "
+    "plane that the surface is equidistant to (which boils down to showing "
+    "the floor level in Poincaré disk model).\n\n"
+    "This is shown on the next slide, in the Poincaré ball model, which is "
+    "the 3D analog of the Poincaré disk model.",
+    
+  "Model dysku Poincaré to model *płaszczyny* hiperbolicznej -- "
+  "być może się zastanawiasz, jak w takim razie rozumieć ściany w 3D.\n\n"
+  "HyperRogue zakłada, że powierzchnia podłogi to powierzchnia ekswidystantna "
+  "w trójwymiarowym hiperbolicznym świecie, a kamera znajduje się nad powierzchnią, "
+  "do której podłoga jest ekwidystantna -- co powoduje, że podłoga wygląda "
+  "dokładnie jak w modelu Poincaré.\n\n"
+  "Pokazuje to kolejny slajd, w modelu kuli, trójwymiarowym odpowiedniku modelu dysku.")
+
+S("Hyperboloid model", "Model hiperboloidy")
+S(
+    "Let's see more models of the hyperbolic plane. "
+    "This model uses a hyperboloid in the Minkowski geometry; "
+    "it is used internally by HyperRogue.",
+    
+    "Pokażemy teraz więcej modeli. To jest hiperboloida w geometrii Minkowskiego; "
+    "HyperRogue wewnętrznie używa tego modelu.")
+
+S("Beltrami-Klein model", "Model Beltramiego-Kleina")
+S(
+    "This model renders straight lines as straight, but it distorts angles.",
+    "Ten model pokazuje linie proste jako proste, ale przekłamuje kąty.")
+
+S("Gans model", "Model Gansa")
+S(
+  "Yet another model, which corresponds to orthographic projection of the "
+  "sphere. Poincaré disk model, Beltrami-Klein model, and the Gans "
+  "model are all obtained by looking at either the hyperboloid model or an "
+  "equidistant surface from various distances.",
+  "Kolejny model, odpowiadający ortograficznemu rzutowi sfery. Model dysku, "
+  "Kleina i Gansa powstają przez patrzenie na model hiperboloidy lub "
+  "powierzchnię ekwidystantną z różnych odległości.")
+
+S("Band model", "Model wstęgi")
+S("render spiral", "rysuj spiralę")
+S(
+  "The band model is the hyperbolic analog of the Mercator projection of the sphere: "
+  "a given straight line is rendered as a straight line, and the rest of the "
+  "world is mapped conformally, that is, angles are not distorted. "
+  "Here, we take the straight line connecting your starting point and your "
+  "current position -- usually the path taken by the player is surprisingly "
+  "close to a straight line. Press '8' to see this path.\n\n"
+  "If you want, press '5' to see it rendered as a spiral, although it takes lots of time and "
+  "memory.",
+  "Model wstęgi to hiperboliczny analog rzutu Mercatora: "
+  "pewna linia prosta jest rysowana jaka linia prosta, a reszta świata jest "
+  "odwzorowana konforemnie, tzn. kąty nie są przekłamywane. "
+  "Tutaj jako centralną linię prostą bierzemy linię łączącą punkt początkowy i "
+  "Twoją obecną pozycję -- zazwyczaj droga wybrana przez gracza jest "
+  "niespodzianie zbliżona do linii prostej. Naciśnij '8', by zobaczyć ścieżkę.\n\n"
+  "Możesz też nacisnąć '5' by zobaczyć to w postaci spirali, ale wymaga to "
+  "bardzo dużo czasu i pamięci.")
+
+S("Conformal square model", "Konforemny kwadrat")
+S("The world can be mapped conformally to a square too.",
+  "Świat można też konforemnie odwzorować na kwadrat.")
+
+S("Shoot'em up mode", "Tryb strzelanki")
+S("In the shoot'em up mode, space and time is continuous. "
+  "You attack by throwing knives. "
+  "Very fun with two players!\n\n"
+  "There are other special modes too which change the gameplay or "
+  "focus on a particular challenge.",
+  "W trybie strzelanki czas i przestrzeń są ciągłe. Atakujesz "
+  "rzucając nożami. Bardzo fajne na dwóch graczy!\n\n"
+  "Jest wiele trybów specjalnych, zmieniających rozgrywkę lub "
+  "koncentrujących się na konkretnym wyzwaniu.")
+
+S("THE END", "KONIEC")
+S("leave the Tutorial", "opuść Podręcznik")
+S(
+  "This tour shows just a small part of what you can see in the world of HyperRogue. "
+  "For example, "
+  "hyperbolic mazes are much nicer than their Euclidean counterparts. "
+  "Have fun exploring!\n\n"
+  "Press '5' to leave the tutorial mode.",
+
+  "Ten podręcznik pokazuje tylko małą część świata HyperRogue. Na przykład "
+  "hiperboliczne labirynty są ciekawsze niż euklidesowe. Miłej zabawy!"
+  "Naciśnij '5' by opuścić podręcznik."
+  )
 
 #undef Orb
 

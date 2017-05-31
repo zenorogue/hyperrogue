@@ -5087,5 +5087,496 @@ S("A land for people wanting to experiment with cellular automata in the HyperRo
         "NEW_ACHIEVEMENT_8_18_DESC" "Победите Земляного червя в фактор-геометрии зебры."
 */
 
+N("Tortoise", GEN_F, "Черепаха", "Черепахи", "Черепаху", "Черепахой")
+S("line patterns", "шаблоны линий")
+S("1 turn", "1 ход")
+S("%1 turns", "ходов: %1")
+S("items/kills mode", "режим предметов/убийств")
+S("images", "изображения")
+S("letters", "буквы")
+S("input", "ввод")
+S("default", "по умолчанию")
+S("config", "настройки")
+S("expansion", "расширение")
+ 
+S("continue", "продолжить")
+S("main menu", "главное меню")
+S("restart", "новая игра")
+S("quit", "выход")
+S("exit menu", "выйти из меню")
+ 
+S(
+  "A tourist from another world. They mutter something about the 'tutorial', "
+  "and claim that they are here just to learn, and to leave without any treasures. "
+  "Do not kill them!",
+ 
+  "Турист из другого мира. Они бормочут что-то про 'руководство', и "
+  "говорят, что хотят научить, а не забрать сокровища. Не убивай их!")
+ 
+S(
+  "This monster has come from another world, presumably to steal our treasures. "
+  "Not as fast as an Eagle, not as resilient as the guards from the Palace, "
+  "and not as huge as the Mutant Ivy from the Clearing; however, "
+  "they are very dangerous because of their intelligence, "
+  "and access to magical powers.\n\n",
+ 
+  "Этот монстр прибыл из другого мира, видимо, чтобы украсть наши сокровища. "
+  "Не такой быстрый, как орёл, не такой живучий, как стражники из Дворца, "
+  "не такой живучий, как плющ-мутант с Поляны; однако они "
+  "опасны из-за их интеллекта и доступа к магическим силам.\n\n"
+  )
+ 
+S(
+  "Actually, their powers appear god-like...\n\n",
+  "Его силы кажутся богоподобными...\n\n"
+  )
+ 
+S(
+  "Rogues will never make moves which result in their immediate death. "
+  "Even when cornered, they are able to instantly teleport back to their "
+  "home world at any moment, taking the treasures forever... but "
+  "at least they will not steal anything further!\n\n",
+ 
+  "Разбойник никогда не сделает ход, ведущий к его смерти. "
+  "Когда они окружены, они могут мгновенно телепортироваться обратно "
+  "в их родной мир, забирая все сокровища... но хотя бы "
+  "не украдут ничего в будущем!\n\n")
+ 
+S(
+  "Despite this intelligence, Rogues appear extremely surprised "
+  "by the most basic facts about geometry. They must come from "
+  "some really strange world.\n\n",
+ 
+  "Несмотря на их интеллект, Разбойники весьма удивлены "
+  "простейшими фактами из геометрии. Наверное, они пришли "
+  "из очень странного мира\n\n.")  
+ 
+S("change the alpha parameter to show the lines",
+  "измените параметр альфа, чтобы увидеть эти линии")
+ 
+S("triangle grid: not rings", "треугольная сетка: нет колец")
+S("triangle grid: rings", "треугольная сетка: кольца")
+S("heptagonal grid", "семиугольная сетка")
+S("rhombic tesselation", "замощение ромбами")
+S("triheptagonal tesselation", "замощение треугольниками и семиугольниками")
+S("normal tesselation", "обычное замощение")
+S("big triangular grid", "большая треугольная сетка")
+S("underlying tree", "основное дерево")
+S("circle/horocycle tree", "основное дерево для окружностей/орициклов")
+S("zebra triangles", "зебра: треугольники")
+S("zebra lines", "зебра: линии")
+S("vineyard pattern", "узор виноградника")
+S("firewall lines", "стены огня")
+S("firewall lines: Palace", "стены огня: Дворец")
+S("firewall lines: Power", "стены огня: Сила")
+ 
+S("(ESC) tour menu", "(ESC) меню обучения")
+S("Try the Tutorial to help with understanding the "
+  "geometry of HyperRogue (menu -> special modes).\n\n",
+  "Попробуйте Руководство, чтобы понять геометрию HyperRogue (меню -> специальные режимы.\n\n")
+ 
+S("Tutorial", "Руководство")
+S("spherical geometry", "сферическая геометрия")
+S("Euclidean geometry", "евклидова геометрия")
+S("more curved hyperbolic geometry", "более искривлённая геометрия")
+S("teleport away", "телепортироваться отсюда")
+S("Shift-click a location to teleport there.", "Shift-клик на поле, чтобы телепортироваться туда.")
+S("Click a location to teleport there.", "Кликни на поле, чтобы телепортироваться туда.")
+ 
+S("move through walls", "проходить сквозь стены")
+S("flash", "вспышка")
+S("static mode", "статичный режим")
+S("Static mode enabled.", "Статичный режим включен.")
+S("Static mode disabled.", "Статичный режим выключен.")
+S("enable/disable texts", "включить/выключить тексты")
+S("Help texts disabled.", "Тексты помощи выключены.")
+S("next slide", "следующий слайд")
+S("previous slide", "предыдущий слайд")
+ 
+S("This tutorial is different than most other game tutorials -- "
+  "you are not forced to do anything, and you can go wherever you want.\n\n"
+  "However, %the1 is not what we are talking about now. "
+  "We will not explain this land at the moment, and you could ponentially "
+  "get lost there.\n\n"
+  "Remember that you can get to the next slide by pressing Enter.",
+ 
+  "Это руководство отличается от большинства других -- "
+  "ты не обязан ничего делать, иди куда хочешь.\n\n"
+  "Однако %1 -- не то, о чём мы сейчас говорим. Мы не будем сейчас "
+  "объяснять эту землю, и ты можешь заблудиться в ней.\n\n"
+  "Нажми Enter, чтобы перейти на следующий слайд.")
+ 
+S("Introduction", "Введение")
+S("Welcome to the HyperRogue tutorial!", "Добро пожаловать в руководство HyperRogue!")
+S(
+  "This tutorial is mostly aimed to show what is "
+  "special about the geometry used by HyperRogue. "
+  "It also shows the basics of gameplay, and "
+  "how is it affected by geometry.\n\n"
+  "You decide when you want to stop playing with the "
+  "current \"slide\" and go to the next one, by pressing Enter. You can also "
+  "press ESC to see a "
+  "menu with other options.",
+ 
+  "Главная цель этого руководства -- показать особенности геометрии "
+  "в HyperRogue. Также здесь объясняются основы игры, и как геометрия "
+  "на них влияет.\n\n"
+  "Ты можешь перейти на следующий \"слайд\", "
+  "нажав Enter. Нажми ESC, чтобы открыть меню с другими опциями.")
+ 
+S("Basics of gameplay", "Начала игры")
+S("gain Ice Diamonds", "собери Ледяные алмазы")
+S("The game starts in the Icy Lands. Collect the Ice Diamonds "
+  "(press F1 if you do not know how to move). "
+  "After you collect many of them, monsters will start to pose a challenge.\n"
+  "As is typical in roguelikes and other games based on tactical skill rather "
+  "than story, if you lose, you have to start a new one from the start. "
+  "However, in this tutorial, you can simply press '4' "
+  "to teleport away from a bad situation."
+  "In general, the tutorial is rigged to show you what it "
+  "wants -- for example, in this slide, you can press '5' to get "
+  "lots of Ice Diamonds quickly.",
+ 
+  "Игра начинается в Ледяной земле. Собирай Ледяные алмазы "
+  "(нажми F1, если не знаешь, как ходить). "
+  "Когда ты соберёшь много алмазов, монстры начнут "
+  "становиться проблемой. Как и в других играх жанра roguelike, "
+  "после проигрыша ты начнёшь играть с начала; "
+  "но в пределах этого руководства ты можешь нажать '4', "
+  "чтобы телепортироваться из плохой ситуации. Руководство "
+  "устроено так, чтобы показать тебе игру -- "
+  "например, на этом слайде ты можешь нажать '5', чтобы "
+  "получить сразу много алмазов.")
+ 
+S("Hypersian Rug model", "Модель Гиперсидского ковра")
+S(
+  "New players think that the action of HyperRogue takes place on a sphere. "
+#ifdef MOBWEB
+  "This is not true -- the Tutorial in the native desktop version shows "
+  "the surface HyperRogue actually takes place on.",
+#else
+  "This is not true -- the next slide will show the surface HyperRogue "
+  "actually takes place on.\n\n"
+  "Use arrow keys to rotate the model, and Page Up/Down to zoom.\n\n"
+  "If you do not see anything, press '5' to try a safer renderer.",
+#endif
+ 
+  "Новички иногда думают, что действие в HyperRogue происходит на сфере. "
+#ifdef MOBWEB
+  "Это неправда -- Руководство в компьютерной версии покажет тебе "
+  "настоящую поверхность HyperRogue."
+#else
+  "Это неправда -- на следующем слайде показана настоящая поверхность HyperRogue.\n\n"
+  "Используйте стрелки, чтобы поворачивать модель, и Page Up/Down, чтобы менять размер.\n\n"
+  "Если ничего не видно, нажми '5' для безопасного визуализатора."
+#endif
+  )
+ 
+S("Expansion", "Расширение")
+S(
+  "The next slide shows the number of cells in distance 1, 2, 3, ... from you. "
+  "It grows exponentially: there are more than 10^100 cells "
+  "in radius 1000 around you, and you will move further away during the game!\n\n"
+  "This is extremely important in the design of HyperRogue. "
+  "HyperRogue has many navigational puzzles -- what would be simple in Euclidean world "
+  "is extremely tricky "
+  "in hyperbolic geometry (you want to reach a specific location 20 cells away, "
+  "which of the thousands of possible directions should you take?); however, other things virtually impossible in Euclidean "
+  "world become easy in HyperRogue. "
+  "HyperRogue had to be specially designed so that it is impossible to grind the "
+  "infinite world. There are almost no permanent upgrades; collecting treasures "
+  "brings you benefits, but trying to get too many of the same kind is extremely dangerous.",
+ 
+  "Следующий слайд покажет количество клеток на расстоянии 1, 2, 3, ... от тебя. "
+  "Оно растёт экспоненциально: в радиусе 1000 клеток от тебя находится более 10^100 клеток, "
+  "а ты за время игры уйдёшь гораздо дальше!\n\n"
+  "Это очень важно для HyperRogue. Здесь есть много загадок навигации -- "
+  "то, что очень просто в евклидовой геометрии, становится невероятно сложным "
+  "в гиперболической геометрии (ты хочешь попасть в определённую клетку на расстоянии 20 от тебя, "
+  "какое из тысяч направлений выбрать?); однако другие вещи, практически невозможные в евклидовом мире, "
+  "здесь очень просты. Игра HyperRogue сделана так, чтобы было невозможно просто "
+  "захватывать бесконечный мир -- практически нет постоянных улучшений, "
+  "сбор сокровищ даёт преимущества, но собирать много сокровищ одного вида "
+  "весьма опасно.")
+ 
+S("Tiling and Tactics", "Геометрия и тактика")
+S(
+  "The tactics of fighting simple monsters, such as the Yetis from the Icy Lands, "
+  "might appear shallow, but hyperbolic geometry is essential even there. "
+  "In the next slide, you are attacked by two monsters at once. "
+  "You can make them line up simply by "
+  "running away in a straight line. "
+  "Press '2' to try the same in the Euclidean world -- it is impossible.",
+  "Тактика боя с простыми монстрами, такими как Йети из Ледяной земли, может "
+  "показаться обычной, но геометрия важна и здесь. "
+  "На следующем слайде тебя атакуют сразу два монстра. Ты можешь "
+  "справиться с ними, просто отходя по прямой. Нажми '2', чтобы попробовать сделать "
+  "то же самое в евклидовом мире -- ничего не выйдет.")
+ 
+S("Straight Lines", "Прямые линии")
+S("Hyperbolic geometry has been discovered by the 19th century mathematicians who "
+  "wondered about the nature of paralellness. Take a line L and a point A. "
+  "Can a world exist where there is more than one line passing through A "
+  "which does not cross L?\n\n"
+  "The Icy Land will be very dangerous if you have lots of Ice Diamonds -- "
+  "lots of Yetis and Ice Wolves hunting you! But the other lands, where "
+  "you have no treasures yet, will still be (relatively) safe.\n\n"
+  "Wander further, and you should find Crossroads quickly -- "
+  "the Great Walls are straight lines, and indeed, they work differently than in "
+  "Euclidean. On the other side of Great Walls, you see other lands -- "
+  "there are about 50 lands in HyperRogue, based "
+  "on different mechanics and aspects of hyperbolic geometry.",
+ 
+  "Гиперболическая геометрия была открыта в 19 веке математиками, которые интересовались "
+  "природой параллельности. Возьмём прямую L и точку A. Может ли существовать "
+  "мир, в котором есть более чем одна прямая, проходящая через A "
+  "и не пересекающая L?\n\n"
+  "Ледяная земля становится очень опасной, когда у тебя много Ледяных алмазов -- "
+  "много Йети и Ледяных волков охотятся на тебя! "
+  "Но другие земли, где у тебя нет сокровищ, всё ещё (относительно) безопасны.\n\n"
+  "Исследуй дальше, и ты скоро найдёшь Перекрёсток -- Великие стены являются "
+  "прямыми, и они ведут себя не так, как в евклидовой геометрии. "
+  "По другую сторону от Великих стен ты видишь другие земли -- их около 50, "
+  "основанных на разных особенностях гиперболической геометрии.")
+ 
+S("Running Dogs", "Бегущие собаки")
+S(
+  "To learn more about straight lines, "
+  "wander further, and you should find the Land of Eternal Motion. "
+  "Try to run in a straight line, with a Running Dog next to you. "
+  "Even though the Running Dog runs at the same speed as you, "
+  "it will appear to go slower -- this is because you are running "
+  "in a straight line, and the Running Dog has to run in a curve "
+  "called an equidistant.\n\n"
+#ifdef MAC
+ "Remember that you can click with right Shift on anything to get more information.",
+#else
+  "Remember that you can right click on anything to get more information.",
+#endif
+  "Чтобы узнать больше о прямых линиях, "
+  "найди Землю вечного движения. "
+  "Попробуй двигаться по прямой вместе с собакой, бегущей рядом. "
+  "Хотя вы бежите с равной скоростью, она будет "
+  "отставать -- дело в том, что ты бежишь по прямой, "
+  "а собака -- по кривой, называемой эквидистантой.\n\n")
+ 
+S("Equidistants", "Эквидистанты")
+S(
+  "Equidistants are curves which are at some fixed distance from a "
+  "straight line. Some lands in HyperRogue are based on equidistants; "
+  "you should see them after wandering a bit more.\n\n"
+  "This tutorial gives you freedom to go wherever you choose, "
+  "but we do not recommend going deep into the Dungeon or the Ocean -- "
+  "getting back might be difficult.",
+ 
+  "Эквидистантой называется кривая, состоящая из точек на фиксированном расстоянии от прямой. "
+  "Некоторые земли основаны на эквидистантах; "
+  "ты увидишь их через некоторое время.\n\n"
+  "Это руководство позволяет идти куда угодно, "
+  "но мы не рекомендуем забираться глубоко в Подземелье или Океан -- "
+  "возвращение может оказаться трудным.")
+ 
+S("Circles", "Окружности")
+S(
+  "Circles are strange in hyperbolic geometry too. "
+  "Look for the Castle of Camelot in the Crossroads; "
+  "the Round Table inside is a circle of radius 28. "
+  "Finding its center is a difficult challenge.\n\n"
+  "Press '5' to cheat by seeing the smaller circles too.\n\n"
+  "Note: Camelot and some other lands are unlocked earlier in the Tutorial than in a real game.",
+ 
+  "Окружности в гиперболической геометрии тоже странные. "
+  "Найдите замок Камелот на Перекрёстке; Круглый стол внутри него "
+  "является кругом радиуса 28. Найти его центр -- "
+  "трудная задача.\n\n"
+  "Нажмите '5' чтобы получить подсказку -- увидеть меньшие круги.\n\n"
+  "Внимание: Камелот и некоторые другие земли открываются в Руководстве раньше, "
+  "чем в обычной игре.")
+ 
+S("Horocycles", "Орициклы")
+S("Horocycles are similar to circles, but you cannot reach their center at all -- "
+  "they can be understood as limit circles of infinite radius centered in some point "
+  "in infinity (also called an ideal point).\n\n"
+  "Go to R'Lyeh, and you should quickly find a Temple of Cthulhu there. "
+  "Each circle of columns is actually a horocycle. Horocycles in a given "
+  "temple are concentric, and there is an infinite number of them.",
+ 
+  "Орициклы похожи на круги, но достичь их центра невозможно -- "
+  "их можно понимать как предельные круги бесконечного радиуса с центром "
+  "в точке на бесконечности (такие точки называются идеальными).\n\n"
+  "Иди в Р'Льех и найди Храм Ктулху. Каждый круг колонн "
+  "на самом деле орицикл. Орициклы в храме концентричны, и их число бесконечно.")
+ 
+S("Half-plane model", "Модель полуплоскости")
+S("The game is normally displayed in the so called Poincaré disk model, "
+  "which is a kind of a map of the infinite hyperbolic world. "
+  "There are many projections of Earth, but since Earth is curved, "
+  "all of them have to distort distances or angles in some way -- "
+  "the same is true in hyperbolic geometry. "
+  "The next slide shows another model, called the Poincaré upper half-plane model. In this model, "
+  "horocycles centered at one specific ideal point are drawn as straight lines.",
+ 
+  "Обычно игра отображается в так называемой модели Пуанкаре в диске, карте "
+  "бесконечного гиперболического мира. Есть много проекций Земли, "
+  "но, так как она искривлённая, все они искажают расстояния или углы "
+  "каким-то образом -- то же самое верно и здесь. "
+  "Следующий слайд изображает другую модель, называемую моделью верхней полуплоскости. "
+  "В этой модели орициклы с центром в одной определённой идеальной точке изображаются "
+  "прямыми линиями.")
+ 
+S("Curvature", "Кривизна")
+S("gain Orb of the Sword", "получи Сферу меча")
+S(
+  "Now, go to the Burial Grounds and find an Orb of the Sword. The Sword appears to "
+  "always be facing in the same direction whatever you do, and it appears that "
+  "you have to rotate the sword to excavate the treasures; "
+  "yet, it is possible to excavate them! You migth have already noticed "
+  "that the world rotates after you move around a loop and return to an old "
+  "place.\n\n"
+  "This is related to the fact that the world of HyperRogue is curved, and "
+  "the sum of angles in a triangle is not equal to 180 degrees.",
+ 
+  "Теперь иди в Курганы и найди Сферу меча. Кажется, что меч всегда направлен "
+  "в одну и ту же сторону, что бы ты не делал%E0, а для того, чтобы добыть сокровища, "
+  "нужно его повернуть. И его можно повернуть! Может быть, ты уже заметил%E0, "
+  "что мир повернётся, если пройти по петле и вернуться на то же место.\n\n"
+  "Это связано с тем, что мир HyperRogue искривлён, и сумма углов треугольника "
+  "не равна 180 градусам.")
+ 
+S("Periodic patterns", "Периодические узоры")
+S("Hyperbolic geometry yields much more interesting periodic patterns "
+  "than Euclidean.",
+  "Гиперболическая геометрия даёт больше интересных периодических шаблонов, "
+  "чем евклидова.")
+ 
+S("Periodic patterns: application", "Приложение периодических узоров")
+S("Many lands in HyperRogue are based around periodic patterns. "
+  "For example, both Zebra and Windy Plains are based on the pattern "
+  "shown in the previous slide. "
+  "Such lands often have tree-like nature.",
+  "Wiele krain jest opartych na okresowych wzorach. Na przykład Zebra "
+  "i Wietrzna Równina są obie oparte na wzorze z poprzedniego slajdu. "
+  "Krainy takie mają zwykle drzewiastą strukturę.")
+ 
+S("Fractal landscapes", "Фрактальные пейзажи")
+S("On the following slide, the colors change smoothly in the whole infinite world. "
+  "Again, this works better than in Euclidean geometry.",
+  "На следующем слайде цвета изменяются плавно по всему бесконечному миру. "
+  "Опять же, это работает лучше, чем в евклидовой геометрии.")
+ 
+S("Fractal landscapes: application", "Приложение фрактальных пейзажей")
+S("create a baby tortoise", "создай черепашку")
+S(
+  "This is applied in HyperRogue to create landscapes, such as the chasms in the "
+  "land of Reptiles or the Dragon Chasms, which you should find quickly. "
+  "Also in the Dragon Chasms, you can find a Baby Tortoise, and try to find "
+  "a matching adult tortoise in the Galápagos. "
+  "There are over two millions of species, but since there is so much space in "
+  "hyperbolic geometry, finding a matching tortoise is possible. The brighter "
+  "the color in Galápagos is, the more aspects of the tortoises in the given "
+  "area are matching.",
+ 
+  "Фракталы применяются для создания пропастей в земле Рептилий "
+  "и в Драконьей бездне, которые ты быстро найдёшь. "
+  "Также в Драконьей бездне ты можешь найти Черепашку и попробовать "
+  "найти её родителей на Галапагосах. Там живёт более двух миллионов видов, "
+  "но в гиперболической геометрии очень много места, и найти её вид "
+  "вполне возможно. Чем ярче цвет клетки, "
+  "тем больше параметров совпадает с тем видом, что ты ищешь.")
+ 
+S("Poincaré Ball model", "Сферическая модель Пуанкаре")
+S(
+    "The Poincaré disk model is a model of a hyperbolic *plane* -- you "
+    "might wonder why are the walls rendered in 3D then.\n\n"
+    "HyperRogue actually assumes that the floor level is an equidistant surface "
+    "in a three-dimensional hyperbolic world, and the camera is placed above the "
+    "plane that the surface is equidistant to (which boils down to showing "
+    "the floor level in Poincaré disk model).\n\n"
+    "This is shown on the next slide, in the Poincaré ball model, which is "
+    "the 3D analog of the Poincaré disk model.",
+   
+  "Модель диска Пуанкаре -- это модель гиперболической *плоскости*, и ты "
+  "мог задуматься, почему же стены отображаются в 3D.\n\n"
+  "HyperRogue на самом деле предполагает, что уровень пола -- это "
+  "эквидистанта в трёхмерном гиперболическом мире, а камера находится выше плоскости, "
+  "эквидистантой к которой является поверхность -- таким образом пол выглядит "
+  "в точности как в модели Пуанкаре.\n\n"
+  "Это показано на следующем слайде, в модели сферы, трёхмерном аналоге модели диска.")
+ 
+S("Hyperboloid model", "Модель гиперболоида")
+S(
+    "Let's see more models of the hyperbolic plane. "
+    "This model uses a hyperboloid in the Minkowski geometry; "
+    "it is used internally by HyperRogue.",
+   
+    "Давай посмотрим на другие модели. Эта модель использует гиперболоид в геометрии Минковского; "
+    "HyperRogue внутренне использует эту модель.")
+ 
+S("Beltrami-Klein model", "Модель Бельтрами-Клейна")
+S(
+    "This model renders straight lines as straight, but it distorts angles.",
+    "В этой модели прямые линии остаются прямыми, но углы искажаются.")
+ 
+S("Gans model", "Модель Ганса")
+S(
+  "Yet another model, which corresponds to orthographic projection of the "
+  "sphere. Poincaré disk model, Beltrami-Klein model, and the Gans "
+  "model are all obtained by looking at either the hyperboloid model or an "
+  "equidistant surface from various distances.",
+  "Ещё одна модель, соответствующая ортогональной проекции сферы. Модели диска, "
+  "Клейна и Ганса могут быть получены проекциями из модели гиперболоида "
+  "или из эквидистанты с разных расстояний.")
+ 
+S("Band model", "Модель ленты")
+S("render spiral", "нарисовать спираль")
+S(
+  "The band model is the hyperbolic analog of the Mercator projection of the sphere: "
+  "a given straight line is rendered as a straight line, and the rest of the "
+  "world is mapped conformally, that is, angles are not distorted. "
+  "Here, we take the straight line connecting your starting point and your "
+  "current position -- usually the path taken by the player is surprisingly "
+  "close to a straight line. Press '8' to see this path.\n\n"
+  "If you want, press '5' to see it rendered as a spiral, although it takes lots of time and "
+  "memory.",
+ 
+  "Модель ленты -- гиперболический аналог проекции Меркатора сферы: "
+  "данная прямая отображается в прямую, а оставшаяся часть "
+  "отображается конформно, то есть углы не искажаются. "
+  "Здесь в качестве центральной прямой используется прямая, соединяющая точку старта и "
+  "твою текущую позицию -- обычно твой путь оказывается неожиданно близко "
+  "с прямой. Нажми '8', чтобы увидеть свой путь.\n\n"
+  "Если хочешь, нажми '5', чтобы отрисовать спираль, хотя это займёт много "
+  "времени и памяти.")
+ 
+S("Conformal square model", "Конформный квадрат")
+S("The world can be mapped conformally to a square too.",
+  "Также можно конформно отобразить мир на квадрат.")
+ 
+S("Shoot'em up mode", "режим стрельбы")
+S("In the shoot'em up mode, space and time is continuous. "
+  "You attack by throwing knives. "
+  "Very fun with two players!\n\n"
+  "There are other special modes too which change the gameplay or "
+  "focus on a particular challenge.",
+ 
+  "В режиме стрельбы пространство и время непрерывны. Ты атакуешь, "
+  "кидая ножи. Очень весело для двоих игроков!\n\n"
+  "Есть и другие специальные режимы, изменяющие игру или "
+  "концентрирующиеся на определённых задачах.")
+ 
+S("THE END", "КОНЕЦ")
+S("leave the Tutorial", "выйти из Руководства")
+S(
+  "This tour shows just a small part of what you can see in the world of HyperRogue. "
+  "For example, "
+  "hyperbolic mazes are much nicer than their Euclidean counterparts. "
+  "Have fun exploring!\n\n"
+  "Press '5' to leave the tutorial mode.",
+ 
+  "Это путешествие показало лишь малую часть мира HyperRogue. Например, "
+  "гиперболические лабиринты намного приятнее евклидовых. Приятной игры!"
+  "Нажмите '5', чтобы выйти из режима Руководства."
+  )
+
 #undef Orb
  

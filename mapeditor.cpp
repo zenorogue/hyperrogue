@@ -1878,9 +1878,9 @@ namespace linepatterns {
     {patZebraTriangles, "zebra triangles", (int) 0x40FF4000},
     {patZebraLines, "zebra lines", (int) 0xFF000000},
     {patVine, "vineyard pattern", (int) 0x8438A400},
-    {patPalacelike, "firewall line", (int) 0xFF400000},
-    {patPalace, "firewall line: Palace", (int) 0xFFD50000},
-    {patPower, "firewall line: Power", (int) 0xFFFF0000},
+    {patPalacelike, "firewall lines", (int) 0xFF400000},
+    {patPalace, "firewall lines: Palace", (int) 0xFFD50000},
+    {patPower, "firewall lines: Power", (int) 0xFFFF0000},
     {0, NULL, 0}
     };
 

@@ -145,12 +145,14 @@ void parrep(string& x, string w, stringpar p) {
       rep(x, "%abl"+w, N->n[0].abl);
       rep(x, "%ł"+w, choose3(N->n[0].genus, "ł", "ła", "ło"));
       rep(x, "%łem"+w, choose3(N->n[0].genus, "łem", "łam", "łom"));
+      rep(x, "%łeś"+w, choose3(N->n[0].genus, "łeś", "łaś", "łoś"));
       rep(x, "%ął"+w, choose3(N->n[0].genus, "ął", "ęła", "ęło"));
       rep(x, "%ya"+w, choose3(N->n[0].genus, "y", "a", "e"));
       rep(x, "%yą"+w, choose4(N->n[0].genus, "ego", "ą", "e", "y"));
       rep(x, "%oa"+w, choose3(N->n[0].genus, "", "a", "o"));
       rep(x, "%ymą"+w, choose3(N->n[0].genus, "ym", "ą", "ym"));
       rep(x, "%go"+w, choose3(N->n[0].genus, "go", "ją", "je"));
+      rep(x, "%aka"+w, choose3(N->n[0].genus, "a", "ka", "a"));
       }
     else {
       rep(x,"%"+w, p.v);

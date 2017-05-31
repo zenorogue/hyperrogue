@@ -5007,4 +5007,507 @@ S("compass size", "velikost kompasu")
 		"NEW_ACHIEVEMENT_8_18_DESC"	"Poraž Písečného červa v geometrii Zebra kvocientu."
 */
 
+N("Tortoise", GEN_F, "Želva", "Želvy", "Želva", "Želvou")
+S("line patterns", "vzory čar")
+S("1 turn", "1 kolo")
+S("%1 turns", "kola: %1")
+S("items/kills mode", "mód předmětů/zabitých netvorů")
+S("images", "obrázky")
+S("letters", "písmena")
+S("input", "vstup")
+S("default", "default")
+S("config", "konfigurace")
+S("expansion", "rozšíření")
+
+S("continue", "pokračuj")
+S("main menu", "hlavní menu")
+S("restart", "nová hra")
+S("quit", "konec")
+S("exit menu", "opusť menu")
+
+S(
+  "A tourist from another world. They mutter something about the 'tutorial', "
+  "and claim that they are here just to learn, and to leave without any treasures. "
+  "Do not kill them!",
+  
+  "Turista z jiného světa. Mumlá něco o 'tutoriálu' a tvrdí, že se jenom učí "
+  "a odejde bez pokladů. Nezabíjet!")
+
+S(
+  "This monster has come from another world, presumably to steal our treasures. "
+  "Not as fast as an Eagle, not as resilient as the guards from the Palace, "
+  "and not as huge as the Mutant Ivy from the Clearing; however, "
+  "they are very dangerous because of their intelligence, "
+  "and access to magical powers.\n\n",
+
+  "Tento netvor přišel z jiného světa, asi proto, aby nám ukradl poklady. "
+  "Není tak rychlý jako Orel, není tak odolný jako stráže z Paláce, a není "
+  "tak obrovský jako Mutantní břečtan z Mýtiny; díky své inteligenci a přístupu "
+  "k magickým schopnostem je však velmi nebezpečný.\n\n"
+  )
+
+S(
+  "Actually, their powers appear god-like...\n\n",
+  "Vlastně se zdá, že má až božskou moc...\n\n"
+  )
+
+S(
+  "Rogues will never make moves which result in their immediate death. "
+  "Even when cornered, they are able to instantly teleport back to their "
+  "home world at any moment, taking the treasures forever... but "
+  "at least they will not steal anything further!\n\n",
+  
+  "Chytráci nikdy neudělají tah, který by vedl k jejich okamžité smrti. I když "
+  "jsou zahnaní do kouta, dokážou se kdykoli okamžitě teleportovat do svého "
+  "domovského světa a navěky s sebou odnést poklady... ale aspoň už nebudou "
+  "krást nic dalšího!\n\n")
+
+S(
+  "Despite this intelligence, Rogues appear extremely surprised "
+  "by the most basic facts about geometry. They must come from "
+  "some really strange world.\n\n",
+  
+  "Navzdory jejich inteligenci se zdá, že Chytráky dokážou nesmírně překvapit "
+  "i ta nejzákladnější geometrická fakta. Musejí pocházet z nějakého opravdu"
+  "podivného světa.")
+
+S("change the alpha parameter to show the lines",
+  "čáry můžeš zviditelnit změnou parametru alfa")
+
+S("triangle grid: not rings", "trojúhelníková mřížka: bez prstenců")
+S("triangle grid: rings", "trojúhelníková mřížka: s prstenci")
+S("heptagonal grid", "sedmiúhelníková mřížka")
+S("rhombic tesselation", "kosočtvercové dělení")
+S("triheptagonal tesselation", "troj-sedmiúhelníkové dělení")
+S("normal tesselation", "normální dělení")
+S("big triangular grid", "velká trojúhelníková mřížka")
+S("underlying tree", "stromová základní struktura")
+S("circle/horocycle tree", "kruhový/horocyklický strom")
+S("zebra triangles", "zebra: trojúhelníky")
+S("zebra lines", "zebra: čáry")
+S("vineyard pattern", "vinicový vzor")
+S("firewall lines", "čáry ohnivých stěn")
+S("firewall lines: Palace", "čáry ohnivých stěn: Palác")
+S("firewall lines: Power", "čáry ohnivých stěn: Moc")
+
+S("(ESC) tour menu", "(ESC) menu prohlídky")
+S("Try the Tutorial to help with understanding the "
+  "geometry of HyperRogue (menu -> special modes).\n\n",
+  "Zkuste Tutoriál, chcete-li pomoci s chápáním geometrie "
+  "HyperRogue (menu -> speciální módy.\n\n")
+
+S("Tutorial", "Tutoriál")
+S("spherical geometry", "sférická geometrie")
+S("Euclidean geometry", "eukleidovská geometrie")
+S("more curved hyperbolic geometry", "zakřivenější hyperbolická geometrie")
+S("teleport away", "teleportuj se pryč")
+S("Shift-click a location to teleport there.", "Shift-klikni na políčko, kam se chceš teleportovat.")
+S("Click a location to teleport there.", "Klikni na políčko, kam se chceš teleportovat.")
+
+S("move through walls", "procházení zdmi")
+S("flash", "záblesk")
+S("static mode", "statický mód")
+S("Static mode enabled.", "Statický mód zapnut.")
+S("Static mode disabled.", "Statický mód vypnut.")
+S("enable/disable texts", "zapnout/vypnout texty")
+S("Help texts disabled.", "Texty nápovědy vypnuty.")
+S("next slide", "další snímek")
+S("previous slide", "předešlý snímek")
+
+S("This tutorial is different than most other game tutorials -- "
+  "you are not forced to do anything, and you can go wherever you want.\n\n"
+  "However, %the1 is not what we are talking about now. "
+  "We will not explain this land at the moment, and you could ponentially "
+  "get lost there.\n\n"
+  "Remember that you can get to the next slide by pressing Enter.",
+  
+  "Tento tutoriál funguje jinak, než ve většině her -- k ničemu tě nenutíme "
+  "a můžeš si jít, kam chceš.\n\n"
+  "Ale %1 není to, o čem teď mluvíme. Tento kraj momentálně tutoriál nevysvětluje "
+  "a je možné, že se v něm ztratíš.\n\n"
+  "Nezapomeň, že stiskem klávesy Enter můžeš přejít na další snímek.")
+
+S("Introduction", "Úvod")
+S("Welcome to the HyperRogue tutorial!", "Vítej v tutoriálu HyperRogue!")
+S(
+  "This tutorial is mostly aimed to show what is "
+  "special about the geometry used by HyperRogue. "
+  "It also shows the basics of gameplay, and "
+  "how is it affected by geometry.\n\n"
+  "You decide when you want to stop playing with the "
+  "current \"slide\" and go to the next one, by pressing Enter. You can also "
+  "press ESC to see a "
+  "menu with other options.",
+  
+  "Tento tutoriál je převážně zaměřen na to, aby ukázal, co je zvláštního "
+  "na geometrii, kterou HyperRogue používá. Také ukazuje základy hry a to, "
+  "jak ji geometrie ovlivňuje.\n\n"
+  "Když si budeš chtít přestat hrát se současným \"snímkem\" a přejít na další, "
+  "stiskni Enter. Stiskem ESC můžeš také zobrazit menu s dalšími možnostmi.")
+
+S("Basics of gameplay", "Základy hry")
+S("gain Ice Diamonds", "získej Ledové diamanty")
+S("The game starts in the Icy Lands. Collect the Ice Diamonds "
+  "(press F1 if you do not know how to move). "
+  "After you collect many of them, monsters will start to pose a challenge.\n"
+  "As is typical in roguelikes and other games based on tactical skill rather "
+  "than story, if you lose, you have to start a new one from the start. "
+  "However, in this tutorial, you can simply press '4' "
+  "to teleport away from a bad situation."
+  "In general, the tutorial is rigged to show you what it "
+  "wants -- for example, in this slide, you can press '5' to get "
+  "lots of Ice Diamonds quickly.",
+  "Hra začíná v Ledovém kraji. Sbírej Ledové diamanty (pokud nevíš, jak "
+  "se pohybovat, stiskni F1). Když jich nasbíráš mnoho, netvoři začnou "
+  "být nebezpeční.\n"
+  "Jak je zvykem ve hrách žánru roguelike a v jiných, které jsou založené "
+  "na taktických dovednostech a nikoli na příběhu, pokud prohraješ, budeš "
+  "muset začít hrát od začátku. V tomto tutoriálu se ale můžeš z ošklivé "
+  "situace jednoduše teleportovat stisknutím klávesy '4'. Tutoriál je "
+  "obecně dělaný tak, aby ti mohl snadno ukázat, co chce -- v tomto snímku "
+  "můžeš například stisknout klávesu '5', abys rychle získal velké množství "
+  "Ledových diamantů.")
+
+S("Hypersian Rug model", "Model hyperského koberce")
+S(
+  "New players think that the action of HyperRogue takes place on a sphere. "
+#ifdef MOBWEB
+  "This is not true -- try the Tutorial in the native desktop version shows "
+  "the surface HyperRogue actually takes place on.",
+#else
+  "This is not true -- the next slide will show the surface HyperRogue "
+  "actually takes place on.\n\n"
+  "Use arrow keys to rotate the model, and Page Up/Down to zoom.\n\n"
+  "If you do not see anything, press '5' to try a safer renderer.",
+#endif
+  
+
+  "Noví hráči si často myslí, že se HyperRogue odehrává na povrchu koule. "
+#ifdef MOBWEB
+  "Není to pravda -- Tutoriál v desktopové verzi ti může ukázat povrch, "
+  "na jakém se HyperRogue opravdu odehrává."
+#else
+  "Není to pravda -- další snímek ti ukáže povrch, na jakém se "
+  "HyperRogue opravdu odehrává.\n\n"
+  "Model můžeš otáčet šipkami a zoomovat klávesami Page Up/Down.\n\n"
+  "Pokud nic nevidíš, stiskni klávesu '5' pro aktivaci bezpečnějšího rendereru."
+#endif
+  )
+
+S("Expansion", "Expanze")
+S(
+  "The next slide shows the number of cells in distance 1, 2, 3, ... from you. "
+  "It grows exponentially: there are more than 10^100 cells "
+  "in radius 1000 around you, and you will move further away during the game!\n\n"
+  "This is extremely important in the design of HyperRogue. "
+  "HyperRogue has many navigational puzzles -- what would be simple in Euclidean world "
+  "is extremely tricky "
+  "in hyperbolic geometry (you want to reach a specific location 20 cells away, "
+  "which of the thousands of possible directions should you take?); however, other things virtually impossible in Euclidean "
+  "world become easy in HyperRogue. "
+  "HyperRogue had to be specially designed so that it is impossible to grind the "
+  "infinite world. There are almost no permanent upgrades; collecting treasures "
+  "brings you benefits, but trying to get too many of the same kind is extremely dangerous.",
+  
+  "Další snímek ukazuje počet políček ve vzdálenosti 1, 2, 3, ... od tebe. "
+  "Roste exponenciálně: v kruhu o poloměru 1000 kolem tebe je více než 10^100 "
+  "políček, a během hry dojdeš ještě dál!\n\n"
+  "Tento fakt je pro design HyperRogue velmi důležitý. Hra obsahuje mnoho "
+  "navigačních hádanek -- to, co by v eukleidovském světě bylo jednoduché, "
+  "je v hyperbolické geometrii extrémně složité (chceš se dostat na určité "
+  "místo 20 políček daleko -- kterým z tisíců možných směrů se máš vydat?); "
+  "na druhou stranu, jiné věci, které jsou v eukleidovském světě prakticky "
+  "nemožné, jsou v HyperRogue snadné. HyperRogue musel být speciálně navržen "
+  "tak, aby se v jeho nekonečném světě nedalo grindovat. Nejsou v něm téměř "
+  "žádné trvalé upgrady; sbírání pokladů ti přináší výhody, ale pokud se "
+  "pokusíš získat příliš mnoho pokladů jednoho druhu, bude to nesmírně nebezpečné.")
+
+S("Tiling and Tactics", "Hyperbolické dělení a taktika")
+S(
+  "The tactics of fighting simple monsters, such as the Yetis from the Icy Lands, "
+  "might appear shallow, but hyperbolic geometry is essential even there. "
+  "In the next slide, you are attacked by two monsters at once. "
+  "You can make them line up simply by "
+  "running away in a straight line. "
+  "Press '2' to try the same in the Euclidean world -- it is impossible.",
+  "Taktika boje proti jednoduchým netvorům, jako jsou například Yetiové "
+  "z Ledového kraje, může vypadat jednoduše, ale i tam je hyperbolická "
+  "geometrie zásadní. Na dalším snímku na tebe útočí dva netvoři najednou. "
+  "Pokud budeš utíkat po přímce, přinutíš je, aby se seřadili. Stiskni "
+  "klávesu '2', abys to samé zkusil v eukleidovském světě -- je to nemožné.")
+
+S("Straight Lines", "Přímky")
+S("Hyperbolic geometry has been discovered by the 19th century mathematicians who "
+  "wondered about the nature of paralellness. Take a line L and a point A. "
+  "Can a world exist where there is more than one line passing through A "
+  "which does not cross L?\n\n"
+  "The Icy Land will be very dangerous if you have lots of Ice Diamonds -- "
+  "lots of Yetis and Ice Wolves hunting you! But the other lands, where "
+  "you have no treasures yet, will still be (relatively) safe.\n\n"
+  "Wander further, and you should find Crossroads quickly -- "
+  "the Great Walls are straight lines, and indeed, they work differently than in "
+  "Euclidean. On the other side of Great Walls, you see other lands -- "
+  "there are about 50 lands in HyperRogue, based "
+  "on different mechanics and aspects of hyperbolic geometry.",
+  
+  "Hyperbolickou geometrii objevili matematikové z 19. století, kteří "
+  "přemýšleli o povaze rovnoběžnosti. Máš-li přímku p a bod A, může "
+  "existovat svět, ve kterém bodem A prochází více než jedna přímka, "
+  "která neprotíná p?\n\n"
+  "Ledový kraj bude velmi nebezpečný, pokud máte hodně Ledových "
+  "diamantů -- potom tě bude honit spousta Yetiů a Ledových vlků! "
+  "Ale ostatní kraje, ve kterých ještě žádné poklady nemáš, budou "
+  "stále bezpečné (relativně).\n\n"
+  "Půjdeš-li dál, měl bys rychle narazit na Křižovatku -- Velké zdi "
+  "jsou přímky a skutečně fungují jinak než v eukleidovské geometrii. "
+  "Na druhé straně Velkých zdí uvidíš jiné kraje -- HyperRogue obsahuje "
+  "zhruba 50 krajů založených na různých mechanikách a aspektech "
+  "hyperbolické geometrie.")
+
+S("Running Dogs", "Běžící psi")
+S(
+  "To learn more about straight lines, "
+  "wander further, and you should find the Land of Eternal Motion. "
+  "Try to run in a straight line, with a Running Dog next to you. "
+  "Even though the Running Dog runs at the same speed as you, "
+  "it will appear to go slower -- this is because you are running "
+  "in a straight line, and the Running Dog has to run in a curve "
+  "called an equidistant.\n\n"
+#ifdef MAC
+ "Remember that you can click with right Shift on anything to get more information.",
+#else
+  "Remember that you can right click on anything to get more information.",
+#endif
+  "Chceš-li se dozvědět víc o přímkách, běž dál a měl bys najít Zemi "
+  "věčného pohybu. Pokus se tam běžet po přímce, zatímco vedle tebe běží "
+  "Běžící pes. I když běží stejně rychle jako ty, bude se zdát, že je "
+  "pomalejší -- to proto, že ty běžíš po přímce, zatímco Běžící pes musí "
+  "běžet po křivce zvané 'ekvidistanta'.\n\n")
+#ifdef MAC
+  "Nezapomeň, že pokud na cokoli klikneš s pravým shiftem, můžeš o tom "
+  "získat víc informací.",
+#else
+  "Nezapomeň, že pokud na cokoli klikneš pravým tlačítkem, můžeš o tom "
+  "získat víc informací.",
+#endif
+
+S("Equidistants", "Ekvidistanty")
+S(
+  "Equidistants are curves which are at some fixed distance from a "
+  "straight line. Some lands in HyperRogue are based on equidistants; "
+  "you should see them after wandering a bit more.\n\n"
+  "This tutorial gives you freedom to go wherever you choose, "
+  "but we do not recommend going deep into the Dungeon or the Ocean -- "
+  "getting back might be difficult.",
+  
+  "Ekvidistanty jsou křivky, které mají určitou danou vzdálenost od nějaké "
+  "přímky. V HyperRogue jsou kraje, které jsou na ekvidistantách založeny; "
+  "když budeš putovat dál, měl bys na ně narazit.\n\n"
+  "V tomto tutoriálu se můžeš vydat, kam se ti zlíbí, ale doporučujeme, abys "
+  "nechodil příliš hluboko do Žaláře nebo do Oceánu -- mohl bys mít problém "
+  "vrátit se zpátky.")
+
+S("Circles", "Kružnice")
+S(
+  "Circles are strange in hyperbolic geometry too. "
+  "Look for the Castle of Camelot in the Crossroads; "
+  "the Round Table inside is a circle of radius 28. "
+  "Finding its center is a difficult challenge.\n\n"
+  "Press '5' to cheat by seeing the smaller circles too.\n\n"
+  "Note: Camelot and some other lands are unlocked earlier in the Tutorial than in a real game.",
+
+  "I kružnice jsou v hyperbolické geometrii podivné. Zkus na Křižovatce najít "
+  "hrad Kamelot; Kulatý stůl uvnitř je kružnice o poloměru 28. Najít její střed "
+  "je obtížný úkol.\n\n"
+  "Stiskem klávesy '5' můžeš podvádět a vidět i menší kružnice.\n\n"
+  "Poznámka: Camelot a některé další kraje se v Tutoriálu odemykají "
+  "dříve než ve skutečné hře.")
+
+S("Horocycles", "Horocykly")
+S("Horocycles are similar to circles, but you cannot reach their center at all -- "
+  "they can be understood as limit circles of infinite radius centered in some point "
+  "in infinity (also called an ideal point).\n\n"
+  "Go to R'Lyeh, and you should quickly find a Temple of Cthulhu there. "
+  "Each circle of columns is actually a horocycle. Horocycles in a given "
+  "temple are concentric, and there is an infinite number of them.",
+
+  "Horocykly se podobají kružnicím, ale jejich středu vůbec nelze dosáhnout "
+  "-- můžeš si je představit jako limitní kružnice s nekonečným poloměrem, "
+  "jejichž střed je v nějakém bodě v nekonečnu (takzvaném ideálním bodě).\n\n"
+  "Běž do R'Lyeh. Měl bys tam rychle najít Cthulhuův chrám. Každý kruh ze "
+  "sloupů je ve skutečnosti horocyklus. Horocykly v každém chrámu jsou "
+  "soustředné a je jich nekonečně mnoho.")
+
+S("Half-plane model", "Polorovinový model")
+S("The game is normally displayed in the so called Poincaré disk model, "
+  "which is a kind of a map of the infinite hyperbolic world. "
+  "There are many projections of Earth, but since Earth is curved, "
+  "all of them have to distort distances or angles in some way -- "
+  "the same is true in hyperbolic geometry. "
+  "The next slide shows another model, called the Poincaré upper half-plane model. In this model, "
+  "horocycles centered at one specific ideal point are drawn as straight lines.",
+  
+  "Hra se normálně zobrazuje v modelu nazývaném 'Poincarého disk', což je něco "
+  "jako mapa nekonečného hyperbolického světa. Země má také mnoho projekcí, "
+  "ale protože je zakřivená, musejí tyto projekce vždy nějakým způsobem "
+  "zkreslovat vzdálenosti nebo úhly -- a v hyperbolické geometrii platí totéž. "
+  "Další snímek ti ukáže jiný model, zvaný 'Poincarého model horní poloroviny'. "
+  "V tomto modelu vypadají horocykly se středem v jednom specifickém ideálním "
+  "bodě jako přímky.")
+
+S("Curvature", "Zakřivení")
+S("gain Orb of the Sword", "získej Sféru meče")
+S(
+  "Now, go to the Burial Grounds and find an Orb of the Sword. The Sword appears to "
+  "always be facing in the same direction whatever you do, and it appears that "
+  "you have to rotate the sword to excavate the treasures; "
+  "yet, it is possible to excavate them! You migth have already noticed "
+  "that the world rotates after you move around a loop and return to an old "
+  "place.\n\n"
+  "This is related to the fact that the world of HyperRogue is curved, and "
+  "the sum of angles in a triangle is not equal to 180 degrees.",
+
+  "Teď se vydej na Pohřebiště a najdi Sféru meče. Ať děláš, co děláš, Meč bude "
+  "vždy otočený stejným směrem, a přitom se zdá, že abys mohl vykopat poklady, "
+  "musíš Meč natočit; přesto je však možné je vykopat! Možná už sis všiml, že "
+  "když se pohybuješ po uzavřené křivce a vrátíš se tam, odkud jsi vyšel, "
+  "bude svět pootočený.\n\n"
+  "To souvisí s faktem, že svět HyperRogue je zakřivený a součet úhlů v trojúhelníku se nerovná 180 stupňům.")
+
+S("Periodic patterns", "Periodické vzory")
+S("Hyperbolic geometry yields much more interesting periodic patterns "
+  "than Euclidean.",
+  "V hyperbolické geometrii lze najít mnohem zajímavější "
+  "periodické vzory než v eukleidovské.")
+
+S("Periodic patterns: application", "Periodické vzory: aplikace")
+S("Many lands in HyperRogue are based around periodic patterns. "
+  "For example, both Zebra and Windy Plains are based on the pattern "
+  "shown in the previous slide. "
+  "Such lands often have tree-like nature.",
+  "HyperRogue obsahuje řadu krajů, které jsou založené na periodických "
+  "vzorech. Tak například Zebra a Větrné pláně jsou obě založené na vzoru "
+  "na předešlém snímku. Tyto kraje mívají často stromovou povahu.")
+
+S("Fractal landscapes", "Fraktální krajinky")
+S("On the following slide, the colors change smoothly in the whole infinite world. "
+  "Again, this works better than in Euclidean geometry.",
+  "Na následujícím snímku se barvy v celém nekonečném světě hladce "
+  "mění. I v tomto případě to v hyperbolické geometrii funguje lépe než "
+  "v eukleidovské.")
+
+S("Fractal landscapes: application", "Fraktální krajinky: aplikace")
+S("create a baby tortoise", "vytvoř želvičku")
+S(
+  "This is applied in HyperRogue to create landscapes, such as the chasms in the "
+  "land of Reptiles or the Dragon Chasms, which you should find quickly. "
+  "Also in the Dragon Chasms, you can find a Baby Tortoise, and try to find "
+  "a matching adult tortoise in the Galápagos. "
+  "There are over two millions of species, but since there is so much space in "
+  "hyperbolic geometry, finding a matching tortoise is possible. The brighter "
+  "the color in Galápagos is, the more aspects of the tortoises in the given "
+  "area are matching.",
+  
+  "HyperRogue tohoto využívá pro vytváření krajin, jako jsou propasti v zemi "
+  "Ještěrek nebo v Dračích propastech, které bys měl rychle najít. V Dračích "
+  "propastech můžeš také najít Želvičku, a potom se pokusit na Galapágách "
+  "najít dospělou želvu, která jí odpovídá. Existuje více než dva milióny "
+  "druhů želv, ale protože v hyperbolické geometrii je tolik místa, je možné "
+  "najít tu, která patří ke tvé Želvičce. Čím jasnější barva, tím více aspektů "
+  "želv v dané oblasti odpovídá tvé Želvičce.")
+
+S("Poincaré Ball model", "Model Poincarého koule")
+S(
+    "The Poincaré disk model is a model of a hyperbolic *plane* -- you "
+    "might wonder why are the walls rendered in 3D then.\n\n"
+    "HyperRogue actually assumes that the floor level is an equidistant surface "
+    "in a three-dimensional hyperbolic world, and the camera is placed above the "
+    "plane that the surface is equidistant to (which boils down to showing "
+    "the floor level in Poincaré disk model).\n\n"
+    "This is shown on the next slide, in the Poincaré ball model, which is "
+    "the 3D analog of the Poincaré disk model.",
+    
+  "Poincarého disk je model hyperbolické *roviny* -- možná si tedy říkáš, "
+  "proč se zdi zobrazují ve 3D.\n\n"
+  "HyperRogue ve skutečnosti předpokládá, že podlaha je ekvidistantní plocha "
+  "ve trojrozměrném hyperbolickém světě, a že kamera se nachází nad rovinou, "
+  "ke které je tato plocha ekvidistantní (což ve výsledku znamená, že se "
+  "podlaha zobrazuje jako Poincarého disk).\n\n"
+  "To můžeš vidět v následujícím snímku, který ukazuje Poincarého kouli "
+  "-- 3D analog Poincarého disku.")
+
+S("Hyperboloid model", "Hyperboloidový model")
+S(
+    "Let's see more models of the hyperbolic plane. "
+    "This model uses a hyperboloid in the Minkowski geometry; "
+    "it is used internally by HyperRogue.",
+    
+    "Podívejme se na další modely hyperbolické roviny. Tento model "
+  "používá hyperboloid v Minkowského geometrii; právě tento model "
+  "HyperRogue používá interně.")
+
+S("Beltrami-Klein model", "Beltrami-Kleinův model")
+S(
+    "This model renders straight lines as straight, but it distorts angles.",
+    "Tento model zobrazuje přímky jako přímky, ale zkresluje úhly.")
+
+S("Gans model", "Gansův model")
+S(
+  "Yet another model, which corresponds to orthographic projection of the "
+  "sphere. Poincaré disk model, Beltrami-Klein model, and the Gans "
+  "model are all obtained by looking at either the hyperboloid model or an "
+  "equidistant surface from various distances.",
+  "A tady máme další model, který odpovídá ortografické projekci koule. Poincerého disk, Beltrami-Kleinův model i Gansův model se získají tak, že se z různých vzdáleností díváte na hyperboloidový model nebo na ekvidistantní plochu.")
+
+S("Band model", "Pásový model")
+S("render spiral", "renderování spirály")
+S(
+  "The band model is the hyperbolic analog of the Mercator projection of the sphere: "
+  "a given straight line is rendered as a straight line, and the rest of the "
+  "world is mapped conformally, that is, angles are not distorted. "
+  "Here, we take the straight line connecting your starting point and your "
+  "current position -- usually the path taken by the player is surprisingly "
+  "close to a straight line. Press '8' to see this path.\n\n"
+  "If you want, press '5' to see it rendered as a spiral, although it takes lots of time and "
+  "memory.",
+  "Pásový model je hyperbolickým analogem Mercatorovy projekce na kouli: "
+  "jedna daná přímka se zobrazí jako přímka a zbytek světa je namapován "
+  "konformálně, tedy bez zkreslení úhlů. V tomto případě použijeme přímku, "
+  "která spojuje bod, kde jsi začal hru, a tvou současnou polohu -- dráha, "
+  "po které hráč jde, je obvykle překvapivě blízká přímce. Tuto cestu můžeš "
+  "vidět stisknutím klávesy '8'.\n\n"
+  "Pokud chceš, můžeš ji také stisknutím klávesy '5' vyrenderovat jako spirálu; "
+  "vyžaduje to však hodně času a paměti.")
+
+S("Conformal square model", "Konformální čtvercový model")
+S("The world can be mapped conformally to a square too.",
+  "Svět je také možné konformálně namapovat na čtverec.")
+
+S("Shoot'em up mode", "Mód střílečky")
+S("In the shoot'em up mode, space and time is continuous. "
+  "You attack by throwing knives. "
+  "Very fun with two players!\n\n"
+  "There are other special modes too which change the gameplay or "
+  "focus on a particular challenge.",
+  "V módu střílečky je prostor i čas spojitý. Útočíš "
+  "vrháním nožů. Veliká legrace ve dvou hráčích!\n\n"
+  "HyperRogue také obsahuje další speciální módy, které mění "
+  "způsob hry nebo jsou zaměřené na určitý úkol.")
+
+S("THE END", "KONEC")
+S("leave the Tutorial", "opusť Tutoriál")
+S(
+  "This tour shows just a small part of what you can see in the world of HyperRogue. "
+  "For example, "
+  "hyperbolic mazes are much nicer than their Euclidean counterparts. "
+  "Have fun exploring!\n\n"
+  "Press '5' to leave the tutorial mode.",
+
+  "Tato prohlídka ukazuje jen malou část toho, co můžeš vidět ve světě "
+  "HyperRogue. Tak například: hyperbolická bludiště jsou mnohem hezčí "
+  "než jejich eukleidovské protějšky. Bav se při dalším zkoumání!\n\n."
+  "Stisknutím klávesy '5' opustíš tutoriál."
+  )
+
+
 #undef Orb

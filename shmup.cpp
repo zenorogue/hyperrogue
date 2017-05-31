@@ -501,6 +501,13 @@ void pressaction(int id) {
     actionspressed[id]++;
   }
 
+bool notremapped(int sym) {
+  int k = vid.scfg.keyaction[sym];
+  k /= 16;
+  if(k > 3) k--; else if(k==3) k = 2;
+  return k <= multi::players;
+  }
+
 void handleInput(int delta) {
 #ifndef NOSDL
   double d = delta / 500.;
@@ -902,7 +909,7 @@ multimap<cell*, monster*> monstersAt;
 
 typedef multimap<cell*, monster*>::iterator mit;
 
-vector<monster*> active;
+vector<monster*> active, nonvirtual, additional;
 
 cell *findbaseAround(hyperpoint p, cell *around) {
   cell *best = around;
@@ -917,6 +924,10 @@ cell *findbaseAround(hyperpoint p, cell *around) {
   return best;
   }
 
+cell *findbaseAround(const transmatrix& H, cell *around) {
+  return findbaseAround(tC0(H), around);
+  }
+
 cell *findbaseAroundRepeat(hyperpoint p, cell *around) {
   while(true) {
     cell *c = findbaseAround(p, around);
@@ -925,11 +936,21 @@ cell *findbaseAroundRepeat(hyperpoint p, cell *around) {
     }
   }
 
+cell *findbaseAroundRepeat(const transmatrix& H, cell *around) {
+  return findbaseAroundRepeat(tC0(H), around);
+  }
 
 /* double distance(hyperpoint h) {
   h = spintox(h) * h;
   return asinh(h[2]);
   } */
+
+void fixelliptic(transmatrix& at) {
+  if(elliptic && at[2][2] < 0) {
+    for(int i=0; i<3; i++) for(int j=0; j<3; j++)
+      at[i][j] = -at[i][j];
+    }
+  }
 
 struct monster {
   eMonster type;
@@ -953,6 +974,7 @@ struct monster {
   double swordangle; // sword angle wrt at
   double vel;        // velocity, for flail balls
   double footphase;
+  bool isVirtual;  // off the screen: gmatrix is unknown, and pat equals at
   
   monster() { 
     dead = false; inBoat = false; parent = NULL; nextshot = 0; 
@@ -964,25 +986,46 @@ struct monster {
     }
     
   void findpat() {
-    pat = gmatrix[base] * at;
+    isVirtual = !gmatrix.count(base);
+    if(!isVirtual) pat = gmatrix[base] * at;
+    else pat = at;
     }
 
-  cell *findbase(hyperpoint p) {
-    return findbaseAround(p, base);
+  cell *findbase(const transmatrix& T) {
+    if(isVirtual) {
+      cell *c = base;
+      auto cT = T;
+      virtualRebase(c, cT, true);
+      return c;
+      }
+    else return findbaseAround(T, base);
     }
-  
-  void rebasePat(transmatrix new_pat) {
+
+  void rebasePat(const transmatrix& new_pat) {
+    if(isVirtual) { 
+      at = new_pat;
+      virtualRebase(this, true); 
+      fixmatrix(at); pat = at;
+      return;
+      }
+    if(geometry == gQuotient) {
+      at = inverse(gmatrix[base]) * new_pat;
+      virtualRebase(this, true);
+      fixmatrix(at);
+      return;
+      }
     pat = new_pat;
-    cell *c2 = findbase(pat*C0);
+    cell *c2 = findbase(pat);
     // if(c2 != base) printf("rebase %p -> %p\n", base, c2);
     base = c2;
     at = inverse(gmatrix[c2]) * pat;
     fixmatrix(at);
+    fixelliptic(at);
     }
 
-  void rebaseAt(transmatrix new_at) {
+  /* void rebaseAt(const transmatrix& new_at) {
     rebasePat(gmatrix[base] * new_at);
-    }
+    } */
 
   bool trackroute(transmatrix goal, double spd) {
     cell *c = base;
@@ -1001,7 +1044,7 @@ struct monster {
 
       // queuepoly(nat, shKnife, 0xFFFFFFC0);
 
-      cell *c2 = findbaseAround(nat*C0, c);
+      cell *c2 = findbaseAround(nat, c);
       if(c2 != c && !passable_for(type, c2, c, P_CHAIN | P_ONPLAYER)) {
         return false;
         }
@@ -1027,7 +1070,7 @@ struct monster {
 
       // queuepoly(nat, shKnife, 0xFFFFFFC0);
 
-      cell *c2 = findbaseAround(nat*C0, c);
+      cell *c2 = findbaseAround(nat, c);
       if(c2 != c) {
         if(0) printf("old dist: %lf\n", (double) intval(nat*C0, gmatrix[c]*C0));
         if(0) printf("new dist: %lf\n", (double) intval(nat*C0, gmatrix[c2]*C0));
@@ -1087,8 +1130,7 @@ void killMonster(monster* m, eMonster who_kills, int flags = 0) {
   }
 
 void pushmonsters() {
-  for(int i=0; i<size(active); i++) {
-    monster *m = active[i];
+  for(monster *m: nonvirtual) {
     m->notpushed = isPlayer(m) || m->dead || (m->base->monst && m->base->monst != m->type);
     if(!m->notpushed) {
       m->stk = m->base->monst;
@@ -1098,8 +1140,8 @@ void pushmonsters() {
   }
 
 void popmonsters() {
-  for(int i=size(active)-1; i>=0; i--) {
-    monster *m = active[i];
+  for(int i=size(nonvirtual)-1; i>=0; i--) {
+    monster *m = nonvirtual[i];
     if(!m->notpushed) {
       if(m->type == m->base->monst)
         m->base->monst = m->stk;
@@ -1117,8 +1159,7 @@ void popmonsters() {
   }
 
 void degradeDemons() {
-  for(int i=0; i<size(active); i++) {
-    monster *m = active[i];
+  for(monster* m: nonvirtual) {
     if(m->type == moGreater) m->type = moLesser;
     if(m->stk == moGreater) m->type = moLesser;
     }
@@ -1176,7 +1217,7 @@ void awakenMimics(monster *m, cell *c2) {
       
       if(isBullet(m) && i == 1) m2->at = m2->at * spin(M_PI); // no idea why this
       
-      active.push_back(m2);
+      additional.push_back(m2);
 
       // if you don't understand it, don't worry,
       // I don't understand it either
@@ -1198,7 +1239,7 @@ void shootBullet(monster *m) {
   bullet->parent = m;
   bullet->pid = m->pid;
   bullet->parenttype = m->type;
-  active.push_back(bullet);
+  additional.push_back(bullet);
   
   if(markOrb(itOrbThorns)) {
     monster* bullet = new monster;
@@ -1208,7 +1249,7 @@ void shootBullet(monster *m) {
     bullet->parent = m;
     bullet->pid = m->pid;
     bullet->parenttype = m->type;
-    active.push_back(bullet);
+    additional.push_back(bullet);
     }
 
   if(markOrb(itOrbThorns)) {
@@ -1219,7 +1260,7 @@ void shootBullet(monster *m) {
     bullet->parent = m;
     bullet->pid = m->pid;
     bullet->parenttype = m->type;
-    active.push_back(bullet);
+    additional.push_back(bullet);
     }
  
   if(markOrb(itOrbDash)) {
@@ -1229,7 +1270,7 @@ void shootBullet(monster *m) {
     bullet->type = moBullet;
     bullet->parent = m;
     bullet->parenttype = m->type;
-    active.push_back(bullet);
+    additional.push_back(bullet);
     }
   }
 
@@ -1238,7 +1279,9 @@ void killThePlayer(eMonster m) {
   }
 
 monster *playerCrash(monster *who, hyperpoint where) {
+  if(who->isVirtual) return NULL;
   for(int j=0; j<players; j++) if(pc[j]!=who) {
+    if(pc[j]->isVirtual) continue;
     double d = intval(pc[j]->pat*C0, where);
     if(d < 0.1 * SCALE2 || d > 100) return pc[j];
     }
@@ -1401,7 +1444,9 @@ void movePlayer(monster *m, int delta) {
   double mturn = 0, mgo = 0, mdx = 0, mdy = 0;
   
   bool shotkey = false, dropgreen = false, facemouse = false;
-  if(facemouse) ;
+  if(facemouse) {
+    // silence warning that facemouse unused
+    }
   
   int b = 16*tableid[cpid];
     for(int i=0; i<8; i++) if(actionspressed[b+i]) playermoved = true;
@@ -1535,11 +1580,11 @@ void movePlayer(monster *m, int delta) {
 
     // spin(span[igo]) * xpush(playergo[cpid]) * spin(-span[igo]);
   
-    c2 = m->findbase(nat*C0);
+    c2 = m->findbase(nat);
     
     // don't have several players in one spot
     // also don't let them run too far from each other!
-    monster* crashintomon = playerCrash(m, nat*C0);
+    monster* crashintomon = m->isVirtual ? NULL : playerCrash(m, nat*C0);
     if(crashintomon) go = false;
   
     if(go && c2 != m->base) {
@@ -1581,7 +1626,7 @@ void movePlayer(monster *m, int delta) {
         for(int di=-1; di<2; di+=2) {
           cell *c = getMovR(c2, sd+di);
           if(!c) continue;
-          if(!gmatrix.count(c)) continue;
+          if(m->isVirtual || !gmatrix.count(c)) continue;
           double d = intval(gmatrix[c] * C0, m->pat * C0);
           // printf("di=%d d=%lf\n", di, d);
           if(d<bestd) bestd=d, subdir = di;
@@ -1719,11 +1764,10 @@ void movePlayer(monster *m, int delta) {
   
   playerfire[cpid] = false;
   
-  if(items[itOrbHorns]) {
+  if(items[itOrbHorns] && !m->isVirtual) {
     hyperpoint H = hornpos(cpid);
 
-    for(int j=0; j<size(active); j++) {
-      monster* m2 = active[j];
+    for(monster *m2: nonvirtual) {
       if(m2 == m) continue;
       
       double d = intval(m2->pat*C0, H);
@@ -1737,13 +1781,12 @@ void movePlayer(monster *m, int delta) {
       }
     }
     
-  for(int b=0; b<2; b++) if(sword::orbcount(b)) {
+  for(int b=0; b<2; b++) if(sword::orbcount(b) && !m->isVirtual) {
   
     for(double d=0; d<=1.001; d += .1) {
       hyperpoint H = swordpos(cpid, b, d);
   
-      for(int j=0; j<size(active); j++) {
-        monster* m2 = active[j];
+      for(monster *m2: nonvirtual) {
         if(m2 == m) continue;
         
         double d = intval(m2->pat*C0, H);
@@ -1799,7 +1842,16 @@ monster *getPlayer() {
   return pc[cpid];
   }
 
+void virtualize(monster *m) {
+  if(quotient) forCellCM(c2, m->base) if(!gmatrix.count(c2)) {
+    m->isVirtual = true;
+    m->pat = m->at;
+    return;
+    }
+  }
+
 void moveMimic(monster *m) {
+  virtualize(m);
   transmatrix nat = m->pat;
   cpid = m->pid;
   m->footphase = getPlayer()->footphase;
@@ -1807,7 +1859,7 @@ void moveMimic(monster *m) {
   // no need to care about Mirror images, as they already have their 'at' matrix reversed :|
   nat = nat * spin(playerturn[cpid]) * xpush(playergo[cpid]);
 
-  cell *c2 = m->findbase(nat*C0);  
+  cell *c2 = m->findbase(nat);
   if(c2 != m->base && !passable(c2, m->base, P_ISPLAYER | P_MIRROR))
     killMonster(m, moNone);
   else {
@@ -1827,7 +1879,7 @@ void moveMimic(monster *m) {
     c2->wall = waNone;
     }
 
-  if(c2->cpdist >= 6)
+  if(!quotient && c2->cpdist >= 6)
     m->dead = true;
   }
 
@@ -1846,9 +1898,9 @@ bool verifyTeleport() {
   }
 
 void destroyMimics() {
-  for(int i=0; i<size(active); i++)
-    if(isMimic(active[i]->type)) 
-      active[i]->dead = true;
+  for(monster *m: active)
+    if(isMimic(m->type)) 
+      m->dead = true;
   }
 
 void teleported() {
@@ -1868,7 +1920,7 @@ void shoot(eItem it, monster *m) {
   bullet->pid = m->pid;
   bullet->parenttype = m->type;
   items[it]--;
-  active.push_back(bullet);
+  additional.push_back(bullet);
   }
 
 eItem targetRangedOrbKey(orbAction a) {
@@ -1887,8 +1939,7 @@ eItem targetRangedOrbKey(orbAction a) {
     }
   mousetarget = NULL;
 
-  for(int j=0; j<size(active); j++) {
-    monster* m2 = active[j];
+  for(monster *m2: nonvirtual) {
     if(m2->dead) continue;
 #ifdef ROGUEVIZ
     if(rogueviz::virt(m2)) continue;
@@ -1956,8 +2007,11 @@ int speedfactor() {
 void moveBullet(monster *m, int delta) {
   cpid = m->pid;
   m->findpat();
+  virtualize(m);
+  
   transmatrix nat0 = m->pat;
   transmatrix nat = m->pat;
+  
 
   if(isReptile(m->base->wall)) m->base->wparam = reptilemax();
     
@@ -1976,11 +2030,11 @@ void moveBullet(monster *m, int delta) {
     m->vel = 1/200.;
   else if(m->type == moTongue) {
     m->vel = 1/1500.;
-    if(!m->parent || intval(nat*C0, m->parent->pat*C0) > SCALE2 * 0.4)
+    if(m->isVirtual || !m->parent || intval(nat*C0, m->parent->pat*C0) > SCALE2 * 0.4)
       m->dead = true;
     }
   nat = nat * xpush(delta * SCALE * m->vel / speedfactor());
-  cell *c2 = m->findbase(nat*C0);
+  cell *c2 = m->findbase(nat);
 
   if(isActivable(c2)) activateActiv(c2, true);
   
@@ -2023,14 +2077,13 @@ void moveBullet(monster *m, int delta) {
   m->rebasePat(nat);
   
   // destroy stray bullets
-  for(int i=0; i<m->base->type; i++) 
+  if(!quotient) for(int i=0; i<m->base->type; i++) 
     if(!m->base->mov[i] || !gmatrix.count(m->base->mov[i]))
       m->dead = true;
 
   // items[itOrbWinter] = 100; items[itOrbLife] = 100;
   
-  for(int j=0; j<size(active); j++) {
-    monster* m2 = active[j];
+  if(!m->isVirtual) for(monster* m2: nonvirtual) {
     if(m2 == m || (m2 == m->parent && m->vel >= 0) || m2->parent == m->parent) continue;
     
     // Flailers only killable by themselves
@@ -2137,7 +2190,7 @@ bool dragonbreath(cell *dragon) {
   bullet->type = moFireball;
   bullet->parent = bullet;
   bullet->pid = randplayer;
-  active.push_back(bullet);
+  additional.push_back(bullet);
   return true;
   }
 
@@ -2195,15 +2248,16 @@ void moveMonster(monster *m, int delta) {
   else if(isBull(m->type))
     step *= 1.5;
   
-  if(items[itOrbBeauty]) {
+  if(items[itOrbBeauty] && !m->isVirtual) {
     bool nearplayer = false;
-    for(int pid=0; pid<players; pid++) {
+    for(int pid=0; pid<players; pid++) if(!pc[pid]->isVirtual) {
       double dist = intval(pc[pid]->pat*C0, m->pat*C0);
       if(dist < SCALE2) nearplayer = true;
       }
     if(nearplayer) markOrb(itOrbBeauty), step /= 2;
     }
 
+  if(m->isVirtual) return;
   transmatrix nat = m->pat;
 
   if(stunned) {
@@ -2221,18 +2275,18 @@ void moveMonster(monster *m, int delta) {
 
   else {
   
-    if(m->type == moSleepBull) {  
-      for(int j=0; j<size(active); j++) if(active[j]!=m && active[j]->type != moBullet) {
-        monster* m2 = active[j];
+    if(m->type == moSleepBull && !m->isVirtual) {
+      for(monster *m2: nonvirtual) if(m2!=m && m2->type != moBullet) {
         double d = intval(m2->pat*C0, nat*C0);
         if(d < SCALE2*3 && m2->type == moPlayer) m->type = moRagingBull;
         }
       }
     
     if(m->type == moWitchFlash) for(int pid=0; pid<players; pid++) {
+      if(pc[pid]->isVirtual) continue;
+      if(m->isVirtual) continue;
       bool okay = intval(pc[pid]->pat*C0, m->pat*C0) < 2 * SCALE2;
-      for(int i=0; i<size(active); i++) {
-        monster *m2 = active[i];
+      for(monster *m2: nonvirtual) {
         if(m2 != m && isWitch(m2->type) && intval(m2->pat*C0, m->pat*C0) < 2 * SCALE2)
           okay = false;
         }
@@ -2247,19 +2301,19 @@ void moveMonster(monster *m, int delta) {
       }
     if(isBug(m->type)) {
       vector<monster*> bugtargets;
-      for(int i=0; i<size(active); i++)
-        if(!isBullet(active[i]))
-        if(active[i]->type != m->type)
-        if(!isPlayer(active[i]) || !invismove)
-        if(!active[i]->dead)
-          bugtargets.push_back(active[i]);
+      for(monster *m2: nonvirtual) 
+        if(!isBullet(m2))
+        if(m2->type != m->type)
+        if(!isPlayer(m2) || !invismove)
+        if(!m2->dead)
+          bugtargets.push_back(m2);
       
       closerTo = m->pat * C0;
       sort(bugtargets.begin(), bugtargets.end(), closer);
   
-      for(int i=0; i<size(bugtargets); i++)
-        if(m->trackroute(bugtargets[i]->pat, step)) {
-          goal = bugtargets[i]->pat;
+      for(monster *m2: bugtargets)
+        if(m->trackroute(m2->pat, step)) {
+          goal = m2->pat;
           direct = true;
           break;
           }
@@ -2340,8 +2394,8 @@ void moveMonster(monster *m, int delta) {
       }
     }
   
-  if(m->type == moVampire) for(int i=0; i<players; i++) 
-  if(intval(m->pat*C0, pc[i]->pat*C0) < SCALE2 * 2) {
+  if(m->type == moVampire && !m->isVirtual) for(int i=0; i<players; i++) 
+  if(!pc[i]->isVirtual && intval(m->pat*C0, pc[i]->pat*C0) < SCALE2 * 2) {
     for(int i=0; i<ittypes; i++)
       if(itemclass(eItem(i)) == IC_ORB && items[i] && items[itOrbTime] && !orbused[i])
         orbused[i] = true;
@@ -2384,6 +2438,7 @@ void moveMonster(monster *m, int delta) {
     igo++; goto igo_retry; }
 
   for(int i=0; i<multi::players; i++) for(int b=0; b<2; b++) if(sword::orbcount(b)) {  
+    if(pc[i]->isVirtual) continue;
     hyperpoint H = swordpos(i, b, 1);
     double d = intval(H, nat*C0);
     if(d < SCALE2 * 0.12) { igo++; goto igo_retry; }
@@ -2393,10 +2448,9 @@ void moveMonster(monster *m, int delta) {
 
   monster* crashintomon = NULL;
   
-  for(int j=0; j<size(active); j++) if(active[j]!=m && active[j]->type != moBullet) {
-    monster* m2 = active[j];
+  if(!m->isVirtual) for(monster *m2: nonvirtual) if(m2!=m && m2->type != moBullet) {
     double d = intval(m2->pat*C0, nat*C0);
-    if(d < SCALE2 * 0.1) crashintomon = active[j];
+    if(d < SCALE2 * 0.1) crashintomon = m2;
     }
   
   for(int i=0; i<players; i++) 
@@ -2423,7 +2477,7 @@ void moveMonster(monster *m, int delta) {
   
   if(crashintomon) { igo++; goto igo_retry; }
 
-  cell *c2 = m->findbase(nat*C0);
+  cell *c2 = m->findbase(nat);
 
   if(m->type == moButterfly && !passable_for(m->type, c2, m->base, P_CHAIN)) {
     igo++; goto igo_retry;
@@ -2446,7 +2500,7 @@ void moveMonster(monster *m, int delta) {
       bullet->parent = m;
       bullet->parenttype = m->type;
       bullet->pid = whichPlayerOn(c2);
-      active.push_back(bullet);
+      additional.push_back(bullet);
       return;
       }
     }
@@ -2494,10 +2548,10 @@ void moveMonster(monster *m, int delta) {
       cell *c3 = m->base->mov[i];
       if(dirfromto(c3, c2) != -1 && c3->wall == waFreshGrave && gmatrix.count(c3)) {
         bool monstersNear = false;
-        for(int i=0; i<size(active); i++) {
-          if(active[i] != m && intval(active[i]->pat*C0, gmatrix[c3]*C0) < SCALE2 * .3)
+        for(monster *m2: nonvirtual) {
+          if(m2 != m && intval(m2->pat*C0, gmatrix[c3]*C0) < SCALE2 * .3)
             monstersNear = true;
-          if(active[i] != m && intval(active[i]->pat*C0, gmatrix[c2]*C0) < SCALE2 * .3)
+          if(m2 != m && intval(m2->pat*C0, gmatrix[c2]*C0) < SCALE2 * .3)
             monstersNear = true;
           }
         if(!monstersNear) {
@@ -2510,7 +2564,7 @@ void moveMonster(monster *m, int delta) {
           undead->parenttype = m->type;
           undead->pid = 0;
           undead->findpat();
-          active.push_back(undead);
+          additional.push_back(undead);
 
           undead = new monster;
           undead->base = c3;
@@ -2520,7 +2574,7 @@ void moveMonster(monster *m, int delta) {
           undead->parenttype = m->type;
           undead->findpat();
           undead->pid = 0;
-          active.push_back(undead);
+          additional.push_back(undead);
 
           c3->wall = waAncientGrave;
           addMessage(XLAT("%The1 raises some undead!", m->type));
@@ -2581,7 +2635,7 @@ void moveMonster(monster *m, int delta) {
       bullet->at = m->at;
       bullet->type = moFireball;
       bullet->parent = m;
-      active.push_back(bullet);
+      additional.push_back(bullet);
       bullet->pid = directi;
       if(m->type == moPyroCultist) 
         m->type = moCultist;
@@ -2596,10 +2650,10 @@ void moveMonster(monster *m, int delta) {
       bullet->parent = m;
       bullet->parenttype = moOutlaw;
       bullet->pid = directi;
-      active.push_back(bullet);
+      additional.push_back(bullet);
       m->nextshot = curtime + 1500;
       }
-    for(int i=0; i<players; i++)
+    for(int i=0; i<players; i++) if(!pc[i]->isVirtual)
     if((m->type == moAirElemental) && curtime >= m->nextshot && intval(m->pat*C0, pc[i]->pat*C0) < SCALE2 * 2) {
       monster* bullet = new monster;
       bullet->base = m->base;
@@ -2607,16 +2661,16 @@ void moveMonster(monster *m, int delta) {
       bullet->type = moAirball;
       bullet->parent = m;
       bullet->pid = i;
-      active.push_back(bullet);
+      additional.push_back(bullet);
       m->nextshot = curtime + 1500;
       }
-    for(int i=0; i<players; i++)
+    for(int i=0; i<players; i++) if(!pc[i]->isVirtual)
       if(m->type == moTortoise && tortoise::seek() && !tortoise::diff(getBits(m->torigin)) && intval(m->pat*C0, pc[i]->pat*C0) < SCALE2) {
         items[itBabyTortoise] += 4;
         m->dead = true;
         addMessage(XLAT(playergender() == GEN_F ? "You are now a tortoise heroine!" : "You are now a tortoise hero!"));
         }
-    for(int i=0; i<players; i++)
+    for(int i=0; i<players; i++) if(!pc[i]->isVirtual)
     if(m->type == moFlailer && curtime >= m->nextshot && 
       intval(m->pat*C0, pc[i]->pat*C0) < SCALE2 * 2) {
       m->nextshot = curtime + 3500;
@@ -2627,16 +2681,45 @@ void moveMonster(monster *m, int delta) {
       bullet->parent = m;
       bullet->vel = 1/400.0;
       bullet->pid = i;
-      active.push_back(bullet);
+      additional.push_back(bullet);
       break;
       }
+    }
+  }
+
+void activateMonstersAt(cell *c) {
+  pair<mit, mit> p = 
+    monstersAt.equal_range(c);
+  for(mit it = p.first; it != p.second;) {
+    mit itplus = it;
+    itplus++;
+    active.push_back(it->second);
+    monstersAt.erase(it);
+    it = itplus;
+    }
+  if(c->monst && isMimic(c->monst)) c->monst = moNone;
+  // mimics are awakened by awakenMimics
+  if(c->monst && !isIvy(c) && !isWorm(c) && !isMutantIvy(c) && !isKraken(c->monst) && c->monst != moPrincess) {
+    // awaken as a monster
+    monster *enemy = new monster;
+    enemy->at = Id;
+    enemy->base = c;
+    if(enemy->type == moButterfly)
+      enemy->torigin = createMov(c, (c->mondir + 419) % c->type);
+    enemy->torigin = c;
+    enemy->type = c->monst;
+    enemy->hitpoints = c->hitpoints;
+    if(c->wall == waBoat && isLeader(c->monst)) 
+      enemy->inBoat = true, c->wall = waSea;
+    c->monst = moNone;
+    active.push_back(enemy);
     }
   }
 
 void turn(int delta) {
 
   lmousetarget = NULL;
-  if(mousetarget && intval(mouseh, mousetarget->pat*C0) < 0.1)
+  if(mousetarget && !mousetarget->isVirtual && intval(mouseh, mousetarget->pat*C0) < 0.1)
     lmousetarget = mousetarget;
   
   if(delta > 1000) delta = 1000;
@@ -2650,36 +2733,12 @@ void turn(int delta) {
   invismove = (curtime >= visibleAt) && markOrb(itOrbInvis);
 
   // detect active monsters
-  for(unordered_map<cell*, transmatrix>::iterator it = gmatrix.begin(); it != gmatrix.end(); it++) {
-    cell *c = it->first;
-    pair<mit, mit> p = 
-      monstersAt.equal_range(c);
-    for(mit it = p.first; it != p.second;) {
-      mit itplus = it;
-      itplus++;
-      active.push_back(it->second);      
-      monstersAt.erase(it);
-      it = itplus;
-      }
-    if(c->monst && isMimic(c->monst)) c->monst = moNone;
-    // mimics are awakened by awakenMimics
-    if(c->monst && !isIvy(c) && !isWorm(c) && !isMutantIvy(c) && !isKraken(c->monst) && c->monst != moPrincess) {
-      // awaken as a monster
-      monster *enemy = new monster;
-      enemy->at = Id;
-      enemy->base = c;
-      if(enemy->type == moButterfly)
-        enemy->torigin = createMov(c, (c->mondir + 419) % c->type);
-      enemy->torigin = c;
-      enemy->type = c->monst;
-      enemy->hitpoints = c->hitpoints;
-      if(c->wall == waBoat && isLeader(c->monst)) 
-        enemy->inBoat = true, c->wall = waSea;
-      c->monst = moNone;
-      active.push_back(enemy);
-      }
-    }
-
+  if(quotient)
+    for(cell *c: currentmap->allcells()) activateMonstersAt(c);
+  else
+    for(unordered_map<cell*, transmatrix>::iterator it = gmatrix.begin(); it != gmatrix.end(); it++) 
+      activateMonstersAt(it->first);
+  
   /* printf("size: gmatrix = %ld, active = %ld, monstersAt = %ld, delta = %d\n", 
     gmatrix.size(), active.size(), monstersAt.size(),
     delta); */
@@ -2688,14 +2747,15 @@ void turn(int delta) {
   
   for(int i=0; i<motypes; i++) exists[i] = false;
 
-  for(int i=0; i<size(active); i++) {
-    monster* m = active[i];
+  nonvirtual.clear();
+  for(monster *m: active) {
     m->findpat();
+    if(m->isVirtual) continue;
+    else nonvirtual.push_back(m);
     exists[movegroup(m->type)] = true;
     }
   
-  for(int i=0; i<size(active); i++) {
-    monster* m = active[i];
+  for(monster *m: active) {
     
     switch(m->type) {
       case moPlayer: 
@@ -2710,8 +2770,7 @@ void turn(int delta) {
       }
     }
 
-  for(int i=0; i<size(active); i++) {
-    monster* m = active[i];
+  for(monster *m: active) {
     if(isMimic(m->type))
       moveMimic(m);
     }
@@ -2751,9 +2810,9 @@ void turn(int delta) {
   
     // move monsters of this type
     
-    for(int i=0; i<size(active); i++) 
-     if(movegroup(active[i]->type) == t)
-        moveMonster(active[i], delta);
+    for(monster *m: nonvirtual)
+      if(movegroup(m->type) == t)
+        moveMonster(m, delta);
     }
   
   if(shmup::on) {
@@ -2851,14 +2910,18 @@ void turn(int delta) {
       }
     }
   
+  for(monster *m: additional) active.push_back(m); additional.clear();
+  
   // deactivate all monsters
-  for(int i=0; i<size(active); i++)
-    if(active[i]->dead && active[i]->type != moPlayer) {
-      for(int j=0; j<size(active); j++) if(active[j]->parent == active[i])
-        active[j]->parent = active[i]->parent;
-      delete active[i];
+  for(monster *m: active)
+    if(m->dead && m->type != moPlayer) {
+      for(monster *m2: active) if(m2->parent == m)
+        m2->parent = m->parent;
+      delete m;
       }
-    else active[i]->store();
+    else {
+      m->store();
+      }
     
   active.clear();
 
@@ -3043,7 +3106,7 @@ bool drawMonster(const transmatrix& V, cell *c, const transmatrix*& Vboat, trans
 void clearMonsters() {
   for(mit it = monstersAt.begin(); it != monstersAt.end(); it++)
     delete(it->second);
-  for(int i=0; i<size(active); i++) delete active[i];
+  for(monster *m: active) delete m;
   monstersAt.clear();
   active.clear();
   }
@@ -3066,9 +3129,9 @@ bool playerInBoat(int i) {
   }
 
 void destroyBoats(cell *c) {
-  for(int i=0; i<size(active); i++)
-    if(active[i]->base == c && active[i]->inBoat)
-      active[i]->inBoat = false;
+  for(monster *m: active)
+    if(m->base == c && m->inBoat)
+      m->inBoat = false;
   }
 
 transmatrix calc_relative_matrix(cell *c, heptagon *h1) {
@@ -3167,34 +3230,34 @@ transmatrix calc_relative_matrix_help(cell *c, heptagon *h1) {
   return gm * where;
   }
 
-void virtualRebase(shmup::monster *m, bool tohex) {
-  
+void virtualRebase(cell*& base, transmatrix& at, bool tohex) {
   if(euclid || sphere) {
     again:
-    forCellCM(c2, m->base) {
-      transmatrix newat = inverse(ggmatrix(c2)) * ggmatrix(m->base) * m->at;
+    forCellCM(c2, base) {
+      transmatrix newat = inverse(ggmatrix(c2)) * ggmatrix(base) * at;
       if(hypot(tC0(newat)[0], tC0(newat)[1])
-        < hypot(tC0(m->at)[0], tC0(m->at)[1])) {
-        m->at = newat;
-        m->base = c2;
+        < hypot(tC0(at)[0], tC0(at)[1])) {
+        at = newat;
+        base = c2;
         goto again;
         }
       }
+    fixelliptic(at);
     return;
     }
 
   while(true) {
   
-    if(m->base->type == 6) {
-      cell *c7 = m->base->master->c7;
-      for(int d=0; d<7; d++) if(c7->mov[d] == m->base)
-        m->at = hexmove[d] * m->at;
-      m->base = c7;
+    if(base->type == 6) {
+      cell *c7 = base->master->c7;
+      for(int d=0; d<7; d++) if(c7->mov[d] == base)
+        at = hexmove[d] * at;
+      base = c7;
       }
     
-    double currz = (m->at * C0)[2];
+    double currz = (at * C0)[2];
     
-    heptagon *h = m->base->master;
+    heptagon *h = base->master;
     
     cell *newbase = NULL;
     
@@ -3207,7 +3270,7 @@ void virtualRebase(shmup::monster *m, bool tohex) {
       heptspin hs2 = hsstep(hs, 0);
       transmatrix V2 = spin((purehepta?M_PI:0)-hs2.spin*2*M_PI/7) * invheptmove[d];
       if(purehepta) V2 = V2 * spin(M_PI);
-      double newz = (V2 * m->at * C0) [2];
+      double newz = (V2 * at * C0) [2];
       if(newz < currz) {
         currz = newz;
         bestV = V2;
@@ -3217,9 +3280,9 @@ void virtualRebase(shmup::monster *m, bool tohex) {
 
     if(!newbase) {
       if(tohex && !purehepta) for(int d=0; d<7; d++) {
-        cell *c = createMov(m->base, d);
-        transmatrix V2 = spin(-m->base->spn(d)*2*M_PI/6) * invhexmove[d];
-        double newz = (V2 *m->at * C0) [2];
+        cell *c = createMov(base, d);
+        transmatrix V2 = spin(-base->spn(d)*2*M_PI/6) * invhexmove[d];
+        double newz = (V2 *at * C0) [2];
         if(newz < currz) {
           currz = newz;
           bestV = V2;
@@ -3227,19 +3290,22 @@ void virtualRebase(shmup::monster *m, bool tohex) {
           }
         }
       if(newbase) {
-        m->base = newbase;
-        m->at = bestV * m->at;
+        base = newbase;
+        at = bestV * at;
         }
       break;
       }
     
-    // printf("%p: rebase %p -> %p\n", m, m->base, newbase);
-    m->base = newbase;
-    m->at = bestV * m->at;
+    base = newbase;
+    at = bestV * at;
     }
-
+  
   }
 
+void virtualRebase(shmup::monster *m, bool tohex) {
+  virtualRebase(m->base, m->at, tohex);
+  }
+  
 }
 
 #ifdef ROGUEVIZ

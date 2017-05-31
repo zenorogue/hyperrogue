@@ -81,6 +81,11 @@ const hyperpoint Cx1 = { {1,0,1.41421356237} };
 // also used to verify whether a point h1 is on the hyperbolic plane by using Hypc for h2
 
 ld intval(const hyperpoint &h1, const hyperpoint &h2) {
+  if(elliptic) {
+    double d1 = squar(h1[0]-h2[0]) + squar(h1[1]-h2[1]) + squar(h1[2]-h2[2]);
+    double d2 = squar(h1[0]+h2[0]) + squar(h1[1]+h2[1]) + squar(h1[2]+h2[2]);
+    return min(d1, d2);
+    }
   return squar(h1[0]-h2[0]) + squar(h1[1]-h2[1]) + (sphere?1:euclid?0:-1) * squar(h1[2]-h2[2]);
   }
 
@@ -379,7 +384,11 @@ transmatrix inverse(transmatrix T) {
 
 // distance between mh and 0
 double hdist0(const hyperpoint& mh) {
-  if(sphere) return mh[2] >= 1 ? 0 : mh[2] <= -1 ? M_PI : acos(mh[2]);
+  if(sphere) {
+    ld res = mh[2] >= 1 ? 0 : mh[2] <= -1 ? M_PI : acos(mh[2]);
+    if(elliptic && res > M_PI/2) res = 2*M_PI-res;
+    return res;
+    }
   if(!euclid && mh[2] > 1.5) return acosh(mh[2]);
   ld d = sqrt(mh[0]*mh[0]+mh[1]*mh[1]);
   if(euclid) return d;
