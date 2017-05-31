@@ -5341,7 +5341,7 @@ S(
   "area are matching.",
   
   "Jest to używane w grze do stworzenia krajobrazów, jak przepaści w "
-  "Jaszczurkach lub Smoczych Otchłaniach, które niedł↓go znajdziesz. "
+  "Jaszczurkach lub Smoczych Otchłaniach, które niedługo znajdziesz. "
   "W Smoczych Otchłaniach możesz znaleźć Żółwika, i poszukać "
   "pasującego dorosłego żółwia w Galápagos. Jest ponad 2 miliony gatunków, "
   "ale ze względu na ilość miejsca w geometrii hiperbolicznej, znalezienie "

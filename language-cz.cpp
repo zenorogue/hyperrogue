@@ -5282,14 +5282,15 @@ S(
   "věčného pohybu. Pokus se tam běžet po přímce, zatímco vedle tebe běží "
   "Běžící pes. I když běží stejně rychle jako ty, bude se zdát, že je "
   "pomalejší -- to proto, že ty běžíš po přímce, zatímco Běžící pes musí "
-  "běžet po křivce zvané 'ekvidistanta'.\n\n")
+  "běžet po křivce zvané 'ekvidistanta'.\n\n"
 #ifdef MAC
   "Nezapomeň, že pokud na cokoli klikneš s pravým shiftem, můžeš o tom "
-  "získat víc informací.",
+  "získat víc informací."
 #else
   "Nezapomeň, že pokud na cokoli klikneš pravým tlačítkem, můžeš o tom "
-  "získat víc informací.",
+  "získat víc informací."
 #endif
+  )
 
 S("Equidistants", "Ekvidistanty")
 S(
