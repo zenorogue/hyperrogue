@@ -276,6 +276,76 @@ heptagon *getDodecahedron(int i) {
 
 cell*& euclideanAtCreate(eucoord x, eucoord y);
 
+namespace torusconfig {
+  // the configuration of the torus topology.
+  // torus cells are indexed [0..qty),
+  // where the cell to the right from i is indexed i+dx,
+  // and the cell to the down-rightis numbered i+dy
+  // changed with command line option: -tpar <qty>,<dx>,<dy>
+  int qty = 127*3, dx = -1, dy = 11*2;
+  }
+
+int decodeId(heptagon* h);
+heptagon* encodeId(int id);
+
+struct hrmap_torus : hrmap {
+
+  vector<cell*> all;
+  vector<int> dists;
+
+  virtual vector<cell*>& allcells() { return all; }
+  
+  cell *gamestart() {
+    return all[0];
+    }
+
+  hrmap_torus() {
+    using namespace torusconfig;
+    all.resize(qty);
+    for(int i=0; i<qty; i++) {
+      all[i] = newCell(6, NULL);
+      all[i]->master = encodeId(i);
+      }
+    dx %= qty;
+    dy %= qty;
+    for(int i=0; i<qty; i++) {
+      all[i]->mov[0] = all[(i+dx+2*qty)%qty];
+      all[i]->mov[1] = all[(i+dy+2*qty)%qty];
+      all[i]->mov[2] = all[(i+dy-dx+2*qty)%qty];
+      all[i]->mov[3] = all[(i-dx+2*qty)%qty];
+      all[i]->mov[4] = all[(i-dy+2*qty)%qty];
+      all[i]->mov[5] = all[(i-dy+dx+2*qty)%qty];
+      for(int j=0; j<6; j++)
+        tsetspin(all[i]->spintable, j, (j+3) % 6);
+      }
+    celllister cl(gamestart(), 100, 100000000, NULL);
+    dists.resize(qty);
+    for(int i=0; i<size(cl.lst); i++)
+      dists[decodeId(cl.lst[i]->master)] = cl.dists[i];
+    }
+  
+  ~hrmap_torus() {
+    for(cell *c: all) delete c;
+    }
+  };
+
+int toridMod(int id) {
+  using namespace torusconfig;
+  id %= qty; if(id < 0) id += qty;
+  return id;
+  }
+
+hrmap_torus *torusmap() {
+  return dynamic_cast<hrmap_torus*> (currentmap);
+  }
+
+cell *getTorusId(int id) {
+  hrmap_torus *cur = torusmap();
+  if(!cur) return NULL;
+  return cur->all[toridMod(id)];
+  }
+
+
 struct hrmap_euclidean : hrmap {
 
   cell *gamestart() {
@@ -322,16 +392,30 @@ struct hrmap_euclidean : hrmap {
 union heptacoder {
   heptagon *h;
   struct { eucoord x; eucoord y; } c;
+  int id;
   };
 
 void decodeMaster(heptagon *h, eucoord& x, eucoord& y) {
+  if(torus) { printf("decodeMaster on torus\n"); exit(1); }
   heptacoder u;
   u.h = h; x = u.c.x; y = u.c.y;
   }
 
+int decodeId(heptagon* h) {
+  heptacoder u;
+  u.h = h; return u.id;
+  }
+
 heptagon* encodeMaster(eucoord x, eucoord y) {
+  if(torus) { printf("encodeMaster on torus\n"); exit(1); }
   heptacoder u;
   u.c.x = x; u.c.y = y;
+  return u.h;
+  }
+
+heptagon* encodeId(int id) {
+  heptacoder u;
+  u.id = id;
   return u.h;
   }
 
@@ -591,6 +675,7 @@ void eumerge(cell* c1, cell *c2, int s1, int s2) {
 //  map<pair<eucoord, eucoord>, cell*> euclidean;
 
 cell*& euclideanAt(eucoord x, eucoord y) {
+  if(torus) { printf("euclideanAt called\n"); exit(1); }
   hrmap_euclidean* euc = dynamic_cast<hrmap_euclidean*> (currentmap);
   return euc->at(x, y);
   }
@@ -615,7 +700,8 @@ cell*& euclideanAtCreate(eucoord x, eucoord y) {
 void initcells() {
   DEBB(DF_INIT, (debugfile,"initcells\n"));
   
-  if(euclid) currentmap = new hrmap_euclidean;
+  if(torus) currentmap = new hrmap_torus;
+  else if(euclid) currentmap = new hrmap_euclidean;
   else if(sphere) currentmap = new hrmap_spherical;
   else if(quotient) currentmap = new quotientspace::hrmap_quotient;
   else currentmap = new hrmap_hyperbolic;
@@ -705,6 +791,7 @@ void verifycells(heptagon *at) {
   }
 
 int eupattern(cell *c) {
+  if(torus) return decodeId(c->master) % 3;
   eucoord x, y;
   decodeMaster(c->master, x, y);
   short z = (short(y+2*x))%3;
@@ -760,6 +847,8 @@ int compdist(int dx[3]) {
 
 int celldist(cell *c) {
   if(euclid) {
+    if(torus) 
+      return torusmap()->dists[decodeId(c->master)];
     eucoord x, y;
     decodeMaster(c->master, x, y);
     return eudist(x, y);
@@ -782,6 +871,7 @@ int euclidAlt(short x, short y);
 
 int celldistAlt(cell *c) {
   if(euclid) {
+    if(torus) return celldist(c);
     eucoord x, y;
     decodeMaster(c->master, x, y);
     return euclidAlt(x, y);
@@ -817,6 +907,10 @@ unsigned bitmajority(unsigned a, unsigned b, unsigned c) {
 
 int eufifty(cell *c) {
   eucoord x, y;
+  if(torus) {
+    if(c->land == laWildWest) return decodeId(c->master) % 37;
+    else return decodeId(c->master) % 27;
+    }
   decodeMaster(c->master, x, y);
   int ix = short(x) + 99999 + short(y);
   int iy = short(y) + 99999;
@@ -1196,9 +1290,16 @@ cdata *getHeptagonCdata(heptagon *h) {
   }
 
 cdata *getEuclidCdata(heptagon *h) {
+
+  if(torus) {
+    static cdata xx;
+    return &xx;
+    }
+    
   eucoord x, y;
   hrmap_euclidean* euc = dynamic_cast<hrmap_euclidean*> (currentmap);
   if(euc->eucdata.count(h)) return &(euc->eucdata[h]);
+  
   decodeMaster(h, x, y);
 
   if(x == 0 && y == 0) {
@@ -1314,6 +1415,8 @@ int celldistance(cell *c1, cell *c2) {
   int d = 0;
   
   if(euclid) {
+    if(torus) 
+      return torusmap()->dists[toridMod(decodeId(c1->master)-decodeId(c2->master))];
     eucoord x1, y1, x2, y2;
     decodeMaster(c1->master, x1, y1);
     decodeMaster(c2->master, x2, y2);
@@ -1404,6 +1507,7 @@ void clearMemory() {
   }
 
 int getHemisphere(cell *c, int which) {
+  if(torus) return 0;
   if(c->type != 6) {
     int id = c->master->fiftyval;
     int hemitable[3][12] = {

@@ -11,6 +11,7 @@ namespace whirlwind {
 
   int fzebra3(cell *c) {
     if(euclid) {
+      if(torus) return 0;
       eucoord x, y;
       decodeMaster(c->master, x, y);
       return 1+((((signed short)(y)+int(50000))/3)%3);
@@ -543,9 +544,9 @@ namespace princess {
 
   int dist(cell *c) {
     if(c->land != laPalace) return OUT_OF_PALACE;
+    else if(quotient || sphere || torus) return OUT_OF_PRISON;
     else if(euclid) return celldistAlt(c);
     else if(!c->master->alt) return OUT_OF_PRISON;
-    else if(quotient || sphere) return OUT_OF_PRISON;
     else return celldistAlt(c);
     }
   
@@ -778,9 +779,10 @@ namespace clearing {
     if(buggyplant) return;
     
     if(euclid) {
+      if(torus) return;
       if(pseudohept(c)) return;
       c->monst = moMutant;
-
+      
       eucoord x, y;
       decodeMaster(c->master, x, y);
       int xco = x * 2 + y + 1;
@@ -1101,7 +1103,7 @@ namespace mirror {
     }
   
   void destroyStray() {
-    if(geometry == gQuotient2) return;
+    if(doall) return;
     for(int i=0; i<size(mirrors2); i++) {
       cell *c = mirrors2[i];
       if(c->cpdist > 7 && isMimic(c)) {
@@ -1402,12 +1404,13 @@ namespace hive {
       if(!q) { if(c->land == laHive) c->landparam += 3; continue; }
       int d = gmoves[hrand(q)];
       cell *c2 = c->mov[d];
-      if(c2->monst) {
+      if(c2->monst || isPlayerOn(c2)) {
         eMonster killed = c2->monst;
+        if(isPlayerOn(c2)) killed = moPlayer;
         if(isBug(killed)) battlecount++;
-        else if(!fightspam(c2))
-          addMessage(XLAT("%The1 fights with %the2!", c->monst, c2->monst));
-        attackMonster(c2, AF_ORSTUN, c->monst);
+        else if(killed != moPlayer && !fightspam(c2))
+          addMessage(XLAT("%The1 fights with %the2!", c->monst, killed));
+        attackMonster(c2, AF_ORSTUN | AF_GETPLAYER, c->monst);
         // killMonster(c);
         if(isBug(killed)) {
           c2->monst = moDeadBug, deadbug.push_back(c2);
@@ -1613,7 +1616,7 @@ namespace heat {
       double xrate = (c->land == laCocytus && shmup::on) ? 1/3. : 1;
       if(purehepta) xrate *= 1.7;
       if(!shmup::on) xrate /= FIX94;
-      if(c->cpdist > 7 && !quotient) break;
+      if(c->cpdist > 7 && !doall) break;
   
       if(hasTimeout(c)) {
         if(tick) useup(c);
@@ -1623,24 +1626,36 @@ namespace heat {
       if(isFire(c) && tick) {
         if(c->wall != waPartialFire) for(int i=0; i<c->type; i++) {
           cell *c2 = c->mov[i];
-          if(c2 && c2->wall == waNone && c2->land == laRose && c->wparam >= 10)
+          if(!c2) continue;
+          if(c2->wall == waNone && c2->land == laRose && c->wparam >= 10)
             rosefires.push_back(make_pair(c2, c->wparam));
-          if(c2 && c2->wall == waFire && c2->land == laRose && c->wparam >= 10 && c2->wparam < c->wparam/2)
+          if(c2->wall == waFire && c2->land == laRose && c->wparam >= 10 && c2->wparam < c->wparam/2)
             rosefires.push_back(make_pair(c2, c->wparam));
-          if(c2 && c2->wall == waVinePlant)
+          if(againstWind(c, c2) && c->wall != waEternalFire && c->wparam >= 10) {
+            if(isFire(c2)) {
+              if(c2->wparam < c->wparam/2) {
+                rosefires.push_back(make_pair(c2, c->wparam));
+                }
+              }
+            else {
+              rosefires.push_back(make_pair(c2, c->wparam));
+              useup(c);
+              }
+            }
+          if(c2->wall == waVinePlant)
             vinefires.push_back(c2);
-          if(c2 && c2->wall == waRose)
+          if(c2->wall == waRose)
             vinefires.push_back(c2);
-          if(c2 && c2->wall == waSaloon)
+          if(c2->wall == waSaloon)
             vinefires.push_back(c2);
-          if(c2 && c2->wall == waSmallTree && c2->land != laDryForest)
+          if(c2->wall == waSmallTree && c2->land != laDryForest)
             vinefires.push_back(c2);
-          if(c2 && (c2->wall == waWeakBranch || c2->wall == waCanopy || c2->wall == waTrunk || c2->wall == waSolidBranch ||
+          if((c2->wall == waWeakBranch || c2->wall == waCanopy || c2->wall == waTrunk || c2->wall == waSolidBranch ||
             c2->wall == waBigBush || c2->wall == waSmallBush))
             vinefires.push_back(c2);
-          if(c2 && c2->wall == waBonfireOff) activateActiv(c2, false);
+          if(c2->wall == waBonfireOff) activateActiv(c2, false);
           // both halfvines have to be near fire at once
-          if(c2 && cellHalfvine(c2) && c->mov[(i+1)%c->type]->wall == c2->wall)
+          if(cellHalfvine(c2) && c->mov[(i+1)%c->type]->wall == c2->wall)
             vinefires.push_back(c2);
           }
         
@@ -1704,7 +1719,7 @@ namespace heat {
         hmods[i] = hmod;
         }
       
-      if((readd || HEAT(c)) && !quotient) 
+      if((readd || HEAT(c)) && !doall)
         offscreen.push_back(c);
 
       }
@@ -1752,8 +1767,8 @@ namespace heat {
       cell* c = rosefires[i].first;
       int qty = rosefires[i].second;
       qty /= 2;
-      if(c->wall == waNone && c->land == laRose)
-        makeflame(c, qty, false);
+      // if(c->wall == waNone && c->land == laRose)
+      makeflame(c, qty, false);
       if(c->wparam < qty) c->wparam = qty;
       }
     
@@ -1763,21 +1778,30 @@ namespace heat {
   void dryforest() {
     vector<cell*>& allcells = currentmap->allcells();
     int dcs = size(allcells);
+
     for(int i=0; i<dcs; i++) {
       cell *c = allcells[i];
-      if(!quotient && c->cpdist > 8) break;
+      if(!doall && c->cpdist > 8) break;
       if(c->land != laDryForest) continue;
       
-      for(int j=0; j<c->type; j++) if(c->mov[j]) {
-        if(isFire(c->mov[j])) c->landparam++;
+      forCellEx(c2, c) {
+        if(isFire(c2)) {
+          if(!againstWind(c, c2)) c->landparam++;
+          if(againstWind(c2, c)) c->landparam++;
+          }
         }
+      }
+
+    for(int i=0; i<dcs; i++) {
+      cell *c = allcells[i];
+      if(c->land != laDryForest) continue;
   
       if(c->landparam >= 10) makeflame(c, 10, false), c->landparam = 0;
       }
   
     for(int i=0; i<dcs; i++) {
       cell *c = allcells[i];
-      if(!quotient && c->cpdist > 8) break;
+      if(!doall && c->cpdist > 8) break;
       if(c->land != laDryForest) continue;
       if((c->wall == waBigTree || c->wall == waSmallTree || isFire(c)) && c->landparam >= 1)
         c->wall = waEternalFire;
@@ -1797,7 +1821,7 @@ void livecaves() {
   
   for(int i=0; i<dcs; i++) {
     cell *c = allcells[i];
-    if(!quotient && c->cpdist > 8) break;
+    if(!doall && c->cpdist > 8) break;
     
     if(c->wall == waCavefloor || c->wall == waCavewall || c->wall == waDeadTroll) {
       c->aitmp = 0;
@@ -1899,7 +1923,7 @@ void livecaves() {
 
   for(int i=0; i<dcs; i++) {
     cell *c = allcells[i];
-    if(!quotient && c->cpdist > 8) break;
+    if(!doall && c->cpdist > 8) break;
 
     if(c->wall == waCavefloor || c->wall == waCavewall) {
   //  if(c->land != laCaves) continue;
@@ -2429,7 +2453,10 @@ namespace prairie {
     c->LHU.fi.walldist = 8;
     c->LHU.fi.walldist2 = 8;
     
-    if(euclid) {
+    if(torus) {
+      c->LHU.fi.rval = 0;
+      }
+    else if(euclid) {
       eucoord x, y;
       decodeMaster(c->master, x, y);
       c->LHU.fi.rval = (y&15);

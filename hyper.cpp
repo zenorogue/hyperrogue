@@ -70,6 +70,15 @@ eItem readItem(const char *s) {
   return itNone;
   }
 
+eMonster readMonster(const char *s) {
+  string ss = s;
+  for(int i=0; i<motypes; i++) if(strstr(minf[i].name, s) != NULL) {
+    return eMonster(i);
+    break;
+    }
+  return moNone;
+  }
+
 void initializeCLI() {
   printf("HyperRogue by Zeno Rogue <zeno@attnam.com>, version " VER "\n");
 
@@ -120,6 +129,13 @@ int arg::readCommon() {
     PHASE(3) cheater++; timerghost = false;
     shift(); eItem i = readItem(args());
     shift(); items[i] = argi(); 
+    }
+  else if(argis("-M")) {
+    PHASE(3) cheater++; timerghost = false;
+    shift(); eMonster m = readMonster(args());
+    shift(); int q = argi();
+    printf("m = %s q = %d\n", dnameof(m), q);
+    restoreGolems(q, m, 7);
     }
   else if(argis("-L")) {
     printf("Treasures:\n");
@@ -192,6 +208,13 @@ else if(args()[0] == '-' && args()[1] == x && args()[2] == '0') { if(curphase ==
       );
     autocheat = true;
     fp43.init(p); 
+    }
+  else if(argis("-tpar")) { 
+    shift(); sscanf(args(), "%d,%d,%d", 
+      &torusconfig::qty, 
+      &torusconfig::dx,
+      &torusconfig::dy
+      );
     }
   else if(argis("-cs")) {
     shift(); 

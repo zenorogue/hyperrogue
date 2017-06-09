@@ -1699,7 +1699,7 @@ bool drawstar(cell *c) {
 
 bool drawItemType(eItem it, cell *c, const transmatrix& V, int icol, int ticks, bool hidden) {
   char xch = iinf[it].glyph;
-  int ct6 = c ? c->type-6 : 0;
+  int ct6 = c ? c->type-6 : 1;
   hpcshape *xsh = 
     (it == itPirate || it == itKraken) ? &shPirateX :
     (it == itBuggy || it == itBuggy2) ? &shPirateX :
@@ -1708,6 +1708,7 @@ bool drawItemType(eItem it, cell *c, const transmatrix& V, int icol, int ticks, 
     (it == itBombEgg || it == itTrollEgg) ? &shEgg :
     it == itDodeca ? &shDodeca :
     xch == '*' ? &shGem[ct6] : 
+    it == itShard ? &shMFloor[0] :
     it == itTreat ? &shTreat :
     it == itSlime ? &shEgg :
     xch == '%' ? &shDaisy : xch == '$' ? &shStar : xch == ';' ? &shTriangle :
@@ -7086,38 +7087,38 @@ void showGameover() {
   if(intour) {
 #ifdef TOUR
     if(canmove) {
-      dialog::addItem("spherical geometry", '1');
-      dialog::addItem("Euclidean geometry", '2');
-      dialog::addItem("more curved hyperbolic geometry", '3');
+      dialog::addItem(XLAT("spherical geometry"), '1');
+      dialog::addItem(XLAT("Euclidean geometry"), '2');
+      dialog::addItem(XLAT("more curved hyperbolic geometry"), '3');
       }
     if(!items[itOrbTeleport])
-      dialog::addItem("teleport away", '4');
+      dialog::addItem(XLAT("teleport away"), '4');
     else if(!items[itOrbAether])
-      dialog::addItem("move through walls", '4');
+      dialog::addItem(XLAT("move through walls"), '4');
     else
-      dialog::addItem("flash", '4');
+      dialog::addItem(XLAT("flash"), '4');
     if(canmove) {
       if(tour::slidecommand != "") 
         dialog::addItem(tour::slidecommand, '5');
-      dialog::addItem("static mode", '6');
-      dialog::addItem("enable/disable texts", '7');
-      dialog::addItem("next slide", SDLK_RETURN);
-      dialog::addItem("previous slide", SDLK_BACKSPACE);
+      dialog::addItem(XLAT("static mode"), '6');
+      dialog::addItem(XLAT("enable/disable texts"), '7');
+      dialog::addItem(XLAT("next slide"), SDLK_RETURN);
+      dialog::addItem(XLAT("previous slide"), SDLK_BACKSPACE);
       }
     else
       dialog::addBreak(200);
-    dialog::addItem("main menu", 'v');
+    dialog::addItem(XLAT("main menu"), 'v');
 #endif
     }
   else {
-    dialog::addItem(canmove ? "continue" : "see how it ended", SDLK_ESCAPE);
-    dialog::addItem("main menu", 'v');
-    dialog::addItem("restart", SDLK_F5);
+    dialog::addItem(XLAT(canmove ? "continue" : "see how it ended"), SDLK_ESCAPE);
+    dialog::addItem(XLAT("main menu"), 'v');
+    dialog::addItem(XLAT("restart"), SDLK_F5);
     #ifndef MOBILE
-    dialog::addItem(quitsaves() ? "save" : "quit", SDLK_F10);
+    dialog::addItem(XLAT(quitsaves() ? "save" : "quit"), SDLK_F10);
     #endif
     #ifdef ANDROIDSHARE
-    dialog::addItem("SHARE", 's'-96);
+    dialog::addItem(XLAT("SHARE"), 's'-96);
     #endif
     }
   
@@ -8618,9 +8619,9 @@ void handleKeyQuit(int sym, int uni) {
   else if(sym == SDLK_PAGEUP || sym == SDLK_KP9) msgscroll+=5;
   else if(sym == SDLK_PAGEDOWN || sym == SDLK_KP3) msgscroll-=5;
   else if(uni == 'v') cmode = emMenu;
-  else if(sym == SDLK_HOME || sym == SDLK_F3 || (sym == ' ' && DEFAULTCONTROL)) 
+  else if(sym == SDLK_F3 || (sym == ' ' || sym == SDLK_HOME)) 
     fullcenter();
-  else if(uni == 'o') setAppropriateOverview();
+  else if(uni == 'o' && DEFAULTNOR(sym)) setAppropriateOverview();
 #ifndef NOSAVE
   else if(uni == 't') {
     if(!canmove) restartGame();
@@ -8669,49 +8670,50 @@ void handleKeyNormal(int sym, int uni, extra& ev) {
     }
 #endif
 
-  if(DEFAULTCONTROL) {
+  if(uni == sym && DEFAULTNOR(sym)) {
+    if(sym == '1') { 
+      vid.alpha = 999; vid.scale = 998;
+      }
+    if(sym == '2') { 
+      vid.alpha = 1; vid.scale = 0.4;
+      }
+    if(sym == '3') { 
+      vid.alpha = 1; vid.scale = 1;
+      }
+    if(sym == '4') { 
+      vid.alpha = 0; vid.scale = 1;
+      }
+    if(sym == '5') { 
+      vid.wallmode++;
+      if(vid.wallmode == 6) vid.wallmode = 0;
+      }
+    if(sym == '6') {
+      vid.grid = !vid.grid;
+      }
+    if(sym == '7') {
+      vid.darkhepta = !vid.darkhepta;
+      }
+    if(sym == '8') {
+      backcolor = backcolor ^ 0xFFFFFF;
+      printf("back = %x\n", backcolor);
+      }
+    if(sym == '9') {
+      pmodel = eModel(8 - pmodel);
+      // vid.yshift = 1 - vid.yshift;
+      // vid.drawmousecircle = true;
+      }
+    if(sym == 'm' && canmove && cmode == emNormal && (centerover == cwt.c ? mouseover : centerover))
+      performMarkCommand(mouseover);
+    }
+  
+  if(DEFAULTCONTROL) {  
     if(sym == '.' || sym == 's') movepcto(-1, 1);
     if(uni == '%' && sym == '5') { 
       if(vid.wallmode == 0) vid.wallmode = 6;
       vid.wallmode--;
       }
-    if(uni == sym) {
-      if(uni == '1') { 
-        vid.alpha = 999; vid.scale = 998;
-        }
-      if(uni == '2') { 
-        vid.alpha = 1; vid.scale = 0.4;
-        }
-      if(uni == '3') { 
-        vid.alpha = 1; vid.scale = 1;
-        }
-      if(uni == '4') { 
-        vid.alpha = 0; vid.scale = 1;
-        }
-      if(uni == '5') { 
-        vid.wallmode++;
-        if(vid.wallmode == 6) vid.wallmode = 0;
-        }
-      if(uni == '6') {
-        vid.grid = !vid.grid;
-        }
-      if(uni == '7') {
-        vid.darkhepta = !vid.darkhepta;
-        }
-      if(uni == '8') {
-        backcolor = backcolor ^ 0xFFFFFF;
-        printf("back = %x\n", backcolor);
-        }
-      if(uni == '9') {
-        pmodel = eModel(8 - pmodel);
-        // vid.yshift = 1 - vid.yshift;
-        // vid.drawmousecircle = true;
-        }
-      }
     if((sym == SDLK_DELETE || sym == SDLK_KP_PERIOD || sym == 'g') && uni != 'G' && uni != 'G'-64) 
       movepcto(MD_DROP, 1);
-    if(sym == 'm' && canmove && cmode == emNormal && (centerover == cwt.c ? mouseover : centerover))
-      performMarkCommand(mouseover);
     if(sym == 't' && uni != 'T' && uni != 'T'-64 && canmove && cmode == emNormal) {
       if(playermoved && items[itStrongWind]) {
         cell *c = whirlwind::jumpDestination(cwt.c);
@@ -8763,9 +8765,9 @@ void handleKeyNormal(int sym, int uni, extra& ev) {
     else if(sym == SDLK_PAGEDOWN || sym == SDLK_KP3) msgscroll-=5;
     }
   
-  if(uni == 'o') setAppropriateOverview();
+  if(uni == 'o' && DEFAULTNOR(sym)) setAppropriateOverview();
   
-  if(sym == SDLK_HOME || sym == SDLK_F3 || (sym == ' ' && DEFAULTCONTROL)) 
+  if((sym == SDLK_HOME || sym == SDLK_F3 || sym == ' ') && DEFAULTNOR(sym)) 
     fullcenter();
   
 /*      if(sym == SDLK_F6) {
@@ -8774,7 +8776,7 @@ void handleKeyNormal(int sym, int uni, extra& ev) {
     cmode = emDraw;
     } */
 
-  if(sym == 'v') {
+  if(sym == 'v' && DEFAULTNOR(sym)) {
     cmode = emMenu;
     }
 
@@ -8826,7 +8828,7 @@ void handlekey(int sym, int uni, extra& ev) {
   if(tour::on && tour::handleKeyTour(sym, uni)) return;
 #endif
 
-  if(((cmode == emNormal && canmove) || (cmode == emQuit && !canmove) || cmode == emDraw || (cmode == emMapEditor && !mapeditor::subscreen)) && DEFAULTCONTROL && !rug::rugged) {
+  if(((cmode == emNormal && canmove) || (cmode == emQuit && !canmove) || cmode == emDraw || (cmode == emMapEditor && !mapeditor::subscreen)) && DEFAULTNOR(sym) && !rug::rugged) {
 #ifndef PANDORA
     if(sym == SDLK_RIGHT) { 
       if(conformal::on)

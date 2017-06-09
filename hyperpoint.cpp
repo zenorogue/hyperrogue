@@ -1,12 +1,17 @@
 // Hyperbolic Rogue
 // Copyright (C) 2011-2012 Zeno Rogue, see 'hyper.cpp' for details
 
-enum eGeometry {gNormal, gEuclid, gSphere, gElliptic, gQuotient, gQuotient2, gGUARD};
+enum eGeometry {gNormal, gEuclid, gSphere, gElliptic, gQuotient, gQuotient2, gTorus, gGUARD};
 eGeometry geometry, targetgeometry = gEuclid;
-#define euclid (geometry == gEuclid)
+#define euclid (geometry == gEuclid || geometry == gTorus)
 #define sphere (geometry == gSphere || geometry == gElliptic)
 #define elliptic (geometry == gElliptic)
 #define quotient (geometry == gQuotient ? 1 : geometry == gQuotient2 ? 2 : 0)
+#define torus (geometry == gTorus)
+#define doall (quotient || torus)
+
+#define smallbounded (sphere || quotient == 1 || torus)
+    
 
 // for the pure heptagonal grid
 bool purehepta = false;

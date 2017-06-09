@@ -1008,7 +1008,7 @@ struct monster {
       fixmatrix(at); pat = at;
       return;
       }
-    if(geometry == gQuotient) {
+    if(geometry == gQuotient || geometry == gTorus) {
       at = inverse(gmatrix[base]) * new_pat;
       virtualRebase(this, true);
       fixmatrix(at);
@@ -1514,10 +1514,14 @@ void movePlayer(monster *m, int delta) {
   playerturn[cpid] = mturn * delta / 150.0;
 
   double mdd = hypot(mdx, mdy);
+  
   if(mdd > 1e-6) {
     hyperpoint jh = hpxy(mdx/100.0, mdy/100.0);
+    hyperpoint ctr = m->pat * C0;
 
-    hyperpoint h = inverse(m->pat) * rgpushxto0(m->pat * C0) * jh;
+    if(sphere && vid.alphax > 1.001) for(int i=0; i<3; i++) ctr[i] = -ctr[i];
+
+    hyperpoint h = inverse(m->pat) * rgpushxto0(ctr) * jh;
     
     playerturn[cpid] = -atan2(h[1], h[0]);
     mgo += mdd;
@@ -1526,7 +1530,7 @@ void movePlayer(monster *m, int delta) {
 #ifndef NOSDL
   Uint8 *keystate = SDL_GetKeyState(NULL);
   bool forcetarget = (keystate[SDLK_RSHIFT] | keystate[SDLK_LSHIFT]);
-  if(((mousepressed && !forcetarget) || facemouse) && delta > 0 && !outofmap(mouseh)) {
+  if(((mousepressed && !forcetarget) || facemouse) && delta > 0 && !mouseout()) {
     // playermoved = true;
     hyperpoint h = inverse(m->pat) * mouseh;
     playerturn[cpid] = -atan2(h[1], h[0]);
@@ -1843,7 +1847,7 @@ monster *getPlayer() {
   }
 
 void virtualize(monster *m) {
-  if(quotient) forCellCM(c2, m->base) if(!gmatrix.count(c2)) {
+  if(doall) forCellCM(c2, m->base) if(!gmatrix.count(c2)) {
     m->isVirtual = true;
     m->pat = m->at;
     return;
@@ -1879,7 +1883,7 @@ void moveMimic(monster *m) {
     c2->wall = waNone;
     }
 
-  if(!quotient && c2->cpdist >= 6)
+  if(!doall && c2->cpdist >= 6)
     m->dead = true;
   }
 
@@ -2077,7 +2081,7 @@ void moveBullet(monster *m, int delta) {
   m->rebasePat(nat);
   
   // destroy stray bullets
-  if(!quotient) for(int i=0; i<m->base->type; i++) 
+  if(!doall) for(int i=0; i<m->base->type; i++) 
     if(!m->base->mov[i] || !gmatrix.count(m->base->mov[i]))
       m->dead = true;
 
@@ -2716,6 +2720,16 @@ void activateMonstersAt(cell *c) {
     }
   }
 
+void fixStorage() {
+  vector<monster*> restore;
+  for(auto it = monstersAt.begin(); it != monstersAt.end(); it++)
+    if(it->second->base != it->first) {
+      restore.push_back(it->second);
+      monstersAt.erase(it++);
+      }
+  for(monster *m: restore) m->store();
+  }
+
 void turn(int delta) {
 
   lmousetarget = NULL;
@@ -2733,7 +2747,7 @@ void turn(int delta) {
   invismove = (curtime >= visibleAt) && markOrb(itOrbInvis);
 
   // detect active monsters
-  if(quotient)
+  if(doall)
     for(cell *c: currentmap->allcells()) activateMonstersAt(c);
   else
     for(unordered_map<cell*, transmatrix>::iterator it = gmatrix.begin(); it != gmatrix.end(); it++) 
@@ -2998,7 +3012,7 @@ bool drawMonster(const transmatrix& V, cell *c, const transmatrix*& Vboat, trans
     m->pat = ggmatrix(m->base) * m->at;
     transmatrix view = V * m->at;
     
-    if(!outofmap(mouseh)) {
+    if(!mouseout()) {
 #ifdef ROGUEVIZ
       if(rogueviz::virt(m)) ; else
 #endif
@@ -3039,6 +3053,7 @@ bool drawMonster(const transmatrix& V, cell *c, const transmatrix*& Vboat, trans
           hyperpoint h = keytarget(cpid);
           queuechr(h, vid.fsize, '+', iinf[keyresult[cpid]].color);
           }
+
         break;
       case moBullet: {
         int col;
@@ -3172,8 +3187,6 @@ transmatrix calc_relative_matrix(cell *c, heptagon *h1) {
   return gm * where;
   }
 
-    transmatrix ztmp;
-    
 transmatrix &ggmatrix(cell *c) {
   transmatrix& t = gmatrix[c];
   if(t[2][2] == 0) {
@@ -3182,6 +3195,11 @@ transmatrix &ggmatrix(cell *c) {
     else if(sphere) {
       printf("error: gmatrix0 not known\n");
       exit(1);
+      }
+    else if(torus) {
+      forCellIdEx(c2, i, c)
+        if(celldistance(c2, centerover) < celldistance(c, centerover))
+          t = ggmatrix(c2) * eumovedir(3+i);
       }
     else if(euclid) {
       eucoord xh, yh, xc, yc;
@@ -3233,7 +3251,15 @@ transmatrix calc_relative_matrix_help(cell *c, heptagon *h1) {
 void virtualRebase(cell*& base, transmatrix& at, bool tohex) {
   if(euclid || sphere) {
     again:
-    forCellCM(c2, base) {
+    if(torus) for(int i=0; i<6; i++) {
+      transmatrix newat = eumovedir(3+i) * at;
+      if(hdist0(tC0(newat)) < hdist0(tC0(at))) {
+        at = newat;
+        base = createMov(base, i);
+        goto again;
+        }
+      }
+    else forCellCM(c2, base) {
       transmatrix newat = inverse(ggmatrix(c2)) * ggmatrix(base) * at;
       if(hypot(tC0(newat)[0], tC0(newat)[1])
         < hypot(tC0(at)[0], tC0(at)[1])) {

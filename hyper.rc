@@ -1,8 +1,8 @@
 id ICON "hr-icon.ico"
 
 1 VERSIONINFO
-FILEVERSION     9,4,0,11
-PRODUCTVERSION  9,4,0,11
+FILEVERSION     9,4,0,12
+PRODUCTVERSION  9,4,0,12
 BEGIN
   BLOCK "StringFileInfo"
   BEGIN
@@ -15,7 +15,7 @@ BEGIN
       VALUE "LegalCopyright", "Zeno Rogue"
       VALUE "OriginalFilename", "hyper.exe"
       VALUE "ProductName", "HyperRogue"
-      VALUE "ProductVersion", "9.4k"
+      VALUE "ProductVersion", "9.4l"
     END
   END
 

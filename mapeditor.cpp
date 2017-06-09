@@ -1231,7 +1231,7 @@ namespace mapeditor {
 
       transmatrix V2 = V * spin(M_PI + 2*M_PI*a/dsCur->rots);
 
-      if(outofmap(mouseh)) break;
+      if(mouseout()) break;
 
       hyperpoint P2 = V2 * inverse(cwtV) * mouseh;
     
@@ -1368,7 +1368,7 @@ namespace mapeditor {
     displayButton(vid.xres-8, 8+fs*2, XLAT("o = zoom out"), 'o', 16);
     displayfr(vid.xres-8, 8+fs, 2, vid.fsize, XLAT("e = edit this"), 0xC0C0C0, 16);
 
-    if(!outofmap(mouseh)) {
+    if(!mouseout()) {
       hyperpoint mh = inverse(drawtrans * rgpushxto0(ccenter)) * mouseh;
       displayfr(vid.xres-8, vid.yres-8-fs*6, 2, vid.fsize, XLAT("x: %1", fts4(mh[0])), 0xC0C0C0, 16);
       displayfr(vid.xres-8, vid.yres-8-fs*5, 2, vid.fsize, XLAT("y: %1", fts4(mh[1])), 0xC0C0C0, 16);

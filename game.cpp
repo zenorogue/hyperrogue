@@ -379,8 +379,6 @@ bool thruVine(cell *c, cell *c2) {
 
 // === MOVEMENT FUNCTIONS ===
 
-bool againstWind(cell *c2, cell *c1); // to, from
-
 // w = from->mov[d]
 bool againstCurrent(cell *w, cell *from) {
   if(from->land != laWhirlpool) return false;
@@ -4280,7 +4278,7 @@ bool swordAttack(cell *mt, eMonster who, cell *c, int bb) {
   eMonster m = c->monst;
   if(c->wall == waCavewall) markOrb(bb ? itOrbSword2: itOrbSword);
   if(c->wall == waSmallTree || c->wall == waBigTree || c->wall == waRose || c->wall == waCTree || c->wall == waVinePlant ||
-    thruVine(mt, c)) {
+    thruVine(mt, c) || c->wall == waBigBush || c->wall == waSmallBush || c->wall == waSolidBranch || c->wall == waWeakBranch) {
     playSound(NULL, "hit-axe"+pick123());
     markOrb(bb ? itOrbSword2: itOrbSword);
     drawParticles(c, winf[c->wall].color, 16);
@@ -7075,6 +7073,9 @@ bool mightBeMine(cell *c) {
   }
 
 void performMarkCommand(cell *c) {
+#ifdef ROGUEVIZ
+  rogueviz::mark(c);
+#endif
   if(c->land == laCA && c->wall == waNone) 
     c->wall = waFloorA;
   else if(c->land == laCA && c->wall == waFloorA)

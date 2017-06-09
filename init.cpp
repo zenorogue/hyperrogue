@@ -1,6 +1,6 @@
-#define VER "9.4k"
-#define VERNUM 9411
-#define VERNUM_HEX 0x9411
+#define VER "9.4l"
+#define VERNUM 9412
+#define VERNUM_HEX 0x9412
 
 #define GEN_M 0
 #define GEN_F 1
@@ -186,6 +186,7 @@ typedef int SDL_Event;
 #undef TOUR
 #else
 #include <functional>
+#include <memory>
 #endif
 
 #include <cmath>
@@ -198,6 +199,8 @@ typedef int SDL_Event;
 #include <string>
 #include <map>
 #include <queue>
+
+#include <array>
 
 #ifdef USE_UNORDERED_MAP
 #include <unordered_map>
@@ -392,7 +395,7 @@ void handleclick(MOBPAR_FORMAL) {
         }
       }
 
-    if(buttonclicked || outofmap(mouseh)) {
+    if(buttonclicked || mouseout()) {
       
       if(andmode == 0 && getcstat == 'g' && !shmup::on && (cmode == emNormal || cmode == emQuit)) {
         movepcto(MD_DROP);
@@ -435,7 +438,7 @@ void handleclick(MOBPAR_FORMAL) {
         }
       }
     
-    if(andmode == 0 && cmode == (canmove ? emNormal : emQuit) && !outofmap(mouseh)) {
+    if(andmode == 0 && cmode == (canmove ? emNormal : emQuit) && !mouseout()) {
 
       bool forcetarget = longclick;
       
@@ -484,7 +487,7 @@ void mobile_draw(MOBPAR_FORMAL) {
   safety = false;
   vid.fsize = (min(vid.xres, vid.yres) * fontscale + 50) / 3200;
   
-  hyperpoint mouseoh = mouseh;
+  mouseoh = mouseh;
   gtouched = mousepressed = clicked;
 
   longclick = lclicked && ticks > touchedAt + 500;
@@ -592,7 +595,7 @@ void mobile_draw(MOBPAR_FORMAL) {
   if((cmode != emVisual1 && cmode != emScores)) {
      
     if(clicked && lclicked && andmode == 1 && !inmenu) {
-      if(!outofmap(mouseoh) && !outofmap(mouseh) && mouseoh[2] < 50 && mouseh[2] < 50) {
+      if(!mouseout2() && mouseoh[2] < 50 && mouseh[2] < 50) {
         panning(mouseoh, mouseh);
         }
       }

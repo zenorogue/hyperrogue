@@ -34,7 +34,7 @@ string fname;
 // const char *fname;
 // const char *cfname;
 
-enum eVizkind { kNONE, kAnyGraph, kTree, kSpiral, kSAG, kCollatz, kFullNet };
+enum eVizkind { kNONE, kAnyGraph, kTree, kSpiral, kSAG, kCollatz, kFullNet, kKohonen };
 eVizkind kind;
 
 bool on;
@@ -889,6 +889,12 @@ bool edgecmp(edgeinfo *e1, edgeinfo *e2) {
   return e1->weight > e2->weight;
   }
 
+#include "kohonen.cpp"
+
+void describe(cell *c) {
+  if(kind == kKohonen) return kohonen::describe(c);
+  }
+
 string describe(shmup::monster *m) {
   int i = m->pid;
   vertexdata& vd = vdata[i];
@@ -1244,8 +1250,9 @@ void readcolor(const char *cfname) {
     if(size(lab) && lab[0] == '*') {
       lab = lab.substr(1);
       for(int i=0; i<size(vdata); i++)
-        if(vdata[i].name.find(lab) != string::npos)
+        if(vdata[i].name.find(lab) != string::npos) {
           vdata[i].cp = x;
+          }
       }
     else {
       int i = getid(lab);
@@ -1296,6 +1303,7 @@ void close() {
 void turn(int delta) {
   if(!on) return;
   if(kind == kSAG) sag::iterate();
+  if(kind == kKohonen) kohonen::steps();
   // shmup::pc[0]->rebase();
   }
 
@@ -1601,6 +1609,21 @@ int readArgs() {
   else if(argis("-ggamma")) {
     shift(); ggamma = argf();
     }
+  else if(argis("-som")) {
+    PHASE(3);
+    shift(); const char *fname = args();
+    shift(); int percount = argi();
+    shift(); kohonen::run(fname, percount, argf());
+    }
+  else if(argis("-somsave")) {
+    PHASE(3);
+    while(!kohonen::finished()) kohonen::step();
+    shift(); kohonen::ksave(args());
+    }
+  else if(argis("-somload")) {
+    PHASE(3);
+    shift(); kohonen::kload(args());
+    }
   else if(argis("-nolegend")) {
     legend.clear();
     }
@@ -1623,12 +1646,16 @@ void showMenu() {
   dialog::init(XLAT("rogueviz configuration"));
 
   dialog::addSelItem(XLAT("temperature"), fts(sag::temperature), 't');
-  dialog::addSelItem(XLAT("SAG mode"), sag::sagmodes[sag::sagmode], 'm');
+  if(kind == kSAG)
+    dialog::addSelItem(XLAT("SAG mode"), sag::sagmodes[sag::sagmode], 'm');
   dialog::addBoolItem(XLAT("show labels"), showlabels, 'l');
   dialog::addBoolItem(XLAT("mark special vertices"), specialmark, 'x');
   dialog::addSelItem(XLAT("background color"), itsh(backcolor), 'b');
   dialog::addSelItem(XLAT("gamma value for edges"), fts(ggamma), 'g');
-  dialog::addBoolItem(XLAT("vertices in 3D"), rog3, '3');
+  dialog::addBoolItem(XLAT("vertices in 3D"), rog3, 'v');
+  
+  if(kind == kKohonen)
+    kohonen::showMenu();
 
   dialog::addBreak(50);
   dialog::addItem(XLAT("exit menu"), 'v');
@@ -1644,7 +1671,7 @@ void handleMenu(int sym, int uni) {
     sag::sagmode = sag::eSagmode( (1+sag::sagmode) % 3 );
     }
   else if(uni == 'l') showlabels = !showlabels;
-  else if(uni == '3') rog3 = !rog3;
+  else if(uni == 'v') rog3 = !rog3;
   else if(uni == 'x') specialmark = !specialmark;
   else if(uni == 'b') backcolor ^= 0xFFFFFF;
   else if(uni == 'g') {
@@ -1658,6 +1685,7 @@ void handleMenu(int sym, int uni) {
     printf("named = %d\n", size(named));
     cmode = emNormal;
     }
+  else if(kind == kKohonen && kohonen::handleMenu(sym, uni)) ;
   else if(doexiton(sym, uni)) cmode = emNormal;
   }
 

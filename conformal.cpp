@@ -706,7 +706,7 @@ namespace conformal {
   
   void renderAutoband() {
 #ifndef NOSDL
-    if(celldist(cwt.c) <= 7) return;
+    if(!cwt.c || celldist(cwt.c) <= 7) return;
     if(!autoband) return;
     eModel spm = pmodel;
     bool ih = includeHistory;

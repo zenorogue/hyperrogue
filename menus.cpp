@@ -1137,7 +1137,7 @@ int euperpage = 21;
 
 const char* geometrynames[gGUARD] = {
   "hyperbolic", "Euclidean", "spherical", "elliptic", 
-  "Zebra quotient", "field quotient"
+  "Zebra quotient", "field quotient", "torus"
   };  
 
 void showEuclideanMenu() {

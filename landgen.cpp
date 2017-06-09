@@ -98,7 +98,7 @@ int isNative(eLand l, eMonster m) {
 
     case laDeadCaves: 
       return (m == moEarthElemental || m == moDarkTroll) ? 2 : 
-        m == moGoblin ? 1 : 0;
+        (m == moGoblin || m == moSeep) ? 1 : 0;
 
     case laPower: 
       return (isWitch(m) || m == moEvilGolem) ? 1 : 0;
@@ -319,7 +319,7 @@ struct orbinfo {
   eItem orb;
   };
 
-orbinfo orbinfos[ORBLINES] = {
+const orbinfo orbinfos[ORBLINES] = {
   {laGraveyard, 200, 200,itGreenStone}, // must be first so that it does not reduce 
   // chance of other orbs
   {laJungle, 1200, 1500,itOrbLightning},
@@ -545,6 +545,9 @@ eOrbLandRelation getOLR(eItem it, eLand l) {
     if(l == laMotion || l == laZebra || l == laIvoryTower || l == laEndorian ||
       l == laMountain || l == laReptile || l == laDungeon)
       return olrUseless;
+  
+  if(it == itOrbWinter && l == laMinefield)
+    return olrForbidden;
   
   if(it == itOrbWinter && l != laRlyeh && l != laTemple) 
     return olrUseless;
@@ -1017,7 +1020,7 @@ void placePrizeOrb(cell *c) {
   if(l == laPalace && princess::dist(c) < OUT_OF_PRISON)
     l = laPrincessQuest;
   for(int i=0; i<ORBLINES; i++) {
-    orbinfo& oi(orbinfos[i]);
+    const orbinfo& oi(orbinfos[i]);
     eOrbLandRelation olr = getOLR(oi.orb, l);
     if(olr != olrPrize25 && olr != olrPrize3) continue;
     int treas = items[treasureType(oi.l)];
@@ -1050,7 +1053,7 @@ void placeLocalOrbs(cell *c) {
   if(isElemental(l)) l = laElementalWall;
   
   for(int i=0; i<ORBLINES; i++) {
-    orbinfo& oi(orbinfos[i]);
+    const orbinfo& oi(orbinfos[i]);
     if(oi.l != l) continue;
     if(yendor::on && (oi.orb == itOrbSafety || oi.orb == itOrbYendor))
       continue;
@@ -1072,7 +1075,7 @@ void placeLocalOrbs(cell *c) {
 
 void placeCrossroadOrbs(cell *c) {  
   for(int i=0; i<ORBLINES; i++) {
-    orbinfo& oi(orbinfos[i]);
+    const orbinfo& oi(orbinfos[i]);
     if(!oi.gchance) continue;
     int treas = items[treasureType(oi.l)] * landMultiplier(oi.l);
     if(tactic::on && isCrossroads(tactic::lasttactic)) {
@@ -1095,7 +1098,7 @@ void placeCrossroadOrbs(cell *c) {
 
 void placeOceanOrbs(cell *c) {  
   for(int i=0; i<ORBLINES; i++) {
-    orbinfo& oi(orbinfos[i]);
+    const orbinfo& oi(orbinfos[i]);
     if(items[treasureType(oi.l)] * landMultiplier(oi.l) < 10) continue;
     if(!oi.gchance) continue;
     if(oi.orb == itOrbLife) continue; // useless
@@ -3289,8 +3292,8 @@ void setdist(cell *c, int d, cell *from) {
     if(c->land == laWhirlpool && !tactic::on && !yendor::on) setland(c, laOcean);
     if(c->land == laCamelot && !tactic::on) setland(c, laCrossroads);
 
-    if(euclid) setLandEuclid(c);
-    if(sphere) setLandSphere(c);
+    if(sphere || torus) setLandSphere(c);
+    else if(euclid) setLandEuclid(c);
     if(quotient) { setland(c, euclidland); setLandQuotient(c); }
     
     // if(chaosmode) setland(c, getCLand(c));
@@ -3452,6 +3455,7 @@ void setdist(cell *c, int d, cell *from) {
     if(d==8 && c->land == laEmerald) {
       if(randomPatternsMode)
         c->wall = RANDPAT3(0) ? waCavewall : waCavefloor;
+      else if(torus) ;
       else if(euclid) {
         eucoord x, y;
         decodeMaster(c->master, x, y);
@@ -3483,6 +3487,7 @@ void setdist(cell *c, int d, cell *from) {
       int v;
       if(randomPatternsMode)
         v = RANDPAT ? 24 : 0;
+      else if(torus) ;
       else if(euclid) {
         eucoord x, y;
         decodeMaster(c->master, x, y);
@@ -3508,7 +3513,8 @@ void setdist(cell *c, int d, cell *from) {
       }
 
     if(d==8 && c->land == laZebra) {
-      if(euclid) {
+      if(torus) ;
+      else if(euclid) {
         eucoord x, y;
         decodeMaster(c->master, x, y);
         if(y&1) c->wall = waTrapdoor;
@@ -3528,7 +3534,8 @@ void setdist(cell *c, int d, cell *from) {
       }
     
     if(d==8 && c->land == laWineyard) {
-      if(euclid) {
+      if(torus) ;
+      else if(euclid) {
         eucoord x, y;
         decodeMaster(c->master, x, y);
         int dy = ((short)y)%3; if(dy<0) dy += 3;
@@ -3794,7 +3801,8 @@ void setdist(cell *c, int d, cell *from) {
       
       if(c->land == laStorms) {
       
-        if(euclid) {
+        if(torus) ;
+        else if(euclid) {
           eucoord x, y;
           decodeMaster(c->master, x, y);
           if(short(x+1)%3 == 0 && short(y)%3 == 0) {
@@ -4628,8 +4636,24 @@ void setdist(cell *c, int d, cell *from) {
           cw.c->monst = moMouse;
           }
         c2->wall = waOpenPlate;
-        }
-          
+        }          
+      }
+    
+    if(d == 7 && c->land == laMountain) {
+      if(hrand(50000) < 100)
+        buildIvy(c, 0, 3);
+      else if(hrand(125000) < 100 - celldistAlt(c))
+        c->monst = moMonkey;
+      else if(hrand(200000) < min(100, -10*celldistAlt(c)) - celldistAlt(c))
+        c->monst = moEagle;
+      else if(hrand(100) < 5) 
+        c->wall = waPlatform;
+      else if(hrand(100) < 20)
+        c->wall = waBigBush;
+      else if(hrand(100) < 12)
+        c->wall = waSmallBush;
+      else if(hrand(500) < -celldistAlt(c) / 5 - items[itAmethyst])
+        c->item = itAmethyst;
       }
     
     if(d == 7 && passable(c, NULL, 0) && !safety) {
@@ -4935,22 +4959,6 @@ void setdist(cell *c, int d, cell *from) {
           if(hardivy ? buildIvy(c, 1, 9) : buildIvy(c, 0, c->type))
             c->item = itRuby;
           }
-        }
-      if(c->land == laMountain) {
-        if(hrand(50000) < 100)
-          buildIvy(c, 0, 3);
-        else if(hrand(125000) < 100 - celldistAlt(c))
-          c->monst = moMonkey;
-        else if(hrand(200000) < min(100, -10*celldistAlt(c)) - celldistAlt(c))
-          c->monst = moEagle;
-        else if(hrand(100) < 5)
-          c->wall = waPlatform;
-        else if(hrand(100) < 20)
-          c->wall = waBigBush;
-        else if(hrand(100) < 12)
-          c->wall = waSmallBush;
-        else if(hrand(500) < -celldistAlt(c) / 5 - items[itAmethyst])
-          c->item = itAmethyst;
         }
       if(c->land == laWhirlwind) {
         if(hrand(4500) < items[itWindstone] + hard)
@@ -5280,8 +5288,8 @@ void wandering() {
 
   if(cwt.c->land == laZebra && cwt.c->wall == waNone && wchance(items[itZebra], 20))
     wanderingZebra(cwt.c);
-    
-  if(sphere || quotient == 1) {
+  
+  if(smallbounded) {
     int maxdist = 0;
     for(int i=0; i<size(dcal); i++) if(dcal[i]->cpdist > maxdist) maxdist = dcal[i]->cpdist;
     for(int i=0; i<size(dcal); i++) if(dcal[i]->cpdist >= maxdist-1) { first7 = i; break; }
@@ -5295,7 +5303,7 @@ void wandering() {
     int i = first7 + hrand(size(dcal) - first7);
     cell *c = dcal[i];
     
-    if((sphere || quotient == 1) && !c->item && hrand(5) == 0 && c->land != laHalloween) {
+    if(smallbounded && !c->item && hrand(5) == 0 && c->land != laHalloween) {
       if(passable(c, NULL, 0) || euclidland == laKraken) {
         if(!haveOrbPower() && euclidland != laHell) for(int it=0; it<1000 && !c->item; it++)
           placeLocalOrbs(c);
@@ -5314,7 +5322,7 @@ void wandering() {
 
     if(!c->monst) c->stuntime = 0;
 
-    if(timerghost && !sphere && quotient != 1) {
+    if(timerghost && !smallbounded) {
       // wandering seeps & ghosts
       if(seepcount && c->wall == waCavewall && !c->monst && canReachPlayer(c, moSlime)) {
         c->monst = moSeep;

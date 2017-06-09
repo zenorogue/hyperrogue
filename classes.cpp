@@ -1415,7 +1415,7 @@ struct landtype {
   const char *help;
   };
 
-landtype linf[landtypes] = {
+const landtype linf[landtypes] = {
   { 0xFF00FF, "???"          , ""},
   { 0xC06000, "Great Wall"   , ""},
   { 0xFF0000, "Crossroads"   , 
