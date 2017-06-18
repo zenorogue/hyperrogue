@@ -11,24 +11,9 @@ string tourhelp;
 
 int currentslide;
 
-const int LEGAL_NONE=0;
-const int LEGAL_UNLIMITED=1;
-const int LEGAL_HYPERBOLIC=2;
-const int LEGAL_ANY=3;
-const int LEGAL_NONEUC=4;
-const int QUICKSKIP=8;
-const int FINALSLIDE=16;
-
 // #ifdef PRES
 // #include "presentation.cpp"
 // #else
-
-struct slide { 
-  const char *name; int unused_id; int flags; const char *help; 
-  function<void(presmode mode)> action;
-  } ;
-
-extern slide slides[];
 
 // modes: 
 //   1 - enter the slide
@@ -74,7 +59,7 @@ void presentation(presmode mode) {
 
   cheater = 0;
   
-  if(mode == pmStart) tourhelp = slides[currentslide].name;
+  if(mode == pmStart) tourhelp = XLAT(slides[currentslide].name);
   
   if(sickmode && !items[itOrbTeleport]) items[itOrbTeleport] = 1;
   if(mode == pmStart) slidecommand = "";
@@ -89,8 +74,8 @@ void presentation(presmode mode) {
 void slidehelp() {
   if(texts) {
     help = 
-      helptitle(slides[currentslide].name, 0xFF8000) + 
-      slides[currentslide].help;
+      helptitle(XLAT(slides[currentslide].name), 0xFF8000) + 
+      XLAT(slides[currentslide].help);
     if(cmode != emHelp)  
       lastmode = cmode;
     cmode = emHelp; 
@@ -115,8 +100,8 @@ bool handleKeyTour(int sym, int uni) {
     if(currentslide == 0) { slidehelp(); return true; }
     presentation(pmStop);
     currentslide--;
-    presentation(pmStart);
     if(cmode == emHelp) slidehelp();
+    presentation(pmStart);
     return true;
     }
   if(sym == '1' || sym == '2' || sym == '3') {
@@ -188,6 +173,11 @@ bool handleKeyTour(int sym, int uni) {
         canmove = true;
         }
       }
+    else addMessage(
+      (vid.shifttarget&1) ? 
+        "Shift-click a location to teleport there."
+      : "Click a location to teleport there."
+      );
     return true;
     }
   if(sym == '5') {
@@ -243,16 +233,12 @@ void start() {
   presentation(pmStartAll);
   restartGame('T');
   if(tour::on) {
-    presentation(pmStart);
     slidehelp();
+    presentation(pmStart);
     }
   }
 
-#ifdef OTHERSLIDES
-#include "other-slides.cpp"
-#else
-
-slide slides[] = {
+slide default_slides[] = {
   {"Introduction", 10, LEGAL_ANY | QUICKSKIP,
     "This tutorial is mostly aimed to show what is "
     "special about the geometry used by HyperRogue. "
@@ -266,8 +252,23 @@ slide slides[] = {
       if(mode == 1) {
         if(tour::texts) addMessage(XLAT("Welcome to the HyperRogue tutorial!"));
         else clearMessages();  
-        }  
+        }
       SHOWLAND( l == laIce );
+#ifdef ROGUEVIZ
+       slidecommand = "RogueViz presentation";
+       if(mode == 1)
+         help += 
+           "\n\nYour version of HyperRogue is compiled with RogueViz. "
+           "Press '5' to switch to the RogueViz slides. Watching the "
+           "common HyperRogue tutorial first is useful too, "
+           "as an introduction to hyperbolic geometry.";         
+       if(mode == 4) {
+         slides = rogueviz::rvtour::rvslides;
+         while(tour::on) restartGame('T', false);
+         firstland = euclidland = laPalace;
+         tour::start();
+         }
+#endif            
       }
     },
   {"Basics of gameplay", 11, LEGAL_ANY,
@@ -294,7 +295,7 @@ slide slides[] = {
   {"Hypersian Rug model", 21, LEGAL_HYPERBOLIC,
     "New players think that the action of HyperRogue takes place on a sphere. "
 #ifdef WEB
-    "This is not true -- try the Tutorial in the native desktop version shows "
+    "This is not true -- the Tutorial in the native desktop version shows "
     "the surface HyperRogue actually takes place on.",
 #else
     "This is not true -- the next slide will show the surface HyperRogue "
@@ -326,7 +327,7 @@ slide slides[] = {
 #endif
       SHOWLAND( l == laIce );
       }
-    }, 
+    },
   {"Expansion", 22, LEGAL_ANY,
     "The next slide shows the number of cells in distance 1, 2, 3, ... from you. "
     "It grows exponentially: there are more than 10^100 cells "
@@ -649,49 +650,6 @@ slide slides[] = {
       if(mode == 3) pmodel = mdDisk;
       }
     },
-#ifdef ROGUEVIZ
-  {"Collatz conjecture", 51, LEGAL_NONE,
-    "Your version of HyperRogue includes RogueViz, which "
-    "is an adaptation of HyperRogue as a visualization tool "
-    "rather than a game. Hyperbolic space is great "
-    "for visualizing some kinds of data because of the vast amount "
-    "of space.\n\n"
-    "The following slide is a visualization of the Collatz conjecture. "
-    "Press '5' for a spiral rendering of the Collatz conjecture visualization.",
-    [] (presmode mode) {
-      setCanvas(mode, 'd');
-      if(mode == 1) {
-        rogueviz::dftcolor = 0x206020FF;
-  
-        rogueviz::collatz::s2 = .3;
-        rogueviz::collatz::p2 = .5;
-        rogueviz::collatz::s3 = -.4;
-        rogueviz::collatz::p3 = .4;
-  
-        rogueviz::showlabels = true;
-        
-        rogueviz::on = true;
-        gmatrix.clear();
-        drawthemap();
-        gmatrix0 = gmatrix;
-  
-        rogueviz::collatz::start();
-        }
-      
-      if(mode == 3) {
-        rogueviz::close();
-        shmup::clearMonsters();
-        }
-  
-      slidecommand = "render spiral";
-      if(mode == 4) {
-        pmodel = mdBand, conformal::create(), conformal::rotation = 0,
-        conformal::createImage(true),
-        conformal::clear(), pmodel = mdDisk;      
-        }
-      }
-    },
-#endif
 #ifndef WEB
   {"Shoot'em up mode", 52, LEGAL_NONE,
     "In the shoot'em up mode, space and time is continuous. "
@@ -723,6 +681,7 @@ slide slides[] = {
       }
     }
   };
-#endif
+
+slide *slides = default_slides;
 
 }

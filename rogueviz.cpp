@@ -1195,9 +1195,7 @@ void drawExtra() {
     ld x = vid.xres - rad;
     ld y = (vid.radius * (i+.5)) / size(legend) * 2 - vid.radius + vid.yres/2;
 
-    transmatrix V = Id;
-    V[0][2] += (x - vid.xcenter) / vid.radius * (1+vid.alphax);
-    V[1][2] += (y - vid.ycenter) / vid.radius * (1+vid.alphax);
+    transmatrix V = atscreenpos(x, y, vid.radius/4);
     
     poly_outline = OUTLINE_NONE;
     queuedisk(V, vd.cp, true);
@@ -1615,6 +1613,9 @@ int readArgs() {
     shift(); int percount = argi();
     shift(); kohonen::run(fname, percount, argf());
     }
+  else if(argis("-rvpres")) {
+    tour::slides = rvtour::rvslides;
+    }
   else if(argis("-somsave")) {
     PHASE(3);
     while(!kohonen::finished()) kohonen::step();
@@ -1709,6 +1710,179 @@ string help() {
     ret += "Current visualization: full net\n\n";
   return ret;
   }
+
+namespace rvtour {
+
+using namespace tour;
+
+string cname() {
+  if(euclid) return "coord-6.txt";
+  if(purehepta) return "coord-7.txt";
+  return "coord-67.txt";
+  }
+
+template<class T> function<void(presmode)> roguevizslide(char c, T t) {
+  return [c,t] (presmode mode) {
+    mapeditor::canvasback = 0x101010;
+    setCanvas(mode, c);
+    if(mode == 1 || mode == pmGeometryStart) t();
   
+    if(mode == 3 || mode == pmGeometry || mode == pmGeometryReset) {
+      rogueviz::close();
+      shmup::clearMonsters();
+      if(mode == pmGeometryReset) t();
+      }
+  
+    slidecommand = "toggle the player";
+    if(mode == 4) 
+      mapeditor::drawplayer = !mapeditor::drawplayer;
+    };
+  }
+
+slide rvslides[] = {
+    {"HyperRogue", 999, LEGAL_ANY, 
+      "This is a presentation of RogueViz, which "
+      "is an adaptation of HyperRogue as a visualization tool "
+      "rather than a game. Hyperbolic space is great "
+      "for visualizing some kinds of data because of the vast amount "
+      "of space.\n\n"
+      "Press '5' to switch to the standard HyperRogue tutorial. "
+      "Press ESC to look at other functions of this presentation."
+      ,
+      [] (presmode mode) {
+        slidecommand = "the standard presentation";
+        if(mode == 4) {
+          tour::slides = default_slides;
+          while(tour::on) restartGame('T', false);
+           firstland = euclidland = laIce;
+          tour::start();
+          }
+        }
+      },
+    {"HyperRogue", 999, LEGAL_ANY, 
+      "One simple slide about HyperRogue. Press '5' to show some hyperbolic straight lines.",
+      [] (presmode mode) {
+       using namespace linepatterns;
+       slidecommand = "toggle the Palace lines";
+       if(mode == 4)
+         switchAlpha(patPalace, 0xFF);
+       if(mode == 3)
+         setColor(patPalace, 0xFFD50000);
+        }
+      },
+  {"Collatz conjecture", 51, LEGAL_UNLIMITED,
+    "The following slide is a visualization of the Collatz conjecture. "
+    "Press '5' for a spiral rendering of the Collatz conjecture visualization.\n\n"
+    "Note that this, and many other RogueViz visualizations, have "
+    "Euclidean versions (press ESC).\n",
+    roguevizslide('d', [] () {
+      rogueviz::dftcolor = 0x206020FF;
+      
+      int fac = euclid ? 2 : 1;
+
+      rogueviz::collatz::s2 = .3;
+      rogueviz::collatz::p2 = .5 * fac;
+      rogueviz::collatz::s3 = -.4;
+      rogueviz::collatz::p3 = .4 * fac;
+
+      rogueviz::showlabels = true;
+      
+      rogueviz::on = true;
+      gmatrix.clear();
+      drawthemap();
+      gmatrix0 = gmatrix;
+
+      rogueviz::collatz::start();
+      })
+    },
+
+  {"Roguelikes", 63, LEGAL_UNLIMITED,
+    "A visualization of roguelikes, based on disccusion on /r/reddit. "
+    "See: http://www.roguetemple.com/z/hyper/reddit.php",
+    roguevizslide('0', [] () {
+      rogueviz::dftcolor = 0x282828FF;
+
+      rogueviz::showlabels = true;
+      rogueviz::ggamma = .5;
+      rogueviz::sag::edgepower = 1;
+      rogueviz::sag::edgemul = 1;
+      
+      rogueviz::on = true;
+      gmatrix.clear();
+      drawthemap();
+      gmatrix0 = gmatrix;
+
+      rogueviz::sag::read("rogueviz/roguelikes/edges.csv");
+      rogueviz::readcolor("rogueviz/roguelikes/color.csv");
+      rogueviz::sag::loadsnake("rogueviz/roguelikes/" + cname());
+      })    
+    },
+  {"Programming languages of GitHub", 64, LEGAL_UNLIMITED,
+    "A visualization of programming languages.",
+    roguevizslide('0', [] () {
+      rogueviz::dftcolor = 0x282828FF;
+
+      rogueviz::showlabels = true;
+      rogueviz::ggamma = 1;
+      rogueviz::sag::edgepower = .4;
+      rogueviz::sag::edgemul = .02;
+      
+      rogueviz::on = true;
+      gmatrix.clear();
+      drawthemap();
+      gmatrix0 = gmatrix;
+
+      rogueviz::sag::read("rogueviz/lang/edges.csv");
+      rogueviz::readcolor("rogueviz/lang/color.csv");
+      rogueviz::sag::loadsnake("rogueviz/lang/" + cname());
+      if(euclid) rogueviz::legend.clear();
+      })
+    },
+    {"Boardgames", 62, LEGAL_UNLIMITED,
+        "A visualization of board games, based on discussions on Reddit.",
+    roguevizslide('0', [] () {
+      rogueviz::dftcolor = 0x282828FF;
+
+      rogueviz::showlabels = true;
+      rogueviz::ggamma = .7;
+      rogueviz::sag::edgepower = 1;
+      rogueviz::sag::edgemul = 1;
+      
+      rogueviz::on = true;
+      gmatrix.clear();
+      drawthemap();
+      gmatrix0 = gmatrix;
+
+      rogueviz::sag::read("rogueviz/boardgames/edges.csv");
+      rogueviz::readcolor("rogueviz/boardgames/color.csv");
+      rogueviz::sag::loadsnake("rogueviz/boardgames/" + cname());
+      })
+        },
+    {"Tree of Life", 61, LEGAL_UNLIMITED,
+      "Not described.",
+
+    roguevizslide('0', [] () {
+
+      rogueviz::dftcolor = 0x206020FF;
+
+      rogueviz::showlabels = true;
+      
+      rogueviz::on = true;
+      gmatrix.clear();
+      drawthemap();
+      gmatrix0 = gmatrix;
+
+      rogueviz::tree::read("rogueviz/treeoflife/tol.txt");
+      })},
+  {"THE END", 99, LEGAL_ANY | FINALSLIDE,
+    "Press '5' to leave the presentation.",
+    [] (presmode mode) {
+      firstland = euclidland = laIce;
+      if(mode == 4) restartGame('T');
+      }
+    }
+  };
+
+}
 
 };
