@@ -932,7 +932,7 @@ void handleChangeMode(int sym, int uni) {
 #ifndef NOEDIT
   else if(xuni == 'g') {
     cmode = emDraw;
-    mapeditor::drawcell = cwt.c;
+    mapeditor::initdraw(cwt.c);
   }
 #endif
   else if(xuni == 'e') {

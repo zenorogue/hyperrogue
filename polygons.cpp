@@ -1827,6 +1827,8 @@ namespace svg {
     if(info) fprintf(f, "</a>");
     }
 
+  string font = "Times";
+  
   void text(int x, int y, int size, const string& str, bool frame, int col, int align) {
 
     double dfc = (x - vid.xcenter) * (x - vid.xcenter) + 
@@ -1838,6 +1840,8 @@ namespace svg {
     
     col = 0xFF + (col << 8);
 
+    bool uselatex = font == "latex";  
+
     if(!invisible(col)) {
       startstring();
       string str2 = "";
@@ -1848,13 +1852,19 @@ namespace svg {
           str2 += "&lt;";
         else if(str[i] == '>')
           str2 += "&gt;";
+        else if(uselatex && str[i] == '#')
+          str2 += "\\#";
         else str2 += str[i];
-      fprintf(f, "<text x='%s' y='%s' font-family='Times' text-anchor='%s' font-size='%s' %s>%s</text>",
+      if(uselatex) str2 = string("\\myfont{")+coord(size)+"}{" + str2 + "}";  
+      fprintf(f, "<text x='%s' y='%s' text-anchor='%s' ",
         coord(x), coord(y+size*.4), 
         align == 8 ? "middle" :
         align < 8 ? "start" :
-        "end",
-        coord(size), stylestr(col, frame ? 0x0000000FF : 0, (1<<sightrange)*dfc/40), str2.c_str());
+        "end");
+      if(!uselatex)
+        fprintf(f, "font-family='%s' font-size='%s' ", font.c_str(), coord(size));      
+      fprintf(f, "%s>%s</text>",
+        stylestr(col, frame ? 0x0000000FF : 0, (1<<sightrange)*dfc/40), str2.c_str());
       stopstring();
       fprintf(f, "\n");
       }

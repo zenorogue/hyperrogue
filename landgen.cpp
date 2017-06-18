@@ -3487,7 +3487,7 @@ void setdist(cell *c, int d, cell *from) {
       int v;
       if(randomPatternsMode)
         v = RANDPAT ? 24 : 0;
-      else if(torus) ;
+      else if(torus) v=0;
       else if(euclid) {
         eucoord x, y;
         decodeMaster(c->master, x, y);

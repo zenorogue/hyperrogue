@@ -15,6 +15,14 @@ namespace mapeditor {
   int subcanvas;
   int displaycodes;
 
+  struct editwhat {
+    double dist;
+    int rotid, symid, pointid;
+    bool side;
+    cell *c;
+    } ew, ewsearch;
+  bool autochoose;
+  
 #ifndef NOEDIT
   map<int, cell*> modelcell;
   
@@ -1191,7 +1199,7 @@ namespace mapeditor {
         }
       else if(uni == ' ') {
         cmode = emDraw;
-        drawcell = mouseover ? mouseover : cwt.c;
+        initdraw(mouseover ? mouseover : cwt.c);
         }
       }
     }
@@ -1215,7 +1223,7 @@ namespace mapeditor {
   bool coloring;
   int colortouse = 0xC0C0C0FF;
 
-  transmatrix drawtrans;
+  transmatrix drawtrans, drawtransnew;
 
   void loadShape(int sg, int id, hpcshape& sh, int d, int layer) {
     initShape(sg, id);
@@ -1277,7 +1285,7 @@ namespace mapeditor {
   
       int sg = drawcellShapeGroup();
       
-      for(int i=0; i<USERSHAPEIDS; i++) if(editingShape(sg, i) && usershapes[sg][i]) {
+      if(0) for(int i=0; i<USERSHAPEIDS; i++) if(editingShape(sg, i) && usershapes[sg][i]) {
   
         usershapelayer &ds(usershapes[sg][i]->d[mapeditor::dslayer]);
   
@@ -1294,6 +1302,8 @@ namespace mapeditor {
     }
 
   void showDrawEditor() {
+
+    if(!mouseout()) getcstat = '-';
 
     if(coloring) {
       dialog::drawColorDialog(colortouse);
@@ -1342,17 +1352,23 @@ namespace mapeditor {
     displayfr(8, 8+fs, 2, vid.fsize, line1, 0xC0C0C0, 0);
     displayfr(8, 8+fs*2, 2, vid.fsize, line2, 0xC0C0C0, 0);
     displayButton(8, 8+fs*3, XLAT("l = layers: %1", its(dslayer)), 'l', 0);
-    if(us) {
+    if(us && size(us->d[dslayer].list)) {
       usershapelayer& ds(us->d[dslayer]);
       displayButton(8, 8+fs*4, XLAT("1-9 = rotations: %1", its(ds.rots)), '1' + (ds.rots % 9), 0);
       displayButton(8, 8+fs*5, XLAT(ds.sym ? "0 = symmetry" : "0 = asymmetry"), '0', 0);
 
       displayfr(8, 8+fs*7, 2, vid.fsize, XLAT("%1 vertices", its(size(ds.list))), 0xC0C0C0, 0);
-      displayfr(8, 8+fs*8, 2, vid.fsize, XLAT("a = add v"), 0xC0C0C0, 0);
-      displayfr(8, 8+fs*9, 2, vid.fsize, XLAT("m = move v"), 0xC0C0C0, 0);
-      displayfr(8, 8+fs*10, 2, vid.fsize, XLAT("d = delete v"), 0xC0C0C0, 0);
-      displayfr(8, 8+fs*11, 2, vid.fsize, XLAT("c = readd v"), 0xC0C0C0, 0);
-      displayfr(8, 8+fs*12, 2, vid.fsize, XLAT("b = reorder"), 0xC0C0C0, 0);
+      displaymm('a', 8, 8+fs*8, 2, vid.fsize, XLAT("a = add v"), 0);
+      if(autochoose) {
+        displaymm('m', 8, 8+fs*9, 2, vid.fsize, XLAT("m = move v"), 0);
+        displaymm('d', 8, 8+fs*10, 2, vid.fsize, XLAT("d = delete v"), 0);
+        }
+      else {
+        displayButton(8, 8+fs*9, XLAT("m = move v"), 'm', 0);
+        displayButton(8, 8+fs*10, XLAT("d = delete v"), 'd', 0);
+        }
+      displaymm('c', 8, 8+fs*11, 2, vid.fsize, XLAT(autochoose ? "autochoose" : "c = choose"), 0);
+      displayButton(8, 8+fs*12, XLAT("b = switch auto"), 'b', 0);
 
       displayfr(8, 8+fs*14, 2, vid.fsize, XLAT("t = shift"), 0xC0C0C0, 0);
       displayfr(8, 8+fs*15, 2, vid.fsize, XLAT("y = spin"), 0xC0C0C0, 0);
@@ -1361,12 +1377,13 @@ namespace mapeditor {
       }
     else {
       displayfr(8, 8+fs*5, 2, vid.fsize, XLAT("'n' to start"), 0xC0C0C0, 0);
+      mousekey = 'n';
       }
 
-    displayfr(vid.xres-8, 8+fs*4, 2, vid.fsize, XLAT("g = grid"), 0xC0C0C0, 16);
+    displaymm('e', vid.xres-8, 8+fs*4, 2, vid.fsize, XLAT("g = grid"), 16);
     displayButton(vid.xres-8, 8+fs*3, XLAT("z = zoom in"), 'z', 16);
     displayButton(vid.xres-8, 8+fs*2, XLAT("o = zoom out"), 'o', 16);
-    displayfr(vid.xres-8, 8+fs, 2, vid.fsize, XLAT("e = edit this"), 0xC0C0C0, 16);
+    displaymm('e', vid.xres-8, 8+fs, 2, vid.fsize, XLAT("e = edit this"), 16);
 
     if(!mouseout()) {
       hyperpoint mh = inverse(drawtrans * rgpushxto0(ccenter)) * mouseh;
@@ -1385,6 +1402,9 @@ namespace mapeditor {
   void applyToShape(int sg, int id, int uni, hyperpoint mh) {
     bool haveshape = usershapes[sg][id];
     bool xnew = false;
+    
+    if(uni == '-') uni = mousekey;
+    
     if(!haveshape) {
       if(uni == 'n' || uni == 'u')
         initShape(sg, id);
@@ -1397,6 +1417,7 @@ namespace mapeditor {
       }
 
     usershapelayer *dsCur = &usershapes[sg][id]->d[dslayer];
+
     if(uni == 'n' || xnew) {
       dsCur->list.clear();
       dsCur->list.push_back(mh);
@@ -1404,7 +1425,14 @@ namespace mapeditor {
       }
 
     if(uni == 'a' && haveshape) {
-      dsCur->list.push_back(mh);
+      mh = spin(2*M_PI*-ew.rotid/dsCur->rots) * mh;
+      if(ew.symid) mh = Mirror * mh;
+    
+      if(ew.pointid < 0 || ew.pointid >= size(dsCur->list)) 
+        ew.pointid = size(dsCur->list)-1, ew.side = 1;
+
+      dsCur->list.insert(dsCur->list.begin()+ew.pointid+(ew.side?1:0), mh);
+      if(ew.side) ew.pointid++;
       rebuildPolys = true;
       }
     
@@ -1413,28 +1441,25 @@ namespace mapeditor {
       usershapes[sg][id] = NULL;
       }
 
-    if(uni == 'm' || uni == 'd' || uni == 'c' || uni == 'b') {
-      int i = 0;
-      if(size(dsCur->list) < 1) return;
-      for(int j=1; j<size(dsCur->list); j++) 
-        if(intval(mh, dsCur->list[j]) < intval(mh, dsCur->list[i]))
-          i = j;
-      if(uni == 'm') 
+    if(uni == 'm' || uni == 'd') {
+
+      int i = ew.pointid;
+
+      if(i < 0 || i >= size(dsCur->list)) return;
+
+      mh = spin(2*M_PI*-ew.rotid/dsCur->rots) * mh;
+      if(ew.symid) mh = Mirror * mh;
+
+      if(uni == 'm' || uni == 'M') 
         dsCur->list[i] = mh;
-      if(uni == 'd')
+      if(uni == 'd' || uni == 'b') {
         dsCur->list.erase(dsCur->list.begin() + i);
-      if(uni == 'c')
-        dsCur->list.push_back(dsCur->list[i]);
-      if(uni == 'b') {
-        while(i) {
-          dsCur->list.push_back(dsCur->list[0]);
-          dsCur->list.erase(dsCur->list.begin());
-          i--;
-          }
+        if(ew.side == 1 && ew.pointid >= i) ew.pointid--;
+        if(ew.side == 0 && ew.pointid > i) ew.pointid--;
         }
       rebuildPolys = true;
       }
-
+    
     if(uni == 'T') {
       /* loadShape(sg, id, shFemaleBody, 1, 1);
       loadShape(sg, id, shPKnife, 1, 2);
@@ -1563,8 +1588,10 @@ namespace mapeditor {
     }
   
   void drawHandleKey(int sym, int uni) {
-
+  
     if(choosefile && handleKeyFile(sym, uni)) return;
+
+    if(uni == SETMOUSEKEY) mousekey = newmousekey;
   
     if(coloring) {
       int v = dialog::handleKeyColor(sym, uni, colortouse);
@@ -1582,12 +1609,15 @@ namespace mapeditor {
       applyToShape(sg, i, uni, mh);
       
     if(uni == 'e') {
-      drawcell = mouseover ? mouseover : cwt.c;
+      initdraw(mouseover ? mouseover : cwt.c);
       }
     if(uni == 'l') { dslayer++; dslayer %= USERLAYERS; }
     if(uni == 'L') { dslayer--; if(dslayer < 0) dslayer += USERLAYERS; }
     
     if(uni == 'g') coldcenter = ccenter, ccenter = mh;
+    if(uni == 'c') ew = ewsearch;
+    if(uni == 'b') autochoose = !autochoose;
+
     
     if(uni == 'S') {
       for(int i=0; i<USERSHAPEGROUPS; i++) for(int j=0; j<USERSHAPEIDS; j++) {
@@ -1839,6 +1869,134 @@ namespace mapeditor {
       }
     return canvasback;
     }
+
+  void initdraw(cell *c) {
+    mapeditor::drawcell = c;
+    ew.c = c;
+    ew.rotid = 0;
+    ew.symid = 0;
+    ew.pointid = -1;
+    ew.side = 0;
+    ewsearch = ew;
+    }
+    
+  bool drawUserShape(transmatrix V, int group, int id, int color, cell *c) {
+  #ifdef MOBILE
+    return false;
+  #else
+  
+    usershape *us = usershapes[group][id];
+    if(us) {  
+      for(int i=0; i<USERLAYERS; i++) {
+        usershapelayer& ds(us->d[i]);
+        hpcshape& sh(ds.sh);
+    
+        if(sh.s != sh.e) 
+          queuepoly(V, sh, ds.color ? ds.color : color);
+        }
+      }
+  
+  #ifndef NOEDIT  
+    if(cmode == emDraw && mapeditor::editingShape(group, id)) {
+  
+      /* for(int a=0; a<size(ds.list); a++) {
+        hyperpoint P2 = V * ds.list[a];
+  
+        int xc, yc, sc;
+        getcoord(P2, xc, yc, sc);
+        queuechr(xc, yc, sc, 10, 'x', 
+          a == 0 ? 0x00FF00 : 
+          a == size(ds.list)-1 ? 0xFF0000 :
+          0xFFFF00);
+        } */
+      
+      if(c == ew.c) mapeditor::drawtrans = V;
+      
+      if(!us) return false;
+   
+      usershapelayer &ds(us->d[mapeditor::dslayer]);
+      
+      hyperpoint mh = inverse(mapeditor::drawtrans) * mouseh;
+  
+      for(int a=0; a<ds.rots; a++) 
+      for(int b=0; b<(ds.sym?2:1); b++) {
+  
+        if(mouseout()) break;
+  
+        hyperpoint P2 = V * spin(2*M_PI*a/ds.rots) * (b?Mirror*mh:mh);
+      
+        queuechr(P2, 10, 'x', 0xFF00FF);
+        }
+      
+      hyperpoint Plast = V * spin(-2*M_PI/ds.rots) * (ds.sym?Mirror*ds.list[0]:ds.list[size(ds.list)-1]);
+      int state = 0;
+      int gstate = 0;
+      double dist2;
+      hyperpoint lpsm;
+      
+      for(int a=0; a<ds.rots; a++) 
+      for(int b=0; b<(ds.sym?2:1); b++) {
+      
+        hyperpoint mh2 = spin(2*M_PI*-ew.rotid/ds.rots) * mh;
+        if(ew.symid) mh2 = Mirror * mh2;
+        hyperpoint pseudomouse = V * spin(2*M_PI*a/ds.rots) * mirrorif(mh2, b);      
+      
+        for(int t=0; t<size(ds.list); t++) {
+          int ti = b ? size(ds.list)-1-t : t;
+
+          hyperpoint P2 = V * spin(2*M_PI*a/ds.rots) * mirrorif(ds.list[ti], b);
+          
+          if(!mouseout()) {
+            double d = hdist(mouseh, P2);
+            if(d < ewsearch.dist)
+              ewsearch.dist = d,
+              ewsearch.rotid = a,
+              ewsearch.symid = b,
+              ewsearch.pointid = ti,
+              ewsearch.c = c,
+              ewsearch.side = b,
+              state = 1,
+              dist2 = d + hdist(mouseh, Plast) - hdist(P2, Plast);
+          
+            else if(state == 1) {
+              double dist3 = d + hdist(mouseh, Plast) - hdist(P2, Plast);
+              if(dist3 < dist2) 
+                ewsearch.side = !ewsearch.side;
+              state = 2;
+              }
+            }
+          
+          queuechr(P2, 10, 'o', 
+            0xC000C0);
+          
+          if(!mouseout()) {
+            if(gstate == 1) queueline(lpsm, P2, 0x90000080), gstate = 0;
+            if(ti == ew.pointid) {
+              queueline(pseudomouse, P2, 0xF0000080);
+              if(ew.side == b) queueline(pseudomouse, Plast, 0x90000080);
+              else gstate = 1, lpsm = pseudomouse;
+              }
+            }
+  
+          Plast = P2;           
+          }
+  
+        }
+      
+      if(gstate == 1) queueline(lpsm, V * ds.list[0], 0x90000080), gstate = 0;
+      if(state == 1) {
+        hyperpoint P2 = V * ds.list[0];
+        if(hdist(mouseh, P2) + hdist(mouseh, Plast) - hdist(P2, Plast) < dist2) 
+          ewsearch.side = 1;
+        }
+      
+      }
+  #endif
+  
+    return us;
+  #endif
+    }
+  
   }
 
 namespace linepatterns {
@@ -2100,5 +2258,4 @@ namespace linepatterns {
       dialog::openColorDialog(patterns[uni - 'a'].color, NULL);
     else if(doexiton(sym,uni)) cmode = emNormal;
     }
-  
   };

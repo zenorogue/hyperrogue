@@ -503,9 +503,10 @@ void pressaction(int id) {
 
 bool notremapped(int sym) {
   int k = vid.scfg.keyaction[sym];
+  if(k == 0) return true;
   k /= 16;
-  if(k > 3) k--; else if(k==3) k = 2;
-  return k <= multi::players;
+  if(k > 3) k--; else if(k==3) k = 0;
+  return k > multi::players;
   }
 
 void handleInput(int delta) {
