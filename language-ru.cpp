@@ -5454,10 +5454,10 @@ S("Many lands in HyperRogue are based around periodic patterns. "
   "For example, both Zebra and Windy Plains are based on the pattern "
   "shown in the previous slide. "
   "Such lands often have tree-like nature.",
-  "Wiele krain jest opartych na okresowych wzorach. Na przykład Zebra "
-  "i Wietrzna Równina są obie oparte na wzorze z poprzedniego slajdu. "
-  "Krainy takie mają zwykle drzewiastą strukturę.")
- 
+  "Многие земли основаны на периодических узорах. Например, "
+  "Зебра и Ветреная Равнина содержат узоры с предыдущего слайда. "
+  "Такие земли часто имеют древовидную структуру.")
+
 S("Fractal landscapes", "Фрактальные пейзажи")
 S("On the following slide, the colors change smoothly in the whole infinite world. "
   "Again, this works better than in Euclidean geometry.",
@@ -5579,4 +5579,4 @@ S(
   )
 
 #undef Orb
- 
+  
