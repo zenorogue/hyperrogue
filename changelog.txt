@@ -1633,3 +1633,73 @@
 - [tutorial] Aether or Flash is given if you cannot teleport away from the current situation (or when you press the cheat key twice)
 - [tutorial] added a warning if the player is trying to go to an unexpected land
 - [technical] fixed the weird numbering of shapes in polygons.cpp; minor improvements to RogueViz
+
+2017.04.28 13:25 versin 9.4h
+- tutorial reminds about right-clicking
+- black background and blue circle replaced by an aura
+- fixed side number dialogs
+
+2017.05.19 20:08 version 9.4i
+- when the camera is rotated, aura and mouse are affected
+- prettier trihepta grid
+- the line patterns menu displays many kinds of regular patterns of lines over the game screen (Ctrl+W in the cheat mode, or 'random patterns' in the map editor)
+- keys are now shown correctly in color menu items
+- Tutorial: keys no longer work in other menus; info that Camelot unlocks early; 
+- many improvements to RogueViz (special help, extra option s)
+- navigation keys now work in RogueViz and color dialog
+- Rogue description
+- '1 turn' not '1 turns'
+- weird keys no longer exit menus
+- alt+enter for full screen
+- keypad Enter should now work in most cases
+- commandline options should work later
+- stranded boats now can be used in the shmup mode under Orb of Water
+
+2017.05.29 11:19 version 9.4j
+- [technical] improved the architecture of the Tutorial
+- the tutorial menu now shows what '5' does in the current slide
+- [RogueViz mostly] virtualRebase now works in other geometries
+- [RogueViz] Euclidean Collatz
+- [RogueViz] better closing
+- [technical] better conditional compilation: in particular, can be compiled with NOTTF (use built-in compressed font) and NOSDL (no graphics, but can still do e.g. SVG output)
+- graphical inventory/kills in HUD instead of letters (optional)
+- better inventory/kills on square screens
+
+2017.05.31 18:50 version 9.4k
+- translations updated
+- ascending leaderboarsd (such as the Hyperstone time) should be fixed
+- fixed switch the land from the menu in alternate geometry modes
+- mimics and thrown knives are now simulated everywhere in field quotients (they cannot follow a straight line in shmup due to precision errors... I mean, don't expect too much of your aim!)
+- fixed some things about the elliptic shmup mode
+- fixed additional controls in the shmup mode (or when keys are remapped) -- they now work unless these particular keys have been mapped to something
+- fixed Halloween crashing in the large field quotient geometry
+- I feel like the game would benefit from having unique art for the Shards to display on the treasure counter. :) 
+
+2017.06.08 19:53 version 9.4l
+- fixed hyperbugs moving into Orb of the Shell
+- fixed orbs appearing inside the Mountain platforms
+- Orb of the Sword now removes bushes and branches (for consistency)
+- added torus geometry (torus size configurable via command line parameters)
+- command-line option to create monster(s) (e.g. -M "Red Hyperbug" 3)
+- fixed the size of kills/items in the heptagonal mode (they were scaled up instead of down)
+- improved mouse targetting of locations further away in Euclidean
+- sphere shmup movement/elliptic confusing
+- changed Orb of Winter to be 'forbidden' in the Minefield rather than useless
+- seeps are listed as appearing in Dead Cave
+- orb unlock info
+- wind/fire effects, improved dry forest spreading
+- [RogueViz] self-organizing maps
+
+2017.06.12 19:45 version 9.4m
+- [RogueViz] can switch the Tutorial to RogueViz presentation
+- [RogueViz] fixed the placement of the legend in Euclidean RogueViz
+- fixed a bug with resolving conflicts between 'standard' and configured keys
+
+2017.06.18 19:00 version 9.4n
+- mouse control in the vector graphics editor (e.g. click on 'add v' then clicking on the map will add vertices)
+- the vector graphics editor now allows editing any part of the shape in a much more user friendly way
+- Bulls can now attack tough monsters (hedgehogs, flailers, viziers) and push stunnable monsters now (even heavy ones) and Thumpers; if pushing is impossible, the Bull will be stunned instead of attacking eternally
+- changing the screen background color now affects the hypersian rug mode
+- added a missing russian translation
+- [RogueViz] fixed legend in the svg/high quality output
+- more control for text in svg output
