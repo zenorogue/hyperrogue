@@ -114,14 +114,14 @@ movedir mousedest, joydir;
 
 int mousex, mousey, joyx, joyy, panjoyx, panjoyy;
 bool autojoy = true;
-hyperpoint mouseh;
+hyperpoint mouseh, mouseoh;
 
 bool leftclick, rightclick, targetclick, hiliteclick, anyshiftclick, wheelclick,
   forcetarget, lshiftclick, lctrlclick;
 bool gtouched;
 bool revcontrol;
 
-int getcstat; ld getcshift; bool inslider;
+int getcstat, lgetcstat; ld getcshift; bool inslider;
 
 int ZZ;
 
@@ -1252,11 +1252,21 @@ double q3 = sqrt(double(3));
 
 bool outofmap(hyperpoint h) {
   if(euclid) 
-    return h[0] * h[0] + h[1] * h[1] > 15 * eurad;
+    return false; // h[0] * h[0] + h[1] * h[1] > 15 * eurad;
   else if(sphere)
     return h[2] < .1 && h[2] > -.1 && h[1] > -.1 && h[1] < .1 && h[0] > -.1 && h[0] < .1;
   else
     return h[2] < .5;
+  }
+
+bool mouseout() {
+  if((getcstat != '-' && getcstat) || (lgetcstat && lgetcstat != '-')) return true;
+  return outofmap(mouseh);
+  }
+
+bool mouseout2() {
+  if((getcstat && getcstat != '-') || (lgetcstat && lgetcstat != '-')) return true;
+  return outofmap(mouseh) || outofmap(mouseoh);
   }
 
 void drawShield(const transmatrix& V, eItem it) {
@@ -1432,53 +1442,9 @@ void drawStunStars(const transmatrix& V, int t) {
     }
   }
 
-bool drawUserShape(transmatrix V, int group, int id, int color) {
-#ifdef MOBILE
-  return false;
-#else
-  usershape *us = usershapes[group][id];
-  if(!us) return false;
-
-  for(int i=0; i<USERLAYERS; i++) {
-    usershapelayer& ds(us->d[i]);
-    hpcshape& sh(ds.sh);
-
-    if(sh.s != sh.e) 
-      queuepoly(V, sh, ds.color ? ds.color : color);
-    }
-
-#ifndef NOEDIT  
-  if(cmode == emDraw && mapeditor::editingShape(group, id)) {
-
-    usershapelayer &ds(usershapes[group][id]->d[mapeditor::dslayer]);
-    
-    /* for(int a=0; a<size(ds.list); a++) {
-      hyperpoint P2 = V * ds.list[a];
-
-      int xc, yc, sc;
-      getcoord(P2, xc, yc, sc);
-      queuechr(xc, yc, sc, 10, 'x', 
-        a == 0 ? 0x00FF00 : 
-        a == size(ds.list)-1 ? 0xFF0000 :
-        0xFFFF00);
-      } */
-    
-    hyperpoint mh = inverse(mapeditor::drawtrans) * mouseh;
-
-    for(int a=0; a<ds.rots; a++) 
-    for(int b=0; b<(ds.sym?2:1); b++) {
-
-      if(outofmap(mouseh)) break;
-
-      hyperpoint P2 = V * spin(2*M_PI*a/ds.rots) * (b?Mirror*mh:mh);
-    
-      queuechr(P2, 10, 'x', 0xFF00FF);
-      }
-    }
-#endif
-
-  return true;
-#endif
+hyperpoint mirrorif(const hyperpoint& V, bool b) {
+  if(b) return Mirror*V;
+  else return V;
   }
 
 string csnameid(int id) {
@@ -1773,7 +1739,7 @@ bool drawItemType(eItem it, cell *c, const transmatrix& V, int icol, int ticks, 
     xsh = NULL;
     }
   
-  else if(drawUserShape(V, 2, it, darkena(icol, 0, 0xFF))) ;
+  else if(mapeditor::drawUserShape(V, 2, it, darkena(icol, 0, 0xFF), c)) ;
   
   else if(it == itRose) {
     for(int u=0; u<4; u++)
@@ -1838,11 +1804,6 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, int col, dou
 
   char xch = minf[m].glyph;
 
-#ifndef NOEDIT
-  if(where == mapeditor::drawcell)
-    mapeditor::drawtrans = V;
-#endif
-
   if(m == moTortoise && where && where->stuntime >= 3)
     drawStunStars(V, where->stuntime-2);
   else if (m == moTortoise || m == moPlayer || (where && !where->stuntime)) ;
@@ -1860,8 +1821,8 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, int col, dou
   
     charstyle& cs = getcs();
       
-    bool havus = drawUserShape(V, 0, cs.charid, cs.skincolor);
-
+    bool havus = mapeditor::drawUserShape(V, 0, cs.charid, cs.skincolor, where);
+    
     if(mapeditor::drawplayer && !havus) {
     
       if(cs.charid >= 8) {
@@ -1974,12 +1935,12 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, int col, dou
       }
     }
   
-  else if(drawUserShape(V, 1, m, darkena(col, 0, 0xFF))) return false;
+  else if(mapeditor::drawUserShape(V, 1, m, darkena(col, 0, 0xFF), where)) return false;
 
   else if(isMimic(m) || m == moShadow || m == moIllusion) {
     charstyle& cs = getcs();
     
-    if(drawUserShape(V, 0, (cs.charid&1)?1:0, darkena(col, 0, 0x80))) return false;
+    if(mapeditor::drawUserShape(V, 0, (cs.charid&1)?1:0, darkena(col, 0, 0x80), where)) return false;
     
     if(cs.charid >= 8) {
       queuepoly(VABODY, shWolfBody, darkena(col, 0, 0xC0));
@@ -2729,11 +2690,7 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, int col) {
         else 
           Vb = Vb * ddspin(c, c->mondir);
 
-#ifndef NOEDIT
-        if(c == mapeditor::drawcell) mapeditor::drawtrans = Vb;
-#endif
-
-        if(drawUserShape(Vb, 1, c->monst, (col << 8) + 0xFF)) return false;
+        if(mapeditor::drawUserShape(Vb, 1, c->monst, (col << 8) + 0xFF, c)) return false;
 
         if(isIvy(c) || isMutantIvy(c) || c->monst == moFriendlyIvy)
           queuepoly(Vb, shIBranch, (col << 8) + 0xFF);
@@ -2863,7 +2820,7 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, int col) {
 
     if(flipplayer) Vs = Vs * pispin;
 
-    if(!outofmap(mouseh) && !nospins) {
+    if(!mouseout() && !nospins) {
       // transmatrix invxy = Id; invxy[0][0] = invxy[1][1] = -1;
       
       hyperpoint P2 = Vs * inverse(cwtV) * mouseh;
@@ -4091,7 +4048,11 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
   ivoryz = isGravityLand(c->land);
 
   transmatrix& gm = gmatrix[c];
-  bool orig = (gm[2][2] == 0 || fabs(gm[2][2]-1) >= fabs(V[2][2]-1) - 1e-8);
+  bool orig = 
+    gm[2][2] == 0 ? true : 
+    torus ? hypot(gm[0][2], gm[1][2]) >= hypot(V[0][2], V[1][2]) :
+    (sphere && vid.alphax >= 1.001) ? fabs(gm[2][2]-1) <= fabs(V[2][2]-1) :
+    fabs(gm[2][2]-1) >= fabs(V[2][2]-1) - 1e-8;
 
   if(orig) gm = V;
 
@@ -4163,12 +4124,14 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       modist2 = intval(mouseh, VC0);
       mouseover2 = c;
       }
-
-    double dfc = euclid ? intval(VC0, C0) : VC0[2];
     
-    if(dfc < centdist) {
-      centdist = dfc;
-      centerover = c;
+    if(!torus) {
+      double dfc = euclid ? intval(VC0, C0) : VC0[2];
+    
+      if(dfc < centdist) {
+        centdist = dfc;
+        centerover = c;
+        }
       }
     
     int orbrange = (items[itRevolver] ? 3 : 2);
@@ -4356,12 +4319,6 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         
       bool eoh = euclid || purehepta;
 
-#ifndef NOEDIT
-      if(c == mapeditor::drawcell && c != cwt.c && !c->monst && !c->item) {
-        mapeditor::drawtrans = Vpdir;
-        }
-#endif
-
       if(c->wall == waChasm) {
         if(c->land == laZebra) fd++;
         if(c->land == laHalloween && !wmblack) {
@@ -4372,8 +4329,8 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         }
               
 #ifndef NOEDIT
-      if(drawUserShape(Vpdir, mapeditor::cellShapeGroup(), mapeditor::realpatternsh(c),
-        darkena(fcol, fd, cmode == emDraw ? 0xC0 : 0xFF)));
+      if(mapeditor::drawUserShape(Vpdir, mapeditor::cellShapeGroup(), mapeditor::realpatternsh(c),
+        darkena(fcol, fd, cmode == emDraw ? 0xC0 : 0xFF), c));
       
       else if(mapeditor::whichShape == '7') {
         if(ishept(c))
@@ -5309,6 +5266,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
     
 #ifndef NOEDIT
     if(cmode == emMapEditor && !mapeditor::subscreen && lmouseover && darken == 0 &&
+      !mouseout() && 
       (mapeditor::whichPattern ? mapeditor::subpattern(c) == mapeditor::subpattern(lmouseover) : c == lmouseover)) {
       queuecircle(V, .78, 0x00FFFFFF);
       }
@@ -5338,7 +5296,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
   }
 
 bool confusingGeometry() {
-  return elliptic || quotient == 1;
+  return elliptic || quotient == 1 || torus;
   }
 
 struct flashdata {
@@ -5717,6 +5675,25 @@ string princessReviveHelp() {
   return h;
   }
 
+void describeOrb(string& help, const orbinfo& oi) {
+  eOrbLandRelation olr = getOLR(oi.orb, cwt.c->land);
+  eItem tr = treasureType(oi.l);
+  help += "\n\n" + XLAT(olrDescriptions[olr], cwt.c->land, tr, treasureType(cwt.c->land));
+  int t = items[tr] * landMultiplier(oi.l);
+  if(t >= 25)
+  if(olr == olrPrize25 || olr == olrPrize3 || olr == olrGuest || olr == olrMonster || olr == olrAlways) {
+    help += XLAT("\nSpawn rate (as prize Orb): %1%/%2\n", 
+      its(int(.5 + 100 * orbprizefun(t))),
+      its(oi.gchance));
+    }
+  if(t >= 10)
+  if(olr == olrHub) {
+    help += XLAT("\nSpawn rate (in Hubs): %1%/%2\n", 
+      its(int(.5 + 100 * orbcrossfun(t))),
+      its(oi.gchance));
+    }
+  }
+
 string generateHelpForItem(eItem it) {
 
    string help = helptitle(XLATN(iinf[it].name), iinf[it].color);
@@ -5786,25 +5763,23 @@ string generateHelpForItem(eItem it) {
     }
   
   if(itemclass(it) == IC_ORB || it == itGreenStone || it == itOrbYendor) {
-    eOrbLandRelation olr = getOLR(it, cwt.c->land);
-
     for(int i=0; i<ORBLINES; i++) {
-      orbinfo& oi(orbinfos[i]);
-      if(oi.orb == it) {
-        eItem tr = treasureType(oi.l);
-        help += "\n\n" + XLAT(olrDescriptions[olr], cwt.c->land, tr, treasureType(cwt.c->land));
-        int t = items[tr] * landMultiplier(oi.l);
-        if(t >= 25)
-        if(olr == olrPrize25 || olr == olrPrize3 || olr == olrGuest || olr == olrMonster || olr == olrAlways) {
-          help += XLAT("\nSpawn rate (as prize Orb): %1%/%2\n", 
-            its(int(.5 + 100 * orbprizefun(t))),
-            its(oi.gchance));
+      const orbinfo& oi(orbinfos[i]);
+      if(oi.orb == it) describeOrb(help, oi);
+      }
+    }
+  
+  if(itemclass(it) == IC_TREASURE) {
+    for(int i=0; i<ORBLINES; i++) {
+      const orbinfo& oi(orbinfos[i]);
+      if(treasureType(oi.l) == it) {
+        if(oi.gchance > 0) {
+          help += XLAT("\n\nOrb unlocked: %1", oi.orb);
+          describeOrb(help, oi);
           }
-        if(t >= 10)
-        if(olr == olrHub) {
-          help += XLAT("\nSpawn rate (in Hubs): %1%/%2\n", 
-            its(int(.5 + 100 * orbcrossfun(t))),
-            its(oi.gchance));
+        else if(oi.l == cwt.c->land) {
+          help += XLAT("\n\nSecondary orb: %1", oi.orb);
+          describeOrb(help, oi);
           }
         }
       }
@@ -6192,9 +6167,14 @@ void describeMouseover() {
       out += " " + describeRPM(c->land);
       
     if(euclid && cheater) {
-      eucoord x, y;
-      decodeMaster(c->master, x, y);
-      out += " ("+its(short(x))+","+its(short(y))+")";
+      if(torus) {
+        out += " ("+its(decodeId(c->master))+")";
+        }
+      else {
+        eucoord x, y;
+        decodeMaster(c->master, x, y);
+        out += " ("+its(short(x))+","+its(short(y))+")";
+        }
       }
       
     // char zz[64]; sprintf(zz, " P%d", princess::dist(c)); out += zz;
@@ -6233,10 +6213,10 @@ void describeMouseover() {
     
     if(isActivable(c)) out += XLAT(" (touch to activate)");
     
-    if(hasTimeout(c)) out += XLAT(" [" + turnstring(c->wparam) + "]");
+    if(hasTimeout(c)) out += " [" + turnstring(c->wparam) + "]";
     
     if(isReptile(c->wall))
-      out += XLAT(" [" + turnstring((unsigned char) c->wparam) + "]");
+      out += " [" + turnstring((unsigned char) c->wparam) + "]";
   
     if(c->monst) {
       out += ", "; out += XLAT1(minf[c->monst].name); 
@@ -6299,7 +6279,6 @@ void describeMouseover() {
 
     if(isWarped(c)) 
       help += s0 + "\n\n" + warpdesc;
-
     }
   else if(cmode == emVisual1) {
     if(getcstat == 'p') {
@@ -6351,6 +6330,10 @@ void describeMouseover() {
     }
     
   mouseovers = out;
+
+#ifdef ROGUEVIZ
+  rogueviz::describe(c);
+#endif
   
   int col = linf[cwt.c->land].color;
   if(cwt.c->land == laRedRock) col = 0xC00000;
@@ -6422,25 +6405,52 @@ transmatrix eumove(int x, int y) {
   return Mat;
   }
 
+transmatrix eumovedir(int d) {
+  d = fix6(d);
+  switch(d) {
+    case 0: return eumove(1,0);
+    case 1: return eumove(0,1);
+    case 2: return eumove(-1,1);
+    case 3: return eumove(-1,0);
+    case 4: return eumove(0,-1);
+    case 5: return eumove(1,-1);
+    }
+  return eumove(0,0);
+  }
+
 void drawEuclidean() {
   DEBB(DF_GRAPH, (debugfile,"drawEuclidean\n"));
-  eucoord px, py;
+  eucoord px=0, py=0;
   if(!centerover) centerover = cwt.c;
   // printf("centerover = %p player = %p [%d,%d]-[%d,%d]\n", lcenterover, cwt.c,
   //   mindx, mindy, maxdx, maxdy);
-  decodeMaster(centerover->master, px, py);
+  int pid;
+  const bool b = torus;
+  if(b)
+    pid = decodeId(centerover->master);
+  else
+    decodeMaster(centerover->master, px, py);
   
   int minsx = mindx-1, maxsx=maxdx+1, minsy=mindy-1, maxsy=maxdy+1;
   mindx=maxdx=mindy=maxdy=0;
   
   for(int dx=minsx; dx<=maxsx; dx++)
   for(int dy=minsy; dy<=maxsy; dy++) {
-    eucoord x = dx+px;
-    eucoord y = dy+py;
     reclevel = eudist(dx, dy);
-    cell *c = euclideanAt(x,y);
+    cell *c;
+    transmatrix Mat;
+    if(b) {
+      reclevel = eudist(dx, dy);
+      c = getTorusId(pid+torusconfig::dx*dx+torusconfig::dy*dy);
+      Mat = eumove(dx,dy);
+      }
+    else {
+      eucoord x = dx+px;
+      eucoord y = dy+py;
+      c = euclideanAt(x,y);
+      Mat = eumove(x, y);
+      }
     if(!c) continue;
-    transmatrix Mat = eumove(x, y);
     Mat = View * Mat;
     
     // Mat[0][0] = -1;
@@ -6525,7 +6535,9 @@ void drawthemap() {
       keycelldist = YDIST - i;
       }                                                                
     }
-  
+
+  if(mapeditor::autochoose) mapeditor::ew = mapeditor::ewsearch;
+  mapeditor::ewsearch.dist = 1e30;
   modist = 1e20; mouseover = NULL; 
   modist2 = 1e20; mouseover2 = NULL; 
   mouseovers = XLAT("Press F1 or right click for help");
@@ -6535,7 +6547,8 @@ void drawthemap() {
 #ifdef TOUR
   if(tour::on) mouseovers = tour::tourhelp;
 #endif
-  centdist = 1e20; centerover = NULL; 
+  centdist = 1e20; 
+  if(!torus) centerover = NULL; 
 
   for(int i=0; i<multi::players; i++) {
     multi::ccdist[i] = 1e20; multi::ccat[i] = NULL;
@@ -6544,7 +6557,7 @@ void drawthemap() {
   #ifdef MOBILE
   mouseovers = XLAT("No info about this...");
   #endif
-  if(outofmap(mouseh)) 
+  if(mouseout()) 
     modist = -5;
   playerfound = false;
   // playerfoundL = false;
@@ -6617,7 +6630,7 @@ void drawthemap() {
   Uint8 *keystate = SDL_GetKeyState(NULL);
   lmouseover = mouseover;
   bool useRangedOrb = (!(vid.shifttarget & 1) && haveRangedOrb() && lmouseover && lmouseover->cpdist > 1) || (keystate[SDLK_RSHIFT] | keystate[SDLK_LSHIFT]);
-  if(!useRangedOrb && cmode != emMapEditor && DEFAULTCONTROL && !outofmap(mouseh)) {
+  if(!useRangedOrb && cmode != emMapEditor && DEFAULTCONTROL && !mouseout()) {
     void calcMousedest();
     calcMousedest();
     cellwalker cw = cwt; bool f = flipplayer;
@@ -6661,7 +6674,7 @@ void centerpc(ld aspd) {
     // Euclidean
     aspd *= (2+3*R*R);
     if(aspd > R) aspd = R;
-  
+    
     View[0][2] -= cwtV[0][2] * aspd / R;
     View[1][2] -= cwtV[1][2] * aspd / R;
     }
@@ -6744,7 +6757,7 @@ void optimizeview() {
     hyperpoint H = View * tC0(T);
     if(H[2] < best) best = H[2], turn = i, TB = T;
     }
-  
+
   if(turn >= 0) {
     View = View * TB;
     fixmatrix(View);
@@ -6796,7 +6809,7 @@ void movepckeydir(int d) {
   }
 
 void calcMousedest() {
-  if(outofmap(mouseh)) return;
+  if(mouseout()) return;
   if(revcontrol == true) { mouseh[0] = -mouseh[0]; mouseh[1] = -mouseh[1]; }
   ld mousedist = intval(mouseh, tC0(shmup::ggmatrix(cwt.c)));
   mousedest.d = -1;
@@ -6918,6 +6931,7 @@ void calcparam() {
   vid.alphax = vid.alpha + eye;
   vid.goteyes = vid.eye > 0.001 || vid.eye < -0.001;
   vid.goteyes2 = vid.goteyes;
+  vid.scrdist = vid.radius;
   }
 
 void displayButton(int x, int y, const string& name, int key, int align, int rad) {
@@ -6926,6 +6940,16 @@ void displayButton(int x, int y, const string& name, int key, int align, int rad
     getcstat = key;
     }
   }
+
+char mousekey = 'n';
+char newmousekey;
+
+void displaymm(char c, int x, int y, int rad, int size, const string& title, int align) {
+  if(displayfr(x, y, rad, size, title, c == mousekey ? 0xFF8000 : 0xC0C0C0, align)) {
+    displayfr(x, y, rad, size, title, 0xFFFF00, align);
+    getcstat = SETMOUSEKEY, newmousekey = c;
+    }
+  }  
 
 bool displayButtonS(int x, int y, const string& name, int col, int align, int size) {
   if(displaystr(x, y, 0, size, name, col, align)) {
@@ -7413,8 +7437,8 @@ transmatrix atscreenpos(ld x, ld y, ld size) {
 
   V[0][2] += (x - vid.xcenter);
   V[1][2] += (y - vid.ycenter);
-  V[0][0] = size * 2 * crossf / hcrossf;
-  V[1][1] = size * 2 * crossf / hcrossf;
+  V[0][0] = size * 2 * hcrossf / crossf;
+  V[1][1] = size * 2 * hcrossf / crossf;
   V[2][2] = vid.scrdist;
   if(euclid) V[2][2] /= EUCSCALE;
 
@@ -7964,6 +7988,7 @@ void drawscreen() {
 
   if(conformal::includeHistory && cmode != emProgress) conformal::restoreBack();
   
+  lgetcstat = getcstat;
   getcstat = 0; inslider = false;
   
   if(cmode == emNormal || cmode == emQuit) drawStats();
@@ -8132,7 +8157,7 @@ void restartGraph() {
   linepatterns::clearAll();
   if(currentmap) {
     if(euclid) {
-      centerover = euclideanAtCreate(0,0);
+      centerover = torus ? getTorusId(0) : euclideanAtCreate(0,0);
       }
     else {
       viewctr.h = currentmap->getOrigin();
@@ -9210,7 +9235,7 @@ void mainloopiter() {
       }
 
     if(ev.type == SDL_MOUSEMOTION) {
-      hyperpoint mouseoh = mouseh;
+      mouseoh = mouseh;
       
       mousing = true;
       mousemoved = true;
@@ -9223,9 +9248,8 @@ void mainloopiter() {
       else
 #endif
         mouseh = gethyper(mousex, mousey);
-      
-      if((rightclick || (SDL_GetMouseState(NULL, NULL) & SDL_BUTTON_MMASK)) && 
-        !outofmap(mouseh) && !outofmap(mouseoh) && 
+
+      if((rightclick || (SDL_GetMouseState(NULL, NULL) & SDL_BUTTON_MMASK)) && !mouseout2() && 
          mouseh[2] < 50 && mouseoh[2] < 50) {
         panning(mouseoh, mouseh);
         }

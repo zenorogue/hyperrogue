@@ -216,6 +216,7 @@ namespace shmup {
   
   void virtualRebase(cell*& base, transmatrix& at, bool tohex);
   void virtualRebase(shmup::monster *m, bool tohex);
+  void fixStorage();
   }
 
 // graph
@@ -384,6 +385,7 @@ namespace mapeditor {
   int patterndir(cell *c, char w = whichPattern);
   int subpattern(cell *c);
   extern cell *drawcell;
+  void initdraw(cell *c); 
   }
 
 #ifndef NORUG
@@ -992,6 +994,7 @@ namespace rogueviz {
   void fixparam();
   int readArgs();
   void close();
+  void mark(cell *c);
   }
 #endif
 
@@ -1004,6 +1007,7 @@ void movecost(cell* from, cell *to);
 void checkmove();
 
 transmatrix eumove(int x, int y);
+transmatrix eumovedir(int d);
 
 #ifndef NOSAVE
 void loadScores();
@@ -1136,6 +1140,8 @@ namespace tour {
     pmGeometry = 11, pmGeometryReset = 13, pmGeometryStart = 15
     };
 
+  void setCanvas(presmode mode, char canv);
+
   void presentation(presmode mode);
   void checkGoodLand(eLand l);
   int getid();
@@ -1145,12 +1151,34 @@ namespace tour {
   extern function<bool(eLand)> showland;
 
   void start();
+
+  struct slide { 
+    const char *name; int unused_id; int flags; const char *help; 
+    function<void(presmode mode)> action;
+    } ;
+  
+  extern slide *slides;
+  extern slide default_slides[];
+
+  static const int LEGAL_NONE=0;
+  static const int LEGAL_UNLIMITED=1;
+  static const int LEGAL_HYPERBOLIC=2;
+  static const int LEGAL_ANY=3;
+  static const int LEGAL_NONEUC=4;
+  static const int QUICKSKIP=8;
+  static const int FINALSLIDE=16;
+  
+  extern slide slideHypersian;
+  extern slide slideExpansion;
   };
 #endif
 
 namespace rogueviz {
   extern bool rog3;
   extern bool rvwarp;
+  namespace rvtour {
+    extern tour::slide rvslides[];
+    }
   };
 
 extern bool doCross;
@@ -1199,3 +1227,18 @@ int celldistance(cell *c1, cell *c2);
 bool behindsphere(const transmatrix& V);
 extern hyperpoint pirateCoords;
 
+bool mouseout();
+
+bool againstWind(cell *c2, cell *c1); // to, from
+
+transmatrix atscreenpos(ld x, ld y, ld size);
+
+hyperpoint mirrorif(const hyperpoint& V, bool b);
+
+#define SETMOUSEKEY 5000
+extern char mousekey;
+extern char newmousekey;
+void displaymm(char c, int x, int y, int rad, int size, const string& title, int align);
+
+bool canPushThumperOn(cell *tgt, cell *thumper, cell *player);
+void pushThumper(cell *th, cell *cto);

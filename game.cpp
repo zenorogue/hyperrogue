@@ -848,7 +848,7 @@ bool canAttack(cell *c1, eMonster m1, cell *c2, eMonster m2, flagtype flags) {
   if((flags & AF_ONLY_FBUG)   && m2 != moPlayer && !isFriendlyOrBug(c2)) return false;
   if((flags & AF_ONLY_ENEMY) && (m2 == moPlayer || isFriendlyOrBug(c2))) return false;
 
-  if(m2 == moHedge && !(flags & (AF_STAB | AF_TOUGH | AF_EAT | AF_MAGIC | AF_LANCE | AF_SWORD_INTO | AF_HORNS)))
+  if(m2 == moHedge && !(flags & (AF_STAB | AF_TOUGH | AF_EAT | AF_MAGIC | AF_LANCE | AF_SWORD_INTO | AF_HORNS | AF_BULL)))
     if(!checkOrb(m1, itOrbThorns)) return false;
   
   if(m2 == moDraugr && !(flags & (AF_SWORD | AF_MAGIC | AF_SWORD_INTO | AF_HORNS))) return false;
@@ -906,17 +906,17 @@ bool canAttack(cell *c1, eMonster m1, cell *c2, eMonster m2, flagtype flags) {
   // if(m2 == moTortoise && !(flags & AF_MAGIC)) return false;
   
   if(m2 == moRoseBeauty)
-    if(!(flags & (AF_MAGIC | AF_LANCE | AF_GUN | AF_SWORD_INTO))) 
+    if(!(flags & (AF_MAGIC | AF_LANCE | AF_GUN | AF_SWORD_INTO | AF_BULL))) 
     if(!isMimic(m1))
     if(!checkOrb(m1, itOrbBeauty) && !checkOrb(m1, itOrbAether) && !checkOrb(m1, itOrbShield))
     if(!c1 || !c2 || !withRose(c1,c2))
       return false;
   
   if(m2 == moFlailer && !c2->stuntime)
-    if(!(flags & (AF_MAGIC | AF_TOUGH | AF_EAT | AF_HORNS | AF_LANCE | AF_BACK | AF_SWORD_INTO))) return false;
+    if(!(flags & (AF_MAGIC | AF_TOUGH | AF_EAT | AF_HORNS | AF_LANCE | AF_BACK | AF_SWORD_INTO | AF_BULL))) return false;
 
   if(m2 == moVizier && c2->hitpoints > 1)
-    if(!(flags & (AF_MAGIC | AF_TOUGH | AF_EAT | AF_HORNS | AF_LANCE | AF_BACK | AF_FAST))) return false;
+    if(!(flags & (AF_MAGIC | AF_TOUGH | AF_EAT | AF_HORNS | AF_LANCE | AF_BACK | AF_FAST | AF_BULL))) return false;
                        
   return true;
   }
@@ -1582,8 +1582,8 @@ void stunMonster(cell *c2) {
     c2->hitpoints--;
     if(c2->monst == moPrincess)
       playSound(c2, princessgender() ? "hit-princess" : "hit-prince");
-    }
-  c2->stuntime = (
+    } 
+  int newtime = (
     c2->monst == moFatGuard ? 2 : 
     c2->monst == moSkeleton && c2->land != laPalace && c2->land != laHalloween ? 7 :
     isMetalBeast(c2->monst) ? 7 :
@@ -1599,6 +1599,7 @@ void stunMonster(cell *c2) {
     c2->monst == moHedge ? 1 :
     c2->monst == moFlailer ? 1 :
     3);
+  if(c2->stuntime < newtime) c2->stuntime = newtime;
   if(isBull(c2->monst)) c2->mondir = NODIR;
   checkStunKill(c2);
   }
@@ -2116,6 +2117,10 @@ bool attackMonster(cell *c, flagtype flags, eMonster killer) {
   bool dostun = (flags & AF_ORSTUN) && attackJustStuns(c);
   
   if((flags & AF_HORNS) && hornStuns(c)) dostun = true;
+  if((flags & AF_BULL) && c->monst == moVizier && c->hitpoints > 1) {
+    dostun = true;
+    c->stuntime = 2;
+    }
   
   if(c->monst == moSkeleton && (flags & AF_SWORD)) dostun = false;
 
@@ -3265,6 +3270,7 @@ int moveval(cell *c1, cell *c2, int d, int mf) {
   if(isWorm(m) && !passable_for(c1->monst, c2, c1, P_MONSTER)) return -1700;
   
   if(canAttack(c1, m, c2, c2->monst, AF_GETPLAYER | mf) && !(mf & MF_NOATTACKS)) {
+    if(m == moRagingBull && c1->mondir != NODIR) return -1700;
     if(mf & MF_MOUNT) {
       if(c2 == dragon::target) return 3000;
       else if(isFriendlyOrBug(c2)) return 500;
@@ -3369,6 +3375,43 @@ int stayval(cell *c, flagtype mf) {
   return 1000;
   }
 
+int totalbulldistance(cell *c, int k) {
+  int tbd = 0;
+  for(int p=0; p<numplayers(); p++) {
+    cell *c2  = shpos[p][(cshpos+SHSIZE-k-1)%SHSIZE];
+    if(c2) tbd += bulldistance(c, c2);
+    }
+  return tbd;
+  }
+
+void determinizeBull(cell *c, int *posdir, int& nc) {
+  // determinize the Angry Beast movement:
+  // use the previous PC's positions as the tiebreaker
+  for(int k=0; k<SHSIZE && nc>1; k++) {
+    int pts[10];
+    for(int d=0; d<nc; d++) pts[d] = totalbulldistance(c->mov[posdir[d]], k);
+
+    int bestpts = 1000;
+    for(int d=0; d<nc; d++) if(pts[d] < bestpts) bestpts = pts[d];
+    int nc0 = 0;
+    for(int d=0; d<nc; d++) if(pts[d] == bestpts) posdir[nc0++] = posdir[d];
+    nc = nc0;
+    }
+  }
+
+int determinizeBullPush(cellwalker bull) {
+  int nc = 2;
+  int dirs[2], positive;
+  cwstep(bull);
+  cell *c2 = bull.c;
+  if(c2->type == 6) return 1; // irrelevant
+  cwspin(bull, 3); dirs[0] = positive = bull.spin;
+  cwspin(bull, -6); dirs[1] = bull.spin;
+  determinizeBull(c2, dirs, nc);
+  if(dirs[0] == positive) return -1;
+  return 1;
+  }    
+
 int pickMoveDirection(cell *c, flagtype mf) {
   int posdir[10], nc = 0, bestval = stayval(c, mf);
 
@@ -3381,26 +3424,9 @@ int pickMoveDirection(cell *c, flagtype mf) {
     if(val == bestval) posdir[nc++] = d;
     }
   
-  if(c->monst == moRagingBull) {
-    // determinize the Angry Beast movement:
-    // use the previous PC's positions as the tiebreaker
-    for(int k=0; k<SHSIZE && nc>1; k++) {
-      int pts[10];
-      for(int d=0; d<nc; d++) pts[d] = 0;
-      for(int d=0; d<nc; d++)
-      for(int p=0; p<numplayers(); p++) {
-        cell *c2  = shpos[p][(cshpos+SHSIZE-k-1)%SHSIZE];
-        if(c2) pts[d] += bulldistance(c->mov[posdir[d]], c2);
-        }
-      int bestpts = 1000;
-      for(int d=0; d<nc; d++)
-        if(pts[d] < bestpts) bestpts = pts[d];
-      int nc0 = 0;
-      for(int d=0; d<nc; d++) if(pts[d] == bestpts) posdir[nc0++] = posdir[d];
-      nc = nc0;
-      }
-    }
-
+  if(c->monst == moRagingBull) 
+    determinizeBull(c, posdir, nc);
+    
   if(!nc) return -1;
   nc = hrand(nc);
   return posdir[nc];
@@ -3427,6 +3453,32 @@ int pickDownDirection(cell *c, flagtype mf) {
   return downs[hrand(qdowns)];
   }
 
+template<class T> 
+cell *determinePush(cellwalker who, cell *c2, int subdir, T valid) {
+  cellwalker push = who;
+  cwstep(push);
+  cwspin(push, 3 * -subdir);
+  cwstep(push);
+  if(valid(push.c)) return push.c;
+  if(c2->type == 7) {
+    cwstep(push);
+    cwspin(push, 1 * -subdir);
+    cwstep(push);
+    if(valid(push.c)) return push.c;
+    }
+  if(gravityLevel(push.c) < gravityLevel(c2)) {
+    cwstep(push); cwspin(push, 1); cwstep(push);
+    if(gravityLevel(push.c) < gravityLevel(c2)) {
+      cwstep(push); cwspin(push, -2); cwstep(push);
+      }
+    if(gravityLevel(push.c) < gravityLevel(c2)) {
+      cwstep(push); cwspin(push, 1); cwstep(push);
+      }
+    if(valid(push.c)) return push.c;
+    }
+  return c2;
+  }
+ 
 // Angry Beast attack
 // note: this is done both before and after movement
 void beastAttack(cell *c, bool player) {
@@ -3436,8 +3488,27 @@ void beastAttack(cell *c, bool player) {
     int flags = AF_BULL | AF_ORSTUN;
     if(player) flags |= AF_GETPLAYER;
     if(!opposite) flags |= AF_ONLY_FBUG;
-    if(canAttack(c, moRagingBull, c2, c2->monst, flags))
+    if(canAttack(c, moRagingBull, c2, c2->monst, flags)) {
       attackMonster(c2, flags | AF_MSG, moRagingBull);
+      if(c2->monst && c2->stuntime) {
+        cellwalker bull (c, d);
+        int subdir = determinizeBullPush(bull);
+        cell *c3 = determinePush(bull, c2, subdir, [c2] (cell *c) { return passable(c, c2, P_BLOW); });
+        if(c3 && c3 != c2)
+          pushMonster(c3, c2);
+        }
+      }
+    if(c2->wall == waThumperOff) {
+      playSound(c2, "click");
+      c2->wall = waThumperOn;
+      }
+    if(c2->wall == waThumperOn) {
+      cellwalker bull (c, d);
+      int subdir = determinizeBullPush(bull);
+      cell *c3 = determinePush(bull, c2, subdir, [c2] (cell *c) { return canPushThumperOn(c, c2, c); });
+      if(c3 && c3 != c2)
+        pushThumper(c2, c3);
+      }
     }
   }
 
@@ -6358,6 +6429,10 @@ void killFriendlyIvy() {
     killMonster(c2, moPlayer, 0);
   }
 
+bool monsterPushable(cell *c2) {
+  return (c2->monst != moFatGuard && !(isMetalBeast(c2->monst) && c2->stuntime < 2) && c2->monst != moTortoise);
+  }  
+
 bool movepcto(int d, int subdir, bool checkonly) {
   global_pushto = NULL;
   bool switchplaces = false;
@@ -6440,21 +6515,8 @@ bool movepcto(int d, int subdir, bool checkonly) {
       }
 
     if(c2->wall == waThumperOn && !c2->monst && !nonAdjacentPlayer(c2, cwt.c)) {
-      cellwalker push = cwt;
-      cwstep(push);
-      cwspin(push, 3 * -subdir);
-      cwstep(push);
-/*    if(w == waBigStatue && push.c->type == 7) {
-        if(checkonly) return false;
-        addMessage(XLAT("%The1 is too heavy to put it back on the pedestal.", c2->wall));
-        return false;
-        } */
-      if((!canPushThumperOn(push.c, c2, cwt.c) && c2->type == 7)) {
-        cwstep(push);
-        cwspin(push, 1 * -subdir);
-        cwstep(push);
-        }
-      if(!canPushThumperOn(push.c, c2, cwt.c)) {
+      cell *c3 = determinePush(cwt, c2, subdir, [c2] (cell *c) { return canPushThumperOn(c, c2, cwt.c); });
+      if(c3 == c2) {
         if(checkonly) return false;
         addMessage(XLAT("No room to push %the1.", c2->wall));
         return false;
@@ -6463,39 +6525,12 @@ bool movepcto(int d, int subdir, bool checkonly) {
         if(!checkonly && errormsgs) wouldkill("%The1 would kill you there!");
         return false;
         }
-      global_pushto = push.c;
+      global_pushto = c3;
       if(checkonly) return true;
       addMessage(XLAT("You push %the1.", c2->wall));
       lastmovetype = lmPush; lastmove = cwt.c;
-      pushThumper(c2, push.c);
+      pushThumper(c2, c3);
       }
-
-/*  if((c2->wall == waBigStatue) && c2->type == 7 && !monstersnear(c2)) {
-      int q = 0;
-      for(int i=3; i<=4; i++) {
-        cellwalker push = cwt;
-        cwstep(push);
-        cwspin(push, i);
-        cwstep(push);
-        if(passable(push.c, c2, false, true)) q++;
-        }
-      if(!q) {
-        if(checkonly) return false;
-        addMessage(XLAT("No room to push %the1.", c2->wall));
-        return false;
-        }
-      if(checkonly) return true;
-      addMessage(XLAT("You push %the1.", c2->wall));
-      c2->wall = waNone;
-      for(int i=3; i<=4; i++) {
-        cellwalker push = cwt;
-        cwstep(push);
-        cwspin(push, i);
-        cwstep(push);
-        if(passable(push.c, c2, false, true)) 
-          push.c->wall = waBigStatue;
-        }
-      } */
 
     if(c2->item == itHolyGrail && roundTableRadius(c2) < newRoundTableRadius()) {
       if(checkonly) return false;
@@ -6658,33 +6693,14 @@ bool movepcto(int d, int subdir, bool checkonly) {
         return false;
         }
       
+      // pushto=c2 means that the monster is not killed and thus
+      // still counts for lightning in monstersnear
       cell *pushto = NULL;
       if(isStunnable(c2->monst) && c2->hitpoints > 1) {
-        // pushto=c2 means that the monster is not killed and thus
-        // still counts for lightning in monstersnear
-        pushto = c2;
-        if(c2->monst != moFatGuard && !(isMetalBeast(c2->monst) && c2->stuntime < 2) && c2->monst != moTortoise) {
-          cellwalker push = cwt;
-          cwstep(push);
-          cwspin(push, 3 * -subdir);
-          cwstep(push);
-          if(c2->type == 7 && !passable(push.c, c2, P_BLOW)) {
-            cwstep(push);
-            cwspin(push, 1 * -subdir);
-            cwstep(push);
-            }
-          if(!passable(push.c, c2, P_BLOW) && gravityLevel(push.c) < gravityLevel(c2)) {
-            cwstep(push); cwspin(push, 1); cwstep(push);
-            if(gravityLevel(push.c) < gravityLevel(c2)) {
-              cwstep(push); cwspin(push, -2); cwstep(push);
-              }
-            if(gravityLevel(push.c) < gravityLevel(c2)) {
-              cwstep(push); cwspin(push, 1); cwstep(push);
-              }
-            }
-          if(passable(push.c, c2, P_BLOW))
-            pushto = push.c;
-          }
+        if(monsterPushable(c2))
+          pushto = determinePush(cwt, c2, subdir, [c2] (cell *c) { return passable(c, c2, P_BLOW); });
+        else          
+          pushto = c2;
         }
       if(c2->monst == moTroll || c2->monst == moFjordTroll || 
          c2->monst == moForestTroll || c2->monst == moStormTroll || c2->monst == moVineSpirit)

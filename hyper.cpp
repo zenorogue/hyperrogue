@@ -309,6 +309,11 @@ else if(args()[0] == '-' && args()[1] == x && args()[2] == '0') { if(curphase ==
   else if(argis("-svgsize")) {
     shift(); sscanf(args(), "%d/%d", &svg::svgsize, &svg::divby);
     }
+  else if(argis("-svgfont")) {
+    shift(); svg::font = args();
+    // note: use '-svgfont latex' to produce text output as: \myfont{size}{text}
+    // (this is helpful with Inkscape's PDF+TeX output feature; define \myfont yourself)
+    }
 #ifndef NOPNG
   else if(argis("-pngsize")) {
     shift(); sscanf(args(), "%d", &pngres);
