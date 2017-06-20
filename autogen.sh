@@ -1,5 +1,5 @@
 #!/bin/bash
 autoreconf -vfi
-./configure
+./configure "$@"
 echo "Now, just do \"make install\" "
 
