@@ -767,7 +767,7 @@ genderswitch_t genderswitch[NUM_GS] = {
 
 // --- items ---
 
-const int ittypes = 110;
+const int ittypes = 111;
 
 struct itemtype {
   char  glyph;
@@ -1152,6 +1152,7 @@ itemtype iinf[ittypes] = {
     "You get the powers of Shield, Horns, and Thorns after you move two moves in a straight line "
     "with this Orb." },
   { '$', 0xC060C0, "Spinel", bulldashdesc },
+  { 'o', 0xC0C0FF, "Orb of the Mirror", NODESCYET },
   };
 
 enum eItem { itNone, itDiamond, itGold, itSpice, itRuby, itElixir, itShard, itBone, itHell, itStatue,
@@ -1181,22 +1182,15 @@ enum eItem { itNone, itDiamond, itGold, itSpice, itRuby, itElixir, itShard, itBo
   itWindstone, itOrbEmpathy, itStrongWind, itBuggy, itBuggy2,
   itRose, itCoral, itOrbBeauty, itOrb37, itOrbEnergy,
   itBabyTortoise, itOrbShell, itApple, itDragon, itOrbDomination,
-  itOrbSword,
-  itKraken, itOrbSword2, itBarrow,
-  itTrollEgg, itWarning,
-  itOrbStone, itOrbNature, itTreat,
-  itSlime, itAmethyst,
-  itOrbRecall, itDodeca,
-  itOrbDash,
-  itGreenGrass,
-  itOrbHorns,
-  itOrbBull,
-  itBull
+  itOrbSword, itKraken, itOrbSword2, itBarrow,
+  itTrollEgg, itWarning, itOrbStone, itOrbNature, itTreat,
+  itSlime, itAmethyst, itOrbRecall, itDodeca, itOrbDash, itGreenGrass, itOrbHorns,
+  itOrbBull, itBull, itOrbMirror
   };
 
 // --- wall types ---
 
-const int walltypes = 96;
+const int walltypes = 97;
 
 struct walltype {
   char  glyph;
@@ -1375,6 +1369,7 @@ walltype winf[walltypes] = {
     "Bushes block the movement of birds."},
   { '.', 0xFFFF00, "Reptile floor", reptiledesc},
   { '.', 0xFFFF00, "Reptile bridge", reptiledesc},
+  { '.', 0xFFFF00, "invisible floor", NODESCYET},
   };
 
 enum eWall { waNone, waIcewall, waBarrier, waFloorA, waFloorB, waCavewall, waCavefloor, waDeadTroll, waDune,
@@ -1402,7 +1397,8 @@ enum eWall { waNone, waIcewall, waBarrier, waFloorA, waFloorB, waCavewall, waCav
   waBarrowWall, waBarrowDig,
   waPetrified, waTower,
   waBigBush, waSmallBush,
-  waReptile, waReptileBridge
+  waReptile, waReptileBridge,
+  waInvisibleFloor
   };
 
 // --- land types ---
@@ -1782,3 +1778,24 @@ eLand randlands[RANDLANDS] = {
   laOvergrown, laWildWest, laWarpCoast
   };
 
+// land completion for shared unlocking
+#define U5 (inv::on ? 10 : 5)
+// land completion for advanced unlocking
+#define U10 (inv::on ? 25 : 10)
+
+// land completion
+#define R10 (inv::on ? 50 : 10)
+// intermediate lands
+#define R30 (inv::on ? 100 : 30)
+// advanced lands
+#define R60 (inv::on ? 200 : 60)
+// advanced lands II
+#define R90 (inv::on ? 300 : 90)
+// Crossroads IV
+#define R200 (inv::on ? 800 : 200)
+// Crossroads V
+#define R300 (inv::on ? 1200 : 300)
+// kill types for Dragon Chasms
+#define R20 (inv::on ? 30 : 20)
+// kill count for Graveyard/Hive
+#define R100 (inv::on ? 500 : 100)

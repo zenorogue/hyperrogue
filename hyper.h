@@ -251,6 +251,7 @@ int darkened(int c);
 extern int getcstat;
 bool displaychr(int x, int y, int shift, int size, char chr, int col);
 bool displayfr(int x, int y, int b, int size, const string &s, int color, int align);
+bool displayfrSP(int x, int y, int sh, int b, int size, const string &s, int color, int align, int p);
 
 bool outofmap(hyperpoint h);
 void applymodel(hyperpoint H, hyperpoint& Hscr);
@@ -262,6 +263,7 @@ void resetview(); extern heptspin viewctr; extern cell *centerover;
 void drawthemap();
 void drawfullmap();
 bool displaystr(int x, int y, int shift, int size, const char *str, int color, int align);
+bool displaystr(int x, int y, int shift, int size, const string& str, int color, int align);
 
 extern int darken;
 void calcparam();
@@ -322,7 +324,14 @@ struct videopar {
   float scrdist;
   
   bool usingGL;
-  bool usingAA;
+  int antialias;
+  #define AA_NOGL      1
+  #define AA_VERSION   2
+  #define AA_LINES     4
+  #define AA_POLY      8
+  #define AA_LINEWIDTH 16
+  #define AA_FONT      32
+  ld linewidth;
 
   int joyvalue, joyvalue2, joypanthreshold;
   ld joypanspeed;
@@ -344,7 +353,7 @@ extern videopar vid;
 
 enum emtype {emNormal, emHelp, 
   emMenu,
-  emVisual1, emVisual2, 
+  emBasicConfig, emGraphConfig, emDisplayMode, 
   emChangeMode, emCustomizeChar,
   emQuit, emDraw, emScores, emPickEuclidean, 
   emPickScores, 
@@ -360,7 +369,9 @@ enum emtype {emNormal, emHelp,
   emJoyConfig,
   emColor, emNumber,
   em3D, emRogueviz,
-  emLinepattern
+  emLinepattern,
+  emPeace, emInventory,
+  emSlideshows
   };
  
 extern emtype cmode, lastmode;
@@ -704,6 +715,7 @@ template<class T> struct dynamicval {
   T& where;
   T backup;
   dynamicval(T& wh, T val) : where(wh) { backup = wh; wh = val; }
+  dynamicval(T& wh) : where(wh) { backup = wh; }
   ~dynamicval() { where = backup; }
   };
 
@@ -790,6 +802,7 @@ namespace dialog {
     int color, colorv, colork, colors, colorc;
     int scale;
     double param;
+    int position;
     };
 
   item& lastItem();
@@ -801,7 +814,7 @@ namespace dialog {
   void addHelp(string body);
   void addInfo(string body, int color = 0xC0C0C0);
   void addItem(string body, int key);
-  void addBreak(int val);  
+  int addBreak(int val);  
   void addTitle(string body, int color, int scale);
   
   void init();
@@ -947,6 +960,9 @@ void ShadowV(const transmatrix& V, const struct hpcshape& bp, int prio = PPR_MON
 #define OUTLINE_OTHER    0xFFFFFFFF
 #define OUTLINE_DEAD     0x800000FF
 #define OUTLINE_TRANS    0
+#define OUTLINE_DEFAULT  ((bordcolor << 8) + 0xFF)
+#define OUTLINE_FORE     ((forecolor << 8) + 0xFF)
+#define OUTLINE_BACK     ((backcolor << 8) + 0xFF)
 
 extern bool audio;
 extern string musiclicense;
@@ -1023,7 +1039,7 @@ extern cell *recallCell;
 extern eLand cheatdest;
 void cheatMoveTo(eLand l);
 
-extern int backcolor;
+extern int backcolor, bordcolor, forecolor;
 
 extern bool overgenerate;
 void doOvergenerate();
@@ -1131,6 +1147,7 @@ namespace tour {
   extern bool on;
   extern string tourhelp;
   extern string slidecommand;
+  extern int currentslide;
   
   bool handleKeyTour(int sym, int uni);
 
@@ -1167,9 +1184,18 @@ namespace tour {
   static const int LEGAL_NONEUC=4;
   static const int QUICKSKIP=8;
   static const int FINALSLIDE=16;
+  static const int QUICKGEO=32;
+  static const int SIDESCREEN = 64;
   
   extern slide slideHypersian;
   extern slide slideExpansion;
+
+  namespace ss {
+    void showMenu();
+    void handleKey(int sym, int uni);
+    void list(slide*);
+    }
+
   };
 #endif
 
@@ -1184,10 +1210,8 @@ namespace rogueviz {
 extern bool doCross;
 void optimizeview();
 
-#ifndef NOPNG
 extern int pngres;
 extern int pngformat;
-#endif
 
 extern bool noGUI;
 extern bool dronemode;
@@ -1211,7 +1235,8 @@ namespace linepatterns {
     patPower,
     patNormal,
     patTrihepta,
-    patBigTriangles
+    patBigTriangles,
+    patBigRings
     };
   
   void clearAll();
@@ -1242,3 +1267,26 @@ void displaymm(char c, int x, int y, int rad, int size, const string& title, int
 
 bool canPushThumperOn(cell *tgt, cell *thumper, cell *player);
 void pushThumper(cell *th, cell *cto);
+
+template<class T> T pick(T x, T y) { return hrand(2) ? x : y; }
+template<class T> T pick(T x, T y, T z) { switch(hrand(3)) { case 0: return x; case 1: return y; case 2: return z; } return x; }
+template<class T> T pick(T x, T y, T z, T v) { switch(hrand(4)) { case 0: return x; case 1: return y; case 2: return z; case 3: return v; } return x; }
+
+eLand getNewSealand(eLand old);
+bool createOnSea(eLand old);
+
+namespace inv {
+  bool on;
+  }
+
+bool drawItemType(eItem it, cell *c, const transmatrix& V, int icol, int ticks, bool hidden);
+
+void initquickqueue();
+void quickqueue();
+int darkenedby(int c, int lev);
+extern int mousex, mousey;
+string generateHelpForItem(eItem it);
+bool graphglyph();
+extern bool hiliteclick;
+extern int antialiaslines;
+extern int ringcolor;

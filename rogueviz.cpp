@@ -163,11 +163,26 @@ void createViz(int id, cell *c, transmatrix at) {
   vd.m->at = at;
   }
 
+void notimpl() {
+  printf("Not implemented\n"); exit(1); 
+  }
+
+hyperpoint where(int i) {
+  auto m = vdata[i].m;
+  if(m->base == currentmap->gamestart()) return tC0(m->at);
+  else { 
+    notimpl(); // actually probably that's a buug
+    return inverse(shmup::ggmatrix(currentmap->gamestart())) * (shmup::ggmatrix(m->base) * tC0(m->at));
+    }
+  }
+  
 void addedge(int i, int j, edgeinfo *ei) {
-  double d = hdist(vdata[i].m->at * C0, vdata[j].m->at * C0);
+  hyperpoint hi = where(i);
+  hyperpoint hj = where(j);
+  double d = hdist(hi, hj);
   if(d >= 4) {
     // printf("splitting %lf\n", d);
-    hyperpoint h = mid(vdata[i].m->at * C0, vdata[j].m->at * C0);
+    hyperpoint h = mid(hi, hj);
     int id = size(vdata);
     vdata.resize(id+1);
     vertexdata& vd(vdata[id]);
@@ -178,6 +193,7 @@ void addedge(int i, int j, edgeinfo *ei) {
     
     addedge(i, id, ei);
     addedge(id, j, ei);
+    shmup::virtualRebase(vd.m, true);
     }
   else addedge0(i, j, ei);
   }
@@ -204,7 +220,14 @@ int dftcolor = 0x282828FF;
 
 namespace spiral {
 
-  void place(int N, ld mul) {
+  ld mul;
+  
+  transmatrix at(double d) {
+    return spin(log(d) * 2 * M_PI / log(mul)) * xpush(log(d));
+    }
+
+  void place(int N, ld _mul) {
+    mul = _mul;
     init(); kind = kSpiral;
     vdata.resize(N);
   
@@ -213,7 +236,7 @@ namespace spiral {
       
       double d = i + 1;
       
-      transmatrix h = spin(log(d) * 2 * M_PI / log(mul)) * xpush(log(d));
+      transmatrix h = at(d);
   
       createViz(i, cwt.c, h);
       vd.name = its(i+1);
@@ -265,17 +288,35 @@ namespace collatz {
     }  
   }
 
-int readLabel(FILE *f) {
+string readLabel_s(FILE *f) {
   char xlabel[10000];
-  if(fscanf(f, "%9500s", xlabel) <= 0) return -1;
-  return getid(xlabel);
+  if(fscanf(f, "%9500s", xlabel) <= 0) return "";
+  return xlabel;
+  }
+
+int readLabel(FILE *f) {
+  string s = readLabel_s(f);
+  if(s == "") return -1;
+  return getid(s);
   }
 
 namespace anygraph {
   double R, alpha, T;
   vector<pair<double, double> > coords;
+  
+  int N;
+               
+  void fixedges() {
+    for(int i=N; i<size(vdata); i++) if(vdata[i].m) vdata[i].m->dead = true;
+    for(int i=0; i<size(vdata); i++) vdata[i].edges.clear();
+    vdata.resize(N);
+    for(auto e: edgeinfos) {
+      e->orig = NULL;
+      addedge(e->i, e->j, e);
+      }
+    }
 
-  void read(string fn, bool subdiv = true, bool doRebase = true) {
+  void read(string fn, bool subdiv = true, bool doRebase = true, bool doStore = true) {
     init(); kind = kAnyGraph;
     fname = fn;
     FILE *f = fopen((fn + "-coordinates.txt").c_str(), "rt");
@@ -285,17 +326,17 @@ namespace anygraph {
       }
     printf("Reading coordinates...\n");
     char buf[100];  
-    int N;
     int err;
     err = fscanf(f, "%s%s%s%s%d%lf%lf%lf", buf, buf, buf, buf, &N, 
       &anygraph::R, &anygraph::alpha, &anygraph::T);
     if(err < 8) { printf("Error: incorrect format of the first line\n"); exit(1); }
     vdata.reserve(N);
     while(true) {
-      int id = readLabel(f);
-      if(id < 0) break;
+      string s = readLabel_s(f);
+      if(s == "" || s == "-1") break;
+      int id = getid(s);
       vertexdata& vd(vdata[id]);
-      vd.name = its(id);
+      vd.name = s;
       vd.cp = colorpair(dftcolor);
       
       double r, alpha;
@@ -333,6 +374,8 @@ namespace anygraph {
         }
       printf("Done.\n");
       }
+    
+    if(doStore) storeall();
     }
   
   }
@@ -1030,8 +1073,7 @@ void drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
 
       transmatrix& gm1 = shmup::ggmatrix(vd1.m->base);
       transmatrix& gm2 = shmup::ggmatrix(vd2.m->base);
-          
-      
+                
       hyperpoint h1 = gm1 * vd1.m->at * C0;
       hyperpoint h2 = gm2 * vd2.m->at * C0;
       
@@ -1046,11 +1088,25 @@ void drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
         } */
       
       int col = 
-        ((hilite ? 0xFF0000 : backcolor ? 0x808080 : 0xFFFFFF) << 8) + xlalpha;
-      
-      if(pmodel) {
-        queueline(h1, h2, col, 2);
-        lastptd().prio = PPR_STRUCT0;
+        ((hilite ? 0xFF0000 : forecolor) << 8) + xlalpha;
+
+      bool onspiral = kind == kSpiral && abs(ei->i - ei->j) == 1;      
+      if(pmodel || onspiral) {
+        if(onspiral) {
+          const int prec = 20; 
+          transmatrix T = shmup::ggmatrix(currentmap->gamestart());
+          hyperpoint l1 = T*tC0(spiral::at(1+ei->i));
+          for(int z=1; z<=prec; z++) {
+            hyperpoint l2 = T*tC0(spiral::at(1+ei->i+(ei->j-ei->i) * z / (prec+.0)));
+            queueline(l1, l2, col, 0);
+            l1 = l2;
+            lastptd().prio = PPR_STRUCT0;
+            }
+          }
+        else {
+          queueline(h1, h2, col, 2);
+          lastptd().prio = PPR_STRUCT0;
+          }
         }
       else {
       
@@ -1058,8 +1114,22 @@ void drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
         if(!ei->orig) {
           ei->orig = euclid ? cwt.c : viewctr.h->c7; // cwt.c;
           ei->prec.clear();
+          
           transmatrix T = inverse(shmup::ggmatrix(ei->orig));
-          storeline(ei->prec, T*h1, T*h2);
+
+          if(kind == kSpiral && abs(ei->i - ei->j) == 1) {
+            ei->orig = currentmap->gamestart();
+            hyperpoint l1 = tC0(spiral::at(1+ei->i));
+            storevertex(ei->prec, l1);
+            const int prec = 20; 
+            for(int z=1; z<=prec; z++) {
+              hyperpoint l2 = tC0(spiral::at(1+ei->i+(ei->j-ei->i) * z / (prec+.0)));
+              storeline(ei->prec, l1, l2);
+              l1 = l2;
+              }
+            }
+          else 
+            storeline(ei->prec, T*h1, T*h2);
           }
         queuetable(shmup::ggmatrix(ei->orig), &ei->prec[0], size(ei->prec)/3, col, 0,
           PPR_STRUCT0);
@@ -1180,12 +1250,15 @@ void drawExtra() {
     
     for(int i=0; i<size(named); i++) if(gmatrix.count(named[i])) {
       string s = ""; s += 'A'+i;
-      queuestr(gmatrix[named[i]], 1, s, backcolor ? 0 : 0xFFFFFF, 1);
+      queuestr(gmatrix[named[i]], 1, s, forecolor, 1);
       }
     
     canmove = true; items[itOrbAether] = true;
     }
   
+#ifndef NORUG
+  if(!rug::rugged) 
+#endif
   for(int i=0; i<size(legend); i++) {
     int k = legend[i];
     vertexdata& vd = vdata[k];
@@ -1199,7 +1272,8 @@ void drawExtra() {
     
     poly_outline = OUTLINE_NONE;
     queuedisk(V, vd.cp, true);
-    queuestr(int(x-rad), int(y), 0, rad*(svg::in?5:3)/4, vd.name, backcolor ? 0 : 0xFFFFFF, 0, 16);
+    poly_outline = OUTLINE_DEFAULT;
+    queuestr(int(x-rad), int(y), 0, rad*(svg::in?5:3)/4, vd.name, forecolor, 0, 16);
     }
   }
 
@@ -1271,6 +1345,7 @@ void init() {
   mapeditor::drawplayer = false;
   firstland = euclidland = laCanvas;
   if(!shmup::on) restartGame('s');
+  else restartGame();
 #else
   firstland = euclidland = laCanvas;
   restartGame();
@@ -1310,6 +1385,7 @@ void fixparam() {
   if(size(legend)) vid.xcenter = vid.ycenter;
   }
 
+#ifndef NOSDL
 void rvvideo(const char *fname) {
   if(kind == kCollatz) {
     pngformat = 2;
@@ -1465,6 +1541,7 @@ struct storydata { int s; int e; const char *text; } story[] = {
     saveHighQualityShot(buf);
     }
   }
+#endif
 
 int readArgs() {
   using namespace arg;
@@ -1636,9 +1713,11 @@ int readArgs() {
   else if(argis("-TURN")) {
     PHASE(3); shmup::turn(100);
     }
+#ifndef NOSDL
   else if(argis("-video")) {
     shift(); rvvideo(args());
     }
+#endif
   else return 1;
   return 0;
   }
@@ -1674,7 +1753,7 @@ void handleMenu(int sym, int uni) {
   else if(uni == 'l') showlabels = !showlabels;
   else if(uni == 'v') rog3 = !rog3;
   else if(uni == 'x') specialmark = !specialmark;
-  else if(uni == 'b') backcolor ^= 0xFFFFFF;
+  else if(uni == 'b') backcolor ^= 0xFFFFFF, bordcolor ^= 0xFFFFFF, forecolor ^= 0xFFFFFF;
   else if(uni == 'g') {
     dialog::editNumber(ggamma, 0, 5, .01, 0.5, XLAT("gamma value for edges"), "");
     dialog::sidedialog = true;
@@ -1739,8 +1818,26 @@ template<class T> function<void(presmode)> roguevizslide(char c, T t) {
     };
   }
 
+template<class T, class T1> function<void(presmode)> roguevizslide_action(char c, T t, T1 act) {
+  return [c,t,act] (presmode mode) {
+    mapeditor::canvasback = 0x101010;
+    setCanvas(mode, c);
+    if(mode == 1 || mode == pmGeometryStart) t();
+  
+    if(mode == 3 || mode == pmGeometry || mode == pmGeometryReset) {
+      rogueviz::close();
+      shmup::clearMonsters();
+      if(mode == pmGeometryReset) t();
+      }
+  
+    act(mode);
+    };
+  }
+
+#define RVPATH HYPERPATH "rogueviz/"
+
 slide rvslides[] = {
-    {"HyperRogue", 999, LEGAL_ANY, 
+    {"RogueViz", 999, LEGAL_ANY, 
       "This is a presentation of RogueViz, which "
       "is an adaptation of HyperRogue as a visualization tool "
       "rather than a game. Hyperbolic space is great "
@@ -1751,15 +1848,16 @@ slide rvslides[] = {
       ,
       [] (presmode mode) {
         slidecommand = "the standard presentation";
+        if(mode == pmStartAll) firstland = euclidland = laPalace;
         if(mode == 4) {
           tour::slides = default_slides;
           while(tour::on) restartGame('T', false);
-           firstland = euclidland = laIce;
+          firstland = euclidland = laIce;
           tour::start();
           }
         }
       },
-    {"HyperRogue", 999, LEGAL_ANY, 
+    {"straight lines in the Palace", 999, LEGAL_ANY, 
       "One simple slide about HyperRogue. Press '5' to show some hyperbolic straight lines.",
       [] (presmode mode) {
        using namespace linepatterns;
@@ -1812,9 +1910,9 @@ slide rvslides[] = {
       drawthemap();
       gmatrix0 = gmatrix;
 
-      rogueviz::sag::read("rogueviz/roguelikes/edges.csv");
-      rogueviz::readcolor("rogueviz/roguelikes/color.csv");
-      rogueviz::sag::loadsnake("rogueviz/roguelikes/" + cname());
+      rogueviz::sag::read(RVPATH "roguelikes/edges.csv");
+      rogueviz::readcolor(RVPATH "roguelikes/color.csv");
+      rogueviz::sag::loadsnake(RVPATH "roguelikes/" + cname());
       })    
     },
   {"Programming languages of GitHub", 64, LEGAL_UNLIMITED,
@@ -1832,9 +1930,9 @@ slide rvslides[] = {
       drawthemap();
       gmatrix0 = gmatrix;
 
-      rogueviz::sag::read("rogueviz/lang/edges.csv");
-      rogueviz::readcolor("rogueviz/lang/color.csv");
-      rogueviz::sag::loadsnake("rogueviz/lang/" + cname());
+      rogueviz::sag::read(RVPATH "lang/edges.csv");
+      rogueviz::readcolor(RVPATH "lang/color.csv");
+      rogueviz::sag::loadsnake(RVPATH "lang/" + cname());
       if(euclid) rogueviz::legend.clear();
       })
     },
@@ -1853,9 +1951,9 @@ slide rvslides[] = {
       drawthemap();
       gmatrix0 = gmatrix;
 
-      rogueviz::sag::read("rogueviz/boardgames/edges.csv");
-      rogueviz::readcolor("rogueviz/boardgames/color.csv");
-      rogueviz::sag::loadsnake("rogueviz/boardgames/" + cname());
+      rogueviz::sag::read(RVPATH "boardgames/edges.csv");
+      rogueviz::readcolor(RVPATH "boardgames/color.csv");
+      rogueviz::sag::loadsnake(RVPATH "boardgames/" + cname());
       })
         },
     {"Tree of Life", 61, LEGAL_UNLIMITED,
@@ -1872,7 +1970,7 @@ slide rvslides[] = {
       drawthemap();
       gmatrix0 = gmatrix;
 
-      rogueviz::tree::read("rogueviz/treeoflife/tol.txt");
+      rogueviz::tree::read(RVPATH "treeoflife/tol.txt");
       })},
   {"THE END", 99, LEGAL_ANY | FINALSLIDE,
     "Press '5' to leave the presentation.",

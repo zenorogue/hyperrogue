@@ -1853,7 +1853,7 @@ void livecaves() {
         if(c->mov[j]->wall == waThumperOn) c->aitmp+=100;
         if(c->mov[j]->wall == waFire) c->aitmp+=100;
         if(c->mov[j]->wall == waBigStatue) c->aitmp-=100;
-        if(c->mov[j]->item) c->aitmp+=2;
+        if(c->mov[j]->item && !peace::on) c->aitmp+=2;
         if(c->mov[j]->monst == moZombie) c->aitmp += 10;
         if(c->mov[j]->monst == moGhost) c->aitmp += 10;
         if(c->mov[j]->monst == moTentacleGhost) c->aitmp += 10;
@@ -2024,7 +2024,7 @@ namespace tortoise {
   void updateVals(int delta) {
     int currbits = getBits(cwt.c);
     for(int i=0; i<numbits; i++)
-      update(seekval[i], seek() ? getBit(seekbits, i) : .5, delta);
+      update(seekval[i], seek() && !(peace::on && !peace::hint) ? getBit(seekbits, i) : .5, delta);
     for(int i=0; i<numbits; i++)
       update(currval[i], getBit(currbits, i), delta);
     }

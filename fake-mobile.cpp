@@ -213,7 +213,7 @@ int main(int argc, char **argv) {
           items[itGreenStone] = 100;
           }
         action = sym; */
-        extra ex;
+        eventtype ex;
         mousing = false;
         handlekey(sym, sym, ex);
         }

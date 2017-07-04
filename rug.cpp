@@ -8,6 +8,7 @@
 #define TEXTURESIZE (texturesize)
 #define HTEXTURESIZE (texturesize/2)
 
+#ifdef AVOID_GLEW
 #ifdef LINUX
 extern "C" {
 GLAPI void APIENTRY glGenFramebuffers (GLsizei n, GLuint *framebuffers);
@@ -26,6 +27,7 @@ GLAPI void APIENTRY glDeleteFramebuffers (GLsizei n, const GLuint *framebuffers)
 
 #ifdef MAC
 #define glFramebufferTexture glFramebufferTextureEXT 
+#endif
 #endif
 
 namespace rug {
@@ -389,7 +391,11 @@ void initTexture() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
   
+#ifdef TEX
     glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, renderedTexture, 0);  
+#else
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, renderedTexture, 0);  
+#endif
     GLenum DrawBuffers[1] = {GL_COLOR_ATTACHMENT0};
     glDrawBuffers(1, DrawBuffers);
     
@@ -467,6 +473,11 @@ void closeTexture() {
 
 double xview, yview;
 
+void glcolorClear(int color) {
+  unsigned char *c = (unsigned char*) (&color);
+  glClearColor(c[3] / 255.0, c[2] / 255.0, c[1]/255.0, c[0] / 255.0);
+  }
+
 void drawRugScene() {
   GLfloat light_ambient[] = { 3.5, 3.5, 3.5, 1.0 };
   GLfloat light_diffuse[] = { 1.0, 1.0, 1.0, 1.0 };
@@ -490,7 +501,10 @@ void drawRugScene() {
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
 
-  glClearColor(0.05,0.05,0.05,1);
+  if(backcolor == 0) 
+    glClearColor(0.05,0.05,0.05,1);
+  else
+    glcolorClear(backcolor << 8 | 0xFF);
   glClearDepth(1.0f); 
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   
@@ -555,7 +569,7 @@ transmatrix rotmatrix(double rotation, int c0, int c1) {
 transmatrix currentrot;
     
 void init() {
-#ifdef WINDOWS
+#ifndef AVOID_GLEW
   if(!glew) { 
     glew = true; 
     GLenum err = glewInit();

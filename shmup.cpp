@@ -573,9 +573,9 @@ void initConfig() {
   char* t = vid.scfg.keyaction;
   
   t['w'] = 16 + 4;
-  t['s'] = 16 + 5;
-  t['a'] = 16 + 6;
-  t['d'] = 16 + 7;
+  t['d'] = 16 + 5;
+  t['s'] = 16 + 6;
+  t['a'] = 16 + 7;
 
 #ifndef MOBILE
   t[SDLK_KP8] = 16 + 4;
@@ -2925,7 +2925,9 @@ void turn(int delta) {
       }
     }
   
-  for(monster *m: additional) active.push_back(m); additional.clear();
+  for(monster *m: additional) 
+    active.push_back(m);
+  additional.clear();
   
   // deactivate all monsters
   for(monster *m: active)

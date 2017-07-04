@@ -72,7 +72,7 @@ void presentation(presmode mode) {
   }
 
 void slidehelp() {
-  if(texts) {
+  if(texts && slides[currentslide].help[0]) {
     help = 
       helptitle(XLAT(slides[currentslide].name), 0xFF8000) + 
       XLAT(slides[currentslide].help);
@@ -87,7 +87,10 @@ bool handleKeyTour(int sym, int uni) {
   if(!normode) return false;
   int flags = slides[currentslide].flags;
   if((sym == SDLK_RETURN || sym == SDLK_KP_ENTER) && (cmode != emHelp || (flags & QUICKSKIP))) {
-    if(geometry || purehepta) { restartGame(0, false); return true; }
+    if(geometry || purehepta) { 
+      restartGame(0, false); 
+      if(!(flags & QUICKGEO)) return true; 
+      }
     if(flags & FINALSLIDE) return true;
     presentation(pmStop);
     currentslide++;
@@ -96,7 +99,10 @@ bool handleKeyTour(int sym, int uni) {
     return true;
     }
   if(sym == SDLK_BACKSPACE) {
-    if(geometry || purehepta) { restartGame(0, false); return true; }
+    if(geometry || purehepta) { 
+      restartGame(0, false); 
+      if(!(flags & QUICKGEO)) return true;
+      }
     if(currentslide == 0) { slidehelp(); return true; }
     presentation(pmStop);
     currentslide--;
@@ -207,6 +213,10 @@ bool handleKeyTour(int sym, int uni) {
     conformal::includeHistory = !conformal::includeHistory;
     return true;
     }
+  if(sym == '9') {
+    cmode = emSlideshows;
+    return true;
+    }
   return false;
   }
 
@@ -225,12 +235,76 @@ void checkGoodLand(eLand l) {
     }
   }
 
+namespace ss {
+  vector<slide*> slideshows;
+  slide *wts;
+
+  void list(slide *ss) {
+    for(auto s: slideshows) if (s == ss) return;
+    slideshows.push_back(ss);
+    }
+
+  int sssize;
+   
+  void showMenu() {
+    if(!wts) wts = slides; 
+
+    dialog::init(XLAT("slides"), forecolor, 150, 100);
+    
+    for(sssize=0;; sssize++) {
+      int i = sssize;
+      dialog::addBoolItem(XLAT(wts[i].name), wts == slides && i == currentslide, 'a'+i);
+      if(wts[i].flags & FINALSLIDE) break;
+      }
+    dialog::addBreak(50);
+    if(size(slideshows) > 1) dialog::addItem(XLAT("change slideshow"), '1');
+    dialog::addItem(XLAT("exit menu"), '0');
+    dialog::display();
+    }
+
+  void handleKey(int sym, int uni) {
+    if(uni >= 'a' && uni < 'a' + sssize) {
+      if(geometry || purehepta) {
+        restartGame(0, false); 
+        presentation(pmGeometryReset);
+        }
+      if(slides != wts) {
+        while(tour::on) restartGame('T', false);
+        slides = wts;
+        tour::start();
+        }
+      presentation(pmStop);
+      currentslide = uni - 'a';
+      cmode = emNormal;
+      presentation(pmStart);
+      slidehelp();
+      }
+    else if(uni == '1') {
+      list(wts);
+      for(int i=0; i<size(slideshows)-1; i++) if(slideshows[i] == wts) {
+        wts = slideshows[i+1]; return;
+        }
+      wts = slideshows[0];
+      }
+    else if(doexiton(sym, uni)) { wts = NULL; cmode = emNormal; }
+    }
+
+  }
+  
 void start() {
+  ss::list(default_slides);
+#ifdef ROGUEVIZ
+  ss::list(rogueviz::rvtour::rvslides);
+#endif
   currentslide = 0;
   vid.scale = 1;
   vid.alpha = 1;
   pmodel = mdDisk;
-  presentation(pmStartAll);
+  if(!tour::on) presentation(pmStartAll);
+  else {
+    presentation(pmStop);
+    firstland = euclidland = laIce;
+    }
   restartGame('T');
   if(tour::on) {
     slidehelp();
@@ -249,6 +323,7 @@ slide default_slides[] = {
     "press ESC to see a "
     "menu with other options.",
     [] (presmode mode) {
+      if(mode == pmStartAll) firstland = euclidland = laIce;
       if(mode == 1) {
         if(tour::texts) addMessage(XLAT("Welcome to the HyperRogue tutorial!"));
         else clearMessages();  
@@ -265,7 +340,6 @@ slide default_slides[] = {
        if(mode == 4) {
          slides = rogueviz::rvtour::rvslides;
          while(tour::on) restartGame('T', false);
-         firstland = euclidland = laPalace;
          tour::start();
          }
 #endif            
@@ -637,10 +711,12 @@ slide default_slides[] = {
         centerpc(INF);
         conformal::includeHistory = false;
         }
+#ifndef NOSDL
       slidecommand = "render spiral";
       if(mode == 4) conformal::createImage(true);
       if(mode == 11) conformal::create();
       if(mode == 13) conformal::clear();
+#endif
       }
     },
   {"Conformal square model", 46, LEGAL_HYPERBOLIC,

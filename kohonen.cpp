@@ -379,7 +379,9 @@ void ksave(const char *fname) {
   FILE *f = fopen(fname, "wt");
   fprintf(f, "%d %d\n", cells, t);
   for(neuron& n: net) {
-    for(int k=0; k<cols; k++) fprintf(f, "%.4lf ", n.net[k]); fprintf(f, "\n");
+    for(int k=0; k<cols; k++)
+      fprintf(f, "%.4lf ", n.net[k]);
+    fprintf(f, "\n");
     }
   fclose(f);
   }

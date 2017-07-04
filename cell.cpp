@@ -72,19 +72,13 @@ struct celllister {
   vector<int> tmps;
   vector<int> dists;
   
-  bool listed(cell *c) {
-    return c->aitmp >= 0 && c->aitmp < size(lst) && lst[c->aitmp] == c;
-    }
-  
   void add(cell *c, int d) {
-    if(listed(c)) return;
-    c->aitmp = size(lst);
+    if(eq(c->aitmp, sval)) return;
+    c->aitmp = sval;
     tmps.push_back(c->aitmp);
     lst.push_back(c);
     dists.push_back(d);
     }
-  
-  int getdist(cell *c) { return dists[c->aitmp]; }
   
   ~celllister() {
     for(int i=0; i<size(lst); i++) lst[i]->aitmp = tmps[i];
@@ -94,6 +88,7 @@ struct celllister {
     lst.clear();
     tmps.clear();
     dists.clear();
+    sval++;
     add(orig, 0);
     cell *last = orig;
     for(int i=0; i<size(lst); i++) {
@@ -108,6 +103,17 @@ struct celllister {
         }
       }
     }
+
+  void prepare() {
+    for(int i=0; i<size(lst); i++) lst[i]->aitmp = i;
+    }
+  
+  int getdist(cell *c) { return dists[c->aitmp]; }
+  
+  bool listed(cell *c) {
+    return c->aitmp >= 0 && c->aitmp < size(lst) && lst[c->aitmp] == c;
+    }
+  
   };
 
 // -- hrmap ---

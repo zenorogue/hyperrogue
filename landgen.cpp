@@ -388,6 +388,15 @@ eItem orbType(eLand l) {
   return itNone;
   }
 
+const orbinfo& getOrbInfo(eItem orb) {
+  for(int i=0; i<ORBLINES; i++) 
+    if(orbinfos[i].orb == orb && orbinfos[i].gchance)
+      return orbinfos[i];
+  static orbinfo oi; 
+  oi.l = laMirror;
+  return oi;
+  }
+
 enum eOrbLandRelation { 
   olrForbidden, // never appears: forbidden
   olrDangerous, // never appears: would be dangerous
@@ -613,10 +622,10 @@ bool landUnlocked(eLand l) {
   
   switch(l) {
     case laOvergrown: 
-      return gold() >= 60 && items[itRuby] >= 10;
+      return gold() >= R60 && items[itRuby] >= U10;
     
     case laStorms: case laWhirlwind: 
-      return gold() >= 60;
+      return gold() >= R60;
     
     case laWildWest: case laHalloween:
       return false;
@@ -627,49 +636,49 @@ bool landUnlocked(eLand l) {
 
     case laMirror: case laMinefield: case laPalace:
     case laOcean: case laLivefjord:
-      return gold() >= 30;
+      return gold() >= R30;
     
     case laCaribbean: case laWhirlpool:
       return exploreland[0][laOcean] || items[itCoast] || items[itStatue];
     
     case laRlyeh: case laDryForest: case laWineyard: case laCrossroads2:
-      return gold() >= 60;
+      return gold() >= R60;
     
     case laDeadCaves:
-      return gold() >= 60 && items[itGold] >= 10;
+      return gold() >= R60 && items[itGold] >= U10;
 
     case laGraveyard:
-      return tkills() >= 100;
+      return tkills() >= R100;
 
     case laHive:
-      return tkills() >= 100 && gold() >= 60;
+      return tkills() >= R100 && gold() >= R60;
 
     case laRedRock:
-      return gold() >= 60 && items[itSpice] >= 10;
+      return gold() >= R60 && items[itSpice] >= U10;
     
     case laEmerald:
-      return (items[itFernFlower] >= 5 && items[itGold] >= 5) || kills[moVizier];
+      return (items[itFernFlower] >= U5 && items[itGold] >= U5) || kills[moVizier];
     
     case laCamelot:
-      return items[itEmerald] >= 5;
+      return items[itEmerald] >= U5;
     
     case laHell: case laCrossroads3:
       return hellUnlocked();
       
     case laPower: 
-      return items[itHell] >= 10;
+      return items[itHell] >= U10;
 
     case laCocytus: 
-      return items[itHell] >= 10 && items[itDiamond] >= 10;
+      return items[itHell] >= U10 && items[itDiamond] >= U10;
 
     case laTemple:
-      return items[itStatue] >= 5;
+      return items[itStatue] >= U5;
 
     case laClearing:
-      return items[itMutant] >= 5;
+      return items[itMutant] >= U5;
 
-    case laIvoryTower: return gold() >= 30;
-    case laZebra: return gold() >= 30 && items[itFeather] >= 10;
+    case laIvoryTower: return gold() >= R30;
+    case laZebra: return gold() >= R30 && items[itFeather] >= U10;
 
     case laEAir: case laEEarth: case laEWater: case laEFire:  case laElementalWall:
       return elementalUnlocked();
@@ -678,52 +687,52 @@ bool landUnlocked(eLand l) {
       return false;
     
     case laHaunted: case laHauntedWall: case laHauntedBorder: 
-      return items[itBone] >= 10;
+      return items[itBone] >= U10;
 
     case laPrincessQuest: return kills[moVizier] && !shmup::on && multi::players == 1;
     
     case laRose: 
-      return gold() >= 60;
+      return gold() >= R60;
       
     case laWarpCoast: case laWarpSea: 
-      return gold() >= 30;
+      return gold() >= R30;
       
     case laCrossroads4:
-      return gold() >= 200;
+      return gold() >= R200;
     
     case laEndorian:
-      return items[itIvory] >= 10;
+      return items[itIvory] >= U10;
     
     case laTortoise:
       return tortoise::seek();
     
     case laDragon:
-      return killtypes() >= 20;
+      return killtypes() >= R20;
     
     case laKraken:
-      return items[itFjord] >= 10;
+      return items[itFjord] >= U10;
 
     case laBurial:
-      return items[itKraken] >= 10;
+      return items[itKraken] >= U10;
 
     case laTrollheim:
       return trollUnlocked();
     
     case laDungeon:
-      return items[itPalace] >= 5 && items[itIvory] >= 5;
+      return items[itPalace] >= U5 && items[itIvory] >= U5;
 
     case laMountain:
-      return items[itRuby] >= 5 && items[itIvory] >= 5;
+      return items[itRuby] >= U5 && items[itIvory] >= U5;
       
     case laReptile:
-      return gold() >= 30 && items[itElixir] >= 10;
+      return gold() >= R30 && items[itElixir] >= U10;
     
     case laPrairie:
     case laBull:
-      return gold() >= 90;
+      return gold() >= R90;
     
     case laCrossroads5:
-      return gold() >= 300;
+      return gold() >= R300;
     }
   return false;
   }
@@ -731,7 +740,7 @@ bool landUnlocked(eLand l) {
 int orbsUnlocked() {
   int i = 0;
   for(int t=0; t<ittypes; t++) 
-    if(itemclass(eItem(t)) == IC_TREASURE && items[t] >= 10)
+    if(itemclass(eItem(t)) == IC_TREASURE && items[t] >= R10)
       i++;
   return i;
   }
@@ -745,7 +754,7 @@ void countHyperstoneQuest(int& i1, int& i2) {
   for(int t=1; t<ittypes; t++) 
     if(t != itHyperstone && t != itBounty && t != itTreat &&
     itemclass(eItem(t)) == IC_TREASURE) {
-      i2++; if(items[t] >= 10) i1++;
+      i2++; if(items[t] >= R10) i1++;
       }
   }  
 
@@ -991,12 +1000,14 @@ ld orbprizefun(int tr) {
   }
 
 ld orbcrossfun(int tr) {
+  if(inv::on) return tr >= 50 ? 1 : 0;
   if(tr < 10) return 0;
   if(tr > 25) return 1;
   return (tr*2 + 50) / 100.;
   }
 
 bool buildPrizeMirror(cell *c, int freq) {
+  if(inv::on) return false;
   if(c->type == 7 && !purehepta) return false;
   if(items[itShard] < 25) return false;
   if(freq && hrand(freq * 100 / orbprizefun(items[itShard])) >= 100)
@@ -1008,6 +1019,7 @@ bool buildPrizeMirror(cell *c, int freq) {
 void placePrizeOrb(cell *c) {
   eLand l = c->land;
   if(isElemental(l)) l = laElementalWall;
+  if(peace::on) return;
 
   // these two lands would have too much orbs according to normal rules
   if(l == laPalace && hrand(100) >= 20) return;
@@ -1021,6 +1033,7 @@ void placePrizeOrb(cell *c) {
     l = laPrincessQuest;
   for(int i=0; i<ORBLINES; i++) {
     const orbinfo& oi(orbinfos[i]);
+    if(inv::on && oi.orb != itOrbYendor) return;
     eOrbLandRelation olr = getOLR(oi.orb, l);
     if(olr != olrPrize25 && olr != olrPrize3) continue;
     int treas = items[treasureType(oi.l)];
@@ -1051,10 +1064,12 @@ void placeLocalOrbs(cell *c) {
   if(l == laZebra && c->wall == waTrapdoor) return;
   if(isGravityLand(l) && cellEdgeUnstable(c)) return;
   if(isElemental(l)) l = laElementalWall;
+  if(peace::on) return;
   
   for(int i=0; i<ORBLINES; i++) {
     const orbinfo& oi(orbinfos[i]);
     if(oi.l != l) continue;
+    if(inv::on && (oi.orb != itOrbYendor)) continue;
     if(yendor::on && (oi.orb == itOrbSafety || oi.orb == itOrbYendor))
       continue;
     if(!oi.lchance) continue;
@@ -1074,9 +1089,11 @@ void placeLocalOrbs(cell *c) {
   }
 
 void placeCrossroadOrbs(cell *c) {  
+  if(peace::on) return;
   for(int i=0; i<ORBLINES; i++) {
     const orbinfo& oi(orbinfos[i]);
     if(!oi.gchance) continue;
+    if(inv::on && oi.orb != itOrbSafety && oi.orb != itOrbYendor) return;
     int treas = items[treasureType(oi.l)] * landMultiplier(oi.l);
     if(tactic::on && isCrossroads(tactic::lasttactic)) {
       if(oi.orb == itOrbYendor || oi.orb == itOrbSummon || oi.orb == itOrbFish || oi.orb == itOrbDigging || oi.orb == itOrbLove || oi.orb == itOrbLuck)
@@ -1097,8 +1114,10 @@ void placeCrossroadOrbs(cell *c) {
   }
 
 void placeOceanOrbs(cell *c) {  
+  if(peace::on) return;
   for(int i=0; i<ORBLINES; i++) {
     const orbinfo& oi(orbinfos[i]);
+    if(inv::on && oi.orb != itOrbSafety && oi.orb != itOrbYendor) return;
     if(items[treasureType(oi.l)] * landMultiplier(oi.l) < 10) continue;
     if(!oi.gchance) continue;
     if(oi.orb == itOrbLife) continue; // useless
@@ -1136,8 +1155,7 @@ void raiseBuggyGeneration(cell *c, const char *s) {
     }
   // return;
 
-#ifdef LOCAL
-  
+#ifdef DEBUG_LANDGEN 
   describeCell(c);
   for(int i=0; i<c->type; i++) describeCell(c->mov[i]);
 
@@ -1547,10 +1565,6 @@ eLand pickluck(eLand l1, eLand l2) {
 
 #define LIKELY for(int u=0; u<5; u++)
 
-template<class T> T pick(T x, T y) { return hrand(2) ? x : y; }
-template<class T> T pick(T x, T y, T z) { switch(hrand(3)) { case 0: return x; case 1: return y; case 2: return z; } return x; }
-template<class T> T pick(T x, T y, T z, T v) { switch(hrand(4)) { case 0: return x; case 1: return y; case 2: return z; case 3: return v; } return x; }
-
 bool noChaos(eLand l) {
   if(l == laOcean || l == laTemple) return false;
   return 
@@ -1563,6 +1577,7 @@ eLand getNewSealand(eLand old) {
   while(true) {
     eLand p = pick(laOcean, pick(laCaribbean, laLivefjord, laWarpSea, laKraken));
     if(p == laKraken && !landUnlocked(p)) continue;
+    if(p == laKraken && peace::on) continue;
     if(incompatible(old, p)) continue;
     if(p == old) continue;
     if(chaosmode && noChaos(p)) continue;
@@ -1574,52 +1589,34 @@ bool doEndorian = false;
 
 int whichnow=0;
 
+bool createOnSea(eLand old) {
+  return
+    old == laWarpSea || old == laCaribbean || old == laKraken ||
+    (old == laLivefjord && hrand(2)) || 
+    (old == laOcean && (chaosmode ? hrand(2) : !generatingEquidistant));
+  }
+
 eLand getNewLand(eLand old) {
 
-  /* eLand landtab[10] = {
-    laWhirlwind, laRose, laEndorian, laRlyeh,
-    laPalace, laOcean, laEmerald, laStorms,
-    laGraveyard, laAlchemist 
-    }; */
-  
-  // return landtab[items[itStrongWind]++ % 10];
-  // if(old != laPrairie) return laRiver;
+#ifdef EXTRA_NEWLAND
+  if(true) {
+    eLand l = extra::getNext(old);
+    if(l) return l;
+    }  
+#endif
   
   #ifdef TOUR
   if(tour::on) {
     eLand l = tour::getNext(old);
     if(l) return l;
     }
+  
+  if(peace::on) {
+    eLand l = peace::getNext(old);
+    if(l) return l;
+    }
   #endif
   
-#ifdef LOCAL
-  extern bool doAutoplay;
-  if(doAutoplay) 
-    return pick(laOcean, laLivefjord, laWarpSea, laWarpCoast);
-  extern bool doCross;
-  if(doCross) {
-    whichnow++;
-    eLand tabb[30] = {
-/*      laIce, laRedRock, laCaribbean, laWarpCoast, laWhirlwind, laPower,
-      laMirror, laPalace, laLivefjord, laAlchemist, laCocytus, 
-      laHell, laJungle, laCaves, laDesert, laRlyeh, laStorms,
-      laGraveyard, laMotion, laDryForest, laDragon, laZebra, laIvoryTower,
-      laTrollheim, laOvergrown, laBurial, laRose, laHive, laEmerald,
-      laEmerald */
-      laIce, laPalace, laDryForest, laRedRock, laWhirlwind,
-      laAlchemist, laWarpCoast, laOvergrown,
-      laEmerald, laWhirlwind,
-      laIce, laRedRock, laWarpCoast, laPalace, laWhirlwind,
-      laAlchemist, laDryForest, laOvergrown,
-      laEmerald, laDesert,
-      laIce, laRedRock, laWarpCoast, laPalace, laWhirlwind,
-      laAlchemist, laDryForest, laOvergrown,
-      laEmerald, laDesert,
-      };
-    return tabb[whichnow%30];
-    }
-#endif
-
   if(cheatdest != old) if(!isCyclic(cheatdest) && !isTechnicalLand(cheatdest)) return cheatdest;
   
   if(old == laTortoise) return laDragon;
@@ -1673,15 +1670,13 @@ eLand getNewLand(eLand old) {
   
   if(isWarped(old) && (hrand(100) < 25) && chaosmode) return eLand(old ^ laWarpCoast ^ laWarpSea);
 
-  if(old == laWarpSea || old == laCaribbean || old == laKraken ||
-    (old == laLivefjord && hrand(2)) || 
-    (old == laOcean && (chaosmode ? hrand(2) : !generatingEquidistant)))
+  if(createOnSea(old)) 
       return getNewSealand(old);
-  
+
   if(old == laGraveyard && generatingEquidistant)
     return laHaunted;
   
-  if(old == laOcean && gold() >= 60 && hrand(100) < 75 && !rlyehComplete()) 
+  if(old == laOcean && gold() >= R60 && hrand(100) < 75 && !rlyehComplete()) 
     return laRlyeh;
     
   if(old == laRlyeh && !rlyehComplete())
@@ -1708,7 +1703,7 @@ eLand getNewLand(eLand old) {
   if(old != laDeadCaves) tab[cnt++] = laCaves;
   
   // the intermediate lands
-  if(gold() >= 30) {
+  if(gold() >= R30) {
     tab[cnt++] = laCrossroads;
     tab[cnt++] = laMirror;
     tab[cnt++] = laOcean;
@@ -1717,15 +1712,15 @@ eLand getNewLand(eLand old) {
     tab[cnt++] = laPalace;
     if(old == laDragon) LIKELY tab[cnt++] = laReptile;
     if(kills[moVizier]) tab[cnt++] = laEmerald;
-    if(items[itFeather] >= 10) tab[cnt++] = laZebra;
+    if(items[itFeather] >= U10) tab[cnt++] = laZebra;
     tab[cnt++] = laWarpCoast;
     if(euclid) tab[cnt++] = laWarpSea;
     // Ivory Tower tends to crash while generating equidistant
     if(!generatingEquidistant) tab[cnt++] = laIvoryTower;
-    if(items[itElixir] >= 10) tab[cnt++] = laReptile;
-    if(items[itIvory] >= 10 && !generatingEquidistant) tab[cnt++] = laEndorian;
+    if(items[itElixir] >= U10) tab[cnt++] = laReptile;
+    if(items[itIvory] >= U10 && !generatingEquidistant) tab[cnt++] = laEndorian;
     
-    if(items[itKraken] >= 10) tab[cnt++] = laBurial;
+    if(items[itKraken] >= U10) tab[cnt++] = laBurial;
     }
 
   if(landUnlocked(laDungeon)) {
@@ -1734,29 +1729,29 @@ eLand getNewLand(eLand old) {
      }
   
   // the advanced lands
-  if(gold() >= 60) {
+  if(gold() >= R60) {
     tab[cnt++] = laStorms;
     tab[cnt++] = laWhirlwind;
     tab[cnt++] = laCrossroads;
     if(!generatingEquidistant) tab[cnt++] = laCrossroads2;
-    if(items[itRuby] >= 10) {
+    if(items[itRuby] >= U10) {
       tab[cnt++] = laOvergrown;
       if(old == laJungle) LIKELY tab[cnt++] = laOvergrown;
       }
     if(rlyehComplete()) tab[cnt++] = laRlyeh;
     else if(chaosmode && (old == laWarpCoast || old == laLivefjord || old == laOcean)) 
       tab[cnt++] = laRlyeh;
-    if(items[itStatue] >= 5 && chaosmode)
+    if(items[itStatue] >= U5 && chaosmode)
       tab[cnt++] = laTemple;
     if(old == laCrossroads || old == laCrossroads2) tab[cnt++] = laOcean;
     if(old == laOcean) tab[cnt++] = laCrossroads;
-    if(items[itGold] >= 5 && items[itFernFlower] >= 5 && !kills[moVizier]) 
+    if(items[itGold] >= U5 && items[itFernFlower] >= U5 && !kills[moVizier]) 
       tab[cnt++] = laEmerald;
     tab[cnt++] = laDryForest;
     tab[cnt++] = laWineyard;
-    if(items[itGold] >= 10) tab[cnt++] = laDeadCaves;
+    if(items[itGold] >= U10) tab[cnt++] = laDeadCaves;
     // tab[cnt++] = laCaribbean;
-    if(items[itSpice] >= 10) {
+    if(items[itSpice] >= U10) {
       tab[cnt++] = laRedRock;
       if(old == laDesert) LIKELY tab[cnt++] = laRedRock;
       }
@@ -1765,22 +1760,22 @@ eLand getNewLand(eLand old) {
     tab[cnt++] = laRose;
     }
   
-  if(gold() >= 90) {
+  if(gold() >= R90) {
     if(!chaosmode) tab[cnt++] = laPrairie;
     if(old == laPrairie) LIKELY tab[cnt++] = laBull;
     tab[cnt++] = laBull;
     if(old == laBull && !chaosmode) LIKELY tab[cnt++] = laPrairie;
     }
   
-  if(gold() >= 300)
+  if(gold() >= R300)
     tab[cnt++] = laCrossroads5;
   
-  if(tkills() >= 100) {
+  if(tkills() >= R100) {
     tab[cnt++] = laGraveyard;
-    if(gold() >= 60) tab[cnt++] = laHive;
+    if(gold() >= R60) tab[cnt++] = laHive;
     }
   
-  if(killtypes() >= 20) {
+  if(killtypes() >= R20) {
     tab[cnt++] = laDragon;
     if(old == laReptile) LIKELY tab[cnt++] = laDragon;
     }
@@ -1815,8 +1810,8 @@ eLand getNewLand(eLand old) {
     tab[cnt++] = laHell;
     }
   
-  if(items[itHell] >= 10) {
-    if(items[itDiamond] >= 10) {
+  if(items[itHell] >= U10) {
+    if(items[itDiamond] >= U10) {
       tab[cnt++] = laCocytus;
       if(old == laHell || old == laIce) LIKELY tab[cnt++] = laCocytus;
       }
@@ -1839,6 +1834,7 @@ eLand getNewLand(eLand old) {
   }
 
 bool notDippingFor(eItem i) {
+  if(peace::on) return false;
   int v = items[i] - currentLocalTreasure;
   if(v <= 10) return true;
   if(v >= 20) return false;
@@ -1846,6 +1842,7 @@ bool notDippingFor(eItem i) {
   }
 
 bool notDippingForExtra(eItem i, eItem x) {
+  if(peace::on) return false;
   int v = items[i] - min(items[x], currentLocalTreasure);
   if(v <= 10) return true;
   if(v >= 20) return false;
@@ -1932,25 +1929,28 @@ eLand showlist[10] = {
   laHell, laRlyeh, laAlchemist, laGraveyard, laCaves, laDesert, laIce, laJungle, laMotion, laMirror
   };
 
+void buildBarrierForce(cell *c, int d, eLand l) {
+  c->bardir = d;
+  eLand oldland = c->land;
+  if(oldland == laNone) {
+    raiseBuggyGeneration(c, "oldland is NONE");
+    return;
+    }
+  eLand newland = l ? l : getNewLand(oldland);
+  if(showoff) newland = showlist[(showid++) % 10];
+  landcount[newland]++;
+  if(d == 4 || d == 5 || d == 6) c->barleft = oldland, c->barright = newland;
+  else c->barleft = newland, c->barright = oldland;
+  c->landparam = 40;
+  extendcheck(c);
+  }
+
 void buildBarrier(cell *c, int d, eLand l) {
   d %= 7;
   cellwalker bb(c, d);
   
-  if(checkBarriersFront(bb) && checkBarriersBack(bb)) {
-    c->bardir = d;
-    eLand oldland = c->land;
-    if(oldland == laNone) {
-      raiseBuggyGeneration(c, "oldland is NONE");
-      return;
-      }
-    eLand newland = l ? l : getNewLand(oldland);
-    if(showoff) newland = showlist[(showid++) % 10];
-    landcount[newland]++;
-    if(d == 4 || d == 5 || d == 6) c->barleft = oldland, c->barright = newland;
-    else c->barleft = newland, c->barright = oldland;
-    c->landparam = 40;
-    extendcheck(c);
-    }
+  if(checkBarriersFront(bb) && checkBarriersBack(bb)) 
+    buildBarrierForce(c, d, l);
   }
 
 bool buildBarrier4(cell *c, int d, int mode, eLand ll, eLand lr) {
@@ -2138,21 +2138,13 @@ extern bool bugtrack;
 
 bool generatingEquidistant = false;
 
-void buildAnotherEquidistant(cell *c) {
-  //printf("building another coast\n");
-  
-  if(yendor::on) return;
-
+cell *buildAnotherEquidistant(cell *c, int radius) {
   int gdir = -1;
   for(int i=0; i<c->type; i++) {
     if(c->mov[i] && c->mov[i]->mpdist < c->mpdist) gdir = i;
     }
-  if(gdir == -1) return;
+  if(gdir == -1) return NULL;
   
-  generatingEquidistant = true;
-  
-  int radius = c->land == laOcean ? 30 : HAUNTED_RADIUS + 5;
-
   cellwalker cw(c, (gdir+3) % c->type);
   vector<cell*> coastpath;
   while(size(coastpath) < radius || cw.c->type != 7) {
@@ -2161,13 +2153,10 @@ void buildAnotherEquidistant(cell *c) {
 #ifdef AUTOPLAY
       if(doAutoplay) printf("avoiding the Crossroads II\n"); // todo
 #endif
-      generatingEquidistant = false;
-      return;
+      return NULL;
       }
-    if(cw.c->bardir != NODIR) {
-      generatingEquidistant = false;
-      return;
-      }
+    if(cw.c->bardir != NODIR) return NULL;
+
     /* forCellEx(c2, cw.c) if(c2->bardir != NODIR) {
       generatingEquidistant = false;
       return;
@@ -2176,21 +2165,21 @@ void buildAnotherEquidistant(cell *c) {
     if(cw.c->land == laNone && cw.c->mpdist <= 7) {
       raiseBuggyGeneration(cw.c, "landNone 1");
       for(int i=0; i<size(coastpath); i++) coastpath[i]->item = itPirate;
-      return;
+      return NULL;
       }
     cwstep(cw); cwspin(cw, 3); 
     if(cw.c->type == 7 && hrand(2) == 0) cwspin(cw, 1);
     }
-  int mpd[10];
-  for(int i=0; i<10; i++) mpd[i] = coastpath[i]->mpdist;
   coastpath.push_back(cw.c);
   // printf("setdists\n");
   for(int i=1; i<size(coastpath) - 1; i++) {
     if(coastpath[i-1]->land == laNone) {
       raiseBuggyGeneration(cwt.c, "landNone 3");
+      int mpd[10];
+      for(int i=0; i<10; i++) mpd[i] = coastpath[i]->mpdist;
       {for(int i=0; i<10; i++) printf("%d ", mpd[i]);} printf("\n");
       for(int i=0; i<size(coastpath); i++) coastpath[i]->item = itPirate;
-      return;
+      return NULL;
       }
     setdist(coastpath[i], BARLEV, coastpath[i-1]);
     setdist(coastpath[i], BARLEV-1, coastpath[i-1]);
@@ -2210,16 +2199,14 @@ void buildAnotherEquidistant(cell *c) {
   if(c2->land == laNone) {
     raiseBuggyGeneration(c2, "landNone 2");
     for(int i=0; i<size(coastpath); i++) coastpath[i]->item = itPirate;
-    return;
+    return NULL;
     }
 
-  if(c2->land != c->land) {
-    generatingEquidistant = false;
-    return; // prevent gravity anomalies
-    }
+  // prevent gravity anomalies
+  if(c2->land != c->land) return NULL;
   
   // else if(c->type == 7 && hrand(10000) < 20 && !isCrossroads(c->land) && gold() >= 200)
-  if(c2->type == 7 && gold() >= 200 && hrand(10) < 2 && buildBarrierNowall(c2, laCrossroads4, true))  {
+  if(c2->type == 7 && gold() >= R200 && hrand(10) < 2 && buildBarrierNowall(c2, laCrossroads4, true))  {
     nowall = true;
     // raiseBuggyGeneration(c2, "check");
     // return;
@@ -2232,7 +2219,21 @@ void buildAnotherEquidistant(cell *c) {
     for(int j=BARLEV; j>=6; j--)
       setdist(coastpath[i], j, NULL);
     }
+    
+  return c2;
+  }
 
+void buildAnotherEquidistant(cell *c) {
+  //printf("building another coast\n");
+  
+  if(yendor::on) return;
+
+  generatingEquidistant = true;
+  
+  int radius = c->land == laOcean ? 30 : HAUNTED_RADIUS + 5;
+
+  buildAnotherEquidistant(c, radius);
+  
   generatingEquidistant = false;
   }
 
@@ -2279,7 +2280,11 @@ eMonster crossroadsMonster() {
     moWaterElemental, moAirElemental, moFireElemental,
     moFatGuard, moMiner, moPalace, moVizier
     };
-  return m[hrand(24)];
+  eMonster mo = m[hrand(24)];
+  if(peace::on && mo == moWaterElemental) return crossroadsMonster();
+  if(peace::on && mo == moFireFairy) return crossroadsMonster();
+  if(peace::on && isMultitile(mo)) return crossroadsMonster();
+  return mo;
   }
 
 eMonster wanderingCrossroadsMonster() {
@@ -2535,7 +2540,7 @@ void buildRedWall(cell *c, int gemchance) {
   c->wall = waRed3;
   if(hrand(100+ki) < gemchance + ki)
     c->item = itRedGem;
-  if(items[itRedGem] >= 10 && hrand(8000) < gemchance)
+  if(items[itRedGem] >= 10 && hrand(8000) < gemchance && !peace::on && !inv::on)
     c->item = itOrbSpace;
   else if(hrand(8000) < gemchance * PRIZEMUL)
     placePrizeOrb(c);
@@ -2876,7 +2881,7 @@ void buildBigStuff(cell *c, cell *from) {
   else if(c->type == 7 && c->land == laCrossroads4 && hrand(10000) < 7000 && c->land && 
     buildBarrierNowall(c, getNewLand(laCrossroads4))) ;
   
-  else if(c->type == 7 && hrand(10000) < 20 && !generatingEquidistant && !yendor::on && !tactic::on && !isCrossroads(c->land) && gold() >= 200 &&
+  else if(c->type == 7 && hrand(10000) < 20 && !generatingEquidistant && !yendor::on && !tactic::on && !isCrossroads(c->land) && gold() >= R200 &&
     !isSealand(c->land) && !isHaunted(c->land) && !isGravityLand(c->land) && 
     (c->land != laRlyeh || rlyehComplete()) &&
     c->land != laTortoise && c->land != laPrairie && c->land && 
@@ -2936,8 +2941,8 @@ void buildBigStuff(cell *c, cell *from) {
     }
       
   if((!chaosmode) && bearsCamelot(c->land) && c->type == 7 && 
-    (quickfind(laCamelot) || (hrand(2000) < 200 && 
-    items[itEmerald] >= 5 && !tactic::on))) {
+    (quickfind(laCamelot) || peace::on || (hrand(2000) < 200 && 
+    items[itEmerald] >= U5 && !tactic::on))) {
     int rtr = newRoundTableRadius();
     heptagon *alt = createAlternateMap(c, rtr+14, hsOrigin);
     if(alt) {
@@ -2951,8 +2956,8 @@ void buildBigStuff(cell *c, cell *from) {
     // buildbigstuff
 
     if(c->land == laRlyeh && c->type == 7 && 
-      (quickfind(laTemple) || (hrand(2000) < 100 && 
-      items[itStatue] >= 5 && !randomPatternsMode && 
+      (quickfind(laTemple) || peace::on || (hrand(2000) < 100 && 
+      items[itStatue] >= U5 && !randomPatternsMode && 
       !tactic::on && !yendor::on)))
       createAlternateMap(c, 2, hsA);
 
@@ -2963,7 +2968,7 @@ void buildBigStuff(cell *c, cell *from) {
 
     if(c->land == laOvergrown && c->type == 7 && 
       (quickfind(laClearing) || (hrand(2000) < 25 && 
-      !randomPatternsMode && items[itMutant] >= 5 &&
+      !randomPatternsMode && items[itMutant] >= U5 &&
       !tactic::on && !yendor::on))) {
       heptagon *h = createAlternateMap(c, 2, hsA);
       if(h) clearing::bpdata[h].root = NULL;
@@ -2974,7 +2979,7 @@ void buildBigStuff(cell *c, cell *from) {
       if(h) h->alt->emeraldval = hrand(2);
       }
 
-    if(c->land == laOcean && c->type == 7 && deepOcean && !generatingEquidistant && 
+    if(c->land == laOcean && c->type == 7 && deepOcean && !generatingEquidistant && !peace::on &&
       (quickfind(laWhirlpool) || (
         hrand(2000) < (purehepta ? 500 : 1000) && !tactic::on && !yendor::on)))
       createAlternateMap(c, 2, hsA);
@@ -2983,9 +2988,10 @@ void buildBigStuff(cell *c, cell *from) {
       createAlternateMap(c, 2, hsA);
 
     if(c->land == laPalace && c->type == 7 && !princess::generating && !shmup::on && multi::players == 1 &&
-      (princess::forceMouse ? (from && from->pathdist != INF) : (hrand(2000) < 20)) && 
+      (princess::forceMouse ? (from && from->pathdist != INF) : 
+        (hrand(2000) < (peace::on ? 100 : 20))) && 
       !c->master->alt && 
-      (princess::challenge || kills[moVizier]) && !tactic::on && !yendor::on) 
+      (princess::challenge || kills[moVizier] || peace::on) && !tactic::on && !yendor::on) 
       createAlternateMap(c, 141, hsOrigin, waPalace);
     }
   
@@ -3233,6 +3239,7 @@ bool redtrolls(cell *c) {
   }
 
 bool reptilecheat = false;
+bool weaponless = false;
 
 eMonster pickTroll(cell *c) { 
   if(redtrolls(c))
@@ -3450,6 +3457,8 @@ void setdist(cell *c, int d, cell *from) {
         cell *c2 = c->mov[hrand(c->type)];
         if(c2->wall == waNone) c2->wall = waTrapdoor;
         }
+
+      if((c->wall == waClosePlate || c->wall == waTrapdoor) && peace::on) c->wall = waNone;
       }
   
     if(d==8 && c->land == laEmerald) {
@@ -3641,7 +3650,7 @@ void setdist(cell *c, int d, cell *from) {
         }
 
       if(c->land == laTrollheim) {
-        if(hrand(50000) < (chaosmode?1000:5) && c->wall != waBarrier && celldist(c) >= 7 && !safety) {
+        if(hrand(50000) < (chaosmode?1000:5) && c->wall != waBarrier && celldist(c) >= 7 && !safety && !peace::on) {
           bool okay = true;
           forCellCM(c2, c) forCellCM(c3, c2) forCellCM(c4, c3) forCellCM(c5, c4) {
             cell *cx = chaosmode ? c3 : c5;
@@ -4252,7 +4261,7 @@ void setdist(cell *c, int d, cell *from) {
             c2->hitpoints = 1;
             c2->mondir = c->spn(i);
             }
-          playSound(c, "seen-kraken");
+          if(!peace::on) playSound(c, "seen-kraken");
           }
         }
 
@@ -4282,7 +4291,7 @@ void setdist(cell *c, int d, cell *from) {
 
     if(d == 8 && c->land == laOvergrown) {
       if(hrand(doCross ?450:15000) < 20 + (2 * items[itMutant] + hard) && !safety) {
-        c->item = itMutant;
+        if(!peace::on) c->item = itMutant;
         c->landparam = items[itMutant] + 5 + hrand(11);
         c->wall = waNone;
         for(int i=0; i<c->type; i++) 
@@ -4338,7 +4347,7 @@ void setdist(cell *c, int d, cell *from) {
           
         int depth = getHauntedDepth(c);
         
-        if(hrand(500 + depth) < depth - items[itLotus] && !safety)
+        if(hrand(500 + depth) < depth - items[itLotus] && !safety && !peace::on)
           c->item = itLotus;
         }
       }
@@ -4373,7 +4382,7 @@ void setdist(cell *c, int d, cell *from) {
         }
       if(coast && hrand(10) < 5) {
         c->wall = waBoat;
-        if(items[itPirate] >= 10 && hrand(100) < 2 && !safety)
+        if(items[itPirate] >= 10 && hrand(100) < 2 && !safety && !peace::on && !inv::on)
           c->item = itOrbTime;
         else if(hrand(100) < 2*PRIZEMUL && !safety) 
           placePrizeOrb(c);
@@ -4384,7 +4393,7 @@ void setdist(cell *c, int d, cell *from) {
       c->monst = moSeep;
     
     if(d == 7 && c->land == laLivefjord && c->wall == waSea && hrand(5000) < 15 + items[itFjord] + hard && !safety) {
-      if(items[itFjord] >= 5 && hrand(100) < 20)
+      if(items[itFjord] >= 5 && hrand(100) < 20 && !peace::on)
         c->monst = moWaterElemental;
       else {
         c->monst = moViking;
@@ -4401,7 +4410,7 @@ void setdist(cell *c, int d, cell *from) {
       c->item = itFjord;
       }
     
-    if(d == 7 && c->land == laLivefjord && items[itFjord] >= 10 && hrand(2000) < 2)
+    if(d == 7 && c->land == laLivefjord && items[itFjord] >= 10 && hrand(2000) < 2 && !peace::on && !inv::on)
       c->item = itOrbFish;
     
     if(d == 7 && c->land == laLivefjord && hrand(2000) < 2*PRIZEMUL)
@@ -4444,13 +4453,13 @@ void setdist(cell *c, int d, cell *from) {
       else if((c->landparam >= 1 && c->landparam <= 25) || chaosmode) {
         if(hrand(1000) < 5)
           c->wall = waBoat;
-        if(hrand(1000) < PT(50 + kills[moAlbatross]/2, 150))
+        if(hrand(1000) < PT(50 + kills[moAlbatross]/2, 150) && !peace::on)
           c->item = itCoast;
         if(hrand(15000) < 10 + 2 * items[itCoast] + 2 * hard)
           c->monst = moAlbatross;
-        if(items[itCoast] >= 10 && hrand(10000) < 5)
+        if(items[itCoast] >= 10 && hrand(10000) < 5 && !peace::on && !inv::on)
           c->item = itOrbAir;
-        else if(items[itCoast] >= 10 && hrand(10000) < 6)
+        else if(items[itCoast] >= 10 && hrand(10000) < 6 && !peace::on && !inv::on)
           c->item = itOrbEmpathy;
         if(hrand(10000) < 5*PRIZEMUL)
           placePrizeOrb(c);
@@ -4539,13 +4548,13 @@ void setdist(cell *c, int d, cell *from) {
 
       if(hrand(5000) < minefreq)
         c->wall = waMineMine;
-      else if(hrand(5000) < tfreq && !safety) {
+      else if(hrand(5000) < tfreq && !safety && !peace::on) {
         c->item = itBombEgg;
         c->landparam = items[itBombEgg] + 5 + hrand(11);
         }
       else if(hrand(5000) < treas - 20 + yendor::hardness() && !safety)
         c->monst = moBomberbird;
-      else if(treas >= 10 && hrand(5000) < 10 && !safety)
+      else if(treas >= 10 && hrand(5000) < 10 && !safety && !peace::on && !inv::on)
         c->item = itOrbFriend;
       else if(hrand(5000) < 10*PRIZEMUL && !safety)
         placePrizeOrb(c);
@@ -4665,7 +4674,7 @@ void setdist(cell *c, int d, cell *from) {
           else
             c->monst = moFamiliar;
           }
-        else if(c->landparam >= 14 && hrand(2000) < PT(50+kills[moGargoyle]+kills[moFamiliar], 150) && !cellEdgeUnstable(c) ) {
+        else if(c->landparam >= 14 && hrand(2000) < PT(50+kills[moGargoyle]+kills[moFamiliar], 150) && !cellEdgeUnstable(c) && !peace::on) {
           c->item = itIvory;
           }
         }
@@ -4673,7 +4682,7 @@ void setdist(cell *c, int d, cell *from) {
       if(c->land == laDungeon) {
         int lp = c->landparam * c->landparam;
         if(lp > 100) lp = 100;
-        if(c->landparam >= 10 && hrand(20000) < 5*lp + items[itSlime] + hard && !cellEdgeUnstable(c)) {
+        if(c->landparam >= 10 && hrand(20000) < 5*lp + items[itSlime] + hard && !cellEdgeUnstable(c) && !peace::on) {
           c->monst = moSkeleton, c->hitpoints = 3;
           }
         else if(c->landparam >= 10 && hrand(50000) < lp/2 + items[itSlime] + hard) {
@@ -4709,14 +4718,14 @@ void setdist(cell *c, int d, cell *from) {
         }
 
       if(c->land == laTortoise) {
-        if(hrand(4000) < 50 + items[itBabyTortoise]*2 + hard * 6 && !safety) {
+        if(hrand(4000) < (peace::on ? 750 : 50 + items[itBabyTortoise]*2 + hard * 6) && !safety) {
           c->monst = moTortoise;
           c->hitpoints = 3;
           }
         
         int chance = 50 + items[itBabyTortoise]*2;
         if(quickfind(laTortoise)) chance += 150;
-        if((tactic::on || euclid) && hrand(4000) < chance && !safety) {
+        if((tactic::on || euclid || peace::on) && hrand(4000) < chance && !safety) {
           c->item = itBabyTortoise;
           tortoise::babymap[c] = getBits(c) ^ tortoise::getRandomBits();
           }
@@ -4730,7 +4739,7 @@ void setdist(cell *c, int d, cell *from) {
         if(hrand(5000) < PT(100 + 2 * (kills[moPalace] + kills[moFatGuard] + kills[moVizier] + kills[moSkeleton]), 200) && notDippingFor(itPalace) &&
           c->wall != waOpenGate && !lookingForPrincess0)
           c->item = itPalace;
-        if(items[itPalace] >= 10 && hrand(5000) < 16 && c->wall != waOpenGate)
+        if(items[itPalace] >= 10 && hrand(5000) < 16 && c->wall != waOpenGate && !inv::on && !peace::on)
           c->item = hrand(100) < 80 ? itOrbFrog : itOrbDiscord;
         if(hrand(5000) < 20*PRIZEMUL && c->wall != waOpenGate)
           placePrizeOrb(c);
@@ -4806,7 +4815,7 @@ void setdist(cell *c, int d, cell *from) {
         if(hrand(5000) < PT(100 + 2 * (kills[moWorm] + kills[moDesertman]), 200) && notDippingFor(itSpice))
           c->item = itSpice;
         if(hrand(8000) < 10 + 2 * (items[itSpice] + hard) && !c->monst)
-          c->monst = hrand(2) ? moWorm : moDesertman,
+          c->monst = (hrand(2) && !peace::on) ? moWorm : moDesertman,
           c->mondir = NODIR;
         }
       if(c->land == laRedRock) {
@@ -4814,7 +4823,7 @@ void setdist(cell *c, int d, cell *from) {
           int i = -1;
           for(int t=0; t<6; t++) if(c->mov[t]->mpdist > c->mpdist && !pseudohept(c->mov[t]))
             i = t;
-          if(i != -1) {
+          if(i != -1 && !peace::on) {
             c->monst = moHexSnake;
             preventbarriers(c);
             int len = purehepta ? 2 : ROCKSNAKELENGTH;
@@ -4853,7 +4862,7 @@ void setdist(cell *c, int d, cell *from) {
         else if((havewhat&HF_DRAGON) && items[itDragon] < 10)
           dchance = 5; 
           
-        if(hrand(150000) < dchance && !c->monst && (!c->wall || c->wall == waChasm)) {
+        if(hrand(150000) < dchance && !c->monst && (!c->wall || c->wall == waChasm) && !peace::on) {
           havewhat |= HF_DRAGON;
           // printf("dragon generated with dchance = %d\n", dchance);
           vector<int> possi;
@@ -4887,7 +4896,7 @@ void setdist(cell *c, int d, cell *from) {
             else c2->mondir = NODIR;
             }
           }
-        if(!c->monst && !tactic::on && !yendor::on && !euclid && hrand(4000) < 10 && !safety) {
+        if(!c->monst && !tactic::on && !yendor::on && !peace::on && !euclid && hrand(4000) < 10 && !safety) {
           c->item = itBabyTortoise;
           tortoise::babymap[c] = getBits(c) ^ tortoise::getRandomBits();
           }
@@ -4918,7 +4927,7 @@ void setdist(cell *c, int d, cell *from) {
           }
         else if(hrand(5000) < 100 + elkills*3 && notDippingFor(itElemental))
           c->item = localshard;
-        else if(hrand(5000) < 10 && items[itElemental] >= 10)
+        else if(hrand(5000) < 10 && items[itElemental] >= 10 && !inv::on && !peace::on)
           c->item = itOrbSummon;
         else if(hrand(5000) < 10*PRIZEMUL)
           placePrizeOrb(c);
@@ -4939,7 +4948,7 @@ void setdist(cell *c, int d, cell *from) {
           c->stuntime = 7;
           }
         }
-      if(c->land == laBurial && !safety) {
+      if(c->land == laBurial && !safety && !peace::on) {
         if(hrand(15000) < 5 + 3 * items[itBarrow] + 4 * hard)
           c->monst = moDraugr;
         else if(hrand(5000) < 20 + (quickfind(laBurial) ? 40 : 0))
@@ -4956,7 +4965,7 @@ void setdist(cell *c, int d, cell *from) {
           int hardchance = items[itRuby] + hard;
           if(hardchance > 25) hardchance = 25;
           bool hardivy = hrand(100) < hardchance;
-          if(hardivy ? buildIvy(c, 1, 9) : buildIvy(c, 0, c->type))
+          if((hardivy ? buildIvy(c, 1, 9) : buildIvy(c, 0, c->type)) && !peace::on)
             c->item = itRuby;
           }
         }
@@ -5061,7 +5070,7 @@ void setdist(cell *c, int d, cell *from) {
       if(c->land == laRlyeh) {
         if(hrand(5000) < PT(30 + 2 * (kills[moCultist] + kills[moTentacle] + kills[moPyroCultist]), 100) && notDippingFor(itStatue))
           c->item = itStatue;
-        if(hrand(8000) < 5 + items[itStatue] + hard && !c->monst)
+        if(hrand(8000) < 5 + items[itStatue] + hard && !c->monst && !peace::on)
           c->monst = moTentacle, c->item = itStatue, c->mondir = NODIR;
         else if(hrand(12000) < 5 + items[itStatue] + hard)
           c->monst = hrand(3) ? ((hrand(40) < items[itStatue]-25) ? moCultistLeader : moCultist) : moPyroCultist;
@@ -5082,13 +5091,13 @@ void setdist(cell *c, int d, cell *from) {
           (euclid || c->master->alt) ? celldistAlt(c) : 10;
         // remember: d is negative
         if(chaosmode ? hrand(100) < 25 : d % TEMPLE_EACH == 0) {
-          if(hrand(5000) < 20 - 2*d && !c->monst)
+          if(hrand(5000) < 20 - 2*d && !c->monst && !peace::on)
             c->monst = moTentacle, c->mondir = NODIR;
           }
         else {
           // int d0 = d % TEMPLE_EACH;
           // if(d0<0) d0=-d0;
-          if(hrand(100) < 30) //  && d0 != 1 && d0 != TEMPLE_EACH-1)
+          if(hrand(100) < (peace::on ? 15 : 30)) //  && d0 != 1 && d0 != TEMPLE_EACH-1)
             c->wall = waBigStatue;
           else if(hrand(20000) < -d)
             c->monst = hrand(3) ? moCultist : moPyroCultist;
@@ -5096,7 +5105,7 @@ void setdist(cell *c, int d, cell *from) {
             c->monst = moCultistLeader;
           else if(hrand(5000) < 250)
             c->item = itGrimoire;
-          else if(hrand(5000) < 10 && (chaosmode ? items[itGrimoire] >= 10 : -d > TEMPLE_EACH * 10))
+          else if(hrand(5000) < 10 && (chaosmode ? items[itGrimoire] >= 10 : -d > TEMPLE_EACH * 10) && !peace::on && !inv::on)
             c->item = itOrbDragon;
           }
         }
@@ -5116,7 +5125,7 @@ void setdist(cell *c, int d, cell *from) {
           c->item = itFernFlower;
         if(hrand(4000) < 40 + items[itFernFlower] + hard)
           c->monst = moHedge;
-        else if(hrand(8000) < 2 * items[itFernFlower] + hard)
+        else if(hrand(8000) < 2 * items[itFernFlower] + hard && !peace::on)
           c->monst = moFireFairy;
         }
       if(c->land == laHell) {
@@ -5167,8 +5176,8 @@ void setdist(cell *c, int d, cell *from) {
           c->monst = eMonster(moBug0 + hrand(3)); */
         }
       if(c->land == laCaribbean) {
-//      if(hrand(1500) < 60 && celldistAlt(c) <= -5)
-//        c->item = itCompass;
+        if(hrand(1500) < 4 && celldistAlt(c) <= -5 && peace::on)
+          c->item = itCompass;
         if(hrand(16000) < 40 + (items[itPirate] + hard))
           c->monst = moPirate;
         }
@@ -5227,6 +5236,7 @@ int getGhostTimer() {
   }
 
 int getGhostcount() {
+  if(peace::on) return 0;
   int t = getGhostTimer();
   int ghostcount = 0;
   if(t > 80) ghostcount = (t-80 + hrand(20)) / 20;
@@ -5383,12 +5393,12 @@ void wandering() {
         playSeenSound(c);
         continue;
         }
-      if(c->land == laLivefjord && wchance(items[itFjord], 80) && items[itFjord] >= 10 && canReachPlayer(c, moWaterElemental)) {
+      if(!peace::on && c->land == laLivefjord && wchance(items[itFjord], 80) && items[itFjord] >= 10 && canReachPlayer(c, moWaterElemental)) {
         c->monst = moWaterElemental;
         playSeenSound(c);
         continue;
         }
-      if(c->land == laKraken && ((sphere && !hrand(15)) || wchance(items[itKraken], 240)) && !pseudohept(c)) {
+      if(!peace::on && c->land == laKraken && ((sphere && !hrand(15)) || wchance(items[itKraken], 240)) && !pseudohept(c)) {
         bool b = canReachPlayer(c, moKrakenH);
         if(sphere && (haveKraken() || !items[itOrbFish])) { 
           c->monst = moViking; c->wall = waBoat; c->item = itOrbFish; 
@@ -5427,13 +5437,13 @@ void wandering() {
       c->monst = hrand(2) ? moWolf : moYeti;
 
     else if(c->land == laDesert && wchance(items[itSpice], 10))
-      c->monst = hrand(10) ? moDesertman : moWorm;
+      c->monst = (hrand(10) || peace::on) ? moDesertman : moWorm;
 
     else if(c->land == laDragon && (items[itDragon] >= 8 || items[itOrbYendor]) && wchance(items[itDragon], 20))
       c->monst = moFireElemental;
 
     else if(c->land == laRedRock && wchance(items[itRedGem], 10))
-      c->monst = hrand(10) ? moRedTroll : moHexSnake;
+      c->monst = (hrand(10) || peace::on) ? moRedTroll : moHexSnake;
 
     else if(c->land == laCaves && wchance(items[itGold], 5))
       c->monst = hrand(3) ? moTroll : moGoblin;
@@ -5513,7 +5523,7 @@ void wandering() {
     else if(c->land == laAlchemist && wchance(items[itElixir], 3) && canReachPlayer(c, moSlime) && c->item == itNone)
       c->monst = moSlime; // ?
     
-    else if(isElemental(c->land) && wchance(items[itElemental], 20))
+    else if(isElemental(c->land) && wchance(items[itElemental], 20) && !peace::on)
       c->monst = elementalOf(c->land);
     
     else if(c->land == laIvoryTower && wchance(items[itIvory], 20))

@@ -248,7 +248,7 @@ S("You feel that you have enough treasure to access new lands!", "Вы чувс�
 S("Collect more treasures, there are still more lands waiting...", "Собирайте больше сокровищ, ещё много земель Вас ждут...")
 S("You feel that the stars are right, and you can access R'Lyeh!", "Вы чувствуете, что звёзды правы, Вы можете открыть Р'Льех!")
 S("Kill monsters and collect treasures, and you may get access to Hell...", "Убивайте монстров и собирайте сокровища, и Вы сможете открыть Ад...")
-S("To access Hell, collect 10 treasures each of 9 kinds...", "Чтобы открыть Ад, соберите по 10 сокровищ из 9 различных мест...")
+S("To access Hell, collect %1 treasures each of 9 kinds...", "Чтобы открыть Ад, соберите по %1 сокровищ из 9 различных мест...")
 S("Abandon all hope, the gates of Hell are opened!", "Оставь надежду, врата Ада открылись!")
 S("And the Orbs of Yendor await!", "Шары Йендора ждут!")
 S("You switch places with %the1.", "Вы поменялись местами с %abl1.")
@@ -340,10 +340,10 @@ S("GAME OVER", "КОНЕЦ ИГРЫ")
 S("Your score: %1", "Ваш счёт: %1")
 S("Enemies killed: %1", "Врагов убито: %1")
 S("Orbs of Yendor found: %1", "Собрано сфер Йендора: %1")
-S("Collect 30 $$$ to access more worlds", "Соберите 30 $$$, чтобы открыть новые земли")
-S("Collect at least 10 treasures in each of 9 types to access Hell", "Соберите хотя бы по 10 сокровищ 9 разных типов, чтобы попасть в Ад")
+S("Collect %1 $$$ to access more worlds", "Соберите %1 $$$, чтобы открыть новые земли")
+S("Collect at least %1 treasures in each of 9 types to access Hell", "Соберите хотя бы по %1 сокровищ 9 разных типов, чтобы попасть в Ад")
 S("Collect at least 10 Demon Daisies to find the Orbs of Yendor", "Соберите 10 адских ромашек, чтобы найти сферу Йендора")
-S("Hyperstone Quest: collect at least 10 %1 in %the2", "Миссия Гиперкамня: соберите 10 драгоценностей в %abl2")
+S("Hyperstone Quest: collect at least %3 %1 in %the2", "Миссия Гиперкамня: соберите %3 драгоценностей в %abl2")
 S("Hyperstone Quest completed!", "Миссия Гиперкамня закончена!")
 S("Look for the Orbs of Yendor in Hell or in the Crossroads!", "Ищите сферы Йендора в Аду и на Перекрёстке!")
 S("Unlock the Orb of Yendor!", "Откройте сферу Йендора!")
@@ -978,7 +978,7 @@ S("Periodic Editor", "Периодический редактор")
 // also translate this line:
 // "In the periodic editor, press 0-4 to switch walls in different ways\n",
 
-S("Collect 60 $$$ to access even more lands", "Соберите 60 $$$, чтобы открыть новые земли")
+S("Collect %1 $$$ to access even more lands", "Соберите %1 $$$, чтобы открыть новые земли")
 
 // Emerald Mine
 // ------------
@@ -2169,6 +2169,18 @@ S("player 4 X", "игрок 4 X")
 S("player 4 Y", "игрок 4 Y")
 S("player 4 go", "игрок 4 идёт")
 S("player 4 spin", "игрок 4 вертит")
+S("player 5 X", "игрок 5 X")
+S("player 5 Y", "игрок 5 Y")
+S("player 5 go", "игрок 5 идёт")
+S("player 5 spin", "игрок 5 вертит")
+S("player 6 X", "игрок 6 X")
+S("player 6 Y", "игрок 6 Y")
+S("player 6 go", "игрок 6 идёт")
+S("player 6 spin", "игрок 6 вертит")
+S("player 7 X", "игрок 7 X")
+S("player 7 Y", "игрок 7 Y")
+S("player 7 go", "игрок 7 идёт")
+S("player 7 spin", "игрок 7 вертит")
  
 S("Joystick %1, axis %2", "Джойстик %1, ось %2")
 S("one player", "один игрок")
@@ -2492,8 +2504,8 @@ S("Accessible only from %the1 (until finished).\n", "Доступно тольк
 S("Accessible only from %the1 or %the2.\n", "Доступно только из %a1 и %a2.\n")
  
 S("Kills required: %1.\n", "УБийств нужно: %1 $$$.\n")
-S("Finished lands required: %1 (collect 10 treasure)\n",
-  "Земель окончено: %1 (собрано 10 сокровищ)\n")
+S("Finished lands required: %1 (collect %2 treasure)\n",
+  "Земель окончено: %1 (собрано %2 сокровищ)\n")
  
 S("Treasure required: %1 x %2.\n", "Сокровищ собрано: %1 x %2.\n")
  
@@ -3864,8 +3876,8 @@ S(
 S("%The1 scares %the2 a bit!", "%1 немного пугает %a2!")
 S("%The1 attacks your shell!", "%1 атакует вашу раковину!")
  
-S("Hyperstone Quest: collect at least 10 points in %the2",
-  "Миссия Гиперкамней: собери не меньше 10 очков %abl2")
+S("Hyperstone Quest: collect at least %3 points in %the2",
+  "Миссия Гиперкамней: собери не меньше %3 очков %abl2")
  
 S("animals killed: %1", "животных убито: %1")
 S("\n\nTortoises are not monsters! They are just annoyed. They do not count for your total kills.",
@@ -5091,7 +5103,7 @@ N("Tortoise", GEN_F, "Черепаха", "Черепахи", "Черепаху",
 S("line patterns", "шаблоны линий")
 S("1 turn", "1 ход")
 S("%1 turns", "ходов: %1")
-S("items/kills mode", "режим предметов/убийств")
+S("inventory/kill mode", "режим предметов/убийств")
 S("images", "изображения")
 S("letters", "буквы")
 S("input", "ввод")

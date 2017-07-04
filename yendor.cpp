@@ -5,6 +5,8 @@
 // Yendor Quest, together with the Yendor Challenge
 // also, the Pure Tactics Mode
 
+namespace peace { extern bool on; }
+
 #define MODECODES 254
 
 int hiitemsMax(eItem it) {
@@ -151,6 +153,7 @@ namespace yendor {
   int yii = NOYENDOR;
   
   int hardness() {
+    if(peace::on) return 15; // just to generate monsters
     int thf = 0;
     for(int i=0; i<size(yi); i++) {
       yendorinfo& ye ( yi[i] );
@@ -522,6 +525,46 @@ namespace yendor {
       }
     else if(doexiton(sym, uni)) cmode = emNormal;
     }
+  
+  void collected(cell* c2) {
+    int pg = gold();
+    playSound(c2, "tada");
+    items[itOrbShield] += 31;
+    for(int i=0; i<size(yendor::yi); i++)
+      if(yendor::yi[i].path[0] == c2) 
+        yendor::yi[i].foundOrb = true;
+    // Shielding always, so that we know that it protects!
+    for(int i=0; i<4; i++) switch(hrand(13)) {
+      case 0: items[itOrbSpeed] += 31; break;
+      case 1: items[itOrbLightning] += 78; break;
+      case 2: items[itOrbFlash] += 78; break;
+      case 3: items[itOrbTime] += 78; break;
+      case 4: items[itOrbWinter] += 151; break;
+      case 5: items[itOrbDigging] += 151; break;
+      case 6: items[itOrbTeleport] += 151; break;
+      case 7: items[itOrbThorns] += 151; break;
+      case 8: items[itOrbInvis] += 151; break;
+      case 9: items[itOrbPsi] += 151; break;
+      case 10: items[itOrbAether] += 151; break;
+      case 11: items[itOrbFire] += 151; break;
+      case 12: items[itOrbSpace] += 78; break;
+      }
+    items[itOrbYendor]++; 
+    items[itKey]--;
+    yendor::everwon = true;
+    if(yendor::on) {
+      yendor::won = true;
+      if(!cheater) {
+        dynamicval<bool> c(chaosmode, false);
+        yendor::bestscore[modecode()][yendor::challenge] = 
+          max(yendor::bestscore[modecode()][yendor::challenge], items[itOrbYendor]);
+        yendor::uploadScore();        
+        }
+      }
+    addMessage(XLAT("CONGRATULATIONS!"));
+    achievement_collection(itOrbYendor, pg, gold());
+    achievement_victory(false);
+    }
   };
 
 #define MAXTAC 20
@@ -795,6 +838,7 @@ int modecode() {
 #endif
   if(quotient) return 6;
 #endif
+  if(peace::on) return 6;
   int xcode = 0;
 
   if(shmup::on) xcode += 2;
@@ -859,3 +903,166 @@ void buildmodetable() {
   for(int i=0; i<newmodecode; i++) if(!codeused[i]) printf("// unused code: %d\n", i);
   printf("int newmodecode = %d;\n", newmodecode);
   }
+
+namespace peace {
+
+  bool on = false;
+  bool hint = false;
+  
+  bool otherpuzzles;
+  eLand whichland;
+  
+  eLand simonlevels[] = {
+    laCrossroads, laCrossroads2, laDesert, laCaves, laAlchemist, laRlyeh, laEmerald,
+    laWineyard, laDeadCaves, laRedRock, laPalace,
+    laLivefjord, laDragon,
+    laNone
+    };
+
+  eLand explorelevels[] = {
+    laBurial, laTortoise, laCamelot, laPalace,
+    laIce, laJungle, laMirror, laDryForest, laCaribbean, laOcean, laZebra,
+    laOvergrown, laWhirlwind, laWarpCoast, laReptile,
+    laElementalWall, laAlchemist,
+    laNone
+    };                       
+
+  eLand *levellist;
+  int qty;
+  
+  eLand getNext(eLand last) {
+    if(isElemental(last) && hrand(100) < 90)
+      return laNone;
+    else if(createOnSea(last))
+      return getNewSealand(last);
+    else if(isCrossroads(last)) {
+      while(isCrossroads(last) || last == laCaribbean || last == laCamelot)
+        last = levellist[hrand(qty)];
+      if(last == laElementalWall) last = laEFire;
+      return last;
+      }
+    else return pick(laCrossroads, laCrossroads2);
+    }
+    
+  bool isAvailable(eLand l) {
+    for(int i=0; explorelevels[i]; i++) if(explorelevels[i] == l) return true;
+    return false;
+    }
+  
+  void showMenu() {
+    dialog::init(XLAT(otherpuzzles ? "hyperbolic puzzles" : "memory game"), 0x40A040, 150, 100);
+
+    levellist = otherpuzzles ? explorelevels : simonlevels;
+ 
+    for(qty = 0; levellist[qty]; qty++) 
+      dialog::addItem(XLAT1(linf[levellist[qty]].name), 'a'+qty);
+
+    dialog::addBreak(100);
+    dialog::addItem(XLAT(otherpuzzles ? "memory game" : "other hyperbolic puzzles"), '1');
+    dialog::addBoolItem(XLAT("display hints"), hint, '2');
+    dialog::addItem(XLAT("Help"), SDLK_F1);
+    dialog::addItem(XLAT("Return to the normal game"), '0');
+    
+    dialog::display();
+    }
+    
+  const char *chelp = NODESCYET;
+  
+  namespace simon {
+
+    vector<cell*> path;
+    int tobuild;
+    
+    void build() {
+      if(otherpuzzles || !on) return;
+      while(size(path) < tobuild) {
+        cell *cp = path[size(path)-1];
+        cell *cp2 = path[size(path)-2];
+        vector<pair<cell*, cell*>> clister;
+        clister.emplace_back(cp, cp);
+        
+        int id = 0;
+        sval++;
+        while(id < size(clister)) {
+          cell *c = clister[id].first;
+          cell *fr = clister[id].second;
+          setdist(c, 5, NULL);
+          
+          forCellEx(c2,c)
+            if(!eq(c2->aitmp, sval) && passable(c2, c, 0) && (c2->land == whichland || c2->land == laTemple) && !c2->item) {
+              if(!id) fr = c2;
+              bool next;
+              if(whichland == laRlyeh)
+                next = c2->land == laTemple && (cp2->land == laRlyeh || celldistAlt(c2) < celldistAlt(cp2) - 8); 
+              else 
+                next = celldistance(c2, cp2) == 8;
+              if(next) {
+                path.push_back(fr);
+                fr->item = itDodeca;
+                goto again;
+                }              
+              clister.emplace_back(c2, fr); 
+              c2->aitmp = sval;
+              }
+          id++;
+          }
+        printf("Path broken, searched = %d\n", id);
+        for(auto t: clister) t.first->item = itPirate;
+        return;
+        again: ;      
+        }
+      }
+  
+    void extend() {
+      int i = 0;
+      while(i<size(path) && path[i]->item != itDodeca) i++;
+      if(tobuild == i+9)
+        addMessage("You must collect all the dodecahedra on the path!");
+      tobuild = i + 9;
+      build();
+      }
+    
+    void init() {
+      tobuild = 0;
+      if(!on) return;
+      if(otherpuzzles) { items[itGreenStone] = 500; return; }
+      cell *c2 = cwt.c->mov[0];
+      makeEmpty(c2);
+      c2->item = itOrbYendor;
+      
+      path.clear();
+      path.push_back(cwt.c);
+      path.push_back(c2);
+      extend(); 
+      }
+    
+    void restore() {
+      for(int i=1; i<size(path); i++)
+        if(path[i]->item == itNone && items[itDodeca])
+          path[i]->item = itDodeca, items[itDodeca]--;
+      }
+    }
+    
+  void handleKey(int sym, int uni) {
+    dialog::handleNavigation(sym, uni);
+    
+    if(uni == '1') otherpuzzles = !otherpuzzles;
+    else if(uni >= 'a' && uni < 'a' + qty) {
+      whichland = levellist[uni - 'a'];
+      restartGame(peace::on ? 0 : 'P');
+      cmode = emNormal;
+      }
+    else if(uni == '2') { hint = !hint; cmode = emNormal; }
+    else if(uni == '0') {
+      firstland = laIce;
+      if(peace::on) restartGame('P');
+      cmode = emNormal;
+      }
+    else if(uni == 'h' || sym == SDLK_F1) {
+      lastmode = cmode;
+      cmode = emHelp;
+      help = chelp;
+      }
+    else if(doexiton(sym, uni)) cmode = emNormal;
+    }
+  };

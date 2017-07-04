@@ -243,7 +243,7 @@ S("You feel that you have enough treasure to access new lands!", "Du spürst, da
 S("Collect more treasures, there are still more lands waiting...", "Sammle mehr Schätze, es warten weitere Länder auf dich...")
 S("You feel that the stars are right, and you can access R'Lyeh!", "Die Sterne stehen günstig, du kannst R´Lyeh erreichen!")
 S("Kill monsters and collect treasures, and you may get access to Hell...", "Wenn du Monster tötest und Schätze sammelst erhältst du vielleicht Zutritt zur Hölle...")
-S("To access Hell, collect 10 treasures each of 9 kinds...", "Um die Hölle zu erreichen sammle je 10 von 9 verschiedenen Schätzen...")
+S("To access Hell, collect %1 treasures each of 9 kinds...", "Um die Hölle zu erreichen sammle je %1 von 9 verschiedenen Schätzen...")
 S("Abandon all hope, the gates of Hell are opened!", "Gib jegliche Hoffnung auf, die Pforte der Hölle ist geöffnet!")
 S("And the Orbs of Yendor await!", "Und die Orbs von Yendor erwarten dich!")
 S("You switch places with %the1.", "Du tauschst den Platz mit %dem1 %a1.")
@@ -334,10 +334,10 @@ S("GAME OVER", "GAME OVER")
 S("Your score: %1", "Punkte: %1")
 S("Enemies killed: %1", "Getötete Gegner: %1")
 S("Orbs of Yendor found: %1", "Orbs von Yendor gefunden: %1")
-S("Collect 30 $$$ to access more worlds", "Sammle 30 $$$ um mehr Länder betreten zu können")
-S("Collect at least 10 treasures in each of 9 types to access Hell", "Sammle 9 verschiedene Schätze mindestens 10x um Zugang zur Hölle zu erhalten")
+S("Collect %1 $$$ to access more worlds", "Sammle %1 $$$ um mehr Länder betreten zu können")
+S("Collect at least %1 treasures in each of 9 types to access Hell", "Sammle 9 verschiedene Schätze mindestens %1x um Zugang zur Hölle zu erhalten")
 S("Collect at least 10 Demon Daisies to find the Orbs of Yendor", "Sammle mindestens 10 Dämonenblümchen um die Orbs von Yendor zu finden")
-S("Hyperstone Quest: collect at least 10 %1 in %the2", "Hyperstein-Herausforderung: Sammle 10 %P1 %a2")
+S("Hyperstone Quest: collect at least %3 %1 in %the2", "Hyperstein-Herausforderung: Sammle %3 %P1 %a2")
 S("Hyperstone Quest completed!", "Hyperstein-Herausforderung abgeschlossen!")
 S("Look for the Orbs of Yendor in Hell or in the Crossroads!", "Such die Orbs von Yendor in der Hölle oder auf den Kreuzungen!")
 S("Unlock the Orb of Yendor!", "Öffne den Orb von Yendor!")
@@ -947,7 +947,7 @@ S("Periodic Editor", "Periodischer Editor")
 // "In the periodic editor, press 0-4 to switch walls in different ways\n",
 // "Im periodischen Editor kannst du 0-4 verwenden um die Wände zu verändern\n"
 
-S("Collect 60 $$$ to access even more lands", "Sammle 60 $$$ um noch mehr Länder zu besuchen.")
+S("Collect %1 $$$ to access even more lands", "Sammle %1 $$$ um noch mehr Länder zu besuchen.")
 
 // Emerald Mine
 
@@ -2337,8 +2337,8 @@ S("Accessible only from %the1 (until finished).\n", "Nur von %der1 %a1 aus errei
 S("Accessible only from %the1 or %the2.\n", "Nur von %der1 %a1 oder %der %a2 aus erreichbar.\n")
 
 S("Kills required: %1.\n", "Benötigte Kills: %1.\n")
-S("Finished lands required: %1 (collect 10 treasure)\n",
-  "Abgeschlossene Länder benötigt: %1 (sammle 10 Schätze)\n")
+S("Finished lands required: %1 (collect %2 treasure)\n",
+  "Abgeschlossene Länder benötigt: %1 (sammle %2 Schätze)\n")
 
 S("Treasure required: %1 x %2.\n", "Benötigte Schätze: %1 x %2.\n")
 
@@ -3427,7 +3427,8 @@ S("Dragon Scales are a prized material for armors. "
   "wie sie einen Drachen getötet haben.\n\n"
   "Drachenschuppen verschwinden nach 500 Zügen.")
 
-S("Dragons are powerful monsters. They are slow, but evil, "
+S(
+  "Dragons are powerful monsters. They are slow, but evil, "
   "and love to pick on creatures who are even slower than "
   "them. They must be stopped!\n\n"
 
@@ -3438,8 +3439,8 @@ S("Dragons are powerful monsters. They are slow, but evil, "
   "The head will regenerate on the "
   "turns the Dragon is not moving, so you will usually have to hit it with "
   "your last attack; otherwise, if the head is healthy, it may breathe "
-  "fire (at range 3), losing the hitpoint. Killing the Dragon gives you "
-  "treasure.",
+  "fire (at range 3), losing the hitpoint. Killing the Dragon "
+  "while still in the Dragon Chasms gives you treasure.",
 
   "Drachen sind mächtige Monster. Sie sind langsam, aber böse, "
   "und lieben es Wesen zu schikanieren, die noch langsamer sind als sie. "
@@ -3525,8 +3526,8 @@ S("Galápagos is the land of Tortoises. "
 S("%The1 scares %the2 a bit!", "%Der1 %1 ängstigt %den2 %a2 ein wenig!")
 S("%The1 attacks your shell!", "%Der1 %1 attackiert deinen Panzer!")
 
-S("Hyperstone Quest: collect at least 10 points in %the2",
-  "Hyperstein-Herausforderung: sammle mindestens 10 Punkte %abl2")
+S("Hyperstone Quest: collect at least %3 points in %the2",
+  "Hyperstein-Herausforderung: sammle mindestens %3 Punkte %abl2")
 
 S("animals killed: %1", "getötete Tiere: %1")
 S("\n\nTortoises are not monsters! They are just annoyed. They do not count for your total kills.",

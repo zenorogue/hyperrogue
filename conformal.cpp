@@ -190,8 +190,8 @@ namespace spiral {
       if(dosave) { dosave = false; IMAGESAVE(s, buf); }
       SDL_UnlockSurface(s);
       if(displayhelp) {
-        displaystr(SX/2, vid.fsize*2, 0, vid.fsize, "arrows = navigate, ESC = return, h = hide help", 0xFFFFFF, 8);
-        displaystr(SX/2, SY - vid.fsize*2, 0, vid.fsize, XLAT("s = save to " IMAGEEXT, buf), 0xFFFFFF, 8);
+        displaystr(SX/2, vid.fsize*2, 0, vid.fsize, "arrows = navigate, ESC = return, h = hide help", forecolor, 8);
+        displaystr(SX/2, SY - vid.fsize*2, 0, vid.fsize, XLAT("s = save to " IMAGEEXT, buf), forecolor, 8);
         }
       SDL_UpdateRect(s, 0, 0, 0, 0);  
       shiftx += velx; shifty += vely;

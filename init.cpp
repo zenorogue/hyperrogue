@@ -1,6 +1,6 @@
-#define VER "9.4n"
-#define VERNUM 9414
-#define VERNUM_HEX 0x9414
+#define VER "9.4n1"
+#define VERNUM 9415
+#define VERNUM_HEX 0x9415
 
 #define GEN_M 0
 #define GEN_F 1
@@ -40,7 +40,9 @@
 #define GFX
 #endif
 
+#ifndef NOGL
 #define GL
+#endif
 
 #define PSEUDOKEY_WHEELDOWN 2501
 #define PSEUDOKEY_WHEELUP 2502
@@ -52,6 +54,8 @@
 #ifdef MAC
 #define NOPNG
 #endif
+
+// #define INV
 
 #ifndef MOBILE
 #ifndef NOAUDIO
@@ -70,6 +74,10 @@
 int fontscale = 100;
 bool buttonclicked;
 void gdpush(int t);
+#endif
+
+#ifndef HYPERPATH
+#define HYPERPATH ""
 #endif
 
 #include <stdio.h>
@@ -151,7 +159,11 @@ typedef int SDL_Event;
 
 #ifdef GL
 
-#ifdef WINDOWS
+#ifdef MAC
+#define AVOID_GLEW
+#endif
+
+#ifndef AVOID_GLEW
   #include <GL/glew.h>
 #else
   #define GL_GLEXT_PROTOTYPES 1
@@ -251,12 +263,18 @@ const char *loadlevel = NULL;
 #include "game.cpp"
 #include "landgen.cpp"
 #include "orbs.cpp"
+#ifdef INV
+#include "inventory.cpp"
+#endif
 #include "system.cpp"
 #include "geometry.cpp"
 #include "polygons.cpp"
 #include "mapeditor.cpp"
 #ifndef MOBILE
 #include "netgen.cpp"
+#endif
+#ifdef EXTRA
+#include "extra/extra.cpp"
 #endif
 #include "graph.cpp"
 #include "sound.cpp"
@@ -592,7 +610,7 @@ void mobile_draw(MOBPAR_FORMAL) {
   displayTexts();
   #endif
 
-  if((cmode != emVisual1 && cmode != emScores)) {
+  if((cmode != emBasicConfig && cmode != emScores)) {
      
     if(clicked && lclicked && andmode == 1 && !inmenu) {
       if(!mouseout2() && mouseoh[2] < 50 && mouseh[2] < 50) {
@@ -646,3 +664,35 @@ void mobile_draw(MOBPAR_FORMAL) {
 #ifdef NOAUDIO
 void playSound(cell*, const string &s, int vol) { printf("play sound: %s vol %d\n", s.c_str(), vol); }
 #endif
+
+// optional hooks
+// you may include hyper.cpp from another file and define EXTRA_... to change some things
+namespace extra {
+
+  // on drawing cells
+  void drawcell(cell *c, const transmatrix& V);
+
+  // on each frame
+  void frame();
+
+  // on stats drawing
+  void stats();
+
+  // return true if key is handled
+  bool handleKey(int sym, int uni);
+
+  // return true to exit immediately
+  bool main(int argc, char **argv);
+
+  // extra configuration, called together with reading arguments
+  void config();
+
+  // read command line arguments
+  int arg();
+
+  // change land distribution
+  eLand getNext(eLand old);
+
+  // change musics
+  bool changeMusic(eLand id);
+  }

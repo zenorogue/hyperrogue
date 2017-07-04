@@ -314,7 +314,7 @@ bool isWall(cell *w) {
     w->wall == waLadder || w->wall == waTrunk || w->wall == waSolidBranch ||
     w->wall == waWeakBranch || w->wall == waCanopy || w->wall == waTower ||
     w->wall == waSmallBush || w->wall == waBigBush ||
-    w->wall == waReptile || w->wall == waReptileBridge)
+    w->wall == waReptile || w->wall == waReptileBridge || w->wall == waInvisibleFloor)
     return false;
   if(isWatery(w) || isChasmy(w) || isFire(w)) return false;
   return true;
@@ -641,7 +641,7 @@ bool highwall(cell *c) {
   }
 
 int chasmgraph(cell *c) {
-  if(c->wall == waChasm) return 2;
+  if(c->wall == waChasm || c->wall == waInvisibleFloor) return 2;
   if(isChasmy(c)) return 1;
   if(isWateryOrBoat(c)) return 1;
   if(wmescher && c->wall == waBarrier && c->land == laOceanWall) return 1;

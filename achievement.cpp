@@ -83,6 +83,7 @@ bool wrongMode(char flags) {
   if(shmup::on != (flags == 's')) return true;
   if(randomPatternsMode) return true;
   if(yendor::on) return true;
+  if(peace::on) return true;
   if(tactic::on) return true;
 #ifdef TOUR
   if(tour::on) return true;
@@ -94,7 +95,7 @@ bool wrongMode(char flags) {
 
 void achievement_log(const char* s, char flags) {
 
-#ifdef LOCAL
+#ifdef PRINT_ACHIEVEMENTS
   printf("achievement = %s [%d]\n", s, wrongMode(flags));
 #endif
   
@@ -124,7 +125,7 @@ void achievement_log(const char* s, char flags) {
 
 #ifdef STEAM
 void improveItemScores();
-#include "hypersteam.cpp"
+#include "private/hypersteam.cpp"
 #else
 #ifndef ANDROID
 #ifndef IOS
@@ -525,6 +526,17 @@ void achievement_final(bool really_final) {
   if(tour::on) return;
 #endif
   
+  if(randomPatternsMode) return;
+  if(peace::on) return;
+  if(yendor::on) return;
+
+  if(tactic::on) {
+    tactic::record();
+    tactic::unrecord();
+    tactic::uploadScore();
+    return;
+    }
+
   if(sphere && euclidland == laHalloween) {
     if(shmup::on || chaosmode || purehepta || numplayers() > 1 || tactic::on || randomPatternsMode)
       return;
@@ -534,16 +546,7 @@ void achievement_final(bool really_final) {
   if(euclid) return;
   if(sphere) return;
   if(elliptic) return;
-  if(randomPatternsMode) return;
-
-  if(tactic::on) {
-    tactic::record();
-    tactic::unrecord();
-    tactic::uploadScore();
-    return;
-    }
   
-  if(yendor::on) return;
   
   // no leaderboards for two special modes at once
   int specials = 0;
@@ -610,6 +613,7 @@ void achievement_victory(bool hyper) {
   if(randomPatternsMode) return;
   if(hyper && shmup::on) return;
   if(yendor::on) return;
+  if(peace::on) return;
   if(tactic::on) return;
   if(chaosmode) return;
   DEBB(DF_STEAM, (debugfile,"after checks\n"))

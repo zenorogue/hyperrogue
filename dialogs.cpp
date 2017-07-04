@@ -86,7 +86,6 @@ namespace dialog {
     it.color = 0xC0C0C0;
     it.colork = 0x808080;
     it.colorv = 0x80A040;
-    it.colors = 0xFFD500;
     it.colorc = 0xFFD500;
     it.colors = 0xFF8000;
     if(value == ONOFF(true)) it.colorv = 0x40FF40;
@@ -148,11 +147,12 @@ namespace dialog {
     items.push_back(it);
     }
 
-  void addBreak(int val) {
+  int addBreak(int val) {
     item it;
     it.type = diBreak;
     it.scale = val;
     items.push_back(it);
+    return items.size()-1;
     }
   
   void addTitle(string body, int color, int scale) {
@@ -285,6 +285,7 @@ namespace dialog {
       int top = tothei;
       tothei += dfspace * I.scale / 100;
       int mid = (top + tothei) / 2;
+      I.position = mid;
       if(I.type == diTitle || I.type == diInfo) {
         displayfr(dcenter, mid, 2, dfsize * I.scale/100, I.body, I.color, 8);
         }
@@ -414,7 +415,7 @@ namespace dialog {
     for(int i=0; i<4; i++) {
       int y = vid.yres / 2 + (2-i) * vid.fsize * 2;
       
-      int col = ((i==colorp) && !mousing) ? 0xFFD500 : 0xFFFFFF;
+      int col = ((i==colorp) && !mousing) ? 0xFFD500 : forecolor;
 
       displayColorButton(vid.xres / 4, y, "(", 0, 16, 0, col);
       string rgt = ") "; rgt += "ABGR" [i];
@@ -622,7 +623,10 @@ namespace dialog {
     if(ne.editwhat == &geom3::middetail && geom3::highdetail > geom3::middetail)
       geom3::highdetail = geom3::middetail;
     
-    if(lastmode == em3D) buildpolys(), resetGL();
+    if(lastmode == em3D) buildpolys();
+#ifdef GL
+    if(lastmode == em3D) resetGL();
+#endif
     }
   
   void drawNumberDialog() {
@@ -662,6 +666,9 @@ namespace dialog {
     
     if(ne.editwhat == &ne.intbuf && ne.intval == &sightrange && cheater)
       addBoolItem("overgenerate", overgenerate, 'o');
+
+    if(ne.editwhat == &vid.linewidth)
+      addBoolItem("finer lines at the boundary", vid.antialias & AA_LINEWIDTH, 'o');
 
     display();
     }
@@ -710,6 +717,8 @@ namespace dialog {
       }
     else if(uni == 'o' && ne.editwhat == &ne.intbuf && ne.intval == &sightrange && cheater)
       overgenerate = !overgenerate;
+    else if(uni == 'o' && ne.editwhat == &vid.linewidth)
+      vid.antialias ^= AA_LINEWIDTH;
     else if(uni == 'p' && ne.editwhat == &vid.alpha) {
       *ne.editwhat = 1; vid.scale = 1; ne.s = "1";
       }

@@ -119,6 +119,12 @@ int arg::readCommon() {
   else if(argis("-back")) {
     shift(); backcolor = strtol(args(), NULL, 16);
     }
+  else if(argis("-borders")) {
+    shift(); bordcolor = strtol(args(), NULL, 16);
+    }
+  else if(argis("-fore")) {
+    shift(); forecolor = strtol(args(), NULL, 16);
+    }
   else if(argis("-W2")) {
     shift(); cheatdest = readland(args()); autocheat = true;
     }
@@ -168,6 +174,8 @@ int arg::readCommon() {
     exit(0);
     }
 
+  else if(argis("-aa")) { PHASEFROM(2); shift(); vid.antialias = argi(); }
+  else if(argis("-lw")) { PHASEFROM(2); shift(); vid.linewidth = argf(); }
   else if(argis("-wm")) { PHASEFROM(2); vid.wallmode = argi(); }
   else if(argis("-mm")) { PHASEFROM(2); vid.monmode = argi(); }
 
@@ -379,7 +387,11 @@ else if(args()[0] == '-' && args()[1] == x && args()[2] == '0') { if(curphase ==
   return 0;
   }
 
+#ifndef NOMAIN
 int main(int argc, char **argv) {
+#ifdef EXTRA_MAIN
+  if(extra::main(argc, argv)) return 0;
+#endif
 #ifndef WEB
   #ifdef LINUX
     moreStack();
@@ -394,6 +406,7 @@ int main(int argc, char **argv) {
   profile_info();
   return 0;
   }
+#endif
 
 #ifdef USE_COMMANDLINE
 namespace arg {
@@ -401,11 +414,14 @@ namespace arg {
   
   void read(int phase) { 
     curphase = phase;
+#ifdef EXTRA_CONFIG
+    extra::config();
+#endif
     while(argc) {
       int r;
       r = readCommon(); if(r == 2) return; if(r == 0) { lshift(); continue; }
-#ifdef LOCAL
-      r = readLocal(); if(r == 2) return; if(r == 0) { lshift(); continue; }
+#ifdef EXTRA_ARG
+      r = extra::arg(); if(r == 2) return; if(r == 0) { lshift(); continue; }
 #endif
 #ifdef ROGUEVIZ
       r = rogueviz::readArgs(); if(r == 2) return; if(r == 0) { lshift(); continue; }

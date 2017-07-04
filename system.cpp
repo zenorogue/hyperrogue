@@ -26,6 +26,8 @@ void initgame() {
     firstland = safetyland;
     }
   
+  if(peace::on) euclidland = firstland = peace::whichland;
+  
   if(tactic::on && (euclid || sphere)) euclidland = firstland;
   
   if(firstland == laNone || firstland == laBarrier)
@@ -50,7 +52,7 @@ void initgame() {
   
   setdist(cwt.c, BARLEV, NULL);
 
-  if((tactic::on || yendor::on) && isCyclic(firstland)) {
+  if((tactic::on || yendor::on || peace::on) && isCyclic(firstland)) {
     anthraxBonus = items[itHolyGrail];
     cwt.c->mov[0]->land = firstland;
     if(firstland == laWhirlpool) cwt.c->mov[0]->wall = waSea;
@@ -149,6 +151,8 @@ void initgame() {
     items[treasureType(firstland)] = 15;
   
   yendor::init(3);
+  peace::simon::init();
+  
   multi::revive_queue.clear();
 #ifdef TOUR
   if(tour::on) tour::presentation(tour::pmRestart);
@@ -178,7 +182,10 @@ void initgame() {
     timerghost = true;
     truelotus = 0;
     survivalist = true;
-    if(!randomPatternsMode && !tactic::on && !yendor::on) {
+#ifdef INV
+    if(inv::on) inv::init();
+#endif
+    if(!randomPatternsMode && !tactic::on && !yendor::on && !peace::on) {
       if(firstland != (princess::challenge ? laPalace : laIce)) cheater++;
       }
     if(tactic::trailer) ;
@@ -206,6 +213,7 @@ void initgame() {
       addMessage(XLAT("You are playing %the1 in the Pure Tactics mode.", firstland));
     else if(yendor::on)
       addMessage(XLAT("Welcome to the Yendor Challenge %1!", its(yendor::challenge)));
+    else if(peace::on) ; // no welcome message
     else if(shmup::on) ; // welcome message given elsewhere
     else if(euclid)
       addMessage(XLAT("Welcome to the Euclidean mode!"));
@@ -598,7 +606,7 @@ void loadBoxHigh() {
 // certify that saves and achievements were received
 // in an official version of HyperRogue
 #ifdef CERTIFY
-#include "certify.cpp"
+#include "private/certify.cpp"
 #else
 
 namespace anticheat {
@@ -636,6 +644,7 @@ void saveStats(bool emergency = false) {
   if(tour::on) return;
   #endif
   if(randomPatternsMode) return;
+  if(peace::on) return;
   
   remove_emergency_save();
 
@@ -718,6 +727,7 @@ void saveStats(bool emergency = false) {
   if(purehepta) fprintf(f, "Heptagons only mode\n");
   if(chaosmode) fprintf(f, "Chaos mode\n");
   if(shmup::on) fprintf(f, "Shoot-em up mode\n");
+  if(inv::on) fprintf(f, "Inventory mode\n");
   if(multi::players > 1) fprintf(f, "Multi-player (%d players)\n", multi::players);
   fprintf(f, "Number of cells explored, by distance from the player:\n"); 
   {for(int i=0; i<10; i++) fprintf(f, " %d", explore[i]);} fprintf(f, "\n");
@@ -951,6 +961,16 @@ void restartGame(char switchWhat, bool push) {
     cellcount = 0;
     clearMemory();
     }
+  if(switchWhat == 'P') {
+    peace::on = !peace::on;
+    tactic::on = yendor::on = princess::challenge = 
+    randomPatternsMode = inv::on = false;
+    }
+  if(switchWhat == 'i') {
+    inv::on = !inv::on;
+    tactic::on = yendor::on = princess::challenge = 
+    randomPatternsMode = peace::on = false;
+    }
   if(switchWhat == 'C') {
     geometry = gNormal;
     yendor::on = tactic::on = princess::challenge = false;
@@ -960,7 +980,7 @@ void restartGame(char switchWhat, bool push) {
 #ifdef TOUR
   if(switchWhat == 'T') {
     geometry = gNormal;
-    yendor::on = tactic::on = princess::challenge = false;
+    yendor::on = tactic::on = princess::challenge = peace::on = inv::on = false;
     chaosmode = purehepta = randomPatternsMode = false;
     shmup::on = false;
     resetGeometry();    
@@ -982,6 +1002,8 @@ void restartGame(char switchWhat, bool push) {
   if(switchWhat == 'y') {
     yendor::on = !yendor::on;
     tactic::on = false;
+    peace::on = false;
+    inv::on = false;
     princess::challenge = false;
     randomPatternsMode = false;
     chaosmode = false;
@@ -990,6 +1012,8 @@ void restartGame(char switchWhat, bool push) {
   if(switchWhat == 't') {
     tactic::on = !tactic::on;
     yendor::on = false;
+    peace::on = false;
+    inv::on = false;
     randomPatternsMode = false;
     princess::challenge = false;
     chaosmode = false;
@@ -1003,6 +1027,8 @@ void restartGame(char switchWhat, bool push) {
     randomPatternsMode = !randomPatternsMode;
     tactic::on = false;
     yendor::on = false;
+    peace::on = false;
+    inv::on = false;
     princess::challenge = false;
     }
   if(switchWhat == 'p') {
@@ -1012,6 +1038,7 @@ void restartGame(char switchWhat, bool push) {
     tactic::on = false;
     yendor::on = false;
     chaosmode = false;
+    inv::on = false;
     }
   initcells();
 
@@ -1385,11 +1412,9 @@ bool applyCheat(char u, cell *c = NULL) {
     cblind = !cblind;
     return true;
     }
-#ifdef LOCAL
-  if(u == 'K'-64) {
-    printf("viewctr = %p.%d\n", viewctr.h, viewctr.spin);
-    display(View);
-    }
+  if(u == 'P'-64) 
+    peace::on = !peace::on;
+#ifdef CHEAT_DISABLE_ALLOWED
   if(u == 'D'-64) {
     cheater = 0; autocheat = 0;
     return true;

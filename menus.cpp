@@ -8,6 +8,13 @@
 
 ld whatever = 0;
 
+void gotoHelp(const string& h, emtype c = cmode) {
+  help = h;
+  if(c != emHelp) lastmode = c;
+  cmode = emHelp;
+  printf("goto help, back = %d\n", c);
+  }
+ 
 void showOverview() {
   DEBB(DF_GRAPH, (debugfile,"show overview\n"));
   mouseovers = XLAT("world overview");
@@ -48,7 +55,7 @@ void showOverview() {
     if(landUnlocked(l)) col = linf[l].color; else col = 0x404040;
     if(chaosmode && noChaos(l)) col = 0x400000;
     if(l == curland)
-      displayfrZ(1, i0, 1, vf-4, "*", 0xFFFFFF, 0);
+      displayfrZ(1, i0, 1, vf-4, "*", forecolor, 0);
     if(displayfrZ(xr*1, i0, 1, vf-4, XLAT1(linf[l].name), col, 0))
       getcstat = 1000 + l;
     eItem it = treasureType(l);
@@ -127,10 +134,7 @@ void handleOverview(int sym, int uni) {
       canmove = true;
       if(princ) fullcenter();
       }
-    else {
-      lastmode = cmode;
-      cmode = emHelp; help = generateHelpForLand(eLand(umod));
-      }
+    else gotoHelp(generateHelpForLand(eLand(umod)));
     }
   else if(udiv == 2 && umod < ittypes) {
     if(cheater && !hiliteclick) {
@@ -144,29 +148,20 @@ void handleOverview(int sym, int uni) {
       if(hardcore) canmove = true;
       else checkmove();
       }
-    else {
-      lastmode = cmode;
-      cmode = emHelp; help = generateHelpForItem(eItem(umod));
-      }
+    else gotoHelp(generateHelpForItem(eItem(umod)));
     }
-  else if(udiv == 3 && umod < walltypes) {
-    lastmode = cmode;
-    cmode = emHelp; help = generateHelpForWall(eWall(umod));
-    }
-  else if(uni == SDLK_F1) {
-    lastmode = cmode;
-    cmode = emHelp; 
-    help = 
-      "This displays all lands available in the game. "
-      "Bonus lands (available only in separate challenges) "
-      "are not included. Lands written in dark have to be "
-      "unlocked, and lands in dark red are unavailable "
-      "because of using special options. Click on any "
-      "land or item to get information about it. Hover over "
-      "an Orb to know its relation to the current land. "
-      "Cheaters can click to move between lands, and use the "
-      "mousewheel to gain or lose treasures and orbs quickly (Ctrl = precise, Shift = reverse).";
-    }
+  else if(udiv == 3 && umod < walltypes) gotoHelp(generateHelpForWall(eWall(umod)));
+  else if(uni == SDLK_F1) gotoHelp(
+    "This displays all lands available in the game. "
+    "Bonus lands (available only in separate challenges) "
+    "are not included. Lands written in dark have to be "
+    "unlocked, and lands in dark red are unavailable "
+    "because of using special options. Click on any "
+    "land or item to get information about it. Hover over "
+    "an Orb to know its relation to the current land. "
+    "Cheaters can click to move between lands, and use the "
+    "mousewheel to gain or lose treasures and orbs quickly (Ctrl = precise, Shift = reverse)."
+    );
   else if(dialog::handlePageButtons(uni)) ;
   else if(doexiton(sym, uni)) cmode = emNormal;
   }
@@ -188,7 +183,10 @@ void showMainMenu() {
   dialog::init(XLAT("HyperRogue %1", VER), 0xC00000, 200, 100);
 
   dialog::addItem(XLAT("basic configuration"), 'b');
-  dialog::addItem(XLAT("advanced configuration"), 'a');
+  dialog::addItem(XLAT("graphics configuration"), 'g');
+  dialog::addItem(XLAT("special display modes"), 'd');
+  dialog::addItem(XLAT("special game modes"), 'm');
+
 #ifndef NOSAVE
   dialog::addItem(XLAT("local highscores"), 't');
 #endif
@@ -197,7 +195,6 @@ void showMainMenu() {
     dialog::addItem(XLAT("cheats"), 'c');
   else dialog::addBreak(100);
   dialog::addItem(XLAT("restart game"), 'r'); dialog::lastItem().keycaption += " / F5";
-  dialog::addItem(XLAT("special game modes"), 'm');
   
   string q;
   #ifdef MOBILE
@@ -215,10 +212,13 @@ void showMainMenu() {
   dialog::addItem(XLAT(q), SDLK_ESCAPE);
   dialog::addItem(XLAT("world overview"), 'o');    
 
+  if(inv::on)
+    dialog::addItem(XLAT("inventory"), 'i');    
+
   if(checkHalloweenDate()) dialog::addItem(XLAT("Halloween mini-game"), 'y'-96);
 
 #ifdef ROGUEVIZ
-  dialog::addItem(XLAT("rogueviz menu"), 'g'); 
+  dialog::addItem(XLAT("rogueviz menu"), 'u'); 
 #endif
   
 #ifdef MOBILE
@@ -241,14 +241,12 @@ void showMainMenu() {
 
 void handleMenuKey(int sym, int uni) {
   dialog::handleNavigation(sym, uni);
-  if(sym == SDLK_F1 || sym == 'h') {
-    lastmode = cmode;
-    cmode = emHelp;
-    }
+  if(sym == SDLK_F1 || sym == 'h') gotoHelp(help);
   else if(sym == 'c' && cheater)
     cmode = emCheatMenu;
-  else if(sym == 'b') cmode = emVisual1;
-  else if(sym == 'a') cmode = emVisual2;
+  else if(sym == 'b') cmode = emBasicConfig;
+  else if(sym == 'g') cmode = emGraphConfig;
+  else if(sym == 'd') cmode = emDisplayMode;
   else if(sym == 'm') cmode = emChangeMode;
 #ifndef NOSAVE
   else if(sym == 't') loadScores();
@@ -278,6 +276,10 @@ void handleMenuKey(int sym, int uni) {
     clearMessages();
     cmode = emOverview;
     }
+  else if(sym == 'i') {
+    clearMessages();
+    cmode = emInventory;
+    }
   else if(sym == SDLK_ESCAPE) {
     cmode = emQuit;
     achievement_final(false);
@@ -291,7 +293,7 @@ void handleMenuKey(int sym, int uni) {
 #endif
 #endif
 #ifdef ROGUEVIZ
-  else if(uni == 'g') cmode = emRogueviz;
+  else if(uni == 'u') cmode = emRogueviz;
 #endif
   else if(doexiton(sym, uni)) {
     cmode = emNormal;
@@ -299,91 +301,93 @@ void handleMenuKey(int sym, int uni) {
     }
   }
 
-void showVisual1() {
-  dialog::init(XLAT("basic configuration"));
-      
-#ifndef MOBILE
-  dialog::addSelItem(XLAT("video resolution"), its(vid.xres) + "x"+its(vid.yres), 0);
+void showAllConfig() {
+  dialog::addBreak(50);
+  dialog::addItem(XLAT("exit configuration"), 'v');
+#ifndef NOCONFIG
+  dialog::addItem(XLAT("save the current config"), 's');
 #endif
+  }
+
+void handleAllConfig(int sym, int uni) {
+  if(sym == SDLK_F1 || uni == 'h') gotoHelp(help);
+
+  if(uni == 'v') cmode = emMenu;
+  if(sym == SDLK_ESCAPE) cmode = emNormal;
+#ifndef NOCONFIG
+  if(uni == 's') saveConfig();
+#endif  
+  }
+
+void showGraphConfig() {
+
+  dialog::init(XLAT("graphics configuration"));
+
+  #ifndef ONEGRAPH
+  #ifdef GL
+  dialog::addBoolItem(XLAT("openGL mode"), vid.usingGL, 'o');
+  #endif
+  #endif
+
+  if(!vid.usingGL)
+    dialog::addBoolItem(XLAT("anti-aliasing"), vid.antialias & AA_NOGL, 'O');
+
+  if(vid.usingGL)
+    dialog::addSelItem(XLAT("anti-aliasing"), 
+      (vid.antialias & AA_POLY) ? "polygons" :
+      (vid.antialias & AA_LINES) ? "lines" :
+      "NO", 'O');
+
+  if(vid.usingGL) {
+    dialog::addSelItem(XLAT("line width"), fts(vid.linewidth), 'w');
+//    dialog::addBoolItem(XLAT("finer lines at the boundary"), vid.antialias & AA_LINEWIDTH, 'b');
+    }
+
+  #ifndef MOBWEB
+  dialog::addSelItem(XLAT("framerate limit"), its(vid.framelimit), 'l');
+  #endif
+
 #ifndef IOS
   dialog::addBoolItem(XLAT("fullscreen mode"), (vid.full), 'f');
 #endif
+
   dialog::addSelItem(XLAT("scrolling speed"), fts(vid.sspeed), 'a');
-  dialog::addSelItem(XLAT("movement animation speed"), fts(vid.mspeed), 'r');
-  dialog::addSelItem(XLAT("projection"), fts(vid.alpha), 'p');
-  dialog::addSelItem(XLAT("scale factor"), fts(vid.scale), 'z');
-  
-#ifdef LOCAL
+  dialog::addSelItem(XLAT("movement animation speed"), fts(vid.mspeed), 'm');
+
+  dialog::addBoolItem(XLAT("extra graphical effects"), (vid.particles), 'u');
+
+#ifdef WHATEVER
   dialog::addSelItem(XLAT("whatever"), fts(whatever), 'j');
 #endif
-
-  const char *wdmodes[6] = {"ASCII", "black", "plain", "Escher", "plain/3D", "Escher/3D"};
-  const char *mdmodes[6] = {"ASCII", "items only", "items and monsters", "high contrast",
-    "3D", "high contrast/3D"};
 
   const char *glyphsortnames[6] = {
     "first on top", "first on bottom", 
     "last on top", "last on bottom",
     "by land", "by number"
     };
-
-
-  dialog::addSelItem(XLAT("items/kills mode"), XLAT(vid.graphglyph ? "images" : "letters"), 'd');
-  dialog::addBoolItem(XLAT("mark heptagons"), (vid.darkhepta), '7');
-  dialog::addBoolItem(XLAT("draw the grid"), (vid.grid), '6');
-  dialog::addBoolItem(XLAT("extra graphical effects"), (vid.particles), 'u');
-  
-  dialog::addSelItem(XLAT("wall display mode"), XLAT(wdmodes[vid.wallmode]), 'w');
-  dialog::addSelItem(XLAT("monster display mode"), XLAT(mdmodes[vid.monmode]), 'm');
-  const char *axmodes[5] = {"OFF", "auto", "light", "heavy", "arrows"};
-  dialog::addSelItem(XLAT("help for keyboard users"), XLAT(axmodes[vid.axes]), 'c');
-#ifndef NOAUDIO
-  dialog::addSelItem(XLAT("background music volume"), its(musicvolume), 'b');
-  dialog::addSelItem(XLAT("sound effects volume"), its(effvolume), 'e');
-#endif
-#ifndef NOTRANS
-  dialog::addSelItem(XLAT("language"), XLAT("EN"), 'l');
-#endif
-  dialog::addSelItem(XLAT("player character"), numplayers() > 1 ? "" : csname(vid.cs), 'g');
-
+ 
+  const char *glyphmodenames[3] = {"letters", "auto", "images"};
   dialog::addSelItem(XLAT("inventory/kill sorting"), XLAT(glyphsortnames[glyphsortorder]), 'k');
 
-  dialog::addBreak(50);
-  dialog::addItem(XLAT("exit configuration"), 'v');
-#ifndef NOCONFIG
-  dialog::addItem(XLAT("save the current config"), 's');
+  dialog::addSelItem(XLAT("inventory/kill mode"), XLAT(glyphmodenames[vid.graphglyph]), 'd');
+
+#ifdef MOBILE
+  dialog::addSelItem(XLAT("font scale"), its(fontscale), 'b');
 #endif
 
-  if(lang() != 0) {
-    string tw = "";
-    string s = XLAT("TRANSLATIONWARNING");
-    if(s != "" && s != "TRANSLATIONWARNING") tw += s;
-    s = XLAT("TRANSLATIONWARNING2");
-    if(s != "" && s != "TRANSLATIONWARNING2") { if(tw != "") tw += " "; tw += s; }
-    if(tw != "") {
-      dialog::addBreak(50);
-      dialog::addHelp(tw);
-      dialog::lastItem().color = 0xFF0000;
-      }
-    }
+  dialog::addSelItem(XLAT("sight range"), its(sightrange), 'r');
 
+#ifdef MOBILE
+  dialog::addSelItem(XLAT("compass size"), its(vid.mobilecompasssize), 'c');
+#endif
+
+  dialog::addSelItem(XLAT("aura brightness"), its(vid.aurastr), 'z');
+  dialog::addSelItem(XLAT("aura smoothening factor"), its(vid.aurasmoothen), 'x');
+  
+  showAllConfig();
   dialog::display();
   }
-
-void projectionDialog() {
-  geom3::tc_alpha = ticks;
-  dialog::editNumber(vid.alpha, -5, 5, .1, 1,
-    XLAT("projection"),
-    XLAT("HyperRogue uses the Minkowski hyperboloid model internally. "
-    "Klein and Poincaré models can be obtained by perspective, "
-    "and the Gans model is obtained by orthogonal projection. "
-//  "This parameter specifies the distance from the hyperboloid center "
-//  "to the eye. "
-    "See also the conformal mode (in the special modes menu) "
-    "for more models."));
-  dialog::sidedialog = true;
-  }
-
+  
 void switchFullscreen() {
   vid.full = !vid.full;
 #ifdef ANDROID
@@ -417,71 +421,142 @@ void switchGL() {
 #endif
   }
 
-void switchHardcore() {
-  if(hardcore && !canmove) { 
-    restartGame();
-    hardcore = false;
-    cmode = emNormal;
-    }
-  else if(hardcore && canmove) { hardcore = false; }
-  else { hardcore = true; canmove = true; hardcoreAt = turncount; }
-  if(hardcore)
-      addMessage("One wrong move, and it is game over!");
-  else
-      addMessage("Not so hardcore?");
-  if(pureHardcore()) cmode = emNormal;
-  }
-
-void handleVisual1(int sym, int uni) {
+void handleGraphConfig(int sym, int uni) {
   dialog::handleNavigation(sym, uni);
-    
-  char xuni = uni | 96;
-  
-  if(uni >= 32 && uni < 64) xuni = uni;
-  
-  if(xuni == 'p') projectionDialog();
-  
-  if(xuni == '6') vid.grid = !vid.grid;
-  if(xuni == 'u') vid.particles = !vid.particles;
-  
-  if(xuni == 'd') vid.graphglyph = !vid.graphglyph;
 
+  if(uni == 'O') uni = 'o', shiftmul = -1;
+  
+  char xuni = uni | 96;
+
+  if(xuni == 'u') vid.particles = !vid.particles;
+  if(xuni == 'd') vid.graphglyph = (1+vid.graphglyph)%3;
+  
   if(xuni == 'j') {
     dialog::editNumber(whatever, -10, 10, 1, 0, XLAT("whatever"), 
       XLAT("Whatever."));
     dialog::sidedialog = true;
     }
 
-  if(xuni == 'z') {
-    dialog::editNumber(vid.scale, .001, 1000, .1, 1, XLAT("scale factor"), 
-      XLAT("Scale the displayed model."));
-    dialog::scaleLog();
-    dialog::sidedialog = true;
-    }
-  
   if(xuni == 'a') dialog::editNumber(vid.sspeed, -5, 5, 1, 0, 
     XLAT("scrolling speed"),
     XLAT("+5 = center instantly, -5 = do not center the map"));
 
-  if(xuni == 'r') dialog::editNumber(vid.mspeed, -5, 5, 1, 0, 
+  if(xuni == 'm') dialog::editNumber(vid.mspeed, -5, 5, 1, 0, 
     XLAT("movement animation speed"),
     XLAT("+5 = move instantly"));
+
+  if(xuni == 'r') {
+    dialog::editNumber(sightrange, 4, cheater ? 10 : 7, 1, 7, XLAT("sight range"), 
+      XLAT("Roughly 42% cells are on the edge of your sight range. Reducing "
+      "the sight range makes HyperRogue work faster, but also makes "
+      "the game effectively harder."));
+    dialog::sidedialog = true;
+    }
 
   if(xuni == 'k') {
     glyphsortorder = eGlyphsortorder((glyphsortorder+6+(shiftmul>0?1:-1)) % gsoMAX);
     }
   
   if(xuni == 'f') switchFullscreen();
-  
-  if(xuni == 'v') cmode = emNormal;
-  if(sym == SDLK_F2) cmode = emVisual2;
-#ifndef NOCONFIG
-  if(xuni == 's') saveConfig();
+
+#ifndef ONEGRAPH
+  if(xuni == 'o' && shiftmul > 0) switchGL();
 #endif
+
+  if(xuni == 'o' && shiftmul < 0) {
+    if(!vid.usingGL)
+      vid.antialias ^= AA_NOGL | AA_FONT;
+    else if(vid.antialias & AA_POLY)
+      vid.antialias ^= AA_POLY | AA_LINES;
+    else if(vid.antialias & AA_LINES) 
+      vid.antialias |= AA_POLY;
+    else 
+      vid.antialias |= AA_LINES;
+    }
   
-  if(xuni == '7') { vid.darkhepta = !vid.darkhepta; }
-  if(xuni == 'w') { vid.wallmode += 60 + (shiftmul > 0 ? 1 : -1); vid.wallmode %= 6; }
-  if(xuni == 'm') { vid.monmode += 60 + (shiftmul > 0 ? 1 : -1); vid.monmode %= 6; }
+  // if(xuni == 'b') vid.antialias ^= AA_LINEWIDTH;
+ 
+  if(xuni == 'w' && vid.usingGL)
+    dialog::editNumber(vid.linewidth, 0, 10, 0.1, 1, XLAT("line width"), "");
+
+  if(xuni == 'c') 
+    dialog::editNumber(vid.mobilecompasssize, 0, 100, 10, 20, XLAT("compass size"), "");
+  
+  if(xuni == 'l') 
+    dialog::editNumber(vid.framelimit, 5, 300, 10, 300, XLAT("framerate limit"), "");
+  
+#ifdef MOBILE
+  if(xuni =='b') 
+    dialog::editNumber(fontscale, 0, 400, 10, 100, XLAT("font scale"), "");
+#endif
+
+  if(xuni =='z') 
+    dialog::editNumber(vid.aurastr, 0, 256, 10, 128, XLAT("aura brightness"), "");
+  else if(xuni =='x') 
+    dialog::editNumber(vid.aurasmoothen, 1, 180, 1, 5, XLAT("aura smoothening factor"), "");
+
+  handleAllConfig(sym, xuni);
+  }  
+
+void showBasicConfig() {
+  const char *axmodes[5] = {"OFF", "auto", "light", "heavy", "arrows"};
+  dialog::init(XLAT("basic configuration"));
+
+#ifndef NOTRANS
+  dialog::addSelItem(XLAT("language"), XLAT("EN"), 'l');
+#endif
+  dialog::addSelItem(XLAT("player character"), numplayers() > 1 ? "" : csname(vid.cs), 'g');
+
+#ifndef NOAUDIO
+  dialog::addSelItem(XLAT("background music volume"), its(musicvolume), 'b');
+  dialog::addSelItem(XLAT("sound effects volume"), its(effvolume), 'e');
+#endif
+
+// input:  
+  dialog::addSelItem(XLAT("help for keyboard users"), XLAT(axmodes[vid.axes]), 'c');
+
+  dialog::addBoolItem(XLAT("reverse pointer control"), (revcontrol), 'r');
+  dialog::addBoolItem(XLAT("draw circle around the target"), (vid.drawmousecircle), 'd');
+  
+  dialog::addSelItem(XLAT("message flash time"), its(vid.flashtime), 't');
+#ifdef MOBILE
+  dialog::addBoolItem(XLAT("targetting ranged Orbs long-click only"), (vid.shifttarget&2), 'i');
+#else
+  dialog::addBoolItem(XLAT("targetting ranged Orbs Shift+click only"), (vid.shifttarget&1), 'i');
+#endif
+#ifdef STEAM
+  dialog::addBoolItem(XLAT("send scores to Steam leaderboards"), (vid.steamscore&1), 'l');
+#endif
+
+#ifndef MOBILE
+  dialog::addSelItem(XLAT("configure keys/joysticks"), "", 'p');
+#endif
+
+  showAllConfig();
+
+  if(lang() != 0) {
+    string tw = "";
+    string s = XLAT("TRANSLATIONWARNING");
+    if(s != "" && s != "TRANSLATIONWARNING") tw += s;
+    s = XLAT("TRANSLATIONWARNING2");
+    if(s != "" && s != "TRANSLATIONWARNING2") { if(tw != "") tw += " "; tw += s; }
+    if(tw != "") {
+      dialog::addBreak(50);
+      dialog::addHelp(tw);
+      dialog::lastItem().color = 0xFF0000;
+      }
+    }
+
+  dialog::display();
+  }
+
+void handleBasicConfig(int sym, int uni) {
+  dialog::handleNavigation(sym, uni);
+    
+  char xuni = uni | 96;
+  
+  if(uni >= 32 && uni < 64) xuni = uni;
+
   if(xuni == 'c') { vid.axes += 60 + (shiftmul > 0 ? 1 : -1); vid.axes %= 5; }
 #ifndef NOAUDIO
   if(xuni == 'b') {
@@ -507,10 +582,26 @@ void handleVisual1(int sym, int uni) {
   
   if(xuni == 'g') cmode = emCustomizeChar;
 
-#ifdef LOCAL  
-  extern void process_local(int);
-  process_local(sym);
+#ifndef MOBILE
+  if(xuni == 'p') {
+    cmode = emShmupConfig; 
+    multi::shmupcfg = shmup::on;
+    }
 #endif
+  
+  if(xuni == 'r') revcontrol = !revcontrol;
+  if(xuni == 'd') vid.drawmousecircle = !vid.drawmousecircle;
+
+#ifdef STEAM
+  if(xuni == 'l') vid.steamscore = vid.steamscore^1;
+#endif
+  if(xuni == 't') 
+    dialog::editNumber(vid.flashtime, 0, 64, 1, 8, XLAT("message flash time"),
+      XLAT("How long should the messages stay on the screen."));
+  
+  if(xuni == 'i') { vid.shifttarget = vid.shifttarget^3; }
+
+  handleAllConfig(sym, xuni);
   }
 
 void showJoystickConfig() {
@@ -537,20 +628,33 @@ void handleJoystickConfig(int sym, int uni) {
   dialog::handleNavigation(sym, uni);
   char xuni = uni | 96;
   if(xuni == 'p') autojoy = !autojoy;
-  if(xuni == 'a') 
+  else if(xuni == 'a') 
     dialog::editNumber(vid.joyvalue, 0, 32768, 100, 4800, XLAT("first joystick: movement threshold"), "");
-  if(xuni == 'b') 
+  else if(xuni == 'b') 
     dialog::editNumber(vid.joyvalue2, 0, 32768, 100, 5600, XLAT("first joystick: execute movement threshold"), "");
-  if(xuni == 'c')
+  else if(xuni == 'c')
     dialog::editNumber(vid.joypanthreshold, 0, 32768, 100, 2500, XLAT("second joystick: pan threshold"), "");
-  if(xuni == 'd') 
+  else if(xuni == 'd') 
     dialog::editNumber(vid.joypanspeed, 0, 1e-2, 1e-5, 1e-4, XLAT("second joystick: panning speed"), "");
 
-  if(xuni == 'v') 
+  else if(xuni == 'v') 
     cmode = emShmupConfig;
   
-  if(sym == SDLK_F10) cmode = emNormal;
-  if(doexiton(sym, uni)) cmode = emShmupConfig;
+  else if(doexiton(sym, uni)) cmode = emShmupConfig;
+  }
+
+void projectionDialog() {
+  geom3::tc_alpha = ticks;
+  dialog::editNumber(vid.alpha, -5, 5, .1, 1,
+    XLAT("projection"),
+    XLAT("HyperRogue uses the Minkowski hyperboloid model internally. "
+    "Klein and Poincar‚ models can be obtained by perspective, "
+    "and the Gans model is obtained by orthogonal projection. "
+//  "This parameter specifies the distance from the hyperboloid center "
+//  "to the eye. "
+    "See also the conformal mode (in the special modes menu) "
+    "for more models."));
+  dialog::sidedialog = true;
   }
 
 void show3D() {
@@ -576,6 +680,7 @@ void show3D() {
   dialog::addBreak(50);
   dialog::addSelItem(XLAT("Y shift"), fts3(vid.yshift), 'y');
   dialog::addSelItem(XLAT("camera rotation"), fts3(vid.camera_angle), 's');
+  dialog::addSelItem(XLAT("distance between eyes"), fts3(vid.eye), 'e');
   dialog::addBreak(50);
   dialog::addBoolItem(XLAT("ball model"), pmodel == mdBall, 'B');
   dialog::addBoolItem(XLAT("hyperboloid model"), pmodel == mdHyperboloid, 'M');
@@ -700,6 +805,14 @@ void handle3D(int sym, int uni) {
     dialog::editNumber(geom3::rock_wall_ratio, 0, 1, .1, .9, XLAT("Rock-III to wall ratio"), "");
   else if(uni == 'h') 
     dialog::editNumber(geom3::human_wall_ratio, 0, 1, .1, .7, XLAT("Human to wall ratio"), "");
+  
+  else if(uni == 'e') {
+    dialog::editNumber(vid.eye, -10, 10, 0.01, 0, XLAT("distance between eyes"),
+      XLAT("Watch the Minkowski hyperboloid or the hypersian rug mode with the "
+      "red/cyan 3D glasses."));
+    dialog::sidedialog = true;
+    }
+
   else if(uni == 'y') 
     dialog::editNumber(vid.yshift, 0, 1, .1, 0, XLAT("Y shift"), 
       "Don't center on the player character."
@@ -720,139 +833,126 @@ void handle3D(int sym, int uni) {
   else if(uni == 'M') 
     pmodel = (pmodel == mdHyperboloid ? mdDisk : mdHyperboloid);
 
-  else if(doexiton(sym, uni)) cmode = emVisual2;
+  else if(doexiton(sym, uni)) cmode = emDisplayMode;
   
   if(cmode == emNumber) dialog::sidedialog = true;
   }
 
-void showVisual2() {
+void showDisplayMode() {
 
-  dialog::init(XLAT("advanced configuration"));
+  dialog::init(XLAT("special display modes"));
 
-  #ifndef ONEGRAPH
-  #ifdef GL
-  dialog::addSelItem(XLAT("openGL & antialiasing mode"), vid.usingGL ? "OpenGL" : vid.usingAA ? "AA" : "OFF", 'o');
-  #endif
-  #endif
-  dialog::addSelItem(XLAT("distance between eyes"), fts3(vid.eye), 'e');
-  #ifndef MOBWEB
-  dialog::addSelItem(XLAT("framerate limit"), its(vid.framelimit), 'f');
-  #endif
+  const char *wdmodes[6] = {"ASCII", "black", "plain", "Escher", "plain/3D", "Escher/3D"};
+  const char *mdmodes[6] = {"ASCII", "items only", "items and monsters", "high contrast",
+    "3D", "high contrast/3D"};
 
-#ifndef MOBILE
-  dialog::addSelItem(XLAT("configure input"), "", 'p');
-#endif
+  dialog::addBoolItem(XLAT("orthogonal projection"), vid.alpha >= 500, '1');
+  dialog::addBoolItem(XLAT("small Poincaré model"), vid.alpha == 1 && vid.scale < 1, '2');
+  dialog::addBoolItem(XLAT("big Poincaré model"), vid.alpha == 1 && vid.scale >= 1, '3');
+  dialog::addBoolItem(XLAT("Klein-Beltrami model"), vid.alpha == 0, '4');
+  dialog::addSelItem(XLAT("wall display mode"), XLAT(wdmodes[vid.wallmode]), '5');
+  dialog::addBoolItem(XLAT("draw the grid"), (vid.grid), '6');
+  dialog::addBoolItem(XLAT("mark heptagons"), (vid.darkhepta), '7');
+  dialog::addSelItem(XLAT("3D configuration"), "", '9');
 
-#ifdef MOBILE
-  dialog::addSelItem(XLAT("font scale"), its(fontscale), 'b');
-#endif
-
-  dialog::addSelItem(XLAT("sight range"), its(sightrange), 'a');
-  dialog::addBoolItem(XLAT("reverse pointer control"), (revcontrol), 'r');
-  dialog::addBoolItem(XLAT("draw circle around the target"), (vid.drawmousecircle), 'd');
-  
-  dialog::addSelItem(XLAT("message flash time"), its(vid.flashtime), 't');
-#ifdef MOBILE
-  dialog::addBoolItem(XLAT("targetting ranged Orbs long-click only"), (vid.shifttarget&2), 'i');
-#else
-  dialog::addBoolItem(XLAT("targetting ranged Orbs Shift+click only"), (vid.shifttarget&1), 'i');
-#endif
-#ifdef STEAM
-  dialog::addBoolItem(XLAT("send scores to Steam leaderboards"), (vid.steamscore&1), 'l');
-#endif
-  dialog::addSelItem(XLAT("3D configuration"), "", '3');
-#ifdef MOBILE
-  dialog::addSelItem(XLAT("compass size"), its(vid.mobilecompasssize), 'c');
-#endif
-
-  dialog::addSelItem(XLAT("aura brightness"), its(vid.aurastr), 'z');
-  dialog::addSelItem(XLAT("aura smoothening factor"), its(vid.aurasmoothen), 'x');
+  dialog::addSelItem(XLAT("scale factor"), fts(vid.scale), 'z');
+  dialog::addSelItem(XLAT("monster display mode"), XLAT(mdmodes[vid.monmode]), 'm');
 
   dialog::addBreak(50);
-  dialog::addItem(XLAT("exit configuration"), 'v');
-#ifndef NOCONFIG
-  dialog::addItem(XLAT("save the current config"), 's');
+
+#ifndef NOEDIT
+  dialog::addBoolItem(XLAT("vector graphics editor"), (false), 'g');
 #endif
 
+  // display modes  
+#ifndef NORUG
+  dialog::addBoolItem(XLAT("hypersian rug mode"), (rug::rugged), 'u');
+#endif
+#ifndef NOMODEL
+  dialog::addBoolItem(XLAT("paper model creator"), (false), 'n');
+#endif
+  dialog::addBoolItem(XLAT("conformal/history mode"), (conformal::on), 'a');
+  dialog::addBoolItem(XLAT("expansion"), viewdists, 'x');
+  
+  showAllConfig();
   dialog::display();
   }
 
-void handleVisual2(int sym, int uni) {
+void gmodekeys(int sym, int uni) {
+  if(uni == '1') { vid.alpha = 999; vid.scale = 998; }
+  if(uni == '2') { vid.alpha = 1; vid.scale = 0.4; }
+  if(uni == '3') { vid.alpha = 1; vid.scale = 1; }
+  if(uni == '4') { vid.alpha = 0; vid.scale = 1; }
+  if(uni == '5') { vid.wallmode += 60 + (shiftmul > 0 ? 1 : -1); vid.wallmode %= 6; }
+  if(uni == '6') vid.grid = !vid.grid;
+  if(uni == '7') { vid.darkhepta = !vid.darkhepta; }
+  if(uni == '%' && sym == '5') { 
+    if(vid.wallmode == 0) vid.wallmode = 6;
+    vid.wallmode--;
+    }
+  }
+
+void handleDisplayMode(int sym, int uni) {
   dialog::handleNavigation(sym, uni);
   char xuni = uni;
   if((xuni >= 'A' && xuni <= 'Z') || (xuni >= 1 && xuni <= 26)) xuni |= 32;
-  
-  if(xuni == 'v' || sym == SDLK_F2 || sym == SDLK_ESCAPE) cmode = emNormal;
-#ifndef NOCONFIG
-  if(xuni == 's') saveConfig();
-#endif
-  
-  if(xuni == '3') cmode = em3D;
-  
-  if(xuni == 'c') 
-    dialog::editNumber(vid.mobilecompasssize, 0, 100, 10, 20, XLAT("compass size"), "");
-  
-  if(sym == SDLK_F1 || sym == 'h')
-    lastmode = cmode, cmode = emHelp;
 
-#ifndef ONEGRAPH
-  if(xuni == 'o' && shiftmul > 0) switchGL();
-
-#ifndef MOBILE
-  if(xuni == 'o' && shiftmul < 0 && !vid.usingGL) {
-    vid.usingAA = !vid.usingAA;
-    if(vid.usingAA) addMessage(XLAT("anti-aliasing enabled"));
-    if(!vid.usingAA) addMessage(XLAT("anti-aliasing disabled"));
-    }
-#endif
-#endif
-
-#ifndef MOBILE
-  if(xuni == 'p') {
-    cmode = emShmupConfig; 
-    multi::shmupcfg = shmup::on;
-    }
-#endif
+  if(xuni == 'p') projectionDialog();
   
-  if(xuni == 'f') 
-    dialog::editNumber(vid.framelimit, 5, 300, 10, 300, XLAT("framerate limit"), "");
-  
-  if(xuni == 'a') {
-    dialog::editNumber(sightrange, 4, cheater ? 10 : 7, 1, 7, XLAT("sight range"), 
-      XLAT("Roughly 42% cells are on the edge of your sight range. Reducing "
-      "the sight range makes HyperRogue work faster, but also makes "
-      "the game effectively harder."));
+  if(xuni == 'z') {
+    dialog::editNumber(vid.scale, .001, 1000, .1, 1, XLAT("scale factor"), 
+      XLAT("Scale the displayed model."));
+    dialog::scaleLog();
     dialog::sidedialog = true;
     }
-
-  if(xuni == 'r') revcontrol = !revcontrol;
-  if(xuni == 'd') vid.drawmousecircle = !vid.drawmousecircle;
-
-#ifdef MOBILE
-  if(xuni =='b') 
-    dialog::editNumber(fontscale, 0, 400, 10, 100, XLAT("font scale"), "");
-#endif
-
-  if(xuni =='z') 
-    dialog::editNumber(vid.aurastr, 0, 256, 10, 128, XLAT("aura brightness"), "");
-  if(xuni =='x') 
-    dialog::editNumber(vid.aurasmoothen, 1, 180, 1, 5, XLAT("aura smoothening factor"), "");
-
-  if(xuni == 'e') {
-    dialog::editNumber(vid.eye, -10, 10, 0.01, 0, XLAT("distance between eyes"),
-      XLAT("Watch the Minkowski hyperboloid or the hypersian rug mode with the "
-      "red/cyan 3D glasses."));
-    dialog::sidedialog = true;
-    }
-
-#ifdef STEAM
-  if(xuni == 'l') vid.steamscore = vid.steamscore^1;
-#endif
-  if(xuni == 't') 
-    dialog::editNumber(vid.flashtime, 0, 64, 1, 8, XLAT("message flash time"),
-      XLAT("How long should the messages stay on the screen."));
   
-  if(xuni == 'i') { vid.shifttarget = vid.shifttarget^3; }
+  if(xuni == 'm') { vid.monmode += 60 + (shiftmul > 0 ? 1 : -1); vid.monmode %= 6; }
+
+  if(xuni == '9') cmode = em3D;
+  
+#ifndef NOEDIT
+  else if(xuni == 'g') {
+    cmode = emDraw;
+    mapeditor::initdraw(cwt.c);
+    }
+#endif
+
+  else if(xuni == 'x') {
+    viewdists = !viewdists;
+    cmode = emNormal;
+    }
+#ifndef NORUG
+  else if(xuni == 'u') {
+    if(sphere) projectionDialog();
+    else rug::select();
+    }
+#endif
+  else if(uni == 'a')
+      cmode = emConformal;
+
+#ifndef NOMODEL
+  else if(xuni == 'n')
+    cmode = emNetgen;
+#endif
+
+  else gmodekeys(sym, uni);
+
+  handleAllConfig(sym, xuni);
+  }
+
+void switchHardcore() {
+  if(hardcore && !canmove) { 
+    restartGame();
+    hardcore = false;
+    cmode = emNormal;
+    }
+  else if(hardcore && canmove) { hardcore = false; }
+  else { hardcore = true; canmove = true; hardcoreAt = turncount; }
+  if(hardcore)
+      addMessage("One wrong move, and it is game over!");
+  else
+      addMessage("Not so hardcore?");
+  if(pureHardcore()) cmode = emNormal;
   }
 
 void showChangeMode() {
@@ -876,6 +976,8 @@ void showChangeMode() {
   dialog::addBoolItem(XLAT("pure tactics mode"), (tactic::on), 't');
   dialog::addBoolItem(XLAT("heptagonal mode"), (purehepta), '7');
   dialog::addBoolItem(XLAT("Chaos mode"), (chaosmode), 'C');
+  dialog::addBoolItem(XLAT("peaceful mode"), (chaosmode), 'P');
+  dialog::addBoolItem(XLAT("inventory mode"), (inv::on), 'i');
 
   dialog::addBreak(50);
   // cheating and map editor
@@ -883,21 +985,8 @@ void showChangeMode() {
   dialog::addBoolItem(XLAT("cheat mode"), (cheater), 'c');
 #ifndef NOEDIT
   dialog::addBoolItem(XLAT("map editor"), (false), 'm');
-  dialog::addBreak(50);
-  dialog::addBoolItem(XLAT("vector graphics editor"), (false), 'g');
 #endif
 
-  // display modes
-  
-#ifndef NORUG
-  dialog::addBoolItem(XLAT("hypersian rug mode"), (rug::rugged), 'u');
-#endif
-#ifndef NOMODEL
-  dialog::addBoolItem(XLAT("paper model creator"), (false), 'n');
-#endif
-  dialog::addBoolItem(XLAT("conformal/history mode"), (conformal::on), 'a');
-  dialog::addBoolItem(XLAT("expansion"), viewdists, 'x');
-  
   dialog::addBreak(50);
   
   dialog::addItem(XLAT("return to the game"), 'v');
@@ -908,7 +997,7 @@ void handleChangeMode(int sym, int uni) {
   dialog::handleNavigation(sym, uni);    
   char xuni = uni;
   
-  if(xuni == 'v' || sym == SDLK_F2 || sym == SDLK_ESCAPE) cmode = emNormal;
+  if(xuni == 'v' || sym == SDLK_ESCAPE) cmode = emNormal;
   
   else if(uni == 'c') {
     if(tactic::on && gold()) {
@@ -929,43 +1018,27 @@ void handleChangeMode(int sym, int uni) {
       }
     }
   
-#ifndef NOEDIT
-  else if(xuni == 'g') {
-    cmode = emDraw;
-    mapeditor::initdraw(cwt.c);
-  }
-#endif
   else if(xuni == 'e') {
     cmode = emPickEuclidean;
   }
-  else if(xuni == 'x') {
-    viewdists = !viewdists;
-    cmode = emNormal;
-    }
   else if(xuni == 't') {
     clearMessages();
     cmode = emTactic;
   }
-#ifndef NORUG
-  else if(xuni == 'u') {
-    if(sphere) projectionDialog();
-    else rug::select();
-    }
-#endif
   else if(xuni == 'y') {
     clearMessages();
     if(yendor::everwon || autocheat)
         cmode = emYendor;
-    else {
-      cmode = emHelp;
-      help = yendor::chelp;
-      lastmode = emChangeMode;
-      }
+    else gotoHelp(yendor::chelp);
     }
   else if(xuni == '7')
-      restartGame('7');
-  else if(uni == 'a')
-      cmode = emConformal;
+    restartGame('7');
+  else if(xuni == 'P')
+    cmode = emPeace;
+  else if(xuni == 'i') {
+    restartGame('i');
+    cmode = emNormal;
+    }
 #ifdef TOUR
   else if(uni == 'T') {
     cmode = emNormal;
@@ -973,15 +1046,13 @@ void handleChangeMode(int sym, int uni) {
     }
 #endif
   else if(uni == 'C') {
-    if(!chaosmode) {
-      cmode = emHelp;
-      help =
+    if(!chaosmode) gotoHelp(
       "In the Chaos mode, lands change very often, and "
       "there are no walls between them. "
       "Some lands are incompatible with this."
-      "\n\nYou need to reach Crossroads IV to unlock the Chaos mode.";
-      lastmode = chaosUnlocked ? emNormal : emChangeMode;
-      }
+      "\n\nYou need to reach Crossroads IV to unlock the Chaos mode.",
+      chaosUnlocked ? emNormal : emChangeMode
+      );
     if(chaosUnlocked) restartGame('C');
     }
   else if(xuni == 'p') {
@@ -1013,10 +1084,6 @@ void handleChangeMode(int sym, int uni) {
     cmode = emShmupConfig;
 #endif
     }
-#ifndef NOMODEL
-  else if(xuni == 'n')
-    cmode = emNetgen;
-#endif
   else if(xuni == 'h' && !shmup::on) 
     switchHardcore();
   else if(xuni == 'r') {
@@ -1126,7 +1193,7 @@ void handleCustomizeChar(int sym, int uni) {
   if(xuni == 'd') switchcolor(cs.dresscolor, cat ? haircolors : dresscolors);
   if(xuni == 'f') switchcolor(cs.dresscolor2, dresscolors2);
   if(xuni == 'u') switchcolor(cs.uicolor, eyecolors);
-  if(xuni == 'v' || sym == SDLK_F2 || sym == SDLK_ESCAPE) cmode = emNormal;
+  if(xuni == 'v' || sym == SDLK_ESCAPE) cmode = emNormal;
   }
 
 int eupage = 0;
@@ -1220,8 +1287,7 @@ void handleEuclidean(int sym, int uni) {
       }
     else euclidland = laIce;
     }
-  else if(uni == '2' || sym == SDLK_F1) {
-    help =
+  else if(uni == '2' || sym == SDLK_F1) gotoHelp(
     "If you want to know how much the gameplay is affected by the "
     "hyperbolic geometry in HyperRogue, this mode is for you!\n\n"
     
@@ -1231,10 +1297,8 @@ void handleEuclidean(int sym, int uni) {
     "ultraparallel lines (Crossroads, Vineyard, Palace) cannot be "
     "faithfully represented in Euclidean, so yo get more "
     "or less simplified versions of them. Choose Crossroads to play a game "
-    "where many different lands appear.";
-    cmode = emHelp;
-    lastmode = emPickEuclidean;
-    }
+    "where many different lands appear."
+    );
   else if(doexiton(sym, uni)) cmode = emNormal;
   }
 
@@ -1259,12 +1323,12 @@ void showScores() {
 
   mouseovers = XLAT("t/left/right - change display, up/down - scroll, s - sort by") + modes;
 
-  displaystr(bx*4, vid.fsize*2, 0, vid.fsize, "#", 0xFFFFFF, 16);
-  displaystr(bx*8, vid.fsize*2, 0, vid.fsize, "$$$", 0xFFFFFF, 16);
-  displaystr(bx*12, vid.fsize*2, 0, vid.fsize, XLAT("kills"), 0xFFFFFF, 16);
-  displaystr(bx*18, vid.fsize*2, 0, vid.fsize, XLAT("time"), 0xFFFFFF, 16);
-  displaystr(bx*22, vid.fsize*2, 0, vid.fsize, XLAT("ver"), 0xFFFFFF, 16);
-  displaystr(bx*23, vid.fsize*2, 0, vid.fsize, displayfor(NULL), 0xFFFFFF, 0);
+  displaystr(bx*4, vid.fsize*2, 0, vid.fsize, "#", forecolor, 16);
+  displaystr(bx*8, vid.fsize*2, 0, vid.fsize, "$$$", forecolor, 16);
+  displaystr(bx*12, vid.fsize*2, 0, vid.fsize, XLAT("kills"), forecolor, 16);
+  displaystr(bx*18, vid.fsize*2, 0, vid.fsize, XLAT("time"), forecolor, 16);
+  displaystr(bx*22, vid.fsize*2, 0, vid.fsize, XLAT("ver"), forecolor, 16);
+  displaystr(bx*23, vid.fsize*2, 0, vid.fsize, displayfor(NULL), forecolor, 0);
   if(scorefrom < 0) scorefrom = 0;
   int id = 0;
   int omit = scorefrom;
@@ -1448,7 +1512,6 @@ void showHelp() {
     getcstat = SDLK_ESCAPE;
     if(help == "HELPFUN") {
       help_delegate();
-      dialog::display();
       return;
       }
 
@@ -1462,7 +1525,7 @@ void showHelp() {
       dialog::addHelp(help.substr(id+1));
       }
     else {
-      dialog::init("help", 0xFFFFFF, 120, 100);
+      dialog::init("help", forecolor, 120, 100);
       dialog::addHelp(help);
       }
     
@@ -1545,10 +1608,7 @@ void showDemo() {
 
 void handleDemoKey(int sym, int uni) {
   dialog::handleNavigation(sym, uni);
-  if(sym == SDLK_F1 || sym == 'h') {
-    lastmode = cmode;
-    cmode = emHelp;
-    }
+  if(sym == SDLK_F1 || sym == 'h') gotoHelp(help);
   else if(sym == 'a') {
     toggleanim(!demoanim);
     cmode = emNormal;
@@ -1596,6 +1656,11 @@ void displayMenus() {
   if(cmode == emJoyConfig) showJoystickConfig();
   if(cmode == emOverview) showOverview();
   if(cmode == emYendor) yendor::showMenu();
+  if(cmode == emPeace) peace::showMenu();
+#ifdef INV
+  if(cmode == emInventory) inv::showMenu();
+#endif
+  if(cmode == emSlideshows) tour::ss::showMenu();
   if(cmode == emChangeMode) showChangeMode();
   if(cmode == emCustomizeChar) showCustomizeChar();
   if(cmode == emShmupConfig) shmup::showShmupConfig();
@@ -1604,8 +1669,9 @@ void displayMenus() {
   if(cmode == emPickEuclidean) showEuclideanMenu();
   if(cmode == emMenu) showMainMenu();
   if(cmode == emCheatMenu) showCheatMenu();
-  if(cmode == emVisual1) showVisual1();
-  if(cmode == emVisual2) showVisual2();
+  if(cmode == emBasicConfig) showBasicConfig();
+  if(cmode == emGraphConfig) showGraphConfig();
+  if(cmode == emDisplayMode) showDisplayMode();
   if(cmode == emColor) dialog::drawColorDialog(*dialog::colorPointer);
   if(cmode == emNumber) dialog::drawNumberDialog();
   if(cmode == emLinepattern) linepatterns::showMenu();

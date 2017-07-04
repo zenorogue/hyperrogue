@@ -13,6 +13,8 @@ int maxreclevel, reclevel;
 int lastt;
 
 int backcolor = 0;
+int bordcolor = 0;
+int forecolor = 0xFFFFFF;
 
 int detaillevel = 0;
 
@@ -174,7 +176,7 @@ void loadfont(int siz) {
 #ifdef WEB
     font[siz] = TTF_OpenFont("sans-serif", siz);
 #else
-    font[siz] = TTF_OpenFont("DejaVuSans-Bold.ttf", siz);
+    font[siz] = TTF_OpenFont(HYPERPATH "DejaVuSans-Bold.ttf", siz);
 #endif
     // Destination set by ./configure (in the GitHub repository)
     #ifdef FONTDESTDIR
@@ -196,7 +198,11 @@ int textwidth(int siz, const string &str) {
   if(size(str) == 0) return 0;
 
 #ifdef NOTTF
+#ifdef GL
   return gl_width(siz, str.c_str());
+#else
+  return 0;
+#endif
 
 #else
 
@@ -222,29 +228,28 @@ int textwidth(int siz, const string &str) {
 
 int gradient(int c0, int c1, ld v0, ld v, ld v1);
 
-#ifdef LOCAL
-double fadeout = 1;
-#endif
-
-int darkened(int c) {
-#ifdef LOCAL
-  c = gradient(0, c, 0, fadeout, 1);
-#endif
-  // c = ((c & 0xFFFF) << 8) | ((c & 0xFF0000) >> 16);
-  // c = ((c & 0xFFFF) << 8) | ((c & 0xFF0000) >> 16);
-  for(int i=0; i<darken; i++) c &= 0xFEFEFE, c >>= 1;
+int darkenedby(int c, int lev) {
+  for(int i=0; i<lev; i++)
+    c = ((c & 0xFEFEFE) >> 1);
   return c;
   }
 
-int darkenedby(int c, int lev) {
-  for(int i=0; i<lev; i++) c &= 0xFEFEFE, c >>= 1;
+int darkened(int c) {
+#ifdef EXTRA_FADEOUT
+  c = gradient(backcolor, c, 0, extra::fadeout, 1);
+#endif
+  for(int i=0; i<darken; i++)
+    c = ((c & 0xFEFEFE) >> 1) + ((backcolor & 0xFEFEFE) >> 1);
   return c;
   }
 
 int darkena(int c, int lev, int a) {
-  for(int i=0; i<lev; i++) c &= 0xFEFEFE, c >>= 1;
-  return (c << 8) + a;
+  return (darkenedby(c, lev) << 8) + a;
   }
+
+#ifndef GL
+void setcameraangle(bool b) { }
+#endif
 
 #ifdef GL
 
@@ -349,6 +354,20 @@ void setGLProjection() {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   
   glEnable(GL_BLEND);
+  if(vid.antialias & AA_LINES) {
+    glEnable(GL_LINE_SMOOTH);
+    glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+    }
+  else glDisable(GL_LINE_SMOOTH);
+  glLineWidth(vid.linewidth);
+  
+  if(vid.antialias & AA_POLY) {
+    glEnable(GL_POLYGON_SMOOTH);
+    glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
+    }
+  else glDisable(GL_POLYGON_SMOOTH);
+
+  //glLineWidth(1.0f);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   
   if(pmodel == mdBall || pmodel == mdHyperboloid) {
@@ -413,6 +432,54 @@ void glError(const char* GLcall, const char* file, const int line) {
 #include "nofont.cpp"
 #endif
 
+void sdltogl(SDL_Surface *txt, glfont_t& f, int ch) {
+#ifdef NOTTF
+  int otwidth, otheight, tpix[3000], tpixindex = 0;
+  loadCompressedChar(otwidth, otheight, tpix);
+#else
+  int otwidth = txt->w;
+  int otheight = txt->h;
+#endif
+  
+  int twidth = next_p2( otwidth );
+  int theight = next_p2( otheight );
+
+#ifdef NOTTF
+  int expanded_data[twidth * theight];
+#else
+  Uint16 expanded_data[twidth * theight];
+#endif
+
+  for(int j=0; j <theight;j++) for(int i=0; i < twidth; i++) {
+#ifdef NOTTF
+    expanded_data[(i+j*twidth)] = (i>=otwidth || j>=otheight) ? 0 : tpix[tpixindex++];
+#else
+    expanded_data[(i+j*twidth)] = 
+        ((i>=txt->w || j>=txt->h) ? 0 : ((qpixel(txt, i, j)>>24)&0xFF) * 0x100) | 0x00FF;
+#endif
+    }
+  
+  f.widths[ch] = otwidth;
+  f.heights[ch] = otheight;
+
+  glBindTexture( GL_TEXTURE_2D, f.textures[ch]);
+  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
+ 
+  glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, twidth, theight, 0,
+#ifdef NOTTF
+    GL_RGBA, GL_UNSIGNED_BYTE, 
+#else
+    GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE, 
+#endif
+    expanded_data );
+ 
+  float x=(float)otwidth / (float)twidth;
+  float y=(float)otheight / (float)theight;
+  f.tx[ch] = x;
+  f.ty[ch] = y;
+  }
+  
 void init_glfont(int size) {
   if(glfont[size]) return;
   DEBB(DF_INIT, (debugfile,"init GL font: %d\n", size));
@@ -442,11 +509,9 @@ void init_glfont(int size) {
     if(ch<32) continue;
 
 #ifdef NOTTF
-    int otwidth, otheight, tpix[3000], tpixindex = 0;
-    loadCompressedChar(otwidth, otheight, tpix);
+    sdltogl(NULL, f, ch);
 
 #else
-
     SDL_Surface *txt;
     if(ch < 128) {
       str[0] = ch;
@@ -459,78 +524,8 @@ void init_glfont(int size) {
 #ifdef CREATEFONT
     generateFont(ch, txt);
 #endif
-
-    int otwidth = txt->w;
-    int otheight = txt->h;
+    sdltogl(txt, f, ch);
 #endif
-
-    int twidth = next_p2( otwidth );
-    int theight = next_p2( otheight );
-
-#ifdef NOTTF
-    int expanded_data[twidth * theight];
-#else
-    Uint16 expanded_data[twidth * theight];
-#endif
-
-    for(int j=0; j <theight;j++) for(int i=0; i < twidth; i++) {
-#ifdef NOTTF
-      expanded_data[(i+j*twidth)] = (i>=otwidth || j>=otheight) ? 0 : tpix[tpixindex++];
-#else
-      expanded_data[(i+j*twidth)] = 
-          (i>=txt->w || j>=txt->h) ? 0 : ((qpixel(txt, i, j)>>24)&0xFF) * 0x101;
-#endif
-      }
-    
-/*    if(ch == '@') {
-      for(int j=0; j <theight;j++) {
-        for(int i=0; i < twidth; i++) printf("%4x ", expanded_data[(i+j*twidth)]);
-        printf("\n");
-        }
-      } */
-
-//  printf("b\n");
-    f.widths[ch] = otwidth;
-    f.heights[ch] = otheight;
-  
-    glBindTexture( GL_TEXTURE_2D, f.textures[ch]);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
-   
-    glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, twidth, theight, 0,
-#ifdef NOTTF
-      GL_RGBA, GL_UNSIGNED_BYTE, 
-#else
-      GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE, 
-#endif
-      expanded_data );
-   
-//  printf("c\n");
-
-    float x=(float)otwidth / (float)twidth;
-    float y=(float)otheight / (float)theight;
-    f.tx[ch] = x;
-    f.ty[ch] = y;
-
-/*  glNewList(f.list_base+ch,GL_COMPILE);
-    glBindTexture(GL_TEXTURE_2D, f.textures[ch]);
-   
-    //glPushMatrix();
-   
-    // glTranslatef(bitmap_glyph->left,0,0);
-    // glTranslatef(0,bitmap_glyph->top-bitmap.rows,0);
-   
-//  printf("d\n");
-  
-    glBegin(GL_QUADS);
-    float eps=0;
-    glTexCoord2d(eps,eps); glVertex2f(0, txt->h);
-    glTexCoord2d(eps,y-0); glVertex2f(0, 0);
-    glTexCoord2d(x-eps,y-0); glVertex2f(txt->w, 0);
-    glTexCoord2d(x-eps,0); glVertex2f(txt->w, txt->h);
-    glEnd();
-    glEndList(); */
-    //glPopMatrix();
 
 #ifndef NOTTF
     SDL_FreeSurface(txt);    
@@ -541,16 +536,27 @@ void init_glfont(int size) {
   GLERR("initfont");
   }
 
+int utfsize(char c) {
+  unsigned char cu = c;
+  if(cu < 128) return 1;
+  if(cu < 224) return 2;
+  if(cu < 0xE0) return 3;
+  return 4;
+  }
+
+bool eqs(const char* x, const char* y) {
+  return *y? *x==*y?eqs(x+1,y+1):false:true;
+  }
+
 int getnext(const char* s, int& i) {
+  int siz = utfsize(s[i]);
+  if(siz == 1) return s[i++];
   for(int k=0; k<NUMEXTRA; k++)
-    if(s[i] == natchars[k][0] && s[i+1] == natchars[k][1]) {
-      i += 2; return 128+k;
+    if(eqs(s+i, natchars[k])) {
+      i += siz; return 128+k;
       }
-  if(s[i] < 0 && s[i+1] < 0) {
-    printf("Unknown character: '%c%c'\n", s[i], s[i+1]);
-    i += 2; return '?';
-    }
-  return s[i++];
+  printf("Unknown character in: '%s'\n", s);
+  i += siz; return '?';
   }
 
 GLfloat tver[24];
@@ -727,7 +733,7 @@ bool displaystr(int x, int y, int shift, int size, const char *str, int color, i
 
   loadfont(size);
 
-  SDL_Surface *txt = (vid.usingAA?TTF_RenderUTF8_Blended:TTF_RenderUTF8_Solid)(font[size], str, col);
+  SDL_Surface *txt = ((vid.antialias & AA_FONT)?TTF_RenderUTF8_Blended:TTF_RenderUTF8_Solid)(font[size], str, col);
   
   if(txt == NULL) return false;
 
@@ -767,12 +773,25 @@ bool displaystr(int x, int y, int shift, int size, const string &s, int color, i
   return displaystr(x, y, shift, size, s.c_str(), color, align);
   }
 
-bool displayfr(int x, int y, int b, int size, const string &s, int color, int align) {
-  displaystr(x-b, y, 0, size, s, 0, align);
-  displaystr(x+b, y, 0, size, s, 0, align);
-  displaystr(x, y-b, 0, size, s, 0, align);
-  displaystr(x, y+b, 0, size, s, 0, align);
+bool displayfrSP(int x, int y, int sh, int b, int size, const string &s, int color, int align, int p) {
+  if(b) {
+    displaystr(x-b, y, 0, size, s, p, align);
+    displaystr(x+b, y, 0, size, s, p, align);
+    displaystr(x, y-b, 0, size, s, p, align);
+    displaystr(x, y+b, 0, size, s, p, align);
+    }
+  if(b >= 2) {
+    int b1 = b-1;
+    displaystr(x-b1, y-b1, 0, size, s, p, align);
+    displaystr(x-b1, y+b1, 0, size, s, p, align);
+    displaystr(x+b1, y-b1, 0, size, s, p, align);
+    displaystr(x+b1, y+b1, 0, size, s, p, align);
+    }
   return displaystr(x, y, 0, size, s, color, align);
+  }
+
+bool displayfr(int x, int y, int b, int size, const string &s, int color, int align) {
+  return displayfrSP(x, y, 0, b, size, s, color, align, poly_outline>>8);
   }
 
 bool displaychr(int x, int y, int shift, int size, char chr, int col) {
@@ -903,6 +922,12 @@ void addMessage(string s, char spamtype) {
   addMessageToLog(m, msgs);
   }
 
+int colormix(int a, int b, int c) {
+  for(int p=0; p<3; p++)
+    part(a, p) = part(a,p) + (part(b,p) - part(a,p)) * part(c,p) / 255;
+  return a;
+  }
+
 void drawmessages() {
   DEBB(DF_GRAPH, (debugfile,"draw messages\n"));
   int i = 0;
@@ -918,7 +943,8 @@ void drawmessages() {
       int y = vid.yres - vid.fsize * (size(msgs) - j) - (ISIOS ? 4 : 0);
       string s = msgs[j].msg;
       if(msgs[j].quantity > 1) s += " (x" + its(msgs[j].quantity) + ")";
-      displayfr(x, y, 1, vid.fsize, s, 0x10101 * (255 - age/vid.flashtime), 8);
+      poly_outline = gradient(bordcolor, backcolor, 0, age, 256*vid.flashtime) << 8;
+      displayfr(x, y, 1, vid.fsize, s, gradient(forecolor, backcolor, 0, age, 256*vid.flashtime), 8);
       msgs[i++] = msgs[j];
       }
     }
@@ -1180,7 +1206,7 @@ int gradient(int c0, int c1, ld v0, ld v, ld v1) {
     int p0 = (c0 >> (8*a)) & 255;
     int p1 = (c1 >> (8*a)) & 255;
     int p = (p0*(256-vv) + p1*vv + 127) >> 8;
-    c += p << (8*a);
+    c |= p << (8*a);
     }
   return c;
   }
@@ -1511,9 +1537,7 @@ namespace tortoise {
     else if(d < 0) mcol = 0;
     
       int dd = 0xFF * (atan(fabs(d)/2) / (M_PI/2));
-      /* poly_outline = OUTLINE_TRANS;
-      queuepoly(V, shHeptaMarker, darkena(mcol, 0, dd));
-      poly_outline = OUTLINE_NONE; */
+      
     return gradient(0x487830, mcol, 0, dd, 0xFF);
     }
   };
@@ -1885,7 +1909,8 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, int col, dou
         queuepoly(VBODY, shBullHorn, items[itOrbDiscord] ? watercolor(0) : 0xFF000040);
         queuepoly(VBODY * Mirror, shBullHorn, items[itOrbDiscord] ? watercolor(0) : 0xFF000040);
         }
-      if(items[itOrbThorns])
+      if(peace::on) ;
+      else if(items[itOrbThorns])
         queuepoly(VBODY, shHedgehogBladePlayer, items[itOrbDiscord] ? watercolor(0) : 0x00FF00FF);
       else if(!shmup::on && items[itOrbDiscord])
         queuepoly(VBODY, cs.charid >= 2 ? shSabre : shPSword, watercolor(0));
@@ -2217,7 +2242,7 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, int col, dou
     otherbodyparts(V, darkena(col, 0, 0xC0), m, footphase);
     ShadowV(V, shPBody);
     queuepoly(VBODY, shPBody, darkena(col, 0, 0xC0));
-    queuepoly(VBODY, shPSword, 0xFFFF00FF);
+    if(!peace::on) queuepoly(VBODY, shPSword, 0xFFFF00FF);
     queuepoly(VHEAD, shHood, 0xD0D000C0);
     }
   else if(m == moPalace || m == moFatGuard || m == moVizier || m == moSkeleton) {
@@ -2310,7 +2335,7 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, int col, dou
     ShadowV(V, shPBody);
     otherbodyparts(V, darkena(col, 0, 0xFF), m, footphase);
     queuepoly(VBODY, shPBody, darkena(col, 0, 0xC0));
-    queuepoly(VBODY, shPSword, darkena(col, 0, 0xFF));
+    if(!peace::on) queuepoly(VBODY, shPSword, darkena(col, 0, 0xFF));
     queuepoly(VHEAD, shArmor, darkena(col, 1, 0xFF));
     }
   else if(m == moGhost || m == moSeep || m == moFriendlyGhost) {
@@ -2348,7 +2373,7 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, int col, dou
     otherbodyparts(V, darkena(col, 1, 0xFF), m, footphase);
     ShadowV(V, shPBody);
     queuepoly(VBODY, shPBody, darkena(col, 0, 0xC0));
-    queuepoly(VBODY, shPSword, darkena(col, 2, 0xFF));
+    if(!peace::on) queuepoly(VBODY, shPSword, darkena(col, 2, 0xFF));
     queuepoly(VHEAD, shHood, darkena(col, 1, 0xFF));
     }
   else if(m == moPirate) {
@@ -2383,7 +2408,7 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, int col, dou
     otherbodyparts(V, darkena(col, 1, 0xFF), m, footphase);
     ShadowV(V, shPBody);
     queuepoly(VBODY, shPBody, darkena(0xE00000, 0, 0xFF));
-    queuepoly(VBODY, shPSword, darkena(0xD0D0D0, 0, 0xFF));
+    if(!peace::on) queuepoly(VBODY, shPSword, darkena(0xD0D0D0, 0, 0xFF));
     queuepoly(VBODY, shKnightCloak, darkena(0x404040, 0, 0xFF));
     queuepoly(VHEAD, shVikingHelmet, darkena(0xC0C0C0, 0, 0XFF));
     queuepoly(VHEAD, shPFace, darkena(0xFFFF80, 0, 0xFF));
@@ -2574,13 +2599,13 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, int col, dou
   }
 
 bool drawMonsterTypeDH(eMonster m, cell *where, const transmatrix& V, int col, bool dh, ld footphase) {
+  dynamicval<int> p(poly_outline, poly_outline);
   if(dh) {
     poly_outline = OUTLINE_DEAD;
     darken++;
     }
   bool b = drawMonsterType(m,where,V,col, footphase);
   if(dh) {
-    poly_outline = OUTLINE_NONE;
     darken--;
     }
   return b;
@@ -2931,10 +2956,10 @@ int keycelldist;
 int aurac[AURA+1][4];
 
 bool haveaura() {
-  return pmodel == mdDisk && !sphere && !euclid && vid.aurastr>0 && !svg::in && (auraNOGL || vid.usingGL);
+  return pmodel == mdDisk && (!sphere || vid.alpha > 10) && !euclid && vid.aurastr>0 && !svg::in && (auraNOGL || vid.usingGL);
   }
   
-void clearaura() {
+void clearaura() { 
   if(!haveaura()) return;
   for(int a=0; a<AURA; a++) for(int b=0; b<4; b++) 
     aurac[a][b] = 0;
@@ -2943,7 +2968,8 @@ void clearaura() {
 void addaura(const hyperpoint& h, int col, int fd) {
   if(!haveaura()) return;
   int r = int(2*AURA + atan2(h[0], h[1]) * AURA / 2 / M_PI) % AURA; 
-  aurac[r][3] += ((128 * 128 / vid.aurastr) << (fd + darken));
+  aurac[r][3] += ((128 * 128 / vid.aurastr) << fd);
+  col = darkened(col);
   aurac[r][0] += (col>>16)&255;
   aurac[r][1] += (col>>8)&255;
   aurac[r][2] += (col>>0)&255;
@@ -2968,17 +2994,24 @@ void sumaura(int v) {
   
 void drawaura() {
   if(!haveaura()) return;
+  double rad = vid.radius;
+  if(sphere) rad /= sqrt(vid.alphax*vid.alphax - 1);
   
   for(int v=0; v<4; v++) sumaura(v);
 
+  double bak[3];
+  bak[0] = ((backcolor>>16)&255)/255.;
+  bak[1] = ((backcolor>>8)&255)/255.;
+  bak[2] = ((backcolor>>0)&255)/255.;
+  
 #ifndef NOSDL
   if(!vid.usingGL) {
     SDL_LockSurface(s);
     for(int y=0; y<vid.yres; y++)
     for(int x=0; x<vid.xres; x++) {
 
-      ld hx = (x * 1. - vid.xcenter) / vid.radius;
-      ld hy = (y * 1. - vid.ycenter) / vid.radius;
+      ld hx = (x * 1. - vid.xcenter) / rad;
+      ld hy = (y * 1. - vid.ycenter) / rad;
   
       if(vid.camera_angle) camrotate(hx, hy);
       
@@ -3003,7 +3036,7 @@ void drawaura() {
         double c1 = aurac[rm][2-c] / (aurac[rm][3]+.1);
         double c2 = aurac[rm+1][2-c] / (aurac[rm+1][3]+.1);
         const ld one = 1;
-        part(p, c) = int(255 * min(one, cmul * (c1 + fr * (c2-c1)))); 
+        part(p, c) = int(255 * min(one, bak[2-c] + cmul * ((c1 + fr * (c2-c1) - bak[2-c])))); 
         }
       }
     SDL_UnlockSurface(s);
@@ -3031,16 +3064,15 @@ void drawaura() {
     facs[d] = .99999 +  .00001 * exp(dd);
     }
   facs[10] = 10;
-  
+
   for(int r=0; r<=AURA; r++) for(int z=0; z<11; z++) {
     float rr = (M_PI * 2 * r) / AURA;
-    float rad = vid.radius * facs[z];
+    float rad0 = rad * facs[z];
     int rm = r % AURA;
-    cx[r][z][0] = rad * sin(rr);
-    cx[r][z][1] = rad * cos(rr);
-    cx[r][z][2] = cmul[z] * aurac[rm][0] / (aurac[rm][3]+.1); 
-    cx[r][z][3] = cmul[z] * aurac[rm][1] / (aurac[rm][3]+.1); 
-    cx[r][z][4] = cmul[z] * aurac[rm][2] / (aurac[rm][3]+.1);                                   
+    cx[r][z][0] = rad0 * sin(rr);
+    cx[r][z][1] = rad0 * cos(rr);
+    for(int u=0; u<3; u++)
+      cx[r][z][u+2] = bak[u] + (aurac[rm][u] / (aurac[rm][3]+.1) - bak[u]) * cmul[z];
     }
   
   for(int u=0; u<4; u++) glcoords[u][2] = vid.scrdist;
@@ -3093,7 +3125,7 @@ void drawCircle(int x, int y, int size, int color) {
   gdpush(4); gdpush(color); gdpush(x); gdpush(y); gdpush(size);
 #else
 #ifdef SDLGFX
-  (vid.usingAA?aacircleColor:circleColor) (s, x, y, size, color);
+  ((vid.antialias && AA_NOGL)?aacircleColor:circleColor) (s, x, y, size, color);
 #else
 #ifndef NOSDL
   int pts = size * 4;
@@ -3249,7 +3281,7 @@ void drawReptileFloor(const transmatrix& V, cell *c, int col, bool usefloor) {
   else dcol = darkena(ecol, 0, 0x80);
 
   dynamicval<int> p(poly_outline, 
-    doHighlight() && ecol != -1 && ecol != 0 ? OUTLINE_ENEMY : OUTLINE_NONE);
+    doHighlight() && ecol != -1 && ecol != 0 ? OUTLINE_ENEMY : OUTLINE_DEFAULT);
 
   if(!chasmg) {
     if(wmescher)
@@ -3324,7 +3356,7 @@ void drawMovementArrows(cell *c, transmatrix V) {
       // make it more transparent
       int col = getcs().uicolor;
       col -= (col & 0xFF) >> 1;
-      poly_outline = OUTLINE_NONE;
+      poly_outline = OUTLINE_DEFAULT;
       queuepoly(fixrot * spin(-d * M_PI/4 + (sphere && vid.alpha>1?M_PI:0))/* * eupush(1,0)*/, shArrow, col);
 
       if(c->type != 6 && (isStunnable(c->monst) || c->wall == waThumperOn)) {
@@ -3363,7 +3395,7 @@ void drawMobileArrow(cell *c, transmatrix V) {
   if(invalid) col -= (col & 0xFF) >> 1;
   if(invalid) col -= (col & 0xFF) >> 1;
   
-  poly_outline = OUTLINE_NONE;
+  poly_outline = OUTLINE_DEFAULT;
   transmatrix m2 = Id;
   ld scale = vid.mobilecompasssize / 15.;
   m2[0][0] = scale; m2[1][1] = scale; m2[2][2] = 1;
@@ -3923,7 +3955,7 @@ bool openorsafe(cell *c) {
 #define Dark(x) darkena(x,0,0xFF)
 
 int gridcolor(cell *c1, cell *c2) {
-  if(cmode == emDraw) return Dark(0xFFFFFF);
+  if(cmode == emDraw) return Dark(forecolor);
   if(!c2)
     return 0x202020 >> darken;
   int rd1 = rosedist(c1), rd2 = rosedist(c2);
@@ -4028,18 +4060,22 @@ bool allemptynear(cell *c) {
   return true;
   }
 
-bool behindsphere(const transmatrix& V) {
+bool behindsphere(const hyperpoint& h) {
   if(!sphere) return false;
 
   if(vid.alpha > 1) {
-     if(V[2][2] > -1/vid.alpha) return true;
+     if(h[2] > -1/vid.alpha) return true;
      }  
   
   if(vid.alpha <= 1) {
-    if(V[2][2] < -.8) return true;
+    if(h[2] < -.8) return true;
     }
   
   return false;
+  }
+
+bool behindsphere(const transmatrix& V) {
+  return behindsphere(tC0(V));
   }
 
 void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
@@ -4057,6 +4093,10 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
   if(orig) gm = V;
 
   if(behindsphere(V)) return;
+  
+#ifdef EXTRA_DRAWCELL
+  extra::drawcell(c, V);
+#endif
   
   ld dist0 = hdist0(tC0(V)) - 1e-6;
   if(dist0 < geom3::highdetail) detaillevel = 2;
@@ -4160,6 +4200,17 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
     // addaura(tC0(V), wcol);
     int zcol = fcol;
 
+    if(peace::on && peace::hint && c->land != laTortoise) {
+      int d =
+        (c->land == laCamelot || (c->land == laCaribbean && celldistAlt(c) <= 0) || (c->land == laPalace && celldistAlt(c))) ? celldistAlt(c):
+        celldist(c);
+
+      int dc = 
+        0x10101 * (127 + int(127 * sin(ticks / 200. + d*1.5)));
+      wcol = gradient(wcol, dc, 0, .3, 1);
+      fcol = gradient(fcol, dc, 0, .3, 1);
+      }
+
     if(viewdists) {
       int cd = celldistance(c, cwt.c);
       string label = its(cd);
@@ -4181,7 +4232,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       int ds = ticks;
       for(int u=0; u<5; u++) {
         ld rad = hexf * (.3 * u + (ds%1000) * .0003);
-        int tcol = darkena(gradient(0xFFFFFF, 0, 0, rad, 1.5 * hexf), 0, 0xFF);
+        int tcol = darkena(gradient(forecolor, backcolor, 0, rad, 1.5 * hexf), 0, 0xFF);
         for(int a=0; a<S84; a++)
           queueline(V*ddi0(a, rad), V*ddi0(a+1, rad), tcol, 0);
         }
@@ -4286,7 +4337,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       c->land == laReptile ? 0 :
       2;
 
-    poly_outline = OUTLINE_NONE;
+    poly_outline = OUTLINE_DEFAULT;
 
     int sl = snakelevel(c);
     
@@ -4307,7 +4358,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       shmup::drawMonster(V, c, Vboat, Vboat0, zlev);
       }
 
-    poly_outline = (backcolor << 8) + 0xFF;
+    poly_outline = OUTLINE_DEFAULT;
 
     if(!wmascii) {
     
@@ -4631,10 +4682,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         int labeli = mapeditor::displaycodes == 1 ? mapeditor::realpattern(c) : mapeditor::subpattern(c);
         
         string label = its(labeli);
-        if(svg::in)
-          queuestr(V, .5, label, 0xFF000000);
-        else
-          queuestr(V, .2, label, 0xFFFFFFFF);
+        queuestr(V, .5, label, 0xFF000000 + forecolor);
         
         /* transmatrix V2 = V * applyPatterndir(c);
         qfloor(c, V2, shNecro, 0x80808080);
@@ -4938,7 +4986,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         else {
           queuepoly(V, shMirror, darkena(wcol, 0, 0xC0));
           }
-        poly_outline = OUTLINE_NONE;
+        poly_outline = OUTLINE_DEFAULT;
         }
       
       else if(isFire(c) || isThumper(c) || c->wall == waBonfireOff) {
@@ -5113,35 +5161,10 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
 
          poly_outline = OUTLINE_TRANS;
          queuepoly((*Vdp)*V0*xpush(hexf*-cos(ph0)), shDisk, aircol);
-         poly_outline = OUTLINE_NONE;
+         poly_outline = OUTLINE_DEFAULT;
          }
        }
-
-//    queuepoly(V*ddi(rand() % S84, hexf*(rand()%100)/100), shDisk, aircolor(airdir));
       }
-
-    /* int rd = rosedist(c);
-    if(rd > 0 && ((rd&7) == (turncount&7))) {
-
-     for(int i=0; i<c->type; i++) {
-       cell *c2 = c->mov[i]; 
-       if(rosedist(c2) == rosedist(c)-1) {
-         int hdir = displaydir(c, i);
-         transmatrix V0 = spin((S42+hdir) * M_PI / S42);
-         
-         double ph = ticks / 75.0; // + airdir * M_PI / (S21+.0);
-         
-         int rosecol = 0x764e7c00 | int(32 + 32 * -cos(ph));
-         
-         double ph0 = ph/2;
-         ph0 -= floor(ph0/M_PI)*M_PI;
-
-         poly_outline = OUTLINE_TRANS;
-         queuepoly(V*V0*ddi(0, hexf*-cos(ph0)), shDisk, rosecol);
-         poly_outline = OUTLINE_NONE;
-         }
-       }
-      } */
 
     if(c->land == laWhirlwind) {
       whirlwind::calcdirs(c);
@@ -5167,13 +5190,13 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
  
         poly_outline = OUTLINE_TRANS;
         queuepoly((*Vdp)*V0*xpush(ldist*(2*ph1-1)), shDisk, aircol);
-        poly_outline = OUTLINE_NONE;
+        poly_outline = OUTLINE_DEFAULT;
         }
 
       }
 
     if(error) {
-      queuechr(V, 1, ch, asciicol, 2);
+      queuechr(V, 1, ch, darkenedby(asciicol, darken), 2);
       }
     
     if(vid.grid) {
@@ -5286,11 +5309,6 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
     
 #ifndef NOMODEL
     netgen::buildVertexInfo(c, V);
-#endif
-
-#ifdef LOCAL
-    extern void localdraw (const transmatrix& V, cell *c);
-    localdraw(V, c);
 #endif
     }
   }
@@ -5504,7 +5522,7 @@ void drawFlashes() {
     if(f.spd) {
       kill = tim > 300;
       int partcol = darkena(f.color, 0, max(255 - kill/2, 0));
-      poly_outline = OUTLINE_NONE;
+      poly_outline = OUTLINE_DEFAULT;
       queuepoly(V * spin(f.angle) * xpush(f.spd * tim / 50000.), shParticle[f.size], partcol);
       }
     
@@ -5908,13 +5926,13 @@ string generateHelpForLand(eLand l) {
   #define ACCONLY(z) s += XLAT("Accessible only from %the1.\n", z);
   #define ACCONLY2(z,x) s += XLAT("Accessible only from %the1 or %the2.\n", z, x);
   #define ACCONLYF(z) s += XLAT("Accessible only from %the1 (until finished).\n", z);
-  #define TREQ(z) { s += XLAT("Treasure required: %1 $$$.\n", #z); buteol(s, gold(), z); }
-  #define TREQ2(z,x) { s += XLAT("Treasure required: %1 x %2.\n", #z, x); buteol(s, items[x], z); }
+  #define TREQ(z) { s += XLAT("Treasure required: %1 $$$.\n", its(z)); buteol(s, gold(), z); }
+  #define TREQ2(z,x) { s += XLAT("Treasure required: %1 x %2.\n", its(z), x); buteol(s, items[x], z); }
   
   if(l == laMirror || l == laMinefield || l == laPalace ||
     l == laOcean || l == laLivefjord || l == laZebra || l == laWarpCoast || l == laWarpSea ||
     l == laReptile || l == laIvoryTower)
-      TREQ(30)
+      TREQ(R30)
 
   
   if(isCoastal(l)) 
@@ -5935,50 +5953,50 @@ string generateHelpForLand(eLand l) {
   if(l == laDryForest || l == laWineyard || l == laDeadCaves || l == laHive || l == laRedRock ||
     l == laOvergrown || l == laStorms || l == laWhirlwind || l == laRose ||
     l == laCrossroads2 || l == laRlyeh)
-      TREQ(60)
+      TREQ(R60)
     
-  if(l == laReptile) TREQ2(10, itElixir)
-  if(l == laEndorian) TREQ2(10, itIvory)
-  if(l == laKraken) TREQ2(10, itFjord)
-  if(l == laBurial) TREQ2(10, itKraken)
+  if(l == laReptile) TREQ2(U10, itElixir)
+  if(l == laEndorian) TREQ2(U10, itIvory)
+  if(l == laKraken) TREQ2(U10, itFjord)
+  if(l == laBurial) TREQ2(U10, itKraken)
 
-  if(l == laDungeon) TREQ2(5, itIvory)
-  if(l == laDungeon) TREQ2(5, itPalace)
-  if(l == laMountain) TREQ2(5, itIvory)
-  if(l == laMountain) TREQ2(5, itRuby)
+  if(l == laDungeon) TREQ2(U5, itIvory)
+  if(l == laDungeon) TREQ2(U5, itPalace)
+  if(l == laMountain) TREQ2(U5, itIvory)
+  if(l == laMountain) TREQ2(U5, itRuby)
     
-  if(l == laPrairie) TREQ(90)
-  if(l == laBull) TREQ(90)
-  if(l == laCrossroads4) TREQ(200)
-  if(l == laCrossroads5) TREQ(300)
+  if(l == laPrairie) TREQ(R90)
+  if(l == laBull) TREQ(R90)
+  if(l == laCrossroads4) TREQ(R200)
+  if(l == laCrossroads5) TREQ(R300)
   
   if(l == laGraveyard || l == laHive) {
     s += XLAT("Kills required: %1.\n", "100");
-    buteol(s, tkills(), 100);
+    buteol(s, tkills(), R100);
     }
   
   if(l == laDragon) {
     s += XLAT("Different kills required: %1.\n", "20");
-    buteol(s, killtypes(), 20);
+    buteol(s, killtypes(), R20);
     }
   
   if(l == laTortoise) ACCONLY(laDragon)
   if(l == laTortoise) s += XLAT("Find a %1 in %the2.", itBabyTortoise, laDragon);
 
   if(l == laHell || l == laCrossroads3) {
-    s += XLAT("Finished lands required: %1 (collect 10 treasure)\n", "9");
+    s += XLAT("Finished lands required: %1 (collect %2 treasure)\n", "9", its(R10));
     buteol(s, orbsUnlocked(), 9);
     }
   
-  if(l == laCocytus || l == laPower) TREQ2(10, itHell)
-  if(l == laRedRock) TREQ2(10, itSpice)
-  if(l == laOvergrown) TREQ2(10, itRuby)
-  if(l == laClearing) TREQ2(5, itMutant)
-  if(l == laCocytus) TREQ2(10, itDiamond)
-  if(l == laDeadCaves) TREQ2(10, itGold)
-  if(l == laTemple) TREQ2(5, itStatue)
-  if(l == laHaunted) TREQ2(10, itBone)
-  if(l == laCamelot) TREQ2(5, itEmerald)
+  if(l == laCocytus || l == laPower) TREQ2(U10, itHell)
+  if(l == laRedRock) TREQ2(U10, itSpice)
+  if(l == laOvergrown) TREQ2(U10, itRuby)
+  if(l == laClearing) TREQ2(U5, itMutant)
+  if(l == laCocytus) TREQ2(U10, itDiamond)
+  if(l == laDeadCaves) TREQ2(U10, itGold)
+  if(l == laTemple) TREQ2(U5, itStatue)
+  if(l == laHaunted) TREQ2(U10, itBone)
+  if(l == laCamelot) TREQ2(U5, itEmerald)
   if(l == laEmerald) {
     TREQ2(5, itFernFlower) TREQ2(5, itGold)
     s += XLAT("Alternatively: kill a %1 in %the2.\n", moVizier, laPalace);
@@ -6006,7 +6024,7 @@ string generateHelpForLand(eLand l) {
     KILLREQ(moRedTroll, laRedRock);
     }
   
-  if(l == laZebra) TREQ2(10, itFeather)
+  if(l == laZebra) TREQ2(U10, itFeather)
   
   if(l == laCamelot || l == laPrincessQuest)
     s += XLAT("Completing the quest in this land is not necessary for the Hyperstone Quest.");
@@ -6280,29 +6298,21 @@ void describeMouseover() {
     if(isWarped(c)) 
       help += s0 + "\n\n" + warpdesc;
     }
-  else if(cmode == emVisual1) {
-    if(getcstat == 'p') {
-      out = XLAT("0 = Klein model, 1 = Poincaré model");
-      if(vid.alpha < -0.5)
-        out = XLAT("you are looking through it!");
-      if(vid.alpha > 5)
-        out = XLAT("(press 'i' to approach infinity (Gans model)");
-      }
-    else if(getcstat == 'r') {
-      out = XLAT("simply resize the window to change resolution");
-      }
-    /* else if(getcstat == 'f') {
-      out = XLAT("[+] keep the window size, [-] use the screen resolution");
-      } */
-    else if(getcstat == 'a' && vid.sspeed > -4.99)
+  else if(cmode == emGraphConfig) {
+    if(getcstat == 'a' && vid.sspeed > -4.99)
       out = XLAT("+5 = center instantly, -5 = do not center the map");
     else if(getcstat == 'a')
       out = XLAT("press Space or Home to center on the PC");
     else if(getcstat == 'w')
       out = XLAT("also hold Alt during the game to toggle high contrast");
-    else if(getcstat == 'w' || getcstat == 'm')
-      out = XLAT("You can choose one of the several modes");
-    else if(getcstat == 'c')
+    else if(getcstat == 'f')
+      out = XLAT("Reduce the framerate limit to conserve CPU energy");
+    }
+  else if(cmode == emBasicConfig) {
+    /* else if(getcstat == 'f') {
+      out = XLAT("[+] keep the window size, [-] use the screen resolution");
+      } */
+    if(getcstat == 'c')
       out = XLAT("The axes help with keyboard movement");
     else if(getcstat == 'g')
       out = XLAT("Affects looks and grammar");
@@ -6312,17 +6322,13 @@ void describeMouseover() {
 #endif
     else out = "";
     }
-  else if(cmode == emVisual2) {
+  else if(cmode == emDisplayMode) {
     if(getcstat == 'p') {
       if(autojoy) 
         out = XLAT("joystick mode: automatic (release the joystick to move)");
       if(!autojoy) 
         out = XLAT("joystick mode: manual (press a button to move)");
       }
-    else if(getcstat == 'e')
-      out = XLAT("You need special glasses to view the game in 3D");
-    else if(getcstat == 'f')
-      out = XLAT("Reduce the framerate limit to conserve CPU energy");
     }
   else if(cmode == emChangeMode) {
     if(getcstat == 'h')
@@ -6584,6 +6590,10 @@ void drawthemap() {
   rogueviz::drawExtra();
   #endif
 
+#ifdef EXTRA_FRAME
+  extra::frame();
+#endif
+  
   #ifdef TOUR
   if(tour::on) tour::presentation(tour::pmFrame);
   #endif
@@ -6921,6 +6931,11 @@ void calcparam() {
     if(vid.xres >= vid.yres * 5/4-16 && dialog::sidedialog && cmode == emNumber) 
       sidescreen = true;
     if(viewdists && cmode == emNormal && vid.xres > vid.yres) sidescreen = true;
+#ifdef TOUR
+    if(tour::on && (tour::slides[tour::currentslide].flags & tour::SIDESCREEN))
+      sidescreen = true;
+#endif
+
     if(sidescreen) vid.xcenter = vid.yres/2;
     }
   
@@ -7031,14 +7046,14 @@ void showGameover() {
   else {
     if(princess::challenge) 
       dialog::addInfo(XLAT("Follow the Mouse and escape with %the1!", moPrincess));
-    else if(gold() < 30)
-      dialog::addInfo(XLAT("Collect 30 $$$ to access more worlds"));
-    else if(gold() < 60)
-      dialog::addInfo(XLAT("Collect 60 $$$ to access even more lands"));
+    else if(gold() < R30)
+      dialog::addInfo(XLAT("Collect %1 $$$ to access more worlds", its(R30)));
+    else if(gold() < R60)
+      dialog::addInfo(XLAT("Collect %1 $$$ to access even more lands", its(R60)));
     else if(!hellUnlocked())
-      dialog::addInfo(XLAT("Collect at least 10 treasures in each of 9 types to access Hell"));
-    else if(items[itHell] < 10)
-      dialog::addInfo(XLAT("Collect at least 10 Demon Daisies to find the Orbs of Yendor"));
+      dialog::addInfo(XLAT("Collect at least %1 treasures in each of 9 types to access Hell", its(R10)));
+    else if(items[itHell] < R10)
+      dialog::addInfo(XLAT("Collect at least %1 Demon Daisies to find the Orbs of Yendor", its(R10)));
     else if(size(yendor::yi) == 0)
       dialog::addInfo(XLAT("Look for the Orbs of Yendor in Hell or in the Crossroads!"));
     else 
@@ -7056,21 +7071,21 @@ void showGameover() {
 #ifdef TOUR
   else if(tour::on) ;
 #endif
-  else if(tkills() < 100)
-    dialog::addInfo(XLAT("Defeat 100 enemies to access the Graveyard"));
-  else if(kills[moVizier] == 0 && (items[itFernFlower] < 5 || items[itGold] < 5))
+  else if(tkills() < R100)
+    dialog::addInfo(XLAT("Defeat %1 enemies to access the Graveyard", its(R100)));
+  else if(kills[moVizier] == 0 && (items[itFernFlower] < U5 || items[itGold] < U5))
     dialog::addInfo(XLAT("Kill a Vizier in the Palace to access Emerald Mine"));
-  else if(items[itEmerald] < 5)
+  else if(items[itEmerald] < U5)
     dialog::addInfo(XLAT("Collect 5 Emeralds to access Camelot"));
   else if(hellUnlocked() && !chaosmode) {
     bool b = true;
     for(int i=0; i<LAND_HYP; i++)
-      if(b && items[treasureType(land_hyp[i])] < 10) {
+      if(b && items[treasureType(land_hyp[i])] < R10) {
         dialog::addInfo(
           XLAT(
-            land_hyp[i] == laTortoise ? "Hyperstone Quest: collect at least 10 points in %the2" :
-            "Hyperstone Quest: collect at least 10 %1 in %the2", 
-            treasureType(land_hyp[i]), land_hyp[i]));
+            land_hyp[i] == laTortoise ? "Hyperstone Quest: collect at least %3 points in %the2" :
+            "Hyperstone Quest: collect at least %3 %1 in %the2", 
+            treasureType(land_hyp[i]), land_hyp[i], its(R10)));
         b = false;
         }
     if(b) 
@@ -7128,6 +7143,7 @@ void showGameover() {
       dialog::addItem(XLAT("enable/disable texts"), '7');
       dialog::addItem(XLAT("next slide"), SDLK_RETURN);
       dialog::addItem(XLAT("previous slide"), SDLK_BACKSPACE);
+      dialog::addItem(XLAT("list of slides"), '9');
       }
     else
       dialog::addBreak(200);
@@ -7271,6 +7287,8 @@ void setAppropriateOverview() {
     cmode = emTactic;
   else if(yendor::on)
     cmode = emYendor;
+  else if(peace::on)
+    cmode = emPeace;
   else if(geometry != gNormal)
     cmode = emPickEuclidean;
   else 
@@ -7445,6 +7463,10 @@ transmatrix atscreenpos(ld x, ld y, ld size) {
   return V;
   }
 
+bool graphglyph() {
+  return vid.graphglyph == 2 || (vid.graphglyph == 1 && vid.monmode);
+  }
+
 bool displayglyph(int cx, int cy, int buttonsize, char glyph, int color, int qty, int flags, int id) {
     
   bool b =
@@ -7453,9 +7475,8 @@ bool displayglyph(int cx, int cy, int buttonsize, char glyph, int color, int qty
   int glsize = buttonsize;
   if(glyph == '%' || glyph == 'M' || glyph == 'W') glsize = glsize*4/5;
   
-  if(vid.graphglyph) {
-    ptds.clear();
-    poly_outline = OUTLINE_NONE;
+  if(graphglyph()) {
+    initquickqueue();
     if(id >= ittypes) {
       eMonster m = eMonster(id - ittypes);
       int bsize = buttonsize;
@@ -7561,11 +7582,14 @@ void displayglyph2(int cx, int cy, int buttonsize, int i) {
     }
   }
 
+bool nohud, nomenukey;
+
 void drawStats() {
 #ifdef ROGUEVIZ
-  if(rogueviz::on) return;
+  if(rogueviz::on || nohud) return;
 #endif
   if(viewdists && sidescreen) {
+    distcolors[0] = forecolor;
     dialog::init("");
     int qty[64];
     vector<cell*>& ac = currentmap->allcells();
@@ -7587,16 +7611,16 @@ void drawStats() {
     if(geometry == gNormal && !purehepta) {
       dialog::addBreak(200);
       dialog::addHelp("a(d+4) = a(d+3) + a(d+2) + a(d+1) - a(d)");
-      dialog::addInfo("a(d) ~ 1.72208^d", 0xFFFFFF);
+      dialog::addInfo("a(d) ~ 1.72208ᵈ", forecolor);
       }
     if(geometry == gNormal && purehepta) {
       dialog::addBreak(200);
       dialog::addHelp("a(d+2) = 3a(d+1) - a(d+2)");
-      dialog::addInfo("a(d) ~ 2.61803^d", 0xFFFFFF);
+      dialog::addInfo("a(d) ~ 2.61803ᵈ", forecolor);
       }
     if(geometry == gEuclid) {
       dialog::addBreak(300);
-      dialog::addInfo("a(n) = 6n", 0xFFFFFF);
+      dialog::addInfo("a(d) = 6d", forecolor);
       }
     dialog::display();
     }
@@ -7707,7 +7731,7 @@ void drawStats() {
     }
 
   string s0;
-  if(displayButtonS(vid.xres - 8, vid.fsize, "score: " + its(gold()), 0xFFFFFFF, 16, vid.fsize)) {
+  if(displayButtonS(vid.xres - 8, vid.fsize, "score: " + its(gold()), forecolor, 16, vid.fsize)) {
     mouseovers = XLAT("Your total wealth"),
     instat = true,
     getcstat = SDLK_F1,
@@ -7720,7 +7744,7 @@ void drawStats() {
       "Orbs of Yendor are worth 50 $$$ each.\n\n"
       );
     }
-  if(displayButtonS(8, vid.fsize, "kills: " + its(tkills()), 0xFFFFFFF, 0, vid.fsize)) {
+  if(displayButtonS(8, vid.fsize, "kills: " + its(tkills()), forecolor, 0, vid.fsize)) {
     instat = true,
     getcstat = SDLK_F1,
     mouseovers = XLAT("Your total kills")+": " + its(tkills()),
@@ -7754,10 +7778,13 @@ XLAT(
     }
 
   achievement_display();
-#ifdef LOCAL
-  process_local_stats();
+#ifdef EXTRA_STATS
+  extra::stats();
 #endif
   }
+
+int pngres = 2000;
+int pngformat = 0;
 
 #ifndef NOSDL
 
@@ -7768,9 +7795,6 @@ void IMAGESAVE(SDL_Surface *s, const char *fname) {
   SDL_FreeSurface(s2);
   }
 #endif
-
-int pngres = 2000;
-int pngformat = 0;
 
 void saveHighQualityShot(const char *fname, const char *caption, int fade) {
 
@@ -7829,7 +7853,7 @@ void saveHighQualityShot(const char *fname, const char *caption, int fade) {
         }
 
     if(caption)
-      displayfr(vid.xres/2, vid.fsize+vid.fsize/4, 3, vid.fsize*2, caption, 0xFFFFFF, 8);
+      displayfr(vid.xres/2, vid.fsize+vid.fsize/4, 3, vid.fsize*2, caption, forecolor, 8);
 
     char buf[128]; strftime(buf, 128, "bigshota-%y%m%d-%H%M%S" IMAGEEXT, localtime(&timer));
     buf[7] += i;
@@ -7867,6 +7891,8 @@ void ballgeometry() {
   queuereset(pmodel, PPR_CIRCLE);
   }
 
+int ringcolor = darkena(0xFF, 0, 0xFF);
+
 void drawfullmap() {
 
   DEBB(DF_GRAPH, (debugfile,"draw full map\n"));
@@ -7885,8 +7911,7 @@ void drawfullmap() {
       else if(vid.grid) // mark the edge
         rad /= sqrt(vid.alphax*vid.alphax - 1);
       }
-    if(!haveaura()) queuecircle(vid.xcenter, vid.ycenter, rad, 
-      svg::in ? 0x808080FF : darkena(0xFF, 0, 0xFF), 
+    if(!haveaura()) queuecircle(vid.xcenter, vid.ycenter, rad, ringcolor,
       vid.usingGL ? PPR_CIRCLE : PPR_OUTCIRCLE);
     if(pmodel == mdBall) ballgeometry();
     }
@@ -7966,6 +7991,7 @@ void drawscreen() {
   if(cmode != emNormal && cmode != emDraw && cmode != emCustomizeChar) darken = 2;
   if(cmode == emQuit && !canmove) darken = 0;
   if(cmode == emOverview) darken = 16;
+  if(cmode == emOverview && !vid.monmode && !hiliteclick) darken = 4;
   
   if(sidescreen) darken = 0;
 
@@ -7987,6 +8013,8 @@ void drawscreen() {
   else drawfullmap();
 
   if(conformal::includeHistory && cmode != emProgress) conformal::restoreBack();
+
+  poly_outline = OUTLINE_DEFAULT;
   
   lgetcstat = getcstat;
   getcstat = 0; inslider = false;
@@ -8001,8 +8029,8 @@ void drawscreen() {
     if(andmode == 0 && shmup::on) {
       using namespace shmupballs;
       calc();
-      drawCircle(xmove, yb, rad, 0xFFFFFFFF);
-      drawCircle(xmove, yb, rad/2, 0xFFFFFFFF);
+      drawCircle(xmove, yb, rad, OUTLINE_FORE);
+      drawCircle(xmove, yb, rad/2, OUTLINE_FORE);
       drawCircle(xfire, yb, rad, 0xFF0000FF);
       drawCircle(xfire, yb, rad/2, 0xFF0000FF);
       }
@@ -8073,9 +8101,11 @@ void drawscreen() {
     }
 
   #ifndef MOBILE
-  if(cmode == emNormal || cmode == emVisual1 || cmode == emVisual2 || cmode == emChangeMode ) {
+  if(cmode == emNormal || cmode == emBasicConfig || cmode == emGraphConfig || cmode == emDisplayMode || cmode == emChangeMode ) {
+    if(nomenukey)
+      ;
 #ifdef TOUR
-    if(tour::on) 
+    else if(tour::on) 
       displayButton(vid.xres-8, vid.yres-vid.fsize, XLAT("(ESC) tour menu"), SDLK_ESCAPE, 16);
     else
 #endif
@@ -8224,7 +8254,7 @@ void saveConfig() {
     }
   fprintf(f, "%d %d %d %d\n", vid.xres, vid.yres, vid.full, vid.fsize);
   fprintf(f, "%f %f %f %f\n", float(vid.scale), float(vid.eye), float(vid.alpha), float(vid.sspeed));
-  fprintf(f, "%d %d %d %d %d %d %d\n", vid.wallmode, vid.monmode, vid.axes, musicvolume, vid.framelimit, vid.usingGL, vid.usingAA);
+  fprintf(f, "%d %d %d %d %d %d %d\n", vid.wallmode, vid.monmode, vid.axes, musicvolume, vid.framelimit, vid.usingGL, vid.antialias);
   fprintf(f, "%d %d %d %f %d %d\n", vid.joyvalue, vid.joyvalue2, vid.joypanthreshold, float(vid.joypanspeed), autojoy, vid.flashtime);
   
   savecs(f, vid.cs, 0);
@@ -8278,15 +8308,14 @@ void saveConfig() {
     float(vid.ballangle), float(vid.ballproj)
     );
 
-  fprintf(f, "%d %d %d %d\n", vid.mobilecompasssize, vid.aurastr, vid.aurasmoothen, vid.graphglyph);
-
+  fprintf(f, "%d %d %d %d %f\n", vid.mobilecompasssize, vid.aurastr, vid.aurasmoothen, vid.graphglyph, float(vid.linewidth));
   }
     
   fprintf(f, "\n\nThis is a configuration file for HyperRogue (version " VER ")\n");
   fprintf(f, "\n\nThe numbers are:\n");
   fprintf(f, "screen width & height, fullscreen mode (0=windowed, 1=fullscreen), font size\n");
   fprintf(f, "scale, eye distance, parameter, scrolling speed\n");
-  fprintf(f, "wallmode, monster mode, cross mode, music volume, framerate limit, usingGL, usingAA\n");
+  fprintf(f, "wallmode, monster mode, cross mode, music volume, framerate limit, usingGL, antialiasing flags\n");
   fprintf(f, "calibrate first joystick (threshold A, threshold B), calibrate second joystick (pan threshold, pan speed), joy mode\n");
   fprintf(f, "gender (1=female, 16=same gender prince), language, skin color, hair color, sword color, dress color\n");
   fprintf(f, "darken hepta, shift target\n");
@@ -8331,8 +8360,10 @@ void loadConfig() {
     if(err == 4) {
       vid.scale = a; vid.eye = b; vid.alpha = c; vid.sspeed = d;
       }
-    err=fscanf(f, "%d%d%d%d%d%d%d", &vid.wallmode, &vid.monmode, &vid.axes, &musicvolume, &vid.framelimit, &gl, &aa);
-    vid.usingGL = gl; vid.usingAA = aa;
+    err=fscanf(f, "%d%d%d%d%d%d%d", &vid.wallmode, &vid.monmode, &vid.axes, &musicvolume, &vid.framelimit, &gl, &vid.antialias);
+    vid.usingGL = gl;
+    if(vid.antialias == 0) vid.antialias = AA_VERSION | AA_LINES | AA_LINEWIDTH;
+    if(vid.antialias == 1) vid.antialias = AA_NOGL | AA_VERSION | AA_LINES | AA_LINEWIDTH | AA_FONT;
     double jps = vid.joypanspeed;
     err=fscanf(f, "%d%d%d%lf%d%d", &vid.joyvalue, &vid.joyvalue2, &vid.joypanthreshold, &jps, &aa, &vid.flashtime);
     vid.joypanspeed = jps;
@@ -8407,7 +8438,9 @@ void loadConfig() {
     
     readf(f, vid.yshift); readf(f, vid.camera_angle); readf(f, vid.ballangle); readf(f, vid.ballproj);
 
-    err=fscanf(f, "%d%d%d%d\n", &vid.mobilecompasssize, &vid.aurastr, &vid.aurasmoothen, &vid.graphglyph);
+    jps = vid.linewidth;
+    err=fscanf(f, "%d%d%d%d%lf\n", &vid.mobilecompasssize, &vid.aurastr, &vid.aurasmoothen, &vid.graphglyph, &jps);
+    vid.linewidth = jps;
   
     fclose(f);
     DEBB(DF_INIT, (debugfile,"Loaded configuration: %s\n", conffile));
@@ -8452,7 +8485,8 @@ void initgraph() {
   DEBB(DF_INIT, (debugfile,"initgraph\n"));
 
   vid.usingGL = true;
-  vid.usingAA = true;
+  vid.antialias = AA_NOGL | AA_FONT | AA_LINES | AA_LINEWIDTH | AA_VERSION;
+  vid.linewidth = 1;
   vid.flashtime = 8;
   vid.scale = 1;
   vid.alpha = 1;
@@ -8594,10 +8628,6 @@ void panning(hyperpoint hf, hyperpoint ht) {
   playermoved = false;
   }
 
-#ifdef LOCAL
-#include "local.cpp"
-#endif
-
 bool needConfirmation() {
   return canmove && (gold() >= 30 || tkills() >= 50) && !cheater && !quitsaves();
   }
@@ -8647,6 +8677,7 @@ void handleKeyQuit(int sym, int uni) {
   else if(sym == SDLK_F3 || (sym == ' ' || sym == SDLK_HOME)) 
     fullcenter();
   else if(uni == 'o' && DEFAULTNOR(sym)) setAppropriateOverview();
+  else if(uni == 'i' && DEFAULTNOR(sym) && inv::on) cmode = emInventory;
 #ifndef NOSAVE
   else if(uni == 't') {
     if(!canmove) restartGame();
@@ -8663,12 +8694,12 @@ void handleKeyQuit(int sym, int uni) {
   }
 
 #ifdef MOBILE
-#define extra int
+typedef int eventtype;
 #else
-#define extra SDL_Event
+typedef SDL_Event eventtype;
 #endif
 
-void handleKeyNormal(int sym, int uni, extra& ev) {
+void handleKeyNormal(int sym, int uni, eventtype& ev) {
 
   if(cheater) {
     if(applyCheat(uni, mouseover))
@@ -8696,30 +8727,11 @@ void handleKeyNormal(int sym, int uni, extra& ev) {
 #endif
 
   if(uni == sym && DEFAULTNOR(sym)) {
-    if(sym == '1') { 
-      vid.alpha = 999; vid.scale = 998;
-      }
-    if(sym == '2') { 
-      vid.alpha = 1; vid.scale = 0.4;
-      }
-    if(sym == '3') { 
-      vid.alpha = 1; vid.scale = 1;
-      }
-    if(sym == '4') { 
-      vid.alpha = 0; vid.scale = 1;
-      }
-    if(sym == '5') { 
-      vid.wallmode++;
-      if(vid.wallmode == 6) vid.wallmode = 0;
-      }
-    if(sym == '6') {
-      vid.grid = !vid.grid;
-      }
-    if(sym == '7') {
-      vid.darkhepta = !vid.darkhepta;
-      }
+    gmodekeys(sym, uni);
     if(sym == '8') {
       backcolor = backcolor ^ 0xFFFFFF;
+      bordcolor = bordcolor ^ 0xFFFFFF;
+      forecolor = forecolor ^ 0xFFFFFF;
       printf("back = %x\n", backcolor);
       }
     if(sym == '9') {
@@ -8733,10 +8745,6 @@ void handleKeyNormal(int sym, int uni, extra& ev) {
   
   if(DEFAULTCONTROL) {  
     if(sym == '.' || sym == 's') movepcto(-1, 1);
-    if(uni == '%' && sym == '5') { 
-      if(vid.wallmode == 0) vid.wallmode = 6;
-      vid.wallmode--;
-      }
     if((sym == SDLK_DELETE || sym == SDLK_KP_PERIOD || sym == 'g') && uni != 'G' && uni != 'G'-64) 
       movepcto(MD_DROP, 1);
     if(sym == 't' && uni != 'T' && uni != 'T'-64 && canmove && cmode == emNormal) {
@@ -8791,6 +8799,7 @@ void handleKeyNormal(int sym, int uni, extra& ev) {
     }
   
   if(uni == 'o' && DEFAULTNOR(sym)) setAppropriateOverview();
+  if(uni == 'i' && DEFAULTNOR(sym) && inv::on) cmode = emInventory;
   
   if((sym == SDLK_HOME || sym == SDLK_F3 || sym == ' ') && DEFAULTNOR(sym)) 
     fullcenter();
@@ -8803,10 +8812,6 @@ void handleKeyNormal(int sym, int uni, extra& ev) {
 
   if(sym == 'v' && DEFAULTNOR(sym)) {
     cmode = emMenu;
-    }
-
-  if(sym == SDLK_F2) {
-    cmode = emVisual1;
     }
 
 #ifndef NOSDL
@@ -8841,13 +8846,13 @@ void handleKeyNormal(int sym, int uni, extra& ev) {
 #ifdef ROGUEVIZ
   rogueviz::processKey(sym, uni);
 #endif
-
-#ifdef LOCAL
-  process_local0(sym);
-#endif
   }
 
-void handlekey(int sym, int uni, extra& ev) {
+void handlekey(int sym, int uni, eventtype& ev) {
+
+#ifdef EXTRA_HANDLEKEY
+  if(extra::handleKey(sym, uni)) return;
+#endif
 
 #ifdef TOUR
   if(tour::on && tour::handleKeyTour(sym, uni)) return;
@@ -8916,10 +8921,11 @@ void handlekey(int sym, int uni, extra& ev) {
   if(cmode == emNormal) handleKeyNormal(sym, uni, ev);
   else if(cmode == emMenu) handleMenuKey(sym, uni);
   else if(cmode == emCheatMenu) handleCheatMenu(sym, uni);
-  else if(cmode == emVisual1) handleVisual1(sym, uni);
+  else if(cmode == emBasicConfig) handleBasicConfig(sym, uni);
+  else if(cmode == emGraphConfig) handleGraphConfig(sym, uni);
   else if(cmode == emJoyConfig) handleJoystickConfig(sym, uni);
   else if(cmode == emCustomizeChar) handleCustomizeChar(sym, uni);
-  else if(cmode == emVisual2) handleVisual2(sym, uni);
+  else if(cmode == emDisplayMode) handleDisplayMode(sym, uni);
   else if(cmode == emChangeMode) handleChangeMode(sym, uni);
   else if(cmode == emShmupConfig) shmup::handleConfig(sym, uni);
 #ifndef NOMODEL
@@ -8940,6 +8946,11 @@ void handlekey(int sym, int uni, extra& ev) {
 #endif
   else if(cmode == emConformal) conformal::handleKey(sym, uni);
   else if(cmode == emYendor) yendor::handleKey(sym, uni);
+  else if(cmode == emPeace) peace::handleKey(sym, uni);
+#ifdef INV
+  else if(cmode == emInventory) inv::handleKey(sym, uni);
+#endif
+  else if(cmode == emSlideshows) tour::ss::handleKey(sym, uni);
   else if(cmode == emTactic) tactic::handleKey(sym, uni);
   else if(cmode == emOverview) handleOverview(sym, uni);
   else if(cmode == emPickEuclidean) handleEuclidean(sym, uni);
@@ -8977,10 +8988,6 @@ void mainloopiter() {
   #endif
   #endif
 
-#ifdef LOCAL
-  process_local_extra();
-#endif
-  
   optimizeview();
 
   if(conformal::on) conformal::apply();
@@ -8988,7 +8995,7 @@ void mainloopiter() {
   ticks = SDL_GetTicks();
     
   int cframelimit = vid.framelimit;
-  if((cmode == emVisual1 || cmode == emVisual2 || cmode == emHelp || cmode == emQuit ||
+  if((cmode == emBasicConfig || cmode == emGraphConfig || cmode == emDisplayMode || cmode == emHelp || cmode == emQuit ||
     cmode == emCustomizeChar || cmode == emMenu || cmode == emPickEuclidean ||
     cmode == emScores || cmode == emPickScores) && cframelimit > 15)
     cframelimit = 15;
@@ -9294,7 +9301,9 @@ void cleargraph() {
   for(int i=0; i<256; i++) if(font[i]) TTF_CloseFont(font[i]);
 #endif
 #ifndef EXTERNALFONT
+#ifdef GL
   for(int i=0; i<128; i++) if(glfont[i]) delete glfont[i];
+#endif
 #endif
 #ifndef NOSDL
 #ifndef SIMULATE_JOYSTICK
@@ -9327,8 +9336,10 @@ void showMissionScreen() {
 
 void resetGeometry() {
   precalc();
-  fp43.analyze(); 
+  fp43.analyze();
+#ifdef GL
   resetGL();
+#endif
   }
 
 

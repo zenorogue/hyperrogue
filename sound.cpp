@@ -69,9 +69,8 @@ void handlemusic() {
   DEBB(DF_GRAPH, (debugfile,"handle music\n"));
   if(audio && musicvolume) {
     eLand id = getCurrentLandForMusic();
-#ifdef LOCAL
-    extern bool local_changemusic(eLand& id);
-    if(local_changemusic(id)) return;
+#ifdef EXTRA_MUSIC
+    if(extra::changemusic(id)) return;
 #endif
     if(outoffocus) id = eLand(0);
     if(musfname[id] == "LAST") id = cid;
@@ -154,6 +153,7 @@ bool loadMusicInfo(string dir) {
 bool loadMusicInfo() {
   return
     loadMusicInfo(musicfile)
+    || loadMusicInfo(HYPERPATH "hyperrogue-music.txt") 
     || loadMusicInfo("./hyperrogue-music.txt") 
     || loadMusicInfo("music/hyperrogue-music.txt")
 // Destination set by ./configure (in the GitHub repository)
@@ -187,7 +187,7 @@ map<string, Mix_Chunk*> chunks;
 #ifdef SOUNDDESTDIR
 string wheresounds = SOUNDDESTDIR;
 #else
-string wheresounds = "sounds/";
+string wheresounds = HYPERPATH "sounds/";
 #endif
 
 void playSound(cell *c, const string& fname, int vol) {

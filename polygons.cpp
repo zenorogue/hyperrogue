@@ -11,6 +11,8 @@ bool first;
 
 bool fatborder;
 
+int poly_outline;
+
 #define PSHIFT 0
 // #define STLSORT
 
@@ -25,6 +27,10 @@ struct hpcshape {
 
 hpcshape *last = NULL;
 
+#ifndef GL
+typedef float GLfloat;
+#endif
+
 struct qpoly {
       transmatrix V;
       GLfloat *tab;
@@ -36,9 +42,10 @@ struct qpoly {
 struct qline {
       hyperpoint H1, H2;
       int prf;
+      double width;
       };
       
-#define MAXQCHR 16
+#define MAXQCHR 40
 
 struct qchr {
       char str[MAXQCHR];
@@ -122,17 +129,17 @@ SDL_Surface *aux;
 
 vector<polytodraw*> ptds2;
 
+#define POLYMAX 60000
+
 #ifdef GL
 #define USEPOLY
 
 GLuint shapebuffer;
 
-#define POLYMAX 60000
 GLfloat glcoords[POLYMAX][3];
 int qglcoords;
 
 extern void glcolor(int color);
-#endif
 
 GLfloat *currentvertices;
 
@@ -142,7 +149,25 @@ void activateVertexArray(GLfloat *f, int qty) {
   glVertexPointer(3, GL_FLOAT, 0, f);
   }
 
+extern GLfloat *ourshape;
 
+void activateShapes() {
+  if(currentvertices != ourshape) {
+    activateVertexArray(ourshape, qhpc);
+    }
+  }
+
+void activateGlcoords() {
+  activateVertexArray(glcoords[0], qglcoords);
+  }
+#endif
+
+#ifdef GFX
+#define POLYMAX 60000
+#define USEPOLY
+#endif
+
+#ifdef USEPOLY
 GLfloat *ourshape = NULL;
 
 void initPolyForGL() {
@@ -158,24 +183,11 @@ void initPolyForGL() {
     ourshape[id++] = hpc[i][1];
     ourshape[id++] = hpc[i][2];
     }
-  
+
+#ifdef GL  
   currentvertices = NULL;
+#endif
   }
-
-void activateShapes() {
-  if(currentvertices != ourshape) {
-    activateVertexArray(ourshape, qhpc);
-    }
-  }
-
-void activateGlcoords() {
-  activateVertexArray(glcoords[0], qglcoords);
-  }
-
-
-#ifdef GFX
-#define POLYMAX 60000
-#define USEPOLY
 #endif
 
 int polyi;
@@ -189,6 +201,7 @@ hyperpoint gltopoint(GLfloat t[3]) {
   }
 
 void addpoint(const hyperpoint& H) {
+#ifdef GL
   if(vid.usingGL) {
     if(polyi >= POLYMAX) return;
     if(pmodel) {
@@ -211,6 +224,9 @@ void addpoint(const hyperpoint& H) {
       }
     qglcoords++;
     }
+#else
+  if(0) {}
+#endif
   else {
     if(polyi >= POLYMAX) return;
     hyperpoint Hscr;
@@ -256,6 +272,7 @@ void filledPolygonColorI(SDL_Surface *s, int* polyx, int *polyy, int polyi, int 
   }
 #endif
 
+#ifdef GL
 void glcolor2(int color) {
   unsigned char *c = (unsigned char*) (&color);
   glColor4f(c[3] / 255.0, c[2] / 255.0, c[1]/255.0, c[0] / 255.0);
@@ -339,7 +356,22 @@ void gldraw(int useV, const transmatrix& V, int ps, int pq, int col, int outline
     if(useV) glPopMatrix();
     }
   }
+#endif
 
+double linewidthat(const hyperpoint& h) {
+  if(vid.antialias & AA_LINEWIDTH) {
+    double dz = h[2];
+    if(dz < 1 || abs(dz-vid.scrdist) < 1e-6) return vid.linewidth;
+    else {
+      double dx = sqrt(dz * dz - 1);
+      double dfc = dx/(dz+1);
+      dfc = 1 - dfc*dfc;
+      return dfc * vid.linewidth;
+      }
+    }
+  return vid.linewidth;
+  }
+  
 void drawpolyline(const transmatrix& V, GLfloat* tab, int cnt, int col, int outline) {
 #ifdef GL
   if(vid.usingGL) {
@@ -347,7 +379,8 @@ void drawpolyline(const transmatrix& V, GLfloat* tab, int cnt, int col, int outl
       const int pq = cnt;
       if(currentvertices != tab)
         activateVertexArray(tab, pq);
-      const int ps=0;
+      const int ps=0;      
+      glLineWidth(linewidthat(tC0(V)));
       gldraw(1, V, ps, pq, col, outline);    
       }
     else {
@@ -388,7 +421,7 @@ void drawpolyline(const transmatrix& V, GLfloat* tab, int cnt, int col, int outl
   filledPolygonColorI(s, polyx, polyy, polyi, col);
   if(vid.goteyes) filledPolygonColorI(aux, polyxr, polyy, polyi, col);
   
-  (vid.usingAA?aapolylineColor:polylineColor)(s, polyx, polyy, polyi, outline);
+  ((vid.antialias & AA_NOGL) ?aapolylineColor:polylineColor)(s, polyx, polyy, polyi, outline);
   if(vid.goteyes) aapolylineColor(aux, polyxr, polyy, polyi, outline);
   
   if(vid.xres >= 2000 || fatborder) {
@@ -448,6 +481,7 @@ void drawqueueitem(polytodraw& ptd) {
     drawpolyline(ptd.u.poly.V, ptd.u.poly.tab, ptd.u.poly.cnt, ptd.col, ptd.u.poly.outline);
     }
   else if(ptd.kind == pkLine) {
+    dynamicval<ld> d(vid.linewidth, ptd.u.line.width); 
     prettyline(ptd.u.line.H1, ptd.u.line.H2, ptd.col, ptd.u.line.prf);
     }
   else if(ptd.kind == pkString) {
@@ -456,13 +490,8 @@ void drawqueueitem(polytodraw& ptd) {
     if(svg::in) 
       svg::text(q.x, q.y, q.size, q.str, q.frame, ptd.col, q.align);
     else {
-      if(q.frame) {
-        displaystr(q.x-q.frame, q.y, q.shift, q.size, q.str, 0, q.align);
-        displaystr(q.x+q.frame, q.y, q.shift, q.size, q.str, 0, q.align);
-        displaystr(q.x, q.y-q.frame, q.shift, q.size, q.str, 0, q.align);
-        displaystr(q.x, q.y+q.frame, q.shift, q.size, q.str, 0, q.align);
-        }
-      displaystr(q.x, q.y, q.shift, q.size, q.str, ptd.col, q.align);
+      int fr = q.frame & 255;
+      displayfrSP(q.x, q.y, q.shift, fr, q.size, q.str, ptd.col, q.align, q.frame >> 8);
       }
 #else
     displayfr(q.x, q.y, q.frame, q.size, q.str, ptd.col, q.align);
@@ -489,6 +518,12 @@ void drawqueueitem(polytodraw& ptd) {
       }
     SDL_UnlockSurface(aux);
     }
+#endif
+  }
+
+void initquickqueue() {
+  ptds.clear();
+  poly_outline = OUTLINE_NONE;
   }
 
 void quickqueue() {
@@ -565,13 +600,13 @@ void drawqueue() {
     drawqueueitem(ptd);
     }
 
+#ifdef GL
   if(vid.goteyes && vid.usingGL) selectEyeGL(0), selectEyeMask(0);
-
-#endif
 #endif
 
   setcameraangle(false);
   curvedata.clear(); curvestart = 0;
+#endif
   }
 
 hpcshape 
@@ -1574,8 +1609,6 @@ void initShape(int sg, int id) {
     }
   }
 
-int poly_outline;
-
 unsigned char& part(int& col, int i) {
   unsigned char* c = (unsigned char*) &col; return c[i];
   }
@@ -1698,6 +1731,7 @@ void queueline(const hyperpoint& H1, const hyperpoint& H2, int col, int prf = 0,
   ptd.u.line.H1 = H1;
   ptd.u.line.H2 = H2;
   ptd.u.line.prf = prf;
+  ptd.u.line.width = (linewidthat(H1) + linewidthat(H2)) / 2;
   ptd.col = (darkened(col >> 8) << 8) + (col & 0xFF);
   ptd.prio = prio << PSHIFT;
   }
@@ -1713,7 +1747,7 @@ void queuestr(int x, int y, int shift, int size, string str, int col, int frame 
   ptd.u.chr.shift = shift;
   ptd.u.chr.size = size;
   ptd.col = darkened(col);
-  ptd.u.chr.frame = frame;
+  ptd.u.chr.frame = frame ? (poly_outline & ~ 255) : 0;
   ptd.prio = PPR_TEXT << PSHIFT;
   }
 
@@ -1728,7 +1762,7 @@ void queuechr(int x, int y, int shift, int size, char chr, int col, int frame = 
   ptd.u.chr.size = size;
   ptd.u.chr.align = align;
   ptd.col = col;
-  ptd.u.chr.frame = frame;
+  ptd.u.chr.frame = frame ? (poly_outline & ~ 255) : 0;
   ptd.prio = PPR_TEXT << PSHIFT;
   }
 
@@ -1912,6 +1946,7 @@ namespace svg {
     dynamicval<videopar> v(vid, vid);
     dynamicval<bool> v2(in, true);
     dynamicval<int> v4(cheater, 0);
+    dynamicval<int> v5(ringcolor, 0x808080FF);
     
     vid.usingGL = false;
     vid.xres = vid.yres = svgsize ? svgsize : min(1 << (sightrange+7), 16384);

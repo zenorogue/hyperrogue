@@ -34,7 +34,8 @@ void tsetspin(uint32_t& t, int d, int spin) {
 
 struct heptagon {
   // automaton state
-  hstate s : 8;
+  hstate s : 6;
+  int dm4: 2;
   // we are spin[i]-th neighbor of move[i]
   uint32_t spintable;
   int spin(int d) { return tspin(spintable, d); }
@@ -126,6 +127,7 @@ heptagon *buildHeptagon(heptagon *parent, int d, hstate s, int pard = 0) {
 //generateEmeraldval(parent);
 //generateEmeraldval(h);
   if(pard == 0) {
+    h->dm4 = parent->dm4+1;
     if(purehepta) h->distance = parent->distance + 1;
     else if(parent->s == hsOrigin) h->distance = 2;
     else if(h->spin(0) == 5) 
@@ -134,7 +136,10 @@ heptagon *buildHeptagon(heptagon *parent, int d, hstate s, int pard = 0) {
       h->distance = createStep(h->move[0], (h->spin(0)+2)%7)->distance + 3;
     else h->distance = parent->distance + 2;
     }
-  else h->distance = parent->distance - (purehepta?1:2);
+  else {
+    h->distance = parent->distance - (purehepta?1:2);
+    h->dm4 = parent->dm4-1;
+    }
   return h;
   }
 

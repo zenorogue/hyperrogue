@@ -39,21 +39,21 @@ dictionary<noun> nouns[NUMLAN];
 
 #include <set>
 
+int utfsize(char c) {
+  unsigned char cu = c;
+  if(cu < 128) return 1;
+  if(cu < 224) return 2;
+  if(cu < 0xE0) return 3;
+  return 4;
+  }
+
 void addutftoset(set<string>& s, string& w) {
   int i = 0;
 //printf("%s\n", w.c_str());
   while(i < size(w)) {
-  
-    if(((signed char)(w[i])) < 0) {
-      string z = w.substr(i, 2);
-//    printf("Insert: %s [%02x%02x]\n", z.c_str(), w[i], w[i+1]);
-      s.insert(w.substr(i, 2));
-      i += 2;
-      }
-    else {
-      s.insert(w.substr(i, 1));
-      i++;
-      }
+    int siz = utfsize(w[i]);
+    s.insert(w.substr(i, siz));
+    i += siz;
     }
   }
 
@@ -143,6 +143,8 @@ int main() {
   plural.insert("Elemental Planes");
   plural.insert("Crossroads IV");
   plural.insert("Kraken Depths");
+  allchars.insert("ᵈ");
+  allchars.insert("δ");
   
 #define S(a,b) d[1].add(a,b); 
 #define N(a,b,c,d,e,f) \
@@ -236,7 +238,7 @@ int main() {
 //printf("ALL:");
   for(set<string>::iterator it = allchars.begin(); it != allchars.end(); it++) {
 //  printf(" \"%s\",", it->c_str());
-    if(size(*it) == 2) { javastring += (*it); vchars.push_back(*it); c++; }
+    if(size(*it) >= 2) { javastring += (*it); vchars.push_back(*it); c++; }
     }
   printf("// DO NOT EDIT -- this file is generated automatically with langen\n");
   printf("\n");

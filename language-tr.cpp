@@ -229,7 +229,7 @@ S("You feel that you have enough treasure to access new lands!", "Yeni diyarlara
 S("Collect more treasures, there are still more lands waiting...", "Daha fazla hazine topla, hâlâ seni bekleyen diyarlar var...")
 S("You feel that the stars are right, and you can access R'Lyeh!", "Yıldızlar sana, R'Lyeh'e ulaşabileceğini söylüyor!")
 S("Kill monsters and collect treasures, and you may get access to Hell...", "Canavarlar öldür, hazineler topla ve belki Cehenneme erişebilirsin...")
-S("To access Hell, collect 10 treasures each of 9 kinds...", "Cehenneme erişmek için her 9 hazine tipinden 10'ar tane toplamalısın...")
+S("To access Hell, collect %1 treasures each of 9 kinds...", "Cehenneme erişmek için her 9 hazine tipinden %1'ar tane toplamalısın...")
 S("Abandon all hope, the gates of Hell are opened!", "Umutlar tükendi, Cehennemin kapıları açıldı!")
 S("And the Orbs of Yendor await!", "Yendorun Küresi seni bekliyor!")
 S("You switch places with %the1.", "%abl1 yer değiştirdin.")
@@ -320,11 +320,11 @@ S("GAME OVER", "OYUN BİTTİ")
 S("Your score: %1", "Puanın: %1")
 S("Enemies killed: %1", "Öldürülen Düşmanlar: %1")
 S("Orbs of Yendor found: %1", "Bulunan Yendor Küresi sayısı: %1")
-S("Collect 30 $$$ to access more worlds", "30 $$$ toplayarak başka dünyalara eriş")
-// S("Collect 60 $$$ to access R'Lyeh and Dry Forest", "60 $$$ toplayarak R'Lyeh ve Kara Ormana eriş.")
-S("Collect at least 10 treasures in each of 9 types to access Hell", "9 hazine çeşidinin hepsinden 10'ar tane toplayarak Cehenneme erişebilirsin.")
+S("Collect %1 $$$ to access more worlds", "%1 $$$ toplayarak başka dünyalara eriş")
+// S("Collect %1 $$$ to access R'Lyeh and Dry Forest", "60 $$$ toplayarak R'Lyeh ve Kara Ormana eriş.")
+S("Collect at least %1 treasures in each of 9 types to access Hell", "9 hazine çeşidinin hepsinden %1'ar tane toplayarak Cehenneme erişebilirsin.")
 S("Collect at least 10 Demon Daisies to find the Orbs of Yendor", "10 Şeytan Papatyası toplayarak Yendorun Kürelerini bulabilirsin.")
-S("Hyperstone Quest: collect at least 10 %1 in %the2", "Aşkıntaş Görevi: %2'de en az 10 hazine topla.")
+S("Hyperstone Quest: collect at least %3 %1 in %the2", "Aşkıntaş Görevi: %2'de en az %3 hazine topla.")
 S("Hyperstone Quest completed!", "Aşkıntaş görevi tamamlandı.")
 S("Look for the Orbs of Yendor in Hell or in the Crossroads!", "Yendorun Küreleri için Cehennemi yahut Arayolları ara!")
 S("Unlock the Orb of Yendor!", "Yendor'un küresinin kilidini aç!")
@@ -921,7 +921,7 @@ S("Periodic Editor", "Periyodik Editör")
 // "In the periodic editor, press 0-4 to switch walls in different ways\n",
 // "Periyodik editörde, duvarları farklı şekillerde seçmek için 0-4'e basın.\n"
 
-S("Collect 60 $$$ to access even more lands", "Daha da fazla diyara ulaşmak için 60 $$$ toplayın.")
+S("Collect %1 $$$ to access even more lands", "Daha da fazla diyara ulaşmak için %1 $$$ toplayın.")
 
 // Emerald Mine
 // ------------
@@ -2382,8 +2382,8 @@ S("Accessible only from %the1 (until finished).\n", "Sadece %a1 erişilebilir. %
 S("Accessible only from %the1 or %the2.\n", "Sadece %a1 veya %a2 erişilebilir.\n")
 
 S("Kills required: %1.\n", "Gereken leşler: %1 $$$.\n")
-S("Finished lands required: %1 (collect 10 treasure)\n",
-  "Gereken bitirilmiş diyarlar: %1 (10 hazine toplananlar)\n")
+S("Finished lands required: %1 (collect %2 treasure)\n",
+  "Gereken bitirilmiş diyarlar: %1 (%2 hazine toplananlar)\n")
 
 S("Treasure required: %1 x %2.\n", "Gereken hazine: %1 tane %2.\n")
 

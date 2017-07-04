@@ -248,7 +248,7 @@ S("You feel that you have enough treasure to access new lands!", "Masz wystarcza
 S("Collect more treasures, there are still more lands waiting...", "Zbieraj skarby, nowe krainy czekają...")
 S("You feel that the stars are right, and you can access R'Lyeh!", "Gwiazdy są na miejscu, R'Lyeh czeka!")
 S("Kill monsters and collect treasures, and you may get access to Hell...", "Zabijaj potwory, zdobywaj skarby, może trafisz do Piekła...")
-S("To access Hell, collect 10 treasures each of 9 kinds...", "By dostać się do Piekła, znajdź po 10 skarbów każdego z 9 rodzajów...")
+S("To access Hell, collect %1 treasures each of 9 kinds...", "By dostać się do Piekła, znajdź po %1 skarbów każdego z 9 rodzajów...")
 S("Abandon all hope, the gates of Hell are opened!", "Porzuć wszelką nadzieję, bramy Piekła są otwarte!")
 S("And the Orbs of Yendor await!", "I sfery Yendoru czekają!")
 S("You switch places with %the1.", "Zamieniasz się miejscami z %abl1.")
@@ -339,10 +339,10 @@ S("GAME OVER", "KONIEC GRY")
 S("Your score: %1", "Twój wynik: %1")
 S("Enemies killed: %1", "Potwory pokonane: %1")
 S("Orbs of Yendor found: %1", "Znalezione Sfery Yendoru: %1")
-S("Collect 30 $$$ to access more worlds", "Znajdź 30 $$$, by iść do nowych krain")
-S("Collect at least 10 treasures in each of 9 types to access Hell", "Znajdź po 10 skarbów w 9 typach, by się dostać do Piekła")
+S("Collect %1 $$$ to access more worlds", "Znajdź %1 $$$, by iść do nowych krain")
+S("Collect at least %1 treasures in each of 9 types to access Hell", "Znajdź po %1 skarbów w 9 typach, by się dostać do Piekła")
 S("Collect at least 10 Demon Daisies to find the Orbs of Yendor", "Znajdź 10 Czarciego Ziela, by znaleźć Sfery Yendoru")
-S("Hyperstone Quest: collect at least 10 %1 in %the2", "Misja alternatywna: znajdź co najmniej 10 skarbów %abl2")
+S("Hyperstone Quest: collect at least %3 %1 in %the2", "Misja alternatywna: znajdź co najmniej %3 skarbów %abl2")
 S("Hyperstone Quest completed!", "Misja alternatywna zakończona!")
 S("Look for the Orbs of Yendor in Hell or in the Crossroads!", "Szukaj Sfer Yendoru w Piekle albo na Skrzyżowaniu!")
 S("Unlock the Orb of Yendor!", "Otwórz Sferę Yendoru!")
@@ -994,7 +994,7 @@ S("Periodic Editor", "Edytor okresowy")
 // also translate this line:
 // "In the periodic editor, press 0-4 to switch walls in different ways\n",
 
-S("Collect 60 $$$ to access even more lands", "Znajdź 60 $$$ by iść do kolejnych krain")
+S("Collect %1 $$$ to access even more lands", "Znajdź %1 $$$ by iść do kolejnych krain")
 
 // Emerald Mine
 // ------------
@@ -2500,8 +2500,8 @@ S("Accessible only from %the1 (until finished).\n", "Kraina dostępna tylko popr
 S("Accessible only from %the1 or %the2.\n", "Kraina dostępna tylko poprzez %a1 i %a2.\n")
 
 S("Kills required: %1.\n", "Wymagani pokonani przeciwnicy: %1.\n")
-S("Finished lands required: %1 (collect 10 treasure)\n",
-  "Wymagane ukończone krainy: %1 (zdobądź 10 skarbów)\n")
+S("Finished lands required: %1 (collect %2 treasure)\n",
+  "Wymagane ukończone krainy: %1 (zdobądź %2 skarbów)\n")
 
 S("Treasure required: %1 x %2.\n", "Wymagane skarby: %1 x %2.\n")
 
@@ -3737,8 +3737,8 @@ S(
 S("%The1 scares %the2 a bit!", "%1 troszkę przestraszy%ł1 %a2!")
 S("%The1 attacks your shell!", "%1 zaatakowa%ł1 Twoją skorupę!")
 
-S("Hyperstone Quest: collect at least 10 points in %the2",
-  "Misja Hiperkamień: zdobądź co najmniej 10 punktów %abl2")
+S("Hyperstone Quest: collect at least %3 points in %the2",
+  "Misja Hiperkamień: zdobądź co najmniej %3 punktów %abl2")
 
 S("animals killed: %1", "zabitych zwierząt: %1")
 S("\n\nTortoises are not monsters! They are just annoyed. They do not count for your total kills.",
@@ -4946,7 +4946,7 @@ N("Tortoise", GEN_M, "Żółw", "Żółwie", "Żółwia", "Żółwiem")
 S("line patterns", "wzory linii")
 S("1 turn", "1 kolejka")
 S("%1 turns", "kolejek: %1")
-S("items/kills mode", "tryb rzeczy/zabić")
+S("inventory/kill mode", "tryb rzeczy/zabić")
 S("images", "obrazki")
 S("letters", "literki")
 S("input", "sterowanie")
@@ -5442,4 +5442,22 @@ S(
 
 #undef Orb
 
+/*
+// for 10.0
 
+S("configure keys/joysticks", "konfiguracja klawiszy/joysticka")
+S("Press F5 or 'o' to try again!", "Naciśnij F5 lub 'o' by spróbować jeszcze raz!")  
+S("peaceful mode", "tryb pokojowy")
+S("inventory mode", "tryb inwentarza")
+S("inventory", "sfery")
+S("mirror what?", "co odbić?")
+S("Which orb to use?", "Której Sfery użyć?")
+S("Unlocked by: %1 in %2", "Odblokwane przez: %1 %abl2")
+S(" (next at %1)", " (kolejny przy %1)")
+S(" (next at %1 to %2)", " (kolejny przy %1 do %2)")
+S("Number of uses left: %1", "Pozostało użyć: %1")
+S("You mirror %the1.", "Odbijasz %a1.")
+S("You need to stand next to a magic mirror or cloud to use %the1.", 
+  "Musisz stać przy magicznym lustrze, by odbić %a1.")
+S("Each orb type can be mirrored only once.", "Każdy typ sfery może być odbity tylko raz.")
+*/

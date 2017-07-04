@@ -265,7 +265,7 @@ S("You feel that you have enough treasure to access new lands!", "Cítíš, že 
 S("Collect more treasures, there are still more lands waiting...", "Sbírej další poklady, další kraje stále čekají...")
 S("You feel that the stars are right, and you can access R'Lyeh!", "Cítíš, že postavení hvězd je správné, a ty můžeš vstoupit do R'Lyeh!")
 S("Kill monsters and collect treasures, and you may get access to Hell...", "Zabíjej netvory a sbírej poklady a možná najdeš cestu do Pekla...")
-S("To access Hell, collect 10 treasures each of 9 kinds...", "Aby ses dostal do Pekla, sesbírej 10 pokladů od každého z 9 různých typů...")
+S("To access Hell, collect %1 treasures each of 9 kinds...", "Aby ses dostal do Pekla, sesbírej %1 pokladů od každého z 9 různých typů...")
 S("Abandon all hope, the gates of Hell are opened!", "Zanech vší naděje, brány Pekla jsou otevřeny!")
 S("And the Orbs of Yendor await!", "A Yendorské sféry čekají!")
 S("You switch places with %the1.", "Vyměni%l0 sis místo s %abl1.")
@@ -367,11 +367,11 @@ S("GAME OVER", "KONEC HRY")
 S("Your score: %1", "Tvé skóre: %1")
 S("Enemies killed: %1", "Zabitých netvorů: %1")
 S("Orbs of Yendor found: %1", "Nalezených Yendorských sfér: %1")
-S("Collect 30 $$$ to access more worlds", "Další kraje zpřístupníš sesbíráním 30 $$$")
-// S("Collect 60 $$$ to access R'Lyeh and Dry Forest", "R'Lyeh a Suchý hvozd zpřístupníš sesbíráním 60 $$$")
-S("Collect at least 10 treasures in each of 9 types to access Hell", "Peklo zpřístupníš sesbíráním 10 pokladů od každého z 9 typů")
+S("Collect %1 $$$ to access more worlds", "Další kraje zpřístupníš sesbíráním %1 $$$")
+// S("Collect %1 $$$ to access R'Lyeh and Dry Forest", "R'Lyeh a Suchý hvozd zpřístupníš sesbíráním %1 $$$")
+S("Collect at least %1 treasures in each of 9 types to access Hell", "Peklo zpřístupníš sesbíráním %1 pokladů od každého z 9 typů")
 S("Collect at least 10 Demon Daisies to find the Orbs of Yendor", "Yendorské sféry zpřístupníš sesbíráním nejméně 10 Čertových kvítek")
-S("Hyperstone Quest: collect at least 10 %1 in %the2", "Hyperkamový úkol: sesbírej nejméně 10 pokladů %abl2")
+S("Hyperstone Quest: collect at least %3 %1 in %the2", "Hyperkamový úkol: sesbírej nejméně %3 pokladů %abl2")
 S("Hyperstone Quest completed!", "Hyperkamový úkol splněn!")
 S("Look for the Orbs of Yendor in Hell or in the Crossroads!", "Hledej Yendorské sféry v Pekle nebo na Křižovatce!")
 S("Unlock the Orb of Yendor!", "Odemkni Yendorskou sféru!")
@@ -1009,7 +1009,7 @@ S("Periodic Editor", "Periodický editor")
 // also translate this line:
 // "Stiskem kláves 0-4 můžete různě přepínat zdi\n",
 
-S("Collect 60 $$$ to access even more lands", "Sesbíráním 60 $$$ získáš přístup do dalších krajů")
+S("Collect %1 $$$ to access even more lands", "Sesbíráním %1 $$$ získáš přístup do dalších krajů")
 
 // Emerald Mine
 // ------------
@@ -2530,8 +2530,8 @@ S("Accessible only from %the1 (until finished).\n", "Tento kraj je dostupný pou
 S("Accessible only from %the1 or %the2.\n", "Tento kraj je dostupný pouze skrz %a1 nebo %a2.\n")
 
 S("Kills required: %1.\n", "Potřebuješ zabít %1 nepřátel.\n")
-S("Finished lands required: %1 (collect 10 treasure)\n",
-  "Potřebuješ dokončit %1 krajů (získat v nich 10 pokladů)\n")
+S("Finished lands required: %1 (collect %2 treasure)\n",
+  "Potřebuješ dokončit %1 krajů (získat v nich %2 pokladů)\n")
 
 S("Treasure required: %1 x %2.\n", "Potřebuješ %1 x %2.\n")
 
@@ -3821,8 +3821,8 @@ S(
 S("%The1 scares %the2 a bit!", "%1 trochu vyleka%l1 %a2!")
 S("%The1 attacks your shell!", "%1 zaútoči%l1 na tvůj krunýř!")
 
-S("Hyperstone Quest: collect at least 10 points in %the2",
-  "Hyperkamový úkol: získej nejméně 10 bodů %abl2")
+S("Hyperstone Quest: collect at least %3 points in %the2",
+  "Hyperkamový úkol: získej nejméně %3 bodů %abl2")
 
 S("animals killed: %1", "zabitých zvířat: %1")
 S("\n\nTortoises are not monsters! They are just annoyed. They do not count for your total kills.",
@@ -5011,7 +5011,7 @@ N("Tortoise", GEN_F, "Želva", "Želvy", "Želva", "Želvou")
 S("line patterns", "vzory čar")
 S("1 turn", "1 kolo")
 S("%1 turns", "kola: %1")
-S("items/kills mode", "mód předmětů/zabitých netvorů")
+S("inventory/kill mode", "mód předmětů/zabitých netvorů")
 S("images", "obrázky")
 S("letters", "písmena")
 S("input", "vstup")

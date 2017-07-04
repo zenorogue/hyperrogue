@@ -687,7 +687,7 @@ bool sharkpassable(cell *w, cell *c) {
 
 bool canPushStatueOn(cell *c) {
   return passable(c, NULL, P_MONSTER) && c->wall != waBoat && !snakelevel(c) &&
-    !isWorm(c->monst) && !isReptile(c->wall);
+    !isWorm(c->monst) && !isReptile(c->wall) && !peace::on;
   }
 
 void moveBoat(cell *to, cell *from) {
@@ -843,6 +843,8 @@ bool canAttack(cell *c1, eMonster m1, cell *c2, eMonster m2, flagtype flags) {
   if((flags & AF_GETPLAYER) && isPlayerOn(c2)) m2 = moPlayer;
   
   if(!m2) return false;
+  
+  if(m2 == moPlayer && peace::on) return false;
   
   if((flags & AF_ONLY_FRIEND) && m2 != moPlayer && !isFriendly(c2)) return false;
   if((flags & AF_ONLY_FBUG)   && m2 != moPlayer && !isFriendlyOrBug(c2)) return false;
@@ -1214,7 +1216,9 @@ int monstersnear2() {
   }
 
 int monstersnear(cell *c, cell *nocount, eMonster who, cell *pushto, cell *comefrom) {
-  
+
+  if(peace::on) return 0; // you are safe
+
   stalemate1 sm(who, c, nocount, pushto, comefrom);
   
   if(who == moPlayer) for(int b=0; b<2; b++) sm.swordlast[b] = sword::pos(multi::cpid, b);
@@ -2055,7 +2059,7 @@ void fightmessage(eMonster victim, eMonster attacker, bool stun, int flags) {
       else
         addMessage(XLAT("You pierce %the1.", victim)); // normal
       }
-    else {
+    else if(!peace::on) {
       playSound(NULL, "hit-sword"+pick123());
       addMessage(XLAT("You kill %the1.", victim)); // normal
       }
@@ -2133,6 +2137,8 @@ bool attackMonster(cell *c, flagtype flags, eMonster killer) {
   else 
     killMonster(c, killer, flags);
 
+  if(peace::on) return false;
+  
   int ntk = tkills();
   int ntkt = killtypes();
     
@@ -2318,6 +2324,8 @@ void calcTidalPhase() {
   tidalphase = tide[
     (shmup::on ? shmup::curtime/600 : turncount)
     % tidalsize];
+  if(peace::on)
+    tidalphase = 5 + tidalphase / 6;
   }
 
 int tidespeed() {
@@ -2587,7 +2595,7 @@ void bfs() {
         c2->cpdist = d+1;
         
         // remove treasures
-        if(c2->item && c2->cpdist == distlimit && itemclass(c2->item) == IC_TREASURE &&
+        if(!peace::on && c2->item && c2->cpdist == distlimit && itemclass(c2->item) == IC_TREASURE &&
           c2->item != itBabyTortoise &&
           (items[c2->item] >= (chaosmode?10:20) + currentLocalTreasure || getGhostcount() >= 2)) {
             c2->item = itNone;
@@ -2914,7 +2922,9 @@ void gainShard(cell *c2, const char *msg) {
   invismove = false;
   }
 
-void playerMoveEffects(cell *c1, cell *c2) {    
+void playerMoveEffects(cell *c1, cell *c2) {
+
+  if(peace::on) items[itOrbSword] = c2->land == laBurial ? 100 : 0;
 
   sword::angle[multi::cpid] = sword::shift(c1, c2, sword::angle[multi::cpid]);
   
@@ -3276,7 +3286,7 @@ int moveval(cell *c1, cell *c2, int d, int mf) {
       else if(isFriendlyOrBug(c2)) return 500;
       else return 2000;
       }
-    if(isPlayerOn(c2)) return 2500;
+    if(isPlayerOn(c2)) return peace::on ? -1700 : 2500;
     else if(isFriendlyOrBug(c2)) return 2000;
     else return 500;
     }
@@ -3338,7 +3348,7 @@ int moveval(cell *c1, cell *c2, int d, int mf) {
   if(m == moRagingBull && c1->mondir != NODIR)
     return 1500 - bulldist(c2);
   
-  if((mf & MF_PATHDIST) && c2->pathdist < c1->pathdist) return 1500; // good move
+  if((mf & MF_PATHDIST) && c2->pathdist < c1->pathdist && !peace::on) return 1500; // good move
   
   // prefer straight direction when wandering
   int dd = angledist(c1, c1->mondir, d);
@@ -3369,6 +3379,8 @@ int stayval(cell *c, flagtype mf) {
   // Vikings move in a roughly straight line even if they cannot detect you
   if(c->monst == moViking && c->wall == waBoat)
     return 750;
+  // in peaceful, all monsters are wandering
+  if(peace::on && c->monst != moTortoise) return 750;
   if(isWorm(c->monst)) return 550;
   if(c->monst == moRagingBull) return -1690; // worse than to stay in place
   if(c->monst == moBat && batsAfraid(c)) return 575;
@@ -3871,7 +3883,7 @@ void moveivy() {
         raiseBuggyGeneration(c, "wrong mondir!");
       for(int j=0; j<c->type; j++) {
         if(c->mov[j] && canAttack(c, c->monst, c->mov[j], c->mov[j]->monst, AF_ONLY_FRIEND | AF_GETPLAYER)) {
-          if(isPlayerOn(c->mov[j]))
+          if(isPlayerOn(c->mov[j])) 
             killThePlayerAt(c->monst, c->mov[j], 0);
           else {
             if(attackJustStuns(c->mov[j]))
@@ -4033,7 +4045,7 @@ void groupmove(eMonster movtype, flagtype mf) {
       }
     }
   else {
-    for(int i=0; i<size(targets); i++) gendfs.push_back(targets[i]);
+    if(!peace::on) for(int i=0; i<size(targets); i++) gendfs.push_back(targets[i]);
   
     if(invisfish && (movtype == moSlime || movtype == moShark || movtype == moKrakenH)) for(int i=0; i<numplayers(); i++) {
       cell *c = playerpos(i);
@@ -4387,6 +4399,7 @@ void swordAttackStatic() {
   }
 
 void stabbingAttack(cell *mf, cell *mt, eMonster who, int bonuskill) {
+  if(peace::on) return;
   int numsh = 0, numflail = 0, numlance = 0, numslash = 0;
   
   int backdir = neighborId(mt, mf);
@@ -4727,7 +4740,7 @@ void specialMoves() {
     
     eMonster m = c->monst;
     
-    if(m == moSleepBull) {
+    if(m == moSleepBull && !peace::on) {
       bool wakeup = false;
       forCellEx(c2, c) if(c2->monst == moGadfly) {
         addMessage(XLAT("%The1 wakes up %the2.", c2->monst, m));
@@ -4957,6 +4970,17 @@ void moverefresh(bool turn = true) {
           c->monst = moReptile;
           c->hitpoints = 3;
           c->stuntime = 0;
+          int gooddirs[7], qdirs = 0;
+          // in the peace mode, a reptile will
+          // prefer to walk on the ground, rather than the chasm
+          for(int i=0; i<c->type; i++) {
+            int i0 = (i+3) % c->type;
+            int i1 = (i+c->type-3) % c->type;
+            if(c->mov[i0] && passable(c->mov[i0], c, 0)) 
+            if(c->mov[i1] && passable(c->mov[i1], c, 0)) 
+              gooddirs[qdirs++] = i;
+            }
+          if(qdirs) c->mondir = gooddirs[hrand(qdirs)];
           playSound(c, "click");
           }
         }
@@ -5521,7 +5545,8 @@ void gainLife() {
 void collectMessage(cell *c2, eItem which) {
   bool specialmode = 
     yendor::on || tactic::on || princess::challenge || euclid || sphere;
-    
+  
+  if(which == itDodeca && peace::on) return;  
   if(which == itTreat) ;    
   else if(isElementalShard(which)) {
     int tsh = 
@@ -5536,8 +5561,9 @@ void collectMessage(cell *c2, eItem which) {
       addMessage(t);
       }
     }
-  else if(which == itKey)
+  else if(which == itKey) {
     addMessage(XLAT("You have found the Key! Now unlock this Orb of Yendor!"));
+    }
   else if(which == itGreenStone && !items[itGreenStone])
     addMessage(XLAT("This orb is dead..."));
   else if(which == itGreenStone)
@@ -5632,6 +5658,7 @@ bool collectItem(cell *c2, bool telekinesis) {
       princess::forceVizier = true;
     
     if(!cantGetGrimoire(c2, false)) collectMessage(c2, c2->item);
+    if(c2->item == itDodeca) peace::simon::extend();
     }
   
   if(isRevivalOrb(c2->item) && multi::revive_queue.size()) {
@@ -5861,47 +5888,21 @@ bool collectItem(cell *c2, bool telekinesis) {
     playSound(c2, "pickup-orb");
     items[c2->item] += 78;
     }
+  else if(c2->item == itOrbYendor && peace::on) {
+    if(!items[itDodeca]) {
+      addMessage(XLAT("Collect as many Dodecahedra as you can, then return here!"));
+      }
+    else {
+      addMessage(XLAT("Your score: %1", its(items[itDodeca])));
+      peace::simon::restore();
+      }
+    dopickup = false;
+    }
   else if(c2->item == itOrbYendor && yendor::state(c2) != yendor::ysUnlocked) {
     dopickup = false;
     }
-  else if(c2->item == itOrbYendor) {
-    playSound(c2, "tada");
-    items[itOrbShield] += 31;
-    for(int i=0; i<size(yendor::yi); i++)
-      if(yendor::yi[i].path[0] == c2) 
-        yendor::yi[i].foundOrb = true;
-    // Shielding always, so that we know that it protects!
-    for(int i=0; i<4; i++) switch(hrand(13)) {
-      case 0: items[itOrbSpeed] += 31; break;
-      case 1: items[itOrbLightning] += 78; break;
-      case 2: items[itOrbFlash] += 78; break;
-      case 3: items[itOrbTime] += 78; break;
-      case 4: items[itOrbWinter] += 151; break;
-      case 5: items[itOrbDigging] += 151; break;
-      case 6: items[itOrbTeleport] += 151; break;
-      case 7: items[itOrbThorns] += 151; break;
-      case 8: items[itOrbInvis] += 151; break;
-      case 9: items[itOrbPsi] += 151; break;
-      case 10: items[itOrbAether] += 151; break;
-      case 11: items[itOrbFire] += 151; break;
-      case 12: items[itOrbSpace] += 78; break;
-      }
-    items[itOrbYendor]++; 
-    items[itKey]--;
-    yendor::everwon = true;
-    if(yendor::on) {
-      yendor::won = true;
-      if(!cheater) {
-        dynamicval<bool> c(chaosmode, false);
-        yendor::bestscore[modecode()][yendor::challenge] = 
-          max(yendor::bestscore[modecode()][yendor::challenge], items[itOrbYendor]);
-        yendor::uploadScore();        
-        }
-      }
-    addMessage(XLAT("CONGRATULATIONS!"));
-    achievement_collection(itOrbYendor, pg, gold());
-    achievement_victory(false);
-    }
+  else if(c2->item == itOrbYendor) 
+    yendor::collected(c2);    
   else if(c2->item == itHolyGrail) {
     playSound(c2, "tada");
     int v = newRoundTableRadius() + 12;
@@ -5993,7 +5994,7 @@ bool collectItem(cell *c2, bool telekinesis) {
     if(pg < 75 && g2 >= 75)
       addMessage(XLAT("Kill monsters and collect treasures, and you may get access to Hell..."));
     if(pg < 90 && g2 >= 90) 
-      addMessage(XLAT("To access Hell, collect 10 treasures each of 9 kinds..."));
+      addMessage(XLAT("To access Hell, collect %1 treasures each of 9 kinds...", its(R10)));
     if(hellUnlocked() && !lhu) {
       addMessage(XLAT("Abandon all hope, the gates of Hell are opened!"));
       addMessage(XLAT("And the Orbs of Yendor await!"));
@@ -6467,6 +6468,7 @@ bool movepcto(int d, int subdir, bool checkonly) {
 
   if(d >= 0) {
     cell *c2 = cwt.c->mov[d];
+    bool goodTortoise = c2->monst == moTortoise && tortoise::seek() && !tortoise::diff(tortoise::getb(c2)) && !c2->item;
 
     if(againstRose(cwt.c, c2) && !scentResistant()) {
       if(checkonly) return false;
@@ -6652,7 +6654,8 @@ bool movepcto(int d, int subdir, bool checkonly) {
       knightFlavorMessage(c2);
       return false;
       }
-    else if(c2->monst && (!isFriendly(c2) || c2->monst == moTameBomberbird || isMountable(c2->monst))) {
+    else if(c2->monst && (!isFriendly(c2) || c2->monst == moTameBomberbird || isMountable(c2->monst))
+      && !(peace::on && !isMultitile(c2->monst) && !goodTortoise)) {
     
       bool fast = !((!items[itOrbSpeed]) || (items[itOrbSpeed]&1));
       
@@ -6731,7 +6734,7 @@ bool movepcto(int d, int subdir, bool checkonly) {
           !c2->item);
         } */
       
-      if(c2->monst == moTortoise && tortoise::seek() && !tortoise::diff(tortoise::getb(c2)) && !c2->item) {
+      if(goodTortoise) {
         items[itBabyTortoise] += 4;
         updateHi(itBabyTortoise, items[itBabyTortoise]);
         c2->item = itBabyTortoise;
@@ -6792,7 +6795,7 @@ bool movepcto(int d, int subdir, bool checkonly) {
         addMessage("Are you sure you want to step there?");
         return false;
         }
-      if(c2->item == itOrbYendor && !boatmove && !checkonly && yendor::check(c2)) {
+      if(c2->item == itOrbYendor && !boatmove && !checkonly && !peace::on && yendor::check(c2)) {
         return false;
         }
       if(monstersnear(c2, NULL, moPlayer, NULL, cwt.c)) {
@@ -6888,8 +6891,20 @@ bool movepcto(int d, int subdir, bool checkonly) {
       
       movecost(cwt.c, c2);
 
-      if(c2->monst == moGolem || c2->monst == moIllusion || isPrincess(c2->monst) || c2->monst == moMouse ||
-        c2->monst == moFriendlyGhost) {
+      {
+      bool pushpast = false;
+      pushpast = 
+        c2->monst == moGolem || c2->monst == moIllusion || isPrincess(c2->monst) || c2->monst == moMouse ||
+        c2->monst == moFriendlyGhost;
+      
+      if(peace::on) pushpast |= c2->monst && !isMultitile(c2->monst);
+      
+      if(isMimic(c2->monst)) {
+        addMessage(XLAT("You rejoin %the1.", c2->monst));
+        playSound(c2, "click");
+        killMonster(c2, moNone);
+        }
+      else if(pushpast) {
         bool pswitch = false;
         if(c2->monst == moMouse)
           princess::mouseSqueak(c2);
@@ -6907,11 +6922,7 @@ bool movepcto(int d, int subdir, bool checkonly) {
         c2->monst = moNone;
         switchplaces = true;
         }
-      else if(isMimic(c2->monst)) {
-        addMessage(XLAT("You rejoin %the1.", c2->monst));
-        playSound(c2, "click");
-        killMonster(c2, moNone);
-        }
+      }
       
       mountjump:
       lastmovetype = lmMove; lastmove = cwt.c;
