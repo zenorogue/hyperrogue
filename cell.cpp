@@ -1431,7 +1431,8 @@ int celldistance(cell *c1, cell *c2) {
   
   if(sphere || quotient == 1) {
     celllister cl(c1, 64, 1000, c2);
-    return cl.getdist(c2);
+    for(int i=0; i<size(cl.lst); i++)
+      if(cl.lst[i] == c2) return cl.dists[i];
     }
   
   if(quotient == 2)
