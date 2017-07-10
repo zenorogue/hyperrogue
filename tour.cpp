@@ -72,21 +72,20 @@ void presentation(presmode mode) {
   }
 
 void slidehelp() {
-  if(texts && slides[currentslide].help[0]) {
-    help = 
-      helptitle(XLAT(slides[currentslide].name), 0xFF8000) + 
-      XLAT(slides[currentslide].help);
-    if(cmode != emHelp)  
-      lastmode = cmode;
-    cmode = emHelp; 
-    }
+  if(texts && slides[currentslide].help[0])
+    gotoHelp(
+      help = 
+        helptitle(XLAT(slides[currentslide].name), 0xFF8000) + 
+        XLAT(slides[currentslide].help)
+      );
   }
 
 bool handleKeyTour(int sym, int uni) {
-  bool normode = (cmode == emHelp || cmode == emNormal || cmode == emQuit);
-  if(!normode) return false;
+  if(!tour::on) return false;
+  if(!cmode2) return false;
   int flags = slides[currentslide].flags;
-  if((sym == SDLK_RETURN || sym == SDLK_KP_ENTER) && (cmode != emHelp || (flags & QUICKSKIP))) {
+  if((sym == SDLK_RETURN || sym == SDLK_KP_ENTER) && (cmode2 != smHelp || (flags & QUICKSKIP))) {
+    if(cmode2) popScreen();
     if(geometry || purehepta) { 
       restartGame(0, false); 
       if(!(flags & QUICKGEO)) return true; 
@@ -106,7 +105,7 @@ bool handleKeyTour(int sym, int uni) {
     if(currentslide == 0) { slidehelp(); return true; }
     presentation(pmStop);
     currentslide--;
-    if(cmode == emHelp) slidehelp();
+    if(cmode2 == smHelp) popScreen(), slidehelp();
     presentation(pmStart);
     return true;
     }
@@ -164,7 +163,7 @@ bool handleKeyTour(int sym, int uni) {
     return true;
     }
   if(sym == '4') {
-    cmode = emNormal;
+    popScreenAll();
     if(items[itOrbTeleport]) goto give_aether;
     items[itOrbTeleport] = 1;
     checkmove();
@@ -214,15 +213,15 @@ bool handleKeyTour(int sym, int uni) {
     return true;
     }
   if(sym == '9') {
-    cmode = emSlideshows;
+    pushScreen(ss::showMenu);
     return true;
     }
   return false;
   }
 
 void checkGoodLand(eLand l) {
-  if(!showland(l) && texts) {
-    help = XLAT(
+  if(!showland(l) && texts) 
+    gotoHelp(XLAT(
       "This tutorial is different than most other game tutorials -- "
       "you are not forced to do anything, and you can go wherever you want.\n\n"
       "However, %the1 is not what we are talking about now. "
@@ -230,9 +229,7 @@ void checkGoodLand(eLand l) {
       "get lost there.\n\n"
       "Remember that you can get to the next slide by pressing Enter.",
       l
-      );
-    cmode = emHelp;
-    }
+      ));
   }
 
 namespace ss {
@@ -260,42 +257,38 @@ namespace ss {
     if(size(slideshows) > 1) dialog::addItem(XLAT("change slideshow"), '1');
     dialog::addItem(XLAT("exit menu"), '0');
     dialog::display();
-    }
-
-  void handleKey(int sym, int uni) {
-    if(uni >= 'a' && uni < 'a' + sssize) {
-      if(geometry || purehepta) {
-        restartGame(0, false); 
-        presentation(pmGeometryReset);
+    keyhandler = [] (int sym, int uni) {
+      if(uni >= 'a' && uni < 'a' + sssize) {
+        if(geometry || purehepta) {
+          restartGame(0, false); 
+          presentation(pmGeometryReset);
+          }
+        if(slides != wts) {
+          while(tour::on) restartGame('T', false);
+          slides = wts;
+          tour::start();
+          }
+        presentation(pmStop);
+        currentslide = uni - 'a';
+        popScreenAll();
+        presentation(pmStart);
+        slidehelp();
         }
-      if(slides != wts) {
-        while(tour::on) restartGame('T', false);
-        slides = wts;
-        tour::start();
+      else if(uni == '1') {
+        list(wts);
+        for(int i=0; i<size(slideshows)-1; i++) if(slideshows[i] == wts) {
+          wts = slideshows[i+1]; return;
+          }
+        wts = slideshows[0];
         }
-      presentation(pmStop);
-      currentslide = uni - 'a';
-      cmode = emNormal;
-      presentation(pmStart);
-      slidehelp();
-      }
-    else if(uni == '1') {
-      list(wts);
-      for(int i=0; i<size(slideshows)-1; i++) if(slideshows[i] == wts) {
-        wts = slideshows[i+1]; return;
-        }
-      wts = slideshows[0];
-      }
-    else if(doexiton(sym, uni)) { wts = NULL; cmode = emNormal; }
+      else if(doexiton(sym, uni)) { wts = NULL; popScreen(); }
+      };
     }
 
   }
   
 void start() {
   ss::list(default_slides);
-#ifdef ROGUEVIZ
-  ss::list(rogueviz::rvtour::rvslides);
-#endif
   currentslide = 0;
   vid.scale = 1;
   vid.alpha = 1;
@@ -759,5 +752,9 @@ slide default_slides[] = {
   };
 
 slide *slides = default_slides;
+
+auto a1 = addHook(hooks_frame, 100, [] () { if(tour::on) tour::presentation(tour::pmFrame); });
+auto a2 = addHook(hooks_handleKey, 100, handleKeyTour);
+auto a3 = addHook(hooks_nextland, 100, [] (eLand l) { return tour::on ? getNext(l) : laNone; });
 
 }

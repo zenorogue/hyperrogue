@@ -386,7 +386,53 @@ namespace dialog {
   
   int colorp = 0;
   
-  void drawColorDialog(int color) {
+  int *colorPointer;
+  
+  bool handleKeyColor(int sym, int uni) {
+    int& color = *colorPointer;
+
+    if(uni >= 'A' && uni <= 'D') {
+      int x = (mousex - vid.xres/4) * 510 / vid.xres;
+      if(x < 0) x = 0;
+      if(x > 255) x = 255;
+      unsigned char* pts = (unsigned char*) &color;
+      pts[uni - 'A'] = x;
+      }
+    else if(uni == ' ') {
+      bool inHistory = false;
+      for(int i=0; i<10; i++) if(colorhistory[i] == (unsigned) color)
+        inHistory = true;
+      if(!inHistory) { colorhistory[lch] = color; lch++; lch %= 10; }
+      popScreen();
+      }
+    else if(uni >= '0' && uni <= '9') {
+      color = colorhistory[uni - '0'];
+      }
+    else if(palette && uni >= 'a' && uni < 'a'+(int) palette[0]) {
+      color = palette[1 + uni - 'a'];
+      }
+    else if(sym == SDLK_DOWN || sym == SDLK_KP2) {
+      colorp = (colorp-1) & 3;
+      }
+    else if(sym == SDLK_UP || sym == SDLK_KP8) {
+      colorp = (colorp+1) & 3;
+      }
+    else if(sym == SDLK_LEFT || sym == SDLK_KP4) {
+      unsigned char* pts = (unsigned char*) &color;
+      pts[colorp] -= abs(shiftmul) < .6 ? 1 : 17;
+      }
+    else if(sym == SDLK_RIGHT || sym == SDLK_KP6) {
+      unsigned char* pts = (unsigned char*) &color;
+      pts[colorp] += abs(shiftmul) < .6 ? 1 : 17;
+      }
+    else if(doexiton(sym, uni)) 
+      popScreen();
+    return false;
+    }
+  
+  void drawColorDialog() {
+    int color = *colorPointer;
+    
     int ash = 8;
     
     for(int j=0; j<10; j++) {
@@ -427,60 +473,13 @@ namespace dialog {
       }
     
     displayColorButton(vid.xres/2, vid.yres/2+vid.fsize * 6, XLAT("select this color") + " : " + itsh(color), ' ', 8, 0, color >> ash);
+    
+    keyhandler = handleKeyColor;
     }
-  
-  // 0: nothing happened, 1: color accepted, 2: break
-  int handleKeyColor(int sym, int uni, int& color) {
-
-    if(uni >= 'A' && uni <= 'D') {
-      int x = (mousex - vid.xres/4) * 510 / vid.xres;
-      if(x < 0) x = 0;
-      if(x > 255) x = 255;
-      unsigned char* pts = (unsigned char*) &color;
-      pts[uni - 'A'] = x;
-      }
-    else if(uni == ' ') {
-      bool inHistory = false;
-      for(int i=0; i<10; i++) if(colorhistory[i] == (unsigned) color)
-        inHistory = true;
-      if(!inHistory) { colorhistory[lch] = color; lch++; lch %= 10; }
-      return 1;
-      }
-    else if(uni >= '0' && uni <= '9') {
-      color = colorhistory[uni - '0'];
-      }
-    else if(palette && uni >= 'a' && uni < 'a'+(int) palette[0]) {
-      color = palette[1 + uni - 'a'];
-      }
-    else if(sym == SDLK_DOWN || sym == SDLK_KP2) {
-      colorp = (colorp-1) & 3;
-      }
-    else if(sym == SDLK_UP || sym == SDLK_KP8) {
-      colorp = (colorp+1) & 3;
-      }
-    else if(sym == SDLK_LEFT || sym == SDLK_KP4) {
-      unsigned char* pts = (unsigned char*) &color;
-      pts[colorp] -= abs(shiftmul) < .6 ? 1 : 17;
-      }
-    else if(sym == SDLK_RIGHT || sym == SDLK_KP6) {
-      unsigned char* pts = (unsigned char*) &color;
-      pts[colorp] += abs(shiftmul) < .6 ? 1 : 17;
-      }
-    else if(uni || sym == SDLK_F10) return 2;
-    return 0;
-    }
-  
-  int *colorPointer;
-  emtype lastmode;
   
   void openColorDialog(int& col, unsigned int *pal) {
     colorPointer = &col; palette = pal;
-    lastmode = cmode; cmode = emColor;
-    }
-  
-  void handleColor(int sym, int uni) {
-    int ret = handleKeyColor(sym, uni, *colorPointer);
-    if(ret) cmode = lastmode;
+    pushScreen(drawColorDialog);
     }
   
   struct numberEditor {
@@ -509,28 +508,6 @@ namespace dialog {
     ne.scale = log;
     ne.inverse_scale = exp;
     ne.positive = true;
-    }
-  
-  void editNumber(ld& x, ld vmin, ld vmax, ld step, ld dft, string title, string help) {
-    ne.editwhat = &x;
-    ne.s = fts(x);
-    ne.vmin = vmin;
-    ne.vmax = vmax;
-    ne.step = step;
-    ne.dft = dft;
-    ne.title = title;
-    ne.help = help;
-    lastmode = cmode; cmode = emNumber;
-    ne.scale = ne.inverse_scale = identity;
-    ne.intval = NULL;
-    ne.positive = false;
-    sidedialog = false;
-    }
-
-  void editNumber(int& x, int vmin, int vmax, int step, int dft, string title, string help) {
-    editNumber(ne.intbuf, vmin, vmax, step, dft, title, help);
-    ne.intbuf = x; ne.intval = &x; ne.s = its(x);
-    sidedialog = true;
     }
   
   string disp(ld x) { if(ne.intval) return its((int) (x+.5)); else return fts(x); }
@@ -603,14 +580,14 @@ namespace dialog {
     if(ne.intval == &polygonal::coefid && polygonal::coefid < 0) 
       *ne.editwhat = *ne.intval = 0, affect('v');
       
-    if(ne.intval == &polygonal::coefid && polygonal::coefid >= MSI) 
-      *ne.editwhat = *ne.intval = MSI-1, affect('v');
+    if(ne.intval == &polygonal::coefid && polygonal::coefid >= polygonal::MSI) 
+      *ne.editwhat = *ne.intval = polygonal::MSI-1, affect('v');
       
     if(ne.intval == &polygonal::deg && polygonal::deg < 0) 
-      *ne.editwhat = *ne.intval = MSI-1, affect('v');
+      *ne.editwhat = *ne.intval = polygonal::MSI-1, affect('v');
       
-    if(ne.intval == &polygonal::deg && polygonal::deg >= MSI) 
-      *ne.editwhat = *ne.intval = MSI-1, affect('v');
+    if(ne.intval == &polygonal::deg && polygonal::deg >= polygonal::MSI) 
+      *ne.editwhat = *ne.intval = polygonal::MSI-1, affect('v');
       
     if(ne.intval == &polygonal::SI) polygonal::solve();
     if(ne.editwhat == &polygonal::STAR) polygonal::solve();
@@ -623,13 +600,15 @@ namespace dialog {
     if(ne.editwhat == &geom3::middetail && geom3::highdetail > geom3::middetail)
       geom3::highdetail = geom3::middetail;
     
-    if(lastmode == em3D) buildpolys();
+    buildpolys();
 #ifdef GL
-    if(lastmode == em3D) resetGL();
+    resetGL();
 #endif
     }
   
   void drawNumberDialog() {
+    gamescreen(sidedialog ? 0 : 2);
+    cmode2 = smNumber;
     init(ne.title);
     addInfo(ne.s);
     addSlider(ne.scale(ne.vmin), ne.scale(*ne.editwhat), ne.scale(ne.vmax), 500);
@@ -644,7 +623,7 @@ namespace dialog {
 
     addBreak(100);
     
-    if(lastmode == em3D) ne.help = explain3D(ne.editwhat);
+    ne.help = explain3D(ne.editwhat);
 
     if(ne.help != "") {
       addHelp(ne.help);
@@ -671,70 +650,68 @@ namespace dialog {
       addBoolItem("finer lines at the boundary", vid.antialias & AA_LINEWIDTH, 'o');
 
     display();
-    }
-  
-  void handleNumber(int sym, int uni) {
-    handleNavigation(sym, uni);
-    if((uni >= '0' && uni <= '9') || (uni == '.' && !ne.intval) || (uni == '-' && !ne.positive)) {
-      ne.s += uni;
-      affect('s');
-      }
-    else if(uni == '\b' || uni == '\t') {
-      ne.s = ne.s. substr(0, size(ne.s)-1);
-      sscanf(ne.s.c_str(), LDF, ne.editwhat);
-      affect('s');
-      }
-#ifndef MOBILE
-    else if(sym == SDLK_RIGHT || sym == SDLK_KP6) {
-      if(ne.intval && abs(shiftmul) < .6)
-        (*ne.editwhat)++;
-      else
-        *ne.editwhat = ne.inverse_scale(ne.scale(*ne.editwhat) + shiftmul * ne.step);
-      affect('v');
-      }
-    else if(sym == SDLK_LEFT || sym == SDLK_KP4) {
-      if(ne.intval && abs(shiftmul) < .6)
-        (*ne.editwhat)--;
-      else
-        *ne.editwhat = ne.inverse_scale(ne.scale(*ne.editwhat) - shiftmul * ne.step);
-      affect('v');
-      }
-#endif
-    else if(sym == SDLK_HOME) {
-      *ne.editwhat = ne.dft;
-      affect('v');
-      }
-    else if(uni == 500) {
-      int sl, sr;
-      if(sidescreen)
-        sl = vid.yres + vid.fsize*2, sr = vid.xres - vid.fsize*2;
-      else
-        sl = vid.xres/4, sr = vid.xres*3/4;
-      ld d = (mousex - sl + .0) / (sr-sl);
-      *ne.editwhat = 
-        ne.inverse_scale(d * (ne.scale(ne.vmax) - ne.scale(ne.vmin)) + ne.scale(ne.vmin));
-      affect('v');
-      }
-    else if(uni == 'o' && ne.editwhat == &ne.intbuf && ne.intval == &sightrange && cheater)
-      overgenerate = !overgenerate;
-    else if(uni == 'o' && ne.editwhat == &vid.linewidth)
-      vid.antialias ^= AA_LINEWIDTH;
-    else if(uni == 'p' && ne.editwhat == &vid.alpha) {
-      *ne.editwhat = 1; vid.scale = 1; ne.s = "1";
-      }
-    else if(uni == 'k' && ne.editwhat == &vid.alpha) {
-      *ne.editwhat = 0; vid.scale = 1; ne.s = "0";
-      }
-    else if((uni == 'i' || uni == 'I' || uni == 'o' || uni == 'O') && ne.editwhat == &vid.alpha) {
-      double d = exp(shiftmul/10);
-      vid.alpha *= d;
-      vid.scale *= d;
-      ne.s = fts(vid.alpha);
-      }
-    else if(doexiton(sym, uni)) {
-      cmode = lastmode;
-      }
-    }
+    
+    keyhandler = [] (int sym, int uni) {
+      handleNavigation(sym, uni);
+      if((uni >= '0' && uni <= '9') || (uni == '.' && !ne.intval) || (uni == '-' && !ne.positive)) {
+        ne.s += uni;
+        affect('s');
+        }
+      else if(uni == '\b' || uni == '\t') {
+        ne.s = ne.s. substr(0, size(ne.s)-1);
+        sscanf(ne.s.c_str(), LDF, ne.editwhat);
+        affect('s');
+        }
+  #ifndef MOBILE
+      else if(sym == SDLK_RIGHT || sym == SDLK_KP6) {
+        if(ne.intval && abs(shiftmul) < .6)
+          (*ne.editwhat)++;
+        else
+          *ne.editwhat = ne.inverse_scale(ne.scale(*ne.editwhat) + shiftmul * ne.step);
+        affect('v');
+        }
+      else if(sym == SDLK_LEFT || sym == SDLK_KP4) {
+        if(ne.intval && abs(shiftmul) < .6)
+          (*ne.editwhat)--;
+        else
+          *ne.editwhat = ne.inverse_scale(ne.scale(*ne.editwhat) - shiftmul * ne.step);
+        affect('v');
+        }
+  #endif
+      else if(sym == SDLK_HOME) {
+        *ne.editwhat = ne.dft;
+        affect('v');
+        }
+      else if(uni == 500) {
+        int sl, sr;
+        if(sidescreen)
+          sl = vid.yres + vid.fsize*2, sr = vid.xres - vid.fsize*2;
+        else
+          sl = vid.xres/4, sr = vid.xres*3/4;
+        ld d = (mousex - sl + .0) / (sr-sl);
+        *ne.editwhat = 
+          ne.inverse_scale(d * (ne.scale(ne.vmax) - ne.scale(ne.vmin)) + ne.scale(ne.vmin));
+        affect('v');
+        }
+      else if(uni == 'o' && ne.editwhat == &ne.intbuf && ne.intval == &sightrange && cheater)
+        overgenerate = !overgenerate;
+      else if(uni == 'o' && ne.editwhat == &vid.linewidth)
+        vid.antialias ^= AA_LINEWIDTH;
+      else if(uni == 'p' && ne.editwhat == &vid.alpha) {
+        *ne.editwhat = 1; vid.scale = 1; ne.s = "1";
+        }
+      else if(uni == 'k' && ne.editwhat == &vid.alpha) {
+        *ne.editwhat = 0; vid.scale = 1; ne.s = "0";
+        }
+      else if((uni == 'i' || uni == 'I' || uni == 'o' || uni == 'O') && ne.editwhat == &vid.alpha) {
+        double d = exp(shiftmul/10);
+        vid.alpha *= d;
+        vid.scale *= d;
+        ne.s = fts(vid.alpha);
+        }
+      else if(doexiton(sym, uni)) popScreen();
+      };
+    }  
 
   int nlpage = 1;
   int wheelshift = 0;
@@ -783,6 +760,28 @@ namespace dialog {
     else if(uni == PSEUDOKEY_WHEELDOWN) wheelshift++;
     else return false;
     return true;
+    }
+  
+  void editNumber(ld& x, ld vmin, ld vmax, ld step, ld dft, string title, string help) {
+    ne.editwhat = &x;
+    ne.s = fts(x);
+    ne.vmin = vmin;
+    ne.vmax = vmax;
+    ne.step = step;
+    ne.dft = dft;
+    ne.title = title;
+    ne.help = help;
+    ne.scale = ne.inverse_scale = identity;
+    ne.intval = NULL;
+    ne.positive = false;
+    sidedialog = false;
+    pushScreen(drawNumberDialog);
+    }
+
+  void editNumber(int& x, int vmin, int vmax, int step, int dft, string title, string help) {
+    editNumber(ne.intbuf, vmin, vmax, step, dft, title, help);
+    ne.intbuf = x; ne.intval = &x; ne.s = its(x);
+    sidedialog = true;
     }
   
   };

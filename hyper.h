@@ -151,6 +151,7 @@ void loadcs(FILE *f, charstyle& cs, int vernum);
 
 namespace multi {
 
+  extern bool shmupcfg;
   void recall();
   extern cell *origpos[MAXPLAYER], *origtarget[MAXPLAYER];
   extern int players;
@@ -178,7 +179,11 @@ namespace multi {
     char hataction[MAXJOY][MAXHAT][4];
     int  deadzoneval[MAXJOY][MAXAXE];
     };
-  
+
+  void saveConfig(FILE *f);
+  void loadConfig(FILE *f);
+  void initConfig();
+   
   charstyle scs[MAXPLAYER];
 
   bool playerActive(int p);
@@ -186,9 +191,11 @@ namespace multi {
   cell *multiPlayerTarget(int i);
   void checklastmove();
   void leaveGame(int i);
+  void showShmupConfig();
   }
 
 namespace shmup {
+  using namespace multi;
   void recall();
   extern bool on;
   extern bool safety;
@@ -217,6 +224,7 @@ namespace shmup {
   void virtualRebase(cell*& base, transmatrix& at, bool tohex);
   void virtualRebase(shmup::monster *m, bool tohex);
   void fixStorage();
+  void addShmupHelp(string& out);
   }
 
 // graph
@@ -227,8 +235,6 @@ void showMissionScreen();
 
 void restartGraph();
 void resetmusic();
-
-void cleargraphmemory();
 
 void drawFlash(cell* c);
 void drawBigFlash(cell* c);
@@ -319,6 +325,7 @@ struct videopar {
   int flashtime;
   
   int wallmode, monmode, axes;
+  bool revcontrol;
 
   // for OpenGL
   float scrdist;
@@ -331,6 +338,7 @@ struct videopar {
   #define AA_POLY      8
   #define AA_LINEWIDTH 16
   #define AA_FONT      32
+  #define AA_MULTI     64
   ld linewidth;
 
   int joyvalue, joyvalue2, joypanthreshold;
@@ -351,30 +359,11 @@ struct videopar {
 
 extern videopar vid;
 
-enum emtype {emNormal, emHelp, 
-  emMenu,
-  emBasicConfig, emGraphConfig, emDisplayMode, 
-  emChangeMode, emCustomizeChar,
-  emQuit, emDraw, emScores, emPickEuclidean, 
-  emPickScores, 
-  emShmupConfig,
-  emMapEditor,
-  emPatternPicker,
-  emOverview,
-  emNetgen,
-  emYendor, emTactic, emRugConfig,
-  emConformal,
-  emProgress,
-  emCheatMenu, emLeader,
-  emJoyConfig,
-  emColor, emNumber,
-  em3D, emRogueviz,
-  emLinepattern,
-  emPeace, emInventory,
-  emSlideshows
-  };
- 
-extern emtype cmode, lastmode;
+extern vector< function<void()> > screens;
+
+template<class T> void pushScreen(T& x) { screens.push_back(x); } 
+inline void popScreen() { screens.pop_back(); }
+inline void popScreenAll() { while(size(screens)>1) popScreen(); }
 
 extern transmatrix View; // current rotation, relative to viewctr
 extern transmatrix cwtV; // player-relative view
@@ -390,26 +379,36 @@ namespace mapeditor {
   extern char whichCanvas;
   extern int displaycodes;
   int generateCanvas(cell *c);
-  void clearModelCells();
   void applyModelcell(cell *c);
   int realpattern(cell *c);
   int patterndir(cell *c, char w = whichPattern);
   int subpattern(cell *c);
   extern cell *drawcell;
   void initdraw(cell *c); 
+  void showMapEditor();
+  void showDrawEditor();
   }
 
 #ifndef NORUG
 namespace rug {
   extern bool rugged;
+  extern bool renderonce;
+  extern bool rendernogl;
+  extern int  texturesize;
+  extern double scale;
+  void show();
   void init();
   void close();
   void actDraw();
+  void select();
   void buildVertexInfo(cell *c, transmatrix V);
   }
 #endif
 
 #define HASLINEVIEW
+#include <complex>
+typedef complex<ld> cld;
+
 namespace conformal {
   extern bool on;
   extern vector<pair<cell*, eMonster> > killhistory;
@@ -417,10 +416,15 @@ namespace conformal {
   extern vector<cell*> movehistory;
   extern bool includeHistory;
   extern int rotation;
+  extern bool autoband;
+  extern bool autobandhistory;
+  extern bool dospiral;
+  extern ld lvspeed;
+  extern int bandsegment;
+  extern int bandhalf;  
   
   void create();
   void clear();
-  void handleKey();
   void show();
   void apply();
   void movetophase();
@@ -428,11 +432,16 @@ namespace conformal {
 
   extern vector<shmup::monster*> v;
   extern double phase;
+  void applyIB();
   }
   
 namespace polygonal {
+  static const int MSI = 120;
   extern int SI;
   extern ld STAR;
+  extern int deg;
+  extern complex<ld> coef[MSI];
+  extern int maxcoef, coefid;
   void solve();
   pair<ld, ld> compute(ld x, ld y);
   }
@@ -805,12 +814,15 @@ namespace dialog {
     int position;
     };
 
+  extern vector<item> items;
+
   item& lastItem();
+  extern unsigned int *palette;
   
   void addSelItem(string body, string value, int key);
   void addBoolItem(string body, bool value, int key);
   void addColorItem(string body, int value, int key);
-  void openColorDialog(int& col, unsigned int *pal);
+  void openColorDialog(int& col, unsigned int *pal = palette);
   void addHelp(string body);
   void addInfo(string body, int color = 0xC0C0C0);
   void addItem(string body, int key);
@@ -820,9 +832,6 @@ namespace dialog {
   void init();
   void init(string title, int color = 0xE8E8E8, int scale = 150, int brk = 60);
   void display();
-
-  void drawColorDialog(int color);
-  int handleKeyColor(int sym, int uni, int& color);
 
   void editNumber(ld& x, ld vmin, ld vmax, ld step, ld dft, string title, string help);
   void editNumber(int& x, int vmin, int vmax, int step, int dft, string title, string help);
@@ -1002,6 +1011,7 @@ extern eGlyphsortorder glyphsortorder;
 namespace rogueviz { 
   extern bool on;
   string describe(shmup::monster *m);
+  void describe(cell *c);
   void activate(shmup::monster *m);
   void drawVertex(const transmatrix &V, cell *c, shmup::monster *m);
   bool virt(shmup::monster *m);
@@ -1011,6 +1021,8 @@ namespace rogueviz {
   int readArgs();
   void close();
   void mark(cell *c);
+  void showMenu();
+  string makehelp();
   }
 #endif
 
@@ -1149,11 +1161,10 @@ namespace tour {
   extern string slidecommand;
   extern int currentslide;
   
-  bool handleKeyTour(int sym, int uni);
-
   enum presmode { 
     pmStartAll = 0,
     pmStart = 1, pmFrame = 2, pmStop = 3, pmKey = 4, pmRestart = 5,
+    pmAfterFrame = 6,
     pmGeometry = 11, pmGeometryReset = 13, pmGeometryStart = 15
     };
 
@@ -1192,7 +1203,6 @@ namespace tour {
 
   namespace ss {
     void showMenu();
-    void handleKey(int sym, int uni);
     void list(slide*);
     }
 
@@ -1218,6 +1228,8 @@ extern bool dronemode;
 
 extern ld whatever;
 
+enum screenmode { smMenu, smNormal, smMission, smHelp, smMap, smDraw, smNumber, smShmupConfig, smOverview };
+
 namespace linepatterns {
 
   enum ePattern {
@@ -1242,6 +1254,7 @@ namespace linepatterns {
   void clearAll();
   void setColor(ePattern id, int col);
   void drawAll();
+  void showMenu();
   };
 
 transmatrix ddspin(cell *c, int d, int bonus = 0);
@@ -1290,3 +1303,145 @@ bool graphglyph();
 extern bool hiliteclick;
 extern int antialiaslines;
 extern int ringcolor;
+
+#include <functional>
+
+template<class T> class hookset : public map<int, function<T>> {};
+typedef hookset<void()> *purehookset;
+
+template<class T, class U> int addHook(hookset<T>*& m, int prio, const U& hook) {
+  if(!m) m = new hookset<T> ();
+  (*m)[prio] = hook;
+  return 0;
+  }
+
+extern purehookset hooks_frame, hooks_stats, clearmemory;
+
+template<class T, class... U> void callhooks(hookset<T> *h, U... args) {
+  if(h) for(auto& p: *h) p.second(args...);
+  }
+
+template<class T, class V, class... U> V callhandlers(V zero, hookset<T> *h, U... args) {
+  if(h) for(auto& p: *h) {
+    auto z = p.second(args...);
+    if(z != zero) return z;
+    }
+  return zero;
+  }
+
+extern hookset<bool(int sym, int uni)> *hooks_handleKey;
+extern hookset<void(cell *c, const transmatrix& V)> *hooks_drawcell;
+extern hookset<bool(int argc, char** argv)> *hooks_main;
+extern hookset<int()> *hooks_args;
+extern hookset<eLand(eLand)> *hooks_nextland;
+
+// hooks to extend HyperRogue with an external program
+// start compilation from another file which defines EXTRA_..., includes
+// hyper.cpp, then defines the necessary functions
+
+extern ld shiftmul;
+void initcs(charstyle &cs);
+charstyle& getcs();
+
+struct msginfo {
+  int stamp;
+  char flashout;
+  char spamtype;
+  int quantity;
+  string msg;
+  };
+
+extern vector<msginfo> msgs;
+void flashMessages();
+
+extern int lightat, safetyat;
+
+int watercolor(int phase);
+bool doHighlight();
+string buildHelpText();
+string buildCredits();
+void setAppropriateOverview();
+bool quitsaves();
+extern bool sidescreen;
+
+static const char* COLORBAR = "###";
+int textwidth(int siz, const string &str);
+#define GLERR(call) glError(call, __FILE__, __LINE__)
+
+extern bool gtouched, mousepressed, mousemoved, actonrelease;
+extern bool inslider;
+
+#ifdef ROGUEVIZ
+#define DOSHMUP (shmup::on || rogueviz::on)
+#else
+#define DOSHMUP shmup::on
+#endif
+
+extern bool outoffocus;
+extern int frames;
+extern transmatrix playerV;
+extern bool didsomething;
+extern void drawStats();
+extern int calcfps();
+extern int distcolors[8];
+
+extern eItem orbToTarget;
+extern eMonster monsterToSummon;
+
+void panning(hyperpoint hf, hyperpoint ht);
+extern transmatrix sphereflip;
+
+void initConfig();
+void loadConfig();
+
+extern bool auraNOGL;
+
+#ifndef NOSDL
+extern void initJoysticks();
+extern int joyx, joyy, panjoyx, panjoyy;
+extern bool autojoy;
+extern movedir joydir;
+extern SDL_Joystick* sticks[8];
+extern int numsticks;
+void closeJoysticks();
+#endif
+
+void preparesort();
+
+#ifdef MOBILE
+#define SHMUPTITLE "shoot'em up mode"
+#else
+#define SHMUPTITLE "shoot'em up and multiplayer"
+#endif
+
+bool dodrawcell(cell *c);
+void drawcell(cell *c, transmatrix V, int spinv, bool mirrored);
+extern double downspin;
+
+extern int frameid;
+extern bool leftclick;
+void clearMemory();
+
+extern function <void(int sym, int uni)> keyhandler;
+void gmodekeys(int sym, int uni);
+
+void switchGL();
+void switchFullscreen();
+extern screenmode cmode2;
+
+void gotoHelp(const string& h);
+void showCustomizeChar();
+void showScores();
+void showPickScores();
+void showCheatMenu();
+void showDisplayMode();
+void showChangeMode();
+void showEuclideanMenu();
+void show3D();
+void gameoverscreen();
+void showJoyConfig();
+
+void gamescreen(int darken);
+void showMission();
+void handleKeyQuit(int sym, int uni);
+void handlePanning(int sym, int uni);

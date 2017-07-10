@@ -659,49 +659,49 @@ namespace netgen {
       
       dialog::display();
       }
-    }
+    
+    keyhandler = [] (int sym, int uni) {
+      dialog::handleNavigation(sym, uni);
   
-  void handleKey(int sym, int uni) {
-    dialog::handleNavigation(sym, uni);
-
-    if(!loaded) { 
-      loadData(); 
       if(!loaded) { 
-        addMessage(XLAT("Failed to load the file 'papermodeldata.txt'"));
-        cmode = emNormal;
+        loadData(); 
+        if(!loaded) { 
+          addMessage(XLAT("Failed to load the file 'papermodeldata.txt'"));
+          popScreen();
+          return;
+          }
+        if(!created) {
+          View = Id;
+          if(centerover) viewctr.h = centerover->master;
+          else viewctr.h = cwt.c->master;
+          playermoved = false;
+          dataFromHR();
+          designNet();
+          created = 1;
+          return;
+          }
+        }
+  
+      if(mode == 2 && uni != 0) {
+        mode = 0;
         return;
         }
-      if(!created) {
+      if(uni == 's') {
         View = Id;
         if(centerover) viewctr.h = centerover->master;
         else viewctr.h = cwt.c->master;
         playermoved = false;
-        dataFromHR();
-        designNet();
-        created = 1;
-        return;
         }
-      }
-
-    if(mode == 2 && uni != 0) {
-      mode = 0;
-      return;
-      }
-    if(uni == 's') {
-      View = Id;
-      if(centerover) viewctr.h = centerover->master;
-      else viewctr.h = cwt.c->master;
-      playermoved = false;
-      }
-    else if(uni == 'c') {
-      createPapermodel();
-      addMessage(XLAT("The paper model created as papermodel-*.bmp"));
-      }
-    else if(uni == 'd') designNet();
-    else if(uni == 't') mode = 2;
-    else if(doexiton(sym, uni))
-      cmode = emNormal;
+      else if(uni == 'c') {
+        createPapermodel();
+        addMessage(XLAT("The paper model created as papermodel-*.bmp"));
+        }
+      else if(uni == 'd') designNet();
+      else if(uni == 't') mode = 2;
+      else if(doexiton(sym, uni))
+        popScreen();
+      };
     }
-    
+  
   }
 #endif

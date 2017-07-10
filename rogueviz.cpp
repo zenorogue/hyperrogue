@@ -955,9 +955,9 @@ string describe(shmup::monster *m) {
   
   sort(alledges.begin(), alledges.end(), edgecmp);
     
-  help = "Edges: ";
+  ::help = "Edges: ";
 
-  if(vd.info) help = (*vd.info) + "\n" + help;
+  if(vd.info) ::help = (*vd.info) + "\n" + help;
 
   for(int j=0; j<size(alledges); j++) {
     edgeinfo *ei = alledges[j];
@@ -1741,37 +1741,37 @@ void showMenu() {
   dialog::addItem(XLAT("exit menu"), 'v');
 
   dialog::display();
-  }
-
-void handleMenu(int sym, int uni) {
-  dialog::handleNavigation(sym, uni);
-  if(uni == 't')
-    dialog::editNumber(sag::temperature, sag::lowtemp, sag::hightemp, 1, 0, XLAT("temperature"), "");
-  else if(uni == 'm') {
-    sag::sagmode = sag::eSagmode( (1+sag::sagmode) % 3 );
-    }
-  else if(uni == 'l') showlabels = !showlabels;
-  else if(uni == 'v') rog3 = !rog3;
-  else if(uni == 'x') specialmark = !specialmark;
-  else if(uni == 'b') backcolor ^= 0xFFFFFF, bordcolor ^= 0xFFFFFF, forecolor ^= 0xFFFFFF;
-  else if(uni == 'g') {
-    dialog::editNumber(ggamma, 0, 5, .01, 0.5, XLAT("gamma value for edges"), "");
-    dialog::sidedialog = true;
-    }
-  else if(uni == 'z') {
-    for(int i=0; i<size(named)-1; i++) if(named[i] == cwt.c)
-      swap(named[i], named[i+1]);
-    if(!size(named) || named[size(named)-1] != cwt.c) named.push_back(cwt.c);
-    printf("named = %d\n", size(named));
-    cmode = emNormal;
-    }
-  else if(kind == kKohonen && kohonen::handleMenu(sym, uni)) ;
-  else if(doexiton(sym, uni)) cmode = emNormal;
+  
+  keyhandler = [] (int sym, int uni) {
+    dialog::handleNavigation(sym, uni);
+    if(uni == 't')
+      dialog::editNumber(sag::temperature, sag::lowtemp, sag::hightemp, 1, 0, XLAT("temperature"), "");
+    else if(uni == 'm') {
+      sag::sagmode = sag::eSagmode( (1+sag::sagmode) % 3 );
+      }
+    else if(uni == 'l') showlabels = !showlabels;
+    else if(uni == 'v') rog3 = !rog3;
+    else if(uni == 'x') specialmark = !specialmark;
+    else if(uni == 'b') backcolor ^= 0xFFFFFF, bordcolor ^= 0xFFFFFF, forecolor ^= 0xFFFFFF;
+    else if(uni == 'g') {
+      dialog::editNumber(ggamma, 0, 5, .01, 0.5, XLAT("gamma value for edges"), "");
+      dialog::sidedialog = true;
+      }
+    else if(uni == 'z') {
+      for(int i=0; i<size(named)-1; i++) if(named[i] == cwt.c)
+        swap(named[i], named[i+1]);
+      if(!size(named) || named[size(named)-1] != cwt.c) named.push_back(cwt.c);
+      printf("named = %d\n", size(named));
+      popScreen();
+      }
+    else if(kind == kKohonen && kohonen::handleMenu(sym, uni)) ;
+    else if(doexiton(sym, uni)) popScreen();
+    };
   }
 
 void processKey(int sym, int uni) { }
 
-string help() {
+string makehelp() {
   string ret = 
     "This is RogueViz, a visualization engine based on HyperRogue.\n\nUse WASD to move, v for menu.\n\n"
     "Read more about RogueViz on : http://roguetemple.com/z/hyper/rogueviz.php\n\n";
@@ -1822,15 +1822,16 @@ template<class T, class T1> function<void(presmode)> roguevizslide_action(char c
   return [c,t,act] (presmode mode) {
     mapeditor::canvasback = 0x101010;
     setCanvas(mode, c);
-    if(mode == 1 || mode == pmGeometryStart) t();
+    if(mode == pmStart || mode == pmGeometryStart) t();
   
-    if(mode == 3 || mode == pmGeometry || mode == pmGeometryReset) {
+    act(mode);
+
+    if(mode == pmStop || mode == pmGeometry || mode == pmGeometryReset) {
       rogueviz::close();
       shmup::clearMonsters();
       if(mode == pmGeometryReset) t();
       }
   
-    act(mode);
     };
   }
 
@@ -1982,5 +1983,12 @@ slide rvslides[] = {
   };
 
 }
+
+auto hooks  = 
+  addHook(hooks_frame, 0, drawExtra) +
+  addHook(hooks_args, 100, readArgs) +
+  addHook(clearmemory, 0, clear) +
+  addHook(hooks_config, 0, [] () { ss::list(rogueviz::rvtour::rvslides); });
+
 
 };

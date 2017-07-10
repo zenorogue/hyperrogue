@@ -387,11 +387,11 @@ else if(args()[0] == '-' && args()[1] == x && args()[2] == '0') { if(curphase ==
   return 0;
   }
 
+hookset<bool(int argc, char** argv)> *hooks_main;
+
 #ifndef NOMAIN
 int main(int argc, char **argv) {
-#ifdef EXTRA_MAIN
-  if(extra::main(argc, argv)) return 0;
-#endif
+  if(callhandlers(false, hooks_main, argc, argv)) return 0;
 #ifndef WEB
   #ifdef LINUX
     moreStack();
@@ -409,25 +409,25 @@ int main(int argc, char **argv) {
 #endif
 
 #ifdef USE_COMMANDLINE
+purehookset hooks_config;
+
+hookset<int()> *hooks_args;
+
 namespace arg {
   int argc; char **argv;
+
+  auto ah = addHook(hooks_args, 0, readCommon);
   
   void read(int phase) { 
     curphase = phase;
-#ifdef EXTRA_CONFIG
-    extra::config();
-#endif
+    callhooks(hooks_config);
     while(argc) {
-      int r;
-      r = readCommon(); if(r == 2) return; if(r == 0) { lshift(); continue; }
-#ifdef EXTRA_ARG
-      r = extra::arg(); if(r == 2) return; if(r == 0) { lshift(); continue; }
-#endif
-#ifdef ROGUEVIZ
-      r = rogueviz::readArgs(); if(r == 2) return; if(r == 0) { lshift(); continue; }
-#endif
+      for(auto& h: *hooks_args) {
+        int r = h.second(); if(r == 2) return; if(r == 0) { lshift(); goto cont; }
+        }
       printf("Unknown option: %s\n", args());
       exit(3);
+      cont: ;
       }
     }
   }

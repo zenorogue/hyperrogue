@@ -1,6 +1,6 @@
-#define VER "9.4n1"
-#define VERNUM 9415
-#define VERNUM_HEX 0x9415
+#define VER "9.4n2"
+#define VERNUM 9416
+#define VERNUM_HEX 0x9416
 
 #define GEN_M 0
 #define GEN_F 1
@@ -276,6 +276,23 @@ const char *loadlevel = NULL;
 #ifdef EXTRA
 #include "extra/extra.cpp"
 #endif
+#include "basegraph.cpp"
+#include "help.cpp"
+#include "config.cpp"
+#include "scores.cpp"
+#include "menus.cpp"
+#ifdef FIXEDSIZE
+#include "nofont.cpp"
+#endif
+#include "shmup.cpp"
+#ifdef ROGUEVIZ
+#include "rogueviz.cpp"
+#endif
+#include "conformal.cpp"
+#include "rug.cpp"
+#include "control.cpp"
+#include "hud.cpp"
+#include "hypgraph.cpp"
 #include "graph.cpp"
 #include "sound.cpp"
 #include "achievement.cpp"
@@ -299,7 +316,6 @@ void initAll() {
   eLand f = firstland;
   
   // initlanguage();
-  cmode = emNormal;
   initgraph();
 #ifndef NOSAVE
   loadsave();
@@ -396,7 +412,7 @@ bool useRangedOrb;
 
 void handleclick(MOBPAR_FORMAL) {
 
-    if(!shmup::on && andmode == 0 && cmode == emNormal && canmove && !useRangedOrb && vid.mobilecompasssize > 0) {
+    if(!shmup::on && andmode == 0 && size(screens) == 1 && canmove && !useRangedOrb && vid.mobilecompasssize > 0) {
       using namespace shmupballs;
       int dx = mousex - xmove;
       int dy = mousey - yb;
@@ -404,7 +420,7 @@ void handleclick(MOBPAR_FORMAL) {
       if(h < rad) {
         if(h < rad*SKIPFAC) movepcto(MD_WAIT);
         else {
-          double d = revcontrol ? -1 : 1;
+          double d = vid.revcontrol ? -1 : 1;
           mouseh = hpxy(dx * d / rad, dy * d / rad);
           mousemovement();
           }
@@ -415,7 +431,7 @@ void handleclick(MOBPAR_FORMAL) {
 
     if(buttonclicked || mouseout()) {
       
-      if(andmode == 0 && getcstat == 'g' && !shmup::on && (cmode == emNormal || cmode == emQuit)) {
+      if(andmode == 0 && getcstat == 'g' && !shmup::on && size(screens) == 1) {
         movepcto(MD_DROP);
         getcstat = 0;
         }
@@ -424,7 +440,7 @@ void handleclick(MOBPAR_FORMAL) {
         int px = mousex < vid.xcenter ? 0 : 1;
         int py = mousey < vid.ycenter ? 0 : 1;
         
-        if(cmode == (canmove ? emNormal : emQuit)) {
+        if(size(screens) == 1) {
           if(px == 0 && py == 1) {
             if(andmode == 0 && shmup::on) ; 
             else andmode = 10;
@@ -456,7 +472,7 @@ void handleclick(MOBPAR_FORMAL) {
         }
       }
     
-    if(andmode == 0 && cmode == (canmove ? emNormal : emQuit) && !mouseout()) {
+    if(andmode == 0 && size(screens) == 1 && !mouseout()) {
 
       bool forcetarget = longclick;
       
@@ -499,7 +515,7 @@ void mobile_draw(MOBPAR_FORMAL) {
   if(playermoved && vid.sspeed > -4.99)
     centerpc(tdiff / 1000.0 * exp(vid.sspeed));
 
-  if(shmup::on && (andmode == 0 || andmode == 10) && cmode == emNormal) 
+  if(shmup::on && (andmode == 0 || andmode == 10) && size(screens) == 1) 
     shmup::turn(tdiff);
     
   safety = false;
@@ -520,7 +536,7 @@ void mobile_draw(MOBPAR_FORMAL) {
     if(hypot(mousex - xmove, mousey - yb) < rad) targetclick = false;
     }
   
-  if(cmode == emNormal) {
+  if(size(screens) == 1) {
     lmouseover = (gtouched && lclicked) ? mouseover : NULL;
     if(!shmup::on && !useRangedOrb && vid.mobilecompasssize) {
       using namespace shmupballs;
@@ -530,7 +546,7 @@ void mobile_draw(MOBPAR_FORMAL) {
       if(h < rad) {
         if(h < rad*SKIPFAC) { lmouseover = cwt.c; mousedest.d = -1; }
         else {
-          double d = revcontrol ? -1 : 1;
+          double d = vid.revcontrol ? -1 : 1;
           mouseh = hpxy(dx * d / rad, dy * d / rad);
           calcMousedest();          
           }
@@ -555,6 +571,8 @@ void mobile_draw(MOBPAR_FORMAL) {
   drawscreen();
   shiftmul = getcshift;
   calcMousedest();
+
+  inmenu = size(screens) > 1;
 
   if(lclicked && !clicked && !inmenu) handleclick(MOBPAR_ACTUAL);
 
@@ -581,29 +599,20 @@ void mobile_draw(MOBPAR_FORMAL) {
 
 #ifdef ANDROIDSHARE
   if(getcstat == 's'-96 && keyreact) {
-    cmode = canmove ? emQuit : emNormal;
+    popScreenAll().
     shareScore(MOBPAR_ACTUAL);
-    cmode = emNormal;
     }
 #endif
 
-  if(andmode == 2 && cmode != emNormal) andmode = 12;
+  if(andmode == 2 && size(screens) != 1) andmode = 12;
 
   if((cmode == emQuit && !canmove && keyreact && lclicked && !clicked) && !buttonclicked) {
-    cmode = emNormal; printf("back to quit\n");
+    popScreenAll(); printf("back to quit\n");
     }
   else if(cmode == emScores) handleScoreKeys(0, 0);
   else if(getcstat && keyreact) {
-
-    if(cmode == (canmove ? emQuit : emNormal)) 
-      handleQuit(getcstat, getcstat);
-
-    else {
-      if(cmode != emNormal && cmode != emQuit) inmenu = true;
-      if(cmode == emMenu && getcstat == 'q') openURL();
-      else { extra ex; handlekey(getcstat, getcstat, ex); }
-      }
-
+    if(cmode == emMenu && getcstat == 'q') openURL();
+    else { extra ex; handlekey(getcstat, getcstat, ex); }
     }
 
   #ifdef IOS
@@ -621,7 +630,7 @@ void mobile_draw(MOBPAR_FORMAL) {
     if(andmode == 1 && lclicked && !clicked && !inmenu && mouseover)
       performMarkCommand(mouseover);
 
-    if(clicked && andmode == 2 && (mouseover != lmouseover || mouseovers != lmouseovers) && cmode == emNormal) {
+    if(clicked && andmode == 2 && (mouseover != lmouseover || mouseovers != lmouseovers) && !inmenu) {
       addMessage(mouseovers);
       lmouseovers = mouseovers;
       }
@@ -630,7 +639,7 @@ void mobile_draw(MOBPAR_FORMAL) {
     if(andmode == 20 && clicked != lclicked) andmode = 10;
 
     if(andmode == 2 && lclicked && !clicked) { 
-      if(cmode == emNormal)
+      if(!inmenu)
         showHelp(MOBPAR_ACTUAL, help);
       else if(cmode != emScores && cmode != emPickScores)
         cmode = emNormal;
@@ -664,35 +673,3 @@ void mobile_draw(MOBPAR_FORMAL) {
 #ifdef NOAUDIO
 void playSound(cell*, const string &s, int vol) { printf("play sound: %s vol %d\n", s.c_str(), vol); }
 #endif
-
-// optional hooks
-// you may include hyper.cpp from another file and define EXTRA_... to change some things
-namespace extra {
-
-  // on drawing cells
-  void drawcell(cell *c, const transmatrix& V);
-
-  // on each frame
-  void frame();
-
-  // on stats drawing
-  void stats();
-
-  // return true if key is handled
-  bool handleKey(int sym, int uni);
-
-  // return true to exit immediately
-  bool main(int argc, char **argv);
-
-  // extra configuration, called together with reading arguments
-  void config();
-
-  // read command line arguments
-  int arg();
-
-  // change land distribution
-  eLand getNext(eLand old);
-
-  // change musics
-  bool changeMusic(eLand id);
-  }

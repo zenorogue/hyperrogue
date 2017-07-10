@@ -474,3 +474,5 @@ transmatrix mzscale(const transmatrix& t, double fac) {
   return res;
   }
 
+transmatrix pushone() { return euclid ? eupush(1, 0) : xpush(sphere?.5 : 1); }
+

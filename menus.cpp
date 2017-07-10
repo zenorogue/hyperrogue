@@ -8,13 +8,12 @@
 
 ld whatever = 0;
 
-void gotoHelp(const string& h, emtype c = cmode) {
-  help = h;
-  if(c != emHelp) lastmode = c;
-  cmode = emHelp;
-  printf("goto help, back = %d\n", c);
+int PREC(ld x) {
+  ld sh = shiftmul;
+  if(sh > -.2 && sh < .2) x = 10.01; 
+  return int(shiftmul * x);
   }
- 
+
 void showOverview() {
   DEBB(DF_GRAPH, (debugfile,"show overview\n"));
   mouseovers = XLAT("world overview");
@@ -107,63 +106,57 @@ void showOverview() {
     }
 
   dialog::displayPageButtons(3, pages);
-  }
-
-int PREC(ld x) {
-  ld sh = shiftmul;
-  if(sh > -.2 && sh < .2) x = 10.01; 
-  return int(shiftmul * x);
-  }
-
-void handleOverview(int sym, int uni) {
-  int umod = uni % 1000;
-  int udiv = uni / 1000;
-  if(udiv == 1 && umod < landtypes) {
-    if(cheater && !hiliteclick) {
-      eLand l = eLand(umod);
-      cheater++;
-      bool princ = (l == laPrincessQuest);
-      if(princ) {
-        if(kills[moVizier] == 0) kills[moVizier] = 1;
-        princess::forceMouse = true;
-        princess::gotoPrincess = true;
-        l = laPalace;
+  
+  keyhandler = [] (int sym, int uni) {
+    int umod = uni % 1000;
+    int udiv = uni / 1000;
+    if(udiv == 1 && umod < landtypes) {
+      if(cheater && !hiliteclick) {
+        eLand l = eLand(umod);
+        cheater++;
+        bool princ = (l == laPrincessQuest);
+        if(princ) {
+          if(kills[moVizier] == 0) kills[moVizier] = 1;
+          princess::forceMouse = true;
+          princess::gotoPrincess = true;
+          l = laPalace;
+          }
+        cheatMoveTo(l);
+        popScreen();
+        canmove = true;
+        if(princ) fullcenter();
         }
-      cheatMoveTo(l);
-      cmode = emNormal;
-      canmove = true;
-      if(princ) fullcenter();
+      else gotoHelp(generateHelpForLand(eLand(umod)));
       }
-    else gotoHelp(generateHelpForLand(eLand(umod)));
-    }
-  else if(udiv == 2 && umod < ittypes) {
-    if(cheater && !hiliteclick) {
-      cheater++;
-      int ic = itemclass(eItem(umod));
-      if(ic == IC_TREASURE) items[umod] += PREC(10);
-      if(ic == IC_ORB) items[umod] += PREC(60);
-      if(umod == itGreenStone) items[umod] += PREC(100);
-      else if(ic == IC_OTHER) items[umod] += (shiftmul>0?1:-1);
-      if(items[umod] < 0) items[umod] = 0;
-      if(hardcore) canmove = true;
-      else checkmove();
+    else if(udiv == 2 && umod < ittypes) {
+      if(cheater && !hiliteclick) {
+        cheater++;
+        int ic = itemclass(eItem(umod));
+        if(ic == IC_TREASURE) items[umod] += PREC(10);
+        if(ic == IC_ORB) items[umod] += PREC(60);
+        if(umod == itGreenStone) items[umod] += PREC(100);
+        else if(ic == IC_OTHER) items[umod] += (shiftmul>0?1:-1);
+        if(items[umod] < 0) items[umod] = 0;
+        if(hardcore) canmove = true;
+        else checkmove();
+        }
+      else gotoHelp(generateHelpForItem(eItem(umod)));
       }
-    else gotoHelp(generateHelpForItem(eItem(umod)));
-    }
-  else if(udiv == 3 && umod < walltypes) gotoHelp(generateHelpForWall(eWall(umod)));
-  else if(uni == SDLK_F1) gotoHelp(
-    "This displays all lands available in the game. "
-    "Bonus lands (available only in separate challenges) "
-    "are not included. Lands written in dark have to be "
-    "unlocked, and lands in dark red are unavailable "
-    "because of using special options. Click on any "
-    "land or item to get information about it. Hover over "
-    "an Orb to know its relation to the current land. "
-    "Cheaters can click to move between lands, and use the "
-    "mousewheel to gain or lose treasures and orbs quickly (Ctrl = precise, Shift = reverse)."
-    );
-  else if(dialog::handlePageButtons(uni)) ;
-  else if(doexiton(sym, uni)) cmode = emNormal;
+    else if(udiv == 3 && umod < walltypes) gotoHelp(generateHelpForWall(eWall(umod)));
+    else if(uni == SDLK_F1) gotoHelp(
+      "This displays all lands available in the game. "
+      "Bonus lands (available only in separate challenges) "
+      "are not included. Lands written in dark have to be "
+      "unlocked, and lands in dark red are unavailable "
+      "because of using special options. Click on any "
+      "land or item to get information about it. Hover over "
+      "an Orb to know its relation to the current land. "
+      "Cheaters can click to move between lands, and use the "
+      "mousewheel to gain or lose treasures and orbs quickly (Ctrl = precise, Shift = reverse)."
+      );
+    else if(dialog::handlePageButtons(uni)) ;
+    else if(doexiton(sym, uni)) popScreen();
+    };
   }
 
 bool checkHalloweenDate() {
@@ -177,6 +170,7 @@ bool checkHalloweenDate() {
   }
 
 void showMainMenu() {
+  gamescreen(2);
 
   getcstat = ' ';
   
@@ -208,7 +202,7 @@ void showMainMenu() {
   if(canmove)                                     
     q = "review your quest";
   else
-    q = "review the scene";
+    q = "game over screen";
   dialog::addItem(XLAT(q), SDLK_ESCAPE);
   dialog::addItem(XLAT("world overview"), 'o');    
 
@@ -231,614 +225,77 @@ void showMainMenu() {
   dialog::addItem("SHARE", 's'-96);
 #endif
   
-  if(!canmove) q = "game over screen";
+  if(!canmove) q = "review the scene";
   else if(turncount > 0) q = "continue game";
   else q = "play the game!";
   
   dialog::addItem(XLAT(q), ' ');
   dialog::display();
-  }
-
-void handleMenuKey(int sym, int uni) {
-  dialog::handleNavigation(sym, uni);
-  if(sym == SDLK_F1 || sym == 'h') gotoHelp(help);
-  else if(sym == 'c' && cheater)
-    cmode = emCheatMenu;
-  else if(sym == 'b') cmode = emBasicConfig;
-  else if(sym == 'g') cmode = emGraphConfig;
-  else if(sym == 'd') cmode = emDisplayMode;
-  else if(sym == 'm') cmode = emChangeMode;
-#ifndef NOSAVE
-  else if(sym == 't') loadScores();
-#endif
-  else if(uni == 'y'-96) {
-    if(!sphere) {
-      euclidland = laHalloween;
-      restartGame('E');
-      vid.alpha = 999;
-      vid.scale = 998;
-      cmode = emNormal;
+  
+  keyhandler = [] (int sym, int uni) {
+    dialog::handleNavigation(sym, uni);
+    if(sym == SDLK_F1 || sym == 'h') gotoHelp(help);
+    else if(sym == 'c' && cheater) pushScreen(showCheatMenu);
+    else if(sym == 'b') pushScreen(showBasicConfig);
+    else if(sym == 'g') pushScreen(showGraphConfig);
+    else if(sym == 'd') pushScreen(showDisplayMode);
+    else if(sym == 'm') pushScreen(showChangeMode);
+  #ifndef NOSAVE
+    else if(sym == 't') loadScores();
+  #endif
+    else if(uni == 'y'-96) {
+      if(!sphere) {
+        euclidland = laHalloween;
+        restartGame('E');
+        vid.alpha = 999;
+        vid.scale = 998;
+        popScreen();
+        }
+      else {
+        restartGame('E');
+        vid.alpha = 1;
+        vid.scale = 1;
+        popScreen();
+        }
       }
-    else {
-      restartGame('E');
-      vid.alpha = 1;
-      vid.scale = 1;
-      cmode = emNormal;
+    else if(sym == 'r' || sym == SDLK_F5) {
+      restartGame();
+      popScreen();
       }
-    }
-  else if(sym == 'r' || sym == SDLK_F5) {
-    restartGame();
-    cmode = emNormal;
-    }
-  else if(sym == 'q' || sym == SDLK_F10) 
-    quitmainloop = true;
-  else if(sym == 'o') {
-    clearMessages();
-    cmode = emOverview;
-    }
-  else if(sym == 'i') {
-    clearMessages();
-    cmode = emInventory;
-    }
-  else if(sym == SDLK_ESCAPE) {
-    cmode = emQuit;
-    achievement_final(false);
-    }
-#ifdef MOBILE
-#ifdef HAVE_ACHIEVEMENTS
-  else if(sym == '3') {
-    achievement_final(false);
-    cmode = emLeader;
-    }
+    else if(sym == 'q' || sym == SDLK_F10) 
+      quitmainloop = true;
+    else if(sym == 'o') {
+      clearMessages();
+      pushScreen(showOverview);
+      }
+#ifdef INV
+    else if(sym == 'i') {
+      clearMessages();
+      pushScreen(inv::show());
+      }
 #endif
-#endif
-#ifdef ROGUEVIZ
-  else if(uni == 'u') cmode = emRogueviz;
-#endif
-  else if(doexiton(sym, uni)) {
-    cmode = emNormal;
-    msgs.clear();
-    }
-  }
-
-void showAllConfig() {
-  dialog::addBreak(50);
-  dialog::addItem(XLAT("exit configuration"), 'v');
-#ifndef NOCONFIG
-  dialog::addItem(XLAT("save the current config"), 's');
-#endif
-  }
-
-void handleAllConfig(int sym, int uni) {
-  if(sym == SDLK_F1 || uni == 'h') gotoHelp(help);
-
-  if(uni == 'v') cmode = emMenu;
-  if(sym == SDLK_ESCAPE) cmode = emNormal;
-#ifndef NOCONFIG
-  if(uni == 's') saveConfig();
-#endif  
-  }
-
-void showGraphConfig() {
-
-  dialog::init(XLAT("graphics configuration"));
-
-  #ifndef ONEGRAPH
-  #ifdef GL
-  dialog::addBoolItem(XLAT("openGL mode"), vid.usingGL, 'o');
+    else if(sym == SDLK_ESCAPE) 
+      showMissionScreen();
+  #ifdef MOBILE
+  #ifdef HAVE_ACHIEVEMENTS
+    else if(sym == '3') {
+      achievement_final(false);
+      pushScreen(leader::showMenu);
+      }
   #endif
   #endif
-
-  if(!vid.usingGL)
-    dialog::addBoolItem(XLAT("anti-aliasing"), vid.antialias & AA_NOGL, 'O');
-
-  if(vid.usingGL)
-    dialog::addSelItem(XLAT("anti-aliasing"), 
-      (vid.antialias & AA_POLY) ? "polygons" :
-      (vid.antialias & AA_LINES) ? "lines" :
-      "NO", 'O');
-
-  if(vid.usingGL) {
-    dialog::addSelItem(XLAT("line width"), fts(vid.linewidth), 'w');
-//    dialog::addBoolItem(XLAT("finer lines at the boundary"), vid.antialias & AA_LINEWIDTH, 'b');
-    }
-
-  #ifndef MOBWEB
-  dialog::addSelItem(XLAT("framerate limit"), its(vid.framelimit), 'l');
+  #ifdef ROGUEVIZ
+    else if(uni == 'u') pushScreen(rogueviz::showMenu);
   #endif
-
-#ifndef IOS
-  dialog::addBoolItem(XLAT("fullscreen mode"), (vid.full), 'f');
-#endif
-
-  dialog::addSelItem(XLAT("scrolling speed"), fts(vid.sspeed), 'a');
-  dialog::addSelItem(XLAT("movement animation speed"), fts(vid.mspeed), 'm');
-
-  dialog::addBoolItem(XLAT("extra graphical effects"), (vid.particles), 'u');
-
-#ifdef WHATEVER
-  dialog::addSelItem(XLAT("whatever"), fts(whatever), 'j');
-#endif
-
-  const char *glyphsortnames[6] = {
-    "first on top", "first on bottom", 
-    "last on top", "last on bottom",
-    "by land", "by number"
+    else if(doexiton(sym, uni)) {
+      popScreenAll();
+      msgs.clear();
+      }
     };
- 
-  const char *glyphmodenames[3] = {"letters", "auto", "images"};
-  dialog::addSelItem(XLAT("inventory/kill sorting"), XLAT(glyphsortnames[glyphsortorder]), 'k');
-
-  dialog::addSelItem(XLAT("inventory/kill mode"), XLAT(glyphmodenames[vid.graphglyph]), 'd');
-
-#ifdef MOBILE
-  dialog::addSelItem(XLAT("font scale"), its(fontscale), 'b');
-#endif
-
-  dialog::addSelItem(XLAT("sight range"), its(sightrange), 'r');
-
-#ifdef MOBILE
-  dialog::addSelItem(XLAT("compass size"), its(vid.mobilecompasssize), 'c');
-#endif
-
-  dialog::addSelItem(XLAT("aura brightness"), its(vid.aurastr), 'z');
-  dialog::addSelItem(XLAT("aura smoothening factor"), its(vid.aurasmoothen), 'x');
-  
-  showAllConfig();
-  dialog::display();
-  }
-  
-void switchFullscreen() {
-  vid.full = !vid.full;
-#ifdef ANDROID
-  addMessage(XLAT("Reenter HyperRogue to apply this setting"));
-  settingsChanged = true;
-#endif
-#ifndef NOSDL
-  if(true) {
-    vid.xres = vid.full ? vid.xscr : 9999;
-    vid.yres = vid.full ? vid.yscr : 9999;
-    extern bool setfsize;
-    setfsize = true;
-    }
-  setvideomode();
-#endif
-  }
-
-void switchGL() {
-  vid.usingGL = !vid.usingGL;
-  if(vid.usingGL) addMessage(XLAT("openGL mode enabled"));
-  if(!vid.usingGL) addMessage(XLAT("openGL mode disabled"));
-#ifndef ANDROID
-  if(!vid.usingGL) addMessage(XLAT("shift+O to switch anti-aliasing"));
-#endif
-#ifdef ANDROID
-  settingsChanged = true;
-#else
-#ifndef NOSDL
-  setvideomode();
-#endif
-#endif
-  }
-
-void handleGraphConfig(int sym, int uni) {
-  dialog::handleNavigation(sym, uni);
-
-  if(uni == 'O') uni = 'o', shiftmul = -1;
-  
-  char xuni = uni | 96;
-
-  if(xuni == 'u') vid.particles = !vid.particles;
-  if(xuni == 'd') vid.graphglyph = (1+vid.graphglyph)%3;
-  
-  if(xuni == 'j') {
-    dialog::editNumber(whatever, -10, 10, 1, 0, XLAT("whatever"), 
-      XLAT("Whatever."));
-    dialog::sidedialog = true;
-    }
-
-  if(xuni == 'a') dialog::editNumber(vid.sspeed, -5, 5, 1, 0, 
-    XLAT("scrolling speed"),
-    XLAT("+5 = center instantly, -5 = do not center the map"));
-
-  if(xuni == 'm') dialog::editNumber(vid.mspeed, -5, 5, 1, 0, 
-    XLAT("movement animation speed"),
-    XLAT("+5 = move instantly"));
-
-  if(xuni == 'r') {
-    dialog::editNumber(sightrange, 4, cheater ? 10 : 7, 1, 7, XLAT("sight range"), 
-      XLAT("Roughly 42% cells are on the edge of your sight range. Reducing "
-      "the sight range makes HyperRogue work faster, but also makes "
-      "the game effectively harder."));
-    dialog::sidedialog = true;
-    }
-
-  if(xuni == 'k') {
-    glyphsortorder = eGlyphsortorder((glyphsortorder+6+(shiftmul>0?1:-1)) % gsoMAX);
-    }
-  
-  if(xuni == 'f') switchFullscreen();
-
-#ifndef ONEGRAPH
-  if(xuni == 'o' && shiftmul > 0) switchGL();
-#endif
-
-  if(xuni == 'o' && shiftmul < 0) {
-    if(!vid.usingGL)
-      vid.antialias ^= AA_NOGL | AA_FONT;
-    else if(vid.antialias & AA_POLY)
-      vid.antialias ^= AA_POLY | AA_LINES;
-    else if(vid.antialias & AA_LINES) 
-      vid.antialias |= AA_POLY;
-    else 
-      vid.antialias |= AA_LINES;
-    }
-  
-  // if(xuni == 'b') vid.antialias ^= AA_LINEWIDTH;
- 
-  if(xuni == 'w' && vid.usingGL)
-    dialog::editNumber(vid.linewidth, 0, 10, 0.1, 1, XLAT("line width"), "");
-
-  if(xuni == 'c') 
-    dialog::editNumber(vid.mobilecompasssize, 0, 100, 10, 20, XLAT("compass size"), "");
-  
-  if(xuni == 'l') 
-    dialog::editNumber(vid.framelimit, 5, 300, 10, 300, XLAT("framerate limit"), "");
-  
-#ifdef MOBILE
-  if(xuni =='b') 
-    dialog::editNumber(fontscale, 0, 400, 10, 100, XLAT("font scale"), "");
-#endif
-
-  if(xuni =='z') 
-    dialog::editNumber(vid.aurastr, 0, 256, 10, 128, XLAT("aura brightness"), "");
-  else if(xuni =='x') 
-    dialog::editNumber(vid.aurasmoothen, 1, 180, 1, 5, XLAT("aura smoothening factor"), "");
-
-  handleAllConfig(sym, xuni);
-  }  
-
-void showBasicConfig() {
-  const char *axmodes[5] = {"OFF", "auto", "light", "heavy", "arrows"};
-  dialog::init(XLAT("basic configuration"));
-
-#ifndef NOTRANS
-  dialog::addSelItem(XLAT("language"), XLAT("EN"), 'l');
-#endif
-  dialog::addSelItem(XLAT("player character"), numplayers() > 1 ? "" : csname(vid.cs), 'g');
-
-#ifndef NOAUDIO
-  dialog::addSelItem(XLAT("background music volume"), its(musicvolume), 'b');
-  dialog::addSelItem(XLAT("sound effects volume"), its(effvolume), 'e');
-#endif
-
-// input:  
-  dialog::addSelItem(XLAT("help for keyboard users"), XLAT(axmodes[vid.axes]), 'c');
-
-  dialog::addBoolItem(XLAT("reverse pointer control"), (revcontrol), 'r');
-  dialog::addBoolItem(XLAT("draw circle around the target"), (vid.drawmousecircle), 'd');
-  
-  dialog::addSelItem(XLAT("message flash time"), its(vid.flashtime), 't');
-#ifdef MOBILE
-  dialog::addBoolItem(XLAT("targetting ranged Orbs long-click only"), (vid.shifttarget&2), 'i');
-#else
-  dialog::addBoolItem(XLAT("targetting ranged Orbs Shift+click only"), (vid.shifttarget&1), 'i');
-#endif
-#ifdef STEAM
-  dialog::addBoolItem(XLAT("send scores to Steam leaderboards"), (vid.steamscore&1), 'l');
-#endif
-
-#ifndef MOBILE
-  dialog::addSelItem(XLAT("configure keys/joysticks"), "", 'p');
-#endif
-
-  showAllConfig();
-
-  if(lang() != 0) {
-    string tw = "";
-    string s = XLAT("TRANSLATIONWARNING");
-    if(s != "" && s != "TRANSLATIONWARNING") tw += s;
-    s = XLAT("TRANSLATIONWARNING2");
-    if(s != "" && s != "TRANSLATIONWARNING2") { if(tw != "") tw += " "; tw += s; }
-    if(tw != "") {
-      dialog::addBreak(50);
-      dialog::addHelp(tw);
-      dialog::lastItem().color = 0xFF0000;
-      }
-    }
-
-  dialog::display();
-  }
-
-void handleBasicConfig(int sym, int uni) {
-  dialog::handleNavigation(sym, uni);
-    
-  char xuni = uni | 96;
-  
-  if(uni >= 32 && uni < 64) xuni = uni;
-
-  if(xuni == 'c') { vid.axes += 60 + (shiftmul > 0 ? 1 : -1); vid.axes %= 5; }
-#ifndef NOAUDIO
-  if(xuni == 'b') {
-    dialog::editNumber(musicvolume, 0, 128, 10, 60, XLAT("background music volume"), "");
-    }
-  if(xuni == 'e') {
-    dialog::editNumber(effvolume, 0, 128, 10, 60, XLAT("sound effects volume"), "");
-    }
-#endif
-  
-  if(sym == SDLK_ESCAPE) cmode = emNormal;
-  
-#ifndef NOTRANS
-  if(xuni == 'l') {
-    vid.language += (shiftmul>0?1:-1);
-    vid.language %= NUMLAN;
-    if(vid.language < 0) vid.language += NUMLAN;
-#ifdef ANDROID
-    settingsChanged = true;
-#endif
-    }
-#endif
-  
-  if(xuni == 'g') cmode = emCustomizeChar;
-
-#ifndef MOBILE
-  if(xuni == 'p') {
-    cmode = emShmupConfig; 
-    multi::shmupcfg = shmup::on;
-    }
-#endif
-  
-  if(xuni == 'r') revcontrol = !revcontrol;
-  if(xuni == 'd') vid.drawmousecircle = !vid.drawmousecircle;
-
-#ifdef STEAM
-  if(xuni == 'l') vid.steamscore = vid.steamscore^1;
-#endif
-  if(xuni == 't') 
-    dialog::editNumber(vid.flashtime, 0, 64, 1, 8, XLAT("message flash time"),
-      XLAT("How long should the messages stay on the screen."));
-  
-  if(xuni == 'i') { vid.shifttarget = vid.shifttarget^3; }
-
-  handleAllConfig(sym, xuni);
-  }
-
-void showJoystickConfig() {
-
-  dialog::init(XLAT("joystick configuration"));
-  
-  dialog::addSelItem(XLAT("first joystick position (movement)"), its(joyx)+","+its(joyy), 0);
-  dialog::addSelItem(XLAT("second joystick position (panning)"), its(panjoyx)+","+its(panjoyy), 0);
-  
-#ifndef MOBWEB
-  dialog::addSelItem(XLAT("joystick mode"), XLAT(autojoy ? "automatic" : "manual"), 'p');
-    
-  dialog::addSelItem(XLAT("first joystick: movement threshold"), its(vid.joyvalue), 'a');
-  dialog::addSelItem(XLAT("first joystick: execute movement threshold"), its(vid.joyvalue2), 'b');
-  dialog::addSelItem(XLAT("second joystick: pan threshold"), its(vid.joypanthreshold), 'c');
-  dialog::addSelItem(XLAT("second joystick: panning speed"), fts(vid.joypanspeed * 1000), 'd');
-#endif
-
-  dialog::addItem(XLAT("back"), 'v');
-  dialog::display();
-  }
-
-void handleJoystickConfig(int sym, int uni) {
-  dialog::handleNavigation(sym, uni);
-  char xuni = uni | 96;
-  if(xuni == 'p') autojoy = !autojoy;
-  else if(xuni == 'a') 
-    dialog::editNumber(vid.joyvalue, 0, 32768, 100, 4800, XLAT("first joystick: movement threshold"), "");
-  else if(xuni == 'b') 
-    dialog::editNumber(vid.joyvalue2, 0, 32768, 100, 5600, XLAT("first joystick: execute movement threshold"), "");
-  else if(xuni == 'c')
-    dialog::editNumber(vid.joypanthreshold, 0, 32768, 100, 2500, XLAT("second joystick: pan threshold"), "");
-  else if(xuni == 'd') 
-    dialog::editNumber(vid.joypanspeed, 0, 1e-2, 1e-5, 1e-4, XLAT("second joystick: panning speed"), "");
-
-  else if(xuni == 'v') 
-    cmode = emShmupConfig;
-  
-  else if(doexiton(sym, uni)) cmode = emShmupConfig;
-  }
-
-void projectionDialog() {
-  geom3::tc_alpha = ticks;
-  dialog::editNumber(vid.alpha, -5, 5, .1, 1,
-    XLAT("projection"),
-    XLAT("HyperRogue uses the Minkowski hyperboloid model internally. "
-    "Klein and Poincar‚ models can be obtained by perspective, "
-    "and the Gans model is obtained by orthogonal projection. "
-//  "This parameter specifies the distance from the hyperboloid center "
-//  "to the eye. "
-    "See also the conformal mode (in the special modes menu) "
-    "for more models."));
-  dialog::sidedialog = true;
-  }
-
-void show3D() {
-  using namespace geom3;
-  dialog::init(XLAT("3D configuration"));
-
-  dialog::addSelItem(XLAT("High detail range"), fts(highdetail), 'n');
-  dialog::addSelItem(XLAT("Mid detail range"), fts(middetail), 'm');
-  
-  dialog::addBreak(50);
-  dialog::addSelItem(XLAT("Camera level above the plane"), fts3(camera), 'c');
-  dialog::addSelItem(XLAT("Ground level below the plane"), fts3(depth), 'g');
-
-  dialog::addSelItem(XLAT("Projection at the ground level"), fts3(vid.alpha), 'a');
-  dialog::addBreak(50);
-  dialog::addSelItem(XLAT("Height of walls"), fts3(wall_height), 'w');
-  
-  dialog::addSelItem(XLAT("Rock-III to wall ratio"), fts3(rock_wall_ratio), 'r');
-  dialog::addSelItem(XLAT("Human to wall ratio"), fts3(human_wall_ratio), 'h');
-  dialog::addSelItem(XLAT("Level of water surface"), fts3(lake_top), 'l');
-  dialog::addSelItem(XLAT("Level of water bottom"), fts3(lake_bottom), 'k');  
-
-  dialog::addBreak(50);
-  dialog::addSelItem(XLAT("Y shift"), fts3(vid.yshift), 'y');
-  dialog::addSelItem(XLAT("camera rotation"), fts3(vid.camera_angle), 's');
-  dialog::addSelItem(XLAT("distance between eyes"), fts3(vid.eye), 'e');
-  dialog::addBreak(50);
-  dialog::addBoolItem(XLAT("ball model"), pmodel == mdBall, 'B');
-  dialog::addBoolItem(XLAT("hyperboloid model"), pmodel == mdHyperboloid, 'M');
-  dialog::addSelItem(XLAT("camera rotation in ball model"), fts3(vid.ballangle), 'b');
-  dialog::addSelItem(XLAT("projection in ball model"), fts3(vid.ballproj), 'x');
-
-  dialog::addBreak(50);
-  if(!(wmspatial || mmspatial))
-    dialog::addInfo(XLAT("set 3D monsters or walls in basic config first"));
-  else if(invalid != "")
-    dialog::addInfo(XLAT("error: "+invalid));
-  else
-    dialog::addInfo(XLAT("parameters set correctly"));
-  dialog::addBreak(50);
-  dialog::addItem(XLAT("exit 3D configuration"), 'v');
-  dialog::display();
-  }
-
-string explain3D(ld *param) {
-  using namespace geom3;
-  if(param == &highdetail || param == &middetail)
-    return 
-      XLAT(
-        "Objects at distance less than %1 absolute units "
-        "from the center will be displayed with high "
-        "detail, and at distance at least %2 with low detail.",
-        fts3(highdetail), fts3(middetail)
-        );
-      
-  if(param == &camera)
-    return
-      XLAT(
-        "Camera is placed %1 absolute units above a plane P in a three-dimensional "
-        "world. Ground level is actually an equidistant surface, %2 absolute units "
-        "below the plane P. The plane P (as well as the ground level or any "
-        "other equidistant surface below it) is viewed at an angle of %3 "
-        "(the tangent of the angle between the point in "
-        "the center of your vision and a faraway location is 1/cosh(c) = %4).",
-        fts3(camera),
-        fts3(depth),
-        fts3(atan(1/cosh(camera))*2*180/M_PI),
-        fts3(1/cosh(camera)));
-  if(param == &depth)
-    return
-      XLAT(
-        "Ground level is actually an equidistant surface, "
-        "%1 absolute units below the plane P. "
-        "Theoretically, this value affects the world -- "
-        "for example, eagles could fly %2 times faster by "
-        "flying above the ground level, on the plane P -- "
-        "but the actual game mechanics are not affected. "
-        "(Distances reported by the vector graphics editor "
-        "are not about points on the ground level, but "
-        "about the matching points on the plane P -- "
-        "divide them by the factor above to get actual "
-        "distances.)"
-        
-        ,
-        fts3(depth), fts3(cosh(depth)));
-        // mention absolute units
-        
-  if(param == &vid.alpha)
-    return
-      XLAT(
-        "If we are viewing an equidistant g absolute units below a plane, "
-        "from a point c absolute units above the plane, this corresponds "
-        "to viewing a Minkowski hyperboloid from a point "
-        "tanh(g)/tanh(c) units below the center. This in turn corresponds to "
-        "the Poincaré model for g=c, and Klein-Beltrami model for g=0.");
-      
-  if(param == &wall_height)
-    return
-      XLAT(
-        "The height of walls, in absolute units. For the current values of g and c, "
-        "wall height of %1 absolute units corresponds to projection value of %2.",
-        fts3(wall_height), fts3(factor_to_projection(geom3::WALL)));
-
-  if(param == &rock_wall_ratio)
-    return
-      XLAT(
-        "The ratio of Rock III to walls is %1, so Rock III are %2 absolute units high. "
-        "Length of paths on the Rock III level is %3 of the corresponding length on the "
-        "ground level.",
-        fts3(rock_wall_ratio), fts3(wall_height * rock_wall_ratio),
-        fts3(cosh(depth - wall_height * rock_wall_ratio) / cosh(depth)));
-
-  if(param == &human_wall_ratio)
-    return
-      XLAT(
-        "Humans are %1 "
-        "absolute units high. Your head travels %2 times the distance travelled by your "
-        "feet.",
-        fts3(wall_height * human_wall_ratio),
-        fts3(cosh(depth - wall_height * human_wall_ratio) / cosh(depth)));
-        
-  return "";
-  }
-
-void handle3D(int sym, int uni) {
-  using namespace geom3;
-  dialog::handleNavigation(sym, uni);
-  
-  if(uni == 'n') 
-    dialog::editNumber(geom3::highdetail, 0, 5, .5, 7, XLAT("High detail range"), "");
-  else if(uni == 'm') 
-    dialog::editNumber(geom3::middetail, 0, 5, .5, 7, XLAT("Mid detail range"), "");
-  else if(uni == 'c') 
-    tc_camera = ticks,
-    dialog::editNumber(geom3::camera, 0, 5, .1, 1, XLAT("Camera level above the plane"), "");
-  else if(uni == 'g') 
-    tc_depth = ticks,
-    dialog::editNumber(geom3::depth, 0, 5, .1, 1, XLAT("Ground level below the plane"), "");
-  else if(uni == 'a') 
-    projectionDialog();
-  else if(uni == 'w') 
-    dialog::editNumber(geom3::wall_height, 0, 1, .1, .3, XLAT("Height of walls"), "");
-  else if(uni == 'l') 
-    dialog::editNumber(geom3::lake_top, 0, 1, .1, .25, XLAT("Level of water surface"), "");
-  else if(uni == 'k') 
-    dialog::editNumber(geom3::lake_bottom, 0, 1, .1, .9, XLAT("Level of water bottom"), "");
-  else if(uni == 'r') 
-    dialog::editNumber(geom3::rock_wall_ratio, 0, 1, .1, .9, XLAT("Rock-III to wall ratio"), "");
-  else if(uni == 'h') 
-    dialog::editNumber(geom3::human_wall_ratio, 0, 1, .1, .7, XLAT("Human to wall ratio"), "");
-  
-  else if(uni == 'e') {
-    dialog::editNumber(vid.eye, -10, 10, 0.01, 0, XLAT("distance between eyes"),
-      XLAT("Watch the Minkowski hyperboloid or the hypersian rug mode with the "
-      "red/cyan 3D glasses."));
-    dialog::sidedialog = true;
-    }
-
-  else if(uni == 'y') 
-    dialog::editNumber(vid.yshift, 0, 1, .1, 0, XLAT("Y shift"), 
-      "Don't center on the player character."
-      );
-  else if(uni == 's') 
-    dialog::editNumber(vid.camera_angle, -180, 180, 5, 0, XLAT("camera rotation"), 
-      "Rotate the camera. Can be used to obtain a first person perspective, "
-      "or third person perspective when combined with Y shift."
-      );
-  else if(uni == 'b') 
-    dialog::editNumber(vid.ballangle, 0, 90, 5, 0, XLAT("camera rotation in ball model"), 
-      "Rotate the camera in ball/hyperboloid model.");
-  else if(uni == 'x') 
-    dialog::editNumber(vid.ballproj, 0, 100, .1, 0, XLAT("projection in ball model"), 
-      "This parameter affects the ball model the same way as the projection parameter affects the disk model.");
-  else if(uni == 'B') 
-    pmodel = (pmodel == mdBall ? mdDisk : mdBall);
-  else if(uni == 'M') 
-    pmodel = (pmodel == mdHyperboloid ? mdDisk : mdHyperboloid);
-
-  else if(doexiton(sym, uni)) cmode = emDisplayMode;
-  
-  if(cmode == emNumber) dialog::sidedialog = true;
   }
 
 void showDisplayMode() {
+  gamescreen(3);
 
   dialog::init(XLAT("special display modes"));
 
@@ -876,6 +333,54 @@ void showDisplayMode() {
   
   showAllConfig();
   dialog::display();
+  
+  keyhandler = [] (int sym, int uni) {
+    dialog::handleNavigation(sym, uni);
+    char xuni = uni;
+    if((xuni >= 'A' && xuni <= 'Z') || (xuni >= 1 && xuni <= 26)) xuni |= 32;
+  
+    if(xuni == 'p') projectionDialog();
+    
+    if(xuni == 'z') {
+      dialog::editNumber(vid.scale, .001, 1000, .1, 1, XLAT("scale factor"), 
+        XLAT("Scale the displayed model."));
+      dialog::scaleLog();
+      dialog::sidedialog = true;
+      }
+    
+    if(xuni == 'm') { vid.monmode += 60 + (shiftmul > 0 ? 1 : -1); vid.monmode %= 6; }
+  
+    if(xuni == '9') pushScreen(show3D);
+    
+  #ifndef NOEDIT
+    else if(xuni == 'g') {
+      pushScreen(mapeditor::showDrawEditor);
+      mapeditor::initdraw(cwt.c);
+      }
+  #endif
+  
+    else if(xuni == 'x') {
+      viewdists = !viewdists;
+      popScreen();
+      }
+  #ifndef NORUG
+    else if(xuni == 'u') {
+      if(sphere) projectionDialog();
+      else rug::select();
+      }
+  #endif
+    else if(uni == 'a')
+      pushScreen(conformal::show);
+  
+  #ifndef NOMODEL
+    else if(xuni == 'n')
+      pushScreen(netgen::show);
+  #endif
+  
+    else gmodekeys(sym, uni);
+  
+    handleAllConfig(sym, xuni);
+    };
   }
 
 void gmodekeys(int sym, int uni) {
@@ -892,59 +397,11 @@ void gmodekeys(int sym, int uni) {
     }
   }
 
-void handleDisplayMode(int sym, int uni) {
-  dialog::handleNavigation(sym, uni);
-  char xuni = uni;
-  if((xuni >= 'A' && xuni <= 'Z') || (xuni >= 1 && xuni <= 26)) xuni |= 32;
-
-  if(xuni == 'p') projectionDialog();
-  
-  if(xuni == 'z') {
-    dialog::editNumber(vid.scale, .001, 1000, .1, 1, XLAT("scale factor"), 
-      XLAT("Scale the displayed model."));
-    dialog::scaleLog();
-    dialog::sidedialog = true;
-    }
-  
-  if(xuni == 'm') { vid.monmode += 60 + (shiftmul > 0 ? 1 : -1); vid.monmode %= 6; }
-
-  if(xuni == '9') cmode = em3D;
-  
-#ifndef NOEDIT
-  else if(xuni == 'g') {
-    cmode = emDraw;
-    mapeditor::initdraw(cwt.c);
-    }
-#endif
-
-  else if(xuni == 'x') {
-    viewdists = !viewdists;
-    cmode = emNormal;
-    }
-#ifndef NORUG
-  else if(xuni == 'u') {
-    if(sphere) projectionDialog();
-    else rug::select();
-    }
-#endif
-  else if(uni == 'a')
-      cmode = emConformal;
-
-#ifndef NOMODEL
-  else if(xuni == 'n')
-    cmode = emNetgen;
-#endif
-
-  else gmodekeys(sym, uni);
-
-  handleAllConfig(sym, xuni);
-  }
-
 void switchHardcore() {
   if(hardcore && !canmove) { 
     restartGame();
     hardcore = false;
-    cmode = emNormal;
+    popScreen();
     }
   else if(hardcore && canmove) { hardcore = false; }
   else { hardcore = true; canmove = true; hardcoreAt = turncount; }
@@ -952,10 +409,11 @@ void switchHardcore() {
       addMessage("One wrong move, and it is game over!");
   else
       addMessage("Not so hardcore?");
-  if(pureHardcore()) cmode = emNormal;
+  if(pureHardcore()) popScreen();
   }
 
 void showChangeMode() {
+  gamescreen(3);
   dialog::init(XLAT("special game modes"));
   
   // gameplay modes
@@ -991,111 +449,104 @@ void showChangeMode() {
   
   dialog::addItem(XLAT("return to the game"), 'v');
   dialog::display();
-  }
-
-void handleChangeMode(int sym, int uni) {
-  dialog::handleNavigation(sym, uni);    
-  char xuni = uni;
   
-  if(xuni == 'v' || sym == SDLK_ESCAPE) cmode = emNormal;
-  
-  else if(uni == 'c') {
-    if(tactic::on && gold()) {
-      addMessage(XLAT("Not available in the pure tactics mode!"));
+  keyhandler = [] (int sym, int uni) {
+    dialog::handleNavigation(sym, uni);    
+    char xuni = uni;
+    
+    if(xuni == 'v' || sym == SDLK_ESCAPE) popScreen();
+    
+    else if(uni == 'c') {
+      if(tactic::on && gold()) {
+        addMessage(XLAT("Not available in the pure tactics mode!"));
+        }
+      else if(!cheater) {
+        cheater++;
+        addMessage(XLAT("You activate your demonic powers!"));
+  #ifndef MOBILE
+        addMessage(XLAT("Shift+F, Shift+O, Shift+T, Shift+L, Shift+U, etc."));
+  #endif
+        popScreen();
+        }
+      else {
+        popScreen();
+        firstland = princess::challenge ? laPalace : laIce;
+        restartGame();
+        }
       }
-    else if(!cheater) {
-      cheater++;
-      addMessage(XLAT("You activate your demonic powers!"));
-#ifndef MOBILE
-      addMessage(XLAT("Shift+F, Shift+O, Shift+T, Shift+L, Shift+U, etc."));
-#endif
-      cmode = emNormal;
+    
+    else if(xuni == 'e') 
+      pushScreen(showEuclideanMenu);
+    else if(xuni == 't') {
+      clearMessages();
+      pushScreen(tactic::showMenu);
+    }
+    else if(xuni == 'y') {
+      clearMessages();
+      if(yendor::everwon || autocheat)
+        pushScreen(yendor::showMenu);
+      else gotoHelp(yendor::chelp);
       }
-    else {
-      cmode = emNormal;
-      firstland = princess::challenge ? laPalace : laIce;
-      restartGame();
+    else if(xuni == '7')
+      restartGame('7');
+    else if(xuni == 'P')
+      pushScreen(peace::showMenu);
+    else if(xuni == 'i') {
+      restartGame('i');
       }
-    }
-  
-  else if(xuni == 'e') {
-    cmode = emPickEuclidean;
-  }
-  else if(xuni == 't') {
-    clearMessages();
-    cmode = emTactic;
-  }
-  else if(xuni == 'y') {
-    clearMessages();
-    if(yendor::everwon || autocheat)
-        cmode = emYendor;
-    else gotoHelp(yendor::chelp);
-    }
-  else if(xuni == '7')
-    restartGame('7');
-  else if(xuni == 'P')
-    cmode = emPeace;
-  else if(xuni == 'i') {
-    restartGame('i');
-    cmode = emNormal;
-    }
-#ifdef TOUR
-  else if(uni == 'T') {
-    cmode = emNormal;
-    tour::start();
-    }
-#endif
-  else if(uni == 'C') {
-    if(!chaosmode) gotoHelp(
-      "In the Chaos mode, lands change very often, and "
-      "there are no walls between them. "
-      "Some lands are incompatible with this."
-      "\n\nYou need to reach Crossroads IV to unlock the Chaos mode.",
-      chaosUnlocked ? emNormal : emChangeMode
-      );
-    if(chaosUnlocked) restartGame('C');
-    }
-  else if(xuni == 'p') {
-    if(!princess::everSaved)
-      addMessage(XLAT("Save %the1 first to unlock this challenge!", moPrincess));
-    else {
-      restartGame('p');
-      cmode = emNormal;
+  #ifdef TOUR
+    else if(uni == 'T') {
+      tour::start();
       }
-    }
-#ifndef NOEDIT
-  else if(xuni == 'm') {
-    if(tactic::on) 
-      addMessage(XLAT("Not available in the pure tactics mode!"));
-    else {
-      cheater++;
-      cmode = emMapEditor;
-      lastexplore = turncount;
-      addMessage(XLAT("You activate your terraforming powers!"));
+  #endif
+    else if(uni == 'C') {
+      if(chaosUnlocked) restartGame('C');
+      if(chaosmode) gotoHelp(
+        "In the Chaos mode, lands change very often, and "
+        "there are no walls between them. "
+        "Some lands are incompatible with this."
+        "\n\nYou need to reach Crossroads IV to unlock the Chaos mode."
+        );
       }
-    }
-#endif
-  else if(xuni == 's') {
-#ifdef MOBILE
-    restartGame('s');
-    cmode = emNormal;
-#else
-    multi::shmupcfg = shmup::on;
-    cmode = emShmupConfig;
-#endif
-    }
-  else if(xuni == 'h' && !shmup::on) 
-    switchHardcore();
-  else if(xuni == 'r') {
-    firstland = laIce;
-    restartGame('r');
-    cmode = emNormal;
-    }
-  else if(doexiton(sym, uni))
-    cmode = emMenu;
+    else if(xuni == 'p') {
+      if(!princess::everSaved)
+        addMessage(XLAT("Save %the1 first to unlock this challenge!", moPrincess));
+      else
+        restartGame('p');
+      }
+  #ifndef NOEDIT
+    else if(xuni == 'm') {
+      if(tactic::on) 
+        addMessage(XLAT("Not available in the pure tactics mode!"));
+      else {
+        cheater++;
+        pushScreen(mapeditor::showMapEditor);
+        lastexplore = turncount;
+        addMessage(XLAT("You activate your terraforming powers!"));
+        }
+      }
+  #endif
+    else if(xuni == 's') {
+  #ifdef MOBILE
+      restartGame('s');
+  #else
+      multi::shmupcfg = shmup::on;
+      pushScreen(shmup::showShmupConfig);
+  #endif
+      }
+    else if(xuni == 'h' && !shmup::on) 
+      switchHardcore();
+    else if(xuni == 'r') {
+      firstland = laIce;
+      restartGame('r');
+      }
+    else if(doexiton(sym, uni))
+      popScreen();
+    };
   }
 
 void showCheatMenu() {
+  gamescreen(1);
   dialog::init("cheat menu");
   dialog::addItem(XLAT("return to the game"), ' ');
   dialog::addBreak(50);
@@ -1124,76 +575,21 @@ void showCheatMenu() {
   dialog::addItem(XLAT("switch ghost timer"), 'G'-64);
   dialog::addItem(XLAT("switch web display"), 'W'-64);
   dialog::display();
-  }
-
-void handleCheatMenu(int sym, int uni) {
-  dialog::handleNavigation(sym, uni);
-  if(uni != 0) {
-    applyCheat(uni);
-    if(uni == 'F' || uni == 'C' || uni == 'O' ||
-      uni == 'S' || uni == 'U' || uni == 'G' ||
-      uni == 'W' || uni == 'I' || uni == 'E' ||
-      uni == 'H' || uni == 'B' || uni == 'M' ||
-      uni == 'P' || uni == 'Y'-64 || uni == 'G'-64 ||
-      uni == ' ' || uni == 8 || uni == 13 ||
-      uni == SDLK_ESCAPE || uni == 'q' || uni == 'v' || sym == SDLK_ESCAPE ||
-      sym == SDLK_F10) 
-      cmode = emNormal;
-    }
-  }
-
-void showCustomizeChar() {
-  dialog::init(XLAT("Customize character"));
-  
-  if(shmup::on || multi::players) shmup::cpid = shmup::cpid_edit % shmup::players;
-  charstyle& cs = getcs();
-  
-  dialog::addSelItem(XLAT("character"), csname(cs), 'g');
-  dialog::addColorItem(XLAT("skin color"), cs.skincolor, 's');
-  dialog::addColorItem(XLAT("weapon color"), cs.swordcolor, 'w');
-  dialog::addColorItem(XLAT("hair color"), cs.haircolor, 'h');
-  
-  if(cs.charid >= 1) dialog::addColorItem(XLAT("dress color"), cs.dresscolor, 'd');
-  else dialog::addBreak(100);
-  if(cs.charid == 3) dialog::addColorItem(XLAT("dress color II"), cs.dresscolor2, 'f');
-  else dialog::addBreak(100);
-  
-  dialog::addColorItem(XLAT("movement color"), cs.uicolor, 'u');
-
-  if(!shmup::on && multi::players == 1) dialog::addSelItem(XLAT("save whom"), XLAT1(minf[moPrincess].name), 'p');
-  
-  if(numplayers() > 1) dialog::addSelItem(XLAT("player"), its(shmup::cpid+1), 'a');
-  
-  dialog::addBreak(50);
-  dialog::addItem(XLAT("return to the game"), 'v');
-  dialog::display();
-  }
-
-void switchcolor(int& c, unsigned int* cs) {
-  dialog::openColorDialog(c, cs);
-  }
-
-void handleCustomizeChar(int sym, int uni) {
-  dialog::handleNavigation(sym, uni);
-  char xuni = uni | 96;
-
-  if(shmup::on || multi::players) shmup::cpid = shmup::cpid_edit % shmup::players;
-  charstyle& cs = getcs();
-  if(xuni == 'a') { shmup::cpid_edit++; shmup::cpid_edit %= 60; }
-  if(xuni == 'g') {
-    cs.charid++;
-    if(cs.charid == 2 && !princess::everSaved) cs.charid = 4;
-    cs.charid %= 10;
-    }
-  if(xuni == 'p') vid.samegender = !vid.samegender;
-  bool cat = cs.charid >= 4;
-  if(xuni == 's') switchcolor(cs.skincolor, cat ? haircolors : skincolors);
-  if(xuni == 'h') switchcolor(cs.haircolor, haircolors);
-  if(xuni == 'w') switchcolor(cs.swordcolor, cat ? eyecolors : swordcolors);
-  if(xuni == 'd') switchcolor(cs.dresscolor, cat ? haircolors : dresscolors);
-  if(xuni == 'f') switchcolor(cs.dresscolor2, dresscolors2);
-  if(xuni == 'u') switchcolor(cs.uicolor, eyecolors);
-  if(xuni == 'v' || sym == SDLK_ESCAPE) cmode = emNormal;
+  keyhandler = []   (int sym, int uni) {
+    dialog::handleNavigation(sym, uni);
+    if(uni != 0) {
+      applyCheat(uni);
+      if(uni == 'F' || uni == 'C' || uni == 'O' ||
+        uni == 'S' || uni == 'U' || uni == 'G' ||
+        uni == 'W' || uni == 'I' || uni == 'E' ||
+        uni == 'H' || uni == 'B' || uni == 'M' ||
+        uni == 'P' || uni == 'Y'-64 || uni == 'G'-64 ||
+        uni == ' ' || uni == 8 || uni == 13 ||
+        uni == SDLK_ESCAPE || uni == 'q' || uni == 'v' || sym == SDLK_ESCAPE ||
+        sym == SDLK_F10) 
+        popScreen();
+      }
+    };
   }
 
 int eupage = 0;
@@ -1208,6 +604,7 @@ const char* geometrynames[gGUARD] = {
   };  
 
 void showEuclideanMenu() {
+  gamescreen(4);
   int s = vid.fsize;
   vid.fsize = vid.fsize * 4/5;
   dialog::init(XLAT("Euclidean/elliptic mode"));
@@ -1250,307 +647,68 @@ void showEuclideanMenu() {
   dialog::display();
 
   vid.fsize = s;
-  }
-
-void handleEuclidean(int sym, int uni) {
-  dialog::handleNavigation(sym, uni);
-  int lid;
-  if(uni >= 'a' && uni <= 'z') lid = uni - 'a';
-  else if(uni >= 'A' && uni <= 'Z') lid = 26 + uni - 'A';
-  else lid = -1;
-  
-  if(lid >= 0) lid += euperpage * eupage;
-  
-  if(uni == '0') {
-    targetgeometry = geometry;
-    restartGame('g');
-    cmode = emNormal;
-    }
-  else if(uni == '5') {
-    targetgeometry = eGeometry(1+targetgeometry);
-    if(targetgeometry == gGUARD) targetgeometry = gEuclid;
-    }
-  else if(uni == '-' || uni == PSEUDOKEY_WHEELUP || uni == PSEUDOKEY_WHEELDOWN) {
-    eupage++;
-    if(eupage * euperpage >= LAND_SPHEUC) eupage = 0;
-    }
-  else if(lid >= 0 && lid < LAND_SPHEUC) {
-    euclidland = land_spheuc[lid];
-    if(landvisited[euclidland] && euclidland != laOceanWall) {
-      if(targetgeometry != geometry)
-        restartGame('g');
-      else
-        restartGame(tactic::on ? 't' : 0);
-      // disable PTM if chosen a land from the Euclidean menu
-      if(tactic::on) restartGame('t');
-      cmode = emNormal;
-      }
-    else euclidland = laIce;
-    }
-  else if(uni == '2' || sym == SDLK_F1) gotoHelp(
-    "If you want to know how much the gameplay is affected by the "
-    "hyperbolic geometry in HyperRogue, this mode is for you!\n\n"
+  keyhandler = [] (int sym, int uni) {
+    dialog::handleNavigation(sym, uni);
+    int lid;
+    if(uni >= 'a' && uni <= 'z') lid = uni - 'a';
+    else if(uni >= 'A' && uni <= 'Z') lid = 26 + uni - 'A';
+    else lid = -1;
     
-    "You can play an Euclidean version of each of the lands in "
-    "HyperRogue. Lands which include horocycles (Temple, Caribbean, "
-    "Whirlpool), infinite trees (Zebra, Emerald), or networks of "
-    "ultraparallel lines (Crossroads, Vineyard, Palace) cannot be "
-    "faithfully represented in Euclidean, so yo get more "
-    "or less simplified versions of them. Choose Crossroads to play a game "
-    "where many different lands appear."
-    );
-  else if(doexiton(sym, uni)) cmode = emNormal;
+    if(lid >= 0) lid += euperpage * eupage;
+    
+    if(uni == '0') {
+      targetgeometry = geometry;
+      restartGame('g');
+      popScreen();
+      }
+    else if(uni == '5') {
+      targetgeometry = eGeometry(1+targetgeometry);
+      if(targetgeometry == gGUARD) targetgeometry = gEuclid;
+      }
+    else if(uni == '-' || uni == PSEUDOKEY_WHEELUP || uni == PSEUDOKEY_WHEELDOWN) {
+      eupage++;
+      if(eupage * euperpage >= LAND_SPHEUC) eupage = 0;
+      }
+    else if(lid >= 0 && lid < LAND_SPHEUC) {
+      euclidland = land_spheuc[lid];
+      if(landvisited[euclidland] && euclidland != laOceanWall) {
+        if(targetgeometry != geometry)
+          restartGame('g');
+        else
+          restartGame(tactic::on ? 't' : 0);
+        // disable PTM if chosen a land from the Euclidean menu
+        if(tactic::on) restartGame('t');
+        popScreen();
+        }
+      else euclidland = laIce;
+      }
+    else if(uni == '2' || sym == SDLK_F1) gotoHelp(
+      "If you want to know how much the gameplay is affected by the "
+      "hyperbolic geometry in HyperRogue, this mode is for you!\n\n"
+      
+      "You can play an Euclidean version of each of the lands in "
+      "HyperRogue. Lands which include horocycles (Temple, Caribbean, "
+      "Whirlpool), infinite trees (Zebra, Emerald), or networks of "
+      "ultraparallel lines (Crossroads, Vineyard, Palace) cannot be "
+      "faithfully represented in Euclidean, so yo get more "
+      "or less simplified versions of them. Choose Crossroads to play a game "
+      "where many different lands appear."
+      );
+    else if(doexiton(sym, uni)) popScreen();
+    };
   }
 
 #ifdef MOBILE
 namespace leader { void showMenu(); void handleKey(int sym, int uni); }
 #endif
 
-#ifndef NOSAVE
-void showScores() {
-  int y = vid.fsize * 7/2;
-  int bx = vid.fsize;
-  getcstat = 1;
-  
-  string modes = 
-    scoremode == 0 ? XLAT(", m - mode: normal") :
-    scoremode == 1 ? XLAT(", m - mode: shoot'em up") :
-    scoremode == 2 ? XLAT(", m - mode: hardcore only") :
-    "?";
-
-  if(euclid) modes += XLAT(" (E:%1)", euclidland);
-
-
-  mouseovers = XLAT("t/left/right - change display, up/down - scroll, s - sort by") + modes;
-
-  displaystr(bx*4, vid.fsize*2, 0, vid.fsize, "#", forecolor, 16);
-  displaystr(bx*8, vid.fsize*2, 0, vid.fsize, "$$$", forecolor, 16);
-  displaystr(bx*12, vid.fsize*2, 0, vid.fsize, XLAT("kills"), forecolor, 16);
-  displaystr(bx*18, vid.fsize*2, 0, vid.fsize, XLAT("time"), forecolor, 16);
-  displaystr(bx*22, vid.fsize*2, 0, vid.fsize, XLAT("ver"), forecolor, 16);
-  displaystr(bx*23, vid.fsize*2, 0, vid.fsize, displayfor(NULL), forecolor, 0);
-  if(scorefrom < 0) scorefrom = 0;
-  int id = 0;
-  int omit = scorefrom;
-  int rank = 0;
-  while(y < (ISMOBILE ? vid.yres - 5*vid.fsize : vid.yres - 2 * vid.fsize)) { 
-    if(id >= size(scores)) break;
-        
-    score& S(scores[id]);
-    
-    bool wrongtype = false;
-    
-    wrongtype |= (euclid && (!S.box[116] || S.box[120] != euclidland));
-    wrongtype |= (!euclid && S.box[116]);
-
-    wrongtype |= (scoremode == 1 && !S.box[119]);
-    wrongtype |= (scoremode != 1 && S.box[119]);
-    wrongtype |= (scoremode == 2 && (!S.box[117] || S.box[118] >= PUREHARDCORE_LEVEL));
-    
-    if(wrongtype) { id++; continue; }
-
-    if(omit) { omit--; rank++; id++; continue; }
-
-    char buf[16];
-    
-    rank++; sprintf(buf, "%d", rank);
-    displaystr(bx*4,  y, 0, vid.fsize, buf, 0xC0C0C0, 16);
-    
-    sprintf(buf, "%d", S.box[2]);
-    displaystr(bx*8,  y, 0, vid.fsize, buf, 0xC0C0C0, 16);
-    
-    sprintf(buf, "%d", S.box[3]);
-    displaystr(bx*12,  y, 0, vid.fsize, buf, 0xC0C0C0, 16);
-
-    sprintf(buf, "%d:%02d", S.box[0]/60, S.box[0] % 60);
-    displaystr(bx*18,  y, 0, vid.fsize, buf, 0xC0C0C0, 16);
-
-    displaystr(bx*22,  y, 0, vid.fsize, S.ver, 0xC0C0C0, 16);
-
-    displaystr(bx*23, y, 0, vid.fsize, displayfor(&S), 0xC0C0C0, 0);
-    
-    y += vid.fsize*5/4; id++;
-    }
-
-#ifdef MOBILE
-  buttonclicked = false;
-  displayabutton(-1, +1, XLAT("SORT"), BTON);
-  displayabutton( 0, +1, XLAT("PICK"), BTON);
-  displayabutton(+1, +1, XLAT("PLAY"), BTON);
-#endif
-  }
-
-void sortScores() {
-  if(scorerev) reverse(scores.begin(), scores.end());
-  else {
-    scorerev = true;
-    scoresort = scoredisplay; 
-    stable_sort(scores.begin(), scores.end(), scorecompare);
-    }
-  }
-
-void shiftScoreDisplay(int delta) {
-  scoredisplay = (scoredisplay + POSSCORE + delta) % POSSCORE, scorerev = false;
-  if(fakescore()) shiftScoreDisplay(delta);
-  }
-
-void handleScoreKeys(int sym, int uni) {
-#ifndef MOBILE
-  if(sym == SDLK_LEFT || sym == SDLK_KP4 || sym == 'h' || sym == 'a')
-    shiftScoreDisplay(-1);
-  else if(sym == SDLK_RIGHT || sym == SDLK_KP6 || sym == 'l' || sym == 'd')
-    shiftScoreDisplay(1);
-  else if(sym == 't') { mapeditor::infix = ""; cmode = emPickScores; }
-  else if(sym == SDLK_UP || sym == 'k' || sym == 'w')
-    scorefrom -= 5;
-  else if(sym == SDLK_DOWN || sym == 'j' || sym == 'x')
-    scorefrom += 5;
-  else if(sym == PSEUDOKEY_WHEELUP)
-    scorefrom--;
-  else if(sym == PSEUDOKEY_WHEELDOWN)
-    scorefrom++;
-  else if(sym == 's') sortScores(); 
-  else if(sym == 'm') { scoremode++; scoremode %= 3; }
-  else if(doexiton(sym, uni)) cmode = emNormal;
-#else
-  static int scoredragx, scoredragy;
-  extern bool clicked, lclicked;
-  extern int andmode;
-  
-  if(andmode) { 
-    if(!clicked && !lclicked) {
-      andmode = 0;
-      scoredragx = mousex;
-      scoredragy = mousey;
-      }
-    }
-
-  else {
-  
-    if(clicked && !lclicked)
-      scoredragx = mousex, scoredragy = mousey;
-  
-    else if(lclicked && !clicked) {
-      if(mousey > vid.ycenter - 2 * vid.fsize) {
-        if(mousex < vid.xcenter*2/3) sortScores();
-        else if(mousex < vid.xcenter*4/3)
-          cmode = emPickScores;
-        else andmode = 0, cmode = emNormal;
-        }
-      }
-    
-    else if(clicked && lclicked) {
-  //  if(mousex > scoredragx + 80) scoredragx += 80, shiftScoreDisplay(1); 
-  //  if(mousex < scoredragx - 80) scoredragx -= 80, shiftScoreDisplay(-1); 
-      while(mousey > scoredragy + vid.fsize) scoredragy += vid.fsize, scorefrom--;
-      while(mousey < scoredragy - vid.fsize) scoredragy -= vid.fsize, scorefrom++;
-      }
-    }
-#endif
-  }
-        
-bool monsterpage = false;
-
-void handlePickScoreKeys(int sym, int uni) {
-  extern int andmode;
-  andmode = 2;
-  if(uni == 'm') monsterpage = !monsterpage; else
-  if(uni >= '1' && uni <= '9') uni = uni + 1000 - '1';
-  else if(uni >= 1000 && uni < 1000 + size(pickscore_options)) { 
-    cmode = emScores; 
-    scoredisplay = pickscore_options[uni - 1000].second;
-    }
-  else if(mapeditor::editInfix(uni)) ;
-  else if(doexiton(sym, uni)) cmode = emScores;
-  }
-        
-void showPickScores() {
-
-  getcstat = '0';  
-  int d = scoredisplay;
-  
-  pickscore_options.clear();
-
-  scorerev = false;
-
-  for(int i=0; i<POSSCORE; i++) {
-    scoredisplay = i;
-    if(!fakescore()) {
-      string s = displayfor(NULL);
-      if(mapeditor::hasInfix(s))
-        if(monsbox[scoredisplay] == monsterpage)
-          pickscore_options.push_back(make_pair(s, i));
-      }
-    }
-  sort(pickscore_options.begin(), pickscore_options.end());
-  
-  int q = (int) pickscore_options.size();
-  int percolumn = vid.yres / (vid.fsize+3) - 4;
-  int columns = 1 + (q-1) / percolumn;
-  
-  for(int i=0; i<q; i++) {
-    int x = 16 + (vid.xres * (i/percolumn)) / columns;
-    int y = (vid.fsize+3) * (i % percolumn) + vid.fsize*2;
-    
-    scoredisplay = pickscore_options[i].second;
-    if(q <= 9)
-      pickscore_options[i].first = pickscore_options[i].first + " [" + its(i+1) + "]";
-    if(!fakescore())
-      displayButton(x, y, pickscore_options[i].first, 1000+i, 0);
-    }
-  
-  displayButton(vid.xres/2, vid.yres - vid.fsize*2, "kills", 'm', 8);
-
-  scoredisplay = d;
-
-  mouseovers = mapeditor::infix;
-  }
-#endif
-
-void showHelp() {
-    
-    getcstat = SDLK_ESCAPE;
-    if(help == "HELPFUN") {
-      help_delegate();
-      return;
-      }
-
-    if(help == "@") help = buildHelpText();
-    
-    string help2;
-    if(help[0] == '@') {
-      int iv = help.find("\t");
-      int id = help.find("\n");
-      dialog::init(help.substr(iv+1, id-iv-1), atoi(help.c_str()+1), 120, 100);
-      dialog::addHelp(help.substr(id+1));
-      }
-    else {
-      dialog::init("help", forecolor, 120, 100);
-      dialog::addHelp(help);
-      }
-    
-    if(help == buildHelpText()) dialog::addItem("credits", 'c');
-    
-    dialog::display();
-    }
-
-void handleHelp(int sym, int uni) {
-  dialog::handleNavigation(sym, uni);
-  if(sym == SDLK_F1 && help != "@") 
-    help = "@";
-  else if(uni == 'c')
-    help = buildCredits();
-  else if(doexiton(sym, uni))
-    cmode = lastmode;
-  }
-
 void handleQuit(int sym, int uni) {
   if(uni == 'r' || sym == SDLK_F5) {
-    restartGame(), cmode = emNormal;
+    restartGame(), popScreen();
     msgs.clear();
     }
-  else if(uni == 'v') cmode = emMenu;
-  else if(uni == SDLK_ESCAPE) cmode = canmove ? emNormal : emQuit;
+  else if(uni == 'v') pushScreen(showMainMenu);
+  else if(uni == SDLK_ESCAPE) popScreen();
   else if(uni == 'o') setAppropriateOverview();
 #ifndef NOSAVE
   else if(uni == 't') {
@@ -1586,6 +744,7 @@ void toggleanim(bool v) {
   }
 
 void showDemo() {
+  gamescreen(2);
 
   getcstat = ' ';
   
@@ -1611,94 +770,240 @@ void handleDemoKey(int sym, int uni) {
   if(sym == SDLK_F1 || sym == 'h') gotoHelp(help);
   else if(sym == 'a') {
     toggleanim(!demoanim);
-    cmode = emNormal;
+    popScreen();
     }
   else if(sym == 'f') {
     firstland = laIce;
     if(tactic::on) restartGame('t');
     else restartGame();
-    cmode = emNormal;
+    popScreen();
     }
   else if(sym == 'T') {
     firstland = laIce;
     if(!tour::on) tour::start();
-    cmode = emNormal;
+    popScreen();
     }
   else if(sym == 't') {
     firstland = laTemple;
     if(!tactic::on) restartGame('t');
     else restartGame();
-    cmode = emNormal;
+    popScreen();
     }
   else if(sym == 'l') {
     firstland = laStorms;
     if(!tactic::on) restartGame('t');
     else restartGame();
-    cmode = emNormal;
+    popScreen();
     }
   else if(sym == 'b') {
     firstland = laBurial;
     if(!tactic::on) restartGame('t');
     else restartGame();
     items[itOrbSword] = 60;
-    cmode = emNormal;
+    popScreen();
     }
   }
 #endif
 
-void displayMenus() {
-  #ifdef DEMO
-  if(cmode == emOverview || cmode == emMenu) {
-    showDemo();
-    return;
+function <void(int sym, int uni)> keyhandler;
+
+#ifndef MOBILE
+void quitOrAgain() {
+  int y = vid.yres * (618) / 1000;
+  displayButton(vid.xres/2, y + vid.fsize*1/2, 
+    (items[itOrbSafety] && havesave) ? 
+      XLAT("Press Enter or F10 to save") : 
+      XLAT("Press Enter or F10 to quit"), 
+    SDLK_RETURN, 8, 2);
+  displayButton(vid.xres/2, y + vid.fsize*2, XLAT("or 'r' or F5 to restart"), 'r', 8, 2);
+  displayButton(vid.xres/2, y + vid.fsize*7/2, XLAT("or 't' to see the top scores"), 't', 8, 2);
+  displayButton(vid.xres/2, y + vid.fsize*10/2, XLAT("or 'v' to see the main menu"), 'v', 8, 2);
+  displayButton(vid.xres/2, y + vid.fsize*13/2, XLAT("or 'o' to see the world overview"), 'o', 8, 2);
+  }
+#endif
+
+int msgscroll = 0;
+
+string timeline() {
+    int timespent = (int) (savetime + (timerstopped ? 0 : (time(NULL) - timerstart)));
+  char buf[20];
+  sprintf(buf, "%d:%02d", timespent/60, timespent % 60);
+  return 
+    shmup::on ? 
+      XLAT("%1 knives (%2)", its(turncount), buf)
+    :
+      XLAT("%1 turns (%2)", its(turncount), buf);
+  }
+
+void showMission() {
+
+  cmode2 = smMission;
+  gamescreen(1); drawStats();
+  keyhandler = handleKeyQuit;
+
+  dialog::init(
+#ifdef TOUR
+    tour::on ? (canmove ? XLAT("Tutorial") : XLAT("GAME OVER")) :
+#endif
+    cheater ? XLAT("It is a shame to cheat!") : 
+    showoff ? XLAT("Showoff mode") :
+    canmove && princess::challenge ? XLAT("%1 Challenge", moPrincess) :
+    canmove ? XLAT("Quest status") : 
+    XLAT("GAME OVER"), 
+    0xC00000, 200, 100
+    );
+  dialog::addInfo(XLAT("Your score: %1", its(gold())));
+  dialog::addInfo(XLAT("Enemies killed: %1", its(tkills())));
+
+#ifdef TOUR
+  if(tour::on) ; else 
+#endif
+  if(items[itOrbYendor]) {
+    dialog::addInfo(XLAT("Orbs of Yendor found: %1", its(items[itOrbYendor])), iinf[itOrbYendor].color);
+    dialog::addInfo(XLAT("CONGRATULATIONS!"), iinf[itOrbYendor].color);
     }
-  #endif
-  if(cmode == emJoyConfig) showJoystickConfig();
-  if(cmode == emOverview) showOverview();
-  if(cmode == emYendor) yendor::showMenu();
-  if(cmode == emPeace) peace::showMenu();
-#ifdef INV
-  if(cmode == emInventory) inv::showMenu();
+  else {
+    if(princess::challenge) 
+      dialog::addInfo(XLAT("Follow the Mouse and escape with %the1!", moPrincess));
+    else if(gold() < R30)
+      dialog::addInfo(XLAT("Collect %1 $$$ to access more worlds", its(R30)));
+    else if(gold() < R60)
+      dialog::addInfo(XLAT("Collect %1 $$$ to access even more lands", its(R60)));
+    else if(!hellUnlocked())
+      dialog::addInfo(XLAT("Collect at least %1 treasures in each of 9 types to access Hell", its(R10)));
+    else if(items[itHell] < R10)
+      dialog::addInfo(XLAT("Collect at least %1 Demon Daisies to find the Orbs of Yendor", its(R10)));
+    else if(size(yendor::yi) == 0)
+      dialog::addInfo(XLAT("Look for the Orbs of Yendor in Hell or in the Crossroads!"));
+    else 
+      dialog::addInfo(XLAT("Unlock the Orb of Yendor!"));
+    }
+  
+  if(!timerstopped && !canmove) {
+    savetime += time(NULL) - timerstart;
+    timerstopped = true;
+    }
+  if(canmove && !timerstart)
+    timerstart = time(NULL);
+  
+  if(princess::challenge) ;
+#ifdef TOUR
+  else if(tour::on) ;
 #endif
-  if(cmode == emSlideshows) tour::ss::showMenu();
-  if(cmode == emChangeMode) showChangeMode();
-  if(cmode == emCustomizeChar) showCustomizeChar();
-  if(cmode == emShmupConfig) shmup::showShmupConfig();
-  if(cmode == emConformal) conformal::show();
-  if(cmode == emTactic) tactic::showMenu();
-  if(cmode == emPickEuclidean) showEuclideanMenu();
-  if(cmode == emMenu) showMainMenu();
-  if(cmode == emCheatMenu) showCheatMenu();
-  if(cmode == emBasicConfig) showBasicConfig();
-  if(cmode == emGraphConfig) showGraphConfig();
-  if(cmode == emDisplayMode) showDisplayMode();
-  if(cmode == emColor) dialog::drawColorDialog(*dialog::colorPointer);
-  if(cmode == emNumber) dialog::drawNumberDialog();
-  if(cmode == emLinepattern) linepatterns::showMenu();
+  else if(tkills() < R100)
+    dialog::addInfo(XLAT("Defeat %1 enemies to access the Graveyard", its(R100)));
+  else if(kills[moVizier] == 0 && (items[itFernFlower] < U5 || items[itGold] < U5))
+    dialog::addInfo(XLAT("Kill a Vizier in the Palace to access Emerald Mine"));
+  else if(items[itEmerald] < U5)
+    dialog::addInfo(XLAT("Collect 5 Emeralds to access Camelot"));
+  else if(hellUnlocked() && !chaosmode) {
+    bool b = true;
+    for(int i=0; i<LAND_HYP; i++)
+      if(b && items[treasureType(land_hyp[i])] < R10) {
+        dialog::addInfo(
+          XLAT(
+            land_hyp[i] == laTortoise ? "Hyperstone Quest: collect at least %3 points in %the2" :
+            "Hyperstone Quest: collect at least %3 %1 in %the2", 
+            treasureType(land_hyp[i]), land_hyp[i], its(R10)));
+        b = false;
+        }
+    if(b) 
+      dialog::addInfo(XLAT("Hyperstone Quest completed!"), iinf[itHyperstone].color);
+    }
+  else dialog::addInfo(XLAT("Some lands unlock at specific treasures or kills"));
+  if(cheater) {
+    dialog::addInfo(XLAT("you have cheated %1 times", its(cheater)), 0xFF2020);
+    }
+  if(!cheater) {
+    dialog::addInfo(timeline(), 0xC0C0C0);
+    }
+  
+  msgs.clear();
+  if(msgscroll < 0) msgscroll = 0;
+  int gls = size(gamelog) - msgscroll;
+  int mnum = 0;
+  for(int i=gls-5; i<gls; i++) 
+    if(i>=0) {
+      msginfo m;
+      m.spamtype = 0;
+      m.flashout = true;
+      m.stamp = ticks-128*vid.flashtime-128*(gls-i);
+      m.msg = gamelog[i].msg;
+      m.quantity = gamelog[i].quantity;
+      mnum++,
+      msgs.push_back(m);
+      }
 
-#ifndef NOMODEL
-  if(cmode == emNetgen) netgen::show();
-#endif
-#ifndef NORUG
-  if(cmode == emRugConfig) rug::show();
-#endif
-#ifndef NOEDIT
-  if(cmode == emMapEditor) mapeditor::showMapEditor();
-  if(cmode == emDraw) mapeditor::showDrawEditor();
+  dialog::addBreak(100);
+  
+  bool intour = false;
+  
+#ifdef TOUR
+  intour = tour::on;
 #endif
 
-#ifndef NOSAVE
-  if(cmode == emScores) showScores();
-  if(cmode == emPickScores) showPickScores();
+  if(intour) {
+#ifdef TOUR
+    if(canmove) {
+      dialog::addItem(XLAT("spherical geometry"), '1');
+      dialog::addItem(XLAT("Euclidean geometry"), '2');
+      dialog::addItem(XLAT("more curved hyperbolic geometry"), '3');
+      }
+    if(!items[itOrbTeleport])
+      dialog::addItem(XLAT("teleport away"), '4');
+    else if(!items[itOrbAether])
+      dialog::addItem(XLAT("move through walls"), '4');
+    else
+      dialog::addItem(XLAT("flash"), '4');
+    if(canmove) {
+      if(tour::slidecommand != "") 
+        dialog::addItem(tour::slidecommand, '5');
+      dialog::addItem(XLAT("static mode"), '6');
+      dialog::addItem(XLAT("enable/disable texts"), '7');
+      dialog::addItem(XLAT("next slide"), SDLK_RETURN);
+      dialog::addItem(XLAT("previous slide"), SDLK_BACKSPACE);
+      dialog::addItem(XLAT("list of slides"), '9');
+      }
+    else
+      dialog::addBreak(200);
+    dialog::addItem(XLAT("main menu"), 'v');
 #endif
-  if(cmode == emHelp) showHelp();
-  if(cmode == em3D) show3D();
-#ifdef MOBILE
-#ifdef HAVE_ACHIEVEMENTS
-  if(cmode == emLeader) leader::showMenu();
-#endif
-#endif
-#ifdef ROGUEVIZ
-  if(cmode == emRogueviz) rogueviz::showMenu();
-#endif
+    }
+  else {
+    dialog::addItem(XLAT(canmove ? "continue" : "see how it ended"), SDLK_ESCAPE);
+    dialog::addItem(XLAT("main menu"), 'v');
+    dialog::addItem(XLAT("restart"), SDLK_F5);
+    #ifndef MOBILE
+    dialog::addItem(XLAT(quitsaves() ? "save" : "quit"), SDLK_F10);
+    #endif
+    #ifdef ANDROIDSHARE
+    dialog::addItem(XLAT("SHARE"), 's'-96);
+    #endif
+    }
+  
+  dialog::display();
+
+  if(mnum)
+    displayfr(vid.xres/2, vid.yres-vid.fsize*(mnum+1), 2, vid.fsize/2,  XLAT("last messages:"), 0xC0C0C0, 8);  
+  }
+
+void setAppropriateOverview() {
+  clearMessages();
+  if(tactic::on)
+    pushScreen(tactic::showMenu);
+  else if(yendor::on)
+    pushScreen(yendor::showMenu);
+  else if(peace::on)
+    pushScreen(peace::showMenu);
+  else if(geometry != gNormal)
+    pushScreen(showEuclideanMenu);
+  else 
+    pushScreen(showOverview);
+  }
+
+void showMissionScreen() {
+  popScreenAll();
+  pushScreen(showMission);
+  achievement_final(false);
+  msgscroll = 0;
   }

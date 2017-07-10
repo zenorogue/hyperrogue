@@ -25,11 +25,10 @@ namespace mapeditor {
   
 #ifndef NOEDIT
   map<int, cell*> modelcell;
-  
-  void clearModelCells() {
-    modelcell.clear();
-    }
-  
+
+  void handleKeyMap(int sym, int uni);
+  bool handleKeyFile(int sym, int uni);
+
   void applyModelcell(cell *c) {
     if(mapeditor::whichPattern == 'H') return;
     if(mapeditor::whichPattern == 'H') return;
@@ -157,7 +156,6 @@ namespace mapstream {
 
     clearMemory();
     initcells();
-    cleargraphmemory();
     if(shmup::on) shmup::init();
 
     while(true) {
@@ -425,8 +423,6 @@ namespace mapeditor {
     return true;
     }
     
-  int subscreen; //0=normal, 1=config, 2=patterns, 3=predesigned
-
   cell *drawcell;
 
 #ifndef NOEDIT
@@ -557,11 +553,15 @@ namespace mapeditor {
     return f1.first < f2.first;
     }
   
+  string filecaption, cfileext;
+  string *cfileptr;
+  
   void drawFileDialog() {
     displayfr(vid.xres/2, 30 + vid.fsize, 2, vid.fsize, 
-      XLAT(cmode == emDraw ? "pics to save/load:" : "level to save/load:"), forecolor, 8);
+      filecaption, forecolor, 8);
       
-    string cfile = cmode == emDraw ? picfile : levelfile;
+    string& cfile = *cfileptr;
+
     displayfr(vid.xres/2, 34 + vid.fsize * 2, 2, vid.fsize, 
       cfile, editext ? 0xFF00FF : 0xFFFF00, 8);
     
@@ -589,7 +589,7 @@ namespace mapeditor {
       while ((dir = readdir(d)) != NULL) {
         string s = dir->d_name;
         if(s != ".." && s[0] == '.') ;
-        else if(size(s) > 4 && s.substr(size(s)-4) == (cmode == emDraw ? ".pic" : ".lev"))
+        else if(size(s) > 4 && s.substr(size(s)-4) == cfileext)
           v.push_back(make_pair(s, CFILE));
         else if(dir->d_type & DT_DIR)
           v.push_back(make_pair(s+"/", CDIR));
@@ -608,6 +608,8 @@ namespace mapeditor {
         
       displayColorButton(x, y, v[i].first, 1000 + i, 0, 0, v[i].second, 0xFFFF00);
       }
+
+    keyhandler = handleKeyFile;
     }
   
   void displayFunctionKeys() {
@@ -630,142 +632,190 @@ namespace mapeditor {
     v.push_back(make_pair(s, i));
     }
   
+  void showPrePattern() {
+    dialog::init("predesigned patterns");
+    dialog::addItem(XLAT("Gameboard"), 'g');
+    dialog::addItem(XLAT("random colors"), 'r');
+    dialog::addItem(XLAT("rainbow landscape"), 'l');
+    dialog::addItem(XLAT("dark rainbow landscape"), 'd');
+    dialog::addItem(XLAT("football"), 'F');
+
+    dialog::addSelItem(XLAT("emerald pattern"), "emerald", 'e');
+
+    dialog::addSelItem(XLAT("four elements"), "palace", 'b');
+    dialog::addSelItem(XLAT("eight domains"), "palace", 'a');
+
+    dialog::addSelItem(XLAT("zebra pattern"), "zebra", 'z');
+    dialog::addSelItem(XLAT("four triangles"), "zebra", 't');
+    dialog::addSelItem(XLAT("three stripes"), "zebra", 'x');
+
+    dialog::addSelItem(XLAT("random black-and-white"), "current", 'w');
+
+    dialog::addSelItem(XLAT("field pattern C"), "field", 'C');
+    dialog::addSelItem(XLAT("field pattern D"), "field", 'D');
+    dialog::addSelItem(XLAT("field pattern N"), "field", 'N');
+    dialog::addSelItem(XLAT("field pattern S"), "field", 'S');
+
+    dialog::display();
+    
+    keyhandler = [] (int sym, int uni) {
+      dialog::handleNavigation(sym, uni);
+      if((uni >= 'a' && uni <= 'z') || (uni >= 'A' && uni <= 'Z')) {
+        whichCanvas = uni;
+        subcanvas = rand();
+        firstland = laCanvas; randomPatternsMode = false;
+        restartGame();
+        }
+      else if(doexiton(sym, uni)) popScreen();
+      };    
+    }
+  
+  void showPattern() {
+    dialog::init();
+
+    dialog::addBoolItem(XLAT(euclid ? "three colors" : "Emerald Pattern"), (whichPattern == 'f'), 'f');
+    dialog::addBoolItem(XLAT("Palace Pattern"), (whichPattern == 'p'), 'p');
+    dialog::addBoolItem(XLAT(euclid ? "three colors rotated" : "Zebra Pattern"), (whichPattern == 'z'), 'z');
+    dialog::addBoolItem(XLAT("field pattern"), (whichPattern == 'F'), 'F');
+
+    if(whichPattern == 'f') symRotation = true;
+    if(whichPattern == 'F') ;
+    else if(!euclid) {
+      dialog::addBoolItem(XLAT("rotational symmetry"), (symRotation), '0');
+      dialog::addBoolItem(XLAT("symmetry 0-1"), (sym01), '1');
+      dialog::addBoolItem(XLAT("symmetry 0-2"), (sym02), '2');
+      dialog::addBoolItem(XLAT("symmetry 0-3"), (sym03), '3');
+      }
+    else
+      dialog::addBoolItem(XLAT("edit all three colors"), (symRotation), '0');
+
+    dialog::addBoolItem(XLAT("display pattern codes (full)"), (displaycodes == 1), 'd');
+    dialog::addBoolItem(XLAT("display pattern codes (simplified)"), (displaycodes == 2), 's');
+
+    dialog::addBoolItem(XLAT("display only hexagons"), (whichShape == '6'), '6');
+    dialog::addBoolItem(XLAT("display only heptagons"), (whichShape == '7'), '7');
+    dialog::addBoolItem(XLAT("display the triheptagonal grid"), (whichShape == '8'), '8');
+    dialog::addItem(XLAT("line patterns"), 'l');
+
+    dialog::addItem(XLAT("predesigned patterns"), 'r');
+    dialog::display();
+    
+    keyhandler = [] (int sym, int uni) {
+      dialog::handleNavigation(sym, uni);
+      if(uni == 'f' || uni == 'p' || uni == 'z' || uni == 'H' || uni == 'F') {
+        if(whichPattern == uni) whichPattern = 0;
+        else whichPattern = uni;
+        modelcell.clear();
+        }
+      
+      else if(uni == '0') symRotation = !symRotation;
+      else if(uni == '1') sym01 = !sym01;
+      else if(uni == '2') sym02 = !sym02;
+      else if(uni == '3') sym03 = !sym03;
+      else if(uni == '6' || uni == '7' || uni == '8') {
+        if(whichShape == uni) whichShape = 0;
+        else whichShape = uni;
+        }
+      else if(uni == '3') sym03 = !sym03;
+      else if(uni == 'd') displaycodes = displaycodes == 1 ? 0 : 1;
+      else if(uni == 's') displaycodes = displaycodes == 2 ? 0 : 2;
+      
+      else if(uni == 'l')
+        pushScreen(linepatterns::showMenu);
+
+      else if(uni == 'r') pushScreen(showPrePattern);
+      
+      else if(doexiton(sym, uni)) popScreen();
+      };
+    }
+  
+  void showList() {
+    v.clear();
+    if(painttype == 4) painttype = 0;
+    switch(painttype) {
+      case 0: 
+        for(int i=0; i<motypes; i++) {
+          eMonster m = eMonster(i);
+          if(
+            m == moTongue || m == moPlayer || m == moFireball || m == moBullet ||
+            m == moFlailBullet || m == moShadow || m == moAirball ||
+            m == moWolfMoved || m == moGolemMoved ||
+            m == moTameBomberbirdMoved || m == moKnightMoved ||
+            m == moDeadBug || m == moLightningBolt || m == moDeadBird ||
+            m == moMouseMoved || m == moPrincessMoved || m == moPrincessArmedMoved) ;
+          else vpush(i, minf[i].name);
+          }
+        break;
+      case 1:
+        for(int i=0; i<ittypes; i++) vpush(i, iinf[i].name);
+        break;
+      case 2:
+        for(int i=0; i<landtypes; i++) vpush(i, linf[i].name);
+        break;
+      case 3:
+        for(int i=0; i<walltypes; i++) if(i != waChasmD) vpush(i, winf[i].name);
+        break;
+      }
+    // sort(v.begin(), v.end());
+    
+    if(infix != "") mouseovers = infix;
+    
+    int q = v.size();
+    int percolumn = vid.yres / (vid.fsize+5) - 4;
+    int columns = 1 + (q-1) / percolumn;
+    
+    for(int i=0; i<q; i++) {
+      int x = 16 + (vid.xres * (i/percolumn)) / columns;
+      int y = (vid.fsize+5) * (i % percolumn) + vid.fsize*2;
+      
+      int actkey = 1000 + i;
+      string vv = v[i].first;
+      if(i < 9) { vv += ": "; vv += ('1' + i); }
+      
+      displayButton(x, y, vv, actkey, 0);
+      }
+    keyhandler = [] (int sym, int uni) {
+      if(uni >= '1' && uni <= '9') uni = 1000 + uni - '1';
+      if(sym == SDLK_RETURN || sym == SDLK_KP_ENTER || sym == '-' || sym == SDLK_KP_MINUS) uni = 1000;
+      for(int z=0; z<size(v); z++) if(1000 + z == uni) {
+        paintwhat = v[z].second;
+        paintwhat_str = v[z].first;
+        mousepressed = false;
+        popScreen();
+        return;
+        }
+      if(editInfix(uni)) ;
+      else if(doexiton(sym, uni)) popScreen();
+      };    
+    }
+  
   void showMapEditor() {
+    cmode2 = smMap;
+    gamescreen(0);
   
-    if(choosefile) { drawFileDialog(); return; }
-  
-    if(subscreen == 2) {
-      dialog::init();
+    int fs = vid.fsize + 5;
+    
+    getcstat = '-';
 
-      dialog::addBoolItem(XLAT(euclid ? "three colors" : "Emerald Pattern"), (whichPattern == 'f'), 'f');
-      dialog::addBoolItem(XLAT("Palace Pattern"), (whichPattern == 'p'), 'p');
-      dialog::addBoolItem(XLAT(euclid ? "three colors rotated" : "Zebra Pattern"), (whichPattern == 'z'), 'z');
-      dialog::addBoolItem(XLAT("field pattern"), (whichPattern == 'F'), 'F');
+    displayfr(8, 8 + fs, 2, vid.fsize, paintwhat_str, forecolor, 0);
+    displayfr(8, 8+fs*2, 2, vid.fsize, XLAT("use at your own risk!"), 0x800000, 0);
 
-      if(whichPattern == 'f') symRotation = true;
-      if(whichPattern == 'F') ;
-      else if(!euclid) {
-        dialog::addBoolItem(XLAT("rotational symmetry"), (symRotation), '0');
-        dialog::addBoolItem(XLAT("symmetry 0-1"), (sym01), '1');
-        dialog::addBoolItem(XLAT("symmetry 0-2"), (sym02), '2');
-        dialog::addBoolItem(XLAT("symmetry 0-3"), (sym03), '3');
-        }
-      else
-        dialog::addBoolItem(XLAT("edit all three colors"), (symRotation), '0');
-
-      dialog::addBoolItem(XLAT("display pattern codes (full)"), (displaycodes == 1), 'd');
-      dialog::addBoolItem(XLAT("display pattern codes (simplified)"), (displaycodes == 2), 's');
-
-      dialog::addBoolItem(XLAT("display only hexagons"), (whichShape == '6'), '6');
-      dialog::addBoolItem(XLAT("display only heptagons"), (whichShape == '7'), '7');
-      dialog::addBoolItem(XLAT("display the triheptagonal grid"), (whichShape == '8'), '8');
-      dialog::addItem(XLAT("line patterns"), 'l');
-
-      dialog::addItem(XLAT("predesigned patterns"), 'r');
-      dialog::display();
-      }
-    else if(subscreen == 3) {
-      dialog::init("predesigned patterns");
-      dialog::addItem(XLAT("Gameboard"), 'g');
-      dialog::addItem(XLAT("random colors"), 'r');
-      dialog::addItem(XLAT("rainbow landscape"), 'l');
-      dialog::addItem(XLAT("dark rainbow landscape"), 'd');
-      dialog::addItem(XLAT("football"), 'F');
-
-      dialog::addSelItem(XLAT("emerald pattern"), "emerald", 'e');
-
-      dialog::addSelItem(XLAT("four elements"), "palace", 'b');
-      dialog::addSelItem(XLAT("eight domains"), "palace", 'a');
-
-      dialog::addSelItem(XLAT("zebra pattern"), "zebra", 'z');
-      dialog::addSelItem(XLAT("four triangles"), "zebra", 't');
-      dialog::addSelItem(XLAT("three stripes"), "zebra", 'x');
-
-      dialog::addSelItem(XLAT("random black-and-white"), "current", 'w');
-
-      dialog::addSelItem(XLAT("field pattern C"), "field", 'C');
-      dialog::addSelItem(XLAT("field pattern D"), "field", 'D');
-      dialog::addSelItem(XLAT("field pattern N"), "field", 'N');
-      dialog::addSelItem(XLAT("field pattern S"), "field", 'S');
-
-      dialog::display();
-      }
-    else if(subscreen == 1 && painttype == 6) 
-      dialog::drawColorDialog(paintwhat);
-    else if(subscreen == 1) {
-      v.clear();
-      if(painttype == 4) painttype = 0;
-      switch(painttype) {
-        case 0: 
-          for(int i=0; i<motypes; i++) {
-            eMonster m = eMonster(i);
-            if(
-              m == moTongue || m == moPlayer || m == moFireball || m == moBullet ||
-              m == moFlailBullet || m == moShadow || m == moAirball ||
-              m == moWolfMoved || m == moGolemMoved ||
-              m == moTameBomberbirdMoved || m == moKnightMoved ||
-              m == moDeadBug || m == moLightningBolt || m == moDeadBird ||
-              m == moMouseMoved || m == moPrincessMoved || m == moPrincessArmedMoved) ;
-            else vpush(i, minf[i].name);
-            }
-          break;
-        case 1:
-          for(int i=0; i<ittypes; i++) vpush(i, iinf[i].name);
-          break;
-        case 2:
-          for(int i=0; i<landtypes; i++) vpush(i, linf[i].name);
-          break;
-        case 3:
-          for(int i=0; i<walltypes; i++) if(i != waChasmD) vpush(i, winf[i].name);
-          break;
-        }
-      // sort(v.begin(), v.end());
+    displayButton(8, 8+fs*4, XLAT("0-9 = radius (%1)", its(radius)), ('0' + (radius+1)%10), 0);
+    displayButton(8, 8+fs*5, XLAT("b = boundary"), 'b', 0);
+    displayButton(8, 8+fs*6, XLAT("m = monsters"), 'm', 0);
+    displayButton(8, 8+fs*7, XLAT("w = walls"), 'w', 0);
+    displayButton(8, 8+fs*8, XLAT("i = items"), 'i', 0);
+    displayButton(8, 8+fs*9, XLAT("l = lands"), 'l', 0);
+    displayfr(8, 8+fs*10, 2, vid.fsize, XLAT("c = copy"), 0xC0C0C0, 0);
+    displayButton(8, 8+fs*11, XLAT("u = undo"), 'u', 0);
+    if(painttype == 4)
+      displayButton(8, 8+fs*12, XLAT("f = flip %1", ONOFF(copyflip)), 'u', 0);
+    displayButton(8, 8+fs*13, XLAT("r = regular"), 'r', 0);
+    displayButton(8, 8+fs*14, XLAT("p = paint"), 'p', 0);
       
-      if(infix != "") mouseovers = infix;
-      
-      int q = v.size();
-      int percolumn = vid.yres / (vid.fsize+5) - 4;
-      int columns = 1 + (q-1) / percolumn;
-      
-      for(int i=0; i<q; i++) {
-        int x = 16 + (vid.xres * (i/percolumn)) / columns;
-        int y = (vid.fsize+5) * (i % percolumn) + vid.fsize*2;
-        
-        int actkey = 1000 + i;
-        string vv = v[i].first;
-        if(i < 9) { vv += ": "; vv += ('1' + i); }
-        
-        displayButton(x, y, vv, actkey, 0);
-        }
-      }
-    else {
-      /* displayfr(vid.xres/2, vid.ycenter - vid.radius * 3/4 - vid.fsize*3/2, 2,
-        vid.fsize, 
-        XLAT("MAP EDITOR: ") + paintwhat_str, 
-        0xFFFFFF, 8); */
-        
-      int fs = vid.fsize + 5;
-      
-      getcstat = '-';
-
-      displayfr(8, 8 + fs, 2, vid.fsize, paintwhat_str, forecolor, 0);
-      displayfr(8, 8+fs*2, 2, vid.fsize, XLAT("use at your own risk!"), 0x800000, 0);
-
-      displayButton(8, 8+fs*4, XLAT("0-9 = radius (%1)", its(radius)), ('0' + (radius+1)%10), 0);
-      displayButton(8, 8+fs*5, XLAT("b = boundary"), 'b', 0);
-      displayButton(8, 8+fs*6, XLAT("m = monsters"), 'm', 0);
-      displayButton(8, 8+fs*7, XLAT("w = walls"), 'w', 0);
-      displayButton(8, 8+fs*8, XLAT("i = items"), 'i', 0);
-      displayButton(8, 8+fs*9, XLAT("l = lands"), 'l', 0);
-      displayfr(8, 8+fs*10, 2, vid.fsize, XLAT("c = copy"), 0xC0C0C0, 0);
-      displayButton(8, 8+fs*11, XLAT("u = undo"), 'u', 0);
-      if(painttype == 4)
-        displayButton(8, 8+fs*12, XLAT("f = flip %1", ONOFF(copyflip)), 'u', 0);
-      displayButton(8, 8+fs*13, XLAT("r = regular"), 'r', 0);
-      displayButton(8, 8+fs*14, XLAT("p = paint"), 'p', 0);
-        
-      displayFunctionKeys();
-      }
+    displayFunctionKeys();
+    
+    keyhandler = handleKeyMap;
     }
   
   int spillinc() {
@@ -1032,16 +1082,16 @@ namespace mapeditor {
       }
     }
   
-  bool handleKeyFile(int uni, int& sym) {
-    string& s(cmode == emDraw ? picfile : levelfile);
+  bool handleKeyFile(int uni, int sym) {
+    string& s(*cfileptr);
     int i = size(s) - (editext?0:4);
     if(uni > 2000) sym = uni - 2000;
     if(sym == SDLK_RETURN || sym == SDLK_KP_ENTER || sym == SDLK_ESCAPE) {
-      choosefile = false;
+      popScreen();
       return true;
       }
     else if(sym == SDLK_F2 || sym == SDLK_F3) {
-      choosefile = false;
+      popScreen();
       return false;
       }
     else if(sym == SDLK_F4) {
@@ -1075,132 +1125,80 @@ namespace mapeditor {
     return true;
     }
   
-  void handleKey(int sym, int uni) {
-    if(choosefile && handleKeyFile(sym, uni)) ;
-    else if(subscreen == 1 && painttype == 6) {
-      paintwhat_str = "paint";
-      int v = dialog::handleKeyColor(sym, uni, paintwhat);
-      if(v == 1) subscreen = 0;
-      if(v == 2) cmode = emNormal;
-      }
-    else if(subscreen == 1) {
-      if(uni >= '1' && uni <= '9') uni = 1000 + uni - '1';
-      if(sym == SDLK_RETURN || sym == SDLK_KP_ENTER || sym == '-' || sym == SDLK_KP_MINUS) uni = 1000;
-      for(int z=0; z<size(v); z++) if(1000 + z == uni) {
-        paintwhat = v[z].second;
-        paintwhat_str = v[z].first;
-        subscreen = 0;
-        mousepressed = false;
-        }
-      if(editInfix(uni)) ;
-      else if(subscreen == 1 && uni != 0) cmode = emNormal;      
-      }
-    else if(subscreen == 3) {
-      dialog::handleNavigation(sym, uni);
-      if((uni >= 'a' && uni <= 'z') || (uni >= 'A' && uni <= 'Z')) {
-        whichCanvas = uni;
-        subcanvas = rand();
-        firstland = laCanvas; randomPatternsMode = false;
-        restartGame(); subscreen = 0;
-        }
-      else if(uni != 0) subscreen = 0;
-      }
-    else if(subscreen == 2) {
-      dialog::handleNavigation(sym, uni);
-      if(uni == 'f' || uni == 'p' || uni == 'z' || uni == 'H' || uni == 'F') {
-        if(whichPattern == uni) whichPattern = 0;
-        else whichPattern = uni;
-        clearModelCells();
-        }
-      
-      else if(uni == '0') symRotation = !symRotation;
-      else if(uni == '1') sym01 = !sym01;
-      else if(uni == '2') sym02 = !sym02;
-      else if(uni == '3') sym03 = !sym03;
-      else if(uni == '6' || uni == '7' || uni == '8') {
-        if(whichShape == uni) whichShape = 0;
-        else whichShape = uni;
-        }
-      else if(uni == '3') sym03 = !sym03;
-      else if(uni == 'd') displaycodes = displaycodes == 1 ? 0 : 1;
-      else if(uni == 's') displaycodes = displaycodes == 2 ? 0 : 2;
-      
-      else if(uni == 'l')
-        cmode = emLinepattern; 
+  void handleKeyMap(int sym, int uni) {
+    handlePanning(sym, uni);
 
-      else if(uni == 'r') 
-        subscreen = 3;
-      
-      else if(uni != 0) subscreen = 0;
+    // left-clicks are coded with '-', and right-clicks are coded with sym F1
+    if(uni == '-') undoLock();
+    if(mousepressed && mouseover && sym != SDLK_F1)
+      allInPattern(mouseover, radius, neighborId(mouseover, mouseover2));
+    
+    if(mouseover) for(int i=0; i<mouseover->type; i++) createMov(mouseover, i);
+    if(uni == 'u') applyUndo();
+    else if(uni == 'v' || sym == SDLK_F10 || sym == SDLK_ESCAPE) popScreen();
+    else if(uni >= '0' && uni <= '9') radius = uni - '0';
+    else if(uni == 'm') pushScreen(showList), painttype = 0, infix = "";
+    else if(uni == 'i') pushScreen(showList), painttype = 1, infix = "";
+    else if(uni == 'l') pushScreen(showList), painttype = 2, infix = "";
+    else if(uni == 'w') pushScreen(showList), painttype = 3, infix = "";
+    else if(uni == 'r') pushScreen(showPattern);
+    else if(uni == 't' && mouseover) {
+      cwt.c = mouseover; playermoved = true;
+      cwt.spin = neighborId(mouseover, mouseover2);
       }
-    else {
-      // left-clicks are coded with '-', and right-clicks are coded with sym F1
-      if(uni == '-') undoLock();
-      if(mousepressed && mouseover && sym != SDLK_F1)
-        allInPattern(mouseover, radius, neighborId(mouseover, mouseover2));
-      
-      if(mouseover) for(int i=0; i<mouseover->type; i++) createMov(mouseover, i);
-      if(uni == 'u') applyUndo();
-      else if(uni == 'v' || sym == SDLK_F10 || sym == SDLK_ESCAPE) cmode = emNormal;
-      else if(uni >= '0' && uni <= '9') radius = uni - '0';
-      else if(uni == 'm') subscreen = 1, painttype = 0, infix = "";
-      else if(uni == 'i') subscreen = 1, painttype = 1, infix = "";
-      else if(uni == 'l') subscreen = 1, painttype = 2, infix = "";
-      else if(uni == 'w') subscreen = 1, painttype = 3, infix = "";
-      else if(uni == 'r') subscreen = 2;
-      else if(uni == 't' && mouseover) {
-        cwt.c = mouseover; playermoved = true;
-        cwt.spin = neighborId(mouseover, mouseover2);
-        }
-      else if(uni == 'b') painttype = 5, paintwhat_str = XLAT("boundary");
-      else if(uni == 'p')
-        subscreen = 1, paintwhat = (painttype ==6 ? paintwhat : 0x808080), painttype = 6;
-      else if(sym == SDLK_F2) {
-        if(mapstream::saveMap(levelfile.c_str()))
-          addMessage(XLAT("Map saved to %1", levelfile));
-        else
-          addMessage(XLAT("Failed to save map to %1", levelfile));
-        }
-      else if(sym == SDLK_F5) {
-        restartGame();
-        }
-      else if(sym == SDLK_F3) {
-        if(mapstream::loadMap(levelfile.c_str()))
-          addMessage(XLAT("Map loaded from %1", levelfile));
-        else
-          addMessage(XLAT("Failed to load map from %1", levelfile));
-        }
-      else if(sym == SDLK_F4)
-        choosefile = true;
-      else if(sym == SDLK_F6) {
-        saveHighQualityShot();
-        }
-      else if(sym == SDLK_F8) {
-        svg::render();
-        }
-      else if(sym == SDLK_F7) {
-        drawplayer = !drawplayer;
-        }
-      else if(uni == 'c') {
-        if(mouseover && mouseover2)
-          copydir = neighborId(mouseover, mouseover2);
-        if(copydir<0) copydir = 0;
-        copyflip = (uni == 'f');
-        copywhat = mouseover, painttype = 4;
-        paintwhat_str = XLAT("copying");
-        }
-      else if(uni == 'f') {
-        copyflip = !copyflip;
-        }
-      else if(uni == 'h' || sym == SDLK_F1) {
-        lastmode = cmode;
-        cmode = emHelp;
-        help = mehelptext();
-        }
-      else if(uni == ' ') {
-        cmode = emDraw;
-        initdraw(mouseover ? mouseover : cwt.c);
-        }
+    else if(uni == 'b') painttype = 5, paintwhat_str = XLAT("boundary");
+    else if(uni == 'p') {
+      painttype = 6;
+      paintwhat_str = "paint";
+      dialog::openColorDialog(paintwhat = (painttype ==6 ? paintwhat : 0x808080));
+      }
+    else if(sym == SDLK_F2) {
+      if(mapstream::saveMap(levelfile.c_str()))
+        addMessage(XLAT("Map saved to %1", levelfile));
+      else
+        addMessage(XLAT("Failed to save map to %1", levelfile));
+      }
+    else if(sym == SDLK_F5) {
+      restartGame();
+      }
+    else if(sym == SDLK_F3) {
+      if(mapstream::loadMap(levelfile.c_str()))
+        addMessage(XLAT("Map loaded from %1", levelfile));
+      else
+        addMessage(XLAT("Failed to load map from %1", levelfile));
+      }
+    else if(sym == SDLK_F4) {
+      cfileptr = &levelfile;
+      filecaption = XLAT("level to save/load:");
+      cfileext = ".lev";
+      pushScreen(drawFileDialog);
+      }
+    else if(sym == SDLK_F6) {
+      saveHighQualityShot();
+      }
+    else if(sym == SDLK_F8) {
+      svg::render();
+      }
+    else if(sym == SDLK_F7) {
+      drawplayer = !drawplayer;
+      }
+    else if(uni == 'c') {
+      if(mouseover && mouseover2)
+        copydir = neighborId(mouseover, mouseover2);
+      if(copydir<0) copydir = 0;
+      copyflip = (uni == 'f');
+      copywhat = mouseover, painttype = 4;
+      paintwhat_str = XLAT("copying");
+      }
+    else if(uni == 'f') {
+      copyflip = !copyflip;
+      }
+    else if(uni == 'h' || sym == SDLK_F1) 
+      gotoHelp(mehelptext());
+    else if(uni == ' ') {
+      popScreen();
+      pushScreen(showDrawEditor);
+      initdraw(mouseover ? mouseover : cwt.c);
       }
     }
 
@@ -1216,7 +1214,7 @@ namespace mapeditor {
    "the screen for more keys.";
 
   string drawhelptext() { 
-    return XLAT(mapeditor::drawhelp);
+    return XLAT(drawhelp);
     }
       
   int dslayer;
@@ -1235,83 +1233,57 @@ namespace mapeditor {
     }
 
   void drawGhosts(cell *c, const transmatrix& V, int ct) {
-/*  if(cmode == emDraw && cwt.c->type == 6 && ct == 6) for(int a=0; a<dsCur->rots; a++) {
-
-      transmatrix V2 = V * spin(M_PI + 2*M_PI*a/dsCur->rots);
-
-      if(mouseout()) break;
-
-      hyperpoint P2 = V2 * inverse(cwtV) * mouseh;
-    
-      int xc, yc, sc;
-      getcoord(P2, xc, yc, sc);
-      displaychr(xc, yc, sc, 10, 'x', 0xFF);
-
-      if(crad > 0 && c->cpdist <= 3) {
-        lalpha = 0x80;
-        transmatrix movtocc = V2 * inverse(cwtV) * rgpushxto0(ccenter);
-        for(int d=0; d<84; d++) 
-          drawline(movtocc * ddi(d+1, crad) * C0, movtocc * ddi(d, crad) * C0, 0xC00000);
-        lalpha = 0xFF;
-        }
-      } */
     }
 
   hyperpoint ccenter = C0;
   hyperpoint coldcenter = C0;
   
   void drawGrid() {
-    if(cmode == emDraw && !inHighQual) {
-
-      for(int d=0; d<84; d++) {
-        transmatrix d2 = drawtrans * rgpushxto0(ccenter);
-        int lalpha;
-        if(d % (84/drawcell->type) == 0)
-          lalpha = 0x40;
-        else
-          lalpha = 0x20;
-        int col = darkena(0xC0C0C0, 0, lalpha);
-        queueline(d2 * C0, d2 * spin(M_PI*d/42)* xpush(1) * C0, col);
-        for(int u=2; u<=20; u++) {
-          if(u % 5 == 0) lalpha = 0x40;
-          else lalpha = 0x20;
-          queueline(
-            d2 * spin(M_PI*d/42)* xpush(u/20.) * C0, 
-            d2 * spin(M_PI*(d+1)/42)* xpush(u/20.) * C0, 
-            darkena(0xC0C0C0, 0, lalpha));
-          }
+    for(int d=0; d<84; d++) {
+      transmatrix d2 = drawtrans * rgpushxto0(ccenter);
+      int lalpha;
+      if(d % (84/drawcell->type) == 0)
+        lalpha = 0x40;
+      else
+        lalpha = 0x20;
+      int col = darkena(0xC0C0C0, 0, lalpha);
+      queueline(d2 * C0, d2 * spin(M_PI*d/42)* xpush(1) * C0, col);
+      for(int u=2; u<=20; u++) {
+        if(u % 5 == 0) lalpha = 0x40;
+        else lalpha = 0x20;
+        queueline(
+          d2 * spin(M_PI*d/42)* xpush(u/20.) * C0, 
+          d2 * spin(M_PI*(d+1)/42)* xpush(u/20.) * C0, 
+          darkena(0xC0C0C0, 0, lalpha));
         }
-      queueline(drawtrans*ccenter, drawtrans*coldcenter, darkena(0xC0C0C0, 0, 0x20));
-  
-      int sg = drawcellShapeGroup();
-      
-      if(0) for(int i=0; i<USERSHAPEIDS; i++) if(editingShape(sg, i) && usershapes[sg][i]) {
-  
-        usershapelayer &ds(usershapes[sg][i]->d[mapeditor::dslayer]);
-  
-        for(int a=0; a<size(ds.list); a++) {
-          hyperpoint P2 = drawtrans * ds.list[a];
+      }
+    queueline(drawtrans*ccenter, drawtrans*coldcenter, darkena(0xC0C0C0, 0, 0x20));
+
+    int sg = drawcellShapeGroup();
     
-          queuechr(P2, 10, 'x', 
-            darkena(a == 0 ? 0x00FF00 : 
-            a == size(ds.list)-1 ? 0xFF0000 :
-            0xFFFF00, 0, 0xFF));
-          }
+    if(0) for(int i=0; i<USERSHAPEIDS; i++) if(editingShape(sg, i) && usershapes[sg][i]) {
+
+      usershapelayer &ds(usershapes[sg][i]->d[mapeditor::dslayer]);
+
+      for(int a=0; a<size(ds.list); a++) {
+        hyperpoint P2 = drawtrans * ds.list[a];
+  
+        queuechr(P2, 10, 'x', 
+          darkena(a == 0 ? 0x00FF00 : 
+          a == size(ds.list)-1 ? 0xFF0000 :
+          0xFFFF00, 0, 0xFF));
         }
       }
     }
 
+  void drawHandleKey(int sym, int uni);
+
   void showDrawEditor() {
+    cmode2 = smDraw;
+    drawGrid();
 
     if(!mouseout()) getcstat = '-';
 
-    if(coloring) {
-      dialog::drawColorDialog(colortouse);
-      return;
-      }
-
-    if(choosefile) { drawFileDialog(); return; }
-  
     int sg = drawcellShapeGroup();
     
     string line1, line2;
@@ -1395,6 +1367,8 @@ namespace mapeditor {
       }
     
     displayFunctionKeys();
+    
+    keyhandler = drawHandleKey;
     }
   
   bool rebuildPolys = false;
@@ -1588,17 +1562,10 @@ namespace mapeditor {
     }
   
   void drawHandleKey(int sym, int uni) {
-  
-    if(choosefile && handleKeyFile(sym, uni)) return;
 
-    if(uni == SETMOUSEKEY) mousekey = newmousekey;
+    handlePanning(sym, uni);
   
-    if(coloring) {
-      int v = dialog::handleKeyColor(sym, uni, colortouse);
-      if(v == 2) { coloring = false; return; }
-      else if(v == 1) { coloring = false; uni = COLORKEY; }
-      else return;
-      }
+    if(uni == SETMOUSEKEY) mousekey = newmousekey;
   
     dslayer %= USERLAYERS;
     hyperpoint mh = inverse(drawtrans) * mouseh;
@@ -1638,11 +1605,21 @@ namespace mapeditor {
     if(uni == 'z') vid.scale *= 2;
     if(uni == 'o') vid.scale /= 2;
 
-    if(uni == ' ' && cheater) cmode = emMapEditor;
+    if(uni == ' ' && cheater) {
+      popScreen();
+      pushScreen(showMapEditor);
+      }
 
-    if(uni == 'p') coloring = true;
+    if(uni == 'p')
+      dialog::openColorDialog(colortouse);
 
-    if(sym == SDLK_F4) choosefile = true;
+    if(sym == SDLK_F4) {
+      filecaption = XLAT("pics to save/load:");
+      cfileptr = &picfile;
+      cfileext = ".pic";
+      pushScreen(drawFileDialog);
+      return;
+      }
 
     if(sym == SDLK_F2) {
       FILE *f = fopen(picfile.c_str(), "wt");
@@ -1728,20 +1705,28 @@ namespace mapeditor {
         if(usershapes[i][j]) delete usershapes[i][j];
       }
     
-    if(sym == SDLK_ESCAPE) cmode = emNormal;
+    if(sym == SDLK_ESCAPE) popScreen();
 
     if(sym == SDLK_F1) {
-      lastmode = cmode;
-      cmode = emHelp;
-      sym = 0;
-      help = drawhelptext();
+      gotoHelp(drawhelptext());
       }
 
-    if(sym == SDLK_F10) cmode = emNormal;
+    if(sym == SDLK_F10) popScreen();
 
     if(rebuildPolys)
       buildpolys(), rebuildPolys = false;
     }
+
+  auto hooks = addHook(clearmemory, 0, [] () {
+    if(mapeditor::painttype == 4) 
+      mapeditor::painttype = 0, mapeditor::paintwhat = 0,
+      mapeditor::paintwhat_str = "clear monster";
+      mapeditor::copywhat = NULL;
+    mapeditor::undo.clear();
+    if(!cheater) mapeditor::displaycodes = 0;
+    if(!cheater) mapeditor::whichShape = 0;
+    modelcell.clear();
+    });  
 #endif
 
   int canvasback = linf[laCanvas].color >> 2;
@@ -1897,7 +1882,7 @@ namespace mapeditor {
       }
   
   #ifndef NOEDIT  
-    if(cmode == emDraw && mapeditor::editingShape(group, id)) {
+    if(cmode2 == smDraw && mapeditor::editingShape(group, id)) {
   
       /* for(int a=0; a<size(ds.list); a++) {
         hyperpoint P2 = V * ds.list[a];
@@ -2264,12 +2249,13 @@ lessalphaif(col, behindsphere(V), behindsphere(gmatrix[c2]))
     dialog::addInfo("change the alpha parameter to show the lines");
   
     dialog::display();
+    
+    keyhandler = [] (int sym, int uni) {
+      dialog::handleNavigation(sym, uni);
+      if(uni >= 'a' && uni < 'a' + numpat)
+        dialog::openColorDialog(patterns[uni - 'a'].color, NULL);
+      else if(doexiton(sym,uni)) popScreen();
+      }; 
     }
   
-  void handleMenu(int sym, int uni) {
-    dialog::handleNavigation(sym, uni);
-    if(uni >= 'a' && uni < 'a' + numpat)
-      dialog::openColorDialog(patterns[uni - 'a'].color, NULL);
-    else if(doexiton(sym,uni)) cmode = emNormal;
-    }
   };

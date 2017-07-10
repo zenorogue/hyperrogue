@@ -68,9 +68,9 @@ void loadsamples(const char *fname) {
   while(true) {
     sample s;
     alloc(s.val);
-    for(int i=0; i<cols; i++)
-      if(fscanf(f, "%lf", &s.val[i]) != 1) { fclose(f); return; }
     if(feof(f)) break;
+    for(int i=0; i<cols; i++)
+      if(fscanf(f, "%lf", &s.val[i]) != 1) { break; }
     fgetc(f);
     while(true) {
       int c = fgetc(f);

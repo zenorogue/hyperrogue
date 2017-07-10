@@ -412,6 +412,31 @@ namespace yendor {
     };
   vector<scoredata> scoreboard;
 
+  const char *chelp = 
+    "There are many possible solutions to the Yendor Quest. In the Yendor "
+    "Challenge, you will try many of them!\n\n"    
+    "Each challenge takes part in a specific land, and you have to use what "
+    "you have available.\n\n"
+    
+    "You need to obtain an Orb of Yendor in the normal game to activate "
+    "this challenge, and (ever) collect 10 treasures in one or two lands "
+    "to activate a specific level.\n\n"
+    
+    "After you complete each challenge, you can try it again, on a harder "
+    "difficulty level.\n\n"
+    
+    "All the solutions showcased in the Yendor Challenge work in the normal "
+    "play too. However, passages to other lands, and (sometimes) some land features "
+    "are disabled in the Yendor "
+    "Challenge, so that you have to use the expected method. Also, "
+    "the generation rules are changed slightly for the Palace "
+    "and Minefield while you are looking for the Orb of Yendor, "
+    "to make the challenge more balanced "
+    "(but these changes are also active during the normal Yendor Quest).\n\n"
+    
+    "You get 1000 points for each challenge won, and 1 extra point for "
+    "each extra difficulty level.";
+
   void showMenu() {
     int s = vid.fsize;
     vid.fsize = vid.fsize * 4/5;
@@ -475,57 +500,28 @@ namespace yendor {
 
     yendor::uploadScore();
     vid.fsize = s;
-    }
     
-  const char *chelp = 
-    "There are many possible solutions to the Yendor Quest. In the Yendor "
-    "Challenge, you will try many of them!\n\n"    
-    "Each challenge takes part in a specific land, and you have to use what "
-    "you have available.\n\n"
-    
-    "You need to obtain an Orb of Yendor in the normal game to activate "
-    "this challenge, and (ever) collect 10 treasures in one or two lands "
-    "to activate a specific level.\n\n"
-    
-    "After you complete each challenge, you can try it again, on a harder "
-    "difficulty level.\n\n"
-    
-    "All the solutions showcased in the Yendor Challenge work in the normal "
-    "play too. However, passages to other lands, and (sometimes) some land features "
-    "are disabled in the Yendor "
-    "Challenge, so that you have to use the expected method. Also, "
-    "the generation rules are changed slightly for the Palace "
-    "and Minefield while you are looking for the Orb of Yendor, "
-    "to make the challenge more balanced "
-    "(but these changes are also active during the normal Yendor Quest).\n\n"
-    
-    "You get 1000 points for each challenge won, and 1 extra point for "
-    "each extra difficulty level.";
-
-  void handleKey(int sym, int uni) {
-    dialog::handleNavigation(sym, uni);
-    if(uni >= 'a' && uni < 'a'+YENDORLEVELS-1) {
-      challenge = uni-'a' + 1;
-      if(levelUnlocked(challenge) || autocheat) {
-        restartGame(yendor::on ? 0 : 'y');
-        cmode = emNormal;
+    keyhandler = [] (int sym, int uni) {
+      dialog::handleNavigation(sym, uni);
+      if(uni >= 'a' && uni < 'a'+YENDORLEVELS-1) {
+        challenge = uni-'a' + 1;
+        if(levelUnlocked(challenge) || autocheat) {
+          restartGame(yendor::on ? 0 : 'y');
+          popScreen();
+          }
+        else 
+          addMessage("Collect 10 treasures in various lands to unlock the challenges there");
         }
-      else 
-        addMessage("Collect 10 treasures in various lands to unlock the challenges there");
-      }
-    else if(uni == '0') {
-      if(yendor::on) restartGame('y');
-      cmode = emNormal;
-      }
-    else if(uni == '1') easy = !easy;
-    else if(uni == '2' || sym == SDLK_F1) {
-      lastmode = cmode;
-      cmode = emHelp;
-      help = chelp;
-      }
-    else if(doexiton(sym, uni)) cmode = emNormal;
+      else if(uni == '0') {
+        if(yendor::on) restartGame('y');
+        popScreen();
+        }
+      else if(uni == '1') easy = !easy;
+      else if(uni == '2' || sym == SDLK_F1) gotoHelp(chelp);
+      else if(doexiton(sym, uni)) popScreen();
+      };
     }
-  
+    
   void collected(cell* c2) {
     int pg = gold();
     playSound(c2, "tada");
@@ -565,6 +561,10 @@ namespace yendor {
     achievement_collection(itOrbYendor, pg, gold());
     achievement_victory(false);
     }
+  
+  auto hooks = addHook(clearmemory, 0, [] () {
+    yendor::yii = NOYENDOR; yendor::yi.clear();
+    });
   };
 
 #define MAXTAC 20
@@ -738,23 +738,20 @@ namespace tactic {
         }      
       displayScore(scorehere, xr * 50);
       }
-    }
+     
+    keyhandler = [] (int sym, int uni) {
+      if(uni >= 1000 && uni < 1000 + LAND_TAC) {
+        firstland = euclidland = getLandById(uni - 1000);
+        restartGame(tactic::on ? 0 : 't');
+        popScreen();
+        }
+      else if(uni == '0') {
+        popScreen();
+        firstland = laIce;
+        if(tactic::on) restartGame('t');
+        }
 
-  void handleKey(int sym, int uni) {
-    if(uni >= 1000 && uni < 1000 + LAND_TAC) {
-      firstland = euclidland = getLandById(uni - 1000);
-      restartGame(tactic::on ? 0 : 't');
-      cmode = emNormal;
-      }
-    else if(uni == '0') {
-      cmode = emNormal;
-      firstland = laIce;
-      if(tactic::on) restartGame('t');
-      }
-    else if(sym == SDLK_F1) {
-      lastmode = cmode;
-      cmode = emHelp;
-      help = 
+      else if(sym == SDLK_F1) gotoHelp(
         "In the pure tactics mode, you concentrate on a specific land. "
         "Your goal to obtain as high score as possible, without using "
         "features of the other lands. You can then compare your score "
@@ -775,12 +772,13 @@ namespace tactic {
         "The rate of treasure spawn is static in this mode. It is not "
         "increased by killing monsters.\n\n"
         
-        "Good luck, and have fun!";
-        
-      }
-    else if(dialog::handlePageButtons(uni)) ;
-    else if(doexiton(sym, uni)) cmode = emNormal;
+        "Good luck, and have fun!"
+        );
+      else if(dialog::handlePageButtons(uni)) ;
+      else if(doexiton(sym, uni)) popScreen();
+      };
     }
+
   };
 
 int modecodetable[42][6] = {
@@ -931,6 +929,7 @@ namespace peace {
   int qty;
   
   eLand getNext(eLand last) {
+    if(!peace::on) return laNone;
     if(isElemental(last) && hrand(100) < 90)
       return laNone;
     else if(createOnSea(last))
@@ -949,23 +948,6 @@ namespace peace {
     return false;
     }
   
-  void showMenu() {
-    dialog::init(XLAT(otherpuzzles ? "hyperbolic puzzles" : "memory game"), 0x40A040, 150, 100);
-
-    levellist = otherpuzzles ? explorelevels : simonlevels;
- 
-    for(qty = 0; levellist[qty]; qty++) 
-      dialog::addItem(XLAT1(linf[levellist[qty]].name), 'a'+qty);
-
-    dialog::addBreak(100);
-    dialog::addItem(XLAT(otherpuzzles ? "memory game" : "other hyperbolic puzzles"), '1');
-    dialog::addBoolItem(XLAT("display hints"), hint, '2');
-    dialog::addItem(XLAT("Help"), SDLK_F1);
-    dialog::addItem(XLAT("Return to the normal game"), '0');
-    
-    dialog::display();
-    }
-    
   const char *chelp = NODESCYET;
   
   namespace simon {
@@ -1043,26 +1025,41 @@ namespace peace {
       }
     }
     
-  void handleKey(int sym, int uni) {
-    dialog::handleNavigation(sym, uni);
+  void showMenu() {
+    dialog::init(XLAT(otherpuzzles ? "hyperbolic puzzles" : "memory game"), 0x40A040, 150, 100);
+
+    levellist = otherpuzzles ? explorelevels : simonlevels;
+ 
+    for(qty = 0; levellist[qty]; qty++) 
+      dialog::addItem(XLAT1(linf[levellist[qty]].name), 'a'+qty);
+
+    dialog::addBreak(100);
+    dialog::addItem(XLAT(otherpuzzles ? "memory game" : "other hyperbolic puzzles"), '1');
+    dialog::addBoolItem(XLAT("display hints"), hint, '2');
+    dialog::addItem(XLAT("Help"), SDLK_F1);
+    dialog::addItem(XLAT("Return to the normal game"), '0');
     
-    if(uni == '1') otherpuzzles = !otherpuzzles;
-    else if(uni >= 'a' && uni < 'a' + qty) {
-      whichland = levellist[uni - 'a'];
-      restartGame(peace::on ? 0 : 'P');
-      cmode = emNormal;
-      }
-    else if(uni == '2') { hint = !hint; cmode = emNormal; }
-    else if(uni == '0') {
-      firstland = laIce;
-      if(peace::on) restartGame('P');
-      cmode = emNormal;
-      }
-    else if(uni == 'h' || sym == SDLK_F1) {
-      lastmode = cmode;
-      cmode = emHelp;
-      help = chelp;
-      }
-    else if(doexiton(sym, uni)) cmode = emNormal;
+    dialog::display();
+    
+    keyhandler = [] (int sym, int uni) {
+      dialog::handleNavigation(sym, uni);
+      
+      if(uni == '1') otherpuzzles = !otherpuzzles;
+      else if(uni >= 'a' && uni < 'a' + qty) {
+        whichland = levellist[uni - 'a'];
+        restartGame(peace::on ? 0 : 'P');
+        popScreen();
+        }
+      else if(uni == '2') { hint = !hint; popScreen(); }
+      else if(uni == '0') {
+        firstland = laIce;
+        if(peace::on) restartGame('P');
+        popScreen();
+        }
+      else if(uni == 'h' || sym == SDLK_F1) gotoHelp(chelp);
+      else if(doexiton(sym, uni)) popScreen();
+      };
     }
+    
+  auto aNext = addHook(hooks_nextland, 100, getNext);
   };

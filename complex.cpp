@@ -2761,3 +2761,17 @@ namespace ca {
       }
     }
   }
+
+auto ccm = addHook(clearmemory, 0, [] () {
+  offscreen.clear();  
+  princess::clear();
+  mirrors.clear();
+  clearing::bpdata.clear();
+  tortoise::emap.clear();
+  tortoise::babymap.clear();
+  prairie::lasttreasure = NULL;
+  prairie::enter = NULL;
+  prairie::tchoices.clear();
+  prairie::beaststogen.clear();
+  });
+

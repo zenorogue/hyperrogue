@@ -925,6 +925,7 @@ namespace gamestack {
   };
 
 void restartGame(char switchWhat, bool push) {
+  popScreenAll();
   DEBB(DF_INIT, (debugfile,"restartGame\n"));
   
   if(push)
@@ -1061,41 +1062,6 @@ void restartGame(char switchWhat, bool push) {
   resetmusic();
   }
 
-void clearGameMemory() {
-  #ifdef HASLINEVIEW
-  conformal::renderAutoband();
-  conformal::on = false;
-  #endif
-  DEBB(DF_INIT, (debugfile,"clearGameMemory\n"));
-  pathq.clear();
-  dcal.clear();
-  yendor::yii = NOYENDOR; yendor::yi.clear();
-  clearshadow();
-  offscreen.clear();  
-  princess::clear();
-  buggycells.clear();
-  mirrors.clear();
-  clearing::bpdata.clear();
-  tortoise::emap.clear();
-  tortoise::babymap.clear();
-  seenSevenMines = false;
-  #ifdef HASLINEVIEW
-  conformal::killhistory.clear();
-  conformal::findhistory.clear();
-  conformal::movehistory.clear();
-  conformal::includeHistory = false;
-  #endif
-  recallCell = NULL;
-  prairie::lasttreasure = NULL;
-  prairie::enter = NULL;
-  prairie::tchoices.clear();
-  prairie::beaststogen.clear();
-  butterflies.clear();
-  #ifdef ROGUEVIZ
-  rogueviz::close();
-  #endif
-  }
-
 static int orbid = 0;
 
 eItem nextOrb() {
@@ -1222,7 +1188,6 @@ bool applyCheat(char u, cell *c = NULL) {
       items[itOrbShield] += 1;
       cheater++; addMessage(XLAT("Orb power gained!"));
       canmove = true;
-      if(cmode == emQuit) cmode = emNormal;
       }
     return true;
     }
@@ -1235,12 +1200,12 @@ bool applyCheat(char u, cell *c = NULL) {
 #ifndef NOEDIT
   if(u == 'A') {
     lastexplore = turncount;
-    cmode = emMapEditor;
+    pushScreen(mapeditor::showMapEditor);
     return true;
     }
   if(u == 'A'-64) {
     mapeditor::drawcell = mouseover ? mouseover : cwt.c;
-    cmode = emDraw;
+    pushScreen(mapeditor::showDrawEditor);
     return true;
     }
 #endif
@@ -1366,7 +1331,7 @@ bool applyCheat(char u, cell *c = NULL) {
     return true;
     }
   if(u == 'W'-64) {
-    cmode = emLinepattern;
+    pushScreen(linepatterns::showMenu);
     return true;
     }
   if(u == 'G'-64) {
@@ -1422,4 +1387,20 @@ bool applyCheat(char u, cell *c = NULL) {
 #endif
   return false;
   }
+
+purehookset clearmemory;
+
+void clearMemory() {
+  callhooks(clearmemory);
+  }
+
+auto cgm = addHook(clearmemory, 40, [] () {
+  pathq.clear();
+  dcal.clear();
+  clearshadow();
+  seenSevenMines = false;
+  recallCell = NULL;
+  butterflies.clear();
+  buggycells.clear();
+  });
 

@@ -1,6 +1,5 @@
 // Hyperbolic Rogue -- the conformal/history mode
 // Copyright (C) 2011-2016 Zeno Rogue, see 'hyper.cpp' for details
-#include <complex>
 
 namespace polygonal {
 
@@ -10,8 +9,6 @@ namespace polygonal {
   ld  STAR = 0;
   
   int deg = 20;
-
-  #define MSI 120
 
   ld matrix[MSI][MSI];
   ld ans[MSI];
@@ -227,7 +224,14 @@ bool isbad(ld z) { return !isfinite(z) || fabs(z) > 1e6; }
 
 namespace conformal {
 
+  void handleKeyC(int sym, int uni);
+  
   int lastprogress;
+  
+  void progress_screen() {
+    gamescreen(0);
+    mouseovers = "";
+    }
 
   void progress(string str) {
 #ifndef NOSDL
@@ -429,9 +433,9 @@ namespace conformal {
       int siz = size(v);
       for(int j=1; j<siz-1; j++) {
         SDL_Surface *buffer = s;
-        emtype cm = cmode;
         s = sav; 
-        cmode = emProgress;
+        
+        pushScreen(progress_screen);
 
         char buf[128];
         sprintf(buf, "#%03d", segid);
@@ -440,7 +444,6 @@ namespace conformal {
         calcparam();
         vid.radius = bandhalf;
 
-        cmode = cm;
         s = buffer;
         viewctr.h = v[j]->base->master;
         viewctr.spin = 0; 
@@ -461,6 +464,8 @@ namespace conformal {
         getcoord0(next, x, y, shift);
         
         int bwidth = x-bandhalf;
+        
+        popScreen();
         
         drawsegment:
         
@@ -572,10 +577,12 @@ namespace conformal {
     dialog::addItem(XLAT("exit this menu"), 'q');
     dialog::display();
     mouseovers = XLAT("see http://www.roguetemple.com/z/hyper/conformal.php");
+    keyhandler = handleKeyC;
     }
 
   int ib = 0;
   ld compbuf;
+
   void applyIB() {
     using namespace polygonal;
     cld& tgt = coef[coefid];
@@ -583,7 +590,7 @@ namespace conformal {
     if(ib == 2) tgt = cld(real(tgt), compbuf);
     }
     
-  void handleKey(int sym, int uni) {
+  void handleKeyC(int sym, int uni) {
     dialog::handleNavigation(sym, uni);
     ib = 0;
   
@@ -624,7 +631,7 @@ namespace conformal {
       dialog::sidedialog = true;
       }
     else if(sym == 'n' && pmodel == mdPolygonal) {
-      dialog::editNumber(polygonal::deg, 2, MSI-1, 1, 2, XLAT("degree of the approximation"), "");
+      dialog::editNumber(polygonal::deg, 2, polygonal::MSI-1, 1, 2, XLAT("degree of the approximation"), "");
       dialog::sidedialog = true;
       }
     else if(sym == 'x' && pmodel == mdPolynomial)  {
@@ -642,7 +649,7 @@ namespace conformal {
       ib = 2;
       }
     else if(sym == 'n' && pmodel == mdPolynomial)
-      dialog::editNumber(polygonal::coefid, 0, MSI-1, 1, 0, XLAT("which coefficient"), "");
+      dialog::editNumber(polygonal::coefid, 0, polygonal::MSI-1, 1, 0, XLAT("which coefficient"), "");
     else if(sym == 'r') rotation += (shiftmul > 0 ? 1:3);
     else if(sym == 'a') 
       dialog::editNumber(lvspeed, -5, 5, .1, 1, XLAT("animation speed"), "");
@@ -654,7 +661,6 @@ namespace conformal {
 #ifndef NOSDL
     else if(uni == 'f' && pmodel == mdBand && on) createImage(dospiral);
 #endif
-    else if(sym == 'q' || sym == SDLK_ESCAPE || sym == '0') { cmode = emNormal; }
     else if(sym == 'i') { 
       if(canmove && !cheater) {
         addMessage("Enable cheat mode or GAME OVER to use this");
@@ -666,6 +672,7 @@ namespace conformal {
     else if(sym == 'j') { 
       autobandhistory = !autobandhistory; 
       }
+    else if(doexiton(sym, uni)) popScreen();
     }
   
   void restore() {
@@ -718,5 +725,15 @@ namespace conformal {
     pmodel = spm;
     includeHistory = ih;
 #endif
-  }
+    }
+
+  auto hooks = addHook(clearmemory, 0, [] () {
+    conformal::renderAutoband();
+    conformal::on = false;
+    conformal::killhistory.clear();
+    conformal::findhistory.clear();
+    conformal::movehistory.clear();
+    conformal::includeHistory = false;
+    });
+
   }

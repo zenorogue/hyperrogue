@@ -1,0 +1,460 @@
+purehookset hooks_stats;
+
+int monsterclass(eMonster m) {
+  if(isFriendly(m) || m == moTortoise) return 1;
+  else if(isMonsterPart(m)) return 2;
+  else return 0;
+  }
+
+int glyphclass(int i) {
+  if(i < ittypes) {
+    eItem it = eItem(i);
+    return itemclass(it) == IC_TREASURE ? 0 : 1; 
+    }
+  else {
+    eMonster m = eMonster(i-ittypes);
+    return monsterclass(m) == 0 ? 2 : 3; 
+    }
+  }
+
+int subclass(int i) {
+  if(i < ittypes) 
+    return itemclass(eItem(i)); 
+  else 
+    return monsterclass(eMonster(i-ittypes));
+  }
+
+#define GLYPH_MARKTODO   1
+#define GLYPH_MARKOVER   2
+#define GLYPH_LOCAL      4
+#define GLYPH_IMPORTANT  8
+#define GLYPH_NONUMBER   16
+#define GLYPH_DEMON      32
+#define GLYPH_RUNOUT     64
+#define GLYPH_INPORTRAIT 128
+#define GLYPH_LOCAL2     256
+#define GLYPH_TARGET     512
+#define GLYPH_INSQUARE   1024
+
+eGlyphsortorder glyphsortorder;
+  
+int zero = 0;
+
+int& ikmerge(int i) {
+  if(i < ittypes) return items[i];
+  else if(i == ittypes) return zero;
+  else return kills[i-ittypes];
+  }
+
+const int glyphs = ittypes + motypes;
+
+int gfirsttime[glyphs], glasttime[glyphs], gcopy[glyphs], ikland[glyphs];
+int glyphorder[glyphs];
+
+void updatesort() {
+  for(int i=0; i<glyphs; i++) {
+    if(ikmerge(i) && gfirsttime[i] == 0)
+      gfirsttime[i] = ticks;
+    if(ikmerge(i) != gcopy[i])
+      gcopy[i] = items[i], glasttime[i] = ticks;
+    }    
+  }
+
+void preparesort() {
+  for(int i=0; i<glyphs; i++) glyphorder[i] = i;
+  for(int i=0; i<LAND_OVERX; i++) {
+    eLand l = land_over[i];
+    ikland[treasureType(l)] = i+1;
+    for(int mi=0; mi<motypes; mi++) 
+      if(isNative(l, eMonster(mi)))
+        ikland[mi+ittypes] = i+1;
+    }
+  glyphsortorder = gsoLand; updatesort();
+  glyphsortorder = gsoFirstTop;
+  }
+
+int glyphsortkey = 0;
+
+int glyphcorner(int i) {
+  if(i < ittypes)
+    return itemclass(eItem(i)) == IC_ORB ? 2 : 0;
+  else
+    return 1;
+  }
+
+bool glyphsort(int i, int j) {
+  if(subclass(i) != subclass(j))
+    return subclass(i) < subclass(j);
+  if(glyphsortorder == gsoFirstTop)
+    return gfirsttime[i] < gfirsttime[j];
+  if(glyphsortorder == gsoFirstBottom)
+    return gfirsttime[i] > gfirsttime[j];
+  if(glyphsortorder == gsoLastTop)
+    return glasttime[i] > glasttime[j];
+  if(glyphsortorder == gsoLastBottom)
+    return glasttime[i] < glasttime[j];
+  if(glyphsortorder == gsoValue)
+    return ikmerge(i) > ikmerge(j);
+  if(glyphsortorder == gsoLand)
+    return ikland[i] < ikland[j];
+  return 0;
+  }
+
+int glyphflags(int gid) {
+  int f = 0;
+  if(gid < ittypes) {
+    eItem i = eItem(gid);
+    if(itemclass(i) == IC_NAI) f |= GLYPH_NONUMBER;
+    if(isElementalShard(i)) {
+      f |= GLYPH_LOCAL | GLYPH_INSQUARE;
+      if(i == localshardof(cwt.c->land)) f |= GLYPH_LOCAL2;
+      }
+    if(i == treasureType(cwt.c->land)) 
+      f |= GLYPH_LOCAL | GLYPH_LOCAL2 | GLYPH_IMPORTANT | GLYPH_INSQUARE;
+    if(i == itHolyGrail) {
+      if(items[i] >= 3) f |= GLYPH_MARKOVER;
+      }
+    else if(itemclass(i) == IC_TREASURE) {
+      if(items[i] >= 25 && items[i] < 100) f |= GLYPH_MARKOVER;
+      else if(items[i] < 10) f |= GLYPH_MARKTODO;
+      }
+    else {
+      f |= GLYPH_IMPORTANT | GLYPH_INSQUARE;
+      if(itemclass(i) == IC_ORB && items[i] < 10) f |= GLYPH_RUNOUT;
+      }
+    if(i == orbToTarget) f |= GLYPH_TARGET;
+    f |= GLYPH_INPORTRAIT;
+    }
+  else {
+    eMonster m = eMonster(gid-ittypes);
+    if(m == moLesser) f |= GLYPH_IMPORTANT | GLYPH_DEMON | GLYPH_INPORTRAIT | GLYPH_INSQUARE;
+    int isnat = isNative(cwt.c->land, m);
+    if(isnat) f |= GLYPH_LOCAL | GLYPH_IMPORTANT | GLYPH_INPORTRAIT | GLYPH_INSQUARE;
+    if(isnat == 2) f |= GLYPH_LOCAL2;
+    if(m == monsterToSummon) f |= GLYPH_TARGET;
+    }
+  return f;
+  }
+
+bool graphglyph() {
+  return vid.graphglyph == 2 || (vid.graphglyph == 1 && vid.monmode);
+  }
+
+bool displayglyph(int cx, int cy, int buttonsize, char glyph, int color, int qty, int flags, int id) {
+    
+  bool b =
+    mousex >= cx && mousex < cx+buttonsize && mousey >= cy-buttonsize/2 && mousey <= cy-buttonsize/2+buttonsize;
+
+  int glsize = buttonsize;
+  if(glyph == '%' || glyph == 'M' || glyph == 'W') glsize = glsize*4/5;
+  
+  if(graphglyph()) {
+    initquickqueue();
+    if(id >= ittypes) {
+      eMonster m = eMonster(id - ittypes);
+      int bsize = buttonsize;
+      if(m == moKrakenH) bsize /= 3;
+      if(m == moKrakenT || m == moDragonTail) bsize /= 2;
+      if(m == moSlime) bsize = (2*bsize+1)/3;
+      transmatrix V = atscreenpos(cx+buttonsize/2, cy, bsize);
+      int mcol = color;
+      mcol -= (color & 0xFCFCFC) >> 2;
+      drawMonsterType(m, NULL, V, mcol, 0);
+      }
+    else {
+      eItem it = eItem(id);
+      int bsize = buttonsize;
+      if(glyph =='*') bsize *= 2;
+      if(glyph == '$') bsize = (bsize*5+2)/3;
+      if(glyph == 'o') bsize = (bsize*3+1)/2;
+      if(glyph == 't') bsize = bsize*5/2;
+      if(it == itWarning) bsize *= 2;
+      if(it == itBombEgg || it == itTrollEgg || it == itDodeca) bsize = bsize*3/2;
+      transmatrix V = atscreenpos(cx+buttonsize/2, cy, bsize);
+      int icol = color;
+      icol -= (color & 0xFCFCFC) >> 2;
+      int ic = itemclass(it);
+      drawItemType(it, NULL, V, icol, (ic == IC_ORB || ic == IC_NAI) ? ticks*2 : ((glyph == 't' && qty%5) || it == itOrbYendor) ? ticks/2 : 0, false);
+      }
+    quickqueue();
+    }
+  else if(glyph == '*')
+    displaychr(cx + buttonsize/2, cy+buttonsize/4, 0, glsize*3/2, glyph, darkenedby(color, b?0:1));
+  else
+    displaychr(cx + buttonsize/2, cy, 0, glsize, glyph, darkenedby(color, b?0:1));
+  
+  string fl = "";
+  string str = its(qty);
+
+  if(flags & GLYPH_TARGET) fl += "!";
+  if(flags & GLYPH_LOCAL2) fl += "+";
+  else if(flags & GLYPH_LOCAL) fl += "-";
+  if(flags & GLYPH_DEMON) fl += "X";
+  if(flags & GLYPH_MARKOVER) str += "!";
+
+  if(fl != "") 
+    displaystr(cx + buttonsize, cy-buttonsize/2 + buttonsize/4, 0, buttonsize/2, fl, darkenedby(color, 0), 16);
+
+  if(flags & GLYPH_NONUMBER) str = "";
+  
+  int bsize = 
+    (qty < 10 && (flags & (GLYPH_MARKTODO | GLYPH_RUNOUT))) ? buttonsize*3/4 :
+    qty < 100 ? buttonsize / 2 :
+    buttonsize / 3;
+  if(str != "")
+    displayfr(cx + buttonsize, cy + buttonsize/2 - bsize/2, 1, bsize, str, color, 16);
+
+  return b;
+  }
+
+void displayglyph2(int cx, int cy, int buttonsize, int i) {
+      
+  char glyph = i < ittypes ? iinf[i].glyph : minf[i-ittypes].glyph;
+  int color = i < ittypes ? iinf[i].color : minf[i-ittypes].color;
+  int imp = glyphflags(i);
+
+  if(displayglyph(cx, cy, buttonsize, glyph, color, ikmerge(i), imp, i)) {
+    instat = true;
+    getcstat = SDLK_F1;
+    if(i < ittypes) {
+      eItem it = eItem(i);
+      int t = itemclass(it);
+      if(t == IC_TREASURE)
+        mouseovers = XLAT("treasure collected: %1", it);
+      if(t == IC_OTHER)
+        mouseovers = XLAT("objects found: %1", it);
+      if(t == IC_NAI)
+        mouseovers = XLAT("%1", it);
+      if(t == IC_ORB)
+        mouseovers = XLAT("orb power: %1", eItem(i));
+      if(it == itGreenStone) {
+        mouseovers += XLAT(" (click to drop)");
+        getcstat = 'g';
+        }
+      if(imp & GLYPH_LOCAL) mouseovers += XLAT(" (local treasure)");
+      help = generateHelpForItem(it);
+      }
+    else {
+      eMonster m = eMonster(i-ittypes);
+      if(isMonsterPart(m))
+        mouseovers = s0 + XLAT("parts destroyed: %1", m);
+      else if(isFriendly(m) && isNonliving(m))
+        mouseovers = s0 + XLAT("friends destroyed: %1", m);
+      else if(isFriendly(m))
+        mouseovers = s0 + XLAT("friends killed: %1", m);
+      else if(isNonliving(m))
+        mouseovers = s0 + XLAT("monsters destroyed: %1", m);
+      else if(m == moTortoise)
+        mouseovers = s0 + XLAT("animals killed: %1", m);
+      else 
+        mouseovers = s0 + XLAT("monsters killed: %1", m);
+      if(imp & GLYPH_LOCAL2) mouseovers += XLAT(" (killing increases treasure spawn)");
+      else if(imp & GLYPH_LOCAL) mouseovers += XLAT(" (appears here)");
+      help = generateHelpForMonster(m);
+      }
+    }
+  }
+
+bool nohud, nomenukey;
+
+hookset<bool()> *hooks_prestats;
+
+void drawStats() {
+  callhandlers(false, hooks_prestats);
+#ifdef ROGUEVIZ
+  if(rogueviz::on || nohud) return;
+#endif
+  if(viewdists && sidescreen) {
+    distcolors[0] = forecolor;
+    dialog::init("");
+    int qty[64];
+    vector<cell*>& ac = currentmap->allcells();
+    for(int i=0; i<64; i++) qty[i] = 0;
+    for(int i=0; i<size(ac); i++) {
+      int d = celldistance(ac[i], cwt.c);
+      if(d >= 0 && d < 64) qty[d]++;
+      }
+    if(geometry == gNormal)
+      for(int i=purehepta?6:8; i<=15; i++) 
+        qty[i] = 
+          purehepta ?
+            3*qty[i-1] - qty[i-2]
+          : qty[i-1] + qty[i-2] + qty[i-3] - qty[i-4];
+    if(geometry == gEuclid)
+      for(int i=8; i<=15; i++) qty[i] = 6*i;
+    for(int i=0; i<64; i++) if(qty[i])
+      dialog::addInfo(its(qty[i]), distcolors[i&7]);
+    if(geometry == gNormal && !purehepta) {
+      dialog::addBreak(200);
+      dialog::addHelp("a(d+4) = a(d+3) + a(d+2) + a(d+1) - a(d)");
+      dialog::addInfo("a(d) ~ 1.72208áµ", forecolor);
+      }
+    if(geometry == gNormal && purehepta) {
+      dialog::addBreak(200);
+      dialog::addHelp("a(d+2) = 3a(d+1) - a(d+2)");
+      dialog::addInfo("a(d) ~ 2.61803áµ", forecolor);
+      }
+    if(geometry == gEuclid) {
+      dialog::addBreak(300);
+      dialog::addInfo("a(d) = 6d", forecolor);
+      }
+    dialog::display();
+    }
+  if(sidescreen) return;
+  
+  if(vid.xres > vid.yres * 85/100 && vid.yres > vid.xres * 85/100) {
+    int bycorner[4];
+    for(int u=0; u<4; u++) bycorner[u] = 0;
+    for(int i=0; i<glyphs; i++) if(ikmerge(i) && (glyphflags(i) & GLYPH_INSQUARE))
+      bycorner[glyphcorner(i)]++;
+    updatesort();
+    stable_sort(glyphorder, glyphorder+glyphs, glyphsort);
+    int rad = min(vid.xres, vid.yres) / 2;
+    for(int cor=0; cor<3; cor++) {
+      for(int a=5; a<41; a++) {
+        int s = min(vid.xres, vid.yres) / a;
+        int spots = 0;
+        for(int u=vid.fsize; u<vid.xres/2-s; u += s)
+        for(int v=vid.fsize; v<vid.yres/2-s; v += s)
+          if(hypot(vid.xres/2-u-s, vid.yres/2-v-s) > rad) {
+            spots++;
+            }
+        if(spots >= bycorner[cor] && spots >= 3) {
+          int next = 0;
+          vector<int> glyphstoshow;
+          for(int i=0; i<glyphs; i++) {
+            int g = glyphorder[i];
+            if(ikmerge(g) && (glyphflags(g) & GLYPH_INSQUARE) && glyphcorner(g) == cor)
+              glyphstoshow.push_back(g);
+            }
+          for(int u=vid.fsize; u<vid.xres/2-s; u += s)
+          for(int v=vid.fsize; v<vid.yres/2-s; v += s)
+            if(hypot(vid.xres/2-u-s, vid.yres/2-v-s) > rad) {
+              if(next >= size(glyphstoshow)) break;
+
+              int cx = u;
+              int cy = v + s/2;
+              if(cor&1) cx = vid.xres-1-s-cx;
+              if(cor&2) cy = vid.yres-1-cy;
+    
+              displayglyph2(cx, cy, s, glyphstoshow[next++]);
+              }
+          break;
+          }
+        }
+      }
+    return;
+    }
+  
+  instat = false;
+  bool portrait = vid.xres < vid.yres;
+  int colspace = portrait ? (vid.yres - vid.xres - vid.fsize*3) : (vid.xres - vid.yres - 16) / 2;
+  int rowspace = portrait ? vid.xres - 16 : vid.yres - vid.fsize * 4;
+  int colid[4], rowid[4];
+  int maxbyclass[4];
+  for(int z=0; z<4; z++) maxbyclass[z] = 0;
+  for(int i=0; i<glyphs; i++) if(ikmerge(i))
+    if(!portrait || (glyphflags(i) | GLYPH_INPORTRAIT))
+      maxbyclass[glyphclass(i)]++;
+  int buttonsize;
+  int columns, rows;
+  bool imponly = false;
+  int minsize = vid.fsize * (portrait ? 4 : 2);  
+  rows = 0;
+  while((buttonsize = minsize - vid.killreduction)) {
+    columns = colspace / buttonsize;
+    rows = rowspace / buttonsize;
+    int coltaken = 0;
+    for(int z=0; z<4; z++) {
+      if(z == 2 && !portrait) {
+        if(coltaken > columns) { vid.killreduction++; continue; }
+        coltaken = 0;
+        }
+      colid[z] = coltaken, rowid[z] = 0,
+      coltaken += (maxbyclass[z] + rows-1) / rows;
+      }
+    if(coltaken > columns) { vid.killreduction++; continue; }
+    break;
+    }
+
+  if(buttonsize <= vid.fsize*3/4) {
+    imponly = true; buttonsize = minsize;
+    rows = rowspace / buttonsize; if(!rows) return;
+    colid[0] = 0; colid[2] = portrait ? 1 : 0;
+    }  
+  
+  updatesort();
+  stable_sort(glyphorder, glyphorder+glyphs, glyphsort);
+  
+  for(int i0=0; i0<glyphs; i0++) {
+    int i = glyphorder[i0];
+    if(!ikmerge(i)) continue;
+    int z = glyphclass(i);
+    int imp = glyphflags(i);
+    if(imponly) { z &=~1; if(!(imp & GLYPH_IMPORTANT)) continue; }
+
+    int cx, cy;
+    if(portrait)
+      cx = 8 + buttonsize * rowid[z], cy = vid.fsize*2 + buttonsize * (colid[z]) + buttonsize/2;
+    else
+      cx = 8 + buttonsize * (colid[z]), cy = vid.fsize * 3 + buttonsize * rowid[z];
+    
+    if(!portrait && z < 2) cx = vid.xres - cx - buttonsize;
+
+    rowid[z]++; if(rowid[z] >= rows) rowid[z] = 0, colid[z]++;
+    
+    displayglyph2(cx, cy, buttonsize, i);    
+    }
+
+  string s0;
+  if(displayButtonS(vid.xres - 8, vid.fsize, "score: " + its(gold()), forecolor, 16, vid.fsize)) {
+    mouseovers = XLAT("Your total wealth"),
+    instat = true,
+    getcstat = SDLK_F1,
+    help = helptitle(XLAT("Your total wealth"), 0xFFD500) + 
+    XLAT(
+      "The total value of the treasure you have collected.\n\n"
+      "Every world type contains a specific type of treasure, worth 1 $$$; "
+      "your goal is to collect as much treasure as possible, but every treasure you find "
+      "causes more enemies to hunt you in its native land.\n\n"
+      "Orbs of Yendor are worth 50 $$$ each.\n\n"
+      );
+    }
+  if(displayButtonS(8, vid.fsize, "kills: " + its(tkills()), forecolor, 0, vid.fsize)) {
+    instat = true,
+    getcstat = SDLK_F1,
+    mouseovers = XLAT("Your total kills")+": " + its(tkills()),
+    help = helptitle(XLAT("Your total kills") + ": " + its(tkills()), 0x404040) + 
+      XLAT(
+      "In most lands, more treasures are generated with each enemy native to this land you kill. "
+      "Moreover, 100 kills is a requirement to enter the Graveyard and the Hive.\n\n"
+      "Friendly creatures and parts of monsters (such as the Ivy) do appear in the list, "
+      "but are not counted in the total kill count.");
+    }
+  if(displayButtonS(4, vid.yres - 4 - vid.fsize/2, s0+VER+ " fps: " + its(calcfps()), 0x202020, 0, vid.fsize/2)) {
+    mouseovers = XLAT("frames per second"),
+    getcstat = SDLK_F1,
+    instat = true,
+    help = 
+      helptitle(XLAT("frames per second"), 0xFF4040) +
+      XLAT(
+      "The higher the number, the smoother the animations in the game. "
+      "If you find that animations are not smooth enough, you can try "
+      "to change the options "
+      ) +
+#ifdef IOS
+XLAT(
+      "(in the MENU). You can reduce the sight range, this should make "
+      "the animations smoother.");
+#else
+XLAT(
+      "(press v) and change the wall/monster mode to ASCII, or change "
+      "the resolution.");
+#endif
+    }
+
+  achievement_display();
+
+  callhooks(hooks_stats);
+  }
+

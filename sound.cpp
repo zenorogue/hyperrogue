@@ -65,13 +65,13 @@ int musfadeval = 2000;
 
 eLand cid = laNone;
 
+hookset<bool(eLand)> *hooks_music;
+
 void handlemusic() {
   DEBB(DF_GRAPH, (debugfile,"handle music\n"));
   if(audio && musicvolume) {
     eLand id = getCurrentLandForMusic();
-#ifdef EXTRA_MUSIC
-    if(extra::changemusic(id)) return;
-#endif
+    if(callhandlers(false, hooks_music, id)) return;
     if(outoffocus) id = eLand(0);
     if(musfname[id] == "LAST") id = cid;
     if(!loaded[id]) {

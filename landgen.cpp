@@ -1596,27 +1596,13 @@ bool createOnSea(eLand old) {
     (old == laOcean && (chaosmode ? hrand(2) : !generatingEquidistant));
   }
 
+hookset<eLand(eLand)> *hooks_nextland;
+
 eLand getNewLand(eLand old) {
 
-#ifdef EXTRA_NEWLAND
-  if(true) {
-    eLand l = extra::getNext(old);
-    if(l) return l;
-    }  
-#endif
-  
-  #ifdef TOUR
-  if(tour::on) {
-    eLand l = tour::getNext(old);
-    if(l) return l;
-    }
-  
-  if(peace::on) {
-    eLand l = peace::getNext(old);
-    if(l) return l;
-    }
-  #endif
-  
+  eLand l = callhandlers(laNone, hooks_nextland, old);
+  if(l) return l;
+    
   if(cheatdest != old) if(!isCyclic(cheatdest) && !isTechnicalLand(cheatdest)) return cheatdest;
   
   if(old == laTortoise) return laDragon;

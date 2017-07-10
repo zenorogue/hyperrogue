@@ -1501,17 +1501,7 @@ void clearCellMemory() {
   allmaps.clear();
   }
 
-void clearMemory() {
-  extern void clearGameMemory();
-  clearGameMemory();
-  shmup::clearMemory();
-  cleargraphmemory();
-#ifndef NOEDIT
-  mapeditor::clearModelCells();
-#endif
-  clearCellMemory();
-  DEBMEM ( printf("ok\n"); )
-  }
+auto cellhooks = addHook(clearmemory, 500, clearCellMemory);
 
 int getHemisphere(cell *c, int which) {
   if(torus) return 0;

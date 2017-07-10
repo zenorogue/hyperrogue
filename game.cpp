@@ -5415,8 +5415,12 @@ void checkmove() {
       if(movepcto(1, 1, true)) 
         canmove = legalmoves[cwt.spin] = true;
   if(kills[moPlayer]) canmove = false;
-  if(!canmove)
+
+  if(!canmove) {
     achievement_final(true);
+    if(cmode2 == smNormal) showMissionScreen();
+    }
+
   if(canmove && timerstopped) {
     timerstart = time(NULL);
     timerstopped = false;

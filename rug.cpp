@@ -667,50 +667,45 @@ void show() {
   dialog::addBoolItem(XLAT("render texture without OpenGL"), (rendernogl), 'g');  
   dialog::addSelItem(XLAT("texture size"), its(texturesize)+"x"+its(texturesize), 's');
   dialog::display();
-  }
+  keyhandler = [] (int sym, int uni) {
+  #ifdef PANDORA
+    rendernogl = true;
+  #endif
+    dialog::handleNavigation(sym, uni);
 
-void handleKey(int sym, int uni) {
-#ifdef PANDORA
-  rendernogl = true;
-#endif
-  dialog::handleNavigation(sym, uni);
-
-  if(uni == 'h') {
-    lastmode = cmode;
-    cmode = emHelp;
-    help = 
+    if(uni == 'h') gotoHelp(
       "In this mode, HyperRogue is played on a 3D model of a part of the hyperbolic plane, "
       "similar to one you get from the 'paper model creator' or by hyperbolic crocheting.\n\n"
       "This requires some OpenGL extensions and may crash or not work correctly -- enabling "
       "the 'render texture without OpenGL' options may be helpful in this case. Also the 'render once' option "
       "will make the rendering faster, but the surface will be rendered only once, so "
       "you won't be able to play a game on it.\n\n"
-      "Use arrow keys to rotate, Page Up/Down to zoom.";
-    }
-  else if(uni == 'u') {
-    if(sphere) restartGame('E');
-    if(euclid) restartGame('e');
-    rug::init();
-    cmode = emNormal;
-    }
-  else if(uni == 'o')
-    renderonce = !renderonce;
-#ifndef PANDORA
-  else if(uni == 'g')
-    rendernogl = !rendernogl;
-#endif
-  else if(uni == 's') {
-    texturesize *= 2;
-    if(texturesize == 8192) texturesize = 128;
-    dialog::scaleLog();
-    }
-  else if(doexiton(sym, uni))
-    cmode = emChangeMode;
+      "Use arrow keys to rotate, Page Up/Down to zoom."
+      );
+    else if(uni == 'u') {
+      if(sphere) restartGame('E');
+      if(euclid) restartGame('e');
+      rug::init();
+      popScreen();
+      }
+    else if(uni == 'o')
+      renderonce = !renderonce;
+  #ifndef PANDORA
+    else if(uni == 'g')
+      rendernogl = !rendernogl;
+  #endif
+    else if(uni == 's') {
+      texturesize *= 2;
+      if(texturesize == 8192) texturesize = 128;
+      dialog::scaleLog();
+      }
+    else if(doexiton(sym, uni)) popScreen();
+    };
   }
 
 void select() {
   if(rug::rugged) rug::close();
-  else cmode = emRugConfig;
+  else pushScreen(rug::show);
   }
   
 }
