@@ -1,6 +1,6 @@
-#define VER "9.4n3"
-#define VERNUM 9417
-#define VERNUM_HEX 0x9417
+#define VER "9.4n2"
+#define VERNUM 9416
+#define VERNUM_HEX 0x9416
 
 #define GEN_M 0
 #define GEN_F 1
@@ -265,6 +265,8 @@ const char *loadlevel = NULL;
 #include "orbs.cpp"
 #ifdef INV
 #include "closed/inventory.cpp"
+#else
+bool inv::on;
 #endif
 #include "system.cpp"
 #include "geometry.cpp"
