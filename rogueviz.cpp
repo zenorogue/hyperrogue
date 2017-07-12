@@ -1755,7 +1755,7 @@ void showMenu() {
     else if(uni == 'b') backcolor ^= 0xFFFFFF, bordcolor ^= 0xFFFFFF, forecolor ^= 0xFFFFFF;
     else if(uni == 'g') {
       dialog::editNumber(ggamma, 0, 5, .01, 0.5, XLAT("gamma value for edges"), "");
-      dialog::sidedialog = true;
+      dialog::dialogflags = sm::SIDE;
       }
     else if(uni == 'z') {
       for(int i=0; i<size(named)-1; i++) if(named[i] == cwt.c)

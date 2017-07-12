@@ -673,7 +673,8 @@ void describeMouseover() {
   }
 
 void showHelp() {
-  cmode2 = smHelp;
+  gamescreen(2);
+  cmode = sm::HELP | sm::DOTOUR;
   getcstat = SDLK_ESCAPE;
   if(help == "HELPFUN") {
     help_delegate();

@@ -172,7 +172,7 @@ namespace dialog {
 
   int dcenter, dwidth;
 
-  bool sidedialog;
+  int dialogflags;
 
   int displayLong(string str, int siz, int y, bool measure) {
 
@@ -251,12 +251,13 @@ namespace dialog {
     
     dcenter = vid.xres/2;
     dwidth = vid.xres;
-    measure();
-    
+
     if(sidescreen) {
       dwidth = vid.xres - vid.yres;
       dcenter = vid.xres - dwidth / 2;
       }
+    
+    measure();
     
     while(tothei > vid.yres - 5 * vid.fsize) {
       int adfsize = int(dfsize * sqrt((vid.yres - 5. * vid.fsize) / tothei));
@@ -600,15 +601,17 @@ namespace dialog {
     if(ne.editwhat == &geom3::middetail && geom3::highdetail > geom3::middetail)
       geom3::highdetail = geom3::middetail;
     
-    buildpolys();
-#ifdef GL
-    resetGL();
-#endif
+    if(cmode & sm::A3) {
+      buildpolys();
+  #ifdef GL
+      resetGL();
+  #endif
+     }
     }
   
   void drawNumberDialog() {
-    gamescreen(sidedialog ? 0 : 2);
-    cmode2 = smNumber;
+    cmode = sm::NUMBER | dialogflags;
+    gamescreen((cmode & sm::SIDE) ? 0 : 2);
     init(ne.title);
     addInfo(ne.s);
     addSlider(ne.scale(ne.vmin), ne.scale(*ne.editwhat), ne.scale(ne.vmax), 500);
@@ -623,7 +626,7 @@ namespace dialog {
 
     addBreak(100);
     
-    ne.help = explain3D(ne.editwhat);
+    if(cmode && sm::A3) ne.help = explain3D(ne.editwhat);
 
     if(ne.help != "") {
       addHelp(ne.help);
@@ -774,14 +777,14 @@ namespace dialog {
     ne.scale = ne.inverse_scale = identity;
     ne.intval = NULL;
     ne.positive = false;
-    sidedialog = false;
+    dialogflags = (cmode & (sm::SIDE | sm::A3));
+    cmode |= sm::NUMBER;
     pushScreen(drawNumberDialog);
     }
 
   void editNumber(int& x, int vmin, int vmax, int step, int dft, string title, string help) {
     editNumber(ne.intbuf, vmin, vmax, step, dft, title, help);
     ne.intbuf = x; ne.intval = &x; ne.s = its(x);
-    sidedialog = true;
     }
   
   };

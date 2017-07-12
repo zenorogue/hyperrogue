@@ -533,6 +533,9 @@ namespace conformal {
     };
   
   void show() {
+    cmode = sm::SIDE;
+    gamescreen(0);
+    
     dialog::init(XLAT("conformal/history mode"));
 
     dialog::addBoolItem(XLAT("include history"), (includeHistory), 'i');
@@ -622,18 +625,12 @@ namespace conformal {
         setvideomode();
         } */
       }
-    else if(sym == 'x' && pmodel == mdPolygonal) {
+    else if(sym == 'x' && pmodel == mdPolygonal)
       dialog::editNumber(polygonal::SI, 3, 10, 1, 4, XLAT("polygon sides"), "");
-      dialog::sidedialog = true;
-      }
-    else if(sym == 'y' && pmodel == mdPolygonal) {
+    else if(sym == 'y' && pmodel == mdPolygonal)
       dialog::editNumber(polygonal::STAR, -1, 1, .1, 0, XLAT("star factor"), "");
-      dialog::sidedialog = true;
-      }
-    else if(sym == 'n' && pmodel == mdPolygonal) {
+    else if(sym == 'n' && pmodel == mdPolygonal)
       dialog::editNumber(polygonal::deg, 2, polygonal::MSI-1, 1, 2, XLAT("degree of the approximation"), "");
-      dialog::sidedialog = true;
-      }
     else if(sym == 'x' && pmodel == mdPolynomial)  {
       polygonal::maxcoef = max(polygonal::maxcoef, polygonal::coefid);
       int ci = polygonal::coefid + 1;

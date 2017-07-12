@@ -1229,7 +1229,20 @@ extern bool dronemode;
 
 extern ld whatever;
 
-enum screenmode { smMenu, smNormal, smMission, smHelp, smMap, smDraw, smNumber, smShmupConfig, smOverview };
+namespace sm {
+  static const int NORMAL = 1;
+  static const int MISSION = 2;
+  static const int HELP = 4;
+  static const int MAP = 8;
+  static const int DRAW = 16;
+  static const int NUMBER = 32;
+  static const int SHMUPCONFIG = 64;
+  static const int OVERVIEW = 128;
+  static const int SIDE = 256;
+  static const int DOTOUR = 512;
+  static const int CENTER = 1024;
+  static const int A3 = 2048; // affects poly
+  };
 
 namespace linepatterns {
 
@@ -1430,7 +1443,7 @@ void gmodekeys(int sym, int uni);
 
 void switchGL();
 void switchFullscreen();
-extern screenmode cmode2;
+extern int cmode;
 
 namespace scores { void load(); }
 
@@ -1454,3 +1467,5 @@ namespace leader { void showMenu(); void handleKey(int sym, int uni); }
 #endif
 
 bool needConfirmation();
+
+extern const char* geometrynames_short[gGUARD];

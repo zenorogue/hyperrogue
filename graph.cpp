@@ -2509,7 +2509,7 @@ void setcolors(cell *c, int& wcol, int &fcol) {
   if(c->wall == waAncientGrave || c->wall == waFreshGrave || c->wall == waThumperOn || c->wall == waThumperOff || c->wall == waBonfireOff)
     fcol = wcol;
     
-  if(c->land == laMinefield && c->wall == waMineMine && (cmode2 == smMap || !canmove))
+  if(c->land == laMinefield && c->wall == waMineMine && ((cmode && sm::MAP) || !canmove))
     fcol = wcol = 0xFF4040;
 
   if(mightBeMine(c) && mineMarkedSafe(c))
@@ -2682,7 +2682,7 @@ bool openorsafe(cell *c) {
 #define Dark(x) darkena(x,0,0xFF)
 
 int gridcolor(cell *c1, cell *c2) {
-  if(cmode2 == smDraw) return Dark(forecolor);
+  if(cmode & sm::DRAW) return Dark(forecolor);
   if(!c2)
     return 0x202020 >> darken;
   int rd1 = rosedist(c1), rd2 = rosedist(c2);
@@ -2896,7 +2896,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
 
     if(!buggyGeneration && c->mpdist > 8 && !cheater) return; // not yet generated
     
-    if(c->land == laNone && cmode2 == smMap) {
+    if(c->land == laNone && (cmode & sm::MAP)) {
       queuepoly(V, shTriangle, 0xFF0000FF);
       }
   
@@ -2961,7 +2961,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       hiddens = false;
       }
     
-    if(hiddens && cmode2 != smMap)
+    if(hiddens && !(cmode & sm::MAP))
       it = itNone;
 
     int icol = 0, moncol = 0xFF00FF;
@@ -3088,7 +3088,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
               
 #ifndef NOEDIT
       if(mapeditor::drawUserShape(Vpdir, mapeditor::cellShapeGroup(), mapeditor::realpatternsh(c),
-        darkena(fcol, fd, cmode2 == smDraw ? 0xC0 : 0xFF), c));
+        darkena(fcol, fd, (cmode & sm::DRAW) ? 0xC0 : 0xFF), c));
       
       else if(mapeditor::whichShape == '7') {
         if(ishept(c))
@@ -3397,7 +3397,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         }
 #endif
 
-      if(cmode2 == smNumber && (dialog::editingDetail())) {
+      if((cmode & sm::NUMBER) && (dialog::editingDetail())) {
         int col = 
           dist0 < geom3::highdetail ? 0xFF80FF80 :
           dist0 >= geom3::middetail ? 0xFFFF8080 :
@@ -3907,6 +3907,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       }
     
     if(vid.grid) {
+      vid.linewidth *= 3;
       // sphere: 0.3948
       // sphere heptagonal: 0.5739
       // sphere trihepta: 0.3467
@@ -3939,6 +3940,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
                     V * ddspin(c,t,+S7) * xpush0(x), 
                     gridcolor(c, c->mov[t]), 1);
         }
+      vid.linewidth /= 3;
       }
 
     if(!euclid && (!pirateTreasureSeek || compassDist(c) < compassDist(pirateTreasureSeek)))
@@ -3995,7 +3997,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
   if(!inHighQual) {
     
 #ifndef NOEDIT
-    if(cmode2 == smMap && lmouseover && darken == 0 &&
+    if((cmode & sm::MAP) && lmouseover && darken == 0 &&
       !mouseout() && 
       (mapeditor::whichPattern ? mapeditor::subpattern(c) == mapeditor::subpattern(lmouseover) : c == lmouseover)) {
       queuecircle(V, .78, 0x00FFFFFF);
@@ -4097,7 +4099,7 @@ void queuecircleat(cell *c, double rad, int col) {
 
 void drawMarkers() {
 
-  if(darken || cmode2 == smNumber) return;
+  if(darken || !(cmode & sm::NORMAL)) return;
 
   if(!inHighQual) {
 
@@ -4188,7 +4190,7 @@ void drawMarkers() {
   monsterToSummon = moNone;
   orbToTarget = itNone;
 
-  if(mouseover && targetclick && cmode2 == smNormal) {
+  if(mouseover && targetclick) {
     shmup::cpid = 0;
     orbToTarget = targetRangedOrb(mouseover, roCheck);
     if(orbToTarget == itOrbSummon) {
@@ -4408,7 +4410,7 @@ void drawthemap() {
   Uint8 *keystate = SDL_GetKeyState(NULL);
   lmouseover = mouseover;
   bool useRangedOrb = (!(vid.shifttarget & 1) && haveRangedOrb() && lmouseover && lmouseover->cpdist > 1) || (keystate[SDLK_RSHIFT] | keystate[SDLK_LSHIFT]);
-  if(!useRangedOrb && cmode2 != smMap && DEFAULTCONTROL && !mouseout()) {
+  if(!useRangedOrb && !(cmode & sm::MAP) && DEFAULTCONTROL && !mouseout()) {
     void calcMousedest();
     calcMousedest();
     cellwalker cw = cwt; bool f = flipplayer;
@@ -4502,9 +4504,8 @@ void calcparam() {
     vid.ycenter = vid.yres - realradius - vid.fsize - (ISIOS ? 10 : 0);
     }
   else {
-    if(vid.xres >= vid.yres * 5/4-16 && dialog::sidedialog && cmode2 == smNumber) 
+    if(vid.xres >= vid.yres * 5/4-16 && (cmode & sm::SIDE))
       sidescreen = true;
-    if(viewdists && cmode2 == smNormal && vid.xres > vid.yres) sidescreen = true;
 #ifdef TOUR
     if(tour::on && (tour::slides[tour::currentslide].flags & tour::SIDESCREEN))
       sidescreen = true;
@@ -4571,7 +4572,7 @@ void drawfullmap() {
   drawthemap();
   #ifndef NORUG
   if(!inHighQual) {
-    if(cmode2 == smNormal && !rug::rugged) {
+    if((cmode & sm::NORMAL) && !rug::rugged) {
       if(multi::players > 1) {
         transmatrix bcwtV = cwtV;
         for(int i=0; i<multi::players; i++) if(multi::playerActive(i))
@@ -4584,7 +4585,7 @@ void drawfullmap() {
         drawmovestar(0, 0);
       }
     if(rug::rugged && !rug::renderonce) queueline(C0, mouseh, 0xFF00FFFF, 5);
-    if(cmode2 == smDraw) mapeditor::drawGrid();
+    if(cmode & sm::DRAW) mapeditor::drawGrid();
     }
   #endif
   profile_start(2);
@@ -4648,7 +4649,8 @@ void normalscreen() {
 #endif
 
   if(!outofmap(mouseh)) getcstat = '-';
-  cmode2 = smNormal;
+  cmode = sm::NORMAL | sm::DOTOUR | sm::CENTER;
+  if(viewdists) cmode |= sm::SIDE;
   gamescreen(hiliteclick && mmmon ? 1 : 0); drawStats();
   if(nomenukey)
     ;
@@ -4665,7 +4667,7 @@ void normalscreen() {
 
 vector< function<void()> > screens = { normalscreen };
 
-screenmode cmode2;
+int cmode;
 
 void drawscreen() {
 
@@ -4697,7 +4699,7 @@ void drawscreen() {
   
   mouseovers = " ";
 
-  cmode2 = smMenu;
+  cmode = 0;
   keyhandler = [] (int sym, int uni) { return false; };
   screens.back()();
 
@@ -4710,7 +4712,9 @@ void drawscreen() {
 
   drawmessages();
   
-  if((havewhat&HF_BUG) && darken == 0 && cmode2 == smNormal) for(int k=0; k<3; k++)
+  bool normal = cmode & sm::NORMAL;
+  
+  if((havewhat&HF_BUG) && darken == 0 && normal) for(int k=0; k<3; k++)
     displayfr(vid.xres/2 + vid.fsize * 5 * (k-1), vid.fsize*2,   2, vid.fsize, 
       its(hive::bugcount[k]), minf[moBug0+k].color, 8);
     
@@ -4730,7 +4734,7 @@ void drawscreen() {
       }
     }
 
-  if((minefieldNearby || tmines) && !items[itOrbAether] && darken == 0 && cmode2 == smNormal) {
+  if((minefieldNearby || tmines) && !items[itOrbAether] && darken == 0 && normal) {
     string s;
     if(tmines > 7) tmines = 7;
     int col = minecolors[tmines];

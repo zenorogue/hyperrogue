@@ -291,12 +291,12 @@ void drawStats() {
     if(geometry == gNormal && !purehepta) {
       dialog::addBreak(200);
       dialog::addHelp("a(d+4) = a(d+3) + a(d+2) + a(d+1) - a(d)");
-      dialog::addInfo("a(d) ~ 1.72208áµ", forecolor);
+      dialog::addInfo("a(d) ~ 1.72208ᵈ", forecolor);
       }
     if(geometry == gNormal && purehepta) {
       dialog::addBreak(200);
       dialog::addHelp("a(d+2) = 3a(d+1) - a(d+2)");
-      dialog::addInfo("a(d) ~ 2.61803áµ", forecolor);
+      dialog::addInfo("a(d) ~ 2.61803ᵈ", forecolor);
       }
     if(geometry == gEuclid) {
       dialog::addBreak(300);

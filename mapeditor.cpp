@@ -790,7 +790,7 @@ namespace mapeditor {
     }
   
   void showMapEditor() {
-    cmode2 = smMap;
+    cmode = sm::MAP;
     gamescreen(0);
   
     int fs = vid.fsize + 5;
@@ -1279,7 +1279,7 @@ namespace mapeditor {
   void drawHandleKey(int sym, int uni);
 
   void showDrawEditor() {
-    cmode2 = smDraw;
+    cmode = sm::DRAW;
     drawGrid();
 
     if(!mouseout()) getcstat = '-';
@@ -1882,7 +1882,7 @@ namespace mapeditor {
       }
   
   #ifndef NOEDIT  
-    if(cmode2 == smDraw && mapeditor::editingShape(group, id)) {
+    if((cmode == sm::DRAW) && mapeditor::editingShape(group, id)) {
   
       /* for(int a=0; a<size(ds.list); a++) {
         hyperpoint P2 = V * ds.list[a];

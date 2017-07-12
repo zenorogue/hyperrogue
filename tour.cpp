@@ -82,10 +82,11 @@ void slidehelp() {
 
 bool handleKeyTour(int sym, int uni) {
   if(!tour::on) return false;
-  if(!cmode2) return false;
+  if(!(cmode & sm::DOTOUR)) return false;
+  bool inhelp = cmode & sm::HELP;
   int flags = slides[currentslide].flags;
-  if((sym == SDLK_RETURN || sym == SDLK_KP_ENTER) && (cmode2 != smHelp || (flags & QUICKSKIP))) {
-    if(cmode2) popScreen();
+  if((sym == SDLK_RETURN || sym == SDLK_KP_ENTER) && (!inhelp || (flags & QUICKSKIP))) {
+    if(inhelp) popScreen();
     if(geometry || purehepta) { 
       restartGame(0, false); 
       if(!(flags & QUICKGEO)) return true; 
@@ -105,7 +106,7 @@ bool handleKeyTour(int sym, int uni) {
     if(currentslide == 0) { slidehelp(); return true; }
     presentation(pmStop);
     currentslide--;
-    if(cmode2 == smHelp) popScreen(), slidehelp();
+    if(inhelp) popScreen(), slidehelp();
     presentation(pmStart);
     return true;
     }

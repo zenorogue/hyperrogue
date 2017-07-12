@@ -423,7 +423,8 @@ void handleAllConfig(int sym, int uni) {
   }
 
 void showGraphConfig() {
-  gamescreen(3);
+  gamescreen(0);
+  cmode = sm::SIDE;
 
   dialog::init(XLAT("graphics configuration"));
 
@@ -505,11 +506,9 @@ void showGraphConfig() {
     if(xuni == 'u') vid.particles = !vid.particles;
     if(xuni == 'd') vid.graphglyph = (1+vid.graphglyph)%3;
     
-    if(xuni == 'j') {
+    if(xuni == 'j')
       dialog::editNumber(whatever, -10, 10, 1, 0, XLAT("whatever"), 
         XLAT("Whatever."));
-      dialog::sidedialog = true;
-      }
   
     if(xuni == 'a') dialog::editNumber(vid.sspeed, -5, 5, 1, 0, 
       XLAT("scrolling speed"),
@@ -521,13 +520,11 @@ void showGraphConfig() {
       XLAT("movement animation speed"),
       XLAT("+5 = move instantly"));
   
-    if(xuni == 'r') {
+    if(xuni == 'r')
       dialog::editNumber(sightrange, 4, cheater ? 10 : 7, 1, 7, XLAT("sight range"), 
         XLAT("Roughly 42% cells are on the edge of your sight range. Reducing "
         "the sight range makes HyperRogue work faster, but also makes "
         "the game effectively harder."));
-      dialog::sidedialog = true;
-      }
   
     if(xuni == 'k') {
       glyphsortorder = eGlyphsortorder((glyphsortorder+6+(shiftmul>0?1:-1)) % gsoMAX);
@@ -766,13 +763,12 @@ void projectionDialog() {
   dialog::editNumber(vid.alpha, -5, 5, .1, 1,
     XLAT("projection"),
     XLAT("HyperRogue uses the Minkowski hyperboloid model internally. "
-    "Klein and Poincar‚ models can be obtained by perspective, "
+    "Klein and PoincarÃ© models can be obtained by perspective, "
     "and the Gans model is obtained by orthogonal projection. "
 //  "This parameter specifies the distance from the hyperboloid center "
 //  "to the eye. "
     "See also the conformal mode (in the special modes menu) "
     "for more models."));
-  dialog::sidedialog = true;
   }
 
 string explain3D(ld *param) {
@@ -825,7 +821,7 @@ string explain3D(ld *param) {
         "from a point c absolute units above the plane, this corresponds "
         "to viewing a Minkowski hyperboloid from a point "
         "tanh(g)/tanh(c) units below the center. This in turn corresponds to "
-        "the Poincaré model for g=c, and Klein-Beltrami model for g=0.");
+        "the PoincarÃš model for g=c, and Klein-Beltrami model for g=0.");
       
   if(param == &wall_height)
     return
@@ -856,7 +852,8 @@ string explain3D(ld *param) {
   }
 
 void show3D() {
-  gamescreen(4);
+  gamescreen(0);
+  cmode = sm::SIDE | sm::A3;
   using namespace geom3;
   dialog::init(XLAT("3D configuration"));
 
@@ -902,8 +899,10 @@ void show3D() {
     dialog::handleNavigation(sym, uni);
     
     if(uni == 'n') 
+      cmode &= sm::A3,
       dialog::editNumber(geom3::highdetail, 0, 5, .5, 7, XLAT("High detail range"), "");
     else if(uni == 'm') 
+      cmode &= sm::A3,
       dialog::editNumber(geom3::middetail, 0, 5, .5, 7, XLAT("Mid detail range"), "");
     else if(uni == 'c') 
       tc_camera = ticks,
@@ -924,26 +923,29 @@ void show3D() {
     else if(uni == 'h') 
       dialog::editNumber(geom3::human_wall_ratio, 0, 1, .1, .7, XLAT("Human to wall ratio"), "");
     
-    else if(uni == 'e') {
+    else if(uni == 'e')
+      cmode &= sm::A3,
       dialog::editNumber(vid.eye, -10, 10, 0.01, 0, XLAT("distance between eyes"),
         XLAT("Watch the Minkowski hyperboloid or the hypersian rug mode with the "
         "red/cyan 3D glasses."));
-      dialog::sidedialog = true;
-      }
   
     else if(uni == 'y') 
+      cmode &= sm::A3,
       dialog::editNumber(vid.yshift, 0, 1, .1, 0, XLAT("Y shift"), 
         "Don't center on the player character."
         );
     else if(uni == 's') 
+      cmode &= sm::A3,
       dialog::editNumber(vid.camera_angle, -180, 180, 5, 0, XLAT("camera rotation"), 
         "Rotate the camera. Can be used to obtain a first person perspective, "
         "or third person perspective when combined with Y shift."
         );
     else if(uni == 'b') 
+      cmode &= sm::A3,
       dialog::editNumber(vid.ballangle, 0, 90, 5, 0, XLAT("camera rotation in ball model"), 
         "Rotate the camera in ball/hyperboloid model.");
     else if(uni == 'x') 
+      cmode &= sm::A3,
       dialog::editNumber(vid.ballproj, 0, 100, .1, 0, XLAT("projection in ball model"), 
         "This parameter affects the ball model the same way as the projection parameter affects the disk model.");
     else if(uni == 'B') 
@@ -952,8 +954,6 @@ void show3D() {
       pmodel = (pmodel == mdHyperboloid ? mdDisk : mdHyperboloid);
   
     else if(doexiton(sym, uni)) popScreen();
-    
-    if(cmode2 == smNumber) dialog::sidedialog = true;
     };
   }
 

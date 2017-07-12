@@ -5425,7 +5425,7 @@ void checkmove() {
 
   if(!canmove) {
     achievement_final(true);
-    if(cmode2 == smNormal) showMissionScreen();
+    if(cmode & sm::NORMAL) showMissionScreen();
     }
 
   if(canmove && timerstopped) {

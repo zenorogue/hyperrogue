@@ -361,7 +361,7 @@ void run(const char *fname, int _perdist, double _maxfac) {
   }
   
 void describe(cell *c) {
-  if(cmode2 == smHelp) return;
+  if(cmode & sm::HELP) return;
   neuron *n = getNeuronSlow(c);
   if(!n) return;
   help += "cell number: " + its(n - &net[0]) + "\n";

@@ -633,6 +633,8 @@ namespace netgen {
     }
 
   void show() {
+    cmode = sm::SIDE;
+    gamescreen(0);
     if(true) {
       for(int i=0; i<CELLS; i++) {
         int t = ct[i];

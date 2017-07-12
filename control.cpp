@@ -308,7 +308,7 @@ void handleKeyNormal(int sym, int uni) {
       // vid.yshift = 1 - vid.yshift;
       // vid.drawmousecircle = true;
       }
-    if(sym == 'm' && canmove && cmode2 == smNormal && (centerover == cwt.c ? mouseover : centerover))
+    if(sym == 'm' && canmove && (centerover == cwt.c ? mouseover : centerover))
       performMarkCommand(mouseover);
     }
   
@@ -316,7 +316,7 @@ void handleKeyNormal(int sym, int uni) {
     if(sym == '.' || sym == 's') movepcto(-1, 1);
     if((sym == SDLK_DELETE || sym == SDLK_KP_PERIOD || sym == 'g') && uni != 'G' && uni != 'G'-64) 
       movepcto(MD_DROP, 1);
-    if(sym == 't' && uni != 'T' && uni != 'T'-64 && canmove && cmode2 == smNormal) {
+    if(sym == 't' && uni != 'T' && uni != 'T'-64 && canmove) {
       if(playermoved && items[itStrongWind]) {
         cell *c = whirlwind::jumpDestination(cwt.c);
         if(c) centerover = c;
@@ -415,11 +415,13 @@ void mainloopiter() {
 
   cframelimit = vid.framelimit;
   if(outoffocus && cframelimit > 10) cframelimit = 10;  
+  
+  bool normal = cmode & sm::NORMAL;
 
-  if(DOSHMUP && cmode2 == smNormal) 
+  if(DOSHMUP && normal) 
     timetowait = 0, shmup::turn(ticks - lastt);
     
-  if(!DOSHMUP && (multi::alwaysuse || multi::players > 1) && cmode2 == smNormal)
+  if(!DOSHMUP && (multi::alwaysuse || multi::players > 1) && normal)
     timetowait = 0, multi::handleMulti(ticks - lastt);
 
   if(vid.sspeed >= 5 && gmatrix.count(cwt.c) && !elliptic) {
@@ -436,7 +438,7 @@ void mainloopiter() {
   if(timetowait > 0)
     SDL_Delay(timetowait);
   else {
-    if(cmode2 == smNormal) {
+    if(cmode & sm::CENTER) {
       if(playermoved && vid.sspeed > -4.99 && !outoffocus)
         centerpc((ticks - lastt) / 1000.0 * exp(vid.sspeed));
       if(panjoyx || panjoyy) 
@@ -544,8 +546,10 @@ void mainloopiter() {
           panjoyy = ev.jaxis.value;
         }
       }
+    
+    bool shmupconf = cmode & sm::SHMUPCONFIG;
 
-    if(ev.type == SDL_JOYBUTTONDOWN && cmode2 == smShmupConfig && vid.scfg.setwhat) {
+    if(ev.type == SDL_JOYBUTTONDOWN && shmupconf && vid.scfg.setwhat) {
       int joyid = ev.jbutton.which;
       int button = ev.jbutton.button;
       if(joyid < 8 && button < 32)
@@ -553,7 +557,7 @@ void mainloopiter() {
       vid.scfg.setwhat = 0;
       }
 
-    else if(ev.type == SDL_JOYHATMOTION && cmode2 == smShmupConfig && vid.scfg.setwhat) {
+    else if(ev.type == SDL_JOYHATMOTION && shmupconf && vid.scfg.setwhat) {
       int joyid = ev.jhat.which;
       int hat = ev.jhat.hat;
       int dir = 4;
@@ -588,11 +592,10 @@ void mainloopiter() {
     
     dialog::handleZooming(ev);
     
-    if(sym == SDLK_F1 && cmode2 == smNormal && playermoved)
+    if(sym == SDLK_F1 && normal && playermoved)
       help = "@";
     
-    bool rollchange = 
-     cmode2 == smOverview && getcstat >= 2000 && cheater;
+    bool rollchange = (cmode & sm::OVERVIEW) && getcstat >= 2000 && cheater;
 
     if(ev.type == SDL_MOUSEBUTTONDOWN) {
       flashMessages();
@@ -666,7 +669,7 @@ void mainloopiter() {
       }
 
     if(ev.type == SDL_QUIT) {
-      if(needConfirmation() && cmode2 != smMission) showMissionScreen();
+      if(needConfirmation() && !(cmode & sm::MISSION)) showMissionScreen();
       else quitmainloop = true;
       }
 

@@ -163,16 +163,6 @@ void showOverview() {
 
 // -- main menu --
 
-bool checkHalloweenDate() {
-  time_t t = time(NULL);
-  struct tm tm = *localtime(&t);
-  int month = tm.tm_mon + 1;
-  int day = tm.tm_mday;
-  if(month == 10 && day >= 24) return true;
-  if(month == 11 && day <= 7) return true;
-  return false;
-  }
-
 void showMainMenu() {
   gamescreen(2);
 
@@ -213,8 +203,6 @@ void showMainMenu() {
   if(inv::on)
     dialog::addItem(XLAT("inventory"), 'i');    
 
-  if(checkHalloweenDate()) dialog::addItem(XLAT("Halloween mini-game"), 'y'-96);
-
 #ifdef ROGUEVIZ
   dialog::addItem(XLAT("rogueviz menu"), 'u'); 
 #endif
@@ -247,21 +235,6 @@ void showMainMenu() {
   #ifndef NOSAVE
     else if(sym == 't') scores::load();
   #endif
-    else if(uni == 'y'-96) {
-      if(!sphere) {
-        euclidland = laHalloween;
-        restartGame('E');
-        vid.alpha = 999;
-        vid.scale = 998;
-        popScreen();
-        }
-      else {
-        restartGame('E');
-        vid.alpha = 1;
-        vid.scale = 1;
-        popScreen();
-        }
-      }
     else if(sym == 'r' || sym == SDLK_F5) {
       restartGame();
       popScreen();
@@ -301,7 +274,8 @@ void showMainMenu() {
 // -- display modes --
 
 void showDisplayMode() {
-  gamescreen(3);
+  cmode = sm::SIDE;
+  gamescreen(0);
 
   dialog::init(XLAT("special display modes"));
 
@@ -353,7 +327,6 @@ void showDisplayMode() {
       dialog::editNumber(vid.scale, .001, 1000, .1, 1, XLAT("scale factor"), 
         XLAT("Scale the displayed model."));
       dialog::scaleLog();
-      dialog::sidedialog = true;
       }
     
     if(xuni == 'm') { vid.monmode += 60 + (shiftmul > 0 ? 1 : -1); vid.monmode %= 6; }
@@ -369,7 +342,6 @@ void showDisplayMode() {
   
     else if(xuni == 'x') {
       viewdists = !viewdists;
-      popScreen();
       }
   #ifndef NORUG
     else if(xuni == 'u') {
@@ -603,6 +575,11 @@ int euperpage = 21;
 const char* geometrynames[gGUARD] = {
   "hyperbolic", "Euclidean", "spherical", "elliptic", 
   "Zebra quotient", "field quotient", "torus"
+  };  
+
+const char* geometrynames_short[gGUARD] = {
+  "hyper", "Euclid", "sphere", "elliptic", 
+  "Zebra", "field", "torus"
   };  
 
 void showEuclideanMenu() {
