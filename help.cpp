@@ -60,7 +60,9 @@ string buildHelpText() {
   h += XLAT(
     "You can right click any element to get more information about it.\n\n"
     );
+#ifdef MAC
   h += XLAT("(You can also use right Shift)\n\n");
+#endif
 #endif
   h += XLAT("See more on the website: ") 
     + "http//roguetemple.com/z/hyper/\n\n";
@@ -158,7 +160,7 @@ string generateHelpForItem(eItem it) {
    
    help += XLAT(iinf[it].help);
    
-   if(it == itSavedPrincess || it == itOrbLove)
+   if(it == itSavedPrincess || it == itOrbLove) if(!inv::on)
      help += princessReviveHelp();
      
    if(it == itTrollEgg)
@@ -530,16 +532,12 @@ void describeMouseover() {
   DEBB(DF_GRAPH, (debugfile,"describeMouseover\n"));
 
   cell *c = mousing ? mouseover : playermoved ? NULL : centerover;
-  string out = mouseovers;
-  if(!c || instat || getcstat) { }
+  string& out = mouseovers;
+  if(!c || instat || getcstat != '-') { }
   else if(c->wall != waInvisibleFloor) {
     out = XLAT1(linf[c->land].name);
     help = generateHelpForLand(c->land);
         
-    // Celsius
-    
-    // if(c->land == laIce) out = "Icy Lands (" + fts(60 * (c->heat - .4)) + " C)";
-    
     if(c->land == laIce || c->land == laCocytus) 
       out += " (" + fts(heat::celsius(c)) + " °C)";
     if(c->land == laDryForest && c->landparam) 
@@ -562,29 +560,10 @@ void describeMouseover() {
 
     if(c->land == laTortoise && tortoise::seek()) out += " " + tortoise::measure(getBits(c));
 
-    /* if(c->land == laGraveyard || c->land == laHauntedBorder || c->land == laHaunted)
-      out += " (" + its(c->landparam)+")"; */
-    
     if(buggyGeneration) {
       char buf[20]; sprintf(buf, " H=%d M=%d", c->landparam, c->mpdist); out += buf;
       }
     
-//  if(c->land == laBarrier)
-//    out += "(" + string(linf[c->barleft].name) + " / " + string(linf[c->barright].name) + ")";
-
-    // out += "(" + its(c->bardir) + ":" + string(linf[c->barleft].name) + " / " + string(linf[c->barright].name) + ")";
-    
-    // out += " MD"+its(c->mpdist);
-
-    // out += " WP:" + its(c->wparam);
-    // out += " rose:" + its(rosemap[c]/4) + "." + its(rosemap[c]%4);
-    // out += " MP:" + its(c->mpdist);
-    // out += " cda:" + its(celldistAlt(c));
-    
-    /* out += " DP=" + its(celldistance(c, cwt.c));
-    out += " DO=" + its(celldist(c));
-    out += " PD=" + its(c->pathdist); */
-
     if(false) {
 
       out += " LP:" + itsh(c->landparam)+"/"+its(turncount);
@@ -594,33 +573,17 @@ void describeMouseover() {
       out += " D:" + its(c->mpdist);
       
       char zz[64]; sprintf(zz, " P%p", c); out += zz;
-      // out += " rv" + its(rosedist(c));
-  //  if(rosemap.count(c))
-  //    out += " rv " + its(rosemap[c]/8) + "." + its(rosemap[c]%8);
-  //  out += " ai" + its(c->aitmp);
+
       if(euclid) {
         for(int i=0; i<4; i++) out += " " + its(getEuclidCdata(c->master)->val[i]);
         out += " " + itsh(getBits(c));
         }
       else {
         for(int i=0; i<4; i++) out += " " + its(getHeptagonCdata(c->master)->val[i]);
-  //  out += " " + itsh(getHeptagonCdata(c->master)->bits);
         out += " " + fts(tortoise::getScent(getBits(c)));
         }
-      // itsh(getHeptagonCdata(c->master)->bits);
-  //  out += " barleft: " + s0 + dnameof(c->barleft);
-  //  out += " barright: " + s0 + dnameof(c->barright);
       }
     
-    // char zz[64]; sprintf(zz, " P%p", c); out += zz;
-    
-    /* whirlwind::calcdirs(c);
-    for(int i=0; i<whirlwind::qdirs; i++) 
-      out += " " + its(whirlwind::dfrom[i]) + ":" + its(whirlwind::dto[i]); */
-    // out += " : " + its(whirlwinddir(c));
-    
-    
-
     if(randomPatternsMode)
       out += " " + describeRPM(c->land);
       
@@ -635,26 +598,6 @@ void describeMouseover() {
         }
       }
       
-    // char zz[64]; sprintf(zz, " P%d", princess::dist(c)); out += zz;
-    // out += " MD"+its(c->mpdist);
-    // out += " H "+its(c->heat);
-    // if(c->type != 6) out += " Z"+its(c->master->zebraval);
-    // out += " H"+its(c->heat);
-    
-/*  // Hive debug
-    if(c->land == laHive) {
-      out += " [" + its(c->tmp) + " H" + its(int(c->heat));
-      if(c->tmp >= 0 && c->tmp < size(buginfo) && buginfo[c->tmp].where == c) {
-        buginfo_t b(buginfo[c->tmp]);
-        for(int k=0; k<3; k++) out += ":" + its(b.dist[k]);
-        for(int k=0; k<3; k++) 
-        for(int i=0; i<size(bugqueue[k]); i++)
-          if(bugqueue[k][i] == c->tmp)
-            out += " B"+its(k)+":"+its(i);
-        }
-      out += "]";
-      } */
-  
     if(c->wall && 
       !((c->wall == waFloorA || c->wall == waFloorB || c->wall == waFloorC || c->wall == waFloorD) && c->item)) { 
       out += ", "; out += XLAT1(winf[c->wall].name); 
@@ -721,55 +664,11 @@ void describeMouseover() {
     if(isWarped(c)) 
       help += s0 + "\n\n" + warpdesc;
     }
-/*
-  else if(cmode == emGraphConfig) {
-    if(getcstat == 'a' && vid.sspeed > -4.99)
-      out = XLAT("+5 = center instantly, -5 = do not center the map");
-    else if(getcstat == 'a')
-      out = XLAT("press Space or Home to center on the PC");
-    else if(getcstat == 'w')
-      out = XLAT("also hold Alt during the game to toggle high contrast");
-    else if(getcstat == 'f')
-      out = XLAT("Reduce the framerate limit to conserve CPU energy");
-    }
-  else if(cmode == emBasicConfig) {
-    if(getcstat == 'c')
-      out = XLAT("The axes help with keyboard movement");
-    else if(getcstat == 'g')
-      out = XLAT("Affects looks and grammar");
-#ifndef MOBILE
-    else if(getcstat == 's')
-      out = XLAT("Config file: %1", conffile);
-#endif
-    else out = "";
-    }
-  else if(cmode == emDisplayMode) {
-    if(getcstat == 'p') {
-      if(autojoy) 
-        out = XLAT("joystick mode: automatic (release the joystick to move)");
-      if(!autojoy) 
-        out = XLAT("joystick mode: manual (press a button to move)");
-      }
-    }
-  else if(cmode == emChangeMode) {
-    if(getcstat == 'h')
-      out = XLAT("One wrong move and it is game over!");
-    }
-*/
     
-  mouseovers = out;
-
 #ifdef ROGUEVIZ
   rogueviz::describe(c);
 #endif
   
-  int col = linf[cwt.c->land].color;
-  if(cwt.c->land == laRedRock) col = 0xC00000;
-
-#ifndef MOBILE
-  displayfr(vid.xres/2, vid.fsize,   2, vid.fsize, out, col, 8);
-#endif
-
   if(mousey < vid.fsize * 3/2) getcstat = SDLK_F1;
   }
 

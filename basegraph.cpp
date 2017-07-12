@@ -1003,7 +1003,7 @@ void setvideomode() {
     flags = SDL_OPENGL | SDL_HWSURFACE | SDL_GL_DOUBLEBUFFER;
     SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 1);
 
-    if(vid.antialias && AA_MULTI) {
+    if(vid.antialias & AA_MULTI) {
       SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
       SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 16);
       glEnable(GL_MULTISAMPLE);

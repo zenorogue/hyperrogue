@@ -559,7 +559,12 @@ bool isFriendly(eMonster m);
 bool isFriendly(cell *c);
 bool isChild(cell *w, cell *killed); // is w killed if killed is killed?
 
-int gold();
+static const int NO_TREASURE = 1;
+static const int NO_YENDOR = 2;
+static const int NO_GRAIL = 4;
+static const int NO_LOVE = 8;
+
+int gold(int no = 0);
 int tkills();
 bool hellUnlocked();
 
@@ -1037,10 +1042,6 @@ void checkmove();
 transmatrix eumove(int x, int y);
 transmatrix eumovedir(int d);
 
-#ifndef NOSAVE
-void loadScores();
-#endif
-
 int reptilemax();
 
 extern bool mousing;
@@ -1289,7 +1290,9 @@ eLand getNewSealand(eLand old);
 bool createOnSea(eLand old);
 
 namespace inv {
-  bool on;
+  extern bool on;
+  extern int remaining[ittypes];
+  void compute();
   }
 
 bool drawItemType(eItem it, cell *c, const transmatrix& V, int icol, int ticks, bool hidden);
@@ -1315,7 +1318,7 @@ template<class T, class U> int addHook(hookset<T>*& m, int prio, const U& hook) 
   return 0;
   }
 
-extern purehookset hooks_frame, hooks_stats, clearmemory;
+extern purehookset hooks_frame, hooks_stats, clearmemory, hooks_config;
 
 template<class T, class... U> void callhooks(hookset<T> *h, U... args) {
   if(h) for(auto& p: *h) p.second(args...);
@@ -1429,10 +1432,10 @@ void switchGL();
 void switchFullscreen();
 extern screenmode cmode2;
 
+namespace scores { void load(); }
+
 void gotoHelp(const string& h);
 void showCustomizeChar();
-void showScores();
-void showPickScores();
 void showCheatMenu();
 void showDisplayMode();
 void showChangeMode();
@@ -1445,3 +1448,9 @@ void gamescreen(int darken);
 void showMission();
 void handleKeyQuit(int sym, int uni);
 void handlePanning(int sym, int uni);
+
+#ifdef MOBILE
+namespace leader { void showMenu(); void handleKey(int sym, int uni); }
+#endif
+
+bool needConfirmation();

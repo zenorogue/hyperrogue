@@ -602,7 +602,7 @@ bool drawItemType(eItem it, cell *c, const transmatrix& V, int icol, int ticks, 
       queuepolyat(V * spin(ticks / 1500. + M_PI/(ct6+6)), *xsh, darkena(0x202020, 0, hidden ? 0x40 : 0xF0), PPR_ITEMb);
     }
   
-  else if(xch == 'o') {
+  else if(xch == 'o' || it == itInventory) {
     if(it == itOrbFire) icol = firecolor(100);
     queuepoly(V, shDisk, darkena(icol, 0, hidden ? 0x20 : 0xC0));
     if(it == itOrbFire) icol = firecolor(200);
@@ -4330,13 +4330,7 @@ void drawthemap() {
   mapeditor::ewsearch.dist = 1e30;
   modist = 1e20; mouseover = NULL; 
   modist2 = 1e20; mouseover2 = NULL; 
-  mouseovers = XLAT("Press F1 or right click for help");
-#ifdef ROGUEVIZ
-  if(rogueviz::on) mouseovers = " ";
-#endif
-#ifdef TOUR
-  if(tour::on) mouseovers = tour::tourhelp;
-#endif
+
   centdist = 1e20; 
   if(!torus) centerover = NULL; 
 
@@ -4643,6 +4637,16 @@ void gamescreen(int _darken) {
 
 void normalscreen() {
   help = "@";
+
+#ifdef ROGUEVIZ
+  if(!rogueviz::on)
+#endif
+  mouseovers = XLAT("Press F1 or right click for help");
+
+#ifdef TOUR  
+  if(tour::on) mouseovers = tour::tourhelp;
+#endif
+
   if(!outofmap(mouseh)) getcstat = '-';
   cmode2 = smNormal;
   gamescreen(hiliteclick && mmmon ? 1 : 0); drawStats();
@@ -4655,6 +4659,8 @@ void normalscreen() {
 #endif
     displayButton(vid.xres-8, vid.yres-vid.fsize, XLAT("(v) menu"), 'v', 16);
   keyhandler = handleKeyNormal;
+
+  describeMouseover();
   }
 
 vector< function<void()> > screens = { normalscreen };
@@ -4689,14 +4695,21 @@ void drawscreen() {
   lgetcstat = getcstat;
   getcstat = 0; inslider = false;
   
+  mouseovers = " ";
+
   cmode2 = smMenu;
   keyhandler = [] (int sym, int uni) { return false; };
   screens.back()();
 
+  int col = linf[cwt.c->land].color;
+  if(cwt.c->land == laRedRock) col = 0xC00000;
+
+#ifndef MOBILE
+  displayfr(vid.xres/2, vid.fsize,   2, vid.fsize, mouseovers, col, 8);
+#endif
+
   drawmessages();
   
-  describeMouseover();
-
   if((havewhat&HF_BUG) && darken == 0 && cmode2 == smNormal) for(int k=0; k<3; k++)
     displayfr(vid.xres/2 + vid.fsize * 5 * (k-1), vid.fsize*2,   2, vid.fsize, 
       its(hive::bugcount[k]), minf[moBug0+k].color, 8);

@@ -1721,7 +1721,7 @@ namespace mapeditor {
     if(mapeditor::painttype == 4) 
       mapeditor::painttype = 0, mapeditor::paintwhat = 0,
       mapeditor::paintwhat_str = "clear monster";
-      mapeditor::copywhat = NULL;
+    mapeditor::copywhat = NULL;
     mapeditor::undo.clear();
     if(!cheater) mapeditor::displaycodes = 0;
     if(!cheater) mapeditor::whichShape = 0;

@@ -1987,8 +1987,8 @@ slide rvslides[] = {
 auto hooks  = 
   addHook(hooks_frame, 0, drawExtra) +
   addHook(hooks_args, 100, readArgs) +
-  addHook(clearmemory, 0, clear) +
-  addHook(hooks_config, 0, [] () { ss::list(rogueviz::rvtour::rvslides); });
+  addHook(clearmemory, 0, close) +
+  addHook(hooks_config, 0, [] () { tour::ss::list(rogueviz::rvtour::rvslides); });
 
 
 };

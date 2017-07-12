@@ -589,6 +589,8 @@ namespace princess {
           achievement_gain("PRINCESS1");
         princess::saved = true;
         princess::everSaved = true;
+        if(inv::on && !princess::reviveAt)
+          princess::reviveAt = gold(NO_LOVE);
         items[itSavedPrincess]++;
         }
       if(newdist == OUT_OF_PRISON && princess::challenge) {

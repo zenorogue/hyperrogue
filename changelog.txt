@@ -1703,3 +1703,34 @@
 - added a missing russian translation
 - [RogueViz] fixed legend in the svg/high quality output
 - more control for text in svg output
+
+2017.07.04 14:40 work in progress
+- peaceful mode (work in progress)
+- anti-aliased lines, and linewidth setting, option to make lines further from the model center narrower
+- rearranged the menus
+- '9' key to list all the frames in the current slideshow; better support for multiple slideshows compiled in
+- configurable border and foreground color (mostly for presentations, not available in the menus)
+- aura effect adjusts to the background color
+- nicer text frames
+- aura in the spherical geometry
+- fixed the Hypersian Rug on some machines (using another OpenGL function), glew used on Linux
+- unicode superscript d is now used in the expansion screen instead of "^d"
+- some preparation for the Inventory Mode
+- texts changed, some minor translation fixes
+- fixed the default wsad keys
+- [technical] improved the NOGL compilation flag to avoid OpenGL
+- [technical] refactoring (gotoHelp, sdltogl)
+- [technical] changed #ifdef LOCAL to #ifdef EXTRA_...; extra features are now included by starting the compilation from another file
+- [technical] HYPERPATH added, for reaching the files when HyperRogue is called from a different location
+- [technical] private source files moved to the "private" dir
+
+- antialiased multisampling
+- major refactoring: return to previous menu
+- image in the character selection screen
+- ignore zero-score games
+- do not save zero-score games
+- consistency in menu
+- multiple selectable columns in scores
+- menu -> scores => list the current game if in game over
+- yendor hardness fix
+- hints shown on the quest status/quit screen

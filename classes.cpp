@@ -736,7 +736,7 @@ enum eMonster {
   // shmup specials
   moPlayer, moBullet, moFlailBullet, moFireball, moTongue, moAirball,
   // temporary
-  moDeadBug, moLightningBolt, moDeadBird, moEnergySword, moWarning,
+  moDeadBug, moLightningBolt, moDeadBird, moEnergySword, moWarning, 
   moRogueviz
   };
 
@@ -767,7 +767,7 @@ genderswitch_t genderswitch[NUM_GS] = {
 
 // --- items ---
 
-const int ittypes = 111;
+const int ittypes = 112;
 
 struct itemtype {
   char  glyph;
@@ -1153,6 +1153,7 @@ itemtype iinf[ittypes] = {
     "with this Orb." },
   { '$', 0xC060C0, "Spinel", bulldashdesc },
   { 'o', 0xC0C0FF, "Orb of the Mirror", NODESCYET },
+  { 'O', 0xF0F0F0, "your orbs", NODESC},  
   };
 
 enum eItem { itNone, itDiamond, itGold, itSpice, itRuby, itElixir, itShard, itBone, itHell, itStatue,
@@ -1185,7 +1186,8 @@ enum eItem { itNone, itDiamond, itGold, itSpice, itRuby, itElixir, itShard, itBo
   itOrbSword, itKraken, itOrbSword2, itBarrow,
   itTrollEgg, itWarning, itOrbStone, itOrbNature, itTreat,
   itSlime, itAmethyst, itOrbRecall, itDodeca, itOrbDash, itGreenGrass, itOrbHorns,
-  itOrbBull, itBull, itOrbMirror
+  itOrbBull, itBull, itOrbMirror,
+  itInventory
   };
 
 // --- wall types ---

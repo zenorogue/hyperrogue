@@ -10,7 +10,7 @@ bool gtouched;
 
 int getcstat, lgetcstat; ld getcshift; bool inslider;
 
-int andmode = 0;
+function <void(int sym, int uni)> keyhandler;
 
 // is the player using mouse? (used for auto-cross)
 bool mousing = true;
@@ -31,12 +31,6 @@ int lastt;
 #ifdef WEB
 Uint8 *SDL_GetKeyState(void *v) { static Uint8 tab[1024]; return tab; }
 #endif
-
-bool quitsaves() { return (items[itOrbSafety] && havesave); }
-
-bool needConfirmation() {
-  return canmove && (gold() >= 30 || tkills() >= 50) && !cheater && !quitsaves();
-  }
 
 bool mouseout() {
   if((getcstat != '-' && getcstat) || (lgetcstat && lgetcstat != '-')) return true;
@@ -210,52 +204,6 @@ bool doexiton(int sym, int uni) {
   return false;
   }
 
-void handleKeyQuit(int sym, int uni) {
-  dialog::handleNavigation(sym, uni);
-  // ignore the camera movement keys
-
-#ifndef NORUG
-  if(rug::rugged && (sym == SDLK_UP || sym == SDLK_DOWN || sym == SDLK_PAGEUP || sym == SDLK_PAGEDOWN ||
-    sym == SDLK_RIGHT || sym == SDLK_LEFT))
-    sym = 0;
-#endif
-
-  if(sym == SDLK_RETURN || sym == SDLK_KP_ENTER || sym == SDLK_F10) quitmainloop = true;
-  else if(uni == 'r' || sym == SDLK_F5) {
-    restartGame(), popScreen();
-    msgs.clear();
-    }
-  else if(sym == SDLK_UP || sym == SDLK_KP8 || sym == PSEUDOKEY_WHEELUP) msgscroll++;
-  else if(sym == SDLK_DOWN || sym == SDLK_KP2 || sym == PSEUDOKEY_WHEELDOWN) msgscroll--;
-  else if(sym == SDLK_PAGEUP || sym == SDLK_KP9) msgscroll+=5;
-  else if(sym == SDLK_PAGEDOWN || sym == SDLK_KP3) msgscroll-=5;
-  else if(uni == 'v') popScreenAll(), pushScreen(showMainMenu);
-  else if(sym == SDLK_F3 || (sym == ' ' || sym == SDLK_HOME)) 
-    fullcenter();
-  else if(uni == 'o' && DEFAULTNOR(sym)) setAppropriateOverview();
-#ifdef INV
-  else if(uni == 'i' && DEFAULTNOR(sym) && inv::on) 
-    pushScreen(inv::show);
-#endif
-#ifndef NOSAVE
-  else if(uni == 't') {
-    if(!canmove) restartGame();
-    loadScores();
-    msgs.clear();
-    }
-  #endif
-  
-  else if(doexiton(sym, uni) && !didsomething) {
-    popScreen();
-    msgscroll = 0;
-    msgs.clear();
-    if(!canmove) {
-      addMessage(XLAT("GAME OVER"));
-      addMessage(timeline());
-      }
-    }
-  }
-
 bool didsomething;
 
 #ifdef MOBILE
@@ -394,24 +342,6 @@ void handleKeyNormal(int sym, int uni) {
   if(sym == SDLK_F10) {
     if(needConfirmation()) pushScreen(showMission);
     else quitmainloop = true;
-    }
-  
-  if(!canmove) {
-    if(sym == SDLK_RETURN || sym == SDLK_KP_ENTER) quitmainloop = true;
-    else if(uni == 'r') restartGame();
-#ifndef NOSAVE
-    else if(uni == 't') {
-      restartGame();
-      loadScores();
-      }
-#endif
-#ifndef NORUG
-    else if(rug::rugged) ;
-#endif
-    else if(sym == SDLK_UP || sym == SDLK_KP8) msgscroll++;
-    else if(sym == SDLK_DOWN || sym == SDLK_KP2) msgscroll--;
-    else if(sym == SDLK_PAGEUP || sym == SDLK_KP9) msgscroll+=5;
-    else if(sym == SDLK_PAGEDOWN || sym == SDLK_KP3) msgscroll-=5;
     }
   
   if(uni == 'o' && DEFAULTNOR(sym)) setAppropriateOverview();
@@ -775,4 +705,18 @@ void displayabutton(int px, int py, string s, int col) {
     buttonclicked = true;
   }
 #endif
+
+void gmodekeys(int sym, int uni) {
+  if(uni == '1') { vid.alpha = 999; vid.scale = 998; }
+  if(uni == '2') { vid.alpha = 1; vid.scale = 0.4; }
+  if(uni == '3') { vid.alpha = 1; vid.scale = 1; }
+  if(uni == '4') { vid.alpha = 0; vid.scale = 1; }
+  if(uni == '5') { vid.wallmode += 60 + (shiftmul > 0 ? 1 : -1); vid.wallmode %= 6; }
+  if(uni == '6') vid.grid = !vid.grid;
+  if(uni == '7') { vid.darkhepta = !vid.darkhepta; }
+  if(uni == '%' && sym == '5') { 
+    if(vid.wallmode == 0) vid.wallmode = 6;
+    vid.wallmode--;
+    }
+  }
 

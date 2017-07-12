@@ -3,6 +3,8 @@
 
 #include "dialogs.cpp"
 
+// -- overview --
+
 #define BLACKISH 0x404040
 #define REDDISH 0x400000
 
@@ -159,6 +161,8 @@ void showOverview() {
     };
   }
 
+// -- main menu --
+
 bool checkHalloweenDate() {
   time_t t = time(NULL);
   struct tm tm = *localtime(&t);
@@ -241,7 +245,7 @@ void showMainMenu() {
     else if(sym == 'd') pushScreen(showDisplayMode);
     else if(sym == 'm') pushScreen(showChangeMode);
   #ifndef NOSAVE
-    else if(sym == 't') loadScores();
+    else if(sym == 't') scores::load();
   #endif
     else if(uni == 'y'-96) {
       if(!sphere) {
@@ -271,7 +275,7 @@ void showMainMenu() {
 #ifdef INV
     else if(sym == 'i') {
       clearMessages();
-      pushScreen(inv::show());
+      pushScreen(inv::show);
       }
 #endif
     else if(sym == SDLK_ESCAPE) 
@@ -294,6 +298,8 @@ void showMainMenu() {
     };
   }
 
+// -- display modes --
+
 void showDisplayMode() {
   gamescreen(3);
 
@@ -308,6 +314,8 @@ void showDisplayMode() {
   dialog::addBoolItem(XLAT("big Poincaré model"), vid.alpha == 1 && vid.scale >= 1, '3');
   dialog::addBoolItem(XLAT("Klein-Beltrami model"), vid.alpha == 0, '4');
   dialog::addSelItem(XLAT("wall display mode"), XLAT(wdmodes[vid.wallmode]), '5');
+  if(getcstat == '5')
+    mouseovers = XLAT("also hold Alt during the game to toggle high contrast");
   dialog::addBoolItem(XLAT("draw the grid"), (vid.grid), '6');
   dialog::addBoolItem(XLAT("mark heptagons"), (vid.darkhepta), '7');
   dialog::addSelItem(XLAT("3D configuration"), "", '9');
@@ -383,19 +391,7 @@ void showDisplayMode() {
     };
   }
 
-void gmodekeys(int sym, int uni) {
-  if(uni == '1') { vid.alpha = 999; vid.scale = 998; }
-  if(uni == '2') { vid.alpha = 1; vid.scale = 0.4; }
-  if(uni == '3') { vid.alpha = 1; vid.scale = 1; }
-  if(uni == '4') { vid.alpha = 0; vid.scale = 1; }
-  if(uni == '5') { vid.wallmode += 60 + (shiftmul > 0 ? 1 : -1); vid.wallmode %= 6; }
-  if(uni == '6') vid.grid = !vid.grid;
-  if(uni == '7') { vid.darkhepta = !vid.darkhepta; }
-  if(uni == '%' && sym == '5') { 
-    if(vid.wallmode == 0) vid.wallmode = 6;
-    vid.wallmode--;
-    }
-  }
+// -- game modes -- 
 
 void switchHardcore() {
   if(hardcore && !canmove) { 
@@ -426,16 +422,18 @@ void showChangeMode() {
   dialog::addBoolItem(XLAT(SHMUPTITLE), (shmup::on || multi::players > 1), 's');
   if(!shmup::on) dialog::addSelItem(XLAT("hardcore mode"),
     hardcore && !pureHardcore() ? XLAT("PARTIAL") : ONOFF(hardcore), 'h');
+  if(getcstat == 'h')
+    mouseovers = XLAT("One wrong move and it is game over!");
   
   multi::cpid = 0;
-  dialog::addBoolItem(XLAT("%1 Challenge", moPrincess), (princess::challenge), 'p');
-  dialog::addBoolItem(XLAT("random pattern mode"), (randomPatternsMode), 'r');
-  dialog::addBoolItem(XLAT("Yendor Challenge"), (yendor::on), 'y');
-  dialog::addBoolItem(XLAT("pure tactics mode"), (tactic::on), 't');
   dialog::addBoolItem(XLAT("heptagonal mode"), (purehepta), '7');
   dialog::addBoolItem(XLAT("Chaos mode"), (chaosmode), 'C');
-  dialog::addBoolItem(XLAT("peaceful mode"), (chaosmode), 'P');
+  dialog::addBoolItem(XLAT("peaceful mode"), (chaosmode), 'p');
   dialog::addBoolItem(XLAT("inventory mode"), (inv::on), 'i');
+  dialog::addBoolItem(XLAT("pure tactics mode"), (tactic::on), 't');
+  dialog::addBoolItem(XLAT("Yendor Challenge"), (yendor::on), 'y');
+  dialog::addBoolItem(XLAT("%1 Challenge", moPrincess), (princess::challenge), 'P');
+  dialog::addBoolItem(XLAT("random pattern mode"), (randomPatternsMode), 'r');
 
   dialog::addBreak(50);
   // cheating and map editor
@@ -489,7 +487,7 @@ void showChangeMode() {
       }
     else if(xuni == '7')
       restartGame('7');
-    else if(xuni == 'P')
+    else if(xuni == 'p')
       pushScreen(peace::showMenu);
     else if(xuni == 'i') {
       restartGame('i');
@@ -512,7 +510,7 @@ void showChangeMode() {
       if(!princess::everSaved)
         addMessage(XLAT("Save %the1 first to unlock this challenge!", moPrincess));
       else
-        restartGame('p');
+        restartGame('P');
       }
   #ifndef NOEDIT
     else if(xuni == 'm') {
@@ -544,6 +542,8 @@ void showChangeMode() {
       popScreen();
     };
   }
+
+// -- cheat menu --
 
 void showCheatMenu() {
   gamescreen(1);
@@ -591,6 +591,8 @@ void showCheatMenu() {
       }
     };
   }
+
+// -- geometry menu --
 
 int eupage = 0;
 int euperpage = 21;
@@ -698,27 +700,7 @@ void showEuclideanMenu() {
     };
   }
 
-#ifdef MOBILE
-namespace leader { void showMenu(); void handleKey(int sym, int uni); }
-#endif
-
-void handleQuit(int sym, int uni) {
-  if(uni == 'r' || sym == SDLK_F5) {
-    restartGame(), popScreen();
-    msgs.clear();
-    }
-  else if(uni == 'v') pushScreen(showMainMenu);
-  else if(uni == SDLK_ESCAPE) popScreen();
-  else if(uni == 'o') setAppropriateOverview();
-#ifndef NOSAVE
-  else if(uni == 't') {
-    if(!canmove) restartGame();
-    loadScores();
-    msgs.clear();
-    }
-#endif
-  
-  }
+// -- demo --
 
 #ifdef DEMO
 bool demoanim;
@@ -804,188 +786,8 @@ void handleDemoKey(int sym, int uni) {
     }
   }
 #endif
-
-function <void(int sym, int uni)> keyhandler;
-
-#ifndef MOBILE
-void quitOrAgain() {
-  int y = vid.yres * (618) / 1000;
-  displayButton(vid.xres/2, y + vid.fsize*1/2, 
-    (items[itOrbSafety] && havesave) ? 
-      XLAT("Press Enter or F10 to save") : 
-      XLAT("Press Enter or F10 to quit"), 
-    SDLK_RETURN, 8, 2);
-  displayButton(vid.xres/2, y + vid.fsize*2, XLAT("or 'r' or F5 to restart"), 'r', 8, 2);
-  displayButton(vid.xres/2, y + vid.fsize*7/2, XLAT("or 't' to see the top scores"), 't', 8, 2);
-  displayButton(vid.xres/2, y + vid.fsize*10/2, XLAT("or 'v' to see the main menu"), 'v', 8, 2);
-  displayButton(vid.xres/2, y + vid.fsize*13/2, XLAT("or 'o' to see the world overview"), 'o', 8, 2);
-  }
-#endif
-
-int msgscroll = 0;
-
-string timeline() {
-    int timespent = (int) (savetime + (timerstopped ? 0 : (time(NULL) - timerstart)));
-  char buf[20];
-  sprintf(buf, "%d:%02d", timespent/60, timespent % 60);
-  return 
-    shmup::on ? 
-      XLAT("%1 knives (%2)", its(turncount), buf)
-    :
-      XLAT("%1 turns (%2)", its(turncount), buf);
-  }
-
-void showMission() {
-
-  cmode2 = smMission;
-  gamescreen(1); drawStats();
-  keyhandler = handleKeyQuit;
-
-  dialog::init(
-#ifdef TOUR
-    tour::on ? (canmove ? XLAT("Tutorial") : XLAT("GAME OVER")) :
-#endif
-    cheater ? XLAT("It is a shame to cheat!") : 
-    showoff ? XLAT("Showoff mode") :
-    canmove && princess::challenge ? XLAT("%1 Challenge", moPrincess) :
-    canmove ? XLAT("Quest status") : 
-    XLAT("GAME OVER"), 
-    0xC00000, 200, 100
-    );
-  dialog::addInfo(XLAT("Your score: %1", its(gold())));
-  dialog::addInfo(XLAT("Enemies killed: %1", its(tkills())));
-
-#ifdef TOUR
-  if(tour::on) ; else 
-#endif
-  if(items[itOrbYendor]) {
-    dialog::addInfo(XLAT("Orbs of Yendor found: %1", its(items[itOrbYendor])), iinf[itOrbYendor].color);
-    dialog::addInfo(XLAT("CONGRATULATIONS!"), iinf[itOrbYendor].color);
-    }
-  else {
-    if(princess::challenge) 
-      dialog::addInfo(XLAT("Follow the Mouse and escape with %the1!", moPrincess));
-    else if(gold() < R30)
-      dialog::addInfo(XLAT("Collect %1 $$$ to access more worlds", its(R30)));
-    else if(gold() < R60)
-      dialog::addInfo(XLAT("Collect %1 $$$ to access even more lands", its(R60)));
-    else if(!hellUnlocked())
-      dialog::addInfo(XLAT("Collect at least %1 treasures in each of 9 types to access Hell", its(R10)));
-    else if(items[itHell] < R10)
-      dialog::addInfo(XLAT("Collect at least %1 Demon Daisies to find the Orbs of Yendor", its(R10)));
-    else if(size(yendor::yi) == 0)
-      dialog::addInfo(XLAT("Look for the Orbs of Yendor in Hell or in the Crossroads!"));
-    else 
-      dialog::addInfo(XLAT("Unlock the Orb of Yendor!"));
-    }
-  
-  if(!timerstopped && !canmove) {
-    savetime += time(NULL) - timerstart;
-    timerstopped = true;
-    }
-  if(canmove && !timerstart)
-    timerstart = time(NULL);
-  
-  if(princess::challenge) ;
-#ifdef TOUR
-  else if(tour::on) ;
-#endif
-  else if(tkills() < R100)
-    dialog::addInfo(XLAT("Defeat %1 enemies to access the Graveyard", its(R100)));
-  else if(kills[moVizier] == 0 && (items[itFernFlower] < U5 || items[itGold] < U5))
-    dialog::addInfo(XLAT("Kill a Vizier in the Palace to access Emerald Mine"));
-  else if(items[itEmerald] < U5)
-    dialog::addInfo(XLAT("Collect 5 Emeralds to access Camelot"));
-  else if(hellUnlocked() && !chaosmode) {
-    bool b = true;
-    for(int i=0; i<LAND_HYP; i++)
-      if(b && items[treasureType(land_hyp[i])] < R10) {
-        dialog::addInfo(
-          XLAT(
-            land_hyp[i] == laTortoise ? "Hyperstone Quest: collect at least %3 points in %the2" :
-            "Hyperstone Quest: collect at least %3 %1 in %the2", 
-            treasureType(land_hyp[i]), land_hyp[i], its(R10)));
-        b = false;
-        }
-    if(b) 
-      dialog::addInfo(XLAT("Hyperstone Quest completed!"), iinf[itHyperstone].color);
-    }
-  else dialog::addInfo(XLAT("Some lands unlock at specific treasures or kills"));
-  if(cheater) {
-    dialog::addInfo(XLAT("you have cheated %1 times", its(cheater)), 0xFF2020);
-    }
-  if(!cheater) {
-    dialog::addInfo(timeline(), 0xC0C0C0);
-    }
-  
-  msgs.clear();
-  if(msgscroll < 0) msgscroll = 0;
-  int gls = size(gamelog) - msgscroll;
-  int mnum = 0;
-  for(int i=gls-5; i<gls; i++) 
-    if(i>=0) {
-      msginfo m;
-      m.spamtype = 0;
-      m.flashout = true;
-      m.stamp = ticks-128*vid.flashtime-128*(gls-i);
-      m.msg = gamelog[i].msg;
-      m.quantity = gamelog[i].quantity;
-      mnum++,
-      msgs.push_back(m);
-      }
-
-  dialog::addBreak(100);
-  
-  bool intour = false;
-  
-#ifdef TOUR
-  intour = tour::on;
-#endif
-
-  if(intour) {
-#ifdef TOUR
-    if(canmove) {
-      dialog::addItem(XLAT("spherical geometry"), '1');
-      dialog::addItem(XLAT("Euclidean geometry"), '2');
-      dialog::addItem(XLAT("more curved hyperbolic geometry"), '3');
-      }
-    if(!items[itOrbTeleport])
-      dialog::addItem(XLAT("teleport away"), '4');
-    else if(!items[itOrbAether])
-      dialog::addItem(XLAT("move through walls"), '4');
-    else
-      dialog::addItem(XLAT("flash"), '4');
-    if(canmove) {
-      if(tour::slidecommand != "") 
-        dialog::addItem(tour::slidecommand, '5');
-      dialog::addItem(XLAT("static mode"), '6');
-      dialog::addItem(XLAT("enable/disable texts"), '7');
-      dialog::addItem(XLAT("next slide"), SDLK_RETURN);
-      dialog::addItem(XLAT("previous slide"), SDLK_BACKSPACE);
-      dialog::addItem(XLAT("list of slides"), '9');
-      }
-    else
-      dialog::addBreak(200);
-    dialog::addItem(XLAT("main menu"), 'v');
-#endif
-    }
-  else {
-    dialog::addItem(XLAT(canmove ? "continue" : "see how it ended"), SDLK_ESCAPE);
-    dialog::addItem(XLAT("main menu"), 'v');
-    dialog::addItem(XLAT("restart"), SDLK_F5);
-    #ifndef MOBILE
-    dialog::addItem(XLAT(quitsaves() ? "save" : "quit"), SDLK_F10);
-    #endif
-    #ifdef ANDROIDSHARE
-    dialog::addItem(XLAT("SHARE"), 's'-96);
-    #endif
-    }
-  
-  dialog::display();
-
-  if(mnum)
-    displayfr(vid.xres/2, vid.yres-vid.fsize*(mnum+1), 2, vid.fsize/2,  XLAT("last messages:"), 0xC0C0C0, 8);  
-  }
+ 
+// -- overview --
 
 void setAppropriateOverview() {
   clearMessages();
@@ -1001,9 +803,3 @@ void setAppropriateOverview() {
     pushScreen(showOverview);
   }
 
-void showMissionScreen() {
-  popScreenAll();
-  pushScreen(showMission);
-  achievement_final(false);
-  msgscroll = 0;
-  }

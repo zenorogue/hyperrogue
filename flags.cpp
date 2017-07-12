@@ -267,7 +267,7 @@ int itemclass(eItem i) {
   if(i == itSavedPrincess || i == itStrongWind || i == itWarning)
     return IC_NAI;
   if(i == itKey || i == itOrbYendor || i == itGreenStone || i == itHolyGrail || i == itCompass ||
-    isElementalShard(i) || i == itRevolver) 
+    isElementalShard(i) || i == itRevolver || i == itInventory) 
     return IC_OTHER;  
   return IC_ORB;
   }

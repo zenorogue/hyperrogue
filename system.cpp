@@ -645,6 +645,7 @@ void saveStats(bool emergency = false) {
   #endif
   if(randomPatternsMode) return;
   if(peace::on) return;
+  if(!gold()) return;
   
   remove_emergency_save();
 

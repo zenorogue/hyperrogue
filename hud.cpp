@@ -231,6 +231,10 @@ void displayglyph2(int cx, int cy, int buttonsize, int i) {
         mouseovers += XLAT(" (click to drop)");
         getcstat = 'g';
         }
+      if(it == itInventory) {
+        mouseovers += XLAT(" (click to use)");
+        getcstat = 'i';
+        }
       if(imp & GLYPH_LOCAL) mouseovers += XLAT(" (local treasure)");
       help = generateHelpForItem(it);
       }

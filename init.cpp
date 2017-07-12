@@ -1,6 +1,6 @@
-#define VER "9.4n2"
-#define VERNUM 9416
-#define VERNUM_HEX 0x9416
+#define VER "9.4n3"
+#define VERNUM 9417
+#define VERNUM_HEX 0x9417
 
 #define GEN_M 0
 #define GEN_F 1
@@ -264,7 +264,7 @@ const char *loadlevel = NULL;
 #include "landgen.cpp"
 #include "orbs.cpp"
 #ifdef INV
-#include "inventory.cpp"
+#include "closed/inventory.cpp"
 #endif
 #include "system.cpp"
 #include "geometry.cpp"
@@ -281,6 +281,7 @@ const char *loadlevel = NULL;
 #include "config.cpp"
 #include "scores.cpp"
 #include "menus.cpp"
+#include "quit.cpp"
 #ifdef FIXEDSIZE
 #include "nofont.cpp"
 #endif

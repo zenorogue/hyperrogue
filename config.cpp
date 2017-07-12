@@ -407,6 +407,8 @@ void showAllConfig() {
   dialog::addItem(XLAT("exit configuration"), 'v');
 #ifndef NOCONFIG
   dialog::addItem(XLAT("save the current config"), 's');
+  if(getcstat == 's')
+    mouseovers = XLAT("Config file: %1", conffile);
 #endif
   }
 
@@ -448,6 +450,8 @@ void showGraphConfig() {
 
   #ifndef MOBWEB
   dialog::addSelItem(XLAT("framerate limit"), its(vid.framelimit), 'l');
+  if(getcstat == 'l') 
+    mouseovers = XLAT("Reduce the framerate limit to conserve CPU energy");
   #endif
 
 #ifndef IOS
@@ -455,6 +459,7 @@ void showGraphConfig() {
 #endif
 
   dialog::addSelItem(XLAT("scrolling speed"), fts(vid.sspeed), 'a');
+    
   dialog::addSelItem(XLAT("movement animation speed"), fts(vid.mspeed), 'm');
 
   dialog::addBoolItem(XLAT("extra graphical effects"), (vid.particles), 'u');
@@ -508,7 +513,9 @@ void showGraphConfig() {
   
     if(xuni == 'a') dialog::editNumber(vid.sspeed, -5, 5, 1, 0, 
       XLAT("scrolling speed"),
-      XLAT("+5 = center instantly, -5 = do not center the map"));
+      XLAT("+5 = center instantly, -5 = do not center the map")
+      + "\n\n" +
+      XLAT("press Space or Home to center on the PC"));
   
     if(xuni == 'm') dialog::editNumber(vid.mspeed, -5, 5, 1, 0, 
       XLAT("movement animation speed"),
@@ -613,6 +620,8 @@ void showBasicConfig() {
   dialog::addSelItem(XLAT("language"), XLAT("EN"), 'l');
 #endif
   dialog::addSelItem(XLAT("player character"), numplayers() > 1 ? "" : csname(vid.cs), 'g');
+  if(getcstat == 'g') 
+    mouseovers = XLAT("Affects looks and grammar");
 
 #ifndef NOAUDIO
   dialog::addSelItem(XLAT("background music volume"), its(musicvolume), 'b');
@@ -719,6 +728,12 @@ void showJoyConfig() {
   
 #ifndef MOBWEB
   dialog::addSelItem(XLAT("joystick mode"), XLAT(autojoy ? "automatic" : "manual"), 'p');
+  if(getcstat == 'p') {
+    if(autojoy) 
+      mouseovers = XLAT("joystick mode: automatic (release the joystick to move)");
+    if(!autojoy) 
+      mouseovers = XLAT("joystick mode: manual (press a button to move)");
+    }
     
   dialog::addSelItem(XLAT("first joystick: movement threshold"), its(vid.joyvalue), 'a');
   dialog::addSelItem(XLAT("first joystick: execute movement threshold"), its(vid.joyvalue2), 'b');

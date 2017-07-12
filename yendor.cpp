@@ -154,6 +154,7 @@ namespace yendor {
   
   int hardness() {
     if(peace::on) return 15; // just to generate monsters
+    if(!yendor::generating && !yendor::path && !yendor::on) return 0;
     int thf = 0;
     for(int i=0; i<size(yi); i++) {
       yendorinfo& ye ( yi[i] );
