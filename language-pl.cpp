@@ -346,7 +346,7 @@ S("Hyperstone Quest: collect at least %3 %1 in %the2", "Misja alternatywna: znaj
 S("Hyperstone Quest completed!", "Misja alternatywna zakończona!")
 S("Look for the Orbs of Yendor in Hell or in the Crossroads!", "Szukaj Sfer Yendoru w Piekle albo na Skrzyżowaniu!")
 S("Unlock the Orb of Yendor!", "Otwórz Sferę Yendoru!")
-S("Defeat 100 enemies to access the Graveyard", "Pokonaj 100 przeciwników, by trafić na Cmentarz")
+S("Defeat %1 enemies to access the Graveyard", "Pokonaj %1 przeciwników, by trafić na Cmentarz")
 S("(press ESC during the game to review your quest)", "(naciśnij ESC w trakcie gry, by zobaczyć stan swojej misji)")
 S("you have cheated %1 times", "liczba oszustw: %1")
 S("%1 turns (%2)", "kolejek: %1 (%2)")
@@ -5440,19 +5440,31 @@ S(
   "Naciśnij '5' by opuścić podręcznik."
   )
 
-#undef Orb
-
 /*
 // for 10.0
+*/
 
-S("configure keys/joysticks", "konfiguracja klawiszy/joysticka")
-S("Press F5 or 'o' to try again!", "Naciśnij F5 lub 'o' by spróbować jeszcze raz!")  
-S("peaceful mode", "tryb pokojowy")
-S("inventory mode", "tryb inwentarza")
-S("inventory", "sfery")
+// Orb Strategy mode
+S("Orb Strategy mode", "tryb strategii sfer")
+
+S(
+  "You are playing in the Orb Strategy Mode. Collecting treasure "
+  "gives you access to magical Orb powers. In this mode, "
+  "unlocking requirements are generally higher, and "
+  "several quests and lands "
+  "give you extremely powerful Orbs of the Mirror.\n",
+
+  "Grasz w trybie strategii sfer. Zebrane skarby dają Ci "
+  "dostęp do magicznych mocy. W tym trybie wymagania "
+  "są generalnie wyższe, i  niektóre krainy i misje "
+  "dają Ci bardzo potężne Sfery Lustra.\n")
+
+S("The treasure gives your magical powers!", "Skarby dają Ci moce magiczne!")
+S("Press 'i' to access your magical powers.", "Naciśnij 'i', by użyć mocy.")
+S("inventory", "Twoje sfery")
 S("mirror what?", "co odbić?")
 S("Which orb to use?", "Której Sfery użyć?")
-S("Unlocked by: %1 in %2", "Odblokwane przez: %1 %abl2")
+S("Unlocked by: %1 in %2", "Odblokowane przez: %1 %abl2")
 S(" (next at %1)", " (kolejny przy %1)")
 S(" (next at %1 to %2)", " (kolejny przy %1 do %2)")
 S("Number of uses left: %1", "Pozostało użyć: %1")
@@ -5460,4 +5472,223 @@ S("You mirror %the1.", "Odbijasz %a1.")
 S("You need to stand next to a magic mirror or cloud to use %the1.", 
   "Musisz stać przy magicznym lustrze, by odbić %a1.")
 S("Each orb type can be mirrored only once.", "Każdy typ sfery może być odbity tylko raz.")
-*/
+
+S(
+  "\n\nIn the Orb Strategy Mode, Orbs of Yendor appear in Hell after "
+  "you collect 25 Demon Daisies in Hell, in Crossroads/Ocean after you collect 50, "
+  "and everywhere after you collect 100.",
+
+  "\n\nW trybie strategii sfer Sfery Yendoru się pojawiają w Piekle "
+  "po zebraniu 25 Czarcich Ziel, na Skrzyżowaniu/Oceanie po zebraniu 50, "
+  "wszędzie po zebraniu 100."
+  );  
+
+S(
+  "\n\nIn the Orb Strategy Mode, dead orbs are available once you collect "
+  "10 Necromancer Totems in the Graveyard.",
+  
+  "\n\nW trybie strategii sfer martwe sfery są dostępne po zdobyciu "
+  "10 Totemów Nekromanty na Cmentarzu.")
+
+S(
+  "\n\nIn the Orb Strategy Mode, Orbs of Safety can be gained by "
+  "collecting Phoenix Feathers in the Land of Eternal Motion. "
+  "You can also find unlimited Orbs of Safety in the Crossroads "
+  "and the Ocean (after collecting 25 Phoenix Feathers) "
+  "and in the Prairie.",
+  
+  "\n\nW trybie strategii sfer Sfery Bezpieczeństwa mogą być zdobyte "
+  "przez zbieranie Piór Feniksa w Krainie Wiecznego Ruchu. "
+  "Można też znaleźć nieograniczone Sfery Bezpieczeństwa na "
+  "Skrzyżowaniach (po zdobyciu 25 Piór Feniksa) i na Prerii."
+  )
+
+S(
+  "\n\nCollect %the1 to gain an extra Orb of the Mirror. "
+  "You can gain further Orbs of the Mirror by collecting 2, 4, 8...",
+
+  "\n\nZdobądź %a1 by dostać dodatkową Sferę Lustra. "
+  "Więcej Sfer Lustra dostaniesz przy 2, 4, 8..."
+  )
+
+S(
+  "\n\nIn the Orb Strategy Mode, the Orb of Luck also "
+  "significantly increases the frequency of Great Walls, Crossroads IV, "
+  "and sub-lands.",
+  
+  "\n\nW trybie strategii sfer Sfera Szczęścia dodatkowo "
+  "znacznie zwiększa częstotliwość wielkich ścian, Skrzyżowań IV, "
+  "i podkrain.")
+
+S("\n\nIn the Orb Strategy Mode, each 25 Necromancer's Totems "
+  "you are given a random offensive Orb.",
+  
+  "\n\nW trybie strategii sfer każde 25 Totemów Nekromanty "
+  "daje dodatkową ofensywną sferę.")
+ 
+S(
+  "Use Orb of the Mirror to gain copies of one of your Orbs; "
+  "mirroring weaker Orbs usually yields more copies. "
+  "It can only be used once per Orb type, "
+  "and only when you are next to a mirror.",
+  
+  "Użyj Sfery Lustra by skopiować jedną z Twoich sfer; "
+  "odbijanie słabszych Sfer zwykle daje więcej kopii. "
+  "Możesz użyć tylko raz na każdy typ Sfery, "
+  "i tylko stojąc obok lustra.")
+  
+S("Uses to gain: %1", "Dostaniesz użyć: %1")
+S("already mirrored", "już było odbijane")
+  
+N("your orbs", GEN_F, "Twoje Sfery", "Twoje Sfery", "Twoje Sfery", "Twoje Sfery")
+S("Click this to see your orbs.", "Kliknij by zobaczyć Twoje sfery.")                                                   
+
+// peaceful mode
+S("configure keys/joysticks", "konfiguracja klawiszy/joysticka")
+S("peaceful mode", "tryb spokojny")
+
+// config changes
+S("Press F5 or 'o' to try again!", "Naciśnij F5 lub 'o' by spróbować jeszcze raz!")  
+S("aura brightness", "jasność aury")
+S("aura smoothening factor", "wygładzanie aury")
+S("graphics configuration", "konfiguracja grafiki")
+S("special display modes", "specjalne tryby ekranu")
+S("openGL mode", "tryb OpenGL")
+S("anti-aliasing", "anti-aliasing")
+S("line width", "szerokość linii")
+S("configure panning and general keys", "skonfiguruj klawisze ogólne")
+
+S("\n\nHint: use 'm' to toggle cells quickly",
+  "\n\nWsk: użyj 'm' by szybko przestawiać pola");
+
+// cell pattern names
+S("football", "piłka nożna")
+S("dark rainbow landscape", "ciemna tęcza")
+S("field pattern", "wzór pola")
+S("field pattern C", "wzór pola C")
+S("field pattern D", "wzór pola D")
+S("field pattern N", "wzór pola N")
+S("field pattern S", "wzór pola S")
+S("four triangles", "cztery trójkąty")
+S("big triangles: rings", "duże trójkąty: pierścenie")
+
+// missing for the Tutorial
+S("tutorial", "podręcznik")
+S("This Orb is not compatible with the Tutorial.", "Ta Sfera nie jest kompatybilna z podręcznikiem.")
+
+// local scores
+S("turns", "kol")
+S("cells", "pola")
+S("sort", "sortuj")
+S("choose", "wybór")
+S("play", "graj")
+
+// draw editor
+S("autochoose", "autowybór")
+S("c = choose", "c = wybór")
+S("b = switch auto", "b = ustaw auto")
+
+// mission screen hints
+
+S(
+  "If you collect too many treasures in a given land, it will become "
+  "extremely dangerous. Try other lands once you have enough!",
+  "Jeśli zbierzesz za dużo skarbów w jednej krainie, stanie się ona "
+  "bardzo niebezpieczna. Spróbuj pójść do innych krain, gdy masz dość!");
+
+S(
+  "Remember that you can right click mostly anything for more information.",
+  "Pamiętaj, że prawie wszystko możesz kliknąć prawym przyciskiem, "
+  "by dowiedzieć się czegoś na dany temat.")
+
+S("Want to understand the geometry in HyperRogue? Try the Tutorial!",
+  "Chcesz zrozumieć geometrię w HyperRogue? Obejrzyj Podręcznik!");
+
+S(
+  "Collecting 25 treasures in a given land may be dangerous, "
+  "but allows magical Orbs of this land to appear in other places!",
+  "Zebranie 25 skarbów w jednej krainie może być niebezpieczne, "
+  "ale powoduje, że magiczne Sfery z tej krainy "
+  "pojawiają się w pozostałych krainach!")
+
+S(
+  "Press ESC to view this screen during the game.",
+  "Naciśnij ESC w czasie gry, by obejrzeć ten ekran.")
+
+S("The 'world overview' shows all the lands in HyperRogue.",
+  "'Przegląd krain' pokazuje wszystkie krainy w HyperRogue."
+  )
+
+S("Press 'o' to see all the lands in HyperRogue.",
+  "Naciśnij 'o', by zobaczyć wszystkie krainy w HyperRogue.")
+
+S(
+  "Want another type of game? Want more challenge?\n"
+  "HyperRogue has many special modes and challenges that "
+  "significantly change the gameplay. Try them!",
+  
+  "Chcesz spróbować innego typu gry? Dodatkowych wyzwań?\n"
+  "HyperRogue ma dużo specjalnych trybów, istotnie "
+  "zmieniających styl gry. Wypróbuj je!")
+
+S(
+  "Hyperbolic geometry can be shown in many ways.",
+  "Geometria hiperboliczna może być pokazana na wiele sposobów...")
+
+S(
+  "You do not want to lose the game from a single mistake?\n"
+  "Do you want to use the Orbs strategically?\n"
+  "Try the Orb Strategy mode!",
+  
+  "Nie chcesz ginąć od jednego błędu? Chcesz używać Sfer strategicznie? "
+  "Wypróbuj tryb strategii sfer!")
+
+S(
+  "Do you think you are playing on a ball? "
+  "This is far from the truth!\n",
+  
+  "Myślisz, że grasz na sferze? Jest to dalekie od prawdy!\n")
+
+S(
+  "Did you know that the path you take during the game "
+  "is usually very close to a straight line?\n",
+
+  "Czy wiesz, że droga, którą przebywasz w czasie gry, "
+  "jest zwykle bardzo zbliżona do linii prostej?")
+
+S("Show me!", "Pokaż!")
+
+S(
+  "You are %1 cells away from the starting point, or "
+  "the place where you used an Orb of Safety last time. "
+  "There are %2 such cells.\n",
+  
+  "Jesteś %1 kroków od punktu startu, lub miejsca "
+  "ostatniego użycia Sfery Bezpieczeństwa. "
+  "Takich pól jest %2.\n")
+
+S("about ", "około ")
+S(" (%1 more digits)", " (jeszcze cyfr: %1)")
+
+S("see how it ended", "jak się skończyło")
+
+// other missing/new things
+S("\n\nOrb unlocked: %1", "\n\nOdblokowana Sfera: %1")
+S("Orb unlocked: %1", "Odblokowana Sfera: %1")
+S("\n\nSecondary orb: %1", "\n\nDodatkowa Sfera: %1")
+S(" to submerge", " do zanurzenia")
+S(" to surface", " do wynurzenia")
+S("%The1 says, \"not this place, it looks even worse...\"", 
+  "%The1 mówi, \"nie tu, tu jest jeszcze gorzej...\"")
+S("torus", "torus")
+S(" (click to use)", " (klik by użyć)")
+N("Hall of Mirrors", GEN_F, "Lustrzana Sala", "Lustrzane Sale", "Lustzaną Salę", "w Lustrzanej Sali")
+Orb("the Mirror", "Lustra")
+N("Reflection", GEN_N, "Odbicie", "Odbicia", "Odbicie", "w Odbiciu")
+N("mirror wall", GEN_F, "lustrzana ściana", "lustrzane ściany", "lustrzaną ścianę", "lustrzaną ścianą")
+
+S("This would only move you deeper into the trap!",
+  "To tylko przeniesie Cię w głąb pułapki!");
+
+#undef Orb
+

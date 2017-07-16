@@ -526,7 +526,7 @@ void mainloopiter() {
       drawscreen();
       }
     
-    if(ev.type == SDL_JOYAXISMOTION) {
+    if(ev.type == SDL_JOYAXISMOTION && normal && DEFAULTCONTROL) {
       if(ev.jaxis.which == 0) {
         if(ev.jaxis.axis == 0)
           joyx = ev.jaxis.value;
@@ -565,16 +565,28 @@ void mainloopiter() {
       if(ev.jhat.value == SDL_HAT_RIGHT) dir = 1;
       if(ev.jhat.value == SDL_HAT_DOWN) dir = 2;
       if(ev.jhat.value == SDL_HAT_LEFT) dir = 3;
+      printf("%d %d %d\n", joyid, hat, dir);
       if(joyid < 8 && hat < 4 && dir < 4) {
         vid.scfg.hataction[joyid][hat][dir] = vid.scfg.setwhat;
         vid.scfg.setwhat = 0;
         }
       }
 
-    else if(ev.type == SDL_JOYBUTTONDOWN && DEFAULTCONTROL) {
+    else if(ev.type == SDL_JOYHATMOTION && !normal) {
+      if(ev.jhat.value == SDL_HAT_UP) sym = SDLK_UP;
+      if(ev.jhat.value == SDL_HAT_DOWN) sym = SDLK_DOWN;
+      if(ev.jhat.value == SDL_HAT_LEFT) sym = SDLK_LEFT;
+      if(ev.jhat.value == SDL_HAT_RIGHT) sym = SDLK_RIGHT;
+      }
+
+    else if(ev.type == SDL_JOYBUTTONDOWN && normal && DEFAULTCONTROL) {
       flashMessages();
       movepcto(joydir);
       checkjoy();
+      }
+
+    else if(ev.type == SDL_JOYBUTTONDOWN && !normal) {
+      sym = uni = SDLK_RETURN;
       }
 
     if(ev.type == SDL_KEYDOWN) {

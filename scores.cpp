@@ -39,6 +39,7 @@ bool isHardcore(score *S) {
 int modediff(score *S) {
   int diff = 0;
   eGeometry g = (eGeometry) S->box[116]; 
+  if(S->box[306] != inv::on) diff += 4;
   if(S->box[238]) g = gSphere;
   if(S->box[239]) g = gElliptic;
   if(max(S->box[197], 1) != multi::players) diff += 8;
@@ -64,6 +65,7 @@ string modedesc(score *S) {
   if(S->box[196]) s += "/C";
   if(S->box[119]) s += "/s";
   if(S->box[197] > 1) s += "/P" + its(S->box[197]);
+  if(S->box[306]) s += "/i";
   if(isHardcore(S)) s += "/h";
   return s;
   }
@@ -301,7 +303,7 @@ void load() {
       
       for(int i=boxid; i<MAXBOX; i++) sc.box[i] = 0;
 
-      if(sc.ver >= "4.4") {
+      if(!verless(sc.ver, "4.4")) {
         sc.box[0] = sc.box[65];
         // the first executable on Steam included a corruption
         if(sc.box[65] > 1420000000 && sc.box[65] < 1430000000) {

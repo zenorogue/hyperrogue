@@ -4,6 +4,8 @@
 
 // basic graphics:
 
+int inmirrorcount = 0;
+
 bool wmspatial, wmescher, wmplain, wmblack, wmascii;
 bool mmspatial, mmhigh, mmmon, mmitem;
 int maxreclevel, reclevel;
@@ -614,6 +616,7 @@ bool drawItemType(eItem it, cell *c, const transmatrix& V, int icol, int ticks, 
     if(it == itOrbUndeath) icol = minf[moFriendlyGhost].color;
     if(it == itOrbRecall) icol = 0x101010;
     hpcshape& sh = 
+      it == itOrbLove ? shLoveRing :
       isRangedOrb(it) ? shTargetRing :
       isOffensiveOrb(it) ? shSawRing :
       isFriendOrb(it) ? shPeaceRing :
@@ -1023,9 +1026,12 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, int col, dou
     queuepoly(VBIRD * Mirror, shGadflyEye, darkena(col, 2, 0xFF));
     }
   else if(m == moVampire || m == moBat) {
-    if(m == moBat) ShadowV(V, shBatWings); // but vampires have no shadow
-    queuepoly(VBIRD, shBatWings, darkena(0x303030, 0, 0xFF));
-    queuepoly(VBIRD, shBatBody, darkena(0x606060, 0, 0xFF));
+    // vampires have no shadow and no mirror images
+    if(m == moBat) ShadowV(V, shBatWings);
+    if(m == moBat || !inmirrorcount) {
+      queuepoly(VBIRD, shBatWings, darkena(0x303030, 0, 0xFF));
+      queuepoly(VBIRD, shBatBody, darkena(0x606060, 0, 0xFF));
+      }
     /* queuepoly(V, shBatMouth, darkena(0xC00000, 0, 0xFF));
     queuepoly(V, shBatFang, darkena(0xFFC0C0, 0, 0xFF));
     queuepoly(V*Mirror, shBatFang, darkena(0xFFC0C0, 0, 0xFF));
@@ -1444,7 +1450,7 @@ bool applyAnimation(cell *c, transmatrix& V, double& footphase, int layer) {
   }
 
 double chainAngle(cell *c, transmatrix& V, cell *c2, double dft) {
-  if(!gmatrix0.count(c2)) return dft;
+  if(inmirrorcount || !gmatrix0.count(c2)) return dft;
   hyperpoint h = C0;
   if(animations[LAYER_BIG].count(c2)) h = animations[LAYER_BIG][c2].wherenow * h;
   h = inverse(V) * gmatrix0[c2] * h;
@@ -1453,7 +1459,7 @@ double chainAngle(cell *c, transmatrix& V, cell *c2, double dft) {
 
 // equivalent to V = V * spin(-chainAngle(c,V,c2,dft));
 bool chainAnimation(cell *c, transmatrix& V, cell *c2, int i, int b) {
-  if(!gmatrix0.count(c2)) {
+  if(inmirrorcount || !gmatrix0.count(c2)) {
     V = V * ddspin(c,i,b);
     return false;
     }
@@ -1502,7 +1508,8 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, int col) {
   double footphaseb = 0, footphase = 0;
   
   transmatrix Vs = Vparam; nospins = applyAnimation(c, Vs, footphase, LAYER_SMALL);
-  transmatrix Vb = Vparam; nospinb = applyAnimation(c, Vb, footphaseb, LAYER_BIG);
+  transmatrix Vb = Vparam; 
+  if(!inmirrorcount) nospinb = applyAnimation(c, Vb, footphaseb, LAYER_BIG);
 //  nospin = true;
 
   eMonster m = c->monst;
@@ -1638,6 +1645,8 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, int col) {
   
     if(!nospins) 
       Vs = Vs * ddspin(c, c->mondir, flipplayer ? S42 : 0);
+      
+    if(inmirrorcount&1) col ^= minf[moMirror].color ^ minf[moMirage].color;
 
     if(c->monst == moMirror) Vs = Vs * Mirror;
         
@@ -2240,7 +2249,8 @@ void setcolors(cell *c, int& wcol, int &fcol) {
     if(c->wall == waPlatform) wcol = 0xF0F0A0;
     }
   if(c->land == laWineyard) fcol = 0x006000;
-  if(c->land == laMirror) fcol = 0x808080;
+  if(c->land == laMirror || c->land == laMirrorWall)
+    fcol = 0x808080;
   if(c->land == laMotion) fcol = 0xF0F000;
   if(c->land == laGraveyard) fcol = 0x107010;
   if(c->land == laDryForest) fcol = gradient(0x008000, 0x800000, 0, c->landparam, 10);
@@ -2509,7 +2519,7 @@ void setcolors(cell *c, int& wcol, int &fcol) {
   if(c->wall == waAncientGrave || c->wall == waFreshGrave || c->wall == waThumperOn || c->wall == waThumperOff || c->wall == waBonfireOff)
     fcol = wcol;
     
-  if(c->land == laMinefield && c->wall == waMineMine && ((cmode && sm::MAP) || !canmove))
+  if(c->land == laMinefield && c->wall == waMineMine && ((cmode & sm::MAP) || !canmove))
     fcol = wcol = 0xFF4040;
 
   if(mightBeMine(c) && mineMarkedSafe(c))
@@ -2792,14 +2802,17 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
   qfi.shape = NULL; qfi.special = false;
   ivoryz = isGravityLand(c->land);
 
-  transmatrix& gm = gmatrix[c];
-  bool orig = 
-    gm[2][2] == 0 ? true : 
-    torus ? hypot(gm[0][2], gm[1][2]) >= hypot(V[0][2], V[1][2]) :
-    (sphere && vid.alphax >= 1.001) ? fabs(gm[2][2]-1) <= fabs(V[2][2]-1) :
-    fabs(gm[2][2]-1) >= fabs(V[2][2]-1) - 1e-8;
+  bool orig = false;
+  if(!inmirrorcount) {
+    transmatrix& gm = gmatrix[c];
+    orig = 
+      gm[2][2] == 0 ? true : 
+      torus ? hypot(gm[0][2], gm[1][2]) >= hypot(V[0][2], V[1][2]) :
+      (sphere && vid.alphax >= 1.001) ? fabs(gm[2][2]-1) <= fabs(V[2][2]-1) :
+      fabs(gm[2][2]-1) >= fabs(V[2][2]-1) - 1e-8;
 
-  if(orig) gm = V;
+    if(orig) gm = V;
+    }
 
   if(behindsphere(V)) return;
   
@@ -2862,7 +2875,8 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
   
     hyperpoint VC0 = tC0(V);
   
-    if(intval(mouseh, VC0) < modist) {
+    if(inmirrorcount) ;
+    else if(intval(mouseh, VC0) < modist) {
       modist2 = modist; mouseover2 = mouseover;
       modist = intval(mouseh, VC0);
       mouseover = c;
@@ -2871,7 +2885,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       modist2 = intval(mouseh, VC0);
       mouseover2 = c;
       }
-    
+
     if(!torus) {
       double dfc = euclid ? intval(VC0, C0) : VC0[2];
     
@@ -2892,6 +2906,19 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         }
       }
 
+    if(inmirror(c)) {
+      if(inmirrorcount >= 10) return;
+      cellwalker cw(c, 0, mirrored);
+      cw = mirror::reflect(cw);
+      int cmc = (cw.mirrored == mirrored) ? 2 : 1;
+      inmirrorcount += cmc;
+      if(cw.mirrored != mirrored) V = V * Mirror;
+      if(cw.spin) V = V * spin(2*M_PI*cw.spin/cw.c->type);
+      drawcell(cw.c, V, 0, cw.mirrored);
+      inmirrorcount -= cmc;
+      return;
+      }                  
+    
     // int col = 0xFFFFFF - 0x20 * c->maxdist - 0x2000 * c->cpdist;
 
     if(!buggyGeneration && c->mpdist > 8 && !cheater) return; // not yet generated
@@ -2904,8 +2931,20 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
     int wcol, fcol, asciicol;
     
     setcolors(c, wcol, fcol);
+    
+    if(inmirror(c)) {
+      // for debugging
+      if(c->land == laMirrored) fcol = 0x008000;
+      if(c->land == laMirrorWall2) fcol = 0x800000;
+      if(c->land == laMirrored2) fcol = 0x000080;
+      }
+    
+    for(int k=0; k<inmirrorcount; k++)
+      wcol = gradient(wcol, 0xC0C0FF, 0, 0.2, 1),
+      fcol = gradient(fcol, 0xC0C0FF, 0, 0.2, 1);
+
     // addaura(tC0(V), wcol);
-    int zcol = fcol;
+    int zcol = fcol;      
 
     if(peace::on && peace::hint && c->land != laTortoise) {
       int d =
@@ -2918,6 +2957,11 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       fcol = gradient(fcol, dc, 0, .3, 1);
       }
 
+    if(c->land == laMirrored || c->land == laMirrorWall2 || c->land == laMirrored2) {
+      string label = its(c->landparam);
+      queuestr(V, 1 * .2, label, 0xFFFFFFFF, 1);
+      }
+      
     if(viewdists) {
       int cd = celldistance(c, cwt.c);
       string label = its(cd);
@@ -3112,6 +3156,44 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
             shBigTriangle, darkena(fcol, fd, 0xFF));
         }
 #endif
+      
+      else if(c->land == laMirrorWall) {
+        int d = mirror::mirrordir(c);
+        bool onleft = c->type == 7;
+        if(c->type == 7 && c->barleft == laMirror)
+          onleft = !onleft;
+        if(c->type == 6 && c->mov[d]->barleft == laMirror)
+          onleft = !onleft;
+        if(purehepta) onleft = !onleft;
+        
+        if(d == -1) {
+          for(d=0; d<6; d++) 
+            if(c->mov[d] && c->mov[(1+d)%6] && c->mov[d]->land == laMirrorWall && c->mov[(1+d)%6]->land == laMirrorWall)
+              break;
+          qfi.spin = ddspin(c, d, 0);
+          transmatrix V2 = V * qfi.spin;
+          for(int d=0; d<6; d++) {
+            inmirrorcount+=d;
+            qfloor(c, V2 * spin(d*M_PI/3), shHalfFloor[2], darkena(fcol, fd, 0xFF));
+            inmirrorcount-=d;
+            }
+          const int layers = 2 << detaillevel;
+          for(int z=1; z<layers; z++) 
+            queuepolyat(mscale(V2, zgrad0(0, geom3::wall_height, z, layers)), shHalfMirror[2], 0xC0C0C080, PPR_WALL3+z-layers);
+          }
+        else {
+          qfi.spin = ddspin(c, d, S42);
+          transmatrix V2 = V * qfi.spin;
+          inmirrorcount++;
+          qfloor(c, mirrorif(V2, !onleft), shHalfFloor[ct6], darkena(fcol, fd, 0xFF));
+          inmirrorcount--;
+          qfloor(c, mirrorif(V2, onleft), shHalfFloor[ct6], darkena(fcol, fd, 0xFF));
+  
+          const int layers = 2 << detaillevel;
+          for(int z=1; z<layers; z++) 
+            queuepolyat(mscale(V2, zgrad0(0, geom3::wall_height, z, layers)), shHalfMirror[ct6], 0xC0C0C080, PPR_WALL3+z-layers);
+          }
+        }
       
       else if(c->land == laWineyard && cellHalfvine(c)) {
 
@@ -3606,6 +3688,8 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
          }
         }
 
+      else if(c->wall == waMirrorWall) ;
+      
       else if(highwall(c)) {
         zcol = wcol;
         int wcol0 = wcol;
@@ -4363,6 +4447,7 @@ void drawthemap() {
       maxreclevel,
       hsOrigin, ypush(vid.yshift) * sphereflip * View);
     }
+  ivoryz = false;
   
   linepatterns::drawAll();
   
@@ -4589,6 +4674,7 @@ void drawfullmap() {
     }
   #endif
   profile_start(2);
+
   drawaura();
   drawqueue();
   profile_stop(2);

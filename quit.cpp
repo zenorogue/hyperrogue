@@ -19,13 +19,6 @@ string timeline() {
       XLAT("%1 turns (%2)", its(turncount), buf);
   }
 
-struct hint {
-  time_t last;
-  function<bool()> usable;
-  function<void()> display;
-  function<void()> action;  
-  };
-
 void noaction() {}
 
 function<void()> cancel = noaction;
@@ -58,7 +51,7 @@ hint hints[] = {
       },    
     []() { 
        dialog::addHelp(XLAT(
-        "If you collect too many treasures in a given land, monsters will be "
+        "If you collect too many treasures in a given land, it will become "
         "extremely dangerous. Try other lands once you have enough!"));
       },
     noaction},
@@ -97,7 +90,7 @@ hint hints[] = {
     []() { return !inv::on; },
     []() { 
       dialog::addHelp(XLAT(
-        "Collecting 25 treasures in a given land is dangerous, "
+        "Collecting 25 treasures in a given land may be dangerous, "
         "but allows magical Orbs of this land to appear in other places!"
         ));
       },
@@ -136,7 +129,7 @@ hint hints[] = {
     0,
     []() { return !canmove; },
     []() { 
-      dialog::addInfo(XLAT(
+      dialog::addHelp(XLAT(
         "Want another type of game? Want more challenge?\n"
         "HyperRogue has many special modes and challenges that "
         "significantly change the gameplay. Try them!"
@@ -174,8 +167,6 @@ hint hints[] = {
       dialog::addBreak(50);
 #ifdef INF
       dialog::addItem(XLAT("Orb Strategy mode"), 'z');
-#else
-      dialog::addItem(XLAT("(paid versions only)"), 'z');
 #endif
       },
     []() {
@@ -193,7 +184,7 @@ hint hints[] = {
         "This is far from the truth!\n"
         ));
       dialog::addBreak(50);
-      dialog::addItem(XLAT("Hypersian Rug mode"), 'z');
+      dialog::addItem(XLAT("hypersian rug mode"), 'z');
       },
     [] () {
       popScreen();
@@ -217,7 +208,7 @@ hint hints[] = {
     []() { 
       dialog::addHelp(XLAT(
         "Did you know that the path you take during the game "
-        "is very close to a straight line?\n"
+        "is usually very close to a straight line?\n"
         ));
       dialog::addBreak(50);
       dialog::addItem(XLAT("Show me!"), 'z');
@@ -298,6 +289,10 @@ hint hints[] = {
   }; 
 
 int hinttoshow;
+
+string contstr() {
+  return XLAT(canmove ? "continue" : "see how it ended");
+  }
 
 void showMission() {
 
@@ -439,9 +434,11 @@ void showMission() {
 #endif
     }
   else {
-    dialog::addItem(XLAT(canmove ? "continue" : "see how it ended"), SDLK_ESCAPE);
+    dialog::addItem(contstr(), SDLK_ESCAPE);
     dialog::addItem(XLAT("main menu"), 'v');
     dialog::addItem(XLAT("restart"), SDLK_F5);
+    if(inv::on && items[itInventory])
+      dialog::addItem(XLAT("inventory"), 'i');
     #ifndef MOBILE
     dialog::addItem(XLAT(quitsaves() ? "save" : "quit"), SDLK_F10);
     #endif
@@ -469,7 +466,7 @@ void handleKeyQuit(int sym, int uni) {
 
   if(sym == SDLK_RETURN || sym == SDLK_KP_ENTER || sym == SDLK_F10) quitmainloop = true;
   else if(uni == 'r' || sym == SDLK_F5) {
-    restartGame(), popScreen();
+    restartGame();
     msgs.clear();
     }
   else if(sym == SDLK_UP || sym == SDLK_KP8 || sym == PSEUDOKEY_WHEELUP) msgscroll++;
@@ -524,5 +521,7 @@ void showMissionScreen() {
       }
     hints[hinttoshow].last = time(NULL);
     }
+  
+  dialog::highlight_text = contstr();
   }
 

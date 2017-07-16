@@ -4,6 +4,19 @@
 
 // land generation routines
 
+int steplimit = 0;
+int cstep;
+
+template<class... T>
+void limitgen(T... args) {
+  if(steplimit) {
+    cstep++;
+    printf("%6d ", cstep);
+    printf(args...);
+    if(cstep == steplimit) buggyGeneration = true;
+    }
+  }
+
 vector<cell*> buggycells;
 
 cell *pathTowards(cell *pf, cell *pt) {
@@ -57,7 +70,7 @@ int isNative(eLand l, eMonster m) {
     case laAlchemist: 
       return (m == moSlime) ? 2 : 0;
 
-    case laMirror: 
+    case laMirror: case laMirrored: case laMirrorWall: case laMirrorWall2: case laMirrored2:
       return (m == moEagle || m == moRanger || m == moMirror || m == moMirage) ? 1 : 0;
       
     case laMotion: 
@@ -217,7 +230,10 @@ eItem treasureType(eLand l) {
     case laDesert: return itSpice;
 
     case laAlchemist: return itElixir;
-    case laMirror: return itShard;
+
+    case laMirror: case laMirrored: case laMirrorWall: case laMirrorWall2: case laMirrored2:
+      return itShard;
+
     case laMotion: return itFeather;
 
     case laGraveyard: return itBone;
@@ -310,7 +326,7 @@ eItem wanderingTreasure(cell *c) {
   return treasureType(l);
   }
 
-#define ORBLINES 54
+#define ORBLINES 56
 
 struct orbinfo {
   eLand l;
@@ -350,6 +366,7 @@ const orbinfo orbinfos[ORBLINES] = {
   {laOcean, 0, 3000, itOrbEmpathy},
   {laOcean, 0, 0, itOrbAir},
   {laPalace, 0, 4000, itOrbDiscord},
+  {laPalace, 0, 0, itOrbFrog},
   {laZebra, 500, 2100, itOrbFrog},
   {laLivefjord, 0, 1800, itOrbFish},
   {laPrincessQuest, 0, 200, itOrbLove},
@@ -374,6 +391,7 @@ const orbinfo orbinfos[ORBLINES] = {
   {laReptile, 500, 2100, itOrbDash},
   {laBull, 720, 3000, itOrbHorns},
   {laPrairie, 0, 3500, itOrbBull},
+  {laWhirlpool, 0, 0, itOrbSafety},
   {laWhirlpool, 0, 2000, itOrbWater}, // must be last because it generates a boat
   };
 
@@ -635,7 +653,8 @@ bool landUnlocked(eLand l) {
       return true;
 
     case laMirror: case laMinefield: case laPalace:
-    case laOcean: case laLivefjord:
+    case laOcean: case laLivefjord: case laMirrored: case laMirrorWall: case laMirrorWall2:
+    case laMirrored2: 
       return gold() >= R30;
     
     case laCaribbean: case laWhirlpool:
@@ -926,6 +945,10 @@ void setbarrier(cell *c) {
   else if(c->barleft == laHaunted || c->barright == laHaunted) {
     c->land = laHauntedWall;
     }
+  else if(c->barleft == laMirrored2 || c->barright == laMirrored2)
+    c->land = laMirrorWall2;
+  else if(c->barleft == laMirrored || c->barright == laMirrored)
+    c->land = laMirrorWall;
   else {
     c->wall = waBarrier;
     c->land = laBarrier;
@@ -1016,24 +1039,36 @@ bool buildPrizeMirror(cell *c, int freq) {
   return true;
   }                    
 
-void placePrizeOrb(cell *c) {
+eLand getPrizeLand(cell *c = cwt.c) {
   eLand l = c->land;
   if(isElemental(l)) l = laElementalWall;
+  if(l == laPalace && princess::dist(c) < OUT_OF_PRISON)
+    l = laPrincessQuest;
+  return l;
+  }
+
+void placePrizeOrb(cell *c) {
   if(peace::on) return;
+  
+  eLand l = getPrizeLand(c);
 
   // these two lands would have too much orbs according to normal rules
   if(l == laPalace && hrand(100) >= 20) return;
+  if(l == laPrincessQuest && hrand(100) >= 20) return;
   if(l == laGraveyard && hrand(100) >= 15) return;
   if(l == laBurial && hrand(100) >= 10) return;
   if(l == laLivefjord && hrand(100) >= 35) return;
   if(l == laMinefield && hrand(100) >= 25) return;
   if(l == laElementalWall && hrand(100) >= 25) return;
 
-  if(l == laPalace && princess::dist(c) < OUT_OF_PRISON)
-    l = laPrincessQuest;
   for(int i=0; i<ORBLINES; i++) {
     const orbinfo& oi(orbinfos[i]);
-    if(inv::on && oi.orb != itOrbYendor) return;
+
+    if(inv::on) {
+      if(oi.orb == itOrbYendor && items[itHell] >= 100) ;
+      else continue;
+      }
+
     eOrbLandRelation olr = getOLR(oi.orb, l);
     if(olr != olrPrize25 && olr != olrPrize3) continue;
     int treas = items[treasureType(oi.l)];
@@ -1069,7 +1104,10 @@ void placeLocalOrbs(cell *c) {
   for(int i=0; i<ORBLINES; i++) {
     const orbinfo& oi(orbinfos[i]);
     if(oi.l != l) continue;
-    if(inv::on && (oi.orb != itOrbYendor)) continue;
+    if(inv::on) {
+      if(oi.orb != itOrbYendor) continue;
+      if(items[itHell] < 25) continue;
+      }
     if(yendor::on && (oi.orb == itOrbSafety || oi.orb == itOrbYendor))
       continue;
     if(!oi.lchance) continue;
@@ -1093,7 +1131,12 @@ void placeCrossroadOrbs(cell *c) {
   for(int i=0; i<ORBLINES; i++) {
     const orbinfo& oi(orbinfos[i]);
     if(!oi.gchance) continue;
-    if(inv::on && oi.orb != itOrbSafety && oi.orb != itOrbYendor) return;
+
+    if(inv::on) {
+      if(oi.orb == itOrbYendor && items[itHell] >= 50) ;
+      else if(oi.orb == itOrbSafety && items[itFeather] >= 25) ;
+      else continue;
+      }
     int treas = items[treasureType(oi.l)] * landMultiplier(oi.l);
     if(tactic::on && isCrossroads(tactic::lasttactic)) {
       if(oi.orb == itOrbYendor || oi.orb == itOrbSummon || oi.orb == itOrbFish || oi.orb == itOrbDigging || oi.orb == itOrbLove || oi.orb == itOrbLuck)
@@ -1117,7 +1160,13 @@ void placeOceanOrbs(cell *c) {
   if(peace::on) return;
   for(int i=0; i<ORBLINES; i++) {
     const orbinfo& oi(orbinfos[i]);
-    if(inv::on && oi.orb != itOrbSafety && oi.orb != itOrbYendor) return;
+
+    if(inv::on) {
+      if(oi.orb == itOrbYendor && items[itHell] >= 50) ;
+      else if(oi.orb == itOrbSafety && items[itFeather] >= 25) ;
+      else continue;
+      }
+
     if(items[treasureType(oi.l)] * landMultiplier(oi.l) < 10) continue;
     if(!oi.gchance) continue;
     if(oi.orb == itOrbLife) continue; // useless
@@ -1193,8 +1242,28 @@ void extendcheck(cell *c) {
     raiseBuggyGeneration(c, "extend error");
     }
   }
+
+bool oldmirror;
+
+bool inmirror(eLand l) {
+  return l == laMirrored || l == laMirrorWall2 || l == laMirrored2;
+  }
+
+bool inmirror(cell *c) {
+  return inmirror(c->land);
+  }
+
+bool inmirror(const cellwalker& cw) {
+  return inmirror(cw.c->land);
+  }
+
+bool mirrorwall(cell *c) {
+  return c->barleft == laMirrored || c->barright == laMirrored;
+  }
   
 void extendBarrierFront(cell *c) {
+  limitgen("extend front %p\n", c); 
+  if(buggyGeneration) return;
   int ht = c->landparam;
   extendcheck(c);
 
@@ -1205,7 +1274,8 @@ void extendBarrierFront(cell *c) {
     bb.c->barleft = c->barleft;
     bb.c->barright = c->barright;
     setbarrier(bb.c);
-    bb.c->landparam = (ht-4);
+    if(!mirrorwall(bb.c)) 
+      bb.c->landparam = (ht-4);
   //printf("[A heat %d]\n", ht-4);
 
     cwspin(bb, 2); cwstep(bb); setland(bb.c, c->barleft); cwstep(bb);
@@ -1216,11 +1286,15 @@ void extendBarrierFront(cell *c) {
     bb.c->barleft = c->barright;
     bb.c->barright = c->barleft;
     setbarrier(bb.c);
-    bb.c->landparam = (ht-4)^2;
+    if(!mirrorwall(bb.c)) 
+      bb.c->landparam = (ht-4)^2;
   //printf("[B heat %d]\n", (ht-4)^2);
     cwspin(bb, 3); cwstep(bb);
     
-    bb.c->landparam = ht ^ 2;
+    bb.c->barleft = c->barleft;
+    bb.c->barright = c->barright;
+    if(!mirrorwall(bb.c)) 
+      bb.c->landparam = ht ^ 2;
     }
 
 //printf("[C heat %d]\n", (ht)^2);
@@ -1238,6 +1312,8 @@ void extendBarrierFront(cell *c) {
   }
 
 void extendBarrierBack(cell *c) {
+  limitgen("extend back %p\n", c); 
+  if(buggyGeneration) return;
   int ht = c->landparam;
   extendcheck(c);
 
@@ -1248,7 +1324,8 @@ void extendBarrierBack(cell *c) {
   bb.c->bardir = bb.spin;
   bb.c->barleft = c->barright;
   bb.c->barright = c->barleft;
-  bb.c->landparam = ht ^ 11;
+  if(!mirrorwall(bb.c)) 
+    bb.c->landparam = ht ^ 11;
   extendcheck(bb.c);
 //printf("[D heat %d]\n", (ht^11));
 
@@ -1257,7 +1334,8 @@ void extendBarrierBack(cell *c) {
     cwstep(bb); 
     bb.c->barleft = c->barright;
     bb.c->barright = c->barleft;
-    bb.c->landparam = (ht^11)-4;
+    if(!mirrorwall(bb.c)) 
+      bb.c->landparam = (ht^11)-4;
     cwstep(bb);
     }
 //printf("[E heat %d]\n", (ht^11));
@@ -1266,11 +1344,13 @@ void extendBarrierBack(cell *c) {
   extendBarrier(bb.c);
   }
 
-eLand oppositeElement(eLand l) {
+eLand oppositeElement(eLand l, eLand l2) {
   if(l == laEFire) return laEWater;
   if(l == laEWater) return laEFire;
   if(l == laEAir) return laEEarth;
   if(l == laEEarth) return laEAir;
+  if(l == laMirror && l2 == laMirrored) return laMirrored2;
+  if(l == laMirrored2 && l2 == laMirrored) return laMirror;
   return l;
   }
 
@@ -1353,7 +1433,14 @@ void extendCR5(cell *c) {
     }
   }
 
+bool isbar4(cell *c) {
+  return
+    c->wall == waBarrier || c->land == laElementalWall || 
+    c->land == laMirrorWall || c->land == laMirrorWall2;
+  }  
+
 void extendBarrier(cell *c) {
+  limitgen("extend barrier %p\n", c); 
   if(buggyGeneration) return;
   
   if(c->barleft == NOWALLSEP_USED) return;
@@ -1361,7 +1448,8 @@ void extendBarrier(cell *c) {
   extendcheck(c);
   
   // printf("build barrier at %p", c);
-  if(c->land == laBarrier || c->land == laElementalWall || c->land == laHauntedWall || c->land == laOceanWall) { 
+  if(c->land == laBarrier || c->land == laElementalWall || c->land == laHauntedWall || c->land == laOceanWall || 
+    c->land == laMirrorWall || c->land == laMirrorWall2) { 
     // printf("-> ready\n");
     return;
     }
@@ -1376,14 +1464,40 @@ void extendBarrier(cell *c) {
     return;
     }
   
+  bool firstmirror = 
+    (c->barleft == laMirrored || c->barright == laMirrored) && 
+      c->barleft != laMirrored2 && c->barright != laMirrored2;
+  
+  if(firstmirror && c->barleft == laMirror && hrand(100) < 60) {
+    cellwalker cw(c, c->bardir);
+    if(!purehepta) cwstep(cw);
+    if(cw.c->land != laMirrorWall)
+      if(buildBarrier6(cw, 1)) return;
+    }
+    
+  if(firstmirror && (purehepta?c->barleft == laMirror : c->barright == laMirror) && hrand(100) < 60) {
+    cellwalker cw(c, c->bardir);
+    if(purehepta) {
+      cwspin(cw, -3); cwstep(cw); cwspin(cw, -3);
+//    cwspin(cw, 3); cwstep(cw); cwspin(cw, -2); cwstep(cw); cwspin(cw, 3);
+      }
+    else {
+      cwstep(cw); cwspin(cw, 3); cwstep(cw); cwspin(cw, -1); // check this
+      }
+    if(buildBarrier6(cw, 2)) return;    
+    }
+    
   if(((c->barleft == laCrossroads3 || c->barright == laCrossroads3) && hrand(100) < 66) ||
-    (isElemental(c->barleft) && isElemental(c->barright) && hrand(100) < 25)) {
+    (isElemental(c->barleft) && isElemental(c->barright) && hrand(100) < 75) 
+    || (firstmirror && hrand(100) < 60)
+    ) {
     
     cellwalker cw(c, c->bardir);
     if(purehepta) {
-      cwstep(cw); if(cw.c->wall == waBarrier || cw.c->land == laElementalWall) {
+      cwstep(cw); 
+      if(isbar4(cw.c)) {
         cwstep(cw); cwspin(cw, 3); cwstep(cw); cwspin(cw, -1); cwstep(cw);
-        bool b = buildBarrier4(cw.c, cw.spin, 2, oppositeElement(c->barleft), c->barright);
+        bool b = buildBarrier4(cw.c, cw.spin, 2, oppositeElement(c->barleft, c->barright), c->barright);
         if(b) return;
         }
       else {
@@ -1394,9 +1508,9 @@ void extendBarrier(cell *c) {
     else {
       cwspin(cw, 3); cwstep(cw); 
       cell *cp = cwpeek(cw, 4);
-      if(cp->wall != waBarrier && cp->land != laElementalWall) {
+      if(!isbar4(cp)) {
         cwspin(cw, 2);  cwstep(cw);
-        bool b = buildBarrier4(cw.c, cw.spin, 2, oppositeElement(c->barleft), c->barright);
+        bool b = buildBarrier4(cw.c, cw.spin, 2, oppositeElement(c->barleft, c->barright), c->barright);
         if(b) return;
         }
       else {
@@ -1602,6 +1716,8 @@ eLand getNewLand(eLand old) {
 
   eLand l = callhandlers(laNone, hooks_nextland, old);
   if(l) return l;
+  
+  if(old == laMirror && !oldmirror && hrand(10)) return laMirrored;
     
   if(cheatdest != old) if(!isCyclic(cheatdest) && !isTechnicalLand(cheatdest)) return cheatdest;
   
@@ -1927,7 +2043,7 @@ void buildBarrierForce(cell *c, int d, eLand l) {
   landcount[newland]++;
   if(d == 4 || d == 5 || d == 6) c->barleft = oldland, c->barright = newland;
   else c->barleft = newland, c->barright = oldland;
-  c->landparam = 40;
+  if(!mirrorwall(c)) c->landparam = 40;
   extendcheck(c);
   }
 
@@ -1939,7 +2055,124 @@ void buildBarrier(cell *c, int d, eLand l) {
     buildBarrierForce(c, d, l);
   }
 
+bool buildBarrier6(cellwalker cw, int type) {
+  limitgen("build6 %p/%d (%d)\n", cw.c, cw.spin, type); 
+  
+  cellwalker b[4];
+  for(int i=0; i<4; i++) b[i] = cw;
+  
+  if(buggyGeneration) return true;
+
+  if(!purehepta) {
+    cwstep(b[0]);
+    cwspin(b[1], 1); cwstep(b[1]); cwspin(b[1], 3); cwstep(b[1]); 
+    cwspin(b[2], 4); cwstep(b[2]);
+    cwspin(b[3], 3); cwstep(b[3]); cwspin(b[3], 3); cwstep(b[3]);
+    }
+  else {
+    cwspin(b[1], 3); cwstep(b[1]); cwspin(b[1], 3);
+    cwspin(b[2], -2); cwstep(b[2]); cwspin(b[2], -3);
+    cwspin(b[3], -3); cwstep(b[3]); cwspin(b[3], 2); cwstep(b[3]); cwspin(b[3],-3);
+    if(type == 1 && b[3].c->land != laMirrorWall) return false;
+    if(type == 2 && cwpeek(b[1], 0)->land != laMirrorWall) return false;
+    // if(type == 2 && b[2].c->land != laMirrorWall) return false;
+    }
+  
+  if(false) {
+    for(int z=0; z<4; z++) {
+      printf("%p/%d\n", b[z].c, b[z].spin);
+      b[z].c->wall = waStrandedBoat; b[z].c->land = laAlchemist;
+      b[z].c->mondir = b[z].spin;
+      b[z].c->mpdist = 7;
+      b[z].c->item = eItem(1+z);
+      buggyGeneration = true;
+      }
+    return true;
+    }
+   
+  if(type == 1) {  
+    if(!(purehepta?checkBarriersFront:checkBarriersBack)(b[1], 6, true)) return false;
+    if(!(purehepta?checkBarriersFront:checkBarriersBack)(b[2], 6, true)) return false;
+    }
+  else {
+    if(!(purehepta?checkBarriersFront:checkBarriersBack)(b[0], 6, true)) return false;
+    if(!(purehepta?checkBarriersFront:checkBarriersBack)(b[3], 6, true)) return false;
+    }
+  
+  for(int d=0; d<4; d++) {
+    b[d].c->bardir = b[d].spin;
+    
+    if(purehepta) {
+      b[0].c->barleft = laMirrored, b[0].c->barright = laMirrored2;
+      b[1].c->barleft = laMirror, b[1].c->barright = laMirrored;
+      b[2].c->barleft = laMirrored2, b[2].c->barright = laMirrored;
+      b[3].c->barleft = laMirrored, b[3].c->barright = laMirror;
+      }
+    else {    
+      b[0].c->barleft = laMirror, b[0].c->barright = laMirrored;
+      b[1].c->barleft = laMirrored, b[1].c->barright = laMirror;
+      b[2].c->barleft = laMirrored, b[2].c->barright = laMirrored2;
+      b[3].c->barleft = laMirrored2, b[3].c->barright = laMirrored;
+      }
+  
+    (purehepta?extendBarrierFront:extendBarrierBack)(b[d].c);
+    }  
+
+  if(purehepta && false) {
+    for(int a=0; a<4; a++) 
+      extendBarrierBack(cwpeek(b[a],0));
+    }
+
+  if(!purehepta) {
+    setland(cwpeek(cw, 1), laMirrorWall);
+    setland(cwpeek(cw, 2), laMirrored);
+    setland(cwpeek(cw, 3), laMirrorWall2);
+    setland(cwpeek(cw, 4), laMirrorWall2);
+    setland(cwpeek(cw, 5), laMirrored);
+    setland(cwpeek(cw, 0), laMirrorWall);
+    setland(cwpeek(b[0], 2), laMirrored);
+    setland(cwpeek(b[3], 6), laMirrored2);
+    setland(cwpeek(b[3], 5), laMirrored2);
+    setland(cwpeek(b[1], -1), laMirrored);
+    setland(cwpeek(b[2], -2), laMirrored);
+    setland(cwpeek(b[1], -2), laMirrored);
+    setland(cwpeek(b[0], -2), laMirror);
+    cw.c->land = laMirrorWall;
+    cw.c->wall = waMirrorWall;
+    cw.c->landparam = 1;
+    }
+  else {
+    setland(cw.c, laMirrorWall2);
+    setland(cwpeek(cw, 0), laMirrorWall2);
+    setland(cwpeek(cw, 1), laMirrored);
+    setland(cwpeek(cw, 2), laMirrored);
+    setland(cwpeek(cw, 3), laMirrorWall);
+    setland(cwpeek(cw, 4), laMirrored);
+    setland(cwpeek(cw, 5), laMirrorWall2);
+    setland(cwpeek(cw, 6), laMirrored2);
+
+    setland(cwpeek(b[1], 0), laMirrorWall);
+    setland(cwpeek(b[1], 1), laMirror);
+    setland(cwpeek(b[1], 2), laMirrorWall);
+    setland(cwpeek(b[1], 6), laMirrored);
+
+    cellwalker cf = b[0];
+    cwstep(cf);
+    setland(cwpeek(cf, -2), laMirrored);
+
+    cf = b[3];
+    cwstep(cf);
+    setland(cwpeek(cf, -2), laMirrored);
+    }
+
+  return true;
+  }
+  
+  
+
 bool buildBarrier4(cell *c, int d, int mode, eLand ll, eLand lr) {
+  limitgen("build4 %p\n", c); 
+  if(buggyGeneration) return true;
   d %= 7;
   cellwalker b1(c, d);
 
@@ -1978,8 +2211,8 @@ bool buildBarrier4(cell *c, int d, int mode, eLand ll, eLand lr) {
       return false;
     }
   
-  eLand xl = oppositeElement(ll);
-  eLand xr = oppositeElement(lr);
+  eLand xl = oppositeElement(ll, lr);
+  eLand xr = oppositeElement(lr, ll);
 
   c->bardir = d, c->barleft = ll, c->barright = lr; extendBarrierBack(c);
   
@@ -2235,6 +2468,9 @@ int coastval(cell *c, eLand base) {
       return 0;
     if(c->land != laGraveyard && c->land != laHauntedBorder) return 30;
     }
+  else if(base == laMirrored) {
+    if(!inmirror(c)) return 0;
+    }
   else {
     if(c->land == laOceanWall || c->land == laCaribbean || c->land == laWhirlpool ||
       c->land == laLivefjord || c->land == laWarpSea || c->land == laKraken)
@@ -2303,6 +2539,7 @@ void buildEquidistant(cell *c) {
     // buggycells.push_back(c);
     }
   if(b == laHauntedBorder) b = laGraveyard;
+  if(inmirror(b)) b = laMirrored;
   int mcv = UNKNOWN;
 
   // find the lowest coastval
@@ -2326,7 +2563,7 @@ void buildEquidistant(cell *c) {
     for(int i=0; i<c->type; i++) 
       if(coastval(c->mov[i], b) == mcv)
         qcv++, sid = i;
-    
+      
     // if(generatingEquidistant) printf("qcv=%d mcv=%d\n", qcv, mcv);
     if(qcv >= 2) c->landparam = mcv+1; // (mcv == UNKNOWN ? UNKNOWN : mcv+1);
     else {
@@ -2827,6 +3064,10 @@ void setLandEuclid(cell *c) {
     }
   }
 
+#define INVLUCK (items[itOrbLuck] && inv::on)
+#define I2000 (INVLUCK?600:2000)
+#define I10000 (INVLUCK?3000:10000)
+
 void buildBigStuff(cell *c, cell *from) {
   if(sphere || quotient) return;
   bool deepOcean = false;
@@ -2867,7 +3108,7 @@ void buildBigStuff(cell *c, cell *from) {
   else if(c->type == 7 && c->land == laCrossroads4 && hrand(10000) < 7000 && c->land && 
     buildBarrierNowall(c, getNewLand(laCrossroads4))) ;
   
-  else if(c->type == 7 && hrand(10000) < 20 && !generatingEquidistant && !yendor::on && !tactic::on && !isCrossroads(c->land) && gold() >= R200 &&
+  else if(c->type == 7 && hrand(I10000) < 20 && !generatingEquidistant && !yendor::on && !tactic::on && !isCrossroads(c->land) && gold() >= R200 &&
     !isSealand(c->land) && !isHaunted(c->land) && !isGravityLand(c->land) && 
     (c->land != laRlyeh || rlyehComplete()) &&
     c->land != laTortoise && c->land != laPrairie && c->land && 
@@ -2891,8 +3132,9 @@ void buildBigStuff(cell *c, cell *from) {
       }
     }
 
-  else if(c->type == 7 && c->land && hrand(10000) < (
+  else if(c->type == 7 && c->land && hrand(I10000) < (
     showoff ? (cwt.c->mpdist > 7 ? 0 : 10000) : 
+    inmirror(c) ? 0 :
     isGravityLand(c->land) ? 0 :
     generatingEquidistant ? 0 :
     c->land == laPrairie ? 0 :
@@ -2915,6 +3157,7 @@ void buildBigStuff(cell *c, cell *from) {
     (c->land == laGraveyard && items[itBone] >= 10) ? 120 :
     c->land == laOcean ? (deepOcean ? (purehepta ? 250 : 2000) : 0) :
     c->land == laDragon ? 120 :
+    (c->land == laMirror && !oldmirror) ? 6000 :
     50))
   {
     
@@ -2927,7 +3170,7 @@ void buildBigStuff(cell *c, cell *from) {
     }
       
   if((!chaosmode) && bearsCamelot(c->land) && c->type == 7 && 
-    (quickfind(laCamelot) || peace::on || (hrand(2000) < 200 && 
+    (quickfind(laCamelot) || peace::on || (hrand(I2000) < 200 && 
     items[itEmerald] >= U5 && !tactic::on))) {
     int rtr = newRoundTableRadius();
     heptagon *alt = createAlternateMap(c, rtr+14, hsOrigin);
@@ -2942,18 +3185,18 @@ void buildBigStuff(cell *c, cell *from) {
     // buildbigstuff
 
     if(c->land == laRlyeh && c->type == 7 && 
-      (quickfind(laTemple) || peace::on || (hrand(2000) < 100 && 
+      (quickfind(laTemple) || peace::on || (hrand(I2000) < 100 && 
       items[itStatue] >= U5 && !randomPatternsMode && 
       !tactic::on && !yendor::on)))
       createAlternateMap(c, 2, hsA);
 
     if(c->land == laJungle && c->type == 7 && 
-      (quickfind(laMountain) || (hrand(2000) < 100 && 
+      (quickfind(laMountain) || (hrand(I2000) < 100 && 
       !randomPatternsMode && !tactic::on && !yendor::on && landUnlocked(laMountain))))
       createAlternateMap(c, 2, hsA);
 
     if(c->land == laOvergrown && c->type == 7 && 
-      (quickfind(laClearing) || (hrand(2000) < 25 && 
+      (quickfind(laClearing) || (hrand(I2000) < 25 && 
       !randomPatternsMode && items[itMutant] >= U5 &&
       !tactic::on && !yendor::on))) {
       heptagon *h = createAlternateMap(c, 2, hsA);
@@ -2977,8 +3220,11 @@ void buildBigStuff(cell *c, cell *from) {
       (princess::forceMouse ? (from && from->pathdist != INF) : 
         (hrand(2000) < (peace::on ? 100 : 20))) && 
       !c->master->alt && 
-      (princess::challenge || kills[moVizier] || peace::on) && !tactic::on && !yendor::on) 
-      createAlternateMap(c, 141, hsOrigin, waPalace);
+      (princess::challenge || kills[moVizier] || peace::on) && !tactic::on && !yendor::on) {
+      createAlternateMap(c, PRADIUS0, hsOrigin, waPalace);
+      celllister cl(c, 5, 1000000, NULL);
+      for(cell *c: cl.lst) if(c->master->alt) generateAlts(c->master);
+      }
     }
   
   if(hasbardir(c)) extendBarrier(c);
@@ -3265,6 +3511,8 @@ void setdist(cell *c, int d, cell *from) {
 
   if(d <= 3) lastexplore = shmup::on ? shmup::curtime : turncount;
 
+  oldmirror = euclid || chaosmode || yendor::on || yendor::generating;
+
   if(buggyGeneration) {
     if(d < BARLEV) for(int i=0; i<c->type; i++) {
       setdist(createMov(c, i), d+(purehepta?2:1), c);
@@ -3310,6 +3558,8 @@ void setdist(cell *c, int d, cell *from) {
   if(d == BARLEV && !euclid && c != cwt.c) 
     buildBigStuff(c, from);
   
+  if(buggyGeneration) return;
+  
   if(d < 10) {
     explore[d]++;
     exploreland[d][c->land]++;
@@ -3320,6 +3570,9 @@ void setdist(cell *c, int d, cell *from) {
       }
     
     if(d == BARLEV-2 && c->land == laOcean) 
+      buildEquidistant(c);
+
+    if(d == BARLEV-2 && inmirror(c)) 
       buildEquidistant(c);
 
     if(d == BARLEV-2 && (c->land == laGraveyard || c->land == laHauntedBorder || c->land == laHaunted))
@@ -3908,7 +4161,7 @@ void setdist(cell *c, int d, cell *from) {
       
       if(c->land == laPalace && !euclid && c->master->alt) {
         int d = celldistAlt(c);
-        if(d <= 150) generateAlts(c->master);
+        if(d <= PRADIUS1) generateAlts(c->master);
         }
       
       if((bearsCamelot(c->land) && !euclid && !quotient) || c->land == laCamelot) 
@@ -4734,9 +4987,12 @@ void setdist(cell *c, int d, cell *from) {
           princess::getPrisonInfo(c) &&
           (euclid || (princess::getPrisonInfo(c)->bestdist < 6 && princess::getPrisonInfo(c)->princess))) {
           c->monst = moMouse;
-          addMessage(XLAT("You hear a distant squeak!"));
-          playSound(c, "mousesqueak");
-          drawBigFlash(c);
+          if(!princess::squeaked) {
+            addMessage(XLAT("You hear a distant squeak!"));
+            playSound(c, "mousesqueak");
+            drawBigFlash(c);
+            princess::squeaked = true;
+            }
 /*          {
   cell *c2= c;          
   z:
@@ -5024,7 +5280,7 @@ void setdist(cell *c, int d, cell *from) {
         else {
           if(hyperstonesUnlocked() && hrand(25000) < min(PT(tkills(), 2000), 5000) && notDippingFor(itHyperstone))
             c->item = itHyperstone;
-          if(hrand(4000) < items[itHyperstone] + 2 * items[itHolyGrail] && !c->monst) {
+          if(hrand(4000) < items[itHyperstone] && !c->monst) {
             // only interesting monsters here!
             eMonster cm = crossroadsMonster();
             if(cm == moIvyRoot) buildIvy(c, 0, c->type);
@@ -5035,14 +5291,19 @@ void setdist(cell *c, int d, cell *from) {
             }
           }
         }
+      if(c->land == laMirrored || c->land == laMirrorWall || c->land == laMirrorWall2 ||
+        c->land == laMirrored2)
+        c->wall = waMirrorWall;
       if(c->land == laMirror) {
-        if((purehepta?pseudohept(c):!ishept(c)) && hrand(5000) < 120 && notDippingFor(itShard))
+        int freqt = oldmirror ? 1 : 4;
+        int freqm = (oldmirror || cwt.c->land != laMirror) ? 1 : 30;
+        if((purehepta?pseudohept(c):!ishept(c)) && hrand(5000/freqt) < 120 && notDippingFor(itShard))
           c->wall = hrand(2) ? waMirror : waCloud;
-        else if(ishept(c) && hrand(5000) < 10 * PRIZEMUL)
+        else if(ishept(c) && hrand(5000/freqt) < 10 * PRIZEMUL)
           placePrizeOrb(c);
-        else if(hrand(12000) < 8 + items[itShard] + hard)
+        else if(hrand(12000/freqt) < 8 + items[itShard] + hard)
           c->monst = moRanger;
-        else if(hrand(60000) < 8 + items[itShard] + hard)
+        else if(hrand(60000/freqm) < 8 + items[itShard] + hard)
           c->monst = moEagle;
         }
       if(c->land == laGraveyard) {
@@ -5186,14 +5447,14 @@ void setdist(cell *c, int d, cell *from) {
 
 bool wchance(int a, int of) {
   of *= 10; 
-  a += yendor::hardness() + items[itHolyGrail] + 1;
+  a += yendor::hardness() + 1;
   if(isCrossroads(cwt.c->land)) 
     a+= items[itHyperstone] * 10;
 
 //if(cwt.c->land == laWhirlwind && !nowhirl) a += items[itWindstone] * 3;
 
   for(int i=0; i<ittypes; i++) if(itemclass(eItem(i)) == IC_TREASURE)
-    a = max(a, (items[i]-10) / 10);
+    a = max(a, (items[i]-R10) / 10);
   return hrand(a+of) < a;
   }
 
@@ -5298,6 +5559,7 @@ void wandering() {
   while(first7 < size(dcal)) {
     int i = first7 + hrand(size(dcal) - first7);
     cell *c = dcal[i];
+    if(inmirror(c)) continue;
     
     if(smallbounded && !c->item && hrand(5) == 0 && c->land != laHalloween) {
       if(passable(c, NULL, 0) || euclidland == laKraken) {
@@ -5327,7 +5589,7 @@ void wandering() {
         continue;
         }
       
-      if(ghostcount && !c->monst) {
+      if(ghostcount && !c->monst && !inmirror(c)) {
         c->monst = moGhost;
         playSeenSound(c);
         ghostcount--;

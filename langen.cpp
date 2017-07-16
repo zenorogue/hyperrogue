@@ -7,12 +7,12 @@
 #define GEN_N 2
 #define GEN_O 3
 
-using namespace std;
 #include <map>
 #include <string>
 #include <stdio.h>
 #include <vector>
 #include <stdlib.h>
+using namespace std;
 
 template<class T> int size(T x) { return x.size(); }
 

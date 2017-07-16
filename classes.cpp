@@ -1143,17 +1143,23 @@ itemtype iinf[ittypes] = {
     "Target a cell on the other side to use it."
     },
   { '$', 0x80FF80, "Green Grass", prairiedesc },
-  { 'o', 0x8080FF, "Orb of Horns", 
+  { 'o', 0xC09090, "Orb of Horns", 
     "After you move while having this Orb, you immediately attack the next cell in the straight line "
     "(or two cells, when moving on a heptagon). This attack is slightly stronger than your normal "
     "attack: it can stun some of the monsters which cannot be killed or stunned normally."
     },
-  { 'o', 0x8080FF, "Orb of the Bull", 
+  { 'o', 0xA05020, "Orb of the Bull", 
     "You get the powers of Shield, Horns, and Thorns after you move two moves in a straight line "
     "with this Orb." },
   { '$', 0xC060C0, "Spinel", bulldashdesc },
-  { 'o', 0xC0C0FF, "Orb of the Mirror", NODESCYET },
-  { 'O', 0xF0F0F0, "your orbs", NODESC},  
+  { 'o', 0xC0C0FF, "Orb of the Mirror", 
+    "Use Orb of the Mirror to gain copies of one of your Orbs; "
+    "mirroring weaker Orbs usually yields more copies. "
+    "It can only be used once per Orb type, "
+    "and only when you are next to a mirror.",
+     },
+  { 'O', 0xF0F0F0, "your orbs", 
+    "Click this to see your orbs."},  
   };
 
 enum eItem { itNone, itDiamond, itGold, itSpice, itRuby, itElixir, itShard, itBone, itHell, itStatue,
@@ -1192,7 +1198,7 @@ enum eItem { itNone, itDiamond, itGold, itSpice, itRuby, itElixir, itShard, itBo
 
 // --- wall types ---
 
-const int walltypes = 97;
+const int walltypes = 98;
 
 struct walltype {
   char  glyph;
@@ -1372,6 +1378,7 @@ walltype winf[walltypes] = {
   { '.', 0xFFFF00, "Reptile floor", reptiledesc},
   { '.', 0xFFFF00, "Reptile bridge", reptiledesc},
   { '.', 0xFFFF00, "invisible floor", NODESCYET},
+  { '#', 0xC0C0FF, "mirror wall", NODESCYET},
   };
 
 enum eWall { waNone, waIcewall, waBarrier, waFloorA, waFloorB, waCavewall, waCavefloor, waDeadTroll, waDune,
@@ -1400,12 +1407,13 @@ enum eWall { waNone, waIcewall, waBarrier, waFloorA, waFloorB, waCavewall, waCav
   waPetrified, waTower,
   waBigBush, waSmallBush,
   waReptile, waReptileBridge,
-  waInvisibleFloor
+  waInvisibleFloor,
+  waMirrorWall
   };
 
 // --- land types ---
 
-const int landtypes = 67;
+const int landtypes = 71;
 
 struct landtype {
   int color;
@@ -1437,7 +1445,7 @@ const landtype linf[landtypes] = {
     "A land filled with huge ivy plants and dangerous animals."
     },
   { 0x900090, "Alchemist Lab", slimehelp},
-  { 0x704070, "Mirror Land",
+  { 0x704070, "Hall of Mirrors",
     "A strange land which contains mirrors and mirages, protected by Mirror Rangers."},
   { 0x404070, "Graveyard",
     "All the monsters you kill are carried to this strange land, and buried. "
@@ -1578,7 +1586,11 @@ const landtype linf[landtypes] = {
   { 0x0000D0, "Prairie", prairiedesc},
   { 0x800080, "Bull Dash", bulldashdesc},
   { 0xC000C0, "Crossroads V", "Extremely narrow Crossroads layout.\n"},
-  { 0xC0C0C0, "Cellular Automaton", cadesc}
+  { 0xC0C0C0, "Cellular Automaton", cadesc},
+  { 0xC0C0FF, "Mirror Wall", NODESCYET},
+  { 0xC8C8FF, "Reflection", NODESCYET},
+  { 0xC0C0FF, "Reflection", NODESCYET},
+  { 0xC8C8FF, "Reflection", NODESCYET},
   };
 
 enum eLand { laNone, laBarrier, laCrossroads, laDesert, laIce, laCaves, laJungle, laAlchemist, laMirror, laGraveyard,
@@ -1595,7 +1607,8 @@ enum eLand { laNone, laBarrier, laCrossroads, laDesert, laIce, laCaves, laJungle
   laEndorian, laTortoise, laDragon,
   laKraken, laBurial, laTrollheim,
   laHalloween, laDungeon, laMountain, laReptile,
-  laPrairie, laBull, laCrossroads5, laCA
+  laPrairie, laBull, laCrossroads5, laCA,
+  laMirrorWall, laMirrored, laMirrorWall2, laMirrored2
   };
 
 // cell information for the game

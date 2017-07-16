@@ -45,43 +45,91 @@ int lang() {
 
 bool autojoy = true;
 
-/*struct saver {
+struct supersaver {
   string name;
-  virtual string save();
-  virtual void load(string& s);
+  virtual string save() = 0;
+  virtual void load(const string& s) = 0;
+  virtual bool dosave() = 0;
   };
 
-struct intsaver : saver {
-  int& val;
-  int dft;
-  void intsaver() { val = dft; }
-  string save() { return its(val); }
-  void load(string& s) { val = atoi(s.c_str()); }
+vector<shared_ptr<supersaver>> savers;
+
+template<class T> struct dsaver : supersaver {
+  T& val;
+  T dft;
+  bool dosave() { return val != dft; }
+  dsaver(T& val) : val(val) { }
   };
 
-struct hexsaver : saver {
-  int& val;
-  int dft;
-  void intsaver() { val = dft; }
-  string save() { return itsh(val); }
-  void load(string& s) { val = strtol(s.c_str(), 16); }
-  };
+template<class T> struct saver : dsaver<T> {};
 
-struct ldsaver : saver {
-  ld& val;
-  ld dft;
-  void intsaver() { val = dft; }
-  string save() { return ffts(val); }
-  void load(string& s) { val = atof(s.c_str()); }
-  };
-
-vector<shared_ptr<saver>> savers;
-
-void initConfig0() {
-  savers.push_back(make_shared<intsaver> ({"cs.charid", cs.charid, 0}));
+template<class T, class U, class V> void addsaver(T& i, U name, V dft) {
+  auto s = make_shared<saver<T>> (i);
+  s->dft = i = dft;
+  s->name = name;
+  savers.push_back(s);
   }
-*/
 
+template<class T> void addsaver(T& i, string name) {
+  addsaver(i, name, i);
+  }
+
+template<class T> struct saverenum : supersaver {
+  T& val;
+  T dft;
+  bool dosave() { return val != dft; }
+  saverenum<T>(T& v) : val(v) { }
+  string save() { return its(val); }
+  void load(const string& s) { val = (T) atoi(s.c_str()); }
+  };
+
+template<class T, class U> void addsaverenum(T& i, U name) {
+  auto s = make_shared<saverenum<T>> (i);
+  s->dft = i;
+  s->name = name;
+  savers.push_back(s);
+  }
+
+template<> struct saver<int> : dsaver<int> {
+  saver<int>(int& val) : dsaver<int>(val) { }
+  string save() { return its(val); }
+  void load(const string& s) { val = atoi(s.c_str()); }
+  };
+
+template<> struct saver<char> : dsaver<char> {
+  saver<char>(char& val) : dsaver<char>(val) { }
+  string save() { return its(val); }
+  void load(const string& s) { val = atoi(s.c_str()); }
+  };
+
+template<> struct saver<bool> : dsaver<bool> {
+  saver<bool>(bool& val) : dsaver<bool>(val) { }
+  string save() { return val ? "yes" : "no"; }
+  void load(const string& s) { val = size(s) && s[0] == 'y'; }
+  };
+
+template<> struct saver<unsigned> : dsaver<unsigned> {
+  saver<unsigned>(unsigned& val) : dsaver<unsigned>(val) { }
+  string save() { return itsh(val); }
+  void load(const string& s) { val = strtol(s.c_str(), NULL, 16); }
+  };
+
+template<> struct saver<ld> : dsaver<ld> {
+  saver<ld>(ld& val) : dsaver<ld>(val) { }
+  string save() { return ftssmart(val); }
+  void load(const string& s) { val = atof(s.c_str()); }
+  };
+
+void addsaver(charstyle& cs, string s) {
+  addsaver(cs.charid, s + ".charid");
+  addsaver(cs.skincolor, s + ".skincolor");
+  addsaver(cs.haircolor, s + ".haircolor");
+  addsaver(cs.dresscolor, s + ".dresscolor");
+  addsaver(cs.swordcolor, s + ".swordcolor");
+  addsaver(cs.dresscolor2, s + ".dresscolor2");
+  addsaver(cs.uicolor, s + ".uicolor");
+  }
+  
 // R:239, G:208, B:207 
 
 unsigned int skincolors[]  = { 7, 0xD0D0D0FF, 0xEFD0C9FF, 0xC77A58FF, 0xA58869FF, 0x602010FF, 0xFFDCB1FF, 0xEDE4C8FF };
@@ -127,69 +175,109 @@ void loadcs(FILE *f, charstyle& cs, int xvernum) {
   }
 
 void initConfig() {
-  vid.usingGL = true;
-  vid.antialias = AA_NOGL | AA_FONT | AA_LINES | AA_LINEWIDTH | AA_VERSION;
-  vid.linewidth = 1;
-  vid.flashtime = 8;
-  vid.scale = 1;
-  vid.alpha = 1;
-  vid.sspeed = 0;
-  vid.mspeed = 1;
-  vid.eye = 0;
-  vid.full = false;
-  vid.ballangle = 20;
-  vid.yshift = 0;
-  vid.camera_angle = 0;
-  vid.ballproj = 1;
-  vid.aurastr = 128;
-  vid.aurasmoothen = 5;
-  vid.graphglyph = 1;
-
-#ifdef ANDROID
-  vid.monmode = 2;
-  vid.wallmode = 3;
-#else
-#ifdef PANDORA
-  vid.monmode = 2;
-  vid.wallmode = 3;
-#else
-  vid.monmode = 4;
-  vid.wallmode = 5;
-#endif
-#endif
-
-  vid.particles = 1;
-  vid.mobilecompasssize = 30;
-
-  vid.joyvalue = 4800;
-  vid.joyvalue2 = 5600;
-  vid.joypanthreshold = 2500;
-#ifdef PANDORA
-  vid.joypanspeed = 0.0001;
-#else
-  vid.joypanspeed = 0;
-#endif
-
-  vid.framelimit = 75;
-  vid.axes = 1;
-  vid.shifttarget = 2;
-  vid.steamscore = 1;
   
-  initcs(vid.cs);
+  // basic config
+  addsaver(vid.flashtime, "flashtime", 8);
+  addsaver(vid.mobilecompasssize, "mobile compass size", 30);
+  addsaver(vid.axes, "movement help", 1);
+  addsaver(vid.shifttarget, "shift-targetting", 2);
+  addsaver(vid.steamscore, "scores to Steam", 1);
+  initcs(vid.cs); addsaver(vid.cs, "single");
+  addsaver(vid.samegender, "princess choice", false);
+  addsaver(vid.language, "language", -1);  
+  addsaver(vid.drawmousecircle, "mouse circle", ISMOBILE || ISPANDORA);
+  addsaver(vid.revcontrol, "reverse control", false);
+  addsaver(musicvolume, "music volume");
+  addsaver(effvolume, "sound effect volume");
+  addsaverenum(glyphsortorder, "glyph sort order");
   
+  // basic graphics
+  
+  addsaver(vid.usingGL, "usingGL", true);
+  addsaver(vid.antialias, "antialias", AA_NOGL | AA_FONT | AA_LINES | AA_LINEWIDTH | AA_VERSION);
+  addsaver(vid.linewidth, "linewidth", 1);
+  addsaver(vid.scale, "scale", 1);
+  addsaver(vid.alpha, "projection", 1);
+  addsaver(vid.sspeed, "scrollingspeed", 0);
+  addsaver(vid.mspeed, "movement speed", 1);
+  addsaver(vid.full, "fullscreen", false);
+  addsaver(vid.aurastr, "aura strength", 128);
+  addsaver(vid.aurasmoothen, "aura smoothen", 5);
+  addsaver(vid.graphglyph, "graphical items/kills", 1);
+  addsaver(vid.particles, "extra effects", 1);
+  addsaver(vid.framelimit, "frame limit", 75);
+  addsaver(vid.xres, "xres");
+  addsaver(vid.yres, "yres");
+  addsaver(vid.fsize, "font size");
+  addsaver(vid.darkhepta, "mark heptagons", false);
+  
+  // special graphics
+
+  addsaver(vid.eye, "eye distance", 0);
+  addsaver(vid.ballangle, "ball angle", 20);
+  addsaver(vid.yshift, "Y shift", 0);
+  addsaver(vid.camera_angle, "camera angle", 0);
+  addsaver(vid.ballproj, "ballproj", 1);
+  addsaver(vid.monmode, "monster display mode", (ISANDROID || ISPANDORA) ? 2 : 4);
+  addsaver(vid.wallmode, "wall display mode", (ISANDROID || ISPANDORA) ? 3 : 5);
+
+  addsaver(geom3::depth, "3D depth");
+  addsaver(geom3::camera, "3D camera level");
+  addsaver(geom3::wall_height, "3D wall height");
+  addsaver(geom3::rock_wall_ratio, "3D rock-wall ratio");
+  addsaver(geom3::human_wall_ratio, "3D human-wall ratio");
+  addsaver(geom3::lake_top, "3D lake top");
+  addsaver(geom3::lake_bottom, "3D lake bottom");
+  addsaver(geom3::tc_depth, "3D TC depth");
+  addsaver(geom3::tc_camera, "3D TC camera");
+  addsaver(geom3::tc_alpha, "3D TC alpha");
+  addsaver(geom3::highdetail, "3D highdetail");
+  addsaver(geom3::middetail, "3D middetail");
+
+  addsaver(rug::renderonce, "rug-renderonce");
+  addsaver(rug::rendernogl, "rug-rendernogl");
+  addsaver(rug::texturesize, "rug-texturesize");
+  addsaver(rug::scale, "rug-scale");
+
+  addsaverenum(pmodel, "used model");
+  addsaver(polygonal::SI, "polygon sides");
+  addsaver(polygonal::STAR, "polygon star factor");
+  addsaver(polygonal::deg, "polygonal degree");
+  addsaver(conformal::includeHistory, "include history"); // check!
+  addsaver(conformal::lvspeed, "lineview speed");
+  
+  addsaver(polygonal::maxcoef, "polynomial degree");
+  for(int i=0; i<polygonal::MSI; i++) {
+    addsaver(polygonal::coefr[i], "polynomial "+its(i)+".real");
+    addsaver(polygonal::coefi[i], "polynomial "+its(i)+".imag");
+    }
+  
+  addsaver(conformal::bandhalf, "band width");
+  addsaver(conformal::bandsegment, "band segment");
+  addsaver(conformal::rotation, "conformal rotation");
+  addsaver(conformal::autoband, "automatic band");
+  addsaver(conformal::autobandhistory, "automatic band history");
+  addsaver(conformal::dospiral, "do spiral");
+  
+  // control
+  
+  addsaver(vid.joyvalue, "vid.joyvalue", 4800);
+  addsaver(vid.joyvalue2, "vid.joyvalue2", 5600);
+  addsaver(vid.joypanthreshold, "vid.joypanthreshold", 2500);
+  addsaver(vid.joypanspeed, "vid.joypanspeed", ISPANDORA ? 0.0001 : 0);
+  addsaver(autojoy, "autojoy");
+    
   vid.killreduction = 0;
   
-  vid.samegender = false;
-  vid.language = -1;
-  
-  vid.drawmousecircle = false;
-  vid.revcontrol = false;
-#ifdef MOBILE
-  vid.drawmousecircle = true;
-#endif
-#ifdef PANDORA
-  vid.drawmousecircle = true;
-#endif
+  // modes
+    
+  addsaverenum(geometry, "mode-geometry");
+  addsaverenum(euclidland, "mode-geometry land");
+  addsaver(shmup::on, "mode-shmup", false);
+  addsaver(hardcore, "mode-hardcore", false);
+  addsaver(chaosmode, "mode-chaos");
+  addsaver(inv::on, "mode-Orb Strategy");
+  addsaver(purehepta, "mode-heptagonal", false);
   
   shmup::initConfig();  
   }
@@ -201,36 +289,6 @@ void saveConfig() {
     addMessage(s0 + "Could not open the config file: " + conffile);
     return;
     }
-  fprintf(f, "%d %d %d %d\n", vid.xres, vid.yres, vid.full, vid.fsize);
-  fprintf(f, "%f %f %f %f\n", float(vid.scale), float(vid.eye), float(vid.alpha), float(vid.sspeed));
-  fprintf(f, "%d %d %d %d %d %d %d\n", vid.wallmode, vid.monmode, vid.axes, musicvolume, vid.framelimit, vid.usingGL, vid.antialias);
-  fprintf(f, "%d %d %d %f %d %d\n", vid.joyvalue, vid.joyvalue2, vid.joypanthreshold, float(vid.joypanspeed), autojoy, vid.flashtime);
-  
-  savecs(f, vid.cs, 0);
-  
-  fprintf(f, "%d %d\n", vid.darkhepta, vid.shifttarget);
-  
-  fprintf(f, "%d %d %d %d\n", euclid, euclidland, shmup::on, hardcore);
-
-  shmup::saveConfig(f);
-
-  fprintf(f, "%d %d %d %d %f %d %d\n", rug::renderonce, rug::rendernogl, rug::texturesize, purehepta, rug::scale, vid.steamscore, chaosmode);
-
-  fprintf(f, "%d %d %f %d %d %f\n",
-    pmodel, polygonal::SI, float(polygonal::STAR), polygonal::deg, 
-    conformal::includeHistory, float(conformal::lvspeed));
-  
-  fprintf(f, "%d %d %d %d %d %d\n", 
-    conformal::bandhalf, conformal::bandsegment, 
-    conformal::rotation, conformal::autoband, conformal::autobandhistory,
-    conformal::dospiral);
-  
-  fprintf(f, "%d", polygonal::maxcoef);
-  for(int i=0; i<=polygonal::maxcoef; i++) fprintf(f, " %lf %lf", 
-    (double) real(polygonal::coef[i]), (double) imag(polygonal::coef[i]));
-
-  fprintf(f, "\n%d %d %d %f %d %d\n", 
-    vid.revcontrol, vid.drawmousecircle, sightrange, float(vid.mspeed), effvolume, vid.particles);
   
   {
   int pt_depth = 0, pt_camera = 0, pt_alpha = 0;
@@ -241,43 +299,13 @@ void saveConfig() {
   if(tc_depth < tc_alpha ) pt_alpha ++;
   if(tc_alpha > tc_camera) pt_alpha++;
   if(tc_alpha < tc_camera) pt_camera++;
-  
-  fprintf(f, "%f %f %f %f %f %f %f %d %d %d %f %f %d\n",
-    float(geom3::depth), float(geom3::camera), float(geom3::wall_height), 
-    float(geom3::rock_wall_ratio),
-    float(geom3::human_wall_ratio), 
-    float(geom3::lake_top),
-    float(geom3::lake_bottom),
-    pt_depth, pt_camera, pt_alpha,
-    float(geom3::highdetail), float(geom3::middetail),
-    glyphsortorder);
-  
-  fprintf(f, "%f %f %f %f\n",
-    float(vid.yshift), float(vid.camera_angle),
-    float(vid.ballangle), float(vid.ballproj)
-    );
-
-  fprintf(f, "%d %d %d %d %f\n", vid.mobilecompasssize, vid.aurastr, vid.aurasmoothen, vid.graphglyph, float(vid.linewidth));
+  tc_alpha = pt_alpha;
+  tc_camera = pt_camera;
+  tc_depth = pt_depth;
   }
-    
-  fprintf(f, "\n\nThis is a configuration file for HyperRogue (version " VER ")\n");
-  fprintf(f, "\n\nThe numbers are:\n");
-  fprintf(f, "screen width & height, fullscreen mode (0=windowed, 1=fullscreen), font size\n");
-  fprintf(f, "scale, eye distance, parameter, scrolling speed\n");
-  fprintf(f, "wallmode, monster mode, cross mode, music volume, framerate limit, usingGL, antialiasing flags\n");
-  fprintf(f, "calibrate first joystick (threshold A, threshold B), calibrate second joystick (pan threshold, pan speed), joy mode\n");
-  fprintf(f, "gender (1=female, 16=same gender prince), language, skin color, hair color, sword color, dress color\n");
-  fprintf(f, "darken hepta, shift target\n");
-  fprintf(f, "euclid, euclid land, shmup, hardcore\n");
-  fprintf(f, "version number, shmup players, alwaysuse, shmup keyboard/joystick config\n");
-  fprintf(f, "hypersian rug config: renderonce, rendernogl, texturesize; purehepta; rug scale; share score; chaosmode\n");
-  fprintf(f, "conformal: model, sides, star, degree, includeHistory, speed\n");
-  fprintf(f, "conformal: bandwidth, segment, rotation, autoband, autohistory, dospiral\n");
-  fprintf(f, "conformal: degree, (degree+1) times {real, imag}\n");
-  fprintf(f, "vid.revcontrol, drawmousecircle, sight range, movement animation speed, sound effect volume, particle effects\n");
-  fprintf(f, "3D parameters, sort order\n");
-  fprintf(f, "yhsift, camera angle, ball angle, ball projection\n");
-  fprintf(f, "compass size, aura strength, aura smoothen factor, graphical glyphs\n");
+  
+  for(auto s: savers) if(s->dosave())
+    fprintf(f, "%s=%s\n", s->name.c_str(), s->save().c_str());
   
   fclose(f);
 #ifndef MOBILE
@@ -294,110 +322,150 @@ void readf(FILE *f, ld& x) {
   x = fl;
   }
 
+void loadOldConfig(FILE *f) {
+  int gl=1, aa=1, bb=1, cc, dd, ee;
+  int err;
+  float a, b, c, d;
+  err=fscanf(f, "%f%f%f%f\n", &a, &b, &c, &d);
+  if(err == 4) {
+    vid.scale = a; vid.eye = b; vid.alpha = c; vid.sspeed = d;
+    }
+  err=fscanf(f, "%d%d%d%d%d%d%d", &vid.wallmode, &vid.monmode, &vid.axes, &musicvolume, &vid.framelimit, &gl, &vid.antialias);
+  vid.usingGL = gl;
+  if(vid.antialias == 0) vid.antialias = AA_VERSION | AA_LINES | AA_LINEWIDTH;
+  if(vid.antialias == 1) vid.antialias = AA_NOGL | AA_VERSION | AA_LINES | AA_LINEWIDTH | AA_FONT;
+  double jps = vid.joypanspeed;
+  err=fscanf(f, "%d%d%d%lf%d%d", &vid.joyvalue, &vid.joyvalue2, &vid.joypanthreshold, &jps, &aa, &vid.flashtime);
+  vid.joypanspeed = jps;
+  autojoy = aa; aa = 0;
+
+  loadcs(f, vid.cs, 0);
+
+  aa=0; bb=0;
+  err=fscanf(f, "%d%d", &aa, &bb);
+  vid.darkhepta = aa; vid.shifttarget = bb;
+
+  aa = geometry; bb = euclidland; cc = shmup::on; dd = hardcore;
+  err=fscanf(f, "%d%d%d%d", &aa, &bb, &cc, &dd);
+  geometry = eGeometry(aa); euclidland = eLand(bb); shmup::on = cc; hardcore = dd;
+
+  shmup::loadConfig(f);
+
+  aa = rug::renderonce; bb = rug::rendernogl; cc = purehepta; dd = chaosmode; ee = vid.steamscore;
+  double rs = rug::scale;
+  err=fscanf(f, "%d%d%d%d%lf%d%d", &aa, &bb, &rug::texturesize, &cc, &rs, &ee, &dd);
+  rug::renderonce = aa; rug::rendernogl = bb; purehepta = cc; chaosmode = dd; vid.steamscore = ee;
+  rug::scale = rs;
+
+  aa=conformal::includeHistory;
+  double ps = polygonal::STAR, lv = conformal::lvspeed;
+  int pmb = pmodel;
+  err=fscanf(f, "%d%d%lf%d%d%lf",
+    &pmb, &polygonal::SI, &ps, &polygonal::deg,
+    &aa, &lv);
+  pmodel = eModel(pmb);
+  conformal::includeHistory = aa; polygonal::STAR = ps; conformal::lvspeed = lv;
+  
+  aa=conformal::autoband; bb=conformal::autobandhistory; cc=conformal::dospiral;    
+  err=fscanf(f, "%d%d%d%d%d%d", 
+    &conformal::bandhalf, &conformal::bandsegment, &conformal::rotation,
+    &aa, &bb, &cc);
+  conformal::autoband = aa; conformal::autobandhistory = bb; conformal::dospiral = cc;
+  
+  err=fscanf(f, "%d", &polygonal::maxcoef);
+  if(polygonal::maxcoef < 0) polygonal::maxcoef = 0;
+  if(polygonal::maxcoef > polygonal::MSI) polygonal::maxcoef = polygonal::MSI;
+  for(int i=0; i<=polygonal::maxcoef; i++) {
+    double re=0, im=0;
+    err=fscanf(f, "%lf%lf", &re, &im);
+    polygonal::coefr[i] = re;
+    polygonal::coefi[i] = im;
+    }
+  
+  aa=vid.revcontrol; bb=vid.drawmousecircle;
+  d = vid.mspeed;
+  err=fscanf(f, "%d%d%d%f%d%d", &aa, &bb, &sightrange, &d, &effvolume, &vid.particles);
+  vid.mspeed = d;
+  if(sightrange < 4) sightrange = 4;
+  if(sightrange > 7) sightrange = 7;
+  vid.revcontrol = aa; vid.drawmousecircle = bb;
+   
+  readf(f, geom3::depth); readf(f, geom3::camera); readf(f, geom3::wall_height);
+  readf(f, geom3::rock_wall_ratio); readf(f, geom3::human_wall_ratio);
+  readf(f, geom3::lake_top); readf(f, geom3::lake_bottom);
+  
+  err=fscanf(f, "%d %d %d", &geom3::tc_depth, &geom3::tc_camera, &geom3::tc_alpha);
+  
+  readf(f, geom3::highdetail); 
+  geom3::middetail = 200; readf(f, geom3::middetail);
+  if(geom3::middetail == 200) {
+    if(ISMOBILE)
+      geom3::highdetail = 0, geom3::middetail = 3;
+    else
+      geom3::highdetail = geom3::middetail = 5;
+    }
+
+  int gso = glyphsortorder; err=fscanf(f, "%d", &gso); glyphsortorder = eGlyphsortorder(gso);
+  
+  readf(f, vid.yshift); readf(f, vid.camera_angle); readf(f, vid.ballangle); readf(f, vid.ballproj);
+
+  jps = vid.linewidth;
+  err=fscanf(f, "%d%d%d%d%lf\n", &vid.mobilecompasssize, &vid.aurastr, &vid.aurasmoothen, &vid.graphglyph, &jps);
+  vid.linewidth = jps;
+  }
+
+map<string, shared_ptr<supersaver> > allconfigs;
+
+void parseline(const string& str) {
+  for(int i=0; i<size(str); i++) if(str[i] == '=') {
+    string cname = str.substr(0, i);
+    if(!allconfigs.count(cname)) {
+      printf("Warning: unknown config variable: %s\n", str.c_str());
+      return;
+      }
+    auto sav = allconfigs[cname];
+    sav->load(str.substr(i+1));
+    return;
+    }
+  printf("Warning: config line without equality sign: %s\n", str.c_str());
+  }
+
+void loadNewConfig(FILE *f) {
+  for(auto& c: savers) allconfigs[c->name] = c;
+  string rd;
+  while(true) {
+    int c = fgetc(f);
+    if(c == -1) break;
+    if(c == 10 || c == 13) {
+      if(rd != "") parseline(rd);
+      rd = "";
+      }
+    else rd += c;
+    }
+  allconfigs.clear();
+  }
+  
 void loadConfig() {
  
-    DEBB(DF_INIT, (debugfile,"load config\n"));
+  DEBB(DF_INIT, (debugfile,"load config\n"));
   vid.xres = 9999; vid.yres = 9999; vid.framelimit = 300;
   FILE *f = fopen(conffile, "rt");
   if(f) {
-    int fs, gl=1, aa=1, bb=1, cc, dd, ee;
     int err;
+    int fs;
     err=fscanf(f, "%d%d%d%d", &vid.xres, &vid.yres, &fs, &vid.fsize);
-    vid.full = fs;
-    float a, b, c, d;
-    err=fscanf(f, "%f%f%f%f\n", &a, &b, &c, &d);
-    if(err == 4) {
-      vid.scale = a; vid.eye = b; vid.alpha = c; vid.sspeed = d;
+    if(!err) 
+      loadNewConfig(f);
+    else {
+      vid.full = fs;
+      loadOldConfig(f);
       }
-    err=fscanf(f, "%d%d%d%d%d%d%d", &vid.wallmode, &vid.monmode, &vid.axes, &musicvolume, &vid.framelimit, &gl, &vid.antialias);
-    vid.usingGL = gl;
-    if(vid.antialias == 0) vid.antialias = AA_VERSION | AA_LINES | AA_LINEWIDTH;
-    if(vid.antialias == 1) vid.antialias = AA_NOGL | AA_VERSION | AA_LINES | AA_LINEWIDTH | AA_FONT;
-    double jps = vid.joypanspeed;
-    err=fscanf(f, "%d%d%d%lf%d%d", &vid.joyvalue, &vid.joyvalue2, &vid.joypanthreshold, &jps, &aa, &vid.flashtime);
-    vid.joypanspeed = jps;
-    autojoy = aa; aa = 0;
-
-    loadcs(f, vid.cs, 0);
-
-    aa=0; bb=0;
-    err=fscanf(f, "%d%d", &aa, &bb);
-    vid.darkhepta = aa; vid.shifttarget = bb;
-
-    aa = geometry; bb = euclidland; cc = shmup::on; dd = hardcore;
-    err=fscanf(f, "%d%d%d%d", &aa, &bb, &cc, &dd);
-    geometry = eGeometry(aa); euclidland = eLand(bb); shmup::on = cc; hardcore = dd;
-
-    shmup::loadConfig(f);
-
-    aa = rug::renderonce; bb = rug::rendernogl; cc = purehepta; dd = chaosmode; ee = vid.steamscore;
-    double rs = rug::scale;
-    err=fscanf(f, "%d%d%d%d%lf%d%d", &aa, &bb, &rug::texturesize, &cc, &rs, &ee, &dd);
-    rug::renderonce = aa; rug::rendernogl = bb; purehepta = cc; chaosmode = dd; vid.steamscore = ee;
-    rug::scale = rs;
-
-    aa=conformal::includeHistory;
-    double ps = polygonal::STAR, lv = conformal::lvspeed;
-    int pmb = pmodel;
-    err=fscanf(f, "%d%d%lf%d%d%lf",
-      &pmb, &polygonal::SI, &ps, &polygonal::deg,
-      &aa, &lv);
-    pmodel = eModel(pmb);
-    conformal::includeHistory = aa; polygonal::STAR = ps; conformal::lvspeed = lv;
-    
-    aa=conformal::autoband; bb=conformal::autobandhistory; cc=conformal::dospiral;    
-    err=fscanf(f, "%d%d%d%d%d%d", 
-      &conformal::bandhalf, &conformal::bandsegment, &conformal::rotation,
-      &aa, &bb, &cc);
-    conformal::autoband = aa; conformal::autobandhistory = bb; conformal::dospiral = cc;
-    
-    err=fscanf(f, "%d", &polygonal::maxcoef);
-    if(polygonal::maxcoef < 0) polygonal::maxcoef = 0;
-    if(polygonal::maxcoef > polygonal::MSI) polygonal::maxcoef = polygonal::MSI;
-    for(int i=0; i<=polygonal::maxcoef; i++) {
-      double re=0, im=0;
-      err=fscanf(f, "%lf%lf", &re, &im);
-      polygonal::coef[i] = cld(re, im);
-      }
-    
-    aa=vid.revcontrol; bb=vid.drawmousecircle;
-    d = vid.mspeed;
-    err=fscanf(f, "%d%d%d%f%d%d", &aa, &bb, &sightrange, &d, &effvolume, &vid.particles);
-    vid.mspeed = d;
-    if(sightrange < 4) sightrange = 4;
-    if(sightrange > 7) sightrange = 7;
-    vid.revcontrol = aa; vid.drawmousecircle = bb;
-     
-    readf(f, geom3::depth); readf(f, geom3::camera); readf(f, geom3::wall_height);
-    readf(f, geom3::rock_wall_ratio); readf(f, geom3::human_wall_ratio);
-    readf(f, geom3::lake_top); readf(f, geom3::lake_bottom);
-    
-    err=fscanf(f, "%d %d %d", &geom3::tc_depth, &geom3::tc_camera, &geom3::tc_alpha);
-    
-    readf(f, geom3::highdetail); 
-    geom3::middetail = 200; readf(f, geom3::middetail);
-    if(geom3::middetail == 200) {
-      if(ISMOBILE)
-        geom3::highdetail = 0, geom3::middetail = 3;
-      else
-        geom3::highdetail = geom3::middetail = 5;
-      }
-
-    int gso = glyphsortorder; err=fscanf(f, "%d", &gso); glyphsortorder = eGlyphsortorder(gso);
-    
-    readf(f, vid.yshift); readf(f, vid.camera_angle); readf(f, vid.ballangle); readf(f, vid.ballproj);
-
-    jps = vid.linewidth;
-    err=fscanf(f, "%d%d%d%d%lf\n", &vid.mobilecompasssize, &vid.aurastr, &vid.aurasmoothen, &vid.graphglyph, &jps);
-    vid.linewidth = jps;
   
     fclose(f);
     DEBB(DF_INIT, (debugfile,"Loaded configuration: %s\n", conffile));
-    
-    if(err)
-      ;
     }
 
+  polygonal::solve();
   precalc();
   }
 #endif
@@ -957,7 +1025,7 @@ void show3D() {
     };
   }
 
-void switchcolor(int& c, unsigned int* cs) {
+void switchcolor(unsigned int& c, unsigned int* cs) {
   dialog::openColorDialog(c, cs);
   }
 

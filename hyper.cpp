@@ -209,6 +209,14 @@ else if(args()[0] == '-' && args()[1] == x && args()[2] == '0') { if(curphase ==
   else if(argis("-fix")) {
     fixseed = true; autocheat = true;
     }
+  else if(argis("-fixx")) {
+    fixseed = true; autocheat = true;
+    shift(); startseed = argi();
+    }
+  else if(argis("-steplimit")) {
+    fixseed = true; autocheat = true;
+    shift(); steplimit = argi();
+    }
   else if(argis("-qpar")) { 
     int p;
     shift(); sscanf(args(), "%d,%d,%d", 

@@ -36,6 +36,15 @@ string buildHelpText() {
     "automatically cancels all moves which result in that.\n\n"
     );
     
+  if(inv::on)
+  h += XLAT(
+    "You are playing in the Orb Strategy Mode. Collecting treasure "
+    "gives you access to magical Orb powers. In this mode, "
+    "unlocking requirements are generally higher, and "
+    "several quests and lands "
+    "give you extremely powerful Orbs of the Mirror.\n"
+    );
+  else
   h += XLAT(
     "There are many lands in HyperRogue. Collect 10 treasure "
     "in the given land type to complete it; this enables you to "
@@ -127,6 +136,7 @@ string helptitle(string s, int col) {
   }
 
 string princessReviveHelp() {
+  if(inv::on) return "";
   string h = "\n\n" +
     XLAT("Killed %1 can be revived with Orb of the Love, after you collect 20 more $$$.", moPrincess);
   if(princess::reviveAt)
@@ -136,7 +146,8 @@ string princessReviveHelp() {
   }
 
 void describeOrb(string& help, const orbinfo& oi) {
-  eOrbLandRelation olr = getOLR(oi.orb, cwt.c->land);
+  if(inv::on) return;
+  eOrbLandRelation olr = getOLR(oi.orb, getPrizeLand());
   eItem tr = treasureType(oi.l);
   help += "\n\n" + XLAT(olrDescriptions[olr], cwt.c->land, tr, treasureType(cwt.c->land));
   int t = items[tr] * landMultiplier(oi.l);
@@ -222,6 +233,51 @@ string generateHelpForItem(eItem it) {
       }
     }
   
+  if(inv::on) {
+    if(it == itOrbYendor || it == itHell) {
+      help += XLAT(
+        "\n\nIn the Orb Strategy Mode, Orbs of Yendor appear in Hell after "
+        "you collect 25 Demon Daisies in Hell, in Crossroads/Ocean after you collect 50, "
+        "and everywhere after you collect 100.");  
+      }
+    
+    if(it == itBone || it == itGreenStone) {
+      help += XLAT(
+        "\n\nIn the Orb Strategy Mode, dead orbs are available once you collect "
+        "10 Necromancer Totems in the Graveyard."
+        );
+      }
+    
+    if(it == itFeather || it == itOrbSafety) {
+      help += XLAT(
+        "\n\nIn the Orb Strategy Mode, Orbs of Safety can be gained by "
+        "collecting Phoenix Feathers in the Land of Eternal Motion. "
+        "You can also find unlimited Orbs of Safety in the Crossroads "
+        "and the Ocean (after collecting 25 Phoenix Feathers) "
+        "and in the Prairie."
+        );
+      }
+  
+    if(it == itOrbYendor || it == itHolyGrail)
+      help += XLAT(
+        "\n\nCollect %the1 to gain an extra Orb of the Mirror. "
+        "You can gain further Orbs of the Mirror by collecting 2, 4, 8..."
+        );  
+    
+    if(it == itOrbLuck)
+      help += XLAT(
+        "\n\nIn the Orb Strategy Mode, the Orb of Luck also "
+        "significantly increases the frequency of Great Walls, Crossroads IV, "
+        "and sub-lands."
+        );
+
+    if(it == itBone)
+      help += XLAT(
+        "\n\nIn the Orb Strategy Mode, each 25 Necromancer's Totems "
+        "you are given a random offensive Orb."
+        );
+    }
+  
   if(itemclass(it) == IC_ORB || it == itGreenStone || it == itOrbYendor) {
     for(int i=0; i<ORBLINES; i++) {
       const orbinfo& oi(orbinfos[i]);
@@ -237,7 +293,7 @@ string generateHelpForItem(eItem it) {
           help += XLAT("\n\nOrb unlocked: %1", oi.orb);
           describeOrb(help, oi);
           }
-        else if(oi.l == cwt.c->land) {
+        else if(oi.l == cwt.c->land || inv::on) {
           help += XLAT("\n\nSecondary orb: %1", oi.orb);
           describeOrb(help, oi);
           }
@@ -537,7 +593,7 @@ void describeMouseover() {
   else if(c->wall != waInvisibleFloor) {
     out = XLAT1(linf[c->land].name);
     help = generateHelpForLand(c->land);
-        
+    
     if(c->land == laIce || c->land == laCocytus) 
       out += " (" + fts(heat::celsius(c)) + " °C)";
     if(c->land == laDryForest && c->landparam) 
@@ -561,27 +617,7 @@ void describeMouseover() {
     if(c->land == laTortoise && tortoise::seek()) out += " " + tortoise::measure(getBits(c));
 
     if(buggyGeneration) {
-      char buf[20]; sprintf(buf, " H=%d M=%d", c->landparam, c->mpdist); out += buf;
-      }
-    
-    if(false) {
-
-      out += " LP:" + itsh(c->landparam)+"/"+its(turncount);
-
-      out += " CD:" + its(celldist(c));
-      
-      out += " D:" + its(c->mpdist);
-      
-      char zz[64]; sprintf(zz, " P%p", c); out += zz;
-
-      if(euclid) {
-        for(int i=0; i<4; i++) out += " " + its(getEuclidCdata(c->master)->val[i]);
-        out += " " + itsh(getBits(c));
-        }
-      else {
-        for(int i=0; i<4; i++) out += " " + its(getHeptagonCdata(c->master)->val[i]);
-        out += " " + fts(tortoise::getScent(getBits(c)));
-        }
+      char buf[80]; sprintf(buf, " %p H=%d M=%d", c, c->landparam, c->mpdist); out += buf;
       }
     
     if(randomPatternsMode)

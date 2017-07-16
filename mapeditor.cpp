@@ -1150,7 +1150,7 @@ namespace mapeditor {
     else if(uni == 'p') {
       painttype = 6;
       paintwhat_str = "paint";
-      dialog::openColorDialog(paintwhat = (painttype ==6 ? paintwhat : 0x808080));
+      dialog::openColorDialog((unsigned&)(paintwhat = (painttype ==6 ? paintwhat : 0x808080)));
       }
     else if(sym == SDLK_F2) {
       if(mapstream::saveMap(levelfile.c_str()))
@@ -1219,7 +1219,7 @@ namespace mapeditor {
       
   int dslayer;
   bool coloring;
-  int colortouse = 0xC0C0C0FF;
+  unsigned int colortouse = 0xC0C0C0FFu;
 
   transmatrix drawtrans, drawtransnew;
 
@@ -1280,6 +1280,7 @@ namespace mapeditor {
 
   void showDrawEditor() {
     cmode = sm::DRAW;
+    gamescreen(0);
     drawGrid();
 
     if(!mouseout()) getcstat = '-';
@@ -1882,7 +1883,7 @@ namespace mapeditor {
       }
   
   #ifndef NOEDIT  
-    if((cmode == sm::DRAW) && mapeditor::editingShape(group, id)) {
+    if((cmode & sm::DRAW) && mapeditor::editingShape(group, id)) {
   
       /* for(int a=0; a<size(ds.list); a++) {
         hyperpoint P2 = V * ds.list[a];
@@ -1912,6 +1913,8 @@ namespace mapeditor {
       
         queuechr(P2, 10, 'x', 0xFF00FF);
         }
+      
+      if(size(ds.list) == 0) return us;
       
       hyperpoint Plast = V * spin(-2*M_PI/ds.rots) * (ds.sym?Mirror*ds.list[0]:ds.list[size(ds.list)-1]);
       int state = 0;
@@ -2004,27 +2007,27 @@ namespace linepatterns {
   struct {
     int id;
     const char *lpname;
-    int color;
+    unsigned int color;
     } patterns[] = {
 
-    {patTriNet, "triangle grid: not rings", (int) 0xFFFFFF00},
-    {patTriRings, "triangle grid: rings", (int) 0xFFFFFF00},
-    {patHepta, "heptagonal grid", (int) 0x0000C000},
-    {patRhomb, "rhombic tesselation", (int) 0x0000C000},
-    {patTrihepta, "triheptagonal tesselation", (int) 0x0000C000},
-    {patNormal, "normal tesselation", (int) 0x0000C000},
-    {patBigTriangles, "big triangular grid", (int) 0x00606000},
-    {patBigRings, "big triangles: rings", (int) 0x0000C000},
+    {patTriNet, "triangle grid: not rings", 0xFFFFFF00},
+    {patTriRings, "triangle grid: rings", 0xFFFFFF00},
+    {patHepta, "heptagonal grid", 0x0000C000},
+    {patRhomb, "rhombic tesselation", 0x0000C000},
+    {patTrihepta, "triheptagonal tesselation", 0x0000C000},
+    {patNormal, "normal tesselation", 0x0000C000},
+    {patBigTriangles, "big triangular grid", 0x00606000},
+    {patBigRings, "big triangles: rings", 0x0000C000},
     
-    {patTree, "underlying tree", (int) 0x00d0d000},
-    {patAltTree, "circle/horocycle tree", (int) 0xd000d000},
+    {patTree, "underlying tree", 0x00d0d000},
+    {patAltTree, "circle/horocycle tree", 0xd000d000},
 
-    {patZebraTriangles, "zebra triangles", (int) 0x40FF4000},
-    {patZebraLines, "zebra lines", (int) 0xFF000000},
-    {patVine, "vineyard pattern", (int) 0x8438A400},
-    {patPalacelike, "firewall lines", (int) 0xFF400000},
-    {patPalace, "firewall lines: Palace", (int) 0xFFD50000},
-    {patPower, "firewall lines: Power", (int) 0xFFFF0000},
+    {patZebraTriangles, "zebra triangles", 0x40FF4000},
+    {patZebraLines, "zebra lines", 0xFF000000},
+    {patVine, "vineyard pattern", 0x8438A400},
+    {patPalacelike, "firewall lines", 0xFF400000},
+    {patPalace, "firewall lines: Palace", 0xFFD50000},
+    {patPower, "firewall lines: Power", 0xFFFF0000},
     {0, NULL, 0}
     };
 

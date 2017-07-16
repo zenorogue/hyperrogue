@@ -88,8 +88,6 @@ int textwidth(int siz, const string &str) {
 
 #endif
 
-int gradient(int c0, int c1, ld v0, ld v, ld v1);
-
 int darkenedby(int c, int lev) {
   for(int i=0; i<lev; i++)
     c = ((c & 0xFEFEFE) >> 1);
@@ -100,6 +98,10 @@ int darkened(int c) {
 #ifdef EXTRA_FADEOUT
   c = gradient(backcolor, c, 0, extra::fadeout, 1);
 #endif
+  if(inmirrorcount&1)
+    c = gradient(c, winf[waMirror].color, 0, 0.5, 1);
+  else if(inmirrorcount)
+    c = gradient(c, winf[waCloud].color, 0, 0.5, 1);
   for(int i=0; i<darken; i++)
     c = ((c & 0xFEFEFE) >> 1) + ((backcolor & 0xFEFEFE) >> 1);
   return c;
@@ -1008,8 +1010,10 @@ void setvideomode() {
       SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 16);
       glEnable(GL_MULTISAMPLE);
       }
+#ifndef MAC
     else
       glDisable(GL_MULTISAMPLE);
+#endif
     }
 #endif
 

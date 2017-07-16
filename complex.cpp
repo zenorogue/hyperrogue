@@ -466,6 +466,8 @@ namespace princess {
 
 #define OUT_OF_PRISON 200
 #define OUT_OF_PALACE 250
+#define PRADIUS0 (141)
+#define PRADIUS1 (150)
 
   bool generating = false;
   bool challenge = false;
@@ -475,6 +477,8 @@ namespace princess {
   bool forceVizier = false;
   bool forceMouse = false;
   bool gotoPrincess = false;
+  bool nodungeon = false;
+  bool squeaked = false;
 
   int saveHP = 0, saveArmedHP = 0;
   
@@ -496,7 +500,7 @@ namespace princess {
     if(i->alt) i->alt->emeraldval = i->id;
     }
   
-  void newInfo(cell *c) {
+  int newInfo(cell *c) {
     info *i = new info;
     i->prison = c;
     i->princess = c;
@@ -506,6 +510,7 @@ namespace princess {
     i->bestnear = OUT_OF_PRISON;
     infos.push_back(i);
     assign(i);
+    return i->id;
     }
   
   void newFakeInfo(cell *c) {
@@ -514,7 +519,7 @@ namespace princess {
     i->princess = c;
     i->alt = NULL;
     i->id = size(infos);
-    i->bestdist = OUT_OF_PALACE;
+    i->bestdist = items[itSavedPrincess] ? OUT_OF_PALACE : OUT_OF_PRISON;
     i->bestnear = 0;
     infos.push_back(i);
     assign(i);
@@ -524,7 +529,7 @@ namespace princess {
     if(euclid) return NULL;
     if(c->land != laPalace) return NULL;
     if(!c->master->alt) return NULL;
-    int ev = c->master->alt->emeraldval; // NEWYEARFIX
+    int ev = c->master->alt->alt->emeraldval; // NEWYEARFIX
     if(ev < 0 || ev >= size(infos)) return NULL;
     if(infos[ev]->alt != c->master->alt->alt) return NULL;
     return infos[ev];
@@ -535,6 +540,7 @@ namespace princess {
       while(i) {
         infos[i]->id = i-1; assign(infos[i]);
         infos[i-1]->id = i; assign(infos[i-1]);
+        swap(infos[i], infos[i-1]);
         i--;
         }
       return infos[i];
@@ -543,7 +549,7 @@ namespace princess {
     }
 
   int dist(cell *c) {
-    if(c->land != laPalace) return OUT_OF_PALACE;
+    if(c->land != laPalace && c->land != laDungeon) return OUT_OF_PALACE;
     else if(quotient || sphere || torus) return OUT_OF_PRISON;
     else if(euclid) return celldistAlt(c);
     else if(!c->master->alt) return OUT_OF_PRISON;
@@ -565,10 +571,10 @@ namespace princess {
     playSound(c, princessgender() ? "heal-princess" : "heal-prince");
 
     info *inf = NULL;
-    for(int i=0; i<size(infos); i++) 
-      if(infos[i]->princess && infos[i]->bestdist == OUT_OF_PALACE)
+    for(int i=0; i<size(infos); i++) {
+      if(infos[i]->princess && infos[i]->bestdist == OUT_OF_PALACE && isPrincess(infos[i]->princess->monst))
         inf = infos[i];
-
+      }
     if(inf) { inf->princess->monst = moNone; inf->princess = c; }
     else newFakeInfo(c);
     return true;
@@ -586,6 +592,9 @@ namespace princess {
 //    printf("Improved dist to %d\n", newdist);
       if(newdist == OUT_OF_PALACE) {
         if(!princess::saved)
+#ifdef INV
+        if(!inv::on || !inv::usedForbidden)
+#endif
           achievement_gain("PRINCESS1");
         princess::saved = true;
         princess::everSaved = true;
@@ -600,25 +609,27 @@ namespace princess {
         showMissionScreen();
         }
       }
+    if(i->princess->land == laDungeon && !saved && !nodungeon) {
+      addMessage(XLAT("%The1 says, \"not this place, it looks even worse...\"", moPrincess));
+      nodungeon = true;
+      }
     }
 
   void save(cell *princess) {
     if(euclid) return;
     princess::info *i = princess::getPrincessInfo(princess);
     if(!i || i->bestdist <= 3) princess->monst = moNone;
-    else if(i) setdist(i, OUT_OF_PALACE);
+    else if(i) setdist(i, OUT_OF_PRISON);
     }
 
   void move(cell *ct, cell *cf) {
     if(euclid) return;
     princess::info *i = princess::getPrincessInfo(cf);
     if(!i) {
-      static bool warn = true;
       // note: OK if mapediting or loading
-      if(warn) printf("Warning: unknown princess\n"); 
-      if(warn && !cheater) 
+      printf("Warning: unknown princess\n"); 
+      if(!cheater) 
         addMessage("Warning: unknown princess (that's a bug, please report)");
-      warn = false;
       }
     else {
       i->princess = ct;
@@ -661,31 +672,33 @@ namespace princess {
     retry:
     if(msgid >= 32) msgid = 0;  
     
-    if(msgid == 0 && d < 20 && c->land == laPalace) {
+    bool inpalace = c->land == laPalace || c->land == laDungeon;
+    
+    if(msgid == 0 && d < 20 && inpalace) {
       addMessage(XLAT("%The1 kisses you, and begs you to bring %him1 away from here.", m));
       }
-    else if(msgid == 1 && d >= 20 && c->land == laPalace) {
+    else if(msgid == 1 && d >= 20 && inpalace) {
       if(m == moPrincess)
         addMessage(XLAT("\"I want my revenge. Stun a guard and leave him for me!\"", m));
       else
         addMessage(XLAT("\"That felt great. Thanks!\"", m));
       }
-    else if(msgid  == 2 && d >= 70 && c->land == laPalace) {
+    else if(msgid  == 2 && d >= 70 && inpalace) {
       addMessage(XLAT("\"Bring me out of here please!\"", m));
       }
-    else if(msgid == 3 && c->land != laPalace) {
+    else if(msgid == 3 && !inpalace) {
       addMessage(XLAT("%The1 kisses you, and thanks you for saving %him1.", m));
       }
-    else if(msgid == 4 && c->land != laPalace && m == moPrincess) {
+    else if(msgid == 4 && !inpalace && m == moPrincess) {
       addMessage(XLAT("\"I have been trained to fight with a Hypersian scimitar, you know?\"", m));
       }
-    else if(msgid == 5 && c->land != laPalace) {
+    else if(msgid == 5 && !inpalace) {
       addMessage(XLAT("\"I would love to come to your world with you!\"", m));
       }
-    else if(msgid == 6 && c->land != laPalace) {
+    else if(msgid == 6 && !inpalace) {
       addMessage(XLAT("\"Straight lines stay close to each other forever, this is so romantic!\"", m));
       }
-    else if(msgid == 7 && c->land != laPalace) {
+    else if(msgid == 7 && !inpalace) {
       addMessage(XLAT("\"Maps... Just like the world, but smaller... how is that even possible?!\"", m));
       }    
     else {
@@ -1005,21 +1018,29 @@ namespace mirror {
       c->wall == waFrozenLake || c->wall == waDeadfloor || c->wall == waDeadfloor2 ||
       c->wall == waGiantRug || c->wall == waCIsland || c->wall == waCIsland2 ||
       c->wall == waGargoyleFloor || c->wall == waRubble ||
-      c->wall == waGargoyleBridge || c->wall == waTempFloor || c->wall == waTempBridge;
-    }
-  
-  void createMM(cellwalker& cw, eMonster type) {
-    if(type == moLightningBolt)
-      castLightningBolt(cw);
-    else if(cw.c->monst == moNone && cellMirrorable(cw.c) && !isPlayerOn(cw.c))  {
-      cw.c->monst = type;
-      cw.c->mondir = cw.spin;
-      cw.c->hitpoints = multi::cpid;
-      }
+      c->wall == waGargoyleBridge || c->wall == waTempFloor || c->wall == waTempBridge ||
+      c->wall == waMirrorWall;
     }
   
   inline eMonster switchtype(eMonster m) { 
     return (m == moMirror) ? moMirage : moMirror;
+    }
+  
+  void createMM(cellwalker& cw, eMonster type) {
+    if(type == moLightningBolt) {
+      castLightningBolt(cw);
+      return;
+      }
+    if(inmirror(cw)) {
+      bool b = cw.mirrored;
+      cw = reflect(cw);
+      if(cw.mirrored != b) type = switchtype(type);
+      }
+    if(cw.c->monst == moNone && cellMirrorable(cw.c) && !isPlayerOn(cw.c))  {
+      cw.c->monst = type;
+      cw.c->mondir = cw.spin;
+      cw.c->hitpoints = multi::cpid;
+      }
     }
   
   inline eMonster switchtypeif(eMonster m, bool b) { 
@@ -1113,7 +1134,7 @@ namespace mirror {
         }
       }
     }
-  
+
   void go(bool fwd) {
     int tk = tkills();
     int nummirage = 0;
@@ -1123,9 +1144,24 @@ namespace mirror {
       if(c->hitpoints != multi::cpid) continue;
       eMonster m = c->monst;
       if(isMimic(m)) {
-        if(m == moMirage) nummirage++;
+      
         int dir = c->mondir;
+        if(m == moMirage) nummirage++;
         cell *c2 = c->mov[dir];
+
+        if(c2 && inmirror(c2)) {
+          if(c->land == laMirror) {
+            // c->mondir = (dir+3) % 6;
+            c->monst = switchtype(m);
+            continue;
+            }
+          cellwalker cw(c2, c->spin(dir), false);
+          cw = reflect(cw);
+          dir = c->mondir = cw.c->spin(cw.spin);
+          if(cw.mirrored) m = c->monst = switchtype(m);
+          c2 = c->mov[dir];
+          }
+        
         if(c2 && !isMimic(c2) && canAttack(c,m,c2,c2->monst, 0))
           attackMonster(c2, AF_MSG | AF_ORSTUN, m);
         if(c2->wall == waBigTree)
@@ -1135,7 +1171,7 @@ namespace mirror {
         if(!fwd) continue;
         c->monst = moNone;
         if(!c2) continue;
-        if(!passable(c2, c, P_MONSTER | P_MIRROR))  continue;
+        if(!passable(c2, c, P_MONSTER | P_MIRROR | P_MIRRORWALL))  continue;
         if(isWorm(c2)) continue;
         if(c2->monst == moGreater) {
           c2->monst = moLesser; continue;
@@ -1192,7 +1228,123 @@ namespace mirror {
     if(multi::players > 1) spin(d);
     go(fwd);
     }
+  
+  int mirrordir(cell *c) {
+    if(c->type == 7) return c->bardir;
 
+   int icount = 0, isum = 0;
+   for(int i=0; i<6; i+=2) {
+     if(createMov(c, i)->bardir == c->spin(i))
+       icount++, isum+=i;
+     }
+   if(icount > 1) return -1;
+   return isum;
+   }
+  
+  pair<bool, cellwalker> traceback(vector<int>& v, cellwalker cw) {
+    bool goout = false;
+    for(int i=size(v)-1; i>=0; i--) {
+      if(v[i]) cwspin(cw, -v[i]);
+      else { 
+        cwstep(cw);
+        if(cw.c->land == laMirrorWall || cw.c->land == laMirror) goout = true;
+        }
+      }
+    return make_pair(goout, cw);
+    }
+
+  cellwalker reflect(cellwalker cw, bool debug) {
+    int stepcount = 0;
+    cellwalker cwcopy = cw;
+    static vector<int> v;
+    v.clear();
+    while(true) {
+      if(!inmirror(cw)) break;
+      stepcount++; if(stepcount > 10000) {
+         if(debug) cw.c->wall = waBoat;
+         if(debug) printf("fail\n"); return cw; 
+         }
+      cell *c0 = cwpeek(cw, 0);
+      int go = 0;
+      if(!inmirror(c0)) go = 2;
+      else if(c0->landparam && c0->landparam < cw.c->landparam) go = 1;
+      if(go) {
+        v.push_back(0);
+        cwstep(cw);
+        if(debug) queuemarkerat(gmatrix[cw.c], 0x00FF0020);
+        if(go == 2) break;
+        }
+      else {
+        v.push_back(1);
+        cwspin(cw, 1);
+        }        
+      }
+    if(cw.c->land == laMirrorWall || cw.c->land == laMirrorWall2) {
+      if(cw.c->type == 7) {
+        while(cw.spin != cw.c->bardir) {
+          cwspin(cw, 1);
+          v.push_back(1);
+          stepcount++; if(stepcount > 10000) { printf("failhep\n"); return cw; }
+          }
+        if(purehepta && cwpeek(cw,0) == cwcopy.c)
+          v.pop_back();
+        if(purehepta && cwpeek(cw,3)->land == laMirrored && cwpeek(cw,2)->land == laMirrorWall) {
+          cw.mirrored = !cw.mirrored;
+          auto p = traceback(v, cw);
+          if(p.first) return p.second;
+          cwspin(cw, 2); 
+          v.push_back(2);
+          cwstep(cw); 
+          if(debug) queuemarkerat(gmatrix[cw.c], 0xC9C90080);
+          v.push_back(0);
+          cwspin(cw, 3); 
+          v.push_back(3);
+          }
+        }
+      else {
+        while(cwpeek(cw,0)->type != 7) {
+          cwspin(cw, 1);
+          v.push_back(1);
+          }
+        int icount = 0;
+        for(int i=0; i<3; i++) {
+          if(cwpeek(cw, 0)->bardir == cw.c->spin(cw.spin))
+            icount++;
+          cwspin(cw, 2);
+          }
+        if(icount >= 2) {
+          cellwalker cwcopy = cw;
+          for(int a=0; a<3; a++) for(int m=0; m<2; m++) {
+            cellwalker cw = cwcopy;
+            if(m) cw.mirrored = !cw.mirrored;
+            cwspin(cw, a*2);
+            auto p = traceback(v,cw);
+            if(p.first) return p.second;
+            }
+          printf("icount >= 2 but failed\n");
+          return cw;
+          }
+        while(cwpeek(cw, 0)->bardir != cw.c->spin(cw.spin)) {
+          stepcount++; if(stepcount > 10000) { printf("fail2\n"); return cw; }
+          cwspin(cw, 2);
+          v.push_back(1);
+          v.push_back(1);
+          }
+        }
+      }
+    else v.pop_back();
+    cw.mirrored = !cw.mirrored;
+    cw = traceback(v,cw).second;
+    return cw;
+    }
+  
+  void debug() {
+    if(!mouseover) return;
+    queuemarkerat(gmatrix[mouseover], 0xFF0000FF);
+    cellwalker mw(mouseover, (SDL_GetTicks()/1000) % mouseover->type, (SDL_GetTicks()/500) % 2);
+    mw = mirror::reflect(mw, true);
+    queuemarkerat(gmatrix[mw.c], 0x800000FF);
+    }
   }
 
 namespace hive {
@@ -2765,7 +2917,7 @@ namespace ca {
   }
 
 auto ccm = addHook(clearmemory, 0, [] () {
-  offscreen.clear();  
+  offscreen.clear();
   princess::clear();
   mirrors.clear();
   clearing::bpdata.clear();

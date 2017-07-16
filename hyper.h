@@ -7,7 +7,7 @@
 
 #define LB_YENDOR_CHALLENGE 40
 #define LB_PURE_TACTICS 41
-#define NUMLEADER 69
+#define NUMLEADER 70
 #define LB_PURE_TACTICS_SHMUP 49
 #define LB_PURE_TACTICS_COOP 50
 
@@ -73,6 +73,7 @@ eItem treasureType(eLand l);
 void buildBarrier(cell *c, int d, eLand l = laNone);
 void extendBarrier(cell *c);
 bool buildBarrier4(cell *c, int d, int mode, eLand ll, eLand lr);
+bool buildBarrier6(struct cellwalker cw, int type);
 bool makeEmpty(cell *c);
 bool isCrossroads(eLand l);
 enum orbAction { roMouse, roKeyboard, roCheck, roMouseForce, roMultiCheck, roMultiGo };
@@ -134,7 +135,8 @@ void activateActiv(cell *c, bool msg);
 // shmup
 
 struct charstyle {
-  int charid, skincolor, haircolor, dresscolor, swordcolor, dresscolor2, uicolor;
+  int charid;
+  unsigned skincolor, haircolor, dresscolor, swordcolor, dresscolor2, uicolor;
   };
 
 string csname(charstyle& cs);
@@ -271,7 +273,7 @@ void drawfullmap();
 bool displaystr(int x, int y, int shift, int size, const char *str, int color, int align);
 bool displaystr(int x, int y, int shift, int size, const string& str, int color, int align);
 
-extern int darken;
+extern int darken, inmirrorcount;
 void calcparam();
 
 #ifdef USE_SDL
@@ -395,7 +397,7 @@ namespace rug {
   extern bool renderonce;
   extern bool rendernogl;
   extern int  texturesize;
-  extern double scale;
+  extern ld   scale;
   void show();
   void init();
   void close();
@@ -406,8 +408,6 @@ namespace rug {
 #endif
 
 #define HASLINEVIEW
-#include <complex>
-typedef complex<ld> cld;
 
 namespace conformal {
   extern bool on;
@@ -440,7 +440,7 @@ namespace polygonal {
   extern int SI;
   extern ld STAR;
   extern int deg;
-  extern complex<ld> coef[MSI];
+  extern ld coefr[MSI], coefi[MSI];
   extern int maxcoef, coefid;
   void solve();
   pair<ld, ld> compute(ld x, ld y);
@@ -469,6 +469,7 @@ extern bool localKill(shmup::monster *m);
 #define P_ONPLAYER   (1<<6)  // always can step on the player
 #define P_FLYING     (1<<7)  // is flying
 #define P_BULLET     (1<<8)  // bullet can fly through more things
+#define P_MIRRORWALL (1<<9)  // mirror images go through mirror walls
 #define P_JUMP1      (1<<10) // first part of a jump
 #define P_JUMP2      (1<<11) // second part of a jump
 #define P_TELE       (1<<12) // teleport onto
@@ -519,7 +520,7 @@ extern bool safety;
 
 #define SAGEMELT .1
 #define TEMPLE_EACH 6
-#define PT(x, y) ((tactic::on || quotient == 2) ? (y) : (x))
+#define PT(x, y) ((tactic::on || quotient == 2) ? (y) : inv::on ? min(2*(y),x) : (x))
 #define ROCKSNAKELENGTH 50
 #define WORMLENGTH 15
 #define PUREHARDCORE_LEVEL 10
@@ -540,7 +541,7 @@ bool isAlchAny(eWall w);
 bool isAlchAny(cell *c);
 
 #define YDIST 101
-#define MODECODES 254
+#define MODECODES 255
   
 extern cellwalker cwt; // player character position
 extern int sval;
@@ -827,7 +828,7 @@ namespace dialog {
   void addSelItem(string body, string value, int key);
   void addBoolItem(string body, bool value, int key);
   void addColorItem(string body, int value, int key);
-  void openColorDialog(int& col, unsigned int *pal = palette);
+  void openColorDialog(unsigned int& col, unsigned int *pal = palette);
   void addHelp(string body);
   void addInfo(string body, int color = 0xC0C0C0);
   void addItem(string body, int key);
@@ -1304,8 +1305,14 @@ bool createOnSea(eLand old);
 
 namespace inv {
   extern bool on;
+  extern bool usedForbidden;
   extern int remaining[ittypes];
   void compute();
+  void applyBox(eItem it);
+
+  extern int incheck;  
+  void check(int delta);
+  void show();
   }
 
 bool drawItemType(eItem it, cell *c, const transmatrix& V, int icol, int ticks, bool hidden);
@@ -1327,6 +1334,9 @@ typedef hookset<void()> *purehookset;
 
 template<class T, class U> int addHook(hookset<T>*& m, int prio, const U& hook) {
   if(!m) m = new hookset<T> ();
+  while(m->count(prio)) {
+    prio++;
+    }
   (*m)[prio] = hook;
   return 0;
   }
@@ -1469,3 +1479,38 @@ namespace leader { void showMenu(); void handleKey(int sym, int uni); }
 bool needConfirmation();
 
 extern const char* geometrynames_short[gGUARD];
+
+namespace mirror {
+  cellwalker reflect(cellwalker cw, bool debug = false);
+  }
+
+bool inmirror(eLand l);
+bool inmirror(cell *c);
+bool inmirror(const cellwalker& cw);
+
+void queuemarkerat(const transmatrix& V, int col);
+
+void check_total_victory();
+void applyBoxNum(int& i, string name = "");
+extern int hinttoshow;
+
+bool isShmupLifeOrb(eItem it);
+int orbcharges(eItem it);
+
+#ifdef PANDORA
+static const bool ISPANDORA = true;
+#else
+static const bool ISPANDORA = false;
+#endif
+
+int gradient(int c0, int c1, ld v0, ld v, ld v1);
+
+struct hint {
+  time_t last;
+  function<bool()> usable;
+  function<void()> display;
+  function<void()> action;  
+  };
+
+extern hint hints[];
+int counthints();

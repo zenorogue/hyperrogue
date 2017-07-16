@@ -42,7 +42,7 @@ bool glew   = false;
 bool renderonce  = false;
 bool rendernogl  = false;
 int  texturesize = 1024;
-double scale = 1;
+ld scale = 1;
 
 int queueiter, qvalid, dt;
 double err;

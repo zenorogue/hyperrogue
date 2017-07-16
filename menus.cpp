@@ -401,7 +401,7 @@ void showChangeMode() {
   dialog::addBoolItem(XLAT("heptagonal mode"), (purehepta), '7');
   dialog::addBoolItem(XLAT("Chaos mode"), (chaosmode), 'C');
   dialog::addBoolItem(XLAT("peaceful mode"), (chaosmode), 'p');
-  dialog::addBoolItem(XLAT("inventory mode"), (inv::on), 'i');
+  dialog::addBoolItem(XLAT("Orb Strategy mode"), (inv::on), 'i');
   dialog::addBoolItem(XLAT("pure tactics mode"), (tactic::on), 't');
   dialog::addBoolItem(XLAT("Yendor Challenge"), (yendor::on), 'y');
   dialog::addBoolItem(XLAT("%1 Challenge", moPrincess), (princess::challenge), 'P');

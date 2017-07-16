@@ -1,6 +1,6 @@
-#define VER "9.4n2"
-#define VERNUM 9416
-#define VERNUM_HEX 0x9416
+#define VER "10.0"
+#define VERNUM 10000
+#define VERNUM_HEX 0xA000
 
 #define GEN_M 0
 #define GEN_F 1
@@ -264,7 +264,7 @@ const char *loadlevel = NULL;
 #include "landgen.cpp"
 #include "orbs.cpp"
 #ifdef INV
-#include "closed/inventory.cpp"
+#include "inventory.cpp"
 #else
 bool inv::on;
 #endif
@@ -307,12 +307,13 @@ bool inv::on;
 #endif
 
 bool fixseed = false;
+int startseed = 0;
 
 void initAll() {
   ca::init();
   arg::read(1);
   srand(time(NULL));
-  shrand(fixseed ? 0 : time(NULL));
+  shrand(fixseed ? startseed : time(NULL));
 
   achievement_init(); // not in ANDROID
 

@@ -1,6 +1,9 @@
 // Hyperbolic Rogue -- the conformal/history mode
 // Copyright (C) 2011-2016 Zeno Rogue, see 'hyper.cpp' for details
 
+#include <complex>
+typedef complex<ld> cld;
+
 namespace polygonal {
 
   typedef complex<ld> cld;
@@ -13,10 +16,16 @@ namespace polygonal {
   ld matrix[MSI][MSI];
   ld ans[MSI];
   
-  cld coef[MSI];
+  cld coef[MSI]; 
+  ld coefr[MSI], coefi[MSI]; 
   int maxcoef, coefid;
   
   void solve() {
+    if(pmodel == mdPolynomial) {
+      for(int i=0; i<MSI; i++) coef[i] = cld(coefr[i], coefi[i]);
+      return;
+      } 
+    if(pmodel != mdPolygonal) return;
     if(SI < 3) SI = 3;
     for(int i=0; i<MSI; i++) ans[i] = cos(M_PI / SI);
     for(int i=0; i<MSI; i++)
@@ -547,9 +556,9 @@ namespace conformal {
 
     if(pmodel == 4) {
       dialog::addSelItem(XLAT("coefficient"), 
-        fts4(real(polygonal::coef[polygonal::coefid])), 'x');
+        fts4(polygonal::coefr[polygonal::coefid]), 'x');
       dialog::addSelItem(XLAT("coefficient (imaginary)"), 
-        fts4(imag(polygonal::coef[polygonal::coefid])), 'y');
+        fts4(polygonal::coefi[polygonal::coefid]), 'y');
       dialog::addSelItem(XLAT("which coefficient"), its(polygonal::coefid), 'n');
       }
 
@@ -583,19 +592,8 @@ namespace conformal {
     keyhandler = handleKeyC;
     }
 
-  int ib = 0;
-  ld compbuf;
-
-  void applyIB() {
-    using namespace polygonal;
-    cld& tgt = coef[coefid];
-    if(ib == 1) tgt = cld(compbuf, imag(tgt));
-    if(ib == 2) tgt = cld(real(tgt), compbuf);
-    }
-    
   void handleKeyC(int sym, int uni) {
     dialog::handleNavigation(sym, uni);
-    ib = 0;
   
     if(uni == 'e') {
       if(on) clear();
@@ -618,7 +616,7 @@ namespace conformal {
           if(pmodel == mdHalfplane || pmodel == mdBand || pmodel == mdEquidistant || pmodel == mdEquiarea)
             goto switchagain;
         }
-      if(pmodel == mdPolygonal) polygonal::solve();
+      polygonal::solve();
       /* if(pmodel && vid.usingGL) {
         addMessage(XLAT("openGL mode disabled"));
         vid.usingGL = false;
@@ -634,16 +632,12 @@ namespace conformal {
     else if(sym == 'x' && pmodel == mdPolynomial)  {
       polygonal::maxcoef = max(polygonal::maxcoef, polygonal::coefid);
       int ci = polygonal::coefid + 1;
-      compbuf = real(polygonal::coef[polygonal::coefid]);
-      dialog::editNumber(compbuf, -10, 10, .01/ci/ci, 0, XLAT("coefficient"), "");
-      ib = 1;
+      dialog::editNumber(polygonal::coefr[polygonal::coefid], -10, 10, .01/ci/ci, 0, XLAT("coefficient"), "");
       }
     else if(sym == 'y' && pmodel == mdPolynomial) {
       polygonal::maxcoef = max(polygonal::maxcoef, polygonal::coefid);
       int ci = polygonal::coefid + 1;
-      compbuf = imag(polygonal::coef[polygonal::coefid]);
-      dialog::editNumber(compbuf, -10, 10, .01/ci/ci, 0, XLAT("coefficient (imaginary)"), "");
-      ib = 2;
+      dialog::editNumber(polygonal::coefi[polygonal::coefid], -10, 10, .01/ci/ci, 0, XLAT("coefficient (imaginary)"), "");
       }
     else if(sym == 'n' && pmodel == mdPolynomial)
       dialog::editNumber(polygonal::coefid, 0, polygonal::MSI-1, 1, 0, XLAT("which coefficient"), "");

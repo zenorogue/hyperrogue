@@ -648,7 +648,7 @@ struct cellwalker {
   cell *c;
   int spin;
   bool mirrored;
-  cellwalker(cell *c, int spin) : c(c), spin(spin) { mirrored = false; }
+  cellwalker(cell *c, int spin, bool m=false) : c(c), spin(spin), mirrored(m) { }
   cellwalker() { mirrored = false; }
   };
 

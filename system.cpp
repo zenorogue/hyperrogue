@@ -15,6 +15,13 @@ bool timerstopped;
 int savecount;
 bool showoff = false, doCross = false;
 
+bool verless(const string& v, const string& cmp) {
+  // no checks exists for versions greater than 10.0 yet
+  if(isdigit(v[0]) && isdigit(v[1]))
+    return false;
+  return v < cmp;
+  }
+
 // initialize the game
 void initgame() {
   DEBB(DF_INIT, (debugfile,"initGame\n"));
@@ -167,6 +174,8 @@ void initgame() {
       makeEmpty(cwt.c);
     }
   
+  princess::squeaked = false;
+  
   if(!safety) {
     usedSafety = false;
     timerstart = time(NULL); turncount = 0; rosewave = 0; rosephase = 0;
@@ -254,8 +263,8 @@ void initgame() {
 bool havesave = true;
 
 #ifndef NOSAVE
-#define MAXBOX 300
-#define POSSCORE 258 // update this when new boxes are added!
+#define MAXBOX 500
+#define POSSCORE 308 // update this when new boxes are added!
 
 struct score {
   string ver;
@@ -275,7 +284,7 @@ void applyBox(int& t) {
   else boxid++;
   }
 
-void applyBoxNum(int& i, string name = "") {
+void applyBoxNum(int& i, string name) {
   fakebox[boxid] = (name == "");
   boxname[boxid] = name;
   monsbox[boxid] = false;
@@ -313,6 +322,31 @@ void applyBoxI(eItem it, bool f = false) {
   else applyBox(items[it]);
   }
 
+vector<eItem> invorb;
+
+void addinv(eItem it) {
+  invorb.push_back(it);
+  }
+
+void applyBoxOrb(eItem it) {
+  applyBoxI(it, true);
+  invorb.push_back(it);
+  }  
+
+void list_invorb() {
+  for(eItem it: invorb) {
+#ifdef INV
+    if(true) {
+      inv::applyBox(it);
+      continue;
+      }
+#endif
+    int u = 0;
+    applyBoxNum(u);
+    }
+  invorb.clear();
+  }
+
 void applyBoxM(eMonster m, bool f = false) {
   fakebox[boxid] = f;
   boxname[boxid] = minf[m].name;
@@ -321,6 +355,7 @@ void applyBoxM(eMonster m, bool f = false) {
   }
 
 void applyBoxes() {
+  invorb.clear();
 
   eLand lostin = laNone;
 
@@ -347,9 +382,9 @@ void applyBoxes() {
     else if(i == moWormwait) applyBoxM(moFireFairy);
     else if(i == moTentacleEscaping) applyBoxM(moMiner);
     else if(i == moGolemMoved) applyBoxM(moIllusion);
-    else if(i == moTentaclewait) applyBoxI(itOrbThorns, true);
-    else if(i == moGreater) applyBoxI(itOrbDragon, true);
-    else if(i == moGreaterM) applyBoxI(itOrbIllusion, true);
+    else if(i == moTentaclewait) applyBoxOrb(itOrbThorns);
+    else if(i == moGreater) applyBoxOrb(itOrbDragon);
+    else if(i == moGreaterM) applyBoxOrb(itOrbIllusion);
     else applyBoxM(eMonster(i), fake);
     }
     
@@ -371,17 +406,17 @@ void applyBoxes() {
   else if(loading) firstland = safetyland = eLand(applyBoxLoad());
   else lostin = eLand(savebox[boxid++]);
   
-  for(int i=itOrbLightning; i<25; i++) applyBoxI(eItem(i), true);
+  for(int i=itOrbLightning; i<25; i++) applyBoxOrb(eItem(i));
   
   applyBoxI(itRoyalJelly);
   applyBoxI(itWine);
   applyBoxI(itSilver);
   applyBoxI(itEmerald);
   applyBoxI(itPower);
-  applyBoxI(itOrbFire, true);
-  applyBoxI(itOrbInvis, true);
-  applyBoxI(itOrbAether, true);
-  applyBoxI(itOrbPsi, true);
+  applyBoxOrb(itOrbFire);
+  applyBoxOrb(itOrbInvis);
+  applyBoxOrb(itOrbAether);
+  applyBoxOrb(itOrbPsi);
   applyBoxM(moBug0);
   applyBoxM(moBug1);
   applyBoxM(moBug2);
@@ -407,12 +442,12 @@ void applyBoxes() {
   applyBoxM(moCShark);
   applyBoxM(moParrot);
   applyBoxI(itPirate);
-  applyBoxI(itOrbTime, true);
+  applyBoxOrb(itOrbTime);
   
   applyBoxM(moHexSnake);
   applyBoxM(moRedTroll);
   applyBoxI(itRedGem);
-  applyBoxI(itOrbSpace, true);
+  applyBoxOrb(itOrbSpace);
   
   int geo = geometry;
   applyBoxNum(geo, ""); geometry = eGeometry(geo);
@@ -429,14 +464,14 @@ void applyBoxes() {
   applyBoxM(moBomberbird);
   applyBoxM(moTameBomberbird);
   applyBoxM(moAlbatross);
-  applyBoxI(itOrbFriend, true);
-  applyBoxI(itOrbAir, true);
-  applyBoxI(itOrbWater, true);
+  applyBoxOrb(itOrbFriend);
+  applyBoxOrb(itOrbAir);
+  applyBoxOrb(itOrbWater);
   
   applyBoxI(itPalace);
   applyBoxI(itFjord);
-  applyBoxI(itOrbFrog, true);
-  applyBoxI(itOrbDiscord, true);
+  applyBoxOrb(itOrbFrog);
+  applyBoxOrb(itOrbDiscord);
   applyBoxM(moPalace);
   applyBoxM(moFatGuard);
   applyBoxM(moSkeleton);
@@ -446,7 +481,7 @@ void applyBoxes() {
   applyBoxM(moWaterElemental);
   
   applyBoxI(itSavedPrincess);
-  applyBoxI(itOrbLove, true);
+  applyBoxOrb(itOrbLove);
   applyBoxM(moPrincess);
   applyBoxM(moPrincessMoved, false); // live Princess for Safety
   applyBoxM(moPrincessArmedMoved, false); // live Princess for Safety
@@ -467,8 +502,8 @@ void applyBoxes() {
   applyBoxM(moFamiliar);
   applyBoxM(moGargoyle);
   applyBoxM(moOrangeDog);
-  applyBoxI(itOrbSummon, true);
-  applyBoxI(itOrbMatter, true);
+  applyBoxOrb(itOrbSummon);
+  applyBoxOrb(itOrbMatter);
 
   applyBoxM(moForestTroll);
   applyBoxM(moStormTroll);
@@ -479,8 +514,8 @@ void applyBoxes() {
   applyBoxI(itMutant);
   applyBoxI(itFulgurite);
   applyBoxI(itBounty);
-  applyBoxI(itOrbLuck, true);
-  applyBoxI(itOrbStunning, true);
+  applyBoxOrb(itOrbLuck);
+  applyBoxOrb(itOrbStunning);
   
   applyBoxBool(tactic::on, "");
   applyBoxNum(elec::lightningfast, "");
@@ -488,22 +523,22 @@ void applyBoxes() {
   // if(savebox[boxid]) printf("lotus = %d (lost = %d)\n", savebox[boxid], isHaunted(lostin));
   if(loadingHi && isHaunted(lostin)) boxid++;
   else applyBoxI(itLotus);
-  applyBoxI(itOrbUndeath, true);
+  applyBoxOrb(itOrbUndeath);
   applyBoxI(itWindstone);
-  applyBoxI(itOrbEmpathy, true);
+  applyBoxOrb(itOrbEmpathy);
   applyBoxM(moWindCrow);
-  applyBoxI(itMutant2);
-  applyBoxI(itOrbFreedom, true);
+  applyBoxOrb(itMutant2);
+  applyBoxOrb(itOrbFreedom);
   applyBoxM(moRedFox);
   applyBoxBool(survivalist);
   if(loadingHi) applyBoxI(itLotus);
   else applyBoxNum(truelotus, "lotus/escape");
   applyBoxBool(purehepta, "heptagons only"); 
   applyBoxI(itRose);
-  applyBoxI(itOrbBeauty, true);
+  applyBoxOrb(itOrbBeauty);
   applyBoxI(itCoral);
-  applyBoxI(itOrb37, true);
-  applyBoxI(itOrbEnergy, true);
+  applyBoxOrb(itOrb37);
+  applyBoxOrb(itOrbEnergy);
   applyBoxM(moRatling);
   applyBoxM(moFalsePrincess);
   applyBoxM(moRoseLady);
@@ -520,11 +555,11 @@ void applyBoxes() {
   applyBoxM(moResearcher);
   applyBoxI(itDragon);
   applyBoxM(moDragonHead);
-  applyBoxI(itOrbDomination, true);
+  applyBoxOrb(itOrbDomination);
   applyBoxI(itBabyTortoise);
   applyBoxNum(tortoise::seekbits, "");
   applyBoxM(moTortoise);
-  applyBoxI(itOrbShell, true);
+  applyBoxOrb(itOrbShell);
   
   applyBoxNum(safetyseed);
 
@@ -539,12 +574,12 @@ void applyBoxes() {
   applyBoxI(itKraken);
   applyBoxM(moKrakenH);
   applyBoxM(moKrakenT);
-  applyBoxI(itOrbSword, true);
+  applyBoxOrb(itOrbSword);
   applyBoxI(itBarrow);
   applyBoxM(moDraugr);
-  applyBoxI(itOrbSword2, true);
+  applyBoxOrb(itOrbSword2);
   applyBoxI(itTrollEgg);
-  applyBoxI(itOrbStone, true);
+  applyBoxOrb(itOrbStone);
   
   bool sph;
   sph = false; applyBoxBool(sph, "sphere"); if(sph) geometry = gSphere;
@@ -554,22 +589,34 @@ void applyBoxes() {
   applyBoxI(itDodeca);
   applyBoxI(itAmethyst);
   applyBoxI(itSlime);
-  applyBoxI(itOrbNature, true);
-  applyBoxI(itOrbDash, true); 
-  // itOrbRecall should not be here
+  applyBoxOrb(itOrbNature);
+  applyBoxOrb(itOrbDash); 
+  addinv(itOrbRecall);
   applyBoxM(moBat);
   applyBoxM(moReptile);
   applyBoxM(moFriendlyIvy);
   
   applyBoxI(itGreenGrass);
   applyBoxI(itBull);
-  applyBoxI(itOrbHorns, true);
-  applyBoxI(itOrbBull, true);
+  applyBoxOrb(itOrbHorns);
+  applyBoxOrb(itOrbBull);
   applyBoxM(moSleepBull);
   applyBoxM(moRagingBull);
   applyBoxM(moHerdBull);
   applyBoxM(moButterfly);
   applyBoxM(moGadfly);
+
+  // 10.0:
+  applyBoxNum(hinttoshow); // 258
+  addinv(itOrbMirror);
+  addinv(itGreenStone);
+  list_invorb();
+  applyBoxBool(inv::on, "inventory"); // 306
+  #ifdef INV
+  applyBoxNum(inv::rseed);
+  #else
+  { int u; applyBoxNum(u); }
+  #endif
   
   if(POSSCORE != boxid) printf("ERROR: %d boxes\n", boxid);
   }
@@ -785,6 +832,7 @@ void loadsave() {
   score sc;
   bool ok = false;
   bool tamper = false;
+  int coh = counthints();
   while(!feof(f)) {
     char buf[120];
     if(fgets(buf, 120, f) == NULL) break;
@@ -792,7 +840,8 @@ void loadsave() {
       gamecount++;
       if(fscanf(f, "%s", buf) <= 0) break;
       sc.ver = buf;
-      if(sc.ver < "4.4" || sc.ver == "CHEATER!") { ok = false; continue; }
+      if(sc.ver[1] != '.') sc.ver = '0' + sc.ver;
+      if(verless(sc.ver, "4.4") || sc.ver == "CHEATER!") { ok = false; continue; }
       ok = true;
       for(int i=0; i<MAXBOX; i++) {
         if(fscanf(f, "%d", &sc.box[i]) <= 0) {
@@ -802,6 +851,10 @@ void loadsave() {
 
           for(int i=0; i<boxid; i++) savebox[i] = sc.box[i];
           for(int i=boxid; i<MAXBOX; i++) savebox[i] = 0, sc.box[i] = 0;
+
+          if(savebox[258] >= 0 && savebox[258] < coh) {
+             hints[savebox[258]].last = savebox[1];
+             }
 
           loadBoxHigh();
 
@@ -826,7 +879,10 @@ void loadsave() {
       
       for(int xc=0; xc<MODECODES; xc++)
         if(tid == tactic::id && (anticheat::check(cert, ver, dnameof(eLand(land)), tc, t, ts, xc*999+tid + 256 * score))) {
-          if(score != 0 && !(land == laOcean && ver < string("8.0f")))
+          if(score != 0 
+            && !(land == laOcean && verless(ver, "8.0f"))
+            && !(land == laMirror && verless(ver, "10.0"))
+          )
             tactic::record(eLand(land), score, xc);
           anticheat::nextid(tactic::id, ver, cert);
           break;
@@ -843,8 +899,8 @@ void loadsave() {
       if(anticheat::check(cert, ver, won ? "WON" : "LOST", tc, t, ts, xc*999 + cid + 256 * oy)) {
         if(xc == 19 && cid == 25) xc = 0;
         if(cid > 0 && cid < YENDORLEVELS) 
-        if(!(ver < string("8.0f") && oy > 1 && cid == 15)) 
-        if(!(ver < string("9.3b") && oy > 1 && (cid == 27 || cid == 28))) 
+        if(!(verless(ver, "8.0f") && oy > 1 && cid == 15)) 
+        if(!(verless(ver, "9.3b") && oy > 1 && (cid == 27 || cid == 28))) 
           {
           yendor::bestscore[xc][cid] = max(yendor::bestscore[xc][cid], oy);
           }
@@ -955,6 +1011,7 @@ void restartGame(char switchWhat, bool push) {
   #endif
     achievementsReceived.clear();
     princess::saved = false;
+    princess::nodungeon = false;
     princess::reviveAt = 0;
     princess::forceVizier = false;
     princess::forceMouse = false;
@@ -1101,7 +1158,8 @@ eItem randomTreasure2(int cv) {
 
 bool isTechnicalLand(eLand l) {
   return l == laNone || l == laOceanWall || l == laBarrier || l == laCanvas ||
-    l == laHauntedWall || l == laHauntedBorder || l == laCA;
+    l == laHauntedWall || l == laHauntedBorder || l == laCA ||
+    l == laMirrorWall || l == laMirrored;
   }
 
 eLand cheatdest;

@@ -387,10 +387,10 @@ namespace dialog {
   
   int colorp = 0;
   
-  int *colorPointer;
+  unsigned int *colorPointer;
   
   bool handleKeyColor(int sym, int uni) {
-    int& color = *colorPointer;
+    unsigned& color = *colorPointer;
 
     if(uni >= 'A' && uni <= 'D') {
       int x = (mousex - vid.xres/4) * 510 / vid.xres;
@@ -478,7 +478,7 @@ namespace dialog {
     keyhandler = handleKeyColor;
     }
   
-  void openColorDialog(int& col, unsigned int *pal) {
+  void openColorDialog(unsigned int& col, unsigned int *pal) {
     colorPointer = &col; palette = pal;
     pushScreen(drawColorDialog);
     }
@@ -593,7 +593,7 @@ namespace dialog {
     if(ne.intval == &polygonal::SI) polygonal::solve();
     if(ne.editwhat == &polygonal::STAR) polygonal::solve();
     
-    conformal::applyIB();
+    polygonal::solve();
     
     if(ne.editwhat == &geom3::highdetail && geom3::highdetail > geom3::middetail)
       geom3::middetail = geom3::highdetail;
@@ -626,7 +626,7 @@ namespace dialog {
 
     addBreak(100);
     
-    if(cmode && sm::A3) ne.help = explain3D(ne.editwhat);
+    if(cmode & sm::A3) ne.help = explain3D(ne.editwhat);
 
     if(ne.help != "") {
       addHelp(ne.help);

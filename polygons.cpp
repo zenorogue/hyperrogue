@@ -630,10 +630,11 @@ hpcshape
   shBarrowFloor[3],
   shTriheptaFloor[11], shTriheptaFloor2[2], shTriheptaEuc[3],
   shCross, shGiantStar[2], shLake, shMirror,
+  shHalfFloor[3], shHalfMirror[3],
   shGem[2], shStar, shDisk, shDiskT, shDiskS, shDiskM, shDiskSq, shRing,   
   shEgg,
   shSpikedRing, shTargetRing, shSawRing, shGearRing, shPeaceRing, shHeptaRing,
-  shSpearRing,
+  shSpearRing, shLoveRing,
   shDaisy, shTriangle, shNecro, shStatue, shKey,
   shGun,
   shFigurine, shTreat,
@@ -1112,6 +1113,36 @@ void buildpolys() {
     }
   hpcpush(ddi(0, crossf * .25) * C0);
   
+  /* three nice spikes
+  bshape(shLoveRing, PPR_ITEM);
+  for(int i=0; i<=S84; i+=3)
+    hpcpush(ddi(i, crossf * .25) * C0);
+  for(int i=S84; i>=0; i--) {
+    int j = i*3 % S84;
+    int d = j - S42;
+    if(d<0) d = -d;
+    d = 8 - 2 * d;
+    if(d<0) d = 0;
+    hpcpush(ddi(i, crossf * (.3 + .02 * d)) * C0);
+    }
+  hpcpush(ddi(0, crossf * .25) * C0);
+  */
+  
+  bshape(shLoveRing, PPR_ITEM);
+  for(int i=0; i<=S84; i+=3)
+    hpcpush(ddi(i, crossf * .25) * C0);
+  for(int i=S84; i>=0; i--) {
+    int j = i*3 % S84;
+    double d = j - S42;
+    d = d / 9;
+    if(d<0) d = -d;
+    d = 8 - 2 * d;
+    if(d<0) d = 0;
+    if(d >= 6) d -= (d-6)/3;
+    hpcpush(ddi(i, crossf * (.27 + .02 * d)) * C0);
+    }
+  hpcpush(ddi(0, crossf * .25) * C0);
+  
   bshape(shSawRing, PPR_ITEM);
   for(int i=0; i<=S84; i+=3)
     hpcpush(ddi(i, crossf * .25) * C0);
@@ -1241,6 +1272,13 @@ void buildpolys() {
 
   bshape(shButterflyFloor[0], PPR_FLOOR, scalef*spzoom6, 325);
   bshape(shButterflyFloor[1], PPR_FLOOR, scalef*spzoomd7, 326);
+
+  bshape(shHalfFloor[0], PPR_FLOOR, scalef*spzoom6, 329);
+  bshape(shHalfFloor[1], PPR_FLOOR, scalef*spzoom6, 327);
+  bshape(shHalfFloor[2], PPR_FLOOR, scalef*spzoom6, 331);
+  bshape(shHalfMirror[0], PPR_WALL, scalef*spzoom6, 330);
+  bshape(shHalfMirror[1], PPR_WALL, scalef*spzoom6, 328);
+  bshape(shHalfMirror[2], PPR_WALL, scalef*spzoom6, 332);
 
   bshape(shLeafFloor[0], PPR_FLOOR_DRAGON, 1*spzoom6, 313);
   bshape(shLeafFloor[1], PPR_FLOOR_DRAGON, 1*spzoomd7, 314);
@@ -2009,6 +2047,10 @@ void queuecircle(const transmatrix& V, double size, int col) {
   queuecircle(xc, yc, int(sqrt(squar(xc-xs)+squar(yc-ys)) * size), col);
   }
 
+void queuemarkerat(const transmatrix& V, int col) {
+  queuepolyat(V, shTriangle, col, PPR_LINE);
+  }
+
 long double polydata[] = {
 // shStarFloor[0] (6x1)
 NEWSHAPE,   1,6,1, 0.267355,0.153145, 0.158858,0.062321, 0.357493,-0.060252,
@@ -2659,6 +2701,20 @@ NEWSHAPE, 324, 1, 1, 0.168968,-0.004476, 0.175788,-0.012316, 0.172390,-0.020150,
 NEWSHAPE, 325, 3, 1, 0.003906,-0.017741, -0.005665,-0.023874, -0.001296,-0.059255, 0.008110,-0.088485, 0.021638,-0.119244, 0.001998,-0.123781, -0.025603,-0.125790, -0.042514,-0.132101, -0.062642,-0.134604, -0.080079,-0.114436, -0.119123,-0.090010, -0.141865,-0.078372, -0.171380,-0.068573, -0.219062,-0.058323, -0.143742,-0.087861, -0.091657,-0.119016, -0.064293,-0.149293, -0.035036,-0.174552, 0.008068,-0.188158, 0.033975,-0.202674, 0.014209,-0.230302, -0.012607,-0.273132, -0.029424,-0.294809, -0.225216,-0.161997, -0.242761,-0.128783, -0.243022,-0.100285, -0.242528,-0.076469, -0.253522,-0.113827, -0.276566,-0.145725, -0.242545,-0.170535, -0.250219,-0.181472, -0.286326,-0.161348, -0.293850,-0.153836, -0.307260,-0.144896, -0.340292,-0.119818, -0.408251,-0.088506, -0.397993,-0.073727, -0.374925,-0.086159, -0.356519,-0.086714, -0.343301,-0.057086, -0.319019,-0.041256, -0.278705,-0.010797, -0.342214,0.129479, -0.259524,0.175390, -0.228995,0.117575, -0.204395,0.063454, -0.257242,0.022435, -0.263564,0.003431, -0.193668,0.062052, -0.104991,0.119589, -0.107623,0.096041, -0.111440,0.076555, -0.126283,0.044518, -0.143519,0.037706, -0.175989,0.003239, -0.213542,-0.048387, -0.188075,-0.038009, -0.156904,-0.002863, -0.139409,0.021202, -0.129500,0.034230, 
 // shButterflyFloor[1]
 NEWSHAPE, 326, 7, 1, -0.199281,-0.117040, -0.202870,-0.110023, -0.247957,-0.128116, -0.298501,0.006170, -0.226086,0.045756, -0.061553,0.006677, -0.059070,0.020733, -0.217691,0.072727, 
+
+// halfhepta
+NEWSHAPE, 327, 1, 1, 0.335252,0.044112, 0.225849,0.283419, -0.081851,0.347313, -0.325491,0.159424, -0.323584,0.033019, 
+// hepta mirror
+NEWSHAPE, 328, 1, 2, -0.315398,0.010102, 0.568278,0.010645, 
+
+// halfhex
+NEWSHAPE, 329, 1, 1, 0.263160,0.022375, 0.265137,0.152727, 0.000228,0.306625, -0.261438,0.151819, -0.263489,0.020161, 
+// halfhex mirror
+NEWSHAPE, 330, 1, 2, 0.262597,0.018558, -0.261563,0.016306, 
+
+NEWSHAPE, 331, 1, 1, 0.148337,0.215535, 0.267624,0.150567, 0.262973,0.019662, 0.033981,0.019835, 
+// 0 0 1 [000000]
+NEWSHAPE, 332, 6, 2, -0.016778,-0.008267, -0.261607,-0.011992, 
 
 NEWSHAPE
 };

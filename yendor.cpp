@@ -7,7 +7,7 @@
 
 namespace peace { extern bool on; }
 
-#define MODECODES 254
+#define MODECODES 255
 
 int hiitemsMax(eItem it) {
   int mx = 0;
@@ -211,6 +211,7 @@ namespace yendor {
           nyi.path[i] = lig.c;
           
           cwstep(lig);
+          if(inmirror(lig)) lig = mirror::reflect(lig);
           cwspin(lig, 3);
           if(lig.c->type == 7) {
             if(in_endorian && endorian_change && i >= YDIST - 20) {
@@ -289,6 +290,8 @@ namespace yendor {
             c2->wall = waPlatform;
         if(c2->land == laReptile && i >= 0)
           c2->wall = waChasm;
+        if(c2->land == laMirrorWall && i == -1)
+          c2->wall = waNone;
         }
       key->item = itKey;
   
@@ -508,14 +511,12 @@ namespace yendor {
         challenge = uni-'a' + 1;
         if(levelUnlocked(challenge) || autocheat) {
           restartGame(yendor::on ? 0 : 'y');
-          popScreen();
           }
         else 
           addMessage("Collect 10 treasures in various lands to unlock the challenges there");
         }
       else if(uni == '0') {
         if(yendor::on) restartGame('y');
-        popScreen();
         }
       else if(uni == '1') easy = !easy;
       else if(uni == '2' || sym == SDLK_F1) gotoHelp(chelp);
@@ -744,12 +745,11 @@ namespace tactic {
       if(uni >= 1000 && uni < 1000 + LAND_TAC) {
         firstland = euclidland = getLandById(uni - 1000);
         restartGame(tactic::on ? 0 : 't');
-        popScreen();
         }
       else if(uni == '0') {
-        popScreen();
         firstland = laIce;
         if(tactic::on) restartGame('t');
+        else popScreen();
         }
 
       else if(sym == SDLK_F1) gotoHelp(
@@ -827,7 +827,7 @@ int modecodetable[42][6] = {
   {248,249,250,251,252,253}, // shmup heptagonal elliptic chaosmode
   };
 // unused code: 25
-int newmodecode = 254;
+int newmodecode = 255;
 
 int modecode() {
 #ifndef NOSAVE
@@ -838,6 +838,7 @@ int modecode() {
   if(quotient) return 6;
 #endif
   if(peace::on) return 6;
+  if(inv::on) return 254; // no code yet
   int xcode = 0;
 
   if(shmup::on) xcode += 2;
@@ -1049,13 +1050,11 @@ namespace peace {
       else if(uni >= 'a' && uni < 'a' + qty) {
         whichland = levellist[uni - 'a'];
         restartGame(peace::on ? 0 : 'P');
-        popScreen();
         }
       else if(uni == '2') { hint = !hint; popScreen(); }
       else if(uni == '0') {
         firstland = laIce;
         if(peace::on) restartGame('P');
-        popScreen();
         }
       else if(uni == 'h' || sym == SDLK_F1) gotoHelp(chelp);
       else if(doexiton(sym, uni)) popScreen();

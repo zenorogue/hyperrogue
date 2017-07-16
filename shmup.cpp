@@ -60,6 +60,9 @@ namespace multi {
   movedir whereto[MAXPLAYER]; // player's target cell  
 
   double mdx[MAXPLAYER], mdy[MAXPLAYER]; // movement vector for the next move
+  
+  static const int CMDS = 15;
+  static const int CMDS_PAN = 11;
 
   const char* playercmds_shmup[15] = {
     "forward", "backward", "turn left", "turn right",
@@ -77,13 +80,15 @@ namespace multi {
     ""
     };
   
-  const char* pancmds[7] = {
+  const char* pancmds[11] = {
     "pan up", "pan right", "pan down", "pan left",
-    "rotate left", "rotate right", "home"
+    "rotate left", "rotate right", "home",
+    "world overview", "review your quest", "inventory", "main menu"
     };
 
 #define SHMUPAXES_BASE 4
 #define SHMUPAXES ((SHMUPAXES_BASE) + 4 * (MAXPLAYER))
+#define SHMUPAXES_CUR ((SHMUPAXES_BASE) + 4 * vid.scfg.players)
 
 const char* axemodes[SHMUPAXES] = {
   "do nothing", 
@@ -121,44 +126,6 @@ const char* axemodes[SHMUPAXES] = {
   };
 
 int centerplayer = -1;
-
-#ifndef NOCONFIG
-void saveConfig(FILE *f) {
-  fprintf(f, "%d %d %d", VERNUM, vid.scfg.players, alwaysuse);
-  for(int i=0; i<512; i++) fprintf(f, " %d", vid.scfg.keyaction[i]);
-  for(int i=0; i<MAXJOY; i++) for(int j=0; j<MAXBUTTON; j++) fprintf(f, " %d", vid.scfg.joyaction[i][j]);
-  for(int i=0; i<MAXJOY; i++) for(int j=0; j<MAXAXE; j++) fprintf(f, " %d", vid.scfg.axeaction[i][j]);
-  for(int i=0; i<MAXJOY; i++) for(int j=0; j<MAXAXE; j++) fprintf(f, " %d", vid.scfg.deadzoneval[i][j]);
-  for(int i=0; i<MAXJOY; i++) for(int j=0; j<MAXHAT; j++) for(int k=0; k<4; k++)
-    fprintf(f, " %d", vid.scfg.hataction[i][j][k]);
-  fprintf(f, "\n");
-  for(int i=0; i<MAXPLAYER; i++) savecs(f, scs[i], VERNUM);
-  }
-
-void scanchar(FILE *f, char& c) {
-  int i = c;
-  int err = fscanf(f, "%d", &i);
-  if(err == 1) c = i;
-  }
-  
-void loadConfig(FILE *f) {
-  int xvernum;
-  int err = fscanf(f, "%d %d", &xvernum, &vid.scfg.players);
-  if(vid.scfg.players < 1 || vid.scfg.players > MAXPLAYER)
-    vid.scfg.players = 1;
-  if(err != 2) return;
-  if(xvernum >= 8990) { int b=alwaysuse; err=fscanf(f, " %d", &b); alwaysuse = b; }
-  for(int i=0; i<512; i++) scanchar(f, vid.scfg.keyaction[i]);
-  for(int i=0; i<MAXJOY; i++) for(int j=0; j<MAXBUTTON; j++) scanchar(f, vid.scfg.joyaction[i][j]);
-  for(int i=0; i<MAXJOY; i++) for(int j=0; j<MAXAXE; j++) scanchar(f, vid.scfg.axeaction[i][j]);
-  
-  if(xvernum >= 9007)
-    for(int i=0; i<MAXJOY; i++) for(int j=0; j<MAXAXE; j++) err = fscanf(f, " %d", &vid.scfg.deadzoneval[i][j]);
-  for(int i=0; i<MAXJOY; i++) for(int j=0; j<MAXHAT; j++) for(int k=0; k<4; k++)
-    scanchar(f, vid.scfg.hataction[i][j][k]);
-  for(int i=0; i<(xvernum < 8990 ? 4 : 7); i++) loadcs(f, scs[i], xvernum);
-  }
-#endif
 
 int shmupnumkeys;
 const char** shmupcmdtable;
@@ -213,15 +180,16 @@ void handleConfig(int sym, int uni);
 
 void showShmupConfig() {
 #ifndef NOSDL
+  cmode = sm::SHMUPCONFIG;
 
   int sc = vid.scfg.subconfig;
 
   if(sc == 1 || sc == 2 || sc == 4 || sc == 5 || sc == 6 || sc == 7 || sc == 8) {
-    shmupnumkeys = 15;
+    shmupnumkeys = CMDS;
     shmupcmdtable = shmup::on ? playercmds_shmup : playercmds_turn;
     }
   else if(sc == 3) {
-    shmupnumkeys = 7;
+    shmupnumkeys = CMDS_PAN;
     shmupcmdtable = pancmds;
     }
   else if(sc == SCJOY) {
@@ -304,7 +272,7 @@ void showShmupConfig() {
     else dialog::addBreak(100);
       
     if(shmupcfg || multi::alwaysuse || vid.scfg.players > 1)
-      dialog::addItem(XLAT("configure panning"), 'p');
+      dialog::addItem(XLAT("configure panning and general keys"), 'p');
     else dialog::addBreak(100);
 
     if(numsticks > 0) {
@@ -442,8 +410,8 @@ help += XLAT("This menu can be also used to configure keys.\n\n");
         else {
           int v = (*axeconfigs[xuni - 'a']);
           v += (shiftmul>0?1:-1);
-          v += SHMUPAXES;
-          v %= SHMUPAXES;
+          v += SHMUPAXES_CUR;
+          v %= SHMUPAXES_CUR;
           (*axeconfigs[xuni - 'a']) = v;
           }
         }
@@ -494,63 +462,7 @@ bool notremapped(int sym) {
   return k > multi::players;
   }
 
-void handleInput(int delta) {
-#ifndef NOSDL
-  double d = delta / 500.;
-
-  Uint8 *keystate = SDL_GetKeyState(NULL);
-
-  for(int i=0; i<NUMACT; i++) 
-    lactionpressed[i] = actionspressed[i],
-    actionspressed[i] = 0;
-
-  for(int i=0; i<SHMUPAXES; i++) axespressed[i] = 0;
-  
-  for(int i=0; i<SDLK_LAST; i++) if(keystate[i]) 
-    pressaction(vid.scfg.keyaction[i]);
-  
-  for(int j=0; j<numsticks; j++) {
-
-    for(int b=0; b<SDL_JoystickNumButtons(sticks[j]) && b<MAXBUTTON; b++)
-      if(SDL_JoystickGetButton(sticks[j], b))
-        pressaction(vid.scfg.joyaction[j][b]);
-
-    for(int b=0; b<SDL_JoystickNumHats(sticks[j]) && b<MAXHAT; b++) {
-      int stat = SDL_JoystickGetHat(sticks[j], b);
-      if(stat & SDL_HAT_UP) pressaction(vid.scfg.hataction[j][b][0]);
-      if(stat & SDL_HAT_RIGHT) pressaction(vid.scfg.hataction[j][b][1]);
-      if(stat & SDL_HAT_DOWN) pressaction(vid.scfg.hataction[j][b][2]);
-      if(stat & SDL_HAT_LEFT) pressaction(vid.scfg.hataction[j][b][3]);
-      }
-    
-    for(int b=0; b<SDL_JoystickNumAxes(sticks[j]) && b<MAXAXE; b++) {
-      int value = SDL_JoystickGetAxis(sticks[j], b);
-      int dz = vid.scfg.deadzoneval[j][b];
-      if(value > dz) value -= dz; else if(value < -dz) value += dz;
-      else value = 0;
-      axespressed[vid.scfg.axeaction[j][b] % SHMUPAXES] += value;
-      }
-    }
-
-  if(keystate[SDLK_LCTRL] || keystate[SDLK_RCTRL]) d /= 5;
-  
-  double panx = 
-    actionspressed[49] - actionspressed[51] + axespressed[2] / 32000.0;
-  double pany = 
-    actionspressed[50] - actionspressed[48] + axespressed[3] / 20000.0;
-    
-  double panspin = actionspressed[52] - actionspressed[53] + axespressed[1] / 20000.0;
-  
-  if(actionspressed[54]) { centerplayer = -1, playermoved = true; centerpc(100); }
-  
-  if(panx || pany || panspin) {
-    View = xpush(-panx * d) * ypush(-pany * d) * spin(panspin * d) * View;
-    playermoved = false;
-    }
-#endif
-  }
-
-int tableid[7] = {1, 2, 4, 5, 6, 7, 8};
+#ifndef NOCONFIG
 
 void initConfig() {
   vid.scfg.players = 1;
@@ -650,7 +562,124 @@ void initConfig() {
   multi::scs[4].uicolor = 0xC000C0FF;
   multi::scs[5].uicolor = 0x00C0C0FF;
   multi::scs[6].uicolor = 0xC0C0C0FF;
+  
+  addsaver(vid.scfg.players, "mode-number of players");
+  addsaver(alwaysuse, "use configured keys");  
+  // unfortunately we cannot use key names here because SDL is not yet initialized
+  for(int i=0; i<512; i++)
+    addsaver(vid.scfg.keyaction[i], string("key:")+its(i));
+  for(int i=0; i<MAXJOY; i++) {
+    string pre = "joystick "+cts('A'+i);
+    for(int j=0; j<MAXBUTTON; j++) 
+      addsaver(vid.scfg.joyaction[i][j], pre+"-B"+its(j));
+    for(int j=0; j<MAXAXE; j++) {
+      addsaver(vid.scfg.axeaction[i][j], pre+" axis "+its(j));
+      addsaver(vid.scfg.deadzoneval[i][j], pre+" deadzone "+its(j));
+      }
+    for(int j=0; j<MAXHAT; j++) for(int k=0; k<4; k++) {
+      addsaver(vid.scfg.hataction[i][j][k], pre+" hat "+its(j)+" "+"URDL"[k]);
+      }
+    }
+  for(int i=0; i<7; i++) addsaver(multi::scs[i], "player"+its(i));
   }
+
+void scanchar(FILE *f, char& c) {
+  int i = c;
+  int err = fscanf(f, "%d", &i);
+  if(err == 1) c = i;
+  }
+  
+void loadConfig(FILE *f) {
+  int xvernum;
+  int err = fscanf(f, "%d %d", &xvernum, &vid.scfg.players);
+  if(vid.scfg.players < 1 || vid.scfg.players > MAXPLAYER)
+    vid.scfg.players = 1;
+  if(err != 2) return;
+  if(xvernum >= 8990) { int b=alwaysuse; err=fscanf(f, " %d", &b); alwaysuse = b; }
+  for(int i=0; i<512; i++) scanchar(f, vid.scfg.keyaction[i]);
+  for(int i=0; i<MAXJOY; i++) for(int j=0; j<MAXBUTTON; j++) scanchar(f, vid.scfg.joyaction[i][j]);
+  for(int i=0; i<MAXJOY; i++) for(int j=0; j<MAXAXE; j++) scanchar(f, vid.scfg.axeaction[i][j]);
+  
+  if(xvernum >= 9007)
+    for(int i=0; i<MAXJOY; i++) for(int j=0; j<MAXAXE; j++) err = fscanf(f, " %d", &vid.scfg.deadzoneval[i][j]);
+  for(int i=0; i<MAXJOY; i++) for(int j=0; j<MAXHAT; j++) for(int k=0; k<4; k++)
+    scanchar(f, vid.scfg.hataction[i][j][k]);
+  for(int i=0; i<(xvernum < 8990 ? 4 : 7); i++) loadcs(f, scs[i], xvernum);
+  }
+#endif
+
+void handleInput(int delta) {
+#ifndef NOSDL
+  double d = delta / 500.;
+
+  Uint8 *keystate = SDL_GetKeyState(NULL);
+
+  for(int i=0; i<NUMACT; i++) 
+    lactionpressed[i] = actionspressed[i],
+    actionspressed[i] = 0;
+
+  for(int i=0; i<SHMUPAXES; i++) axespressed[i] = 0;
+  
+  for(int i=0; i<SDLK_LAST; i++) if(keystate[i]) 
+    pressaction(vid.scfg.keyaction[i]);
+  
+  for(int j=0; j<numsticks; j++) {
+
+    for(int b=0; b<SDL_JoystickNumButtons(sticks[j]) && b<MAXBUTTON; b++)
+      if(SDL_JoystickGetButton(sticks[j], b))
+        pressaction(vid.scfg.joyaction[j][b]);
+
+    for(int b=0; b<SDL_JoystickNumHats(sticks[j]) && b<MAXHAT; b++) {
+      int stat = SDL_JoystickGetHat(sticks[j], b);
+      if(stat & SDL_HAT_UP) pressaction(vid.scfg.hataction[j][b][0]);
+      if(stat & SDL_HAT_RIGHT) pressaction(vid.scfg.hataction[j][b][1]);
+      if(stat & SDL_HAT_DOWN) pressaction(vid.scfg.hataction[j][b][2]);
+      if(stat & SDL_HAT_LEFT) pressaction(vid.scfg.hataction[j][b][3]);
+      }
+    
+    for(int b=0; b<SDL_JoystickNumAxes(sticks[j]) && b<MAXAXE; b++) {
+      int value = SDL_JoystickGetAxis(sticks[j], b);
+      int dz = vid.scfg.deadzoneval[j][b];
+      if(value > dz) value -= dz; else if(value < -dz) value += dz;
+      else value = 0;
+      axespressed[vid.scfg.axeaction[j][b] % SHMUPAXES] += value;
+      }
+    }
+
+  if(keystate[SDLK_LCTRL] || keystate[SDLK_RCTRL]) d /= 5;
+  
+  double panx = 
+    actionspressed[49] - actionspressed[51] + axespressed[2] / 32000.0;
+  double pany = 
+    actionspressed[50] - actionspressed[48] + axespressed[3] / 20000.0;
+    
+  double panspin = actionspressed[52] - actionspressed[53] + axespressed[1] / 20000.0;
+  
+  if(actionspressed[54]) { centerplayer = -1, playermoved = true; centerpc(100); }
+
+  if(actionspressed[55] && !lactionpressed[55]) 
+    pushScreen(showOverview);
+  
+  if(actionspressed[56] && !lactionpressed[56]) 
+    showMissionScreen();
+  
+#ifdef INV
+  if(actionspressed[57] && !lactionpressed[57]) 
+    pushScreen(inv::show);
+#endif
+  
+  if(actionspressed[58] && !lactionpressed[58]) 
+    pushScreen(showMainMenu);
+  
+  if(panx || pany || panspin) {
+    View = xpush(-panx * d) * ypush(-pany * d) * spin(panspin * d) * View;
+    playermoved = false;
+    }
+#endif
+  }
+
+  int tableid[7] = {1, 2, 4, 5, 6, 7, 8};
+
 
   void leaveGame(int i) {
     multi::player[i].c = NULL;

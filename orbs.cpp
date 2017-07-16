@@ -343,6 +343,7 @@ void castLightningBolt(cellwalker lig) {
     if(lig.c->mov[lig.spin] == NULL) break;
 
     cwstep(lig);
+    if(inmirror(lig)) lig = mirror::reflect(lig);
     
     cell *c = lig.c;
 
@@ -1188,3 +1189,79 @@ eItem targetRangedOrb(cell *c, orbAction a) {
   return eItem(-1);
   }
 
+int orbcharges(eItem it) {
+  switch(it) {
+    case itRevolver: //pickup-key
+      return 6;
+    case itOrbShield:
+      return inv::on ? 30 : 20;
+    case itOrbDiscord:
+      return inv::on ? 46 : 23;
+    case itOrbLove:
+    case itOrbUndeath:
+    case itOrbSpeed: //"pickup-speed");
+    case itOrbInvis:
+    case itOrbAether:
+      return 30;
+    case itOrbWinter: // "pickup-winter"
+       return inv::on ? 45 : 30;
+       break;
+    case itOrbBeauty:
+    case itOrbEmpathy:
+    case itOrbFreedom:
+      return 40;
+    case itOrbFrog: 
+    case itOrbDash:
+      return 45;
+    case itOrb37:
+    case itOrbEnergy:
+      return 50;
+    case itOrbRecall:
+    case itOrbNature:
+    case itOrbStone:
+    case itOrbStunning:
+    case itOrbLuck:
+      return 60;
+    case itOrbWater:
+    case itOrbMatter:
+    case itOrbHorns:
+    case itOrbBull:
+    case itOrbShell:
+      return 66;
+    case itOrbTime:
+    case itOrbSpace:
+    case itOrbThorns:
+    case itOrbLightning:
+    case itOrbFlash:
+    case itOrbIllusion:
+    case itOrbPsi:
+    case itOrbDigging:
+    case itOrbTeleport:
+      return 77;
+    case itOrbDomination:
+      return 90;
+    case itOrbSummon:
+      return 120;     
+
+    case itOrbSword:
+      return 60 + 30 * multi::activePlayers();
+    case itOrbSword2:
+      return 40 + 20 * multi::activePlayers();
+    case itOrbFish:
+      return 20 + 10 * multi::activePlayers();
+    case itOrbFire:
+      return sphere ? 3 : 30;
+    case itOrbDragon:
+       return sphere ? 10 : 77;
+    default:
+      return 0;
+    }
+  }
+
+bool isShmupLifeOrb(eItem it) {
+  return 
+    it == itOrbLife || it == itOrbFriend ||
+    it == itOrbNature || it == itOrbEmpathy ||
+    it == itOrbUndeath || it == itOrbLove ||
+    it == itOrbDomination;  
+  }

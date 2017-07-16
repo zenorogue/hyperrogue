@@ -29,6 +29,13 @@ string its(int i) { char buf[64]; sprintf(buf, "%d", i); return buf; }
 string fts(float x) { char buf[64]; sprintf(buf, "%4.2f", x); return buf; }
 string fts3(float x) { char buf[64]; sprintf(buf, "%5.3f", x); return buf; }
 string fts4(float x) { char buf[64]; sprintf(buf, "%6.4f", x); return buf; }
+
+string ftssmart(ld x) {
+  if(x == int(x)) return its(int(x));
+  if(abs(x) > 1) return fts4(x);
+  char buf[64]; sprintf(buf, "%.10le", (double) x); return buf;
+  }
+
 string cts(char c) { char buf[8]; buf[0] = c; buf[1] = 0; return buf; }
 string llts(long long i) {
     // sprintf does not work on Windows IIRC

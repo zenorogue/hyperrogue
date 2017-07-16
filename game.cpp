@@ -124,9 +124,9 @@ cellwalker cwt;       // single player character position
 inline cell*& singlepos() { return cwt.c; }
 inline bool singleused() { return !(shmup::on || multi::players > 1); }
 
-#include "mtrand.cpp"
+#include <random>
 
-MTRand_int32 r;
+mt19937 r;
 
 void shrand(int i) {
   r.seed(i);
@@ -510,6 +510,9 @@ bool passable(cell *w, cell *from, flagtype flags) {
   if(w->wall == waMirror || w->wall == waCloud) 
     return F(P_MIRROR | P_AETHER);
   
+  if(w->wall == waMirrorWall)
+    return F(P_MIRRORWALL);
+  
   if(F(P_BULLET)) {
     if(isFire(w) || w->wall == waBonfireOff || cellHalfvine(w) || 
       w->wall == waAncientGrave || w->wall == waFreshGrave || w->wall == waRoundTable)
@@ -632,10 +635,12 @@ bool ghostmove(eMonster m, cell* to, cell* from) {
   if((m == moWitchGhost || m == moWitchWinter) && to->land != laPower)
     return false;
   if(isGhost(m))
-    for(int i=0; i<to->type; i++) 
+    for(int i=0; i<to->type; i++) {
+      if(inmirror(to->mov[i])) return false;
       if(to->mov[i] && to->mov[i] != from && isGhost(to->mov[i]->monst) &&
         (to->mov[i]->monst == moFriendlyGhost) == (m== moFriendlyGhost))
         return false;
+      }
   if(isGhost(m) || m == moWitchGhost) return true;
   if(m == moGreaterShark) return isWatery(to);
   if(m == moWitchWinter) 
@@ -1728,6 +1733,10 @@ void killMonster(cell *c, eMonster who, flagtype deathflags) {
       i->princess = NULL;
       if(i->bestdist == OUT_OF_PALACE) {
         items[itSavedPrincess]--;
+        if(items[itSavedPrincess] < 0) {
+          printf("princess below 0\n");
+          items[itSavedPrincess] = 0;
+          }
         if(items[itSavedPrincess] == 0 && !inv::on) {
           items[itOrbLove] = 0;
           princess::reviveAt = gold(NO_LOVE) + 20;
@@ -5399,6 +5408,11 @@ bool hasSafeOrb(cell *c) {
   }
 
 void checkmove() {
+
+#ifdef INV
+  if(inv::on) inv::compute();
+#endif
+
   if(multi::players > 1 && !multi::checkonly) return;
   if(hardcore) return;
   msgscroll = 0;
@@ -5423,6 +5437,20 @@ void checkmove() {
         canmove = legalmoves[cwt.spin] = true;
   if(kills[moPlayer]) canmove = false;
 
+#ifdef INV  
+  if(!canmove && !inv::incheck) {
+    if(inv::remaining[itOrbSafety])
+      canmove = true;
+    else {
+      inv::check(1);
+      checkmove();
+      inv::check(-1);
+      }
+    if(canmove)
+      pushScreen(inv::show);
+    }
+#endif
+
   if(!canmove) {
     achievement_final(true);
     if(cmode & sm::NORMAL) showMissionScreen();
@@ -5435,11 +5463,7 @@ void checkmove() {
   items[itWarning]-=2;
 
   for(int i=0; i<ittypes; i++) orbused[i] = orbusedbak[i];
-  if(recallCell && !markOrb(itOrbRecall)) activateRecall();
-  
-#ifdef INV
-  if(inv::on) inv::compute();
-#endif
+  if(recallCell && !markOrb(itOrbRecall)) activateRecall();  
   }
 
 // move the PC. Warning: a very long function! todo: refactor
@@ -5554,7 +5578,7 @@ bool cantGetGrimoire(cell *c2, bool verbose = true) {
 
 void gainLife() {
   items[itOrbLife] ++;
-  if(items[itOrbLife] > 5) items[itOrbLife] = 5;
+  if(items[itOrbLife] > 5 && !shmup::on) items[itOrbLife] = 5;
   }
 
 void collectMessage(cell *c2, eItem which) {
@@ -5686,19 +5710,29 @@ bool collectItem(cell *c2, bool telekinesis) {
   if(isRevivalOrb(c2->item) && multi::revive_queue.size()) {
     multiRevival(cwt.c, c2);
     }
-  else if(c2->item == itOrbSpeed) {
-    items[c2->item] += 31;
-    playSound(c2, "pickup-speed");
+  else if(isShmupLifeOrb(c2->item) && shmup::on) {
+    playSound(c2, "pickup-orb"); // TODO summon
+    gainLife();
+    }
+  else if(orbcharges(c2->item)) {
+    eItem it = c2->item;
+    if(it == itOrbRecall) saveRecall(c2);
+    if(it == itOrbFire) playSound(c2, "fire");
+    else if(it == itOrbFire) playSound(c2, "fire");
+    else if(it == itOrbWinter) playSound(c2, "pickup-winter");
+    else if(it == itOrbSpeed) playSound(c2, "pickup-speed");
+    else if(it == itRevolver) playSound(c2, "pickup-key");
+    else playSound(c2, "pickup-orb");
+    if(!items[it]) items[it]++;
+    items[it] += orbcharges(it);
     }
   else if(c2->item == itOrbLife) {
     playSound(c2, "pickup-orb"); // TODO summon
-    if(shmup::on) gainLife();
-    else placeGolem(cwt.c, c2, moGolem);
+    placeGolem(cwt.c, c2, moGolem);
     }
   else if(c2->item == itOrbFriend) {
     playSound(c2, "pickup-orb"); // TODO summon
-    if(shmup::on) gainLife();
-    else placeGolem(cwt.c, c2, moTameBomberbird);
+    placeGolem(cwt.c, c2, moTameBomberbird);
     }
 #ifdef TOUR
   else if(tour::on && (c2->item == itOrbSafety || c2->item == itOrbRecall)) {
@@ -5715,145 +5749,6 @@ bool collectItem(cell *c2, bool telekinesis) {
       activateSafety(c2->land);
     return true;
     }
-  else if(c2->item == itOrbLightning) {
-    playSound(c2, "pickup-orb");
-    items[c2->item] += 78;
-    }
-  else if(c2->item == itOrbStone) {
-    playSound(c2, "pickup-orb");
-    items[c2->item] += 61;
-    }
-  else if(c2->item == itOrbNature) {
-    playSound(c2, "pickup-orb");
-    if(shmup::on) gainLife();
-    else items[c2->item] += 61;
-    }
-  else if(c2->item == itOrbRecall) {
-    saveRecall(c2);
-    playSound(c2, "pickup-orb");
-    items[c2->item] += 61;
-    }
-  else if(c2->item == itOrbTime) {
-    playSound(c2, "pickup-orb");
-    items[c2->item] += 78;
-    }
-  else if(c2->item == itOrbLove) {
-    playSound(c2, "pickup-orb");
-    items[c2->item] += 31;
-    }
-  else if(c2->item == itOrbSpace) {
-    playSound(c2, "pickup-orb");
-    items[c2->item] += 78;
-    }
-  else if(c2->item == itOrbThorns) {
-    playSound(c2, "pickup-orb");
-    items[c2->item] += 78;
-    }
-  else if(c2->item == itOrbSword) {
-    playSound(c2, "pickup-orb");
-    if(!items[itOrbSword] && !items[itOrbSword2]) 
-      sword::shuffle();
-    items[c2->item] += 61 + 30 * multi::activePlayers();
-    }
-  else if(c2->item == itOrbSword2) {
-    playSound(c2, "pickup-orb");
-    if(!items[itOrbSword] && !items[itOrbSword2]) 
-      sword::shuffle();
-    items[c2->item] += 41 + 20 * multi::activePlayers();
-    }
-  else if(c2->item == itOrbFlash) {
-    playSound(c2, "pickup-orb");
-    items[c2->item] += 78;
-    }
-  else if(c2->item == itOrbShield) {
-    playSound(c2, "pickup-orb"); // TODO Shield
-    items[c2->item] += 16;
-    orbused[itOrbShield] = false;
-    }
-  else if(c2->item == itOrbWater) {
-    playSound(c2, "pickup-orb");
-    items[c2->item] += 31;
-    }
-  else if(c2->item == itOrbAir) {
-    playSound(c2, "pickup-orb");
-    items[c2->item] += 67;
-    }
-  else if(c2->item == itOrbFrog) {
-    playSound(c2, "pickup-orb");
-    items[c2->item] += 45;
-    }
-  else if(c2->item == itOrbDash) {
-    playSound(c2, "pickup-orb");
-    items[c2->item] += 45;
-    }
-  else if(c2->item == itOrbDiscord) {
-    playSound(c2, "pickup-orb");
-    // make it seem to be 23
-    if(!items[c2->item]) items[c2->item]++;
-    items[c2->item] += 23;
-    }
-  else if(c2->item == itOrbSummon) {
-    playSound(c2, "pickup-orb");
-    items[c2->item] += 121;
-    }
-  else if(c2->item == itOrbMatter) {
-    playSound(c2, "pickup-orb");
-    items[c2->item] += 67;
-    }
-  else if(c2->item == itOrbHorns) {
-    playSound(c2, "pickup-orb");
-    items[c2->item] += 67;
-    }
-  else if(c2->item == itOrbBull) {
-    playSound(c2, "pickup-orb");
-    items[c2->item] += 67;
-    }
-  else if(c2->item == itOrbFish) {
-    playSound(c2, "pickup-orb");
-    items[c2->item] += 21 + 10 * multi::activePlayers();
-    }
-  else if(c2->item == itOrbWinter) {
-    playSound(c2, "pickup-winter");
-    items[c2->item] += 31;
-    }
-  else if(c2->item == itRevolver) {
-    playSound(c2, "pickup-key");
-    items[c2->item] = 6;
-    }
-  else if(c2->item == itOrbStunning) {
-    playSound(c2, "pickup-orb");
-    items[c2->item] += 61;
-    }
-  else if(c2->item == itOrbLuck) {
-    playSound(c2, "pickup-orb");
-    items[c2->item] += 61;
-    }
-  else if(c2->item == itOrbUndeath) {
-    playSound(c2, "pickup-orb");
-    if(shmup::on) gainLife();
-    else items[c2->item] += 31;
-    }
-  else if(c2->item == itOrbFreedom) {
-    playSound(c2, "pickup-orb");
-    items[c2->item] += 31;
-    }
-  else if(c2->item == itOrb37) {
-    playSound(c2, "pickup-orb");
-    items[c2->item] += 51;
-    }
-  else if(c2->item == itOrbEnergy) {
-    playSound(c2, "pickup-orb");
-    items[c2->item] += 51;
-    }
-  else if(c2->item == itOrbDomination) {
-    playSound(c2, "pickup-orb");
-    if(shmup::on) gainLife();
-    else items[c2->item] += 91;
-    }
-  else if(c2->item == itOrbShell) {
-    playSound(c2, "pickup-orb"); // TOOD shield
-    items[c2->item] += 67;
-    }
   else if(c2->item == itBabyTortoise) {
     using namespace tortoise;
     int bnew = babymap[c2];
@@ -5868,47 +5763,6 @@ bool collectItem(cell *c2, bool telekinesis) {
       babymap[c] = bold;
       }
     else items[itBabyTortoise]++;
-    }
-  else if(c2->item == itOrbBeauty) {
-    playSound(c2, "pickup-orb");
-    items[c2->item] += 41;
-    }
-  else if(c2->item == itOrbEmpathy) {
-    playSound(c2, "pickup-orb");
-    if(shmup::on) gainLife();
-    else items[c2->item] += 41;
-    }
-  else if(c2->item == itOrbFire) {
-    playSound(c2, "fire");
-    items[c2->item] += (sphere ? 3 : 31);
-    }
-  else if(c2->item == itOrbDragon) {
-    playSound(c2, "pickup-orb");
-    items[c2->item] += sphere ? 10 : 78;
-    }
-  else if(c2->item == itOrbIllusion) {
-    playSound(c2, "pickup-orb");
-    items[c2->item] += 78;
-    }
-  else if(c2->item == itOrbPsi) {
-    playSound(c2, "pickup-orb");
-    items[c2->item] += 78;
-    }
-  else if(c2->item == itOrbInvis) {
-    playSound(c2, "pickup-orb");
-    items[c2->item] += 31;
-    }
-  else if(c2->item == itOrbAether) {
-    playSound(c2, "pickup-orb");
-    items[c2->item] += 31;
-    }
-  else if(c2->item == itOrbDigging) {
-    playSound(c2, "pickup-orb");
-    items[c2->item] += 78;
-    }
-  else if(c2->item == itOrbTeleport) {
-    playSound(c2, "pickup-orb");
-    items[c2->item] += 78;
     }
   else if(c2->item == itOrbYendor && peace::on) {
     if(!items[itDodeca]) {
@@ -7002,6 +6856,8 @@ bool movepcto(int d, int subdir, bool checkonly) {
      }
   
   if(multi::players == 1) monstersTurn();
+
+  check_total_victory();
 
   if(items[itWhirlpool] && cwt.c->land != laWhirlpool && !whirlpool::escaped) {
     whirlpool::escaped = true;

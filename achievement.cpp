@@ -1,7 +1,7 @@
 // Hyperbolic Rogue -- achievements
 // Copyright (C) 2011-2016 Zeno Rogue, see 'hyper.cpp' for details
 
-#define NUMLEADER 69
+#define NUMLEADER 70
 
 #define SCORE_UNKNOWN (-1)
 #define NO_SCORE_YET (-2)
@@ -14,7 +14,7 @@ int currentscore[NUMLEADER];
 
 const char* leadernames[NUMLEADER] = {
   "Score", "Diamonds", "Gold", "Spice", "Rubies", "Elixirs",
-  "Shards", "Totems", "Daisies", "Statues", "Feathers", "Sapphires",
+  "Shards100", "Totems", "Daisies", "Statues", "Feathers", "Sapphires",
   "Hyperstones", "Time to Win-71", "Turns to Win-71",
   "Time to 10 Hyperstones-94", "Turns to 10 Hyperstones-94", "Orbs of Yendor",
   "Fern Flowers", 
@@ -58,7 +58,8 @@ const char* leadernames[NUMLEADER] = {
   "Slime Molds", // 65
   "Dodecahedra", // 66
   "Green Grass", // 67
-  "Spinel" // 68
+  "Spinel", // 68
+  "Orb Strategy Score", // 69
   };
 
 #define LB_STATISTICS 62
@@ -212,7 +213,7 @@ void achievement_collection(eItem it, int prevgold, int newgold) {
     if(q == 8) achievement_gain("GRAIL4");
     }
   
-  if(q == 10) {
+  if(q == U10) {
     if(it == itDiamond) achievement_gain("DIAMOND2");
     if(it == itRuby) achievement_gain("RUBY2");
     if(it == itHyperstone) achievement_gain("HYPER2");
@@ -268,7 +269,7 @@ void achievement_collection(eItem it, int prevgold, int newgold) {
     if(it == itBull) achievement_gain("BULL2");
     }
 
-  if(q == 25) {
+  if(q == R10) {
     if(it == itDiamond) achievement_gain("DIAMOND3");
     if(it == itRuby) achievement_gain("RUBY3");
     if(it == itHyperstone) achievement_gain("HYPER3");
@@ -327,7 +328,7 @@ void achievement_collection(eItem it, int prevgold, int newgold) {
     if(it == itBull) achievement_gain("BULL3");
     }
 
-  if(q == 50) {
+  if(q == 50 && !inv::on) {
     if(it == itDiamond) achievement_gain("DIAMOND4");
     if(it == itRuby) achievement_gain("RUBY4");
     if(it == itHyperstone) achievement_gain("HYPER4");
@@ -553,18 +554,21 @@ void achievement_final(bool really_final) {
   if(shmup::on) specials++;
   if(chaosmode) specials++;
   if(purehepta) specials++;
+  if(inv::on) specials++;
   if(specials > 1) return;
   
   if(numplayers() > 1 && chaosmode) return;
   if(numplayers() > 1 && purehepta) return;
+  if(numplayers() > 1 && inv::on) return;
   
   int total_improved = 0;
   specific_improved = 0;
   specific_what = 0;
   
-  if(!shmup::on && !chaosmode && !purehepta && numplayers() == 1) improveItemScores(); 
+  if(!shmup::on && !chaosmode && !purehepta && numplayers() == 1 && !inv::on) improveItemScores(); 
   
   int sid = purehepta ? 57 : chaosmode ? 53 : shmup::on ? (numplayers() > 1 ? 44 : 28) : 
+    inv::on ? 69 :
     (numplayers() > 1 ? 61 : 0);
   
   int tg = gold();
@@ -601,6 +605,19 @@ void achievement_final(bool really_final) {
 #endif
   }
 
+bool hadtotalvictory;
+
+void check_total_victory() {
+  if(!inv::on) return;
+  if(hadtotalvictory) return;
+  if(!items[itOrbYendor]) return;
+  if(!items[itHolyGrail]) return;
+  if(items[itHyperstone] < 50) return;
+  if(!princess::saved) return;
+  hadtotalvictory = true;
+  achievement_gain("TOTALVICTORY");
+  }
+  
 void achievement_victory(bool hyper) {
   DEBB(DF_STEAM, (debugfile,"achievement_victory\n"))
   if(offlineMode) return;

@@ -255,6 +255,11 @@ hyperpoint mirrorif(const hyperpoint& V, bool b) {
   else return V;
   }
 
+transmatrix mirrorif(const transmatrix& V, bool b) {
+  if(b) return V*Mirror;
+  else return V;
+  }
+
 // -1 if away, 0 if not away
 int away(const transmatrix& V2) {
   return intval(C0, V2 * xpush0(1)) > intval(C0, tC0(V2));
@@ -305,7 +310,7 @@ void drawrec(const heptspin& hs, int lev, hstate s, const transmatrix& V) {
   
   if(dodrawcell(c)) {
     reclevel = maxreclevel - lev;
-    drawcell(c, (hs.spin || purehepta) ? V1 * spin(hs.spin*2*M_PI/S7 + (purehepta ? M_PI:0)) : V1, hs.spin,
+    drawcell(c, (hs.spin || purehepta) ? V1 * spin(hs.spin*2*M_PI/S7 + (purehepta ? M_PI:0)) : V1, 0,
       hs.mirrored);
     }
   
