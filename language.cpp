@@ -57,7 +57,7 @@ struct fullnoun {
 const char* natchars[NUMEXTRA] = {"°","é","á"};
 #endif
 
-#ifndef NOTRANS
+#if CAP_TRANS
 #include "language-data.cpp"
 
 hashcode langhash(const string& s) {
@@ -107,7 +107,7 @@ set<string> warnshown;
 
 void basicrep(string& x) { 
 
-#ifndef NOTRANS
+#if CAP_TRANS
   const sentence *s = findInHashTable(x, all_sentences);
   if(!s && !warnshown.count(x)) {
     printf("WARNING: no translations for '%s'\n", x.c_str());
@@ -134,7 +134,7 @@ void basicrep(string& x) {
   }
 
 void parrep(string& x, string w, stringpar p) {
-#ifndef NOTRANS
+#if CAP_TRANS
   int l = lang();
   const fullnoun *N = findInHashTable(p.v, all_nouns);
   if(l == 1) {
@@ -326,7 +326,7 @@ string XLAT(string x, stringpar p1, stringpar p2, stringpar p3, stringpar p4, st
 
 
 string XLATN(string x) { 
-#ifndef NOTRANS
+#if CAP_TRANS
   if(lang()) {
     const fullnoun *N = findInHashTable(x, all_nouns);
     if(N) return N->n[lang()-1].nomp;
@@ -336,7 +336,7 @@ string XLATN(string x) {
   }
 
 string XLAT1(string x) { 
-#ifndef NOTRANS
+#if CAP_TRANS
   if(lang()) {
     const fullnoun *N = findInHashTable(x, all_nouns);
     if(N) return N->n[lang()-1].nom;

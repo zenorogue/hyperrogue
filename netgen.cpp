@@ -1,7 +1,7 @@
 // HyperRogue paper model generator
 // Copyright (C) 2011-2016 Zeno Rogue, see 'hyper.cpp' for details
 
-#ifndef NOMODEL
+#if CAP_MODEL
 namespace netgen {
 
   // We need a two-dimensional vector class for this.
@@ -214,13 +214,13 @@ namespace netgen {
   //============================
   
   void blackline(vec v1, vec v2, int col = 0x000000FF) {
-#ifdef GFX
+#if CAP_SDLGFX==1
     aalineColor(s, int(v1.x), int(v1.y), int(v2.x), int(v2.y), col);
 #endif
     }
   
   void drawtriangle(vec v1, vec v2, vec v3, int col) {
-#ifdef GFX
+#if CAP_SDLGFX==1
     polyx[0] = int(v1.x);
     polyx[1] = int(v2.x);
     polyx[2] = int(v3.x);
@@ -232,7 +232,7 @@ namespace netgen {
     }
     
   void blackcircle(vec v, int r, int col = 0x000000FF) {
-#ifdef GFX
+#if CAP_SDLGFX
     aacircleColor(s, int(v.x), int(v.y), r, col);
 #endif
     }
@@ -297,7 +297,7 @@ namespace netgen {
   // draw the model
   void createPapermodel() {
 
-    #ifndef GFX
+    #if !CAP_SDLGFX
       addMessage(XLAT("High quality shots not available on this platform"));
       return;
     #endif

@@ -134,7 +134,7 @@ char* axeconfigs[24]; int numaxeconfigs;
 int* dzconfigs[24];
 
 string listkeys(int id) {
-#ifndef NOSDL
+#if CAP_SDL
   string lk = "";
   for(int i=0; i<512; i++)
     if(vid.scfg.keyaction[i] == id)
@@ -149,8 +149,7 @@ string listkeys(int id) {
         lk = lk + " " + cts('A'+i)+"-"+"URDL"[d];
         }
   return lk;
-#endif
-#ifdef NOSDL
+#else
   return "";
 #endif
   }
@@ -179,7 +178,7 @@ bool configdead;
 void handleConfig(int sym, int uni);
 
 void showShmupConfig() {
-#ifndef NOSDL
+#if CAP_SDL
   cmode = sm::SHMUPCONFIG;
 
   int sc = vid.scfg.subconfig;
@@ -287,7 +286,7 @@ void showShmupConfig() {
     
     dialog::addBreak(50);
 
-#ifndef NOCONFIG
+#if CAP_CONFIG
     dialog::addItem(XLAT("save the configuration"), 'c');
 #endif
 
@@ -332,7 +331,7 @@ void showShmupConfig() {
   }
 
 void handleConfig(int sym, int uni) {
-#ifndef NOSDL
+#if CAP_SDL
   if(!vid.scfg.setwhat) dialog::handleNavigation(sym, uni);
   int sc = vid.scfg.subconfig;
   if(sc == 0) {
@@ -352,7 +351,7 @@ void handleConfig(int sym, int uni) {
         kills[i] = deaths[i] = treasures[i] = 0;
     else if(uni == 's' || uni == 't') 
       shmupcfg = !shmupcfg;
-#ifndef NOCONFIG
+#if CAP_CONFIG
     else if(uni == 'c')
       ::saveConfig();
 #endif
@@ -462,7 +461,7 @@ bool notremapped(int sym) {
   return k > multi::players;
   }
 
-#ifndef NOCONFIG
+#if CAP_CONFIG
 
 void initConfig() {
   vid.scfg.players = 1;
@@ -474,7 +473,7 @@ void initConfig() {
   t['s'] = 16 + 6;
   t['a'] = 16 + 7;
 
-#ifndef MOBILE
+#if ISMOBILE==0
   t[SDLK_KP8] = 16 + 4;
   t[SDLK_KP6] = 16 + 5;
   t[SDLK_KP2] = 16 + 6;
@@ -497,7 +496,7 @@ void initConfig() {
   t['p'] = 32 + 10;
   t['['] = 32 + pcCenter;
 
-#ifndef MOBILE
+#if ISMOBILE==0
   t[SDLK_UP] = 48 ;
   t[SDLK_RIGHT] = 48 + 1;
   t[SDLK_DOWN] = 48 + 2;
@@ -609,7 +608,7 @@ void loadConfig(FILE *f) {
 #endif
 
 void handleInput(int delta) {
-#ifndef NOSDL
+#if CAP_SDL
   double d = delta / 500.;
 
   Uint8 *keystate = SDL_GetKeyState(NULL);
@@ -663,7 +662,7 @@ void handleInput(int delta) {
   if(actionspressed[56] && !lactionpressed[56]) 
     showMissionScreen();
   
-#ifdef INV
+#if CAP_INV
   if(actionspressed[57] && !lactionpressed[57]) 
     pushScreen(inv::show);
 #endif
@@ -1116,7 +1115,7 @@ bool isMonster(monster *m) { return m->type != moPlayer && m->type != moBullet; 
 
 void killMonster(monster* m, eMonster who_kills, int flags = 0) {
   int tk = tkills();
-#ifdef ROGUEVIZ
+#if CAP_ROGUEVIZ
   if(m->type == moRogueviz) {
     rogueviz::activate(m);
     return;
@@ -1185,59 +1184,46 @@ double playerturn[MAXPLAYER], playergo[MAXPLAYER];
 bool playerfire[MAXPLAYER];
 
 void awakenMimics(monster *m, cell *c2) {
-  for(int i=0; i<size(dcal); i++) {
-    cell *c = dcal[i];
-    if(isMimic(c->monst)) {
-      // straight
-      int i = 0;
-      
-      // if(m->type == moMirror) i++;
-      if(c->monst == moMirror) i++;
-      
-      transmatrix mirrortrans = Id;    
-      if(i == 1) mirrortrans[0][0] = -1;
+  for(auto& mi: mirror::mirrors) {
+    cell *c = mi.second.c;
 
-      if(!gmatrix.count(c)) continue;
-      monster *m2 = new monster;
-      m2->type = c->monst;
-      c->monst = moNone;
-      m2->base = c;
-      
-      if(isBullet(m)) {
-        m2->parenttype = m2->type;
-        m2->type = m->type;
-        m2->vel = m->vel;
-        m2->parent = m->parent;
-        m2->pid = m->pid;
-        }
-      
-      if(m->type == moMirror) {
-        if(m2->type == moMirror) m2->type = moMirage;
-        else if(m2->type == moMirage) m2->type = moMirror;
-        }
-      
-      hyperpoint H = inverse(gmatrix[c2]) * gmatrix[c] * C0;
-      
-      transmatrix xfer = rgpushxto0(H);
+    transmatrix mirrortrans = Id;    
+    if(mi.second.mirrored) mirrortrans[0][0] = -1;
 
-      if(i == 1) {
-        hyperpoint H2 = spintox(H) * H;
-        xfer = rspintox(H) * rpushxto0(H2) * mirrortrans * spintox(H);
-        }
-
-      m2->pat = gmatrix[c2] * xfer * inverse(gmatrix[c2]) * m->pat;
-        
-      m2->at = inverse(gmatrix[c]) * m2->pat * mirrortrans;
-      m2->pid = cpid;
-      
-      if(isBullet(m) && i == 1) m2->at = m2->at * spin(M_PI); // no idea why this
-      
-      additional.push_back(m2);
-
-      // if you don't understand it, don't worry,
-      // I don't understand it either
+    if(!gmatrix.count(c)) continue;
+    monster *m2 = new monster;
+    m2->base = c;
+    
+    if(isBullet(m)) {
+      m2->parenttype = m->parenttype;
+      m2->type = m->type;
+      m2->vel = m->vel;
+      m2->parent = m->parent;
+      m2->pid = m->pid;
       }
+    else
+      m2->type = moMimic;
+    
+    hyperpoint H = inverse(gmatrix[c2]) * gmatrix[c] * C0;
+    
+    transmatrix xfer = rgpushxto0(H);
+
+    if(mi.second.mirrored) {
+      hyperpoint H2 = spintox(H) * H;
+      xfer = rspintox(H) * rpushxto0(H2) * mirrortrans * spintox(H);
+      }
+
+    m2->pat = gmatrix[c2] * xfer * inverse(gmatrix[c2]) * m->pat;
+      
+    m2->at = inverse(gmatrix[c]) * m2->pat;
+    m2->pid = cpid;
+    
+    additional.push_back(m2);
+
+    // if you don't understand it, don't worry,
+    // I don't understand it either
     }
+  mirror::mirrors.clear();
   }
 
 int visibleAt;
@@ -1452,6 +1438,11 @@ bool noncrashable(monster *m, monster *by) {
 
 int bulltime[MAXPLAYER];
 
+void reflect(cell*& c2, monster *m, transmatrix& nat);
+
+// set to P_MIRRORWALL to allow the PCs to go through mirrors
+static const int reflectflag = P_MIRRORWALL;
+
 void movePlayer(monster *m, int delta) {
 
   cpid = m->pid;
@@ -1469,7 +1460,7 @@ void movePlayer(monster *m, int delta) {
   int jb = 4*tableid[cpid];
   for(int i=0; i<4; i++) if(axespressed[jb+i]) playermoved = true;
   
-#ifndef MOBILE
+#if !ISMOBILE
   mgo = actionspressed[b+pcForward] - actionspressed[b+pcBackward] + axespressed[jb+2]/30000.;
   mturn = actionspressed[b+pcTurnLeft] - actionspressed[b+pcTurnRight] + axespressed[jb+3]/30000.;
   mdx = actionspressed[b+pcMoveRight] - actionspressed[b+pcMoveLeft] + axespressed[jb]/30000.;
@@ -1478,9 +1469,8 @@ void movePlayer(monster *m, int delta) {
   shotkey = actionspressed[b+pcFire] || actionspressed[b+pcFaceFire];
   facemouse = actionspressed[b+pcFace] || actionspressed[b+pcFaceFire];
   dropgreen = actionspressed[b+pcDrop];
-#endif
   
-#ifdef MOBILE
+#else
   mdx = mdy = mgo = mturn = 0;
   facemouse = shotkey = false;
   dropgreen = getcstat == 'g';
@@ -1502,7 +1492,7 @@ void movePlayer(monster *m, int delta) {
     targetRangedOrb(mouseover, roKeyboard);
     }
 
-#ifndef MOBILE    
+#if !ISMOBILE
   if(haveRangedOrb()) {
     cwt.c = m->base;
     if(actionspressed[b+pcOrbKey] && !lactionpressed[b+pcOrbKey])
@@ -1542,7 +1532,7 @@ void movePlayer(monster *m, int delta) {
     mgo += mdd;
     }
 
-#ifndef NOSDL
+#if CAP_SDL
   Uint8 *keystate = SDL_GetKeyState(NULL);
   bool forcetarget = (keystate[SDLK_RSHIFT] | keystate[SDLK_LSHIFT]);
   if(((mousepressed && !forcetarget) || facemouse) && delta > 0 && !mouseout()) {
@@ -1600,6 +1590,7 @@ void movePlayer(monster *m, int delta) {
     // spin(span[igo]) * xpush(playergo[cpid]) * spin(-span[igo]);
   
     c2 = m->findbase(nat);
+    if(reflectflag & P_MIRRORWALL) reflect(c2, m, nat);
     
     // don't have several players in one spot
     // also don't let them run too far from each other!
@@ -1623,7 +1614,7 @@ void movePlayer(monster *m, int delta) {
           animateMovement(c2, m->base, LAYER_BOAT);
           }
         }
-      else if(m->inBoat && !isWateryOrBoat(c2) && passable(c2, m->base, P_ISPLAYER | P_MIRROR)) {
+      else if(m->inBoat && !isWateryOrBoat(c2) && passable(c2, m->base, P_ISPLAYER | P_MIRROR | reflectflag)) {
         if(boatGoesThrough(c2) && markOrb(itOrbWater)) {
           c2->wall = isIcyLand(m->base) ? waLake : waSea;
           }
@@ -1669,7 +1660,7 @@ void movePlayer(monster *m, int delta) {
         go = false;
         }
       else if(
-        (blown ? !passable(c2, m->base, P_ISPLAYER | P_BLOW) : !passable(c2, m->base, P_ISPLAYER | P_MIRROR)) && 
+        (blown ? !passable(c2, m->base, P_ISPLAYER | P_BLOW) : !passable(c2, m->base, P_ISPLAYER | P_MIRROR | reflectflag)) && 
         !(isWatery(c2) && m->inBoat && !nonAdjacent(m->base,c2)))
         go = false;
       
@@ -1703,20 +1694,12 @@ void movePlayer(monster *m, int delta) {
       if(c2->item && c2->land == laAlchemist) c2->wall = m->base->wall;
       if(m->base->wall == waRoundTable)
         roundTableMessage(c2);
-      if(c2->wall == waCloud) {
+      if(c2->wall == waCloud || c2->wall == waMirror) {
         visibleFor(500);
-        mirror::createMirages(c2, 0, moMirage);
+        cellwalker cw(c2, 0, false);
+        mirror::createHere(cw, cpid);
+        mirror::breakMirror(cw, cpid);
         awakenMimics(m, c2);
-        c2->wall = waNone;
-        if(c2->land == laMirror) items[itShard]++;
-        }
-      if(c2->wall == waMirror) {
-        visibleFor(500);
-        cwt.c = c2;
-        mirror::createMirrors(c2, 0, moMirage);
-        awakenMimics(m, c2);
-        c2->wall = waNone;
-        if(c2->land == laMirror) items[itShard]++;
         }
       if(c2->wall == waGlass && items[itOrbAether]) {
         items[itOrbAether] = 0;
@@ -1869,6 +1852,59 @@ void virtualize(monster *m) {
     }
   }
 
+bool reflectmatrix(transmatrix& M, cell *c1, cell *c2, bool onlypos) {
+  if(!gmatrix.count(c1) || !gmatrix.count(c2)) return false;
+  transmatrix H = inverse(gmatrix[c1]) * gmatrix[c2];
+  transmatrix S = spintox(tC0(H));
+  ld d = hdist0(tC0(H));
+  transmatrix T = xpush(-d/2) * S * inverse(gmatrix[c1]) * M;
+  if(onlypos && tC0(T)[0] < 0) return false;
+  M = gmatrix[c1] * inverse(S) * xpush(d/2) * MirrorX * T;
+  return true;
+  }
+
+void reflect(cell*& c2, monster *m, transmatrix& nat) {
+  if(c2 != m->base && c2->wall == waMirrorWall && inmirror(c2)) {
+    if(reflectmatrix(nat, m->base, c2, false))
+      c2 = m->base;
+    }
+
+  if(c2 == m->base && inmirror(c2)) {
+    forCellEx(c3, c2) if(c3->land == laMirrorWall) {
+      cell *c1 = m->base;
+      m->base = c3;
+      reflect(c3, m, nat);
+      m->base = c1;
+      c2 = c3;
+      }
+    }
+  
+  if(c2 == m->base && c2->wall == waMirrorWall && c2->land == laMirrorWall) {
+    int d = mirror::mirrordir(c2);
+    if(d != -1) {
+      for(int k=0; k<7; k++) {
+        cell *ca = createMovR(c2, d-k);
+        cell *cb = createMovR(c2, d+k);
+        if(ca->land == laMirror && inmirror(cb)) {
+          reflectmatrix(nat, ca, cb, true);
+          break;
+          }
+        }
+      }
+    else {
+      for(int k=0; k<6; k++) {
+        cell *cb = createMovR(c2, k+1);
+        cell *cc = createMovR(c2, k+2);
+        if(cb->land != laMirrorWall || cc->land != laMirrorWall) continue;
+        cell *ca = createMovR(c2, k);
+        cell *cd = createMovR(c2, k+3);
+        reflectmatrix(nat, cc, ca, true);
+        for(int limit=0; limit<10 && reflectmatrix(nat, cb, cd, true) && reflectmatrix(nat, cc, ca, true); limit++);
+        }
+      } 
+    }
+  }
+
 void moveMimic(monster *m) {
   virtualize(m);
   transmatrix nat = m->pat;
@@ -1879,23 +1915,19 @@ void moveMimic(monster *m) {
   nat = nat * spin(playerturn[cpid]) * xpush(playergo[cpid]);
 
   cell *c2 = m->findbase(nat);
-  if(c2 != m->base && !passable(c2, m->base, P_ISPLAYER | P_MIRROR))
+  reflect(c2, m, nat);
+  if(c2 != m->base && !passable(c2, m->base, P_ISPLAYER | P_MIRROR | P_MIRRORWALL))
     killMonster(m, moNone);
   else {
     m->rebasePat(nat);
     if(playerfire[cpid]) shootBullet(m);
     }  
 
-  if(c2->wall == waCloud) {
-    mirror::createMirages(c2, 0, moMirage);
+  if(c2->wall == waCloud || c2->wall == waMirror) {
+    cellwalker cw(c2, 0, false);
+    mirror::createHere(cw, cpid);
+    mirror::breakMirror(cw, -1);
     awakenMimics(m, c2);
-    c2->wall = waNone;
-    }
-
-  if(c2->wall == waMirror) {
-    mirror::createMirrors(c2, 0, moMirage);
-    awakenMimics(m, c2);
-    c2->wall = waNone;
     }
 
   if(!doall && c2->cpdist >= 6)
@@ -1960,7 +1992,7 @@ eItem targetRangedOrbKey(orbAction a) {
 
   for(monster *m2: nonvirtual) {
     if(m2->dead) continue;
-#ifdef ROGUEVIZ
+#if CAP_ROGUEVIZ
     if(rogueviz::virt(m2)) continue;
 #endif
     if(!mousetarget || intval(mouseh, mousetarget->pat*C0) > intval(mouseh, m2->pat*C0)) 
@@ -2058,22 +2090,18 @@ void moveBullet(monster *m, int delta) {
   if(isActivable(c2)) activateActiv(c2, true);
   
   // knives break mirrors and clouds
-  if(c2->wall == waCloud) {
-    mirror::createMirages(c2, 0, moMirage);
+  if(c2->wall == waCloud || c2->wall == waMirror) {
+    cellwalker cw(c2, 0, false);
+    mirror::createHere(cw, cpid);
+    mirror::breakMirror(cw, -1);
     awakenMimics(m, c2);
-    c2->wall = waNone;
     }
-
-  if(c2->wall == waMirror) {
-    cwt.c = c2;
-    mirror::createMirrors(c2, 0, moMirage);
-    awakenMimics(m, c2);
-    c2->wall = waNone;
-    }
+  
+  reflect(c2, m, nat);
   
   bool godragon = m->type == moFireball && isDragon(c2->monst);
   
-  if(m->type != moTongue && !(godragon || passable(c2, m->base, P_BULLET))) {
+  if(m->type != moTongue && !(godragon || passable(c2, m->base, P_BULLET | P_MIRRORWALL))) {
     m->dead = true;
     if(m->type != moAirball) killMonster(c2, m->parent ? m->parent->type : moNone);
     // cell *c = m->base;
@@ -2190,7 +2218,13 @@ void moveBullet(monster *m, int delta) {
       // Orb of Winter protects from fireballs
       if(m->type == moFireball && ((isPlayer(m2) && markOrb(itOrbWinter)) || m2->type == moWitchWinter)) 
         continue;
+      bool revive = m2->type == moMirrorSpirit && !m2->dead;
       killMonster(m2, m->parent ? m->parent->type : moNone);
+      if(revive && m2->dead) {
+        ::kills[moMirrorSpirit]--;
+        multi::kills[cpid]--;
+        mirrorspirits++;
+        }
       }
     }
   }
@@ -2497,8 +2531,9 @@ void moveMonster(monster *m, int delta) {
   if(crashintomon) { igo++; goto igo_retry; }
 
   cell *c2 = m->findbase(nat);
+  if(reflectflag & P_MIRRORWALL) reflect(c2, m, nat);
 
-  if(m->type == moButterfly && !passable_for(m->type, c2, m->base, P_CHAIN)) {
+  if(m->type == moButterfly && !passable_for(m->type, c2, m->base, P_CHAIN | reflectflag)) {
     igo++; goto igo_retry;
     }
 
@@ -2620,7 +2655,7 @@ void moveMonster(monster *m, int delta) {
           m->base->wall = waBigStatue;
         animateMovement(c2, m->base, LAYER_BOAT);
         }
-      if(passable_for(m->type, c2, m->base, P_CHAIN | P_ONPLAYER) && !isWatery(c2) && m->inBoat) {
+      if(passable_for(m->type, c2, m->base, P_CHAIN | P_ONPLAYER | reflectflag) && !isWatery(c2) && m->inBoat) {
         if(isWatery(m->base)) 
           m->base->wall = waBoat, m->base->mondir = dirfromto(m->base, c2);
         else if(boatStrandable(c2)) c2->wall = waStrandedBoat;
@@ -2637,7 +2672,7 @@ void moveMonster(monster *m, int delta) {
     }
   
   if(!(m->type == moRoseBeauty && c2->land != laRose)) {
-    if(stunned ? passable(c2, m->base, P_BLOW) : passable_for(m->type, c2, m->base, P_CHAIN)) {
+    if(stunned ? passable(c2, m->base, P_BLOW | reflectflag) : passable_for(m->type, c2, m->base, P_CHAIN | reflectflag)) {
       if(c2 != m->base && m->type == moButterfly) 
         m->torigin = m->base;
       m->rebasePat(nat);
@@ -2889,6 +2924,8 @@ void turn(int delta) {
     if(elec::havecharge) elec::act();
     popmonsters();
     
+    bool lastcanmove = canmove;
+    
     canmove = true;
     
     for(int i=0; i<players; i++) {
@@ -2934,6 +2971,8 @@ void turn(int delta) {
         achievement_final(true);
         }
       lastdead = pc[i]->dead;
+      
+      if(lastcanmove && pc[i]->dead) showMissionScreen();
         
       canmove = canmove && !pc[i]->dead;
       }
@@ -2961,7 +3000,7 @@ void turn(int delta) {
     safety = false;
     }
 
-#ifdef ROGUEVIZ
+#if CAP_ROGUEVIZ
   rogueviz::turn(delta);
 #endif
   }
@@ -3030,7 +3069,7 @@ bool drawMonster(const transmatrix& V, cell *c, const transmatrix*& Vboat, trans
     transmatrix view = V * m->at;
     
     if(!mouseout()) {
-#ifdef ROGUEVIZ
+#if CAP_ROGUEVIZ
       if(rogueviz::virt(m)) ; else
 #endif
       if(mapeditor::drawplayer || m->type != moPlayer)
@@ -3077,6 +3116,8 @@ bool drawMonster(const transmatrix& V, cell *c, const transmatrix*& Vboat, trans
         cpid = m->pid;
         if(m->parenttype == moPlayer)
           col = getcs().swordcolor;
+        else if(m->parenttype == moMimic)
+          col = (mirrorcolor(det(view) < 0) << 8) | 0xFF;
         else
           col = (minf[m->parenttype].color << 8) | 0xFF;
         if(getcs().charid >= 4) {
@@ -3107,7 +3148,7 @@ bool drawMonster(const transmatrix& V, cell *c, const transmatrix*& Vboat, trans
         break;
         }
 
-#ifdef ROGUEVIZ      
+#if CAP_ROGUEVIZ      
       case moRogueviz:
         rogueviz::drawVertex(V, c, m);
         break;
@@ -3116,6 +3157,8 @@ bool drawMonster(const transmatrix& V, cell *c, const transmatrix*& Vboat, trans
       default:
         if(m->inBoat) m->footphase = 0;
         int col = minf[m->type].color;
+        if(m->type == moMimic) 
+          col = mirrorcolor(det(view) < 0);
         if(m->type == moSlime) {
           col = winf[c->wall].color;
           col |= (col >> 1);
@@ -3352,7 +3395,7 @@ void virtualRebase(shmup::monster *m, bool tohex) {
 void addShmupHelp(string& out) {
   if(shmup::mousetarget && intval(mouseh, tC0(shmup::mousetarget->pat)) < .1) {
     out += ", "; 
-#ifdef ROGUEVIZ
+#if CAP_ROGUEVIZ
     if(shmup::mousetarget->type == moRogueviz) {
       help = XLAT(minf[shmup::mousetarget->type].help);
       out += rogueviz::describe(shmup::mousetarget);

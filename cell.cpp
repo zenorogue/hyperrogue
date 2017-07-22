@@ -664,6 +664,11 @@ cell *cwpeek(cellwalker cw, int dir) {
   return createMov(cw.c, (cw.spin+420+dir) % cw.c->type);
   }
 
+void cwmirrorat(cellwalker& cw, int d) {
+  cw.spin = (d+d - cw.spin + 420) % cw.c->type;
+  cw.mirrored = !cw.mirrored;
+  }
+
 void cwstep(cellwalker& cw) {
   createMov(cw.c, cw.spin);
   int nspin = cw.c->spn(cw.spin);

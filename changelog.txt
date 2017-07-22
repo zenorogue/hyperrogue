@@ -1704,8 +1704,8 @@
 - [RogueViz] fixed legend in the svg/high quality output
 - more control for text in svg output
 
-2017.07.04 14:40 work in progress
-- peaceful mode (work in progress)
+2017.07.16 21:05 version 10.0
+- peaceful mode
 - anti-aliased lines, and linewidth setting, option to make lines further from the model center narrower
 - rearranged the menus
 - '9' key to list all the frames in the current slideshow; better support for multiple slideshows compiled in
@@ -1718,12 +1718,6 @@
 - some preparation for the Inventory Mode
 - texts changed, some minor translation fixes
 - fixed the default wsad keys
-- [technical] improved the NOGL compilation flag to avoid OpenGL
-- [technical] refactoring (gotoHelp, sdltogl)
-- [technical] changed #ifdef LOCAL to #ifdef EXTRA_...; extra features are now included by starting the compilation from another file
-- [technical] HYPERPATH added, for reaching the files when HyperRogue is called from a different location
-- [technical] private source files moved to the "private" dir
-
 - antialiased multisampling
 - major refactoring: return to previous menu
 - image in the character selection screen
@@ -1732,5 +1726,50 @@
 - consistency in menu
 - multiple selectable columns in scores
 - menu -> scores => list the current game if in game over
-- yendor hardness fix
+- yendor/holygrail hardness fix
 - hints shown on the quest status/quit screen
+- long mirrors in the Mirror Land
+- gravity destroys glyphs
+- horns/bull now have different colors
+- do not save princess in dungeon (and other gravity lands?)
+- better love image
+- controller works in menus
+- better joystick axe configuration (no longer show up to seven players)
+- on the esc-screen, the selection moves to 'continue' to prevent accidental quitting
+- fixed Princess-related bugs (easier to find; squeak only once; no 'unknown princess'; saving with safety)
+- inventory achievements
+- double wall rate for Luck in the inventory mode
+- slightly increased the charge count for Orb of Shielding and Orb of Freedom
+- better config system
+- replaced mtrand.cpp with the std implementation
+- [technical] improved the NOGL compilation flag to avoid OpenGL
+- [technical] refactoring (gotoHelp, sdltogl)
+- [technical] changed #ifdef LOCAL to #ifdef EXTRA_...; extra features are now included by starting the compilation from another file
+- [technical] HYPERPATH added, for reaching the files when HyperRogue is called from a different location
+- [technical] private source files moved to the "private" dir
+
+2017.07.1? ??:?? version 10.0a
+- fixed a bug with achievements
+- fixed a crash bug when restarting from the main menu
+
+2017.07.21 23:59 version 10.0b
+- more changes to the Hall of Mirrors: improved the Mimics, replaced the monsters
+- made the Hall of Mirrors work in special modes (chaos, shmup, peace)
+- multi-tile monster reflections are now animated
+- fix crash bug when shifting modes
+- fix crash bug with shmup mimics
+- made the kill/treasure icons smaller
+- removed the '!' marks on treasure in the Orb Strategy mode
+- Orb of Discord no longer works o Krakens
+- a bit higher mirroring for Orb of Earth
+- fixed a bug with PTM desynchronization due to Mirror Land name change
+- [technical] reworked the system of OS/capability compiler flags
+
+2017.07.23 01:16 version 10.0c
+- added missing descriptions
+- updated the Czech translation
+- Hall of Mirrors and LoEM are no longer forbidden to be adjacent
+- fixed the Overview in the menu to go to the one appropriate for the current mode
+- peaceful mode state is now displayed correctly in the main menu
+- readded the sound when breaking mirrors
+- fixed the vertical position of the flower in hand

@@ -68,7 +68,7 @@ struct polytodraw {
     qchr   chr;
     qcir   cir;
     } u;
-#ifdef ROGUEVIZ
+#if CAP_ROGUEVIZ
   string* info;
   polytodraw() { info = NULL; }
 #endif
@@ -123,16 +123,43 @@ void shift(hpcshape& sh, double dx, double dy, double dz) {
     hpc[i] = m * hpc[i];
   }
 
-#ifndef MOBILE
+#if ISMOBILE==0
 SDL_Surface *aux;
 #endif
 
-vector<polytodraw*> ptds2;
+#define CAP_POLY (CAP_SDLGFX || CAP_GL || CAP_SVG)
 
+#if CAP_POLY
+vector<polytodraw*> ptds2;
 #define POLYMAX 60000
 
-#ifdef GL
-#define USEPOLY
+#if CAP_GL
+GLfloat *currentvertices;
+#endif
+
+GLfloat *ourshape = NULL;
+
+void initPolyForGL() {
+  
+  if(ourshape) delete[] ourshape;
+  ourshape = new GLfloat[3 * qhpc];
+  
+  // GLfloat ourshape[3*qhpc];
+  
+  int id = 0;
+  for(int i=0; i<qhpc; i++) {
+    ourshape[id++] = hpc[i][0];
+    ourshape[id++] = hpc[i][1];
+    ourshape[id++] = hpc[i][2];
+    }
+
+#if CAP_GL  
+  currentvertices = NULL;
+#endif
+  }
+#endif
+
+#if CAP_GL
 
 GLuint shapebuffer;
 
@@ -141,7 +168,6 @@ int qglcoords;
 
 extern void glcolor(int color);
 
-GLfloat *currentvertices;
 
 void activateVertexArray(GLfloat *f, int qty) {
   currentvertices = f;
@@ -162,34 +188,6 @@ void activateGlcoords() {
   }
 #endif
 
-#ifdef GFX
-#define POLYMAX 60000
-#define USEPOLY
-#endif
-
-#ifdef USEPOLY
-GLfloat *ourshape = NULL;
-
-void initPolyForGL() {
-  
-  if(ourshape) delete[] ourshape;
-  ourshape = new GLfloat[3 * qhpc];
-  
-  // GLfloat ourshape[3*qhpc];
-  
-  int id = 0;
-  for(int i=0; i<qhpc; i++) {
-    ourshape[id++] = hpc[i][0];
-    ourshape[id++] = hpc[i][1];
-    ourshape[id++] = hpc[i][2];
-    }
-
-#ifdef GL  
-  currentvertices = NULL;
-#endif
-  }
-#endif
-
 int polyi;
 
 int polyx[POLYMAX], polyxr[POLYMAX], polyy[POLYMAX];
@@ -201,7 +199,7 @@ hyperpoint gltopoint(GLfloat t[3]) {
   }
 
 void addpoint(const hyperpoint& H) {
-#ifdef GL
+#if CAP_GL
   if(vid.usingGL) {
     if(polyi >= POLYMAX) return;
     if(pmodel) {
@@ -254,7 +252,7 @@ void addpoly(const transmatrix& V, GLfloat *tab, int cnt) {
     }
   }
 
-#ifdef SDLGFX
+#if CAP_SDLGFX
 void aapolylineColor(SDL_Surface *s, int*x, int *y, int polyi, int col) {
   for(int i=1; i<polyi; i++)
     aalineColor(s, x[i-1], y[i-1], x[i], y[i], col);
@@ -272,7 +270,7 @@ void filledPolygonColorI(SDL_Surface *s, int* polyx, int *polyy, int polyi, int 
   }
 #endif
 
-#ifdef GL
+#if CAP_GL
 void glcolor2(int color) {
   unsigned char *c = (unsigned char*) (&color);
   glColor4f(c[3] / 255.0, c[2] / 255.0, c[1]/255.0, c[0] / 255.0);
@@ -373,7 +371,7 @@ double linewidthat(const hyperpoint& h) {
   }
   
 void drawpolyline(const transmatrix& V, GLfloat* tab, int cnt, int col, int outline) {
-#ifdef GL
+#if CAP_GL
   if(vid.usingGL) {
     if(pmodel == mdDisk) {    
       const int pq = cnt;
@@ -396,28 +394,17 @@ void drawpolyline(const transmatrix& V, GLfloat* tab, int cnt, int col, int outl
   polyi = 0;
   addpoly(V, tab, cnt);
 
-#ifdef MOBILE
-
-#ifdef ANDROID
-#define ANDROIDGD
+#if CAP_SVG==1
+  if(svg::in) {
+    svg::polygon(polyx, polyy, polyi, col, outline);
+    return;
+    }
 #endif
 
-#ifdef FAKEMOBILE
-#define ANDROIDGD
-#endif
-
-#ifdef ANDROIDGD
+#if CAP_XGD==1
   gdpush(1); gdpush(col); gdpush(outline); gdpush(polyi);
   for(int i=0; i<polyi; i++) gdpush(polyx[i]), gdpush(polyy[i]);
-#endif
-
-#else
-
-#ifndef MOBILE
-  if(svg::in) svg::polygon(polyx, polyy, polyi, col, outline);
-#endif
-
-#ifdef SDLGFX
+#elif CAP_SDLGFX==1
   filledPolygonColorI(s, polyx, polyy, polyi, col);
   if(vid.goteyes) filledPolygonColorI(aux, polyxr, polyy, polyi, col);
   
@@ -434,7 +421,6 @@ void drawpolyline(const transmatrix& V, GLfloat* tab, int cnt, int col, int outl
       for(int t=0; t<polyi; t++) polyx[t] -= x, polyy[t] -= y;
       }
     }
-#endif
 #endif
   }
 
@@ -464,7 +450,7 @@ vector<GLfloat> curvedata;
 int curvestart = 0;
 
 void drawqueueitem(polytodraw& ptd) {
-#ifdef ROGUEVIZ
+#if CAP_ROGUEVIZ
   svg::info = ptd.info;
 #endif
 
@@ -486,7 +472,7 @@ void drawqueueitem(polytodraw& ptd) {
     }
   else if(ptd.kind == pkString) {
     qchr& q(ptd.u.chr);
-#ifndef MOBILE
+#if ISMOBILE==0
     if(svg::in) 
       svg::text(q.x, q.y, q.size, q.str, q.frame, ptd.col, q.align);
     else {
@@ -498,7 +484,7 @@ void drawqueueitem(polytodraw& ptd) {
 #endif
     }
   else if(ptd.kind == pkCircle) {
-#ifndef MOBILE
+#if ISMOBILE==0
     if(svg::in) 
       svg::circle(ptd.u.cir.x, ptd.u.cir.y, ptd.u.cir.size, ptd.col);
     else
@@ -506,7 +492,7 @@ void drawqueueitem(polytodraw& ptd) {
     drawCircle(ptd.u.cir.x, ptd.u.cir.y, ptd.u.cir.size, ptd.col);
     }
 
-#ifndef NOSDL
+#if CAP_SDL
   if(vid.goteyes && !vid.usingGL) {
     int qty = s->w * s->h;
     int *a = (int*) s->pixels;
@@ -533,13 +519,12 @@ void quickqueue() {
   }
 
 void drawqueue() {
-#ifdef USEPOLY
 
   int siz = size(ptds);
 
   setcameraangle(true);
 
-#ifdef GL
+#if CAP_GL
   if(vid.usingGL) 
     glClear(GL_STENCIL_BUFFER_BIT);
 #endif
@@ -574,7 +559,7 @@ void drawqueue() {
 #endif
   profile_stop(3);
 
-#ifndef NOSDL
+#if CAP_SDL
   if(vid.goteyes && !vid.usingGL) {
 
     if(aux && (aux->w != s->w || aux->h != s->h))
@@ -600,13 +585,12 @@ void drawqueue() {
     drawqueueitem(ptd);
     }
 
-#ifdef GL
+#if CAP_GL
   if(vid.goteyes && vid.usingGL) selectEyeGL(0), selectEyeMask(0);
 #endif
 
   setcameraangle(false);
   curvedata.clear(); curvestart = 0;
-#endif
   }
 
 hpcshape 
@@ -1814,13 +1798,13 @@ void queuecircle(int x, int y, int size, int color, int prio = PPR_CIRCLE) {
   ptd.prio = prio << PSHIFT;
   }
 
-#ifdef MOBILE
+#if ISMOBILE==1
 namespace svg {
   bool in = false;
   }
 #endif
 
-#ifndef MOBILE
+#if ISMOBILE==0
 // svg renderer
 namespace svg {
   FILE *f;
@@ -1989,7 +1973,7 @@ namespace svg {
     vid.usingGL = false;
     vid.xres = vid.yres = svgsize ? svgsize : min(1 << (sightrange+7), 16384);
     calcparam();
-#ifdef ROGUEVIZ
+#if CAP_ROGUEVIZ
     rogueviz::fixparam();
 #endif
     inHighQual = true; 

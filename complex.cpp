@@ -592,7 +592,7 @@ namespace princess {
 //    printf("Improved dist to %d\n", newdist);
       if(newdist == OUT_OF_PALACE) {
         if(!princess::saved)
-#ifdef INV
+#if CAP_INV
         if(!inv::on || !inv::usedForbidden)
 #endif
           achievement_gain("PRINCESS1");
@@ -1010,9 +1010,21 @@ namespace whirlpool {
     }
   }
 
+bool operator == (const cellwalker& c1, const cellwalker& c2) {
+  return c1.c == c2.c && c1.spin == c2.spin && c1.mirrored == c2.mirrored;
+  }
+
 namespace mirror {
 
+  vector<pair<int, cellwalker>> mirrors;
+  static const int LIGHTNING = -1; // passed instead of cpid
+  
+  bool noMirrorOn(cell *c) {
+    return c->monst || (!shmup::on && isPlayerOn(c)) || (geometry != gQuotient2 && geometry != gTorus && c->cpdist > 7);
+    }
+
   bool cellMirrorable(cell *c) {
+    if(noMirrorOn(c)) return false;
     return 
       c->wall == waNone || c->wall == waCavefloor || isAlchAny(c) ||
       c->wall == waFrozenLake || c->wall == waDeadfloor || c->wall == waDeadfloor2 ||
@@ -1021,55 +1033,64 @@ namespace mirror {
       c->wall == waGargoyleBridge || c->wall == waTempFloor || c->wall == waTempBridge ||
       c->wall == waMirrorWall;
     }
-  
-  inline eMonster switchtype(eMonster m) { 
-    return (m == moMirror) ? moMirage : moMirror;
+
+  void destroyKilled() {
+    int j = 0;
+    for(int i=0; i<size(mirrors); i++)
+      if(mirrors[i].second.c->monst == moMimic)
+        mirrors[j++] = mirrors[i];
+    mirrors.resize(j);
     }
   
-  void createMM(cellwalker& cw, eMonster type) {
-    if(type == moLightningBolt) {
-      castLightningBolt(cw);
-      return;
-      }
-    if(inmirror(cw)) {
-      bool b = cw.mirrored;
+  void unlist() {
+    for(auto& m: mirrors)
+      if(m.second.c->monst == moMimic)
+        m.second.c->monst = moNone;
+    }
+  
+  void list() {
+    for(auto& m: mirrors)
+      m.second.c->monst = moMimic;
+    }
+
+  void destroyAll() {
+    unlist();
+    mirrors.clear();
+    }
+  
+  void createMirror(cellwalker cw, int cpid) {
+    if(!shmup::on && inmirror(cw))
       cw = reflect(cw);
-      if(cw.mirrored != b) type = switchtype(type);
-      }
-    if(cw.c->monst == moNone && cellMirrorable(cw.c) && !isPlayerOn(cw.c))  {
-      cw.c->monst = type;
-      cw.c->mondir = cw.spin;
-      cw.c->hitpoints = multi::cpid;
+    if(cpid == LIGHTNING)
+      castLightningBolt(cw);
+    else if(cellMirrorable(cw.c)) {
+      for(auto& m: mirrors)
+        if(m == make_pair(cpid,cw))
+          return;
+      mirrors.emplace_back(cpid, cw);
       }
     }
   
-  inline eMonster switchtypeif(eMonster m, bool b) { 
-    if(!b) return m;
-    return (m == moMirror) ? moMirage : moMirror;
-    }
-  
-  void createMirrors(cell *c, int dir, eMonster type) {
-    cellwalker C(c, dir);
+  void createMirrors(cellwalker cw, int cpid) {
+    cw.mirrored = !cw.mirrored;
+    cell *c = cw.c;
     
-    type = switchtype(type);
-  
-    for(int i=0; i<c->type; i++) {
-      cwstep(C);
-      if(C.c->type == c->type) {
-        cwspin(C, i);
-        createMM(C, switchtypeif(type, C.mirrored));
-        cwspin(C, -i);
+    for(int i=0; i<cw.c->type; i++) {
+      cwstep(cw);
+      if(cw.c->type == c->type) {
+        cwspin(cw, i);
+        createMirror(cw, cpid);
+        cwspin(cw, -i);
         }
-      cwstep(C);
-      cwspin(C, 1);
+      cwstep(cw);
+      cwspin(cw, 1);
       }
     }
   
-  void createMirages(cell *c, int dir, eMonster type) {
-    cellwalker C(c, dir);
+  void createMirages(cellwalker cw, int cpid) {
     if(purehepta) {
-      for(int i=0; i<c->type; i++) {
-        cellwalker C2 = C;
+      for(int i=0; i<cw.c->type; i++) {
+        cellwalker C2 = cw;
         cwstep(C2);
         cwspin(C2, 3);
         cwstep(C2);
@@ -1077,156 +1098,138 @@ namespace mirror {
         cwstep(C2);
         cwspin(C2, 3);
         cwspin(C2, -i);
-        createMM(C2, type);
-        cwspin(C, 1);
+        createMirror(C2, cpid);
+        cwspin(cw, 1);
         }
       return;
       }
     for(int i=0; i<6; i++) {
-      cwstep(C);
-      if(C.c->type == 6) {
-        cwspin(C, 2);
-        cwstep(C);
-        cwspin(C, 4-i);
-        createMM(C, type);
-        cwspin(C, 6-4+i);
-        cwstep(C);
-        cwspin(C, 2);
-        cwstep(C);
-        cwspin(C, 2-i);
-        createMM(C, type);
-        cwspin(C, 6-2+i);
-        cwstep(C);
-        cwspin(C, 2);
+      cwstep(cw);
+      if(cw.c->type == 6) {
+        cwspin(cw, 2);
+        cwstep(cw);
+        cwspin(cw, 4-i);
+        createMirror(cw, cpid);
+        cwspin(cw, 6-4+i);
+        cwstep(cw);
+        cwspin(cw, 2);
+        cwstep(cw);
+        cwspin(cw, 2-i);
+        createMirror(cw, cpid);
+        cwspin(cw, 6-2+i);
+        cwstep(cw);
+        cwspin(cw, 2);
         }
-      cwstep(C);
-      cwspin(C, 1);
-      }
-    }
-  
-  void spin(int d) {
-    for(int i=0; i<size(mirrors); i++) {
-      cell *c = mirrors[i];
-      if(c->hitpoints != multi::cpid) continue;
-      if(c->monst == moMirror) 
-        mirrors[i]->mondir = (mirrors[i]->mondir - d + 420) % mirrors[i]->type;
-      if(c->monst == moMirage)
-        mirrors[i]->mondir = (mirrors[i]->mondir + d + 420) % mirrors[i]->type;
-      }
-  
-    }
-  
-  void destroy() {
-    for(int i=0; i<size(mirrors); i++) {
-      cell *c = mirrors[i];
-      eMonster m = c->monst;
-      if(isMimic(m)) c->monst = moNone;
-      }
-    mirrors.clear();
-    }
-  
-  void destroyStray() {
-    if(doall) return;
-    for(int i=0; i<size(mirrors2); i++) {
-      cell *c = mirrors2[i];
-      if(c->cpdist > 7 && isMimic(c)) {
-        c->monst = moNone;
-        }
+      cwstep(cw);
+      cwspin(cw, 1);
       }
     }
 
+  void createHere(cellwalker cw, int cpid) {
+    if(cw.c->wall == waCloud)
+      createMirages(cw, cpid);
+    if(cw.c->wall == waMirror)
+      createMirrors(cw, cpid);
+    }
+  
+  void breakMirror(cellwalker cw, int pid) {
+    cell *c = cw.c;
+    if(c->wall == waMirror || c->wall == waCloud) {
+      drawParticles(c, winf[c->wall].color, 16);
+      playSound(c, "pickup-mirror", 50);
+      if(pid >= 0 && (cw.c->land == laMirror || cw.c->land == laMirrorOld)) {
+        dynamicval<int> d(multi::cpid, pid);
+        gainShard(cw.c, c->wall == waMirror ? "The mirror shatters!" : "The cloud turns into a bunch of images!");
+        }
+      c->wall = waNone;
+      }
+    }
+  
+  bool isKilledByMirror(cell *c) {
+    for(auto& m: mirrors)
+      if(cwpeek(m.second, 0) == c && canAttack(m.second.c, moMimic, c, c->monst, 0))
+        return true;
+    return false;
+    }
+   
   void go(bool fwd) {
     int tk = tkills();
-    int nummirage = 0;
-    mirrors2.clear();
+    int nummirage = 0;    
+    int j = 0;
+    
     for(int i=0; i<size(mirrors); i++) {
-      cell *c = mirrors[i];
-      if(c->hitpoints != multi::cpid) continue;
-      eMonster m = c->monst;
-      if(isMimic(m)) {
-      
-        int dir = c->mondir;
-        if(m == moMirage) nummirage++;
-        cell *c2 = c->mov[dir];
-
-        if(c2 && inmirror(c2)) {
-          if(c->land == laMirror) {
-            // c->mondir = (dir+3) % 6;
-            c->monst = switchtype(m);
-            continue;
-            }
-          cellwalker cw(c2, c->spin(dir), false);
-          cw = reflect(cw);
-          dir = c->mondir = cw.c->spin(cw.spin);
-          if(cw.mirrored) m = c->monst = switchtype(m);
-          c2 = c->mov[dir];
+      auto& m = mirrors[i];
+      bool survive = true;
+      if(m.first == multi::cpid) {
+        cell *c = m.second.c;
+        if(!m.second.mirrored) nummirage++;
+        auto cw2 = m.second;
+        cwstep(cw2);
+        if(inmirror(cw2)) cw2 = reflect(cw2);
+        cell *c2 = cw2.c;
+        if(c2->monst) {
+          c->monst = moMimic;
+          if(!peace::on && canAttack(c,moMimic,c2,c2->monst, 0))
+            attackMonster(c2, AF_MSG | AF_ORSTUN, moMimic);
+          c->monst = moNone;
           }
-        
-        if(c2 && !isMimic(c2) && canAttack(c,m,c2,c2->monst, 0))
-          attackMonster(c2, AF_MSG | AF_ORSTUN, m);
         if(c2->wall == waBigTree)
           c2->wall = waSmallTree;
         else if(c2->wall == waSmallTree)
           c2->wall = waNone;
-        if(!fwd) continue;
-        c->monst = moNone;
-        if(!c2) continue;
-        if(!passable(c2, c, P_MONSTER | P_MIRROR | P_MIRRORWALL))  continue;
-        if(isWorm(c2)) continue;
-        if(c2->monst == moGreater) {
-          c2->monst = moLesser; continue;
-          }
-        if(c2->monst == moGreaterM) {
-          c2->monst = moLesserM; continue;
-          }
-        if(isPlayerOn(c2)) {
-          addMessage(XLAT("You join %the1.", m));
-          playSound(c2, "click");
-          continue;
-          }
-        if(isMimic(c2)) {
-          addMessage(XLAT("Two of your images crash and disappear!"));
-          playSound(c2, "click");
+        if(fwd) {
+          if(noMirrorOn(c2) || !passable(c2, c, P_MONSTER | P_MIRROR | P_MIRRORWALL)) {
+            survive = false;
+            continue;
+            }
+          c->monst = moMimic;
+          moveMonster(c2, c);
           c2->monst = moNone;
-          continue;
+          empathyMove(c, c2, neighborId(c2, c));
+          m.second = cw2;
           }
-        if(isIvy(c2) || c2->monst) {
-          // killIvy(c2);
-          continue;
-          }
-        c->monst = m; moveMonster(c2, c);
-        empathyMove(c, c2, dir);
-        mirrors2.push_back(c2);
-        if(c->mirror(dir) && isMimic(c2->monst)) 
-          c2->monst = switchtype(c2->monst);
+        }
+      if(survive) {
+        mirrors[j++] = m;
         }
       }
-    for(int i=0; i<size(mirrors2); i++) {
-      cell *c = mirrors2[i];
-      if(c->hitpoints != multi::cpid) continue;
-      eMonster m = c->monst;
-      if(c->wall == waMirror) {
-        addMessage(XLAT("%The1 breaks the mirror!", m));
-        drawParticles(c, winf[c->wall].color, 16);
-        playSound(c, "pickup-mirror", 50);
-        createMirrors(c, c->mondir, m);
-        c->wall = waNone;
-        }
-      if(c->wall == waCloud) {
-        playSound(c, "pickup-mirror", 50);
-        drawParticles(c, winf[c->wall].color, 16);
-        addMessage(XLAT("%The1 disperses the cloud!", m));
-        createMirages(c, c->mondir, m);
-        c->wall = waNone;
-        }
-      }
+    mirrors.resize(j);
     achievement_count("MIRRORKILL", tkills(), tk);
     achievement_count("MIRAGE", nummirage, 0);
     }
 
-  void spingo(int d, bool fwd) {
-    if(multi::players > 1) spin(d);
-    go(fwd);
+  void act(int d, int flags) {
+    destroyKilled();
+    unlist();
+    if(multi::players == 1) multi::cpid = 0;
+    bool spinning =  
+      flags & (multi::players > 1 ? SPINMULTI : SPINSINGLE);
+    if(spinning && d) {
+      for(auto& m: mirrors)
+        if(m.first == multi::cpid)
+          cwspin(m.second, d);
+      }
+    if(flags & ATTACK)
+      go(flags & GO);
+    list();
+    }
+  
+  void breakAll() {
+    destroyKilled();
+    unlist();
+    if(numplayers() == 1)
+      createHere(cwt, 0);
+    else for(int i=0; i<numplayers(); i++)
+      createHere(multi::player[i], i);
+    for(int i=0; i<size(mirrors); i++)
+      createHere(mirrors[i].second, mirrors[i].first);
+    if(numplayers() == 1)
+      breakMirror(cwt, 0);
+    else for(int i=0; i<numplayers(); i++)
+      breakMirror(multi::player[i], i);
+    for(int i=0; i<size(mirrors); i++)
+      breakMirror(mirrors[i].second, -1);
+    list();
     }
   
   int mirrordir(cell *c) {
@@ -1237,7 +1240,7 @@ namespace mirror {
      if(createMov(c, i)->bardir == c->spin(i))
        icount++, isum+=i;
      }
-   if(icount > 1) return -1;
+   if(icount != 1) return -1;
    return isum;
    }
   
@@ -1262,7 +1265,8 @@ namespace mirror {
       if(!inmirror(cw)) break;
       stepcount++; if(stepcount > 10000) {
          if(debug) cw.c->wall = waBoat;
-         if(debug) printf("fail\n"); return cw; 
+         if(debug) printf("fail\n"); 
+         return cw; 
          }
       cell *c0 = cwpeek(cw, 0);
       int go = 0;
@@ -1337,14 +1341,20 @@ namespace mirror {
     cw = traceback(v,cw).second;
     return cw;
     }
-  
+
+#if ISMOBILE==0  
   void debug() {
     if(!mouseover) return;
     queuemarkerat(gmatrix[mouseover], 0xFF0000FF);
+#if CAP_SDL
     cellwalker mw(mouseover, (SDL_GetTicks()/1000) % mouseover->type, (SDL_GetTicks()/500) % 2);
+#else
+    cellwalker mw(mouseover, 0, 0);
+#endif
     mw = mirror::reflect(mw, true);
     queuemarkerat(gmatrix[mw.c], 0x800000FF);
     }
+#endif
   }
 
 namespace hive {
@@ -1882,6 +1892,7 @@ namespace heat {
     
     for(int i=0; i<dcs; i++) {
       cell *c = allcells[i];
+      if(!isIcyLand(c)) continue; 
       HEAT(c) += hmods[i] * rate;
       if(c->monst == moCrystalSage && HEAT(c) >= SAGEMELT) {
         addMessage(XLAT("%The1 melts away!", c->monst));
@@ -2867,7 +2878,7 @@ namespace ca {
       carule[i][1] = "00011000";
     }
 
-#ifdef USE_COMMANDLINE
+#if CAP_COMMANDLINE
   bool readArg() {
     using namespace arg;
     if(argis("-caprob")) {
@@ -2919,7 +2930,7 @@ namespace ca {
 auto ccm = addHook(clearmemory, 0, [] () {
   offscreen.clear();
   princess::clear();
-  mirrors.clear();
+  mirror::mirrors.clear();
   clearing::bpdata.clear();
   tortoise::emap.clear();
   tortoise::babymap.clear();

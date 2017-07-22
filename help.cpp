@@ -1,22 +1,20 @@
 string help;
 
-#ifndef NOLAMBDAS
 function<void()> help_delegate;
-#endif
 
 string buildHelpText() {
   DEBB(DF_GRAPH, (debugfile,"buildHelpText\n"));
 
-#ifdef ROGUEVIZ  
+#if CAP_ROGUEVIZ  
   if(rogueviz::on) return rogueviz::makehelp();
 #endif
   
   string h;
   h += XLAT("Welcome to HyperRogue");
-#ifdef ANDROID  
+#if ISANDROID  
   h += XLAT(" for Android");
 #endif
-#ifdef IOS
+#if ISIOS
   h += XLAT(" for iOS");
 #endif
   h += XLAT("! (version %1)\n\n", VER);
@@ -54,7 +52,7 @@ string buildHelpText() {
     "get the details of all the Lands.\n\n");
   h += "\n\n";
     
-#ifdef MOBILE
+#if ISMOBILE
   h += XLAT(
     "Usually, you move by touching somewhere on the map; you can also touch one "
     "of the four buttons on the map corners to change this (to scroll the map "
@@ -69,14 +67,14 @@ string buildHelpText() {
   h += XLAT(
     "You can right click any element to get more information about it.\n\n"
     );
-#ifdef MAC
+#if ISMAC
   h += XLAT("(You can also use right Shift)\n\n");
 #endif
 #endif
   h += XLAT("See more on the website: ") 
     + "http//roguetemple.com/z/hyper/\n\n";
   
-#ifdef TOUR
+#if CAP_TOUR
   h += XLAT("Try the Tutorial to help with understanding the "
     "geometry of HyperRogue (menu -> special modes).\n\n");
 #endif
@@ -100,12 +98,13 @@ string buildCredits() {
   h += XLAT(
     "special thanks to the following people for their bug reports, feature requests, porting, and other help:\n\n%1\n\n",
     "Konstantin Stupnik, ortoslon, chrysn, Adam Borowski, Damyan Ivanov, Ryan Farnsley, mcobit, Darren Grey, tricosahedron, Maciej Chojecki, Marek ÄŚtrnĂˇct, "
-    "wonderfullizardofoz, Piotr MigdaĹ‚, tehora, Michael Heerdegen, Sprite Guard, zelda0x181e, Vipul, snowyowl0, Patashu, phenomist, Alan Malloy, Tom Fryers, Sinquetica, _monad, CtrlAltDestroy, jruderman"
+    "wonderfullizardofoz, Piotr MigdaĹ‚, tehora, Michael Heerdegen, Sprite Guard, zelda0x181e, Vipul, snowyowl0, Patashu, phenomist, Alan Malloy, Tom Fryers, Sinquetica, _monad, CtrlAltDestroy, jruderman, "
+    "Kojiguchi Kazuki, baconcow" 
     );
 #ifdef EXTRALICENSE
   h += EXTRALICENSE;
 #endif
-#ifndef MOBILE
+#if !ISMOBILE
   h += XLAT(
     "\n\nSee sounds/credits.txt for credits for sound effects"
     );
@@ -118,7 +117,7 @@ string pushtext(stringpar p) {
   string s = XLAT(
     "\n\nNote: when pushing %the1 off a heptagonal cell, you can control the pushing direction "
     "by clicking left or right half of the heptagon.", p);
-#ifndef MOBILE
+#if !ISMOBILE
   s += XLAT(" With the keyboard, you can rotate the view for a similar effect (Page Up/Down).");
 #endif
   return s;
@@ -184,7 +183,7 @@ string generateHelpForItem(eItem it) {
        " You need to go deep to collect lots of them.");
      }
      
-#ifdef MOBILE
+#if ISMOBILE==1
    if(it == itOrbSafety)
      help += XLAT("This might be very useful for devices with limited memory.");
 #else
@@ -194,22 +193,22 @@ string generateHelpForItem(eItem it) {
 
    if(isRangedOrb(it)) {
      help += XLAT("\nThis is a ranged Orb. ");
-#ifdef ISMOBILE   
+#if ISMOBILE   
      if(vid.shifttarget&2)
        help += XLAT("\nRanged Orbs can be targeted by long touching the desired location.");
      else
        help += XLAT("\nRanged Orbs can be targeted by touching the desired location.");
 #else
      if(vid.shifttarget&1)
-       help += XLAT("\nRanged Orbs can be targeted by shift-clicking the desired location. "
+       help += XLAT("\nRanged Orbs can be targeted by shift-clicking the desired location. ");
      else
        help += XLAT("\nRanged Orbs can be targeted by clicking the desired location. ");
-     help += "You can also scroll to the desired location and then press 't'.");
+     help += XLAT("You can also scroll to the desired location and then press 't'.");
 #endif
      help += XLAT("\nYou can never target cells which are adjacent to the player character, or ones out of the sight range.");
      }
 
-#ifdef MOBILE
+#if ISMOBILE
    if(it == itGreenStone)
      help += XLAT("You can touch the Dead Orb in your inventory to drop it.");
 #else
@@ -314,7 +313,7 @@ void addMinefieldExplanation(string& s) {
     );
 
   s += "\n\n";
-#ifdef MOBILE
+#if ISMOBILE==1
   s += XLAT("Known mines may be marked by pressing 'm'. Your allies won't step on marked mines.");
 #else
   s += XLAT("Known mines may be marked by touching while in drag mode. Your allies won't step on marked mines.");
@@ -345,7 +344,7 @@ string generateHelpForMonster(eMonster m) {
   string s = helptitle(XLATN(minf[m].name), minf[m].color);
   
   if(m == moPlayer) {
-#ifdef TOUR
+#if CAP_TOUR
     if(tour::on)
       return s+XLAT(
         "A tourist from another world. They mutter something about the 'tutorial', "
@@ -569,7 +568,7 @@ string generateHelpForLand(eLand l) {
       );
     }
   
-#ifndef ISMOBILE
+#if !ISMOBILE
   if(l == laCA)
     s += XLAT("\n\nHint: use 'm' to toggle cells quickly");
 #endif
@@ -701,7 +700,7 @@ void describeMouseover() {
       help += s0 + "\n\n" + warpdesc;
     }
     
-#ifdef ROGUEVIZ
+#if CAP_ROGUEVIZ
   rogueviz::describe(c);
 #endif
   

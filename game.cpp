@@ -7,7 +7,7 @@ int lastsafety;
 int mutantphase;
 int turncount;
 int rosewave, rosephase;
-int avengers;
+int avengers, mirrorspirits;
 
 cell *lastmove;
 enum eLastmovetype {lmSkip, lmMove, lmAttack, lmSpecial, lmPush, lmTree};
@@ -46,6 +46,7 @@ flagtype havewhat, hadwhat;
 #define HF_WARP       (1<<20)
 #define HF_MOUSE      (1<<21)
 #define HF_RIVER      (1<<22)
+#define HF_MIRROR     (1<<23)
 
 bool seenSevenMines = false;
 
@@ -103,7 +104,7 @@ vector<cell*> pathqm; // list of monsters to move (pathq restriced to monsters)
 vector<cell*> targets; // list of monster targets
 
 // monsters of specific types to move
-vector<cell*> worms, ivies, ghosts, golems, mirrors, mirrors2, hexsnakes;
+vector<cell*> worms, ivies, ghosts, golems, hexsnakes;
 
 vector<cell*> temps;  // temporary changes during bfs
 vector<eMonster> tempval;  // restore temps
@@ -270,7 +271,7 @@ int gold(int no) {
   if(!(no & NO_GRAIL)) i += items[itHolyGrail] * 10;
   if(!(no & NO_LOVE)) {
     bool love = items[itOrbLove];
-#ifdef INV
+#if CAP_INV
     if(inv::on && inv::remaining[itOrbLove])
       love = true;
 #endif
@@ -865,6 +866,11 @@ bool canAttack(cell *c1, eMonster m1, cell *c2, eMonster m2, flagtype flags) {
   if(m2 == moHedge && !(flags & (AF_STAB | AF_TOUGH | AF_EAT | AF_MAGIC | AF_LANCE | AF_SWORD_INTO | AF_HORNS | AF_BULL)))
     if(!checkOrb(m1, itOrbThorns)) return false;
   
+  // krakens do not try to fight even with Discord
+  if((m1 == moKrakenT || m1 == moKrakenH) && 
+     (m2 == moKrakenT || m2 == moKrakenH))
+    return false;
+  
   if(m2 == moDraugr && !(flags & (AF_SWORD | AF_MAGIC | AF_SWORD_INTO | AF_HORNS))) return false;
 
   // if(m2 == moHerdBull && !(flags & AF_MAGIC)) return false;
@@ -955,7 +961,7 @@ bool stalemate1::isKilled(cell *w) {
     if(canAttack(moveto, who, w, w->monst, AF_STAB))
       return true;
 
-  if(who == moPlayer && (killed || moveto != comefrom) && mirrorkill(w)) return true;
+  if(who == moPlayer && (killed || moveto != comefrom) && mirror::isKilledByMirror(w)) return true;
   if(w->monst == moIvyHead || w->monst == moIvyBranch || isMutantIvy(w))
     return isChild(w, killed);
 
@@ -998,13 +1004,6 @@ int neighborId(cell *ofWhat, cell *whichOne) {
 
 // how many monsters are near
 eMonster which;
-
-bool mirrorkill(cell *c) {
-  for(int t=0; t<c->type; t++) 
-    if(c->mov[t] && isMimic(c->mov[t]) && c->mov[t]->mov[c->mov[t]->mondir] == c)
-      return true;
-  return false;
-  }
 
 bool flashWouldKill(cell *c, flagtype extra) {
   for(int t=0; t<c->type; t++) {
@@ -1120,7 +1119,7 @@ int monstersnear(stalemate1& sm) {
         }
       // flashwitches cannot attack if it would kill another enemy
       if(c3->monst == moWitchFlash && flashWouldKill(c3, 0)) continue;
-      if(stalemate::anyKilled() && mirrorkill(c3)) continue;
+      if(stalemate::anyKilled() && mirror::isKilledByMirror(c3)) continue;
       res++, which = c3->monst;
       } 
 
@@ -1720,6 +1719,11 @@ void killMonster(cell *c, eMonster who, flagtype deathflags) {
     for(int i=0; i<c->type; i++) if(!isWarped(c->mov[i]->land))
       avenge = true;
     if(avenge) { avengers += 2; }
+    }
+  
+  if(m == moMirrorSpirit && who != moMimic && !(deathflags & AF_MAGIC)) {
+    kills[m]--;
+    mirrorspirits++;
     }
   
   if(isMutantIvy(m) || m == moFriendlyIvy) {
@@ -2549,7 +2553,7 @@ void bfs() {
   
   int dcs = size(dcal);
   for(int i=0; i<dcs; i++) dcal[i]->cpdist = INFD;
-  worms.clear(); ivies.clear(); ghosts.clear(); golems.clear(); mirrors.clear();
+  worms.clear(); ivies.clear(); ghosts.clear(); golems.clear(); 
   temps.clear(); tempval.clear(); targets.clear(); 
   statuecount = 0;
   hexsnakes.clear(); 
@@ -2557,6 +2561,7 @@ void bfs() {
   hadwhat = havewhat;
   havewhat = 0;  
   if(!(hadwhat & HF_WARP)) { avengers = 0; }
+  if(!(hadwhat & HF_MIRROR)) { mirrorspirits = 0; }
 
   elec::havecharge = false;
   elec::afterOrb = false;
@@ -2602,6 +2607,7 @@ void bfs() {
       if(!c2) continue;
       
       if(isWarped(c2->land)) havewhat |= HF_WARP;
+      if(c2->land == laMirror) havewhat |= HF_MIRROR;
       
       if((c->wall == waBoat || c->wall == waSea) &&
         (c2->wall == waSulphur || c2->wall == waSulphurC))
@@ -2726,7 +2732,6 @@ void bfs() {
               if(items[itOrbIllusion]) items[itOrbIllusion]--;
               else c2->monst = moNone;
               }
-            if(isMimic(c2)) mirrors.push_back(c2);
             }
           else if(c2->monst == moButterfly) {
             addButterfly(c2);
@@ -2765,12 +2770,6 @@ void bfs() {
   buildAirmap();
   
   if(overgenerate) doOvergenerate();
-  
-  if(geometry == gQuotient2) {
-    mirrors.clear();
-    for(cell *c: currentmap->allcells())
-      if(isMimic(c)) mirrors.push_back(c);
-    }
   }
 
 bool makeEmpty(cell *c) {
@@ -2928,7 +2927,7 @@ string itemcounter(int qty) {
 void gainShard(cell *c2, const char *msg) {
   invismove = false;
   string s = XLAT(msg);
-  if(c2->land == laMirror) {
+  if(c2->land == laMirror && !peace::on) {
      gainItem(itShard);
      s += itemcounter(items[itShard]);
      collectMessage(c2, itShard);
@@ -2968,23 +2967,6 @@ void playerMoveEffects(cell *c1, cell *c2) {
     drainOrb(itOrbAether, 2);
     }
     
-  if(c2->wall == waMirror && !markOrb(itOrbAether)) {
-    drawParticles(c2, winf[c2->wall].color, 16);
-    gainShard(c2, "The mirror shatters!");
-    playSound(c2, "pickup-mirror");
-    cell *pc = multi::player[multi::cpid].c;
-    multi::player[multi::cpid].c = c2;
-    mirror::createMirrors(cwt.c, cwt.spin, moMirage);
-    multi::player[multi::cpid].c = pc;
-    }
-
-  if(c2->wall == waCloud && !markOrb(itOrbAether)) {
-    drawParticles(c2, winf[c2->wall].color, 16);
-    gainShard(c2, "The cloud turns into a bunch of images!");  
-    playSound(c2, "pickup-mirror");
-    mirror::createMirages(cwt.c, cwt.spin, moMirage);
-    }
-  
   if(cellUnstable(c2) && !markOrb(itOrbAether)) doesFallSound(c2);
 
   if(c2->wall == waStrandedBoat && markOrb(itOrbWater))
@@ -3055,7 +3037,7 @@ void moveMonster(cell *ct, cell *cf) {
     printf("called for Dragon\n");
     return;
     }
-  animateMovement(cf, ct, LAYER_SMALL);
+  if(m != moMimic) animateMovement(cf, ct, LAYER_SMALL);
   // the following line is necessary because otherwise plates disappear only inside the sight range
   if(cellUnstable(cf) && !ignoresPlates(m)) cf->wall = waChasm;
   moveEffect(ct, cf, m);
@@ -3303,7 +3285,7 @@ int moveval(cell *c1, cell *c2, int d, int mf) {
       else return 2000;
       }
     if(isPlayerOn(c2)) return peace::on ? -1700 : 2500;
-    else if(isFriendlyOrBug(c2)) return 2000;
+    else if(isFriendlyOrBug(c2)) return peace::on ? -1600 : 2000;
     else return 500;
     }
   
@@ -4007,7 +3989,8 @@ void groupmove2(cell *c, cell *from, int d, eMonster movtype, flagtype mf) {
 
     if(!passable_for(movtype, from, c, P_ONPLAYER | P_MONSTER)) return;
     if(!ignoresSmell(c->monst) && againstRose(c, from)) return;
-    if((mf & MF_ONLYEAGLE) && c->monst != moEagle && c->monst != moBat) return;
+    if((mf & MF_ONLYEAGLE) && c->monst != moEagle && c->monst != moBat) 
+      return;
     // in the gravity lands, eagles cannot ascend in their second move
     if((mf & MF_ONLYEAGLE) && gravityLevel(c) < gravityLevel(from)) {
       c->aitmp = sval; return;
@@ -5334,7 +5317,7 @@ bool activateRecall() {
   killFriendlyIvy();
   movecost(cwt.c, recallCell);
   playerMoveEffects(cwt.c, recallCell);
-  mirror::destroy();
+  mirror::destroyAll();
 
   items[itOrbSword] = 0;
   items[itOrbSword2] = 0;
@@ -5409,7 +5392,7 @@ bool hasSafeOrb(cell *c) {
 
 void checkmove() {
 
-#ifdef INV
+#if CAP_INV
   if(inv::on) inv::compute();
 #endif
 
@@ -5437,7 +5420,7 @@ void checkmove() {
         canmove = legalmoves[cwt.spin] = true;
   if(kills[moPlayer]) canmove = false;
 
-#ifdef INV  
+#if CAP_INV  
   if(!canmove && !inv::incheck) {
     if(inv::remaining[itOrbSafety])
       canmove = true;
@@ -5530,7 +5513,7 @@ void movecost(cell* from, cell *to) {
       addMessage(XLAT("As you leave, your powers are drained!"));
     }
   
-#ifdef TOUR
+#if CAP_TOUR
   if(from->land != to->land && tour::on)
     tour::checkGoodLand(to->land);
 #endif
@@ -5734,7 +5717,7 @@ bool collectItem(cell *c2, bool telekinesis) {
     playSound(c2, "pickup-orb"); // TODO summon
     placeGolem(cwt.c, c2, moTameBomberbird);
     }
-#ifdef TOUR
+#if CAP_TOUR
   else if(tour::on && (c2->item == itOrbSafety || c2->item == itOrbRecall)) {
     addMessage(XLAT("This Orb is not compatible with the Tutorial."));
     return true;
@@ -5854,7 +5837,7 @@ bool collectItem(cell *c2, bool telekinesis) {
       chaosAchieved = true;
       }
 
-#ifdef MOBILE
+#if ISMOBILE==1
     if(pg < lastsafety + R30*3/2 && g2 >= lastsafety + R30*3/2)
       addMessage(XLAT("The Orb of Safety from the Land of Eternal Motion might save you."));
 #endif
@@ -6167,11 +6150,11 @@ namespace orbbull {
   }
 
 void monstersTurn() {
+  mirror::breakAll();
   DEBT("bfs");
   bfs();
   DEBT("charge");
   if(elec::havecharge) elec::act();
-  mirror::destroyStray();
   DEBT("mmo");
   int phase2 = (1 & items[itOrbSpeed]);
   if(!phase2) movemonsters();
@@ -6335,7 +6318,7 @@ bool movepcto(int d, int subdir, bool checkonly) {
   int origd = d;
   if(d >= 0) {
     cwspin(cwt, d);
-    if(multi::players == 1) mirror::spin(d);
+    mirror::act(d, mirror::SPINSINGLE);
     d = cwt.spin;
     }
   if(d != -1 && !checkonly) playermoved = true;
@@ -6497,38 +6480,43 @@ bool movepcto(int d, int subdir, bool checkonly) {
       goto statuejump;
       }
 
-    if(c2->wall == waBigTree && !c2->monst && !markOrb(itOrbAether) && !nonAdjacentPlayer(cwt.c,c2)) {
+    bool attackable;
+    attackable = 
+      c2->wall == waBigTree ||
+      c2->wall == waSmallTree ||
+      c2->wall == waMirrorWall;
+    attackable = attackable && (!c2->monst || isFriendly(c2));
+    if(attackable && markOrb(itOrbAether) && c2->wall != waMirrorWall)
+      attackable = false;
+    attackable = attackable && !nonAdjacentPlayer(cwt.c,c2);
+      
+    if(attackable) {
       if(checkNeedMove(checkonly, true)) return false;
-      if(monstersnear(cwt.c,NULL,moPlayer,NULL,cwt.c)) {
+      if(monstersnear(cwt.c,c2,moPlayer,NULL,cwt.c)) {
         if(!checkonly && errormsgs) wouldkill("%The1 would get you!");
         return false;
         }
       if(checkonly) return true;
-      drawParticles(c2, winf[c2->wall].color, 4);
-      addMessage(XLAT("You start chopping down the tree."));
-      playSound(c2, "hit-axe" + pick123());
-      if(survivalist && isHaunted(c2->land))
-        survivalist = false;
-      mirror::spingo(origd, 0);
-      c2->wall = waSmallTree;
-      lastmovetype = lmTree; lastmove = c2;
-      swordAttackStatic();
-      }
-    else if(c2->wall == waSmallTree && !c2->monst && !markOrb(itOrbAether) && !nonAdjacentPlayer(cwt.c,c2)) {
-      if(checkNeedMove(checkonly, true)) return false;
-      if(monstersnear(cwt.c,NULL,moPlayer,NULL,cwt.c)) {
-        if(!checkonly && errormsgs) wouldkill("%The1 would get you!");
-        return false;
+      if(c2->wall == waSmallTree) {
+        drawParticles(c2, winf[c2->wall].color, 4);
+        addMessage(XLAT("You start chopping down the tree."));
+        playSound(c2, "hit-axe" + pick123());
+        c2->wall = waNone;
         }
-      if(checkonly) return true;
-      drawParticles(c2, winf[c2->wall].color, 8);
-      addMessage(XLAT("You chop down the tree."));
-      playSound(c2, "hit-axe" + pick123());
+      else if(c2->wall == waBigTree) {
+        drawParticles(c2, winf[c2->wall].color, 8);
+        addMessage(XLAT("You chop down the tree."));
+        playSound(c2, "hit-axe" + pick123());
+        c2->wall = waSmallTree;
+        }
+      else {
+        if(!peace::on)
+          addMessage(XLAT("You swing your sword at the mirror."));
+        }
       if(survivalist && isHaunted(c2->land))
         survivalist = false;
-      mirror::spingo(origd, 0);
+      mirror::act(origd, mirror::SPINMULTI | mirror::ATTACK);
       lastmovetype = lmTree; lastmove = c2;
-      c2->wall = waNone;
       swordAttackStatic();
       }
     else if(c2->monst == moKnight) {
@@ -6616,6 +6604,8 @@ bool movepcto(int d, int subdir, bool checkonly) {
           !c2->item);
         } */
       
+      mirror::act(origd, mirror::SPINMULTI | mirror::ATTACK);
+
       if(goodTortoise) {
         items[itBabyTortoise] += 4;
         updateHi(itBabyTortoise, items[itBabyTortoise]);
@@ -6639,11 +6629,12 @@ bool movepcto(int d, int subdir, bool checkonly) {
         }
       else {
         eMonster m = c2->monst;
-        attackMonster(c2, AF_MSG, moPlayer);
-        produceGhost(c2, m, moPlayer);
+        if(m) {
+          attackMonster(c2, AF_MSG, moPlayer);
+          produceGhost(c2, m, moPlayer);
+          }
         }
       
-      mirror::spingo(origd, 0);
       lastmovetype = lmAttack; lastmove = c2;
       swordAttackStatic();
       }
@@ -6781,12 +6772,7 @@ bool movepcto(int d, int subdir, bool checkonly) {
       
       if(peace::on) pushpast |= c2->monst && !isMultitile(c2->monst);
       
-      if(isMimic(c2->monst)) {
-        addMessage(XLAT("You rejoin %the1.", c2->monst));
-        playSound(c2, "click");
-        killMonster(c2, moNone);
-        }
-      else if(pushpast) {
+      if(pushpast) {
         bool pswitch = false;
         if(c2->monst == moMouse)
           princess::mouseSqueak(c2);
@@ -6817,7 +6803,7 @@ bool movepcto(int d, int subdir, bool checkonly) {
       else
         animateMovement(c1, cwt.c, LAYER_SMALL);
       
-      mirror::spingo(origd, 1);
+      mirror::act(origd, mirror::SPINMULTI | mirror::ATTACK | mirror::GO);
 
       playerMoveEffects(c1, c2);
 
@@ -6984,7 +6970,7 @@ bool mightBeMine(cell *c) {
   }
 
 void performMarkCommand(cell *c) {
-#ifdef ROGUEVIZ
+#if CAP_ROGUEVIZ
   rogueviz::mark(c);
 #endif
   if(c->land == laCA && c->wall == waNone) 

@@ -4,7 +4,7 @@
 #include <map>
 #include <stdint.h>
 
-#ifdef WINDOWS
+#if ISWINDOWS
 #include "direntx.h"
 #include "direntx.c"
 #else
@@ -23,7 +23,7 @@ namespace mapeditor {
     } ew, ewsearch;
   bool autochoose;
   
-#ifndef NOEDIT
+#if CAP_EDIT
   map<int, cell*> modelcell;
 
   void handleKeyMap(int sym, int uni);
@@ -49,7 +49,7 @@ namespace mapeditor {
 #endif
   }
 
-#ifndef NOEDIT
+#if CAP_EDIT
 namespace mapstream {
   std::map<cell*, int> cellids;
   vector<cell*> cellbyid;
@@ -425,7 +425,7 @@ namespace mapeditor {
     
   cell *drawcell;
 
-#ifndef NOEDIT
+#if CAP_EDIT
   int paintwhat = 0;
   int painttype = 0;
   int radius = 0;
@@ -1173,12 +1173,16 @@ namespace mapeditor {
       cfileext = ".lev";
       pushScreen(drawFileDialog);
       }
+#if CAP_SDL    
     else if(sym == SDLK_F6) {
       saveHighQualityShot();
       }
+#endif
+#if CAP_SVG
     else if(sym == SDLK_F8) {
       svg::render();
       }
+#endif
     else if(sym == SDLK_F7) {
       drawplayer = !drawplayer;
       }
@@ -1691,10 +1695,12 @@ namespace mapeditor {
     if(sym == SDLK_F7) {
       drawplayer = !drawplayer;
       }
-    
+
+#if CAP_SDL    
     if(sym == SDLK_F6) {
       saveHighQualityShot();
       }
+#endif
     
     if(sym == SDLK_F8) {
       svg::render();
@@ -1867,7 +1873,7 @@ namespace mapeditor {
     }
     
   bool drawUserShape(transmatrix V, int group, int id, int color, cell *c) {
-  #ifdef MOBILE
+  #if ISMOBILE==1
     return false;
   #else
   
@@ -1882,7 +1888,7 @@ namespace mapeditor {
         }
       }
   
-  #ifndef NOEDIT  
+  #if CAP_EDIT  
     if((cmode & sm::DRAW) && mapeditor::editingShape(group, id)) {
   
       /* for(int a=0; a<size(ds.list); a++) {

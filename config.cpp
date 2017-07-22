@@ -150,7 +150,7 @@ void initcs(charstyle &cs) {
   cs.uicolor    = 0xFF0000FF;
   }
 
-#ifndef NOCONFIG
+#if CAP_CONFIG
 void savecs(FILE *f, charstyle& cs, int xvernum) {
   int gflags = cs.charid;
   if(vid.samegender) gflags |= 16;
@@ -201,7 +201,7 @@ void initConfig() {
   addsaver(vid.sspeed, "scrollingspeed", 0);
   addsaver(vid.mspeed, "movement speed", 1);
   addsaver(vid.full, "fullscreen", false);
-  addsaver(vid.aurastr, "aura strength", 128);
+  addsaver(vid.aurastr, "aura strength", ISMOBILE ? 0 : 128);
   addsaver(vid.aurasmoothen, "aura smoothen", 5);
   addsaver(vid.graphglyph, "graphical items/kills", 1);
   addsaver(vid.particles, "extra effects", 1);
@@ -218,8 +218,8 @@ void initConfig() {
   addsaver(vid.yshift, "Y shift", 0);
   addsaver(vid.camera_angle, "camera angle", 0);
   addsaver(vid.ballproj, "ballproj", 1);
-  addsaver(vid.monmode, "monster display mode", (ISANDROID || ISPANDORA) ? 2 : 4);
-  addsaver(vid.wallmode, "wall display mode", (ISANDROID || ISPANDORA) ? 3 : 5);
+  addsaver(vid.monmode, "monster display mode", ISMOBILE ? 2 : 4);
+  addsaver(vid.wallmode, "wall display mode", ISMOBILE ? 3 : 5);
 
   addsaver(geom3::depth, "3D depth");
   addsaver(geom3::camera, "3D camera level");
@@ -234,10 +234,12 @@ void initConfig() {
   addsaver(geom3::highdetail, "3D highdetail");
   addsaver(geom3::middetail, "3D middetail");
 
+#if CAP_RUG
   addsaver(rug::renderonce, "rug-renderonce");
   addsaver(rug::rendernogl, "rug-rendernogl");
   addsaver(rug::texturesize, "rug-texturesize");
   addsaver(rug::scale, "rug-scale");
+#endif
 
   addsaverenum(pmodel, "used model");
   addsaver(polygonal::SI, "polygon sides");
@@ -308,7 +310,7 @@ void saveConfig() {
     fprintf(f, "%s=%s\n", s->name.c_str(), s->save().c_str());
   
   fclose(f);
-#ifndef MOBILE
+#if ISMOBILE==0
   addMessage(s0 + "Configuration saved to: " + conffile);
 #else
   addMessage(s0 + "Configuration saved");
@@ -323,7 +325,7 @@ void readf(FILE *f, ld& x) {
   }
 
 void loadOldConfig(FILE *f) {
-  int gl=1, aa=1, bb=1, cc, dd, ee;
+  int gl=1, aa=1, bb=1, cc, dd;
   int err;
   float a, b, c, d;
   err=fscanf(f, "%f%f%f%f\n", &a, &b, &c, &d);
@@ -351,11 +353,14 @@ void loadOldConfig(FILE *f) {
 
   shmup::loadConfig(f);
 
-  aa = rug::renderonce; bb = rug::rendernogl; cc = purehepta; dd = chaosmode; ee = vid.steamscore;
+#if CAP_RUG
+  aa = rug::renderonce; bb = rug::rendernogl; cc = purehepta; dd = chaosmode; 
+  int ee = vid.steamscore;
   double rs = rug::scale;
   err=fscanf(f, "%d%d%d%d%lf%d%d", &aa, &bb, &rug::texturesize, &cc, &rs, &ee, &dd);
   rug::renderonce = aa; rug::rendernogl = bb; purehepta = cc; chaosmode = dd; vid.steamscore = ee;
   rug::scale = rs;
+#endif
 
   aa=conformal::includeHistory;
   double ps = polygonal::STAR, lv = conformal::lvspeed;
@@ -473,7 +478,7 @@ void loadConfig() {
 void showAllConfig() {
   dialog::addBreak(50);
   dialog::addItem(XLAT("exit configuration"), 'v');
-#ifndef NOCONFIG
+#if CAP_CONFIG
   dialog::addItem(XLAT("save the current config"), 's');
   if(getcstat == 's')
     mouseovers = XLAT("Config file: %1", conffile);
@@ -485,7 +490,7 @@ void handleAllConfig(int sym, int uni) {
 
   else if(uni == 'v') popScreen();
   else if(sym == SDLK_ESCAPE) popScreen();
-#ifndef NOCONFIG
+#if CAP_CONFIG
   else if(uni == 's') saveConfig();
 #endif  
   }
@@ -496,10 +501,8 @@ void showGraphConfig() {
 
   dialog::init(XLAT("graphics configuration"));
 
-  #ifndef ONEGRAPH
-  #ifdef GL
+  #if CAP_GLORNOT
   dialog::addBoolItem(XLAT("openGL mode"), vid.usingGL, 'o');
-  #endif
   #endif
 
   if(!vid.usingGL)
@@ -517,13 +520,13 @@ void showGraphConfig() {
 //    dialog::addBoolItem(XLAT("finer lines at the boundary"), vid.antialias & AA_LINEWIDTH, 'b');
     }
 
-  #ifndef MOBWEB
+  #if CAP_FRAMELIMIT
   dialog::addSelItem(XLAT("framerate limit"), its(vid.framelimit), 'l');
   if(getcstat == 'l') 
     mouseovers = XLAT("Reduce the framerate limit to conserve CPU energy");
   #endif
 
-#ifndef IOS
+#if !ISIOS && !ISWEB
   dialog::addBoolItem(XLAT("fullscreen mode"), (vid.full), 'f');
 #endif
 
@@ -548,13 +551,13 @@ void showGraphConfig() {
 
   dialog::addSelItem(XLAT("inventory/kill mode"), XLAT(glyphmodenames[vid.graphglyph]), 'd');
 
-#ifdef MOBILE
+#if ISMOBILE==1
   dialog::addSelItem(XLAT("font scale"), its(fontscale), 'b');
 #endif
 
   dialog::addSelItem(XLAT("sight range"), its(sightrange), 'r');
 
-#ifdef MOBILE
+#if ISMOBILE==1
   dialog::addSelItem(XLAT("compass size"), its(vid.mobilecompasssize), 'c');
 #endif
 
@@ -600,7 +603,7 @@ void showGraphConfig() {
     
     if(xuni == 'f') switchFullscreen();
   
-  #ifndef ONEGRAPH
+  #if CAP_GLORNOT
     if(xuni == 'o' && shiftmul > 0) switchGL();
   #endif
   
@@ -615,7 +618,9 @@ void showGraphConfig() {
         vid.antialias |= AA_POLY;
       else 
         vid.antialias |= AA_LINES;
+#if CAP_SDL
       setvideomode();
+#endif
       }
     
     // if(xuni == 'b') vid.antialias ^= AA_LINEWIDTH;
@@ -625,11 +630,13 @@ void showGraphConfig() {
   
     if(xuni == 'c') 
       dialog::editNumber(vid.mobilecompasssize, 0, 100, 10, 20, XLAT("compass size"), "");
-    
+
+  #if CAP_FRAMELIMIT    
     if(xuni == 'l') 
       dialog::editNumber(vid.framelimit, 5, 300, 10, 300, XLAT("framerate limit"), "");
-    
-  #ifdef MOBILE
+  #endif
+      
+  #if ISMOBILE
     if(xuni =='b') 
       dialog::editNumber(fontscale, 0, 400, 10, 100, XLAT("font scale"), "");
   #endif
@@ -645,11 +652,11 @@ void showGraphConfig() {
   
 void switchFullscreen() {
   vid.full = !vid.full;
-#ifdef ANDROID
+#if ISANDROID
   addMessage(XLAT("Reenter HyperRogue to apply this setting"));
   settingsChanged = true;
 #endif
-#ifndef NOSDL
+#if CAP_SDL
   if(true) {
     vid.xres = vid.full ? vid.xscr : 9999;
     vid.yres = vid.full ? vid.yscr : 9999;
@@ -664,15 +671,10 @@ void switchGL() {
   vid.usingGL = !vid.usingGL;
   if(vid.usingGL) addMessage(XLAT("openGL mode enabled"));
   if(!vid.usingGL) addMessage(XLAT("openGL mode disabled"));
-#ifndef ANDROID
-  if(!vid.usingGL) addMessage(XLAT("shift+O to switch anti-aliasing"));
-#endif
-#ifdef ANDROID
+#if ISANDROID
   settingsChanged = true;
-#else
-#ifndef NOSDL
+#elif CAP_SDL
   setvideomode();
-#endif
 #endif
   }
 
@@ -681,17 +683,15 @@ void showBasicConfig() {
   const char *axmodes[5] = {"OFF", "auto", "light", "heavy", "arrows"};
   dialog::init(XLAT("basic configuration"));
 
-#ifndef NOTRANS
-  dialog::addSelItem(XLAT("language"), XLAT("EN"), 'l');
-#endif
+  if(CAP_TRANS) dialog::addSelItem(XLAT("language"), XLAT("EN"), 'l');
   dialog::addSelItem(XLAT("player character"), numplayers() > 1 ? "" : csname(vid.cs), 'g');
   if(getcstat == 'g') 
     mouseovers = XLAT("Affects looks and grammar");
 
-#ifndef NOAUDIO
-  dialog::addSelItem(XLAT("background music volume"), its(musicvolume), 'b');
-  dialog::addSelItem(XLAT("sound effects volume"), its(effvolume), 'e');
-#endif
+  if(CAP_AUDIO) {
+    dialog::addSelItem(XLAT("background music volume"), its(musicvolume), 'b');
+    dialog::addSelItem(XLAT("sound effects volume"), its(effvolume), 'e');
+    }
 
 // input:  
   dialog::addSelItem(XLAT("help for keyboard users"), XLAT(axmodes[vid.axes]), 'c');
@@ -700,18 +700,19 @@ void showBasicConfig() {
   dialog::addBoolItem(XLAT("draw circle around the target"), (vid.drawmousecircle), 'd');
   
   dialog::addSelItem(XLAT("message flash time"), its(vid.flashtime), 't');
-#ifdef MOBILE
+
+#if ISMOBILE
   dialog::addBoolItem(XLAT("targetting ranged Orbs long-click only"), (vid.shifttarget&2), 'i');
 #else
   dialog::addBoolItem(XLAT("targetting ranged Orbs Shift+click only"), (vid.shifttarget&1), 'i');
 #endif
-#ifdef STEAM
+
+#if ISSTEAM
   dialog::addBoolItem(XLAT("send scores to Steam leaderboards"), (vid.steamscore&1), 'l');
 #endif
 
-#ifndef MOBILE
-  dialog::addSelItem(XLAT("configure keys/joysticks"), "", 'p');
-#endif
+  if(CAP_SHMUP && !ISMOBILE)
+    dialog::addSelItem(XLAT("configure keys/joysticks"), "", 'p');
 
   showAllConfig();
 
@@ -738,39 +739,36 @@ void showBasicConfig() {
     if(uni >= 32 && uni < 64) xuni = uni;
   
     if(xuni == 'c') { vid.axes += 60 + (shiftmul > 0 ? 1 : -1); vid.axes %= 5; }
-  #ifndef NOAUDIO
-    if(xuni == 'b') {
+
+    if(CAP_AUDIO && xuni == 'b') {
       dialog::editNumber(musicvolume, 0, 128, 10, 60, XLAT("background music volume"), "");
       }
-    if(xuni == 'e') {
+    if(CAP_AUDIO && xuni == 'e') {
       dialog::editNumber(effvolume, 0, 128, 10, 60, XLAT("sound effects volume"), "");
       }
-  #endif
     
-  #ifndef NOTRANS
-    if(xuni == 'l') {
+    if(CAP_TRANS && xuni == 'l') {
       vid.language += (shiftmul>0?1:-1);
       vid.language %= NUMLAN;
       if(vid.language < 0) vid.language += NUMLAN;
-  #ifdef ANDROID
+  #if ISANDROID
       settingsChanged = true;
   #endif
       }
-  #endif
     
     if(xuni == 'g') pushScreen(showCustomizeChar);
   
-  #ifndef MOBILE
+#if CAP_SHMUP
     if(xuni == 'p') {
       pushScreen(shmup::showShmupConfig);
       multi::shmupcfg = shmup::on;
       }
-  #endif
+#endif
     
     if(xuni == 'r') vid.revcontrol = !vid.revcontrol;
     if(xuni == 'd') vid.drawmousecircle = !vid.drawmousecircle;
   
-  #ifdef STEAM
+  #if ISSTEAM
     if(xuni == 'l') vid.steamscore = vid.steamscore^1;
   #endif
     if(xuni == 't') 
@@ -783,6 +781,7 @@ void showBasicConfig() {
     };
   }
 
+#if CAP_SDLJOY
 void showJoyConfig() {
   gamescreen(4);
 
@@ -791,7 +790,6 @@ void showJoyConfig() {
   dialog::addSelItem(XLAT("first joystick position (movement)"), its(joyx)+","+its(joyy), 0);
   dialog::addSelItem(XLAT("second joystick position (panning)"), its(panjoyx)+","+its(panjoyy), 0);
   
-#ifndef MOBWEB
   dialog::addSelItem(XLAT("joystick mode"), XLAT(autojoy ? "automatic" : "manual"), 'p');
   if(getcstat == 'p') {
     if(autojoy) 
@@ -804,7 +802,6 @@ void showJoyConfig() {
   dialog::addSelItem(XLAT("first joystick: execute movement threshold"), its(vid.joyvalue2), 'b');
   dialog::addSelItem(XLAT("second joystick: pan threshold"), its(vid.joypanthreshold), 'c');
   dialog::addSelItem(XLAT("second joystick: panning speed"), fts(vid.joypanspeed * 1000), 'd');
-#endif
 
   dialog::addItem(XLAT("back"), 'v');
   dialog::display();
@@ -825,6 +822,7 @@ void showJoyConfig() {
     else if(doexiton(sym, uni)) popScreen();
     };
   }
+#endif
 
 void projectionDialog() {
   geom3::tc_alpha = ticks;

@@ -166,6 +166,9 @@ const transmatrix Id = {{{1,0,0}, {0,1,0}, {0,0,1}}};
 // mirror image
 const transmatrix Mirror = {{{1,0,0}, {0,-1,0}, {0,0,1}}};
 
+// mirror image
+const transmatrix MirrorX = {{{-1,0,0}, {0,1,0}, {0,0,1}}};
+
 // rotate by PI
 const transmatrix pispin = {{{-1,0,0}, {0,-1,0}, {0,0,1}}};
 
@@ -368,20 +371,25 @@ void display(const transmatrix& T) {
   printf("\n\n");
   }
 
-transmatrix inverse(transmatrix T) {
-  profile_start(7);
+ld det(const transmatrix& T) {
   ld det = 0;
   for(int i=0; i<3; i++) 
     det += T[0][i] * T[1][(i+1)%3] * T[2][(i+2)%3];
   for(int i=0; i<3; i++) 
     det -= T[0][i] * T[1][(i+2)%3] * T[2][(i+1)%3];
+  return det;
+  }
   
+transmatrix inverse(const transmatrix& T) {
+  profile_start(7);
+  
+  ld d = det(T);
   transmatrix T2;
-  if(det == 0) return T2;
+  if(d == 0) return T2;
   
   for(int i=0; i<3; i++) 
   for(int j=0; j<3; j++) 
-    T2[j][i] = (T[(i+1)%3][(j+1)%3] * T[(i+2)%3][(j+2)%3] - T[(i+1)%3][(j+2)%3] * T[(i+2)%3][(j+1)%3]) / det;
+    T2[j][i] = (T[(i+1)%3][(j+1)%3] * T[(i+2)%3][(j+2)%3] - T[(i+1)%3][(j+2)%3] * T[(i+2)%3][(j+1)%3]) / d;
 
   profile_stop(7);
   return T2;

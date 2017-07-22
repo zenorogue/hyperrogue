@@ -90,7 +90,7 @@ namespace yendor {
     {laMotion,    YF_START_AL | YF_END}, // NOT WON, SEEMS OKAY
     {laAlchemist, 0}, // ALMOST WON
     {laIvoryTower,YF_START_CR | YF_NEAR_ELEM | YF_REPEAT}, // won cool
-    {laMirror,    YF_NEAR_OVER}, // OK
+    {laMirrorOld, YF_NEAR_OVER}, // OK
     {laWhirlpool, 0}, // cool
     {laIce,       YF_NEAR_ELEM}, // OK
     {laHive,      YF_NEAR_RED}, // OK
@@ -668,6 +668,7 @@ namespace tactic {
     }
 
   void showMenu() {
+    cmode = sm::ZOOMABLE;
     mouseovers = XLAT("pure tactics mode") + " - " + mouseovers;
 
     nl = LAND_TAC; 
@@ -830,9 +831,9 @@ int modecodetable[42][6] = {
 int newmodecode = 255;
 
 int modecode() {
-#ifndef NOSAVE
+#if CAP_SAVE
   if(anticheat::tampered || cheater) return 6;
-#ifdef TOUR
+#if CAP_TOUR
   if(tour::on) return 6;
 #endif
   if(quotient) return 6;
@@ -950,8 +951,19 @@ namespace peace {
     return false;
     }
   
-  const char *chelp = NODESCYET;
-  
+  const char *chelp = 
+    "In the peaceful mode, you just explore the world, "
+    "without any battles; there are also several "
+    "navigational puzzles available. In the memory game, "
+    "you have to collect as many Dodecahedra as you can, "
+    "and return to the starting point -- hyperbolic geometry "
+    "makes this extremely difficult! Other hyperbolic puzzles "
+    "include the Burial Grounds (excavate the treasures " 
+    "using your magical sword), Galápagos (try to find an adult "
+    "tortoise matching the baby), Camelot (find the center of "
+    "a large hyperbolic circle), and Palace (follow the mouse). "
+    "Other places listed are for exploration.";
+    
   namespace simon {
 
     vector<cell*> path;
@@ -1028,7 +1040,7 @@ namespace peace {
     }
     
   void showMenu() {
-    dialog::init(XLAT(otherpuzzles ? "hyperbolic puzzles" : "memory game"), 0x40A040, 150, 100);
+    dialog::init(XLAT(otherpuzzles ? "puzzles and exploration" : "memory game"), 0x40A040, 150, 100);
 
     levellist = otherpuzzles ? explorelevels : simonlevels;
  
@@ -1036,9 +1048,9 @@ namespace peace {
       dialog::addItem(XLAT1(linf[levellist[qty]].name), 'a'+qty);
 
     dialog::addBreak(100);
-    dialog::addItem(XLAT(otherpuzzles ? "memory game" : "other hyperbolic puzzles"), '1');
+    dialog::addItem(XLAT(otherpuzzles ? "memory game" : "puzzles and exploration"), '1');
     dialog::addBoolItem(XLAT("display hints"), hint, '2');
-    dialog::addItem(XLAT("Help"), SDLK_F1);
+    dialog::addItem(XLAT("help"), SDLK_F1);
     dialog::addItem(XLAT("Return to the normal game"), '0');
     
     dialog::display();

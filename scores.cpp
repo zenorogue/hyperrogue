@@ -1,4 +1,4 @@
-#ifndef NOSAVE
+#if CAP_SAVE
 
 namespace scores {
 

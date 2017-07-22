@@ -15,19 +15,25 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#define ISANDROID 0
-#define ISMOBILE 0
-#define ISIOS 0
-#define USE_SDL
-#define USE_COMMANDLINE
+#ifdef MAC
+#define ISMAC 1
+#endif
 
-#ifdef STEAM
+#ifdef LINUX
+#define ISLINUX 1
+#endif
+
+#ifdef WINDOWS
+#define ISWINDOWS 1
+#endif
+
+#if ISSTEAM
 #define NOLICENSE
 #endif
 
 #include "init.cpp"
 
-#ifdef LINUX
+#if ISLINUX
 #include <sys/resource.h>
 
 void moreStack() {
@@ -102,10 +108,10 @@ int arg::readCommon() {
   if(argis("-c")) { PHASE(1); shift(); conffile = args(); }
   else if(argis("-s")) { PHASE(1); shift(); scorefile = args(); }
   else if(argis("-m")) { PHASE(1); shift(); musicfile = args(); }
-#ifdef SDLAUDIO
+#if CAP_SDLAUDIO
   else if(argis("-se")) { PHASE(1); shift(); wheresounds = args(); }
 #endif
-#ifndef NOEDIT
+#if CAP_EDIT
   else if(argis("-lev")) { shift(); levelfile = args(); }
   else if(argis("-pic")) { shift(); picfile = args(); }
   else if(argis("-load")) { PHASE(3); shift(); mapstream::loadMap(loadlevel); }
@@ -287,7 +293,7 @@ else if(args()[0] == '-' && args()[1] == x && args()[2] == '0') { if(curphase ==
   else if(argis("--run")) {
     PHASE(3); mainloop(); quitmainloop = false;
     }
-#ifdef TOUR
+#if CAP_TOUR
   else if(argis("--tour")) {
     PHASE(3); tour::start();
     }
@@ -315,7 +321,7 @@ else if(args()[0] == '-' && args()[1] == x && args()[2] == '0') { if(curphase ==
     PHASEFROM(2);
     shift(); sightrange = argi();
     }
-#ifndef NOSDL
+#if CAP_SDL
   else if(argis("-pngshot")) {
     PHASE(3); shift(); 
     printf("saving PNG screenshot to %s\n", args());
@@ -330,14 +336,12 @@ else if(args()[0] == '-' && args()[1] == x && args()[2] == '0') { if(curphase ==
     // note: use '-svgfont latex' to produce text output as: \myfont{size}{text}
     // (this is helpful with Inkscape's PDF+TeX output feature; define \myfont yourself)
     }
-#ifndef NOPNG
   else if(argis("-pngsize")) {
     shift(); sscanf(args(), "%d", &pngres);
     }
   else if(argis("-pngformat")) {
     shift(); sscanf(args(), "%d", &pngformat);
     }
-#endif
   else if(argis("-svggamma")) {
     shift(); svg::gamma = argf();
     }
@@ -400,8 +404,8 @@ hookset<bool(int argc, char** argv)> *hooks_main;
 #ifndef NOMAIN
 int main(int argc, char **argv) {
   if(callhandlers(false, hooks_main, argc, argv)) return 0;
-#ifndef WEB
-  #ifdef LINUX
+#if !ISWEB
+  #if ISLINUX
     moreStack();
   #endif
   arg::init(argc, argv);
@@ -416,7 +420,7 @@ int main(int argc, char **argv) {
   }
 #endif
 
-#ifdef USE_COMMANDLINE
+#if CAP_COMMANDLINE
 purehookset hooks_config;
 
 hookset<int()> *hooks_args;

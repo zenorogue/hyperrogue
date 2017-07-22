@@ -375,7 +375,7 @@ S("Hyperstone Quest: collect at least %3 %1 in %the2", "Hyperkamový úkol: sesb
 S("Hyperstone Quest completed!", "Hyperkamový úkol splněn!")
 S("Look for the Orbs of Yendor in Hell or in the Crossroads!", "Hledej Yendorské sféry v Pekle nebo na Křižovatce!")
 S("Unlock the Orb of Yendor!", "Odemkni Yendorskou sféru!")
-S("Defeat 100 enemies to access the Graveyard", "Hřbitov zpřístupníš poražením 100 nepřátel")
+S("Defeat %1 enemies to access the Graveyard", "Hřbitov zpřístupníš poražením %1 nepřátel")
 S("(press ESC during the game to review your quest)", "(své úkoly můžeš během hry zobrazit stiskem ESC)")
 S("you have cheated %1 times", "počet cheatů: %1")
 S("%1 turns (%2)", "počet kol: %1 (%2)")
@@ -5171,7 +5171,7 @@ S("The game starts in the Icy Lands. Collect the Ice Diamonds "
 S("Hypersian Rug model", "Model hyperského koberce")
 S(
   "New players think that the action of HyperRogue takes place on a sphere. "
-#ifdef MOBWEB
+#if ISMOBWEB
   "This is not true -- try the Tutorial in the native desktop version shows "
   "the surface HyperRogue actually takes place on.",
 #else
@@ -5183,7 +5183,7 @@ S(
   
 
   "Noví hráči si často myslí, že se HyperRogue odehrává na povrchu koule. "
-#ifdef MOBWEB
+#if ISMOBWEB
   "Není to pravda -- Tutoriál v desktopové verzi ti může ukázat povrch, "
   "na jakém se HyperRogue opravdu odehrává."
 #else
@@ -5273,7 +5273,7 @@ S(
   "it will appear to go slower -- this is because you are running "
   "in a straight line, and the Running Dog has to run in a curve "
   "called an equidistant.\n\n"
-#ifdef MAC
+#if ISMAC
  "Remember that you can click with right Shift on anything to get more information.",
 #else
   "Remember that you can right click on anything to get more information.",
@@ -5283,7 +5283,7 @@ S(
   "Běžící pes. I když běží stejně rychle jako ty, bude se zdát, že je "
   "pomalejší -- to proto, že ty běžíš po přímce, zatímco Běžící pes musí "
   "běžet po křivce zvané 'ekvidistanta'.\n\n"
-#ifdef MAC
+#if ISMAC
   "Nezapomeň, že pokud na cokoli klikneš s pravým shiftem, můžeš o tom "
   "získat víc informací."
 #else
@@ -5510,5 +5510,363 @@ S(
   "Stisknutím klávesy '5' opustíš tutoriál."
   )
 
+// Orb Strategy mode
+S("Orb Strategy mode", "sférostrategický mód")
 
+S(
+  "You are playing in the Orb Strategy Mode. Collecting treasure "
+  "gives you access to magical Orb powers. In this mode, "
+  "unlocking requirements are generally higher, and "
+  "several quests and lands "
+  "give you extremely powerful Orbs of the Mirror.\n",
+
+  "Právì hraješ ve sférostrategickém módu. Sbírání pokladù ti dá pøístup "
+  "k magickým silám Sfér. V tomto módu jsou požadavky na odemykání nových "
+  "vìcí obecnì vyšší a nìkolik úkolù a krajù ti dává nesmírnì silné Sféry "
+  "Zrcadla.\n")
+
+S("The treasure gives your magical powers!", "Poklady ti dávají magickou sílu!")
+S("Press 'i' to access your magical powers.", "Stiskem klávesy 'i' pøejdeš na svou magickou sílu.")
+S("inventory", "Tvé Sféry")
+S("mirror what?", "co chceš zrcadlit?")
+S("Which orb to use?", "Kterou Sféru chceš použít?")
+S("Unlocked by: %1 in %2", "Odemèeno pøi: %1 %abl2")
+S(" (next at %1)", " (další pøi %1)")
+S(" (next at %1 to %2)", " (další pøi %1 až %2)")
+S("Number of uses left: %1", "Poèet zbývajících použití: %1")
+S("You mirror %the1.", "Zrcadlíš %a1.")
+S("You need to stand next to a magic mirror or cloud to use %the1.", 
+  "Abys mohl použít %a1, musíš stát vedle kouzelného zrcadla nebo oblaku.")
+S("Each orb type can be mirrored only once.", "Každý typ Sféry lze zrcadlit pouze jednou.")
+
+S(
+  "\n\nIn the Orb Strategy Mode, Orbs of Yendor appear in Hell after "
+  "you collect 25 Demon Daisies in Hell, in Crossroads/Ocean after you collect 50, "
+  "and everywhere after you collect 100.",
+
+  "\n\nVe sférostrategickém módu se Yendorské Sféry objevují v Pekle poté, "
+  "co tam získáš 25 Èertových kvítek. Po získání 50 Èertových kvítek se "
+  "zaènou objevovat na Køižovatce a v Oceánu, a po získání 100 Èertových "
+  "kvítek všude."
+  );  
+
+S(
+  "\n\nIn the Orb Strategy Mode, dead orbs are available once you collect "
+  "10 Necromancer Totems in the Graveyard.",
+  
+  "\n\nMrtvé Sféry se ve sférostrategickém módu objevují poté, co získáš "
+  "10 Nekromancerových totemù na Høbitovì.")
+
+S(
+  "\n\nIn the Orb Strategy Mode, Orbs of Safety can be gained by "
+  "collecting Phoenix Feathers in the Land of Eternal Motion. "
+  "You can also find unlimited Orbs of Safety in the Crossroads "
+  "and the Ocean (after collecting 25 Phoenix Feathers) "
+  "and in the Prairie.",
+  
+  "\n\nVe sférostrategickém módu mùžeš získat Sféry Bezpeènosti sbíráním "
+  "Fénixových pírek v Kraji vìèného pohybu. Také jich mùžeš najít neomezenì "
+  "mnoho na Køižovatce a v Oceánu (ale musíš nejprve získat 25 Fénixových "
+  "pírek) a na Prérii."
+  )
+
+S(
+  "\n\nCollect %the1 to gain an extra Orb of the Mirror. "
+  "You can gain further Orbs of the Mirror by collecting 2, 4, 8...",
+
+  "\n\nKdyž získáš %a1, dostaneš další Sféru Zrcadla. "
+  "Další Sféry Zrcadla pak mùžeš získat za 2, 4, 8..."
+  )
+
+S(
+  "\n\nIn the Orb Strategy Mode, the Orb of Luck also "
+  "significantly increases the frequency of Great Walls, Crossroads IV, "
+  "and sub-lands.",
+  
+  "\n\nVe sférostrategickém módu Sféra Štìstí také výraznì zvyšuje frekvenci Velkých zdí, Køižovatek IV a podkrajù.")
+
+S("\n\nIn the Orb Strategy Mode, each 25 Necromancer's Totems "
+  "you are given a random offensive Orb.",
+  
+  "\n\nVe sférostrategickém módu ti každých 25 Nekromancerových "
+  "totemù pøidá jednu náhodnou útoènou Sféru.")
+ 
+S(
+  "Use Orb of the Mirror to gain copies of one of your Orbs; "
+  "mirroring weaker Orbs usually yields more copies. "
+  "It can only be used once per Orb type, "
+  "and only when you are next to a mirror.",
+  
+  "Sféru Zrcadla mùžeš použít ke kopírování ostatních Sfér; ze slabších "
+  "Sfér obvykle získáš více kopií. Toto lze s každým typem Sféry udìlat "
+  "pouze jednou, a pouze tehdy, když stojíš vedle zrcadla.")
+  
+S("Uses to gain: %1", "Získáš použití: %1")
+S("already mirrored", "již zrcadleno")
+  
+N("your orbs", GEN_F, "Tvé Sféry", "Tvé Sféry", "Tvé Sféry", "Tvé Sféry")
+S("Click this to see your orbs.", "Kliknutím zde zobrazíš své Sféry.")                    
+
+// peaceful mode
+S("configure keys/joysticks", "konfigurace kláves/joysticku")
+S("peaceful mode", "klidný mód")
+
+// config changes
+S("Press F5 or 'o' to try again!", "Stiskem F5 nebo 'o' to mùžeš zkusit znovu!")
+S("aura brightness", "jas aury")
+S("aura smoothening factor", "vyhlazovací faktor aury")
+S("graphics configuration", "konfigurace grafiky")
+S("special display modes", "zvláštní zobrazovací módy")
+S("openGL mode", "mód OpenGL")
+S("anti-aliasing", "anti-aliasing")
+S("line width", "šíøka èar")
+S("configure panning and general keys", "konfigurace pøejíždìní a obecných kláves")
+
+S("\n\nHint: use 'm' to toggle cells quickly",
+  "\n\nTip: políèka lze rychle pøepínat klávesou 'm'");
+
+// cell pattern names
+S("football", "fotbal")
+S("dark rainbow landscape", "temná duha")
+S("field pattern", "vzor pole")
+S("field pattern C", "vzor pole C")
+S("field pattern D", "vzor pole D")
+S("field pattern N", "vzor pole N")
+S("field pattern S", "vzor pole S")
+S("four triangles", "ètyøi trojúhelníky")
+S("big triangles: rings", "velké trojúhelníky: prstence")
+
+// missing for the Tutorial
+S("tutorial", "tutoriál")
+S("This Orb is not compatible with the Tutorial.", "Tato Sféra není kompatibilní s tutoriálem.")
+
+// local scores
+S("turns", "kol")
+S("cells", "políèek")
+S("sort", "tøídìní")
+S("choose", "výbìr")
+S("play", "hraj")
+
+// draw editor
+S("autochoose", "autovýbìr")
+S("c = choose", "c = výbìr")
+S("b = switch auto", "b = pøepni auto")
+
+// mission screen hints
+
+S(
+  "If you collect too many treasures in a given land, it will become "
+  "extremely dangerous. Try other lands once you have enough!",
+  "Pokud získáš pøíliš mnoho pokladù v jednom kraji, zaène být velmi "
+  "nebezpeèný. Až budeš mít dost, zkus jiné kraje!");
+
+S(
+  "Remember that you can right click almost anything for more information.",
+  "Nezapomeò, že témìø na všechno mùžeš kliknout pravým tlaèítkem a získat "
+  "o tom více informací.")
+
+S("Want to understand the geometry in HyperRogue? Try the Tutorial!",
+  "Chceš porozumìt geometrii v HyperRogue? Zkus Tutoriál!");
+
+S(
+  "Collecting 25 treasures in a given land may be dangerous, "
+  "but allows magical Orbs of this land to appear in other places!",
+  "Získat 25 pokladù v jednom kraji mùže být nebezpeèné, ale zpùsobí "
+  "to, že se magické Sféry z tohoto kraje zaènou objevovat i v jiných!")
+
+S(
+  "Press ESC to view this screen during the game.",
+  "Tuto obrazovku mùžeš bìhem hry zobrazit stiskem ESC.")
+
+S("The 'world overview' shows all the lands in HyperRogue.",
+  "'Pøehled krajù' ti ukáže všechny kraje v HyperRogue."
+  )
+
+S("Press 'o' to see all the lands in HyperRogue.",
+  "Stiskem 'o', zobrazíš všechny kraje v HyperRogue.")
+
+S(
+  "Want another type of game? Want more challenge?\n"
+  "HyperRogue has many special modes and challenges that "
+  "significantly change the gameplay. Try them!",
+  
+  "Chceš jiný typ hry? Chceš vìtší výzvu?\n"
+  "HyperRogue obsahuje øadu zvláštních módù a výzev, které "
+  "výraznì mìní styl hry. Zkus je!")
+
+S(
+  "Hyperbolic geometry can be shown in many ways.",
+  "Hyperbolickou geometrii je možné ukázat mnoha zpùsoby...")
+
+S(
+  "You do not want to lose the game from a single mistake?\n"
+  "Do you want to use the Orbs strategically?\n"
+  "Try the Orb Strategy mode!",
+  
+  "Nechceš prohrát kvùli jedné chybì?\n"
+  "Chceš používat Sféry strategicky\n"
+  "Zkus Sférostrategický mód!")
+
+S(
+  "Do you think you are playing on a ball? "
+  "This is far from the truth!\n",
+  
+  "Myslíš, že hraješ na kouli? Samá voda!\n")
+
+S(
+  "Did you know that the path you take during the game "
+  "is usually very close to a straight line?\n",
+
+  "Vìdìl jsi, že cesta, kterou bìhem hry urazíš, je "
+  "obvykle velmi blízká pøímce?")
+
+S("Show me!", "Ukaž!")
+
+S(
+  "You are %1 cells away from the starting point, or "
+  "the place where you used an Orb of Safety last time. "
+  "There are %2 such cells.\n",
+  
+  "Nacházíš se %1 políèek od výchozího bodu nebo od místa, "
+  "kde jsi naposledy použil Sféru Bezpeènosti. Takových "
+  "políèek je celkem %2.\n")
+
+S("about ", "zhruba ")
+S(" (%1 more digits)", " (%1 dalších èíslic)")
+
+S("see how it ended", "podívej se, jak to skonèilo")
+
+// other missing/new things
+S("\n\nOrb unlocked: %1", "\n\nByla odemèena Sféra: %1")
+S("Orb unlocked: %1", "Byla odemèena Sféra: %1")
+S("\n\nSecondary orb: %1", "\n\nSekundární Sféra: %1")
+S(" to submerge", " do ponoøení")
+S(" to surface", " do vynoøení")
+S("%The1 says, \"not this place, it looks even worse...\"", 
+  "%The1 øíká, \"tady ne, tohle vypadá ještì hùø...\"")
+S("torus", "torus")
+S(" (click to use)", " (použij kliknutím)")
+N("Hall of Mirrors", GEN_F, "Zrcadlový sál", "Zrcadlové sály", "Zrcadlový sál", "v Zrcadlovém sále")
+Orb("the Mirror", "Zrcadla")
+N("Reflection", GEN_O, "Odraz", "Odrazy", "Odraz", "v Odraze")
+N("mirror wall", GEN_F, "zrcadlová stìna", "zrcadlové stìny", "zrcadlovou stìnu", "zrcadlovou stìnou")
+
+S("This would only move you deeper into the trap!",
+  "Tím by ses jen dostal dál do pasti!");
+
+S("You swing your sword at the mirror.", "Udeøil jsi meèem do zrcadla.");
+N("Mimic", GEN_M, "Mimik", "Mimikové", "Mimika", "Mimikem")
+N("Narcissist", GEN_M, "Narcis", "Narcisové", "Narcisa", "Narcisem")
+N("Mirror Spirit", GEN_M, "Zrcadlový duch", "Zrcadloví duchové", "Zrcadlového ducha", "Zrcadlovým duchem")
+
+S("This person loves to look at their own reflection in the mirror. "
+  "He believes himself to be one of the most important creatures in this world, "
+  "and hates those who do not admire him.",
+
+  "Tenhle èlovìk se rád kochá svým odrazem v zrcadle. Myslí si, že "
+  "je jedním z nejdùležitìjších tvorù na svìtì a nenávidí ty, "
+  "kteøí ho neobdivují."
+  )
+
+S(
+    "A long time ago a mighty warrior was guarding the mirrors from being broken. "
+    "While this warrior is no longer alive, his reflections have gained life of "
+    "their own, and will punish the intruders.\n\n"
+    "If you attack a Mirror Spirit physically, it is delayed, but not destroyed -- "
+    "more reflections will come out of the mirror. Use Mimics to destroy them.",
+    
+    "Tento mocný váleèník kdysi dávno støežil zrcadla, aby se nerozbila. "
+    "Teï už nežije, ale jeho odrazy získaly svùj vlastní život a trestají vetøelce.\n\n"
+    "Pokud na Zrcadlového ducha fyzicky zaútoèíš, zpomalíš ho tím, ale neznièíš "
+    "-- ze zrcadla vyjdou další odrazy. Pokud ho chceš znièit nadobro, použij Mimiky.")
+
+S(" (25 in the Orb Strategy mode)", " (25 ve Sférostrategickém módu)")
+S(" (50 in the Orb Strategy mode)", " (50 ve Sférostrategickém módu)")
+S(" (not in the Orb Strategy mode)", " (ne ve Sférostrategickém módu)")
+    
+/*
+                        "NEW_ACHIEVEMENT_8_19_NAME"     "Totální vítìzství"
+                        "NEW_ACHIEVEMENT_8_19_DESC"     "Získej ve Sférostrategickém módu Yendorskou Sféru, Svatý grál, Princeznu a 50 Hyperkamù."
+                        
+added to old achievements:
+"(nebo 25 ve Sférostrategickém módu)"
+"(nebo 50 ve Sférostrategickém módu)"
+"(ne ve Sférostrategickém módu)"
+
+These apparently have not been yet translated:
+
+			"NEW_ACHIEVEMENT_8_4_NAME"	"Yendorský adept"
+			"NEW_ACHIEVEMENT_8_4_DESC"	"Dokonèi Yendorskou výzvu."
+			"NEW_ACHIEVEMENT_8_5_NAME"	"Mistr klíèù"
+			"NEW_ACHIEVEMENT_8_5_DESC"	"Dokonèi pìt Yendorských výzev."
+			"NEW_ACHIEVEMENT_8_6_NAME"	"Velmistr klíèù"
+			"NEW_ACHIEVEMENT_8_6_DESC"	"Dokonèi 15 Yendorských výzev."
+			"NEW_ACHIEVEMENT_8_7_NAME"	"Adept taktiky"
+			"NEW_ACHIEVEMENT_8_7_DESC"	"Získej 1000 bodù v Taktickém módu."
+			"NEW_ACHIEVEMENT_8_8_NAME"	"Mistr taktiky"
+			"NEW_ACHIEVEMENT_8_8_DESC"	"Získej 5000 bodù v Taktickém módu."
+			"NEW_ACHIEVEMENT_8_9_NAME"	"Velmistr taktiky"
+			"NEW_ACHIEVEMENT_8_9_DESC"	"Získej 15 000 bodù v Taktickém módu"
+			"NEW_ACHIEVEMENT_8_10_NAME"	"Na druhé stranì"
+			"NEW_ACHIEVEMENT_8_10_DESC"	"Najdi a získej Zelenou trávu."
+
+*/
 #undef Orb
+
+// peaceful texts
+
+S("memory game", "hra na paměť")
+S("display hints", "zobrazovat tipy")
+S("hyperbolic puzzles", "hyperbolické hádanky")
+
+// missing descriptions
+
+S(  "A strange land filled with mirrors. "
+    "Break magic mirrors and enter clouds of mirage to "
+    "gain treasures and helpful Mimics.",
+    
+    "Podivná země plná zrcadel. "
+    "Rozbíjením kouzelných zrcadel a procházením oblaků přeludů "
+    "získáš poklady a užitečné Mimiky.")
+
+S(
+  "A perfect mirror wall. It is unbreakable "
+  "and impassable "
+  "even for aethereal beings, and everything "
+  "you see inside is just an image of "
+  "the real world; you can swing your sword "
+  "at them, but that will not destroy them "
+  "in the real world. "
+  "Mirror walls reflect Mimics, lightning bolts, and "
+  "missiles perfectly.",
+  
+  "Dokonalá zrcadlová stěna. Je nerozbitná a neprostupná, "
+  "a to i pro éterické bytosti. Všechno, co v ní vidíš, je "
+  "pouhý obraz reálného světa; můžeš do toho bít mečem, "
+  "ale v reálném světě se nic nestane. Zrcadlové stěny "
+  "dokonale odrážejí Mimiky, blesky a střely."
+  )
+
+S(
+"In the peaceful mode, you just explore the world, "
+    "without any battles; there are also several "
+    "navigational puzzles available. In the memory game, "
+    "you have to collect as many Dodecahedra as you can, "
+    "and return to the starting point -- hyperbolic geometry "
+    "makes this extremely difficult! Other hyperbolic puzzles "
+    "include the Burial Grounds (excavate the treasures "
+    "using your magical sword), Galápagos (try to find an adult "
+    "tortoise matching the baby), Camelot (find the center of "
+    "a large hyperbolic circle), and Palace (follow the mouse). "
+    "Other places listed are for exploration.",
+"V klidném módu můžeš prostě jen zkoumat svět bez jakýchkoli bitev; "
+ "je v něm také k dispozici několik navigačních hádanek. V paměťové "
+ "hře musíš sesbírat co možná nejvíc Dvanáctistěnů a vrátit se do "
+ "výchozího bodu -- to je v hyperbolické geometrii nesmírně obtížné! "
+ "Další hyperbolické hádanky zahrnují Pohřebiště (vykopávání pokladů "
+ "magickým mečem), Galapágy (hledání dospělé želvy, která odpovídá "
+ "tvé želvičce), Camelot (nalezení středu velkého hyperbolického "
+ "kruhu) a Palác (sledování myši). Jiná uvedená místa se dají "
+ "zkoumat.")
+
+S("puzzles and exploration", "hádanky a zkoumání")

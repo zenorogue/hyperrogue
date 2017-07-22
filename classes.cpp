@@ -335,7 +335,18 @@ const char *naturedesc =
   "You can also target one of the cells adjacent to your ivy "
   "(not to you) to grow or attack there.";
 
-const int motypes = 139;
+const char *mirroreddesc =
+  "A perfect mirror wall. It is unbreakable "
+  "and impassable "
+  "even for aethereal beings, and everything "
+  "you see inside is just an image of "
+  "the real world; you can swing your sword "
+  "at them, but that will not destroy them "
+  "in the real world. "
+  "Mirror walls reflect Mimics, lightning bolts, and "
+  "missiles perfectly.";
+
+const int motypes = 141;
 
 struct monstertype {
   char  glyph;
@@ -393,12 +404,12 @@ monstertype minf[motypes] = {
   { 'M', 0x804000, "Giant Ape",
     "This giant ape thinks that you are an enemy."},
   { 'B', 0x909000, "Slime Beast", slimehelp},
-  { '@', 0x8080FF, "Mirror Image",
-    "A magical being which copies your movements."
-    },
-  { '@', 0xFF8080, "Mirage",
+  { '@', 0xFF80FF, "Mimic",
     "A magical being which copies your movements. "
     "You feel that it would be much more useful in an Euclidean space."
+    },
+  { '@', 0xFF8080, "Mirage (REMOVED)",
+    "A magical being which copies your movements. "
     },
   { '@', 0x509050, "Golem",
     "You can summon these friendly constructs with a magical process."
@@ -673,6 +684,18 @@ monstertype minf[motypes] = {
     "Sleeping bulls wake up when you get into distance of two cells from them."
      },
   { 'S', 0xFFD500, "Butterfly", bulldashdesc},
+  { 'N', 0xFFFF80, "Narcissist", 
+    "This person loves to look at their own reflection in the mirror. "
+    "He believes himself to be one of the most important creatures in this world, "
+    "and hates those who do not admire him."
+    },
+  { 'M', 0xFFC0FF, "Mirror Spirit", 
+    "A long time ago a mighty warrior was guarding the mirrors from being broken. "
+    "While this warrior is no longer alive, his reflections have gained life of "
+    "their own, and will punish the intruders.\n\n"
+    "If you attack a Mirror Spirit physically, it is delayed, but not destroyed -- "
+    "more reflections will come out of the mirror. Use Mimics to destroy them."
+    },
   
   // shmup specials
   { '@', 0xC0C0C0, "Rogue", "In the Shoot'em Up mode, you are armed with thrown Knives."},
@@ -700,7 +723,7 @@ enum eMonster {
   moIvyRoot, moIvyHead, moIvyBranch, moIvyWait, moIvyNext, moIvyDead,
   moMonkey,
   moSlime,
-  moMirror, moMirage, moGolem, moGolemMoved,
+  moMimic, moREMOVED, moGolem, moGolemMoved,
   moEagle, moSeep,
   moZombie, moGhost, moNecromancer, moShadow,
   moTentacle, moTentacletail, moTentaclewait, moTentacleEscaping, 
@@ -732,7 +755,7 @@ enum eMonster {
   moKrakenH, moKrakenT, moDraugr, moFriendlyIvy,
   moVampire, moBat, moReptile, 
   moHerdBull, moRagingBull, moSleepBull,
-  moButterfly,
+  moButterfly, moNarciss, moMirrorSpirit,
   // shmup specials
   moPlayer, moBullet, moFlailBullet, moFireball, moTongue, moAirball,
   // temporary
@@ -1378,7 +1401,7 @@ walltype winf[walltypes] = {
   { '.', 0xFFFF00, "Reptile floor", reptiledesc},
   { '.', 0xFFFF00, "Reptile bridge", reptiledesc},
   { '.', 0xFFFF00, "invisible floor", NODESCYET},
-  { '#', 0xC0C0FF, "mirror wall", NODESCYET},
+  { '#', 0xC0C0FF, "mirror wall", mirroreddesc},
   };
 
 enum eWall { waNone, waIcewall, waBarrier, waFloorA, waFloorB, waCavewall, waCavefloor, waDeadTroll, waDune,
@@ -1413,7 +1436,7 @@ enum eWall { waNone, waIcewall, waBarrier, waFloorA, waFloorB, waCavewall, waCav
 
 // --- land types ---
 
-const int landtypes = 71;
+const int landtypes = 72;
 
 struct landtype {
   int color;
@@ -1446,7 +1469,10 @@ const landtype linf[landtypes] = {
     },
   { 0x900090, "Alchemist Lab", slimehelp},
   { 0x704070, "Hall of Mirrors",
-    "A strange land which contains mirrors and mirages, protected by Mirror Rangers."},
+    "A strange land filled with mirrors. "
+    "Break magic mirrors and mirage clouds to "
+    "gain treasures and helpful Mimics."
+    },
   { 0x404070, "Graveyard",
     "All the monsters you kill are carried to this strange land, and buried. "
     "Careless Rogues are also carried here..."
@@ -1587,10 +1613,12 @@ const landtype linf[landtypes] = {
   { 0x800080, "Bull Dash", bulldashdesc},
   { 0xC000C0, "Crossroads V", "Extremely narrow Crossroads layout.\n"},
   { 0xC0C0C0, "Cellular Automaton", cadesc},
-  { 0xC0C0FF, "Mirror Wall", NODESCYET},
-  { 0xC8C8FF, "Reflection", NODESCYET},
-  { 0xC0C0FF, "Reflection", NODESCYET},
-  { 0xC8C8FF, "Reflection", NODESCYET},
+  { 0xC0C0FF, "Mirror Wall", mirroreddesc},
+  { 0xC8C8FF, "Reflection", mirroreddesc},
+  { 0xC0C0FF, "Reflection", mirroreddesc},
+  { 0xC8C8FF, "Reflection", mirroreddesc},
+  { 0xC8C8FF, "Mirror Land", 
+    "A strange land which contains mirrors and mirages, protected by Mirror Rangers."},
   };
 
 enum eLand { laNone, laBarrier, laCrossroads, laDesert, laIce, laCaves, laJungle, laAlchemist, laMirror, laGraveyard,
@@ -1608,7 +1636,8 @@ enum eLand { laNone, laBarrier, laCrossroads, laDesert, laIce, laCaves, laJungle
   laKraken, laBurial, laTrollheim,
   laHalloween, laDungeon, laMountain, laReptile,
   laPrairie, laBull, laCrossroads5, laCA,
-  laMirrorWall, laMirrored, laMirrorWall2, laMirrored2
+  laMirrorWall, laMirrored, laMirrorWall2, laMirrored2,
+  laMirrorOld
   };
 
 // cell information for the game
@@ -1695,7 +1724,7 @@ eLand land_over[LAND_OVERX] = {
 eLand land_euc[LAND_EUC] = {
   laIce, laCaves, laDesert, laMotion, laJungle,
   laCrossroads, 
-  laMirror, laMinefield, laAlchemist, laZebra, laPalace, laPrincessQuest,
+  laMirrorOld, laMinefield, laAlchemist, laZebra, laPalace, laPrincessQuest,
   laOcean, laLivefjord, laWarpCoast, laCaribbean, laKraken, laWhirlpool, laRlyeh, laTemple,
   laElementalWall, laTrollheim,
   laDryForest, laWineyard, laDeadCaves, laGraveyard, laHive, laRedRock, laIvoryTower, 
@@ -1713,7 +1742,7 @@ eLand land_sph[LAND_SPH] = {
   laHalloween,
   laIce, laCaves, laDesert, laMotion, laJungle,
   laCrossroads, 
-  laMirror, laMinefield, laAlchemist, 
+  laMirrorOld, laMinefield, laAlchemist, 
   laLivefjord, laWarpCoast, laKraken, laRlyeh, 
   laTrollheim,
   laDryForest, laDeadCaves, laGraveyard, laHive, laRedRock, 

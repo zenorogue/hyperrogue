@@ -15,10 +15,11 @@ bool timerstopped;
 int savecount;
 bool showoff = false, doCross = false;
 
-bool verless(const string& v, const string& cmp) {
-  // no checks exists for versions greater than 10.0 yet
-  if(isdigit(v[0]) && isdigit(v[1]))
-    return false;
+bool verless(string v, string cmp) {
+  if(isdigit(v[0]) && isdigit(v[1])) 
+    v = "A" + v;
+  if(isdigit(cmp[0]) && isdigit(cmp[1]))
+    cmp = "A" + cmp;
   return v < cmp;
   }
 
@@ -161,7 +162,7 @@ void initgame() {
   peace::simon::init();
   
   multi::revive_queue.clear();
-#ifdef TOUR
+#if CAP_TOUR
   if(tour::on) tour::presentation(tour::pmRestart);
 #endif
   
@@ -191,14 +192,14 @@ void initgame() {
     timerghost = true;
     truelotus = 0;
     survivalist = true;
-#ifdef INV
+#if CAP_INV
     if(inv::on) inv::init();
 #endif
     if(!randomPatternsMode && !tactic::on && !yendor::on && !peace::on) {
       if(firstland != (princess::challenge ? laPalace : laIce)) cheater++;
       }
     if(tactic::trailer) ;
-#ifdef TOUR
+#if CAP_TOUR
     else if(tour::on) ; // displayed by tour
 #endif
     else if(princess::challenge) {
@@ -232,20 +233,21 @@ void initgame() {
       addMessage(XLAT("Good luck in the elliptic plane!"));
     else if(sphere)
       addMessage(XLAT("Welcome to Spherogue!"));
-#ifdef ROGUEVIZ
+#if CAP_ROGUEVIZ
     else if(rogueviz::on)
       addMessage(XLAT("Welcome to RogueViz!"));
 #endif
     else {
       addMessage(XLAT("Welcome to HyperRogue!"));
-#ifndef MOBILE
-#ifdef IOS
+#if ISMAC
       addMessage(XLAT("Press F1 or right-shift-click things for help."));
-#else
+#elif !ISMOBILE
       addMessage(XLAT("Press F1 or right-click things for help."));
 #endif
-#endif
       }
+
+    if(shmup::on && (euclidland == laMirror || euclidland == laMirrorOld) && (geometry == gElliptic || geometry == gQuotient))
+      addMessage(XLAT("This combination is known to be buggy at the moment."));
     }
   else {
     usedSafety = true;
@@ -262,7 +264,7 @@ void initgame() {
 
 bool havesave = true;
 
-#ifndef NOSAVE
+#if CAP_SAVE
 #define MAXBOX 500
 #define POSSCORE 308 // update this when new boxes are added!
 
@@ -335,7 +337,7 @@ void applyBoxOrb(eItem it) {
 
 void list_invorb() {
   for(eItem it: invorb) {
-#ifdef INV
+#if CAP_INV
     if(true) {
       inv::applyBox(it);
       continue;
@@ -612,7 +614,7 @@ void applyBoxes() {
   addinv(itGreenStone);
   list_invorb();
   applyBoxBool(inv::on, "inventory"); // 306
-  #ifdef INV
+  #if CAP_INV
   applyBoxNum(inv::rseed);
   #else
   { int u; applyBoxNum(u); }
@@ -652,7 +654,7 @@ void loadBoxHigh() {
 
 // certify that saves and achievements were received
 // in an official version of HyperRogue
-#ifdef CERTIFY
+#if CAP_CERTIFY
 #include "private/certify.cpp"
 #else
 
@@ -673,7 +675,7 @@ long long saveposition = -1;
 #include <sys/types.h>
 
 void remove_emergency_save() {
-#ifndef WINDOWS
+#if !ISWINDOWS
   if(saveposition >= 0) { 
 /*    if(!timerghost) 
       addMessage(XLAT("Emergency truncate to ") + its(saveposition)); */
@@ -687,7 +689,7 @@ void saveStats(bool emergency = false) {
   DEBB(DF_INIT, (debugfile,"saveStats [%s]\n", scorefile));
 
   if(autocheat) return;
-  #ifdef TOUR
+  #if CAP_TOUR
   if(tour::on) return;
   #endif
   if(randomPatternsMode) return;
@@ -804,7 +806,7 @@ void saveStats(bool emergency = false) {
   
   fprintf(f, "\n\n\n");
   
-#ifndef MOBILE
+#if ISMOBILE==0
   DEBB(DF_INIT, (debugfile, "Game statistics saved to %s\n", scorefile));
   if(!tactic::trailer)
     addMessage(XLAT("Game statistics saved to %1", scorefile));
@@ -815,7 +817,7 @@ void saveStats(bool emergency = false) {
 // load the save
 void loadsave() {
   if(autocheat) return;
-#ifdef TOUR
+#if CAP_TOUR
   if(tour::on) return;
 #endif
   DEBB(DF_INIT, (debugfile,"loadSave\n"));
@@ -876,14 +878,15 @@ void loadsave() {
       int tid, land, score, tc, t, ts, cert;
       sscanf(buf, "%70s%10s%d%d%d%d%d%d%d",
         buf1, ver, &tid, &land, &score, &tc, &t, &ts, &cert);
+
+      eLand l2 = eLand(land);
+      if(land == laMirror && verless(ver, "10.0")) l2 = laMirrorOld;
       
       for(int xc=0; xc<MODECODES; xc++)
-        if(tid == tactic::id && (anticheat::check(cert, ver, dnameof(eLand(land)), tc, t, ts, xc*999+tid + 256 * score))) {
+        if(tid == tactic::id && (anticheat::check(cert, ver, dnameof(l2), tc, t, ts, xc*999+tid + 256 * score))) {
           if(score != 0 
             && !(land == laOcean && verless(ver, "8.0f"))
-            && !(land == laMirror && verless(ver, "10.0"))
-          )
-            tactic::record(eLand(land), score, xc);
+          ) tactic::record(l2, score, xc);
           anticheat::nextid(tactic::id, ver, cert);
           break;
           }
@@ -993,7 +996,7 @@ void restartGame(char switchWhat, bool push) {
     }
   else {
     achievement_final(true);
-  #ifndef NOSAVE
+  #if CAP_SAVE
     saveStats();
   #endif
     for(int i=0; i<ittypes; i++) items[i] = 0;
@@ -1006,7 +1009,7 @@ void restartGame(char switchWhat, bool push) {
       if(multi::playerActive(i)) 
         multi::deaths[i]++;
   
-  #ifndef NOSAVE
+  #if CAP_SAVE
     anticheat::tampered = false; 
   #endif
     achievementsReceived.clear();
@@ -1036,7 +1039,7 @@ void restartGame(char switchWhat, bool push) {
     resetGeometry();
     chaosmode = !chaosmode;
     }
-#ifdef TOUR
+#if CAP_TOUR
   if(switchWhat == 'T') {
     geometry = gNormal;
     yendor::on = tactic::on = princess::challenge = peace::on = inv::on = false;
@@ -1173,13 +1176,6 @@ void cheatMoveTo(eLand l) {
 
 bool applyCheat(char u, cell *c = NULL) {
 
-  if(u == 'M' && cwt.c->type == 6) {
-    addMessage(XLAT("You summon some Mirages!"));
-    cheater++;
-    mirror::createMirrors(cwt.c, cwt.spin, moMirage),
-    mirror::createMirages(cwt.c, cwt.spin, moMirage);
-    return true;
-    }
   if(u == 'G') {
     addMessage(XLAT("You summon a golem!"));
     cheater++;
@@ -1256,7 +1252,7 @@ bool applyCheat(char u, cell *c = NULL) {
     return true;
     }
   if(u == 'R'-64) buildRosemap();
-#ifndef NOEDIT
+#if CAP_EDIT
   if(u == 'A') {
     lastexplore = turncount;
     pushScreen(mapeditor::showMapEditor);
@@ -1357,7 +1353,7 @@ bool applyCheat(char u, cell *c = NULL) {
     }
   if(u == 'Z') {
     flipplayer = false;
-    mirror::spin(1);
+    mirror::act(1, mirror::SPINSINGLE);
     cwspin(cwt, 1);
     return true;
     }

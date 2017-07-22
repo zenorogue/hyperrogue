@@ -1,7 +1,7 @@
 int frames;
 bool outoffocus = false;
 
-int mousex, mousey, joyx, joyy, panjoyx, panjoyy;
+int mousex, mousey;
 hyperpoint mouseh, mouseoh;
 
 bool leftclick, rightclick, targetclick, hiliteclick, anyshiftclick, wheelclick,
@@ -20,15 +20,20 @@ bool mousepressed = false;
 bool mousemoved = false;
 bool actonrelease = false;
 
+#if CAP_SDLJOY
+int joyx, joyy, panjoyx, panjoyy; 
+movedir joydir;
+#endif
+
+movedir mousedest;
 ld shiftmul = 1;
 
 cell *mouseover, *mouseover2, *lmouseover, *centerover;
 ld modist, modist2, centdist;
-movedir mousedest, joydir;
 
 int lastt;
 
-#ifdef WEB
+#if ISWEB
 Uint8 *SDL_GetKeyState(void *v) { static Uint8 tab[1024]; return tab; }
 #endif
 
@@ -125,7 +130,7 @@ void mousemovement() {
   lmouseover = NULL;
   }
 
-#ifndef NOSDL
+#if CAP_SDLJOY
 SDL_Joystick* sticks[8];
 int numsticks;
 
@@ -206,16 +211,12 @@ bool doexiton(int sym, int uni) {
 
 bool didsomething;
 
-#ifdef MOBILE
-typedef int eventtype;
-#else
 typedef SDL_Event eventtype;
-#endif
 
 void handlePanning(int sym, int uni) {
   if(rug::rugged) return;
 
-#ifndef PANDORA
+#if !ISPANDORA
   if(sym == SDLK_RIGHT) { 
     if(conformal::on)
       conformal::lvspeed += 0.1 * shiftmul;
@@ -286,7 +287,7 @@ void handleKeyNormal(int sym, int uni) {
     if(sym == 'u' || sym == 'e' || sym == SDLK_KP9) movepckeydir(7);
     }
 
-#ifdef PANDORA
+#if !ISPANDORA
   if(DEFAULTCONTROL) {
     if(sym == SDLK_RIGHT) movepckeydir(0);
     if(sym == SDLK_LEFT) movepckeydir(4);
@@ -345,7 +346,7 @@ void handleKeyNormal(int sym, int uni) {
     }
   
   if(uni == 'o' && DEFAULTNOR(sym)) setAppropriateOverview();
-#ifdef INV
+#if CAP_INV
   if(uni == 'i' && DEFAULTNOR(sym) && inv::on) 
     pushScreen(inv::show);
 #endif
@@ -374,7 +375,7 @@ void handleKeyNormal(int sym, int uni) {
 
   if(sym == SDLK_F1) gotoHelp(help);
 
-#ifdef ROGUEVIZ
+#if CAP_ROGUEVIZ
   rogueviz::processKey(sym, uni);
 #endif
   }
@@ -386,7 +387,7 @@ void handlekey(int sym, int uni) {
   keyhandler(sym, uni);
   }
 
-#ifdef NOSDL
+#if !CAP_SDL
 void mainloopiter() { printf("(compiled without SDL -- no action)\n"); quitmainloop = true; }
 #else
 
@@ -398,11 +399,9 @@ void mainloopiter() {
 
   DEBB(DF_GRAPH, (debugfile,"main loop\n"));
 
-  #ifndef GFX
-  #ifndef GL
+  #if !CAP_SDLGFX && !CAP_GL 
   vid.wallmode = 0;
   vid.monmode = 0;
-  #endif
   #endif
 
   optimizeview();
@@ -429,7 +428,7 @@ void mainloopiter() {
     if(cwt.mirrored) playerV = playerV * Mirror;
     }
 
-#ifdef WEB
+#if ISWEB
   if(playermoved && vid.sspeed > -4.99 && !outoffocus) {
     centerpc((ticks - lastt) / 1000.0 * exp(vid.sspeed));
     }
@@ -479,7 +478,7 @@ void mainloopiter() {
     targetclick = true;
     }
   
-#ifdef SDLAUDIO
+#if CAP_SDLAUDIO
   if(audio) handlemusic();
 #endif
   SDL_Event ev;
@@ -517,9 +516,6 @@ void mainloopiter() {
       extern bool setfsize;
       setfsize = true;
       setvideomode();
-#ifdef GL
-      if(vid.usingGL) glViewport(0, 0, vid.xres, vid.yres);
-#endif
       }
     
     if(ev.type == SDL_VIDEOEXPOSE) {
@@ -655,7 +651,7 @@ void mainloopiter() {
       mousex = ev.motion.x;
       mousey = ev.motion.y;
 
-#ifndef NORUG
+#if CAP_RUG
       if(rug::rugged)
         mouseh = rug::gethyper(mousex, mousey);
       else
@@ -692,7 +688,7 @@ void mainloopiter() {
 
 void mainloop() {
   lastt = 0;
-#ifdef WEB
+#if ISWEB
   initweb();
   emscripten_set_main_loop(mainloopiter, 0, true);
 #else
@@ -700,7 +696,7 @@ void mainloop() {
 #endif
   }
 
-#ifdef MOBILE
+#if ISMOBILE==1
 void displayabutton(int px, int py, string s, int col) {
   // TMP
   int siz = vid.yres > vid.xres ? vid.fsize*2 : vid.fsize * 3/2;

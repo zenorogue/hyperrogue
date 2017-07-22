@@ -818,7 +818,7 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, int col, dou
   
       if(!shmup::on)
         queuepoly(VBODY, (cs.charid >= 2 ? shSabre : shPSword), darkena(col, 0, 0XC0));
-      else if(shmup::curtime >= shmup::getPlayer()->nextshot)
+      else if(!where || shmup::curtime >= shmup::getPlayer()->nextshot)
         queuepoly(VBODY, shPKnife, darkena(col, 0, 0XC0));
   
       queuepoly(VHEAD, (cs.charid&1) ? shFemaleHair : shPHead,  darkena(col, 1, 0XC0));
@@ -904,7 +904,7 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, int col, dou
         }
       else {
         queuepoly(VHEAD, shPHead,  0xF0A0D0FF);
-        queuepoly(VHEAD, shFlowerHand,  0xC00000FF);
+        queuepoly(VBODY, shFlowerHand,  0xC00000FF);
         queuepoly(VBODY, shSuspenders,  0xC00000FF);
         }
       }
@@ -1148,6 +1148,24 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, int col, dou
     queuepoly(VBODY, shPBody, darkena(col, 0, 0xC0));
     if(!peace::on) queuepoly(VBODY, shPSword, darkena(col, 0, 0xFF));
     queuepoly(VHEAD, shArmor, darkena(col, 1, 0xFF));
+    }
+  else if(m == moNarciss) {
+    ShadowV(V, shPBody);
+    otherbodyparts(V, darkena(col, 0, 0xFF), m, footphase);
+    queuepoly(VBODY, shFlowerHand, darkena(col, 0, 0xFF));
+    queuepoly(VBODY, shPBody, 0xFFE080FF);
+    if(!peace::on) queuepoly(VBODY, shPKnife, 0xC0C0C0FF);
+    queuepoly(VHEAD, shPFace, 0xFFE080FF);
+    queuepoly(VHEAD, shPHead, 0x806A00FF);
+    }
+  else if(m == moMirrorSpirit) {
+    ShadowV(V, shPBody);
+    otherbodyparts(V, darkena(col, 0, 0x90), m, footphase);
+    queuepoly(VBODY, shPBody, darkena(col, 0, 0x90));
+    if(!peace::on) queuepoly(VBODY * Mirror, shPSword, darkena(col, 0, 0xD0));
+    queuepoly(VHEAD, shPHead, darkena(col, 1, 0x90));
+    queuepoly(VHEAD, shPFace, darkena(col, 1, 0x90));
+    queuepoly(VHEAD, shArmor, darkena(col, 0, 0xC0));
     }
   else if(m == moGhost || m == moSeep || m == moFriendlyGhost) {
     if(m == moFriendlyGhost) col = fghostcolor(ticks, where);
@@ -1449,23 +1467,29 @@ bool applyAnimation(cell *c, transmatrix& V, double& footphase, int layer) {
     }
   }
 
-double chainAngle(cell *c, transmatrix& V, cell *c2, double dft) {
-  if(inmirrorcount || !gmatrix0.count(c2)) return dft;
+double chainAngle(cell *c, transmatrix& V, cell *c2, double dft, const transmatrix &Vwhere) {
+  if(!gmatrix0.count(c2)) return dft;
   hyperpoint h = C0;
   if(animations[LAYER_BIG].count(c2)) h = animations[LAYER_BIG][c2].wherenow * h;
-  h = inverse(V) * gmatrix0[c2] * h;
+  if(inmirrorcount)
+    h = inverse(V) * Vwhere * inverse(gmatrix0[c]) * gmatrix0[c2] * h;
+  else
+    h = inverse(V) * gmatrix0[c2] * h;
   return atan2(h[1], h[0]);
   }
 
 // equivalent to V = V * spin(-chainAngle(c,V,c2,dft));
-bool chainAnimation(cell *c, transmatrix& V, cell *c2, int i, int b) {
-  if(inmirrorcount || !gmatrix0.count(c2)) {
+bool chainAnimation(cell *c, transmatrix& V, cell *c2, int i, int b, const transmatrix &Vwhere) {
+  if(!gmatrix0.count(c2)) {
     V = V * ddspin(c,i,b);
     return false;
     }
   hyperpoint h = C0;
   if(animations[LAYER_BIG].count(c2)) h = animations[LAYER_BIG][c2].wherenow * h;
-  h = inverse(V) * gmatrix0[c2] * h;
+  if(inmirrorcount)
+    h = inverse(V) * Vwhere * inverse(gmatrix0[c]) * gmatrix0[c2] * h;
+  else
+    h = inverse(V) * gmatrix0[c2] * h;
   V = V * rspintox(h);
   return true;  
   }
@@ -1508,8 +1532,7 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, int col) {
   double footphaseb = 0, footphase = 0;
   
   transmatrix Vs = Vparam; nospins = applyAnimation(c, Vs, footphase, LAYER_SMALL);
-  transmatrix Vb = Vparam; 
-  if(!inmirrorcount) nospinb = applyAnimation(c, Vb, footphaseb, LAYER_BIG);
+  transmatrix Vb = Vparam; nospinb = applyAnimation(c, Vb, footphaseb, LAYER_BIG);
 //  nospin = true;
 
   eMonster m = c->monst;
@@ -1523,7 +1546,7 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, int col) {
       
       if(mmmon) {
         if(nospinb)
-          chainAnimation(c, Vb, c->mov[c->mondir], c->mondir, 0);
+          chainAnimation(c, Vb, c->mov[c->mondir], c->mondir, 0, Vparam);
         else 
           Vb = Vb * ddspin(c, c->mondir);
 
@@ -1602,7 +1625,7 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, int col) {
         char part = dragon::bodypart(c, dragon::findhead(c));
         if(part == 't') {
           if(nospinb) {
-            chainAnimation(c, Vb, c2, nd, 0);
+            chainAnimation(c, Vb, c2, nd, 0, Vparam);
             Vb = Vb * pispin;
             }
           else {
@@ -1614,9 +1637,9 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, int col) {
           }
         else if(true) {
           if(nospinb) {
-            chainAnimation(c, Vb, c2, nd, 0);
+            chainAnimation(c, Vb, c2, nd, 0, Vparam);
             Vb = Vb * pispin;
-            double ang = chainAngle(c, Vb, c->mov[c->mondir], (displaydir(c, c->mondir) - displaydir(c, nd)) * M_PI / S42);
+            double ang = chainAngle(c, Vb, c->mov[c->mondir], (displaydir(c, c->mondir) - displaydir(c, nd)) * M_PI / S42, Vparam);
             ang /= 2;
             Vb = Vb * spin(M_PI-ang);
             }
@@ -1642,30 +1665,40 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, int col) {
     }
   
   else if(isMimic(c)) {
-  
-    if(!nospins) 
-      Vs = Vs * ddspin(c, c->mondir, flipplayer ? S42 : 0);
-      
-    if(inmirrorcount&1) col ^= minf[moMirror].color ^ minf[moMirage].color;
-
-    if(c->monst == moMirror) Vs = Vs * Mirror;
+    int xdir = 0, copies = 1;
+    if(c->wall == waMirrorWall) {
+      xdir = mirror::mirrordir(c);
+      copies = 2;
+      if(xdir == -1) copies = 6, xdir = 0;
+      }
+    for(auto& m: mirror::mirrors) if(c == m.second.c) 
+    for(int d=0; d<copies; d++) {
+      multi::cpid = m.first;
+      auto cw = m.second;
+      if(d&1) cwmirrorat(cw, xdir);
+      if(d>=2) cwspin(cw, 2);
+      if(d>=4) cwspin(cw, 2);
+      transmatrix Vs = Vparam;
+      bool mirr = cw.mirrored;
+      Vs = Vs * ddspin(c, cw.spin-cwt.spin, euclid ? 0 : S42);
+      nospins = applyAnimation(cwt.c, Vs, footphase, LAYER_SMALL);
+      if(!nospins) Vs = Vs * ddspin(c, cwt.spin);
+      if(mirr) Vs = Vs * Mirror;
+      if(inmirrorcount&1) mirr = !mirr;
+      col = mirrorcolor(geometry == gElliptic ? det(Vs) < 0 : mirr);
+      if(!nospins && flipplayer) Vs = Vs * pispin;
+      if(mmmon) {
+        drawMonsterType(moMimic, c, Vs, col, footphase);
+        drawPlayerEffects(Vs, c, false);
+        }
+      if(!mouseout() && !nospins) {
+        transmatrix invxy = Id;
+        if(flipplayer) invxy[0][0] = invxy[1][1] = -1;
         
-    multi::cpid = c->hitpoints;
-
-    if(mmmon) {
-      drawMonsterType(c->monst, c, Vs, col, footphase);
-      drawPlayerEffects(Vs, c, false);
+        hyperpoint P2 = Vs * inverse(cwtV) * invxy * mouseh;
+        queuechr(P2, 10, 'x', 0xFF00);
+        }     
       }
-
-    if(flipplayer) Vs = Vs * pispin;
-
-    if(!mouseout() && !nospins) {
-      // transmatrix invxy = Id; invxy[0][0] = invxy[1][1] = -1;
-      
-      hyperpoint P2 = Vs * inverse(cwtV) * mouseh;
-      queuechr(P2, 10, 'x', 0xFF00);
-      }
-    
     return !mmmon;
     }
   
@@ -1707,7 +1740,7 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, int col) {
   else if(c->monst == moKrakenT) {
     if(c->hitpoints == 0) col = 0x404040;
     if(nospinb) {
-      chainAnimation(c, Vb, c->mov[c->mondir], c->mondir, 0);
+      chainAnimation(c, Vb, c->mov[c->mondir], c->mondir, 0, Vparam);
       Vb = Vb * pispin;
       }
     else Vb = Vb * ddspin(c, c->mondir, S42);
@@ -1813,12 +1846,14 @@ void drawaura() {
   
   for(int v=0; v<4; v++) sumaura(v);
 
+#if CAP_SDL || CAP_GL
   double bak[3];
   bak[0] = ((backcolor>>16)&255)/255.;
   bak[1] = ((backcolor>>8)&255)/255.;
   bak[2] = ((backcolor>>0)&255)/255.;
+#endif
   
-#ifndef NOSDL
+#if CAP_SDL
   if(!vid.usingGL) {
     SDL_LockSurface(s);
     for(int y=0; y<vid.yres; y++)
@@ -1858,7 +1893,7 @@ void drawaura() {
     }
 #endif
 
-#ifdef GL
+#if CAP_GL
   setcameraangle(true);
   
   glEnableClientState(GL_COLOR_ARRAY);
@@ -2249,7 +2284,7 @@ void setcolors(cell *c, int& wcol, int &fcol) {
     if(c->wall == waPlatform) wcol = 0xF0F0A0;
     }
   if(c->land == laWineyard) fcol = 0x006000;
-  if(c->land == laMirror || c->land == laMirrorWall)
+  if(c->land == laMirror || c->land == laMirrorWall || c->land == laMirrorOld)
     fcol = 0x808080;
   if(c->land == laMotion) fcol = 0xF0F000;
   if(c->land == laGraveyard) fcol = 0x107010;
@@ -2344,7 +2379,7 @@ void setcolors(cell *c, int& wcol, int &fcol) {
 
   if(c->land == laCamelot) {
     int d = showoff ? 0 : ((euclid||c->master->alt) ? celldistAltRelative(c) : 0);
-#ifdef TOUR
+#if CAP_TOUR
     if(!tour::on) camelotcheat = false;
     if(camelotcheat) 
         fcol = (d&1) ? 0xC0C0C0 : 0x606060;
@@ -3115,7 +3150,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
     
       // floor
       
-#ifndef NOEDIT
+#if CAP_EDIT
       transmatrix Vpdir = V * applyPatterndir(c);
 #endif
         
@@ -3130,7 +3165,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           }
         }
               
-#ifndef NOEDIT
+#if CAP_EDIT
       if(mapeditor::drawUserShape(Vpdir, mapeditor::cellShapeGroup(), mapeditor::realpatternsh(c),
         darkena(fcol, fd, (cmode & sm::DRAW) ? 0xC0 : 0xFF), c));
       
@@ -3171,27 +3206,37 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
             if(c->mov[d] && c->mov[(1+d)%6] && c->mov[d]->land == laMirrorWall && c->mov[(1+d)%6]->land == laMirrorWall)
               break;
           qfi.spin = ddspin(c, d, 0);
-          transmatrix V2 = V * qfi.spin;
-          for(int d=0; d<6; d++) {
+          transmatrix V2 = V * qfi.spin;          
+          if(!wmblack) for(int d=0; d<6; d++) {
             inmirrorcount+=d;
             qfloor(c, V2 * spin(d*M_PI/3), shHalfFloor[2], darkena(fcol, fd, 0xFF));
             inmirrorcount-=d;
+            }          
+          if(wmspatial) {
+            const int layers = 2 << detaillevel;
+            for(int z=1; z<layers; z++) 
+              queuepolyat(mscale(V2, zgrad0(0, geom3::wall_height, z, layers)), shHalfMirror[2], 0xC0C0C080, PPR_WALL3+z-layers);
             }
-          const int layers = 2 << detaillevel;
-          for(int z=1; z<layers; z++) 
-            queuepolyat(mscale(V2, zgrad0(0, geom3::wall_height, z, layers)), shHalfMirror[2], 0xC0C0C080, PPR_WALL3+z-layers);
+          else
+            queuepolyat(V2, shHalfMirror[2], 0xC0C0C080, PPR_WALL3);
           }
         else {
           qfi.spin = ddspin(c, d, S42);
           transmatrix V2 = V * qfi.spin;
-          inmirrorcount++;
-          qfloor(c, mirrorif(V2, !onleft), shHalfFloor[ct6], darkena(fcol, fd, 0xFF));
-          inmirrorcount--;
-          qfloor(c, mirrorif(V2, onleft), shHalfFloor[ct6], darkena(fcol, fd, 0xFF));
+          if(!wmblack) {
+            inmirrorcount++;
+            qfloor(c, mirrorif(V2, !onleft), shHalfFloor[ct6], darkena(fcol, fd, 0xFF));
+            inmirrorcount--;
+            qfloor(c, mirrorif(V2, onleft), shHalfFloor[ct6], darkena(fcol, fd, 0xFF));
+            }
   
-          const int layers = 2 << detaillevel;
-          for(int z=1; z<layers; z++) 
-            queuepolyat(mscale(V2, zgrad0(0, geom3::wall_height, z, layers)), shHalfMirror[ct6], 0xC0C0C080, PPR_WALL3+z-layers);
+          if(wmspatial) {
+            const int layers = 2 << detaillevel;
+            for(int z=1; z<layers; z++) 
+              queuepolyat(mscale(V2, zgrad0(0, geom3::wall_height, z, layers)), shHalfMirror[ct6], 0xC0C0C080, PPR_WALL3+z-layers);
+            }
+          else 
+            queuepolyat(V2, shHalfMirror[ct6], 0xC0C0C080, PPR_WALL3);
           }
         }
       
@@ -3464,7 +3509,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         }
       // walls
 
-#ifndef NOEDIT
+#if CAP_EDIT
 
       if(mapeditor::displaycodes) {
 
@@ -3904,7 +3949,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       applyAnimation(c, Vboat0, footphase, LAYER_BOAT);
       }
     
-#ifndef NOEDIT
+#if CAP_EDIT
     if(c == mapeditor::drawcell && mapeditor::drawcellShapeGroup() == 2)
       mapeditor::drawtrans = V;
 #endif
@@ -4080,15 +4125,13 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       
   if(!inHighQual) {
     
-#ifndef NOEDIT
+#if CAP_EDIT
     if((cmode & sm::MAP) && lmouseover && darken == 0 &&
       !mouseout() && 
       (mapeditor::whichPattern ? mapeditor::subpattern(c) == mapeditor::subpattern(lmouseover) : c == lmouseover)) {
       queuecircle(V, .78, 0x00FFFFFF);
       }
-#endif
-    
-#ifndef NOEDIT
+
     mapeditor::drawGhosts(c, V, ct);
 #endif
     }
@@ -4100,7 +4143,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       queueline(tC0(V), V*tC0(hexmove[c->bardir]), col, 2);
       }
     
-#ifndef NOMODEL
+#if CAP_MODEL
     netgen::buildVertexInfo(c, V);
 #endif
     }
@@ -4175,7 +4218,7 @@ void queuecircleat(cell *c, double rad, int col) {
 #define Gm(x) gmatrix[x]
 #define Gm0(x) tC0(gmatrix[x])
 
-#ifdef MOBILE
+#if ISMOBILE==1
 #define MOBON (clicked)
 #else
 #define MOBON true
@@ -4187,11 +4230,7 @@ void drawMarkers() {
 
   if(!inHighQual) {
 
-#ifdef PANDORA
-    bool ok = mousepressed;
-#else
-    bool ok = true;
-#endif
+  bool ok = !ISPANDORA || mousepressed;
      
     if(G(dragon::target) && haveMount()) {
       queuechr(Gm0(dragon::target), 2*vid.fsize, 'X', 
@@ -4223,15 +4262,19 @@ void drawMarkers() {
       queuecircleat(global_pushto, .6, darkena(0xFFD500, 0, 0xFF));
       }
 
+#if CAP_JOY
     if(joydir.d >= 0) 
       queuecircleat(cwt.c->mov[(joydir.d+cwt.spin) % cwt.c->type], .78 - .02 * sin(ticks/199.0), 
         darkena(0x00FF00, 0, 0xFF));
+#endif
 
-#ifndef NOMODEL
-    if(centerover && !playermoved && netgen::mode == 0 && !conformal::on)
+    bool m = true;
+#if CAP_MODEL
+    m = netgen::mode == 0;
+#endif
+    if(centerover && !playermoved && m && !conformal::on)
       queuecircleat(centerover, .70 - .06 * sin(ticks/200.0), 
         darkena(int(175 + 25 * sin(ticks / 200.0)), 0, 0xFF));
-#endif
 
     if(multi::players > 1 || multi::alwaysuse) for(int i=0; i<numplayers(); i++) {
       multi::cpid = i;
@@ -4242,7 +4285,7 @@ void drawMarkers() {
 
     // process mouse
 
-#ifdef MOBILE
+#if ISMOBILE
   extern bool useRangedOrb;
   if(canmove && !shmup::on && andmode == 0 && !useRangedOrb && vid.mobilecompasssize > 0) {
     using namespace shmupballs;
@@ -4424,7 +4467,7 @@ void drawthemap() {
     multi::ccdist[i] = 1e20; multi::ccat[i] = NULL;
     }
 
-  #ifdef MOBILE
+  #if ISMOBILE
   mouseovers = XLAT("No info about this...");
   #endif
   if(mouseout()) 
@@ -4491,7 +4534,7 @@ void drawthemap() {
       }
     }
 
-  #ifndef NOSDL
+  #if CAP_SDL
   Uint8 *keystate = SDL_GetKeyState(NULL);
   lmouseover = mouseover;
   bool useRangedOrb = (!(vid.shifttarget & 1) && haveRangedOrb() && lmouseover && lmouseover->cpdist > 1) || (keystate[SDLK_RSHIFT] | keystate[SDLK_LSHIFT]);
@@ -4506,7 +4549,7 @@ void drawthemap() {
     movepcto(mousedest.d, mousedest.subdir, true);
     for(int i=0; i<ittypes; i++) orbused[i] = recorduse[i];
     items[itWarning] -= 2;
-    if(multi::players == 1 && cw.spin != cwt.spin) mirror::spin(-mousedest.d);
+    if(cw.spin != cwt.spin) mirror::act(-mousedest.d, mirror::SPINSINGLE);
     cwt = cw; flipplayer = f;
     lmouseover = mousedest.d >= 0 ? cwt.c->mov[(cwt.spin + mousedest.d) % cwt.c->type] : cwt.c;
     }
@@ -4522,7 +4565,7 @@ void drawmovestar(double dx, double dy) {
   if(!playerfound) return;
   
   if(shmup::on) return;
-#ifndef NORUG
+#if CAP_RUG
   if(rug::rugged && multi::players == 1 && !multi::alwaysuse) return;
 #endif
 
@@ -4549,7 +4592,7 @@ void drawmovestar(double dx, double dy) {
   
   else for(int d=0; d<8; d++) {
     int col = starcol;
-#ifdef PANDORA
+#if ISPANDORA
     if(leftclick && (d == 2 || d == 6 || d == 1 || d == 7)) col &= 0xFFFFFF3F;
     if(rightclick && (d == 2 || d == 6 || d == 3 || d == 5)) col &= 0xFFFFFF3F;
     if(!leftclick && !rightclick && (d&1)) col &= 0xFFFFFF3F;
@@ -4591,7 +4634,7 @@ void calcparam() {
   else {
     if(vid.xres >= vid.yres * 5/4-16 && (cmode & sm::SIDE))
       sidescreen = true;
-#ifdef TOUR
+#if CAP_TOUR
     if(tour::on && (tour::slides[tour::currentslide].flags & tour::SIDESCREEN))
       sidescreen = true;
 #endif
@@ -4655,7 +4698,6 @@ void drawfullmap() {
 
   clearaura();
   drawthemap();
-  #ifndef NORUG
   if(!inHighQual) {
     if((cmode & sm::NORMAL) && !rug::rugged) {
       if(multi::players > 1) {
@@ -4669,10 +4711,13 @@ void drawfullmap() {
       else 
         drawmovestar(0, 0);
       }
+#if CAP_RUG
     if(rug::rugged && !rug::renderonce) queueline(C0, mouseh, 0xFF00FFFF, 5);
+#endif
+#if CAP_EDIT
     if(cmode & sm::DRAW) mapeditor::drawGrid();
+#endif
     }
-  #endif
   profile_start(2);
 
   drawaura();
@@ -4680,27 +4725,31 @@ void drawfullmap() {
   profile_stop(2);
   }
 
+#ifdef ISMOBILE
+int andmode;
+#endif
+
 void gamescreen(int _darken) {
   darken = _darken;
   
   if(conformal::includeHistory) conformal::restore();
 
-#ifndef NORUG
+#if CAP_RUG
   if(rug::rugged) {
     rug::actDraw();
-    }
+    } else
 #endif
-  else drawfullmap();
+  drawfullmap();
 
   if(conformal::includeHistory) conformal::restoreBack();
 
   poly_outline = OUTLINE_DEFAULT;
   
-  #ifdef MOBILE
+  #if ISMOBILE
   
   buttonclicked = false;
   
-  if(cmode == smNormal) {
+  if(cmode & sm::NORMAL) {
     if(andmode == 0 && shmup::on) {
       using namespace shmupballs;
       calc();
@@ -4725,12 +4774,12 @@ void gamescreen(int _darken) {
 void normalscreen() {
   help = "@";
 
-#ifdef ROGUEVIZ
+#if CAP_ROGUEVIZ
   if(!rogueviz::on)
 #endif
   mouseovers = XLAT("Press F1 or right click for help");
 
-#ifdef TOUR  
+#if CAP_TOUR  
   if(tour::on) mouseovers = tour::tourhelp;
 #endif
 
@@ -4740,7 +4789,7 @@ void normalscreen() {
   gamescreen(hiliteclick && mmmon ? 1 : 0); drawStats();
   if(nomenukey)
     ;
-#ifdef TOUR
+#if CAP_TOUR
   else if(tour::on) 
     displayButton(vid.xres-8, vid.yres-vid.fsize, XLAT("(ESC) tour menu"), SDLK_ESCAPE, 16);
   else
@@ -4762,20 +4811,24 @@ void drawscreen() {
   DEBB(DF_GRAPH, (debugfile,"drawscreen\n"));
 
   calcparam();
-  #ifdef ROGUEVIZ
+  #if CAP_ROGUEVIZ
   rogueviz::fixparam();
   #endif
-#ifdef GL
+
+#if CAP_GL
   if(vid.usingGL) setGLProjection();
 #endif
   
-  #ifndef NOSDL
+  #if CAP_SDL
   // SDL_LockSurface(s);
   // unsigned char *b = (unsigned char*) s->pixels;
   // int n = vid.xres * vid.yres * 4;
   // while(n) *b >>= 1, b++, n--;
   // memset(s->pixels, 0, vid.xres * vid.yres * 4);
-  if(!vid.usingGL) SDL_FillRect(s, NULL, backcolor);
+  #if CAP_GL
+  if(!vid.usingGL) 
+  #endif
+    SDL_FillRect(s, NULL, backcolor);
   #endif
    
   // displaynum(vx,100, 0, 24, 0xc0c0c0, celldist(cwt.c), ":");
@@ -4787,12 +4840,12 @@ void drawscreen() {
 
   cmode = 0;
   keyhandler = [] (int sym, int uni) { return false; };
+  if(!size(screens)) pushScreen(normalscreen);
   screens.back()();
 
+#if !ISMOBILE
   int col = linf[cwt.c->land].color;
   if(cwt.c->land == laRedRock) col = 0xC00000;
-
-#ifndef MOBILE
   displayfr(vid.xres/2, vid.fsize,   2, vid.fsize, mouseovers, col, 8);
 #endif
 
@@ -4844,8 +4897,8 @@ void drawscreen() {
   // SDL_UnlockSurface(s);
 
   DEBT("swapbuffers");
-#ifndef NOSDL
-#ifdef GL
+#if CAP_SDL
+#if CAP_GL
   if(vid.usingGL) SDL_GL_SwapBuffers(); else
 #endif
   SDL_UpdateRect(s, 0, 0, vid.xres, vid.yres);
@@ -4882,7 +4935,7 @@ auto graphcm = addHook(clearmemory, 0, [] () {
 void resetGeometry() {
   precalc();
   fp43.analyze();
-#ifdef GL
+#if CAP_GL
   resetGL();
 #endif
   }

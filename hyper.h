@@ -112,8 +112,12 @@ namespace hive { void createBugArmy(cell *c); }
 namespace whirlpool { void generate(cell *wto); }
 namespace whirlwind { void generate(cell *wto); }
 namespace mirror { 
-  void createMirrors(cell *c, int dir, eMonster type);
-  void createMirages(cell *c, int dir, eMonster type);
+  static const int SPINSINGLE = 1;
+  static const int SPINMULTI = 2;
+  static const int GO = 4;
+  static const int ATTACK = 8;
+    
+  void act(int dir, int flags);
   }
 
 int neighborId(cell *c1, cell *c2);
@@ -276,13 +280,13 @@ bool displaystr(int x, int y, int shift, int size, const string& str, int color,
 extern int darken, inmirrorcount;
 void calcparam();
 
-#ifdef USE_SDL
+#if CAP_SDL
 int& qpixel(SDL_Surface *surf, int x, int y);
 void setvideomode();
 void saveHighQualityShot(const char *fname = NULL, const char *caption = NULL, int fade = 255);
 #endif
 
-#ifndef NOCONFIG
+#if CAP_CONFIG
 void saveConfig();
 #endif
 
@@ -391,7 +395,7 @@ namespace mapeditor {
   void showDrawEditor();
   }
 
-#ifndef NORUG
+#if CAP_RUG
 namespace rug {
   extern bool rugged;
   extern bool renderonce;
@@ -450,13 +454,6 @@ void selectEyeGL(int ed);
 void selectEyeMask(int ed);
 extern int ticks;
 void setGLProjection();
-
-#ifdef LOCAL
-extern void process_local_stats();
-bool localDescribe();
-void localDrawMap();
-extern bool localKill(shmup::monster *m);
-#endif
 
 // passable flags
 
@@ -529,14 +526,13 @@ extern bool safety;
 #define INF  9999
 #define INFD 20
 #define PINFD 125
-#define BARLEV ((ISANDROID||ISIOS||purehepta)?9:10)
+#define BARLEV ((ISANDROID||ISIOS||ISFAKEMOBILE||purehepta)?9:10)
 #define BUGLEV 15
 // #define BARLEV 9
 
 bool isKillable(cell *c);
 bool isKillableSomehow(cell *c);
 
-extern vector<cell*> mirrors, mirrors2;
 bool isAlchAny(eWall w);
 bool isAlchAny(cell *c);
 
@@ -689,16 +685,17 @@ int getGhostcount();
 void raiseBuggyGeneration(cell *c, const char *s);
 void verifyMutantAround(cell *c);
 
-// #define NOPNG
+#if CAP_SDL
 
-#ifdef NOPNG
-#define IMAGEEXT ".bmp"
-#define IMAGESAVE SDL_SaveBMP
-#else
+#if CAP_PNG
 #include "savepng.h"
 #define IMAGEEXT ".png"
-
 void IMAGESAVE(SDL_Surface *s, const char *fname);
+#else
+#define IMAGEEXT ".bmp"
+#define IMAGESAVE SDL_SaveBMP
+#endif
+
 #endif
 
 void drawscreen();
@@ -715,7 +712,7 @@ bool isDragon(eMonster m);
 
 // for some reason I need this to compile under OSX
 
-#ifdef MAC
+#if ISMAC
 extern "C" { void *_Unwind_Resume = 0; }
 #endif
 
@@ -790,15 +787,9 @@ bool againstCurrent(cell *w, cell *from);
 
 extern bool timerghost;
 
-#ifdef PANDORA
-#define MENU_SCALING
-#endif
+#define CAP_MENUSCALING (ISPANDORA || ISMOBILE)
 
-#ifdef MOBILE
-#define MENU_SCALING
-#endif
-
-#ifdef MENU_SCALING
+#if CAP_MENUSCALING
 #define displayfrZ dialog::displayzoom
 #else
 #define displayfrZ displayfr
@@ -952,7 +943,8 @@ enum PPR {
   PPR_ONTENTACLE, PPR_ONTENTACLE_EYES, PPR_ONTENTACLE_EYES2,
   PPR_MONSTER_SHADOW,
   PPR_MONSTER_FOOT, PPR_MONSTER_LEG, PPR_MONSTER_GROIN,
-  PPR_MONSTER_BODY, PPR_MONSTER_SUBWPN, PPR_MONSTER_WPN, PPR_MONSTER_ARMOR0, PPR_MONSTER_ARMOR1,
+  PPR_MONSTER_SUBWPN, PPR_MONSTER_WPN,
+  PPR_MONSTER_BODY, PPR_MONSTER_ARMOR0, PPR_MONSTER_ARMOR1,
   PPR_MONSTER_CLOAK, PPR_MONSTER_NECK,
   PPR_MONSTER_HEAD, PPR_MONSTER_FACE, PPR_MONSTER_EYE0, PPR_MONSTER_EYE1,
   PPR_MONSTER_HAIR, PPR_MONSTER_HAT0, PPR_MONSTER_HAT1,
@@ -1013,7 +1005,7 @@ enum eGlyphsortorder {
 
 extern eGlyphsortorder glyphsortorder;
 
-#ifdef ROGUEVIZ
+#if CAP_ROGUEVIZ
 namespace rogueviz { 
   extern bool on;
   string describe(shmup::monster *m);
@@ -1102,7 +1094,7 @@ extern int cshpos;
 
 
 namespace arg {
-#ifdef USE_COMMANDLINE
+#if CAP_COMMANDLINE
   extern int argc; extern char **argv;
   
   inline void lshift() {
@@ -1150,13 +1142,7 @@ void verifycells(heptagon *at);
 int zebra40(cell *c);
 cell *createMov(cell *c, int d);
 
-#ifndef MOBWEB
-#ifndef TOUR
-#define TOUR
-#endif
-#endif
-
-#ifdef TOUR
+#if CAP_TOUR
 namespace tour {
   extern bool on;
   extern string tourhelp;
@@ -1214,9 +1200,11 @@ namespace tour {
 namespace rogueviz {
   extern bool rog3;
   extern bool rvwarp;
+#if CAP_TOUR
   namespace rvtour {
     extern tour::slide rvslides[];
     }
+#endif
   };
 
 extern bool doCross;
@@ -1243,6 +1231,7 @@ namespace sm {
   static const int DOTOUR = 512;
   static const int CENTER = 1024;
   static const int A3 = 2048; // affects poly
+  static const int ZOOMABLE = 4096;
   };
 
 namespace linepatterns {
@@ -1397,7 +1386,7 @@ int textwidth(int siz, const string &str);
 extern bool gtouched, mousepressed, mousemoved, actonrelease;
 extern bool inslider;
 
-#ifdef ROGUEVIZ
+#if CAP_ROGUEVIZ
 #define DOSHMUP (shmup::on || rogueviz::on)
 #else
 #define DOSHMUP shmup::on
@@ -1422,10 +1411,10 @@ void loadConfig();
 
 extern bool auraNOGL;
 
-#ifndef NOSDL
+#if CAP_SDLJOY
 extern void initJoysticks();
-extern int joyx, joyy, panjoyx, panjoyy;
 extern bool autojoy;
+extern int joyx, joyy, panjoyx, panjoyy;
 extern movedir joydir;
 extern SDL_Joystick* sticks[8];
 extern int numsticks;
@@ -1434,7 +1423,7 @@ void closeJoysticks();
 
 void preparesort();
 
-#ifdef MOBILE
+#if ISMOBILE==1
 #define SHMUPTITLE "shoot'em up mode"
 #else
 #define SHMUPTITLE "shoot'em up and multiplayer"
@@ -1472,7 +1461,7 @@ void showMission();
 void handleKeyQuit(int sym, int uni);
 void handlePanning(int sym, int uni);
 
-#ifdef MOBILE
+#if ISMOBILE==1
 namespace leader { void showMenu(); void handleKey(int sym, int uni); }
 #endif
 
@@ -1497,12 +1486,6 @@ extern int hinttoshow;
 bool isShmupLifeOrb(eItem it);
 int orbcharges(eItem it);
 
-#ifdef PANDORA
-static const bool ISPANDORA = true;
-#else
-static const bool ISPANDORA = false;
-#endif
-
 int gradient(int c0, int c1, ld v0, ld v, ld v1);
 
 struct hint {
@@ -1514,3 +1497,14 @@ struct hint {
 
 extern hint hints[];
 int counthints();
+
+void gainShard(cell *c2, const char *msg);
+
+int textwidth(int siz, const string &str);
+#if CAP_GL
+int gl_width(int size, const char *s);
+#endif
+
+#ifdef ISMOBILE
+extern int andmode;
+#endif

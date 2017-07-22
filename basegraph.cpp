@@ -2,15 +2,38 @@ int backcolor = 0;
 int bordcolor = 0;
 int forecolor = 0xFFFFFF;
 
-#ifndef NOSDL
-SDL_Surface *s;
+int utfsize(char c) {
+  unsigned char cu = c;
+  if(cu < 128) return 1;
+  if(cu < 224) return 2;
+  if(cu < 0xF0) return 3;
+  return 4;
+  }
 
-#ifndef NOTTF
+bool eqs(const char* x, const char* y) {
+  return *y? *x==*y?eqs(x+1,y+1):false:true;
+  }
+
+int getnext(const char* s, int& i) {
+
+  int siz = utfsize(s[i]);
+// if(fontdeb) printf("s=%s i=%d siz=%d\n", s, i, siz);
+  if(siz == 1) return s[i++];
+  for(int k=0; k<NUMEXTRA; k++)
+    if(eqs(s+i, natchars[k])) {
+      i += siz; return 128+k;
+      }
+  printf("Unknown character in: '%s'\n", s);
+  i ++; return '?';
+  }
+
+#if CAP_SDLTTF
 TTF_Font *font[256];
 #endif
-#endif
 
-#ifndef NOSDL
+#if CAP_SDL
+SDL_Surface *s;
+
 int ZZ;
 
 int& qpixel(SDL_Surface *surf, int x, int y) {
@@ -31,15 +54,10 @@ int qpixel3(SDL_Surface *surf, int x, int y) {
   }
 #endif
 
-#ifndef EXTERNALFONT
-#ifndef NOTTF
+#if CAP_SDLTTF
 void loadfont(int siz) {
   if(!font[siz]) {
-#ifdef WEB
-    font[siz] = TTF_OpenFont("sans-serif", siz);
-#else
-    font[siz] = TTF_OpenFont(HYPERPATH "DejaVuSans-Bold.ttf", siz);
-#endif
+    font[siz] = TTF_OpenFont(ISWEB ? "sans-serif" : HYPERPATH "DejaVuSans-Bold.ttf", siz);
     // Destination set by ./configure (in the GitHub repository)
     #ifdef FONTDESTDIR
     if (font[siz] == NULL) {
@@ -54,38 +72,30 @@ void loadfont(int siz) {
   }
 #endif
 
-int gl_width(int size, const char *s);
-
+#if !ISFAKEMOBILE && !ISANDROID & !ISIOS
 int textwidth(int siz, const string &str) {
   if(size(str) == 0) return 0;
 
-#ifdef NOTTF
-#ifdef GL
-  return gl_width(siz, str.c_str());
-#else
-  return 0;
-#endif
-
-#else
-
+#if CAP_SDLTTF
   loadfont(siz);
   
   int w, h;
   TTF_SizeUTF8(font[siz], str.c_str(), &w, &h);
   // printf("width = %d [%d]\n", w, size(str));
   return w;
+
+#elif CAP_GL
+  return gl_width(siz, str.c_str());
+#else
+  return 0;
 #endif
   }
 #endif
 
-int textwidth(int siz, const string &str);
-
-#ifdef IOS
-
+#if ISIOS
 int textwidth(int siz, const string &str) {
   return mainfont->getSize(str, siz / 36.0).width;
   }
-
 #endif
 
 int darkenedby(int c, int lev) {
@@ -111,11 +121,9 @@ int darkena(int c, int lev, int a) {
   return (darkenedby(c, lev) << 8) + a;
   }
 
-#ifndef GL
+#if !CAP_GL
 void setcameraangle(bool b) { }
-#endif
-
-#ifdef GL
+#else
 
 bool cameraangle_on;
 
@@ -224,12 +232,14 @@ void setGLProjection() {
     }
   else glDisable(GL_LINE_SMOOTH);
   glLineWidth(vid.linewidth);
-  
+
+#if !ISMOBILE
   if(vid.antialias & AA_POLY) {
     glEnable(GL_POLYGON_SMOOTH);
     glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
     }
   else glDisable(GL_POLYGON_SMOOTH);
+#endif
 
   //glLineWidth(1.0f);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -249,11 +259,7 @@ void setGLProjection() {
   selectEyeGL(0);
   }
 
-#ifdef MOBILE
-#define EXTERNALFONT
-#endif
-
-#ifndef EXTERNALFONT
+#if CAP_GLFONT
 
 struct glfont_t {
   GLuint * textures;                                  // Holds The Texture Id's   
@@ -281,16 +287,8 @@ void glError(const char* GLcall, const char* file, const int line) {
     }
   }
 
-#ifdef NOTTF
-#define FIXEDSIZE
-#endif
-
-#ifdef CREATEFONT
-#define FIXEDSIZE
-#endif
-
 void sdltogl(SDL_Surface *txt, glfont_t& f, int ch) {
-#ifdef NOTTF
+#if CAP_TABFONT
   int otwidth, otheight, tpix[3000], tpixindex = 0;
   loadCompressedChar(otwidth, otheight, tpix);
 #else
@@ -301,14 +299,14 @@ void sdltogl(SDL_Surface *txt, glfont_t& f, int ch) {
   int twidth = next_p2( otwidth );
   int theight = next_p2( otheight );
 
-#ifdef NOTTF
+#if CAP_TABFONT
   int expanded_data[twidth * theight];
 #else
   Uint16 expanded_data[twidth * theight];
 #endif
 
   for(int j=0; j <theight;j++) for(int i=0; i < twidth; i++) {
-#ifdef NOTTF
+#if CAP_TABFONT
     expanded_data[(i+j*twidth)] = (i>=otwidth || j>=otheight) ? 0 : tpix[tpixindex++];
 #else
     expanded_data[(i+j*twidth)] = 
@@ -324,7 +322,7 @@ void sdltogl(SDL_Surface *txt, glfont_t& f, int ch) {
   glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
  
   glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, twidth, theight, 0,
-#ifdef NOTTF
+#if CAP_TABFONT
     GL_RGBA, GL_UNSIGNED_BYTE, 
 #else
     GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE, 
@@ -340,6 +338,11 @@ void sdltogl(SDL_Surface *txt, glfont_t& f, int ch) {
 void init_glfont(int size) {
   if(glfont[size]) return;
   DEBB(DF_INIT, (debugfile,"init GL font: %d\n", size));
+
+#if !CAP_TABFONT
+  loadfont(size);
+  if(!font[size]) return;
+#endif
   
   glfont[size] = new glfont_t;
   
@@ -351,10 +354,7 @@ void init_glfont(int size) {
   if(0) for(int i=0; i<128+NUMEXTRA; i++)
     printf("texture %d = %d\n", i, f.textures[i]);
 
-#ifndef NOTTF
-  loadfont(size);
-  if(!font[size]) return;
-
+#if !CAP_TABFONT
   char str[2]; str[1] = 0;
   
   SDL_Color white;
@@ -367,7 +367,7 @@ void init_glfont(int size) {
   
     if(ch<32) continue;
 
-#ifdef NOTTF
+#if CAP_TABFONT
     sdltogl(NULL, f, ch);
 
 #else
@@ -380,13 +380,10 @@ void init_glfont(int size) {
       txt = TTF_RenderUTF8_Blended(font[size], natchars[ch-128], white);
       }
     if(txt == NULL) continue;
-#ifdef CREATEFONT
+#if CAP_CREATEFONT
     generateFont(ch, txt);
 #endif
     sdltogl(txt, f, ch);
-#endif
-
-#ifndef NOTTF
     SDL_FreeSurface(txt);    
 #endif
     }
@@ -395,46 +392,18 @@ void init_glfont(int size) {
   GLERR("initfont");
   }
 
-int utfsize(char c) {
-  unsigned char cu = c;
-  if(cu < 128) return 1;
-  if(cu < 224) return 2;
-  if(cu < 0xF0) return 3;
-  return 4;
-  }
-
-bool eqs(const char* x, const char* y) {
-  return *y? *x==*y?eqs(x+1,y+1):false:true;
-  }
-
-int getnext(const char* s, int& i) {
-
-  int siz = utfsize(s[i]);
-// if(fontdeb) printf("s=%s i=%d siz=%d\n", s, i, siz);
-  if(siz == 1) return s[i++];
-  for(int k=0; k<NUMEXTRA; k++)
-    if(eqs(s+i, natchars[k])) {
-      i += siz; return 128+k;
-      }
-  printf("Unknown character in: '%s'\n", s);
-  i ++; return '?';
-  }
-
 GLfloat tver[24];
 
 int gl_width(int size, const char *s) {
   int gsiz = size;
   if(size > vid.fsize || size > 72) gsiz = 72;
 
-#ifdef FIXEDSIZE
-  gsiz = 36;
+#if CAP_FIXEDSIZE
+  gsiz = CAP_FIXEDSIZE;
 #endif
 
   init_glfont(gsiz);
-
-#ifndef NOTTF
-  if(!font[gsiz]) return 0;
-#endif
+  if(!glfont[gsiz]) return 0;
 
   glfont_t& f(*glfont[gsiz]);
 
@@ -452,15 +421,12 @@ bool gl_print(int x, int y, int shift, int size, const char *s, int color, int a
   int gsiz = size;
   if(size > vid.fsize || size > 72) gsiz = 72;
 
-#ifdef FIXEDSIZE
-  gsiz = 36;
+#if CAP_FIXEDSIZE
+  gsiz = CAP_FIXEDSIZE;
 #endif
   
   init_glfont(gsiz);
-
-#ifndef NOTTF
-  if(!font[gsiz]) return false;
-#endif
+  if(!glfont[gsiz]) return false;
 
   glfont_t& f(*glfont[gsiz]);
   
@@ -561,7 +527,7 @@ purehookset hooks_resetGL;
 void resetGL() {
   DEBB(DF_INIT, (debugfile,"reset GL\n"));
   callhooks(hooks_resetGL);
-#ifndef EXTERNALFONT
+#if CAP_GLFONT
   for(int i=0; i<128; i++) if(glfont[i]) {
     delete glfont[i];
     glfont[i] = NULL;
@@ -572,7 +538,62 @@ void resetGL() {
 
 #endif
 
-#ifndef MOBILE
+#if CAP_XGD
+
+vector<int> graphdata;
+
+void gdpush(int t) {
+  graphdata.push_back(t);
+  }
+
+bool displaychr(int x, int y, int shift, int size, char chr, int col) {
+  gdpush(2); gdpush(x); gdpush(y); gdpush(8);
+  gdpush(col); gdpush(size); gdpush(0);
+  gdpush(1); gdpush(chr); 
+  return false;
+  }
+
+void gdpush_utf8(const string& s) {
+  int g = (int) graphdata.size(), q = 0;
+  gdpush((int) s.size()); for(int i=0; i<size(s); i++) {
+#if ISANDROID
+    unsigned char uch = (unsigned char) s[i];
+    if(uch >= 192 && uch < 224) {
+      int u = ((s[i] - 192)&31) << 6;
+      i++;
+      u += (s[i] - 128) & 63;
+      gdpush(u); q++;
+      }
+    else
+#endif
+      {
+      gdpush(s[i]); q++;
+      }
+    }
+  graphdata[g] = q;
+  }
+
+bool displayfr(int x, int y, int b, int size, const string &s, int color, int align) {
+  gdpush(2); gdpush(x); gdpush(y); gdpush(align);
+  gdpush(color); gdpush(size); gdpush(b);
+  gdpush_utf8(s);
+  int mx = mousex - x;
+  int my = mousey - y;
+  int len = textwidth(size, s);
+  return 
+    mx >= -len*align/32   && mx <= +len*(16-align)/32 && 
+    my >= -size*3/4 && my <= +size*3/4;
+  }
+
+bool displaystr(int x, int y, int shift, int size, const string &s, int color, int align) {
+  return displayfr(x,y,0,size,s,color,align);
+  }
+
+bool displaystr(int x, int y, int shift, int size, char const *s, int color, int align) {
+  return displayfr(x,y,0,size,s,color,align);
+  }
+
+#else
 bool displaystr(int x, int y, int shift, int size, const char *str, int color, int align) {
 
   if(strlen(str) == 0) return false;
@@ -581,11 +602,11 @@ bool displaystr(int x, int y, int shift, int size, const char *str, int color, i
     return false;
     }
   
-#ifdef GL
+#if CAP_GLFONT
   if(vid.usingGL) return gl_print(x, y, shift, size, str, color, align);
 #endif
 
-#ifdef NOTTF
+#if !CAP_SDLTTF
   static bool towarn = true;
   if(towarn) towarn = false, printf("WARNING: NOTTF works only with OpenGL!\n");
   return false;
@@ -667,62 +688,6 @@ bool displaychr(int x, int y, int shift, int size, char chr, int col) {
   buf[0] = chr; buf[1] = 0;
   return displaystr(x, y, shift, size, buf, col, 8);
   }
-
-#else
-
-vector<int> graphdata;
-
-void gdpush(int t) {
-  graphdata.push_back(t);
-  }
-
-bool displaychr(int x, int y, int shift, int size, char chr, int col) {
-  gdpush(2); gdpush(x); gdpush(y); gdpush(8);
-  gdpush(col); gdpush(size); gdpush(0);
-  gdpush(1); gdpush(chr); 
-  return false;
-  }
-
-void gdpush_utf8(const string& s) {
-  int g = (int) graphdata.size(), q = 0;
-  gdpush((int) s.size()); for(int i=0; i<s.size(); i++) {
-#ifdef ANDROID
-    unsigned char uch = (unsigned char) s[i];
-    if(uch >= 192 && uch < 224) {
-      int u = ((s[i] - 192)&31) << 6;
-      i++;
-      u += (s[i] - 128) & 63;
-      gdpush(u); q++;
-      }
-    else
-#endif
-      {
-      gdpush(s[i]); q++;
-      }
-    }
-  graphdata[g] = q;
-  }
-
-bool displayfr(int x, int y, int b, int size, const string &s, int color, int align) {
-  gdpush(2); gdpush(x); gdpush(y); gdpush(align);
-  gdpush(color); gdpush(size); gdpush(b);
-  gdpush_utf8(s);
-  int mx = mousex - x;
-  int my = mousey - y;
-  int len = textwidth(size, s);
-  return 
-    mx >= -len*align/32   && mx <= +len*(16-align)/32 && 
-    my >= -size*3/4 && my <= +size*3/4;
-  }
-
-bool displaystr(int x, int y, int shift, int size, const string &s, int color, int align) {
-  return displayfr(x,y,0,size,s,color,align);
-  }
-
-bool displaystr(int x, int y, int shift, int size, char const *s, int color, int align) {
-  return displayfr(x,y,0,size,s,color,align);
-  }
-
 #endif
 
 bool displaynum(int x, int y, int shift, int size, int col, int val, string title) {
@@ -824,7 +789,7 @@ int gradient(int c0, int c1, ld v0, ld v, ld v1) {
 
 void drawCircle(int x, int y, int size, int color) {
   if(size < 0) size = -size;
-  #ifdef GL
+  #if CAP_GL
   if(vid.usingGL) {
     qglcoords = 0;
     glcolor2(color);
@@ -846,19 +811,15 @@ void drawCircle(int x, int y, int size, int color) {
     }
   #endif
 
-#ifdef MOBILE
+#if CAP_XGD
   gdpush(4); gdpush(color); gdpush(x); gdpush(y); gdpush(size);
-#else
-#ifdef SDLGFX
+#elif CAP_SDLGFX
   ((vid.antialias && AA_NOGL)?aacircleColor:circleColor) (s, x, y, size, color);
-#else
-#ifndef NOSDL
+#elif CAP_SDL
   int pts = size * 4;
   if(pts > 1500) pts = 1500;
   for(int r=0; r<pts; r++)
     qpixel(s, x + int(size * sin(r)), y + int(size * cos(r))) = color;
-#endif
-#endif
 #endif
   }
 
@@ -903,9 +864,7 @@ ld textscale() {
 int pngres = 2000;
 int pngformat = 0;
 
-#ifndef NOSDL
-
-#ifndef NOPNG
+#if CAP_PNG
 void IMAGESAVE(SDL_Surface *s, const char *fname) {
   SDL_Surface *s2 = SDL_PNGFormatAlpha(s);
   SDL_SavePNG(s2, fname);
@@ -913,9 +872,10 @@ void IMAGESAVE(SDL_Surface *s, const char *fname) {
   }
 #endif
 
+#if CAP_SDL
 void saveHighQualityShot(const char *fname, const char *caption, int fade) {
 
-#ifndef SDLGFX
+#if !CAP_SDLGFX
   addMessage(XLAT("High quality shots not available on this platform"));
   return;
 #endif
@@ -944,7 +904,7 @@ void saveHighQualityShot(const char *fname, const char *caption, int fade) {
   vid.usingGL = false;
   // if(vid.pmodel == 0) vid.scale = 0.99;
   calcparam();
-  #ifdef ROGUEVIZ
+  #if CAP_ROGUEVIZ
   rogueviz::fixparam();
   #endif
 
@@ -984,7 +944,7 @@ void saveHighQualityShot(const char *fname, const char *caption, int fade) {
   }
 #endif
 
-#ifndef NOSDL
+#if CAP_SDL
 bool setfsize = true;
 
 void setvideomode() {
@@ -1000,7 +960,7 @@ void setvideomode() {
 
   int flags = 0;
   
-#ifdef GL
+#if CAP_GL
   if(vid.usingGL) {
     flags = SDL_OPENGL | SDL_HWSURFACE | SDL_GL_DOUBLEBUFFER;
     SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 1);
@@ -1008,12 +968,8 @@ void setvideomode() {
     if(vid.antialias & AA_MULTI) {
       SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
       SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 16);
-      glEnable(GL_MULTISAMPLE);
       }
-#ifndef MAC
-    else
-      glDisable(GL_MULTISAMPLE);
-#endif
+
     }
 #endif
 
@@ -1035,8 +991,13 @@ void setvideomode() {
     s = SDL_SetVideoMode(vid.xres, vid.yres, 32, flags | SDL_RESIZABLE);
     }
 
-#ifdef GL
+#if CAP_GL
   if(vid.usingGL) {
+    if(vid.antialias & AA_MULTI) 
+      glEnable(GL_MULTISAMPLE);
+    else
+      glDisable(GL_MULTISAMPLE);
+  
     glViewport(0, 0, vid.xres, vid.yres);
     resetGL();
     }
@@ -1051,7 +1012,10 @@ void initgraph() {
   DEBB(DF_INIT, (debugfile,"initgraph\n"));
   
   initConfig();
+
+#if CAP_SDLJOY
   joyx = joyy = 0; joydir.d = -1;
+#endif
   
   restartGraph();
   
@@ -1060,20 +1024,20 @@ void initgraph() {
   buildpolys();
   
   if(noGUI) {
-#ifdef USE_COMMANDLINE
+#if CAP_COMMANDLINE
     arg::read(2);
 #endif
     return;
     }
 
-  #ifndef NOSDL
+#if CAP_SDL
   if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK) == -1)
   {
     printf("Failed to initialize video.\n");
     exit(2);
   }
 
-#ifdef WEB
+#if ISWEB
   vid.xscr = vid.xres = 1200;
   vid.yscr = vid.yres = 900;
 #else
@@ -1083,18 +1047,18 @@ void initgraph() {
 #endif
   
   SDL_WM_SetCaption("HyperRogue " VER, "HyperRogue " VER);
-  #endif
+#endif
   
   preparesort();
-#ifndef NOCONFIG
+#if CAP_CONFIG
   loadConfig();
 #endif
 
-#ifdef USE_COMMANDLINE
+#if CAP_COMMANDLINE
   arg::read(2);
 #endif
 
-  #ifndef NOSDL
+#if CAP_SDL
   setvideomode();
   if(!s) {
     printf("Failed to initialize graphics.\n");
@@ -1103,37 +1067,37 @@ void initgraph() {
     
   SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL);
   SDL_EnableUNICODE(1);
+#endif
   
-#ifndef NOTTF
+#if CAP_SDLTTF
   if(TTF_Init() != 0) {
     printf("Failed to initialize TTF.\n");
     exit(2);
     }
 #endif
-  
-  initJoysticks();
 
-  #ifdef SDLAUDIO
+#if CAP_SDLJOY  
+  initJoysticks();
+#endif
+
+#if CAP_SDLAUDIO
   initAudio();
-  #endif
+#endif
     
-  #endif
   }
 
 void cleargraph() {
   DEBB(DF_INIT, (debugfile,"clear graph\n"));
-#ifndef NOTTF
+#if CAP_SDLTTF
   for(int i=0; i<256; i++) if(font[i]) TTF_CloseFont(font[i]);
 #endif
-#ifndef EXTERNALFONT
-#ifdef GL
+#if CAL_GLFONT
   for(int i=0; i<128; i++) if(glfont[i]) delete glfont[i];
 #endif
-#endif
-#ifndef NOSDL
-#ifndef SIMULATE_JOYSTICK
+#if CAP_SDLJOY
   closeJoysticks();
 #endif
+#if CAP_SDL
   SDL_Quit();
 #endif
   }

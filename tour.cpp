@@ -11,10 +11,6 @@ string tourhelp;
 
 int currentslide;
 
-// #ifdef PRES
-// #include "presentation.cpp"
-// #else
-
 // modes: 
 //   1 - enter the slide
 //   2 - each frame
@@ -52,10 +48,6 @@ function<bool(eLand)> showland;
 string slidecommand;
 
 void presentation(presmode mode) {
-
-#ifdef PRES
-  presentation2(mode);
-#endif
 
   cheater = 0;
   
@@ -323,7 +315,7 @@ slide default_slides[] = {
         else clearMessages();  
         }
       SHOWLAND( l == laIce );
-#ifdef ROGUEVIZ
+#if CAP_ROGUEVIZ
        slidecommand = "RogueViz presentation";
        if(mode == 1)
          help += 
@@ -362,7 +354,7 @@ slide default_slides[] = {
     }, 
   {"Hypersian Rug model", 21, LEGAL_HYPERBOLIC,
     "New players think that the action of HyperRogue takes place on a sphere. "
-#ifdef WEB
+#if CAP_RUG
     "This is not true -- the Tutorial in the native desktop version shows "
     "the surface HyperRogue actually takes place on.",
 #else
@@ -372,8 +364,8 @@ slide default_slides[] = {
     "If you do not see anything, press '5' to try a safer renderer.",
 #endif
     [] (presmode mode) {
+#if CAP_RUG
       static int wm, mm;
-#ifndef NORUG
       if(mode == 1) {
         rug::init();
         wm = vid.wallmode;
@@ -467,7 +459,7 @@ slide default_slides[] = {
     "it will appear to go slower -- this is because you are running "
     "in a straight line, and the Running Dog has to run in a curve "
     "called an equidistant.\n\n"
-#ifdef MAC
+#if ISMAC
     "Remember that you can click with right Shift on anything to get more information.",
 #else
     "Remember that you can right click on anything to get more information.",
@@ -705,7 +697,7 @@ slide default_slides[] = {
         centerpc(INF);
         conformal::includeHistory = false;
         }
-#ifndef NOSDL
+#if CAP_SDL
       slidecommand = "render spiral";
       if(mode == 4) conformal::createImage(true);
       if(mode == 11) conformal::create();
@@ -720,7 +712,7 @@ slide default_slides[] = {
       if(mode == 3) pmodel = mdDisk;
       }
     },
-#ifndef WEB
+#if !ISWEB
   {"Shoot'em up mode", 52, LEGAL_NONE,
     "In the shoot'em up mode, space and time is continuous. "
     "You attack by throwing knives. "

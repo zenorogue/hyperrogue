@@ -66,7 +66,11 @@ bool hasTimeout(cell *c) {
   }
 
 bool isMimic(eMonster m) {
-  return m == moMirror || m == moMirage;
+  return m == moMimic;
+  }
+
+int mirrorcolor(bool mirrored) {
+  return mirrored ? 0x8080FF : 0xFF80C0;
   }
 
 bool isMimic(cell *c) { 
@@ -93,7 +97,7 @@ bool isGolemOrKnight(cell *c) { return isGolemOrKnight(c->monst); }
 
 bool isNonliving(eMonster m) {
   return 
-    m == moMirage || m == moMirror || m == moGolem || m == moGolemMoved ||
+    m == moMimic || m == moGolem || m == moGolemMoved ||
     m == moZombie || m == moGhost || m == moShadow || m == moSkeleton ||
     m == moEvilGolem || m == moIllusion || m == moEarthElemental || 
     m == moWaterElemental || m == moDraugr;
@@ -355,6 +359,7 @@ bool normalMover(eMonster m) {
     m == moOutlaw || m == moRedFox || m == moFalsePrincess || m == moRoseLady ||
     m == moRoseBeauty || m == moWolf ||
     m == moResearcher || m == moRagingBull || 
+    m == moNarciss || m == moMirrorSpirit || 
     slowMover(m);
   }
 

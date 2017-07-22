@@ -5107,7 +5107,7 @@ S("The game starts in the Icy Lands. Collect the Ice Diamonds "
 S("Hypersian Rug model", "Model Hiperskiego Dywanu")
 S(
   "New players think that the action of HyperRogue takes place on a sphere. "
-#ifdef MOBWEB
+#if ISMOBWEB
   "This is not true -- the Tutorial in the native desktop version shows "
   "the surface HyperRogue actually takes place on.",
 #else
@@ -5119,7 +5119,7 @@ S(
   
 
   "Nowi gracze myślą, że akcja HyperRogue toczy się na sferze. "
-#ifdef MOBWEB
+#if ISMOBWEB
   "To nieprawda -- Podręcznik w komputerowej wersji wykonywalnej "
   "pokazuje powierzchnię, na której w rzeczywistości toczy się rozgrywka."
 #else
@@ -5205,7 +5205,7 @@ S(
   "it will appear to go slower -- this is because you are running "
   "in a straight line, and the Running Dog has to run in a curve "
   "called an equidistant.\n\n"
-#ifdef MAC
+#if ISMAC
  "Remember that you can click with right Shift on anything to get more information.",
 #else
   "Remember that you can right click on anything to get more information.",
@@ -5216,7 +5216,7 @@ S(
   "Mimo że Pies biegnie z tą samą prędkością, nie będzie "
   "w stanie Cię dogonić -- ponieważ Ty ruszasz się w linii prostej, "
   "a Pies biegnie po krzywej zwanej ekwidystantą.\n\n"
-#ifdef MAC
+#if ISMAC
  "Pamiętaj, że możesz klikać z prawym Shiftem na różnych elementach gry, by dowiedzieć się o nich więcej."
 #else
  "Pamiętaj, że możesz klikać prawym przyciskiem na różnych elementach gry, by dowiedzieć się o nich więcej."
@@ -5597,7 +5597,7 @@ S(
   "bardzo niebezpieczna. Spróbuj pójść do innych krain, gdy masz dość!");
 
 S(
-  "Remember that you can right click mostly anything for more information.",
+  "Remember that you can right click almost anything for more information.",
   "Pamiętaj, że prawie wszystko możesz kliknąć prawym przyciskiem, "
   "by dowiedzieć się czegoś na dany temat.")
 
@@ -5689,6 +5689,96 @@ N("mirror wall", GEN_F, "lustrzana ściana", "lustrzane ściany", "lustrzaną ś
 
 S("This would only move you deeper into the trap!",
   "To tylko przeniesie Cię w głąb pułapki!");
+
+S("You swing your sword at the mirror.", "Wywijasz mieczem w kierunku lustra.");
+N("Mimic", GEN_M, "Mimik", "Mimiki", "Mimika", "Mimikiem")
+N("Narcissist", GEN_M, "Narcyz", "Narcyzy", "Narcyza", "Narcyzem")
+N("Mirror Spirit", GEN_M, "Duch Lustra", "Duchy Lustra", "Ducha Lustra", "Duchem Lustra")
+
+S("This person loves to look at their own reflection in the mirror. "
+  "He believes himself to be one of the most important creatures in this world, "
+  "and hates those who do not admire him.",
+
+  "Ten osobnik kocha patrzeć na własne lustrzane odbicie. "
+  "Uważa się za jedną z najważniejszych istot na świecie, "
+  "i nienawidzi tych, którzy go nie podziwiają."
+  )
+
+S(
+    "A long time ago a mighty warrior was guarding the mirrors from being broken. "
+    "While this warrior is no longer alive, his reflections have gained life of "
+    "their own, and will punish the intruders.\n\n"
+    "If you attack a Mirror Spirit physically, it is delayed, but not destroyed -- "
+    "more reflections will come out of the mirror. Use Mimics to destroy them.",
+    
+    "Dawno, dawno temu potężny wojownik bronił lustr przed tymi, co chcieli "
+    "jej rozbić. Wojownik ten już dawno nie żyje, ale jego odbicia zaczęły "
+    "żyć własnym życiem i karać najeźdźców.\n\n"
+    "Jeśli zaatakujesz Ducha Lustra fizycznie, jest spowolniony, ale nie zniszczony -- "
+    "więcej odbić wyjdzie z lustra. Użyj Mimików, by go zniszczyć.")
+
+// peaceful texts
+
+S("memory game", "gra pamięciowa")
+S("display hints", "pokaż wskazówki")
+S("hyperbolic puzzles", "hiperboliczne zagadki")
+
+// missing descriptions
+
+S(  "A strange land filled with mirrors. "
+    "Break magic mirrors and enter clouds of mirage to "
+    "gain treasures and helpful Mimics.",
+    
+    "Dziwna kraina wypełniona lustrami. "
+    "Rozbijaj magiczne lustra i wchodź w chmury mirażowe, "
+    "by zdobywać skarby i przyjazne Mimiki.")
+
+S(
+  "A perfect mirror wall. It is unbreakable "
+  "and impassable "
+  "even for aethereal beings, and everything "
+  "you see inside is just an image of "
+  "the real world; you can swing your sword "
+  "at them, but that will not destroy them "
+  "in the real world. "
+  "Mirror walls reflect Mimics, lightning bolts, and "
+  "missiles perfectly.",
+  
+  "Doskonała lustrzana ściana. Nie da się jej zniszczyć,  "
+  "i nawet istoty eteryczne nie są w stanie "
+  "przejść na drugą stronę. Wszystko co widzisz "
+  "jest tylko obrazem świata rzeczywistego; "
+  "możesz machnąć mieczem w kierunku tego obrazu, "
+  "ale to nie wpłynier na rzeczywistość. "
+  "Lustrzany ściany perfekcyjnie odbijają Mimiki, "
+  "błyskawice, i pociski."
+  )
+
+S(
+"In the peaceful mode, you just explore the world, "
+    "without any battles; there are also several "
+    "navigational puzzles available. In the memory game, "
+    "you have to collect as many Dodecahedra as you can, "
+    "and return to the starting point -- hyperbolic geometry "
+    "makes this extremely difficult! Other hyperbolic puzzles "
+    "include the Burial Grounds (excavate the treasures "
+    "using your magical sword), Galápagos (try to find an adult "
+    "tortoise matching the baby), Camelot (find the center of "
+    "a large hyperbolic circle), and Palace (follow the mouse). "
+    "Other places listed are for exploration.",
+
+"W trybie spokojnym zwiedzasz świat bez żadnej walki; "
+  "jest też tu kilka hiperbolicznych zagadek nawigacyjnych. "
+  "W grze pamięciowej musisz zebrać jak najwięcej Dwunastościanów "
+  "i wrócić do punktu wyjścia -- geometria hiperboliczna powoduje, "
+  "że jest to bardzo trudne! Pozostałe zagadki to Kurhany "
+  "(wykopuj skarby swoim magicznym mieczem), Galapágos "
+  "(znajdź dużego żółwia odpowiadającego żółwiątku), "
+  "Camelot (znajdź środek wielkiego hiperbolicznego kółka), "
+  "i Pałac (idź za myszą). Można też zwiedzić kilka "
+  "innych miejsc.")
+
+S("puzzles and exploration", "hádanky a zkoumání")
 
 #undef Orb
 

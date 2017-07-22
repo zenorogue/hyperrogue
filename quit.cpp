@@ -64,7 +64,7 @@ hint hints[] = {
     []() { 
        dialog::addHelp(XLAT(
         "Remember that you can right click mostly anything for more information."));
-#ifdef MAC
+#if ISMAC
        dialog::addHelp(XLAT(
          "(You can also use right Shift)\n\n"));
 #endif
@@ -73,7 +73,7 @@ hint hints[] = {
 
   {
     0,
-    []() { return !canmove; },    
+    []() { return !canmove; },
     []() { 
       dialog::addHelp(XLAT(
         "Want to understand the geometry in HyperRogue? Try the Tutorial!"
@@ -82,7 +82,11 @@ hint hints[] = {
       dialog::addItem(XLAT("Tutorial"), 'z');
       },
     []() {
+#if CAP_TOUR    
       tour::start();
+#else
+      addMessage("Not in this version");
+#endif
       }},
 
   {
@@ -104,16 +108,14 @@ hint hints[] = {
         "Press ESC to view this screen during the game."
         ));
       },
-    []() {
-      tour::start();
-      }},
-
+    noaction
+    },
   {
     0,
     []() { return true; },
     []() { 
       dialog::addInfo(XLAT(
-#ifdef MOBILE
+#if ISMOBILE==1
         "The 'world overview' shows all the lands in HyperRogue."
 #else
         "Press 'o' to see all the lands in HyperRogue."
@@ -170,14 +172,14 @@ hint hints[] = {
 #endif
       },
     []() {
-#ifdef INV
+#if CAP_INV
       restartGame('i');
 #endif
       }
     },
   {
     0,
-    []() { return geometry == gNormal; },
+    []() { return CAP_RUG && geometry == gNormal; },
     []() { 
       dialog::addHelp(XLAT(
         "Do you think you are playing on a ball? "
@@ -187,6 +189,7 @@ hint hints[] = {
       dialog::addItem(XLAT("hypersian rug mode"), 'z');
       },
     [] () {
+#if CAP_RUG
       popScreen();
       int wm, mm;
       rug::init();
@@ -199,6 +202,7 @@ hint hints[] = {
         vid.wallmode = wm;
         vid.monmode = mm;
         };
+#endif
       }
     },
 
@@ -274,13 +278,11 @@ hint hints[] = {
         restartGame('E');
         vid.alpha = 999;
         vid.scale = 998;
-        popScreen();
         }
       else {
         restartGame('E');
         vid.alpha = 1;
         vid.scale = 1;
-        popScreen();
         }
       }
     },
@@ -301,7 +303,7 @@ void showMission() {
   keyhandler = handleKeyQuit;
 
   dialog::init(
-#ifdef TOUR
+#if CAP_TOUR
     tour::on ? (canmove ? XLAT("Tutorial") : XLAT("GAME OVER")) :
 #endif
     cheater ? XLAT("It is a shame to cheat!") : 
@@ -314,7 +316,7 @@ void showMission() {
   dialog::addInfo(XLAT("Your score: %1", its(gold())));
   dialog::addInfo(XLAT("Enemies killed: %1", its(tkills())));
 
-#ifdef TOUR
+#if CAP_TOUR
   if(tour::on) ; else 
 #endif
   if(items[itOrbYendor]) {
@@ -346,7 +348,7 @@ void showMission() {
     timerstart = time(NULL);
   
   if(princess::challenge) ;
-#ifdef TOUR
+#if CAP_TOUR
   else if(tour::on) ;
 #endif
   else if(tkills() < R100)
@@ -394,20 +396,22 @@ void showMission() {
       }
 
   dialog::addBreak(100);
-  
+
+#if CAP_TOUR  
   if(!tour::on) {
     hints[hinttoshow].display();
     dialog::addBreak(100);
     }
+#endif
   
   bool intour = false;
   
-#ifdef TOUR
+#if CAP_TOUR
   intour = tour::on;
 #endif
 
   if(intour) {
-#ifdef TOUR
+#if CAP_TOUR
     if(canmove) {
       dialog::addItem(XLAT("spherical geometry"), '1');
       dialog::addItem(XLAT("Euclidean geometry"), '2');
@@ -439,10 +443,10 @@ void showMission() {
     dialog::addItem(XLAT("restart"), SDLK_F5);
     if(inv::on && items[itInventory])
       dialog::addItem(XLAT("inventory"), 'i');
-    #ifndef MOBILE
+    #if ISMOBILE==0
     dialog::addItem(XLAT(quitsaves() ? "save" : "quit"), SDLK_F10);
     #endif
-    #ifdef ANDROIDSHARE
+    #if CAP_ANDROIDSHARE
     dialog::addItem(XLAT("SHARE"), 's'-96);
     #endif
     dialog::addBreak(500);
@@ -458,7 +462,7 @@ void handleKeyQuit(int sym, int uni) {
   dialog::handleNavigation(sym, uni);
   // ignore the camera movement keys
 
-#ifndef NORUG
+#if CAP_RUG
   if(rug::rugged && (sym == SDLK_UP || sym == SDLK_DOWN || sym == SDLK_PAGEUP || sym == SDLK_PAGEDOWN ||
     sym == SDLK_RIGHT || sym == SDLK_LEFT))
     sym = 0;
@@ -478,11 +482,11 @@ void handleKeyQuit(int sym, int uni) {
   else if(sym == SDLK_F3 || (sym == ' ' || sym == SDLK_HOME)) 
     fullcenter();
   else if(uni == 'o') setAppropriateOverview();
-#ifdef INV
+#if CAP_INV
   else if(uni == 'i' && inv::on) 
     pushScreen(inv::show);
 #endif
-#ifndef NOSAVE
+#if CAP_SAVE
   else if(uni == 't') {
     msgs.clear();
     scores::load();
@@ -511,7 +515,10 @@ void showMissionScreen() {
   achievement_final(false);
   msgscroll = 0;
 
-  if(!tour::on) {
+#if CAP_TOUR
+  if(!tour::on)
+#endif
+  {
     int ch = counthints();
     hinttoshow = ch;
     int h;

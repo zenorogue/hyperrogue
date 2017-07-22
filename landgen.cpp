@@ -71,7 +71,10 @@ int isNative(eLand l, eMonster m) {
       return (m == moSlime) ? 2 : 0;
 
     case laMirror: case laMirrored: case laMirrorWall: case laMirrorWall2: case laMirrored2:
-      return (m == moEagle || m == moRanger || m == moMirror || m == moMirage) ? 1 : 0;
+      return (m == moMirrorSpirit || m == moNarciss || m == moMimic) ? 1 : 0;
+      
+    case laMirrorOld:
+      return (m == moEagle || m == moRanger || m == moMimic) ? 1 : 0;
       
     case laMotion: 
       return (m == moRunDog) ? 2 : 0;
@@ -232,6 +235,7 @@ eItem treasureType(eLand l) {
     case laAlchemist: return itElixir;
 
     case laMirror: case laMirrored: case laMirrorWall: case laMirrorWall2: case laMirrored2:
+    case laMirrorOld:
       return itShard;
 
     case laMotion: return itFeather;
@@ -317,6 +321,7 @@ eItem wanderingTreasure(cell *c) {
   if(l == laEEarth) return itEarthShard;
   if(l == laElementalWall) return itNone;
   if(l == laMirror && c->type != 6) return itNone;
+  if(l == laMirrorOld && c->type != 6) return itNone;
   if(l == laEmerald) {
     forCellEx(c2, c) if(c2->wall == waCavewall) return itNone;
     }
@@ -399,7 +404,7 @@ bool isElemental(eLand l);
 
 eItem orbType(eLand l) {
   if(isElemental(l)) l = laElementalWall;
-  if(l == laMirror) return itShard;
+  if(l == laMirror || l == laMirrorOld) return itShard;
   for(int i=0; i<ORBLINES; i++) 
     if(orbinfos[i].l == l && orbinfos[i].gchance)
       return orbinfos[i].orb;
@@ -703,6 +708,9 @@ bool landUnlocked(eLand l) {
       return elementalUnlocked();
     
     case laBarrier: case laNone: case laOceanWall: case laCanvas: case laCA:
+      return false;
+    
+    case laMirrorOld:
       return false;
     
     case laHaunted: case laHauntedWall: case laHauntedBorder: 
@@ -1591,7 +1599,7 @@ void chasmifyElemental(cell *c) {
 bool incompatible1(eLand l1, eLand l2) {
   if(isCrossroads(l1) && isCrossroads(l2)) return true;
   if(l1 == laJungle && l2 == laMotion) return true;
-  if(l1 == laMirror && l2 == laMotion) return true;
+  if(l1 == laMirrorOld && l2 == laMotion) return true;
   if(l1 == laPower && l2 == laWineyard) return true;
   if(l1 == laPower && l2 == laDryForest) return true;
   if(l1 == laDragon && l2 == laDryForest) return true;
@@ -1714,11 +1722,11 @@ hookset<eLand(eLand)> *hooks_nextland;
 
 eLand getNewLand(eLand old) {
 
+  if(old == laMirror && !chaosmode && hrand(10) < 8) return laMirrored;
+    
   eLand l = callhandlers(laNone, hooks_nextland, old);
   if(l) return l;
   
-  if(old == laMirror && !oldmirror && hrand(10)) return laMirrored;
-    
   if(cheatdest != old) if(!isCyclic(cheatdest) && !isTechnicalLand(cheatdest)) return cheatdest;
   
   if(old == laTortoise) return laDragon;
@@ -2119,6 +2127,8 @@ bool buildBarrier6(cellwalker cw, int type) {
     }  
 
   if(purehepta && false) {
+    for(int z=0; z<4; z++)
+      b[z].c->item = eItem(1+z+4*type);
     for(int a=0; a<4; a++) 
       extendBarrierBack(cwpeek(b[a],0));
     }
@@ -2529,8 +2539,8 @@ bool checkInTree(cell *c, int maxv) {
 void buildEquidistant(cell *c) {
   if(!c) return;
   if(c->landparam) return;
-  if(chaosmode) return;
   eLand b = c->land;
+  if(chaosmode && !inmirror(b)) return;
   if(!b) { 
     printf("land missing at %p\n", c); 
     describeCell(c);
@@ -2929,7 +2939,7 @@ void setLandQuotient(cell *c) {
 
 bool quickfind(eLand l) {
   if(l == cheatdest) return true;
-#ifdef TOUR
+#if CAP_TOUR
   if(tour::on && tour::quickfind(l)) return true;
 #endif
   return false;
@@ -3098,8 +3108,12 @@ void buildBigStuff(cell *c, cell *from) {
   // buildgreatwalls
   
   if(chaosmode) {
-    if(c->type == 7 && hrand(10000) < 9000 && c->land && buildBarrierNowall(c, getNewLand(c->land))) 
+    if(c->type == 7 && hrand(10000) < 9000 && c->land && !inmirror(c) && buildBarrierNowall(c, getNewLand(c->land))) 
       {}
+    else if(c->type == 7 && c->land == laMirror && hrand(10000) < 2000) {
+      int bd = 2 + hrand(2) * 3;
+      buildBarrier(c, bd, laMirrored); 
+      }
     }
   
   else if(c->type == 7 && isWarped(c->land) && hrand(10000) < 3000 && c->land && 
@@ -3157,7 +3171,7 @@ void buildBigStuff(cell *c, cell *from) {
     (c->land == laGraveyard && items[itBone] >= 10) ? 120 :
     c->land == laOcean ? (deepOcean ? (purehepta ? 250 : 2000) : 0) :
     c->land == laDragon ? 120 :
-    (c->land == laMirror && !oldmirror) ? 6000 :
+    (c->land == laMirror && !yendor::generating) ? 6000 :
     50))
   {
     
@@ -3510,8 +3524,6 @@ void setdist(cell *c, int d, cell *from) {
   // printf("setdist %p %d [%p]\n", c, d, from);
 
   if(d <= 3) lastexplore = shmup::on ? shmup::curtime : turncount;
-
-  oldmirror = euclid || chaosmode || yendor::on || yendor::generating;
 
   if(buggyGeneration) {
     if(d < BARLEV) for(int i=0; i<c->type; i++) {
@@ -5294,17 +5306,27 @@ void setdist(cell *c, int d, cell *from) {
       if(c->land == laMirrored || c->land == laMirrorWall || c->land == laMirrorWall2 ||
         c->land == laMirrored2)
         c->wall = waMirrorWall;
-      if(c->land == laMirror) {
-        int freqt = oldmirror ? 1 : 4;
-        int freqm = (oldmirror || cwt.c->land != laMirror) ? 1 : 30;
-        if((purehepta?pseudohept(c):!ishept(c)) && hrand(5000/freqt) < 120 && notDippingFor(itShard))
+      if(c->land == laMirrorOld) {
+        if((purehepta?pseudohept(c):!ishept(c)) && hrand(5000) < 120 && (peace::on || notDippingFor(itShard)))
           c->wall = hrand(2) ? waMirror : waCloud;
-        else if(ishept(c) && hrand(5000/freqt) < 10 * PRIZEMUL)
+        else if(ishept(c) && hrand(5000) < 10 * PRIZEMUL)
           placePrizeOrb(c);
-        else if(hrand(12000/freqt) < 8 + items[itShard] + hard)
+        else if(hrand(12000) < 8 + items[itShard] + hard)
           c->monst = moRanger;
-        else if(hrand(60000/freqm) < 8 + items[itShard] + hard)
+        else if(hrand(60000) < 8 + items[itShard] + hard)
           c->monst = moEagle;
+        }
+      if(c->land == laMirror) {
+        if((purehepta?pseudohept(c):!ishept(c)) && hrand(1250) < 120 && (peace::on || notDippingFor(itShard)))
+          c->wall = hrand(2) ? waMirror : waCloud;
+        else if(ishept(c) && hrand(5000) < 10 * PRIZEMUL)
+          placePrizeOrb(c);
+        else if(hrand(600) < 8 + items[itShard] + hard) {
+          if(items[itShard] >= 5 && hrand(120) <= 20)
+            c->monst = moMirrorSpirit;
+          else
+            c->monst = moNarciss;
+          }
         }
       if(c->land == laGraveyard) {
         if(hrand(5000) < PT(30 + 4*kills[moZombie] + 6*kills[moNecromancer], 120) && notDippingFor(itBone))
@@ -5437,9 +5459,12 @@ void setdist(cell *c, int d, cell *from) {
       }
     }
 
+  if(purehepta && c->wall == waMirrorWall && c->land == laMirror)
+    c->land = laMirrorWall; // , c->item = itPirate; // not really a proper bugfix
+
   if(d == 7) playSeenSound(c);
   
-#ifndef NOEDIT
+#if CAP_EDIT
   if(d >= 7 && mapeditor::whichPattern)
     mapeditor::applyModelcell(c);
 #endif
@@ -5714,8 +5739,16 @@ void wandering() {
     else if(c->land == laJungle && wchance(items[itRuby], 40))
       c->monst = hrand(10) ? moMonkey : moEagle;
 
-    else if(c->land == laMirror && wchance(items[itShard], 15))
+    else if(c->land == laMirrorOld && wchance(items[itShard], 15))
       c->monst = hrand(10) ? moRanger : moEagle;
+
+    else if(c->land == laMirror && mirrorspirits) {
+      mirrorspirits--;
+      c->monst = moMirrorSpirit;
+      }
+    
+    else if(c->land == laMirror && wchance(items[itShard], 120))
+      c->monst = moNarciss;
 
     else if(c->land == laWarpCoast && wchance(items[itCoral], 40))
       c->monst = moRatling;
@@ -6149,12 +6182,12 @@ namespace halloween {
       }
     int id = hrand(100);
     if(items[itTreat] == 1) {
-#ifndef MOBILE
+#if ISMOBILE==0
       addMessage(XLAT("Hint: use arrow keys to scroll."));
 #endif
       }
     else if(items[itTreat] == 2) {
-#ifndef MOBILE
+#if ISMOBILE==0
       addMessage(XLAT("Hint: press 1 2 3 4 to change the projection."));
 #endif
       }

@@ -55,7 +55,7 @@ void playSeenSound(cell *c) {
     playSound(c, "seen-cultistleader");
   }
 
-#ifdef SDLAUDIO
+#if CAP_SDLAUDIO
 
 bool loaded[landtypes];
 Mix_Music* music[landtypes];

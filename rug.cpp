@@ -3,13 +3,13 @@
 
 // implementation of the Hypersian Rug mode
 
-#ifndef NORUG
+#if CAP_RUG
 
 #define TEXTURESIZE (texturesize)
 #define HTEXTURESIZE (texturesize/2)
 
-#ifdef AVOID_GLEW
-#ifdef LINUX
+#if !CAP_GLEW
+#if ISLINUX
 extern "C" {
 GLAPI void APIENTRY glGenFramebuffers (GLsizei n, GLuint *framebuffers);
 GLAPI void APIENTRY glBindFramebuffer (GLenum target, GLuint framebuffer);
@@ -25,7 +25,7 @@ GLAPI void APIENTRY glDeleteFramebuffers (GLsizei n, const GLuint *framebuffers)
 }
 #endif
 
-#ifdef MAC
+#if ISMAC
 #define glFramebufferTexture glFramebufferTextureEXT 
 #endif
 #endif
@@ -380,7 +380,7 @@ Uint32 *expanded_data;
 void initTexture() {
 
   if(!rendernogl) {
-#ifndef PANDORA
+#if !ISPANDORA
     FramebufferName = 0;
     glGenFramebuffers(1, &FramebufferName);
     glBindFramebuffer(GL_FRAMEBUFFER, FramebufferName);
@@ -440,7 +440,7 @@ void prepareTexture() {
     glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, TEXTURESIZE, TEXTURESIZE, 0, GL_BGRA, GL_UNSIGNED_BYTE, expanded_data );    
     }
   else { 
-#ifndef PANDORA
+#if !ISPANDORA
     glBindFramebuffer(GL_FRAMEBUFFER, FramebufferName);
     glViewport(0,0,TEXTURESIZE,TEXTURESIZE);
   
@@ -463,7 +463,7 @@ void closeTexture() {
     delete[] expanded_data;
     }
   else {
-#ifndef PANDORA
+#if !ISPANDORA
     glDeleteTextures(1, &renderedTexture);
     glDeleteRenderbuffers(1, &depth_stencil_rb);
     glDeleteFramebuffers(1, &FramebufferName);
@@ -569,7 +569,7 @@ transmatrix rotmatrix(double rotation, int c0, int c1) {
 transmatrix currentrot;
     
 void init() {
-#ifndef AVOID_GLEW
+#if CAP_GLEW
   if(!glew) { 
     glew = true; 
     GLenum err = glewInit();
@@ -668,7 +668,7 @@ void show() {
   dialog::addSelItem(XLAT("texture size"), its(texturesize)+"x"+its(texturesize), 's');
   dialog::display();
   keyhandler = [] (int sym, int uni) {
-  #ifdef PANDORA
+  #if ISPANDORA
     rendernogl = true;
   #endif
     dialog::handleNavigation(sym, uni);
@@ -690,7 +690,7 @@ void show() {
       }
     else if(uni == 'o')
       renderonce = !renderonce;
-  #ifndef PANDORA
+  #if !ISPANDORA
     else if(uni == 'g')
       rendernogl = !rendernogl;
   #endif

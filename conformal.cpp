@@ -101,7 +101,7 @@ namespace polygonal {
 
   }
 
-#ifndef NOSDL
+#if CAP_SDL
 namespace spiral {
 
   typedef long double ld;
@@ -243,7 +243,7 @@ namespace conformal {
     }
 
   void progress(string str) {
-#ifndef NOSDL
+#if CAP_SDL
     int tick = SDL_GetTicks();
     if(tick > lastprogress + 250) {
       lastprogress = tick;
@@ -403,7 +403,7 @@ namespace conformal {
   void restore();
   void restoreBack();
 
-#ifndef NOSDL
+#if CAP_SDL
   void createImage(bool dospiral) {
     int segid = 1;
     inHighQual = true;
@@ -571,7 +571,7 @@ namespace conformal {
     dialog::addBoolItem(XLAT("prepare the line animation"), (on), 'e');
     if(on) dialog::addSelItem(XLAT("animation speed"), fts(lvspeed), 'a');
     
-#ifndef NOSDL
+#if CAP_SDL
     dialog::addBoolItem(XLAT("render bands automatically"), (autoband), 'o');
     if(autoband)
       dialog::addBoolItem(XLAT("include history when auto-rendering"), (autobandhistory), 'j');
@@ -649,7 +649,7 @@ namespace conformal {
     else if(sym == 's') 
       dialog::editNumber(bandsegment, 500, 32000, 500, 16000, XLAT("band segment"), "");
     else if(sym == 'g') { dospiral = !dospiral; }
-#ifndef NOSDL
+#if CAP_SDL
     else if(uni == 'f' && pmodel == mdBand && on) createImage(dospiral);
 #endif
     else if(sym == 'i') { 
@@ -703,7 +703,7 @@ namespace conformal {
     }
   
   void renderAutoband() {
-#ifndef NOSDL
+#if CAP_SDL
     if(!cwt.c || celldist(cwt.c) <= 7) return;
     if(!autoband) return;
     eModel spm = pmodel;

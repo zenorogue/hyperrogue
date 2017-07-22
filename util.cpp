@@ -3,15 +3,7 @@
 
 // basic utility functions
 
-#ifdef MOBWEB
-#define MWP
-#endif
-
-#ifdef PANDORA
-#define MWP
-#endif
-
-#ifdef MWP
+#if ISMOBILE || ISWEB || ISPANDORA
 typedef double ld;
 #define LDF "%lf"
 #define PLDF "lf"
@@ -50,7 +42,7 @@ string itsh(int i) {static char buf[16]; sprintf(buf, "%03X", i); return buf; }
 extern FILE *debugfile;
 extern int debugflags;
 
-#ifdef ANDROID
+#if ISANDROID
 #define DEBB(r,x)
 #else
 #define DEBB(r,x) { if(debugfile && (!(r) || (debugflags & (r)))) { fprintf x; fflush(debugfile); } }
@@ -63,7 +55,7 @@ extern int debugflags;
 #define DF_TURN              4
 #define DF_FIELD             8
 
-#ifdef PROFILING
+#if CAP_PROFILING
 
 #include <sys/time.h>
 long long getms() {

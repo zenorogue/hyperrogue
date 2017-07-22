@@ -328,7 +328,7 @@ S("Hyperstone Quest: collect at least %3 %1 in %the2", "Aşkıntaş Görevi: %2'
 S("Hyperstone Quest completed!", "Aşkıntaş görevi tamamlandı.")
 S("Look for the Orbs of Yendor in Hell or in the Crossroads!", "Yendorun Küreleri için Cehennemi yahut Arayolları ara!")
 S("Unlock the Orb of Yendor!", "Yendor'un küresinin kilidini aç!")
-S("Defeat 100 enemies to access the Graveyard", "Mezarlığa erişmek için 100 düşman öldür.")
+S("Defeat %1 enemies to access the Graveyard", "Mezarlığa erişmek için %1 düşman öldür.")
 S("(press ESC during the game to review your quest)", "(Görevine bakmak için oyun sırasında ESC'ye bas.)")
 S("you have cheated %1 times", "şimdiye kadar %1 kez hile yaptın.")
 S("%1 turns (%2)", "tur sayısı: %1 (%2)")

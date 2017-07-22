@@ -341,7 +341,7 @@ S("Hyperstone Quest: collect at least %3 %1 in %the2", "Hyperstein-Herausforderu
 S("Hyperstone Quest completed!", "Hyperstein-Herausforderung abgeschlossen!")
 S("Look for the Orbs of Yendor in Hell or in the Crossroads!", "Such die Orbs von Yendor in der Hölle oder auf den Kreuzungen!")
 S("Unlock the Orb of Yendor!", "Öffne den Orb von Yendor!")
-S("Defeat 100 enemies to access the Graveyard", "Töte 100 Gegner um Zugang zum Friedhof zu erhalten")
+S("Defeat %1 enemies to access the Graveyard", "Töte %1 Gegner um Zugang zum Friedhof zu erhalten")
 S("(press ESC during the game to review your quest)", "(Drücke ESC während des Spiels, um deine aktuelle Quest anzuzeigen)")
 S("you have cheated %1 times", "Du hast %1 mal Cheats benutzt")
 S("%1 turns (%2)", "%1 Züge (%2)")
@@ -470,8 +470,7 @@ S("Usually, you move by touching somewhere on the map; you can also touch one "
   "vier Knöpfe in den Ecken antippen um dies zu ändern (um die Karte zu scrollen oder Infos "
   "über Objekte zu bekommen). Du kannst auch die Zahlen antippen um ihre Bedeutung zu erfahren.\n")
 
-S("Move with mouse, num pad, qweadzxc, or hjklyubn. Wait by pressing 's' or '.'. Spin the world with arrows, PageUp/Down, and Home/Space. "
-  "To save the game you need an Orb of Safety. Press 'v' for config, ESC for the quest status and menu.\n\n",
+S("Move with mouse, num pad, qweadzxc, or hjklyubn. Wait by pressing 's' or '.'. Spin the world with arrows, PageUp/Down, and Home/Space. To save the game you need an Orb of Safety. Press 'v' for the main menu (configuration, special modes, etc.), ESC for the quest status.\n\n",
   "Bewege dich mit der Maus, dem Numpad, qweadzxc, oder hjklyubn. Warte mit 's' oder '.'. Drehe die Welt mit den Pfeiltasten, Bild auf/ab und Pos1/Space. " // FIXME: Leertaste?
   "Um zu speichern, benötigst du einen Orb der Geborgenheit. Drücke V für Einstellungen, ESC für den Quest-Status und das Menü.\n\n")
 

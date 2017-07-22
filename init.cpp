@@ -1,73 +1,167 @@
-#define VER "10.0"
-#define VERNUM 10000
-#define VERNUM_HEX 0xA000
+#define VER "10.0c"
+#define VERNUM 10003
+#define VERNUM_HEX 0xA003
 
 #define GEN_M 0
 #define GEN_F 1
 #define GEN_N 2
 #define GEN_O 3
 
-#ifdef MOBILE
-#define MOBWEB
+// OS settings
+
+#ifndef ISMAC
+#define ISMAC 0
+#endif
+
+#ifndef ISLINUX
+#define ISLINUX 0
+#endif
+
+#ifndef ISWINDOWS
+#define ISWINDOWS 0
+#endif
+
+#ifndef ISPANDORA
+#define ISPANDORA 0
+#endif
+
+#ifndef ISIOS
+#define ISIOS 0
+#endif
+
+#ifndef ISANDROID
+#define ISANDROID 0
+#endif
+
+#ifndef ISWEB
+#define ISWEB 0
+#endif
+
+#ifndef ISFAKEMOBILE
+#define ISFAKEMOBILE 0
+#endif
+
+#define ISMOBILE (ISIOS || ISANDROID || ISFAKEMOBILE)
+#define ISMOBWEB (ISMOBILE || ISWEB)
+
+#ifndef ISMINI
+#define ISMINI 0
+#endif
+
+#ifndef CAP_XGD
+#define CAP_XGD (ISANDROID || ISFAKEMOBILE)
+#endif
+
+#define CAP_FRAMELIMIT (!ISMOBWEB)
+
+#if ISMOBILE==1
 #define EXTERNALFONT
 #endif
 
-#ifdef WEB
-#define MOBWEB
-#define ONEGRAPH
+#ifndef CAP_INV
+#define CAP_INV 1
 #endif
 
-#ifdef IOS
-#define ONEGRAPH
+#ifndef CAP_ANDROIDSHARE
+#define CAP_ANDROIDSHARE (ISANDROID)
 #endif
 
-#ifdef MOBWEB
-#define NORUG
-#define NOEDIT
-#define NOMODEL
+#ifndef CAP_SDL
+#define CAP_SDL (!ISMOBILE)
 #endif
 
-#ifdef MINI
-#define NORUG
-#define NOEDIT
-#define NOMODEL
-#define NOSAVE
-#define NOCONFIG
-#define NOTRANS
+#ifndef CAP_SDLGFX
+#define CAP_SDLGFX (CAP_SDL && !ISWEB)
 #endif
 
-#ifndef STEAM
-#define GFX
+#ifndef CAP_GL
+#define CAP_GL (ISMOBILE || CAP_SDL)
 #endif
 
-#ifndef NOGL
-#define GL
+#ifndef CAP_AUDIO
+#define CAP_AUDIO ((ISMOBILE || CAP_SDL) && !ISWEB && !ISMINI)
+#endif
+
+#define CAP_GLORNOT (CAP_GL && !ISWEB && !ISIOS) 
+
+#ifndef CAP_CERTIFY
+#define CAP_CERTIFY 0
+#endif
+
+#ifndef CAP_RUG
+#define CAP_RUG (!ISMOBWEB && !ISMINI && CAP_SDL && CAP_GL)
+#endif
+
+#ifndef CAP_EDIT
+#define CAP_EDIT (!ISMOBWEB && !ISMINI)
+#endif
+
+#ifndef CAP_MODEL
+#define CAP_MODEL (!ISMOBWEB && !ISMINI && CAP_SDLGFX)
+#endif
+
+#ifndef CAP_SAVE
+#define CAP_SAVE (!ISWEB && !ISMINI)
+#endif
+
+#ifndef CAP_CONFIG
+#define CAP_CONFIG (!ISWEB && !ISMINI)
+#endif
+
+#ifndef CAP_TRANS
+#define CAP_TRANS (!ISWEB && !ISMINI)
+#endif
+
+#ifndef CAP_TOUR
+#define CAP_TOUR (!ISWEB && !ISMINI)
+#endif
+
+#ifndef CAP_ROGUEVIZ
+#define CAP_ROGUEVIZ 0
+#endif
+
+#ifndef CAP_PROFILING
+#define CAP_PROFILING 0
 #endif
 
 #define PSEUDOKEY_WHEELDOWN 2501
 #define PSEUDOKEY_WHEELUP 2502
 
-#ifdef NOGFX
-#undef GFX
+#ifndef CAP_PNG
+#define CAP_PNG (!ISMOBWEB && !ISMAC && CAP_SDLGFX)
 #endif
 
-#ifdef MAC
-#define NOPNG
+#ifndef CAP_COMMANDLINE
+#define CAP_COMMANDLINE (!ISMOBILE)
 #endif
 
-// #define INV
+#define CAP_SDLAUDIO (CAP_SDL && CAP_AUDIO)
 
-#ifndef MOBILE
-#ifndef NOAUDIO
-#define SDLAUDIO
-#endif
+#ifndef CAP_SVG
+#define CAP_SVG (!ISMOBILE)
 #endif
 
-#ifdef MOBILE
-#define NOTTF
+#ifndef CAP_SDLJOY
+#define CAP_SDLJOY (CAP_SDL && !ISWEB)
 #endif
 
-#ifdef MOBILE
+#define CAP_SDLTTF (CAP_SDL && !ISMOBILE && !ISWEB)
+
+#define CAP_GLFONT (CAP_GL && !ISMOBILE)
+
+#ifndef CAP_TABFONT
+#define CAP_TABFONT (ISWEB)
+#endif
+
+#ifndef CAP_FIXEDSIZE
+#define CAP_FIXEDSIZE (CAP_CREATEFONT || CAP_TABLEFONT ? 36 : 0)
+#endif
+
+#ifndef CAP_SHMUP
+#define CAP_SHMUP 1
+#endif
+
+#if ISMOBILE
 #define EXTRALICENSE "\n\nHyperRogue soundtrack by Shawn Parrotte (http://www.shawnparrotte.com), under the Creative Commons BY-SA 3.0 license, http://creativecommons.org/licenses/by-sa/3.0/"
 #undef XEXTRALICENSE
 
@@ -82,31 +176,26 @@ void gdpush(int t);
 
 #include <stdio.h>
 
-#ifdef NOSDL
-#undef USE_SDL
-#endif
-
-#ifdef USE_SDL
+#if CAP_SDL
 #include <SDL/SDL.h>
 
-#ifndef MAC
+#if !ISMAC
 #undef main
 #endif
 
-#ifdef SDLAUDIO
+#if CAP_SDLAUDIO
 #include <SDL/SDL_mixer.h>
 #endif
 
-#ifndef NOTTF
+#if CAP_SDLTTF
 #include <SDL/SDL_ttf.h>
 #endif
 
-#ifdef GFX
-#define SDLGFX
+#if CAP_SDLGFX
 #include <SDL/SDL_gfxPrimitives.h>
 #endif
 
-#else
+#elif !ISFAKEMOBILE
 #define SDLK_F1  (123001)
 #define SDLK_F2  (123002)
 #define SDLK_F3  (123003)
@@ -143,64 +232,36 @@ void gdpush(int t);
 #define SDLK_DELETE (123052)
 #define SDLK_KP_ENTER (123054)
 #define SDLK_BACKSPACE (123055)
-#ifndef FAKEMOBILE
 typedef int SDL_Event;
 #endif
-#define NOSDL
-#define NOTTF
-#define NOPNG
-#undef GFX
-#define NOMODEL
-#define NORUG
-#define NOEDIT
-#define NOAUDIO
-#undef SDLAUDIO
+
+#ifndef CAP_GLEW
+#define CAP_GLEW (CAP_GL && !ISMOBILE && !ISMAC && !ISLINUX)
 #endif
 
-#ifdef GL
-
-#ifdef MAC
-#define AVOID_GLEW
-#endif
-
-#ifndef AVOID_GLEW
+#if CAP_GLEW
   #include <GL/glew.h>
 #else
   #define GL_GLEXT_PROTOTYPES 1
-  #ifndef MOBILE
-      #ifdef MAC
-        #include <OpenGL/gl.h>
-        #include <OpenGL/glu.h>
-      #else
-        #include <GL/gl.h>
-        #include <GL/glu.h>
-        #endif
-
-      #ifdef MAC
-        #include <OpenGL/glext.h>
-      #else
-        #include <GL/glext.h>
-        #endif
-      #endif
-
-  #ifdef ANDROID
-    #ifndef FAKE
-        #include <GLES/gl.h>
-        #include <GLES/glext.h>
-        #include <GLES2/gl2.h>
-      #endif
+  #if ISMAC
+    #include <OpenGL/gl.h>
+    #include <OpenGL/glu.h>
+    #include <OpenGL/glext.h>
+  #elif ISIOS
+    // already included
+  #elif ISANDROID
+    #include <GLES/gl.h>
+    #include <GLES/glext.h>
+    #include <GLES2/gl2.h>
+  #else
+    #include <GL/gl.h>
+    #include <GL/glu.h>
+    #include <GL/glext.h>
     #endif
   #endif
 
-#endif
-
-#ifdef NOLAMBDAS
-#undef TOUR
-#else
 #include <functional>
 #include <memory>
-#endif
-
 #include <cmath>
 #include <time.h>
 #include <vector>
@@ -225,14 +286,14 @@ using namespace std;
 string s0;
 void addMessage(string s, char spamtype = 0);
 
-#ifdef ANDROID
+#if ISANDROID
 FILE *debfile;
 #endif
 
 FILE *debugfile;
 int debugflags;
 
-#ifdef USE_COMMANDLINE
+#if CAP_COMMANDLINE
 const char *scorefile = "hyperrogue.log";
 const char *conffile = "hyperrogue.ini";
 string levelfile = "hyperrogue.lev";
@@ -263,7 +324,7 @@ const char *loadlevel = NULL;
 #include "game.cpp"
 #include "landgen.cpp"
 #include "orbs.cpp"
-#ifdef INV
+#if CAP_INV
 #include "inventory.cpp"
 #else
 bool inv::on;
@@ -272,11 +333,11 @@ bool inv::on;
 #include "geometry.cpp"
 #include "polygons.cpp"
 #include "mapeditor.cpp"
-#ifndef MOBILE
+#if CAP_MODEL
 #include "netgen.cpp"
 #endif
-#ifdef EXTRA
-#include "extra/extra.cpp"
+#if CAP_TABFONT || CAP_CREATEFONT
+#include "nofont.cpp"
 #endif
 #include "basegraph.cpp"
 #include "help.cpp"
@@ -284,11 +345,8 @@ bool inv::on;
 #include "scores.cpp"
 #include "menus.cpp"
 #include "quit.cpp"
-#ifdef FIXEDSIZE
-#include "nofont.cpp"
-#endif
 #include "shmup.cpp"
-#ifdef ROGUEVIZ
+#if CAP_ROGUEVIZ
 #include "rogueviz.cpp"
 #endif
 #include "conformal.cpp"
@@ -299,10 +357,10 @@ bool inv::on;
 #include "graph.cpp"
 #include "sound.cpp"
 #include "achievement.cpp"
-#ifdef TOUR
+#if CAP_TOUR
 #include "tour.cpp"
 #endif
-#ifndef MOBILE
+#if ISMOBILE==0
 #include <unistd.h>
 #endif
 
@@ -321,7 +379,7 @@ void initAll() {
   
   // initlanguage();
   initgraph();
-#ifndef NOSAVE
+#if CAP_SAVE
   loadsave();
 #endif
   resetGeometry();
@@ -344,19 +402,19 @@ void initAll() {
 void finishAll() {
   achievement_final(!items[itOrbSafety]);
   
-#ifndef NOSAVE
+#if CAP_SAVE
   saveStats();
 #endif
   offscreen.clear();
   clearMemory();
-#ifndef MOBILE
+#if ISMOBILE==0
   cleargraph();
 #endif
   
   achievement_close();  
   }
 
-#ifdef ANDROID
+#if ISANDROID
 string buildScoreDescription() {
   string s;
   time_t timer;
@@ -365,7 +423,7 @@ string buildScoreDescription() {
   char buf2[128];
   
   s += XLAT("HyperRogue for Android");
-  s += " ("VER"), http://www.roguetemple.com/z/hyper/\n";
+  s += " ( " VER "), http://www.roguetemple.com/z/hyper/\n";
   s += XLAT("Date: %1 time: %2 s ", buf, its(savetime + time(NULL) - timerstart));
   s += XLAT("distance: %1\n", its(celldist(cwt.c)));
   // s += buf2;
@@ -392,7 +450,7 @@ string buildScoreDescription() {
   }
 #endif
 
-#ifdef MOBILE
+#if ISMOBILE==1
 
 bool lclicked = false, clicked = false;
 string lmouseovers;
@@ -406,10 +464,7 @@ void displayTexts();
 void controlMusic(int ticks);
 
 void showHelp(MOBPAR_FORMAL, string nhelp) {
-  help = nhelp;
-  // helptext = help;
-  lastmode = cmode;
-  cmode = emHelp;
+  gotoHelp(nhelp);
   }
 
 bool useRangedOrb;
@@ -497,14 +552,14 @@ void handleclick(MOBPAR_FORMAL) {
       
     if(andmode >= 10) andmode -= 10;
 
-  if(andmode == 3) cmode = emMenu, andmode = 0;
+  if(andmode == 3) pushScreen(showMainMenu), andmode = 0;
   }
 
 int touchedAt;
 
 int getticks();
 
-#ifdef ANDROIDSHARE
+#if CAP_ANDROIDSHARE
 void shareScore(MOBPAR_FORMAL);
 #endif
 
@@ -540,7 +595,7 @@ void mobile_draw(MOBPAR_FORMAL) {
     if(hypot(mousex - xmove, mousey - yb) < rad) targetclick = false;
     }
   
-  if(size(screens) == 1) {
+  if(cmode & sm::NORMAL) {
     lmouseover = (gtouched && lclicked) ? mouseover : NULL;
     if(!shmup::on && !useRangedOrb && vid.mobilecompasssize) {
       using namespace shmupballs;
@@ -570,7 +625,9 @@ void mobile_draw(MOBPAR_FORMAL) {
 
   if(clicked && !lclicked) touchedAt = ticks;  
 
+#if CAP_XGD
   graphdata.clear();
+#endif
   getcstat = 0; shiftmul = 1; getcshift = 1;
   drawscreen();
   shiftmul = getcshift;
@@ -584,9 +641,9 @@ void mobile_draw(MOBPAR_FORMAL) {
   
   bool keyreact = lclicked && !clicked;
   
-  if(cmode == emOverview || cmode == emTactic) {
+  if(cmode & sm::ZOOMABLE) {
     using namespace dialog::zoom;
-    if(zoomoff || (cmode != emOverview && cmode != emTactic)) {
+    if(zoomoff) {
       zoomf = 1; shiftx = shifty = 0; zoomoff = false; return; 
       }
     if(clicked && !lclicked) {
@@ -601,53 +658,46 @@ void mobile_draw(MOBPAR_FORMAL) {
   
   if(inslider) keyreact = true;
 
-#ifdef ANDROIDSHARE
+#if CAP_ANDROIDSHARE
   if(getcstat == 's'-96 && keyreact) {
-    popScreenAll().
+    popScreenAll();
     shareScore(MOBPAR_ACTUAL);
     }
 #endif
 
   if(andmode == 2 && size(screens) != 1) andmode = 12;
 
-  if((cmode == emQuit && !canmove && keyreact && lclicked && !clicked) && !buttonclicked) {
-    popScreenAll(); printf("back to quit\n");
-    }
-  else if(cmode == emScores) handleScoreKeys(0, 0);
-  else if(getcstat && keyreact) {
-    if(cmode == emMenu && getcstat == 'q') openURL();
-    else { extra ex; handlekey(getcstat, getcstat, ex); }
+  if((cmode & sm::NORMAL) && getcstat == '-')
+    getcstat = 0;
+
+  if(keyreact) {
+    handlekey(getcstat, getcstat);
     }
 
-  #ifdef IOS
+  #if ISIOS
   displayTexts();
   #endif
 
-  if((cmode != emBasicConfig && cmode != emScores)) {
-     
-    if(clicked && lclicked && andmode == 1 && !inmenu) {
-      if(!mouseout2() && mouseoh[2] < 50 && mouseh[2] < 50) {
-        panning(mouseoh, mouseh);
-        }
+  if(clicked && lclicked && andmode == 1 && (cmode & sm::NORMAL)) {
+    if(!mouseout2() && mouseoh[2] < 50 && mouseh[2] < 50) {
+      panning(mouseoh, mouseh);
       }
+    }
 
-    if(andmode == 1 && lclicked && !clicked && !inmenu && mouseover)
-      performMarkCommand(mouseover);
+  if(andmode == 1 && lclicked && !clicked && !inmenu && mouseover)
+    performMarkCommand(mouseover);
 
-    if(clicked && andmode == 2 && (mouseover != lmouseover || mouseovers != lmouseovers) && !inmenu) {
-      addMessage(mouseovers);
-      lmouseovers = mouseovers;
-      }
-  
-    if(andmode == 10 && clicked != lclicked) andmode = 0;
-    if(andmode == 20 && clicked != lclicked) andmode = 10;
+  if(clicked && andmode == 2 && (mouseover != lmouseover || mouseovers != lmouseovers) && !inmenu) {
+    addMessage(mouseovers);
+    lmouseovers = mouseovers;
+    }
 
-    if(andmode == 2 && lclicked && !clicked) { 
-      if(!inmenu)
-        showHelp(MOBPAR_ACTUAL, help);
-      else if(cmode != emScores && cmode != emPickScores)
-        cmode = emNormal;
-      }
+  if(andmode == 10 && clicked != lclicked) andmode = 0;
+  if(andmode == 20 && clicked != lclicked) andmode = 10;
+
+  if(andmode == 2 && lclicked && !clicked) { 
+    showHelp(MOBPAR_ACTUAL, help);
+    }
 
   else if(andmode == 4) {
     achievement_final(false);
@@ -659,21 +709,19 @@ void mobile_draw(MOBPAR_FORMAL) {
     lmouseovers = mouseovers;
     }
 
-    }
-
   if(clicked != lclicked)
     flashMessages();
 
   // END
   lclicked = clicked;  
 
-#ifdef IOS
+#if ISIOS
   controlMusic(ticks - lastt);
   #endif
   }
 
 #endif
 
-#ifdef NOAUDIO
+#if !CAP_AUDIO
 void playSound(cell*, const string &s, int vol) { printf("play sound: %s vol %d\n", s.c_str(), vol); }
 #endif

@@ -112,10 +112,10 @@ int glyphflags(int gid) {
     if(i == treasureType(cwt.c->land)) 
       f |= GLYPH_LOCAL | GLYPH_LOCAL2 | GLYPH_IMPORTANT | GLYPH_INSQUARE;
     if(i == itHolyGrail) {
-      if(items[i] >= 3) f |= GLYPH_MARKOVER;
+      if(items[i] >= 3 && !inv::on) f |= GLYPH_MARKOVER;
       }
     else if(itemclass(i) == IC_TREASURE) {
-      if(items[i] >= 25 && items[i] < 100) f |= GLYPH_MARKOVER;
+      if(items[i] >= 25 && items[i] < 100 && !inv::on) f |= GLYPH_MARKOVER;
       else if(items[i] < 10) f |= GLYPH_MARKTODO;
       }
     else {
@@ -152,7 +152,7 @@ bool displayglyph(int cx, int cy, int buttonsize, char glyph, int color, int qty
     initquickqueue();
     if(id >= ittypes) {
       eMonster m = eMonster(id - ittypes);
-      int bsize = buttonsize;
+      int bsize = buttonsize * 2/3;
       if(m == moKrakenH) bsize /= 3;
       if(m == moKrakenT || m == moDragonTail) bsize /= 2;
       if(m == moSlime) bsize = (2*bsize+1)/3;
@@ -163,7 +163,7 @@ bool displayglyph(int cx, int cy, int buttonsize, char glyph, int color, int qty
       }
     else {
       eItem it = eItem(id);
-      int bsize = buttonsize;
+      int bsize = buttonsize / 2;
       if(glyph =='*') bsize *= 2;
       if(glyph == '$') bsize = (bsize*5+2)/3;
       if(glyph == 'o') bsize = (bsize*3+1)/2;
@@ -265,7 +265,7 @@ hookset<bool()> *hooks_prestats;
 
 void drawStats() {
   callhandlers(false, hooks_prestats);
-#ifdef ROGUEVIZ
+#if CAP_ROGUEVIZ
   if(rogueviz::on || nohud) return;
 #endif
   if(viewdists && sidescreen) {
@@ -446,7 +446,7 @@ void drawStats() {
       "If you find that animations are not smooth enough, you can try "
       "to change the options "
       ) +
-#ifdef IOS
+#if ISIOS
 XLAT(
       "(in the MENU). You can reduce the sight range, this should make "
       "the animations smoother.");

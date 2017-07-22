@@ -1,11 +1,6 @@
-#define ISANDROID 0
-#define ISMOBILE 1
-#define ISIOS 0
-#define MOBILE
+#define ISFAKEMOBILE 1
 #define MOBPAR_FORMAL int
 #define MOBPAR_ACTUAL 0
-#define FAKEMOBILE
-#define ANDROIDSHARE
 #define MIX_MAX_VOLUME 128
 
 const char *scorefile = "fakemobile_score.txt";
@@ -13,13 +8,16 @@ const char *conffile = "fakemobile_config.txt";
 
 #include <SDL/SDL.h>
 
-#include <GL/gl.h>
 #include "init.cpp"
 
 #include <SDL/SDL_ttf.h>
 #include <SDL/SDL_gfxPrimitives.h>
 
 #undef main
+
+void playSound(cell *c, const string& fname, int vol) {
+  printf("Play sound: %s\n", fname.c_str());
+  }
 
 SDL_Surface *s;
 
@@ -107,7 +105,6 @@ int main(int argc, char **argv) {
     }
 
   int mx = 0; int my = 0; bool _clicked = false;
-  int action = 0;
   
   firstland = laMinefield;
   
@@ -129,13 +126,13 @@ int main(int argc, char **argv) {
     action = 0;
     
     gdpos = 0;
-    while(gdpos < graphdata.size()) {
+    while(gdpos < size(graphdata)) {
       switch(gdpop()) {
         case 2: {
           int x = gdpop(), y = gdpop(), al = gdpop();
           int color = gdpop();
           int size = gdpop();
-          int b = gdpop();
+          gdpop();
           int n = gdpop();
           string s;
           for(int i=0; i<n; i++) s += char(gdpop());
@@ -213,9 +210,8 @@ int main(int argc, char **argv) {
           items[itGreenStone] = 100;
           }
         action = sym; */
-        eventtype ex;
         mousing = false;
-        handlekey(sym, sym, ex);
+        handlekey(sym, sym);
         }
         
       if(ev.type == SDL_QUIT) {

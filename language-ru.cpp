@@ -347,7 +347,7 @@ S("Hyperstone Quest: collect at least %3 %1 in %the2", "Миссия Гипер�
 S("Hyperstone Quest completed!", "Миссия Гиперкамня закончена!")
 S("Look for the Orbs of Yendor in Hell or in the Crossroads!", "Ищите сферы Йендора в Аду и на Перекрёстке!")
 S("Unlock the Orb of Yendor!", "Откройте сферу Йендора!")
-S("Defeat 100 enemies to access the Graveyard", "Убейте 100 врагов, чтобы открыть Кладбище")
+S("Defeat %1 enemies to access the Graveyard", "Убейте %1 врагов, чтобы открыть Кладбище")
 S("(press ESC during the game to review your quest)", "(нажмите ESC во время игры, чтобы посмотреть ваши миссии)")
 S("you have cheated %1 times", "количество читов: %1")
 S("%1 turns (%2)", "ходов: %1 (%2)")
@@ -5263,7 +5263,7 @@ S("The game starts in the Icy Lands. Collect the Ice Diamonds "
 S("Hypersian Rug model", "Модель Гиперсидского ковра")
 S(
   "New players think that the action of HyperRogue takes place on a sphere. "
-#ifdef MOBWEB
+#if ISMOBWEB
   "This is not true -- the Tutorial in the native desktop version shows "
   "the surface HyperRogue actually takes place on.",
 #else
@@ -5274,7 +5274,7 @@ S(
 #endif
  
   "Новички иногда думают, что действие в HyperRogue происходит на сфере. "
-#ifdef MOBWEB
+#if ISMOBWEB
   "Это неправда -- Руководство в компьютерной версии покажет тебе "
   "настоящую поверхность HyperRogue."
 #else
@@ -5360,7 +5360,7 @@ S(
   "it will appear to go slower -- this is because you are running "
   "in a straight line, and the Running Dog has to run in a curve "
   "called an equidistant.\n\n"
-#ifdef MAC
+#if ISMAC
  "Remember that you can click with right Shift on anything to get more information.",
 #else
   "Remember that you can right click on anything to get more information.",

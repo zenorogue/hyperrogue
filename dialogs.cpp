@@ -1,6 +1,6 @@
 /* Missing.
 
-#ifndef MOBILE
+#if ISMOBILE==0
   dialog::addItemHelp(16, XLAT("use Shift to decrease and Ctrl to fine tune "));
   dialog::addItemHelp(17, XLAT("(e.g. Shift+Ctrl+Z)"));
 #endif
@@ -18,8 +18,8 @@ namespace dialog {
     bool zoomoff = false;
     };
 
-#ifdef MENU_SCALING
-#ifndef NOSDL
+#if CAP_MENUSCALING
+#if CAP_SDL
   void handleZooming(SDL_Event &ev) {
     using namespace zoom;
     if(zoomoff || (cmode != emOverview && cmode != emTactic)) { 
@@ -241,10 +241,7 @@ namespace dialog {
   void display() {
     int N = items.size();
     dfsize = vid.fsize;
-    #ifdef MOBILE
-    dfsize *= 3;
-    #endif
-    #ifdef PANDORA
+    #if ISMOBILE || ISPANDORA
     dfsize *= 3;
     #endif
     dfspace = dfsize * 5/4;
@@ -292,7 +289,7 @@ namespace dialog {
         }
       else if(I.type == diItem) {
         bool xthis = (mousey >= top && mousey < tothei);
-#ifdef MOBILE
+#if ISMOBILE
         if(xthis && mousepressed) 
           I.color = I.colorc;
 #else
@@ -327,7 +324,7 @@ namespace dialog {
     }
   
   void handleNavigation(int &sym, int &uni) {
-#ifndef MOBILE
+#if !ISMOBILE
     if(uni == '\n' || uni == '\r' || sym == SDLK_KP5)
       for(int i=0; i<size(items); i++) 
         if(items[i].type == diItem)
@@ -529,16 +526,16 @@ namespace dialog {
       if(kind == 'v') ne.s = fts(*ne.editwhat);
       }
 
-#ifndef NOAUDIO
+#if CAP_AUDIO
     if(ne.intval == &musicvolume) {
       if(musicvolume < 0) 
         *ne.editwhat = musicvolume = 0, affect('v');
       else if(musicvolume > MIX_MAX_VOLUME) 
         *ne.editwhat = musicvolume = MIX_MAX_VOLUME, affect('v');
-#ifdef SDLAUDIO
+#if CAP_SDLAUDIO
       else Mix_VolumeMusic(musicvolume);
 #endif
-#ifdef ANDROID
+#if ISANDROID
       settingsChanged = true;
 #endif
       }
@@ -548,7 +545,7 @@ namespace dialog {
         *ne.editwhat = effvolume = 0, affect('v');
       else if(effvolume > MIX_MAX_VOLUME) 
         *ne.editwhat = effvolume = MIX_MAX_VOLUME, affect('v');
-#ifdef ANDROID
+#if ISANDROID
       settingsChanged = true;
 #endif
       }
@@ -557,7 +554,7 @@ namespace dialog {
     if(ne.intval == &vid.framelimit && vid.framelimit < 5) 
       *ne.editwhat = vid.framelimit = 5, affect('v');
 
-#ifdef MOBILE
+#if ISMOBILE==1
     if(ne.intval == &fontscale && fontscale < 50) 
       *ne.editwhat = fontscale = 50, affect('v');
 #endif
@@ -603,7 +600,7 @@ namespace dialog {
     
     if(cmode & sm::A3) {
       buildpolys();
-  #ifdef GL
+  #if CAP_GL
       resetGL();
   #endif
      }
@@ -616,7 +613,7 @@ namespace dialog {
     addInfo(ne.s);
     addSlider(ne.scale(ne.vmin), ne.scale(*ne.editwhat), ne.scale(ne.vmax), 500);
     addBreak(100);
-#ifndef MOBILE
+#if ISMOBILE==0
     addHelp("You can scroll with arrow keys -- Ctrl to fine-tune");
     addBreak(100);
 #endif
@@ -630,12 +627,7 @@ namespace dialog {
 
     if(ne.help != "") {
       addHelp(ne.help);
-      bool scal = size(ne.help) > 160;
-#ifndef MOBILE
-#ifndef PANDORA
-      scal = false;
-#endif
-#endif
+      bool scal = !ISMOBILE && !ISPANDORA && size(ne.help) > 160;
       if(scal) lastItem().scale = 30;
       }
 
@@ -665,7 +657,7 @@ namespace dialog {
         sscanf(ne.s.c_str(), LDF, ne.editwhat);
         affect('s');
         }
-  #ifndef MOBILE
+  #if !ISMOBILE
       else if(sym == SDLK_RIGHT || sym == SDLK_KP6) {
         if(ne.intval && abs(shiftmul) < .6)
           (*ne.editwhat)++;

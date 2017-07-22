@@ -1,12 +1,11 @@
-#define WEB
-#define MOBWEB
+#define ISWEB 1
 #define MINI
 #define NOAUDIO
 #define NOGFX
 #define NOPNG
 #define DEMO
 #define TOUR
-#define NOTTF
+#define CAP_SDLTTF 0
 
 #ifdef FAKEWEB
 void mainloopiter();

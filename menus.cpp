@@ -17,6 +17,7 @@ int PREC(ld x) {
   }
 
 void showOverview() {
+  cmode = sm::ZOOMABLE | sm::OVERVIEW;
   DEBB(DF_GRAPH, (debugfile,"show overview\n"));
   mouseovers = XLAT("world overview");
   mouseovers += "       ";
@@ -175,7 +176,7 @@ void showMainMenu() {
   dialog::addItem(XLAT("special display modes"), 'd');
   dialog::addItem(XLAT("special game modes"), 'm');
 
-#ifndef NOSAVE
+#if CAP_SAVE
   dialog::addItem(XLAT("local highscores"), 't');
 #endif
   dialog::addItem(XLAT("help"), 'h'); dialog::lastItem().keycaption += " / F1";
@@ -185,7 +186,7 @@ void showMainMenu() {
   dialog::addItem(XLAT("restart game"), 'r'); dialog::lastItem().keycaption += " / F5";
   
   string q;
-  #ifdef MOBILE
+  #if ISMOBILE==1
   dialog::addItem(XLAT("visit the website"), 'q');
   #else
   q = quitsaves() ? "save" : "quit"; 
@@ -203,17 +204,17 @@ void showMainMenu() {
   if(inv::on)
     dialog::addItem(XLAT("inventory"), 'i');    
 
-#ifdef ROGUEVIZ
+#if CAP_ROGUEVIZ
   dialog::addItem(XLAT("rogueviz menu"), 'u'); 
 #endif
   
-#ifdef MOBILE
+#if ISMOBILE==1
 #ifdef HAVE_ACHIEVEMENTS
   dialog::addItem(XLAT("leaderboards/achievements"), '3'); 
 #endif
 #endif
 
-#ifdef ANDROIDSHARE
+#if CAP_ANDROIDSHARE
   dialog::addItem("SHARE", 's'-96);
 #endif
   
@@ -232,20 +233,25 @@ void showMainMenu() {
     else if(sym == 'g') pushScreen(showGraphConfig);
     else if(sym == 'd') pushScreen(showDisplayMode);
     else if(sym == 'm') pushScreen(showChangeMode);
-  #ifndef NOSAVE
+  #if CAP_SAVE
     else if(sym == 't') scores::load();
   #endif
     else if(sym == 'r' || sym == SDLK_F5) {
       restartGame();
-      popScreen();
       }
-    else if(sym == 'q' || sym == SDLK_F10) 
+    else if(sym == 'q' || sym == SDLK_F10) {
+#if ISMOBILE
+      extern void openURL();
+      openURL();
+#else
       quitmainloop = true;
+#endif
+      }
     else if(sym == 'o') {
       clearMessages();
-      pushScreen(showOverview);
+      setAppropriateOverview();
       }
-#ifdef INV
+#if CAP_INV
     else if(sym == 'i') {
       clearMessages();
       pushScreen(inv::show);
@@ -253,7 +259,7 @@ void showMainMenu() {
 #endif
     else if(sym == SDLK_ESCAPE) 
       showMissionScreen();
-  #ifdef MOBILE
+  #if ISMOBILE==1
   #ifdef HAVE_ACHIEVEMENTS
     else if(sym == '3') {
       achievement_final(false);
@@ -261,7 +267,7 @@ void showMainMenu() {
       }
   #endif
   #endif
-  #ifdef ROGUEVIZ
+  #if CAP_ROGUEVIZ
     else if(uni == 'u') pushScreen(rogueviz::showMenu);
   #endif
     else if(doexiton(sym, uni)) {
@@ -299,15 +305,15 @@ void showDisplayMode() {
 
   dialog::addBreak(50);
 
-#ifndef NOEDIT
+#if CAP_EDIT
   dialog::addBoolItem(XLAT("vector graphics editor"), (false), 'g');
 #endif
 
   // display modes  
-#ifndef NORUG
+#if CAP_RUG
   dialog::addBoolItem(XLAT("hypersian rug mode"), (rug::rugged), 'u');
 #endif
-#ifndef NOMODEL
+#if CAP_MODEL
   dialog::addBoolItem(XLAT("paper model creator"), (false), 'n');
 #endif
   dialog::addBoolItem(XLAT("conformal/history mode"), (conformal::on), 'a');
@@ -333,7 +339,7 @@ void showDisplayMode() {
   
     if(xuni == '9') pushScreen(show3D);
     
-  #ifndef NOEDIT
+  #if CAP_EDIT
     else if(xuni == 'g') {
       pushScreen(mapeditor::showDrawEditor);
       mapeditor::initdraw(cwt.c);
@@ -343,7 +349,7 @@ void showDisplayMode() {
     else if(xuni == 'x') {
       viewdists = !viewdists;
       }
-  #ifndef NORUG
+  #if CAP_RUG
     else if(xuni == 'u') {
       if(sphere) projectionDialog();
       else rug::select();
@@ -352,7 +358,7 @@ void showDisplayMode() {
     else if(uni == 'a')
       pushScreen(conformal::show);
   
-  #ifndef NOMODEL
+  #if CAP_MODEL
     else if(xuni == 'n')
       pushScreen(netgen::show);
   #endif
@@ -369,7 +375,6 @@ void switchHardcore() {
   if(hardcore && !canmove) { 
     restartGame();
     hardcore = false;
-    popScreen();
     }
   else if(hardcore && canmove) { hardcore = false; }
   else { hardcore = true; canmove = true; hardcoreAt = turncount; }
@@ -377,7 +382,7 @@ void switchHardcore() {
       addMessage("One wrong move, and it is game over!");
   else
       addMessage("Not so hardcore?");
-  if(pureHardcore()) popScreen();
+  if(pureHardcore()) popScreenAll();
   }
 
 void showChangeMode() {
@@ -386,7 +391,7 @@ void showChangeMode() {
   
   // gameplay modes
 
-#ifdef TOUR
+#if CAP_TOUR
   dialog::addBoolItem(XLAT("Tutorial"), tour::on, 'T');
 #endif
 
@@ -400,7 +405,7 @@ void showChangeMode() {
   multi::cpid = 0;
   dialog::addBoolItem(XLAT("heptagonal mode"), (purehepta), '7');
   dialog::addBoolItem(XLAT("Chaos mode"), (chaosmode), 'C');
-  dialog::addBoolItem(XLAT("peaceful mode"), (chaosmode), 'p');
+  dialog::addBoolItem(XLAT("peaceful mode"), peace::on, 'p');
   dialog::addBoolItem(XLAT("Orb Strategy mode"), (inv::on), 'i');
   dialog::addBoolItem(XLAT("pure tactics mode"), (tactic::on), 't');
   dialog::addBoolItem(XLAT("Yendor Challenge"), (yendor::on), 'y');
@@ -411,7 +416,7 @@ void showChangeMode() {
   // cheating and map editor
 
   dialog::addBoolItem(XLAT("cheat mode"), (cheater), 'c');
-#ifndef NOEDIT
+#if CAP_EDIT
   dialog::addBoolItem(XLAT("map editor"), (false), 'm');
 #endif
 
@@ -433,7 +438,7 @@ void showChangeMode() {
       else if(!cheater) {
         cheater++;
         addMessage(XLAT("You activate your demonic powers!"));
-  #ifndef MOBILE
+  #if ISMOBILE==0
         addMessage(XLAT("Shift+F, Shift+O, Shift+T, Shift+L, Shift+U, etc."));
   #endif
         popScreen();
@@ -464,7 +469,7 @@ void showChangeMode() {
     else if(xuni == 'i') {
       restartGame('i');
       }
-  #ifdef TOUR
+  #if CAP_TOUR
     else if(uni == 'T') {
       tour::start();
       }
@@ -484,7 +489,7 @@ void showChangeMode() {
       else
         restartGame('P');
       }
-  #ifndef NOEDIT
+  #if CAP_EDIT
     else if(xuni == 'm') {
       if(tactic::on) 
         addMessage(XLAT("Not available in the pure tactics mode!"));
@@ -497,7 +502,7 @@ void showChangeMode() {
       }
   #endif
     else if(xuni == 's') {
-  #ifdef MOBILE
+  #if ISMOBILE==1
       restartGame('s');
   #else
       multi::shmupcfg = shmup::on;
@@ -592,7 +597,7 @@ void showEuclideanMenu() {
     if(hiitemsMax(treasureType(eLand(i))) >= 25) landvisited[i] = true;
   landvisited[laCrossroads] = true;
   landvisited[laIce] = true;
-  landvisited[laMirror] = true;
+  landvisited[laMirrorOld] = true;
   landvisited[laPrincessQuest] = cheater || princess::everSaved;
   landvisited[laWildWest] = true;
   landvisited[laHalloween] = true;
@@ -638,7 +643,6 @@ void showEuclideanMenu() {
     if(uni == '0') {
       targetgeometry = geometry;
       restartGame('g');
-      popScreen();
       }
     else if(uni == '5') {
       targetgeometry = eGeometry(1+targetgeometry);
@@ -657,7 +661,6 @@ void showEuclideanMenu() {
           restartGame(tactic::on ? 't' : 0);
         // disable PTM if chosen a land from the Euclidean menu
         if(tactic::on) restartGame('t');
-        popScreen();
         }
       else euclidland = laIce;
       }
@@ -735,31 +738,26 @@ void handleDemoKey(int sym, int uni) {
     firstland = laIce;
     if(tactic::on) restartGame('t');
     else restartGame();
-    popScreen();
     }
   else if(sym == 'T') {
     firstland = laIce;
     if(!tour::on) tour::start();
-    popScreen();
     }
   else if(sym == 't') {
     firstland = laTemple;
     if(!tactic::on) restartGame('t');
     else restartGame();
-    popScreen();
     }
   else if(sym == 'l') {
     firstland = laStorms;
     if(!tactic::on) restartGame('t');
     else restartGame();
-    popScreen();
     }
   else if(sym == 'b') {
     firstland = laBurial;
     if(!tactic::on) restartGame('t');
     else restartGame();
     items[itOrbSword] = 60;
-    popScreen();
     }
   }
 #endif

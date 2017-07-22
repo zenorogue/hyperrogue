@@ -1,4 +1,4 @@
-#ifdef NOTTF
+#if CAP_TABFONT
 unsigned char fonttable[] = {
 43,13,0,255,0,255,0,49,
 43,16,0,133,255,6,0,10,255,6,0,10,255,6,0,10,255,6,0,10,255,6,0,10,255,6,0,10,255,6,0,10,255,6,0,10,255,6,0,10,255,6,0,10,236,255,4,235,0,10,206,255,4,205,0,10,176,255,4,175,0,10,146,255,4,145,0,10,116,255,4,115,0,10,86,255,4,85,0,10,55,255,4,55,0,58,255,6,0,10,255,6,0,10,255,6,0,10,255,6,0,10,255,6,0,10,255,6,0,149,
@@ -254,7 +254,7 @@ void loadCompressedChar(int &otwidth, int &otheight, int *tpix) {
   }
 #endif
 
-#ifdef CREATEFONT
+#if CAP_CREATEFONT
 void generateFont(int ch, SDL_Surface *txt) {
   if(ch >= 32) {
     printf("%d,%d,", txt->h, txt->w);

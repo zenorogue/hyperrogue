@@ -595,7 +595,7 @@ namespace sag {
     return cost;
     }
   
-  MTRand53 los;
+  mt19937 los;
 
   bool infullsa;
   
@@ -1256,7 +1256,7 @@ void drawExtra() {
     canmove = true; items[itOrbAether] = true;
     }
   
-#ifndef NORUG
+#if CAP_RUG
   if(!rug::rugged) 
 #endif
   for(int i=0; i<size(legend); i++) {
@@ -1341,7 +1341,7 @@ void readcolor(const char *cfname) {
 void init() {
   if(on) return;
   autocheat = true; 
-#ifndef WEB
+#if !ISWEB
   mapeditor::drawplayer = false;
   firstland = euclidland = laCanvas;
   if(!shmup::on) restartGame('s');
@@ -1385,7 +1385,7 @@ void fixparam() {
   if(size(legend)) vid.xcenter = vid.ycenter;
   }
 
-#ifndef NOSDL
+#if CAP_SDL
 void rvvideo(const char *fname) {
   if(kind == kCollatz) {
     pngformat = 2;
@@ -1713,7 +1713,7 @@ int readArgs() {
   else if(argis("-TURN")) {
     PHASE(3); shmup::turn(100);
     }
-#ifndef NOSDL
+#if CAP_SDL
   else if(argis("-video")) {
     shift(); rvvideo(args());
     }

@@ -443,18 +443,14 @@ void castLightningBolt(cellwalker lig) {
       cwspin(lig, 3);
       if(c->type == 7) cwspin(lig, hrand(2));
       }
-
-    if(c->wall == waCloud) {
-      drawParticles(c, winf[ow].color, 16);
-      c->wall = waNone;
-      mirror::createMirages(c, lig.spin, moLightningBolt);
+    
+    if(lig.c->wall == waCloud) {
+      lig.c->wall = waNone;
+      mirror::createMirages(lig, mirror::LIGHTNING);
       }
-
-    if(c->wall == waMirror) {
-      drawParticles(c, winf[ow].color, 16);
-      c->wall = waNone;
-      mirror::createMirrors(c, lig.spin, moLightningBolt);
-      break;
+    if(lig.c->wall == waMirror) {
+      lig.c->wall = waNone;
+      mirror::createMirrors(lig, mirror::LIGHTNING);
       }
     }
   }
@@ -542,7 +538,7 @@ void teleportTo(cell *dest) {
   drainOrb(itOrbTeleport);
 
   addMessage(XLAT("You teleport to a new location!"));
-  mirror::destroy();
+  mirror::destroyAll();
 
   for(int i=9; i>=0; i--)
     setdist(cwt.c, i, NULL);
@@ -589,7 +585,7 @@ void jumpTo(cell *dest, eItem byWhat, int bonuskill = 0, eMonster dashmon = moNo
     addMessage(XLAT("You vault over %the1!", dashmon));
     }
   
-  mirror::destroy();
+  mirror::destroyAll();
 
   for(int i=9; i>=0; i--)
     setdist(cwt.c, i, NULL);
