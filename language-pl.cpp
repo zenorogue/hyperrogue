@@ -5780,5 +5780,9 @@ S(
 
 S("puzzles and exploration", "hádanky a zkoumání")
 
+S("cheats", "oszustwa")
+S("help for keyboard user", "pomoc dla użytkowników klawiatury")
+S("mark heptagons", "oznacz siedmiokąty")
+
 #undef Orb
 

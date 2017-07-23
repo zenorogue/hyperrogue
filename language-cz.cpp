@@ -5870,3 +5870,10 @@ S(
  "zkoumat.")
 
 S("puzzles and exploration", "hádanky a zkoumání")
+
+S("Zebra quotient", "kvocient Zebra")
+S("cheats", "cheaty")
+S("field quotient", "tělesový kvocient")
+S("help for keyboard user", "pomoc pro uživatele klávesnice")
+S("mark heptagons", "označit sedmiúhelníky")
+

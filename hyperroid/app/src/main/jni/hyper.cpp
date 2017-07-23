@@ -15,17 +15,8 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#define MOBILE
-#define ISMOBILE 1
 #define ISANDROID 1
-#define ISIOS 0
 #define GL_ES
-
-#ifndef ANDROID
-#define ANDROID
-#endif
-
-#define ANDROIDSHARE
 
 #define MOBPAR_FORMAL JNIEnv *env, jobject thiz
 #define MOBPAR_ACTUAL env, thiz
@@ -80,9 +71,9 @@ Java_com_roguetemple_hyperroid_HyperRogue_loadMap
 extern "C" bool
 Java_com_roguetemple_hyperroid_HyperRogue_captureBack
   ( MOBPAR_FORMAL) {
-  if(cmode == emNormal || cmode == emQuit)
-    return false;
-  cmode = emNormal; return true;
+    if(cmode & sm::NORMAL) return false;
+    popScreenAll();
+    return true;
   }
 
 void uploadAll(MOBPAR_FORMAL);
@@ -233,9 +224,8 @@ extern "C" void Java_com_roguetemple_hyperroid_HyperRogue_drawScreenshot(MOBPAR_
   }
 
 extern "C" void Java_com_roguetemple_hyperroid_HyperRogue_handleKey(MOBPAR_FORMAL, jint keycode) {
-  extra ex;
   flashMessages(); mousing = false;
-  handlekey(keycode, keycode, ex);
+  handlekey(keycode, keycode);
   }
 
 extern "C" void Java_com_roguetemple_hyperroid_HyperRogue_update
