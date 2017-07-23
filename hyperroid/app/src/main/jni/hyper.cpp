@@ -32,8 +32,6 @@ bool settingsChanged = false;
 
 #include "../../../../../init.cpp"
 
-JNIEnv *whatever;
-
 // #define delref env->DeleteLocalRef(_thiz)
 
 int semaphore = 0;
