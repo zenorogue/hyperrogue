@@ -5,8 +5,11 @@ import javax.microedition.khronos.opengles.GL10;
 
 // import android.graphics.Paint;
 // import android.graphics.Path;
+import android.content.Context;
 import android.graphics.Typeface;
 import android.opengl.GLSurfaceView;
+import android.os.Build;
+import android.os.PowerManager;
 // bimport android.widget.Toast;
 
 import com.android.texample.GLText;
@@ -25,7 +28,13 @@ public class HyperRenderer implements GLSurfaceView.Renderer {
 	
 	public void onDrawFrame(GL10 gl) {
 	  if(game.forceCanvas) return;
-  	  gl.glClear(GL10.GL_COLOR_BUFFER_BIT);
+
+          PowerManager pm = (PowerManager) game.getSystemService(Context.POWER_SERVICE);
+          boolean isScreenOn = Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT_WATCH ? pm.isInteractive() : pm.isScreenOn();
+          if(!isScreenOn) return;
+          if(!game.activityVisible) return;
+
+          gl.glClear(GL10.GL_COLOR_BUFFER_BIT);
 	  synchronized(game) {
 		game.hv.updateGame();
 		game.draw();

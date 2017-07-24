@@ -1,5 +1,6 @@
 package com.roguetemple.hyperroid;
 
+import android.app.KeyguardManager;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -8,6 +9,7 @@ import android.graphics.Path;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Typeface;
+import android.os.Build;
 import android.os.PowerManager;
 import android.os.SystemClock;
 import android.util.AttributeSet;
@@ -169,7 +171,7 @@ public class HyperView extends View {
     public void updateGame() {
     	lasttick = curtick;
         curtick = (int)SystemClock.elapsedRealtime();
-        
+
         if(clickcnt > 0) clickcnt--;
         
         game.update(width, height, curtick, mousex, mousey, clicked | ((clickcnt & 1) > 0));
@@ -184,9 +186,10 @@ public class HyperView extends View {
       super.onDraw(canvas);
 
       PowerManager pm = (PowerManager) game.getSystemService(Context.POWER_SERVICE);
-      boolean isScreenOn = pm.isScreenOn();
+      boolean isScreenOn = Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT_WATCH ? pm.isInteractive() : pm.isScreenOn();
       if(!isScreenOn) return;
-      
+      if(!game.activityVisible) return;
+
       dc = canvas;
       width = getWidth();
       height = getHeight();      

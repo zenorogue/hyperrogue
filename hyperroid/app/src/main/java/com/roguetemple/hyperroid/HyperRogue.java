@@ -339,10 +339,13 @@ public class HyperRogue extends Activity {
     int lastland;
     int curpos[];
     float curvol;
-    
+
+    public static boolean activityVisible = true;
+
     @Override
     protected void onPause() {
         super.onPause();
+        activityVisible = false;
 
         boolean keep;
 
@@ -392,6 +395,7 @@ public class HyperRogue extends Activity {
      }
 
     protected void onResume() {
+        activityVisible = true;
     	super.onResume();
         if(backgroundmusic != null) {
         	try {backgroundmusic.prepare(); } catch(Exception e) {}
