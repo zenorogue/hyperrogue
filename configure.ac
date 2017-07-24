@@ -36,6 +36,8 @@ AC_CHECK_LIB([SDL_gfx], [main], [], [AS_IF( test ["${host_os#*mingw}" != "$host_
 AC_CHECK_LIB([SDL_ttf], [main], [], [AS_IF( test ["${host_os#*mingw}" != "$host_os"], [export wincppflags=$wincppflags" dll/SDL_ttf.dll" && AC_MSG_RESULT([Building for windows, ignoring])] ,AC_MSG_ERROR([SDL_ttf library was not found]))])
 # Test for libpng
 AC_CHECK_LIB([png], [main], [], AC_MSG_ERROR([png library was not found]))
+# Test for glew
+AC_CHECK_LIB([GLEW], [main], [], AC_MSG_ERROR([Glew library was not found]))
 
 # Checks for header files.
 AC_CHECK_HEADERS([stdlib.h unistd.h])
