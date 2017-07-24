@@ -207,6 +207,13 @@ namespace inv {
   
   bool mirroring;
   
+  const char* helptext = 
+    "You are playing in the Orb Strategy Mode. Collecting treasure "
+    "gives you access to magical Orb powers. In this mode, "
+    "unlocking requirements are generally higher, and "
+    "several quests and lands "
+    "give you extremely powerful Orbs of the Mirror.\n";
+
   void show() {
   
     gamescreen(2);
@@ -255,7 +262,7 @@ namespace inv {
               int tcol = remaining[i] ? darkenedby(icol, 1) : 0;
   
               if(remaining[i] != 1 || !gg)
-                displaystr(px, py, 2, gg?rad:rad*3/2, remaining[i] == 0 ? "X" : remaining[i] == 1 ? "o" : its(remaining[i]), tcol, 8);
+                displaystr(px, py, 2, gg?rad:rad*3/2, remaining[i] <= 0 ? "X" : remaining[i] == 1 ? "o" : its(remaining[i]), tcol, 8);
               }
             
             bool b = hypot(mousex-px, mousey-py) < rad;
@@ -314,9 +321,9 @@ namespace inv {
         if(col)
           displaystr(vid.xres/2, vid.yres - vid.fsize*4, 2, vid.fsize, XLAT(olrDescriptions[olr], cwt.c->land, tr, treasureType(cwt.c->land)), col, 8);
   
-        dialog::displayPageButtons(3, 0);
         }
       }
+    dialog::displayPageButtons(3, 0);
     mouseovers = "";
     keyhandler = [] (int sym, int uni) {
       if(plain) dialog::handleNavigation(sym, uni);

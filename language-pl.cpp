@@ -5784,5 +5784,8 @@ S("cheats", "oszustwa")
 S("help for keyboard user", "pomoc dla użytkowników klawiatury")
 S("mark heptagons", "oznacz siedmiokąty")
 
+S("Collect as many Dodecahedra as you can, then return here!",
+  "Zbierz jak najwięcej Dwunastościanów i tu wróć!")
+  
 #undef Orb
 

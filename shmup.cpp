@@ -927,11 +927,11 @@ vector<monster*> active, nonvirtual, additional;
 
 cell *findbaseAround(hyperpoint p, cell *around) {
   cell *best = around;
-  double d0 = intval(p, gmatrix[around] * C0);
+  double d0 = intval(p, ggmatrix(around) * C0);
   for(int i=0; i<around->type; i++) {
     cell *c2 = around->mov[i];
-    if(c2 && gmatrix.count(c2)) {
-      double d1 = intval(p, gmatrix[c2] * C0);
+    if(c2) {
+      double d1 = intval(p, ggmatrix(c2) * C0);
       if(d1 < d0) { best = c2; d0 = d1; }
       }
     }
@@ -1730,7 +1730,7 @@ void movePlayer(monster *m, int delta) {
       if(c2->wall == waClosePlate || c2->wall == waOpenPlate)
         toggleGates(c2, c2->wall);
   
-      if(c2->item == itOrbYendor) yendor::check(c2);
+      if(c2->item == itOrbYendor && !peace::on) yendor::check(c2);
       collectItem(c2);
       }
     }
@@ -2156,9 +2156,14 @@ void moveBullet(monster *m, int delta) {
         continue;
         }
       // Hedgehog Warriors only killable outside of the 45 degree angle
-      if(m2->type == moHedge) {
+      if(m2->type == moHedge && !peace::on) {
         hyperpoint h = inverse(m2->pat) * m->pat * C0;
         if(h[0] > fabsl(h[1])) { m->dead = true; continue; }
+        }
+      if(peace::on && !isIvy(m2->type)) {
+        m->dead = true;
+        m2->stunoff = curtime + 600;
+        continue;
         }
       // 
       if((m2->type == moPalace || m2->type == moFatGuard || m2->type == moSkeleton ||
@@ -2371,7 +2376,7 @@ void moveMonster(monster *m, int delta) {
           break;
           }
       }
-    else if(m->type == moWolf) {
+    else if(m->type == moWolf && !peace::on) {
       cell *cnext = c;
       for(int i=0; i<c->type; i++) {
         cell *c2 = c->mov[i];
@@ -2408,7 +2413,7 @@ void moveMonster(monster *m, int delta) {
         directi = 0;
         }
       }
-    else if(!direct && !invismove) {
+    else if(!direct && !invismove && !peace::on) {
       for(int i=0; i<players; i++) 
         if(m->trackroute(pc[i]->pat, step) && (!direct || intval(pc[i]->pat*C0, m->pat*C0) < intval(goal*C0,m->pat*C0))) {
           goal = pc[i]->pat;
@@ -2418,7 +2423,7 @@ void moveMonster(monster *m, int delta) {
           }
         }
   
-    if(!direct) while(true) {
+    if(!direct && !peace::on) while(true) {
       if(m->trackroute(gmatrix[c], step))
         goal = gmatrix[c];
       cell *cnext = c;
@@ -2442,7 +2447,7 @@ void moveMonster(monster *m, int delta) {
       // at most 45 degrees
       if(h[0] < fabsl(h[1])) return;
       }
-    else {
+    else if(!peace::on) {
       nat = nat * rspintox(inverse(m->pat) * goal * C0);
       }
     }
@@ -2474,7 +2479,10 @@ void moveMonster(monster *m, int delta) {
   
   igo_retry:
   
-  if(igo == IGO) {
+  if(igo == IGO && peace::on) 
+    nat0 = nat0 * spin(rand() % 16); 
+  
+  else if(igo >= IGO) {
     if(m->type == moHerdBull) m->type = moRagingBull;
     return;
     }
@@ -2486,7 +2494,7 @@ void moveMonster(monster *m, int delta) {
   
   nat = nat0 * spin(igospan[igo]) * xpush(step) * spin(-igospan[igo]);; // * spintox(wherePC);
 
-  if(m->type != moRagingBull)
+  if(m->type != moRagingBull && !peace::on)
   if(intval(nat*C0, goal*C0) >= intval(m->pat*C0, goal*C0) && !stunned && !carried) {
     igo++; goto igo_retry; }
 
@@ -2506,9 +2514,12 @@ void moveMonster(monster *m, int delta) {
     if(d < SCALE2 * 0.1) crashintomon = m2;
     }
   
+  if(!peace::on) 
   for(int i=0; i<players; i++) 
     if(crashintomon == pc[i]) 
       pc[i]->dead = true;
+
+  if(peace::on) ; 
 
   else if(crashintomon && isMimic(crashintomon->type)) {
     killMonster(crashintomon, m->type);
@@ -2537,7 +2548,7 @@ void moveMonster(monster *m, int delta) {
     igo++; goto igo_retry;
     }
 
-  if(isPlayerOn(c2)) {
+  if(isPlayerOn(c2) && !peace::on) {
     bool usetongue = false;
     if(isSlimeMover(m->type) || m->type == moWaterElemental) usetongue = true;
     if(isWatery(c2) && !survivesWater(m->type) && !m->inBoat) usetongue = true;
@@ -2671,6 +2682,8 @@ void moveMonster(monster *m, int delta) {
       }
     }
   
+  if(peace::on && c2->mpdist > 7) return;
+  
   if(!(m->type == moRoseBeauty && c2->land != laRose)) {
     if(stunned ? passable(c2, m->base, P_BLOW | reflectflag) : passable_for(m->type, c2, m->base, P_CHAIN | reflectflag)) {
       if(c2 != m->base && m->type == moButterfly) 
@@ -2678,8 +2691,11 @@ void moveMonster(monster *m, int delta) {
       m->rebasePat(nat);
       if(m->type == moRagingBull && step > 1e-6) m->stunoff = CHARGING;
       }
-    else if(m->type == moRagingBull && m->stunoff == CHARGING)
-      m->stunoff = curtime + BULLSTUN;
+    else {
+      if(peace::on) { igo++; goto igo_retry; }
+      if(m->type == moRagingBull && m->stunoff == CHARGING)
+        m->stunoff = curtime + BULLSTUN;
+      }
     }
 
   if(direct) {
@@ -3122,6 +3138,10 @@ bool drawMonster(const transmatrix& V, cell *c, const transmatrix*& Vboat, trans
           col = (minf[m->parenttype].color << 8) | 0xFF;
         if(getcs().charid >= 4) {
           queuepoly(mmscale(view, 1.15), shPHead, col);
+          ShadowV(view, shPHead);
+          }
+        else if(peace::on) {
+          queuepolyat(mmscale(view, 1.15), shDisk, col, PPR_MISSILE);
           ShadowV(view, shPHead);
           }
         else {

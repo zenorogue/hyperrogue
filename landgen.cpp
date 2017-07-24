@@ -1031,7 +1031,6 @@ ld orbprizefun(int tr) {
   }
 
 ld orbcrossfun(int tr) {
-  if(inv::on) return tr >= 50 ? 1 : 0;
   if(tr < 10) return 0;
   if(tr > 25) return 1;
   return (tr*2 + 50) / 100.;
@@ -1156,7 +1155,7 @@ void placeCrossroadOrbs(cell *c) {
     if(oi.orb == itOrbSafety && c->land == laCrossroads5) continue;
     int mul = c->land == laCrossroads5 ? 10 : 1;
     int gch = oi.gchance;
-    gch /= orbcrossfun(treas);
+    if(!inv::on) gch /= orbcrossfun(treas); else gch /= 2;
     if(hrand(gch) >= mul) continue;
     if(hrand(50+items[itHyperstone]) >= 50) continue;
     c->item = oi.orb;
@@ -4676,7 +4675,7 @@ void setdist(cell *c, int d, cell *from) {
     if(d == 7 && c->land == laDeadCaves && c->wall == waDeadwall && hrand(1000) < items[itSilver] + hard && !safety)
       c->monst = moSeep;
     
-    if(d == 7 && c->wall == waVinePlant && hrand(100) < (randomPatternsMode ? 2 : 10))
+    if(d == 7 && c->wall == waVinePlant && hrand(100) < (randomPatternsMode ? 2 : 10) && !peace::on)
       c->monst = moVineSpirit;
 
     if(d == 7 && c->land == laOcean && !safety) {
@@ -5283,7 +5282,7 @@ void setdist(cell *c, int d, cell *from) {
       if(isCrossroads(c->land)) {
         if(purehepta && c->land == laCrossroads5 && hrand(100) < 60)
           c->wall = waBarrier;
-        else if(c->type == 6 && items[itShard] >= 10 && hrand(8000) < 120*orbcrossfun(items[itShard]))
+        else if(c->type == 6 && !inv::on && items[itShard] >= 10 && hrand(8000) < 120*orbcrossfun(items[itShard]))
           c->wall = hrand(2) ? waMirror : waCloud;
         else if(c->type == 6 && tactic::on && isCrossroads(tactic::lasttactic) && hrand(8000) < 120)
           c->wall = hrand(2) ? waMirror : waCloud;
