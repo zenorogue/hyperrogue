@@ -63,7 +63,7 @@ hint hints[] = {
       },    
     []() { 
        dialog::addHelp(XLAT(
-        "Remember that you can right click mostly anything for more information."));
+        "Remember that you can right click almost anything for more information."));
 #if ISMAC
        dialog::addHelp(XLAT(
          "(You can also use right Shift)\n\n"));

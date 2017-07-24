@@ -677,7 +677,7 @@ namespace princess {
     if(msgid == 0 && d < 20 && inpalace) {
       addMessage(XLAT("%The1 kisses you, and begs you to bring %him1 away from here.", m));
       }
-    else if(msgid == 1 && d >= 20 && inpalace) {
+    else if(msgid == 1 && d >= 20 && inpalace && !peace::on) {
       if(m == moPrincess)
         addMessage(XLAT("\"I want my revenge. Stun a guard and leave him for me!\"", m));
       else
@@ -689,7 +689,7 @@ namespace princess {
     else if(msgid == 3 && !inpalace) {
       addMessage(XLAT("%The1 kisses you, and thanks you for saving %him1.", m));
       }
-    else if(msgid == 4 && !inpalace && m == moPrincess) {
+    else if(msgid == 4 && !inpalace && m == moPrincess && !peace::on) {
       addMessage(XLAT("\"I have been trained to fight with a Hypersian scimitar, you know?\"", m));
       }
     else if(msgid == 5 && !inpalace) {

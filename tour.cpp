@@ -26,12 +26,12 @@ void setCanvas(presmode mode, char canv) {
     mapeditor::whichCanvas = canv;
     ld = firstland;
     firstland = laCanvas;
-    restartGame(0, true);
+    restartGame(0, true); 
     }
   if(mode == pmStop) {
     mapeditor::whichCanvas = wc;
     firstland = ld;
-    restartGame(0, false);
+    popGame();
     }
   }
 
@@ -80,7 +80,7 @@ bool handleKeyTour(int sym, int uni) {
   if((sym == SDLK_RETURN || sym == SDLK_KP_ENTER) && (!inhelp || (flags & QUICKSKIP))) {
     if(inhelp) popScreen();
     if(geometry || purehepta) { 
-      restartGame(0, false); 
+      popGame();
       if(!(flags & QUICKGEO)) return true; 
       }
     if(flags & FINALSLIDE) return true;
@@ -92,7 +92,7 @@ bool handleKeyTour(int sym, int uni) {
     }
   if(sym == SDLK_BACKSPACE) {
     if(geometry || purehepta) { 
-      restartGame(0, false); 
+      popGame();
       if(!(flags & QUICKGEO)) return true;
       }
     if(currentslide == 0) { slidehelp(); return true; }
@@ -141,7 +141,7 @@ bool handleKeyTour(int sym, int uni) {
       }
     
     if(geometry || purehepta) {
-      restartGame(0, false); 
+      popGame();
       presentation(pmGeometryReset);
       return true;
       }
@@ -253,7 +253,7 @@ namespace ss {
     keyhandler = [] (int sym, int uni) {
       if(uni >= 'a' && uni < 'a' + sssize) {
         if(geometry || purehepta) {
-          restartGame(0, false); 
+          popGame();
           presentation(pmGeometryReset);
           }
         if(slides != wts) {
@@ -726,7 +726,7 @@ slide default_slides[] = {
         }
       if(mode == 3) {
         shmup::clearMonsters();
-        restartGame(0, false);
+        popGame();
         }    
       }
     },

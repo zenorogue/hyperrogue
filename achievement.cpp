@@ -1,7 +1,7 @@
 // Hyperbolic Rogue -- achievements
 // Copyright (C) 2011-2016 Zeno Rogue, see 'hyper.cpp' for details
 
-#define NUMLEADER 70
+#define NUMLEADER 72
 
 #define SCORE_UNKNOWN (-1)
 #define NO_SCORE_YET (-2)
@@ -60,6 +60,8 @@ const char* leadernames[NUMLEADER] = {
   "Green Grass", // 67
   "Spinel", // 68
   "Orb Strategy Score", // 69
+  "Real time to Win-OS", // 70
+  "Turns to Win-OS", // 71
   };
 
 #define LB_STATISTICS 62
@@ -633,8 +635,11 @@ void achievement_victory(bool hyper) {
 
   int t = savetime + time(NULL) - timerstart;
   
-  int ih1 = hyper ? 15 : shmup::on ? (numplayers() > 1 ? 45 : 29) : 13;
-  int ih2 = hyper ? 16 : shmup::on ? 30 : 14;
+  if(hyper && shmup::on) return;
+  if(hyper && inv::on) return;
+  
+  int ih1 = hyper ? 15 : inv::on ? 70 : shmup::on ? (numplayers() > 1 ? 45 : 29) : 13;
+  int ih2 = hyper ? 16 : inv::on ? 71 : shmup::on ? 30 : 14;
   
   int improved = 0;
   if(currentscore[ih1] == NO_SCORE_YET || currentscore[ih2] == NO_SCORE_YET)

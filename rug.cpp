@@ -718,7 +718,7 @@ namespace rug {
     bool renderonce = false;
     bool rendernogl = true;
     int texturesize = 512;
-    double scale = 1.0f;
+    ld scale = 1.0f;
 }
 
 #endif

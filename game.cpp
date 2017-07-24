@@ -4380,7 +4380,7 @@ bool swordAttack(cell *mt, eMonster who, cell *c, int bb) {
     drawParticles(c, winf[c->wall].color, 16);
     c->wall = waNone;
     }
-  if(canAttack(mt, who, c, m, AF_SWORD)) {
+  if(!peace::on && canAttack(mt, who, c, m, AF_SWORD)) {
     markOrb(bb ? itOrbSword2: itOrbSword);
     int k = tkills();
     attackMonster(c, AF_ORSTUN | AF_MSG | AF_SWORD, who);
@@ -4398,7 +4398,6 @@ void swordAttackStatic() {
   }
 
 void stabbingAttack(cell *mf, cell *mt, eMonster who, int bonuskill) {
-  if(peace::on) return;
   int numsh = 0, numflail = 0, numlance = 0, numslash = 0;
   
   int backdir = neighborId(mt, mf);
@@ -4416,6 +4415,8 @@ void stabbingAttack(cell *mf, cell *mt, eMonster who, int bonuskill) {
     achievement_count("SLASH", numbb, 0);
     numslash += numbb;
     }
+
+  if(peace::on) return;
   
   for(int t=0; t<mf->type; t++) {
     cell *c = mf->mov[t];
@@ -4815,7 +4816,7 @@ void specialMoves() {
       c->stuntime = 1;
       }
     
-    else if(m == moPyroCultist) {
+    else if(m == moPyroCultist && !peace::on) {
       bool shot = false;
       bool dont_approach = false;
       // smaller range on the sphere
@@ -6013,7 +6014,7 @@ void knightFlavorMessage(cell *c2) {
   else if(msgid  == 2 && !tooeasy) {
     addMessage(XLAT("\"The Holy Grail is in the center of the Round Table.\""));
     }
-  else if(msgid == 3) {
+  else if(msgid == 3 && !peace::on) {
     addMessage(XLAT("\"I enjoy watching the hyperbug battles.\""));
     }
   else if(msgid == 4) {
@@ -6022,10 +6023,10 @@ void knightFlavorMessage(cell *c2) {
   else if(msgid == 5) {
     addMessage(XLAT("\"Nice castle, eh?\""));
     }
-  else if(msgid == 6 && items[itSpice] < 10) {
+  else if(msgid == 6 && items[itSpice] < 10 && !peace::on) {
     addMessage(XLAT("\"The Red Rock Valley is dangerous, but beautiful.\""));
     }
-  else if(msgid == 7 && items[itSpice] < 10) {
+  else if(msgid == 7 && items[itSpice] < 10 && !peace::on) {
     addMessage(XLAT("\"Train in the Desert first!\""));
     }
   else if(msgid == 8) {
@@ -6037,7 +6038,7 @@ void knightFlavorMessage(cell *c2) {
   else if(msgid == 9 && rad <= lastsize) {
       addMessage(XLAT("\"There are %1 floor tiles inside our Table!\"", llts(disksize[rad])));
     }
-  else if(msgid == 10 && !items[itPirate] && !items[itWhirlpool]) {
+  else if(msgid == 10 && !items[itPirate] && !items[itWhirlpool] && !peace::on) {
     addMessage(XLAT("\"Have you tried to take a boat and go into the Ocean? Try it!\""));
     }
   else if(msgid == 11 && !princess::saved) {
@@ -6046,7 +6047,7 @@ void knightFlavorMessage(cell *c2) {
   else if(msgid == 12 && !princess::saved) {
     addMessage(XLAT("\"I wonder what was there...\""));
     }
-  else if(msgid == 13) {
+  else if(msgid == 13 && !peace::on) {
     addMessage(XLAT("\"Be careful in the Rose Garden! It is beautiful, but very dangerous!\""));
     }
   else if(msgid == 14) {

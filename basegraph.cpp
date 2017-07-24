@@ -1,6 +1,6 @@
-int backcolor = 0;
-int bordcolor = 0;
-int forecolor = 0xFFFFFF;
+unsigned backcolor = 0;
+unsigned bordcolor = 0;
+unsigned forecolor = 0xFFFFFF;
 
 int utfsize(char c) {
   unsigned char cu = c;

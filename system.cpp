@@ -984,17 +984,27 @@ namespace gamestack {
   
   };
 
+void popGame() {
+  if(gamestack::pushed()) {
+    gamestack::pop();
+    }
+  }
+
+void popAllGames() {
+  while(gamestack::pushed()) {
+    gamestack::pop();
+    }
+  }
+
 void restartGame(char switchWhat, bool push) {
   popScreenAll();
   DEBB(DF_INIT, (debugfile,"restartGame\n"));
   
+  
   if(push)
     gamestack::push();
-  else if(gamestack::pushed()) {
-    gamestack::pop();
-    return;
-    }
   else {
+    popAllGames();
     achievement_final(true);
   #if CAP_SAVE
     saveStats();

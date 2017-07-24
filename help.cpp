@@ -36,11 +36,7 @@ string buildHelpText() {
     
   if(inv::on)
   h += XLAT(
-    "You are playing in the Orb Strategy Mode. Collecting treasure "
-    "gives you access to magical Orb powers. In this mode, "
-    "unlocking requirements are generally higher, and "
-    "several quests and lands "
-    "give you extremely powerful Orbs of the Mirror.\n"
+    inv::helptext
     );
   else
   h += XLAT(
@@ -345,13 +341,14 @@ string generateHelpForMonster(eMonster m) {
   
   if(m == moPlayer) {
 #if CAP_TOUR
-    if(tour::on)
+    if(tour::on || peace::on)
       return s+XLAT(
         "A tourist from another world. They mutter something about the 'tutorial', "
         "and claim that they are here just to learn, and to leave without any treasures. "
         "Do not kill them!"
         );
 #endif
+
     s += XLAT(
         "This monster has come from another world, presumably to steal our treasures. "
         "Not as fast as an Eagle, not as resilient as the guards from the Palace, "

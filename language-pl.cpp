@@ -5778,7 +5778,7 @@ S(
   "i Pałac (idź za myszą). Można też zwiedzić kilka "
   "innych miejsc.")
 
-S("puzzles and exploration", "hádanky a zkoumání")
+S("puzzles and exploration", "zagadki i zwiedzanie")
 
 S("cheats", "oszustwa")
 S("help for keyboard user", "pomoc dla użytkowników klawiatury")
@@ -5786,6 +5786,13 @@ S("mark heptagons", "oznacz siedmiokąty")
 
 S("Collect as many Dodecahedra as you can, then return here!",
   "Zbierz jak najwięcej Dwunastościanów i tu wróć!")
+
+S("reset all configuration", "reset konfiguracji")
+S("Are you sure?", "Czy na pewno?")
+S("yes, and delete the config file", "tak, i skasuj plik konfiguracyjny")
+S("yes", "tak")
+S("cancel", "anuluj")
+S("reset the special game modes", "zresetuj specjalne tryby gry")
   
 #undef Orb
 

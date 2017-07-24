@@ -2301,6 +2301,8 @@ void moveMonster(monster *m, int delta) {
     }
   else if(m->type == moMetalBeast || m->type == moMetalBeast2) 
     step /= 2;
+  else if(m->type == moTortoise && peace::on)
+    step = 0;
   else if(m->type == moTortoise)
     step /= 3;
   else if(isBull(m->type))

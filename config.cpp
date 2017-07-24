@@ -50,6 +50,7 @@ struct supersaver {
   virtual string save() = 0;
   virtual void load(const string& s) = 0;
   virtual bool dosave() = 0;
+  virtual void reset() = 0;
   };
 
 vector<shared_ptr<supersaver>> savers;
@@ -58,6 +59,7 @@ template<class T> struct dsaver : supersaver {
   T& val;
   T dft;
   bool dosave() { return val != dft; }
+  void reset() { val = dft; }
   dsaver(T& val) : val(val) { }
   };
 
@@ -78,6 +80,7 @@ template<class T> struct saverenum : supersaver {
   T& val;
   T dft;
   bool dosave() { return val != dft; }
+  void reset() { val = dft; }
   saverenum<T>(T& v) : val(v) { }
   string save() { return its(val); }
   void load(const string& s) { val = (T) atoi(s.c_str()); }
@@ -234,18 +237,16 @@ void initConfig() {
   addsaver(geom3::highdetail, "3D highdetail");
   addsaver(geom3::middetail, "3D middetail");
 
-#if CAP_RUG
   addsaver(rug::renderonce, "rug-renderonce");
   addsaver(rug::rendernogl, "rug-rendernogl");
   addsaver(rug::texturesize, "rug-texturesize");
   addsaver(rug::scale, "rug-scale");
-#endif
 
   addsaverenum(pmodel, "used model");
   addsaver(polygonal::SI, "polygon sides");
   addsaver(polygonal::STAR, "polygon star factor");
   addsaver(polygonal::deg, "polygonal degree");
-  addsaver(conformal::includeHistory, "include history"); // check!
+  addsaver(conformal::autobandhistory, "include history"); // check!
   addsaver(conformal::lvspeed, "lineview speed");
   
   addsaver(polygonal::maxcoef, "polynomial degree");
@@ -280,8 +281,38 @@ void initConfig() {
   addsaver(chaosmode, "mode-chaos");
   addsaver(inv::on, "mode-Orb Strategy");
   addsaver(purehepta, "mode-heptagonal", false);
+  addsaver(peace::on, "mode-peace");
+  
+  addsaver(backcolor, "color:background");
+  addsaver(forecolor, "color:foreground");
+  addsaver(bordcolor, "color:borders");
+  addsaver(viewdists, "expansion mode");
   
   shmup::initConfig();  
+  }
+
+void resetModes() {
+  popAllGames();
+  if(shmup::on) restartGame('s');
+  if(inv::on) restartGame('i');
+  if(chaosmode) restartGame('C');
+  if(purehepta) restartGame('7');
+  if(peace::on) restartGame('P');
+  if(tour::on) restartGame('T');
+  if(yendor::on) restartGame('y');
+  if(tactic::on) restartGame('t');
+  if(randomPatternsMode) restartGame('r');
+  if(geometry != gNormal) { targetgeometry = gNormal; restartGame('g'); }
+  }
+  
+void resetConfig() {
+  dynamicval<int> rx(vid.xres, 0);
+  dynamicval<int> ry(vid.yres, 0);
+  dynamicval<int> rf(vid.fsize, 0);
+  dynamicval<bool> rfs(vid.full, false);
+  for(auto s: savers) 
+    if(s->name.substr(0,5) != "mode-")
+      s->reset();
   }
 
 void saveConfig() {
@@ -353,23 +384,21 @@ void loadOldConfig(FILE *f) {
 
   shmup::loadConfig(f);
 
-#if CAP_RUG
   aa = rug::renderonce; bb = rug::rendernogl; cc = purehepta; dd = chaosmode; 
   int ee = vid.steamscore;
   double rs = rug::scale;
   err=fscanf(f, "%d%d%d%d%lf%d%d", &aa, &bb, &rug::texturesize, &cc, &rs, &ee, &dd);
   rug::renderonce = aa; rug::rendernogl = bb; purehepta = cc; chaosmode = dd; vid.steamscore = ee;
   rug::scale = rs;
-#endif
 
-  aa=conformal::includeHistory;
+  aa=conformal::autobandhistory;
   double ps = polygonal::STAR, lv = conformal::lvspeed;
   int pmb = pmodel;
   err=fscanf(f, "%d%d%lf%d%d%lf",
     &pmb, &polygonal::SI, &ps, &polygonal::deg,
     &aa, &lv);
   pmodel = eModel(pmb);
-  conformal::includeHistory = aa; polygonal::STAR = ps; conformal::lvspeed = lv;
+  conformal::autobandhistory = aa; polygonal::STAR = ps; conformal::lvspeed = lv;
   
   aa=conformal::autoband; bb=conformal::autobandhistory; cc=conformal::dospiral;    
   err=fscanf(f, "%d%d%d%d%d%d", 
@@ -678,6 +707,8 @@ void switchGL() {
 #endif
   }
 
+void resetConfigMenu();
+
 void showBasicConfig() {
   gamescreen(3);
   const char *axmodes[5] = {"OFF", "auto", "light", "heavy", "arrows"};
@@ -714,8 +745,8 @@ void showBasicConfig() {
   if(CAP_SHMUP && !ISMOBILE)
     dialog::addSelItem(XLAT("configure keys/joysticks"), "", 'p');
 
-  showAllConfig();
-
+  dialog::addItem(XLAT("reset all configuration"), 'R');
+  
   if(lang() != 0) {
     string tw = "";
     string s = XLAT("TRANSLATIONWARNING");
@@ -765,8 +796,9 @@ void showBasicConfig() {
       }
 #endif
     
-    if(xuni == 'r') vid.revcontrol = !vid.revcontrol;
+    if(uni == 'r') vid.revcontrol = !vid.revcontrol;
     if(xuni == 'd') vid.drawmousecircle = !vid.drawmousecircle;
+    if(uni == 'R') pushScreen(resetConfigMenu);
   
   #if ISSTEAM
     if(xuni == 'l') vid.steamscore = vid.steamscore^1;
@@ -1087,3 +1119,32 @@ void showCustomizeChar() {
     };
   }
 
+void resetConfigMenu() {
+  dialog::init(XLAT("reset all configuration"));
+  dialog::addInfo("Are you sure?");
+  dialog::addItem("yes, and delete the config file", 'd');
+  dialog::addItem("yes", 'y');
+  dialog::addItem("cancel", 'n');
+  dialog::addItem("reset the special game modes", 'r');
+  dialog::display();
+  keyhandler = [] (int sym, int uni) {
+    dialog::handleNavigation(sym, uni);
+
+    if(uni == 'd') { 
+      resetConfig();
+      unlink(conffile);
+      popScreen();
+      }
+    else if(uni == 'y') {
+      printf("reseting config\n");
+      resetConfig();
+      printf("config reset\n");
+      popScreen();
+      }
+    else if(uni == 'r') 
+      resetModes();
+    else if(uni == 'n' || doexiton(sym, uni)) 
+      popScreen();
+    
+    };
+  }

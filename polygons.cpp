@@ -635,7 +635,7 @@ hpcshape
   shDogStripes,
   shPBody, shPSword, shPKnife,
   shHumanFoot, shHumanLeg, shHumanGroin, shHumanNeck, shSkeletalFoot, shYetiFoot,
-  shMagicSword, shSeaTentacle, shKrakenHead, shKrakenEye, shKrakenEye2,
+  shMagicSword, shMagicShovel, shSeaTentacle, shKrakenHead, shKrakenEye, shKrakenEye2,
   shArrow,
   shPHead, shPFace, shGolemhead, shHood, shArmor, 
   shAztecHead, shAztecCap,
@@ -1585,6 +1585,9 @@ void buildpolys() {
 
   if(purehepta) bshape(shMagicSword, PPR_MAGICSWORD, 1, 243);
   else bshape(shMagicSword, PPR_MAGICSWORD, 1, 244);
+
+  if(purehepta) bshape(shMagicShovel, PPR_MAGICSWORD, 1, 333);
+  else bshape(shMagicShovel, PPR_MAGICSWORD, 1, 333);
   
   bshape(shBead0, 20, 1, 250);
   bshape(shBead1, 20, 1, 251);
@@ -2699,6 +2702,8 @@ NEWSHAPE, 330, 1, 2, 0.262597,0.018558, -0.261563,0.016306,
 NEWSHAPE, 331, 1, 1, 0.148337,0.215535, 0.267624,0.150567, 0.262973,0.019662, 0.033981,0.019835, 
 // 0 0 1 [000000]
 NEWSHAPE, 332, 6, 2, -0.016778,-0.008267, -0.261607,-0.011992, 
+
+NEWSHAPE, 333, 1, 2, 0.309841,0.030742, 0.317580,0.053457, 0.334636,0.058055, 0.348174,0.020510, 0.376877,0.022300, 0.687421,0.025648, 0.689655,0.067551, 0.764187,0.063670, 0.857074,0.041713, 0.877970,0.009947,
 
 NEWSHAPE
 };

@@ -395,21 +395,21 @@ namespace mapeditor {
   void showDrawEditor();
   }
 
-#if CAP_RUG
 namespace rug {
   extern bool rugged;
   extern bool renderonce;
   extern bool rendernogl;
   extern int  texturesize;
   extern ld   scale;
+#if CAP_RUG
   void show();
   void init();
   void close();
   void actDraw();
   void select();
   void buildVertexInfo(cell *c, transmatrix V);
-  }
 #endif
+  }
 
 #define HASLINEVIEW
 
@@ -1045,7 +1045,7 @@ extern cell *recallCell;
 extern eLand cheatdest;
 void cheatMoveTo(eLand l);
 
-extern int backcolor, bordcolor, forecolor;
+extern unsigned backcolor, bordcolor, forecolor;
 
 extern bool overgenerate;
 void doOvergenerate();

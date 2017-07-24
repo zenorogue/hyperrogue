@@ -287,7 +287,7 @@ void handleKeyNormal(int sym, int uni) {
     if(sym == 'u' || sym == 'e' || sym == SDLK_KP9) movepckeydir(7);
     }
 
-#if !ISPANDORA
+#if ISPANDORA
   if(DEFAULTCONTROL) {
     if(sym == SDLK_RIGHT) movepckeydir(0);
     if(sym == SDLK_LEFT) movepckeydir(4);

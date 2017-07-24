@@ -980,7 +980,7 @@ int buildIvy(cell *c, int children, int minleaf) {
       if(children && !child) 
         child = c->mov[i], leafchild = buildIvy(c->mov[i], children-1, 5);
       else 
-        c->mov[i]->monst = (leaf++) ? moIvyWait : moIvyHead,
+        c->mov[i]->monst = (leaf++ || peace::on) ? moIvyWait : moIvyHead,
         c->mov[i]->mondir = c->spn(i);
       }
     }
@@ -5349,7 +5349,7 @@ void setdist(cell *c, int d, cell *from) {
             if(c->mov[t]->wall == waColumn)
               c->mov[t]->item = itNone;
             }
-          if(buildIvy(c, 0, 3)) c->item = itStatue;
+          if(buildIvy(c, 0, 3) && !peace::on) c->item = itStatue;
           }
         }
       if(c->land == laTemple) {
@@ -5371,7 +5371,7 @@ void setdist(cell *c, int d, cell *from) {
             c->monst = hrand(3) ? moCultist : moPyroCultist;
           else if(hrand(100000) < -d)
             c->monst = moCultistLeader;
-          else if(hrand(5000) < 250)
+          else if(hrand(5000) < 250 && !peace::on)
             c->item = itGrimoire;
           else if(hrand(5000) < 10 && (chaosmode ? items[itGrimoire] >= 10 : -d > TEMPLE_EACH * 10) && !peace::on && !inv::on)
             c->item = itOrbDragon;
