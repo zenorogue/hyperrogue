@@ -330,6 +330,7 @@ int* killtable[] = {
     &kills[moBat], &kills[moReptile],
     &kills[moHerdBull], &kills[moSleepBull], &kills[moRagingBull],
     &kills[moGadfly], &kills[moButterfly],
+    &kills[moNarciss], &kills[moMirrorSpirit],
     NULL
     };
 
