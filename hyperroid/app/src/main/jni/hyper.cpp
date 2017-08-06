@@ -166,6 +166,7 @@ Java_com_roguetemple_hyperroid_HyperRogue_initGame(MOBPAR_FORMAL) {
   if(gamerunning) return 1;
   gamerunning = true;  
   initAll();
+  if(showstartmenu) pushScreen(showStartMenu);
   uploadAll(MOBPAR_ACTUAL);
   return 0;
   }

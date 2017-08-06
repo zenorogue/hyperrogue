@@ -736,11 +736,11 @@ void showStartMenu() {
   dialog::addInfo(XLAT("use your Orbs in tough situations"));
 #endif
 
-#if CAP_SHMUP
+#if CAP_SHMUP_GOOD
   dialog::addBreak(100);
   dialog::addBigItem(XLAT("shoot'em up mode"), 's');
   dialog::addInfo(XLAT("continuous spacetime"));
-#if HAVE_ACHIEVEMENTS
+#ifdef HAVE_ACHIEVEMENTS
   dialog::addInfo(XLAT("(most achievements are not available)"));
 #endif
 #endif
