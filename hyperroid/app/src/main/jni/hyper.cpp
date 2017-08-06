@@ -27,7 +27,8 @@ void gdpush(int t);
 void shareScore(MOBPAR_FORMAL);
 
 const char *scorefile, *conffile;
-string levelfile, picfile;
+#include <string>
+std::string levelfile, picfile;
 
 bool settingsChanged = false;
 
