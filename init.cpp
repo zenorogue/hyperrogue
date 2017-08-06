@@ -162,7 +162,7 @@
 #endif
 
 #ifndef CAP_SHMUP_GOOD
-#define CAP_SHMUP (!ISMOBWEB)
+#define CAP_SHMUP_GOOD (!ISMOBWEB)
 #endif
 
 #if ISMOBILE
