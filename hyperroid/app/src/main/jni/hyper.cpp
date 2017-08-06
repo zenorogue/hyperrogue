@@ -27,6 +27,7 @@ void gdpush(int t);
 void shareScore(MOBPAR_FORMAL);
 
 const char *scorefile, *conffile;
+string levelfile, picfile;
 
 bool settingsChanged = false;
 
@@ -137,6 +138,8 @@ Java_com_roguetemple_hyperroid_HyperRogue_setFilesDir(MOBPAR_FORMAL, jstring dir
   sscorefile = nativeString; sscorefile += "/hyperrogue.log";
   sconffile = nativeString; sconffile += "/hyperrogue.ini";
   scachefile = nativeString; scachefile += "/scorecache.txt";
+  levelfile = nativeString; levelfile += "/hyperrogue.lev"; 
+  picfile = nativeString; picfile += "/hyperrogue.pic"; 
   scorefile = sscorefile.c_str();
   conffile = sconffile.c_str();
   chmod(scorefile, 0777);
