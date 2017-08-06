@@ -435,6 +435,7 @@ void showMission() {
     else
       dialog::addBreak(200);
     dialog::addItem(XLAT("main menu"), 'v');
+    dialog::addItem("continue", SDLK_ESCAPE);
 #endif
     }
   else {
