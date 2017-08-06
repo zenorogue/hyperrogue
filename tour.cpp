@@ -78,7 +78,7 @@ bool handleKeyTour(int sym, int uni) {
   bool inhelp = cmode & sm::HELP;
   int flags = slides[currentslide].flags;
   if((sym == SDLK_RETURN || sym == SDLK_KP_ENTER) && (!inhelp || (flags & QUICKSKIP))) {
-    if(inhelp) popScreen();
+    popScreenAll();
     if(geometry || purehepta) { 
       popGame();
       if(!(flags & QUICKGEO)) return true; 
@@ -99,6 +99,7 @@ bool handleKeyTour(int sym, int uni) {
     presentation(pmStop);
     currentslide--;
     if(inhelp) popScreen(), slidehelp();
+    else popScreenAll();
     presentation(pmStart);
     return true;
     }
