@@ -2189,6 +2189,9 @@ S("configure player 1", "настройки игрока 1")
 S("configure player 2", "настройки игрока 2")
 S("configure player 3", "настройки игрока 3")
 S("configure player 4", "настройки игрока 4")
+S("configure player 5", "настройки игрока 5")
+S("configure player 6", "настройки игрока 6")
+S("configure player 7", "настройки игрока 7")
 S("configure panning", "настройки прокрутки")
 S("configure joystick axes", "настройка джойстика")
 S("continue playing", "продолжить игру")
@@ -5590,5 +5593,476 @@ S(
   "Нажмите '5', чтобы выйти из режима Руководства."
   )
 
+// Orb Strategy mode
+S("Orb Strategy mode", "режим стратегии сфер")
+ 
+S(
+  "You are playing in the Orb Strategy Mode. Collecting treasure "
+  "gives you access to magical Orb powers. In this mode, "
+  "unlocking requirements are generally higher, and "
+  "several quests and lands "
+  "give you extremely powerful Orbs of the Mirror.\n",
+ 
+  "Ты играешь в режим стратегии сфер. Собирай сокровища и получай "
+  "доступ к силе магических сфер. В этом режиме условия "
+  "открытия доступа, как правило, выше, а некоторые земли и миссии "
+  "дадут тебе очень сильные Сферы зеркала.\n")
+ 
+S("The treasure gives your magical powers!", "Сокровище дало тебе магическую силу!")
+S("Press 'i' to access your magical powers.", "Нажми 'i' для доступа к своим магическим силам.")
+S("inventory", "твои сферы")
+S("mirror what?", "что отразить?")
+S("Which orb to use?", "Какую сферу использовать?")
+S("Unlocked by: %1 in %2", "Разблокирована: %1 %abl2")
+S(" (next at %1)", " (следующий при %1)")
+S(" (next at %1 to %2)", " (следующий при %1 в %2)")
+S("Number of uses left: %1", "Осталось применений: %1")
+S("You mirror %the1.", "Ты отразил %a1.")
+S("You need to stand next to a magic mirror or cloud to use %the1.",
+  "Ты должен стоять рядом с магическим зеркалом или облаком, чтобы использовать %a1.")
+S("Each orb type can be mirrored only once.", "Каждый тип сфер может быть отражён только один раз.")
+ 
+S(
+  "\n\nIn the Orb Strategy Mode, Orbs of Yendor appear in Hell after "
+  "you collect 25 Demon Daisies in Hell, in Crossroads/Ocean after you collect 50, "
+  "and everywhere after you collect 100.",
+ 
+  "\n\nВ режим стратегии сфер Сфера Йендора появляется в Аду, "
+  "когда ты соберёшь 25 Адских Ромашек, на Перекрёстке и а Океана, когда ты соберёшь 50, "
+  "и везде, когда ты соберёшь 100."
+  );  
+ 
+S(
+  "\n\nIn the Orb Strategy Mode, dead orbs are available once you collect "
+  "10 Necromancer Totems in the Graveyard.",
+ 
+  "\n\nВ режиме стратегии сфер Мёртвые сферы доступны после сбора "
+  "десяти Тотемов некроманта на Кладбище.")
+ 
+S(
+  "\n\nIn the Orb Strategy Mode, Orbs of Safety can be gained by "
+  "collecting Phoenix Feathers in the Land of Eternal Motion. "
+  "You can also find unlimited Orbs of Safety in the Crossroads "
+  "and the Ocean (after collecting 25 Phoenix Feathers) "
+  "and in the Prairie.",
+ 
+  "\n\nВ режиме стратегии сфер Сферу безопасности можно получить, "
+  "Перья феникса в Земле вечного движения. "
+  "Также можно найти неограниченные Сферы вечного движения на Перекрёстке "
+  "и в Океане (когда соберёшь 25 Перьев феникса) и в Прерии."
+  )
+ 
+S(
+  "\n\nCollect %the1 to gain an extra Orb of the Mirror. "
+  "You can gain further Orbs of the Mirror by collecting 2, 4, 8...",
+ 
+  "\n\nСобери %a1, чтобы получить дополнительную Сферу зеркала. "
+  "Ты получишь следующую сферу, когда соберёшь 2, 4, 8..."
+  )
+ 
+S(
+  "\n\nIn the Orb Strategy Mode, the Orb of Luck also "
+  "significantly increases the frequency of Great Walls, Crossroads IV, "
+  "and sub-lands.",
+ 
+  "\n\nВ режиме стратегии сфер Сфера удачи также заметно "
+  "увеличивает частоту Великих стен, Перекрёстков IV "
+  "и под-земель.")
+ 
+S("\n\nIn the Orb Strategy Mode, each 25 Necromancer's Totems "
+  "you are given a random offensive Orb.",
+ 
+  "\n\n режиме стратегии сфер каждый 25 Тотемов некроманта "
+  "дают тебе случайную атакующую сферу.")
+ 
+S(
+  "Use Orb of the Mirror to gain copies of one of your Orbs; "
+  "mirroring weaker Orbs usually yields more copies. "
+  "It can only be used once per Orb type, "
+  "and only when you are next to a mirror.",
+ 
+  "Используй Сферу зеркала, чтобы получить копии одной из твоих сфер; "
+  "отражение слабых сфер обычно даёт больше копий. "
+  "Ты можешь отражать каждый тип сферы лишь один раз, "
+  "и только когда ты рядом с зеркалом.")
+ 
+S("Uses to gain: %1", "Получишь применений: %1")
+S("already mirrored", "уже была отражена")
+ 
+N("your orbs", GEN_F, "Твои Сферы", "Твои Сферы", "Твои Сферы", "Твоим Сферами")
+S("Click this to see your orbs.", "Нажми, чтобы увидеть твои Сферы.")                                                  
+ 
+// peaceful mode
+S("configure keys/joysticks", "настройки клавиш/джойстика")
+S("peaceful mode", "мирный режим")
+ 
+// config changes
+S("Press F5 or 'o' to try again!", "Нажми F5 или 'o', чтобы попробовать ещё раз!")  
+S("aura brightness", "яркость ауры")
+S("aura smoothening factor", "сглаживание ауры")
+S("graphics configuration", "настройка графики")
+S("special display modes", "специальные режимы отображения")
+S("openGL mode", "режим OpenGL")
+S("anti-aliasing", "anti-aliasing")
+S("line width", "широта линии")
+S("configure panning and general keys", "настроить панораму и общие клавиши")
+ 
+S("\n\nHint: use 'm' to toggle cells quickly",
+  "\n\nПодсказка: используй 'm', чтобы быстро переключать клетки");
+ 
+// cell pattern names
+S("football", "футбол")
+S("dark rainbow landscape", "тёмная радуга")
+S("field pattern", "узор поля")
+S("field pattern C", "узор поля C")
+S("field pattern D", "узор поля D")
+S("field pattern N", "узор поля N")
+S("field pattern S", "узор поля S")
+S("four triangles", "четыре треугольника")
+S("big triangles: rings", "большие треугольники: кольца")
+ 
+// missing for the Tutorial
+S("tutorial", "руководство")
+S("This Orb is not compatible with the Tutorial.", "Эта сфера не совместима с Руководством.")
+ 
+// local scores
+S("turns", "ходы")
+S("cells", "клетки")
+S("sort", "сортируй")
+S("choose", "выбор")
+S("play", "играй")
+ 
+// draw editor
+S("autochoose", "автовыбор")
+S("c = choose", "c = выбор")
+S("b = switch auto", "b = автопереключение")
+ 
+// mission screen hints
+ 
+S(
+  "If you collect too many treasures in a given land, it will become "
+  "extremely dangerous. Try other lands once you have enough!",
+  "Если ты соберёшь слишком много сокровищ в одной земле, она станет "
+  "весьма опасной. Попробуй другую землю, когда наберёшь достаточно сокровищ здесь!");
+ 
+S(
+  "Remember that you can right click almost anything for more information.",
+  "Помни, что правая кнопка мыши даст информацию практически обо всём.")
+ 
+S("Want to understand the geometry in HyperRogue? Try the Tutorial!",
+  "Хочешь понять геометрию в HyperRogue? Воспользуйся Руководством!");
+ 
+S(
+  "Collecting 25 treasures in a given land may be dangerous, "
+  "but allows magical Orbs of this land to appear in other places!",
+  "Собирать 25 в одной земле довольно опасно, но это позволяет Сферам "
+  "из этой земли появляться в других местах!")
+ 
+S(
+  "Press ESC to view this screen during the game.",
+  "Нажми ESC, чтобы увидеть этот экран во время игры.")
+ 
+S("The 'world overview' shows all the lands in HyperRogue.",
+  "'Обзор мира' покажет все земли в HyperRogue."
+  )
+ 
+S("Press 'o' to see all the lands in HyperRogue.",
+  "Нажми 'o', чтобы увидеть все земли в HyperRogue.")
+ 
+S(
+  "Want another type of game? Want more challenge?\n"
+  "HyperRogue has many special modes and challenges that "
+  "significantly change the gameplay. Try them!",
+ 
+  "Хочешь другой тип игры? Хочешь посложнее?\n"
+  "HyperRogue содержит много специальных режимов, "
+  "заметно меняющих игру. Попробуй их!")
+ 
+S(
+  "Hyperbolic geometry can be shown in many ways.",
+  "На гиперболическую геометрию можно смотреть с разных сторон.")
+ 
+S(
+  "You do not want to lose the game from a single mistake?\n"
+  "Do you want to use the Orbs strategically?\n"
+  "Try the Orb Strategy mode!",
+ 
+  "Не хочешь проигрывать из-за одной ошибки?\n"
+  "Хочешь научить аккуратно использовать Сферы?\n"
+  "Попробуй режим стратегии сфер!")
+ 
+S(
+  "Do you think you are playing on a ball? "
+  "This is far from the truth!\n",
+ 
+  "Думаешь, ты играешь на сфере? Как же это далеко от правды!\n")
+ 
+S(
+  "Did you know that the path you take during the game "
+  "is usually very close to a straight line?\n",
+ 
+  "Ты знал, что путь, который ты проходишь за игру, "
+  "обычно очень близок к прямой линии?")
+ 
+S("Show me!", "Покажи!")
+ 
+S(
+  "You are %1 cells away from the starting point, or "
+  "the place where you used an Orb of Safety last time. "
+  "There are %2 such cells.\n",
+ 
+  "Ты на расстоянии %1 клеток от начала пути или "
+  "от того места, где ты в последний раз использовал Сферу безопасности. "
+  "Всего таких клеток %2.\n")
+ 
+S("about ", "примерно ")
+S(" (%1 more digits)", " (ещё цифр: %1)")
+ 
+S("see how it ended", "смотри, как всё закончилось")
+ 
+// other missing/new things
+S("\n\nOrb unlocked: %1", "\n\nОткрыта сфера: %1")
+S("Orb unlocked: %1", "Открыта сфера: %1")
+S("\n\nSecondary orb: %1", "\n\nДополнительная сфера: %1")
+S(" to submerge", " на погружение")
+S(" to surface", " на поверхность")
+S("%The1 says, \"not this place, it looks even worse...\"",
+  "%1 сказал, \"не это место, оно выглядит ещё хуже...\"")
+S("torus", "тор")
+S(" (click to use)", " (нажми, чтобы использовать)")
+N("Hall of Mirrors", GEN_O, "Зеркальный зал", "Зеркальные залы", "Зеркальный зал", "в Зеркальном зале")
+Orb("the Mirror", "Зеркала")
+N("Reflection", GEN_N, "Отражение", "Отражения", "Отражение", "в Отражении")
+N("mirror wall", GEN_F, "зеркальная стена", "зеркальные стены", "зеркальную стену", "зеркальной стеной")
+ 
+S("This would only move you deeper into the trap!",
+  "Это только уведёт тебя глубже в ловушку!");
+ 
+S("You swing your sword at the mirror.", "Ты размахиваешь мечом в сторону зеркала.");
+N("Mimic", GEN_M, "Мимик", "Мимики", "Мимика", "Мимиком")
+N("Narcissist", GEN_M, "Нарциссист", "Нарциссисты", "Нарциссиста", "Нарциссистом")
+N("Mirror Spirit", GEN_M, "Зеркальный дух", "Зеркальные духи", "Зеркального духа", "Зеркальным духом")
+ 
+S("This person loves to look at their own reflection in the mirror. "
+  "He believes himself to be one of the most important creatures in this world, "
+  "and hates those who do not admire him.",
+ 
+  "Этот человек любит глядеть на своё отражение в зеркале. "
+  "Он верит, что он -- один из самых важных в существ этого мира, "
+  "и ненавидит любого, кто не восхищается им.")
+     
+S(
+    "A long time ago a mighty warrior was guarding the mirrors from being broken. "
+    "While this warrior is no longer alive, his reflections have gained life of "
+    "their own, and will punish the intruders.\n\n"
+    "If you attack a Mirror Spirit physically, it is delayed, but not destroyed -- "
+    "more reflections will come out of the mirror. Use Mimics to destroy them.",
+   
+    "Давным-давно могучий воин охранял эти зеркала, чтобы никто их не разбил. "
+    "Хотя воин давно мёртв, его отражения живы, "
+    "и они накажут незваных гостей.\n\n"
+    "Если ты атакуешь Зеркального духа физически, он замедляется, но не погибает -- "
+    "больше отражений выходит из зеркала. Используй Мимиков, чтобы уничтожать их.")
+ 
+// S(" (25 in the Orb Strategy mode)", " (25 в режиме стратегии сфер)")
+// S(" (50 in the Orb Strategy mode)", " (50 в режиме стратегии сфер)")
+// S(" (not in the Orb Strategy mode)", " (не в режиме стратегии сфер)")
+   
+/*
+                        "NEW_ACHIEVEMENT_8_19_NAME"     "Общая победа"
+                        "NEW_ACHIEVEMENT_8_19_DESC"     "В режиме стратегии сфер получить Сферу Йендора, Святой Грааль, Принцессу и 50 Гиперкамней."
+                       
+added to old achievements:
+"(или 25 в режиме стратегии сфер)"
+"(или 50 в режиме стратегии сфер)"
+"(не в режиме стратегии сфер)"
+ 
+These apparently have not been yet translated:
+ 
+            "NEW_ACHIEVEMENT_8_4_NAME"  "Адепт Йендора"
+            "NEW_ACHIEVEMENT_8_4_DESC"  "Закончи миссию Йендора."
+            "NEW_ACHIEVEMENT_8_5_NAME"  "Мастер ключей"
+            "NEW_ACHIEVEMENT_8_5_DESC"  "Закончи 5 миссий Йендора."
+            "NEW_ACHIEVEMENT_8_6_NAME"  "Гроссмейстер ключей"
+            "NEW_ACHIEVEMENT_8_6_DESC"  "Закончи 15 миссий Йендора."
+            "NEW_ACHIEVEMENT_8_7_NAME"  "Адепт Тактики"
+            "NEW_ACHIEVEMENT_8_7_DESC"  "Получи 1000 очков в режиме тактики."
+            "NEW_ACHIEVEMENT_8_8_NAME"  "Мастер Тактики"
+            "NEW_ACHIEVEMENT_8_8_DESC"  "Получи 5000 очков в режиме тактики."
+            "NEW_ACHIEVEMENT_8_9_NAME"  "Гроссмейстер Тактики"
+            "NEW_ACHIEVEMENT_8_9_DESC"  "Получи 15000 очков в режиме тактики."
+            "NEW_ACHIEVEMENT_8_10_NAME" "На другой стороне"
+            "NEW_ACHIEVEMENT_8_10_DESC" "Найди и собери Зелёную траву."
+ 
+*/
+ 
+// peaceful texts
+ 
+S("memory game", "игра 'память'")
+S("display hints", "показать подсказки")
+S("hyperbolic puzzles", "гиперболические паззлы")
+ 
+// missing descriptions
+ 
+S(  "A strange land filled with mirrors. "
+    "Break magic mirrors and enter clouds of mirage to "
+    "gain treasures and helpful Mimics.",
+   
+    "Странная земля, наполненная зеркалами. "
+    "Разбивай магические зеркала и входи в облака миражей, "
+    "чтобы найти сокровища и дружелюбных Мимиков.")
+ 
+S(
+  "A perfect mirror wall. It is unbreakable "
+  "and impassable "
+  "even for aethereal beings, and everything "
+  "you see inside is just an image of "
+  "the real world; you can swing your sword "
+  "at them, but that will not destroy them "
+  "in the real world. "
+  "Mirror walls reflect Mimics, lightning bolts, and "
+  "missiles perfectly.",
+ 
+  "Идеальная зеркальная стена. Невозможно сломать её или "
+  "пройти через неё, даже для эфирных существ, "
+  "и всё, что ты в ней видишь -- отражения реального мира. "
+  "Ты можешь ударить по отражению мечом, "
+  "но это не убьёт его в реальном мире. "
+  "Стена идеально отражает Мимиков, молнии и ракеты. ")
+ 
+S(
+  "In the peaceful mode, you just explore the world, "
+  "without any battles; there are also several "
+  "navigational puzzles available. In the memory game, "
+  "you have to collect as many Dodecahedra as you can, "
+  "and return to the starting point -- hyperbolic geometry "
+  "makes this extremely difficult! Other hyperbolic puzzles "
+  "include the Burial Grounds (excavate the treasures "
+  "using your magical sword), Galápagos (try to find an adult "
+  "tortoise matching the baby), Camelot (find the center of "
+  "a large hyperbolic circle), and Palace (follow the mouse). "
+  "Other places listed are for exploration.",
+ 
+  "В мирном режиме ты можешь исследовать мир без битв; "
+  "здесь также доступно несколько навигационных головоломок. "
+  "В игре 'память' ты должен собрать как можно больше додекаэдров и "
+  "вернуться в точку старта -- гиперболическая геометрия делает это "
+  "крайне сложным! Другие паззлы включают Курганы (выкопай сокровища "
+  "с помощью магического меча), Галапагосы (найди взрослую черепаху, "
+  "соответствующую маленькой черепашке), Камелот (найди центр большого "
+  "гиперболического круга) и Дворец (следуй за мышкой). "
+  "Остальные места перечислены для изучения."
+);
+ 
+S("puzzles and exploration", "головоломки и изучение")
+
+S("Zebra quotient", "фактор Зебры")
+S("field quotient", "фактор поля")
+S("mark heptagons", "пометить семиугольники")
+S("projection", "проекция")
+S("compass size", "размер компаса")
+ 
+S("Collect as many Dodecahedra as you can, then return here!",
+  "Собери как можно больше Додекаэдров и вернись сюда!")
+ 
+S("reset all configuration", "сбросить все настройки")
+S("Are you sure?", "Вы уверены?")
+S("yes, and delete the config file", "да, и удалить файл с настройками")
+S("yes", "да")
+S("cancel", "отменить")
+S("reset the special game modes", "сбросить специальные режимы")
+ 
+// extra flavor messages for the OSM
+ 
+S("You feel the presence of free saves on the Crossroads.",
+  "Ты чувствуешь, что можешь безопасно сохраниться на перекрёстке.")
+ 
+S("You feel the Orbs of Yendor nearby...",
+  "Ты чувствуешь Сферы Йендора поблизости...")
+ 
+S("You feel the Orbs of Yendor in the Crossroads...",
+  "Ты чувствуешь Сферы Йендора на перекрёстке...")
+ 
+S("You feel the Orbs of Yendor everywhere...",
+  "Ты чувствуешь Сферы Йендора везде...")
+ 
+S("You have gained an offensive power!",
+  "Ты получил атакующую силу!")
+ 
+S("A small reward for braving the Hell.",
+  "Небольшая награда для прошедших сквозь Ад.")
+ 
+S(" (mirrored)", " (отражено)")
+S(" (used %1 times)", " (использовано %1 раз)")
+S("Extras:", "Дополнительно:") // extra Orbs gained in OSM
+ 
+// cheats
+ 
+S("unlock Orbs of Yendor", "открыть Сферы Йендора")
+S("Collected the keys!", "Ключи собраны!");
+S("Saved the Princess!", "Принцесса спасена!")
+S("save a Princess", "спасти Принцессу")
+ 
+// other
+ 
+S("Note for mobiles", "Замечание для мобильных устройств")
+S(
+    "This tutorial is designed for computers, "
+    "and keys are given for all actions. It will "
+    "work without a keyboard though, although less "
+    "comfortably -- just ignore the keys "
+    "given and select options from MENU.\n\n"
+    "Select 'next slide' from MENU.",
+ 
+    "Это руководство сделано для компьютеров, "
+    "и клавиши требуются для всех "
+    "действий. Им можно пользоваться и "
+    "без клавиатуры, хотя и не так удобно -- "
+    "просто игнорируй их и выбирай действия в МЕНЮ.\n\n"
+    "Выбери в МЕНЮ 'следующий слайд'.")
+ 
+S("skip the start menu", "пропустить начальное меню")
+S("quick mouse", "быстрая мышь")
+S("This combination is known to be buggy at the moment.", "Эта комбинация пока что работает с ошибками.")
+ 
+// extra Princess texts
+ 
+S("\"I do not like butterflies. They are treacherous.\"",
+  "\"Не люблю бабочек. Они предательницы.\"")
+ 
+S("\"I hate roses.\"", "\"Ненавижу розы.\"")
+ 
+S("\"In this world there is plenty of space for everyone. We do not need wars.\"",
+  "\"В этом мире так много места для каждого. Вам не нужны войны.\"")
+ 
+S("\"Only the stupid hyperbugs do not understand this.\"",
+  "\"Только глупые гипержуки не понимают этого.\"")
+ 
+S("\"I have once talked to a Yendorian researcher... he was only interested in infinite trees.\"",
+  "\"Со мной беседовал Йендорский исследователь... его интересовали лишь бесконечные деревья.\"")
+ 
+S("\"Infinite trees are boring. I prefer other graphs.\"",
+  "\"Бесконечные деревья скучные. Предпочитаю другие графы.\"")
+ 
+// new start menu
+S("skip the start menu", "пропустить начальное меню")
+ 
+S("HyperRogue classic", "классический режим HyperRogue")
+S("explore the world, collect treasures", "изучай мир, собирай сокровища")
+S("do not get checkmated", "не дай поставить себе мат")
+S("use your Orbs in tough situations", "используй Сферы в трудных ситуациях")
+S("continuous spacetime", "непрерывное пространство и время")
+S("(most achievements are not available)", "(большинство достижений недоступно)")
+S("learn about hyperbolic geometry!", "узнай о гиперболической геометрии!")
+S("more options", "больше вариантов")
+ 
+S(
+  "A strange land filled with mirrors. Break magic mirrors and mirage clouds to "
+  "gain treasures and helpful Mimics.",
+  "Странная земля, полная зеркал. Разбивай волшебные зеркала и облака миражей, "
+  "чтобы найти сокровища и дружелюбных Мимиков."
+  )
+
 #undef Orb
+
   

@@ -37,7 +37,7 @@ bool buildBarrierNowall(cell *c, eLand l2, bool force = false);
 
 bool safety = false;
 
-eLand firstland = laIce, euclidland = laIce;
+eLand firstland = laIce, specialland = laIce;
 
 bool timerghost = true;
 eLand lastland;
@@ -1000,10 +1000,10 @@ bool grailWasFound(cell *c) {
   }
 
 int euclidAlt(short x, short y) {
-  if(euclidland == laTemple || euclidland == laClearing) {
+  if(specialland == laTemple || specialland == laClearing) {
     return max(int(x), x+y);
     }
-  else if(euclidland == laCaribbean || euclidland == laWhirlpool || euclidland == laMountain) {
+  else if(specialland == laCaribbean || specialland == laWhirlpool || specialland == laMountain) {
     return 
       min(
         min(max(int(-x), -x-y) + 3,
@@ -1011,7 +1011,7 @@ int euclidAlt(short x, short y) {
         max(int(x), int(-y)) + 3
         );
     }
-  else if(euclidland == laPrincessQuest)
+  else if(specialland == laPrincessQuest)
     return eudist(x-EPX, y-EPY);
   else return eudist(x-20, y-10);
   }
@@ -1195,42 +1195,6 @@ void describeCell(cell *c) {
   printf("D%3d", c->mpdist);
   printf("MON%3d", c->mondir);
   printf("\n");
-  }
-
-#ifdef BACKTRACE
-#include <execinfo.h>
-#endif
-
-void raiseBuggyGeneration(cell *c, const char *s) {
-
-  printf("procgen error (%p): %s\n", c, s);
-  
-  if(!errorReported) {
-    addMessage(string("something strange happened in: ") + s);
-    errorReported = true;
-    }
-  // return;
-
-#ifdef DEBUG_LANDGEN 
-  describeCell(c);
-  for(int i=0; i<c->type; i++) describeCell(c->mov[i]);
-
-  buggyGeneration = true; buggycells.push_back(c);
-
-#else
-  c->item = itBuggy;
-#endif
-
-#ifdef BACKTRACE
-  void *array[1000];
-  size_t size;
-
-  // get void*'s for all entries on the stack
-  size = backtrace(array, 1000);
-
-  // print out all the frames to stderr
-  backtrace_symbols_fd(array, size, STDERR_FILENO);
-#endif
   }
 
 void setland(cell *c, eLand l) {
@@ -1691,7 +1655,7 @@ bool noChaos(eLand l) {
   return 
     isCrossroads(l) || isCyclic(l) || isHaunted(l) || 
     l == laCaribbean || isGravityLand(l) || l == laPrincessQuest ||
-    l == laPrairie;
+    l == laPrairie || l == laHalloween;
   }
 
 eLand getNewSealand(eLand old) {
@@ -1819,7 +1783,7 @@ eLand getNewLand(eLand old) {
     tab[cnt++] = laLivefjord;
     tab[cnt++] = laMinefield;
     tab[cnt++] = laPalace;
-    if(old == laDragon) LIKELY tab[cnt++] = laReptile;
+    if(old == laDragon && items[itElixir] >= U10) LIKELY tab[cnt++] = laReptile;
     if(kills[moVizier]) tab[cnt++] = laEmerald;
     if(items[itFeather] >= U10) tab[cnt++] = laZebra;
     tab[cnt++] = laWarpCoast;
@@ -1961,7 +1925,7 @@ bool notDippingForExtra(eItem i, eItem x) {
 eLand euland[65536];
 
 eLand switchable(eLand nearland, eLand farland, eucoord c) {
-  if(euclidland == laCrossroads4) {
+  if(specialland == laCrossroads4) {
     if(hrand(15) == 0)
       return getNewLand(nearland);
     return nearland;
@@ -1984,7 +1948,7 @@ eLand switchable(eLand nearland, eLand farland, eucoord c) {
 eLand getEuclidLand(eucoord c) {
   if(euland[c]) return euland[c];
   if(c == 0 || c == eucoord(-1) || c == 1)
-    return euland[c] = euclidland;
+    return euland[c] = specialland;
   if(euland[eucoord(c-2)] && ! euland[eucoord(c-1)]) getEuclidLand(c-1);
   if(euland[eucoord(c+2)] && ! euland[eucoord(c+1)]) getEuclidLand(c+1);
   if(euland[eucoord(c-1)]) return 
@@ -2479,6 +2443,8 @@ int coastval(cell *c, eLand base) {
     }
   else if(base == laMirrored) {
     if(!inmirror(c)) return 0;
+    if(!c->landparam) return UNKNOWN;
+    return c->landparam & 255;
     }
   else {
     if(c->land == laOceanWall || c->land == laCaribbean || c->land == laWhirlpool ||
@@ -2846,10 +2812,30 @@ int getHauntedDepth(cell *c) {
   return -100;
   }
 
+const int NOCOMPASS = 1000000;
+
 int compassDist(cell *c) {
   if(c->master->alt) return celldistAlt(c);
   if(isHaunted(c->land) || c->land == laGraveyard) return getHauntedDepth(c);
-  return 500;
+  return NOCOMPASS;
+  }
+
+cell *findcompass(cell *c) {
+  int d = compassDist(c);
+  if(d == NOCOMPASS) return NULL;
+  
+  while(inscreenrange(c)) {
+    generateAlts(c->master);
+    forCellEx(c2, c) if(compassDist(c2) < d) {
+      c = c2;
+      d = compassDist(c2);
+      goto nextk;
+      }
+    break;
+    nextk: ;
+    }
+  
+  return c;
   }
 
 int towerval(cell *c, cellfunction* cf) {
@@ -2930,9 +2916,9 @@ bool buildBarrierNowall(cell *c, eLand l2, bool force) {
 void setLandQuotient(cell *c) {
   int fv = zebra40(c);
   if(fv/4 == 4 || fv/4 == 6 || fv/4 == 5 || fv/4 == 10) fv ^= 2;
-  if(euclidland == laWarpCoast)
+  if(specialland == laWarpCoast)
     if(fv%4==0 || fv%4 == 2) setland(c, laWarpSea);
-  if(euclidland == laElementalWall)
+  if(specialland == laElementalWall)
     setland(c, eLand(laEFire + (fv%4)));
   }
 
@@ -2945,9 +2931,9 @@ bool quickfind(eLand l) {
   }
 
 void setLandSphere(cell *c) {
-  if(euclidland == laWarpCoast)
+  if(specialland == laWarpCoast)
     setland(c, getHemisphere(c, 0) > 0 ? laWarpCoast : laWarpSea);
-  if(euclidland == laElementalWall) {
+  if(specialland == laElementalWall) {
     int x = getHemisphere(c, 1);
     int y = getHemisphere(c, 2);
     if(x > 0 && y > 0) setland(c, laEFire);
@@ -2965,34 +2951,34 @@ void setLandSphere(cell *c) {
     if(c->land == laElementalWall && c->type != 6)
       c->wall = getElementalWall(hrand(2) ? c->barleft : c->barright);
     }
-  if(euclidland == laCrossroads || euclidland == laCrossroads2 || euclidland == laCrossroads3) {
+  if(specialland == laCrossroads || specialland == laCrossroads2 || specialland == laCrossroads3) {
     int x = getHemisphere(c, 1);
-    if(x == 0 || (euclidland == laCrossroads3 && getHemisphere(c, 2) == 0)) 
+    if(x == 0 || (specialland == laCrossroads3 && getHemisphere(c, 2) == 0)) 
       setland(c, laBarrier), c->wall = waBarrier;
-    else setland(c, euclidland);
-    if(euclidland == laCrossroads3 && c->type != 6 && c->master->fiftyval == 1)
+    else setland(c, specialland);
+    if(specialland == laCrossroads3 && c->type != 6 && c->master->fiftyval == 1)
       c->wall = waBigTree;        
     }
   }
 
 void setLandEuclid(cell *c) {
-  setland(c, euclidland);
-  if(euclidland == laCrossroads) {
+  setland(c, specialland);
+  if(specialland == laCrossroads) {
     eucoord x, y;
     decodeMaster(c->master, x, y);
     setland(c, getEuclidLand(y+2*x));
     }
-  if(euclidland == laCrossroads4) {
+  if(specialland == laCrossroads4) {
     eucoord x, y;
     decodeMaster(c->master, x, y);
     c->land = getEuclidLand(y);
     }
-  if(euclidland == laWhirlpool) {
+  if(specialland == laWhirlpool) {
     c->land = laOcean;
     c->landparam = 99;
     }
-  if(euclidland == laPrincessQuest) setland(c, laPalace);
-  if(euclidland == laOcean) {
+  if(specialland == laPrincessQuest) setland(c, laPalace);
+  if(specialland == laOcean) {
     eucoord x, y;
     decodeMaster(c->master, x, y);
     int y0 = y; if(y>50000) y0 -= 65536; y0 += 10;
@@ -3001,7 +2987,7 @@ void setLandEuclid(cell *c) {
     else if(y0<0) setland(c, laRlyeh);
     else c->landparam = y0;
     }
-  if(euclidland == laIvoryTower || euclidland == laDungeon) {
+  if(specialland == laIvoryTower || specialland == laDungeon) {
     eucoord x, y;
     decodeMaster(c->master, x, y);
     int y0 = y; if(y>50000) y0 -= 65536; y0 = -y0; y0 -= 5;
@@ -3012,7 +2998,7 @@ void setLandEuclid(cell *c) {
       c->landparam = y0;
       }
     }
-  if(euclidland == laElementalWall) {
+  if(specialland == laElementalWall) {
     eucoord x, y;
     decodeMaster(c->master, x, y);
     int y0 = y; if(y>32768) y0 -= 65536;
@@ -3041,7 +3027,7 @@ void setLandEuclid(cell *c) {
       setland(c, laElementalWall);
       }
     }
-  if(euclidland == laCrossroads3) {
+  if(specialland == laCrossroads3) {
     eucoord x, y;
     decodeMaster(c->master, x, y);
     int y0 = y; if(y>32768) y0 -= 65536;
@@ -3060,7 +3046,7 @@ void setLandEuclid(cell *c) {
       c->wall = waBarrier;
       }
     }
-  if(euclidland == laWarpCoast) {
+  if(specialland == laWarpCoast) {
     eucoord x, y;
     decodeMaster(c->master, x, y);
     
@@ -3516,7 +3502,7 @@ bool is02(int i) { return i == 0 || i == 2; }
 
 // This function generates all lands. Warning: it's very long!
 void setdist(cell *c, int d, cell *from) {
-
+  
   if(signed(c->mpdist) <= d) return;
   if(c->mpdist > d+1 && d != BARLEV) setdist(c, d+1, from);
   c->mpdist = d;
@@ -3546,7 +3532,7 @@ void setdist(cell *c, int d, cell *from) {
 
     if(sphere || torus) setLandSphere(c);
     else if(euclid) setLandEuclid(c);
-    if(quotient) { setland(c, euclidland); setLandQuotient(c); }
+    if(quotient) { setland(c, specialland); setLandQuotient(c); }
     
     // if(chaosmode) setland(c, getCLand(c));
     }
@@ -4135,7 +4121,7 @@ void setdist(cell *c, int d, cell *from) {
         }
       
       if(c->land == laHell) {
-        if(hrand(1000) < 36 && celldist(c) >= 3) {
+        if(hrand(1000) < (purehepta ? 16 : 36) && celldist(c) >= 3) {
           for(int i=0; i<c->type; i++) {
             cell *c2 = createMov(c, i);
             setdist(c2, d+1, c);
@@ -5586,8 +5572,8 @@ void wandering() {
     if(inmirror(c)) continue;
     
     if(smallbounded && !c->item && hrand(5) == 0 && c->land != laHalloween) {
-      if(passable(c, NULL, 0) || euclidland == laKraken) {
-        if(!haveOrbPower() && euclidland != laHell) for(int it=0; it<1000 && !c->item; it++)
+      if(passable(c, NULL, 0) || specialland == laKraken) {
+        if(!haveOrbPower() && specialland != laHell) for(int it=0; it<1000 && !c->item; it++)
           placeLocalOrbs(c);
         if(!c->item) c->item = wanderingTreasure(c);
         if(c->item == itShard) {

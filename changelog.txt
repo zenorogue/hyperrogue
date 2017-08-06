@@ -1773,3 +1773,61 @@
 - peaceful mode state is now displayed correctly in the main menu
 - readded the sound when breaking mirrors
 - fixed the vertical position of the flower in hand
+
+2017.07.24 01:49 version 10.0d
+- the bottom line in the inventory mode is now always visible (i.e. you can exit the inventory with mouse)
+- peaceful mode and shmup mode are now compatible
+- fixed the problems with free Orbs of Safety in the Orb Strategy mode
+- fixed some texts
+
+2017.07.25 03:21 version 10.0e
+- more fixes for the peaceful mode: tortoises no longer move in shmup; Fire Cultists
+  no longer throw fire; Ivy no longer grows; no more statues under Ivy; no more
+  Grimoires; the Knights no longer talk about war; the Princess no longer wants
+  revenge; the Sword is graphically replaced with a shovel and digs again
+- fixed a bug with loading the old style config (affected the mobile versions)
+- fixed the arrow keys to scroll
+- the Android version should no longer draw the screen while locked
+- victory speedrun leaderboards in orb strategy
+- Narcissist and Mirror Spirit kills count
+
+2017.07.25 21:24 version 10.0f
+- color saving on 32bit machines should be fixed
+- 'save config' appears again in the basic config
+
+2017.08.06 14:00 version 10.0g
+- added a new Yendor Challenge
+- improved the efficiency in the Hall of Mirrors
+- reduced the sulphur lakes in the Heptagonal Hell
+- new princess messages
+- Halloween and Reflection should no longer appear in the Chaos Yendor Challenge
+- OoY now automatically activates if you move the boat into it
+- no more 'you have found ...' spam while moving an object with a boat
+- checkmate rule no longer thinks you are protected when standing on top of OoY
+- fixed bugs with (hardcore) turn-based multiplayer
+- bugfix: Dragon Chasm->Reptiles did not respect the Elixir of Life requirement
+- no longer crash on saving peacemode
+- map/vector editor commands now always fit on the screen
+- [ui] translations updated, languages selectable from a menu
+- [ui] new start menu
+- [ui] the X for Yendor/Compass is now placed perfectly (well, on the same pixel, and not in Euclidean) and has an aura effect
+- [ui] mouse now acts on click, not on release (configurable in the menu)
+- [ui] animate legs in char select
+- [ui] subtle animations in the inventory/kill list when a monster is killed
+- [ui] player death animations in the hardcore mode
+- [osm] fixed a bug with mirroring message
+- [osm] fixed a bug with Dead Orbs gained incorrectly
+- [osm] rewards for extra Daisies and Elemental Gems
+- [osm] messages after 25 PF, DDaisies
+- [osm] the inventory screen now displays more information
+- [osm] dead orbs no longer require Graveyard in the OSM -- more logical that way
+- [osm] command line options added for OSM and peace 
+- [osm] improve centering the orb display
+- [cheat] new cheats: save princess, unlock all touched Orbs of Yendor
+- [cheat] 'F' clears the "killed by spilling slime carelessly" status
+- [cheat] removed cheats that are made redundant by the Map Editor
+- [cheat] a special screen for debugging the land generation (cheat: shift+G)
+- [mobile] remove menu 'button' from mobiles
+- [mobile] the Tutorial is somewhat adjusted for mobiles
+- [mobile] map/vector editor available (though not very convenient)
+

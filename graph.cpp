@@ -48,10 +48,10 @@ string mouseovers;
 int darken = 0;
 
 struct fallanim {
-  int t_mon, t_floor;
+  int t_mon, t_floor, pid;
   eWall walltype;
   eMonster m;
-  fallanim() { t_floor = 0; t_mon = 0; walltype = waNone; }
+  fallanim() { t_floor = 0; t_mon = 0; pid = 0; walltype = waNone; }
   };
 
 map<cell*, fallanim> fallanims;
@@ -551,9 +551,22 @@ bool drawItemType(eItem it, cell *c, const transmatrix& V, int icol, int ticks, 
     }
   
   else if(it == itCompass) {
+    cell *c1 = findcompass(c);
     transmatrix V2;
-    if(euclid) V2 = V * spin(M_PI/2); // todo incorrect
-    else V2 = V * rspintox(inverse(V) * pirateCoords);
+    if(c1) {
+      transmatrix P = shmup::ggmatrix(c1);
+      hyperpoint P1 = tC0(P);
+      
+      if(isPlayerOn(c)) {
+        queuechr(P1, 2*vid.fsize, 'X', 0x10100 * int(128 + 100 * sin(ticks / 150.)));
+  //      queuestr(V, 1, its(compassDist(c)), 0x10101 * int(128 - 100 * sin(ticks / 150.)), 1);
+        queuestr(P1, vid.fsize, its(-compassDist(c)), 0x10101 * int(128 - 100 * sin(ticks / 150.)));
+        addauraspecial(P1, 0x0000FF, 0);
+        }
+      
+      V2 = V * rspintox(inverse(V) * P1);
+      }
+    else V2 = V;
     V2 = V2 * spin(M_PI * sin(ticks/100.) / 30);
     queuepoly(V2, shCompass1, 0xFF8080FF);
     queuepoly(V2, shCompass2, 0xFFFFFFFF);
@@ -1764,7 +1777,8 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, int col) {
     return drawMonsterTypeDH(m, c, Vs, col, darkhistory, footphase);
     }
   
-  for(int i=0; i<numplayers(); i++) if(c == playerpos(i) && !shmup::on && mapeditor::drawplayer) {
+  for(int i=0; i<numplayers(); i++) if(c == playerpos(i) && !shmup::on && mapeditor::drawplayer && 
+    !(hardcore && !canmove)) {
     if(!nospins) {
       Vs = playerV;
       if(multi::players > 1 ? multi::flipped[i] : flipplayer) Vs = Vs * pispin;
@@ -1789,14 +1803,8 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, int col) {
   return false;
   }
 
-bool showPirateX;
-cell *keycell, *pirateTreasureSeek, *pirateTreasureFound;
-hyperpoint pirateCoords;
-
 double downspin;
 cell *straightDownSeek;
-
-int keycelldist;
 
 #define AURA 180
 
@@ -1806,16 +1814,28 @@ bool haveaura() {
   return pmodel == mdDisk && (!sphere || vid.alpha > 10) && !euclid && vid.aurastr>0 && !svg::in && (auraNOGL || vid.usingGL);
   }
   
+vector<pair<int, int> > auraspecials; 
+
+int auramemo;
+
 void clearaura() { 
   if(!haveaura()) return;
   for(int a=0; a<AURA; a++) for(int b=0; b<4; b++) 
     aurac[a][b] = 0;
+  auraspecials.clear();
+  auramemo = 128 * 128 / vid.aurastr;
+  }
+
+void addauraspecial(const hyperpoint& h, int col, int dir) {
+  if(!haveaura()) return;
+  int r = int(2*AURA + dir + atan2(h[0], h[1]) * AURA / 2 / M_PI) % AURA; 
+  auraspecials.emplace_back(r, col);
   }
 
 void addaura(const hyperpoint& h, int col, int fd) {
   if(!haveaura()) return;
   int r = int(2*AURA + atan2(h[0], h[1]) * AURA / 2 / M_PI) % AURA; 
-  aurac[r][3] += ((128 * 128 / vid.aurastr) << fd);
+  aurac[r][3] += auramemo << fd;
   col = darkened(col);
   aurac[r][0] += (col>>16)&255;
   aurac[r][1] += (col>>8)&255;
@@ -1845,6 +1865,11 @@ void drawaura() {
   if(sphere) rad /= sqrt(vid.alphax*vid.alphax - 1);
   
   for(int v=0; v<4; v++) sumaura(v);
+  for(auto& p: auraspecials) {
+    int r = p.first;
+    aurac[r][3] = auramemo;
+    for(int k=0; k<3; k++) aurac[r][k] = (p.second >> (8*k)) & 255;
+    }
 
 #if CAP_SDL || CAP_GL
   double bak[3];
@@ -2242,212 +2267,8 @@ void setcolors(cell *c, int& wcol, int &fcol) {
 
   wcol = fcol = winf[c->wall].color;
 
-  // floor colors for all the lands
-  if(c->land == laKraken) fcol = 0x20A020;
-  if(c->land == laBurial) fcol = linf[laBurial].color;    
-  if(c->land == laTrollheim) fcol = linf[c->land].color;
-  
-  if(c->land == laBarrier) fcol = linf[c->land].color;
-  if(c->land == laOceanWall) fcol = linf[c->land].color;
-
-  if(c->land == laAlchemist) {
-    fcol = 0x202020;
-    if(c->item && !(conformal::includeHistory && eq(c->aitmp, sval)))
-      fcol = wcol = iinf[c->item].color;
-    }
-  
-  if(c->land == laBull)
-    fcol = 0x800080;
-  
-  if(c->land == laCA)
-    fcol = 0x404040;
-  
-  if(c->land == laReptile) {
-    fcol = reptilecolor(c);
-    }
-  
-  if(c->land == laCrossroads) fcol = (vid.goteyes2 ? 0xFF3030 : 0xFF0000);
-  if(c->land == laCrossroads2) fcol = linf[laCrossroads2].color;
-  if(c->land == laCrossroads3) fcol = linf[laCrossroads3].color;
-  if(c->land == laCrossroads4) fcol = linf[laCrossroads4].color;
-  if(c->land == laCrossroads5) fcol = linf[laCrossroads5].color;
-  if(isElemental(c->land)) fcol = linf[c->land].color;    
-  if(c->land == laDesert) fcol = 0xEDC9AF;
-  if(c->land == laCaves) fcol = 0x202020;
-  if(c->land == laEmerald) fcol = 0x202020;
-  if(c->land == laDeadCaves) fcol = 0x202020;
-  if(c->land == laJungle)  fcol = (vid.goteyes2 ? 0x408040 : 0x008000);
-  if(c->land == laMountain) {
-    if(euclid || c->master->alt)
-      fcol = celldistAlt(c) & 1 ? 0x604020 : 0x302010;
-    else fcol = 0;
-    if(c->wall == waPlatform) wcol = 0xF0F0A0;
-    }
-  if(c->land == laWineyard) fcol = 0x006000;
-  if(c->land == laMirror || c->land == laMirrorWall || c->land == laMirrorOld)
-    fcol = 0x808080;
-  if(c->land == laMotion) fcol = 0xF0F000;
-  if(c->land == laGraveyard) fcol = 0x107010;
-  if(c->land == laDryForest) fcol = gradient(0x008000, 0x800000, 0, c->landparam, 10);
-  if(c->land == laRlyeh) fcol = (vid.goteyes2 ? 0x4080C0 : 0x004080);
-  if(c->land == laPower) fcol = linf[c->land].color;
-  if(c->land == laHell) fcol = (vid.goteyes2 ? 0xC03030 : 0xC00000);
-  if(c->land == laLivefjord) fcol = 0x306030;    
-  if(c->land == laWildWest) fcol = linf[c->land].color;
-  if(c->land == laHalloween) fcol = linf[c->land].color;
-  if(c->land == laMinefield) fcol = 0x80A080;    
-  if(c->land == laCaribbean) fcol = 0x006000;
-  if(c->land == laRose) fcol = linf[c->land].color;
-  if(c->land == laCanvas) fcol = c->landparam;
-  if(c->land == laRedRock) fcol = linf[c->land].color;
-  if(c->land == laDragon) fcol = linf[c->land].color;
-  if(c->land == laStorms) fcol = linf[c->land].color;
-
-  if(c->land == laPalace) {
-    fcol = 0x806020;
-    if(c->wall == waClosedGate || c->wall == waOpenGate)
-      fcol = wcol;
-    }
-  
-  if(c->land == laElementalWall) 
-    fcol = (linf[c->barleft].color>>1) + (linf[c->barright].color>>1);
-    
-  if(c->land == laZebra) {
-    fcol = 0xE0E0E0;
-    if(c->wall == waTrapdoor) fcol = 0x808080;
-    }
-    
-  if(c->land == laCaribbean && (c->wall == waCIsland || c->wall == waCIsland2))
-    fcol = wcol = winf[c->wall].color;
-
-  if(isHive(c->land)) {
-    fcol = linf[c->land].color;
-    if(c->wall == waWaxWall) wcol = c->landparam;
-    if(items[itOrbInvis] && c->wall == waNone && c->landparam)
-      fcol = gradient(fcol, 0xFF0000, 0, c->landparam, 100);
-    if(c->bardir == NOBARRIERS && c->barleft) 
-      fcol = minf[moBug0+c->barright].color;
-    }
-
-  if(isWarped(c->land)) {
-    fcol = pseudohept(c) ? 0x80C080 : 0xA06020;
-    if(c->wall == waSmallTree) wcol = 0x608000;
-    }  
-
-  if(c->land == laTortoise) {
-    fcol = tortoise::getMatchColor(getBits(c));
-    if(c->wall == waBigTree) wcol = 0x709000;
-    else if(c->wall == waSmallTree) wcol = 0x905000;
-    }
-
-  if(c->land == laOvergrown || c->land == laClearing) {
-    fcol = (c->land == laOvergrown/* || (celldistAlt(c)&1)*/) ? 0x00C020 : 0x60E080;
-    if(c->wall == waSmallTree) wcol = 0x008060;
-    else if(c->wall == waBigTree) wcol = 0x0080C0;
-    }
-
-  if(c->land == laTemple) {
-    int d = showoff ? 0 : (euclid||c->master->alt) ? celldistAlt(c) : 99;
-    if(chaosmode)
-      fcol = 0x405090;
-    else if(d % TEMPLE_EACH == 0)
-      fcol = gradient(0x304080, winf[waColumn].color, 0, 0.5, 1);
-//    else if(c->type == 7)
-//      wcol = 0x707070;
-    else if(d% 2 == -1)
-      fcol = 0x304080;
-    else
-      fcol = 0x405090;
-    }
-
-  if(isHaunted(c->land)) {
-    int itcolor = 0;
-    for(int i=0; i<c->type; i++) if(c->mov[i] && c->mov[i]->item)
-      itcolor = 1;
-    if(c->item) itcolor |= 2;
-    fcol = 0x609F60 + 0x202020 * itcolor;
-
-    forCellEx(c2, c) if(c2->monst == moFriendlyGhost)
-      fcol = gradient(fcol, fghostcolor(ticks, c2), 0, .25, 1);
-
-    if(c->monst == moFriendlyGhost) 
-      fcol = gradient(fcol, fghostcolor(ticks, c), 0, .5, 1);    
-
-    if(c->wall == waSmallTree) wcol = 0x004000;
-    else if(c->wall == waBigTree) wcol = 0x008000;
-    }
-
-  if(c->land == laCamelot) {
-    int d = showoff ? 0 : ((euclid||c->master->alt) ? celldistAltRelative(c) : 0);
-#if CAP_TOUR
-    if(!tour::on) camelotcheat = false;
-    if(camelotcheat) 
-        fcol = (d&1) ? 0xC0C0C0 : 0x606060;
-    else 
-#endif
-    if(d < 0) {
-      fcol = 0xA0A0A0;
-      }
-    else {
-      // a nice floor pattern
-      int v = emeraldval(c);
-      int v0 = (v&~3);
-      bool sw = (v&1);
-      if(v0 == 8 || v0 == 12 || v0 == 20 || v0 == 40 || v0 == 36 || v0 == 24)
-        sw = !sw;
-      if(sw)
-        fcol = 0xC0C0C0;
-      else
-        fcol = 0xA0A0A0;
-      }
-    }
-
-  if(c->land == laPrairie) {
-    /* if(isWateryOrBoat(c)) {
-      if(prairie::isriver(c))
-        fcol = ((c->LHU.fi.rval & 1) ? 0x000090 : 0x0000E0)
-          + int(16 * wavefun(ticks / 200. + (c->wparam)*1.5))
-          + ((prairie::next(c) ? 0 : 0xC00000));
-      else
-        fcol = 0x000080;
-      } */
-  
-    if(prairie::isriver(c)) {
-      fcol = ((c->LHU.fi.rval & 1) ? 0x402000: 0x503000);
-      }
-    else {
-      fcol = 0x004000 + 0x001000 * c->LHU.fi.walldist;
-      fcol += 0x10000 * (255 - 511 / (1 + max((int) c->LHU.fi.flowerdist, 1)));
-      // fcol += 0x1 * (511 / (1 + max((int) c->LHU.fi.walldist2, 1)));
-      }
-    }
-  
-  else if(isIcyLand(c) && isIcyWall(c)) {
-    float h = HEAT(c);
-    bool showcoc = c->land == laCocytus && chaosmode && !wmescher;
-    if(h < -0.4)
-      wcol = gradient(showcoc ? 0x4080FF : 0x4040FF, 0x0000FF, -0.4, h, -1);
-    else if(h < 0)
-      wcol = gradient(showcoc ? 0x80C0FF : 0x8080FF, showcoc ? 0x4080FF : 0x4040FF, 0, h, -0.4);
-    else if(h < 0.2)
-      wcol = gradient(showcoc ? 0x80C0FF : 0x8080FF, 0xFFFFFF, 0, h, 0.2);
-    // else if(h < 0.4)
-    //  wcol = gradient(0xFFFFFF, 0xFFFF00, 0.2, h, 0.4);
-    else if(h < 0.6)
-      wcol = gradient(0xFFFFFF, 0xFF0000, 0.2, h, 0.6);
-    else if(h < 0.8)
-      wcol = gradient(0xFF0000, 0xFFFF00, 0.6, h, 0.8);
-    else
-      wcol = 0xFFFF00;
-    if(c->wall == waFrozenLake) 
-      fcol = wcol;
-    else
-      fcol = (wcol & 0xFEFEFE) >> 1;
-    if(c->wall == waLake)
-      fcol = wcol = (wcol & 0xFCFCFC) >> 2;
-    }
-  
-  else if(isWateryOrBoat(c) || c->wall == waReptileBridge) {
+  // water colors
+  if(isWateryOrBoat(c) || c->wall == waReptileBridge) {
     if(c->land == laOcean)
       fcol = (c->landparam > 25 && !chaosmode) ? 0x000090 : 
         0x1010C0 + int(32 * sin(ticks / 500. + (chaosmode ? c->CHAOSPARAM : c->landparam)*1.5));
@@ -2474,56 +2295,259 @@ void setcolors(cell *c, int& wcol, int &fcol) {
     else
       fcol = wcol;
     }
-  
-  else if(c->land == laOcean) {
-    if(chaosmode)
-      fcol = gradient(0xD0A090, 0xD0D020, 0, c->CHAOSPARAM, 30);
-    else
-      fcol = gradient(0xD0D090, 0xD0D020, -1, sin((double) c->landparam), 1);
-    }
 
-  if(c->land == laEmerald) {
-    if(c->wall == waCavefloor || c->wall == waCavewall) {
-      fcol = wcol = gradient(winf[waCavefloor].color, 0xFF00, 0, 0.5, 1);
-      if(c->wall == waCavewall) wcol = 0xC0FFC0;
+  // floor colors for all the lands
+  else switch(c->land) {
+    case laBurial: case laTrollheim: case laBarrier: case laOceanWall:
+    case laCrossroads2: case laCrossroads3: case laCrossroads4: case laCrossroads5:
+    case laRose: case laPower: case laWildWest: case laHalloween: case laRedRock:
+    case laDragon: case laStorms:
+      fcol = linf[c->land].color; break;
+
+    case laDesert: fcol = 0xEDC9AF; break;
+    case laKraken: fcol = 0x20A020; break;
+    case laCA: fcol = 0x404040; break;
+    case laMotion: fcol = 0xF0F000; break;
+    case laGraveyard: fcol = 0x107010; break;
+    case laWineyard: fcol = 0x006000; break;
+    case laLivefjord: fcol = 0x306030; break;
+
+    case laMinefield: 
+      fcol = 0x80A080; 
+      if(c->wall == waMineMine && ((cmode & sm::MAP) || !canmove))
+        fcol = wcol = 0xFF4040;
+      break;
+      
+    case laCaribbean: 
+      if(c->wall != waCIsland && c->wall != waCIsland2)
+        fcol = 0x006000;
+      break;
+
+    case laAlchemist: 
+      fcol = 0x202020;
+      if(c->item && !(conformal::includeHistory && eq(c->aitmp, sval)))
+        fcol = wcol = iinf[c->item].color;
+      break;
+    case laReptile:
+      fcol = reptilecolor(c);
+      break;
+    case laCrossroads:
+      fcol = (vid.goteyes2 ? 0xFF3030 : 0xFF0000);
+      break;
+    case laCaves: case laEmerald: case laDeadCaves:
+      fcol = 0x202020;
+      if(c->land == laEmerald) 
+      if(c->wall == waCavefloor || c->wall == waCavewall) {
+        fcol = wcol = gradient(winf[waCavefloor].color, 0xFF00, 0, 0.5, 1);
+        if(c->wall == waCavewall) wcol = 0xC0FFC0;
+        }
+      break;
+    case laJungle:
+      fcol = (vid.goteyes2 ? 0x408040 : 0x008000);
+      break;
+    case laMirror: case laMirrorWall: case laMirrorOld:
+      fcol = 0x808080;
+      break;
+    case laDryForest:
+      fcol = gradient(0x008000, 0x800000, 0, c->landparam, 10);
+      break;    
+    case laMountain:
+      if(euclid || c->master->alt)
+        fcol = celldistAlt(c) & 1 ? 0x604020 : 0x302010;
+      else fcol = 0;
+      if(c->wall == waPlatform) wcol = 0xF0F0A0;
+      break;
+    case laRlyeh:
+      fcol = (vid.goteyes2 ? 0x4080C0 : 0x004080);
+      break;
+    case laHell:
+      fcol = (vid.goteyes2 ? 0xC03030 : 0xC00000);
+      break;
+    case laCanvas:
+      fcol = c->landparam;
+      break;
+    case laPalace:
+      fcol = 0x806020;
+      if(c->wall == waClosedGate || c->wall == waOpenGate)
+        fcol = wcol;
+      break;
+    case laElementalWall:
+      fcol = (linf[c->barleft].color>>1) + (linf[c->barright].color>>1);
+      break;
+    case laZebra:
+      fcol = 0xE0E0E0;
+      if(c->wall == waTrapdoor) fcol = 0x808080;
+      break;
+    case laHive:
+      fcol = linf[c->land].color;
+      if(c->wall == waWaxWall) wcol = c->landparam;
+      if(items[itOrbInvis] && c->wall == waNone && c->landparam)
+        fcol = gradient(fcol, 0xFF0000, 0, c->landparam, 100);
+      if(c->bardir == NOBARRIERS && c->barleft) 
+        fcol = minf[moBug0+c->barright].color;
+      break;
+    case laTortoise:
+      fcol = tortoise::getMatchColor(getBits(c));
+      if(c->wall == waBigTree) wcol = 0x709000;
+      else if(c->wall == waSmallTree) wcol = 0x905000;
+      break;
+    case laOvergrown: case laClearing:
+      fcol = (c->land == laOvergrown/* || (celldistAlt(c)&1)*/) ? 0x00C020 : 0x60E080;
+      if(c->wall == waSmallTree) wcol = 0x008060;
+      else if(c->wall == waBigTree) wcol = 0x0080C0;
+      break;
+    case laTemple: {
+      int d = showoff ? 0 : (euclid||c->master->alt) ? celldistAlt(c) : 99;
+      if(chaosmode)
+        fcol = 0x405090;
+      else if(d % TEMPLE_EACH == 0)
+        fcol = gradient(0x304080, winf[waColumn].color, 0, 0.5, 1);
+  //    else if(c->type == 7)
+  //      wcol = 0x707070;
+      else if(d% 2 == -1)
+        fcol = 0x304080;
+      else
+        fcol = 0x405090;
+      break;
       }
-    }
 
-  if(c->land == laWhirlwind) {
-    int wcol[4] = {0x404040, 0x404080, 0x2050A0, 0x5050C0};
-    fcol = wcol[whirlwind::fzebra3(c)];
-    }
-
-  if(c->land == laIvoryTower) 
-    fcol = 0x10101 * (32 + (c->landparam&1) * 32) - 0x000010;
+    case laWhirlwind:
+      if(c->land == laWhirlwind) {
+        int wcol[4] = {0x404040, 0x404080, 0x2050A0, 0x5050C0};
+        fcol = wcol[whirlwind::fzebra3(c)];
+        }
+      break;
   
-  if(c->land == laDungeon) {
-    int lp = c->landparam % 5;
-      // xcol = (c->landparam&1) ? 0xD00000 : 0x00D000;
-    int lps[5] = { 0x402000, 0x302000, 0x202000, 0x282000, 0x382000 };
-    fcol = lps[lp];
-    if(c->wall == waClosedGate)
-      fcol = wcol = 0xC0C0C0;
-    if(c->wall == waOpenGate)
-      fcol = wcol = 0x404040;
-    if(c->wall == waPlatform)
-      fcol = wcol = 0xDFB520;
-    }
-  
-  if(c->land == laEndorian) {
-    int clev = cwt.c->land == laEndorian ? edgeDepth(cwt.c) : 0;
-      // xcol = (c->landparam&1) ? 0xD00000 : 0x00D000;
-    fcol = 0x10101 * (32 + (c->landparam&1) * 32) - 0x000010;
-    fcol = gradient(fcol, 0x0000D0, clev-10, edgeDepth(c), clev+10);
-    if(c->wall == waTrunk) fcol = winf[waTrunk].color;
-
-    if(c->wall == waCanopy || c->wall == waSolidBranch || c->wall == waWeakBranch) {
-      fcol = winf[waCanopy].color;
-      if(c->landparam & 1) fcol = gradient(0, fcol, 0, .75, 1);
+    case laIvoryTower:
+      fcol = 0x10101 * (32 + (c->landparam&1) * 32) - 0x000010;
+      break;
+    
+    case laDungeon: {
+      int lp = c->landparam % 5;
+        // xcol = (c->landparam&1) ? 0xD00000 : 0x00D000;
+      int lps[5] = { 0x402000, 0x302000, 0x202000, 0x282000, 0x382000 };
+      fcol = lps[lp];
+      if(c->wall == waClosedGate)
+        fcol = wcol = 0xC0C0C0;
+      if(c->wall == waOpenGate)
+        fcol = wcol = 0x404040;
+      if(c->wall == waPlatform)
+        fcol = wcol = 0xDFB520;
+      break;
       }
     
-    }
+    case laEndorian: {
+      int clev = cwt.c->land == laEndorian ? edgeDepth(cwt.c) : 0;
+        // xcol = (c->landparam&1) ? 0xD00000 : 0x00D000;
+      fcol = 0x10101 * (32 + (c->landparam&1) * 32) - 0x000010;
+      fcol = gradient(fcol, 0x0000D0, clev-10, edgeDepth(c), clev+10);
+      if(c->wall == waTrunk) fcol = winf[waTrunk].color;
+  
+      if(c->wall == waCanopy || c->wall == waSolidBranch || c->wall == waWeakBranch) {
+        fcol = winf[waCanopy].color;
+        if(c->landparam & 1) fcol = gradient(0, fcol, 0, .75, 1);
+        }
+      break;
+      }
     
+    case laPrairie:
+      if(prairie::isriver(c)) {
+        fcol = ((c->LHU.fi.rval & 1) ? 0x402000: 0x503000);
+        }
+      else {
+        fcol = 0x004000 + 0x001000 * c->LHU.fi.walldist;
+        fcol += 0x10000 * (255 - 511 / (1 + max((int) c->LHU.fi.flowerdist, 1)));
+        // fcol += 0x1 * (511 / (1 + max((int) c->LHU.fi.walldist2, 1)));
+        }
+      break;
+  
+    case laCamelot: {
+      int d = showoff ? 0 : ((euclid||c->master->alt) ? celldistAltRelative(c) : 0);
+  #if CAP_TOUR
+      if(!tour::on) camelotcheat = false;
+      if(camelotcheat) 
+          fcol = (d&1) ? 0xC0C0C0 : 0x606060;
+      else 
+  #endif
+      if(d < 0) {
+        fcol = 0xA0A0A0;
+        }
+      else {
+        // a nice floor pattern
+        int v = emeraldval(c);
+        int v0 = (v&~3);
+        bool sw = (v&1);
+        if(v0 == 8 || v0 == 12 || v0 == 20 || v0 == 40 || v0 == 36 || v0 == 24)
+          sw = !sw;
+        if(sw)
+          fcol = 0xC0C0C0;
+        else
+          fcol = 0xA0A0A0;
+        }
+      break;
+      }
+
+    case laIce: case laCocytus:
+      if(isIcyWall(c)) {
+        float h = HEAT(c);
+        bool showcoc = c->land == laCocytus && chaosmode && !wmescher;
+        if(h < -0.4)
+          wcol = gradient(showcoc ? 0x4080FF : 0x4040FF, 0x0000FF, -0.4, h, -1);
+        else if(h < 0)
+          wcol = gradient(showcoc ? 0x80C0FF : 0x8080FF, showcoc ? 0x4080FF : 0x4040FF, 0, h, -0.4);
+        else if(h < 0.2)
+          wcol = gradient(showcoc ? 0x80C0FF : 0x8080FF, 0xFFFFFF, 0, h, 0.2);
+        // else if(h < 0.4)
+        //  wcol = gradient(0xFFFFFF, 0xFFFF00, 0.2, h, 0.4);
+        else if(h < 0.6)
+          wcol = gradient(0xFFFFFF, 0xFF0000, 0.2, h, 0.6);
+        else if(h < 0.8)
+          wcol = gradient(0xFF0000, 0xFFFF00, 0.6, h, 0.8);
+        else
+          wcol = 0xFFFF00;
+        if(c->wall == waFrozenLake) 
+          fcol = wcol;
+        else
+          fcol = (wcol & 0xFEFEFE) >> 1;
+        if(c->wall == waLake)
+          fcol = wcol = (wcol & 0xFCFCFC) >> 2;
+        }
+      break;
+    
+    case laOcean:
+      if(chaosmode)
+        fcol = gradient(0xD0A090, 0xD0D020, 0, c->CHAOSPARAM, 30);
+      else
+        fcol = gradient(0xD0D090, 0xD0D020, -1, sin((double) c->landparam), 1);
+      break;
+        
+    default:
+      if(isElemental(c->land)) fcol = linf[c->land].color;
+      if(isWarped(c->land)) {
+        fcol = pseudohept(c) ? 0x80C080 : 0xA06020;
+        if(c->wall == waSmallTree) wcol = 0x608000;
+        }  
+      if(isHaunted(c->land)) {
+        int itcolor = 0;
+        for(int i=0; i<c->type; i++) if(c->mov[i] && c->mov[i]->item)
+          itcolor = 1;
+        if(c->item) itcolor |= 2;
+        fcol = 0x609F60 + 0x202020 * itcolor;
+    
+        forCellEx(c2, c) if(c2->monst == moFriendlyGhost)
+          fcol = gradient(fcol, fghostcolor(ticks, c2), 0, .25, 1);
+    
+        if(c->monst == moFriendlyGhost) 
+          fcol = gradient(fcol, fghostcolor(ticks, c), 0, .5, 1);    
+    
+        if(c->wall == waSmallTree) wcol = 0x004000;
+        else if(c->wall == waBigTree) wcol = 0x008000;
+        }
+    }
+  
+   /* if(c->land == laCaribbean && (c->wall == waCIsland || c->wall == waCIsland2))
+     fcol = wcol = winf[c->wall].color; */
+
   // floors become fcol
   if(c->wall == waSulphur || c->wall == waSulphurC || isAlch(c) || c->wall == waPlatform)
     fcol = wcol;
@@ -2554,9 +2578,6 @@ void setcolors(cell *c, int& wcol, int &fcol) {
   if(c->wall == waAncientGrave || c->wall == waFreshGrave || c->wall == waThumperOn || c->wall == waThumperOff || c->wall == waBonfireOff)
     fcol = wcol;
     
-  if(c->land == laMinefield && c->wall == waMineMine && ((cmode & sm::MAP) || !canmove))
-    fcol = wcol = 0xFF4040;
-
   if(mightBeMine(c) && mineMarkedSafe(c))
     fcol = wcol = gradient(wcol, 0x40FF40, 0, 0.2, 1);
     
@@ -2796,7 +2817,7 @@ void pushdown(cell *c, int& q, const transmatrix &V, double down, bool rezoom, b
 
 bool dodrawcell(cell *c) {
   // todo: fix when scrolling
-  if(!buggyGeneration && c->land != laCanvas && sightrange < 10) {
+  if(!buggyGeneration && !debugmode && c->land != laCanvas && sightrange < 10) {
     // not yet created
     if(c->mpdist > 7 && !cheater) return false;
     // in the Yendor Challenge, scrolling back is forbidden
@@ -3913,6 +3934,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
              }
            }
          if(fa.t_mon) {
+           dynamicval<int> d(multi::cpid, fa.pid);
            int t = (ticks - fa.t_mon);
            if(t <= 1500) {
              erase = false;
@@ -4072,9 +4094,6 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       vid.linewidth /= 3;
       }
 
-    if(!euclid && (!pirateTreasureSeek || compassDist(c) < compassDist(pirateTreasureSeek)))
-      pirateTreasureSeek = c;
-
     if(!euclid) {
       bool usethis = false;
       double spd = 1;
@@ -4190,11 +4209,12 @@ void fallingFloorAnimation(cell *c, eWall w, eMonster m) {
   fa.walltype = w; fa.m = m;
   // drawParticles(c, darkenedby(linf[c->land].color, 1), 4, 50);
   }
-void fallingMonsterAnimation(cell *c, eMonster m) {
+void fallingMonsterAnimation(cell *c, eMonster m, int id) {
   if(!mmspatial) return;
   fallanim& fa = fallanims[c];
   fa.t_mon = ticks;
   fa.m = m;
+  fa.pid = id;
   // drawParticles(c, darkenedby(linf[c->land].color, 1), 4, 50);
   }
 
@@ -4240,20 +4260,30 @@ void drawMarkers() {
     /* for(int i=0; i<12; i++) if(c->type == 5 && c->master == &dodecahedron[i])
       queuechr(xc, yc, sc, 4*vid.fsize, 'A'+i, iinf[itOrbDomination].color); */
     
-    IG(keycell) {
-      queuechr(Gm0(keycell), 2*vid.fsize, 'X', 0x10101 * int(128 + 100 * sin(ticks / 150.)));
-      queuestr(Gm0(keycell), vid.fsize, its(keycelldist), 0x10101 * int(128 - 100 * sin(ticks / 150.)));
-      }
-    
-    IG(pirateTreasureFound) { 
-      pirateCoords = Gm0(pirateTreasureFound);
-      if(showPirateX) {
-        queuechr(pirateCoords, 2*vid.fsize, 'X', 0x10100 * int(128 + 100 * sin(ticks / 150.)));
-        if(numplayers() == 1 && cwt.c->master->alt)
-          queuestr(pirateCoords, vid.fsize, its(-celldistAlt(cwt.c)), 0x10101 * int(128 - 100 * sin(ticks / 150.)));
+    {
+    using namespace yendor;
+    if(yii < size(yi) && !yi[yii].found) {
+      cell *keycell = NULL;
+      int i;
+      for(i=0; i<YDIST; i++) 
+        if(yi[yii].path[i]->cpdist <= sightrange) {
+          keycell = yi[yii].path[i];
+          break;
+          }
+      if(keycell) {
+        for(; i<YDIST; i++) {
+          cell *c = yi[yii].path[i];
+          if(inscreenrange(c))
+            keycell = c;
+          }
+        hyperpoint H = tC0(shmup::ggmatrix(keycell));
+        queuechr(H, 2*vid.fsize, 'X', 0x10101 * int(128 + 100 * sin(ticks / 150.)));
+        queuestr(H, vid.fsize, its(celldistance(cwt.c, yi[yii].key())), 0x10101 * int(128 - 100 * sin(ticks / 150.)));
+        addauraspecial(H, iinf[itOrbYendor].color, 0);
         }
       }
-          
+    }
+    
     if(lmouseover && vid.drawmousecircle && ok && DEFAULTCONTROL && MOBON) {
       queuecircleat(lmouseover, .8, darkena(lmouseover->cpdist > 1 ? 0x00FFFF : 0xFF0000, 0, 0xFF));
       }
@@ -4434,27 +4464,6 @@ void drawthemap() {
     minf[g.m].name = g.name;
     }
 
-  keycell = NULL;
-
-  pirateTreasureFound = pirateTreasureSeek;
-  pirateTreasureSeek = NULL;
-  straightDownSeek = NULL; downspin = 0;
-  shmup::mousetarget = NULL;
-  showPirateX = false;
-  for(int i=0; i<numplayers(); i++) if(multi::playerActive(i))
-    if(playerpos(i)->item == itCompass) showPirateX = true;
-    
-  using namespace yendor;
-  
-  if(yii < size(yi)) {
-    if(!yi[yii].found) 
-      for(int i=0; i<YDIST; i++) 
-        if(yi[yii].path[i]->cpdist <= sightrange) {
-      keycell = yi[yii].path[i];
-      keycelldist = YDIST - i;
-      }                                                                
-    }
-
   if(mapeditor::autochoose) mapeditor::ew = mapeditor::ewsearch;
   mapeditor::ewsearch.dist = 1e30;
   modist = 1e20; mouseover = NULL; 
@@ -4466,6 +4475,8 @@ void drawthemap() {
   for(int i=0; i<multi::players; i++) {
     multi::ccdist[i] = 1e20; multi::ccat[i] = NULL;
     }
+
+  straightDownSeek = NULL; downspin = 0;
 
   #if ISMOBILE
   mouseovers = XLAT("No info about this...");
@@ -4787,7 +4798,7 @@ void normalscreen() {
   cmode = sm::NORMAL | sm::DOTOUR | sm::CENTER;
   if(viewdists) cmode |= sm::SIDE;
   gamescreen(hiliteclick && mmmon ? 1 : 0); drawStats();
-  if(nomenukey)
+  if(nomenukey || ISMOBILE)
     ;
 #if CAP_TOUR
   else if(tour::on) 
@@ -4999,3 +5010,21 @@ void animateReplacement(cell *a, cell *b, int layer) {
   animateMovement(a, b, layer);
   animateMovement(&c1, a, layer);
   }
+
+void drawBug(const cellwalker& cw, int col) {
+  initquickqueue();
+  transmatrix V = shmup::ggmatrix(cw.c);
+  if(cw.spin) V = V * ddspin(cw.c, cw.spin, S42);
+  queuepoly(V, shBugBody, col);
+  quickqueue();
+  }
+
+cell *viewcenter() {
+  if(euclid) return centerover;
+  else return viewctr.h->c7;
+  }
+
+bool inscreenrange(cell *c) {
+  return celldistance(viewcenter(), c) <= (euclid ? sightrange : purehepta ? 9 : 13);
+  }
+

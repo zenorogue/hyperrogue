@@ -670,7 +670,7 @@ namespace princess {
   
     playSound(c, princessgender() ? "speak-princess" : "speak-prince");
     retry:
-    if(msgid >= 32) msgid = 0;  
+    if(msgid >= 127) msgid = 0;  
     
     bool inpalace = c->land == laPalace || c->land == laDungeon;
     
@@ -692,14 +692,35 @@ namespace princess {
     else if(msgid == 4 && !inpalace && m == moPrincess && !peace::on) {
       addMessage(XLAT("\"I have been trained to fight with a Hypersian scimitar, you know?\"", m));
       }
-    else if(msgid == 5 && !inpalace) {
+    else if(msgid == 16 && !inpalace) {
       addMessage(XLAT("\"I would love to come to your world with you!\"", m));
       }
-    else if(msgid == 6 && !inpalace) {
+    else if(msgid == 20 && !inpalace) {
+      addMessage(XLAT("\"I do not like butterflies. They are treacherous.\"", m));
+      }
+    else if(msgid == 32 && !inpalace) {
       addMessage(XLAT("\"Straight lines stay close to each other forever, this is so romantic!\"", m));
       }
-    else if(msgid == 7 && !inpalace) {
+    else if(msgid == 40 && !inpalace) {
+      addMessage(XLAT("\"I hate roses.\"", m));
+      }
+    else if(msgid == 48 && !inpalace) {
       addMessage(XLAT("\"Maps... Just like the world, but smaller... how is that even possible?!\"", m));
+      }    
+    else if(msgid == 64) {
+      addMessage(XLAT("\"In this world there is plenty of space for everyone. We do not need wars.\"", m));
+      }    
+    else if(msgid == 65) {
+      addMessage(XLAT("\"Only the stupid hyperbugs do not understand this.\"", m));
+      }    
+    else if(msgid == 72 && !inpalace) {
+      addMessage(XLAT("\"I have once talked to a Yendorian researcher... he was only interested in infinite trees.\"", m));
+      }
+    else if(msgid == 73 && !inpalace) {
+      addMessage(XLAT("\"Infinite trees are boring. I prefer other graphs.\"", m));
+      }
+    else if(msgid == 80) {
+      addMessage(XLAT("\"Are there Temples of Cthulhu in your world? Why not?\"", m));
       }    
     else {
       msgid++; goto retry;
@@ -1126,6 +1147,7 @@ namespace mirror {
     }
 
   void createHere(cellwalker cw, int cpid) {
+    if(!cw.c) return;
     if(cw.c->wall == waCloud)
       createMirages(cw, cpid);
     if(cw.c->wall == waMirror)
@@ -1133,6 +1155,7 @@ namespace mirror {
     }
   
   void breakMirror(cellwalker cw, int pid) {
+    if(!cw.c) return;
     cell *c = cw.c;
     if(c->wall == waMirror || c->wall == waCloud) {
       drawParticles(c, winf[c->wall].color, 16);
@@ -1255,8 +1278,11 @@ namespace mirror {
       }
     return make_pair(goout, cw);
     }
+  
+  int depth(cell *c) { return c->landparam & 255; }
 
-  cellwalker reflect(cellwalker cw, bool debug) {
+  cellwalker reflect0(cell *c) {
+    cellwalker cw(c, 0, false);
     int stepcount = 0;
     cellwalker cwcopy = cw;
     static vector<int> v;
@@ -1264,18 +1290,15 @@ namespace mirror {
     while(true) {
       if(!inmirror(cw)) break;
       stepcount++; if(stepcount > 10000) {
-         if(debug) cw.c->wall = waBoat;
-         if(debug) printf("fail\n"); 
          return cw; 
          }
       cell *c0 = cwpeek(cw, 0);
       int go = 0;
       if(!inmirror(c0)) go = 2;
-      else if(c0->landparam && c0->landparam < cw.c->landparam) go = 1;
+      else if(depth(c0) && depth(c0) < depth(cw.c)) go = 1;
       if(go) {
         v.push_back(0);
         cwstep(cw);
-        if(debug) queuemarkerat(gmatrix[cw.c], 0x00FF0020);
         if(go == 2) break;
         }
       else {
@@ -1299,7 +1322,6 @@ namespace mirror {
           cwspin(cw, 2); 
           v.push_back(2);
           cwstep(cw); 
-          if(debug) queuemarkerat(gmatrix[cw.c], 0xC9C90080);
           v.push_back(0);
           cwspin(cw, 3); 
           v.push_back(3);
@@ -1342,19 +1364,33 @@ namespace mirror {
     return cw;
     }
 
-#if ISMOBILE==0  
-  void debug() {
-    if(!mouseover) return;
-    queuemarkerat(gmatrix[mouseover], 0xFF0000FF);
-#if CAP_SDL
-    cellwalker mw(mouseover, (SDL_GetTicks()/1000) % mouseover->type, (SDL_GetTicks()/500) % 2);
-#else
-    cellwalker mw(mouseover, 0, 0);
-#endif
-    mw = mirror::reflect(mw, true);
-    queuemarkerat(gmatrix[mw.c], 0x800000FF);
+  static const int CACHESIZE = 1<<12; // must be a power of 2
+  static const int CACHEMASK = CACHESIZE-1;
+    
+  pair<cell*, cellwalker> cache[CACHESIZE];
+  int nextcache;
+  
+  void clearcache() {
+    for(int i=0; i<CACHESIZE; i++) cache[i].first = NULL;
     }
-#endif
+
+  cellwalker reflect(const cellwalker& cw) {
+    if(!cw.c) return cw;
+    int cid = (cw.c->landparam >> 8) & CACHEMASK;
+    if(cache[cid].first != cw.c) {
+      cid = nextcache++;
+      nextcache &= CACHEMASK;
+      cw.c->landparam &= ~ (CACHEMASK << 8);
+      cw.c->landparam |= (nextcache << 8);
+      cache[cid].first = cw.c;
+      cache[cid].second = reflect0(cw.c);
+      }
+    cellwalker res = cache[cid].second;
+    cwspin(res, cw.spin);
+    if(cw.mirrored) res.mirrored = !res.mirrored;
+    return res;
+    }
+
   }
 
 namespace hive {
@@ -2938,5 +2974,6 @@ auto ccm = addHook(clearmemory, 0, [] () {
   prairie::enter = NULL;
   prairie::tchoices.clear();
   prairie::beaststogen.clear();
+  mirror::clearcache();
   });
 

@@ -3,7 +3,7 @@
 
 // basic utility functions
 
-#if ISMOBILE || ISWEB || ISPANDORA
+#if ISMOBILE || ISWEB || ISPANDORA || 1
 typedef double ld;
 #define LDF "%lf"
 #define PLDF "lf"
@@ -36,6 +36,8 @@ string llts(long long i) {
     return llts(i/10) + its(i%10);
 }
 string itsh(int i) {static char buf[16]; sprintf(buf, "%03X", i); return buf; }
+string itsh2(int i) {static char buf[16]; sprintf(buf, "%02X", i); return buf; }
+string itsh8(int i) {static char buf[16]; sprintf(buf, "%08X", i); return buf; }
 
 // debug utilities
 

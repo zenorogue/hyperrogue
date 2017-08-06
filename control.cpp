@@ -606,40 +606,45 @@ void mainloopiter() {
     bool rollchange = (cmode & sm::OVERVIEW) && getcstat >= 2000 && cheater;
 
     if(ev.type == SDL_MOUSEBUTTONDOWN) {
-      flashMessages();
-      mousepressed = true;
+      mousepressed = ev.type == SDL_MOUSEBUTTONDOWN;
+      if(mousepressed) flashMessages();
       mousing = true;
-      actonrelease = true;
       
-      if(ev.button.button==SDL_BUTTON_WHEELDOWN) {
-        sym = uni = PSEUDOKEY_WHEELDOWN;
+      bool act = false;
+      
+      if(vid.quickmouse) {
+        act = ev.type == SDL_MOUSEBUTTONDOWN;
         }
-      if(ev.button.button==SDL_BUTTON_WHEELUP) {
-        sym = uni = PSEUDOKEY_WHEELUP;
+      else {
+        act = actonrelease && ev.type == SDL_MOUSEBUTTONUP;
+        actonrelease = ev.type == SDL_MOUSEBUTTONDOWN;
         }
-      else if(ev.button.button == SDL_BUTTON_RIGHT) {
-        sym = 1; didsomething = true;
-        }
-      else if(ev.button.button == SDL_BUTTON_MIDDLE) {
-        sym = 2; didsomething = true;
-        }
-      }
+      
+      if(!act) ;
 
-    if(ev.type == SDL_MOUSEBUTTONUP) {
-      mousepressed = false;
-      mousing = true;
-      if(ev.button.button==SDL_BUTTON_RIGHT || leftclick) 
+      else if(ev.button.button==SDL_BUTTON_RIGHT || leftclick) 
         sym = SDLK_F1;
       else if(ev.button.button==SDL_BUTTON_MIDDLE || rightclick) 
         sym = 1, didsomething = true;
-      else if(ev.button.button == SDL_BUTTON_LEFT && actonrelease) {
+      else if(ev.button.button == SDL_BUTTON_LEFT) {
         sym = getcstat, uni = getcstat, shiftmul = getcshift;
         }
-      else if(ev.button.button == SDL_BUTTON_WHEELUP && rollchange) {
-        sym = getcstat, uni = getcstat, shiftmul = getcshift, wheelclick = true;
+      
+      else if(ev.button.button==SDL_BUTTON_WHEELDOWN) {
+        if(rollchange) {
+          sym = getcstat, uni = getcstat, shiftmul = getcshift, wheelclick = true;
+          }
+        else {
+          sym = uni = PSEUDOKEY_WHEELDOWN;
+          }
         }
-      else if(ev.button.button == SDL_BUTTON_WHEELDOWN && rollchange) {
-        sym = getcstat, uni = getcstat, shiftmul = -getcshift, wheelclick = true;
+      if(ev.button.button==SDL_BUTTON_WHEELUP) {
+        if(rollchange) {
+          sym = getcstat, uni = getcstat, shiftmul = -getcshift, wheelclick = true;
+          }
+        else {
+          sym = uni = PSEUDOKEY_WHEELUP;
+          }
         }
       }
 

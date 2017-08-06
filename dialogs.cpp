@@ -147,6 +147,19 @@ namespace dialog {
     items.push_back(it);
     }
 
+  void addBigItem(string body, int key) {
+    item it;
+    it.type = diBigItem;
+    it.body = body;
+    it.keycaption = keyname(key);
+    it.key = key;
+    it.color = 0xC06000;
+    it.colors = 0xFFD500;
+    it.colorc = 0xFF8000;
+    it.scale = 150;
+    items.push_back(it);
+    }
+
   int addBreak(int val) {
     item it;
     it.type = diBreak;
@@ -223,7 +236,7 @@ namespace dialog {
         tothei += dfspace * items[i].scale / 100;
         if(items[i].type == diItem) 
           innerwidth = max(innerwidth, textwidth(dfsize * items[i].scale / 100, items[i].body));
-        if(items[i].type == diTitle || items[i].type == diInfo)
+        if(items[i].type == diTitle || items[i].type == diInfo || items[i].type == diBigItem)
           dialogwidth = max(dialogwidth, textwidth(dfsize * items[i].scale / 100, items[i].body) * 10/9);
         }
       }
@@ -287,7 +300,7 @@ namespace dialog {
       if(I.type == diTitle || I.type == diInfo) {
         displayfr(dcenter, mid, 2, dfsize * I.scale/100, I.body, I.color, 8);
         }
-      else if(I.type == diItem) {
+      else if(I.type == diItem || I.type == diBigItem) {
         bool xthis = (mousey >= top && mousey < tothei);
 #if ISMOBILE
         if(xthis && mousepressed) 
@@ -301,10 +314,15 @@ namespace dialog {
           I.color = (xthis&&mousepressed&&actonrelease) ? I.colorc : I.colors;
           }
 #endif        
-        if(!mousing)
-          displayfr(keyx, mid, 2, dfsize * I.scale/100, I.keycaption, I.colork, 16);
-        displayfr(itemx, mid, 2, dfsize * I.scale/100, I.body, I.color, 0);
-        displayfr(valuex, mid, 2, dfsize * I.scale/100, I.value, I.colorv, 0);
+        if(I.type == diBigItem) {
+          displayfr(dcenter, mid, 2, dfsize * I.scale/100, I.body, I.color, 8);
+          }
+        else {
+          if(!mousing)
+            displayfr(keyx, mid, 2, dfsize * I.scale/100, I.keycaption, I.colork, 16);
+          displayfr(itemx, mid, 2, dfsize * I.scale/100, I.body, I.color, 0);
+          displayfr(valuex, mid, 2, dfsize * I.scale/100, I.value, I.colorv, 0);
+          }
         if(xthis) getcstat = I.key;
         }      
       else if(I.type == diSlider) {
@@ -322,24 +340,28 @@ namespace dialog {
         }
       }
     }
+
+  bool isitem(item& it) {
+    return it.type == diItem || it.type == diBigItem;
+    }
   
   void handleNavigation(int &sym, int &uni) {
 #if !ISMOBILE
     if(uni == '\n' || uni == '\r' || sym == SDLK_KP5)
       for(int i=0; i<size(items); i++) 
-        if(items[i].type == diItem)
+        if(isitem(items[i]))
           if(items[i].body == highlight_text) {
             uni = sym = items[i].key;
             return;
             }
     if(sym == SDLK_PAGEDOWN || sym == SDLK_KP3) {
       for(int i=0; i<size(items); i++)
-        if(items[i].type == diItem)
+        if(isitem(items[i]))
           highlight_text = items[i].body;
       }
     if(sym == SDLK_PAGEUP || sym == SDLK_KP9) {
       for(int i=0; i<size(items); i++) 
-        if(items[i].type == diItem) {
+        if(isitem(items[i])) {
           highlight_text = items[i].body;
           break;
           }
@@ -347,11 +369,11 @@ namespace dialog {
     if(sym == SDLK_UP || sym == SDLK_KP8) {
       string last = "";
       for(int i=0; i<size(items); i++) 
-        if(items[i].type == diItem)
+        if(isitem(items[i]))
           last = items[i].body;
       uni = sym = 0;
       for(int i=0; i<size(items); i++)
-        if(items[i].type == diItem) {
+        if(isitem(items[i])) {
           if(items[i].body == highlight_text) {
             highlight_text = last; return;
             }
@@ -362,12 +384,12 @@ namespace dialog {
     if(sym == SDLK_DOWN || sym == SDLK_KP2) {
       int state = 0;
       for(int i=0; i<size(items); i++)
-        if(items[i].type == diItem) {
+        if(isitem(items[i])) {
           if(state) { highlight_text = items[i].body; return; }
           else if(items[i].body == highlight_text) state = 1;
           }
       for(int i=0; i<size(items); i++)
-        if(items[i].type == diItem) 
+        if(isitem(items[i])) 
           highlight_text = items[i].body;
       uni = sym = 0;
       }

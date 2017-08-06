@@ -70,15 +70,16 @@ namespace inv {
     }
     
   void gainOrbs(eItem it, eItem o) {
+    auto& nx = next[o == itHyperstone ? o : it];
     int qty = items[it];
     if(it == itHolyGrail) {
       remaining[itOrbIllusion] += qty;
-      next[it] = {qty+1, qty+1, qty+1};
+      nx = {qty+1, qty+1, qty+1};
       }
     else {
       bool nextfound = false;
       if(qty >= 10) remaining[o]++;
-      else next[it] = {10,10,10}, nextfound = true;
+      else nx = {10,10,10}, nextfound = true;
       int last = 10;
       for(int k=0; k<30 || !nextfound; k++) {
         int maxstep = 15 + 5 * k;
@@ -94,17 +95,47 @@ namespace inv {
         else 
           xnext = last + 1 + irand(maxstep);
         if(xnext > qty && !nextfound) 
-          next[it] = { last+1, xnext, last + maxstep }, nextfound = true;
+          nx = { last+1, xnext, last + maxstep }, nextfound = true;
         if(xnext <= qty) remaining[o]++; 
         last = xnext;
         }
       }
     }
-  
+
+  int nextp2(int i) {
+    int z = 1;
+    while(z <= i) z <<= 1;
+    return z;
+    }
+    
   void gainMirrors(int qtl) {
     while(qtl > 0) qtl >>= 1, remaining[itOrbMirror]++;
     }
-    
+
+  vector<eItem> offensiveOrbs = {
+    itOrbFlash, itOrbLightning, itOrbPsi, itOrbThorns,
+    itOrbFreedom, itOrbSword, itOrbSword2,
+    itOrbHorns, itOrbDragon, itOrbStunning
+    };
+  
+  vector<eItem> elementalOrbs = {itOrbFire, itOrbWater, itOrbDigging, itOrbAir};
+
+  vector<eItem> demonicOrbs = {itOrbFire, itOrbHorns, itOrbSummon};
+  
+  bool isIn(eItem o, vector<eItem>& l) {
+    for(auto it: l) if(it == o) return true;
+    return false;
+    }
+  
+  void gainRandomOrbs(vector<eItem> orblist, eItem which, int each, int reduce) {
+    const int qoff = size(orblist);
+    for(int i=1; i<qoff; i++) swap(orblist[i], orblist[irand(1+i)]);
+    for(int i=0; i<20; i++) {
+      if((i+1)*each <= items[which] - reduce)
+      remaining[orblist[i%qoff]]++;
+      }
+    }
+  
   void compute() {
     for(int i=0; i<ittypes; i++) remaining[i] = -usedup[i];
     for(int i=0; i<ittypes; i++) if(usedup[i] >= TESTMIRRORED) remaining[i] += MIRRORED;
@@ -148,24 +179,18 @@ namespace inv {
         }
       }
     
-    vector<eItem> offensiveOrbs = {
-      itOrbFlash, itOrbLightning, itOrbPsi, itOrbThorns,
-      itOrbFreedom, itOrbSword, itOrbSword2,
-      itOrbHorns, itOrbDragon, itOrbStunning
-      };
-    const int qoff = size(offensiveOrbs);    
-    for(int i=1; i<qoff; i++) swap(offensiveOrbs[i], offensiveOrbs[irand(1+i)]);
-    for(int i=0; (i+1)*25 <= items[itBone]; i++) 
-      remaining[offensiveOrbs[i%qoff]]++;
+    gainRandomOrbs(offensiveOrbs, itBone, 25, 0);
+    gainRandomOrbs(elementalOrbs, itElemental, 20, 0);
+    gainRandomOrbs(demonicOrbs, itHell, 20, 100);
     
     if(items[itOrbLove] && !items[itSavedPrincess]) items[itSavedPrincess] = 1;
     
     int& r = remaining[itGreenStone];
     
-    if(items[itBone] >= 10) {
+    if(items[itBone] >= 0) {
       for(int i=0; i<ittypes; i++) if(i != itGreenStone) {
         r += usedup[i];
-        if(usedup[i] >= TESTMIRRORED) r -= MIRRORED;
+        if(usedup[i] >= TESTMIRRORED) r -= (MIRRORED - mirrorqty(eItem(i)));
         }
       }
     
@@ -214,6 +239,10 @@ namespace inv {
     "several quests and lands "
     "give you extremely powerful Orbs of the Mirror.\n";
 
+  string extraline(eItem it, string s) {
+    return " "+XLAT1(iinf[it].name) + " ("+s+")";
+    }
+
   void show() {
   
     gamescreen(2);
@@ -245,8 +274,8 @@ namespace inv {
             dialog::addSelItem(XLAT1(iinf[o].name), its(remaining[i]), c);
           else {
             auto pos = orbcoord[oc++];
-            ld px = vid.xres/2 + 2*rad*pos.first + rad*pos.second;
-            ld py = vid.yres/2 + pos.second * rad3;
+            ld px = vid.xcenter + 2*rad*pos.first + rad*pos.second;
+            ld py = vid.ycenter + pos.second * rad3;
             int icol = iinf[o].color;
             if(!remaining[i]) icol = gradient(icol, 0, 0, .5, 1);
             bool gg = graphglyph();
@@ -283,7 +312,6 @@ namespace inv {
       which = orbmap[getcstat];
       }
     else {
-      
       if(which == itNone) {
         displaystr(vid.xres/2, vid.fsize*2, 2, vid.fsize*2, XLAT("Which orb to use?"), 0xC0C0C0, 8);
         }
@@ -301,13 +329,43 @@ namespace inv {
             s += XLAT(" (next at %1)", its(next[t].min));
           else
             s += XLAT(" (next at %1 to %2)", its(next[t].min), its(next[t].max));
+
           displaystr(vid.xres/2, vid.fsize*4, 2, vid.fsize, s, icol, 8);
+          
+          
+          string extras = "";
+          for(int k=0; k<ORBLINES; k++) {
+            auto oi = orbinfos[k];
+            if(oi.gchance || oi.orb != which) continue;
+            eItem it = treasureType(oi.l);
+            extras += extraline(it, "10");
+            }
+          
+          if(which == itOrbMirror) {
+            extras += extraline(itOrbYendor, its(nextp2(items[itOrbYendor])));
+            extras += extraline(itHolyGrail, its(nextp2(items[itHolyGrail])));
+            auto& nx = next[itHyperstone];
+            extras += extraline(itHyperstone, its(nx.min));
+            }
+          if(isIn(which, offensiveOrbs)) extras += extraline(itBone, its(items[itBone]/25*25+25) + "?");
+          if(isIn(which, elementalOrbs)) extras += extraline(itElemental, its(items[itBone]/20*20+20) + "?");
+          if(isIn(which, demonicOrbs)) extras += extraline(itHell, its(max(125, items[itHell]/25*25+25)) + "?");
+
+          if(extras != "")
+            displaystr(vid.xres/2, vid.fsize*5, 2, vid.fsize, XLAT("Extras:")+extras, icol, 8);
           }
-        if(remaining[which] != 1)
-          displaystr(vid.xres/2, vid.fsize*5, 2, vid.fsize, XLAT("Number of uses left: %1", its(remaining[which])), icol, 8);
+
+        if(remaining[which] != 1 || usedup[which]) {
+          string s = XLAT("Number of uses left: %1", its(remaining[which]));
+          int us = usedup[which];
+          if(us >= TESTMIRRORED) s += XLAT(" (mirrored)"), us = us - MIRRORED + mirrorqty(which);
+          if(us) s += XLAT(" (used %1 times)", its(us));
+          displaystr(vid.xres/2, vid.yres - vid.fsize*6, 2, vid.fsize, s, icol, 8);
+          }
+
 #if ISMOBILE==0
         string hot = XLAT1("Hotkey: "); hot += getcstat;
-        displaystr(vid.xres/2, vid.fsize*6, 2, vid.fsize, hot, icol, 8);
+        displaystr(vid.xres/2, vid.yres - vid.fsize*5, 2, vid.fsize, hot, icol, 8);
 #endif
   
         eOrbLandRelation olr = getOLR(oi.orb, getPrizeLand());
@@ -330,7 +388,7 @@ namespace inv {
       
       if(orbmap.count(uni)) {
         eItem orb = orbmap[uni];
-        if(!remaining[orb]) ;
+        if(remaining[orb] <= 0) ;
         else if(orb == itOrbMirror) {
           mirroring = !mirroring;
           // an amusing message
@@ -341,21 +399,20 @@ namespace inv {
             forCellEx(c2, cwt.c) if(c2->wall == waMirror || c2->wall == waCloud || c2->wall == waMirrorWall)
               next = true;
             if(!next) {
-              addMessage("You need to stand next to a magic mirror or cloud to use %the1.", itOrbMirror);
+              addMessage(XLAT("You need to stand next to a magic mirror or cloud to use %the1.", itOrbMirror));
               mirroring = false;
               }
             }
           }
         else if(mirroring) {
           if(usedup[orb] >= TESTMIRRORED) {
-            addMessage("Each orb type can be mirrored only once.");
+            addMessage(XLAT("Each orb type can be mirrored only once."));
             mirroring = false;
             }
-          else if(remaining[orb]) {
+          else if(remaining[orb] > 0) {
             usedup[itOrbMirror]++;
             usedup[orb] += MIRRORED;
             usedup[orb] -= mirrorqty(orb);
-            usedup[itGreenStone]--;
             addMessage(XLAT("You mirror %the1.", orb));
             mirroring = false;
             }
@@ -380,7 +437,10 @@ namespace inv {
       else if(uni == '1') plain = !plain;
       else if(sym == SDLK_F1) 
         gotoHelp(which ? generateHelpForItem(which) : NODESCYET);
-      else if(doexiton(sym, uni)) popScreen();
+      else if(doexiton(sym, uni)) {
+        if(mirroring) mirroring = false;
+        popScreen();
+        }
       };
     }
 

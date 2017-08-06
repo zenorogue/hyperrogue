@@ -3601,6 +3601,35 @@ void explodeAround(cell *c) {
     }
   }
 
+void killHardcorePlayer(int id, flagtype flags) {
+  charstyle& cs = getcs(id);
+  cell *c = playerpos(id);
+  if(flags & AF_FALL)
+    fallingMonsterAnimation(c, moPlayer);
+  else for(int i=0; i<6; i++) {
+    drawParticle(c, cs.skincolor >> 8, 100);
+    drawParticle(c, cs.haircolor >> 8, 125);
+    if(cs.charid)
+      drawParticle(c, cs.dresscolor >> 8, 150);
+    else
+      drawParticle(c, cs.skincolor >> 8, 150);
+    if(cs.charid == 3)
+      drawParticle(c, cs.dresscolor2 >> 8, 175);
+    else 
+      drawParticle(c, cs.skincolor >> 8, 150);
+    drawParticle(c, cs.swordcolor >> 8, 200);
+    }
+  
+  if(multi::players > 1 && multi::activePlayers() > 1) {
+    multi::leaveGame(id);
+    }
+  else {
+    canmove = false;
+    achievement_final(true);
+    msgscroll = 0;
+    }
+  }
+
 void killThePlayer(eMonster m, int id, flagtype flags) {
   if(markOrb(itOrbShield)) return;
   if(shmup::on) {
@@ -3619,13 +3648,7 @@ void killThePlayer(eMonster m, int id, flagtype flags) {
     }
   else if(hardcore) {
     addMessage(XLAT("You are killed by %the1!", m));
-    if(multi::players > 1 && multi::activePlayers() > 1) 
-      multi::leaveGame(id);
-    else {
-      canmove = false;
-      achievement_final(true);
-      msgscroll = 0;
-      }
+    killHardcorePlayer(id, flags);
     }
   else if(m == moLightningBolt && lastmovetype == lmAttack && isAlchAny(playerpos(id))) {
     addMessage(XLAT("You are killed by %the1!", m));
@@ -5196,6 +5219,7 @@ void movemonsters() {
 bool checkNeedMove(bool checkonly, bool attacking) {
   if(items[itOrbDomination] > ORBBASE && cwt.c->monst) 
     return false;
+  int flags = 0;
   if(cwt.c->monst) {
     if(checkonly) return true;
     if(isMountable(cwt.c->monst))
@@ -5212,6 +5236,7 @@ bool checkNeedMove(bool checkonly, bool attacking) {
     if(markOrb2(itOrbAether)) return false;
     if(markOrb2(itOrbFish)) return false;
     if(checkonly) return true;
+    flags |= AF_FALL;
     addMessage(XLAT("Ice below you is melting! RUN!"));
     }
   else if(!attacking && cellEdgeUnstable(cwt.c)) {
@@ -5238,6 +5263,7 @@ bool checkNeedMove(bool checkonly, bool attacking) {
   else if(cwt.c->wall == waChasm) {
     if(markOrb2(itOrbAether)) return false;
     if(checkonly) return true;
+    flags |= AF_FALL;
     addMessage(XLAT("The floor has collapsed! RUN!"));
     }
   else if(items[itOrbAether] > ORBBASE && !passable(cwt.c, NULL, P_ISPLAYER | P_NOAETHER)) {
@@ -5251,12 +5277,8 @@ bool checkNeedMove(bool checkonly, bool attacking) {
     addMessage(XLAT("Your Aether power has expired! RUN!"));
     }
   else return false;
-  if(hardcore) { 
-    canmove = false;
-    achievement_final(true);
-    msgscroll = 0;
-    return false;
-    }
+  if(hardcore) 
+    killHardcorePlayer(multi::cpid, flags);
   return true;
   }
 
@@ -5389,7 +5411,7 @@ bool hasSafeOrb(cell *c) {
     c->item == itOrbSafety ||
     c->item == itOrbShield ||
     c->item == itOrbShell  ||
-    c->item == itOrbYendor;
+    (c->item == itOrbYendor && yendor::state(c) == yendor::ysUnlocked);
   }
 
 void checkmove() {
@@ -5592,8 +5614,10 @@ void collectMessage(cell *c2, eItem which) {
     addMessage(XLAT("This orb is dead..."));
   else if(which == itGreenStone)
     addMessage(XLAT("Another Dead Orb."));
-  else if(itemclass(which) != IC_TREASURE)
-    addMessage(XLAT("You have found %the1!", which));
+  else if(itemclass(which) != IC_TREASURE) {
+    if(c2->wall != waBoat)
+      addMessage(XLAT("You have found %the1!", which));
+    }
   else if(which == itBabyTortoise) {
     playSound(c2, playergender() ? "speak-princess" : "speak-prince");
     addMessage(XLAT("Aww, poor %1... where is your family?", which));
@@ -5639,6 +5663,18 @@ void collectMessage(cell *c2, eItem which) {
   else if(which == itPalace && items[itPalace] == U5-1 && !specialmode) {
     addMessage(XLAT("The rug depicts a man in a deep dungeon, unable to leave."));
     }
+  else if(which == itFeather && items[itFeather] == 25-1 && !specialmode && inv::on)
+    addMessage(XLAT("You feel the presence of free saves on the Crossroads."));
+  else if(which == itHell && items[itHell] == 25-1 && !specialmode && inv::on)
+    addMessage(XLAT("You feel the Orbs of Yendor nearby..."));
+  else if(which == itHell && items[itHell] == 50-1 && !specialmode && inv::on)
+    addMessage(XLAT("You feel the Orbs of Yendor in the Crossroads..."));
+  else if(which == itHell && items[itHell] == 100-1 && !specialmode && inv::on)
+    addMessage(XLAT("You feel the Orbs of Yendor everywhere..."));
+  else if(which == itBone && items[itBone] % 25 == 24 && !specialmode && inv::on)
+    addMessage(XLAT("You have gained an offensive power!"));
+  else if(which == itHell && items[itHell] >= 100 && items[itHell] % 25 == 24 && !specialmode && inv::on)
+    addMessage(XLAT("A small reward for braving the Hell."));
   else if(which == itIvory && items[itIvory] == U5-1 && !specialmode) {
     addMessage(XLAT("You feel attuned to gravity, ready to face mountains and dungeons."));
     }
@@ -5844,7 +5880,7 @@ bool collectItem(cell *c2, bool telekinesis) {
       addMessage(XLAT("The Orb of Safety from the Land of Eternal Motion might save you."));
 #endif
     
-#define IF(x) if(pg < (x) && g2 >= x)
+#define IF(x) if(pg < (x) && g2 >= x && !peace::on)
 
     IF(R60/4) 
       addMessage(XLAT("Collect treasure to access more different lands..."));
@@ -6447,7 +6483,7 @@ bool movepcto(int d, int subdir, bool checkonly) {
       placeWater(c2, cwt.c);
       moveBoat(c2, cwt.c);
       c2->mondir = neighborId(c2, cwt.c);
-      if(cwt.c->item) moveItem(cwt.c, c2, false), boatmove = true;
+      if(cwt.c->item) moveItem(cwt.c, c2, true), boatmove = true;
       goto boatjump;
       }
 

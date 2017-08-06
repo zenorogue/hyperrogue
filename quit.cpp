@@ -273,7 +273,7 @@ hint hints[] = {
       },
     [] () {
       if(!sphere) {
-        euclidland = laHalloween;
+        specialland = laHalloween;
         targetgeometry = gSphere;
         restartGame('E');
         vid.alpha = 999;

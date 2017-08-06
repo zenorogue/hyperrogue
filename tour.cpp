@@ -150,7 +150,7 @@ bool handleKeyTour(int sym, int uni) {
 
     if(sym == '1') targetgeometry = gSphere;
     if(sym == '2') targetgeometry = gEuclid;
-    firstland = euclidland = cwt.c->land;
+    firstland = specialland = cwt.c->land;
     restartGame(sym == '3' ? '7' : 'g', true);
     presentation(pmGeometryStart);
     return true;
@@ -289,7 +289,7 @@ void start() {
   if(!tour::on) presentation(pmStartAll);
   else {
     presentation(pmStop);
-    firstland = euclidland = laIce;
+    firstland = specialland = laIce;
     }
   restartGame('T');
   if(tour::on) {
@@ -299,6 +299,25 @@ void start() {
   }
 
 slide default_slides[] = {
+#if ISMOBILE
+  {"Note for mobiles", 10, LEGAL_ANY | QUICKSKIP,
+    "This tutorial is designed for computers, "
+    "and keys are given for all actions. It will "
+    "work without a keyboard though, although less "
+    "comfortably -- just ignore the keys "
+    "given and select options from MENU.\n\n"
+    "Select 'next slide' from MENU.",
+    
+    [] (presmode mode) {
+      if(mode == pmStartAll) firstland = specialland = laIce;
+      if(mode == 1) {
+        if(tour::texts) addMessage(XLAT("Welcome to the HyperRogue tutorial!"));
+        else clearMessages();  
+        }
+      SHOWLAND( l == laIce );
+      }
+    },
+#endif
   {"Introduction", 10, LEGAL_ANY | QUICKSKIP,
     "This tutorial is mostly aimed to show what is "
     "special about the geometry used by HyperRogue. "
@@ -309,7 +328,7 @@ slide default_slides[] = {
     "press ESC to see a "
     "menu with other options.",
     [] (presmode mode) {
-      if(mode == pmStartAll) firstland = euclidland = laIce;
+      if(mode == pmStartAll) firstland = specialland = laIce;
       if(mode == 1) {
         if(tour::texts) addMessage(XLAT("Welcome to the HyperRogue tutorial!"));
         else clearMessages();  

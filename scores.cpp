@@ -47,7 +47,7 @@ int modediff(score *S) {
   if(S->box[196] != chaosmode) diff += 32;
   if(S->box[119] != shmup::on) diff += 64;
   if(pureHardcore() && !isHardcore(S)) diff += 128;
-  if(g != gNormal && S->box[120] != euclidland) 
+  if(g != gNormal && S->box[120] != specialland) 
     diff += 256;
   if(g != geometry) {
     diff += 512;

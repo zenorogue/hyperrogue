@@ -23,6 +23,60 @@ bool verless(string v, string cmp) {
   return v < cmp;
   }
 
+void welcomeMessage() {
+  if(tactic::trailer) return;
+#if CAP_TOUR
+  else if(tour::on) return; // displayed by tour
+#endif
+  else if(princess::challenge) {
+    kills[moVizier] = 1;
+    princess::forceMouse = true;
+    if(yendor::everwon)
+      items[itGreenStone] = 99;
+    addMessage(XLAT("Welcome to %the1 Challenge!", moPrincess));
+    addMessage(XLAT("The more Hypersian Rugs you collect, the harder it is.", moPrincess));
+    }
+  /* if(tactic::on && isCrossroads(firstland)) {
+    for(int i=0; i<ittypes; i++) 
+      if(itemclass(eItem(i)) == IC_TREASURE && i != itHyperstone)
+        items[i] = 10;
+    kills[moYeti] = 1000;
+    } */
+  
+  else if(randomPatternsMode)
+    addMessage(XLAT("Welcome to the Random Pattern mode!"));
+  else if(tactic::on)
+    addMessage(XLAT("You are playing %the1 in the Pure Tactics mode.", firstland));
+  else if(yendor::on)
+    addMessage(XLAT("Welcome to the Yendor Challenge %1!", its(yendor::challenge)));
+  else if(peace::on) ; // no welcome message
+  else if(shmup::on) ; // welcome message given elsewhere
+  else if(euclid)
+    addMessage(XLAT("Welcome to the Euclidean mode!"));
+  else if(sphere && specialland == laHalloween)
+    addMessage(XLAT("Welcome to Halloween!"));
+  else if(elliptic)
+    addMessage(XLAT("Good luck in the elliptic plane!"));
+  else if(sphere)
+    addMessage(XLAT("Welcome to Spherogue!"));
+#if CAP_ROGUEVIZ
+  else if(rogueviz::on)
+    addMessage(XLAT("Welcome to RogueViz!"));
+#endif
+  else {
+    addMessage(XLAT("Welcome to HyperRogue!"));
+    }
+
+  if(shmup::on && (specialland == laMirror || specialland == laMirrorOld) && (geometry == gElliptic || geometry == gQuotient))
+    addMessage(XLAT("This combination is known to be buggy at the moment."));
+
+#if ISMAC
+  addMessage(XLAT("Press F1 or right-shift-click things for help."));
+#elif !ISMOBILE
+  addMessage(XLAT("Press F1 or right-click things for help."));
+#endif
+  }
+  
 // initialize the game
 void initgame() {
   DEBB(DF_INIT, (debugfile,"initGame\n"));
@@ -34,9 +88,9 @@ void initgame() {
     firstland = safetyland;
     }
   
-  if(peace::on) euclidland = firstland = peace::whichland;
+  if(peace::on) firstland = specialland;
   
-  if(tactic::on && (euclid || sphere)) euclidland = firstland;
+  if(tactic::on && (euclid || sphere)) specialland = firstland;
   
   if(firstland == laNone || firstland == laBarrier)
     firstland = laCrossroads;
@@ -48,7 +102,7 @@ void initgame() {
   if(isGravityLand(firstland) && !tactic::on) firstland = laCrossroads;
   
   cwt.c = currentmap->gamestart(); cwt.spin = 0; cwt.mirrored = false;
-  cwt.c->land = (euclid || sphere) ? euclidland : firstland;
+  cwt.c->land = (euclid || sphere) ? specialland : firstland;
   
   chaosAchieved = false;
 
@@ -92,7 +146,7 @@ void initgame() {
 
   for(int i=0; i<65536; i++) euland[i] = laNone;
   
-  if(euclid && euclidland == laPrincessQuest) {
+  if(euclid && specialland == laPrincessQuest) {
     cell *c = euclideanAtCreate(EPX, EPY);
     princess::generating = true;
     c->land = laPalace;
@@ -198,56 +252,7 @@ void initgame() {
     if(!randomPatternsMode && !tactic::on && !yendor::on && !peace::on) {
       if(firstland != (princess::challenge ? laPalace : laIce)) cheater++;
       }
-    if(tactic::trailer) ;
-#if CAP_TOUR
-    else if(tour::on) ; // displayed by tour
-#endif
-    else if(princess::challenge) {
-      kills[moVizier] = 1;
-      princess::forceMouse = true;
-      if(yendor::everwon)
-        items[itGreenStone] = 99;
-      addMessage(XLAT("Welcome to %the1 Challenge!", moPrincess));
-      addMessage(XLAT("The more Hypersian Rugs you collect, the harder it is.", moPrincess));
-      }
-    /* if(tactic::on && isCrossroads(firstland)) {
-      for(int i=0; i<ittypes; i++) 
-        if(itemclass(eItem(i)) == IC_TREASURE && i != itHyperstone)
-          items[i] = 10;
-      kills[moYeti] = 1000;
-      } */
-    
-    else if(randomPatternsMode)
-      addMessage(XLAT("Welcome to the Random Pattern mode!"));
-    else if(tactic::on)
-      addMessage(XLAT("You are playing %the1 in the Pure Tactics mode.", firstland));
-    else if(yendor::on)
-      addMessage(XLAT("Welcome to the Yendor Challenge %1!", its(yendor::challenge)));
-    else if(peace::on) ; // no welcome message
-    else if(shmup::on) ; // welcome message given elsewhere
-    else if(euclid)
-      addMessage(XLAT("Welcome to the Euclidean mode!"));
-    else if(sphere && euclidland == laHalloween)
-      addMessage(XLAT("Welcome to Halloween!"));
-    else if(elliptic)
-      addMessage(XLAT("Good luck in the elliptic plane!"));
-    else if(sphere)
-      addMessage(XLAT("Welcome to Spherogue!"));
-#if CAP_ROGUEVIZ
-    else if(rogueviz::on)
-      addMessage(XLAT("Welcome to RogueViz!"));
-#endif
-    else {
-      addMessage(XLAT("Welcome to HyperRogue!"));
-#if ISMAC
-      addMessage(XLAT("Press F1 or right-shift-click things for help."));
-#elif !ISMOBILE
-      addMessage(XLAT("Press F1 or right-click things for help."));
-#endif
-      }
-
-    if(shmup::on && (euclidland == laMirror || euclidland == laMirrorOld) && (geometry == gElliptic || geometry == gQuotient))
-      addMessage(XLAT("This combination is known to be buggy at the moment."));
+    welcomeMessage();
     }
   else {
     usedSafety = true;
@@ -456,8 +461,8 @@ void applyBoxes() {
   applyBoxBool(hardcore, "hardcore");
   applyBoxNum(hardcoreAt, "");
   applyBoxBool(shmup::on, "shmup");
-  if(saving) applyBoxSave(euclidland, "euclid land");
-  else if(loading) euclidland = eLand(applyBoxLoad("euclid land"));
+  if(saving) applyBoxSave(specialland, "euclid land");
+  else if(loading) specialland = eLand(applyBoxLoad("euclid land"));
   else fakebox[boxid++] = true;
   
   applyBoxI(itCoast);
@@ -931,6 +936,13 @@ void loadsave() {
     safety = true;
     if(items[itSavedPrincess] < 0) items[itSavedPrincess] = 0;
     addMessage(XLAT("Game loaded."));
+    showstartmenu = false;
+    // reset unsavable special modes just in case
+    peace::on = false;
+    randomPatternsMode = false;
+    yendor::on = false;
+    tactic::on = false;
+    tour::on = false;
     }
   }
 #endif
@@ -1131,326 +1143,6 @@ void restartGame(char switchWhat, bool push) {
   restartGraph();
   resetmusic();
   resetmusic();
-  }
-
-static int orbid = 0;
-
-eItem nextOrb() {
-  orbid++;
-  eItem i = eItem(orbid % ittypes);
-  if(itemclass(i) == IC_ORB) return i;
-  else return nextOrb();
-  }
-
-eItem randomTreasure() {
-  eItem i = eItem(hrand(ittypes));
-  if(itemclass(i) == IC_TREASURE) return i;
-  else return randomTreasure();
-  }
-
-eItem randomTreasure2(int cv) {
-  int bq = 60000, cq = 0;
-  eItem best = itDiamond;
-  eItem lt = localTreasureType();
-  for(int a=1; a<ittypes; a++) {
-    eItem i = eItem(a);
-    if(itemclass(i) != IC_TREASURE) continue;
-    int q = 2*items[i];
-    if(a == lt) q -= (2*cv-1);
-    if(a == itEmerald && bearsCamelot(cwt.c->land)) q -= 8;
-    if(a == itElixir && isCrossroads(cwt.c->land)) q -= 7;
-    if(a == itIvory && isCrossroads(cwt.c->land)) q -= 6;
-    if(a == itPalace && isCrossroads(cwt.c->land)) q -= 5;
-    if(a == itIvory && cwt.c->land == laJungle) q -= 5;
-    if(a == itIvory && cwt.c->land == laPalace) q -= 5;
-    if(q < bq) bq = q, cq = 0;
-    if(q == bq) { cq++; if(hrand(cq) == 0) best = i; }
-    }
-  return best;
-  }
-
-bool isTechnicalLand(eLand l) {
-  return l == laNone || l == laOceanWall || l == laBarrier || l == laCanvas ||
-    l == laHauntedWall || l == laHauntedBorder || l == laCA ||
-    l == laMirrorWall || l == laMirrored;
-  }
-
-eLand cheatdest;
-
-void cheatMoveTo(eLand l) {
-  cheatdest = l;
-  if(l == laCrossroads5) l = laCrossroads;
-  activateSafety(l);
-  cheatdest = laNone;
-  }
-
-bool applyCheat(char u, cell *c = NULL) {
-
-  if(u == 'G') {
-    addMessage(XLAT("You summon a golem!"));
-    cheater++;
-    int i = cwt.spin;
-    if(passable(cwt.c->mov[i], NULL, 0)) 
-      cwt.c->mov[i]->monst = hrand(2) ? moGolem : moTameBomberbird;
-    return true;
-    }
-  if(u == 'L') {
-    do {
-      if(firstland == eLand(landtypes-1))
-        firstland = eLand(2);
-      else
-        firstland = eLand(firstland+1);
-      }
-    while(isTechnicalLand(firstland) || isCyclic(firstland));
-    euclidland = firstland;
-    cheater++; addMessage(XLAT("You will now start your games in %1", firstland));
-    return true;
-    }
-  if(u == 'C') {
-    cheater++; 
-    cheatMoveTo(laCrossroads);
-    addMessage(XLAT("Activated the Hyperstone Quest!"));
-
-    for(int t=1; t<ittypes; t++) 
-      if(t != itHyperstone && t != itBounty && itemclass(eItem(t)) == IC_TREASURE) {
-        items[t] = 10;
-        }
-    kills[moYeti] = 200;
-    kills[moDesertman] = 200;
-    kills[moRunDog] = 200;
-    kills[moZombie] = 200;
-    kills[moMonkey] = 200;
-    kills[moCultist] = 200;
-    kills[moTroll] = 200;
-    return true;
-    }
-  if(u == 'P') {
-    for(int i=0; i<ittypes; i++) 
-      if(itemclass(eItem(i)) == IC_ORB) 
-        items[i] = 0;
-    cheater++; addMessage(XLAT("Orb power depleted!"));
-    return true;
-    }
-  if(u == 'O') {
-    cheater++; addMessage(XLAT("Orbs summoned!"));
-    for(int i=0; i<cwt.c->type; i++) 
-      if(passable(cwt.c->mov[i], NULL, 0)) {
-        eItem it = nextOrb();
-        cwt.c->mov[i]->item = it;
-        }
-    return true;
-    }
-  if(u == 'F') {
-    if(hardcore && !canmove) { 
-      canmove = true; 
-      addMessage(XLAT("Revived!"));
-      }
-    else {
-      items[itOrbFlash] += 1;
-      items[itOrbTeleport] += 1;
-      items[itOrbLightning] += 1;
-      items[itOrbSpeed] += 1;
-      items[itOrbShield] += 1;
-      cheater++; addMessage(XLAT("Orb power gained!"));
-      canmove = true;
-      }
-    return true;
-    }
-  if(u == 'D') {
-    items[itGreenStone] += 10;
-    cheater++; addMessage(XLAT("Dead orbs gained!"));
-    return true;
-    }
-  if(u == 'R'-64) buildRosemap();
-#if CAP_EDIT
-  if(u == 'A') {
-    lastexplore = turncount;
-    pushScreen(mapeditor::showMapEditor);
-    return true;
-    }
-  if(u == 'A'-64) {
-    mapeditor::drawcell = mouseover ? mouseover : cwt.c;
-    pushScreen(mapeditor::showDrawEditor);
-    return true;
-    }
-#endif
-  if(u == 'Y') {
-    items[itOrbYendor] ++;
-    cheater++; addMessage(XLAT("Orb of Yendor gained!"));
-    return true;
-    }
-  if(u == 'T') {
-    items[randomTreasure2(10)] += 10;
-    cheater++; addMessage(XLAT("Treasure gained!"));
-    return true;
-    }
-  if(u == 'T'-64) {
-    items[randomTreasure2(100)] += 100;
-    cheater++; addMessage(XLAT("Lots of treasure gained!"));
-    return true;
-    }
-  if(u == 'I'-64) {
-    items[randomTreasure2(10)] += 25;
-    cheater++; addMessage(XLAT("Treasure gained!"));
-    return true;
-    }
-  if(u == 'U'-64) {
-    items[randomTreasure2(10)] += 50;
-    cheater++; addMessage(XLAT("Treasure gained!"));
-    return true;
-    }
-  if(u == 'W') {
-    addMessage(XLAT("You summon a sandworm!"));
-    cheater++;
-    int i = cwt.spin;
-    if(passable(cwt.c->mov[i], NULL, 0))
-      cwt.c->mov[i]->monst = moWorm,
-      cwt.c->mov[i]->mondir = NODIR;
-    return true;
-    }
-  if(u == 'I') {
-    addMessage(XLAT("You summon an Ivy!"));
-    cheater++;
-    int i = cwt.spin;
-    int j = cwt.c->spn(i);
-    cell* c = cwt.c->mov[i]->mov[(j+3)%cwt.c->mov[i]->type];
-    if(passable(c, NULL, 0)) buildIvy(c, 0, 1);
-    return true;
-    }
-  if(u == 'E') {
-    addMessage(XLAT("You summon a monster!"));
-    cheater++;
-    int i = cwt.spin;
-    if(cwt.c->mov[i]->wall == waChasm)
-      cwt.c->mov[i]->wall = waNone;
-    if(passable(cwt.c->mov[i], NULL, P_MONSTER)) {
-      eMonster mo[9] = { moEagle, moPyroCultist, moGhost, moTroll, moMiner, moVineBeast, moBug0,
-        moBomberbird, moSkeleton };
-      cwt.c->mov[i]->monst = mo[hrand(9)];
-      cwt.c->mov[i]->stuntime = 3;
-      cwt.c->mov[i]->hitpoints = 3;
-      }
-    return true;
-    }
-  if(u == 'E'-64) {
-    if(geometry) {
-      restartGame(0, false);
-      }
-    else {
-      euclidland = cwt.c->land;
-      printf("target geometry = %d\n", targetgeometry);
-      restartGame('g', true);
-      }
-    return true;
-    }
-  if(u == 'H') {
-    addMessage(XLAT("You summon some Thumpers!"));
-    cheater++;
-    for(int i=0; i<cwt.c->type; i++) 
-      if(passable(cwt.c->mov[i], NULL, 0)) {
-        eWall ws[3] = { waThumperOff, waBigStatue, waBoat };
-        cwt.c->mov[i]->wall = ws[hrand(3)];
-        }
-    return true;
-    }
-  if(u == 'B') {
-    addMessage(XLAT("You summon a bonfire!"));
-    cheater++;
-    int i = cwt.spin;
-    if(passable(cwt.c->mov[i], NULL, 0))
-      cwt.c->mov[i]->wall = waBonfireOff;
-    return true;
-    }
-  if(u == 'Z') {
-    flipplayer = false;
-    mirror::act(1, mirror::SPINSINGLE);
-    cwspin(cwt, 1);
-    return true;
-    }
-  if(u == 'J') {
-    if(items[localTreasureType()] > 0)
-      items[localTreasureType()] = 0;
-    else for(int i=1; i<ittypes; i++) 
-      if(itemclass(eItem(i)) == IC_TREASURE) 
-        items[i] = 0;
-    cheater++; addMessage(XLAT("Treasure lost!"));
-    return true;
-    }
-  if(u == 'K') {
-    for(int i=0; i<motypes; i++) kills[i] += 10;
-    kills[moPlayer] = 0;
-    cheater++; addMessage(XLAT("Kills gained!"));
-    return true;
-    }
-  if(u == 'S') {
-    canmove = true;
-    cheatMoveTo(cwt.c->land);
-    items[itOrbSafety] += 3;
-    cheater++; addMessage(XLAT("Activated Orb of Safety!"));
-    return true;
-    }
-  if(u == 'U') {
-    canmove = true;
-    cheatMoveTo(firstland);
-    cheater++; addMessage(XLAT("Teleported to %1!", firstland));
-    return true;
-    }
-  if(u == 'W'-64) {
-    pushScreen(linepatterns::showMenu);
-    return true;
-    }
-  if(u == 'G'-64) {
-    timerghost = !timerghost;
-    cheater++; 
-    addMessage(XLAT("turn count = %1 last exploration = %2 ghost timer = %3",
-      its(turncount), its(lastexplore), ONOFF(timerghost)));
-    return true;
-    }
-  if(u == 'F'-64) {
-    items[itOrbShield] += 30;
-    return true;
-    }
-  if(u == 'Y'-64) {
-    int i = cwt.spin;
-    cwt.c->mov[i]->item = itOrbYendor;
-    return true;
-    }
-  if(u == 'B'-64) {
-    int i = cwt.spin;
-    sword::angle[0]++;
-    cwt.c->mov[i]->item = hrand(2) ? itOrbSword2 : itOrbSword;
-    return true;
-    }
-  if(u == 'X'-64) {
-    items[itOrbNature] += 50;
-    cheater++;
-    return true;
-    }
-  if(u == 'V'-64) {
-    viewdists = !viewdists;
-    return true;
-    }
-  if(u == 'L'-64) {
-    cell *c = mouseover;
-    describeCell(c);
-    printf("Neighbors:"); for(int i=0; i<c->type; i++) printf("%p ",  c->mov[i]);
-    printf("Barrier: dir=%d left=%d right=%d\n",
-      c->bardir, c->barleft, c->barright);
-    return true;
-    }
-  if(u == 'C'-64) {
-    cblind = !cblind;
-    return true;
-    }
-  if(u == 'P'-64) 
-    peace::on = !peace::on;
-#ifdef CHEAT_DISABLE_ALLOWED
-  if(u == 'D'-64) {
-    cheater = 0; autocheat = 0;
-    return true;
-    }
-#endif
-  return false;
   }
 
 purehookset clearmemory;

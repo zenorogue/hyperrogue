@@ -1,6 +1,6 @@
-#define VER "10.0e"
-#define VERNUM 10005
-#define VERNUM_HEX 0xA005
+#define VER "10.0g"
+#define VERNUM 10007
+#define VERNUM_HEX 0xA007
 
 #define GEN_M 0
 #define GEN_F 1
@@ -93,7 +93,7 @@
 #endif
 
 #ifndef CAP_EDIT
-#define CAP_EDIT (!ISMOBWEB && !ISMINI)
+#define CAP_EDIT (!ISWEB && !ISMINI)
 #endif
 
 #ifndef CAP_MODEL
@@ -330,6 +330,7 @@ const char *loadlevel = NULL;
 bool inv::on;
 #endif
 #include "system.cpp"
+#include "debug.cpp"
 #include "geometry.cpp"
 #include "polygons.cpp"
 #include "mapeditor.cpp"
@@ -368,6 +369,7 @@ bool fixseed = false;
 int startseed = 0;
 
 void initAll() {
+  showstartmenu = true;
   ca::init();
   arg::read(1);
   srand(time(NULL));
@@ -552,7 +554,13 @@ void handleclick(MOBPAR_FORMAL) {
       
     if(andmode >= 10) andmode -= 10;
 
-  if(andmode == 3) pushScreen(showMainMenu), andmode = 0;
+  if(andmode == 3) {
+    if(tour::on)
+      showMissionScreen();
+    else
+      pushScreen(showMainMenu);
+    andmode = 0;
+    }
   }
 
 int touchedAt;

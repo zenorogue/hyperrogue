@@ -536,7 +536,7 @@ void achievement_final(bool really_final) {
     return;
     }
 
-  if(sphere && euclidland == laHalloween) {
+  if(sphere && specialland == laHalloween) {
     if(shmup::on || chaosmode || purehepta || numplayers() > 1 || tactic::on || randomPatternsMode)
       return;
     achievement_score(LB_HALLOWEEN, items[itTreat]);

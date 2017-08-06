@@ -3,7 +3,7 @@
 
 // #define CHECKTRANS
 
-#define NUMLAN 6
+#define NUMLAN 7
 
 struct stringpar {
   string v;
@@ -241,6 +241,27 @@ void parrep(string& x, string w, stringpar p) {
       rep(x, "%Der"+w, "The");
       rep(x, "%der"+w, "the");
       rep(x, "%den"+w, "the");
+      }
+    }
+  if(l == 6) {
+    if(N) {
+      rep(x, "%"+w, N->n[5].nom);
+      rep(x, "%P"+w, N->n[5].nomp);
+      rep(x, "%na"+w, choose4(N->n[5].genus, "o", "a", "os", "as") + " " + N->n[5].nom);
+      rep(x, "%g"+w, choose4(N->n[5].genus, "do", "da", "dos", "das")+ " " + N->n[5].nom);
+      rep(x, "%d"+w, choose4(N->n[5].genus, "ao", "à", "aos", "às")+ " " + N->n[5].nom);
+      rep(x, "%l"+w, choose4(N->n[5].genus, "no", "na", "nos", "nas")+ " " + N->n[5].nom);
+      rep(x, "%abl"+w, choose4(N->n[5].genus, "pelo", "pela", "pelos", "pelas")+ " " + N->n[5].nom);
+      rep(x, "%seu"+w, choose4(N->n[5].genus, "seu", "sua", "seus", "suas"));
+      }
+    else {
+      rep(x, "%"+w,p.v);
+      rep(x, "%P"+w, p.v);
+      rep(x, "%na"+w, p.v);
+      rep(x, "%g"+w, p.v);
+      rep(x, "%d"+w, p.v);
+      rep(x, "%l"+w, p.v);
+      rep(x, "%abl"+w, p.v);
       }
     }
 #endif

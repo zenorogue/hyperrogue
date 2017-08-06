@@ -1,8 +1,14 @@
 videopar vid;
 
-charstyle& getcs() {
-  if(multi::players>1 && multi::cpid >= 0 && multi::cpid < multi::players)
-    return multi::scs[multi::cpid];
+#if ISANDROID
+#define ANDROID_SETTINGS settingsChanged = true;
+#else
+#define ANDROID_SETTINGS ;
+#endif
+
+charstyle& getcs(int id) {
+  if(multi::players>1 && id >= 0 && id < multi::players)
+    return multi::scs[id];
   else
     return vid.cs;
   }
@@ -114,7 +120,7 @@ template<> struct saver<bool> : dsaver<bool> {
 template<> struct saver<unsigned> : dsaver<unsigned> {
   saver<unsigned>(unsigned& val) : dsaver<unsigned>(val) { }
   string save() { return itsh(val); }
-  void load(const string& s) { val = strtol(s.c_str(), NULL, 16); }
+  void load(const string& s) { val = (unsigned) strtoll(s.c_str(), NULL, 16); }
   };
 
 template<> struct saver<ld> : dsaver<ld> {
@@ -272,20 +278,27 @@ void initConfig() {
     
   vid.killreduction = 0;
   
+  addsaver(vid.skipstart, "skip the start menu", false);
+  addsaver(vid.quickmouse, "quick mouse", !ISPANDORA);
+  
+  // colors
+  
+  addsaver(backcolor, "color:background");
+  addsaver(forecolor, "color:foreground");
+  addsaver(bordcolor, "color:borders");
+
   // modes
     
   addsaverenum(geometry, "mode-geometry");
-  addsaverenum(euclidland, "mode-geometry land");
   addsaver(shmup::on, "mode-shmup", false);
   addsaver(hardcore, "mode-hardcore", false);
   addsaver(chaosmode, "mode-chaos");
   addsaver(inv::on, "mode-Orb Strategy");
   addsaver(purehepta, "mode-heptagonal", false);
   addsaver(peace::on, "mode-peace");
+  addsaver(peace::otherpuzzles, "mode-peace-submode");
+  addsaverenum(specialland, "land for special modes");
   
-  addsaver(backcolor, "color:background");
-  addsaver(forecolor, "color:foreground");
-  addsaver(bordcolor, "color:borders");
   addsaver(viewdists, "expansion mode");
   
   shmup::initConfig();  
@@ -378,9 +391,9 @@ void loadOldConfig(FILE *f) {
   err=fscanf(f, "%d%d", &aa, &bb);
   vid.darkhepta = aa; vid.shifttarget = bb;
 
-  aa = geometry; bb = euclidland; cc = shmup::on; dd = hardcore;
+  aa = geometry; bb = specialland; cc = shmup::on; dd = hardcore;
   err=fscanf(f, "%d%d%d%d", &aa, &bb, &cc, &dd);
-  geometry = eGeometry(aa); euclidland = eLand(bb); shmup::on = cc; hardcore = dd;
+  geometry = eGeometry(aa); specialland = eLand(bb); shmup::on = cc; hardcore = dd;
 
   shmup::loadConfig(f);
 
@@ -526,7 +539,7 @@ void handleAllConfig(int sym, int uni) {
 
 void showGraphConfig() {
   gamescreen(0);
-  cmode = sm::SIDE;
+  cmode = vid.xres > vid.yres * 1.4 ? sm::SIDE : 0;
 
   dialog::init(XLAT("graphics configuration"));
 
@@ -683,7 +696,7 @@ void switchFullscreen() {
   vid.full = !vid.full;
 #if ISANDROID
   addMessage(XLAT("Reenter HyperRogue to apply this setting"));
-  settingsChanged = true;
+  ANDROID_SETTINGS
 #endif
 #if CAP_SDL
   if(true) {
@@ -700,9 +713,8 @@ void switchGL() {
   vid.usingGL = !vid.usingGL;
   if(vid.usingGL) addMessage(XLAT("openGL mode enabled"));
   if(!vid.usingGL) addMessage(XLAT("openGL mode disabled"));
-#if ISANDROID
-  settingsChanged = true;
-#elif CAP_SDL
+  ANDROID_SETTINGS;
+#if CAP_SDL
   setvideomode();
 #endif
   }
@@ -742,24 +754,17 @@ void showBasicConfig() {
   dialog::addBoolItem(XLAT("send scores to Steam leaderboards"), (vid.steamscore&1), 'l');
 #endif
 
+  dialog::addBoolItem(XLAT("skip the start menu"), vid.skipstart, 'm');
+#if !ISMOBILE
+  dialog::addBoolItem(XLAT("quick mouse"), vid.quickmouse, 'M');
+#endif
+
   if(CAP_SHMUP && !ISMOBILE)
     dialog::addSelItem(XLAT("configure keys/joysticks"), "", 'p');
 
   dialog::addItem(XLAT("reset all configuration"), 'R');
+  showAllConfig();
   
-  if(lang() != 0) {
-    string tw = "";
-    string s = XLAT("TRANSLATIONWARNING");
-    if(s != "" && s != "TRANSLATIONWARNING") tw += s;
-    s = XLAT("TRANSLATIONWARNING2");
-    if(s != "" && s != "TRANSLATIONWARNING2") { if(tw != "") tw += " "; tw += s; }
-    if(tw != "") {
-      dialog::addBreak(50);
-      dialog::addHelp(tw);
-      dialog::lastItem().color = 0xFF0000;
-      }
-    }
-
   dialog::display();
   
   keyhandler = []   (int sym, int uni) {
@@ -768,6 +773,9 @@ void showBasicConfig() {
     char xuni = uni | 96;
     
     if(uni >= 32 && uni < 64) xuni = uni;
+    
+    if(uni == 'M') vid.quickmouse = !vid.quickmouse;
+    else if(xuni == 'm') vid.skipstart = !vid.skipstart;
   
     if(xuni == 'c') { vid.axes += 60 + (shiftmul > 0 ? 1 : -1); vid.axes %= 5; }
 
@@ -778,14 +786,8 @@ void showBasicConfig() {
       dialog::editNumber(effvolume, 0, 128, 10, 60, XLAT("sound effects volume"), "");
       }
     
-    if(CAP_TRANS && xuni == 'l') {
-      vid.language += (shiftmul>0?1:-1);
-      vid.language %= NUMLAN;
-      if(vid.language < 0) vid.language += NUMLAN;
-  #if ISANDROID
-      settingsChanged = true;
-  #endif
-      }
+    if(CAP_TRANS && xuni == 'l')
+      pushScreen(selectLanguageScreen); 
     
     if(xuni == 'g') pushScreen(showCustomizeChar);
   
@@ -1059,7 +1061,14 @@ void switchcolor(unsigned int& c, unsigned int* cs) {
   dialog::openColorDialog(c, cs);
   }
 
+double cc_footphase;
+int lmousex, lmousey;
+
 void showCustomizeChar() {
+
+  cc_footphase += hypot(mousex - lmousex, mousey - lmousey);
+  lmousex = mousex; lmousey = mousey;
+
   gamescreen(4);
   dialog::init(XLAT("Customize character"));
   
@@ -1087,12 +1096,13 @@ void showCustomizeChar() {
   dialog::display();
   
   int firsty = dialog::items[0].position / 2;
+  int scale = firsty - 2 * vid.fsize;
 
   initquickqueue();
-  transmatrix V = atscreenpos(vid.xres/2, firsty, firsty - 2 * vid.fsize);
+  transmatrix V = atscreenpos(vid.xres/2, firsty, scale);
   
   double alpha = atan2(mousex - vid.xres/2, mousey - firsty) - M_PI/2;
-  drawMonsterType(moPlayer, NULL, V * spin(alpha), 0, 0);
+  drawMonsterType(moPlayer, NULL, V * spin(alpha), 0, cc_footphase / scale);
   quickqueue();
   
   keyhandler = [] (int sym, int uni) {
@@ -1104,7 +1114,7 @@ void showCustomizeChar() {
     if(xuni == 'a') { shmup::cpid_edit++; shmup::cpid_edit %= 60; }
     if(xuni == 'g') {
       cs.charid++;
-      if(cs.charid == 2 && !princess::everSaved) cs.charid = 4;
+      if(cs.charid == 2 && !princess::everSaved && !autocheat) cs.charid = 4;
       cs.charid %= 10;
       }
     if(xuni == 'p') vid.samegender = !vid.samegender;
@@ -1148,3 +1158,62 @@ void resetConfigMenu() {
     
     };
   }
+
+void selectLanguageScreen() {
+  gamescreen(4);
+  dialog::init("select language"); // intentionally not translated
+
+  int v = vid.language;  
+  dynamicval<int> d(vid.language, -1);
+  
+  for(int i=0; i<NUMLAN-1 || i == v; i++) {
+    vid.language = i;
+    dialog::addSelItem(XLAT("EN"), its(100 * transcompleteness[i] / transcompleteness[0]) + "%", 'a'+i);
+    }
+  
+  dialog::addBreak(50);
+  vid.language = -1;
+  dialog::addBoolItem(XLAT("default") + ": " + XLAT("EN"), v == -1, '0');
+  dialog::addItem(XLAT("exit configuration"), '1');
+
+  dialog::addBreak(50);
+
+  vid.language = v;
+  if(lang() >= 1)
+    dialog::addHelp(XLAT("add credits for your translation here"));
+  else
+    dialog::addHelp(XLAT("original language"));
+
+  if(lang() != 0) {
+    string tw = "";
+    string s = XLAT("TRANSLATIONWARNING");
+    if(s != "" && s != "TRANSLATIONWARNING") tw += s;
+    s = XLAT("TRANSLATIONWARNING2");
+    if(s != "" && s != "TRANSLATIONWARNING2") { if(tw != "") tw += " "; tw += s; }
+    if(tw != "") {
+      dialog::addHelp(tw);
+      dialog::lastItem().color = 0xFF0000;
+      }
+    }
+
+  dialog::display();
+  
+  keyhandler = []   (int sym, int uni) {
+    dialog::handleNavigation(sym, uni);
+    
+    char xuni = uni | 96;
+    if(uni == '0') {
+      vid.language = -1;
+      ANDROID_SETTINGS;
+      }
+
+    else if(xuni >= 'a' && xuni < 'a'+NUMLAN) {
+      vid.language = xuni - 'a';
+      ANDROID_SETTINGS;
+      }
+    
+    else if(doexiton(sym, uni))
+      popScreen();
+    };
+  }
+  

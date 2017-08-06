@@ -28,11 +28,12 @@ string buildHelpText() {
   h += XLAT(" (press ESC for some hints about it).");
   h += "\n\n";
   
-  h += XLAT(
-    "You can fight most monsters by moving into their location. "
-    "The monster could also kill you by moving into your location, but the game "
-    "automatically cancels all moves which result in that.\n\n"
-    );
+  if(!shmup::on && !hardcore)
+    h += XLAT(
+      "You can fight most monsters by moving into their location. "
+      "The monster could also kill you by moving into your location, but the game "
+      "automatically cancels all moves which result in that.\n\n"
+      );
     
   if(inv::on)
   h += XLAT(
@@ -56,10 +57,11 @@ string buildHelpText() {
     "numbers displayed to get their meanings.\n"
     );
 #else
-  h += XLAT(
-    "Move with mouse, num pad, qweadzxc, or hjklyubn. Wait by pressing 's' or '.'. Spin the world with arrows, PageUp/Down, and Home/Space. "
-    "To save the game you need an Orb of Safety. Press 'v' for the main menu (configuration, special modes, etc.), ESC for the quest status.\n\n"
-    );
+  if(DEFAULTCONTROL)
+    h += XLAT(
+      "Move with mouse, num pad, qweadzxc, or hjklyubn. Wait by pressing 's' or '.'. Spin the world with arrows, PageUp/Down, and Home/Space. "
+      "To save the game you need an Orb of Safety. Press 'v' for the main menu (configuration, special modes, etc.), ESC for the quest status.\n\n"
+      );
   h += XLAT(
     "You can right click any element to get more information about it.\n\n"
     );
@@ -236,12 +238,12 @@ string generateHelpForItem(eItem it) {
         "and everywhere after you collect 100.");  
       }
     
-    if(it == itBone || it == itGreenStone) {
+/*    if(it == itBone || it == itGreenStone) {
       help += XLAT(
         "\n\nIn the Orb Strategy Mode, dead orbs are available once you collect "
         "10 Necromancer Totems in the Graveyard."
         );
-      }
+      } */
     
     if(it == itFeather || it == itOrbSafety) {
       help += XLAT(

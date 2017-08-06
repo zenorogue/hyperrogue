@@ -520,55 +520,6 @@ void showChangeMode() {
     };
   }
 
-// -- cheat menu --
-
-void showCheatMenu() {
-  gamescreen(1);
-  dialog::init("cheat menu");
-  dialog::addItem(XLAT("return to the game"), ' ');
-  dialog::addBreak(50);
-  dialog::addItem(XLAT("gain orb powers"), 'F');
-  dialog::addItem(XLAT("summon treasure"), 'T');
-  dialog::addItem(XLAT("summon dead orbs"), 'D');
-  dialog::addItem(XLAT("lose all treasure"), 'J');
-  dialog::addItem(XLAT("gain kills"), 'K');
-  dialog::addItem(XLAT("Hyperstone Quest"), 'C');
-  dialog::addItem(XLAT("summon orbs"), 'O');
-  dialog::addItem(XLAT("gain Orb of Yendor"), 'Y');
-  dialog::addItem(XLAT("summon lots of treasure"), 'T'-64);
-  dialog::addItem(XLAT("Safety (quick save)"), 'S');
-  dialog::addItem(XLAT("Select the land ---"), 'L');
-  dialog::addItem(XLAT("--- and teleport there"), 'U');
-  dialog::addItem(XLAT("rotate the character"), 'Z');
-  dialog::addItem(XLAT("summon a Golem"), 'G');
-  dialog::addItem(XLAT("summon Sandworm"), 'W');
-  dialog::addItem(XLAT("summon Ivy"), 'I');
-  dialog::addItem(XLAT("summon a Monster"), 'E');
-  dialog::addItem(XLAT("summon Thumpers"), 'H');
-  dialog::addItem(XLAT("summon Bonfire"), 'B');
-  dialog::addItem(XLAT("summon Mimics"), 'M');
-  dialog::addItem(XLAT("deplete orb powers"), 'P');
-  dialog::addItem(XLAT("summon Orb of Yendor"), 'Y'-64);
-  dialog::addItem(XLAT("switch ghost timer"), 'G'-64);
-  dialog::addItem(XLAT("switch web display"), 'W'-64);
-  dialog::display();
-  keyhandler = []   (int sym, int uni) {
-    dialog::handleNavigation(sym, uni);
-    if(uni != 0) {
-      applyCheat(uni);
-      if(uni == 'F' || uni == 'C' || uni == 'O' ||
-        uni == 'S' || uni == 'U' || uni == 'G' ||
-        uni == 'W' || uni == 'I' || uni == 'E' ||
-        uni == 'H' || uni == 'B' || uni == 'M' ||
-        uni == 'P' || uni == 'Y'-64 || uni == 'G'-64 ||
-        uni == ' ' || uni == 8 || uni == 13 ||
-        uni == SDLK_ESCAPE || uni == 'q' || uni == 'v' || sym == SDLK_ESCAPE ||
-        sym == SDLK_F10) 
-        popScreen();
-      }
-    };
-  }
-
 // -- geometry menu --
 
 int eupage = 0;
@@ -653,8 +604,8 @@ void showEuclideanMenu() {
       if(eupage * euperpage >= LAND_SPHEUC) eupage = 0;
       }
     else if(lid >= 0 && lid < LAND_SPHEUC) {
-      euclidland = land_spheuc[lid];
-      if(landvisited[euclidland] && euclidland != laOceanWall) {
+      specialland = land_spheuc[lid];
+      if(landvisited[specialland] && specialland != laOceanWall) {
         if(targetgeometry != geometry)
           restartGame('g');
         else
@@ -662,7 +613,7 @@ void showEuclideanMenu() {
         // disable PTM if chosen a land from the Euclidean menu
         if(tactic::on) restartGame('t');
         }
-      else euclidland = laIce;
+      else specialland = laIce;
       }
     else if(uni == '2' || sym == SDLK_F1) gotoHelp(
       "If you want to know how much the gameplay is affected by the "
@@ -725,42 +676,140 @@ void showDemo() {
   dialog::addItem(XLAT("Burial Grounds"), 'b');
 
   dialog::display();
+  
+  keyhandler = [] (int sym, int uni) {
+    dialog::handleNavigation(sym, uni);
+    if(sym == SDLK_F1 || sym == 'h') gotoHelp(help);
+    else if(sym == 'a') {
+      toggleanim(!demoanim);
+      popScreen();
+      }
+    else if(sym == 'f') {
+      firstland = laIce;
+      if(tactic::on) restartGame('t');
+      else restartGame();
+      }
+    else if(sym == 'T') {
+      firstland = laIce;
+      if(!tour::on) tour::start();
+      }
+    else if(sym == 't') {
+      firstland = laTemple;
+      if(!tactic::on) restartGame('t');
+      else restartGame();
+      }
+    else if(sym == 'l') {
+      firstland = laStorms;
+      if(!tactic::on) restartGame('t');
+      else restartGame();
+      }
+    else if(sym == 'b') {
+      firstland = laBurial;
+      if(!tactic::on) restartGame('t');
+      else restartGame();
+      items[itOrbSword] = 60;
+      }
+    }
   }
 
-void handleDemoKey(int sym, int uni) {
-  dialog::handleNavigation(sym, uni);
-  if(sym == SDLK_F1 || sym == 'h') gotoHelp(help);
-  else if(sym == 'a') {
-    toggleanim(!demoanim);
-    popScreen();
-    }
-  else if(sym == 'f') {
-    firstland = laIce;
-    if(tactic::on) restartGame('t');
-    else restartGame();
-    }
-  else if(sym == 'T') {
-    firstland = laIce;
-    if(!tour::on) tour::start();
-    }
-  else if(sym == 't') {
-    firstland = laTemple;
-    if(!tactic::on) restartGame('t');
-    else restartGame();
-    }
-  else if(sym == 'l') {
-    firstland = laStorms;
-    if(!tactic::on) restartGame('t');
-    else restartGame();
-    }
-  else if(sym == 'b') {
-    firstland = laBurial;
-    if(!tactic::on) restartGame('t');
-    else restartGame();
-    items[itOrbSword] = 60;
-    }
-  }
 #endif
+
+bool showstartmenu;
+
+void showStartMenu() {
+  gamescreen(2);
+
+  getcstat = ' ';
+  
+  dialog::init();
+  
+  dialog::addInfo(XLAT("Welcome to HyperRogue!"));
+  dialog::addBreak(100);
+
+  dialog::addBigItem(XLAT("HyperRogue classic"), 'c');
+  dialog::addInfo(XLAT("explore the world, collect treasures"));
+  dialog::addInfo(XLAT("do not get checkmated"));
+
+#if CAP_INV
+  dialog::addBreak(100);
+  dialog::addBigItem(XLAT("Orb Strategy mode"), 'i');
+  dialog::addInfo(XLAT("use your Orbs in tough situations"));
+#endif
+
+#if CAP_SHMUP
+  dialog::addBreak(100);
+  dialog::addBigItem(XLAT("shoot'em up mode"), 's');
+  dialog::addInfo(XLAT("continuous spacetime"));
+#if HAVE_ACHIEVEMENTS
+  dialog::addInfo(XLAT("(most achievements are not available)"));
+#endif
+#endif
+
+#if CAP_TOUR
+  dialog::addBreak(100);
+  dialog::addBigItem(XLAT("tutorial"), 't');
+  dialog::addInfo(XLAT("learn about hyperbolic geometry!"));
+#endif
+
+#if CAP_ROGUEVIZ && CAP_TOUR
+  dialog::addBreak(100);
+  dialog::addBigItem(XLAT("RogueViz"), 'r');
+  dialog::addInfo(XLAT("see the visualizations"));
+#endif
+
+  dialog::addBreak(100);
+  dialog::addBigItem(XLAT("main menu"), 'm');
+  dialog::addInfo(XLAT("more options"));
+
+  dialog::display();
+  clearMessages();
+  
+  /*
+  initquickqueue();
+  int siz = min(vid.xres, vid.yres) / 8;
+  drawMonsterType(moPrincess, NULL, atscreenpos(siz,siz,siz) * spin(-M_PI/4), 0, 0);
+  drawMonsterType(moKnight, NULL, atscreenpos(vid.xres-siz,siz,siz) * spin(-3*M_PI/4), 0, 0);
+  drawItemType(itOrbYendor, NULL, atscreenpos(siz,vid.yres-siz,siz) * spin(M_PI/4), iinf[itOrbYendor].color, 0, false);
+  drawItemType(itKey, NULL, atscreenpos(siz,vid.yres-siz,siz) * spin(M_PI/4), iinf[itKey].color, 0, false);
+  drawItemType(itHyperstone, NULL, atscreenpos(vid.xres-siz,vid.yres-siz,siz) * spin(3*M_PI/4), iinf[itHyperstone].color, 0, false);
+  quickqueue();
+  */
+
+  keyhandler = [] (int sym, int uni) {
+    dialog::handleNavigation(sym, uni);
+    if(uni == 'o') uni = 'i';
+    if(uni == 'c' || uni == 'i' || uni == 's') {
+      popScreenAll();
+      if(inv::on != (uni == 'i')) restartGame('i');
+      if(shmup::on != (uni == 's')) restartGame('S');
+      clearMessages();
+      welcomeMessage();
+      }
+#if CAP_TOUR
+    else if(uni == 't') {
+      popScreenAll();
+      tour::start();
+      }
+#endif
+#if CAP_ROGUEVIZ && CAP_TOUR
+    else if(uni == 'r') {
+      tour::slides = rvtour::rvslides;
+      popScreenAll();
+      tour::start();
+      }
+#endif
+    else if(sym == 'm') {
+      popScreen();
+      pushScreen(showMainMenu);
+      }
+    else if(sym == SDLK_F10)
+      quitmainloop = true;
+    else if(sym == SDLK_F1)
+      gotoHelp(help);
+    else if(sym == SDLK_ESCAPE || sym == ' ')
+      popScreen();
+    };
+  }
  
 // -- overview --
 

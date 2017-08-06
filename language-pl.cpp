@@ -4265,7 +4265,7 @@ S("Watch the Minkowski hyperboloid or the hypersian rug mode with the "
   "Oglądaj hiperboloidę Minkowskiego albo tryb hiperskiego dywanu przez czerwono-turkusowe okulary 3D.")
 
 S("0 - return", "0 - powrót")
-S("return", "powót")
+S("return", "powrót")
 S("F1 - help", "F1 - pomoc")
 
 // for the conformal polynomial
@@ -5780,10 +5780,6 @@ S(
 
 S("puzzles and exploration", "zagadki i zwiedzanie")
 
-S("cheats", "oszustwa")
-S("help for keyboard user", "pomoc dla użytkowników klawiatury")
-S("mark heptagons", "oznacz siedmiokąty")
-
 S("Collect as many Dodecahedra as you can, then return here!",
   "Zbierz jak najwięcej Dwunastościanów i tu wróć!")
 
@@ -5793,6 +5789,97 @@ S("yes, and delete the config file", "tak, i skasuj plik konfiguracyjny")
 S("yes", "tak")
 S("cancel", "anuluj")
 S("reset the special game modes", "zresetuj specjalne tryby gry")
+
+// extra flavor messages for the OSM
+
+S("You feel the presence of free saves on the Crossroads.",
+  "Wyczuwasz bezpieczeństwo na Skrzyżowaniach.")
+
+S("You feel the Orbs of Yendor nearby...",
+  "Czujesz w pobliżu Sfery Yendoru...")
+  
+S("You feel the Orbs of Yendor in the Crossroads...",
+  "Wyczuwasz Sfery Yendoru na Skrzyżowaniach...")
+
+S("You feel the Orbs of Yendor everywhere...",
+  "Wyczuwasz Sfery Yendoru, wszędzie...")
+
+S("You have gained an offensive power!",
+  "Zdobywasz moc ofensywną!")
+
+S("A small reward for braving the Hell.",
+  "Drobna nagroda za zmierzenie się z Piekłem.")
+
+S(" (mirrored)", " (odbite)")
+S(" (used %1 times)", " (użyte %1 razy)")
+S("Extras:", "Dodatkowe:") // extra Orbs gained in OSM
+
+// cheats
+
+S("unlock Orbs of Yendor", "otwórz Sfery Yendoru")
+S("Collected the keys!", "Zebrano klucze!");
+S("Saved the Princess!", "Uratowano Księżniczkę!")
+S("save a Princess", "uratuj Księżniczkę")
+
+// other
+  
+S("Note for mobiles", "Notka dla urządzeń mobilnych")
+S(
+    "This tutorial is designed for computers, "
+    "and keys are given for all actions. It will "
+    "work without a keyboard though, although less "
+    "comfortably -- just ignore the keys "
+    "given and select options from MENU.\n\n"
+    "Select 'next slide' from MENU.",
+
+    "Ten tutorial jest przeznaczony głównie "
+    "dla komputerów, i klawisze są podane "
+    "dla wszystkich akcji. Działa jednak bez "
+    "klawiatury, choć mniej wygodnie -- "
+    "ignoruj klawisze i wybieraj opcje z MENU.\n\n"
+    "given and select options from MENU.\n\n"
+    "Wybierz z MENU 'następny slajd'.")
+
+S("quick mouse", "szybka mysz")
+S("This combination is known to be buggy at the moment.", "Ta kombinacja opcji obecnie działa błędnie.")
+
+// extra Princess texts
+ 
+S("\"I do not like butterflies. They are treacherous.\"", 
+  "\"Nie lubię motyli. Są zdradzieckie.\"")
+
+S("\"I hate roses.\"", "\"Nienawidzę róż.\"")
+
+S("\"In this world there is plenty of space for everyone. We do not need wars.\"", 
+  "\"W tym świecie jest dość miejsca dla każdego. Nie potrzebujemy wojen.\"")
+
+S("\"Only the stupid hyperbugs do not understand this.\"", 
+  "\"Tylko głupie hiperinsekty tego nie rozumieją.\"")
+
+S("\"I have once talked to a Yendorian researcher... he was only interested in infinite trees.\"",
+  "\"Odwiedził mnie raz badacz Yendoriański... interesowały go tylko nieskończone drzewa.\"")
+
+S("\"Infinite trees are boring. I prefer other graphs.\"", 
+  "\"Nieskończone drzewa są nudne. Wolę inne grafy.\"")
+
+// new start menu
+S("skip the start menu", "pomiń menu startowe")
+
+S("HyperRogue classic", "tryb klasyczny HyperRogue")
+S("explore the world, collect treasures", "zwiedzaj świat i zbieraj skarby")
+S("do not get checkmated", "nie daj się zaszachować")
+S("use your Orbs in tough situations", "używaj Sfer w trudnych sytuacjach")
+S("continuous spacetime", "ciągła czasoprzestrzeń")
+S("(most achievements are not available)", "(większość osiągnięć niedostępna)")
+S("learn about hyperbolic geometry!", "dowiedz się więcej o geometrii hiperbolicznej!")
+S("more options", "więcej opcji")
+
+S(
+  "A strange land filled with mirrors. Break magic mirrors and mirage clouds to "
+  "gain treasures and helpful Mimics.",
+  "Dziwna kraina pełna luster. Zbijaj magiczne lustra i mirażowe chmury, "
+  "by zdobywać skarby i przyjazne Mimiki."
+  )
   
 #undef Orb
 

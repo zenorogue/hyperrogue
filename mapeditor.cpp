@@ -21,7 +21,7 @@ namespace mapeditor {
     bool side;
     cell *c;
     } ew, ewsearch;
-  bool autochoose;
+  bool autochoose = ISMOBILE;
   
 #if CAP_EDIT
   map<int, cell*> modelcell;
@@ -613,7 +613,7 @@ namespace mapeditor {
     }
   
   void displayFunctionKeys() {
-    int fs = vid.fsize + 5;
+    int fs = min(vid.fsize + 5, vid.yres/26);
     displayButton(8, vid.yres-8-fs*11, XLAT("F1 = help"), SDLK_F1, 0);
     displayButton(8, vid.yres-8-fs*10, XLAT("F2 = save"), SDLK_F2, 0);
     displayButton(8, vid.yres-8-fs*9, XLAT("F3 = load"), SDLK_F3, 0);
@@ -621,7 +621,9 @@ namespace mapeditor {
     displayButton(8, vid.yres-8-fs*7, XLAT("F5 = restart"), SDLK_F5, 0);
     displayButton(8, vid.yres-8-fs*6, XLAT("F6 = HQ shot"), SDLK_F6, 0);
     displayButton(8, vid.yres-8-fs*5, XLAT("F7 = player on/off"), SDLK_F7, 0);
+#if CAP_SVG
     displayButton(8, vid.yres-8-fs*4, XLAT("F8 = SVG shot"), SDLK_F8, 0);
+#endif
     displayButton(8, vid.yres-8-fs*3, XLAT("SPACE = map/graphics"), ' ', 0);
     displayButton(8, vid.yres-8-fs*2, XLAT("ESC = return to the game"), SDLK_ESCAPE, 0);
     }
@@ -793,7 +795,7 @@ namespace mapeditor {
     cmode = sm::MAP;
     gamescreen(0);
   
-    int fs = vid.fsize + 5;
+    int fs = min(vid.fsize + 5, vid.yres/26);
     
     getcstat = '-';
 
@@ -1130,7 +1132,7 @@ namespace mapeditor {
 
     // left-clicks are coded with '-', and right-clicks are coded with sym F1
     if(uni == '-') undoLock();
-    if(mousepressed && mouseover && sym != SDLK_F1)
+    if(uni == '-' && mouseover)
       allInPattern(mouseover, radius, neighborId(mouseover, mouseover2));
     
     if(mouseover) for(int i=0; i<mouseover->type; i++) createMov(mouseover, i);
@@ -1262,22 +1264,6 @@ namespace mapeditor {
         }
       }
     queueline(drawtrans*ccenter, drawtrans*coldcenter, darkena(0xC0C0C0, 0, 0x20));
-
-    int sg = drawcellShapeGroup();
-    
-    if(0) for(int i=0; i<USERSHAPEIDS; i++) if(editingShape(sg, i) && usershapes[sg][i]) {
-
-      usershapelayer &ds(usershapes[sg][i]->d[mapeditor::dslayer]);
-
-      for(int a=0; a<size(ds.list); a++) {
-        hyperpoint P2 = drawtrans * ds.list[a];
-  
-        queuechr(P2, 10, 'x', 
-          darkena(a == 0 ? 0x00FF00 : 
-          a == size(ds.list)-1 ? 0xFF0000 :
-          0xFFFF00, 0, 0xFF));
-        }
-      }
     }
 
   void drawHandleKey(int sym, int uni);
@@ -1323,7 +1309,7 @@ namespace mapeditor {
     
     usershape *us =usershapes[drawcellShapeGroup()][drawcellShapeID()];
     
-    int fs = vid.fsize + 5;
+    int fs = min(vid.fsize + 5, vid.yres/28);
 
     // displayButton(8, 8+fs*9, XLAT("l = lands"), 'l', 0);
     displayfr(8, 8+fs, 2, vid.fsize, line1, 0xC0C0C0, 0);
@@ -1353,11 +1339,12 @@ namespace mapeditor {
 
       }
     else {
-      displayfr(8, 8+fs*5, 2, vid.fsize, XLAT("'n' to start"), 0xC0C0C0, 0);
-      mousekey = 'n';
+      displaymm('n', 8, 8+fs*5, 2, vid.fsize, XLAT("'n' to start"), 0);
+      if(mousekey == 'a' || mousekey == 'd' || mousekey == 'd' ||
+        mousekey == 'c') mousekey = 'n';
       }
 
-    displaymm('e', vid.xres-8, 8+fs*4, 2, vid.fsize, XLAT("g = grid"), 16);
+    displaymm('g', vid.xres-8, 8+fs*4, 2, vid.fsize, XLAT("g = grid"), 16);
     displayButton(vid.xres-8, 8+fs*3, XLAT("z = zoom in"), 'z', 16);
     displayButton(vid.xres-8, 8+fs*2, XLAT("o = zoom out"), 'o', 16);
     displaymm('e', vid.xres-8, 8+fs, 2, vid.fsize, XLAT("e = edit this"), 16);
@@ -1580,7 +1567,7 @@ namespace mapeditor {
     for(int i=0; i<USERSHAPEIDS; i++) if(editingShape(sg, i))
       applyToShape(sg, i, uni, mh);
       
-    if(uni == 'e') {
+    if(uni == 'e' || (uni == '-' && mousekey == 'e')) {
       initdraw(mouseover ? mouseover : cwt.c);
       }
     if(uni == 'l') { dslayer++; dslayer %= USERLAYERS; }
@@ -1701,10 +1688,12 @@ namespace mapeditor {
       saveHighQualityShot();
       }
 #endif
-    
+
+#if CAP_SVG    
     if(sym == SDLK_F8) {
       svg::render();
       }
+#endif
     
     if(sym == SDLK_F5) {
       for(int i=0; i<USERSHAPEGROUPS; i++)
@@ -1873,7 +1862,7 @@ namespace mapeditor {
     }
     
   bool drawUserShape(transmatrix V, int group, int id, int color, cell *c) {
-  #if ISMOBILE==1
+  #if !CAP_EDIT
     return false;
   #else
   
@@ -1888,7 +1877,6 @@ namespace mapeditor {
         }
       }
   
-  #if CAP_EDIT  
     if((cmode & sm::DRAW) && mapeditor::editingShape(group, id)) {
   
       /* for(int a=0; a<size(ds.list); a++) {
@@ -1985,7 +1973,6 @@ namespace mapeditor {
         }
       
       }
-  #endif
   
     return us;
   #endif

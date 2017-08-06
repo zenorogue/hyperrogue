@@ -6,6 +6,10 @@
 const char *scorefile = "fakemobile_score.txt";
 const char *conffile = "fakemobile_config.txt";
 
+#include <string>
+std::string levelfile = "fakemobile_level.txt";
+std::string picfile = "fakemobile_pic.txt";
+
 #include <SDL/SDL.h>
 
 #include "init.cpp"

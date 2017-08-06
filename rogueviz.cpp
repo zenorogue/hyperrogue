@@ -1343,11 +1343,11 @@ void init() {
   autocheat = true; 
 #if !ISWEB
   mapeditor::drawplayer = false;
-  firstland = euclidland = laCanvas;
+  firstland = specialland = laCanvas;
   if(!shmup::on) restartGame('s');
   else restartGame();
 #else
-  firstland = euclidland = laCanvas;
+  firstland = specialland = laCanvas;
   restartGame();
 #endif
   on = true;
@@ -1849,11 +1849,11 @@ slide rvslides[] = {
       ,
       [] (presmode mode) {
         slidecommand = "the standard presentation";
-        if(mode == pmStartAll) firstland = euclidland = laPalace;
+        if(mode == pmStartAll) firstland = specialland = laPalace;
         if(mode == 4) {
           tour::slides = default_slides;
           while(tour::on) restartGame('T', false);
-          firstland = euclidland = laIce;
+          firstland = specialland = laIce;
           tour::start();
           }
         }
@@ -1976,7 +1976,7 @@ slide rvslides[] = {
   {"THE END", 99, LEGAL_ANY | FINALSLIDE,
     "Press '5' to leave the presentation.",
     [] (presmode mode) {
-      firstland = euclidland = laIce;
+      firstland = specialland = laIce;
       if(mode == 4) restartGame('T');
       }
     }

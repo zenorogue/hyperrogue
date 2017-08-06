@@ -52,7 +52,7 @@ namespace yendor {
   int challenge; // id of the challenge
   int lastchallenge;
   
-  #define YENDORLEVELS 29
+  #define YENDORLEVELS 30
 
   int bestscore[MODECODES][YENDORLEVELS];
 
@@ -72,6 +72,7 @@ namespace yendor {
   #define YF_START_CR   4096
   #define YF_CHAOS      8192
   #define YF_RECALL     16384
+  #define YF_NEAR_FJORD 32768
   
   #define YF_START_ANY  (YF_START_AL|YF_START_CR)
   
@@ -109,6 +110,7 @@ namespace yendor {
     {laDragon,    YF_DEAD},
     {laReptile,   0},
     {laTortoise,  YF_RECALL},
+    {laCocytus,   YF_NEAR_FJORD}
     };
   
   int tscorelast;
@@ -145,6 +147,8 @@ namespace yendor {
     bool found;
     bool foundOrb;
     int howfar;
+    cell* key() { return path[YDIST-1]; }
+    cell* orb() { return path[0]; }
     };
   
   vector<yendorinfo> yi;
@@ -324,7 +328,7 @@ namespace yendor {
       won = false;
       if(!easy) items[itOrbYendor] = bestscore[modecode()][challenge];
       chaosmode = (clev().flags & YF_CHAOS);
-      euclidland = firstland = clev().l;
+      specialland = firstland = clev().l;
       if(clev().flags & YF_START_AL) {
         firstland = laAlchemist;
         items[itElixir] = 50;
@@ -337,6 +341,7 @@ namespace yendor {
         }
       if(firstland == laGraveyard) items[itBone] = 10;
       if(firstland == laEmerald)   items[itEmerald] = 10;
+      if(firstland == laCocytus)   items[itFjord] = 10;
       if(!euclid) {
         if(clev().flags & YF_DEAD)   items[itGreenStone] = 100;
         if(clev().flags & YF_DEAD5)  items[itGreenStone] = 5;
@@ -361,6 +366,8 @@ namespace yendor {
       yendor::check(c2);
       if(clev().flags & YF_NEAR_IVY)
         nexttostart = laJungle;
+      if(clev().flags & YF_NEAR_FJORD)
+        nexttostart = laLivefjord;
       if(clev().flags & YF_NEAR_TENT)
         nexttostart = laRlyeh;
       if(clev().flags & YF_NEAR_ELEM) {
@@ -404,6 +411,7 @@ namespace yendor {
     if((ylev.flags & YF_NEAR_RED) && hiitemsMax(itRedGem) < 10) return false;
     if((ylev.flags & YF_NEAR_OVER) && hiitemsMax(itMutant) < 10) return false;
     if((ylev.flags & YF_NEAR_TENT) && hiitemsMax(itStatue) < 10) return false;
+    if((ylev.flags & YF_NEAR_FJORD) && hiitemsMax(itFjord) < 10) return false;
     if((ylev.flags & YF_CHAOS) && !chaosUnlocked) return false;
     if((ylev.flags & (YF_DEAD|YF_DEAD5)) && hiitemsMax(itBone) < 10) return false;
     if((ylev.flags & YF_RECALL) && hiitemsMax(itSlime) < 10) return false;
@@ -457,6 +465,7 @@ namespace yendor {
         if(!euclid) {  
           if(ylev.flags & YF_CHAOS) { s = "Chaos mode"; }
           if(ylev.flags & YF_NEAR_IVY) { s += "+"; s += XLATT1(laJungle); }
+          if(ylev.flags & YF_NEAR_FJORD) { s += "+"; s += XLATT1(laLivefjord); }
           if(ylev.flags & YF_NEAR_TENT) { s += "+"; s += XLATT1(laRlyeh); }
           if(ylev.flags & YF_NEAR_ELEM) { s += "+"; s += XLATT1(laElementalWall); }
           if(ylev.flags & YF_NEAR_OVER) { s += "+"; s += XLATT1(laOvergrown); }
@@ -744,7 +753,7 @@ namespace tactic {
      
     keyhandler = [] (int sym, int uni) {
       if(uni >= 1000 && uni < 1000 + LAND_TAC) {
-        firstland = euclidland = getLandById(uni - 1000);
+        firstland = specialland = getLandById(uni - 1000);
         restartGame(tactic::on ? 0 : 't');
         }
       else if(uni == '0') {
@@ -911,7 +920,6 @@ namespace peace {
   bool hint = false;
   
   bool otherpuzzles;
-  eLand whichland;
   
   eLand simonlevels[] = {
     laCrossroads, laCrossroads2, laDesert, laCaves, laAlchemist, laRlyeh, laEmerald,
@@ -931,8 +939,15 @@ namespace peace {
   eLand *levellist;
   int qty;
   
+  void listLevels() {
+    levellist = otherpuzzles ? explorelevels : simonlevels;
+ 
+    for(qty = 0; levellist[qty]; qty++);
+    }
+    
   eLand getNext(eLand last) {
     if(!peace::on) return laNone;
+    if(!qty) listLevels();
     if(isElemental(last) && hrand(100) < 90)
       return laNone;
     else if(createOnSea(last))
@@ -985,10 +1000,10 @@ namespace peace {
           setdist(c, 5, NULL);
           
           forCellEx(c2,c)
-            if(!eq(c2->aitmp, sval) && passable(c2, c, 0) && (c2->land == whichland || c2->land == laTemple) && !c2->item) {
+            if(!eq(c2->aitmp, sval) && passable(c2, c, 0) && (c2->land == specialland || c2->land == laTemple) && !c2->item) {
               if(!id) fr = c2;
               bool next;
-              if(whichland == laRlyeh)
+              if(specialland == laRlyeh)
                 next = c2->land == laTemple && (cp2->land == laRlyeh || celldistAlt(c2) < celldistAlt(cp2) - 8); 
               else 
                 next = celldistance(c2, cp2) == 8;
@@ -1038,14 +1053,13 @@ namespace peace {
           path[i]->item = itDodeca, items[itDodeca]--;
       }
     }
-    
+  
   void showMenu() {
+    listLevels();
     dialog::init(XLAT(otherpuzzles ? "puzzles and exploration" : "memory game"), 0x40A040, 150, 100);
 
-    levellist = otherpuzzles ? explorelevels : simonlevels;
- 
-    for(qty = 0; levellist[qty]; qty++) 
-      dialog::addItem(XLAT1(linf[levellist[qty]].name), 'a'+qty);
+    for(int i = 0; i<qty; i++) 
+      dialog::addItem(XLAT1(linf[levellist[i]].name), 'a'+i);
 
     dialog::addBreak(100);
     dialog::addItem(XLAT(otherpuzzles ? "memory game" : "puzzles and exploration"), '1');
@@ -1060,7 +1074,7 @@ namespace peace {
       
       if(uni == '1') otherpuzzles = !otherpuzzles;
       else if(uni >= 'a' && uni < 'a' + qty) {
-        whichland = levellist[uni - 'a'];
+        specialland = levellist[uni - 'a'];
         restartGame(peace::on ? 0 : 'P');
         }
       else if(uni == '2') { hint = !hint; popScreen(); }

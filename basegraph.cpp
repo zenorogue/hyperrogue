@@ -967,7 +967,7 @@ void setvideomode() {
 
     if(vid.antialias & AA_MULTI) {
       SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
-      SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 16);
+      SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, (vid.antialias & AA_MULTI16) ? 16 : 4);
       }
 
     }

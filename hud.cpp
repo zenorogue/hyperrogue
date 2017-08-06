@@ -50,14 +50,27 @@ const int glyphs = ittypes + motypes;
 
 int gfirsttime[glyphs], glasttime[glyphs], gcopy[glyphs], ikland[glyphs];
 int glyphorder[glyphs];
+int glyphphase[glyphs];
+int glyph_lastticks;
 
 void updatesort() {
   for(int i=0; i<glyphs; i++) {
-    if(ikmerge(i) && gfirsttime[i] == 0)
+    int ik = ikmerge(i);
+    if(ik && gfirsttime[i] == 0)
       gfirsttime[i] = ticks;
-    if(ikmerge(i) != gcopy[i])
-      gcopy[i] = items[i], glasttime[i] = ticks;
-    }    
+    if(ik != gcopy[i])
+      gcopy[i] = ik, glasttime[i] = ticks;
+    int& gp = glyphphase[i];
+    if(ticks <= glasttime[i]+500)
+      gp += (ticks - glyph_lastticks);
+    else if((gp % 500) && i >= ittypes) {    
+      int a = gp;
+      gp += (ticks - glyph_lastticks);
+      if(a/500 != gp/500)
+        gp = gp/500*500;
+      }
+    }
+  glyph_lastticks = ticks;
   }
 
 void preparesort() {
@@ -148,33 +161,39 @@ bool displayglyph(int cx, int cy, int buttonsize, char glyph, int color, int qty
   int glsize = buttonsize;
   if(glyph == '%' || glyph == 'M' || glyph == 'W') glsize = glsize*4/5;
   
+  int d = ticks - glasttime[id];
+  double zoom = (d <= 250 && d >= 0) ? 1.25 - .001 * d : 1;
+  glsize = int(glsize * zoom);
+  
   if(graphglyph()) {
     initquickqueue();
     if(id >= ittypes) {
       eMonster m = eMonster(id - ittypes);
-      int bsize = buttonsize * 2/3;
+      double bsize = buttonsize * 2/3;
       if(m == moKrakenH) bsize /= 3;
       if(m == moKrakenT || m == moDragonTail) bsize /= 2;
       if(m == moSlime) bsize = (2*bsize+1)/3;
-      transmatrix V = atscreenpos(cx+buttonsize/2, cy, bsize);
+      transmatrix V = atscreenpos(cx+buttonsize/2, cy, bsize*zoom);
       int mcol = color;
       mcol -= (color & 0xFCFCFC) >> 2;
-      drawMonsterType(m, NULL, V, mcol, 0);
+      drawMonsterType(m, NULL, V, mcol, glyphphase[id]/500.0);
       }
     else {
       eItem it = eItem(id);
-      int bsize = buttonsize / 2;
+      double bsize = buttonsize / 2;
       if(glyph =='*') bsize *= 2;
       if(glyph == '$') bsize = (bsize*5+2)/3;
       if(glyph == 'o') bsize = (bsize*3+1)/2;
       if(glyph == 't') bsize = bsize*5/2;
       if(it == itWarning) bsize *= 2;
       if(it == itBombEgg || it == itTrollEgg || it == itDodeca) bsize = bsize*3/2;
-      transmatrix V = atscreenpos(cx+buttonsize/2, cy, bsize);
       int icol = color;
       icol -= (color & 0xFCFCFC) >> 2;
       int ic = itemclass(it);
-      drawItemType(it, NULL, V, icol, (ic == IC_ORB || ic == IC_NAI) ? ticks*2 : ((glyph == 't' && qty%5) || it == itOrbYendor) ? ticks/2 : 0, false);
+      bsize = bsize * zoom;
+      transmatrix V = atscreenpos(cx+buttonsize/2, cy, bsize);
+      drawItemType(it, NULL, V, icol, (ic == IC_ORB || ic == IC_NAI) ? ticks*2 : ((glyph == 't' && qty%5) || it == itOrbYendor) ? ticks/2 : 
+        glyphphase[id] * 2, false);
       }
     quickqueue();
     }

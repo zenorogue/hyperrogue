@@ -117,7 +117,7 @@ int arg::readCommon() {
   else if(argis("-load")) { PHASE(3); shift(); mapstream::loadMap(loadlevel); }
 #endif
   else if(argis("-canvas")) {
-    firstland = euclidland = laCanvas;
+    firstland = specialland = laCanvas;
     shift();
     if(args()[1] == 0) mapeditor::whichCanvas = args()[0];
     else mapeditor::canvasback = strtol(args(), NULL, 16);
@@ -133,9 +133,11 @@ int arg::readCommon() {
     }
   else if(argis("-W2")) {
     shift(); cheatdest = readland(args()); autocheat = true;
+    showstartmenu = false;
     }
   else if(argis("-W")) {
-    shift(); firstland = euclidland = readland(args());
+    shift(); firstland = specialland = readland(args());
+    showstartmenu = false;
     }
   else if(argis("-I")) {
     PHASE(3) cheater++; timerghost = false;
@@ -186,9 +188,9 @@ int arg::readCommon() {
   else if(argis("-mm")) { PHASEFROM(2); vid.monmode = argi(); }
 
 #define TOGGLE(x, param, act) \
-else if(args()[0] == '-' && args()[1] == x && !args()[2]) { if(curphase == 3) {act;} else {PHASE(2); param = !param;} } \
-else if(args()[0] == '-' && args()[1] == x && args()[2] == '1') { if(curphase == 3 && !param) {act;} else {PHASE(2); param = true;} } \
-else if(args()[0] == '-' && args()[1] == x && args()[2] == '0') { if(curphase == 3 && param) {act;} else {PHASE(2); param = false;} }
+else if(args()[0] == '-' && args()[1] == x && !args()[2]) { showstartmenu = false; if(curphase == 3) {act;} else {PHASE(2); param = !param;} } \
+else if(args()[0] == '-' && args()[1] == x && args()[2] == '1') { showstartmenu = false; if(curphase == 3 && !param) {act;} else {PHASE(2); param = true;} } \
+else if(args()[0] == '-' && args()[1] == x && args()[2] == '0') { showstartmenu = false; if(curphase == 3 && param) {act;} else {PHASE(2); param = false;} }
 
   TOGGLE('o', vid.usingGL, switchGL())
   TOGGLE('C', chaosmode, restartGame('C'))
@@ -198,7 +200,18 @@ else if(args()[0] == '-' && args()[1] == x && args()[2] == '0') { if(curphase ==
   TOGGLE('S', shmup::on, restartGame('s'))
   TOGGLE('H', hardcore, switchHardcore())
   TOGGLE('R', randomPatternsMode, restartGame('r'))
+  TOGGLE('i', inv::on, restartGame('i'))
   
+  else if(argis("-peace")) {
+    peace::otherpuzzles = true;
+    if(curphase == 3) restartGame('P');
+    else peace::on = true;
+    }
+  else if(argis("-pmem")) {
+    peace::otherpuzzles = false;
+    if(curphase == 3) restartGame('P');
+    else peace::on = true;
+    }
   else if(argis("-geo")) { 
     if(curphase == 3) {
       shift(); targetgeometry = (eGeometry) argi();
@@ -413,6 +426,8 @@ int main(int argc, char **argv) {
 #endif
   initAll();
   arg::read(3);
+  if(showstartmenu)
+    pushScreen(showStartMenu);
   mainloop();
   finishAll();  
   profile_info();

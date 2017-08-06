@@ -16,13 +16,18 @@ using namespace std;
 
 template<class T> int size(T x) { return x.size(); }
 
-#define NUMLAN 6
+#define NUMLAN 7
 
 // language generator
 
+const char *escape(string s, string dft);
+
 template<class T> struct dictionary {
   map<string, T> m;
-  void add(const string& s, const T& val) { m[s] = val; }
+  void add(const string& s, const T& val) { 
+    if(m.count(s)) add(s + " [repeat]", val);
+    else m[s] = val; 
+    }
   T& operator [] (const string& s) { return m[s]; }
   int count(const string& s) { return m.count(s); }
   void clear() { m.clear(); }
@@ -88,7 +93,14 @@ typedef unsigned hashcode;
 
 hashcode hashval;
 
+bool isrepeat(const string& s) {
+  return s.find(" [repeat]") != string::npos;
+  }
+  
 hashcode langhash(const string& s) {
+  if(isrepeat(s)) {
+    return langhash(s.substr(0, s.size() - 9)) + 1;
+    }
   hashcode r = 0;
   for(int i=0; i<size(s); i++) r = hashval * r + s[i];
   return r;
@@ -133,6 +145,64 @@ void setstats(set<string>& s, const char* bn) {
   printf("// %-10s %5d %5d\n", bn, tc, tlen);
   }
 
+void langPL() {
+  #define S(a,b) d[1].add(a,b); 
+  #define N(a,b,c,d,e,f) \
+    {noun n; n.genus = b; n.nom = c; n.nomp = d; n.acc = e; n.abl = f; nouns[1].add(a,n);}
+  #include "language-pl.cpp"
+  #undef N
+  #undef S
+  }
+
+void langTR() {
+#define S(a,b) d[2].add(a,b);
+#define N5(a,b,c,d,e) \
+  {noun n; n.genus = b; n.nom = c; n.nomp = d; n.acc = e; n.abl = e; nouns[2].add(a,n);}
+#define N(a,b,c,d,e,f) \
+  {noun n; n.genus = b; n.nom = c; n.nomp = d; n.acc = e; n.abl = f; nouns[2].add(a,n);}
+#include "language-tr.cpp"
+#undef N
+#undef S
+  }
+
+void langCZ() {
+#define S(a,b) d[3].add(a,b);
+#define N(a,b,c,d,e,f) \
+  {noun n; n.genus = b; n.nom = c; n.nomp = d; n.acc = e; n.abl = f; nouns[3].add(a,n);}
+#include "language-cz.cpp"
+#undef N
+#undef S
+  }
+
+void langRU() {
+#define S(a,b) d[4].add(a,b);
+#define N(a,b,c,d,e,f) \
+  {noun n; n.genus = b; n.nom = c; n.nomp = d; n.acc = e; n.abl = f; nouns[4].add(a,n);}
+#include "language-ru.cpp"
+#undef N
+#undef S
+  }
+
+void langDE() {
+#define S(a,b) d[5].add(a,b);
+#define N(a,b,c,d,e) \
+  {noun n; n.genus = b; n.nom = c; n.nomp = d; n.acc = e; n.abl = e; nouns[5].add(a,n);}
+#include "language-de.cpp"
+#undef N
+#undef S
+  }
+
+void langPT() {
+#define S(a,b) d[6].add(a,b);
+#define N(a,b,c,d,e) \
+  {noun n; n.genus = b; n.nom = c; n.nomp = d; n.abl = e; nouns[6].add(a,n);}
+#include "language-ptbr.cpp"
+#undef N
+#undef S
+  }
+
+int completeness[NUMLAN];
+
 int main() {
 
   nothe.insert("R'Lyeh");
@@ -146,42 +216,8 @@ int main() {
   allchars.insert("ᵈ");
   allchars.insert("δ");
   
-#define S(a,b) d[1].add(a,b); 
-#define N(a,b,c,d,e,f) \
-  {noun n; n.genus = b; n.nom = c; n.nomp = d; n.acc = e; n.abl = f; nouns[1].add(a,n);}
-#include "language-pl.cpp"
-#undef N
-#undef S
-
-#define S(a,b) d[2].add(a,b);
-#define N5(a,b,c,d,e) \
-  {noun n; n.genus = b; n.nom = c; n.nomp = d; n.acc = e; n.abl = e; nouns[2].add(a,n);}
-#define N(a,b,c,d,e,f) \
-  {noun n; n.genus = b; n.nom = c; n.nomp = d; n.acc = e; n.abl = f; nouns[2].add(a,n);}
-#include "language-tr.cpp"
-#undef N
-#undef S
-
-#define S(a,b) d[3].add(a,b);
-#define N(a,b,c,d,e,f) \
-  {noun n; n.genus = b; n.nom = c; n.nomp = d; n.acc = e; n.abl = f; nouns[3].add(a,n);}
-#include "language-cz.cpp"
-#undef N
-#undef S
-
-#define S(a,b) d[4].add(a,b);
-#define N(a,b,c,d,e,f) \
-  {noun n; n.genus = b; n.nom = c; n.nomp = d; n.acc = e; n.abl = f; nouns[4].add(a,n);}
-#include "language-ru.cpp"
-#undef N
-#undef S
-
-#define S(a,b) d[5].add(a,b);
-#define N(a,b,c,d,e) \
-  {noun n; n.genus = b; n.nom = c; n.nomp = d; n.acc = e; n.abl = e; nouns[5].add(a,n);}
-#include "language-de.cpp"
-#undef N
-#undef S
+  langPL(); langCZ(); langRU();
+  langTR(); langDE(); langPT();
 
   // verify
   set<string> s;
@@ -189,12 +225,24 @@ int main() {
     for(map<string,string>::iterator it = d[i].m.begin(); it != d[i].m.end(); it++)
       s.insert(it->first);
   
+  printf("// DO NOT EDIT -- this file is generated automatically with langen\n\n");
+
   for(set<string>::iterator x=s.begin(); x != s.end(); x++) {
-    string mis = "";
-    for(int i=1; i<NUMLAN; i++) if(d[i].count(*x) == 0)
-      mis += d[i]["EN"];
-    if(mis != "")
-      printf("// #warning Missing [%s]: %s\n", mis.c_str(), escape(*x, "?"));
+    string mis = "", mis1 = "";
+    for(int i=1; i<NUMLAN; i++) if(d[i].count(*x) == 0) {
+      string which = d[i]["EN"];
+      if(which != "TR" && which != "DE" && which != "PT-BR")
+        mis += which;
+      else
+        mis1 += which;
+      }
+    if(mis != "" && !isrepeat(*x))
+      printf("// #warning Missing [%s/%s]: %s\n", mis.c_str(), mis1.c_str(), escape(*x, "?"));
+
+    if(!isrepeat(*x)) {
+      completeness[0]++;
+      for(int i=1; i<NUMLAN; i++) if(d[i].count(*x)) completeness[i]++;
+      }
     }
   
   s.clear();
@@ -204,11 +252,20 @@ int main() {
       s.insert(it->first);
   
   for(set<string>::iterator x=s.begin(); x != s.end(); x++) {
-    string mis = "";
-    for(int i=1; i<NUMLAN; i++) if(nouns[i].count(*x) == 0)
-      mis += d[i]["EN"];
-    if(mis != "")
-      printf("// #warning Missing [%s]: %s\n", mis.c_str(), escape(*x, "?"));
+    string mis = "", mis1 = "";
+    for(int i=1; i<NUMLAN; i++) if(nouns[i].count(*x) == 0) {
+      string which = d[i]["EN"];
+      if(which != "TR" && which != "DE" && which != "PT-BR")
+        mis += which;
+      else mis1 += which;
+      }
+    if(mis != "" && !isrepeat(*x))
+      printf("// #warning Missing [%s/%s]: %s\n", mis.c_str(), mis1.c_str(), escape(*x, "?"));
+
+    if(!isrepeat(*x)) {
+      completeness[0]++;
+      for(int i=1; i<NUMLAN; i++) if(nouns[i].count(*x)) completeness[i]++;
+      }
     }
 
 #ifdef CHECKALL
@@ -240,13 +297,16 @@ int main() {
 //  printf(" \"%s\",", it->c_str());
     if(size(*it) >= 2) { javastring += (*it); vchars.push_back(*it); c++; }
     }
-  printf("// DO NOT EDIT -- this file is generated automatically with langen\n");
   printf("\n");
   printf("#define NUMEXTRA %d\n", c);
   printf("const char* natchars[NUMEXTRA] = {");
   for(int i=0; i<c; i++) printf("\"%s\",", vchars[i].c_str());
   printf("};\n");
   printf("//javastring = \"%s\";\n", javastring.c_str());
+  
+  printf("\nint transcompleteness[NUMLAN] = {");
+  for(int i=0; i<NUMLAN; i++) printf("%d, ", completeness[i]);
+  printf("};\n");
 
   for(int i=1; i<NUMLAN; i++) 
     for(map<string,string>::iterator it = d[i].m.begin(); it != d[i].m.end(); it++)
@@ -305,9 +365,11 @@ int main() {
   
   for(map<hashcode,string>::iterator it = ms.begin(); it != ms.end(); it++) {
     string s = it->second;
+    if(isrepeat(s)) printf("#if REPEATED\n");    
     printf("  {0x%x, { // %s\n", it->first, escape(s, s));
     for(int i=1; i<NUMLAN; i++) printf("   %s,\n", escape(d[i][s], s));
     printf("    }},\n");
+    if(isrepeat(s)) printf("#endif\n");
     }
   printf("  };\n\n");
 
@@ -315,6 +377,7 @@ int main() {
   
   for(map<hashcode,string>::iterator it = mn.begin(); it != mn.end(); it++) {
     string s = it->second;
+    if(isrepeat(s)) printf("#if REPEATED\n");
     printf("  {0x%x, %d, { // \"%s\"\n", it->first, 
       (nothe.count(s) ? 1:0) + (plural.count(s) ? 2:0),
       escape(s, s));
@@ -328,6 +391,7 @@ int main() {
       }
     
     printf("    }},\n");
+    if(isrepeat(s)) printf("#endif\n");
     }
 
   printf("  };\n");

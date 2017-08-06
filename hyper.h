@@ -158,6 +158,7 @@ void loadcs(FILE *f, charstyle& cs, int vernum);
 namespace multi {
 
   extern bool shmupcfg;
+  extern bool alwaysuse;
   void recall();
   extern cell *origpos[MAXPLAYER], *origtarget[MAXPLAYER];
   extern int players;
@@ -345,6 +346,7 @@ struct videopar {
   #define AA_LINEWIDTH 16
   #define AA_FONT      32
   #define AA_MULTI     64
+  #define AA_MULTI16   128 // not configurable
   ld linewidth;
 
   int joyvalue, joyvalue2, joypanthreshold;
@@ -361,6 +363,8 @@ struct videopar {
   
   int steamscore;
   bool drawmousecircle; // draw the circle around the mouse
+  bool skipstart;       // skip the start menu
+  int quickmouse;       // quick mouse on the map
   };
 
 extern videopar vid;
@@ -544,7 +548,7 @@ extern int sval;
 
 extern int items[ittypes], hiitems[MODECODES][ittypes], kills[motypes], explore[10], exploreland[10][landtypes], landcount[landtypes];
 
-extern eLand firstland, euclidland;
+extern eLand firstland, specialland;
 bool pseudohept(cell *c);
 bool pureHardcore();
 extern int cheater;
@@ -797,7 +801,7 @@ extern bool timerghost;
 
 namespace dialog {
 
-  enum tDialogItem {diTitle, diItem, diBreak, diHelp, diInfo, diSlider};
+  enum tDialogItem {diTitle, diItem, diBreak, diHelp, diInfo, diSlider, diBigItem};
 
   struct item {
     tDialogItem type;
@@ -907,7 +911,7 @@ void commitAnimations(int layer);
 
 void animateReplacement(cell *a, cell *b, int layer);
 void fallingFloorAnimation(cell *c, eWall w = waNone, eMonster m = moNone);
-void fallingMonsterAnimation(cell *c, eMonster m);
+void fallingMonsterAnimation(cell *c, eMonster m, int id = multi::cpid);
 
 // ranks:
 enum PPR {
@@ -1288,6 +1292,8 @@ void pushThumper(cell *th, cell *cto);
 template<class T> T pick(T x, T y) { return hrand(2) ? x : y; }
 template<class T> T pick(T x, T y, T z) { switch(hrand(3)) { case 0: return x; case 1: return y; case 2: return z; } return x; }
 template<class T> T pick(T x, T y, T z, T v) { switch(hrand(4)) { case 0: return x; case 1: return y; case 2: return z; case 3: return v; } return x; }
+template<class T, class... U> bool among(T x, T y) { return x == y; }
+template<class T, class... U> bool among(T x, T y, U... u) { return x==y || among(x,u...); }
 
 eLand getNewSealand(eLand old);
 bool createOnSea(eLand old);
@@ -1356,7 +1362,7 @@ extern hookset<eLand(eLand)> *hooks_nextland;
 
 extern ld shiftmul;
 void initcs(charstyle &cs);
-charstyle& getcs();
+charstyle& getcs(int id = multi::cpid);
 
 struct msginfo {
   int stamp;
@@ -1470,7 +1476,7 @@ bool needConfirmation();
 extern const char* geometrynames_short[gGUARD];
 
 namespace mirror {
-  cellwalker reflect(cellwalker cw, bool debug = false);
+  cellwalker reflect(const cellwalker& cw);
   }
 
 bool inmirror(eLand l);
@@ -1508,3 +1514,14 @@ int gl_width(int size, const char *s);
 #ifdef ISMOBILE
 extern int andmode;
 #endif
+
+void addaura(const hyperpoint& h, int col, int fd);
+void addauraspecial(const hyperpoint& h, int col, int dir);
+
+void drawBug(const cellwalker& cw, int col);
+
+void mainloop();
+extern bool showstartmenu;
+void selectLanguageScreen();
+
+bool inscreenrange(cell *c);

@@ -5780,9 +5780,9 @@ S(
     "Pokud na Zrcadlového ducha fyzicky zaútoèíš, zpomalíš ho tím, ale neznièíš "
     "-- ze zrcadla vyjdou další odrazy. Pokud ho chceš znièit nadobro, použij Mimiky.")
 
-S(" (25 in the Orb Strategy mode)", " (25 ve Sférostrategickém módu)")
-S(" (50 in the Orb Strategy mode)", " (50 ve Sférostrategickém módu)")
-S(" (not in the Orb Strategy mode)", " (ne ve Sférostrategickém módu)")
+// S(" (25 in the Orb Strategy mode)", " (25 ve Sférostrategickém módu)")
+// S(" (50 in the Orb Strategy mode)", " (50 ve Sférostrategickém módu)")
+// S(" (not in the Orb Strategy mode)", " (ne ve Sférostrategickém módu)")
     
 /*
                         "NEW_ACHIEVEMENT_8_19_NAME"     "Totální vítìzství"
@@ -5872,8 +5872,115 @@ S(
 S("puzzles and exploration", "hádanky a zkoumání")
 
 S("Zebra quotient", "kvocient Zebra")
-S("cheats", "cheaty")
 S("field quotient", "tělesový kvocient")
-S("help for keyboard user", "pomoc pro uživatele klávesnice")
 S("mark heptagons", "označit sedmiúhelníky")
+S("cheats", "cheaty")
+S("help for keyboard users", "pomoc pro uživatele klávesnice")
+
+S("Zebra quotient", "kvocient Zebra")
+S("field quotient", "tělesový kvocient")
+S("mark heptagons", "označit sedmiúhelníky")
+S("projection", "projekce")
+S("compass size", "velikost kompasu")
+
+S("Collect as many Dodecahedra as you can, then return here!",
+  "Získej co možná nejvíc Dvanáctistěnů, a potom se vrať sem!")
+
+S("reset all configuration", "vyresetovat konfiguraci")
+S("Are you sure?", "Určitě?")
+S("yes, and delete the config file", "ano, a vymaž i konfigurační soubor")
+S("yes", "ano")
+S("cancel", "zrušit")
+S("reset the special game modes", "vyresetovat speciální herní módy")
+
+// extra flavor messages for the OSM
+
+S("You feel the presence of free saves on the Crossroads.",
+  "Cítíš, že na Křižovatce si můžeš zdarma uložit hru.")
+
+S("You feel the Orbs of Yendor nearby...",
+  "Cítíš blízkost Yendorských Sfér...")
+  
+S("You feel the Orbs of Yendor in the Crossroads...",
+  "Cítíš Yendorské Sféry na Křižovatce...")
+
+S("You feel the Orbs of Yendor everywhere...",
+  "Cítíš Yendorské Sféry všude...")
+
+S("You have gained an offensive power!",
+  "Získal jsi útočnou schopnost!")
+
+S("A small reward for braving the Hell.",
+  "Malá odměna za to, že ses postavil Peklu.")
+
+S(" (mirrored)", " (zrcadlená)")
+S(" (used %1 times)", " (použitá %1krát)")
+S("Extras:", "Extra:") // extra Orbs gained in OSM
+
+// cheats
+
+S("unlock Orbs of Yendor", "odemkni Yendorské Sféry")
+S("Collected the keys!", "Získal jsi klíče!");
+S("Saved the Princess!", "Zachránil jsi Princeznu!")
+S("save a Princess", "zachraň Princeznu")
+
+// other
+  
+S("Note for mobiles", "Poznámka pro mobilní telefony")
+S(
+    "This tutorial is designed for computers, "
+    "and keys are given for all actions. It will "
+    "work without a keyboard though, although less "
+    "comfortably -- just ignore the keys "
+    "given and select options from MENU.\n\n"
+    "Select 'next slide' from MENU.",
+
+    "Tento tutorial je navržený pro počítače a u všech akcí "
+    "jsou uvedeny klávesy. Funguje i bez klávesnice, i když "
+    "ne tak pohodlně -- prostě ignorujte udávané klávesy a "
+    "vybírejte možnosti z MENU.\n\n"
+    "Vyber z MENU 'další snímek'.")
+
+S("skip the start menu", "přeskoč menu 'start'")
+S("quick mouse", "rychlá myš")
+S("This combination is known to be buggy at the moment.", "Tato kombinace možností v současné době nepracuje správně.")
+
+// extra Princess texts
+ 
+S("\"I do not like butterflies. They are treacherous.\"", 
+  "\"Nesnáším motýly. Jsou zrádní.\"")
+
+S("\"I hate roses.\"", "\"Nenávidím růže.\"")
+
+S("\"In this world there is plenty of space for everyone. We do not need wars.\"", 
+  "\"V tomhle světě je dost místa pro všechny. Nepotřebujeme války.\"")
+
+S("\"Only the stupid hyperbugs do not understand this.\"", 
+  "\"Jenom ti hloupí hyperhmyzáci tomu nerozumějí.\"")
+
+S("\"I have once talked to a Yendorian researcher... he was only interested in infinite trees.\"",
+  "\"Jednou se mnou mluvil jeden Yendorský výzkumník... zajímal se jenom o nekonečné stromy.\"")
+
+S("\"Infinite trees are boring. I prefer other graphs.\"", 
+  "\"Nekonečné stromy jsou nudné. Mám raději jiné grafy.\"")
+
+// new start menu
+S("skip the start menu", "přeskoč menu 'start'")
+
+S("HyperRogue classic", "klasický HyperRogue")
+S("explore the world, collect treasures", "zkoumej svět, sbírej poklady")
+S("do not get checkmated", "vyhni se šachmatu")
+S("use your Orbs in tough situations", "v obtížných situacích používej Sféry")
+S("continuous spacetime", "spojitý časoprostor")
+S("(most achievements are not available)", "(většina achievementů není k dispozici)")
+S("learn about hyperbolic geometry!", "nauč se o hyperbolické geometrii!")
+S("more options", "více možností")
+
+S(
+  "A strange land filled with mirrors. Break magic mirrors and mirage clouds to "
+  "gain treasures and helpful Mimics.",
+  "Podivný kraj plný zrcadel. Rozbíjej magická zrcadla a oblaky přeludů, abys získal poklady a užitečné Mimiky."
+  )
+
+
 
