@@ -430,29 +430,31 @@ void drawStats() {
     }
 
   string s0;
-  if(displayButtonS(vid.xres - 8, vid.fsize, "score: " + its(gold()), forecolor, 16, vid.fsize)) {
-    mouseovers = XLAT("Your total wealth"),
-    instat = true,
-    getcstat = SDLK_F1,
-    help = helptitle(XLAT("Your total wealth"), 0xFFD500) + 
-    XLAT(
-      "The total value of the treasure you have collected.\n\n"
-      "Every world type contains a specific type of treasure, worth 1 $$$; "
-      "your goal is to collect as much treasure as possible, but every treasure you find "
-      "causes more enemies to hunt you in its native land.\n\n"
-      "Orbs of Yendor are worth 50 $$$ each.\n\n"
-      );
-    }
-  if(displayButtonS(8, vid.fsize, "kills: " + its(tkills()), forecolor, 0, vid.fsize)) {
-    instat = true,
-    getcstat = SDLK_F1,
-    mouseovers = XLAT("Your total kills")+": " + its(tkills()),
-    help = helptitle(XLAT("Your total kills") + ": " + its(tkills()), 0x404040) + 
+  if(!peace::on) {
+    if(displayButtonS(vid.xres - 8, vid.fsize, "score: " + its(gold()), forecolor, 16, vid.fsize)) {
+      mouseovers = XLAT("Your total wealth"),
+      instat = true,
+      getcstat = SDLK_F1,
+      help = helptitle(XLAT("Your total wealth"), 0xFFD500) + 
       XLAT(
-      "In most lands, more treasures are generated with each enemy native to this land you kill. "
-      "Moreover, 100 kills is a requirement to enter the Graveyard and the Hive.\n\n"
-      "Friendly creatures and parts of monsters (such as the Ivy) do appear in the list, "
-      "but are not counted in the total kill count.");
+        "The total value of the treasure you have collected.\n\n"
+        "Every world type contains a specific type of treasure, worth 1 $$$; "
+        "your goal is to collect as much treasure as possible, but every treasure you find "
+        "causes more enemies to hunt you in its native land.\n\n"
+        "Orbs of Yendor are worth 50 $$$ each.\n\n"
+        );
+      }
+    if(displayButtonS(8, vid.fsize, "kills: " + its(tkills()), forecolor, 0, vid.fsize)) {
+      instat = true,
+      getcstat = SDLK_F1,
+      mouseovers = XLAT("Your total kills")+": " + its(tkills()),
+      help = helptitle(XLAT("Your total kills") + ": " + its(tkills()), 0x404040) + 
+        XLAT(
+        "In most lands, more treasures are generated with each enemy native to this land you kill. "
+        "Moreover, 100 kills is a requirement to enter the Graveyard and the Hive.\n\n"
+        "Friendly creatures and parts of monsters (such as the Ivy) do appear in the list, "
+        "but are not counted in the total kill count.");
+      }
     }
   if(displayButtonS(4, vid.yres - 4 - vid.fsize/2, s0+VER+ " fps: " + its(calcfps()), 0x202020, 0, vid.fsize/2)) {
     mouseovers = XLAT("frames per second"),
