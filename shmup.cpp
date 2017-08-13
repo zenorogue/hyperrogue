@@ -1397,11 +1397,12 @@ hyperpoint hornpos(int id) {
 
 #define IGO 9
 
-double igospan[IGO] = { 0, 
+double igospan[IGO+1] = { 0, 
   M_PI/6, -M_PI/6, 
   M_PI/4, -M_PI/4,
   M_PI/3, -M_PI/3,
-  M_PI/2.1, -M_PI/2.1
+  M_PI/2.1, -M_PI/2.1,
+  0
   };
 
 bool swordKills(eMonster m) {
