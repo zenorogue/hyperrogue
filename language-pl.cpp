@@ -1536,8 +1536,8 @@ N("Caribbean", GEN_N, "Karaiby", "Morze Karaibskie", "Karaibów", "na Karaibach"
 N("Pirate", GEN_M, "Pirat", "Piraci", "Pirata", "Piratem")
 N("Shark", GEN_M, "Rekin", "Rekiny", "Rekina", "Rekinem")
 N("Parrot", GEN_F, "Papuga", "Papugi", "Papugę", "Papugą")
-N("Pirate Treasure", GEN_M, "Skarb Piratów", "Skarby Piratów", "Skarb Piratów", "Skarbem Piratów")
-N("Compass", GEN_M, "Kompas", "Kompasy", "Kompas", "Kompasem")
+N("Pirate Treasure", GEN_O, "Skarb Piratów", "Skarby Piratów", "Skarb Piratów", "Skarbem Piratów")
+N("Compass", GEN_O, "Kompas", "Kompasy", "Kompas", "Kompasem")
 
 N("sea", GEN_F, "morze", "morza", "morze", "morzem")
 N("boat", GEN_F, "łódka", "łódki", "łódkę", "łódką")
