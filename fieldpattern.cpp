@@ -447,7 +447,7 @@ struct fpattern {
     
     DEBB(DF_FIELD, (debugfile, "wall order = %d\n", wallorder));
 
-#define SETDIST(X, d, it) {int c = matcode[X]; indist[d].push_back(c); if(!it) ; else if(markers[c] && markers[c] != it) markers[c] = itBuggy; else markers[c] = it; }
+#define SETDIST(X, d, it) {int c = matcode[X]; indist[d].push_back(c); if(it == itNone) ; else if(markers[c] && markers[c] != it) markers[c] = itBuggy; else markers[c] = it; }
     
     matrix W = Id;
     for(int i=0; i<wallorder; i++) {
