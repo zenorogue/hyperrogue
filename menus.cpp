@@ -209,7 +209,7 @@ void showMainMenu() {
 #endif
   
 #if ISMOBILE==1
-#ifdef HAVE_ACHIEVEMENTS
+#if CAP_ACHIEVE
   dialog::addItem(XLAT("leaderboards/achievements"), '3'); 
 #endif
 #endif
@@ -740,7 +740,7 @@ void showStartMenu() {
   dialog::addBreak(100);
   dialog::addBigItem(XLAT("shoot'em up mode"), 's');
   dialog::addInfo(XLAT("continuous spacetime"));
-#ifdef HAVE_ACHIEVEMENTS
+#if CAP_ACHIEVE
   dialog::addInfo(XLAT("(most achievements are not available)"));
 #endif
 #endif
@@ -781,7 +781,7 @@ void showStartMenu() {
     if(uni == 'c' || uni == 'i' || uni == 's') {
       popScreenAll();
       if(inv::on != (uni == 'i')) restartGame('i');
-      if(shmup::on != (uni == 's')) restartGame('S');
+      if(shmup::on != (uni == 's')) restartGame('s');
       clearMessages();
       welcomeMessage();
       }
@@ -793,7 +793,7 @@ void showStartMenu() {
 #endif
 #if CAP_ROGUEVIZ && CAP_TOUR
     else if(uni == 'r') {
-      tour::slides = rvtour::rvslides;
+      tour::slides = rogueviz::rvtour::rvslides;
       popScreenAll();
       tour::start();
       }
