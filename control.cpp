@@ -33,10 +33,6 @@ ld modist, modist2, centdist;
 
 int lastt;
 
-#if ISWEB
-Uint8 *SDL_GetKeyState(void *v) { static Uint8 tab[1024]; return tab; }
-#endif
-
 bool mouseout() {
   if((getcstat != '-' && getcstat) || (lgetcstat && lgetcstat != '-')) return true;
   return outofmap(mouseh);
@@ -521,7 +517,8 @@ void mainloopiter() {
     if(ev.type == SDL_VIDEOEXPOSE) {
       drawscreen();
       }
-    
+
+#if CAP_JOY    
     if(ev.type == SDL_JOYAXISMOTION && normal && DEFAULTCONTROL) {
       if(ev.jaxis.which == 0) {
         if(ev.jaxis.axis == 0)
@@ -584,6 +581,7 @@ void mainloopiter() {
     else if(ev.type == SDL_JOYBUTTONDOWN && !normal) {
       sym = uni = SDLK_RETURN;
       }
+#endif
 
     if(ev.type == SDL_KEYDOWN) {
       flashMessages();

@@ -139,6 +139,7 @@ string listkeys(int id) {
   for(int i=0; i<512; i++)
     if(vid.scfg.keyaction[i] == id)
       lk = lk + " " + SDL_GetKeyName(SDLKey(i));
+#if CAP_JOY
   for(int i=0; i<numsticks; i++) for(int k=0; k<SDL_JoystickNumButtons(sticks[i]) && k<MAXBUTTON; k++)
     if(vid.scfg.joyaction[i][k] == id) {
       lk = lk + " " + cts('A'+i)+"-B"+its(k);
@@ -148,6 +149,7 @@ string listkeys(int id) {
       if(vid.scfg.hataction[i][k][d] == id) {
         lk = lk + " " + cts('A'+i)+"-"+"URDL"[d];
         }
+#endif
   return lk;
 #else
   return "";
@@ -191,6 +193,7 @@ void showShmupConfig() {
     shmupnumkeys = CMDS_PAN;
     shmupcmdtable = pancmds;
     }
+#if CAP_JOY
   else if(sc == SCJOY) {
     dialog::init();
     getcstat = ' ';
@@ -220,6 +223,7 @@ void showShmupConfig() {
     dialog::addBoolItem(XLAT("Configure dead zones"), (configdead), 'z');
     dialog::display();
     }
+#endif
   else if(sc == 0) {
 
     dialog::init(SHMUPTITLE);
@@ -251,8 +255,10 @@ void showShmupConfig() {
       dialog::addBreak(100);
     if(vid.scfg.players > 2)
       dialog::addItem(XLAT("configure player 3") + dsc(2), '3');
+#if CAP_JOY
     else if(vid.scfg.players == 1 && !shmupcfg && !shmupcfg && !multi::alwaysuse)
       dialog::addItem(XLAT("old style joystick configuration"), 'b');
+#endif
     else dialog::addBreak(100);
     if(vid.scfg.players > 3)
       dialog::addItem(XLAT("configure player 4") + dsc(3), '4');
@@ -274,11 +280,13 @@ void showShmupConfig() {
       dialog::addItem(XLAT("configure panning and general keys"), 'p');
     else dialog::addBreak(100);
 
+#if CAP_JOY
     if(numsticks > 0) {
       if(shmupcfg || multi::alwaysuse || vid.scfg.players > 1) 
         dialog::addItem(XLAT("configure joystick axes"), 'j');
       else dialog::addBreak(100);
       }
+#endif
 
     if(multi::players > 1) 
       dialog::addItem(XLAT("reset per-player statistics"), 'r');
@@ -343,9 +351,13 @@ void handleConfig(int sym, int uni) {
     else if(uni == '5') vid.scfg.subconfig = 6;
     else if(uni == '6') vid.scfg.subconfig = 7;
     else if(uni == '7') vid.scfg.subconfig = 8;
+#if CAP_JOY
     else if(uni == 'j') vid.scfg.subconfig = SCJOY;
+#endif
     else if(uni == 'a') multi::alwaysuse = !multi::alwaysuse;
+#if CAP_JOY
     else if(uni == 'b') pushScreen(showJoyConfig);
+#endif
     else if(uni == 'r') 
       for(int i=0; i<MAXPLAYER; i++) 
         kills[i] = deaths[i] = treasures[i] = 0;
@@ -621,7 +633,8 @@ void handleInput(int delta) {
   
   for(int i=0; i<SDLK_LAST; i++) if(keystate[i]) 
     pressaction(vid.scfg.keyaction[i]);
-  
+
+#if CAP_JOY  
   for(int j=0; j<numsticks; j++) {
 
     for(int b=0; b<SDL_JoystickNumButtons(sticks[j]) && b<MAXBUTTON; b++)
@@ -644,6 +657,7 @@ void handleInput(int delta) {
       axespressed[vid.scfg.axeaction[j][b] % SHMUPAXES] += value;
       }
     }
+#endif
 
   if(keystate[SDLK_LCTRL] || keystate[SDLK_RCTRL]) d /= 5;
   

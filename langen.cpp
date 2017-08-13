@@ -299,9 +299,10 @@ int main() {
     }
   printf("\n");
   printf("#define NUMEXTRA %d\n", c);
-  printf("const char* natchars[NUMEXTRA] = {");
+  printf("#define NATCHARS {");
   for(int i=0; i<c; i++) printf("\"%s\",", vchars[i].c_str());
   printf("};\n");
+  printf("const char* natchars[NUMEXTRA] = NATCHARS;");
   printf("//javastring = \"%s\";\n", javastring.c_str());
   
   printf("\nint transcompleteness[NUMLAN] = {");

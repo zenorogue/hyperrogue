@@ -1,6 +1,6 @@
-#define VER "10.0g"
-#define VERNUM 10007
-#define VERNUM_HEX 0xA007
+#define VER "10.0h"
+#define VERNUM 10008
+#define VERNUM_HEX 0xA008
 
 #define GEN_M 0
 #define GEN_F 1
@@ -145,7 +145,9 @@
 #define CAP_SDLJOY (CAP_SDL && !ISWEB)
 #endif
 
+#ifndef CAP_SDLTTF
 #define CAP_SDLTTF (CAP_SDL && !ISMOBILE && !ISWEB)
+#endif
 
 #define CAP_GLFONT (CAP_GL && !ISMOBILE)
 
@@ -153,12 +155,24 @@
 #define CAP_TABFONT (ISWEB)
 #endif
 
+#ifndef CAP_CREATEFONT
+#define CAP_CREATEFONT 0
+#endif
+
 #ifndef CAP_FIXEDSIZE
-#define CAP_FIXEDSIZE (CAP_CREATEFONT || CAP_TABLEFONT ? 36 : 0)
+#define CAP_FIXEDSIZE (CAP_CREATEFONT || CAP_TABFONT ? 36 : 0)
 #endif
 
 #ifndef CAP_SHMUP
 #define CAP_SHMUP 1
+#endif
+
+#ifdef ISSTEAM
+#define CAP_ACHIEVE 1
+#endif
+
+#ifndef CAP_ACHIEVE
+#define CAP_ACHIEVE 0
 #endif
 
 #ifndef CAP_SHMUP_GOOD
@@ -237,6 +251,10 @@ void gdpush(int t);
 #define SDLK_KP_ENTER (123054)
 #define SDLK_BACKSPACE (123055)
 typedef int SDL_Event;
+#endif
+
+#if ISWEB
+inline Uint8 *SDL_GetKeyState(void *v) { static Uint8 tab[1024]; return tab; }
 #endif
 
 #ifndef CAP_GLEW
@@ -737,3 +755,4 @@ void mobile_draw(MOBPAR_FORMAL) {
 #if !CAP_AUDIO
 void playSound(cell*, const string &s, int vol) { printf("play sound: %s vol %d\n", s.c_str(), vol); }
 #endif
+

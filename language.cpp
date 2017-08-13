@@ -52,9 +52,9 @@ struct fullnoun {
   noun n[NUMLAN-1];
   };
 
-#ifdef NOTRANS
-#define NUMEXTRA 3
-const char* natchars[NUMEXTRA] = {"°","é","á"};
+#if !CAP_TRANS
+#define NUMEXTRA 5
+const char* natchars[NUMEXTRA] = {"°","é","á", "ᵈ", "δ"};
 #endif
 
 #if CAP_TRANS
@@ -268,7 +268,7 @@ void parrep(string& x, string w, stringpar p) {
   if(true) {
     // proper names (R'Lyeh)
     rep(x,"%"+w,p.v);
-#ifdef NOTRANS
+#if !CAP_TRANS
     int flags = 0;
     if(p.v == "R'Lyeh" || p.v == "Camelot")  flags = 1;
     if(p.v == "Crossroads" || p.v == "Crossroads II" ||

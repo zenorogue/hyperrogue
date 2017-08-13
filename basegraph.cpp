@@ -362,7 +362,11 @@ void init_glfont(int size) {
 #endif
   
 //  glListBase(0);
- 
+
+#if CAP_TABFONT
+  resetTabFont();
+#endif
+
   for(int ch=1;ch<128+NUMEXTRA;ch++) {
   
     if(ch<32) continue;
@@ -387,6 +391,12 @@ void init_glfont(int size) {
     SDL_FreeSurface(txt);    
 #endif
     }
+
+#if CAP_CREATEFONT
+  printf("#define NUMEXTRA %d\n", NUMEXTRA);
+#define DEMACRO(x) #x
+  printf("#define NATCHARS " DEMACRO(NATCHARS) "\n");
+#endif
 
 //printf("init size=%d ok\n", size);
   GLERR("initfont");

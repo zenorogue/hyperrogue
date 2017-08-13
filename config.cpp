@@ -1,3 +1,7 @@
+// Hyperbolic Rogue -- configuration
+
+// Copyright (C) 2017- Zeno Rogue, see 'hyper.cpp' for details
+
 videopar vid;
 
 #if ISANDROID
@@ -45,12 +49,9 @@ int lang() {
   return default_language;
   }
 
-// Hyperbolic Rogue -- configuration
-
-// Copyright (C) 2017- Zeno Rogue, see 'hyper.cpp' for details
-
 bool autojoy = true;
 
+#if CAP_CONFIG
 struct supersaver {
   string name;
   virtual string save() = 0;
@@ -128,6 +129,16 @@ template<> struct saver<ld> : dsaver<ld> {
   string save() { return ftssmart(val); }
   void load(const string& s) { val = atof(s.c_str()); }
   };
+#endif
+
+#if !CAP_CONFIG
+template<class T, class U, class V> void addsaver(T& i, U name, V dft) {
+  i = dft;
+  }
+
+template<class T, class U> void addsaver(T& i, U name) {}
+template<class T, class U> void addsaverenum(T& i, U name) {}
+#endif
 
 void addsaver(charstyle& cs, string s) {
   addsaver(cs.charid, s + ".charid");
@@ -160,17 +171,6 @@ void initcs(charstyle &cs) {
   }
 
 #if CAP_CONFIG
-void savecs(FILE *f, charstyle& cs, int xvernum) {
-  int gflags = cs.charid;
-  if(vid.samegender) gflags |= 16;
-  
-  fprintf(f, "%d %d %08x %08x %08x %08x", 
-    gflags, vid.language, cs.skincolor, cs.haircolor, cs.swordcolor, cs.dresscolor);
-  if(cs.charid == 3) fprintf(f, " %08x", cs.dresscolor2);
-  if(xvernum >= 8990) fprintf(f, " %x", cs.uicolor);
-  fprintf(f, "\n");
-  }
-
 void loadcs(FILE *f, charstyle& cs, int xvernum) {
   int gflags, err = 
   fscanf(f, "%d%d%x%x%x%x", &gflags, &vid.language, &cs.skincolor, &cs.haircolor, &cs.swordcolor, &cs.dresscolor);
@@ -182,6 +182,7 @@ void loadcs(FILE *f, charstyle& cs, int xvernum) {
   if(xvernum >= 8990) if(fscanf(f, "%x", &cs.uicolor)) 
     ;
   }
+#endif
 
 void initConfig() {
   
@@ -300,8 +301,10 @@ void initConfig() {
   addsaverenum(specialland, "land for special modes");
   
   addsaver(viewdists, "expansion mode");
-  
-  shmup::initConfig();  
+
+#if CAP_SHMUP  
+  shmup::initConfig();
+#endif
   }
 
 void resetModes() {
@@ -311,13 +314,16 @@ void resetModes() {
   if(chaosmode) restartGame('C');
   if(purehepta) restartGame('7');
   if(peace::on) restartGame('P');
+#if CAP_TOUR
   if(tour::on) restartGame('T');
+#endif
   if(yendor::on) restartGame('y');
   if(tactic::on) restartGame('t');
   if(randomPatternsMode) restartGame('r');
   if(geometry != gNormal) { targetgeometry = gNormal; restartGame('g'); }
   }
-  
+
+#if CAP_CONFIG  
 void resetConfig() {
   dynamicval<int> rx(vid.xres, 0);
   dynamicval<int> ry(vid.yres, 0);
@@ -327,7 +333,9 @@ void resetConfig() {
     if(s->name.substr(0,5) != "mode-")
       s->reset();
   }
+#endif
 
+#if CAP_CONFIG
 void saveConfig() {
   DEBB(DF_INIT, (debugfile,"save config\n"));
   FILE *f = fopen(conffile, "wt");
@@ -762,7 +770,9 @@ void showBasicConfig() {
   if(CAP_SHMUP && !ISMOBILE)
     dialog::addSelItem(XLAT("configure keys/joysticks"), "", 'p');
 
+#if CAP_CONFIG
   dialog::addItem(XLAT("reset all configuration"), 'R');
+#endif
   showAllConfig();
   
   dialog::display();
@@ -800,7 +810,9 @@ void showBasicConfig() {
     
     if(uni == 'r') vid.revcontrol = !vid.revcontrol;
     if(xuni == 'd') vid.drawmousecircle = !vid.drawmousecircle;
+#if CAP_CONFIG
     if(uni == 'R') pushScreen(resetConfigMenu);
+#endif
   
   #if ISSTEAM
     if(xuni == 'l') vid.steamscore = vid.steamscore^1;
@@ -1129,6 +1141,7 @@ void showCustomizeChar() {
     };
   }
 
+#if CAP_CONFIG
 void resetConfigMenu() {
   dialog::init(XLAT("reset all configuration"));
   dialog::addInfo("Are you sure?");
@@ -1158,7 +1171,9 @@ void resetConfigMenu() {
     
     };
   }
+#endif
 
+#if CAP_TRANS
 void selectLanguageScreen() {
   gamescreen(4);
   dialog::init("select language"); // intentionally not translated
@@ -1216,4 +1231,5 @@ void selectLanguageScreen() {
       popScreen();
     };
   }
+#endif
   
