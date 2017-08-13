@@ -766,7 +766,7 @@ void drawmessages() {
   DEBB(DF_GRAPH, (debugfile,"draw messages\n"));
   int i = 0;
   int t = ticks;
-  for(int j=0; j<size(msgs); j++) {
+  for(int j=0; j<size(msgs) && j<5; j++) {
     int age = msgs[j].flashout * (t - msgs[j].stamp);
     if(msgs[j].spamtype) {
       for(int i=j+1; i<size(msgs); i++) if(msgs[i].spamtype == msgs[j].spamtype)
