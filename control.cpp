@@ -618,6 +618,9 @@ void mainloopiter() {
         actonrelease = ev.type == SDL_MOUSEBUTTONDOWN;
         }
       
+      bool anyctrl = keystate[SDLK_LCTRL] || keystate[SDLK_RCTRL];
+      bool anyshift = keystate[SDLK_LSHIFT] || keystate[SDLK_RSHIFT];
+      
       if(!act) ;
 
       else if(ev.button.button==SDL_BUTTON_RIGHT || leftclick) 
@@ -629,7 +632,15 @@ void mainloopiter() {
         }
       
       else if(ev.button.button==SDL_BUTTON_WHEELDOWN) {
-        if(rollchange) {
+        if(anyctrl && anyshift) {
+          vid.scale /= 1.2;
+          vid.alpha /= 1.2;
+          }
+        else if(anyctrl)
+          vid.scale *= pow(2, -.25);
+        else if(anyshift)
+          vid.alpha -= 0.25;
+        else if(rollchange) {
           sym = getcstat, uni = getcstat, shiftmul = getcshift, wheelclick = true;
           }
         else {
@@ -637,7 +648,15 @@ void mainloopiter() {
           }
         }
       if(ev.button.button==SDL_BUTTON_WHEELUP) {
-        if(rollchange) {
+        if(anyctrl && anyshift) {
+          vid.scale *= 1.2;
+          vid.alpha *= 1.2;
+          }
+        else if(anyctrl)
+          vid.scale *= pow(2, .25);
+        else if(anyshift)
+          vid.alpha += 0.25;
+        else if(rollchange) {
           sym = getcstat, uni = getcstat, shiftmul = -getcshift, wheelclick = true;
           }
         else {
