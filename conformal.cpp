@@ -2,7 +2,12 @@
 // Copyright (C) 2011-2016 Zeno Rogue, see 'hyper.cpp' for details
 
 #include <complex>
-typedef complex<ld> cld;
+
+#if ISMOBWEB
+typedef double precise;
+#else
+typedef long double precise;
+#endif
 
 namespace polygonal {
 
@@ -11,12 +16,12 @@ namespace polygonal {
   int SI = 4;
   ld  STAR = 0;
   
-  int deg = 20;
+  int deg = ISMOBWEB ? 2 : 20;
 
-  ld matrix[MSI][MSI];
-  ld ans[MSI];
+  precise matrix[MSI][MSI];
+  precise ans[MSI];
   
-  cld coef[MSI]; 
+  cld coef[MSI];
   ld coefr[MSI], coefi[MSI]; 
   int maxcoef, coefid;
   
@@ -30,7 +35,7 @@ namespace polygonal {
     for(int i=0; i<MSI; i++) ans[i] = cos(M_PI / SI);
     for(int i=0; i<MSI; i++)
       for(int j=0; j<MSI; j++) {
-        double i0 = (i+0.) / (MSI-1);
+        precise i0 = (i+0.) / (MSI-1);
         // i0 *= i0;
         // i0 = 1 - i0;
         i0 *= M_PI;
@@ -40,11 +45,11 @@ namespace polygonal {
         }
     
     for(int i=0; i<MSI; i++) {
-      ld dby = matrix[i][i];
+      precise dby = matrix[i][i];
       for(int k=0; k<MSI; k++) matrix[i][k] /= dby;
       ans[i] /= dby; 
       for(int j=i+1; j<MSI; j++) {
-        ld sub = matrix[j][i];
+        precise sub = matrix[j][i];
         ans[j] -= ans[i] * sub;
         for(int k=0; k<MSI; k++)
            matrix[j][k] -= sub * matrix[i][k];
@@ -52,7 +57,7 @@ namespace polygonal {
       }
     for(int i=MSI-1; i>=0; i--) {
       for(int j=0; j<i; j++) {
-        ld sub = matrix[j][i];
+        precise sub = matrix[j][i];
         ans[j] -= ans[i] * sub;
         for(int k=0; k<MSI; k++)
            matrix[j][k] -= sub * matrix[i][k];
