@@ -1415,7 +1415,7 @@ void rvvideo(const char *fname) {
     int steps = 0;
     while(true) {
       steps++;
-      if(isnan(View[0][0])) exit(1);
+      if(std::isnan(View[0][0])) exit(1);
       shmup::turn(100);
       drawthemap();
       centerpc(100); optimizeview();
