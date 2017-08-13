@@ -1223,6 +1223,7 @@ int orbcharges(eItem it) {
     case itOrbHorns:
     case itOrbBull:
     case itOrbShell:
+    case itOrbAir:
       return 66;
     case itOrbTime:
     case itOrbSpace:
