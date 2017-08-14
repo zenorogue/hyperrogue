@@ -5550,9 +5550,9 @@ void movecost(cell* from, cell *to) {
   if(isHaunted(from->land) && !isHaunted(to->land)) {
     updateHi(itLotus, truelotus = items[itLotus]);
     if(items[itLotus] >= 1) achievement_gain("LOTUS1");
-    if(items[itLotus] >= 10) achievement_gain("LOTUS2");
-    if(items[itLotus] >= 25) achievement_gain("LOTUS3");
-    if(items[itLotus] >= 50) achievement_gain("LOTUS4");
+    if(items[itLotus] >= (inv::on ? 25 : 10)) achievement_gain("LOTUS2");
+    if(items[itLotus] >= (inv::on ? 50 : 25)) achievement_gain("LOTUS3");
+    if(items[itLotus] >= 50 && !inv::on) achievement_gain("LOTUS4");
     achievement_final(false);
     }
   
