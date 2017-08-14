@@ -5270,6 +5270,8 @@ void setdist(cell *c, int d, cell *from) {
           c->wall = waBarrier;
         else if(c->type == 6 && !inv::on && items[itShard] >= 10 && hrand(8000) < 120*orbcrossfun(items[itShard]))
           c->wall = hrand(2) ? waMirror : waCloud;
+        else if(c->type == 6 && hyperstonesUnlocked() && hrand(8000) < 100)
+          c->wall = hrand(2) ? waMirror : waCloud;
         else if(c->type == 6 && tactic::on && isCrossroads(tactic::lasttactic) && hrand(8000) < 120)
           c->wall = hrand(2) ? waMirror : waCloud;
         else if(c->land == laCrossroads4 && hrand(24000) < 10 && tactic::on)
