@@ -248,6 +248,8 @@ void parrep(string& x, string w, stringpar p) {
       rep(x, "%"+w, N->n[5].nom);
       rep(x, "%P"+w, N->n[5].nomp);
       rep(x, "%na"+w, choose4(N->n[5].genus, "o", "a", "os", "as") + " " + N->n[5].nom);
+      rep(x, "%Na"+w, choose4(N->n[5].genus, "O", "A", "Os", "As") + " " + N->n[5].nom);
+      rep(x, "%oa"+w, choose4(N->n[5].genus, "o", "a", "os", "as"));
       rep(x, "%g"+w, choose4(N->n[5].genus, "do", "da", "dos", "das")+ " " + N->n[5].nom);
       rep(x, "%d"+w, choose4(N->n[5].genus, "ao", "à", "aos", "às")+ " " + N->n[5].nom);
       rep(x, "%l"+w, choose4(N->n[5].genus, "no", "na", "nos", "nas")+ " " + N->n[5].nom);
