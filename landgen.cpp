@@ -1119,8 +1119,10 @@ void placeLocalOrbs(cell *c) {
       continue;
     if(!oi.lchance) continue;
     int ch = hrand(oi.lchance);
+    if(ch == 1 && chaosmode && hrand(2) == 0 && items[treasureType(oi.l)] * landMultiplier(oi.l) >= (11+hrand(15)))
+      ch = 0;
     if(tactic::trailer && ch < 5) ch = 0;
-    if(ch == 0 && items[treasureType(oi.l)] * landMultiplier(oi.l) >= 10) {
+    if(ch == 0 && items[treasureType(oi.l)] * landMultiplier(oi.l) >= (chaosmode ? 1+hrand(10) : 10)) {
       // printf("local orb\n");
       c->item = oi.orb;
       if(oi.orb == itOrbWater && c->land != laOcean) c->wall = waStrandedBoat;
