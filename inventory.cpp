@@ -180,7 +180,7 @@ namespace inv {
       }
     
     gainRandomOrbs(offensiveOrbs, itBone, 25, 0);
-    gainRandomOrbs(elementalOrbs, itElemental, 20, 0);
+    gainRandomOrbs(elementalOrbs, itElemental, 12, 0);
     gainRandomOrbs(demonicOrbs, itHell, 20, 100);
     
     if(items[itOrbLove] && !items[itSavedPrincess]) items[itSavedPrincess] = 1;
