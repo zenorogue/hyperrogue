@@ -5346,9 +5346,8 @@ bool activateRecall() {
   movecost(cwt.c, recallCell);
   playerMoveEffects(cwt.c, recallCell);
   mirror::destroyAll();
-
-  items[itOrbSword] = 0;
-  items[itOrbSword2] = 0;
+  
+  sword::reset();
 
   cwt.c = recallCell; recallCell = NULL;
   cwt.spin = hrand(cwt.c->type); flipplayer = !!(hrand(2));
@@ -5525,7 +5524,7 @@ bool multiRevival(cell *on, cell *moveto) {
     if(multi::player[id].spin < 0) multi::player[id].spin = 0;
     multi::flipped[id] = true;
     multi::whereto[id].d = MD_UNDECIDED;
-    items[itOrbSword] = items[itOrbSword2] = 0;
+    sword::reset();
     return true;
     }
   return false;
