@@ -1235,7 +1235,7 @@ int monstersnear(cell *c, cell *nocount, eMonster who, cell *pushto, cell *comef
   
   if(who == moPlayer) for(int b=0; b<2; b++) sm.swordlast[b] = sword::pos(multi::cpid, b);
   
-  cell *none;
+  cell *none = NULL;
   cell **wcw = &cwt.c;
   if(who != moPlayer) wcw = &none;
   else if(multi::players > 1) wcw = &multi::player[multi::cpid].c;
