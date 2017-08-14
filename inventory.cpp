@@ -16,8 +16,34 @@ namespace inv {
   
   static const int MIRRORED = 1000;
   static const int TESTMIRRORED = 900;
+
+  struct lateextraorb {
+    eItem treasure;
+    eItem orb;
+    int at;
+    };
   
-  int mirrorqty(eItem orb) {
+  vector<lateextraorb> lateextraorbs = {
+    {itPower, itOrbFlash},
+    {itPower, itOrbSpeed},
+    {itPower, itOrbAether},
+    {itPower, itOrbWinter},
+  
+    {itTrollEgg, itOrbFish},
+    {itTrollEgg, itOrbStunning},
+    {itTrollEgg, itOrbLuck},
+    {itTrollEgg, itOrbLife},
+    {itTrollEgg, itOrbDigging},
+    {itTrollEgg, itOrbSpace},
+  
+    {itFulgurite, itOrbLightning},
+    {itWindstone, itOrbSpeed},
+    {itDragon, itOrbDragon},
+    {itSlime, itOrbFlash},
+    {itDodeca, itOrbShield}
+    };
+
+  int mirrorqty0(eItem orb) {
     if(shmup::on && isShmupLifeOrb(orb)) 
       return 3;
     if(orb == itOrbWater) return 10;
@@ -53,6 +79,10 @@ namespace inv {
 
     if(orb == itOrbMirror) return 1;
     return 3;
+    }
+  
+  int mirrorqty(eItem orb) {
+    return int(mirrorqty0(orb) * sqrt(1.000001+items[itPower]/20.));
     }
     
   struct nextinfo { int min, real, max; };
@@ -138,7 +168,11 @@ namespace inv {
   
   void compute() {
     for(int i=0; i<ittypes; i++) remaining[i] = -usedup[i];
-    for(int i=0; i<ittypes; i++) if(usedup[i] >= TESTMIRRORED) remaining[i] += MIRRORED;
+    for(int i=0; i<ittypes; i++) if(usedup[i] >= TESTMIRRORED) {
+      remaining[i] += MIRRORED;
+      remaining[i] -= mirrorqty0(eItem(i));
+      remaining[i] += mirrorqty(eItem(i));
+      }
     
     sirand(rseed);
     
@@ -183,6 +217,11 @@ namespace inv {
     gainRandomOrbs(elementalOrbs, itElemental, 12, 0);
     gainRandomOrbs(demonicOrbs, itHell, 20, 100);
     
+    for(auto& it: lateextraorbs) {
+      it.at = 10 + irand(41);
+      if(items[it.treasure] >= it.at) remaining[it.orb]++;
+      }
+    
     if(items[itOrbLove] && !items[itSavedPrincess]) items[itSavedPrincess] = 1;
     
     int& r = remaining[itGreenStone];
@@ -190,7 +229,7 @@ namespace inv {
     if(items[itBone] >= 0) {
       for(int i=0; i<ittypes; i++) if(i != itGreenStone) {
         r += usedup[i];
-        if(usedup[i] >= TESTMIRRORED) r -= (MIRRORED - mirrorqty(eItem(i)));
+        if(usedup[i] >= TESTMIRRORED) r -= (MIRRORED - mirrorqty0(eItem(i)));
         }
       }
     
@@ -350,6 +389,8 @@ namespace inv {
           if(isIn(which, offensiveOrbs)) extras += extraline(itBone, its(items[itBone]/25*25+25) + "?");
           if(isIn(which, elementalOrbs)) extras += extraline(itElemental, its(items[itBone]/20*20+20) + "?");
           if(isIn(which, demonicOrbs)) extras += extraline(itHell, its(max(125, items[itHell]/25*25+25)) + "?");
+          for(auto& a: lateextraorbs) if(a.orb == which)
+            extras += extraline(a.treasure, items[a.treasure] >= a.at ? (its(a.at)+"!") : "10-50");
 
           if(extras != "")
             displaystr(vid.xres/2, vid.fsize*5, 2, vid.fsize, XLAT("Extras:")+extras, icol, 8);
@@ -358,7 +399,7 @@ namespace inv {
         if(remaining[which] != 1 || usedup[which]) {
           string s = XLAT("Number of uses left: %1", its(remaining[which]));
           int us = usedup[which];
-          if(us >= TESTMIRRORED) s += XLAT(" (mirrored)"), us = us - MIRRORED + mirrorqty(which);
+          if(us >= TESTMIRRORED) s += XLAT(" (mirrored)"), us = us - MIRRORED + mirrorqty0(which);
           if(us) s += XLAT(" (used %1 times)", its(us));
           displaystr(vid.xres/2, vid.yres - vid.fsize*6, 2, vid.fsize, s, icol, 8);
           }
@@ -412,7 +453,7 @@ namespace inv {
           else if(remaining[orb] > 0) {
             usedup[itOrbMirror]++;
             usedup[orb] += MIRRORED;
-            usedup[orb] -= mirrorqty(orb);
+            usedup[orb] -= mirrorqty0(orb);
             addMessage(XLAT("You mirror %the1.", orb));
             mirroring = false;
             }

@@ -261,6 +261,14 @@ string generateHelpForItem(eItem it) {
         "You can gain further Orbs of the Mirror by collecting 2, 4, 8..."
         );  
     
+    if(it == itPower)
+      help += XLAT(
+        "\n\nThe amount of Orbs obtained by using Orbs of Mirroring is "
+        "multiplied by sqrt(1+p/20), where p is the number of Powerstones "
+        "collected. This also affects the mirrorings which happened before "
+        "collecting the Powerstones."
+        );
+    
     if(it == itOrbLuck)
       help += XLAT(
         "\n\nIn the Orb Strategy Mode, the Orb of Luck also "
@@ -430,6 +438,13 @@ string generateHelpForLand(eLand l) {
     l == laReptile || l == laIvoryTower)
       TREQ(R30)
 
+  if(l == laPower && inv::on)
+    help += XLAT(
+      "\n\nThe amount of Orbs obtained by using Orbs of Mirroring is "
+      "multiplied by sqrt(1+p/20), where p is the number of Powerstones "
+      "collected. This also affects the mirrorings which happened before "
+      "collecting the Powerstones."
+      );
   
   if(isCoastal(l)) 
     s += XLAT("Coastal region -- connects inland and aquatic regions.\n");
