@@ -72,15 +72,16 @@ bool applyCheat(char u, cell *c = NULL) {
 
     for(int t=1; t<ittypes; t++) 
       if(t != itHyperstone && t != itBounty && itemclass(eItem(t)) == IC_TREASURE) {
-        items[t] = 10;
+        items[t] = inv::on ? 50 : 10;
         }
-    kills[moYeti] = 200;
-    kills[moDesertman] = 200;
-    kills[moRunDog] = 200;
-    kills[moZombie] = 200;
-    kills[moMonkey] = 200;
-    kills[moCultist] = 200;
-    kills[moTroll] = 200;
+    int qkills = inv::on ? 1000 : 200;
+    kills[moYeti] = qkills;
+    kills[moDesertman] = qkills;
+    kills[moRunDog] = qkills;
+    kills[moZombie] = qkills;
+    kills[moMonkey] = qkills;
+    kills[moCultist] = qkills;
+    kills[moTroll] = qkills;
     return true;
     }
   if(u == 'M') {
