@@ -2485,9 +2485,17 @@ namespace sword {
       return ((s2*S42/c2->type - s1*S42/c1->type) + S21 + angle) % S42;
     }
 
+  void shuffle(int i) {
+    sword::angle[i] = euclid ? S7*hrand(6) : purehepta ? 3*hrand(S14)+1 : hrand(S42);
+    }
+  
+  void reset() {
+    items[itOrbSword] = items[itOrbSword2] = 0;
+    shuffle(multi::cpid);
+    }
+
   void shuffle() {
-    for(int i=0; i<MAXPLAYER; i++)
-      sword::angle[i] = euclid ? S7*hrand(6) : purehepta ? 3*hrand(S14)+1 : hrand(S42);
+    for(int i=0; i<MAXPLAYER; i++) shuffle(i);
     }
   };
 

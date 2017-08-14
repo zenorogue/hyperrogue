@@ -281,10 +281,47 @@ namespace inv {
   string extraline(eItem it, string s) {
     return " "+XLAT1(iinf[it].name) + " ("+s+")";
     }
+  
+  void evokeBeautyAt(cell *c) {
+    forCellEx(c2, c)
+      if(c2->monst && !isFriendly(c2->monst) && !isIvy(c2->monst)) {
+        c2->stuntime += 3;
+        checkStunKill(c2);
+        }
+    }
+  
+  void evokeOrb(eItem it) {
+    if(it == itOrbFreedom)
+      for(int i=0; i<numplayers(); i++)
+        if(multi::playerActive(i))
+          checkFreedom(playerpos(i));
+    
+    if(it == itOrbBeauty) {
+      for(int i=0; i<numplayers(); i++)
+        if(multi::playerActive(i))
+          evokeBeautyAt(playerpos(i));
+      if(items[itOrbEmpathy])
+        for(cell *c: dcal) if(isFriendly(c->monst))
+          evokeBeautyAt(c);
+      }
+    
+    if(it == itOrbSword || it == itOrbSword2) {
+      for(int i=0; i<numplayers(); i++)
+        if(multi::playerActive(i)) {
+          cwt.c = playerpos(i);
+          multi::cpid = i;
+          swordAttackStatic(it == itOrbSword2);
+          }
+      }
+    }
 
   void show() {
   
+    if(remaining[itOrbSword]) items[itOrbSword]++;
+    if(remaining[itOrbSword2]) items[itOrbSword2]++;
     gamescreen(2);
+    if(remaining[itOrbSword]) items[itOrbSword]--;
+    if(remaining[itOrbSword2]) items[itOrbSword2]--;
     cmode = sm::CENTER;
 
     orbcoord.clear();
@@ -470,6 +507,7 @@ namespace inv {
           if(getOLR(it, getPrizeLand()))
             usedForbidden = true;
           cwt.c->item = it;
+          evokeOrb(orbmap[uni]);
           checkmove();
           popScreenAll();
           }

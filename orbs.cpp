@@ -545,7 +545,7 @@ void teleportTo(cell *dest) {
 
   bfs();
   
-  items[itOrbSword] = 0;
+  sword::reset();
   items[itOrbSword2] = 0;
   if(shmup::on)
     shmup::teleported();
@@ -568,8 +568,7 @@ void jumpTo(cell *dest, eItem byWhat, int bonuskill = 0, eMonster dashmon = moNo
     }
   countLocalTreasure();
 
-  items[itOrbSword] = 0;
-  items[itOrbSword2] = 0;
+  sword::reset();
   stabbingAttack(c1, dest, moPlayer, bonuskill);
   playerMoveEffects(c1, dest);
   if(cwt.c->item != itOrbYendor && cwt.c->item != itHolyGrail)

@@ -4415,10 +4415,14 @@ bool swordAttack(cell *mt, eMonster who, cell *c, int bb) {
   return false;
   }
 
+void swordAttackStatic(int bb) {
+  swordAttack(cwt.c, moPlayer, sword::pos(multi::cpid, bb), bb);
+  }
+
 void swordAttackStatic() {
   for(int bb = 0; bb < 2; bb++) 
     if(sword::orbcount(bb))
-      swordAttack(cwt.c, moPlayer, sword::pos(multi::cpid, bb), bb);
+      swordAttackStatic(bb);
   }
 
 void stabbingAttack(cell *mf, cell *mt, eMonster who, int bonuskill) {
