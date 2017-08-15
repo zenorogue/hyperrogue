@@ -17,6 +17,8 @@ struct sample {
 
 vector<sample> data;
 
+vector<int> samples_shown;
+
 int whattodraw[3];
 
 struct neuron {
@@ -31,6 +33,8 @@ struct neuron {
 kohvec weights;
 
 vector<neuron> net;
+
+int neuronId(neuron& n) { return &n - &(net[0]); }
 
 void alloc(kohvec& k) { k.resize(cols); }
 
@@ -67,6 +71,7 @@ void loadsamples(const char *fname) {
   if(fscanf(f, "%d", &cols) != 1) { fclose(f); return; }
   while(true) {
     sample s;
+    bool shown = false;
     alloc(s.val);
     if(feof(f)) break;
     for(int i=0; i<cols; i++)
@@ -75,17 +80,19 @@ void loadsamples(const char *fname) {
     while(true) {
       int c = fgetc(f);
       if(c == -1 || c == 10 || c == 13) break;
-      if(c != 32 && c != 9) s.name += c;
+      if(c == '!' && s.name == "") shown = true;
+      else if(c != 32 && c != 9) s.name += c;
       }
+    if(shown) samples_shown.push_back(size(data));
     data.push_back(move(s));
     }
   fclose(f);
   samples = size(data);
   normalize();
   
-  vdata.resize(samples);
-  for(int i=0; i<samples; i++) {
-    vdata[i].name = data[i].name;
+  vdata.resize(size(samples_shown));
+  for(int i=0; i<size(samples_shown); i++) {
+    vdata[i].name = data[samples_shown[i]].name;
     vdata[i].cp = dftcolor;
     createViz(i, cwt.c, Id);
     }
@@ -93,7 +100,7 @@ void loadsamples(const char *fname) {
   storeall();
   }
 
-int t;
+int t, tmax;
 
 int lpct, mul, maxdist, cells, perdist;
 double maxfac;
@@ -112,7 +119,7 @@ void setindex(bool b) {
   if(b == neurons_indexed) return;
   neurons_indexed = b;
   if(b) {
-    for(neuron& n: net) n.lpbak = n.where->landparam, n.where->landparam = (&n - &net[0]);
+    for(neuron& n: net) n.lpbak = n.where->landparam, n.where->landparam = neuronId(n);
     }
   else {
     for(neuron& n: net) n.where->landparam = n.lpbak;
@@ -144,6 +151,10 @@ void coloring() {
     int c = whattodraw[pid];
     vector<double> listing;
     for(neuron& n: net) switch(c) {
+      case -4:
+        listing.push_back(n.samples);
+        break;
+        
       case -3:
         if(distfrom) 
           listing.push_back(vnorm(n.net, distfrom->net));
@@ -195,14 +206,16 @@ void analyze() {
   
   for(neuron& n: net) n.samples = 0;
   
-  for(int id=0; id<samples; id++) {
-    auto& w = winner(id);
-    whowon[id] = &w;
+  for(int id=0; id<size(samples_shown); id++) {
+    int s = samples_shown[id];
+    auto& w = winner(s);
+    whowon[s] = &w;
     w.samples++;
     }
   
-  for(int id=0; id<samples; id++) {
-    auto& w = *whowon[id];
+  for(int id=0; id<size(samples_shown); id++) {
+    int s = samples_shown[id];
+    auto& w = *whowon[s];
     vdata[id].m->base = w.where;
     vdata[id].m->at = 
       spin(2*M_PI*w.csample / w.samples) * xpush(.25 * (w.samples-1) / w.samples);
@@ -262,26 +275,119 @@ struct cellcrawler {
     }
   };
 
-cellcrawler s0, s1; // hex and non-hex
+// traditionally Gaussian blur is used in the Kohonen algoritm
+// but it does not seem to make much sense in hyperbolic geometry
+// especially wrapped one.
+// GAUSSIAN==1: use the Gaussian blur
+// GAUSSIAN==0: simulate the dispersion on our network
+
+#ifndef GAUSSIAN
+#define GAUSSIAN 0
+#endif
+
+cellcrawler scc[2]; // hex and non-hex
+
+#if GAUSSIAN==0
+double dispersion_precision = .0001;
+int dispersion_each = 1;
+
+vector<vector<ld>> dispersion[2]; 
+
+int dispersion_count;
+#endif
 
 void buildcellcrawler(cell *c) {
-  (c->type == 6 ? s0 : s1).build(cellwalker(c,0));
+  int sccid = c->type != 6;
+  
+  cellcrawler& cr =  scc[sccid];
+  cr.build(cellwalker(c,0));
+
+#if GAUSSIAN==0
+  vector<ld> curtemp;
+  vector<ld> newtemp;
+  vector<int> qty;
+  vector<pair<ld*, ld*> > pairs;
+  int N = size(net);
+  
+  curtemp.resize(N, 0);
+  newtemp.resize(N, 0);
+  qty.resize(N, 0);
+
+  for(int i=0; i<N; i++) 
+  forCellEx(c2, net[i].where) {
+    neuron *nj = getNeuron(c2);
+    if(nj) {
+      pairs.emplace_back(&curtemp[i], &newtemp[neuronId(*nj)]);
+      qty[i]++;
+      }
+    }
+  
+  curtemp[neuronId(*getNeuron(c))] = 1;
+
+  ld vmin = 0, vmax = 1;
+  int iter;
+  
+  auto &d = dispersion[sccid];
+  
+  d.clear();
+
+  printf("Building dispersion...\n");
+  
+  for(iter=0; dispersion_count ? true : vmax > vmin * 1.5; iter++) {
+    if(iter % dispersion_each == 0) {
+      d.emplace_back(N);
+      auto& dispvec = d.back();
+      for(int i=0; i<N; i++) dispvec[i] = curtemp[neuronId(*getNeuron(cr.data[i].orig.c))] / vmax;
+      if(size(d) == dispersion_count) break;
+      }
+    double df = dispersion_precision * (iter+1);
+    double df0 = df / ceil(df);
+    for(int i=0; i<df; i++) {
+      for(auto& p: pairs) 
+        *p.second += *p.first;
+      for(int i=0; i<N; i++) {
+        curtemp[i] += (newtemp[i] / qty[i] - curtemp[i]) * df0;
+        newtemp[i] = 0;
+        }
+      }
+    vmin = vmax = curtemp[0];
+    for(int i=0; i<N; i++) 
+      if(curtemp[i] < vmin) vmin = curtemp[i];
+      else if(curtemp[i] > vmax) vmax = curtemp[i];
+    }
+
+  dispersion_count = size(d);
+  printf("Dispersion count = %d\n", dispersion_count);
+#endif
   }
 
 bool finished() { return t == 0; }
 
 void step() {
-  double sigma = maxdist * t / (perdist*(double) mul);
+
   if(t == 0) return;
+
+#if GAUSSIAN==1
+  double sigma = maxdist * t / (perdist*(double) mul);
+#else
+  int dispid = int(dispersion_count * (t-1.) / tmax);
+#endif
+
 //  double sigma = maxdist * exp(-t / t1);
   int pct = (int) (100 * ((t*(double) mul) / perdist));
   if(pct != lpct) {
     lpct = pct;
     analyze();
+#if GAUSSIAN==1
     printf("t = %6d/%2dx%6d pct = %3d sigma=%10.7lf maxudist=%10.7lf\n", t, mul, perdist, pct, sigma, maxudist);
+#else
+    printf("t = %6d/%2dx%6d pct = %3d dispid=%5d maxudist=%10.7lf\n", t, mul, perdist, pct, dispid, maxudist);
+#endif
     }
   int id = hrand(samples);
   neuron& n = winner(id);
+  whowon[id] = &n;
+  
   
   /* 
   for(neuron& n2: net) {
@@ -294,13 +400,22 @@ void step() {
       n2.net[k] += nu * (irisdata[id][k] - n2.net[k]);
     } */
     
-  cellcrawler& s = n.where->type == 6 ? s0 : s1;
+  int sccid = n.where->type != 6;
+  cellcrawler& s = scc[sccid];
   s.sprawl(cellwalker(n.where, 0));
+
+#if GAUSSIAN==0
+  auto it = dispersion[sccid][dispid].begin();
+#endif
   for(auto& sd: s.data) {
     neuron *n2 = getNeuron(sd.target.c);
     if(!n2) continue;
     double nu = maxfac;
+#if GAUSSIAN==0
+    nu *= *(it++);
+#else
     nu *= exp(-sqr(sd.dist/sigma));
+#endif
     for(int k=0; k<cols; k++)
       n2->net[k] += nu * (data[id].val[k] - n2->net[k]);
     }
@@ -347,6 +462,9 @@ void run(const char *fname, int _perdist, double _maxfac) {
 
   printf("samples = %d cells = %d maxdist = %d\n", samples, cells, maxdist);
     
+#if GAUSSIAN==0
+  dispersion_count = 0;  
+#endif
   c1 = currentmap->gamestart();
   cell *c2 = createMov(c1, 0);
   buildcellcrawler(c1);
@@ -354,7 +472,7 @@ void run(const char *fname, int _perdist, double _maxfac) {
 
   lpct = -46130;  
   mul = 1;
-  t = perdist*mul;  
+  tmax = t = perdist*mul;
   step();
   for(int i=0; i<3; i++) whattodraw[i] = -2;
   analyze();
@@ -364,14 +482,16 @@ void describe(cell *c) {
   if(cmode & sm::HELP) return;
   neuron *n = getNeuronSlow(c);
   if(!n) return;
-  help += "cell number: " + its(n - &net[0]) + "\n";
+  help += "cell number: " + its(neuronId(*n)) + "\n";
   help += "parameters:"; for(int k=0; k<cols; k++) help += " " + fts(n->net[k]); 
   help += ", u-matrix = " + fts(n->udist);
   help += "\n";
+  int qty = 0;
   for(int s=0; s<samples; s++) if(whowon[s] == n) {
     help += "sample "+its(s)+":"; 
     for(int k=0; k<cols; k++) help += " " + fts(data[s].val[k]); 
     help += " "; help += data[s].name; help += "\n";
+    qty++; if(qty >= 20) break;
     }
   }
 
@@ -402,6 +522,20 @@ void kload(const char *fname) {
   analyze();
   }
 
+void kclassify(const char *fname) {
+  for(neuron& n: net) n.samples = 0;
+
+  FILE *f = fopen(fname, "wt");  
+  for(int id=0; id<size(data); id++) {
+    auto& w = winner(id);
+    w.samples++;
+    if(id % 100000 == 0) printf("%d/%d\n", id, size(data));
+    fprintf(f, "%s;%d\n", data[id].name.c_str(), neuronId(w));
+    }
+  fclose(f);
+  coloring();
+  }
+
 void steps() {
   if(!kohonen::finished()) {
     unsigned int t = SDL_GetTicks();
@@ -417,6 +551,7 @@ void showMenu() {
     if(whattodraw[i] == -1) c = "u-matrix";
     else if(whattodraw[i] == -2) c = "u-matrix reversed";
     else if(whattodraw[i] == -3) c = "distance from marked ('m')";
+    else if(whattodraw[i] == -4) c = "number of samples";
     else c = "column " + its(whattodraw[i]);
     dialog::addSelItem(XLAT("coloring (%1)", parts[i]), c, '1'+i);
     }
@@ -426,7 +561,7 @@ bool handleMenu(int sym, int uni) {
   if(uni >= '1' && uni <= '3') {
     int i = uni - '1';
     whattodraw[i]++;
-    if(whattodraw[i] == cols) whattodraw[i] = -3;
+    if(whattodraw[i] == cols) whattodraw[i] = -4;
     coloring();
     return true;
     }

@@ -1699,6 +1699,11 @@ int readArgs() {
     while(!kohonen::finished()) kohonen::step();
     shift(); kohonen::ksave(args());
     }
+  else if(argis("-somclassify")) {
+    PHASE(3);
+    while(!kohonen::finished()) kohonen::step();
+    shift(); kohonen::kclassify(args());
+    }
   else if(argis("-somload")) {
     PHASE(3);
     shift(); kohonen::kload(args());
