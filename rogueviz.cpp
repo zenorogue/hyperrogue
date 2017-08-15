@@ -1341,6 +1341,7 @@ void readcolor(const char *cfname) {
 void init() {
   if(on) return;
   autocheat = true; 
+  showstartmenu = false;
 #if !ISWEB
   mapeditor::drawplayer = false;
   firstland = specialland = laCanvas;
