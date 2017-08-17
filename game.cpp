@@ -5449,7 +5449,7 @@ void checkmove() {
   if(kills[moPlayer]) canmove = false;
 
 #if CAP_INV  
-  if(!canmove && !inv::incheck) {
+  if(inv::on && !canmove && !inv::incheck) {
     if(inv::remaining[itOrbSafety])
       canmove = true;
     else {
