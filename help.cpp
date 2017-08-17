@@ -509,7 +509,7 @@ string generateHelpForLand(eLand l) {
   if(l == laHaunted) TREQ2(U10, itBone)
   if(l == laCamelot) TREQ2(U5, itEmerald)
   if(l == laEmerald) {
-    TREQ2(5, itFernFlower) TREQ2(5, itGold)
+    TREQ2(U5, itFernFlower) TREQ2(U5, itGold)
     s += XLAT("Alternatively: kill a %1 in %the2.\n", moVizier, laPalace);
     buteol(s, kills[moVizier], 1);
     }
