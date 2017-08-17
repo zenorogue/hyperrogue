@@ -1685,28 +1685,8 @@ int readArgs() {
   else if(argis("-ggamma")) {
     shift(); ggamma = argf();
     }
-  else if(argis("-som")) {
-    PHASE(3);
-    shift(); const char *fname = args();
-    shift(); int percount = argi();
-    shift(); kohonen::run(fname, percount, argf());
-    }
   else if(argis("-rvpres")) {
     tour::slides = rvtour::rvslides;
-    }
-  else if(argis("-somsave")) {
-    PHASE(3);
-    while(!kohonen::finished()) kohonen::step();
-    shift(); kohonen::ksave(args());
-    }
-  else if(argis("-somclassify")) {
-    PHASE(3);
-    while(!kohonen::finished()) kohonen::step();
-    shift(); kohonen::kclassify(args());
-    }
-  else if(argis("-somload")) {
-    PHASE(3);
-    shift(); kohonen::kload(args());
     }
   else if(argis("-nolegend")) {
     legend.clear();
