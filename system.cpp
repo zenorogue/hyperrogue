@@ -827,10 +827,6 @@ void loadsave() {
 #endif
   DEBB(DF_INIT, (debugfile,"loadSave\n"));
 
-  for(int xc=0; xc<MODECODES; xc++)
-  for(int i=0; i<landtypes; i++) for(int j=0; j<MAXTAC; j++)
-    tactic::lsc[xc][i][j] = -1;
-  
   gamecount = 0;
 
   FILE *f = fopen(scorefile, "rt");
@@ -1052,11 +1048,13 @@ void restartGame(char switchWhat, bool push) {
     }
   if(switchWhat == 'i') {
     inv::on = !inv::on;
+    if(tactic::on) firstland = laIce;
     tactic::on = yendor::on = princess::challenge = 
     randomPatternsMode = peace::on = false;
     }
   if(switchWhat == 'C') {
     geometry = gNormal;
+    if(tactic::on) firstland = laIce;
     yendor::on = tactic::on = princess::challenge = false;
     resetGeometry();
     chaosmode = !chaosmode;
