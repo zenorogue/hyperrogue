@@ -709,6 +709,7 @@ void mainloopiter() {
 #endif
 
 void mainloop() {
+  if(noGUI) return;
   lastt = 0;
 #if ISWEB
   initweb();
