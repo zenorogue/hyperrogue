@@ -7,11 +7,9 @@
 
 namespace peace { extern bool on; }
 
-#define MODECODES 255
-
 int hiitemsMax(eItem it) {
   int mx = 0;
-  for(int i=0; i<MODECODES; i++) if(hiitems[i][it] > mx) mx = hiitems[i][it];
+  for(auto& a: hiitems) if(a.second[it] > mx) mx = a.second[it];
   return mx;
   }
 
@@ -53,8 +51,8 @@ namespace yendor {
   int lastchallenge;
   
   #define YENDORLEVELS 30
-
-  int bestscore[MODECODES][YENDORLEVELS];
+  
+  map<modecode_t, array<int, YENDORLEVELS>> bestscore;
 
   #define YF_DEAD 1
   #define YF_WALLS 2
@@ -584,15 +582,17 @@ namespace tactic {
   bool trailer = false;
   bool on = false;
   int id;
-  int recordsum[MODECODES][landtypes];
-  int lsc[MODECODES][landtypes][MAXTAC];
+  
+  map<modecode_t, array<int, landtypes>> recordsum;
+  map<modecode_t, array<array<int, MAXTAC>, landtypes> > lsc;
+  
   eLand lasttactic;
   
   struct scoredata {
     string username;
     int scores[landtypes];
     };
-  vector<scoredata> scoreboard[MODECODES];
+  map<modecode_t, vector<scoredata>> scoreboard;
   
   int chances(eLand l) {
     if(modecode() != 0 && l != laCamelot) return 3;
@@ -719,7 +719,7 @@ namespace tactic {
         
       if(unlocked || autocheat) {
         for(int ii=0; ii<ch; ii++)
-          if(displayfrZ(xr*(24+2*ii), i0, 1, (vf-4)*4/5, lsc[xc][l][ii] >= 0 ? its(lsc[xc][l][ii]) : "-", col, 16)) 
+          if(displayfrZ(xr*(24+2*ii), i0, 1, (vf-4)*4/5, lsc[xc][l][ii] > 0 ? its(lsc[xc][l][ii]) : "-", col, 16)) 
             getcstat = 1000 + i1;
 
         if(displayfrZ(xr*(24+2*10), i0, 1, (vf-4)*4/5, 
@@ -842,13 +842,8 @@ int newmodecode = 255;
 int modecode() {
 #if CAP_SAVE
   if(anticheat::tampered || cheater) return 6;
-#if CAP_TOUR
-  if(tour::on) return 6;
 #endif
-  if(quotient) return 6;
-#endif
-  if(peace::on) return 6;
-  if(inv::on) return 254; // no code yet
+
   int xcode = 0;
 
   if(shmup::on) xcode += 2;
@@ -867,7 +862,20 @@ int modecode() {
   
   int np = numplayers()-1; if(np<0 || np>5) np=5;
   
-  return modecodetable[xcode][np];
+  int mct = modecodetable[xcode][np];
+
+  if(geometry == gTorus) mct += 512;
+  if(geometry == gQuotient) mct += 1024;
+  if(geometry == gQuotient2) mct += 1536;
+#if CAP_INV
+  if(inv::on) mct += 2048;
+#endif
+  if(peace::on) mct += 4096;
+#if CAP_TOUR
+  if(tour::on) mct += 8192;
+#endif
+  if(numplayers() == 7) mct += 16384;
+  return mct;
   }
 
 void buildmodetable() {

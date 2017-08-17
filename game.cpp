@@ -86,7 +86,8 @@ extern void DEBT(const char *buf);
 bool eq(short a, short b) { return a==b; }
 
 // game state
-int items[ittypes], hiitems[MODECODES][ittypes], kills[motypes], explore[10], exploreland[10][landtypes], landcount[landtypes];
+int items[ittypes], kills[motypes], explore[10], exploreland[10][landtypes], landcount[landtypes];
+map<modecode_t, array<int, ittypes> > hiitems;
 bool orbused[ittypes], lastorbused[ittypes];
 bool playermoved = true;  // center on the PC?
 bool flipplayer = true;   // flip the player image after move, do not flip after attack
