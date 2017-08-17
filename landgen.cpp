@@ -5310,7 +5310,7 @@ void setdist(cell *c, int d, cell *from) {
           c->wall = hrand(2) ? waMirror : waCloud;
         else if(ishept(c) && hrand(5000) < 10 * PRIZEMUL)
           placePrizeOrb(c);
-        else if(hrand(600) < 8 + items[itShard] + hard) {
+        else if(hrand(cwt.c->land == laMirror ? 600 : 2400) < 8 + items[itShard] + hard) {
           if(items[itShard] >= 5 && hrand(120) <= 20)
             c->monst = moMirrorSpirit;
           else
