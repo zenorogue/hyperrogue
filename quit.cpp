@@ -125,7 +125,7 @@ hint hints[] = {
       dialog::addItem(XLAT("world overview"), 'z');
       },
     []() {
-      pushScreen(showOverview);
+      setAppropriateOverview();
       }},
   {
     0,

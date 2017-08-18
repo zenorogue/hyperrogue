@@ -671,7 +671,7 @@ void handleInput(int delta) {
   if(actionspressed[54]) { centerplayer = -1, playermoved = true; centerpc(100); }
 
   if(actionspressed[55] && !lactionpressed[55]) 
-    pushScreen(showOverview);
+    setAppropriateOverview();
   
   if(actionspressed[56] && !lactionpressed[56]) 
     showMissionScreen();
