@@ -1831,3 +1831,40 @@
 - [mobile] the Tutorial is somewhat adjusted for mobiles
 - [mobile] map/vector editor available (though not very convenient)
 
+2017.08.06 23:45 version 10.0h
+- fixed the shmup mode not turning on
+- fixed some minor bugs with playing the Tutorial with only mouse/touchpad
+
+2017.08.13 21:42 version 10.0i
+- fixed a bug with crashes in peaceful shmup
+- fixed the square model
+- fixed the charge count in the Orb of Air (it only gave 1 charge)
+- kills and treasure count no longer appear in the peaceful mode
+- fixed the orb generation in the Whirlpool in OSM (i.e. they no longer generate)
+- translation fix
+- limited the number of messages appearing on screen to 5
+- you can now use Ctrl/Shift+mousewheel to control zoom and projection
+- updated the online demo
+
+2017.08.14 23:59 version 10.0j
+- in the Chaos Mode you get Orbs earlier (i.e., no need to collect 10 treasures)
+- OSM: Orbs of Beauty, Sword, Sword II, and Freedom automatically attack when acvtivated (and the activation direction (and the direction for Swords is shown on screen)
+- OSM: balance tweaks for the Hyperstone Quest: some advanced lands give extra Orbs; Powerstones increase the number of orbs received from mirroring (and it also affects the mirrorings that happened before collecting Powerstones); mirrors appear together with Hyperstones, so you do not have to go to the Hall of Mirrors to use your new Orbs of the Mirror; - OSM: fixed the Black Lotus achievement awarded incorrectly
+- OSM: the Hyperstone Quest cheat now works correctly
+- OSM: fixed Orbs in the Whirlpool (10.0i fix was incorrect)
+
+2017.08.18 03:12 version 10.0k
+- Filtering by keyboard in the World Overview screen
+- the World Overview now states the orb unlocked correctly in the OSM (for Mirror and Crossroads)
+- magic boats no longer ignore the warp rules
+- fixed minor bugs with boats moving items
+- fixed some bugs with Alchemist's land copying
+- reduced the monster generation in the Hall of Mirrors while you are outside
+- no longer display the orbs on game over outside the OSM mode
+- going from tactic to chaos or OSM should now start in the correct land (and thus no longer enable the cheat mode)
+- Emerald Mine requirements were displayed incorrectly
+- Sight range increase is now allowed in some of the special modes (not only the cheat mode)
+- in the local scoreboard column selection, 'kills' key changed to '/' to remove conflict with searching
+- Configured key and mission menu's overview now display the mode-appropriate overview screen
+- separate land highscores should work in OSM (and some other modes) now
+- RogueViz improvements
