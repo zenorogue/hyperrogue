@@ -155,13 +155,13 @@ void showPickScores() {
       displayButton(x, y, pickscore_options[i].first, 1000+i, 0);
     }
   
-  displayButton(vid.xres/2, vid.yres - vid.fsize*2, "kills", 'm', 8);
+  displayButton(vid.xres/2, vid.yres - vid.fsize*2, "kills", '/', 8);
 
   scoredisplay = d;
 
   mouseovers = mapeditor::infix;
   keyhandler = [] (int sym, int uni) {
-    if(uni == 'm') monsterpage = !monsterpage; else
+    if(uni == '/' && mapeditor::infix == "") monsterpage = !monsterpage; else
     if(uni >= '1' && uni <= '9') uni = uni + 1000 - '1';
     else if(uni >= 1000 && uni < 1000 + size(pickscore_options)) {
       scoredisplay = pickscore_options[uni - 1000].second;
