@@ -603,7 +603,7 @@ void mainloopiter() {
     
     bool rollchange = (cmode & sm::OVERVIEW) && getcstat >= 2000 && cheater;
 
-    if(ev.type == SDL_MOUSEBUTTONDOWN) {
+    if(ev.type == SDL_MOUSEBUTTONDOWN || ev.type == SDL_MOUSEBUTTONUP) {
       mousepressed = ev.type == SDL_MOUSEBUTTONDOWN;
       if(mousepressed) flashMessages();
       mousing = true;
