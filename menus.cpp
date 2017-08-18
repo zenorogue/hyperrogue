@@ -17,28 +17,53 @@ int PREC(ld x) {
   }
 
 void showOverview() {
-  cmode = sm::ZOOMABLE | sm::OVERVIEW;
+  cmode = sm::ZOOMABLE | sm::OVERVIEW;  
   DEBB(DF_GRAPH, (debugfile,"show overview\n"));
-  mouseovers = XLAT("world overview");
-  mouseovers += "       ";
-  mouseovers += XLAT(" kills: %1/%2", its(tkills()), its(killtypes()));
-  mouseovers += XLAT(" $$$: %1", its(gold()));
-  if(hellUnlocked()) {
-    int i1, i2; countHyperstoneQuest(i1, i2);
-    mouseovers += XLAT(" Hyperstone: %1/%2", its(i1), its(i2));
+
+  if(mapeditor::infix != "")
+    mouseovers = mapeditor::infix;
+  else {
+    mouseovers = XLAT("world overview");
+    mouseovers += "       ";
+    mouseovers += XLAT(" kills: %1/%2", its(tkills()), its(killtypes()));
+    mouseovers += XLAT(" $$$: %1", its(gold()));
+    if(hellUnlocked()) {
+      int i1, i2; countHyperstoneQuest(i1, i2);
+      mouseovers += XLAT(" Hyperstone: %1/%2", its(i1), its(i2));
+      }
+    else
+      mouseovers += XLAT(" Hell: %1/9", its(orbsUnlocked()));
     }
-  else
-    mouseovers += XLAT(" Hell: %1/9", its(orbsUnlocked()));
   
   bool pages;
   
   int nl = LAND_OVER, nlm;
   eLand *landtab = land_over;
-  if(randomPatternsMode) { nl = nlm = RANDLANDS; landtab = randlands; }
-  else {
+  if(randomPatternsMode) { nl = RANDLANDS; landtab = randlands; }
+  
+  if(mapeditor::infix != "") {
+    static eLand filteredLands[landtypes];
+    int nlid = 0;
+    for(int i=0; i<nl; i++) {
+      eLand l = landtab[i];
+      string s = dnameof(l);
+      s += "@";
+      s += dnameof(treasureType(l));
+      s += "@";
+      s += dnameof(orbType(l));
+      if(mapeditor::hasInfix(s))
+        filteredLands[nlid++] = l;
+      }
+    if(nlid) {
+      nl = nlid; landtab = filteredLands;
+      }
+    }
+  
+  if(nl > 30) {
     pages = true;
     landtab += dialog::handlePage(nl, nlm, (nl+1)/2);
     }
+  else nlm = nl;
   
   int vf = min((vid.yres-64-vid.fsize*2) / nlm, vid.xres/40);
 
@@ -158,6 +183,7 @@ void showOverview() {
       "mousewheel to gain or lose treasures and orbs quickly (Ctrl = precise, Shift = reverse)."
       );
     else if(dialog::handlePageButtons(uni)) ;
+    else if(mapeditor::editInfix(uni)) ;
     else if(doexiton(sym, uni)) popScreen();
     };
   }
@@ -740,7 +766,9 @@ void setAppropriateOverview() {
     pushScreen(peace::showMenu);
   else if(geometry != gNormal)
     pushScreen(showEuclideanMenu);
-  else 
+  else {
+    mapeditor::infix = "";
     pushScreen(showOverview);
+    }
   }
 

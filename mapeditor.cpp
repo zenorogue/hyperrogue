@@ -409,6 +409,7 @@ namespace mapeditor {
       char tt = 0;
       if(c >= 'a' && c <= 'z') tt += c - 32;
       else if(c >= 'A' && c <= 'Z') tt += c;
+      else if(c == '@') tt += c;
       if(tt) t += tt;
       }
     return t.find(infix) != string::npos;
