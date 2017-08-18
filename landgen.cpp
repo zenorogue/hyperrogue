@@ -404,6 +404,8 @@ bool isElemental(eLand l);
 
 eItem orbType(eLand l) {
   if(isElemental(l)) l = laElementalWall;
+  if(inv::on && (l == laMirror || l == laMirrorOld || isCrossroads(l)))
+    return itOrbMirror;
   if(l == laMirror || l == laMirrorOld) return itShard;
   for(int i=0; i<ORBLINES; i++) 
     if(orbinfos[i].l == l && orbinfos[i].gchance)
