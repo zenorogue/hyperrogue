@@ -6475,7 +6475,7 @@ bool movepcto(int d, int subdir, bool checkonly) {
       goto boatjump;
       }
     
-    if(!c2->monst && cwt.c->wall == waBoat && boatGoesThrough(c2) && markOrb(itOrbWater)) {
+    if(!c2->monst && cwt.c->wall == waBoat && boatGoesThrough(c2) && markOrb(itOrbWater) && !nonAdjacentPlayer(c2, cwt.c)) {
 
       if(havePushConflict(cwt.c, checkonly)) return false;
       if(monstersnear(c2,NULL,moPlayer,NULL,cwt.c)) {
