@@ -1303,6 +1303,10 @@ void prespill(cell* c, eWall t, int rad, cell *from) {
   if((c->monst == moSlime || c->monst == moSlimeNextTurn) && t == waNone) {
     c->wall = waNone; attackMonster(c, 0, moNone);
     }
+  if(c->wall == waClosedGate) {
+    c->wall = waPalace;
+    return;
+    }
   // these walls block spilling completely
   if(c->wall == waIcewall || c->wall == waBarrier ||  c->wall == waWarpGate ||
     c->wall == waDeadTroll || c->wall == waDeadTroll2 || 
@@ -1312,7 +1316,7 @@ void prespill(cell* c, eWall t, int rad, cell *from) {
     c->wall == waDeadwall || c->wall == waWaxWall || c->wall == waCamelot || c->wall == waRoundTable ||
     c->wall == waBigStatue || c->wall == waRed1 || c->wall == waRed2 || c->wall == waRed3 ||
     c->wall == waTower ||
-    c->wall == waPalace || c->wall == waOpenGate || c->wall == waClosedGate ||
+    c->wall == waPalace || 
     c->wall == waPlatform || c->wall == waStone || c->wall == waTempWall ||
     c->wall == waTempFloor || c->wall == waTempBridge ||
     c->wall == waSandstone || c->wall == waCharged || c->wall == waGrounded ||
