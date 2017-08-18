@@ -1528,3 +1528,4 @@ extern bool showstartmenu;
 void selectLanguageScreen();
 
 bool inscreenrange(cell *c);
+bool allowIncreasedSight();

@@ -586,7 +586,7 @@ namespace dialog {
     if(ne.intval == &sightrange && sightrange < 4) 
       *ne.editwhat = sightrange = 4, affect('v');
     
-    int msr = cheater ? 15 : 7;
+    int msr = allowIncreasedSight() ? 15 : 7;
 
     if(ne.intval == &sightrange && sightrange > msr) 
       *ne.editwhat = sightrange = msr, affect('v');

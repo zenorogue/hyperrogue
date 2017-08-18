@@ -4429,11 +4429,24 @@ void drawFlashes() {
     }
   }
 
+bool allowIncreasedSight() {
+  if(cheater) return true;
+  if(peace::on) return true;
+#if CAP_TOUR
+  if(tour::on) return true;
+#endif
+#if CAP_ROGUEVIZ
+  if(rogueviz::on) return true;
+#endif
+  if(randomPatternsMode) return true;
+  return false;
+  }
+
 void drawthemap() {
 
   frameid++;
 
-  if(!cheater && !svg::in && !inHighQual) {
+  if(!allowIncreasedSight()) {
     if(sightrange > 7) sightrange = 7;
     overgenerate = false;
     }
