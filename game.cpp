@@ -6262,7 +6262,7 @@ void pushThumper(cell *th, cell *cto) {
     addMessage(XLAT("%The1 falls!", waThumperOn));
     doesFallSound(cto);
     }
-  else if(cellUnstable(cto)) {
+  else if(cellUnstableOrChasm(cto)) {
     addMessage(XLAT("%The1 fills the hole!", waThumperOn));
     cto->wall = waTempFloor;
     }
