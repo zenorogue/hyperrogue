@@ -6484,10 +6484,11 @@ bool movepcto(int d, int subdir, bool checkonly) {
         }
       
       if(checkonly) return true;
+      if(c2->item && !cwt.c->item) moveItem(c2, cwt.c, false), boatmove = true;
       placeWater(c2, cwt.c);
       moveBoat(c2, cwt.c);
       c2->mondir = neighborId(c2, cwt.c);
-      if(cwt.c->item) moveItem(cwt.c, c2, true), boatmove = true;
+      if(c2->item) boatmove = !boatmove;
       goto boatjump;
       }
 
