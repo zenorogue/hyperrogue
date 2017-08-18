@@ -2325,8 +2325,6 @@ void setcolors(cell *c, int& wcol, int &fcol) {
 
     case laAlchemist: 
       fcol = 0x202020;
-      if(c->item && !(conformal::includeHistory && eq(c->aitmp, sval)))
-        fcol = wcol = iinf[c->item].color;
       break;
     case laReptile:
       fcol = reptilecolor(c);
@@ -2549,8 +2547,15 @@ void setcolors(cell *c, int& wcol, int &fcol) {
      fcol = wcol = winf[c->wall].color; */
 
   // floors become fcol
-  if(c->wall == waSulphur || c->wall == waSulphurC || isAlch(c) || c->wall == waPlatform)
+  if(c->wall == waSulphur || c->wall == waSulphurC || c->wall == waPlatform)
     fcol = wcol;
+  
+  if(isAlch(c)) {
+    if(c->item && !(conformal::includeHistory && eq(c->aitmp, sval)))
+      fcol = wcol = iinf[c->item].color;
+    else
+      fcol = wcol;
+    }
   
   if(c->wall == waDeadTroll2 || c->wall == waPetrified) {
     eMonster m = eMonster(c->wparam);

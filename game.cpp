@@ -6754,7 +6754,12 @@ bool movepcto(int d, int subdir, bool checkonly) {
       boatjump:
       statuejump:
       flipplayer = true; if(multi::players > 1) multi::flipped[multi::cpid] = true;
-      if(c2->item && c2->land == laAlchemist) c2->wall = cwt.c->wall;
+      if(c2->item && isAlch(c2)) {
+        if(cwt.c->wall == waBoat)
+          c2->wall = waNone;
+        else
+          c2->wall = cwt.c->wall;
+        }
       if(c2->wall == waRoundTable) {
         addMessage(XLAT("You jump over the table!"));
         }
