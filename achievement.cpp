@@ -611,7 +611,7 @@ void check_total_victory() {
   if(!items[itOrbYendor]) return;
   if(!items[itHolyGrail]) return;
   if(items[itHyperstone] < 50) return;
-  if(!princess::saved) return;
+  if(!princess::reviveAt) return;
   hadtotalvictory = true;
   achievement_gain("TOTALVICTORY");
   }
