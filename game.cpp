@@ -5733,7 +5733,7 @@ bool collectItem(cell *c2, bool telekinesis) {
       princess::forceVizier = true;
     
     if(!cantGetGrimoire(c2, false)) collectMessage(c2, c2->item);
-    if(c2->item == itDodeca) peace::simon::extend();
+    if(c2->item == itDodeca && peace::on) peace::simon::extend();
     }
   
   if(isRevivalOrb(c2->item) && multi::revive_queue.size()) {
