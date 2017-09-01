@@ -509,7 +509,7 @@ void showChangeMode() {
         "\n\nYou need to reach Crossroads IV to unlock the Chaos mode."
         );
       }
-    else if(xuni == 'p') {
+    else if(xuni == 'P') {
       if(!princess::everSaved)
         addMessage(XLAT("Save %the1 first to unlock this challenge!", moPrincess));
       else
