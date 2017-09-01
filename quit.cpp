@@ -313,8 +313,11 @@ void showMission() {
     XLAT("GAME OVER"), 
     0xC00000, 200, 100
     );
-  dialog::addInfo(XLAT("Your score: %1", its(gold())));
-  dialog::addInfo(XLAT("Enemies killed: %1", its(tkills())));
+
+  if(!peace::on)
+    dialog::addInfo(XLAT("Your score: %1", its(gold())));
+  if(!peace::on)
+    dialog::addInfo(XLAT("Enemies killed: %1", its(tkills())));
 
 #if CAP_TOUR
   if(tour::on) ; else 
@@ -324,7 +327,9 @@ void showMission() {
     dialog::addInfo(XLAT("CONGRATULATIONS!"), iinf[itOrbYendor].color);
     }
   else {
-    if(princess::challenge) 
+    if(tour::on)
+      ;
+    else if(princess::challenge) 
       dialog::addInfo(XLAT("Follow the Mouse and escape with %the1!", moPrincess));
     else if(gold() < R30)
       dialog::addInfo(XLAT("Collect %1 $$$ to access more worlds", its(R30)));
@@ -351,6 +356,7 @@ void showMission() {
 #if CAP_TOUR
   else if(tour::on) ;
 #endif
+  else if(peace::on) ;
   else if(tkills() < R100)
     dialog::addInfo(XLAT("Defeat %1 enemies to access the Graveyard", its(R100)));
   else if(kills[moVizier] == 0 && (items[itFernFlower] < U5 || items[itGold] < U5))
@@ -372,10 +378,10 @@ void showMission() {
       dialog::addInfo(XLAT("Hyperstone Quest completed!"), iinf[itHyperstone].color);
     }
   else dialog::addInfo(XLAT("Some lands unlock at specific treasures or kills"));
-  if(cheater) {
+  if(cheater && !autocheat) {
     dialog::addInfo(XLAT("you have cheated %1 times", its(cheater)), 0xFF2020);
     }
-  if(!cheater) {
+  else {
     dialog::addInfo(timeline(), 0xC0C0C0);
     }
   
