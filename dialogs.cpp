@@ -532,6 +532,10 @@ namespace dialog {
   
   string disp(ld x) { if(ne.intval) return its((int) (x+.5)); else return fts(x); }
 
+  typedef function<void()> reaction_t;
+  
+  reaction_t reaction;
+
   void affect(char kind) {
 
     if(ne.intval) {
@@ -547,6 +551,8 @@ namespace dialog {
         }
       if(kind == 'v') ne.s = fts(*ne.editwhat);
       }
+    
+    if(reaction) reaction();
 
 #if CAP_AUDIO
     if(ne.intval == &musicvolume) {
@@ -794,6 +800,7 @@ namespace dialog {
     dialogflags = (cmode & (sm::SIDE | sm::A3));
     cmode |= sm::NUMBER;
     pushScreen(drawNumberDialog);
+    reaction = reaction_t();
     }
 
   void editNumber(int& x, int vmin, int vmax, int step, int dft, string title, string help) {
