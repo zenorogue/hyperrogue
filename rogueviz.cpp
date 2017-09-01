@@ -29,6 +29,8 @@ bool specialmark = false;
 
 bool rog3 = false;
 
+ld ggamma = .5;
+
 string fname;
 
 // const char *fname;
@@ -1027,8 +1029,6 @@ void queuedisk(const transmatrix& V, const colorpair& cp, bool legend) {
   if(cp.shade == 'm') queuepoly(V, shDiskM, cp.color2);
   }
 
-ld ggamma = .5;
-
 void drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
   if(m->dead) return;
   int i = m->pid;
@@ -1292,7 +1292,16 @@ void readcolor(const char *cfname) {
     
     colorpair x;
     int c2 = fgetc(f);
-    if(c2 == '=') {
+    if(kohonen::samples && c2 == '+') {
+      kohonen::showsample(lab);
+      c2 = fgetc(f);
+      if(c2 == 10 || c2 == 13) continue;
+      }
+    if(c2 == '#') {
+      while(c2 != 10 && c2 != 13 && c2 != -1) c2 = fgetc(f);
+      continue;
+      }
+    else if(c2 == '=') {
       string lab2 = "";
       while(true) {
         int c = fgetc(f);
@@ -1323,6 +1332,12 @@ void readcolor(const char *cfname) {
       lab = lab.substr(1);
       for(int i=0; i<size(vdata); i++)
         if(vdata[i].name.find(lab) != string::npos) {
+          vdata[i].cp = x;
+          }
+      }
+    else if(kohonen::samples) {
+      for(int i=0; i<size(vdata); i++)
+        if(vdata[i].name == lab) {
           vdata[i].cp = x;
           }
       }

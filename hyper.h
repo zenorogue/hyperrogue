@@ -1524,6 +1524,7 @@ void addauraspecial(const hyperpoint& h, int col, int dir);
 void drawBug(const cellwalker& cw, int col);
 
 void mainloop();
+void mainloopiter();
 extern bool showstartmenu;
 void selectLanguageScreen();
 
