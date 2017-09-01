@@ -3511,6 +3511,19 @@ void setdist(cell *c, int d, cell *from) {
   if(c->mpdist > d+1 && d != BARLEV) setdist(c, d+1, from);
   c->mpdist = d;
   // printf("setdist %p %d [%p]\n", c, d, from);
+  
+  // this fixes the following problem:
+  // http://steamcommunity.com/app/342610/discussions/0/1470840994970724215/
+  if(from && d >= 7) {
+    int cdi = celldist(c);
+    if(celldist(from) > cdi) {
+      forCellCM(c2, c) if(celldist(c2) < cdi) {
+        setdist(c2, d, c);
+        from = c2;
+        break;
+        }
+      }
+    }
 
   if(d <= 3) lastexplore = shmup::on ? shmup::curtime : turncount;
 
