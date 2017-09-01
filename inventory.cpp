@@ -82,6 +82,7 @@ namespace inv {
     }
   
   int mirrorqty(eItem orb) {
+    if(orb == itOrbMirror) return 1;
     return int(mirrorqty0(orb) * sqrt(1.000001+items[itPower]/20.));
     }
     
