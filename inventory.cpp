@@ -167,6 +167,7 @@ namespace inv {
     }
   
   void compute() {
+
     for(int i=0; i<ittypes; i++) remaining[i] = -usedup[i];
     for(int i=0; i<ittypes; i++) if(usedup[i] >= TESTMIRRORED) {
       remaining[i] += MIRRORED;
@@ -253,7 +254,8 @@ namespace inv {
     }
   
   map<char, eItem> orbmap;
-  string orbkeys = "zfwplSetsTaMIYgCcPOWAFydLGRUuouE.,bVNhDwWZnrvhBm0123456789";
+  string orbkeys = "zfwplSetsTaMIYgCcPOWAFydLGRUkouE.,bVNxDjJZnrvhBm0123456789";
+  
   typedef pair<int, int> pxy;
   vector<pxy> orbcoord;
 
@@ -338,7 +340,7 @@ namespace inv {
     which = itNone;
         
     if(plain) dialog::init(XLAT(mirroring ? "mirror what?" : "inventory"), forecolor, 150, 100);
-
+    
     int j = 0, oc = 6;
     for(int i=0; i<ittypes; i++) {
       eItem o = eItem(i);
