@@ -706,6 +706,8 @@ void showStartMenu() {
 
   dialog::display();
   clearMessages();
+
+  timerstart = time(NULL);
   
   /*
   initquickqueue();
