@@ -1321,7 +1321,8 @@ void prespill(cell* c, eWall t, int rad, cell *from) {
     c->wall == waTempFloor || c->wall == waTempBridge ||
     c->wall == waSandstone || c->wall == waCharged || c->wall == waGrounded ||
     c->wall == waMetal || c->wall == waSaloon || c->wall == waFan ||
-    c->wall == waBarrowDig || c->wall == waBarrowWall)
+    c->wall == waBarrowDig || c->wall == waBarrowWall ||
+    c->wall == waMirrorWall)
     return;
   // these walls block further spilling
   if(c->wall == waCavewall || cellUnstable(c) || c->wall == waSulphur ||
