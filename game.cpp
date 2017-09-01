@@ -6401,6 +6401,7 @@ bool movepcto(int d, int subdir, bool checkonly) {
     
     if(!passable(c2, cwt.c, P_ISPLAYER | P_MIRROR | P_USEBOAT | P_FRIENDSWAP) && items[itOrbFlash]) {
       if(checkonly) return true;
+      if(orbProtection(itOrbFlash)) return true;
       activateFlash();
       bfs();
       if(multi::players > 1) { multi::whereto[multi::cpid].d = MD_UNDECIDED; return false; }
@@ -6410,6 +6411,7 @@ bool movepcto(int d, int subdir, bool checkonly) {
 
     if(!passable(c2, cwt.c, P_ISPLAYER | P_MIRROR | P_USEBOAT | P_FRIENDSWAP) && items[itOrbLightning]) {
       if(checkonly) return true;
+      if(orbProtection(itOrbLightning)) return true;
       activateLightning();
       keepLightning = true;
       bfs();
@@ -6724,6 +6726,7 @@ bool movepcto(int d, int subdir, bool checkonly) {
 
         if(items[itOrbFlash]) {
           if(checkonly) return true;
+          if(orbProtection(itOrbFlash)) return true;
           activateFlash();
           checkmove();
           return true;
@@ -6731,6 +6734,7 @@ bool movepcto(int d, int subdir, bool checkonly) {
 
         if(items[itOrbLightning]) {
           if(checkonly) return true;
+          if(orbProtection(itOrbLightning)) return true;
           activateLightning();
           checkmove();
           return true;
