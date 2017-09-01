@@ -937,7 +937,6 @@ void loadsave() {
     peace::on = false;
     randomPatternsMode = false;
     yendor::on = false;
-    tactic::on = false;
     tour::on = false;
     }
   }
