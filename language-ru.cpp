@@ -4565,26 +4565,26 @@ S("The tasty treat increases your protection.",
   "Вкусные конфетки улучшат Вашу защиту.")
 S("You gain your protective Shell back!", "Вы вернули свою раковину!")
 
-S("rainbow landscape", "tęczowy krajobraz")
-S("Cannot use %the1 here!", "Nie możesz tutaj tego użyć!")
-S("draw the grid", "rysowanie siatki")
-S("Escher/3D", "Escher/3D")
-S("plain/3D", "prosty/3D")
+S("rainbow landscape", "радужный пейзаж")
+S("Cannot use %the1 here!", "Нельзя использовать %a1 здесь!")
+S("draw the grid", "нарисовать сетку")
+S("Escher/3D", "Эшер/3D")
+S("plain/3D", "простой/3D")
 S("3D", "3D")
-S("Welcome to Halloween!", "Witaj w Halloween!")
+S("Welcome to Halloween!", "Добро пожаловать на Хэллоуин!")
 
 S("How long should the messages stay on the screen.",
-  "Jak długo wiadomości zostają na ekranie")
-S("select this color", "wybierz ten kolor")
-S("sound effects volume", "głośność efektów dźwiękowych")
+  "Как долго сообщения остаются на экране")
+S("select this color", "выбери этот цвет")
+S("sound effects volume", "громкость звуковых эффектов")
 
 S("\n\nSee sounds/credits.txt for credits for sound effects", 
-  "\n\nPodziękowania za efekty dźwiękowe w sounds/credits.txt")
+  "\n\nБлагодарности за звуковые эффекты: sounds/credits.txt")
 
-S("scrolling speed", "prędkość przewijania")
-S("movement animation speed", "prędkość animacji ruchu")
-S("+5 = move instantly", "+5 = ruch natychmiastowy")
-S("extra graphical effects", "dodatkowe efekty graficzne")
+S("scrolling speed", "скорость проматывания")
+S("movement animation speed", "скорость анимации движения")
+S("+5 = move instantly", "+5 = мгновенное движение")
+S("extra graphical effects", "дополнительные графические эффекты")
 
 S("rainbow landscape", "радужный пейзаж")
 S("Cannot use %the1 here!", "Невозможно использовать %a1 here!")
