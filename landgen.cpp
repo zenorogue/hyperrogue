@@ -3598,7 +3598,7 @@ void setdist(cell *c, int d, cell *from) {
         else prairie::generateBeast(c);
         }
       else if(!prairie::nearriver(c) && c->LHU.fi.flowerdist > 7) {
-        if(hrand(3000) < items[itGreenGrass] - (prairie::isriver(cwt.c) ? 14 : 0))
+        if(hrand(9000) < items[itGreenGrass] - (prairie::isriver(cwt.c) ? 40 : 0))
           c->monst = moGadfly;
         else buildPrizeMirror(c, 1000);
         }
