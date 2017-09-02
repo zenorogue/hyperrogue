@@ -760,6 +760,8 @@ void summonAt(cell *dest) {
     tortoise::emap[dest] = dest;
   addMessage(XLAT("You summon %the1!", dest->monst));
   moveEffect(dest, dest, dest->monst);
+  if(dest->wall == waClosePlate || dest->wall == waOpenPlate)
+    toggleGates(dest, dest->wall);
 
   if(hasHitpoints(dest->monst))
     dest->hitpoints = palaceHP();
