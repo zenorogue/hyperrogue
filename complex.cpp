@@ -1776,7 +1776,6 @@ namespace heat {
             HEAT(c) = 0;
           else {
             HEAT(c) *= 1 - rate/10;
-            if(isFire(c)) HEAT(c) += purehepta ? 5.2 : 4;
             offscreen2.push_back(c);
             }
           }
