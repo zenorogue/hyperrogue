@@ -2923,7 +2923,7 @@ void turn(int delta) {
     if(items[itOrbFreedom])
       for(int i=0; i<players; i++)
         checkFreedom(pc[i]->base);
-    heat::processheat(delta / 350.0, tick);
+    heat::processheat(delta / 350.0);
     markOrb(itOrbSpeed);
     
     if((havewhat&HF_DRAGON) && curtime >= nextdragon) {
@@ -2946,7 +2946,7 @@ void turn(int delta) {
         if(havewhat&HF_HEX) movehex(false);
         wandering();
         livecaves();
-        heat::dryforest();
+        heat::processfires();
         if(havewhat&HF_WHIRLPOOL) whirlpool::move();
         if(havewhat&HF_WHIRLWIND) whirlwind::move();
         buildRosemap();

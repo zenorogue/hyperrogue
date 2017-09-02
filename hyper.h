@@ -615,8 +615,6 @@ extern bool invismove, invisfish;
 bool attackingForbidden(cell *c, cell *c2);
 void killOrStunMonster(cell *c2, eMonster who_killed);
 
-extern vector<cell*> offscreen; // offscreen cells to take care off
-
 void useup(cell *c); // useup thumpers/bonfires
 cell *playerpos(int i);
 

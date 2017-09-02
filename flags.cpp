@@ -632,8 +632,8 @@ bool isGrave(eWall w) {
   return w == waFreshGrave || w == waAncientGrave;
   }
 
-bool isTree(cell *c) {
-  return false; // c->wall == waBigTree || c->wall == waSmallTree;
+bool isStandardTree(cell *c) {
+  return c->wall == waBigTree || c->wall == waSmallTree;
   }
 
 bool highwall(cell *c) {

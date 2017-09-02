@@ -1745,8 +1745,6 @@ namespace hive {
 inline float& HEAT(cell *c) { return c->LHU.heat; }
 
 namespace heat {
-  vector<cell*> vinefires;  
-  vector<pair<cell*, int> > rosefires;
   
   double absheat(cell *c) {
     if(c->land == laCocytus) return HEAT(c) -.6;
@@ -1758,39 +1756,35 @@ namespace heat {
   
   // adjust to the improved heat transfer algorithm in 9.4
   const float FIX94 = 1.5;
-  
-  void processheat(double rate = 1, bool tick = true) {
+
+  vector<cell*> offscreen_heat, offscreen_fire; // offscreen cells to take care off
+
+  void processheat(double rate = 1) {
     if(markOrb(itOrbSpeed)) rate /= 2;
-    int oldmelt = kills[0];
+    int oldmelt = kills[0];    
     
     vector<cell*> offscreen2;
     
-    for(int i=0; i<size(offscreen); i++) {
-      cell *c = offscreen[i];
-      if(c->cpdist > 7) {
-        bool readd = false;
+    sval++;
+    
+    for(cell *c: offscreen_heat) {
+      if(c->cpdist > 7 && !doall) {
+        if(eq(c->aitmp, sval)) continue; 
+        c->aitmp = sval;
         if(isIcyLand(c)) {
           if(HEAT(c) < .01 && HEAT(c) > -.01)
             HEAT(c) = 0;
           else {
             HEAT(c) *= 1 - rate/10;
-            readd = true;
+            if(isFire(c)) HEAT(c) += purehepta ? 5.2 : 4;
+            offscreen2.push_back(c);
             }
           }
-        if(hasTimeout(c)) {
-          useup(c);
-          if(hasTimeout(c)) readd = true;
-          }
-        if(readd) offscreen2.push_back(c);
         }
       }
     
-    offscreen.clear(); swap(offscreen, offscreen2);
+    offscreen_heat = move(offscreen2);
   
-    /* if(cwt.c->heat > .5)  cwt.c->heat += .3;
-    if(cwt.c->heat > 1.)  cwt.c->heat += .3;
-    if(cwt.c->heat > 1.4) cwt.c->heat += .5; */
-    
     for(int i=0; i<numplayers(); i++) {
       cell *c = playerpos(i);
       if(!c) continue;
@@ -1801,9 +1795,6 @@ namespace heat {
         HEAT(c) += (markOrb(itOrbWinter) ? -1.2 : 1.2) * xrate;
       }
     
-    vinefires.clear();
-    rosefires.clear();
-        
     vector<cell*>& allcells = currentmap->allcells();
 
     int dcs = size(allcells);
@@ -1811,64 +1802,12 @@ namespace heat {
     vector<ld> hmods(dcs, 0);
     
     for(int i=0; i<dcs; i++) {
-      bool readd = false;
       cell *c = allcells[i];
       double xrate = (c->land == laCocytus && shmup::on) ? 1/3. : 1;
       if(purehepta) xrate *= 1.7;
       if(!shmup::on) xrate /= FIX94;
       if(c->cpdist > 7 && !doall) break;
   
-      if(hasTimeout(c)) {
-        if(tick) useup(c);
-        readd = true;
-        }
-      
-      if(isFire(c) && tick) {
-        if(c->wall != waPartialFire) for(int i=0; i<c->type; i++) {
-          cell *c2 = c->mov[i];
-          if(!c2) continue;
-          if(c2->wall == waNone && c2->land == laRose && c->wparam >= 10)
-            rosefires.push_back(make_pair(c2, c->wparam));
-          if(c2->wall == waFire && c2->land == laRose && c->wparam >= 10 && c2->wparam < c->wparam/2)
-            rosefires.push_back(make_pair(c2, c->wparam));
-          if(againstWind(c, c2) && c->wall != waEternalFire && c->wparam >= 10) {
-            if(isFire(c2)) {
-              if(c2->wparam < c->wparam/2) {
-                rosefires.push_back(make_pair(c2, c->wparam));
-                }
-              }
-            else {
-              rosefires.push_back(make_pair(c2, c->wparam));
-              useup(c);
-              }
-            }
-          if(c2->wall == waVinePlant)
-            vinefires.push_back(c2);
-          if(c2->wall == waRose)
-            vinefires.push_back(c2);
-          if(c2->wall == waSaloon)
-            vinefires.push_back(c2);
-          if(c2->wall == waSmallTree && c2->land != laDryForest)
-            vinefires.push_back(c2);
-          if((c2->wall == waWeakBranch || c2->wall == waCanopy || c2->wall == waTrunk || c2->wall == waSolidBranch ||
-            c2->wall == waBigBush || c2->wall == waSmallBush))
-            vinefires.push_back(c2);
-          if(c2->wall == waBonfireOff) activateActiv(c2, false);
-          // both halfvines have to be near fire at once
-          if(cellHalfvine(c2) && c->mov[(i+1)%c->type]->wall == c2->wall)
-            vinefires.push_back(c2);
-          }
-        
-        // two semifires are required to spread
-        if(c->wall == waPartialFire) for(int i=0; i<c->type; i++) {
-          cell *c2 = c->mov[i];
-          if(c2 && (c2->wall == waVinePlant)) {
-            for(int j=0; j<c2->type; j++) if(c2->mov[j] && c2->mov[j]->wall == waPartialFire &&
-              c2->mov[j] != c)
-              vinefires.push_back(c2);
-            }
-          }
-        }
       if(isIcyLand(c)) {
         ld hmod = 0;
 
@@ -1919,9 +1858,8 @@ namespace heat {
         hmods[i] = hmod;
         }
       
-      if((readd || HEAT(c)) && !doall)
-        offscreen.push_back(c);
-
+      if(HEAT(c) && !doall)
+        offscreen_heat.push_back(c);
       }
     
     #define MELTCOLOR 0xA04040
@@ -1951,63 +1889,97 @@ namespace heat {
         }
       }
   
-    if(tick) for(int i=0; i<size(vinefires); i++) {
-      cell* c = vinefires[i];
-      if(c->wall == waNone && c->land == laRose)
-        makeflame(c, 6, false);
-      else if(c->wall == waVinePlant || c->wall == waSmallTree || c->wall == waSaloon || c->wall == waRose)
-        makeflame(c, 6, false);
-      else if(c->wall == waSolidBranch || c->wall == waTrunk || c->wall == waWeakBranch || c->wall == waCanopy)
-        makeflame(c, 6, false);
-      else if(c->wall == waBigBush || c->wall == waSmallBush)
-        makeflame(c, 6, false);
-      else if(cellHalfvine(c)) destroyHalfvine(c, waPartialFire, 6);
-      }
-    
-    if(tick) for(int i=0; i<size(rosefires); i++) {
-      cell* c = rosefires[i].first;
-      int qty = rosefires[i].second;
-      qty /= 2;
-      // if(c->wall == waNone && c->land == laRose)
-      makeflame(c, qty, false);
-      if(c->wparam < qty) c->wparam = qty;
-      }
-    
     if(kills[0] != oldmelt) bfs();
     }
-  
-  void dryforest() {
-    vector<cell*>& allcells = currentmap->allcells();
-    int dcs = size(allcells);
 
-    for(int i=0; i<dcs; i++) {
-      cell *c = allcells[i];
-      if(!doall && c->cpdist > 8) break;
-      if(c->land != laDryForest) continue;
+  vector<pair<cell*, int> > newfires;
+
+  void processfires() {
+    newfires.clear();
+    
+    vector<cell*> offscreen2;
+
+    sval++;
+    
+    vector<cell*>& allcells = currentmap->allcells();
+
+    for(int x: {0,1}) for(cell *c: x==0 ? allcells : offscreen_fire) {
+      if(eq(c->aitmp, sval)) continue;
+      c->aitmp = sval;
       
-      forCellEx(c2, c) {
-        if(isFire(c2)) {
-          if(!againstWind(c, c2)) c->landparam++;
-          if(againstWind(c2, c)) c->landparam++;
+      if(isFire(c)) {
+      
+        cell *last = c->mov[c->type-1];
+        
+        forCellEx(c2, c) {
+          
+          if(c->wall == waPartialFire) {
+            // two partial fires adjacent are necessary to spread
+            bool ok = false;
+            forCellEx(c3, c2) if(c3 != c && c3->wall == waPartialFire)
+              ok = true;
+            if(!ok) continue;
+            }
+
+          if(c2->wall == waNone && c2->land == laRose && c->wparam >= 10)
+            newfires.emplace_back(c2, c->wparam);
+          if(c2->wall == waFire && c2->land == laRose && c->wparam >= 10 && c2->wparam < c->wparam/2)
+            newfires.emplace_back(c2, c->wparam);
+          if(againstWind(c, c2) && c->wall != waEternalFire && c->wparam >= 10) {
+            if(isFire(c2)) {
+              if(c2->wparam < c->wparam/2) 
+                newfires.emplace_back(c2, c->wparam);
+              }
+            else {
+              newfires.emplace_back(c2, c->wparam);
+              useup(c);
+              }
+            }
+          if(c2->land == laDryForest && c2->wall != waEternalFire) {
+            c2->landparam++;
+            if(c2->landparam >= (isStandardTree(c2) ? 1 : 10)) newfires.emplace_back(c2, 12);
+            else offscreen2.push_back(c);
+            }
+          else if(c2->wall == waVinePlant || c2->wall == waRose || c2->wall == waSaloon ||
+            c2->wall == waWeakBranch || c2->wall == waCanopy || c2->wall == waTrunk || c2->wall == waSolidBranch ||
+            c2->wall == waBigBush || c2->wall == waSmallBush || c2->wall == waBonfireOff || c2->wall == waSmallTree)
+            newfires.emplace_back(c2, 12);
+          else if(cellHalfvine(c2) && last && last->wall == c2->wall)
+            newfires.emplace_back(c2, 12);
+          // both halfvines have to be near fire at once
+          last = c2;
           }
+        
+        }
+
+      if(hasTimeout(c)) {
+        if(c->mpdist == 8 && (c->land == laWineyard || c->land == laEndorian)) {
+          // do not expire, do not store in 'offscreen', do not generate more land
+          }
+        else {
+          useup(c);
+          offscreen2.push_back(c);
+          }
+        }      
+      }
+
+   for(int i=0; i<size(newfires); i++) {
+      cell* c = newfires[i].first;
+      int qty = newfires[i].second;
+      qty /= 2;
+      if(c->wall == waBonfireOff) activateActiv(c, false);
+      else if(cellHalfvine(c)) destroyHalfvine(c, waPartialFire, 6);
+      else makeflame(c, qty, false);
+      if(c->wparam < qty) c->wparam = qty;
+      offscreen2.push_back(c);
+      if(c->land == laRose || c->land == laWildWest || c->land == laOvergrown || isHaunted(c->land) || c->land == laMountain || c->land == laIce) {
+        for(int j=c->mpdist-1; j>=7; j--) setdist(c, j, NULL);
         }
       }
+   
+    offscreen_fire = move(offscreen2);
+    }  
 
-    for(int i=0; i<dcs; i++) {
-      cell *c = allcells[i];
-      if(c->land != laDryForest) continue;
-  
-      if(c->landparam >= 10) makeflame(c, 10, false), c->landparam = 0;
-      }
-  
-    for(int i=0; i<dcs; i++) {
-      cell *c = allcells[i];
-      if(!doall && c->cpdist > 8) break;
-      if(c->land != laDryForest) continue;
-      if((c->wall == waBigTree || c->wall == waSmallTree || isFire(c)) && c->landparam >= 1)
-        c->wall = waEternalFire;
-      }
-    }
   }
 
 bool gardener = false;
@@ -2972,7 +2944,8 @@ namespace ca {
   }
 
 auto ccm = addHook(clearmemory, 0, [] () {
-  offscreen.clear();
+  heat::offscreen_heat.clear();
+  heat::offscreen_fire.clear();
   princess::clear();
   mirror::mirrors.clear();
   clearing::bpdata.clear();

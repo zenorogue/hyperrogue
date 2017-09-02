@@ -6224,7 +6224,7 @@ void monstersTurn() {
   DEBT("lc");
   if(!phase1) livecaves();
   if(!phase1) ca::simulate();
-  if(!phase1) heat::dryforest();
+  if(!phase1) heat::processfires();
   DEBT("heat");
   heat::processheat();
   // if(elec::havecharge) elec::drawcharges();
