@@ -220,6 +220,9 @@ int isNative(eLand l, eMonster m) {
     case laPrairie:
       return (m == moRagingBull || m == moHerdBull || m == moGadfly) ? 1 : 0;
     
+    case laAlchemy2:
+      return false;
+    
     case laCA: return false;
     }
   return false;
@@ -308,6 +311,7 @@ eItem treasureType(eLand l) {
     case laBull: return itBull;
     case laPrairie: return itGreenGrass;
     
+    case laAlchemy2: return itElixir;
     case laCA: return itNone;
     }
   return itNone;
@@ -759,6 +763,9 @@ bool landUnlocked(eLand l) {
     case laPrairie:
     case laBull:
       return gold() >= R90;
+    
+    case laAlchemy2:
+      return gold() >= R30 && items[itElixir] >= U10;
     
     case laCrossroads5:
       return gold() >= R300;
@@ -3514,7 +3521,7 @@ void setdist(cell *c, int d, cell *from) {
   
   // this fixes the following problem:
   // http://steamcommunity.com/app/342610/discussions/0/1470840994970724215/
-  if(from && d >= 7) {
+  if(!generatingEquidistant && from && d >= 7) {
     int cdi = celldist(c);
     if(celldist(from) > cdi) {
       forCellCM(c2, c) if(celldist(c2) < cdi) {

@@ -1440,7 +1440,7 @@ enum eWall { waNone, waIcewall, waBarrier, waFloorA, waFloorB, waCavewall, waCav
 
 // --- land types ---
 
-const int landtypes = 72;
+const int landtypes = 73;
 
 struct landtype {
   int color;
@@ -1623,6 +1623,7 @@ const landtype linf[landtypes] = {
   { 0xC8C8FF, "Reflection", mirroreddesc},
   { 0xC8C8FF, "Mirror Land", 
     "A strange land which contains mirrors and mirages, protected by Mirror Rangers."},
+  { 0xFFFFFF, "Alchemy II", NODESCYET}
   };
 
 enum eLand { laNone, laBarrier, laCrossroads, laDesert, laIce, laCaves, laJungle, laAlchemist, laMirror, laGraveyard,
@@ -1641,7 +1642,8 @@ enum eLand { laNone, laBarrier, laCrossroads, laDesert, laIce, laCaves, laJungle
   laHalloween, laDungeon, laMountain, laReptile,
   laPrairie, laBull, laCrossroads5, laCA,
   laMirrorWall, laMirrored, laMirrorWall2, laMirrored2,
-  laMirrorOld
+  laMirrorOld,
+  laAlchemy2
   };
 
 // cell information for the game

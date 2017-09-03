@@ -585,7 +585,7 @@ struct fpattern {
     DEBB(DF_FIELD, (debugfile, "wall-river distance = %d\n", distwall[riverid]));
     DEBB(DF_FIELD, (debugfile, "river-wall distance = %d\n", distriver[0]));
     }
-  
+
   bool easy(int i) {
     return i < Prime || !(i % Prime);
     }

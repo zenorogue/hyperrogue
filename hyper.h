@@ -1530,3 +1530,9 @@ bool inscreenrange(cell *c);
 bool allowIncreasedSight();
 
 static bool orbProtection(eItem it) { return false; } // not implemented
+
+namespace windmap {
+  void create();
+  }
+
+extern int wavephase;

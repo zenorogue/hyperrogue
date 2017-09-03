@@ -719,6 +719,8 @@ void initcells() {
   
   allmaps.push_back(currentmap);
   
+  windmap::create();
+  
   // origin->emeraldval = 
   }
 
@@ -1399,6 +1401,31 @@ namespace fieldpattern {
 pair<int, bool> fieldval(cell *c) {
   if(c->type == 7) return make_pair(c->master->fieldval, false);
   else return make_pair(btspin(c->master->fieldval, c->spin(0)), true);
+  }
+
+int fieldval_uniq(cell *c) {
+  if(sphere) {
+    if(c->type == 5) return c->master->fieldval;
+    else return createMov(c, 0)->master->fieldval + 256 * createMov(c,2)->master->fieldval + (1<<16) * createMov(c,4)->master->fieldval;
+    }
+  else if(torus) {
+    return decodeId(c->master);
+    }
+  else if(euclid) {
+    eucoord x, y;
+    decodeMaster(c->master, x, y);
+    int i = (short int)(x) * torusconfig::dx + (short int)(y) * torusconfig::dy;
+    i %= torusconfig::qty;
+    if(i<0) i += torusconfig::qty;
+    return i;
+    }
+  if(c->type == 7) return c->master->fieldval/7;
+  else {
+    int z = 0;
+    for(int u=0; u<6; u+=2) 
+      z = max(z, btspin(createMov(c, u)->master->fieldval, c->spin(u)));
+    return -1-z;
+    }
   }
 
 int subpathid = fp43.matcode[fp43.strtomatrix("RRRPRRRRRPRRRP")];

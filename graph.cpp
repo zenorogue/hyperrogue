@@ -2270,7 +2270,9 @@ void setcolors(cell *c, int& wcol, int &fcol) {
   // water colors
   if(isWateryOrBoat(c) || c->wall == waReptileBridge) {
     if(c->land == laOcean)
-      fcol = (c->landparam > 25 && !chaosmode) ? 0x000090 : 
+      fcol = (c->landparam > 25 && !chaosmode) ? ( 
+        0x90 + 8 * sin(windmap::windcodes[windmap::getId(c)] * M_PI / 128 - SDL_GetTicks()/1000.)
+        ) : 
         0x1010C0 + int(32 * sin(ticks / 500. + (chaosmode ? c->CHAOSPARAM : c->landparam)*1.5));
     else if(c->land == laOceanWall)
       fcol = 0x2020FF;
@@ -2363,6 +2365,11 @@ void setcolors(cell *c, int& wcol, int &fcol) {
       break;
     case laCanvas:
       fcol = c->landparam;
+      break;
+    case laAlchemy2:
+      fcol = (windmap::windcodes[windmap::getId(c)] - SDL_GetTicks()/10) & 255;
+      if(fcol > 128) fcol = 256 - fcol;
+      fcol += 96;
       break;
     case laPalace:
       fcol = 0x806020;
@@ -2663,6 +2670,22 @@ void plainfloor(cell *c, bool warp, const transmatrix &V, int col, int prio) {
     }
   }
 
+void fullplainfloor(cell *c, bool warp, const transmatrix &V, int col, int prio) {
+  if(warp) {
+    if(euclid) {
+      if(ishex1(c))
+        queuepolyat(V * pispin * applyPatterndir(c), shTriheptaEuc[0], col, prio);
+      else
+        queuepolyat(V * applyPatterndir(c), shTriheptaEuc[ishept(c)?1:0], col, prio);
+      }
+    else 
+      queuepolyat(V * applyPatterndir(c), shTriheptaFloor[sphere ? 6-c->type : mapeditor::nopattern(c)], col, prio);
+    }
+  else {
+    queuepolyat(V, shFullFloor[c->type==6?0:1], col, prio);
+    }
+  }
+
 void qplainfloor(cell *c, bool warp, const transmatrix &V, int col) {
   if(warp) {
     if(euclid) {
@@ -2678,6 +2701,8 @@ void qplainfloor(cell *c, bool warp, const transmatrix &V, int col) {
     qfloor(c, V, shFloor[c->type==6?0:1], col);
     }
   }
+
+int wavephase;
 
 void warpfloor(cell *c, const transmatrix& V, int col, int prio, bool warp) {
   if(shmup::on || purehepta) warp = false;
@@ -3427,6 +3452,9 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       else if(c->land == laTemple)
         qfloor(c, Vf, (eoh ? shFloor: shTriFloor)[ct6], darkena(fcol, fd, 0xFF));
 
+/*      else if(c->land == laAlchemist)
+        qfloor(c, Vf, shCloudFloor[ct6], darkena(fcol, fd, 0xFF)); */
+
       else if(c->land == laAlchemist)
         qfloor(c, Vf, shCloudFloor[ct6], darkena(fcol, fd, 0xFF));
 
@@ -3472,14 +3500,12 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         qfloor(c, Vf, shMFloor[ct6], darkena(fcol, fd, 0xFF));
 
       else if(c->land == laWhirlwind)
-//      drawZebraFloor(V, c, darkena(fcol, fd, 0xFF));
         qfloor(c, Vf, (eoh ? shCloudFloor : shNewFloor)[ct6], darkena(fcol, fd, 0xFF));
 
       else if(c->land == laHell)
         qfloor(c, Vf, (euclid ? shStarFloor : shDemonFloor)[ct6], darkena(fcol, fd, 0xFF));
 
       else if(c->land == laIce)
-//      qfloor(c, V, shFloor[ct6], darkena(fcol, 2, 0xFF));
         qfloor(c, Vf, shStarFloor[ct6], darkena(fcol, fd, 0xFF));
 
       else if(c->land == laCocytus)
@@ -3525,8 +3551,14 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       else if(c->land == laDryForest)
         qfloor(c, Vf, (eoh ? shStarFloor : shDesertFloor)[ct6], darkena(fcol, fd, 0xFF));
 
-      else if(c->land == laCaribbean || c->land == laOcean || c->land == laOceanWall || c->land == laWhirlpool)
+//      else if(c->land == laOcean && c->landparam > 25) 
+//        qfloor(c, Vf, shWave[wavephase][ct6], darkena(fcol, fd, 0xFF));
+
+      else if((c->land == laCaribbean || c->land == laOcean || c->land == laOceanWall || c->land == laWhirlpool))
         qfloor(c, Vf, shCloudFloor[ct6], darkena(fcol, fd, 0xFF));
+
+      else if((c->land == laKraken))
+        qfloor(c, Vf, shFullFloor[ct6], darkena(fcol, fd, 0xFF));
 
       else if(c->land == laLivefjord)
         qfloor(c, Vf, shCaveFloor[ECT], darkena(fcol, fd, 0xFF));
@@ -3915,6 +3947,8 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
     
     if(chasmg == 1 && wmspatial) {
       int fd0 = fd ? fd-1 : 0;
+      
+      qfi.shape = &getSeabed(*qfi.shape);
       warpfloor(c, (*Vdp), darkena(fcol, fd0, 0x80), PPR_LAKELEV, isWarped(c));
       }
     
@@ -4452,6 +4486,8 @@ bool allowIncreasedSight() {
 void drawthemap() {
 
   frameid++;
+  
+  wavephase = (-(SDL_GetTicks() / 100)) & 7;
 
   if(!allowIncreasedSight()) {
     if(sightrange > 7) sightrange = 7;
