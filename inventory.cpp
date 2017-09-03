@@ -40,7 +40,11 @@ namespace inv {
     {itWindstone, itOrbSpeed},
     {itDragon, itOrbDragon},
     {itSlime, itOrbFlash},
-    {itDodeca, itOrbShield}
+    {itDodeca, itOrbShield},
+    
+    {itGreenGrass, itOrbHorns},
+    {itGreenGrass, itOrbShield},
+    {itGreenGrass, itOrbThorns}
     };
 
   int mirrorqty0(eItem orb) {
