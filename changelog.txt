@@ -1859,6 +1859,8 @@
 - magic boats no longer ignore the warp rules
 - fixed minor bugs with boats moving items
 - fixed some bugs with Alchemist's land copying
+- spilled slime now stabilizes the Palace gates
+- fixed pushing Thumpers into chasms
 - reduced the monster generation in the Hall of Mirrors while you are outside
 - no longer display the orbs on game over outside the OSM mode
 - going from tactic to chaos or OSM should now start in the correct land (and thus no longer enable the cheat mode)
@@ -1868,3 +1870,25 @@
 - Configured key and mission menu's overview now display the mode-appropriate overview screen
 - separate land highscores should work in OSM (and some other modes) now
 - RogueViz improvements
+- fixed the 'quick mouse OFF' option
+
+2017.08.18 03:12 version 10.0l
+- Orb of Stone over water produces bridges now
+- You can now use Orb of Matter over temporary bridge again, to create a wall
+- Fixed some ways of producing permanent land in the Whirlpool
+- summoning bats in the Dungeon activates plates now, since they are stunned
+- Fire spreading is now simulated in the whole generated part of the world.
+- Orb of the Mirror no longer claims to give 2 charges when mirroring itself after powering up
+- timer no longer runs while in the start menu
+- do not spill slime through mirror walls
+- fixed enabling the Princess Challenge
+- reduced the spawn rate of Gadflies in the Prairie, for better balance
+- Great Wall consistency
+- fixed hotkeys in the inventory mode
+- better mission screen in the peace/tutorial/autocheat mode
+- Fixed a bug with saving Camelot PTM
+- No more weird message on collecting Dodecahedra
+- total victory no longer requires the Princess saved in the same session
+- small fixes to the translation, RogueViz improvements
+- added some extra rewards to the Prairie OSM.
+
