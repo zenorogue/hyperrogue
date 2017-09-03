@@ -1447,7 +1447,10 @@ namespace mapeditor {
       loadShape(sg, id, shReptileHead, 2, 5);
       loadShape(sg, id, shReptileTail, 2, 6); */
 
-      loadShape(sg, id, shTrylobite, 2, 0);
+      // loadShape(sg, id, shTrylobite, 2, 0);
+      
+      for(int i=0; i<8; i++)
+        loadShape(sg, id, shWave[i][0], 1, i);
 
       /* loadShape(sg, id, shYeti, 2, 0);
       loadShape(sg, id, shHumanFoot, 1, 1); */
@@ -1554,6 +1557,8 @@ namespace mapeditor {
     return XLAT("vector graphics editor");
     }
   
+  bool onelayeronly;
+  
   void drawHandleKey(int sym, int uni) {
 
     handlePanning(sym, uni);
@@ -1573,6 +1578,7 @@ namespace mapeditor {
       }
     if(uni == 'l') { dslayer++; dslayer %= USERLAYERS; }
     if(uni == 'L') { dslayer--; if(dslayer < 0) dslayer += USERLAYERS; }
+    if(uni == 'l' - 96) onelayeronly = !onelayeronly;
     
     if(uni == 'g') coldcenter = ccenter, ccenter = mh;
     if(uni == 'c') ew = ewsearch;
@@ -1870,6 +1876,7 @@ namespace mapeditor {
     usershape *us = usershapes[group][id];
     if(us) {  
       for(int i=0; i<USERLAYERS; i++) {
+        if(i != dslayer && onelayeronly) continue;
         usershapelayer& ds(us->d[i]);
         hpcshape& sh(ds.sh);
     
