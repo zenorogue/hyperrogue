@@ -1052,7 +1052,7 @@ namespace mirror {
       c->wall == waGiantRug || c->wall == waCIsland || c->wall == waCIsland2 ||
       c->wall == waGargoyleFloor || c->wall == waRubble ||
       c->wall == waGargoyleBridge || c->wall == waTempFloor || c->wall == waTempBridge ||
-      c->wall == waMirrorWall;
+      c->wall == waMirrorWall || c->wall == waPetrifiedBridge;
     }
 
   void destroyKilled() {
@@ -1999,48 +1999,49 @@ void livecaves() {
       c->aitmp = 0;
       if(c->monst == moDarkTroll) c->monst = moTroll;
       if(c->item || c->monst || c->cpdist == 0) continue;
-      for(int j=0; j<c->type; j++) if(c->mov[j]) {
-        if(c->mov[j]->wall == waDeadfloor) c->aitmp++, bringlife.push_back(c->mov[j]);
-        else if(c->mov[j]->wall == waDeadwall || (c->mov[j]->wall == waDeadfloor2 && !c->mov[j]->monst))
-          c->aitmp--, bringlife.push_back(c->mov[j]);
-        else if(c->mov[j]->wall == waCavefloor) c->aitmp++;
-        else if(c->mov[j]->wall == waCavewall) c->aitmp--;
-        else if(c->mov[j]->wall == waRubble) c->aitmp--;
-        else if(c->mov[j]->wall == waGargoyle) c->aitmp--;
-        else if(c->mov[j]->wall == waGargoyleFloor) c->aitmp--;
-        else if(c->mov[j]->wall == waGargoyleBridge) c->aitmp--;
-        else if(c->mov[j]->wall == waDeadTroll) c->aitmp -= 5;
-        else if(c->mov[j]->wall == waDeadTroll2) c->aitmp -= 3;
-        else if(c->mov[j]->wall == waPetrified) c->aitmp -= 2;
-        else if(c->mov[j]->wall == waVinePlant) c->aitmp--;
-        else if(chaosmode && c->mov[j]->land != laCaves && c->mov[j]->land != laEmerald) ;
-        else if(c->mov[j]->land == laTrollheim) ; // trollheim floor does not count
-        else if(c->mov[j]->wall != waBarrier) c->aitmp += 5;
+      forCellEx(c2, c) {
+        eWall w = c2->wall;
+        if(w == waDeadfloor) c->aitmp++, bringlife.push_back(c2);
+        else if(w == waDeadwall || (w == waDeadfloor2 && !c2->monst))
+          c->aitmp--, bringlife.push_back(c2);
+        else if(w == waCavefloor) c->aitmp++;
+        else if(w == waCavewall) c->aitmp--;
+        else if(w == waRubble) c->aitmp--;
+        else if(w == waGargoyle) c->aitmp--;
+        else if(w == waGargoyleFloor) c->aitmp--;
+        else if(w == waGargoyleBridge) c->aitmp--;
+        else if(w == waDeadTroll) c->aitmp -= 5;
+        else if(w == waDeadTroll2) c->aitmp -= 3;
+        else if(w == waPetrified || w == waPetrifiedBridge) c->aitmp -= 2;
+        else if(w == waVinePlant) c->aitmp--;
+        else if(chaosmode && c2->land != laCaves && c2->land != laEmerald) ;
+        else if(c2->land == laTrollheim) ; // trollheim floor does not count
+        else if(w != waBarrier) c->aitmp += 5;
         
         if(sword::at(c)) c->aitmp += 500;
 
-        if(c->mov[j]->cpdist == 0 && markOrb(itOrbDigging)) c->aitmp+=100;
-        if(items[itOrbEmpathy] && isFriendly(c->mov[j]) && markEmpathy(itOrbDigging))
+        if(c2->cpdist == 0 && markOrb(itOrbDigging)) c->aitmp+=100;
+        if(items[itOrbEmpathy] && isFriendly(c2) && markEmpathy(itOrbDigging))
           c->aitmp+=100;
-        if(c->mov[j]->wall == waThumperOn) c->aitmp+=100;
-        if(c->mov[j]->wall == waFire) c->aitmp+=100;
-        if(c->mov[j]->wall == waBigStatue) c->aitmp-=100;
-        if(c->mov[j]->item && !peace::on) c->aitmp+=2;
-        if(c->mov[j]->monst == moZombie) c->aitmp += 10;
-        if(c->mov[j]->monst == moGhost) c->aitmp += 10;
-        if(c->mov[j]->monst == moTentacleGhost) c->aitmp += 10;
-        if(c->mov[j]->monst == moFriendlyGhost) c->aitmp += 10;
-        if(c->mov[j]->monst == moSkeleton) c->aitmp ++;
-        if(c->mov[j]->monst == moGargoyle) c->aitmp--;
-        if(c->mov[j]->monst == moDraugr) c->aitmp--;
-        if(isDragon(c->mov[j]->monst)) c->aitmp++;
-        if(c->mov[j]->monst == moNecromancer) c->aitmp += 10;
-        if(c->mov[j]->monst == moWormtail) c->aitmp++;
-        if(c->mov[j]->monst == moTentacletail) c->aitmp-=2;
-        if(isIvy(c->mov[j])) c->aitmp--;
-        if(isDemon(c->mov[j])) c->aitmp-=3;
-        // if(c->mov[j]->monst) c->tmp++;
-        // if(c->mov[j]->monst == moTroll) c->tmp -= 3;
+        if(w == waThumperOn) c->aitmp+=100;
+        if(w == waFire) c->aitmp+=100;
+        if(w == waBigStatue) c->aitmp-=100;
+        if(c2->item && !peace::on) c->aitmp+=2;
+        if(c2->monst == moZombie) c->aitmp += 10;
+        if(c2->monst == moGhost) c->aitmp += 10;
+        if(c2->monst == moTentacleGhost) c->aitmp += 10;
+        if(c2->monst == moFriendlyGhost) c->aitmp += 10;
+        if(c2->monst == moSkeleton) c->aitmp ++;
+        if(c2->monst == moGargoyle) c->aitmp--;
+        if(c2->monst == moDraugr) c->aitmp--;
+        if(isDragon(c2->monst)) c->aitmp++;
+        if(c2->monst == moNecromancer) c->aitmp += 10;
+        if(c2->monst == moWormtail) c->aitmp++;
+        if(c2->monst == moTentacletail) c->aitmp-=2;
+        if(isIvy(c2)) c->aitmp--;
+        if(isDemon(c2)) c->aitmp-=3;
+        // if(c2->monst) c->tmp++;
+        // if(c2->monst == moTroll) c->tmp -= 3;
         }
       }
     else if(c->land == laLivefjord) {
@@ -2057,11 +2058,11 @@ void livecaves() {
         cell *c2 = c->mov[j];
         if(c2->wall == waNone || c2->wall == waStrandedBoat)
           c->aitmp -= (c2->land == laLivefjord ? 1 : 100);
-        if(c2->wall == waTempFloor || c2->wall == waTempBridge)
+        if(c2->wall == waTempFloor || c2->wall == waTempBridge || c2->wall == waTempBridgeBlocked)
           ;
         else if(c2->wall == waDeadTroll || c2->wall == waDeadTroll2 || c2->wall == waThumperOn || isFire(c2) || snakelevel(c2))
           c->aitmp -= 10;
-        else if(c2->wall == waPetrified)
+        else if(c2->wall == waPetrified || c2->wall == waPetrifiedBridge)
           c->aitmp -= 10;
         if(c2->wall == waBigStatue)
           c->aitmp -= 10;

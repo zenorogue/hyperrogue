@@ -1221,7 +1221,7 @@ enum eItem { itNone, itDiamond, itGold, itSpice, itRuby, itElixir, itShard, itBo
 
 // --- wall types ---
 
-const int walltypes = 98;
+const int walltypes = 100;
 
 struct walltype {
   char  glyph;
@@ -1402,6 +1402,8 @@ walltype winf[walltypes] = {
   { '.', 0xFFFF00, "Reptile bridge", reptiledesc},
   { '.', 0xFFFF00, "invisible floor", NODESCYET},
   { '#', 0xC0C0FF, "mirror wall", mirroreddesc},
+  { '.', 0xE0E0E0, "stepping stones", "A petrified creature."},
+  { '#', 0x309060, "temporary wall", twdesc},
   };
 
 enum eWall { waNone, waIcewall, waBarrier, waFloorA, waFloorB, waCavewall, waCavefloor, waDeadTroll, waDune,
@@ -1431,7 +1433,9 @@ enum eWall { waNone, waIcewall, waBarrier, waFloorA, waFloorB, waCavewall, waCav
   waBigBush, waSmallBush,
   waReptile, waReptileBridge,
   waInvisibleFloor,
-  waMirrorWall
+  waMirrorWall,
+  waPetrifiedBridge,
+  waTempBridgeBlocked
   };
 
 // --- land types ---

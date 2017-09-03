@@ -62,7 +62,8 @@ bool isActivable(cell *c) {
 
 bool hasTimeout(cell *c) {
   return c->wall == waThumperOn || c->wall == waFire || c->wall == waPartialFire ||
-    c->wall == waTempWall || c->wall == waTempFloor || c->wall == waTempBridge;
+    c->wall == waTempWall || c->wall == waTempFloor || c->wall == waTempBridge ||
+    c->wall == waTempBridgeBlocked;
   }
 
 bool isMimic(eMonster m) {
@@ -294,7 +295,8 @@ bool realred(eWall w) {
 
 int snakelevel(eWall w) {
   if(w == waRed1 || w == waDeadfloor2 || w == waRubble || w == waGargoyleFloor || 
-    w == waGargoyleBridge || w == waTempFloor || w == waTempBridge || w == waRoundTable) 
+    w == waGargoyleBridge || w == waTempFloor || w == waTempBridge || w == waRoundTable ||
+    w == waPetrifiedBridge) 
     return 1;
   if(w == waRed2) return 2;
   if(w == waRed3) return 3;
@@ -309,7 +311,7 @@ bool isWall(cell *w) {
     w->wall == waCavefloor || w->wall == waFrozenLake || w->wall == waVineHalfA ||
     w->wall == waVineHalfB || w->wall == waDeadfloor || w->wall == waDeadfloor2 ||
     w->wall == waRubble || w->wall == waGargoyleFloor || w->wall == waGargoyleBridge ||
-    w->wall == waTempFloor || w->wall == waTempBridge ||
+    w->wall == waTempFloor || w->wall == waTempBridge || w->wall == waPetrifiedBridge ||
     w->wall == waBoat || w->wall == waCIsland || w->wall == waCIsland2 || 
     w->wall == waRed1 || w->wall == waRed2 || w->wall == waRed3 ||
     w->wall == waMineUnknown || w->wall == waMineMine || w->wall == waMineOpen ||

@@ -814,7 +814,7 @@ void useup(cell *c) {
     drawParticles(c, c->wall == waFire ? 0xC00000 : winf[c->wall].color, 10, 50);
     if(c->wall == waTempFloor)
       c->wall = waChasm;
-    else if(c->wall == waTempBridge)
+    else if(c->wall == waTempBridge || c->wall == waTempBridgeBlocked)
       placeWater(c, c);
     else 
       c->wall = c->land == laCaribbean ? waCIsland2 : waNone;
@@ -1278,10 +1278,41 @@ int monstersnear(cell *c, cell *nocount, eMonster who, cell *pushto, cell *comef
   stalemate::moves.pop_back();
   return b;
   }
+
+void petrify(cell *c, eWall walltype, eMonster m) {
+  destroyHalfvine(c);
+  playSound(c, "die-troll");
+  
+  if(isWateryOrBoat(c) && c->land == laWhirlpool) {
+    c->wall = waSea;
+    return;
+    }
+  
+  if(walltype == waGargoyle && cellUnstableOrChasm(c)) 
+    walltype = waGargoyleFloor;
+  else if(walltype == waGargoyle && isWatery(c)) 
+    walltype = waGargoyleBridge;
+  else if(walltype == waPetrified && isWatery(c))
+    walltype = waPetrifiedBridge;
+  else if((c->wall == waTempBridge || c->wall == waTempBridgeBlocked) && c->land == laWhirlpool) {
+    c->wall = waTempBridgeBlocked;
+    return;
+    }
+  else if(!doesnotFall(c)) {
+    fallingFloorAnimation(c, walltype, m);
+    return;
+    }
+
+  if(isReptile(c->wall)) kills[moReptile]++;
+  destroyHalfvine(c);
+  c->wall = walltype;
+  c->wparam = m;
+  c->item = itNone;
+  }
         
 void killIvy(cell *c, eMonster who) {
   if(c->monst == moIvyDead) return;
-  if(checkOrb(who, itOrbStone)) c->wall = waPetrified, c->wparam = c->monst;
+  if(checkOrb(who, itOrbStone)) petrify(c, waPetrified, c->monst);
   c->monst = moIvyDead; // NEWYEARFIX
   for(int i=0; i<c->type; i++) if(c->mov[i])
     if(isIvy(c->mov[i]) && c->mov[i]->mondir == c->spn(i))
@@ -1307,6 +1338,8 @@ void prespill(cell* c, eWall t, int rad, cell *from) {
     c->wall = waPalace;
     return;
     }
+  // no slime in Whirlpool
+  if(c->land == laWhirlpool) return;
   // these walls block spilling completely
   if(c->wall == waIcewall || c->wall == waBarrier ||  c->wall == waWarpGate ||
     c->wall == waDeadTroll || c->wall == waDeadTroll2 || 
@@ -1318,7 +1351,7 @@ void prespill(cell* c, eWall t, int rad, cell *from) {
     c->wall == waTower ||
     c->wall == waPalace || 
     c->wall == waPlatform || c->wall == waStone || c->wall == waTempWall ||
-    c->wall == waTempFloor || c->wall == waTempBridge ||
+    c->wall == waTempFloor || c->wall == waTempBridge || c->wall == waPetrifiedBridge || c->wall == waTempBridgeBlocked || 
     c->wall == waSandstone || c->wall == waCharged || c->wall == waGrounded ||
     c->wall == waMetal || c->wall == waSaloon || c->wall == waFan ||
     c->wall == waBarrowDig || c->wall == waBarrowWall ||
@@ -1331,7 +1364,7 @@ void prespill(cell* c, eWall t, int rad, cell *from) {
     c->wall == waVinePlant || isFire(c) || c->wall == waBonfireOff || c->wall == waVineHalfA || c->wall == waVineHalfB ||
     c->wall == waCamelotMoat || c->wall == waSea || c->wall == waCTree ||
     c->wall == waRubble || c->wall == waGargoyleFloor || c->wall == waGargoyle ||
-    c->wall == waRose || c->wall == waPetrified)
+    c->wall == waRose || c->wall == waPetrified || c->wall == waPetrifiedBridge)
       t = waTemporary;
 
   if(c->wall == waSulphur) {
@@ -1484,7 +1517,8 @@ bool snakepile(cell *c, eMonster m) {
       c->wall = waDeadwall; 
     }
   else if(c->wall == waRubble || c->wall == waGargoyleFloor || c->wall == waGargoyleBridge ||
-    c->wall == waTempFloor || c->wall == waTempBridge) {
+    c->wall == waTempFloor || c->wall == waTempBridge || c->wall == waPetrifiedBridge) {
+    if(c->land == laWhirlpool) return false;
     c->wall = waRed2; 
     if(m == moDarkTroll) c->wall = waDeadwall;
     }
@@ -1576,6 +1610,9 @@ void explodeMine(cell *c) {
       c2->wall = waNone;
       makeflame(c2, 10, false);
       }
+    else if(c2->wall == waPetrifiedBridge || c2->wall == waGargoyleBridge) {
+      placeWater(c, c);
+      }
     else if(c2->wall == waPalace || c2->wall == waOpenGate || c2->wall == waClosedGate ||
       c2->wall == waSandstone || c2->wall == waMetal || c2->wall == waSaloon) {
       c2->wall = waNone;
@@ -1654,7 +1691,8 @@ void minerEffect(cell *c) {
   else if(isReptile(c->wall))
     c->wparam = 1; // wake up next turn
   else if(c->wall == waTempFloor) c->wall = waChasm;
-  else if(c->wall == waTempBridge) placeWater(c, NULL);
+  else if(c->wall == waTempBridge || c->wall == waPetrifiedBridge || c->wall == waTempBridgeBlocked) 
+    placeWater(c, NULL);
   else if(doesFall(c))
     ow = waNone;
   else
@@ -1667,7 +1705,7 @@ bool isRatling(eMonster m) {
   }
 
 void killMutantIvy(cell *c, eMonster who) {
-  if(checkOrb(who, itOrbStone)) c->wall = waPetrified, c->wparam = moMutant;
+  if(checkOrb(who, itOrbStone)) petrify(c, waPetrified, moMutant);
   removeIvy(c);
   for(int i=0; i<c->type; i++)
     if(c->mov[i]->mondir == c->spn(i) && (isMutantIvy(c->mov[i]) || c->mov[i]->monst == moFriendlyIvy))
@@ -1776,27 +1814,11 @@ void killMonster(cell *c, eMonster who, flagtype deathflags) {
         }
       }
     
-    if(connected) {
-      pcount = 0;
-      playSound(c, "die-troll");
-      destroyHalfvine(c);
-      if(cellUnstableOrChasm(c)) c->wall = waGargoyleFloor;
-      else if(isWatery(c)) c->wall = waGargoyleBridge;
-      else c->wall = waGargoyle;
-      c->item = itNone;
-      }
+    if(connected) petrify(c, waGargoyle, m), pcount = 0;
     }
     
   if(m == moTroll) {
-    destroyHalfvine(c);
-    if(doesnotFall(c)) {
-      pcount = 0;
-      playSound(c, "die-troll");
-      if(isReptile(c->wall)) kills[moReptile]++;
-      c->wall = waDeadTroll;
-      }
-    else fallingFloorAnimation(c, waDeadTroll, m), pcount = 0;
-    c->item = itNone;
+    petrify(c, waDeadTroll, m); pcount = 0;
     for(int i=0; i<c->type; i++) if(c->mov[i]) {
       c->mov[i]->item = itNone;
       if(c->mov[i]->wall == waDeadwall || c->mov[i]->wall == waDeadfloor2) c->mov[i]->wall = waCavewall;
@@ -1804,16 +1826,7 @@ void killMonster(cell *c, eMonster who, flagtype deathflags) {
       }
     }
   if(m == moFjordTroll || m == moForestTroll || m == moStormTroll) {
-    destroyHalfvine(c);
-    if(doesnotFall(c)) {
-      if(isReptile(c->wall)) kills[moReptile]++;
-      c->wall = waDeadTroll2;
-      pcount = 0;
-      playSound(c, "die-troll");
-      }
-    else fallingFloorAnimation(c, waDeadTroll2, m), pcount = 0;
-    c->wparam = m;
-    c->item = itNone;
+    petrify(c, waDeadTroll2, m);
     }
   if(m == moMiner) {
     pcount = 32;
@@ -1847,17 +1860,8 @@ void killMonster(cell *c, eMonster who, flagtype deathflags) {
   if(m == moPrincess) {
     playSound(c, princessgender() ? "die-princess" : "die-prince");
     }
-  if(m == moVineBeast) {
-    destroyHalfvine(c);
-    if(doesnotFall(c)) {
-      if(isReptile(c->wall)) kills[moReptile]++;
-      c->wall = waVinePlant;
-      pcount = 0;
-      playSound(c, "die-vinebeast");
-      }
-    else fallingFloorAnimation(c, waVinePlant, m), pcount = 0;
-    c->item = itNone;
-    }
+  if(m == moVineBeast) 
+    petrify(c, waVinePlant, m), pcount = 0;
   if(isBird(m)) moveEffect(c, c, moDeadBird);
   if(m == moBomberbird || m == moTameBomberbird) {
     pcount = 0;
@@ -1869,7 +1873,7 @@ void killMonster(cell *c, eMonster who, flagtype deathflags) {
       c->wall == waStrandedBoat || c->wall == waRed1 || c->wall == waGiantRug) {
       c->wall = waMineMine;
       if(c->item) explodeMine(c);
-      else if(c->land == laMinefield) c->landparam |= 1;
+      else if(c->land == laMinefield) c->landparam = 1;
       }
     else if(c->wall == waFrozenLake)
       c->wall = waLake;
@@ -1918,18 +1922,8 @@ void killMonster(cell *c, eMonster who, flagtype deathflags) {
     if(isFire(c) && itemBurns(c->item))
       c->item = itNone;
     }
-  if(checkOrb(who, itOrbStone)) {
-    destroyHalfvine(c);
-    if(doesnotFall(c)) {
-      if(isReptile(c->wall)) kills[moReptile]++;
-      c->wall = waPetrified;
-      pcount = 0;
-      playSound(c, "die-troll");
-      }
-    else fallingFloorAnimation(c, waPetrified, m), pcount = 0;
-    c->wparam = m;
-    c->item = itNone;
-    }
+  if(checkOrb(who, itOrbStone))
+    petrify(c, waPetrified, m), pcount = 0;
   if(m == moFireFairy) {
     drawFireParticles(c, 16); pcount = 0;
     playSound(c, "die-fairy");
@@ -3587,7 +3581,7 @@ void explodeAround(cell *c) {
       if(c2->wall == waPetrified) c2->wall = waNone;
       if(c2->wall == waDeadfloor2) c2->wall = waDeadfloor;
       if(c2->wall == waGargoyleFloor) c2->wall = waChasm;
-      if(c2->wall == waGargoyleBridge) placeWater(c2, c2);
+      if(c2->wall == waGargoyleBridge || c2->wall == waPetrifiedBridge) placeWater(c2, c2);
       if(c2->wall == waRubble) c2->wall = waNone;
       if(c2->wall == waPlatform) c2->wall = waNone;
       if(c2->wall == waStone) c2->wall = waNone;

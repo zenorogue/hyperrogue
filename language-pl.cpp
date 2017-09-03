@@ -5886,3 +5886,5 @@ S(
 N("Kraken", GEN_M, "Kraken", "Krakeny", "Krakena", "Krakenem")
 N("Kraken Tentacle", GEN_F, "Macka Krakena", "Macki Krakena", "Mackę Krakena", "Macką Krakena")
 S(" (killing increases treasure spawn)", " (pokonywanie zwiększa częstość skarbów)");
+
+N("stepping stones", GEN_O, "Bród", "Brody", "Bród", "Brodem")

@@ -2557,9 +2557,9 @@ void setcolors(cell *c, int& wcol, int &fcol) {
       fcol = wcol;
     }
   
-  if(c->wall == waDeadTroll2 || c->wall == waPetrified) {
+  if(c->wall == waDeadTroll2 || c->wall == waPetrified || c->wall == waPetrifiedBridge) {
     eMonster m = eMonster(c->wparam);
-    if(c->wall == waPetrified) 
+    if(c->wall == waPetrified || c->wall == waPetrifiedBridge) 
       wcol = gradient(wcol, minf[m].color, 0, .2, 1);
     if(c->wall == waPetrified || isTroll(m)) if(!(m == moForestTroll && c->land == laOvergrown))
       wcol = gradient(wcol, minf[m].color, 0, .4, 1);
@@ -2845,6 +2845,7 @@ int shallow(cell *c) {
     c->wall == waGargoyleBridge ||
     c->wall == waTempFloor ||
     c->wall == waTempBridge ||
+    c->wall == waPetrifiedBridge ||
     c->wall == waFrozenLake)
     return 5;
   return 7;
@@ -2983,6 +2984,12 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
     // int col = 0xFFFFFF - 0x20 * c->maxdist - 0x2000 * c->cpdist;
 
     if(!buggyGeneration && c->mpdist > 8 && !cheater) return; // not yet generated
+    /* if(!buggyGeneration && c->mpdist > 7 && !cheater) {
+      int cd = c->mpdist;
+      string label = its(cd);
+      int dc = distcolors[cd&7];
+      queuestr(V, (cd > 9 ? .6 : 1) * .2, label, 0xFF000000 + dc, 1);
+      } */
     
     if(c->land == laNone && (cmode & sm::MAP)) {
       queuepoly(V, shTriangle, 0xFF0000FF);

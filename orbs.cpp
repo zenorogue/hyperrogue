@@ -774,7 +774,8 @@ void summonAt(cell *dest) {
 
 bool tempWallPossibleAt(cell *dest) {
   if(dest->monst || (dest->item && !itemHidden(dest))) return false;
-  return dest->wall == waChasm || isWatery(dest) || dest->wall == waNone;
+  return dest->wall == waChasm || isWatery(dest) || dest->wall == waNone ||
+    dest->wall == waTempBridge;
   }
 
 void tempWallAt(cell *dest) {
@@ -782,6 +783,10 @@ void tempWallAt(cell *dest) {
     dest->wall = waTempFloor;
   else if(dest->wall == waNone)
     dest->wall = waTempWall;
+  else if(dest->wall == waTempBridge) {
+    dest->wall = waTempBridgeBlocked;
+    return;
+    }
   else if(isWatery(dest))
     dest->wall = waTempBridge;
   int len = (items[itOrbMatter]+1) / 2;
