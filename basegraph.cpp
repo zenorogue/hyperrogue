@@ -998,6 +998,8 @@ void setvideomode() {
     addMessage("Failed to set the graphical mode: "+its(vid.xres)+"x"+its(vid.yres)+(vid.full ? " fullscreen" : " windowed"));
     vid.xres = 640;
     vid.yres = 480;
+    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 0);
+    vid.antialias &= ~AA_MULTI;
     s = SDL_SetVideoMode(vid.xres, vid.yres, 32, flags | SDL_RESIZABLE);
     }
 
