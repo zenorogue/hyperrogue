@@ -3020,6 +3020,8 @@ void turn(int delta) {
     if(m->dead && m->type != moPlayer) {
       for(monster *m2: active) if(m2->parent == m)
         m2->parent = m->parent;
+      if(m == mousetarget) mousetarget = NULL;
+      if(m == lmousetarget) lmousetarget = NULL;
       delete m;
       }
     else {
@@ -3219,6 +3221,8 @@ void clearMonsters() {
   for(mit it = monstersAt.begin(); it != monstersAt.end(); it++)
     delete(it->second);
   for(monster *m: active) delete m;
+  mousetarget = NULL;
+  lmousetarget = NULL;
   monstersAt.clear();
   active.clear();
   }
