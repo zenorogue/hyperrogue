@@ -733,9 +733,8 @@ void mobile_draw(MOBPAR_FORMAL) {
     achievement_final(false);
     }
     
-  if(clicked && andmode == 2 && (mouseover != lmouseover || mouseovers != lmouseovers)) {
+  if(clicked && andmode == 12 && (mouseover != lmouseover || mouseovers != lmouseovers)) {
     addMessage(mouseovers);
-    showHelp(MOBPAR_ACTUAL, help);
     lmouseovers = mouseovers;
     }
 
