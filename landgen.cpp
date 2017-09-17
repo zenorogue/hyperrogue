@@ -2893,6 +2893,7 @@ eMonster randomHyperbug() {
   }
 
 #define RANDPATC(c) (randpattern(c,randompattern[c->land]))
+#define RANDPATCL(c, l) (randpattern(c,l))
 #define RANDPAT (randpattern(c,randompattern[c->land]))
 #define RANDPAT3(i) (randpatternMajority(c,i,RANDITER))
 #define RANDPATV(x) (randpattern(c,randompattern[x]))
@@ -4436,7 +4437,7 @@ void setdist(cell *c, int d, cell *from) {
           else {
             int k = 0;
             for(int i=0; i<20; i++) 
-              if(RANDPATC(c->mov[i%7]) && !RANDPATC(c->mov[(i+1)%7]))
+              if(RANDPATCL(createMov(c, i%7), laRedRock) && !RANDPATCL(createMov(c, (i+1)%7), laRedRock))
                 k++;
             if(k>=4) buildRedWall(c, 20);
             }
