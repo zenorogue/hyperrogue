@@ -1169,9 +1169,12 @@ namespace mirror {
     }
   
   bool isKilledByMirror(cell *c) {
-    for(auto& m: mirrors)
-      if(cwpeek(m.second, 0) == c && canAttack(m.second.c, moMimic, c, c->monst, 0))
+    for(auto& m: mirrors) {
+      cell *c1 = cwpeek(m.second, 0);
+      if(inmirror(c1)) c1 = reflect(cellwalker(c1, 0, false)).c;
+      if(c1 == c && canAttack(m.second.c, moMimic, c, c->monst, 0))
         return true;
+      }
     return false;
     }
    
