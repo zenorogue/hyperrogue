@@ -97,7 +97,7 @@ string buildCredits() {
     "special thanks to the following people for their bug reports, feature requests, porting, and other help:\n\n%1\n\n",
     "Konstantin Stupnik, ortoslon, chrysn, Adam Borowski, Damyan Ivanov, Ryan Farnsley, mcobit, Darren Grey, tricosahedron, Maciej Chojecki, Marek ÄŚtrnĂˇct, "
     "wonderfullizardofoz, Piotr MigdaĹ‚, tehora, Michael Heerdegen, Sprite Guard, zelda0x181e, Vipul, snowyowl0, Patashu, phenomist, Alan Malloy, Tom Fryers, Sinquetica, _monad, CtrlAltDestroy, jruderman, "
-    "Kojiguchi Kazuki, baconcow" 
+    "Kojiguchi Kazuki, baconcow, Alan" 
     );
 #ifdef EXTRALICENSE
   h += EXTRALICENSE;
