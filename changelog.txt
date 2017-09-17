@@ -1872,7 +1872,7 @@
 - RogueViz improvements
 - fixed the 'quick mouse OFF' option
 
-2017.08.18 03:12 version 10.0l
+2017.09.03 ??:?? version 10.0l
 - Orb of Stone over water produces bridges now
 - You can now use Orb of Matter over temporary bridge again, to create a wall
 - Fixed some ways of producing permanent land in the Whirlpool
@@ -1892,3 +1892,20 @@
 - small fixes to the translation, RogueViz improvements
 - added some extra rewards to the Prairie OSM.
 
+2017.09.03 21:01 version 10.0m
+- great wall consistency caused glitches in the Ocean generation -- hopefully fixed
+- water tiles use tiles with less gaps now, so that it looks better in 3D
+- a subtle wave effect on the free Ocean
+
+2019.09.04 20:43 version 10.0n
+- fixed the shmup crash bug
+
+2019.09.17 14:01 version 10.0o
+- fixed the mirror cache
+- fixed the mirror glitch
+- fixed the Princess Challenge
+- fixed a bug which caused some texts not to be translated
+- fixed a crash bug with Random Pattern Mode and Rock Red Valley on mobiles
+- fixed mouse tooltip messages in mobiles
+- fixed the checkmate rule not taking the mirrored mimics into account
+- fixed some bugs with the activation of Orb of Yendor
