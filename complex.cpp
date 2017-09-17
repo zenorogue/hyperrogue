@@ -1281,8 +1281,7 @@ namespace mirror {
   
   int depth(cell *c) { return c->landparam & 255; }
 
-  cellwalker reflect0(cell *c) {
-    cellwalker cw(c, 0, false);
+  cellwalker reflect0(cellwalker cw) {
     int stepcount = 0;
     cellwalker cwcopy = cw;
     static vector<int> v;
@@ -1383,7 +1382,11 @@ namespace mirror {
       cw.c->landparam &= ~ (CACHEMASK << 8);
       cw.c->landparam |= (cid << 8);
       cache[cid].first = cw.c;
-      cache[cid].second = reflect0(cw.c);
+      cellwalker cw0(cw.c, 0, false);
+      cache[cid].second = reflect0(cw0);
+      int tries = 64;
+      while(inmirror(cache[cid].second.c) && tries--)
+        cache[cid].second = reflect0(cache[cid].second);
       }
     cellwalker res = cache[cid].second;
     cwspin(res, cw.spin);
