@@ -1381,7 +1381,7 @@ namespace mirror {
       cid = nextcache++;
       nextcache &= CACHEMASK;
       cw.c->landparam &= ~ (CACHEMASK << 8);
-      cw.c->landparam |= (nextcache << 8);
+      cw.c->landparam |= (cid << 8);
       cache[cid].first = cw.c;
       cache[cid].second = reflect0(cw.c);
       }
