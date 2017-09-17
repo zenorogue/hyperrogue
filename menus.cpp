@@ -513,7 +513,7 @@ void showChangeMode() {
       if(!princess::everSaved)
         addMessage(XLAT("Save %the1 first to unlock this challenge!", moPrincess));
       else
-        restartGame('P');
+        restartGame('p');
       }
   #if CAP_EDIT
     else if(xuni == 'm') {
