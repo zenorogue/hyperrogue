@@ -6448,6 +6448,10 @@ bool movepcto(int d, int subdir, bool checkonly) {
       return false;
       }
 
+    if(c2->item == itOrbYendor && !checkonly && !peace::on && !itemHiddenFromSight(c2) && yendor::check(c2)) {
+      return false;
+      }
+
     if(isWatery(c2) && !nonAdjacentPlayer(cwt.c,c2) && !c2->monst && cwt.c->wall == waBoat) {
 
       if(havePushConflict(cwt.c, checkonly)) return false;
@@ -6710,9 +6714,6 @@ bool movepcto(int d, int subdir, bool checkonly) {
     else {
       if(mineMarked(c2) && !minesafe() && !checkonly && warningprotection()) {
         addMessage("Are you sure you want to step there?");
-        return false;
-        }
-      if(c2->item == itOrbYendor && !boatmove && !checkonly && !peace::on && yendor::check(c2)) {
         return false;
         }
       if(monstersnear(c2, NULL, moPlayer, NULL, cwt.c)) {
