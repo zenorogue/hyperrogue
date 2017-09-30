@@ -309,6 +309,7 @@ void initConfig() {
 
 void resetModes() {
   popAllGames();
+  firstland = laIce; vid.scfg.players = 1;
   if(shmup::on) restartGame('s');
   if(inv::on) restartGame('i');
   if(chaosmode) restartGame('C');
