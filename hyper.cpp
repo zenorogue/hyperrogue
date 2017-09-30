@@ -144,6 +144,12 @@ int arg::readCommon() {
     shift(); eItem i = readItem(args());
     shift(); items[i] = argi(); 
     }
+  else if(argis("-IP")) {
+    PHASE(3) cheater++; timerghost = false;
+    shift(); eItem i = readItem(args());
+    shift(); int q = argi();
+    placeItems(q, i);
+    }
   else if(argis("-M")) {
     PHASE(3) cheater++; timerghost = false;
     shift(); eMonster m = readMonster(args());

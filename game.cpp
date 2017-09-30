@@ -5328,6 +5328,15 @@ void restoreGolems(int qty, eMonster m, int hp = 0) {
     }
   }
 
+void placeItems(int qty, eItem it) {
+  int dcs = size(dcal);
+  for(int i=1; qty && i<dcs; i++) {
+    cell *c = dcal[i];
+    if(!c->monst && !c->item && passable(c, NULL, 0))
+      c->item = it, qty--;
+    }
+  }
+
 cell *recallCell;
 
 bool activateRecall() {
