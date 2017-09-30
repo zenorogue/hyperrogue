@@ -610,7 +610,7 @@ void describe(cell *c) {
   vector<pair<double, int>> v;
   for(int s=0; s<samples; s++) if(whowon[s] == n) v.emplace_back(vnorm(n->net, data[s].val), s);
   random_shuffle(v.begin(), v.end());
-  sort(v.begin(), v.end(), [] (auto a, auto b) { return a.first < b.first; });
+  sort(v.begin(), v.end(), [] (pair<double,int> a, pair<double,int> b) { return a.first < b.first; });
   
   for(int i=0; i<size(v) && i<20; i++) {
     int s = v[i].second;
