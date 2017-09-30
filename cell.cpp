@@ -677,6 +677,14 @@ void cwstep(cellwalker& cw) {
   cw.spin = nspin;
   }
 
+void cwrev(cellwalker& cw) {
+  cwspin(cw, cw.c->type/2 + ((cw.c->type&1)?hrand(2):0));
+  }
+
+void cwrevstep(cellwalker& cw) {
+  cwrev(cw); cwstep(cw);
+  }
+
 void eumerge(cell* c1, cell *c2, int s1, int s2) {
   if(!c2) return;
   c1->mov[s1] = c2; tsetspin(c1->spintable, s1, s2);
