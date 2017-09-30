@@ -340,6 +340,14 @@ else if(args()[0] == '-' && args()[1] == x && args()[2] == '0') { showstartmenu 
     PHASEFROM(2);
     shift(); sightrange = argi();
     }
+  else if(argis("-srx")) {    
+    PHASEFROM(2);
+    shift(); sightrange = argi(); overgenerate = true; autocheat = true;
+    }
+  else if(argis("-rch")) {    
+    PHASEFROM(2);
+    reptilecheat = true; autocheat = true; firstland = laReptile;
+    }
 #if CAP_SDL
   else if(argis("-pngshot")) {
     PHASE(3); shift(); 
