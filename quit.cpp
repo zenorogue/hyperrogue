@@ -306,7 +306,7 @@ void showMission() {
 #if CAP_TOUR
     tour::on ? (canmove ? XLAT("Tutorial") : XLAT("GAME OVER")) :
 #endif
-    cheater ? XLAT("It is a shame to cheat!") : 
+    (cheater && !autocheat)? XLAT("It is a shame to cheat!") : 
     showoff ? XLAT("Showoff mode") :
     (canmove && princess::challenge) ? XLAT("%1 Challenge", moPrincess) :
     canmove ? XLAT("Quest status") : 
