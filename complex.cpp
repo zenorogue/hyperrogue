@@ -1383,6 +1383,7 @@ namespace mirror {
       forCellEx(c2, cw.c) if(c2->landparam & 255) cando = true;
       if(cando) buildEquidistant(cw.c);
       }
+    if((cw.c->landparam & 255) == 0) return cw;
     int cid = (cw.c->landparam >> 8) & CACHEMASK;
     if(cache[cid].first != cw.c) {
       cid = nextcache++;
