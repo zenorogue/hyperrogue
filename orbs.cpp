@@ -440,8 +440,7 @@ void castLightningBolt(cellwalker lig) {
       bnc++; if(bnc > 10) break;
       }
     else {
-      cwspin(lig, 3);
-      if(c->type == 7) cwspin(lig, hrand(2));
+      cwrev(lig);
       }
     
     if(lig.c->wall == waCloud) {
@@ -654,8 +653,6 @@ eMonster summonedAt(cell *dest) {
     return dest->land == laPalace ? moPalace : moBat;
   if(dest->wall == waFloorA || dest->wall == waFloorB)
     return moSlime;
-  if(dest->wall == waFloorC || dest->wall == waFloorD)
-    return moRatling;
   if(dest->wall == waCavefloor)
     return moTroll;
   if(dest->wall == waDeadfloor)
@@ -698,6 +695,7 @@ eMonster summonedAt(cell *dest) {
   if(dest->wall == waGiantRug)
     return moVizier;
   if(dest->wall == waNone) {
+    if(dest->land == laDogPlains) return moAirElemental;
     if(dest->land == laBull) return moRagingBull;
     if(dest->land == laPrairie) return moAirElemental;
     if(dest->land == laZebra) return moAirElemental;

@@ -4,7 +4,7 @@
 // Copyright (C) 2011-2016 Zeno Rogue, see 'hyper.cpp' for details
 
 bool isIcyLand(eLand l) {
-  return l == laIce || l == laCocytus;
+  return l == laIce || l == laCocytus || l == laBlizzard;
   }
 
 bool isIcyLand(cell *c) {
@@ -24,7 +24,7 @@ bool isWatery(cell *c) {
   }
 
 bool isChasmy(cell *c) {
-  return c->wall == waChasm || c->wall == waSulphur || c->wall == waSulphurC;
+  return c->wall == waChasm || c->wall == waSulphur || c->wall == waSulphurC || c->wall == waBubble;
   }
 
 bool isWateryOrBoat(cell *c) {
@@ -267,7 +267,10 @@ int itemclass(eItem i) {
     i == itBabyTortoise || i == itDragon || i == itApple ||
     i == itKraken || i == itBarrow || i == itTrollEgg || i == itTreat ||
     i == itSlime || i == itAmethyst || i == itDodeca ||
-    i == itGreenGrass || i == itBull)
+    i == itGreenGrass || i == itBull ||
+    i == itAlchemy2 || i == itDogPlains ||
+    i == itBlizzard || i == itTerra
+    )
     return IC_TREASURE;
   if(i == itSavedPrincess || i == itStrongWind || i == itWarning)
     return IC_NAI;
@@ -281,10 +284,18 @@ bool isAlch(eWall w) {
   return w == waFloorA || w == waFloorB;
   }
 
+bool isAlch2(eWall w, bool bubbletoo) {
+  return w == waSlime1 || w == waSlime2 || (bubbletoo && w == waBubble);
+  }
+
+bool isAlch2(cell *c, bool bubbletoo) {
+  return isAlch2(c->wall, bubbletoo);
+  }
+
 bool isAlch(cell *c) { return isAlch(c->wall); }
   
 bool isAlchAny(eWall w) {
-  return w == waFloorA || w == waFloorB || w == waFloorC || w == waFloorD;
+  return w == waFloorA || w == waFloorB;
   }
   
 bool isAlchAny(cell *c) { return isAlchAny(c->wall); }
@@ -320,7 +331,8 @@ bool isWall(cell *w) {
     w->wall == waLadder || w->wall == waTrunk || w->wall == waSolidBranch ||
     w->wall == waWeakBranch || w->wall == waCanopy || w->wall == waTower ||
     w->wall == waSmallBush || w->wall == waBigBush ||
-    w->wall == waReptile || w->wall == waReptileBridge || w->wall == waInvisibleFloor)
+    w->wall == waReptile || w->wall == waReptileBridge || w->wall == waInvisibleFloor ||
+    w->wall == waSlime1 || w->wall == waSlime2 || w->wall == waArrowTrap) 
     return false;
   if(isWatery(w) || isChasmy(w) || isFire(w)) return false;
   return true;
@@ -362,7 +374,8 @@ bool normalMover(eMonster m) {
     m == moRoseBeauty || m == moWolf ||
     m == moResearcher || m == moRagingBull || 
     m == moNarciss || m == moMirrorSpirit || 
-    slowMover(m);
+    m == moHunterDog || m == moTerraWarrior || m == moMercuryGuy || m == moLemur || m == moHunterGuard ||
+    m == moIceGolem || slowMover(m);
   }
 
 // from-to

@@ -403,9 +403,8 @@ void ShadowV(const transmatrix& V, const hpcshape& bp, int prio) {
   if(mmspatial) { 
     if(pmodel == mdHyperboloid || pmodel == mdBall) 
       return; // shadows break the depth testing
-    int p = poly_outline; poly_outline = OUTLINE_TRANS; 
+    dynamicval<int> p(poly_outline, OUTLINE_TRANS);
     queuepolyat(V, bp, SHADOW_MON, prio); 
-    poly_outline = p; 
     }
   }
 
@@ -503,6 +502,7 @@ bool drawItemType(eItem it, cell *c, const transmatrix& V, int icol, int ticks, 
     it == itHolyGrail ? &shGrail :
     isElementalShard(it) ? &shElementalShard :
     (it == itBombEgg || it == itTrollEgg) ? &shEgg :
+    it == itDogPlains ? &shTriangle :
     it == itDodeca ? &shDodeca :
     xch == '*' ? &shGem[ct6] : 
     it == itShard ? &shMFloor[0] :
@@ -610,8 +610,12 @@ bool drawItemType(eItem it, cell *c, const transmatrix& V, int icol, int ticks, 
   
     if(xsh == &shBookCover && mmitem)
       queuepoly(V2, shBook, 0x805020FF);
+    
+    int pr = PPR_ITEM;
+    int alpha = hidden ? (it == itKraken ? 0xC0 : 0x40) : 0xF0;
+    if(c && c->wall == waIcewall) pr = PPR_HIDDEN, alpha = 0x80;
 
-    queuepoly(V2, *xsh, darkena(icol, 0, hidden ? (it == itKraken ? 0xC0 : 0x40) : 0xF0));
+    queuepolyat(V2, *xsh, darkena(icol, 0, alpha), pr);
 
     if(it == itZebra)
       queuepolyat(V * spin(ticks / 1500. + M_PI/(ct6+6)), *xsh, darkena(0x202020, 0, hidden ? 0x40 : 0xF0), PPR_ITEMb);
@@ -643,6 +647,17 @@ bool drawItemType(eItem it, cell *c, const transmatrix& V, int icol, int ticks, 
   else if(it) return true;
 
   return false;
+  }
+
+void drawTerraWarrior(const transmatrix& V, int t, double footphase) {
+  int col = 0xC0C0C0;
+  int col2 = t > 6 ? 0x4040C0 : 0x6060A0;
+  ShadowV(V, shPBody);
+  otherbodyparts(V, darkena(t > 4 ? col2 : col, 0, 0xF0), moDesertman, footphase);
+  queuepoly(VBODY, shPBody, darkena(t > 0 ? col2 : col, 0, 0xF0));
+  queuepoly(VBODY, shPrinceDress, darkena(t > 1 ? col2 : col, 0, 0xF0));
+  if(!peace::on) queuepoly(VBODY * Mirror, shPSword, darkena(t > 2 ? col2 : col, 0, 0xF0));
+  queuepoly(VHEAD, shTurban1, darkena(t > 3 ? col2 : col, 0, 0xF0));
   }
 
 bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, int col, double footphase) {
@@ -984,7 +999,7 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, int col, dou
       }
     queuepoly(VABODY, shBugArmor, darkena(col, 1, 0xFF));
     }
-  else if(m == moRunDog) {
+  else if(m == moRunDog || m == moHunterDog || m == moHunterGuard) {
     if(!mmspatial && !footphase) 
       queuepoly(VABODY, shDogBody, darkena(col, 0, 0xFF));
     else {
@@ -993,9 +1008,18 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, int col, dou
       animallegs(VALEGS, moRunDog, darkena(col, 0, 0xFF), footphase);
       }
     queuepoly(VAHEAD, shDogHead, darkena(col, 0, 0xFF));
-    queuepoly(VAHEAD, shWolf1, darkena(0x202020, 0, 0xFF));
-    queuepoly(VAHEAD, shWolf2, darkena(0x202020, 0, 0xFF));
-    queuepoly(VAHEAD, shWolf3, darkena(0x202020, 0, 0xFF));
+
+    {
+    dynamicval<int> dp(poly_outline);
+    dynamicval<double> dw(minwidth_global);
+    bool redeyes = m != moRunDog;
+    int eyes = darkena(redeyes ? 0xFF0000 : 0x202020, 0, 0xFF);
+
+    if(redeyes) poly_outline = eyes, minwidth_global = 1;
+    queuepoly(VAHEAD, shWolf1, eyes);
+    queuepoly(VAHEAD, shWolf2, eyes);
+    }
+    queuepoly(VAHEAD, shWolf3, darkena(m == moRunDog ? 0x202020 : 0x000000, 0, 0xFF));
     }
   else if(m == moOrangeDog) {
     if(!mmspatial && !footphase) 
@@ -1014,7 +1038,8 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, int col, dou
   else if(m == moShark || m == moGreaterShark || m == moCShark)
     queuepoly(VFISH, shShark, darkena(col, 0, 0xFF));
   else if(m == moEagle || m == moParrot || m == moBomberbird || m == moAlbatross || 
-    m == moTameBomberbird || m == moWindCrow || m == moTameBomberbirdMoved) {
+    m == moTameBomberbird || m == moWindCrow || m == moTameBomberbirdMoved ||
+    m == moSandBird) {
     ShadowV(V, shEagle);
     queuepoly(VBIRD, shEagle, darkena(col, 0, 0xFF));
     }
@@ -1062,6 +1087,8 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, int col, dou
     ShadowV(V, shPBody);
     queuepoly(VBODY, shPBody, c);
     }
+  else if(m == moTerraWarrior)
+    drawTerraWarrior(V, 7, footphase);
   else if(m == moDesertman) {
     otherbodyparts(V, darkena(col, 0, 0xC0), m, footphase);
     ShadowV(V, shPBody);
@@ -1180,6 +1207,15 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, int col, dou
     queuepoly(VHEAD, shPFace, darkena(col, 1, 0x90));
     queuepoly(VHEAD, shArmor, darkena(col, 0, 0xC0));
     }
+  else if(m == moTerraWarrior || m == moMercuryGuy || m == moLemur) {
+    ShadowV(V, shPBody);
+    otherbodyparts(V, darkena(col, 0, 0xF0), m, footphase);
+    queuepoly(VBODY, shPBody, darkena(col, 0, 0xF0));
+    if(!peace::on) queuepoly(VBODY * Mirror, shPSword, darkena(col, 0, 0xF0));
+    queuepoly(VHEAD, shPHead, darkena(col, 1, 0xF0));
+    queuepoly(VHEAD, shPFace, darkena(col, 1, 0xF0));
+    queuepoly(VHEAD, shArmor, darkena(col, 0, 0xF0));
+    }
   else if(m == moGhost || m == moSeep || m == moFriendlyGhost) {
     if(m == moFriendlyGhost) col = fghostcolor(ticks, where);
     queuepoly(VGHOST, shGhost, darkena(col, 0, m == moFriendlyGhost ? 0xC0 : 0x80));
@@ -1285,6 +1321,12 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, int col, dou
     if(b > 6) b = 6;
     queuepoly(VHEAD, shWightCloak, 0x605040A0 + 0x10101000 * b);
     }
+  else if(m == moVoidBeast) {
+    otherbodyparts(V, 0x080808D0, m, footphase);
+    queuepoly(VBODY, shPBody, 0x080808D0);
+    queuepoly(VHEAD, shPHead, 0x080808D0);
+    queuepoly(VHEAD, shWightCloak, 0xFF0000A0);
+    }
   else if(m == moGoblin) {
     otherbodyparts(V, darkena(col, 0, 0xFF), m, footphase);
     ShadowV(V, shYeti);
@@ -1386,7 +1428,7 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, int col, dou
     int acol = col;
     queuepoly(VAHEAD, shTrylobiteHead, darkena(acol, 0, 0xFF));
     }
-  else if(m == moEvilGolem) {
+  else if(m == moEvilGolem || m == moIceGolem) {
     otherbodyparts(V, darkena(col, 2, 0xC0), m, footphase);
     ShadowV(V, shPBody);
     queuepoly(VBODY, shPBody, darkena(col, 0, 0XC0));
@@ -2271,7 +2313,7 @@ void setcolors(cell *c, int& wcol, int &fcol) {
   if(isWateryOrBoat(c) || c->wall == waReptileBridge) {
     if(c->land == laOcean)
       fcol = (c->landparam > 25 && !chaosmode) ? ( 
-        0x90 + 8 * sin(windmap::windcodes[windmap::getId(c)] * M_PI / 128 - SDL_GetTicks()/1000.)
+        0x90 + 8 * sin(windmap::windcodes[windmap::getId(c)] * M_PI / 128 - ticks/1000.)
         ) : 
         0x1010C0 + int(32 * sin(ticks / 500. + (chaosmode ? c->CHAOSPARAM : c->landparam)*1.5));
     else if(c->land == laOceanWall)
@@ -2366,11 +2408,6 @@ void setcolors(cell *c, int& wcol, int &fcol) {
     case laCanvas:
       fcol = c->landparam;
       break;
-    case laAlchemy2:
-      fcol = (windmap::windcodes[windmap::getId(c)] - SDL_GetTicks()/10) & 255;
-      if(fcol > 128) fcol = 256 - fcol;
-      fcol += 96;
-      break;
     case laPalace:
       fcol = 0x806020;
       if(c->wall == waClosedGate || c->wall == waOpenGate)
@@ -2421,6 +2458,17 @@ void setcolors(cell *c, int& wcol, int &fcol) {
         int wcol[4] = {0x404040, 0x404080, 0x2050A0, 0x5050C0};
         fcol = wcol[whirlwind::fzebra3(c)];
         }
+      break;
+
+    case laDogPlains:
+      // fcol = pseudohept(c) ? 0x205050 : 0x306060;
+      fcol = 0x40E0D0;
+      fcol /= 2;
+      if(pseudohept(c)) fcol = fcol * 3/4;
+      break;
+  
+    case laTerracotta:
+      fcol = 0x909090;
       break;
   
     case laIvoryTower:
@@ -2492,24 +2540,34 @@ void setcolors(cell *c, int& wcol, int &fcol) {
       break;
       }
 
-    case laIce: case laCocytus:
+    case laIce: case laCocytus: case laBlizzard:
       if(isIcyWall(c)) {
         float h = HEAT(c);
         bool showcoc = c->land == laCocytus && chaosmode && !wmescher;
-        if(h < -0.4)
-          wcol = gradient(showcoc ? 0x4080FF : 0x4040FF, 0x0000FF, -0.4, h, -1);
+        
+        int colorN04 = showcoc ? 0x4080FF : 0x4040FF;
+        int colorN10 = 0x0000FF;
+        int color0 = c->land == laBlizzard ? 0x5050C0 : showcoc ? 0x80C0FF : 0x8080FF;
+        int color02 = 0xFFFFFF;
+        int color06 = 0xFF0000;
+        int color08 = 0xFFFF00;
+        
+        if(h < -1)
+          wcol = colorN10;
+        else if(h < -0.4)
+          wcol = gradient(colorN04, colorN10 , -0.4, h, -1);
         else if(h < 0)
-          wcol = gradient(showcoc ? 0x80C0FF : 0x8080FF, showcoc ? 0x4080FF : 0x4040FF, 0, h, -0.4);
+          wcol = gradient(color0, colorN04, 0, h, -0.4);
         else if(h < 0.2)
-          wcol = gradient(showcoc ? 0x80C0FF : 0x8080FF, 0xFFFFFF, 0, h, 0.2);
+          wcol = gradient(color0, color02, 0, h, 0.2);
         // else if(h < 0.4)
         //  wcol = gradient(0xFFFFFF, 0xFFFF00, 0.2, h, 0.4);
         else if(h < 0.6)
-          wcol = gradient(0xFFFFFF, 0xFF0000, 0.2, h, 0.6);
+          wcol = gradient(color02, color06, 0.2, h, 0.6);
         else if(h < 0.8)
-          wcol = gradient(0xFF0000, 0xFFFF00, 0.6, h, 0.8);
+          wcol = gradient(color06, color08, 0.6, h, 0.8);
         else
-          wcol = 0xFFFF00;
+          wcol = color08;
         if(c->wall == waFrozenLake) 
           fcol = wcol;
         else
@@ -2562,6 +2620,15 @@ void setcolors(cell *c, int& wcol, int &fcol) {
       fcol = wcol = iinf[c->item].color;
     else
       fcol = wcol;
+    }
+
+  if(isAlch2(c, true)) {
+    int id = alchemyval(c, -1);
+    if(id < 96)
+      wcol = gradient(0x800000, 0xFF0000, 0, id, 96);
+    else 
+      wcol = gradient(0x00FF00, 0xFFFF00, 96, id, 255);
+    fcol = wcol;
     }
   
   if(c->wall == waDeadTroll2 || c->wall == waPetrified || c->wall == waPetrifiedBridge) {
@@ -2884,6 +2951,8 @@ bool allemptynear(cell *c) {
   return true;
   }
 
+#include "blizzard.cpp"
+
 void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
 
   qfi.shape = NULL; qfi.special = false;
@@ -3160,7 +3229,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
     int fd = 
       c->land == laRedRock ? 0 : 
       (c->land == laOcean || c->land == laLivefjord || c->land == laWhirlpool) ? 1 :
-      c->land == laAlchemist || c->land == laIce || c->land == laGraveyard ||
+      c->land == laAlchemist || c->land == laIce || c->land == laGraveyard || c->land == laBlizzard ||
       c->land == laRlyeh || c->land == laTemple || c->land == laWineyard ||
       c->land == laDeadCaves || c->land == laPalace || c->land == laCA ? 1 : 
       c->land == laCanvas ? 0 :
@@ -3179,7 +3248,14 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       c->land == laHalloween ? 1 :
       c->land == laTrollheim ? 2 :
       c->land == laReptile ? 0 :
+      c->land == laDogPlains ? 1 :
       2;
+    
+    if(c->land == laAlchemy2) {
+      int id = alchemyval(c, -1);
+      if(id/4 == 95/4 || id/4 == 255/4) fd = 0;
+      if(id/4 == 95/4-1 || id/4 == 255/4-1) fd = 1;
+      }
 
     poly_outline = OUTLINE_DEFAULT;
 
@@ -3360,6 +3436,11 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       else if(wmblack == 1 && c->wall == waMineOpen && vid.grid) 
         ;
       
+//         else if(true) 
+//          qfloor(c, Vf, shWave[wavephase][ct6], darkena(fcol, fd, 0xFF));
+//        else if(true) 
+//          qfloor(c, Vf, shSeabed[ct6], darkena(fcol, fd, 0xFF));
+
       else if(wmblack) {
         qfloor(c, Vf, shBFloor[ct6], darkena(fcol, 0, 0xFF));
         int rd = rosedist(c);
@@ -3505,7 +3586,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       else if(c->land == laHell)
         qfloor(c, Vf, (euclid ? shStarFloor : shDemonFloor)[ct6], darkena(fcol, fd, 0xFF));
 
-      else if(c->land == laIce)
+      else if(c->land == laIce || c->land == laBlizzard)
         qfloor(c, Vf, shStarFloor[ct6], darkena(fcol, fd, 0xFF));
 
       else if(c->land == laCocytus)
@@ -3680,8 +3761,11 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           placeSidewallX(c, i, SIDE_LAKE, V, isWarped(c), false, darkena(gradient(0, col, 0, .8, 1), fd, 0xFF));
         chasmg = 1;
         }
+      
+      if(c->wall == waTerraWarrior) 
+        drawTerraWarrior(V, c->landparam & 7, 0);
 
-      if(c->wall == waBoat || c->wall == waStrandedBoat) {
+      else if(c->wall == waBoat || c->wall == waStrandedBoat) {
         double footphase;
         bool magical = items[itOrbWater] && (isPlayerOn(c) || (isFriendly(c) && items[itOrbEmpathy]));
         int outcol = magical ? watercolor(0) : 0xC06000FF;
@@ -3741,7 +3825,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
 
       else if(c->wall == waFrozenLake || c->wall == waLake || c->wall == waCamelotMoat ||
         c->wall == waSea || c->wall == waClosePlate || c->wall == waOpenPlate ||
-        c->wall == waOpenGate || c->wall == waTrapdoor)
+        c->wall == waOpenGate || c->wall == waTrapdoor || c->wall == waBubble)
         ;
       
       else if(c->wall == waRose) {
@@ -3837,32 +3921,35 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
             }
           else {
             transmatrix Vdepth = mscale(V, geom3::WALL);
+            int alpha = 0xFF;
+            if(c->wall == waIcewall)
+              alpha = 0xC0;
     
             bool warp = isWarped(c);
             
             if(starcol && !(wmescher && c->wall == waPlatform)) 
               queuepolyat(Vdepth, shThisWall, darkena(starcol, 0, 0xFF), PPR_WALL3A);
     
-            warpfloor(c, Vdepth, darkena(wcol0, fd, 0xFF), PPR_WALL3, warp);
+            warpfloor(c, Vdepth, darkena(wcol0, fd, alpha), PPR_WALL3, warp);
             floorShadow(c, V, SHADOW_WALL, warp);
             
             if(c->wall == waCamelot) {
               forCellIdEx(c2, i, c) {
-                placeSidewallX(c, i, SIDE_SLEV, V, warp, false, darkena(wcol2, fd, 0xFF));
+                placeSidewallX(c, i, SIDE_SLEV, V, warp, false, darkena(wcol2, fd, alpha));
                 }
               forCellIdEx(c2, i, c) {
-                placeSidewallX(c, i, SIDE_SLEV+1, V, warp, false, darkena(wcol2, fd, 0xFF));
+                placeSidewallX(c, i, SIDE_SLEV+1, V, warp, false, darkena(wcol2, fd, alpha));
                 }
               forCellIdEx(c2, i, c) {
-                placeSidewallX(c, i, SIDE_SLEV+2, V, warp, false, darkena(wcol2, fd, 0xFF));
+                placeSidewallX(c, i, SIDE_SLEV+2, V, warp, false, darkena(wcol2, fd, alpha));
                 }
               forCellIdEx(c2, i, c) {
-                placeSidewallX(c, i, SIDE_WTS3, V, warp, false, darkena(wcol2, fd, 0xFF));
+                placeSidewallX(c, i, SIDE_WTS3, V, warp, false, darkena(wcol2, fd, alpha));
                 }
               }
             else forCellIdEx(c2, i, c) {
               if(!highwall(c2) || conegraph(c2)) 
-                { placeSidewallX(c, i, SIDE_WALL, V, warp, false, darkena(wcol2, fd, 0xFF)); }
+                { placeSidewallX(c, i, SIDE_WALL, V, warp, false, darkena(wcol2, fd, alpha)); }
               }
             }
           }
@@ -3870,6 +3957,11 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       
       else if(c->wall == waFan) {
         queuepoly(V * spin(M_PI/6 - fanframe * M_PI / 3), shFan, darkena(wcol, 0, 0xFF));
+        }
+      
+      else if(c->wall == waArrowTrap) {
+        int trapcol[4] = {0x904040, 0xA02020, 0xD00000, 0x303030};
+        queuepoly(V, shDisk, darkena(trapcol[c->wparam&3], 0, 0xFF));
         }
       
       else if(xch == '%') {
@@ -3912,6 +4004,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       else if(xch != '.' && xch != '+' && xch != '>' && xch != ':'&& xch != '-' && xch != ';' && c->wall != waSulphur && xch != ',')
         error = true;
       }
+
     else if(!(it || c->monst || c->cpdist == 0)) error = true;
     
     int sha = shallow(c);
@@ -4069,6 +4162,9 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
          }
        }
       }
+
+    if(c->land == laBlizzard) 
+      blizzardcells[c].frame = frameid;
 
     if(c->land == laWhirlwind) {
       whirlwind::calcdirs(c);
@@ -4472,6 +4568,7 @@ void drawFlashes() {
 
 bool allowIncreasedSight() {
   if(cheater) return true;
+  if(inHighQual) return true;
   if(peace::on) return true;
 #if CAP_TOUR
   if(tour::on) return true;
@@ -4487,7 +4584,7 @@ void drawthemap() {
 
   frameid++;
   
-  wavephase = (-(SDL_GetTicks() / 100)) & 7;
+  wavephase = (-(ticks / 100)) & 7;
 
   if(!allowIncreasedSight()) {
     if(sightrange > 7) sightrange = 7;
@@ -4562,6 +4659,7 @@ void drawthemap() {
       maxreclevel,
       hsOrigin, ypush(vid.yshift) * sphereflip * View);
     }
+  drawBlizzards();
   ivoryz = false;
   
   linepatterns::drawAll();

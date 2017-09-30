@@ -150,6 +150,12 @@ int arg::readCommon() {
     shift(); int q = argi();
     placeItems(q, i);
     }
+  else if(argis("-ambush")) {
+    // make all ambushes use the given number of dogs
+    // example: hyper -W Hunt -IP Shield 1 -ambush 60
+    PHASE(3) cheater++; timerghost = false;
+    shift(); ambushval = argi();
+    }
   else if(argis("-M")) {
     PHASE(3) cheater++; timerghost = false;
     shift(); eMonster m = readMonster(args());
@@ -272,6 +278,10 @@ else if(args()[0] == '-' && args()[1] == x && args()[2] == '0') { showstartmenu 
     fieldpattern::info();
     exit(0);
     } 
+  else if(argis("-quantum")) {
+    quantum = true;
+    autocheat = true;
+    }
   else if(argis("-P")) { 
     PHASE(2); shift(); 
     vid.scfg.players = argi(); 

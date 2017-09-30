@@ -346,7 +346,7 @@ const char *mirroreddesc =
   "Mirror walls reflect Mimics, lightning bolts, and "
   "missiles perfectly.";
 
-const int motypes = 141;
+const int motypes = 150;
 
 struct monstertype {
   char  glyph;
@@ -696,6 +696,14 @@ monstertype minf[motypes] = {
     "If you attack a Mirror Spirit physically, it is delayed, but not destroyed -- "
     "more reflections will come out of the mirror. Use Mimics to destroy them."
     },
+  { 'W', 0x202020, "Hunting Dog", NODESC},
+  { 'T', 0xA0A0A0, "Terracotta Warrior", NODESC},
+  { 'H', 0xA0A0A0, "Mercury Warrior", NODESC},
+  { 'B', 0xA00000, "Void Beast", NODESC},
+  { 'L', 0xA00000, "Lemur", NODESC},
+  { 'W', 0x202020, "Hunting Dog (guarding)", NODESC},
+  { 'G', 0xC0C0FF, "Ice Golem", NODESC},
+  { 'B', 0xC0C0FF, "Sand Bird", NODESC},
   
   // shmup specials
   { '@', 0xC0C0C0, "Rogue", "In the Shoot'em Up mode, you are armed with thrown Knives."},
@@ -706,10 +714,11 @@ monstertype minf[motypes] = {
   { '*', 0xFFFFFF, "Airball", "This magical missile pushes back whatever it hits."},
   // technical
   { '?', 0x00C000, "dead bug", NODESC},
-  { '?', 0xFFFF00, "electric discharge", NODESC}, // appears as 'killed by electrocution'
+  { '?', 0xFFFF00, "electric discharge", NODESC}, // appears as 'killed by electric discharge'
   { '?', 0xE06000, "dead bird", NODESC},
   { '?', 0xE06000, "Energy Sword", NODESC},
   { '!', 0xFF0000, "Warning", warningdesc},
+  { '!', 0xFF0000, "arrow trap", NODESC},
   { '*', 0,        "vertex", "A vertex from rogueviz."}
   };
 
@@ -756,10 +765,12 @@ enum eMonster {
   moVampire, moBat, moReptile, 
   moHerdBull, moRagingBull, moSleepBull,
   moButterfly, moNarciss, moMirrorSpirit,
+  moHunterDog, moTerraWarrior, moMercuryGuy, moVoidBeast, moLemur, moHunterGuard,
+  moIceGolem, moSandBird,
   // shmup specials
   moPlayer, moBullet, moFlailBullet, moFireball, moTongue, moAirball,
   // temporary
-  moDeadBug, moLightningBolt, moDeadBird, moEnergySword, moWarning, 
+  moDeadBug, moLightningBolt, moDeadBird, moEnergySword, moWarning, moArrowTrap,
   moRogueviz
   };
 
@@ -790,7 +801,7 @@ genderswitch_t genderswitch[NUM_GS] = {
 
 // --- items ---
 
-const int ittypes = 112;
+const int ittypes = 119;
 
 struct itemtype {
   char  glyph;
@@ -1183,6 +1194,13 @@ itemtype iinf[ittypes] = {
      },
   { 'O', 0xF0F0F0, "your orbs", 
     "Click this to see your orbs."},  
+  { '$', 0xD0D000, "Sage's Stone", NODESCYET},
+  { '*', 0x40E0D0, "Turquoise", NODESCYET},
+  { '*', 0x009090, "Forgotten Relic", NODESCYET},
+  { '*', 0x009090, "Warstone", NODESCYET},
+  { 'o', 0x307080, "Orb of the Side I", NODESCYET},
+  { 'o', 0x30A080, "Orb of the Side II", NODESCYET},
+  { 'o', 0x30D080, "Orb of the Side III", NODESCYET},
   };
 
 enum eItem { itNone, itDiamond, itGold, itSpice, itRuby, itElixir, itShard, itBone, itHell, itStatue,
@@ -1216,12 +1234,14 @@ enum eItem { itNone, itDiamond, itGold, itSpice, itRuby, itElixir, itShard, itBo
   itTrollEgg, itWarning, itOrbStone, itOrbNature, itTreat,
   itSlime, itAmethyst, itOrbRecall, itDodeca, itOrbDash, itGreenGrass, itOrbHorns,
   itOrbBull, itBull, itOrbMirror,
-  itInventory
+  itInventory,
+  itAlchemy2, itDogPlains, itBlizzard, itTerra,
+  itOrbSide1, itOrbSide2, itOrbSide3
   };
 
 // --- wall types ---
 
-const int walltypes = 100;
+const int walltypes = 103;
 
 struct walltype {
   char  glyph;
@@ -1372,8 +1392,8 @@ walltype winf[walltypes] = {
   { '?', 0xFF00FF, "<earth d",  NODESC},
   { '?', 0xFF00FF, "<elemental tmp>",  NODESC},
   { '?', 0xFF00FF, "<elemental d>",  NODESC},
-  { '+', 0x607030, "unnamed floor C",  NODESC},
-  { '+', 0xC0C0FF, "unnamed floor D",  NODESC},
+  { '+', 0x00F000, "green slime",  NODESC},
+  { '+', 0xF0F000, "yellow slime",  NODESC},
   { '#', 0x764e7c, "rosebush", roselanddesc},
   { '#', 0xC0C000, "warp gate",
     "This gate separates the warped area from the normal land."},
@@ -1404,6 +1424,9 @@ walltype winf[walltypes] = {
   { '#', 0xC0C0FF, "mirror wall", mirroreddesc},
   { '.', 0xE0E0E0, "stepping stones", "A petrified creature."},
   { '#', 0x309060, "temporary wall", twdesc},
+  { 'S', 0xB0B0B0, "warrior statue", NODESCYET},
+  { '=', 0xB0B0B0, "bubbling slime", NODESCYET},
+  { '^', 0xD00000, "arrow trap", NODESCYET},
   };
 
 enum eWall { waNone, waIcewall, waBarrier, waFloorA, waFloorB, waCavewall, waCavefloor, waDeadTroll, waDune,
@@ -1426,7 +1449,7 @@ enum eWall { waNone, waIcewall, waBarrier, waFloorA, waFloorB, waCavewall, waCav
   waCharged, waGrounded, waSandstone, waSaloon, waMetal,
   waDeadTroll2, waFan,
   waTemporary, waEarthD, waElementalTmp, waElementalD,
-  waFloorC, waFloorD, waRose, waWarpGate,
+  waSlime1, waSlime2, waRose, waWarpGate,
   waTrunk, waSolidBranch, waWeakBranch, waCanopy,
   waBarrowWall, waBarrowDig,
   waPetrified, waTower,
@@ -1435,12 +1458,14 @@ enum eWall { waNone, waIcewall, waBarrier, waFloorA, waFloorB, waCavewall, waCav
   waInvisibleFloor,
   waMirrorWall,
   waPetrifiedBridge,
-  waTempBridgeBlocked
+  waTempBridgeBlocked,
+  waTerraWarrior, waBubble,
+  waArrowTrap
   };
 
 // --- land types ---
 
-const int landtypes = 73;
+const int landtypes = 76;
 
 struct landtype {
   int color;
@@ -1623,7 +1648,10 @@ const landtype linf[landtypes] = {
   { 0xC8C8FF, "Reflection", mirroreddesc},
   { 0xC8C8FF, "Mirror Land", 
     "A strange land which contains mirrors and mirages, protected by Mirror Rangers."},
-  { 0xFFFFFF, "Alchemy II", NODESCYET}
+  { 0xA06000, "Alchemy II", NODESCYET},
+  { 0x8080FF, "Blizzard", NODESCYET},
+  { 0x207068, "Hunting Ground", NODESCYET},
+  { 0x888888, "Terracotta Army", NODESCYET}
   };
 
 enum eLand { laNone, laBarrier, laCrossroads, laDesert, laIce, laCaves, laJungle, laAlchemist, laMirror, laGraveyard,
@@ -1643,7 +1671,7 @@ enum eLand { laNone, laBarrier, laCrossroads, laDesert, laIce, laCaves, laJungle
   laPrairie, laBull, laCrossroads5, laCA,
   laMirrorWall, laMirrored, laMirrorWall2, laMirrored2,
   laMirrorOld,
-  laAlchemy2
+  laAlchemy2, laBlizzard, laDogPlains, laTerracotta
   };
 
 // cell information for the game

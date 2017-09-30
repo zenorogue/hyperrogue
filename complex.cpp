@@ -1195,8 +1195,12 @@ namespace mirror {
         cell *c2 = cw2.c;
         if(c2->monst) {
           c->monst = moMimic;
-          if(!peace::on && canAttack(c,moMimic,c2,c2->monst, 0))
+          eMonster m2 = c2->monst;
+          if(!peace::on && canAttack(c,moMimic,c2,m2, 0)) {
             attackMonster(c2, AF_MSG | AF_ORSTUN, moMimic);
+            if(!fwd) produceGhost(c2, m2, moMimic);
+            sideAttack(c, m.second.spin, m2, 0);
+            }
           c->monst = moNone;
           }
         if(c2->wall == waBigTree)
@@ -1758,9 +1762,13 @@ inline float& HEAT(cell *c) { return c->LHU.heat; }
 
 namespace heat {
   
+  void affect(cell *c, double delta) {
+    if(isIcyLand(c)) HEAT(c) += delta;
+    }
+  
   double absheat(cell *c) {
     if(c->land == laCocytus) return HEAT(c) -.6;
-    if(c->land == laIce) return HEAT(c) -.4;
+    if(c->land == laIce || c->land == laBlizzard) return HEAT(c) -.4;
     return 0;
     }
   
@@ -1850,21 +1858,30 @@ namespace heat {
         forCellEx(ct, c) if(!isIcyLand(ct) && isFire(ct)) 
           hmod += xrate*.1;
         
-        for(int j=0; j<c->type; j++) if(c->mov[j]) {
-          if(!isIcyLand(c->mov[j])) {
+        forCellEx(ct, c) {
+          if(!isIcyLand(ct)) {
             // make sure that we can still enter Cocytus,
             // it won't heat up right away even without Orb of Winter or Orb of Speed
-            if(isPlayerOn(c->mov[j]) && (c->land == laIce || markOrb(itOrbWinter))) 
+            if(isPlayerOn(ct) && (c->land == laIce || markOrb(itOrbWinter))) 
               hmod += (markOrb(itOrbWinter) ? -1.2 : 1.2) / 4 * xrate;
             continue;
             }
-          ld hdiff = absheat(c->mov[j]) - absheat(c);
+          ld hdiff = absheat(ct) - absheat(c);
           hdiff /= 10;
-          if(shmup::on && (c->land == laCocytus || c->mov[j]->land == laCocytus))
+
+          if(ct->land == laBlizzard) {
+            int v = (windmap::at(ct) - windmap::at(c)) & 255;
+            if(v > 128) v -= 256;
+            if(v < windmap::NOWINDFROM && v > -windmap::NOWINDFROM)
+              hdiff = hdiff * (1 - v * 5. / windmap::NOWINDFROM);
+            }
+
+          if(shmup::on && (c->land == laCocytus || ct->land == laCocytus))
             hdiff /= 3;
           // if(c->mov[j]->cpdist > 7 && !quotient) hdiff += -HEAT(c) / 30;
           hmod += hdiff;
           }
+        // printf("%d ", vsum);
         
         hmods[i] = hmod;
         }
@@ -1971,7 +1988,16 @@ namespace heat {
           useup(c);
           offscreen2.push_back(c);
           }
-        }      
+        }
+      
+      if(c->wall == waArrowTrap && c->wparam) {
+        c->wparam++;
+        if(c->wparam == 3) {
+          if(canAttack(c, moArrowTrap, c, c->monst, AF_GETPLAYER))
+            attackMonster(c, AF_ORSTUN | AF_MSG | AF_GETPLAYER, moArrowTrap);
+          }
+        if(c->wparam == 4) c->wparam = 0;
+        }
       }
 
    for(int i=0; i<size(newfires); i++) {
@@ -3044,5 +3070,10 @@ namespace windmap {
     printf("  return;\n");
     printf("  }\n");
     }
+  
+  int at(cell *c) {
+    return windmap::windcodes[windmap::getId(c)];
+    }
+
   };
 

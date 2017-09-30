@@ -53,7 +53,8 @@ void achievement_pump();
 vector<string> achievementsReceived;
 
 // game forward declarations
-typedef int flagtype;
+typedef unsigned long long flagtype;
+#define Flag(i) (flagtype(1ull<<i))
 
 bool mirrorkill(cell *c);
 bool isNeighbor(cell *c1, cell *c2);
@@ -461,38 +462,39 @@ void setGLProjection();
 
 // passable flags
 
-#define P_MONSTER    (1<<0)  // can move through monsters
-#define P_MIRROR     (1<<1)  // can move through mirrors
-#define P_REVDIR     (1<<2)  // reverse direction movement
-#define P_WIND       (1<<3)  // can move against the wind
-#define P_GRAVITY    (1<<4)  // can move against the gravity
-#define P_ISPLAYER   (1<<5)  // player-only moves (like the Round Table jump)
-#define P_ONPLAYER   (1<<6)  // always can step on the player
-#define P_FLYING     (1<<7)  // is flying
-#define P_BULLET     (1<<8)  // bullet can fly through more things
-#define P_MIRRORWALL (1<<9)  // mirror images go through mirror walls
-#define P_JUMP1      (1<<10) // first part of a jump
-#define P_JUMP2      (1<<11) // second part of a jump
-#define P_TELE       (1<<12) // teleport onto
-#define P_BLOW       (1<<13) // Orb of Air -- blow, or push
-#define P_AETHER     (1<<14) // aethereal
-#define P_FISH       (1<<15) // swimming
-#define P_WINTER     (1<<16) // fire resistant
-#define P_USEBOAT    (1<<17) // can use boat
-#define P_NOAETHER   (1<<18) // disable AETHER
-#define P_FRIENDSWAP (1<<19) // can move on friends (to swap with tem)
-#define P_ISFRIEND   (1<<20) // is a friend (can use Empathy + Winter/Aether/Fish combo)
-#define P_LEADER     (1<<21) // can push statues and use boats
-#define P_MARKWATER  (1<<22) // mark Orb of Water as used
-#define P_EARTHELEM  (1<<23) // Earth Elemental
-#define P_WATERELEM  (1<<24) // Water Elemental
-#define P_IGNORE37   (1<<25) // ignore the triheptagonal board
-#define P_CHAIN      (1<<26) // for chaining moves with boats
-#define P_DEADLY     (1<<27) // suicide moves allowed
-#define P_ROSE       (1<<28) // rose smell
-#define P_CLIMBUP    (1<<29) // allow climbing up
-#define P_CLIMBDOWN  (1<<30) // allow climbing down
-#define P_REPTILE    (1<<31) // is reptile
+#define P_MONSTER    Flag(0)  // can move through monsters
+#define P_MIRROR     Flag(1)  // can move through mirrors
+#define P_REVDIR     Flag(2)  // reverse direction movement
+#define P_WIND       Flag(3)  // can move against the wind
+#define P_GRAVITY    Flag(4)  // can move against the gravity
+#define P_ISPLAYER   Flag(5)  // player-only moves (like the Round Table jump)
+#define P_ONPLAYER   Flag(6)  // always can step on the player
+#define P_FLYING     Flag(7)  // is flying
+#define P_BULLET     Flag(8)  // bullet can fly through more things
+#define P_MIRRORWALL Flag(9)  // mirror images go through mirror walls
+#define P_JUMP1      Flag(10) // first part of a jump
+#define P_JUMP2      Flag(11) // second part of a jump
+#define P_TELE       Flag(12) // teleport onto
+#define P_BLOW       Flag(13) // Orb of Air -- blow, or push
+#define P_AETHER     Flag(14) // aethereal
+#define P_FISH       Flag(15) // swimming
+#define P_WINTER     Flag(16) // fire resistant
+#define P_USEBOAT    Flag(17) // can use boat
+#define P_NOAETHER   Flag(18) // disable AETHER
+#define P_FRIENDSWAP Flag(19) // can move on friends (to swap with tem)
+#define P_ISFRIEND   Flag(20) // is a friend (can use Empathy + Winter/Aether/Fish combo)
+#define P_LEADER     Flag(21) // can push statues and use boats
+#define P_MARKWATER  Flag(22) // mark Orb of Water as used
+#define P_EARTHELEM  Flag(23) // Earth Elemental
+#define P_WATERELEM  Flag(24) // Water Elemental
+#define P_IGNORE37   Flag(25) // ignore the triheptagonal board
+#define P_CHAIN      Flag(26) // for chaining moves with boats
+#define P_DEADLY     Flag(27) // suicide moves allowed
+#define P_ROSE       Flag(28) // rose smell
+#define P_CLIMBUP    Flag(29) // allow climbing up
+#define P_CLIMBDOWN  Flag(30) // allow climbing down
+#define P_REPTILE    Flag(31) // is reptile
+#define P_VOID       Flag(32) // void beast
 
 bool passable(cell *w, cell *from, flagtype flags);
 
@@ -646,38 +648,39 @@ bool withRose(cell *cfrom, cell *cto);
 
 // canAttack/moveval flags
 
-#define AF_TOUGH             (1<<0)    // tough attacks: Hyperbugs
-#define AF_MAGIC             (1<<1)    // magical attacks: Flash
-#define AF_STAB              (1<<2)    // stabbing attacks (usually ignored except Hedgehogs)
-#define AF_LANCE             (1<<3)    // lance attacks (used by Lancers)
-#define AF_ONLY_ENEMY        (1<<4)    // only say YES if it is an enemy
-#define AF_ONLY_FRIEND       (1<<5)    // only say YES if it is a friend
-#define AF_ONLY_FBUG         (1<<6)    // only say YES if it is a bug_or friend
-#define AF_BACK              (1<<7)    // backward attacks (ignored except Viziers and Flailers)
-#define AF_APPROACH          (1<<8)    // approach attacks (ignored except Lancers)
-#define AF_IGNORE_UNARMED    (1<<9)    // ignore the UNARMED flag
-#define AF_NOSHIELD          (1<<10)   // ignore the shielded status
-#define AF_GETPLAYER         (1<<11)   // check for player (replace m2 with moPlayer for player position)
-#define AF_GUN               (1<<12)   // revolver attack
-#define AF_FAST              (1<<13)   // fast attack
-#define AF_EAT               (1<<17)   // eating attacks from Worm-likes
+#define AF_TOUGH             Flag(0)    // tough attacks: Hyperbugs
+#define AF_MAGIC             Flag(1)    // magical attacks: Flash
+#define AF_STAB              Flag(2)    // stabbing attacks (usually ignored except Hedgehogs)
+#define AF_LANCE             Flag(3)    // lance attacks (used by Lancers)
+#define AF_ONLY_ENEMY        Flag(4)    // only say YES if it is an enemy
+#define AF_ONLY_FRIEND       Flag(5)    // only say YES if it is a friend
+#define AF_ONLY_FBUG         Flag(6)    // only say YES if it is a bug_or friend
+#define AF_BACK              Flag(7)    // backward attacks (ignored except Viziers and Flailers)
+#define AF_APPROACH          Flag(8)    // approach attacks (ignored except Lancers)
+#define AF_IGNORE_UNARMED    Flag(9)    // ignore the UNARMED flag
+#define AF_NOSHIELD          Flag(10)   // ignore the shielded status
+#define AF_GETPLAYER         Flag(11)   // check for player (replace m2 with moPlayer for player position)
+#define AF_GUN               Flag(12)   // revolver attack
+#define AF_FAST              Flag(13)   // fast attack
+#define AF_EAT               Flag(17)   // eating attacks from Worm-likes
 
-#define MF_NOATTACKS         (1<<14)   // don't do any attacks
-#define MF_PATHDIST          (1<<15)   // consider pathdist for moveval
-#define MF_ONLYEAGLE         (1<<16)   // do this only for Eagles
-#define MF_MOUNT             (1<<18)   // don't do 
-#define MF_NOFRIEND          (1<<19)   // don't do it for friends
+#define MF_NOATTACKS         Flag(14)   // don't do any attacks
+#define MF_PATHDIST          Flag(15)   // consider pathdist for moveval
+#define MF_ONLYEAGLE         Flag(16)   // do this only for Eagles
+#define MF_MOUNT             Flag(18)   // don't do 
+#define MF_NOFRIEND          Flag(19)   // don't do it for friends
 
-#define AF_SWORD             (1<<20)   // big sword
-#define AF_SWORD_INTO        (1<<21)   // moving into big sword
-#define AF_MSG               (1<<22)   // produce a message
-#define AF_ORSTUN            (1<<23)   // attackMonster: allow stunning
-#define AF_NEXTTURN          (1<<24)   // next turn -- don't count shield at power 1
-#define AF_FALL              (1<<25)   // death by falling
-#define MF_STUNNED           (1<<26)   // edgeunstable: ignore ladders (as stunned monsters do)
-#define MF_IVY               (1<<27)   // edgeunstable: ignore ivy (ivy cannot climb ivy)
-#define AF_HORNS             (1<<28)   // spear attack (always has APPROACH too)
-#define AF_BULL              (1<<29)   // bull attack
+#define AF_SWORD             Flag(20)   // big sword
+#define AF_SWORD_INTO        Flag(21)   // moving into big sword
+#define AF_MSG               Flag(22)   // produce a message
+#define AF_ORSTUN            Flag(23)   // attackMonster: allow stunning
+#define AF_NEXTTURN          Flag(24)   // next turn -- don't count shield at power 1
+#define AF_FALL              Flag(25)   // death by falling
+#define MF_STUNNED           Flag(26)   // edgeunstable: ignore ladders (as stunned monsters do)
+#define MF_IVY               Flag(27)   // edgeunstable: ignore ivy (ivy cannot climb ivy)
+#define AF_HORNS             Flag(28)   // spear attack (always has APPROACH too)
+#define AF_BULL              Flag(29)   // bull attack
+#define AF_SIDE              Flag(30)   // side attack
 
 bool canAttack(cell *c1, eMonster m1, cell *c2, eMonster m2, flagtype flags);
 
@@ -857,7 +860,7 @@ void resetGeometry();
 
 namespace svg {
   void circle(int x, int y, int size, int col);
-  void polygon(int *polyx, int *polyy, int polyi, int col, int outline);
+  void polygon(int *polyx, int *polyy, int polyi, int col, int outline, double minwidth);
   void text(int x, int y, int size, const string& str, bool frame, int col, int align);
   extern bool in;
   extern string *info;
@@ -1533,6 +1536,16 @@ static bool orbProtection(eItem it) { return false; } // not implemented
 
 namespace windmap {
   void create();
+
+  static const int NOWINDBELOW = 8;
+  static const int NOWINDFROM = 120;
+
+  int at(cell *c);
   }
 
 extern int wavephase;
+
+void buildEquidistant(cell *c);
+void produceGhost(cell *c, eMonster victim, eMonster who);
+void sideAttack(cell *mf, int dir, eMonster who, int bonus, eItem orb);
+void sideAttack(cell *mf, int dir, eMonster who, int bonuskill);

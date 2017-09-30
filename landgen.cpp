@@ -221,7 +221,16 @@ int isNative(eLand l, eMonster m) {
       return (m == moRagingBull || m == moHerdBull || m == moGadfly) ? 1 : 0;
     
     case laAlchemy2:
-      return false;
+      return m == moLemur ? 2 : 0;
+    
+    case laTerracotta:
+      return m == moMercuryGuy ? 2 : m == moTerraWarrior ? 1 : 0;
+    
+    case laBlizzard:
+      return (m == moVoidBeast || m == moIceGolem) ? 2 : 0;
+
+    case laDogPlains:
+      return m == moHunterDog ? 1 : 0;
     
     case laCA: return false;
     }
@@ -311,7 +320,11 @@ eItem treasureType(eLand l) {
     case laBull: return itBull;
     case laPrairie: return itGreenGrass;
     
-    case laAlchemy2: return itElixir;
+    case laAlchemy2: return itAlchemy2;
+    case laTerracotta: return itTerra;
+    case laBlizzard: return itBlizzard;
+    case laDogPlains: return itDogPlains;
+    
     case laCA: return itNone;
     }
   return itNone;
@@ -766,6 +779,15 @@ bool landUnlocked(eLand l) {
     
     case laAlchemy2:
       return gold() >= R30 && items[itElixir] >= U10;
+    
+    case laDogPlains:
+      return true;
+    
+    case laTerracotta:
+      return gold() >= 60;
+    
+    case laBlizzard:
+      return items[itDiamond] >= 5 && items[itWindstone] >= 5;
     
     case laCrossroads5:
       return gold() >= R300;
@@ -3512,6 +3534,15 @@ int reptilemax() {
 
 bool is02(int i) { return i == 0 || i == 2; }
 
+bool openplains(cell *c) {
+  celllister cl(c, purehepta ? 5 : 7, 1000000, NULL);
+  for(cell *c: cl.lst) { 
+    while(c->mpdist > 8) setdist(c, c->mpdist-1, NULL);
+    if(c->land != laDogPlains) return false;
+    }
+  return true;
+  }
+
 // This function generates all lands. Warning: it's very long!
 void setdist(cell *c, int d, cell *from) {
   
@@ -3611,7 +3642,7 @@ void setdist(cell *c, int d, cell *from) {
         else buildPrizeMirror(c, 1000);
         }
       }
-
+    
     if(d == 7)
       prairie::generateTreasure(c);
     
@@ -3986,7 +4017,55 @@ void setdist(cell *c, int d, cell *from) {
       
       if(c->land == laAlchemist) 
         c->wall = (randomPatternsMode ? RANDPAT : hrand(2)) ? waFloorA : waFloorB;
+
+      if(c->land == laAlchemy2) 
+        c->wall = waSlime1;
       
+      if(c->land == laBlizzard) {
+        bool windless = true;
+        int w = windmap::at(c);
+        forCellCM(c2, c) {
+          int w2 = windmap::at(c2);
+          if(((w2-w) & 255) >= windmap::NOWINDBELOW)
+          if(((w-w2) & 255) >= windmap::NOWINDBELOW)
+            windless = false;
+          }
+        if(windless) {
+          c->wall = waIcewall;
+          if(hrand(500) < PT(100 + 2 * kills[moVoidBeast] + 2 * kills[moIceGolem], 200) && notDippingFor(itBlizzard))
+            c->item = itBlizzard;
+          }
+        }
+      
+      if(c->land == laTerracotta) {
+        if(hrand(500) < 15) {
+          cellwalker cw(c, hrand(c->type));
+          cell* cc[5];
+          cc[2] = c;
+          cellwalker cw2 = cw;
+          cwstep(cw); cc[3] = cw.c; cwrevstep(cw); cc[4] = cw.c;
+          cwrevstep(cw2); cc[1] = cw2.c; cwrevstep(cw2); cc[0] = cw2.c;
+          bool ok = true;
+          for(int i=1; i<4; i++) {
+            forCellEx(c2, cc[i]) if(c2->wall == waArrowTrap) ok = false;
+            if(cc[i]->land != laNone && cc[i]->land != laTerracotta) ok = false;
+            if(cc[i]->bardir != NODIR) ok = false;
+            cc[i]->bardir = NOBARRIERS;
+            }
+          if(ok) {
+            for(int i=1; i<4; i++) 
+              cc[i]->wall = waArrowTrap,
+              cc[i]->wparam = 0;
+            cc[0]->wall = waStone;
+            cc[4]->wall = waStone;
+            }
+          }
+        if(pseudohept(c) && hrand(100) < 40 && c->wall == waNone) {
+          c->wall = waTerraWarrior;
+          c->landparam = 0;
+          }
+        }
+
       if(c->land == laDryForest) {
         if(randomPatternsMode)
           c->wall = RANDPAT ? waNone : RANDPATV(laHell) ? waBigTree : waSmallTree;
@@ -4652,6 +4731,23 @@ void setdist(cell *c, int d, cell *from) {
 
     if(d == 7 && c->land == laCaves && c->wall == waCavewall && hrand(5000) < items[itGold] + hard && !safety)
       c->monst = moSeep;
+
+    if(d == 7 && c->land == laDogPlains) {
+      if(hrand(1000) < 10) {
+        if(openplains(c)) {
+          c->item = itDogPlains;
+          vector<cell*> next;
+          forCellEx(c2, c) if(c2->mpdist > 7) next.push_back(c2);
+          if(size(next) && items[itDogPlains] < 10) {
+            cell *c3 = next[hrand(size(next))];
+            forCellEx(c4, c3) if(c4->mpdist > 7 && !isNeighbor(c4, c))
+              c4->monst = moHunterGuard;
+            }
+          }
+        }
+      if(hrand(5000) < items[itDogPlains]- 17 + hard)
+        c->monst = moHunterDog;
+      }
     
     if(d == 7 && c->land == laLivefjord && c->wall == waSea && hrand(5000) < 15 + items[itFjord] + hard && !safety) {
       if(items[itFjord] >= 5 && hrand(100) < 20 && !peace::on)
@@ -4821,7 +4917,7 @@ void setdist(cell *c, int d, cell *from) {
         placePrizeOrb(c);
       }
 
-    if(d == 7 && c->wall == waIcewall && c->land != laIce && c->land != laCocytus)
+    if(d == 7 && c->wall == waIcewall && c->land != laIce && c->land != laCocytus && c->land != laBlizzard)
       c->wall = waNone;
     
     if(d == 7 && c->wall == waRed3 && c->land != laRedRock)
@@ -4971,6 +5067,27 @@ void setdist(cell *c, int d, cell *from) {
           c->item = itDiamond;
         if(hrand(8000) < 2 * (items[itDiamond] + hard))
           c->monst = hrand(2) ? moYeti : moWolf;
+        }
+      
+      if(c->land == laBlizzard) {
+        if(hrand(8000) < 10 + 2 * (items[itBlizzard] + hard))
+          c->monst = pick(moVoidBeast, moIceGolem);
+        }
+
+      if(c->land == laAlchemy2) {
+        if(hrand(5000) < PT(100 + 2 * kills[moLemur], 200) && notDippingFor(itAlchemy2))
+          c->item = itAlchemy2;
+        if(hrand(8000) < 2 * (items[itAlchemy2] + hard))
+          c->monst = moLemur;
+        }
+
+      if(c->land == laTerracotta) {
+        bool nearwarrior = false;
+        forCellEx(c2, c) if(c2->wall == waTerraWarrior) nearwarrior = true;
+        if(nearwarrior && hrand(5000) < PT(100 + 2 * kills[moMercuryGuy], 200) && notDippingFor(itTerra))
+          c->item = itTerra;
+        if(hrand(8000) < 2 * (items[itTerra] + hard))
+          c->monst = moMercuryGuy;
         }
 
       if(c->land == laTrollheim && !safety) {
@@ -5482,7 +5599,7 @@ void setdist(cell *c, int d, cell *from) {
 #endif
   }
 
-bool wchance(int a, int of) {
+bool wchance(int a, int of, int reduction = 0) {
   of *= 10; 
   a += yendor::hardness() + 1;
   if(isCrossroads(cwt.c->land)) 
@@ -5492,6 +5609,10 @@ bool wchance(int a, int of) {
 
   for(int i=0; i<ittypes; i++) if(itemclass(eItem(i)) == IC_TREASURE)
     a = max(a, (items[i]-R10) / 10);
+  
+  a -= reduction;
+  if(a < 0) return false;
+
   return hrand(a+of) < a;
   }
 
@@ -5720,6 +5841,9 @@ void wandering() {
 
     else if(c->land == laIce && wchance(items[itDiamond], 10))
       c->monst = hrand(2) ? moWolf : moYeti;
+
+    else if(c->land == laDogPlains && wchance(items[itDogPlains], 50, 26))
+      c->monst = moHunterDog;
 
     else if(c->land == laDesert && wchance(items[itSpice], 10))
       c->monst = (hrand(10) || peace::on) ? moDesertman : moWorm;
