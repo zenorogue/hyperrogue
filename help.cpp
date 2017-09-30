@@ -95,8 +95,8 @@ string buildCredits() {
 #endif
   h += XLAT(
     "special thanks to the following people for their bug reports, feature requests, porting, and other help:\n\n%1\n\n",
-    "Konstantin Stupnik, ortoslon, chrysn, Adam Borowski, Damyan Ivanov, Ryan Farnsley, mcobit, Darren Grey, tricosahedron, Maciej Chojecki, Marek ÄŚtrnĂˇct, "
-    "wonderfullizardofoz, Piotr MigdaĹ‚, tehora, Michael Heerdegen, Sprite Guard, zelda0x181e, Vipul, snowyowl0, Patashu, phenomist, Alan Malloy, Tom Fryers, Sinquetica, _monad, CtrlAltDestroy, jruderman, "
+    "Konstantin Stupnik, ortoslon, chrysn, Adam Borowski, Damyan Ivanov, Ryan Farnsley, mcobit, Darren Grey, tricosahedron, Maciej Chojecki, Marek Čtrnáct, "
+    "wonderfullizardofoz, Piotr Migdał, tehora, Michael Heerdegen, Sprite Guard, zelda0x181e, Vipul, snowyowl0, Patashu, phenomist, Alan Malloy, Tom Fryers, Sinquetica, _monad, CtrlAltDestroy, jruderman, "
     "Kojiguchi Kazuki, baconcow, Alan" 
     );
 #ifdef EXTRALICENSE
@@ -607,7 +607,7 @@ void describeMouseover() {
     out = XLAT1(linf[c->land].name);
     help = generateHelpForLand(c->land);
     
-    if(c->land == laIce || c->land == laCocytus) 
+    if(isIcyLand(c)) 
       out += " (" + fts(heat::celsius(c)) + " °C)";
     if(c->land == laDryForest && c->landparam) 
       out += " (" + its(c->landparam)+"/10)";
@@ -648,7 +648,7 @@ void describeMouseover() {
       }
       
     if(c->wall && 
-      !((c->wall == waFloorA || c->wall == waFloorB || c->wall == waFloorC || c->wall == waFloorD) && c->item)) { 
+      !((c->wall == waFloorA || c->wall == waFloorB) && c->item)) { 
       out += ", "; out += XLAT1(winf[c->wall].name); 
       
       if(c->wall == waRose) out += " (" + its(7-rosephase) + ")";
