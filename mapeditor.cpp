@@ -941,7 +941,7 @@ namespace mapeditor {
     }
   
   int drawcellShapeGroup() {
-    if(drawcell == cwt.c) return 0;
+    if(drawcell == cwt.c && drawplayer) return 0;
     if(drawcell->monst) return 1;
     if(drawcell->item) return 2;
     return cellShapeGroup();
@@ -1227,6 +1227,9 @@ namespace mapeditor {
   int dslayer;
   bool coloring;
   unsigned int colortouse = 0xC0C0C0FFu;
+  bool colorkey = false;
+  // fake key sent to change the color
+  static const int COLORKEY = (-10000); 
 
   transmatrix drawtrans, drawtransnew;
 
@@ -1270,6 +1273,7 @@ namespace mapeditor {
   void drawHandleKey(int sym, int uni);
 
   void showDrawEditor() {
+    if(colorkey) drawHandleKey(COLORKEY, COLORKEY), colorkey = false;
     cmode = sm::DRAW;
     gamescreen(0);
     drawGrid();
@@ -1436,8 +1440,12 @@ namespace mapeditor {
       loadShape(sg, id, shPFace, 1, 6);
       loadShape(sg, id, shFlowerHair, 1, 7); */
 
-      // loadShape(sg, id, shPBody, 1, 0);
-      // loadShape(sg, id, shPHead, 1, 1);
+      loadShape(sg, id, shPBody, 2, 0);
+      loadShape(sg, id, shTerraArmor1, 2, 1);
+      loadShape(sg, id, shTerraArmor2, 2, 2);
+      loadShape(sg, id, shTerraArmor3, 2, 3);
+      loadShape(sg, id, shPHead, 2, 4);
+      loadShape(sg, id, shPFace, 2, 5);
 
       /* loadShape(sg, id, shReptileFrontFoot, 1, 0);
       loadShape(sg, id, shReptileRearFoot, 1, 1);
@@ -1449,8 +1457,8 @@ namespace mapeditor {
 
       // loadShape(sg, id, shTrylobite, 2, 0);
       
-      for(int i=0; i<8; i++)
-        loadShape(sg, id, shWave[i][0], 1, i);
+      /* for(int i=0; i<8; i++)
+        loadShape(sg, id, shWave[i][0], 1, i); */
 
       /* loadShape(sg, id, shYeti, 2, 0);
       loadShape(sg, id, shHumanFoot, 1, 1); */
@@ -1533,7 +1541,6 @@ namespace mapeditor {
       rebuildPolys = true;
       }
 
-#define COLORKEY (-10000)    
     if(uni == COLORKEY) dsCur->color = colortouse;
     }
 
@@ -1609,8 +1616,10 @@ namespace mapeditor {
       pushScreen(showMapEditor);
       }
 
-    if(uni == 'p')
+    if(uni == 'p') {
       dialog::openColorDialog(colortouse);
+      colorkey = true;
+      }
 
     if(sym == SDLK_F4) {
       filecaption = XLAT("pics to save/load:");
