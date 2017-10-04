@@ -4114,8 +4114,12 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       }
     
 #if CAP_EDIT
-    if(c == mapeditor::drawcell && mapeditor::drawcellShapeGroup() == 2)
-      mapeditor::drawtrans = V;
+    if(c == mapeditor::drawcell) {
+      if(mapeditor::drawcellShapeGroup() == 2) {
+        mapeditor::drawtrans = V;
+        }
+      qfi_dc = qfi;
+      }
 #endif
 
     if(it && cellHalfvine(c)) {

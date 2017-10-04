@@ -1234,7 +1234,6 @@ namespace mapeditor {
   transmatrix drawtrans, drawtransnew;
 
   void loadShape(int sg, int id, hpcshape& sh, int d, int layer) {
-    initShape(sg, id);
     usershapelayer *dsCur = &usershapes[sg][id]->d[layer];
     dsCur->list.clear();
     dsCur->sym = d==2;
@@ -1345,6 +1344,7 @@ namespace mapeditor {
       }
     else {
       displaymm('n', 8, 8+fs*5, 2, vid.fsize, XLAT("'n' to start"), 0);
+      displaymm('u', 8, 8+fs*6, 2, vid.fsize, XLAT("'u' to load current"), 0);
       if(mousekey == 'a' || mousekey == 'd' || mousekey == 'd' ||
         mousekey == 'c') mousekey = 'n';
       }
@@ -1369,7 +1369,64 @@ namespace mapeditor {
     }
   
   bool rebuildPolys = false;
-  
+
+  void loadShapes(int sg, int id) {
+    delete usershapes[sg][id];
+    usershapes[sg][id] = NULL;
+
+    initquickqueue();
+    
+    dynamicval<bool> ws(mmspatial, false);
+    
+    if(sg == 0) {
+      multi::cpid = id, drawMonsterType(moPlayer, drawcell, Id, 0xC0C0C0, 0);
+      }
+    else if(sg == 1) {
+      drawMonsterType(eMonster(id), drawcell, Id, minf[id].color, 0);
+      }
+    else if(sg == 2) {
+      drawItemType(eItem(id), drawcell, Id, iinf[id].color, 0, false);
+      }
+    else {
+      warpfloor(drawcell, Id, 0, PPR_FLOOR, isWarped(drawcell));
+      }
+
+    sortquickqueue();
+      
+    int layer = 0;
+    
+    initShape(sg, id);
+    
+    for(int i=0; i<size(ptds); i++) { 
+      auto& ptd = ptds[i];
+      if(ptd.kind != pkPoly) continue;
+      
+      auto& p = ptd.u.poly;
+      int cnt = p.cnt;
+      
+      usershapelayer *dsCur = &usershapes[sg][id]->d[layer];
+      dsCur->list.clear();
+      dsCur->color = ptd.col;
+      dsCur->sym = false;
+      dsCur->rots = 1;
+      
+      for(auto& v: symmetriesAt)
+        if(p.tab == &ourshape[v[0]*3]) {
+          dsCur->rots = v[1];
+          dsCur->sym = v[2] == 2;
+          }
+        
+      int d = dsCur->rots * (dsCur->sym ? 2 : 1);
+      
+      for(int i=0; i < cnt/d; i++)
+        dsCur->list.push_back(p.V * hpxyz(p.tab[3*i], p.tab[3*i+1], p.tab[3*i+2]));
+      
+      layer++;      
+      if(layer == USERLAYERS) break;
+      }
+    rebuildPolys = true;
+    }
+    
   void applyToShape(int sg, int id, int uni, hyperpoint mh) {
     bool haveshape = usershapes[sg][id];
     bool xnew = false;
@@ -1377,8 +1434,9 @@ namespace mapeditor {
     if(uni == '-') uni = mousekey;
     
     if(!haveshape) {
-      if(uni == 'n' || uni == 'u')
+      if(uni == 'n')
         initShape(sg, id);
+      else if(uni == 'u') ;
       else if(uni >= '0' && uni <= '9') {
         initShape(sg, id);
         xnew = true;
@@ -1394,6 +1452,9 @@ namespace mapeditor {
       dsCur->list.push_back(mh);
       rebuildPolys = true;
       }
+
+    if(uni == 'u') 
+      loadShapes(sg, id);
 
     if(uni == 'a' && haveshape) {
       mh = spin(2*M_PI*-ew.rotid/dsCur->rots) * mh;
@@ -1431,61 +1492,6 @@ namespace mapeditor {
       rebuildPolys = true;
       }
     
-    if(uni == 'T') {
-      /* loadShape(sg, id, shFemaleBody, 1, 1);
-      loadShape(sg, id, shPKnife, 1, 2);
-      loadShape(sg, id, shFemaleDress, 1, 3);
-      loadShape(sg, id, shPrincessDress, 1, 4);
-      loadShape(sg, id, shBeautyHair, 1, 5);
-      loadShape(sg, id, shPFace, 1, 6);
-      loadShape(sg, id, shFlowerHair, 1, 7); */
-
-      loadShape(sg, id, shPBody, 2, 0);
-      loadShape(sg, id, shTerraArmor1, 2, 1);
-      loadShape(sg, id, shTerraArmor2, 2, 2);
-      loadShape(sg, id, shTerraArmor3, 2, 3);
-      loadShape(sg, id, shPHead, 2, 4);
-      loadShape(sg, id, shPFace, 2, 5);
-
-      /* loadShape(sg, id, shReptileFrontFoot, 1, 0);
-      loadShape(sg, id, shReptileRearFoot, 1, 1);
-      loadShape(sg, id, shReptileFrontLeg, 1, 2);
-      loadShape(sg, id, shReptileRearLeg, 1, 3);
-      loadShape(sg, id, shReptileBody, 2, 4);
-      loadShape(sg, id, shReptileHead, 2, 5);
-      loadShape(sg, id, shReptileTail, 2, 6); */
-
-      // loadShape(sg, id, shTrylobite, 2, 0);
-      
-      /* for(int i=0; i<8; i++)
-        loadShape(sg, id, shWave[i][0], 1, i); */
-
-      /* loadShape(sg, id, shYeti, 2, 0);
-      loadShape(sg, id, shHumanFoot, 1, 1); */
-
-      /* loadShape(sg, id, shYeti, 1, 2);
-      loadShape(sg, id, shRatHead, 1, 3);
-      loadShape(sg, id, shRatTail, 1, 1);
-      loadShape(sg, id, shWolf1, 1, 4);
-      loadShape(sg, id, shWolf2, 1, 5);
-      loadShape(sg, id, shRatCape1, 1, 7);
-      loadShape(sg, id, shRatCape2, 1, 6); */
-
-//    loadShape(sg, id, shTortoise[0][0], 1, 0);
-/*      loadShape(sg, id, shTentacleX, 1, 0);
-      loadShape(sg, id, shTentacle, 1, 1);
-      loadShape(sg, id, shJoint, 1, 2); */
-      
-      /* loadShape(3, 0, shTurtleFloor[0], 12, 0);
-      loadShape(3, 1, shTurtleFloor[1], 14, 0); */
-
-      // loadShape(sg, id, shDragonSegment, 2, 0);
-      // loadShape(sg, id, shEyes, 2, 2);
-      
-      // loadShape(sg, id, shFamiliarHead, 2, 0);
-      rebuildPolys = true;
-      }
-
     if(uni == 'K') {
       if(vid.cs.charid >= 4) {
         loadShape(sg, id, shCatBody, 2, 0);

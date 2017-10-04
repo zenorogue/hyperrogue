@@ -524,6 +524,15 @@ void initquickqueue() {
   poly_outline = OUTLINE_NONE;
   }
 
+void sortquickqueue() {
+  for(int i=1; i<size(ptds);)
+    if(i && ptds[i].prio < ptds[i-1].prio) {
+      swap(ptds[i], ptds[i-1]);
+      i--;
+      }
+    else i++;
+  }
+
 void quickqueue() {
   int siz = size(ptds);
   setcameraangle(false);
@@ -698,11 +707,11 @@ hpcshape
   
   shButterflyBody, shButterflyWing, shGadflyBody, shGadflyWing, shGadflyEye,
 
-  shTerraArmor1, shTerraArmor2, shTerraArmor3, shTerraHead, shTerraFace,
+  shTerraArmor1, shTerraArmor2, shTerraArmor3, shTerraHead, shTerraFace, shJiangShi,
 
   shDodeca;
 
-#define USERLAYERS 8
+#define USERLAYERS 32
 #define USERSHAPEGROUPS 8
 #define USERSHAPEIDS 256
 
@@ -762,11 +771,14 @@ hyperpoint spfix(int rots, hyperpoint h) {
   return spin(M_PI + M_PI * 4/35 * d) * h;
   }
 
+vector<array<int, 3>> symmetriesAt;
+
 void bshape(hpcshape& sh, int p, double shzoom, int shapeid) {
   bshape(sh, p);
   int whereis = 0;
   while(polydata[whereis] != NEWSHAPE || polydata[whereis+1] != shapeid) whereis++;
   int rots = polydata[whereis+2]; int sym = polydata[whereis+3];
+  symmetriesAt.emplace_back(array<int,3> ({qhpc, rots, sym}));
   whereis += 4;
   int qty = 0;
   while(polydata[whereis + 2*qty] != NEWSHAPE) qty++;
@@ -830,6 +842,7 @@ void pushShape(const usershapelayer& ds) {
 
 void buildpolys() {
 
+  symmetriesAt.clear();
   geom3::compute();
   DEBB(DF_INIT, (debugfile,"buildpolys\n"));
 
@@ -1475,6 +1488,7 @@ void buildpolys() {
   bshape(shTerraArmor3, PPR_MONSTER_BODY, scalef, 351);
   bshape(shTerraHead, PPR_MONSTER_HEAD, scalef, 352);
   bshape(shTerraFace, PPR_MONSTER_FACE, scalef, 353);
+  bshape(shJiangShi, PPR_MONSTER_BODY, scale, 355);
 
   bshape(shPBody, PPR_MONSTER_BODY, scalef, 85);
   bshape(shYeti, PPR_MONSTER_BODY, scalef, 86);
@@ -1755,6 +1769,7 @@ struct qfloorinfo {
   };
 
 qfloorinfo qfi;
+qfloorinfo qfi_dc;
 
 int chasmg;
 
@@ -2800,6 +2815,7 @@ NEWSHAPE, 352, 1, 2, 0.060794,0.001192, 0.058426,0.023847, 0.050054,0.030986, 0.
 NEWSHAPE, 353, 1, 2, -0.006280,-0.006803, -0.001570,-0.039786, 0.007333,-0.062332, 0.014659,-0.042408, 0.019888,-0.016748, 0.027740,-0.009945, 
 
 NEWSHAPE, 354, 1, 2, 0.250609,-0.000793, 0.091262,-0.024449, 0.090008,-0.008476, -0.131783,-0.007990, -0.229492,-0.028849, -0.208244,0.002239, 
+NEWSHAPE, 355, 1, 2, -0.120944,-0.046316, -0.118320,-0.065458, -0.026635,-0.134194, 0.069939,-0.150868, 0.257603,-0.099875, 0.263931,-0.098916, 0.295208,-0.074359, 0.292228,-0.069765, 0.274479,-0.081250, 0.293481,-0.057622, 0.290757,-0.055430, 0.266210,-0.078038, 0.289156,-0.044495, 0.286442,-0.042311, 0.263022,-0.071079, 0.275695,-0.039346, 0.256850,-0.068686, 0.254313,-0.048283, 0.242683,-0.074603, 0.079643,-0.108059, 0.017947,-0.089316, 0.039133,-0.032229, 
 
 NEWSHAPE
 };

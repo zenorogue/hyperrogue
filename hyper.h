@@ -1549,3 +1549,4 @@ void buildEquidistant(cell *c);
 void produceGhost(cell *c, eMonster victim, eMonster who);
 void sideAttack(cell *mf, int dir, eMonster who, int bonus, eItem orb);
 void sideAttack(cell *mf, int dir, eMonster who, int bonuskill);
+void warpfloor(cell *c, const transmatrix& V, int col, int prio, bool warp);
