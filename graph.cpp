@@ -649,15 +649,18 @@ bool drawItemType(eItem it, cell *c, const transmatrix& V, int icol, int ticks, 
   return false;
   }
 
-void drawTerraWarrior(const transmatrix& V, int t, double footphase) {
-  int col = 0xC0C0C0;
-  int col2 = t > 6 ? 0x4040C0 : 0x6060A0;
+void drawTerraWarrior(const transmatrix& V, int t, int hp, double footphase) {
   ShadowV(V, shPBody);
-  otherbodyparts(V, darkena(t > 4 ? col2 : col, 0, 0xF0), moDesertman, footphase);
-  queuepoly(VBODY, shPBody, darkena(t > 0 ? col2 : col, 0, 0xF0));
-  queuepoly(VBODY, shPrinceDress, darkena(t > 1 ? col2 : col, 0, 0xF0));
-  if(!peace::on) queuepoly(VBODY * Mirror, shPSword, darkena(t > 2 ? col2 : col, 0, 0xF0));
-  queuepoly(VHEAD, shTurban1, darkena(t > 3 ? col2 : col, 0, 0xF0));
+  int col = linf[laTerracotta].color;
+  int bcol = darkena(false ? 0xC0B23E : col, 0, 0xFF);
+  otherbodyparts(V, bcol, moDesertman, footphase);
+  queuepoly(VBODY, shPBody, bcol);
+  if(!peace::on) queuepoly(VBODY * Mirror, shPSword, darkena(0xC0C0C0, 0, 0xFF));
+  queuepoly(VBODY, shTerraArmor1, darkena(t > 0 ? 0x4040FF : col, 0, 0xFF));
+  if(hp >= 4) queuepoly(VBODY, shTerraArmor2, darkena(t > 1 ? 0xC00000 : col, 0, 0xFF));
+  if(hp >= 2) queuepoly(VBODY, shTerraArmor3, darkena(t > 2 ? 0x612600 : col, 0, 0xFF));
+  queuepoly(VHEAD, shTerraHead, darkena(t > 4 ? 0x202020 : t > 3 ? 0x504040 : col, 0, 0xFF));
+  queuepoly(VHEAD, shPFace, bcol);
   }
 
 bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, int col, double footphase) {
@@ -1088,7 +1091,7 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, int col, dou
     queuepoly(VBODY, shPBody, c);
     }
   else if(m == moTerraWarrior)
-    drawTerraWarrior(V, 7, footphase);
+    drawTerraWarrior(V, 7, (where ? where->hitpoints : 7), footphase);
   else if(m == moDesertman) {
     otherbodyparts(V, darkena(col, 0, 0xC0), m, footphase);
     ShadowV(V, shPBody);
@@ -1207,14 +1210,15 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, int col, dou
     queuepoly(VHEAD, shPFace, darkena(col, 1, 0x90));
     queuepoly(VHEAD, shArmor, darkena(col, 0, 0xC0));
     }
-  else if(m == moTerraWarrior || m == moMercuryGuy || m == moLemur) {
+  else if(m == moMercuryGuy || m == moLemur) {
     ShadowV(V, shPBody);
-    otherbodyparts(V, darkena(col, 0, 0xF0), m, footphase);
-    queuepoly(VBODY, shPBody, darkena(col, 0, 0xF0));
+    otherbodyparts(V, darkena(col, 0, 0xC0), m, footphase);
+    queuepoly(VBODY, shPBody, darkena(col, 0, 0x80));
     if(!peace::on) queuepoly(VBODY * Mirror, shPSword, darkena(col, 0, 0xF0));
-    queuepoly(VHEAD, shPHead, darkena(col, 1, 0xF0));
-    queuepoly(VHEAD, shPFace, darkena(col, 1, 0xF0));
-    queuepoly(VHEAD, shArmor, darkena(col, 0, 0xF0));
+    queuepoly(VHEAD, shTerraHead, darkena(col, 0, 0x80));
+    queuepoly(VHEAD, shPFace, darkena(col, 0, 0x80));
+    queuepoly(VBODY, shTerraArmor1, darkena(col, 1, 0x40));
+    queuepoly(VBODY, shTerraArmor2, darkena(col, 1, 0x40));
     }
   else if(m == moGhost || m == moSeep || m == moFriendlyGhost) {
     if(m == moFriendlyGhost) col = fghostcolor(ticks, where);
@@ -2345,7 +2349,7 @@ void setcolors(cell *c, int& wcol, int &fcol) {
     case laBurial: case laTrollheim: case laBarrier: case laOceanWall:
     case laCrossroads2: case laCrossroads3: case laCrossroads4: case laCrossroads5:
     case laRose: case laPower: case laWildWest: case laHalloween: case laRedRock:
-    case laDragon: case laStorms:
+    case laDragon: case laStorms: case laTerracotta:
       fcol = linf[c->land].color; break;
 
     case laDesert: fcol = 0xEDC9AF; break;
@@ -2465,10 +2469,6 @@ void setcolors(cell *c, int& wcol, int &fcol) {
       fcol = 0x40E0D0;
       fcol /= 2;
       if(pseudohept(c)) fcol = fcol * 3/4;
-      break;
-  
-    case laTerracotta:
-      fcol = 0x909090;
       break;
   
     case laIvoryTower:
@@ -3249,6 +3249,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       c->land == laTrollheim ? 2 :
       c->land == laReptile ? 0 :
       c->land == laDogPlains ? 1 :
+      c->land == laTerracotta ? 1 :
       2;
     
     if(c->land == laAlchemy2) {
@@ -3763,7 +3764,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         }
       
       if(c->wall == waTerraWarrior) 
-        drawTerraWarrior(V, c->landparam & 7, 0);
+        drawTerraWarrior(V, randterra ? (c->landparam & 7) : (5 - (c->landparam & 7)), 7, 0);
 
       else if(c->wall == waBoat || c->wall == waStrandedBoat) {
         double footphase;
@@ -3961,7 +3962,9 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       
       else if(c->wall == waArrowTrap) {
         int trapcol[4] = {0x904040, 0xA02020, 0xD00000, 0x303030};
-        queuepoly(V, shDisk, darkena(trapcol[c->wparam&3], 0, 0xFF));
+        if(c->wparam >= 2)
+          queuepoly(V, shDisk, darkena(trapcol[c->wparam&3], 0, 0xFF));
+        if(isCentralTrap(c)) arrowtraps.push_back(c);
         }
       
       else if(xch == '%') {
@@ -4644,6 +4647,8 @@ void drawthemap() {
   playerfound = false;
   // playerfoundL = false;
   // playerfoundR = false;
+  
+  arrowtraps.clear();
 
   sphereflip = Id;
   profile_start(1);
@@ -4660,6 +4665,7 @@ void drawthemap() {
       hsOrigin, ypush(vid.yshift) * sphereflip * View);
     }
   drawBlizzards();
+  drawArrowTraps();
   ivoryz = false;
   
   linepatterns::drawAll();

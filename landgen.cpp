@@ -4062,7 +4062,7 @@ void setdist(cell *c, int d, cell *from) {
           }
         if(pseudohept(c) && hrand(100) < 40 && c->wall == waNone) {
           c->wall = waTerraWarrior;
-          c->landparam = 0;
+          c->landparam = randterra ? 0 : 3 + hrand(3);
           }
         }
 
@@ -4732,7 +4732,7 @@ void setdist(cell *c, int d, cell *from) {
     if(d == 7 && c->land == laCaves && c->wall == waCavewall && hrand(5000) < items[itGold] + hard && !safety)
       c->monst = moSeep;
 
-    if(d == 7 && c->land == laDogPlains) {
+    if(d == 7 && c->land == laDogPlains && false) {
       if(hrand(1000) < 10) {
         if(openplains(c)) {
           c->item = itDogPlains;
@@ -5086,7 +5086,7 @@ void setdist(cell *c, int d, cell *from) {
         forCellEx(c2, c) if(c2->wall == waTerraWarrior) nearwarrior = true;
         if(nearwarrior && hrand(5000) < PT(100 + 2 * kills[moMercuryGuy], 200) && notDippingFor(itTerra))
           c->item = itTerra;
-        if(hrand(8000) < 2 * (items[itTerra] + hard))
+        if(hrand(20000) < 2 * (items[itTerra] + hard))
           c->monst = moMercuryGuy;
         }
 

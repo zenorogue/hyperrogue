@@ -101,7 +101,8 @@ bool isNonliving(eMonster m) {
     m == moMimic || m == moGolem || m == moGolemMoved ||
     m == moZombie || m == moGhost || m == moShadow || m == moSkeleton ||
     m == moEvilGolem || m == moIllusion || m == moEarthElemental || 
-    m == moWaterElemental || m == moDraugr;
+    m == moWaterElemental || m == moDraugr || m == moTerraWarrior ||
+    m == moIceGolem || m == moVoidBeast;
   }
 
 bool isMetalBeast(eMonster m) {
@@ -111,11 +112,11 @@ bool isMetalBeast(eMonster m) {
 bool isStunnable(eMonster m) {
   return m == moPalace || m == moFatGuard || m == moSkeleton || isPrincess(m) ||
     isMetalBeast(m) || m == moTortoise || isDragon(m) ||
-    m == moReptile;
+    m == moReptile || m == moTerraWarrior;
   }
 
 bool hasHitpoints(eMonster m) {
-  return m == moPalace || m == moFatGuard || m == moVizier || isPrincess(m);
+  return m == moPalace || m == moFatGuard || m == moVizier || isPrincess(m) || m == moTerraWarrior;
   }
 
 bool isMountable(eMonster m) {

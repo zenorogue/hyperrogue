@@ -1107,6 +1107,10 @@ int monstersnear(stalemate1& sm) {
 
   elec::builder b;
   if(elec::affected(c)) { which = moLightningBolt; res++; }
+  
+  if(c->wall == waArrowTrap && c->wparam == 2) {
+    which = moArrowTrap; res++;
+    }
 
   if(sm.who == moPlayer || items[itOrbEmpathy]) {
     fast = (items[itOrbSpeed] && (items[itOrbSpeed] & 1));
@@ -1662,15 +1666,10 @@ bool mayExplodeMine(cell *c, eMonster who) {
   }
 
 void stunMonster(cell *c2) {
-  if(c2->monst != moSkeleton && !isMetalBeast(c2->monst) && c2->monst != moTortoise &&
-    c2->monst != moReptile) {
-    c2->hitpoints--;
-    if(c2->monst == moPrincess)
-      playSound(c2, princessgender() ? "hit-princess" : "hit-prince");
-    } 
   int newtime = (
     c2->monst == moFatGuard ? 2 : 
     c2->monst == moSkeleton && c2->land != laPalace && c2->land != laHalloween ? 7 :
+    c2->monst == moTerraWarrior ? min(c2->stuntime + 8 - c2->hitpoints, 7) :
     isMetalBeast(c2->monst) ? 7 :
     c2->monst == moTortoise ? 7 :
     c2->monst == moReptile ? 7 :
@@ -1684,6 +1683,12 @@ void stunMonster(cell *c2) {
     c2->monst == moHedge ? 1 :
     c2->monst == moFlailer ? 1 :
     3);
+  if(c2->monst != moSkeleton && !isMetalBeast(c2->monst) && c2->monst != moTortoise &&
+    c2->monst != moReptile) {
+    c2->hitpoints--;
+    if(c2->monst == moPrincess)
+      playSound(c2, princessgender() ? "hit-princess" : "hit-prince");
+    } 
   if(c2->stuntime < newtime) c2->stuntime = newtime;
   if(isBull(c2->monst)) c2->mondir = NODIR;
   checkStunKill(c2);
@@ -2919,6 +2924,29 @@ void destroyWeakBranch(cell *cf, cell *ct, eMonster who) {
     playSound(cf, "trapdoor");
     drawParticles(cf, winf[waWeakBranch].color, 4);
     }
+  }
+
+bool isCentralTrap(cell *c) {
+  if(c->wall != waArrowTrap) return false;
+  int i = 0;
+  forCellEx(c2, c) if(c2->wall == waArrowTrap) i++;
+  return i == 2;
+  }
+
+array<cell*, 2> traplimits(cell *c) {
+  array<cell*, 2> res;
+  int q = 0;
+  for(int d=0; d<c->type; d++) {
+    cellwalker cw(c, d);
+    cwstep(cw);
+    if(cw.c->wall != waArrowTrap) continue;
+    cwspin(cw, cw.c->type/2);
+    if((cw.c->type&1) && cwpeek(cw, 0)->wall != waStone) cwspin(cw, 1);
+    cwstep(cw);
+    res[q++] = cw.c;
+    }
+  while(q<2) res[q++] = NULL;
+  return res;
   }
 
 void activateArrowTrap(cell *c) {
@@ -4674,7 +4702,8 @@ int movevalue(eMonster m, cell *c, cell *c2, flagtype flags) {
     (m == moPrincessArmed && isPrincess(c2->monst)) ? 14000 : // jealousy!
     isActiveEnemy(c2,m) ? 12000 :
     (c2->monst == moSkeleton || c2->monst == moMetalBeast || 
-     c2->monst == moReptile || c2->monst == moTortoise) ? -400 :
+     c2->monst == moReptile || c2->monst == moTortoise ||
+     c2->monst == moTerraWarrior) ? -400 :
     isIvy(c2) ? 8000 :
     isInactiveEnemy(c2,m) ? 1000 :
     -500;
@@ -6465,16 +6494,29 @@ namespace orbbull {
     }
   }
 
+// predictable or not
+static constexpr bool randterra = false;
+
 void terracotta() {
   for(int i=0; i<numplayers(); i++)
     forCellEx(c2, playerpos(i))
       if(c2->wall == waTerraWarrior) {
-        c2->landparam++;
-        if((c2->landparam == 3 && hrand(3) == 0) ||
-          (c2->landparam == 4 && hrand(2) == 0) || 
-          c2->landparam == 5)
-           c2->monst = moTerraWarrior,
-           c2->wall = waNone;
+        bool live = false;
+        if(randterra) {
+          c2->landparam++;
+          if((c2->landparam == 3 && hrand(3) == 0) ||
+            (c2->landparam == 4 && hrand(2) == 0) || 
+            c2->landparam == 5)
+              live = true;
+          }
+        else {
+          c2->landparam--;
+          live = !c2->landparam;
+          }
+        if(live)
+          c2->monst = moTerraWarrior,
+          c2->hitpoints = 7,
+          c2->wall = waNone;
         }
   }
 
@@ -6626,7 +6668,7 @@ void killFriendlyIvy() {
   }
 
 bool monsterPushable(cell *c2) {
-  return (c2->monst != moFatGuard && !(isMetalBeast(c2->monst) && c2->stuntime < 2) && c2->monst != moTortoise);
+  return (c2->monst != moFatGuard && !(isMetalBeast(c2->monst) && c2->stuntime < 2) && c2->monst != moTortoise && c2->monst != moTerraWarrior);
   }  
 
 bool movepcto(int d, int subdir, bool checkonly) {

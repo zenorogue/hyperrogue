@@ -179,72 +179,31 @@ void drawBlizzards() {
     bc->c->aitmp = bc->tmp;
   }
        
-#if 0
-    {
-      int v0 = windmap::at(c);
-      const bool method2 = true;
-      
-      auto a = [] (cell *c) {
-        ld dx=0, dy=0;
-        int v0 = windmap::at(c);
-        forCellIdEx(c2, i, c) {
-          int v1 = windmap::at(c->mov[i]);
-          if(!c2) continue;
-          int xv1 = (v1 - v0) & 255;
-          if(xv1 >= 128) xv1 -= 256;
-          int hdir = displaydir(c, i);
-          dx += sin(hdir * M_PI / 42) * xv1;
-          dy += cos(hdir * M_PI / 42) * xv1;
-          }
-        return atan2(dx, dy);
-        };
-      
-      ld alpha = a(c);
-      
-      double xx = M_PI / (1 + sqrt(5));
-      
-      forCellIdEx(c2, i, c) {
-        int v1 = windmap::at(c2);
-        int xv1 = (v1 - v0) & 255;
-        if(xv1 >= windmap::NOWINDBELOW && xv1 < windmap::NOWINDFROM) {
-        
-          // method2 ? (ticks/16) - v0 : ticks/4;
-          
-          double xcph = (ticks/16.) - v0;
-          xcph -= floor(xcph / 256) * 256;
-          
-          ld beta = a(c2);
-          for(int u=0; u<(method2 ? 16 : 1); u++) {
-            xcph += 16; if(xcph >= 256) xcph -= 256;
-            if(method2 ? xcph < xv1 : true) {
-              int hdir = displaydir(c, i);
-              int aircol = 0xFFFFFF00; // 0xD0D0FFFF;
-              aircol += int(255. * windmap::NOWINDBELOW / xv1); //  (1-exp(-xv1 / 50.)));
-              double at = method2 ? xcph*1./xv1 : xcph / 256.;
-  
-              double ldist = 
-                purehepta ? tessf :
-                c->type == 6 && c2->type == 6 ? hexhexdist :
-                crossf;
-              
-/*              transmatrix alphamatrix = (*Vdp) * spin(M_PI/2) * xpush(sin(u*xx) * ldist/4) * spin(-M_PI/2) * spin(alpha) * xpush(ldist*at);
-              transmatrix betamatrix = (*Vdp) * spin(hdir*M_PI/42) * xpush(ldist) * 
-                spin(-displaydir(c2, c->spn(i))*M_PI/S42) * 
-                spin(M_PI/2) * xpush(-sin(u*xx)*ldist/4) * spin(-M_PI/2) * 
-                spin(beta) * xpush(ldist * (1-at)); 
-              
-              hyperpoint t = inverse(alphamatrix) * tC0(betamatrix);
-              transmatrix tpartial = alphamatrix * rspintox(t) * xpush(hdist0(t) * at * at * (3-2*at)); */
-                
-              poly_outline = OUTLINE_TRANS;
-              transmatrix V0 = spin((hdir) * M_PI / S42);
-              // queuepoly(tpartial, shSnowball, aircol);
-              queuepoly((*Vdp) * V0 * xpush(at*ldist), shSnowball, aircol);
-              poly_outline = OUTLINE_DEFAULT;
-              }          
-            }
+vector<cell*> arrowtraps;
 
-          }         
+void drawArrowTraps() {
+  for(cell *c: arrowtraps) {
+    auto r = traplimits(c);
+    
+    try {
+      transmatrix& t0 = gmatrix.at(r[0]);
+      transmatrix& t1 = gmatrix.at(r[1]);
+
+      queueline(tC0(t0), tC0(t1), 0xFF0000FF, 4, PPR_ITEM);
+      if((c->wparam & 7) == 3) {
+//        queueline(t0 * randomPointIn(r[0]->type), t1 * randomPointIn(r[1]->type), 0xFFFFFFFF, 4, PPR_ITEM);
+        int tt = ticks % 401;
+        
+        for(int u=0; u<2; u++) {
+          transmatrix& tu = u ? t0 : t1;
+          transmatrix& tv = u ? t1 : t0;
+          hyperpoint trel = inverse(tu) * tC0(tv);
+          transmatrix tpartial = tu * rspintox(trel) * xpush(hdist0(trel) * tt / 401.0);
+          queuepoly(tpartial * ypush(.05), shTrapArrow, 0xFFFFFFFF);
+          }
         }
       }
-#endif
+    catch(out_of_range) {}
+    }
+  }
+  

@@ -697,7 +697,7 @@ monstertype minf[motypes] = {
     "more reflections will come out of the mirror. Use Mimics to destroy them."
     },
   { 'W', 0x202020, "Hunting Dog", NODESC},
-  { 'T', 0xA0A0A0, "Terracotta Warrior", NODESC},
+  { 'T', 0xE2725B, "Terracotta Warrior", NODESC},
   { 'H', 0xA0A0A0, "Mercury Warrior", NODESC},
   { 'B', 0xA00000, "Void Beast", NODESC},
   { 'L', 0xA00000, "Lemur", NODESC},
@@ -1651,7 +1651,7 @@ const landtype linf[landtypes] = {
   { 0xA06000, "Alchemy II", NODESCYET},
   { 0x8080FF, "Blizzard", NODESCYET},
   { 0x207068, "Hunting Ground", NODESCYET},
-  { 0x888888, "Terracotta Army", NODESCYET}
+  { 0xE2725B, "Terracotta Army", NODESCYET}
   };
 
 enum eLand { laNone, laBarrier, laCrossroads, laDesert, laIce, laCaves, laJungle, laAlchemist, laMirror, laGraveyard,
