@@ -262,7 +262,7 @@ transmatrix mirrorif(const transmatrix& V, bool b) {
 
 // -1 if away, 0 if not away
 int away(const transmatrix& V2) {
-  return intval(C0, V2 * xpush0(1)) > intval(C0, tC0(V2));
+  return (intval(C0, V2 * xpush0(.1)) > intval(C0, tC0(V2))) ? -1 : 0;
   }
 
 /* double zgrad(double f1, double f2, int nom, int den) {
