@@ -375,7 +375,7 @@ bool normalMover(eMonster m) {
     m == moRoseBeauty || m == moWolf ||
     m == moResearcher || m == moRagingBull || 
     m == moNarciss || m == moMirrorSpirit || 
-    m == moHunterDog || m == moTerraWarrior || m == moMercuryGuy || m == moLemur || m == moHunterGuard ||
+    m == moHunterDog || m == moTerraWarrior || m == moJiangshi || m == moLemur || m == moHunterGuard ||
     m == moIceGolem || slowMover(m);
   }
 

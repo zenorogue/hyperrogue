@@ -505,6 +505,7 @@ bool drawItemType(eItem it, cell *c, const transmatrix& V, int icol, int ticks, 
     it == itDogPlains ? &shTriangle :
     it == itDodeca ? &shDodeca :
     xch == '*' ? &shGem[ct6] : 
+    xch == '(' ? &shKnife : 
     it == itShard ? &shMFloor[0] :
     it == itTreat ? &shTreat :
     it == itSlime ? &shEgg :
@@ -1210,15 +1211,18 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, int col, dou
     queuepoly(VHEAD, shPFace, darkena(col, 1, 0x90));
     queuepoly(VHEAD, shArmor, darkena(col, 0, 0xC0));
     }
-  else if(m == moMercuryGuy || m == moLemur) {
-    ShadowV(V, shPBody);
-    otherbodyparts(V, darkena(col, 0, 0xC0), m, footphase);
-    queuepoly(VBODY, shPBody, darkena(col, 0, 0x80));
-    if(!peace::on) queuepoly(VBODY * Mirror, shPSword, darkena(col, 0, 0xF0));
-    queuepoly(VHEAD, shTerraHead, darkena(col, 0, 0x80));
-    queuepoly(VHEAD, shPFace, darkena(col, 0, 0x80));
-    queuepoly(VBODY, shTerraArmor1, darkena(col, 1, 0x40));
-    queuepoly(VBODY, shTerraArmor2, darkena(col, 1, 0x40));
+  else if(m == moJiangshi || m == moLemur) {
+    ShadowV(V, shJiangShi);
+    auto z2 = geom3::lev_to_factor(abs(sin(footphase * M_PI * 2)) * geom3::human_height);
+    auto V0 = V;
+    auto V = mmscale(V0, z2);
+    otherbodyparts(V, darkena(col, 0, 0xFF), m, m == moJiangshi ? 0 : footphase);
+    queuepoly(VBODY, shJiangShi, darkena(col, 0, 0xFF));
+    queuepoly(VBODY, shJiangShiDress, darkena(0x202020, 0, 0xFF));
+    queuepoly(VHEAD, shTerraHead, darkena(0x101010, 0, 0xFF));
+    queuepoly(VHEAD, shPFace, darkena(col, 0, 0xFF));
+    queuepoly(VHEAD, shJiangShiCap1, darkena(0x800000, 0, 0xFF));
+    queuepoly(VHEAD, shJiangShiCap2, darkena(0x400000, 0, 0xFF));
     }
   else if(m == moGhost || m == moSeep || m == moFriendlyGhost) {
     if(m == moFriendlyGhost) col = fghostcolor(ticks, where);
@@ -2832,8 +2836,9 @@ void placeSidewall(cell *c, int i, int sidepar, const transmatrix& V, bool warp,
   
   int aw = away(V2); prio += aw;
   if(!detaillevel && aw < 0) return;
-
+  // queuepoly(V2 * xpush(.1), shSnowball, aw ? 0xFFFFFFFF : 0xFF0000FF);
   // prio += c->cpdist - c->mov[i]->cpdist;  
+
   queuepolyat(V2, 
     (mirr?shMFloorSide:warp?shTriheptaSide:shFloorSide)[sidepar][c->type==6?0:1], col, prio);
   }
@@ -3948,9 +3953,11 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
                 placeSidewallX(c, i, SIDE_WTS3, V, warp, false, darkena(wcol2, fd, alpha));
                 }
               }
-            else forCellIdEx(c2, i, c) {
-              if(!highwall(c2) || conegraph(c2)) 
-                { placeSidewallX(c, i, SIDE_WALL, V, warp, false, darkena(wcol2, fd, alpha)); }
+            else {
+              forCellIdEx(c2, i, c) 
+                if(!highwall(c2) || conegraph(c2)) {
+                placeSidewallX(c, i, SIDE_WALL, V, warp, false, darkena(wcol2, fd, alpha));
+                }
               }
             }
           }

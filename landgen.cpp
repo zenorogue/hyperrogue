@@ -224,7 +224,7 @@ int isNative(eLand l, eMonster m) {
       return m == moLemur ? 2 : 0;
     
     case laTerracotta:
-      return m == moMercuryGuy ? 2 : m == moTerraWarrior ? 1 : 0;
+      return m == moJiangshi ? 2 : m == moTerraWarrior ? 1 : 0;
     
     case laBlizzard:
       return (m == moVoidBeast || m == moIceGolem) ? 2 : 0;
@@ -5084,10 +5084,10 @@ void setdist(cell *c, int d, cell *from) {
       if(c->land == laTerracotta) {
         bool nearwarrior = false;
         forCellEx(c2, c) if(c2->wall == waTerraWarrior) nearwarrior = true;
-        if(nearwarrior && hrand(5000) < PT(100 + 2 * kills[moMercuryGuy], 200) && notDippingFor(itTerra))
+        if(nearwarrior && hrand(5000) < PT(100 + 2 * kills[moJiangshi], 200) && notDippingFor(itTerra))
           c->item = itTerra;
         if(hrand(20000) < 2 * (items[itTerra] + hard))
-          c->monst = moMercuryGuy;
+          c->monst = moJiangshi;
         }
 
       if(c->land == laTrollheim && !safety) {

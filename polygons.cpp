@@ -707,7 +707,8 @@ hpcshape
   
   shButterflyBody, shButterflyWing, shGadflyBody, shGadflyWing, shGadflyEye,
 
-  shTerraArmor1, shTerraArmor2, shTerraArmor3, shTerraHead, shTerraFace, shJiangShi,
+  shTerraArmor1, shTerraArmor2, shTerraArmor3, shTerraHead, shTerraFace, 
+  shJiangShi, shJiangShiDress, shJiangShiCap1, shJiangShiCap2,
 
   shDodeca;
 
@@ -1488,7 +1489,10 @@ void buildpolys() {
   bshape(shTerraArmor3, PPR_MONSTER_BODY, scalef, 351);
   bshape(shTerraHead, PPR_MONSTER_HEAD, scalef, 352);
   bshape(shTerraFace, PPR_MONSTER_FACE, scalef, 353);
-  bshape(shJiangShi, PPR_MONSTER_BODY, scale, 355);
+  bshape(shJiangShi, PPR_MONSTER_BODY, scalef, 355);
+  bshape(shJiangShiDress, PPR_MONSTER_BODY, scalef, 356);
+  bshape(shJiangShiCap1, PPR_MONSTER_HAT0, scalef, 357);
+  bshape(shJiangShiCap2, PPR_MONSTER_HAT1, scalef, 358);
 
   bshape(shPBody, PPR_MONSTER_BODY, scalef, 85);
   bshape(shYeti, PPR_MONSTER_BODY, scalef, 86);
@@ -2816,6 +2820,9 @@ NEWSHAPE, 353, 1, 2, -0.006280,-0.006803, -0.001570,-0.039786, 0.007333,-0.06233
 
 NEWSHAPE, 354, 1, 2, 0.250609,-0.000793, 0.091262,-0.024449, 0.090008,-0.008476, -0.131783,-0.007990, -0.229492,-0.028849, -0.208244,0.002239, 
 NEWSHAPE, 355, 1, 2, -0.120944,-0.046316, -0.118320,-0.065458, -0.026635,-0.134194, 0.069939,-0.150868, 0.257603,-0.099875, 0.263931,-0.098916, 0.295208,-0.074359, 0.292228,-0.069765, 0.274479,-0.081250, 0.293481,-0.057622, 0.290757,-0.055430, 0.266210,-0.078038, 0.289156,-0.044495, 0.286442,-0.042311, 0.263022,-0.071079, 0.275695,-0.039346, 0.256850,-0.068686, 0.254313,-0.048283, 0.242683,-0.074603, 0.079643,-0.108059, 0.017947,-0.089316, 0.039133,-0.032229, 
+NEWSHAPE, 356, 1, 2, 0.038226,0.003813, 0.036965,0.050265, 0.023804,0.086855, 0.079552,0.105995, 0.217008,0.045866, 0.243467,0.129202, 0.068641,0.159263, -0.027665,0.143726, -0.122085,0.061736,
+NEWSHAPE, 357, 1, 2, -0.056345,0.025535, -0.042089,0.052635, 0.008058,0.053871, 0.047795,0.029085, 
+NEWSHAPE, 358, 1, 2, -0.045357,0.025586, -0.031505,0.043770, 0.005524,0.044623, 0.033574,0.024080, 
 
 NEWSHAPE
 };
