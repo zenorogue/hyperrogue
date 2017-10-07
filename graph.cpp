@@ -2353,7 +2353,7 @@ void setcolors(cell *c, int& wcol, int &fcol) {
     case laBurial: case laTrollheim: case laBarrier: case laOceanWall:
     case laCrossroads2: case laCrossroads3: case laCrossroads4: case laCrossroads5:
     case laRose: case laPower: case laWildWest: case laHalloween: case laRedRock:
-    case laDragon: case laStorms: case laTerracotta:
+    case laDragon: case laStorms: case laTerracotta: case laMercuryRiver:
       fcol = linf[c->land].color; break;
 
     case laDesert: fcol = 0xEDC9AF; break;
@@ -2616,7 +2616,7 @@ void setcolors(cell *c, int& wcol, int &fcol) {
      fcol = wcol = winf[c->wall].color; */
 
   // floors become fcol
-  if(c->wall == waSulphur || c->wall == waSulphurC || c->wall == waPlatform)
+  if(c->wall == waSulphur || c->wall == waSulphurC || c->wall == waPlatform || c->wall == waMercury)
     fcol = wcol;
   
   if(isAlch(c)) {
@@ -2824,8 +2824,8 @@ void placeSidewall(cell *c, int i, int sidepar, const transmatrix& V, bool warp,
   if(shmup::on || purehepta) warp = false;
   if(warp && !ishept(c) && (!c->mov[i] || !ishept(c->mov[i]))) return;
   int prio;
-  if(mirr) prio = PPR_GLASS - 2;
-  else if(sidepar == SIDE_WALL) prio = PPR_WALL3 - 2;
+  /* if(mirr) prio = PPR_GLASS - 2;
+  else */ if(sidepar == SIDE_WALL) prio = PPR_WALL3 - 2;
   else if(sidepar == SIDE_WTS3) prio = PPR_WALL3 - 2;
   else if(sidepar == SIDE_LAKE) prio = PPR_LAKEWALL;
   else if(sidepar == SIDE_LTOB) prio = PPR_INLAKEWALL;
@@ -2834,8 +2834,10 @@ void placeSidewall(cell *c, int i, int sidepar, const transmatrix& V, bool warp,
   
   transmatrix V2 = V * ddspin(c, i);
   
-  int aw = away(V2); prio += aw;
+  /* int aw = away(V2); prio += aw;
   if(!detaillevel && aw < 0) return;
+  */
+  
   // queuepoly(V2 * xpush(.1), shSnowball, aw ? 0xFFFFFFFF : 0xFF0000FF);
   // prio += c->cpdist - c->mov[i]->cpdist;  
 
@@ -3255,6 +3257,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       c->land == laReptile ? 0 :
       c->land == laDogPlains ? 1 :
       c->land == laTerracotta ? 1 :
+      c->land == laMercuryRiver ? 0 :
       2;
     
     if(c->land == laAlchemy2) {
@@ -3870,7 +3873,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         int col = winf[waGlass].color;
         int dcol = darkena(col, 0, 0x80);
         transmatrix Vdepth = mscale((*Vdp), geom3::WALL);
-        queuepolyat(Vdepth, shMFloor[ct6], dcol, PPR_GLASS);
+        queuepolyat(Vdepth, shMFloor[ct6], dcol, PPR_WALL); // GLASS
         if(validsidepar[SIDE_WALL]) forCellIdEx(c2, i, c) 
           placeSidewall(c, i, SIDE_WALL, (*Vdp), false, true, dcol);
         }
@@ -3982,7 +3985,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           int col = winf[c->wall].color;
           int dcol = darkena(col, 0, 0xC0);
           transmatrix Vdepth = mscale((*Vdp), geom3::WALL);
-          queuepolyat(Vdepth, shMFloor[ct6], dcol, PPR_GLASS);
+          queuepolyat(Vdepth, shMFloor[ct6], dcol, PPR_WALL); // GLASS
           if(validsidepar[SIDE_WALL]) forCellIdEx(c2, i, c) 
             placeSidewall(c, i, SIDE_WALL, (*Vdp), false, true, dcol);
           }
@@ -4011,7 +4014,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         queuepoly(V, shBigCarpet3, darkena(0xC09F00, 0, 0xFF));
         }
 
-      else if(xch != '.' && xch != '+' && xch != '>' && xch != ':'&& xch != '-' && xch != ';' && c->wall != waSulphur && xch != ',')
+      else if(xch != '.' && xch != '+' && xch != '>' && xch != ':'&& xch != '-' && xch != ';' && c->wall != waSulphur && c->wall != waMercury && xch != ',')
         error = true;
       }
 
@@ -4311,7 +4314,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
 #endif
     }
     
-    if(c->bardir != NODIR && c->bardir != NOBARRIERS && c->land != laHauntedWall &&
+    if(vid.grid && c->bardir != NODIR && c->bardir != NOBARRIERS && c->land != laHauntedWall &&
       c->barleft != NOWALLSEP_USED) {
       int col = darkena(0x505050, 0, 0xFF);
       queueline(tC0(V), V*tC0(heptmove[c->bardir]), col, 2);

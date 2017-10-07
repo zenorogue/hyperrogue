@@ -223,7 +223,7 @@ int isNative(eLand l, eMonster m) {
     case laAlchemy2:
       return m == moLemur ? 2 : 0;
     
-    case laTerracotta:
+    case laTerracotta: case laMercuryRiver:
       return m == moJiangshi ? 2 : m == moTerraWarrior ? 1 : 0;
     
     case laBlizzard:
@@ -321,7 +321,7 @@ eItem treasureType(eLand l) {
     case laPrairie: return itGreenGrass;
     
     case laAlchemy2: return itAlchemy2;
-    case laTerracotta: return itTerra;
+    case laTerracotta: case laMercuryRiver: return itTerra;
     case laBlizzard: return itBlizzard;
     case laDogPlains: return itDogPlains;
     
@@ -783,7 +783,7 @@ bool landUnlocked(eLand l) {
     case laDogPlains:
       return true;
     
-    case laTerracotta:
+    case laTerracotta: case laMercuryRiver:
       return gold() >= 60;
     
     case laBlizzard:
@@ -988,6 +988,10 @@ void setbarrier(cell *c) {
     c->land = laMirrorWall2;
   else if(c->barleft == laMirrored || c->barright == laMirrored)
     c->land = laMirrorWall;
+  else if(c->barleft == laTerracotta && c->barright == laTerracotta) {
+    c->land = laMercuryRiver;
+    c->wall = waMercury;
+    }
   else {
     c->wall = waBarrier;
     c->land = laBarrier;
@@ -1440,7 +1444,8 @@ void extendCR5(cell *c) {
 bool isbar4(cell *c) {
   return
     c->wall == waBarrier || c->land == laElementalWall || 
-    c->land == laMirrorWall || c->land == laMirrorWall2;
+    c->land == laMirrorWall || c->land == laMirrorWall2 ||
+    c->land == laMercuryRiver;
   }  
 
 void extendBarrier(cell *c) {
@@ -1453,7 +1458,7 @@ void extendBarrier(cell *c) {
   
   // printf("build barrier at %p", c);
   if(c->land == laBarrier || c->land == laElementalWall || c->land == laHauntedWall || c->land == laOceanWall || 
-    c->land == laMirrorWall || c->land == laMirrorWall2) { 
+    c->land == laMirrorWall || c->land == laMirrorWall2 || c->land == laMercuryRiver) { 
     // printf("-> ready\n");
     return;
     }
@@ -1718,7 +1723,8 @@ hookset<eLand(eLand)> *hooks_nextland;
 
 eLand getNewLand(eLand old) {
 
-  if(old == laMirror && !chaosmode && hrand(10) < 8) return laMirrored;
+  if(old == laMirror && !chaosmode && hrand(10) >= (tactic::on ? 0 : markOrb(itOrbLuck) ? 5 : 2)) return laMirrored;
+  if(old == laTerracotta && !chaosmode && hrand(5) >= (tactic::on ? 0 : markOrb(itOrbLuck) ? 2 : 1)) return laTerracotta;
     
   eLand l = callhandlers(laNone, hooks_nextland, old);
   if(l) return l;
@@ -3180,6 +3186,8 @@ void buildBigStuff(cell *c, cell *from) {
     c->land == laCrossroads2 ? 10000 : 
     c->land == laCrossroads5 ? 10000 : 
     c->land == laCrossroads4 ? 0 : 
+    (c->land == laMirror && !yendor::generating) ? 6000 :
+    c->land == laTerracotta ? 250 :
     (tactic::on && !tactic::trailer) ? 0 :
     c->land == laCaribbean ? 500 :
     (c->land == laWarpSea || c->land == laWarpCoast) ? 500 :
@@ -3190,7 +3198,6 @@ void buildBigStuff(cell *c, cell *from) {
     (c->land == laGraveyard && items[itBone] >= 10) ? 120 :
     c->land == laOcean ? (deepOcean ? (purehepta ? 250 : 2000) : 0) :
     c->land == laDragon ? 120 :
-    (c->land == laMirror && !yendor::generating) ? 6000 :
     50))
   {
     
@@ -4046,16 +4053,19 @@ void setdist(cell *c, int d, cell *from) {
           cwstep(cw); cc[3] = cw.c; cwrevstep(cw); cc[4] = cw.c;
           cwrevstep(cw2); cc[1] = cw2.c; cwrevstep(cw2); cc[0] = cw2.c;
           bool ok = true;
-          for(int i=1; i<4; i++) {
-            forCellEx(c2, cc[i]) if(c2->wall == waArrowTrap) ok = false;
+          for(int i=0; i<5; i++) {
             if(cc[i]->land != laNone && cc[i]->land != laTerracotta) ok = false;
             if(cc[i]->bardir != NODIR) ok = false;
-            cc[i]->bardir = NOBARRIERS;
+            }
+          for(int i=1; i<4; i++) {
+            forCellEx(c2, cc[i]) if(c2->wall == waArrowTrap) ok = false;
             }
           if(ok) {
             for(int i=1; i<4; i++) 
               cc[i]->wall = waArrowTrap,
               cc[i]->wparam = 0;
+            for(int i=0; i<5; i++) 
+              cc[i]->bardir = NOBARRIERS;
             cc[0]->wall = waStone;
             cc[4]->wall = waStone;
             }

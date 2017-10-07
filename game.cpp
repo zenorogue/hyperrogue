@@ -5123,10 +5123,16 @@ void moverefresh(bool turn = true) {
         playSound(c, "click");
         }
       else if(isChasmy(c) || isWatery(c)) {
-        c->wall = waReptileBridge;
+        if(c->wall == waMercury) {
+          fallMonster(c, AF_FALL);
+          c->wall = waNone;
+          }
+        else {
+          c->wall = waReptileBridge;
+          c->wparam = reptilemax();
+          c->monst = moNone;
+          }
         c->item = itNone;
-        c->wparam = reptilemax();
-        c->monst = moNone;
         playSound(c, "click");
         }
       }
@@ -5187,6 +5193,20 @@ void moverefresh(bool turn = true) {
       if(c->monst == moLesser || c->monst == moLesserM || c->monst == moGreater || c->monst == moGreaterM)
         c->monst = moGreaterShark;
       if(c->monst && !survivesWater(c->monst)) {
+        playSound(c, "splash"+pick12());
+        if(isNonliving(c->monst))
+          addMessage(XLAT("%The1 sinks!", c->monst));
+        else 
+          addMessage(XLAT("%The1 drowns!", c->monst));
+        if(isBull(c->monst)) {
+          addMessage(XLAT("%The1 is filled!", c->wall));
+          c->wall = waNone;
+          }
+        fallMonster(c, AF_FALL);
+        }
+      }
+    else if(c->wall == waSulphur || c->wall == waSulphurC || c->wall == waMercury) {
+      if(c->monst && !survivesPoison(c->monst, c->wall)) {
         playSound(c, "splash"+pick12());
         if(isNonliving(c->monst))
           addMessage(XLAT("%The1 sinks!", c->monst));

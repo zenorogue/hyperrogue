@@ -1241,7 +1241,7 @@ enum eItem { itNone, itDiamond, itGold, itSpice, itRuby, itElixir, itShard, itBo
 
 // --- wall types ---
 
-const int walltypes = 103;
+const int walltypes = 104;
 
 struct walltype {
   char  glyph;
@@ -1427,6 +1427,7 @@ walltype winf[walltypes] = {
   { 'S', 0xB0B0B0, "warrior statue", NODESCYET},
   { '=', 0xB0B0B0, "bubbling slime", NODESCYET},
   { '^', 0xD00000, "arrow trap", NODESCYET},
+  { '=', 0xE2E2E2, "mercury river", NODESCYET},
   };
 
 enum eWall { waNone, waIcewall, waBarrier, waFloorA, waFloorB, waCavewall, waCavefloor, waDeadTroll, waDune,
@@ -1460,12 +1461,12 @@ enum eWall { waNone, waIcewall, waBarrier, waFloorA, waFloorB, waCavewall, waCav
   waPetrifiedBridge,
   waTempBridgeBlocked,
   waTerraWarrior, waBubble,
-  waArrowTrap
+  waArrowTrap, waMercury
   };
 
 // --- land types ---
 
-const int landtypes = 76;
+const int landtypes = 77;
 
 struct landtype {
   int color;
@@ -1651,6 +1652,7 @@ const landtype linf[landtypes] = {
   { 0xA06000, "Alchemy II", NODESCYET},
   { 0x8080FF, "Blizzard", NODESCYET},
   { 0x207068, "Hunting Ground", NODESCYET},
+  { 0xE2725B, "Terracotta Army", NODESCYET},
   { 0xE2725B, "Terracotta Army", NODESCYET}
   };
 
@@ -1671,7 +1673,7 @@ enum eLand { laNone, laBarrier, laCrossroads, laDesert, laIce, laCaves, laJungle
   laPrairie, laBull, laCrossroads5, laCA,
   laMirrorWall, laMirrored, laMirrorWall2, laMirrored2,
   laMirrorOld,
-  laAlchemy2, laBlizzard, laDogPlains, laTerracotta
+  laAlchemy2, laBlizzard, laDogPlains, laTerracotta, laMercuryRiver
   };
 
 // cell information for the game

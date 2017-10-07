@@ -24,7 +24,8 @@ bool isWatery(cell *c) {
   }
 
 bool isChasmy(cell *c) {
-  return c->wall == waChasm || c->wall == waSulphur || c->wall == waSulphurC || c->wall == waBubble;
+  return c->wall == waChasm || c->wall == waSulphur || c->wall == waSulphurC || c->wall == waBubble ||
+    c->wall == waMercury;
   }
 
 bool isWateryOrBoat(cell *c) {
@@ -586,6 +587,13 @@ bool survivesWater(eMonster m) {
     isWorm(m) || isIvy(m) || isDragon(m) || isKraken(m) ||
     m == moMutant || m == moFriendlyIvy || 
     m == moTortoise; // Tortoises and Ivies survive, but don't go through water
+  }
+
+// survives Mercury or Sulphur
+bool survivesPoison(eMonster m, eWall p) {
+  return
+    isGhost(m) || m == moWitchGhost || m == moShadow ||
+    isBird(m) || m == moAirElemental || isDragon(m);
   }
 
 // flying even if stunned
