@@ -5094,7 +5094,7 @@ void setdist(cell *c, int d, cell *from) {
       if(c->land == laTerracotta) {
         bool nearwarrior = false;
         forCellEx(c2, c) if(c2->wall == waTerraWarrior) nearwarrior = true;
-        if(nearwarrior && hrand(5000) < PT(100 + 2 * kills[moJiangshi], 200) && notDippingFor(itTerra))
+        if(nearwarrior && hrand(5000) < PT(130 + 2 * kills[moJiangshi], 260) && notDippingFor(itTerra))
           c->item = itTerra;
         if(hrand(20000) < 2 * (items[itTerra] + hard))
           c->monst = moJiangshi;
