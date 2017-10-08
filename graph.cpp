@@ -1402,9 +1402,9 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, int col, dou
     }        
   else if(m == moEarthElemental) {
     otherbodyparts(V, darkena(col, 1, 0xFF), m, footphase);
-    ShadowV(V, shYeti);
-    queuepoly(VBODY, shYeti, darkena(col, 0, 0xC0));
-    queuepoly(VHEAD, shPHead, darkena(col, 0, 0XFF));
+    ShadowV(V, shWaterElemental);
+    queuepoly(VBODY, shWaterElemental, darkena(col, 0, 0xC0));
+    queuepoly(VHEAD, shFemaleHair, darkena(col, 0, 0XFF));
     queuepoly(VHEAD, shPFace, 0xF0000080);
     }        
   else if(m == moWaterElemental) {
