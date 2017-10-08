@@ -505,8 +505,6 @@ eLand randomElementalLand();
 extern eLand euland[65536];
 bool notDippingForExtra(eItem i, eItem x);
 void placePrizeOrb(cell *c);
-int hivehard();
-eMonster randomHyperbug();
 void wandering();
 bool isSealand(eLand l);
 int newRoundTableRadius();
@@ -1554,3 +1552,26 @@ void sideAttack(cell *mf, int dir, eMonster who, int bonuskill);
 void warpfloor(cell *c, const transmatrix& V, int col, int prio, bool warp);
 
 void orboflava(int i);
+
+void setland(cell *c, eLand l);
+
+eLand getNewLand(eLand old);
+
+extern bool randomPatternsMode;
+
+extern int isRandland(eLand l);
+
+extern vector<cell*> buggycells;
+
+extern bool landUnlocked(eLand l);
+
+extern void describeCell(cell*);
+extern bool rlyehComplete();
+
+template<class... T> void limitgen(T... args);
+eLand oppositeElement(eLand l, eLand l2);
+
+extern int hardness_empty();
+extern eWall getElementalWall(eLand l);
+
+void gainItem(eItem it);

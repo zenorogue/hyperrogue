@@ -1,3 +1,49 @@
+int steplimit = 0;
+int cstep;
+
+template<class... T>
+void limitgen(T... args) {
+  if(steplimit) {
+    cstep++;
+    printf("%6d ", cstep);
+    printf(args...);
+    if(cstep == steplimit) buggyGeneration = true;
+    }
+  }
+
+vector<cell*> buggycells;
+
+cell *pathTowards(cell *pf, cell *pt) {
+
+  while(celldist(pt) > celldist(pf)) {
+    if(isNeighbor(pf, pt)) return pt;
+    cell *pn = NULL;
+    forCellEx(pn2, pt) if(celldist(pn2) < celldist(pt)) pn = pn2;
+    pt = pn;
+    }
+
+  if(isNeighbor(pf, pt)) return pt;
+  forCellEx(pn2, pt) if(celldist(pn2) < celldist(pt)) return pn2;
+  return NULL;
+  }
+
+bool buggyGeneration = false;
+
+bool errorReported = false;
+
+void describeCell(cell *c) {
+  if(!c) { printf("NULL\n"); return; }
+  printf("describe %p: ", c);
+  printf("%-15s", linf[c->land].name);
+  printf("%-15s", winf[c->wall].name);
+  printf("%-15s", iinf[c->item].name);
+  printf("%-15s", minf[c->monst].name);
+  printf("LP%08x", c->landparam);
+  printf("D%3d", c->mpdist);
+  printf("MON%3d", c->mondir);
+  printf("\n");
+  }
+
 static int orbid = 0;
 
 void debugScreen();

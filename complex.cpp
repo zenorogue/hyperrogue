@@ -1,7 +1,7 @@
 // Hyperbolic Rogue
 
 // namespaces for complex features (whirlwind, whirlpool, elec, princess, clearing, 
-// mirror, hive, heat + livecaves)
+// mirror, hive, heat + livecaves, etc.)
 
 // Copyright (C) 2011-2016 Zeno Rogue, see 'hyper.cpp' for details
 
@@ -1411,6 +1411,20 @@ namespace mirror {
 
 namespace hive {
 
+  int hivehard() {
+    return items[itRoyalJelly] + hardness_empty();
+    // 0, 5, 40, 135
+    }
+
+  eMonster randomHyperbug() {
+    int h = hivehard();
+    if(hrand(200) < h)
+      return moBug2;
+    return eMonster(moBug0 + hrand(BUGCOLORS));
+    // 50: 25/25/50
+    // 100: 
+    }
+  
   struct buginfo_t {
     cell *where;
     short dist[BUGCOLORS];
@@ -3075,5 +3089,510 @@ namespace windmap {
     return windmap::windcodes[windmap::getId(c)];
     }
 
-  };
+  }
 
+// Halloween namespace
+
+namespace halloween {
+  cell *dragoncells[4];
+  vector<cell*> srch;
+
+  cell *farempty(bool lastresort = false) {
+    int maxdist = 0;
+    vector<cell*> validcells;
+    int firstfar1 = 0;
+    for(int i=1; i<size(dcal); i++) {
+      bool okay = 
+        dcal[i]->item == itNone && dcal[i]->monst == moNone && dcal[i]->wall == waNone;
+      if(lastresort)
+        okay = dcal[i]->wall != waChasm && !isMultitile(dcal[i]->monst);
+      if(okay) {
+        if(dcal[i]->cpdist > maxdist) 
+          firstfar1 = size(validcells),
+          maxdist = dcal[i]->cpdist; 
+        validcells.push_back(dcal[i]);
+        }
+      }
+    
+    int qvc = size(validcells);
+    if(qvc == firstfar1) return farempty(true);
+    
+    return validcells[firstfar1 + hrand(qvc - firstfar1)];
+    }
+  
+  int demoncount;
+  int swordpower;
+  int dragoncount;
+
+  void reset() {
+    demoncount = 0;
+    swordpower = 0;
+    dragoncount = 0;
+    }
+  
+  eMonster nextDemon() {
+    demoncount++;
+    if(demoncount % 9 == 0) return moGreater;
+    return moLesser;
+    }
+  
+  void putMonster(eMonster m) {
+    cell *c = farempty();
+    c->hitpoints = 3;
+    c->monst = m;
+    playSeenSound(c);
+    if(!kills[m]) switch(m) {
+      case moGhost:
+        addMessage(XLAT("Ghosts can move through chasms!"));
+        break;
+      case moSkeleton:
+        addMessage(XLAT("Push Skeletons into the holes!"));
+        break;
+      case moDraugr:
+        addMessage(XLAT("You'll need your magical sword against the Draugar!"));
+        break;
+      case moLesser:
+        addMessage(XLAT("Demons are slow, but you'll need the experience against stronger ones..."));
+        break;
+      case moGreater:
+        addMessage(XLAT("You will need more experience to defeat the Greater Demon!"));
+        break;
+      case moPyroCultist:
+        addMessage(XLAT("Cultists throw fire at you from distance!"));
+        break;
+      case moFlailer:
+        addMessage(XLAT("Defeat Flail Guards by moving away from them."));
+        break;
+      case moVampire:
+        addMessage(XLAT("Vampire Bats drain your magical powers!"));
+        break;
+      default: break;
+      }
+    c->stuntime = 2;
+    }
+  
+  void getTreat(cell *where) {
+    if(!items[itTreat]) reset();
+    gainItem(itTreat);
+    farempty()->item = itTreat;
+    int itr = items[itTreat];
+    items[itOrbTime] += 30;
+    int monpower = 19 + itr + hrand(itr);
+    int mcount = 0;
+    while(monpower > 0) {
+      int id = hrand(10000);
+    
+#define CHANCE(x) (id -= x, id < 0)
+      if(CHANCE(400) && itr >= 5) {
+        putMonster(moGhost);
+        monpower -= 30;
+        mcount++;
+        }
+      else if(CHANCE(400)) {
+        putMonster(pick(moWitch, moZombie));
+        monpower -= 20;
+        mcount++;
+        }
+      else if(CHANCE(400) && itr >= 5) {
+        putMonster(nextDemon());
+        monpower -= 10;
+        mcount++;
+        }
+      else if(CHANCE(100) && itr >= 12) {
+        putMonster(moVampire);
+        monpower -= 10;
+        swordpower -= 5;
+        if(swordpower < 0) swordpower = 0;
+        mcount++;
+        }
+      else if(CHANCE(400) && swordpower > 0 && !mcount && itr >= 15) {
+        putMonster(moDraugr);
+        swordpower -= 3;
+        monpower -= 100;
+        mcount++;
+        }
+      else if(CHANCE(400) && itr >= 10 && !mcount && itr >= 10) {
+        putMonster(moSkeleton);
+        monpower -= 60;
+        mcount++;
+        }
+      else if(CHANCE(10) && itr >= 15) {
+        putMonster(moWitchFire);
+        monpower -= 35;
+        mcount++;
+        }
+      else if(CHANCE(100) && itr >= 5) {
+        putMonster(moFlailer);
+        monpower -= 35;
+        mcount++;
+        }
+      else if(CHANCE(100) && itr >= 5) {
+        putMonster(moPyroCultist);
+        monpower -= 35;
+        mcount++;
+        }        
+      else if(CHANCE(5) && itr >= 20 && kills[moSkeleton]) {
+        putMonster(moFatGuard);
+        monpower -= 35;
+        mcount++;
+        }        
+      else if(CHANCE(5) && itr >= 30 && kills[moFlailer]) {
+        putMonster(moHedge);
+        monpower -= 35;
+        mcount++;
+        }        
+      else if(CHANCE(5) && itr >= 40 && kills[moHedge]) {
+        putMonster(moLancer);
+        monpower -= 60;
+        mcount++;
+        }        
+      else if(CHANCE(1) && itr >= 50 && kills[moHedge]) {
+        putMonster(moFireFairy);
+        monpower -= 40;
+        mcount++;
+        }        
+      else if(CHANCE(5) && itr >= 60) {
+        putMonster(moBomberbird);
+        monpower -= 25;
+        mcount++;
+        }        
+      else if(CHANCE(5) && itr >= 60) {
+        putMonster(moRatlingAvenger);
+        monpower -= 30;
+        mcount++;
+        }        
+      else if(CHANCE(5) && itr >= 60) {
+        putMonster(moVineBeast);
+        monpower -= 30;
+        mcount++;
+        }        
+      else if(CHANCE(5) && itr >= 60) {
+        dragoncount++;
+        }
+      else if(dragoncount && !purehepta && !mcount) {
+        bool fill = false;
+        for(int i=0; i<4; i++) 
+          if(!dragoncells[i] || dragoncells[i]->monst)
+            fill = true;
+        swap(dragoncells[0], dragoncells[3]);
+        swap(dragoncells[1], dragoncells[2]);
+        if(fill) continue;
+        for(int i=0; i<4; i++) {
+          dragoncells[i]->monst = i ? moDragonTail : moDragonHead;
+          dragoncells[i]->mondir = i==3 ? NODIR : neighborId(dragoncells[i], dragoncells[i+1]);
+          dragoncells[i]->hitpoints = 1;
+          dragoncells[i]->stuntime = 1;          
+          playSeenSound(dragoncells[i]);
+          }
+        monpower -= 200;
+        mcount++;
+        dragoncount--;
+        }        
+      }
+    int id = hrand(100);
+    if(items[itTreat] == 1) {
+#if ISMOBILE==0
+      addMessage(XLAT("Hint: use arrow keys to scroll."));
+#endif
+      }
+    else if(items[itTreat] == 2) {
+#if ISMOBILE==0
+      addMessage(XLAT("Hint: press 1 2 3 4 to change the projection."));
+#endif
+      }
+    else if(items[itTreat] == 3) {
+      items[itOrbShell] += 20;
+      addMessage(XLAT("You gain a protective Shell!"));
+      }                                         
+    else if(items[itTreat] == 4) {
+      items[itOrbShell] += 10;
+      addMessage(XLAT("Hint: magical powers from Treats expire after a number of uses."));
+      }
+    else if(kills[moSkeleton] && CHANCE(10)) {
+      addMessage(XLAT("A magical energy sword. Don't waste its power!"));
+      items[itOrbSword] += 5; // todo facing
+      swordpower += 5;
+      }
+    else if(kills[moDraugr] && items[itOrbSword] && CHANCE(10)) {
+      addMessage(XLAT("Another energy sword!"));
+      items[itOrbSword2] += 5;
+      swordpower += 5;
+      }
+    else if(kills[moFlailer] && CHANCE(10)) {
+      items[itOrbThorns] += 5;
+      addMessage(XLAT("You got Thorns! Stab monsters by moving around them."));
+      }
+    else if(kills[moGhost] && CHANCE(10)) {
+      items[itOrbAether] += 5;
+      addMessage(XLAT("Aethereal powers let you go through the holes."));
+      }
+    else { 
+      if(items[itOrbShell] > ORBBASE)
+        addMessage(XLAT("The tasty treat increases your protection."));
+      else 
+        addMessage(XLAT("You gain your protective Shell back!"));
+      items[itOrbShell] += 5;
+      }
+    }
+  }
+
+// ... also includes the Ivory Tower
+
+namespace dungeon {
+
+  void buildIvoryTower(cell *c) {
+    /* if(int(c->landparam) % 5 == 0) 
+      c->wall = waCamelot;
+      */
+    
+    if(euclid) {
+      eucoord x, y;
+      decodeMaster(c->master, x, y);
+      string tab[] = {
+        ".####...",
+        "L...L...",
+        ".L..L...",
+        "L...L...",
+        "........",
+        "........"
+        };
+      int y0 = y; if(y>32768) y0 -= 65536;
+      
+      y0 += 5; y0 %= 12; if(y0<0) y0+=12;
+      
+      if(y0 >= 6) { y0 -= 6; x += 4; }
+      
+      char ch = tab[y0][(x+(y+1)/2)&7];
+      
+      if(ch == '#')
+        c->wall = waPlatform;
+      else if(ch == 'L')
+        c->wall = waLadder;
+      }
+    
+    else if(true) {
+      
+      cell *c2 = c;
+      cell *c3 = c;
+      
+      bool rdepths[5];
+      for(int i=0; i<5; i++) {
+        if(coastvalEdge(c2) == 0) { 
+          rdepths[i] = false;
+          }
+        else {
+          cell *c4 = c2;
+          if(c2 != c3 && !isNeighbor(c2, c3)) {
+            for(int i=0; i<c2->type; i++) if(c2->mov[i] && isNeighbor(c2->mov[i], c3))
+              c4 = c2->mov[i];
+            }
+          rdepths[i] = c2 && c3 && c4 && (c2->landflags == 3 || c3->landflags == 3 || c4->landflags == 3);
+          c2 = chosenDown(c2, 1, 0); // if(!c2) break;
+          c3 = chosenDown(c3, -1, 0);
+          if(!c2) { raiseBuggyGeneration(c, "ivory c2"); return; }
+          if(!c3) { raiseBuggyGeneration(c, "ivory c3"); return; }
+          }
+        }
+      
+      if(rdepths[3]) {
+        c->wall = waPlatform;
+  //        if(!c4->item) c4->item = itPalace;
+        }
+      else if(!rdepths[2] && !rdepths[4] && !rdepths[1]) {
+        c2 = c;
+        c3 = c;
+        cell *c4 = chosenDown(c, 1, 1);
+        cell *c5 = chosenDown(c, -1, -1);
+        for(int i=0; i<3; i++) {
+          if(coastvalEdge(c2) == 0) break;
+          if(c2 && c4 && c4->landflags == 3 && c2->landflags != 3 && c4 == chosenDown(c2, 1, 1)) 
+            c->wall = waLadder;
+          if(c3 && c5 && c5->landflags == 3 && c3->landflags != 3 && c5 == chosenDown(c3, -1, -1)) 
+            c->wall = waLadder;
+          buildEquidistant(c4); buildEquidistant(c5);
+          if(c2) c2 = chosenDown(c2,  1, 0);
+          if(c3) c3 = chosenDown(c3, -1, 0);
+          if(c4) c4 = chosenDown(c4,  1, 0);
+          if(c5) c5 = chosenDown(c5, -1, 0);
+          }
+        }
+      }
+    else c->wall = waCIsland;
+    }
+  
+  int dungeonFlags(cell *c) {
+    if(!c) return 0;
+    buildEquidistant(c);
+    bool rdepths[5];
+  
+    cell *c2 = c;
+    cell *c3 = c;
+      
+    int switchcount = 0;
+    for(int i=0; i<5; i++) {
+      if(coastvalEdge(c2) == 0) { 
+        rdepths[i] = false;
+        }
+      else {
+        cell *c4 = c2;
+        if(c2 != c3 && !isNeighbor(c2, c3)) {
+          for(int i=0; i<c2->type; i++) if(c2->mov[i] && isNeighbor(c2->mov[i], c3))
+            c4 = c2->mov[i];
+          }
+        rdepths[i] = c2 && c3 && c4 && (c2->landflags == 3 || c3->landflags == 3 || c4->landflags == 3);
+        if((c2&&c2->landflags == 1) || (c3&&c3->landflags == 1) || (c4&&c4->landflags == 1))
+          switchcount++;
+        c2 = chosenDown(c2, 1, 0); // if(!c2) break;
+        c3 = chosenDown(c3, -1, 0);
+        if(!c2) { raiseBuggyGeneration(c, "ivory c2"); return 0; }
+        if(!c3) { raiseBuggyGeneration(c, "ivory c3"); return 0; }
+        }
+      }
+    
+    int res = 0;
+    
+    if(rdepths[3]) res |= 1;
+    if(rdepths[2]) res |= 2;
+    if(switchcount&1) res |= 4;
+    
+    return res;
+    }
+  
+  void placeGate(cell *c, eWall w) {
+    if(w == waOpenGate) {
+      c->wall = waClosedGate;
+      toggleGates(c, waOpenPlate, 0);
+      }
+    if(w == waClosedGate) {
+      c->wall = waOpenGate;
+      toggleGates(c, waClosePlate, 0);
+      }
+    }
+  
+  bool isGate(eWall w) {
+    return w == waOpenGate || w == waClosedGate;
+    }
+  
+  void placeRandomGate(cell *c) {
+    placeGate(c, hrand(2) ? waOpenGate : waClosedGate);
+    }
+  
+  void build(cell *c) {
+    /* if(int(c->landparam) % 5 == 0) 
+      c->wall = waCamelot;
+      */
+    
+    if(true) {
+      
+      if(coastvalEdge(c) == 1) forCellEx(c2, c)
+        if(c2->land != laBarrier && c2->land != laDungeon) {
+          c->wall = waLadder;
+          c->wparam = 3;
+          }
+        
+      int df = dungeonFlags(c);
+      
+      if(df&1) {
+        int df1 = dungeonFlags(chosenDown(c,1,1));
+        int df2 = dungeonFlags(chosenDown(c,-1,-1));
+        
+        c->wparam = 0;
+        if(hrand(100) < (c->landparam % 5 == 0 ? 80 : 20)) {
+          if(!(df1&1)) c->wparam = 1;
+          if(!(df2&1)) c->wparam = 2;
+          }
+  
+        if(df&4) 
+          placeRandomGate(c);
+        else if(c->wparam == 0 && c->landparam % 5 == 0 &&  hrand(100) < 10) {
+          c->wall = waLadder;
+          c->wparam = 3 + hrand(2);
+          }
+        else 
+          c->wall = waPlatform;
+        }
+  
+      if(c->wparam) {
+        /* int q = 0;
+        cell* downs[7];
+        forCellEx(c2, c) {
+          buildEquidistant(c2);
+          if(coastvalEdge(c2) > coastvalEdge(c)) downs[q++] = c2;
+          }
+        if(q) downs[hrand(q)]->wall = waLadder;
+        */
+        cell *c2 = 
+          c->wparam == 1 ? chosenDown(c, 1, 2) :
+          c->wparam == 2 ? chosenDown(c, -1, -2) :
+          c->wparam == 3 ? chosenDown(c, 1, 3) :
+          c->wparam == 4 ? chosenDown(c, -1, -3) :
+          NULL;
+        
+        if(c2) {
+          c2->wall = c->wall, c2->wparam = c->wparam;
+          if(c2->wall == waPlatform && hrand(10) < 2) 
+            placeRandomGate(c2);
+          if(isGate(c2->wall) && hrand(10) < 2) 
+            c2->wall = waPlatform;
+          }
+        }
+      }
+    else c->wall = waCIsland;
+    }
+  
+  void buildPlates(cell *c) {
+    if(c->wall) return;
+    int neargate = 0;
+    int neargateDown = 0;
+    int neargateEq = 0;
+    int qup = 0;
+    forCellEx(c2, c) {
+      int d = coastvalEdge(c2) - coastvalEdge(c);
+      if(isGate(c2->wall)) {
+        neargate++;
+        if(d>0) neargateDown++;
+        if(d==0) neargateEq = 0;
+        }
+      if(d<0) qup++;
+      }
+    
+    if(!neargate) return;
+    
+    int hr = 99;
+    
+    if(neargate == neargateDown && qup == 1)
+      hr = hrand(12);
+    else if((zebra40(c) >= 40) && !(neargateEq && neargateDown)) 
+      hr = hrand(36);
+    else if(zebra40(c) >= 40)
+      hr = hrand(5000);
+      
+    if(hr < 5) c->wall = waClosePlate;
+    else if(hr < 10) c->wall = waOpenPlate;
+    }
+
+  bool is02(int i) { return i == 0 || i == 2; }
+  
+  void all(cell *c, int d) {
+    if(d == 8 && (c->land == laIvoryTower || c->land == laDungeon) && !euclid) {
+
+      if(hrand(1000) < 75 && (c->landparam & 1) ) {
+        c->landflags = 3;
+        }
+      else c->landflags = 0;
+      }
+    
+    if(d == 8 && c->land == laDungeon && !euclid) {
+      if(hrand(1000) < 240 && is02(c->landparam%5) ) {
+        c->landflags = 3;
+        }
+      else if(hrand(1000) < 90)
+        c->landflags = 1;
+      else c->landflags = 0;
+      }
+
+    if(d == 7 && c->land == laIvoryTower) buildIvoryTower(c);
+    if(d == 8 && c->land == laDungeon) build(c);
+    if(d == 7 && c->land == laDungeon) buildPlates(c);
+    }
+  }

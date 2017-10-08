@@ -344,6 +344,11 @@ const char *loadlevel = NULL;
 #include "yendor.cpp"
 #include "complex.cpp"
 #include "game.cpp"
+#include "orbgen.cpp"
+#include "monstergen.cpp"
+#include "barriers.cpp"
+#include "bigstuff.cpp"
+#include "landlock.cpp"
 #include "landgen.cpp"
 #include "orbs.cpp"
 #if CAP_INV
