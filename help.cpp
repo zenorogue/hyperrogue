@@ -597,6 +597,26 @@ string turnstring(int i) {
   else return XLAT("%1 turns", its(i));
   }
 
+reaction_t helpgenerator;
+string bygen(reaction_t h) {
+  helpgenerator = h;
+  return "HELPGEN";
+  }
+
+void gotoHelpFor(eLand l);
+
+void gotoHelpFor(eItem i) {
+  help = generateHelpForItem(i);
+  }
+
+void gotoHelpFor(eWall w) {
+  help = generateHelpForWall(w);
+  };
+
+void gotoHelpFor(eMonster m) {
+  help = generateHelpForMonster(m);
+  };
+
 void describeMouseover() {
   DEBB(DF_GRAPH, (debugfile,"describeMouseover\n"));
 
@@ -605,7 +625,7 @@ void describeMouseover() {
   if(!c || instat || getcstat != '-') { }
   else if(c->wall != waInvisibleFloor) {
     out = XLAT1(linf[c->land].name);
-    help = generateHelpForLand(c->land);
+    help = bygen([c] () { gotoHelpFor(c->land); });
     
     if(isIcyLand(c)) 
       out += " (" + fts(heat::celsius(c)) + " °C)";
@@ -656,9 +676,11 @@ void describeMouseover() {
       if((c->wall == waBigTree || c->wall == waSmallTree) && c->land != laDryForest)
         help = 
           "Trees in this forest can be chopped down. Big trees take two turns to chop down.";
-      else if(c->wall != waSea && c->wall != waPalace)
-      if(!((c->wall == waCavefloor || c->wall == waCavewall) && c->land == laEmerald))
-        help = generateHelpForWall(c->wall);
+      else 
+        if(c->wall != waSea && c->wall != waPalace && c->wall != waDeadfloor)
+        if(!((c->wall == waCavefloor || c->wall == waCavewall) && (c->land == laEmerald && c->land == laCaves)))
+        if(!((isAlch(c->wall) && c->land == laAlchemist)))
+          help = bygen([c] () { gotoHelpFor(c->wall); });
       }
     
     if(isActivable(c)) out += XLAT(" (touch to activate)");
@@ -680,7 +702,7 @@ void describeMouseover() {
       if(c->monst == moTortoise && tortoise::seek()) 
         out += " " + tortoise::measure(tortoise::getb(c));
 
-      help = generateHelpForMonster(c->monst);
+      help = bygen([c] () { gotoHelpFor(c->monst); });
       }
   
     if(c->item && !itemHiddenFromSight(c)) {
@@ -689,7 +711,8 @@ void describeMouseover() {
       if(c->item == itBarrow) out += " (x" + its(c->landparam) + ")";
       if(c->item == itBabyTortoise && tortoise::seek()) 
         out += " " + tortoise::measure(tortoise::babymap[c]);
-      if(!c->monst) help = generateHelpForItem(c->item);
+      if(!c->monst) 
+        help = bygen([c] () { gotoHelpFor(c->monst); });
       }
     
     if(isPlayerOn(c) && !shmup::on) out += XLAT(", you"), help = generateHelpForMonster(moPlayer);
@@ -721,8 +744,12 @@ void describeMouseover() {
   if(mousey < vid.fsize * 3/2) getcstat = SDLK_F1;
   }
 
-string help_action_text;
-reaction_t help_action;
+struct help_extension {
+  char key;
+  string text;
+  reaction_t action;
+  };
+vector<help_extension> help_extensions;
 
 void showHelp() {
   gamescreen(2);
@@ -747,19 +774,25 @@ void showHelp() {
     dialog::addHelp(help);
     }
   
-  if(help == buildHelpText()) dialog::addItem(XLAT("credits"), 'c');
-  if(help_action_text != "") dialog::addItem(help_action_text, 't');
+  for(auto& he: help_extensions)
+    dialog::addItem(he.text, he.key);
   
   dialog::display();
   
   keyhandler = [] (int sym, int uni) {
     dialog::handleNavigation(sym, uni);
+    
+    for(auto& he: help_extensions)
+      if(uni == he.key) {
+        // we need to copy he.action
+        // as otherwise it could clear the extensions,
+        // leading to errors
+        auto act = he.action;
+        act();
+        return;
+        }
     if(sym == SDLK_F1 && help != "@") 
       help = "@";
-    else if(uni == 'c')
-      help = buildCredits();
-    else if(uni == 't' && help_action)
-      help_action();
     else if(doexiton(sym, uni))
       popScreen();
     };
@@ -767,6 +800,48 @@ void showHelp() {
 
 void gotoHelp(const string& h) {
   help = h;
-  help_action = reaction_t();
+  help_extensions.clear();
   pushScreen(showHelp);
+  if(help == "@" || help == buildHelpText()) 
+    help_extensions.push_back(help_extension{'c', XLAT("credits"), [] () { help = buildCredits(); }});
+  if(help == "HELPGEN") helpgenerator();
+  }
+
+void subhelp(const string& h) {
+  string oldhelp = help;
+  auto ext = help_extensions;
+  reaction_t back = [oldhelp, ext] () {
+    help = oldhelp;
+    help_extensions = ext;
+    };
+  help = h;
+  help_extensions.clear();
+  if(help == "HELPGEN") helpgenerator();
+  help_extensions.push_back(help_extension{'z', XLAT("back"), back});
+  }
+
+void gotoHelpFor(eLand l) {
+  help = generateHelpForLand(l);
+  
+  int beastcount = 0;
+  for(int m0=0; m0<motypes; m0++)
+    if(isNative(l, eMonster(m0)) && !nodisplay(eMonster(m0))) beastcount++;
+  
+  auto listbeasts = [l] () {
+    char nextmonster = 'a';
+    for(int m0=0; m0<motypes; m0++) {
+      eMonster m = eMonster(m0);
+      if(isNative(l, m) && !nodisplay(m))
+        help_extensions.push_back(help_extension{nextmonster++, XLATN(minf[m].name), [m] () {
+          subhelp(bygen([m] () { gotoHelpFor(m); }));
+          }});
+      }
+    };
+  
+  if(beastcount > 3)       
+  help_extensions.push_back(help_extension{'b', XLAT("bestiary of %the1", l), [l, listbeasts] () { 
+    subhelp(helptitle(XLAT("bestiary of %the1", l), 0xC00000));
+    listbeasts();
+     }});
+  else listbeasts();  
   }

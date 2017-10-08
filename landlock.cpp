@@ -1,5 +1,14 @@
 // land statistics and flags
 
+bool nodisplay(eMonster m) {
+  return 
+    m == moIvyDead ||
+    m == moDragonTail ||
+    m == moWolfMoved ||
+    m == moIvyNext ||
+    m == moIvyDead;
+  }    
+
 // returns: 2 = treasure increaser, 1 = just appears, 0 = does not appear
 int isNative(eLand l, eMonster m) {
   switch(l) {
@@ -41,7 +50,7 @@ int isNative(eLand l, eMonster m) {
       return (m == moHedge || m == moFireFairy) ? 2 : 0;
 
     case laHell: 
-      return (m == moLesser) ? 2 : 0;
+      return (m == moLesser || m == moGreater) ? 2 : 0;
       
     case laCocytus: 
       return (m == moShark || m == moGreaterShark || m == moCrystalSage) ? 2 :
@@ -102,7 +111,7 @@ int isNative(eLand l, eMonster m) {
 
     case laEAir: case laEEarth: case laEWater: case laEFire: 
     case laElementalWall: 
-      if(m == elementalOf(l)) return 2;
+      if(m == elementalOf(l) && m) return 2;
       return (m == moAirElemental || m == moEarthElemental || m == moWaterElemental || m == moFireElemental) ? 1 : 0;
     
     case laStorms: 
@@ -115,7 +124,15 @@ int isNative(eLand l, eMonster m) {
       return (m == moOutlaw) ? 2 : 0;
 
     case laHalloween: 
-      return 1;
+      return (m == moGhost || m == moZombie || m == moWitch ||
+        m == moLesser || m == moGreater || 
+        m == moVampire || m == moDraugr ||
+        m == moSkeleton || m == moWitchFire || 
+        m == moFlailer || m == moPyroCultist || 
+        m == moFatGuard || m == moHedge || 
+        m == moLancer || m == moFireFairy || 
+        m == moBomberbird || m == moRatlingAvenger || 
+        m == moVineBeast || m == moDragonHead || m == moDragonTail) ? 1 : 0;
 
     case laClearing: 
       return (m == moMutant || m == moRedFox) ? 1 : 0;
@@ -181,7 +198,7 @@ int isNative(eLand l, eMonster m) {
     case laDogPlains:
       return m == moHunterDog ? 1 : 0;
     
-    case laCA: return false;
+    case laCA: return 0;
     }
   return false;
   }
