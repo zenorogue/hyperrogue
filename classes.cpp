@@ -346,7 +346,7 @@ const char *mirroreddesc =
   "Mirror walls reflect Mimics, lightning bolts, and "
   "missiles perfectly.";
 
-const int motypes = 150;
+const int motypes = 151;
 
 struct monstertype {
   char  glyph;
@@ -700,10 +700,11 @@ monstertype minf[motypes] = {
   { 'T', 0xE2725B, "Terracotta Warrior", NODESC},
   { 'J', 0x50A030, "Jiangshi", NODESC},
   { 'B', 0xA00000, "Void Beast", NODESC},
-  { 'L', 0xA00000, "Lemur", NODESC},
+  { 'W', 0xA00000, "Lava Wolf", NODESC},
   { 'W', 0x202020, "Hunting Dog (guarding)", NODESC},
   { 'G', 0xC0C0FF, "Ice Golem", NODESC},
   { 'B', 0xC0C0FF, "Sand Bird", NODESC},
+  { 'S', 0xA00000, "Salamander", NODESC},
   
   // shmup specials
   { '@', 0xC0C0C0, "Rogue", "In the Shoot'em Up mode, you are armed with thrown Knives."},
@@ -765,8 +766,8 @@ enum eMonster {
   moVampire, moBat, moReptile, 
   moHerdBull, moRagingBull, moSleepBull,
   moButterfly, moNarciss, moMirrorSpirit,
-  moHunterDog, moTerraWarrior, moJiangshi, moVoidBeast, moLemur, moHunterGuard,
-  moIceGolem, moSandBird,
+  moHunterDog, moTerraWarrior, moJiangshi, moVoidBeast, moLavaWolf, moHunterGuard,
+  moIceGolem, moSandBird, moSalamander,
   // shmup specials
   moPlayer, moBullet, moFlailBullet, moFireball, moTongue, moAirball,
   // temporary
@@ -801,7 +802,7 @@ genderswitch_t genderswitch[NUM_GS] = {
 
 // --- items ---
 
-const int ittypes = 119;
+const int ittypes = 120;
 
 struct itemtype {
   char  glyph;
@@ -1194,13 +1195,14 @@ itemtype iinf[ittypes] = {
      },
   { 'O', 0xF0F0F0, "your orbs", 
     "Click this to see your orbs."},  
-  { '$', 0xD0D000, "Sage's Stone", NODESCYET},
+  { '%', 0xE0E000, "Lava Lily", NODESCYET},
   { '*', 0x40E0D0, "Turquoise", NODESCYET},
   { '*', 0x009090, "Forgotten Relic", NODESCYET},
   { '(', 0xFFE080, "Ancient Weapon", NODESCYET},
   { 'o', 0x307080, "Orb of the Side I", NODESCYET},
   { 'o', 0x30A080, "Orb of the Side II", NODESCYET},
   { 'o', 0x30D080, "Orb of the Side III", NODESCYET},
+  { 'o', 0xD08030, "Orb of Lava", NODESCYET},
   };
 
 enum eItem { itNone, itDiamond, itGold, itSpice, itRuby, itElixir, itShard, itBone, itHell, itStatue,
@@ -1235,13 +1237,14 @@ enum eItem { itNone, itDiamond, itGold, itSpice, itRuby, itElixir, itShard, itBo
   itSlime, itAmethyst, itOrbRecall, itDodeca, itOrbDash, itGreenGrass, itOrbHorns,
   itOrbBull, itBull, itOrbMirror,
   itInventory,
-  itAlchemy2, itDogPlains, itBlizzard, itTerra,
-  itOrbSide1, itOrbSide2, itOrbSide3
+  itLavaLily, itDogPlains, itBlizzard, itTerra,
+  itOrbSide1, itOrbSide2, itOrbSide3,
+  itOrbLava
   };
 
 // --- wall types ---
 
-const int walltypes = 104;
+const int walltypes = 105;
 
 struct walltype {
   char  glyph;
@@ -1428,6 +1431,7 @@ walltype winf[walltypes] = {
   { '=', 0xB0B0B0, "bubbling slime", NODESCYET},
   { '^', 0xD00000, "arrow trap", NODESCYET},
   { '=', 0xE2E2E2, "mercury river", NODESCYET},
+  { '&', 0xD00000, "magma", NODESCYET},
   };
 
 enum eWall { waNone, waIcewall, waBarrier, waFloorA, waFloorB, waCavewall, waCavefloor, waDeadTroll, waDune,
@@ -1461,7 +1465,7 @@ enum eWall { waNone, waIcewall, waBarrier, waFloorA, waFloorB, waCavewall, waCav
   waPetrifiedBridge,
   waTempBridgeBlocked,
   waTerraWarrior, waBubble,
-  waArrowTrap, waMercury
+  waArrowTrap, waMercury, waMagma
   };
 
 // --- land types ---
@@ -1649,7 +1653,7 @@ const landtype linf[landtypes] = {
   { 0xC8C8FF, "Reflection", mirroreddesc},
   { 0xC8C8FF, "Mirror Land", 
     "A strange land which contains mirrors and mirages, protected by Mirror Rangers."},
-  { 0xA06000, "Alchemy II", NODESCYET},
+  { 0xA06000, "Volcanic Wasteland", NODESCYET},
   { 0x8080FF, "Blizzard", NODESCYET},
   { 0x207068, "Hunting Ground", NODESCYET},
   { 0xE2725B, "Terracotta Army", NODESCYET},
@@ -1673,7 +1677,7 @@ enum eLand { laNone, laBarrier, laCrossroads, laDesert, laIce, laCaves, laJungle
   laPrairie, laBull, laCrossroads5, laCA,
   laMirrorWall, laMirrored, laMirrorWall2, laMirrored2,
   laMirrorOld,
-  laAlchemy2, laBlizzard, laDogPlains, laTerracotta, laMercuryRiver
+  laVolcano, laBlizzard, laDogPlains, laTerracotta, laMercuryRiver
   };
 
 // cell information for the game

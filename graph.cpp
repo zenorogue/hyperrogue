@@ -947,7 +947,7 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, int col, dou
     queuepoly(VHEAD, shPFace,  facecolor);
     }
 
-  else if(m == moWolf || m == moRedFox || m == moWolfMoved) {
+  else if(m == moWolf || m == moRedFox || m == moWolfMoved || m == moLavaWolf) {
     ShadowV(V, shWolfBody);
     if(mmspatial || footphase)
       animallegs(VALEGS, moWolf, darkena(col, 0, 0xFF), footphase);
@@ -978,6 +978,17 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, int col, dou
     queuepoly(VAHEAD * Mirror, shReptileEye, darkena(col, 3, 0xFF));
     queuepoly(VABODY, shReptileTail, darkena(col, 2, 0xFF));
     }
+
+  else if(m == moSalamander) {
+    ShadowV(V, shReptileBody);
+    animallegs(VALEGS, moReptile, darkena(0xD00000, 1, 0xFF), footphase);
+    queuepoly(VABODY, shReptileBody, darkena(0xD00000, 0, 0xFF));
+    queuepoly(VAHEAD, shReptileHead, darkena(0xD00000, 1, 0xFF));
+    queuepoly(VAHEAD, shReptileEye, darkena(0xD00000, 0, 0xFF));
+    queuepoly(VAHEAD * Mirror, shReptileEye, darkena(0xD00000, 0, 0xFF));
+    queuepoly(VABODY, shReptileTail, darkena(0xD08000, 0, 0xFF));
+    }
+
   else if(m == moVineBeast) {
     ShadowV(V, shWolfBody);
     if(mmspatial || footphase)
@@ -1211,7 +1222,7 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, int col, dou
     queuepoly(VHEAD, shPFace, darkena(col, 1, 0x90));
     queuepoly(VHEAD, shArmor, darkena(col, 0, 0xC0));
     }
-  else if(m == moJiangshi || m == moLemur) {
+  else if(m == moJiangshi) {
     ShadowV(V, shJiangShi);
     auto z2 = geom3::lev_to_factor(abs(sin(footphase * M_PI * 2)) * geom3::human_height);
     auto V0 = V;
@@ -2363,6 +2374,26 @@ void setcolors(cell *c, int& wcol, int &fcol) {
     case laGraveyard: fcol = 0x107010; break;
     case laWineyard: fcol = 0x006000; break;
     case laLivefjord: fcol = 0x306030; break;
+    
+    case laVolcano: {
+      int id = alchemyval(c, -1)/4;
+      if(c->wall == waMagma) {
+        if(id == 95/4-1) fcol = wcol = 0x200000;
+        else if(id == 95/4) fcol = wcol = 0x100000;
+        else if(id < 48/4) fcol = wcol = gradient(0xF0F000, 0xF00000, 0, id, 48/4);
+        else if(id < 96/4) fcol = wcol = gradient(0xF00000, 0x400000, 48/4, id, 95/4-2);
+        }
+      else {
+        fcol = wcol = 0x404040;
+        if(id == 255/4) fcol = 0xA0A040;
+        if(id == 255/4-1) fcol = 0x606040;
+        }
+      /* {
+        if(id/4 == 255/4) fd = 0;
+        if(id/4 == 95/4-1 || id/4 == 255/4-1) fd = 1;
+        } */
+      break;
+      }
 
     case laMinefield: 
       fcol = 0x80A080; 
@@ -2626,14 +2657,14 @@ void setcolors(cell *c, int& wcol, int &fcol) {
       fcol = wcol;
     }
 
-  if(isAlch2(c, true)) {
+  /* if(false && isAlch2(c, true)) {
     int id = alchemyval(c, -1);
     if(id < 96)
       wcol = gradient(0x800000, 0xFF0000, 0, id, 96);
     else 
       wcol = gradient(0x00FF00, 0xFFFF00, 96, id, 255);
     fcol = wcol;
-    }
+    } */
   
   if(c->wall == waDeadTroll2 || c->wall == waPetrified || c->wall == waPetrifiedBridge) {
     eMonster m = eMonster(c->wparam);
@@ -3260,12 +3291,8 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       c->land == laMercuryRiver ? 0 :
       2;
     
-    if(c->land == laAlchemy2) {
-      int id = alchemyval(c, -1);
-      if(id/4 == 95/4 || id/4 == 255/4) fd = 0;
-      if(id/4 == 95/4-1 || id/4 == 255/4-1) fd = 1;
-      }
-
+    if(c->wall == waMagma) fd = 0;
+    
     poly_outline = OUTLINE_DEFAULT;
 
     int sl = snakelevel(c);
@@ -3547,6 +3574,9 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
 
       else if(c->land == laAlchemist)
         qfloor(c, Vf, shCloudFloor[ct6], darkena(fcol, fd, 0xFF));
+
+      else if(c->land == laVolcano && !eoh)
+        qfloor(c, Vf, shLavaFloor[ct6], darkena(fcol, fd, 0xFF));
 
       else if(c->land == laRose)
         qfloor(c, Vf, shRoseFloor[purehepta ? 2 : ct6], darkena(fcol, fd, 0xFF));

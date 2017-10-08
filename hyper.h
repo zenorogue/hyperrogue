@@ -944,8 +944,10 @@ enum PPR {
   PPR_HEPTAMARK,
   PPR_ITEM, PPR_ITEMa, PPR_ITEMb,
   PPR_BIGSTATUE,
-  PPR_GLASSm, PPR_GLASSs, PPR_GLASSp, PPR_GLASS,
+
   PPR_WALL3m, PPR_WALL3s, PPR_WALL3p, PPR_WALL3, PPR_WALL3A,
+
+// PPR_WALL3m, PPR_WALL3s, PPR_WALL3p, PPR_WALL3, PPR_WALL3A,
   PPR_HIDDEN, PPR_GIANTSHADOW,
   PPR_TENTACLE0, PPR_TENTACLE1,
   PPR_ONTENTACLE, PPR_ONTENTACLE_EYES, PPR_ONTENTACLE_EYES2,
@@ -1550,3 +1552,5 @@ void produceGhost(cell *c, eMonster victim, eMonster who);
 void sideAttack(cell *mf, int dir, eMonster who, int bonus, eItem orb);
 void sideAttack(cell *mf, int dir, eMonster who, int bonuskill);
 void warpfloor(cell *c, const transmatrix& V, int col, int prio, bool warp);
+
+void orboflava(int i);

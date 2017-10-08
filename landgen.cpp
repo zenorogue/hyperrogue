@@ -220,8 +220,8 @@ int isNative(eLand l, eMonster m) {
     case laPrairie:
       return (m == moRagingBull || m == moHerdBull || m == moGadfly) ? 1 : 0;
     
-    case laAlchemy2:
-      return m == moLemur ? 2 : 0;
+    case laVolcano:
+      return (m == moLavaWolf || m == moSalamander) ? 2 : 0;
     
     case laTerracotta: case laMercuryRiver:
       return m == moJiangshi ? 2 : m == moTerraWarrior ? 1 : 0;
@@ -320,7 +320,7 @@ eItem treasureType(eLand l) {
     case laBull: return itBull;
     case laPrairie: return itGreenGrass;
     
-    case laAlchemy2: return itAlchemy2;
+    case laVolcano: return itLavaLily;
     case laTerracotta: case laMercuryRiver: return itTerra;
     case laBlizzard: return itBlizzard;
     case laDogPlains: return itDogPlains;
@@ -777,7 +777,7 @@ bool landUnlocked(eLand l) {
     case laBull:
       return gold() >= R90;
     
-    case laAlchemy2:
+    case laVolcano:
       return gold() >= R30 && items[itElixir] >= U10;
     
     case laDogPlains:
@@ -4025,8 +4025,12 @@ void setdist(cell *c, int d, cell *from) {
       if(c->land == laAlchemist) 
         c->wall = (randomPatternsMode ? RANDPAT : hrand(2)) ? waFloorA : waFloorB;
 
-      if(c->land == laAlchemy2) 
-        c->wall = waSlime1;
+      if(c->land == laVolcano) {
+        c->wall = waNone;
+        if(hrand(20000) < (items[itLavaLily] + hard))
+          c->monst = moSalamander,
+          c->hitpoints = 3;
+        }
       
       if(c->land == laBlizzard) {
         bool windless = true;
@@ -5084,11 +5088,11 @@ void setdist(cell *c, int d, cell *from) {
           c->monst = pick(moVoidBeast, moIceGolem);
         }
 
-      if(c->land == laAlchemy2) {
-        if(hrand(5000) < PT(100 + 2 * kills[moLemur], 200) && notDippingFor(itAlchemy2))
-          c->item = itAlchemy2;
-        if(hrand(8000) < 2 * (items[itAlchemy2] + hard))
-          c->monst = moLemur;
+      if(c->land == laVolcano) {
+        if(hrand(5000) < PT(100 + 2 * kills[moLavaWolf], 200) && notDippingFor(itLavaLily))
+          c->item = itLavaLily;
+        if(hrand(8000) < (items[itLavaLily] + hard))
+          c->monst = moLavaWolf;
         }
 
       if(c->land == laTerracotta) {

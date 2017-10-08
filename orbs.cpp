@@ -1266,3 +1266,20 @@ bool isShmupLifeOrb(eItem it) {
     it == itOrbUndeath || it == itOrbLove ||
     it == itOrbDomination;  
   }
+
+void makelava(cell *c, int i) {
+  if(!pseudohept(c)) return;
+  if(isPlayerOn(c)) return;
+  if(c->wall == waFire && c->wparam < i)
+    c->wparam = i;
+  else makeflame(c, i, false);
+  }
+
+void orboflava(int i) {
+  if(items[itOrbLava]) 
+    for(cell *c: dcal) {
+      if(c->cpdist > 5) break;
+      if(!c->monst || isFriendly(c) || survivesFire(c->monst)) continue;
+      forCellEx(c2, c) makelava(c2, i);
+      }
+  }

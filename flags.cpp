@@ -113,7 +113,7 @@ bool isMetalBeast(eMonster m) {
 bool isStunnable(eMonster m) {
   return m == moPalace || m == moFatGuard || m == moSkeleton || isPrincess(m) ||
     isMetalBeast(m) || m == moTortoise || isDragon(m) ||
-    m == moReptile || m == moTerraWarrior;
+    m == moReptile || m == moTerraWarrior || m == moSalamander;
   }
 
 bool hasHitpoints(eMonster m) {
@@ -270,7 +270,7 @@ int itemclass(eItem i) {
     i == itKraken || i == itBarrow || i == itTrollEgg || i == itTreat ||
     i == itSlime || i == itAmethyst || i == itDodeca ||
     i == itGreenGrass || i == itBull ||
-    i == itAlchemy2 || i == itDogPlains ||
+    i == itLavaLily || i == itDogPlains ||
     i == itBlizzard || i == itTerra
     )
     return IC_TREASURE;
@@ -286,13 +286,13 @@ bool isAlch(eWall w) {
   return w == waFloorA || w == waFloorB;
   }
 
-bool isAlch2(eWall w, bool bubbletoo) {
+/* bool isAlch2(eWall w, bool bubbletoo) {
   return w == waSlime1 || w == waSlime2 || (bubbletoo && w == waBubble);
-  }
+  } */
 
-bool isAlch2(cell *c, bool bubbletoo) {
+/* bool isAlch2(cell *c, bool bubbletoo) {
   return isAlch2(c->wall, bubbletoo);
-  }
+  } */
 
 bool isAlch(cell *c) { return isAlch(c->wall); }
   
@@ -309,7 +309,7 @@ bool realred(eWall w) {
 int snakelevel(eWall w) {
   if(w == waRed1 || w == waDeadfloor2 || w == waRubble || w == waGargoyleFloor || 
     w == waGargoyleBridge || w == waTempFloor || w == waTempBridge || w == waRoundTable ||
-    w == waPetrifiedBridge) 
+    w == waPetrifiedBridge || w == waMagma) 
     return 1;
   if(w == waRed2) return 2;
   if(w == waRed3) return 3;
@@ -334,7 +334,7 @@ bool isWall(cell *w) {
     w->wall == waWeakBranch || w->wall == waCanopy || w->wall == waTower ||
     w->wall == waSmallBush || w->wall == waBigBush ||
     w->wall == waReptile || w->wall == waReptileBridge || w->wall == waInvisibleFloor ||
-    w->wall == waSlime1 || w->wall == waSlime2 || w->wall == waArrowTrap) 
+    w->wall == waSlime1 || w->wall == waSlime2 || w->wall == waArrowTrap || w->wall == waMagma) 
     return false;
   if(isWatery(w) || isChasmy(w) || isFire(w)) return false;
   return true;
@@ -376,7 +376,9 @@ bool normalMover(eMonster m) {
     m == moRoseBeauty || m == moWolf ||
     m == moResearcher || m == moRagingBull || 
     m == moNarciss || m == moMirrorSpirit || 
-    m == moHunterDog || m == moTerraWarrior || m == moJiangshi || m == moLemur || m == moHunterGuard ||
+    m == moHunterDog || m == moTerraWarrior || m == moJiangshi || 
+    m == moLavaWolf || m == moSalamander ||
+    m == moHunterGuard ||
     m == moIceGolem || slowMover(m);
   }
 
@@ -605,7 +607,7 @@ bool survivesFire(eMonster m) {
   return
     isGhost(m) || m == moWitchWinter || m == moWitchGhost ||
     m == moBomberbird || m == moTameBomberbird || m == moTameBomberbirdMoved ||
-    (isFriendly(m) && markOrb(itOrbWinter)) || isWorm(m) || m == moFireElemental ||
+    (isFriendly(m) && markOrb(itOrbWinter)) || m == moFireElemental ||
     isDragon(m) || m == moShadow;
   }
 

@@ -334,6 +334,8 @@ int* killtable[] = {
     &kills[moGadfly], &kills[moButterfly],
     &kills[moNarciss], &kills[moMirrorSpirit],
     &kills[moHunterDog], &kills[moIceGolem], &kills[moVoidBeast],
+    &kills[moJiangshi], &kills[moTerraWarrior],
+    &kills[moSalamander], &kills[moLavaWolf],
     NULL
     };
 
@@ -520,7 +522,8 @@ bool passable(cell *w, cell *from, flagtype flags) {
     return F(P_MIRRORWALL);
   
   if(F(P_BULLET)) {
-    if(isFire(w) || w->wall == waBonfireOff || cellHalfvine(w) || 
+    if(isFire(w) || w->wall == waBonfireOff || cellHalfvine(w) ||  
+      w->wall == waMagma ||
       w->wall == waAncientGrave || w->wall == waFreshGrave || w->wall == waRoundTable)
       return true;
     }
@@ -558,7 +561,7 @@ bool passable(cell *w, cell *from, flagtype flags) {
   
   if(isThorny(w->wall) && F(P_BLOW | P_DEADLY)) return true;
 
-  if(isFire(w)) {
+  if(isFire(w) || w->wall == waMagma) {
     if(!F(P_AETHER | P_WINTER | P_BLOW | P_JUMP1 | P_BULLET | P_DEADLY)) return false;
     }
     
@@ -1682,9 +1685,10 @@ void stunMonster(cell *c2) {
     c2->monst == moVizier ? 1 :
     c2->monst == moHedge ? 1 :
     c2->monst == moFlailer ? 1 :
+    c2->monst == moSalamander ? 6 :
     3);
   if(c2->monst != moSkeleton && !isMetalBeast(c2->monst) && c2->monst != moTortoise &&
-    c2->monst != moReptile) {
+    c2->monst != moReptile && c2->monst != moSalamander) {
     c2->hitpoints--;
     if(c2->monst == moPrincess)
       playSound(c2, princessgender() ? "hit-princess" : "hit-prince");
@@ -2432,10 +2436,12 @@ void checkTide(cell *c) {
     if(isFire(c) && t >= tidalphase)
       c->wall = waSea;
     }
-  if(isAlch2(c, true)) {
+  if(c->land == laVolcano) {
     int id = alchemyval(c, 0);
-    if(id < 96) c->wall = waBubble;
-    else c->wall = waSlime1;
+    if(id < 96) {
+      if(c->wall == waNone) c->wall = waMagma;
+      }
+    else if(c->wall == waMagma) c->wall = waNone;
     }
   }
 
@@ -4703,7 +4709,7 @@ int movevalue(eMonster m, cell *c, cell *c2, flagtype flags) {
     isActiveEnemy(c2,m) ? 12000 :
     (c2->monst == moSkeleton || c2->monst == moMetalBeast || 
      c2->monst == moReptile || c2->monst == moTortoise ||
-     c2->monst == moTerraWarrior) ? -400 :
+     c2->monst == moSalamander || c2->monst == moTerraWarrior) ? -400 :
     isIvy(c2) ? 8000 :
     isInactiveEnemy(c2,m) ? 1000 :
     -500;
@@ -5175,7 +5181,7 @@ void moverefresh(bool turn = true) {
       }
 
     else if(isFire(c)) {
-      if(c->monst && !survivesFire(c->monst)) {
+      if(c->monst && !survivesFire(c->monst) && !isWorm(c->monst)) {
         addMessage(XLAT("%The1 burns!", c->monst));
         if(isBull(c->monst)) {
           addMessage(XLAT("Fire is extinguished!"));
@@ -5216,6 +5222,17 @@ void moverefresh(bool turn = true) {
           addMessage(XLAT("%The1 is filled!", c->wall));
           c->wall = waNone;
           }
+        fallMonster(c, AF_FALL);
+        }
+      }
+    else if(c->wall == waMagma) {
+      if(c->monst == moSalamander) c->stuntime = max<int>(c->stuntime, 1);
+      else if(c->monst && !survivesPoison(c->monst, c->wall)) {
+        playSound(c, "splash"+pick12());
+        if(isNonliving(c->monst))
+          addMessage(XLAT("%The1 is destroyed by lava!", c->monst));
+        else 
+          addMessage(XLAT("%The1 is killed by lava!", c->monst));
         fallMonster(c, AF_FALL);
         }
       }
@@ -5300,6 +5317,9 @@ void moveNormals(eMonster param) {
 
 void movemonsters() {
 
+  DEBT("lava1");
+  orboflava(1);
+
   sagefresh = true;
   turncount++;
 
@@ -5376,6 +5396,9 @@ void movemonsters() {
   
   DEBT("fresh");
   moverefresh();
+  
+  DEBT("lava2");
+  orboflava(2);
 
   DEBT("shadow");
   moveshadow();
@@ -6907,6 +6930,7 @@ bool movepcto(int d, int subdir, bool checkonly) {
         drawParticles(c2, winf[c2->wall].color, 8);
         addMessage(XLAT("You chop down the tree."));
         playSound(c2, "hit-axe" + pick123());
+        c2->wall = waSmallTree;
         sideAttack(cwt.c, d, moPlayer, 0);
         }
       else {
