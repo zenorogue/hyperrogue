@@ -301,6 +301,9 @@ void initConfig() {
   addsaverenum(specialland, "land for special modes");
   
   addsaver(viewdists, "expansion mode");
+  
+  addsaver(vid.msgleft, "message style", 2);
+  addsaver(vid.msglimit, "message limit", 5);
 
 #if CAP_SHMUP  
   shmup::initConfig();
@@ -752,6 +755,11 @@ void showBasicConfig() {
   dialog::addBoolItem(XLAT("draw circle around the target"), (vid.drawmousecircle), 'd');
   
   dialog::addSelItem(XLAT("message flash time"), its(vid.flashtime), 't');
+  dialog::addSelItem(XLAT("limit messages shown"), its(vid.msglimit), 'z');
+  
+  const char* msgstyles[3] = {"centered", "left-aligned", "line-broken"};
+  
+  dialog::addSelItem(XLAT("message style"), XLAT(msgstyles[vid.msgleft]), 'a');
 
 #if ISMOBILE
   dialog::addBoolItem(XLAT("targetting ranged Orbs long-click only"), (vid.shifttarget&2), 'i');
@@ -821,8 +829,14 @@ void showBasicConfig() {
     if(xuni == 't') 
       dialog::editNumber(vid.flashtime, 0, 64, 1, 8, XLAT("message flash time"),
         XLAT("How long should the messages stay on the screen."));
+
+    if(xuni == 'z') 
+      dialog::editNumber(vid.msglimit, 0, 64, 1, 5, XLAT("limit messages shown"),
+        XLAT("Maximum number of messages on screen."));
     
     if(xuni == 'i') { vid.shifttarget = vid.shifttarget^3; }
+    
+    if(xuni == 'a') { vid.msgleft = (1+vid.msgleft) % 3; }
   
     handleAllConfig(sym, xuni);
     };

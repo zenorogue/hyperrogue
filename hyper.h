@@ -334,6 +334,8 @@ struct videopar {
   
   int wallmode, monmode, axes;
   bool revcontrol;
+  
+  int msgleft, msglimit;
 
   // for OpenGL
   float scrdist;

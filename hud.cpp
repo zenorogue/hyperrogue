@@ -90,7 +90,7 @@ int glyphsortkey = 0;
 
 int glyphcorner(int i) {
   if(i < ittypes)
-    return itemclass(eItem(i)) == IC_ORB ? 2 : 0;
+    return itemclass(eItem(i)) == IC_ORB ? 3 : 0;
   else
     return 1;
   }
@@ -333,7 +333,7 @@ void drawStats() {
     updatesort();
     stable_sort(glyphorder, glyphorder+glyphs, glyphsort);
     int rad = min(vid.xres, vid.yres) / 2;
-    for(int cor=0; cor<3; cor++) {
+    for(int cor=0; cor<4; cor++) {
       for(int a=5; a<41; a++) {
         int s = min(vid.xres, vid.yres) / a;
         int spots = 0;
@@ -372,7 +372,7 @@ void drawStats() {
   instat = false;
   bool portrait = vid.xres < vid.yres;
   int colspace = portrait ? (vid.yres - vid.xres - vid.fsize*3) : (vid.xres - vid.yres - 16) / 2;
-  int rowspace = portrait ? vid.xres - 16 : vid.yres - vid.fsize * 4;
+  int rowspace = portrait ? vid.xres - 16 : vid.yres - vid.fsize * (vid.msgleft ? 9 : 4);
   int colid[4], rowid[4];
   int maxbyclass[4];
   for(int z=0; z<4; z++) maxbyclass[z] = 0;

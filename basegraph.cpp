@@ -762,27 +762,79 @@ int colormix(int a, int b, int c) {
   return a;
   }
 
+int rhypot(int a, int b) { return (int) sqrt(a*a - b*b); }
+
+void drawmessage(const string& s, int& y, int col) {
+  int rrad = min(vid.radius, min(vid.xres, vid.yres) / 2);
+  int space;
+  if(y > vid.ycenter + rrad)
+    space = vid.xres;
+  else if(y > vid.ycenter)
+    space = vid.xcenter - rhypot(rrad, y-vid.ycenter);
+  else if(y > vid.ycenter - vid.fsize)
+    space = vid.xcenter - rrad;
+  else if(y > vid.ycenter - vid.fsize - rrad)
+    space = vid.xcenter - rhypot(rrad, vid.ycenter-vid.fsize-y);
+  else
+    space = vid.xres;
+
+  if(textwidth(vid.fsize, s) <= space) {
+    displayfr(0, y, 1, vid.fsize, s, col, 0);
+    y -= vid.fsize;
+    return;
+    }
+
+  for(int i=1; i<size(s); i++)
+    if(s[i-1] == ' ' && textwidth(vid.fsize, "..."+s.substr(i)) <= space) {    
+      displayfr(0, y, 1, vid.fsize, "..."+s.substr(i), col, 0);
+      y -= vid.fsize;
+      drawmessage(s.substr(0, i-1), y, col);
+      return;
+      }  
+
+  // no chance
+  displayfr(0, y, 1, vid.fsize, s, col, 0);
+  y -= vid.fsize;
+  return;
+  }
+
 void drawmessages() {
   DEBB(DF_GRAPH, (debugfile,"draw messages\n"));
   int i = 0;
   int t = ticks;
-  for(int j=0; j<size(msgs) && j<5; j++) {
+  for(int j=0; j<size(msgs); j++) {
+    if(j < size(msgs) - vid.msglimit) continue;
     int age = msgs[j].flashout * (t - msgs[j].stamp);
     if(msgs[j].spamtype) {
       for(int i=j+1; i<size(msgs); i++) if(msgs[i].spamtype == msgs[j].spamtype)
         msgs[j].flashout = 2;
       }
-    if(age < 256*vid.flashtime) {
-      int x = vid.xres / 2;
+    if(age < 256*vid.flashtime)
+      msgs[i++] = msgs[j];
+    }
+  msgs.resize(i);
+  if(vid.msgleft == 2) {
+    int y = vid.yres - vid.fsize - (ISIOS ? 4 : 0);
+    for(int j=size(msgs)-1; j>=0; j--) {
+      int age = msgs[j].flashout * (t - msgs[j].stamp);
+      poly_outline = gradient(bordcolor, backcolor, 0, age, 256*vid.flashtime) << 8;
+      int col = gradient(forecolor, backcolor, 0, age, 256*vid.flashtime);
+      string s = msgs[j].msg;
+      if(msgs[j].quantity > 1) s += " (x" + its(msgs[j].quantity) + ")";
+      drawmessage(s, y, col);
+      }
+    }
+  else {
+    for(int j=0; j<size(msgs); j++) {
+      int age = msgs[j].flashout * (t - msgs[j].stamp);
+      int x = vid.msgleft ? 0 : vid.xres / 2;
       int y = vid.yres - vid.fsize * (size(msgs) - j) - (ISIOS ? 4 : 0);
       string s = msgs[j].msg;
       if(msgs[j].quantity > 1) s += " (x" + its(msgs[j].quantity) + ")";
       poly_outline = gradient(bordcolor, backcolor, 0, age, 256*vid.flashtime) << 8;
-      displayfr(x, y, 1, vid.fsize, s, gradient(forecolor, backcolor, 0, age, 256*vid.flashtime), 8);
-      msgs[i++] = msgs[j];
+      displayfr(x, y, 1, vid.fsize, s, gradient(forecolor, backcolor, 0, age, 256*vid.flashtime), vid.msgleft ? 0 : 8);
       }
     }
-  msgs.resize(i);
   }
 
 int gradient(int c0, int c1, ld v0, ld v, ld v1) {
