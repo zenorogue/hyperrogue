@@ -171,7 +171,7 @@ void flashCell(cell *c, eMonster killer, flagtype flags) {
   if(c->wall == waGargoyleBridge)  placeWater(c, c);
   if(c->wall == waGargoyle)  c->wall = waNone;
   if(c->wall == waPlatform)  c->wall = waNone;
-  if(c->wall == waStone)     c->wall = waNone;
+  if(c->wall == waStone)     c->wall = waNone, destroyTrapsAround(c);
   if(c->wall == waRubble)    c->wall = waNone;
   if(c->wall == waDeadwall)  c->wall = waDeadfloor2;
   if(c->wall == waGiantRug)  c->wall = waNone;
@@ -377,7 +377,8 @@ void castLightningBolt(cellwalker lig) {
 
     if(c->wall == waBigStatue) c->wall = waNone, spin = true;
     if(c->wall == waColumn)    c->wall = waNone, spin = true;
-    if(c->wall == waStone)     c->wall = waNone, brk = true;
+    if(c->wall == waStone)     c->wall = waNone, brk = true, destroyTrapsAround(c);
+    if(c->wall == waArrowTrap) activateArrowTrap(c);
     
     if(c->wall == waCanopy || c->wall == waTrunk || c->wall == waBigBush || c->wall == waSmallBush) {
       makeflame(c, 12, false); brk = true;
@@ -674,7 +675,7 @@ eMonster summonedAt(cell *dest) {
     return moReptile;
   if(dest->wall == waChasm)
     return moAirElemental;
-  if(isFire(dest))
+  if(isFire(dest) || dest->wall == waMagma)
     return moFireElemental;
   if(dest->wall == waCavewall || dest->wall == waDeadwall)
     return moSeep;
@@ -733,6 +734,10 @@ eMonster summonedAt(cell *dest) {
     if(dest->land == laDragon) return moFireElemental;
     if(dest->land == laTortoise) return moTortoise;
     if(dest->land == laBurial) return moEarthElemental;
+    if(dest->land == laVolcano) return moFireElemental;
+    if(dest->land == laBlizzard) return moAirElemental;
+    if(dest->land == laDogPlains) return moAirElemental;
+    if(dest->land == laTerracotta) return moEarthElemental;
     if(isHaunted(dest->land)) return moGhost;
     }
   return moNone;

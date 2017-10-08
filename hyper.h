@@ -1575,3 +1575,6 @@ extern int hardness_empty();
 extern eWall getElementalWall(eLand l);
 
 void gainItem(eItem it);
+
+void destroyTrapsOn(cell *c);
+void destroyTrapsAround(cell *c);

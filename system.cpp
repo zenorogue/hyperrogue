@@ -271,7 +271,7 @@ bool havesave = true;
 
 #if CAP_SAVE
 #define MAXBOX 500
-#define POSSCORE 308 // update this when new boxes are added!
+#define POSSCORE 324 // update this when new boxes are added!
 
 struct score {
   string ver;
@@ -624,7 +624,25 @@ void applyBoxes() {
   #else
   { int u; applyBoxNum(u); }
   #endif
-  
+
+  // 10.1:
+  applyBoxI(itLavaLily);
+  applyBoxI(itDogPlains);
+  applyBoxI(itBlizzard);
+  applyBoxI(itTerra);
+  applyBoxOrb(itOrbSide1);
+  applyBoxOrb(itOrbSide2);
+  applyBoxOrb(itOrbSide3);
+  applyBoxOrb(itOrbLava);
+  applyBoxOrb(itOrbMorph);
+  applyBoxM(moHunterDog);
+  applyBoxM(moIceGolem);
+  applyBoxM(moVoidBeast);
+  applyBoxM(moJiangshi);
+  applyBoxM(moTerraWarrior);
+  applyBoxM(moSalamander);
+  applyBoxM(moLavaWolf);
+
   if(POSSCORE != boxid) printf("ERROR: %d boxes\n", boxid);
   }
 

@@ -419,10 +419,12 @@ bool boatGoesThrough(cell *c) {
     c->wall == waCavefloor || c->wall == waFrozenLake || isReptile(c->wall) ||
     c->wall == waDeadfloor || c->wall == waCIsland || c->wall == waCIsland2 ||
     c->wall == waMineUnknown || c->wall == waMineMine || c->wall == waMineOpen ||
-    c->wall == waBonfireOff || c->wall == waFire || c->wall == waPartialFire;
+    c->wall == waBonfireOff || c->wall == waFire || c->wall == waPartialFire ||
+    c->wall == waArrowTrap;
   }
 
 void placeWater(cell *c, cell *c2) {
+  destroyTrapsOn(c);
   if(isWatery(c)) ;
   else if(c2 && isAlchAny(c2))
     c->wall = c2->wall;
@@ -1390,6 +1392,7 @@ void prespill(cell* c, eWall t, int rad, cell *from) {
     c->wall == waBarrowDig || c->wall == waBarrowWall ||
     c->wall == waMirrorWall)
     return;
+  destroyTrapsOn(c);
   // these walls block further spilling
   if(c->wall == waCavewall || cellUnstable(c) || c->wall == waSulphur ||
     c->wall == waSulphurC || c->wall == waLake || c->wall == waChasm ||
@@ -1451,7 +1454,7 @@ bool earthFloor(cell *c) {
   if(c->monst) return false;
   if(c->wall == waDeadwall) { c->wall = waDeadfloor; return true; }
   if(c->wall == waDune) { c->wall = waNone; return true; }
-  if(c->wall == waStone) { c->wall = waNone; return true; }
+  if(c->wall == waStone && c->land != laTerracotta) { c->wall = waNone; return true; }
   if(c->wall == waAncientGrave || c->wall == waFreshGrave) {
     c->wall = waNone;
     return true;
@@ -1468,12 +1471,20 @@ bool earthFloor(cell *c) {
     c->wall = waNone;
   if(c->wall == waBoat && c->land == laWarpSea)
     c->wall = waStrandedBoat;
+  if(c->wall == waMercury) {
+    c->wall = waNone;
+    return true;
+    }
   if((c->wall == waBarrowDig || c->wall == waBarrowWall) && c->land == laBurial) {
     c->item = itNone;
     c->wall = waNone;
     return true;
     }
   if(c->wall == waPlatform && c->land == laMountain) {
+    c->wall = waNone;
+    return true;
+    }
+  if(c->wall == waChasm && c->land == laDogPlains) {
     c->wall = waNone;
     return true;
     }
@@ -1508,6 +1519,20 @@ bool earthWall(cell *c) {
   if(c->wall == waNone && c->land == laBurial) {
     c->item = itNone;
     c->wall = waBarrowDig;
+    return true;
+    }
+  if(c->wall == waNone && c->land == laDogPlains) {
+    c->item = itNone;
+    c->wall = waChasm;
+    return true;
+    }
+  if(c->wall == waNone && c->land == laTerracotta) {
+    c->wall = waMercury;
+    return true;
+    }
+  if(c->wall == waArrowTrap && c->land == laTerracotta) {
+    destroyTrapsOn(c);
+    c->wall = waMercury;
     return true;
     }
   if(c->wall == waCIsland || c->wall == waCIsland2 || (c->wall == waNone && c->land == laOcean)) {
@@ -1570,6 +1595,7 @@ bool snakepile(cell *c, eMonster m) {
   }
 
 bool makeflame(cell *c, int timeout, bool checkonly) {
+  destroyTrapsOn(c);
   if(itemBurns(c->item)) {
     if(checkonly) return true;
     addMessage(XLAT("%The1 burns!", c->item)), c->item = itNone;
@@ -1637,6 +1663,7 @@ void explodeMine(cell *c) {
   
   for(int i=0; i<c->type; i++) if(c->mov[i]) {
     cell *c2 = c->mov[i];
+    destroyTrapsOn(c2);
     if(c2->wall == waRed2 || c2->wall == waRed3)
       c2->wall = waRed1;
     else if(c2->wall == waDeadTroll || c2->wall == waDeadTroll2 || c2->wall == waPetrified || c2->wall == waGargoyle) {
@@ -2915,6 +2942,14 @@ void toggleGates(cell *ct, eWall type) {
     playSound(ct, "opengate");
   }
 
+void destroyTrapsOn(cell *c) {
+  if(c->wall == waArrowTrap) c->wall = waNone, destroyTrapsAround(c);
+  }
+
+void destroyTrapsAround(cell *c) {
+  forCellEx(c2, c) destroyTrapsOn(c2);
+  }
+
 void destroyWeakBranch(cell *cf, cell *ct, eMonster who) {
   if(cf && ct && cf->wall == waWeakBranch && cellEdgeUnstable(ct) &&
     gravityLevel(ct) >= gravityLevel(cf) && !ignoresPlates(who)) {
@@ -3688,6 +3723,7 @@ cell *moveNormal(cell *c, flagtype mf) {
     }
   }
 
+// for sandworms
 void explodeAround(cell *c) {
   for(int j=0; j<c->type; j++) {
     cell* c2 = c->mov[j];
@@ -3711,7 +3747,7 @@ void explodeAround(cell *c) {
       if(c2->wall == waGargoyleBridge || c2->wall == waPetrifiedBridge) placeWater(c2, c2);
       if(c2->wall == waRubble) c2->wall = waNone;
       if(c2->wall == waPlatform) c2->wall = waNone;
-      if(c2->wall == waStone) c2->wall = waNone;
+      if(c2->wall == waStone) c2->wall = waNone, destroyTrapsAround(c2);
       if(c2->wall == waRose) c2->wall = waNone;
       if(c2->wall == waLadder) c2->wall = waNone;
       if(c2->wall == waGargoyle) c2->wall = waNone;

@@ -802,7 +802,7 @@ genderswitch_t genderswitch[NUM_GS] = {
 
 // --- items ---
 
-const int ittypes = 120;
+const int ittypes = 121;
 
 struct itemtype {
   char  glyph;
@@ -1203,6 +1203,7 @@ itemtype iinf[ittypes] = {
   { 'o', 0x30A080, "Orb of the Side II", NODESCYET},
   { 'o', 0x30D080, "Orb of the Side III", NODESCYET},
   { 'o', 0xD08030, "Orb of Lava", NODESCYET},
+  { 'o', 0x3080D0, "Orb of Morph", NODESCYET},
   };
 
 enum eItem { itNone, itDiamond, itGold, itSpice, itRuby, itElixir, itShard, itBone, itHell, itStatue,
@@ -1239,7 +1240,7 @@ enum eItem { itNone, itDiamond, itGold, itSpice, itRuby, itElixir, itShard, itBo
   itInventory,
   itLavaLily, itDogPlains, itBlizzard, itTerra,
   itOrbSide1, itOrbSide2, itOrbSide3,
-  itOrbLava
+  itOrbLava, itOrbMorph
   };
 
 // --- wall types ---

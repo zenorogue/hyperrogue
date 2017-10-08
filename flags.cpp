@@ -103,7 +103,7 @@ bool isNonliving(eMonster m) {
     m == moZombie || m == moGhost || m == moShadow || m == moSkeleton ||
     m == moEvilGolem || m == moIllusion || m == moEarthElemental || 
     m == moWaterElemental || m == moDraugr || m == moTerraWarrior ||
-    m == moIceGolem || m == moVoidBeast;
+    m == moIceGolem || m == moVoidBeast || m == moJiangshi;
   }
 
 bool isMetalBeast(eMonster m) {
