@@ -1492,7 +1492,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
       break;
     
     case laDogPlains:
-      if(d == 7 && c->land == laDogPlains && false) {
+      if(d == 7 && c->land == laDogPlains) {
         if(hrand(1000) < 10) {
           if(openplains(c)) {
             c->item = itDogPlains;
