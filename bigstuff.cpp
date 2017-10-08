@@ -1027,3 +1027,168 @@ void doOvergenerate() {
     if(c->cpdist <= sightrange-6) setdist(c, 1, NULL);
     }
   }
+
+void buildCamelotWall(cell *c) {
+  c->wall = waCamelot;
+  for(int i=0; i<c->type; i++) {
+    cell *c2 = createMov(c, i);
+    if(c2->wall == waNone && (euclid || (c2->master->alt && c->master->alt)) && celldistAlt(c2) > celldistAlt(c) && c2->monst == moNone)
+      c2->wall = waCamelotMoat;
+    }
+  }
+
+void moreBigStuff(cell *c) {
+  if(c->land == laPalace && !euclid && c->master->alt) {
+    int d = celldistAlt(c);
+    if(d <= PRADIUS1) generateAlts(c->master);
+    }
+
+  if(c->land == laStorms)
+    if(!euclid) {
+      if(c->master->alt && c->master->alt->distance <= 2) {
+        generateAlts(c->master);
+        preventbarriers(c);
+        int d = celldistAlt(c);
+        if(d <= -2) {
+          c->wall = (c->master->alt->alt->emeraldval & 1) ? waCharged : waGrounded;
+          c->item = itNone;
+          c->monst = moNone;
+          }
+        else if(d <= -1)
+          c->wall = (hrand(100) < 20) ? waSandstone : waNone;
+        else if(d <= 0)
+          c->wall = waNone;
+        }
+      }        
+
+  if((bearsCamelot(c->land) && !euclid && !quotient) || c->land == laCamelot) 
+  if(euclid || c->master->alt) {
+    int d = celldistAltRelative(c);
+    if(tactic::on || (d <= 14 && roundTableRadius(c) > 20)) {
+      if(!euclid) generateAlts(c->master);
+      preventbarriers(c);
+      if(d == 10) {
+        if(pseudohept(c)) buildCamelotWall(c);
+        else {
+          if(!euclid) for(int i=0; i<7; i++) generateAlts(c->master->move[i]);
+          int q = 0;
+          for(int t=0; t<6; t++) {
+            createMov(c, t);
+            if(celldistAltRelative(c->mov[t]) == 10 && !pseudohept(c->mov[t])) q++;
+            }
+          if(q == 1) buildCamelotWall(c);
+          // towers of Camelot
+          if(q == 0 && !purehepta) {
+            c->monst = moKnight;
+            c->wall = waTower;
+            forCellEx(c2, c) {
+              int cr = celldistAltRelative(c2);
+              if(cr == 9) ;
+              else {
+                buildCamelotWall(c2);
+                if(c2->type == 6)
+                  c2->wall = waTower, c2->wparam = 1;
+                }
+              }
+            for(int i=0; i<c->type; i++) if(celldistAltRelative(c->mov[i]) < d)
+              c->mondir = i;
+            }
+          }
+        }
+      if(d == 0) c->wall = waRoundTable;
+      if(celldistAlt(c) == 0 && !tactic::on) c->item = itHolyGrail;
+      if(d < 0 && hrand(7000) <= 10 + items[itHolyGrail] * 5) {
+        eMonster m[3] = { moHedge, moLancer, moFlailer };
+        c->monst = m[hrand(3)];
+        }
+      if(d == 1) {
+        // roughly as many knights as table cells
+        if(hrand(purehepta ? 2618 : 1720) < 1000) 
+          c->monst = moKnight;
+        if(!euclid) for(int i=0; i<7; i++) generateAlts(c->master->move[i]);
+        for(int i=0; i<c->type; i++) 
+          if(c->mov[i] && celldistAltRelative(c->mov[i]) < d)
+            c->mondir = (i+3) % 6;
+        }
+      if(tactic::on && d >= 2 && d <= 8 && hrand(1000) < 10)
+        c->item = itOrbSafety;
+      if(d == 5 && tactic::on)
+        c->item = itGreenStone;
+      if(d <= 10) c->land = laCamelot;
+      if(d > 10 && !euclid && !tactic::on) {
+        setland(c, eLand(c->master->alt->alt->fiftyval));
+        if(c->land == laNone) printf("Camelot\n"); // NONEDEBUG
+        }
+      }
+    }
+  
+  if(chaosmode && c->land == laTemple) {
+    for(int i=0; i<c->type; i++)
+      if(pseudohept(c) && c->mov[i] && c->mov[i]->land != laTemple)
+        c->wall = waColumn;
+    }
+  
+  else if((c->land == laRlyeh && !euclid) || c->land == laTemple) {
+    if(euclid || (c->master->alt && (tactic::on || c->master->alt->distance <= 2))) {
+      if(!euclid && !chaosmode) generateAlts(c->master);
+      preventbarriers(c);
+      int d = celldistAlt(c);
+      if(d <= 0) {
+        c->land = laTemple, c->wall = waNone, c->monst = moNone, c->item = itNone;
+        }
+      if(d % TEMPLE_EACH==0) {
+        if(pseudohept(c)) 
+          c->wall = waColumn;
+        else {
+          if(!euclid) for(int i=0; i<7; i++) generateAlts(c->master->move[i]);
+          int q = 0;
+          for(int t=0; t<6; t++) {
+            createMov(c, t);
+            if(celldistAlt(c->mov[t]) % TEMPLE_EACH == 0 && !ishept(c->mov[t])) q++;
+            }
+          if(q == 2) c->wall = waColumn;
+          }
+        }
+      }
+    }
+
+ if((c->land == laOvergrown && !euclid) || c->land == laClearing) {
+    if(euclid || (c->master->alt && (tactic::on || c->master->alt->distance <= 2))) {
+      if(!euclid) generateAlts(c->master);
+      preventbarriers(c);
+      int d = celldistAlt(c);
+      if(d <= 0) {
+        c->land = laClearing, c->wall = waNone; // , c->monst = moNone, c->item = itNone;
+        }
+      else if(d == 1 && !tactic::on && !euclid)
+        c->wall = waSmallTree, c->monst = moNone, c->item = itNone;
+      }
+    }
+
+ if((c->land == laJungle && !euclid) || c->land == laMountain) {
+    if(euclid || (c->master->alt && (tactic::on || c->master->alt->distance <= 2))) {
+      if(!euclid) generateAlts(c->master);
+      preventbarriers(c);
+      int d = celldistAlt(c);
+      if(d <= 0 || (firstland == laMountain && tactic::on)) {
+        c->land = laMountain, c->wall = waNone; // , c->monst = moNone, c->item = itNone;
+        }
+      }
+    }
+
+  if(c->land == laOcean || c->land == laWhirlpool) {
+    bool fullwhirlpool = false;
+    if(tactic::on && tactic::lasttactic == laWhirlpool)
+      fullwhirlpool = true;
+    if(yendor::on && yendor::clev().l == laWhirlpool)
+      fullwhirlpool = true;
+    if(euclid || (c->master->alt && (fullwhirlpool || c->master->alt->distance <= 2))) {
+      if(!euclid) generateAlts(c->master);
+      preventbarriers(c);
+      int dd = celldistAlt(c);
+      if(dd <= 0 || fullwhirlpool) {
+        c->land = laWhirlpool, c->wall = waSea, c->monst = moNone, c->item = itNone;
+        }
+      }
+    }      
+  }
