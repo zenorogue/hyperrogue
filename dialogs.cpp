@@ -532,8 +532,6 @@ namespace dialog {
   
   string disp(ld x) { if(ne.intval) return its((int) (x+.5)); else return fts(x); }
 
-  typedef function<void()> reaction_t;
-  
   reaction_t reaction;
 
   void affect(char kind) {
@@ -655,8 +653,8 @@ namespace dialog {
 
     if(ne.help != "") {
       addHelp(ne.help);
-      bool scal = !ISMOBILE && !ISPANDORA && size(ne.help) > 160;
-      if(scal) lastItem().scale = 30;
+      // bool scal = !ISMOBILE && !ISPANDORA && size(ne.help) > 160;
+      // if(scal) lastItem().scale = 30;
       }
 
     if(ne.editwhat == &vid.alpha) {
@@ -806,6 +804,18 @@ namespace dialog {
   void editNumber(int& x, int vmin, int vmax, int step, int dft, string title, string help) {
     editNumber(ne.intbuf, vmin, vmax, step, dft, title, help);
     ne.intbuf = x; ne.intval = &x; ne.s = its(x);
+    }
+  
+  void helpToEdit(int& x, int vmin, int vmax, int step, int dft) {
+    popScreen();
+    string title = "help";
+    if(help[0] == '@') {
+      int iv = help.find("\t");
+      int id = help.find("\n");
+      title = help.substr(iv+1, id-iv-1);
+      help = help.substr(id+1);
+      }
+    editNumber(x, vmin, vmax, step, dft, title, help);
     }
   
   };

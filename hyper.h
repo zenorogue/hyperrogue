@@ -300,7 +300,9 @@ extern ld crad;
 extern bool mousepressed, anyshiftclick;
 extern string help;
 
-extern function<void()> help_delegate;
+typedef function<void()> reaction_t;
+
+extern reaction_t help_delegate;  
 
 #define HELPFUN(x) (help_delegate = x, "HELPFUN")
 

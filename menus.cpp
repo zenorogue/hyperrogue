@@ -139,36 +139,37 @@ void showOverview() {
     int umod = uni % 1000;
     int udiv = uni / 1000;
     if(udiv == 1 && umod < landtypes) {
-      if(cheater && !hiliteclick) {
-        eLand l = eLand(umod);
-        cheater++;
-        bool princ = (l == laPrincessQuest);
-        if(princ) {
-          if(kills[moVizier] == 0) kills[moVizier] = 1;
-          princess::forceMouse = true;
-          princess::gotoPrincess = true;
-          l = laPalace;
-          }
-        cheatMoveTo(l);
-        popScreen();
-        canmove = true;
-        if(princ) fullcenter();
+      eLand l = eLand(umod);
+      gotoHelp(generateHelpForLand(l));
+      if(cheater) {
+        help_action_text = "teleport";
+        help_action = [l] () {
+          cheater++;
+          bool princ = (l == laPrincessQuest);
+          if(princ) {
+            if(kills[moVizier] == 0) kills[moVizier] = 1;
+            princess::forceMouse = true;
+            princess::gotoPrincess = true;
+            cheatMoveTo(laPalace);
+            }
+          else cheatMoveTo(l);
+          canmove = true;
+          if(princ) fullcenter();
+          popScreen();
+          popScreen();
+          };
         }
-      else gotoHelp(generateHelpForLand(eLand(umod)));
       }
     else if(udiv == 2 && umod < ittypes) {
-      if(cheater && !hiliteclick) {
-        cheater++;
-        int ic = itemclass(eItem(umod));
-        if(ic == IC_TREASURE) items[umod] += PREC(10);
-        if(ic == IC_ORB) items[umod] += PREC(60);
-        if(umod == itGreenStone) items[umod] += PREC(100);
-        else if(ic == IC_OTHER) items[umod] += (shiftmul>0?1:-1);
-        if(items[umod] < 0) items[umod] = 0;
-        if(hardcore) canmove = true;
-        else checkmove();
+      gotoHelp(generateHelpForItem(eItem(umod)));
+      if(cheater) {
+        dialog::helpToEdit(items[umod], 0, 200, 10, 10);
+        dialog::reaction = [] () {
+          if(hardcore) canmove = true;
+          else checkmove();
+          cheater++;
+          };
         }
-      else gotoHelp(generateHelpForItem(eItem(umod)));
       }
     else if(udiv == 3 && umod < walltypes) gotoHelp(generateHelpForWall(eWall(umod)));
     else if(uni == SDLK_F1) gotoHelp(

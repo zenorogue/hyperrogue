@@ -721,6 +721,9 @@ void describeMouseover() {
   if(mousey < vid.fsize * 3/2) getcstat = SDLK_F1;
   }
 
+string help_action_text;
+reaction_t help_action;
+
 void showHelp() {
   gamescreen(2);
   cmode = sm::HELP | sm::DOTOUR;
@@ -744,7 +747,8 @@ void showHelp() {
     dialog::addHelp(help);
     }
   
-  if(help == buildHelpText()) dialog::addItem("credits", 'c');
+  if(help == buildHelpText()) dialog::addItem(XLAT("credits"), 'c');
+  if(help_action_text != "") dialog::addItem(help_action_text, 't');
   
   dialog::display();
   
@@ -754,6 +758,8 @@ void showHelp() {
       help = "@";
     else if(uni == 'c')
       help = buildCredits();
+    else if(uni == 't' && help_action)
+      help_action();
     else if(doexiton(sym, uni))
       popScreen();
     };
@@ -761,5 +767,6 @@ void showHelp() {
 
 void gotoHelp(const string& h) {
   help = h;
+  help_action = reaction_t();
   pushScreen(showHelp);
   }
