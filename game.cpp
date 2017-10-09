@@ -3789,7 +3789,6 @@ void killHardcorePlayer(int id, flagtype flags) {
   else {
     canmove = false;
     achievement_final(true);
-    msgscroll = 0;
     }
   }
 
@@ -5669,7 +5668,6 @@ void checkmove() {
 
   if(multi::players > 1 && !multi::checkonly) return;
   if(hardcore) return;
-  msgscroll = 0;
   bool orbusedbak[ittypes];
   
   // do not activate orbs!

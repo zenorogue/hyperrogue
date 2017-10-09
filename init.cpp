@@ -453,7 +453,7 @@ string buildScoreDescription() {
   
   s += XLAT("HyperRogue for Android");
   s += " ( " VER "), http://www.roguetemple.com/z/hyper/\n";
-  s += XLAT("Date: %1 time: %2 s ", buf, its(savetime + time(NULL) - timerstart));
+  s += XLAT("Date: %1 time: %2 s ", buf, getgametime());
   s += XLAT("distance: %1\n", its(celldist(cwt.c)));
   // s += buf2;
   if(cheater) s += XLAT("Cheats: ") + its(cheater) + "\n";

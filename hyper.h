@@ -237,8 +237,6 @@ namespace shmup {
 
 // graph
 
-extern int msgscroll;
-
 void showMissionScreen();
 
 void restartGraph();
@@ -370,6 +368,7 @@ struct videopar {
   bool drawmousecircle; // draw the circle around the mouse
   bool skipstart;       // skip the start menu
   int quickmouse;       // quick mouse on the map
+  int timeformat;       // time format used in the message log
   };
 
 extern videopar vid;
@@ -1374,6 +1373,9 @@ charstyle& getcs(int id = multi::cpid);
 
 struct msginfo {
   int stamp;
+  time_t rtstamp;
+  int gtstamp;
+  int turnstamp;
   char flashout;
   char spamtype;
   int quantity;
@@ -1582,3 +1584,11 @@ void gainItem(eItem it);
 
 void destroyTrapsOn(cell *c);
 void destroyTrapsAround(cell *c);
+
+extern int messagelogpos;
+
+void showMessageLog();
+
+int getgametime();
+string getgametime_s(int timespent = getgametime());
+extern int stampbase;

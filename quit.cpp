@@ -6,17 +6,22 @@ bool needConfirmation() {
   return canmove && (gold() >= 30 || tkills() >= 50) && !cheater && !quitsaves();
   }
 
-int msgscroll = 0;
+int getgametime() {
+  return (int) (savetime + (timerstopped ? 0 : (time(NULL) - timerstart)));
+  }
 
-string timeline() {
-    int timespent = (int) (savetime + (timerstopped ? 0 : (time(NULL) - timerstart)));
+string getgametime_s(int timespent) {
   char buf[20];
   sprintf(buf, "%d:%02d", timespent/60, timespent % 60);
+  return buf;
+  }
+
+string timeline() {
   return 
     shmup::on ? 
-      XLAT("%1 knives (%2)", its(turncount), buf)
+      XLAT("%1 knives (%2)", its(turncount), getgametime_s())
     :
-      XLAT("%1 turns (%2)", its(turncount), buf);
+      XLAT("%1 turns (%2)", its(turncount), getgametime_s());
   }
 
 void noaction() {}
@@ -258,29 +263,21 @@ hint hints[] = {
 
   {
     0,
-    []() { 
-      if(canmove) return false;
-      time_t t = time(NULL);
-      struct tm tm = *localtime(&t);
-      int month = tm.tm_mon + 1;
-      int day = tm.tm_mday;
-      if(month == 10 && day >= 24) return true;
-      if(month == 11 && day <= 7) return true;
-      return false;
-      },
+    []() { return showHalloween(); },
     []() {
       dialog::addItem(XLAT("Halloween mini-game"), 'z');
       },
     [] () {
       if(!sphere) {
+        resetModes();
         specialland = laHalloween;
         targetgeometry = gSphere;
-        restartGame('E');
+        restartGame('g');
         vid.alpha = 999;
         vid.scale = 998;
         }
       else {
-        restartGame('E');
+        resetModes();
         vid.alpha = 1;
         vid.scale = 1;
         }
@@ -385,22 +382,6 @@ void showMission() {
     dialog::addInfo(timeline(), 0xC0C0C0);
     }
   
-  msgs.clear();
-  if(msgscroll < 0) msgscroll = 0;
-  int gls = size(gamelog) - msgscroll;
-  int mnum = 0;
-  for(int i=gls-5; i<gls; i++) 
-    if(i>=0) {
-      msginfo m;
-      m.spamtype = 0;
-      m.flashout = true;
-      m.stamp = ticks-128*vid.flashtime-128*(gls-i);
-      m.msg = gamelog[i].msg;
-      m.quantity = gamelog[i].quantity;
-      mnum++,
-      msgs.push_back(m);
-      }
-
   dialog::addBreak(100);
 
 #if CAP_TOUR  
@@ -456,13 +437,10 @@ void showMission() {
     #if CAP_ANDROIDSHARE
     dialog::addItem(XLAT("SHARE"), 's'-96);
     #endif
-    dialog::addBreak(500);
     }
+  dialog::addItem(XLAT("message log"), 'l');
   
   dialog::display();
-
-  if(mnum)
-    displayfr(vid.xres/2, vid.yres-vid.fsize*(mnum+1), 2, vid.fsize/2,  XLAT("last messages:"), 0xC0C0C0, 8);  
   }
 
 void handleKeyQuit(int sym, int uni) {
@@ -480,11 +458,8 @@ void handleKeyQuit(int sym, int uni) {
     restartGame();
     msgs.clear();
     }
-  else if(sym == SDLK_UP || sym == SDLK_KP8 || sym == PSEUDOKEY_WHEELUP) msgscroll++;
-  else if(sym == SDLK_DOWN || sym == SDLK_KP2 || sym == PSEUDOKEY_WHEELDOWN) msgscroll--;
-  else if(sym == SDLK_PAGEUP || sym == SDLK_KP9) msgscroll+=5;
-  else if(sym == SDLK_PAGEDOWN || sym == SDLK_KP3) msgscroll-=5;
   else if(uni == 'v') popScreenAll(), pushScreen(showMainMenu);
+  else if(uni == 'l') popScreenAll(), pushScreen(showMessageLog), messagelogpos = size(gamelog);
   else if(uni == 'z') hints[hinttoshow].action();
   else if(sym == SDLK_F3 || (sym == ' ' || sym == SDLK_HOME)) 
     fullcenter();
@@ -502,7 +477,6 @@ void handleKeyQuit(int sym, int uni) {
   
   else if(doexiton(sym, uni) && !didsomething) {
     popScreen();
-    msgscroll = 0;
     msgs.clear();
     if(!canmove) {
       addMessage(XLAT("GAME OVER"));
@@ -520,7 +494,6 @@ void showMissionScreen() {
   popScreenAll();
   pushScreen(showMission);
   achievement_final(false);
-  msgscroll = 0;
 
 #if CAP_TOUR
   if(!tour::on)

@@ -659,6 +659,17 @@ void showEuclideanMenu() {
 
 bool showstartmenu;
 
+bool showHalloween() {
+  if(canmove) return false;
+  time_t t = time(NULL);
+  struct tm tm = *localtime(&t);
+  int month = tm.tm_mon + 1;
+  int day = tm.tm_mday;
+  if(month == 10 && day >= 24) return true;
+  if(month == 11 && day <= 7) return true;
+  return false;
+  }
+
 void showStartMenu() {
   gamescreen(2);
 
@@ -700,6 +711,12 @@ void showStartMenu() {
   dialog::addInfo(XLAT("see the visualizations"));
 #endif
 
+  if(showHalloween()) {
+    dialog::addBreak(100);
+    dialog::addBigItem(XLAT1("Halloween"), 'z');
+    dialog::addInfo(XLAT("Halloween mini-game"));
+    }
+
   dialog::addBreak(100);
   dialog::addBigItem(XLAT("main menu"), 'm');
   dialog::addInfo(XLAT("more options"));
@@ -729,6 +746,19 @@ void showStartMenu() {
       if(shmup::on != (uni == 's')) restartGame('s');
       clearMessages();
       welcomeMessage();
+      stampbase = ticks;
+      }
+    else if(uni == 'z') {
+      popScreenAll();
+      resetModes();
+      stampbase = ticks;
+      if(!sphere) {
+        specialland = laHalloween;
+        targetgeometry = gSphere;
+        restartGame('g');
+        vid.alpha = 999;
+        vid.scale = 998;
+        }
       }
 #if CAP_TOUR
     else if(uni == 't') {
@@ -751,8 +781,13 @@ void showStartMenu() {
       quitmainloop = true;
     else if(sym == SDLK_F1)
       gotoHelp(help);
-    else if(sym == SDLK_ESCAPE || sym == ' ')
+    else if(sym == SDLK_ESCAPE || sym == ' ') {
       popScreen();
+      timerstart = time(NULL);
+      stampbase = ticks;
+      clearMessages();
+      welcomeMessage();
+      }
     };
   }
  
@@ -774,3 +809,66 @@ void setAppropriateOverview() {
     }
   }
 
+int messagelogpos;
+int timeformat;
+int stampbase;
+
+string gettimestamp(msginfo& m) {
+  char buf[128]; 
+  switch(timeformat) {
+    case 0:
+      return its(m.turnstamp);
+    case 1:
+      strftime(buf, 128, "%H:%M:%S", localtime(&m.rtstamp));
+      return buf;
+    case 2:
+      snprintf(buf, 128, "%2d:%02d", m.gtstamp/60, m.gtstamp % 60);
+      return buf;
+    case 3:
+      { int t = m.stamp - stampbase; 
+      bool sign = t < 0;
+      if(sign) t = -t;
+      snprintf(buf, 128, "%2d:%02d.%03d", t/60000, (t/1000) % 60, t % 1000);
+      string s = buf;
+      if(sign) s = "-"+s;
+      return s;
+      }
+    }     
+  return "";
+  }
+  
+void showMessageLog() {
+  DEBB(DF_GRAPH, (debugfile,"show message log\n"));
+
+  int lines = vid.yres / vid.fsize - 2;
+  int maxpos = size(gamelog) - lines;
+  messagelogpos = min(messagelogpos, maxpos);
+  messagelogpos = max(messagelogpos, 0);
+    
+  for(int y=0; y<lines && messagelogpos+y < size(gamelog); y++) {
+    msginfo& m = gamelog[messagelogpos+y];
+    displaystr(vid.fsize*8, vid.fsize*(y+1), 0, vid.fsize, fullmsg(m), 0xC0C0C0, 0);
+    displaystr(vid.fsize*7, vid.fsize*(y+1), 0, vid.fsize, gettimestamp(m), 0xC0C0C0, 16);
+    }
+
+  int i0 = vid.yres - vid.fsize;
+  int xr = vid.xres / 80;
+  
+  string timeformats[5] = {"turns", "real time", "game time", "precise", "no time"};
+  
+  displayButton(xr*70, i0, IFM("0 - ") + XLAT("back"), '0', 8);
+  displayButton(xr*10, i0, IFM("c - ") + XLAT("clear"), '0', 8);
+  displayButton(xr*40, i0, IFM("t - ") + XLAT(timeformats[timeformat]), '0', 8);
+  
+  keyhandler = [lines, maxpos] (int sym, int uni) {
+    if(uni == PSEUDOKEY_WHEELDOWN) messagelogpos++;
+    else if(uni == PSEUDOKEY_WHEELUP) messagelogpos--;
+    else if(uni == SDLK_DOWN || uni == SDLK_KP2) messagelogpos++;
+    else if(uni == SDLK_UP || uni == SDLK_KP8) messagelogpos--;
+    else if(uni == SDLK_PAGEUP || uni == SDLK_KP9) messagelogpos -= lines;
+    else if(uni == SDLK_PAGEDOWN || uni == SDLK_KP3) messagelogpos -= lines;
+    else if(uni == 'c') gamelog.clear();
+    else if(uni == 't') { timeformat++; timeformat %= 5; }
+    else if(doexiton(sym, uni)) popScreen();
+    };
+  }

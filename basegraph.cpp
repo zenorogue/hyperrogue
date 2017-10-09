@@ -725,6 +725,12 @@ void flashMessages() {
       }
   }
 
+string fullmsg(msginfo& m) {
+  string s = m.msg;
+  if(m.quantity > 1) s += " (x" + its(m.quantity) + ")";
+  return s;
+  }
+
 void addMessageToLog(msginfo& m, vector<msginfo>& log) {
 
   if(size(log) != 0) {
@@ -735,7 +741,7 @@ void addMessageToLog(msginfo& m, vector<msginfo>& log) {
       return;
       }
     }
-  if(size(log) < 200)
+  if(size(log) < 1000)
     log.push_back(m);
   else {
     for(int i=0; i<size(log)-1; i++) swap(log[i], log[i+1]);
@@ -750,6 +756,9 @@ void addMessage(string s, char spamtype) {
 
   msginfo m;
   m.msg = s; m.spamtype = spamtype; m.flashout = false; m.stamp = ticks;
+  m.rtstamp = time(NULL);
+  m.gtstamp = getgametime();
+  m.turnstamp = turncount;
   m.quantity = 1;
   
   addMessageToLog(m, gamelog);
@@ -819,9 +828,7 @@ void drawmessages() {
       int age = msgs[j].flashout * (t - msgs[j].stamp);
       poly_outline = gradient(bordcolor, backcolor, 0, age, 256*vid.flashtime) << 8;
       int col = gradient(forecolor, backcolor, 0, age, 256*vid.flashtime);
-      string s = msgs[j].msg;
-      if(msgs[j].quantity > 1) s += " (x" + its(msgs[j].quantity) + ")";
-      drawmessage(s, y, col);
+      drawmessage(fullmsg(msgs[j]), y, col);
       }
     }
   else {
@@ -829,10 +836,8 @@ void drawmessages() {
       int age = msgs[j].flashout * (t - msgs[j].stamp);
       int x = vid.msgleft ? 0 : vid.xres / 2;
       int y = vid.yres - vid.fsize * (size(msgs) - j) - (ISIOS ? 4 : 0);
-      string s = msgs[j].msg;
-      if(msgs[j].quantity > 1) s += " (x" + its(msgs[j].quantity) + ")";
       poly_outline = gradient(bordcolor, backcolor, 0, age, 256*vid.flashtime) << 8;
-      displayfr(x, y, 1, vid.fsize, s, gradient(forecolor, backcolor, 0, age, 256*vid.flashtime), vid.msgleft ? 0 : 8);
+      displayfr(x, y, 1, vid.fsize, fullmsg(msgs[j]), gradient(forecolor, backcolor, 0, age, 256*vid.flashtime), vid.msgleft ? 0 : 8);
       }
     }
   }

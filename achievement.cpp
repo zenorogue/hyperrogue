@@ -633,7 +633,7 @@ void achievement_victory(bool hyper) {
   if(chaosmode) return;
   DEBB(DF_STEAM, (debugfile,"after checks\n"))
 
-  int t = savetime + time(NULL) - timerstart;
+  int t = getgametime();
   
   if(hyper && shmup::on) return;
   if(hyper && inv::on) return;

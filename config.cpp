@@ -188,6 +188,10 @@ void initConfig() {
   
   // basic config
   addsaver(vid.flashtime, "flashtime", 8);
+  addsaver(vid.msgleft, "message style", 2);
+  addsaver(vid.msglimit, "message limit", 5);
+  addsaver(vid.timeformat, "message log time format", 0);
+
   addsaver(vid.mobilecompasssize, "mobile compass size", 30);
   addsaver(vid.axes, "movement help", 1);
   addsaver(vid.shifttarget, "shift-targetting", 2);
@@ -302,9 +306,6 @@ void initConfig() {
   
   addsaver(viewdists, "expansion mode");
   
-  addsaver(vid.msgleft, "message style", 2);
-  addsaver(vid.msglimit, "message limit", 5);
-
 #if CAP_SHMUP  
   shmup::initConfig();
 #endif
