@@ -291,8 +291,32 @@ bool behindsphere(const hyperpoint& h) {
   return false;
   }
 
+ld to01(ld a0, ld a1, ld x) {
+  if(x < a0) return 0;
+  if(x > a1) return 1;
+  return (x-a0) / (a1-a0);
+  }
+
+ld spherity(const hyperpoint& h) {
+  if(!sphere) return 1;
+  
+  if(vid.alpha > 1) {
+    return to01(1/vid.alpha, 1, -h[2]);
+    }  
+  
+  if(vid.alpha <= 1) {
+    return to01(-.8, 1, h[2]);
+    }
+      
+  return 1;
+  }
+
 bool behindsphere(const transmatrix& V) {
   return behindsphere(tC0(V));
+  }
+
+ld spherity(const transmatrix& V) {
+  return spherity(tC0(V));
   }
 
 bool confusingGeometry() {

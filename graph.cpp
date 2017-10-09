@@ -219,6 +219,11 @@ transmatrix ddspin(cell *c, int d, int bonus) {
   return getspinmatrix(hdir);
   }
 
+transmatrix iddspin(cell *c, int d, int bonus = 0) {
+  int hdir = displaydir(c, d) + bonus;
+  return getspinmatrix(-hdir);
+  }
+
 void drawPlayerEffects(const transmatrix& V, cell *c, bool onplayer) {
   if(!onplayer && !items[itOrbEmpathy]) return;
   if(items[itOrbShield] > (shmup::on ? 0 : ORBBASE)) drawShield(V, itOrbShield);
@@ -4056,21 +4061,25 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       bool w = isWarped(c);
       int col = (highwall(c) || c->wall == waTower) ? wcol : fcol;
       if(!chasmg) {
+
+#define D(v) darkena(gradient(0, col, 0, v * (sphere ? spherity(V * cellrelmatrix(c,i)) : 1), 1), fd, 0xFF)
+
         if(sha & 1) {
           forCellIdEx(c2, i, c) if(chasmgraph(c2)) 
-            placeSidewallX(c, i, SIDE_LAKE, V, w, false, darkena(gradient(0, col, 0, .8, 1), fd, 0xFF));
+            placeSidewallX(c, i, SIDE_LAKE, V, w, false, D(.8));
           }
         if(sha & 2) {
           forCellIdEx(c2, i, c) if(chasmgraph(c2)) 
-            placeSidewallX(c, i, SIDE_LTOB, V, w, false, darkena(gradient(0, col, 0, .7, 1), fd, 0xFF));
+            placeSidewallX(c, i, SIDE_LTOB, V, w, false, D(.7));
           }
         if(sha & 4) {
           bool dbot = true;
           forCellIdEx(c2, i, c) if(chasmgraph(c2) == 2) {
             if(dbot) dbot = false,
               warpfloor(c, mscale(V, geom3::BOTTOM), 0x080808FF, PPR_LAKEBOTTOM, isWarped(c));
-            placeSidewallX(c, i, SIDE_BTOI, V, w, false, darkena(gradient(0, col, 0, .6, 1), fd, 0xFF));
+            placeSidewallX(c, i, SIDE_BTOI, V, w, false, D(.6));
             }
+#undef D
           }
         }
       // wall between lake and chasm -- no Escher here
@@ -4078,6 +4087,26 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         placeSidewall(c, i, SIDE_LAKE, V, w, false, 0x202030FF);
         placeSidewall(c, i, SIDE_LTOB, V, w, false, 0x181820FF);
         placeSidewall(c, i, SIDE_BTOI, V, w, false, 0x101010FF);
+        }
+      }
+    
+    if(chasmg == 2 && wmspatial && sphere) {
+      forCellIdEx(c2, i, c) if(chasmgraph(c2) == 0) {
+        transmatrix V2 = V * cellrelmatrix(c, i);
+        if(!behindsphere(V2)) continue;
+        bool w = isWarped(c2);
+        int wcol2, fcol2;
+        setcolors(c2, wcol2, fcol2);
+        int col = (highwall(c2) || c->wall == waTower) ? wcol2 : fcol2;
+        col = gradient(0, col, 0, spherity(V), 1);
+        int j = c->spin(i);
+        if(ticks % 500 < -250) {
+          V2 = V2 * ddspin(c2, j);
+          j = 0;
+          }
+        placeSidewall(c2, j, SIDE_LAKE, V2, w, false, darkena(gradient(0, col, 0, .8, 1), fd, 0xFF));
+        placeSidewall(c2, j, SIDE_LTOB, V2, w, false, darkena(gradient(0, col, 0, .7, 1), fd, 0xFF));
+        placeSidewall(c2, j, SIDE_BTOI, V2, w, false, darkena(gradient(0, col, 0, .6, 1), fd, 0xFF));
         }
       }
     
