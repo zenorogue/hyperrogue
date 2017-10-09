@@ -2996,6 +2996,9 @@ bool allemptynear(cell *c) {
 
 #include "blizzard.cpp"
 
+static const int trapcol[4] = {0x904040, 0xA02020, 0xD00000, 0x303030};
+static const int terracol[8] = {0xD000, 0xE25050, 0xD0D0D0, 0x606060, 0x303030, 0x181818, 0x0080, 0x8080};
+                               
 void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
 
   qfi.shape = NULL; qfi.special = false;
@@ -4006,8 +4009,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         }
       
       else if(c->wall == waArrowTrap) {
-        int trapcol[4] = {0x904040, 0xA02020, 0xD00000, 0x303030};
-        if(c->wparam >= 2)
+        if(c->wparam >= 1)
           queuepoly(V, shDisk, darkena(trapcol[c->wparam&3], 0, 0xFF));
         if(isCentralTrap(c)) arrowtraps.push_back(c);
         }
@@ -4053,7 +4055,13 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         error = true;
       }
 
-    else if(!(it || c->monst || c->cpdist == 0)) error = true;
+    else {
+      if(c->wall == waArrowTrap)
+        asciicol = trapcol[c->wparam & 3];
+      if(c->wall == waTerraWarrior)
+        asciicol = terracol[c->landparam & 7];
+      if(!(it || c->monst || c->cpdist == 0)) error = true;
+      }
     
     int sha = shallow(c);
 

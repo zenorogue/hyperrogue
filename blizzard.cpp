@@ -122,12 +122,21 @@ void drawBlizzards() {
       if(at0>1) at0 -= 1;
       transmatrix tpartial = sball.global * rspintox(t) * xpush(hdist0(t) * at0);
       
-      queuepoly(tpartial, shSnowball, 0xFFFFFF80);
+      if(wmascii || wmblack)
+        queuechr(tpartial, .2, '.', 0xFFFFFF);
+      else
+        queuepoly(tpartial, shSnowball, 0xFFFFFF80);
       }
     }
 
   for(int ii=0; ii<N; ii++) {
     auto& bc = *bcells[ii];
+    if(isNeighbor(bc.c, mouseover)) {
+      if(againstWind(mouseover, bc.c))
+        queuepoly(*bc.gm, shHeptaMarker, 0x00C00040);
+      if(againstWind(bc.c, mouseover))
+        queuepoly(*bc.gm, shHeptaMarker, 0xC0000040);
+      }
     int B = size(bc.outorder);
     if(B<2) continue;
     int i = rand() % B;

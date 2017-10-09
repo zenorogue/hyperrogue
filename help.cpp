@@ -617,6 +617,9 @@ void gotoHelpFor(eMonster m) {
   help = generateHelpForMonster(m);
   };
 
+unsigned char lastval;
+int windtotal;
+
 void describeMouseover() {
   DEBB(DF_GRAPH, (debugfile,"describeMouseover\n"));
 
@@ -645,6 +648,20 @@ void describeMouseover() {
         else 
           out += " (" + turnstring(t) + XLAT(" to submerge") + ")";
         }
+      }
+    else if(c->land == laVolcano) {
+      int id = alchemyval(c, -1)/4;
+      if(id < 96/4)
+        out += " (" + turnstring(96/4-id) + XLAT(" to go cold") + ")";
+      else
+        out += " (" + turnstring(256/4-id) + XLAT(" to submerge") + ")";
+      }
+    else if(c->land == laBlizzard) {
+      int wm = windmap::at(c);
+      windtotal += (signed char) (wm-lastval);
+      lastval = wm;
+      if(c == cwt.c) windtotal = 0;
+      out += " [" + its(windtotal) + "]";
       }
 
     if(c->land == laTortoise && tortoise::seek()) out += " " + tortoise::measure(getBits(c));
