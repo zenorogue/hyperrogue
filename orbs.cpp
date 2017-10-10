@@ -855,6 +855,33 @@ void stun_attack(cell *dest) {
   checkmoveO();
   }
 
+void poly_attack(cell *dest) {
+  playSound(dest, "orb-ranged");
+  auto polymonsters = {
+    moYeti, moRunDog, moHunterDog, moRanger,
+    moDesertman, moMonkey, moZombie, moCultist,
+    moWitch, moEvilGolem, moFamiliar, moOrangeDog,
+    moRedFox, moFalsePrincess, moResearcher,
+    moNarciss, moJiangshi
+    };
+  int ssf = 0;
+  eMonster target = *(polymonsters.begin() + hrand(size(polymonsters)));
+  for(eMonster m: polymonsters)
+    if(kills[m] && m != dest->monst) {
+      ssf += kills[m];
+      if(hrand(ssf) < kills[m])
+        target = m;
+      }
+  addMessage(XLAT("You polymorph %the1 into %the2!", dest->monst, target));
+  dest->monst = target;
+  if(!dest->stuntime) dest->stuntime = 1;
+  checkStunKill(dest);
+  useupOrb(itOrbMorph, 2);
+  createNoise(3);
+  bfs();
+  checkmoveO();
+  }
+
 void placeIllusion(cell *c) {
   c->monst = moIllusion;
   useupOrb(itOrbIllusion, 5);
@@ -1114,6 +1141,12 @@ eItem targetRangedOrb(cell *c, orbAction a) {
   if(items[itOrbStunning] && c->monst && !isMultitile(c->monst) && c->stuntime < 3 && !shmup::on) {
     if(!isCheck(a)) stun_attack(c);
     return itOrbStunning;
+    }
+  
+  // (5d) poly
+  if(items[itOrbMorph] && c->monst && !isMultitile(c->monst) && !shmup::on) {
+    if(!isCheck(a)) poly_attack(c);
+    return itOrbMorph;
     }
   
   // (6) place fire (non-shmup variant)
