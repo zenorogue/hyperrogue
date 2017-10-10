@@ -136,6 +136,8 @@ void reduceOrbPowers() {
   reduceOrbPower(itOrbRecall, 77);
   reduceOrbPower(itOrbBull, 120);
   reduceOrbPower(itOrbHorns, 77);
+  reduceOrbPower(itOrbLava, 80);
+  reduceOrbPower(itOrbMorph, 80);
   if(cwt.c->land != laWildWest)
     reduceOrbPower(itRevolver, 6);
   whirlwind::calcdirs(cwt.c); 
@@ -1230,7 +1232,7 @@ eItem targetRangedOrb(cell *c, orbAction a) {
 int orbcharges(eItem it) {
   switch(it) {
     case itRevolver: //pickup-key
-      return 6;
+      return 6 - items[itRevolver];
     case itOrbShield:
       return inv::on ? 30 : 20;
     case itOrbDiscord:
@@ -1292,6 +1294,13 @@ int orbcharges(eItem it) {
       return sphere ? 3 : 30;
     case itOrbDragon:
        return sphere ? 10 : 77;
+    
+    case itOrbMorph:
+      return 60;
+    
+    case itOrbLava:
+      return 50;
+       
     default:
       return 0;
     }
@@ -1309,8 +1318,8 @@ void makelava(cell *c, int i) {
   if(!pseudohept(c)) return;
   if(isPlayerOn(c)) return;
   if(c->wall == waFire && c->wparam < i)
-    c->wparam = i;
-  else makeflame(c, i, false);
+    c->wparam = i, orbused[itOrbLava] = true;
+  else if(makeflame(c, i, false)) orbused[itOrbLava] = true;
   }
 
 void orboflava(int i) {
