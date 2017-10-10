@@ -281,6 +281,12 @@ string generateHelpForItem(eItem it) {
         "\n\nIn the Orb Strategy Mode, each 25 Necromancer's Totems "
         "you are given a random offensive Orb."
         );
+    
+    if(inv::remaining[it] || inv::usedup[it]) help += "\n\n" + inv::osminfo(it);
+    inv::whichorbinfo = it;  
+    inv::compute();
+    if(inv::orbinfoline != "") help += "\n\n" + inv::orbinfoline;
+    if(inv::extra != "") help += "\n\nExtras:" + inv::extra;
     }
   
   if(itemclass(it) == IC_ORB || it == itGreenStone || it == itOrbYendor) {

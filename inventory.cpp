@@ -20,7 +20,6 @@ namespace inv {
   struct lateextraorb {
     eItem treasure;
     eItem orb;
-    int at;
     };
   
   vector<lateextraorb> lateextraorbs = {
@@ -90,10 +89,6 @@ namespace inv {
     return int(mirrorqty0(orb) * sqrt(1.000001+items[itPower]/20.));
     }
     
-  struct nextinfo { int min, real, max; };
-  
-  nextinfo next[ittypes];
-
   mt19937 invr;
   
   void sirand(int i) {
@@ -104,17 +99,37 @@ namespace inv {
     return invr() % i;
     }
     
+  eItem whichorbinfo;
+  string orbinfoline, extra;
+  
+  string extraline(eItem it, string s) {
+    return " "+XLAT1(iinf[it].name) + " ("+s+")";
+    }
+  
   void gainOrbs(eItem it, eItem o) {
-    auto& nx = next[o == itHyperstone ? o : it];
     int qty = items[it];
     if(it == itHolyGrail) {
       remaining[itOrbIllusion] += qty;
-      nx = {qty+1, qty+1, qty+1};
+      if(it == itOrbIllusion) {
+        orbinfoline += XLAT("Unlocked by: %1 in %2", it, laNone);
+        orbinfoline += XLAT(" (next at %1)", its(qty+1));
+        }
       }
     else {
       bool nextfound = false;
       if(qty >= 10) remaining[o]++;
-      else nx = {10,10,10}, nextfound = true;
+      else {
+        if(whichorbinfo == o) {
+          if(it == itHyperstone) {          
+            extra += extraline(it, "10");
+            }
+          else {
+            orbinfoline += XLAT("Unlocked by: %1 in %2", it, laNone);
+            orbinfoline += XLAT(" (next at %1)", its(10));
+            }
+          }
+        nextfound = true;
+        }
       int last = 10;
       for(int k=0; k<30 || !nextfound; k++) {
         int maxstep = 15 + 5 * k;
@@ -129,8 +144,19 @@ namespace inv {
           }
         else 
           xnext = last + 1 + irand(maxstep);
-        if(xnext > qty && !nextfound) 
-          nx = { last+1, xnext, last + maxstep }, nextfound = true;
+        if(xnext > qty && !nextfound) {
+          if(whichorbinfo == o) {
+            if(it == itHyperstone) {          
+              extra += extraline(it, its(last+maxstep));
+              }
+            orbinfoline += XLAT("Unlocked by: %1 in %2", it, laCrossroads);
+            if(maxstep == 1)
+              orbinfoline += XLAT(" (next at %1)", its(last+1));
+            else
+              orbinfoline += XLAT(" (next at %1 to %2)", its(last+1), its(last + maxstep));
+            }
+          nextfound = true;
+          }
         if(xnext <= qty) remaining[o]++; 
         last = xnext;
         }
@@ -143,8 +169,11 @@ namespace inv {
     return z;
     }
     
-  void gainMirrors(int qtl) {
+  void gainMirrors(eItem forwhich) {
+    int qtl = items[forwhich];
     while(qtl > 0) qtl >>= 1, remaining[itOrbMirror]++;
+    if(whichorbinfo == itOrbMirror)
+      extra += extraline(forwhich, its(nextp2(items[which])));
     }
 
   vector<eItem> offensiveOrbs = {
@@ -166,12 +195,62 @@ namespace inv {
     const int qoff = size(orblist);
     for(int i=1; i<qoff; i++) swap(orblist[i], orblist[irand(1+i)]);
     for(int i=0; i<20; i++) {
-      if((i+1)*each <= items[which] - reduce)
-      remaining[orblist[i%qoff]]++;
+      int nextat = (i+1)*each + reduce;
+      if(items[which] >= nextat) {
+        remaining[orblist[i%qoff]]++;
+        }
+      else {
+        if(isIn(whichorbinfo, orblist))
+          extra += extraline(which, its(nextat) + "?");
+        break;
+        }
       }
     }
   
+  void gainGuestOrbs() {
+    for(int k=0; k<ORBLINES; k++) {
+      auto& oi = orbinfos[k];
+      if(oi.flags & orbgenflags::OSM_AT10) {
+        eItem it = treasureType(oi.l);
+        if(items[it] >= 10) {
+          remaining[oi.orb]++;
+          }
+        if(whichorbinfo == oi.orb) extra += extraline(it, "10");
+        }
+      }
+    }
+  
+  void gainLove() {
+    if(princess::reviveAt) {
+      remaining[itOrbLove]++;
+      int s = gold(NO_LOVE);
+      int last = princess::reviveAt;
+      for(int k=0;; k++) {
+        int nextstep = 50 + 20 * k;
+        last += nextstep;
+        if(last > s) {
+          if(whichorbinfo == itOrbLove) {
+            orbinfoline += XLAT("Unlocked by: %1 in %2", itSavedPrincess, laPrincessQuest);
+            orbinfoline += XLAT(" (next at %1)", its(last));
+            }
+          break;
+          }
+        else { last += nextstep; remaining[itOrbLove]++; }
+        }
+      }
+    }
+  
+  void gainLate(eItem tr, eItem orb) {
+    int at = 10 + irand(41);
+    int itr = items[tr];
+    if(itr >= at) remaining[orb]++;
+    if(whichorbinfo == orb)
+      extra += extraline(tr, itr >= at ? (its(at)+"!") : "10-50");
+    }
+  
   void compute() {
+    extra = "";
+    orbinfoline = "";
 
     for(int i=0; i<ittypes; i++) remaining[i] = -usedup[i];
     for(int i=0; i<ittypes; i++) if(usedup[i] >= TESTMIRRORED) {
@@ -182,51 +261,66 @@ namespace inv {
     
     sirand(rseed);
     
-    vector<pair<eItem, eItem>> itempairs;
-    
-    for(int k=0; k<ORBLINES; k++) {
-      auto oi = orbinfos[k];
-      eLand l = oi.l;
-      eItem it = treasureType(l);
-      eItem o = oi.orb;
-      if(oi.gchance) itempairs.emplace_back(it, o);
-      else if(items[it] >= 10) remaining[o]++;
-      }
-    
-    sort(itempairs.begin(), itempairs.end());
-    
+    gainGuestOrbs();
+        
     gainOrbs(itShard, itOrbMirror);
     gainOrbs(itHyperstone, itOrbMirror);
-    for(auto p: itempairs)
-      gainOrbs(p.first, p.second);
+    gainOrbs(itDiamond, itOrbFlash);
+    gainOrbs(itGold, itOrbLife);
+    gainOrbs(itSpice, itOrbShield);
+    gainOrbs(itRuby, itOrbLightning);
+    gainOrbs(itElixir, itOrbSpeed);
+    gainOrbs(itBone, itGreenStone);
+    gainOrbs(itHell, itOrbYendor);
+    gainOrbs(itStatue, itOrbTeleport);
+    gainOrbs(itFeather, itOrbSafety);
+    gainOrbs(itSapphire, itOrbWinter);
+    gainOrbs(itFernFlower, itOrbThorns);
+    gainOrbs(itWine, itOrbAether);
+    gainOrbs(itSilver, itOrbDigging);
+    gainOrbs(itRoyalJelly, itOrbInvis);
+    gainOrbs(itEmerald, itOrbPsi);
+    gainOrbs(itPower, itOrbFire);
+    gainOrbs(itHolyGrail, itOrbIllusion);
+    gainOrbs(itGrimoire, itOrbDragon);
+    gainOrbs(itPirate, itOrbTime);
+    gainOrbs(itRedGem, itOrbSpace);
+    gainOrbs(itBombEgg, itOrbFriend);
+    gainOrbs(itCoast, itOrbEmpathy);
+    gainOrbs(itWhirlpool, itOrbWater);
+    gainOrbs(itPalace, itOrbDiscord);
+    gainOrbs(itFjord, itOrbFish);
+    gainOrbs(itSavedPrincess, itOrbLove);
+    gainOrbs(itIvory, itOrbMatter);
+    gainOrbs(itZebra, itOrbFrog);
+    gainOrbs(itElemental, itOrbSummon);
+    gainOrbs(itFulgurite, itOrbStunning);
+    gainOrbs(itMutant, itOrbLuck);
+    gainOrbs(itMutant2, itOrbFreedom);
+    gainOrbs(itLotus, itOrbUndeath);
+    gainOrbs(itWindstone, itOrbAir);
+    gainOrbs(itRose, itOrbBeauty);
+    gainOrbs(itCoral, itOrb37);
+    gainOrbs(itBabyTortoise, itOrbShell);
+    gainOrbs(itApple, itOrbEnergy);
+    gainOrbs(itDragon, itOrbDomination);
+    gainOrbs(itKraken, itOrbSword);
+    gainOrbs(itBarrow, itOrbSword2);
+    gainOrbs(itTrollEgg, itOrbStone);
+    gainOrbs(itSlime, itOrbRecall);
+    gainOrbs(itAmethyst, itOrbNature);
+    gainOrbs(itDodeca, itOrbDash);
+    gainOrbs(itGreenGrass, itOrbBull);
+    gainOrbs(itBull, itOrbHorns);
     if(items[itOrbYendor]) remaining[itOrbMirror]++;
-
-    gainMirrors(items[itOrbYendor]);
-    gainMirrors(items[itHolyGrail]);
-    
-    if(princess::reviveAt) {
-      remaining[itOrbLove]++;
-      int s = gold(NO_LOVE);
-      int last = princess::reviveAt;
-      for(int k=0;; k++) {
-        int nextstep = 50 + 20 * k;
-        last += nextstep;
-        if(last > s) {
-          next[itSavedPrincess] = {last, last, last};
-          break;
-          }
-        else { last += nextstep; remaining[itOrbLove]++; }
-        }
-      }
-    
+    gainMirrors(itOrbYendor);
+    gainMirrors(itHolyGrail);    
+    gainLove();    
     gainRandomOrbs(offensiveOrbs, itBone, 25, 0);
     gainRandomOrbs(elementalOrbs, itElemental, 12, 0);
     gainRandomOrbs(demonicOrbs, itHell, 20, 100);
     
-    for(auto& it: lateextraorbs) {
-      it.at = 10 + irand(41);
-      if(items[it.treasure] >= it.at) remaining[it.orb]++;
-      }
+    for(auto& it: lateextraorbs) gainLate(it.treasure, it.orb);
     
     if(items[itOrbLove] && !items[itSavedPrincess]) items[itSavedPrincess] = 1;
     
@@ -285,10 +379,6 @@ namespace inv {
     "several quests and lands "
     "give you extremely powerful Orbs of the Mirror.\n";
 
-  string extraline(eItem it, string s) {
-    return " "+XLAT1(iinf[it].name) + " ("+s+")";
-    }
-  
   void evokeBeautyAt(cell *c) {
     forCellEx(c2, c)
       if(c2->monst && !isFriendly(c2->monst) && !isIvy(c2->monst)) {
@@ -320,6 +410,14 @@ namespace inv {
           swordAttackStatic(it == itOrbSword2);
           }
       }
+    }
+  
+  string osminfo(eItem orb) {
+    string s = XLAT("Number of uses left: %1", its(remaining[orb]));
+    int us = usedup[orb];
+    if(us >= TESTMIRRORED) s += XLAT(" (mirrored)"), us = us - MIRRORED + mirrorqty0(orb);
+    if(us) s += XLAT(" (used %1 times)", its(us));
+    return s;
     }
 
   void show() {
@@ -401,60 +499,29 @@ namespace inv {
       else {
         int icol = iinf[which].color;
         displaystr(vid.xres/2, vid.fsize*2, 2, vid.fsize*2, XLAT1(iinf[which].name), icol, 8);
-        auto oi = getOrbInfo(which);
         
         if(mirroring)
           displaystr(vid.xres/2, vid.fsize*4, 2, vid.fsize, usedup[which] >= TESTMIRRORED ? XLAT("already mirrored") : XLAT("Uses to gain: %1", its(mirrorqty(which))), icol, 8);
         else {
-          eItem t = treasureType(oi.l);
-          string s = XLAT("Unlocked by: %1 in %2", t, oi.l);
-          if(next[t].min == next[t].max)
-            s += XLAT(" (next at %1)", its(next[t].min));
-          else
-            s += XLAT(" (next at %1 to %2)", its(next[t].min), its(next[t].max));
-
-          displaystr(vid.xres/2, vid.fsize*4, 2, vid.fsize, s, icol, 8);
+          whichorbinfo = which;
+          compute();
           
-          
-          string extras = "";
-          for(int k=0; k<ORBLINES; k++) {
-            auto oi = orbinfos[k];
-            if(oi.gchance || oi.orb != which) continue;
-            eItem it = treasureType(oi.l);
-            extras += extraline(it, "10");
-            }
-          
-          if(which == itOrbMirror) {
-            extras += extraline(itOrbYendor, its(nextp2(items[itOrbYendor])));
-            extras += extraline(itHolyGrail, its(nextp2(items[itHolyGrail])));
-            auto& nx = next[itHyperstone];
-            extras += extraline(itHyperstone, its(nx.min));
-            }
-          if(isIn(which, offensiveOrbs)) extras += extraline(itBone, its(items[itBone]/25*25+25) + "?");
-          if(isIn(which, elementalOrbs)) extras += extraline(itElemental, its(items[itBone]/20*20+20) + "?");
-          if(isIn(which, demonicOrbs)) extras += extraline(itHell, its(max(125, items[itHell]/25*25+25)) + "?");
-          for(auto& a: lateextraorbs) if(a.orb == which)
-            extras += extraline(a.treasure, items[a.treasure] >= a.at ? (its(a.at)+"!") : "10-50");
-
-          if(extras != "")
-            displaystr(vid.xres/2, vid.fsize*5, 2, vid.fsize, XLAT("Extras:")+extras, icol, 8);
+          displaystr(vid.xres/2, vid.fsize*4, 2, vid.fsize, orbinfoline, icol, 8);
+                              
+          if(extra != "")
+            displaystr(vid.xres/2, vid.fsize*5, 2, vid.fsize, XLAT("Extras:")+extra, icol, 8);
           }
 
         if(remaining[which] != 1 || usedup[which]) {
-          string s = XLAT("Number of uses left: %1", its(remaining[which]));
-          int us = usedup[which];
-          if(us >= TESTMIRRORED) s += XLAT(" (mirrored)"), us = us - MIRRORED + mirrorqty0(which);
-          if(us) s += XLAT(" (used %1 times)", its(us));
-          displaystr(vid.xres/2, vid.yres - vid.fsize*6, 2, vid.fsize, s, icol, 8);
+          displaystr(vid.xres/2, vid.yres - vid.fsize*6, 2, vid.fsize, osminfo(which), icol, 8);
           }
 
 #if ISMOBILE==0
         string hot = XLAT1("Hotkey: "); hot += getcstat;
         displaystr(vid.xres/2, vid.yres - vid.fsize*5, 2, vid.fsize, hot, icol, 8);
 #endif
-  
-        eOrbLandRelation olr = getOLR(oi.orb, getPrizeLand());
-        eItem tr = treasureType(oi.l);
+
+        eOrbLandRelation olr = getOLR(which, getPrizeLand());
         
         int col = 0;
         if(olr == olrDangerous) col = 0xC00000;
@@ -462,7 +529,7 @@ namespace inv {
         if(olr == olrForbidden) col = 0x804000;
   
         if(col)
-          displaystr(vid.xres/2, vid.yres - vid.fsize*4, 2, vid.fsize, XLAT(olrDescriptions[olr], cwt.c->land, tr, treasureType(cwt.c->land)), col, 8);
+          displaystr(vid.xres/2, vid.yres - vid.fsize*4, 2, vid.fsize, XLAT(olrDescriptions[olr], cwt.c->land, itNone, treasureType(cwt.c->land)), col, 8);
   
         }
       }

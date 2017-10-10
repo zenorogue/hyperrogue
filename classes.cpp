@@ -1206,7 +1206,8 @@ itemtype iinf[ittypes] = {
   { 'o', 0x3080D0, "Orb of Morph", NODESCYET},
   };
 
-enum eItem { itNone, itDiamond, itGold, itSpice, itRuby, itElixir, itShard, itBone, itHell, itStatue,
+enum eItem { 
+  itNone, itDiamond, itGold, itSpice, itRuby, itElixir, itShard, itBone, itHell, itStatue,
   itFeather, itSapphire, itHyperstone, itKey,
   itGreenStone, itOrbYendor,
   itOrbLightning, itOrbFlash, itOrbWinter, itOrbSpeed, itOrbLife, itOrbShield, itOrbDigging,
@@ -1240,7 +1241,7 @@ enum eItem { itNone, itDiamond, itGold, itSpice, itRuby, itElixir, itShard, itBo
   itInventory,
   itLavaLily, itDogPlains, itBlizzard, itTerra,
   itOrbSide1, itOrbSide2, itOrbSide3,
-  itOrbLava, itOrbMorph
+  itOrbLava, itOrbMorph,
   };
 
 // --- wall types ---

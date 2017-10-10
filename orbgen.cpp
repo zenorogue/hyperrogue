@@ -1,86 +1,121 @@
 #define ORBLINES 56
 
+// orbgen flags
+
+namespace orbgenflags {
+  // generates in the given land from 10 treasures, in the classic mode
+  static const int LOCAL10 = 1;
+  // generates in the Crossroads from 10 treasures, in the classic mode
+  static const int CROSS10 = 2;
+  // generates in other places from 25 treasures, in the classic mode
+  static const int GLOBAL25 = 4;
+  // in OSM you get it once at 10 treasures
+  static const int OSM_AT10 = 8;
+
+
+  // 'native' functions return this
+  static const int NATIVE = 64;
+  // 'local' orb will be also placed in OSM (at 25 treasures); needs LOCAL10
+  static const int OSM_LOCAL25 = 128;
+  // 'crossroads' orb will be also placed in OSM (at 50 treasures)
+  static const int OSM_CROSS50 = 256;
+  // 'crossroads' orb will be also placed in OSM (at 25 treasures)
+  static const int OSM_CROSS25 = 512;
+  // 'global' orb will be also placed in OSM (at 100 treasures)
+  static const int OSM_GLOBAL100 = 1024;
+  // do not create in the Crossroads in the tactics mode
+  static const int NO_TACTIC = (1<<11);
+  
+  // typical combinations
+  static const int S_NATIVE = LOCAL10 | CROSS10 | GLOBAL25 | NATIVE;
+  static const int S_GUEST  = LOCAL10 | OSM_AT10;
+  static const int S_YENDOR = S_NATIVE | OSM_LOCAL25 | OSM_CROSS50 | OSM_GLOBAL100 | NO_TACTIC;
+  static const int S_NAT_NT = S_NATIVE | NO_TACTIC;
+  static const int S_NA_O25 = S_NATIVE | OSM_CROSS25;
+  }
+
 struct orbinfo {
+  int flags;
   eLand l;
   int lchance;
   int gchance;
   eItem orb;
+  bool is_native() const { using namespace orbgenflags; return flags & NATIVE; }
   };
 
 const orbinfo orbinfos[ORBLINES] = {
-  {laGraveyard, 200, 200,itGreenStone}, // must be first so that it does not reduce 
-  // chance of other orbs
-  {laJungle, 1200, 1500,itOrbLightning},
-  {laIce, 2000, 1500,itOrbFlash},
-  {laCaves, 1800, 2000,itOrbLife},
-  {laAlchemist, 800, 800,itOrbSpeed},
-  {laDesert, 2500, 1500,itOrbShield},
-  {laHell, 2000, 1000,itOrbYendor},
-  {laRlyeh, 1500, 1500,itOrbTeleport},
-  {laMotion, 2000, 700, itOrbSafety},    
-  {laIce, 1500, 0, itOrbWinter},
-  {laDragon, 2500, 0, itOrbWinter},
-  {laDryForest, 2500, 0, itOrbWinter}, 
-  {laCocytus, 1500, 1500, itOrbWinter}, 
-  {laCaves, 1200, 0, itOrbDigging},
-  {laDryForest, 500, 4500, itOrbThorns},
-  {laDeadCaves, 1800, 0, itGreenStone},
-  {laDeadCaves, 1800, 1500, itOrbDigging},
-  {laEmerald, 1500, 3500, itOrbPsi},
-  {laWineyard, 900, 1200, itOrbAether},
-  {laHive, 800, 1200, itOrbInvis},
-  {laPower, 0, 3000, itOrbFire},
-  {laMinefield, 0, 3500, itOrbFriend},
-  {laTemple, 0, 3000, itOrbDragon},
-  {laCaribbean, 0, 3500, itOrbTime},
-  {laRedRock, 0, 2500, itOrbSpace},
-  {laCamelot, 1000, 1500, itOrbIllusion},
-  {laOcean, 0, 3000, itOrbEmpathy},
-  {laOcean, 0, 0, itOrbAir},
-  {laPalace, 0, 4000, itOrbDiscord},
-  {laPalace, 0, 0, itOrbFrog},
-  {laZebra, 500, 2100, itOrbFrog},
-  {laLivefjord, 0, 1800, itOrbFish},
-  {laPrincessQuest, 0, 200, itOrbLove},
-  {laIvoryTower, 500, 4000, itOrbMatter},
-  {laElementalWall, 1500, 4000, itOrbSummon},
-  {laStorms, 1000, 2500, itOrbStunning},
-  {laOvergrown, 1000, 800, itOrbLuck},
-  {laWhirlwind, 1250, 3000, itOrbAir},
-  {laHaunted, 1000, 5000, itOrbUndeath},
-  {laClearing, 5000, 5000, itOrbFreedom},
-  {laRose, 2000, 8000, itOrbBeauty},
-  {laWarpCoast, 2000, 8000, itOrb37},
-  {laDragon, 500, 5000, itOrbDomination},
-  {laTortoise, 2500, 1500, itOrbShell},
-  {laEndorian, 150, 2500, itOrbEnergy},
-  {laEndorian, 450, 0, itOrbTeleport},
-  {laKraken, 500, 2500, itOrbSword},
-  {laBurial, 500, 2500, itOrbSword2},
-  {laTrollheim, 750, 1800, itOrbStone},
-  {laMountain, 400, 3500, itOrbNature},
-  {laDungeon, 120, 2500, itOrbRecall},
-  {laReptile, 500, 2100, itOrbDash},
-  {laBull, 720, 3000, itOrbHorns},
-  {laPrairie, 0, 3500, itOrbBull},
-  {laWhirlpool, 0, 0, itOrbSafety},
-  {laWhirlpool, 0, 2000, itOrbWater}, // must be last because it generates a boat
+  {orbgenflags::S_NATIVE, laGraveyard, 200, 200,itGreenStone}, // must be first so that it does not reduce 
+  {orbgenflags::S_NATIVE, laJungle, 1200, 1500,itOrbLightning},
+  {orbgenflags::S_NATIVE, laIce, 2000, 1500,itOrbFlash},
+  {orbgenflags::S_NATIVE, laCaves, 1800, 2000,itOrbLife},
+  {orbgenflags::S_NATIVE, laAlchemist, 800, 800,itOrbSpeed},
+  {orbgenflags::S_NATIVE, laDesert, 2500, 1500,itOrbShield},
+  {orbgenflags::S_YENDOR, laHell, 2000, 1000,itOrbYendor},
+  {orbgenflags::S_NATIVE, laRlyeh, 1500, 1500,itOrbTeleport},
+  {orbgenflags::S_NA_O25, laMotion, 2000, 700, itOrbSafety},    
+  {orbgenflags::S_NATIVE, laIce, 1500, 0, itOrbWinter},
+  {orbgenflags::S_GUEST,  laDragon, 2500, 0, itOrbWinter},
+  {orbgenflags::S_GUEST,  laDryForest, 2500, 0, itOrbWinter}, 
+  {orbgenflags::S_NATIVE, laCocytus, 1500, 1500, itOrbWinter}, 
+  {orbgenflags::S_GUEST,  laCaves, 1200, 0, itOrbDigging},
+  {orbgenflags::S_NATIVE, laDryForest, 500, 4500, itOrbThorns},
+  {orbgenflags::S_GUEST,  laDeadCaves, 1800, 0, itGreenStone},
+  {orbgenflags::S_NAT_NT, laDeadCaves, 1800, 1500, itOrbDigging},
+  {orbgenflags::S_NATIVE, laEmerald, 1500, 3500, itOrbPsi},
+  {orbgenflags::S_NATIVE, laWineyard, 900, 1200, itOrbAether},
+  {orbgenflags::S_NATIVE, laHive, 800, 1200, itOrbInvis},
+  {orbgenflags::S_NATIVE, laPower, 0, 3000, itOrbFire},
+  {orbgenflags::S_NATIVE, laMinefield, 0, 3500, itOrbFriend},
+  {orbgenflags::S_NATIVE, laTemple, 0, 3000, itOrbDragon},
+  {orbgenflags::S_NATIVE, laCaribbean, 0, 3500, itOrbTime},
+  {orbgenflags::S_NATIVE, laRedRock, 0, 2500, itOrbSpace},
+  {orbgenflags::S_NATIVE, laCamelot, 1000, 1500, itOrbIllusion},
+  {orbgenflags::S_NATIVE, laOcean, 0, 3000, itOrbEmpathy},
+  {orbgenflags::S_GUEST,  laOcean, 0, 0, itOrbAir},
+  {orbgenflags::S_NATIVE, laPalace, 0, 4000, itOrbDiscord},
+  {orbgenflags::S_GUEST,  laPalace, 0, 0, itOrbFrog},
+  {orbgenflags::S_NATIVE, laZebra, 500, 2100, itOrbFrog},
+  {orbgenflags::S_NAT_NT, laLivefjord, 0, 1800, itOrbFish},
+  {orbgenflags::S_NAT_NT, laPrincessQuest, 0, 200, itOrbLove},
+  {orbgenflags::S_NATIVE, laIvoryTower, 500, 4000, itOrbMatter},
+  {orbgenflags::S_NAT_NT , laElementalWall, 1500, 4000, itOrbSummon},
+  {orbgenflags::S_NATIVE, laStorms, 1000, 2500, itOrbStunning},
+  {orbgenflags::S_NAT_NT, laOvergrown, 1000, 800, itOrbLuck},
+  {orbgenflags::S_NATIVE, laWhirlwind, 1250, 3000, itOrbAir},
+  {orbgenflags::S_NATIVE, laHaunted, 1000, 5000, itOrbUndeath},
+  {orbgenflags::S_NATIVE, laClearing, 5000, 5000, itOrbFreedom},
+  {orbgenflags::S_NATIVE, laRose, 2000, 8000, itOrbBeauty},
+  {orbgenflags::S_NATIVE, laWarpCoast, 2000, 8000, itOrb37},
+  {orbgenflags::S_NATIVE, laDragon, 500, 5000, itOrbDomination},
+  {orbgenflags::S_NATIVE, laTortoise, 2500, 1500, itOrbShell},
+  {orbgenflags::S_NATIVE, laEndorian, 150, 2500, itOrbEnergy},
+  {orbgenflags::S_GUEST,  laEndorian, 450, 0, itOrbTeleport},
+  {orbgenflags::S_NATIVE, laKraken, 500, 2500, itOrbSword},
+  {orbgenflags::S_NATIVE, laBurial, 500, 2500, itOrbSword2},
+  {orbgenflags::S_NATIVE, laTrollheim, 750, 1800, itOrbStone},
+  {orbgenflags::S_NATIVE, laMountain, 400, 3500, itOrbNature},
+  {orbgenflags::S_NATIVE, laDungeon, 120, 2500, itOrbRecall},
+  {orbgenflags::S_NATIVE, laReptile, 500, 2100, itOrbDash},
+  {orbgenflags::S_NATIVE, laBull, 720, 3000, itOrbHorns},
+  {orbgenflags::S_NATIVE, laPrairie, 0, 3500, itOrbBull},
+  {orbgenflags::S_GUEST,  laWhirlpool, 0, 0, itOrbSafety},
+  {orbgenflags::S_NATIVE, laWhirlpool, 0, 2000, itOrbWater},
   };
 
-eItem orbType(eLand l) {
+eItem nativeOrbType(eLand l) {
   if(isElemental(l)) l = laElementalWall;
   if(inv::on && (l == laMirror || l == laMirrorOld || isCrossroads(l)))
     return itOrbMirror;
   if(l == laMirror || l == laMirrorOld) return itShard;
   for(int i=0; i<ORBLINES; i++) 
-    if(orbinfos[i].l == l && orbinfos[i].gchance)
+    if(orbinfos[i].l == l && orbinfos[i].is_native())
       return orbinfos[i].orb;
   return itNone;
   }
 
-const orbinfo& getOrbInfo(eItem orb) {
+const orbinfo& getNativityOrbInfo(eItem orb) {
   for(int i=0; i<ORBLINES; i++) 
-    if(orbinfos[i].orb == orb && orbinfos[i].gchance)
+    if(orbinfos[i].orb == orb && orbinfos[i].is_native())
       return orbinfos[i];
   static orbinfo oi; 
   oi.l = laMirror;
@@ -161,7 +196,7 @@ eOrbLandRelation getOLR(eItem it, eLand l) {
 
   if(it == itOrbIllusion && l == laCamelot) return olrNative1;
   if(it == itOrbLove) return olrNoPrizeOrb;    
-  if(orbType(l) == it) return olrNative;
+  if(nativeOrbType(l) == it) return olrNative;
   if(it == itOrbWinter && (l == laIce || l == laDryForest || l == laDragon))
     return olrGuest;
   if(it == itOrbLuck && l == laIvoryTower)
@@ -346,9 +381,11 @@ void placePrizeOrb(cell *c) {
 
   for(int i=0; i<ORBLINES; i++) {
     const orbinfo& oi(orbinfos[i]);
+    if(!(oi.flags & orbgenflags::GLOBAL25)) continue;
 
+    int mintreas = 25;
     if(inv::on) {
-      if(oi.orb == itOrbYendor && items[itHell] >= 100) ;
+      if(oi.flags & orbgenflags::OSM_GLOBAL100) mintreas = 100;
       else continue;
       }
 
@@ -357,7 +394,7 @@ void placePrizeOrb(cell *c) {
     int treas = items[treasureType(oi.l)];
     if(olr == olrPrize3) treas *= 10;
     if(olr == olrPrize25 || olr == olrPrize3 || olr == olrGuest || olr == olrMonster || olr == olrAlways) {
-      if(treas < 25) continue;
+      if(treas < mintreas) continue;
       } 
     else continue;
 
@@ -386,11 +423,8 @@ void placeLocalOrbs(cell *c) {
   
   for(int i=0; i<ORBLINES; i++) {
     const orbinfo& oi(orbinfos[i]);
+    if(!(oi.flags & orbgenflags::LOCAL10)) continue;
     if(oi.l != l) continue;
-    if(inv::on) {
-      if(oi.orb != itOrbYendor) continue;
-      if(items[itHell] < 25) continue;
-      }
     if(yendor::on && (oi.orb == itOrbSafety || oi.orb == itOrbYendor))
       continue;
     if(!oi.lchance) continue;
@@ -398,7 +432,15 @@ void placeLocalOrbs(cell *c) {
     if(ch == 1 && chaosmode && hrand(2) == 0 && items[treasureType(oi.l)] * landMultiplier(oi.l) >= (11+hrand(15)))
       ch = 0;
     if(tactic::trailer && ch < 5) ch = 0;
-    if(ch == 0 && items[treasureType(oi.l)] * landMultiplier(oi.l) >= (chaosmode ? 1+hrand(10) : 10)) {
+    int tc = items[treasureType(oi.l)] * landMultiplier(oi.l);
+    int tcmin = (chaosmode ? 1+hrand(10) : 10);
+    if(inv::on) {
+      if(!(oi.flags & orbgenflags::OSM_LOCAL25))
+        tc = 0;
+      else
+        tcmin = 25;
+      }
+    if(ch == 0 && tc >= tcmin) {
       // printf("local orb\n");
       c->item = oi.orb;
       if(oi.orb == itOrbWater && c->land != laOcean) c->wall = waStrandedBoat;
@@ -415,21 +457,27 @@ void placeCrossroadOrbs(cell *c) {
   if(peace::on) return;
   for(int i=0; i<ORBLINES; i++) {
     const orbinfo& oi(orbinfos[i]);
+    if(!(oi.flags & orbgenflags::CROSS10)) continue;
     if(!oi.gchance) continue;
 
+    int treas = items[treasureType(oi.l)] * landMultiplier(oi.l);
+    int mintreas = 10;
+    
     if(inv::on) {
-      if(oi.orb == itOrbYendor && items[itHell] >= 50) ;
-      else if(oi.orb == itOrbSafety && items[itFeather] >= 25) ;
+      if(oi.flags & orbgenflags::OSM_CROSS25)
+        mintreas = 25;
+      else if(oi.flags & orbgenflags::OSM_CROSS50)
+        mintreas = 50;
       else continue;
       }
-    int treas = items[treasureType(oi.l)] * landMultiplier(oi.l);
-    if(tactic::on && isCrossroads(tactic::lasttactic)) {
-      if(oi.orb == itOrbYendor || oi.orb == itOrbSummon || oi.orb == itOrbFish || oi.orb == itOrbDigging || oi.orb == itOrbLove || oi.orb == itOrbLuck)
+    
+    if(tactic::on) {
+      if(isCrossroads(tactic::lasttactic) && (oi.flags & orbgenflags::NO_TACTIC))
         continue;
+      else mintreas = 0;
       }
-    else {
-      if(treas < 10) continue;
-      }
+    if(treas < mintreas) continue;
+
     if(oi.orb == itOrbSafety && c->land == laCrossroads5) continue;
     int mul = c->land == laCrossroads5 ? 10 : 1;
     int gch = oi.gchance;
@@ -445,14 +493,20 @@ void placeOceanOrbs(cell *c) {
   if(peace::on) return;
   for(int i=0; i<ORBLINES; i++) {
     const orbinfo& oi(orbinfos[i]);
+    if(!(oi.flags & orbgenflags::CROSS10)) continue;
+    
+    int treas = items[treasureType(oi.l)] * landMultiplier(oi.l);
+    int mintreas = 10;
 
     if(inv::on) {
-      if(oi.orb == itOrbYendor && items[itHell] >= 50) ;
-      else if(oi.orb == itOrbSafety && items[itFeather] >= 25) ;
+      if(oi.flags & orbgenflags::OSM_CROSS25)
+        mintreas = 25;
+      else if(oi.flags & orbgenflags::OSM_CROSS50)
+        mintreas = 50;
       else continue;
       }
 
-    if(items[treasureType(oi.l)] * landMultiplier(oi.l) < 10) continue;
+    if(treas < mintreas) continue;
     if(!oi.gchance) continue;
     if(oi.orb == itOrbLife) continue; // useless
     if(hrand(oi.gchance) >= 20) continue;

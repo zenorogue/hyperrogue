@@ -50,7 +50,7 @@ void showOverview() {
       s += "@";
       s += dnameof(treasureType(l));
       s += "@";
-      s += dnameof(orbType(l));
+      s += dnameof(nativeOrbType(l));
       if(mapeditor::hasInfix(s))
         filteredLands[nlid++] = l;
       }
@@ -104,7 +104,7 @@ void showOverview() {
       getcstat = 2000+it;
     if(displayfrZ(xr*24+c8*5, i0, 1, vf-4, XLAT1(iinf[it].name), col, 0))
       getcstat = 2000+it;
-    eItem io = orbType(l);
+    eItem io = nativeOrbType(l);
     if(io == itShard) {
       if(items[it] >= 10) col = winf[waMirror].color; else col = BLACKISH;
       if(chaosmode && noChaos(l)) col = REDDISH;

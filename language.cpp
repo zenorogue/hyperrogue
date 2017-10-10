@@ -20,6 +20,28 @@ const char *dnameof(eLand l) { return linf[l].name; }
 const char *dnameof(eWall w) { return winf[w].name; }
 const char *dnameof(eItem i) { return iinf[i].name; }
 
+/*
+string dnameofEnum(eItem i) {
+  FILE *f = fopen("classes.cpp", "rt");
+  while(!feof(f)) {
+    char buf[256];
+    fgets(buf, 256, f);
+    if(strstr(buf, "eItem")) {
+      string ret;
+      int qty = i;
+      while(qty > -1) {
+        char c = fgetc(f);
+        if(c == ' ' || c == '\n' || c == '\r') continue;
+        else if(c == ',') qty--;
+        else if(!qty) ret += c;
+        }
+      return ret;
+      }
+    }
+  return "?";
+  }
+*/
+
 void rep(string& pattern, string what, string to) {
   while(true) {
     size_t at = pattern.find(what);
