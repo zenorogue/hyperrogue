@@ -735,7 +735,7 @@ void describeMouseover() {
       if(c->item == itBabyTortoise && tortoise::seek()) 
         out += " " + tortoise::measure(tortoise::babymap[c]);
       if(!c->monst) 
-        help = bygen([c] () { gotoHelpFor(c->monst); });
+        help = bygen([c] () { gotoHelpFor(c->item); });
       }
     
     if(isPlayerOn(c) && !shmup::on) out += XLAT(", you"), help = generateHelpForMonster(moPlayer);
