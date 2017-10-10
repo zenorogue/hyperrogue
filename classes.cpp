@@ -1199,9 +1199,9 @@ itemtype iinf[ittypes] = {
   { '*', 0x40E0D0, "Turquoise", NODESCYET},
   { '*', 0x009090, "Forgotten Relic", NODESCYET},
   { '(', 0xFFE080, "Ancient Weapon", NODESCYET},
-  { 'o', 0x307080, "Orb of the Side I", NODESCYET},
-  { 'o', 0x30A080, "Orb of the Side II", NODESCYET},
-  { 'o', 0x30D080, "Orb of the Side III", NODESCYET},
+  { 'o', 0x307080, "Orb of Slashing", NODESCYET},
+  { 'o', 0x30A080, "Orb of the Triangle", NODESCYET},
+  { 'o', 0x30D080, "Orb of Ferocity", NODESCYET},
   { 'o', 0xD08030, "Orb of Lava", NODESCYET},
   { 'o', 0x3080D0, "Orb of Morph", NODESCYET},
   };
