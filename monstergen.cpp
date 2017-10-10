@@ -444,7 +444,7 @@ void wandering() {
     else if(c->land == laIce && wchance(items[itDiamond], 10))
       c->monst = hrand(2) ? moWolf : moYeti;
 
-    else if(c->land == laHunting && wchance(items[itDogPlains], 50, 26))
+    else if(c->land == laHunting && wchance(items[itHunting], 50, 26))
       c->monst = moHunterDog;
 
     else if(c->land == laDesert && wchance(items[itSpice], 10))

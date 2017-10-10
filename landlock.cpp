@@ -289,7 +289,7 @@ eItem treasureType(eLand l) {
     case laVolcano: return itLavaLily;
     case laTerracotta: case laMercuryRiver: return itTerra;
     case laBlizzard: return itBlizzard;
-    case laHunting: return itDogPlains;
+    case laHunting: return itHunting;
     
     case laCA: return itNone;
     }
