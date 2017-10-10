@@ -740,7 +740,7 @@ bool passable_for(eMonster m, cell *w, cell *from, flagtype extra) {
   if(w->monst && !(extra & P_MONSTER) && !isPlayerOn(w)) 
     return false;
   if(m == moWolf) {
-    return isIcyLand(w) && (isPlayerOn(w) || passable(w, from, extra));
+    return (isIcyLand(w) || w->land == laVolcano) && (isPlayerOn(w) || passable(w, from, extra));
     }
   if(normalMover(m) || isBug(m) || isDemon(m) || m == moHerdBull) {
     if((isWitch(m) || m == moEvilGolem) && w->land != laPower && w->land != laHalloween)
@@ -2466,7 +2466,7 @@ void checkTide(cell *c) {
   if(c->land == laVolcano) {
     int id = alchemyval(c, 0);
     if(id < 96) {
-      if(c->wall == waNone) c->wall = waMagma;
+      if(c->wall == waNone || isWateryOrBoat(c) || c->wall == waVinePlant) c->wall = waMagma;
       }
     else if(c->wall == waMagma) c->wall = waNone;
     }
@@ -3305,6 +3305,8 @@ void moveMonster(cell *ct, cell *cf) {
     }
 
   if(m == moAirElemental) airmap.push_back(make_pair(ct, 0));
+  if(m == moWolf && ct->land == laVolcano) ct->monst = moLavaWolf;
+  if(m == moLavaWolf && isIcyLand(ct)) ct->monst = moWolfMoved;
 
   int inc = incline(cf, ct);
   if(inc == -3 && ct->monst == moReptile)
@@ -3389,6 +3391,12 @@ int bulldistance(cell *c, cell *d) {
   return 8 * cd - low;
   }
 
+int landheattype(cell *c) {
+  if(isIcyLand(c)) return 0;
+  if(c->land == laVolcano) return 2;
+  return 1;
+  }
+
 // move value
 int moveval(cell *c1, cell *c2, int d, int mf) {
   if(!c2) return -5000;
@@ -3448,8 +3456,26 @@ int moveval(cell *c1, cell *c2, int d, int mf) {
     if(!lancerok) return 750;
     }
 
+  bool hunt = true;
+  
+  if(m == moLavaWolf) {
+    // prefers to keep to volcano
+    int clht = landheattype(c1);
+    int dlht = landheattype(c2);
+    if(dlht > clht) return 1510;
+    if(dlht < clht) return 700;
+    // will not hunt the player if these rules do not allow it
+    bool onlava = false;
+    for(cell *c: targets) {
+      if(landheattype(c) >= clht) onlava = true;
+      forCellEx(cc, c) if(landheattype(cc) >= clht) onlava = true;
+      }
+    if(!onlava) hunt = false;
+    }
+  
   if(m == moWolf) {
     int val = 1500;
+    if(c2->land == laVolcano) return 1510;
     if(heat::absheat(c2) <= heat::absheat(c1))
       return 900;
     for(int i=0; i<c1->type; i++) {
@@ -3473,7 +3499,7 @@ int moveval(cell *c1, cell *c2, int d, int mf) {
   if(m == moRagingBull && c1->mondir != NODIR)
     return 1500 - bulldist(c2);
   
-  if((mf & MF_PATHDIST) && c2->pathdist < c1->pathdist && !peace::on) return 1500; // good move
+  if(hunt && (mf & MF_PATHDIST) && c2->pathdist < c1->pathdist && !peace::on) return 1500; // good move
   
   // prefer straight direction when wandering
   int dd = angledist(c1, c1->mondir, d);
@@ -3510,6 +3536,8 @@ int stayval(cell *c, flagtype mf) {
   if(c->monst == moRagingBull) return -1690; // worse than to stay in place
   if(c->monst == moBat && batsAfraid(c)) return 575;
   if(c->monst == moHunterGuard) return 1600; // prefers to stay in place
+  // Lava Wolves will wander if not hunting
+  if(c->monst == moLavaWolf) return 750;
   return 1000;
   }
 

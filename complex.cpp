@@ -1869,8 +1869,12 @@ namespace heat {
         if(isFire(c)) hmod += 4 * xrate;
         if(isPrincess(c->monst)) hmod += (markEmpathy(itOrbWinter) ? -1.2 : 1.2) * xrate;
         
-        forCellEx(ct, c) if(!isIcyLand(ct) && isFire(ct)) 
-          hmod += xrate*.1;
+        forCellEx(ct, c) {
+          if(!isIcyLand(ct) && isFire(ct)) 
+            hmod += xrate*.1;
+          if(ct->land == laVolcano) 
+            hmod += xrate * (ct->wall == waMagma ? .4 : .2);
+          }
         
         forCellEx(ct, c) {
           if(!isIcyLand(ct)) {
