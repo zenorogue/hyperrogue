@@ -7118,6 +7118,8 @@ bool movepcto(int d, int subdir, bool checkonly) {
         }
       else if(isStunnable(c2->monst) && c2->hitpoints > 1) {
         attackMonster(c2, AF_ORSTUN | AF_MSG, moPlayer);
+        // salamanders are stunned for longer time when pushed into a wall
+        if(c2->monst == moSalamander && (pushto == c2 || !pushto)) c2->stuntime = 10;
         if(pushto && pushto != c2) pushMonster(pushto, c2);
         }
       else if(c2->monst == moVizier && c2->hitpoints > 1) {
