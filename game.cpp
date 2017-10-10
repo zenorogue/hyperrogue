@@ -2467,9 +2467,12 @@ void checkTide(cell *c) {
     int id = alchemyval(c, 0);
     if(id < 96) {
       if(c->wall == waNone || isWateryOrBoat(c) || c->wall == waVinePlant) {
+        if(isWateryOrBoat(c)) 
+          playSound(c, "steamhiss");
         c->wall = waMagma;
         if(itemBurns(c->item)) {
           addMessage(XLAT("%The1 burns!", c->item)), c->item = itNone;
+          playSound(c, "steamhiss", 30);
           }
         }
       }
@@ -5296,11 +5299,11 @@ void moverefresh(bool turn = true) {
     else if(c->wall == waMagma) {
       if(c->monst == moSalamander) c->stuntime = max<int>(c->stuntime, 1);
       else if(c->monst && !survivesPoison(c->monst, c->wall)) {
-        playSound(c, "splash"+pick12());
         if(isNonliving(c->monst))
           addMessage(XLAT("%The1 is destroyed by lava!", c->monst));
         else 
           addMessage(XLAT("%The1 is killed by lava!", c->monst));
+        playSound(c, "steamhiss", 70);
         fallMonster(c, AF_FALL);
         }
       }
