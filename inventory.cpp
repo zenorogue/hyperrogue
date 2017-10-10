@@ -111,7 +111,7 @@ namespace inv {
     if(it == itHolyGrail) {
       remaining[itOrbIllusion] += qty;
       if(it == itOrbIllusion) {
-        orbinfoline += XLAT("Unlocked by: %1 in %2", it, laNone);
+        orbinfoline += XLAT("Unlocked by: %1 in %2", it, landof(it));
         orbinfoline += XLAT(" (next at %1)", its(qty+1));
         }
       }
@@ -124,7 +124,7 @@ namespace inv {
             extra += extraline(it, "10");
             }
           else {
-            orbinfoline += XLAT("Unlocked by: %1 in %2", it, laNone);
+            orbinfoline += XLAT("Unlocked by: %1 in %2", it, landof(it));
             orbinfoline += XLAT(" (next at %1)", its(10));
             }
           }
@@ -149,11 +149,13 @@ namespace inv {
             if(it == itHyperstone) {          
               extra += extraline(it, its(last+maxstep));
               }
-            orbinfoline += XLAT("Unlocked by: %1 in %2", it, laCrossroads);
-            if(maxstep == 1)
-              orbinfoline += XLAT(" (next at %1)", its(last+1));
-            else
-              orbinfoline += XLAT(" (next at %1 to %2)", its(last+1), its(last + maxstep));
+            else {
+              orbinfoline += XLAT("Unlocked by: %1 in %2", it, landof(it));
+              if(maxstep == 1)
+                orbinfoline += XLAT(" (next at %1)", its(last+1));
+              else
+                orbinfoline += XLAT(" (next at %1 to %2)", its(last+1), its(last + maxstep));
+              }
             }
           nextfound = true;
           }
@@ -274,7 +276,7 @@ namespace inv {
     gainOrbs(itHell, itOrbYendor);
     gainOrbs(itStatue, itOrbTeleport);
     gainOrbs(itFeather, itOrbSafety);
-    gainOrbs(itSapphire, itOrbWinter);
+    gainOrbs(itSapphire, itOrbMorph);
     gainOrbs(itFernFlower, itOrbThorns);
     gainOrbs(itWine, itOrbAether);
     gainOrbs(itSilver, itOrbDigging);
@@ -319,10 +321,10 @@ namespace inv {
     gainRandomOrbs(offensiveOrbs, itBone, 25, 0);
     gainRandomOrbs(elementalOrbs, itElemental, 12, 0);
     gainRandomOrbs(demonicOrbs, itHell, 20, 100);
-    gainOrbs(itOrbLava, itLavaLily);
-    gainOrbs(itOrbSide3, itHunting);
-    gainOrbs(itOrbWinter, itBlizzard);
-    gainOrbs(itOrbSide1, itTerra);
+    gainOrbs(itLavaLily, itOrbLava);
+    gainOrbs(itHunting, itOrbSide3);
+    gainOrbs(itBlizzard, itOrbWinter);
+    gainOrbs(itTerra, itOrbSide1);
 
     for(auto& it: lateextraorbs) gainLate(it.treasure, it.orb);
     
@@ -434,7 +436,7 @@ namespace inv {
     cmode = sm::CENTER;
 
     orbcoord.clear();
-    for(int y=-3; y<=3; y++) for(int x=-4; x<=4; x++) if(x+y<=4 && x+y >= -4 && (x||y))
+    for(int y=-3; y<=3; y++) for(int x=-5; x<=5; x++) if(x+y<=5 && x+y >= -5 && (x||y))
       orbcoord.emplace_back(x,y);
     sort(orbcoord.begin(), orbcoord.end(), [](pxy p1, pxy p2) {
       return sq(p1) < sq(p2); });

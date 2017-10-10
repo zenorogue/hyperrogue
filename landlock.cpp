@@ -296,6 +296,11 @@ eItem treasureType(eLand l) {
   return itNone;
   }
 
+eLand landof(eItem it) {
+  for(int i=0; i<landtypes; i++) if(treasureType(eLand(i)) == it) return eLand(i);
+  return laNone;
+  }
+
 bool isSealand(eLand l) {
   return l == laOcean || l == laCaribbean || l == laWhirlpool || l == laLivefjord ||
     l == laOceanWall || l == laWarpSea || l == laKraken;
