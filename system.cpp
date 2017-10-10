@@ -627,7 +627,7 @@ void applyBoxes() {
 
   // 10.1:
   applyBoxI(itLavaLily);
-  applyBoxI(itDogPlains);
+  applyBoxI(itHunting);
   applyBoxI(itBlizzard);
   applyBoxI(itTerra);
   applyBoxOrb(itOrbSide1);

@@ -101,7 +101,7 @@ const orbinfo orbinfos[ORBLINES] = {
   {orbgenflags::S_NATIVE, laPrairie, 0, 3500, itOrbBull},
   {orbgenflags::S_GUEST,  laWhirlpool, 0, 0, itOrbSafety},
   {orbgenflags::S_NATIVE, laVolcano, 0, 7000, itOrbLava},
-  {orbgenflags::S_NATIVE, laDogPlains, 0, 2500, itOrbSide3},
+  {orbgenflags::S_NATIVE, laHunting, 0, 2500, itOrbSide3},
   {orbgenflags::S_NATIVE, laBlizzard, 0, 2000, itOrbWinter},
   {orbgenflags::S_NATIVE, laTerracotta, 800, 2500, itOrbSide1},
   {orbgenflags::S_NATIVE, laWhirlpool, 0, 2000, itOrbWater}, // needs to be last

@@ -1015,7 +1015,7 @@ bool openplains(cell *c) {
   celllister cl(c, purehepta ? 5 : 7, 1000000, NULL);
   for(cell *c: cl.lst) { 
     while(c->mpdist > 8) setdist(c, c->mpdist-1, NULL);
-    if(c->land != laDogPlains) return false;
+    if(c->land != laHunting) return false;
     }
   return true;
   }

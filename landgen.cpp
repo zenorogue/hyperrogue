@@ -1485,15 +1485,15 @@ void giantLandSwitch(cell *c, int d, cell *from) {
         }
       break;
     
-    case laDogPlains:
-      if(d == 7 && c->land == laDogPlains) {
+    case laHunting:
+      if(d == 7 && c->land == laHunting) {
         if(hrand(1000) < 20) {
           if(openplains(c)) {
             if(hrand(2) == 0) {
-              c->item = itDogPlains;
+              c->item = itHunting;
               vector<cell*> next;
               forCellEx(c2, c) if(c2->mpdist > 7) next.push_back(c2);
-              if(size(next) && items[itDogPlains] < 10) {
+              if(size(next) && items[itHunting] < 10) {
                 cell *c3 = next[hrand(size(next))];
                 forCellEx(c4, c3) if(c4->mpdist > 7 && !isNeighbor(c4, c))
                   c4->monst = moHunterGuard;
@@ -1502,7 +1502,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
             else placeLocalSpecial(c, 10);
             }
           }
-        if(hrand(5000) < items[itDogPlains]- 17 + yendor::hardness())
+        if(hrand(5000) < items[itHunting]- 17 + yendor::hardness())
           c->monst = moHunterDog;
         }
       break;

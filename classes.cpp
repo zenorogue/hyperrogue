@@ -1239,7 +1239,7 @@ enum eItem {
   itSlime, itAmethyst, itOrbRecall, itDodeca, itOrbDash, itGreenGrass, itOrbHorns,
   itOrbBull, itBull, itOrbMirror,
   itInventory,
-  itLavaLily, itDogPlains, itBlizzard, itTerra,
+  itLavaLily, itHunting, itBlizzard, itTerra,
   itOrbSide1, itOrbSide2, itOrbSide3,
   itOrbLava, itOrbMorph,
   };
@@ -1679,7 +1679,7 @@ enum eLand { laNone, laBarrier, laCrossroads, laDesert, laIce, laCaves, laJungle
   laPrairie, laBull, laCrossroads5, laCA,
   laMirrorWall, laMirrored, laMirrorWall2, laMirrored2,
   laMirrorOld,
-  laVolcano, laBlizzard, laDogPlains, laTerracotta, laMercuryRiver
+  laVolcano, laBlizzard, laHunting, laTerracotta, laMercuryRiver
   };
 
 // cell information for the game

@@ -1484,7 +1484,7 @@ bool earthFloor(cell *c) {
     c->wall = waNone;
     return true;
     }
-  if(c->wall == waChasm && c->land == laDogPlains) {
+  if(c->wall == waChasm && c->land == laHunting) {
     c->wall = waNone;
     return true;
     }
@@ -1521,7 +1521,7 @@ bool earthWall(cell *c) {
     c->wall = waBarrowDig;
     return true;
     }
-  if(c->wall == waNone && c->land == laDogPlains) {
+  if(c->wall == waNone && c->land == laHunting) {
     c->item = itNone;
     c->wall = waChasm;
     return true;
@@ -6008,7 +6008,7 @@ void ambush(cell *c, eItem what) {
       if(c1 != clast && cl.listed(c1) && cl.getdist(c1) == d)
         c2 = c1;
     if(!c2) break;
-    if(c2->land == laDogPlains && c2->wall == waNone && c2->monst == moNone)
+    if(c2->land == laHunting && c2->wall == waNone && c2->monst == moNone)
       around.push_back(c2);
     clast = ccur; ccur = c2;
     if(c2 == c0) break;
@@ -6016,12 +6016,12 @@ void ambush(cell *c, eItem what) {
   int N = size(around);
   int dogs;
   
-  int qty = items[itDogPlains];
+  int qty = items[itHunting];
   
   if(ambushval) dogs = ambushval;
   else
   switch(what) {
-    case itDogPlains:
+    case itHunting:
       if(qty <= 16)
         dogs = qty;
       else
@@ -6144,7 +6144,7 @@ bool collectItem(cell *c2, bool telekinesis) {
     if(c2->item == itDodeca && peace::on) peace::simon::extend();
     }
 
-  if(c2->land == laDogPlains && c2->item) {
+  if(c2->land == laHunting && c2->item) {
     addMessage(XLAT("You are ambushed!"));
     ambush(c2, c2->item);
     }

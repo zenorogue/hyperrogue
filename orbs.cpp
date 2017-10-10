@@ -698,7 +698,7 @@ eMonster summonedAt(cell *dest) {
   if(dest->wall == waGiantRug)
     return moVizier;
   if(dest->wall == waNone) {
-    if(dest->land == laDogPlains) return moAirElemental;
+    if(dest->land == laHunting) return moAirElemental;
     if(dest->land == laBull) return moRagingBull;
     if(dest->land == laPrairie) return moAirElemental;
     if(dest->land == laZebra) return moAirElemental;
@@ -738,7 +738,6 @@ eMonster summonedAt(cell *dest) {
     if(dest->land == laBurial) return moEarthElemental;
     if(dest->land == laVolcano) return moFireElemental;
     if(dest->land == laBlizzard) return moAirElemental;
-    if(dest->land == laDogPlains) return moAirElemental;
     if(dest->land == laTerracotta) return moEarthElemental;
     if(isHaunted(dest->land)) return moGhost;
     }

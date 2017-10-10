@@ -270,7 +270,7 @@ int itemclass(eItem i) {
     i == itKraken || i == itBarrow || i == itTrollEgg || i == itTreat ||
     i == itSlime || i == itAmethyst || i == itDodeca ||
     i == itGreenGrass || i == itBull ||
-    i == itLavaLily || i == itDogPlains ||
+    i == itLavaLily || i == itHunting ||
     i == itBlizzard || i == itTerra
     )
     return IC_TREASURE;

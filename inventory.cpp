@@ -320,7 +320,7 @@ namespace inv {
     gainRandomOrbs(elementalOrbs, itElemental, 12, 0);
     gainRandomOrbs(demonicOrbs, itHell, 20, 100);
     gainOrbs(itOrbLava, itLavaLily);
-    gainOrbs(itOrbSide3, itDogPlains);
+    gainOrbs(itOrbSide3, itHunting);
     gainOrbs(itOrbWinter, itBlizzard);
     gainOrbs(itOrbSide1, itTerra);
 

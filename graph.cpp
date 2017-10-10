@@ -507,7 +507,7 @@ bool drawItemType(eItem it, cell *c, const transmatrix& V, int icol, int ticks, 
     it == itHolyGrail ? &shGrail :
     isElementalShard(it) ? &shElementalShard :
     (it == itBombEgg || it == itTrollEgg) ? &shEgg :
-    it == itDogPlains ? &shTriangle :
+    it == itHunting ? &shTriangle :
     it == itDodeca ? &shDodeca :
     xch == '*' ? &shGem[ct6] : 
     xch == '(' ? &shKnife : 
@@ -2507,7 +2507,7 @@ void setcolors(cell *c, int& wcol, int &fcol) {
         }
       break;
 
-    case laDogPlains:
+    case laHunting:
       // fcol = pseudohept(c) ? 0x205050 : 0x306060;
       fcol = 0x40E0D0;
       fcol /= 2;
@@ -3297,7 +3297,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       c->land == laHalloween ? 1 :
       c->land == laTrollheim ? 2 :
       c->land == laReptile ? 0 :
-      c->land == laDogPlains ? 1 :
+      c->land == laHunting ? 1 :
       c->land == laTerracotta ? 1 :
       c->land == laMercuryRiver ? 0 :
       2;
