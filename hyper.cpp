@@ -298,6 +298,12 @@ else if(args()[0] == '-' && args()[1] == x && args()[2] == '0') { showstartmenu 
     debugfile = stderr;
     shift(); debugflags = argi();
     }
+  else if(argis("-each")) {
+    shift(); int q = argi(); autocheat = true;
+    for(int i=0; i<ittypes; i++)
+      if(itemclass(eItem(i)) == IC_TREASURE)
+        items[i] = q;
+    }
   else if(argis("-ch")) { autocheat = true; }
   else if(argis("-zoom")) { 
     PHASEFROM(2); shift(); vid.scale = argf();
