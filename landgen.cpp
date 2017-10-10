@@ -38,10 +38,7 @@ void buildRedWall(cell *c, int gemchance) {
   c->wall = waRed3;
   if(hrand(100+ki) < gemchance + ki)
     c->item = itRedGem;
-  if(items[itRedGem] >= 10 && hrand(8000) < gemchance && !peace::on && !inv::on)
-    c->item = itOrbSpace;
-  else if(hrand(8000) < gemchance * PRIZEMUL)
-    placePrizeOrb(c);
+  else if(gemchance) placeLocalSpecial(c, 8000, gemchance, gemchance);
   }
 
 #define RANDPATC(c) (randpattern(c,randompattern[c->land]))
@@ -680,11 +677,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           c->item = itFjord;
           }
         
-        if(items[itFjord] >= 10 && hrand(2000) < 2 && !peace::on && !inv::on)
-          c->item = itOrbFish;
-        
-        if(hrand(2000) < 2*PRIZEMUL)
-          placePrizeOrb(c);
+        placeLocalSpecial(c, 1000);
         
         buildPrizeMirror(c, 1000);      
         }
@@ -745,6 +738,8 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           c->hitpoints = 3;
         if(hrand(8000) < PT(100 + 2 * kills[moLavaWolf], 200) && notDippingFor(itLavaLily))
           c->item = itLavaLily;
+        else placeLocalSpecial(c, 1000, 2, 10);
+        // prize orbs get a bonus, because most of them are not allowed anyway
         }
       ONEMPTY {
         if(hrand(8000) < (items[itLavaLily] + yendor::hardness()))
@@ -766,11 +761,12 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           c->wall = waIcewall;
           if(hrand(500) < PT(100 + 2 * kills[moVoidBeast] + 2 * kills[moIceGolem], 200) && notDippingFor(itBlizzard))
             c->item = itBlizzard;
+          else placeLocalSpecial(c, 100);
           }
         }
       if(d == 8) c->landparam = 0;
       ONEMPTY {
-        if(hrand(8000) < 10 + 2 * (items[itBlizzard] + yendor::hardness()))
+        if(hrand(8000) < 10 + (items[itBlizzard] + yendor::hardness()))
           c->monst = pick(moVoidBeast, moIceGolem);
         }
 
@@ -1222,10 +1218,8 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           }
         if(coast && hrand(10) < 5) {
           c->wall = waBoat;
-          if(items[itPirate] >= 10 && hrand(100) < 2 && !safety && !peace::on && !inv::on)
-            c->item = itOrbTime;
-          else if(hrand(100) < 2*PRIZEMUL && !safety) 
-            placePrizeOrb(c);
+          
+          placeLocalSpecial(c, 50);
           }
         }  
       if(d == 7 && c->wall == waSea && hrand(10000) < 20 + items[itPirate] + 2 * yendor::hardness() && !safety)
@@ -1493,16 +1487,19 @@ void giantLandSwitch(cell *c, int d, cell *from) {
     
     case laDogPlains:
       if(d == 7 && c->land == laDogPlains) {
-        if(hrand(1000) < 10) {
+        if(hrand(1000) < 20) {
           if(openplains(c)) {
-            c->item = itDogPlains;
-            vector<cell*> next;
-            forCellEx(c2, c) if(c2->mpdist > 7) next.push_back(c2);
-            if(size(next) && items[itDogPlains] < 10) {
-              cell *c3 = next[hrand(size(next))];
-              forCellEx(c4, c3) if(c4->mpdist > 7 && !isNeighbor(c4, c))
-                c4->monst = moHunterGuard;
+            if(hrand(2) == 0) {
+              c->item = itDogPlains;
+              vector<cell*> next;
+              forCellEx(c2, c) if(c2->mpdist > 7) next.push_back(c2);
+              if(size(next) && items[itDogPlains] < 10) {
+                cell *c3 = next[hrand(size(next))];
+                forCellEx(c4, c3) if(c4->mpdist > 7 && !isNeighbor(c4, c))
+                  c4->monst = moHunterGuard;
+                }
               }
+            else placeLocalSpecial(c, 10);
             }
           }
         if(hrand(5000) < items[itDogPlains]- 17 + yendor::hardness())
@@ -1542,10 +1539,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
             c->monst = moAlbatross;
           if(items[itCoast] >= 10 && hrand(10000) < 5 && !peace::on && !inv::on)
             c->item = itOrbAir;
-          else if(items[itCoast] >= 10 && hrand(10000) < 6 && !peace::on && !inv::on)
-            c->item = itOrbEmpathy;
-          if(hrand(10000) < 5*PRIZEMUL)
-            placePrizeOrb(c);
+          else placeLocalSpecial(c, 10000, 6, 5);
           buildPrizeMirror(c, 2000);
           }
         else if(c->landparam > 25) {
@@ -1595,10 +1589,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           }
         else if(hrand(5000) < treas - 20 + yendor::hardness() && !safety)
           c->monst = moBomberbird;
-        else if(treas >= 10 && hrand(5000) < 10 && !safety && !peace::on && !inv::on)
-          c->item = itOrbFriend;
-        else if(hrand(5000) < 10*PRIZEMUL && !safety)
-          placePrizeOrb(c);
+        else placeLocalSpecial(c, 500);
         }
       if(d == 3 && safety && (c->wall == waMineMine || c->wall == waMineUnknown))
         c->wall = waMineOpen;
@@ -1743,10 +1734,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           }
         else if(hrand(5000) < 100 + elkills*3 && notDippingFor(itElemental))
           c->item = localshard;
-        else if(hrand(5000) < 10 && items[itElemental] >= 10 && !inv::on && !peace::on)
-          c->item = itOrbSummon;
-        else if(hrand(5000) < 10*PRIZEMUL)
-          placePrizeOrb(c);
+        else placeLocalSpecial(c, 500);
         }
       break;
     

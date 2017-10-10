@@ -456,7 +456,7 @@ bool ignoresPlates(eMonster m) {
   }
 
 bool itemBurns(eItem it) {
-  return it && it != itOrbDragon && it != itOrbFire && it != itDragon && it != itTreat;
+  return it && it != itOrbDragon && it != itOrbFire && it != itDragon && it != itOrbWinter && it != itOrbLava && it != itTreat && it != itLavaLily;
   }
 
 bool attackThruVine(eMonster m) {
@@ -529,20 +529,22 @@ bool haveRangedOrb() {
     items[itOrbIllusion] || items[itOrbSpace] || items[itOrbAir] ||
     items[itOrbFrog] || items[itOrbSummon] || items[itOrbMatter] ||
     items[itRevolver] || items[itOrbStunning] || items[itStrongWind] ||
-    items[itOrbDomination] || items[itOrbNature] || items[itOrbDash];
+    items[itOrbDomination] || items[itOrbNature] || items[itOrbDash] ||
+    items[itOrbMorph];
   }
 
 bool isOffensiveOrb(eItem it) {
   return it == itOrbLightning || it == itOrbFlash || it == itOrbThorns ||
     it == itOrbDragon || it == itOrbStunning || 
-    it == itOrbFreedom || it == itOrbPsi;
+    it == itOrbFreedom || it == itOrbPsi ||
+    it == itOrbSide1 || it == itOrbSide2 || it == itOrbSide3;
   }
 
 bool isRangedOrb(eItem i) {
   return i == itOrbPsi || i == itOrbDragon || i == itOrbTeleport || i == itOrbIllusion ||
     i == itOrbSpace || i == itOrbAir || i == itOrbFrog ||
     i == itOrbSummon || i == itOrbMatter || i == itRevolver || i == itOrbStunning ||
-    i == itOrbDomination || i == itOrbNature || i == itOrbDash;
+    i == itOrbDomination || i == itOrbNature || i == itOrbDash || i == itOrbMorph;
   }
 
 bool isProtectionOrb(eItem i) {
@@ -561,11 +563,12 @@ bool isUtilityOrb(eItem i) {
   return i == itOrbSpeed || i == itOrbDigging || 
     i == itOrbSafety || i == itOrbTeleport || i == itOrbAether ||
     i == itOrbTime || i == itOrbSpace || 
-    i == itOrbSummon || i == itOrbLuck || i == itOrbEnergy;
+    i == itOrbSummon || i == itOrbLuck || i == itOrbEnergy ||
+    i == itOrbLava;
   }
 
 bool isDirectionalOrb(eItem i) {
-  return i == itOrbHorns || i == itOrbBull;
+  return i == itOrbHorns || i == itOrbBull || i == itOrbSword || i == itOrbSword2;
   }
 
 bool isRevivalOrb(eItem i) {

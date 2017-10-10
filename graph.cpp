@@ -629,7 +629,10 @@ bool drawItemType(eItem it, cell *c, const transmatrix& V, int icol, int ticks, 
   
   else if(xch == 'o' || it == itInventory) {
     if(it == itOrbFire) icol = firecolor(100);
-    queuepoly(V, shDisk, darkena(icol, 0, hidden ? 0x20 : 0xC0));
+    int pr = PPR_ITEM;
+    bool inice = c && c->wall == waIcewall;
+    if(inice) pr = PPR_HIDDEN;
+    queuepolyat(V, shDisk, darkena(icol, 0, inice ? 0x80 : hidden ? 0x20 : 0xC0), pr);
     if(it == itOrbFire) icol = firecolor(200);
     if(it == itOrbFriend || it == itOrbDiscord) icol = 0xC0C0C0;
     if(it == itOrbFrog) icol = 0xFF0000;
@@ -647,7 +650,7 @@ bool drawItemType(eItem it, cell *c, const transmatrix& V, int icol, int ticks, 
       isDirectionalOrb(it) ? shSpearRing :
       it == itOrb37 ? shHeptaRing :
       shRing;
-    queuepoly(V * spin(ticks / 1500.), sh, darkena(icol, 0, int(0x80 + 0x70 * sin(ticks / 300.))));
+    queuepolyat(V * spin(ticks / 1500.), sh, darkena(icol, 0, int(0x80 + 0x70 * sin(ticks / 300.))), pr);
     }
 
   else if(it) return true;

@@ -2466,7 +2466,12 @@ void checkTide(cell *c) {
   if(c->land == laVolcano) {
     int id = alchemyval(c, 0);
     if(id < 96) {
-      if(c->wall == waNone || isWateryOrBoat(c) || c->wall == waVinePlant) c->wall = waMagma;
+      if(c->wall == waNone || isWateryOrBoat(c) || c->wall == waVinePlant) {
+        c->wall = waMagma;
+        if(itemBurns(c->item)) {
+          addMessage(XLAT("%The1 burns!", c->item)), c->item = itNone;
+          }
+        }
       }
     else if(c->wall == waMagma) c->wall = waNone;
     }
@@ -6033,6 +6038,10 @@ void ambush(cell *c, eItem what) {
     
     case itOrbThorns:
     case itOrb37:
+      dogs = 20;
+      return;
+    
+    case itOrbLava:
       dogs = 20;
       return;
     

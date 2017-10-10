@@ -1,4 +1,4 @@
-#define ORBLINES 56
+#define ORBLINES 61
 
 // orbgen flags
 
@@ -53,10 +53,11 @@ const orbinfo orbinfos[ORBLINES] = {
   {orbgenflags::S_YENDOR, laHell, 2000, 1000,itOrbYendor},
   {orbgenflags::S_NATIVE, laRlyeh, 1500, 1500,itOrbTeleport},
   {orbgenflags::S_NA_O25, laMotion, 2000, 700, itOrbSafety},    
-  {orbgenflags::S_NATIVE, laIce, 1500, 0, itOrbWinter},
+  {orbgenflags::S_GUEST,  laIce, 1500, 0, itOrbWinter},
   {orbgenflags::S_GUEST,  laDragon, 2500, 0, itOrbWinter},
   {orbgenflags::S_GUEST,  laDryForest, 2500, 0, itOrbWinter}, 
-  {orbgenflags::S_NATIVE, laCocytus, 1500, 1500, itOrbWinter}, 
+  {orbgenflags::S_NATIVE, laCocytus, 1500, 1500, itOrbMorph}, 
+  {orbgenflags::S_GUEST,  laCocytus, 1500, 0, itOrbWinter}, 
   {orbgenflags::S_GUEST,  laCaves, 1200, 0, itOrbDigging},
   {orbgenflags::S_NATIVE, laDryForest, 500, 4500, itOrbThorns},
   {orbgenflags::S_GUEST,  laDeadCaves, 1800, 0, itGreenStone},
@@ -99,7 +100,11 @@ const orbinfo orbinfos[ORBLINES] = {
   {orbgenflags::S_NATIVE, laBull, 720, 3000, itOrbHorns},
   {orbgenflags::S_NATIVE, laPrairie, 0, 3500, itOrbBull},
   {orbgenflags::S_GUEST,  laWhirlpool, 0, 0, itOrbSafety},
-  {orbgenflags::S_NATIVE, laWhirlpool, 0, 2000, itOrbWater},
+  {orbgenflags::S_NATIVE, laVolcano, 0, 7000, itOrbLava},
+  {orbgenflags::S_NATIVE, laDogPlains, 0, 2500, itOrbSide3},
+  {orbgenflags::S_NATIVE, laBlizzard, 0, 2000, itOrbWinter},
+  {orbgenflags::S_NATIVE, laTerracotta, 800, 2500, itOrbSide1},
+  {orbgenflags::S_NATIVE, laWhirlpool, 0, 2000, itOrbWater}, // needs to be last
   };
 
 eItem nativeOrbType(eLand l) {
@@ -131,7 +136,7 @@ enum eOrbLandRelation {
   olrPrize25,   // prize for collecting 25
   olrPrize3,    // prize for collecting 3
   olrNative,    // native orb in this land
-  olrNative1,    // native orb in this land (1)
+  olrNative1,   // native orb in this land (1)
   olrGuest,     // extra orb in this land
   olrPNative,   // Land of Power: native
   olrPBasic,    // Land of Power: basic orbs
@@ -139,7 +144,8 @@ enum eOrbLandRelation {
   olrPNever,    // Land of Power: foreign orbs
   olrHub,       // hub lands
   olrMonster,   // available from a monster
-  olrAlways     // always available
+  olrAlways,    // always available
+  olrBurns      // burns
   };
 
 string olrDescriptions[] = {
@@ -159,7 +165,8 @@ string olrDescriptions[] = {
   "this Orb never appears in %the1",
   "Hub Land: orbs appear here if unlocked in their native land",
   "kill a monster, or collect 25 %2",
-  "always available"
+  "always available",
+  "would be destroyed in %the1"
   };
 
 eOrbLandRelation getOLR(eItem it, eLand l) {
@@ -190,6 +197,8 @@ eOrbLandRelation getOLR(eItem it, eLand l) {
   if(it == itOrbYendor && l == laWhirlwind) return olrUseless;
   
   if(it == itOrbLife && (l == laKraken)) return olrUseless;
+  
+  if(l == laVolcano && itemBurns(it)) return olrBurns;
   
   if(it == itOrbAir && l == laAlchemist) return olrUseless;
   // if(it == itOrbShield && l == laMotion) return olrUseless;
@@ -451,6 +460,15 @@ void placeLocalOrbs(cell *c) {
     else if(oi.gchance && (ch >= 11 && ch < 11+PRIZEMUL)) 
       placePrizeOrb(c);
     }
+  }
+
+void placeLocalSpecial(cell *c, int outof, int loc=1, int priz=1) {
+  if(peace::on || safety) return;
+  int i = hrand(outof);
+  if(i < loc && items[treasureType(c->land)] >= 10 && !inv::on) 
+    c->item = nativeOrbType(c->land);
+  else if(i >= loc && i < loc + PRIZEMUL * priz)
+    placePrizeOrb(c);
   }
 
 void placeCrossroadOrbs(cell *c) {  
