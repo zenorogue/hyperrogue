@@ -1436,6 +1436,19 @@ int fieldval_uniq(cell *c) {
     }
   }
 
+int fieldval_uniq_rand(cell *c, int randval) {
+  if(sphere || torus || euclid) 
+    // we do not care in these cases
+    return fieldval_uniq(c);
+  if(c->type == 7) return fp43.gmul(c->master->fieldval, randval)/7;
+  else {
+    int z = 0;
+    for(int u=0; u<6; u+=2) 
+      z = max(z, btspin(fp43.gmul(createMov(c, u)->master->fieldval, randval), c->spin(u)));
+    return -1-z;
+    }
+  }
+
 int subpathid = fp43.matcode[fp43.strtomatrix("RRRPRRRRRPRRRP")];
 int subpathorder = fp43.order(fp43.matrices[subpathid]);
 

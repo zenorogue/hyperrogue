@@ -198,6 +198,7 @@ eOrbLandRelation getOLR(eItem it, eLand l) {
   
   if(it == itOrbLife && (l == laKraken)) return olrUseless;
   
+  if(l == laVolcano && it == itOrbSafety) return olrDangerous;
   if(l == laVolcano && itemBurns(it)) return olrBurns;
   
   if(it == itOrbAir && l == laAlchemist) return olrUseless;
