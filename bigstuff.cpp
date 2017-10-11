@@ -1012,6 +1012,10 @@ void buildBigStuff(cell *c, cell *from) {
   }
 
 bool openplains(cell *c) {
+  if(chaosmode) {
+    forCellEx(c2, c) if(c2->land != laHunting) return false;
+    return true;
+    }
   if(purehepta) {
     celllister cl(c, 5, 1000000, NULL);
     int bad = 0;
