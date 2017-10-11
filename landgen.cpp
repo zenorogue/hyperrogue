@@ -231,7 +231,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
         if(hrand(5000) < PT(100 + 2 * (kills[moPalace] + kills[moFatGuard] + kills[moVizier] + kills[moSkeleton]), 200) && notDippingFor(itPalace) &&
           c->wall != waOpenGate && !lookingForPrincess0)
           c->item = itPalace;
-        if(items[itPalace] >= 10 && hrand(5000) < 16 && c->wall != waOpenGate && !inv::on && !peace::on)
+        if(items[itPalace] >= treasureForLocal() && hrand(5000) < 16 && c->wall != waOpenGate && !inv::on && !peace::on)
           c->item = hrand(100) < 80 ? itOrbFrog : itOrbDiscord;
         if(hrand(5000) < 20*PRIZEMUL && c->wall != waOpenGate)
           placePrizeOrb(c);
@@ -1059,7 +1059,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
             c->monst = moCultistLeader;
           else if(hrand(5000) < 250 && !peace::on)
             c->item = itGrimoire;
-          else if(hrand(5000) < 10 && (chaosmode ? items[itGrimoire] >= 10 : -d > TEMPLE_EACH * 10) && !peace::on && !inv::on)
+          else if(hrand(5000) < 10 && (chaosmode ? items[itGrimoire] >= treasureForLocal() : -d > TEMPLE_EACH * 10) && !peace::on && !inv::on)
             c->item = itOrbDragon;
           }
         }
@@ -1537,7 +1537,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
             c->item = itCoast;
           if(hrand(15000) < 10 + 2 * items[itCoast] + 2 * yendor::hardness())
             c->monst = moAlbatross;
-          if(items[itCoast] >= 10 && hrand(10000) < 5 && !peace::on && !inv::on)
+          if(items[itCoast] >= treasureForLocal() && hrand(10000) < 5 && !peace::on && !inv::on)
             c->item = itOrbAir;
           else placeLocalSpecial(c, 10000, 6, 5);
           buildPrizeMirror(c, 2000);

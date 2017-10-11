@@ -423,6 +423,11 @@ void placePrizeOrb(cell *c) {
   // printf("land: %s orb: %s\n", dnameof(l), dnameof(c->item));
   }
 
+// 10 not in chaos, less in chaos
+int treasureForLocal() {
+  return (chaosmode ? 1+hrand(10) : 10);
+  }
+
 void placeLocalOrbs(cell *c) {
   eLand l = c->land;
   if(l == laZebra && c->wall == waTrapdoor) return;
@@ -442,7 +447,7 @@ void placeLocalOrbs(cell *c) {
       ch = 0;
     if(tactic::trailer && ch < 5) ch = 0;
     int tc = items[treasureType(oi.l)] * landMultiplier(oi.l);
-    int tcmin = (chaosmode ? 1+hrand(10) : 10);
+    int tcmin = treasureForLocal();
     if(inv::on) {
       if(!(oi.flags & orbgenflags::OSM_LOCAL25))
         tc = 0;
@@ -465,7 +470,7 @@ void placeLocalOrbs(cell *c) {
 void placeLocalSpecial(cell *c, int outof, int loc=1, int priz=1) {
   if(peace::on || safety) return;
   int i = hrand(outof);
-  if(i < loc && items[treasureType(c->land)] >= 10 && !inv::on) 
+  if(i < loc && items[treasureType(c->land)] >= treasureForLocal() && !inv::on) 
     c->item = nativeOrbType(c->land);
   else if(i >= loc && i < loc + PRIZEMUL * priz)
     placePrizeOrb(c);
