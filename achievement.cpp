@@ -1,7 +1,7 @@
 // Hyperbolic Rogue -- achievements
 // Copyright (C) 2011-2016 Zeno Rogue, see 'hyper.cpp' for details
 
-#define NUMLEADER 72
+#define NUMLEADER 76
 
 #define SCORE_UNKNOWN (-1)
 #define NO_SCORE_YET (-2)
@@ -16,7 +16,7 @@ const char* leadernames[NUMLEADER] = {
   "Score", "Diamonds", "Gold", "Spice", "Rubies", "Elixirs",
   "Shards100", "Totems", "Daisies", "Statues", "Feathers", "Sapphires",
   "Hyperstones", "Time to Win-71", "Turns to Win-71",
-  "Time to 10 Hyperstones-94", "Turns to 10 Hyperstones-94", "Orbs of Yendor",
+  "Time to 10 Hyperstones-101", "Turns to 10 Hyperstones-101", "Orbs of Yendor",
   "Fern Flowers", 
   "Royal Jellies", "Powerstones", "Silver", "Wine", "Emeralds", "Grimoires",
   "Holy Grails", "Red Gems", "Pirate Treasures",
@@ -62,6 +62,10 @@ const char* leadernames[NUMLEADER] = {
   "Orb Strategy Score", // 69
   "Real time to Win-OS", // 70
   "Turns to Win-OS", // 71
+  "Ancient Weapons", // 72
+  "Forgotten Relics", // 73
+  "Lava Lilies", // 74
+  "Turquoises", // 75
   };
 
 #define LB_STATISTICS 62
@@ -202,6 +206,11 @@ void achievement_collection(eItem it, int prevgold, int newgold) {
 
     if(it == itGreenGrass) achievement_gain("PRAIR1");
     if(it == itBull) achievement_gain("BULL1");
+    
+    if(it == itHunting) achievement_gain("TURQ1");
+    if(it == itBlizzard) achievement_gain("BLIZZ1");
+    if(it == itLavaLily) achievement_gain("LILY1");
+    if(it == itTerra) achievement_gain("TERRAC1");
     }
 
   // 32
@@ -265,6 +274,11 @@ void achievement_collection(eItem it, int prevgold, int newgold) {
 
     if(it == itGreenGrass) achievement_gain("PRAIR2");
     if(it == itBull) achievement_gain("BULL2");
+    
+    if(it == itHunting) achievement_gain("TURQ2");
+    if(it == itBlizzard) achievement_gain("BLIZZ2");
+    if(it == itLavaLily) achievement_gain("LILY2");
+    if(it == itTerra) achievement_gain("TERRAC2");
     }
 
   if(q == (inv::on ? 50 : 25)) {
@@ -324,6 +338,11 @@ void achievement_collection(eItem it, int prevgold, int newgold) {
 
     if(it == itGreenGrass) achievement_gain("PRAIR3");
     if(it == itBull) achievement_gain("BULL3");
+    
+    if(it == itHunting) achievement_gain("TURQ3");
+    if(it == itBlizzard) achievement_gain("BLIZZ3");
+    if(it == itLavaLily) achievement_gain("LILY3");
+    if(it == itTerra) achievement_gain("TERRAC3");
     }
 
   if(q == 50 && !inv::on) {
@@ -380,6 +399,11 @@ void achievement_collection(eItem it, int prevgold, int newgold) {
 
     if(it == itGreenGrass) achievement_gain("PRAIR4");
     if(it == itBull) achievement_gain("BULL4");
+    
+    if(it == itHunting) achievement_gain("TURQ4");
+    if(it == itBlizzard) achievement_gain("BLIZZ4");
+    if(it == itLavaLily) achievement_gain("LILY4");
+    if(it == itTerra) achievement_gain("TERRAC4");
     }
   
   if(it == itOrbYendor) {
