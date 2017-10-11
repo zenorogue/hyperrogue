@@ -1203,7 +1203,7 @@ itemtype iinf[ittypes] = {
   { 'o', 0x30A080, "Orb of the Triangle", NODESCYET},
   { 'o', 0x30D080, "Orb of Ferocity", NODESCYET},
   { 'o', 0xD08030, "Orb of Lava", NODESCYET},
-  { 'o', 0x3080D0, "Orb of Morph", NODESCYET},
+  { 'o', 0x3080D0, "Orb of Change", NODESCYET},
   };
 
 enum eItem { 
