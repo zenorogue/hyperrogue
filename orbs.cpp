@@ -138,6 +138,10 @@ void reduceOrbPowers() {
   reduceOrbPower(itOrbHorns, 77);
   reduceOrbPower(itOrbLava, 80);
   reduceOrbPower(itOrbMorph, 80);
+
+  reduceOrbPower(itOrbSide1, 120);
+  reduceOrbPower(itOrbSide2, 120);
+  reduceOrbPower(itOrbSide3, 120);
   if(cwt.c->land != laWildWest)
     reduceOrbPower(itRevolver, 6);
   whirlwind::calcdirs(cwt.c); 
@@ -877,7 +881,7 @@ void poly_attack(cell *dest) {
   dest->monst = target;
   if(!dest->stuntime) dest->stuntime = 1;
   checkStunKill(dest);
-  useupOrb(itOrbMorph, 2);
+  useupOrb(itOrbMorph, 3);
   createNoise(3);
   bfs();
   checkmoveO();
@@ -1298,6 +1302,11 @@ int orbcharges(eItem it) {
       return 60;
     
     case itOrbLava:
+      return 50;
+    
+    case itOrbSide1:
+    case itOrbSide2:
+    case itOrbSide3:
       return 50;
        
     default:

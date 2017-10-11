@@ -2384,7 +2384,7 @@ void setcolors(cell *c, int& wcol, int &fcol) {
     case laLivefjord: fcol = 0x306030; break;
     
     case laVolcano: {
-      int id = alchemyval(c, -1)/4;
+      int id = lavatide(c, -1)/4;
       if(c->wall == waMagma) {
         if(id == 95/4-1) fcol = wcol = 0x200000;
         else if(id == 95/4) fcol = wcol = 0x100000;
@@ -2666,7 +2666,7 @@ void setcolors(cell *c, int& wcol, int &fcol) {
     }
 
   /* if(false && isAlch2(c, true)) {
-    int id = alchemyval(c, -1);
+    int id = lavatide(c, -1);
     if(id < 96)
       wcol = gradient(0x800000, 0xFF0000, 0, id, 96);
     else 

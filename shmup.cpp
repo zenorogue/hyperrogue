@@ -1256,34 +1256,17 @@ void shootBullet(monster *m) {
   bullet->parenttype = m->type;
   additional.push_back(bullet);
   
-  if(markOrb(itOrbThorns)) {
+  eItem orbdir[8] = {
+    itNone, itOrbSide1, itOrbThorns, itOrbSide2, itOrbSide3, itOrbSide2, itOrbThorns, itOrbSide1
+    };
+  
+  for(int i=1; i<8; i++) if(markOrb(orbdir[i])) {
     monster* bullet = new monster;
     bullet->base = m->base;
-    bullet->at = m->at * spin(M_PI/2);
+    bullet->at = m->at * spin(M_PI/4*i);
     bullet->type = moBullet;
     bullet->parent = m;
     bullet->pid = m->pid;
-    bullet->parenttype = m->type;
-    additional.push_back(bullet);
-    }
-
-  if(markOrb(itOrbThorns)) {
-    monster* bullet = new monster;
-    bullet->base = m->base;
-    bullet->at = m->at * spin(-M_PI/2);
-    bullet->type = moBullet;
-    bullet->parent = m;
-    bullet->pid = m->pid;
-    bullet->parenttype = m->type;
-    additional.push_back(bullet);
-    }
- 
-  if(markOrb(itOrbDash)) {
-    monster* bullet = new monster;
-    bullet->base = m->base;
-    bullet->at = m->at * spin(M_PI);
-    bullet->type = moBullet;
-    bullet->parent = m;
     bullet->parenttype = m->type;
     additional.push_back(bullet);
     }
@@ -1331,7 +1314,8 @@ void oceanCurrents(transmatrix& nat, monster *m, int delta) {
     }
   }
 
-void airCurrents(transmatrix& nat, monster *m, int delta) {
+bool airCurrents(transmatrix& nat, monster *m, int delta) {
+  bool carried = false;
   cell *c = m->base;
   if(c->land == laWhirlwind) {
     whirlwind::calcdirs(c);
@@ -1341,6 +1325,7 @@ void airCurrents(transmatrix& nat, monster *m, int delta) {
       
       double spd = SCALE * delta / 900.;
         
+      if(m->type == moVoidBeast) spd = -spd;
       if(spd) {
         transmatrix goal = gmatrix[c2];
 
@@ -1350,9 +1335,31 @@ void airCurrents(transmatrix& nat, monster *m, int delta) {
         nat = nat * rspintox(H);
         nat = nat * xpush(spd);
         nat = nat * spintox(H);
+        carried = true; 
         }
       }
     }
+  if(c->land == laBlizzard) {
+    int wmc = windmap::at(c);
+    forCellEx(c2, c) { 
+      if(!c2 || !gmatrix.count(c2)) continue;
+      int z = (windmap::at(c2) - wmc) & 255;
+      if(z >= 128) z -= 256;
+      if(m->type == moVoidBeast) z = -z;
+      if(z < windmap::NOWINDFROM && z > -windmap::NOWINDFROM) {
+        transmatrix goal = gmatrix[c2];
+
+        // transmatrix t = spintox(H) * xpush(delta/300.) * rspintox(H);
+
+        hyperpoint H = inverse(m->pat) * goal * C0;
+        nat = nat * rspintox(H);
+        nat = nat * xpush(z * SCALE * delta / 50000.);
+        nat = nat * spintox(H);
+        carried = true; 
+        }
+      }
+    }
+  return carried;
   }
 
 void roseCurrents(transmatrix& nat, monster *m, int delta) {
@@ -1423,7 +1430,8 @@ bool swordKills(eMonster m) {
   return 
     m != moHedge && m != moMetalBeast && m != moMetalBeast2
     && m != moTortoise && m != moGreater && m != moRoseBeauty
-    && m != moReptile && !isBull(m) && m != moButterfly;
+    && m != moReptile && !isBull(m) && m != moButterfly &&
+    m != moSalamander && m != moTerraWarrior;
   }
 
 bool hornKills(eMonster m) {
@@ -1432,7 +1440,8 @@ bool hornKills(eMonster m) {
     && m != moTortoise && m != moGreater && m != moSkeleton
     && m != moDraugr && m != moRoseBeauty
     && m != moReptile && !isBull(m) && m != moButterfly && !isBulletType(m)
-    && m != moPalace && m != moFatGuard && m != moVizier;
+    && m != moPalace && m != moFatGuard && m != moVizier &&
+    m != moSalamander && m != moTerraWarrior;
   }
 
 bool hornStuns(eMonster m) {
@@ -1445,8 +1454,10 @@ bool noncrashable(monster *m, monster *by) {
   if(mt == moDraugr && by->type != moDraugr) return true;
   if(isBull(mt)) return true;
   if(mt == moReptile) return true;
+  if(mt == moSalamander) return true;
   if(mt == moRoseBeauty && by->type != moRoseLady) return true;
   if(mt == moTortoise) return true;
+  if(mt == moTerraWarrior) return true;
   if(mt == moSkeleton) return true;
   return false;
   }
@@ -1570,8 +1581,7 @@ void movePlayer(monster *m, int delta) {
   if(m->base->land == laWhirlpool && !markOrb(itOrbWater))
     oceanCurrents(nat, m, delta);
     
-  if(m->base->land == laWhirlwind)
-    airCurrents(nat, m, delta);
+  airCurrents(nat, m, delta);
     
   if(rosedist(m->base) == 1)
     roseCurrents(nat, m, delta);
@@ -1582,6 +1592,8 @@ void movePlayer(monster *m, int delta) {
   
   playergo[cpid] = mgo * SCALE * delta / 600;
   
+  if(playergo[cpid] && markOrb(itOrbDash)) playergo[cpid] *= 1.5;
+
   bool go = false; 
   
   cell *c2 = m->base;
@@ -1773,7 +1785,7 @@ void movePlayer(monster *m, int delta) {
     if(isWatery(m->base) && !m->inBoat && !markOrb(itOrbFish))
       m->dead = true;
 
-    if(isFire(m->base) && !markOrb(itOrbWinter))
+    if(isFireOrMagma(m->base) && !markOrb(itOrbWinter))
       m->dead = true;
     }
 
@@ -2102,6 +2114,9 @@ void moveBullet(monster *m, int delta) {
   nat = nat * xpush(delta * SCALE * m->vel / speedfactor());
   cell *c2 = m->findbase(nat);
 
+  if(m->parent && isPlayer(m->parent) && markOrb(itOrbLava) && c2 != m->base && !isPlayerOn(m->base)) 
+    makeflame(m->base, 5, false);
+
   if(isActivable(c2)) activateActiv(c2, true);
   
   // knives break mirrors and clouds
@@ -2183,14 +2198,16 @@ void moveBullet(monster *m, int delta) {
       // 
       if((m2->type == moPalace || m2->type == moFatGuard || m2->type == moSkeleton ||
         m2->type == moVizier || isMetalBeast(m2->type) || m2->type == moTortoise ||
-        m2->type == moReptile) && m2->hitpoints > 1) {
+        m2->type == moReptile || m2->type == moSalamander || m2->type == moTerraWarrior) && m2->hitpoints > 1) {
         m2->rebasePat(m2->pat * rspintox(inverse(m2->pat) * nat0 * C0));
-        if(m2->type != moSkeleton && !isMetalBeast(m2->type) && m2->type != moReptile) 
+        if(m2->type != moSkeleton && !isMetalBeast(m2->type) && m2->type != moReptile && m2->type != moSalamander) 
           m2->hitpoints--;
         m->dead = true;
         if(m2->type == moVizier) ;
         else if(m2->type == moFatGuard)
           m2->stunoff = curtime + 600;
+        else if(m2->type == moTerraWarrior)
+          m2->stunoff = curtime + 300 * (6 - m2->hitpoints);
         else if(m2->type == moMetalBeast || m2->type == moMetalBeast2)
           m2->stunoff = curtime + 3000;
         else if(m2->type == moReptile)
@@ -2288,8 +2305,12 @@ void moveMonster(monster *m, int delta) {
   if(isWatery(m->base) && !survivesWater(m->type) && !m->inBoat && m->type != moReptile)
     killMonster(m, moNone);
 
-  if(isFire(m->base) && !survivesFire(m->type))
-    killMonster(m, moNone);
+  if(isFireOrMagma(m->base)) {
+    if(m->type == moSalamander)
+      m->stunoff = max(ticks+500, m->stunoff);
+    else if(!survivesFire(m->type))
+      killMonster(m, moNone);
+    }
 
   if(m->base->wall == waClosedGate && !survivesWall(m->type))
     killMonster(m, moNone);
@@ -2307,6 +2328,8 @@ void moveMonster(monster *m, int delta) {
     step *= 2;
   else if(m->type == moEagle)
     step *= 1.6;
+  else if(m->type == moHunterDog)
+    step *= 1.5;
   else if(m->type == moLancer)
     step *= 1.25;
   else if(isDemon(m->type)) {
@@ -2339,10 +2362,15 @@ void moveMonster(monster *m, int delta) {
     if(m->blowoff > curtime) {
       step = SCALE * -delta / 1000.;
       }
-    else if(m->type == moFatGuard || m->type == moTortoise || m->type == moRagingBull)
+    else if(m->type == moFatGuard || m->type == moTortoise || m->type == moRagingBull || m->type == moTerraWarrior)
       step = 0;
     else if(m->type == moReptile)
       step = SCALE * -delta / 1000. * (m->stunoff - curtime) / 3000.;
+    else if(m->type == moSalamander) {
+      if(isFireOrMagma(m->base)) step = 0;
+      else
+        step = SCALE * -delta / 2000.;
+      }
     else step = SCALE * -delta/2000.;
     }
   
@@ -2397,7 +2425,7 @@ void moveMonster(monster *m, int delta) {
       cell *cnext = c;
       for(int i=0; i<c->type; i++) {
         cell *c2 = c->mov[i];
-        if(c2 && gmatrix.count(c2) && HEAT(c2) > HEAT(c) && isIcyLand(c2) && passable(c2, c, 0))
+        if(c2 && gmatrix.count(c2) && (c2->land == laVolcano || (isIcyLand(c2) && HEAT(c2) > HEAT(c))) && passable(c2, c, 0))
           cnext = c2;
         }
       goal = gmatrix[cnext];
@@ -2482,8 +2510,8 @@ void moveMonster(monster *m, int delta) {
   if(c->land == laWhirlpool && (m->type == moShark || m->type == moCShark || m->type == moPirate))
     oceanCurrents(nat, m, delta), carried = true;
 
-  if(m->base->land == laWhirlwind) 
-    airCurrents(nat, m, delta), carried = true;
+  if(m->type != moGhost && m->type != moFriendlyGhost && m->type != moAirElemental)
+    carried |= airCurrents(nat, m, delta);
   
   if(rosedist(m->base) == 1)
     roseCurrents(nat, m, delta), carried = true;
@@ -2570,7 +2598,7 @@ void moveMonster(monster *m, int delta) {
     if(isSlimeMover(m->type) || m->type == moWaterElemental) usetongue = true;
     if(isWatery(c2) && !survivesWater(m->type) && !m->inBoat) usetongue = true;
     if(c2->wall == waChasm && !survivesChasm(m->type)) usetongue = true;
-    if(isFire(c2) && !survivesFire(m->type) && !m->inBoat) usetongue = true;
+    if(isFireOrMagma(c2) && !survivesFire(m->type) && !m->inBoat) usetongue = true;
     if(isBird(m->type) && !passable_for(moEagle, c2, c, 0)) usetongue = true;
     if(usetongue) {
       if(curtime < m->nextshot) return;
@@ -2601,6 +2629,9 @@ void moveMonster(monster *m, int delta) {
   if(c2 != m->base && cellUnstable(m->base) && !ignoresPlates(m->type))
     doesFallSound(m->base);
 
+  if(m->type == moWolf && c2->land == laVolcano) m->type = moLavaWolf;
+  if(m->type == moLavaWolf && isIcyLand(c2)) m->type = moWolf;
+  
   if(c2 != m->base && m->type == moWitchFire) makeflame(m->base, 10, false);
   if(c2 != m->base && m->type == moFireElemental) makeflame(m->base, 20, false);
   if(c2 != m->base && m->type == moWaterElemental) placeWater(c2, m->base);
@@ -2786,7 +2817,7 @@ void activateMonstersAt(cell *c) {
     }
   if(c->monst && isMimic(c->monst)) c->monst = moNone;
   // mimics are awakened by awakenMimics
-  if(c->monst && !isIvy(c) && !isWorm(c) && !isMutantIvy(c) && !isKraken(c->monst) && c->monst != moPrincess) {
+  if(c->monst && !isIvy(c) && !isWorm(c) && !isMutantIvy(c) && !isKraken(c->monst) && c->monst != moPrincess && c->monst != moHunterGuard) {
     // awaken as a monster
     monster *enemy = new monster;
     enemy->at = Id;

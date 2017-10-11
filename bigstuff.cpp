@@ -1012,12 +1012,23 @@ void buildBigStuff(cell *c, cell *from) {
   }
 
 bool openplains(cell *c) {
-  celllister cl(c, purehepta ? 5 : 7, 1000000, NULL);
-  for(cell *c: cl.lst) { 
-    while(c->mpdist > 8) setdist(c, c->mpdist-1, NULL);
-    if(c->land != laHunting) return false;
+  if(purehepta) {
+    celllister cl(c, 5, 1000000, NULL);
+    int bad = 0;
+    for(cell *c: cl.lst) { 
+      while(c->mpdist > 8) setdist(c, c->mpdist-1, NULL);
+      if(c->land != laHunting) {bad++; if(bad>5) return false;}
+      }
+    return true;
     }
-  return true;
+  else {
+    celllister cl(c, purehepta ? 5 : 7, 1000000, NULL);
+    for(cell *c: cl.lst) { 
+      while(c->mpdist > 8) setdist(c, c->mpdist-1, NULL);
+      if(c->land != laHunting) return false;
+      }
+    return true;
+    }    
   }
 
 void doOvergenerate() {

@@ -49,6 +49,10 @@ bool isFire(cell *w) {
   return w->wall == waFire || w->wall == waPartialFire || w->wall == waEternalFire;
   }
 
+bool isFireOrMagma(cell *w) {
+  return isFire(w) || w->wall == waMagma;
+  }
+
 bool isThumper(eWall w) {
   return w == waThumperOff || w == waThumperOn;
   }

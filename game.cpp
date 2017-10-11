@@ -631,7 +631,7 @@ bool againstWind(cell *cto, cell *cfrom) {
   if(!cfrom || !cto) return false;
   int dcto = airdist(cto), dcfrom = airdist(cfrom);
   if(dcto < dcfrom) return true;
-  if(cfrom->land == laBlizzard && cto->land == laBlizzard && dcto == 3 && dcfrom == 3) {
+  if(cfrom->land == laBlizzard && !shmup::on && cto->land == laBlizzard && dcto == 3 && dcfrom == 3) {
     char vfrom = windmap::at(cfrom);
     char vto = windmap::at(cto);
     int z = (vfrom-vto) & 255;
@@ -2428,8 +2428,9 @@ bool recalcTide;
 #define LANDDIST LHU.bytes[1]
 #define CHAOSPARAM LHU.bytes[2]
 
-int alchemyval(cell *c, int t) {
-  return (windmap::at(c) + (turncount+t)*4) & 255;
+int lavatide(cell *c, int t) {
+  int tc = (shmup::on ? shmup::curtime/400 : turncount);
+  return (windmap::at(c) + (tc+t)*4) & 255;
   }
 
 void checkTide(cell *c) {
@@ -2464,7 +2465,7 @@ void checkTide(cell *c) {
       c->wall = waSea;
     }
   if(c->land == laVolcano) {
-    int id = alchemyval(c, 0);
+    int id = lavatide(c, 0);
     if(id < 96) {
       if(c->wall == waNone || isWateryOrBoat(c) || c->wall == waVinePlant) {
         if(isWateryOrBoat(c)) 
@@ -5533,6 +5534,11 @@ bool checkNeedMove(bool checkonly, bool attacking) {
     if(markOrb2(itOrbAether)) return false;
     if(checkonly) return true;
     addMessage(XLAT("This spot will be burning soon! RUN!"));
+    }
+  else if(cwt.c->wall == waMagma && !markOrb(itOrbWinter) && !markOrb2(itOrbShield)) {
+    if(markOrb2(itOrbAether)) return false;
+    if(checkonly) return true;
+    addMessage(XLAT("Run away from the magma!"));
     }
   else if(cwt.c->wall == waChasm) {
     if(markOrb2(itOrbAether)) return false;

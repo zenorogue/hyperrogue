@@ -656,7 +656,7 @@ void describeMouseover() {
         }
       }
     else if(c->land == laVolcano) {
-      int id = alchemyval(c, -1)/4;
+      int id = lavatide(c, -1)/4;
       if(id < 96/4)
         out += " (" + turnstring(96/4-id) + XLAT(" to go cold") + ")";
       else
