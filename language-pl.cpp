@@ -5881,10 +5881,86 @@ S(
   "by zdobywać skarby i przyjazne Mimiki."
   )
   
-#undef Orb
+// were missing
 
 N("Kraken", GEN_M, "Kraken", "Krakeny", "Krakena", "Krakenem")
 N("Kraken Tentacle", GEN_F, "Macka Krakena", "Macki Krakena", "Mackę Krakena", "Macką Krakena")
 S(" (killing increases treasure spawn)", " (pokonywanie zwiększa częstość skarbów)");
 
 N("stepping stones", GEN_O, "Bród", "Brody", "Bród", "Brodem")
+
+// 10.1
+
+// mew message options
+S("centered", "po środku")
+S("left-aligned", "na lewo")
+S("line-broken", "łamane linie")
+S("message style", "styl wiadomości")
+S("limit messages shown", "ograniczenie na wiadomości")
+S("Maximum number of messages on screen.", "Największa możliwa liczba wiadomości na ekranie.")
+
+S("message log", "log wiadomości")
+S("real time", "czas rzeczywisty")
+S("game time", "czas gry")
+S("precise", "dokładny czas")
+S("no time", "bez czasu")
+S("back", "wróć")
+S("clear", "czyść")
+
+// 'u' now loads the current picture in the Map Editor
+S("'u' to load current", "'u' by załadować obecne")
+
+// Happy Hunting Ground
+//----------------------
+
+N("Hunting Ground", GEN_F, "Kraina Wiecznych Łowów", "Kraina Wiecznych Łowów", "Krainę Wiecznych Łowów", "w Krainie Wiecznych Łowów")
+N("Hunting Dog", GEN_M, "Pies Myśliwski", "Psy Myśliwskie", "Psa Myśliwskiego", "Psem Myśliwskim")
+N("Hunting Dog (guarding)", GEN_M, "Pies Myśliwski (waruje)", "Psy Myśliwskie (warują)", "Psa Myśliwskiego (warującego)", "Psem Myśliwskim (warującym)")
+N("Turquoise", GEN_O, "Turkus", "Turkusy", "Turkus", "Turkusem")
+Orb("Ferocity", "Zaciekłości")
+
+// Volcanic Wasteland
+//--------------------
+
+N("Volcanic Wasteland", GEN_F, "Wulkaniczna Kraina", "Wulkaniczne Krainy", "Wulkaniczną Krainę", "w Wulkanicznej Krainie")
+N("Salamander", GEN_F, "Salamandra", "Salamandry", "Salamandrę", "Salamandrą")
+N("Lava Wolf", GEN_M, "Wilk Lawowy", "Wilki Lawowe", "Wilka Lawowego", "Wilkiem Lawowym")
+Orb("Lava", "Lawy")
+
+// Orbs would be destroyed in Volcanic Wasteland
+S("would be destroyed in %the1", "by%ł1by zniszczon%y1 %abl1") 
+S(" to go cold", " by ostygnąć")
+S("%The1 is destroyed by lava!", "%The1 jest zniszczon%y1 przez lawę!")
+S("%The1 is killed by lava!", "%The1 jest zabit%y1 przez lawę!")
+S("Run away from the magma!", "Uciekaj od magmy!")
+
+// Terracotta Army
+//-----------------
+
+N("Terracotta Army", GEN_F, "Armia Terakotowa", "Armie Terakotowe", "Armię Terakotową", "w Armii Terakotowej")
+N("arrow trap", GEN_F, "strzelająca pułapka", "strzelające pułapki", "strzelającą pułapkę", "strzelającą pułapką")
+N("mercury river", GEN_F, "rzeka rtęci", "rzeki rtęci", "rzekę rtęci", "rzeką rtęci")
+N("Terracotta Warrior", GEN_M, "Terakotowy Wojownik", "Terakotowi Wojownicy", "Terakotowego Wojownika", "Terakotowym Wojownikiem")
+N("Jiangshi", GEN_M, "Jiangshi", "Jiangshi", "Jiangshi", "Jiangshi")
+Orb("Slashing", "Cięcia")
+
+// Blizzard
+//----------
+
+N("Blizzard", GEN_F, "Zamieć", "Zamieci", "Zamieci", "w Zamieci")
+N("Ice Golem", GEN_M, "Lodowy Golem", "Lodowe Golemy", "Lodowego Golema", "Lodowym Golemem")
+N("Void Beast", GEN_F, "Bestia Nicości", "Bestie Nicości", "Bestię Nicości", "Bestią Nicości")
+N("Forgotten Relic", GEN_F, "Relikwia", "Relikwie", "Relikwię", "Relikwią")
+Orb("Change", "Zmiany")
+
+/* S("Once in the past there lived a tribe whose prophets warned about the great blizzard that was to come and freeze the world. "
+  "They thought it was the wrath of the gods, so they put some altars, so that the gods could hear their pleas. "
+  "The mighty golems guarded those altars, making sure nobody steals the jewels, because a robbed god is a angry god. "
+  "Unfortunately winter has come (maybe because the monks knew how to stop the golems and were said to had escaped earlier with some of the jewels). "
+  "The tribe has frozen to death, altars got covered with snow and ice. Only ice golems still guard them waiting for the meltdown.") */
+
+// yet unused orb
+Orb("the Triangle", "Trójkąta")
+
+#undef Orb
+
