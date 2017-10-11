@@ -395,6 +395,8 @@ bool inv::on;
 bool fixseed = false;
 int startseed = 0;
 
+eLand firstland0;
+
 void initAll() {
   showstartmenu = true;
   ca::init();
@@ -404,7 +406,7 @@ void initAll() {
 
   achievement_init(); // not in ANDROID
 
-  eLand f = firstland;
+  firstland0 = firstland;
   
   // initlanguage();
   initgraph();
@@ -425,7 +427,7 @@ void initAll() {
     restoreGolems(kills[moPrincessArmedMoved], moPrincessArmed, princess::saveArmedHP); kills[moPrincessArmedMoved] = 0;
     }
   
-  firstland = f;
+  firstland = firstland0;
   }
 
 void finishAll() {

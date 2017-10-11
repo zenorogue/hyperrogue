@@ -136,7 +136,8 @@ int arg::readCommon() {
     showstartmenu = false;
     }
   else if(argis("-W")) {
-    shift(); firstland = specialland = readland(args());
+    shift(); 
+    firstland0 = firstland = specialland = readland(args()); autocheat = true;
     showstartmenu = false;
     }
   else if(argis("-I")) {
