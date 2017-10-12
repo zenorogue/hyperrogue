@@ -1444,6 +1444,48 @@ bool hornKills(eMonster m) {
     m != moSalamander && m != moTerraWarrior;
   }
 
+queue<pair<int, cell*>> traplist;
+
+void activateArrow(cell *c) {
+  if(isCentralTrap(c))
+    traplist.emplace(ticks + 500, c);
+  }
+
+monster arrowtrap_fakeparent;
+
+void doTraps() {
+  while(true) { 
+    if(traplist.empty()) return;
+    auto t = traplist.front();
+    if(t.first > ticks) return;
+    int d = t.second->wparam;
+    if(d == 2) {
+      auto tl = traplimits(t.second);
+      for(int i=1; i<4; i++) if(tl[i]) tl[i]->wparam = 3;
+      traplist.emplace(t.first + 500, t.second);
+      
+      for(int i=0; i<5; i += 4) try {
+        transmatrix& tu = gmatrix.at(tl[i]);
+        transmatrix& tv = gmatrix.at(tl[4-i]);
+        monster* bullet = new monster;
+        bullet->base = tl[i];
+        bullet->at = rspintox(inverse(tu) * tC0(tv));
+        bullet->type = moArrowTrap;
+        bullet->parent = &arrowtrap_fakeparent;
+        bullet->pid = 0;
+        bullet->parenttype = moArrowTrap;
+        additional.push_back(bullet);
+        }
+      catch(out_of_range) {}
+      }
+    else if(d == 3) {
+      auto tl = traplimits(t.second);
+      for(int i=1; i<4; i++) if(tl[i]) tl[i]->wparam = 0;
+      }
+    traplist.pop();
+    }
+  }
+
 bool hornStuns(eMonster m) {
   return !isBulletType(m) && m != moRoseBeauty;
   }
@@ -1756,6 +1798,9 @@ void movePlayer(monster *m, int delta) {
 
       if(c2->wall == waClosePlate || c2->wall == waOpenPlate)
         toggleGates(c2, c2->wall);
+
+      if(c2->wall == waArrowTrap && c2->wparam == 0 && !markOrb(itOrbAether))
+       activateArrowTrap(c2);
   
       if(c2->item == itOrbYendor && !peace::on) yendor::check(c2);
       collectItem(c2);
@@ -2106,6 +2151,8 @@ void moveBullet(monster *m, int delta) {
     m->vel = 1/500.;
   else if(m->type == moAirball)
     m->vel = 1/200.;
+  else if(m->type == moArrowTrap)
+    m->vel = 1/200.;
   else if(m->type == moTongue) {
     m->vel = 1/1500.;
     if(m->isVirtual || !m->parent || intval(nat*C0, m->parent->pat*C0) > SCALE2 * 0.4)
@@ -2131,7 +2178,7 @@ void moveBullet(monster *m, int delta) {
   
   bool godragon = m->type == moFireball && isDragon(c2->monst);
   
-  if(m->type != moTongue && !(godragon || passable(c2, m->base, P_BULLET | P_MIRRORWALL))) {
+  if(m->type != moTongue && !(godragon || (c2==m->base && m->type == moArrowTrap) || passable(c2, m->base, P_BULLET | P_MIRRORWALL))) {
     m->dead = true;
     if(m->type != moAirball) killMonster(c2, m->parent ? m->parent->type : moNone);
     // cell *c = m->base;
@@ -2161,7 +2208,8 @@ void moveBullet(monster *m, int delta) {
   // items[itOrbWinter] = 100; items[itOrbLife] = 100;
   
   if(!m->isVirtual) for(monster* m2: nonvirtual) {
-    if(m2 == m || (m2 == m->parent && m->vel >= 0) || m2->parent == m->parent) continue;
+    if(m2 == m || (m2 == m->parent && m->vel >= 0) || m2->parent == m->parent) 
+      continue;
     
     // Flailers only killable by themselves
     if(m2->type == moFlailer && m2 != m->parent) continue;
@@ -2221,7 +2269,7 @@ void moveBullet(monster *m, int delta) {
         continue;
         }
       // conventional missiles cannot hurt some monsters
-      bool conv = (m->type == moBullet || m->type == moFlailBullet || m->type == moTongue);
+      bool conv = (m->type == moBullet || m->type == moFlailBullet || m->type == moTongue || m->type == moArrowTrap);
 
       if(m2->type == moGreater && conv) {
         m->dead = true;
@@ -2243,7 +2291,7 @@ void moveBullet(monster *m, int delta) {
         }
       // Knights reflect bullets
       if(m2->type == moKnight) {
-        if(m->parent) {
+        if(m->parent && m->parent != &arrowtrap_fakeparent) {
           nat = nat * rspintox(inverse(m->pat) * m->parent->pat * C0);
           m->rebasePat(nat);
           }
@@ -2379,7 +2427,7 @@ void moveMonster(monster *m, int delta) {
   else {
   
     if(m->type == moSleepBull && !m->isVirtual) {
-      for(monster *m2: nonvirtual) if(m2!=m && m2->type != moBullet) {
+      for(monster *m2: nonvirtual) if(m2!=m && m2->type != moBullet && m2->type != moArrowTrap) {
         double d = intval(m2->pat*C0, nat*C0);
         if(d < SCALE2*3 && m2->type == moPlayer) m->type = moRagingBull;
         }
@@ -2554,7 +2602,7 @@ void moveMonster(monster *m, int delta) {
 
   monster* crashintomon = NULL;
   
-  if(!m->isVirtual) for(monster *m2: nonvirtual) if(m2!=m && m2->type != moBullet) {
+  if(!m->isVirtual) for(monster *m2: nonvirtual) if(m2!=m && m2->type != moBullet && m2->type != moArrowTrap) {
     double d = intval(m2->pat*C0, nat*C0);
     if(d < SCALE2 * 0.1) crashintomon = m2;
     }
@@ -2619,7 +2667,10 @@ void moveMonster(monster *m, int delta) {
 
   if(c2 != m->base && (c2->wall == waClosePlate || c2->wall == waOpenPlate) && !ignoresPlates(m->type))
     toggleGates(c2, c2->wall, 3);
-  
+
+  if(c2 != m->base && c2->wall == waArrowTrap && c2->wparam == 0 && !ignoresPlates(m->type))
+    activateArrowTrap(c2);
+
   if(c2 != m->base && mayExplodeMine(c2, m->type)) 
     killMonster(m, moNone);
   
@@ -2891,6 +2942,7 @@ void turn(int delta) {
         break;
       
       case moBullet: case moFlailBullet: case moFireball: case moTongue: case moAirball:
+      case moArrowTrap:
         moveBullet(m, delta);
         break;
       
@@ -2945,6 +2997,8 @@ void turn(int delta) {
   
   if(shmup::on) {
 
+    doTraps();
+
     bool tick = curtime >= nextmove;
     keepLightning = ticks <= lightat + 1000;
     cwt.c = pc[0]->base;
@@ -2977,6 +3031,7 @@ void turn(int delta) {
         if(havewhat&HF_HEX) movehex(false);
         wandering();
         livecaves();
+        terracotta();
         heat::processfires();
         if(havewhat&HF_WHIRLPOOL) whirlpool::move();
         if(havewhat&HF_WHIRLWIND) whirlwind::move();
@@ -3201,6 +3256,11 @@ bool drawMonster(const transmatrix& V, cell *c, const transmatrix*& Vboat, trans
           }
         break;
         }
+      case moArrowTrap: {
+        queuepoly(mmscale(view, 1.15), shTrapArrow, 0xFFFFFFFF);
+        ShadowV(view, shTrapArrow);
+        break;
+        }
       case moTongue: {
         queuepoly(mmscale(view, 1.15), shTongue, (minf[m->parenttype].color << 8) | 0xFF);
         ShadowV(view, shTongue);
@@ -3261,6 +3321,7 @@ void clearMonsters() {
 void clearMemory() {
   clearMonsters();
   gmatrix.clear();
+  traplist = {};
   curtime = 0;
   nextmove = 0;
   nextdragon = 0;

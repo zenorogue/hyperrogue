@@ -2983,26 +2983,29 @@ bool isCentralTrap(cell *c) {
   return i == 2;
   }
 
-array<cell*, 2> traplimits(cell *c) {
-  array<cell*, 2> res;
+array<cell*, 5> traplimits(cell *c) {
+  array<cell*, 5> res;
   int q = 0;
+  res[2] = c;
   for(int d=0; d<c->type; d++) {
     cellwalker cw(c, d);
     cwstep(cw);
     if(cw.c->wall != waArrowTrap) continue;
+    res[1+q*2] = cw.c;
     cwspin(cw, cw.c->type/2);
     if((cw.c->type&1) && cwpeek(cw, 0)->wall != waStone) cwspin(cw, 1);
     cwstep(cw);
-    res[q++] = cw.c;
+    res[(q++)*4] = cw.c;
     }
-  while(q<2) res[q++] = NULL;
+  while(q<2) { res[q*4] = res[1+q*2] = NULL; q++; }
   return res;
   }
 
 void activateArrowTrap(cell *c) {
   if(c->wall == waArrowTrap && c->wparam == 0) {
-    c->wparam = 1;
+    c->wparam = shmup::on ? 2 : 1;
     forCellEx(c2, c) activateArrowTrap(c2);
+    if(shmup::on) shmup::activateArrow(c);
     }
   }
 
@@ -3093,7 +3096,7 @@ void playerMoveEffects(cell *c1, cell *c2) {
   if((c2->wall == waClosePlate || c2->wall == waOpenPlate) && !markOrb(itOrbAether))
     toggleGates(c2, c2->wall);
 
-  if(c2->wall == waArrowTrap && !markOrb(itOrbAether))
+  if(c2->wall == waArrowTrap && c2->wparam == 0 && !markOrb(itOrbAether))
     activateArrowTrap(c2);
     
   princess::playernear(c2);
@@ -6620,27 +6623,37 @@ namespace orbbull {
 // predictable or not
 static constexpr bool randterra = false;
 
+void terracotta(cell *c) {
+  if(c->wall == waTerraWarrior) {
+    bool live = false;
+    if(randterra) {
+      c->landparam++;
+      if((c->landparam == 3 && hrand(3) == 0) ||
+        (c->landparam == 4 && hrand(2) == 0) || 
+        c->landparam == 5)
+          live = true;
+      }
+    else {
+      c->landparam--;
+      live = !c->landparam;
+      }
+    if(live)
+      c->monst = moTerraWarrior,
+      c->hitpoints = 7,
+      c->wall = waNone;
+    }
+  }
+
 void terracotta() {
   for(int i=0; i<numplayers(); i++)
-    forCellEx(c2, playerpos(i))
-      if(c2->wall == waTerraWarrior) {
-        bool live = false;
-        if(randterra) {
-          c2->landparam++;
-          if((c2->landparam == 3 && hrand(3) == 0) ||
-            (c2->landparam == 4 && hrand(2) == 0) || 
-            c2->landparam == 5)
-              live = true;
-          }
-        else {
-          c2->landparam--;
-          live = !c2->landparam;
-          }
-        if(live)
-          c2->monst = moTerraWarrior,
-          c2->hitpoints = 7,
-          c2->wall = waNone;
+    forCellEx(c, playerpos(i)) {
+      if(shmup::on) {
+        forCellEx(c2, c)
+          terracotta(c2);
         }
+      else
+        terracotta(c);
+      }
   }
 
 void monstersTurn() {

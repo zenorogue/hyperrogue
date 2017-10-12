@@ -183,8 +183,8 @@ bool isAnyIvy(eMonster m) {
 
 bool isBulletType(eMonster m) { 
   return 
-    m == moBullet || m == moFlailBullet || 
-    m == moFireball || m == moTongue || m == moAirball; 
+    m == moBullet || m == moFlailBullet || m == moFireball || 
+    m == moTongue || m == moAirball || m == moArrowTrap; 
   }
 
 bool isMutantIvy(cell *c) { return isMutantIvy(c->monst); }

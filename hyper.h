@@ -233,6 +233,7 @@ namespace shmup {
   void virtualRebase(shmup::monster *m, bool tohex);
   void fixStorage();
   void addShmupHelp(string& out);
+  void activateArrow(cell *c);
   }
 
 // graph

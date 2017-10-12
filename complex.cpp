@@ -2008,7 +2008,7 @@ namespace heat {
           }
         }
       
-      if(c->wall == waArrowTrap && c->wparam) {
+      if(c->wall == waArrowTrap && c->wparam && !shmup::on) {
         c->wparam++;
         if(c->wparam == 3) {
           if(canAttack(c, moArrowTrap, c, c->monst, AF_GETPLAYER))

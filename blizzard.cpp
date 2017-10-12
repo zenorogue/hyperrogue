@@ -202,10 +202,10 @@ void drawArrowTraps() {
     
     try {
       transmatrix& t0 = gmatrix.at(r[0]);
-      transmatrix& t1 = gmatrix.at(r[1]);
+      transmatrix& t1 = gmatrix.at(r[4]);
 
       queueline(tC0(t0), tC0(t1), 0xFF0000FF, 4, PPR_ITEM);
-      if((c->wparam & 7) == 3) {
+      if((c->wparam & 7) == 3 && !shmup::on) {
 //        queueline(t0 * randomPointIn(r[0]->type), t1 * randomPointIn(r[1]->type), 0xFFFFFFFF, 4, PPR_ITEM);
         int tt = ticks % 401;
         
@@ -221,4 +221,9 @@ void drawArrowTraps() {
     catch(out_of_range) {}
     }
   }
-  
+
+auto ccm_blizzard = addHook(clearmemory, 0, [] () {
+  arrowtraps.clear();
+  blizzardcells.clear();
+  bcells.clear();
+  });
