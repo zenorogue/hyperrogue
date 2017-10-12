@@ -1181,25 +1181,27 @@ void giantLandSwitch(cell *c, int d, cell *from) {
       break;
     
     case laCaribbean:
-      if(d == 9 && !euclid) {
-        if(c->master->alt && c->master->alt->distance <= 2) {
-          if(!euclid) generateAlts(c->master);
-          preventbarriers(c);
+      if(d == 9) {
+        if(!euclid) {
+          if(c->master->alt && c->master->alt->distance <= 2) {
+            if(!euclid) generateAlts(c->master);
+            preventbarriers(c);
+            int d = celldistAlt(c);
+            if(d <= 0) 
+              // c->wall = waChasm;
+              generateTreasureIsland(c);
+            else
+              c->wall = waSea;
+            }
+          else c->wall = waSea;
+          }
+        else {
           int d = celldistAlt(c);
           if(d <= 0) 
-            // c->wall = waChasm;
             generateTreasureIsland(c);
           else
             c->wall = waSea;
           }
-        else c->wall = waSea;
-        }
-      else {
-        int d = celldistAlt(c);
-        if(d <= 0) 
-          generateTreasureIsland(c);
-        else
-          c->wall = waSea;
         }
       if(d == 8 && !euclid) {
         int mindist  = 9;
