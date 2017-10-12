@@ -759,12 +759,19 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, int col, dou
         queuepoly(VBODY, shPrinceDress,  fc(400, cs.dresscolor, 5));
       if(cs.charid == 3) 
         queuepoly(VBODY, shPrincessDress,  fc(400, cs.dresscolor2, 5));
+        
+      if(items[itOrbSide3])
+        queuepoly(VBODY, (cs.charid&1) ? shFerocityF : shFerocityM, fc(0, cs.skincolor, 0));
 
       if(items[itOrbHorns]) {
         queuepoly(VBODY, shBullHead, items[itOrbDiscord] ? watercolor(0) : 0xFF000030);
         queuepoly(VBODY, shBullHorn, items[itOrbDiscord] ? watercolor(0) : 0xFF000040);
         queuepoly(VBODY * Mirror, shBullHorn, items[itOrbDiscord] ? watercolor(0) : 0xFF000040);
         }
+
+      if(items[itOrbSide1] && !shmup::on)
+        queuepoly(VBODY * spin(-M_PI/24), cs.charid >= 2 ? shSabre : shPSword, fc(314, cs.swordcolor, 3)); // 3 not colored
+      
       if(peace::on) ;
       else if(items[itOrbThorns])
         queuepoly(VBODY, shHedgehogBladePlayer, items[itOrbDiscord] ? watercolor(0) : 0x00FF00FF);
@@ -859,6 +866,11 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, int col, dou
       if(!shmup::on) {
         if(items[itOrbThorns] && items[itOrbEmpathy])
           queuepoly(VBODY, shHedgehogBladePlayer, darkena(col, 0, 0x40));
+        if(items[itOrbSide1] && !shmup::on)
+          queuepoly(VBODY * spin(-M_PI/24), cs.charid >= 2 ? shSabre : shPSword, darkena(col, 0, 0x40));      
+        if(items[itOrbSide3] && items[itOrbEmpathy])
+          queuepoly(VBODY, (cs.charid&1) ? shFerocityF : shFerocityM, darkena(col, 0, 0x40));
+
         queuepoly(VBODY, (cs.charid >= 2 ? shSabre : shPSword), darkena(col, 0, 0XC0));
         }
       else if(!where || shmup::curtime >= shmup::getPlayer()->nextshot)
