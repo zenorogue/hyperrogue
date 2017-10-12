@@ -560,7 +560,8 @@ bool isEmpathyOrb(eItem i) {
     i == itOrbFire || i == itOrbDigging || i == itOrbWinter ||
     i == itOrbUndeath || i == itOrbSpeed || i == itOrbShield ||
     i == itOrbAether || i == itOrbInvis || i == itOrbThorns ||
-    i == itOrbWater || i == itOrbStone;
+    i == itOrbWater || i == itOrbStone ||
+    i == itOrbSide1 || i == itOrbSide2 || i == itOrbSide3;
   }
 
 bool isUtilityOrb(eItem i) {
