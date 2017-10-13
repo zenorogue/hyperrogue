@@ -239,6 +239,41 @@ const char *cadesc =
   "(-c0 or -c1 can be given if the same rule is to be used for hexagonal "
   "and heptagonal cells).";
 
+const char *huntingdesc = 
+  "The Happy Hunting Ground is the place where hunting is easy; "
+  "the spirits of hunters go here after their death, if their life was deemed worthy. "
+  "You did not qualify though, so you will not ever be able to find your way to the places "
+  "where the hunter spirits and game are... "
+  "and their hunting dogs will hunt you instead!\n\n"
+  "You hope to use this to learn some "
+  "skills in fighting in open hyperbolic space, though.";
+
+const char *terradesc = 
+  "Spending 3-5 turns next to the Terracotta Warriors will cause them to awaken. "
+  "They have 7 HP, and get stunned for longer and longer time with each attack.";
+
+const char *terraldesc = 
+  "The Emperor's mausoleum. The army "
+  "of Terracotta Warriors is supposed to protect him in his "
+  "afterlife, while the traps are to protect the treasures "
+  "in the mausoleum from thieves.";
+
+const char *arrowtrapdesc =
+  "The arrow traps will automatically launch a deadly arrow when stepped on. They are quite old though, so the arrow will "
+  "actually fly at the end of the next turn.";
+
+const char *lavadesc =
+  "The volcanic activity in this land is extremely unstable. "
+  "Lava is too hot to walk on. It cools quickly, but another "
+  "flow will come soon...";
+
+const char *blizzarddesc = 
+  "Once in the past there lived a tribe whose prophets warned about the great blizzard that was to come and freeze the world. "
+  "They thought it was the wrath of the gods, so they put some altars, so that the gods could hear their pleas. "
+  "The mighty golems guarded those altars, making sure nobody steals the jewels, because a robbed god is a angry god. "
+  "Unfortunately winter has come (maybe because only the monks knew how to stop the golems, and they were said to had escaped earlier with some of the jewels). "
+  "The tribe has frozen to death, altars got covered with snow and ice. Only ice golems still guard them waiting for the spring.";  
+
 const char *NODESC = "No description yet.";
 const char *NODESCYET = "No description yet.";
 const char *GENDERSWITCH = NODESC;
@@ -696,15 +731,30 @@ monstertype minf[motypes] = {
     "If you attack a Mirror Spirit physically, it is delayed, but not destroyed -- "
     "more reflections will come out of the mirror. Use Mimics to destroy them."
     },
-  { 'W', 0x202020, "Hunting Dog", NODESC},
-  { 'T', 0xE2725B, "Terracotta Warrior", NODESC},
-  { 'J', 0x50A030, "Jiangshi", NODESC},
-  { 'B', 0xA00000, "Void Beast", NODESC},
-  { 'W', 0xA00000, "Lava Wolf", NODESC},
-  { 'W', 0x202020, "Hunting Dog (guarding)", NODESC},
-  { 'G', 0xC0C0FF, "Ice Golem", NODESC},
+  { 'W', 0x202020, "Hunting Dog", huntingdesc},
+  { 'T', 0xE2725B, "Terracotta Warrior", terradesc},
+  { 'J', 0x50A030, "Jiangshi", 
+    "You think this was one of the people who have constructed the Terracotta Warriors and the arrow traps. "
+    "They have been locked inside, so that they will never release the secrets of the mausoleum. They would like to return their homes and families, though."
+    },
+  { 'B', 0xA00000, "Void Beast", 
+    "Are creatures of Void actual monsters, or just monster-shaped holes in the air?\n\nVoid Beasts move simply by letting the air move into their current location -- "
+    "the hole will move to the place where the air came from! Void Beasts are great at moving against the wind, but they have problems "
+    "moving with the wind."},
+  { 'W', 0xA00000, "Lava Wolf", 
+    "While Ice Wolves love heat, their instinct usually will not let tem to go outside the Icy Lands "
+    "-- they are afraid that they will be unable to get back home, and that they will lose the track of their "
+    "prey. However, they find the Volcanic Wasteland so hot and attractive that they abandon their "
+    "natural instincts... and try to track their prey using their other senses and intelligence."},
+  { 'W', 0x202020, "Hunting Dog (guarding)", huntingdesc},
+  { 'G', 0xC0C0FF, "Ice Golem", 
+    "The Ice Golems are powered by intense magical coldness. When destroyed in the Blizzard or another icy land, they become "
+    "ice walls, and freeze the land around them."},
   { 'B', 0xC0C0FF, "Sand Bird", NODESC},
-  { 'S', 0xA00000, "Salamander", NODESC},
+  { 'S', 0xA00000, "Salamander", 
+    "Salamanders are tough lizard-like creatures. Their tough skin protects them "
+    "from both physical attacks and heat. Salamanders "
+    "are stunned for a longer time if you push them into lava, fire, or a solid obstacle."},
   
   // shmup specials
   { '@', 0xC0C0C0, "Rogue", "In the Shoot'em Up mode, you are armed with thrown Knives."},
@@ -715,11 +765,11 @@ monstertype minf[motypes] = {
   { '*', 0xFFFFFF, "Airball", "This magical missile pushes back whatever it hits."},
   // technical
   { '?', 0x00C000, "dead bug", NODESC},
-  { '?', 0xFFFF00, "electric discharge", NODESC}, // appears as 'killed by electric discharge'
+  { '?', 0xFFFF00, "electric discharge", elecdesc}, // appears as 'killed by electric discharge'
   { '?', 0xE06000, "dead bird", NODESC},
   { '?', 0xE06000, "Energy Sword", NODESC},
   { '!', 0xFF0000, "Warning", warningdesc},
-  { '!', 0xFF0000, "arrow trap", NODESC},
+  { '!', 0xFF0000, "arrow trap", arrowtrapdesc},
   { '*', 0,        "vertex", "A vertex from rogueviz."}
   };
 
@@ -1195,15 +1245,30 @@ itemtype iinf[ittypes] = {
      },
   { 'O', 0xF0F0F0, "your orbs", 
     "Click this to see your orbs."},  
-  { '%', 0xE0E000, "Lava Lily", NODESCYET},
-  { '*', 0x40E0D0, "Turquoise", NODESCYET},
-  { '*', 0x009090, "Forgotten Relic", NODESCYET},
-  { '(', 0xFFE080, "Ancient Weapon", NODESCYET},
-  { 'o', 0x307080, "Orb of Slashing", NODESCYET},
-  { 'o', 0x30A080, "Orb of the Triangle", NODESCYET},
-  { 'o', 0x30D080, "Orb of Ferocity", NODESCYET},
-  { 'o', 0xD08030, "Orb of Lava", NODESCYET},
-  { 'o', 0x3080D0, "Orb of Change", NODESCYET},
+  { '%', 0xE0E000, "Lava Lily", 
+    "This plant, able to survive in the extreme conditions of the Volcanic Wasteland, "
+    "is a valuable alchemical ingredient."
+    },
+  { '*', 0x40E0D0, "Turquoise", 
+    "Hunters believe that wearing a Turquoise amulet will improve their accuracy. "
+    "This one has been lost, but the hunting dogs are guarding it until the owner returns."},
+  { '*', 0x009090, "Forgotten Relic", blizzarddesc},
+  { '(', 0xFFE080, "Ancient Weapon", 
+    "This ancient weapon is beautifully encrusted with precious gems, but you prefer your own -- it is much lighter."},
+  { 'o', 0x307080, "Orb of Slashing", 
+    "Whenever you attack with this Orb, you also hit the monsters adjacent both to you and the monster you originally attacked."},
+  { 'o', 0x30A080, "Orb of the Triangle", 
+    "Whenever you attack with this Orb, you also hit the monsters adjacent to you which are neither adjacent nor opposite to the monster "
+    "you originally attacked."},
+  { 'o', 0x30D080, "Orb of Ferocity", 
+    "Whenever you attack with this Orb, you also hit the monsters adjacent to you and opposite to the monster you originally attacked."},
+  { 'o', 0xD08030, "Orb of Lava", 
+    "This Orb summons a minor volcanic activity around you. "
+    "All the heptagonal cells adjacent to enemies in distance at most 5 to you "
+    "will be set on fire. Does not affect the cell you are on, and enemies resistant to fire."},
+  { 'o', 0x3080D0, "Orb of Change", 
+    "This ranged Orb will transform the target monster into one without any special powers. It also stuns them for one turn. "
+    "Does not affect multi-tile monsters."},
   };
 
 enum eItem { 
@@ -1429,11 +1494,11 @@ walltype winf[walltypes] = {
   { '#', 0xC0C0FF, "mirror wall", mirroreddesc},
   { '.', 0xE0E0E0, "stepping stones", "A petrified creature."},
   { '#', 0x309060, "temporary wall", twdesc},
-  { 'S', 0xB0B0B0, "warrior statue", NODESCYET},
-  { '=', 0xB0B0B0, "bubbling slime", NODESCYET},
-  { '^', 0xD00000, "arrow trap", NODESCYET},
-  { '=', 0xE2E2E2, "mercury river", NODESCYET},
-  { '&', 0xD00000, "magma", NODESCYET},
+  { 'S', 0xB0B0B0, "warrior statue", terradesc},
+  { '=', 0xB0B0B0, "bubbling slime", NODESC},
+  { '^', 0xD00000, "arrow trap", arrowtrapdesc},
+  { '=', 0xE2E2E2, "mercury river", "A river of mercury."},
+  { '&', 0xD00000, "lava", lavadesc},
   };
 
 enum eWall { waNone, waIcewall, waBarrier, waFloorA, waFloorB, waCavewall, waCavefloor, waDeadTroll, waDune,
@@ -1655,11 +1720,11 @@ const landtype linf[landtypes] = {
   { 0xC8C8FF, "Reflection", mirroreddesc},
   { 0xC8C8FF, "Mirror Land", 
     "A strange land which contains mirrors and mirages, protected by Mirror Rangers."},
-  { 0xA06000, "Volcanic Wasteland", NODESCYET},
-  { 0x8080FF, "Blizzard", NODESCYET},
-  { 0x207068, "Hunting Ground", NODESCYET},
-  { 0xE2725B, "Terracotta Army", NODESCYET},
-  { 0xE2725B, "Terracotta Army", NODESCYET}
+  { 0xA06000, "Volcanic Wasteland", lavadesc},
+  { 0x8080FF, "Blizzard", blizzarddesc},
+  { 0x207068, "Hunting Ground", huntingdesc},
+  { 0xE2725B, "Terracotta Army", terraldesc},
+  { 0xE2725B, "Terracotta Army", terraldesc}
   };
 
 enum eLand { laNone, laBarrier, laCrossroads, laDesert, laIce, laCaves, laJungle, laAlchemist, laMirror, laGraveyard,
@@ -1739,22 +1804,22 @@ struct gcell {
 #define NODIR 7
 #define NOBARRIERS 8
 
-#define LAND_OVER 53
-#define LAND_OVERX 55
+#define LAND_OVER 57
+#define LAND_OVERX 59
 
 eLand land_over[LAND_OVERX] = {
-  laIce, laCaves, laDesert, laMotion, laJungle, laAlchemist,
+  laIce, laCaves, laDesert, laHunting, laMotion, laJungle, laAlchemist, 
   laCrossroads, 
-  laMirror, laMinefield, laPalace, laPrincessQuest, laZebra, laReptile, 
+  laMirror, laMinefield, laPalace, laPrincessQuest, laZebra, laReptile, laVolcano,
   laOcean, laWarpCoast, laLivefjord, laKraken, laCaribbean, laWhirlpool, laRlyeh, laTemple,
   laIvoryTower, laEndorian, laDungeon, laMountain, 
   laCrossroads2, 
-  laDryForest, laWineyard, laDeadCaves, laGraveyard, laHaunted, laHive, 
+  laDryForest, laWineyard, laDeadCaves, laGraveyard, laHaunted, laHive, laBlizzard,
   laRedRock, 
   laDragon, laTortoise,
   laOvergrown, laClearing, laStorms, laWhirlwind, laRose, laBurial,
   laEmerald, laCamelot, 
-  laPrairie, laBull, 
+  laPrairie, laBull, laTerracotta,
   laElementalWall, laTrollheim,
   laHell, laCrossroads3, laCocytus, laPower, laCrossroads4,
   laCrossroads5,  
@@ -1762,7 +1827,7 @@ eLand land_over[LAND_OVERX] = {
   laWildWest, laHalloween
   };
 
-#define LAND_EUC 49
+#define LAND_EUC 53
 eLand land_euc[LAND_EUC] = {
   laIce, laCaves, laDesert, laMotion, laJungle,
   laCrossroads, 
@@ -1775,7 +1840,8 @@ eLand land_euc[LAND_EUC] = {
   laHell, laCrossroads3, laCocytus, laPower,
   laCrossroads4, 
   laWildWest,
-  laReptile, laMountain, laBull, laPrairie
+  laReptile, laMountain, laBull, laPrairie,
+  laVolcano, laHunting, laBlizzard, laTerracotta,
   };
 // MISSING: laCrossroads2
 
@@ -1795,7 +1861,7 @@ eLand land_sph[LAND_SPH] = {
   laWildWest, laPalace, laBull, laPrairie, laCA
   };
 
-#define LAND_HYP 47
+#define LAND_HYP 51
 eLand land_hyp[LAND_HYP] = {
   laHell, laCocytus, laGraveyard, 
   laWineyard, laDryForest, laCaves, 
@@ -1809,7 +1875,8 @@ eLand land_hyp[LAND_HYP] = {
   laReptile, laDungeon, laMountain,
   laTortoise,
   laKraken, laBurial, laTrollheim, 
-  laPrairie, laBull,
+  laPrairie, laBull, 
+  laVolcano, laHunting, laBlizzard, laTerracotta,
   // always must be last
   laCrossroads
   };

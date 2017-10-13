@@ -5914,35 +5914,154 @@ S("'u' to load current", "'u' by załadować obecne")
 //----------------------
 
 N("Hunting Ground", GEN_F, "Kraina Wiecznych Łowów", "Kraina Wiecznych Łowów", "Krainę Wiecznych Łowów", "w Krainie Wiecznych Łowów")
+
+S("The Happy Hunting Ground is the place where hunting is easy; "
+  "the spirits of hunters go here after their death, if their life was deemed worthy. "
+  "You did not qualify though, so you will not ever be able to find your way to the places "
+  "where the hunter spirits and game are... "
+  "and their hunting dogs will hunt you instead!\n\n"
+  "You hope to use this to learn some "
+  "skills in fighting in open hyperbolic space, though.",
+  
+  "W Krainie Wiecznych Łowów polowanie jest łatwe; dusze myśliwych idą tu po ich śmierci, "
+  "jeżeli ich życie zostało uznane za godne. Ty się nie kwalifikujesz, także nigdy "
+  "nie trafisz do miejsc, gdzie przebywają dusze myśliwych i zwierzyna... "
+  "a ich psy myśliwskie będą polować na Ciebie!\n\n"
+  "Masz jednak nadzieję, że uda Ci się wykorzystać to miejsce do wytrenowania "
+  "umiejętności walki w otwartej hiperbolicznej przestrzeni."
+  )
+  
 N("Hunting Dog", GEN_M, "Pies Myśliwski", "Psy Myśliwskie", "Psa Myśliwskiego", "Psem Myśliwskim")
 N("Hunting Dog (guarding)", GEN_M, "Pies Myśliwski (waruje)", "Psy Myśliwskie (warują)", "Psa Myśliwskiego (warującego)", "Psem Myśliwskim (warującym)")
 N("Turquoise", GEN_O, "Turkus", "Turkusy", "Turkus", "Turkusem")
 Orb("Ferocity", "Zaciekłości")
 
+S("Hunters believe that wearing a Turquoise amulet will improve their accuracy. "
+  "This one has been lost, but the hunting dogs are guarding it until the owner returns.",
+  
+  "Myśliwi wierzą, że turkusowy amulet poprawi ich celność. "
+  "Ten amulet został zgubiony, ale psy myśliwskie go pilnują do czasu powrotu właściciela."
+  )
+
+S("Whenever you attack with this Orb, you also hit the monsters adjacent to you and opposite to the monster you originally attacked.",
+  "Gdy atakujesz z tą Sferą, atakujesz także potwory obok Ciebie po przeciwnej stronie od oryginalnie zaatakowanego potwora."
+  )
+
 // Volcanic Wasteland
 //--------------------
 
-N("Volcanic Wasteland", GEN_F, "Wulkaniczna Kraina", "Wulkaniczne Krainy", "Wulkaniczną Krainę", "w Wulkanicznej Krainie")
+N("Volcanic Wasteland", GEN_N, "Wulkaniczne Pustkowie", "Wulkaniczne Pustkowia", "Wulkaniczne Pustkoiwe", "w Wulkanicznym Pustkowiu")
+N("lava", GEN_F, "lawa", "lawy", "lawę", "lawą")
+
+S("The volcanic activity in this land is extremely unstable. "
+  "Lava is too hot to walk on. It cools quickly, but another "
+  "flow will come soon...",
+  
+  "W tej krainie aktywność wulkaniczna jest bardzo niestabilna. "
+  "Lawa jest zbyt gorąca, by po niej chodzić. Stygnie szybko, "
+  "ale wkrótce przyjdzie kolejny przypływ..."
+  )
+
 N("Salamander", GEN_F, "Salamandra", "Salamandry", "Salamandrę", "Salamandrą")
+
+S("Salamanders are tough lizard-like creatures. Their tough skin protects them "
+  "from both physical attacks and heat. Salamanders "
+  "are stunned for a longer time if you push them into lava, fire, or a solid obstacle.",
+  
+  "Salamandry to potężne stworzenia podobne do jaszczurek. Ich skóra chroni je przed "
+  "atakami fizycznymi i gorącem. Salamandry stają się nieaktywne przez dłuższy czas, "
+  "jeśli wepchniesz je do lawy, ognia, lub w solidną przeszkodę."
+  )
+
 N("Lava Wolf", GEN_M, "Wilk Lawowy", "Wilki Lawowe", "Wilka Lawowego", "Wilkiem Lawowym")
+
+S("While Ice Wolves love heat, their instinct usually will not let tem to go outside the Icy Lands "
+  "-- they are afraid that they will be unable to get back home, and that they will lose the track of their "
+  "prey. However, they find the Volcanic Wasteland so hot and attractive that they abandon their "
+  "natural instincts... and try to track their prey using their other senses and intelligence.",
+  
+  "Lodowe Wilki uwielbiają ciepło. Ich instynkt jednak zabrania im wyjść poza Lodową Krainę -- "
+  "obawiają się, że już nie wrócą do domu, i że nie będą w stanie dalej wyczuwać swoje ofiary. "
+  "Jednak Wulkaniczne Pustkowie jest dla nich tak gorące i atrakcyjne, że postanawiają "
+  "porzucić swoje naturalne instynkty... i polować przy użyciu swoich pozostałych zmysłów i inteligencji.")
+  
+N("Lava Lily", GEN_F, "Lilia Lawowa", "Lilie Lawowe", "Lilię Lawową", "Lilią Lawową")
+
+S("This plant, able to survive in the extreme conditions of the Volcanic Wasteland, "
+  "is a valuable alchemical ingredient.",
+  
+  "Ta roślina, zdolna to przeżycia w ekstremalnych warunkach Wulkanicznego Pustkowia, "
+  "jest wartościowym składnikiem alchemicznym.")
+
 Orb("Lava", "Lawy")
+S("This Orb summons a minor volcanic activity around you. "
+  "All the heptagonal cells adjacent to enemies in distance at most 5 to you "
+  "will be set on fire. Does not affect the cell you are on, and enemies resistant to fire.",
+  
+  "Ta Sfera powoduje aktywność wulkaniczną w Twoich okolicach. "
+  "Wszystkie siedmiokątne pola obok przeciwników w odległości co najwyżej 5 od Ciebie "
+  "będą się palić. Nie wpływa to na pole, na którym stoisz, ani na przeciwników odpornych na ogień."
+  )
 
 // Orbs would be destroyed in Volcanic Wasteland
 S("would be destroyed in %the1", "by%ł1by zniszczon%y1 %abl1") 
 S(" to go cold", " by ostygnąć")
 S("%The1 is destroyed by lava!", "%The1 jest zniszczon%y1 przez lawę!")
 S("%The1 is killed by lava!", "%The1 jest zabit%y1 przez lawę!")
-S("Run away from the magma!", "Uciekaj od magmy!")
+S("Run away from the lava!", "Uciekaj od lawy!")
 
 // Terracotta Army
 //-----------------
 
 N("Terracotta Army", GEN_F, "Armia Terakotowa", "Armie Terakotowe", "Armię Terakotową", "w Armii Terakotowej")
+
+S("The Emperor's mausoleum. The army "
+  "of Terracotta Warriors is supposed to protect him in his "
+  "afterlife, while the traps are to protect the treasures "
+  "in the mausoleum from thieves.",
+
+  "Mauzuleum Cesarza. "
+  "Terakotowi wojownicy mają go chronić w życiu pozagrobowym, "
+  "a pułapki chronić znajdujące się w mauzoleum skarby "
+  "przed złodziejami."
+  )
+
+S("Spending 3-5 turns next to the Terracotta Warriors will cause them to awaken. "
+  "They have 7 HP, and get stunned for longer and longer time with each attack.",
+  
+  "Terakotowi Wojownicy budzą się, gdy spędzisz 3 do 5 kolejek obok nich. "
+  "Mają 7 HP, i z każdym atakiem są ogłuszani na coraz dłuższy czas."
+  )
+
 N("arrow trap", GEN_F, "strzelająca pułapka", "strzelające pułapki", "strzelającą pułapkę", "strzelającą pułapką")
+
+S("The arrow traps will automatically launch a deadly arrow when stepped on. They are quite old though, so the arrow will "
+  "actually fly at the end of the next turn.",
+  
+  "Te pułapki strzelają zabójczymi strzałami, gdy ktoś na nich stanie. Konstrukcja jest dosyć stara, także strzały "
+  "wylatują po zakończeniu następnej kolejki."
+  )
+
 N("mercury river", GEN_F, "rzeka rtęci", "rzeki rtęci", "rzekę rtęci", "rzeką rtęci")
+S("A river of mercury.", "Rzeka rtęci.")
+
 N("Terracotta Warrior", GEN_M, "Terakotowy Wojownik", "Terakotowi Wojownicy", "Terakotowego Wojownika", "Terakotowym Wojownikiem")
+
 N("Jiangshi", GEN_M, "Jiangshi", "Jiangshi", "Jiangshi", "Jiangshi")
+S("You think this was one of the people who have constructed the Terracotta Warriors and the arrow traps. "
+  "They have been locked inside, so that they will never release the secrets of the mausoleum. They would like to return their homes and families, though.",
+  
+  "Podejrzewasz, że te istoty kiedyś były rzemieślnikami, którzy skonstruowali Terakotowych Wojowników i "
+  "pułapki. Zostali tutaj zamknięci, by nigdy nie wydali sekretów mauzoleum. Chcieliby jednak wrócić do swoich domów i rodzin." 
+  )
+
 Orb("Slashing", "Cięcia")
+S("Whenever you attack with this Orb, you also hit the monsters adjacent both to you and the monster you originally attacked.",
+  "Gdy atakujesz z tą Sferą, atakujesz także potwory obok Ciebie i obok oryginalnie zaatakowanego potwora.")
+
+N("Ancient Weapon", GEN_F, "Starożytna Broń", "Starożytne Bronie", "Starożytną Broń", "Starożytną Bronią")
+S("This ancient weapon is beautifully encrusted with precious gems, but you prefer your own -- it is much lighter.",
+  "Ta starożytna broń jest pięknie zdobiona drogocennymi kamieniami, ale wolisz swoją własną -- jest dużo lżejsza.")
 
 // Blizzard
 //----------
@@ -5950,17 +6069,53 @@ Orb("Slashing", "Cięcia")
 N("Blizzard", GEN_F, "Zamieć", "Zamieci", "Zamieci", "w Zamieci")
 N("Ice Golem", GEN_M, "Lodowy Golem", "Lodowe Golemy", "Lodowego Golema", "Lodowym Golemem")
 N("Void Beast", GEN_F, "Bestia Nicości", "Bestie Nicości", "Bestię Nicości", "Bestią Nicości")
-N("Forgotten Relic", GEN_F, "Relikwia", "Relikwie", "Relikwię", "Relikwią")
-Orb("Change", "Zmiany")
+N("Forgotten Relic", GEN_F, "Zgubiona Relikwia", "Zgubione Relikwie", "Zgubioną Relikwię", "Zgubioną Relikwią")
 
-/* S("Once in the past there lived a tribe whose prophets warned about the great blizzard that was to come and freeze the world. "
+S("The Ice Golems are powered by intense magical coldness. When destroyed in the Blizzard or another icy land, they become "
+  "ice walls, and freeze the land around them.",
+  
+  "Lodowe Golemy napędzane są intensywnym, magicznym zimnem. Gdy golem jest zniszczony w Zamieci albo innej "
+  "lodowej krainie, zamienia się w lodową ścianę, i zamraża ziemię w okolicy.")
+
+S("Are creatures of Void actual monsters, or just monster-shaped holes in the air?\n\nVoid Beasts move simply by letting the air move into their current location -- "
+  "the hole will move to the place where the air came from! Void Beasts are great at moving against the wind, but they have problems "
+  "moving with the wind.",
+  
+  "Czy stworzenia Nicości to rzeczywiście potwory, czy tylko dziury w powietrzu o kształcie potworów?\n\n"
+  "Bestie Nicości poruszają się poprzez pozwolenie powietrzu na wlecenie w zajmowane przez nie obecnie miejsce -- "
+  "dziura przesunie się w miejsce, skąd powietrze przyszło! Bestie Nicości świetnie poruszają się pod wiatr, ale "
+  "nie są w stanie ruszać się z wiatrem."
+  )
+
+S("Once in the past there lived a tribe whose prophets warned about the great blizzard that was to come and freeze the world. "
   "They thought it was the wrath of the gods, so they put some altars, so that the gods could hear their pleas. "
   "The mighty golems guarded those altars, making sure nobody steals the jewels, because a robbed god is a angry god. "
-  "Unfortunately winter has come (maybe because the monks knew how to stop the golems and were said to had escaped earlier with some of the jewels). "
-  "The tribe has frozen to death, altars got covered with snow and ice. Only ice golems still guard them waiting for the meltdown.") */
+  "Unfortunately winter has come (maybe because only the monks knew how to stop the golems, and they were said to had escaped earlier with some of the jewels). "
+  "The tribe has frozen to death, altars got covered with snow and ice. Only ice golems still guard them waiting for the spring.",
+  
+  "Dawno dawno temu żyło tu plemię, którego prorocy ostrzegali przed wielką zamiecią, która miała zamrozić świat. "
+  "Według nich był to gniew bogów, także postawili ołtarze, chronione przez golemy, by nikt nie ukradł należących do bogów "
+  "klejnotów -- okradziony bóg, to rozzłoszczony bóg. Niestety, zima w końcu przyszła (być może dlatego że tylko mnisi wiedzieli, jak sobie radzić z golemami, a ci uciekli z "
+  "klejnotami). Plemię zamarzło, ołtarze pokryły się lodem. Golemy zostały, czekając na odwilż."
+  )
+
+// Winter becomes native in Blizzard, while Change replaces Winter in Cocytus
+Orb("Change", "Zmiany")
+S("This ranged Orb will transform the target monster into one without any special powers. It also stuns them for one turn. "
+  "Does not affect multi-tile monsters.",
+  "Ta sfera zamienia wybranego potwora w takiego, który nie ma żadnych specjalnych mocy, a także ogłusza go na jedną kolejkę. "
+  "Nie działa na potwory zajmujące wiele pól."
+  )
 
 // yet unused orb
 Orb("the Triangle", "Trójkąta")
+S("Whenever you attack with this Orb, you also hit the monsters adjacent to you which are neither adjacent nor opposite to the monster "
+  "you originally attacked.",
+  "Gdy atakujesz z tą Sferą, atakujesz także potwory obok Ciebie, które ani nie są obok, ani na przeciwko oryginalnie zaatakowanego potwora.")
+                                                                    
+S("Using %the1 in %the2 sounds dangerous...", "Używanie %1 %abl2 brzmi niebezpiecznie...")
+S("%The1 is mostly useless in %the2...", "%1 jest raczej bezużyteczna %abl2...")
+S("%The1 is forbidden in %the2 (disables some achievements)", "%1 zabroniona %abl2 (użycie wyłącza niektóre osiągnięcia")
 
 #undef Orb
 
