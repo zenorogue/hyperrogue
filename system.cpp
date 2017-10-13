@@ -98,6 +98,7 @@ void initgame() {
   if(firstland == laCrossroads5 && !tactic::on) firstland = laCrossroads2; // could not fit!
   if(firstland == laOceanWall) firstland = laOcean; 
   if(firstland == laHauntedWall) firstland = laGraveyard; 
+  if(firstland == laMercuryRiver) firstland = laTerracotta;
   if(firstland == laMountain && !tactic::on) firstland = laJungle;
   if(isGravityLand(firstland) && !tactic::on) firstland = laCrossroads;
   
