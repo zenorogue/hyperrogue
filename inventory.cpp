@@ -527,15 +527,23 @@ namespace inv {
         displaystr(vid.xres/2, vid.yres - vid.fsize*5, 2, vid.fsize, hot, icol, 8);
 #endif
 
-        eOrbLandRelation olr = getOLR(which, getPrizeLand());
+        eLand pl = getPrizeLand();
+        eOrbLandRelation olr = getOLR(which, pl);
         
         int col = 0;
-        if(olr == olrDangerous) col = 0xC00000;
-        if(olr == olrUseless) col = 0x808080;
-        if(olr == olrForbidden) col = 0x804000;
+        const char *fmsg = NULL;
+        if(olr == olrDangerous) 
+          col = 0xC00000,
+          fmsg = "Using %the1 in %the2 sounds dangerous...";
+        else if(olr == olrUseless) 
+          col = 0xC00000,
+          fmsg = "%The1 is mostly useless in %the2...";
+        else if(olr == olrForbidden) 
+          col = 0x804000,
+          fmsg = "%The1 is forbidden in %the2 (disables some achievements)";
   
-        if(col)
-          displaystr(vid.xres/2, vid.yres - vid.fsize*4, 2, vid.fsize, XLAT(olrDescriptions[olr], cwt.c->land, itNone, treasureType(cwt.c->land)), col, 8);
+        if(fmsg)
+          displaystr(vid.xres/2, vid.yres - vid.fsize*4, 2, vid.fsize, XLAT(fmsg, which, pl), col, 8);
   
         }
       }
@@ -584,7 +592,7 @@ namespace inv {
           cwt.c->item = orbmap[uni];
           collectItem(cwt.c, true);
           if(!cwt.c->item) usedup[orbmap[uni]]++;
-          if(getOLR(it, getPrizeLand()))
+          if(getOLR(it, getPrizeLand()) == olrForbidden)
             usedForbidden = true;
           cwt.c->item = it;
           evokeOrb(orbmap[uni]);

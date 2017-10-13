@@ -260,7 +260,8 @@ eOrbLandRelation getOLR(eItem it, eLand l) {
       l == laMinefield || l == laCocytus) return olrUseless;
 
   if(l == laPrincessQuest)
-    if(it == itOrbAether || it == itOrbFlash || it == itOrbTeleport || it == itOrbSummon || it == itOrbFreedom)
+    if(it == itOrbAether || it == itOrbFlash || it == itOrbTeleport || it == itOrbSummon || it == itOrbFreedom ||
+      it == itOrbFriend)
       return olrForbidden;
     
   if(l == laTemple)
