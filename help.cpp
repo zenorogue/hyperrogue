@@ -430,7 +430,7 @@ string generateHelpForLand(eLand l) {
 
   s += "\n\n";
   if(l == laIce || l == laCaves || l == laDesert || l == laMotion || l == laJungle ||
-    l == laCrossroads || l == laAlchemist)
+    l == laCrossroads || l == laAlchemist || l == laHunting)
       s += XLAT("Always available.\n");
 
   #define ACCONLY(z) s += XLAT("Accessible only from %the1.\n", z);
@@ -469,10 +469,11 @@ string generateHelpForLand(eLand l) {
   
   if(l == laDryForest || l == laWineyard || l == laDeadCaves || l == laHive || l == laRedRock ||
     l == laOvergrown || l == laStorms || l == laWhirlwind || l == laRose ||
-    l == laCrossroads2 || l == laRlyeh)
+    l == laCrossroads2 || l == laRlyeh || l == laVolcano)
       TREQ(R60)
     
   if(l == laReptile) TREQ2(U10, itElixir)
+  if(l == laVolcano) TREQ2(U10, itElixir)
   if(l == laEndorian) TREQ2(U10, itIvory)
   if(l == laKraken) TREQ2(U10, itFjord)
   if(l == laBurial) TREQ2(U10, itKraken)
@@ -481,9 +482,13 @@ string generateHelpForLand(eLand l) {
   if(l == laDungeon) TREQ2(U5, itPalace)
   if(l == laMountain) TREQ2(U5, itIvory)
   if(l == laMountain) TREQ2(U5, itRuby)
+
+  if(l == laBlizzard) TREQ2(U5, itDiamond)
+  if(l == laBlizzard) TREQ2(U5, itWindstone)
     
   if(l == laPrairie) TREQ(R90)
   if(l == laBull) TREQ(R90)
+  if(l == laTerracotta) TREQ(R90)
   if(l == laCrossroads4) TREQ(R200)
   if(l == laCrossroads5) TREQ(R300)
   

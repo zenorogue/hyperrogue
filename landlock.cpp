@@ -494,16 +494,16 @@ bool landUnlocked(eLand l) {
       return gold() >= R90;
     
     case laVolcano:
-      return gold() >= R30 && items[itElixir] >= U10;
+      return gold() >= R60 && items[itElixir] >= U10;
     
     case laHunting:
       return true;
     
     case laTerracotta: case laMercuryRiver:
-      return gold() >= 60;
+      return gold() >= R90;
     
     case laBlizzard:
-      return items[itDiamond] >= 5 && items[itWindstone] >= 5;
+      return items[itDiamond] >= U5 && items[itWindstone] >= U5;
     
     case laCrossroads5:
       return gold() >= R300;
