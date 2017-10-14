@@ -312,6 +312,8 @@ string generateHelpForItem(eItem it) {
       }
     }
 
+  if(inv::on && it == itInventory)
+    help += "\n\n" + XLAT(inv::helptext);
   return help;
   }
 
