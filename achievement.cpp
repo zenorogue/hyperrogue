@@ -538,6 +538,11 @@ void improveItemScores() {
 
   improve_score(67, itGreenGrass);
   improve_score(68, itBull);
+
+  improve_score(72, itTerra);
+  improve_score(73, itBlizzard);
+  improve_score(74, itLavaLily);
+  improve_score(75, itHunting);
   }
 
 void achievement_final(bool really_final) {
