@@ -348,11 +348,13 @@ bool hellUnlocked() {
   }
 
 ld orbprizefun(int tr) {
+  if(tactic::on) return 1;
   if(tr < 10) return 0;
   return .6 + .4 * log(tr/25.) / log(2);
   }
 
 ld orbcrossfun(int tr) {
+  if(tactic::on) return 1;
   if(tr < 10) return 0;
   if(tr > 25) return 1;
   return (tr*2 + 50) / 100.;
