@@ -1595,3 +1595,5 @@ string getgametime_s(int timespent = getgametime());
 extern int stampbase;
 
 transmatrix cellrelmatrix(cell *c, int i);
+
+void terracottaAround(cell *c);
