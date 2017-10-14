@@ -658,6 +658,7 @@ hpcshape
   shIBranch, shTentacle, shTentacleX, shILeaf[2], 
   shMovestar,
   shWolf, shYeti, shDemon, shGDemon, shEagle, shGargoyleWings, shGargoyleBody,
+  shFoxTail1, shFoxTail2,
   shDogBody, shDogHead, shDogFrontLeg, shDogRearLeg, shDogFrontPaw, shDogRearPaw,
   shDogTorso,
   shHawk,
@@ -787,7 +788,9 @@ void bshape(hpcshape& sh, int p, double shzoom, int shapeid) {
   int whereis = 0;
   while(polydata[whereis] != NEWSHAPE || polydata[whereis+1] != shapeid) whereis++;
   int rots = polydata[whereis+2]; int sym = polydata[whereis+3];
-  symmetriesAt.emplace_back(array<int,3> ({qhpc, rots, sym}));
+  array<int,3> arr;
+  arr[0] = qhpc; arr[1] = rots; arr[2] = sym;
+  symmetriesAt.emplace_back(arr);
   whereis += 4;
   int qty = 0;
   while(polydata[whereis + 2*qty] != NEWSHAPE) qty++;
@@ -1455,6 +1458,8 @@ void buildpolys() {
   bshape(shWolf1, PPR_MONSTER_EYE0, scalef, 74);
   bshape(shWolf2, PPR_MONSTER_EYE0, scalef, 75);
   bshape(shWolf3, PPR_MONSTER_EYE0, scalef, 76);
+  bshape(shFoxTail1, PPR_MONSTER_BODY, scalef, 363);
+  bshape(shFoxTail2, PPR_MONSTER_BODY, scalef, 364);
   bshape(shHawk, PPR_MONSTER_BODY, scalef, 77);
   bshape(shEagle, PPR_MONSTER_BODY, scalef, 78);
   bshape(shWaterElemental, PPR_MONSTER_BODY, scalef, 81);
@@ -2842,6 +2847,9 @@ NEWSHAPE, 360, 7, 1, -0.118455,0.162875, -0.179457,0.274805, -0.139062,0.404961,
 
 NEWSHAPE, 361, 1, 2, -0.077784,0.096705, -0.112723,0.108509, -0.096729,0.084112, -0.130665,0.091676, -0.112529,0.069411, -0.150758,0.068526, -0.119865,0.047315, -0.151705,0.038980, -0.116648,0.028374, -0.149534,0.021061, -0.119798,0.000000,
 NEWSHAPE, 362, 1, 1, -0.098710,-0.040954, -0.120861,-0.011561, -0.169793,0.001055, -0.213918,-0.011649, -0.244439,-0.030821, -0.257630,-0.038325, -0.286489,-0.056656, -0.321137,-0.048332, -0.347048,-0.011856, -0.316514,-0.028969, -0.296328,-0.024605, -0.263040,0.006390, -0.210822,0.055089, -0.164571,0.054857, -0.130462,0.046293, -0.098742,0.054623, -0.091289,-0.004197,
+
+NEWSHAPE, 363, 1, 2, -0.252495,0.014545, -0.330447,0.029660, -0.319594,0.016402, -0.419249,0.040217, -0.457189,-0.013336, 
+NEWSHAPE, 364, 1, 2, -0.486619,0.002830, -0.418060,0.040577, -0.427473,0.022591, -0.408958,0.019603, -0.426031,0.010325, -0.407739,0.001037, 
 NEWSHAPE
 };
 
