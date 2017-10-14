@@ -46,6 +46,11 @@ int& ikmerge(int i) {
   else return kills[i-ittypes];
   }
 
+bool ikappear(int i) {
+  if(i == itInventory && inv::on) return true;
+  return ikmerge(i);
+  }
+
 const int glyphs = ittypes + motypes;
 
 int gfirsttime[glyphs], glasttime[glyphs], gcopy[glyphs], ikland[glyphs];
@@ -56,7 +61,7 @@ int glyph_lastticks;
 void updatesort() {
   for(int i=0; i<glyphs; i++) {
     int ik = ikmerge(i);
-    if(ik && gfirsttime[i] == 0)
+    if(ikappear(i) && gfirsttime[i] == 0)
       gfirsttime[i] = ticks;
     if(ik != gcopy[i])
       gcopy[i] = ik, glasttime[i] = ticks;
@@ -328,7 +333,7 @@ void drawStats() {
   if(vid.xres > vid.yres * 85/100 && vid.yres > vid.xres * 85/100) {
     int bycorner[4];
     for(int u=0; u<4; u++) bycorner[u] = 0;
-    for(int i=0; i<glyphs; i++) if(ikmerge(i) && (glyphflags(i) & GLYPH_INSQUARE))
+    for(int i=0; i<glyphs; i++) if(ikappear(i) && (glyphflags(i) & GLYPH_INSQUARE))
       bycorner[glyphcorner(i)]++;
     updatesort();
     stable_sort(glyphorder, glyphorder+glyphs, glyphsort);
@@ -347,7 +352,7 @@ void drawStats() {
           vector<int> glyphstoshow;
           for(int i=0; i<glyphs; i++) {
             int g = glyphorder[i];
-            if(ikmerge(g) && (glyphflags(g) & GLYPH_INSQUARE) && glyphcorner(g) == cor)
+            if(ikappear(g) && (glyphflags(g) & GLYPH_INSQUARE) && glyphcorner(g) == cor)
               glyphstoshow.push_back(g);
             }
           for(int u=vid.fsize; u<vid.xres/2-s; u += s)
@@ -376,7 +381,7 @@ void drawStats() {
   int colid[4], rowid[4];
   int maxbyclass[4];
   for(int z=0; z<4; z++) maxbyclass[z] = 0;
-  for(int i=0; i<glyphs; i++) if(ikmerge(i))
+  for(int i=0; i<glyphs; i++) if(ikappear(i))
     if(!portrait || (glyphflags(i) | GLYPH_INPORTRAIT))
       maxbyclass[glyphclass(i)]++;
   int buttonsize;
@@ -411,7 +416,7 @@ void drawStats() {
   
   for(int i0=0; i0<glyphs; i0++) {
     int i = glyphorder[i0];
-    if(!ikmerge(i)) continue;
+    if(!ikappear(i)) continue;
     int z = glyphclass(i);
     int imp = glyphflags(i);
     if(imponly) { z &=~1; if(!(imp & GLYPH_IMPORTANT)) continue; }
