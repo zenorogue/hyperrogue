@@ -2414,7 +2414,7 @@ void setcolors(cell *c, int& wcol, int &fcol) {
         else if(id < 48/4) fcol = wcol = gradient(0xF0F000, 0xF00000, 0, id, 48/4);
         else if(id < 96/4) fcol = wcol = gradient(0xF00000, 0x400000, 48/4, id, 95/4-2);
         }
-      else {
+      else if(c->wall == waNone) {
         fcol = wcol = 0x404040;
         if(id == 255/4) fcol = 0xA0A040;
         if(id == 255/4-1) fcol = 0x606040;
