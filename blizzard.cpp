@@ -52,6 +52,7 @@ blizzardcell* getbcell(cell *c) {
   }
 
 void drawBlizzards() {
+  poly_outline = OUTLINE_NONE;
   auto it = blizzardcells.begin();
   bcells.clear();
   while(it != blizzardcells.end()) 
@@ -103,10 +104,13 @@ void drawBlizzards() {
 
   for(int i=0; i<N; i++) {
     auto& bc = *bcells[i];
-    cell *c = bc.c;
-    
     for(auto sb: bc.inorder)
       sb->global = (*bc.gm) * sb->T;
+    }
+
+  for(int i=0; i<N; i++) {
+    auto& bc = *bcells[i];
+    cell *c = bc.c;
     
     bc.outid = 0;
     
