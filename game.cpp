@@ -1595,7 +1595,7 @@ bool snakepile(cell *c, eMonster m) {
   }
 
 bool makeflame(cell *c, int timeout, bool checkonly) {
-  destroyTrapsOn(c);
+  if(!checkonly) destroyTrapsOn(c);
   if(itemBurns(c->item)) {
     if(checkonly) return true;
     addMessage(XLAT("%The1 burns!", c->item)), c->item = itNone;
@@ -2605,18 +2605,21 @@ void computePathdist(eMonster param) {
     for(int j=0; j<c->type; j++) {
       int i = (fd+j) % c->type; 
       // printf("i=%d cd=%d\n", i, c->mov[i]->cpdist);
+      cell *c2 = c->mov[i];
 
-      if(c->mov[i] && c->mov[i]->pathdist == PINFD &&
-        passable(c->mov[i], (qb<qtarg) && !nonAdjacent(c,c->mov[i]) && !thruVine(c,c->mov[i]) ?NULL:c, P_MONSTER | P_REVDIR)) {
+      if(c2 && c2->pathdist == PINFD &&
+        passable(c2, (qb<qtarg) && !nonAdjacent(c,c2) && !thruVine(c,c2) ?NULL:c, P_MONSTER | P_REVDIR)) {
         
         if(qb >= qtarg) {
-          if(param == moTortoise && nogoSlow(c, c->mov[i])) continue;
-          if(param == moIvyRoot  && strictlyAgainstGravity(c, c->mov[i], false, MF_IVY)) continue;
+          if(param == moTortoise && nogoSlow(c, c2)) continue;
+          if(param == moIvyRoot  && strictlyAgainstGravity(c, c2, false, MF_IVY)) continue;
           if(param == moWorm && (cellUnstable(c) || cellEdgeUnstable(c))) continue;
+          if(items[itOrbLava] && c2->cpdist <= 5 && pseudohept(c) && makeflame(c2, 1, true))
+            continue;
           }
 
-        c->mov[i]->pathdist = d+1;
-        pathq.push_back(c->mov[i]); reachedfrom.push_back(c->spn(i));
+        c2->pathdist = d+1;
+        pathq.push_back(c2); reachedfrom.push_back(c->spn(i));
         }
       }
     }
