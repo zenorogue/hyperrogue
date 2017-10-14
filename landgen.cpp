@@ -853,7 +853,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
             c->wall = waNone;
             }
           }
-        }    
+        }
       if(d == 7 && c->item == itMutant) {
         if(c->monst != moMutant && isMultitile(c->monst))
           c->item = itNone;
@@ -1767,6 +1767,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
     case laCrossroads3:
     case laCrossroads4:
     case laCrossroads5:
+      if(c->wall == waTower) c->land = laCamelot;
       ONEMPTY {
         if(purehepta && c->land == laCrossroads5 && hrand(100) < 60)
           c->wall = waBarrier;
@@ -1992,10 +1993,10 @@ void setdist(cell *c, int d, cell *from) {
     buildEquidistant(c);
     }
 
-  if(d == 9) moreBigStuff(c);
-
   giantLandSwitch(c, d, from);
   
+  if(d == 9) moreBigStuff(c);
+
   if(d == 7) repairLandgen(c);
 
   ONEMPTY if(!c->item) {
