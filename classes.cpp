@@ -742,10 +742,11 @@ monstertype minf[motypes] = {
     "the hole will move to the place where the air came from! Void Beasts are great at moving against the wind, but they have problems "
     "moving with the wind."},
   { 'W', 0xA00000, "Lava Wolf", 
-    "While Ice Wolves love heat, their instinct usually will not let tem to go outside the Icy Lands "
-    "-- they are afraid that they will be unable to get back home, and that they will lose the track of their "
-    "prey. However, they find the Volcanic Wasteland so hot and attractive that they abandon their "
-    "natural instincts... and try to track their prey using their other senses and intelligence."},
+    "While Ice Wolves love heat, their instincts usually will not let them leave the Icy Lands -- "
+    "they are afraid that they will be unable to get back home, and that they will lose track of their prey. "
+    "However, they find the Volcanic Wasteland so hot and attractive that they abandon their natural instincts... "
+    "and try to track their prey using their other senses and intelligence."
+     },
   { 'W', 0x202020, "Hunting Dog (guarding)", huntingdesc},
   { 'G', 0xC0C0FF, "Ice Golem", 
     "The Ice Golems are powered by intense magical coldness. When destroyed in the Blizzard or another icy land, they become "
@@ -1810,14 +1811,15 @@ struct gcell {
 eLand land_over[LAND_OVERX] = {
   laIce, laCaves, laDesert, laHunting, laMotion, laJungle, laAlchemist, 
   laCrossroads, 
-  laMirror, laMinefield, laPalace, laPrincessQuest, laZebra, laReptile, laVolcano,
+  laMirror, laMinefield, laPalace, laPrincessQuest, laZebra, laReptile, 
   laOcean, laWarpCoast, laLivefjord, laKraken, laCaribbean, laWhirlpool, laRlyeh, laTemple,
   laIvoryTower, laEndorian, laDungeon, laMountain, 
   laCrossroads2, 
-  laDryForest, laWineyard, laDeadCaves, laGraveyard, laHaunted, laHive, laBlizzard,
-  laRedRock, 
+  laDryForest, laWineyard, laDeadCaves, laGraveyard, laHaunted, laHive, 
+  laRedRock, laVolcano,
   laDragon, laTortoise,
-  laOvergrown, laClearing, laStorms, laWhirlwind, laRose, laBurial,
+  laOvergrown, laClearing, laStorms, laRose, laBurial, laWhirlwind, 
+  laBlizzard,
   laEmerald, laCamelot, 
   laPrairie, laBull, laTerracotta,
   laElementalWall, laTrollheim,

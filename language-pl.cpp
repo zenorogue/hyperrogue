@@ -5975,10 +5975,10 @@ S("Salamanders are tough lizard-like creatures. Their tough skin protects them "
 
 N("Lava Wolf", GEN_M, "Wilk Lawowy", "Wilki Lawowe", "Wilka Lawowego", "Wilkiem Lawowym")
 
-S("While Ice Wolves love heat, their instinct usually will not let tem to go outside the Icy Lands "
-  "-- they are afraid that they will be unable to get back home, and that they will lose the track of their "
-  "prey. However, they find the Volcanic Wasteland so hot and attractive that they abandon their "
-  "natural instincts... and try to track their prey using their other senses and intelligence.",
+S("While Ice Wolves love heat, their instincts usually will not let them leave the Icy Lands -- "
+  "they are afraid that they will be unable to get back home, and that they will lose track of their prey. "
+  "However, they find the Volcanic Wasteland so hot and attractive that they abandon their natural instincts... "
+  "and try to track their prey using their other senses and intelligence.",
   
   "Lodowe Wilki uwielbiają ciepło. Ich instynkt jednak zabrania im wyjść poza Lodową Krainę -- "
   "obawiają się, że już nie wrócą do domu, i że nie będą w stanie dalej wyczuwać swoje ofiary. "
