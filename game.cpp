@@ -3022,6 +3022,8 @@ void moveEffect(cell *ct, cell *cf, eMonster m) {
   if(cf) destroyWeakBranch(cf, ct, m);
 
   mayExplodeMine(ct, m);
+  
+  if(!isNonliving(m)) terracottaAround(ct);
  
   if(ct->wall == waMineUnknown && !ct->item && !ignoresPlates(m)) 
     ct->landparam |= 2; // mark as safe
@@ -5259,7 +5261,8 @@ void moverefresh(bool turn = true) {
       }
 
     else if(isFire(c)) {
-      if(c->monst && !survivesFire(c->monst) && !isWorm(c->monst)) {
+      if(c->monst == moSalamander) c->stuntime = max<int>(c->stuntime, 1);
+      else if(c->monst && !survivesFire(c->monst) && !isWorm(c->monst)) {
         addMessage(XLAT("%The1 burns!", c->monst));
         if(isBull(c->monst)) {
           addMessage(XLAT("Fire is extinguished!"));
@@ -6645,6 +6648,11 @@ void terracotta(cell *c) {
       c->hitpoints = 7,
       c->wall = waNone;
     }
+  }
+
+void terracottaAround(cell *c) {
+  forCellEx(c2, c)
+    terracotta(c2);
   }
 
 void terracotta() {
