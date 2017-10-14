@@ -742,6 +742,7 @@ eLand getNewLand(eLand old) {
   tab[cnt++] = laDesert;
   tab[cnt++] = laJungle;
   tab[cnt++] = laMotion;
+  tab[cnt++] = laHunting;
   tab[cnt++] = laAlchemist;
   if(old != laDeadCaves) tab[cnt++] = laCaves;
   
@@ -790,8 +791,11 @@ eLand getNewLand(eLand old) {
     if(old == laOcean) tab[cnt++] = laCrossroads;
     if(items[itGold] >= U5 && items[itFernFlower] >= U5 && !kills[moVizier]) 
       tab[cnt++] = laEmerald;
+    if(items[itWindstone] >= U5 && items[itDiamond] >= U5) 
+      tab[cnt++] = laBlizzard;
     tab[cnt++] = laDryForest;
     tab[cnt++] = laWineyard;
+    if(items[itElixir] >= U10) tab[cnt++] = laVolcano;
     if(items[itGold] >= U10) tab[cnt++] = laDeadCaves;
     // tab[cnt++] = laCaribbean;
     if(items[itSpice] >= U10) {
@@ -808,6 +812,7 @@ eLand getNewLand(eLand old) {
     if(old == laPrairie) LIKELY tab[cnt++] = laBull;
     tab[cnt++] = laBull;
     if(old == laBull && !chaosmode) LIKELY tab[cnt++] = laPrairie;
+    tab[cnt++] = laTerracotta;
     }
   
   if(gold() >= R300)
