@@ -1446,6 +1446,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
             }
           }
         }
+      break;
 
     case laRose:
       if(d == 8 && c->land == laRose && hrand(2000) < 100 && !c->wall && !c->item && !c->monst) {
