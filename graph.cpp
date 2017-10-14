@@ -981,6 +981,10 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, int col, dou
     else
       queuepoly(VALEGS, shWolfLegs, darkena(col, 0, 0xFF));
     queuepoly(VABODY, shWolfBody, darkena(col, 0, 0xFF));
+    if(m == moRedFox) {
+      queuepoly(VABODY, shFoxTail1, darkena(col, 0, 0xFF));
+      queuepoly(VABODY, shFoxTail2, darkena(0xFFFFFF, 0, 0xFF));
+      }
     queuepoly(VAHEAD, shWolfHead, darkena(col, 0, 0xFF));
     queuepoly(VAHEAD, shWolfEyes, darkena(col, 3, 0xFF));
     }
