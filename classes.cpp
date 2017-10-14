@@ -1897,12 +1897,14 @@ eLand land_scape[LAND_SCAPE] = {
   laCrossroads, laCrossroads2, laCrossroads3
   };
 
-#define LAND_TAC 50
+#define LAND_TAC 56
 
 struct landtacinfo { eLand l; int tries, multiplier; };
 
 landtacinfo land_tac[LAND_TAC] = {
-  {laIce, 10, 1}, {laDesert, 10, 1}, {laMotion, 10, 1}, {laCaves, 10, 1}, {laAlchemist, 10, 1},
+  {laIce, 10, 1}, {laDesert, 10, 1}, 
+  {laHunting, 5, 2},
+  {laMotion, 10, 1}, {laCaves, 10, 1}, {laAlchemist, 10, 1},
   {laJungle, 10, 1}, {laMirror, 10, 1}, {laZebra, 10, 1}, {laPalace, 10, 1}, 
   {laOcean, 10, 1}, {laLivefjord, 10, 1}, {laWarpCoast, 10, 1}, {laRlyeh, 10, 1}, {laHell, 10, 1}, 
   {laDryForest, 10, 1}, {laWineyard, 10, 1}, {laReptile, 10, 1},
@@ -1916,9 +1918,13 @@ landtacinfo land_tac[LAND_TAC] = {
   {laTemple, 5, 2}, {laMinefield, 5, 2},
   {laPower, 5, 2}, {laHive, 5, 2}, {laRedRock, 5, 2}, {laStorms, 5, 2}, {laOvergrown, 5, 2},
   {laClearing, 5, 2},
-  {laWhirlwind, 5, 2}, {laRose, 5, 2}, {laDragon, 2, 5}, {laTortoise, 1, 10},
+  {laWhirlwind, 5, 2}, 
+  {laBlizzard, 10, 1},
+  {laRose, 5, 2}, {laVolcano, 10, 1}, {laDragon, 2, 5}, {laTortoise, 1, 10},
   {laBurial, 5, 2}, 
+  {laBlizzard, 5, 2},
   {laElementalWall, 10, 1}, {laTrollheim, 5, 2},
+  {laPrairie, 5, 2}, {laBull, 5, 2},
   
   {laCrossroads, 10, 1}, {laCrossroads2, 10, 1}, {laCrossroads3, 10, 1}, {laCrossroads4, 10, 1}, 
   
