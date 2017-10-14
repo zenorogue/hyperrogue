@@ -2467,8 +2467,8 @@ void checkTide(cell *c) {
   if(c->land == laVolcano) {
     int id = lavatide(c, 0);
     if(id < 96) {
-      if(c->wall == waNone || isWateryOrBoat(c) || c->wall == waVinePlant) {
-        if(isWateryOrBoat(c)) 
+      if(c->wall == waNone || isWateryOrBoat(c) || c->wall == waVinePlant || isAlch(c)) {
+        if(isWateryOrBoat(c) || isAlch(c)) 
           playSound(c, "steamhiss");
         c->wall = waMagma;
         if(itemBurns(c->item)) {
@@ -7298,6 +7298,10 @@ bool movepcto(int d, int subdir, bool checkonly) {
         invismove = false;
         cwt.c->wall = waIcewall;
         }
+      
+      if(items[itOrbWinter])
+        forCellEx(c3, c2) if(c3->wall == waIcewall && c3->item)
+          markOrb(itOrbWinter), collectItem(c3);
       
       movecost(cwt.c, c2);
 

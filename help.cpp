@@ -219,6 +219,10 @@ string generateHelpForItem(eItem it) {
      help += XLAT("\n\nThis Orb protects you from attacks, scents, and insulates you "
        "from electricity. It does not let you go through deadly terrain, but "
        "if you are attacked with fire, it lets you stay in place in it.");
+
+  if(it == itOrbWinter) 
+    help += XLAT("\n\nThis Orb also allows you to collect items encased in ice.");
+
   if(it == itOrbEmpathy) {
     int cnt = 0;
     for(int i=0; i<ittypes; i++) {
