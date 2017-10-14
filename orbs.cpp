@@ -176,6 +176,7 @@ void flashCell(cell *c, eMonster killer, flagtype flags) {
   if(c->wall == waGargoyleFloor)  c->wall = waChasm;
   if(c->wall == waGargoyleBridge)  placeWater(c, c);
   if(c->wall == waGargoyle)  c->wall = waNone;
+  if(c->wall == waTerraWarrior)  c->wall = waNone;
   if(c->wall == waPlatform)  c->wall = waNone;
   if(c->wall == waStone)     c->wall = waNone, destroyTrapsAround(c);
   if(c->wall == waRubble)    c->wall = waNone;
@@ -385,6 +386,7 @@ void castLightningBolt(cellwalker lig) {
     if(c->wall == waColumn)    c->wall = waNone, spin = true;
     if(c->wall == waStone)     c->wall = waNone, brk = true, destroyTrapsAround(c);
     if(c->wall == waArrowTrap) activateArrowTrap(c);
+    if(c->wall == waTerraWarrior)  c->wall = waNone;
     
     if(c->wall == waCanopy || c->wall == waTrunk || c->wall == waBigBush || c->wall == waSmallBush) {
       makeflame(c, 12, false); brk = true;
