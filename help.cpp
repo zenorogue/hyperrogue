@@ -860,11 +860,16 @@ void gotoHelpFor(eLand l) {
   auto listbeasts = [l] () {
     char nextmonster = 'a';
     for(int m0=0; m0<motypes; m0++) {
-      eMonster m = eMonster(m0);
-      if(isNative(l, m) && !nodisplay(m))
-        help_extensions.push_back(help_extension{nextmonster++, XLATN(minf[m].name), [m] () {
+      const eMonster m = eMonster(m0);
+      if(isNative(l, m) && !nodisplay(m)) {
+        help_extension hex;
+        hex.key = nextmonster++;
+        hex.text = XLATN(minf[m].name);
+        hex.action = [m] () {
           subhelp(bygen([m] () { gotoHelpFor(m); }));
-          }});
+          };
+        help_extensions.push_back(hex);
+        }
       }
     };
   

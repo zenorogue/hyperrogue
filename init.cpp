@@ -1,6 +1,6 @@
-#define VER "10.0o"
-#define VERNUM 10015
-#define VERNUM_HEX 0xA00F
+#define VER "10.1"
+#define VERNUM 10100
+#define VERNUM_HEX 0xA080
 
 #define GEN_M 0
 #define GEN_F 1
@@ -294,7 +294,7 @@ inline Uint8 *SDL_GetKeyState(void *v) { static Uint8 tab[1024]; return tab; }
 #include <string>
 #include <map>
 #include <queue>
-
+#include <stdexcept>
 #include <array>
 
 #ifdef USE_UNORDERED_MAP

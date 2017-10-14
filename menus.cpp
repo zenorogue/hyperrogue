@@ -139,10 +139,13 @@ void showOverview() {
     int umod = uni % 1000;
     int udiv = uni / 1000;
     if(udiv == 1 && umod < landtypes) {
-      eLand l = eLand(umod);
+      const eLand l = eLand(umod);
       gotoHelp(""); gotoHelpFor(l);
       if(cheater) {
-        help_extensions.push_back(help_extension{'t', XLAT("teleport"), [l] () { 
+        help_extension hex;
+        hex.key = 't';
+        hex.text = XLAT("teleport");
+        hex.action = [l] () {
           cheater++;
           bool princ = (l == laPrincessQuest);
           if(princ) {
@@ -156,7 +159,8 @@ void showOverview() {
           if(princ) fullcenter();
           popScreen();
           popScreen();
-          }});
+          };
+        help_extensions.push_back(hex);
         }
       }
     else if(udiv == 2 && umod < ittypes) {
