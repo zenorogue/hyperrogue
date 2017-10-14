@@ -864,17 +864,21 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, int col, dou
       queuepoly(VBODY, (cs.charid&1) ? shFemaleBody : shPBody,  darkena(col, 0, 0X80));
   
       if(!shmup::on) {
-        if(items[itOrbThorns] && items[itOrbEmpathy])
+        bool emp = items[itOrbEmpathy] && m != moShadow;
+        if(items[itOrbThorns] && emp)
           queuepoly(VBODY, shHedgehogBladePlayer, darkena(col, 0, 0x40));
         if(items[itOrbSide1] && !shmup::on)
           queuepoly(VBODY * spin(-M_PI/24), cs.charid >= 2 ? shSabre : shPSword, darkena(col, 0, 0x40));      
-        if(items[itOrbSide3] && items[itOrbEmpathy])
+        if(items[itOrbSide3] && emp)
           queuepoly(VBODY, (cs.charid&1) ? shFerocityF : shFerocityM, darkena(col, 0, 0x40));
 
         queuepoly(VBODY, (cs.charid >= 2 ? shSabre : shPSword), darkena(col, 0, 0XC0));
         }
       else if(!where || shmup::curtime >= shmup::getPlayer()->nextshot)
         queuepoly(VBODY, shPKnife, darkena(col, 0, 0XC0));
+
+      if(knighted)
+        queuepoly(VBODY, shKnightCloak, darkena(col, 1, 0xC0));
   
       queuepoly(VHEAD, (cs.charid&1) ? shFemaleHair : shPHead,  darkena(col, 1, 0XC0));
       queuepoly(VHEAD, shPFace,  darkena(col, 0, 0XC0));
