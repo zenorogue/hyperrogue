@@ -958,7 +958,8 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           }
         else {
           int i = zebra40(c);
-          if(i >= 40 && hrand(100) < 50) 
+          if(c->wall); 
+          else if(i >= 40 && hrand(100) < 50) 
             c->wall = hrand(2) ? waCharged : waGrounded;
           else if(ishept(c) && hrand(100) < 20)
             c->wall = waSandstone;
