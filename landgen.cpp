@@ -480,21 +480,34 @@ void giantLandSwitch(cell *c, int d, cell *from) {
     case laBurial:
       if(d == 9) {
         if(hrand(5000) < 25 && celldist(c) >= 5 && !safety) {
-          c->item = itBarrow;
-          c->landparam = 2 + hrand(2);
-          c->wall = waBarrowDig;
-          forCellCM(c2, c) c2->wall = waBarrowWall, c2->item = itNone;
+          bool goodland = true;
           cell *c2 = createMov(c, hrand(c->type));
-          c2->wall = waBarrowDig;
-          forCellCM(c3, c2) {
-            if(c3 == c || isNeighbor(c3, c)) continue;
-            bool adj = false;
-            forCellEx(c4, c)
-              if(c4 != c2 && isNeighborCM(c3, c4)) adj = true;
-            if(adj)
-              c3->wall = waBarrowDig;
-            else
-              c3->wall = waBarrowWall, c3->item = itNone;
+          for(auto cx: {c, c2})
+            forCellCM(c3,cx) {
+              if(c3->land != laNone && c3->land != laBurial)
+                goodland = false;
+              if(c3->bardir != NODIR && c3->bardir != NOBARRIERS) 
+                goodland = false;
+              }
+          if(goodland) {
+            c->item = itBarrow;
+            c->landparam = 2 + hrand(2);
+            c->wall = waBarrowDig;
+            forCellCM(c3, c) 
+              c3->wall = waBarrowWall, c3->item = itNone,
+              c3->bardir = NOBARRIERS;
+            c2->wall = waBarrowDig;
+            forCellCM(c3, c2) {
+              if(c3 == c || isNeighbor(c3, c)) continue;
+              c3->bardir = NOBARRIERS;
+              bool adj = false;
+              forCellEx(c4, c)
+                if(c4 != c2 && isNeighborCM(c3, c4)) adj = true;
+              if(adj)
+                c3->wall = waBarrowDig;
+              else
+                c3->wall = waBarrowWall, c3->item = itNone;
+              }
             }
           }
         }
