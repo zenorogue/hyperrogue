@@ -603,7 +603,7 @@ namespace inv {
       
       else if(uni == '1') plain = !plain;
       else if(sym == SDLK_F1) 
-        gotoHelp(which ? generateHelpForItem(which) : NODESCYET);
+        gotoHelp(which ? generateHelpForItem(which) : XLAT(helptext));
       else if(doexiton(sym, uni)) {
         if(mirroring) mirroring = false;
         popScreen();
