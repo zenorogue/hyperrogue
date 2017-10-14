@@ -520,7 +520,7 @@ void wandering() {
     else if(c->land == laOvergrown && wchance(items[itMutant], 50)) 
       c->monst = moForestTroll;
 
-    else if(c->land == laTerracotta && wchance(items[itTerra], 35)) 
+    else if(c->land == laTerracotta && wchance(items[itTerra], 40)) 
       c->monst = moJiangshi;
 
     else if(c->land == laCaribbean && wchance(items[itPirate], 30))
