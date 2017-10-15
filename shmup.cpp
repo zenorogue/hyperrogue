@@ -677,7 +677,7 @@ void handleInput(int delta) {
     showMissionScreen();
   
 #if CAP_INV
-  if(actionspressed[57] && !lactionpressed[57]) 
+  if(actionspressed[57] && !lactionpressed[57] && inv::on) 
     pushScreen(inv::show);
 #endif
   
