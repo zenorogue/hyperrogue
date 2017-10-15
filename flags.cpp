@@ -382,7 +382,7 @@ bool normalMover(eMonster m) {
     m == moNarciss || m == moMirrorSpirit || 
     m == moHunterDog || m == moTerraWarrior || m == moJiangshi || 
     m == moLavaWolf || m == moSalamander ||
-    m == moHunterGuard ||
+    m == moHunterGuard || m == moHunterChanging ||
     m == moIceGolem || slowMover(m);
   }
 

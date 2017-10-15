@@ -1045,7 +1045,7 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, int col, dou
       }
     queuepoly(VABODY, shBugArmor, darkena(col, 1, 0xFF));
     }
-  else if(m == moRunDog || m == moHunterDog || m == moHunterGuard) {
+  else if(m == moRunDog || m == moHunterDog || m == moHunterGuard || m == moHunterChanging) {
     if(!mmspatial && !footphase) 
       queuepoly(VABODY, shDogBody, darkena(col, 0, 0xFF));
     else {
@@ -1062,6 +1062,7 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, int col, dou
     bool redeyes = false;
     if(m == moHunterDog) eyecolor = 0xFF0000, redeyes = true;
     if(m == moHunterGuard) eyecolor = 0xFF6000, redeyes = true;
+    if(m == moHunterChanging) eyecolor = 0xFFFF00, redeyes = true;
     int eyes = darkena(eyecolor, 0, 0xFF);
 
     if(redeyes) poly_outline = eyes, minwidth_global = 1;
@@ -1864,6 +1865,8 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, int col) {
       hyperpoint V1 = spintox(V0) * V0;
 
       Vs = cwtV * rspintox(V0) * rpushxto0(V1) * pispin;
+      if(c->monst == moHunterChanging)  
+        Vs = Vs * spin(M_PI);
       }
     
     if(c->monst == moShadow) 

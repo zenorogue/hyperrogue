@@ -381,7 +381,7 @@ const char *mirroreddesc =
   "Mirror walls reflect Mimics, lightning bolts, and "
   "missiles perfectly.";
 
-const int motypes = 151;
+const int motypes = 152;
 
 struct monstertype {
   char  glyph;
@@ -756,6 +756,7 @@ monstertype minf[motypes] = {
     "Salamanders are tough lizard-like creatures. Their tough skin protects them "
     "from both physical attacks and heat. Salamanders "
     "are stunned for a longer time if you push them into lava, fire, or a solid obstacle."},
+  { 'W', 0x202020, "Hunting Dog (preparing ambush)", huntingdesc},
   
   // shmup specials
   { '@', 0xC0C0C0, "Rogue", "In the Shoot'em Up mode, you are armed with thrown Knives."},
@@ -818,7 +819,7 @@ enum eMonster {
   moHerdBull, moRagingBull, moSleepBull,
   moButterfly, moNarciss, moMirrorSpirit,
   moHunterDog, moTerraWarrior, moJiangshi, moVoidBeast, moLavaWolf, moHunterGuard,
-  moIceGolem, moSandBird, moSalamander,
+  moIceGolem, moSandBird, moSalamander, moHunterChanging,
   // shmup specials
   moPlayer, moBullet, moFlailBullet, moFireball, moTongue, moAirball,
   // temporary

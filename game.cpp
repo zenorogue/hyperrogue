@@ -1818,6 +1818,7 @@ void killMonster(cell *c, eMonster who, flagtype deathflags) {
   if(m == moTentacleGhost) m = moGhost;
   if(!isBulletType(m)) kills[m]++;
   if(m == moHunterGuard) m = moHunterDog;
+  if(m == moHunterChanging) m = moHunterDog;
 
   if(!c->item) if(m == moButterfly && (deathflags & AF_BULL))
     c->item = itBull;
@@ -3199,6 +3200,7 @@ void moveMonster(cell *ct, cell *cf) {
   else {
     ct->monst = m;
     if(m == moWolf) ct->monst = moWolfMoved;
+    if(m == moHunterChanging) ct->stuntime = 1;
     if(ct->monst != moTentacleGhost)
       ct->mondir = neighborId(ct, cf);
     }
@@ -3515,6 +3517,9 @@ int moveval(cell *c1, cell *c2, int d, int mf) {
   
   if(m == moRagingBull && c1->mondir != NODIR)
     return 1500 - bulldist(c2);
+  
+  // actually they just run away
+  if(m == moHunterChanging && c2->pathdist > c1->pathdist) return 1600;
   
   if(hunt && (mf & MF_PATHDIST) && c2->pathdist < c1->pathdist && !peace::on) return 1500; // good move
   
@@ -5008,6 +5013,9 @@ void specialMoves() {
     
     eMonster m = c->monst;
     
+    if(m == moHunterGuard && items[itHunting] >= 10)
+      c->monst = moHunterChanging;
+    
     if(m == moSleepBull && !peace::on) {
       bool wakeup = false;
       forCellEx(c2, c) if(c2->monst == moGadfly) {
@@ -6015,10 +6023,7 @@ int ambushSize(cell *c, eItem what) {
     return ambushval;
   switch(what) {
     case itHunting:
-      if(qty <= 16)
-        return qty;
-      else
-        return max(33-qty, 6);
+      return min(min(qty, max(33-qty, 6)), 15);
     
     case itOrbSide3:
       return restricted ? 10 : 20;

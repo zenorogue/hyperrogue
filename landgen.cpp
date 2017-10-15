@@ -1511,14 +1511,54 @@ void giantLandSwitch(cell *c, int d, cell *from) {
         if(hrand(1000) < 20) {
           if(openplains(c)) {
             if(hrand(2) == 0) {
-              c->item = itHunting;
-              vector<cell*> next;
-              forCellEx(c2, c) if(c2->mpdist > 7) next.push_back(c2);
-              if(size(next) && items[itHunting] < 10) {
-                cell *c3 = next[hrand(size(next))];
-                forCellEx(c4, c3) if(c4->mpdist > 7 && !isNeighbor(c4, c))
-                  c4->monst = moHunterGuard;
+              if(!items[itHunting]) {
+                vector<pair<cell*, cell*>> next;
+                int bonus = c->type - 4;
+                for(int i=0; i<c->type; i++) {
+                  cellwalker cw0(c, i);
+                  cwstep(cw0); cwrevstep(cw0);
+                  cellwalker cw1(c, i+bonus);
+                  cwspin(cw1, 0); cwstep(cw1); cwrevstep(cw1);
+                  if(cw0.c->mpdist > 7)
+                  if(cw1.c->mpdist > 7)
+                    next.emplace_back(cw0.c, cw1.c);
+                  }
+                if(size(next)) {
+                  c->item = itHunting;
+                  auto& p = next[hrand(size(next))];
+                  p.first->monst = moHunterGuard;
+                  p.second->monst = moHunterGuard;
+                  }
                 }
+              else if(items[itHunting] < 10) {
+                vector<cell*> next;
+                forCellEx(c2, c) if(c2->mpdist > 7 && c2->type == 6) next.push_back(c2);
+                if(size(next)) {
+                  c->item = itHunting;
+                  cell *c3 = next[hrand(size(next))];
+                  vector<cell*> dogcells;
+                  forCellEx(c4, c3) if(c4->mpdist > 7 && !isNeighbor(c4, c))
+                    dogcells.push_back(c4);
+                  if(items[itHunting] < 10 && size(dogcells) >= 2) {
+                    while(true) {
+                      cell *dog1 = dogcells[hrand(size(dogcells))];
+                      cell *dog2 = dogcells[hrand(size(dogcells))];
+                      if(isNeighbor(dog1, dog2)) {
+                        dog1->monst = moHunterGuard;
+                        dog1->landparam = 0;
+                        dog2->monst = moHunterGuard;
+                        dog2->landparam = 1;
+                        break;
+                        }
+                      }
+                    }
+                  else if(size(dogcells)) {
+                    c->item = itHunting;
+                    dogcells[hrand(size(dogcells))]->monst = moHunterGuard;
+                    }
+                  }
+                }
+              else c->item = itHunting;
               }
             else placeLocalSpecial(c, 10);
             }
