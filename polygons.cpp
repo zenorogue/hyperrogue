@@ -577,11 +577,12 @@ void drawqueue() {
   
   for(int i = 0; i<siz; i++) ptds2[qp[ptds[i].prio]++] = &ptds[i];
   
-  for(int p: {PPR_REDWALLs, PPR_REDWALLs2, PPR_REDWALLs3, PPR_WALL3s})
+  for(int p: {PPR_REDWALLs, PPR_REDWALLs2, PPR_REDWALLs3, PPR_WALL3s,
+    PPR_LAKEWALL, PPR_INLAKEWALL, PPR_BELOWBOTTOM}) 
   sort(&ptds2[qp0[p]], &ptds2[qp[p]], 
     [] (polytodraw* p1, polytodraw* p2) {
       return intval(p1->u.poly.V * xpush0(.1), C0)
-        > intval(p2->u.poly.V * xpush0(.1), C0);
+        < intval(p2->u.poly.V * xpush0(.1), C0);
       });
 
 #endif
