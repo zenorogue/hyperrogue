@@ -1,6 +1,6 @@
-#define VER "10.1b"
-#define VERNUM 10102
-#define VERNUM_HEX 0xA082
+#define VER "10.1c"
+#define VERNUM 10103
+#define VERNUM_HEX 0xA083
 
 #define GEN_M 0
 #define GEN_F 1

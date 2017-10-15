@@ -1897,10 +1897,10 @@
 - water tiles use tiles with less gaps now, so that it looks better in 3D
 - a subtle wave effect on the free Ocean
 
-2019.09.04 20:43 version 10.0n
+2017.09.04 20:43 version 10.0n
 - fixed the shmup crash bug
 
-2019.09.17 14:01 version 10.0o
+2017.09.17 14:01 version 10.0o
 - fixed the mirror cache
 - fixed the mirror glitch
 - fixed the Princess Challenge
@@ -1909,3 +1909,79 @@
 - fixed mouse tooltip messages in mobiles
 - fixed the checkmate rule not taking the mirrored mimics into account
 - fixed some bugs with the activation of Orb of Yendor
+
+2019.10.14 19:50 version 10.1
+
+* four new lands
+- Terracotta Army
+- Hunting Ground
+- Volcanic Wasteland
+- Blizzard
+
+* help and interface improvements:
+- the help for Orb Strategy Mode did not appear when it should
+- orb help now lists the OSM information (required refactoring)
+- 'inventory' icon always appears in OSM now (even if you have no orbs)
+- better info about forbidden/dangerous/useless orbs, and fixed a bug with marking using forbidden orbs
+- more space for orbs in OSM, fixed some bugs
+- help screen for lands includes bestiaries
+- improved cheating in the Overview
+- new message styles added (left-aligned messages which no longer obscure the game area)
+- 'message log' is now a separate option in the mission screen
+- added Halloween to start menu (if the date is correct) and fixed it in quit menu
+- fixed the names in credits
+- mission screen reshown after a bad move in 'see how it ended'
+- fixed problems where the standard mode would not be reset correctly
+
+* graphical improvements:
+- Mimics now display Thorns (with Empathy)
+- made Earth Elemental look similar to other Elementals
+- improved Giant Fox
+- improved the display of holes in Halloween
+- fixed the 'away' function to draw sidewalls correctly
+- Hall of Mirrors works better with high sightrange
+- changed graphics for some orbs
+
+* gameplay:
+- Orb of Friendship is now forbidden in the Princess Quest
+- fixed the Crossroads in PTM
+- relaxed local orb generation rule in the Chaos Mode implemented in special cases too
+- you no longer can have more than 6 bullets for the Revolver in Wild West
+
+* technical:
+- improvements in the graphics editor: 'u' loads the current monster image; if PC display is off, you automatically edit the floor below; fixed editing colors
+- refactored the land generation
+- some new command line options
+- 'shame to cheat' is no longer displayed when autocheating is on
+
+2019.10.14 19:50 version 10.1a
+- fixed the missing leaderboards
+- fixed the typos in the description of Lava Wolf
+- fixed the ordering of lands in the Overview
+
+2019.10.15 01:06 version 10.1b
+- added wandering monsters to the new lands
+- no longer highlight blizzard particles
+- flash/lightning destroys terracotta warriors
+- more tactical lands
+- Salamanders stunned by fire
+- slime visible in Volcanic Wasteland (but destroyed by lava)
+- living monsters awaken Terracotta Warriors
+
+2019.10.16 00:43 version 10.1c
+- changes to the Hunting Ground:
+- - a new pattern at 0 treasures
+- - guards now always appear in pairs (not larger groups)
+- - you can now see the guards leave to form larger ambushes at 10 treasures
+- - made the 17-18th treasures a bit easier
+- worms no longer spam messages while going over lava
+- fixed the confusion between changing language and sending score to Leaderboards
+- Item/boat burning message no longer appears when this happens out of sight
+- 'that was easy' message no longer appears if you are actually fighting a group
+- fixed the PTM list (Blizzard appeared twice instead of Terracotta)
+- rebound 'i'nventory key no longer works if it should not
+- Orb of Safety no longer goes above 7
+- guarding dogs have slightly orange eyes
+- ambush size is displayed by hovering over the item in Hunting Ground
+- Terracotta counters are sometimes lowered at high treasure levels
+- fixed two more graphical glitches in Halloween
