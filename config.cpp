@@ -769,7 +769,7 @@ void showBasicConfig() {
 #endif
 
 #if ISSTEAM
-  dialog::addBoolItem(XLAT("send scores to Steam leaderboards"), (vid.steamscore&1), 'l');
+  dialog::addBoolItem(XLAT("send scores to Steam leaderboards"), (vid.steamscore&1), 's');
 #endif
 
   dialog::addBoolItem(XLAT("skip the start menu"), vid.skipstart, 'm');
@@ -825,7 +825,7 @@ void showBasicConfig() {
 #endif
   
   #if ISSTEAM
-    if(xuni == 'l') vid.steamscore = vid.steamscore^1;
+    if(xuni == 's') vid.steamscore = vid.steamscore^1;
   #endif
     if(xuni == 't') 
       dialog::editNumber(vid.flashtime, 0, 64, 1, 8, XLAT("message flash time"),
