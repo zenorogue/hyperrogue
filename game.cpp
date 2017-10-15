@@ -6003,18 +6003,99 @@ void collectMessage(cell *c2, eItem which) {
 
 int ambushval;
 
+int ambushSize(cell *c, eItem what) {
+  bool restricted = false;
+  for(cell *c2: dcal) {
+    if(c2->cpdist > 3) break;
+    if(c2->monst) restricted = true;
+    }
+
+  int qty = items[itHunting];
+  if(ambushval)
+    return ambushval;
+  switch(what) {
+    case itHunting:
+      if(qty <= 16)
+        return qty;
+      else
+        return max(33-qty, 6);
+    
+    case itOrbSide3:
+      return restricted ? 10 : 20;
+    
+    case itOrbFreedom:
+      return restricted ? 10 : 60;
+    
+    case itOrbThorns:
+    case itOrb37:
+      return 20;
+    
+    case itOrbLava:
+      return 20;
+    
+    case itOrbBeauty:
+      return 35;
+    
+    case itOrbShell:
+      return 35;
+
+    case itOrbPsi:
+      // return 40; -> no benefits
+      return 20;
+
+    case itOrbDash:
+    case itOrbFrog:
+      return 40;
+    
+    case itOrbAir:
+    case itOrbDragon:
+      return 50;
+
+    case itOrbStunning:
+      // return restricted ? 50 : 60; -> no benefits
+      return 30;
+    
+    case itOrbBull:
+    case itOrbSpeed:
+    case itOrbShield:
+      return 60;
+
+    case itOrbInvis:
+      return 80;
+
+    case itOrbTeleport:
+      return 300;
+    
+    case itGreenStone:
+    case itOrbSafety:
+    case itOrbYendor:
+      return 0;
+    
+    case itKey:
+      return 16;
+
+    case itWarning:
+      return qty;
+    
+    default:
+      return restricted ? 6 : 10;
+      break;    
+    
+    // Flash can survive about 70, but this gives no benefits
+    }
+  
+  }
+
 void ambush(cell *c, eItem what) {
   int maxdist = purehepta ? 5 : 7;
   celllister cl(c, maxdist, 1000000, NULL);
   cell *c0 = c;
   int d = 0;
   cl.prepare();
-  bool restricted = false;
   for(cell *cx: cl.lst) {
     int dh = cl.getdist(cx);
     if(dh <= 2 && cx->monst == moHunterGuard)
       cx->monst = moHunterDog;
-    if(dh <= 3 && cx->monst) restricted = true;
     if(dh > d) c0 = cx, d = dh;
     }
   vector<cell*> around;
@@ -6032,98 +6113,7 @@ void ambush(cell *c, eItem what) {
     if(c2 == c0) break;
     }
   int N = size(around);
-  int dogs;
-  
-  int qty = items[itHunting];
-  
-  if(ambushval) dogs = ambushval;
-  else
-  switch(what) {
-    case itHunting:
-      if(qty <= 16)
-        dogs = qty;
-      else
-        dogs = max(33-qty, 6);
-      break;
-    
-    case itOrbSide3:
-      dogs = restricted ? 10 : 20;
-      break;
-    
-    case itOrbFreedom:
-      dogs = restricted ? 10 : 60;
-      break;
-    
-    case itOrbThorns:
-    case itOrb37:
-      dogs = 20;
-      return;
-    
-    case itOrbLava:
-      dogs = 20;
-      return;
-    
-    case itOrbBeauty:
-      dogs = 35;
-      return;
-    
-    case itOrbShell:
-      dogs = 35;
-      break;
-
-    case itOrbPsi:
-      // dogs = 40; -> no benefits
-      dogs = 20;
-      break;
-
-    case itOrbDash:
-    case itOrbFrog:
-      dogs = 40;
-      break;
-    
-    case itOrbAir:
-    case itOrbDragon:
-      dogs = 50;
-      break;
-
-    case itOrbStunning:
-      // dogs = restricted ? 50 : 60; -> no benefits
-      dogs = 30;
-      break;
-    
-    case itOrbBull:
-    case itOrbSpeed:
-    case itOrbShield:
-      dogs = 60;
-      break;
-
-    case itOrbInvis:
-      dogs = 80;
-      break;
-
-    case itOrbTeleport:
-      dogs = 300;
-      break;
-    
-    case itGreenStone:
-    case itOrbSafety:
-    case itOrbYendor:
-      return;
-    
-    case itKey:
-      dogs = 16;
-      break;
-
-    case itWarning:
-      dogs = qty;
-      break;
-    
-    default:
-      dogs = restricted ? 6 : 10;
-      break;    
-    
-    // Flash can survive about 70, but this gives no benefits
-    }
+  int dogs = ambushSize(c, what);  
   
   int gaps = dogs;
   if(!N) return;
