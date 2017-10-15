@@ -2241,8 +2241,13 @@ bool attackMonster(cell *c, flagtype flags, eMonster killer) {
   if(tk == 0 && ntk > 0 && !tactic::on && !euclid && !sphere) {
     if(notthateasy(m))
       addMessage(XLAT("Quite tough, for your first fight."));
-    else 
-      addMessage(XLAT("That was easy, but groups could be dangerous."));
+    else {
+      bool more = false;
+      forCellEx(c2, cwt.c) forCellEx(c3, c2)
+        if(c3->monst) more = true;
+      if(!more)
+        addMessage(XLAT("That was easy, but groups could be dangerous."));
+      }
     }
     
   if(tk < 10 && ntk >= 10 && !tactic::on && !euclid && !sphere && !inv::on)
