@@ -139,7 +139,7 @@ string listkeys(int id) {
   for(int i=0; i<512; i++)
     if(vid.scfg.keyaction[i] == id)
       lk = lk + " " + SDL_GetKeyName(SDLKey(i));
-#if CAP_JOY
+#if CAP_SDLJOY
   for(int i=0; i<numsticks; i++) for(int k=0; k<SDL_JoystickNumButtons(sticks[i]) && k<MAXBUTTON; k++)
     if(vid.scfg.joyaction[i][k] == id) {
       lk = lk + " " + cts('A'+i)+"-B"+its(k);
@@ -193,7 +193,7 @@ void showShmupConfig() {
     shmupnumkeys = CMDS_PAN;
     shmupcmdtable = pancmds;
     }
-#if CAP_JOY
+#if CAP_SDLJOY
   else if(sc == SCJOY) {
     dialog::init();
     getcstat = ' ';
@@ -255,7 +255,7 @@ void showShmupConfig() {
       dialog::addBreak(100);
     if(vid.scfg.players > 2)
       dialog::addItem(XLAT("configure player 3") + dsc(2), '3');
-#if CAP_JOY
+#if CAP_SDLJOY
     else if(vid.scfg.players == 1 && !shmupcfg && !shmupcfg && !multi::alwaysuse)
       dialog::addItem(XLAT("old style joystick configuration"), 'b');
 #endif
@@ -280,7 +280,7 @@ void showShmupConfig() {
       dialog::addItem(XLAT("configure panning and general keys"), 'p');
     else dialog::addBreak(100);
 
-#if CAP_JOY
+#if CAP_SDLJOY
     if(numsticks > 0) {
       if(shmupcfg || multi::alwaysuse || vid.scfg.players > 1) 
         dialog::addItem(XLAT("configure joystick axes"), 'j');
@@ -351,11 +351,11 @@ void handleConfig(int sym, int uni) {
     else if(uni == '5') vid.scfg.subconfig = 6;
     else if(uni == '6') vid.scfg.subconfig = 7;
     else if(uni == '7') vid.scfg.subconfig = 8;
-#if CAP_JOY
+#if CAP_SDLJOY
     else if(uni == 'j') vid.scfg.subconfig = SCJOY;
 #endif
     else if(uni == 'a') multi::alwaysuse = !multi::alwaysuse;
-#if CAP_JOY
+#if CAP_SDLJOY
     else if(uni == 'b') pushScreen(showJoyConfig);
 #endif
     else if(uni == 'r') 
@@ -634,7 +634,7 @@ void handleInput(int delta) {
   for(int i=0; i<SDLK_LAST; i++) if(keystate[i]) 
     pressaction(vid.scfg.keyaction[i]);
 
-#if CAP_JOY  
+#if CAP_SDLJOY  
   for(int j=0; j<numsticks; j++) {
 
     for(int b=0; b<SDL_JoystickNumButtons(sticks[j]) && b<MAXBUTTON; b++)

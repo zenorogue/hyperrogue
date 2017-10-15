@@ -4550,7 +4550,7 @@ void drawMarkers() {
       queuecircleat(global_pushto, .6, darkena(0xFFD500, 0, 0xFF));
       }
 
-#if CAP_JOY
+#if CAP_SDLJOY
     if(joydir.d >= 0) 
       queuecircleat(cwt.c->mov[(joydir.d+cwt.spin) % cwt.c->type], .78 - .02 * sin(ticks/199.0), 
         darkena(0x00FF00, 0, 0xFF));
