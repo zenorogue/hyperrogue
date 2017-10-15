@@ -1923,9 +1923,8 @@ landtacinfo land_tac[LAND_TAC] = {
   {laBlizzard, 10, 1},
   {laRose, 5, 2}, {laVolcano, 10, 1}, {laDragon, 2, 5}, {laTortoise, 1, 10},
   {laBurial, 5, 2}, 
-  {laBlizzard, 5, 2},
   {laElementalWall, 10, 1}, {laTrollheim, 5, 2},
-  {laPrairie, 5, 2}, {laBull, 5, 2},
+  {laPrairie, 5, 2}, {laBull, 5, 2}, {laTerracotta, 10, 1}, 
   
   {laCrossroads, 10, 1}, {laCrossroads2, 10, 1}, {laCrossroads3, 10, 1}, {laCrossroads4, 10, 1}, 
   
