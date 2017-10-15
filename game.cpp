@@ -1598,7 +1598,9 @@ bool makeflame(cell *c, int timeout, bool checkonly) {
   if(!checkonly) destroyTrapsOn(c);
   if(itemBurns(c->item)) {
     if(checkonly) return true;
-    addMessage(XLAT("%The1 burns!", c->item)), c->item = itNone;
+    if(c->cpdist <= 7)
+      addMessage(XLAT("%The1 burns!", c->item));
+    c->item = itNone;
     }
   if(cellUnstable(c)) {
     if(checkonly) return true;
@@ -1609,7 +1611,8 @@ bool makeflame(cell *c, int timeout, bool checkonly) {
     return false;
   else if(c->wall == waBoat) {
     if(checkonly) return true;
-    addMessage(XLAT("%The1 burns!", winf[c->wall].name));
+    if(c->cpdist <= 7)
+      addMessage(XLAT("%The1 burns!", winf[c->wall].name));
     drawFireParticles(c, 24);
     placeWater(c, c);
     if(isIcyLand(c)) HEAT(c) += 1;
