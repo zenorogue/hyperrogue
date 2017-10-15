@@ -4504,7 +4504,7 @@ void queuecircleat(cell *c, double rad, int col) {
 
 void drawMarkers() {
 
-  if(darken || !(cmode & sm::NORMAL)) return;
+  if(!(cmode & sm::NORMAL)) return;
 
   if(!inHighQual) {
 
