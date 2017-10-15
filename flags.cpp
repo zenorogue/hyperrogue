@@ -599,11 +599,11 @@ bool survivesWater(eMonster m) {
     m == moTortoise; // Tortoises and Ivies survive, but don't go through water
   }
 
-// survives Mercury or Sulphur
+// survives Mercury or Sulphur or Lava
 bool survivesPoison(eMonster m, eWall p) {
   return
     isGhost(m) || m == moWitchGhost || m == moShadow ||
-    isBird(m) || m == moAirElemental || isDragon(m);
+    isBird(m) || m == moAirElemental || isDragon(m) || isWorm(m);
   }
 
 // flying even if stunned
