@@ -68,7 +68,7 @@ void updatesort() {
     int& gp = glyphphase[i];
     if(ticks <= glasttime[i]+500)
       gp += (ticks - glyph_lastticks);
-    else if((gp % 500) && i >= ittypes) {    
+    else if((gp % 500) && ((i >= ittypes) || i == itTerra)) {    
       int a = gp;
       gp += (ticks - glyph_lastticks);
       if(a/500 != gp/500)
@@ -190,6 +190,7 @@ bool displayglyph(int cx, int cy, int buttonsize, char glyph, int color, int qty
       if(glyph == '$') bsize = (bsize*5+2)/3;
       if(glyph == 'o') bsize = (bsize*3+1)/2;
       if(glyph == 't') bsize = bsize*5/2;
+      if(glyph == '(') bsize = bsize*2.5;
       if(it == itWarning) bsize *= 2;
       if(it == itBombEgg || it == itTrollEgg || it == itDodeca) bsize = bsize*3/2;
       int icol = color;
@@ -197,8 +198,12 @@ bool displayglyph(int cx, int cy, int buttonsize, char glyph, int color, int qty
       int ic = itemclass(it);
       bsize = bsize * zoom;
       transmatrix V = atscreenpos(cx+buttonsize/2, cy, bsize);
-      drawItemType(it, NULL, V, icol, (ic == IC_ORB || ic == IC_NAI) ? ticks*2 : ((glyph == 't' && qty%5) || it == itOrbYendor) ? ticks/2 : 
-        glyphphase[id] * 2, false);
+      double t =
+        (ic == IC_ORB || ic == IC_NAI) ? ticks*2 : 
+        ((glyph == 't' && qty%5) || it == itOrbYendor) ? ticks/2 : 
+        it == itTerra ? glyphphase[id] * 3 * M_PI + 900 * M_PI:
+        glyphphase[id] * 2;
+      drawItemType(it, NULL, V, icol, t, false);
       }
     quickqueue();
     }
