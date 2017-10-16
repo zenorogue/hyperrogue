@@ -815,9 +815,9 @@ void giantLandSwitch(cell *c, int d, cell *from) {
         if(pseudohept(c) && hrand(100) < 40 && c->wall == waNone) {
           c->wall = waTerraWarrior;
           c->landparam = randterra ? 0 : 3 + hrand(3);
-          if(hrand(100) > items[itTerra]-10)
+          if(hrand(100) < items[itTerra]-10)
             c->landparam--;
-          if(hrand(100) > items[itTerra]-10)
+          if(hrand(100) < items[itTerra]-10)
             c->landparam--;
           }
         }
