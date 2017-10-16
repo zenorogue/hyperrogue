@@ -140,12 +140,12 @@ void initJoysticks() {
   if(numsticks > 8) numsticks = 8;
   for(int i=0; i<numsticks; i++) {
     sticks[i] = SDL_JoystickOpen(i);
-    printf("axes = %d, balls = %d, buttons = %d, hats = %d\n",
+    /* printf("axes = %d, balls = %d, buttons = %d, hats = %d\n",
       SDL_JoystickNumAxes(sticks[i]),
       SDL_JoystickNumBalls(sticks[i]),
       SDL_JoystickNumButtons(sticks[i]),
       SDL_JoystickNumHats(sticks[i])
-      );
+      ); */
     }
   }
 
