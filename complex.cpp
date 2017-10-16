@@ -1880,7 +1880,7 @@ namespace heat {
           if(!isIcyLand(ct)) {
             // make sure that we can still enter Cocytus,
             // it won't heat up right away even without Orb of Winter or Orb of Speed
-            if(isPlayerOn(ct) && (c->land == laIce || markOrb(itOrbWinter))) 
+            if(isPlayerOn(ct) && (c->land != laCocytus || markOrb(itOrbWinter))) 
               hmod += (markOrb(itOrbWinter) ? -1.2 : 1.2) / 4 * xrate;
             continue;
             }
