@@ -2995,7 +2995,7 @@ bool dodrawcell(cell *c) {
     // in the Yendor Challenge, scrolling back is forbidden
     if(c->cpdist > 7 && (yendor::on && !cheater)) return false;
     // (incorrect comment) too far, no bugs nearby
-    if(playermoved && sightrange <= 7 && c->cpdist > sightrange) return false;
+    if(playermoved && sightrange <= 7 && c->cpdist > sightrange && c->cpdist > ambush_distance) return false;
     }
   
   return true;
@@ -4769,9 +4769,10 @@ void drawthemap() {
     drawEuclidean();
   else {
     if(sphere && vid.alpha > 1) sphereflip[2][2] = -1;
+    int sr = max(sightrange, ambush_distance);
     maxreclevel = 
-      conformal::on ? sightrange + 2:
-      (!playermoved) ? sightrange+1 : sightrange + 4;
+      conformal::on ? sr + 2:
+      (!playermoved) ? sr+1 : sr + 4;
     
     drawrec(viewctr, 
       maxreclevel,

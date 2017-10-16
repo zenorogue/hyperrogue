@@ -48,6 +48,8 @@ flagtype havewhat, hadwhat;
 #define HF_RIVER      Flag(22)
 #define HF_MIRROR     Flag(23)
 #define HF_VOID       Flag(24)
+#define HF_HUNTER     Flag(25)
+#define HF_FAILED_AMBUSH     Flag(26)
 
 bool seenSevenMines = false;
 
@@ -2848,6 +2850,7 @@ void bfs() {
           else if(c2->monst == moEarthElemental) havewhat |= HF_EARTH;
           else if(c2->monst == moWaterElemental) havewhat |= HF_WATER;
           else if(c2->monst == moVoidBeast) havewhat |= HF_VOID;
+          else if(c2->monst == moHunterDog) havewhat |= HF_HUNTER;
           else if(c2->monst == moShark || c2->monst == moCShark) havewhat |= HF_SHARK;
           else if(c2->monst == moAirElemental) 
             havewhat |= HF_AIR, airmap.push_back(make_pair(c2,0));
@@ -5024,6 +5027,9 @@ void specialMoves() {
     if(m == moHunterGuard && items[itHunting] >= 10)
       c->monst = moHunterChanging;
     
+    if(m == moHunterDog && (havewhat & HF_FAILED_AMBUSH))
+      c->monst = moHunterChanging;
+    
     if(m == moSleepBull && !peace::on) {
       bool wakeup = false;
       forCellEx(c2, c) if(c2->monst == moGadfly) {
@@ -5412,10 +5418,61 @@ void moveNormals(eMonster param) {
     }
   }
 
+void markAmbush(cell *c) {
+  if(eq(c->aitmp, sval)) return;
+  c->aitmp = sval;
+  forCellEx(c2, c) 
+    if(c2->cpdist < c->cpdist) 
+      markAmbush(c2);
+  }
+
+int ambush_distance;
+bool ambushed;
+
+void checkAmbushState() {
+  if(havewhat & HF_HUNTER) {
+    sval++;
+    for(cell *c: dcal) {
+      if(c->monst == moHunterDog) {
+        if(c->cpdist > ambush_distance)
+          ambush_distance = c->cpdist;
+        markAmbush(c);
+        }
+      if(c->monst == moHunterGuard && c->cpdist <= 4) 
+        markAmbush(c);
+      }
+    if(items[itHunting] > 5 && items[itHunting] <= 22) {
+      int q = 0;
+      for(int i=0; i<numplayers(); i++) 
+        forCellEx(c2, playerpos(i))
+          if(eq(c2->aitmp, sval))
+            q++;      
+      if(q == 1) havewhat |= HF_FAILED_AMBUSH;
+      if(q == 2) {
+        for(int i=0; i<numplayers(); i++) 
+        forCellEx(c2, playerpos(i))
+          if(eq(c2->aitmp, sval))
+            forCellEx(c3, playerpos(i)) 
+              if(c3 != c2 && isNeighbor(c2,c3))
+              if(eq(c3->aitmp, sval))
+                havewhat |= HF_FAILED_AMBUSH;
+        }
+      if(havewhat & HF_FAILED_AMBUSH && ambushed) {
+        addMessage(XLAT("The Hunting Dogs give up."));
+        ambushed = false;
+        }        
+      }
+    }
+  
+  }
+  
 void movemonsters() {
+  ambush_distance = 0;
 
   DEBT("lava1");
   orboflava(1);
+  
+  checkAmbushState();
 
   sagefresh = true;
   turncount++;
@@ -6130,6 +6187,7 @@ void ambush(cell *c, eItem what) {
   
   int gaps = dogs;
   if(!N) return;
+  ambushed = true;
   int shift = hrand(N);
   dogs = min(dogs, N);
   gaps = min(gaps, N);
