@@ -756,7 +756,8 @@ monstertype minf[motypes] = {
     "Salamanders are tough lizard-like creatures. Their tough skin protects them "
     "from both physical attacks and heat. Salamanders "
     "are stunned for a longer time if you push them into lava, fire, or a solid obstacle."},
-  { 'W', 0x202020, "Hunting Dog (preparing ambush)", huntingdesc},
+  { 'W', 0x202020, "Hunting Dog (regrouping)", 
+    "When your plan has clearly failed, it is better to abandon it and go to a safe place, to have a chance of succeeding next time. This dog clearly knows this."},
   
   // shmup specials
   { '@', 0xC0C0C0, "Rogue", "In the Shoot'em Up mode, you are armed with thrown Knives."},

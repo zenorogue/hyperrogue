@@ -6063,6 +6063,286 @@ S(
   "чтобы найти сокровища и дружелюбных Мимиков."
   )
 
+
+// were missing
+
+N("Kraken", GEN_M, "Кракен", "Кракены", "Кракена", "Кракеном")
+N("Kraken Tentacle", GEN_N, "Щупальце кракена", "Щупальца кракена", "Щупальце кракена", "Щупальцем кракена")
+S(" (killing increases treasure spawn)", " (убийство увеличивает генерацию сокровищ)");
+
+N("stepping stones", GEN_F, "Ступенька", "Ступеньки", "Ступеньку", "Ступенькой")
+
+// 10.1
+
+// mew message options
+S("centered", "по центру")
+S("left-aligned", "налево")
+S("line-broken", "ломаная линия")
+S("message style", "стиль сообщений")
+S("limit messages shown", "ограничения на число сообщений")
+S("Maximum number of messages on screen.", "Максимальное число сообщений на экране.")
+
+S("message log", "лог сообщений")
+S("real time", "реальное время")
+S("game time", "время в игре")
+S("precise", "точное время")
+S("no time", "без времени")
+S("back", "назад")
+S("clear", "очистить")
+
+// 'u' now loads the current picture in the Map Editor
+S("'u' to load current", "'u' чтобы загрузить текущую")
+
+// Happy Hunting Ground
+//----------------------
+
+N("Hunting Ground", GEN_N, "Охотничьи угодья", "Охотничьи угодья", "Охотничьи угодья", "в Охотничьих угодьях")
+
+S("The Happy Hunting Ground is the place where hunting is easy; "
+  "the spirits of hunters go here after their death, if their life was deemed worthy. "
+  "You did not qualify though, so you will not ever be able to find your way to the places "
+  "where the hunter spirits and game are... "
+  "and their hunting dogs will hunt you instead!\n\n"
+  "You hope to use this to learn some "
+  "skills in fighting in open hyperbolic space, though.",
+  
+  "В Охотничьих угодья охотиться легко; духи охотников остаются здесь после смерти, "
+  "если прожили достойную жизнь. Но ты не отобрался, так что ты не "
+  "сможешь найти место, где живут охотники и дичь... "
+  "а их псы будут охотиться на тебя!\n\n"
+  "Но, надеюсь, ты используешь это, чтобы улучшить свои "
+  "навыки сражения в гиперболическом мире."
+  )
+  
+N("Hunting Dog", GEN_M, "Охотничий пёс", "Охотничьи псы", "Охотничьего пса", "Охотничьим псом")
+N("Hunting Dog (guarding)", GEN_M, "Охотничий пёс (сторожит)", "Охотничьи псы (сторожит)", "Охотничьего пса (сторожит)", "Охотничьим псом (сторожит)")
+N("Turquoise", GEN_F, "Бирюза", "Бирюзы", "Бирюзу", "Бирюзой")
+Orb("Ferocity", "Свирепости")
+
+S("Hunters believe that wearing a Turquoise amulet will improve their accuracy. "
+  "This one has been lost, but the hunting dogs are guarding it until the owner returns.",
+  
+  "Охотники верят, что бирюзовый амулет повышает их точность. "
+  "Этот амулет был потерян, но псы его сторожат, пока не вернётся хозяин."
+  )
+
+S("Whenever you attack with this Orb, you also hit the monsters adjacent to you and opposite to the monster you originally attacked.",
+  "Когда ты атакуешь с этой сферой, ты также атакуешь существ, соседних с тобой и противоположных тому, которого ты изначально атаковал."
+  )
+
+// Volcanic Wasteland
+//--------------------
+
+N("Пустыня вулканов", GEN_F, "Пустыня вулканов", "Пустыни вулканов", "Пустыню вулканов", "в Пустыне вулканов")
+N("lava", GEN_F, "лава", "лавы", "лаву", "лавой")
+
+S("The volcanic activity in this land is extremely unstable. "
+  "Lava is too hot to walk on. It cools quickly, but another "
+  "flow will come soon...",
+  
+  "Активность вулканов в этой земле очень нестабильна. "
+  "Лава слишком горяча, чтобы по ней ходить. Она быстро , "
+  "остывает, но скоро появится новый поток..."
+  )
+
+N("Salamander", GEN_F, "Саламандра", "Саламандры", "Саламандру", "Саламандрой")
+
+S("Salamanders are tough lizard-like creatures. Their tough skin protects them "
+  "from both physical attacks and heat. Salamanders "
+  "are stunned for a longer time if you push them into lava, fire, or a solid obstacle.",
+  
+  "Саламандры -- сильные существа, похожие на ящериц. Их толстая кожа защищает и от атак, "
+  "и от жары. Их можно оглушить на большее время, если толкнуть в лаву, "
+  "огонь или твёрдое препятствие."
+  )
+
+N("Lava Wolf", GEN_M, "Лавовый волк", "Лавовые волки", "Лавового волка", "Лавовым волком")
+
+S("While Ice Wolves love heat, their instinct usually will not let tem to go outside the Icy Lands "
+  "-- they are afraid that they will be unable to get back home, and that they will lose the track of their "
+  "prey. However, they find the Volcanic Wasteland so hot and attractive that they abandon their "
+  "natural instincts... and try to track their prey using their other senses and intelligence.",
+  
+  "Хотя ледяные волки любят тепло, их инстинкт не даёт им выйти из Ледяной земли -- "
+  "они боятся, что не смогут вернуться домой, и больше не смогут искать добычу. "
+  "Но они нашли Пустыню вулканов, и она была настолько горяча и притягательна, "
+  "что они забыли про свои инстинкты... и теперь они ищут добычу по-другому.")
+  
+N("Lava Lily", GEN_F, "Лавовая лилия", "Лавовые лилии", "Лавовую лилию", "Лавовой лилией")
+
+S("This plant, able to survive in the extreme conditions of the Volcanic Wasteland, "
+  "is a valuable alchemical ingredient.",
+  
+  "Это растение, способное выживать в условиях Пустыни вулканов, "
+  "является ценным алхимическим ингредиентом.")
+
+Orb("Lava", "Лавы")
+S("This Orb summons a minor volcanic activity around you. "
+  "All the heptagonal cells adjacent to enemies in distance at most 5 to you "
+  "will be set on fire. Does not affect the cell you are on, and enemies resistant to fire.",
+  
+  "Эта сфера вызывает небольшую вулканическую активность вокруг тебя. "
+  "Все семиугольники вокруг врагов на расстоянии не больше 5 от тебя "
+  "будут подожжены. Не влияет на клетку, где ты стоишь, и на врагов, устойчивых к огню."
+  )
+
+// Orbs would be destroyed in Volcanic Wasteland
+S("would be destroyed in %the1", "будет уничтожено %abl1") 
+S(" to go cold", " чтобы остыть")
+S("%The1 is destroyed by lava!", "%1 уничтожен%E1 лавой!")
+S("%The1 is killed by lava!", "%1 убит%E1 лавой!")
+S("Run away from the lava!", "Беги из лавы!")
+
+// Terracotta Army
+//-----------------
+
+N("Terracotta Army", GEN_F, "Терракотовая армия", "Терракотовые армии", "Терракотовой армией", "в Терракотовой армией")
+
+S("The Emperor's mausoleum. The army "
+  "of Terracotta Warriors is supposed to protect him in his "
+  "afterlife, while the traps are to protect the treasures "
+  "in the mausoleum from thieves.",
+
+  "Мавзолей Императора. "
+  "Терракотовая армия должна была защитить его в загробной жизни, "
+  "а ловушки должны были защитить его сокровища "
+  "от воров."
+  )
+
+S("Spending 3-5 turns next to the Terracotta Warriors will cause them to awaken. "
+  "They have 7 HP, and get stunned for longer and longer time with each attack.",
+  
+  "Терракотовые воины проснутся, если ты проведешь 3-5 ходов рядом. "
+  "У них 7 HP, и они застывают на всё большее время с каждым ударом."
+  )
+
+N("arrow trap", GEN_F, "ловушка со стрелой", "ловушки со стрелами", "ловушку со стрелой", "ловушкой со стрелой")
+
+S("The arrow traps will automatically launch a deadly arrow when stepped on. They are quite old though, so the arrow will "
+  "actually fly at the end of the next turn.",
+  
+  "Ловушка со стрелой выпускает смертоносную стрелу, когда на неё наступают. Конструкция довольно старая, так что она "
+  "срабатывает в конце следующего конца."
+  )
+
+N("mercury river", GEN_F, "река ртути", "реки ртути", "реку ртути", "рекой ртути")
+S("A river of mercury.", "Река ртути.")
+
+N("Terracotta Warrior", GEN_M, "Терракотовый воин", "Терракотовые воины", "Терракотового воина", "Терракотовым воином")
+
+
+N("Jiangshi", GEN_M, "Цзянши", "Цзянши", "Цзянши", "Цзянши")
+S("You think this was one of the people who have constructed the Terracotta Warriors and the arrow traps. "
+  "They have been locked inside, so that they will never release the secrets of the mausoleum. They would like to return their homes and families, though.",
+  
+  "Ты думаешь, что это один из тех, кто построил Терракотовую армию и эти ловушки. "
+  "Они заперты здесь, и никогда не расскажут секреты мавзолея. Они хотят вернуться домой, в семью." 
+  )
+
+Orb("Slashing", "Резки")
+S("Whenever you attack with this Orb, you also hit the monsters adjacent both to you and the monster you originally attacked.",
+  "Когда ты атакуешь с этой сферой, ты также попадаешь по всем существам, стоящим рядом и с тобой, и с существом, атакованным изначально.")
+
+N("Ancient Weapon", GEN_N, "Старинное оружие", "Старинные оружия", "Старинное оружие", "Старинным оружием")
+S("This ancient weapon is beautifully encrusted with precious gems, but you prefer your own -- it is much lighter.",
+  "Это старинное оружие умело инкрустировано драгоценными камнями, но ты предпочитаешь своё -- оно гораздо легче.")
+
+// Blizzard
+//----------
+
+N("Blizzard", GEN_F, "Метель", "Метели", "Метель", "в Метели")
+N("Ice Golem", GEN_M, "Ледяной голем", "Ледяные големы", "Ледяного голема", "Ледяным големом")
+N("Void Beast", GEN_M, "Зверь пустоты", "Звери пустоты", "Зверя пустоты", "Зверем пустоты")
+N("Forgotten Relic", GEN_F, "Забытая реликвия", "Забытые реликвии", "Забытую реликвию", "Забытой реликвией")
+
+S("The Ice Golems are powered by intense magical coldness. When destroyed in the Blizzard or another icy land, they become "
+  "ice walls, and freeze the land around them.",
+  
+  "Ледяные големы содержат сильную магию холода. Если голем уничтожается в Метели или другой холодной земле, "
+  "он превращается в ледяную стену и замораживает всё вокруг себя.")
+
+S("Are creatures of Void actual monsters, or just monster-shaped holes in the air?\n\nVoid Beasts move simply by letting the air move into their current location -- "
+  "the hole will move to the place where the air came from! Void Beasts are great at moving against the wind, but they have problems "
+  "moving with the wind.",
+  
+  "Существа Пустоты -- это настоящие монстры или просто дырки в воздухе в виде монстров?\n\n"
+  "Звери пустоты перемещаются, позволяя воздуху двигаться на место себя -- "
+  "дырка перемещается туда, где воздух был раньше! Они прекрасно движутся против ветра, "
+  "но им сложно двигаться по ветру."
+  )
+
+S("Once in the past there lived a tribe whose prophets warned about the great blizzard that was to come and freeze the world. "
+  "They thought it was the wrath of the gods, so they put some altars, so that the gods could hear their pleas. "
+  "The mighty golems guarded those altars, making sure nobody steals the jewels, because a robbed god is a angry god. "
+  "Unfortunately winter has come (maybe because only the monks knew how to stop the golems, and they were said to had escaped earlier with some of the jewels). "
+  "The tribe has frozen to death, altars got covered with snow and ice. Only ice golems still guard them waiting for the spring.",
+  
+  "Давным-давно жило племя, пророки которого предупреждали о великой метели, которая заморозит весь мир. "
+  "Они думали, что это гнев богов, так что они поставили алтари, чтобы боги слышали их молитвы. "
+  "Могучие големы защищали алтари, чтобы никто не украл сокровища, ведь ограбленный бог -- злой бог. "
+  "К сожалению, зима пришла (возможно, потому, что только монахи знали, как остановить големов, а они сбежали, "
+  "говорят, что с частью сокровищ). Племя замёрзло до смерти, алтари заледенели. Лишь големы стоят и ждут весны."
+  )
+
+// Winter becomes native in Blizzard, while Change replaces Winter in Cocytus
+Orb("Change", "Замены")
+S("This ranged Orb will transform the target monster into one without any special powers. It also stuns them for one turn. "
+  "Does not affect multi-tile monsters.",
+  "Эта сфера меняет монстра-цель на обычное существо безо всяких специальных свойств, а также оглушает его на один ход. "
+  "Не работает на монстров из нескольких клеток."
+  )
+
+// yet unused orb
+Orb("the Triangle", "Треугольника")
+S("Whenever you attack with this Orb, you also hit the monsters adjacent to you which are neither adjacent nor opposite to the monster "
+  "you originally attacked.",
+  "Когда ты атакуешь с этой сферой, ты также атакуешь всех существ, соседних с тобой, которые не являются ни соседними, ни противоположными с изначально атакованным.")
+
+S("Using %the1 in %the2 sounds dangerous...", "Использовать %1 %abl2 довольно опасно...")
+S("%The1 is mostly useless in %the2...", "%1 обычно бесполезна %abl2...")
+S("%The1 is forbidden in %the2 (disables some achievements)", "%1 запрещена %abl2 (отключает часть достижений)")
+
+// (by dogs)
+S("You are ambushed!", "Засада!")
+// (cheat)
+S("teleport", "телепорт")
+S("ambush:", "засада")
+
+/*
+		"NEW_ACHIEVEMENT_8_20_NAME"	"Охотник"
+		"NEW_ACHIEVEMENT_8_20_DESC"	"Собрать Бирюзу."
+		"NEW_ACHIEVEMENT_9_4_NAME"	"Охотничий пёс"
+		"NEW_ACHIEVEMENT_9_4_DESC"	"Собрать 10 Бирюзы. (или 25 в режиме Стратегии сфер)"
+		"NEW_ACHIEVEMENT_8_22_NAME"	"Мастер побега"
+		"NEW_ACHIEVEMENT_8_22_DESC"	"Собрать 25 Бирюзы. (или 50 в режиме Стратегии сфер)"
+        "NEW_ACHIEVEMENT_8_23_NAME" "Мастер свирепости"
+		"NEW_ACHIEVEMENT_8_23_DESC"	"Собрать 50 Бирюзы. (не в режиме Стратегии сфер)"
+		"NEW_ACHIEVEMENT_8_24_NAME"	"Найти Терракотовую армию"
+		"NEW_ACHIEVEMENT_8_24_DESC"	"Собрать Старинное оружие."
+		"NEW_ACHIEVEMENT_8_25_NAME"	"Цзянши"
+		"NEW_ACHIEVEMENT_8_25_DESC"	"Собрать 10 Старинных оружий. (или 25 в режиме Стратегии сфер)"
+		"NEW_ACHIEVEMENT_8_26_NAME"	"Терракотовый воин"
+		"NEW_ACHIEVEMENT_8_26_DESC"	"Собрать 25 Старинных оружий. (или 50 в режиме Стратегии сфер)"
+		"NEW_ACHIEVEMENT_8_27_NAME"	"Император"
+		"NEW_ACHIEVEMENT_8_27_DESC"	"Собрать 50 Старинных оружий. (не в режиме Стратегии сфер)"
+		"NEW_ACHIEVEMENT_8_28_NAME"	"Найти Метель"
+		"NEW_ACHIEVEMENT_8_28_DESC"	"Собрать Забытую реликвию."
+		"NEW_ACHIEVEMENT_8_29_NAME"	"Ледяной голем"
+		"NEW_ACHIEVEMENT_8_29_DESC"	"Собрать 10 Забытых реликвий. (или 25 в режиме Стратегии сфер)"
+		"NEW_ACHIEVEMENT_8_30_NAME"	"Зверь пустоты"
+		"NEW_ACHIEVEMENT_8_30_DESC"	"Собрать 25 Забытых реликвий. (или 50 в режиме Стратегии сфер)"
+		"NEW_ACHIEVEMENT_8_31_NAME"	"Мастер Метели"
+		"NEW_ACHIEVEMENT_8_31_DESC"	"Собрать 50 Забытых реликвий. (не в режиме Стратегии сфер)"
+		"NEW_ACHIEVEMENT_9_0_NAME"	"Найти Пустыню вулканов"
+		"NEW_ACHIEVEMENT_9_0_DESC"	"Собрать Лавовую лилию."
+		"NEW_ACHIEVEMENT_9_1_NAME"	"Лавовый волк"
+		"NEW_ACHIEVEMENT_9_1_DESC"	"Собрать 10 Лавовых лилий. (или 25 в режиме Стратегии сфер)"
+		"NEW_ACHIEVEMENT_9_2_NAME"	"Саламандра"
+		"NEW_ACHIEVEMENT_9_2_DESC"	"Собрать 25 Лавовых лилий. (или 50 в режиме Стратегии сфер)"
+		"NEW_ACHIEVEMENT_9_3_NAME"	"Мастер вулкана"
+		"NEW_ACHIEVEMENT_9_3_DESC"	"Собрать 50 Лавовых лилий. (не в режиме Стратегии сфер)"
+*/
+
 #undef Orb
 
   

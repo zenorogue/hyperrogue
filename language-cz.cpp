@@ -5811,7 +5811,6 @@ These apparently have not been yet translated:
 			"NEW_ACHIEVEMENT_8_10_DESC"	"Najdi a získej Zelenou trávu."
 
 */
-#undef Orb
 
 // peaceful texts
 
@@ -5982,5 +5981,303 @@ S(
   "Podivný kraj plný zrcadel. Rozbíjej magická zrcadla a oblaky přeludů, abys získal poklady a užitečné Mimiky."
   )
 
+// were missing
+
+N("Kraken", GEN_M, "Kraken", "Krakeni", "Krakena", "Krakenem")
+N("Kraken Tentacle", GEN_N, "Krakení chapadlo", "Krakení chapadla", "Krakení chapadlo", "Krakením chapadlem")
+S(" (killing increases treasure spawn)", " (zabití zlepšuje výskyt pokladů)");
+
+N("stepping stones", GEN_O, "Brod", "Brody", "Brod", "Brodem")
+
+// 10.1
+
+// mew message options
+S("centered", "na střed")
+S("left-aligned", "nalevo")
+S("line-broken", "lámání řádků")
+S("message style", "styl zpráv")
+S("limit messages shown", "limit počtu zobrazených zpráv")
+S("Maximum number of messages on screen.", "Maximální počet zpráv na obrazovce.")
+
+S("message log", "log zpráv")
+S("real time", "skutečný čas")
+S("game time", "herní čas")
+S("precise", "přesný čas")
+S("no time", "bez času")
+S("back", "zpátky")
+S("clear", "vyčistit")
+
+// 'u' now loads the current picture in the Map Editor
+S("'u' to load current", "'u' nahraje současný")
+
+// Happy Hunting Ground
+//----------------------
+
+N("Hunting Ground", GEN_N, "Věčná loviště", "Věčná loviště", "Věčných lovištích", "ve Věčných lovištích")
+
+S("The Happy Hunting Ground is the place where hunting is easy; "
+  "the spirits of hunters go here after their death, if their life was deemed worthy. "
+  "You did not qualify though, so you will not ever be able to find your way to the places "
+  "where the hunter spirits and game are... "
+  "and their hunting dogs will hunt you instead!\n\n"
+  "You hope to use this to learn some "
+  "skills in fighting in open hyperbolic space, though.",
+  
+  "Věčná loviště jsou místem, kde je lov snadný; po smrti sem "
+  "odcházejí duše lovců, pokud byl jejich život uznán hodným. "
+  "Ty ses ovšem nekvalifikoval, a tak nikdy nenajdeš cestu do "
+  "míst, kde jsou duchové lovců a zvěře... a jejich lovečtí psi "
+  "budou místo toho lovit tebe!\n\n"
+  "Doufáš však, že se tak něco naučíš o boji v otevřeném "
+  "hyperbolickém prostoru."
+  )
+  
+N("Hunting Dog", GEN_M, "Lovecký pes", "Lovečtí psi", "Loveckého psa", "Loveckým psem")
+
+N("Hunting Dog (guarding)", GEN_M, "Lovecký pes (na stráži)", "Lovečtí psi (na stráži)", "Loveckého psa (na stráži)", "Loveckým psem (na stráži)")
+N("Hunting Dog (regrouping)", GEN_M, "Lovecký pes (na ústupu)", "Lovečtí psi (na ústupu)", "Loveckého psa (na ústupu)", "Loveckým psem (na ústupu)")
+N("Turquoise", GEN_O, "Tyrkys", "Tyrkysy", "Tyrkys", "Tyrkysem")
+Orb("Ferocity", "Dravosti")
+
+S("Hunters believe that wearing a Turquoise amulet will improve their accuracy. "
+  "This one has been lost, but the hunting dogs are guarding it until the owner returns.",
+  
+  "Lovci věří, že amulet z Tyrkysu zlepší jejich mušku. Tento amulet se "
+  "ztratil, ale lovečtí psi ho střeží, dokud se nevrátí jeho majitel."
+  )
+
+S("Whenever you attack with this Orb, you also hit the monsters adjacent to you and opposite to the monster you originally attacked.",
+  "Když zaútočíš a máš tuto Sféru, zaútočíš zároveň na netvory vedle "
+  "sebe a naproti netvorovi, na kterého jsi zaútočil původně.."
+  )
+
+S("When your plan has clearly failed, it is better to abandon it and go to a safe place, to have a chance of succeeding next time. This dog clearly knows this.",
+  "Když plán evidentně selže, je lepší ho opustit a odejít na "
+  "nějaké bezpečné místo, abys měl šanci na úspěch někdy příště. "
+  "Tenhle pes to očividně ví.")
+
+// Volcanic Wasteland
+//--------------------
+
+N("Volcanic Wasteland", GEN_F, "Sopačná pustina", "Sopečné pustiny", "Sopečnou pustinu", "v Sopečné pustině")
+N("lava", GEN_F, "láva", "láva", "lávu", "lávou")
+
+S("The volcanic activity in this land is extremely unstable. "
+  "Lava is too hot to walk on. It cools quickly, but another "
+  "flow will come soon...",
+  
+  "Sopečná činnost v tomto kraji je nesmírně nestabilní. "
+  "Láva je příliš žhavá, než abys po ní mohl chodit. Rychle "
+  "chladne, ale za chvíli vyteče další..."
+  )
+
+N("Salamander", GEN_M, "Salamandr", "Salamandři", "Salamandra", "Salamandrem")
+
+S("Salamanders are tough lizard-like creatures. Their tough skin protects them "
+  "from both physical attacks and heat. Salamanders "
+  "are stunned for a longer time if you push them into lava, fire, or a solid obstacle.",
+  
+  "Salamandři jsou odolní tvorové podobní ještěrům. Jejich tuhá "
+  "kůže je chrání před fyzickými útoky i před ohněm. Pokud Salamandra "
+  "strčíte do lávy, do ohně, nebo do pevné překážky, bude omráčený "
+  "na delší dobu."
+  )
+
+N("Lava Wolf", GEN_M, "Lávový vlk", "Lávoví vlci", "Lávového vlka", "Lávovým vlkem")
+
+S("While Ice Wolves love heat, their instinct usually will not let tem to go outside the Icy Lands "
+  "-- they are afraid that they will be unable to get back home, and that they will lose the track of their "
+  "prey. However, they find the Volcanic Wasteland so hot and attractive that they abandon their "
+  "natural instincts... and try to track their prey using their other senses and intelligence.",
+  
+  "Zatímco Ledoví vlci milují teplo, jejich instinkt jim obvykle nedovolí "
+  "opustit Ledový kraj -- bojí se, že už nenajdou cestu domů a ztratí stopu "
+  "kořisti. Ale Sopečná pustina je tak horká a přitažlivá, že nechají své "
+  "instinkty plavat... a začnou se snažit stopovat kořist pomocí svých "
+  "ostatních smyslů a inteligence. A tak vznikají Lávoví vlci.")
+  
+N("Lava Lily", GEN_F, "Lávová lilie", "Lávové lilie", "Lávovou lilii", "Lovávou lilií")
+
+S("This plant, able to survive in the extreme conditions of the Volcanic Wasteland, "
+  "is a valuable alchemical ingredient.",
+  
+  "Tato rostlina, která dokáže přežít v extrémních podmínkách Sopečné "
+  "pustiny, je cennou alchymistickou přísadou.")
+
+Orb("Lava", "Lávy")
+S("This Orb summons a minor volcanic activity around you. "
+  "All the heptagonal cells adjacent to enemies in distance at most 5 to you "
+  "will be set on fire. Does not affect the cell you are on, and enemies resistant to fire.",
+  
+  "Tato Sféra kolem tebe vyvolá mírnou sopečnou činnost. Všechna "
+  "sedmiúhelníková políčka vedle nepřátel ve vzdálenosti nejvýše 5 "
+  "od tebe začnou hořet. Nepůsobí na políčko, na kterém se nacházíš "
+  "ty, a na nepřátele odolné proti ohni."
+  )
+
+// Orbs would be destroyed in Volcanic Wasteland
+S("would be destroyed in %the1", "by%l1by zničen%1 %abl1") 
+S(" to go cold", " vychladnout")
+S("%The1 is destroyed by lava!", "Láva zničila %a1!")
+S("%The1 is killed by lava!", "Láva zabila %a1!")
+S("Run away from the lava!", "Utíkej od lávy!")
+
+// Terracotta Army
+//-----------------
+
+N("Terracotta Army", GEN_F, "Terakotová armáda", "Terakotové armády", "Terakotovou armádu", "v Terakotové armádě")
+
+S("The Emperor's mausoleum. The army "
+  "of Terracotta Warriors is supposed to protect him in his "
+  "afterlife, while the traps are to protect the treasures "
+  "in the mausoleum from thieves.",
+
+  "Císařovo mauzoleum. Armáda Terakotových válečníků ho má "
+  "chránit v jeho posmrtném životě a pasti mají chránit "
+  "mauzoleum před zloději."
+  )
+
+S("Spending 3-5 turns next to the Terracotta Warriors will cause them to awaken. "
+  "They have 7 HP, and get stunned for longer and longer time with each attack.",
+  
+  "Pokud zůstaneš 3-5 kol vedle Terakotového válečníka, probudí se. Má 7 "
+  "životů a každý útok ho omráčí na delší dobu než ten předešlý."
+  )
+
+N("arrow trap", GEN_F, "šípová past", "šípové pasti", "šípovou past", "šípovou pastí")
+
+S("The arrow traps will automatically launch a deadly arrow when stepped on. They are quite old though, so the arrow will "
+  "actually fly at the end of the next turn.",
+  
+  "Když šlápneš na šípovou past, automaticky se vystřelí smrtící šíp. "
+  "Pasti jsou ale velice staré, takže šíp vyletí teprve na konci "
+  "příštího kola."
+  )
+
+N("mercury river", GEN_F, "rtuťová řeka", "rtuťové řeky", "rtuťovou řeku", "rtuťovou řekou")
+S("A river of mercury.", "Řeka tvořená rtutí.")
+
+N("Terracotta Warrior", GEN_M, "Terakotový válečník", "Terakotoví válečníci", "Terakotového válečníka", "Terakotovým válečníkem")
+
+N("Jiangshi", GEN_M, "Ťiang-š'", "Ťiang-š'", "Ťiang-š'", "Ťiang-š'")
+S("You think this was one of the people who have constructed the Terracotta Warriors and the arrow traps. "
+  "They have been locked inside, so that they will never release the secrets of the mausoleum. They would like to return their homes and families, though.",
+  
+  "Říkáš si, že tohle byl asi jeden z lidí, kteří postavili Terakotové "
+  "válečníky a šípové pasti. Zůstali tu zamčení, aby nikdy neprozradili "
+  "tajemství mauzolea. Ale rádi by se vrátili domů ke svým rodinám." 
+  )
+
+Orb("Slashing", "Sekání")
+S("Whenever you attack with this Orb, you also hit the monsters adjacent both to you and the monster you originally attacked.",
+  "Kdykoli zaútočíš a máš tuto Sféru, zasáhneš také netvory, kteří sousedí s tebou a s netvorem, na kterého jsi zaútočil původně.")
+
+N("Ancient Weapon", GEN_F, "Stará zbraň", "Staré zbraně", "Starou zbraň", "Starou zbraní")
+S("This ancient weapon is beautifully encrusted with precious gems, but you prefer your own -- it is much lighter.",
+  "Tato starobylá zbraň je krásně zdobená drahokamy, ale tobě je milejší "
+  "tvoje vlastní -- je mnohem lehčí.")
+
+// Blizzard
+//----------
+
+N("Blizzard", GEN_F, "Vánice", "Vánice", "Vánici", "ve Vánici")
+N("Ice Golem", GEN_M, "Ledový golem", "Ledoví golemové", "Ledového golema", "Ledovým golemem")
+N("Void Beast", GEN_F, "Prázdnostvůra", "Prázdnostvůry", "Prázdnostvůru", "Prázdnostvůrou")
+N("Forgotten Relic", GEN_F, "Zapomenutá relikvie", "Zapomenuté relikvie", "Zapomenutou relikvii", "Zapomenutou relikvií")
+
+S("The Ice Golems are powered by intense magical coldness. When destroyed in the Blizzard or another icy land, they become "
+  "ice walls, and freeze the land around them.",
+  
+  "Ledové golemy pohání intenzivní magický chlad. Pokud jsou zničeni "
+  "ve Vánici nebo v jiném ledovém kraji, promění se v ledové stěny "
+  "a zmrazí půdu kolem sebe.")
+
+S("Are creatures of Void actual monsters, or just monster-shaped holes in the air?\n\nVoid Beasts move simply by letting the air move into their current location -- "
+  "the hole will move to the place where the air came from! Void Beasts are great at moving against the wind, but they have problems "
+  "moving with the wind.",
+  
+  "Jsou bytosti z Prázdnoty skuteční netvoři nebo jenom díry "
+  "ve vzduchu ve tvaru netvorů?\n\n"
+  "Prázdnostvůry se pohybují prostě tím, že nechávají vzduch "
+  "proniknout tam, kde právě jsou -- díra se pak přesune tam, "
+  "odkud přišel vzduch! Prázdnostvůry se dokážou skvěle "
+  "pohybovat proti větru, ale mají problémy s pohybem po větru."
+  )
+
+S("Once in the past there lived a tribe whose prophets warned about the great blizzard that was to come and freeze the world. "
+  "They thought it was the wrath of the gods, so they put some altars, so that the gods could hear their pleas. "
+  "The mighty golems guarded those altars, making sure nobody steals the jewels, because a robbed god is a angry god. "
+  "Unfortunately winter has come (maybe because only the monks knew how to stop the golems, and they were said to had escaped earlier with some of the jewels). "
+  "The tribe has frozen to death, altars got covered with snow and ice. Only ice golems still guard them waiting for the spring.",
+  
+  "Kdysi dávno byl jeden kmen, jehož prorokové varovali před velkou vánicí, "
+  "která měla přijít a zmrazit svět. Mysleli si, že je to hněv bohů, a tak "
+  "postavili oltáře, aby bohové vyslyšeli jejich prosby. Oltáře chránili "
+  "mocní golemové, aby nikdo neukradl klenoty, protože okradený bůh je "
+  "rozhněvaný bůh. Zima však bohužel stejně přišla (možná proto, že "
+  "jenom mnichové věděli, jak golemy zastavit, a ti prý utekli i "
+  "s nějakými klenoty). Kmen zahynul zimou a oltáře pokryl sníh a "
+  "led. Jen ledoví golemové je stále střeží a čekají na jaro."
+  )
+
+// Winter becomes native in Blizzard, while Change replaces Winter in Cocytus
+Orb("Change", "Změny")
+S("This ranged Orb will transform the target monster into one without any special powers. It also stuns them for one turn. "
+  "Does not affect multi-tile monsters.",
+  "Tato sféra promění cílového netvora v jiného, který nemá žádné "
+  "zvláštní schopnosti. Kromě toho ho také na jedno kolo omráčí. "
+  "Nepůsobí na netvory, kteří zabírají více políček."
+  )
+
+// yet unused orb
+Orb("the Triangle", "Trujúhelníku")
+S("Whenever you attack with this Orb, you also hit the monsters adjacent to you which are neither adjacent nor opposite to the monster "
+  "you originally attacked.",
+  "Když zaútočíš a máš tuto Sféru, zasáhneš také všechny netvory, kteří s tebou sousedí, ale nesousedí s netvorem, na kterého jsi zaútočil původně, a nejsou ani naproti němu.")
+
+S("Using %the1 in %the2 sounds dangerous...", "Používat %1 %abl2, to zní nebezpečně...")
+S("%The1 is mostly useless in %the2...", "%1 není %abl2 příliš užitečná...")
+S("%The1 is forbidden in %the2 (disables some achievements)", "%1 je %abl2 zakázané (její použití znemožní některé achievementy)")
+
+S("You are ambushed!", "Přepadení!")
+S("teleport", "teleport")
+S("ambush:", "přepadení:")
+
+/*
+		"NEW_ACHIEVEMENT_8_20_NAME"	"Kořist"
+		"NEW_ACHIEVEMENT_8_20_DESC"	"Získej Tyrkys."
+		"NEW_ACHIEVEMENT_9_4_NAME"	"Lovecký pes"
+		"NEW_ACHIEVEMENT_9_4_DESC"	"Získej 10 Tyrkysů (nebo 25 ve Sférostrategickém módu)."
+		"NEW_ACHIEVEMENT_8_22_NAME"	"Mistr úniků"
+		"NEW_ACHIEVEMENT_8_22_DESC"	"Získej 25 Tyrkysů (nebo 50 ve Sférostrategickém módu)."
+                "NEW_ACHIEVEMENT_8_23_NAME"     "Pán dravosti"
+		"NEW_ACHIEVEMENT_8_23_DESC"	"Získej 50 Tyrkysů (nelze získat ve Sférostrategickém módu)."
+		"NEW_ACHIEVEMENT_8_24_NAME"	"Došel jsi do Terakotové armády"
+		"NEW_ACHIEVEMENT_8_24_DESC"	"Získej Staoru zbraň."
+		"NEW_ACHIEVEMENT_8_25_NAME"	"Ťiang-š'"
+		"NEW_ACHIEVEMENT_8_25_DESC"	"Získej 10 Starých zbraní (nebo 25 ve Sférostrategickém módu)."
+		"NEW_ACHIEVEMENT_8_26_NAME"	"Terakotový válečník"
+		"NEW_ACHIEVEMENT_8_26_DESC"	"Získej 25 Starých zbraní (nebo 50 ve Sférostrategickém módu)."
+		"NEW_ACHIEVEMENT_8_27_NAME"	"Císař"
+		"NEW_ACHIEVEMENT_8_27_DESC"	"Získej 50 Starých zbraní (nelze získat ve Sférostrategickém módu)."
+		"NEW_ACHIEVEMENT_8_28_NAME"	"Došel jsi do Vánice"
+		"NEW_ACHIEVEMENT_8_28_DESC"	"Získej Zapomenutou relikvii."
+		"NEW_ACHIEVEMENT_8_29_NAME"	"Ledový golem"
+		"NEW_ACHIEVEMENT_8_29_DESC"	"Získej 10 Zapomenutých relikvií (nebo 25 ve Sférostrategickém módu)."
+		"NEW_ACHIEVEMENT_8_30_NAME"	"Prázdnostvůra"
+		"NEW_ACHIEVEMENT_8_30_DESC"	"Získej 25 Zapomenutých relikvií (nebo 50 ve Sférostrategickém módu)."
+		"NEW_ACHIEVEMENT_8_31_NAME"	"Pán Vánice"
+		"NEW_ACHIEVEMENT_8_31_DESC"	"Získej 50 Zapomenutých relikvií (nelze získat ve Sférostrategickém módu)."
+		"NEW_ACHIEVEMENT_9_0_NAME"	"Došel jsi do Sopečné pustiny"
+		"NEW_ACHIEVEMENT_9_0_DESC"	"Získej Lávovou lilii."
+		"NEW_ACHIEVEMENT_9_1_NAME"	"Lávový vlk"
+		"NEW_ACHIEVEMENT_9_1_DESC"	"Získej 10 Lávových lilií (nebo 25 ve Sférostrategickém módu)."
+		"NEW_ACHIEVEMENT_9_2_NAME"	"Salamandr"
+		"NEW_ACHIEVEMENT_9_2_DESC"	"Získej 25 Lávových lilií (nebo 50 ve Sférostrategickém módu)."
+		"NEW_ACHIEVEMENT_9_3_NAME"	"Pán sopky"
+		"NEW_ACHIEVEMENT_9_3_DESC"	"Získej 50 Lávových lilií (nelze získat ve Sférostrategickém módu)."
+*/
+
+#undef Orb
 
 
