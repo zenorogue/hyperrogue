@@ -6049,7 +6049,7 @@ N("Terracotta Warrior", GEN_M, "Terakotowy Wojownik", "Terakotowi Wojownicy", "T
 
 N("Jiangshi", GEN_M, "Jiangshi", "Jiangshi", "Jiangshi", "Jiangshi")
 S("You think this was one of the people who have constructed the Terracotta Warriors and the arrow traps. "
-  "They have been locked inside, so that they will never release the secrets of the mausoleum. They would like to return their homes and families, though.",
+  "They have been locked inside, so that they will never divulge the secrets of the mausoleum. They would like to return their homes and families, though.",
   
   "Podejrzewasz, że te istoty kiedyś były rzemieślnikami, którzy skonstruowali Terakotowych Wojowników i "
   "pułapki. Zostali tutaj zamknięci, by nigdy nie wydali sekretów mauzoleum. Chcieliby jednak wrócić do swoich domów i rodzin." 

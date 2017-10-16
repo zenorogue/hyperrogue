@@ -6161,7 +6161,7 @@ N("Terracotta Warrior", GEN_M, "Terakotový válečník", "Terakotoví válečn�
 
 N("Jiangshi", GEN_M, "Ťiang-š'", "Ťiang-š'", "Ťiang-š'", "Ťiang-š'")
 S("You think this was one of the people who have constructed the Terracotta Warriors and the arrow traps. "
-  "They have been locked inside, so that they will never release the secrets of the mausoleum. They would like to return their homes and families, though.",
+  "They have been locked inside, so that they will never divulge the secrets of the mausoleum. They would like to return their homes and families, though.",
   
   "Říkáš si, že tohle byl asi jeden z lidí, kteří postavili Terakotové "
   "válečníky a šípové pasti. Zůstali tu zamčení, aby nikdy neprozradili "
@@ -6242,6 +6242,8 @@ S("%The1 is forbidden in %the2 (disables some achievements)", "%1 je %abl2 zaká
 S("You are ambushed!", "Přepadení!")
 S("teleport", "teleport")
 S("ambush:", "přepadení:")
+
+S("The Hunting Dogs give up.", "Lovečtí psi vzdali pronásledování.");
 
 /*
 		"NEW_ACHIEVEMENT_8_20_NAME"	"Kořist"

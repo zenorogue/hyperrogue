@@ -6233,7 +6233,7 @@ N("Terracotta Warrior", GEN_M, "Терракотовый воин", "Терра�
 
 N("Jiangshi", GEN_M, "Цзянши", "Цзянши", "Цзянши", "Цзянши")
 S("You think this was one of the people who have constructed the Terracotta Warriors and the arrow traps. "
-  "They have been locked inside, so that they will never release the secrets of the mausoleum. They would like to return their homes and families, though.",
+  "They have been locked inside, so that they will never divulge the secrets of the mausoleum. They would like to return their homes and families, though.",
   
   "Ты думаешь, что это один из тех, кто построил Терракотовую армию и эти ловушки. "
   "Они заперты здесь, и никогда не расскажут секреты мавзолея. Они хотят вернуться домой, в семью." 
