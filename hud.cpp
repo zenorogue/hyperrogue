@@ -253,7 +253,7 @@ void displayglyph2(int cx, int cy, int buttonsize, int i) {
       if(t == IC_OTHER)
         mouseovers = XLAT("objects found: %1", it);
       if(t == IC_NAI)
-        mouseovers = XLAT("%1", it);
+        mouseovers = XLATN(it);
       if(t == IC_ORB)
         mouseovers = XLAT("orb power: %1", eItem(i));
       if(it == itGreenStone) {
