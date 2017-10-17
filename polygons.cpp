@@ -406,7 +406,7 @@ void drawpolyline(const polytodraw& p) {
 #endif
 
 #if CAP_XGD==1
-  gdpush(1); gdpush(col); gdpush(outline); gdpush(polyi);
+  gdpush(1); gdpush(p.col); gdpush(pp.outline); gdpush(polyi);
   for(int i=0; i<polyi; i++) gdpush(polyx[i]), gdpush(polyy[i]);
 #elif CAP_SDLGFX==1
   filledPolygonColorI(s, polyx, polyy, polyi, p.col);

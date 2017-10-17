@@ -3321,7 +3321,7 @@ void clearMonsters() {
 void clearMemory() {
   clearMonsters();
   gmatrix.clear();
-  traplist = {};
+  while(!traplist.empty()) traplist.pop();
   curtime = 0;
   nextmove = 0;
   nextdragon = 0;
