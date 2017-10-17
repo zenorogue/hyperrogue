@@ -1985,3 +1985,11 @@
 - ambush size is displayed by hovering over the item in Hunting Ground
 - Terracotta counters are sometimes lowered at high treasure levels
 - fixed two more graphical glitches in Halloween
+- fixed the joystick support
+
+2019.10.17 01:50 version 10.1d
+- updated the translations
+- made the dogs give up to 'regroup' when you have escaped
+- you can now melt ice through great wall into the Blizzard
+- if the sight range option is lowered below 7, ambushes temporarily increase it (as the land makes no sense otherwise)
+- ancient weapon icon in the inventory
