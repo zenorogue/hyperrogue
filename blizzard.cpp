@@ -1,8 +1,11 @@
 double randd() { return (rand() % 1000000) / 1000000. + .0000005; }
 
+double cellgfxdist(cell *c, int i) {
+  return purehepta ? tessf : (c->type == 6 && (i&1)) ? hexhexdist : crossf;
+  }
+
 transmatrix cellrelmatrix(cell *c, int i) {
-  double d =
-    purehepta ? tessf : (c->type == 6 && (i&1)) ? hexhexdist : crossf;
+  double d = cellgfxdist(c, i);
   return ddspin(c, i) * xpush(d) * iddspin(c->mov[i], c->spin(i), euclid ? 0 : S42);
   }
 

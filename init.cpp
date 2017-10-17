@@ -179,11 +179,12 @@
 #define CAP_SHMUP_GOOD (!ISMOBWEB)
 #endif
 
+int fontscale = 100;
+
 #if ISMOBILE
 #define EXTRALICENSE "\n\nHyperRogue soundtrack by Shawn Parrotte (http://www.shawnparrotte.com), under the Creative Commons BY-SA 3.0 license, http://creativecommons.org/licenses/by-sa/3.0/"
 #undef XEXTRALICENSE
 
-int fontscale = 100;
 bool buttonclicked;
 void gdpush(int t);
 #endif

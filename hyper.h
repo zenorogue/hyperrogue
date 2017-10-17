@@ -361,6 +361,8 @@ struct videopar {
   bool samegender; // same gender for the Princess?
   int language;
   
+  bool backeffects; // background particle effects
+  
   int killreduction, itemreduction, portreduction;
   
   multi::config scfg;
@@ -822,6 +824,8 @@ namespace dialog {
     };
 
   extern vector<item> items;
+  
+  extern reaction_t reaction;
 
   item& lastItem();
   extern unsigned int *palette;

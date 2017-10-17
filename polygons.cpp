@@ -652,7 +652,7 @@ hpcshape
   shEgg,
   shSpikedRing, shTargetRing, shSawRing, shGearRing, shPeaceRing, shHeptaRing,
   shSpearRing, shLoveRing,
-  shDaisy, shTriangle, shNecro, shStatue, shKey,
+  shDaisy, shTriangle, shNecro, shStatue, shKey, shWindArrow,
   shGun,
   shFigurine, shTreat,
   shElementalShard,
@@ -1363,6 +1363,7 @@ void buildpolys() {
 
   bshape(shMercuryBridge[0], PPR_FLOOR,  scalef*spzoom6, 365);
   bshape(shMercuryBridge[1], PPR_FLOOR,  scalef*spzoomd7, 366);
+  bshape(shWindArrow, PPR_HEPTAMARK,  scalef, 367);
   
   bshape(shPalaceGate, PPR_STRUCT1, scalef, 47);
   bshape(shSemiFeatherFloor[0], PPR_FLOOR,  scalef*spzoom6, 48);
@@ -2859,6 +2860,8 @@ NEWSHAPE, 364, 1, 2, -0.486619,0.002830, -0.418060,0.040577, -0.427473,0.022591,
 
 NEWSHAPE, 365, 1, 2, -0.236444,-0.000864, -0.300824,-0.142089, 0.027603,-0.331178, 0.117026,-0.205327, 
 NEWSHAPE, 366, 1, 2, 0.120242,0.202432, 0.476077,0.202192,
+
+NEWSHAPE, 367, 1, 2, -0.096569,0.019944, 0.040859,0.019906, 0.037742,0.058710, 0.116624,-0.000000, 
 
 NEWSHAPE
 };

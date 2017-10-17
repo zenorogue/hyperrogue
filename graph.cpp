@@ -4337,8 +4337,14 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
        }
       }
 
-    if(c->land == laBlizzard) 
-      blizzardcells[c].frame = frameid;
+    if(c->land == laBlizzard) {
+      if(vid.backeffects)
+        blizzardcells[c].frame = frameid;
+      else {
+        forCellIdEx(c2, i, c) if(againstWind(c, c2))
+          queuepoly(V * ddspin(c, i) * xpush(cellgfxdist(c, i)/2), shWindArrow, 0x8080FF80);
+        }
+      }
 
     if(c->land == laWhirlwind) {
       whirlwind::calcdirs(c);

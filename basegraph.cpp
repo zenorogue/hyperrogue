@@ -1014,6 +1014,10 @@ void saveHighQualityShot(const char *fname, const char *caption, int fade) {
 #if CAP_SDL
 bool setfsize = true;
 
+void do_setfsize() {
+  vid.fsize = min(vid.yres * fontscale/ 3200, vid.xres * fontscale/ 4800), setfsize = false;
+  }
+
 void setvideomode() {
 
   DEBB(DF_INIT, (debugfile,"setvideomode\n"));
@@ -1023,7 +1027,7 @@ void setvideomode() {
     if(vid.yres > vid.yscr) vid.yres = vid.yscr * 9/10, setfsize = true;    
     }
   
-  if(setfsize) vid.fsize = min(vid.yres / 32, vid.xres / 48), setfsize = false;
+  if(setfsize) do_setfsize();
 
   int flags = 0;
   
@@ -1047,7 +1051,7 @@ void setvideomode() {
   if(vid.full && !s) {
     vid.xres = vid.xscr;
     vid.yres = vid.yscr;
-    vid.fsize = min(vid.yres / 32, vid.xres / 48);
+    do_setfsize();
     s = SDL_SetVideoMode(vid.xres, vid.yres, 32, flags | SDL_FULLSCREEN);
     }
 

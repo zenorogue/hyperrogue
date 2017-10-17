@@ -273,6 +273,7 @@ void initConfig() {
   addsaver(conformal::autobandhistory, "automatic band history");
   addsaver(conformal::dospiral, "do spiral");
   
+  addsaver(vid.backeffects, "background particle effects", (ISMOBILE || ISPANDORA) ? false : true);
   // control
   
   addsaver(vid.joyvalue, "vid.joyvalue", 4800);
@@ -590,6 +591,7 @@ void showGraphConfig() {
   dialog::addSelItem(XLAT("movement animation speed"), fts(vid.mspeed), 'm');
 
   dialog::addBoolItem(XLAT("extra graphical effects"), (vid.particles), 'u');
+  dialog::addBoolItem(XLAT("background particle effects"), (vid.backeffects), 'p');
 
 #ifdef WHATEVER
   dialog::addSelItem(XLAT("whatever"), fts(whatever), 'j');
@@ -606,9 +608,7 @@ void showGraphConfig() {
 
   dialog::addSelItem(XLAT("inventory/kill mode"), XLAT(glyphmodenames[vid.graphglyph]), 'd');
 
-#if ISMOBILE==1
   dialog::addSelItem(XLAT("font scale"), its(fontscale), 'b');
-#endif
 
   dialog::addSelItem(XLAT("sight range"), its(sightrange), 'r');
 
@@ -691,10 +691,14 @@ void showGraphConfig() {
       dialog::editNumber(vid.framelimit, 5, 300, 10, 300, XLAT("framerate limit"), "");
   #endif
       
-  #if ISMOBILE
-    if(xuni =='b') 
-      dialog::editNumber(fontscale, 0, 400, 10, 100, XLAT("font scale"), "");
-  #endif
+    if(xuni =='b') {
+      dialog::editNumber(fontscale, 25, 400, 10, 100, XLAT("font scale"), "");
+      if(!ISMOBILE)
+        dialog::reaction = [] () { setfsize = true; if(fontscale < 25) fontscale = 25; do_setfsize(); };
+      }
+  
+    if(xuni =='p') 
+      vid.backeffects = !vid.backeffects;
   
     if(xuni =='z') 
       dialog::editNumber(vid.aurastr, 0, 256, 10, 128, XLAT("aura brightness"), "");
