@@ -6128,5 +6128,8 @@ S("When your plan has clearly failed, it is better to abandon it and go to a saf
 
 S("The Hunting Dogs give up.", "Myśliwskie psy się poddały.");
 
+S("\n\nThis orb also allows you to collect items encased in ice.",
+  "\n\nTa sfera pozwala Ci również zbierać rzeczy zamrożone w lodowej ścianie.")
+  
 #undef Orb
 
