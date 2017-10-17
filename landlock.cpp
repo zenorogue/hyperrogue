@@ -622,6 +622,7 @@ eLand pickluck(eLand l1, eLand l2) {
   }
 
 #define LIKELY for(int u=0; u<5; u++)
+#define LIKELY2 for(int u=0; u<2; u++)
 
 bool noChaos(eLand l) {
   if(l == laOcean || l == laTemple) return false;
@@ -725,7 +726,7 @@ eLand getNewLand(eLand old) {
   if(old == laRlyeh && !rlyehComplete())
     return laOcean;
     
-  eLand tab[256];
+  eLand tab[1024];
   int cnt = 0;
   
 /*   if(isHive(old) && hrand(100) < 90) {
@@ -742,6 +743,10 @@ eLand getNewLand(eLand old) {
   tab[cnt++] = laDesert;
   tab[cnt++] = laJungle;
   tab[cnt++] = laMotion;
+  if(old == laZebra) LIKELY2 {
+    tab[cnt++] = laMotion;
+    tab[cnt++] = laHunting;
+    }
   tab[cnt++] = laHunting;
   tab[cnt++] = laAlchemist;
   if(old != laDeadCaves) tab[cnt++] = laCaves;
@@ -757,6 +762,7 @@ eLand getNewLand(eLand old) {
     if(old == laDragon && items[itElixir] >= U10) LIKELY tab[cnt++] = laReptile;
     if(kills[moVizier]) tab[cnt++] = laEmerald;
     if(items[itFeather] >= U10) tab[cnt++] = laZebra;
+    if(old == laMotion || old == laHunting) LIKELY2 tab[cnt++] = laZebra;
     tab[cnt++] = laWarpCoast;
     if(euclid) tab[cnt++] = laWarpSea;
     // Ivory Tower tends to crash while generating equidistant
@@ -791,11 +797,20 @@ eLand getNewLand(eLand old) {
     if(old == laOcean) tab[cnt++] = laCrossroads;
     if(items[itGold] >= U5 && items[itFernFlower] >= U5 && !kills[moVizier]) 
       tab[cnt++] = laEmerald;
-    if(items[itWindstone] >= U5 && items[itDiamond] >= U5) 
+    if(items[itWindstone] >= U5 && items[itDiamond] >= U5) {
       tab[cnt++] = laBlizzard;
+      if(old == laIce || old == laCocytus || old == laWhirlwind) 
+        LIKELY tab[cnt++] = laBlizzard;
+      if(old == laBlizzard) LIKELY tab[cnt++] = laIce;
+      if(old == laBlizzard) LIKELY tab[cnt++] = laWhirlwind;
+      }
     tab[cnt++] = laDryForest;
     tab[cnt++] = laWineyard;
-    if(items[itElixir] >= U10) tab[cnt++] = laVolcano;
+    if(items[itElixir] >= U10) {
+      tab[cnt++] = laVolcano;
+      if(old == laAlchemist) LIKELY2 tab[cnt++] = laVolcano;
+      if(old == laVolcano) LIKELY2 tab[cnt++] = laAlchemist;
+      }
     if(items[itGold] >= U10) tab[cnt++] = laDeadCaves;
     // tab[cnt++] = laCaribbean;
     if(items[itSpice] >= U10) {
@@ -861,7 +876,7 @@ eLand getNewLand(eLand old) {
   if(items[itHell] >= U10) {
     if(items[itDiamond] >= U10) {
       tab[cnt++] = laCocytus;
-      if(old == laHell || old == laIce) LIKELY tab[cnt++] = laCocytus;
+      if(old == laHell || old == laIce || old == laBlizzard) LIKELY tab[cnt++] = laCocytus;
       }
     if(old == laCocytus) LIKELY { tab[cnt++] = laIce; tab[cnt++] = laHell; }
     tab[cnt++] = laPower;
