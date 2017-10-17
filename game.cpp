@@ -6768,7 +6768,7 @@ void monstersTurn() {
 
   orbbull::check();
 
-  terracotta();
+  if(!phase1) terracotta();
   
   DEBT("check");
   checkmove();
