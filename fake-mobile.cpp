@@ -110,7 +110,9 @@ int main(int argc, char **argv) {
 
   int mx = 0; int my = 0; bool _clicked = false;
   
+  inv::on = true;
   firstland = laMinefield;
+  activateSafety(laWhirlwind);
   
   items[itGreenStone] = 100;
   items[itDiamond] = 50;

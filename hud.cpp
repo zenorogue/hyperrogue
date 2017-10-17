@@ -260,6 +260,10 @@ void displayglyph2(int cx, int cy, int buttonsize, int i) {
         mouseovers += XLAT(" (click to drop)");
         getcstat = 'g';
         }
+      if(it == itStrongWind) {
+        mouseovers += XLAT(" (click to use)");
+        getcstat = 't';
+        }
       if(it == itInventory) {
         mouseovers += XLAT(" (click to use)");
         getcstat = 'i';

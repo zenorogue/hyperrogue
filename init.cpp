@@ -520,13 +520,29 @@ void handleclick(MOBPAR_FORMAL) {
       }
 
     if(buttonclicked || mouseout()) {
+
+      bool statkeys = andmode == 0 && !shmup::on && size(screens) == 1;
       
-      if(andmode == 0 && getcstat == 'g' && !shmup::on && size(screens) == 1) {
+      if(statkeys && getcstat == 'g') {
         movepcto(MD_DROP);
         getcstat = 0;
         }
       
-      else if(getcstat != SDLK_F1) {
+      else if(statkeys && getcstat == 'i') {
+        if(inv::on) pushScreen(inv::show);
+        getcstat = 0;
+        }
+      
+      else if(statkeys && getcstat == 't') {
+        if(playermoved && items[itStrongWind]) {
+          cell *c = whirlwind::jumpDestination(cwt.c);
+          if(c) centerover = c;
+          }
+        targetRangedOrb(centerover, roKeyboard);
+        getcstat = 0;
+        }
+
+      else if(getcstat != SDLK_F1 && getcstat != 'i' && getcstat != 't') {
         int px = mousex < vid.xcenter ? 0 : 1;
         int py = mousey < vid.ycenter ? 0 : 1;
         
