@@ -6547,13 +6547,13 @@ bool movepcto(int d, int subdir, bool checkonly) {
       if(checkonly) return true;
       if(c2->wall == waSmallTree) {
         drawParticles(c2, winf[c2->wall].color, 4);
-        addMessage(XLAT("You start chopping down the tree."));
+        addMessage(XLAT("You chop down the tree."));
         playSound(c2, "hit-axe" + pick123());
         c2->wall = waNone;
         }
       else if(c2->wall == waBigTree) {
         drawParticles(c2, winf[c2->wall].color, 8);
-        addMessage(XLAT("You chop down the tree."));
+        addMessage(XLAT("You start chopping down the tree."));
         playSound(c2, "hit-axe" + pick123());
         c2->wall = waSmallTree;
         }
