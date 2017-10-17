@@ -3048,7 +3048,7 @@ int getfd(cell *c) {
     
     case laTerracotta:
     case laMercuryRiver:
-      return c->wall == waMercury ? 0 : 1;
+      return (c->wall == waMercury && wmspatial) ? 0 : 1;
 
     case laKraken:
     case laBurial:
@@ -3778,8 +3778,10 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
             if(c < c->mov[bridgedir]) {
               bspin = Vf * bspin;
               queuepoly(bspin, shMercuryBridge[1], darkena(fcol, fd+1, 0xFF));
-              queuepolyat(mscale(bspin, geom3::LAKE), shMercuryBridge[1], darkena(gradient(0, winf[waMercury].color, 0, 0.8,1), 0, 0x80), PPR_LAKELEV);
-              queuepolyat(mscale(bspin, geom3::BOTTOM), shMercuryBridge[1], darkena(0x202020, 0, 0xFF), PPR_LAKEBOTTOM);
+              if(wmspatial) {
+                queuepolyat(mscale(bspin, geom3::LAKE), shMercuryBridge[1], darkena(gradient(0, winf[waMercury].color, 0, 0.8,1), 0, 0x80), PPR_LAKELEV);
+                queuepolyat(mscale(bspin, geom3::BOTTOM), shMercuryBridge[1], darkena(0x202020, 0, 0xFF), PPR_LAKEBOTTOM);
+                }
               }
             }
           }
