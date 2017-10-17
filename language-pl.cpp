@@ -6117,14 +6117,16 @@ S("Using %the1 in %the2 sounds dangerous...", "Używanie %1 %abl2 brzmi niebezpi
 S("%The1 is mostly useless in %the2...", "%1 jest raczej bezużyteczna %abl2...")
 S("%The1 is forbidden in %the2 (disables some achievements)", "%1 zabroniona %abl2 (użycie wyłącza niektóre osiągnięcia")
 
-S("You are ambushed!", "Přepadení!")
+S("You are ambushed!", "Zasadzka!")
 S("teleport", "teleport")
-S("ambush:", "přepadení:")
+S("ambush:", "zasadzka:")
 
 N("Hunting Dog (regrouping)", GEN_M, "Pies Myśliwski (ucieka)", "Psy Myśliwskie (uciekają)", "Psa Myśliwskiego (uciekającego)", "Psem Myśliwskim (uciekającym)")
 S("When your plan has clearly failed, it is better to abandon it and go to a safe place, to have a chance of succeeding next time. This dog clearly knows this.",
   "Kiedy jest jasne, że Twój plan się nie powiódł, lepiej jest go porzucić i odejść w bezpieczne miejsce, by mieć szansę na sukces przy kolejnej próbie. "
   "Ten pies zdecydowanie to wie.")
+
+S("The Hunting Dogs give up.", "Myśliwskie psy się poddały.");
 
 #undef Orb
 

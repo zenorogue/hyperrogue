@@ -6343,6 +6343,14 @@ S("ambush:", "засада")
 		"NEW_ACHIEVEMENT_9_3_DESC"	"Собрать 50 Лавовых лилий. (не в режиме Стратегии сфер)"
 */
 
+N("Hunting Dog (regrouping)", GEN_M, "Охотничий пёс (перегруппируется)", "Охотничьи псы (перегруппируется)", "Охотничьего пса (перегруппируется)", "Охотничьим псом (перегруппируется)")
+
+S("When your plan has clearly failed, it is better to abandon it and go to a safe place, to have a chance of succeeding next time. This dog clearly knows this.",
+  "Если твой план провалился, лучше уйти в более безопасное место, а потом попробовать ещё раз. Этот пёс, конечно, знает это."
+  )
+
+S("The Hunting Dogs give up.", "Охотничий пёс сдался.")
+
 #undef Orb
 
   
