@@ -4141,7 +4141,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         queuepoly(V, shBigCarpet3, darkena(0xC09F00, 0, 0xFF));
         }
 
-      else if(xch != '.' && xch != '+' && xch != '>' && xch != ':'&& xch != '-' && xch != ';' && c->wall != waSulphur && c->wall != waMercury && xch != ',')
+      else if(xch != '.' && xch != '+' && xch != '>' && xch != ':'&& xch != '-' && xch != ';' && c->wall != waSulphur && c->wall != waMercury && xch != ',' && xch != '&')
         error = true;
       }
 
