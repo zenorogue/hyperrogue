@@ -6133,7 +6133,7 @@ S("Whenever you attack with this Orb, you also hit the monsters adjacent to you 
 // Volcanic Wasteland
 //--------------------
 
-N("Пустыня вулканов", GEN_F, "Пустыня вулканов", "Пустыни вулканов", "Пустыню вулканов", "в Пустыне вулканов")
+N("Volcanic Wasteland", GEN_F, "Пустыня вулканов", "Пустыни вулканов", "Пустыню вулканов", "в Пустыне вулканов")
 N("lava", GEN_F, "лава", "лавы", "лаву", "лавой")
 
 S("The volcanic activity in this land is extremely unstable. "
@@ -6158,10 +6158,8 @@ S("Salamanders are tough lizard-like creatures. Their tough skin protects them "
 
 N("Lava Wolf", GEN_M, "Лавовый волк", "Лавовые волки", "Лавового волка", "Лавовым волком")
 
-S("While Ice Wolves love heat, their instinct usually will not let tem to go outside the Icy Lands "
-  "-- they are afraid that they will be unable to get back home, and that they will lose the track of their "
-  "prey. However, they find the Volcanic Wasteland so hot and attractive that they abandon their "
-  "natural instincts... and try to track their prey using their other senses and intelligence.",
+S(
+  "While Ice Wolves love heat, their instincts usually will not let them leave the Icy Lands -- they are afraid that they will be unable to get back home, and that they will lose track of their prey. However, they find the Volcanic Wasteland so hot and attractive that they abandon their natural instincts... and try to track their prey using their other senses and intelligence.",
   
   "Хотя ледяные волки любят тепло, их инстинкт не даёт им выйти из Ледяной земли -- "
   "они боятся, что не смогут вернуться домой, и больше не смогут искать добычу. "

@@ -6085,11 +6085,8 @@ S("Salamanders are tough lizard-like creatures. Their tough skin protects them "
 
 N("Lava Wolf", GEN_M, "Lávový vlk", "Lávoví vlci", "Lávového vlka", "Lávovým vlkem")
 
-S("While Ice Wolves love heat, their instinct usually will not let tem to go outside the Icy Lands "
-  "-- they are afraid that they will be unable to get back home, and that they will lose the track of their "
-  "prey. However, they find the Volcanic Wasteland so hot and attractive that they abandon their "
-  "natural instincts... and try to track their prey using their other senses and intelligence.",
-  
+S("While Ice Wolves love heat, their instincts usually will not let them leave the Icy Lands -- they are afraid that they will be unable to get back home, and that they will lose track of their prey. However, they find the Volcanic Wasteland so hot and attractive that they abandon their natural instincts... and try to track their prey using their other senses and intelligence.",
+ 
   "Zatímco Ledoví vlci milují teplo, jejich instinkt jim obvykle nedovolí "
   "opustit Ledový kraj -- bojí se, že už nenajdou cestu domů a ztratí stopu "
   "kořisti. Ale Sopečná pustina je tak horká a přitažlivá, že nechají své "
