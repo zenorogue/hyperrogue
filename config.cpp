@@ -693,8 +693,9 @@ void showGraphConfig() {
       
     if(xuni =='b') {
       dialog::editNumber(fontscale, 25, 400, 10, 100, XLAT("font scale"), "");
-      if(!ISMOBILE)
+      #if !ISMOBILE
         dialog::reaction = [] () { setfsize = true; if(fontscale < 25) fontscale = 25; do_setfsize(); };
+      #endif
       }
   
     if(xuni =='p') 
