@@ -1993,3 +1993,18 @@
 - you can now melt ice through great wall into the Blizzard
 - if the sight range option is lowered below 7, ambushes temporarily increase it (as the land makes no sense otherwise)
 - ancient weapon icon in the inventory
+
+2019.10.17 23:41 version 10.1e
+- added an option to disable background particles (for lower end platforms and for easier reading)
+- added an option to change the font size on desktop
+- the wind icon in Windy Plains is clickable now
+- [mobiles] clicking the Inventory and Wind icons works correctly now
+- [mobiles] fixed the missing 'achievements and leaderboards' in the menu
+- no more ASCII characters in some wall display modes on lava+lily
+- bridges over the merrcury rivers look better now
+- Terracotta Warriors no longer wake up if they have ghosts over them
+- Orb of Fish has a tail now
+- minor text/translation improvements
+- warriors awakening takes Orb of Speed into account now
+- land connection likelihoods adjusted for the new lands
+ 
