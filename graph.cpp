@@ -632,7 +632,8 @@ bool drawItemType(eItem it, cell *c, const transmatrix& V, int icol, int ticks, 
     int pr = PPR_ITEM;
     bool inice = c && c->wall == waIcewall;
     if(inice) pr = PPR_HIDDEN;
-    queuepolyat(V, shDisk, darkena(icol, 0, inice ? 0x80 : hidden ? 0x20 : 0xC0), pr);
+
+    int icol1 = icol;
     if(it == itOrbFire) icol = firecolor(200);
     if(it == itOrbFriend || it == itOrbDiscord) icol = 0xC0C0C0;
     if(it == itOrbFrog) icol = 0xFF0000;
@@ -641,6 +642,12 @@ bool drawItemType(eItem it, cell *c, const transmatrix& V, int icol, int ticks, 
     if(it == itOrbAir) icol = 0xFFFFFF;
     if(it == itOrbUndeath) icol = minf[moFriendlyGhost].color;
     if(it == itOrbRecall) icol = 0x101010;
+    int col = darkena(icol, 0, int(0x80 + 0x70 * sin(ticks / 300.)));
+
+    if(it == itOrbFish)
+      queuepolyat(V * spin(ticks / 1500.), shFishTail, col, PPR_ITEM_BELOW);
+
+    queuepolyat(V, shDisk, darkena(icol1, 0, inice ? 0x80 : hidden ? 0x20 : 0xC0), pr);
     hpcshape& sh = 
       it == itOrbLove ? shLoveRing :
       isRangedOrb(it) ? shTargetRing :
@@ -650,7 +657,7 @@ bool drawItemType(eItem it, cell *c, const transmatrix& V, int icol, int ticks, 
       isDirectionalOrb(it) ? shSpearRing :
       it == itOrb37 ? shHeptaRing :
       shRing;
-    queuepolyat(V * spin(ticks / 1500.), sh, darkena(icol, 0, int(0x80 + 0x70 * sin(ticks / 300.))), pr);
+    queuepolyat(V * spin(ticks / 1500.), sh, col, pr);
     }
 
   else if(it) return true;
