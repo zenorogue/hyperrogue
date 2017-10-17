@@ -6347,7 +6347,7 @@ S("When your plan has clearly failed, it is better to abandon it and go to a saf
   "Если твой план провалился, лучше уйти в более безопасное место, а потом попробовать ещё раз. Этот пёс, конечно, знает это."
   )
 
-S("The Hunting Dogs give up.", "Охотничий пёс сдался.")
+S("The Hunting Dogs give up.", "Охотничьи псы сдались.")
 
 #undef Orb
 
