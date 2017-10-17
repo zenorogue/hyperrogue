@@ -362,7 +362,7 @@ int main() {
   
   printf("hashcode hashval = 0x%x;\n\n", hashval);
   
-  printf("sentence all_sentences[] = {\n", size(allsent));
+  printf("sentence all_sentences[] = {\n");
   
   for(map<hashcode,string>::iterator it = ms.begin(); it != ms.end(); it++) {
     string s = it->second;
@@ -374,7 +374,7 @@ int main() {
     }
   printf("  };\n\n");
 
-  printf("fullnoun all_nouns[] = {\n", size(allnouns));
+  printf("fullnoun all_nouns[] = {\n");
   
   for(map<hashcode,string>::iterator it = mn.begin(); it != mn.end(); it++) {
     string s = it->second;
