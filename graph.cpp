@@ -3031,6 +3031,53 @@ bool allemptynear(cell *c) {
 static const int trapcol[4] = {0x904040, 0xA02020, 0xD00000, 0x303030};
 static const int terracol[8] = {0xD000, 0xE25050, 0xD0D0D0, 0x606060, 0x303030, 0x181818, 0x0080, 0x8080};
                                
+// how much to darken
+int getfd(cell *c) {
+  switch(c->land) {
+    case laRedRock:
+    case laReptile:
+    case laCanvas: 
+      return 0;
+    
+    case laTerracotta:
+    case laMercuryRiver:
+      return c->wall == waMercury ? 0 : 1;
+
+    case laKraken:
+    case laBurial:
+    case laIvoryTower:
+    case laDungeon:
+    case laMountain:
+    case laEndorian:
+    case laCaribbean:
+    case laWhirlwind:
+    case laRose:
+    case laWarpSea:
+    case laTortoise:
+    case laDragon:
+    case laHalloween:
+    case laHunting:
+    case laOcean:
+    case laLivefjord:
+    case laWhirlpool:
+    case laAlchemist:
+    case laIce:
+    case laGraveyard:
+    case laBlizzard:
+    case laRlyeh:
+    case laTemple:
+    case laWineyard:
+    case laDeadCaves:
+    case laPalace:
+    case laCA:
+      return 1;
+    
+    case laTrollheim:
+    default:
+      return 2;
+    }    
+  }
+                               
 void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
 
   qfi.shape = NULL; qfi.special = false;
@@ -3304,33 +3351,8 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
     
     chasmg = chasmgraph(c);
     
-    int fd = 
-      c->land == laRedRock ? 0 : 
-      (c->land == laOcean || c->land == laLivefjord || c->land == laWhirlpool) ? 1 :
-      c->land == laAlchemist || c->land == laIce || c->land == laGraveyard || c->land == laBlizzard ||
-      c->land == laRlyeh || c->land == laTemple || c->land == laWineyard ||
-      c->land == laDeadCaves || c->land == laPalace || c->land == laCA ? 1 : 
-      c->land == laCanvas ? 0 :
-      c->land == laKraken ? 1 :
-      c->land == laBurial ? 1 :
-      c->land == laIvoryTower ? 1 :
-      c->land == laDungeon ? 1 :
-      c->land == laMountain ? 1 :
-      c->land == laEndorian ? 1 :
-      c->land == laCaribbean ? 1 :
-      c->land == laWhirlwind ? 1 :
-      c->land == laRose ? 1 :
-      c->land == laWarpSea ? 1 :
-      c->land == laTortoise ? 1 :
-      c->land == laDragon ? 1 :
-      c->land == laHalloween ? 1 :
-      c->land == laTrollheim ? 2 :
-      c->land == laReptile ? 0 :
-      c->land == laHunting ? 1 :
-      c->land == laTerracotta ? 1 :
-      c->land == laMercuryRiver ? 0 :
-      2;
-    
+    int fd = getfd(c);
+                     
     if(c->wall == waMagma) fd = 0;
     
     poly_outline = OUTLINE_DEFAULT;
@@ -3726,8 +3748,35 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       else if(c->land == laRedRock)
         qfloor(c, Vf, eoh ? shFloor[ct6] : shDesertFloor[ct6], darkena(fcol, fd, 0xFF));
 
-      else if(c->land == laPalace || c->land == laTerracotta || c->land == laMercuryRiver)
+      else if(c->land == laPalace || c->land == laTerracotta)
         qfloor(c, Vf, (eoh?shFloor:shPalaceFloor)[ct6], darkena(fcol, fd, 0xFF));
+      
+      else if(c->land == laMercuryRiver) {
+        if(eoh)
+          qfloor(c, Vf, shFloor[ct6], darkena(fcol, fd, 0xFF));
+        else {
+          int bridgedir = -1;
+          if(c->type == 6) {
+            for(int i=1; i<c->type; i+=2)
+              if(pseudohept(c->mov[(i+5)%6]) && c->mov[(i+5)%6]->land == laMercuryRiver)
+              if(pseudohept(c->mov[(i+1)%6]) && c->mov[(i+1)%6]->land == laMercuryRiver)
+                bridgedir = i;
+            }
+          if(bridgedir == -1)
+            qfloor(c, Vf, (eoh?shFloor:shPalaceFloor)[ct6], darkena(fcol, fd, 0xFF));
+          else {
+            transmatrix bspin = ddspin(c, bridgedir);
+            qfloor(c, Vf, bspin, shMercuryBridge[0], darkena(fcol, fd, 0xFF));
+            // only needed in one direction
+            if(c < c->mov[bridgedir]) {
+              bspin = Vf * bspin;
+              queuepoly(bspin, shMercuryBridge[1], darkena(fcol, fd+1, 0xFF));
+              queuepolyat(mscale(bspin, geom3::LAKE), shMercuryBridge[1], darkena(gradient(0, winf[waMercury].color, 0, 0.8,1), 0, 0x80), PPR_LAKELEV);
+              queuepolyat(mscale(bspin, geom3::BOTTOM), shMercuryBridge[1], darkena(0x202020, 0, 0xFF), PPR_LAKEBOTTOM);
+              }
+            }
+          }
+        }
 
       else {
         qfloor(c, Vf, shFloor[ct6], darkena(fcol, fd, 0xFF));

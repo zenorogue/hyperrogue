@@ -642,6 +642,7 @@ hpcshape
   shSemiFloor[2], shSemiBFloor[2], shSemiFloorShadow,
   shDesertFloor[2], shRedRockFloor[3][2],
   shPalaceFloor[2], shNewFloor[2], shTrollFloor[2],
+  shMercuryBridge[2],
   shLeafFloor[2],
   shBarrowFloor[3],
   shTriheptaFloor[11], shTriheptaFloor2[2], shTriheptaEuc[3],
@@ -1359,6 +1360,10 @@ void buildpolys() {
   bshape(shTriheptaEucShadow[2], PPR_FLOOR,  scalef*SHADMUL, 44);
   bshape(shPalaceFloor[0], PPR_FLOOR,  scalef*spzoom6, 45);
   bshape(shPalaceFloor[1], PPR_FLOOR,  scalef*spzoomd7, 46);
+
+  bshape(shMercuryBridge[0], PPR_FLOOR,  scalef*spzoom6, 365);
+  bshape(shMercuryBridge[1], PPR_FLOOR,  scalef*spzoomd7, 366);
+  
   bshape(shPalaceGate, PPR_STRUCT1, scalef, 47);
   bshape(shSemiFeatherFloor[0], PPR_FLOOR,  scalef*spzoom6, 48);
   bshape(shSemiFeatherFloor[1], PPR_FLOOR,  scalef*spzoom6, 49);
@@ -2851,6 +2856,10 @@ NEWSHAPE, 362, 1, 1, -0.098710,-0.040954, -0.120861,-0.011561, -0.169793,0.00105
 
 NEWSHAPE, 363, 1, 2, -0.252495,0.014545, -0.330447,0.029660, -0.319594,0.016402, -0.419249,0.040217, -0.457189,-0.013336, 
 NEWSHAPE, 364, 1, 2, -0.486619,0.002830, -0.418060,0.040577, -0.427473,0.022591, -0.408958,0.019603, -0.426031,0.010325, -0.407739,0.001037, 
+
+NEWSHAPE, 365, 1, 2, -0.236444,-0.000864, -0.300824,-0.142089, 0.027603,-0.331178, 0.117026,-0.205327, 
+NEWSHAPE, 366, 1, 2, 0.120242,0.202432, 0.476077,0.202192,
+
 NEWSHAPE
 };
 

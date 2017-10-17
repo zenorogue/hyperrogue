@@ -821,6 +821,13 @@ void giantLandSwitch(cell *c, int d, cell *from) {
             c->landparam--;
           }
         }
+      if(d == 7) {
+        int nearriver = 0;
+        forCellEx(c2, c) 
+          if(c2->wall == waMercury && pseudohept(c2)) 
+            nearriver++;
+        if(nearriver == 2) c->land = laMercuryRiver;
+        }
       ONEMPTY {
         bool nearwarrior = false;
         forCellEx(c2, c) if(c2->wall == waTerraWarrior) nearwarrior = true;
