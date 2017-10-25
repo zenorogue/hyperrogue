@@ -2007,4 +2007,7 @@
 - minor text/translation improvements
 - warriors awakening takes Orb of Speed into account now
 - land connection likelihoods adjusted for the new lands
- 
+
+2019.10.25 23:17 version 10.1f
+- fixed the Halloween in main menu
+- fixed Zebra unlocking
