@@ -664,7 +664,6 @@ void showEuclideanMenu() {
 bool showstartmenu;
 
 bool showHalloween() {
-  if(canmove) return false;
   time_t t = time(NULL);
   struct tm tm = *localtime(&t);
   int month = tm.tm_mon + 1;

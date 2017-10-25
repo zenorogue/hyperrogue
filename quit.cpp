@@ -263,7 +263,7 @@ hint hints[] = {
 
   {
     0,
-    []() { return showHalloween(); },
+    []() { return !canmove && showHalloween(); },
     []() {
       dialog::addItem(XLAT("Halloween mini-game"), 'z');
       },
