@@ -761,8 +761,10 @@ eLand getNewLand(eLand old) {
     tab[cnt++] = laPalace;
     if(old == laDragon && items[itElixir] >= U10) LIKELY tab[cnt++] = laReptile;
     if(kills[moVizier]) tab[cnt++] = laEmerald;
-    if(items[itFeather] >= U10) tab[cnt++] = laZebra;
-    if(old == laMotion || old == laHunting) LIKELY2 tab[cnt++] = laZebra;
+    if(items[itFeather] >= U10) {
+      tab[cnt++] = laZebra;
+      if(old == laMotion || old == laHunting) LIKELY2 tab[cnt++] = laZebra;
+      }
     tab[cnt++] = laWarpCoast;
     if(euclid) tab[cnt++] = laWarpSea;
     // Ivory Tower tends to crash while generating equidistant
