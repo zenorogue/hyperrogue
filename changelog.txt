@@ -2012,10 +2012,14 @@
 - fixed the Halloween in main menu
 - fixed Zebra unlocking
 
-2019.10.25 23:17 version 10.1g
+2019.10.26 22:00 version 10.1g
 - fixed floating-point values sometimes saving incorrectly on Windows
 - fixed 's'ave the config also toggling the 's'team leaderboards
 - fixed the 'wm' and 'mm' commandline options
 - added the Octagonal geometry (work in progress)
+
+2019.10.26 22:39 version 10.1h
+- fixed some graphical glitches introduced by 10.1g
+- fixed some graphical glitches in Halloween
 
 
