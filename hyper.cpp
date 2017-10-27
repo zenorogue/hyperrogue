@@ -197,8 +197,8 @@ int arg::readCommon() {
 
   else if(argis("-aa")) { PHASEFROM(2); shift(); vid.antialias = argi(); }
   else if(argis("-lw")) { PHASEFROM(2); shift(); vid.linewidth = argf(); }
-  else if(argis("-wm")) { PHASEFROM(2); vid.wallmode = argi(); }
-  else if(argis("-mm")) { PHASEFROM(2); vid.monmode = argi(); }
+  else if(argis("-wm")) { PHASEFROM(2); shift(); vid.wallmode = argi(); }
+  else if(argis("-mm")) { PHASEFROM(2); shift(); vid.monmode = argi(); }
 
 #define TOGGLE(x, param, act) \
 else if(args()[0] == '-' && args()[1] == x && !args()[2]) { showstartmenu = false; if(curphase == 3) {act;} else {PHASE(2); param = !param;} } \
