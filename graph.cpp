@@ -2909,6 +2909,8 @@ void placeSidewall(cell *c, int i, int sidepar, const transmatrix& V, bool warp,
   
   transmatrix V2 = V * ddspin(c, i);
   
+  // if(sphere && vid.alphax <= 1 && tC0(V2 * xpush(cellgfxdist(c, i)/2))[2] < -.5) return; 
+ 
   /* int aw = away(V2); prio += aw;
   if(!detaillevel && aw < 0) return;
   */

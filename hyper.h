@@ -1602,3 +1602,5 @@ extern int stampbase;
 transmatrix cellrelmatrix(cell *c, int i);
 
 void terracottaAround(cell *c);
+
+double cellgfxdist(cell *c, int i);
