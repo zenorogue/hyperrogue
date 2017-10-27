@@ -539,6 +539,11 @@ void quickqueue() {
   for(int i=0; i<siz; i++) drawqueueitem(ptds[i]);
   }
 
+ld xintval(const hyperpoint& h) {
+  if(sphere && vid.alpha > 1) return -h[2];
+  return -intval(h, C0);
+  }
+
 void drawqueue() {
 
   int siz = size(ptds);
@@ -581,8 +586,8 @@ void drawqueue() {
     PPR_LAKEWALL, PPR_INLAKEWALL, PPR_BELOWBOTTOM}) 
   sort(&ptds2[qp0[p]], &ptds2[qp[p]], 
     [] (polytodraw* p1, polytodraw* p2) {
-      return intval(p1->u.poly.V * xpush0(.1), C0)
-        < intval(p2->u.poly.V * xpush0(.1), C0);
+      return xintval(p1->u.poly.V * xpush0(.1))
+        < xintval(p2->u.poly.V * xpush0(.1));
       });
 
 #endif
