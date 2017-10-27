@@ -54,7 +54,7 @@ movedir vectodir(const hyperpoint& P) {
     Centered = eupush(-H[0], -H[1]) * Centered;
   ld binv = 99;
   
-  ld dirdist[7];
+  ld dirdist[MAX_EDGE];
   for(int i=0; i<cwt.c->type; i++) {
     dirdist[i] = intval(Centered * xspinpush0(-i * 2 * M_PI /cwt.c->type, .5), P);
     }
@@ -97,7 +97,7 @@ void calcMousedest() {
   
   cellwalker bcwt = cwt;
   
-  ld dists[7];
+  ld dists[MAX_EDGE];
   
   for(int i=0; i<cwt.c->type; i++)
     dists[i] = intval(mouseh, tC0(shmup::ggmatrix(cwt.c->mov[i])));

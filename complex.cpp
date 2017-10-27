@@ -52,7 +52,7 @@ namespace whirlwind {
     qdirs = 0;
     if(d == 0) return;
     int qdf = 0, qdt = 0;
-    int cats[7];
+    int cats[MAX_EDGE];
     for(int i=0; i<c->type; i++) 
       cats[i] = cat(createMov(c,i));
     for(int i=0; i<c->type; i++)
@@ -2599,7 +2599,7 @@ namespace kraken {
       cell *c = dcal[i];
       if(c->monst == moKrakenH && !c->stuntime && !isWateryOrBoat(c)) {
         int qdir = 0;
-        cell *ctab[7];
+        cell *ctab[MAX_EDGE];
         forCellEx(c2, c) if(isWatery(c2)) ctab[qdir++] = c2;
         random_shuffle(ctab, ctab+qdir);
         while(qdir--) trymove(ctab[qdir]);
@@ -3529,7 +3529,7 @@ namespace dungeon {
   
       if(c->wparam) {
         /* int q = 0;
-        cell* downs[7];
+        cell* downs[MAX_EDGE];
         forCellEx(c2, c) {
           buildEquidistant(c2);
           if(coastvalEdge(c2) > coastvalEdge(c)) downs[q++] = c2;

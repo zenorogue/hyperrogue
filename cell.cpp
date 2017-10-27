@@ -32,7 +32,7 @@ struct cell : gcell {
   int mirror(int d) { return tmirror(spintable, d); }
 
   heptagon *master;
-  cell *mov[7]; // meaning very similar to heptagon::move
+  cell *mov[MAX_EDGE]; // meaning very similar to heptagon::move
   };
 
 int fixdir(int a, cell *c) { a %= c->type; if(a<0) a += c->type; return a; }
@@ -46,7 +46,7 @@ cell *newCell(int type, heptagon *master) {
   cellcount++;
   c->type = type;
   c->master = master;
-  for(int i=0; i<7; i++) c->mov[i] = NULL;
+  for(int i=0; i<MAX_EDGE; i++) c->mov[i] = NULL;
   initcell(c);
   return c;
   }
@@ -152,12 +152,12 @@ struct hrmap_hyperbolic : hrmap {
     h.fieldval = 0;
     h.rval0 = h.rval1 = 0;
     h.cdata = NULL;
-    for(int i=0; i<7; i++) h.move[i] = NULL;
+    for(int i=0; i<MAX_EDGE; i++) h.move[i] = NULL;
     h.spintable = 0;
     h.alt = NULL;
     h.distance = 0;
     ispurehepta = purehepta;
-    h.c7 = newCell(7, origin);
+    h.c7 = newCell(S7, origin);
     }
   heptagon *getOrigin() { return origin; }
   ~hrmap_hyperbolic() {
@@ -526,7 +526,7 @@ struct hrmap_quotient : hrmap {
         h->fieldval = 7*i;
         h->rval0 = h->rval1 = 0; h->cdata = NULL;
         h->distance = 0;
-        h->c7 = newCell(7, h);
+        h->c7 = newCell(S7, h);
         }
       for(int j=0; j<7; j++) {
         h->move[rv(j)] = allh[connections[i*7+j]/7];
@@ -591,10 +591,10 @@ cell *createMov(cell *c, int d) {
     int a3 = c->type/2;
     int a4 = a3+1;
     
-    heptspin hs2 = hsstep(hsspin(hs, a3), a3);    
+    heptspin hs2 = hsstep(hsspin(hs, a3), -a4);
     merge(hs2.h->c7, hs2.spin, n, 2, hs2.mirrored);
     
-    heptspin hs3 = hsstep(hsspin(hs, a4), a4);
+    heptspin hs3 = hsstep(hsspin(hs, a4), -a3);
     merge(hs3.h->c7, hs3.spin, n, 4, hs3.mirrored);
     
     extern void verifycell(cell *c);
@@ -634,12 +634,12 @@ cell *createMov(cell *c, int d) {
   }
 
 cell *createMovR(cell *c, int d) {
-  d %= 420; d += 420; d %= c->type;
+  d %= MODFIXER; d += MODFIXER; d %= c->type;
   return createMov(c, d);
   }
 
 cell *getMovR(cell *c, int d) {
-  d %= 420; d += 420; d %= c->type;
+  d %= MODFIXER; d += MODFIXER; d %= c->type;
   return c->mov[d];
   }
 
@@ -653,7 +653,7 @@ struct cellwalker {
   };
 
 void cwspin(cellwalker& cw, int d) {
-  cw.spin = (cw.spin+(MIRR(cw)?-d:d) + 420) % cw.c->type;
+  cw.spin = (cw.spin+(MIRR(cw)?-d:d) + MODFIXER) % cw.c->type;
   }
 
 bool cwstepcreates(cellwalker& cw) {
@@ -661,11 +661,11 @@ bool cwstepcreates(cellwalker& cw) {
   }
 
 cell *cwpeek(cellwalker cw, int dir) {
-  return createMov(cw.c, (cw.spin+420+dir) % cw.c->type);
+  return createMov(cw.c, (cw.spin+MODFIXER+dir) % cw.c->type);
   }
 
 void cwmirrorat(cellwalker& cw, int d) {
-  cw.spin = (d+d - cw.spin + 420) % cw.c->type;
+  cw.spin = (d+d - cw.spin + MODFIXER) % cw.c->type;
   cw.mirrored = !cw.mirrored;
   }
 
@@ -726,8 +726,8 @@ void initcells() {
   else currentmap = new hrmap_hyperbolic;
   
   allmaps.push_back(currentmap);
-  
-  windmap::create();
+
+  if(!AT8) windmap::create();  
   
   // origin->emeraldval = 
   }
@@ -806,7 +806,7 @@ void verifycells(heptagon *at) {
     printf("hexmix error %p [%d s=%d] %p %p\n", at, i, at->spin(i), at->move[i], at->move[i]->move[at->spin(i)]);
     }
   if(!sphere && !quotient) 
-    for(int i=0; i<7; i++) if(at->move[i] && at->spin(i) == 0 && at->s != hsOrigin)
+    for(int i=0; i<S7; i++) if(at->move[i] && at->spin(i) == 0 && at->s != hsOrigin)
       verifycells(at->move[i]);
   verifycell(at->c7);
   }
@@ -831,7 +831,7 @@ bool ishept(cell *c) {
 bool ishex1(cell *c) {
   // EUCLIDEAN
   if(euclid) return eupattern(c) == 1;
-  else return c->type == 7;
+  else return c->type != 6;
   }
 
 int emeraldval(cell *c) {
@@ -875,7 +875,7 @@ int celldist(cell *c) {
     return eudist(x, y);
     }
   if(sphere) return celldistance(c, currentmap->gamestart());
-  if(c->type == 7) return c->master->distance;
+  if(c->type != 6) return c->master->distance;
   int dx[3];
   for(int u=0; u<3; u++)
     dx[u] = createMov(c, u+u)->master->distance;
@@ -898,7 +898,7 @@ int celldistAlt(cell *c) {
     return euclidAlt(x, y);
     }
   if(!c->master->alt) return 0;
-  if(c->type == 7) return c->master->alt->distance;
+  if(c->type != 6) return c->master->alt->distance;
   int dx[3];
   for(int u=0; u<3; u++) if(createMov(c, u+u)->master->alt == NULL)
     return ALTDIST_UNKNOWN;
@@ -964,7 +964,7 @@ int cdist50(cell *c) {
       return "0123333332112332223322233211233333322"[eufifty(c)] - '0';
     else return "012333321112322232222321123"[eufifty(c)] - '0';
     }
-  if(c->type == 7) return cdist50(fiftyval(c));
+  if(c->type != 6) return cdist50(fiftyval(c));
   int a0 = cdist50(createMov(c,0));
   int a1 = cdist50(createMov(c,2));
   int a2 = cdist50(createMov(c,4));
@@ -973,7 +973,7 @@ int cdist50(cell *c) {
   }
 
 int land50(cell *c) {
-  if(c->type == 7) return land50(fiftyval(c));
+  if(c->type != 6) return land50(fiftyval(c));
   else if(sphere || euclid) return 0;
   else {
     if(cdist50(createMov(c,0)) < 3) return land50(createMov(c,0));
@@ -984,7 +984,7 @@ int land50(cell *c) {
   }
 
 int polara50(cell *c) {
-  if(c->type == 7) return polara50(fiftyval(c));
+  if(c->type != 6) return polara50(fiftyval(c));
   else if(sphere || euclid) return 0;
   else {
     if(cdist50(createMov(c,0)) < 3) return polara50(createMov(c,0));
@@ -996,7 +996,7 @@ int polara50(cell *c) {
 
 int polarb50(cell *c) {
   if(euclid) return true;
-  if(c->type == 7) return polarb50(fiftyval(c));
+  if(c->type != 6) return polarb50(fiftyval(c));
   else if(sphere || euclid) return true;
   else {
     if(cdist50(createMov(c,0)) < 3) return polarb50(createMov(c,0));
@@ -1011,7 +1011,7 @@ int elhextable[28][3] = {
   };
 
 int fiftyval049(cell *c) {
-  if(c->type == 7 || euclid) return fiftyval(c) / 32;
+  if(c->type != 6 || euclid) return fiftyval(c) / 32;
   else if(sphere) return 0;
   else {
     int a[3], qa=0;
@@ -1049,7 +1049,7 @@ int fiftyval049(cell *c) {
 // zebraval
 
 int zebra40(cell *c) {
-  if(c->type == 7) return (c->master->zebraval/10);
+  if(c->type != 6) return (c->master->zebraval/10);
   else if(sphere) return 0;
   else if(euclid) return eupattern(c);
   else {
@@ -1073,7 +1073,7 @@ int zebra40(cell *c) {
   }
 
 int zebra3(cell *c) {
-  if(c->type == 7) return (c->master->zebraval/10)/4;
+  if(c->type != 6) return (c->master->zebraval/10)/4;
   else if(sphere) return 0;
   else { 
     int ii[3];
@@ -1368,7 +1368,7 @@ cdata *getEuclidCdata(heptagon *h) {
 
 int getCdata(cell *c, int j) {
   if(euclid) return getEuclidCdata(c->master)->val[j];
-  else if(c->type == 7) return getHeptagonCdata(c->master)->val[j]*3;
+  else if(c->type != 6) return getHeptagonCdata(c->master)->val[j]*3;
   else {
     int jj = 0;
     for(int k=0; k<6; k++) if(c->mov[k] && c->mov[k]->type == 7)
@@ -1379,7 +1379,7 @@ int getCdata(cell *c, int j) {
 
 int getBits(cell *c) {
   if(euclid) return getEuclidCdata(c->master)->bits;
-  else if(c->type == 7) return getHeptagonCdata(c->master)->bits;
+  else if(c->type != 6) return getHeptagonCdata(c->master)->bits;
   else {
     int b0 = getHeptagonCdata(createMov(c, 0)->master)->bits;
     int b1 = getHeptagonCdata(createMov(c, 2)->master)->bits;
@@ -1427,7 +1427,7 @@ int fieldval_uniq(cell *c) {
     if(i<0) i += torusconfig::qty;
     return i;
     }
-  if(c->type == 7) return c->master->fieldval/7;
+  if(c->type != 6) return c->master->fieldval/7;
   else {
     int z = 0;
     for(int u=0; u<6; u+=2) 
@@ -1440,7 +1440,7 @@ int fieldval_uniq_rand(cell *c, int randval) {
   if(sphere || torus || euclid) 
     // we do not care in these cases
     return fieldval_uniq(c);
-  if(c->type == 7) return fp43.gmul(c->master->fieldval, randval)/7;
+  if(c->type != 6) return fp43.gmul(c->master->fieldval, randval)/7;
   else {
     int z = 0;
     for(int u=0; u<6; u+=2) 

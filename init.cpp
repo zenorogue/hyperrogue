@@ -1,6 +1,6 @@
-#define VER "10.1f"
-#define VERNUM 10106
-#define VERNUM_HEX 0xA086
+#define VER "10.1g"
+#define VERNUM 10107
+#define VERNUM_HEX 0xA087
 
 #define GEN_M 0
 #define GEN_F 1
@@ -325,12 +325,15 @@ const char *musicfile = "";
 const char *loadlevel = NULL;
 #endif
 
-#define S7 (sphere?5:7)
+#define AT8 (geometry == gOctagon ? 1 : 0)
+
+#define S7 (sphere?5:AT8?8:7)
 #define S42 (S7*6)
 #define S14 (S7*2)
 #define S21 (S7*3)
 #define S28 (S7*4)
 #define S84 (S7*12)
+#define MAX_EDGE 8
 
 #include "util.cpp"
 #include "hyperpoint.cpp"

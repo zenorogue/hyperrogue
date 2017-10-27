@@ -555,17 +555,17 @@ void showChangeMode() {
 int eupage = 0;
 int euperpage = 21;
 
-#define LAND_SPHEUC ((targetgeometry > 1) ? LAND_SPH : LAND_EUC)
-#define land_spheuc ((targetgeometry > 1) ? land_sph : land_euc)
+#define LAND_SPHEUC ((targetgeometry == gOctagon) ? LAND_OCT : (targetgeometry > 1) ? LAND_SPH : LAND_EUC)
+#define land_spheuc ((targetgeometry == gOctagon) ? land_oct : (targetgeometry > 1) ? land_sph : land_euc)
 
 const char* geometrynames[gGUARD] = {
   "hyperbolic", "Euclidean", "spherical", "elliptic", 
-  "Zebra quotient", "field quotient", "torus"
+  "Zebra quotient", "field quotient", "torus", "octagons"
   };  
 
 const char* geometrynames_short[gGUARD] = {
   "hyper", "Euclid", "sphere", "elliptic", 
-  "Zebra", "field", "torus"
+  "Zebra", "field", "torus", "oct"
   };  
 
 void showEuclideanMenu() {

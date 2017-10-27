@@ -1767,12 +1767,13 @@ struct gcell {
 
   unsigned 
     pathdist : 7,       // player distance wrt usual movement
-    cpdist : 5, mpdist : 5; // current/minimum player distance
+    cpdist : 8, mpdist : 8; // current/minimum player distance
 
-  unsigned mondir : 3,   // monster direction, for multi-tile monsters and graphics
+  unsigned 
+    mondir : 4,         // monster direction, for multi-tile monsters and graphics
     bardir : 4,         // barrier direction
     stuntime : 4,       // stun time left (for Palace Guards and Skeletons)
-    hitpoints : 3;      // hitpoints left (for Palace Guards, also reused as cpid for mirrors)
+    hitpoints : 4;      // hitpoints left (for Palace Guards, also reused as cpid for mirrors)
   
   unsigned landflags : 8;      // extra flags for land
   
@@ -1804,8 +1805,8 @@ struct gcell {
 
 #define fval LHU.fi.fieldval
 
-#define NODIR 7
-#define NOBARRIERS 8
+#define NODIR 8
+#define NOBARRIERS 9
 
 #define LAND_OVER 57
 #define LAND_OVERX 59
@@ -1864,6 +1865,16 @@ eLand land_sph[LAND_SPH] = {
   laCrossroads4,
   laWildWest, laPalace, laBull, laPrairie, laCA
   };
+
+#define LAND_OCT 23
+eLand land_oct[LAND_OCT] = {
+  laDesert, laIce, laCaves, laJungle, laAlchemist, 
+  laGraveyard, laRlyeh, laHell, laCocytus, laMotion, 
+  laDryForest, laDeadCaves, laRedRock, laMinefield, laLivefjord,
+  laStorms, laOvergrown, laRose, laKraken, laBurial,
+  laTrollheim, laBull, laHunting
+  };
+
 
 #define LAND_HYP 51
 eLand land_hyp[LAND_HYP] = {

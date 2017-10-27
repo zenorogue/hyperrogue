@@ -177,7 +177,7 @@ heptagon *createAlternateMap(cell *c, int rad, hstate firststate, int special) {
   alt->s = firststate;
   alt->emeraldval = 0;
   alt->zebraval = 0;
-  for(int i=0; i<7; i++) alt->move[i] = NULL;
+  for(int i=0; i<MAX_EDGE; i++) alt->move[i] = NULL;
   alt->distance = 0;
   alt->c7 = NULL;
   alt->alt = alt;
@@ -225,7 +225,7 @@ void generateTreasureIsland(cell *c) {
     beCIsland(c);
     if(c->wall == waCTree) return;
     }
-  cell* ctab[7];
+  cell* ctab[MAX_EDGE];
   int qc = 0, qlo, qhi;
   for(int i=0; i<c->type; i++) {
     cell *c2 = createMov(c, i);
@@ -578,7 +578,7 @@ void buildEquidistant(cell *c) {
   }
 
 cell *randomDown(cell *c) {
-  cell *tab[7];
+  cell *tab[MAX_EDGE];
   int q=0;
   for(int i=0; i<c->type; i++) 
     if(c->mov[i] && coastval(c->mov[i], laIvoryTower) < coastval(c, laIvoryTower))
@@ -845,7 +845,7 @@ bool quickfind(eLand l) {
 #define I10000 (INVLUCK?3000:10000)
 
 void buildBigStuff(cell *c, cell *from) {
-  if(sphere || quotient) return;
+  if(sphere || quotient || AT8) return;
   bool deepOcean = false;
         
   if(c->land == laOcean) {

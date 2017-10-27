@@ -9,8 +9,10 @@
 // automaton state
 enum hstate { hsOrigin, hsA, hsB, hsError, hsA0, hsA1, hsB0, hsB1, hsC };
 
-int fixrot(int a) { return (a+490)% S7; }
-int fix42(int a) { return (a+420)% S42; }
+#define MODFIXER 23520
+
+int fixrot(int a) { return (a+MODFIXER)% S7; }
+int fix42(int a) { return (a+MODFIXER)% S42; }
 
 struct heptagon;
 
@@ -43,7 +45,7 @@ struct heptagon {
   void setspin(int d, int sp) { tsetspin(spintable, d, sp); }
   // neighbors; move[0] always goes towards origin,
   // and then we go clockwise
-  heptagon* move[7];
+  heptagon* move[MAX_EDGE];
   // distance from the origin
   short distance;
   // emerald/wineyard generator
@@ -88,10 +90,11 @@ hstate transition(hstate s, int dir) {
     }
   else {
     if(s == hsOrigin) return hsA;
-    if(s == hsA && dir >= 3 && dir <= 4) return hsA;
-    if(s == hsA && dir == 5) return hsB;
-    if(s == hsB && dir == 4) return hsB;
+    if(s == hsA && dir >= 3 && dir <= S7-3) return hsA;
+    if(s == hsA && dir == S7-2) return hsB;
+    if(s == hsB && dir == S7-3) return hsB;
     if(s == hsB && dir == 3) return hsA;
+    if(s == hsB && AT8 && dir == 4) return hsA;
     }
   return hsError;
   }
@@ -99,25 +102,38 @@ hstate transition(hstate s, int dir) {
 // create h->move[d] if not created yet
 heptagon *createStep(heptagon *h, int d);
 
+/*
+int indent = 0;
+
+struct indenter {
+  indenter() { indent += 2; }
+  ~indenter() { indent -= 2; }
+  };
+
+template<class... T> auto iprintf(T... t) { for(int i=0; i<indent; i++) putchar(' '); return printf(t...); }
+*/
+
 // create a new heptagon
 heptagon *buildHeptagon(heptagon *parent, int d, hstate s, int pard = 0) {
   heptagon *h = new heptagon;
   h->alt = NULL;
   h->s = s;
-  for(int i=0; i<7; i++) h->move[i] = NULL;
+  for(int i=0; i<MAX_EDGE; i++) h->move[i] = NULL;
   h->spintable = 0;
   h->move[pard] = parent; tsetspin(h->spintable, pard, d);
   parent->move[d] = h; tsetspin(parent->spintable, d, pard);
   if(parent->c7) {
-    h->c7 = newCell(7, h);
-    h->emeraldval = emerald_heptagon(parent->emeraldval, d);
-    h->zebraval = zebra_heptagon(parent->zebraval, d);
-    h->fieldval = fp43.connections[fieldpattern::btspin(parent->fieldval, d)];
+    h->c7 = newCell(S7, h);
     h->rval0 = h->rval1 = 0; h->cdata = NULL;
-    if(parent->s == hsOrigin)
-      h->fiftyval = fiftytable[0][d];
-    else
-      h->fiftyval = nextfiftyval(parent->fiftyval, parent->move[0]->fiftyval, d);
+    if(!AT8) {
+      h->emeraldval = emerald_heptagon(parent->emeraldval, d);
+      h->zebraval = zebra_heptagon(parent->zebraval, d);
+      h->fieldval = fp43.connections[fieldpattern::btspin(parent->fieldval, d)];
+      if(parent->s == hsOrigin)
+        h->fiftyval = fiftytable[0][d];
+      else
+        h->fiftyval = nextfiftyval(parent->fiftyval, parent->move[0]->fiftyval, d);
+      }
     }
   else {
     h->c7 = NULL;
@@ -167,19 +183,19 @@ heptagon *createStep(heptagon *h, int d) {
   else if(d == 1) {
     addSpin(h, d, h->move[0], h->spin(0)-1, -1);
     }
-  else if(d == 6) {
+  else if(d == S7-1) {
     addSpin(h, d, h->move[0], h->spin(0)+1, +1);
     }
   else if(d == 2) {
     createStep(h->move[0], h->spin(0)-1);
-    addSpin(h, d, h->move[0]->modmove(h->spin(0)-1), 5 + h->move[0]->gspin(h->spin(0)-1), -1);
+    addSpin(h, d, h->move[0]->modmove(h->spin(0)-1), S7-2 + h->move[0]->gspin(h->spin(0)-1), -1);
     }
-  else if(d == 5 && h->s == hsB) {
+  else if(d == S7-2 && h->s == hsB) {
     createStep(h->move[0], h->spin(0)+1);
     addSpin(h, d, h->move[0]->modmove(h->spin(0)+1), 2 + h->move[0]->gspin(h->spin(0)+1), +1);
     }
   else
-    buildHeptagon(h, d, (d == 5 || (h->s == hsB && d == 4)) ? hsB : hsA);
+    buildHeptagon(h, d, (d == S7-2 || (h->s == hsB && d == S7-3)) ? hsB : hsA);
   return h->move[d];
   }
 

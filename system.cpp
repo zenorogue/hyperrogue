@@ -103,7 +103,7 @@ void initgame() {
   if(isGravityLand(firstland) && !tactic::on) firstland = laCrossroads;
   
   cwt.c = currentmap->gamestart(); cwt.spin = 0; cwt.mirrored = false;
-  cwt.c->land = (euclid || sphere) ? specialland : firstland;
+  cwt.c->land = (euclid || sphere || AT8) ? specialland : firstland;
   
   chaosAchieved = false;
 

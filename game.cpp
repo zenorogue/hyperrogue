@@ -2570,7 +2570,7 @@ void buildRosemap() {
 
   }
 
-int getDistLimit() { return purehepta?5:7; }
+int getDistLimit() { return purehepta?(AT8?4:5):7; }
 
 bool nogoSlow(cell *to, cell *from) {
   if(cellEdgeUnstable(to) && gravityLevel(to) >= gravityLevel(from)) return true;
@@ -3658,7 +3658,8 @@ template<class T>
 cell *determinePush(cellwalker who, cell *c2, int subdir, T valid) {
   cellwalker push = who;
   cwstep(push);
-  cwspin(push, 3 * -subdir);
+  int pd = push.c->type == 8 ? 4 : 3;
+  cwspin(push, pd * -subdir);
   cwstep(push);
   if(valid(push.c)) return push.c;
   if(c2->type == 7) {
@@ -4438,7 +4439,7 @@ void movehex(bool mounted) {
     cell *c = hexsnakes[i];
     if(c->monst == moHexSnake) {
       if(!goodmount(c, mounted)) continue;
-      int t[7];
+      int t[MAX_EDGE];
       for(int i=0; i<c->type; i++) t[i] = i;
       for(int j=1; j<c->type; j++) swap(t[j], t[hrand(j+1)]);
       for(int u=0; u<c->type; u++) {
@@ -4566,7 +4567,7 @@ void moveghosts() {
     
     if(isGhostMover(c->monst) && c->cpdist >= 1) {
       
-      int mdir[7];
+      int mdir[MAX_EDGE];
 
       for(int j=0; j<c->type; j++) 
         if(c->mov[j] && canAttack(c, c->monst, c->mov[j], c->mov[j]->monst, AF_GETPLAYER | AF_ONLY_FBUG)) {
@@ -4902,7 +4903,7 @@ void movegolems(flagtype flags) {
       for(int i=0; i<ittypes; i++) recorduse[i] = orbused[i];
 
       DEBT("stayval");
-      int bestv = stayvalue(m, c), bq = 0, bdirs[7];
+      int bestv = stayvalue(m, c), bq = 0, bdirs[MAX_EDGE];
 
       DEBT("moveval");
       for(int k=0; k<c->type; k++) if(c->mov[k]) {
@@ -5266,7 +5267,7 @@ void moverefresh(bool turn = true) {
           c->monst = moReptile;
           c->hitpoints = 3;
           c->stuntime = 0;
-          int gooddirs[7], qdirs = 0;
+          int gooddirs[MAX_EDGE], qdirs = 0;
           // in the peace mode, a reptile will
           // prefer to walk on the ground, rather than the chasm
           for(int i=0; i<c->type; i++) {
@@ -5774,7 +5775,7 @@ void activateSafety(eLand l) {
   restartGraph();  
   }
 
-bool legalmoves[8];
+bool legalmoves[MAX_EDGE+1];
 
 bool hasSafeOrb(cell *c) {
   return 
@@ -5801,7 +5802,7 @@ void checkmove() {
 
   canmove = false;
   items[itWarning]+=2;
-  if(movepcto(-1, 0, true)) canmove = legalmoves[7] = true;
+  if(movepcto(-1, 0, true)) canmove = legalmoves[MAX_EDGE] = true;
   
   if(ISMOBILE || !canmove)
     for(int i=0; i<cwt.c->type; i++) 

@@ -13,12 +13,14 @@ ld tessf, crossf, hexf, hcrossf, hexhexdist;
 
 #define ALPHA (M_PI*2/S7)
 
-hyperpoint Crad[42];
+hyperpoint Crad[6*MAX_EDGE];
 
-transmatrix heptmove[7], hexmove[7];
-transmatrix invheptmove[7], invhexmove[7];
+transmatrix heptmove[MAX_EDGE], hexmove[MAX_EDGE];
+transmatrix invheptmove[MAX_EDGE], invhexmove[MAX_EDGE];
 
-transmatrix spinmatrix[84];
+transmatrix spinmatrix[MAX_EDGE*12];
+
+ld hexshift;
 
 const transmatrix& getspinmatrix(int id) {
   while(id>=S84) id -= S84;
@@ -30,11 +32,15 @@ const transmatrix& getspinmatrix(int id) {
 // hexf = 0.378077 hcrossf = 0.620672 tessf = 1.090550
 // hexhexdist = 0.566256
 
+ld hcrossf7 = 0.620672;
+
 // the distance between two hexagon centers
 
 void precalc() {
 
   DEBB(DF_INIT, (debugfile,"precalc\n"));
+  
+  hexshift = 0;
 
   if(euclid) return;
 
@@ -75,8 +81,13 @@ void precalc() {
     Crad[i] = spin(2*M_PI*i/S42) * xpush(.4) * C0;
   for(int d=0; d<S7; d++)
     heptmove[d] = spin(-d * ALPHA) * xpush(tessf) * spin(M_PI);
+    
+  hexshift = 0;
+  if(!AT8 && !purehepta)
+    hexshift = ALPHA/2 + ALPHA * ((S7-1)/2) + M_PI;
+
   for(int d=0; d<S7; d++) 
-    hexmove[d] = spin(-d * ALPHA) * xpush(-crossf)* spin(M_PI);  
+    hexmove[d] = spin(hexshift-d * ALPHA) * xpush(-crossf)* spin(M_PI);  
 
   for(int d=0; d<S7; d++) invheptmove[d] = inverse(heptmove[d]);
   for(int d=0; d<S7; d++) invhexmove[d] = inverse(hexmove[d]);

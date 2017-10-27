@@ -211,7 +211,7 @@ int displaydir(cell *c, int d) {
   if(euclid)
     return - d * S84 / c->type;
   else
-    return S42 - d * S84 / c->type;
+    return (c->type != 6 ? -hexshift:0) + S42 - d * S84 / c->type;
   }
 
 transmatrix ddspin(cell *c, int d, int bonus) {
@@ -500,7 +500,7 @@ bool drawstar(cell *c) {
 
 bool drawItemType(eItem it, cell *c, const transmatrix& V, int icol, int ticks, bool hidden) {
   char xch = iinf[it].glyph;
-  int ct6 = c ? c->type-6 : 1;
+  int ct6 = c ? c->type != 6 : 1;
   hpcshape *xsh = 
     (it == itPirate || it == itKraken) ? &shPirateX :
     (it == itBuggy || it == itBuggy2) ? &shPirateX :
@@ -2296,7 +2296,7 @@ void drawMovementArrows(cell *c, transmatrix V) {
       poly_outline = OUTLINE_DEFAULT;
       queuepoly(fixrot * spin(-d * M_PI/4 + (sphere && vid.alpha>1?M_PI:0))/* * eupush(1,0)*/, shArrow, col);
 
-      if(c->type != 6 && (isStunnable(c->monst) || c->wall == waThumperOn)) {
+      if((c->type & 1) && (isStunnable(c->monst) || c->wall == waThumperOn)) {
         transmatrix Centered = rgpushxto0(tC0(cwtV));
         int sd = md.subdir;
         if(sphere) sd = -sd;
@@ -4644,7 +4644,7 @@ void drawMarkers() {
     calc();
     queuecircle(xmove, yb, rad, 0xFF0000FF);
     queuecircle(xmove, yb, rad*SKIPFAC, 
-      legalmoves[7] ? 0xFF0000FF : 0xFF000080
+      legalmoves[MAX_EDGE] ? 0xFF0000FF : 0xFF000080
       );
     forCellAll(c2, cwt.c) IG(c2) drawMobileArrow(c2, Gm(c2));
     }

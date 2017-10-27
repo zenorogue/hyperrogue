@@ -1950,6 +1950,21 @@ void repairLandgen(cell *c) {
     }
   }
 
+int dnext(int d) {
+  if(!purehepta && !AT8)
+    //0,1,2,3,4,5,6,7
+    return d+1;
+  else if(!purehepta && AT8)
+    //0,1,2,3,4,5,7
+    return d+(d==5?2:1);
+  else if(purehepta && AT8)
+    //0,1,3,5,7
+    return d+(d>=1 && d<7?2:1);
+  else 
+    // 0,1,2,3,5,7
+    return d+(d>=3 && d<7?2:1);
+  }
+  
 void setdist(cell *c, int d, cell *from) {
   
   if(signed(c->mpdist) <= d) return;
@@ -2022,7 +2037,8 @@ void setdist(cell *c, int d, cell *from) {
     exploreland[d][c->land]++;
     
     if(d < BARLEV) for(int i=0; i<c->type; i++) {
-      setdist(createMov(c, i), d+(purehepta && d>=3 && d<7?2:1), c);
+      
+      setdist(createMov(c, i), dnext(d), c);
       if(buggyGeneration) return;
       }
     
