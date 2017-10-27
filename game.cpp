@@ -2570,7 +2570,7 @@ void buildRosemap() {
 
   }
 
-int getDistLimit() { return purehepta?(AT8?4:5):7; }
+int getDistLimit() { return purehepta?(AT8?4:5):(AT8?6:7); }
 
 bool nogoSlow(cell *to, cell *from) {
   if(cellEdgeUnstable(to) && gravityLevel(to) >= gravityLevel(from)) return true;
