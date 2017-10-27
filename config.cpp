@@ -127,7 +127,10 @@ template<> struct saver<unsigned> : dsaver<unsigned> {
 template<> struct saver<ld> : dsaver<ld> {
   saver<ld>(ld& val) : dsaver<ld>(val) { }
   string save() { return ftssmart(val); }
-  void load(const string& s) { val = atof(s.c_str()); }
+  void load(const string& s) { 
+    if(s == "0.0000000000e+000") ; // ignore!
+    else val = atof(s.c_str()); 
+    }
   };
 #endif
 
@@ -632,9 +635,11 @@ void showGraphConfig() {
     if(xuni == 'u') vid.particles = !vid.particles;
     if(xuni == 'd') vid.graphglyph = (1+vid.graphglyph)%3;
     
-    if(xuni == 'j')
+    if(xuni == 'j') {
       dialog::editNumber(whatever, -10, 10, 1, 0, XLAT("whatever"), 
         XLAT("Whatever."));
+      dialog::reaction = resetGeometry;
+      }
   
     if(xuni == 'a') dialog::editNumber(vid.sspeed, -5, 5, 1, 0, 
       XLAT("scrolling speed"),
@@ -774,7 +779,7 @@ void showBasicConfig() {
 #endif
 
 #if ISSTEAM
-  dialog::addBoolItem(XLAT("send scores to Steam leaderboards"), (vid.steamscore&1), 's');
+  dialog::addBoolItem(XLAT("send scores to Steam leaderboards"), (vid.steamscore&1), 'x');
 #endif
 
   dialog::addBoolItem(XLAT("skip the start menu"), vid.skipstart, 'm');
@@ -830,7 +835,7 @@ void showBasicConfig() {
 #endif
   
   #if ISSTEAM
-    if(xuni == 's') vid.steamscore = vid.steamscore^1;
+    if(xuni == 'x') vid.steamscore = vid.steamscore^1;
   #endif
     if(xuni == 't') 
       dialog::editNumber(vid.flashtime, 0, 64, 1, 8, XLAT("message flash time"),
