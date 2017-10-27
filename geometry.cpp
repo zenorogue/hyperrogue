@@ -42,7 +42,11 @@ void precalc() {
   
   hexshift = 0;
 
-  if(euclid) return;
+  if(euclid) { 
+    dynamicval<eGeometry> g(geometry, gNormal);
+    precalc();
+    return;
+    }
 
   ld fmin = 1, fmax = 2;
   
@@ -83,7 +87,7 @@ void precalc() {
     heptmove[d] = spin(-d * ALPHA) * xpush(tessf) * spin(M_PI);
     
   hexshift = 0;
-  if(!AT8 && !purehepta)
+  if(AT8 && !purehepta)
     hexshift = ALPHA/2 + ALPHA * ((S7-1)/2) + M_PI;
 
   for(int d=0; d<S7; d++) 
