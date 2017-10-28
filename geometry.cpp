@@ -8,6 +8,7 @@ ld tessf, crossf, hexf, hcrossf, hexhexdist;
 
 // tessf: distance from heptagon center to another heptagon center
 // hexf: distance from heptagon center to heptagon vertex
+// hcrossf: distance from heptagon center to big heptagon vertex
 // crossf: distance from heptagon center to adjacent hexagon center
 // hexhexdist: distance between adjacent hexagon vertices
 
@@ -18,7 +19,7 @@ hyperpoint Crad[6*MAX_EDGE];
 transmatrix heptmove[MAX_EDGE], hexmove[MAX_EDGE];
 transmatrix invheptmove[MAX_EDGE], invhexmove[MAX_EDGE];
 
-transmatrix spinmatrix[MAX_EDGE*12];
+transmatrix spinmatrix[MAX_S84];
 
 ld hexshift;
 
@@ -33,6 +34,7 @@ const transmatrix& getspinmatrix(int id) {
 // hexhexdist = 0.566256
 
 ld hcrossf7 = 0.620672;
+ld hexf7 = 0.378077;
 
 // the distance between two hexagon centers
 
@@ -42,30 +44,50 @@ void precalc() {
   
   hexshift = 0;
 
+  int vertexdegree = S6/2;
+  ld fmin, fmax;  
+
   if(euclid) { 
-    dynamicval<eGeometry> g(geometry, gNormal);
-    precalc();
-    return;
+    // dynamicval<eGeometry> g(geometry, gNormal);
+    // precalc(); }
+    // for(int i=0; i<S84; i++) spinmatrix[i] = spin(i * M_PI / S42);
+    hcrossf = hexhexdist = hexf = hexf7;
+    tessf = hexf * sqrt(3);
+    goto finish;
     }
 
-  ld fmin = 1, fmax = 2;
+  fmin = AT456 ? 0 : 1, fmax = 2;
   
   for(int p=0; p<100; p++) {
     ld f =  (fmin+fmax) / 2;
-    hyperpoint H = xpush(f) * C0;
-    ld v1 = intval(H, C0), v2 = intval(H, spin(2*M_PI/S7)*H);
+    ld v1, v2;
+    if(vertexdegree == 3) {
+      hyperpoint H = xpush(f) * C0;
+      v1 = intval(H, C0), v2 = intval(H, spin(2*M_PI/S7)*H);
+      }
+    else if(vertexdegree == 4) {
+      hyperpoint H = xpush(f) * C0;
+      ld opposite = hdist(H, spin(2*M_PI/S7)*H);
+      hyperpoint Hopposite = spin(M_PI/S7) * xpush(opposite) * C0;
+      v2 = intval(H, Hopposite), v1 = intval(H, C0);
+      }
     if(sphere ? v1 < v2 : v1 > v2) fmin = f; else fmax = f;
     }
   tessf = fmin;
   
-  fmin = 0, fmax = sphere ? M_PI / 2 : 2;
-  for(int p=0; p<100; p++) {
-    ld f =  (fmin+fmax) / 2;
-    hyperpoint H = spin(M_PI/S7) * xpush(f) * C0;
-    ld v1 = intval(H, C0), v2 = intval(H, xpush(tessf) * C0);
-    if(v1 < v2) fmin = f; else fmax = f;
+  if(vertexdegree == 3) {
+    fmin = 0, fmax = sphere ? M_PI / 2 : 2;
+    for(int p=0; p<100; p++) {
+      ld f =  (fmin+fmax) / 2;
+      hyperpoint H = spin(M_PI/S7) * xpush(f) * C0;
+      ld v1 = intval(H, C0), v2 = intval(H, xpush(tessf) * C0);
+      if(v1 < v2) fmin = f; else fmax = f;
+      }
+    hcrossf = fmin;
     }
-  hcrossf = fmin;
+  else {
+    hcrossf = hdist(xpush(tessf) * C0, spin(2*M_PI/S7) * xpush(tessf) * C0) / 2;
+    }
   crossf = purehepta ? tessf : hcrossf;
   
   fmin = 0, fmax = tessf;
@@ -79,17 +101,21 @@ void precalc() {
     }
   hexf = fmin;
   
-  // printf("hexf = %.6Lf cross = %.6Lf tessf = %.6Lf\n", hexf, crossf, tessf);
+  if(AT8 && !purehepta)
+    hexshift = ALPHA/2 + ALPHA * ((S7-1)/2) + M_PI;
+
+  if(AT46 && !purehepta)
+    hexshift = ALPHA/2 + ALPHA * ((S7-1)/2) + M_PI;
+    
+  finish:
+
+  printf("hexf = " LDF" hcross = " LDF" tessf = " LDF"\n", hexf, hcrossf, tessf);
   
   for(int i=0; i<S42; i++)
     Crad[i] = spin(2*M_PI*i/S42) * xpush(.4) * C0;
   for(int d=0; d<S7; d++)
     heptmove[d] = spin(-d * ALPHA) * xpush(tessf) * spin(M_PI);
     
-  hexshift = 0;
-  if(AT8 && !purehepta)
-    hexshift = ALPHA/2 + ALPHA * ((S7-1)/2) + M_PI;
-
   for(int d=0; d<S7; d++) 
     hexmove[d] = spin(hexshift-d * ALPHA) * xpush(-crossf)* spin(M_PI);  
 

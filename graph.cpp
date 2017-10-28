@@ -20,8 +20,6 @@ purehookset hooks_frame;
 #define BTOFF 0x404040
 #define BTON  0xC0C000
 
-#define K(c) (c->type==6?0:1)
-
 // #define PANDORA
 
 int colorbar;
@@ -154,6 +152,17 @@ void drawSpeed(const transmatrix& V) {
     }
   }
 
+int ctof(cell *c) {
+  if(purehepta) return 1;
+  // if(euclid) return 0;
+  return ishept(c) ? 1 : 0;
+  // c->type == 6 ? 0 : 1;
+  }
+
+int ctof012(cell *c) {
+  return ishept(c)?1:ishex1(c)?0:2;
+  }
+
 void drawSafety(const transmatrix& V, int ct) {
   ld ds = ticks / 50.;
   int col = darkena(iinf[itOrbSafety].color, 0, 0xFF);
@@ -211,7 +220,7 @@ int displaydir(cell *c, int d) {
   if(euclid)
     return - d * S84 / c->type;
   else
-    return (c->type != 6 ? -hexshift:0) + S42 - d * S84 / c->type;
+    return (ctof(c) ? -hexshift:0) + S42 - d * S84 / c->type;
   }
 
 transmatrix ddspin(cell *c, int d, int bonus) {
@@ -231,8 +240,6 @@ void drawPlayerEffects(const transmatrix& V, cell *c, bool onplayer) {
 
   if(items[itOrbSpeed]) drawSpeed(V); 
 
-  int ct = c->type;
-  
   if(onplayer && (items[itOrbSword] || items[itOrbSword2])) {
     using namespace sword;
   
@@ -270,7 +277,7 @@ void drawPlayerEffects(const transmatrix& V, cell *c, bool onplayer) {
       }
     }
 
-  if(onplayer && items[itOrbSafety]) drawSafety(V, ct);
+  if(onplayer && items[itOrbSafety]) drawSafety(V, c->type);
 
   if(onplayer && items[itOrbFlash]) drawFlash(V); 
   if(onplayer && items[itOrbLove]) drawLove(V, 0); // displaydir(c, cwt.spin)); 
@@ -500,7 +507,7 @@ bool drawstar(cell *c) {
 
 bool drawItemType(eItem it, cell *c, const transmatrix& V, int icol, int ticks, bool hidden) {
   char xch = iinf[it].glyph;
-  int ct6 = c ? c->type != 6 : 1;
+  int ct6 = c ? ctof(c) : 1;
   hpcshape *xsh = 
     (it == itPirate || it == itKraken) ? &shPirateX :
     (it == itBuggy || it == itBuggy2) ? &shPirateX :
@@ -1706,8 +1713,8 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, int col) {
 
     if(mmmon) {
       if(isIvy(c) || isMutantIvy(c) || c->monst == moFriendlyIvy) {
-        queuepoly(mmscale(Vb, geom3::ABODY), shILeaf[K(c)], darkena(col, 0, 0xFF));
-        ShadowV(Vb, shILeaf[K(c)], PPR_GIANTSHADOW);
+        queuepoly(mmscale(Vb, geom3::ABODY), shILeaf[ctof(c)], darkena(col, 0, 0xFF));
+        ShadowV(Vb, shILeaf[ctof(c)], PPR_GIANTSHADOW);
         }
       else if(m == moWorm || m == moWormwait || m == moHexSnake) {
         Vb = Vb * pispin;
@@ -2150,7 +2157,7 @@ void drawTowerFloor(const transmatrix& V, cell *c, int col, cellfunction *cf = c
   if(j >= 0)
     qfloor(c, V, applyDowndir(c, cf), shTower[j], col);
   else if(c->wall != waLadder)
-    qfloor(c, V, shMFloor[K(c)], col);
+    qfloor(c, V, shMFloor[ctof(c)], col);
   }
 
 void drawZebraFloor(const transmatrix& V, cell *c, int col) {
@@ -2226,7 +2233,7 @@ void drawReptileFloor(const transmatrix& V, cell *c, int col, bool usefloor) {
     if(wmescher)
       queuepoly(V2, shReptile[j][1], dcol);
     else
-      queuepoly(V2, shMFloor[c->type!=6], dcol);
+      queuepoly(V2, shMFloor[ctof(c)], dcol);
     }
   
   if(ecol != -1) {
@@ -2253,7 +2260,7 @@ void drawEmeraldFloor(const transmatrix& V, cell *c, int col) {
   if(j >= 0)
     qfloor(c, V, applyPatterndir(c, 'f'), shEmeraldFloor[j], col);
   else
-    qfloor(c, V, shCaveFloor[euclid?2:K(c)], col);
+    qfloor(c, V, shCaveFloor[euclid?2:ctof(c)], col);
   }
 
 double fanframe;
@@ -2790,13 +2797,13 @@ void floorShadow(cell *c, const transmatrix& V, int col, bool warp) {
       if(ishex1(c))
         queuepolyat(V * pispin * applyPatterndir(c), shTriheptaEucShadow[0], col, PPR_WALLSHADOW);
       else
-        queuepolyat(V * applyPatterndir(c), shTriheptaEucShadow[ishept(c)?1:0], col, PPR_WALLSHADOW);
+        queuepolyat(V * applyPatterndir(c), shTriheptaEucShadow[ctof(c)], col, PPR_WALLSHADOW);
       }
     else 
-      queuepolyat(V * applyPatterndir(c), shTriheptaFloorShadow[ishept(c)?1:0], col, PPR_WALLSHADOW);
+      queuepolyat(V * applyPatterndir(c), shTriheptaFloorShadow[ctof(c)], col, PPR_WALLSHADOW);
     }
   else {
-    queuepolyat(V, shFloorShadow[c->type==6?0:1], col, PPR_WALLSHADOW);
+    queuepolyat(V, shFloorShadow[ctof(c)], col, PPR_WALLSHADOW);
     }
   }
 
@@ -2806,13 +2813,13 @@ void plainfloor(cell *c, bool warp, const transmatrix &V, int col, int prio) {
       if(ishex1(c))
         queuepolyat(V * pispin * applyPatterndir(c), shTriheptaEuc[0], col, prio);
       else
-        queuepolyat(V * applyPatterndir(c), shTriheptaEuc[ishept(c)?1:0], col, prio);
+        queuepolyat(V * applyPatterndir(c), shTriheptaEuc[ctof(c)], col, prio);
       }
     else 
-      queuepolyat(V * applyPatterndir(c), shTriheptaFloor[sphere ? 6-c->type : mapeditor::nopattern(c)], col, prio);
+      queuepolyat(V * applyPatterndir(c), shTriheptaFloor[sphere ? ctof(c) : mapeditor::nopattern(c)], col, prio);
     }
   else {
-    queuepolyat(V, shFloor[c->type==6?0:1], col, prio);
+    queuepolyat(V, shFloor[ctof(c)], col, prio);
     }
   }
 
@@ -2822,13 +2829,13 @@ void fullplainfloor(cell *c, bool warp, const transmatrix &V, int col, int prio)
       if(ishex1(c))
         queuepolyat(V * pispin * applyPatterndir(c), shTriheptaEuc[0], col, prio);
       else
-        queuepolyat(V * applyPatterndir(c), shTriheptaEuc[ishept(c)?1:0], col, prio);
+        queuepolyat(V * applyPatterndir(c), shTriheptaEuc[ctof(c)], col, prio);
       }
     else 
-      queuepolyat(V * applyPatterndir(c), shTriheptaFloor[sphere ? 6-c->type : mapeditor::nopattern(c)], col, prio);
+      queuepolyat(V * applyPatterndir(c), shTriheptaFloor[sphere ? ctof(c) : mapeditor::nopattern(c)], col, prio);
     }
   else {
-    queuepolyat(V, shFullFloor[c->type==6?0:1], col, prio);
+    queuepolyat(V, shFullFloor[ctof(c)], col, prio);
     }
   }
 
@@ -2838,13 +2845,13 @@ void qplainfloor(cell *c, bool warp, const transmatrix &V, int col) {
       if(ishex1(c))
         qfloor(c, V, pispin * applyPatterndir(c), shTriheptaEuc[0], col);
       else
-        qfloor(c, V, applyPatterndir(c), shTriheptaEuc[ishept(c)?1:0], col);
+        qfloor(c, V, applyPatterndir(c), shTriheptaEuc[ctof(c)], col);
       }
     else 
-      qfloor(c, V, applyPatterndir(c), shTriheptaFloor[sphere ? 6-c->type : mapeditor::nopattern(c)], col);
+      qfloor(c, V, applyPatterndir(c), shTriheptaFloor[sphere ? ctof(c) : mapeditor::nopattern(c)], col);
     }
   else {
-    qfloor(c, V, shFloor[c->type==6?0:1], col);
+    qfloor(c, V, shFloor[ctof(c)], col);
     }
   }
 
@@ -2919,7 +2926,7 @@ void placeSidewall(cell *c, int i, int sidepar, const transmatrix& V, bool warp,
   // prio += c->cpdist - c->mov[i]->cpdist;  
 
   queuepolyat(V2, 
-    (mirr?shMFloorSide:warp?shTriheptaSide:shFloorSide)[sidepar][c->type==6?0:1], col, prio);
+    (mirr?shMFloorSide:warp?shTriheptaSide:shFloorSide)[sidepar][ctof(c)], col, prio);
   }
 
 bool openorsafe(cell *c) {
@@ -3353,8 +3360,8 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         }
       }
     
-    int ct = c->type;
-    int ct6 = K(c);
+    int ctype = c->type;
+    int ct6 = ctof(c);
 
     bool error = false;
     
@@ -3419,9 +3426,9 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       
       else if(mapeditor::whichShape == '8') {
         if(euclid) 
-          qfloor(c, Vf, shTriheptaEuc[ishept(c) ? 1 : ishex1(c) ? 0 : 2], darkena(fcol, fd, 0xFF));
+          qfloor(c, Vf, shTriheptaEuc[ctof012(c)], darkena(fcol, fd, 0xFF));
         else
-          qfloor(c, Vf, shTriheptaFloor[ishept(c) ? 1 : 0], darkena(fcol, fd, 0xFF));
+          qfloor(c, Vf, shTriheptaFloor[ctof(c)], darkena(fcol, fd, 0xFF));
         }
       
       else if(mapeditor::whichShape == '6') {
@@ -3558,7 +3565,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         }
       
       else if(isWarped(c) && euclid)
-        qfloor(c, Vf, shTriheptaEuc[ishept(c)?1:ishex1(c)?0:2], darkena(fcol, fd, 0xFF));
+        qfloor(c, Vf, shTriheptaEuc[ctof012(c)], darkena(fcol, fd, 0xFF));
 
       else if(isWarped(c) && !purehepta && !shmup::on) {
         int np = mapeditor::nopattern(c);
@@ -3597,7 +3604,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           case 11: qfloor(c, Vf, shPowerFloor[ct6], dfcol); break;
           case 12: qfloor(c, Vf, shDesertFloor[ct6], dfcol); break;
           case 13: qfloor(c, Vf, purehepta ? shChargedFloor[3] : shChargedFloor[ct6], dfcol); break;
-          case 14: qfloor(c, Vf, ct==6?shChargedFloor[2]:shFloor[1], dfcol); break;
+          case 14: qfloor(c, Vf, ct6?shFloor[1]:shChargedFloor[2], dfcol); break;
           }
         }
 
@@ -3636,9 +3643,11 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
 
       else if(c->land == laRlyeh)
         qfloor(c, Vf, (eoh ? shFloor: shTriFloor)[ct6], darkena(fcol, fd, 0xFF));
+//      qfloor(c, Vf, shTriFloor[ct6], darkena(fcol, fd, 0xFF));
 
       else if(c->land == laTemple)
-        qfloor(c, Vf, (eoh ? shFloor: shTriFloor)[ct6], darkena(fcol, fd, 0xFF));
+//      qfloor(c, Vf, (eoh ? shFloor: shTriFloor)[ct6], darkena(fcol, fd, 0xFF));
+        qfloor(c, Vf, shTriFloor[ct6], darkena(fcol, fd, 0xFF));
 
 /*      else if(c->land == laAlchemist)
         qfloor(c, Vf, shCloudFloor[ct6], darkena(fcol, fd, 0xFF)); */
@@ -3707,7 +3716,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           qfloor(c, ishex1(c) ? V*pispin : Vf, 
             ishept(c) ? shFloor[0] : shChargedFloor[2], darkena(fcol, fd, 0xFF));
         else 
-          qfloor(c, Vf, (purehepta ? shChargedFloor[3] : ct==6 ? shChargedFloor[2] : shFloor[1]), darkena(fcol, fd, 0xFF));
+          qfloor(c, Vf, (purehepta ? shChargedFloor[3] : ct6 ? shFloor[1] : shChargedFloor[2]), darkena(fcol, fd, 0xFF));
         }
 
       else if(c->land == laWildWest)
@@ -3957,7 +3966,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
 
       else if(c->wall == waClosePlate || c->wall == waOpenPlate || (c->wall == waTrapdoor && c->land != laZebra)) {
         transmatrix V2 = V;
-        if(ct != 6 && wmescher) V2 = V * pispin;
+        if((ctype&1) && wmescher) V2 = V * pispin;
         queuepoly(V2, shMFloor[ct6], darkena(winf[c->wall].color, 0, 0xFF));
         queuepoly(V2, shMFloor2[ct6], (!wmblack) ? darkena(fcol, 1, 0xFF) : darkena(0,1,0xFF));
         }
@@ -4303,7 +4312,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
 
     if(true) {
       int q = ptds.size();
-      error |= drawMonster(V, ct, c, moncol); 
+      error |= drawMonster(V, ctype, c, moncol); 
       if(Vboat != &V && Vboat != &Vboat0 && q != size(ptds)) 
         pushdown(c, q, V, -geom3::factor_to_lev(zlevel(tC0((*Vboat)))),
           !isMultitile(c->monst), false);
@@ -4475,7 +4484,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       queuecircle(V, .78, 0x00FFFFFF);
       }
 
-    mapeditor::drawGhosts(c, V, ct);
+    mapeditor::drawGhosts(c, V, ctype);
 #endif
     }
     

@@ -881,18 +881,23 @@ void buildpolys() {
   
   // scales
   scalef = purehepta ? crossf / hcrossf7 : hcrossf / hcrossf7;
-  double scalef2 = purehepta ? crossf / hcrossf7 * .88 : hcrossf / hcrossf7;
+  double scalef2 = purehepta ? crossf / hcrossf7 * .88 : euclid ? 1 : hcrossf / hcrossf7;
   
   double spzoom = sphere ? 1.4375 : 1;
   
   double spzoom6 = sphere ? 1.2375 : 1;
   double spzoom7 = sphere ? .8 : 1;
   double spzoomd7 = (purehepta && sphere) ? 1 : spzoom7;
+  
+  double fac80 = AT45 ? 1.4 : AT46 ? 1.2 : .8;
+  double fac94 = euclid ? .8 : AT456 ? (purehepta ? 1.1 : .9) : .94;
+
+  auto MF = [] (double f, int i) { return (f*i)/8; };
 
 #define SHADMUL 1.3
   
   // procedural floors
-  double shexf = purehepta ? crossf* .55 : hexf;    
+  double shexf = purehepta ? crossf* .55 : hexf;
   
   double p = -.006;
   
@@ -917,16 +922,18 @@ void buildpolys() {
   for(int t=0; t<=S7; t++) hpcpush(ddi(t*12, x) * C0);
   }
 
-  int td = (AT8 && purehepta) ? S42+6 : 0;
+  int td = ((purehepta || euclid) && !(S7&1)) ? S42+S6 : 0;
+  
+  bool strict = false;
   
   bshape(shFloor[0], PPR_FLOOR);
-  for(int t=0; t<=6; t++) hpcpush(ddi(S7 + t*S14, shexf*.8*spzoom) * C0);
+  for(int t=0; t<=S6; t++) hpcpush(ddi(S7 + t*S14, shexf*fac80*spzoom) * C0);
 
   bshape(shCircleFloor, PPR_FLOOR);
   for(int t=0; t<=84; t+=2) hpcpush(ddi(t, shexf*.7*spzoom) * C0);
 
   bshape(shFloor[1], PPR_FLOOR);
-  for(int t=0; t<=S7; t++) hpcpush(ddi(t*12 + td, shexf*.94) * C0);
+  for(int t=0; t<=S7; t++) hpcpush(ddi(t*S12 + td, strict ? hcrossf : euclid ? shexf*fac80*spzoom : shexf*fac94) * C0);
 
   for(int i=0; i<3; i++) for(int j=0; j<3; j++) shadowmulmatrix[i][j] =
     i==2&&j==2 ? 1:
@@ -934,10 +941,10 @@ void buildpolys() {
     0;
   
   bshape(shFloorShadow[0], PPR_FLOOR);
-  for(int t=0; t<=6; t++) hpcpush(ddi(S7 + t*S14, shexf*.8*spzoom*SHADMUL) * C0);
+  for(int t=0; t<=6; t++) hpcpush(ddi(S7 + t*S14, shexf*fac80*spzoom*SHADMUL) * C0);
 
   bshape(shFloorShadow[1], PPR_FLOOR);
-  for(int t=0; t<=S7; t++) hpcpush(ddi(t*12, shexf*.94*SHADMUL) * C0);
+  for(int t=0; t<=S7; t++) hpcpush(ddi(t*12, shexf*fac94*SHADMUL) * C0);
   
   // sidewalls for the 3D mode
   for(int k=0; k<SIDEPARS; k++) {
@@ -952,15 +959,15 @@ void buildpolys() {
     validsidepar[k] = (dlow > 0 && dhi > 0) || (dlow < 0 && dhi < 0);
 
     bshape(shFloorSide[k][0], PPR_LAKEWALL);
-    for(int t=0; t<=1; t++) hpcpush(ddi(t*S14-S7, shexf*.8*spzoom) * C0);
+    for(int t=0; t<=1; t++) hpcpush(ddi(t*S14-S7, shexf*fac80*spzoom) * C0);
     chasmifyPoly(dlow, dhi, k);
     
     bshape(shFloorSide[k][1], PPR_LAKEWALL);
-    for(int t=0; t<=1; t++) hpcpush(ddi(t*12-6, shexf*.94) * C0);
+    for(int t=0; t<=1; t++) hpcpush(ddi(t*12-6, shexf*fac94) * C0);
     chasmifyPoly(dlow, dhi, k);
 
     bshape(shSemiFloorSide[k], PPR_LAKEWALL);
-    for(int t=0; t<=3; t+=3) hpcpush(ddi(S7 + (3+t)*S14, shexf*.8*spzoom) * C0);
+    for(int t=0; t<=3; t+=3) hpcpush(ddi(S7 + (3+t)*S14, shexf*fac80*spzoom) * C0);
     chasmifyPoly(dlow, dhi, k);
 
     bshape(shTriheptaSide[k][0], PPR_LAKEWALL);
@@ -972,42 +979,42 @@ void buildpolys() {
     chasmifyPoly(dlow, dhi, k);
 
     bshape(shMFloorSide[k][0], PPR_LAKEWALL);
-    for(int t=0; t<=1; t++) hpcpush(ddi(t*S14-S7, shexf*.7*spzoom) * C0);
+    for(int t=0; t<=1; t++) hpcpush(ddi(t*S14-S7, shexf*MF(fac80,7)*spzoom) * C0);
     chasmifyPoly(dlow, dhi, k);
 
     bshape(shMFloorSide[k][1], PPR_LAKEWALL);
-    for(int t=0; t<=1; t++) hpcpush(ddi(t*12-6, shexf*.8) * C0);
+    for(int t=0; t<=1; t++) hpcpush(ddi(t*12-6, shexf*MF(fac94,7)) * C0);
     chasmifyPoly(dlow, dhi, k);
     }
 
   for(int d=0; d<2; d++) {
     bshape(shSemiFloor[d], PPR_FLOOR);
-    for(int t=0; t<=4; t++) hpcpush(ddi(S7 + (3+3*d+t%4)*S14, shexf*.8*spzoom) * C0);
+    for(int t=0; t<=4; t++) hpcpush(ddi(S7 + (3+3*d+t%4)*S14, shexf*fac80*spzoom) * C0);
     }
 
   bshape(shMFloor[0], PPR_FLOORa);
-  for(int t=0; t<=6; t++) hpcpush(ddi(S7 + t*S14, shexf*.7*spzoom) * C0);
+  for(int t=0; t<=6; t++) hpcpush(ddi(S7 + t*S14, shexf*MF(fac80,7)*spzoom) * C0);
 
   bshape(shMFloor[1], PPR_FLOORa);
-  for(int t=0; t<=S7; t++) hpcpush(ddi(t*12, shexf*.8) * C0);
+  for(int t=0; t<=S7; t++) hpcpush(ddi(t*12, shexf*MF(fac94,7)) * C0);
 
-  bshape(shMFloor2[0], PPR_FLOORb);
-  for(int t=0; t<=6; t++) hpcpush(ddi(S7 + t*S14, shexf*.6*spzoom) * C0);
+  bshape(shMFloor2[0], PPR_FLOORb);                         
+  for(int t=0; t<=6; t++) hpcpush(ddi(S7 + t*S14, shexf*MF(fac80,6)*spzoom) * C0);
 
   bshape(shMFloor2[1], PPR_FLOORb);
-  for(int t=0; t<=S7; t++) hpcpush(ddi(t*12, shexf*.7) * C0);
+  for(int t=0; t<=S7; t++) hpcpush(ddi(t*12, shexf*MF(fac94,6)) * C0);
   
   bshape(shMFloor3[0], PPR_FLOORc);
-  for(int t=0; t<=6; t++) hpcpush(ddi(S7 + t*S14, shexf*.5*spzoom) * C0);
+  for(int t=0; t<=6; t++) hpcpush(ddi(S7 + t*S14, shexf*MF(fac80,5)*spzoom) * C0);
 
   bshape(shMFloor3[1], PPR_FLOORc);
-  for(int t=0; t<=S7; t++) hpcpush(ddi(t*12, shexf*.6) * C0);
+  for(int t=0; t<=S7; t++) hpcpush(ddi(t*12, shexf*MF(fac94,5)) * C0);
   
   bshape(shMFloor4[0], PPR_FLOORd);
-  for(int t=0; t<=6; t++) hpcpush(ddi(S7 + t*S14, shexf*.4*spzoom) * C0);
+  for(int t=0; t<=6; t++) hpcpush(ddi(S7 + t*S14, shexf*MF(fac80,4)*spzoom) * C0);
 
   bshape(shMFloor4[1], PPR_FLOORd);
-  for(int t=0; t<=S7; t++) hpcpush(ddi(t*12, shexf*.5) * C0);
+  for(int t=0; t<=S7; t++) hpcpush(ddi(t*12, shexf*MF(fac94,4)) * C0);
 
   bshape(shBigCarpet1, PPR_GFLOORa);
 //for(int t=0; t<=7; t++) hpcpush(ddi(t*12, -shexf*3.5) * C0);  
@@ -1052,20 +1059,27 @@ void buildpolys() {
   
   bshape(shMirror, PPR_WALL);
   if(purehepta) {
-    for(int t=0; t<=S7; t++) hpcpush(ddi(t*12, shexf*.8) * C0);
+    for(int t=0; t<=S7; t++) hpcpush(ddi(t*12, shexf*MF(fac80,7)) * C0);
     }
   else {
-    for(int t=0; t<=6; t++) hpcpush(ddi(S7 + t*S14, shexf*.7) * C0);
+    for(int t=0; t<=6; t++) hpcpush(ddi(S7 + t*S14, shexf*MF(fac94,7)) * C0);
     }
 
   bshape(shWall[0], PPR_WALL);
-  for(int t=0; t<=6; t++) {
-    hpcpush(ddi(S7 + t*S14, shexf*.8) * C0);
+  for(int t=0; t<=S6; t++) {
+    hpcpush(ddi(S7 + t*S14, shexf*fac80) * C0);
     hpcpush(ddi(S14 + t*S14, shexf*.2) * C0);
     }
   
   bshape(shWall[1], PPR_WALL);
-  for(int t=0; t<=S7; t++) hpcpush(ddi(t*36+td, shexf*.94) * C0);
+  if(S7 == 6) {
+    for(int t=0; t<=S6; t++) {
+      hpcpush(ddi(S7 + t*S14, shexf*fac80) * C0);
+      hpcpush(ddi(S14 + t*S14, shexf*.2) * C0);
+      }
+    }
+  else
+    for(int t=0; t<=S7; t++) hpcpush(ddi(t*S36+td, shexf*fac94) * C0);
 
   bshape(shCross, PPR_WALL);
   for(int i=0; i<=S84; i+=S7)
@@ -1074,13 +1088,20 @@ void buildpolys() {
 // items
   
   bshape(shGem[0], PPR_ITEM);
-  for(int t=0; t<=6; t++) {
+  for(int t=0; t<=S6; t++) {
     hpcpush(ddi(S7 + t*S14, shexf*.4) * C0);
     hpcpush(ddi(S14 + t*S14, shexf*.1) * C0);
     }
   
   bshape(shGem[1], PPR_ITEM);
-  for(int t=0; t<=S7; t++) hpcpush(ddi(t*36, shexf*.5) * C0);
+  if(S7 == 6) {
+    for(int t=0; t<=S6; t++) {
+      hpcpush(ddi(S7 + t*S14, shexf*.4) * C0);
+      hpcpush(ddi(S14 + t*S14, shexf*.1) * C0);
+      }
+    }
+  else 
+    for(int t=0; t<=S7; t++) hpcpush(ddi(t*S36, shexf*.5) * C0);
 
   bshape(shStar, PPR_ITEM);
   for(int t=0; t<S84; t+=6) {
@@ -1292,7 +1313,10 @@ void buildpolys() {
 
   // floors:
   bshape(shStarFloor[0], PPR_FLOOR, scalef2*spzoom6, 1);
-  bshape(shStarFloor[1], PPR_FLOOR, scalef2*spzoomd7, 2, .9);
+  if(euclid)
+    bshape(shStarFloor[1], PPR_FLOOR, scalef2*spzoom6, 1);
+  else
+    bshape(shStarFloor[1], PPR_FLOOR, scalef2*spzoomd7, 2, .9);
   bshape(shCloudFloor[0], PPR_FLOOR, scalef2*spzoom6, 3);
   bshape(shCloudFloor[1], PPR_FLOOR, scalef2*spzoomd7, 4, .17);
   

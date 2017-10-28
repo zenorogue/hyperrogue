@@ -5,8 +5,8 @@
 
 #define DEBMEM(x) // { x fflush(stdout); }
                     
-int fix6(int a) { return (a+96)% 6; }
-int fix7(int a) { return (a+420)%S7; }
+int fix6(int a) { return (a+MODFIXER)%S6; }
+int fix7(int a) { return (a+MODFIXER)%S7; }
 
 int dirdiff(int dd, int t) {
   dd %= t;
@@ -564,84 +564,7 @@ struct hrmap_quotient : hrmap {
 
 // --- general ---
 
-// very similar to createMove in heptagon.cpp
-cell *createMov(cell *c, int d) {
-
-  if(euclid && !c->mov[d]) {
-    eucoord x, y;
-    decodeMaster(c->master, x, y);
-    for(int dx=-1; dx<=1; dx++)
-    for(int dy=-1; dy<=1; dy++)
-      euclideanAtCreate(x+dx, y+dy);
-    if(!c->mov[d]) { printf("fail!\n"); }
-    }
-  
-  if(c->mov[d]) return c->mov[d];
-  else if(purehepta) {
-    heptagon *h2 = createStep(c->master, d);
-    merge(c,d,h2->c7,c->master->spin(d),false);
-    }
-  else if(c->type != 6) {
-    cell *n = newCell(6, c->master);
-
-    merge(c,d,n,0,false);
-    
-    heptspin hs; hs.h = c->master; hs.spin = d; hs.mirrored = false;
-    
-    int a3 = c->type/2;
-    int a4 = a3+1;
-    
-    heptspin hs2 = hsstep(hsspin(hs, a3), -a4);
-    merge(hs2.h->c7, hs2.spin, n, 2, hs2.mirrored);
-    
-    heptspin hs3 = hsstep(hsspin(hs, a4), -a3);
-    merge(hs3.h->c7, hs3.spin, n, 4, hs3.mirrored);
-    
-    extern void verifycell(cell *c);
-    verifycell(n);
-    }
-  
-  else if(d == 5) {
-    int di = fixrot(c->spin(0)+1);
-    cell *c2 = createMov(c->mov[0], di);
-    bool mirr = c->mov[0]->mirror(di);
-    merge(c, 5, c2, fix6(c->mov[0]->spn(di) + (mirr?-1:1)), mirr);
-    
-    // c->mov[5] = c->mov[0]->mov[fixrot(c->spn[0]+1)]; 
-    // c->spn[5] = fix6(c->mov[0]->spn[fixrot(c->spn[0]+1)] + 1);
-    }
-  
-  else if(d == 1) {
-    int di = fixrot(c->spn(0)-1);
-    cell *c2 = createMov(c->mov[0], di);
-    bool mirr = c->mov[0]->mirror(di);
-    merge(c, 1, c2, fix6(c->mov[0]->spn(di) - (mirr?-1:1)), mirr);
-    
-    // c->mov[1] = c->mov[0]->mov[fixrot(c->spn[0]-1)]; 
-    // c->spn[1] = fix6(c->mov[0]->spn[fixrot(c->spn[0]-1)] - 1);
-    }
-  
-  else if(d == 3) {
-    bool mirr = c->mirror(2);
-    int di = fixrot(c->spn(2)-(mirr?-1:1));
-    cell *c2 = createMov(c->mov[2], di);
-    bool nmirr = mirr ^ c->mov[2]->mirror(di);
-    merge(c, 3, c2, fix6(c->mov[2]->spn(di) - (nmirr?-1:1)), nmirr);
-    // c->mov[3] = c->mov[2]->mov[fixrot(c->spn[2]-1)];
-    // c->spn[3] = fix6(c->mov[2]->spn[fixrot(c->spn[2]-1)] - 1);
-    }
-  return c->mov[d];
-  }
-
-cell *createMovR(cell *c, int d) {
-  d %= MODFIXER; d += MODFIXER; d %= c->type;
-  return createMov(c, d);
-  }
-
-cell *getMovR(cell *c, int d) {
-  d %= MODFIXER; d += MODFIXER; d %= c->type;
-  return c->mov[d];
-  }
+cell *createMov(cell *c, int d);
 
 // similar to heptspin from heptagon.cpp
 struct cellwalker {
@@ -683,6 +606,96 @@ void cwrev(cellwalker& cw) {
 
 void cwrevstep(cellwalker& cw) {
   cwrev(cw); cwstep(cw);
+  }
+
+// very similar to createMove in heptagon.cpp
+cell *createMov(cell *c, int d) {
+
+  if(euclid && !c->mov[d]) {
+    eucoord x, y;
+    decodeMaster(c->master, x, y);
+    for(int dx=-1; dx<=1; dx++)
+    for(int dy=-1; dy<=1; dy++)
+      euclideanAtCreate(x+dx, y+dy);
+    if(!c->mov[d]) { printf("fail!\n"); }
+    }
+  
+  if(c->mov[d]) return c->mov[d];
+  else if(purehepta) {
+    heptagon *h2 = createStep(c->master, d);
+    merge(c,d,h2->c7,c->master->spin(d),false);
+    }
+  else if(c == c->master->c7) {
+    
+    cell *n = newCell(S6, c->master);
+
+    merge(c,d,n,0,false);
+    
+    heptspin hs; hs.h = c->master; hs.spin = d; hs.mirrored = false;
+    
+    int a3 = c->type/2;
+    int a4 = a3+1;
+        
+    /*
+    heptspin hs2 = hsstep(hsspin(hs, a3), -a4);
+    merge(hs2.h->c7, hs2.spin, n, 2, hs2.mirrored);
+    
+    heptspin hs3 = hsstep(hsspin(hs, a4), -a3);
+    merge(hs3.h->c7, hs3.spin, n, S6-2, hs3.mirrored);
+    */
+    
+    for(int u=2; u<S6; u+=2) {
+      hs = hsstep(hsspin(hs, a3), -a4);
+      merge(hs.h->c7, hs.spin, n, u, hs.mirrored);
+      }
+    
+    extern void verifycell(cell *c);
+    verifycell(n);
+    }
+
+/*  
+  else if(d == S6-1) {
+    int di = fixrot(c->spin(0)+1);
+    cell *c2 = createMov(c->mov[0], di);
+    bool mirr = c->mov[0]->mirror(di);
+    merge(c, S6-1, c2, fix6(c->mov[0]->spn(di) + (mirr?-1:1)), mirr);
+    
+    // c->mov[5] = c->mov[0]->mov[fixrot(c->spn[0]+1)]; 
+    // c->spn[5] = fix6(c->mov[0]->spn[fixrot(c->spn[0]+1)] + 1);
+    }
+  
+  else if(d == 1) {
+    int di = fixrot(c->spn(0)-1);
+    cell *c2 = createMov(c->mov[0], di);
+    bool mirr = c->mov[0]->mirror(di);
+    merge(c, 1, c2, fix6(c->mov[0]->spn(di) - (mirr?-1:1)), mirr);
+    
+    // c->mov[1] = c->mov[0]->mov[fixrot(c->spn[0]-1)]; 
+    // c->spn[1] = fix6(c->mov[0]->spn[fixrot(c->spn[0]-1)] - 1);
+    }
+  
+  else if(d == 3 || d == 5) { */
+  
+  else {
+    bool mirr = c->mirror(d-1);
+    int di = fixrot(c->spn(d-1)-(mirr?-1:1));
+    cell *c2 = createMov(c->mov[d-1], di);
+    bool nmirr = mirr ^ c->mov[d-1]->mirror(di);
+    merge(c, d, c2, fix6(c->mov[d-1]->spn(di) - (nmirr?-1:1)), nmirr);
+    // c->mov[3] = c->mov[2]->mov[fixrot(c->spn[2]-1)];
+    // c->spn[3] = fix6(c->mov[2]->spn[fixrot(c->spn[2]-1)] - 1);
+    }
+  return c->mov[d];
+  }
+
+cell *createMovR(cell *c, int d) {
+  d %= MODFIXER; d += MODFIXER; d %= c->type;
+  return createMov(c, d);
+  }
+
+cell *getMovR(cell *c, int d) {
+  d %= MODFIXER; d += MODFIXER; d %= c->type;
+  return c->mov[d];
   }
 
 void eumerge(cell* c1, cell *c2, int s1, int s2) {
@@ -727,7 +740,7 @@ void initcells() {
   
   allmaps.push_back(currentmap);
 
-  if(!AT8) windmap::create();  
+  if(!AT8 && !AT456) windmap::create();  
   
   // origin->emeraldval = 
   }
@@ -792,7 +805,7 @@ void verifycell(cell *c) {
   for(int i=0; i<t; i++) {
     cell *c2 = c->mov[i];
     if(c2) {
-      if(t != 6 && !purehepta) verifycell(c2);
+      if(!euclid && !purehepta && c == c->master->c7) verifycell(c2);
       if(c2->mov[c->spn(i)] && c2->mov[c->spn(i)] != c) {
         printf("cell error %p:%d [%d] %p:%d [%d]\n", c, i, c->type, c2, c->spn(i), c2->type);
         exit(1);
@@ -825,13 +838,13 @@ int eupattern(cell *c) {
 bool ishept(cell *c) {
   // EUCLIDEAN
   if(euclid) return eupattern(c) == 0;
-  else return c->type != 6;
+  else return c->type != S6;
   }
 
 bool ishex1(cell *c) {
   // EUCLIDEAN
   if(euclid) return eupattern(c) == 1;
-  else return c->type != 6;
+  else return c->type != S6;
   }
 
 int emeraldval(cell *c) {

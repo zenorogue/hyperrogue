@@ -1,7 +1,7 @@
 // Hyperbolic Rogue
 // Copyright (C) 2011-2012 Zeno Rogue, see 'hyper.cpp' for details
 
-enum eGeometry {gNormal, gEuclid, gSphere, gElliptic, gQuotient, gQuotient2, gTorus, gOctagon, gGUARD};
+enum eGeometry {gNormal, gEuclid, gSphere, gElliptic, gQuotient, gQuotient2, gTorus, gOctagon, g45, g46, gGUARD};
 eGeometry geometry, targetgeometry = gEuclid;
 #define euclid (geometry == gEuclid || geometry == gTorus)
 #define sphere (geometry == gSphere || geometry == gElliptic)

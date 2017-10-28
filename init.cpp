@@ -326,14 +326,22 @@ const char *loadlevel = NULL;
 #endif
 
 #define AT8 (geometry == gOctagon ? 1 : 0)
+#define AT45 (geometry == g45 ? 1 : 0)
+#define AT46 (geometry == g46 ? 1 : 0)
+#define AT456 (AT45 | AT46)
+#define AT4568 (AT45 | AT46 | AT8)
 
-#define S7 (sphere?5:AT8?8:7)
-#define S42 (S7*6)
+#define S7 (sphere?5:AT45?5:AT46?6:AT8?8:euclid?6:7)
+#define S6 (AT456 ? 8 : 6)
+#define S42 (S7*S6)
+#define S12 (S6*2)
 #define S14 (S7*2)
 #define S21 (S7*3)
 #define S28 (S7*4)
-#define S84 (S7*12)
+#define S36 (S6*6)
+#define S84 (S7*S6*2)
 #define MAX_EDGE 8
+#define MAX_S84 240
 
 #include "util.cpp"
 #include "hyperpoint.cpp"

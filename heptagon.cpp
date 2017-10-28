@@ -88,6 +88,13 @@ hstate transition(hstate s, int dir) {
     if(s == hsB0 && dir == S7-2) return hsC;
     return hsError;
     }
+  else if(AT456) {
+    if(s == hsOrigin) return hsA;
+    if(s == hsA && (dir >= 2 && dir < S7-1)) return hsA;
+    if(s == hsA && (dir == S7-1)) return hsB;
+    if(s == hsB && (dir >= 2 && dir < S7-2)) return hsA;
+    if(s == hsB && (dir == S7-2)) return hsB;
+    }
   else {
     if(s == hsOrigin) return hsA;
     if(s == hsA && dir >= 3 && dir <= S7-3) return hsA;
@@ -125,7 +132,7 @@ heptagon *buildHeptagon(heptagon *parent, int d, hstate s, int pard = 0) {
   if(parent->c7) {
     h->c7 = newCell(S7, h);
     h->rval0 = h->rval1 = 0; h->cdata = NULL;
-    if(!AT8) {
+    if(!AT8 && !AT456) {
       h->emeraldval = emerald_heptagon(parent->emeraldval, d);
       h->zebraval = zebra_heptagon(parent->zebraval, d);
       h->fieldval = fp43.connections[fieldpattern::btspin(parent->fieldval, d)];
@@ -159,45 +166,28 @@ heptagon *buildHeptagon(heptagon *parent, int d, hstate s, int pard = 0) {
   return h;
   }
 
+void connectHeptagons(heptagon *h1, int d1, heptagon *h2, int d2) {
+  h1->move[d1] = h2;
+  h1->setspin(d1, d2);
+  h2->move[d2] = h1;
+  h2->setspin(d2, d1);
+  }
+
 void addSpin(heptagon *h, int d, heptagon *from, int rot, int spin) {
   rot = fixrot(rot);
   createStep(from, rot);
-  h->move[d] = from->move[rot];
-  h->setspin(d, fixrot(from->spin(rot) + spin));
-  h->move[d]->move[fixrot(from->spin(rot) + spin)] = h;
-  h->move[d]->setspin(fixrot(from->spin(rot) + spin), d);
+  int fr = fixrot(from->spin(rot) + spin);
+  connectHeptagons(h, d, from->move[rot], fr);
+/*  h->move[d] = from->move[rot];
+  h->setspin(d, fr);
+  h->move[d]->move[fr] = h;
+  h->move[d]->setspin(fr, d); */
 //generateEmeraldval(h->move[d]); generateEmeraldval(h);
   }
 
 extern int hrand(int);
 
-heptagon *createStep(heptagon *h, int d) {
-  d = fixrot(d);
-  if(!h->move[0] && h->s != hsOrigin) {
-    buildHeptagon(h, 0, hsA, 3 + hrand(2));
-    }
-  if(h->move[d]) return h->move[d];
-  if(h->s == hsOrigin) {
-    buildHeptagon(h, d, hsA);
-    }
-  else if(d == 1) {
-    addSpin(h, d, h->move[0], h->spin(0)-1, -1);
-    }
-  else if(d == S7-1) {
-    addSpin(h, d, h->move[0], h->spin(0)+1, +1);
-    }
-  else if(d == 2) {
-    createStep(h->move[0], h->spin(0)-1);
-    addSpin(h, d, h->move[0]->modmove(h->spin(0)-1), S7-2 + h->move[0]->gspin(h->spin(0)-1), -1);
-    }
-  else if(d == S7-2 && h->s == hsB) {
-    createStep(h->move[0], h->spin(0)+1);
-    addSpin(h, d, h->move[0]->modmove(h->spin(0)+1), 2 + h->move[0]->gspin(h->spin(0)+1), +1);
-    }
-  else
-    buildHeptagon(h, d, (d == S7-2 || (h->s == hsB && d == S7-3)) ? hsB : hsA);
-  return h->move[d];
-  }
+heptagon *createStep(heptagon *h, int d);
 
 // a structure used to walk on the heptagonal tesselation
 // (remembers not only the heptagon, but also direction)
@@ -225,6 +215,58 @@ heptspin hsspin(const heptspin &hs, int val) {
   return res;
   }
 
+heptagon *createStep(heptagon *h, int d) {
+  d = fixrot(d);
+  if(!h->move[0] && h->s != hsOrigin) {
+    buildHeptagon(h, 0, hsA, 3 + hrand(2));
+    }
+  if(h->move[d]) return h->move[d];
+  if(h->s == hsOrigin) {
+    buildHeptagon(h, d, hsA);
+    }
+  else if(AT456) {
+    if(d == 1) {
+      heptspin hs;
+      hs.h = h;
+      hs.spin = 0;
+      hs.mirrored = false;
+      hs = hsstep(hs, -1);
+      hs = hsstep(hs, -1);
+      hs = hsstep(hs, -1);
+      connectHeptagons(h, d, hs.h, hs.spin);
+      }
+    else if(h->s == hsB && d == S7-1) {
+      heptspin hs;
+      hs.h = h;
+      hs.spin = 0;
+      hs.mirrored = false;
+      hs = hsstep(hs, 1);
+      hs = hsstep(hs, 1);
+      hs = hsstep(hs, 1);
+      connectHeptagons(h, d, hs.h, hs.spin);    
+      }
+    else 
+      buildHeptagon(h, d, transition(h->s, d));
+    }
+  else if(d == 1) {
+    addSpin(h, d, h->move[0], h->spin(0)-1, -1);
+    }
+  else if(d == S7-1) {
+    addSpin(h, d, h->move[0], h->spin(0)+1, +1);
+    }
+  else if(d == 2) {
+    createStep(h->move[0], h->spin(0)-1);
+    addSpin(h, d, h->move[0]->modmove(h->spin(0)-1), S7-2 + h->move[0]->gspin(h->spin(0)-1), -1);
+    }
+  else if(d == S7-2 && h->s == hsB) {
+    createStep(h->move[0], h->spin(0)+1);
+    addSpin(h, d, h->move[0]->modmove(h->spin(0)+1), 2 + h->move[0]->gspin(h->spin(0)+1), +1);
+    }
+  else
+    buildHeptagon(h, d, (d == S7-2 || (h->s == hsB && d == S7-3)) ? hsB : hsA);
+  return h->move[d];
+  }
+
 // display the coordinates of the heptagon
 void backtrace(heptagon *pos) {
   if(pos->s == hsOrigin) return;
@@ -236,3 +278,4 @@ void hsshow(const heptspin& t) {
   printf("ORIGIN"); backtrace(t.h); printf(" (spin %d)\n", t.spin);
   }
 
+  
