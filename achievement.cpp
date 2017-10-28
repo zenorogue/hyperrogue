@@ -84,6 +84,7 @@ bool wrongMode(char flags) {
   if(flags == 'x') return false;
   if(purehepta != (flags == '7')) return true;
   if(euclid != (flags == 'e')) return true;
+  if(flags == 'E' && S7 < 5) return false;
   if(sphere != (flags == 'E')) return true;
   if((quotient == 1) != (flags == 'q')) return true;
   if((quotient == 2) != (flags == 'Q')) return true;

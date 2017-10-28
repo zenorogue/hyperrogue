@@ -332,6 +332,7 @@ void debugScreen() {
     dialog::addSelItem("item", dnameof(mouseover->item), 0);
     dialog::addBreak(50);
     dialog::addSelItem("cpdist", its(mouseover->cpdist), 0);
+    dialog::addSelItem("celldist", its(celldist(mouseover)), 0);
     dialog::addSelItem("pathdist", its(mouseover->pathdist), 0);
     dialog::addSelItem("temporary", its(mouseover->aitmp), 0);
     dialog::addBreak(50);

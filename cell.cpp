@@ -653,37 +653,12 @@ cell *createMov(cell *c, int d) {
     verifycell(n);
     }
 
-/*  
-  else if(d == S6-1) {
-    int di = fixrot(c->spin(0)+1);
-    cell *c2 = createMov(c->mov[0], di);
-    bool mirr = c->mov[0]->mirror(di);
-    merge(c, S6-1, c2, fix6(c->mov[0]->spn(di) + (mirr?-1:1)), mirr);
-    
-    // c->mov[5] = c->mov[0]->mov[fixrot(c->spn[0]+1)]; 
-    // c->spn[5] = fix6(c->mov[0]->spn[fixrot(c->spn[0]+1)] + 1);
-    }
-  
-  else if(d == 1) {
-    int di = fixrot(c->spn(0)-1);
-    cell *c2 = createMov(c->mov[0], di);
-    bool mirr = c->mov[0]->mirror(di);
-    merge(c, 1, c2, fix6(c->mov[0]->spn(di) - (mirr?-1:1)), mirr);
-    
-    // c->mov[1] = c->mov[0]->mov[fixrot(c->spn[0]-1)]; 
-    // c->spn[1] = fix6(c->mov[0]->spn[fixrot(c->spn[0]-1)] - 1);
-    }
-  
-  else if(d == 3 || d == 5) { */
-  
   else {
     bool mirr = c->mirror(d-1);
     int di = fixrot(c->spn(d-1)-(mirr?-1:1));
     cell *c2 = createMov(c->mov[d-1], di);
     bool nmirr = mirr ^ c->mov[d-1]->mirror(di);
     merge(c, d, c2, fix6(c->mov[d-1]->spn(di) - (nmirr?-1:1)), nmirr);
-    // c->mov[3] = c->mov[2]->mov[fixrot(c->spn[2]-1)];
-    // c->spn[3] = fix6(c->mov[2]->spn[fixrot(c->spn[2]-1)] - 1);
     }
   return c->mov[d];
   }
@@ -740,7 +715,7 @@ void initcells() {
   
   allmaps.push_back(currentmap);
 
-  if(!AT8 && !AT456) windmap::create();  
+  if(S7 <= 7 && S6 <= 6) windmap::create();  
   
   // origin->emeraldval = 
   }
@@ -849,7 +824,7 @@ bool ishex1(cell *c) {
 
 int emeraldval(cell *c) {
   if(euclid) return eupattern(c);
-  if(sphere) return 0;
+  if(sphere || weirdhyperbolic) return 0;
   if(c->type == 7)
     return c->master->emeraldval >> 3;
   else {
@@ -868,13 +843,19 @@ int eudist(short sx, short sy) {
   return max(max(z0,z1), z2);
   }
 
-int compdist(int dx[3]) {
-  int mi = min(min(dx[0], dx[1]), dx[2]);
-  if(dx[0] > mi+2 || dx[1] > mi+2 || dx[2] > mi+2)
-    return -1; // { printf("cycle error!\n"); exit(1); }
-  if(dx[0] == mi+2 || dx[1] == mi+2 || dx[2] == mi+2)
-    return mi+1;
-  if((dx[0] == mi+1) + (dx[1] == mi+1) + (dx[2] == mi+1) >= 2)
+int compdist(int dx[]) {
+  int mi = dx[0];
+  for(int u=0; u<S3; u++) mi = min(mi, dx[u]);
+  for(int u=0; u<S3; u++) 
+    if(dx[u] > mi+2)
+      return -1; // { printf("cycle error!\n"); exit(1); }
+  for(int u=0; u<S3; u++) 
+    if(dx[u] == mi+2)
+      return mi+1;
+  int cnt = 0;
+  for(int u=0; u<S3; u++) 
+    if(dx[u] == mi) cnt++;
+  if(cnt < 2)
     return mi+1;
   return mi;
   }
@@ -888,9 +869,9 @@ int celldist(cell *c) {
     return eudist(x, y);
     }
   if(sphere) return celldistance(c, currentmap->gamestart());
-  if(c->type != 6) return c->master->distance;
-  int dx[3];
-  for(int u=0; u<3; u++)
+  if(ctof(c)) return c->master->distance;
+  int dx[MAX_S3];
+  for(int u=0; u<S3; u++)
     dx[u] = createMov(c, u+u)->master->distance;
   return compdist(dx);
   }
@@ -911,16 +892,18 @@ int celldistAlt(cell *c) {
     return euclidAlt(x, y);
     }
   if(!c->master->alt) return 0;
-  if(c->type != 6) return c->master->alt->distance;
-  int dx[3];
-  for(int u=0; u<3; u++) if(createMov(c, u+u)->master->alt == NULL)
+  if(ctof(c)) return c->master->alt->distance;
+  int dx[MAX_S3];
+  for(int u=0; u<S3; u++) if(createMov(c, u+u)->master->alt == NULL)
     return ALTDIST_UNKNOWN;
-  for(int u=0; u<3; u++)
+  for(int u=0; u<S3; u++)
     dx[u] = createMov(c, u+u)->master->alt->distance;
-  int mi = min(min(dx[0], dx[1]), dx[2]);
-  if(dx[0] > mi+2 || dx[1] > mi+2 || dx[2] > mi+2)
+  // return compdist(dx); -> not OK because of boundary conditions
+  int mi = dx[0];
+  for(int i=1; i<S3; i++) mi = min(mi, dx[i]);
+  for(int i=0; i<S3; i++) if(dx[i] > mi+2)
     return ALTDIST_BOUNDARY; // { printf("cycle error!\n"); exit(1); }
-  if(dx[0] == mi+2 || dx[1] == mi+2 || dx[2] == mi+2)
+  for(int i=0; i<S3; i++) if(dx[i] == mi+2)
     return mi+1;
   return mi;
   }
@@ -959,7 +942,7 @@ int eufifty(cell *c) {
 
 int fiftyval(cell *c) {
   if(euclid) return eufifty(c) * 32;
-  if(sphere) return 0;
+  if(sphere || S7>7 || S6>6) return 0;
   if(c->type == 7)
     return c->master->fiftyval;
   else {
@@ -971,7 +954,7 @@ int fiftyval(cell *c) {
   }
 
 int cdist50(cell *c) {
-  if(sphere) return 0;
+  if(sphere || S7>7 || S6>6) return 0;
   if(euclid) {
     if(c->land == laWildWest) 
       return "0123333332112332223322233211233333322"[eufifty(c)] - '0';
@@ -998,7 +981,7 @@ int land50(cell *c) {
 
 int polara50(cell *c) {
   if(c->type != 6) return polara50(fiftyval(c));
-  else if(sphere || euclid) return 0;
+  else if(sphere || euclid || S7>7 || S6>6) return 0;
   else {
     if(cdist50(createMov(c,0)) < 3) return polara50(createMov(c,0));
     if(cdist50(createMov(c,2)) < 3) return polara50(createMov(c,2));
@@ -1010,7 +993,7 @@ int polara50(cell *c) {
 int polarb50(cell *c) {
   if(euclid) return true;
   if(c->type != 6) return polarb50(fiftyval(c));
-  else if(sphere || euclid) return true;
+  else if(sphere || euclid || S7>7 || S6>6) return true;
   else {
     if(cdist50(createMov(c,0)) < 3) return polarb50(createMov(c,0));
     if(cdist50(createMov(c,2)) < 3) return polarb50(createMov(c,2));
@@ -1063,7 +1046,7 @@ int fiftyval049(cell *c) {
 
 int zebra40(cell *c) {
   if(c->type != 6) return (c->master->zebraval/10);
-  else if(sphere) return 0;
+  else if(sphere || S7>7 || S6>6) return 0;
   else if(euclid) return eupattern(c);
   else {
     int ii[3], z;
@@ -1087,7 +1070,7 @@ int zebra40(cell *c) {
 
 int zebra3(cell *c) {
   if(c->type != 6) return (c->master->zebraval/10)/4;
-  else if(sphere) return 0;
+  else if(sphere || S7>7 || S6>6) return 0;
   else { 
     int ii[3];
     ii[0] = (c->mov[0]->master->zebraval/10)/4;
@@ -1426,7 +1409,7 @@ pair<int, bool> fieldval(cell *c) {
 
 int fieldval_uniq(cell *c) {
   if(sphere) {
-    if(c->type == 5) return c->master->fieldval;
+    if(ctof(c)) return c->master->fieldval;
     else return createMov(c, 0)->master->fieldval + 256 * createMov(c,2)->master->fieldval + (1<<16) * createMov(c,4)->master->fieldval;
     }
   else if(torus) {
@@ -1440,7 +1423,7 @@ int fieldval_uniq(cell *c) {
     if(i<0) i += torusconfig::qty;
     return i;
     }
-  if(c->type != 6) return c->master->fieldval/7;
+  if(ctof(c)) return c->master->fieldval/7;
   else {
     int z = 0;
     for(int u=0; u<6; u+=2) 

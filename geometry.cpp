@@ -14,7 +14,7 @@ ld tessf, crossf, hexf, hcrossf, hexhexdist;
 
 #define ALPHA (M_PI*2/S7)
 
-hyperpoint Crad[6*MAX_EDGE];
+hyperpoint Crad[MAX_S84];
 
 transmatrix heptmove[MAX_EDGE], hexmove[MAX_EDGE];
 transmatrix invheptmove[MAX_EDGE], invhexmove[MAX_EDGE];
@@ -56,7 +56,7 @@ void precalc() {
     goto finish;
     }
 
-  fmin = AT456 ? 0 : 1, fmax = 2;
+  fmin = 0, fmax = 3;
   
   for(int p=0; p<100; p++) {
     ld f =  (fmin+fmax) / 2;
@@ -101,15 +101,12 @@ void precalc() {
     }
   hexf = fmin;
   
-  if(AT8 && !purehepta)
+  if(!euclid && !purehepta && !(S7&1))
     hexshift = ALPHA/2 + ALPHA * ((S7-1)/2) + M_PI;
 
-  if(AT46 && !purehepta)
-    hexshift = ALPHA/2 + ALPHA * ((S7-1)/2) + M_PI;
-    
   finish:
-
-  printf("hexf = " LDF" hcross = " LDF" tessf = " LDF"\n", hexf, hcrossf, tessf);
+  
+  printf("S7=%d S6=%d hexf = " LDF" hcross = " LDF" tessf = " LDF" hexshift = " LDF "\n", S7, S6, hexf, hcrossf, tessf, hexshift);
   
   for(int i=0; i<S42; i++)
     Crad[i] = spin(2*M_PI*i/S42) * xpush(.4) * C0;

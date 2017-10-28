@@ -108,6 +108,25 @@ void giantLandSwitch(cell *c, int d, cell *from) {
       break;
     
     case laPalace: // -------------------------------------------------------------
+    
+      if(weirdhyperbolic) {
+        if(d == 9) {
+          int i = hrand(100);
+          if(i < 10) 
+            c->wall = waPalace;
+          else if(i < 15) 
+            c->wall = waClosePlate;
+          else if(i < 20) 
+            c->wall = waOpenPlate;
+          else if(i < 25) 
+            c->wall = waTrapdoor;
+          else if(i < 30) 
+            c->wall = waClosedGate;
+          else if(i < 35) 
+            c->wall = waOpenGate;
+          }
+        break;
+        }
 
       if(d == 9) {
         if(cdist50(c) == 3 && polarb50(c) == 1)
@@ -1951,18 +1970,31 @@ void repairLandgen(cell *c) {
   }
 
 int dnext(int d) {
-  if(!purehepta && !AT8)
-    //0,1,2,3,4,5,6,7
-    return d+1;
-  else if(!purehepta && AT8)
-    //0,1,2,3,4,5,7
-    return d+(d==5?2:1);
-  else if(purehepta && AT8)
-    //0,1,3,5,7
-    return d+(d>=1 && d<7?2:1);
-  else 
-    // 0,1,2,3,5,7
-    return d+(d>=3 && d<7?2:1);
+  switch(getDistLimit()&7) {
+    case 0:
+    case 1:
+      // 0,7
+      return d+(d<7?7:1);
+    case 2:
+      // 0,1,7
+      return d+(d>=1 && d<7?6:1);
+    case 3:
+      // 0,1,4,7
+      return d+(d>=1 && d<7?3:1);
+    case 4:
+      //0,1,3,5,7
+      return d+(d>=1 && d<7?2:1);
+    case 5:
+      // 0,1,2,3,5,7
+      return d+(d>=3 && d<7?2:1);
+    case 6:
+      // 0,1,2,3,4,5,7
+      return d+(d==5?2:1);
+    case 7:
+      //0,1,2,3,4,5,6,7
+      return d+1;
+    }
+  return d+1;
   }
   
 void setdist(cell *c, int d, cell *from) {

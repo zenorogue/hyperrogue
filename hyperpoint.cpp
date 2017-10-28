@@ -1,17 +1,53 @@
 // Hyperbolic Rogue
 // Copyright (C) 2011-2012 Zeno Rogue, see 'hyper.cpp' for details
 
-enum eGeometry {gNormal, gEuclid, gSphere, gElliptic, gQuotient, gQuotient2, gTorus, gOctagon, g45, g46, gGUARD};
-eGeometry geometry, targetgeometry = gEuclid;
-#define euclid (geometry == gEuclid || geometry == gTorus)
-#define sphere (geometry == gSphere || geometry == gElliptic)
-#define elliptic (geometry == gElliptic)
-#define quotient (geometry == gQuotient ? 1 : geometry == gQuotient2 ? 2 : 0)
-#define torus (geometry == gTorus)
-#define doall (quotient || torus)
+enum eGeometry {gNormal, gEuclid, gSphere, gElliptic, gQuotient, gQuotient2, gTorus, gOctagon, g45, g46, g47, gSmallSphere, gTinySphere, gGUARD};
 
+struct geometryinfo {
+  const char* name;
+  const char* shortname;
+  int sides;
+  int vertex;
+  int quotientstyle;
+  int cclass; // 0-hyperbolic, 1-Euclidean, 2-spherical
+  int distlimit[2]; // truncated, non-truncated
+  };
+
+static const int qZEBRA = 1;
+static const int qFIELD = 2;
+static const int qELLIP = 4;
+static const int qTORUS = 8;
+
+// note: dnext assumes that x&7 equals 7
+static const int SEE_ALL = 15;
+static const int FORBIDDEN = -1;
+
+geometryinfo ginf[gGUARD] = {
+  {"hyperbolic",     "hyper",    7, 3, 0,      0, {7, 5}},
+  {"Euclidean",      "euclid",   6, 3, 0,      1, {7, FORBIDDEN}},
+  {"spherical",      "sphere",   5, 3, 0,      2, {SEE_ALL, SEE_ALL}},
+  {"elliptic",       "elliptic", 5, 3, qELLIP, 2, {SEE_ALL, SEE_ALL}},
+  {"Zebra quotient", "Zebra",    7, 3, qZEBRA, 0, {7, 5}},
+  {"field quotient", "field",    7, 3, qFIELD, 0, {7, 5}},
+  {"torus",          "torus",    6, 3, qTORUS, 1, {7, FORBIDDEN}},
+  {"octagons",       "oct",      8, 3, 0,      0, {6, 4}},
+  {"four pentagons", "4x5",      5, 4, 0,      0, {6, 4}},
+  {"four hexagons",  "4x6",      6, 4, 0,      0, {5, 3}},
+  {"four heptagons", "4x7",      7, 4, 0,      0, {4, 3}},
+  {"small sphere",   "3x4",      4, 3, 0,      2, {SEE_ALL, SEE_ALL}},
+  {"tiny sphere",   "3x3",      3, 3, 0,      2, {SEE_ALL, SEE_ALL}},
+  };
+
+eGeometry geometry, targetgeometry = gEuclid;
+extern bool targettrunc;
+
+#define euclid (ginf[geometry].cclass == 1)
+#define sphere (ginf[geometry].cclass == 2)
+#define elliptic (ginf[geometry].quotientstyle & 4)
+#define quotient (ginf[geometry].quotientstyle & 3)
+#define torus (ginf[geometry].quotientstyle & 8)
+#define doall (ginf[geometry].quotientstyle)
 #define smallbounded (sphere || quotient == 1 || torus)
-    
 
 // for the pure heptagonal grid
 bool purehepta = false;

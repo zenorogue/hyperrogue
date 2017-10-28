@@ -367,6 +367,8 @@ bool pseudohept(cell *c) {
         c->master == getDodecahedron(3) ||
         c->master == getDodecahedron(5) ||
         c->master == getDodecahedron(6);
+    if(S3 > 3)
+      return c->master->distance & 1;
     int z = zebra40(c);
     return z == 5 || z == 8 || z == 15;
     }
@@ -2019,7 +2021,7 @@ void killMonster(cell *c, eMonster who, flagtype deathflags) {
 
   if(m == moPirate && isOnCIsland(c) && c->item == itNone && (
       euclid ||
-      (c->master->alt && celldistAlt(c) <= (purehepta ? -3 : -5)) ||
+      (c->master->alt && celldistAlt(c) <= 2-getDistLimit()) ||
       isHaunted(c->land))) {
     bool toomany = false;
     for(int i=0; i<c->type; i++) {
@@ -2570,7 +2572,7 @@ void buildRosemap() {
 
   }
 
-int getDistLimit() { return purehepta?(AT8?4:5):(AT8?6:7); }
+int getDistLimit() { return ginf[geometry].distlimit[purehepta]; }
 
 bool nogoSlow(cell *to, cell *from) {
   if(cellEdgeUnstable(to) && gravityLevel(to) >= gravityLevel(from)) return true;
@@ -6158,7 +6160,7 @@ int ambushSize(cell *c, eItem what) {
   }
 
 void ambush(cell *c, eItem what) {
-  int maxdist = purehepta ? 5 : 7;
+  int maxdist = getDistLimit();
   celllister cl(c, maxdist, 1000000, NULL);
   cell *c0 = c;
   int d = 0;

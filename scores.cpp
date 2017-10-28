@@ -59,7 +59,7 @@ string modedesc(score *S) {
   eGeometry g = (eGeometry) S->box[116]; 
   if(S->box[238]) g = gSphere;
   if(S->box[239]) g = gElliptic;
-  string s = geometrynames_short[g];
+  string s = ginf[g].shortname;
   if(g != gNormal) s += " " + csub(XLATT1((eLand) S->box[120]), 3);
   if(S->box[186]) s += "/7";
   if(S->box[196]) s += "/C";

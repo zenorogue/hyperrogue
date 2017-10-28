@@ -87,35 +87,35 @@ bool grailWasFound(cell *c) {
   return c->master->alt->alt->emeraldval & GRAIL_FOUND;
   }
 
-void generateAlts(heptagon *h) {
+void generateAlts(heptagon *h, int levs) {
   if(!h->alt) return;
   preventbarriers(h->c7);
-  for(int i=0; i<7; i++) preventbarriers(h->c7->mov[i]);
-  for(int i=0; i<7; i++) 
+  for(int i=0; i<S7; i++) preventbarriers(h->c7->mov[i]);
+  for(int i=0; i<S7; i++) 
     createStep(h->alt, i)->alt = h->alt->alt;
   int relspin = -4; // for horocycles it must go the other way
   if(quotient) relspin = 0;
   else {
-  for(int j=0; j<7; j++) for(int i=0; i<7; i++) {
+  for(int j=0; j<S7; j++) for(int i=0; i<S7; i++) {
     createStep(h, i);
     if(h->move[i]->alt == h->alt->move[j]) {
-      relspin = (i-j+7) % 7;
+      relspin = (i-j+S7) % S7;
       break;
       }
     }
   if(relspin == -4 && quotient != 2) {
     if(h->alt != h->alt->alt) {
       printf("relspin {%p:%p}\n", h->alt, h->alt->alt);
-      {for(int i=0; i<7; i++) printf("%p ", h->alt->move[i]);} printf(" ALT\n");
-      {for(int i=0; i<7; i++) printf("%p ", h->move[i]);} printf(" REAL\n");
-      {for(int i=0; i<7; i++) printf("%p ", h->move[i]->alt);} printf(" REAL ALT\n");
+      {for(int i=0; i<S7; i++) printf("%p ", h->alt->move[i]);} printf(" ALT\n");
+      {for(int i=0; i<S7; i++) printf("%p ", h->move[i]);} printf(" REAL\n");
+      {for(int i=0; i<S7; i++) printf("%p ", h->move[i]->alt);} printf(" REAL ALT\n");
       }
     relspin = 3;
     } }
   // h[relspin] matches alt[0]
 //printf("{%d~%d}\n", h->distance, h->alt->distance);
-  for(int i=0; i<7; i++) {
-    int ir = (7+i-relspin)%7;
+  for(int i=0; i<S7; i++) {
+    int ir = (S7+i-relspin)%S7;
     heptagon *hm = h->alt->move[ir];
     heptagon *ho = createStep(h, i);
 //  printf("[%p:%d ~ %p:%d] %p ~ %p\n", 
@@ -129,6 +129,7 @@ void generateAlts(heptagon *h) {
       continue;
       }
     ho->alt = hm;
+    if(levs) generateAlts(ho, levs-1);
     }
   }
 
@@ -141,10 +142,16 @@ heptagon *createAlternateMap(cell *c, int rad, hstate firststate, int special) {
     }
   if(gdir < 0) return NULL;
   
+  // non-crossing in weird hyperbolic
+  if(weirdhyperbolic) {
+    if(c->bardir == NOBARRIERS) return NULL;
+    forCellEx(c1, c) if(c1->bardir == NOBARRIERS) return NULL;
+    }
+  
   // check for non-crossing
   int bd = 2;
   cellwalker bb(c, bd);
-  if(!(checkBarriersFront(bb) && checkBarriersBack(bb))) {
+  if(!weirdhyperbolic && !(checkBarriersFront(bb) && checkBarriersBack(bb))) {
     return NULL;
     }
 
@@ -153,10 +160,7 @@ heptagon *createAlternateMap(cell *c, int rad, hstate firststate, int special) {
   cell *cx[rad+1];
   for(int i=0; i<rad; i++) {
     cx[i] = bf.c;
-    if(bf.c->type == 6)
-      cwspin(bf, 3);
-    else
-      cwspin(bf, 3 + hrand(2));
+    cwrev(bf);
     cwstep(bf);
     }
   cx[rad] = bf.c;
@@ -420,6 +424,7 @@ bool checkInTree(cell *c, int maxv) {
 void buildEquidistant(cell *c) {
   if(!c) return;
   if(c->landparam) return;
+  if(geometry) return;
   eLand b = c->land;
   if(chaosmode && !inmirror(b)) return;
   if(!b) { 
@@ -497,9 +502,9 @@ void buildEquidistant(cell *c) {
     }
   
   if(c->land == laEndorian) {
-    if(c->landparam == 1 && c->type == 7) {
-      for(int i=0; i<7; i++) {
-        int i1 = (i+1) % 7;
+    if(c->landparam == 1 && ctof(c)) {
+      for(int i=0; i<S7; i++) {
+        int i1 = (i+1) % S7;
         if(c->mov[i] && c->mov[i]->land != laEndorian && c->mov[i]->land != laNone)
         if(c->mov[i1] && c->mov[i1]->land != laEndorian && c->mov[i1]->land != laNone) {
           c->landflags = 2;
@@ -507,12 +512,12 @@ void buildEquidistant(cell *c) {
           }
         }
       }
-    else if(c->landparam == 1 && c->type == 6) {
-      for(int i=0; i<6; i++) {
-        int i1 = (i+1) % 6;
-        int i2 = (i+2) % 6;
-        int i4 = (i+4) % 6;
-        int i5 = (i+5) % 6;
+    else if(c->landparam == 1 && !ctof(c)) {
+      for(int i=0; i<S6; i++) {
+        int i1 = (i+1) % S6;
+        int i2 = (i+2) % S6;
+        int i4 = (i+4) % S6;
+        int i5 = (i+5) % S6;
         if(c->mov[i] && c->mov[i]->land == laBarrier && c->mov[i]->type == 7)
         if(c->mov[i1] && c->mov[i1]->land != laBarrier)
         if(c->mov[i2] && c->mov[i2]->land != laBarrier) 
@@ -600,7 +605,7 @@ cell *chosenDown(cell *c, int which, int bonus, cellfunction* cf) {
     if(c->mov[i]->mpdist > BARLEV && cf == coastvalEdge) setdist(c->mov[i], BARLEV, c);
     
     if((*cf)(c->mov[i]) == d) {
-      int i2 = (i+which+42)%c->type;
+      int i2 = (i+which+S42)%c->type;
       createMov(c, i2);
       if((*cf)(c->mov[i2]) == d)
         return createMovR(c, i2+bonus);
@@ -834,6 +839,7 @@ void setLandEuclid(cell *c) {
 
 bool quickfind(eLand l) {
   if(l == cheatdest) return true;
+  if(l == specialland && weirdhyperbolic) return true;
 #if CAP_TOUR
   if(tour::on && tour::quickfind(l)) return true;
 #endif
@@ -845,27 +851,30 @@ bool quickfind(eLand l) {
 #define I10000 (INVLUCK?3000:10000)
 
 void buildBigStuff(cell *c, cell *from) {
-  if(sphere || quotient || AT8) return;
+  if(sphere || quotient) return;
   bool deepOcean = false;
-        
-  if(c->land == laOcean) {
-    if(!from) deepOcean = true;
-    else for(int i=0; i<from->type; i++) {
-      cell *c2 = from->mov[i];
-      if(c2 && c2->land == laOcean && c2->landparam > 30) {
-        deepOcean = true;
-        }
-      if(c2) forCellEx(c3, c2) if(c3 && c3->land == laOcean && c3->landparam > 30)
-        deepOcean = true;
-      }
-    }
   
-  if(c->land == laGraveyard) {
-    if(!from) deepOcean = true;
-    else for(int i=0; i<from->type; i++) {
-      cell *c2 = from->mov[i];
-      if(c2 && c2->landparam > HAUNTED_RADIUS+5)
-        deepOcean = true;
+  if(!weirdhyperbolic) {
+        
+    if(c->land == laOcean) {
+      if(!from) deepOcean = true;
+      else for(int i=0; i<from->type; i++) {
+        cell *c2 = from->mov[i];
+        if(c2 && c2->land == laOcean && c2->landparam > 30) {
+          deepOcean = true;
+          }
+        if(c2) forCellEx(c3, c2) if(c3 && c3->land == laOcean && c3->landparam > 30)
+          deepOcean = true;
+        }
+      }
+    
+    if(c->land == laGraveyard) {
+      if(!from) deepOcean = true;
+      else for(int i=0; i<from->type; i++) {
+        cell *c2 = from->mov[i];
+        if(c2 && c2->landparam > HAUNTED_RADIUS+5)
+          deepOcean = true;
+        }
       }
     }
   
@@ -873,7 +882,9 @@ void buildBigStuff(cell *c, cell *from) {
   
   // buildgreatwalls
   
-  if(chaosmode) {
+  if(weirdhyperbolic) ; // barriers not implemented yet in weird hyperbolic
+  
+  else if(chaosmode) {
     if(c->type == 7 && hrand(10000) < 9000 && c->land && !inmirror(c) && buildBarrierNowall(c, getNewLand(c->land))) 
       {}
     else if(c->type == 7 && c->land == laMirror && hrand(10000) < 2000) {
@@ -950,7 +961,7 @@ void buildBigStuff(cell *c, cell *from) {
     buildBarrier4(c, bd, 0, getNewLand(c->land), c->land); */
     }
       
-  if((!chaosmode) && bearsCamelot(c->land) && c->type == 7 && 
+  if((!chaosmode) && bearsCamelot(c->land) && ctof(c) && 
     (quickfind(laCamelot) || peace::on || (hrand(I2000) < 200 && 
     items[itEmerald] >= U5 && !tactic::on))) {
     int rtr = newRoundTableRadius();
@@ -965,18 +976,18 @@ void buildBigStuff(cell *c, cell *from) {
   
     // buildbigstuff
 
-    if(c->land == laRlyeh && c->type == 7 && 
+    if(c->land == laRlyeh && ctof(c) && 
       (quickfind(laTemple) || peace::on || (hrand(I2000) < 100 && 
       items[itStatue] >= U5 && !randomPatternsMode && 
       !tactic::on && !yendor::on)))
       createAlternateMap(c, 2, hsA);
 
-    if(c->land == laJungle && c->type == 7 && 
+    if(c->land == laJungle && ctof(c) && 
       (quickfind(laMountain) || (hrand(I2000) < 100 && 
       !randomPatternsMode && !tactic::on && !yendor::on && landUnlocked(laMountain))))
       createAlternateMap(c, 2, hsA);
 
-    if(c->land == laOvergrown && c->type == 7 && 
+    if(c->land == laOvergrown && ctof(c) && 
       (quickfind(laClearing) || (hrand(I2000) < 25 && 
       !randomPatternsMode && items[itMutant] >= U5 &&
       !tactic::on && !yendor::on))) {
@@ -984,20 +995,20 @@ void buildBigStuff(cell *c, cell *from) {
       if(h) clearing::bpdata[h].root = NULL;
       }
 
-    if(c->land == laStorms && c->type == 7 && hrand(2000) < 1000 && !randomPatternsMode) {
+    if(c->land == laStorms && ctof(c) && hrand(2000) < 1000 && !randomPatternsMode) {
       heptagon *h = createAlternateMap(c, 2, hsA);
       if(h) h->alt->emeraldval = hrand(2);
       }
 
-    if(c->land == laOcean && c->type == 7 && deepOcean && !generatingEquidistant && !peace::on &&
+    if(c->land == laOcean && ctof(c) && deepOcean && !generatingEquidistant && !peace::on &&
       (quickfind(laWhirlpool) || (
         hrand(2000) < (purehepta ? 500 : 1000) && !tactic::on && !yendor::on)))
       createAlternateMap(c, 2, hsA);
 
-    if(c->land == laCaribbean && c->type == 7)
+    if(c->land == laCaribbean && ctof(c))
       createAlternateMap(c, 2, hsA);
 
-    if(c->land == laPalace && c->type == 7 && !princess::generating && !shmup::on && multi::players == 1 &&
+    if(c->land == laPalace && ctof(c) && !princess::generating && !shmup::on && multi::players == 1 &&
       (princess::forceMouse ? (from && from->pathdist != INF) : 
         (hrand(2000) < (peace::on ? 100 : 20))) && 
       !c->master->alt && 
@@ -1016,8 +1027,9 @@ bool openplains(cell *c) {
     forCellEx(c2, c) if(c2->land != laHunting) return false;
     return true;
     }
-  if(purehepta) {
-    celllister cl(c, 5, 1000000, NULL);
+  int dlimit = getDistLimit();
+  if(dlimit < 7) {
+    celllister cl(c, dlimit, 1000000, NULL);
     int bad = 0;
     for(cell *c: cl.lst) { 
       while(c->mpdist > 8) setdist(c, c->mpdist-1, NULL);
@@ -1026,7 +1038,7 @@ bool openplains(cell *c) {
     return true;
     }
   else {
-    celllister cl(c, purehepta ? 5 : 7, 1000000, NULL);
+    celllister cl(c, dlimit, 1000000, NULL);
     for(cell *c: cl.lst) { 
       while(c->mpdist > 8) setdist(c, c->mpdist-1, NULL);
       if(c->land != laHunting) return false;
@@ -1085,9 +1097,9 @@ void moreBigStuff(cell *c) {
       if(d == 10) {
         if(pseudohept(c)) buildCamelotWall(c);
         else {
-          if(!euclid) for(int i=0; i<7; i++) generateAlts(c->master->move[i]);
+          if(!euclid) for(int i=0; i<S7; i++) generateAlts(c->master->move[i]);
           int q = 0;
-          for(int t=0; t<6; t++) {
+          for(int t=0; t<S6; t++) {
             createMov(c, t);
             if(celldistAltRelative(c->mov[t]) == 10 && !pseudohept(c->mov[t])) q++;
             }
@@ -1101,7 +1113,7 @@ void moreBigStuff(cell *c) {
               if(cr == 9) ;
               else {
                 buildCamelotWall(c2);
-                if(c2->type == 6)
+                if(!ctof(c2))
                   c2->wall = waTower, c2->wparam = 1;
                 }
               }
@@ -1120,7 +1132,7 @@ void moreBigStuff(cell *c) {
         // roughly as many knights as table cells
         if(hrand(purehepta ? 2618 : 1720) < 1000) 
           c->monst = moKnight;
-        if(!euclid) for(int i=0; i<7; i++) generateAlts(c->master->move[i]);
+        if(!euclid) for(int i=0; i<S7; i++) generateAlts(c->master->move[i]);
         for(int i=0; i<c->type; i++) 
           if(c->mov[i] && celldistAltRelative(c->mov[i]) < d)
             c->mondir = (i+3) % 6;
@@ -1155,7 +1167,7 @@ void moreBigStuff(cell *c) {
         if(pseudohept(c)) 
           c->wall = waColumn;
         else {
-          if(!euclid) for(int i=0; i<7; i++) generateAlts(c->master->move[i]);
+          if(!euclid) for(int i=0; i<S7; i++) generateAlts(c->master->move[i]);
           int q = 0;
           for(int t=0; t<6; t++) {
             createMov(c, t);

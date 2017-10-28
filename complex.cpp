@@ -3101,6 +3101,7 @@ namespace windmap {
     }
   
   int at(cell *c) {
+    if(weirdhyperbolic) return ((size_t)c) % 255;
     return windmap::windcodes[windmap::getId(c)];
     }
 

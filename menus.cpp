@@ -425,7 +425,7 @@ void showChangeMode() {
   dialog::addBoolItem(XLAT("Tutorial"), tour::on, 'T');
 #endif
 
-  dialog::addBoolItem(XLAT("Euclidean/elliptic mode"), (euclid || sphere), 'e');
+  dialog::addBoolItem(XLAT("experiment with geometry"), (euclid || sphere), 'e');
   dialog::addBoolItem(XLAT(SHMUPTITLE), (shmup::on || multi::players > 1), 's');
   if(!shmup::on) dialog::addSelItem(XLAT("hardcore mode"),
     hardcore && !pureHardcore() ? XLAT("PARTIAL") : ONOFF(hardcore), 'h');
@@ -480,8 +480,10 @@ void showChangeMode() {
         }
       }
     
-    else if(xuni == 'e') 
+    else if(xuni == 'e') {
+      targettrunc = purehepta;
       pushScreen(showEuclideanMenu);
+      }
     else if(xuni == 't') {
       clearMessages();
       pushScreen(tactic::showMenu);
@@ -555,25 +557,164 @@ void showChangeMode() {
 int eupage = 0;
 int euperpage = 21;
 
-#define LAND_SPHEUC ((AT4568) ? LAND_OCT : (targetgeometry > 1) ? LAND_SPH : LAND_EUC)
-#define land_spheuc ((AT4568) ? land_oct : (targetgeometry > 1) ? land_sph : land_euc)
+// test all the floor patterns!
 
-const char* geometrynames[gGUARD] = {
-  "hyperbolic", "Euclidean", "spherical", "elliptic", 
-  "Zebra quotient", "field quotient", "torus", "octagons",
-  "four pentagons", "four hexagons"
-  };  
+#ifdef SCALETUNER
+#define LAND_SPHEUC 26
 
-const char* geometrynames_short[gGUARD] = {
-  "hyper", "Euclid", "sphere", "elliptic", 
-  "Zebra", "field", "torus", "oct", "4,5", "4,6"
-  };  
+eLand land_spheuc[LAND_SPHEUC] = {
+  laDesert,
+  laBull,
+  laPalace,
+  laWildWest,
+  laPower,
+  laStorms,
+  laHell,
+  laWhirlwind,
+  laGraveyard,
+  laTrollheim,
+  laBurial,
+  laVolcano,
+  laRlyeh,
+  laTortoise,
+  laRose,
+  laCrossroads,
+  laCaves,
+  laOvergrown,
+  laAlchemist,
+  laJungle,
+  laMotion,
+  laIce,
+  laDragon,
+  laKraken,
+  laWarpCoast,
+  laCaribbean
+  };
+
+#else
+
+#define LAND_SPHEUC ((weirdhyperbolic) ? LAND_OCT : (targetgeometry > 1) ? LAND_SPH : LAND_EUC)
+#define land_spheuc ((weirdhyperbolic) ? land_oct : (targetgeometry > 1) ? land_sph : land_euc)
+#endif
+
+const char *curvenames[8] = {
+  "0", "1", "2", "extremely hyperbolic", "strongly hyperbolic", "strongly hyperbolic", "moderately hyperbolic", "weakly hyperbolic"
+  };
+
+void useHyperrogueGeometry() {
+  targetgeometry = geometry;
+  restartGame('g');
+  if(targettrunc != purehepta) restartGame('7');
+  }
+
+string euchelp =
+  "If you want to know how much the gameplay is affected by the "
+  "hyperbolic geometry in HyperRogue, this mode is for you!\n\n"
+  
+  "You can try many different geometries here. We start by gluing "
+  "n-gons in such a way that k of them meet in every vertex. "
+  "Depending on n and k, this either folds into a sphere, unfolds into a plane, "
+  "or requires a hyperbolic space. The result may be then 'truncated' by "
+  "replacing each vertex by a 2k-gon. Furthermore, you can play "
+  "with quotient geometries. For example, the elliptic geometry is "
+  "obtained from the sphere by making the antipodes be the same point, "
+  "so you return to the same spot (but as a mirror image) after going there. "
+  "Halloween is a land specially designed for the 'sphere' geometry; "
+  "several more tilings can be played on by playing Graveyard or Warped Coast "
+  "in a truncated tiling. " 
+  "Have fun experimenting! Not all graphics and lands are implemented in "
+  "all geometries, but lots of them are.";
+
+void showPickGeometry() {
+  int ts = ginf[targetgeometry].sides;
+  int tv = ginf[targetgeometry].vertex;
+  int tq = ginf[targetgeometry].quotientstyle;
+  int nom = (targettrunc ? tv : tv+ts) * ((tq & qELLIP) ? 2 : 4);
+  int denom = (2*ts + 2*tv - ts * tv);
+  
+  gamescreen(4);
+  dialog::init(XLAT("select the geometry"));
+  for(int i=0; i<gGUARD; i++)
+    dialog::addBoolItem(XLAT(ginf[i].name), targetgeometry == i, 'a'+i);
+  
+  dialog::addBreak(50);
+
+  if(ts == 6 && tv == 3)
+    dialog::addSelItem("truncated", "does not matter", 't');
+  else
+    dialog::addBoolItem("truncated", !targettrunc, 't');
+
+  dialog::addBreak(50);
+
+  int worldsize = denom ? nom/denom : 0;
+  if(tq & qTORUS) worldsize = torusconfig::qty;
+  if(tq & qZEBRA) worldsize = targettrunc ? 12 : 40;
+  if(tq & qFIELD) {
+    worldsize = size(fp43.matrices) / ts;
+    if(!targettrunc) worldsize = (10*worldsize) / 3;
+    }
+
+  dialog::addSelItem("sides per face", its(ts), 0);
+  dialog::addSelItem("faces per vertex", its(tv), 0);
+
+  string qstring = "none";
+  if(tq & qZEBRA) qstring = "zebra";
+
+  else if(tq & qFIELD) qstring = "field";
+
+  else if(tq & qELLIP) qstring = "torus";
+
+  else if(tq & qTORUS) qstring = "torus";
+
+  dialog::addSelItem("quotient space", qstring, 0);
+
+  dialog::addSelItem("size of the world", 
+    XLAT(
+      worldsize == 0 ? "infinite" : 
+      worldsize > 0 ? "finite (%1)" :
+      "exponentially infinite (%1)", its(worldsize)),
+    0);
+  
+  switch(ginf[targetgeometry].cclass) {
+    case 0:
+      dialog::addSelItem("curvature", curvenames[ginf[targetgeometry].distlimit[targettrunc]], 0);
+      break;
+    
+    case 1: 
+      dialog::addSelItem("curvature", "flat", 0);
+      break;
+    
+    case 2:
+      dialog::addSelItem("curvature", "spherical", 0);
+      break;
+    }
+  
+  dialog::addItem(XLAT("help"), SDLK_F1);  
+  dialog::addItem(XLAT("done"), '0');  
+  dialog::display();
+
+  keyhandler = [] (int sym, int uni) {
+    dialog::handleNavigation(sym, uni);
+    if(uni >= 'a' && uni < 'a'+gGUARD)
+      targetgeometry = eGeometry(uni - 'a');
+    else if(uni == 't')
+      targettrunc = !targettrunc;
+    else if(uni == '2' || sym == SDLK_F1) gotoHelp(euchelp);
+    else if(doexiton(sym, uni)) {
+      popScreen();
+      if(targetgeometry == gEuclid) targettrunc = false;
+      if(targetgeometry == gNormal) popScreen(), useHyperrogueGeometry();      
+      }
+    };
+  }
+
+bool targettrunc;
 
 void showEuclideanMenu() {
   gamescreen(4);
   int s = vid.fsize;
   vid.fsize = vid.fsize * 4/5;
-  dialog::init(XLAT("Euclidean/elliptic mode"));
+  dialog::init(XLAT("experiment with geometry"));
   if(cheater) for(int i=0; i<landtypes; i++) landvisited[i] = true;
   for(int i=0; i<landtypes; i++)
     if(hiitemsMax(treasureType(eLand(i))) >= 25) landvisited[i] = true;
@@ -583,11 +724,17 @@ void showEuclideanMenu() {
   landvisited[laPrincessQuest] = cheater || princess::everSaved;
   landvisited[laWildWest] = true;
   landvisited[laHalloween] = true;
+  landvisited[laWarpCoast] = true;
+  landvisited[laGraveyard] = true;
   landvisited[laCA] = true;
   // for(int i=2; i<lt; i++) landvisited[i] = true;
+  
+  string truncatenames[2] = {" (t)", " (n)"};
 
-  dialog::addSelItem(XLAT("geometry"), XLAT(geometrynames[targetgeometry]), '5');
+  dialog::addSelItem(XLAT("geometry"), XLAT(ginf[targetgeometry].name) + truncatenames[targettrunc], '5');
   dialog::addBreak(50);
+  
+  eLand current = (geometry == targetgeometry) ? specialland : laNone;
 
   for(int i=0; i<euperpage; i++) {
     if(euperpage * eupage + i >= LAND_SPHEUC) { dialog::addBreak(100); break; }
@@ -596,7 +743,7 @@ void showEuclideanMenu() {
       char ch;
       if(i < 26) ch = 'a' + i;
       else ch = 'A' + (i-26);
-      dialog::addItem(XLAT1(linf[l].name), ch);
+      dialog::addBoolItem(XLAT1(linf[l].name), l == current, ch);
       }
     else dialog::addBreak(100);
     }
@@ -622,13 +769,10 @@ void showEuclideanMenu() {
     
     if(lid >= 0) lid += euperpage * eupage;
     
-    if(uni == '0') {
-      targetgeometry = geometry;
-      restartGame('g');
-      }
+    if(uni == '0') 
+      useHyperrogueGeometry();
     else if(uni == '5') {
-      targetgeometry = eGeometry(1+targetgeometry);
-      if(targetgeometry == gGUARD) targetgeometry = gEuclid;
+      pushScreen(showPickGeometry);
       }
     else if(uni == '-' || uni == PSEUDOKEY_WHEELUP || uni == PSEUDOKEY_WHEELDOWN) {
       eupage++;
@@ -641,23 +785,15 @@ void showEuclideanMenu() {
           restartGame('g');
         else
           restartGame(tactic::on ? 't' : 0);
+        // switch the truncated if necessary
+        if(targettrunc != purehepta)
+          restartGame('7');
         // disable PTM if chosen a land from the Euclidean menu
         if(tactic::on) restartGame('t');
         }
       else specialland = laIce;
       }
-    else if(uni == '2' || sym == SDLK_F1) gotoHelp(
-      "If you want to know how much the gameplay is affected by the "
-      "hyperbolic geometry in HyperRogue, this mode is for you!\n\n"
-      
-      "You can play an Euclidean version of each of the lands in "
-      "HyperRogue. Lands which include horocycles (Temple, Caribbean, "
-      "Whirlpool), infinite trees (Zebra, Emerald), or networks of "
-      "ultraparallel lines (Crossroads, Vineyard, Palace) cannot be "
-      "faithfully represented in Euclidean, so yo get more "
-      "or less simplified versions of them. Choose Crossroads to play a game "
-      "where many different lands appear."
-      );
+    else if(uni == '2' || sym == SDLK_F1) gotoHelp(euchelp);
     else if(doexiton(sym, uni)) popScreen();
     };
   }
@@ -805,8 +941,10 @@ void setAppropriateOverview() {
     pushScreen(yendor::showMenu);
   else if(peace::on)
     pushScreen(peace::showMenu);
-  else if(geometry != gNormal)
+  else if(geometry != gNormal) {
+    targettrunc = purehepta;
     pushScreen(showEuclideanMenu);
+    }
   else {
     mapeditor::infix = "";
     pushScreen(showOverview);

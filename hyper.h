@@ -87,7 +87,7 @@ bool destroyHalfvine(cell *c, eWall newwall = waNone, int tval = 6);
 void buildCrossroads2(cell *c);
 bool isHaunted(eLand l);
 heptagon *createAlternateMap(cell *c, int rad, hstate firststate, int special=0);
-void generateAlts(heptagon *h);
+void generateAlts(heptagon *h, int levs = S3-3);
 void setdist(cell *c, int d, cell *from);
 void checkOnYendorPath();
 void killThePlayerAt(eMonster m, cell *c, flagtype flags);
@@ -536,7 +536,7 @@ extern bool safety;
 #define INF  9999
 #define INFD 20
 #define PINFD 125
-#define BARLEV ((ISANDROID||ISIOS||ISFAKEMOBILE||purehepta)?9:10)
+#define BARLEV ((ISANDROID||ISIOS||ISFAKEMOBILE||getDistLimit()<7)?9:10)
 #define BUGLEV 15
 // #define BARLEV 9
 
@@ -1489,8 +1489,6 @@ namespace leader { void showMenu(); void handleKey(int sym, int uni); }
 
 bool needConfirmation();
 
-extern const char* geometrynames_short[gGUARD];
-
 namespace mirror {
   cellwalker reflect(const cellwalker& cw);
   }
@@ -1604,3 +1602,8 @@ transmatrix cellrelmatrix(cell *c, int i);
 void terracottaAround(cell *c);
 
 double cellgfxdist(cell *c, int i);
+
+int ctof(cell *c);
+
+void modalDebug(cell *c);
+int getDistLimit();

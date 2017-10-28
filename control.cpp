@@ -56,7 +56,8 @@ movedir vectodir(const hyperpoint& P) {
   
   ld dirdist[MAX_EDGE];
   for(int i=0; i<cwt.c->type; i++) {
-    dirdist[i] = intval(Centered * xspinpush0(-i * 2 * M_PI /cwt.c->type, .5), P);
+    dirdist[i] = intval(Centered * ddspin(cwt.c, i, 0) * xpush(-.5) * C0, P);
+    //xspinpush0(-i * 2 * M_PI /cwt.c->type, .5), P);
     }
     
   movedir res;
@@ -266,6 +267,29 @@ void handlePanning(int sym, int uni) {
     sym = 1;
     }
   }
+
+#ifdef SCALETUNER
+double tunev = .1;
+
+bool handleTune(int sym, int uni) {
+  if(uni == 'q') { tunev *= .5; return true; }
+  else if(uni == 'e') { tunev *= 2; return true; }
+  else if(uni == 'w') bscale7 += tunev*shiftmul;
+  else if(uni == 's') bscale7 -= tunev*shiftmul;
+  else if(uni == 'a') brot7 -= tunev*shiftmul;
+  else if(uni == 'd') brot7 += tunev*shiftmul;
+  else if(uni == 'i') bscale6 += tunev*shiftmul;
+  else if(uni == 'k') bscale6 -= tunev*shiftmul;
+  else if(uni == 'j') brot6 -= tunev*shiftmul;
+  else if(uni == 'l') brot6 += tunev*shiftmul;
+  else if(uni == 'z')
+    bscale7 = bscale6 = 1, brot7 = brot6 = 0;
+  else return false;
+  printf("s7 %lf r7 %lf s6 %lf r6 %lf\n", bscale7, brot7, bscale6, brot6);
+  resetGeometry();
+  return true;
+  }
+#endif
   
 void handleKeyNormal(int sym, int uni) {
 
@@ -275,6 +299,10 @@ void handleKeyNormal(int sym, int uni) {
     }
 
   if(DEFAULTNOR(sym)) handlePanning(sym, uni);
+  
+#ifdef SCALETUNER
+  if(handleTune(sym, uni)) return;
+#endif
 
   if(!(uni >= 'A' && uni <= 'Z') && DEFAULTCONTROL) {
     if(sym == 'l' || sym == 'd' || sym == SDLK_KP6) movepckeydir(0);

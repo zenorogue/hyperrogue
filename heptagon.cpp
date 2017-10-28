@@ -88,7 +88,7 @@ hstate transition(hstate s, int dir) {
     if(s == hsB0 && dir == S7-2) return hsC;
     return hsError;
     }
-  else if(AT456) {
+  else if(S6 == 8) {
     if(s == hsOrigin) return hsA;
     if(s == hsA && (dir >= 2 && dir < S7-1)) return hsA;
     if(s == hsA && (dir == S7-1)) return hsB;
@@ -99,9 +99,8 @@ hstate transition(hstate s, int dir) {
     if(s == hsOrigin) return hsA;
     if(s == hsA && dir >= 3 && dir <= S7-3) return hsA;
     if(s == hsA && dir == S7-2) return hsB;
+    if(s == hsB && dir >= 3 && dir <= S7-4) return hsA;
     if(s == hsB && dir == S7-3) return hsB;
-    if(s == hsB && dir == 3) return hsA;
-    if(s == hsB && AT8 && dir == 4) return hsA;
     }
   return hsError;
   }
@@ -120,8 +119,10 @@ struct indenter {
 template<class... T> auto iprintf(T... t) { for(int i=0; i<indent; i++) putchar(' '); return printf(t...); }
 */
 
+#define COMPUTE -1000000
+
 // create a new heptagon
-heptagon *buildHeptagon(heptagon *parent, int d, hstate s, int pard = 0) {
+heptagon *buildHeptagon(heptagon *parent, int d, hstate s, int pard = 0, int fixdistance = COMPUTE) {
   heptagon *h = new heptagon;
   h->alt = NULL;
   h->s = s;
@@ -132,7 +133,7 @@ heptagon *buildHeptagon(heptagon *parent, int d, hstate s, int pard = 0) {
   if(parent->c7) {
     h->c7 = newCell(S7, h);
     h->rval0 = h->rval1 = 0; h->cdata = NULL;
-    if(!AT8 && !AT456) {
+    if(!weirdhyperbolic) {
       h->emeraldval = emerald_heptagon(parent->emeraldval, d);
       h->zebraval = zebra_heptagon(parent->zebraval, d);
       h->fieldval = fp43.connections[fieldpattern::btspin(parent->fieldval, d)];
@@ -151,16 +152,51 @@ heptagon *buildHeptagon(heptagon *parent, int d, hstate s, int pard = 0) {
 //generateEmeraldval(h);
   if(pard == 0) {
     h->dm4 = parent->dm4+1;
-    if(purehepta) h->distance = parent->distance + 1;
-    else if(parent->s == hsOrigin) h->distance = 2;
-    else if(h->spin(0) == 5) 
+    if(fixdistance != COMPUTE) h->distance = fixdistance;
+    else if(purehepta) h->distance = parent->distance + 1;
+    else if(parent->s == hsOrigin) h->distance = parent->distance + 2;
+    else if(S3 == 4) {
+      h->distance = parent->distance + 2;
+      if(h->spin(0) == 2 || (h->spin(0) == 3 && S7 <= 5))
+        h->distance = min<short>(h->distance, createStep(h->move[0], 0)->distance + 3);
+      if(h->spin(0) == 2 && h->move[0]) {
+        int d = h->spin(0);
+        int d1 = (d+S7-1)%S7;
+        heptagon* h1 = createStep(h->move[0], d1);
+        if(h1->distance <= h->move[0]->distance)
+          h->distance = h->move[0]->distance+1;
+        }
+      if((h->s == hsB && h->move[0]->s == hsB) || h->move[0]->s == hsA) {
+        int d = h->spin(0);
+        heptagon* h1 = createStep(h->move[0], (d+1)%S7);
+        if(h1->distance <= h->move[0]->distance)
+          h->distance = h->move[0]->distance+1;
+        }
+      if(h->spin(0) == S7-1)
+        h->distance = min(
+          h->move[0]->move[0]->distance + 2,
+          createStep(h, S7-1)->distance + 1
+          );
+      }
+    else if(h->spin(0) == S7-2) 
       h->distance = parent->distance + 1;
-    else if(h->spin(0) == 4 && h->move[0]->s == hsB)
-      h->distance = createStep(h->move[0], (h->spin(0)+2)%7)->distance + 3;
+    else if(h->spin(0) == S7-3 && h->move[0]->s == hsB)
+      h->distance = createStep(h->move[0], (h->spin(0)+2)%S7)->distance + 3;
     else h->distance = parent->distance + 2;
     }
   else {
     h->distance = parent->distance - (purehepta?1:2);
+    if(S3 == 4 && S7 == 5) {
+      if(h->s == hsOrigin) {
+        printf("had to cheat!\n");
+        h->distance = parent->distance - 2;
+        }
+      else {
+        h->distance = parent->distance - 1;
+        buildHeptagon(h, 2, hsA, 0, h->distance + 2);
+        buildHeptagon(h, 4, hsB, 0, h->distance);
+        }
+      }
     h->dm4 = parent->dm4-1;
     }
   return h;
@@ -171,6 +207,12 @@ void connectHeptagons(heptagon *h1, int d1, heptagon *h2, int d2) {
   h1->setspin(d1, d2);
   h2->move[d2] = h1;
   h2->setspin(d2, d1);
+  }
+
+int recsteps;
+
+void breakpoint() {
+//  printf("Breakpoint!\n");
   }
 
 void addSpin(heptagon *h, int d, heptagon *from, int rot, int spin) {
@@ -198,8 +240,13 @@ struct heptspin {
   heptspin() { mirrored = false; }
   };
 
+int lrecsteps;
+
 heptspin hsstep(const heptspin &hs, int spin) {
+  recsteps++;
+  if(recsteps % 5 == 0 && recsteps > lrecsteps) lrecsteps = recsteps, breakpoint();
   createStep(hs.h, hs.spin);
+  recsteps--;
   heptspin res;
   res.h = hs.h->move[hs.spin];
   res.mirrored = hs.mirrored ^ hs.h->mirror(hs.spin);
@@ -218,13 +265,21 @@ heptspin hsspin(const heptspin &hs, int val) {
 heptagon *createStep(heptagon *h, int d) {
   d = fixrot(d);
   if(!h->move[0] && h->s != hsOrigin) {
-    buildHeptagon(h, 0, hsA, 3 + hrand(2));
+    // cheating: 
+    int pard;
+    if(S3 == 3) 
+      pard = 3 + hrand(2);
+    else if(S3 == 4 && S7 == 5)
+      pard = 3; // to do: randomize
+    else if(S3 == 4)
+      pard = 3;
+    buildHeptagon(h, 0, h->distance < -1000 ? hsOrigin : hsA, pard);
     }
   if(h->move[d]) return h->move[d];
   if(h->s == hsOrigin) {
     buildHeptagon(h, d, hsA);
     }
-  else if(AT456) {
+  else if(S3 == 4) {
     if(d == 1) {
       heptspin hs;
       hs.h = h;

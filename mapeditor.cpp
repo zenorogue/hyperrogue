@@ -2196,12 +2196,12 @@ lessalphaif(col, behindsphere(V), behindsphere(gmatrix[c2]))
         }
         
       case patTree:
-        if(c->type != 6 && !euclid) 
+        if(ctof(c) && !euclid) 
           queueline(tC0(V), V*ddi0(purehepta?S42:0, tessf), col1, 2);
         break;
       
       case patAltTree:
-        if(c->type != 6 && !euclid && c->master->alt) {
+        if(ctof(c) && !euclid && c->master->alt) {
           for(int i=0; i<S7; i++)
             if(c->master->move[i] && c->master->move[i]->alt == c->master->alt->move[0])
               queueline(tC0(V), V*xspinpush0((purehepta?M_PI:0) -2*M_PI*i/S7, tessf), col, 2);
