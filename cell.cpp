@@ -961,7 +961,8 @@ int fiftyval049(cell *c) {
 // zebraval
 
 int zebra40(cell *c) {
-  if(ctof(c)) return (c->master->zebraval/10);
+  if(euclid) return eupattern(c);
+  else if(ctof(c)) return (c->master->zebraval/10);
   else if(sphere) return 0;
   else if(euclid) return eupattern(c);
   else {
