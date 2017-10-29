@@ -2319,7 +2319,6 @@ void drawMovementArrows(cell *c, transmatrix V) {
       if((c->type & 1) && (isStunnable(c->monst) || c->wall == waThumperOn)) {
         transmatrix Centered = rgpushxto0(tC0(cwtV));
         int sd = md.subdir;
-        if(sphere) sd = -sd;
         queuepoly(inverse(Centered) * rgpushxto0(Centered * tC0(V)) * rspintox(Centered*tC0(V)) * spin(-sd * M_PI/S7) * xpush(0.2), shArrow, col);
         }
       else break;
