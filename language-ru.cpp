@@ -388,7 +388,6 @@ S("heptagonal game board", "семиугольная игровая доска")
 S("triangular game board", "треугольная игровая доска")
 S("HyperRogue game board", "игровая доска HyperRogue")
 S("first page [Space]", "первая страница [пробел]")
-S("exit configuration", "выйти из настроек")
 S("Configuration:", "Настройки:")
 S("video resolution", "видео разрешение")
 S("fullscreen mode", "полноэкранный режим")
@@ -415,7 +414,6 @@ S("use Shift to decrease and Ctrl to fine tune ", "используйте Shift 
 S("(e.g. Shift+Ctrl+Z)", "Ctrl для тонкой настройки") // (например, Shift+Ctrl+Z)")
 S("the second page [Space]", "вторая страница [Пробел]")
 S("special features [Space]", "специальные опции [Пробел]")
-S("exit configuration", "выйти из настроек")
 S("see the help screen", "смотри экран помощи")
 S("save the current config", "сохранить текущие настройки")
 S("(v) config", "(v) настр.")
@@ -2844,7 +2842,6 @@ S("paper model creator", "создатель бумажных моделей")
 S("synchronize net and map", "синхронизовать сеть и карту")
 S("display the scope", "показать охват")
 S("create the model", "создать модель")
-S("back to HyperRogue", "вернуться в игру")
 S("design the net", "разработать сеть")
  
 S("The paper model created as papermodel-*.bmp", "Модель сохранена как papermodel-*.bmp")
@@ -3403,7 +3400,6 @@ S(
   "Используйте стрелки для вращения, Page Up/Down для изменения масштаба.")
  
 S("what's this?", "что это?")
-S("take me back", "вернуться в меню")
 S("enable the Hypersian Rug mode", "включить режим гиперсидского ковра")
 S("render the texture only once", "отрисовать один раз")
 S("render texture without OpenGL", "не использовать OpenGL")
@@ -3695,7 +3691,6 @@ S("band width", "ширина ленты")
 S("length of a segment", "длина отрезка")
 S("spiral on rendering", "спираль отрисовки")
 S("render now (length: %1)", "рисуется сейчас (длина: %1)")
-S("exit this menu", "выход")
 S("Enable cheat mode or GAME OVER to use this", "Доступно только в конце игры и в режиме обманщика")
  
 // remember to note it's in English
@@ -4417,7 +4412,6 @@ S("Watch the Minkowski hyperboloid or the hypersian rug mode with the "
   "Смотреть гиперболоид Минковского или режим гиперсидского через красно-голубые 3D очки.")
  
 S("0 - return", "0 - вернуться")
-S("return", "вернуться")
 S("go back", "вернуться")
 S("F1 - help", "F1 - помощь")
  
@@ -4630,7 +4624,6 @@ S("Level of water bottom", "Уровень дна водоёма")
 S("set 3D monsters or walls in basic config first",
   "сначала выставлять монстров или стены в режиме 3D ")
 S("parameters set correctly", "параметры корректны")
-S("exit 3D configuration", "выйти из настроек 3D")
  
 S("Objects at distance less than %1 absolute units "
   "from the center will be displayed with high "
