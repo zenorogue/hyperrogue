@@ -722,6 +722,7 @@ void showEuclideanMenu() {
     if(hiitemsMax(treasureType(eLand(i))) >= 25) landvisited[i] = true;
   landvisited[laCrossroads] = true;
   landvisited[laIce] = true;
+  landvisited[laHunting] = true;
   landvisited[laMirrorOld] = true;
   landvisited[laPrincessQuest] = cheater || princess::everSaved;
   landvisited[laWildWest] = true;
