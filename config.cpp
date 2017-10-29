@@ -194,6 +194,7 @@ void initConfig() {
   addsaver(vid.msgleft, "message style", 2);
   addsaver(vid.msglimit, "message limit", 5);
   addsaver(vid.timeformat, "message log time format", 0);
+  addsaver(fontscale, "fontscale", 100);
 
   addsaver(vid.mobilecompasssize, "mobile compass size", 30);
   addsaver(vid.axes, "movement help", 1);
