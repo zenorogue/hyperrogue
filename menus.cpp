@@ -728,6 +728,7 @@ void showEuclideanMenu() {
   landvisited[laHalloween] = true;
   landvisited[laWarpCoast] = true;
   landvisited[laGraveyard] = true;
+  landvisited[laDual] = true;
   landvisited[laCA] = true;
   // for(int i=2; i<lt; i++) landvisited[i] = true;
   

@@ -2431,7 +2431,7 @@ void setcolors(cell *c, int& wcol, int &fcol) {
     case laBurial: case laTrollheim: case laBarrier: case laOceanWall:
     case laCrossroads2: case laCrossroads3: case laCrossroads4: case laCrossroads5:
     case laRose: case laPower: case laWildWest: case laHalloween: case laRedRock:
-    case laDragon: case laStorms: case laTerracotta: case laMercuryRiver:
+    case laDragon: case laStorms: case laTerracotta: case laMercuryRiver: case laDual:
       fcol = linf[c->land].color; break;
 
     case laDesert: fcol = 0xEDC9AF; break;
@@ -2818,6 +2818,12 @@ void floorShadow(cell *c, const transmatrix& V, int col, bool warp) {
     else 
       queuepolyat(V * applyPatterndir(c), shTriheptaFloorShadow[ctof(c)], col, PPR_WALLSHADOW);
     }
+  else if(c->land == laDual) {
+    if(euclid && ishex1(c))
+      queuepolyat(V * pispin, shBigTriShadow, col, PPR_WALLSHADOW);
+    else
+      queuepolyat(V, shBigTriShadow, col, PPR_WALLSHADOW);
+    }    
   else {
     queuepolyat(V, shFloorShadow[ctof(c)], col, PPR_WALLSHADOW);
     }
@@ -2838,6 +2844,12 @@ void plainfloor(cell *c, bool warp, const transmatrix &V, int col, int prio) {
     else 
       queuepolyat(V * applyPatterndir(c), shTriheptaFloor[sphere ? ctof(c) : mapeditor::nopattern(c)], col, prio);
     }
+  else if(c->land == laDual) {
+    if(euclid && ishex1(c))
+      queuepolyat(V * pispin, shBigTriangle, col, prio);
+    else
+      queuepolyat(V, shBigTriangle, col, prio);
+    }    
   else {
     queuepolyat(V, shFloor[ctof(c)], col, prio);
     }
@@ -2854,10 +2866,18 @@ void fullplainfloor(cell *c, bool warp, const transmatrix &V, int col, int prio)
     else 
       queuepolyat(V * applyPatterndir(c), shTriheptaFloor[sphere ? ctof(c) : mapeditor::nopattern(c)], col, prio);
     }
+  else if(c->land == laDual) {
+    if(euclid && ishex1(c))
+      queuepolyat(V * pispin, shBigTriangle, col, prio);
+    else
+      queuepolyat(V, shBigTriangle, col, prio);
+    }    
   else {
     queuepolyat(V, shFullFloor[ctof(c)], col, prio);
     }
   }
+
+void qfloor_eswap(cell *c, const transmatrix& V, const hpcshape& sh, int col);
 
 void qplainfloor(cell *c, bool warp, const transmatrix &V, int col) {
   if(warp) {
@@ -2870,6 +2890,8 @@ void qplainfloor(cell *c, bool warp, const transmatrix &V, int col) {
     else 
       qfloor(c, V, applyPatterndir(c), shTriheptaFloor[sphere ? ctof(c) : mapeditor::nopattern(c)], col);
     }
+  else if(c->land == laDual)
+    qfloor_eswap(c, V, shBigTriangle, col);
   else {
     qfloor(c, V, shFloor[ctof(c)], col);
     }
@@ -2925,6 +2947,10 @@ void escherSidewall(cell *c, int sidepar, const transmatrix& V, int col) {
 void placeSidewall(cell *c, int i, int sidepar, const transmatrix& V, bool warp, bool mirr, int col) {
   if(shmup::on || purehepta) warp = false;
   if(warp && !ishept(c) && (!c->mov[i] || !ishept(c->mov[i]))) return;
+  if(c->land == laDual) {
+    if(ctof(c)) return;
+    if(euclid ? (ishex1(c) ? !(i&1) : (i&1)) : !(i&1)) return;
+    }
   int prio;
   /* if(mirr) prio = PPR_GLASS - 2;
   else */ if(sidepar == SIDE_WALL) prio = PPR_WALL3 - 2;
@@ -2944,9 +2970,9 @@ void placeSidewall(cell *c, int i, int sidepar, const transmatrix& V, bool warp,
   
   // queuepoly(V2 * xpush(.1), shSnowball, aw ? 0xFFFFFFFF : 0xFF0000FF);
   // prio += c->cpdist - c->mov[i]->cpdist;  
-
+  
   queuepolyat(V2, 
-    (mirr?shMFloorSide:warp?shTriheptaSide:shFloorSide)[sidepar][ctof(c)], col, prio);
+    (mirr?shMFloorSide:warp?shTriheptaSide:c->land == laDual?shBigTriSide:shFloorSide)[sidepar][ctof(c)], col, prio);
   }
 
 bool openorsafe(cell *c) {
@@ -3590,6 +3616,10 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       
       else if(isWarped(c) && euclid) 
         qfloor_eswap(c, Vf, shTriheptaFloor[ctof(c)], darkena(fcol, fd, 0xFF));
+
+      else if(c->land == laDual && !purehepta && !ctof(c)) {
+        qfloor_eswap(c, Vf, shBigTriangle, darkena(fcol, fd, 0xFF));
+        }
 
       else if(isWarped(c) && !purehepta && !shmup::on) {
         int np = mapeditor::nopattern(c);

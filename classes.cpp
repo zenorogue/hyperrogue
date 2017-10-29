@@ -1557,11 +1557,12 @@ const landtype linf[landtypes] = {
   { 0x8080FF, "Blizzard", blizzarddesc},
   { 0x207068, "Hunting Ground", huntingdesc},
   { 0xE2725B, "Terracotta Army", terraldesc},
-  { 0xE2725B, "Terracotta Army", terraldesc}
+  { 0xE2725B, "Terracotta Army", terraldesc},
+  { 0xE04040, "Dual", NODESCYET}
   };
 
 #define LAND_OVER 57
-#define LAND_OVERX 59
+#define LAND_OVERX 60
 
 eLand land_over[LAND_OVERX] = {
   laIce, laCaves, laDesert, laHunting, laMotion, laJungle, laAlchemist, 
@@ -1581,10 +1582,10 @@ eLand land_over[LAND_OVERX] = {
   laHell, laCrossroads3, laCocytus, laPower, laCrossroads4,
   laCrossroads5,  
   // EXTRA
-  laWildWest, laHalloween
+  laWildWest, laHalloween, laDual
   };
 
-#define LAND_EUC 53
+#define LAND_EUC 54
 eLand land_euc[LAND_EUC] = {
   laIce, laCaves, laDesert, laMotion, laJungle,
   laCrossroads, 
@@ -1599,10 +1600,11 @@ eLand land_euc[LAND_EUC] = {
   laWildWest,
   laReptile, laMountain, laBull, laPrairie,
   laVolcano, laHunting, laBlizzard, laTerracotta,
+  laDual
   };
 // MISSING: laCrossroads2
 
-#define LAND_SPH 39
+#define LAND_SPH 40
 eLand land_sph[LAND_SPH] = {
   laHalloween,
   laIce, laCaves, laDesert, laMotion, laJungle,
@@ -1615,19 +1617,21 @@ eLand land_sph[LAND_SPH] = {
   laEmerald, laDragon, laTortoise,
   laHell, laCrossroads3, laCocytus, laPower, laElementalWall,
   laCrossroads4,
-  laWildWest, laPalace, laBull, laPrairie, laCA
+  laWildWest, laPalace, laBull, laPrairie, laCA,
+  laDual
   };
 
-#define LAND_OCT 33
+#define LAND_OCT 36
 eLand land_oct[LAND_OCT] = {
-  laIce, laDesert, laCaves, laJungle, laAlchemist, 
+  laWarpCoast, laIce, laDesert, laCaves, laJungle, laAlchemist, 
   laGraveyard, laRlyeh, laHell, laCocytus, laMotion, 
   laDryForest, laDeadCaves, laRedRock, laMinefield, laLivefjord,
   laStorms, laOvergrown, laRose, laKraken, laBurial,
   laTrollheim, laBull, laHunting,
   laCaribbean, laCamelot, laPalace, laMirrorOld,
   laVolcano, laBlizzard, laTerracotta,
-  laWineyard, laPower, laEmerald
+  laWineyard, laPower, laEmerald, laWhirlpool,
+  laDual
   };
 
 

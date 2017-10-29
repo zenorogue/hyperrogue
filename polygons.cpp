@@ -639,7 +639,8 @@ hpcshape
   shHedgehogBlade, shHedgehogBladePlayer,
   shWolfBody, shWolfHead, shWolfLegs, shWolfEyes,
   shWolfFrontLeg, shWolfRearLeg, shWolfFrontPaw, shWolfRearPaw,
-  shBigHepta, shBigTriangle, shBigHex, shBigHexTriangle, shBigHexTriangleRev,
+  shBigHepta, shBigHex, shBigHexTriangle, shBigHexTriangleRev,
+  shBigTriangle, shBigTriSide[SIDEPARS][2], shBigTriShadow,
   shFemaleBody, shFemaleHair, shFemaleDress, shWitchDress,
   shWitchHair, shBeautyHair, shFlowerHair, shFlowerHand, shSuspenders,
   shBugBody, shBugArmor, shBugLeg, shBugAntenna,
@@ -1010,6 +1011,10 @@ void buildpolys() {
     bshape(shMFloorSide[k][1], PPR_LAKEWALL);
     for(int t=0; t<=1; t++) hpcpush(ddi(t*S12-S6, MF(floorrad1,7)) * C0);
     chasmifyPoly(dlow, dhi, k);
+
+    bshape(shBigTriSide[k][0], PPR_LAKEWALL);
+    for(int t=0; t<=1; t++) hpcpush(ddi(t*S28-S14, hcrossf*.94) * C0);
+    chasmifyPoly(dlow, dhi, k);
     }
 
   for(int d=0; d<2; d++) {
@@ -1316,7 +1321,11 @@ void buildpolys() {
   for(int t=0; t<=S6; t++) hpcpush(ddi(t*S14, -shexf*1.3) * C0);
   
   bshape(shBigTriangle, PPR_FLOOR);
-  for(int t=0; t<=S3; t++) hpcpush(ddi(t*S28, hcrossf*.94) * C0);
+  for(int t=0; t<=S3; t++) hpcpush(ddi(t*S28, -hcrossf*.94) * C0);
+
+  bshape(shBigTriShadow, PPR_FLOOR);
+  for(int t=0; t<=S3; t++) hpcpush(ddi(t*S28 + S14, hcrossf*.94*SHADMUL) * C0);
+
   
 /*bshape(shBigHexTriangleRev, PPR_FLOOR);
   for(int t=0; t<=S3; t++) hpcpush(ddi(t*S28, -shexf*1.3) * C0);
@@ -1897,9 +1906,8 @@ bool isSpecial(const hpcshape &h) {
     &h != &shFloor[0] && 
     &h != &shFloor[1] && 
     &h != &shTriheptaFloor[0] && 
-    &h != &shTriheptaFloor[1] && 
-    &h != &shTriheptaEuc[0] && 
-    &h != &shTriheptaEuc[1];
+    &h != &shTriheptaFloor[1] &&
+    &h != &shBigTriangle;
   }
 
 const hpcshape& getSeabed(const hpcshape& c) {
@@ -1927,7 +1935,7 @@ void qfloor0(cell *c, const transmatrix& V, const hpcshape& h, int col) {
   }
   
 void qfloor(cell *c, const transmatrix& V, const hpcshape& h, int col) {
-  qfloor0(c, V, h, col);  
+  qfloor0(c, V, h, col);
   qfi.special = isSpecial(h);
   qfi.shape = &h, qfi.spin = Id; 
   }

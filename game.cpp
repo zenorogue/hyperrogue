@@ -2896,6 +2896,8 @@ bool makeEmpty(cell *c) {
     c->wall = waFrozenLake;
   else if(c->land == laAlchemist || c->land == laCanvas)
     ;
+  else if(c->land == laDual)
+    ;
   else if(c->land == laCaves || c->land == laEmerald)
     c->wall = waCavefloor;
   else if(c->land == laDeadCaves)

@@ -1919,6 +1919,11 @@ void giantLandSwitch(cell *c, int d, cell *from) {
     case laMercuryRiver:
       // do nothing!
       break;
+    
+    case laDual:
+      if(d == 9 && (ctof(c) || hrand(100) < 5))
+        c->wall = waChasm;
+      break;
     }
   }
 
