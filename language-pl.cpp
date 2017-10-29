@@ -586,7 +586,7 @@ S("The Alchemists produce magical potions from pools of blue and red slime. You 
  "the color of the slime and slime beasts around them.",
  "Alchemicy produkują magiczne napoje z niebieskiej i czerwonej mazi. Możesz "
  "poruszać się poprzez maź, ale nie możesz przesunąć się z pola niebieskiego "
- "na czerwone, ani z powrotem. Pola zawierające przedmioty są bezbarwne, "
+ "na czerwone ani z powrotem. Pola zawierające przedmioty są bezbarwne, "
  "po zebraniu przedmiotu zmieniają kolor na kolor pola, na którym "
  "gracz był wcześniej. Maziste Stwory również ograniczone są do swojego koloru. "
  "Zabijane eksplodują, niszcząc przedmioty i zmieniając kolor mazi wokół nich.\n")
@@ -3840,13 +3840,14 @@ S("player 7 spin", "gracz 7 obrót")
 //=============
 
 // extra descriptions for Orbs and some other things
+// -------------------------------------------------
 
 S("\n\nThis Orb is triggered on your first attack or illegal move.",
   "\n\nTa Sfera się aktywuje automatycznie, gdy wykonasz atak lub nielegalny ruch.")
 
 S("\nYou can never target cells which are adjacent to the player character, "
      "or ones out of the sight range.",
-     "\nNie możesz celować w pola obok postaci, ani poza zasięgiem wzroku.")
+     "\nNie możesz celować w pola obok postaci ani poza zasięgiem wzroku.")
 
 S("\nThis is a ranged Orb. ", "\nDziałanie tej Sfery celujesz w konkretne miejsce.")
 
@@ -3888,7 +3889,7 @@ S("\n\nThis Orb protects you from attacks, scents, and insulates you "
   "from electricity. It does not let you go through deadly terrain, but "
   "if you are attacked with fire, it lets you stay in place in it.",
   
-  "\n\nTa Sfera chroni Cię przed atakami, zapachami, i izoluje od "
+  "\n\nTa Sfera chroni Cię przed atakami, zapachami i izoluje od "
   "elektryczności. Nie pozwala iść przez zabójczy teren, ale "
   "jeśli zostaniesz zaatakowan%y0 ogniem, możesz stać w miejscu.")
 
@@ -3896,6 +3897,7 @@ S("Completing the quest in this land is not necessary for the Hyperstone Quest."
   "Wykonanie tego zadania nie jest konieczne do zdobycia Hiperkamieni.")
 
 // other options
+// -------------
 
 S("player", "gracz")
 S("movement color", "kolor ruchu")
@@ -3907,6 +3909,7 @@ S("leaderboards/achievements", "osiągnięcia i rankingi")
 S("return to the game", "powrót do gry")
 
 // Android texts
+// -------------
 
 S("connected to Google Games", "połączenie z Google Games")
 S("background music", "muzyka w tle")
@@ -3914,6 +3917,7 @@ S("view your achievements", "pokaż osiągnięcia")
 S("next page", "kolejna strona")
 
 // new multiplayer
+// ---------------
 
 S("shoot'em up and multiplayer", "strzelanka / wielu graczy")
 
@@ -3961,20 +3965,21 @@ S(
 
 "Wielu graczy: współpracujecie (lokalnie); można też współzawodniczyć o skarby i zabicia, "
 "które są liczone dla każdego gracza. Sfery i skarby są dzielone, sfery wyczerpują się "
-"szybciej, noże wracają wolniej, i gracze nie mogą się rozdzielać.\n\n")
+"szybciej, noże wracają wolniej, a gracze nie mogą się rozdzielać.\n\n")
 
 S(
 "Turn-based multiplayer: Turns are executed in parallel. A player can leave the game "
 "by pressing a designated key (useful when about to get killed or lost). The following "
 "Orbs work to bring such players back: ",
-"Turowo na wielu graczy: tury wykonujecie równolegle. Gracz może opuścić grę "
-"naciskając wyznaczony klawisz (użyteczne, gdy się zgubi lub by zaraz został zabity). "
-"Następujących Sfer można użyć, by taki gracz wrócił:")
+"Turowo na wielu graczy: tury wykonujecie równolegle. Gracz może opuścić grę, "
+"naciskając wyznaczony klawisz (użyteczne, gdy się zgubi lub gdyby zaraz został zabity). "
+"Aby taki gracz wrócił, można użyć następujących Sfer:")
 
 S("This menu can be also used to configure keys.\n\n",
   "To menu może być też użyte do konfiguracji klawiszy.")
 
 // other stuff
+// -----------
 
 S("Warnings are issued when you try to do something that appears dangerous, "
   "like stepping on a known mine, or getting your boat destroyed by "
@@ -3990,6 +3995,7 @@ S("Warnings are issued when you try to do something that appears dangerous, "
 
 
 // kraken depths
+// -------------
 
 N("Kraken Depths", GEN_F, "Głębiny Krakenów", "Głębiny Krakenów", "Głębiny Krakenów", "w Głębinach Krakenów")
 
@@ -4002,15 +4008,15 @@ S(
     "a Kraken. You will also need Orb of the Fish to get the treasures, luckily you can "
     "steal one from the Viking treasure hunters.",
     
-    "Dawno, dawno temu, to był szlak handlowy, ale Krakeny wypłynęły z głębin. Wiele "
-    "statków handlowych zatonęła. Według legendy, gdzieś w głębinach ukryty jest sekret "
+    "Dawno, dawno temu, był to szlak handlowy, ale Krakeny wypłynęły z głębin. Wiele "
+    "statków handlowych zatonęło. Według legendy, gdzieś w głębinach ukryty jest sekret "
     "magicznej broni...\n\n"
-    "Możesz tu znaleźć Zatopione Skarby, ale nie będą się one pojawiać, aż pokonasz "
+    "Możesz tu znaleźć Zatopione Skarby, ale nie będą się one pojawiać, póki nie pokonasz "
     "Krakena. By wyłowić skarby, potrzebna jest Sfera Ryby. Na szczęście można ukraść "
-    "ją od wikińskich łowców skarbów.")
+    "ją wikińskim łowcom skarbów.")
 
 S(
-  "There are Krakens in your homeland too... huge sea monsters which "
+  "There are Krakens in your homeland, too... huge sea monsters which "
   "could easily destroy ships. The geometry of this strange world "
   "prevents quick movement of huge objects, "
   "so there are no large ships, only small boats, and "
@@ -4025,8 +4031,8 @@ S(
   "Tam, skąd pochodzisz, również są Krakeny... wielkie morskie potwory, które "
   "z łatwością mogą zatapiać statki. Geometria tego dziwnego świata powoduje, "
   "że wielkie obiekty nie mogą się szybko poruszać, nie ma tu zatem dużych statków, "
-  "tylko małe łódki, i hiperboliczne Krakeny też są względnie małe. Wciąż one są "
-  "chyba największymi stworzeniami, które wciąż mogą się poruszać z rozsądną "
+  "tylko małe łódki, a hiperboliczne Krakeny też są względnie małe. Wciąż one są "
+  "chyba największymi stworzeniami, mogącymi się poruszać z rozsądną "
   "prędkością...\n\n"
   
   "Głowa krakena porusza się tylko po sześciokątach. By pokonać Krakena, musisz "
@@ -4044,10 +4050,10 @@ S(
     "move or rotate it otherwise. Most monsters can be killed by moving the sword into them, "
     "and won't move into the spot with the sword.",
     
-    "Ta Sfera daje Ci ostrze zbudowaną z czystej magicznej energii. Nie trzymasz "
+    "Ta Sfera daje Ci ostrze zbudowane z czystej magicznej energii. Nie trzymasz "
     "go w ręce, po prostu unosi się ono w powietrzu obok Ciebie. Kiedy się poruszasz, "
     "ostrze energii porusza się razem z Tobą, pozostając skierowane pod tym samym "
-    "kątem względem Twojego ruchu, co wcześniej -- nie możesz nim obracać "
+    "kątem względem Twojego ruchu co wcześniej -- nie możesz nim obracać, "
     "ani poruszać w inny sposób. Większość potworów ginie, gdy uderzysz w nie ostrzem, "
     "nie wejdą one też na pole, na którym ostrze jest.")
 
@@ -4057,6 +4063,7 @@ S("Cargo of a ship which was once destroyed by a Kraken.",
   "Ładunek statku zatopionego dawno temu przez Krakena.")
 
 // burial grounds
+// --------------
 
 N("Burial Grounds", GEN_O, "Kurhany", "Kurhany", "Kurhany", "w Kurhanach")
 
@@ -4114,7 +4121,8 @@ N("barrow", GEN_O, "kurhan", "kurhany", "kurhan", "kurhanem")
 S("Your Orb of the Sword can be used to dig here.", 
   "Możesz tu kopać przy użyciu Sfery Ostrza.")
 
-// trollheim
+// Trollheim
+// ---------
 
 N("Trollheim", GEN_O, "Trollheim", "Trollheim", "Trollheim", "w Trollheim")
 
@@ -4125,7 +4133,7 @@ S(
     "these Trolls yourself?",
     
     "Wiele klanów Trolli żyje w tym królestwie. Można tu znaleźć mnóstwo pomników "
-    "trolli, albo raczej nie pomników, tylko po prostu stare Trolle, które "
+    "trolli albo raczej nie pomników, tylko po prostu stare Trolle, które "
     "umierając zamieniły się kamień. A może to Trolle zabite przez Ciebie?")
 
 
@@ -4152,7 +4160,7 @@ S(
     
     "Gdy Trolle umierają, zamieniają się w kamień. Ta Sfera powoduje, że "
     "dzieje się to ze wszystkimi pokonanymi stworzeniami. Pomniki stworzone "
-    "przez Sferę Kamienia mają inne własności niż Trolle spetryfikowane naturalnie.")
+    "przez Sferę Kamienia mają nieco inne własności niż Trolle spetryfikowane naturalnie.")
 
 N("stone statue", GEN_O, "kamienny pomnik", "kamienne pomniki", "kamienny pomnik", "kamiennym pomnikiem")
 
@@ -4162,6 +4170,7 @@ S("mark heptagons", "oznaczenia na siedmiokątach")
 S("help for keyboard users", "pomoc dla użytkowników klawiatury")
 
 // missing
+// -------
 
 S("You leave %the1.", "Zostawiasz %a1.") // Baby Tortoise
 
@@ -4175,32 +4184,39 @@ S("You feel that a magical weapon is waiting for you...",
   "Czujesz, że magiczna broń na Ciebie czeka...")
 
 // missing
+// -------
 
 S("reset per-player statistics", "zresetuj statystyki graczy")
 S("An alternate layout of the Crossroads, without walls.", "Alternatywny układ Skrzyżowań, bez ścian.")
 S("cheats", "oszustwa")
 
 S("Known mines may be marked by pressing 'm'. Your allies won't step on marked mines.", 
-  "Znane miny można oznaczać naciskając 'm'. Twoi przyjaciele nie będą stawać na oznaczonych minach.")
+  "Znane miny można oznaczać, naciskając 'm'. Twoi przyjaciele nie będą stawać na oznaczonych minach.")
 
 S("Known mines may be marked by touching while in drag mode. Your allies won't step on marked mines.", 
-  "Znane miny można oznaczać dotykając ich w trybie przeciągania. Twoi przyjaciele nie będą stawać na oznaczonych minach.")
+  "Znane miny można oznaczać, dotykając ich w trybie przeciągania. Twoi przyjaciele nie będą stawać na oznaczonych minach.")
 
 // 9.0 patches
-//=============
+// ===========
 
 // extra help
+// ----------
+
 S("Coastal region -- connects inland and aquatic regions.\n",
   "Kraina przybrzeżna -- łączy krainy lądowe i morskie.\n")
 
 S("Aquatic region -- accessible only from coastal regions and other aquatic regions.\n",
-  "Kraina morska -- dostępna jedynie zs krain przybrzeżnych i morskic.\n")
+  "Kraina morska -- dostępna jedynie z krain przybrzeżnych i morskich.\n")
 
 // barrow treasure protected from Orb of Space
+// -------------------------------------------
+
 S("%The1 is protected from this kind of magic!",
   "Tego typu magia nie działa na %1!")
 
 // Orb is always available in the given land
+// -----------------------------------------
+
 S("always available", "zawsze dostępna")
 
 S("\n\nAfter the Trolls leave, you have 750 turns to collect %the1, or it gets stolen.",
@@ -4216,13 +4232,15 @@ S(
     
     "W świecie HyperRogue jest wiele krain. Kraina jest zdobyta, "
     "gdy zbierzesz w niej 10 skarbów; gdy zdobędziesz krainę, "
-    "możesz znaleźć magiczną Sferę tej krainy, i w niektórych przypadkach "
-    "uzsykać dostęp do nowych krain. Gdy zbierzesz 25 skarbów, "
+    "możesz znaleźć magiczną Sferę tej krainy i w niektórych przypadkach "
+    "uzyskać dostęp do nowych krain. Gdy zbierzesz 25 skarbów, "
     "ten typ Sfer będzie się też pojawiał w innych krainach. "
     "Naciśnij '0', by obejrzeć szczegóły na temat wszystkich Krain.\n\n"
     )
 
 // welcome messages
+// ----------------
+
 S("Welcome to the Random Pattern mode!", "Witaj w trybie losowych wzorów!")
 S("You are playing %the1 in the Pure Tactics mode.", "Grasz %a1 w trybie taktycznym.")
 // %1 is the number
@@ -4236,6 +4254,7 @@ S("Good luck in the elliptic plane!", "Powodzenia na płasczyźnie eliptycznej!"
 S("Welcome to Spherogue!", "Witaj w Sferogue!")
 
 // extra help for joystick configuration
+// -------------------------------------
 
 S("joystick configuration", "konfiguracja joysticka")
 S("first joystick position (movement)", "pozycja pierwszego joysticka (ruch)")
@@ -4252,6 +4271,7 @@ S("leave the game", "opuść grę")
 S("drop Dead Orb (up + down)", "połóż Martwą Sferę (góra+dół)")
 
 // extra help for configuration / projection and geometry
+// ------------------------------------------------------
 
 S("Roughly 42% cells are on the edge of your sight range. Reducing "
   "the sight range makes HyperRogue work faster, but also makes "
@@ -4299,7 +4319,7 @@ S("Euclidean", "euklidesowa")
 S("projection", "rzut")
 
 // VERSION 9.1
-//=============
+// ===========
 
 N("Familiar", GEN_M, "Chowaniec", "Chowańce", "Chowańca", "Chowańcem")
 S("Commanded %the1!", "%1 dosta%ł1 rozkaz!")
@@ -4324,7 +4344,7 @@ S("which may not some day be applied to phenomena of the real world.\"",
   
 // quote of Gauss
 S("\"It is not possession but the act of getting there, ",
-  "\"Nie posiadanie, ale proces docieranie na miejsce, ")
+  "\"Nie posiadanie, ale proces docierania na miejsce ")
   
 S("which grants the greatest enjoyment.\"", "sprawia największą przyjemność.\"")
 
@@ -4371,9 +4391,9 @@ S(
   "resources.",
   
   "Halloween to specjalna kraina, dostępna jedynie w geometrii sferycznej "
-  "lub eliptycznej ('o' by zmienić). Grasz na powierzchni wydrążonej dyni, "
+  "lub eliptycznej ('o' by zmienić). Grasz na powierzchni wydrążonej dyni "
   "i musisz zdobyć jak najwięcej Cukierków. Każdy Cukierek przynosi "
-  "nowe potwory do walki, i nowe magiczne moce. Walcz z potworami, "
+  "nowe potwory do walki i nowe magiczne moce. Walcz z potworami, "
   "efektywnie zarządzając swoimi ograniczonymi zasobami."
   )
 
@@ -4435,7 +4455,7 @@ S("+5 = move instantly", "+5 = ruch natychmiastowy")
 S("extra graphical effects", "dodatkowe efekty graficzne")
 
 // VERSION 9.3
-//=============
+// ============
 
 S("SORT", "SORT")
 S("PICK", "TEN")
@@ -4480,7 +4500,7 @@ S("Ground level is actually an equidistant surface, "
   "Poziom podłoża jest w rzeczywistości ekwidystantną powierzchnią "
   "%1 jednostek pod płaszczyzną P. Teoretycznie, ta wartość "
   "wpływa na świat -- przykładowo, orły mogłyby latać %2 razy "
-  "szybciej latając powyżej poziomu podłoża, na wysokości płaszczyzny "
+  "szybciej, latając powyżej poziomu podłoża na wysokości płaszczyzny "
   "P -- ale nie wpływa to na mechanikę gry w żaden sposób. "
   "(Odległości wyświetlane przez edytor grafiki "
   "dotyczą odległości między odpowiednimi punktami na płaszczyźnie P.")
@@ -4492,7 +4512,7 @@ S( "If we are viewing an equidistant g absolute units below a plane, "
    "the Poincaré model for g=c, and Klein-Beltrami model for g=0.",
    
    "Jeśli ekwidystantną powierzchnię g jednostek pod płaszczyzną oglądamy "
-   "z punktu na wysokości c, odpowiada to oglądaniu hiperboloidy Monkowskiego "
+   "z punktu na wysokości c, odpowiada to oglądaniu hiperboloidy Minkowskiego "
    "z punktu tanh(g)/tanh(c) poniżej jej środka. To z kolei odpowiada "
    "modelowi Poincaré dla g=c, i Kleina-Beltramiego dla g=0.")
 
@@ -4517,6 +4537,8 @@ S( "Humans are %1 "
    "nogi.")
   
 // Euclidean regular patterns
+// --------------------------
+
 S("three colors", "trzy kolory")
 S("three colors rotated", "trzy kolory obrócone")
 S("edit all three colors", "edytuj wszystkie kolory")
@@ -4542,7 +4564,7 @@ S("\n\nFast flying creatures may attack or go against gravity only in their firs
   "tylko w swoim pierwszym ruchu.")
 
 // Dungeon
-//---------
+// -------
 
 N("Dungeon", GEN_O, "Loch", "Lochy", "Loch", "w Lochu")
 
@@ -4567,7 +4589,7 @@ S("Someone has told you that one can get battle experience safely by "
   "poprzez zabicie dużej liczby właściwie niegroźnych stworzeń, jak na "
   "przykład Nietoperzy. Ale czy to ma jakiś sens?...\n\n"
   
-  "Nie ma. Nietoperze nie mogą Ci nic zrobić, ale blokują Twój ruch, "
+  "Nie ma. Nietoperze nie mogą Ci nic zrobić, ale blokują Twój ruch "
   "i mogą przestawiać przełączniki, gdy na nie spadną."
   )
 
@@ -4588,18 +4610,21 @@ S("When the charges on this Orb expire, "
 //
 
 // lost mountain
-//===============
+// =============
 
 //N("Pyramid", GEN_F, "Piramida", "Piramidy", "Piramidą", "na Piramidzie")
 N("Lost Mountain", GEN_F, "Zagubiona Góra", "Zagubione Góry", "Zagubioną Górą", "na Zagubionej Górze")
 
-/* S("An ancient civilization has created this pyramid in the Jungle by "
+S("An ancient civilization has created this pyramid in the Jungle by "
   "changing the gravity. The gravity is still changed, but "
   "the pyramid is overgrown with ivies and bushes. "
   "Will you dare to climb the ivies to get treasures waiting above?",
   
-  ""
-  ) */
+  "Starożytna cywilizacja stworzyła tę piramidę w Dżungli, zmieniając "
+  "grawitację. Grawitacja nadal jest zmieniona, ale piramida zarosła "
+  "bluszczem i krzakami. Odważysz się wspiąć po bluszczu, aby zdobyć "
+  "skarby czekające wyżej?"
+  )
   
 S(
   "Gravitational anomalies in the Jungle create mountains "
@@ -4655,7 +4680,7 @@ S("This Orb allows you to grow like an Ivy. "
   "Ta Sfera pozwala Ci rosnąć jak bluszcz. "
   "Bluszcz jest zawsze ukorzeniony na Twojej pozycji; "
   "ruch w obrębie komórek bluszcza powoduje przemieszczenie "
-  "korzenia. Bluszcz rośnie gdy ruszasz się na nową komórkę "
+  "korzenia. Bluszcz rośnie, gdy ruszasz się na nową komórkę "
   "(o ile bluszcz mógłby tam urosnąć, w przeciwnym przypadku "
   "bluszcz się łamie). Możesz również wycelować w jedną z "
   "komórek sąsiadujących z Twoim bluszczem (nie z Tobą), "
@@ -4663,7 +4688,7 @@ S("This Orb allows you to grow like an Ivy. "
   )
 
 // reptiles
-//==========
+// ========
 
 N("Reptiles", GEN_O, "Jaszczurki", "Jaszczurki", "Jaszczurki", "na Jaszczurkach")
 N("Reptile", GEN_F, "Jaszczurka", "Jaszczurki", "Jaszczurkę", "Jaszczurką")
@@ -4680,9 +4705,9 @@ S("These reptiles are quite strange creatures. They "
   "you can push and stun them.",
   
   "Te jaszczurki to dosyć dziwne stwory. "
-  "Większość życia spędzają śpiąc, tworząc "
+  "Większość życia spędzają śpiąc -- tworzą wtedy "
   "podłogi, po których można chodzić. "
-  "Czasami się budzą by zapolować, "
+  "Czasami się budzą, by zapolować, "
   "ale bardzo chętnie położą się znów do snu, jeśli "
   "natrafią na swojej drodze na dziurę. "
   "Twoje ataki nie zabijają jaszczurek, ale "
@@ -4748,7 +4773,7 @@ S(
   "Dywan przedstawia człowieka w głębokich lochach, niezdolnego do ucieczki.")
 S(
   "You feel attuned to gravity, ready to face mountains and dungeons.",
-  "Jesteś dostrojon%ya1 do grawitacji, gotow%ya1 na góry i lochy.")
+  "Czujesz się przystosowan%ya1 do grawitacji, gotow%ya1 na góry i lochy.")
 
 // VERSION 9.4
 //=============
@@ -4763,12 +4788,13 @@ S("Quite tough, for your first fight.", "Jak na pierwszą walkę -- całkiem tru
 S("(You can also use right Shift)\n\n", "(Możesz też użyć prawego Shifta)\n\n")
 
 // Crossroads V
-//--------------
+// ------------
 
 N("Crossroads V", GEN_O, "Skrzyżowanie V", "Skrzyżowania V", "Skrzyżowanie V", "na Skrzyżowaniu V")
 S("Extremely narrow Crossroads layout.\n", "Skrajnie wąski układ Skrzyżowań.")
 
 // Bull Dash/Prairie common
+// ------------------------
 
 N("Sleeping Bull", GEN_M, "Śpiący Byk", "Śpiące Byki", "Śpiącego Byka", "Śpiącym Bykiem")
 
@@ -4786,18 +4812,18 @@ S("Raging Bulls charge in a straight line: on heptagons, when they can choose on
   "Raging Bulls cannot be killed or stunned conventionally.",
   
   "Wściekłe Byki szarżują w linii prostej: na siedmiokątach, gdy mogą wybrać jeden z dwóch kierunków, "
-  "wybierają pole bliższe Twojej obecnej pozycji. W przypadku remisu pole z większą liczbą sąsiadów bliżej "
-  "Ciebie jest wybierane. W przypadku dalszego remisu, rozważane są Twoje wcześniejsze pozycje. "
-  "Byki mogą atakować w dowolnym kierunku; potwory na ich drodze są atakowane nawet jak są przyjazne. "
-  "Gdy Byk się z czymś zderzy, przeszkoda jest niszczona, i Byk jest ogłuszony na 3 kolejki, "
-  "po czym szarżuje ponownie (w dowolnym kierunku). Wściekłego Byka nie można zabić ani ogłuszyć "
+  "wybierają pole bliższe Twojej obecnej pozycji. W przypadku remisu wybierane jest pole z większą liczbą sąsiadów bliżej "
+  "Ciebie. W przypadku dalszego remisu, rozważane są Twoje wcześniejsze pozycje. "
+  "Byki mogą atakować w dowolnym kierunku; potwory na ich drodze są atakowane nawet, jak są przyjazne. "
+  "Gdy Byk się z czymś zderzy, przeszkoda jest niszczona, a Byk jest ogłuszony na 3 kolejki, "
+  "po czym szarżuje ponownie (w dowolnym kierunku). Wściekłego Byka nie można zabić, ani ogłuszyć "
   "zwykłą bronią."
   )
 
 N("Herd Bull", GEN_M, "Stadny Byk", "Stadne Byki", "Stadnego Byka", "Stadnym Bykiem")
 
 S("Herds of these Bulls are running long distances for some reason. They become Raging Bulls if something stops them.",
-  "Stada tych Byków biegną długie dystansy z jakiegoś powodu. Gdy coś je zatrzyma, stają się "
+  "Stada tych Byków z jakiegoś powodu biegną długie dystansy. Gdy coś je zatrzyma, stają się "
   "Wściekłymi Bykami."
   )
 
@@ -4810,7 +4836,7 @@ S("Fire is extinguished!", "Ogień zgasł!")
 S("%The1 is filled!", "%1 zosta%ł1 zalan%1y!")
 
 // Prairie
-//---------
+// -------
 
 N("Prairie", GEN_F, "Preria", "Prerie", "Prerię", "na Prerii")
 N("Green Grass", GEN_F, "Zielona Trawa", "Zielone Trawy", "Zieloną Trawę", "Zieloną Trawą")
@@ -4828,7 +4854,7 @@ S("You get the powers of Shield, Horns, and Thorns after you move two moves in a
   "Gdy ruszysz się 2 pola w linii prostej z tą Sferą, dostajesz moce Tarczy, Rogów i Cierni.")
 
 // Bull Dash
-//-----------
+// ---------
 
 N("Bull Dash", GEN_F, "Kraina Byków", "Krainy Byków", "Krainę Byków", "w Krainie Byków")
 N("Butterfly", GEN_M, "Motylek", "Motylki", "Motylka", "Motylkiem")
@@ -4857,7 +4883,7 @@ S(
 S("You pierce %the1.", "Bodziesz %a1.")
 
 // new 3D options
-//----------------
+// --------------
 
 S("Y shift", "przesunięcie Y")
 S("Don't center on the player character.", "Nie centruj na graczu.")
@@ -4865,7 +4891,7 @@ S("Don't center on the player character.", "Nie centruj na graczu.")
 S("camera rotation", "obróć kamerę")
 S("Rotate the camera. Can be used to obtain a first person perspective, "
   "or third person perspective when combined with Y shift.",
-  "Obróć kamerę. Można użyć do uzyskania perspektywy z pierwszej osoby, "
+  "Obróć kamerę. Można użyć do uzyskania perspektywy z pierwszej osoby "
   "lub z trzeciej osoby po połączeniu z przesunięciem Y.")
 
 S("ball model", "model kuli")
@@ -4880,16 +4906,16 @@ S("camera rotation in ball model", "obróć kamerę w modelu kuli")
 S("Rotate the camera in ball/hyperboloid model.", "Obróć kamerę w modelu kuli/hiperboloidy.")
 
 // extra help
-//------------
+// ----------
 
-S("\nSpecial conduct (still valid)\n", "\nDodatkowe wyzwanie (wciąż spełnione):")
+S("\nSpecial conduct (still valid)\n", "\nDodatkowe wyzwanie (wciąż aktualne):")
 S("\nSpecial conduct failed:\n", "\nDodatkowe wyzwanie (przegrane):")
 S("Avoid escaping from a discharge (\"That was close\").",
   "Unikaj uciekania przed wyładowaniem (\"było blisko\").")
 S("Avoid chopping trees, using Orbs, and non-graveyard monsters in the Haunted Woods.",
-  "Unikaj ścinania drzew, używania Sfer, i potworów spoza Cmentarza.")
+  "Unikaj ścinania drzew, używania Sfer i potworów spoza Cmentarza.")
 S("\n\nEasy %1 might disappear when you collect more of its kind.",
-  "\n\nŁatw%ya1 %1 może zniknąć podczas gdy zbierasz je w innych miejscach.")
+  "\n\nŁatw%ya1 %1 może zniknąć, podczas gdy zbierasz je w innych miejscach.")
 S(" You need to go deep to collect lots of them.", "By zebrać ich dużo, musisz głęboko wejść w krainę.")
 
 S("\nSpawn rate (as prize Orb): %1%/%2\n", "\nCzęstość występowania (jako nagroda): %1%/%2\n")
@@ -4911,7 +4937,7 @@ S("A land for people wanting to experiment with cellular automata in the HyperRo
   "Kraina dla tych, co chcą eksperymentować z automatami komórkowymi w siatce HyperRogue. "
   "Reguły można podawać w linii poleceń; domyślne to\n"
   "-c07 00100000 -c06 0010000 -c17 00011000 -c16 0001100 -caprob 0.3\n"
-  "(można podać -c0 lub -c1 by dać te same reguły dla sześciokątów i "
+  "(można podać -c0 lub -c1, by dać te same reguły dla sześciokątów i "
   "siedmiokątów).")
 
 S("compass size", "rozmiar kompasu")
@@ -4941,6 +4967,7 @@ S("field quotient", "przestrzeń ilorazowa ciała")
 */
 
 // additional texts for 9.4k
+// -------------------------
 
 N("Tortoise", GEN_M, "Żółw", "Żółwie", "Żółwia", "Żółwiem")
 S("line patterns", "wzory linii")
@@ -4965,8 +4992,8 @@ S(
   "and claim that they are here just to learn, and to leave without any treasures. "
   "Do not kill them!",
   
-  "Turyst%aka0 z innego świata. Coś mamrocze o 'podręczniku', i że "
-  "się tylko uczy, że nie jest tu po skarby. Nie zabijać!")
+  "Turyst%aka0 z innego świata. Coś mamrocze o 'podręczniku', że "
+  "się tylko uczy i nie jest tu po skarby. Nie zabijać!")
 
 S(
   "This monster has come from another world, presumably to steal our treasures. "
@@ -4993,7 +5020,7 @@ S(
   "home world at any moment, taking the treasures forever... but "
   "at least they will not steal anything further!\n\n",
   
-  "Cwaniacy nigdy nie robią ruchów, po których by zostali od razu zabici. "
+  "Cwaniacy nigdy nie robią ruchów, po których zostaliby od razu zabici. "
   "Nawet gdy się ich otoczy, są zdolni natychmiast teleportować się "
   "i wrócić do świata, skąd pochodzą, zabierając skarby na zawsze... "
   "ale przynajmniej nie ukradną już nic więcej!\n\n")
@@ -5056,11 +5083,11 @@ S("This tutorial is different than most other game tutorials -- "
   "get lost there.\n\n"
   "Remember that you can get to the next slide by pressing Enter.",
   
-  "Ten podręcznik jest inny niż większość innych -- "
-  "nie masz obowiązku robić tego co tutorial chce, możesz iść dokąd chcesz.\n\n"
-  "Ale %1 nie jest miejscem, o którym teraz mówimy. Nie wyjaśnimy go, "
+  "Ten podręcznik różni się od większości innych -- "
+  "nie masz obowiązku robić tego, co tutorial sugeruje, możesz iść, dokąd chcesz.\n\n"
+  "Ale %1 nie jest miejscem, o którym teraz mówimy. Nie wyjaśnimy go "
   "i potencjalnie możesz się zgubić.\n\n"
-  "Naciśnij Enter by przejść do kolejnego slajdu.")
+  "Naciśnij Enter, by przejść do kolejnego slajdu.")
 
 S("Introduction", "Wstęp")
 S("Welcome to the HyperRogue tutorial!", "Witaj w podręczniku HyperRogue!")
@@ -5076,9 +5103,9 @@ S(
   
   "Zadaniem tego podręcznika jest pokazanie szczególnych własności "
   "geometrii używanej przez HyperRogue; są też pokazane podstawy "
-  "rozgrywki, i jak geometria na nie wpływa.\n\n"
+  "rozgrywki i jak geometria na nie wpływa.\n\n"
   "Ty decydujesz, kiedy chcesz skończyć bawić się obecnym \"slajdem\" "
-  "i przejść do kolejnego, naciskając Enter. Naciśnij ESC by zobaczyć "
+  "i przejść do kolejnego, naciskając Enter. Naciśnij ESC, by zobaczyć "
   "pozostałe opcje.")
 
 S("Basics of gameplay", "Podstawy rozgrywki")
@@ -5094,14 +5121,14 @@ S("The game starts in the Icy Lands. Collect the Ice Diamonds "
   "wants -- for example, in this slide, you can press '5' to get "
   "lots of Ice Diamonds quickly.",
   "Gra rozpoczyna się w Lodowej Krainie. Zbieraj Lodowe Diamenty "
-  "(naciśnij F1 jeśli nie wiesz jak się ruszać). "
+  "(naciśnij F1, jeśli nie wiesz, jak się ruszać). "
   "Po zebraniu wielu Diamentów ataki potworów staną się "
   "wyzwaniem. Zgodnie z konwencjami gier roguelike, "
   "jeśli przegrasz, zaczynasz od początku; "
   "w tym podręczniku jednak wystarczy nacisnąć '4', "
   "by uciec ze złej sytuacji. Podręcznik jest "
-  "podkręcony tak, by pokazać to co chce -- "
-  "na przykład tutaj możesz nacisnąć '5' by "
+  "podkręcony tak, by pokazać to, co powinien -- "
+  "na przykład tutaj możesz nacisnąć '5', by "
   "zdobyć szybko dużo diamentów.")
 
 S("Hypersian Rug model", "Model Hiperskiego Dywanu")
@@ -5146,10 +5173,10 @@ S(
   "brings you benefits, but trying to get too many of the same kind is extremely dangerous.",
   
   "Kolejny slajd pokazuje liczbę pól w odległości 1, 2, 3, ... od Ciebie. "
-  "Rośnie ona wykładniczo: jest ponad 10^100 pól w promieniu 1000 od Ciebie, "
-  "i w trakcie gry będziesz odchodzić dalej!\n\n"
+  "Rośnie ona wykładniczo: jest ponad 10^100 pól w promieniu 1000 pól od Ciebie, "
+  "a w trakcie gry będziesz odchodzić jeszcze dalej!\n\n"
   "Jest to bardzo ważne dla designu HyperRogue. Są tu zagadki nawigacyjne -- "
-  "coś co by było proste w świecie euklidesowej wymaga przemyślenia "
+  "coś, co by było proste w świecie euklidesowym, wymaga przemyślenia "
   "w geometrii hiperbolicznej (chcesz dostać się do miejsca 20 pól od Ciebie, "
   "który z tysiąca możliwych kierunków wybrać?); z kolei inne rzeczy stają się "
   "tu łatwe. Gra HyperRogue jest zaprojektowana tak, by nie dało się "
@@ -5167,7 +5194,7 @@ S(
   "Press '2' to try the same in the Euclidean world -- it is impossible.",
   "Taktyka walki z prostymi potworami, jak Yeti z Krainy Lodu, może się "
   "wydawać płytka, ale geometria hiperboliczna jest istotna nawet tu. "
-  "W następnym slajdzie atakują Cię 2 potwory naraz. Możesz uciec po prostu "
+  "W następnym slajdzie atakują Cię 2 potwory naraz. Możesz uciec, po prostu "
   "odchodząc od nich w linii prostej. Naciśnij '2', by spróbować tego "
   "w świecie euklidesowym -- jest to niemożliwe.")
 
@@ -5192,7 +5219,7 @@ S("Hyperbolic geometry has been discovered by the 19th century mathematicians wh
   "Kraina Lodu jest bardzo niebezpieczna, gdy masz mnóstwo Diamentów. "
   "Ale inne krainy, w których jeszcze nie masz skarbów, są w miarę bezpieczne.\n\n"
   "Zwiedzaj dalej, a szybko znajdziesz Skrzyżowanie -- jego ściany są "
-  "liniami prostymi, i działają inaczej niż w geometrii euklidesowej. "
+  "liniami prostymi i działają inaczej niż w geometrii euklidesowej. "
   "Po drugiej stronie Wielkich Ścian widzisz inne krainy -- jest ich około 50, "
   "opartych na róznych aspektach geometrii hiperbolicznej.")
 
@@ -5252,7 +5279,7 @@ S(
   "Szukaj zamku Camelot na Skrzyżowaniu; Okrągły Stół "
   "jest kołem o promieniu 28. Znalezienie jego środka "
   "to trudne wyzwanie.\n\n"
-  "Naciśnij '5' by oszukać -- zobaczyć mniejsze okręgi.\n\n"
+  "Naciśnij '5', by oszukać -- zobaczyć mniejsze okręgi.\n\n"
   "Uwaga: Camelot i niektóre inne krainy w tym podręczniku są pokazywane wcześniej "
   "niż w normalnej grze.")
 
@@ -5267,8 +5294,8 @@ S("Horocycles are similar to circles, but you cannot reach their center at all -
   "Horocykle są podobne do okręgów, ale nie możesz dotrzeć do ich środka -- "
   "są to graniczne okręgi o nieskończonym promieniu, których środek jest w nieskończoności "
   "(takie punkty nazywamy punktami idealnymi).\n\n"
-  "Idź do R'Lyeh, i szybko znajdziesz Świątynię Cthulhu.  Każdy krąg kolumn "
-  "jest horocyklem. Horocykle w danej świątyni są współśrodkowe, i jest ich "
+  "Idź do R'Lyeh, a szybko znajdziesz Świątynię Cthulhu.  Każdy krąg kolumn "
+  "jest horocyklem. Horocykle w danej świątyni są współśrodkowe i jest ich "
   "nieskończenie wiele.")
 
 S("Half-plane model", "Model półpłaszczyzny")
@@ -5284,7 +5311,7 @@ S("The game is normally displayed in the so called Poincaré disk model, "
   "hiperbolicznego świata. Istnieje wiele rodzajów rzutu Ziemi, ale "
   "ze względu na jej krzywiznę, każdy z nich przekłamuje odległości czy kąty "
   "w jakiś sposób -- to samo dzieje się w geometrii hiperbolicznej. "
-  "Następny slajd pokazuje inny model, model półpłaszczyzny. "
+  "Następny slajd pokazuje inny model -- model półpłaszczyzny. "
   "W tym modelu horocykle o środku w danym punkcie idealnym wyglądają jak linie "
   "poziome.")
 
@@ -5300,11 +5327,11 @@ S(
   "This is related to the fact that the world of HyperRogue is curved, and "
   "the sum of angles in a triangle is not equal to 180 degrees.",
 
-  "Teraz idź do Kurhanów i znajdź Sferę Ostrza. Ostrze wygląda jakby zawsze było "
-  "skierowane w tą samą stronę, a wydaje się, że do wykopania skarbów trzeba "
+  "Teraz idź do Kurhanów i znajdź Sferę Ostrza. Ostrze wygląda, jakby zawsze było "
+  "skierowane w tę samą stronę, a wydaje się, że do wykopania skarbów trzeba "
   "je obrócić. Jednak wykopanie skarbów jest możliwe! Być może już zauważy%łeś0, "
   "że świat się obraca, gdy zrobisz pętlę.\n\n"
-  "Jest to związane z zakrzywieniem świata HyperRogue, i tym, że suma kątów "
+  "Jest to związane z zakrzywieniem świata HyperRogue i tym, że suma kątów "
   "trójkąta nie jest równa 180 stopni.")
 
 S("Periodic patterns", "Wzory okresowe")
@@ -5340,9 +5367,9 @@ S(
   "the color in Galápagos is, the more aspects of the tortoises in the given "
   "area are matching.",
   
-  "Jest to używane w grze do stworzenia krajobrazów, jak przepaści w "
+  "Jest to używane w grze do stworzenia krajobrazów, takich jak przepaści w "
   "Jaszczurkach lub Smoczych Otchłaniach, które niedługo znajdziesz. "
-  "W Smoczych Otchłaniach możesz znaleźć Żółwika, i poszukać "
+  "W Smoczych Otchłaniach możesz znaleźć Żółwika i poszukać "
   "pasującego dorosłego żółwia w Galápagos. Jest ponad 2 miliony gatunków, "
   "ale ze względu na ilość miejsca w geometrii hiperbolicznej, znalezienie "
   "pasującego żółwia jest możliwe. Im jaśniejszy kolor w Galápagos, tym "
@@ -5361,7 +5388,7 @@ S(
     
   "Model dysku Poincaré to model *płaszczyny* hiperbolicznej -- "
   "być może się zastanawiasz, jak w takim razie rozumieć ściany w 3D.\n\n"
-  "HyperRogue zakłada, że powierzchnia podłogi to powierzchnia ekswidystantna "
+  "HyperRogue zakłada, że powierzchnia podłogi to powierzchnia ekwidystantna "
   "w trójwymiarowym hiperbolicznym świecie, a kamera znajduje się nad powierzchnią, "
   "do której podłoga jest ekwidystantna -- co powoduje, że podłoga wygląda "
   "dokładnie jak w modelu Poincaré.\n\n"
@@ -5403,12 +5430,12 @@ S(
   "If you want, press '5' to see it rendered as a spiral, although it takes lots of time and "
   "memory.",
   "Model wstęgi to hiperboliczny analog rzutu Mercatora: "
-  "pewna linia prosta jest rysowana jaka linia prosta, a reszta świata jest "
+  "pewna linia prosta jest rysowana jako linia prosta, a reszta świata jest "
   "odwzorowana konforemnie, tzn. kąty nie są przekłamywane. "
   "Tutaj jako centralną linię prostą bierzemy linię łączącą punkt początkowy i "
   "Twoją obecną pozycję -- zazwyczaj droga wybrana przez gracza jest "
   "niespodzianie zbliżona do linii prostej. Naciśnij '8', by zobaczyć ścieżkę.\n\n"
-  "Możesz też nacisnąć '5' by zobaczyć to w postaci spirali, ale wymaga to "
+  "Możesz też nacisnąć '5', by zobaczyć to w postaci spirali, ale wymaga to "
   "bardzo dużo czasu i pamięci.")
 
 S("Conformal square model", "Konforemny kwadrat")
@@ -5421,8 +5448,8 @@ S("In the shoot'em up mode, space and time is continuous. "
   "Very fun with two players!\n\n"
   "There are other special modes too which change the gameplay or "
   "focus on a particular challenge.",
-  "W trybie strzelanki czas i przestrzeń są ciągłe. Atakujesz "
-  "rzucając nożami. Bardzo fajne na dwóch graczy!\n\n"
+  "W trybie strzelanki czas i przestrzeń są ciągłe. Atakujesz, "
+  "rzucając nożami. Bardzo fajne dla dwóch graczy!\n\n"
   "Jest wiele trybów specjalnych, zmieniających rozgrywkę lub "
   "koncentrujących się na konkretnym wyzwaniu.")
 
@@ -5435,9 +5462,9 @@ S(
   "Have fun exploring!\n\n"
   "Press '5' to leave the tutorial mode.",
 
-  "Ten podręcznik pokazuje tylko małą część świata HyperRogue. Na przykład "
+  "Ten podręcznik pokazuje tylko małą część świata HyperRogue. Na przykład, "
   "hiperboliczne labirynty są ciekawsze niż euklidesowe. Miłej zabawy!"
-  "Naciśnij '5' by opuścić podręcznik."
+  "Naciśnij '5', by opuścić podręcznik."
   )
 
 /*
@@ -5445,6 +5472,8 @@ S(
 */
 
 // Orb Strategy mode
+// -----------------
+
 S("Orb Strategy mode", "tryb strategii sfer")
 
 S(
@@ -5456,13 +5485,13 @@ S(
 
   "Grasz w trybie strategii sfer. Zebrane skarby dają Ci "
   "dostęp do magicznych mocy. W tym trybie wymagania "
-  "są generalnie wyższe, i  niektóre krainy i misje "
+  "są generalnie wyższe, a  niektóre krainy i misje "
   "dają Ci bardzo potężne Sfery Lustra.\n")
 
 S("The treasure gives your magical powers!", "Skarby dają Ci moce magiczne!")
 S("Press 'i' to access your magical powers.", "Naciśnij 'i', by użyć mocy.")
 S("inventory", "Twoje sfery")
-S("mirror what?", "co odbić?")
+S("mirror what?", "Co odbić?")
 S("Which orb to use?", "Której Sfery użyć?")
 S("Unlocked by: %1 in %2", "Odblokowane przez: %1 %abl2")
 S(" (next at %1)", " (kolejny przy %1)")
@@ -5478,7 +5507,7 @@ S(
   "you collect 25 Demon Daisies in Hell, in Crossroads/Ocean after you collect 50, "
   "and everywhere after you collect 100.",
 
-  "\n\nW trybie strategii sfer Sfery Yendoru się pojawiają w Piekle "
+  "\n\nW trybie strategii sfer Sfery Yendoru pojawiają się w Piekle "
   "po zebraniu 25 Czarcich Ziel, na Skrzyżowaniu/Oceanie po zebraniu 50, "
   "wszędzie po zebraniu 100."
   );  
@@ -5517,7 +5546,7 @@ S(
   "and sub-lands.",
   
   "\n\nW trybie strategii sfer Sfera Szczęścia dodatkowo "
-  "znacznie zwiększa częstotliwość wielkich ścian, Skrzyżowań IV, "
+  "znacznie zwiększa częstotliwość wielkich ścian, Skrzyżowań IV "
   "i podkrain.")
 
 S("\n\nIn the Orb Strategy Mode, each 25 Necromancer's Totems "
@@ -5532,23 +5561,25 @@ S(
   "It can only be used once per Orb type, "
   "and only when you are next to a mirror.",
   
-  "Użyj Sfery Lustra by skopiować jedną z Twoich sfer; "
+  "Użyj Sfery Lustra, by skopiować jedną z Twoich sfer; "
   "odbijanie słabszych Sfer zwykle daje więcej kopii. "
-  "Możesz użyć tylko raz na każdy typ Sfery, "
+  "Możesz użyć tylko raz na każdy typ Sfery "
   "i tylko stojąc obok lustra.")
   
 S("Uses to gain: %1", "Dostaniesz użyć: %1")
 S("already mirrored", "już było odbijane")
   
 N("your orbs", GEN_F, "Twoje Sfery", "Twoje Sfery", "Twoje Sfery", "Twoje Sfery")
-S("Click this to see your orbs.", "Kliknij by zobaczyć Twoje sfery.")                                                   
+S("Click this to see your orbs.", "Kliknij, by zobaczyć Twoje sfery.")                                                   
 
 // peaceful mode
+// -------------
+
 S("configure keys/joysticks", "konfiguracja klawiszy/joysticka")
 S("peaceful mode", "tryb spokojny")
 
 // config changes
-S("Press F5 or 'o' to try again!", "Naciśnij F5 lub 'o' by spróbować jeszcze raz!")  
+S("Press F5 or 'o' to try again!", "Naciśnij F5 lub 'o', by spróbować jeszcze raz!")  
 S("aura brightness", "jasność aury")
 S("aura smoothening factor", "wygładzanie aury")
 S("graphics configuration", "konfiguracja grafiki")
@@ -5628,7 +5659,7 @@ S(
   "significantly change the gameplay. Try them!",
   
   "Chcesz spróbować innego typu gry? Dodatkowych wyzwań?\n"
-  "HyperRogue ma dużo specjalnych trybów, istotnie "
+  "HyperRogue ma dużo specjalnych trybów istotnie "
   "zmieniających styl gry. Wypróbuj je!")
 
 S(
@@ -5663,7 +5694,7 @@ S(
   "the place where you used an Orb of Safety last time. "
   "There are %2 such cells.\n",
   
-  "Jesteś %1 kroków od punktu startu, lub miejsca "
+  "Jesteś %1 kroków od punktu startu lub miejsca "
   "ostatniego użycia Sfery Bezpieczeństwa. "
   "Takich pól jest %2.\n")
 
@@ -5700,7 +5731,7 @@ S("This person loves to look at their own reflection in the mirror. "
   "and hates those who do not admire him.",
 
   "Ten osobnik kocha patrzeć na własne lustrzane odbicie. "
-  "Uważa się za jedną z najważniejszych istot na świecie, "
+  "Uważa się za jedną z najważniejszych istot na świecie "
   "i nienawidzi tych, którzy go nie podziwiają."
   )
 
@@ -5711,7 +5742,7 @@ S(
     "If you attack a Mirror Spirit physically, it is delayed, but not destroyed -- "
     "more reflections will come out of the mirror. Use Mimics to destroy them.",
     
-    "Dawno, dawno temu potężny wojownik bronił lustr przed tymi, co chcieli "
+    "Dawno, dawno temu potężny wojownik bronił luster przed tymi, co chcieli "
     "jej rozbić. Wojownik ten już dawno nie żyje, ale jego odbicia zaczęły "
     "żyć własnym życiem i karać najeźdźców.\n\n"
     "Jeśli zaatakujesz Ducha Lustra fizycznie, jest spowolniony, ale nie zniszczony -- "
@@ -5744,14 +5775,14 @@ S(
   "Mirror walls reflect Mimics, lightning bolts, and "
   "missiles perfectly.",
   
-  "Doskonała lustrzana ściana. Nie da się jej zniszczyć,  "
+  "Doskonała lustrzana ściana. Nie da się jej zniszczyć  "
   "i nawet istoty eteryczne nie są w stanie "
-  "przejść na drugą stronę. Wszystko co widzisz "
+  "przejść na drugą stronę. Wszystko, co widzisz "
   "jest tylko obrazem świata rzeczywistego; "
   "możesz machnąć mieczem w kierunku tego obrazu, "
-  "ale to nie wpłynier na rzeczywistość. "
-  "Lustrzany ściany perfekcyjnie odbijają Mimiki, "
-  "błyskawice, i pociski."
+  "ale to nie wpłynie na rzeczywistość. "
+  "Lustrzane ściany perfekcyjnie odbijają Mimiki, "
+  "błyskawice i pociski."
   )
 
 S(
@@ -5773,8 +5804,8 @@ S(
   "i wrócić do punktu wyjścia -- geometria hiperboliczna powoduje, "
   "że jest to bardzo trudne! Pozostałe zagadki to Kurhany "
   "(wykopuj skarby swoim magicznym mieczem), Galapágos "
-  "(znajdź dużego żółwia odpowiadającego żółwiątku), "
-  "Camelot (znajdź środek wielkiego hiperbolicznego kółka), "
+  "(znajdź dużego żółwia odpowiadającego żółwikowi), "
+  "Camelot (znajdź środek wielkiego hiperbolicznego koła), "
   "i Pałac (idź za myszą). Można też zwiedzić kilka "
   "innych miejsc.")
 
@@ -5791,6 +5822,7 @@ S("cancel", "anuluj")
 S("reset the special game modes", "zresetuj specjalne tryby gry")
 
 // extra flavor messages for the OSM
+// ---------------------------------
 
 S("You feel the presence of free saves on the Crossroads.",
   "Wyczuwasz bezpieczeństwo na Skrzyżowaniach.")
@@ -5802,7 +5834,7 @@ S("You feel the Orbs of Yendor in the Crossroads...",
   "Wyczuwasz Sfery Yendoru na Skrzyżowaniach...")
 
 S("You feel the Orbs of Yendor everywhere...",
-  "Wyczuwasz Sfery Yendoru, wszędzie...")
+  "Wyczuwasz wszędzie Sfery Yendoru ...")
 
 S("You have gained an offensive power!",
   "Zdobywasz moc ofensywną!")
@@ -5815,6 +5847,7 @@ S(" (used %1 times)", " (użyte %1 razy)")
 S("Extras:", "Dodatkowe:") // extra Orbs gained in OSM
 
 // cheats
+// ------
 
 S("unlock Orbs of Yendor", "otwórz Sfery Yendoru")
 S("Collected the keys!", "Zebrano klucze!");
@@ -5822,6 +5855,7 @@ S("Saved the Princess!", "Uratowano Księżniczkę!")
 S("save a Princess", "uratuj Księżniczkę")
 
 // other
+// -----
   
 S("Note for mobiles", "Notka dla urządzeń mobilnych")
 S(
@@ -5833,7 +5867,7 @@ S(
     "Select 'next slide' from MENU.",
 
     "Ten tutorial jest przeznaczony głównie "
-    "dla komputerów, i klawisze są podane "
+    "dla komputerów i klawisze są podane "
     "dla wszystkich akcji. Działa jednak bez "
     "klawiatury, choć mniej wygodnie -- "
     "ignoruj klawisze i wybieraj opcje z MENU.\n\n"
@@ -5844,6 +5878,7 @@ S("quick mouse", "szybka mysz")
 S("This combination is known to be buggy at the moment.", "Ta kombinacja opcji obecnie działa błędnie.")
 
 // extra Princess texts
+// --------------------
  
 S("\"I do not like butterflies. They are treacherous.\"", 
   "\"Nie lubię motyli. Są zdradzieckie.\"")
@@ -5857,12 +5892,14 @@ S("\"Only the stupid hyperbugs do not understand this.\"",
   "\"Tylko głupie hiperinsekty tego nie rozumieją.\"")
 
 S("\"I have once talked to a Yendorian researcher... he was only interested in infinite trees.\"",
-  "\"Odwiedził mnie raz badacz Yendoriański... interesowały go tylko nieskończone drzewa.\"")
+  "\"Odwiedził mnie raz badacz yendoriański... interesowały go jedynie nieskończone drzewa.\"")
 
 S("\"Infinite trees are boring. I prefer other graphs.\"", 
   "\"Nieskończone drzewa są nudne. Wolę inne grafy.\"")
 
 // new start menu
+// --------------
+
 S("skip the start menu", "pomiń menu startowe")
 
 S("HyperRogue classic", "tryb klasyczny HyperRogue")
