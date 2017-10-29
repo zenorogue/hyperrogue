@@ -900,7 +900,7 @@ void buildBigStuff(cell *c, cell *from) {
     buildBarrierNowall(c, getNewLand(laCrossroads4))) ;
   
   else if(c->type == 7 && hrand(I10000) < 20 && !generatingEquidistant && !yendor::on && !tactic::on && !isCrossroads(c->land) && gold() >= R200 &&
-    !isSealand(c->land) && !isHaunted(c->land) && !isGravityLand(c->land) && 
+    !inmirror(c) && !isSealand(c->land) && !isHaunted(c->land) && !isGravityLand(c->land) && 
     (c->land != laRlyeh || rlyehComplete()) &&
     c->land != laTortoise && c->land != laPrairie && c->land && 
     !(c->land == laGraveyard && !deepOcean) 
