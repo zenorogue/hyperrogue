@@ -3863,7 +3863,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       if(pseudohept(c) && (
         c->land == laRedRock || 
         vid.darkhepta ||
-        (purehepta && (c->land == laClearing || isWarped(c))))) {
+        (c->land == laClearing && purehepta))) {
         queuepoly((*Vdp), shHeptaMarker, wmblack ? 0x80808080 : 0x00000080);
         }
 
