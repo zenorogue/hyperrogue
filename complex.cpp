@@ -3063,6 +3063,7 @@ namespace windmap {
       }
     
     int tries = 0;
+    int maxtries = specialland == laVolcano || specialland == laWhirlwind || chaosmode ? 20 : 1;
     tryagain:
 
     for(int i=0; i<N; i++) windcodes[i] = hrand(256);
@@ -3099,13 +3100,12 @@ namespace windmap {
     for(int i=0; i<N; i++) ingroup[windcodes[i] >> 6]++;
     for(int u=0; u<4; u++) if(!ingroup[u]) {
       tries++;
-      if(tries < 5) goto tryagain;
+      if(tries < maxtries) goto tryagain;
       }
-    if(tries >= 5) {
+    if(tries >= maxtries && maxtries >= 20) {
       addMessage("Failed to generate an interesting wind/lava pattern.");
       }
-    
-    if(true) {
+    else if(false) {
       printf("tocheck size = %d\n", size(tocheck));
       printf("if(N == %d) {\n", N);
       printf("  windcodes = {");
