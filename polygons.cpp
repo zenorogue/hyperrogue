@@ -1,7 +1,7 @@
 // HyperRogue, shapes used for the vector graphics
 // Copyright (C) 2011-2016 Zeno Rogue, see 'hyper.cpp' for details
 
-#define QHPC 32000
+#define QHPC 512000
 
 int qhpc, prehpc;
 
@@ -40,9 +40,11 @@ bool ptdsort(const polytodraw& p1, const polytodraw& p2) {
 
 void hpcpush(hyperpoint h) { 
   if(sphere) h = mid(h,h);
-  if(vid.usingGL && !first && intval(hpc[qhpc-1], h) > (sphere ? .01 : 0.25)) {
+  if(vid.usingGL && !first && intval(hpc[qhpc-1], h) > (sphere ? .0001 : 0.25)) {
     hyperpoint md = mid(hpc[qhpc-1], h);
     hpcpush(md);
+    hpcpush(h);
+    return;
     }
   first = false;
   hpc[qhpc++] = h;
