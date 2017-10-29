@@ -3994,7 +3994,7 @@ S("Warnings are issued when you try to do something that appears dangerous, "
   "jeszcze raz.")
 
 
-// kraken depths
+// Kraken Depths
 // -------------
 
 N("Kraken Depths", GEN_F, "Głębiny Krakenów", "Głębiny Krakenów", "Głębiny Krakenów", "w Głębinach Krakenów")
@@ -4062,7 +4062,7 @@ N("Sunken Treasure", GEN_O, "Zatopiony Skarb", "Zatopione Skarby", "Zatopiony Sk
 S("Cargo of a ship which was once destroyed by a Kraken.", 
   "Ładunek statku zatopionego dawno temu przez Krakena.")
 
-// burial grounds
+// Burial Grounds
 // --------------
 
 N("Burial Grounds", GEN_O, "Kurhany", "Kurhany", "Kurhany", "w Kurhanach")
@@ -4455,7 +4455,7 @@ S("+5 = move instantly", "+5 = ruch natychmiastowy")
 S("extra graphical effects", "dodatkowe efekty graficzne")
 
 // VERSION 9.3
-// ============
+// ===========
 
 S("SORT", "SORT")
 S("PICK", "TEN")
@@ -4609,12 +4609,13 @@ S("When the charges on this Orb expire, "
 // 
 //
 
-// lost mountain
-// =============
+// Lost Mountain
+// -------------
 
 //N("Pyramid", GEN_F, "Piramida", "Piramidy", "Piramidą", "na Piramidzie")
 N("Lost Mountain", GEN_F, "Zagubiona Góra", "Zagubione Góry", "Zagubioną Górą", "na Zagubionej Górze")
 
+/*
 S("An ancient civilization has created this pyramid in the Jungle by "
   "changing the gravity. The gravity is still changed, but "
   "the pyramid is overgrown with ivies and bushes. "
@@ -4625,6 +4626,7 @@ S("An ancient civilization has created this pyramid in the Jungle by "
   "bluszczem i krzakami. Odważysz się wspiąć po bluszczu, aby zdobyć "
   "skarby czekające wyżej?"
   )
+*/
   
 S(
   "Gravitational anomalies in the Jungle create mountains "
@@ -4687,8 +4689,8 @@ S("This Orb allows you to grow like an Ivy. "
   "by tam urosnąć lub zaatakować."
   )
 
-// reptiles
-// ========
+// Reptiles
+// --------
 
 N("Reptiles", GEN_O, "Jaszczurki", "Jaszczurki", "Jaszczurki", "na Jaszczurkach")
 N("Reptile", GEN_F, "Jaszczurka", "Jaszczurki", "Jaszczurkę", "Jaszczurką")
@@ -4776,7 +4778,7 @@ S(
   "Czujesz się przystosowan%ya1 do grawitacji, gotow%ya1 na góry i lochy.")
 
 // VERSION 9.4
-//=============
+// ===========
 
 // not previously translated
 S("shift+O to switch anti-aliasing", "shift+O by przełączyć antialiasing")
