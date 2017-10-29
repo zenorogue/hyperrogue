@@ -249,7 +249,7 @@ namespace ss {
       }
     dialog::addBreak(50);
     if(size(slideshows) > 1) dialog::addItem(XLAT("change slideshow"), '1');
-    dialog::addItem(XLAT("exit menu"), '0');
+    dialog::addItem(XLAT("exit menu"), ' ');
     dialog::display();
     keyhandler = [] (int sym, int uni) {
       if(uni >= 'a' && uni < 'a' + sssize) {

@@ -527,7 +527,7 @@ void loadConfig() {
 
 void showAllConfig() {
   dialog::addBreak(50);
-  dialog::addItem(XLAT("exit configuration"), 'v');
+  dialog::addItem(XLAT("exit configuration"), ' ');
 #if CAP_CONFIG
   dialog::addItem(XLAT("save the current config"), 's');
   if(getcstat == 's')
@@ -538,7 +538,7 @@ void showAllConfig() {
 void handleAllConfig(int sym, int uni) {
   if(sym == SDLK_F1 || uni == 'h') gotoHelp(help);
 
-  else if(uni == 'v') popScreen();
+  else if(uni == ' ') popScreen();
   else if(sym == SDLK_ESCAPE) popScreen();
 #if CAP_CONFIG
   else if(uni == 's') saveConfig();
@@ -624,6 +624,8 @@ void showGraphConfig() {
     
     char xuni = uni | 96;
   
+    if(uni >= 32 && uni < 64) xuni = uni;
+
     if(xuni == 'u') vid.particles = !vid.particles;
     if(xuni == 'd') vid.graphglyph = (1+vid.graphglyph)%3;
     
@@ -849,12 +851,12 @@ void showJoyConfig() {
   dialog::addSelItem(XLAT("second joystick: pan threshold"), its(vid.joypanthreshold), 'c');
   dialog::addSelItem(XLAT("second joystick: panning speed"), fts(vid.joypanspeed * 1000), 'd');
 
-  dialog::addItem(XLAT("back"), 'v');
+  dialog::addItem(XLAT("back"), ' ');
   dialog::display();
   
   keyhandler = [] (int sym, int uni) {
     dialog::handleNavigation(sym, uni);
-    char xuni = uni | 96;
+    char xuni = uni | 32;
     if(xuni == 'p') autojoy = !autojoy;
     else if(xuni == 'a') 
       dialog::editNumber(vid.joyvalue, 0, 32768, 100, 4800, XLAT("first joystick: movement threshold"), "");
@@ -1003,7 +1005,7 @@ void show3D() {
   else
     dialog::addInfo(XLAT("parameters set correctly"));
   dialog::addBreak(50);
-  dialog::addItem(XLAT("exit 3D configuration"), 'v');
+  dialog::addItem(XLAT("exit 3D configuration"), ' ');
   dialog::display();
   
   keyhandler = [] (int sym, int uni) {
@@ -1104,7 +1106,7 @@ void showCustomizeChar() {
   if(numplayers() > 1) dialog::addSelItem(XLAT("player"), its(shmup::cpid+1), 'a');
   
   dialog::addBreak(50);
-  dialog::addItem(XLAT("return to the game"), 'v');
+  dialog::addItem(XLAT("return to the game"), ' ');
   dialog::display();
   
   int firsty = dialog::items[0].position / 2;
@@ -1119,7 +1121,7 @@ void showCustomizeChar() {
   
   keyhandler = [] (int sym, int uni) {
     dialog::handleNavigation(sym, uni);
-    char xuni = uni | 96;
+    char xuni = uni | 32;
   
     if(shmup::on || multi::players) shmup::cpid = shmup::cpid_edit % shmup::players;
     charstyle& cs = getcs();
@@ -1137,7 +1139,7 @@ void showCustomizeChar() {
     if(xuni == 'd') switchcolor(cs.dresscolor, cat ? haircolors : dresscolors);
     if(xuni == 'f') switchcolor(cs.dresscolor2, dresscolors2);
     if(xuni == 'u') switchcolor(cs.uicolor, eyecolors);
-    if(xuni == 'v' || sym == SDLK_ESCAPE) popScreen();
+    if(uni == ' ' || sym == SDLK_ESCAPE) popScreen();
     };
   }
 
@@ -1189,7 +1191,7 @@ void selectLanguageScreen() {
   dialog::addBreak(50);
   vid.language = -1;
   dialog::addBoolItem(XLAT("default") + ": " + XLAT("EN"), v == -1, '0');
-  dialog::addItem(XLAT("exit configuration"), '1');
+  dialog::addItem(XLAT("exit configuration"), ' ');
 
   dialog::addBreak(50);
 
@@ -1216,7 +1218,7 @@ void selectLanguageScreen() {
   keyhandler = []   (int sym, int uni) {
     dialog::handleNavigation(sym, uni);
     
-    char xuni = uni | 96;
+    char xuni = uni | 32;
     if(uni == '0') {
       vid.language = -1;
       ANDROID_SETTINGS;

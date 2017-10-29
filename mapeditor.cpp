@@ -2247,7 +2247,7 @@ lessalphaif(col, behindsphere(V), behindsphere(gmatrix[c2]))
       dialog::addColorItem(XLAT(patterns[numpat].lpname), patterns[numpat].color, 'a'+numpat);
   
     dialog::addBreak(50);
-    dialog::addItem(XLAT("exit menu"), 'v');
+    dialog::addItem(XLAT("exit menu"), ' ');
     
     dialog::addBreak(50);
     dialog::addInfo("change the alpha parameter to show the lines");

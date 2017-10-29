@@ -1739,7 +1739,7 @@ void showMenu() {
     kohonen::showMenu();
 
   dialog::addBreak(50);
-  dialog::addItem(XLAT("exit menu"), 'v');
+  dialog::addItem(XLAT("exit menu"), ' ');
 
   dialog::display();
   

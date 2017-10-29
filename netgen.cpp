@@ -656,7 +656,7 @@ namespace netgen {
       dialog::addItem(XLAT("synchronize net and map"), 's');
       dialog::addItem(XLAT("display the scope"), 't');  
       dialog::addItem(XLAT("create the model"), 'c');
-      dialog::addItem(XLAT("back to HyperRogue"), 'q');
+      dialog::addItem(XLAT("back to HyperRogue"), ' ');
       dialog::addItem(XLAT("design the net"), 'd');
       
       dialog::display();

@@ -820,6 +820,8 @@ namespace dialog {
 
   item& lastItem();
   extern unsigned int *palette;
+
+  string keyname(int k);
   
   void addSelItem(string body, string value, int key);
   void addBoolItem(string body, bool value, int key);

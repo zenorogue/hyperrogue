@@ -448,14 +448,14 @@ void showChangeMode() {
 
   dialog::addBreak(50);
   
-  dialog::addItem(XLAT("return to the game"), 'v');
+  dialog::addItem(XLAT("return to the game"), ' ');
   dialog::display();
   
   keyhandler = [] (int sym, int uni) {
     dialog::handleNavigation(sym, uni);    
     char xuni = uni;
-    
-    if(xuni == 'v' || sym == SDLK_ESCAPE) popScreen();
+
+    if(xuni == ' ' || sym == SDLK_ESCAPE) popScreen();
     
     else if(uni == 'c') {
       if(tactic::on && gold()) {
@@ -773,4 +773,3 @@ void setAppropriateOverview() {
     pushScreen(showOverview);
     }
   }
-

@@ -591,7 +591,7 @@ namespace conformal {
       }
 #endif
       
-    dialog::addItem(XLAT("exit this menu"), 'q');
+    dialog::addItem(XLAT("exit this menu"), ' ');
     dialog::display();
     mouseovers = XLAT("see http://www.roguetemple.com/z/hyper/conformal.php");
     keyhandler = handleKeyC;
