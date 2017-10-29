@@ -774,14 +774,6 @@ void describeMouseover() {
     if(isWarped(c)) 
       help += s0 + "\n\n" + warpdesc;
     }
-
-  if(c && c->master->alt) {
-    char buf[100];
-    sprintf(buf, " [alt=%p]", c->master->alt->alt);
-    out += " ALT " + its(celldistAlt(c));
-    out += buf;
-    }
-
     
 #if CAP_ROGUEVIZ
   rogueviz::describe(c);
