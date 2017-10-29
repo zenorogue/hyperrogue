@@ -3,20 +3,7 @@
 
 // basic utility functions
 
-#if ISMOBILE || ISWEB || ISPANDORA || 1
-typedef double ld;
-#define LDF "%lf"
-#define PLDF "lf"
-#define ASINH asinh
-#else
-typedef long double ld;
-#define LDF "%Lf"
-#define PLDF "Lf"
-#define ASINH asinhl
-#endif
-
 long double sqr(long double x) { return x*x; }
-template<class T> int size(const T& x) {return int(x.size()); }
 string its(int i) { char buf[64]; sprintf(buf, "%d", i); return buf; }
 string fts(float x) { char buf[64]; sprintf(buf, "%4.2f", x); return buf; }
 string fts3(float x) { char buf[64]; sprintf(buf, "%5.3f", x); return buf; }

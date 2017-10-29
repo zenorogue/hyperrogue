@@ -1,6 +1,8 @@
 // Hyperbolic Rogue -- items, monsters, walls, lands, descriptions, etc.
 // Copyright (C) 2011-2016 Zeno Rogue, see 'hyper.cpp' for details
 
+#include "classes.h"
+
 // --- help ---
 
 const char *wormdes = 
@@ -381,17 +383,6 @@ const char *mirroreddesc =
   "Mirror walls reflect Mimics, lightning bolts, and "
   "missiles perfectly.";
 
-const int motypes = 152;
-
-struct monstertype {
-  char  glyph;
-  int   color;
-  const char *name;
-  const char *help;
-  };
-
-#define BUGCOLORS 3
-
 const char* tamebomberdesc = 
   "This bomberbird will follow you at some distance, and attack your enemies. "
   "You can kill it to place a mine.";
@@ -400,6 +391,12 @@ const char *gargdesc =
     "A being made of stone, who likes high buildings. It becomes normal stone when "
     "killed, but only if next to something stable -- otherwise it falls.";
   
+const char *lakeDesc = "Hell has these lakes everywhere... They are shaped like evil stars, and filled with burning sulphur.";
+
+const char *thumpdesc = "A device that attracts sandworms and other enemies. You need to activate it.";
+
+const char *twdesc = "This structure will disappear after some time.";
+
 monstertype minf[motypes] = {
   { 0,   0,        "no monster"       , NULL},
   { 'Y', 0x4040FF, "Yeti"       ,
@@ -776,67 +773,6 @@ monstertype minf[motypes] = {
   { '*', 0,        "vertex", "A vertex from rogueviz."}
   };
 
-enum eMonster { 
-  moNone, 
-  moYeti, moWolf, moWolfMoved, 
-  moRanger, 
-  moTroll, moGoblin, 
-  moWorm, moWormtail, moWormwait, moHedge, 
-  moDesertman, 
-  moIvyRoot, moIvyHead, moIvyBranch, moIvyWait, moIvyNext, moIvyDead,
-  moMonkey,
-  moSlime,
-  moMimic, moREMOVED, moGolem, moGolemMoved,
-  moEagle, moSeep,
-  moZombie, moGhost, moNecromancer, moShadow,
-  moTentacle, moTentacletail, moTentaclewait, moTentacleEscaping, 
-  moCultist, moPyroCultist,
-  moGreater, moGreaterM, moLesser, moLesserM,
-  moShark, moRunDog, moGreaterShark, moFireFairy,
-  moCrystalSage, moLancer, moFlailer, moMiner,
-  moVineBeast, moVineSpirit, moDarkTroll, moEarthElemental,
-  moBug0, moBug1, moBug2, 
-  moWitch, moWitchSpeed, moWitchFlash, moWitchFire, moWitchWinter, moWitchGhost,
-  moEvilGolem, moKnight, moCultistLeader, moSlimeNextTurn, moKnightMoved,
-  moIllusion,
-  moPirate, moCShark, moParrot,
-  moHexSnake, moHexSnakeTail, moRedTroll, moBomberbird, moAlbatross,
-  moTameBomberbird, moTameBomberbirdMoved,
-  moPalace, moFatGuard, moSkeleton, moVizier,
-  moViking, moFjordTroll, moWaterElemental,
-  moMouse, moMouseMoved, 
-  moPrincess, moPrincessMoved, 
-  moPrincessArmed, moPrincessArmedMoved,
-  moFamiliar, moGargoyle, moFireElemental, moAirElemental,
-  moOrangeDog, moTentacleGhost,
-  moMetalBeast, moMetalBeast2, moOutlaw, moMutant, 
-  moStormTroll, moForestTroll, 
-  moRedFox, moWindCrow, moFriendlyGhost, moRatling, moFalsePrincess, moRoseLady,
-  moRoseBeauty, moRatlingAvenger,
-  moTortoise, moDragonHead, moDragonTail,
-  moGadfly, moResearcher, moSparrowhawk,
-  moKrakenH, moKrakenT, moDraugr, moFriendlyIvy,
-  moVampire, moBat, moReptile, 
-  moHerdBull, moRagingBull, moSleepBull,
-  moButterfly, moNarciss, moMirrorSpirit,
-  moHunterDog, moTerraWarrior, moJiangshi, moVoidBeast, moLavaWolf, moHunterGuard,
-  moIceGolem, moSandBird, moSalamander, moHunterChanging,
-  // shmup specials
-  moPlayer, moBullet, moFlailBullet, moFireball, moTongue, moAirball,
-  // temporary
-  moDeadBug, moLightningBolt, moDeadBird, moEnergySword, moWarning, moArrowTrap,
-  moRogueviz
-  };
-
-struct genderswitch_t {
-  int gender;
-  eMonster m;
-  const char *name;
-  const char *desc;
-  };
-
-#define NUM_GS 6
-
 genderswitch_t genderswitch[NUM_GS] = {
   { GEN_F, moFalsePrincess, "False Princess", 
      "Don't be fooled by this red-haired girl, or you will be stabbed if you come too close!"},
@@ -854,15 +790,6 @@ genderswitch_t genderswitch[NUM_GS] = {
   };
 
 // --- items ---
-
-const int ittypes = 121;
-
-struct itemtype {
-  char  glyph;
-  int   color;
-  const char *name;
-  const char *help;
-  };
 
 itemtype iinf[ittypes] = {
   { 0,   0,        "no item",       NULL},
@@ -1274,60 +1201,7 @@ itemtype iinf[ittypes] = {
     "Does not affect multi-tile monsters."},
   };
 
-enum eItem { 
-  itNone, itDiamond, itGold, itSpice, itRuby, itElixir, itShard, itBone, itHell, itStatue,
-  itFeather, itSapphire, itHyperstone, itKey,
-  itGreenStone, itOrbYendor,
-  itOrbLightning, itOrbFlash, itOrbWinter, itOrbSpeed, itOrbLife, itOrbShield, itOrbDigging,
-  itOrbTeleport, itOrbSafety,
-  itOrbThorns, itFernFlower,
-  itWine, itOrbAether, itSilver, itOrbPsi,
-  itRoyalJelly, itEmerald, itOrbInvis, itPower, itOrbFire,
-  itHolyGrail, itGrimoire,
-  itOrbDragon, itOrbIllusion,
-  itPirate, itCompass,
-  itRedGem, itOrbTime, itOrbSpace,
-  itBombEgg, itCoast, itWhirlpool,
-  itOrbFriend, itOrbWater, itOrbAir,
-  itPalace, itOrbFrog,
-  itFjord, itOrbFish,
-  itOrbDiscord,
-  itSavedPrincess, itOrbLove,
-  itIvory, itZebra, 
-  itFireShard, itAirShard, itEarthShard, itWaterShard,
-  itElemental, itOrbSummon, itOrbMatter,
-  itBounty, itRevolver, itFulgurite, itMutant,
-  itOrbStunning, itOrbLuck, 
-  itMutant2, itOrbFreedom, itLotus, itOrbUndeath,
-  itWindstone, itOrbEmpathy, itStrongWind, itBuggy, itBuggy2,
-  itRose, itCoral, itOrbBeauty, itOrb37, itOrbEnergy,
-  itBabyTortoise, itOrbShell, itApple, itDragon, itOrbDomination,
-  itOrbSword, itKraken, itOrbSword2, itBarrow,
-  itTrollEgg, itWarning, itOrbStone, itOrbNature, itTreat,
-  itSlime, itAmethyst, itOrbRecall, itDodeca, itOrbDash, itGreenGrass, itOrbHorns,
-  itOrbBull, itBull, itOrbMirror,
-  itInventory,
-  itLavaLily, itHunting, itBlizzard, itTerra,
-  itOrbSide1, itOrbSide2, itOrbSide3,
-  itOrbLava, itOrbMorph,
-  };
-
 // --- wall types ---
-
-const int walltypes = 105;
-
-struct walltype {
-  char  glyph;
-  int   color;
-  const char *name;
-  const char *help;
-  };
-
-const char *lakeDesc = "Hell has these lakes everywhere... They are shaped like evil stars, and filled with burning sulphur.";
-
-const char *thumpdesc = "A device that attracts sandworms and other enemies. You need to activate it.";
-
-const char *twdesc = "This structure will disappear after some time.";
 
 walltype winf[walltypes] = {
   { '.', 0xFF00FF, "no wall",        NULL},
@@ -1504,49 +1378,7 @@ walltype winf[walltypes] = {
   { '&', 0xD00000, "lava", lavadesc},
   };
 
-enum eWall { waNone, waIcewall, waBarrier, waFloorA, waFloorB, waCavewall, waCavefloor, waDeadTroll, waDune,
-  waMirror, waCloud, waThumperOff, waFire, waAncientGrave, waFreshGrave, waColumn, waSulphurC, waSulphur,
-  waLake, waFrozenLake, waChasm, waChasmD, waBigTree, waSmallTree, 
-  waVinePlant, waVineHalfA, waVineHalfB, waPartialFire, 
-  waDeadwall, waDeadfloor, waDeadfloor2, waWaxWall, waGlass, waCamelot, waRoundTable,
-  waCamelotMoat,
-  waBigStatue,
-  waSea, waBoat, waCIsland, waCIsland2, waCTree,
-  waRed1, waRed2, waRed3,
-  waMineUnknown, waMineMine, waMineOpen,
-  waStrandedBoat,
-  waPalace, waClosedGate, waOpenGate, waClosePlate, waOpenPlate, waTrapdoor,
-  waGiantRug,
-  waPlatform, waGargoyle, waGargoyleFloor, waRubble, waLadder, waStone,
-  waBonfireOff, waThumperOn, waEternalFire,
-  waGargoyleBridge,
-  waTempWall, waTempFloor, waTempBridge,
-  waCharged, waGrounded, waSandstone, waSaloon, waMetal,
-  waDeadTroll2, waFan,
-  waTemporary, waEarthD, waElementalTmp, waElementalD,
-  waSlime1, waSlime2, waRose, waWarpGate,
-  waTrunk, waSolidBranch, waWeakBranch, waCanopy,
-  waBarrowWall, waBarrowDig,
-  waPetrified, waTower,
-  waBigBush, waSmallBush,
-  waReptile, waReptileBridge,
-  waInvisibleFloor,
-  waMirrorWall,
-  waPetrifiedBridge,
-  waTempBridgeBlocked,
-  waTerraWarrior, waBubble,
-  waArrowTrap, waMercury, waMagma
-  };
-
 // --- land types ---
-
-const int landtypes = 77;
-
-struct landtype {
-  int color;
-  const char *name;
-  const char *help;
-  };
 
 const landtype linf[landtypes] = {
   { 0xFF00FF, "???"          , ""},
@@ -1730,84 +1562,6 @@ const landtype linf[landtypes] = {
   { 0xE2725B, "Terracotta Army", terraldesc}
   };
 
-enum eLand { laNone, laBarrier, laCrossroads, laDesert, laIce, laCaves, laJungle, laAlchemist, laMirror, laGraveyard,
-  laRlyeh, laHell, laCocytus, laMotion, laDryForest, laEmerald, laWineyard, laDeadCaves, 
-  laHive, laPower, laCamelot, laTemple, 
-  laCrossroads2, laCaribbean, laRedRock, laMinefield, laOcean, laWhirlpool,
-  laPalace, laLivefjord, 
-  laIvoryTower, laZebra, laEFire, laEAir, laEEarth, laEWater, laCrossroads3,
-  laOceanWall, laElementalWall, 
-  laCanvas, laPrincessQuest,
-  laWildWest, laStorms, laOvergrown, laClearing, 
-  laHaunted, laHauntedWall, laHauntedBorder,
-  laWhirlwind, laRose, laWarpCoast, laWarpSea, laCrossroads4,
-  laEndorian, laTortoise, laDragon,
-  laKraken, laBurial, laTrollheim,
-  laHalloween, laDungeon, laMountain, laReptile,
-  laPrairie, laBull, laCrossroads5, laCA,
-  laMirrorWall, laMirrored, laMirrorWall2, laMirrored2,
-  laMirrorOld,
-  laVolcano, laBlizzard, laHunting, laTerracotta, laMercuryRiver
-  };
-
-// cell information for the game
-
-struct gcell {
-
-  // main fields
-  eLand land : 8;
-  eWall wall : 8;
-  eMonster monst : 8;
-  eItem item : 8;
-
-  // if this is a barrier, what lands on are on the sides?
-  eLand barleft : 8, barright : 8; 
-
-  unsigned ligon : 1;    // is it sparkling with lightning?
-
-  unsigned 
-    pathdist : 7,       // player distance wrt usual movement
-    cpdist : 8, mpdist : 8; // current/minimum player distance
-
-  unsigned 
-    mondir : 4,         // monster direction, for multi-tile monsters and graphics
-    bardir : 4,         // barrier direction
-    stuntime : 4,       // stun time left (for Palace Guards and Skeletons)
-    hitpoints : 4;      // hitpoints left (for Palace Guards, also reused as cpid for mirrors)
-  
-  unsigned landflags : 8;      // extra flags for land
-  
-  // 'landparam' is used for: 
-  // heat in Icy/Cocytus; 
-  // heat in Dry (0..10); 
-  // CR2 structure; 
-  // hive Weird Rock color / pheromones;
-  // Ocean/coast depth;
-  // Bomberbird Egg hatch time / mine marking;
-  // number of Ancient Jewelry;
-  // improved tracking in Trollheim
-  union { 
-    int32_t landpar; 
-    float heat; 
-    char bytes[4]; 
-    struct fieldinfo { 
-      uint16_t fieldval;
-      unsigned rval : 4;
-      unsigned flowerdist : 4;
-      unsigned walldist : 4;
-      unsigned walldist2 : 4;
-      } fi;
-  
-  } LHU;
-  };
-
-#define landparam LHU.landpar
-
-#define fval LHU.fi.fieldval
-
-#define NODIR 8
-#define NOBARRIERS 9
-
 #define LAND_OVER 57
 #define LAND_OVERX 59
 
@@ -1954,24 +1708,19 @@ eLand randlands[RANDLANDS] = {
   laOvergrown, laWildWest, laWarpCoast
   };
 
-// land completion for shared unlocking
-#define U5 (inv::on ? 10 : 5)
-// land completion for advanced unlocking
-#define U10 (inv::on ? 25 : 10)
+geometryinfo ginf[gGUARD] = {
+  {"hyperbolic",     "hyper",    7, 3, 0,      0, {7, 5}},
+  {"Euclidean",      "euclid",   6, 3, 0,      1, {7, FORBIDDEN}},
+  {"spherical",      "sphere",   5, 3, 0,      2, {SEE_ALL, SEE_ALL}},
+  {"elliptic",       "elliptic", 5, 3, qELLIP, 2, {SEE_ALL, SEE_ALL}},
+  {"Zebra quotient", "Zebra",    7, 3, qZEBRA, 0, {7, 5}},
+  {"field quotient", "field",    7, 3, qFIELD, 0, {7, 5}},
+  {"torus",          "torus",    6, 3, qTORUS, 1, {7, FORBIDDEN}},
+  {"octagons",       "oct",      8, 3, 0,      0, {6, 4}},
+  {"four pentagons", "4x5",      5, 4, 0,      0, {6, 4}},
+  {"four hexagons",  "4x6",      6, 4, 0,      0, {5, 3}},
+  {"four heptagons", "4x7",      7, 4, 0,      0, {4, 3}},
+  {"small sphere",   "3x4",      4, 3, 0,      2, {SEE_ALL, SEE_ALL}},
+  {"tiny sphere",   "3x3",      3, 3, 0,      2, {SEE_ALL, SEE_ALL}},
+  };
 
-// land completion
-#define R10 (inv::on ? 50 : 10)
-// intermediate lands
-#define R30 (inv::on ? 100 : 30)
-// advanced lands
-#define R60 (inv::on ? 200 : 60)
-// advanced lands II
-#define R90 (inv::on ? 300 : 90)
-// Crossroads IV
-#define R200 (inv::on ? 800 : 200)
-// Crossroads V
-#define R300 (inv::on ? 1200 : 300)
-// kill types for Dragon Chasms
-#define R20 (inv::on ? 30 : 20)
-// kill count for Graveyard/Hive
-#define R100 (inv::on ? 500 : 100)

@@ -340,14 +340,15 @@ const char *loadlevel = NULL;
 #define MAX_S3 4
 #define MAX_S84 240
 
+#include "classes.cpp"
+#include "hyper.h"
+
 #include "util.cpp"
 #include "hyperpoint.cpp"
 #include "patterns.cpp"
-#include "classes.cpp"
 #include "fieldpattern.cpp"
 #include "heptagon.cpp"
 #include "language.cpp"
-#include "hyper.h"
 #include "cell.cpp"
 #include "flags.cpp"
 #include "yendor.cpp"

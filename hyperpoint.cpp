@@ -1,43 +1,6 @@
 // Hyperbolic Rogue
 // Copyright (C) 2011-2012 Zeno Rogue, see 'hyper.cpp' for details
 
-enum eGeometry {gNormal, gEuclid, gSphere, gElliptic, gQuotient, gQuotient2, gTorus, gOctagon, g45, g46, g47, gSmallSphere, gTinySphere, gGUARD};
-
-struct geometryinfo {
-  const char* name;
-  const char* shortname;
-  int sides;
-  int vertex;
-  int quotientstyle;
-  int cclass; // 0-hyperbolic, 1-Euclidean, 2-spherical
-  int distlimit[2]; // truncated, non-truncated
-  };
-
-static const int qZEBRA = 1;
-static const int qFIELD = 2;
-static const int qELLIP = 4;
-static const int qTORUS = 8;
-
-// note: dnext assumes that x&7 equals 7
-static const int SEE_ALL = 15;
-static const int FORBIDDEN = -1;
-
-geometryinfo ginf[gGUARD] = {
-  {"hyperbolic",     "hyper",    7, 3, 0,      0, {7, 5}},
-  {"Euclidean",      "euclid",   6, 3, 0,      1, {7, FORBIDDEN}},
-  {"spherical",      "sphere",   5, 3, 0,      2, {SEE_ALL, SEE_ALL}},
-  {"elliptic",       "elliptic", 5, 3, qELLIP, 2, {SEE_ALL, SEE_ALL}},
-  {"Zebra quotient", "Zebra",    7, 3, qZEBRA, 0, {7, 5}},
-  {"field quotient", "field",    7, 3, qFIELD, 0, {7, 5}},
-  {"torus",          "torus",    6, 3, qTORUS, 1, {7, FORBIDDEN}},
-  {"octagons",       "oct",      8, 3, 0,      0, {6, 4}},
-  {"four pentagons", "4x5",      5, 4, 0,      0, {6, 4}},
-  {"four hexagons",  "4x6",      6, 4, 0,      0, {5, 3}},
-  {"four heptagons", "4x7",      7, 4, 0,      0, {4, 3}},
-  {"small sphere",   "3x4",      4, 3, 0,      2, {SEE_ALL, SEE_ALL}},
-  {"tiny sphere",   "3x3",      3, 3, 0,      2, {SEE_ALL, SEE_ALL}},
-  };
-
 eGeometry geometry, targetgeometry = gEuclid;
 extern bool targettrunc;
 
@@ -90,12 +53,6 @@ int sig(int z) { return (sphere || z<2)?1:-1; }
 // we represent the points on the hyperbolic plane
 // by points in 3D space (Minkowski space) such that x^2+y^2-z^2 == -1, z > 0
 // (this is analogous to representing a sphere with points such that x^2+y^2+z^2 == 1)
-
-struct hyperpoint {
-  ld tab[3];
-  ld& operator [] (int i) { return tab[i]; }
-  const ld& operator [] (int i) const { return tab[i]; }
-  };
 
 hyperpoint hpxyz(ld x, ld y, ld z) { 
   // EUCLIDEAN
@@ -189,12 +146,6 @@ hyperpoint midz(const hyperpoint& H1, const hyperpoint& H2) {
 
 // matrices represent isometries of the hyperbolic plane
 // (just like isometries of the sphere are represented by rotation matrices)
-
-struct transmatrix {
-  ld tab[3][3];
-  ld * operator [] (int i) { return tab[i]; }
-  const ld * operator [] (int i) const { return tab[i]; }
-  };
 
 // identity matrix
 const transmatrix Id = {{{1,0,0}, {0,1,0}, {0,0,1}}};

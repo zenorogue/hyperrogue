@@ -4,11 +4,6 @@
 // heptagon here refers to underlying heptagonal tesselation
 // (which you can see by changing the conditions in graph.cpp)
 
-// automaton state
-enum hstate { hsOrigin, hsA, hsB, hsError, hsA0, hsA1, hsB0, hsB1, hsC };
-
-#define MODFIXER 23520
-
 #define MIRR(x) x.mirrored
 
 int fixrot(int a) { return (a+MODFIXER)% S7; }

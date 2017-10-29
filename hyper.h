@@ -11,6 +11,128 @@
 #define LB_PURE_TACTICS_SHMUP 49
 #define LB_PURE_TACTICS_COOP 50
 
+#if ISMOBILE || ISWEB || ISPANDORA || 1
+typedef double ld;
+#define LDF "%lf"
+#define PLDF "lf"
+#define ASINH asinh
+#else
+typedef long double ld;
+#define LDF "%Lf"
+#define PLDF "Lf"
+#define ASINH asinhl
+#endif
+
+struct hyperpoint {
+  ld tab[3];
+  ld& operator [] (int i) { return tab[i]; }
+  const ld& operator [] (int i) const { return tab[i]; }
+  };
+
+struct transmatrix {
+  ld tab[3][3];
+  ld * operator [] (int i) { return tab[i]; }
+  const ld * operator [] (int i) const { return tab[i]; }
+  };
+
+// cell information for the game
+
+struct gcell {
+
+  // main fields
+  eLand land : 8;
+  eWall wall : 8;
+  eMonster monst : 8;
+  eItem item : 8;
+
+  // if this is a barrier, what lands on are on the sides?
+  eLand barleft : 8, barright : 8; 
+
+  unsigned ligon : 1;    // is it sparkling with lightning?
+
+  unsigned 
+    pathdist : 7,       // player distance wrt usual movement
+    cpdist : 8, mpdist : 8; // current/minimum player distance
+
+  unsigned 
+    mondir : 4,         // monster direction, for multi-tile monsters and graphics
+    bardir : 4,         // barrier direction
+    stuntime : 4,       // stun time left (for Palace Guards and Skeletons)
+    hitpoints : 4;      // hitpoints left (for Palace Guards, also reused as cpid for mirrors)
+  
+  unsigned landflags : 8;      // extra flags for land
+  
+  // 'landparam' is used for: 
+  // heat in Icy/Cocytus; 
+  // heat in Dry (0..10); 
+  // CR2 structure; 
+  // hive Weird Rock color / pheromones;
+  // Ocean/coast depth;
+  // Bomberbird Egg hatch time / mine marking;
+  // number of Ancient Jewelry;
+  // improved tracking in Trollheim
+  union { 
+    int32_t landpar; 
+    float heat; 
+    char bytes[4]; 
+    struct fieldinfo { 
+      uint16_t fieldval;
+      unsigned rval : 4;
+      unsigned flowerdist : 4;
+      unsigned walldist : 4;
+      unsigned walldist2 : 4;
+      } fi;
+  
+  } LHU;
+  };
+
+#define landparam LHU.landpar
+
+#define fval LHU.fi.fieldval
+
+#define NODIR 8
+#define NOBARRIERS 9
+
+struct heptagon;
+struct heptspin;
+struct cell;
+struct cellwalker;
+
+// automaton state
+enum hstate { hsOrigin, hsA, hsB, hsError, hsA0, hsA1, hsB0, hsB1, hsC };
+
+#define MODFIXER 23520
+
+#define BUGCOLORS 3
+
+// land completion for shared unlocking
+#define U5 (inv::on ? 10 : 5)
+// land completion for advanced unlocking
+#define U10 (inv::on ? 25 : 10)
+
+// land completion
+#define R10 (inv::on ? 50 : 10)
+// intermediate lands
+#define R30 (inv::on ? 100 : 30)
+// advanced lands
+#define R60 (inv::on ? 200 : 60)
+// advanced lands II
+#define R90 (inv::on ? 300 : 90)
+// Crossroads IV
+#define R200 (inv::on ? 800 : 200)
+// Crossroads V
+#define R300 (inv::on ? 1200 : 300)
+// kill types for Dragon Chasms
+#define R20 (inv::on ? 30 : 20)
+// kill count for Graveyard/Hive
+#define R100 (inv::on ? 500 : 100)
+
+string XLAT(string x);
+string cts(char c);
+int hrand(int i);
+
+template<class T> int size(const T& x) {return int(x.size()); }
+
 extern int currentscore[NUMLEADER];
 extern int syncstate;
 
