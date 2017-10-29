@@ -593,8 +593,10 @@ eLand land_spheuc[LAND_SPHEUC] = {
 
 #else
 
-#define LAND_SPHEUC ((weirdhyperbolic) ? LAND_OCT : (targetgeometry > 1) ? LAND_SPH : LAND_EUC)
-#define land_spheuc ((weirdhyperbolic) ? land_oct : (targetgeometry > 1) ? land_sph : land_euc)
+#define tweirdhyperbolic (targetgeometry == gOctagon || targetgeometry == g45 || targetgeometry == g46 || targetgeometry == g47)
+
+#define LAND_SPHEUC ((tweirdhyperbolic) ? LAND_OCT : (targetgeometry > 1) ? LAND_SPH : LAND_EUC)
+#define land_spheuc ((tweirdhyperbolic) ? land_oct : (targetgeometry > 1) ? land_sph : land_euc)
 #endif
 
 const char *curvenames[8] = {
