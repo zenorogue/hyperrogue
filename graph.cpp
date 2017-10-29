@@ -2811,9 +2811,9 @@ void floorShadow(cell *c, const transmatrix& V, int col, bool warp) {
   else if(warp) {
     if(euclid) {
       if(ishex1(c))
-        queuepolyat(V * pispin * applyPatterndir(c), shTriheptaEucShadow[0], col, PPR_WALLSHADOW);
+        queuepolyat(V * pispin, shTriheptaFloorShadow[0], col, PPR_WALLSHADOW);
       else
-        queuepolyat(V * applyPatterndir(c), shTriheptaEucShadow[ctof(c)], col, PPR_WALLSHADOW);
+        queuepolyat(V, shTriheptaFloorShadow[ctof(c)], col, PPR_WALLSHADOW);
       }
     else 
       queuepolyat(V * applyPatterndir(c), shTriheptaFloorShadow[ctof(c)], col, PPR_WALLSHADOW);
@@ -2826,10 +2826,14 @@ void floorShadow(cell *c, const transmatrix& V, int col, bool warp) {
 void plainfloor(cell *c, bool warp, const transmatrix &V, int col, int prio) {
   if(warp) {
     if(euclid) {
-      if(ishex1(c))
-        queuepolyat(V * pispin * applyPatterndir(c), shTriheptaEuc[0], col, prio);
+      /* if(ishex1(c))
+        queuepolyat(V * pispin * applyPatterndir(c), shTriheptaFloor[0], col, prio);
       else
-        queuepolyat(V * applyPatterndir(c), shTriheptaEuc[ctof(c)], col, prio);
+        queuepolyat(V * applyPatterndir(c), shTriheptaFloor[ctof(c)], col, prio); */
+      if(ishex1(c))
+        queuepolyat(V * pispin, shTriheptaFloor[ctof(c)], col, prio);        
+      else
+        queuepolyat(V, shTriheptaFloor[ctof(c)], col, prio);
       }
     else 
       queuepolyat(V * applyPatterndir(c), shTriheptaFloor[sphere ? ctof(c) : mapeditor::nopattern(c)], col, prio);
@@ -2843,9 +2847,9 @@ void fullplainfloor(cell *c, bool warp, const transmatrix &V, int col, int prio)
   if(warp) {
     if(euclid) {
       if(ishex1(c))
-        queuepolyat(V * pispin * applyPatterndir(c), shTriheptaEuc[0], col, prio);
+        queuepolyat(V * pispin, shTriheptaFloor[0], col, prio);
       else
-        queuepolyat(V * applyPatterndir(c), shTriheptaEuc[ctof(c)], col, prio);
+        queuepolyat(V, shTriheptaFloor[ctof(c)], col, prio);
       }
     else 
       queuepolyat(V * applyPatterndir(c), shTriheptaFloor[sphere ? ctof(c) : mapeditor::nopattern(c)], col, prio);
@@ -2859,9 +2863,9 @@ void qplainfloor(cell *c, bool warp, const transmatrix &V, int col) {
   if(warp) {
     if(euclid) {
       if(ishex1(c))
-        qfloor(c, V, pispin * applyPatterndir(c), shTriheptaEuc[0], col);
+        qfloor(c, V, applyPatterndir(c) * pispin, shTriheptaFloor[0], col);
       else
-        qfloor(c, V, applyPatterndir(c), shTriheptaEuc[ctof(c)], col);
+        qfloor(c, V, applyPatterndir(c), shTriheptaFloor[ctof(c)], col);
       }
     else 
       qfloor(c, V, applyPatterndir(c), shTriheptaFloor[sphere ? ctof(c) : mapeditor::nopattern(c)], col);
@@ -3064,8 +3068,8 @@ static const int trapcol[4] = {0x904040, 0xA02020, 0xD00000, 0x303030};
 static const int terracol[8] = {0xD000, 0xE25050, 0xD0D0D0, 0x606060, 0x303030, 0x181818, 0x0080, 0x8080};
 
 void qfloor_eswap(cell *c, const transmatrix& V, const hpcshape& sh, int col) {
-  if(euclid && ishex1(c))
-    qfloor(c, V * pispin, sh, col);
+  if(euclid && ishex1(c)) 
+    qfloor(c, V, pispin, sh, col);
   else
     qfloor(c, V, sh, col);
   };
@@ -3448,10 +3452,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         }
       
       else if(mapeditor::whichShape == '8') {
-        if(euclid) 
-          qfloor(c, Vf, shTriheptaEuc[ctof012(c)], darkena(fcol, fd, 0xFF));
-        else
-          qfloor(c, Vf, shTriheptaFloor[ctof(c)], darkena(fcol, fd, 0xFF));
+        qfloor_eswap(c, Vf, shTriheptaFloor[ctof(c)], darkena(fcol, fd, 0xFF));
         }
       
       else if(mapeditor::whichShape == '6') {
@@ -3587,8 +3588,8 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           qfloor(c, Vf, shHeptaMarker, darkena(fcol, 0, 0x40));
         }
       
-      else if(isWarped(c) && euclid)
-        qfloor(c, Vf, shTriheptaEuc[ctof012(c)], darkena(fcol, fd, 0xFF));
+      else if(isWarped(c) && euclid) 
+        qfloor_eswap(c, Vf, shTriheptaFloor[ctof(c)], darkena(fcol, fd, 0xFF));
 
       else if(isWarped(c) && !purehepta && !shmup::on) {
         int np = mapeditor::nopattern(c);
@@ -3676,7 +3677,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         qfloor(c, Vf, CLOUDFLOOR, darkena(fcol, fd, 0xFF));
 
       else if(c->land == laVolcano)
-        qfloor(c, Vf, LAVAFLOOR, darkena(fcol, fd, 0xFF));
+        qfloor_eswap(c, Vf, LAVAFLOOR, darkena(fcol, fd, 0xFF));
 
       else if(c->land == laRose)
         qfloor_eswap(c, Vf, ROSEFLOOR, darkena(fcol, fd, 0xFF));
@@ -4412,29 +4413,31 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       // hyper heptagonal: 0.6150
       // hyper: 0.3798
       
+      int prec = sphere ? 3 : 1;
+      
       if(purehepta) {
-        double x = sphere?.645:.6150;
+        double x = hcrossf;
         for(int t=0; t<S7; t++) 
           if(c->mov[t] && c->mov[t] < c)
-          queueline(V * ddspin(c,t,-6) * xpush0(x), 
-                    V * ddspin(c,t,6) * xpush0(x), 
-                    gridcolor(c, c->mov[t]), 1);
+          queueline(V * ddspin(c,t,-S6) * xpush0(x), 
+                    V * ddspin(c,t,S6) * xpush0(x), 
+                    gridcolor(c, c->mov[t]), prec);
         }
       else if(isWarped(c)) {
-        double x = sphere?.3651:euclid?.2611:.2849;
-        if(!ishept(c)) for(int t=0; t<6; t++) if(c->mov[t] && ishept(c->mov[t]))
+        double x = hexhexdist/2;
+        if(!ishept(c)) for(int t=0; t<S6; t++) if(c->mov[t] && ishept(c->mov[t]))
           queueline(V * ddspin(c,t,-S14) * xpush0(x), 
                     V * ddspin(c,t,+S14) * xpush0(x), 
-                    gridcolor(c, c->mov[t]), 1);
+                    gridcolor(c, c->mov[t]), prec);
         }
       else if(ishept(c) && !euclid) ;
       else {
-        double x = sphere?.401:euclid?.3 : .328;
-        for(int t=0; t<6; t++) 
+        double x = hexvdist;
+        for(int t=0; t< S6; t++) 
           if(euclid ? c->mov[t]<c : (((t^1)&1) || c->mov[t] < c))
           queueline(V * ddspin(c,t,-S7) * xpush0(x), 
                     V * ddspin(c,t,+S7) * xpush0(x), 
-                    gridcolor(c, c->mov[t]), 1);
+                    gridcolor(c, c->mov[t]), prec);
         }
       vid.linewidth /= 3;
       }

@@ -347,6 +347,10 @@ else if(args()[0] == '-' && args()[1] == x && args()[2] == '0') { showstartmenu 
     PHASEFROM(2);
     shift(); sightrange = argi(); overgenerate = true; autocheat = true;
     }
+  else if(argis("-we")) {    
+    PHASEFROM(2);
+    shift(); whatever = argf(); resetGeometry();
+    }
   else if(argis("-rch")) {    
     PHASEFROM(2);
     reptilecheat = true; autocheat = true; firstland = laReptile;

@@ -374,7 +374,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           if(y0 == 3 || y0 == 4) v=24; else v=0;
           }
         else v = emeraldval(c);
-        if(v == 0) c->wall = waStone;
+        if(v == 0 && !euclid) c->wall = waStone;
         else {
           v &= ~3;
           if((v == 24 || v == 32 || v == 56))

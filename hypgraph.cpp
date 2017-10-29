@@ -238,7 +238,8 @@ transmatrix sphereflip; // on the sphere, flip
 heptspin viewctr; // heptagon and rotation where the view is centered at
 bool playerfound; // has player been found in the last drawing?
 
-double eurad = 0.52;
+#define eurad crossf
+
 double q3 = sqrt(double(3));
 
 bool outofmap(hyperpoint h) {

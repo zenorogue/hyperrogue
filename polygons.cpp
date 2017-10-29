@@ -737,7 +737,7 @@ void bshape(hpcshape& sh, int p) {
 
 vector<array<int, 3>> symmetriesAt;
 
-#ifdef SCALETUNER
+#ifndef SCALETUNER
 static const
 #endif
 double bscale7 = 1, brot7 = 0, bscale6 = 1, brot6 = 0;
@@ -759,10 +759,11 @@ void bshape(hpcshape& sh, int p, double shzoom, int shapeid, double bonus = 0) {
   int rots2 = rots;
   if(rots == 7) {
     rots2 = S7;
-    if(rots2 != 7) bonus += M_PI;
+    if(rots2 != 7 && !euclid) bonus += M_PI;
     shzoomx *= bscale7;
     shzoomy *= bscale7;
     bonus += brot7;
+    if(euclid) shzoomx *= .9, shzoomy *= .9, bonus += .3;    
     }
   if(rots == 3) {
     rots2 = S3;
@@ -857,16 +858,28 @@ void buildpolys() {
   
   // scales
   scalef = purehepta ? crossf / hcrossf7 : hcrossf / hcrossf7;
-  double scalef2 = purehepta ? crossf / hcrossf7 * .88 : euclid ? 1 : hcrossf / hcrossf7;
+
+  if(euclid) scalef *= .52/crossf;
+
+  double scalef2 = purehepta ? crossf / hcrossf7 * .88 : euclid ? scalef : hcrossf / hcrossf7;
   
   double spzoom = sphere ? 1.4375 : 1;
   
   double spzoom6 = sphere ? 1.2375 : 1;
   double spzoom7 = sphere ? .8 : 1;
+
   double spzoomd7 = (purehepta && sphere) ? 1 : spzoom7;
   
-  double fac80 = geometry == g45 ? 1.4 : geometry == g46 ? 1.2 : .8;
+  double fac80 = geometry == g45 ? 1.4 : geometry == g46 ? 1.2 : geometry == gOctagon ? .7 : .8;
   double fac94 = euclid ? .8 : (S6==4) ? (purehepta ? 1.1 : .9) : .94;
+  
+  if(euclid) fac80 = fac94 = .9;
+  
+  if(geometry == g47 || geometry == gSmallSphere || geometry == gTinySphere)
+    fac80 *= 1.2, fac94 *= .94;
+
+  if(geometry == gTinySphere)
+    fac80 *= 1.2, fac94 *= .94;
 
   auto MF = [] (double f, int i) { return (f*i)/8; };
 
@@ -897,6 +910,10 @@ void buildpolys() {
 
   double trihepta0 = scalef*spzoom6*(.2776+p) * SCA4(1.3) * SCA46(.975) * SCA47(.85) * bscale6 * (S7==8?.9:1);
   double trihepta1 = (sphere ? .54 : scalef*spzoom6*(.5273-2*p) * SCA4(.8) * SCA46(1.075)) * (sphere&&S7==4?1.3:1) * bscale7;
+  
+  double eps = hexhexdist * .05;
+  if(euclid) trihepta0 = hexhexdist * .5 - eps * sqrt(3)/2, trihepta1 = hexhexdist * sqrt(3)/2 - eps; // .5-.1; .75-.05
+
   if(sphere&&S7==3) trihepta0 *= 1.3, trihepta1 *= 1.6;
 
 
@@ -915,20 +932,12 @@ void buildpolys() {
   bshape(shTriheptaFloorShadow[1], PPR_FLOOR);
   for(int t=0; t<=S7; t++) hpcpush(ddi(t*S12 + tshift1, trihepta1*SHADMUL) * C0);
 
-  {double x = sphere?.401:euclid?.3 : .328;
+  {double x = hexvdist;
   bshape(shFullFloor[0], PPR_FLOOR);
-  if(a4) x = hcrossf * .7;
-  if(a4 && S7 == 6) x *= .9125;
-  if(a4 && S7 == 7) x *= .85;
-  if(sphere&&S7==4) x*= 1.7;
-  if(sphere&&S7==3) x*= 2.55;
   x *= bscale6;
   for(int t=0; t<=S6; t++) hpcpush(ddi(S7 + t*S14, x) * C0);
 
-  x = purehepta ? 0.62 : sphere ? .345 : euclid ? .3 : 0.38;
-  if(a4) x = purehepta ? hcrossf: hexf;
-  if(sphere&&S7==4) x*= 1.3;
-  if(sphere&&S7==3) x*= 1.5;
+  x = rhexf;
   x *= bscale7;
   bshape(shFullFloor[1], PPR_FLOOR);
   for(int t=0; t<=S7; t++) hpcpush(ddi(t*S12+td, x) * C0);
@@ -1340,7 +1349,7 @@ void buildpolys() {
   
   double espzoom6 = spzoom6, espzoomd7 = spzoomd7;
   
-  if(euclid) espzoom6 *= 1.5, espzoomd7 *= 1.2;
+  // if(euclid) espzoom6 *= 1.5, espzoomd7 *= 1.2;
   
   double octroll = S7 == 8 ? .2 : (S7 == 6 && a4) ? -.2 : (S7 == 7 && a4) ? .1 : 0;
 
@@ -1358,7 +1367,7 @@ void buildpolys() {
   
   bshape(shCloudFloor[0], PPR_FLOOR, scalef2*spzoom6*(sphere?.9:1)*ffscale2, 3, ffspin2);
   bshape(shCloudFloor[1], PPR_FLOOR, scalef2*spzoomd7*ffscale2*SCAP4(1.5), 4, octroll);
-  bshape(shCloudFloor[2], PPR_FLOOR, scalef2*spzoom6*.9, 3);
+  bshape(shCloudFloor[2], PPR_FLOOR, euclid ? scalef2 : scalef2*spzoom6*.9, 3);
   
   bshape(shCrossFloor[0], PPR_FLOOR, scalef*espzoom6*(sphere?.9:1)*ffscale2, 5, ffspin2);
   bshape(shCrossFloor[1], PPR_FLOOR, scalef*espzoomd7*(sphere?.9:1)*ffscale2 * SCA47(1.3), 6, octroll);
@@ -1368,21 +1377,21 @@ void buildpolys() {
   bshape(shChargedFloor[2], PPR_FLOOR, scalef*espzoom6, 7);
   bshape(shChargedFloor[3], 12, spzoomd7 * (sphere&&purehepta?.9:1) * SCA4(1.2), 10); // purehepta variant
 
-  bshape(shSStarFloor[0], PPR_FLOOR, scalef*spzoom6*(euclid?1.4:sphere?.8:1)*ffscale2, 11, ROT4(.775));
-  bshape(shSStarFloor[1], PPR_FLOOR, scalef*spzoomd7*(euclid?1.2:1)*SCA4(.85), 12, octroll);
+  bshape(shSStarFloor[0], PPR_FLOOR, scalef*spzoom6*(sphere?.8:1)*ffscale2, 11, ROT4(.775));
+  bshape(shSStarFloor[1], PPR_FLOOR, scalef*spzoomd7*SCA4(.85), 12, octroll);
   bshape(shOverFloor[0], PPR_FLOOR, scalef*spzoom, 13);
   if(purehepta) bshape(shOverFloor[1], PPR_FLOOR, sphere ? .83 : 1, 14, octroll);
   else bshape(shOverFloor[1], PPR_FLOOR, scalef*spzoom7, 15);
-  bshape(shOverFloor[2], PPR_FLOOR, 1*spzoom7, 16);
+  bshape(shOverFloor[2], PPR_FLOOR, euclid?scalef*1.2:spzoom7, 16);
   bshape(shTriFloor[0], PPR_FLOOR, scalef*espzoom6*(sphere?.9:1)*ffscale2*SCA4(0.9), 17, ffspin2 + ROT47(.1));
   bshape(shTriFloor[1], PPR_FLOOR, scalef*espzoomd7*ffscale2*SCA4(1.2)*SCA47(1.5), 18, octroll + ROT4(.25) - ROT47(.1) + ROTS4(.7));
   bshape(shFeatherFloor[0], PPR_FLOOR, scalef*spzoom6*ffscale2, 19, ffspin2);
   if(purehepta) bshape(shFeatherFloor[1], PPR_FLOOR, sphere ? .83 : SCAP4(1.1), 20);
   else bshape(shFeatherFloor[1], PPR_FLOOR, scalef*spzoom7*(sphere?1.1:1)*ffscale2*(a4?1.1:1), 21, sphere?1.3:0);
-  bshape(shFeatherFloor[2], PPR_FLOOR, 1, 22);  // Euclidean variant
+  bshape(shFeatherFloor[2], PPR_FLOOR, scalef*1.1, 22);  // Euclidean variant
   bshape(shBarrowFloor[0], PPR_FLOOR, spzoom6 * (S7==8?1.4:1) * SCA467(1.7) * SCA46(.8), 23);
   bshape(shBarrowFloor[1], PPR_FLOOR, (sphere&&purehepta?.9:1) * spzoomd7 * (S7==8?1.5:1) * SCA4(1.15) * SCA467(1.9) * SCA46(.8), 24, octroll - ROT47(.1));
-  bshape(shBarrowFloor[2], PPR_FLOOR, sphere?.9:1, 25);
+  bshape(shBarrowFloor[2], PPR_FLOOR, (sphere||euclid)?.9:1, 25);
   bshape(shNewFloor[0], PPR_FLOOR, scalef*espzoom6 * ffscale2, 26, ffspin2);
   bshape(shNewFloor[1], PPR_FLOOR, scalef*espzoomd7 * ffscale2, 27, octroll);
 
@@ -1406,7 +1415,7 @@ void buildpolys() {
   bshape(shSeabed[1], PPR_FLOOR, scalef*spzoom6, 335);
   bshape(shCloudSeabed[0], PPR_FLOOR, scalef*spzoom6 * SCA46(.8) * SCA47(.75), 336);
   bshape(shCloudSeabed[1], PPR_FLOOR, scalef*spzoom6 * SCA46(.5) * SCA47(.6), 337, ROT46(-.2));
-  bshape(shCloudSeabed[2], PPR_FLOOR, scalef*espzoom6*0.825, 337);
+  bshape(shCloudSeabed[2], PPR_FLOOR, scalef*espzoom6, 337);
   bshape(shCaveSeabed[0], PPR_FLOOR, scalef*spzoom6, 338);
   bshape(shCaveSeabed[1], PPR_FLOOR, scalef*spzoom6, 339);
   
@@ -1439,7 +1448,7 @@ void buildpolys() {
   bshape(shTriheptaEucShadow[1], PPR_FLOOR,  scalef*SHADMUL, 43);
   bshape(shTriheptaEucShadow[2], PPR_FLOOR,  scalef*SHADMUL, 44);
   bshape(shPalaceFloor[0], PPR_FLOOR,  scalef*espzoom6*ffscale2, 45, ROT4(.775));
-  bshape(shPalaceFloor[1], PPR_FLOOR,  scalef*espzoomd7*(euclid?1.1:1)*SCA4(.85), 46, (euclid ? M_PI/2-.4 : S7==8 ? -.6 : 0) + ROT46(-.3));
+  bshape(shPalaceFloor[1], PPR_FLOOR,  scalef*espzoomd7*SCA4(.85), 46, (euclid ? 0 : S7==8 ? -.6 : 0) + ROT46(-.3));
 
   bshape(shMercuryBridge[0], PPR_FLOOR,  scalef*spzoom6, 365);
   bshape(shMercuryBridge[1], PPR_FLOOR,  scalef*spzoomd7, 366);
@@ -1452,22 +1461,22 @@ void buildpolys() {
   bshape(shDemonFloor[0], PPR_FLOOR,  scalef*espzoom6*(sphere?.9:1) * ffscale2, 51, ffspin2);
   bshape(shCaveFloor[0], PPR_FLOOR,  scalef*spzoom6 * ffscale2, 52, ffspin2);
   bshape(shCaveFloor[1], PPR_FLOOR,  scalef*spzoomd7 * ffscale2 * (sphere?.9:1) * SCAP4(1.6), 53, octroll);
-  bshape(shCaveFloor[2], PPR_FLOOR,  1, 54);  // Euclidean variant
+  bshape(shCaveFloor[2], PPR_FLOOR,  scalef*1.1, 54);  // Euclidean variant
   bshape(shDesertFloor[0], PPR_FLOOR,  scalef*espzoom6*ffscale6, 55, ffspin6);
   bshape(shDesertFloor[1], PPR_FLOOR,  scalef*espzoomd7*(sphere?.9:1), 56, octroll+ffspin7);
   for(int i=1; i<=3; i++) for(int j=0; j<2; j++) 
     zoomShape(shDesertFloor[j], shRedRockFloor[i-1][j], 1 - .1 * i, PPR_FLOORa+i);
   bshape(shPowerFloor[0], PPR_FLOOR_DRAGON, scalef*espzoom6*(sphere?.8:1)*ffscale2, 57, ffspin2);
-  bshape(shPowerFloor[1], PPR_FLOOR_DRAGON, scalef*espzoomd7*ffscale2, 58, euclid?M_PI/2:octroll);
+  bshape(shPowerFloor[1], PPR_FLOOR_DRAGON, scalef*espzoomd7*ffscale2, 58, octroll);
   bshape(shRoseFloor[2], PPR_FLOOR,  1, 173); // purehepta
   bshape(shRoseFloor[0], PPR_FLOOR,  1, 174);
   bshape(shRoseFloor[1], PPR_FLOOR,  scalef * SCAP4(.85), 175, (purehepta && a4 ? M_PI/8 : 0));
-  bshape(shTurtleFloor[0], PPR_FLOOR,  (sphere?.9*1.3: a4 ? 1.6 : S7==8 ? 1.3 : 1) * SCA46(1.4) * SCA47(1.4), 176);
-  bshape(shTurtleFloor[1], PPR_FLOOR,  scalef * (euclid?1.2:a4?.9:1) * SCA47(1.3), 177, (euclid ? M_PI/2 : octroll) - ROT47(.1));
+  bshape(shTurtleFloor[0], PPR_FLOOR,  (euclid?.9:1) * (sphere?.9*1.3: a4 ? 1.6 : S7==8 ? 1.3 : 1) * SCA46(1.4) * SCA47(1.4), 176);
+  bshape(shTurtleFloor[1], PPR_FLOOR,  (euclid?.9:1) * scalef * (a4?.9:1) * SCA47(1.3), 177, octroll - ROT47(.1));
   bshape(shTurtleFloor[2], PPR_FLOOR,  sphere && purehepta ? .9 : 1, 178); // purehepta
   bshape(shDragonFloor[0], PPR_FLOOR_DRAGON, (S7==8?1.3:1) * SCA4(1.6), 181, ffspin2);
   bshape(shDragonFloor[1], PPR_FLOOR_DRAGON, (sphere ? .9:1) * (S7==8?1.1:1) * SCA4(.9) * scalef, 182, octroll);
-  bshape(shDragonFloor[2], PPR_FLOOR,  1, 183);
+  bshape(shDragonFloor[2], PPR_FLOOR,  scalef * 1.1, 183);
   bshape(shZebra[0], PPR_FLOOR,  scalef, 162);
   bshape(shZebra[1], PPR_FLOOR,  scalef, 163);
   bshape(shZebra[2], PPR_FLOOR,  scalef, 164);
@@ -1489,7 +1498,7 @@ void buildpolys() {
   bshape(shTower[7], PPR_FLOOR_TOWER,  1, 203); // purehepta 7
   bshape(shTower[8], PPR_FLOOR_TOWER,  1, 204); // purehepta 11
   bshape(shTower[9], PPR_FLOOR_TOWER,  1, 205); // purehepta 15
-  bshape(shTower[10], PPR_FLOOR_TOWER,  1, 206);  // Euclidean
+  bshape(shTower[10], PPR_FLOOR_TOWER,  scalef, 206);  // Euclidean
   
   // structures & walls
   bshape(shBoatOuter, PPR_STRUCT0, scalef, 154);
@@ -2967,12 +2976,13 @@ NEWSHAPE
 #define ROSEFLOOR shRoseFloor[ct6]
 
 #define ECT (euclid?2:ct6)
+#define ECTH (euclid || purehepta?2:ct6)
 
 // no eswap
 #define PLAINFLOOR shFloor[ct6]
 #define FULLFLOOR shFullFloor[ct6]
 #define CAVEFLOOR shCaveFloor[ECT]
-#define OVERFLOOR shOverFloor[ECT]
+#define OVERFLOOR shOverFloor[ECTH]
 #define CLOUDFLOOR shCloudFloor[ECT]
 #define FEATHERFLOOR shFeatherFloor[ECT]
 #define MFLOOR1 shMFloor[ct6]

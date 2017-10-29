@@ -4,13 +4,16 @@
 // Copyright (C) 2011-2012 Zeno Rogue, see 'hyper.cpp' for details
 
 
-ld tessf, crossf, hexf, hcrossf, hexhexdist;
+ld tessf, crossf, hexf, hcrossf, hexhexdist, hexvdist, hepvdist, rhexf;
 
 // tessf: distance from heptagon center to another heptagon center
-// hexf: distance from heptagon center to heptagon vertex
+// hexf: distance from heptagon center to small heptagon vertex
 // hcrossf: distance from heptagon center to big heptagon vertex
-// crossf: distance from heptagon center to adjacent hexagon center
+// crossf: distance from heptagon center to adjacent cell center (either hcrossf or tessf)
 // hexhexdist: distance between adjacent hexagon vertices
+// hexvdist: distance between hexagon vertex and hexagon center
+// hepvdist: distance between heptagon vertex and hexagon center (either hcrossf or something else)
+// rhexf: distance from heptagon center to heptagon vertex (either hexf or hcrossf)
 
 #define ALPHA (M_PI*2/S7)
 
@@ -51,8 +54,14 @@ void precalc() {
     // dynamicval<eGeometry> g(geometry, gNormal);
     // precalc(); }
     // for(int i=0; i<S84; i++) spinmatrix[i] = spin(i * M_PI / S42);
-    hcrossf = hexhexdist = hexf = hexf7;
-    tessf = hexf * sqrt(3);
+    crossf = .5;
+    tessf = crossf * sqrt(3);
+    hexf = tessf/3;
+    hcrossf = crossf;
+    hexhexdist = crossf;
+    hexvdist = hexf;
+    hepvdist = crossf;
+    rhexf = hexf;
     goto finish;
     }
 
@@ -101,12 +110,12 @@ void precalc() {
     }
   hexf = fmin;
   
+  rhexf = purehepta ? hcrossf : hexf;
+  
   if(!euclid && !purehepta && !(S7&1))
     hexshift = ALPHA/2 + ALPHA * ((S7-1)/2) + M_PI;
 
   finish:
-  
-  printf("S7=%d S6=%d hexf = " LDF" hcross = " LDF" tessf = " LDF" hexshift = " LDF "\n", S7, S6, hexf, hcrossf, tessf, hexshift);
   
   for(int i=0; i<S42; i++)
     Crad[i] = spin(2*M_PI*i/S42) * xpush(.4) * C0;
@@ -120,6 +129,12 @@ void precalc() {
   for(int d=0; d<S7; d++) invhexmove[d] = inverse(hexmove[d]);
 
   hexhexdist = hdist(xpush(crossf) * C0, spin(M_PI*2/S7) * xpush(crossf) * C0);
+  
+  hexvdist = hdist(tC0(xpush(hexf)), spin(ALPHA/2) * tC0(xpush(hcrossf)));
+
+  printf("S7=%d S6=%d hexf = " LDF" hcross = " LDF" tessf = " LDF" hexshift = " LDF " hexhex = " LDF " hexv = " LDF "\n", S7, S6, hexf, hcrossf, tessf, hexshift, 
+    hexhexdist, hexvdist);
+  
   
   for(int i=0; i<S84; i++) spinmatrix[i] = spin(i * M_PI / S42);
   }
