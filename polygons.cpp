@@ -28,55 +28,6 @@ struct hpcshape {
 
 hpcshape *last = NULL;
 
-#ifndef GL
-typedef float GLfloat;
-#endif
-
-struct qpoly {
-      transmatrix V;
-      GLfloat *tab;
-      int curveindex;
-      int cnt;
-      int outline;
-      double minwidth;
-      };
-
-struct qline {
-      hyperpoint H1, H2;
-      int prf;
-      double width;
-      };
-      
-#define MAXQCHR 40
-
-struct qchr {
-      char str[MAXQCHR];
-      int x, y, shift, size, frame;
-      int align;
-      };
-      
-struct qcir {
-      int x, y, size;
-      };
-
-enum eKind { pkPoly, pkLine, pkString, pkCircle, pkShape, pkResetModel };
-
-struct polytodraw {
-  eKind kind;
-  int prio, col;
-  union {
-    qpoly  poly;
-    qline  line;
-    qchr   chr;
-    qcir   cir;
-    double dvalue;
-    } u;
-#if CAP_ROGUEVIZ
-  string* info;
-  polytodraw() { info = NULL; }
-#endif
-  };
-
 vector<polytodraw> ptds;
 
 polytodraw& lastptd() { return ptds[size(ptds)-1]; }

@@ -21,6 +21,8 @@ namespace shmupballs {
 
 namespace multi {
 
+  charstyle scs[MAXPLAYER];
+
   int players = 1;
   cellwalker player[MAXPLAYER];
   vector<int> revive_queue; // queue for revival

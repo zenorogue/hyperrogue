@@ -15,22 +15,6 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#ifdef MAC
-#define ISMAC 1
-#endif
-
-#ifdef LINUX
-#define ISLINUX 1
-#endif
-
-#ifdef WINDOWS
-#define ISWINDOWS 1
-#endif
-
-#if ISSTEAM
-#define NOLICENSE
-#endif
-
 #include "init.cpp"
 
 #if ISLINUX
@@ -473,6 +457,7 @@ hookset<int()> *hooks_args;
 
 namespace arg {
   int argc; char **argv;
+  int curphase;
 
   auto ah = addHook(hooks_args, 0, readCommon);
   

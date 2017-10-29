@@ -77,7 +77,7 @@ void upload_score(int id, int v);
 
 string achievementMessage[3];
 int achievementTimer;
-// vector<string> achievementsReceived;
+vector<string> achievementsReceived;
 
 bool wrongMode(char flags) {
   if(cheater) return true;

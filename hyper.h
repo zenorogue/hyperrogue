@@ -94,8 +94,32 @@ struct gcell {
 #define NOBARRIERS 9
 
 struct heptagon;
+
 struct heptspin;
-struct cell;
+
+inline int tspin(uint32_t& t, int d) { return (t >> (d<<2)) & 7; }
+inline int tmirror(uint32_t& t, int d) { return (t >> ((d<<2)+3)) & 1; }
+
+struct cell : gcell {
+  char type; // 6 for hexagons, 7 for heptagons
+
+  // wall parameter, used for remaining power of Bonfires and Thumpers
+  char wparam;
+
+  // 'tmp' is used for:
+  // pathfinding algorithm used by monsters with atypical movement (which do not use pathdist)
+  // bugs' pathfinding algorithm
+  short aitmp;
+
+  uint32_t spintable;
+  int spin(int d) { return tspin(spintable, d); }
+  int spn(int d) { return tspin(spintable, d); }
+  int mirror(int d) { return tmirror(spintable, d); }
+
+  heptagon *master;
+  cell *mov[MAX_EDGE]; // meaning very similar to heptagon::move
+  };
+
 struct cellwalker;
 
 // automaton state
@@ -129,6 +153,7 @@ enum hstate { hsOrigin, hsA, hsB, hsError, hsA0, hsA1, hsB0, hsB1, hsC };
 
 string XLAT(string x);
 string cts(char c);
+string its(int i);
 int hrand(int i);
 
 template<class T> int size(const T& x) {return int(x.size()); }
@@ -172,7 +197,7 @@ void achievement_display();
 void achievement_pump();
 
 // achievements received this game
-vector<string> achievementsReceived;
+extern vector<string> achievementsReceived;
 
 // game forward declarations
 typedef unsigned long long flagtype;
@@ -314,7 +339,7 @@ namespace multi {
   void loadConfig(FILE *f);
   void initConfig();
    
-  charstyle scs[MAXPLAYER];
+  extern charstyle scs[MAXPLAYER];
 
   bool playerActive(int p);
   int activePlayers();
@@ -877,8 +902,8 @@ struct stalemate1 {
   };
 
 namespace stalemate {
-  vector<stalemate1> moves;
-  bool  nextturn;
+  extern vector<stalemate1> moves;
+  extern bool  nextturn;
   
   bool isKilled(cell *c);
 
@@ -1251,7 +1276,7 @@ namespace arg {
   
   inline void init(int _argc, char **_argv) { argc=_argc-1; argv=_argv+1; }
   
-  int curphase;
+  extern int curphase;
   
   inline void phaseerror(int x) {
     printf("Command line error: cannot read command '%s' from phase %d in phase %d\n", args(), x, curphase);
@@ -1523,7 +1548,8 @@ void setAppropriateOverview();
 bool quitsaves();
 extern bool sidescreen;
 
-static const char* COLORBAR = "###";
+extern const char* COLORBAR;
+
 int textwidth(int siz, const string &str);
 #define GLERR(call) glError(call, __FILE__, __LINE__)
 
@@ -1664,7 +1690,7 @@ void selectLanguageScreen();
 bool inscreenrange(cell *c);
 bool allowIncreasedSight();
 
-static bool orbProtection(eItem it) { return false; } // not implemented
+static inline bool orbProtection(eItem it) { return false; } // not implemented
 
 namespace windmap {
   void create();
@@ -1729,3 +1755,55 @@ int ctof(cell *c);
 
 void modalDebug(cell *c);
 int getDistLimit();
+
+void drawqueue();
+
+#ifndef GL
+typedef float GLfloat;
+#endif
+
+struct qpoly {
+      transmatrix V;
+      GLfloat *tab;
+      int curveindex;
+      int cnt;
+      int outline;
+      double minwidth;
+      };
+
+struct qline {
+      hyperpoint H1, H2;
+      int prf;
+      double width;
+      };
+      
+#define MAXQCHR 40
+
+struct qchr {
+      char str[MAXQCHR];
+      int x, y, shift, size, frame;
+      int align;
+      };
+      
+struct qcir {
+      int x, y, size;
+      };
+
+enum eKind { pkPoly, pkLine, pkString, pkCircle, pkShape, pkResetModel };
+
+struct polytodraw {
+  eKind kind;
+  int prio, col;
+  union {
+    qpoly  poly;
+    qline  line;
+    qchr   chr;
+    qcir   cir;
+    double dvalue;
+    } u;
+#if CAP_ROGUEVIZ
+  string* info;
+  polytodraw() { info = NULL; }
+#endif
+  };
+

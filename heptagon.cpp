@@ -16,14 +16,6 @@ cell *newCell(int type, heptagon *master);
 
 // spintable functions
 
-int tspin(uint32_t& t, int d) {
-  return (t >> (d<<2)) & 7;
-  }
-
-int tmirror(uint32_t& t, int d) {
-  return (t >> ((d<<2)+3)) & 1;
-  }
-
 void tsetspin(uint32_t& t, int d, int spin) {
   t &= ~(15 << (d<<2));
   t |= spin << (d<<2);

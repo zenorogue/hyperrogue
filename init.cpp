@@ -1,3 +1,19 @@
+#ifdef MAC
+#define ISMAC 1
+#endif
+
+#ifdef LINUX
+#define ISLINUX 1
+#endif
+
+#ifdef WINDOWS
+#define ISWINDOWS 1
+#endif
+
+#if ISSTEAM
+#define NOLICENSE
+#endif
+
 #define VER "10.1h"
 #define VERNUM 10108
 #define VERNUM_HEX 0xA088
@@ -179,7 +195,7 @@
 #define CAP_SHMUP_GOOD (!ISMOBWEB)
 #endif
 
-int fontscale = 100;
+extern int fontscale;
 
 #if ISMOBILE
 #define EXTRALICENSE "\n\nHyperRogue soundtrack by Shawn Parrotte (http://www.shawnparrotte.com), under the Creative Commons BY-SA 3.0 license, http://creativecommons.org/licenses/by-sa/3.0/"
@@ -306,8 +322,30 @@ inline Uint8 *SDL_GetKeyState(void *v) { static Uint8 tab[1024]; return tab; }
 
 using namespace std;
 
-string s0;
 void addMessage(string s, char spamtype = 0);
+
+#define S7 ginf[geometry].sides
+#define S3 ginf[geometry].vertex
+#define weirdhyperbolic (S7 > 7 || S3 > 3)
+#define S6 (S3*2)
+#define S42 (S7*S6)
+#define S12 (S6*2)
+#define S14 (S7*2)
+#define S21 (S7*S3)
+#define S28 (S7*4)
+#define S36 (S6*6)
+#define S84 (S7*S6*2)
+#define MAX_EDGE 8
+#define MAX_S3 4
+#define MAX_S84 240
+
+#ifdef ONE_CU
+#include "classes.h"
+#include "hyper.h"
+
+#else
+
+int fontscale = 100;
 
 #if ISANDROID
 FILE *debfile;
@@ -325,20 +363,7 @@ const char *musicfile = "";
 const char *loadlevel = NULL;
 #endif
 
-#define S7 ginf[geometry].sides
-#define S3 ginf[geometry].vertex
-#define weirdhyperbolic (S7 > 7 || S3 > 3)
-#define S6 (S3*2)
-#define S42 (S7*S6)
-#define S12 (S6*2)
-#define S14 (S7*2)
-#define S21 (S7*S3)
-#define S28 (S7*4)
-#define S36 (S6*6)
-#define S84 (S7*S6*2)
-#define MAX_EDGE 8
-#define MAX_S3 4
-#define MAX_S84 240
+string s0;
 
 #include "classes.cpp"
 #include "hyper.h"
@@ -788,3 +813,4 @@ void mobile_draw(MOBPAR_FORMAL) {
 void playSound(cell*, const string &s, int vol) { printf("play sound: %s vol %d\n", s.c_str(), vol); }
 #endif
 
+#endif

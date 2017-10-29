@@ -208,3 +208,5 @@ static const int SEE_ALL = 15;
 static const int FORBIDDEN = -1;
 
 extern eGeometry geometry;
+
+extern geometryinfo ginf[gGUARD];

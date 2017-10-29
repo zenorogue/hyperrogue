@@ -15,26 +15,6 @@ int dirdiff(int dd, int t) {
   return dd;
   }
 
-struct cell : gcell {
-  char type; // 6 for hexagons, 7 for heptagons
-
-  // wall parameter, used for remaining power of Bonfires and Thumpers
-  char wparam;
-
-  // 'tmp' is used for:
-  // pathfinding algorithm used by monsters with atypical movement (which do not use pathdist)
-  // bugs' pathfinding algorithm
-  short aitmp;
-
-  uint32_t spintable;
-  int spin(int d) { return tspin(spintable, d); }
-  int spn(int d) { return tspin(spintable, d); }
-  int mirror(int d) { return tmirror(spintable, d); }
-
-  heptagon *master;
-  cell *mov[MAX_EDGE]; // meaning very similar to heptagon::move
-  };
-
 int fixdir(int a, cell *c) { a %= c->type; if(a<0) a += c->type; return a; }
 
 int cellcount = 0;

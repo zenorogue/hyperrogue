@@ -11,6 +11,8 @@
 
 */
 
+const char* COLORBAR = "###";
+
 namespace dialog {
 
   namespace zoom {

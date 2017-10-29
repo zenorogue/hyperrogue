@@ -1072,6 +1072,9 @@ bool outlawNearby(cell *c, int dist) {
 // int monstersnear(cell *c, cell *nocount = NULL, eMonster who = moPlayer, cell *pushto = NULL) {
 
 namespace stalemate {
+  vector<stalemate1> moves;
+  bool  nextturn;
+
   bool anyKilled() {
     for(int i=0; i<size(moves); i++) if(moves[i].killed) return true;
     return false;
