@@ -1,8 +1,6 @@
 // Hyperbolic Rogue -- items, monsters, walls, lands, descriptions, etc.
 // Copyright (C) 2011-2016 Zeno Rogue, see 'hyper.cpp' for details
 
-#include "classes.h"
-
 // --- help ---
 
 const char *wormdes = 
