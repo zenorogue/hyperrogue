@@ -448,7 +448,7 @@ void showChangeMode() {
 
   dialog::addBreak(50);
   
-  dialog::addItem(XLAT("return to the game"), ' ');
+  dialog::addItem(XLAT("go back"), ' ');
   dialog::display();
   
   keyhandler = [] (int sym, int uni) {

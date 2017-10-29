@@ -527,7 +527,7 @@ void loadConfig() {
 
 void showAllConfig() {
   dialog::addBreak(50);
-  dialog::addItem(XLAT("exit configuration"), ' ');
+  dialog::addItem(XLAT("go back"), ' ');
 #if CAP_CONFIG
   dialog::addItem(XLAT("save the current config"), 's');
   if(getcstat == 's')
@@ -851,7 +851,8 @@ void showJoyConfig() {
   dialog::addSelItem(XLAT("second joystick: pan threshold"), its(vid.joypanthreshold), 'c');
   dialog::addSelItem(XLAT("second joystick: panning speed"), fts(vid.joypanspeed * 1000), 'd');
 
-  dialog::addItem(XLAT("back"), ' ');
+  dialog::addBreak(50);
+  dialog::addItem(XLAT("go back"), ' ');
   dialog::display();
   
   keyhandler = [] (int sym, int uni) {
@@ -1005,7 +1006,7 @@ void show3D() {
   else
     dialog::addInfo(XLAT("parameters set correctly"));
   dialog::addBreak(50);
-  dialog::addItem(XLAT("exit 3D configuration"), ' ');
+  dialog::addItem(XLAT("go back"), ' ');
   dialog::display();
   
   keyhandler = [] (int sym, int uni) {
@@ -1106,7 +1107,7 @@ void showCustomizeChar() {
   if(numplayers() > 1) dialog::addSelItem(XLAT("player"), its(shmup::cpid+1), 'a');
   
   dialog::addBreak(50);
-  dialog::addItem(XLAT("return to the game"), ' ');
+  dialog::addItem(XLAT("go back"), ' ');
   dialog::display();
   
   int firsty = dialog::items[0].position / 2;
@@ -1191,7 +1192,7 @@ void selectLanguageScreen() {
   dialog::addBreak(50);
   vid.language = -1;
   dialog::addBoolItem(XLAT("default") + ": " + XLAT("EN"), v == -1, '0');
-  dialog::addItem(XLAT("exit configuration"), ' ');
+  dialog::addItem(XLAT("go back"), ' ');
 
   dialog::addBreak(50);
 

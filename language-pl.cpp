@@ -4266,6 +4266,7 @@ S("Watch the Minkowski hyperboloid or the hypersian rug mode with the "
 
 S("0 - return", "0 - powrót")
 S("return", "powrót")
+S("go back", "powrót")
 S("F1 - help", "F1 - pomoc")
 
 // for the conformal polynomial

@@ -1639,6 +1639,7 @@ S("You are killed by %the1!", "%1 tarafından öldürüldün!")
 N("Great Wall", GEN_M, "Büyük Duvar", "Büyük Duvarları", "Büyük Duvarı", "Büyük Duvarda")
 
 S("(v) menu", "(v) menü")
+S("go back", "dön")
 S("return to the game", "oyuna dön")
 S("or 'v' to see the main menu", "veya ana menüyü görmek için 'v'ye bas.")
 

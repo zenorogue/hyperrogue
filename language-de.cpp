@@ -898,6 +898,7 @@ S("Shift=random, Ctrl=mix", "Shift=Zufällig, Ctrl=Mischen")
 
 S("Euclidean mode", "Euklidischer Modus")
 S("Return to the hyperbolic world", "Zur hyperbolischen Welt zurückkehren")
+S("go back", "zurück")
 S("Choose from the lands visited this game.", "Wähle aus den Ländern, die diese Sitzung besucht wurden.")
 S("Scores and achievements are not", "Im euklidischem Modus werden");
 S("saved in the Euclidean mode!", "Punkte und Errungenschaften nicht gespeichert!");

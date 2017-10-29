@@ -661,7 +661,7 @@ void show() {
   dialog::init(XLAT("hypersian rug mode"), iinf[itPalace].color, 150, 100);
 
   dialog::addItem(XLAT("what's this?"), 'h');
-  dialog::addItem(XLAT("take me back"), ' ');
+  dialog::addItem(XLAT("go back"), ' ');
   dialog::addItem(XLAT("enable the Hypersian Rug mode"), 'u');
   dialog::addBoolItem(XLAT("render the texture only once"), (renderonce), 'o');
   dialog::addBoolItem(XLAT("render texture without OpenGL"), (rendernogl), 'g');  
