@@ -375,13 +375,13 @@ slide default_slides[] = {
   {"Hypersian Rug model", 21, LEGAL_HYPERBOLIC,
     "New players think that the action of HyperRogue takes place on a sphere. "
 #if CAP_RUG
-    "This is not true -- the Tutorial in the native desktop version shows "
-    "the surface HyperRogue actually takes place on.",
-#else
     "This is not true -- the next slide will show the surface HyperRogue "
     "actually takes place on.\n\n"
     "Use arrow keys to rotate the model, and Page Up/Down to zoom.\n\n"
     "If you do not see anything, press '5' to try a safer renderer.",
+#else
+    "This is not true -- the Tutorial in the native desktop version shows "
+    "the surface HyperRogue actually takes place on.",
 #endif
     [] (presmode mode) {
 #if CAP_RUG
