@@ -1,12 +1,8 @@
 // This file implements routines related to barriers (Great Walls and similar).
 
-bool buildBarrierNowall(cell *c, eLand l2, bool force = false);
+bool checkBarriersFront(cellwalker bb, int q, bool cross) {
 
-bool checkBarriersBack(cellwalker bb, int q=5, bool cross = false);
-
-bool checkBarriersFront(cellwalker bb, int q=5, bool cross = false) {
-
-  if(bb.c->type == 6) 
+  if(!ctof(bb.c)) 
     return false;
 
   if(bb.c->mpdist < BARLEV) return false;
@@ -65,12 +61,11 @@ bool checkBarriersBack(cellwalker bb, int q, bool cross) {
   return checkBarriersFront(bb, q);
   }
 
-const eLand NOWALLSEP = laNone;
-const eLand NOWALLSEP_USED = laWhirlpool;
-
 bool checkBarriersNowall(cellwalker bb, int q, int dir, eLand l1=laNone, eLand l2=laNone) {
   if(bb.c->mpdist < BARLEV && l1 == laNone) return false;
   if(bb.c->bardir != NODIR && l1 == laNone) return false;
+  // if(bb.c->mov[dir] && bb.c->mov[dir]->bardir != NODIR && l1 == laNone) return false;
+  // if(bb.c->mov[dir] && bb.c->mov[dir]->mpdist < BARLEV && l1 == laNone) return false;
   
   if(l1 != laNone) { 
     bb.c->bardir = bb.spin; bb.c->barright = l2; bb.c->barleft = NOWALLSEP; 
@@ -92,7 +87,12 @@ bool checkBarriersNowall(cellwalker bb, int q, int dir, eLand l1=laNone, eLand l
       }
     }
   
-  if(purehepta) {
+  if(purehepta && S3==4) {
+    cwspin(bb, dir);
+    cwstep(bb);
+    cwspin(bb, dir);
+    }
+  else if(purehepta) {
     cwspin(bb, 3*dir);
     cwstep(bb);
     cwspin(bb, -3*dir);
@@ -116,7 +116,7 @@ eWall getElementalWall(eLand l) {
 
 void setbarrier(cell *c) {
   if(isSealand(c->barleft) && isSealand(c->barright)) {
-    bool setbar = c->type == 7;
+    bool setbar = ctof(c);
     if(c->barleft == laKraken || c->barright == laKraken)
     if(c->barleft != laWarpSea && c->barright != laWarpSea)
       setbar = !setbar;
@@ -260,8 +260,22 @@ void extendNowall(cell *c) {
     setland(cw.c, c->barright);
     }
   
+  if(purehepta && S3 == 4) {
+    cwstep(cw);
+    setland(cw.c, c->barright);
+    cw.c->barleft = NOWALLSEP_USED;
+    cw.c->barright = c->land;
+    cw.c->bardir = cw.spin;
+    cwstep(cw);
+    }
+  
   for(int i=-1; i<2; i+=2) {  
-    if(purehepta) {
+    if(purehepta && S3==4) {
+      cwspin(cw, i);
+      cwstep(cw);
+      cwspin(cw, i);
+      }
+    else if(purehepta) {
       cwspin(cw, 3*i);
       cwstep(cw);
       cwspin(cw, -3*i);
@@ -270,21 +284,33 @@ void extendNowall(cell *c) {
       cwspin(cw, 2*i);
       cwstep(cw);
       }
-    setland(cw.c, c->barright);
     if(cw.c->barleft != NOWALLSEP_USED) {
       cw.c->barleft = NOWALLSEP;
-      cw.c->barright = c->land;
-      if(c->barright == laNone) { 
-        printf("barright\n"); 
-        }// NONEDEBUG
-      setland(cw.c, c->barright);
-      if(!purehepta) cwspin(cw, i);
-      cw.c->bardir = cw.spin;
-      if(!purehepta) cwspin(cw, -i);
+      if(S3 == 4 && purehepta) {
+        cw.c->barright = c->barright;
+        cw.c->bardir = cw.spin;
+        setland(cw.c, c->land);
+        }
+      else {
+        setland(cw.c, c->barright);
+        cw.c->barright = c->land;
+        if(c->barright == laNone) { 
+          printf("barright\n"); 
+          }// NONEDEBUG
+        setland(cw.c, c->barright);
+        if(!purehepta) cwspin(cw, i);
+        cw.c->bardir = cw.spin;
+        if(!purehepta) cwspin(cw, -i);
+        }
       extendcheck(cw.c);
       extendBarrier(cw.c);
       }
-    if(purehepta) {
+    if(purehepta && S3==4) {
+      cwspin(cw, -i);
+      cwstep(cw);
+      cwspin(cw, -i);
+      }
+    else if(purehepta) {
       cwspin(cw, 3*i);
       cwstep(cw);
       cwspin(cw, -3*i);
@@ -754,7 +780,7 @@ bool buildBarrierNowall(cell *c, eLand l2, bool force) {
     }
   
   for(int i=0; i<3; i++) {
-    int d = dtab[i];
+    int d = (S3>3 && purehepta) ? (2+(i&1)) : dtab[i];
     if(force) d=1;
     cellwalker cw(c, d);
     

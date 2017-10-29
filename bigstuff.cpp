@@ -4,8 +4,6 @@
 // * 'setland' routines for other geometries
 // * the buildBigStuff function which calls equidistant/(horo)cycle/barrier generators.
 
-#define UNKNOWN 65535
-
 // horocycles
 
 int newRoundTableRadius() {
@@ -176,7 +174,7 @@ heptagon *createAlternateMap(cell *c, int rad, hstate firststate, int special) {
     }
   
   heptagon *alt = new heptagon;
-  allmaps.push_back(new hrmap_alternate(alt));
+  allmaps.push_back(newAltMap(alt));
 //printf("new alt {%p}\n", alt);
   alt->s = firststate;
   alt->emeraldval = 0;
@@ -282,7 +280,6 @@ void generateTreasureIsland(cell *c) {
 
 // equidistants 
 
-#define HAUNTED_RADIUS (purehepta?5:7)
 extern bool generatingEquidistant;
 
 bool generatingEquidistant = false;
@@ -317,7 +314,7 @@ cell *buildAnotherEquidistant(cell *c, int radius) {
       return NULL;
       }
     cwstep(cw); cwspin(cw, 3); 
-    if(cw.c->type == 7 && hrand(2) == 0) cwspin(cw, 1);
+    if(ctof(cw.c) && hrand(2) == 0) cwspin(cw, 1);
     }
   coastpath.push_back(cw.c);
   // printf("setdists\n");
@@ -354,8 +351,8 @@ cell *buildAnotherEquidistant(cell *c, int radius) {
   // prevent gravity anomalies
   if(c2->land != c->land) return NULL;
   
-  // else if(c->type == 7 && hrand(10000) < 20 && !isCrossroads(c->land) && gold() >= 200)
-  if(c2->type == 7 && gold() >= R200 && hrand(10) < 2 && buildBarrierNowall(c2, laCrossroads4, true))  {
+  // else if(ctof(c) && hrand(10000) < 20 && !isCrossroads(c->land) && gold() >= 200)
+  if(ctof(c2) && gold() >= R200 && hrand(10) < 2 && buildBarrierNowall(c2, laCrossroads4, true))  {
     nowall = true;
     // raiseBuggyGeneration(c2, "check");
     // return;
@@ -557,7 +554,7 @@ void buildEquidistant(cell *c) {
             c->landflags = 1;
             }
           }
-        if(c2 && c2->landparam < c->landparam && c2->landflags == 1 && c->type == 7) {
+        if(c2 && c2->landparam < c->landparam && c2->landflags == 1 && ctof(c)) {
           cell *c3 = c->mov[(i+1)%7];
           if(c3 && c3->landparam < c->landparam && c3->landflags == 1) {
             c->wall = waTrunk;
@@ -882,24 +879,24 @@ void buildBigStuff(cell *c, cell *from) {
   
   // buildgreatwalls
   
-  if(weirdhyperbolic) ; // barriers not implemented yet in weird hyperbolic
+  if(celldist(c) < 3) ;
   
   else if(chaosmode) {
-    if(c->type == 7 && hrand(10000) < 9000 && c->land && !inmirror(c) && buildBarrierNowall(c, getNewLand(c->land))) 
+    if(ctof(c) && hrand(10000) < 9000 && c->land && !inmirror(c) && buildBarrierNowall(c, getNewLand(c->land))) 
       {}
-    else if(c->type == 7 && c->land == laMirror && hrand(10000) < 2000) {
+    else if(ctof(c) && c->land == laMirror && hrand(10000) < 2000 && !weirdhyperbolic) {
       int bd = 2 + hrand(2) * 3;
       buildBarrier(c, bd, laMirrored); 
       }
     }
   
-  else if(c->type == 7 && isWarped(c->land) && hrand(10000) < 3000 && c->land && 
+  else if(ctof(c) && isWarped(c->land) && hrand(10000) < 3000 && c->land && 
     buildBarrierNowall(c, eLand(c->land ^ laWarpSea ^ laWarpCoast))) ;
   
-  else if(c->type == 7 && c->land == laCrossroads4 && hrand(10000) < 7000 && c->land && 
+  else if(ctof(c) && c->land == laCrossroads4 && hrand(10000) < 7000 && c->land && 
     buildBarrierNowall(c, getNewLand(laCrossroads4))) ;
   
-  else if(c->type == 7 && hrand(I10000) < 20 && !generatingEquidistant && !yendor::on && !tactic::on && !isCrossroads(c->land) && gold() >= R200 &&
+  else if(ctof(c) && hrand(I10000) < 20 && !generatingEquidistant && !yendor::on && !tactic::on && !isCrossroads(c->land) && gold() >= R200 &&
     !inmirror(c) && !isSealand(c->land) && !isHaunted(c->land) && !isGravityLand(c->land) && 
     (c->land != laRlyeh || rlyehComplete()) &&
     c->land != laTortoise && c->land != laPrairie && c->land && 
@@ -909,21 +906,23 @@ void buildBigStuff(cell *c, cell *from) {
     buildBarrierNowall(c, laCrossroads4) ;
     }
   
+  else if(weirdhyperbolic) ; // non-Nowall barriers not implemented yet in weird hyperbolic
+  
   else if(c->land == laCrossroads2 && !purehepta)
     buildCrossroads2(c);
   
   else if(c->land == laPrairie && c->LHU.fi.walldist == 0) {
     for(int bd=0; bd<7; bd++) {
       int fval2 = createStep(c->master, bd)->fieldval;
-      int wd = currfp.gmul(fval2, currfp.inverses[c->fval-1]);
-      if(currfp.distwall[wd] == 0) {
+      int wd = currfp_gmul(fval2, currfp_inverses(c->fval-1));
+      if(currfp_distwall(wd) == 0) {
         buildBarrier(c, bd); 
         break;
         }
       }
     }
 
-  else if(c->type == 7 && c->land && hrand(I10000) < (
+  else if(ctof(c) && c->land && hrand(I10000) < (
     showoff ? (cwt.c->mpdist > 7 ? 0 : 10000) : 
     inmirror(c) ? 0 :
     isGravityLand(c->land) ? 0 :
