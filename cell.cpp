@@ -1474,14 +1474,33 @@ auto cellhooks = addHook(clearmemory, 500, clearCellMemory);
 
 int getHemisphere(cell *c, int which) {
   if(torus) return 0;
-  if(c->type != 6) {
+  if(ctof(c)) {
     int id = c->master->fiftyval;
-    int hemitable[3][12] = {
-      { 6, 3, 3, 3, 3, 3,-6,-3,-3,-3,-3,-3},
-      { 6, 3, 6, 3, 0, 0,-6,-3,-6,-3, 0, 0},
-      {-3, 0, 3, 0,-6,-6, 3, 0,-3, 0, 6, 6}
-      };
-    return hemitable[which][id];
+    if(S7 == 5) {
+      int hemitable[3][12] = {
+        { 6, 3, 3, 3, 3, 3,-6,-3,-3,-3,-3,-3},
+        { 6, 3, 6, 3, 0, 0,-6,-3,-6,-3, 0, 0},
+        {-3, 0, 3, 0,-6,-6, 3, 0,-3, 0, 6, 6}
+        };
+      return hemitable[which][id];
+      }
+    else if(S7 == 4) {
+      int hemitable[3][6] = {
+        { 2, 2, 2,-1,-1,-1},
+        { 2,-1, 2, 2,-1,-1},
+        { 2,-1,-1, 2, 2,-1},
+        };
+      return hemitable[which][id];
+      }
+    else if(S7 == 3) {
+      int hemitable[3][4] = {
+        { 2, 2,-1,-1},
+        { 2,-1, 2,-1},
+        { 2,-1,-1, 2},
+        };
+      return hemitable[which][id];
+      }
+    else return 0;
     }
   else {
     int score = 0;
