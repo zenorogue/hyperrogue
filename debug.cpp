@@ -1,16 +1,6 @@
 int steplimit = 0;
 int cstep;
 
-template<class... T>
-void limitgen(T... args) {
-  if(steplimit) {
-    cstep++;
-    printf("%6d ", cstep);
-    printf(args...);
-    if(cstep == steplimit) buggyGeneration = true;
-    }
-  }
-
 vector<cell*> buggycells;
 
 cell *pathTowards(cell *pf, cell *pt) {

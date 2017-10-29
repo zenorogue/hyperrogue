@@ -210,3 +210,6 @@ static const int FORBIDDEN = -1;
 extern eGeometry geometry;
 
 extern geometryinfo ginf[gGUARD];
+
+extern monstertype minf[motypes];
+extern itemtype iinf[ittypes];

@@ -6,54 +6,10 @@
 
 #define MIRR(x) x.mirrored
 
-int fixrot(int a) { return (a+MODFIXER)% S7; }
-int fix42(int a) { return (a+MODFIXER)% S42; }
-
-struct heptagon;
-
 struct cell;
 cell *newCell(int type, heptagon *master);
 
 // spintable functions
-
-void tsetspin(uint32_t& t, int d, int spin) {
-  t &= ~(15 << (d<<2));
-  t |= spin << (d<<2);
-  }
-
-struct heptagon {
-  // automaton state
-  hstate s : 6;
-  int dm4: 2;
-  // we are spin[i]-th neighbor of move[i]
-  uint32_t spintable;
-  int spin(int d) { return tspin(spintable, d); }
-  int mirror(int d) { return tmirror(spintable, d); }
-  void setspin(int d, int sp) { tsetspin(spintable, d, sp); }
-  // neighbors; move[0] always goes towards origin,
-  // and then we go clockwise
-  heptagon* move[MAX_EDGE];
-  // distance from the origin
-  short distance;
-  // emerald/wineyard generator
-  short emeraldval;
-  // fifty generator
-  short fiftyval;
-  // zebra generator (1B actually)
-  short zebraval;
-  // field id
-  int fieldval;
-  // evolution data
-  short rval0, rval1;
-  struct cdata *cdata;
-  // central cell
-  cell *c7;
-  // associated generator of alternate structure, for Camelot and horocycles
-  heptagon *alt;
-  // functions
-  heptagon*& modmove(int i) { return move[fixrot(i)]; }
-  unsigned char gspin(int i) { return spin(fixrot(i)); }
-  };
 
 // the automaton is used to generate each heptagon in an unique way
 // (you can see the tree obtained by changing the conditions in graph.cpp)
@@ -91,9 +47,6 @@ hstate transition(hstate s, int dir) {
     }
   return hsError;
   }
-
-// create h->move[d] if not created yet
-heptagon *createStep(heptagon *h, int d);
 
 /*
 int indent = 0;
@@ -196,10 +149,6 @@ void connectHeptagons(heptagon *h1, int d1, heptagon *h2, int d2) {
 
 int recsteps;
 
-void breakpoint() {
-//  printf("Breakpoint!\n");
-  }
-
 void addSpin(heptagon *h, int d, heptagon *from, int rot, int spin) {
   rot = fixrot(rot);
   createStep(from, rot);
@@ -214,8 +163,6 @@ void addSpin(heptagon *h, int d, heptagon *from, int rot, int spin) {
 
 extern int hrand(int);
 
-heptagon *createStep(heptagon *h, int d);
-
 // a structure used to walk on the heptagonal tesselation
 // (remembers not only the heptagon, but also direction)
 struct heptspin {
@@ -225,13 +172,8 @@ struct heptspin {
   heptspin() { mirrored = false; }
   };
 
-int lrecsteps;
-
 heptspin hsstep(const heptspin &hs, int spin) {
-  recsteps++;
-  if(recsteps % 5 == 0 && recsteps > lrecsteps) lrecsteps = recsteps, breakpoint();
   createStep(hs.h, hs.spin);
-  recsteps--;
   heptspin res;
   res.h = hs.h->move[hs.spin];
   res.mirrored = hs.mirrored ^ hs.h->mirror(hs.spin);
@@ -318,4 +260,6 @@ void hsshow(const heptspin& t) {
   printf("ORIGIN"); backtrace(t.h); printf(" (spin %d)\n", t.spin);
   }
 
-  
+// create h->move[d] if not created yet
+heptagon *createStep(heptagon *h, int d);
+

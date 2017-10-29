@@ -4,14 +4,6 @@
 eGeometry geometry, targetgeometry = gEuclid;
 extern bool targettrunc;
 
-#define euclid (ginf[geometry].cclass == 1)
-#define sphere (ginf[geometry].cclass == 2)
-#define elliptic (ginf[geometry].quotientstyle & 4)
-#define quotient (ginf[geometry].quotientstyle & 3)
-#define torus (ginf[geometry].quotientstyle & 8)
-#define doall (ginf[geometry].quotientstyle)
-#define smallbounded (sphere || quotient == 1 || torus)
-
 // for the pure heptagonal grid
 bool purehepta = false;
 

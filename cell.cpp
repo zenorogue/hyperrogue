@@ -38,62 +38,9 @@ void merge(cell *c, int d, cell *c2, int d2, bool mirrored = false) {
   tsetspin(c2->spintable, d2, d + (mirrored?8:0));
   }
 
-typedef unsigned short eucoord;
-
 struct cdata {
   int val[4];
   int bits;
-  };
-
-// list all cells in distance at most maxdist, or until when maxcount cells are reached
-
-struct celllister {
-  vector<cell*> lst;
-  vector<int> tmps;
-  vector<int> dists;
-  
-  void add(cell *c, int d) {
-    if(eq(c->aitmp, sval)) return;
-    c->aitmp = sval;
-    tmps.push_back(c->aitmp);
-    lst.push_back(c);
-    dists.push_back(d);
-    }
-  
-  ~celllister() {
-    for(int i=0; i<size(lst); i++) lst[i]->aitmp = tmps[i];
-    }
-  
-  celllister(cell *orig, int maxdist, int maxcount, cell *breakon) {
-    lst.clear();
-    tmps.clear();
-    dists.clear();
-    sval++;
-    add(orig, 0);
-    cell *last = orig;
-    for(int i=0; i<size(lst); i++) {
-      cell *c = lst[i];
-      if(maxdist) forCellCM(c2, c) {
-        add(c2, dists[i]+1);
-        if(c2 == breakon) return;
-        }
-      if(c == last) {
-        if(size(lst) >= maxcount || dists[i]+1 == maxdist) break;
-        last = lst[size(lst)-1];
-        }
-      }
-    }
-
-  void prepare() {
-    for(int i=0; i<size(lst); i++) lst[i]->aitmp = i;
-    }
-  
-  int getdist(cell *c) { return dists[c->aitmp]; }
-  
-  bool listed(cell *c) {
-    return c->aitmp >= 0 && c->aitmp < size(lst) && lst[c->aitmp] == c;
-    }
-  
   };
 
 // -- hrmap ---
@@ -116,6 +63,7 @@ struct hrmap_alternate : hrmap {
   ~hrmap_alternate() { clearfrom(origin); }
   };
 
+hrmap *newAltMap(heptagon *o) { return new hrmap_alternate(o); }
 // --- hyperbolic geometry ---
 
 struct hrmap_hyperbolic : hrmap {
@@ -546,15 +494,6 @@ struct hrmap_quotient : hrmap {
 
 cell *createMov(cell *c, int d);
 
-// similar to heptspin from heptagon.cpp
-struct cellwalker {
-  cell *c;
-  int spin;
-  bool mirrored;
-  cellwalker(cell *c, int spin, bool m=false) : c(c), spin(spin), mirrored(m) { }
-  cellwalker() { mirrored = false; }
-  };
-
 void cwspin(cellwalker& cw, int d) {
   cw.spin = (cw.spin+(MIRR(cw)?-d:d) + MODFIXER) % cw.c->type;
   }
@@ -887,9 +826,6 @@ int celldistAlt(cell *c) {
     return mi+1;
   return mi;
   }
-
-#define GRAIL_FOUND 0x4000
-#define GRAIL_RADIUS_MASK 0x3FFF
 
 int dirfromto(cell *cfrom, cell *cto) {
   for(int i=0; i<cfrom->type; i++) if(cfrom->mov[i] == cto) return i;

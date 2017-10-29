@@ -711,3 +711,7 @@ fpattern& getcurrfp() {
 }
 
 #define currfp fieldpattern::getcurrfp()
+
+int currfp_gmul(int a, int b) { return currfp.gmul(a,b); }
+int currfp_inverses(int i) { return currfp.inverses[i]; }
+int currfp_distwall(int i) { return currfp.distwall[i]; }

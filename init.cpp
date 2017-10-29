@@ -339,12 +339,9 @@ void addMessage(string s, char spamtype = 0);
 #define MAX_S3 4
 #define MAX_S84 240
 
-#ifdef ONE_CU
-#include "classes.h"
-#include "hyper.h"
+#include "compileunits.h"
 
-#else
-
+#if CU_INIT
 int fontscale = 100;
 
 #if ISANDROID
@@ -364,68 +361,6 @@ const char *loadlevel = NULL;
 #endif
 
 string s0;
-
-#include "classes.cpp"
-#include "hyper.h"
-
-#include "util.cpp"
-#include "hyperpoint.cpp"
-#include "patterns.cpp"
-#include "fieldpattern.cpp"
-#include "heptagon.cpp"
-#include "language.cpp"
-#include "cell.cpp"
-#include "flags.cpp"
-#include "yendor.cpp"
-#include "complex.cpp"
-#include "game.cpp"
-#include "orbgen.cpp"
-#include "monstergen.cpp"
-#include "barriers.cpp"
-#include "bigstuff.cpp"
-#include "landlock.cpp"
-#include "landgen.cpp"
-#include "orbs.cpp"
-#if CAP_INV
-#include "inventory.cpp"
-#else
-bool inv::on;
-#endif
-#include "system.cpp"
-#include "debug.cpp"
-#include "geometry.cpp"
-#include "polygons.cpp"
-#include "mapeditor.cpp"
-#if CAP_MODEL
-#include "netgen.cpp"
-#endif
-#if CAP_TABFONT || CAP_CREATEFONT
-#include "nofont.cpp"
-#endif
-#include "basegraph.cpp"
-#include "help.cpp"
-#include "config.cpp"
-#include "scores.cpp"
-#include "menus.cpp"
-#include "quit.cpp"
-#include "shmup.cpp"
-#if CAP_ROGUEVIZ
-#include "rogueviz.cpp"
-#endif
-#include "conformal.cpp"
-#include "rug.cpp"
-#include "control.cpp"
-#include "hud.cpp"
-#include "hypgraph.cpp"
-#include "graph.cpp"
-#include "sound.cpp"
-#include "achievement.cpp"
-#if CAP_TOUR
-#include "tour.cpp"
-#endif
-#if ISMOBILE==0
-#include <unistd.h>
-#endif
 
 bool fixseed = false;
 int startseed = 0;

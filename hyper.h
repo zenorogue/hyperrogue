@@ -1,3 +1,6 @@
+// This is the main header file of HyperRogue. Mostly everything is dumped here.
+// It is quite chaotic.
+
 // scale the Euclidean
 #define EUCSCALE 2.3
 
@@ -92,13 +95,55 @@ struct gcell {
 
 #define NODIR 8
 #define NOBARRIERS 9
+#define MODFIXER 23520
 
-struct heptagon;
-
-struct heptspin;
-
+inline void tsetspin(uint32_t& t, int d, int spin) { t &= ~(15 << (d<<2)); t |= spin << (d<<2); }
 inline int tspin(uint32_t& t, int d) { return (t >> (d<<2)) & 7; }
 inline int tmirror(uint32_t& t, int d) { return (t >> ((d<<2)+3)) & 1; }
+
+inline int fixrot(int a) { return (a+MODFIXER)% S7; }
+inline int fix42(int a) { return (a+MODFIXER)% S42; }
+
+struct cell;
+
+// automaton state
+enum hstate { hsOrigin, hsA, hsB, hsError, hsA0, hsA1, hsB0, hsB1, hsC };
+
+struct heptagon {
+  // automaton state
+  hstate s : 6;
+  int dm4: 2;
+  // we are spin[i]-th neighbor of move[i]
+  uint32_t spintable;
+  int spin(int d) { return tspin(spintable, d); }
+  int mirror(int d) { return tmirror(spintable, d); }
+  void setspin(int d, int sp) { tsetspin(spintable, d, sp); }
+  // neighbors; move[0] always goes towards origin,
+  // and then we go clockwise
+  heptagon* move[MAX_EDGE];
+  // distance from the origin
+  short distance;
+  // emerald/wineyard generator
+  short emeraldval;
+  // fifty generator
+  short fiftyval;
+  // zebra generator (1B actually)
+  short zebraval;
+  // field id
+  int fieldval;
+  // evolution data
+  short rval0, rval1;
+  struct cdata *cdata;
+  // central cell
+  cell *c7;
+  // associated generator of alternate structure, for Camelot and horocycles
+  heptagon *alt;
+  // functions
+  heptagon*& modmove(int i) { return move[fixrot(i)]; }
+  unsigned char gspin(int i) { return spin(fixrot(i)); }
+  };
+
+struct heptspin;
 
 struct cell : gcell {
   char type; // 6 for hexagons, 7 for heptagons
@@ -120,12 +165,14 @@ struct cell : gcell {
   cell *mov[MAX_EDGE]; // meaning very similar to heptagon::move
   };
 
-struct cellwalker;
-
-// automaton state
-enum hstate { hsOrigin, hsA, hsB, hsError, hsA0, hsA1, hsB0, hsB1, hsC };
-
-#define MODFIXER 23520
+// similar to heptspin from heptagon.cpp
+struct cellwalker {
+  cell *c;
+  int spin;
+  bool mirrored;
+  cellwalker(cell *c, int spin, bool m=false) : c(c), spin(spin), mirrored(m) { }
+  cellwalker() { mirrored = false; }
+  };
 
 #define BUGCOLORS 3
 
@@ -1726,7 +1773,18 @@ extern bool landUnlocked(eLand l);
 extern void describeCell(cell*);
 extern bool rlyehComplete();
 
-template<class... T> void limitgen(T... args);
+extern int steplimit, cstep;
+
+template<class... T>
+void limitgen(T... args) {
+  if(steplimit) {
+    cstep++;
+    printf("%6d ", cstep);
+    printf(args...);
+    if(cstep == steplimit) buggyGeneration = true;
+    }
+  }
+
 eLand oppositeElement(eLand l, eLand l2);
 
 extern int hardness_empty();
@@ -1807,3 +1865,232 @@ struct polytodraw {
 #endif
   };
 
+extern bool purehepta;
+extern int emeraldtable[100][7];
+
+extern void cwspin(cellwalker& cw, int d);
+extern cell *cwpeek(cellwalker cw, int dir);
+extern void cwstep(cellwalker& cw);
+extern void cwrevstep(cellwalker& cw);
+extern void cwrev(cellwalker& cw);
+
+const eLand NOWALLSEP = laNone;
+const eLand NOWALLSEP_USED = laWhirlpool;
+
+bool hasbardir(cell *c);
+
+bool buildBarrierNowall(cell *c, eLand l2, bool force = false);
+bool checkBarriersBack(cellwalker bb, int q=5, bool cross = false);
+bool checkBarriersFront(cellwalker bb, int q=5, bool cross = false);
+
+bool quickfind(eLand l);
+void beCIsland(cell *c);
+bool isOnCIsland(cell *c);
+void generateTreasureIsland(cell *c);
+bool openplains(cell *c);
+void buildBigStuff(cell *c, cell *from);
+void setLandQuotient(cell *c);
+void setLandSphere(cell *c);
+void moreBigStuff(cell *c);
+void setLandEuclid(cell *c);
+bool checkInTree(cell *c, int maxv);
+cell *findcompass(cell *c);
+int edgeDepth(cell *c);
+int compassDist(cell *c);
+
+#define HAUNTED_RADIUS getDistLimit()
+#define UNKNOWN 65535
+
+#if CAP_COMMANDLINE
+extern const char *scorefile;
+extern string levelfile;
+extern string picfile;
+extern const char *conffile;
+extern const char *musicfile;
+#endif
+
+extern string s0;
+extern int anthraxBonus;
+int celldistAlt(cell *c);
+int celldist(cell *c);
+int getHemisphere(cell *c, int which);
+
+#define euclid (ginf[geometry].cclass == 1)
+#define sphere (ginf[geometry].cclass == 2)
+#define elliptic (ginf[geometry].quotientstyle & 4)
+#define quotient (ginf[geometry].quotientstyle & 3)
+#define torus (ginf[geometry].quotientstyle & 8)
+#define doall (ginf[geometry].quotientstyle)
+#define smallbounded (sphere || quotient == 1 || torus)
+
+namespace tactic {
+  extern bool on;
+  extern bool trailer;
+  extern eLand lasttactic;
+  }
+
+namespace yendor {
+  extern bool on;
+  extern bool generating;
+  extern eLand nexttostart;
+  
+  #define YF_DEAD 1
+  #define YF_WALLS 2
+  #define YF_END 4
+  #define YF_DEAD5 8
+
+  #define YF_NEAR_IVY   16
+  #define YF_NEAR_ELEM  32
+  #define YF_NEAR_OVER  64
+  #define YF_NEAR_RED   128
+  #define YF_REPEAT     512
+  #define YF_NEAR_TENT  1024
+
+  #define YF_START_AL   2048
+  #define YF_START_CR   4096
+  #define YF_CHAOS      8192
+  #define YF_RECALL     16384
+  #define YF_NEAR_FJORD 32768
+  
+  #define YF_START_ANY  (YF_START_AL|YF_START_CR)  
+
+  struct yendorlevel {
+    eLand l;
+    int flags;
+    };
+  
+  yendorlevel& clev();
+  }
+
+namespace clearing {
+
+  struct clearingdata {
+    cell *root;
+    int dist;
+    };
+  
+  extern bool buggyplant;
+  
+  extern std::map<heptagon*, clearingdata> bpdata;
+  }
+
+namespace peace {
+  extern bool on;
+  }
+
+namespace princess {
+#define EPX 39
+#define EPY 21
+
+#define OUT_OF_PRISON 200
+#define OUT_OF_PALACE 250
+#define PRADIUS0 (141)
+#define PRADIUS1 (150)
+
+  extern bool generating;
+  extern bool gotoPrincess;
+  extern bool forceMouse;
+  extern bool challenge;
+
+  struct info {
+    int id;         // id of this info
+    cell *prison;   // where was the Princess locked
+    heptagon *alt;  // alt of the prison
+    int bestdist;   // best dist achieved
+    int bestnear;   // best dist achieved, by the player
+    int value;      // number of Rugs at 120
+    cell *princess; // where is the Princess currently
+    };
+    
+  int newInfo(cell *c);
+  }
+
+#define GRAIL_FOUND 0x4000
+#define GRAIL_RADIUS_MASK 0x3FFF
+
+int eudist(short sx, short sy);
+
+heptagon *createStep(heptagon *h, int d);
+
+cell *createMovR(cell *c, int d);
+
+bool ishept(cell *c);
+int cdist50(cell *c);
+int polarb50(cell *c);
+
+bool isGravityLand(eLand l);
+bool isWarped(eLand l);
+
+struct hrmap;
+extern hrmap *currentmap;
+extern vector<hrmap*> allmaps;
+
+// list all cells in distance at most maxdist, or until when maxcount cells are reached
+
+struct celllister {
+  vector<cell*> lst;
+  vector<int> tmps;
+  vector<int> dists;
+  
+  void add(cell *c, int d) {
+    if(eq(c->aitmp, sval)) return;
+    c->aitmp = sval;
+    tmps.push_back(c->aitmp);
+    lst.push_back(c);
+    dists.push_back(d);
+    }
+  
+  ~celllister() {
+    for(int i=0; i<size(lst); i++) lst[i]->aitmp = tmps[i];
+    }
+  
+  celllister(cell *orig, int maxdist, int maxcount, cell *breakon) {
+    lst.clear();
+    tmps.clear();
+    dists.clear();
+    sval++;
+    add(orig, 0);
+    cell *last = orig;
+    for(int i=0; i<size(lst); i++) {
+      cell *c = lst[i];
+      if(maxdist) forCellCM(c2, c) {
+        add(c2, dists[i]+1);
+        if(c2 == breakon) return;
+        }
+      if(c == last) {
+        if(size(lst) >= maxcount || dists[i]+1 == maxdist) break;
+        last = lst[size(lst)-1];
+        }
+      }
+    }
+
+  void prepare() {
+    for(int i=0; i<size(lst); i++) lst[i]->aitmp = i;
+    }
+  
+  int getdist(cell *c) { return dists[c->aitmp]; }
+  
+  bool listed(cell *c) {
+    return c->aitmp >= 0 && c->aitmp < size(lst) && lst[c->aitmp] == c;
+    }
+  
+  };
+
+typedef unsigned short eucoord;
+void decodeMaster(heptagon *h, eucoord& x, eucoord& y);
+
+hrmap *newAltMap(heptagon *o);
+
+#define currfp fieldpattern::getcurrfp()
+namespace fieldpattern {
+  struct fpattern& getcurrfp();
+  }
+
+int currfp_gmul(int a, int b);
+int currfp_inverses(int i);
+int currfp_distwall(int i);
+
+const char *dnameof(eMonster m);
+const char *dnameof(eLand l);
+const char *dnameof(eWall w);
+const char *dnameof(eItem i);

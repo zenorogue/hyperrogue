@@ -42,11 +42,6 @@ namespace yendor {
   bool won = false;
   bool easy = false;
   
-  struct yendorlevel {
-    eLand l;
-    int flags;
-    };
-  
   int challenge; // id of the challenge
   int lastchallenge;
   
@@ -54,26 +49,6 @@ namespace yendor {
   
   map<modecode_t, array<int, YENDORLEVELS>> bestscore;
 
-  #define YF_DEAD 1
-  #define YF_WALLS 2
-  #define YF_END 4
-  #define YF_DEAD5 8
-
-  #define YF_NEAR_IVY   16
-  #define YF_NEAR_ELEM  32
-  #define YF_NEAR_OVER  64
-  #define YF_NEAR_RED   128
-  #define YF_REPEAT     512
-  #define YF_NEAR_TENT  1024
-
-  #define YF_START_AL   2048
-  #define YF_START_CR   4096
-  #define YF_CHAOS      8192
-  #define YF_RECALL     16384
-  #define YF_NEAR_FJORD 32768
-  
-  #define YF_START_ANY  (YF_START_AL|YF_START_CR)
-  
   eLand nexttostart;
 
 #define LAND_YENDOR_CHAOS 41

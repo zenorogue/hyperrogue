@@ -461,14 +461,6 @@ namespace elec {
 
 namespace princess {
 
-#define EPX 39
-#define EPY 21
-
-#define OUT_OF_PRISON 200
-#define OUT_OF_PALACE 250
-#define PRADIUS0 (141)
-#define PRADIUS1 (150)
-
   bool generating = false;
   bool challenge = false;
   bool saved = false;
@@ -484,16 +476,6 @@ namespace princess {
   
   int reviveAt;
   
-  struct info {
-    int id;         // id of this info
-    cell *prison;   // where was the Princess locked
-    heptagon *alt;  // alt of the prison
-    int bestdist;   // best dist achieved
-    int bestnear;   // best dist achieved, by the player
-    int value;      // number of Rugs at 120
-    cell *princess; // where is the Princess currently
-    };
-    
   vector<info*> infos;
   
   void assign(info *i) {
@@ -747,11 +729,6 @@ namespace princess {
 
 namespace clearing {
 
-  struct clearingdata {
-    cell *root;
-    int dist;
-    };
-  
   bool buggyplant = false;
   
   std::map<heptagon*, clearingdata> bpdata;

@@ -17,6 +17,8 @@
 
 #include "init.cpp"
 
+#if CU_HYPER
+
 #if ISLINUX
 #include <sys/resource.h>
 
@@ -474,4 +476,5 @@ namespace arg {
       }
     }
   }
+#endif
 #endif
