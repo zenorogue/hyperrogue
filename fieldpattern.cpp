@@ -34,7 +34,7 @@ bool operator < (const matrix& A, const matrix& B) {
   }
 
 int btspin(int id, int d) {
-  return 7*(id/7) + (id + d) % 7;
+  return S7*(id/S7) + (id + d) % S7;
   }
 
 struct fpattern {
@@ -153,8 +153,8 @@ struct fpattern {
   vector<int> connections;
   
   vector<int> inverses;
-  vector<int> rrf; // rrf[i] equals gmul(i, 6)
-  vector<int> rpf; // rpf[i] equals gmul(i, 7)
+  vector<int> rrf; // rrf[i] equals gmul(i, S7-1)
+  vector<int> rpf; // rpf[i] equals gmul(i, S7)
   
   matrix mpow(matrix M, int N) {
     while((N&1) == 0) N >>= 1, M = mmul(M, M);
@@ -184,7 +184,7 @@ struct fpattern {
   string decodepath(int i) {
     string s;
     while(i) {
-      if(i % 7) i--, s += 'R';
+      if(i % S7) i--, s += 'R';
       else i = connections[i], s += 'P';
       }
     return s;
@@ -242,7 +242,10 @@ struct fpattern {
         R[0][1] = sn; R[1][0] = sub(0, sn);
         
         matrix Z = R;
-        for(int i=0; i<6; i++) Z = mmul(Z, R);
+        for(int i=1; i<S7; i++) {
+          if(Z == Id) goto nextcs;
+          Z = mmul(Z, R);
+          }
                 
         if(Z != Id) continue;
         if(R[0][0] == 1) continue;
@@ -257,10 +260,16 @@ struct fpattern {
           P[2][0] = sh;
           P[2][2] = ch;
           
-          matrix Z = mmul(P, R);
-          Z = mmul(Z, mmul(Z, Z));
+          matrix Z1 = mmul(P, R);
+          matrix Z = Z1;
+          for(int i=1; i<S3; i++) {
+            if(Z == Id) goto nextch;
+            Z = mmul(Z, Z1);
+            }
           if(Z == Id) return 0;
+          nextch: ;
           }
+        nextcs: ;
         }
       }
   
@@ -277,7 +286,7 @@ struct fpattern {
     
     matcode.clear(); matrices.clear();
     add(Id);
-    if(matrices.size() != 7) { printf("Error: rotation crash\n"); exit(1); }
+    if(size(matrices) != S7) { printf("Error: rotation crash #1 (%d)\n", size(matrices)); exit(1); }
     
     connections.clear();
     
@@ -289,7 +298,7 @@ struct fpattern {
       
       add(PM);
   
-      if(matrices.size() % 7) { printf("Error: rotation crash\n"); exit(1); }
+      if(size(matrices) % S7) { printf("Error: rotation crash (%d)\n", size(matrices)); exit(1); }
       
       if(!matcode.count(PM)) { printf("Error: not marked\n"); exit(1); }
   
@@ -301,12 +310,12 @@ struct fpattern {
 
     DEBB(DF_FIELD, (debugfile, "Number of heptagons: %d\n", N));
   
-    rrf.resize(N); rrf[0] = 6;
+    rrf.resize(N); rrf[0] = S7-1;
     for(int i=0; i<N; i++) 
       rrf[btspin(i,1)] = btspin(rrf[i], 1),
       rrf[connections[i]] = connections[rrf[i]];
   
-    rpf.resize(N); rpf[0] = 7;
+    rpf.resize(N); rpf[0] = S7;
     for(int i=0; i<N; i++) 
       rpf[btspin(i,1)] = btspin(rpf[i], 1),
       rpf[connections[i]] = connections[rpf[i]];
@@ -323,7 +332,7 @@ struct fpattern {
       
     if(0) for(int i=0; i<size(matrices); i++) {
       printf("%5d/%4d", connections[i], inverses[i]);
-      if(i%7 == 6) printf("\n");       
+      if(i%S7 == S7-1) printf("\n");       
       }
     
     DEBB(DF_FIELD, (debugfile, "Built.\n"));
@@ -371,7 +380,7 @@ struct fpattern {
       if(dists[at] <= i) continue;
       maxd = i;
       dists[at] = i;
-      for(int q=0; q<7; q++) {
+      for(int q=0; q<S7; q++) {
         dists[at] = i;
         if(purehepta)
           indist[i+1].push_back(connections[at]);
@@ -409,17 +418,17 @@ struct fpattern {
 
     otherpole = 0;
     
-    for(int i=0; i<N; i+=7) {
+    for(int i=0; i<N; i+=S7) {
       int mp = 0;
-      for(int q=0; q<7; q++) if(disthep[connections[i+q]] < disthep[i]) mp++;
-      if(mp == 7) {
+      for(int q=0; q<S7; q++) if(disthep[connections[i+q]] < disthep[i]) mp++;
+      if(mp == S7) {
         bool eq = true;
-        for(int q=0; q<7; q++) if(disthep[connections[i+q]] != disthep[connections[i]]) eq = false;
+        for(int q=0; q<S7; q++) if(disthep[connections[i+q]] != disthep[connections[i]]) eq = false;
         if(eq) {
-          // for(int q=0; q<7; q++) printf("%3d", disthep[connections[i+q]]);
+          // for(int q=0; q<S7; q++) printf("%3d", disthep[connections[i+q]]);
           // printf(" (%2d) at %d\n", disthep[i], i);
           if(disthep[i] > disthep[otherpole]) otherpole = i;
-          // for(int r=0; r<7; r++) {
+          // for(int r=0; r<S7; r++) {
           // printf("Matrix: "); for(int a=0; a<3; a++) for(int b=0; b<3; b++)
           //    printf("%4d", matrices[i+r][a][b]); printf("\n");
           //  }
@@ -679,6 +688,26 @@ void info() {
   printf("cases found = %d (%d hard)\n", cases, hard);
   }
 
+fpattern& getcurrfp() {
+  if(S7 == 8 && S3 == 3) {
+    static fpattern fp(17);
+    return fp;
+    }
+  if(S7 == 5 && S3 == 4) {
+    static fpattern fp(11);
+    return fp;
+    }
+  if(S7 == 6 && S3 == 4) {
+    static fpattern fp(13);
+    return fp;
+    }
+  if(S7 == 7 && S3 == 4) {
+    static fpattern fp(13);
+    return fp;
+    }
+  return fp43;
+  }
+
 }
 
-using fieldpattern::fp43;
+#define currfp fieldpattern::getcurrfp()

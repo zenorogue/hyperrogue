@@ -236,7 +236,7 @@ else if(args()[0] == '-' && args()[1] == x && args()[2] == '0') { showstartmenu 
     }
   else if(argis("-qs")) {
     autocheat = true;
-    shift(); fp43.qpaths.push_back(args());
+    shift(); currfp.qpaths.push_back(args());
     }
   else if(argis("-fix")) {
     fixseed = true; autocheat = true;
@@ -255,7 +255,7 @@ else if(args()[0] == '-' && args()[1] == x && args()[2] == '0') { showstartmenu 
       &p, &quotientspace::rvadd, &quotientspace::rvdir
       );
     autocheat = true;
-    fp43.init(p); 
+    currfp.init(p); 
     }
   else if(argis("-tpar")) { 
     shift(); sscanf(args(), "%d,%d,%d", 
@@ -266,14 +266,14 @@ else if(args()[0] == '-' && args()[1] == x && args()[2] == '0') { showstartmenu 
     }
   else if(argis("-cs")) {
     shift(); 
-    fieldpattern::matrix M = fp43.strtomatrix(args());
-    fieldpattern::subpathid = fp43.matcode[M];
-    fieldpattern::subpathorder = fp43.order(M);
+    fieldpattern::matrix M = currfp.strtomatrix(args());
+    fieldpattern::subpathid = currfp.matcode[M];
+    fieldpattern::subpathorder = currfp.order(M);
     autocheat = true;
     }
   else if(argis("-csp")) {
     autocheat = true;
-    fp43.findsubpath();
+    currfp.findsubpath();
     }
   else if(argis("-fi")) {
     fieldpattern::info();

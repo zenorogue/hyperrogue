@@ -7,6 +7,8 @@
 // rules for the emeraldvalues of heptagons.
 int emerald_heptagon(int parent, int dir) {
 
+  if(S7 == 8 && dir > 3) dir--;
+
   // no emeraldgen here
   if(parent == 0) return 0;
 
@@ -357,6 +359,7 @@ int emerald_heptagon(int parent, int dir) {
   
   #undef RULE
 
+  if(weirdhyperbolic) return 0;
   printf("HEPTAGONAL RULE MISSING for (%d,%d)\n", parent,dir);
   exit(1);
   }
@@ -408,7 +411,8 @@ int emerald_hexagon(int a, int b, int c) {
   if(a==34 && b == 35 && c== 41) return 59;
   if(a==34 && b == 40 && c== 35) return 58;
   if(a==34 && b == 41 && c== 35) return 25;
-  printf("HEXAGONAL RULE MISSING for (%d,%d,%d)\n", a,b,c);
+  if(!weirdhyperbolic)
+    printf("HEXAGONAL RULE MISSING for (%d,%d,%d)\n", a,b,c);
   return 0;
   // exit(1);
   }
@@ -1005,9 +1009,16 @@ RULE50(0x1df, 0x0c6, 0x1ae, 0x0ff, 0x0df, 0x1b7, 0x0f7, 0x1a6)
 
 #undef RULE50
 
+int firstfiftyval(int d) {
+  if(S7 == 8 && d > 3) d--;
+  return fiftytable[0][d];
+  }
+
 int nextfiftyval(int par, int gpar, int d) {
+  if(S7 == 8 && d > 3) d--;
   for(int i=0; i<7; i++) if(fiftytable[par][i] == gpar)
     return fiftytable[par][(i+d)%7];
+  if(weirdhyperbolic) return 0;
   printf("fifty pattern error!\n");
   exit(1);
   }
@@ -1052,6 +1063,7 @@ int zebratable6[28][3] = {
 
 // rules for the emeraldvalues of heptagons.
 int zebra_heptagon(int parent, int dir) {
+  if(S7 == 8 && dir > 3) dir--;
   return zebratable[parent/10-4][(70+dir-(parent%10))%7];
   }
 

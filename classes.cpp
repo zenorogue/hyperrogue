@@ -1866,14 +1866,16 @@ eLand land_sph[LAND_SPH] = {
   laWildWest, laPalace, laBull, laPrairie, laCA
   };
 
-#define LAND_OCT 25
+#define LAND_OCT 33
 eLand land_oct[LAND_OCT] = {
   laIce, laDesert, laCaves, laJungle, laAlchemist, 
   laGraveyard, laRlyeh, laHell, laCocytus, laMotion, 
   laDryForest, laDeadCaves, laRedRock, laMinefield, laLivefjord,
   laStorms, laOvergrown, laRose, laKraken, laBurial,
   laTrollheim, laBull, laHunting,
-  laCaribbean, laCamelot
+  laCaribbean, laCamelot, laPalace, laMirrorOld,
+  laVolcano, laBlizzard, laTerracotta,
+  laWineyard, laPower, laEmerald
   };
 
 

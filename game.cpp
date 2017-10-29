@@ -3605,9 +3605,10 @@ int determinizeBullPush(cellwalker bull) {
   int dirs[2], positive;
   cwstep(bull);
   cell *c2 = bull.c;
-  if(c2->type == 6) return 1; // irrelevant
-  cwspin(bull, 3); dirs[0] = positive = bull.spin;
-  cwspin(bull, -6); dirs[1] = bull.spin;
+  if(!(c2->type & 1)) return 1; // irrelevant
+  int d = c2->type / 2;
+  cwspin(bull, d); dirs[0] = positive = bull.spin;
+  cwspin(bull, -2*d); dirs[1] = bull.spin;
   determinizeBull(c2, dirs, nc);
   if(dirs[0] == positive) return -1;
   return 1;
@@ -3660,11 +3661,11 @@ template<class T>
 cell *determinePush(cellwalker who, cell *c2, int subdir, T valid) {
   cellwalker push = who;
   cwstep(push);
-  int pd = push.c->type == 8 ? 4 : 3;
+  int pd = push.c->type/2;
   cwspin(push, pd * -subdir);
   cwstep(push);
   if(valid(push.c)) return push.c;
-  if(c2->type == 7) {
+  if(c2->type&1) {
     cwstep(push);
     cwspin(push, 1 * -subdir);
     cwstep(push);

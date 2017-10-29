@@ -1124,20 +1124,20 @@ namespace mirror {
         }
       return;
       }
-    for(int i=0; i<6; i++) {
+    for(int i=0; i<S6; i++) {
       cwstep(cw);
-      if(cw.c->type == 6) {
+      if(!ctof(cw.c)) {
         cwspin(cw, 2);
         cwstep(cw);
-        cwspin(cw, 4-i);
+        cwspin(cw, S6-2-i);
         createMirror(cw, cpid);
-        cwspin(cw, 6-4+i);
+        cwspin(cw, 2+i);
         cwstep(cw);
-        cwspin(cw, 2);
+        cwspin(cw, S6-4);
         cwstep(cw);
         cwspin(cw, 2-i);
         createMirror(cw, cpid);
-        cwspin(cw, 6-2+i);
+        cwspin(cw, S6-2+i);
         cwstep(cw);
         cwspin(cw, 2);
         }
@@ -2066,6 +2066,7 @@ void livecaves() {
         else if(w == waGargoyle) c->aitmp--;
         else if(w == waGargoyleFloor) c->aitmp--;
         else if(w == waGargoyleBridge) c->aitmp--;
+        else if(w == waStone) ;
         else if(w == waDeadTroll) c->aitmp -= 5;
         else if(w == waDeadTroll2) c->aitmp -= 3;
         else if(w == waPetrified || w == waPetrifiedBridge) c->aitmp -= 2;
@@ -2703,9 +2704,9 @@ namespace prairie {
       }
     else {
       if(!from) {
-        for(int i=0; i<size(fp43.matrices); i++)
-          if(fp43.distflower[i] == 0)
-            c->fval = fp43.inverses[i]+1;
+        for(int i=0; i<size(currfp.matrices); i++)
+          if(currfp.distflower[i] == 0)
+            c->fval = currfp.inverses[i]+1;
         }
       else if(from && from->land == laPrairie && from->fval)
         c->fval = from->fval;
@@ -2729,15 +2730,15 @@ namespace prairie {
           }
         }
       pair<int,bool> fv = fieldpattern::fieldval(c);
-      fv = fp43.gmul(fv, fp43.inverses[c->fval-1]);
+      fv = currfp.gmul(fv, fp43.inverses[c->fval-1]);
       
-      rd = fp43.getdist(fv, fp43.distriver);
-      int rl = fp43.getdist(fv, fp43.distriverleft);
-      int rr = fp43.getdist(fv, fp43.distriverright);
+      rd = currfp.getdist(fv, fp43.distriver);
+      int rl = currfp.getdist(fv, fp43.distriverleft);
+      int rr = currfp.getdist(fv, fp43.distriverright);
 
-      c->LHU.fi.flowerdist = fp43.getdist(fv, fp43.distflower);
-      c->LHU.fi.walldist   = fp43.getdist(fv, fp43.distwall);
-      c->LHU.fi.walldist2  = fp43.getdist(fv, fp43.distwall2);
+      c->LHU.fi.flowerdist = currfp.getdist(fv, fp43.distflower);
+      c->LHU.fi.walldist   = currfp.getdist(fv, fp43.distwall);
+      c->LHU.fi.walldist2  = currfp.getdist(fv, fp43.distwall2);
 
       c->LHU.fi.rval = 0;
       if(rd <= 7 && rl < rr) 
@@ -2751,7 +2752,7 @@ namespace prairie {
     if(c->LHU.fi.walldist == 0) c->wall = waBarrier;
 
     if(0) if(c->type == 7) for(int i=0; i<7; i++) {
-      eItem m = fp43.markers[fieldpattern::btspin(c->master->fieldval,i)];
+      eItem m = currfp.markers[fieldpattern::btspin(c->master->fieldval,i)];
       if(m) {
         if(c->item) c->item = itBuggy2;
         else c->item = m, c->mondir = i;
@@ -3054,12 +3055,15 @@ namespace windmap {
     if(N == 18920) precomp = windcodes18920;
     if(N == 5676) precomp = windcodes5676;
     
-    if(precomp && size(fp43.matrices)) {
-      int randval = hrand(size(fp43.matrices));
+    if(precomp && size(currfp.matrices)) {
+      int randval = hrand(size(currfp.matrices));
       for(int i=0; i<N; i++)
         windcodes[i] = precomp[getid[fieldpattern::fieldval_uniq_rand(samples[i], randval)]-1];
       return;
       }
+    
+    int tries = 0;
+    tryagain:
 
     for(int i=0; i<N; i++) windcodes[i] = hrand(256);
     
@@ -3069,7 +3073,7 @@ namespace windmap {
     random_shuffle(tocheck.begin(), tocheck.end());    
     
     for(int a=0; a<size(tocheck); a++) {
-      if(a >= 200*N) break;
+      if(a >= 200*N) { printf("does not converge\n"); break; }
       int bestval = 1000000000, best = 0;
       int i = tocheck[a];
       for(int k=0; k<256; k++) {
@@ -3089,7 +3093,19 @@ namespace windmap {
       inqueue[i] = false;
       windcodes[i] = best;
       }
-    if(false) {
+    
+    int ingroup[4];
+    for(int u=0; u<4; u++) ingroup[u] = 0;
+    for(int i=0; i<N; i++) ingroup[windcodes[i] >> 6]++;
+    for(int u=0; u<4; u++) if(!ingroup[u]) {
+      tries++;
+      if(tries < 5) goto tryagain;
+      }
+    if(tries >= 5) {
+      addMessage("Failed to generate an interesting wind/lava pattern.");
+      }
+    
+    if(true) {
       printf("tocheck size = %d\n", size(tocheck));
       printf("if(N == %d) {\n", N);
       printf("  windcodes = {");
@@ -3101,7 +3117,6 @@ namespace windmap {
     }
   
   int at(cell *c) {
-    if(weirdhyperbolic) return ((size_t)c) % 255;
     return windmap::windcodes[windmap::getId(c)];
     }
 

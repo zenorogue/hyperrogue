@@ -4,12 +4,12 @@
 // heptagon here refers to underlying heptagonal tesselation
 // (which you can see by changing the conditions in graph.cpp)
 
-#define MIRR(x) x.mirrored
-
 // automaton state
 enum hstate { hsOrigin, hsA, hsB, hsError, hsA0, hsA1, hsB0, hsB1, hsC };
 
 #define MODFIXER 23520
+
+#define MIRR(x) x.mirrored
 
 int fixrot(int a) { return (a+MODFIXER)% S7; }
 int fix42(int a) { return (a+MODFIXER)% S42; }
@@ -133,15 +133,13 @@ heptagon *buildHeptagon(heptagon *parent, int d, hstate s, int pard = 0, int fix
   if(parent->c7) {
     h->c7 = newCell(S7, h);
     h->rval0 = h->rval1 = 0; h->cdata = NULL;
-    if(!weirdhyperbolic) {
-      h->emeraldval = emerald_heptagon(parent->emeraldval, d);
-      h->zebraval = zebra_heptagon(parent->zebraval, d);
-      h->fieldval = fp43.connections[fieldpattern::btspin(parent->fieldval, d)];
-      if(parent->s == hsOrigin)
-        h->fiftyval = fiftytable[0][d];
-      else
-        h->fiftyval = nextfiftyval(parent->fiftyval, parent->move[0]->fiftyval, d);
-      }
+    h->emeraldval = emerald_heptagon(parent->emeraldval, d);
+    h->zebraval = zebra_heptagon(parent->zebraval, d);
+    h->fieldval = currfp.connections[fieldpattern::btspin(parent->fieldval, d)];
+    if(parent->s == hsOrigin)
+      h->fiftyval = firstfiftyval(d);
+    else
+      h->fiftyval = nextfiftyval(parent->fiftyval, parent->move[0]->fiftyval, d);
     }
   else {
     h->c7 = NULL;

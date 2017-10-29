@@ -650,7 +650,7 @@ void showPickGeometry() {
   if(tq & qTORUS) worldsize = torusconfig::qty;
   if(tq & qZEBRA) worldsize = targettrunc ? 12 : 40;
   if(tq & qFIELD) {
-    worldsize = size(fp43.matrices) / ts;
+    worldsize = size(currfp.matrices) / ts;
     if(!targettrunc) worldsize = (10*worldsize) / 3;
     }
 

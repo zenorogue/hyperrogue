@@ -68,7 +68,6 @@ movedir vectodir(const hyperpoint& P) {
       binv = dirdist[i];
       res.d = i;
       res.subdir = dirdist[(i+1)%cwt.c->type] < dirdist[(i+cwt.c->type-1)%cwt.c->type] ? 1 : -1;
-      if(sphere) res.subdir = -res.subdir;
       }
     }
   
@@ -117,8 +116,6 @@ void calcMousedest() {
     if(cwt.mirrored) 
       mousedest.d = fixdir(-mousedest.d, cwt.c), 
       mousedest.subdir = -mousedest.subdir;
-    
-    if(sphere) mousedest.subdir = -mousedest.subdir;
     }
   
   if(vid.revcontrol == true) { mouseh[0] = -mouseh[0]; mouseh[1] = -mouseh[1]; }

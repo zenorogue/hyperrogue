@@ -487,7 +487,7 @@ struct hrmap_quotient : hrmap {
   hrmap_quotient() {
   
     if(quotient == 2) {
-      connections = fp43.connections;
+      connections = currfp.connections;
       }
     else {
       heptspin hs; hs.h = base.origin; hs.spin = 0;
@@ -715,7 +715,7 @@ void initcells() {
   
   allmaps.push_back(currentmap);
 
-  if(S7 <= 7 && S6 <= 6) windmap::create();  
+  windmap::create();  
   
   // origin->emeraldval = 
   }
@@ -824,8 +824,8 @@ bool ishex1(cell *c) {
 
 int emeraldval(cell *c) {
   if(euclid) return eupattern(c);
-  if(sphere || weirdhyperbolic) return 0;
-  if(c->type == 7)
+  if(sphere) return 0;
+  if(ctof(c))
     return c->master->emeraldval >> 3;
   else {
     return emerald_hexagon(
@@ -1045,8 +1045,8 @@ int fiftyval049(cell *c) {
 // zebraval
 
 int zebra40(cell *c) {
-  if(c->type != 6) return (c->master->zebraval/10);
-  else if(sphere || S7>7 || S6>6) return 0;
+  if(ctof(c)) return (c->master->zebraval/10);
+  else if(sphere) return 0;
   else if(euclid) return eupattern(c);
   else {
     int ii[3], z;
@@ -1403,7 +1403,7 @@ cell *heptatdir(cell *c, int d) {
 namespace fieldpattern {
 
 pair<int, bool> fieldval(cell *c) {
-  if(c->type == 7) return make_pair(c->master->fieldval, false);
+  if(ctof(c)) return make_pair(c->master->fieldval, false);
   else return make_pair(btspin(c->master->fieldval, c->spin(0)), true);
   }
 
@@ -1423,10 +1423,10 @@ int fieldval_uniq(cell *c) {
     if(i<0) i += torusconfig::qty;
     return i;
     }
-  if(ctof(c)) return c->master->fieldval/7;
+  if(ctof(c)) return c->master->fieldval/S7;
   else {
     int z = 0;
-    for(int u=0; u<6; u+=2) 
+    for(int u=0; u<S6; u+=2) 
       z = max(z, btspin(createMov(c, u)->master->fieldval, c->spin(u)));
     return -1-z;
     }
@@ -1436,28 +1436,32 @@ int fieldval_uniq_rand(cell *c, int randval) {
   if(sphere || torus || euclid) 
     // we do not care in these cases
     return fieldval_uniq(c);
-  if(c->type != 6) return fp43.gmul(c->master->fieldval, randval)/7;
+  if(ctof(c)) return currfp.gmul(c->master->fieldval, randval)/7;
   else {
     int z = 0;
     for(int u=0; u<6; u+=2) 
-      z = max(z, btspin(fp43.gmul(createMov(c, u)->master->fieldval, randval), c->spin(u)));
+      z = max(z, btspin(currfp.gmul(createMov(c, u)->master->fieldval, randval), c->spin(u)));
     return -1-z;
     }
   }
 
-int subpathid = fp43.matcode[fp43.strtomatrix("RRRPRRRRRPRRRP")];
-int subpathorder = fp43.order(fp43.matrices[subpathid]);
+int subpathid = currfp.matcode[currfp.strtomatrix("RRRPRRRRRPRRRP")];
+int subpathorder = currfp.order(currfp.matrices[subpathid]);
 
 pair<int, int> subval(cell *c, int _subpathid = subpathid, int _subpathorder = subpathorder) {
-  if(c->type == 6)
-    return min(min(subval(createMov(c, 0)),subval(createMov(c, 2))), subval(createMov(c, 4)));
+  if(!ctof(c)) {
+    auto m = subval(createMov(c, 0));
+    for(int u=2; u<S6; u+=2)
+      m = min(m, subval(createMov(c, u)));
+    return m;
+    }
   else {
     pair<int, int> pbest, pcur;
     pcur.first = c->master->fieldval;
     pcur.second = 0;
     pbest = pcur;
     for(int i=0; i<_subpathorder; i++) {
-      pcur.first = fp43.gmul(pcur.first, _subpathid);
+      pcur.first = currfp.gmul(pcur.first, _subpathid);
       pcur.second++;
       if(pcur < pbest) pbest = pcur;
       }
@@ -1485,7 +1489,7 @@ int celldistance(cell *c1, cell *c2) {
     }
   
   if(quotient == 2)
-    return fp43.getdist(fieldpattern::fieldval(c1), fieldpattern::fieldval(c2));
+    return currfp.getdist(fieldpattern::fieldval(c1), fieldpattern::fieldval(c2));
 
   int d1 = celldist(c1), d2 = celldist(c2);
 

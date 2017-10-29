@@ -2176,6 +2176,10 @@ void drawTowerFloor(const transmatrix& V, cell *c, int col, cellfunction *cf = c
 void drawZebraFloor(const transmatrix& V, cell *c, int col) {
 
   if(euclid) { qfloor(c, V, shTower[10], col); return; }
+  if(weirdhyperbolic) {
+    int ct6 = ctof(c);
+    qfloor(c, V, PLAINFLOOR, col); return;
+    }
   
   int i = zebra40(c);
   i &= ~3;
@@ -5309,7 +5313,7 @@ auto graphcm = addHook(clearmemory, 0, [] () {
 
 void resetGeometry() {
   precalc();
-  fp43.analyze();
+  currfp.analyze();
 #if CAP_GL
   resetGL();
 #endif

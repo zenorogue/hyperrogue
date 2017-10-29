@@ -313,7 +313,8 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           }
         else {
           int v = emeraldval(c);
-          if((v&3) >= 2) 
+          if(v == 0) c->wall = waStone;
+          else if((v&3) >= 2) 
             c->wall = waCavewall;
           else c->wall = waCavefloor;
           }
@@ -373,19 +374,22 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           if(y0 == 3 || y0 == 4) v=24; else v=0;
           }
         else v = emeraldval(c);
-        v &= ~3;
-        if((v == 24 || v == 32 || v == 56))
-          c->wall = waEternalFire;
-        else if(hrand(100) < 10) {
-          c->wall = waGlass;
-          eItem protectedItems[18] = {
-            itPower, itPower, itPower, itPower, itPower, itPower,
-            itOrbLightning, itOrbLightning, itOrbThorns, itOrbThorns,
-            itOrbInvis, itOrbInvis,
-            itOrbShield, itOrbTeleport, itOrbPsi,
-            itOrbDragon, itOrbIllusion, itOrbTime
-            };
-          c->item = protectedItems[hrand(18)];
+        if(v == 0) c->wall = waStone;
+        else {
+          v &= ~3;
+          if((v == 24 || v == 32 || v == 56))
+            c->wall = waEternalFire;
+          else if(hrand(100) < 10) {
+            c->wall = waGlass;
+            eItem protectedItems[18] = {
+              itPower, itPower, itPower, itPower, itPower, itPower,
+              itOrbLightning, itOrbLightning, itOrbThorns, itOrbThorns,
+              itOrbInvis, itOrbInvis,
+              itOrbShield, itOrbTeleport, itOrbPsi,
+              itOrbDragon, itOrbIllusion, itOrbTime
+              };
+            c->item = protectedItems[hrand(18)];
+            }
           }
         }
       // seal entrances to the Land of Power.
@@ -411,7 +415,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
             itOrbFlash, itOrbSpeed, itOrbFire, itOrbWinter, itOrbAether, itOrbLife};
           c->item = powerorbs[hrand(6)];
           }
-        else if(c->type == 6 && hrand(5000) < 10) 
+        else if(!ctof(c) && hrand(5000) < 10) 
           c->wall = hrand(2) ? waMirror : waCloud;
         else if(hrand(1000) < 10 + (items[itPower] ? 10:0) + (items[itPower] + yendor::hardness()))
           c->monst = eMonster(moWitch + hrand(NUMWITCH));
@@ -449,16 +453,19 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           }
         else {
           int v = emeraldval(c);
-          int w = v / 4;
-          if(randomPatternsMode) c->wall = RANDPAT ? waVinePlant : waNone;
-          else if(w == 9 || w == 10 || w == 7 || w == 8) {
-            c->wall = waVinePlant;
+          if(v == 0) c->wall = waStone;
+          else {
+            int w = v / 4;
+            if(randomPatternsMode) c->wall = RANDPAT ? waVinePlant : waNone;
+            else if(w == 9 || w == 10 || w == 7 || w == 8) {
+              c->wall = waVinePlant;
+              }
+            else if(v == 24 || v == 58 || v == 26 || v == 56)
+              c->wall = waVineHalfA;
+            else if(v == 25 || v == 59 || v == 27 || v == 57)
+              c->wall = waVineHalfB;
+            else c->wall = waNone;
             }
-          else if(v == 24 || v == 58 || v == 26 || v == 56)
-            c->wall = waVineHalfA;
-          else if(v == 25 || v == 59 || v == 27 || v == 57)
-            c->wall = waVineHalfB;
-          else c->wall = waNone;
           }
         }
       if(d == 7 && c->wall == waVinePlant && hrand(100) < (randomPatternsMode ? 2 : 10) && !peace::on)
@@ -1841,11 +1848,11 @@ void giantLandSwitch(cell *c, int d, cell *from) {
       ONEMPTY {
         if(purehepta && c->land == laCrossroads5 && hrand(100) < 60)
           c->wall = waBarrier;
-        else if(c->type == 6 && !inv::on && items[itShard] >= 10 && hrand(8000) < 120*orbcrossfun(items[itShard]))
+        else if(!ctof(c) && !inv::on && items[itShard] >= 10 && hrand(8000) < 120*orbcrossfun(items[itShard]))
           c->wall = hrand(2) ? waMirror : waCloud;
-        else if(c->type == 6 && hyperstonesUnlocked() && hrand(8000) < 100)
+        else if(!ctof(c) && hyperstonesUnlocked() && hrand(8000) < 100)
           c->wall = hrand(2) ? waMirror : waCloud;
-        else if(c->type == 6 && tactic::on && isCrossroads(tactic::lasttactic) && hrand(8000) < 120)
+        else if(!ctof(c) && tactic::on && isCrossroads(tactic::lasttactic) && hrand(8000) < 120)
           c->wall = hrand(2) ? waMirror : waCloud;
         else if(c->land == laCrossroads4 && hrand(24000) < 10 && tactic::on)
           c->wall = waRose;

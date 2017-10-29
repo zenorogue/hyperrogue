@@ -1752,22 +1752,22 @@ namespace mapeditor {
   int generateCanvas(cell *c) {
     if(whichCanvas == 'C') {
       using namespace fieldpattern;
-      int z = fp43.getdist(fieldval(c), make_pair(0,false));
-      if(z < fp43.circrad) return 0x00C000;
-      int z2 = fp43.getdist(fieldval(c), make_pair(fp43.otherpole,false));
-      if(z2 < fp43.disthep[fp43.otherpole] - fp43.circrad)
+      int z = currfp.getdist(fieldval(c), make_pair(0,false));
+      if(z < currfp.circrad) return 0x00C000;
+      int z2 = currfp.getdist(fieldval(c), make_pair(fp43.otherpole,false));
+      if(z2 < currfp.disthep[fp43.otherpole] - fp43.circrad)
         return 0x3000;
       return 0x6000;
       }
     if(whichCanvas == 'D') {
       using namespace fieldpattern;
-      int z = fp43.getdist(fieldval(c), make_pair(0,false));
-      return 255 * (fp43.maxdist+1-z) / fp43.maxdist;
+      int z = currfp.getdist(fieldval(c), make_pair(0,false));
+      return 255 * (currfp.maxdist+1-z) / fp43.maxdist;
       }
     if(whichCanvas == 'N') {
       using namespace fieldpattern;
-      int z = fp43.getdist(fieldval(c), make_pair(0,false));
-      int z2 = fp43.getdist(fieldval(c), make_pair(fp43.otherpole,false));
+      int z = currfp.getdist(fieldval(c), make_pair(0,false));
+      int z2 = currfp.getdist(fieldval(c), make_pair(fp43.otherpole,false));
       if(z < z2) return 0x00C000;
       if(z > z2) return 0xC00000;
       return 0xCCCC00;

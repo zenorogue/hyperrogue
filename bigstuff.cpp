@@ -915,8 +915,8 @@ void buildBigStuff(cell *c, cell *from) {
   else if(c->land == laPrairie && c->LHU.fi.walldist == 0) {
     for(int bd=0; bd<7; bd++) {
       int fval2 = createStep(c->master, bd)->fieldval;
-      int wd = fp43.gmul(fval2, fp43.inverses[c->fval-1]);
-      if(fp43.distwall[wd] == 0) {
+      int wd = currfp.gmul(fval2, currfp.inverses[c->fval-1]);
+      if(currfp.distwall[wd] == 0) {
         buildBarrier(c, bd); 
         break;
         }
