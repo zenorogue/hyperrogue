@@ -970,7 +970,7 @@ void buildpolys() {
   for(int t=0; t<=6; t++) hpcpush(ddi(S7 + t*S14, floorrad0*SHADMUL) * C0);
 
   bshape(shFloorShadow[1], PPR_FLOOR);
-  for(int t=0; t<=S7; t++) hpcpush(ddi(t*12, floorrad1*SHADMUL) * C0);
+  for(int t=0; t<=S7; t++) hpcpush(ddi(t*S12 + td, floorrad1*SHADMUL) * C0);
   
   // sidewalls for the 3D mode
   for(int k=0; k<SIDEPARS; k++) {
@@ -1078,10 +1078,10 @@ void buildpolys() {
   // walls etc
   
   bshape(shGiantStar[1], PPR_GFLOORa);
-  for(int t=0; t<=S7; t++) hpcpush(ddi(t*36, -shexf*2.4) * C0);
+  for(int t=0; t<=S7; t++) hpcpush(ddi(t*S36, -shexf*2.4) * C0);
 
   bshape(shGiantStar[0], PPR_GFLOORa);
-  for(int t=0; t<=6; t++) {
+  for(int t=0; t<=S6; t++) {
     hpcpush(ddi(t*S14, -shexf*2.4) * C0);
     hpcpush(ddi(t*S14+S7, shexf*1.5) * C0);
     }
@@ -1112,8 +1112,8 @@ void buildpolys() {
     for(int t=0; t<=S7; t++) hpcpush(ddi(t*S36+td, shexf*fac94) * C0);
 
   bshape(shCross, PPR_WALL);
-  for(int i=0; i<=S84; i+=S7)
-    hpcpush(ddi(i, shexf * (i%3 ? 0.8 : 0.3)) * C0);
+  for(int i=0; i<=84; i+=7)
+    hpcpush(spin(2*M_PI*i/84) * xpush(shexf * (i%3 ? 0.8 : 0.3)) * C0);
 
 // items
   
@@ -1134,20 +1134,20 @@ void buildpolys() {
     for(int t=0; t<=S7; t++) hpcpush(ddi(t*S36, shexf*.5) * C0);
 
   bshape(shStar, PPR_ITEM);
-  for(int t=0; t<S84; t+=6) {
+  for(int t=0; t<S84; t+=S6) {
     hpcpush(ddi(t,   shexf*.2) * C0);
     hpcpush(ddi(t+3,   shexf*.6) * C0);
     }
 
   bshape(shDaisy, PPR_ITEM);
-  for(int t=0; t<=6; t++) {
+  for(int t=0; t<=S6; t++) {
     hpcpush(ddi(t*S14, shexf*.8*3/4) * C0);
     hpcpush(ddi(t*S14+S7, shexf*-.5*3/4) * C0);
     }
   hpcpush(ddi(0, shexf*.6) * C0);
 
   bshape(shTriangle, PPR_ITEM);
-  for(int t=0; t<=4; t++) {
+  for(int t=0; t<=S3; t++) {
     hpcpush(ddi(t*S28, shexf*.5) * C0);
     }
   
@@ -1157,7 +1157,7 @@ void buildpolys() {
   else if(purehepta && S6 == 8) disksize *= 1.5;
 
   bshape(shDisk, PPR_ITEM);
-  for(int i=0; i<=S84; i+=3)
+  for(int i=0; i<=S84; i+=S3)
     hpcpush(ddi(i, disksize * .2) * C0);
 
   bshape(shDiskT, PPR_ITEM);
@@ -1172,42 +1172,42 @@ void buildpolys() {
     }
 
   bshape(shDiskM, PPR_ITEM);
-  for(int i=0; i<=S84; i+=3) {
+  for(int i=0; i<=S84; i+=S3) {
     hpcpush(ddi(i, disksize * .1) * C0);
     }
 
   bshape(shDiskSq, PPR_ITEM);
-  for(int i=0; i<=S84; i+=21) {
+  for(int i=0; i<=S84; i+=S21) {
     hpcpush(ddi(i, disksize * .15) * C0);
     }
 
   bshape(shEgg, PPR_ITEM);
-  for(int i=0; i<=S84; i+=3)
+  for(int i=0; i<=S84; i+=S3)
     hpcpush(hpxy(sin(i*2*M_PI/S84)*.15, cos(i*2*M_PI/S84)*.11));
   
   bshape(shRing, PPR_ITEM);
-  for(int i=0; i<=S84; i+=3)
+  for(int i=0; i<=S84; i+=S3)
     hpcpush(ddi(i, disksize * .25) * C0);
   for(int i=S84; i>=0; i--)
     hpcpush(ddi(i, disksize * .30) * C0);
   hpcpush(ddi(0, disksize * .25) * C0);
   
   bshape(shSpikedRing, PPR_ITEM);
-  for(int i=0; i<=S84; i+=3)
+  for(int i=0; i<=S84; i+=S3)
     hpcpush(ddi(i, disksize * .25) * C0);
   for(int i=S84; i>=0; i--)
     hpcpush(ddi(i, disksize * (i&1?.35:.30)) * C0);
   hpcpush(ddi(0, disksize * .25) * C0);
   
   bshape(shTargetRing, PPR_ITEM);
-  for(int i=0; i<=S84; i+=3)
+  for(int i=0; i<=S84; i+=S3)
     hpcpush(ddi(i, disksize * .25) * C0);
   for(int i=S84; i>=0; i--)
     hpcpush(ddi(i, disksize * (i >= S42-6 && i <= S42+6 ?.36:.30)) * C0);
   hpcpush(ddi(0, disksize * .25) * C0);
   
   bshape(shSpearRing, PPR_ITEM);
-  for(int i=0; i<=S84; i+=3)
+  for(int i=0; i<=S84; i+=S3)
     hpcpush(ddi(i, disksize * .25) * C0);
   for(int i=S84; i>=0; i--) {
     int d = i - S42;
@@ -1234,7 +1234,7 @@ void buildpolys() {
   */
   
   bshape(shLoveRing, PPR_ITEM);
-  for(int i=0; i<=S84; i+=3)
+  for(int i=0; i<=S84; i+=S3)
     hpcpush(ddi(i, disksize * .25) * C0);
   for(int i=S84; i>=0; i--) {
     int j = i*3 % S84;
@@ -1249,39 +1249,39 @@ void buildpolys() {
   hpcpush(ddi(0, disksize * .25) * C0);
   
   bshape(shSawRing, PPR_ITEM);
-  for(int i=0; i<=S84; i+=3)
+  for(int i=0; i<=S84; i+=S3)
     hpcpush(ddi(i, disksize * .25) * C0);
   for(int i=S84; i>=0; i--)
     hpcpush(ddi(i, disksize * (.3 + (i&3) * .02)) * C0);
   hpcpush(ddi(0, disksize * .25) * C0);
   
   bshape(shGearRing, PPR_ITEM);
-  for(int i=0; i<=S84; i+=3)
+  for(int i=0; i<=S84; i+=S3)
     hpcpush(ddi(i, disksize * .25) * C0);
   for(int i=S84; i>=0; i--)
     hpcpush(ddi(i, disksize * ((i%6<3)?.3:.36)) * C0);
   hpcpush(ddi(0, disksize * .25) * C0);
   
   bshape(shPeaceRing, PPR_ITEM);
-  for(int i=0; i<=S84; i+=3)
+  for(int i=0; i<=S84; i++)
     hpcpush(ddi(i, disksize * .25) * C0);
   for(int i=S84; i>=0; i--)
     hpcpush(ddi(i, disksize * (i%28 < 7?.36 : .3)) * C0);
   hpcpush(ddi(0, disksize * .25) * C0);
   
   bshape(shHeptaRing, PPR_ITEM);
-  for(int i=0; i<=S84; i+=3)
+  for(int i=0; i<=S84; i+=S3)
     hpcpush(ddi(i, disksize * .25) * C0);
   for(int i=S84; i>=0; i--)
     hpcpush(ddi(i, disksize * (i%12 < 3?.4 : .27)) * C0);
   hpcpush(ddi(0, disksize * .25) * C0);
   
   bshape(shCompass1, PPR_ITEM);
-  for(int i=0; i<=S84; i+=3)
+  for(int i=0; i<=S84; i+=S3)
     hpcpush(ddi(i, crossf * .35) * C0);
   
   bshape(shCompass2, PPR_ITEMa);
-  for(int i=0; i<=S84; i+=3)
+  for(int i=0; i<=S84; i+=S3)
     hpcpush(ddi(i, crossf * .3) * C0);
   
   bshape(shCompass3, PPR_ITEMb);
@@ -1296,13 +1296,13 @@ void buildpolys() {
   hpcpush(ddi(21, crossf/5) * ddi(0, crossf) * C0); */
   
   bshape(shILeaf[0], PPR_ONTENTACLE);
-  for(int t=0; t<=6; t++) {
+  for(int t=0; t<=S6; t++) {
     hpcpush(ddi(S7 + t*S14, shexf*.7) * C0);
     hpcpush(ddi(S14 + t*S14, shexf*.15) * C0);
     }
 
   bshape(shILeaf[1], PPR_ONTENTACLE);
-  for(int t=0; t<=S7; t++) hpcpush(ddi(t*36, shexf*.8) * C0);
+  for(int t=0; t<=S7; t++) hpcpush(ddi(t*S36, shexf*.8) * C0);
 
   bshape(shSlime, 33);
   for(int i=0; i<=S84; i++)
