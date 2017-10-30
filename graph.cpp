@@ -2803,6 +2803,7 @@ void setcolors(cell *c, int& wcol, int &fcol) {
   if(c->wall == waGlass && !wmspatial) fcol = wcol;
   
   if(c->wall == waRoundTable) fcol = wcol; 
+
   }
 
 bool noAdjacentChasms(cell *c) {
@@ -3298,7 +3299,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
     int wcol, fcol, asciicol;
     
     setcolors(c, wcol, fcol);
-    
+
     if(inmirror(c)) {
       // for debugging
       if(c->land == laMirrored) fcol = 0x008000;
@@ -4403,8 +4404,10 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       }
 
     if(c->land == laBlizzard) {
-      if(vid.backeffects)
-        blizzardcells[c].frame = frameid;
+      if(vid.backeffects) {
+        if(c->cpdist <= getDistLimit())
+          blizzardcells[c].frame = frameid;
+        }
       else {
         forCellIdEx(c2, i, c) if(againstWind(c, c2))
           queuepoly(V * ddspin(c, i) * xpush(cellgfxdist(c, i)/2), shWindArrow, 0x8080FF80);
@@ -5353,6 +5356,8 @@ auto graphcm = addHook(clearmemory, 0, [] () {
   mouseover = centerover = lmouseover = NULL;  
   for(int i=0; i<ANIMLAYERS; i++) animations[i].clear();
   gmatrix.clear(); gmatrix0.clear();
+  flashes.clear();
+  fallanims.clear();
   });
 
 void resetGeometry() {
