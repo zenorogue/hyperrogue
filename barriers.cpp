@@ -748,9 +748,11 @@ void buildCrossroads2(cell *c) {
   int h = c->landparam;
   
   if(h/4 >= 8 && h/4 <= 11) {
-    for(int i=0; i<c->type; i++) { 
-      createMov(c, i)->land = laCrossroads2;
-      if(!c->mov[i]->landparam) buildCrossroads2(c->mov[i]);
+    for(int i=0; i<c->type; i++) if(c->land != laBarrier) { 
+      cell *c2 = createMov(c, i);
+      if(c2->land == laBarrier) continue;
+      c2->land = laCrossroads2;
+      if(!c2->landparam) buildCrossroads2(c2);
       }
     if(h/4 == 8 || h/4 == 10)
     for(int i=0; i<c->type; i++) { 
