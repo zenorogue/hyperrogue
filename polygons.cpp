@@ -1306,11 +1306,20 @@ void buildpolys() {
   bshape(shILeaf[0], PPR_ONTENTACLE);
   for(int t=0; t<=S6; t++) {
     hpcpush(ddi(S7 + t*S14, shexf*.7) * C0);
-    hpcpush(ddi(S14 + t*S14, shexf*.15) * C0);
+    if(t != S6)
+      hpcpush(ddi(S14 + t*S14, shexf*.15) * C0);
     }
 
   bshape(shILeaf[1], PPR_ONTENTACLE);
-  for(int t=0; t<=S7; t++) hpcpush(ddi(t*S36, shexf*.8) * C0);
+  if(S3 == 3) 
+    for(int t=0; t<=S7; t++) hpcpush(ddi(t*S36, shexf*.8) * C0);
+  else {
+    for(int t=0; t<=S7; t++) {
+      hpcpush(ddi(t*S12, shexf*.8) * C0);
+      if(t != S6)
+        hpcpush(ddi(t*S12 + S6, shexf*.2) * C0);
+      }
+    }
 
   bshape(shSlime, 33);
   for(int i=0; i<=S84; i++)
