@@ -223,7 +223,9 @@ void checkGoodLand(eLand l) {
       "get lost there.\n\n"
       "Remember that you can get to the next slide by pressing Enter.",
       l
-      ));
+      ) +
+      XLAT(" This tutorial will not advance on its own -- you have to press Enter (not while reading help text).");
+      );
   }
 
 namespace ss {
@@ -301,7 +303,7 @@ void start() {
 
 slide default_slides[] = {
 #if ISMOBILE
-  {"Note for mobiles", 10, LEGAL_ANY | QUICKSKIP,
+  {"Note for mobiles", 10, LEGAL_HYPERBOLIC | QUICKSKIP,
     "This tutorial is designed for computers, "
     "and keys are given for all actions. It will "
     "work without a keyboard though, although less "
@@ -319,7 +321,7 @@ slide default_slides[] = {
       }
     },
 #endif
-  {"Introduction", 10, LEGAL_ANY | QUICKSKIP,
+  {"Introduction", 10, LEGAL_HYPERBOLIC | QUICKSKIP,
     "This tutorial is mostly aimed to show what is "
     "special about the geometry used by HyperRogue. "
     "It also shows the basics of gameplay, and "
@@ -351,7 +353,7 @@ slide default_slides[] = {
 #endif            
       }
     },
-  {"Basics of gameplay", 11, LEGAL_ANY,
+  {"Basics of gameplay", 11, LEGAL_HYPERBOLIC,
     "The game starts in the Icy Lands. Collect the Ice Diamonds "
     "(press F1 if you do not know how to move). "
     "After you collect many of them, monsters will start to pose a challenge.\n"
