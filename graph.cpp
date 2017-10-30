@@ -2431,8 +2431,14 @@ void setcolors(cell *c, int& wcol, int &fcol) {
     case laBurial: case laTrollheim: case laBarrier: case laOceanWall:
     case laCrossroads2: case laCrossroads3: case laCrossroads4: case laCrossroads5:
     case laRose: case laPower: case laWildWest: case laHalloween: case laRedRock:
-    case laDragon: case laStorms: case laTerracotta: case laMercuryRiver: case laDual:
+    case laDragon: case laStorms: case laTerracotta: case laMercuryRiver:
       fcol = linf[c->land].color; break;
+    
+    case laDual:
+      fcol = linf[c->land].color;
+      if(c->landparam == 2) fcol = 0x40FF00;
+      if(c->landparam == 3) fcol = 0xC0FF00;
+      break;
 
     case laDesert: fcol = 0xEDC9AF; break;
     case laKraken: fcol = 0x20A020; break;
@@ -3139,6 +3145,7 @@ int getfd(cell *c) {
     case laDeadCaves:
     case laPalace:
     case laCA:
+    case laDual:
       return 1;
     
     case laTrollheim:

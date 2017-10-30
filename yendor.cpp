@@ -589,7 +589,7 @@ namespace tactic {
   bool tacticUnlocked(int i) {
     eLand l = land_tac[i].l;
     if(autocheat) return true;
-    if(l == laWildWest) return true;
+    if(l == laWildWest || l == laDual) return true;
     return hiitemsMax(treasureType(l)) * landMultiplier(l) >= 20;
     }
 

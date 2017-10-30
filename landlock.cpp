@@ -198,6 +198,9 @@ int isNative(eLand l, eMonster m) {
     case laHunting:
       return m == moHunterDog ? 1 : 0;
     
+    case laDual: 
+      return m == moRatling ? 2 : 0;
+
     case laCA: return 0;
     }
   return false;
@@ -290,6 +293,7 @@ eItem treasureType(eLand l) {
     case laTerracotta: case laMercuryRiver: return itTerra;
     case laBlizzard: return itBlizzard;
     case laHunting: return itHunting;
+    case laDual: return itGlowCrystal;
     
     case laCA: return itNone;
     }
@@ -385,7 +389,7 @@ bool landUnlocked(eLand l) {
     case laStorms: case laWhirlwind: 
       return gold() >= R60;
     
-    case laWildWest: case laHalloween:
+    case laWildWest: case laHalloween: case laDual: 
       return false;
       
     case laIce: case laJungle: case laCaves: case laDesert: 

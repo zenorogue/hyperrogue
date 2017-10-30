@@ -1197,6 +1197,7 @@ itemtype iinf[ittypes] = {
   { 'o', 0x3080D0, "Orb of Change", 
     "This ranged Orb will transform the target monster into one without any special powers. It also stuns them for one turn. "
     "Does not affect multi-tile monsters."},
+  { '!', 0x80FF00, "Glowing Crystal", NODESC},
   };
 
 // --- wall types ---
@@ -1558,7 +1559,7 @@ const landtype linf[landtypes] = {
   { 0x207068, "Hunting Ground", huntingdesc},
   { 0xE2725B, "Terracotta Army", terraldesc},
   { 0xE2725B, "Terracotta Army", terraldesc},
-  { 0xE04040, "Dual", NODESCYET}
+  { 0x80FF00, "Crystal World", NODESCYET}
   };
 
 #define LAND_OVER 57

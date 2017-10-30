@@ -68,7 +68,7 @@ struct genderswitch_t {
 
 #define NUM_GS 6
 
-static const int ittypes = 121;
+static const int ittypes = 122;
 
 struct itemtype {
   char  glyph;
@@ -112,7 +112,7 @@ enum eItem {
   itInventory,
   itLavaLily, itHunting, itBlizzard, itTerra,
   itOrbSide1, itOrbSide2, itOrbSide3,
-  itOrbLava, itOrbMorph,
+  itOrbLava, itOrbMorph, itGlowCrystal
   };
 
 static const int walltypes = 105;

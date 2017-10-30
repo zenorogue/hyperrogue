@@ -1921,8 +1921,33 @@ void giantLandSwitch(cell *c, int d, cell *from) {
       break;
     
     case laDual:
-      if(d == 9 && (ctof(c) || hrand(100) < 5))
-        c->wall = waChasm;
+      if(d == 7) {
+        if(pseudohept(c))
+          c->wall = waChasm;
+        else {
+          c->landparam = 1;
+          if(S7%2 == 0) {
+            c->landparam = 2;
+            forCellCM(c2, c) {
+              if(c2->landparam == 2) c->landparam = 3;
+              if(!ctof(c2)) forCellCM(c3, c2) if(c3->landparam == 3) c->landparam = 3;
+              }
+            }
+          int hr = hrand(100) / 5;
+          if(hr == 0)
+            c->wall = waTrapdoor;
+          else if(hr == 1)
+            c->wall = waSmallTree;
+          else if(hr == 2)
+            c->wall = waStone;
+          }
+        }
+      ONEMPTY {
+        if(hrand(5000) < PT(100 + 2 * kills[moRatling], 200) && notDippingFor(itGlowCrystal))
+          c->item = itGlowCrystal;
+        if(hrand(2000) < 2 * (items[itGlowCrystal] + yendor::hardness()))
+          c->monst = moRatling;
+        }      
       break;
     }
   }

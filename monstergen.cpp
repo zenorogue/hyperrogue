@@ -438,6 +438,11 @@ void wandering() {
     else if(c->land == laClearing && wchance(items[itMutant2], 150) && items[itMutant2] >= 15 && !c->monst && c->type == 7) 
       c->monst = moRedFox;
 
+    else if(c->land == laDual && wchance(items[itGlowCrystal], 40)) {
+      c->monst = moRatling;
+      playSeenSound(c);
+      }
+
     else if(hrand(50) < statuecount * statuecount) 
       c->monst = moCultistLeader;
 

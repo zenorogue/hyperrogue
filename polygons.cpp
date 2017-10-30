@@ -967,7 +967,7 @@ void buildpolys() {
     0;
   
   bshape(shFloorShadow[0], PPR_FLOOR);
-  for(int t=0; t<=6; t++) hpcpush(ddi(S7 + t*S14, floorrad0*SHADMUL) * C0);
+  for(int t=0; t<=S6; t++) hpcpush(ddi(S7 + t*S14, floorrad0*SHADMUL) * C0);
 
   bshape(shFloorShadow[1], PPR_FLOOR);
   for(int t=0; t<=S7; t++) hpcpush(ddi(t*S12 + td, floorrad1*SHADMUL) * C0);
@@ -1324,7 +1324,7 @@ void buildpolys() {
   for(int t=0; t<=S3; t++) hpcpush(ddi(t*S28, -hcrossf*.94) * C0);
 
   bshape(shBigTriShadow, PPR_FLOOR);
-  for(int t=0; t<=S3; t++) hpcpush(ddi(t*S28 + S14, hcrossf*.94*SHADMUL) * C0);
+  for(int t=0; t<=S3; t++) hpcpush(ddi(t*S28 + S14 + (S3==4?S14:0), hcrossf*.94*SHADMUL) * C0);
 
   
 /*bshape(shBigHexTriangleRev, PPR_FLOOR);
