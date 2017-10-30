@@ -508,7 +508,7 @@ namespace princess {
     }
   
   info *getPrisonInfo(cell *c) {
-    if(euclid) return NULL;
+    if(euclid || quotient || sphere) return NULL;
     if(c->land != laPalace) return NULL;
     if(!c->master->alt) return NULL;
     int ev = c->master->alt->alt->emeraldval; // NEWYEARFIX
@@ -734,50 +734,54 @@ namespace clearing {
   std::map<heptagon*, clearingdata> bpdata;
   
   int plantdir(cell *c) {
-    generateAlts(c->master);
-    for(int i=0; i<7; i++)
-      generateAlts(c->master->move[i]);
+    if(!quotient) {
+      generateAlts(c->master);
+      for(int i=0; i<S7; i++)
+        generateAlts(c->master->move[i]);
+      }
     int d = celldistAlt(c);
     
     if(nontruncated) {
-      for(int i=0; i<7; i++) {
+      for(int i=0; i<S7; i++) {
         cell *c2 = createMov(c, i);
         if(!pseudohept(c2) && celldistAlt(c2) == d-1)
           return i;
         }
-      for(int i=0; i<7; i++) {
+      for(int i=0; i<S7; i++) {
         cell *c2 = createMov(c, i);
         if(celldistAlt(c2) == d-1)
-          return (i+1) % 7;
+          return (i+1) % S7;
         }
       }
 
-    for(int i=1; i<6; i+=2) {
+    for(int i=1; i<S6; i+=2) {
       cell *c2 = createMov(c, i);
       if(celldistAlt(c2) == d-1)
         return i;
       }
 
-    int quseful = 0, tuseful = 0;
-    for(int i=1; i<6; i+=2) {
+    int quseful = 0, tuseful = 0, tuseful2 = 0;
+    for(int i=1; i<S6; i+=2) {
       cell *c2 = c->mov[i];
       if(celldistAlt(c2) == d) {
         bool useful = false;
-        for(int j=1; j<6; j++) {
+        for(int j=1; j<S6; j++) {
           cell *c3 = createMov(c2, j);
           if(celldistAlt(c3) == d-1)
             useful = true;
           }
-        if(useful) quseful++, tuseful += i;
+        if(useful) quseful++, tuseful += (1<<i), tuseful2 = i;
         }
       }
-    if(quseful == 1) return tuseful;
+    if(quseful == 1) return tuseful2;
     if(quseful == 2) {
       int i;
-      if(tuseful == 3+5) i = 3;
-      if(tuseful == 5+1) i = 5;
-      if(tuseful == 1+3) i = 1;
-      if((d & 7) < 4) i = (i+2) % 6;
+      if(tuseful == (1<<3)+(1<<5)) i = 3;
+      if(tuseful == (1<<5)+(1<<1)) i = 5;
+      if(tuseful == (1<<1)+(1<<3)) i = 1;
+      if(tuseful == (1<<5)+(1<<7)) i = 5;
+      if(tuseful == (1<<7)+(1<<1)) i = 7;
+      if((d & 7) < 4) i = (i+2) % S6;
       return i;
       }
     printf("error in plantdir\n");
@@ -790,6 +794,8 @@ namespace clearing {
     
   void generate(cell *c) {
     if(buggyplant) return;
+    
+    if(sphere) return;
     
     if(euclid) {
       if(torus) return;
@@ -822,11 +828,17 @@ namespace clearing {
     
     int ds;
     
+    int stepcount = 0;
     while(true) {
       if(c == bd.root) {ds = bd.dist; break; }
 
       // printf("R %4d C %4d\n", celldistAlt(bd.root), celldistAlt(c));
       if(celldistAlt(c) > celldistAlt(bd.root)) {
+        stepcount++;
+        if(stepcount > 1000) {
+          printf("buggy #1\n");
+          return;
+          }
 
         if(c->mpdist <= 6) {
           if(c->monst != moMutant) return; // already cut!
@@ -853,7 +865,7 @@ namespace clearing {
           }
         rpath.push_back(bd.root);
         // printf("r [%4d] %p -> %p\n", celldistAlt(bd.root), bd.root, bd.root->mov[plantdir(bd.root)]);
-        bd.root = bd.root->mov[plantdir(bd.root)];
+        bd.root = createMov(bd.root, plantdir(bd.root));
         }
       }
     
@@ -3363,6 +3375,7 @@ namespace dungeon {
       */
     
     if(euclid) {
+      if(torus) return;
       eucoord x, y;
       decodeMaster(c->master, x, y);
       string tab[] = {

@@ -633,7 +633,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           havewhat |= HF_DRAGON;
           // printf("dragon generated with dchance = %d\n", dchance);
           vector<int> possi;
-          for(int t=0; t<6; t++) if(c->mov[t]->mpdist > c->mpdist) possi.push_back(t);
+          for(int t=0; t<c->type; t++) if(c->mov[t]->mpdist > c->mpdist) possi.push_back(t);
           if(size(possi)) {
             int i = possi[hrand(size(possi))];
             int dragonlength = 6 + items[itDragon] / 2;
@@ -1565,7 +1565,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
                 }
               else if(items[itHunting] < 10) {
                 vector<cell*> next;
-                forCellEx(c2, c) if(c2->mpdist > 7 && c2->type == 6) next.push_back(c2);
+                forCellEx(c2, c) if(c2->mpdist > 7 && (nontruncated || !ctof(c2))) next.push_back(c2);
                 if(size(next)) {
                   c->item = itHunting;
                   cell *c3 = next[hrand(size(next))];
@@ -2066,7 +2066,7 @@ void setdist(cell *c, int d, cell *from) {
   
   if(d >= BARLEV) {
   
-    if(!c->land && from->land != laElementalWall && from->land != laHauntedWall && from->land != laOceanWall &&
+    if(!c->land && from && from->land != laElementalWall && from->land != laHauntedWall && from->land != laOceanWall &&
       from->land != laBarrier) {
         if(!hasbardir(c)) setland(c, from->land);
         }

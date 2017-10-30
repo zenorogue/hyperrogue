@@ -33,6 +33,9 @@ int roundTableRadius(cell *c) {
   }
 
 int celldistAltRelative(cell *c) {
+  if(sphere || quotient) {
+    return celldist(c) - 3;
+    }
   if(tactic::on) return getAnthraxData(c, false);
   return celldistAlt(c) - roundTableRadius(c);
   }
@@ -81,7 +84,7 @@ cell *findcompass(cell *c) {
   }
 
 bool grailWasFound(cell *c) {
-  if(euclid) return items[itHolyGrail];
+  if(euclid || quotient || sphere) return items[itHolyGrail];
   return c->master->alt->alt->emeraldval & GRAIL_FOUND;
   }
 
@@ -1079,6 +1082,8 @@ void doOvergenerate() {
   int dcs = size(dcal);
   for(int i=0; i<dcs; i++) {
     cell *c = dcal[i];
+    if(weirdhyperbolic && (c->land == laCaribbean)) continue;
+    if(weirdhyperbolic && (c->land == laStorms || c->land == laCamelot || c->land == laTemple || c->land == laOcean)) continue;
     if(c->cpdist <= sightrange-6) setdist(c, 1, NULL);
     }
   }
@@ -1099,7 +1104,7 @@ void moreBigStuff(cell *c) {
     }
 
   if(c->land == laStorms)
-    if(!euclid) {
+    if(!euclid && !quotient && !sphere) {
       if(c->master->alt && c->master->alt->distance <= 2) {
         generateAlts(c->master);
         preventbarriers(c);

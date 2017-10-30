@@ -810,9 +810,12 @@ int celldistAlt(cell *c) {
     decodeMaster(c->master, x, y);
     return euclidAlt(x, y);
     }
+  if(sphere || quotient) {
+    return celldist(c) - 3;
+    }
   if(!c->master->alt) return 0;
   if(ctof(c)) return c->master->alt->distance;
-  int dx[MAX_S3];
+  int dx[MAX_S3]; dx[0] = 0;
   for(int u=0; u<S3; u++) if(createMov(c, u+u)->master->alt == NULL)
     return ALTDIST_UNKNOWN;
   for(int u=0; u<S3; u++)
@@ -1414,15 +1417,18 @@ int celldistance(cell *c1, cell *c2) {
 
   cell *cl1=c1, *cr1=c1, *cl2=c2, *cr2=c2;
   while(true) {
-    /* if(cl1 == cl2) return d;
-    if(cl1 == cr2) return d;
-    if(cr1 == cl2) return d;
-    if(cr1 == cr2) return d; */
-        
-    //if(isNeighbor(cl1, cl2)) return d+1;
-    //if(isNeighbor(cl1, cr2)) return d+1;
-    //if(isNeighbor(cr1, cl2)) return d+1;
-    //if(isNeighbor(cr1, cr2)) return d+1;
+  
+  if(weirdhyperbolic) {
+      if(cl1 == cl2) return d;
+      if(cl1 == cr2) return d;
+      if(cr1 == cl2) return d;
+      if(cr1 == cr2) return d;
+          
+      if(isNeighbor(cl1, cl2)) return d+1;
+      if(isNeighbor(cl1, cr2)) return d+1;
+      if(isNeighbor(cr1, cl2)) return d+1;
+      if(isNeighbor(cr1, cr2)) return d+1;
+      }
     
     if(d1 == d2) for(int u=0; u<2; u++) {
       cell *ac0 = u ? cr1 : cr2, *ac = ac0;
@@ -1445,11 +1451,16 @@ int celldistance(cell *c1, cell *c2) {
         }
       }  
     
-    /* forCellEx(c, cl2) if(isNeighbor(c, cr1)) return d+2;
-    forCellEx(c, cl1) if(isNeighbor(c, cr2)) return d+2;
+    if(weirdhyperbolic) {
+      forCellEx(c, cl2) if(isNeighbor(c, cr1)) return d+2;
+      forCellEx(c, cl1) if(isNeighbor(c, cr2)) return d+2;
 
-    forCellEx(ca, cl2) forCellEx(cb, cr1) if(isNeighbor(ca, cb)) return d+3;
-    forCellEx(ca, cl1) forCellEx(cb, cr2) if(isNeighbor(ca, cb)) return d+3; */
+      forCellEx(ca, cl2) forCellEx(cb, cr1) if(isNeighbor(ca, cb)) return d+3;
+      forCellEx(ca, cl1) forCellEx(cb, cr2) if(isNeighbor(ca, cb)) return d+3;
+
+      forCellEx(ca, cl2) forCellEx(cb, cr1) forCellEx(cc, cb) if(isNeighbor(ca, cc)) return d+4;
+      forCellEx(ca, cl1) forCellEx(cb, cr2) forCellEx(cc, cb) if(isNeighbor(ca, cc)) return d+4;
+      }
 
     if(d1 >= d2) {
       cl1 = chosenDown(cl1, -1, 0, celldist);
