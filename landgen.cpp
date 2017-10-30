@@ -1410,7 +1410,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
               if(c3->monst || c3->bardir != NODIR || c3->wall) break;
               c2 = c3;
               c2->monst = moHexSnakeTail;
-              i = (j + (S6==8 ? 4 : (len%2 ? 2 : 4))) % 6;
+              i = (j + (S6==8 ? 4 : (len%2 ? 2 : 4))) % S6;
               }
             if(size(rocksnake) < ROCKSNAKELENGTH/2 && !purehepta) {
               for(int i=0; i<size(rocksnake); i++) 
