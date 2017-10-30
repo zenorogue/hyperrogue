@@ -1405,7 +1405,7 @@ void buildpolys() {
 
   bshape(shSStarFloor[0], PPR_FLOOR, scalef*spzoom6*(sphere?.8:1)*ffscale2, 11, ROT4(.775));
   bshape(shSStarFloor[1], PPR_FLOOR, scalef*spzoomd7*SCA4(.85), 12, octroll);
-  bshape(shOverFloor[0], PPR_FLOOR, scalef*spzoom * SCA47(1.3) * SCA45(1.3) * SCA46(1.1), 13, ROT47(-.75) + ROT45(-.7)+ROT46(.9));
+  bshape(shOverFloor[0], PPR_FLOOR, scalef*spzoom * SCA47(1.3) * SCA45(1.3) * SCA46(1.1), 13, ROT47(-.75) + ROT45(-.7)+ROT46(.9) + (geometry == 0 && !nontruncated ? M_PI:0));
   if(nontruncated) {
     if(a4) bshape(shOverFloor[1], PPR_FLOOR, 1, 368 + S7 - 5, 0);
     else bshape(shOverFloor[1], PPR_FLOOR, (sphere ? .83 : 1) * SCA38(1.3), 14, octroll + ROT38(.4));
