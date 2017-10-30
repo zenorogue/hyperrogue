@@ -274,6 +274,10 @@ const char *blizzarddesc =
   "Unfortunately winter has come (maybe because only the monks knew how to stop the golems, and they were said to had escaped earlier with some of the jewels). "
   "The tribe has frozen to death, altars got covered with snow and ice. Only ice golems still guard them waiting for the spring.";  
 
+const char *crystaldesc = 
+  "Yes, this is definitely a crystal. A very regular crystalline structure.\n\n"
+  "This land has been designed to test various geometries, and it does not appear during a normal gameplay."
+
 const char *NODESC = "No description yet.";
 const char *NODESCYET = "No description yet.";
 const char *GENDERSWITCH = NODESC;
@@ -1197,7 +1201,7 @@ itemtype iinf[ittypes] = {
   { 'o', 0x3080D0, "Orb of Change", 
     "This ranged Orb will transform the target monster into one without any special powers. It also stuns them for one turn. "
     "Does not affect multi-tile monsters."},
-  { '!', 0x80FF00, "Glowing Crystal", NODESC},
+  { '!', 0x80FF00, "Glowing Crystal", crystaldesc},
   };
 
 // --- wall types ---
@@ -1559,7 +1563,7 @@ const landtype linf[landtypes] = {
   { 0x207068, "Hunting Ground", huntingdesc},
   { 0xE2725B, "Terracotta Army", terraldesc},
   { 0xE2725B, "Terracotta Army", terraldesc},
-  { 0x80FF00, "Crystal World", NODESCYET}
+  { 0x80FF00, "Crystal World", crystaldesc}
   };
 
 #define LAND_OVER 57
