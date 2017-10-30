@@ -1390,9 +1390,9 @@ void giantLandSwitch(cell *c, int d, cell *from) {
       if(d == 7 && c->wall == waNone)
         buildPrizeMirror(c, 1000);    
       ONEMPTY {
-        if(hrand((doCross && celldist(c) <= 5) ?450:16000) < 30+items[itRedGem]+yendor::hardness() && !pseudohept(c) && !c->monst && !c->wall) {
+        if(hrand((doCross && celldist(c) <= 5) ?450:16000) < 30+items[itRedGem]+yendor::hardness() && !pseudohept(c) && !c->monst && !c->wall && !(purehepta && S3==4)) {
           int i = -1;
-          for(int t=0; t<6; t++) if(c->mov[t]->mpdist > c->mpdist && !pseudohept(c->mov[t]))
+          for(int t=0; t<c->type; t++) if(c->mov[t]->mpdist > c->mpdist && !pseudohept(c->mov[t]))
             i = t;
           if(i != -1 && !peace::on) {
             c->monst = moHexSnake;
@@ -1410,7 +1410,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
               if(c3->monst || c3->bardir != NODIR || c3->wall) break;
               c2 = c3;
               c2->monst = moHexSnakeTail;
-              i = (j + (len%2 ? 2 : 4)) % 6;
+              i = (j + (S6==8 ? 4 : (len%2 ? 2 : 4))) % 6;
               }
             if(size(rocksnake) < ROCKSNAKELENGTH/2 && !purehepta) {
               for(int i=0; i<size(rocksnake); i++) 
