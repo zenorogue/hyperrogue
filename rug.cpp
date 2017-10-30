@@ -155,7 +155,7 @@ void buildRug() {
       cell *c3 = c->mov[(j+1) % c->type];
       rugpoint *w2 = vptr[c3];
       if(!w2) continue;
-      if(c->type == 7) addTriangle(v, w, w2);
+      if(ctof(c)) addTriangle(v, w, w2);
       }
     }
 
@@ -659,10 +659,17 @@ hyperpoint gethyper(ld x, ld y) {
 
 void show() {
   dialog::init(XLAT("hypersian rug mode"), iinf[itPalace].color, 150, 100);
+  
+  if(euclid || sphere) {
+    dialog::addInfo("This makes sense only in hyperbolic geometry.");
+    dialog::addBreak(50);
+    }
 
   dialog::addItem(XLAT("what's this?"), 'h');
   dialog::addItem(XLAT("take me back"), 'q');
+
   dialog::addItem(XLAT("enable the Hypersian Rug mode"), 'u');
+    
   dialog::addBoolItem(XLAT("render the texture only once"), (renderonce), 'o');
   dialog::addBoolItem(XLAT("render texture without OpenGL"), (rendernogl), 'g');  
   dialog::addSelItem(XLAT("texture size"), its(texturesize)+"x"+its(texturesize), 's');
@@ -683,10 +690,12 @@ void show() {
       "Use arrow keys to rotate, Page Up/Down to zoom."
       );
     else if(uni == 'u') {
-      if(sphere) restartGame('E');
-      if(euclid) restartGame('e');
-      rug::init();
-      popScreen();
+      if(euclid || sphere)
+        addMessage("This makes sense only in hyperbolic geometry.");
+      else {        
+        rug::init();
+        popScreen();
+        }
       }
     else if(uni == 'o')
       renderonce = !renderonce;

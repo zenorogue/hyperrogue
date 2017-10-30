@@ -389,8 +389,8 @@ void showDisplayMode() {
       pushScreen(conformal::show);
   
   #if CAP_MODEL
-    else if(xuni == 'n')
-      pushScreen(netgen::show);
+    else if(xuni == 'n') 
+      netgen::run();
   #endif
   
     else gmodekeys(sym, uni);

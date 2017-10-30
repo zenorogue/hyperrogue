@@ -704,6 +704,14 @@ namespace netgen {
         popScreen();
       };
     }
-  
+
+  void run() { 
+    if(euclid) 
+      addMessage("Useless in Euclidean geometry.");
+    else if(sphere)
+      addMessage("Not implemented for spherical geometry.");
+    else
+      pushScreen(show);
+    }
   }
 #endif
