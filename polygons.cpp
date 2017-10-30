@@ -758,28 +758,32 @@ void bshape(hpcshape& sh, int p, double shzoom, int shapeid, double bonus = 0) {
   double shzoomy = shzoom;
   if(shzoom == WOLF) shzoomx = 1.5 * (purehepta ? crossf / hcrossf : 1), shzoomy = 1.6 * (purehepta ? crossf / hcrossf : 1);
   int rots2 = rots;
-  if(rots == 7) {
-    rots2 = S7;
-    if(rots2 != 7 && !euclid) bonus += M_PI;
-    shzoomx *= bscale7;
-    shzoomy *= bscale7;
-    bonus += brot7;
-    if(euclid) shzoomx *= .9, shzoomy *= .9, bonus += .3;    
+  // shapes 368..370 are specially designed
+  if(!(shapeid >= 368 && shapeid <= 370)) {
+    if(rots == 7) {
+      rots2 = S7;
+      if(rots2 != 7 && !euclid) bonus += M_PI;
+      shzoomx *= bscale7;
+      shzoomy *= bscale7;
+      bonus += brot7;
+      if(euclid) shzoomx *= .9, shzoomy *= .9, bonus += .3;    
+      }
+    if(rots == 3) {
+      rots2 = S3;
+      shzoomx *= bscale6;
+      shzoomy *= bscale6;
+      if(S6 == 8) bonus += .4;
+      bonus += brot6;
+      }
+    if(rots == 6) {
+      rots2 = S6;
+      shzoomx *= bscale6;
+      shzoomy *= bscale6;
+      if(S6 == 8) bonus += .4;
+      bonus += brot6;
+      }
     }
-  if(rots == 3) {
-    rots2 = S3;
-    shzoomx *= bscale6;
-    shzoomy *= bscale6;
-    if(S6 == 8) bonus += .4;
-    bonus += brot6;
-    }
-  if(rots == 6) {
-    rots2 = S6;
-    shzoomx *= bscale6;
-    shzoomy *= bscale6;
-    if(S6 == 8) bonus += .4;
-    bonus += brot6;
-    }
+  else shzoomx *= bscale7, shzoomy *= bscale7;
   double bonusf = /* sphere ? M_PI*4/35 : */ (rots-rots2+.0) / rots2;
   
   auto ipoint = [&] (int i, int mul) {
@@ -884,7 +888,7 @@ void buildpolys() {
 
   auto MF = [] (double f, int i) { return (f*i)/8; };
 
-#define SHADMUL 1.3
+#define SHADMUL (S3==4 ? 1.05 : 1.3)
   
   // procedural floors
   double shexf = purehepta ? crossf* .55 : hexf;
@@ -898,14 +902,18 @@ void buildpolys() {
 #define SCA4(x) (a4?x:1)
 #define ROT4(x) (a4?x:0)
 
+#define SCA38(x) (S7 == 8 ? x:1)
+#define SCA45(x) (a4 && S7 == 5?x:1)
 #define SCA46(x) (a4 && S7 == 6?x:1)
 #define SCA47(x) (a4 && S7 == 7?x:1)
 #define SCA467(x) (a4 && S7 >= 6?x:1)
 
+#define ROT45(x) (a4 && S7 == 5?x:1)
 #define ROT46(x) (a4 && S7 == 6?x:0)
 #define ROT47(x) (a4 && S7 == 7?x:0)
 #define ROT467(x) (a4 && S7 >= 6?x:0)
 #define ROTS4(x) (sphere && S7 == 4?x:0)
+#define ROT38(x) (S7 == 8 ? x:0)
 
 #define SCAP4(x) (a4&&purehepta?x:1)
 
@@ -1388,8 +1396,11 @@ void buildpolys() {
 
   bshape(shSStarFloor[0], PPR_FLOOR, scalef*spzoom6*(sphere?.8:1)*ffscale2, 11, ROT4(.775));
   bshape(shSStarFloor[1], PPR_FLOOR, scalef*spzoomd7*SCA4(.85), 12, octroll);
-  bshape(shOverFloor[0], PPR_FLOOR, scalef*spzoom, 13);
-  if(purehepta) bshape(shOverFloor[1], PPR_FLOOR, sphere ? .83 : 1, 14, octroll);
+  bshape(shOverFloor[0], PPR_FLOOR, scalef*spzoom * SCA47(1.3) * SCA45(1.3) * SCA46(1.1), 13, ROT47(-.75) + ROT45(-.7)+ROT46(.9));
+  if(purehepta) {
+    if(a4) bshape(shOverFloor[1], PPR_FLOOR, 1, 368 + S7 - 5, 0);
+    else bshape(shOverFloor[1], PPR_FLOOR, (sphere ? .83 : 1) * SCA38(1.3), 14, octroll + ROT38(.4));
+    }
   else bshape(shOverFloor[1], PPR_FLOOR, scalef*spzoom7, 15);
   bshape(shOverFloor[2], PPR_FLOOR, euclid?scalef*1.2:spzoom7, 16);
   bshape(shTriFloor[0], PPR_FLOOR, scalef*espzoom6*(sphere?.9:1)*ffscale2*SCA4(0.9), 17, ffspin2 + ROT47(.1));
@@ -1422,11 +1433,11 @@ void buildpolys() {
 
   bshape(shSeabed[0], PPR_FLOOR, scalef*spzoom6, 334);
   bshape(shSeabed[1], PPR_FLOOR, scalef*spzoom6, 335);
-  bshape(shCloudSeabed[0], PPR_FLOOR, scalef*spzoom6 * SCA46(.8) * SCA47(.75), 336);
-  bshape(shCloudSeabed[1], PPR_FLOOR, scalef*spzoom6 * SCA46(.5) * SCA47(.6), 337, ROT46(-.2));
+  bshape(shCloudSeabed[0], PPR_FLOOR, scalef*spzoom6 * SCA46(.8) * SCA47(.75) * SCA38(1.05) * SCA45(.75), 336, ROT45(-.8125));
+  bshape(shCloudSeabed[1], PPR_FLOOR, scalef*spzoom6 * SCA46(.5) * SCA47(.6) * SCA38(1.25) * SCA45(.35), 337, ROT46(-.2) + ROT38(.2));
   bshape(shCloudSeabed[2], PPR_FLOOR, scalef*espzoom6, 337);
-  bshape(shCaveSeabed[0], PPR_FLOOR, scalef*spzoom6, 338);
-  bshape(shCaveSeabed[1], PPR_FLOOR, scalef*spzoom6, 339);
+  bshape(shCaveSeabed[0], PPR_FLOOR, scalef*spzoom6 * SCA45(.65) * SCA46(.7) * SCA47(.675), 338);
+  bshape(shCaveSeabed[1], PPR_FLOOR, scalef*spzoom6 * SCA45(.5) * SCA46(.6) * SCA47(.725), 339, ROT46(-.3));
   bshape(shCaveSeabed[2], PPR_FLOOR, scalef*spzoom6*(euclid?1.2:1), 54);
   
   for(int i=0; i<8; i++) {
@@ -2963,6 +2974,11 @@ NEWSHAPE, 366, 1, 2, 0.120242,0.202432, 0.476077,0.202192,
 
 NEWSHAPE, 367, 1, 2, -0.096569,0.019944, 0.040859,0.019906, 0.037742,0.058710, 0.116624,-0.000000, 
 
+// overgrown for 4-5 to 4-7 non-truncated
+NEWSHAPE, 368, 5, 1, -0.722750,-0.522024, -0.310675,-0.189104, -0.809015,-0.052887, -0.464722,0.060902, -1.057795,0.207750, 
+NEWSHAPE, 369, 6, 1, 1.125689,-0.648796, 0.574166,-0.456509, 0.822679,-1.131184, 0.174168,-0.605003, 0.411340,-1.336854, 
+NEWSHAPE, 370, 7, 1, 1.034599,-1.366924, 0.528060,-0.892063, 0.490794,-1.701844, 0.081991,-0.819912, 0.042928,-1.637383, 
+
 NEWSHAPE
 };
 
@@ -2986,13 +3002,12 @@ NEWSHAPE
 #define ROSEFLOOR shRoseFloor[ct6]
 
 #define ECT (euclid?2:ct6)
-#define ECTH (euclid || purehepta?2:ct6)
 
 // no eswap
 #define PLAINFLOOR shFloor[ct6]
 #define FULLFLOOR shFullFloor[ct6]
 #define CAVEFLOOR shCaveFloor[ECT]
-#define OVERFLOOR shOverFloor[ECTH]
+#define OVERFLOOR shOverFloor[ECT]
 #define CLOUDFLOOR shCloudFloor[ECT]
 #define FEATHERFLOOR shFeatherFloor[ECT]
 #define MFLOOR1 shMFloor[ct6]
