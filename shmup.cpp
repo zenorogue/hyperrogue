@@ -3410,7 +3410,7 @@ transmatrix &ggmatrix(cell *c) {
     else {
       t = 
         View * spin(viewctr.spin * 2 * M_PI / S7) * calc_relative_matrix(c, viewctr.h);
-      if(purehepta) t = t * pispin;
+      if(nontruncated) t = t * pispin;
       }
     }
   return t;
@@ -3420,7 +3420,7 @@ transmatrix calc_relative_matrix_help(cell *c, heptagon *h1) {
   transmatrix gm = Id;
   heptagon *h2 = c->master;
   transmatrix where = Id;
-  if(!purehepta) for(int d=0; d<7; d++) if(h2->c7->mov[d] == c)
+  if(!nontruncated) for(int d=0; d<7; d++) if(h2->c7->mov[d] == c)
     where = hexmove[d];
   // always add to last!
   while(h1 != h2) {
@@ -3489,8 +3489,8 @@ void virtualRebase(cell*& base, transmatrix& at, bool tohex) {
       hs.h = h;
       hs.spin = d;
       heptspin hs2 = hsstep(hs, 0);
-      transmatrix V2 = spin((purehepta?M_PI:0)-hs2.spin*2*M_PI/7) * invheptmove[d];
-      if(purehepta) V2 = V2 * spin(M_PI);
+      transmatrix V2 = spin((nontruncated?M_PI:0)-hs2.spin*2*M_PI/7) * invheptmove[d];
+      if(nontruncated) V2 = V2 * spin(M_PI);
       double newz = (V2 * at * C0) [2];
       if(newz < currz) {
         currz = newz;
@@ -3500,7 +3500,7 @@ void virtualRebase(cell*& base, transmatrix& at, bool tohex) {
       }
 
     if(!newbase) {
-      if(tohex && !purehepta) for(int d=0; d<7; d++) {
+      if(tohex && !nontruncated) for(int d=0; d<7; d++) {
         cell *c = createMov(base, d);
         transmatrix V2 = spin(-base->spn(d)*2*M_PI/6) * invhexmove[d];
         double newz = (V2 *at * C0) [2];

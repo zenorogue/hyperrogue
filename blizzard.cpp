@@ -1,7 +1,7 @@
 double randd() { return (rand() % 1000000) / 1000000. + .0000005; }
 
 double cellgfxdist(cell *c, int i) {
-  return purehepta ? tessf : (c->type == 6 && (i&1)) ? hexhexdist : crossf;
+  return nontruncated ? tessf : (c->type == 6 && (i&1)) ? hexhexdist : crossf;
   }
 
 transmatrix cellrelmatrix(cell *c, int i) {
@@ -13,7 +13,7 @@ hyperpoint randomPointIn(int t) {
   while(true) {
     hyperpoint h = spin(2*M_PI*(randd()-.5)/t) * tC0(xpush(asinh(randd())));
     double d =
-      purehepta ? tessf : t == 6 ? hexhexdist : crossf;
+      nontruncated ? tessf : t == 6 ? hexhexdist : crossf;
     if(hdist0(h) < hdist0(xpush(-d) * h))
       return spin(2*M_PI/t * (rand() % t)) * h;
     }

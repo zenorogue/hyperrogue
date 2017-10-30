@@ -346,7 +346,7 @@ string generateHelpForWall(eWall w) {
   if(w == waMineMine || w == waMineUnknown || w == waMineOpen)
     addMinefieldExplanation(s);
   if(isThumper(w)) s += pushtext(w);
-  if((w == waClosePlate || w == waOpenPlate) && purehepta) 
+  if((w == waClosePlate || w == waOpenPlate) && nontruncated) 
     s += "\n\n(For the heptagonal mode, the radius has been reduced to 2 for closing plates.)";
   return s;
   }

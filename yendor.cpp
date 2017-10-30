@@ -825,12 +825,12 @@ int modecode() {
   else if(pureHardcore()) xcode ++;
   
   if(euclid) xcode += 6;
-  else if(purehepta) xcode += 3;
+  else if(nontruncated) xcode += 3;
   
   if(sphere) {
     xcode += 9;
     if(elliptic) xcode += 6;
-    if(purehepta) xcode += 3;
+    if(nontruncated) xcode += 3;
     }
   
   if(chaosmode) xcode += 21;
@@ -865,7 +865,7 @@ void buildmodetable() {
     extern bool hardcore;
     hardcore = (b%3 == 1);
     shmup::on = (b%3 == 2);
-    purehepta = (b/3)%7 == 1 || (b/3)%7 == 4 || (b/3)%7 == 6;
+    nontruncated = (b/3)%7 == 1 || (b/3)%7 == 4 || (b/3)%7 == 6;
     geometry = gNormal;
     if((b/3)%7 == 2) geometry = gEuclid;
     if((b/3)%7 >= 3) geometry = gSphere;
@@ -884,7 +884,7 @@ void buildmodetable() {
     if(hardcore) printf(" hardcore");
     else if(shmup::on) printf(" shmup");
     else printf(" softcore");
-    if(purehepta) printf(" heptagonal");
+    if(nontruncated) printf(" heptagonal");
     if(euclid) printf(" euclidean");
     else if(elliptic) printf(" elliptic");
     else if(sphere) printf(" spherical");

@@ -304,7 +304,7 @@ void initConfig() {
   addsaver(hardcore, "mode-hardcore", false);
   addsaver(chaosmode, "mode-chaos");
   addsaver(inv::on, "mode-Orb Strategy");
-  addsaver(purehepta, "mode-heptagonal", false);
+  addsaver(nontruncated, "mode-heptagonal", false);
   addsaver(peace::on, "mode-peace");
   addsaver(peace::otherpuzzles, "mode-peace-submode");
   addsaverenum(specialland, "land for special modes");
@@ -322,7 +322,7 @@ void resetModes() {
   if(shmup::on) restartGame('s');
   if(inv::on) restartGame('i');
   if(chaosmode) restartGame('C');
-  if(purehepta) restartGame('7');
+  if(nontruncated) restartGame('7');
   if(peace::on) restartGame('P');
 #if CAP_TOUR
   if(tour::on) restartGame('T');
@@ -415,11 +415,11 @@ void loadOldConfig(FILE *f) {
 
   shmup::loadConfig(f);
 
-  aa = rug::renderonce; bb = rug::rendernogl; cc = purehepta; dd = chaosmode; 
+  aa = rug::renderonce; bb = rug::rendernogl; cc = nontruncated; dd = chaosmode; 
   int ee = vid.steamscore;
   double rs = rug::scale;
   err=fscanf(f, "%d%d%d%d%lf%d%d", &aa, &bb, &rug::texturesize, &cc, &rs, &ee, &dd);
-  rug::renderonce = aa; rug::rendernogl = bb; purehepta = cc; chaosmode = dd; vid.steamscore = ee;
+  rug::renderonce = aa; rug::rendernogl = bb; nontruncated = cc; chaosmode = dd; vid.steamscore = ee;
   rug::scale = rs;
 
   aa=conformal::autobandhistory;

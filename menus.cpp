@@ -647,7 +647,7 @@ void showEuclideanMenu() {
     int ts = ginf[geometry].sides;
     int tv = ginf[geometry].vertex;
     int tq = ginf[geometry].quotientstyle;
-    int nom = (purehepta ? tv : tv+ts) * ((tq & qELLIP) ? 2 : 4);
+    int nom = (nontruncated ? tv : tv+ts) * ((tq & qELLIP) ? 2 : 4);
     int denom = (2*ts + 2*tv - ts * tv);
     
     dialog::addSelItem(XLAT("land"), XLAT1(linf[specialland].name), '5');
@@ -661,16 +661,16 @@ void showEuclideanMenu() {
     if(ts == 6 && tv == 3)
       dialog::addSelItem("truncated", "does not matter", 't');
     else
-      dialog::addBoolItem("truncated", !purehepta, 't');
+      dialog::addBoolItem("truncated", !nontruncated, 't');
   
     dialog::addBreak(50);
   
     int worldsize = denom ? nom/denom : 0;
     if(tq & qTORUS) worldsize = torusconfig::qty;
-    if(tq & qZEBRA) worldsize = purehepta ? 12 : 40;
+    if(tq & qZEBRA) worldsize = nontruncated ? 12 : 40;
     if(tq & qFIELD) {
       worldsize = size(currfp.matrices) / ts;
-      if(!purehepta) worldsize = ((ts+tv)*worldsize) / tv;
+      if(!nontruncated) worldsize = ((ts+tv)*worldsize) / tv;
       }
   
     dialog::addSelItem("sides per face", its(ts), 0);
@@ -750,7 +750,7 @@ void showEuclideanMenu() {
     dialog::init(XLAT("use this where?"));
     string truncatenames[2] = {" (t)", " (n)"};
   
-    dialog::addSelItem(XLAT("geometry"), XLAT(ginf[geometry].name) + truncatenames[purehepta], '5');
+    dialog::addSelItem(XLAT("geometry"), XLAT(ginf[geometry].name) + truncatenames[nontruncated], '5');
     dialog::addBreak(50);
     
     for(int i=0; i<euperpage; i++) {

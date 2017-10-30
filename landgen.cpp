@@ -137,7 +137,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
         if(getHemisphere(c,0) == 1)
           c->wall = waPalace;
         if(getHemisphere(c,0) == 3)
-          c->wall = purehepta ? waOpenGate : waClosedGate;
+          c->wall = nontruncated ? waOpenGate : waClosedGate;
         if(getHemisphere(c,0) == 4 && hrand(100) < 40)
           c->wall = waClosePlate;
         if(getHemisphere(c,0) == 6)
@@ -154,7 +154,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
         bool lookingForPrincess = !euclid && c->master->alt && !princess::challenge;
         
         bool pgate = false;
-        if(purehepta) {
+        if(nontruncated) {
           int i = fiftyval049(c);
           if(i >= 8 && i <= 14 && !polarb50(c)) pgate = true;
           }
@@ -190,9 +190,9 @@ void giantLandSwitch(cell *c, int d, cell *from) {
               }
             }
           }
-        else if((hrand(100) < (lookingForPrincess ? (purehepta ? 11 : 7) : 5) && cdist50(c)) ||
+        else if((hrand(100) < (lookingForPrincess ? (nontruncated ? 11 : 7) : 5) && cdist50(c)) ||
           (cdist50(c) == 0 && polarb50(c) && hrand(100) < 60)) {
-          c->wall = hrand(100) < (lookingForPrincess ? (purehepta ? 25 : 30):50) ? waClosePlate : waOpenPlate;
+          c->wall = hrand(100) < (lookingForPrincess ? (nontruncated ? 25 : 30):50) ? waClosePlate : waOpenPlate;
           }
         else if(hrand(100) < (lookingForPrincess ? 3 : 5))
           c->wall = waTrapdoor;
@@ -207,9 +207,9 @@ void giantLandSwitch(cell *c, int d, cell *from) {
 
       if(princess::generating) {
         // no Opening Plates nearby
-        if(d <= 7 && c->wall == waOpenPlate && !purehepta)
+        if(d <= 7 && c->wall == waOpenPlate && !nontruncated)
           c->wall = waNone;
-        if(d <= 7 && c->wall == waClosePlate && purehepta)
+        if(d <= 7 && c->wall == waClosePlate && nontruncated)
           c->wall = waOpenPlate;
         // no monsters nearby
         if(d>0) c->monst = moNone;
@@ -306,7 +306,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
             c->wall = waCavewall;
           else c->wall = waCavefloor;
           }
-        else if(purehepta) {
+        else if(nontruncated) {
           if(polarb50(c)) 
             c->wall = waCavewall;
           else c->wall = waCavefloor;
@@ -324,7 +324,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
         c->monst = moSeep;
     
       ONEMPTY {
-        if(hrand(purehepta?400:1000) < PT(100 + 2 * (kills[moMiner] + kills[moLancer] + kills[moFlailer]), 200) && notDippingFor(itEmerald)) {
+        if(hrand(nontruncated?400:1000) < PT(100 + 2 * (kills[moMiner] + kills[moLancer] + kills[moFlailer]), 200) && notDippingFor(itEmerald)) {
           // do not destroy walls!
           bool ok = true;
           for(int i=0; i<c->type; i++) if(c->mov[i]->wall == waCavewall) ok = false;
@@ -904,7 +904,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
     
     case laHalloween:
       if(d == 9) {
-        if(purehepta) {
+        if(nontruncated) {
           int fv = c->master->fiftyval;
           if(fv == 1 || fv == 4 || fv == 2) 
             c->wall = waChasm;
@@ -998,10 +998,10 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           if(c->type != 6) {
             int id = c->master->fiftyval;
             if(id == 1) c->wall = waCharged;
-            if(id == (elliptic && !purehepta ? 3 : 9)) c->wall = waGrounded;
+            if(id == (elliptic && !nontruncated ? 3 : 9)) c->wall = waGrounded;
             }
           }
-        else if(purehepta) {
+        else if(nontruncated) {
           int i = zebra40(c);
           if((i == 5 || i == 8) && hrand(100) < 20) c->wall = hrand(2) ? waCharged : waGrounded;
           else if(i == 15) c->wall = waSandstone;
@@ -1118,7 +1118,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
 
     case laHell:      
       if(d == 9) {
-        if(hrand(1000) < (purehepta ? 16 : 36) && celldist(c) >= 3) {
+        if(hrand(1000) < (nontruncated ? 16 : 36) && celldist(c) >= 3) {
           for(int i=0; i<c->type; i++) {
             cell *c2 = createMov(c, i);
             setdist(c2, d+1, c);
@@ -1170,7 +1170,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
     
     case laHive:
       if(d == 9) {
-        if(hrand(2000) < (chaosmode ? 1000 : purehepta?200:2) && !safety) 
+        if(hrand(2000) < (chaosmode ? 1000 : nontruncated?200:2) && !safety) 
           hive::createBugArmy(c);
         if(hrand(2000) < 100 && !c->wall && !c->item && !c->monst) {
           int nww = 0;
@@ -1390,14 +1390,14 @@ void giantLandSwitch(cell *c, int d, cell *from) {
       if(d == 7 && c->wall == waNone)
         buildPrizeMirror(c, 1000);    
       ONEMPTY {
-        if(hrand((doCross && celldist(c) <= 5) ?450:16000) < 30+items[itRedGem]+yendor::hardness() && !pseudohept(c) && !c->monst && !c->wall && !(purehepta && S3==4)) {
+        if(hrand((doCross && celldist(c) <= 5) ?450:16000) < 30+items[itRedGem]+yendor::hardness() && !pseudohept(c) && !c->monst && !c->wall && !(nontruncated && S3==4)) {
           int i = -1;
           for(int t=0; t<c->type; t++) if(c->mov[t]->mpdist > c->mpdist && !pseudohept(c->mov[t]))
             i = t;
           if(i != -1 && !peace::on) {
             c->monst = moHexSnake;
             preventbarriers(c);
-            int len = purehepta ? 2 : ROCKSNAKELENGTH;
+            int len = nontruncated ? 2 : ROCKSNAKELENGTH;
             cell *c2 = c;
             vector<cell*> rocksnake;
             while(--len) {
@@ -1412,14 +1412,14 @@ void giantLandSwitch(cell *c, int d, cell *from) {
               c2->monst = moHexSnakeTail;
               i = (j + (S6==8 ? 4 : (len%2 ? 2 : 4))) % S6;
               }
-            if(size(rocksnake) < ROCKSNAKELENGTH/2 && !purehepta) {
+            if(size(rocksnake) < ROCKSNAKELENGTH/2 && !nontruncated) {
               for(int i=0; i<size(rocksnake); i++) 
                 rocksnake[i]->monst = moNone;
               }
             else c2->mondir = NODIR;
             }
           }
-        else if(hrand(16000) < 50+items[itRedGem]+yendor::hardness() && (purehepta?hrand(10)<3:!ishept(c)) && !c->monst)
+        else if(hrand(16000) < 50+items[itRedGem]+yendor::hardness() && (nontruncated?hrand(10)<3:!ishept(c)) && !c->monst)
           c->monst = moRedTroll,
           c->mondir = NODIR;
         }
@@ -1435,7 +1435,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           if(hrand(1000) < 150 && celldist(c) >= 3 && !pseudohept(c)) 
             c->wall = waSmallTree;
           int q = 0;
-          if(!purehepta && !chaosmode) for(int i=0; i<c->type; i++) 
+          if(!nontruncated && !chaosmode) for(int i=0; i<c->type; i++) 
             if(c->mov[i] && !isWarped(c->mov[i]->land) && c->mov[i]->land != laCrossroads4) 
               q++;
           if(q == 1) c->wall = waWarpGate;
@@ -1444,7 +1444,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
         if(c->land == laWarpSea) {
           c->wall = waSea;
           int q = 0;
-          if(!purehepta && !chaosmode) for(int i=0; i<c->type; i++) 
+          if(!nontruncated && !chaosmode) for(int i=0; i<c->type; i++) 
             if(c->mov[i] && !isWarped(c->mov[i]->land)) q++;
           if(q == 1) c->wall = waWarpGate;
           }      
@@ -1744,7 +1744,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
     
     case laMirrorOld:
       ONEMPTY {
-        if((purehepta?pseudohept(c):!ishept(c)) && hrand(5000) < 120 && (peace::on || notDippingFor(itShard)))
+        if((nontruncated?pseudohept(c):!ishept(c)) && hrand(5000) < 120 && (peace::on || notDippingFor(itShard)))
           c->wall = hrand(2) ? waMirror : waCloud;
         else if(ishept(c) && hrand(5000) < 10 * PRIZEMUL)
           placePrizeOrb(c);
@@ -1757,7 +1757,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
     
     case laMirror:
       ONEMPTY {
-        if((purehepta?pseudohept(c):!ishept(c)) && hrand(1250) < 120 && (peace::on || notDippingFor(itShard)))
+        if((nontruncated?pseudohept(c):!ishept(c)) && hrand(1250) < 120 && (peace::on || notDippingFor(itShard)))
           c->wall = hrand(2) ? waMirror : waCloud;
         else if(ishept(c) && hrand(5000) < 10 * PRIZEMUL)
           placePrizeOrb(c);
@@ -1846,7 +1846,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
     case laCrossroads5:
       if(c->wall == waTower) c->land = laCamelot;
       ONEMPTY {
-        if(purehepta && c->land == laCrossroads5 && hrand(100) < 60)
+        if(nontruncated && c->land == laCrossroads5 && hrand(100) < 60)
           c->wall = waBarrier;
         else if(!ctof(c) && !inv::on && items[itShard] >= 10 && hrand(8000) < 120*orbcrossfun(items[itShard]))
           c->wall = hrand(2) ? waMirror : waCloud;
@@ -2058,7 +2058,7 @@ void setdist(cell *c, int d, cell *from) {
 
   if(buggyGeneration) {
     if(d < BARLEV) for(int i=0; i<c->type; i++) {
-      setdist(createMov(c, i), d+(purehepta?2:1), c);
+      setdist(createMov(c, i), d+(nontruncated?2:1), c);
       }
     if(d >= BARLEV) c->item = itBuggy2;
     return;
@@ -2142,7 +2142,7 @@ void setdist(cell *c, int d, cell *from) {
       placeLocalOrbs(c);
     }
 
-  if(purehepta && c->wall == waMirrorWall && c->land == laMirror)
+  if(nontruncated && c->wall == waMirrorWall && c->land == laMirror)
     c->land = laMirrorWall; // , c->item = itPirate; // not really a proper bugfix
 
   if(d == 7) playSeenSound(c);

@@ -79,7 +79,7 @@ bool handleKeyTour(int sym, int uni) {
   int flags = slides[currentslide].flags;
   if((sym == SDLK_RETURN || sym == SDLK_KP_ENTER) && (!inhelp || (flags & QUICKSKIP))) {
     popScreenAll();
-    if(geometry || purehepta) { 
+    if(geometry || nontruncated) { 
       popGame();
       if(!(flags & QUICKGEO)) return true; 
       }
@@ -91,7 +91,7 @@ bool handleKeyTour(int sym, int uni) {
     return true;
     }
   if(sym == SDLK_BACKSPACE) {
-    if(geometry || purehepta) { 
+    if(geometry || nontruncated) { 
       popGame();
       if(!(flags & QUICKGEO)) return true;
       }
@@ -141,7 +141,7 @@ bool handleKeyTour(int sym, int uni) {
         }
       }
     
-    if(geometry || purehepta) {
+    if(geometry || nontruncated) {
       popGame();
       presentation(pmGeometryReset);
       return true;
@@ -255,7 +255,7 @@ namespace ss {
     dialog::display();
     keyhandler = [] (int sym, int uni) {
       if(uni >= 'a' && uni < 'a' + sssize) {
-        if(geometry || purehepta) {
+        if(geometry || nontruncated) {
           popGame();
           presentation(pmGeometryReset);
           }

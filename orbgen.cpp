@@ -363,7 +363,7 @@ ld orbcrossfun(int tr) {
 
 bool buildPrizeMirror(cell *c, int freq) {
   if(inv::on) return false;
-  if(c->type == 7 && !purehepta) return false;
+  if(c->type == 7 && !nontruncated) return false;
   if(items[itShard] < 25) return false;
   if(freq && hrand(freq * 100 / orbprizefun(items[itShard])) >= 100)
     return false;

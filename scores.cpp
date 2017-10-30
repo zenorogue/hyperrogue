@@ -43,7 +43,7 @@ int modediff(score *S) {
   if(S->box[238]) g = gSphere;
   if(S->box[239]) g = gElliptic;
   if(max(S->box[197], 1) != multi::players) diff += 8;
-  if(S->box[186] != purehepta) diff += 16;
+  if(S->box[186] != nontruncated) diff += 16;
   if(S->box[196] != chaosmode) diff += 32;
   if(S->box[119] != shmup::on) diff += 64;
   if(pureHardcore() && !isHardcore(S)) diff += 128;

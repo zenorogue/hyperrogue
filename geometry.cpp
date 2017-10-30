@@ -97,7 +97,7 @@ void precalc() {
   else {
     hcrossf = hdist(xpush(tessf) * C0, spin(2*M_PI/S7) * xpush(tessf) * C0) / 2;
     }
-  crossf = purehepta ? tessf : hcrossf;
+  crossf = nontruncated ? tessf : hcrossf;
   
   fmin = 0, fmax = tessf;
   for(int p=0; p<100; p++) {
@@ -110,9 +110,9 @@ void precalc() {
     }
   hexf = fmin;
   
-  rhexf = purehepta ? hcrossf : hexf;
+  rhexf = nontruncated ? hcrossf : hexf;
   
-  if(!euclid && !purehepta && !(S7&1))
+  if(!euclid && !nontruncated && !(S7&1))
     hexshift = ALPHA/2 + ALPHA * ((S7-1)/2) + M_PI;
 
   finish:

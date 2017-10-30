@@ -91,7 +91,7 @@ heptagon *buildHeptagon(heptagon *parent, int d, hstate s, int pard = 0, int fix
   if(pard == 0) {
     h->dm4 = parent->dm4+1;
     if(fixdistance != COMPUTE) h->distance = fixdistance;
-    else if(purehepta) h->distance = parent->distance + 1;
+    else if(nontruncated) h->distance = parent->distance + 1;
     else if(parent->s == hsOrigin) h->distance = parent->distance + 2;
     else if(S3 == 4) {
       h->distance = parent->distance + 2;
@@ -123,7 +123,7 @@ heptagon *buildHeptagon(heptagon *parent, int d, hstate s, int pard = 0, int fix
     else h->distance = parent->distance + 2;
     }
   else {
-    h->distance = parent->distance - (purehepta?1:2);
+    h->distance = parent->distance - (nontruncated?1:2);
     if(S3 == 4 && S7 == 5) {
       if(h->s == hsOrigin) {
         printf("had to cheat!\n");

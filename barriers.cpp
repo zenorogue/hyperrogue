@@ -8,20 +8,20 @@ bool checkBarriersFront(cellwalker bb, int q, bool cross) {
   if(bb.c->mpdist < BARLEV) return false;
   if(bb.c->mpdist == BUGLEV) return false;
   if(bb.c->bardir != NODIR) return false;
-  if(bb.spin == (purehepta ? 3 : 0)) {q--; if(!q) return true; }
+  if(bb.spin == (nontruncated ? 3 : 0)) {q--; if(!q) return true; }
 
   if(!cross) for(int i=0; i<7; i++) {
     cellwalker bb2 = bb;
     cwspin(bb2, i); cwstep(bb2); 
     if(bb2.c->bardir != NODIR) return false; 
-    if(!purehepta) { 
+    if(!nontruncated) { 
       cwspin(bb2, 4); cwstep(bb2);
       if(bb2.c->bardir != NODIR) return false;
       }
     }
 
   cwstep(bb); 
-  if(!purehepta) { cwspin(bb, 3); cwstep(bb); cwspin(bb, 3); cwstep(bb); }
+  if(!nontruncated) { cwspin(bb, 3); cwstep(bb); cwspin(bb, 3); cwstep(bb); }
   return checkBarriersBack(bb, q);
   }
 
@@ -48,13 +48,13 @@ bool checkBarriersBack(cellwalker bb, int q, bool cross) {
     cellwalker bb2 = bb;
     cwspin(bb2, i); cwstep(bb2); 
     if(bb2.c->bardir != NODIR) return false;
-    if(!purehepta) {
+    if(!nontruncated) {
       cwspin(bb2, 4); cwstep(bb2);
       if(bb2.c->bardir != NODIR) return false;
       }
     }
 
-  cwspin(bb, 3); cwstep(bb); cwspin(bb, purehepta ? 5 : 4); 
+  cwspin(bb, 3); cwstep(bb); cwspin(bb, nontruncated ? 5 : 4); 
   // bool create = cwstepcreates(bb);
   cwstep(bb); cwspin(bb, 3); 
   // if(create && bb.spin == 0) return true;
@@ -87,12 +87,12 @@ bool checkBarriersNowall(cellwalker bb, int q, int dir, eLand l1=laNone, eLand l
       }
     }
   
-  if(purehepta && S3==4) {
+  if(nontruncated && S3==4) {
     cwspin(bb, dir);
     cwstep(bb);
     cwspin(bb, dir);
     }
-  else if(purehepta) {
+  else if(nontruncated) {
     cwspin(bb, 3*dir);
     cwstep(bb);
     cwspin(bb, -3*dir);
@@ -158,7 +158,7 @@ void setland(cell *c, eLand l) {
 
 void extendcheck(cell *c) {
   return;
-  if(!purehepta && c->landparam == 0 && c->barleft != NOWALLSEP) {
+  if(!nontruncated && c->landparam == 0 && c->barleft != NOWALLSEP) {
     raiseBuggyGeneration(c, "extend error");
     }
   }
@@ -176,7 +176,7 @@ void extendBarrierFront(cell *c) {
   cellwalker bb(c, c->bardir); setbarrier(bb.c);
   cwstep(bb); 
   
-  if(!purehepta) {
+  if(!nontruncated) {
     bb.c->barleft = c->barleft;
     bb.c->barright = c->barright;
     setbarrier(bb.c);
@@ -212,7 +212,7 @@ void extendBarrierFront(cell *c) {
   extendBarrier(bb.c);
   
   for(int a=-3; a<=3; a++) if(a) {
-    bb.c = c; bb.spin = c->bardir; cwspin(bb, purehepta?-a:a); cwstep(bb); 
+    bb.c = c; bb.spin = c->bardir; cwspin(bb, nontruncated?-a:a); cwstep(bb); 
     setland(bb.c, a > 0 ? c->barright : c->barleft);
     }
   }
@@ -224,8 +224,8 @@ void extendBarrierBack(cell *c) {
   extendcheck(c);
 
   cellwalker bb(c, c->bardir); setbarrier(bb.c);
-  cwspin(bb, 3); cwstep(bb); cwspin(bb, purehepta?5:4); 
-  setland(bb.c, purehepta ? c->barleft : c->barright); 
+  cwspin(bb, 3); cwstep(bb); cwspin(bb, nontruncated?5:4); 
+  setland(bb.c, nontruncated ? c->barleft : c->barright); 
   cwstep(bb); cwspin(bb, 3);
   bb.c->bardir = bb.spin;
   bb.c->barleft = c->barright;
@@ -236,7 +236,7 @@ void extendBarrierBack(cell *c) {
 //printf("[D heat %d]\n", (ht^11));
 
   // needed for CR2 to work
-  if(!purehepta) { 
+  if(!nontruncated) { 
     cwstep(bb); 
     bb.c->barleft = c->barright;
     bb.c->barright = c->barleft;
@@ -255,12 +255,12 @@ void extendNowall(cell *c) {
   c->barleft = NOWALLSEP_USED;
   cellwalker cw(c, c->bardir);
   
-  if(!purehepta) {
+  if(!nontruncated) {
     cwstep(cw);
     setland(cw.c, c->barright);
     }
   
-  if(purehepta && S3 == 4) {
+  if(nontruncated && S3 == 4) {
     cwstep(cw);
     setland(cw.c, c->barright);
     cw.c->barleft = NOWALLSEP_USED;
@@ -270,12 +270,12 @@ void extendNowall(cell *c) {
     }
   
   for(int i=-1; i<2; i+=2) {  
-    if(purehepta && S3==4) {
+    if(nontruncated && S3==4) {
       cwspin(cw, i);
       cwstep(cw);
       cwspin(cw, i);
       }
-    else if(purehepta) {
+    else if(nontruncated) {
       cwspin(cw, 3*i);
       cwstep(cw);
       cwspin(cw, -3*i);
@@ -286,7 +286,7 @@ void extendNowall(cell *c) {
       }
     if(cw.c->barleft != NOWALLSEP_USED) {
       cw.c->barleft = NOWALLSEP;
-      if(S3 == 4 && purehepta) {
+      if(S3 == 4 && nontruncated) {
         cw.c->barright = c->barright;
         cw.c->bardir = cw.spin;
         setland(cw.c, c->land);
@@ -298,19 +298,19 @@ void extendNowall(cell *c) {
           printf("barright\n"); 
           }// NONEDEBUG
         setland(cw.c, c->barright);
-        if(!purehepta) cwspin(cw, i);
+        if(!nontruncated) cwspin(cw, i);
         cw.c->bardir = cw.spin;
-        if(!purehepta) cwspin(cw, -i);
+        if(!nontruncated) cwspin(cw, -i);
         }
       extendcheck(cw.c);
       extendBarrier(cw.c);
       }
-    if(purehepta && S3==4) {
+    if(nontruncated && S3==4) {
       cwspin(cw, -i);
       cwstep(cw);
       cwspin(cw, -i);
       }
-    else if(purehepta) {
+    else if(nontruncated) {
       cwspin(cw, 3*i);
       cwstep(cw);
       cwspin(cw, -3*i);
@@ -325,7 +325,7 @@ void extendNowall(cell *c) {
 bool gotit = false;
 
 void extendCR5(cell *c) {
-  if(purehepta) return;
+  if(nontruncated) return;
 // if(c->barright == laCrossroads5) extendCR5(c);
   eLand forbidden = c->barleft;
   eLand forbidden2 = laNone;
@@ -391,14 +391,14 @@ void extendBarrier(cell *c) {
   
   if(firstmirror && c->barleft == laMirror && hrand(100) < 60) {
     cellwalker cw(c, c->bardir);
-    if(!purehepta) cwstep(cw);
+    if(!nontruncated) cwstep(cw);
     if(cw.c->land != laMirrorWall)
       if(buildBarrier6(cw, 1)) return;
     }
     
-  if(firstmirror && (purehepta?c->barleft == laMirror : c->barright == laMirror) && hrand(100) < 60) {
+  if(firstmirror && (nontruncated?c->barleft == laMirror : c->barright == laMirror) && hrand(100) < 60) {
     cellwalker cw(c, c->bardir);
-    if(purehepta) {
+    if(nontruncated) {
       cwspin(cw, -3); cwstep(cw); cwspin(cw, -3);
 //    cwspin(cw, 3); cwstep(cw); cwspin(cw, -2); cwstep(cw); cwspin(cw, 3);
       }
@@ -414,7 +414,7 @@ void extendBarrier(cell *c) {
     ) {
     
     cellwalker cw(c, c->bardir);
-    if(purehepta) {
+    if(nontruncated) {
       cwstep(cw); 
       if(isbar4(cw.c)) {
         cwstep(cw); cwspin(cw, 3); cwstep(cw); cwspin(cw, -1); cwstep(cw);
@@ -478,7 +478,7 @@ bool buildBarrier6(cellwalker cw, int type) {
   
   if(buggyGeneration) return true;
 
-  if(!purehepta) {
+  if(!nontruncated) {
     cwstep(b[0]);
     cwspin(b[1], 1); cwstep(b[1]); cwspin(b[1], 3); cwstep(b[1]); 
     cwspin(b[2], 4); cwstep(b[2]);
@@ -506,18 +506,18 @@ bool buildBarrier6(cellwalker cw, int type) {
     }
    
   if(type == 1) {  
-    if(!(purehepta?checkBarriersFront:checkBarriersBack)(b[1], 6, true)) return false;
-    if(!(purehepta?checkBarriersFront:checkBarriersBack)(b[2], 6, true)) return false;
+    if(!(nontruncated?checkBarriersFront:checkBarriersBack)(b[1], 6, true)) return false;
+    if(!(nontruncated?checkBarriersFront:checkBarriersBack)(b[2], 6, true)) return false;
     }
   else {
-    if(!(purehepta?checkBarriersFront:checkBarriersBack)(b[0], 6, true)) return false;
-    if(!(purehepta?checkBarriersFront:checkBarriersBack)(b[3], 6, true)) return false;
+    if(!(nontruncated?checkBarriersFront:checkBarriersBack)(b[0], 6, true)) return false;
+    if(!(nontruncated?checkBarriersFront:checkBarriersBack)(b[3], 6, true)) return false;
     }
   
   for(int d=0; d<4; d++) {
     b[d].c->bardir = b[d].spin;
     
-    if(purehepta) {
+    if(nontruncated) {
       b[0].c->barleft = laMirrored, b[0].c->barright = laMirrored2;
       b[1].c->barleft = laMirror, b[1].c->barright = laMirrored;
       b[2].c->barleft = laMirrored2, b[2].c->barright = laMirrored;
@@ -530,17 +530,17 @@ bool buildBarrier6(cellwalker cw, int type) {
       b[3].c->barleft = laMirrored2, b[3].c->barright = laMirrored;
       }
   
-    (purehepta?extendBarrierFront:extendBarrierBack)(b[d].c);
+    (nontruncated?extendBarrierFront:extendBarrierBack)(b[d].c);
     }  
 
-  if(purehepta && false) {
+  if(nontruncated && false) {
     for(int z=0; z<4; z++)
       b[z].c->item = eItem(1+z+4*type);
     for(int a=0; a<4; a++) 
       extendBarrierBack(cwpeek(b[a],0));
     }
 
-  if(!purehepta) {
+  if(!nontruncated) {
     setland(cwpeek(cw, 1), laMirrorWall);
     setland(cwpeek(cw, 2), laMirrored);
     setland(cwpeek(cw, 3), laMirrorWall2);
@@ -594,11 +594,11 @@ bool buildBarrier4(cell *c, int d, int mode, eLand ll, eLand lr) {
   cellwalker b1(c, d);
 
   cellwalker b2(c, d);
-  if(purehepta) cwstep(b2);
+  if(nontruncated) cwstep(b2);
   else { cwstep(b2); cwspin(b2, 3); cwstep(b2); cwspin(b2, 3); cwstep(b2); }
   
   cellwalker b3(c, d);
-  if(purehepta) {
+  if(nontruncated) {
     cwspin(b3, -1); cwstep(b3); cwspin(b3, 3);
     }
   else {
@@ -606,7 +606,7 @@ bool buildBarrier4(cell *c, int d, int mode, eLand ll, eLand lr) {
     }
 
   cellwalker b4(c, d);
-  if(purehepta) {
+  if(nontruncated) {
     cwspin(b4, 1); cwstep(b4); cwspin(b4, -3);
     }
   else {
@@ -642,16 +642,16 @@ bool buildBarrier4(cell *c, int d, int mode, eLand ll, eLand lr) {
   c= b4.c; d=b4.spin;
   c->bardir = d, c->barleft = ll, c->barright = xr; extendBarrierFront(c);
   
-  if(!purehepta) for(int a=-3; a<=3; a++) if(a) {
+  if(!nontruncated) for(int a=-3; a<=3; a++) if(a) {
     setland(cwpeek(b1, a), a > 0 ? lr : ll);
     setland(cwpeek(b2, a), a > 0 ? xr : xl);
     setland(cwpeek(b3, a), a > 0 ? lr : xl);
     setland(cwpeek(b4, a), a > 0 ? xr : ll);
     }
   
-  if(purehepta) setbarrier(b1.c), setbarrier(b2.c), setbarrier(b3.c), setbarrier(b4.c);
+  if(nontruncated) setbarrier(b1.c), setbarrier(b2.c), setbarrier(b3.c), setbarrier(b4.c);
 
-  if(!purehepta) {
+  if(!nontruncated) {
     cell *cp;
     cp = cwpeek(b1, 0);
     cp->barleft = ll; cp->barright = lr; setbarrier(cp);
@@ -780,7 +780,7 @@ bool buildBarrierNowall(cell *c, eLand l2, bool force) {
     }
   
   for(int i=0; i<3; i++) {
-    int d = (S3>3 && purehepta) ? (2+(i&1)) : dtab[i];
+    int d = (S3>3 && nontruncated) ? (2+(i&1)) : dtab[i];
     if(force) d=1;
     cellwalker cw(c, d);
     

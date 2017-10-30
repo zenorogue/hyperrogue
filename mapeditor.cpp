@@ -316,7 +316,7 @@ namespace mapeditor {
                 
                 int t4 = t>>2, tcdir = 0;
                 
-                if(purehepta) tcdir = t^1;
+                if(nontruncated) tcdir = t^1;
                 
                 else if(t4 == 10) tcdir = t-20;
                 else if(t4 >= 4 && t4 < 7) tcdir = 40 + (t&3);
@@ -2181,7 +2181,7 @@ lessalphaif(col, behindsphere(V), behindsphere(gmatrix[c2]))
       case patBigTriangles: {
         if(pseudohept(c) && !euclid) for(int i=0; i<S7; i++) 
           if(c->master->move[i] < c->master) {
-            queueline(tC0(V), V*xspinpush0((purehepta?M_PI:0) -2*M_PI*i/S7, tessf), col1, 2);
+            queueline(tC0(V), V*xspinpush0((nontruncated?M_PI:0) -2*M_PI*i/S7, tessf), col1, 2);
             }
         break;
         }
@@ -2190,21 +2190,21 @@ lessalphaif(col, behindsphere(V), behindsphere(gmatrix[c2]))
         if(pseudohept(c) && !euclid) for(int i=0; i<S7; i++) 
           if(c->master->move[i] && c->master->move[i] < c->master && c->master->move[i]->dm4 == c->master->dm4) {
             cell *c2 = c->master->move[i]->c7;
-            queueline(tC0(V), V*xspinpush0((purehepta?M_PI:0) -2*M_PI*i/S7, tessf), col2, 2);
+            queueline(tC0(V), V*xspinpush0((nontruncated?M_PI:0) -2*M_PI*i/S7, tessf), col2, 2);
             }
         break;
         }
         
       case patTree:
         if(ctof(c) && !euclid) 
-          queueline(tC0(V), V*ddi0(purehepta?S42:0, tessf), col1, 2);
+          queueline(tC0(V), V*ddi0(nontruncated?S42:0, tessf), col1, 2);
         break;
       
       case patAltTree:
         if(ctof(c) && !euclid && c->master->alt) {
           for(int i=0; i<S7; i++)
             if(c->master->move[i] && c->master->move[i]->alt == c->master->alt->move[0])
-              queueline(tC0(V), V*xspinpush0((purehepta?M_PI:0) -2*M_PI*i/S7, tessf), col, 2);
+              queueline(tC0(V), V*xspinpush0((nontruncated?M_PI:0) -2*M_PI*i/S7, tessf), col, 2);
           }
         break;
       

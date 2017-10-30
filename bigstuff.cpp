@@ -579,7 +579,7 @@ void buildEquidistant(cell *c) {
   if(c->landparam > 30 && b == laOcean && !generatingEquidistant && hrand(10) < 5) 
     buildAnotherEquidistant(c);
 
-  if(c->landparam > HAUNTED_RADIUS+5 && b == laGraveyard && !generatingEquidistant && hrand(100) < (purehepta?25:5) && items[itBone] >= 10) 
+  if(c->landparam > HAUNTED_RADIUS+5 && b == laGraveyard && !generatingEquidistant && hrand(100) < (nontruncated?25:5) && items[itBone] >= 10) 
     buildAnotherEquidistant(c);
   }
 
@@ -913,7 +913,7 @@ void buildBigStuff(cell *c, cell *from) {
   
   else if(weirdhyperbolic) ; // non-Nowall barriers not implemented yet in weird hyperbolic
   
-  else if(c->land == laCrossroads2 && !purehepta)
+  else if(c->land == laCrossroads2 && !nontruncated)
     buildCrossroads2(c);
   
   else if(c->land == laPrairie && c->LHU.fi.walldist == 0) {
@@ -952,7 +952,7 @@ void buildBigStuff(cell *c, cell *from) {
     c->land == laHaunted ? 0 :
     (c->land == laGraveyard && !deepOcean) ? 0 :
     (c->land == laGraveyard && items[itBone] >= 10) ? 120 :
-    c->land == laOcean ? (deepOcean ? (purehepta ? 250 : 2000) : 0) :
+    c->land == laOcean ? (deepOcean ? (nontruncated ? 250 : 2000) : 0) :
     c->land == laDragon ? 120 :
     50))
   {
@@ -1006,7 +1006,7 @@ void buildBigStuff(cell *c, cell *from) {
 
     if(c->land == laOcean && ctof(c) && deepOcean && !generatingEquidistant && !peace::on &&
       (quickfind(laWhirlpool) || (
-        hrand(2000) < (purehepta ? 500 : 1000) && !tactic::on && !yendor::on)))
+        hrand(2000) < (nontruncated ? 500 : 1000) && !tactic::on && !yendor::on)))
       createAlternateMap(c, 2, hsA);
 
     if(c->land == laCaribbean && ctof(c))
@@ -1117,7 +1117,7 @@ void moreBigStuff(cell *c) {
             }
           if(q == 1) buildCamelotWall(c);
           // towers of Camelot
-          if(q == 0 && !purehepta) {
+          if(q == 0 && !nontruncated) {
             c->monst = moKnight;
             c->wall = waTower;
             forCellEx(c2, c) {
@@ -1142,7 +1142,7 @@ void moreBigStuff(cell *c) {
         }
       if(d == 1) {
         // roughly as many knights as table cells
-        if(hrand(purehepta ? 2618 : 1720) < 1000) 
+        if(hrand(nontruncated ? 2618 : 1720) < 1000) 
           c->monst = moKnight;
         if(!euclid) for(int i=0; i<S7; i++) generateAlts(c->master->move[i]);
         for(int i=0; i<c->type; i++) 
@@ -1176,7 +1176,7 @@ void moreBigStuff(cell *c) {
         c->land = laTemple, c->wall = waNone, c->monst = moNone, c->item = itNone;
         }
       if(d % TEMPLE_EACH==0) {
-        if((weirdhyperbolic && purehepta) ? hrand(100) < 50 : pseudohept(c)) 
+        if((weirdhyperbolic && nontruncated) ? hrand(100) < 50 : pseudohept(c)) 
           c->wall = waColumn;
         else {
           if(!euclid) for(int i=0; i<S7; i++) generateAlts(c->master->move[i]);

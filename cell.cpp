@@ -68,7 +68,7 @@ hrmap *newAltMap(heptagon *o) { return new hrmap_alternate(o); }
 
 struct hrmap_hyperbolic : hrmap {
   heptagon *origin;
-  bool ispurehepta;
+  bool isnontruncated;
   hrmap_hyperbolic() {
     // printf("Creating hyperbolic map: %p\n", this);
     origin = new heptagon;
@@ -84,14 +84,14 @@ struct hrmap_hyperbolic : hrmap {
     h.spintable = 0;
     h.alt = NULL;
     h.distance = 0;
-    ispurehepta = purehepta;
+    isnontruncated = nontruncated;
     h.c7 = newCell(S7, origin);
     }
   heptagon *getOrigin() { return origin; }
   ~hrmap_hyperbolic() {
     DEBMEM ( verifycells(origin); )
     // printf("Deleting hyperbolic map: %p\n", this);
-    dynamicval<bool> ph(purehepta, ispurehepta);
+    dynamicval<bool> ph(nontruncated, isnontruncated);
     clearfrom(origin);
     }
   void verify() { verifycells(origin); }
@@ -110,10 +110,10 @@ int spherecells() {
   
 struct hrmap_spherical : hrmap {
   heptagon *dodecahedron[12];
-  bool ispurehepta;
+  bool isnontruncated;
 
   hrmap_spherical() {
-    ispurehepta = purehepta;
+    isnontruncated = nontruncated;
     for(int i=0; i<spherecells(); i++) {
       heptagon& h = *(dodecahedron[i] = new heptagon);
       h.s = hsOrigin;
@@ -178,7 +178,7 @@ struct hrmap_spherical : hrmap {
   heptagon *getOrigin() { return dodecahedron[0]; }
 
   ~hrmap_spherical() {
-    dynamicval<bool> ph(purehepta, ispurehepta);
+    dynamicval<bool> ph(nontruncated, isnontruncated);
     for(int i=0; i<spherecells(); i++) clearHexes(dodecahedron[i]);
     for(int i=0; i<spherecells(); i++) delete dodecahedron[i];
     }    
@@ -540,7 +540,7 @@ cell *createMov(cell *c, int d) {
     }
   
   if(c->mov[d]) return c->mov[d];
-  else if(purehepta) {
+  else if(nontruncated) {
     heptagon *h2 = createStep(c->master, d);
     merge(c,d,h2->c7,c->master->spin(d),false);
     }
@@ -659,7 +659,7 @@ heptagon deletion_marker;
 
 void clearHexes(heptagon *at) {
   if(at->c7) {
-    if(!purehepta) for(int i=0; i<7; i++)
+    if(!nontruncated) for(int i=0; i<7; i++)
       clearcell(at->c7->mov[i]);
     clearcell(at->c7);
     }
@@ -699,7 +699,7 @@ void verifycell(cell *c) {
   for(int i=0; i<t; i++) {
     cell *c2 = c->mov[i];
     if(c2) {
-      if(!euclid && !purehepta && c == c->master->c7) verifycell(c2);
+      if(!euclid && !nontruncated && c == c->master->c7) verifycell(c2);
       if(c2->mov[c->spn(i)] && c2->mov[c->spn(i)] != c) {
         printf("cell error %p:%d [%d] %p:%d [%d]\n", c, i, c->type, c2, c->spn(i), c2->type);
         exit(1);
@@ -1434,7 +1434,7 @@ int celldistance(cell *c1, cell *c2) {
       if(ac == xtgt) return d;
       ac = chosenDown(ac, 1, 1, celldist);
       if(ac == tgt) return d+2;
-      if(!purehepta) {
+      if(!nontruncated) {
         ac = chosenDown(ac, 1, 1, celldist);
         if(ac == tgt) {
           if(chosenDown(ac0, 1, 0, celldist) ==

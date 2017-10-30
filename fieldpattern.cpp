@@ -382,7 +382,7 @@ struct fpattern {
       dists[at] = i;
       for(int q=0; q<S7; q++) {
         dists[at] = i;
-        if(purehepta)
+        if(nontruncated)
           indist[i+1].push_back(connections[at]);
         else {
           indist[i+2].push_back(connections[at]);
@@ -396,7 +396,7 @@ struct fpattern {
   
   void analyze() {
     
-    DEBB(DF_FIELD, (debugfile, "purehepta = %d\n", purehepta));
+    DEBB(DF_FIELD, (debugfile, "nontruncated = %d\n", nontruncated));
     int N = connections.size();
     
     markers.resize(N);
@@ -511,7 +511,7 @@ struct fpattern {
         W = mmul(Wall, W);
         }
       }
-    dijkstra(purehepta ? distriver : distflower, indist);
+    dijkstra(nontruncated ? distriver : distflower, indist);
     
     W = matrices[riverid];
     for(int i=0; i<wallorder; i++) {
@@ -533,10 +533,10 @@ struct fpattern {
       SETDIST(W, 1, itGold)
       W = mmul(W, Wall);
       }
-    int riverdist = dijkstra(purehepta ? distflower : distriver, indist);
+    int riverdist = dijkstra(nontruncated ? distflower : distriver, indist);
     DEBB(DF_FIELD, (debugfile, "river dist = %d\n", riverdist));
     
-    if(!purehepta) {
+    if(!nontruncated) {
       W = matrices[riverid];
       for(int i=0; i<wallorder; i++) {
         SETDIST(W, 0, itStatue)

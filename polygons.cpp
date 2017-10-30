@@ -718,12 +718,12 @@ hyperpoint hpxd(ld d, ld x, ld y, ld z) {
 double scalef;
 
 hyperpoint hpxyzsc(double x, double y, double z) {
-  if(purehepta) return hpxd(scalef, x, y, z);
+  if(nontruncated) return hpxd(scalef, x, y, z);
   else return hpxyz(x,y,z);
   }
 
 hyperpoint turtlevertex(int u, double x, double y, double z) {
-  ld scale = purehepta ? scalef : 1;
+  ld scale = nontruncated ? scalef : 1;
   if(u) scale /= 2;
   return hpxd(scale, x, y, z);
   }
@@ -756,7 +756,7 @@ void bshape(hpcshape& sh, int p, double shzoom, int shapeid, double bonus = 0) {
   while(polydata[whereis + 2*qty] != NEWSHAPE) qty++;
   double shzoomx = shzoom;
   double shzoomy = shzoom;
-  if(shzoom == WOLF) shzoomx = 1.5 * (purehepta ? crossf / hcrossf : 1), shzoomy = 1.6 * (purehepta ? crossf / hcrossf : 1);
+  if(shzoom == WOLF) shzoomx = 1.5 * (nontruncated ? crossf / hcrossf : 1), shzoomy = 1.6 * (nontruncated ? crossf / hcrossf : 1);
   int rots2 = rots;
   // shapes 368..370 are specially designed
   if(!(shapeid >= 368 && shapeid <= 370)) {
@@ -862,21 +862,21 @@ void buildpolys() {
     }
   
   // scales
-  scalef = purehepta ? crossf / hcrossf7 : hcrossf / hcrossf7;
+  scalef = nontruncated ? crossf / hcrossf7 : hcrossf / hcrossf7;
 
   if(euclid) scalef *= .52/crossf;
 
-  double scalef2 = purehepta ? crossf / hcrossf7 * .88 : euclid ? scalef : hcrossf / hcrossf7;
+  double scalef2 = nontruncated ? crossf / hcrossf7 * .88 : euclid ? scalef : hcrossf / hcrossf7;
   
   double spzoom = sphere ? 1.4375 : 1;
   
   double spzoom6 = sphere ? 1.2375 : 1;
   double spzoom7 = sphere ? .8 : 1;
 
-  double spzoomd7 = (purehepta && sphere) ? 1 : spzoom7;
+  double spzoomd7 = (nontruncated && sphere) ? 1 : spzoom7;
   
   double fac80 = geometry == g45 ? 1.4 : geometry == g46 ? 1.2 : geometry == gOctagon ? .7 : .8;
-  double fac94 = euclid ? .8 : (S6==4) ? (purehepta ? 1.1 : .9) : .94;
+  double fac94 = euclid ? .8 : (S6==4) ? (nontruncated ? 1.1 : .9) : .94;
   
   if(euclid) fac80 = fac94 = .9;
   
@@ -891,11 +891,11 @@ void buildpolys() {
 #define SHADMUL (S3==4 ? 1.05 : 1.3)
   
   // procedural floors
-  double shexf = purehepta ? crossf* .55 : hexf;
+  double shexf = nontruncated ? crossf* .55 : hexf;
   
   double p = -.006;
   
-  int td = ((purehepta || euclid) && !(S7&1)) ? S42+S6 : 0;
+  int td = ((nontruncated || euclid) && !(S7&1)) ? S42+S6 : 0;
   
   bool a4 = S6 == 8; 
   
@@ -915,7 +915,7 @@ void buildpolys() {
 #define ROTS4(x) (sphere && S7 == 4?x:0)
 #define ROT38(x) (S7 == 8 ? x:0)
 
-#define SCAP4(x) (a4&&purehepta?x:1)
+#define SCAP4(x) (a4&&nontruncated?x:1)
 
   double trihepta0 = scalef*spzoom6*(.2776+p) * SCA4(1.3) * SCA46(.975) * SCA47(.85) * bscale6 * (S7==8?.9:1);
   double trihepta1 = (sphere ? .54 : scalef*spzoom6*(.5273-2*p) * SCA4(.8) * SCA46(1.075)) * (sphere&&S7==4?1.3:1) * bscale7;
@@ -954,7 +954,7 @@ void buildpolys() {
 
   bool strict = false;
   
-  if(a4 && purehepta) fac94 *= 1.1;
+  if(a4 && nontruncated) fac94 *= 1.1;
   
   double floorrad0 = shexf*fac80*spzoom;
   
@@ -1096,7 +1096,7 @@ void buildpolys() {
   hpcpush(ddi(0, -shexf*2.4) * C0);
   
   bshape(shMirror, PPR_WALL);
-  if(purehepta) {
+  if(nontruncated) {
     for(int t=0; t<=S7; t++) hpcpush(ddi(t*12, shexf*MF(fac80,7)) * C0);
     }
   else {
@@ -1160,9 +1160,9 @@ void buildpolys() {
     }
   
   double disksize = crossf;
-  if(purehepta && S7 == 8) disksize *= 2;
+  if(nontruncated && S7 == 8) disksize *= 2;
   else if(S7 == 8) disksize *= 1.5;
-  else if(purehepta && S6 == 8) disksize *= 1.5;
+  else if(nontruncated && S6 == 8) disksize *= 1.5;
 
   bshape(shDisk, PPR_ITEM);
   for(int i=0; i<=S84; i+=S3)
@@ -1369,9 +1369,9 @@ void buildpolys() {
   
   if(S7 == 8) spzoom6 *= .9;
   
-  if(a4 && !purehepta) spzoom6 *= 1.9, spzoom7 *= .9, spzoomd7 *= .9;
-  if(a4 && !purehepta && S7 == 6) spzoom6 *= .9;
-  if(a4 && !purehepta && S7 == 7) spzoom6 *= .85;
+  if(a4 && !nontruncated) spzoom6 *= 1.9, spzoom7 *= .9, spzoomd7 *= .9;
+  if(a4 && !nontruncated && S7 == 6) spzoom6 *= .9;
+  if(a4 && !nontruncated && S7 == 7) spzoom6 *= .85;
   
   double espzoom6 = spzoom6, espzoomd7 = spzoomd7;
   
@@ -1401,12 +1401,12 @@ void buildpolys() {
   bshape(shChargedFloor[0], PPR_FLOOR, scalef*espzoom6*(sphere?.9:1)*ffscale2, 7, ffspin2);
   bshape(shChargedFloor[1], PPR_FLOOR, scalef*spzoomd7, 9);
   bshape(shChargedFloor[2], PPR_FLOOR, scalef*espzoom6, 7);
-  bshape(shChargedFloor[3], 12, spzoomd7 * (sphere&&purehepta?.9:1) * SCA4(1.2), 10); // purehepta variant
+  bshape(shChargedFloor[3], 12, spzoomd7 * (sphere&&nontruncated?.9:1) * SCA4(1.2), 10); // nontruncated variant
 
   bshape(shSStarFloor[0], PPR_FLOOR, scalef*spzoom6*(sphere?.8:1)*ffscale2, 11, ROT4(.775));
   bshape(shSStarFloor[1], PPR_FLOOR, scalef*spzoomd7*SCA4(.85), 12, octroll);
   bshape(shOverFloor[0], PPR_FLOOR, scalef*spzoom * SCA47(1.3) * SCA45(1.3) * SCA46(1.1), 13, ROT47(-.75) + ROT45(-.7)+ROT46(.9));
-  if(purehepta) {
+  if(nontruncated) {
     if(a4) bshape(shOverFloor[1], PPR_FLOOR, 1, 368 + S7 - 5, 0);
     else bshape(shOverFloor[1], PPR_FLOOR, (sphere ? .83 : 1) * SCA38(1.3), 14, octroll + ROT38(.4));
     }
@@ -1415,11 +1415,11 @@ void buildpolys() {
   bshape(shTriFloor[0], PPR_FLOOR, scalef*espzoom6*(sphere?.9:1)*ffscale2*SCA4(0.9), 17, ffspin2 + ROT47(.1));
   bshape(shTriFloor[1], PPR_FLOOR, scalef*espzoomd7*ffscale2*SCA4(1.2)*SCA47(1.5), 18, octroll + ROT4(.25) - ROT47(.1) + ROTS4(.7));
   bshape(shFeatherFloor[0], PPR_FLOOR, scalef*spzoom6*ffscale2, 19, ffspin2);
-  if(purehepta) bshape(shFeatherFloor[1], PPR_FLOOR, sphere ? .83 : SCAP4(1.1), 20);
+  if(nontruncated) bshape(shFeatherFloor[1], PPR_FLOOR, sphere ? .83 : SCAP4(1.1), 20);
   else bshape(shFeatherFloor[1], PPR_FLOOR, scalef*spzoom7*(sphere?1.1:1)*ffscale2*(a4?1.1:1), 21, sphere?1.3:0);
   bshape(shFeatherFloor[2], PPR_FLOOR, scalef*1.1, 22);  // Euclidean variant
   bshape(shBarrowFloor[0], PPR_FLOOR, (euclid?.9:1) * spzoom6 * (S7==8?1.4:1) * SCA467(1.7) * SCA46(.8), 23);
-  bshape(shBarrowFloor[1], PPR_FLOOR, (sphere&&purehepta?.9:1) * spzoomd7 * (S7==8?1.5:1) * SCA4(1.15) * SCA467(1.9) * SCA46(.8), 24, octroll - ROT47(.1));
+  bshape(shBarrowFloor[1], PPR_FLOOR, (sphere&&nontruncated?.9:1) * spzoomd7 * (S7==8?1.5:1) * SCA4(1.15) * SCA467(1.9) * SCA46(.8), 24, octroll - ROT47(.1));
   bshape(shBarrowFloor[2], PPR_FLOOR, (sphere||euclid)?.9:1, 25);
   bshape(shNewFloor[0], PPR_FLOOR, scalef*espzoom6 * ffscale2, 26, ffspin2);
   bshape(shNewFloor[1], PPR_FLOOR, scalef*espzoomd7 * ffscale2, 27, octroll);
@@ -1498,12 +1498,12 @@ void buildpolys() {
     zoomShape(shDesertFloor[j], shRedRockFloor[i-1][j], 1 - .1 * i, PPR_FLOORa+i);
   bshape(shPowerFloor[0], PPR_FLOOR_DRAGON, scalef*espzoom6*(sphere?.8:1)*ffscale2, 57, ffspin2);
   bshape(shPowerFloor[1], PPR_FLOOR_DRAGON, scalef*espzoomd7*ffscale2, 58, octroll);
-  bshape(shRoseFloor[2], PPR_FLOOR,  1, 173); // purehepta
+  bshape(shRoseFloor[2], PPR_FLOOR,  1, 173); // nontruncated
   bshape(shRoseFloor[0], PPR_FLOOR,  (euclid?.9:1), 174);
-  bshape(shRoseFloor[1], PPR_FLOOR,  (euclid?.9:1) * scalef * SCAP4(.85), 175, (purehepta && a4 ? M_PI/8 : 0));
+  bshape(shRoseFloor[1], PPR_FLOOR,  (euclid?.9:1) * scalef * SCAP4(.85), 175, (nontruncated && a4 ? M_PI/8 : 0));
   bshape(shTurtleFloor[0], PPR_FLOOR,  (euclid?.9:1) * (sphere?.9*1.3: a4 ? 1.6 : S7==8 ? 1.3 : 1) * SCA46(1.4) * SCA47(1.4), 176);
   bshape(shTurtleFloor[1], PPR_FLOOR,  (euclid?.9:1) * scalef * (a4?.9:1) * SCA47(1.3), 177, octroll - ROT47(.1));
-  bshape(shTurtleFloor[2], PPR_FLOOR,  sphere && purehepta ? .9 : 1, 178); // purehepta
+  bshape(shTurtleFloor[2], PPR_FLOOR,  sphere && nontruncated ? .9 : 1, 178); // nontruncated
   bshape(shDragonFloor[0], PPR_FLOOR_DRAGON, (S7==8?1.3:1) * SCA4(1.6), 181, ffspin2);
   bshape(shDragonFloor[1], PPR_FLOOR_DRAGON, (sphere ? .9:1) * (S7==8?1.1:1) * SCA4(.9) * scalef, 182, octroll);
   bshape(shDragonFloor[2], PPR_FLOOR,  scalef * 1.1, 183);
@@ -1511,7 +1511,7 @@ void buildpolys() {
   bshape(shZebra[1], PPR_FLOOR,  scalef, 163);
   bshape(shZebra[2], PPR_FLOOR,  scalef, 164);
   bshape(shZebra[3], PPR_FLOOR,  scalef, 165);
-  bshape(shZebra[4], PPR_FLOOR,  1, 166); // for purehepta
+  bshape(shZebra[4], PPR_FLOOR,  1, 166); // for nontruncated
   bshape(shEmeraldFloor[0], PPR_FLOOR,  scalef, 167); // 4
   bshape(shEmeraldFloor[1], PPR_FLOOR,  scalef, 168); // 12
   bshape(shEmeraldFloor[2], PPR_FLOOR,  scalef, 169); // 16
@@ -1525,9 +1525,9 @@ void buildpolys() {
   bshape(shTower[4], PPR_FLOOR_TOWER,  scalef, 200); // 9
   bshape(shTower[5], PPR_FLOOR_TOWER,  scalef, 201); // 10
   bshape(shTower[6], PPR_FLOOR_TOWER,  scalef, 202); // 10
-  bshape(shTower[7], PPR_FLOOR_TOWER,  1, 203); // purehepta 7
-  bshape(shTower[8], PPR_FLOOR_TOWER,  1, 204); // purehepta 11
-  bshape(shTower[9], PPR_FLOOR_TOWER,  1, 205); // purehepta 15
+  bshape(shTower[7], PPR_FLOOR_TOWER,  1, 203); // nontruncated 7
+  bshape(shTower[8], PPR_FLOOR_TOWER,  1, 204); // nontruncated 11
+  bshape(shTower[9], PPR_FLOOR_TOWER,  1, 205); // nontruncated 15
   bshape(shTower[10], PPR_FLOOR_TOWER,  scalef, 206);  // Euclidean
   
   // structures & walls
@@ -1560,17 +1560,17 @@ void buildpolys() {
   copyshape(shJoint, shDisk, PPR_ONTENTACLE);
   bshape(shTentHead, PPR_ONTENTACLE, scalef, 79);
   bshape(shWormHead, PPR_ONTENTACLE, scalef, 80);
-  if(purehepta) bshape(shDragonSegment, PPR_TENTACLE1, 1, 233);
+  if(nontruncated) bshape(shDragonSegment, PPR_TENTACLE1, 1, 233);
   else bshape(shDragonSegment, PPR_TENTACLE1, scalef, 234);
   bshape(shDragonWings, PPR_ONTENTACLE, scalef, 237);
   bshape(shDragonLegs, PPR_TENTACLE0, scalef, 238);
-  if(purehepta) bshape(shDragonTail, PPR_TENTACLE1, 1, 239);
+  if(nontruncated) bshape(shDragonTail, PPR_TENTACLE1, 1, 239);
   else bshape(shDragonTail, PPR_TENTACLE1, scalef, 240);
   bshape(shDragonNostril, PPR_ONTENTACLE_EYES, scalef, 241);
   bshape(shDragonHead, PPR_ONTENTACLE, scalef, 242);
-  if(purehepta) bshape(shSeaTentacle, PPR_TENTACLE1, 1, 245);
+  if(nontruncated) bshape(shSeaTentacle, PPR_TENTACLE1, 1, 245);
   else bshape(shSeaTentacle, PPR_TENTACLE1, 1, 246);  
-  ld ksc = purehepta ? 1.8 : 1.5;  
+  ld ksc = nontruncated ? 1.8 : 1.5;  
   bshape(shKrakenHead, PPR_ONTENTACLE, ksc, 247);
   bshape(shKrakenEye, PPR_ONTENTACLE_EYES, ksc, 248);
   bshape(shKrakenEye2, PPR_ONTENTACLE_EYES2, ksc, 249);
@@ -1796,10 +1796,10 @@ void buildpolys() {
   for(int v=0; v<13; v++) for(int z=0; z<2; z++)
     copyshape(shTortoise[v][4+z], shTortoise[v][2+z], shTortoise[v][2+z].prio + (PPR_CARRIED-PPR_ITEM));
 
-  if(purehepta) bshape(shMagicSword, PPR_MAGICSWORD, 1, 243);
+  if(nontruncated) bshape(shMagicSword, PPR_MAGICSWORD, 1, 243);
   else bshape(shMagicSword, PPR_MAGICSWORD, 1, 244);
 
-  if(purehepta) bshape(shMagicShovel, PPR_MAGICSWORD, 1, 333);
+  if(nontruncated) bshape(shMagicShovel, PPR_MAGICSWORD, 1, 333);
   else bshape(shMagicShovel, PPR_MAGICSWORD, 1, 333);
   
   bshape(shBead0, 20, 1, 250);
@@ -1933,7 +1933,7 @@ bool isSpecial(const hpcshape &h) {
 const hpcshape& getSeabed(const hpcshape& c) {
   if(&c == &shCloudFloor[2]) return shCloudSeabed[2];
   if(&c == &shCaveFloor[2]) return shCaveSeabed[2];
-  if(purehepta || euclid || sphere) return c;
+  if(nontruncated || euclid || sphere) return c;
   if(&c == &shFloor[0]) return shFullFloor[0];
   if(&c == &shFloor[1]) return shFullFloor[1];
   if(&c == &shCaveFloor[0]) return shCaveSeabed[0];
@@ -2994,19 +2994,19 @@ NEWSHAPE
 /* floors */
 
 // need eswap
-#define DESERTFLOOR (purehepta ? shCloudFloor : shDesertFloor)[ct6]
-#define BUTTERFLYFLOOR (purehepta ? shFloor : shButterflyFloor)[ct6]
-#define PALACEFLOOR (purehepta?shFloor:shPalaceFloor)[ct6]
-#define SSTARFLOOR (purehepta ? shCloudFloor : shSStarFloor)[ct6] // untested
-#define POWERFLOOR (purehepta ? shStarFloor : shPowerFloor)[ct6] // untested
-#define CHARGEDFLOOR (purehepta ? shChargedFloor[3] : ct6 ? shFloor[1] : shChargedFloor[0]) // scale!
+#define DESERTFLOOR (nontruncated ? shCloudFloor : shDesertFloor)[ct6]
+#define BUTTERFLYFLOOR (nontruncated ? shFloor : shButterflyFloor)[ct6]
+#define PALACEFLOOR (nontruncated?shFloor:shPalaceFloor)[ct6]
+#define SSTARFLOOR (nontruncated ? shCloudFloor : shSStarFloor)[ct6] // untested
+#define POWERFLOOR (nontruncated ? shStarFloor : shPowerFloor)[ct6] // untested
+#define CHARGEDFLOOR (nontruncated ? shChargedFloor[3] : ct6 ? shFloor[1] : shChargedFloor[0]) // scale!
 #define DEMONFLOOR shDemonFloor[ct6] // untested
-#define NEWFLOOR (purehepta ? shCloudFloor : shNewFloor)[ct6] // untested
-#define CROSSFLOOR (purehepta ? shFloor : shCrossFloor)[ct6] // untested
+#define NEWFLOOR (nontruncated ? shCloudFloor : shNewFloor)[ct6] // untested
+#define CROSSFLOOR (nontruncated ? shFloor : shCrossFloor)[ct6] // untested
 #define TROLLFLOOR shTrollFloor[ct6] // tested?
-#define BARROWFLOOR shBarrowFloor[euclid?0:purehepta?2:ct6]
-#define LAVAFLOOR (purehepta ? shFloor : shLavaFloor)[ct6]
-#define TRIFLOOR ((purehepta ? shFloor : shTriFloor)[ct6])
+#define BARROWFLOOR shBarrowFloor[euclid?0:nontruncated?2:ct6]
+#define LAVAFLOOR (nontruncated ? shFloor : shLavaFloor)[ct6]
+#define TRIFLOOR ((nontruncated ? shFloor : shTriFloor)[ct6])
 #define TURTLEFLOOR shTurtleFloor[ct6]
 #define ROSEFLOOR shRoseFloor[ct6]
 

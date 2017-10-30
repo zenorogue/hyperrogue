@@ -361,7 +361,7 @@ bool isWarped(cell *c) {
 // in the 'pure heptagonal' tiling, returns true for a set of cells
 // which roughly corresponds to the heptagons in the normal tiling
 bool pseudohept(cell *c) {
-  if(purehepta) {
+  if(nontruncated) {
     if(sphere) 
       return 
         c->master == getDodecahedron(3) ||
@@ -2035,7 +2035,7 @@ void killMonster(cell *c, eMonster who, flagtype deathflags) {
     for(int i=0; i<c->type; i++) {
       cell *c2 = c->mov[i];
       if(c2 && c2->item == itCompass) toomany = true;
-      if(c2 && !purehepta) for(int j=0; j<c2->type; j++)
+      if(c2 && !nontruncated) for(int j=0; j<c2->type; j++)
         if(c2->mov[j] && c2->mov[j]->item == itCompass)
           toomany = true;
       }
@@ -2580,7 +2580,7 @@ void buildRosemap() {
 
   }
 
-int getDistLimit() { return ginf[geometry].distlimit[purehepta]; }
+int getDistLimit() { return ginf[geometry].distlimit[nontruncated]; }
 
 bool nogoSlow(cell *to, cell *from) {
   if(cellEdgeUnstable(to) && gravityLevel(to) >= gravityLevel(from)) return true;
@@ -2968,7 +2968,7 @@ void toggleGates(cell *ct, eWall type, int rad) {
 void toggleGates(cell *ct, eWall type) {
   playSound(ct, "click");
   numgates = 0;
-  if(type == waClosePlate && purehepta)
+  if(type == waClosePlate && nontruncated)
     toggleGates(ct, type, 2);
   else
     toggleGates(ct, type, 3);
@@ -6518,11 +6518,11 @@ ld circlesizeD[10000];
 int lastsize;
 
 void computeSizes() {
-  lastsize = purehepta ? 44 : 76;
+  lastsize = nontruncated ? 44 : 76;
 
   circlesize[0] = 1;
   
-  if(!purehepta) {
+  if(!nontruncated) {
     circlesize[1] = 1*7;
     circlesize[2] = 2*7;
     circlesize[3] = 4*7;
@@ -7260,7 +7260,7 @@ bool movepcto(int d, int subdir, bool checkonly) {
       if(checkonly) return false;
       if(nonAdjacent(cwt.c,c2))
         addMessage(XLAT(
-          purehepta ? 
+          nontruncated ? 
           "You cannot move between the cells without dots here!" :
           "You cannot move between the triangular cells here!"
           ));

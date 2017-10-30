@@ -335,13 +335,13 @@ void drawrec(const heptspin& hs, int lev, hstate s, const transmatrix& V) {
   
   if(dodrawcell(c)) {
     reclevel = maxreclevel - lev;
-    drawcell(c, (hs.spin || purehepta) ? V1 * spin(hs.spin*2*M_PI/S7 + (purehepta ? M_PI:0)) : V1, 0,
+    drawcell(c, (hs.spin || nontruncated) ? V1 * spin(hs.spin*2*M_PI/S7 + (nontruncated ? M_PI:0)) : V1, 0,
       hs.mirrored);
     }
   
   if(lev <= 0) return;
   
-  if(!purehepta) for(int d=0; d<S7; d++) {
+  if(!nontruncated) for(int d=0; d<S7; d++) {
     int ds = fixrot(hs.spin + d);
     reclevel = maxreclevel - lev + 1;
     // createMov(c, ds);
