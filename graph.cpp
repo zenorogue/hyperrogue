@@ -2824,7 +2824,7 @@ void floorShadow(cell *c, const transmatrix& V, int col, bool warp) {
     else 
       queuepolyat(V * applyPatterndir(c), shTriheptaFloorShadow[ctof(c)], col, PPR_WALLSHADOW);
     }
-  else if(c->land == laDual) {
+  else if(c->land == laDual && !purehepta) {
     if(euclid && ishex1(c))
       queuepolyat(V * pispin, shBigTriShadow, col, PPR_WALLSHADOW);
     else
@@ -2850,7 +2850,7 @@ void plainfloor(cell *c, bool warp, const transmatrix &V, int col, int prio) {
     else 
       queuepolyat(V * applyPatterndir(c), shTriheptaFloor[sphere ? ctof(c) : mapeditor::nopattern(c)], col, prio);
     }
-  else if(c->land == laDual) {
+  else if(c->land == laDual && !purehepta) {
     if(euclid && ishex1(c))
       queuepolyat(V * pispin, shBigTriangle, col, prio);
     else
@@ -2872,7 +2872,7 @@ void fullplainfloor(cell *c, bool warp, const transmatrix &V, int col, int prio)
     else 
       queuepolyat(V * applyPatterndir(c), shTriheptaFloor[sphere ? ctof(c) : mapeditor::nopattern(c)], col, prio);
     }
-  else if(c->land == laDual) {
+  else if(c->land == laDual && !purehepta) {
     if(euclid && ishex1(c))
       queuepolyat(V * pispin, shBigTriangle, col, prio);
     else
@@ -2896,7 +2896,7 @@ void qplainfloor(cell *c, bool warp, const transmatrix &V, int col) {
     else 
       qfloor(c, V, applyPatterndir(c), shTriheptaFloor[sphere ? ctof(c) : mapeditor::nopattern(c)], col);
     }
-  else if(c->land == laDual)
+  else if(c->land == laDual && !purehepta)
     qfloor_eswap(c, V, shBigTriangle, col);
   else {
     qfloor(c, V, shFloor[ctof(c)], col);
@@ -2953,7 +2953,7 @@ void escherSidewall(cell *c, int sidepar, const transmatrix& V, int col) {
 void placeSidewall(cell *c, int i, int sidepar, const transmatrix& V, bool warp, bool mirr, int col) {
   if(shmup::on || purehepta) warp = false;
   if(warp && !ishept(c) && (!c->mov[i] || !ishept(c->mov[i]))) return;
-  if(c->land == laDual) {
+  if(c->land == laDual && !purehepta) {
     if(ctof(c)) return;
     if(euclid ? (ishex1(c) ? !(i&1) : (i&1)) : !(i&1)) return;
     }
@@ -2978,7 +2978,7 @@ void placeSidewall(cell *c, int i, int sidepar, const transmatrix& V, bool warp,
   // prio += c->cpdist - c->mov[i]->cpdist;  
   
   queuepolyat(V2, 
-    (mirr?shMFloorSide:warp?shTriheptaSide:c->land == laDual?shBigTriSide:shFloorSide)[sidepar][ctof(c)], col, prio);
+    (mirr?shMFloorSide:warp?shTriheptaSide:(c->land == laDual&&!purehepta)?shBigTriSide:shFloorSide)[sidepar][ctof(c)], col, prio);
   }
 
 bool openorsafe(cell *c) {
