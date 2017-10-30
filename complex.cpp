@@ -3040,7 +3040,7 @@ namespace windmap {
       }
     
     int tries = 0;
-    int maxtries = specialland == laVolcano || specialland == laWhirlwind || chaosmode ? 20 : 1;
+    int maxtries = specialland == laVolcano || specialland == laBlizzard || chaosmode ? 20 : 1;
     tryagain:
 
     for(int i=0; i<N; i++) windcodes[i] = hrand(256);
