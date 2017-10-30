@@ -2148,6 +2148,10 @@ transmatrix applyDowndir(cell *c, cellfunction *cf) {
   }
 
 void drawTowerFloor(const transmatrix& V, cell *c, int col, cellfunction *cf = coastvalEdge) {
+  if(weirdhyperbolic || sphere) {
+    int ct6 = ctof(c);
+    qfloor(c, V, PLAINFLOOR, col); return;
+    }
   int j = -1;
 
   if(euclid) j = 10;

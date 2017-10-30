@@ -1891,6 +1891,7 @@ bool openplains(cell *c);
 void buildBigStuff(cell *c, cell *from);
 void setLandQuotient(cell *c);
 void setLandSphere(cell *c);
+void setLandWeird(cell *c);
 void moreBigStuff(cell *c);
 void setLandEuclid(cell *c);
 bool checkInTree(cell *c, int maxv);

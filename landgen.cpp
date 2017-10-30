@@ -2078,6 +2078,7 @@ void setdist(cell *c, int d, cell *from) {
 
     if(sphere || torus) setLandSphere(c);
     else if(euclid) setLandEuclid(c);
+    if(weirdhyperbolic) setLandWeird(c);
     if(quotient) { setland(c, specialland); setLandQuotient(c); }
     
     // if(chaosmode) setland(c, getCLand(c));

@@ -2679,6 +2679,9 @@ namespace prairie {
     else if(sphere) {
       c->LHU.fi.rval = celldistance(c, cwt.c) + 8 - (nontruncated ? 2 : 3);
       }
+    else if(weirdhyperbolic) {
+      c->LHU.fi.rval = max(celldist(c), 15);
+      }
     else {
       if(!from) {
         for(int i=0; i<size(currfp.matrices); i++)
@@ -3348,6 +3351,12 @@ namespace halloween {
 
 namespace dungeon {
 
+  void towerError(cell *c) {
+    // only care in the standard geometry -- weird ones are intentionally left buggy
+    if(!weirdhyperbolic && !sphere && !quotient) 
+      raiseBuggyGeneration(c, "ivory tower/dungeon generation error");
+    }
+
   void buildIvoryTower(cell *c) {
     /* if(int(c->landparam) % 5 == 0) 
       c->wall = waCamelot;
@@ -3397,8 +3406,8 @@ namespace dungeon {
           rdepths[i] = c2 && c3 && c4 && (c2->landflags == 3 || c3->landflags == 3 || c4->landflags == 3);
           c2 = chosenDown(c2, 1, 0); // if(!c2) break;
           c3 = chosenDown(c3, -1, 0);
-          if(!c2) { raiseBuggyGeneration(c, "ivory c2"); return; }
-          if(!c3) { raiseBuggyGeneration(c, "ivory c3"); return; }
+          if(!c2) { towerError(c); return; }
+          if(!c3) { towerError(c); return; }
           }
         }
       
@@ -3452,8 +3461,8 @@ namespace dungeon {
           switchcount++;
         c2 = chosenDown(c2, 1, 0); // if(!c2) break;
         c3 = chosenDown(c3, -1, 0);
-        if(!c2) { raiseBuggyGeneration(c, "ivory c2"); return 0; }
-        if(!c3) { raiseBuggyGeneration(c, "ivory c3"); return 0; }
+        if(!c2) { towerError(c); return 0; }
+        if(!c3) { towerError(c); return 0; }
         }
       }
     

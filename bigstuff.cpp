@@ -662,6 +662,16 @@ int towerval(cell *c, cellfunction* cf) {
 
 /* other geometries */
 
+void setLandWeird(cell *c) {
+  if(specialland == laIvoryTower || specialland == laEndorian || specialland == laDungeon || specialland == laOcean) {
+    int d = celldist(c) - (getDistLimit() - 2);
+    if(d <= 0) 
+      c->land = laCrossroads4;
+    else
+      c->land = specialland, c->landparam = d;
+    }
+  }
+
 void setLandQuotient(cell *c) {
   int fv = zebra40(c);
   if(fv/4 == 4 || fv/4 == 6 || fv/4 == 5 || fv/4 == 10) fv ^= 2;
@@ -669,6 +679,13 @@ void setLandQuotient(cell *c) {
     if(fv%4==0 || fv%4 == 2) setland(c, laWarpSea);
   if(specialland == laElementalWall)
     setland(c, eLand(laEFire + (fv%4)));
+  if(specialland == laIvoryTower || specialland == laEndorian || specialland == laDungeon || specialland == laOcean) {
+    int d = celldist(c) - 1;
+    if(d <= 0) 
+      c->land = laCrossroads4;
+    else
+      c->land = specialland, c->landparam = d;
+    }
   }
 
 void setLandSphere(cell *c) {
@@ -699,6 +716,13 @@ void setLandSphere(cell *c) {
     else setland(c, specialland);
     if(specialland == laCrossroads3 && c->type != 6 && c->master->fiftyval == 1)
       c->wall = waBigTree;        
+    }
+  if(specialland == laIvoryTower || specialland == laEndorian || specialland == laDungeon || specialland == laOcean) {
+    int d = celldist(c);
+    if(d <= 0) 
+      c->land = laCrossroads4;
+    else
+      c->land = specialland, c->landparam = d;
     }
   }
 
@@ -880,7 +904,7 @@ void buildBigStuff(cell *c, cell *from) {
     }
   
   if(generatingEquidistant) deepOcean = false;
-  if(weirdhyperbolic && c->land == laOcean) deepOcean = true;
+  if(weirdhyperbolic && c->land == laOcean) deepOcean = c->landparam >= 30;
   
   // buildgreatwalls
   
