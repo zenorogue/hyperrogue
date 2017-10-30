@@ -758,7 +758,7 @@ eLand getNewLand(eLand old) {
   // the intermediate lands
   if(gold() >= R30) {
     tab[cnt++] = laCrossroads;
-    tab[cnt++] = laMirror;
+    tab[cnt++] = geometry ? laMirrorOld : laMirror;
     tab[cnt++] = laOcean;
     tab[cnt++] = laLivefjord;
     tab[cnt++] = laMinefield;
@@ -787,7 +787,7 @@ eLand getNewLand(eLand old) {
   // the advanced lands
   if(gold() >= R60) {
     tab[cnt++] = laStorms;
-    tab[cnt++] = laWhirlwind;
+    if(!weirdhyperbolic) tab[cnt++] = laWhirlwind;
     tab[cnt++] = laCrossroads;
     if(!generatingEquidistant) tab[cnt++] = laCrossroads2;
     if(items[itRuby] >= U10) {
