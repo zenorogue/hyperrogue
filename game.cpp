@@ -7261,8 +7261,8 @@ bool movepcto(int d, int subdir, bool checkonly) {
         addMessage(XLAT("You would get hurt!", c2->wall));
       else if(cellEdgeUnstable(cwt.c) && cellEdgeUnstable(c2))
         addMessage(XLAT("Gravity does not allow this!"));
-      else if(c2.c->wall == waChasm && c2.c->land == laDual)
-        addMessage(XLAT("You cannot move there!");
+      else if(c2->wall == waChasm && c2->land == laDual)
+        addMessage(XLAT("You cannot move there!"));
       else {
         addMessage(XLAT("You cannot move through %the1!", c2->wall));
         }
