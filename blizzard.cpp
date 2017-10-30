@@ -35,7 +35,7 @@ struct blizzardcell {
   transmatrix *gm;
   char wmap;
   int inward, outward, ward;
-  int qty[7];
+  int qty[MAX_EDGE];
   vector<snowball*> inorder, outorder;
   int inid, outid;
   ~blizzardcell() { for(auto i: inorder) delete i; }
