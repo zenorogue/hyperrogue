@@ -276,7 +276,7 @@ const char *blizzarddesc =
 
 const char *crystaldesc = 
   "Yes, this is definitely a crystal. A very regular crystalline structure.\n\n"
-  "This land has been designed to test various geometries, and it does not appear during a normal gameplay."
+  "This land has been designed to test various geometries, and it does not appear during a normal gameplay.";
 
 const char *NODESC = "No description yet.";
 const char *NODESCYET = "No description yet.";
