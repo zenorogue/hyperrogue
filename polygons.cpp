@@ -3007,7 +3007,7 @@ NEWSHAPE
 #define BARROWFLOOR shBarrowFloor[euclid?0:nontruncated?2:ct6]
 #define LAVAFLOOR (nontruncated ? shFloor : shLavaFloor)[ct6]
 #define TRIFLOOR ((nontruncated ? shFloor : shTriFloor)[ct6])
-#define TURTLEFLOOR shTurtleFloor[ct6]
+#define TURTLEFLOOR shTurtleFloor[nontruncated ? 2 : ct6]
 #define ROSEFLOOR shRoseFloor[ct6]
 
 #define ECT (euclid?2:ct6)
