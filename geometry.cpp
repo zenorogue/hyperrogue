@@ -69,7 +69,7 @@ void precalc() {
   
   for(int p=0; p<100; p++) {
     ld f =  (fmin+fmax) / 2;
-    ld v1, v2;
+    ld v1=0, v2=0;
     if(vertexdegree == 3) {
       hyperpoint H = xpush(f) * C0;
       v1 = intval(H, C0), v2 = intval(H, spin(2*M_PI/S7)*H);
