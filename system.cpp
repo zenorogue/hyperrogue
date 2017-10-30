@@ -76,6 +76,10 @@ void welcomeMessage() {
   addMessage(XLAT("Press F1 or right-click things for help."));
 #endif
   }
+
+int trailer_cash0 = 5;
+int trailer_cash1 = 15;
+bool trailer_safety = true;
   
 // initialize the game
 void initgame() {
@@ -121,8 +125,10 @@ void initgame() {
     if(firstland == laWhirlpool) cwt.c->mov[0]->wall = waSea;
     
     setdist(cwt.c->mov[0], BARLEV-1, cwt.c);
-    heptagon *h = createAlternateMap(cwt.c, 2, hsA);
-    if(!h) printf("FAIL\n");
+    if(!sphere && !euclid) {
+      heptagon *h = createAlternateMap(cwt.c, 2, hsA);
+      if(!h) printf("FAIL\n");
+      }
     }
   
   if(tactic::on && firstland == laPower) {
@@ -138,8 +144,8 @@ void initgame() {
     }
   
   if(tactic::on && tactic::trailer)
-    items[treasureType(firstland)] = 5;
-  
+    items[treasureType(firstland)] = trailer_cash0;
+
   tactic::lasttactic = firstland;
   yendor::lastchallenge = yendor::challenge;
   
@@ -174,7 +180,7 @@ void initgame() {
   // extern int sightrange; sightrange = 9;
   // cwt.c->land = laHell; items[itHell] = 10;
   for(int i=BARLEV; i>=0; i--) {
-    if(tactic::trailer && cwt.c->land != laClearing) safety = true;
+    if(tactic::trailer && cwt.c->land != laClearing) safety = trailer_safety;
     setdist(cwt.c, i, NULL);
     if(tactic::trailer) safety = false;
     
@@ -211,7 +217,7 @@ void initgame() {
     }
     
   if(tactic::on && tactic::trailer)
-    items[treasureType(firstland)] = 15;
+    items[treasureType(firstland)] = trailer_cash1;
   
   yendor::init(3);
   peace::simon::init();
