@@ -224,7 +224,7 @@ void checkGoodLand(eLand l) {
       "Remember that you can get to the next slide by pressing Enter.",
       l
       ) +
-      XLAT(" This tutorial will not advance on its own -- you have to press Enter (not while reading help text).");
+      XLAT(" This tutorial will not advance on its own -- you have to press Enter (not while reading help text).")
       );
   }
 
