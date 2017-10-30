@@ -55,7 +55,7 @@
 # Living Fjord [39]
 [29] */music/hr3-caves.ogg
 # Ivory Tower [30]
-[30] */music/hr3-laboratory.ogg
+[30] */music/hr3-hell.ogg
 # Zebra [31]
 [31] */music/hr3-motion.ogg
 # Elemental Fire [32]
@@ -118,7 +118,21 @@
 [65] */music/hr3-crossroads.ogg
 # Cellular Automata [66]
 [66] */music/hr3-laboratory.ogg
-
+# old mirror is at 71, and 67-70 are Reflection lands
+[67] */music/hr3-mirror.ogg
+[68] */music/hr3-mirror.ogg
+[69] */music/hr3-mirror.ogg
+[70] */music/hr3-mirror.ogg
+[71] */music/hr3-mirror.ogg
+# Volcanic Wasteland
+[72] */music/hr3-hell.ogg
+# Blizzard
+[73] */music/hr3-icyland.ogg
+# Hunting Ground [74]
+[74] */music/hr3-graveyard.ogg
+# Terracotta (and Mercury River) [75-76]
+[75] */music/hr3-graveyard.ogg
+[76] */music/hr3-graveyard.ogg
 # None [00] (used when the window is out of focus)
 
 
