@@ -7249,6 +7249,8 @@ bool movepcto(int d, int subdir, bool checkonly) {
           "You cannot move between the cells without dots here!" :
           "You cannot move between the triangular cells here!"
           ));
+      else if(againstWind(c2, cwt.c))
+        addMessage(XLAT(airdist(c2) < 3 ? "The Air Elemental blows you away!" : "You cannot go against the wind!"));
       else if(isAlch(c2))
         addMessage(XLAT("Wrong color!"));
       else if(c2->wall == waRoundTable)
@@ -7259,8 +7261,8 @@ bool movepcto(int d, int subdir, bool checkonly) {
         addMessage(XLAT("You would get hurt!", c2->wall));
       else if(cellEdgeUnstable(cwt.c) && cellEdgeUnstable(c2))
         addMessage(XLAT("Gravity does not allow this!"));
-      else if(againstWind(c2, cwt.c))
-        addMessage(XLAT(airdist(c2) < 3 ? "The Air Elemental blows you away!" : "You cannot go against the wind!"));
+      else if(c2.c->wall == waChasm && c2.c->land == laDual)
+        addMessage(XLAT("You cannot move there!");
       else {
         addMessage(XLAT("You cannot move through %the1!", c2->wall));
         }
