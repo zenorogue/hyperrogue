@@ -1625,7 +1625,7 @@ eLand land_sph[LAND_SPH] = {
 #define LAND_OCT 36
 eLand land_oct[LAND_OCT] = {
   laWarpCoast, laIce, laDesert, laCaves, laJungle, laAlchemist, 
-  laGraveyard, laRlyeh, laHell, laCocytus, laMotion, 
+  laGraveyard, laTemple, laHell, laCocytus, laMotion, 
   laDryForest, laDeadCaves, laRedRock, laMinefield, laLivefjord,
   laStorms, laOvergrown, laRose, laKraken, laBurial,
   laTrollheim, laBull, laHunting,

@@ -421,6 +421,10 @@ bool checkInTree(cell *c, int maxv) {
 void buildEquidistant(cell *c) {
   if(!c) return;
   if(c->landparam) return;
+  if(weirdhyperbolic) {
+    c->landparam = 50;
+    return;
+    }
   if(geometry) return;
   eLand b = c->land;
   if(chaosmode && !inmirror(b)) return;
@@ -876,6 +880,7 @@ void buildBigStuff(cell *c, cell *from) {
     }
   
   if(generatingEquidistant) deepOcean = false;
+  if(weirdhyperbolic && c->land == laOcean) deepOcean = true;
   
   // buildgreatwalls
   
@@ -1094,13 +1099,21 @@ void moreBigStuff(cell *c) {
       if(!euclid) generateAlts(c->master);
       preventbarriers(c);
       if(d == 10) {
-        if(pseudohept(c)) buildCamelotWall(c);
+        if(weirdhyperbolic ? hrand(100) < 50 : pseudohept(c)) buildCamelotWall(c);
         else {
           if(!euclid) for(int i=0; i<S7; i++) generateAlts(c->master->move[i]);
           int q = 0;
-          for(int t=0; t<S6; t++) {
-            createMov(c, t);
-            if(celldistAltRelative(c->mov[t]) == 10 && !pseudohept(c->mov[t])) q++;
+          if(weirdhyperbolic) {
+            for(int t=0; t<c->type; t++) createMov(c, t);
+            q = hrand(100);
+            if(q < 10) q = 0;
+            else if(q < 50) q = 1;
+            }
+          else {
+            for(int t=0; t<c->type; t++) {
+              createMov(c, t);
+              if(celldistAltRelative(c->mov[t]) == 10 && !pseudohept(c->mov[t])) q++;
+              }
             }
           if(q == 1) buildCamelotWall(c);
           // towers of Camelot
@@ -1163,12 +1176,12 @@ void moreBigStuff(cell *c) {
         c->land = laTemple, c->wall = waNone, c->monst = moNone, c->item = itNone;
         }
       if(d % TEMPLE_EACH==0) {
-        if(pseudohept(c)) 
+        if((weirdhyperbolic && purehepta) ? hrand(100) < 50 : pseudohept(c)) 
           c->wall = waColumn;
         else {
           if(!euclid) for(int i=0; i<S7; i++) generateAlts(c->master->move[i]);
           int q = 0;
-          for(int t=0; t<6; t++) {
+          for(int t=0; t<c->type; t++) {
             createMov(c, t);
             if(celldistAlt(c->mov[t]) % TEMPLE_EACH == 0 && !ishept(c->mov[t])) q++;
             }

@@ -898,7 +898,7 @@ namespace whirlpool {
     if(i == c->type) return NULL;
     if(d>d2) next = -next;
     for(int j=1; j<c->type; j++) {
-      cell *c2 = c->mov[(i+420+next*j) % c->type];
+      cell *c2 = c->mov[(i+MODFIXER+next*j) % c->type];
       if(celldistAlt(c2) == d) return c2;
       }
     return NULL;
