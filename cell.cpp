@@ -1281,6 +1281,7 @@ cdata *getEuclidCdata(heptagon *h) {
 
 int getCdata(cell *c, int j) {
   if(euclid) return getEuclidCdata(c->master)->val[j];
+  else if(geometry) return 0;
   else if(c->type != 6) return getHeptagonCdata(c->master)->val[j]*3;
   else {
     int jj = 0;
@@ -1292,6 +1293,7 @@ int getCdata(cell *c, int j) {
 
 int getBits(cell *c) {
   if(euclid) return getEuclidCdata(c->master)->bits;
+  else if(geometry) return 0;
   else if(c->type != 6) return getHeptagonCdata(c->master)->bits;
   else {
     int b0 = getHeptagonCdata(createMov(c, 0)->master)->bits;
