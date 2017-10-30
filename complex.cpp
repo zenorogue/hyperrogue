@@ -922,6 +922,8 @@ namespace whirlpool {
     cell *prev = whirlline[size(whirlline)-2];
     for(int i=0; i<at->type; i++) 
       if(at->mov[i] && (euclid || at->mov[i]->master->alt) && celldistAlt(at->mov[i]) == d && at->mov[i] != prev) {
+        if(at->mov[i] == whirlline[0]) return; // loops in weird geometries?
+        if(at->mov[i] == whirlline[size(whirlline)/2]) return; // even weirder geometry?
         whirlline.push_back(at->mov[i]);
         goto again;
         }
@@ -930,6 +932,8 @@ namespace whirlpool {
   void generate(cell *wto) {
     if(wto->wall == waBoat || wto->monst)
       return;
+    
+    wto->wall = waSea;
     
     if(hrand(35000) < 40 + items[itWhirlpool] + yendor::hardness())
       wto->monst = moCShark;
