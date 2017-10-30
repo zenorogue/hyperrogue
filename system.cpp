@@ -1071,7 +1071,7 @@ void restartGame(char switchWhat, bool push) {
     randomPatternsMode = peace::on = false;
     }
   if(switchWhat == 'C') {
-    if(euclid || sphere)
+    if(euclid || sphere || quotient)
       geometry = gNormal;
     if(tactic::on) firstland = laIce;
     yendor::on = tactic::on = princess::challenge = false;
@@ -1096,7 +1096,7 @@ void restartGame(char switchWhat, bool push) {
   if(switchWhat == 'g') {
     if(geometry == targetgeometry) geometry = gNormal;
     else geometry = targetgeometry;
-    if(chaosmode && (euclid || sphere)) chaosmode = false;
+    if(chaosmode && (euclid || sphere || quotient)) chaosmode = false;
     if(purehepta && euclid) purehepta = false;
     resetGeometry();
     }
