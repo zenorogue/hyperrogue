@@ -1274,14 +1274,14 @@ void buildpolys() {
   for(int i=0; i<=S84; i++)
     hpcpush(ddi(i, disksize * .25) * C0);
   for(int i=S84; i>=0; i--)
-    hpcpush(ddi(i, disksize * (i%28 < 7?.36 : .3)) * C0);
+    hpcpush(ddi(i, disksize * (i%S28 < S7?.36 : .3)) * C0);
   hpcpush(ddi(0, disksize * .25) * C0);
   
   bshape(shHeptaRing, PPR_ITEM);
   for(int i=0; i<=S84; i+=S3)
     hpcpush(ddi(i, disksize * .25) * C0);
   for(int i=S84; i>=0; i--)
-    hpcpush(ddi(i, disksize * (i%12 < 3?.4 : .27)) * C0);
+    hpcpush(ddi(i, disksize * (i%S12 < S3?.4 : .27)) * C0);
   hpcpush(ddi(0, disksize * .25) * C0);
   
   bshape(shCompass1, PPR_ITEM);
