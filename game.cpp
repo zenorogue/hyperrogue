@@ -1288,10 +1288,15 @@ int monstersnear(cell *c, cell *nocount, eMonster who, cell *pushto, cell *comef
   if(who == moPlayer) for(int b=0; b<2; b++) {
     sm.swordnext[b] = sword::pos(multi::cpid, b);
     sm.swordtransit[b] = NULL;
-    if(sm.swordnext[b] && sm.swordnext[b] != sm.swordlast[b] && !isNeighbor(sm.swordlast[b], sm.swordnext[b]))
+    if(sm.swordnext[b] && sm.swordnext[b] != sm.swordlast[b] && !isNeighbor(sm.swordlast[b], sm.swordnext[b])) {
       forCellEx(c2, sm.swordnext[b])
-        if(c2 != c && c2 != comefrom && isNeighbor(c2, sm.swordlast[b]))
+        if(c2 != c && c2 != comefrom && isNeighbor(c2, S3==3 ? sm.swordlast[b] : *wcw))
           sm.swordtransit[b] = c2;
+      if(S3 == 4)
+        forCellEx(c2, c)
+          if(c2 != comefrom && isNeighbor(c2, sm.swordlast[b]))
+            sm.swordtransit[b] = c2;
+      }
     }
 
   stalemate::moves.push_back(sm);
@@ -4700,8 +4705,16 @@ void stabbingAttack(cell *mf, cell *mt, eMonster who, int bonuskill) {
     if(swordAttack(mt, who, st, bb)) numbb++;
     if(sf != st && !isNeighbor(sf,st)) {
       // also attack the in-transit cell
-      forCellEx(sb, sf) if(isNeighbor(sb, st) && sb != mf && sb != mt)
-        if(swordAttack(mt, who, sb, bb)) numbb++;
+      if(S3 == 3) {
+        forCellEx(sb, sf) if(isNeighbor(sb, st) && sb != mf && sb != mt)
+          if(swordAttack(mt, who, sb, bb)) numbb++;
+        }
+      else {
+        forCellEx(sb, mf) if(isNeighbor(sb, st) && sb != mt)
+          if(swordAttack(mt, who, sb, bb)) numbb++;
+        forCellEx(sb, mt) if(isNeighbor(sb, sf) && sb != mf)
+          if(swordAttack(mt, who, sb, bb)) numbb++;
+        }
       }
     achievement_count("SLASH", numbb, 0);
     numslash += numbb;
