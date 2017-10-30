@@ -6025,6 +6025,8 @@ void collectMessage(cell *c2, eItem which) {
     addMessage(XLAT("You feel that %the1 slowly become%s1 dangerous...", c2->land));
     addMessage(XLAT("Better find some other place."));
     }
+  else if(which == itHunting && items[itHunting] == 4 && !specialmode && !ISMOBWEB)
+    addMessage(XLAT("Hint: hold Alt to highlights enemies and other important features."));
   else if(which == itSpice && items[itSpice] == U10*7/10 && !specialmode)
     addMessage(XLAT("You have a vision of the future, fighting demons in Hell..."));
   else if(which == itSpice && items[itSpice] == U10-1 && !specialmode)
