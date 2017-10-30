@@ -193,14 +193,14 @@ heptagon *createStep(heptagon *h, int d) {
   d = fixrot(d);
   if(!h->move[0] && h->s != hsOrigin) {
     // cheating: 
-    int pard;
+    int pard=0;
     if(S3 == 3) 
       pard = 3 + hrand(2);
     else if(S3 == 4 && S7 == 5)
       pard = 3; // to do: randomize
     else if(S3 == 4)
       pard = 3;
-    buildHeptagon(h, 0, h->distance < -1000 ? hsOrigin : hsA, pard);
+    buildHeptagon(h, 0, h->distance < -10000 ? hsOrigin : hsA, pard);
     }
   if(h->move[d]) return h->move[d];
   if(h->s == hsOrigin) {
