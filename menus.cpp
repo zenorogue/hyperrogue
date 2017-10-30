@@ -433,7 +433,6 @@ void showChangeMode() {
     mouseovers = XLAT("One wrong move and it is game over!");
   
   multi::cpid = 0;
-  dialog::addBoolItem(XLAT("heptagonal mode"), (purehepta), '7');
   dialog::addBoolItem(XLAT("Chaos mode"), (chaosmode), 'C');
   dialog::addBoolItem(XLAT("peaceful mode"), peace::on, 'p');
   dialog::addBoolItem(XLAT("Orb Strategy mode"), (inv::on), 'i');
@@ -480,10 +479,8 @@ void showChangeMode() {
         }
       }
     
-    else if(xuni == 'e') {
-      targettrunc = purehepta;
-      pushScreen(showEuclideanMenu);
-      }
+    else if(xuni == 'e') 
+      runGeometryExperiments();
     else if(xuni == 't') {
       clearMessages();
       pushScreen(tactic::showMenu);
@@ -494,8 +491,6 @@ void showChangeMode() {
         pushScreen(yendor::showMenu);
       else gotoHelp(yendor::chelp);
       }
-    else if(xuni == '7')
-      restartGame('7');
     else if(xuni == 'p')
       pushScreen(peace::showMenu);
     else if(xuni == 'i') {
@@ -593,21 +588,13 @@ eLand land_spheuc[LAND_SPHEUC] = {
 
 #else
 
-#define tweirdhyperbolic (targetgeometry == gOctagon || targetgeometry == g45 || targetgeometry == g46 || targetgeometry == g47)
-
-#define LAND_SPHEUC ((tweirdhyperbolic) ? LAND_OCT : (targetgeometry > 1) ? LAND_SPH : LAND_EUC)
-#define land_spheuc ((tweirdhyperbolic) ? land_oct : (targetgeometry > 1) ? land_sph : land_euc)
+#define LAND_SPHEUC ((weirdhyperbolic) ? LAND_OCT : (geometry > 1) ? LAND_SPH : LAND_EUC)
+#define land_spheuc ((weirdhyperbolic) ? land_oct : (geometry > 1) ? land_sph : land_euc)
 #endif
 
 const char *curvenames[8] = {
   "0", "1", "2", "extremely hyperbolic", "strongly hyperbolic", "strongly hyperbolic", "moderately hyperbolic", "weakly hyperbolic"
   };
-
-void useHyperrogueGeometry() {
-  targetgeometry = geometry;
-  restartGame('g');
-  if(targettrunc != purehepta) restartGame('7');
-  }
 
 string euchelp =
   "If you want to know how much the gameplay is affected by the "
@@ -621,102 +608,24 @@ string euchelp =
   "with quotient geometries. For example, the elliptic geometry is "
   "obtained from the sphere by making the antipodes be the same point, "
   "so you return to the same spot (but as a mirror image) after going there. "
-  "Halloween is a land specially designed for the 'sphere' geometry; "
-  "several more tilings can be played on by playing Graveyard or Warped Coast "
-  "in a truncated tiling. " 
-  "Have fun experimenting! Not all graphics and lands are implemented in "
-  "all geometries, but lots of them are.";
+  "Have fun experimenting! "
+  "Achievements and leaderboards do not work in geometry experiments, "
+  "except some specific ones.\n\n"
+  "In standard geometry (truncated or not), you can play the full game, but in other geometries "
+  "you select a particular land. Lands are unlocked by visiting them in this "
+  "game, or permanently by collecting 25 treasure. Try Crossroads in Euclidean "
+  "or chaos mode in non-standard non-quotient hyperbolic to visit many lands. "
+  "Highlights:\n"
+  "* Crystal World and Warped Coast can be understood as extra geometries.\n"
+  "* Halloween is specially designed for spherical geometry.\n"
+  "* To see the difference, try Hunting Grounds in Euclidean -- it is impossible.\n";
 
-void showPickGeometry() {
-  int ts = ginf[targetgeometry].sides;
-  int tv = ginf[targetgeometry].vertex;
-  int tq = ginf[targetgeometry].quotientstyle;
-  int nom = (targettrunc ? tv : tv+ts) * ((tq & qELLIP) ? 2 : 4);
-  int denom = (2*ts + 2*tv - ts * tv);
-  
-  gamescreen(4);
-  dialog::init(XLAT("select the geometry"));
-  for(int i=0; i<gGUARD; i++)
-    dialog::addBoolItem(XLAT(ginf[i].name), targetgeometry == i, 'a'+i);
-  
-  dialog::addBreak(50);
-
-  if(ts == 6 && tv == 3)
-    dialog::addSelItem("truncated", "does not matter", 't');
-  else
-    dialog::addBoolItem("truncated", !targettrunc, 't');
-
-  dialog::addBreak(50);
-
-  int worldsize = denom ? nom/denom : 0;
-  if(tq & qTORUS) worldsize = torusconfig::qty;
-  if(tq & qZEBRA) worldsize = targettrunc ? 12 : 40;
-  if(tq & qFIELD) {
-    worldsize = size(currfp.matrices) / ts;
-    if(!targettrunc) worldsize = (10*worldsize) / 3;
-    }
-
-  dialog::addSelItem("sides per face", its(ts), 0);
-  dialog::addSelItem("faces per vertex", its(tv), 0);
-
-  string qstring = "none";
-  if(tq & qZEBRA) qstring = "zebra";
-
-  else if(tq & qFIELD) qstring = "field";
-
-  else if(tq & qELLIP) qstring = "torus";
-
-  else if(tq & qTORUS) qstring = "torus";
-
-  dialog::addSelItem("quotient space", qstring, 0);
-
-  dialog::addSelItem("size of the world", 
-    XLAT(
-      worldsize == 0 ? "infinite" : 
-      worldsize > 0 ? "finite (%1)" :
-      "exponentially infinite (%1)", its(worldsize)),
-    0);
-  
-  switch(ginf[targetgeometry].cclass) {
-    case 0:
-      dialog::addSelItem("curvature", curvenames[ginf[targetgeometry].distlimit[targettrunc]], 0);
-      break;
-    
-    case 1: 
-      dialog::addSelItem("curvature", "flat", 0);
-      break;
-    
-    case 2:
-      dialog::addSelItem("curvature", "spherical", 0);
-      break;
-    }
-  
-  dialog::addItem(XLAT("help"), SDLK_F1);  
-  dialog::addItem(XLAT("done"), '0');  
-  dialog::display();
-
-  keyhandler = [] (int sym, int uni) {
-    dialog::handleNavigation(sym, uni);
-    if(uni >= 'a' && uni < 'a'+gGUARD)
-      targetgeometry = eGeometry(uni - 'a');
-    else if(uni == 't')
-      targettrunc = !targettrunc;
-    else if(uni == '2' || sym == SDLK_F1) gotoHelp(euchelp);
-    else if(doexiton(sym, uni)) {
-      popScreen();
-      if(targetgeometry == gEuclid) targettrunc = false;
-      if(targetgeometry == gNormal) popScreen(), useHyperrogueGeometry();      
-      }
-    };
-  }
-
-bool targettrunc;
+int ewhichscreen = 2;
 
 void showEuclideanMenu() {
-  gamescreen(4);
+  cmode = sm::SIDE;
+  gamescreen(0);  
   int s = vid.fsize;
-  vid.fsize = vid.fsize * 4/5;
-  dialog::init(XLAT("experiment with geometry"));
   if(cheater) for(int i=0; i<landtypes; i++) landvisited[i] = true;
   for(int i=0; i<landtypes; i++)
     if(hiitemsMax(treasureType(eLand(i))) >= 25) landvisited[i] = true;
@@ -733,73 +642,179 @@ void showEuclideanMenu() {
   landvisited[laCA] = true;
   // for(int i=2; i<lt; i++) landvisited[i] = true;
   
-  string truncatenames[2] = {" (t)", " (n)"};
+  if(geometry == gNormal || ewhichscreen == 2) {
+    dialog::init(XLAT("experiment with geometry"));
+    int ts = ginf[geometry].sides;
+    int tv = ginf[geometry].vertex;
+    int tq = ginf[geometry].quotientstyle;
+    int nom = (purehepta ? tv : tv+ts) * ((tq & qELLIP) ? 2 : 4);
+    int denom = (2*ts + 2*tv - ts * tv);
+    
+    dialog::addSelItem(XLAT("land"), XLAT1(linf[specialland].name), '5');
+    dialog::addBreak(50);
 
-  dialog::addSelItem(XLAT("geometry"), XLAT(ginf[targetgeometry].name) + truncatenames[targettrunc], '5');
-  dialog::addBreak(50);
+    for(int i=0; i<gGUARD; i++)
+      dialog::addBoolItem(XLAT(ginf[i].name), geometry == i, 'a'+i);
+    
+    dialog::addBreak(50);
   
-  eLand current = (geometry == targetgeometry) ? specialland : laNone;
-
-  for(int i=0; i<euperpage; i++) {
-    if(euperpage * eupage + i >= LAND_SPHEUC) { dialog::addBreak(100); break; }
-    eLand l = land_spheuc[euperpage * eupage + i];
-    if(landvisited[l]) {
+    if(ts == 6 && tv == 3)
+      dialog::addSelItem("truncated", "does not matter", 't');
+    else
+      dialog::addBoolItem("truncated", !purehepta, 't');
+  
+    dialog::addBreak(50);
+  
+    int worldsize = denom ? nom/denom : 0;
+    if(tq & qTORUS) worldsize = torusconfig::qty;
+    if(tq & qZEBRA) worldsize = purehepta ? 12 : 40;
+    if(tq & qFIELD) {
+      worldsize = size(currfp.matrices) / ts;
+      if(!purehepta) worldsize = ((ts+tv)*worldsize) / tv;
+      }
+  
+    dialog::addSelItem("sides per face", its(ts), 0);
+    dialog::addSelItem("faces per vertex", its(tv), 0);
+  
+    string qstring = "none";
+    if(tq & qZEBRA) qstring = "zebra";
+  
+    else if(tq & qFIELD) qstring = "field";
+  
+    else if(tq & qELLIP) qstring = "torus";
+  
+    else if(tq & qTORUS) qstring = "torus";
+  
+    dialog::addSelItem("quotient space", qstring, 0);
+  
+    dialog::addSelItem("size of the world", 
+      XLAT(
+        worldsize == 0 ? "infinite" : 
+        worldsize > 0 ? "finite (%1)" :
+        "exponentially infinite (%1)", its(worldsize)),
+      0);
+    
+    switch(ginf[geometry].cclass) {
+      case 0:
+        dialog::addSelItem("curvature", curvenames[getDistLimit()], 0);
+        break;
+      
+      case 1: 
+        dialog::addSelItem("curvature", "flat", 0);
+        break;
+      
+      case 2:
+        dialog::addSelItem("curvature", "spherical", 0);
+        break;
+      }
+    
+    if(sphere) 
+      dialog::addBoolItem(XLAT("stereographic/orthogonal"), vid.alpha>10, '1');
+    else
+      dialog::addBoolItem(XLAT("Poincaré/Klein"), vid.alpha>.5, '1');
+    dialog::addItem(XLAT("help"), SDLK_F1);  
+    dialog::addItem(XLAT("done"), '0');  
+    dialog::display();
+  
+    keyhandler = [] (int sym, int uni) {
+      dialog::handleNavigation(sym, uni);
+      if(uni >= 'a' && uni < 'a'+gGUARD) {
+        targetgeometry = eGeometry(uni - 'a');
+        restartGame(geometry == targetgeometry ? 0 : 'g');
+        pushScreen(showEuclideanMenu);
+        }
+      else if(uni == 't') {
+        if(!euclid) {
+          restartGame('7');
+          pushScreen(showEuclideanMenu);
+          }
+        }
+      else if(uni == '2' || sym == SDLK_F1) gotoHelp(euchelp);
+      else if(uni == '1' && !euclid) {
+        if(sphere) {
+          if(vid.alpha < 10) { vid.alpha = 999; vid.scale = 998; }
+          else {vid.alpha = 1; vid.scale = .4; }
+          }
+        else {
+          if(vid.alpha > .5) { vid.alpha = 0; vid.scale = 1; }
+          else {vid.alpha = 1; vid.scale = 1; }
+          }
+        }
+      else if(uni == '5')
+        ewhichscreen ^= 3;
+      else if(doexiton(sym, uni))
+        popScreen();
+      };
+    }
+  else {
+    dialog::init(XLAT("use this where?"));
+    string truncatenames[2] = {" (t)", " (n)"};
+  
+    dialog::addSelItem(XLAT("geometry"), XLAT(ginf[geometry].name) + truncatenames[purehepta], '5');
+    dialog::addBreak(50);
+    
+    for(int i=0; i<euperpage; i++) {
+      if(euperpage * eupage + i >= LAND_SPHEUC) { dialog::addBreak(100); break; }
+      eLand l = land_spheuc[euperpage * eupage + i];
       char ch;
       if(i < 26) ch = 'a' + i;
       else ch = 'A' + (i-26);
-      dialog::addBoolItem(XLAT1(linf[l].name), l == current, ch);
-      }
-    else dialog::addBreak(100);
-    }
-  dialog::addBreak(50);
-  dialog::addItem(XLAT("Return to the hyperbolic world"), '0');
-  dialog::addItem(XLAT("next page"), '-');
-
-  dialog::addBreak(100);
-  dialog::addHelp(
-    XLAT("Choose from the lands visited this game.") + " " +
-    XLAT("Scores and achievements are not") + " " + XLAT("saved in the Euclidean mode!")
-    );
-  
-  dialog::display();
-
-  vid.fsize = s;
-  keyhandler = [] (int sym, int uni) {
-    dialog::handleNavigation(sym, uni);
-    int lid;
-    if(uni >= 'a' && uni <= 'z') lid = uni - 'a';
-    else if(uni >= 'A' && uni <= 'Z') lid = 26 + uni - 'A';
-    else lid = -1;
-    
-    if(lid >= 0) lid += euperpage * eupage;
-    
-    if(uni == '0') 
-      useHyperrogueGeometry();
-    else if(uni == '5') {
-      pushScreen(showPickGeometry);
-      }
-    else if(uni == '-' || uni == PSEUDOKEY_WHEELUP || uni == PSEUDOKEY_WHEELDOWN) {
-      eupage++;
-      if(eupage * euperpage >= LAND_SPHEUC) eupage = 0;
-      }
-    else if(lid >= 0 && lid < LAND_SPHEUC) {
-      specialland = land_spheuc[lid];
-      if(landvisited[specialland] && specialland != laOceanWall) {
-        if(targetgeometry != geometry)
-          restartGame('g');
-        else
-          restartGame(tactic::on ? 't' : 0);
-        // switch the truncated if necessary
-        if(targettrunc != purehepta)
-          restartGame('7');
-        // disable PTM if chosen a land from the Euclidean menu
-        if(tactic::on) restartGame('t');
+      if(landvisited[l]) {
+        dialog::addBoolItem(XLAT1(linf[l].name), l == specialland, ch);
         }
-      else specialland = laIce;
+      else {
+        dialog::addSelItem(XLAT1(linf[l].name), XLAT("(locked)"), ch);
+        }
       }
-    else if(uni == '2' || sym == SDLK_F1) gotoHelp(euchelp);
-    else if(doexiton(sym, uni)) popScreen();
-    };
+    dialog::addBreak(50);
+    if(chaosUnlocked && !quotient && !euclid && !sphere)
+      dialog::addItem(XLAT("Chaos mode"), '1');
+    dialog::addItem(XLAT("next page"), '-');
+    
+    dialog::addItem(XLAT("help"), SDLK_F1);  
+    dialog::addItem(XLAT("done"), '0');
+    dialog::display();
+  
+    vid.fsize = s;
+    keyhandler = [] (int sym, int uni) {
+      dialog::handleNavigation(sym, uni);
+      int lid;
+      if(uni >= 'a' && uni <= 'z') lid = uni - 'a';
+      else if(uni >= 'A' && uni <= 'Z') lid = 26 + uni - 'A';
+      else lid = -1;
+      
+      if(lid >= 0) lid += euperpage * eupage;
+      
+      if(uni == '5') 
+        ewhichscreen ^= 3;
+      else if(uni == '-' || uni == PSEUDOKEY_WHEELUP || uni == PSEUDOKEY_WHEELDOWN) {
+        eupage++;
+        if(eupage * euperpage >= LAND_SPHEUC) eupage = 0;
+        }
+      else if(uni == '1') {
+        if(chaosUnlocked) {
+          restartGame('C');
+          pushScreen(showEuclideanMenu);
+          }
+        }
+      else if(lid >= 0 && lid < LAND_SPHEUC) {
+        eLand nland = land_spheuc[lid];
+        if(landvisited[nland]) {
+          specialland = nland;
+          restartGame(tactic::on ? 't' : 0);
+          pushScreen(showEuclideanMenu);
+          }
+        }
+      else if(uni == '2' || sym == SDLK_F1) gotoHelp(euchelp);
+      else if(doexiton(sym, uni)) popScreen();
+      };
+    }
+  
+  }
+
+void runGeometryExperiments() {
+  specialland = cwt.c->land;
+  pushScreen(showEuclideanMenu);
   }
 
 bool showstartmenu;
@@ -946,8 +961,7 @@ void setAppropriateOverview() {
   else if(peace::on)
     pushScreen(peace::showMenu);
   else if(geometry != gNormal) {
-    targettrunc = purehepta;
-    pushScreen(showEuclideanMenu);
+    runGeometryExperiments();
     }
   else {
     mapeditor::infix = "";

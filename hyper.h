@@ -2094,3 +2094,5 @@ const char *dnameof(eMonster m);
 const char *dnameof(eLand l);
 const char *dnameof(eWall w);
 const char *dnameof(eItem i);
+
+void runGeometryExperiments();

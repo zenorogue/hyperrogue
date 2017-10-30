@@ -1,8 +1,7 @@
 // Hyperbolic Rogue
 // Copyright (C) 2011-2012 Zeno Rogue, see 'hyper.cpp' for details
 
-eGeometry geometry, targetgeometry = gEuclid;
-extern bool targettrunc;
+eGeometry geometry, targetgeometry;
 
 // for the pure heptagonal grid
 bool purehepta = false;

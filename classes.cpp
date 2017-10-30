@@ -1712,18 +1712,18 @@ eLand randlands[RANDLANDS] = {
   };
 
 geometryinfo ginf[gGUARD] = {
-  {"hyperbolic",     "hyper",    7, 3, 0,      0, {7, 5}},
-  {"Euclidean",      "euclid",   6, 3, 0,      1, {7, FORBIDDEN}},
-  {"spherical",      "sphere",   5, 3, 0,      2, {SEE_ALL, SEE_ALL}},
-  {"elliptic",       "elliptic", 5, 3, qELLIP, 2, {SEE_ALL, SEE_ALL}},
-  {"Zebra quotient", "Zebra",    7, 3, qZEBRA, 0, {7, 5}},
-  {"field quotient", "field",    7, 3, qFIELD, 0, {7, 5}},
-  {"torus",          "torus",    6, 3, qTORUS, 1, {7, FORBIDDEN}},
-  {"octagons",       "oct",      8, 3, 0,      0, {6, 4}},
-  {"four pentagons", "4x5",      5, 4, 0,      0, {6, 4}},
-  {"four hexagons",  "4x6",      6, 4, 0,      0, {5, 3}},
-  {"four heptagons", "4x7",      7, 4, 0,      0, {4, 3}},
-  {"small sphere",   "3x4",      4, 3, 0,      2, {SEE_ALL, SEE_ALL}},
-  {"tiny sphere",   "3x3",      3, 3, 0,      2, {SEE_ALL, SEE_ALL}},
+  {"standard",            "HR",       7, 3, 0,      0, {7, 5}},
+  {"Euclidean",           "euclid",   6, 3, 0,      1, {7, FORBIDDEN}},
+  {"spherical",           "sphere",   5, 3, 0,      2, {SEE_ALL, SEE_ALL}},
+  {"elliptic",            "elliptic", 5, 3, qELLIP, 2, {SEE_ALL, SEE_ALL}},
+  {"Zebra quotient",      "Zebra",    7, 3, qZEBRA, 0, {7, 5}},
+  {"field quotient",      "field",    7, 3, qFIELD, 0, {7, 5}},
+  {"torus",               "torus",    6, 3, qTORUS, 1, {7, FORBIDDEN}},
+  {"octagons",            "oct",      8, 3, 0,      0, {6, 4}},
+  {"four pentagons",      "4x5",      5, 4, 0,      0, {6, 4}},
+  {"four hexagons",       "4x6",      6, 4, 0,      0, {5, 3}},
+  {"four heptagons",      "4x7",      7, 4, 0,      0, {4, 3}},
+  {"cube",                "3x4",      4, 3, 0,      2, {SEE_ALL, SEE_ALL}},
+  {"tetrahedron (buggy)", "3x3",      3, 3, 0,      2, {SEE_ALL, SEE_ALL}},
   };
 
