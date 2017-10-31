@@ -939,6 +939,8 @@ void IMAGESAVE(SDL_Surface *s, const char *fname) {
   }
 #endif
 
+hookset<void(SDL_Surface*)> *hooks_hqshot;
+
 #if CAP_SDL
 void saveHighQualityShot(const char *fname, const char *caption, int fade) {
 
@@ -988,6 +990,8 @@ void saveHighQualityShot(const char *fname, const char *caption, int fade) {
     SDL_FillRect(s, NULL, numi==1 ? backcolor : i ? 0xFFFFFF : 0);
     drawfullmap();
     
+    callhooks(hooks_hqshot, s);
+
     if(fade < 255) 
       for(int y=0; y<vid.yres; y++)
       for(int x=0; x<vid.xres; x++) {
@@ -1004,6 +1008,7 @@ void saveHighQualityShot(const char *fname, const char *caption, int fade) {
     buf[7] += i;
     if(!fname) fname = buf;
     IMAGESAVE(s, fname);
+    
 
     if(i == 0) addMessage(XLAT("Saved the high quality shot to %1", fname));
     }
