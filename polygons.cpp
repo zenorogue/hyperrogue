@@ -1397,11 +1397,16 @@ void buildpolys() {
   
   bshape(shCrossFloor[0], PPR_FLOOR, scalef*espzoom6*(sphere?.9:1)*ffscale2, 5, ffspin2);
   bshape(shCrossFloor[1], PPR_FLOOR, scalef*espzoomd7*(sphere?.9:1)*ffscale2 * SCA47(1.3), 6, octroll);
+  
+  double ntscale =
+    SCA38(nontruncated?1.4:1) * (a4 && nontruncated?(S7==7?2:S7==6?1.525:1):1);
+  double ntrot =
+    (a4 && nontruncated && S7==6?.25:0) + ROT38(nontruncated?-.2:0);
 
   bshape(shChargedFloor[0], PPR_FLOOR, scalef*espzoom6*(sphere?.9:1)*ffscale2, 7, ffspin2);
   bshape(shChargedFloor[1], PPR_FLOOR, scalef*spzoomd7, 9);
   bshape(shChargedFloor[2], PPR_FLOOR, scalef*espzoom6, 7);
-  bshape(shChargedFloor[3], 12, spzoomd7 * (sphere&&nontruncated?.9:1) * SCA4(1.2), 10); // nontruncated variant
+  bshape(shChargedFloor[3], 12, spzoomd7 * (sphere&&nontruncated?.9:1) * SCA4(1.2)* ntscale, 10, ntrot); // nontruncated variant
 
   bshape(shSStarFloor[0], PPR_FLOOR, scalef*spzoom6*(sphere?.8:1)*ffscale2, 11, ROT4(.775));
   bshape(shSStarFloor[1], PPR_FLOOR, scalef*spzoomd7*SCA4(.85), 12, octroll);
@@ -1415,12 +1420,12 @@ void buildpolys() {
   bshape(shTriFloor[0], PPR_FLOOR, scalef*espzoom6*(sphere?.9:1)*ffscale2*SCA4(0.9), 17, ffspin2 + ROT47(.1));
   bshape(shTriFloor[1], PPR_FLOOR, scalef*espzoomd7*ffscale2*SCA4(1.2)*SCA47(1.5), 18, octroll + ROT4(.25) - ROT47(.1) + ROTS4(.7));
   bshape(shFeatherFloor[0], PPR_FLOOR, scalef*spzoom6*ffscale2, 19, ffspin2);
-  if(nontruncated) bshape(shFeatherFloor[1], PPR_FLOOR, sphere ? .83 : SCAP4(1.1), 20);
-  else bshape(shFeatherFloor[1], PPR_FLOOR, scalef*spzoom7*(sphere?1.1:1)*ffscale2*(a4?1.1:1), 21, sphere?1.3:0);
+  if(nontruncated) bshape(shFeatherFloor[1], PPR_FLOOR, sphere ? .83 : SCAP4(1.1) * ntscale, 20, ntrot);
+  else bshape(shFeatherFloor[1], PPR_FLOOR, scalef*spzoom7*(sphere?1.1:1)*ffscale2*(a4?1.1:1)*ntscale, 21, sphere?1.3:ntrot);
   bshape(shFeatherFloor[2], PPR_FLOOR, scalef*1.1, 22);  // Euclidean variant
   bshape(shBarrowFloor[0], PPR_FLOOR, (euclid?.9:1) * spzoom6 * (S7==8?1.4:1) * SCA467(1.7) * SCA46(.8), 23);
   bshape(shBarrowFloor[1], PPR_FLOOR, (sphere&&nontruncated?.9:1) * spzoomd7 * (S7==8?1.5:1) * SCA4(1.15) * SCA467(1.9) * SCA46(.8), 24, octroll - ROT47(.1));
-  bshape(shBarrowFloor[2], PPR_FLOOR, (sphere||euclid)?.9:1, 25);
+  bshape(shBarrowFloor[2], PPR_FLOOR, (sphere||euclid)?.9:1*ntscale, 25, ntrot);
   bshape(shNewFloor[0], PPR_FLOOR, scalef*espzoom6 * ffscale2, 26, ffspin2);
   bshape(shNewFloor[1], PPR_FLOOR, scalef*espzoomd7 * ffscale2, 27, octroll);
 
@@ -1503,7 +1508,7 @@ void buildpolys() {
   bshape(shRoseFloor[1], PPR_FLOOR,  (euclid?.9:1) * scalef * SCAP4(.85), 175, (nontruncated && a4 ? M_PI/8 : 0));
   bshape(shTurtleFloor[0], PPR_FLOOR,  (euclid?.9:1) * (sphere?.9*1.3: a4 ? 1.6 : S7==8 ? 1.3 : 1) * SCA46(1.4) * SCA47(1.4), 176);
   bshape(shTurtleFloor[1], PPR_FLOOR,  (euclid?.9:1) * scalef * (a4?.9:1) * SCA47(1.3), 177, octroll - ROT47(.1));
-  bshape(shTurtleFloor[2], PPR_FLOOR,  sphere && nontruncated ? .9 : 1, 178); // nontruncated
+  bshape(shTurtleFloor[2], PPR_FLOOR,  sphere && nontruncated ? .9 : ntscale, 178, ntrot); // nontruncated
   bshape(shDragonFloor[0], PPR_FLOOR_DRAGON, (S7==8?1.3:1) * SCA4(1.6), 181, ffspin2);
   bshape(shDragonFloor[1], PPR_FLOOR_DRAGON, (sphere ? .9:1) * (S7==8?1.1:1) * SCA4(.9) * scalef, 182, octroll);
   bshape(shDragonFloor[2], PPR_FLOOR,  scalef * 1.1, 183);
