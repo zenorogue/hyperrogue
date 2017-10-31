@@ -6167,8 +6167,123 @@ S("When your plan has clearly failed, it is better to abandon it and go to a saf
 
 S("The Hunting Dogs give up.", "Myśliwskie psy się poddały.");
 
+// missing from previous versions:
+
 S("\n\nThis orb also allows you to collect items encased in ice.",
   "\n\nTa sfera pozwala Ci również zbierać rzeczy zamrożone w lodowej ścianie.")
+
+// vampire attack
+S("%The1 drains your powers!", "%The1 wysysa Twoje moce!")
+
+// additions
+S(" This tutorial will not advance on its own -- you have to press Enter (not while reading help text).", 
+  " Ten podręcznik nie idzie do przodu sam z siebie -- musisz nacisnąć Enter (nie podczas czytania tekstu pomocy)."
+  )
+
+S("Hint: hold Alt to highlights enemies and other important features.",
+  "Wskazówka: trzymaj Alt by podświetlać przeciwników i inne istotne elementy.")
+
+// Crystal World
+N("Crystal World", GEN_O, "Kryształowy Świat", "Kryształowe Światy", "Kryształowy Świat", "w Kryształowym Świecie")
+N("Glowing Crystal", GEN_O, "Świecący Kryształ", "Świecące Kryształy", "Świecący Kryształ", "Świecącym Kryształem")
+
+S("Yes, this is definitely a crystal. A very regular crystalline structure.\n\n"
+  "This land has been designed as a tool to play with various geometries, and it does not appear during a normal gameplay.",
   
+  "Tak, to na pewno kryształ. Bardzo regularna struktura krystaliczna.\n\n"
+  "Ta kraina została zaprojektowana do zabawy różnymi geometriami, i nie pojawia się podczas normalnej gry.")
+
+S("You cannot move there!", "Nie możesz tam iść!");
+
+// geometry stuff
+
+S("experiment with geometry", "eksperymenty z geometrią")
+
+S(
+  "If you want to know how much the gameplay is affected by the "
+  "hyperbolic geometry in HyperRogue, this mode is for you!\n\n"
+  
+  "You can try many different geometries here. We start by gluing "
+  "n-gons in such a way that k of them meet in every vertex. "
+  "Depending on n and k, this either folds into a sphere, unfolds into a plane, "
+  "or requires a hyperbolic space. The result may be then 'truncated' by "
+  "replacing each vertex by a 2k-gon. Furthermore, you can play "
+  "with quotient geometries. For example, the elliptic geometry is "
+  "obtained from the sphere by making the antipodes be the same point, "
+  "so you return to the same spot (but as a mirror image) after going there. "
+  "Have fun experimenting! "
+  "Achievements and leaderboards do not work in geometry experiments, "
+  "except some specific ones.\n\n"
+  "In standard geometry (truncated or not), you can play the full game, but in other geometries "
+  "you select a particular land. Lands are unlocked by visiting them in this "
+  "session, or permanently by collecting 25 treasure. Try Crossroads in Euclidean "
+  "or chaos mode in non-standard non-quotient hyperbolic to visit many lands. "
+  "Highlights:\n"
+  "* Crystal World and Warped Coast can be understood as extra geometries.\n"
+  "* Halloween is specially designed for spherical geometry.\n"
+  "* To see the difference, try Hunting Grounds in Euclidean -- it is impossible.\n",
+  
+  "Chcesz wiedzieć, jak geometria wpływa na grę HyperRogue? Ten tryb jest dla Ciebie!\n\n"
+  "Możesz tu wypróbować wiele różnych geometrii. Zaczynamy od sklejania n-kątów tak, "
+  "by k z nich spotykało się w 1 wierzchołku. Zależnie od n i k, to się zwija w kulkę, "
+  "rozwija w płaszczyznę, albo wymaga przestrzeni hiperbolicznej. Wynik może być "
+  "następnie 'przycięty' poprzez zastąpienie każdego wierzchołka 2k-kątem. Można "
+  "też eksperymentować z przestrzeniami ilorazowymi. Na przykład, geometria eliptyczna "
+  "jest otrzymana w ten sposób, że antypody traktujemy jako ten sam punkt, także "
+  "po przejściu na antypody wracasz w to samo miejsce (ale odbit%y0 lustrzanie). "
+  "Miłej zabawy! Osiągnięcia nie działają w eksperymentach geometrycznych, oprócz "
+  "niektórych specjalnych.\n\n"
+  "W standardowej geometrii (przyciętej lub nie) grasz całą grę, w innych geometriach "
+  "wybierasz krainę. Krainy są odblokowane poprzez odwiedzenie ich w tej sesji, lub "
+  "permanentnie przez zebranie 25 skarbów. By odwiedzić wiele krain, wypróbuj "
+  "Skrzyżowanie w geometrii euklidesowej, lub Chaos w niestandardowej nieilorazowej "
+  "geometrii.\n"
+  "Godne uwagi:\n"
+  "* Kryształowy Świat i Zakrzywiony Brzeg to w pewnym sensie dodatkowe geometrie.\n"
+  "* Halloween to kraina zaprojektowana dla geometrii sferycznej.\n"
+  "* Wypróbuj Krainę Wiecznych Łowów w geometrii euklidesowej -- staje się "
+  "niemożliwa do przejścia."  
+  )
+
+// new geometries available:
+S("standard", "standard") // renamed from 'hyperbolic'
+
+S("octagons", "ośmiokąty")
+S("four pentagons", "cztery pięciokąty")
+S("four hexagons", "cztery sześciokąty")
+S("four heptagons", "cztery siedmiokąty")
+S("cube", "sześcian")
+S("tetrahedron (buggy)", "czworościan (bugi)")
+S("tetrahedron", "czworościan") // in case if it gets better
+
+S("land", "kraina")
+S("truncated", "przycięte")
+S("does not matter", "bez znaczenia")
+S("sides per face", "boki ścian")
+S("faces per vertex", "wierzchołki")
+S("none", "brak")
+S("zebra", "zebra")
+S("field", "ciało")
+S("quotient space", "przestrzeń ilorazowa")
+S("size of the world", "wielkość świata")
+S("flat", "płaska")
+
+// truncated or not truncated
+S(" (t)", " (p)")
+S(" (n)", " (n)")
+
+S("(locked)", "(blok)")
+
+S("stereographic/orthogonal", "rzut stereo/orto")
+S("Poincaré/Klein", "Poincaré/Klein")
+  
+// Paper Model Creator
+S("Useless in Euclidean geometry.", "Bezużyteczne w geometrii euklidesowej.");
+S("Not implemented for spherical geometry. Please tell me if you really want this.",
+  "Nie zaimplementowane dla geometrii sferycznej. Jeśli bardzo tego chcesz, powiedz.")
+
+// Hypersian Rug
+S("This makes sense only in hyperbolic geometry.", "To ma sens tylko w geometrii hiperbolicznej.")
+
 #undef Orb
 

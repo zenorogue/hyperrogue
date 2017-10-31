@@ -215,6 +215,7 @@ int main() {
   plural.insert("Kraken Depths");
   allchars.insert("ᵈ");
   allchars.insert("δ");
+  allchars.insert("∞");
   
   langPL(); langCZ(); langRU();
   langTR(); langDE(); langPT();

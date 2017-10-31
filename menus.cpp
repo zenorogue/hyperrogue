@@ -347,7 +347,7 @@ void showDisplayMode() {
   dialog::addBoolItem(XLAT("paper model creator"), (false), 'n');
 #endif
   dialog::addBoolItem(XLAT("conformal/history mode"), (conformal::on), 'a');
-  dialog::addBoolItem(XLAT("expansion"), viewdists, 'x');
+//  dialog::addBoolItem(XLAT("expansion"), viewdists, 'x');
   
   showAllConfig();
   dialog::display();
@@ -613,7 +613,7 @@ string euchelp =
   "except some specific ones.\n\n"
   "In standard geometry (truncated or not), you can play the full game, but in other geometries "
   "you select a particular land. Lands are unlocked by visiting them in this "
-  "game, or permanently by collecting 25 treasure. Try Crossroads in Euclidean "
+  "session, or permanently by collecting 25 treasure. Try Crossroads in Euclidean "
   "or chaos mode in non-standard non-quotient hyperbolic to visit many lands. "
   "Highlights:\n"
   "* Crystal World and Warped Coast can be understood as extra geometries.\n"
@@ -659,9 +659,9 @@ void showEuclideanMenu() {
     dialog::addBreak(50);
   
     if(ts == 6 && tv == 3)
-      dialog::addSelItem("truncated", "does not matter", 't');
+      dialog::addSelItem(XLAT("truncated"), XLAT("does not matter"), 't');
     else
-      dialog::addBoolItem("truncated", !nontruncated, 't');
+      dialog::addBoolItem(XLAT("truncated"), !nontruncated, 't');
   
     dialog::addBreak(50);
   
@@ -673,8 +673,8 @@ void showEuclideanMenu() {
       if(!nontruncated) worldsize = ((ts+tv)*worldsize) / tv;
       }
   
-    dialog::addSelItem("sides per face", its(ts), 0);
-    dialog::addSelItem("faces per vertex", its(tv), 0);
+    dialog::addSelItem(XLAT("sides per face"), its(ts), 0);
+    dialog::addSelItem(XLAT("faces per vertex"), its(tv), 0);
   
     string qstring = "none";
     if(tq & qZEBRA) qstring = "zebra";
@@ -685,26 +685,25 @@ void showEuclideanMenu() {
   
     else if(tq & qTORUS) qstring = "torus";
   
-    dialog::addSelItem("quotient space", qstring, 0);
+    dialog::addSelItem(XLAT("quotient space"), XLAT(qstring), 0);
   
-    dialog::addSelItem("size of the world", 
-      XLAT(
-        worldsize == 0 ? "infinite" : 
-        worldsize > 0 ? "finite (%1)" :
-        "exponentially infinite (%1)", its(worldsize)),
-      0);
+    dialog::addSelItem(XLAT("size of the world"), 
+      worldsize < 0 ? "exp(∞)*" + (nom%denom ? its(nom)+"/"+its(-denom) : its(-worldsize)): 
+      worldsize == 0 ? "∞" :
+      its(worldsize),
+      '3');
     
     switch(ginf[geometry].cclass) {
       case 0:
-        dialog::addSelItem("curvature", curvenames[getDistLimit()], 0);
+        dialog::addSelItem(XLAT("Curvature"), XLAT("hyperbolic"), 0);
         break;
       
       case 1: 
-        dialog::addSelItem("curvature", "flat", 0);
+        dialog::addSelItem(XLAT("Curvature"), XLAT("flat"), 0);
         break;
       
       case 2:
-        dialog::addSelItem("curvature", "spherical", 0);
+        dialog::addSelItem(XLAT("Curvature"), XLAT("spherical"), 0);
         break;
       }
     
@@ -713,7 +712,7 @@ void showEuclideanMenu() {
     else
       dialog::addBoolItem(XLAT("Poincaré/Klein"), vid.alpha>.5, '1');
     dialog::addItem(XLAT("help"), SDLK_F1);  
-    dialog::addItem(XLAT("done"), '0');  
+    dialog::addItem(XLAT("back"), '0');  
     dialog::display();
   
     keyhandler = [] (int sym, int uni) {
@@ -730,6 +729,7 @@ void showEuclideanMenu() {
           }
         }
       else if(uni == '2' || sym == SDLK_F1) gotoHelp(euchelp);
+      else if(uni == '3') { viewdists = !viewdists; if(viewdists) popScreenAll(); }
       else if(uni == '1' && !euclid) {
         if(sphere) {
           if(vid.alpha < 10) { vid.alpha = 999; vid.scale = 998; }
@@ -747,10 +747,10 @@ void showEuclideanMenu() {
       };
     }
   else {
-    dialog::init(XLAT("use this where?"));
+    dialog::init(XLAT("experiment with geometry"));
     string truncatenames[2] = {" (t)", " (n)"};
   
-    dialog::addSelItem(XLAT("geometry"), XLAT(ginf[geometry].name) + truncatenames[nontruncated], '5');
+    dialog::addSelItem(XLAT("geometry"), XLAT(ginf[geometry].name) + XLAT(truncatenames[nontruncated]), '5');
     dialog::addBreak(50);
     
     for(int i=0; i<euperpage; i++) {
@@ -772,7 +772,7 @@ void showEuclideanMenu() {
     dialog::addItem(XLAT("next page"), '-');
     
     dialog::addItem(XLAT("help"), SDLK_F1);  
-    dialog::addItem(XLAT("done"), '0');
+    dialog::addItem(XLAT("back"), '0');
     dialog::display();
   
     vid.fsize = s;
@@ -954,13 +954,15 @@ void showStartMenu() {
 
 void setAppropriateOverview() {
   clearMessages();
-  if(tactic::on)
+  if(viewdists)
+    runGeometryExperiments();
+  else if(tactic::on)
     pushScreen(tactic::showMenu);
   else if(yendor::on)
     pushScreen(yendor::showMenu);
   else if(peace::on)
     pushScreen(peace::showMenu);
-  else if(geometry != gNormal) {
+  else if(geometry != gNormal && !chaosmode && !(geometry == gEuclid && isCrossroads(specialland))) {
     runGeometryExperiments();
     }
   else {

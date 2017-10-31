@@ -709,7 +709,7 @@ namespace netgen {
     if(euclid) 
       addMessage("Useless in Euclidean geometry.");
     else if(sphere)
-      addMessage("Not implemented for spherical geometry.");
+      addMessage("Not implemented for spherical geometry. Please tell me if you really want this.");
     else
       pushScreen(show);
     }
