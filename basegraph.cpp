@@ -947,7 +947,9 @@ void saveHighQualityShot(const char *fname, const char *caption, int fade) {
   return;
 #endif
 
-  dynamicval<int> v3(sightrange, (cheater && sightrange < 10) ? 10 : sightrange);
+  int maxrange = getDistLimit() * 3/2;
+
+  dynamicval<int> v3(sightrange, (cheater && sightrange < maxrange) ? maxrange : sightrange);
 
   if(cheater) doOvergenerate();
 
@@ -966,7 +968,6 @@ void saveHighQualityShot(const char *fname, const char *caption, int fade) {
     vid.xres = vid.yres * 22/16;
     while(vid.xres & 15) vid.xres++;
     }
-  printf("format = %d, %d x %d\n", pngformat, vid.xres, vid.yres);
 
   vid.usingGL = false;
   // if(vid.pmodel == 0) vid.scale = 0.99;
@@ -975,7 +976,7 @@ void saveHighQualityShot(const char *fname, const char *caption, int fade) {
   rogueviz::fixparam();
   #endif
 
-  printf("format = %d, %d x %d\n", pngformat, vid.xres, vid.yres);
+  // printf("format = %d, %d x %d\n", pngformat, vid.xres, vid.yres);
 
   dynamicval<SDL_Surface*> v5(s, SDL_CreateRGBSurface(SDL_SWSURFACE,vid.xres,vid.yres,32,0,0,0,0));
 
