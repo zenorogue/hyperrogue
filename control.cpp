@@ -54,6 +54,8 @@ movedir vectodir(const hyperpoint& P) {
     Centered = eupush(-H[0], -H[1]) * Centered;
   ld binv = 99;
   
+  if(euclid) Centered = pispin * Centered;
+  
   ld dirdist[MAX_EDGE];
   for(int i=0; i<cwt.c->type; i++) {
     dirdist[i] = intval(Centered * ddspin(cwt.c, i, 0) * xpush(-.5) * C0, P);
