@@ -1,7 +1,32 @@
-# note: this Makefile for Mac is based on this post. I have no resources to test it myself.
-# http://groups.google.com/group/rec.games.roguelike.development/browse_thread/thread/9c02e09c0195dc16/3cbde3dc4a0b7e4e
+# This Makefile works for Mac OS X (Yosemite).
 #
-# You will also probably need to configure it yourself a bit to make it work.
+# Run "brew install sdl" to install SDL in /usr/local.
+# Run "brew install sdl_gfx".
+# Run "brew install sdl_mixer".
+# Run "brew install sdl_ttf".
+# Run "make -f Makefile.mac" to build HyperRogue as ./hyper.
 
-hyper: hyper.cpp graph.cpp hyperpoint.cpp geometry.cpp cell.cpp heptagon.cpp game.cpp polygons.cpp classes.cpp
-	g++ -m32 -I/sw/include hyper.cpp -L/sw/lib -lSDL -lSDLMain -lSDL_ttf -lSDL_gfx -framework AppKit -DMAC -O3
+CXXFLAGS += -std=c++11 -DMAC
+CXXFLAGS += -W -Wall -Wextra -pedantic
+CXXFLAGS += -Wno-format-pedantic -Wno-unused-parameter -Wno-char-subscripts -Wno-missing-field-initializers -Wno-vla-extension
+CXXFLAGS += ${EXTRA_CXXFLAGS}
+CXXFLAGS += -I/usr/local/include
+LDFLAGS += -L/usr/local/lib
+
+hyper: hyper.o
+	$(CXX) $(CXXFLAGS) hyper.o $(LDFLAGS) -lSDL -lSDLMain -lSDL_gfx -lSDL_mixer -lSDL_ttf -framework AppKit -framework OpenGL -o hyper
+
+hyper.o: *.cpp language-data.cpp
+	$(CXX) $(CXXFLAGS) -O2 -c hyper.cpp
+
+langen: langen.cpp
+	$(CXX) $(CXXFLAGS) -O0 -Wno-embedded-directive langen.cpp -o langen
+
+# Generation of language-data.cpp
+language-data.cpp: langen
+	./langen > language-data.cpp
+
+.PHONY: clean
+
+clean:
+	rm -f langen language-data.cpp hyper.o hyper

@@ -3926,6 +3926,7 @@ S("player 7 spin", "hráč 7 otáčení")
 //=============
 
 // extra descriptions for Orbs and some other things
+// -------------------------------------------------
 
 S("\n\nThis Orb is triggered on your first attack or illegal move.",
   "\n\nTato sféra se aktivuje prvním útokem nebo ilegálním tahem.")
@@ -3982,6 +3983,7 @@ S("Completing the quest in this land is not necessary for the Hyperstone Quest."
   "Splnění mise v tomto kraji není nezbytné pro Hyperkamovou misi.")
 
 // other options
+// -------------
 
 S("player", "hráč")
 S("movement color", "barva pohybu")
@@ -3993,6 +3995,7 @@ S("leaderboards/achievements", "leaderboardy/achievementy")
 S("return to the game", "návrat do hry")
 
 // Android texts
+// -------------
 
 S("connected to Google Games", "připojeno ke Google Games")
 S("background music", "hudba")
@@ -4063,6 +4066,7 @@ S("This menu can be also used to configure keys.\n\n",
   "Toto menu je také možné použít pro konfiguraci kláves.\n\n")
 
 // other stuff
+// -----------
 
 S("Warnings are issued when you try to do something that appears dangerous, "
   "like stepping on a known mine, or getting your boat destroyed by "
@@ -4078,6 +4082,7 @@ S("Warnings are issued when you try to do something that appears dangerous, "
 
 
 // kraken depths
+// -------------
 
 N("Kraken Depths", GEN_F, "Krakení hlubiny", "Krakení hlubiny", "Krakení hlubiny", "v Krakeních hlubinách")
 
@@ -4143,6 +4148,7 @@ S("Cargo of a ship which was once destroyed by a Kraken.",
   "Náklad z lodi, kterou kdysi zničil Kraken.")
 
 // burial grounds
+// --------------
 
 N("Burial Grounds", GEN_N, "Pohřebiště", "Pohřebiště", "Pohřebiště", "na Pohřebišti")
 
@@ -4200,7 +4206,8 @@ N("barrow", GEN_F, "mohyla", "mohyly", "mohylu", "mohylou")
 S("Your Orb of the Sword can be used to dig here.", 
   "Tvá Sféra Meče se dá použít k prokopání tohoto políčka.")
 
-// trollheim
+// Trollheim
+// ---------
 
 N("Trollheim", GEN_O, "Trollheim", "Trollheimy", "Trollheim", "v Trollheimu")
 
@@ -4270,12 +4277,14 @@ S("Known mines may be marked by touching while in drag mode. Your allies won't s
   "Políčka, která obsahují miny, je možné označit dotekem v módu tažení. Vaši spojenci na označené miny nevstoupí.")
 
 // VERSION 9.0n
-//==============
+// ============
 
 // 9.0 patches
-//=============
+// ============
 
 // extra help
+// ----------
+
 S("Coastal region -- connects inland and aquatic regions.\n",
   "Pobřežní kraj -- spojuje vnitrozemské a mořské kraje.\n")
 
@@ -4283,10 +4292,14 @@ S("Aquatic region -- accessible only from coastal regions and other aquatic regi
   "Kraina morska -- dostępna jedynie zs krain przybrzeżnych i morskic.\n")
 
 // barrow treasure protected from Orb of Space
+// -------------------------------------------
+
 S("%The1 is protected from this kind of magic!",
   "%1 má ochranu proti tomuto typu magie!")
 
 // Orb is always available in the given land
+// -----------------------------------------
+
 S("always available", "vždy dostupná")
 
 S("\n\nAfter the Trolls leave, you have 750 turns to collect %the1, or it gets stolen.",
@@ -4308,6 +4321,8 @@ S(
     )
 
 // welcome messages
+// ----------------
+
 S("Welcome to the Random Pattern mode!", "Vítej v módu náhodných vzorů!")
 S("You are playing %the1 in the Pure Tactics mode.", "Právě hraješ %a1 v čistě taktickém módu.")
 // %1 is the number
@@ -4321,6 +4336,7 @@ S("Good luck in the elliptic plane!", "Hodně štěstí v eliptické rovině!")
 S("Welcome to Spherogue!", "Vítej ve Sférogue!")
 
 // extra help for joystick configuration
+// -------------------------------------
 
 S("joystick configuration", "konfigurace joysticku")
 S("first joystick position (movement)", "pozice prvního joysticku (pohyb)")
@@ -4337,6 +4353,7 @@ S("leave the game", "vyskoč ze hry")
 S("drop Dead Orb (up + down)", "polož Mrtvou sféru (nahoru + dolů)")
 
 // extra help for configuration / projection and geometry
+// ------------------------------------------------------
 
 S("Roughly 42% cells are on the edge of your sight range. Reducing "
   "the sight range makes HyperRogue work faster, but also makes "
@@ -4354,6 +4371,8 @@ S("return", "návrat")
 S("F1 - help", "F1 - nápověda")
 
 // for the conformal polynomial
+// ----------------------------
+
 S("coefficient (imaginary)", "koeficient (imaginární část)")
 S("Scale the displayed model.", "Změň měřítko zobrazeného modelu.")
 S("Reenter HyperRogue to apply this setting", "Toto nastavení se aplikuje po návratu do HyperRogue")
@@ -4384,7 +4403,7 @@ S("Euclidean", "eukleidovská")
 S("projection", "projekce")
 
 // VERSION 9.1
-//=============
+// ===========
 
 N("Familiar", GEN_M, "Pomocník", "Pomocníci", "Pomocníka", "Pomocníkem")
 S("Commanded %the1!", "%1 dosta%l1 rozkaz!")
@@ -4523,13 +4542,15 @@ S("+5 = move instantly", "+5 = okamitý pohyb")
 S("extra graphical effects", "extra grafické efekty")
 
 // VERSION 9.3
-//=============
+// ===========
 
 S("SORT", "TŘÍDIT")
 S("PICK", "VYBRAT")
 S("PLAY", "HRÁT")
 
 // 3D configuration
+// ----------------
+
 S("3D configuration", "3D konfigurace")
 S("High detail range", "Rozsah vysokých detailů")
 S("Mid detail range", "Rozsah středních detailů")
@@ -4605,6 +4626,8 @@ S( "Humans are %1 "
    "vzdálenosti, kterou urazí tvé nohy.")
   
 // Euclidean regular patterns
+// --------------------------
+
 S("three colors", "tři barvy")
 S("three colors rotated", "tři barvy s otočkou")
 S("edit all three colors", "edituj všechny tři barvy")
@@ -4630,7 +4653,7 @@ S("\n\nFast flying creatures may attack or go against gravity only in their firs
   "\n\nRychlí létající tvorové mohou útočit nebo se protivit gravitaci pouze při svém prvním pohybu.")
 
 // Dungeon
-//---------
+// -------
 
 N("Dungeon", GEN_O, "Žalář", "Žaláře", "Žalář", "v Žaláři")
 
@@ -4676,7 +4699,7 @@ S("When the charges on this Orb expire, "
 //
 
 // lost mountain
-//===============
+// =============
 
 //N("Pyramid", GEN_F, "Pyramida", "Pyramidy", "Pyramida", "na Pyramidě")
 N("Lost Mountain", GEN_F, "Ztracená hora", "Ztracené hory", "Ztracenou horu", "na Ztracené hoře")
@@ -4741,7 +4764,7 @@ S("This Orb allows you to grow like an Ivy. "
   )
 
 // reptiles
-//==========
+// ========
 
 N("Reptiles", GEN_O, "Ještěrky", "Ještěrky", "Ještěrky", "na Ještěrkách")
 N("Reptile", GEN_F, "Ještěrka", "Ještěrky", "Ještěrku", "Ještěrce")
@@ -4826,7 +4849,7 @@ S("You feel attuned to gravity, ready to face mountains and dungeons.",
   "Cítíš se přizpůsoben%ý1 gravitaci, připraven%ý1 čelit horám a žalářům.")
 
 // VERSION 9.4
-//=============
+// ===========
 
 // not previously translated
 S("shift+O to switch anti-aliasing", "Stiskem Shift+O se přepíná antialiasing")
@@ -4838,12 +4861,13 @@ S("Quite tough, for your first fight.", "Na první bitku docela obtížný soupe
 S("(You can also use right Shift)\n\n", "(Také lze použít pravý Shift)\n\n")
 
 // Crossroads V
-//--------------
+// ------------
 
 N("Crossroads V", GEN_O, "Křižovatka V", "Křižovatky V", "Křižovatku V", "na Křižovatce V")
 S("Extremely narrow Crossroads layout.\n", "Velmi úzká verze Křižovatky.")
 
 // Bull Dash/Prairie common
+// ------------------------
 
 N("Sleeping Bull", GEN_M, "Spící Býk", "Spící Býci", "Spícího Býka", "Spícím Býkem")
 
@@ -4882,7 +4906,7 @@ S("Fire is extinguished!", "Oheň je uhašen!")
 S("%The1 is filled!", "%1 je naplněn%1ý!")
 
 // Prairie
-//---------
+// -------
 
 N("Prairie", GEN_F, "Prérie", "Prérii", "Prérii", "na Prérii")
 N("Green Grass", GEN_F, "Zelená Tráva", "Zelené Trávy", "Zelenou Trávu", "Zelenou Trávou")
@@ -4899,7 +4923,7 @@ S("You get the powers of Shield, Horns, and Thorns after you move two moves in a
   "Kdykoli se pohneš o dvě políčka rovně, získáš schopnosti Štítu, Rohů a Trnů.")
 
 // Bull Dash
-//-----------
+// ---------
 
 N("Bull Dash", GEN_O, "Býčí kraj", "Býčí kraje", "Býčí kraj", "v Býčím kraji")
 N("Butterfly", GEN_M, "Motýlek", "Motýlci", "Motýlka", "Motýlkem")
@@ -4928,7 +4952,7 @@ S(
 S("You pierce %the1.", "Probodl jsi %a1.")
 
 // new 3D options
-//----------------
+// --------------
 
 S("Y shift", "Y posuv")
 S("Don't center on the player character.", "Necentrovat na hráče.")
@@ -4951,7 +4975,7 @@ S("camera rotation in ball model", "rotace kamery v modelu koule")
 S("Rotate the camera in ball/hyperboloid model.", "Rotace kamery v modelu koule/hyperboloidu.")
 
 // extra help
-//------------
+// ----------
 
 S("\nSpecial conduct (still valid)\n", "\nZvláštní výzva (stále platná):")
 S("\nSpecial conduct failed:\n", "\nZvláštní výzva (neúspěšná):")
@@ -5511,6 +5535,8 @@ S(
   )
 
 // Orb Strategy mode
+// -----------------
+
 S("Orb Strategy mode", "sférostrategický mód")
 
 S(
@@ -5608,6 +5634,8 @@ N("your orbs", GEN_F, "Tvé Sféry", "Tvé Sféry", "Tvé Sféry", "Tvé Sféry"
 S("Click this to see your orbs.", "Kliknutím zde zobrazíš své Sféry.")                    
 
 // peaceful mode
+// -------------
+
 S("configure keys/joysticks", "konfigurace kláves/joysticku")
 S("peaceful mode", "klidný mód")
 
@@ -5653,6 +5681,7 @@ S("c = choose", "c = výbìr")
 S("b = switch auto", "b = pøepni auto")
 
 // mission screen hints
+// --------------------
 
 S(
   "If you collect too many treasures in a given land, it will become "
@@ -5737,6 +5766,8 @@ S(" (%1 more digits)", " (%1 dalších èíslic)")
 S("see how it ended", "podívej se, jak to skonèilo")
 
 // other missing/new things
+// ------------------------
+
 S("\n\nOrb unlocked: %1", "\n\nByla odemèena Sféra: %1")
 S("Orb unlocked: %1", "Byla odemèena Sféra: %1")
 S("\n\nSecondary orb: %1", "\n\nSekundární Sféra: %1")
@@ -5813,6 +5844,7 @@ These apparently have not been yet translated:
 */
 
 // peaceful texts
+// --------------
 
 S("memory game", "hra na paměť")
 S("display hints", "zobrazovat tipy")
@@ -5893,6 +5925,7 @@ S("cancel", "zrušit")
 S("reset the special game modes", "vyresetovat speciální herní módy")
 
 // extra flavor messages for the OSM
+// ---------------------------------
 
 S("You feel the presence of free saves on the Crossroads.",
   "Cítíš, že na Křižovatce si můžeš zdarma uložit hru.")
@@ -5917,6 +5950,7 @@ S(" (used %1 times)", " (použitá %1krát)")
 S("Extras:", "Extra:") // extra Orbs gained in OSM
 
 // cheats
+// ------
 
 S("unlock Orbs of Yendor", "odemkni Yendorské Sféry")
 S("Collected the keys!", "Získal jsi klíče!");
@@ -5924,6 +5958,7 @@ S("Saved the Princess!", "Zachránil jsi Princeznu!")
 S("save a Princess", "zachraň Princeznu")
 
 // other
+// -----
   
 S("Note for mobiles", "Poznámka pro mobilní telefony")
 S(
@@ -5945,7 +5980,8 @@ S("quick mouse", "rychlá myš")
 S("This combination is known to be buggy at the moment.", "Tato kombinace možností v současné době nepracuje správně.")
 
 // extra Princess texts
- 
+// --------------------
+
 S("\"I do not like butterflies. They are treacherous.\"", 
   "\"Nesnáším motýly. Jsou zrádní.\"")
 
@@ -5964,6 +6000,8 @@ S("\"Infinite trees are boring. I prefer other graphs.\"",
   "\"Nekonečné stromy jsou nudné. Mám raději jiné grafy.\"")
 
 // new start menu
+// --------------
+
 S("skip the start menu", "přeskoč menu 'start'")
 
 S("HyperRogue classic", "klasický HyperRogue")

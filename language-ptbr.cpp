@@ -590,6 +590,8 @@ S(
 
 #if 0
 
+// from this the Polish translation is inserted, please translate it further!
+
 S(
  "The Alchemists produce magical potions from pools of blue and red slime. You "
  "can go through these pools, but you cannot move from a blue pool to a red "
@@ -599,12 +601,7 @@ S(
  "but when they are killed, they explode, destroying items and changing "
  "the color of the slime and slime beasts around them.",
  
- "Alchemicy produkują magiczne napoje z niebieskiej i czerwonej mazi. Możesz "
- "poruszać się poprzez maź, ale nie możesz przesunąć się z pola niebieskiego "
- "na czerwone, ani z powrotem. Pola zawierające przedmioty są bezbarwne, "
- "po zebraniu przedmiotu zmieniają kolor na kolor pola, na którym "
- "gracz był wcześniej. Maziste Stwory również ograniczone są do swojego koloru. "
- "Zabijane eksplodują, niszcząc przedmioty i zmieniając kolor mazi wokół nich.\n")
+ "")
 
 S(
  "These creatures are slow, but very powerful... more powerful than you. "
@@ -613,27 +610,21 @@ S(
  "Each 10 lesser demons you kill, you become powerful enough to kill all the greater "
  "demons on the screen, effectively turning them into lesser demons.",
 
- "Te demony są powolne, ale bardzo silne... silniejsze od Ciebie. "
- "Potrzebujesz zdobyć trochę doświadczenia, zanim będziesz w stanie je pokonać. "
- "Nawet wtedy przyjdą jeszcze silniejsze demony...\n\n"
- "Za każdym razem, gdy pokonasz 10 mniejszych demonów, stajesz się dostatecznie silny, "
- "by pokonać wszystkie Wielkie Demony na ekranie. Stają się one w tym momencie "
- "Mniejszymi Demonami.")
+ "")
 
 S(
  "These creatures are slow, but they often appear in large numbers.",
- "Te demony są powolne, ale często pojawiają się w dużych grupach.")
+ "T")
 
 S(
  "A big monster from the Living Caves. A dead Troll will be reunited "
  "with the rocks, causing some walls to grow around its body.",
  
- "Duży stwór z Żyjących Jaskiń. Martwy Troll połączy się ze skałą, "
- "powodując rozrost skał wokół jego ciała.")
+ "")
 
 S(
  "Huge, impassable walls which separate various lands.",
- "Wielkie ściany, które oddzielają od siebie poszczególne krainy.")
+ "")
 
 S(
  "This cave contains walls which are somehow living. After each turn, each cell "
@@ -3996,6 +3987,7 @@ S("Completing the quest in this land is not necessary for the Hyperstone Quest."
   "Wykonanie tego zadania nie jest konieczne do zdobycia Hiperkamieni.")
 
 // other options
+// -------------
 
 S("player", "gracz")
 S("movement color", "kolor ruchu")
@@ -4007,6 +3999,7 @@ S("leaderboards/achievements", "osiągnięcia i rankingi")
 S("return to the game", "powrót do gry")
 
 // Android texts
+// -------------
 
 S("connected to Google Games", "połączenie z Google Games")
 S("background music", "muzyka w tle")
@@ -4014,6 +4007,7 @@ S("view your achievements", "pokaż osiągnięcia")
 S("next page", "kolejna strona")
 
 // new multiplayer
+// ---------------
 
 S("shoot'em up and multiplayer", "strzelanka / wielu graczy")
 
@@ -4075,6 +4069,7 @@ S("This menu can be also used to configure keys.\n\n",
   "To menu może być też użyte do konfiguracji klawiszy.")
 
 // other stuff
+// -----------
 
 S("Warnings are issued when you try to do something that appears dangerous, "
   "like stepping on a known mine, or getting your boat destroyed by "
@@ -4089,7 +4084,8 @@ S("Warnings are issued when you try to do something that appears dangerous, "
   "jeszcze raz.")
 
 
-// kraken depths
+// Kraken Depths
+// -------------
 
 N("Kraken Depths", GEN_F, "Głębiny Krakenów", "Głębiny Krakenów", "Głębiny Krakenów", "w Głębinach Krakenów")
 
@@ -4157,6 +4153,7 @@ S("Cargo of a ship which was once destroyed by a Kraken.",
   "Ładunek statku zatopionego dawno temu przez Krakena.")
 
 // burial grounds
+// --------------
 
 N("Burial Grounds", GEN_O, "Kurhany", "Kurhany", "Kurhany", "w Kurhanach")
 
@@ -4214,7 +4211,8 @@ N("barrow", GEN_O, "kurhan", "kurhany", "kurhan", "kurhanem")
 S("Your Orb of the Sword can be used to dig here.", 
   "Możesz tu kopać przy użyciu Sfery Ostrza.")
 
-// trollheim
+// Trollheim
+// ---------
 
 N("Trollheim", GEN_O, "Trollheim", "Trollheim", "Trollheim", "w Trollheim")
 
@@ -4262,6 +4260,7 @@ S("mark heptagons", "oznaczenia na siedmiokątach")
 S("help for keyboard users", "pomoc dla użytkowników klawiatury")
 
 // missing
+// -------
 
 S("You leave %the1.", "Zostawiasz %a1.") // Baby Tortoise
 
@@ -4287,9 +4286,11 @@ S("Known mines may be marked by touching while in drag mode. Your allies won't s
   "Znane miny można oznaczać dotykając ich w trybie przeciągania. Twoi przyjaciele nie będą stawać na oznaczonych minach.")
 
 // 9.0 patches
-//=============
+// ===========
 
 // extra help
+// ----------
+
 S("Coastal region -- connects inland and aquatic regions.\n",
   "Kraina przybrzeżna -- łączy krainy lądowe i morskie.\n")
 
@@ -4297,10 +4298,14 @@ S("Aquatic region -- accessible only from coastal regions and other aquatic regi
   "Kraina morska -- dostępna jedynie zs krain przybrzeżnych i morskic.\n")
 
 // barrow treasure protected from Orb of Space
+// -------------------------------------------
+
 S("%The1 is protected from this kind of magic!",
   "Tego typu magia nie działa na %1!")
 
 // Orb is always available in the given land
+// -----------------------------------------
+
 S("always available", "zawsze dostępna")
 
 S("\n\nAfter the Trolls leave, you have 750 turns to collect %the1, or it gets stolen.",
@@ -4323,6 +4328,8 @@ S(
     )
 
 // welcome messages
+// ----------------
+
 S("Welcome to the Random Pattern mode!", "Witaj w trybie losowych wzorów!")
 S("You are playing %the1 in the Pure Tactics mode.", "Grasz %a1 w trybie taktycznym.")
 // %1 is the number
@@ -4336,6 +4343,7 @@ S("Good luck in the elliptic plane!", "Powodzenia na płasczyźnie eliptycznej!"
 S("Welcome to Spherogue!", "Witaj w Sferogue!")
 
 // extra help for joystick configuration
+// -------------------------------------
 
 S("joystick configuration", "konfiguracja joysticka")
 S("first joystick position (movement)", "pozycja pierwszego joysticka (ruch)")
@@ -4352,6 +4360,7 @@ S("leave the game", "opuść grę")
 S("drop Dead Orb (up + down)", "połóż Martwą Sferę (góra+dół)")
 
 // extra help for configuration / projection and geometry
+// ------------------------------------------------------
 
 S("Roughly 42% cells are on the edge of your sight range. Reducing "
   "the sight range makes HyperRogue work faster, but also makes "
@@ -4399,7 +4408,7 @@ S("Euclidean", "euklidesowa")
 S("projection", "rzut")
 
 // VERSION 9.1
-//=============
+// ===========
 
 N("Familiar", GEN_M, "Chowaniec", "Chowańce", "Chowańca", "Chowańcem")
 S("Commanded %the1!", "%1 dosta%ł1 rozkaz!")
@@ -4535,13 +4544,15 @@ S("+5 = move instantly", "+5 = ruch natychmiastowy")
 S("extra graphical effects", "dodatkowe efekty graficzne")
 
 // VERSION 9.3
-//=============
+// ===========
 
 S("SORT", "SORT")
 S("PICK", "TEN")
 S("PLAY", "GRAJ")
 
 // 3D configuration
+// ----------------
+
 S("3D configuration", "konfiguracja 3D")
 S("High detail range", "Zasięg wysokiego poziomu szczegółów")
 S("Mid detail range", "Zasięg średniego poziomu szczegółów")
@@ -4617,6 +4628,8 @@ S( "Humans are %1 "
    "nogi.")
   
 // Euclidean regular patterns
+// --------------------------
+
 S("three colors", "trzy kolory")
 S("three colors rotated", "trzy kolory obrócone")
 S("edit all three colors", "edytuj wszystkie kolory")
@@ -4642,7 +4655,7 @@ S("\n\nFast flying creatures may attack or go against gravity only in their firs
   "tylko w swoim pierwszym ruchu.")
 
 // Dungeon
-//---------
+// -------
 
 N("Dungeon", GEN_O, "Loch", "Lochy", "Loch", "w Lochu")
 
@@ -4688,7 +4701,7 @@ S("When the charges on this Orb expire, "
 //
 
 // lost mountain
-//===============
+// -------------
 
 //N("Pyramid", GEN_F, "Piramida", "Piramidy", "Piramidą", "na Piramidzie")
 N("Lost Mountain", GEN_F, "Zagubiona Góra", "Zagubione Góry", "Zagubioną Górą", "na Zagubionej Górze")
@@ -4763,7 +4776,7 @@ S("This Orb allows you to grow like an Ivy. "
   )
 
 // reptiles
-//==========
+// --------
 
 N("Reptiles", GEN_O, "Jaszczurki", "Jaszczurki", "Jaszczurki", "na Jaszczurkach")
 N("Reptile", GEN_F, "Jaszczurka", "Jaszczurki", "Jaszczurkę", "Jaszczurką")
@@ -4851,7 +4864,7 @@ S(
   "Jesteś dostrojon%ya1 do grawitacji, gotow%ya1 na góry i lochy.")
 
 // VERSION 9.4
-//=============
+// ===========
 
 // not previously translated
 S("shift+O to switch anti-aliasing", "shift+O by przełączyć antialiasing")
@@ -4863,12 +4876,13 @@ S("Quite tough, for your first fight.", "Jak na pierwszą walkę -- całkiem tru
 S("(You can also use right Shift)\n\n", "(Możesz też użyć prawego Shifta)\n\n")
 
 // Crossroads V
-//--------------
+// ------------
 
 N("Crossroads V", GEN_O, "Skrzyżowanie V", "Skrzyżowania V", "Skrzyżowanie V", "na Skrzyżowaniu V")
 S("Extremely narrow Crossroads layout.\n", "Skrajnie wąski układ Skrzyżowań.")
 
 // Bull Dash/Prairie common
+// ------------------------
 
 N("Sleeping Bull", GEN_M, "Śpiący Byk", "Śpiące Byki", "Śpiącego Byka", "Śpiącym Bykiem")
 
@@ -4910,7 +4924,7 @@ S("Fire is extinguished!", "Ogień zgasł!")
 S("%The1 is filled!", "%1 zosta%ł1 zalan%1y!")
 
 // Prairie
-//---------
+// -------
 
 N("Prairie", GEN_F, "Preria", "Prerie", "Prerię", "na Prerii")
 N("Green Grass", GEN_F, "Zielona Trawa", "Zielone Trawy", "Zieloną Trawę", "Zieloną Trawą")
@@ -4928,7 +4942,7 @@ S("You get the powers of Shield, Horns, and Thorns after you move two moves in a
   "Gdy ruszysz się 2 pola w linii prostej z tą Sferą, dostajesz moce Tarczy, Rogów i Cierni.")
 
 // Bull Dash
-//-----------
+// ---------
 
 N("Bull Dash", GEN_F, "Kraina Byków", "Krainy Byków", "Krainę Byków", "w Krainie Byków")
 N("Butterfly", GEN_M, "Motylek", "Motylki", "Motylka", "Motylkiem")
@@ -4957,7 +4971,7 @@ S(
 S("You pierce %the1.", "Bodziesz %a1.")
 
 // new 3D options
-//----------------
+// --------------
 
 S("Y shift", "przesunięcie Y")
 S("Don't center on the player character.", "Nie centruj na graczu.")
@@ -4980,7 +4994,7 @@ S("camera rotation in ball model", "obróć kamerę w modelu kuli")
 S("Rotate the camera in ball/hyperboloid model.", "Obróć kamerę w modelu kuli/hiperboloidy.")
 
 // extra help
-//------------
+// ----------
 
 S("\nSpecial conduct (still valid)\n", "\nDodatkowe wyzwanie (wciąż spełnione):")
 S("\nSpecial conduct failed:\n", "\nDodatkowe wyzwanie (przegrane):")
@@ -5041,6 +5055,7 @@ S("field quotient", "przestrzeń ilorazowa ciała")
 */
 
 // additional texts for 9.4k
+// -------------------------
 
 N("Tortoise", GEN_M, "Żółw", "Żółwie", "Żółwia", "Żółwiem")
 S("line patterns", "wzory linii")
@@ -5541,11 +5556,12 @@ S(
   )
 
 
-/*
-// for 10.0
-*/
+// VERSION 10.0
+// ============
 
 // Orb Strategy mode
+// -----------------
+
 S("Orb Strategy mode", "tryb strategii sfer")
 
 S(
@@ -5645,10 +5661,14 @@ N("your orbs", GEN_F, "Twoje Sfery", "Twoje Sfery", "Twoje Sfery", "Twoje Sfery"
 S("Click this to see your orbs.", "Kliknij by zobaczyć Twoje sfery.")                                                   
 
 // peaceful mode
+// -------------
+
 S("configure keys/joysticks", "konfiguracja klawiszy/joysticka")
 S("peaceful mode", "tryb spokojny")
 
 // config changes
+// --------------
+
 S("Press F5 or 'o' to try again!", "Naciśnij F5 lub 'o' by spróbować jeszcze raz!")  
 S("aura brightness", "jasność aury")
 S("aura smoothening factor", "wygładzanie aury")
@@ -5663,6 +5683,8 @@ S("\n\nHint: use 'm' to toggle cells quickly",
   "\n\nWsk: użyj 'm' by szybko przestawiać pola");
 
 // cell pattern names
+// ------------------
+
 S("football", "piłka nożna")
 S("dark rainbow landscape", "ciemna tęcza")
 S("field pattern", "wzór pola")
@@ -5690,6 +5712,7 @@ S("c = choose", "c = wybór")
 S("b = switch auto", "b = ustaw auto")
 
 // mission screen hints
+// --------------------
 
 S(
   "If you collect too many treasures in a given land, it will become "
@@ -5819,12 +5842,14 @@ S(
     "więcej odbić wyjdzie z lustra. Użyj Mimików, by go zniszczyć.")
 
 // peaceful texts
+// --------------
 
 S("memory game", "gra pamięciowa")
 S("display hints", "pokaż wskazówki")
 S("hyperbolic puzzles", "hiperboliczne zagadki")
 
 // missing descriptions
+// --------------------
 
 S(  "A strange land filled with mirrors. "
     "Break magic mirrors and enter clouds of mirage to "
@@ -5892,6 +5917,7 @@ S("cancel", "anuluj")
 S("reset the special game modes", "zresetuj specjalne tryby gry")
 
 // extra flavor messages for the OSM
+// ---------------------------------
 
 S("You feel the presence of free saves on the Crossroads.",
   "Wyczuwasz bezpieczeństwo na Skrzyżowaniach.")
@@ -5916,6 +5942,7 @@ S(" (used %1 times)", " (użyte %1 razy)")
 S("Extras:", "Dodatkowe:") // extra Orbs gained in OSM
 
 // cheats
+// ------
 
 S("unlock Orbs of Yendor", "otwórz Sfery Yendoru")
 S("Collected the keys!", "Zebrano klucze!");
@@ -5923,6 +5950,7 @@ S("Saved the Princess!", "Uratowano Księżniczkę!")
 S("save a Princess", "uratuj Księżniczkę")
 
 // other
+// -----
   
 S("Note for mobiles", "Notka dla urządzeń mobilnych")
 S(
@@ -5945,6 +5973,7 @@ S("quick mouse", "szybka mysz")
 S("This combination is known to be buggy at the moment.", "Ta kombinacja opcji obecnie działa błędnie.")
 
 // extra Princess texts
+// --------------------
  
 S("\"I do not like butterflies. They are treacherous.\"", 
   "\"Nie lubię motyli. Są zdradzieckie.\"")
@@ -5964,6 +5993,8 @@ S("\"Infinite trees are boring. I prefer other graphs.\"",
   "\"Nieskończone drzewa są nudne. Wolę inne grafy.\"")
 
 // new start menu
+// --------------
+
 S("skip the start menu", "pomiń menu startowe")
 
 S("HyperRogue classic", "tryb klasyczny HyperRogue")
