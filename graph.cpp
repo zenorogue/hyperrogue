@@ -3813,11 +3813,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         qfloor(c, Vf, CLOUDFLOOR, darkena(fcol, fd, 0xFF));
 
       else if(c->land == laKraken)
-<<<<<<< HEAD
         qfloor(c, Vf, FULLFLOOR, darkena(fcol, fd, 0xFF));
-=======
-        qfloor(c, Vf, shFullFloor[ct6], darkena(fcol, fd, 0xFF));
->>>>>>> c611131f5a64f8ead4067ff459927125df567c96
 
       else if(c->land == laLivefjord)
         qfloor(c, Vf, CAVEFLOOR, darkena(fcol, fd, 0xFF));
