@@ -295,6 +295,9 @@ else if(args()[0] == '-' && args()[1] == x && args()[2] == '0') { showstartmenu 
   else if(argis("-zoom")) { 
     PHASEFROM(2); shift(); vid.scale = argf();
     }
+  else if(argis("-alpha")) { 
+    PHASEFROM(2); shift(); vid.alpha = argf();
+    }
   else if(argis("-Y")) { 
     yendor::on = true;
     shift(); yendor::challenge = argi();
