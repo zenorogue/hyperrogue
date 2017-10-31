@@ -2022,4 +2022,16 @@
 - fixed some graphical glitches introduced by 10.1g
 - fixed some graphical glitches in Halloween
 
+2019.10.31 00:31 version 10.2
+- added Crystal World
+- reworked the geometry experiment menu
+- changed the Hunting Ground music to Graveyard
+- hint about Alt added to Hunting Ground
+- extra help about slide changing, disabled Euclidean mode from early slides
+- fixed the message priority on alchemy+wind
+- fixed the wrong text in Tutorial
+- fixed a bug which reduced the quality of graphics
+- no more forced heptamarkers on non-truncated Warped since they are denoted with colors anyway
+- fontscale is now saved
+- fixed CR4 appearing inside mirror reflections
 

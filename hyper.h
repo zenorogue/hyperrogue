@@ -1865,7 +1865,6 @@ struct polytodraw {
 #endif
   };
 
-extern bool purehepta;
 extern int emeraldtable[100][7];
 
 extern void cwspin(cellwalker& cw, int d);
