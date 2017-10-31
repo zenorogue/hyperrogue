@@ -607,10 +607,11 @@ void describe(cell *c) {
   help += "parameters:"; for(int k=0; k<cols; k++) help += " " + fts(n->net[k]); 
   help += ", u-matrix = " + fts(n->udist);
   help += "\n";
-  vector<pair<double, int>> v;
+  using Pair = pair<double, int>;
+  vector<Pair> v;
   for(int s=0; s<samples; s++) if(whowon[s] == n) v.emplace_back(vnorm(n->net, data[s].val), s);
   random_shuffle(v.begin(), v.end());
-  sort(v.begin(), v.end(), [] (auto a, auto b) { return a.first < b.first; });
+  sort(v.begin(), v.end(), [] (const Pair& a, const Pair& b) { return a.first < b.first; });
   
   for(int i=0; i<size(v) && i<20; i++) {
     int s = v[i].second;

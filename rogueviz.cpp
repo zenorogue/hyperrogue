@@ -1415,7 +1415,7 @@ void rvvideo(const char *fname) {
         reached = (2*reached-1) / 3;
       else reached *= 2;
       }
-    printf("reached = %Ld\n", reached);
+    printf("reached = %lld\n", reached);
     vector<string> seq;
     while(reached>1) { 
       seq.push_back(llts(reached));
