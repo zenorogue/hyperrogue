@@ -6195,7 +6195,7 @@ void ambush(cell *c, eItem what) {
   vector<cell*> around;
   cell *clast = NULL;
   cell *ccur = c0;
-  while(true) {
+  for(int tries=0; tries<10000; tries++) {
     cell *c2 = NULL;
     forCellEx(c1, ccur)
       if(c1 != clast && cl.listed(c1) && cl.getdist(c1) == d)
