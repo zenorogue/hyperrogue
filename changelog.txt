@@ -2035,3 +2035,13 @@
 - fontscale is now saved
 - fixed CR4 appearing inside mirror reflections
 
+2019.11.01 00:48 version 10.2a
+- improved the texts in geometry experiment menu
+- translation updates (to Polish)
+- the "expansion" screen has moved to the geometry experiment menu (click world size)
+- 'o' key acts more intelligently now
+- fixed the reverse keyboard movement in Euclidean
+- fixed graphical glitches with the sphere (the sphere is now drawn completely, )
+- added 'alpha' commandline parameter
+- fixed some polygons which did not end in the start point
+- Hunting Ground no longer hangs in some geometries
