@@ -1,6 +1,22 @@
 // HyperRogue, shapes used for the vector graphics
 // Copyright (C) 2011-2016 Zeno Rogue, see 'hyper.cpp' for details
 
+// draw the lines
+static const int POLY_DRAWLINES = 1;
+// draw the area
+static const int POLY_DRAWAREA = 2;
+// draw the inverse -- useful in stereographic projection
+static const int POLY_INVERSE = 4;
+// never draw in inverse
+static const int POLY_ISSIDE = 8;
+
+// there are points behind the camera
+static const int POLY_BEHIND = 16;
+// some coordinates are too large -- best not to draw to avoid glitches
+static const int POLY_TOOLARGE = 32;
+// on the sphere (orthogonal projection), do not draw without any points in front
+static const int POLY_INFRONT = 64;
+
 #define QHPC 512000
 
 int qhpc, prehpc;
@@ -24,7 +40,9 @@ extern long double polydata[];
 
 struct hpcshape {
   int s, e, prio;
+  int flags;
   };
+
 
 hpcshape *last = NULL;
 
@@ -40,7 +58,7 @@ bool ptdsort(const polytodraw& p1, const polytodraw& p2) {
 
 void hpcpush(hyperpoint h) { 
   if(sphere) h = mid(h,h);
-  if(vid.usingGL && !first && intval(hpc[qhpc-1], h) > (sphere ? .0001 : 0.25)) {
+  if(/*vid.usingGL && */!first && intval(hpc[qhpc-1], h) > (sphere ? .0001 : 0.25)) {
     hyperpoint md = mid(hpc[qhpc-1], h);
     hpcpush(md);
     hpcpush(h);
@@ -70,6 +88,7 @@ void chasmifyPoly(double fac, double fac2, int k) {
     hpc[qhpc++] = H;
     }
   hpc[qhpc++] = hpc[last->s];
+  last->flags |= POLY_ISSIDE;
   }
 
 void shift(hpcshape& sh, double dx, double dy, double dz) {
@@ -148,56 +167,65 @@ int polyi;
 
 int polyx[POLYMAX], polyxr[POLYMAX], polyy[POLYMAX];
 
+int poly_flags;
+
 hyperpoint gltopoint(GLfloat t[3]) {
   hyperpoint h;
   h[0] = t[0]; h[1] = t[1]; h[2] = t[2];
   return h;
   }
 
+void add1(const hyperpoint& H) {
+  for(int i=0; i<3; i++) glcoords[qglcoords][i] = H[i];
+  }  
+
+int spherespecial;
+
 void addpoint(const hyperpoint& H) {
-#if CAP_GL
-  if(vid.usingGL) {
-    if(polyi >= POLYMAX) return;
-    if(pmodel) {
-      hyperpoint Hscr;
-      applymodel(H, Hscr);
-      glcoords[qglcoords][0] = Hscr[0] * vid.radius;
-      glcoords[qglcoords][1] = Hscr[1] * vid.radius;
-      glcoords[qglcoords][2] = Hscr[2] * vid.radius;
-      }
-    else if(euclid) {
-      for(int i=0; i<3; i++) glcoords[qglcoords][i] = H[i];
-  
-      glcoords[qglcoords][2] *= EUCSCALE;
-      glcoords[qglcoords][2] += vid.alpha;
-      // glcoords[qglcoords][2] = 1; // EUCSCALE;
-      }
-    else {
-      for(int i=0; i<3; i++) glcoords[qglcoords][i] = H[i];
-      glcoords[qglcoords][2] += vid.alpha;
-      }
-    qglcoords++;
-    }
-#else
-  if(0) {}
-#endif
-  else {
-    if(polyi >= POLYMAX) return;
-    hyperpoint Hscr;
+  if(qglcoords >= POLYMAX) return;
+
+  if(true) {
+    hyperpoint Hscr;             
     applymodel(H, Hscr);
-    ld x = vid.xcenter + Hscr[0] * vid.radius;
-    ld y = vid.ycenter + Hscr[1] * vid.radius;
+    if(vid.alphax + H[2] <= BEHIND_LIMIT) poly_flags |= POLY_BEHIND;
+    
+    if(spherespecial) {
+      double curnorm = H[0]*H[0]+H[1]*H[1]+H[2]*H[2];
+      double horizon = curnorm / vid.alphax;
+      
+      if((spherespecial>0) ^ (H[2] <= -horizon)) poly_flags |= POLY_INFRONT;
+      else {
+        double coef = 
+          (sqrt(curnorm - horizon*horizon) / (vid.alpha - horizon)) / 
+          (sqrt(curnorm - H[2]*H[2]) / (vid.alpha+H[2]));
+            
+//      double coef = (vid.alphax + horizon) / (vid.alphax + H[2]); -< that one has a funny effect, seriously
+        Hscr[0] *= coef;
+        Hscr[1] *= coef;
+        }
+      }
+    for(int i=0; i<3; i++) Hscr[i] *= vid.radius;
+    add1(Hscr);
+    } /*
+  else {
+    add1(H);
+    if(euclid) glcoords[qglcoords][2] *= EUCSCALE;
+    glcoords[qglcoords][2] += vid.alpha;
+    // glcoords[qglcoords][2] = 1; // EUCSCALE;
+    } */
+  qglcoords++;
+  }
 
-    if(x < -vid.xres) x = -vid.xres;
-    if(y < -vid.yres) y = -vid.yres;
-    if(x > 2*vid.xres) x = 2*vid.xres;
-    if(y > 2*vid.yres) y = 2*vid.yres;
-
-    ld xe = Hscr[2] * vid.radius * vid.eye;
-    polyx[polyi] = x-xe;
-    polyxr[polyi] = x+xe;
-    polyy[polyi] = y;
-    polyi++;
+void coords_to_poly() {
+  polyi = qglcoords;
+  for(int i=0; i<polyi; i++) {
+//  printf("%lf %lf\n", double(glcoords[i][0]), double(glcoords[i][1]));
+    ld x = vid.xcenter + glcoords[i][0];
+    ld y = vid.ycenter + glcoords[i][1];
+    ld xe = glcoords[i][2] * vid.eye;
+    polyx[i] = x-xe;
+    polyxr[i] = x+xe;
+    polyy[i] = y;
     }
   }
 
@@ -261,9 +289,11 @@ void glapplymatrix(const transmatrix& V) {
   glMultMatrixf(mat);
   }
 
-void gldraw(int useV, const transmatrix& V, int ps, int pq, int col, int outline) {
+void gldraw(int useV, const transmatrix& V, int ps, int pq, int col, int outline, int flags) {
   for(int ed = vid.goteyes ? -1 : 0; ed<2; ed+=2) {
     if(ed) selectEyeGL(ed);
+    bool draw = col;
+    again:
     
     if(useV == 1) {
       glMatrixMode(GL_MODELVIEW);
@@ -284,7 +314,7 @@ void gldraw(int useV, const transmatrix& V, int ps, int pq, int col, int outline
       glMultMatrixf(mat);
       }
       
-    if(col) {
+    if(draw) {
       glEnable(GL_STENCIL_TEST);
  
       glColorMask( GL_FALSE,GL_FALSE,GL_FALSE,GL_FALSE );
@@ -292,13 +322,33 @@ void gldraw(int useV, const transmatrix& V, int ps, int pq, int col, int outline
       glStencilFunc( GL_ALWAYS, 0x1, 0x1 );
       glColor4f(1,1,1,1);
       glDrawArrays(GL_TRIANGLE_FAN, ps, pq);
- 
-      selectEyeMask(ed);
- 
-      glcolor2(col);
-      glStencilOp( GL_ZERO, GL_ZERO, GL_ZERO);
-      glStencilFunc( GL_EQUAL, 1, 1);
-      glDrawArrays(GL_TRIANGLE_FAN, ps, pq);
+      
+      if(flags & POLY_INVERSE) {
+        selectEyeMask(ed);
+        glcolor2(col);
+        glStencilOp( GL_ZERO, GL_ZERO, GL_ZERO);
+        glStencilFunc( GL_NOTEQUAL, 1, 1);
+        GLfloat xx = vid.xres;
+        GLfloat yy = vid.yres;
+        GLfloat scr[12] = {
+          -xx, -yy, vid.scrdist, +xx, -yy, vid.scrdist, 
+          +xx, +yy, vid.scrdist, -xx, +yy, vid.scrdist
+          };
+        GLfloat *cur = currentvertices;
+        activateVertexArray(scr, 4);
+        if(useV) glPopMatrix();
+        glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+        activateVertexArray(cur, 0);
+        draw = false; goto again;
+        }
+      else { 
+        selectEyeMask(ed);
+        glcolor2(col);
+        glStencilOp( GL_ZERO, GL_ZERO, GL_ZERO);
+        glStencilFunc( GL_EQUAL, 1, 1);
+        glDrawArrays(GL_TRIANGLE_FAN, ps, pq);
+        }
+      
       glDisable(GL_STENCIL_TEST);
       }
     
@@ -326,43 +376,100 @@ double linewidthat(const hyperpoint& h, double minwidth) {
   return vid.linewidth;
   }
   
-void drawpolyline(const polytodraw& p) {
+void drawpolyline(polytodraw& p) {
   auto pp = p.u.poly;
+
 #if CAP_GL
-  if(vid.usingGL) {
-    if(pmodel == mdDisk) {    
-      const int pq = pp.cnt;
-      if(currentvertices != pp.tab)
-        activateVertexArray(pp.tab, pq);
-      const int ps=0;
-      glLineWidth(linewidthat(tC0(pp.V), pp.minwidth));
-      gldraw(1, pp.V, ps, pq, p.col, pp.outline);
-      }
-    else {
-      qglcoords = 0;
-      addpoly(pp.V, pp.tab, pp.cnt);
-      activateGlcoords();    
-      gldraw(2, Id, 0, qglcoords, p.col, pp.outline);
-      }
+  if(vid.usingGL && pmodel == mdDisk && !spherespecial) {
+    const int pq = pp.cnt;
+    if(currentvertices != pp.tab)
+      activateVertexArray(pp.tab, pq);
+    const int ps=0;
+    glLineWidth(linewidthat(tC0(pp.V), pp.minwidth));
+    gldraw(1, pp.V, ps, pq, p.col, pp.outline, 0);
     return;
     }
 #endif
   
-  polyi = 0;
+  qglcoords = 0;
+  poly_flags = pp.flags;
+  
+  double d = 0, curradius = 0;
+  if(sphere) {
+    d = det(pp.V);
+    curradius = pow(abs(d), 1/3.);
+    }
+  
+  /* pp.outline = 0x80808080;
+  p.col = 0; */
+
   addpoly(pp.V, pp.tab, pp.cnt);
+  
+  int poly_limit = max(vid.xres, vid.yres) * 2;
+
+  if(poly_flags & POLY_BEHIND) return;
+  for(int i=0; i<qglcoords; i++) {
+    if(abs(glcoords[i][0]) > poly_limit || abs(glcoords[i][1]) > poly_limit)
+      return; // too large!
+    }
+
+  if(sphere && vid.alphax > 1) {
+    if(!hiliteclick && !(poly_flags & POLY_INFRONT)) return;
+    }
+
+  if(spherespecial > 0 && !(poly_flags & POLY_ISSIDE)) {
+    double rarea = 0;
+    for(int i=0; i<qglcoords-1; i++) 
+      rarea += glcoords[i][0] * glcoords[i+1][1] - glcoords[i][1] * glcoords[i+1][0];
+    
+    if(d < 0) poly_flags ^= POLY_INVERSE;
+    
+    if(rarea>0)
+      poly_flags ^= POLY_INVERSE;
+    
+    if(poly_flags & POLY_INVERSE) {
+      if(curradius < vid.alphax - 1e-6) return;
+      }
+    }
+  else poly_flags &=~ POLY_INVERSE;
+    
+#if CAP_GL
+  if(vid.usingGL) {
+    if(pmodel == 0) for(int i=0; i<qglcoords; i++) glcoords[i][2] = vid.scrdist;
+    activateGlcoords();    
+    gldraw(2, Id, 0, qglcoords, p.col, pp.outline, poly_flags);
+    }
+#endif
 
 #if CAP_SVG==1
   if(svg::in) {
-    svg::polygon(polyx, polyy, polyi, p.col, pp.outline, pp.minwidth);
+    coords_to_poly();
+    int col = p.col;
+    if(poly_flags & POLY_INVERSE) col = 0;
+    svg::polygon(polyx, polyy, polyi, col, pp.outline, pp.minwidth);
     return;
     }
 #endif
+
+  coords_to_poly();
 
 #if CAP_XGD==1
   gdpush(1); gdpush(p.col); gdpush(pp.outline); gdpush(polyi);
   for(int i=0; i<polyi; i++) gdpush(polyx[i]), gdpush(polyy[i]);
 #elif CAP_SDLGFX==1
-  filledPolygonColorI(s, polyx, polyy, polyi, p.col);
+
+  if(poly_flags & POLY_INVERSE) {
+    int i = polyi;
+    polyx[i] = 0; polyy[i] = 0; i++;
+    polyx[i] = vid.xres; polyy[i] = 0; i++;
+    polyx[i] = vid.xres; polyy[i] = vid.yres; i++;
+    polyx[i] = 0; polyy[i] = vid.yres; i++;
+    polyx[i] = 0; polyy[i] = 0; i++;
+    filledPolygonColorI(s, polyx, polyy, polyi+5, p.col);
+    }
+  else  
+    filledPolygonColorI(s, polyx, polyy, polyi, p.col);
+
   if(vid.goteyes) filledPolygonColorI(aux, polyxr, polyy, polyi, p.col);
   
   ((vid.antialias & AA_NOGL) ?aapolylineColor:polylineColor)(s, polyx, polyy, polyi, pp.outline);
@@ -487,6 +594,7 @@ void sortquickqueue() {
   }
 
 void quickqueue() {
+  spherespecial = 0;
   int siz = size(ptds);
   setcameraangle(false);
   for(int i=0; i<siz; i++) drawqueueitem(ptds[i]);
@@ -562,7 +670,36 @@ void drawqueue() {
     SDL_BlitSurface(s, NULL, aux, NULL);
     }
 #endif
-  
+
+  spherespecial = 0;
+  // on the sphere, parts on the back are drawn first
+  if(sphere && !vid.eye && pmodel == 0) {
+    spherespecial = vid.alphax > 1 ? 1 : -1;
+    #ifndef STLSORT
+    for(int p: {PPR_REDWALLs, PPR_REDWALLs2, PPR_REDWALLs3, PPR_WALL3s,
+      PPR_LAKEWALL, PPR_INLAKEWALL, PPR_BELOWBOTTOM}) 
+        reverse(&ptds2[qp0[p]], &ptds2[qp[p]]);
+    #endif
+    for(int i=siz-1; i>=0; i--) {
+  #ifdef STLSORT
+      polytodraw& ptd (ptds[i]);
+  #else
+      polytodraw& ptd (*ptds2[i]);
+  #endif
+      if(ptd.kind == pkPoly) {
+        unsigned c = ptd.col;
+        ptd.col = ((c & 0xFCFCFC00) >> 2) | (c & 0xFF);
+        drawqueueitem(ptd);
+        ptd.col = c;
+        }
+      }
+    #ifndef STLSORT
+    for(int p: {PPR_REDWALLs, PPR_REDWALLs2, PPR_REDWALLs3, PPR_WALL3s,
+      PPR_LAKEWALL, PPR_INLAKEWALL, PPR_BELOWBOTTOM}) 
+        reverse(&ptds2[qp0[p]], &ptds2[qp[p]]);
+    #endif
+    spherespecial *= -1;
+    }
   for(int i=0; i<siz; i++) {
 #ifdef STLSORT
     polytodraw& ptd (ptds[i]);
@@ -571,7 +708,7 @@ void drawqueue() {
 #endif
     drawqueueitem(ptd);
     }
-
+  
 #if CAP_GL
   if(vid.goteyes && vid.usingGL) selectEyeGL(0), selectEyeMask(0);
 #endif
@@ -707,6 +844,7 @@ void drawTentacle(hpcshape &h, ld rad, ld var, ld divby) {
     hpcpush(ddi(S21, rad + var * sin(i * M_PI/divby)) * ddi(0, tlength * i/20.) * C0);
   for(int i=20; i>=0; i--)
     hpcpush(ddi(S21*3, rad - var * sin(i * M_PI/divby)) * ddi(0, tlength * i/20.) * C0);
+  hpcpush(ddi(S21, rad + var * sin(0 * M_PI/divby)) * ddi(0, tlength * 0/20.) * C0);
   }
 
 hyperpoint hpxd(ld d, ld x, ld y, ld z) {
@@ -729,10 +867,22 @@ hyperpoint turtlevertex(int u, double x, double y, double z) {
   }
 
 
+void finishshape() {
+  last->e = qhpc;
+  double area = 0;
+  for(int i=last->s; i<last->e-1; i++)
+    area += hpc[i][0] * hpc[i+1][1] - hpc[i+1][0] * hpc[i][1];
+  if(area >= 0) last->flags |= POLY_INVERSE;
+  if(isnan(area)) ;
+  else if(intval(hpc[last->s], hpc[last->e-1]) > 1e-6)
+    printf("bad end\n");
+  }
+
 void bshape(hpcshape& sh, int p) {
-  if(last) last->e = qhpc;
+  if(last) finishshape();
   last = &sh;
   last->s = qhpc, last->prio = p;
+  last->flags = 0;
   first = true; 
   }
 
@@ -820,7 +970,7 @@ void zoomShape(hpcshape& old, hpcshape& newsh, double factor, int lev) {
   }
 
 void bshapeend() {
-  if(last) last->e = qhpc;
+  if(last) finishshape();
   last = NULL;
   }
 
@@ -856,9 +1006,9 @@ void buildpolys() {
   qhpc = 0;
 
   bshape(shMovestar, PPR_MOVESTAR);
-  for(int i=0; i<8; i++) {
+  for(int i=0; i<=8; i++) {
     hpcpush(spin(M_PI * i/4) * xpush(crossf) * spin(M_PI * i/4) * C0);
-    hpcpush(spin(M_PI * i/4 + M_PI/8) * xpush(crossf/4) * spin(M_PI * i/4 + M_PI/8) * C0);
+    if(i != 8) hpcpush(spin(M_PI * i/4 + M_PI/8) * xpush(crossf/4) * spin(M_PI * i/4 + M_PI/8) * C0);
     }
   
   // scales
@@ -964,7 +1114,7 @@ void buildpolys() {
   for(int t=0; t<=S6; t++) hpcpush(ddi(S7 + t*S14, floorrad0) * C0);
 
   bshape(shCircleFloor, PPR_FLOOR);
-  for(int t=0; t<=84; t+=2) hpcpush(ddi(t, shexf*.7*spzoom) * C0);
+  for(int t=0; t<=S84; t+=2) hpcpush(ddi(t, shexf*.7*spzoom) * C0);
   
   bshape(shFloor[1], PPR_FLOOR);
   for(int t=0; t<=S7; t++) hpcpush(ddi(t*S12 + td, floorrad1) * C0);
@@ -1106,7 +1256,7 @@ void buildpolys() {
   bshape(shWall[0], PPR_WALL);
   for(int t=0; t<=S6; t++) {
     hpcpush(ddi(S7 + t*S14, shexf*fac80) * C0);
-    hpcpush(ddi(S14 + t*S14, shexf*.2) * C0);
+    if(t != S6) hpcpush(ddi(S14 + t*S14, shexf*.2) * C0);
     }
   
   bshape(shWall[1], PPR_WALL);
@@ -1128,29 +1278,29 @@ void buildpolys() {
   bshape(shGem[0], PPR_ITEM);
   for(int t=0; t<=S6; t++) {
     hpcpush(ddi(S7 + t*S14, shexf*.4) * C0);
-    hpcpush(ddi(S14 + t*S14, shexf*.1) * C0);
+    if(t != S6) hpcpush(ddi(S14 + t*S14, shexf*.1) * C0);
     }
   
   bshape(shGem[1], PPR_ITEM);
   if(S7 == 6) {
     for(int t=0; t<=S6; t++) {
       hpcpush(ddi(S7 + t*S14, shexf*.4) * C0);
-      hpcpush(ddi(S14 + t*S14, shexf*.1) * C0);
+      if(t != S6) hpcpush(ddi(S14 + t*S14, shexf*.1) * C0);
       }
     }
   else 
     for(int t=0; t<=S7; t++) hpcpush(ddi(t*S36, shexf*.5) * C0);
 
   bshape(shStar, PPR_ITEM);
-  for(int t=0; t<S84; t+=S6) {
+  for(int t=0; t<=S84; t+=S6) {
     hpcpush(ddi(t,   shexf*.2) * C0);
-    hpcpush(ddi(t+3,   shexf*.6) * C0);
+    if(t != S84) hpcpush(ddi(t+3,   shexf*.6) * C0);
     }
 
   bshape(shDaisy, PPR_ITEM);
   for(int t=0; t<=S6; t++) {
     hpcpush(ddi(t*S14, shexf*.8*3/4) * C0);
-    hpcpush(ddi(t*S14+S7, shexf*-.5*3/4) * C0);
+    if(t != S6) hpcpush(ddi(t*S14+S7, shexf*-.5*3/4) * C0);
     }
   hpcpush(ddi(0, shexf*.6) * C0);
 
@@ -1175,8 +1325,10 @@ void buildpolys() {
   bshape(shDiskS, PPR_ITEM);
   for(int i=0; i<=S84; i+=S21) {
     hpcpush(ddi(i, disksize * .2) * C0);
-    hpcpush(ddi(i+S21/3, disksize * .1) * C0);
-    hpcpush(ddi(i+S21-S21/3, disksize * .1) * C0);
+    if(i != S84) {
+      hpcpush(ddi(i+S21/3, disksize * .1) * C0);
+      hpcpush(ddi(i+S21-S21/3, disksize * .1) * C0);
+      }
     }
 
   bshape(shDiskM, PPR_ITEM);
@@ -1296,6 +1448,7 @@ void buildpolys() {
   hpcpush(ddi(0, crossf * .29) * C0);
   hpcpush(ddi(S21, crossf * .04) * C0);
   hpcpush(ddi(-S21, crossf * .04) * C0);
+  hpcpush(ddi(0, crossf * .29) * C0);
   
   /* bshape(shBranch, 32);
   hpcpush(ddi(21, crossf/5) * C0);
@@ -1351,11 +1504,11 @@ void buildpolys() {
   for(int t=0; t<=S3; t++) hpcpush(ddi(S14+t*S28, -shexf*1.3) * C0); */
   
   bshape(shRose, PPR_ITEM);
-  for(int t=0; t<S84; t++) 
+  for(int t=0; t<=S84; t++) 
     hpcpush(spin(M_PI * t / (S42+.0)) * xpush(crossf * (0.2 + .15 * sin(M_PI * t / (S42+.0) * 3))) * C0);
 
   bshape(shThorns, PPR_THORNS);
-  for(int t=0; t<60; t++) 
+  for(int t=0; t<=60; t++) 
     hpcpush(spin(M_PI * t / 30.0) * xpush(crossf * ((t&1) ? 0.3 : 0.6)) * C0);
     
   for(int i=0; i<16; i++) {
@@ -1454,7 +1607,7 @@ void buildpolys() {
   bshape(shCaveSeabed[1], PPR_FLOOR, scalef*spzoom6 * SCA45(.5) * SCA46(.6) * SCA47(.725), 339, ROT46(-.3));
   bshape(shCaveSeabed[2], PPR_FLOOR, scalef*spzoom6*(euclid?1.2:1), 54);
   
-  for(int i=0; i<8; i++) {
+  if(false) for(int i=0; i<8; i++) {
     hpcshape& sh = shWave[i][1];
     bshape(sh, PPR_FLOOR, scalef*spzoom6, 340);
     for(int t=sh.s; t<sh.e; t++)
@@ -1881,6 +2034,7 @@ void queuepolyat(const transmatrix& V, const hpcshape& h, int col, int prio) {
   ptd.prio = prio << PSHIFT;
   ptd.u.poly.outline = poly_outline;
   ptd.u.poly.minwidth = minwidth_global;
+  ptd.u.poly.flags = h.flags;
   }
 
 void addfloats(vector<GLfloat>& v, hyperpoint h) {
@@ -1905,6 +2059,7 @@ void queuetable(const transmatrix& V, GLfloat *f, int cnt, int linecol, int fill
   ptd.prio = prio << PSHIFT;
   ptd.u.poly.outline = linecol;
   ptd.u.poly.minwidth = minwidth_global;
+  ptd.u.poly.flags = 0;
   }
 
 void queuepoly(const transmatrix& V, const hpcshape& h, int col) {
