@@ -1077,7 +1077,7 @@ void buildpolys() {
 
 
   int tshift0 = (a4?S14:0);
-  int tshift1 = td + (!(S7&1)) ? S6:0; // +S6+(a4&(S7&1)?S6:0);
+  int tshift1 = (td + (!(S7&1))) ? S6:0; // +S6+(a4&(S7&1)?S6:0);
 
   bshape(shTriheptaFloor[0], PPR_FLOOR);
   for(int t=0; t<=S3; t++) hpcpush(ddi(t*S28 + tshift0, trihepta0) * C0);
