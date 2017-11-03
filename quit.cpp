@@ -296,7 +296,7 @@ string contstr() {
 eLand nextHyperstone() {
   generateLandList(isLandValid);
   for(eLand l: landlist)
-    if(items[treasureType(l)] < R10 && !isCrossroads(l))
+    if(items[treasureType(l)] < R10 && !isCrossroads(l) && l != laPrincessQuest && l != laCamelot)
       return l;
   if(items[itHyperstone] >= 10) return laNone;
   return laCrossroads;

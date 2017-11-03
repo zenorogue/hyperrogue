@@ -518,7 +518,7 @@ bool landUnlocked(eLand l) {
 void countHyperstoneQuest(int& i1, int& i2) {
   i1 = 0; i2 = 0;
   generateLandList(isLandValid);
-  for(eLand l: landlist) {
+  for(eLand l: landlist) if(l != laCamelot && l != laPrincessQuest) {
     eItem ttype = treasureType(l);
     if(ttype != itHyperstone) {
       i2++; if(items[ttype] >= R10) i1++;
@@ -756,7 +756,7 @@ eLand getNewLand(eLand old) {
   tab[cnt++] = laHunting;
   tab[cnt++] = laAlchemist;
   if(old != laDeadCaves) tab[cnt++] = laCaves;
-  
+    
   // the intermediate lands
   if(gold() >= R30) {
     tab[cnt++] = laCrossroads;
@@ -836,6 +836,7 @@ eLand getNewLand(eLand old) {
     if(old == laBull && !chaosmode) LIKELY tab[cnt++] = laPrairie;
     tab[cnt++] = laTerracotta;
     tab[cnt++] = laRose;
+    if(chaosmode && geometry) tab[cnt++] = laDual;
     }
   
   if(gold() >= R300)
@@ -914,10 +915,10 @@ vector<eLand> land_over = {
   laDryForest, laWineyard, laDeadCaves, laGraveyard, laHaunted, laHive, 
   laRedRock, laVolcano,
   laDragon, laTortoise,
-  laOvergrown, laClearing, laStorms, laRose, laBurial, laWhirlwind, 
+  laOvergrown, laClearing, laStorms, laBurial, laWhirlwind, 
   laBlizzard,
   laEmerald, laCamelot, 
-  laPrairie, laBull, laTerracotta,
+  laPrairie, laBull, laTerracotta, laRose,
   laElementalWall, laTrollheim,
   laHell, laCrossroads3, laCocytus, laPower, laCrossroads4,
   laCrossroads5,  
@@ -1025,7 +1026,7 @@ int isLandValid(eLand l) {
     if(quotient || elliptic || smallsphere || torus) 
       return 0;
     // Yendorian only implemented in standard
-    if(l == laEndorian)
+    if(l == laEndorian && geometry)
       return 0;
     // special Euclidean implementations
     if(euclid && (l == laIvoryTower || l == laMountain || l == laOcean)) 
@@ -1068,7 +1069,7 @@ int isLandValid(eLand l) {
     return 0;
     
   // this pattern does not work on elliptic and small spheres
-  if((l == laBlizzard || l == laVolcano) || elliptic || S7 < 5)
+  if((l == laBlizzard || l == laVolcano) && elliptic && S7 < 5)
     return 0;
   
   // Kraken does not really work in odd non-truncated geometries
@@ -1142,7 +1143,7 @@ int isLandValid(eLand l) {
     return 0;
 
   // OK in small bounded worlds, and in Euclidean
-  if(l == laCrossroads4 && !(euclid || smallbounded))
+  if(l == laCrossroads4 && !(stdeuc || smallbounded))
     return 0;
 
   if(l == laZebra && !(stdeuc || (a4 && nontruncated) || a46 || quotient == 1))
