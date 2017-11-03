@@ -1044,8 +1044,10 @@ int isLandValid(eLand l) {
   
   // Kraken does not really work in odd non-truncated geometries
   // (but we do have to allow it in Standard)
-  if(l == laKraken && nontruncated && (S7&1) && !geometry)
+  if(l == laKraken && nontruncated && (S7&1)) {
+    if(!geometry) return 1;
     return 0;
+    }
   
   // needs standard/Euclidean (needs vineyard pattern)
   if(l == laWineyard && !stdeuc)
@@ -1080,8 +1082,10 @@ int isLandValid(eLand l) {
     return 0;
   
   // Warped Coast does not work on non-truncated S3s (except standard heptagonal where we have to keep it)
-  if(l == laWarpCoast && geometry && (S3==3) && nontruncated)
+  if(l == laWarpCoast && (S3==3) && nontruncated) {
+    if(!geometry) return 1;
     return 0;
+    }
   
   // laPower and laEmerald and laPalace -> [partial] in quotients and weirdhyperbolic
   if((l == laPower || l == laEmerald || l == laPalace) && !stdeuc && !(bigsphere && !elliptic))
