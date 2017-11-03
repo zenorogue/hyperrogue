@@ -934,6 +934,11 @@ void giantLandSwitch(cell *c, int d, cell *from) {
         if(quotient && zebra40(c) == 5) {
           c->wall = waChasm;
           }
+        if(torus) {
+          int i = hrand(100);
+          if(i == 0) c->item = itTreat;
+          else if(i < 5) c->wall = waChasm;
+          }
         }
       break;
     
