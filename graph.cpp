@@ -3176,7 +3176,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
     if(orig) gm = V;
     }
 
-  if(behindsphere(V)) return;
+  // if(behindsphere(V)) return;
   
   callhooks(hooks_drawcell, c, V);
   
@@ -3472,7 +3472,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       if(c->wall == waChasm) {
         if(c->land == laZebra) fd++;
         if(c->land == laHalloween && !wmblack) {
-          transmatrix Vdepth = mscale(V, geom3::BOTTOM);
+          transmatrix Vdepth = wmspatial ? mscale(V, geom3::BOTTOM) : V;
           queuepolyat(Vdepth, shFloor[ct6], darkena(firecolor(ticks / 10), 0, 0xDF),
             PPR_LAKEBOTTOM);
           }
@@ -4227,6 +4227,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       if(!chasmg) {
 
 #define D(v) darkena(gradient(0, col, 0, v * (sphere ? spherity(V * cellrelmatrix(c,i)) : 1), 1), fd, 0xFF)
+// #define D(v) darkena(col, fd, 0xFF)
 
         if(sha & 1) {
           forCellIdEx(c2, i, c) if(chasmgraph(c2)) 
@@ -4254,10 +4255,10 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         }
       }
     
-    if(chasmg == 2 && wmspatial && sphere) {
+    if(false) if(chasmg == 2 && wmspatial && sphere) {
       forCellIdEx(c2, i, c) if(chasmgraph(c2) == 0) {
         transmatrix V2 = V * cellrelmatrix(c, i);
-        if(!behindsphere(V2)) continue;
+        // if(!behindsphere(V2)) continue;
         bool w = isWarped(c2);
         int wcol2, fcol2;
         setcolors(c2, wcol2, fcol2);

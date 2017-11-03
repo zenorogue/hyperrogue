@@ -1063,6 +1063,53 @@ int zebratable6[28][3] = {
 
 // rules for the emeraldvalues of heptagons.
 int zebra_heptagon(int parent, int dir) {
+  if(S3 == 4) {
+    int mm = (parent % 10 + S7 - dir) % S7;
+    int mv = parent / 10;
+    // whichbright: d&1
+    if(S7 == 5) switch(mm) {
+      case 0:
+        return 10 * (mv^1);
+      case 1:
+        return 10 * (mv^2) + 4;
+      case 2:
+        return 10 * (mv^4) + 3;
+      case 3:
+        return 10 * (mv^4) + 2;
+      case 4:
+        return 10 * (mv^2) + 1;
+      }
+    if(S7 == 7) switch(mm) {
+      case 0:
+        return 10 * (mv^2);
+      case 1:
+        return 10 * (mv^1) + 6;
+      case 2:
+        return 10 * (mv^2) + 5;
+      case 3:
+        return 10 * (mv^4) + 4;
+      case 4:
+        return 10 * (mv^4) + 3;
+      case 5:
+        return 10 * (mv^2) + 2;
+      case 6:
+        return 10 * (mv^1) + 1;
+      }
+    if(S7 == 6) switch(mm) {
+      case 0:
+        return 10 * (mv^2);
+      case 1:
+        return 10 * (mv^1) + 5;
+      case 2:
+        return 10 * (mv^2) + 4;
+      case 3:
+        return 10 * (mv^1) + 3;
+      case 4:
+        return 10 * (mv^2) + 2;
+      case 5:
+        return 10 * (mv^1) + 1;
+      }
+    }
   if(S7 == 8 && dir > 3) dir--;
   return zebratable[parent/10-4][(70+dir-(parent%10))%7];
   }

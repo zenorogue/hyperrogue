@@ -86,7 +86,7 @@ void ballmodel(hyperpoint& ret, double alpha, double d, double zl) {
 void applymodel(hyperpoint H, hyperpoint& ret) {
   
   ld tz = euclid ? (EUCSCALE+vid.alphax) : vid.alphax+H[2];
-  if(tz < 1e-3 && tz > -1e-3) tz = 1000;
+  if(tz < BEHIND_LIMIT && tz > -BEHIND_LIMIT) tz = BEHIND_LIMIT;
   
   if(pmodel == mdUnchanged) { 
     for(int i=0; i<3; i++) ret[i] = H[i] / vid.radius;
@@ -306,7 +306,7 @@ ld spherity(const hyperpoint& h) {
     }  
   
   if(vid.alpha <= 1) {
-    return to01(-.8, 1, h[2]);
+    return to01(-1.5, 1, h[2]);
     }
       
   return 1;

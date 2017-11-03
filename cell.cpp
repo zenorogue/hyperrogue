@@ -968,6 +968,9 @@ int zebra40(cell *c) {
   else if(ctof(c)) return (c->master->zebraval/10);
   else if(sphere) return 0;
   else if(euclid) return eupattern(c);
+  else if(S3 == 4 && S7 == 6) {
+    return 8 + ((c->master->zebraval / 10 + c->spin(0))%2) * 2;
+    }
   else {
     int ii[3], z;
     ii[0] = (c->mov[0]->master->zebraval/10);
@@ -1304,12 +1307,6 @@ int getBits(cell *c) {
     int b2 = getHeptagonCdata(createMov(c, 4)->master)->bits;
     return (b0 & b1) | (b1 & b2) | (b2 & b0);
     }
-  }
-
-eLand getCLand(cell *c) {
-  int b = getBits(c);
-  b = (b&31) ^ (b>>5);
-  return land_scape[b & 31];
   }
 
 cell *heptatdir(cell *c, int d) {

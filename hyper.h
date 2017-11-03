@@ -1827,6 +1827,7 @@ struct qpoly {
       int cnt;
       int outline;
       double minwidth;
+      int flags;
       };
 
 struct qline {
@@ -2096,3 +2097,7 @@ const char *dnameof(eWall w);
 const char *dnameof(eItem i);
 
 void runGeometryExperiments();
+
+// z to close to this limit => do not draw
+
+#define BEHIND_LIMIT 1e-6
