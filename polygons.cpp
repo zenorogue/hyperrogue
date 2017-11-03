@@ -873,9 +873,9 @@ void finishshape() {
   for(int i=last->s; i<last->e-1; i++)
     area += hpc[i][0] * hpc[i+1][1] - hpc[i+1][0] * hpc[i][1];
   if(area >= 0) last->flags |= POLY_INVERSE;
-  if(isnan(area)) ;
+  /* if(isnan(area)) ;
   else if(intval(hpc[last->s], hpc[last->e-1]) > 1e-6)
-    printf("bad end\n");
+    printf("bad end\n"); */
   }
 
 void bshape(hpcshape& sh, int p) {
