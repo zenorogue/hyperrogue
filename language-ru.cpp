@@ -6389,6 +6389,123 @@ S("When your plan has clearly failed, it is better to abandon it and go to a saf
 
 S("The Hunting Dogs give up.", "Охотничьи псы сдались.")
 
+
+// missing from previous versions:
+ 
+S("\n\nThis orb also allows you to collect items encased in ice.",
+  "\n\nЭта сфера также позволяет собирать предметы, замерзшие во льду.")
+ 
+// vampire attack
+S("%The1 drains your powers!", "%1 пьет ваши силы!")
+ 
+// additions
+S(" This tutorial will not advance on its own -- you have to press Enter (not while reading help text).",
+  " Это руководство не будет продвигаться вперед само по себе -- нужно нажать Enter (не во время чтения текста помощи)."
+  )
+ 
+S("Hint: hold Alt to highlights enemies and other important features.",
+  "Подсказка: зажмите Alt, чтобы подсветить врагов и другие важные вещи.")
+ 
+// Crystal World
+N("Crystal World", GEN_O, "Кристальный Мир", "Кристальные Миры", "Кристальный Мир", "в Кристальном Мире")
+N("Glowing Crystal", GEN_O, "Светящийся Кристалл", "Светящиеся Кристаллы", "Светящийся Кристалл", "Светящимся Кристаллом")
+ 
+S("Yes, this is definitely a crystal. A very regular crystalline structure.\n\n"
+  "This land has been designed as a tool to play with various geometries, and it does not appear during a normal gameplay.",
+ 
+  "Да, это определенно кристалл. Регулярная кристаллическая структура.\n\n"
+  "Эта земля была сделана, чтобы поиграть с различными геометриями, и она не влияет на обычную игру.")
+ 
+S("You cannot move there!", "Ты не можешь ходить сюда!");
+ 
+// geometry stuff
+ 
+S("experiment with geometry", "эксперименты с геометрией")
+ 
+S(
+  "If you want to know how much the gameplay is affected by the "
+  "hyperbolic geometry in HyperRogue, this mode is for you!\n\n"
+ 
+  "You can try many different geometries here. We start by gluing "
+  "n-gons in such a way that k of them meet in every vertex. "
+  "Depending on n and k, this either folds into a sphere, unfolds into a plane, "
+  "or requires a hyperbolic space. The result may be then 'truncated' by "
+  "replacing each vertex by a 2k-gon. Furthermore, you can play "
+  "with quotient geometries. For example, the elliptic geometry is "
+  "obtained from the sphere by making the antipodes be the same point, "
+  "so you return to the same spot (but as a mirror image) after going there. "
+  "Have fun experimenting! "
+  "Achievements and leaderboards do not work in geometry experiments, "
+  "except some specific ones.\n\n"
+  "In standard geometry (truncated or not), you can play the full game, but in other geometries "
+  "you select a particular land. Lands are unlocked by visiting them in this "
+  "session, or permanently by collecting 25 treasure. Try Crossroads in Euclidean "
+  "or chaos mode in non-standard non-quotient hyperbolic to visit many lands. "
+  "Highlights:\n"
+  "* Crystal World and Warped Coast can be understood as extra geometries.\n"
+  "* Halloween is specially designed for spherical geometry.\n"
+  "* To see the difference, try Hunting Grounds in Euclidean -- it is impossible.\n",
+ 
+  "Хочешь узнать, насколько гиперболическая геометрия влияет на игру? Тогда этот режим для тебя!\n\n"
+  "Ты можешь попробовать много разных геометрий. Для начала можно склеивать n-угольники так, "
+  "чтобы k штук сходилось в одной вершине. В зависимости от n и k to может получиться сфера, "
+  "обычная плоскость или плоскость Лобачевского (она же гиперболическая плоскость). Также есть 'усеченные' версии, "
+  "в которых каждая вершина заменяется 2k-угольником. Еще можно поиграть с геометрией "
+  "факторпространств. Например, эллиптическая геометрия получается, если "
+  "склеить противоположные точки сферы, то есть при переходе на противоположную "
+  "сторону сферы ты попадаешь в ту же самую точке (но как бы отраженную в зеркале). "
+  "Интересных экспериментов! Достижения и таблицы рекордов здесь недоступны, кроме "
+  "некоторых специальных.\n\n"
+  "В стандартной геометрии (усеченной или нет) ты получишь всю игру,но в других геометриях "
+  "ты выбираешь одну землю. Земля становится доступной, если ты открыл ее в этой сессии или "
+  "когда-либо собрал в ней 25 сокровищ. Попробуй использовать Перекресток в Евклидовом режиме "
+  "или режиме Хаоса в нестандартной геометрии (не факторпространства), чтобы посетить много земель.\n"
+  "Важные идеи:\n"
+  "* Кристальный мир и Искривленный берег можно понимать как другие геометрии.\n"
+  "* Хэллоуин специально создан для сферической геометрии.\n"
+  "* Чтобы увидеть разницу, попробуй поиграть в Охотничьи угодья в Евклидовой геометрии -- ничего не выйдет."
+  )
+ 
+// new geometries available:
+S("standard", "обычная") // renamed from 'hyperbolic'
+ 
+S("octagons", "восьмиугольники")
+S("four pentagons", "четыре пятиугольника")
+S("four hexagons", "четыре шестиугольника")
+S("four heptagons", "четыре семиугольника")
+S("cube", "куб")
+S("tetrahedron (buggy)", "тетраэдр (ошибки)")
+S("tetrahedron", "тетраэдр") // in case if it gets better
+ 
+S("land", "земля")
+S("truncated", "усеченный")
+S("does not matter", "не важно")
+S("sides per face", "сторон у клетка")
+S("faces per vertex", "клеток в вершине")
+S("none", "нет")
+S("zebra", "зебра")
+S("field", "поле")
+S("quotient space", "факторпространство")
+S("size of the world", "размер мира")
+S("flat", "плоскость")
+ 
+// truncated or not truncated
+S(" (t)", " (у)")
+S(" (n)", " (н)")
+ 
+S("(locked)", "(закрыто)")
+ 
+S("stereographic/orthogonal", "стереографическая/ортогональная")
+S("Poincaré/Klein", "Пуанкаре/Клейн")
+ 
+// Paper Model Creator
+S("Useless in Euclidean geometry.", "Бесполезно в Евклидовой геометрии.");
+S("Not implemented for spherical geometry. Please tell me if you really want this.",
+  "Не реализовано для сферической геометрии. Напиши мне, если очень хочешь.")
+ 
+// Hypersian Rug
+S("This makes sense only in hyperbolic geometry.", "Имеет смысл только в гиперболической геометрии.")
+
 #undef Orb
 
   

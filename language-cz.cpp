@@ -6315,6 +6315,126 @@ S("The Hunting Dogs give up.", "Lovečtí psi vzdali pronásledování.");
 		"NEW_ACHIEVEMENT_9_3_DESC"	"Získej 50 Lávových lilií (nelze získat ve Sférostrategickém módu)."
 */
 
+// missing from previous versions:
+
+S("\n\nThis orb also allows you to collect items encased in ice.",
+  "\n\nTato Sféra ti také umožňuje sbírat předměty zarostlé v ledu.")
+
+// vampire attack
+S("%The1 drains your powers!", "%The1 vysává tvou sílu!")
+
+// additions
+S(" This tutorial will not advance on its own -- you have to press Enter (not while reading help text).", 
+  " Tento tutoriál nepostupuje sám od sebe -- musíš stisknout Enter (ale ne při čtení nápovědy)."
+  )
+
+S("Hint: hold Alt to highlights enemies and other important features.",
+  "Nápověda: když budeš držet Alt, zvýrazníš tím nepřátele a jiné důležité věci.")
+
+// Crystal World
+N("Crystal World", GEN_O, "Krystalický svět", "Krystalické světy", "Krystalický svět", "v krystalickém světě")
+N("Glowing Crystal", GEN_O, "Zářící krystal", "Zářící krystaly", "Zářící krystal", "Zářícím krystalem")
+
+S("Yes, this is definitely a crystal. A very regular crystalline structure.\n\n"
+  "This land has been designed as a tool to play with various geometries, and it does not appear during a normal gameplay.",
+  
+  "Ano, tohle je rozhodně krystal. A navíc má velice pravidelnou krystalickou strukturu.\n\n"
+  "Tento kraj byl navržený jako nástroj pro hraní s různými geometriemi a v normální hře se neobjevuje.")
+
+S("You cannot move there!", "Tam se nemůžeš pohnout!");
+
+// geometry stuff
+
+S("experiment with geometry", "experimentování s geometrií")
+
+S(
+  "If you want to know how much the gameplay is affected by the "
+  "hyperbolic geometry in HyperRogue, this mode is for you!\n\n"
+  
+  "You can try many different geometries here. We start by gluing "
+  "n-gons in such a way that k of them meet in every vertex. "
+  "Depending on n and k, this either folds into a sphere, unfolds into a plane, "
+  "or requires a hyperbolic space. The result may be then 'truncated' by "
+  "replacing each vertex by a 2k-gon. Furthermore, you can play "
+  "with quotient geometries. For example, the elliptic geometry is "
+  "obtained from the sphere by making the antipodes be the same point, "
+  "so you return to the same spot (but as a mirror image) after going there. "
+  "Have fun experimenting! "
+  "Achievements and leaderboards do not work in geometry experiments, "
+  "except some specific ones.\n\n"
+  "In standard geometry (truncated or not), you can play the full game, but in other geometries "
+  "you select a particular land. Lands are unlocked by visiting them in this "
+  "session, or permanently by collecting 25 treasure. Try Crossroads in Euclidean "
+  "or chaos mode in non-standard non-quotient hyperbolic to visit many lands. "
+  "Highlights:\n"
+  "* Crystal World and Warped Coast can be understood as extra geometries.\n"
+  "* Halloween is specially designed for spherical geometry.\n"
+  "* To see the difference, try Hunting Grounds in Euclidean -- it is impossible.\n",
+  
+  "Pokud chceš vědět, jak geometrie HyperRogue ovlivňuje hru, tento mód je právě "
+  "pro tebe!\n\n"
+  "Můžeš tu vyzkoušet celou řadu různých geometrií. Začneme tím, že slepíme "
+  "n-úhelníky tak, aby se jich v každém vrcholu stýkalo k. V závislosti na "
+  "n a k se výsledek složí do koule, rozloží do roviny, a nebo bude vyžadovat "
+  "hyperbolický prostor. Výsledek je pak možné 'seříznout' tím, že se každý "
+  "vrchol nahradí 2k-úhelníkem. Navíc si můžete hrát s kvocientovými "
+  "geometriemi. Tak například eliptickou geometrii získáte ze sférické "
+  "tím, že ztotožníš každé dva protilehlé body, takže po příchodu tam "
+  "skončíš na stejném místě (ovšem zrcadlově převrácen%ý0). Bav se při "
+  "experimentování! Achievementy a žebříčky v geometrických experimentech "
+  "nefungují, s výjimkou některých zvláštních případů.\n\n"
+  "Ve standardní geometrii (seříznuté či neseříznuté) můžeš hrát plnou hru, "
+  "ale v jiných geometriích si musíš vybrat, kde chceš hrát. Kraje se "
+  "odemknou, když je navštívíš během hry nebo trvale po sebrání 25 "
+  "pokladů. Zkus Křižovatku v eukleidovském módu nebo chaotický mód "
+  "v nestandardní, nekvocientovém hyperbolickém světě, pokud chceš "
+  "navštívit mnoho krajů.\n"
+  "Zajímavé body:\n"
+  "* Křišťálový svět a Pokřivené pobřeží lze brát jako další geometrie navíc.\n"
+  "* Halloween je kraj specificky navržený pro sférickou geometrii.\n"
+  "* Zkus Věčná loviště v eukleidovském módu, abys viděl ten rozdíl -- jsou nemožná."  
+  )
+
+// new geometries available:
+S("standard", "standardní") // renamed from 'hyperbolic'
+
+S("octagons", "osmiúhelníky")
+S("four pentagons", "čtyři pětiúhelníky")
+S("four hexagons", "čtyři šestiúhelníky")
+S("four heptagons", "čtyři sedmiúhelníky")
+S("cube", "krychle")
+S("tetrahedron (buggy)", "čtyřstěn (problémový)")
+S("tetrahedron", "čtyřstěn") // in case if it gets better
+
+S("land", "kraj")
+S("truncated", "seříznutí")
+S("does not matter", "nehraje roli")
+S("sides per face", "počet stran")
+S("faces per vertex", "stupeň vrcholů")
+S("none", "žádný")
+S("zebra", "zebra")
+S("field", "těleso")
+S("quotient space", "kvocientový prostor")
+S("size of the world", "velikost světa")
+S("flat", "placka")
+
+// truncated or not truncated
+S(" (t)", " (s)")
+S(" (n)", " (n)")
+
+S("(locked)", "(uzamčeno)")
+
+S("stereographic/orthogonal", "stereografická/ortogonální projekce")
+S("Poincaré/Klein", "Poincaré/Klein")
+  
+// Paper Model Creator
+S("Useless in Euclidean geometry.", "V eukleidovské geometrii k ničemu.");
+S("Not implemented for spherical geometry. Please tell me if you really want this.",
+  "Není implementováno ve sférické geometrii. Pokud byste to opravdu chtěli, dejte mi vědět.")
+
+// Hypersian Rug
+S("This makes sense only in hyperbolic geometry.", "To dává smysl jenom v hyperbolické geometrii.")
+
 #undef Orb
 
 
