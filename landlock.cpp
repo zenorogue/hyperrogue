@@ -1053,7 +1053,7 @@ int isLandValid(eLand l) {
   
   // works in most spheres, Zebra quotient, and stdeuc
   if(l == laWhirlwind)
-    if(!(stdeuc || quotient == 1 || (sphere && !nontruncated) || (bigsphere && nontruncated && !elliptic)))
+    if(!(stdeuc || quotient == 1 || (S7 == 4 && !nontruncated) || (bigsphere && nontruncated && !elliptic)))
       return 0;
     
   // needs standard/Euclidean (needs fractal landscape)
