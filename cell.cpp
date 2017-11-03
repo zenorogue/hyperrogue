@@ -1516,7 +1516,7 @@ int getHemisphere(cell *c, int which) {
   else {
     int score = 0;
     for(int i=0; i<6; i+=2) 
-      score += getHemisphere(c->mov[i], which);
+      score += getHemisphere(c->mov[i], which) * (c->mirror(i) ? -1 : 1);
     return score/3;
     }
   }

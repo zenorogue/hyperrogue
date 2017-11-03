@@ -712,9 +712,12 @@ void setLandSphere(cell *c) {
     if(c->land == laElementalWall && c->type != 6)
       c->wall = getElementalWall(hrand(2) ? c->barleft : c->barright);
     }
-  if(specialland == laCrossroads || specialland == laCrossroads2 || specialland == laCrossroads3) {
+  if(!torus)
+  if(specialland == laCrossroads || specialland == laCrossroads2 || specialland == laCrossroads3 || specialland == laTerracotta) {
     int x = getHemisphere(c, 1);
-    if(x == 0 || (specialland == laCrossroads3 && getHemisphere(c, 2) == 0)) 
+    if(x == 0 && specialland == laTerracotta)
+      setland(c, laMercuryRiver), c->wall = waMercury;
+    else if(x == 0 || (specialland == laCrossroads3 && getHemisphere(c, 2) == 0)) 
       setland(c, laBarrier), c->wall = waBarrier;
     else setland(c, specialland);
     if(specialland == laCrossroads3 && c->type != 6 && c->master->fiftyval == 1)
@@ -771,6 +774,14 @@ void setLandEuclid(cell *c) {
     eucoord x, y;
     decodeMaster(c->master, x, y);
     setland(c, getEuclidLand(y+2*x));
+    }
+  if(specialland == laTerracotta) {
+    eucoord x, y;
+    decodeMaster(c->master, x, y);
+    if((y+2*x) % 16 == 1) {
+      setland(c, laMercuryRiver);
+      c->wall = waMercury;
+      }
     }
   if(specialland == laCrossroads4) {
     eucoord x, y;
