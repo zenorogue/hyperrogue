@@ -718,7 +718,7 @@ void showEuclideanMenu() {
       if(i < 26) ch = 'a' + i;
       else ch = 'A' + (i-26);
       string validclasses[4] = {"", " (½)", "", " (!)"};
-      string s = XLAT1(linf[l].name) + validclasses[isLandValid(l)];
+      string s = XLAT1(linf[l].name);
 
       if(landvisited[l]) {
         dialog::addBoolItem(s, l == specialland, ch);
@@ -726,6 +726,9 @@ void showEuclideanMenu() {
       else {
         dialog::addSelItem(s, XLAT("(locked)"), ch);
         }
+      
+      dialog::lastItem().color = linf[l].color;
+      dialog::lastItem().value += validclasses[isLandValid(l)];
       }
     dialog::addBreak(50);
     if(chaosUnlocked && !quotient && !euclid && !sphere)
