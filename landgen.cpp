@@ -2108,7 +2108,7 @@ void setdist(cell *c, int d, cell *from) {
   if(d >= BARLEV) {
   
     if(!c->land && from && from->land != laElementalWall && from->land != laHauntedWall && from->land != laOceanWall &&
-      from->land != laBarrier) {
+      from->land != laBarrier && !quotient) {
         if(!hasbardir(c)) setland(c, from->land);
         }
     if(c->land == laTemple && !tactic::on && !chaosmode) setland(c, laRlyeh);
