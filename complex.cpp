@@ -1722,7 +1722,11 @@ namespace hive {
     if(!gdir) return;
     cellwalker bf(c, gdir);
     int radius = 9;
+    if(getDistLimit() <= 6) radius = 6;
     if(chaosmode) radius = 5;
+    if(chaosmode && getDistLimit() <= 5) radius = 4;
+    if(getDistLimit() <= 3) radius = 3;
+
     for(int i=2; i<radius; i++) {
       if(bf.c->type == 6)
         cwspin(bf, 3);
