@@ -216,6 +216,7 @@ int main() {
   allchars.insert("ᵈ");
   allchars.insert("δ");
   allchars.insert("∞");
+  allchars.insert("½");
   
   langPL(); langCZ(); langRU();
   langTR(); langDE(); langPT();

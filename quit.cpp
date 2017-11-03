@@ -293,6 +293,15 @@ string contstr() {
   return XLAT(canmove ? "continue" : "see how it ended");
   }
 
+eLand nextHyperstone() {
+  generateLandList(isLandValid);
+  for(eLand l: landlist)
+    if(items[treasureType(l)] < R10 && !isCrossroads(l))
+      return l;
+  if(items[itHyperstone] >= 10) return laNone;
+  return laCrossroads;
+  }
+
 void showMission() {
 
   cmode = sm::DOTOUR | sm::MISSION | sm::CENTER;
@@ -361,17 +370,14 @@ void showMission() {
   else if(items[itEmerald] < U5)
     dialog::addInfo(XLAT("Collect 5 Emeralds to access Camelot"));
   else if(hellUnlocked() && !chaosmode) {
-    bool b = true;
-    for(int i=0; i<LAND_HYP; i++)
-      if(b && items[treasureType(land_hyp[i])] < R10) {
+    eLand l = nextHyperstone();
+    if(l) 
         dialog::addInfo(
           XLAT(
-            land_hyp[i] == laTortoise ? "Hyperstone Quest: collect at least %3 points in %the2" :
+            l ? "Hyperstone Quest: collect at least %3 points in %the2" :
             "Hyperstone Quest: collect at least %3 %1 in %the2", 
-            treasureType(land_hyp[i]), land_hyp[i], its(R10)));
-        b = false;
-        }
-    if(b) 
+            treasureType(l), l, its(R10)));
+    else
       dialog::addInfo(XLAT("Hyperstone Quest completed!"), iinf[itHyperstone].color);
     }
   else dialog::addInfo(XLAT("Some lands unlock at specific treasures or kills"));

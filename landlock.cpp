@@ -517,12 +517,14 @@ bool landUnlocked(eLand l) {
 
 void countHyperstoneQuest(int& i1, int& i2) {
   i1 = 0; i2 = 0;
-  for(int t=1; t<ittypes; t++) 
-    if(t != itHyperstone && t != itBounty && t != itTreat &&
-    itemclass(eItem(t)) == IC_TREASURE) {
-      i2++; if(items[t] >= R10) i1++;
+  generateLandList(isLandValid);
+  for(eLand l: landlist) {
+    eItem ttype = treasureType(l);
+    if(ttype != itHyperstone) {
+      i2++; if(items[ttype] >= R10) i1++;
       }
-  }  
+    }
+  }
 
 bool hyperstonesUnlocked() {
   int i1, i2;
@@ -535,7 +537,7 @@ bool hyperstonesUnlocked() {
 int isRandland(eLand l) {
   if(l == laIce || l == laDesert || l == laCaves || l == laWildWest)
     return 2;
-  for(int i=0; i<RANDLANDS; i++) if(randlands[i] == l) return 1;
+  for(eLand ll: randlands) if(l == ll) return 1;
   return 0;
   }
 
@@ -607,7 +609,7 @@ bool lchance(eLand l) {
 
 eLand pickLandRPM(eLand old) {
   while(true) {
-    eLand n = randlands[hrand(RANDLANDS)];
+    eLand n = randlands[hrand(size(randlands))];
     if(incompatible(n, old)) continue;
     if(isRandland(n) == 2) return n;
     if(hiitemsMax(treasureType(n)) < 10)
@@ -901,4 +903,270 @@ eLand getNewLand(eLand old) {
   
   return n;  
   }
+
+vector<eLand> land_over = {
+  laIce, laCaves, laDesert, laHunting, laMotion, laJungle, laAlchemist, 
+  laCrossroads, 
+  laMirror, laMinefield, laPalace, laPrincessQuest, laZebra, laReptile, 
+  laOcean, laWarpCoast, laLivefjord, laKraken, laCaribbean, laWhirlpool, laRlyeh, laTemple,
+  laIvoryTower, laEndorian, laDungeon, laMountain, 
+  laCrossroads2, 
+  laDryForest, laWineyard, laDeadCaves, laGraveyard, laHaunted, laHive, 
+  laRedRock, laVolcano,
+  laDragon, laTortoise,
+  laOvergrown, laClearing, laStorms, laRose, laBurial, laWhirlwind, 
+  laBlizzard,
+  laEmerald, laCamelot, 
+  laPrairie, laBull, laTerracotta,
+  laElementalWall, laTrollheim,
+  laHell, laCrossroads3, laCocytus, laPower, laCrossroads4,
+  laCrossroads5,  
+  // EXTRA
+  laWildWest, laHalloween, laDual, laCA
+  };
+
+vector<eLand> landlist;
+
+template<class T> void generateLandList(T t) {
+  landlist.clear();
+  for(auto l: land_over) if(t(l)) landlist.push_back(l);    
+  }
+
+eLand getLandForList(cell *c) {
+  eLand l = c->land;
+  if(isElemental(l)) return laElementalWall;
+  if(l == laWarpSea) return laWarpCoast;
+  if(l == laMercuryRiver) return laTerracotta;
+  if(l == laBarrier) return laCrossroads;
+  if(l == laOceanWall) return laOcean;
+  if(l == laPalace && princess::dist(cwt.c) < OUT_OF_PRISON)
+    l = laPrincessQuest;
+  // princess?
+  return l;
+  }
+
+// check if the given land should appear in lists
+int isLandValid(eLand l) {
+
+  // Random Pattern allowed only in some specific lands
+  if(randomPatternsMode && !isRandland(l))
+    return 0;
+
+  bool stdeuc = geometry == gNormal || geometry == gEuclid;
+  bool a38 = geometry == gOctagon;
+  bool a4 = S3 == 4;
+  bool a45 = geometry == g45;
+  bool a46 = geometry == g46;
+  bool a47 = geometry == g47;
+  bool smallsphere = S7 < 5;
+  bool bigsphere = S7 == 5;
+  
+  if(isElemental(l)) {
+    if(l != laElementalWall)
+      return 0;
+    // not good in Field quotient
+    if(quotient == 2)
+      return 0;
+    }
+  
+  // does not agree with the pattern
+  if(l == laStorms && quotient == 2) 
+    return 0;
+  
+  // available only in weird geometries
+  if(l == laMirrorOld && !geometry)
+    return 0;
+  
+  // available only in standard geometry
+  if(l == laMirror && geometry)
+    return 0; 
+  
+  // Halloween needs bounded world (can be big bounded)
+  if(l == laHalloween && !bounded)
+    return 0;
+  
+  // these don't appear in normal game, but do appear in special modes
+  bool normalgame = !geometry && !tactic::on;  
+  if((l == laWildWest || l == laDual) && normalgame)
+    return 0;
+  
+  // Crystal World is designed for truncated geometries
+  if(l == laDual && nontruncated)
+    return 0;
+  
+  // standard, non-PTM specific
+  if(l == laCrossroads5 && tactic::on)
+    return 0;
+    
+  // standard non-PTM non-chaos specific
+  if((l == laCrossroads5 || l == laCrossroads2) && (geometry || chaosmode))
+    return 0;
+
+  // equidistant-based lands -- only in standard geometry
+  if((l == laDungeon || l == laEndorian) && (geometry || chaosmode))
+    return 0; //CHECKMORE
+  
+  // has a special construction in Chaos mode
+  if(l == laOcean && (!stdeuc && !chaosmode))
+    return 0;
+  
+  // equidistant-based lands, but also implemented in Euclidean
+  if((l == laIvoryTower || l == laMountain) && (!stdeuc || chaosmode))
+    return 0;
+  
+  if(l == laPrincessQuest && (!stdeuc || chaosmode || tactic::on))
+    return 0;
+
+  // works correctly only in some geometries
+  if(l == laClearing)
+    if(chaosmode || !(stdeuc || a38 || (a45 && !nontruncated) || (a47 && !nontruncated)))
+      return 0;
+
+  // does not work in non-truncated a4
+  if(l == laOvergrown && a4 && nontruncated)
+    return 0;
+
+  // does not work in bounded either
+  if(l == laOvergrown && bounded)
+    return 0;
+  
+  // horocycle-based lands, not available in bounded geometries nor in Chaos mode
+  if((l == laWhirlpool || l == laCamelot || l == laCaribbean || l == laTemple) && (bounded || chaosmode))
+    return 0;
+    
+  // Temple and Hive has a special Chaos Mode variant, but they are still essentially unbounded
+  if((l == laTemple || l == laHive) && bounded)
+    return 0;
+    
+  // this pattern does not work on elliptic and small spheres
+  if((l == laBlizzard || l == laVolcano) || elliptic || S7 < 5)
+    return 0;
+  
+  // Kraken does not really work in odd non-truncated geometries
+  // (but we do have to allow it in Standard)
+  if(l == laKraken && nontruncated && (S7&1) && !geometry)
+    return 0;
+  
+  // needs standard/Euclidean (needs vineyard pattern)
+  if(l == laWineyard && !stdeuc)
+    return 0;
+  
+  // works in most spheres, Zebra quotient, and stdeuc
+  if(l == laWhirlwind)
+    if(!(stdeuc || quotient == 1 || (sphere && !nontruncated) || (bigsphere && nontruncated && !elliptic)))
+      return 0;
+    
+  // needs standard/Euclidean (needs fractal landscape)
+  if(l == laTortoise && !stdeuc)
+    return 0;
+  
+  // technical lands do not count
+  if(l != laCA && isTechnicalLand(l))
+    return 0;
+  
+  // only in bounded geometry, and not in PTM
+  if(l == laCA && !bounded)
+    return 0;
+
+  if(l == laCA && tactic::on)
+    return 0;
+  
+  // Dragon Chasm requires unbounded space [partial]
+  if(l == laDragon && bounded)
+    return 0;
+  
+  // Graveyard pattern does not work on non-truncated weird geometries
+  if(l == laGraveyard && weirdhyperbolic && nontruncated)
+    return 0;
+  
+  // Warped Coast does not work on non-truncated S3s (except standard heptagonal where we have to keep it)
+  if(l == laWarpCoast && geometry && (S3==3) && nontruncated)
+    return 0;
+  
+  // laPower and laEmerald and laPalace -> [partial] in quotients and weirdhyperbolic
+  if((l == laPower || l == laEmerald || l == laPalace) && !stdeuc && !(bigsphere && !elliptic))
+    return 1;
+
+  if(l == laDragon && geometry)
+    return 1;
+
+  if(l == laTrollheim && quotient == 2)
+    return 0;
+  
+  if(l == laTrollheim && geometry)
+    return 1;
+  
+  if(l == laReptile && (geometry || nontruncated))
+    return 1;
+  
+  if(l == laCrossroads && weirdhyperbolic) 
+    return 0;
+  
+  if(l == laCrossroads && smallsphere) 
+    return 0;
+  
+  if(l == laCrossroads3 && !stdeuc && !bigsphere)
+    return 0;
+
+  // OK in small bounded worlds, and in Euclidean
+  if(l == laCrossroads4 && !(euclid || smallbounded))
+    return 0;
+
+  if(l == laZebra && !(stdeuc || (a4 && nontruncated) || a46 || quotient == 1))
+    return 0;
+  
+  if(l == laCrossroads3 && euclid)
+    return 1; // because it is not accurate
+
+  if(l == laPrairie) {
+    if(stdeuc || (bigsphere && !nontruncated && !elliptic) || (quotient == 2)) ;
+    else if(!bounded) return 1;
+    else return 0;
+    }
+  
+  if(l == laTerracotta && !stdeuc && !(bigsphere))
+    return 1;
+
+  // highlight Crossroads on Euclidean
+  if(euclid && (l == laCrossroads || l == laCrossroads4))
+    return 3; 
+  
+  // highlight Zebra-based lands on Zebra Quotient!
+  if((l == laZebra || l == laWhirlwind || l == laStorms) && quotient == 1)
+    return 3;  
+  
+  // highlight FP-based lands on Field Quotient!
+  if((l == laPrairie || l == laVolcano || l == laBlizzard) && quotient == 2)
+    return 3;  
+  
+  // these are highlighted whenever allowed
+  if(l == laHalloween || l == laDual)
+    return 3;
+  
+  return 2;
+  }
+
+/*
+int checkLands() {
+  for(int i=0; i<landtypes; i++) {
+    eLand l = eLand(i);
+    char inover = 'N';
+    for(int i=0; i<LAND_OVERX; i++) if(land_over[i] == l) inover = 'X';
+    for(int i=0; i<LAND_OVER; i++) if(land_over[i] == l) inover = 'Y';
+    char ineuc = 'N';
+    for(int i=0; i<LAND_EUC; i++) if(land_euc[i] == l) ineuc = 'Y';
+    char insph = 'N';
+    for(int i=0; i<LAND_SPH; i++) if(land_sph[i] == l) insph = 'Y';
+    char inoct = 'N';
+    for(int i=0; i<LAND_OCT; i++) if(land_oct[i] == l) inoct = 'Y';
+    char intac = 'N';
+    for(auto ti: land_tac) if(l == ti.l) intac = 'Y';
+    printf("%c %c %c %c %c %c %c :: %s\n", 
+      isTechnicalLand(l) ? 'T' : 'R',
+      inover, ineuc, insph, inoct, intac, noChaos(l) ? 'N' : 'Y', linf[i].name);
+    }
+  exit(0);
+  }
+
+auto hookcl = addHook(hooks_args, 100, checkLands); */
 

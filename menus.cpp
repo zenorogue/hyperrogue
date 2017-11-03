@@ -37,45 +37,41 @@ void showOverview() {
   
   bool pages;
   
-  int nl = LAND_OVER, nlm;
-  eLand *landtab = land_over;
-  if(randomPatternsMode) { nl = RANDLANDS; landtab = randlands; }
+  generateLandList(isLandValid);
   
   if(mapeditor::infix != "") {
-    static eLand filteredLands[landtypes];
-    int nlid = 0;
-    for(int i=0; i<nl; i++) {
-      eLand l = landtab[i];
+    vector<eLand> filtered;
+    for(eLand l: landlist) {
       string s = dnameof(l);
       s += "@";
       s += dnameof(treasureType(l));
       s += "@";
       s += dnameof(nativeOrbType(l));
       if(mapeditor::hasInfix(s))
-        filteredLands[nlid++] = l;
+        filtered.push_back(l);
       }
-    if(nlid) {
-      nl = nlid; landtab = filteredLands;
-      }
+    if(filtered.size()) 
+      landlist = filtered;
     }
+  
+  int nl = size(landlist), nlm;
+  
+  int lstart = 0;
   
   if(nl > 30) {
     pages = true;
-    landtab += dialog::handlePage(nl, nlm, (nl+1)/2);
+    lstart += dialog::handlePage(nl, nlm, (nl+1)/2);
     }
   else nlm = nl;
   
   int vf = min((vid.yres-64-vid.fsize*2) / nlm, vid.xres/40);
 
-  eLand curland = cwt.c->land;
-  if(curland == laPalace && princess::dist(cwt.c) < OUT_OF_PRISON)
-    curland = laPrincessQuest;
-  if(isElemental(curland)) curland = laElementalWall;
+  eLand curland = getLandForList(cwt.c);
   
   getcstat = '0';
   
   for(int i=0; i<nl; i++) {
-    eLand l = landtab[i];
+    eLand l = landlist[lstart + i];
     int xr = vid.xres / 64;
     int i0 = 56 + vid.fsize + i * vf;
     int col;
@@ -552,46 +548,6 @@ void showChangeMode() {
 int eupage = 0;
 int euperpage = 21;
 
-// test all the floor patterns!
-
-#ifdef SCALETUNER
-#define LAND_SPHEUC 26
-
-eLand land_spheuc[LAND_SPHEUC] = {
-  laDesert,
-  laBull,
-  laPalace,
-  laWildWest,
-  laPower,
-  laStorms,
-  laHell,
-  laWhirlwind,
-  laGraveyard,
-  laTrollheim,
-  laBurial,
-  laVolcano,
-  laRlyeh,
-  laTortoise,
-  laRose,
-  laCrossroads,
-  laCaves,
-  laOvergrown,
-  laAlchemist,
-  laJungle,
-  laMotion,
-  laIce,
-  laDragon,
-  laKraken,
-  laWarpCoast,
-  laCaribbean
-  };
-
-#else
-
-#define LAND_SPHEUC ((weirdhyperbolic) ? LAND_OCT : (geometry > 1) ? LAND_SPH : LAND_EUC)
-#define land_spheuc ((weirdhyperbolic) ? land_oct : (geometry > 1) ? land_sph : land_euc)
-#endif
-
 const char *curvenames[8] = {
   "0", "1", "2", "extremely hyperbolic", "strongly hyperbolic", "strongly hyperbolic", "moderately hyperbolic", "weakly hyperbolic"
   };
@@ -753,17 +709,22 @@ void showEuclideanMenu() {
     dialog::addSelItem(XLAT("geometry"), XLAT(ginf[geometry].name) + XLAT(truncatenames[nontruncated]), '5');
     dialog::addBreak(50);
     
+    generateLandList(isLandValid);
+    
     for(int i=0; i<euperpage; i++) {
-      if(euperpage * eupage + i >= LAND_SPHEUC) { dialog::addBreak(100); break; }
-      eLand l = land_spheuc[euperpage * eupage + i];
+      if(euperpage * eupage + i >= size(landlist)) { dialog::addBreak(100); break; }
+      eLand l = landlist[euperpage * eupage + i];
       char ch;
       if(i < 26) ch = 'a' + i;
       else ch = 'A' + (i-26);
+      string validclasses[4] = {"", " (½)", "", " (!)"};
+      string s = XLAT1(linf[l].name) + validclasses[isLandValid(l)];
+
       if(landvisited[l]) {
-        dialog::addBoolItem(XLAT1(linf[l].name), l == specialland, ch);
+        dialog::addBoolItem(s, l == specialland, ch);
         }
       else {
-        dialog::addSelItem(XLAT1(linf[l].name), XLAT("(locked)"), ch);
+        dialog::addSelItem(s, XLAT("(locked)"), ch);
         }
       }
     dialog::addBreak(50);
@@ -789,7 +750,7 @@ void showEuclideanMenu() {
         ewhichscreen ^= 3;
       else if(uni == '-' || uni == PSEUDOKEY_WHEELUP || uni == PSEUDOKEY_WHEELDOWN) {
         eupage++;
-        if(eupage * euperpage >= LAND_SPHEUC) eupage = 0;
+        if(eupage * euperpage >= size(landlist)) eupage = 0;
         }
       else if(uni == '1') {
         if(chaosUnlocked) {
@@ -797,8 +758,8 @@ void showEuclideanMenu() {
           pushScreen(showEuclideanMenu);
           }
         }
-      else if(lid >= 0 && lid < LAND_SPHEUC) {
-        eLand nland = land_spheuc[lid];
+      else if(lid >= 0 && lid < size(landlist)) {
+        eLand nland = landlist[lid];
         if(landvisited[nland]) {
           specialland = nland;
           restartGame(tactic::on ? 't' : 0);
@@ -813,7 +774,7 @@ void showEuclideanMenu() {
   }
 
 void runGeometryExperiments() {
-  specialland = cwt.c->land;
+  specialland = getLandForList(cwt.c);
   pushScreen(showEuclideanMenu);
   }
 

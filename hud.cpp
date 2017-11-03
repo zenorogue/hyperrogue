@@ -80,7 +80,7 @@ void updatesort() {
 
 void preparesort() {
   for(int i=0; i<glyphs; i++) glyphorder[i] = i;
-  for(int i=0; i<LAND_OVERX; i++) {
+  for(int i=0; i<size(land_over); i++) {
     eLand l = land_over[i];
     ikland[treasureType(l)] = i+1;
     for(int mi=0; mi<motypes; mi++) 

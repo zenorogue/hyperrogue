@@ -1923,6 +1923,7 @@ int getHemisphere(cell *c, int which);
 #define torus (ginf[geometry].quotientstyle & 8)
 #define doall (ginf[geometry].quotientstyle)
 #define smallbounded (sphere || quotient == 1 || torus)
+#define bounded (sphere || quotient || torus)
 
 namespace tactic {
   extern bool on;
@@ -2101,3 +2102,7 @@ void runGeometryExperiments();
 // z to close to this limit => do not draw
 
 #define BEHIND_LIMIT 1e-6
+
+extern vector<eLand> landlist;
+template<class T> void generateLandList(T t);
+int isLandValid(eLand l);

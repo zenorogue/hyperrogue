@@ -571,23 +571,22 @@ namespace tactic {
   
   int chances(eLand l) {
     if(modecode() != 0 && l != laCamelot) return 3;
-    for(int i=0; i<LAND_TAC; i++)
-      if(land_tac[i].l == l) {
-        return land_tac[i].tries;
-        }
+    for(auto& ti: land_tac)
+      if(ti.l == l) 
+        return ti.tries;
     return 0;
     }
   
   int tacmultiplier(eLand l) {
     if(modecode() != 0 && l != laCamelot) return 1;
     if(modecode() != 0 && l == laCamelot) return 3;
-    for(int i=0; i<LAND_TAC; i++)
-      if(land_tac[i].l == l) return land_tac[i].multiplier;
+    for(auto& ti: land_tac)
+      if(ti.l == l)
+        return ti.multiplier;
     return 0;
     }
   
-  bool tacticUnlocked(int i) {
-    eLand l = land_tac[i].l;
+  bool tacticUnlocked(eLand l) {
     if(autocheat) return true;
     if(l == laWildWest || l == laDual) return true;
     return hiitemsMax(treasureType(l)) * landMultiplier(l) >= 20;
@@ -642,23 +641,16 @@ namespace tactic {
     uploadScoreCode(4, LB_PURE_TACTICS_COOP);
     }
   
-  int nl;
-  
-  eLand getLandById(int i) {
-    return
-      sphere ? land_sph[i] :
-      euclid ? land_euc[i] :
-      land_tac[i].l;
-    }
-
   void showMenu() {
     cmode = sm::ZOOMABLE;
     mouseovers = XLAT("pure tactics mode") + " - " + mouseovers;
-
-    nl = LAND_TAC; 
     
-    if(euclid) nl = LAND_EUC;
-    if(sphere) nl = LAND_SPH;
+    { 
+    dynamicval<bool> t(tactic::on, true);
+    generateLandList(isLandValid);
+    }
+    
+    int nl = size(landlist);
 
     int nlm;
     int ofs = dialog::handlePage(nl, nlm, nl/2);
@@ -675,7 +667,7 @@ namespace tactic {
 
     for(int i=0; i<nl; i++) {
       int i1 = i + ofs;
-      eLand l = getLandById(i1);
+      eLand l = landlist[i1];
 
       int i0 = 56 + i * vf;
       int col;
@@ -684,7 +676,7 @@ namespace tactic {
 
       if(!ch) continue;
       
-      bool unlocked = tacticUnlocked(i1);
+      bool unlocked = tacticUnlocked(l);
       
       if(unlocked) col = linf[l].color; else col = 0x202020;
       
@@ -714,8 +706,8 @@ namespace tactic {
     uploadScore();
     if(on) unrecord(firstland);
     
-    if(getcstat >= 1000) {
-      int ld = land_tac[getcstat-1000].l;      
+    if(getcstat >= 1000 && getcstat < 1000 + size(landlist)) {
+      int ld = landlist[getcstat-1000];
       subscoreboard scorehere;
       for(int i=0; i<size(scoreboard[xc]); i++) {
         int sc = scoreboard[xc][i].scores[ld];
@@ -727,8 +719,8 @@ namespace tactic {
       }
      
     keyhandler = [] (int sym, int uni) {
-      if(uni >= 1000 && uni < 1000 + LAND_TAC) {
-        firstland = specialland = getLandById(uni - 1000);
+      if(uni >= 1000 && uni < 1000 + size(landlist)) {
+        firstland = specialland = landlist[uni - 1000];
         restartGame(tactic::on ? 0 : 't');
         }
       else if(uni == '0') {

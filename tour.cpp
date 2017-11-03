@@ -124,18 +124,16 @@ bool handleKeyTour(int sym, int uni) {
       }
     
     if(sym == '2') {
-      bool ok = cwt.c->land == laCanvas;
-      for(int i=0; i<LAND_EUC; i++) if(land_euc[i] == cwt.c->land) ok = true;
-      if(!ok) {
+      dynamicval<eGeometry> g(geometry, gEuclid);
+      if(cwt.c->land != laCanvas && !isLandValid(cwt.c->land)) {
         addMessage(XLAT("This land has no Euclidean version."));
         return true;
         }
       }
     
     if(sym == '1') {
-      bool ok = cwt.c->land == laCanvas;
-      for(int i=0; i<LAND_SPH; i++) if(land_sph[i] == cwt.c->land) ok = true;
-      if(!ok) {
+      dynamicval<eGeometry> g(geometry, gSphere);
+      if(cwt.c->land != laCanvas && !isLandValid(cwt.c->land)) {
         addMessage(XLAT("This land has no spherical version."));
         return true;
         }

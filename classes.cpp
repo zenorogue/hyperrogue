@@ -1566,119 +1566,9 @@ const landtype linf[landtypes] = {
   { 0x80FF00, "Crystal World", crystaldesc}
   };
 
-#define LAND_OVER 57
-#define LAND_OVERX 60
-
-eLand land_over[LAND_OVERX] = {
-  laIce, laCaves, laDesert, laHunting, laMotion, laJungle, laAlchemist, 
-  laCrossroads, 
-  laMirror, laMinefield, laPalace, laPrincessQuest, laZebra, laReptile, 
-  laOcean, laWarpCoast, laLivefjord, laKraken, laCaribbean, laWhirlpool, laRlyeh, laTemple,
-  laIvoryTower, laEndorian, laDungeon, laMountain, 
-  laCrossroads2, 
-  laDryForest, laWineyard, laDeadCaves, laGraveyard, laHaunted, laHive, 
-  laRedRock, laVolcano,
-  laDragon, laTortoise,
-  laOvergrown, laClearing, laStorms, laRose, laBurial, laWhirlwind, 
-  laBlizzard,
-  laEmerald, laCamelot, 
-  laPrairie, laBull, laTerracotta,
-  laElementalWall, laTrollheim,
-  laHell, laCrossroads3, laCocytus, laPower, laCrossroads4,
-  laCrossroads5,  
-  // EXTRA
-  laWildWest, laHalloween, laDual
-  };
-
-#define LAND_EUC 54
-eLand land_euc[LAND_EUC] = {
-  laIce, laCaves, laDesert, laMotion, laJungle,
-  laCrossroads, 
-  laMirrorOld, laMinefield, laAlchemist, laZebra, laPalace, laPrincessQuest,
-  laOcean, laLivefjord, laWarpCoast, laCaribbean, laKraken, laWhirlpool, laRlyeh, laTemple,
-  laElementalWall, laTrollheim,
-  laDryForest, laWineyard, laDeadCaves, laGraveyard, laHive, laRedRock, laIvoryTower, 
-  laOvergrown, laClearing, laStorms, laWhirlwind, laRose, laBurial,
-  laEmerald, laCamelot, laDragon, laTortoise,
-  laHell, laCrossroads3, laCocytus, laPower,
-  laCrossroads4, 
-  laWildWest,
-  laReptile, laMountain, laBull, laPrairie,
-  laVolcano, laHunting, laBlizzard, laTerracotta,
-  laDual
-  };
-// MISSING: laCrossroads2
-
-#define LAND_SPH 40
-eLand land_sph[LAND_SPH] = {
-  laHalloween,
-  laIce, laCaves, laDesert, laMotion, laJungle,
-  laCrossroads, 
-  laMirrorOld, laMinefield, laAlchemist, 
-  laLivefjord, laWarpCoast, laKraken, laRlyeh, 
-  laTrollheim,
-  laDryForest, laDeadCaves, laGraveyard, laHive, laRedRock, 
-  laOvergrown, laStorms, laWhirlwind, laRose, laBurial,
-  laEmerald, laDragon, laTortoise,
-  laHell, laCrossroads3, laCocytus, laPower, laElementalWall,
-  laCrossroads4,
-  laWildWest, laPalace, laBull, laPrairie, laCA,
-  laDual
-  };
-
-#define LAND_OCT 36
-eLand land_oct[LAND_OCT] = {
-  laWarpCoast, laIce, laDesert, laCaves, laJungle, laAlchemist, 
-  laGraveyard, laTemple, laHell, laCocytus, laMotion, 
-  laDryForest, laDeadCaves, laRedRock, laMinefield, laLivefjord,
-  laStorms, laOvergrown, laRose, laKraken, laBurial,
-  laTrollheim, laBull, laHunting,
-  laCaribbean, laCamelot, laPalace, laMirrorOld,
-  laVolcano, laBlizzard, laTerracotta,
-  laWineyard, laPower, laEmerald, laWhirlpool,
-  laDual
-  };
-
-
-#define LAND_HYP 51
-eLand land_hyp[LAND_HYP] = {
-  laHell, laCocytus, laGraveyard, 
-  laWineyard, laDryForest, laCaves, 
-  laPalace, laEmerald, laHive, laDeadCaves, laPower,
-  laOcean, laLivefjord, laRlyeh, laTemple, laIce, 
-  laDesert, laRedRock, 
-  laWhirlpool, laOvergrown, laClearing, laStorms,
-  laCaribbean, laJungle, laAlchemist, laMotion, laMirror, laMinefield,
-  laZebra, laElementalWall, laIvoryTower, laHaunted, laWhirlwind, 
-  laWarpCoast, laRose, laDragon, laEndorian, 
-  laReptile, laDungeon, laMountain,
-  laTortoise,
-  laKraken, laBurial, laTrollheim, 
-  laPrairie, laBull, 
-  laVolcano, laHunting, laBlizzard, laTerracotta,
-  // always must be last
-  laCrossroads
-  };
-
-#define LAND_SCAPE 32
-eLand land_scape[LAND_SCAPE] = {
-  laHell, laCocytus, laGraveyard, 
-  laWineyard, laDryForest, laCaves, 
-  laPalace, laEmerald, laDeadCaves, laPower,
-  laOcean, laLivefjord, laRlyeh, laTemple, laIce, 
-  laDesert, laRedRock, 
-  laOvergrown, laStorms,
-  laJungle, laAlchemist, laMotion, laMirror, laMinefield,
-  laZebra, laWhirlwind, laCrossroads,
-  laWarpCoast, laRose,
-  laCrossroads, laCrossroads2, laCrossroads3
-  };
-
-#define LAND_TAC 56
-
 struct landtacinfo { eLand l; int tries, multiplier; };
 
-landtacinfo land_tac[LAND_TAC] = {
+vector<landtacinfo> land_tac = {
   {laIce, 10, 1}, {laDesert, 10, 1}, 
   {laHunting, 5, 2},
   {laMotion, 10, 1}, {laCaves, 10, 1}, {laAlchemist, 10, 1},
@@ -1708,8 +1598,7 @@ landtacinfo land_tac[LAND_TAC] = {
   {laWildWest, 10, 1}
   };
 
-#define RANDLANDS 17
-eLand randlands[RANDLANDS] = {
+vector<eLand> randlands = {
   laIce, laDesert, laCaves, laAlchemist, laGraveyard, laPower, laLivefjord, laZebra,
   laRlyeh, laDryForest, laEmerald, laWineyard, laDeadCaves, laRedRock,
   laOvergrown, laWildWest, laWarpCoast
