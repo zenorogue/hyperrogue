@@ -109,7 +109,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
     
     case laPalace: // -------------------------------------------------------------
     
-      if(weirdhyperbolic) {
+      if(weirdhyperbolic || torus || S7 < 5) {
         if(d == 9) {
           int i = hrand(100);
           if(i < 10) 
@@ -134,17 +134,18 @@ void giantLandSwitch(cell *c, int d, cell *from) {
         }
     
       if(d == 8 && sphere) {
-        if(getHemisphere(c,0) == 1)
+        int gs = getHemisphere(c,0);
+        if(gs == 1)
           c->wall = waPalace;
-        if(getHemisphere(c,0) == 3)
+        if(gs == 3)
           c->wall = nontruncated ? waOpenGate : waClosedGate;
-        if(getHemisphere(c,0) == 4 && hrand(100) < 40)
+        if(gs == 4 && hrand(100) < 40)
           c->wall = waClosePlate;
-        if(getHemisphere(c,0) == 6)
+        if(gs == 6)
           c->wall = waOpenPlate;
-        if(getHemisphere(c,0) == -3)
+        if(gs == -3)
           c->wall = pick(waClosePlate, waOpenPlate);
-        if(getHemisphere(c,0) == -6)
+        if(gs == -6)
           c->wall = waTrapdoor;
         }
   
@@ -370,7 +371,16 @@ void giantLandSwitch(cell *c, int d, cell *from) {
         int v;
         if(randomPatternsMode)
           v = RANDPAT ? 24 : 0;
-        else if(torus) v=0;
+        else if(sphere) {
+          int gs = getHemisphere(c, 0);
+          if(gs == -3 || gs == -1 || gs == 1 || gs == 3)
+            v = 24;
+          else
+            v = 6;
+          }
+        else if(torus || weirdhyperbolic || quotient) {
+          v = hrand(100) < 25 ? 24 : 16;
+          }
         else if(euclid) {
           eucoord x, y;
           decodeMaster(c->master, x, y);

@@ -1117,7 +1117,7 @@ int isLandValid(eLand l) {
     }
   
   // laPower and laEmerald and laPalace -> [partial] in quotients and weirdhyperbolic
-  if((l == laPower || l == laEmerald || l == laPalace) && !stdeuc && !(bigsphere && !elliptic))
+  if((l == laPower || l == laEmerald || l == laPalace) && !stdeuc && !bigsphere)
     return 1;
 
   if(l == laDragon && !stdeuc)
