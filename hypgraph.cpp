@@ -402,9 +402,15 @@ void drawEuclidean() {
     pid = decodeId(centerover->master);
   else
     decodeMaster(centerover->master, px, py);
-  
+
   int minsx = mindx-1, maxsx=maxdx+1, minsy=mindy-1, maxsy=maxdy+1;
   mindx=maxdx=mindy=maxdy=0;
+  
+  static ld centerd;
+  
+  transmatrix View0 = View;
+  
+  ld cellrad = vid.radius / (EUCSCALE + vid.alphax);
   
   for(int dx=minsx; dx<=maxsx; dx++)
   for(int dy=minsy; dy<=maxsy; dy++) {
@@ -423,7 +429,13 @@ void drawEuclidean() {
       Mat = eumove(x, y);
       }
     if(!c) continue;
-    Mat = View * Mat;
+    Mat = View0 * Mat;
+    
+    if(torus) {
+      ld locald = (Mat[0][2] * Mat[0][2] + Mat[1][2] * Mat[1][2]);
+      if(c == centerover) centerd = locald;
+      else if(locald < centerd) centerd = locald, centerover = c, View = View0 * eumove(dx, dy); 
+      }
     
     // Mat[0][0] = -1;
     // Mat[1][1] = -1;
@@ -440,10 +452,10 @@ void drawEuclidean() {
       if(dx > maxdx) maxdx = dx;
       if(dy > maxdy) maxdy = dy;
       }
-    
-    if(dodrawcell(c)) {
-      drawcell(c, Mat, 0, false);
-      }
+    if(cx >= -cellrad && cy >= -cellrad && cx < vid.xres+cellrad && cy < vid.yres+cellrad)
+      if(dodrawcell(c)) {
+        drawcell(c, Mat, 0, false);
+        }
     }
   }
 
@@ -457,7 +469,9 @@ void centerpc(ld aspd) {
   if(vid.sspeed >= 4.99) aspd = 1000;
   DEBB(DF_GRAPH, (debugfile,"center pc\n"));
   hyperpoint H = ypush(-vid.yshift) * sphereflip * tC0(cwtV);
-  if(H[0] == 0 && H[1] == 0) return; // either already centered or direction unknown
+  if(H[0] == 0 && H[1] == 0) {
+    return; // either already centered or direction unknown
+    }
   ld R = hdist0(H); // = sqrt(H[0] * H[0] + H[1] * H[1]);
   if(R < 1e-9) {
     /* if(playerfoundL && playerfoundR) {
@@ -475,6 +489,7 @@ void centerpc(ld aspd) {
     
     View[0][2] -= cwtV[0][2] * aspd / R;
     View[1][2] -= cwtV[1][2] * aspd / R;
+        
     }
   
   else {

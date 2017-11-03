@@ -345,7 +345,7 @@ void handleKeyNormal(int sym, int uni) {
     if((sym == SDLK_DELETE || sym == SDLK_KP_PERIOD || sym == 'g') && uni != 'G' && uni != 'G'-64) 
       movepcto(MD_DROP, 1);
     if(sym == 't' && uni != 'T' && uni != 'T'-64 && canmove) {
-      if(playermoved && items[itStrongWind]) {
+      if(playermoved && items[itStrongWind]) { 
         cell *c = whirlwind::jumpDestination(cwt.c);
         if(c) centerover = c;
         }
