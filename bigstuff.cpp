@@ -1032,6 +1032,7 @@ void buildBigStuff(cell *c, cell *from) {
     if(c->land == laOvergrown && ctof(c) && 
       (quickfind(laClearing) || (hrand(I2000) < 25 && 
       !randomPatternsMode && items[itMutant] >= U5 &&
+      isLandValid(laClearing) &&
       !tactic::on && !yendor::on))) {
       heptagon *h = createAlternateMap(c, 2, hsA);
       if(h) clearing::bpdata[h].root = NULL;
