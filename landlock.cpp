@@ -1012,18 +1012,36 @@ int isLandValid(eLand l) {
   // standard non-PTM non-chaos specific
   if((l == laCrossroads5 || l == laCrossroads2) && (geometry || chaosmode))
     return 0;
-
-  // equidistant-based lands -- only in standard geometry
-  if((l == laDungeon || l == laEndorian) && (geometry || chaosmode))
-    return 0; //CHECKMORE
-  
-  // has a special construction in Chaos mode
-  if(l == laOcean && (!stdeuc && !chaosmode))
-    return 0;
+    
+  // equidistant-based lands
+  if(l == laDungeon || l == laEndorian || l == laIvoryTower || l == laMountain || l == laOcean) {
+    // special construction
+    if(chaosmode && l == laOcean) 
+      return 2; 
+    // no equidistants supported in chaos mode
+    if(chaosmode) 
+      return 0;
+    // no equidistants supported in these geometries (big sphere is OK though)
+    if(quotient || elliptic || smallsphere || torus) 
+      return 0;
+    // Yendorian only implemented in standard
+    if(l == laEndorian)
+      return 0;
+    // special Euclidean implementations
+    if(euclid && (l == laIvoryTower || l == laMountain || l == laOcean)) 
+      return 2;
+    // in other geometries, it works, but as circles, not equidistants
+    if(geometry)
+      return 1;
+    }
   
   // equidistant-based lands, but also implemented in Euclidean
-  if((l == laIvoryTower || l == laMountain) && (!stdeuc || chaosmode))
+  if((l == laIvoryTower || l == laMountain) && (!stdeuc || chaosmode)) {
+    if(quotient || euclid || elliptic || smallsphere || chaosmode)  
+      return 0; //CHECKMORE
+    if(l == laDungeon) return 1;
     return 0;
+    }
   
   if(l == laPrincessQuest && (!stdeuc || chaosmode || tactic::on))
     return 0;
