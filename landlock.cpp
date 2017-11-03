@@ -1087,16 +1087,16 @@ int isLandValid(eLand l) {
   if((l == laPower || l == laEmerald || l == laPalace) && !stdeuc && !(bigsphere && !elliptic))
     return 1;
 
-  if(l == laDragon && geometry)
+  if(l == laDragon && !stdeuc)
     return 1;
 
   if(l == laTrollheim && quotient == 2)
     return 0;
   
-  if(l == laTrollheim && geometry)
+  if(l == laTrollheim && !stdeuc)
     return 1;
   
-  if(l == laReptile && (geometry || nontruncated))
+  if(l == laReptile && (!stdeuc || nontruncated))
     return 1;
   
   if(l == laCrossroads && weirdhyperbolic) 
@@ -1128,7 +1128,7 @@ int isLandValid(eLand l) {
     return 1;
 
   // highlight Crossroads on Euclidean
-  if(euclid && (l == laCrossroads || l == laCrossroads4))
+  if(euclid && !torus && (l == laCrossroads || l == laCrossroads4))
     return 3; 
   
   // highlight Zebra-based lands on Zebra Quotient!
