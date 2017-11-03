@@ -330,7 +330,7 @@ void wandering() {
     
     if(smallbounded && !c->item && hrand(5) == 0 && c->land != laHalloween) {
       if(passable(c, NULL, 0) || specialland == laKraken) {
-        if(!haveOrbPower() && specialland != laHell) for(int it=0; it<1000 && !c->item; it++)
+        if(c->land != laGraveyard && !haveOrbPower() && specialland != laHell) for(int it=0; it<1000 && !c->item; it++)
           placeLocalOrbs(c);
         if(!c->item) c->item = wanderingTreasure(c);
         if(c->item == itShard) {
