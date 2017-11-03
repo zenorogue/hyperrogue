@@ -958,9 +958,14 @@ void giantLandSwitch(cell *c, int d, cell *from) {
     
     case laWhirlwind:
       if(d == 9) {
-        if(sphere) 
+        if(S7 == 5) 
           c->wall = (pseudohept(c) && (c->master->fiftyval == 0 || c->master->fiftyval == 6)) ?
             waFan : waNone;
+        else if(sphere) {
+          if(whirlwind::fzebra3(c) == 0) c->wall = waFan;
+          if(S7 == 4 && celldistance(c, currentmap->gamestart()) == 2 && ctof(c))
+            c->wall = waChasm;
+          }
         else if(!euclid && zebra3(c) == 0) c->wall = waFan;
         else if(pseudohept(c) && hrand(2000) < 150)
           c->wall = waChasm;

@@ -16,7 +16,14 @@ namespace whirlwind {
       decodeMaster(c->master, x, y);
       return 1+((((signed short)(y)+int(50000))/3)%3);
       }
-    if(sphere) return getHemisphere(c, 0) > 0 ? 1 : 2;
+    if(S7 == 5) return getHemisphere(c, 0) > 0 ? 1 : 2;
+    if(S7 < 5) {
+      int d = celldistance(currentmap->gamestart(), c);
+      if(d == 0) return 0;
+      if(S7 == 4 && d == 3) return 0;
+      if(S7 == 3 && d == 2 && !ctof(c)) return 0;
+      return 1;
+      }
     return zebra3(c);
     }
 
