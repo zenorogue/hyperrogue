@@ -474,7 +474,7 @@ string generateHelpForLand(eLand l) {
   if(l == laCamelot) ACCONLY2(laCrossroads, laCrossroads3)
   
   if(l == laDryForest || l == laWineyard || l == laDeadCaves || l == laHive || l == laRedRock ||
-    l == laOvergrown || l == laStorms || l == laWhirlwind || l == laRose ||
+    l == laOvergrown || l == laStorms || l == laWhirlwind || 
     l == laCrossroads2 || l == laRlyeh || l == laVolcano)
       TREQ(R60)
     
@@ -494,6 +494,7 @@ string generateHelpForLand(eLand l) {
     
   if(l == laPrairie) TREQ(R90)
   if(l == laBull) TREQ(R90)
+  if(l == laRose) TREQ(R90)
   if(l == laTerracotta) TREQ(R90)
   if(l == laCrossroads4) TREQ(R200)
   if(l == laCrossroads5) TREQ(R300)

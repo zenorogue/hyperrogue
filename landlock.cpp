@@ -458,7 +458,7 @@ bool landUnlocked(eLand l) {
     case laPrincessQuest: return kills[moVizier] && !shmup::on && multi::players == 1;
     
     case laRose: 
-      return gold() >= R60;
+      return gold() >= R90;
       
     case laWarpCoast: case laWarpSea: 
       return gold() >= R30;
@@ -827,7 +827,6 @@ eLand getNewLand(eLand old) {
       }
     if(old == laRedRock) LIKELY tab[cnt++] = laDesert;
     if(old == laOvergrown) LIKELY tab[cnt++] = laJungle;
-    tab[cnt++] = laRose;
     }
   
   if(gold() >= R90) {
@@ -836,6 +835,7 @@ eLand getNewLand(eLand old) {
     tab[cnt++] = laBull;
     if(old == laBull && !chaosmode) LIKELY tab[cnt++] = laPrairie;
     tab[cnt++] = laTerracotta;
+    tab[cnt++] = laRose;
     }
   
   if(gold() >= R300)
