@@ -294,7 +294,9 @@ void giantLandSwitch(cell *c, int d, cell *from) {
       if(d==8) {
         if(randomPatternsMode)
           c->wall = RANDPAT3(0) ? waCavewall : waCavefloor;
-        else if(torus) ;
+        else if(torus) {
+          c->wall = waCavefloor;
+          }
         else if(euclid) {
           eucoord x, y;
           decodeMaster(c->master, x, y);
@@ -311,9 +313,12 @@ void giantLandSwitch(cell *c, int d, cell *from) {
             c->wall = waCavewall;
           else c->wall = waCavefloor;
           }
+        else if(weirdhyperbolic && S7 != 8)
+          c->wall = waCavefloor;
         else {
           int v = emeraldval(c);
-          if(v == 0) c->wall = waStone;
+          if(v == 0)
+            c->wall = waStone;
           else if((v&3) >= 2) 
             c->wall = waCavewall;
           else c->wall = waCavefloor;
