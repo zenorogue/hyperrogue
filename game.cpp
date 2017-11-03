@@ -6192,6 +6192,12 @@ void ambush(cell *c, eItem what) {
       cx->monst = moHunterDog;
     if(dh > d) c0 = cx, d = dh;
     }
+  if(sphere) {
+    int dogs = ambushSize(c, what);  
+    for(int i = cl.lst.size()-1; i>0 && dogs; i--) 
+      if(!isPlayerOn(cl.lst[i]) && !cl.lst[i]->monst)
+        cl.lst[i]->monst = moHunterDog, dogs--;
+    }
   vector<cell*> around;
   cell *clast = NULL;
   cell *ccur = c0;
