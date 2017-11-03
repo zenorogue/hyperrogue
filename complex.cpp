@@ -2706,10 +2706,8 @@ namespace prairie {
       c->LHU.fi.rval = max(celldist(c), 15);
       }
     else {
-      if(!from) {
-        for(int i=0; i<size(currfp.matrices); i++)
-          if(currfp.distflower[i] == 0)
-            c->fval = currfp.inverses[i]+1;
+      if(quotient == 2 || !from) {
+        c->fval = currfp.distflower0;
         }
       else if(from && from->land == laPrairie && from->fval)
         c->fval = from->fval;

@@ -342,6 +342,7 @@ struct fpattern {
   vector<char> disthex;
   
   vector<char> distwall, distriver, distwall2, distriverleft, distriverright, distflower;
+  int distflower0;
   
   vector<eItem> markers;
   
@@ -535,6 +536,12 @@ struct fpattern {
       }
     int riverdist = dijkstra(nontruncated ? distflower : distriver, indist);
     DEBB(DF_FIELD, (debugfile, "river dist = %d\n", riverdist));
+    
+    for(int i=0; i<size(currfp.matrices); i++)
+      if(currfp.distflower[i] == 0) {
+        distflower0 = currfp.inverses[i]+1;
+        break;
+        }
     
     if(!nontruncated) {
       W = matrices[riverid];
