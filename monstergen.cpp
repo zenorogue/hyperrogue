@@ -321,6 +321,13 @@ void wandering() {
     cell *c = dcal[i];
     if(inmirror(c)) continue;
     
+    if(specialland == laStorms) {
+      // place the sandstone wall completely randomly (but not on the player)
+      vector<cell*>& ac = currentmap->allcells();
+      c = ac[hrand(size(ac))];
+      if(isPlayerOn(c)) continue;
+      }
+    
     if(smallbounded && !c->item && hrand(5) == 0 && c->land != laHalloween) {
       if(passable(c, NULL, 0) || specialland == laKraken) {
         if(!haveOrbPower() && specialland != laHell) for(int it=0; it<1000 && !c->item; it++)

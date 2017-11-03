@@ -973,6 +973,17 @@ int isLandValid(eLand l) {
   if(l == laStorms && quotient == 2) 
     return 0;
   
+  // pattern not implemented
+  if(l == laStorms && S7 == 8) 
+    return 1;
+  
+  // not enough space
+  if(l == laStorms && nontruncated && elliptic) 
+    return 0;
+
+  if(l == laStorms && nontruncated && S3 == 3) 
+    return 0;
+
   // available only in weird geometries
   if(l == laMirrorOld && !geometry)
     return 0;
@@ -1147,6 +1158,9 @@ int isLandValid(eLand l) {
   if(l == laHalloween || l == laDual)
     return 3;
   
+  if(l == laStorms && torus) 
+    return 3;
+
   return 2;
   }
 

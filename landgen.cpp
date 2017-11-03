@@ -985,7 +985,11 @@ void giantLandSwitch(cell *c, int d, cell *from) {
     case laStorms:
       if(d == 9) {
       
-        if(torus) ;
+        if(torus) {
+          int pid = decodeId(c->master);
+          if(pid == 381/3) c->wall = waCharged;
+          if(pid == 381*2/3) c->wall = waGrounded;
+          }
         else if(euclid) {
           eucoord x, y;
           decodeMaster(c->master, x, y);
@@ -1005,16 +1009,43 @@ void giantLandSwitch(cell *c, int d, cell *from) {
             }
           }
         else if(sphere) { 
-          if(c->type != 6) {
-            int id = c->master->fiftyval;
-            if(id == 1) c->wall = waCharged;
-            if(id == (elliptic && !nontruncated ? 3 : 9)) c->wall = waGrounded;
+          if(S7 == 5) {
+            if(ctof(c)) {
+              int id = c->master->fiftyval;
+              if(id == 1) c->wall = waCharged;
+              if(id == (elliptic && !nontruncated ? 3 : 9)) c->wall = waGrounded;
+              }
+            }
+          else if(S7 == 4) {
+            if(ctof(c)) {
+              int id = c->master->fiftyval;
+              if(id == 1) c->wall = waCharged;
+              if(id == 3) c->wall = waGrounded;
+              }
+            }
+          else if(S7 == 3) {
+            if(ctof(c)) {
+              int id = c->master->fiftyval;
+              if(id == 1) c->wall = waCharged;
+              }
+            else {
+              c->wall = waGrounded;
+              forCellEx(c2, c) if(ctof(c2) && c2->master->fiftyval == 1)
+                c->wall = waNone;
+              }
             }
           }
         else if(nontruncated) {
           int i = zebra40(c);
           if((i == 5 || i == 8) && hrand(100) < 20) c->wall = hrand(2) ? waCharged : waGrounded;
           else if(i == 15) c->wall = waSandstone;
+          }
+        else if(S3 > 3) {
+          int z = zebra40(c);
+          int i = z;
+          int b = 0;
+          while(i) { if(i&1) b++; i>>=1; }
+          if(ctof(c) && (b&1) && hrand(100) < 20)  c->wall = (z&2) ? waCharged : waGrounded;
           }
         else {
           int i = zebra40(c);
