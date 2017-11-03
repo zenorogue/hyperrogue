@@ -145,7 +145,7 @@ void reduceOrbPowers() {
   if(cwt.c->land != laWildWest)
     reduceOrbPower(itRevolver, 6);
   whirlwind::calcdirs(cwt.c); 
-  items[itStrongWind] = !items[itOrbAether] && whirlwind::qdirs == 1 && !euclid;
+  items[itStrongWind] = !items[itOrbAether] && whirlwind::qdirs == 1;
   items[itWarning] = 0;
   }
 
