@@ -666,7 +666,8 @@ namespace mapeditor {
       if((uni >= 'a' && uni <= 'z') || (uni >= 'A' && uni <= 'Z')) {
         whichCanvas = uni;
         subcanvas = rand();
-        firstland = laCanvas; randomPatternsMode = false;
+        firstland = specialland = laCanvas; 
+        randomPatternsMode = false;
         restartGame();
         }
       else if(doexiton(sym, uni)) popScreen();
