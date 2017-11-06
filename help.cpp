@@ -635,6 +635,14 @@ void gotoHelpFor(eMonster m) {
   help = generateHelpForMonster(m);
   };
 
+void appendHelp(string s) {
+  auto h = helpgenerator;
+  if(help == "HELPGEN") 
+    bygen([h,s] { h(); help += s; });
+  else
+    help += s;
+  }
+
 unsigned char lastval;
 int windtotal;
 
@@ -767,13 +775,13 @@ void describeMouseover() {
     if(sword::at(c)) out += ", Energy Sword";
     
     if(rosedist(c) || c->land == laRose || c->wall == waRose)
-      help += s0 + "\n\n" + rosedesc;
+      appendHelp(string("\n\n") + rosedesc);
     
     if(isWarped(c) && !isWarped(c->land))
       out += ", warped";
 
     if(isWarped(c)) 
-      help += s0 + "\n\n" + warpdesc;
+      appendHelp(string("\n\n") + warpdesc);
     }
     
 #if CAP_ROGUEVIZ
