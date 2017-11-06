@@ -442,9 +442,9 @@ struct hrmap_quotient : hrmap {
 
       }
     
-    int TOT = connections.size() / 7;
+    int TOT = connections.size() / S7;
     printf("heptagons = %d\n", TOT);
-    printf("all cells = %d\n", TOT*10/3);
+    printf("all cells = %d\n", TOT*(S7+S3)/S3);
     if(!TOT) exit(1);
     allh.resize(TOT);
     for(int i=0; i<TOT; i++) allh[i] = new heptagon;
@@ -461,14 +461,14 @@ struct hrmap_quotient : hrmap {
         h->emeraldval = 0;
         h->zebraval = 0;
         h->fiftyval = 0;
-        h->fieldval = 7*i;
+        h->fieldval = S7*i;
         h->rval0 = h->rval1 = 0; h->cdata = NULL;
         h->distance = 0;
         h->c7 = newCell(S7, h);
         }
-      for(int j=0; j<7; j++) {
-        h->move[rv(j)] = allh[connections[i*7+j]/7];
-        h->setspin(rv(j), rv(connections[i*7+j]%7));
+      for(int j=0; j<S7; j++) {
+        h->move[rv(j)] = allh[connections[i*S7+j]/S7];
+        h->setspin(rv(j), rv(connections[i*S7+j]%S7));
         }
       }
   

@@ -29,13 +29,125 @@ string euchelp =
 
 int ewhichscreen = 2;
 
-void showQuotientConfig() {}
+// extra information for field quotient extra configuration
+
+struct primeinfo {
+  int p;
+  int cells;
+  bool squared;
+  };  
+
+struct fgeomextra {
+  eGeometry base;
+  vector<primeinfo> primes;
+  int current_prime_id;
+  fgeomextra(eGeometry b, int i) : base(b), current_prime_id(i) {}
+  };
+
+vector<fgeomextra> fgeomextras = {
+  fgeomextra(gNormal, 3),
+  fgeomextra(gOctagon, 1),
+  fgeomextra(g45, 0),
+  fgeomextra(g46, 3),
+  fgeomextra(g47, 0)
+  };
+
+int current_extra = 0;
+
+void nextPrime(fgeomextra& ex) {
+  dynamicval<eGeometry> g(geometry, ex.base);
+  int nextprime;
+  if(size(ex.primes))
+    nextprime = ex.primes.back().p + 1;
+  else
+    nextprime = 2;
+  while(true) {
+    fieldpattern::fpattern fp(0);
+    fp.Prime = nextprime;
+    if(fp.solve() == 0) {
+      fp.build();
+      ex.primes.emplace_back(primeinfo{nextprime, size(fp.matrices) / S7, fp.wsquare});
+      break;
+      }
+    nextprime++;
+    }
+  }
+
+void nextPrimes(fgeomextra& ex) {
+  while(size(ex.primes) < 4) 
+    nextPrime(ex);
+  }
+
+void enableFieldChange() {
+  fgeomextra& gxcur = fgeomextras[current_extra];
+  fieldpattern::quotient_field_changed = true;
+  nextPrimes(gxcur);
+  dynamicval<eGeometry> g(geometry, gQuotient2);
+  ginf[geometry].sides = ginf[gxcur.base].sides;
+  ginf[geometry].vertex = ginf[gxcur.base].vertex;
+  ginf[geometry].distlimit = ginf[gxcur.base].distlimit;
+  fieldpattern::current_quotient_field.init(gxcur.primes[gxcur.current_prime_id].p);
+  }
+
+void showQuotientConfig() {
+  gamescreen(2);
+  dialog::init(XLAT("advanced configuration"));
+  fgeomextra& gxcur = fgeomextras[current_extra];
+  for(int i=0; i<size(fgeomextras); i++) {
+    auto& g = fgeomextras[i];
+    dialog::addBoolItem(XLAT(ginf[g.base].name), g.base == gxcur.base, 'a'+i);
+    }
+  nextPrimes(gxcur);
+  for(int i=0; i<size(gxcur.primes); i++) {
+    auto& p = gxcur.primes[i];
+    dialog::addBoolItem(XLAT("order %1%2 (non-truncated cells: %3)", its(p.p), p.squared ? "²" : "", its(p.cells)), i == gxcur.current_prime_id, 'A'+i);
+    }
+  
+  if(size(gxcur.primes) < 6) {
+    dialog::addBreak(100);
+    dialog::addHelp(
+      "This geometry is obtained by applying the same 'generators' which "
+      "lead to creating the given basic hyperbolic geometry, "
+      "but using a fixed finite field instead of the field of reals. "
+      "It can be also interpreted as a quotient of the given basic geometry. "
+      "Warning: field patterns based on large primes might generate for a long time."
+      );
+    dialog::addBreak(100);
+    }
+
+  dialog::addItem("find the next prime", 'p');
+  dialog::addItem("activate", 'x');
+  dialog::addItem("default", 'c');
+
+  keyhandler = [&gxcur] (int sym, int uni) {
+    if(uni >= 'a' && uni < 'a' + size(fgeomextras))
+      current_extra = uni - 'a';
+    else if(uni >= 'A' && uni < 'A' + size(gxcur.primes))
+      gxcur.current_prime_id = uni - 'A';
+    else if(uni == 'p')
+      nextPrime(gxcur);
+    else if(uni == 'x' || uni == '\n') {
+      targetgeometry = gxcur.base; restartGame('g');
+      enableFieldChange();
+      targetgeometry = gQuotient2; restartGame('g');
+      }
+    else if(uni == 'c') {
+      targetgeometry = gEuclid; restartGame('g');
+      fieldpattern::quotient_field_changed = false;
+      targetgeometry = gQuotient2; restartGame('g');
+      }
+    else if(doexiton(sym, uni))
+      popScreen();
+    };
+  
+  dialog::display();
+  }
 
 void showTorusConfig() {
   cmode = sm::SIDE | sm::TORUSCONFIG;
   gamescreen(2);
   
-  dialog::init(XLAT("advanced concfiguration"));
+  dialog::init(XLAT("advanced configuration"));
   
   dialog::addSelItem(XLAT("number of cells (n)"), its(torusconfig::newqty), 'n');
   dialog::addSelItem(XLAT("cell bottom-right from 0 (d)"), its(torusconfig::newdy), 'd');

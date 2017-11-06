@@ -196,7 +196,7 @@ struct geometryinfo {
   int vertex;
   int quotientstyle;
   int cclass; // 0-hyperbolic, 1-Euclidean, 2-spherical
-  int distlimit[2]; // truncated, non-truncated
+  array<int,2> distlimit; // truncated, non-truncated
   };
 
 static const int qZEBRA = 1;

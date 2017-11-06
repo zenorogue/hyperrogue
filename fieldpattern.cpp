@@ -695,7 +695,12 @@ void info() {
   printf("cases found = %d (%d hard)\n", cases, hard);
   }
 
+fpattern current_quotient_field(0);
+bool quotient_field_changed;
+
 fpattern& getcurrfp() {
+  if(quotient == 2 && quotient_field_changed)
+    return current_quotient_field;  
   if(S7 == 8 && S3 == 3) {
     static fpattern fp(17);
     return fp;
