@@ -958,11 +958,11 @@ int isLandValid(eLand l) {
     return 0;
 
   bool stdeuc = geometry == gNormal || geometry == gEuclid;
-  bool a38 = geometry == gOctagon;
+  bool a38 = S7 == 8;
   bool a4 = S3 == 4;
-  bool a45 = geometry == g45;
-  bool a46 = geometry == g46;
-  bool a47 = geometry == g47;
+  bool a45 = a4 && S7 == 5;
+  bool a46 = a4 && S7 == 6;
+  bool a47 = a4 && S7 == 7;
   bool smallsphere = S7 < 5;
   bool bigsphere = S7 == 5;
   

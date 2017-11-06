@@ -1025,8 +1025,14 @@ void buildpolys() {
 
   double spzoomd7 = (nontruncated && sphere) ? 1 : spzoom7;
   
-  double fac80 = geometry == g45 ? 1.4 : geometry == g46 ? 1.2 : geometry == gOctagon ? .7 : .8;
-  double fac94 = euclid ? .8 : (S6==4) ? (nontruncated ? 1.1 : .9) : .94;
+  bool a38 = S7 == 8;
+  bool a4 = S6 == 8; 
+  bool a45 = a4 && S7 == 5;
+  bool a46 = a4 && S7 == 6;
+  bool a47 = a4 && S7 == 7;
+  
+  double fac80 = a45 ? 1.4 : a46 ? 1.2 : (a38) ? .7 : .8;
+  double fac94 = euclid ? .8 : a4 ? (nontruncated ? 1.1 : .9) : .94;
   
   if(euclid) fac80 = fac94 = .9;
   
@@ -1047,23 +1053,21 @@ void buildpolys() {
   
   int td = ((nontruncated || euclid) && !(S7&1)) ? S42+S6 : 0;
   
-  bool a4 = S6 == 8; 
-  
 #define SCA4(x) (a4?x:1)
 #define ROT4(x) (a4?x:0)
 
-#define SCA38(x) (S7 == 8 ? x:1)
+#define SCA38(x) (a38 ? x:1)
 #define SCA45(x) (a4 && S7 == 5?x:1)
-#define SCA46(x) (a4 && S7 == 6?x:1)
-#define SCA47(x) (a4 && S7 == 7?x:1)
+#define SCA46(x) (a46?x:1)
+#define SCA47(x) (a47?x:1)
 #define SCA467(x) (a4 && S7 >= 6?x:1)
 
 #define ROT45(x) (a4 && S7 == 5?x:1)
-#define ROT46(x) (a4 && S7 == 6?x:0)
-#define ROT47(x) (a4 && S7 == 7?x:0)
+#define ROT46(x) (a46?x:0)
+#define ROT47(x) (a47?x:0)
 #define ROT467(x) (a4 && S7 >= 6?x:0)
 #define ROTS4(x) (sphere && S7 == 4?x:0)
-#define ROT38(x) (S7 == 8 ? x:0)
+#define ROT38(x) (a38 ? x:0)
 
 #define SCAP4(x) (a4&&nontruncated?x:1)
 
@@ -1310,8 +1314,8 @@ void buildpolys() {
     }
   
   double disksize = crossf;
-  if(nontruncated && S7 == 8) disksize *= 2;
-  else if(S7 == 8) disksize *= 1.5;
+  if(nontruncated && a38) disksize *= 2;
+  else if(a38) disksize *= 1.5;
   else if(nontruncated && S6 == 8) disksize *= 1.5;
 
   bshape(shDisk, PPR_ITEM);
@@ -1520,17 +1524,17 @@ void buildpolys() {
   
   // hand-drawn shapes
   
-  if(S7 == 8) spzoom6 *= .9;
+  if(a38) spzoom6 *= .9;
   
   if(a4 && !nontruncated) spzoom6 *= 1.9, spzoom7 *= .9, spzoomd7 *= .9;
-  if(a4 && !nontruncated && S7 == 6) spzoom6 *= .9;
-  if(a4 && !nontruncated && S7 == 7) spzoom6 *= .85;
+  if(a46 && !nontruncated) spzoom6 *= .9;
+  if(a47 && !nontruncated) spzoom6 *= .85;
   
   double espzoom6 = spzoom6, espzoomd7 = spzoomd7;
   
   // if(euclid) espzoom6 *= 1.5, espzoomd7 *= 1.2;
   
-  double octroll = S7 == 8 ? .2 : (S7 == 6 && a4) ? -.2 : (S7 == 7 && a4) ? .1 : 0;
+  double octroll = a38 ? .2 : a46 ? -.2 : a47 ? .1 : 0;
 
   double ffscale6 = SCA4(.675);
   double ffspin6 = ROT4(.125);
@@ -1554,7 +1558,7 @@ void buildpolys() {
   double ntscale =
     SCA38(nontruncated?1.4:1) * (a4 && nontruncated?(S7==7?2:S7==6?1.525:1):1);
   double ntrot =
-    (a4 && nontruncated && S7==6?.25:0) + ROT38(nontruncated?-.2:0);
+    (a46 && nontruncated?.25:0) + ROT38(nontruncated?-.2:0);
 
   bshape(shChargedFloor[0], PPR_FLOOR, scalef*espzoom6*(sphere?.9:1)*ffscale2, 7, ffspin2);
   bshape(shChargedFloor[1], PPR_FLOOR, scalef*spzoomd7, 9);
