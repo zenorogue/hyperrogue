@@ -3,10 +3,6 @@
 int eupage = 0;
 int euperpage = 21;
 
-const char *curvenames[8] = {
-  "0", "1", "2", "extremely hyperbolic", "strongly hyperbolic", "strongly hyperbolic", "moderately hyperbolic", "weakly hyperbolic"
-  };
-
 string euchelp =
   "If you want to know how much the gameplay is affected by the "
   "hyperbolic geometry in HyperRogue, this mode is for you!\n\n"
