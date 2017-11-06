@@ -3065,6 +3065,8 @@ bool dodrawcell(cell *c) {
   if(!buggyGeneration && !debugmode && c->land != laCanvas && sightrange < 10) {
     // not yet created
     if(c->mpdist > 7 && !cheater) return false;
+    // always show on the torus rug
+    if(rug::rugged && torus) return true;
     // in the Yendor Challenge, scrolling back is forbidden
     if(c->cpdist > 7 && (yendor::on && !cheater)) return false;
     // (incorrect comment) too far, no bugs nearby
@@ -5138,9 +5140,6 @@ void drawfullmap() {
       else 
         drawmovestar(0, 0);
       }
-#if CAP_RUG
-    if(rug::rugged && !rug::renderonce) queueline(C0, mouseh, 0xFF00FFFF, 5);
-#endif
 #if CAP_EDIT
     if(cmode & sm::DRAW) mapeditor::drawGrid();
 #endif
@@ -5238,6 +5237,7 @@ void drawscreen() {
   DEBB(DF_GRAPH, (debugfile,"drawscreen\n"));
 
   calcparam();
+  // rug::setVidParam();
   #if CAP_ROGUEVIZ
   rogueviz::fixparam();
   #endif

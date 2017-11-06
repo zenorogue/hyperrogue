@@ -1910,7 +1910,7 @@
 - fixed the checkmate rule not taking the mirrored mimics into account
 - fixed some bugs with the activation of Orb of Yendor
 
-2019.10.14 19:50 version 10.1
+2017.10.14 19:50 version 10.1
 
 * four new lands
 - Terracotta Army
@@ -1954,12 +1954,12 @@
 - some new command line options
 - 'shame to cheat' is no longer displayed when autocheating is on
 
-2019.10.14 19:50 version 10.1a
+2017.10.14 19:50 version 10.1a
 - fixed the missing leaderboards
 - fixed the typos in the description of Lava Wolf
 - fixed the ordering of lands in the Overview
 
-2019.10.15 01:06 version 10.1b
+2017.10.15 01:06 version 10.1b
 - added wandering monsters to the new lands
 - no longer highlight blizzard particles
 - flash/lightning destroys terracotta warriors
@@ -1968,7 +1968,7 @@
 - slime visible in Volcanic Wasteland (but destroyed by lava)
 - living monsters awaken Terracotta Warriors
 
-2019.10.16 00:43 version 10.1c
+2017.10.16 00:43 version 10.1c
 - changes to the Hunting Ground:
 - - a new pattern at 0 treasures
 - - guards now always appear in pairs (not larger groups)
@@ -1987,14 +1987,14 @@
 - fixed two more graphical glitches in Halloween
 - fixed the joystick support
 
-2019.10.17 01:50 version 10.1d
+2017.10.17 01:50 version 10.1d
 - updated the translations
 - made the dogs give up to 'regroup' when you have escaped
 - you can now melt ice through great wall into the Blizzard
 - if the sight range option is lowered below 7, ambushes temporarily increase it (as the land makes no sense otherwise)
 - ancient weapon icon in the inventory
 
-2019.10.17 23:41 version 10.1e
+2017.10.17 23:41 version 10.1e
 - added an option to disable background particles (for lower end platforms and for easier reading)
 - added an option to change the font size on desktop
 - the wind icon in Windy Plains is clickable now
@@ -2008,21 +2008,21 @@
 - warriors awakening takes Orb of Speed into account now
 - land connection likelihoods adjusted for the new lands
 
-2019.10.25 23:17 version 10.1f
+2017.10.25 23:17 version 10.1f
 - fixed the Halloween in main menu
 - fixed Zebra unlocking
 
-2019.10.26 22:00 version 10.1g
+2017.10.26 22:00 version 10.1g
 - fixed floating-point values sometimes saving incorrectly on Windows
 - fixed 's'ave the config also toggling the 's'team leaderboards
 - fixed the 'wm' and 'mm' commandline options
 - added the Octagonal geometry (work in progress)
 
-2019.10.26 22:39 version 10.1h
+2017.10.26 22:39 version 10.1h
 - fixed some graphical glitches introduced by 10.1g
 - fixed some graphical glitches in Halloween
 
-2019.10.31 00:31 version 10.2
+2017.10.31 00:31 version 10.2
 - added Crystal World
 - reworked the geometry experiment menu
 - changed the Hunting Ground music to Graveyard
@@ -2035,7 +2035,7 @@
 - fontscale is now saved
 - fixed CR4 appearing inside mirror reflections
 
-2019.11.01 00:48 version 10.2a
+2017.11.01 00:48 version 10.2a
 - improved the texts in geometry experiment menu
 - translation updates (to Polish)
 - the "expansion" screen has moved to the geometry experiment menu (click world size)
@@ -2045,3 +2045,30 @@
 - added 'alpha' commandline parameter
 - fixed some polygons which did not end in the start point
 - Hunting Ground no longer hangs in some geometries
+
+2017.11.03 22:56 version 10.2b
+General:
+- marked Orb of Earth as useful in Hunting Ground
+- Rose Garden needs 90 treasure now
+- the order of lands is now the same in all listings
+- translations updated
+- Glowing Crystals no longer required for the Hyperstone Quest
+
+Geometry experiment improvements:
+- Crystal World now generated in weird hyperbolic chaos mode
+- no Dead Orb generation in the smallworld Graveyard
+- Power works correctly on big spheres (randomly on other weird geometries)
+- adjusted the hive radii in weird hyperbolic geometries
+- fixed the Field Quotient Prairie
+- improved the Land of Storms
+- made ambushes work on the sphere
+- added Mercury Rivers to Euclidean and spherical Terracotta Army
+- improved Windy Plains on smaller spheres
+- Zebra patterns for some of the new geometries
+- Halloween on a Torus
+- 'strong wind' was not allowed in Euclidean for some reason
+    some fixes in validity
+    validity appears in better place, lands colored
+    don't display 'bad end'
+    translations updated
+    unified the land lists

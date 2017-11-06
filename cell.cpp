@@ -214,8 +214,13 @@ namespace torusconfig {
   // the configuration of the torus topology.
   // torus cells are indexed [0..qty),
   // where the cell to the right from i is indexed i+dx,
-  // and the cell to the down-rightis numbered i+dy
-  // changed with command line option: -tpar <qty>,<dx>,<dy>
+  // and the cell to the down-right is numbered i+dy
+
+  // Changed with command line option: -tpar <qty>,<dx>,<dy>
+  // Ideally, qty, dx, and dy should have the same "modulo 3"
+  // values as the default -- otherwise the three-color
+  // pattern breaks. Also, they should have no common
+  // prime divisor.
   int qty = 127*3, dx = -1, dy = 11*2;
   }
 

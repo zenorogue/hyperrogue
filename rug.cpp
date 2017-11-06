@@ -3,6 +3,7 @@
 
 // implementation of the Hypersian Rug mode
 
+
 #if CAP_RUG
 
 #define TEXTURESIZE (texturesize)
@@ -31,6 +32,8 @@ GLAPI void APIENTRY glDeleteFramebuffers (GLsizei n, const GLuint *framebuffers)
 #endif
 
 namespace rug {
+
+double rugzoom = .3;
 
 // hypersian rug datatypes and globals
 //-------------------------------------
@@ -134,7 +137,130 @@ void calcLengths() {
     points[i]->edges[j].len = hdist(points[i]->h, points[i]->edges[j].target->h);
   }
 
+void setVidParam() {
+  vid.xres = vid.yres = TEXTURESIZE; vid.scale = 1; 
+  vid.radius = HTEXTURESIZE; vid.xcenter = HTEXTURESIZE; vid.ycenter = HTEXTURESIZE;
+  vid.beta = 2; vid.alphax = 1; vid.eye = 0; vid.goteyes = false;
+  if(torus) vid.radius *= rugzoom;
+  }
+
+void buildTorusRug() {
+  using namespace torusconfig;
+
+  dynamicval<videopar> d(vid, vid);
+  rugzoom = 1;
+  setVidParam();
+
+  struct toruspoint {
+    int x,y;
+    toruspoint() { x=qty; y=qty; }
+    toruspoint(int _x, int _y) : x(_x), y(_y) {}
+    int d2() { 
+      return x*x+x*y+y*y;
+      }
+    };
+  
+  vector<toruspoint> zeropoints;
+  vector<toruspoint> tps(qty);
+  
+  for(int ax=-qty; ax<qty; ax++)
+  for(int ay=-qty; ay<qty; ay++) {
+    int v = (ax*dx + ay*dy) % qty;
+    if(v<0) v += qty;
+    toruspoint tp(ax, ay);
+    if(tps[v].d2() > tp.d2()) tps[v] = tp;
+    if(v == 0) 
+      zeropoints.emplace_back(ax, ay);
+    }
+  
+  pair<toruspoint, toruspoint> solution;
+  ld bestsol = 1e12;
+    
+  for(auto p1: zeropoints)
+  for(auto p2: zeropoints) {
+    int det = p1.x * p2.y - p2.x * p1.y;
+    if(det < 0) continue;
+    if(det != qty && det != -qty) continue;
+    ld quality = ld(p1.d2()) * p2.d2();
+    if(quality < bestsol * 3)
+    if(quality < bestsol)
+      bestsol = quality, solution.first = p1, solution.second = p2;
+    }
+  
+  if(solution.first.d2() > solution.second.d2())
+    swap(solution.first, solution.second);
+    
+  ld factor = sqrt(ld(solution.second.d2()) / solution.first.d2());
+  
+  printf("factor = %lf\n", factor);
+  if(factor < 2) factor = 2.2;
+  factor -= 1;
+        
+  // 22,1
+  // 7,-17
+  
+  // transmatrix z1 = {{{22,7,0}, {1,-17,0}, {0,0,1}}};
+  transmatrix z1 = {{{(ld)solution.first.x,(ld)solution.second.x,0}, {(ld)solution.first.y,(ld)solution.second.y,0}, {0,0,1}}};
+  transmatrix z2 = inverse(z1);
+  printf("h1 = %s\n", display(z2 * hyperpoint {22,1,0}));
+  
+  auto addToruspoint = [&] (int x, int y) {
+    auto r = addRugpoint(C0, 0);
+    hyperpoint onscreen;
+    applymodel(tC0(eumove(x, y)), onscreen);
+    // take point (1,0)
+    // apply eumove(1,0)
+    // divide by EUCSCALE
+    // multiply by vid.radius (= HTEXTURESIZE * rugzoom)
+    // add 1, divide by texturesize
+    r->x1 = onscreen[0];
+    r->y1 = onscreen[1];
+    // r->y1 = (1 + onscreen[1] * rugzoom / EUCSCALE)/2;
+    hyperpoint h1 = hpxyz(x, y, 0);
+    hyperpoint h2 = z2 * h1;
+    double alpha = -h2[0] * 2 * M_PI;
+    double beta = -h2[1] * 2 * M_PI;
+    // r->flat = {alpha, beta, 0}; 
+    double sc = (factor+1)/4;
+    r->flat = {(factor+cos(alpha)) * cos(beta) * sc, (factor+cos(alpha)) * sin(beta) * sc, -sin(alpha) * sc};
+    r->valid = true;
+    return r;
+    };
+    
+  for(int i=0; i<qty; i++) {
+    int x = tps[i].x, y = tps[i].y;
+    auto r00 = addToruspoint(x, y);
+    auto r10 = addToruspoint(x+1, y);
+    auto r01 = addToruspoint(x, y+1);
+    auto rn1 = addToruspoint(x-1, y+1);
+    addTriangle(r00, r10, r01);
+    addTriangle(r00, r01, rn1);
+    }
+  
+  double maxz = 0;
+  
+  for(auto p: points)
+    maxz = max(maxz, max(abs(p->x1), abs(p->y1)));
+  
+  // maxz * rugzoom * vid.radius == vid.radius
+  
+  rugzoom = 1 / maxz;
+  printf("rugzoom = %lf\n", rugzoom);
+  
+  for(auto p: points)
+    p->x1 = (vid.xcenter + vid.radius * rugzoom * p->x1)/ vid.xres,
+    p->y1 = (vid.ycenter - vid.radius * rugzoom * p->y1)/ vid.yres;
+  
+  return;
+  }
+
 void buildRug() {
+
+  if(torus) {
+    buildTorusRug();
+    return;
+    }
+  
 
   map<cell*, rugpoint *> vptr;
  
@@ -305,6 +431,7 @@ void addNewPoints() {
 
 void physics() {
 
+  if(torus) return;
   for(int it=0; it<10000 && !stop; it++) 
     if(pqueue.empty()) addNewPoints();
     else {
@@ -362,12 +489,6 @@ void drawTriangle(triangle& t) {
   glVertex3f(x2, y2, z2);
   glTexCoord2f(m3.x1, m3.y1); 
   glVertex3f(x3, y3, z3);
-  }
-
-void setVidParam() {
-  vid.xres = vid.yres = TEXTURESIZE; vid.scale = 1; 
-  vid.radius = HTEXTURESIZE; vid.xcenter = HTEXTURESIZE; vid.ycenter = HTEXTURESIZE;
-  vid.beta = 2; vid.alphax = 1; vid.eye = 0; vid.goteyes = false;
   }
 
 GLuint FramebufferName = 0;
@@ -447,7 +568,10 @@ void prepareTexture() {
     setGLProjection();
     ptds.clear();
     drawthemap();
-    if(!renderonce) queueline(C0, mouseh, 0xFF00FF);
+    if(!renderonce) {
+      for(int i=0; i<numplayers(); i++) if(multi::playerActive(i))
+        queueline(tC0(shmup::ggmatrix(playerpos(i))), mouseh, 0xFF00FF, 8);
+      }
     drawqueue();  
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 #endif
@@ -639,15 +763,42 @@ hyperpoint gethyper(ld x, ld y) {
   double mx = ((x*2 / vid.xres)-1) * xview;
   double my = (1-(y*2 / vid.yres)) * yview;
   double bdist = 1e12;
-  besti = 0;
   
-  for(int i=0; i<size(points); i++) {
-    rugpoint& m = *points[i];
-    double dist = hypot(m.flat[0]-mx, m.flat[1]-my);
-    if(dist < bdist) bdist = dist, besti = i;
+  double rx1, ry1;
+  
+  bool found = false;
+  
+  for(int i=0; i<size(triangles); i++) {
+    auto r0 = triangles[i].m[0];
+    auto r1 = triangles[i].m[1];
+    auto r2 = triangles[i].m[2];
+    double dx1 = r1->flat[0] - r0->flat[0];
+    double dy1 = r1->flat[1] - r0->flat[1];
+    double dx2 = r2->flat[0] - r0->flat[0];
+    double dy2 = r2->flat[1] - r0->flat[1];
+    double dxm = mx - r0->flat[0];
+    double dym = my - r0->flat[1];
+    // A (dx1,dy1) = (1,0)
+    // B (dx2,dy2) = (0,1)
+    double det = dx1*dy2 - dy1*dx2;
+    double tx = dxm * dy2 - dym * dx2;
+    double ty = -(dxm * dy1 - dym * dx1);
+    tx /= det; ty /= det;
+    if(tx >= 0 && ty >= 0 && tx+ty <= 1) {
+      double rz1 = r0->flat[2] * (1-tx-ty) + r1->flat[2] * tx + r2->flat[2] * ty;
+      rz1 = -rz1;
+      if(rz1 < bdist) {
+        bdist = rz1;
+        rx1 = r0->x1 + (r1->x1 - r0->x1) * tx + (r2->x1 - r0->x1) * ty;
+        ry1 = r0->y1 + (r1->y1 - r0->y1) * tx + (r2->y1 - r0->y1) * ty;
+        }
+      found = true;
+      }
     }
   
-  double px = points[besti]->x1 * TEXTURESIZE, py = (1-points[besti]->y1) * TEXTURESIZE;
+  if(!found) return hpxy(0,0);
+  
+  double px = rx1 * TEXTURESIZE, py = (1-ry1) * TEXTURESIZE;
 
   videopar svid = vid;
   setVidParam();
@@ -660,7 +811,7 @@ hyperpoint gethyper(ld x, ld y) {
 void show() {
   dialog::init(XLAT("hypersian rug mode"), iinf[itPalace].color, 150, 100);
   
-  if(euclid || sphere) {
+  if((euclid || sphere) && !torus) {
     dialog::addInfo("This makes sense only in hyperbolic geometry.");
     dialog::addBreak(50);
     }
@@ -690,7 +841,7 @@ void show() {
       "Use arrow keys to rotate, Page Up/Down to zoom."
       );
     else if(uni == 'u') {
-      if(euclid || sphere)
+      if((euclid || sphere) && !torus)
         addMessage("This makes sense only in hyperbolic geometry.");
       else {        
         rug::init();
