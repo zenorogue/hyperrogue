@@ -2160,7 +2160,7 @@ void queuestr(int x, int y, int shift, int size, string str, int col, int frame 
   ptd.u.chr.shift = shift;
   ptd.u.chr.size = size;
   ptd.col = darkened(col);
-  ptd.u.chr.frame = frame ? (poly_outline & ~ 255) : 0;
+  ptd.u.chr.frame = frame ? ((poly_outline & ~ 255)+1) : 0;
   ptd.prio = PPR_TEXT << PSHIFT;
   }
 
