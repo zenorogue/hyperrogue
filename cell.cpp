@@ -221,7 +221,12 @@ namespace torusconfig {
   // values as the default -- otherwise the three-color
   // pattern breaks. Also, they should have no common
   // prime divisor.
-  int qty = 127*3, dx = 1, dy = -11*2;
+  int def_qty = 127*3, dx = 1, def_dy = -11*2;
+  int qty = def_qty, dy = def_dy;
+  
+  // new values to change
+  int newqty, newdy;
+  int torus_cx, torus_cy;
   }
 
 int decodeId(heptagon* h);

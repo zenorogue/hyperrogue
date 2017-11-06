@@ -1443,6 +1443,7 @@ namespace sm {
   static const int CENTER = 1024;
   static const int A3 = 2048; // affects poly
   static const int ZOOMABLE = 4096;
+  static const int TORUSCONFIG = 8192;
   };
 
 namespace linepatterns {

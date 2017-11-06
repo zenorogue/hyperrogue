@@ -59,6 +59,7 @@ bool inv::on;
 #include "config.cpp"
 #include "scores.cpp"
 #include "menus.cpp"
+#include "geom-exp.cpp"
 #include "quit.cpp"
 #include "shmup.cpp"
 #if CAP_ROGUEVIZ

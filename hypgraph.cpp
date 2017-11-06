@@ -390,6 +390,10 @@ transmatrix eumovedir(int d) {
   return eumove(0,0);
   }
 
+ld matrixnorm(const transmatrix& Mat) {
+  return Mat[0][2] * Mat[0][2] + Mat[1][2] * Mat[1][2];
+  }
+  
 void drawEuclidean() {
   DEBB(DF_GRAPH, (debugfile,"drawEuclidean\n"));
   eucoord px=0, py=0;
@@ -402,18 +406,20 @@ void drawEuclidean() {
     pid = decodeId(centerover->master);
   else
     decodeMaster(centerover->master, px, py);
-
+    
   int minsx = mindx-1, maxsx=maxdx+1, minsy=mindy-1, maxsy=maxdy+1;
   mindx=maxdx=mindy=maxdy=0;
-  
-  static ld centerd;
   
   transmatrix View0 = View;
   
   ld cellrad = vid.radius / (EUCSCALE + vid.alphax);
   
+  ld centerd = matrixnorm(View0);
+  
   for(int dx=minsx; dx<=maxsx; dx++)
   for(int dy=minsy; dy<=maxsy; dy++) {
+    torusconfig::torus_cx = dx;
+    torusconfig::torus_cy = dy;
     reclevel = eudist(dx, dy);
     cell *c;
     transmatrix Mat;
@@ -432,9 +438,8 @@ void drawEuclidean() {
     Mat = View0 * Mat;
     
     if(torus) {
-      ld locald = (Mat[0][2] * Mat[0][2] + Mat[1][2] * Mat[1][2]);
-      if(c == centerover) centerd = locald;
-      else if(locald < centerd) centerd = locald, centerover = c, View = View0 * eumove(dx, dy); 
+      ld locald = matrixnorm(Mat);
+      if(locald < centerd) centerd = locald, centerover = c, View = View0 * eumove(dx, dy);
       }
     
     // Mat[0][0] = -1;

@@ -3067,6 +3067,7 @@ bool dodrawcell(cell *c) {
     if(c->mpdist > 7 && !cheater) return false;
     // always show on the torus rug
     if(rug::rugged && torus) return true;
+    if(cmode & sm::TORUSCONFIG) return true;
     // in the Yendor Challenge, scrolling back is forbidden
     if(c->cpdist > 7 && (yendor::on && !cheater)) return false;
     // (incorrect comment) too far, no bugs nearby
@@ -3342,6 +3343,14 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       /* queuepolyat(V, shFloor[ct6], darkena(gradient(0, distcolors[cd&7], 0, .25, 1), fd, 0xC0),
         PPR_TEXT); */
       queuestr(V, (cd > 9 ? .6 : 1) * .2, label, 0xFF000000 + distcolors[cd&7], 1);
+      }
+    
+    if(cmode & sm::TORUSCONFIG) {
+      using namespace torusconfig;
+      int cd = torus_cx * dx + torus_cy * newdy;
+      cd %= newqty; if(cd<0) cd += newqty;
+      string label = its(cd);
+      queuestr(V, cd ? .2 : .6, label, cd == 0 ? 0xFFFF0040 : 0xFFFFFFD0, 1);
       }
 
     asciicol = wcol;
