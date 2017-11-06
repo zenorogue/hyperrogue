@@ -1629,7 +1629,8 @@ void giantLandSwitch(cell *c, int d, cell *from) {
                   forCellEx(c4, c3) if(c4->mpdist > 7 && !isNeighbor(c4, c))
                     dogcells.push_back(c4);
                   if(items[itHunting] < 10 && size(dogcells) >= 2) {
-                    while(true) {
+                    for(int t=0;; t++) {
+                      if(t == 50) { c->item = itNone; break; }
                       cell *dog1 = dogcells[hrand(size(dogcells))];
                       cell *dog2 = dogcells[hrand(size(dogcells))];
                       if(isNeighbor(dog1, dog2)) {
