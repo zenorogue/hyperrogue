@@ -253,7 +253,7 @@ void showMainMenu() {
   
   keyhandler = [] (int sym, int uni) {
     dialog::handleNavigation(sym, uni);
-    if(sym == SDLK_F1 || sym == 'h') gotoHelp(help);
+    if(sym == SDLK_F1 || sym == 'h') gotoHelp("@");
     else if(sym == 'c' && cheater) pushScreen(showCheatMenu);
     else if(sym == 'b') pushScreen(showBasicConfig);
     else if(sym == 'g') pushScreen(showGraphConfig);
