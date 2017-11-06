@@ -421,8 +421,10 @@ namespace mapeditor {
                     }
             
                 else if(u < 2) return 0;
-                
+
+#if LOCAL                
                 printf("unhandled: u=%d\n", u);
+#endif
             }
         }
         return 0;
@@ -1162,9 +1164,11 @@ namespace mapeditor {
     handlePanning(sym, uni);
 
     // left-clicks are coded with '-', and right-clicks are coded with sym F1
-    if(uni == '-') undoLock();
-    if(uni == '-' && mouseover)
+    if(uni == '-' && !holdmouse) undoLock();
+    if(uni == '-' && mouseover) {
       allInPattern(mouseover, radius, neighborId(mouseover, mouseover2));
+      holdmouse = true;
+      }
     
     if(mouseover) for(int i=0; i<mouseover->type; i++) createMov(mouseover, i);
     if(uni == 'u') applyUndo();

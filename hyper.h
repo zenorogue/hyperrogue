@@ -2109,3 +2109,4 @@ template<class T> void generateLandList(T t);
 int isLandValid(eLand l);
 
 bool inmirrororwall(eLand l);
+extern bool holdmouse;

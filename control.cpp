@@ -8,6 +8,8 @@ bool leftclick, rightclick, targetclick, hiliteclick, anyshiftclick, wheelclick,
   forcetarget, lshiftclick, lctrlclick;
 bool gtouched;
 
+bool holdmouse;
+
 int getcstat, lgetcstat; ld getcshift; bool inslider;
 
 function <void(int sym, int uni)> keyhandler;
@@ -638,6 +640,7 @@ void mainloopiter() {
       mousepressed = ev.type == SDL_MOUSEBUTTONDOWN;
       if(mousepressed) flashMessages();
       mousing = true;
+      holdmouse = false;
       
       bool act = false;
       
@@ -710,6 +713,8 @@ void mainloopiter() {
       else
 #endif
         mouseh = gethyper(mousex, mousey);
+        
+      if(holdmouse && getcstat == '-') sym = uni = getcstat;
 
       if((rightclick || (SDL_GetMouseState(NULL, NULL) & SDL_BUTTON_MMASK)) && !mouseout2() && 
          mouseh[2] < 50 && mouseoh[2] < 50) {
