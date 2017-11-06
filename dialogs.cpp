@@ -532,7 +532,12 @@ namespace dialog {
     ne.positive = true;
     }
   
-  string disp(ld x) { if(ne.intval) return its((int) (x+.5)); else return fts(x); }
+  int ldtoint(ld x) {
+    if(x > 0) return int(x+.5);
+    else return int(x-.5);
+    }
+  
+  string disp(ld x) { if(ne.intval) return its(ldtoint(x)); else return fts(x); }
 
   reaction_t reaction;
 
@@ -540,7 +545,7 @@ namespace dialog {
 
     if(ne.intval) {
       if(kind == 's') sscanf(ne.s.c_str(), "%d", ne.intval), *ne.editwhat = *ne.intval;
-      if(kind == 'v') *ne.intval = (int) (*ne.editwhat + .5), ne.s = its(*ne.intval);
+      if(kind == 'v') *ne.intval = ldtoint(*ne.editwhat), ne.s = its(*ne.intval);
       }
     else {
       if(kind == 's') {
