@@ -285,6 +285,7 @@ namespace mapeditor {
                 u += 2;
                 if(!ishept(c->mov[v])) qhex++;
             }
+            if(u == 8 && qhex == 2) return 12;
             if(u == 2 && qhex == 1) return 8;
             if(u == 6 && qhex == 2) return 10;
             return u;
@@ -294,10 +295,17 @@ namespace mapeditor {
     
     bool reflectPatternAt(cell *c, char p = whichPattern) {
         if(p == 'p' && polarb50(c)) return true;
-        if(p == 0 && nopattern(c) == 4) {
+        if(p == 0) {
+          int np = nopattern(c);
+          if(np == 4) {
             int d = patterndir(c);
             return !isWarped(createMov(c, (d+1)%6));
-        }
+            }
+          if(np == 12) {
+            int d = patterndir(c);
+            return !isWarped(createMov(c, (d+1)%6));
+            }
+          }
         return false;
     }
     
@@ -367,33 +375,54 @@ namespace mapeditor {
                 if(euclid) return 0;
                 int u = nopattern(c);
                 
-                if(u == 6)
+                if(u == 6) {
                     for(int i=1; i<c->type; i+=2) if(!isWarped(createMov(c,i)))
                         return i;
+                    }
                 
-                if(u == 2 || u == 3 || u == 8)
+                else if(u == 2 || u == 3 || u == 8) {
                     for(int i=0; i<c->type; i++) if(!isWarped(createMov(c,i)))
                         return i;
+                    }
                 
-                if(u == 4 || u == 10)
+                else if(u == 4 || u == 10) {
                     for(int i=0; i<c->type; i+=2) if(!isWarped(createMov(c,i)))
                         return i;
+                    }
                 
-                if(u == 6)
+                else if(u == 6) {
                     for(int i=1; i<c->type; i+=2) if(!isWarped(createMov(c,i))) 
                         return i;
+                    }
                 
-                if(u == 5)
+                else if(u == 5) {
                     for(int i=0; i<c->type; i++) if(!isWarped(createMov(c,(i+3)%7)) && !isWarped(createMov(c,(i+4)%7))) 
                         return i;
+                    }
                 
-                if(u == 9)
+                else if(u == 9) {
                     for(int i=0; i<c->type; i++) if(!isWarped(createMov(c,(i+2)%7)) && !isWarped(createMov(c,(i+5)%7))) 
                         return i;
+                    }
                 
-                if(u == 7)
+                else if(u == 11) {
+                    for(int i=0; i<c->type; i++) if(isWarped(createMov(c,(i)%7)) && isWarped(createMov(c,(i+1)%7))) 
+                        return i;
+                    }
+                
+                else if(u == 12) {
+                    for(int i=0; i<c->type; i+=2) if(isWarped(createMov(c,i)))
+                        return i;
+                    }
+
+                else if(u == 7) {
                     for(int i=0; i<c->type; i++) if(!isWarped(createMov(c,(i+1)%7)) && !isWarped(createMov(c,(i+6)%7))) 
                         return i;
+                    }
+            
+                else if(u < 2) return 0;
+                
+                printf("unhandled: u=%d\n", u);
             }
         }
         return 0;

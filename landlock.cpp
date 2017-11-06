@@ -350,6 +350,10 @@ bool inmirror(eLand l) {
   return l == laMirrored || l == laMirrorWall2 || l == laMirrored2;
   }
 
+bool inmirrororwall(eLand l) {
+  return l == laMirrored || l == laMirrorWall2 || l == laMirrored2 || l == laMirrorWall;
+  }
+
 bool inmirror(cell *c) {
   return inmirror(c->land);
   }

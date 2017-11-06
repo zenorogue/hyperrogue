@@ -3647,8 +3647,10 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       else if(isWarped(c) && !nontruncated && !shmup::on) {
         int np = mapeditor::nopattern(c);
         if(c->landparam == 1337) np = 0; // for the achievement screenshot
-        if(np < 11)
+        if(np < 13)
           qfloor(c, Vf, applyPatterndir(c), shTriheptaFloor[np], darkena(fcol, fd, 0xFF));
+        else
+          qfloor(c, Vf, shFloor[ctof(c)], darkena(fcol, fd, 0xFF));
         }
 
       else if(wmplain) {

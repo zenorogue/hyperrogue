@@ -740,7 +740,7 @@ hpcshape
   shMercuryBridge[2],
   shLeafFloor[2],
   shBarrowFloor[3],
-  shTriheptaFloor[11], shTriheptaFloor2[2], shTriheptaEuc[3],
+  shTriheptaFloor[13], shTriheptaFloor2[2], shTriheptaEuc[3],
   shCross, shGiantStar[2], shLake, shMirror,
   shHalfFloor[3], shHalfMirror[3],
   shGem[2], shStar, shDisk, shDiskT, shDiskS, shDiskM, shDiskSq, shRing,   
@@ -1624,8 +1624,10 @@ void buildpolys() {
   bshape(shTriheptaFloor[5], PPR_FLOOR,  scalef, 35);
   bshape(shTriheptaFloor[6], PPR_FLOOR,  scalef, 36);
   bshape(shTriheptaFloor[7], PPR_FLOOR,  scalef, 37);
+  bshape(shTriheptaFloor[12], PPR_FLOOR,  scalef, 373);
   bshape(shTriheptaFloor[9], PPR_FLOOR,  scalef, 38);
   bshape(shTriheptaFloor[10], PPR_FLOOR,  scalef, 39);
+  bshape(shTriheptaFloor[11], PPR_FLOOR,  scalef, 372);
   bshape(shTriheptaFloor2[0], PPR_FLOOR,  scalef, 40);
   bshape(shTriheptaFloor2[1], PPR_FLOOR,  scalef, 41);
   bshape(shSemiFloorShadow, PPR_FLOOR, scalef, 263);
@@ -3147,6 +3149,10 @@ NEWSHAPE, 367, 1, 2, -0.096569,0.019944, 0.040859,0.019906, 0.037742,0.058710, 0
 NEWSHAPE, 368, 5, 1, -0.722750,-0.522024, -0.310675,-0.189104, -0.809015,-0.052887, -0.464722,0.060902, -1.057795,0.207750, 
 NEWSHAPE, 369, 6, 1, 1.125689,-0.648796, 0.574166,-0.456509, 0.822679,-1.131184, 0.174168,-0.605003, 0.411340,-1.336854, 
 NEWSHAPE, 370, 7, 1, 1.034599,-1.366924, 0.528060,-0.892063, 0.490794,-1.701844, 0.081991,-0.819912, 0.042928,-1.637383, 
+
+NEWSHAPE, 371, 1, 1, -0.013726,-0.304365, 0.244972,-0.147728, 0.266167,0.130112, 0.156825,0.210539, -0.271641,0.147226, -0.281599,-0.145412,
+NEWSHAPE, 372, 1, 1, -0.514563,-0.238476, -0.340659,0.172987, -0.100245,0.368967, 0.214334,0.276255, 0.349294,-0.008293, 0.203063,-0.280225, -0.078470,-0.352806, 
+NEWSHAPE, 373, 1, 1, -0.019312,0.304743, -0.289045,0.177117, -0.127176,-0.240665, 0.007400,-0.336712, 0.257684,-0.184398, 0.234654,0.191587,
 
 NEWSHAPE
 };

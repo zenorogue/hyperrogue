@@ -2107,3 +2107,5 @@ void runGeometryExperiments();
 extern vector<eLand> landlist;
 template<class T> void generateLandList(T t);
 int isLandValid(eLand l);
+
+bool inmirrororwall(eLand l);

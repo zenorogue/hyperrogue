@@ -354,7 +354,7 @@ int killtypes() {
   }
 
 bool isWarped(cell *c) {
-  return isWarped(c->land) || (items[itOrb37] && c->cpdist <= 4);
+  return isWarped(c->land) || (!inmirrororwall(c->land) && (items[itOrb37] && c->cpdist <= 4));
   }
 
 // returns ishept in the normal tiling;
