@@ -960,7 +960,7 @@ string explain3D(ld *param) {
         "from a point c absolute units above the plane, this corresponds "
         "to viewing a Minkowski hyperboloid from a point "
         "tanh(g)/tanh(c) units below the center. This in turn corresponds to "
-        "the PoincarÚ model for g=c, and Klein-Beltrami model for g=0.");
+        "the Poincaré model for g=c, and Klein-Beltrami model for g=0.");
       
   if(param == &wall_height)
     return
