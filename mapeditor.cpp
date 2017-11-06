@@ -1784,29 +1784,29 @@ namespace mapeditor {
   int canvasback = linf[laCanvas].color >> 2;
 
   int generateCanvas(cell *c) {
-    if(whichCanvas == 'C') {
+    if(whichCanvas == 'C' && !torus) {
       using namespace fieldpattern;
       int z = currfp.getdist(fieldval(c), make_pair(0,false));
       if(z < currfp.circrad) return 0x00C000;
-      int z2 = currfp.getdist(fieldval(c), make_pair(fp43.otherpole,false));
-      if(z2 < currfp.disthep[fp43.otherpole] - fp43.circrad)
+      int z2 = currfp.getdist(fieldval(c), make_pair(currfp.otherpole,false));
+      if(z2 < currfp.disthep[currfp.otherpole] - currfp.circrad)
         return 0x3000;
       return 0x6000;
       }
-    if(whichCanvas == 'D') {
+    if(whichCanvas == 'D' && !torus) {
       using namespace fieldpattern;
       int z = currfp.getdist(fieldval(c), make_pair(0,false));
-      return 255 * (currfp.maxdist+1-z) / fp43.maxdist;
+      return 255 * (currfp.maxdist+1-z) / currfp.maxdist;
       }
-    if(whichCanvas == 'N') {
+    if(whichCanvas == 'N' && !torus) {
       using namespace fieldpattern;
       int z = currfp.getdist(fieldval(c), make_pair(0,false));
-      int z2 = currfp.getdist(fieldval(c), make_pair(fp43.otherpole,false));
+      int z2 = currfp.getdist(fieldval(c), make_pair(currfp.otherpole,false));
       if(z < z2) return 0x00C000;
       if(z > z2) return 0xC00000;
       return 0xCCCC00;
       }
-    if(whichCanvas == 'S') {
+    if(whichCanvas == 'S' && !torus) {
       return 0x3F1F0F * fieldpattern::subval(c).second + 0x000080;
       }
     if(whichCanvas == 'g')

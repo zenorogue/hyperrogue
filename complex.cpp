@@ -2735,15 +2735,15 @@ namespace prairie {
           }
         }
       pair<int,bool> fv = fieldpattern::fieldval(c);
-      fv = currfp.gmul(fv, fp43.inverses[c->fval-1]);
+      fv = currfp.gmul(fv, currfp.inverses[c->fval-1]);
       
-      rd = currfp.getdist(fv, fp43.distriver);
-      int rl = currfp.getdist(fv, fp43.distriverleft);
-      int rr = currfp.getdist(fv, fp43.distriverright);
+      rd = currfp.getdist(fv, currfp.distriver);
+      int rl = currfp.getdist(fv, currfp.distriverleft);
+      int rr = currfp.getdist(fv, currfp.distriverright);
 
-      c->LHU.fi.flowerdist = currfp.getdist(fv, fp43.distflower);
-      c->LHU.fi.walldist   = currfp.getdist(fv, fp43.distwall);
-      c->LHU.fi.walldist2  = currfp.getdist(fv, fp43.distwall2);
+      c->LHU.fi.flowerdist = currfp.getdist(fv, currfp.distflower);
+      c->LHU.fi.walldist   = currfp.getdist(fv, currfp.distwall);
+      c->LHU.fi.walldist2  = currfp.getdist(fv, currfp.distwall2);
 
       c->LHU.fi.rval = 0;
       if(rd <= 7 && rl < rr) 
