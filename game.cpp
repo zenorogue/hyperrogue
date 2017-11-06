@@ -2889,6 +2889,7 @@ void bfs() {
   }
 
 bool makeEmpty(cell *c) {
+
   if(c->monst != moPrincess) {
     if(isAnyIvy(c->monst)) killMonster(c, moPlayer, 0);
     else if(isWorm(c->monst)) {
@@ -2911,17 +2912,17 @@ bool makeEmpty(cell *c) {
     c->wall = waBoat; // , c->item = itOrbYendor;
   else if(c->land == laMinefield)
     c->wall = waMineOpen;
-  else if(c->wall == waFan && sphere)
+  else if(c->wall == waFan && bounded)
     ;
-  else if(c->wall == waOpenPlate && sphere)
+  else if(c->wall == waOpenPlate && bounded)
     ;
   else if(c->wall == waGiantRug)
     ;
-  else if(c->wall == waFreshGrave && (sphere || quotient))
+  else if(c->wall == waFreshGrave && bounded)
     ;
   else if(isReptile(c->wall))
     c->wparam = reptilemax();
-  else if(c->wall == waAncientGrave && sphere)
+  else if(c->wall == waAncientGrave && bounded)
     ;
   else
     c->wall = waNone;
