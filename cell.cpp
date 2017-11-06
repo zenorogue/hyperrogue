@@ -221,7 +221,7 @@ namespace torusconfig {
   // values as the default -- otherwise the three-color
   // pattern breaks. Also, they should have no common
   // prime divisor.
-  int qty = 127*3, dx = -1, dy = 11*2;
+  int qty = 127*3, dx = 1, dy = -11*2;
   }
 
 int decodeId(heptagon* h);
@@ -724,7 +724,7 @@ void verifycells(heptagon *at) {
   }
 
 int eupattern(cell *c) {
-  if(torus) return decodeId(c->master) % 3;
+  if(torus) return (decodeId(c->master)*2) % 3;
   eucoord x, y;
   decodeMaster(c->master, x, y);
   short z = (short(y+2*x))%3;

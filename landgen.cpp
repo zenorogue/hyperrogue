@@ -1002,8 +1002,8 @@ void giantLandSwitch(cell *c, int d, cell *from) {
       
         if(torus) {
           int pid = decodeId(c->master);
-          if(pid == 381/3) c->wall = waCharged;
-          if(pid == 381*2/3) c->wall = waGrounded;
+          if(pid == torusconfig::qty/3) c->wall = waCharged;
+          if(pid == torusconfig::qty*2/3) c->wall = waGrounded;
           }
         else if(euclid) {
           eucoord x, y;
