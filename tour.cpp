@@ -86,8 +86,8 @@ bool handleKeyTour(int sym, int uni) {
     if(flags & FINALSLIDE) return true;
     presentation(pmStop);
     currentslide++;
-    slidehelp();
     presentation(pmStart);
+    slidehelp();
     return true;
     }
   if(sym == SDLK_BACKSPACE) {
@@ -98,9 +98,9 @@ bool handleKeyTour(int sym, int uni) {
     if(currentslide == 0) { slidehelp(); return true; }
     presentation(pmStop);
     currentslide--;
-    if(inhelp) popScreen(), slidehelp();
-    else popScreenAll();
     presentation(pmStart);
+    popScreenAll();
+    if(inhelp) slidehelp();
     return true;
     }
   if(sym == '1' || sym == '2' || sym == '3') {
