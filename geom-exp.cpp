@@ -66,7 +66,7 @@ void nextPrime(fgeomextra& ex) {
     fp.Prime = nextprime;
     if(fp.solve() == 0) {
       fp.build();
-      ex.primes.emplace_back(primeinfo{nextprime, size(fp.matrices) / S7, fp.wsquare});
+      ex.primes.emplace_back(primeinfo{nextprime, size(fp.matrices) / S7, (bool) fp.wsquare});
       break;
       }
     nextprime++;
