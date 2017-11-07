@@ -588,7 +588,7 @@ namespace conformal {
       dialog::addSelItem(XLAT("degree of the approximation"), its(polygonal::deg), 'n');
       }
     
-    dialog::addBoolItem(XLAT("prepare the line animation"), (on), 'e');
+    if(!bounded && !euclid) dialog::addBoolItem(XLAT("prepare the line animation"), (on), 'e');
     if(on) dialog::addSelItem(XLAT("animation speed"), fts(lvspeed), 'a');
     
 #if CAP_SDL
@@ -596,7 +596,7 @@ namespace conformal {
     if(autoband)
       dialog::addBoolItem(XLAT("include history when auto-rendering"), (autobandhistory), 'j');
     
-    bool renderable = on && pmodel == 2;
+    bool renderable = on && pmodel == 2 && !euclid && !sphere;
     if(renderable || autoband) {
       dialog::addSelItem(XLAT("band width"), "2*"+its(bandhalf), 'd');
       dialog::addSelItem(XLAT("length of a segment"), its(bandsegment), 's');
