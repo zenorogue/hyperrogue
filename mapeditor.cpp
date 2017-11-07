@@ -1631,7 +1631,7 @@ namespace mapeditor {
     for(int i=0; i<3; i++) {
       double d;
       int err = fscanf(f, "%lf", &d);
-      if(err) printf("Warning: read error\n");
+      if(err != 1) printf("Warning: read error\n");
       h[i] = d;
       }
     return h;
