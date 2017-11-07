@@ -2072,3 +2072,28 @@ Geometry experiment improvements:
     don't display 'bad end'
     translations updated
     unified the land lists
+
+2017.11.07 14:42 version 10.2c
+
+Fixes in help/tutorial:
+- fixed the Help in main menu showing incorrect screens
+- fixed the problem with help not appearing correctly in Warped and Rose
+- fixed the Tutorial not showing the help text for some slides
+
+Geometry experiment improvements:
+- Hypersian Rug now works with the torus
+- you can now use 'Advanced Configuration' in Torus and Field Quotient geometries
+- fixed the mobile HUD elements not displaying in the correct locations
+- reduced the sphere graphics quality on mobiles
+- fixed Sphere display with eyedistance
+- fixed a freeze bug in Hunting Ground+Chaos+octagonal
+- the wall blocking the starting point (e.g. "your" grave) is no longer removed in any bounded geometries
+
+Map Editor improvements:
+- the load/save feature in the Map Editor should now work correctly in other geometries
+- MapEditor's "predesigned patterns" feature now works correctly with other geometries
+- fixed a crash when trying to use predesigned patterns in Torus
+- you can now hold mouse to paint multiple cells
+
+Other:
+- fixed glitches with OoWarp+Hall of Mirrors
