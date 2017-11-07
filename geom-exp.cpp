@@ -185,7 +185,9 @@ void showTorusConfig() {
       targetgeometry = gTorus; restartGame('g');
       }
     else if(uni == 'z') editScale();
+#if CAP_RUG
     else if(uni == 'u') rug::select();
+#endif
     else if(doexiton(sym, uni))
       popScreen();
     };
