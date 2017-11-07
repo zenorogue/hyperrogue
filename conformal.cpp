@@ -554,7 +554,7 @@ namespace conformal {
 
     dialog::addBoolItem(XLAT("include history"), (includeHistory), 'i');
     
-    bool notconformal0 = (pmodel >= 5 && pmodel <= 6);
+    bool notconformal0 = (pmodel >= 5 && pmodel <= 6) && !euclid;
     bool notconformal = notconformal0 || abs(vid.alpha-1) > 1e-3;
 
     dialog::addSelItem(notconformal ? XLAT("model used (not conformal!)") : XLAT("model used"), 
