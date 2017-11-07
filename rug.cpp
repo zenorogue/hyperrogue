@@ -796,7 +796,7 @@ hyperpoint gethyper(ld x, ld y) {
       }
     }
   
-  if(!found) return hpxy(0,0);
+  if(!found) return Hypc;
   
   double px = rx1 * TEXTURESIZE, py = (1-ry1) * TEXTURESIZE;
 

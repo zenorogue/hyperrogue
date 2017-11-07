@@ -244,7 +244,7 @@ double q3 = sqrt(double(3));
 
 bool outofmap(hyperpoint h) {
   if(euclid) 
-    return false; // h[0] * h[0] + h[1] * h[1] > 15 * eurad;
+    return h[2] < .5; // false; // h[0] * h[0] + h[1] * h[1] > 15 * eurad;
   else if(sphere)
     return h[2] < .1 && h[2] > -.1 && h[1] > -.1 && h[1] < .1 && h[0] > -.1 && h[0] < .1;
   else
