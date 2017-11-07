@@ -34,6 +34,7 @@ GLAPI void APIENTRY glDeleteFramebuffers (GLsizei n, const GLuint *framebuffers)
 namespace rug {
 
 double rugzoom = .3;
+int torus_precision = 2;
 
 // hypersian rug datatypes and globals
 //-------------------------------------
@@ -204,7 +205,7 @@ void buildTorusRug() {
   transmatrix z2 = inverse(z1);
   printf("h1 = %s\n", display(z2 * hyperpoint {22,1,0}));
   
-  auto addToruspoint = [&] (int x, int y) {
+  auto addToruspoint = [&] (ld x, ld y) {
     auto r = addRugpoint(C0, 0);
     hyperpoint onscreen;
     applymodel(tC0(eumove(x, y)), onscreen);
@@ -226,15 +227,21 @@ void buildTorusRug() {
     r->valid = true;
     return r;
     };
+  
+  int rugmax = min(torus_precision, 16);
+  ld rmd = rugmax;
     
   for(int i=0; i<qty; i++) {
     int x = tps[i].x, y = tps[i].y;
-    auto r00 = addToruspoint(x, y);
-    auto r10 = addToruspoint(x+1, y);
-    auto r01 = addToruspoint(x, y+1);
-    auto rn1 = addToruspoint(x-1, y+1);
-    addTriangle(r00, r10, r01);
-    addTriangle(r00, r01, rn1);
+    rugpoint *rugarr[32][32];
+    for(int yy=0; yy<=rugmax; yy++)
+    for(int xx=0; xx<=rugmax; xx++)
+      rugarr[yy][xx] = addToruspoint(x+(xx-yy)/rmd, y+yy/rmd);
+    
+    for(int yy=0; yy<rugmax; yy++)
+    for(int xx=0; xx<rugmax; xx++)
+      addTriangle(rugarr[yy][xx], rugarr[yy+1][xx], rugarr[yy+1][xx+1]),
+      addTriangle(rugarr[yy][xx], rugarr[yy][xx+1], rugarr[yy+1][xx+1]);
     }
   
   double maxz = 0;
@@ -824,6 +831,11 @@ void show() {
   dialog::addBoolItem(XLAT("render the texture only once"), (renderonce), 'o');
   dialog::addBoolItem(XLAT("render texture without OpenGL"), (rendernogl), 'g');  
   dialog::addSelItem(XLAT("texture size"), its(texturesize)+"x"+its(texturesize), 's');
+  if(torus) {
+    if(torus_precision < 1) torus_precision = 1;
+    if(torus_precision > 16) torus_precision = 16;
+    dialog::addSelItem(XLAT("precision"), its(torus_precision), 'p');
+    }
   dialog::display();
   keyhandler = [] (int sym, int uni) {
   #if ISPANDORA
@@ -850,6 +862,8 @@ void show() {
       }
     else if(uni == 'o')
       renderonce = !renderonce;
+    else if(uni == 'p' && torus_precision)
+      dialog::editNumber(torus_precision, 0, 16, 1, 2, "precision", "precision");
   #if !ISPANDORA
     else if(uni == 'g')
       rendernogl = !rendernogl;

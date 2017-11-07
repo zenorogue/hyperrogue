@@ -1243,7 +1243,7 @@ void fullcenter();
 void movecost(cell* from, cell *to);
 void checkmove();
 
-transmatrix eumove(int x, int y);
+transmatrix eumove(ld x, ld y);
 transmatrix eumovedir(int d);
 
 int reptilemax();

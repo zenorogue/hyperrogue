@@ -363,7 +363,7 @@ void drawrec(const heptspin& hs, int lev, hstate s, const transmatrix& V) {
 
 int mindx=-7, mindy=-7, maxdx=7, maxdy=7;
   
-transmatrix eumove(int x, int y) {
+transmatrix eumove(ld x, ld y) {
   transmatrix Mat = Id;
   Mat[2][2] = 1;
   Mat[0][2] += (x + y * .5) * eurad;

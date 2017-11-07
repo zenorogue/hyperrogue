@@ -29,67 +29,8 @@ string euchelp =
 
 int ewhichscreen = 2;
 
-// extra information for field quotient extra configuration
-
-struct primeinfo {
-  int p;
-  int cells;
-  bool squared;
-  };  
-
-struct fgeomextra {
-  eGeometry base;
-  vector<primeinfo> primes;
-  int current_prime_id;
-  fgeomextra(eGeometry b, int i) : base(b), current_prime_id(i) {}
-  };
-
-vector<fgeomextra> fgeomextras = {
-  fgeomextra(gNormal, 3),
-  fgeomextra(gOctagon, 1),
-  fgeomextra(g45, 0),
-  fgeomextra(g46, 3),
-  fgeomextra(g47, 0)
-  };
-
-int current_extra = 0;
-
-void nextPrime(fgeomextra& ex) {
-  dynamicval<eGeometry> g(geometry, ex.base);
-  int nextprime;
-  if(size(ex.primes))
-    nextprime = ex.primes.back().p + 1;
-  else
-    nextprime = 2;
-  while(true) {
-    fieldpattern::fpattern fp(0);
-    fp.Prime = nextprime;
-    if(fp.solve() == 0) {
-      fp.build();
-      ex.primes.emplace_back(primeinfo{nextprime, size(fp.matrices) / S7, (bool) fp.wsquare});
-      break;
-      }
-    nextprime++;
-    }
-  }
-
-void nextPrimes(fgeomextra& ex) {
-  while(size(ex.primes) < 4) 
-    nextPrime(ex);
-  }
-
-void enableFieldChange() {
-  fgeomextra& gxcur = fgeomextras[current_extra];
-  fieldpattern::quotient_field_changed = true;
-  nextPrimes(gxcur);
-  dynamicval<eGeometry> g(geometry, gQuotient2);
-  ginf[geometry].sides = ginf[gxcur.base].sides;
-  ginf[geometry].vertex = ginf[gxcur.base].vertex;
-  ginf[geometry].distlimit = ginf[gxcur.base].distlimit;
-  fieldpattern::current_quotient_field.init(gxcur.primes[gxcur.current_prime_id].p);
-  }
-
 void showQuotientConfig() {
+  using namespace fieldpattern;
   gamescreen(2);
   dialog::init(XLAT("advanced configuration"));
   fgeomextra& gxcur = fgeomextras[current_extra];
