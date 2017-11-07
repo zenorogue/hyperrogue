@@ -773,8 +773,16 @@ int colormix(int a, int b, int c) {
 
 int rhypot(int a, int b) { return (int) sqrt(a*a - b*b); }
 
+ld realradius() {
+  ld vradius = vid.radius;
+  if(sphere && vid.alphax > 1) vradius /= sqrt(vid.alphax*vid.alphax - 1);
+  if(sphere && vid.alphax <= 1) vradius = 1e12; // use the following
+  vradius = min<ld>(vradius, min(vid.xres, vid.yres) / 2);
+  return vradius;
+  }
+
 void drawmessage(const string& s, int& y, int col) {
-  int rrad = min(vid.radius, min(vid.xres, vid.yres) / 2);
+  int rrad = (int) realradius();
   int space;
   if(y > vid.ycenter + rrad)
     space = vid.xres;

@@ -5048,8 +5048,6 @@ void drawmovestar(double dx, double dy) {
 
 // old style joystick control
 
-int realradius;
-
 bool sidescreen;
 
 bool dronemode;
@@ -5059,7 +5057,7 @@ void calcparam() {
   vid.xcenter = vid.xres / 2;
   vid.ycenter = vid.yres / 2;
   
-  realradius = min(vid.xcenter, vid.ycenter);
+  int realradius = min(vid.xcenter, vid.ycenter);
 
   vid.radius = int(vid.scale * vid.ycenter) - (ISANDROID ? 2 : ISIOS ? 40 : 40);
   

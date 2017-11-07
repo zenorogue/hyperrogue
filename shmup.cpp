@@ -11,8 +11,8 @@ extern bool clicked;
 namespace shmupballs {
   int xmove, xfire, yb, rad;
 
-  void calc() {
-    rad = min(vid.radius, min(vid.xres, vid.yres) / 2) * (vid.mobilecompasssize ? vid.mobilecompasssize : 14) / 100;
+  void calc() {      
+    rad = int(realradius() * (vid.mobilecompasssize ? vid.mobilecompasssize : 14) / 100);
     xmove = max(vid.xcenter - vid.radius - rad, rad);
     xfire = min(vid.xcenter + vid.radius + rad, vid.xres - rad);
     yb = vid.ycenter + vid.radius - rad;
