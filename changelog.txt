@@ -2082,6 +2082,8 @@ Fixes in help/tutorial:
 
 Geometry experiment improvements:
 - Hypersian Rug now works with the torus
+- conformal menu: band model for spherical geometry (aka Mercator projection) works nicely now
+- conformal menu: fixed the azimuthal modes with Euclidean and spherical geometries
 - you can now use 'Advanced Configuration' in Torus and Field Quotient geometries
 - fixed the mobile HUD elements not displaying in the correct locations
 - reduced the sphere graphics quality on mobiles
@@ -2097,3 +2099,4 @@ Map Editor improvements:
 
 Other:
 - fixed glitches with OoWarp+Hall of Mirrors
+- menus are no longer shown on the side in mobile versions
