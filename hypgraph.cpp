@@ -155,7 +155,7 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
     ld d = hdist0(H);
     if(pmodel == 6 && sphere)
       d = sqrt(2*(1 - cos(d))) * 1.25; // /1.5 to make it fit on the screen better
-    else if(pmodel == 6)
+    else if(pmodel == 6 && !euclid)
       d = sqrt(2*(cosh(d) - 1)) / 1.5;
     ret[0] = d * H[0] / rad / 4;
     ret[1] = d * H[1] / rad / 4;
