@@ -314,6 +314,19 @@ void gldraw(int useV, const transmatrix& V, int ps, int pq, int col, int outline
       glMultMatrixf(mat);
       }
       
+    if(useV == 3) {
+      glMatrixMode(GL_MODELVIEW);
+      glPushMatrix();
+      GLfloat mat[16] = {
+        1, 0, 0, 0,
+        0, 1, 0, 0,
+        0, 0, 0, 0,
+        0, 0, vid.scrdist, 1
+        };
+      mat[8] += ed * vid.eye;
+      glMultMatrixf(mat);
+      }
+      
     if(draw) {
       glEnable(GL_STENCIL_TEST);
  
@@ -435,9 +448,10 @@ void drawpolyline(polytodraw& p) {
     
 #if CAP_GL
   if(vid.usingGL) {
-    if(pmodel == 0) for(int i=0; i<qglcoords; i++) glcoords[i][2] = vid.scrdist;
+    // if(pmodel == 0) for(int i=0; i<qglcoords; i++) glcoords[i][2] = vid.scrdist;
     activateGlcoords();    
-    gldraw(2, Id, 0, qglcoords, p.col, pp.outline, poly_flags);
+    gldraw(3, Id, 0, qglcoords, p.col, pp.outline, poly_flags);
+    return;
     }
 #endif
 
@@ -673,7 +687,7 @@ void drawqueue() {
 
   spherespecial = 0;
   // on the sphere, parts on the back are drawn first
-  if(sphere && !vid.eye && pmodel == 0) {
+  if(sphere && pmodel == 0) {
     spherespecial = vid.alphax > 1 ? 1 : -1;
     #ifndef STLSORT
     for(int p: {PPR_REDWALLs, PPR_REDWALLs2, PPR_REDWALLs3, PPR_WALL3s,
