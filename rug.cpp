@@ -812,7 +812,7 @@ void show() {
   dialog::init(XLAT("hypersian rug mode"), iinf[itPalace].color, 150, 100);
   
   if((euclid || sphere) && !torus) {
-    dialog::addInfo("This makes sense only in hyperbolic geometry.");
+    dialog::addInfo("This makes sense only in hyperbolic or Torus geometry.");
     dialog::addBreak(50);
     }
 
@@ -842,7 +842,7 @@ void show() {
       );
     else if(uni == 'u') {
       if((euclid || sphere) && !torus)
-        addMessage("This makes sense only in hyperbolic geometry.");
+        addMessage("This makes sense only in hyperbolic or Torus geometry.");
       else {        
         rug::init();
         popScreen();

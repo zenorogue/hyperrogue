@@ -6433,7 +6433,7 @@ S("Not implemented for spherical geometry. Please tell me if you really want thi
   "Není implementováno ve sférické geometrii. Pokud byste to opravdu chtěli, dejte mi vědět.")
 
 // Hypersian Rug
-S("This makes sense only in hyperbolic geometry.", "To dává smysl jenom v hyperbolické geometrii.")
+S("This makes sense only in hyperbolic or Torus geometry.", "To dává smysl jenom v hyperbolické geometrii/torus.")
 
 #undef Orb
 

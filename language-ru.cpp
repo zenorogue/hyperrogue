@@ -6504,7 +6504,7 @@ S("Not implemented for spherical geometry. Please tell me if you really want thi
   "Не реализовано для сферической геометрии. Напиши мне, если очень хочешь.")
  
 // Hypersian Rug
-S("This makes sense only in hyperbolic geometry.", "Имеет смысл только в гиперболической геометрии.")
+S("This makes sense only in hyperbolic or Torus geometry.", "Имеет смысл только в гиперболической/тор геометрии.")
 
 #undef Orb
 
