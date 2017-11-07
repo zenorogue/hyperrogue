@@ -86,7 +86,22 @@ namespace mapstream {
     if(!f) return false;
     int32_t i = VERNUM; save(i);
     save(mapeditor::whichPattern);
-    addToQueue(cwt.c->master->c7);
+    save(geometry);
+    save(nontruncated);
+    if(geometry == gTorus) {
+      save(torusconfig::qty);
+      save(torusconfig::dx);
+      save(torusconfig::dy);
+      }
+    if(geometry == gQuotient2) {
+      using namespace fieldpattern;
+      save(quotient_field_changed);
+      if(quotient_field_changed) {
+        save(current_extra);
+        save(fgeomextras[current_extra].current_prime_id);
+        }
+      }
+    addToQueue(bounded ? currentmap->gamestart() : cwt.c->master->c7);
     for(int i=0; i<size(cellbyid); i++) {
       cell *c = cellbyid[i];
       if(i) {
@@ -115,6 +130,7 @@ namespace mapstream {
         if(c2 && c2->land != laNone) addToQueue(c2);
         }
       }
+    printf("cells saved = %d\n", size(cellbyid));
     int32_t n = -1; save(n);
     int32_t id = cellids.count(cwt.c) ? cellids[cwt.c] : -1;
     save(id);
@@ -153,6 +169,27 @@ namespace mapstream {
     int vernum = loadInt();
     printf("vernum = %d\n", vernum);
     if(vernum >= 7400) load(mapeditor::whichPattern);
+    
+    if(vernum >= 10203) {
+      load(geometry);
+      load(nontruncated);
+      if(geometry == gTorus) {
+        load(torusconfig::qty);
+        load(torusconfig::dx);
+        load(torusconfig::dy);
+        }
+      if(geometry == gQuotient2) {
+        using namespace fieldpattern;
+        load(quotient_field_changed);
+        if(quotient_field_changed) {
+          load(current_extra);
+          load(fgeomextras[current_extra].current_prime_id);
+          enableFieldChange();
+          }
+        }
+      }
+    
+    resetGeometry();
 
     clearMemory();
     initcells();
@@ -174,10 +211,10 @@ namespace mapstream {
         cell *c2 = cellbyid[parent];
         dir  = fixspin(dir, relspin[parent], c2->type);
         c = createMov(c2, dir);
-        // printf("%p:%d,%d -> %p\n", c2, dir, c);
+        // printf("%p:%d,%d -> %p\n", c2, relspin[parent], dir, c);
         
         // spinval becomes xspinval
-        rspin = (c2->spn(dir) - loadChar() + 42) % c->type;
+        rspin = (c2->spn(dir) - loadChar() + MODFIXER) % c->type;
         }
       
       cellbyid.push_back(c);
