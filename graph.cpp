@@ -5165,6 +5165,12 @@ int andmode;
 #endif
 
 void gamescreen(int _darken) {
+
+  if(ISMOBILE && (cmode & sm::SIDE)) {
+    cmode ^= sm::SIDE;
+    darken += 2;
+    }
+
   darken = _darken;
   
   if(conformal::includeHistory) conformal::restore();
