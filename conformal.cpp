@@ -554,11 +554,26 @@ namespace conformal {
 
     dialog::addBoolItem(XLAT("include history"), (includeHistory), 'i');
     
-    bool notconformal = (pmodel >= 5 && pmodel <= 6) || abs(vid.alpha-1) > 1e-3;
+    bool notconformal0 = (pmodel >= 5 && pmodel <= 6);
+    bool notconformal = notconformal0 || abs(vid.alpha-1) > 1e-3;
 
-    dialog::addSelItem(notconformal ? XLAT("model used (not conformal!)") : XLAT("model used"), XLAT(modelnames[pmodel]), 'm');
+    dialog::addSelItem(notconformal ? XLAT("model used (not conformal!)") : XLAT("model used"), 
+      XLAT(
+        pmodel == mdBand && sphere ? "Mercator" : 
+        pmodel == mdHalfplane && euclid ? "inversion" : 
+        modelnames[pmodel]), 'm');
     dialog::addSelItem(XLAT("rotation"), directions[pmodel][rotation&3], 'r');
+    
+    if(pmodel == mdBand && sphere)
+      dialog::addSelItem(XLAT("scale factor"), fts(vid.scale), 'z');
 
+    if(abs(vid.alpha-1) > 1e-3 && pmodel != mdBall && pmodel != mdHyperboloid) {
+      dialog::addBreak(50);
+      dialog::addInfo("NOTE: this works 'correctly' only if the Poincaré model/stereographic projection is used.");
+      dialog::addBreak(50);
+      dialog::addBoolItem("Switch", false, '6');
+      }      
+    
     if(pmodel == 4) {
       dialog::addSelItem(XLAT("coefficient"), 
         fts4(polygonal::coefr[polygonal::coefid]), 'x');
@@ -600,7 +615,11 @@ namespace conformal {
   void handleKeyC(int sym, int uni) {
     dialog::handleNavigation(sym, uni);
   
-    if(uni == 'e') {
+    if(uni == '6')
+      vid.alpha = 1, vid.scale = 1;
+    else if(uni == 'z')
+      editScale();
+    else if(uni == 'e') {
       if(on) clear();
       else {
         if(canmove && !cheater) {
@@ -617,9 +636,13 @@ namespace conformal {
 
       switchagain: {
         pmodel = eModel((pmodel + (shiftmul > 0 ? 1 : -1) + MODELCOUNT) % MODELCOUNT);
-        if(sphere) 
-          if(pmodel == mdHalfplane || pmodel == mdBand || pmodel == mdEquidistant || pmodel == mdEquiarea)
-            goto switchagain;
+        
+        if(pmodel != mdEquidistant && pmodel != mdDisk && pmodel != mdEquiarea && pmodel != mdPolynomial && pmodel != mdHyperboloid) {
+          if(sphere && pmodel != mdBand)
+              goto switchagain;
+          if(euclid && pmodel != mdHalfplane && pmodel != mdBall)
+              goto switchagain;
+          }
         }
       polygonal::solve();
       /* if(pmodel && vid.usingGL) {

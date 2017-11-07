@@ -388,6 +388,89 @@ double linewidthat(const hyperpoint& h, double minwidth) {
     }
   return vid.linewidth;
   }
+
+
+// -radius to +3radius
+
+int mercator_coord;
+int mercator_loop_min = 0, mercator_loop_max = 0;
+
+void fixMercator() {
+  
+  ld period = 4 * vid.radius;
+  ld hperiod = period / 2;
+  
+  mercator_coord = 1;
+  ld cmin = -vid.xcenter, cmax = vid.xres - vid.xcenter, dmin = -vid.ycenter, dmax = vid.yres - vid.ycenter;
+  if(mercator_coord)
+    swap(cmin, dmin), swap(cmax, dmax);
+
+  for(int i = 0; i<qglcoords; i++) {
+    while(glcoords[0][mercator_coord] < hperiod) glcoords[0][mercator_coord] += period;
+    while(glcoords[0][mercator_coord] > hperiod) glcoords[0][mercator_coord] -= period;
+    }
+    
+  ld first = glcoords[0][mercator_coord];
+  ld next = first;
+  
+  ld mincoord = first, maxcoord = first;
+
+  for(int i = 0; i<qglcoords; i++) {
+    while(glcoords[i][mercator_coord] < next - hperiod)
+      glcoords[i][mercator_coord] += period;
+    while(glcoords[i][mercator_coord] > next + hperiod)
+      glcoords[i][mercator_coord] -= period;
+    next = glcoords[i][mercator_coord];
+    mincoord = min<ld>(mincoord, glcoords[i][mercator_coord]);
+    maxcoord = max<ld>(maxcoord, glcoords[i][mercator_coord]);
+    }
+  
+  ld last = first;
+  while(last < next - hperiod) last += period;
+  while(last > next + hperiod) last -= period;
+  
+  if(first == last) {
+    while(mincoord > cmin)
+      mercator_loop_min--, mincoord -= period;
+    while(maxcoord < cmax)
+      mercator_loop_max++, maxcoord += period;
+    }
+  else {
+    if(last < first) {
+      reverse(glcoords, glcoords+qglcoords);
+      swap(first, last);
+      }
+    while(maxcoord > cmin) {
+      for(int i=0; i<qglcoords; i++) glcoords[i][mercator_coord] -= period;
+      first -= period; last -= period;
+      mincoord -= period; maxcoord -= period;
+      }
+    int base = qglcoords;
+    int minto = mincoord;
+    while(minto < cmax) {
+      for(int i=0; i<base; i++) {
+        for(int c=0; c<3; c++) 
+          glcoords[qglcoords][c] = glcoords[qglcoords-base][c];
+        glcoords[qglcoords][mercator_coord] += period;
+        qglcoords++;
+        }
+      minto += period;
+      }
+    for(int r=0; r<3; r++)
+      glcoords[qglcoords][r] = glcoords[qglcoords-1][r];
+    qglcoords++;
+    for(int r=0; r<3; r++)
+      glcoords[qglcoords][r] = glcoords[0][r];
+    qglcoords++;
+    for(int u=1; u<=2; u++) {
+      auto& v = glcoords[qglcoords-u][1-mercator_coord];
+      v = v < 0 ? dmin : dmax;
+      }
+    /* printf("cycling %d -> %d\n", base, qglcoords);
+    for(int a=0; a<qglcoords; a++)
+      printf("[%3d] %10.5lf %10.5lf\n", a, glcoords[a][0], glcoords[a][1]); */
+    }
+  }
   
 void drawpolyline(polytodraw& p) {
   auto pp = p.u.poly;
@@ -418,19 +501,20 @@ void drawpolyline(polytodraw& p) {
 
   addpoly(pp.V, pp.tab, pp.cnt);
   
+  mercator_loop_min = mercator_loop_max = 0;
+  if(sphere && pmodel == mdBand)
+    fixMercator();
+    
   int poly_limit = max(vid.xres, vid.yres) * 2;
-
+  
   if(poly_flags & POLY_BEHIND) return;
+
   for(int i=0; i<qglcoords; i++) {
     if(abs(glcoords[i][0]) > poly_limit || abs(glcoords[i][1]) > poly_limit)
       return; // too large!
     }
 
-  if(sphere && vid.alphax > 1) {
-    if(!hiliteclick && !(poly_flags & POLY_INFRONT)) return;
-    }
-
-  if(spherespecial > 0 && !(poly_flags & POLY_ISSIDE)) {
+  if((spherespecial > 0 || pmodel == mdEquidistant || pmodel == mdEquiarea) && !(poly_flags & POLY_ISSIDE)) {
     double rarea = 0;
     for(int i=0; i<qglcoords-1; i++) 
       rarea += glcoords[i][0] * glcoords[i+1][1] - glcoords[i][1] * glcoords[i+1][0];
@@ -446,60 +530,75 @@ void drawpolyline(polytodraw& p) {
     }
   else poly_flags &=~ POLY_INVERSE;
     
-#if CAP_GL
-  if(vid.usingGL) {
-    // if(pmodel == 0) for(int i=0; i<qglcoords; i++) glcoords[i][2] = vid.scrdist;
-    activateGlcoords();    
-    gldraw(3, Id, 0, qglcoords, p.col, pp.outline, poly_flags);
-    return;
+  if(sphere && vid.alphax > 1) {
+    if(!hiliteclick && !(poly_flags & POLY_INFRONT)) return;
     }
-#endif
-
-#if CAP_SVG==1
-  if(svg::in) {
-    coords_to_poly();
-    int col = p.col;
-    if(poly_flags & POLY_INVERSE) col = 0;
-    svg::polygon(polyx, polyy, polyi, col, pp.outline, pp.minwidth);
-    return;
-    }
-#endif
-
-  coords_to_poly();
-
-#if CAP_XGD==1
-  gdpush(1); gdpush(p.col); gdpush(pp.outline); gdpush(polyi);
-  for(int i=0; i<polyi; i++) gdpush(polyx[i]), gdpush(polyy[i]);
-#elif CAP_SDLGFX==1
-
-  if(poly_flags & POLY_INVERSE) {
-    int i = polyi;
-    polyx[i] = 0; polyy[i] = 0; i++;
-    polyx[i] = vid.xres; polyy[i] = 0; i++;
-    polyx[i] = vid.xres; polyy[i] = vid.yres; i++;
-    polyx[i] = 0; polyy[i] = vid.yres; i++;
-    polyx[i] = 0; polyy[i] = 0; i++;
-    filledPolygonColorI(s, polyx, polyy, polyi+5, p.col);
-    }
-  else  
-    filledPolygonColorI(s, polyx, polyy, polyi, p.col);
-
-  if(vid.goteyes) filledPolygonColorI(aux, polyxr, polyy, polyi, p.col);
-  
-  ((vid.antialias & AA_NOGL) ?aapolylineColor:polylineColor)(s, polyx, polyy, polyi, pp.outline);
-  if(vid.goteyes) aapolylineColor(aux, polyxr, polyy, polyi, pp.outline);
-  
-  if(vid.xres >= 2000 || fatborder) {
-    int xmi = 3000, xma = -3000;
-    for(int t=0; t<polyi; t++) xmi = min(xmi, polyx[t]), xma = max(xma, polyx[t]);
     
-    if(xma > xmi + 20) for(int x=-1; x<2; x++) for(int y=-1; y<=2; y++) if(x*x+y*y == 1) {
-      for(int t=0; t<polyi; t++) polyx[t] += x, polyy[t] += y;
-      aapolylineColor(s, polyx, polyy, polyi, pp.outline);
-      for(int t=0; t<polyi; t++) polyx[t] -= x, polyy[t] -= y;
+  int lastl = 0;
+
+  for(int l=mercator_loop_min; l <= mercator_loop_max; l++) {
+  
+    if(l || lastl) { 
+      for(int i=0; i<qglcoords; i++)
+        glcoords[i][mercator_coord] += vid.radius * 4 * (l - lastl);
+      lastl = l;
       }
+  
+  #if CAP_GL
+    if(vid.usingGL) {
+      // if(pmodel == 0) for(int i=0; i<qglcoords; i++) glcoords[i][2] = vid.scrdist;
+      activateGlcoords();    
+      gldraw(3, Id, 0, qglcoords, p.col, pp.outline, poly_flags);
+      continue;
+      }
+  #endif
+  
+  #if CAP_SVG==1
+    if(svg::in) {
+      coords_to_poly();
+      int col = p.col;
+      if(poly_flags & POLY_INVERSE) col = 0;
+      svg::polygon(polyx, polyy, polyi, col, pp.outline, pp.minwidth);
+      continue;
+      }
+  #endif
+  
+    coords_to_poly();
+  
+  #if CAP_XGD==1
+    gdpush(1); gdpush(p.col); gdpush(pp.outline); gdpush(polyi);
+    for(int i=0; i<polyi; i++) gdpush(polyx[i]), gdpush(polyy[i]);
+  #elif CAP_SDLGFX==1
+  
+    if(poly_flags & POLY_INVERSE) {
+      int i = polyi;
+      polyx[i] = 0; polyy[i] = 0; i++;
+      polyx[i] = vid.xres; polyy[i] = 0; i++;
+      polyx[i] = vid.xres; polyy[i] = vid.yres; i++;
+      polyx[i] = 0; polyy[i] = vid.yres; i++;
+      polyx[i] = 0; polyy[i] = 0; i++;
+      filledPolygonColorI(s, polyx, polyy, polyi+5, p.col);
+      }
+    else  
+      filledPolygonColorI(s, polyx, polyy, polyi, p.col);
+  
+    if(vid.goteyes) filledPolygonColorI(aux, polyxr, polyy, polyi, p.col);
+    
+    ((vid.antialias & AA_NOGL) ?aapolylineColor:polylineColor)(s, polyx, polyy, polyi, pp.outline);
+    if(vid.goteyes) aapolylineColor(aux, polyxr, polyy, polyi, pp.outline);
+    
+    if(vid.xres >= 2000 || fatborder) {
+      int xmi = 3000, xma = -3000;
+      for(int t=0; t<polyi; t++) xmi = min(xmi, polyx[t]), xma = max(xma, polyx[t]);
+      
+      if(xma > xmi + 20) for(int x=-1; x<2; x++) for(int y=-1; y<=2; y++) if(x*x+y*y == 1) {
+        for(int t=0; t<polyi; t++) polyx[t] += x, polyy[t] += y;
+        aapolylineColor(s, polyx, polyy, polyi, pp.outline);
+        for(int t=0; t<polyi; t++) polyx[t] -= x, polyy[t] -= y;
+        }
+      }
+  #endif
     }
-#endif
   }
 
 vector<float> prettylinepoints;
