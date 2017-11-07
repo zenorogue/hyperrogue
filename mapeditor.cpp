@@ -166,6 +166,7 @@ namespace mapstream {
   bool loadMap(const char *fname) {
     f = fopen(fname, "rb");
     if(!f) return false;
+    clearMemory();
     int vernum = loadInt();
     printf("vernum = %d\n", vernum);
     if(vernum >= 7400) load(mapeditor::whichPattern);
@@ -191,7 +192,6 @@ namespace mapstream {
     
     resetGeometry();
 
-    clearMemory();
     initcells();
     if(shmup::on) shmup::init();
 
