@@ -203,7 +203,6 @@ void buildTorusRug() {
   // transmatrix z1 = {{{22,7,0}, {1,-17,0}, {0,0,1}}};
   transmatrix z1 = {{{(ld)solution.first.x,(ld)solution.second.x,0}, {(ld)solution.first.y,(ld)solution.second.y,0}, {0,0,1}}};
   transmatrix z2 = inverse(z1);
-  printf("h1 = %s\n", display(z2 * hyperpoint {22,1,0}));
   
   auto addToruspoint = [&] (ld x, ld y) {
     auto r = addRugpoint(C0, 0);
@@ -223,7 +222,7 @@ void buildTorusRug() {
     double beta = -h2[1] * 2 * M_PI;
     // r->flat = {alpha, beta, 0}; 
     double sc = (factor+1)/4;
-    r->flat = {(factor+cos(alpha)) * cos(beta) * sc, (factor+cos(alpha)) * sin(beta) * sc, -sin(alpha) * sc};
+    r->flat = hpxyz((factor+cos(alpha)) * cos(beta) * sc, (factor+cos(alpha)) * sin(beta) * sc, -sin(alpha) * sc);
     r->valid = true;
     return r;
     };
@@ -771,7 +770,7 @@ hyperpoint gethyper(ld x, ld y) {
   double my = (1-(y*2 / vid.yres)) * yview;
   double bdist = 1e12;
   
-  double rx1, ry1;
+  double rx1=0, ry1=0;
   
   bool found = false;
   
