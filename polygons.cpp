@@ -1175,7 +1175,7 @@ void buildpolys() {
 #define SCA47(x) (a47?x:1)
 #define SCA467(x) (a4 && S7 >= 6?x:1)
 
-#define ROT45(x) (a4 && S7 == 5?x:1)
+#define ROT45(x) (a4 && S7 == 5?x:0)
 #define ROT46(x) (a46?x:0)
 #define ROT47(x) (a47?x:0)
 #define ROT467(x) (a4 && S7 >= 6?x:0)
@@ -1680,7 +1680,7 @@ void buildpolys() {
 
   bshape(shSStarFloor[0], PPR_FLOOR, scalef*spzoom6*(sphere?.8:1)*ffscale2, 11, ROT4(.775));
   bshape(shSStarFloor[1], PPR_FLOOR, scalef*spzoomd7*SCA4(.85), 12, octroll);
-  bshape(shOverFloor[0], PPR_FLOOR, scalef*spzoom * SCA47(1.3) * SCA45(1.3) * SCA46(1.1), 13, ROT47(-.75) + ROT45(-.7)+ROT46(.9) + (geometry == 0 && !nontruncated ? M_PI:0));
+  bshape(shOverFloor[0], PPR_FLOOR, scalef*spzoom * SCA47(1.3) * SCA45(1.3) * SCA46(1.1), 13, ROT47(-.75) + ROT45(-.7)+ROT46(.9));
   if(nontruncated) {
     if(a4) bshape(shOverFloor[1], PPR_FLOOR, 1, 368 + S7 - 5, 0);
     else bshape(shOverFloor[1], PPR_FLOOR, (sphere ? .83 : 1) * SCA38(1.3), 14, octroll + ROT38(.4));
@@ -1717,7 +1717,7 @@ void buildpolys() {
 
   bshape(shSeabed[0], PPR_FLOOR, scalef*spzoom6, 334);
   bshape(shSeabed[1], PPR_FLOOR, scalef*spzoom6, 335);
-  bshape(shCloudSeabed[0], PPR_FLOOR, scalef*spzoom6 * SCA46(.8) * SCA47(.75) * SCA38(1.05) * SCA45(.75), 336, ROT45(-.8125));
+  bshape(shCloudSeabed[0], PPR_FLOOR, scalef*spzoom6 * SCA46(.8) * SCA47(.75) * SCA38(1.05) * SCA45(.75), 336, ROT45(-.8125) + ROT38(1));
   bshape(shCloudSeabed[1], PPR_FLOOR, scalef*spzoom6 * SCA46(.5) * SCA47(.6) * SCA38(1.25) * SCA45(.35), 337, ROT46(-.2) + ROT38(.2));
   bshape(shCloudSeabed[2], PPR_FLOOR, scalef*espzoom6, 337);
   bshape(shCaveSeabed[0], PPR_FLOOR, scalef*spzoom6 * SCA45(.65) * SCA46(.7) * SCA47(.675), 338);
