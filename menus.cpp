@@ -348,7 +348,7 @@ void showDisplayMode() {
 #if CAP_MODEL
   dialog::addBoolItem(XLAT("paper model creator"), (false), 'n');
 #endif
-  dialog::addBoolItem(XLAT("conformal/history mode"), (conformal::on), 'a');
+  dialog::addBoolItem(XLAT("conformal/history mode"), (conformal::on || pmodel || conformal::includeHistory), 'a');
 //  dialog::addBoolItem(XLAT("expansion"), viewdists, 'x');
   
   showAllConfig();
