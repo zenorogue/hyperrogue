@@ -817,7 +817,7 @@ namespace mapeditor {
             m == moTameBomberbirdMoved || m == moKnightMoved ||
             m == moDeadBug || m == moLightningBolt || m == moDeadBird ||
             m == moMouseMoved || m == moPrincessMoved || m == moPrincessArmedMoved) ;
-          else if(m == moDragonHead) vpush(i, XLAT1("Dragon Head"));
+          else if(m == moDragonHead) vpush(i, "Dragon Head");
           else vpush(i, minf[i].name);
           }
         break;
