@@ -5210,6 +5210,8 @@ void moverefresh(bool turn = true) {
       c->stuntime--;
       int breathrange = sphere ? 2 : 3;
       if(c->stuntime == 0 && c->monst == moDragonHead)  {
+        // if moDragonHead is renamed to "Dragon Head", we might need to change this
+        eMonster subject = c->monst;
         if(!c->hitpoints) c->hitpoints = 1;
         else if(shmup::on && dragon::totalhp(c) > 2 && shmup::dragonbreath(c)) {
           c->hitpoints = 0;
@@ -5217,7 +5219,7 @@ void moverefresh(bool turn = true) {
         else if(dragon::totalhp(c) <= 2) ;
         else if(items[itOrbDomination] && isMounted(c)) {
           if(dragon::target && celldistance(c, dragon::target) <= breathrange && makeflame(dragon::target, 5, true)) {
-            addMessage(XLAT("%The1 breathes fire!", c->monst));
+            addMessage(XLAT("%The1 breathes fire!", subject));
             makeflame(dragon::target, 5, false);
             playSound(dragon::target, "fire");
             c->hitpoints = 0;
@@ -5227,11 +5229,11 @@ void moverefresh(bool turn = true) {
           for(int i=0; i<size(targets); i++) {
             cell *t = targets[i];
             if(celldistance(c, t) <= breathrange && makeflame(t, 5, true)) {
-              if(isPlayerOn(t)) addMessage(XLAT("%The1 breathes fire at you!", c->monst));
+              if(isPlayerOn(t)) addMessage(XLAT("%The1 breathes fire at you!", subject));
               else if(t->monst)
-                addMessage(XLAT("%The1 breathes fire at %the2!", c->monst, t->monst));
+                addMessage(XLAT("%The1 breathes fire at %the2!", subject, t->monst));
               else
-                addMessage(XLAT("%The1 breathes fire!", c->monst));
+                addMessage(XLAT("%The1 breathes fire!", subject));
               makeflame(t, 5, false);
               playSound(t, "fire");
               c->hitpoints = 0;
@@ -5820,17 +5822,17 @@ void checkmove() {
   // do not activate orbs!
   for(int i=0; i<ittypes; i++) orbusedbak[i] = orbused[i];
 
-  for(int i=0; i<8; i++) legalmoves[i] = false;
+  for(int i=0; i<=MAX_EDGE; i++) legalmoves[i] = false;
 
   canmove = false;
   items[itWarning]+=2;
   if(movepcto(-1, 0, true)) canmove = legalmoves[MAX_EDGE] = true;
   
-  if(ISMOBILE || !canmove)
+  if(vid.mobilecompasssize || !canmove)
     for(int i=0; i<cwt.c->type; i++) 
       if(movepcto(1, -1, true)) 
         canmove = legalmoves[cwt.spin] = true;
-  if(ISMOBILE || !canmove)
+  if(vid.mobilecompasssize || !canmove)
     for(int i=0; i<cwt.c->type; i++) 
       if(movepcto(1, 1, true)) 
         canmove = legalmoves[cwt.spin] = true;
