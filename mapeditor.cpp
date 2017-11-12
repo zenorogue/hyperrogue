@@ -42,8 +42,10 @@ namespace mapeditor {
       c->landparam = c2->landparam;
       c->wparam = c2->wparam;
       c->mondir = c2->mondir;
+      c->stuntime = c2->stuntime;
+      c->hitpoints = c2->hitpoints;
       if(c2->mondir != NODIR)
-        c->mondir = (c2->mondir - patterndir(c2) + patterndir(c) + 7*6*5) % c->type;
+        c->mondir = (c2->mondir - patterndir(c2) + patterndir(c) + MODFIXER) % c->type;
       }
     }
 #endif
@@ -168,7 +170,6 @@ namespace mapstream {
     if(!f) return false;
     clearMemory();
     int vernum = loadInt();
-    printf("vernum = %d\n", vernum);
     if(vernum >= 7400) load(mapeditor::whichPattern);
     
     if(vernum >= 10203) {
@@ -499,7 +500,8 @@ namespace mapeditor {
   int painttype = 0;
   int radius = 0;
   string paintwhat_str = "clear monster";
-  cell *copywhat = NULL; int copydir; bool copyflip;
+  
+  cellwalker copysource;
   
   bool symRotation, sym01, sym02, sym03;
   int whichpart;
@@ -815,6 +817,7 @@ namespace mapeditor {
             m == moTameBomberbirdMoved || m == moKnightMoved ||
             m == moDeadBug || m == moLightningBolt || m == moDeadBird ||
             m == moMouseMoved || m == moPrincessMoved || m == moPrincessArmedMoved) ;
+          else if(m == moDragonHead) vpush(i, XLAT1("Dragon Head"));
           else vpush(i, minf[i].name);
           }
         break;
@@ -881,7 +884,7 @@ namespace mapeditor {
     displayfr(8, 8+fs*10, 2, vid.fsize, XLAT("c = copy"), 0xC0C0C0, 0);
     displayButton(8, 8+fs*11, XLAT("u = undo"), 'u', 0);
     if(painttype == 4)
-      displayButton(8, 8+fs*12, XLAT("f = flip %1", ONOFF(copyflip)), 'u', 0);
+      displayButton(8, 8+fs*12, XLAT("f = flip %1", ONOFF(copysource.mirrored)), 'u', 0);
     displayButton(8, 8+fs*13, XLAT("r = regular"), 'r', 0);
     displayButton(8, 8+fs*14, XLAT("p = paint"), 'p', 0);
       
@@ -894,30 +897,6 @@ namespace mapeditor {
     if(radius>=2) return 0;
     if(anyshiftclick) return -1;
     return 1;
-    }
-
-  void spillCopy(cell *c1, int d1, cell *c2, int d2, int r) {
-    saveUndo(c1);
-    int cf = copyflip ? -1 : 1;
-    if(c2->land == laNone) return;
-    c1->wall = c2->wall;
-    c1->item = c2->item;
-    c1->land = c2->land;
-    c1->monst = c2->monst;
-    c1->landparam = c2->landparam;
-    c1->wparam = c2->wparam;
-    // c1->tmp = c2->tmp;
-    if(c2->mondir == NODIR) c1->mondir = NODIR;
-    else c1->mondir = (cf * (c2->mondir - d2) + d1 + 42) % c1->type;
-    checkUndo();
-    
-    if(r) for(int i=0; i<c1->type; i++) {
-      if(c1 != mouseover && (i == 0 || i == 1 || i == c1->type-1)) continue;
-      createMov(c1, i);
-      int i0 = (42+cf*i+d1) % c1->type;
-      int i1 = (i + d2) % c2->type;
-      spillCopy(c1->mov[i0], c1->spn(i0), c2->mov[i1], c2->spn(i1), r-1);
-      }
     }
   
   int subpatternEmerald(int i) {
@@ -1035,18 +1014,10 @@ namespace mapeditor {
     if(group < 3) return id == drawcellShapeID();
     return subpatternShape(id) == subpattern(drawcell);
     }
-  
-  void spill(cell *c, int r, int cdir) {
 
-    if(painttype == 4 && radius) {
-      if(mouseover->type != copywhat->type) return;
-      if(cdir<0) cdir=0;
-      if(mouseover->type == 6 && ((cdir^copydir)&1)) {
-        cdir++; cdir %= 6;
-        }
-      spillCopy(mouseover, cdir, copywhat, copydir, radius);
-      }
-
+  void editCell(const pair<cellwalker, cellwalker>& where) {
+    cell *c = where.first.c;
+    int cdir = where.first.spin;
     saveUndo(c);
     switch(painttype) {
       case 0:
@@ -1107,51 +1078,95 @@ namespace mapeditor {
         c->landparam = paintwhat >> 8;
         break;
       case 4:
+        cell *copywhat = where.second.c;
         c->wall = copywhat->wall;
         c->item = copywhat->item;
         c->land = copywhat->land;
         c->monst = copywhat->monst;
         c->landparam = copywhat->landparam;
         c->wparam = copywhat->wparam;
+        c->hitpoints = copywhat->hitpoints;
+        c->stuntime = copywhat->stuntime; 
         if(copywhat->mondir == NODIR) c->mondir = NODIR;
-        else if(c->mondir == c->type-1) c->mondir = 0;
-        else c->mondir++;
+        else c->mondir = ((where.first.mirrored == where.second.mirrored ? 1 : -1) * (copywhat->mondir - where.second.spin) + cdir + MODFIXER) % c->type;
         break;
       }
     checkUndo();
-    if(r) for(int i=0; i<c->type; i++) spill(createMov(c, i), r-1, c->spn(i));
     }
   
-  void allInPattern(cell *c, int r, int cdir) {
+  vector<pair<cellwalker, cellwalker> > spill_list;
+  
+  void list_spill(cellwalker tgt, cellwalker src) {
+    spill_list.clear(); sval++;
+    spill_list.emplace_back(tgt, src);
+    int crad = 0, nextstepat = 0;
+    for(int i=0; i<size(spill_list); i++) {
+      if(i == nextstepat) {
+        crad++; nextstepat = size(spill_list);
+        if(crad > radius) break;
+        }
+      auto sd = spill_list[i];
+      for(int i=0; i<sd.first.c->type; i++) {
+        auto sd2 = sd;
+        cwspin(sd2.first, i); cwstep(sd2.first);
+        if(eq(sd2.first.c->aitmp, sval)) continue; 
+        sd2.first.c->aitmp = sval;
+        if(sd2.second.c) {
+          cwspin(sd2.second, i); cwstep(sd2.second);
+          if(sd2.second.c->land == laNone) continue;
+          }
+        spill_list.push_back(sd2);
+        }
+      }
+    }
+  
+  void editAt(cellwalker where) {
+
+    if(painttype == 4 && radius) {
+      if(where.c->type != copysource.c->type) return;
+      if(where.spin<0) where.spin=0;
+      if(!nontruncated && !ctof(mouseover) && ((where.spin&1) != (copysource.spin&1)))
+        cwspin(where, 1);
+      }
+    if(painttype != 4) copysource.c = NULL;
+    list_spill(where, copysource);
+    
+    for(auto& st: spill_list)
+      editCell(st);
+    }
+  
+  void allInPattern(cellwalker where) {
 
     if(!whichPattern) {
-      spill(c, r, cdir);
+      editAt(where);
       return;
       }
 
     vector<cell*> v;
-    v.push_back(c);
+    v.push_back(where.c);
     sval++;
-    c->aitmp = sval;
-    
-    cdir = cdir - patterndir(c);
-    int sp = subpattern(c);
+    where.c->aitmp = sval;
     
     int at = 0;
     while(at < size(v)) {
       cell *c2 = v[at];
       at++;
       
+      forCellEx(c3, c2) 
+        if(!eq(c3->aitmp, sval))
+          c3->aitmp = sval, v.push_back(c3);
+      }
+    
+    int cdir = where.spin;
+    if(cdir >= 0) 
+      cdir = cdir - patterndir(where.c);
+    int sp = subpattern(where.c);
+    
+    for(cell* c2: v)
       if(subpattern(c2) == sp) {
-        spill(c2, r, fixdir(cdir + patterndir(c2), c));
+        editAt(cellwalker(c2, cdir>=0 ? fixdir(cdir + patterndir(c2), c2) : -1));
         modelcell[realpattern(c2)] = c2;
         }
-      for(int i=0; i<c2->type; i++) {
-        cell *c3 = c2->mov[i];
-        if(c3 && !eq(c3->aitmp, sval))
-          c3->aitmp = sval, v.push_back(c3);
-        }
-      }
     }
   
   bool handleKeyFile(int uni, int sym) {
@@ -1197,13 +1212,19 @@ namespace mapeditor {
     return true;
     }
   
+  cellwalker mouseover_cw(bool fix) {
+    int d = neighborId(mouseover, mouseover2);
+    if(d == -1 && fix) d = hrand(mouseover->type);
+    return cellwalker(mouseover, d);
+    }
+  
   void handleKeyMap(int sym, int uni) {
     handlePanning(sym, uni);
 
     // left-clicks are coded with '-', and right-clicks are coded with sym F1
     if(uni == '-' && !holdmouse) undoLock();
     if(uni == '-' && mouseover) {
-      allInPattern(mouseover, radius, neighborId(mouseover, mouseover2));
+      allInPattern(mouseover_cw(false));
       holdmouse = true;
       }
     
@@ -1217,8 +1238,8 @@ namespace mapeditor {
     else if(uni == 'w') pushScreen(showList), painttype = 3, infix = "";
     else if(uni == 'r') pushScreen(showPattern);
     else if(uni == 't' && mouseover) {
-      cwt.c = mouseover; playermoved = true;
-      cwt.spin = neighborId(mouseover, mouseover2);
+      playermoved = true;
+      cwt = mouseover_cw(true);
       }
     else if(uni == 'b') painttype = 5, paintwhat_str = XLAT("boundary");
     else if(uni == 'p') {
@@ -1261,15 +1282,12 @@ namespace mapeditor {
       drawplayer = !drawplayer;
       }
     else if(uni == 'c') {
-      if(mouseover && mouseover2)
-        copydir = neighborId(mouseover, mouseover2);
-      if(copydir<0) copydir = 0;
-      copyflip = (uni == 'f');
-      copywhat = mouseover, painttype = 4;
+      copysource = mouseover_cw(true);
+      painttype = 4;
       paintwhat_str = XLAT("copying");
       }
     else if(uni == 'f') {
-      copyflip = !copyflip;
+      copysource.mirrored = !copysource.mirrored;
       }
     else if(uni == 'h' || sym == SDLK_F1) 
       gotoHelp(mehelptext());
@@ -1810,7 +1828,7 @@ namespace mapeditor {
     if(mapeditor::painttype == 4) 
       mapeditor::painttype = 0, mapeditor::paintwhat = 0,
       mapeditor::paintwhat_str = "clear monster";
-    mapeditor::copywhat = NULL;
+    mapeditor::copysource.c = NULL;
     mapeditor::undo.clear();
     if(!cheater) mapeditor::displaycodes = 0;
     if(!cheater) mapeditor::whichShape = 0;
