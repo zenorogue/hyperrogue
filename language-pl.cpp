@@ -6282,8 +6282,12 @@ S("Useless in Euclidean geometry.", "Bezużyteczne w geometrii euklidesowej.");
 S("Not implemented for spherical geometry. Please tell me if you really want this.",
   "Nie zaimplementowane dla geometrii sferycznej. Jeśli bardzo tego chcesz, powiedz.")
 
+#undef Orb
+
 // Hypersian Rug
 S("This makes sense only in hyperbolic or Torus geometry.", "To ma sens tylko w geometrii hiperbolicznej i na torusie.")
 
-#undef Orb
+// for the map editor
+N("Dragon Head", GEN_F, "Głowa Smoka", "Głowy Smoka", "Głowę Smoka", "Głową Smoka")
+
 
