@@ -2321,6 +2321,7 @@ namespace dragon {
       if(c->mov[i] && isDragon(c->mov[i]->monst) && c->mov[i]->mondir == c->spn(i)) {
         c = c->mov[i]; goto findhead;
         }
+    if(cmode & sm::MAP) return c;
     if(!conformal::includeHistory) {
       printf("dragon bug #3 (%p -> %p)\n", cor, c); 
       dragbugs = true;
