@@ -646,6 +646,10 @@ namespace conformal {
         }
       polygonal::solve();
       vid.alpha = 1; vid.scale = 1;
+      if(pmodel == mdBand && sphere)
+        vid.scale = .3;
+      if(pmodel == mdDisk && sphere)
+        vid.scale = .4;
       }
     else if(sym == 'x' && pmodel == mdPolygonal)
       dialog::editNumber(polygonal::SI, 3, 10, 1, 4, XLAT("polygon sides"), "");
