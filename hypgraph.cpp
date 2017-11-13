@@ -153,12 +153,15 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
   if(pmodel == mdEquidistant || pmodel == mdEquiarea) {
     ld rad = sqrt(H[0] * H[0] + H[1] * H[1]);
     ld d = hdist0(H);
+    
+    // 4 pi / 2pi = M_PI 
+    
     if(pmodel == 6 && sphere)
-      d = sqrt(2*(1 - cos(d))) * 1.25; // /1.5 to make it fit on the screen better
+      d = sqrt(2*(1 - cos(d))) * M_PI / 2;
     else if(pmodel == 6 && !euclid)
       d = sqrt(2*(cosh(d) - 1)) / 1.5;
-    ret[0] = d * H[0] / rad / 4;
-    ret[1] = d * H[1] / rad / 4;
+    ret[0] = d * H[0] / rad / M_PI;
+    ret[1] = d * H[1] / rad / M_PI;
     ret[2] = 0; 
     if(zlev != 1 && vid.goteyes) 
       ret[2] = geom3::factor_to_lev(zlev);
