@@ -1936,7 +1936,9 @@ cell *straightDownSeek;
 int aurac[AURA+1][4];
 
 bool haveaura() {
-  return pmodel == mdDisk && (!sphere || vid.alpha > 10) && !euclid && vid.aurastr>0 && !svg::in && (auraNOGL || vid.usingGL);
+  if(!(vid.aurastr>0 && !svg::in && (auraNOGL || vid.usingGL))) return false;
+  if(sphere && (pmodel == mdEquidistant || pmodel == mdEquiarea)) return true;
+  return pmodel == mdDisk && (!sphere || vid.alpha > 10) && !euclid;
   }
   
 vector<pair<int, int> > auraspecials; 
@@ -1987,7 +1989,7 @@ void sumaura(int v) {
 void drawaura() {
   if(!haveaura()) return;
   double rad = vid.radius;
-  if(sphere) rad /= sqrt(vid.alphax*vid.alphax - 1);
+  if(sphere && pmodel != mdEquidistant && pmodel != mdEquiarea) rad /= sqrt(vid.alphax*vid.alphax - 1);
   
   for(int v=0; v<4; v++) sumaura(v);
   for(auto& p: auraspecials) {
@@ -2322,7 +2324,7 @@ void drawMovementArrows(cell *c, transmatrix V) {
       int col = getcs().uicolor;
       col -= (col & 0xFF) >> 1;
       poly_outline = OUTLINE_DEFAULT;
-      queuepoly(fixrot * spin(-d * M_PI/4 + (sphere && vid.alpha>1?M_PI:0))/* * eupush(1,0)*/, shArrow, col);
+      queuepoly(fixrot * spin(-d * M_PI/4 + (sphereflipped()?M_PI:0))/* * eupush(1,0)*/, shArrow, col);
 
       if((c->type & 1) && (isStunnable(c->monst) || c->wall == waThumperOn)) {
         transmatrix Centered = rgpushxto0(tC0(cwtV));
@@ -2333,8 +2335,6 @@ void drawMovementArrows(cell *c, transmatrix V) {
       }
     }
   }
-
-#define SKIPFAC .4
 
 void drawMobileArrow(cell *c, transmatrix V) {
 
@@ -2354,17 +2354,17 @@ void drawMobileArrow(cell *c, transmatrix V) {
   transmatrix m2 = Id;
   ld scale = vid.mobilecompasssize / 15.;
   m2[0][0] = scale; m2[1][1] = scale; m2[2][2] = 1;
-
-  transmatrix Centered = rgpushxto0(tC0(cwtV));
+  
+  transmatrix Centered = rgpushxto0(tC0(cwtV * sphereflip));
   transmatrix t = inverse(Centered) * V;
   double alpha = atan2(tC0(t)[1], tC0(t)[0]);
-  
+
   using namespace shmupballs;
   
   double dx = xmove + rad*(1+SKIPFAC-.2)/2 * cos(alpha);
   double dy = yb + rad*(1+SKIPFAC-.2)/2 * sin(alpha);
   
-  queuepoly(screenpos(dx, dy) * spin(-alpha) * m2, shArrow, col);
+  queuepolyat(screenpos(dx, dy) * spin(-alpha) * m2, shArrow, col, PPR_MOBILE_ARROW);
   }
 
 int celldistAltPlus(cell *c) { return 1000000 + celldistAlt(c); }
@@ -3173,7 +3173,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
     orig = 
       gm[2][2] == 0 ? true : 
       torus ? hypot(gm[0][2], gm[1][2]) >= hypot(V[0][2], V[1][2]) :
-      (sphere && vid.alphax >= 1.001) ? fabs(gm[2][2]-1) <= fabs(V[2][2]-1) :
+      sphereflipped() ? fabs(gm[2][2]-1) <= fabs(V[2][2]-1) :
       fabs(gm[2][2]-1) >= fabs(V[2][2]-1) - 1e-8;
 
     if(orig) gm = V;
@@ -4721,18 +4721,16 @@ void drawMarkers() {
 
     // process mouse
 
-#if ISMOBILE
-  extern bool useRangedOrb;
-  if(canmove && !shmup::on && andmode == 0 && !useRangedOrb && vid.mobilecompasssize > 0) {
-    using namespace shmupballs;
-    calc();
-    queuecircle(xmove, yb, rad, 0xFF0000FF);
-    queuecircle(xmove, yb, rad*SKIPFAC, 
-      legalmoves[MAX_EDGE] ? 0xFF0000FF : 0xFF000080
-      );
-    forCellAll(c2, cwt.c) IG(c2) drawMobileArrow(c2, Gm(c2));
-    }
-#endif
+    if(haveMobileCompass()) {
+      using namespace shmupballs;
+      calc();
+      queuecircle(xmove, yb, rad, 0xFF0000FF);
+      queuecircle(xmove, yb, rad*SKIPFAC, 
+        legalmoves[MAX_EDGE] ? 0xFF0000FF : 0xFF000080
+        );
+      forCellAll(c2, cwt.c) IG(c2) drawMobileArrow(c2, Gm(c2));
+      if(hypot(mousex-xmove, mousey-yb) <= rad) getcstat = '-';
+      }
 
     if((vid.axes == 4 || (vid.axes == 1 && !mousing)) && !shmup::on) {
       if(multi::players == 1) {
@@ -4916,7 +4914,7 @@ void drawthemap() {
   if(euclid)
     drawEuclidean();
   else {
-    if(sphere && vid.alpha > 1) sphereflip[2][2] = -1;
+    if(sphereflipped()) sphereflip[2][2] = -1;
     int sr = max(sightrange, ambush_distance);
     maxreclevel = 
       conformal::on ? sr + 2:
