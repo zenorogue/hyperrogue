@@ -649,6 +649,7 @@ void prettyline(hyperpoint h1, hyperpoint h2, int col, int lev) {
   pp.minwidth = minwidth_global;
   p.col = 0;
   pp.outline = col;
+  pp.flags = POLY_ISSIDE;
   drawpolyline(p);
   }
 
