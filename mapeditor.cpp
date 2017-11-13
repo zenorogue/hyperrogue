@@ -2159,12 +2159,6 @@ namespace linepatterns {
 
     switch(id) {
 
-#define col1 \
-lessalphaif(col, behindsphere(V))
-
-#define col2 \
-lessalphaif(col, behindsphere(V), behindsphere(gmatrix[c2]))
-
       case patZebraTriangles:
         if(zebra40(c) / 4 == 10) {
           bool all = true;
@@ -2203,7 +2197,7 @@ lessalphaif(col, behindsphere(V), behindsphere(gmatrix[c2]))
           if(euclid ? c->mov[t]<c : (((t^1)&1) || c->mov[t] < c))
             queueline(V * ddspin(c,t,-S7) * xpush0(x), 
                 V * ddspin(c,t,+S7) * xpush0(x), 
-                col1, 1);
+                col, 1);
         break;
         }
       
@@ -2214,14 +2208,14 @@ lessalphaif(col, behindsphere(V), behindsphere(gmatrix[c2]))
           double x = sphere?.3651:euclid?.2611:.2849;
           queueline(V * ddspin(c,i,-S14) * xpush0(x), 
             V * ddspin(c,i,+S14) * xpush0(x), 
-            col2, 1);
+            col, 1);
           }
         break;
       
       case patTriNet:
         forCellEx(c2, c) if(c2 > c) if(gmatrix.count(c2)) if(celldist(c) != celldist(c2)) {
           queueline(tC0(V), gmatrix[c2]*C0, 
-            darkena(backcolor ^ 0xFFFFFF, 0, col2),
+            darkena(backcolor ^ 0xFFFFFF, 0, col),
             2);
           }
         break;
@@ -2229,21 +2223,21 @@ lessalphaif(col, behindsphere(V), behindsphere(gmatrix[c2]))
       case patTriRings:
         forCellEx(c2, c) if(c2 > c) if(gmatrix.count(c2) && celldist(c) == celldist(c2)) 
           queueline(tC0(V), gmatrix[c2]*C0, 
-            darkena(backcolor ^ 0xFFFFFF, 0, col2),
+            darkena(backcolor ^ 0xFFFFFF, 0, col),
             2);
         break;
 
       case patHepta:
         forCellEx(c2, c) if(c2 > c) if(gmatrix.count(c2) && pseudohept(c) == pseudohept(c2)) 
           queueline(tC0(V), gmatrix[c2]*C0, 
-            darkena(backcolor ^ 0xFFFFFF, 0, col2),
+            darkena(backcolor ^ 0xFFFFFF, 0, col),
             2);
         break;
 
       case patRhomb:
         forCellEx(c2, c) if(c2 > c) if(gmatrix.count(c2) && pseudohept(c) != pseudohept(c2)) 
           queueline(tC0(V), gmatrix[c2]*C0, 
-            darkena(backcolor ^ 0xFFFFFF, 0, col2),
+            darkena(backcolor ^ 0xFFFFFF, 0, col),
             2);
         break;
       
@@ -2264,29 +2258,27 @@ lessalphaif(col, behindsphere(V), behindsphere(gmatrix[c2]))
         if(pseudohept(c)) for(int i=0; i<7; i++) 
           queueline(V * ddspin(c,i,84*5/14) * xpush0(tessf/2),
                     V * ddspin(c,i,84*9/14) * xpush0(tessf/2),
-                              col1, 1);
+                              col, 1);
         break;
       
       case patBigTriangles: {
         if(pseudohept(c) && !euclid) for(int i=0; i<S7; i++) 
           if(c->master->move[i] < c->master) {
-            queueline(tC0(V), V*xspinpush0((nontruncated?M_PI:0) -2*M_PI*i/S7, tessf), col1, 2);
+            queueline(tC0(V), V*xspinpush0((nontruncated?M_PI:0) -2*M_PI*i/S7, tessf), col, 2);
             }
         break;
         }
         
       case patBigRings: {
         if(pseudohept(c) && !euclid) for(int i=0; i<S7; i++) 
-          if(c->master->move[i] && c->master->move[i] < c->master && c->master->move[i]->dm4 == c->master->dm4) {
-            cell *c2 = c->master->move[i]->c7;
-            queueline(tC0(V), V*xspinpush0((nontruncated?M_PI:0) -2*M_PI*i/S7, tessf), col2, 2);
-            }
+          if(c->master->move[i] && c->master->move[i] < c->master && c->master->move[i]->dm4 == c->master->dm4)
+            queueline(tC0(V), V*xspinpush0((nontruncated?M_PI:0) -2*M_PI*i/S7, tessf), col, 2);
         break;
         }
         
       case patTree:
         if(ctof(c) && !euclid) 
-          queueline(tC0(V), V*ddi0(nontruncated?S42:0, tessf), col1, 2);
+          queueline(tC0(V), V*ddi0(nontruncated?S42:0, tessf), col, 2);
         break;
       
       case patAltTree:
@@ -2339,8 +2331,6 @@ lessalphaif(col, behindsphere(V), behindsphere(gmatrix[c2]))
         }
       }
     }
-#undef col1
-#undef col2
   
   int numpat = 0;
   

@@ -740,6 +740,8 @@ ld xintval(const hyperpoint& h) {
   return -intval(h, C0);
   }
 
+ld backbrightness = .25;
+
 void drawqueue() {
 
   int siz = size(ptds);
@@ -824,7 +826,10 @@ void drawqueue() {
   #endif
       if(ptd.kind == pkPoly || ptd.kind == pkLine) {
         unsigned c = ptd.col;
-        ptd.col = (gradient(c>>8, backcolor, 0, .75, 1)<<8) | 0xFF;
+        int alpha = ptd.col & 255;
+        if(alpha == 255)
+          ptd.col = (gradient(backcolor, c>>8, 0, backbrightness, 1)<<8) | 0xFF;
+        else ptd.col = ptd.col - alpha + int(backbrightness * alpha);
         drawqueueitem(ptd);
         ptd.col = c;
         }

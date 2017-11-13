@@ -2126,3 +2126,4 @@ bool handleCompass();
 bool sphereflipped() { return sphere && vid.alpha > 1.1; }
 int cellcolor(cell *c);
 transmatrix screenpos(ld x, ld y);
+extern ld backbrightness;

@@ -310,6 +310,7 @@ void initConfig() {
   addsaverenum(specialland, "land for special modes");
   
   addsaver(viewdists, "expansion mode");
+  addsaver(backbrightness, "brightness behind sphere");
   
 #if CAP_SHMUP  
   shmup::initConfig();
@@ -1022,6 +1023,9 @@ void show3D() {
   dialog::addBoolItem(XLAT("hyperboloid model"), pmodel == mdHyperboloid, 'M');
   dialog::addSelItem(XLAT("camera rotation in ball model"), fts3(vid.ballangle), 'b');
   dialog::addSelItem(XLAT("projection in ball model"), fts3(vid.ballproj), 'x');
+  
+  if(sphere)
+    dialog::addSelItem(XLAT("brightness behind the sphere"), fts3(backbrightness), 'i');
 
   dialog::addBreak(50);
   if(!(wmspatial || mmspatial))
@@ -1088,6 +1092,9 @@ void show3D() {
       cmode &= sm::A3,
       dialog::editNumber(vid.ballproj, 0, 100, .1, 0, XLAT("projection in ball model"), 
         "This parameter affects the ball model the same way as the projection parameter affects the disk model.");
+    else if(uni == 'i') 
+      dialog::editNumber(backbrightness, 0, 1, .01, 0.25, XLAT("brightness behind the sphere"), 
+        "brightness behind the sphere");
     else if(uni == 'B') 
       pmodel = (pmodel == mdBall ? mdDisk : mdBall);
     else if(uni == 'M') 
