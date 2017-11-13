@@ -646,11 +646,6 @@ namespace conformal {
         }
       polygonal::solve();
       vid.alpha = 1; vid.scale = 1;
-      /* if(pmodel && vid.usingGL) {
-        addMessage(XLAT("openGL mode disabled"));
-        vid.usingGL = false;
-        setvideomode();
-        } */
       }
     else if(sym == 'x' && pmodel == mdPolygonal)
       dialog::editNumber(polygonal::SI, 3, 10, 1, 4, XLAT("polygon sides"), "");
