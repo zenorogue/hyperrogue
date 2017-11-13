@@ -179,7 +179,7 @@ void add1(const hyperpoint& H) {
   for(int i=0; i<3; i++) glcoords[qglcoords][i] = H[i];
   }  
 
-int spherespecial;
+int spherespecial, spherephase;
 
 void addpoint(const hyperpoint& H) {
   if(qglcoords >= POLYMAX) return;
@@ -474,6 +474,13 @@ void fixMercator() {
   
 void drawpolyline(polytodraw& p) {
   auto pp = p.u.poly;
+  
+  if(spherespecial && p.prio == PPR_MOBILE_ARROW) {
+    if(spherephase == 0) return;
+    dynamicval<int> ss(spherespecial, 0);
+    drawpolyline(p);
+    return;
+    }
 
 #if CAP_GL
   if(vid.usingGL && pmodel == mdDisk && !spherespecial) {
@@ -530,7 +537,7 @@ void drawpolyline(polytodraw& p) {
     }
   else poly_flags &=~ POLY_INVERSE;
     
-  if(sphere && vid.alphax > 1) {
+  if(sphereflipped()) {
     if(!hiliteclick && !(poly_flags & POLY_INFRONT)) return;
     }
     
@@ -542,6 +549,18 @@ void drawpolyline(polytodraw& p) {
       for(int i=0; i<qglcoords; i++)
         glcoords[i][mercator_coord] += vid.radius * 4 * (l - lastl);
       lastl = l;
+      }
+
+    if((pmodel == mdEquidistant || pmodel == mdEquiarea) && (poly_flags & POLY_INVERSE)) {
+      ld h = atan2(glcoords[0][0], glcoords[0][1]);
+      for(int i=0; i<=360; i++) {
+        ld a = i * M_PI / 180 + h;
+        glcoords[qglcoords][0] = vid.radius * sin(a);
+        glcoords[qglcoords][1] = vid.radius * cos(a);
+        glcoords[qglcoords][2] = vid.scrdist;
+        qglcoords++;
+        }
+      poly_flags ^= POLY_INVERSE;
       }
   
   #if CAP_GL
@@ -572,11 +591,13 @@ void drawpolyline(polytodraw& p) {
   
     if(poly_flags & POLY_INVERSE) {
       int i = polyi;
-      polyx[i] = 0; polyy[i] = 0; i++;
-      polyx[i] = vid.xres; polyy[i] = 0; i++;
-      polyx[i] = vid.xres; polyy[i] = vid.yres; i++;
-      polyx[i] = 0; polyy[i] = vid.yres; i++;
-      polyx[i] = 0; polyy[i] = 0; i++;
+      if(true) {
+        polyx[i] = 0; polyy[i] = 0; i++;
+        polyx[i] = vid.xres; polyy[i] = 0; i++;
+        polyx[i] = vid.xres; polyy[i] = vid.yres; i++;
+        polyx[i] = 0; polyy[i] = vid.yres; i++;
+        polyx[i] = 0; polyy[i] = 0; i++;
+        }
       filledPolygonColorI(s, polyx, polyy, polyi+5, p.col);
       }
     else  
@@ -714,7 +735,7 @@ void quickqueue() {
   }
 
 ld xintval(const hyperpoint& h) {
-  if(sphere && vid.alpha > 1) return -h[2];
+  if(sphereflipped()) return -h[2];
   return -intval(h, C0);
   }
 
@@ -785,9 +806,10 @@ void drawqueue() {
 #endif
 
   spherespecial = 0;
+  spherephase = 0;
   // on the sphere, parts on the back are drawn first
   if(sphere && pmodel == 0) {
-    spherespecial = vid.alphax > 1 ? 1 : -1;
+    spherespecial = sphereflipped() ? 1 : -1;
     #ifndef STLSORT
     for(int p: {PPR_REDWALLs, PPR_REDWALLs2, PPR_REDWALLs3, PPR_WALL3s,
       PPR_LAKEWALL, PPR_INLAKEWALL, PPR_BELOWBOTTOM}) 
@@ -812,6 +834,7 @@ void drawqueue() {
         reverse(&ptds2[qp0[p]], &ptds2[qp[p]]);
     #endif
     spherespecial *= -1;
+    spherephase = 1;
     }
   for(int i=0; i<siz; i++) {
 #ifdef STLSORT
