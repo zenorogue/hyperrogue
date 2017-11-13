@@ -3014,18 +3014,18 @@ void pushdown(cell *c, int& q, const transmatrix &V, double down, bool rezoom, b
       
       ptd.u.poly.V = xyzscale( V, xyscale*zscale, zscale)
         * inverse(V) * ptd.u.poly.V;
-      
+        
       if(!repriority) ;
       else if(nlev < -geom3::lake_bottom-1e-3) {
-        ptd.prio = PPR_BELOWBOTTOM;
+        ptd.prio = PPR_BELOWBOTTOM_FALLANIM;
         if(c->wall != waChasm)
           ptd.col = 0; // disappear!
         }
       else if(nlev < -geom3::lake_top-1e-3)
-        ptd.prio = PPR_INLAKEWALL;
+        ptd.prio = PPR_INLAKEWALL_FALLANIM;
       else if(nlev < 0)
-        ptd.prio = PPR_LAKEWALL;
-      }
+        ptd.prio = PPR_LAKEWALL_FALLANIM;
+      }      
     }
   }
 
@@ -4266,12 +4266,13 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
     
     if(chasmg) {
       int q = size(ptds);
+      int maxtime = euclid || sphere ? 20000 : 1500;
       if(fallanims.count(c)) {
          fallanim& fa = fallanims[c];
          bool erase = true;
          if(fa.t_floor) {
            int t = (ticks - fa.t_floor);
-           if(t <= 1500) {
+           if(t <= maxtime) {
              erase = false;
              if(fa.walltype == waNone)
                warpfloor(c, V, darkena(fcol, fd, 0xFF), PPR_FLOOR, isWarped(c));
@@ -4294,7 +4295,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
          if(fa.t_mon) {
            dynamicval<int> d(multi::cpid, fa.pid);
            int t = (ticks - fa.t_mon);
-           if(t <= 1500) {
+           if(t <= maxtime) {
              erase = false;
              c->stuntime = 0;
              transmatrix V2 = V;
