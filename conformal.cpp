@@ -637,7 +637,7 @@ namespace conformal {
       switchagain: {
         pmodel = eModel((pmodel + (shiftmul > 0 ? 1 : -1) + MODELCOUNT) % MODELCOUNT);
         
-        if(pmodel != mdEquidistant && pmodel != mdDisk && pmodel != mdEquiarea && pmodel != mdPolynomial && pmodel != mdHyperboloid) {
+        if(!mdEqui() && pmodel != mdDisk && pmodel != mdPolynomial && pmodel != mdHyperboloid) {
           if(sphere && pmodel != mdBand)
               goto switchagain;
           if(euclid && pmodel != mdHalfplane && pmodel != mdBall)

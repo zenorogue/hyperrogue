@@ -521,7 +521,7 @@ void drawpolyline(polytodraw& p) {
       return; // too large!
     }
 
-  if((spherespecial > 0 || pmodel == mdEquidistant || pmodel == mdEquiarea) && !(poly_flags & POLY_ISSIDE)) {
+  if((spherespecial > 0 || (sphere && mdEqui())) && !(poly_flags & POLY_ISSIDE)) {
     double rarea = 0;
     for(int i=0; i<qglcoords-1; i++) 
       rarea += glcoords[i][0] * glcoords[i+1][1] - glcoords[i][1] * glcoords[i+1][0];
@@ -551,7 +551,7 @@ void drawpolyline(polytodraw& p) {
       lastl = l;
       }
 
-    if((pmodel == mdEquidistant || pmodel == mdEquiarea) && (poly_flags & POLY_INVERSE)) {
+    if(mdEqui() && (poly_flags & POLY_INVERSE)) {
       ld h = atan2(glcoords[0][0], glcoords[0][1]);
       for(int i=0; i<=360; i++) {
         ld a = i * M_PI / 180 + h;

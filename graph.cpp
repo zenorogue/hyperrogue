@@ -1937,7 +1937,7 @@ int aurac[AURA+1][4];
 
 bool haveaura() {
   if(!(vid.aurastr>0 && !svg::in && (auraNOGL || vid.usingGL))) return false;
-  if(sphere && (pmodel == mdEquidistant || pmodel == mdEquiarea)) return true;
+  if(sphere && mdEqui()) return true;
   return pmodel == mdDisk && (!sphere || vid.alpha > 10) && !euclid;
   }
   
@@ -1989,7 +1989,7 @@ void sumaura(int v) {
 void drawaura() {
   if(!haveaura()) return;
   double rad = vid.radius;
-  if(sphere && pmodel != mdEquidistant && pmodel != mdEquiarea) rad /= sqrt(vid.alphax*vid.alphax - 1);
+  if(sphere && !mdEqui()) rad /= sqrt(vid.alphax*vid.alphax - 1);
   
   for(int v=0; v<4; v++) sumaura(v);
   for(auto& p: auraspecials) {
@@ -5054,10 +5054,10 @@ void drawfullmap() {
     
   ptds.clear();
 
-  if(!vid.goteyes && !euclid && (pmodel == mdDisk || pmodel == mdBall || (sphere && (pmodel == mdEquidistant || pmodel == mdEquiarea)))) {
+  if(!vid.goteyes && !euclid && (pmodel == mdDisk || pmodel == mdBall || (sphere && mdEqui()))) {
     double rad = vid.radius;
     if(sphere) {
-      if(pmodel == mdEquidistant || pmodel == mdEquiarea)
+      if(mdEqui())
         ;
       else if(!vid.grid && !elliptic)
         rad = 0; 

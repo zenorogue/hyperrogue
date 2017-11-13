@@ -1297,6 +1297,8 @@ void drawShape(pair<ld,ld>* coords, int qty, int color);
 
 extern eModel pmodel;
 
+inline bool mdEqui() { return pmodel == mdEquidistant || pmodel == mdEquiarea; }
+
 int darkena(int c, int lev, int a);
 
 #define SHSIZE 16

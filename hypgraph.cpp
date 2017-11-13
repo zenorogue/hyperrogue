@@ -150,7 +150,7 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
     H = H / zlev;
     }
 
-  if(pmodel == mdEquidistant || pmodel == mdEquiarea) {
+  if(mdEqui()) {
     ld rad = sqrt(H[0] * H[0] + H[1] * H[1]);
     ld d = hdist0(H);
     
@@ -166,6 +166,7 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
     if(zlev != 1 && vid.goteyes) 
       ret[2] = geom3::factor_to_lev(zlev);
     ghcheck(ret,H);
+
     return;
     }
   
