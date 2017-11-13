@@ -187,7 +187,7 @@ void addpoint(const hyperpoint& H) {
   if(true) {
     hyperpoint Hscr;             
     applymodel(H, Hscr);
-    if(vid.alphax + H[2] <= BEHIND_LIMIT) poly_flags |= POLY_BEHIND;
+    if(vid.alphax + H[2] <= BEHIND_LIMIT && pmodel == mdDisk) poly_flags |= POLY_BEHIND;
     
     if(spherespecial) {
       double curnorm = H[0]*H[0]+H[1]*H[1]+H[2]*H[2];
