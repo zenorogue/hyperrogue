@@ -5096,10 +5096,12 @@ void drawfullmap() {
     
   ptds.clear();
 
-  if(!vid.goteyes && !euclid && (pmodel == mdDisk || pmodel == mdBall)) {
+  if(!vid.goteyes && !euclid && (pmodel == mdDisk || pmodel == mdBall || (sphere && (pmodel == mdEquidistant || pmodel == mdEquiarea)))) {
     double rad = vid.radius;
     if(sphere) {
-      if(!vid.grid && !elliptic)
+      if(pmodel == mdEquidistant || pmodel == mdEquiarea)
+        ;
+      else if(!vid.grid && !elliptic)
         rad = 0; 
       else if(vid.alphax <= 0)
         ;
