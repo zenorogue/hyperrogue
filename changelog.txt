@@ -2100,3 +2100,20 @@ Map Editor improvements:
 Other:
 - fixed glitches with OoWarp+Hall of Mirrors
 - menus are no longer shown on the side in mobile versions
+
+2017.11.13 12:00 version 10.2d
+- fixed the incorrectly rotated display of Overgrown Floor and Ocean Surface in the standard geometry
+- changing the model in conformal menu automatically resets scale/projection now
+- fixed parts of 3D modelse disappearing in Mercator/equi* on sphere
+- fixed the issues with falling animations (drawn in wrong order); also they remain active for longer time in non-hyperbolic now
+- the center no longer disappears in Euclidean equi* models
+- HUD elements, including the compass, now drawn correctly in all conformal pmodels
+- lines behind sphere are now drawn (darker)
+- better colors for objects behind the sphere when changing the background color
+- fixed model boundary drawing on spheres
+- improvements to the spherical equi* models: the correct circle is used as the boundary, instead of the whole screen; aura
+- conformal/history mode in Menu is now marked ON if any of its features is active
+- improvements to the Map Editor: fixed bugs with copying on new geometries; copying now also copies HP/stuntime; more efficient copying/painting when high radius is selected; "dragon" and "dragon head" show up as different names; buggy dragons are no longer fixed while still in the map editor
+- the factor of darkening the elements behind the sphere is is now configurable (in 3D menu); also works better with transparency now
+- fixed some bugs with the 'movement compass' for mobile devices (correct placement and rotation); it is now also available on all platforms (though probably not that useful not on mobiles)
+- some fixes for shmup in new geometries (untested)
