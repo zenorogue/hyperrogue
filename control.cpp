@@ -399,7 +399,9 @@ void handleKeyNormal(int sym, int uni) {
       if(!shmup::on)
         multi::mousemovement(mouseover);
       }
-    else mousemovement();
+    else if(handleCompass()) ;
+    else
+      mousemovement();
     }
 
   if(sym == SDLK_F1) gotoHelp(help);
@@ -791,3 +793,32 @@ void gmodekeys(int sym, int uni) {
     }
   }
 
+bool haveMobileCompass() {
+#if CAP_MOBILE
+  if(andmode || useRangedOrb) return false;
+#else
+  if(forcetarget) return false;
+#endif
+  return canmove && !shmup::on && vid.mobilecompasssize > 0 && size(screens) == 1;
+  }
+  
+bool handleCompass() {
+  if(!haveMobileCompass()) return false;
+  
+  using namespace shmupballs;
+  int dx = mousex - xmove;
+  int dy = mousey - yb;
+  int h = hypot(dx, dy);
+  if(h < rad) {
+    if(h < rad*SKIPFAC) movepcto(MD_WAIT);
+    else {
+      double d = vid.revcontrol ? -1 : 1;
+      mouseh = hpxy(dx * d / rad, dy * d / rad);
+      mousemovement();
+      }
+    getcstat = 0;
+    return true;
+    }
+
+  return false;
+  }

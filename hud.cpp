@@ -296,6 +296,37 @@ bool nohud, nomenukey;
 
 hookset<bool()> *hooks_prestats;
 
+void drawMobileArrow(cell *c, transmatrix V) {
+
+  // int col = getcs().uicolor;
+  // col -= (col & 0xFF) >> 1;
+  
+  int dir = neighborId(cwt.c, c);
+  bool invalid = !legalmoves[dir];
+  
+  int col = cellcolor(c);
+  if(col == OUTLINE_NONE) col = 0xC0C0C0FF;
+  col -= (col & 0xFF) >> 1;
+  if(invalid) col -= (col & 0xFF) >> 1;
+  if(invalid) col -= (col & 0xFF) >> 1;
+  
+  poly_outline = OUTLINE_DEFAULT;
+  // transmatrix m2 = Id;
+  ld scale = vid.mobilecompasssize * 7;
+  // m2[0][0] = scale; m2[1][1] = scale; m2[2][2] = 1;
+  
+  transmatrix Centered = rgpushxto0(tC0(cwtV * sphereflip));
+  transmatrix t = inverse(Centered) * V;
+  double alpha = atan2(tC0(t)[1], tC0(t)[0]);
+
+  using namespace shmupballs;
+  
+  double dx = xmove + rad*(1+SKIPFAC-.2)/2 * cos(alpha);
+  double dy = yb + rad*(1+SKIPFAC-.2)/2 * sin(alpha);
+  
+  queuepolyat(atscreenpos(dx, dy, scale) * spin(-alpha), shArrow, col, PPR_MOBILE_ARROW);
+  }
+
 void drawStats() {
   callhandlers(false, hooks_prestats);
 #if CAP_ROGUEVIZ
@@ -338,6 +369,27 @@ void drawStats() {
     dialog::display();
     }
   if(sidescreen) return;
+
+  {
+  dynamicval<eModel> pm(pmodel, mdDisk);
+  dynamicval<ld> va(vid.alpha, 1);
+  dynamicval<ld> vax(vid.alphax, 1);
+  dynamicval<videopar> v(vid, vid);
+  calcparam();
+  selectEyeGL(0);
+
+  if(haveMobileCompass()) {
+    initquickqueue();
+    using namespace shmupballs;
+    calc();
+    queuecircle(xmove, yb, rad, 0xFF0000FF);
+    queuecircle(xmove, yb, rad*SKIPFAC, 
+      legalmoves[MAX_EDGE] ? 0xFF0000FF : 0xFF000080
+      );
+    forCellEx(c2, cwt.c) if(gmatrix.count(c2)) drawMobileArrow(c2, gmatrix[c2]);
+    if(hypot(mousex-xmove, mousey-yb) <= rad) getcstat = '-';
+    quickqueue();
+    }
   
   if(vid.xres > vid.yres * 85/100 && vid.yres > vid.xres * 85/100) {
     int bycorner[4];
@@ -495,5 +547,9 @@ XLAT(
   achievement_display();
 
   callhooks(hooks_stats);
+  }
+  
+  calcparam();
+  selectEyeGL(0);
   }
 

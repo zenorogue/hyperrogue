@@ -1164,6 +1164,7 @@ enum PPR {
   PPR_CARRIED, PPR_CARRIEDa, PPR_CARRIEDb,
   PPR_PARTICLE, PPR_SWORDMARK, PPR_MAGICSWORD, PPR_MISSILE, 
   PPR_MINEMARK, PPR_ARROW,
+  PPR_MOBILE_ARROW,
   PPR_LINE, PPR_TEXT, PPR_CIRCLE,
   PPR_MAX
   };
@@ -2110,3 +2111,13 @@ int isLandValid(eLand l);
 
 bool inmirrororwall(eLand l);
 extern bool holdmouse;
+
+// what part of the compass does 'skip turn'
+static const auto SKIPFAC = .4;
+
+bool haveMobileCompass();
+bool handleCompass();
+
+bool sphereflipped() { return sphere && vid.alpha > 1.1; }
+int cellcolor(cell *c);
+transmatrix screenpos(ld x, ld y);

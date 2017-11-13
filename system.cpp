@@ -272,6 +272,7 @@ void initgame() {
   
   lastsafety = gold();
   bfs();
+  checkmove();
   }
 
 bool havesave = true;

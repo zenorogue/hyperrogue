@@ -2336,37 +2336,6 @@ void drawMovementArrows(cell *c, transmatrix V) {
     }
   }
 
-void drawMobileArrow(cell *c, transmatrix V) {
-
-  // int col = getcs().uicolor;
-  // col -= (col & 0xFF) >> 1;
-  
-  int dir = neighborId(cwt.c, c);
-  bool invalid = !legalmoves[dir];
-  
-  int col = cellcolor(c);
-  if(col == OUTLINE_NONE) col = 0xC0C0C0FF;
-  col -= (col & 0xFF) >> 1;
-  if(invalid) col -= (col & 0xFF) >> 1;
-  if(invalid) col -= (col & 0xFF) >> 1;
-  
-  poly_outline = OUTLINE_DEFAULT;
-  transmatrix m2 = Id;
-  ld scale = vid.mobilecompasssize / 15.;
-  m2[0][0] = scale; m2[1][1] = scale; m2[2][2] = 1;
-  
-  transmatrix Centered = rgpushxto0(tC0(cwtV * sphereflip));
-  transmatrix t = inverse(Centered) * V;
-  double alpha = atan2(tC0(t)[1], tC0(t)[0]);
-
-  using namespace shmupballs;
-  
-  double dx = xmove + rad*(1+SKIPFAC-.2)/2 * cos(alpha);
-  double dy = yb + rad*(1+SKIPFAC-.2)/2 * sin(alpha);
-  
-  queuepolyat(screenpos(dx, dy) * spin(-alpha) * m2, shArrow, col, PPR_MOBILE_ARROW);
-  }
-
 int celldistAltPlus(cell *c) { return 1000000 + celldistAlt(c); }
 
 bool drawstaratvec(double dx, double dy) {
@@ -4720,17 +4689,6 @@ void drawMarkers() {
       }
 
     // process mouse
-
-    if(haveMobileCompass()) {
-      using namespace shmupballs;
-      calc();
-      queuecircle(xmove, yb, rad, 0xFF0000FF);
-      queuecircle(xmove, yb, rad*SKIPFAC, 
-        legalmoves[MAX_EDGE] ? 0xFF0000FF : 0xFF000080
-        );
-      forCellAll(c2, cwt.c) IG(c2) drawMobileArrow(c2, Gm(c2));
-      if(hypot(mousex-xmove, mousey-yb) <= rad) getcstat = '-';
-      }
 
     if((vid.axes == 4 || (vid.axes == 1 && !mousing)) && !shmup::on) {
       if(multi::players == 1) {

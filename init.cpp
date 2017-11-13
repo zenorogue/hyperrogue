@@ -14,7 +14,7 @@
 #define NOLICENSE
 #endif
 
-#define VER "10.23"
+#define VER "10.2c"
 #define VERNUM 10203
 #define VERNUM_HEX 0xA093
 
@@ -84,6 +84,10 @@
 
 #ifndef CAP_SDL
 #define CAP_SDL (!ISMOBILE)
+#endif
+
+#ifdef CAP_COMPASS
+#define CAP_COMPASS ISMOBILE
 #endif
 
 #ifndef CAP_SDLGFX
@@ -472,22 +476,7 @@ bool useRangedOrb;
 
 void handleclick(MOBPAR_FORMAL) {
 
-    if(!shmup::on && andmode == 0 && size(screens) == 1 && canmove && !useRangedOrb && vid.mobilecompasssize > 0) {
-      using namespace shmupballs;
-      int dx = mousex - xmove;
-      int dy = mousey - yb;
-      int h = hypot(dx, dy);
-      if(h < rad) {
-        if(h < rad*SKIPFAC) movepcto(MD_WAIT);
-        else {
-          double d = vid.revcontrol ? -1 : 1;
-          mouseh = hpxy(dx * d / rad, dy * d / rad);
-          mousemovement();
-          }
-        getcstat = 0;
-        return;
-        }
-      }
+    if(handleCompass()) return;
 
     if(buttonclicked || mouseout()) {
 

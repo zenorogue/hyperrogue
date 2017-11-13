@@ -196,7 +196,7 @@ void initConfig() {
   addsaver(vid.timeformat, "message log time format", 0);
   addsaver(fontscale, "fontscale", 100);
 
-  addsaver(vid.mobilecompasssize, "mobile compass size", 30);
+  addsaver(vid.mobilecompasssize, "mobile compass size", ISMOBILE || ISPANDORA ? 30 : 0);
   addsaver(vid.axes, "movement help", 1);
   addsaver(vid.shifttarget, "shift-targetting", 2);
   addsaver(vid.steamscore, "scores to Steam", 1);
@@ -616,9 +616,7 @@ void showGraphConfig() {
 
   dialog::addSelItem(XLAT("sight range"), its(sightrange), 'r');
 
-#if ISMOBILE==1
   dialog::addSelItem(XLAT("compass size"), its(vid.mobilecompasssize), 'c');
-#endif
 
   dialog::addSelItem(XLAT("aura brightness"), its(vid.aurastr), 'z');
   dialog::addSelItem(XLAT("aura smoothening factor"), its(vid.aurasmoothen), 'x');
@@ -689,8 +687,11 @@ void showGraphConfig() {
     if(xuni == 'w' && vid.usingGL)
       dialog::editNumber(vid.linewidth, 0, 10, 0.1, 1, XLAT("line width"), "");
   
-    if(xuni == 'c') 
+    if(xuni == 'c') {
       dialog::editNumber(vid.mobilecompasssize, 0, 100, 10, 20, XLAT("compass size"), "");
+      // we need to check the moves
+      dialog::reaction = checkmove;
+      }
 
   #if CAP_FRAMELIMIT    
     if(xuni == 'l') 

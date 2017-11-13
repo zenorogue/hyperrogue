@@ -775,8 +775,12 @@ int rhypot(int a, int b) { return (int) sqrt(a*a - b*b); }
 
 ld realradius() {
   ld vradius = vid.radius;
-  if(sphere && vid.alphax > 1) vradius /= sqrt(vid.alphax*vid.alphax - 1);
-  if(sphere && vid.alphax <= 1) vradius = 1e12; // use the following
+  if(sphere) {
+    if(sphereflipped()) 
+      vradius /= sqrt(vid.alphax*vid.alphax - 1);
+    else
+      vradius = 1e12; // use the following
+    }
   vradius = min<ld>(vradius, min(vid.xres, vid.yres) / 2);
   return vradius;
   }
