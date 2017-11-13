@@ -3349,15 +3349,15 @@ transmatrix calc_relative_matrix(cell *c, heptagon *h1) {
   transmatrix gm = Id;
   heptagon *h2 = c->master;
   transmatrix where = Id;
-  for(int d=0; d<7; d++) if(h2->c7->mov[d] == c)
+  for(int d=0; d<S7; d++) if(h2->c7->mov[d] == c)
     where = hexmove[d];
   // always add to last!
 //bool hsol = false;
 //transmatrix sol;
   while(h1 != h2) {
-    for(int d=0; d<7; d++) if(h2->move[d] == h1) {
+    for(int d=0; d<S7; d++) if(h2->move[d] == h1) {
       int sp = h2->spin(d);
-      return gm * heptmove[sp] * spin(2*M_PI*d/7) * where;
+      return gm * heptmove[sp] * spin(2*M_PI*d/S7) * where;
       }
     if(h1->distance < h2->distance) {
       int sp = h2->spin(0);
@@ -3421,11 +3421,11 @@ transmatrix calc_relative_matrix_help(cell *c, heptagon *h1) {
   transmatrix gm = Id;
   heptagon *h2 = c->master;
   transmatrix where = Id;
-  if(!nontruncated) for(int d=0; d<7; d++) if(h2->c7->mov[d] == c)
+  if(!nontruncated) for(int d=0; d<S7; d++) if(h2->c7->mov[d] == c)
     where = hexmove[d];
   // always add to last!
   while(h1 != h2) {
-    for(int d=0; d<7; d++) if(h1->move[d] == h2) printf("(adj) ");
+    for(int d=0; d<S7; d++) if(h1->move[d] == h2) printf("(adj) ");
     if(h1->distance < h2->distance) {
       int sp = h2->spin(0);
       printf("A%d ", sp);
@@ -3470,9 +3470,9 @@ void virtualRebase(cell*& base, transmatrix& at, bool tohex) {
 
   while(true) {
   
-    if(base->type == 6) {
+    if(!ctof(base)) {
       cell *c7 = base->master->c7;
-      for(int d=0; d<7; d++) if(c7->mov[d] == base)
+      for(int d=0; d<S7; d++) if(c7->mov[d] == base)
         at = hexmove[d] * at;
       base = c7;
       }
@@ -3485,12 +3485,12 @@ void virtualRebase(cell*& base, transmatrix& at, bool tohex) {
     
     transmatrix bestV;
     
-    for(int d=0; d<7; d++) {
+    for(int d=0; d<S7; d++) {
       heptspin hs;
       hs.h = h;
       hs.spin = d;
       heptspin hs2 = hsstep(hs, 0);
-      transmatrix V2 = spin((nontruncated?M_PI:0)-hs2.spin*2*M_PI/7) * invheptmove[d];
+      transmatrix V2 = spin((nontruncated?M_PI:0)-hs2.spin*2*M_PI/S7) * invheptmove[d];
       if(nontruncated) V2 = V2 * spin(M_PI);
       double newz = (V2 * at * C0) [2];
       if(newz < currz) {
@@ -3501,9 +3501,9 @@ void virtualRebase(cell*& base, transmatrix& at, bool tohex) {
       }
 
     if(!newbase) {
-      if(tohex && !nontruncated) for(int d=0; d<7; d++) {
+      if(tohex && !nontruncated) for(int d=0; d<S7; d++) {
         cell *c = createMov(base, d);
-        transmatrix V2 = spin(-base->spn(d)*2*M_PI/6) * invhexmove[d];
+        transmatrix V2 = spin(-base->spn(d)*2*M_PI/S6) * invhexmove[d];
         double newz = (V2 *at * C0) [2];
         if(newz < currz) {
           currz = newz;
