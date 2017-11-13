@@ -822,9 +822,9 @@ void drawqueue() {
   #else
       polytodraw& ptd (*ptds2[i]);
   #endif
-      if(ptd.kind == pkPoly) {
+      if(ptd.kind == pkPoly || ptd.kind == pkLine) {
         unsigned c = ptd.col;
-        ptd.col = ((c & 0xFCFCFC00) >> 2) | (c & 0xFF);
+        ptd.col = (gradient(c>>8, backcolor, 0, .75, 1)<<8) | 0xFF;
         drawqueueitem(ptd);
         ptd.col = c;
         }
