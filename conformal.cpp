@@ -645,6 +645,7 @@ namespace conformal {
           }
         }
       polygonal::solve();
+      vid.alpha = 1; vid.scale = 1;
       /* if(pmodel && vid.usingGL) {
         addMessage(XLAT("openGL mode disabled"));
         vid.usingGL = false;
