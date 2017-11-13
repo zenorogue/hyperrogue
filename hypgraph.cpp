@@ -152,6 +152,7 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
 
   if(mdEqui()) {
     ld rad = sqrt(H[0] * H[0] + H[1] * H[1]);
+    if(rad == 0) rad = 1;
     ld d = hdist0(H);
     
     // 4 pi / 2pi = M_PI 
