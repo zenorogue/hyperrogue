@@ -611,9 +611,11 @@ namespace inv {
       };
     }
 
+#if CAP_SAVE
   void applyBox(eItem it) {
     applyBoxNum(usedup[it]);
     }
+#endif
   
   int incheck;
   

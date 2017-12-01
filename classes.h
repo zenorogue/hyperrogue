@@ -214,3 +214,5 @@ extern geometryinfo ginf[gGUARD];
 
 extern monstertype minf[motypes];
 extern itemtype iinf[ittypes];
+
+extern const landtype linf[landtypes];

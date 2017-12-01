@@ -3,8 +3,6 @@
 
 // cells the game is played on
 
-#define DEBMEM(x) // { x fflush(stdout); }
-                    
 int fix6(int a) { return (a+MODFIXER)%S6; }
 int fix7(int a) { return (a+MODFIXER)%S7; }
 
@@ -45,14 +43,6 @@ struct cdata {
 
 // -- hrmap ---
 
-struct hrmap {
-  virtual heptagon *getOrigin() { return NULL; }
-  virtual cell *gamestart() { return getOrigin()->c7; }
-  virtual ~hrmap() { };
-  virtual vector<cell*>& allcells() { return dcal; }
-  virtual void verify() { }
-  };
-
 hrmap *currentmap;
 vector<hrmap*> allmaps;
 
@@ -66,36 +56,24 @@ struct hrmap_alternate : hrmap {
 hrmap *newAltMap(heptagon *o) { return new hrmap_alternate(o); }
 // --- hyperbolic geometry ---
 
-struct hrmap_hyperbolic : hrmap {
-  heptagon *origin;
-  bool isnontruncated;
-  hrmap_hyperbolic() {
-    // printf("Creating hyperbolic map: %p\n", this);
-    origin = new heptagon;
-    heptagon& h = *origin;
-    h.s = hsOrigin;
-    h.emeraldval = 98;
-    h.zebraval = 40;
-    h.fiftyval = 0;
-    h.fieldval = 0;
-    h.rval0 = h.rval1 = 0;
-    h.cdata = NULL;
-    for(int i=0; i<MAX_EDGE; i++) h.move[i] = NULL;
-    h.spintable = 0;
-    h.alt = NULL;
-    h.distance = 0;
-    isnontruncated = nontruncated;
-    h.c7 = newCell(S7, origin);
-    }
-  heptagon *getOrigin() { return origin; }
-  ~hrmap_hyperbolic() {
-    DEBMEM ( verifycells(origin); )
-    // printf("Deleting hyperbolic map: %p\n", this);
-    dynamicval<bool> ph(nontruncated, isnontruncated);
-    clearfrom(origin);
-    }
-  void verify() { verifycells(origin); }
-  };
+hrmap_hyperbolic::hrmap_hyperbolic() {
+  // printf("Creating hyperbolic map: %p\n", this);
+  origin = new heptagon;
+  heptagon& h = *origin;
+  h.s = hsOrigin;
+  h.emeraldval = 98;
+  h.zebraval = 40;
+  h.fiftyval = 0;
+  h.fieldval = 0;
+  h.rval0 = h.rval1 = 0;
+  h.cdata = NULL;
+  for(int i=0; i<MAX_EDGE; i++) h.move[i] = NULL;
+  h.spintable = 0;
+  h.alt = NULL;
+  h.distance = 0;
+  isnontruncated = nontruncated;
+  h.c7 = newCell(S7, origin);
+  }
 
 // --- spherical geometry ---
 

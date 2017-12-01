@@ -74,6 +74,10 @@
 #define EXTERNALFONT
 #endif
 
+#ifndef CAP_FILES
+#define CAP_FILES 1
+#endif
+
 #ifndef CAP_INV
 #define CAP_INV 1
 #endif
@@ -113,7 +117,7 @@
 #endif
 
 #ifndef CAP_EDIT
-#define CAP_EDIT (!ISWEB && !ISMINI)
+#define CAP_EDIT (CAP_FILES && !ISWEB && !ISMINI)
 #endif
 
 #ifndef CAP_MODEL
@@ -121,11 +125,11 @@
 #endif
 
 #ifndef CAP_SAVE
-#define CAP_SAVE (!ISWEB && !ISMINI)
+#define CAP_SAVE (CAP_FILES && !ISWEB && !ISMINI)
 #endif
 
 #ifndef CAP_CONFIG
-#define CAP_CONFIG (!ISWEB && !ISMINI)
+#define CAP_CONFIG (CAP_FILES && !ISWEB && !ISMINI)
 #endif
 
 #ifndef CAP_TRANS
@@ -160,6 +164,13 @@
 #ifndef CAP_SVG
 #define CAP_SVG (!ISMOBILE)
 #endif
+
+#ifndef CAP_POLY
+#define CAP_POLY (CAP_SDLGFX || CAP_GL || CAP_SVG)
+#endif
+
+#define CAP_QUEUE CAP_POLY
+#define CAP_CURVE CAP_POLY
 
 #ifndef CAP_SDLJOY
 #define CAP_SDLJOY (CAP_SDL && !ISWEB)
@@ -282,6 +293,7 @@ inline Uint8 *SDL_GetKeyState(void *v) { static Uint8 tab[1024]; return tab; }
 #define CAP_GLEW (CAP_GL && !ISMOBILE && !ISMAC && !ISLINUX)
 #endif
 
+#if CAP_GL
 #if CAP_GLEW
   #include <GL/glew.h>
 #else
@@ -302,6 +314,7 @@ inline Uint8 *SDL_GetKeyState(void *v) { static Uint8 tab[1024]; return tab; }
     #include <GL/glext.h>
     #endif
   #endif
+#endif
 
 #include <functional>
 #include <memory>
@@ -355,15 +368,6 @@ FILE *debfile;
 FILE *debugfile;
 int debugflags;
 
-#if CAP_COMMANDLINE
-const char *scorefile = "hyperrogue.log";
-const char *conffile = "hyperrogue.ini";
-string levelfile = "hyperrogue.lev";
-string picfile = "hyperrogue.pic";
-const char *musicfile = "";
-const char *loadlevel = NULL;
-#endif
-
 string s0;
 
 bool fixseed = false;
@@ -374,7 +378,9 @@ eLand firstland0;
 void initAll() {
   showstartmenu = true;
   ca::init();
+#if CAP_COMMANDLINE
   arg::read(1);
+#endif
   srand(time(NULL));
   shrand(fixseed ? startseed : time(NULL));
 

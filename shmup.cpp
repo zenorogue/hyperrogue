@@ -476,8 +476,6 @@ bool notremapped(int sym) {
   return k > multi::players;
   }
 
-#if CAP_CONFIG
-
 void initConfig() {
   vid.scfg.players = 1;
   
@@ -597,6 +595,7 @@ void initConfig() {
   for(int i=0; i<7; i++) addsaver(multi::scs[i], "player"+its(i));
   }
 
+#if CAP_CONFIG
 void scanchar(FILE *f, char& c) {
   int i = c;
   int err = fscanf(f, "%d", &i);
@@ -983,142 +982,73 @@ void fixelliptic(transmatrix& at) {
     }
   }
 
-struct monster {
-  eMonster type;
-  cell *base;
-  cell *torigin; 
-    // tortoises: origin
-    // butterflies: last position
-  transmatrix at;
-  transmatrix pat;
-  eMonster stk;
-  bool dead;
-  bool notpushed;
-  bool inBoat;
-  monster *parent; // who shot this missile
-  eMonster parenttype; // type of the parent
-  int nextshot;    // when will it be able to shot (players/flailers)
-  int pid;         // player ID
-  char hitpoints;
-  int stunoff;
-  int blowoff;
-  double swordangle; // sword angle wrt at
-  double vel;        // velocity, for flail balls
-  double footphase;
-  bool isVirtual;  // off the screen: gmatrix is unknown, and pat equals at
-  
-  monster() { 
-    dead = false; inBoat = false; parent = NULL; nextshot = 0; 
-    stunoff = 0; blowoff = 0; footphase = 0;
-    }
+void monster::store() {
+  monstersAt.insert(make_pair(base, this));
+  }
 
-  void store() {
-    monstersAt.insert(make_pair(base, this));
-    }
-    
-  void findpat() {
-    isVirtual = !gmatrix.count(base);
-    if(!isVirtual) pat = gmatrix[base] * at;
-    else pat = at;
-    }
+void monster::findpat() {
+  isVirtual = !gmatrix.count(base);
+  if(!isVirtual) pat = gmatrix[base] * at;
+  else pat = at;
+  }
 
-  cell *findbase(const transmatrix& T) {
-    if(isVirtual) {
-      cell *c = base;
-      auto cT = T;
-      virtualRebase(c, cT, true);
-      return c;
-      }
-    else return findbaseAround(T, base);
+cell *monster::findbase(const transmatrix& T) {
+  if(isVirtual) {
+    cell *c = base;
+    auto cT = T;
+    virtualRebase(c, cT, true);
+    return c;
     }
+  else return findbaseAround(T, base);
+  }
 
-  void rebasePat(const transmatrix& new_pat) {
-    if(isVirtual) { 
-      at = new_pat;
-      virtualRebase(this, true); 
-      fixmatrix(at); pat = at;
-      return;
-      }
-    if(geometry == gQuotient || geometry == gTorus) {
-      at = inverse(gmatrix[base]) * new_pat;
-      virtualRebase(this, true);
-      fixmatrix(at);
-      return;
-      }
-    pat = new_pat;
-    cell *c2 = findbase(pat);
-    // if(c2 != base) printf("rebase %p -> %p\n", base, c2);
-    base = c2;
-    at = inverse(gmatrix[c2]) * pat;
+void monster::rebasePat(const transmatrix& new_pat) {
+  if(isVirtual) { 
+    at = new_pat;
+    virtualRebase(this, true); 
+    fixmatrix(at); pat = at;
+    return;
+    }
+  if(geometry == gQuotient || geometry == gTorus) {
+    at = inverse(gmatrix[base]) * new_pat;
+    virtualRebase(this, true);
     fixmatrix(at);
-    fixelliptic(at);
+    return;
     }
+  pat = new_pat;
+  cell *c2 = findbase(pat);
+  // if(c2 != base) printf("rebase %p -> %p\n", base, c2);
+  base = c2;
+  at = inverse(gmatrix[c2]) * pat;
+  fixmatrix(at);
+  fixelliptic(at);
+  }
 
-  /* void rebaseAt(const transmatrix& new_at) {
-    rebasePat(gmatrix[base] * new_at);
-    } */
+bool trackroute(monster *m, transmatrix goal, double spd) {
+  cell *c = m->base;
+  
+  // queuepoly(goal, shGrail, 0xFFFFFFC0);
 
-  bool trackroute(transmatrix goal, double spd) {
-    cell *c = base;
-    
-    // queuepoly(goal, shGrail, 0xFFFFFFC0);
+  transmatrix mat = inverse(m->pat) * goal;
+  
+  transmatrix mat2 = spintox(mat*C0) * mat;
+  
+  double d = 0, dist = asinh(mat2[0][2]);
 
-    transmatrix mat = inverse(pat) * goal;
-    
-    transmatrix mat2 = spintox(mat*C0) * mat;
-    
-    double d = 0, dist = asinh(mat2[0][2]);
+  while(d < dist) {
+    d += spd;
+    transmatrix nat = m->pat * rspintox(mat * C0) * xpush(d); 
 
-    while(d < dist) {
-      d += spd;
-      transmatrix nat = pat * rspintox(mat * C0) * xpush(d); 
+    // queuepoly(nat, shKnife, 0xFFFFFFC0);
 
-      // queuepoly(nat, shKnife, 0xFFFFFFC0);
-
-      cell *c2 = findbaseAround(nat, c);
-      if(c2 != c && !passable_for(type, c2, c, P_CHAIN | P_ONPLAYER)) {
-        return false;
-        }
-      c = c2;
+    cell *c2 = findbaseAround(nat, c);
+    if(c2 != c && !passable_for(m->type, c2, c, P_CHAIN | P_ONPLAYER)) {
+      return false;
       }
-    return true;
+    c = c2;
     }
-
-  bool trackrouteView(transmatrix goal, double spd) {
-    cell *c = base;
-    
-    queuepoly(goal, shGrail, 0xFFFFFFC0);
-
-    transmatrix mat = inverse(pat) * goal;
-    
-    transmatrix mat2 = spintox(mat*C0) * mat;
-    
-    double d = 0, dist = asinh(mat2[0][2]);
-
-    while(d < dist) {
-      d += spd;
-      transmatrix nat = pat * rspintox(mat * C0) * xpush(d); 
-
-      // queuepoly(nat, shKnife, 0xFFFFFFC0);
-
-      cell *c2 = findbaseAround(nat, c);
-      if(c2 != c) {
-        if(0) printf("old dist: %lf\n", (double) intval(nat*C0, gmatrix[c]*C0));
-        if(0) printf("new dist: %lf\n", (double) intval(nat*C0, gmatrix[c2]*C0));
-        }
-      queuepoly(gmatrix[c2], shKnife, 0xFF0000FF);
-      if(c2 != c && !passable_for(type, c2, c, P_CHAIN))
-        return false;
-      c = c2;
-      }
-    if(0) printf("dist = %lf, d = %lf, spd = %lf, lint = %lf, lcd = %lf\n", dist, d, spd, 
-      (double) intval(pat * rspintox(mat * C0) * xpush(d)*C0, goal*C0),
-      (double) intval(pat * rspintox(mat * C0) * xpush(d)*C0, gmatrix[c]*C0)
-      );
-    return true;
-    }
-
-  };
+  return true;
+  }
 
 monster *pc[MAXPLAYER], *mousetarget, *lmousetarget;
 
@@ -2466,7 +2396,7 @@ void moveMonster(monster *m, int delta) {
       sort(bugtargets.begin(), bugtargets.end(), closer);
   
       for(monster *m2: bugtargets)
-        if(m->trackroute(m2->pat, step)) {
+        if(trackroute(m, m2->pat, step)) {
           goal = m2->pat;
           direct = true;
           break;
@@ -2511,7 +2441,7 @@ void moveMonster(monster *m, int delta) {
       }
     else if(!direct && !invismove && !peace::on) {
       for(int i=0; i<players; i++) 
-        if(m->trackroute(pc[i]->pat, step) && (!direct || intval(pc[i]->pat*C0, m->pat*C0) < intval(goal*C0,m->pat*C0))) {
+        if(trackroute(m, pc[i]->pat, step) && (!direct || intval(pc[i]->pat*C0, m->pat*C0) < intval(goal*C0,m->pat*C0))) {
           goal = pc[i]->pat;
           direct = true;
           directi = i;
@@ -2520,7 +2450,7 @@ void moveMonster(monster *m, int delta) {
         }
   
     if(!direct && !peace::on) while(true) {
-      if(m->trackroute(gmatrix[c], step))
+      if(trackroute(m, gmatrix[c], step))
         goal = gmatrix[c];
       cell *cnext = c;
       for(int i=0; i<c->type; i++) {

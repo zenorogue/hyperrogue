@@ -165,12 +165,6 @@ extern int hrand(int);
 
 // a structure used to walk on the heptagonal tesselation
 // (remembers not only the heptagon, but also direction)
-struct heptspin {
-  heptagon *h;
-  int spin;
-  bool mirrored;
-  heptspin() { mirrored = false; }
-  };
 
 heptspin hsstep(const heptspin &hs, int spin) {
   createStep(hs.h, hs.spin);

@@ -150,28 +150,11 @@ const transmatrix MirrorX = {{{-1,0,0}, {0,1,0}, {0,0,1}}};
 // rotate by PI
 const transmatrix pispin = {{{-1,0,0}, {0,-1,0}, {0,0,1}}};
 
-hyperpoint operator * (const transmatrix& T, const hyperpoint& H) {
-  hyperpoint z;
-  for(int i=0; i<3; i++) {
-    z[i] = 0;
-    for(int j=0; j<3; j++) z[i] += T[i][j] * H[j];
-    }
-  return z;
-  }
-
 // T * C0, optimized
 inline hyperpoint tC0(const transmatrix &T) {
   hyperpoint z;
   z[0] = T[0][2]; z[1] = T[1][2]; z[2] = T[2][2];
   return z;
-  }
-
-inline transmatrix operator * (const transmatrix& T, const transmatrix& U) {
-  transmatrix R;
-  // for(int i=0; i<3; i++) for(int j=0; j<3; j++) R[i][j] = 0;
-  for(int i=0; i<3; i++) for(int j=0; j<3; j++) // for(int k=0; k<3; k++)
-    R[i][j] = T[i][0] * U[0][j] + T[i][1] * U[1][j] + T[i][2] * U[2][j];
-  return R;
   }
 
 // rotate by alpha degrees
@@ -304,8 +287,6 @@ transmatrix rgpushxto0(const hyperpoint& H) {
 
 // fix the matrix T so that it is indeed an isometry
 // (without using this, imprecision could accumulate)
-
-void display(const transmatrix& T);
 
 void fixmatrix(transmatrix& T) {
   if(euclid) {

@@ -26,6 +26,8 @@ typedef long double ld;
 #define ASINH asinhl
 #endif
 
+#define DEBMEM(x) // { x fflush(stdout); }
+
 struct hyperpoint {
   ld tab[3];
   ld& operator [] (int i) { return tab[i]; }
@@ -37,6 +39,23 @@ struct transmatrix {
   ld * operator [] (int i) { return tab[i]; }
   const ld * operator [] (int i) const { return tab[i]; }
   };
+
+inline hyperpoint operator * (const transmatrix& T, const hyperpoint& H) {
+  hyperpoint z;
+  for(int i=0; i<3; i++) {
+    z[i] = 0;
+    for(int j=0; j<3; j++) z[i] += T[i][j] * H[j];
+    }
+  return z;
+  }
+
+inline transmatrix operator * (const transmatrix& T, const transmatrix& U) {
+  transmatrix R;
+  // for(int i=0; i<3; i++) for(int j=0; j<3; j++) R[i][j] = 0;
+  for(int i=0; i<3; i++) for(int j=0; j<3; j++) // for(int k=0; k<3; k++)
+    R[i][j] = T[i][0] * U[0][j] + T[i][1] * U[1][j] + T[i][2] * U[2][j];
+  return R;
+  }
 
 // cell information for the game
 
@@ -143,7 +162,12 @@ struct heptagon {
   unsigned char gspin(int i) { return spin(fixrot(i)); }
   };
 
-struct heptspin;
+struct heptspin {
+  heptagon *h;
+  int spin;
+  bool mirrored;
+  heptspin() { mirrored = false; }
+  };
 
 struct cell : gcell {
   char type; // 6 for hexagons, 7 for heptagons
@@ -203,7 +227,9 @@ string cts(char c);
 string its(int i);
 int hrand(int i);
 
+#ifndef STDSIZE
 template<class T> int size(const T& x) {return int(x.size()); }
+#endif
 
 extern int currentscore[NUMLEADER];
 extern int syncstate;
@@ -406,6 +432,46 @@ namespace shmup {
   void clearMemory();
   void init();
   void teleported();
+  
+  struct monster {
+    eMonster type;
+    cell *base;
+    cell *torigin; 
+      // tortoises: origin
+      // butterflies: last position
+    transmatrix at;
+    transmatrix pat;
+    eMonster stk;
+    bool dead;
+    bool notpushed;
+    bool inBoat;
+    monster *parent; // who shot this missile
+    eMonster parenttype; // type of the parent
+    int nextshot;    // when will it be able to shot (players/flailers)
+    int pid;         // player ID
+    char hitpoints;
+    int stunoff;
+    int blowoff;
+    double swordangle; // sword angle wrt at
+    double vel;        // velocity, for flail balls
+    double footphase;
+    bool isVirtual;  // off the screen: gmatrix is unknown, and pat equals at
+    
+    monster() { 
+      dead = false; inBoat = false; parent = NULL; nextshot = 0; 
+      stunoff = 0; blowoff = 0; footphase = 0;
+      }
+  
+    void store();
+      
+    void findpat();
+  
+    cell *findbase(const transmatrix& T);
+  
+    void rebasePat(const transmatrix& new_pat);
+  
+    };
+
   extern struct monster* mousetarget;
   extern eItem targetRangedOrb(orbAction a);
   void degradeDemons();
@@ -425,9 +491,11 @@ namespace shmup {
   
   void virtualRebase(cell*& base, transmatrix& at, bool tohex);
   void virtualRebase(shmup::monster *m, bool tohex);
+  transmatrix calc_relative_matrix(cell *c, heptagon *h1);
   void fixStorage();
   void addShmupHelp(string& out);
   void activateArrow(cell *c);
+  transmatrix& ggmatrix(cell *c);
   }
 
 // graph
@@ -1057,6 +1125,7 @@ void checkStunKill(cell *dest);
 void clearMessages();
 
 void resetGeometry();
+extern bool nontruncated;
 
 namespace svg {
   void circle(int x, int y, int size, int col);
@@ -1346,8 +1415,6 @@ namespace arg {
   
   void read(int phase);
   
-#else
-  inline void read(int phase) { }
 #endif
   }
 
@@ -1556,7 +1623,7 @@ template<class T, class... U> void callhooks(hookset<T> *h, U... args) {
   if(h) for(auto& p: *h) p.second(args...);
   }
 
-template<class T, class V, class... U> V callhandlers(V zero, hookset<T> *h, U... args) {
+template<class T, class V, class... U> V callhandlers(V zero, hookset<T> *h, U&... args) {
   if(h) for(auto& p: *h) {
     auto z = p.second(args...);
     if(z != zero) return z;
@@ -1843,7 +1910,7 @@ struct qline {
       double width;
       };
       
-#define MAXQCHR 40
+#define MAXQCHR 64
 
 struct qchr {
       char str[MAXQCHR];
@@ -2030,7 +2097,28 @@ int polarb50(cell *c);
 bool isGravityLand(eLand l);
 bool isWarped(eLand l);
 
-struct hrmap;
+struct hrmap {
+  virtual heptagon *getOrigin() { return NULL; }
+  virtual cell *gamestart() { return getOrigin()->c7; }
+  virtual ~hrmap() { };
+  virtual vector<cell*>& allcells() { return dcal; }
+  virtual void verify() { }
+  };
+
+struct hrmap_hyperbolic : hrmap {
+  heptagon *origin;
+  bool isnontruncated;
+  hrmap_hyperbolic();
+  heptagon *getOrigin() { return origin; }
+  ~hrmap_hyperbolic() {
+    DEBMEM ( verifycells(origin); )
+    // printf("Deleting hyperbolic map: %p\n", this);
+    dynamicval<bool> ph(nontruncated, isnontruncated);
+    clearfrom(origin);
+    }
+  void verify() { verifycells(origin); }
+  };
+
 extern hrmap *currentmap;
 extern vector<hrmap*> allmaps;
 
@@ -2123,7 +2211,55 @@ static const auto SKIPFAC = .4;
 bool haveMobileCompass();
 bool handleCompass();
 
-bool sphereflipped() { return sphere && vid.alpha > 1.1; }
+inline bool sphereflipped() { return sphere && vid.alpha > 1.1; }
 int cellcolor(cell *c);
 transmatrix screenpos(ld x, ld y);
 extern ld backbrightness;
+
+void initcells();
+void precalc();
+extern const hyperpoint C0;
+extern const transmatrix Id;
+
+extern long long circlesize[100], disksize[100];
+extern ld circlesizeD[10000];
+void computeSizes();
+
+#if CAP_FILES
+extern const char *scorefile;
+extern const char *conffile;
+extern string levelfile;
+extern string picfile;
+extern const char *musicfile;
+extern const char *loadlevel;
+#endif
+
+transmatrix spin(ld alpha);
+transmatrix xpush(ld alpha);
+transmatrix inverse(const transmatrix&);
+ld hdist(const hyperpoint& h1, const hyperpoint& h2);
+
+extern bool fixseed;
+extern eLand firstland0;
+extern int startseed;
+
+
+extern transmatrix heptmove[MAX_EDGE], hexmove[MAX_EDGE];
+extern transmatrix invheptmove[MAX_EDGE], invhexmove[MAX_EDGE];
+
+heptspin hsstep(const heptspin &hs, int spin);
+
+extern void fixmatrix(transmatrix&);
+void display(const transmatrix& T);
+transmatrix rgpushxto0(const hyperpoint& H);
+char *display(const hyperpoint& H);
+
+extern int cellcount, heptacount;
+
+string its(int i);
+
+double hdist0(const hyperpoint& mh);
+
+extern bool fading;
+extern ld fadeout;
+int itemclass(eItem i);

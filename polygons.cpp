@@ -102,11 +102,12 @@ void shift(hpcshape& sh, double dx, double dy, double dz) {
 SDL_Surface *aux;
 #endif
 
-#define CAP_POLY (CAP_SDLGFX || CAP_GL || CAP_SVG)
-
 #if CAP_POLY
 vector<polytodraw*> ptds2;
 #define POLYMAX 60000
+
+GLfloat glcoords[POLYMAX][3];
+int qglcoords;
 
 #if CAP_GL
 GLfloat *currentvertices;
@@ -138,9 +139,6 @@ void initPolyForGL() {
 
 GLuint shapebuffer;
 
-GLfloat glcoords[POLYMAX][3];
-int qglcoords;
-
 extern void glcolor(int color);
 
 
@@ -163,6 +161,7 @@ void activateGlcoords() {
   }
 #endif
 
+#if CAP_POLY
 int polyi;
 
 int polyx[POLYMAX], polyxr[POLYMAX], polyy[POLYMAX];
@@ -472,6 +471,10 @@ void fixMercator() {
     }
   }
   
+unsigned char& part(int& col, int i) {
+  unsigned char* c = (unsigned char*) &col; return c[i];
+  }
+
 void drawpolyline(polytodraw& p) {
   auto pp = p.u.poly;
   
@@ -605,6 +608,8 @@ void drawpolyline(polytodraw& p) {
   
     if(vid.goteyes) filledPolygonColorI(aux, polyxr, polyy, polyi, p.col);
     
+    // part(pp.outline, 0) = part(pp.outline, 0) * linewidthat(tC0(pp.V), pp.minwidth);
+
     ((vid.antialias & AA_NOGL) ?aapolylineColor:polylineColor)(s, polyx, polyy, polyi, pp.outline);
     if(vid.goteyes) aapolylineColor(aux, polyxr, polyy, polyi, pp.outline);
     
@@ -655,6 +660,7 @@ void prettyline(hyperpoint h1, hyperpoint h2, int col, int lev) {
 
 vector<GLfloat> curvedata;
 int curvestart = 0;
+bool keep_curvedata = false;
 
 void drawqueueitem(polytodraw& ptd) {
 #if CAP_ROGUEVIZ
@@ -856,7 +862,9 @@ void drawqueue() {
 #endif
 
   setcameraangle(false);
-  curvedata.clear(); curvestart = 0;
+  if(!keep_curvedata) {
+    curvedata.clear(); curvestart = 0;
+    }
   }
 
 hpcshape 
@@ -2153,10 +2161,6 @@ void initShape(int sg, int id) {
     }
   }
 
-unsigned char& part(int& col, int i) {
-  unsigned char* c = (unsigned char*) &col; return c[i];
-  }
-
 void queuepolyat(const transmatrix& V, const hpcshape& h, int col, int prio) {
   polytodraw& ptd = nextptd();
   ptd.kind = pkPoly;
@@ -2308,7 +2312,7 @@ void queuestr(int x, int y, int shift, int size, string str, int col, int frame 
   ptd.u.chr.shift = shift;
   ptd.u.chr.size = size;
   ptd.col = darkened(col);
-  ptd.u.chr.frame = frame ? ((poly_outline & ~ 255)+1) : 0;
+  ptd.u.chr.frame = frame ? ((poly_outline & ~ 255)+frame) : 0;
   ptd.prio = PPR_TEXT << PSHIFT;
   }
 
@@ -3338,3 +3342,5 @@ NEWSHAPE
 
 // fix Warp
 // fix Kraken
+
+#endif
