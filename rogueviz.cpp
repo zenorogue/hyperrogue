@@ -20,6 +20,8 @@
 
 // hyper -tess <parameter file> -- visualize a horocyclic tesselation,
 
+#include "rogueviz.h"
+
 namespace rogueviz {
 
 void init();
@@ -40,22 +42,6 @@ enum eVizkind { kNONE, kAnyGraph, kTree, kSpiral, kSAG, kCollatz, kFullNet, kKoh
 eVizkind kind;
 
 bool on;
-
-struct edgeinfo {
-  int i, j;
-  double weight, weight2;
-  bool visible;
-  vector<GLfloat> prec;
-  cell *orig;
-  int lastdraw;
-  edgeinfo() { visible = true; orig = NULL; lastdraw = -1; }
-  };
-
-struct colorpair {
-  int color1, color2;
-  char shade;
-  colorpair(int col = 0xC0C0C0FF) { shade = 0; color1 = col; }
-  };
 
 colorpair parse(const string& s) {
   colorpair cp;
@@ -115,18 +101,6 @@ colorpair perturb(colorpair cp) {
   cp.color2 = perturb(cp.color2);
   return cp;
   }
-
-struct vertexdata {
-  vector<pair<int, edgeinfo*> > edges;
-  string name;
-  colorpair cp;
-  edgeinfo *virt;
-  bool special;
-  int data;
-  string *info;
-  shmup::monster *m;
-  vertexdata() { virt = NULL; m = NULL; info = NULL; special = false; }
-  };
 
 vector<vertexdata> vdata;
 
@@ -318,7 +292,7 @@ namespace anygraph {
       }
     }
 
-  void read(string fn, bool subdiv = true, bool doRebase = true, bool doStore = true) {
+  void read(string fn, bool subdiv, bool doRebase, bool doStore) {
     init(); kind = kAnyGraph;
     fname = fn;
     FILE *f = fopen((fn + "-coordinates.txt").c_str(), "rt");
@@ -363,7 +337,6 @@ namespace anygraph {
       int i = readLabel(f), j = readLabel(f);
       if(i == -1 || j == -1) break;
       addedge(i, j, 0, subdiv);
-      if(qlink % 10000 == 0) printf("%d\n", qlink);
       qlink++;
       }
     fclose(f);
@@ -1559,6 +1532,7 @@ struct storydata { int s; int e; const char *text; } story[] = {
   }
 #endif
 
+#if CAP_COMMANDLINE
 int readArgs() {
   using namespace arg;
            
@@ -1722,6 +1696,7 @@ int readArgs() {
   else return 1;
   return 0;
   }
+#endif
 
 void showMenu() {
   dialog::init(XLAT("rogueviz configuration"));
@@ -1987,9 +1962,11 @@ slide rvslides[] = {
 
 auto hooks  = 
   addHook(hooks_frame, 0, drawExtra) +
+#if CAP_COMMANDLINE
   addHook(hooks_args, 100, readArgs) +
-  addHook(clearmemory, 0, close) +
-  addHook(hooks_config, 0, [] () { tour::ss::list(rogueviz::rvtour::rvslides); });
+  addHook(hooks_config, 0, [] () { tour::ss::list(rogueviz::rvtour::rvslides); }) +
+#endif
+  addHook(clearmemory, 0, close);
 
 
 };
