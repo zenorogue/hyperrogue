@@ -65,7 +65,7 @@ int musfadeval = 2000;
 
 eLand cid = laNone;
 
-hookset<bool(eLand)> *hooks_music;
+hookset<bool(eLand&)> *hooks_music;
 
 void handlemusic() {
   DEBB(DF_GRAPH, (debugfile,"handle music\n"));
@@ -102,6 +102,7 @@ void handlemusic() {
     }
   }
 
+hookset<bool(eLand&)> *hooks_resetmusic;
 
 void resetmusic() {
   if(audio && musicvolume) {
