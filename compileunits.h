@@ -81,6 +81,7 @@ bool inv::on;
 #if ISMOBILE==0
 #include <unistd.h>
 #endif
+#include "commandline.cpp"
 #endif
 
 #if IN_CU(1)
