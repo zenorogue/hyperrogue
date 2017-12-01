@@ -376,7 +376,9 @@ void drawStats() {
   dynamicval<ld> vax(vid.alphax, 1);
   dynamicval<videopar> v(vid, vid);
   calcparam();
+#if CAP_GL
   selectEyeGL(0);
+#endif
 
   if(haveMobileCompass()) {
     initquickqueue();
@@ -550,6 +552,8 @@ XLAT(
   }
   
   calcparam();
+#if CAP_GL
   selectEyeGL(0);
+#endif
   }
 
