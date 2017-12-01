@@ -979,6 +979,7 @@ bool handleMenu(int sym, int uni) {
   return false;
   }
 
+#if CAP_COMMANDLINE
 int readArgs() {
   using namespace arg;
 
@@ -1101,7 +1102,10 @@ int readArgs() {
   return 0;
   }
 
-auto hooks = addHook(hooks_args, 100, readArgs) + addHook(hooks_frame, 50, levelline::draw);
+auto hooks = addHook(hooks_args, 100, readArgs);
+#endif
+
+auto hooks2 = addHook(hooks_frame, 50, levelline::draw);
 }
 
 void mark(cell *c) {
