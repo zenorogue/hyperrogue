@@ -509,8 +509,10 @@ void wandering() {
     else if(c->land == laBlizzard && wchance(items[itBlizzard], 120))
       c->monst = hrand(5) ? moVoidBeast : moIceGolem;
 
-    else if(c->land == laVolcano && wchance(items[itLavaLily], 120))
+    else if(c->land == laVolcano && wchance(items[itLavaLily], 120)) {
       c->monst = hrand(5) ? moLavaWolf : moSalamander;
+      c->hitpoints = 3;
+      }
 
     else if(c->land == laTrollheim && wchance(items[itTrollEgg], 150))
       c->monst = pickTroll(c);
