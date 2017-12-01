@@ -6,6 +6,8 @@
 
 #define MIRR(x) x.mirrored
 
+int heptacount = 0;
+
 struct cell;
 cell *newCell(int type, heptagon *master);
 
@@ -64,6 +66,7 @@ template<class... T> auto iprintf(T... t) { for(int i=0; i<indent; i++) putchar(
 // create a new heptagon
 heptagon *buildHeptagon(heptagon *parent, int d, hstate s, int pard = 0, int fixdistance = COMPUTE) {
   heptagon *h = new heptagon;
+  heptacount++;
   h->alt = NULL;
   h->s = s;
   for(int i=0; i<MAX_EDGE; i++) h->move[i] = NULL;
