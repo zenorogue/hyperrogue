@@ -104,14 +104,16 @@ int darkenedby(int c, int lev) {
   return c;
   }
 
+bool fading = false;
+
+ld fadeout = 1;
+
 int darkened(int c) {
-#ifdef EXTRA_FADEOUT
-  c = gradient(backcolor, c, 0, extra::fadeout, 1);
-#endif
   if(inmirrorcount&1)
     c = gradient(c, winf[waMirror].color, 0, 0.5, 1);
   else if(inmirrorcount)
     c = gradient(c, winf[waCloud].color, 0, 0.5, 1);
+  if(fading) c = gradient(backcolor, c, 0, fadeout, 1);
   for(int i=0; i<darken; i++)
     c = ((c & 0xFEFEFE) >> 1) + ((backcolor & 0xFEFEFE) >> 1);
   return c;
@@ -1029,13 +1031,13 @@ void saveHighQualityShot(const char *fname, const char *caption, int fade) {
   }
 #endif
 
-#if CAP_SDL
 bool setfsize = true;
 
 void do_setfsize() {
   vid.fsize = min(vid.yres * fontscale/ 3200, vid.xres * fontscale/ 4800), setfsize = false;
   }
 
+#if CAP_SDL
 void setvideomode() {
 
   DEBB(DF_INIT, (debugfile,"setvideomode\n"));
