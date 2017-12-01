@@ -291,6 +291,8 @@ bool handleTune(int sym, int uni) {
   return true;
   }
 #endif
+
+purehookset hooks_fixticks;
   
 void handleKeyNormal(int sym, int uni) {
 
@@ -440,6 +442,7 @@ void mainloopiter() {
   if(conformal::on) conformal::apply();
   
   ticks = SDL_GetTicks();
+  callhooks(hooks_fixticks);
     
   int timetowait = lastt + 1000 / cframelimit - ticks;
 
