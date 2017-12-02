@@ -51,6 +51,31 @@ bool reptilecheat = false;
 
 #define ONEMPTY if(d == 7 && passable(c, NULL, 0) && !safety)
 
+vector<cell*> noescape_list;
+
+bool blizzard_no_escape1(cell *c) {
+  if(c->aitmp >= 0 && c->aitmp < size(noescape_list) && noescape_list[c->aitmp] == c)
+    return true;
+  c->aitmp = size(noescape_list); noescape_list.push_back(c);
+  if(c->item == itOrbSafety)
+    return false;
+  forCellEx(c2, c) {
+    if(c2->land == laBarrier)
+      continue;
+    if(c2->land != laBlizzard && passable(c2, NULL, 0))
+      return false;
+    if(!againstWind(c2, c) && !blizzard_no_escape1(c2))
+      return false;
+    }
+  return true;
+  }
+
+bool blizzard_no_escape(cell *c) {
+  sval++;
+  noescape_list.resize(0);
+  return blizzard_no_escape1(c);
+  }
+
 // the giant switch generating most of the lands...
 
 void giantLandSwitch(cell *c, int d, cell *from) {
@@ -823,6 +848,8 @@ void giantLandSwitch(cell *c, int d, cell *from) {
         if(hrand(8000) < 10 + (items[itBlizzard] + yendor::hardness()))
           c->monst = pick(moVoidBeast, moIceGolem);
         }
+      if((d == 7 || d == 6) && blizzard_no_escape(c))
+        c->item = itOrbSafety, c->monst = moNone;
 
       break;
     
