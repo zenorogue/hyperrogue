@@ -729,10 +729,14 @@ bool ishex1(cell *c) {
   else return c->type != S6;
   }
 
+int val46(cell *c) {
+  return ctof(c) ? c->master->emeraldval :
+    ((c->master->emeraldval & 1) ^ ((c->master->emeraldval & 2)>>1) ^ (c->spin(0)&1)) ? 8 : 4;
+  }
+
 int emeraldval(cell *c) {
   if(euclid) return eupattern(c);
-  if(a46) return ctof(c) ? ((c->master->emeraldval & 2) ? 1 : 0) : 
-    ((c->master->emeraldval & 1) ^ ((c->master->emeraldval & 2)>>1) ^ (c->spin(0)&1)) ? 8 : 4;
+  if(a46) return val46(c);
   if(sphere) return 0;
   if(ctof(c))
     return c->master->emeraldval >> 3;
@@ -849,10 +853,16 @@ int eufifty(cell *c) {
     }
   }
 
+int val38(cell *c) {
+  if(ctof(c)) return c->master->fiftyval;
+  else return 4 ^ c->master->fiftyval ^ (c->spin(0) & 1);
+  }
+  
 int fiftyval(cell *c) {
+  if(a38) return val38(c);
   if(euclid) return eufifty(c) * 32;
   if(sphere || S7>7 || S6>6) return 0;
-  if(c->type == 7)
+  if(ctof(c))
     return c->master->fiftyval;
   else {
     return bitmajority(
@@ -953,9 +963,28 @@ int fiftyval049(cell *c) {
 
 // zebraval
 
+int dir_truncated457(cell *c) {
+  int wset = 0;
+  for(int i=0; i<4; i++) 
+    if(zebra40(createMov(c, i*2))&2) wset |= (1<<i);
+  if(wset == 0) return -8;
+  if(wset == 15) return -10;
+  if(wset == 3) return 1;
+  if(wset == 6) return 3;
+  if(wset == 12) return 5;
+  if(wset == 9) return 7;
+  return 0;
+  }
+
 int zebra40(cell *c) {
   if(euclid) return eupattern(c);
+  else if(a46) return val46(c);
   else if(ctof(c)) return (c->master->zebraval/10);
+  else if(a4) {
+    int ws = dir_truncated457(c);
+    if(ws < 0) return -ws;
+    return 16 + (ws/2);
+    }
   else if(sphere) return 0;
   else if(euclid) return eupattern(c);
   else if(S3 == 4 && S7 == 6) {

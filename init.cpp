@@ -345,6 +345,7 @@ void addMessage(string s, char spamtype = 0);
 #define S3 ginf[geometry].vertex
 #define weirdhyperbolic (S7 > 7 || S3 > 3)
 #define weirdhyperbolic (S7 > 7 || S3 > 3)
+#define stdhyperbolic (S7 == 7 && S3 == 3)
 
 #define a4 (S3 == 4)
 #define a45 (S3 == 4 && S7 == 5)

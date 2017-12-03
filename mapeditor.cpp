@@ -352,12 +352,41 @@ namespace mapeditor {
         if(!c2) return 0;
         return neighborId(c, c2);
     }
+
+    int patterndir46(cell *c, int bits) {
+      if(ctof(c)) {
+        int b = c->master->emeraldval & bits;
+        return (b&1) ^ (b & 2 ? 1 : 0);
+        }
+      else
+        return ((c->mov[0]->master->emeraldval + c->spin(0)) & 1) ? 2 : 0;
+      }
     
+    int patterndir38(cell *c) {
+      if(ctof(c)) return c->master->fiftyval;
+      return 0;
+      }
+          
+    int patterndir457(cell *c) {
+      if(!ctof(c)) {
+        int d = dir_truncated457(c);
+        if(d >= 0) return d;
+        return 0;
+        }
+      for(int i=0; i<c->type; i++)
+        if((zebra40(createStep(c->master, i + S7/2)->c7)&2) == (zebra40(createStep(c->master, i + 1 + S7/2)->c7)&2))
+          return i;
+      return 0;
+      }
+
     int patterndir(cell *c, char w) {
         switch(w) {
             case 'z': {
-                int t = zebra40(c);
-                
+                if(a46) return patterndir46(c, 3);
+                if(a4) return patterndir457(c);
+                if(a38) return patterndir38(c);
+                int t = zebra40(c);                
+
                 if(euclid) return (t*4) % 6;
                 
                 int t4 = t>>2, tcdir = 0;
@@ -378,13 +407,10 @@ namespace mapeditor {
             }
                 
             case 'f': {
+                if(a46) return patterndir46(c, 1);
+                if(a38) return patterndir38(c);
+                if(a4) return patterndir457(c);
                 int t = emeraldval(c);
-                if(a46) {
-                  if(ctof(c))
-                    return (c->master->emeraldval & 1) ^ (c->master->emeraldval & 2 ? 1 : 0);
-                  else
-                    return ((c->mov[0]->master->emeraldval + c->spin(0)) & 1) ? 2 : 0;
-                  }
                 if(euclid) return 0;
                 int tcdir = 0, tbest = (t&3);
                 for(int i=0; i<c->type; i++) {
@@ -399,6 +425,9 @@ namespace mapeditor {
             }
                 
             case 'p': {
+                if(a46) return patterndir46(c, 2);
+                if(a4) return patterndir457(c);
+                if(a38) return patterndir38(c);
                 int tcdir = -1, tbest = -1;
                 int pa = polara50(c);
                 int pb = polarb50(c);
@@ -417,12 +446,9 @@ namespace mapeditor {
                 
             case 0: {
                 if(euclid) return 0;
-                if(a46) {
-                  if(ctof(c))
-                    return c->master->emeraldval;
-                  else
-                    return ((c->mov[0]->master->emeraldval + c->spin(0)) & 1) ? 2 : 0;
-                  }
+                if(a46) return patterndir46(c, 1);
+                if(a4) return patterndir457(c);
+                if(a38) return patterndir38(c);
                 int u = nopattern(c);
                 
                 if(u == 6) {
@@ -764,25 +790,43 @@ namespace mapeditor {
     }
     dialog::init();
 
-    if(a46)
-      dialog::addBoolItem("two colors", (whichPattern == 'f'), 'f');
-    else
-      dialog::addBoolItem(XLAT(euclid ? "three colors" : "Emerald Pattern"), (whichPattern == 'f'), 'f');
-    if(!a4)
+    if(a46) {
+      dialog::addBoolItem(XLAT("two colors"), (whichPattern == 'f'), 'f');
+      dialog::addBoolItem(XLAT("two colors rotated"), (whichPattern == 'z'), 'z');
+      }
+    else if(a4) {
+      dialog::addBoolItem(XLAT("Zebra Pattern"), (whichPattern == 'z'), 'z');
+      }
+    else if(a38) {
+      dialog::addBoolItem(XLAT("Zebra Pattern"), (whichPattern == 'z'), 'z');
+      dialog::addBoolItem(XLAT("broken Emerald Pattern"), (whichPattern == 'f'), 'f');
+      dialog::addBoolItem(XLAT("rotated pattern"), (whichPattern == 'p'), 'p');
+      }
+    else if(euclid) {
+      dialog::addBoolItem(XLAT("three colors"), (whichPattern == 'f'), 'f');
       dialog::addBoolItem(XLAT("Palace Pattern"), (whichPattern == 'p'), 'p');
-    if(!a4)
-      dialog::addBoolItem(XLAT(euclid ? "three colors rotated" : "Zebra Pattern"), (whichPattern == 'z'), 'z');
-    dialog::addBoolItem(XLAT("field pattern"), (whichPattern == 'F'), 'F');
+      dialog::addBoolItem(XLAT("three colors rotated"), (whichPattern == 'z'), 'z');
+      }
+    else {
+      if(!stdhyperbolic) 
+        dialog::addInfo("patterns do not work correctly in this geometry!");
 
-    if(whichPattern == 'f') symRotation = true;
+      dialog::addBoolItem(XLAT("Emerald Pattern"), (whichPattern == 'f'), 'f');
+      dialog::addBoolItem(XLAT("Palace Pattern"), (whichPattern == 'p'), 'p');
+      dialog::addBoolItem(XLAT("Zebra Pattern"), (whichPattern == 'z'), 'z');
+      }
+    if(euclid)
+      dialog::addBoolItem(XLAT("torus pattern"), (whichPattern == 'F'), 'F');
+    else if(!sphere)
+      dialog::addBoolItem(XLAT("field pattern"), (whichPattern == 'F'), 'F');
+
+    if(whichPattern == 'f' && stdhyperbolic) symRotation = true;
     if(whichPattern == 'F') ;
     else if(!euclid) {
       dialog::addBoolItem(XLAT("rotational symmetry"), (symRotation), '0');
       dialog::addBoolItem(XLAT("symmetry 0-1"), (sym01), '1');
-      if(!a46 || !nontruncated) 
-        dialog::addBoolItem(XLAT("symmetry 0-2"), (sym02), '2');
-      if(!a46) 
-        dialog::addBoolItem(XLAT("symmetry 0-3"), (sym03), '3');
+      dialog::addBoolItem(XLAT("symmetry 0-2"), (sym02), '2');
+      dialog::addBoolItem(XLAT("symmetry 0-3"), (sym03), '3');
       }
     else
       dialog::addBoolItem(XLAT("edit all three colors"), (symRotation), '0');
@@ -936,12 +980,17 @@ namespace mapeditor {
     if(euclid) return (symRotation && (i<3)) ? 0 : i;
     i = subpatternEmerald(i);
     if(symRotation) {
-      if(i >= 8 && i < 12) i -= 4;
-      if(i >= 12 && i < 16) i -= 8;
-      if(i >= 20 && i < 24) i -= 4;
-      if(i >= 24 && i < 28) i -= 8;
-      if(i >= 32 && i < 36) i -= 4;
-      if(i >= 36 && i < 40) i -= 8;
+      if(a4 && !a46) {
+        if(i >= 4 && i < 7) i -= 4;
+        }
+      else {
+        if(i >= 8 && i < 12) i -= 4;
+        if(i >= 12 && i < 16) i -= 8;
+        if(i >= 20 && i < 24) i -= 4;
+        if(i >= 24 && i < 28) i -= 8;
+        if(i >= 32 && i < 36) i -= 4;
+        if(i >= 36 && i < 40) i -= 8;
+        }
       }
     return i;
     }
@@ -960,6 +1009,8 @@ namespace mapeditor {
       case 'f':
         return subpatternEmerald(emeraldval(c)); // 44 to 99
       case 'p': {
+        if(a46) return subpatternEmerald(val46(c));
+        if(a38) return val38(c);
         int i = fiftyval049(c);
         i *= 4;
         if(polara50(c)) i|=1;
@@ -978,11 +1029,13 @@ namespace mapeditor {
 
   int realpattern(cell *c) {
     switch(whichPattern) { 
-      case 'z': 
+      case 'z':
         return zebra40(c); // 4 to 43
       case 'f':
         return emeraldval(c); // 44 to 99
       case 'p': {
+        if(a46) return val46(c);
+        if(a38) return val38(c);
         int i = fiftyval049(c);
         i *= 4;
         if(polara50(c)) i|=1;
