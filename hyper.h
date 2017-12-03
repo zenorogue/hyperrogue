@@ -1120,6 +1120,7 @@ namespace dialog {
   bool handlePageButtons(int uni);
   extern bool sidedialog;
   extern int dialogflags;
+  extern int dcenter;
   }
 
 void checkStunKill(cell *dest);
@@ -2266,3 +2267,14 @@ double hdist0(const hyperpoint& mh);
 extern bool fading;
 extern ld fadeout;
 int itemclass(eItem i);
+
+extern purehookset hooks_drawmap;
+extern hookset<bool(eLand&)> *hooks_music;
+extern hookset<bool()> *hooks_prestats;
+extern purehookset hooks_fixticks;
+void activateVertexArray(GLfloat *f, int qty);
+
+ld realradius();
+void sdltogl(SDL_Surface *txt, glfont_t& f, int ch);
+void glcolor2(int color);
+
