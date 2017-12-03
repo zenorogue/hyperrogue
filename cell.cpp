@@ -498,7 +498,7 @@ bool cwstepcreates(cellwalker& cw) {
   }
 
 cell *cwpeek(cellwalker cw, int dir) {
-  return createMov(cw.c, (cw.spin+MODFIXER+dir) % cw.c->type);
+  return createMov(cw.c, (cw.spin+MODFIXER+(MIRR(cw)?-dir:dir)) % cw.c->type);
   }
 
 void cwmirrorat(cellwalker& cw, int d) {
