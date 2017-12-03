@@ -790,8 +790,10 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, int col, dou
           int col = items[itOrbDiscord] ? watercolor(0) : fc(314, cs.swordcolor, 3);
           queuepoly(VAHEAD, shWolf1, col);
           queuepoly(VAHEAD, shWolf2, col);
-          queuepoly(VAHEAD, shWolf3, col);
           }
+
+        int colnose = items[itOrbDiscord] ? watercolor(0) : fc(314, 0xFF, 3);
+        queuepoly(VAHEAD, shWolf3, colnose);
         }
       else if(cs.charid >= 4) {
         if(!mmspatial && !footphase)
