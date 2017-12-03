@@ -1260,10 +1260,12 @@ void buildpolys() {
   
   if(a4 && nontruncated) fac94 *= 1.1;
   
+  if(a46 && nontruncated) fac94 *= .9; 
+
   double floorrad0 = shexf*fac80*spzoom;
   
   double floorrad1 = strict ? hcrossf : euclid ? shexf*fac80*spzoom : shexf*fac94;
-
+  
   bshape(shFloor[0], PPR_FLOOR);
   for(int t=0; t<=S6; t++) hpcpush(ddi(S7 + t*S14, floorrad0) * C0);
 
