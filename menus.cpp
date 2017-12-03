@@ -108,7 +108,7 @@ void showOverview() {
         getcstat = 3000+waMirror;
       if(getcstat == 3000+waMirror)
         mouseovers = XLAT(
-          olrDescriptions[getOLR(io, cwt.c->land)], cwt.c->land, it, treasureType(cwt.c->land));
+          olrDescriptions[getOLR(io, cwt.c->land)], cwt.c->land, it, treasureTypeUnlock(curland, io));
       }
     else if(io) {
       if(lv >= 25) col = 0xFFD500;
@@ -125,7 +125,7 @@ void showOverview() {
         getcstat = 2000+io;
       if(getcstat == 2000+io)
         mouseovers = XLAT(
-          olrDescriptions[getOLR(io, curland)], curland, it, treasureType(curland));
+          olrDescriptions[getOLR(io, curland)], curland, it, treasureTypeUnlock(curland, io));
       }
     }
 

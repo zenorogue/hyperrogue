@@ -146,7 +146,8 @@ void describeOrb(string& help, const orbinfo& oi) {
   if(inv::on) return;
   eOrbLandRelation olr = getOLR(oi.orb, getPrizeLand());
   eItem tr = treasureType(oi.l);
-  help += "\n\n" + XLAT(olrDescriptions[olr], cwt.c->land, tr, treasureType(cwt.c->land));
+  eItem tt = treasureTypeUnlock(cwt.c->land, oi.orb);
+  help += "\n\n" + XLAT(olrDescriptions[olr], cwt.c->land, tr, tt);
   int t = items[tr] * landMultiplier(oi.l);
   if(t >= 25)
   if(olr == olrPrize25 || olr == olrPrize3 || olr == olrGuest || olr == olrMonster || olr == olrAlways) {

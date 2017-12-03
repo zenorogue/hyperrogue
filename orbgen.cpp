@@ -233,7 +233,7 @@ eOrbLandRelation getOLR(eItem it, eLand l) {
     return olrUseless;
    if(it == itOrbNature && l == laWineyard)
     return olrDangerous;
-  if(it == itOrbFrog && l == laPrincessQuest)
+  if((it == itOrbFrog || it == itOrbDiscord) && l == laPrincessQuest)
     return olrGuest;
   if(it == itOrbDragon && l == laRlyeh)
     return olrMonster;

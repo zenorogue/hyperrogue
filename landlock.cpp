@@ -300,6 +300,12 @@ eItem treasureType(eLand l) {
   return itNone;
   }
 
+eItem treasureTypeUnlock(eLand l, eItem u) {
+  if(u != itOrbLove && l == laPrincessQuest)
+    return itPalace;
+  return treasureType(l);
+  }
+
 eLand landof(eItem it) {
   for(int i=0; i<landtypes; i++) if(treasureType(eLand(i)) == it) return eLand(i);
   return laNone;
