@@ -6183,16 +6183,17 @@ int ambushSize(cell *c, eItem what) {
   
   }
 
-void ambush(cell *c, eItem what) {
+int ambush(cell *c, eItem what) {
   int maxdist = getDistLimit();
   celllister cl(c, maxdist, 1000000, NULL);
   cell *c0 = c;
   int d = 0;
   cl.prepare();
+  int dogs0 = 0;
   for(cell *cx: cl.lst) {
     int dh = cl.getdist(cx);
     if(dh <= 2 && cx->monst == moHunterGuard)
-      cx->monst = moHunterDog;
+      cx->monst = moHunterDog, dogs0++;
     if(dh > d) c0 = cx, d = dh;
     }
   if(sphere) {
@@ -6219,7 +6220,7 @@ void ambush(cell *c, eItem what) {
   int dogs = ambushSize(c, what);  
   
   int gaps = dogs;
-  if(!N) return;
+  if(!N) return dogs0;
   ambushed = true;
   int shift = hrand(N);
   dogs = min(dogs, N);
@@ -6231,6 +6232,7 @@ void ambush(cell *c, eItem what) {
     nextdog->stuntime = 1;
     drawFlash(nextdog);
     }
+  return dogs + dogs0;
   }
 
 bool collectItem(cell *c2, bool telekinesis) {
@@ -6257,8 +6259,9 @@ bool collectItem(cell *c2, bool telekinesis) {
     }
 
   if(c2->land == laHunting && c2->item) {
-    addMessage(XLAT("You are ambushed!"));
-    ambush(c2, c2->item);
+    int dogs = ambush(c2, c2->item);
+    if(dogs)
+      addMessage(XLAT("You are ambushed!"));
     }
   
   if(isRevivalOrb(c2->item) && multi::revive_queue.size()) {
@@ -6913,6 +6916,7 @@ bool monsterPushable(cell *c2) {
   }  
 
 bool movepcto(int d, int subdir, bool checkonly) {
+  if(d >= 0 && !checkonly && subdir != 1 && subdir != -1) printf("subdir = %d\n", subdir);
   global_pushto = NULL;
   bool switchplaces = false;
 
