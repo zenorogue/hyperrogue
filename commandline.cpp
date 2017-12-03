@@ -75,6 +75,23 @@ int arg::readCommon() {
     if(args()[1] == 0) mapeditor::whichCanvas = args()[0];
     else mapeditor::canvasback = strtol(args(), NULL, 16);
     }
+  else if(argis("-noplayer")) 
+    mapeditor::drawplayer = !mapeditor::drawplayer;
+  else if(argis("-pattern")) {
+    PHASE(3);
+    shift();
+    char *c = args();
+    using namespace mapeditor;
+    sym01 = sym02 = sym03 = symRotation = false;
+    while(*c) { 
+      if(*c == '1') sym01 = true; 
+      else if(*c == '2') sym02 = true; 
+      else if(*c == '3') sym03 = true; 
+      else if(*c == '0') symRotation = true;
+      else whichPattern = *c;
+      c++; 
+      }
+    }
   else if(argis("-back")) {
     shift(); backcolor = strtol(args(), NULL, 16);
     }
