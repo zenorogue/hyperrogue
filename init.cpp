@@ -344,6 +344,20 @@ void addMessage(string s, char spamtype = 0);
 #define S7 ginf[geometry].sides
 #define S3 ginf[geometry].vertex
 #define weirdhyperbolic (S7 > 7 || S3 > 3)
+#define weirdhyperbolic (S7 > 7 || S3 > 3)
+
+#define a4 (S3 == 4)
+#define a45 (S3 == 4 && S7 == 5)
+#define a46 (S3 == 4 && S7 == 6)
+#define a47 (S3 == 4 && S7 == 7)
+#define a467 (S3 == 4 && S7 >= 6)
+#define a38 (S7 == 8)
+#define sphere4 (sphere && S7 == 4)
+#define stdeuc (geometry == gNormal || geometry == gEuclid)
+#define smallsphere (S7 < 5)
+#define bigsphere (S7 == 5)
+#define ap4 (a4 && nontruncated)
+
 #define S6 (S3*2)
 #define S42 (S7*S6)
 #define S12 (S6*2)

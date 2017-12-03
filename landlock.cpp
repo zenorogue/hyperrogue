@@ -957,15 +957,6 @@ int isLandValid(eLand l) {
   if(randomPatternsMode && !isRandland(l))
     return 0;
 
-  bool stdeuc = geometry == gNormal || geometry == gEuclid;
-  bool a38 = S7 == 8;
-  bool a4 = S3 == 4;
-  bool a45 = a4 && S7 == 5;
-  bool a46 = a4 && S7 == 6;
-  bool a47 = a4 && S7 == 7;
-  bool smallsphere = S7 < 5;
-  bool bigsphere = S7 == 5;
-  
   if(isElemental(l)) {
     if(l != laElementalWall)
       return 0;

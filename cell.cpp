@@ -540,19 +540,19 @@ cell *createMov(cell *c, int d) {
     
     heptspin hs; hs.h = c->master; hs.spin = d; hs.mirrored = false;
     
-    int a3 = c->type/2;
-    int a4 = a3+1;
+    int alt3 = c->type/2;
+    int alt4 = alt3+1;
         
     /*
-    heptspin hs2 = hsstep(hsspin(hs, a3), -a4);
+    heptspin hs2 = hsstep(hsspin(hs, a3), -alt4);
     merge(hs2.h->c7, hs2.spin, n, 2, hs2.mirrored);
     
-    heptspin hs3 = hsstep(hsspin(hs, a4), -a3);
+    heptspin hs3 = hsstep(hsspin(hs, a4), -alt3);
     merge(hs3.h->c7, hs3.spin, n, S6-2, hs3.mirrored);
     */
     
     for(int u=2; u<S6; u+=2) {
-      hs = hsstep(hsspin(hs, a3), -a4);
+      hs = hsstep(hsspin(hs, alt3), -alt4);
       merge(hs.h->c7, hs.spin, n, u, hs.mirrored);
       }
     
