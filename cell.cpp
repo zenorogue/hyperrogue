@@ -85,6 +85,8 @@ int spherecells() {
   if(S7 == 1) return 1;
   return 12;
   }
+
+vector<int> siblings;
   
 struct hrmap_spherical : hrmap {
   heptagon *dodecahedron[12];
@@ -102,10 +104,15 @@ struct hrmap_spherical : hrmap {
       h.alt = NULL;
       h.cdata = NULL;
       h.spintable = 0;
+      h.fieldval = i;
       for(int i=0; i<S7; i++) h.move[i] = NULL;
       h.c7 = newCell(S7, &h);
       }
-   for(int i=0; i<S7; i++) {
+    if(S7 == 5)
+      siblings = {1, 0, 10, 4, 3, 8, 9, 11, 5, 6, 2, 7};
+    else
+      siblings = {1, 0, 3, 2, 5, 4};
+    for(int i=0; i<S7; i++) {
       dodecahedron[0]->move[i] = dodecahedron[i+1];
       dodecahedron[0]->setspin(i, 0);
       dodecahedron[i+1]->move[0] = dodecahedron[0];
@@ -1538,5 +1545,53 @@ int getHemisphere(cell *c, int which) {
       score += getHemisphere(c->mov[i], which) * (c->mirror(i) ? -1 : 1);
     return score/3;
     }
+  }
+
+struct sphereinfo {
+  int id;
+  int dir;
+  bool reflect;
+  };
+
+sphereinfo valsphere(cell *c) {
+  sphereinfo si;
+  if(ctof(c)) {
+    int d = c->master->fieldval;
+    si.id = (d < siblings[d]) ? 0 : 1;
+    for(int i=0; i<S7; i++) {
+      int di = c->master->move[i]->fieldval;
+      if(di == siblings[d]) si.dir = i;
+      }
+    si.reflect = false;
+    }
+  else {
+    int ids = 0, tids = 0, td = 0;
+    for(int i=0; i<S3; i++) {
+      int d = c->mov[i*2]->master->fieldval;
+      ids |= (1<<d); tids += d;
+      }
+    for(int i=0; i<S3; i++) {
+      int d = c->mov[i*2]->master->fieldval;
+      if(ids & (1<<siblings[d])) td += d;
+      }
+    if(td) {
+      si.id = 4;
+      for(int i=0; i<S3; i++) {
+        int d = c->mov[i*2]->master->fieldval;
+        if(!(ids & (1<<siblings[d]))) si.dir = 2*i;
+        }
+      si.reflect = false;
+      }
+    else {
+      si.id = 8;
+      si.dir = 0; // whatever 
+      sphereinfo si2 = valsphere(c->mov[0]);
+      int di = si2.dir - c->spin(0);
+      di %= S7; 
+      if(di<0) di += S7;
+      si.reflect = di > S7/2;
+      }
+    }
+  return si;
   }
 

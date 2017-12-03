@@ -332,6 +332,7 @@ namespace mapeditor {
     }
     
     bool reflectPatternAt(cell *c, char p = whichPattern) {
+        if(p == 'p' && sphere) return valsphere(c).reflect;
         if(p == 'p' && polarb50(c)) return true;
         if(p == 0) {
           int np = nopattern(c);
@@ -378,13 +379,16 @@ namespace mapeditor {
           return i;
       return 0;
       }
-
+    
     int patterndir(cell *c, char w) {
+        if(w != 'H') {
+          if(a46) return patterndir46(c, w == 'z' ? 3 : w == 'p' ? 2 : 1);
+          if(a4) return patterndir457(c);
+          if(a38) return patterndir38(c);
+          if(sphere) return valsphere(c).dir;
+          }
         switch(w) {
             case 'z': {
-                if(a46) return patterndir46(c, 3);
-                if(a4) return patterndir457(c);
-                if(a38) return patterndir38(c);
                 int t = zebra40(c);                
 
                 if(euclid) return (t*4) % 6;
@@ -407,9 +411,6 @@ namespace mapeditor {
             }
                 
             case 'f': {
-                if(a46) return patterndir46(c, 1);
-                if(a38) return patterndir38(c);
-                if(a4) return patterndir457(c);
                 int t = emeraldval(c);
                 if(euclid) return 0;
                 int tcdir = 0, tbest = (t&3);
@@ -425,9 +426,6 @@ namespace mapeditor {
             }
                 
             case 'p': {
-                if(a46) return patterndir46(c, 2);
-                if(a4) return patterndir457(c);
-                if(a38) return patterndir38(c);
                 int tcdir = -1, tbest = -1;
                 int pa = polara50(c);
                 int pb = polarb50(c);
@@ -446,9 +444,6 @@ namespace mapeditor {
                 
             case 0: {
                 if(euclid) return 0;
-                if(a46) return patterndir46(c, 1);
-                if(a4) return patterndir457(c);
-                if(a38) return patterndir38(c);
                 int u = nopattern(c);
                 
                 if(u == 6) {
@@ -807,6 +802,9 @@ namespace mapeditor {
       dialog::addBoolItem(XLAT("Palace Pattern"), (whichPattern == 'p'), 'p');
       dialog::addBoolItem(XLAT("three colors rotated"), (whichPattern == 'z'), 'z');
       }
+    else if(sphere) {
+      dialog::addBoolItem(XLAT("siblings"), (whichPattern == 'p'), 'p');
+      }
     else {
       if(!stdhyperbolic) 
         dialog::addInfo("patterns do not work correctly in this geometry!");
@@ -817,7 +815,9 @@ namespace mapeditor {
       }
     if(euclid)
       dialog::addBoolItem(XLAT("torus pattern"), (whichPattern == 'F'), 'F');
-    else if(!sphere)
+    else if(sphere)
+      dialog::addBoolItem(XLAT("single cells"), (whichPattern == 'F'), 'F');
+    else
       dialog::addBoolItem(XLAT("field pattern"), (whichPattern == 'F'), 'F');
 
     if(whichPattern == 'f' && stdhyperbolic) symRotation = true;
@@ -837,9 +837,12 @@ namespace mapeditor {
     dialog::addBoolItem(XLAT("display only hexagons"), (whichShape == '6'), '6');
     dialog::addBoolItem(XLAT("display only heptagons"), (whichShape == '7'), '7');
     dialog::addBoolItem(XLAT("display the triheptagonal grid"), (whichShape == '8'), '8');
-    dialog::addItem(XLAT("line patterns"), 'l');
+    if(cheater || autocheat) dialog::addItem(XLAT("line patterns"), 'l');
+    else dialog::addInfo("enable the cheat mode to use line patterns");
 
-    dialog::addItem(XLAT("predesigned patterns"), 'r');
+    if(!needConfirmation()) dialog::addItem(XLAT("predesigned patterns"), 'r');
+    else dialog::addInfo("start a new game to use predesigned patterns");
+
     dialog::display();
     
     keyhandler = [] (int sym, int uni) {
@@ -862,10 +865,10 @@ namespace mapeditor {
       else if(uni == 'd') displaycodes = displaycodes == 1 ? 0 : 1;
       else if(uni == 's') displaycodes = displaycodes == 2 ? 0 : 2;
       
-      else if(uni == 'l')
+      else if(uni == 'l' && (cheater || autocheat))
         pushScreen(linepatterns::showMenu);
 
-      else if(uni == 'r') pushScreen(showPrePattern);
+      else if(uni == 'r' && !needConfirmation()) pushScreen(showPrePattern);
       
       else if(doexiton(sym, uni)) popScreen();
       };
@@ -955,7 +958,7 @@ namespace mapeditor {
       displayButton(8, 8+fs*12, XLAT("f = flip %1", ONOFF(copysource.mirrored)), 'u', 0);
     displayButton(8, 8+fs*13, XLAT("r = regular"), 'r', 0);
     displayButton(8, 8+fs*14, XLAT("p = paint"), 'p', 0);
-      
+
     displayFunctionKeys();
     
     keyhandler = handleKeyMap;
@@ -1011,6 +1014,7 @@ namespace mapeditor {
       case 'p': {
         if(a46) return subpatternEmerald(val46(c));
         if(a38) return val38(c);
+        if(sphere) return subpatternEmerald(valsphere(c).id);
         int i = fiftyval049(c);
         i *= 4;
         if(polara50(c)) i|=1;
@@ -1020,7 +1024,6 @@ namespace mapeditor {
       case 'P':
         return fiftyval(c);
       case 'H':
-        return realpattern(c);
       case 'F':
         return realpattern(c);
       }
@@ -1036,6 +1039,7 @@ namespace mapeditor {
       case 'p': {
         if(a46) return val46(c);
         if(a38) return val38(c);
+        if(sphere) return valsphere(c).id;
         int i = fiftyval049(c);
         i *= 4;
         if(polara50(c)) i|=1;
@@ -1045,24 +1049,18 @@ namespace mapeditor {
       case 'H': 
         return towerval(c);
       case 'F': {
-        if(euclid) {
-          using namespace torusconfig;
-          eucoord cx, cy;
-          decodeMaster(c->master, cx, cy);
-          int cd = cx * dx + cy * dy;
-          cd %= qty; if(cd<0) cd += qty;
-          return cd;
-          }
-        pair<int, bool> p = fieldpattern::fieldval(c);
-        return 10*p.first + (p.second?6:7);
+        if(euclid)
+          // use the torus ID
+          return fieldpattern::fieldval_uniq(c);
+        else if(nontruncated)
+          // use the actual field codes
+          return fieldpattern::fieldval(c).first;
+        else          
+          // use the small numbers from windmap
+          return windmap::getId(c);
         }
       }
     return nopattern(c);
-    }
-
-  int realpatternsh(cell *c) {
-    if(whichPattern == 'F') return nopattern(c);
-    else return realpattern(c);
     }
 
   int cellShapeGroup() {
@@ -1084,7 +1082,7 @@ namespace mapeditor {
     if(drawcell == cwt.c) return vid.cs.charid;
     if(drawcell->monst) return drawcell->monst;
     if(drawcell->item) return drawcell->item;
-    return subpattern(drawcell) % (USERSHAPEIDS);
+    return subpattern(drawcell);
     }
 
   int subpatternShape(int i) {
@@ -1450,6 +1448,7 @@ namespace mapeditor {
     cmode = sm::DRAW;
     gamescreen(0);
     drawGrid();
+    callhandlers(false, hooks_prestats);
 
     if(!mouseout()) getcstat = '-';
 
@@ -1481,7 +1480,7 @@ namespace mapeditor {
       
       default:
         line1 = XLAT("floor/pattern");
-        line2 = "#" + its(subpattern(cwt.c));
+        line2 = "#" + its(subpattern(drawcell));
         break;
       }
     
@@ -1491,7 +1490,10 @@ namespace mapeditor {
 
     // displayButton(8, 8+fs*9, XLAT("l = lands"), 'l', 0);
     displayfr(8, 8+fs, 2, vid.fsize, line1, 0xC0C0C0, 0);
-    displayfr(8, 8+fs*2, 2, vid.fsize, line2, 0xC0C0C0, 0);
+    if(sg >= 3)
+      displayButton(8, 8+fs*2, line2 + XLAT(" (r = complex tesselations)"), 'r', 0);
+    else
+      displayfr(8, 8+fs*2, 2, vid.fsize, line2, 0xC0C0C0, 0);
     displayButton(8, 8+fs*3, XLAT("l = layers: %1", its(dslayer)), 'l', 0);
     if(us && size(us->d[dslayer].list)) {
       usershapelayer& ds(us->d[dslayer]);
@@ -1836,7 +1838,12 @@ namespace mapeditor {
     if(uni == 'g') coldcenter = ccenter, ccenter = mh;
     if(uni == 'c') ew = ewsearch;
     if(uni == 'b') autochoose = !autochoose;
-
+    
+    if(uni == 'r') {
+      pushScreen(showPattern);
+      if(drawplayer) 
+        addMessage(XLAT("Hint: use F7 to edit floor under the player"));
+      }
     
     if(uni == 'S') {
       for(int i=0; i<USERSHAPEGROUPS; i++) for(int j=0; j<USERSHAPEIDS; j++) {
@@ -2067,6 +2074,8 @@ namespace mapeditor {
   #if !CAP_EDIT
     return false;
   #else
+  
+    id = id % USERSHAPEIDS;
   
     usershape *us = usershapes[group][id];
     if(us) {  
