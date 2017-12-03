@@ -1022,6 +1022,7 @@ void finishshape() {
   double area = 0;
   for(int i=last->s; i<last->e-1; i++)
     area += hpc[i][0] * hpc[i+1][1] - hpc[i+1][0] * hpc[i][1];
+  if(abs(area) < 1e-9) last->flags |= POLY_ISSIDE;
   if(area >= 0) last->flags |= POLY_INVERSE;
   /* if(isnan(area)) ;
   else if(intval(hpc[last->s], hpc[last->e-1]) > 1e-6)
@@ -2118,10 +2119,9 @@ void buildpolys() {
     usershape *us = usershapes[i][j];
     if(!us) continue;
     for(int l=0; l<USERLAYERS; l++) {
-      us->d[l].sh.s = qhpc;
-      first = true;
+      bshape(us->d[l].sh, us->d[l].sh.prio);
       pushShape(us->d[l]);
-      us->d[l].sh.e = qhpc;
+      finishshape();
       }
     }
   
