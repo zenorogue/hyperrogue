@@ -731,7 +731,8 @@ bool ishex1(cell *c) {
 
 int emeraldval(cell *c) {
   if(euclid) return eupattern(c);
-  if(a46) return c->master->distance & 1;
+  if(a46) return ctof(c) ? ((c->master->emeraldval & 2) ? 1 : 0) : 
+    ((c->master->emeraldval & 1) ^ ((c->master->emeraldval & 2)>>1) ^ (c->spin(0)&1)) ? 8 : 4;
   if(sphere) return 0;
   if(ctof(c))
     return c->master->emeraldval >> 3;

@@ -379,7 +379,12 @@ namespace mapeditor {
                 
             case 'f': {
                 int t = emeraldval(c);
-                if(a46) return c->master->emeraldval ^ (c->master->distance & 1);
+                if(a46) {
+                  if(ctof(c))
+                    return (c->master->emeraldval & 1) ^ (c->master->emeraldval & 2 ? 1 : 0);
+                  else
+                    return ((c->mov[0]->master->emeraldval + c->spin(0)) & 1) ? 2 : 0;
+                  }
                 if(euclid) return 0;
                 int tcdir = 0, tbest = (t&3);
                 for(int i=0; i<c->type; i++) {
@@ -412,7 +417,12 @@ namespace mapeditor {
                 
             case 0: {
                 if(euclid) return 0;
-                if(a46) return c->master->emeraldval;
+                if(a46) {
+                  if(ctof(c))
+                    return c->master->emeraldval;
+                  else
+                    return ((c->mov[0]->master->emeraldval + c->spin(0)) & 1) ? 2 : 0;
+                  }
                 int u = nopattern(c);
                 
                 if(u == 6) {
@@ -769,10 +779,10 @@ namespace mapeditor {
     else if(!euclid) {
       dialog::addBoolItem(XLAT("rotational symmetry"), (symRotation), '0');
       dialog::addBoolItem(XLAT("symmetry 0-1"), (sym01), '1');
-      if(!a46) {
+      if(!a46 || !nontruncated) 
         dialog::addBoolItem(XLAT("symmetry 0-2"), (sym02), '2');
+      if(!a46) 
         dialog::addBoolItem(XLAT("symmetry 0-3"), (sym03), '3');
-        }
       }
     else
       dialog::addBoolItem(XLAT("edit all three colors"), (symRotation), '0');

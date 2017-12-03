@@ -656,6 +656,7 @@ namespace mapeditor {
   extern bool drawplayer; 
   extern char whichPattern, whichShape;
   extern char whichCanvas;
+  extern bool symRotation, sym01, sym02, sym03;
   extern int displaycodes;
   int generateCanvas(cell *c);
   void applyModelcell(cell *c);

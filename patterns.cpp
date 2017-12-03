@@ -7,7 +7,7 @@
 // rules for the emeraldvalues of heptagons.
 int emerald_heptagon(int parent, int dir) {
 
-  if(a46) return (parent+dir)&1;
+  if(a46) return parent ^ (dir & 1) ^ 2;
 
   if(S7 == 8 && dir > 3) dir--;
 
