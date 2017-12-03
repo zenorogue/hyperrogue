@@ -2275,6 +2275,7 @@ extern purehookset hooks_fixticks;
 void activateVertexArray(GLfloat *f, int qty);
 
 ld realradius();
-void sdltogl(SDL_Surface *txt, glfont_t& f, int ch);
+
+void sdltogl(SDL_Surface *txt, struct glfont_t& f, int ch);
 void glcolor2(int color);
 
