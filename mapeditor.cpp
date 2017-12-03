@@ -992,6 +992,14 @@ namespace mapeditor {
       case 'H': 
         return towerval(c);
       case 'F': {
+        if(euclid) {
+          using namespace torusconfig;
+          eucoord cx, cy;
+          decodeMaster(c->master, cx, cy);
+          int cd = cx * dx + cy * dy;
+          cd %= qty; if(cd<0) cd += qty;
+          return cd;
+          }
         pair<int, bool> p = fieldpattern::fieldval(c);
         return 10*p.first + (p.second?6:7);
         }
@@ -1023,7 +1031,7 @@ namespace mapeditor {
     if(drawcell == cwt.c) return vid.cs.charid;
     if(drawcell->monst) return drawcell->monst;
     if(drawcell->item) return drawcell->item;
-    return subpattern(drawcell);
+    return subpattern(drawcell) % (USERSHAPEIDS);
     }
 
   int subpatternShape(int i) {

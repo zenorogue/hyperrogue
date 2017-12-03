@@ -971,7 +971,7 @@ hpcshape
 
 #define USERLAYERS 32
 #define USERSHAPEGROUPS 8
-#define USERSHAPEIDS 256
+#define USERSHAPEIDS 4096
 
 struct usershapelayer {
   vector<hyperpoint> list;
