@@ -296,7 +296,7 @@ string generateHelpForItem(eItem it) {
   if(itemclass(it) == IC_ORB || it == itGreenStone || it == itOrbYendor) {
     for(int i=0; i<ORBLINES; i++) {
       const orbinfo& oi(orbinfos[i]);
-      if(oi.orb == it) describeOrb(help, oi);
+      if(oi.orb == it && oi.is_native()) describeOrb(help, oi);
       }
     }
   

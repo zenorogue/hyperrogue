@@ -25,10 +25,12 @@ namespace orbgenflags {
   static const int OSM_GLOBAL100 = 1024;
   // do not create in the Crossroads in the tactics mode
   static const int NO_TACTIC = (1<<11);
+  // guest Orb
+  static const int GUEST = (1<<12);
   
   // typical combinations
   static const int S_NATIVE = LOCAL10 | CROSS10 | GLOBAL25 | NATIVE;
-  static const int S_GUEST  = LOCAL10 | OSM_AT10;
+  static const int S_GUEST  = LOCAL10 | OSM_AT10 | GUEST;
   static const int S_YENDOR = S_NATIVE | OSM_LOCAL25 | OSM_CROSS50 | OSM_GLOBAL100 | NO_TACTIC;
   static const int S_NAT_NT = S_NATIVE | NO_TACTIC;
   static const int S_NA_O25 = S_NATIVE | OSM_CROSS25;
@@ -208,8 +210,11 @@ eOrbLandRelation getOLR(eItem it, eLand l) {
   if(it == itOrbIllusion && l == laCamelot) return olrNative1;
   if(it == itOrbLove) return olrNoPrizeOrb;    
   if(nativeOrbType(l) == it) return olrNative;
-  if(it == itOrbWinter && (l == laIce || l == laDryForest || l == laDragon))
-    return olrGuest;
+  
+  for(orbinfo& oi: orbinfos)
+    if(oi.flags && orbgenflags::GUEST && oi.l == l && oi.orb == it)
+      return olrGuest;
+      
   if(it == itOrbLuck && l == laIvoryTower)
     return olrUseless;
   if(it == itOrbLuck && l == laEndorian)
@@ -228,9 +233,7 @@ eOrbLandRelation getOLR(eItem it, eLand l) {
     return olrUseless;
    if(it == itOrbNature && l == laWineyard)
     return olrDangerous;
-  if(it == itOrbDigging && l == laCaves)
-    return olrGuest;
-  if(it == itOrbFrog && (l == laPalace || l == laPrincessQuest))
+  if(it == itOrbFrog && l == laPrincessQuest)
     return olrGuest;
   if(it == itOrbDragon && l == laRlyeh)
     return olrMonster;
