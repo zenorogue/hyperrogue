@@ -2310,7 +2310,7 @@ void moveMonster(monster *m, int delta) {
   else if(m->type == moEagle)
     step *= 1.6;
   else if(m->type == moHunterDog)
-    step *= 1.5;
+    step *= (1 + .5 / numplayers());
   else if(m->type == moLancer)
     step *= 1.25;
   else if(isDemon(m->type)) {
