@@ -5179,7 +5179,11 @@ void gamescreen(int _darken) {
 
   if(ISMOBILE && (cmode & sm::SIDE)) {
     cmode ^= sm::SIDE;
-    darken += 2;
+    _darken += 2;
+    }
+  
+  if((cmode & sm::MAYDARK) && !sidescreen) {
+    _darken += 2;
     }
 
   darken = _darken;

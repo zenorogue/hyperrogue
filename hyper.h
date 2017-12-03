@@ -1118,6 +1118,7 @@ namespace dialog {
   void displayPageButtons(int i, bool pages);
   bool handlePageButtons(int uni);
   extern bool sidedialog;
+  extern int dialogflags;
   }
 
 void checkStunKill(cell *dest);
@@ -1517,6 +1518,7 @@ namespace sm {
   static const int A3 = 2048; // affects poly
   static const int ZOOMABLE = 4096;
   static const int TORUSCONFIG = 8192;
+  static const int MAYDARK = 16384;
   };
 
 namespace linepatterns {

@@ -557,8 +557,8 @@ void handleAllConfig(int sym, int uni) {
   }
 
 void showGraphConfig() {
+  cmode = vid.xres > vid.yres * 1.4 ? sm::SIDE : sm::MAYDARK;
   gamescreen(0);
-  cmode = vid.xres > vid.yres * 1.4 ? sm::SIDE : 0;
 
   dialog::init(XLAT("graphics configuration"));
 
@@ -993,8 +993,8 @@ string explain3D(ld *param) {
   }
 
 void show3D() {
+  cmode = sm::SIDE | sm::A3 | sm::MAYDARK;
   gamescreen(0);
-  cmode = sm::SIDE | sm::A3;
   using namespace geom3;
   dialog::init(XLAT("3D configuration"));
 

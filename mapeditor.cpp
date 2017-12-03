@@ -379,6 +379,7 @@ namespace mapeditor {
                 
             case 'f': {
                 int t = emeraldval(c);
+                if(a46) return c->master->emeraldval ^ (c->master->distance & 1);
                 if(euclid) return 0;
                 int tcdir = 0, tbest = (t&3);
                 for(int i=0; i<c->type; i++) {
@@ -411,6 +412,7 @@ namespace mapeditor {
                 
             case 0: {
                 if(euclid) return 0;
+                if(a46) return c->master->emeraldval;
                 int u = nopattern(c);
                 
                 if(u == 6) {
@@ -745,11 +747,21 @@ namespace mapeditor {
     }
   
   void showPattern() {
+    cmode = sm::SIDE | sm::MAYDARK;
+    {
+    dynamicval<int> dc(displaycodes, displaycodes ? displaycodes : 2);
+    gamescreen(0);
+    }
     dialog::init();
 
-    dialog::addBoolItem(XLAT(euclid ? "three colors" : "Emerald Pattern"), (whichPattern == 'f'), 'f');
-    dialog::addBoolItem(XLAT("Palace Pattern"), (whichPattern == 'p'), 'p');
-    dialog::addBoolItem(XLAT(euclid ? "three colors rotated" : "Zebra Pattern"), (whichPattern == 'z'), 'z');
+    if(a46)
+      dialog::addBoolItem("two colors", (whichPattern == 'f'), 'f');
+    else
+      dialog::addBoolItem(XLAT(euclid ? "three colors" : "Emerald Pattern"), (whichPattern == 'f'), 'f');
+    if(!a4)
+      dialog::addBoolItem(XLAT("Palace Pattern"), (whichPattern == 'p'), 'p');
+    if(!a4)
+      dialog::addBoolItem(XLAT(euclid ? "three colors rotated" : "Zebra Pattern"), (whichPattern == 'z'), 'z');
     dialog::addBoolItem(XLAT("field pattern"), (whichPattern == 'F'), 'F');
 
     if(whichPattern == 'f') symRotation = true;
@@ -757,8 +769,10 @@ namespace mapeditor {
     else if(!euclid) {
       dialog::addBoolItem(XLAT("rotational symmetry"), (symRotation), '0');
       dialog::addBoolItem(XLAT("symmetry 0-1"), (sym01), '1');
-      dialog::addBoolItem(XLAT("symmetry 0-2"), (sym02), '2');
-      dialog::addBoolItem(XLAT("symmetry 0-3"), (sym03), '3');
+      if(!a46) {
+        dialog::addBoolItem(XLAT("symmetry 0-2"), (sym02), '2');
+        dialog::addBoolItem(XLAT("symmetry 0-3"), (sym03), '3');
+        }
       }
     else
       dialog::addBoolItem(XLAT("edit all three colors"), (symRotation), '0');
@@ -2341,6 +2355,9 @@ namespace linepatterns {
   int numpat = 0;
   
   void showMenu() {
+    cmode = sm::SIDE | sm::MAYDARK;
+    gamescreen(0);
+
     dialog::init(XLAT("line patterns"));
     
     for(numpat=0; patterns[numpat].lpname; numpat++)
@@ -2356,8 +2373,10 @@ namespace linepatterns {
     
     keyhandler = [] (int sym, int uni) {
       dialog::handleNavigation(sym, uni);
-      if(uni >= 'a' && uni < 'a' + numpat)
+      if(uni >= 'a' && uni < 'a' + numpat) {
         dialog::openColorDialog(patterns[uni - 'a'].color, NULL);
+        dialog::dialogflags |= sm::MAYDARK | sm::SIDE;
+        }
       else if(doexiton(sym,uni)) popScreen();
       }; 
     }

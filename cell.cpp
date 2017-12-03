@@ -61,7 +61,7 @@ hrmap_hyperbolic::hrmap_hyperbolic() {
   origin = new heptagon;
   heptagon& h = *origin;
   h.s = hsOrigin;
-  h.emeraldval = 98;
+  h.emeraldval = a46 ? 0 : 98;
   h.zebraval = 40;
   h.fiftyval = 0;
   h.fieldval = 0;
@@ -731,6 +731,7 @@ bool ishex1(cell *c) {
 
 int emeraldval(cell *c) {
   if(euclid) return eupattern(c);
+  if(a46) return c->master->distance & 1;
   if(sphere) return 0;
   if(ctof(c))
     return c->master->emeraldval >> 3;

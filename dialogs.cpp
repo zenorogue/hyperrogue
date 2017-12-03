@@ -414,7 +414,7 @@ namespace dialog {
     unsigned& color = *colorPointer;
 
     if(uni >= 'A' && uni <= 'D') {
-      int x = (mousex - vid.xres/4) * 510 / vid.xres;
+      int x = (mousex - (dcenter-dwidth/4)) * 510 / dwidth;
       if(x < 0) x = 0;
       if(x > 255) x = 255;
       unsigned char* pts = (unsigned char*) &color;
@@ -453,12 +453,23 @@ namespace dialog {
     }
   
   void drawColorDialog() {
+    cmode = sm::NUMBER | dialogflags;
+    if(cmode & sm::SIDE) gamescreen(0);
+
+    dcenter = vid.xres/2;
+    dwidth = vid.xres;
+
+    if(sidescreen) {
+      dwidth = vid.xres - vid.yres;
+      dcenter = vid.xres - dwidth / 2;
+      }
+
     int color = *colorPointer;
     
     int ash = 8;
     
     for(int j=0; j<10; j++) {
-      int x = vid.xres / 2 + vid.fsize * 2 * (j-5);
+      int x = dcenter + vid.fsize * 2 * (j-5);
       int y = vid.yres / 2- 5 * vid.fsize;
       
       string s0 = ""; s0 += ('0'+j);
@@ -471,7 +482,7 @@ namespace dialog {
     if(palette) {
       int q = palette[0]; 
       for(int i=0; i<q; i++) {
-        int x = vid.xres / 2 + vid.fsize * (2 * i-q);
+        int x = dcenter + vid.fsize * (2 * i-q);
         int y = vid.yres / 2- 7 * vid.fsize;
         string s0 = ""; s0 += ('a'+i);
         vid.fsize *= 2;
@@ -485,22 +496,23 @@ namespace dialog {
       
       int col = ((i==colorp) && !mousing) ? 0xFFD500 : forecolor;
 
-      displayColorButton(vid.xres / 4, y, "(", 0, 16, 0, col);
+      displayColorButton(dcenter - dwidth/4, y, "(", 0, 16, 0, col);
       string rgt = ") "; rgt += "ABGR" [i];
-      displayColorButton(vid.xres * 3/4, y, rgt, 0, 0, 0, col);
-      displayColorButton(vid.xres /4 + vid.xres * ((color >> (8*i)) & 0xFF) / 510, y, "#", 0, 8, 0, col);
+      displayColorButton(dcenter + dwidth/4, y, rgt, 0, 0, 0, col);
+      displayColorButton(dcenter - dwidth/4 + dwidth * ((color >> (8*i)) & 0xFF) / 510, y, "#", 0, 8, 0, col);
       
       if(mousey >= y - vid.fsize && mousey < y + vid.fsize)
         getcstat = 'A' + i, inslider = true;
       }
     
-    displayColorButton(vid.xres/2, vid.yres/2+vid.fsize * 6, XLAT("select this color") + " : " + itsh(color), ' ', 8, 0, color >> ash);
+    displayColorButton(dcenter, vid.yres/2+vid.fsize * 6, XLAT("select this color") + " : " + itsh(color), ' ', 8, 0, color >> ash);
     
     keyhandler = handleKeyColor;
     }
   
   void openColorDialog(unsigned int& col, unsigned int *pal) {
     colorPointer = &col; palette = pal;
+    dialogflags = 0;
     pushScreen(drawColorDialog);
     }
   
@@ -641,7 +653,7 @@ namespace dialog {
   
   void drawNumberDialog() {
     cmode = sm::NUMBER | dialogflags;
-    gamescreen((cmode & sm::SIDE) ? 0 : 2);
+    gamescreen(0);
     init(ne.title);
     addInfo(ne.s);
     addSlider(ne.scale(ne.vmin), ne.scale(*ne.editwhat), ne.scale(ne.vmax), 500);
@@ -802,7 +814,8 @@ namespace dialog {
     ne.scale = ne.inverse_scale = identity;
     ne.intval = NULL;
     ne.positive = false;
-    dialogflags = (cmode & (sm::SIDE | sm::A3));
+    dialogflags = (cmode & sm::A3);
+    if(cmode & sm::SIDE) dialogflags |= sm::MAYDARK;
     cmode |= sm::NUMBER;
     pushScreen(drawNumberDialog);
     reaction = reaction_t();
