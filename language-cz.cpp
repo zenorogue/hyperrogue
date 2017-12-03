@@ -6437,6 +6437,6 @@ S("This makes sense only in hyperbolic or Torus geometry.", "To dává smysl jen
 
 #undef Orb
 
-S("score: ", "skóre: ")
-S("kills: ", "zabitých netvorů: ")
+S("score: %1", "skóre: %1")
+S("kills: %1", "zabitých netvorů: %1")
 

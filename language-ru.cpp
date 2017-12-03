@@ -6508,6 +6508,6 @@ S("This makes sense only in hyperbolic or Torus geometry.", "Имеет смыс
 
 #undef Orb
 
-S("score: ", "Очки: ")
-S("kills: ", "Убийства: ")
+S("score: %1", "Очки: %1")
+S("kills: %1", "Убийства: %1")
   

@@ -4004,5 +4004,5 @@ S("A petrified creature.", "Eine versteinerte Kreatur.")
 
 #undef Orb
 
-S("score: ", "punkte: ")
-S("kills: ", "kills: ")
+S("score: %1", "punkte: %1")
+S("kills: %1", "kills: %1")
