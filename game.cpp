@@ -5876,7 +5876,7 @@ void placeGolem(cell *on, cell *moveto, eMonster m) {
     addMessage(XLAT("There is no room for %the1!", m));
     return;
     }
-  if(passable(on, moveto, m == moTameBomberbird ? P_FLYING : 0))
+  if(passable(on, moveto, P_ISFRIEND | (m == moTameBomberbird ? P_FLYING : 0)))
     on->monst = m;
   else {
     on->monst = m;
