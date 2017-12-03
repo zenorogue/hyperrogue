@@ -211,7 +211,7 @@ eOrbLandRelation getOLR(eItem it, eLand l) {
   if(it == itOrbLove) return olrNoPrizeOrb;    
   if(nativeOrbType(l) == it) return olrNative;
   
-  for(orbinfo& oi: orbinfos)
+  for(const orbinfo& oi: orbinfos)
     if(oi.flags && orbgenflags::GUEST && oi.l == l && oi.orb == it)
       return olrGuest;
       
