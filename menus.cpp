@@ -210,6 +210,8 @@ void showMainMenu() {
     dialog::addItem(XLAT("cheats"), 'c');
   else dialog::addBreak(100);
   dialog::addItem(XLAT("restart game"), 'r'); dialog::lastItem().keycaption += " / F5";
+
+  dialog::addItem(XLAT(inSpecialMode() ? "reset special modes" : "back to the start menu"), 'R');
   
   string q;
   #if ISMOBILE==1
@@ -259,10 +261,12 @@ void showMainMenu() {
     else if(sym == 'g') pushScreen(showGraphConfig);
     else if(sym == 'd') pushScreen(showDisplayMode);
     else if(sym == 'm') pushScreen(showChangeMode);
+    else if(uni == 'R')
+      popScreenAll(), pushScreen(showStartMenu);
   #if CAP_SAVE
     else if(sym == 't') scores::load();
   #endif
-    else if(sym == 'r' || sym == SDLK_F5) {
+    else if(uni == 'r' || sym == SDLK_F5) {
       restartGame();
       }
     else if(sym == 'q' || sym == SDLK_F10) {
@@ -629,15 +633,18 @@ void showStartMenu() {
     if(uni == 'o') uni = 'i';
     if(uni == 'c' || uni == 'i' || uni == 's') {
       popScreenAll();
-      if(inv::on != (uni == 'i')) restartGame('i');
-      if(shmup::on != (uni == 's')) restartGame('s');
+      resetModes(uni);
       clearMessages();
       welcomeMessage();
       stampbase = ticks;
+      if(uni == 's') {
+        multi::shmupcfg = shmup::on;
+        pushScreen(multi::showShmupConfig);
+        }
       }
     else if(uni == 'z') {
       popScreenAll();
-      resetModes();
+      resetModes('g');
       stampbase = ticks;
       if(!sphere) {
         specialland = laHalloween;
@@ -650,6 +657,7 @@ void showStartMenu() {
 #if CAP_TOUR
     else if(uni == 't') {
       popScreenAll();
+      resetModes('c');
       tour::start();
       }
 #endif

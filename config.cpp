@@ -4,6 +4,9 @@
 
 videopar vid;
 
+#define DEFAULT_WALLMODE ISMOBILE ? 3 : 5
+#define DEFAULT_MONMODE  ISMOBILE ? 2 : 4
+
 #if ISANDROID
 #define ANDROID_SETTINGS settingsChanged = true;
 #else
@@ -236,8 +239,8 @@ void initConfig() {
   addsaver(vid.yshift, "Y shift", 0);
   addsaver(vid.camera_angle, "camera angle", 0);
   addsaver(vid.ballproj, "ballproj", 1);
-  addsaver(vid.monmode, "monster display mode", ISMOBILE ? 2 : 4);
-  addsaver(vid.wallmode, "wall display mode", ISMOBILE ? 3 : 5);
+  addsaver(vid.monmode, "monster display mode", DEFAULT_MONMODE);
+  addsaver(vid.wallmode, "wall display mode", DEFAULT_WALLMODE);
 
   addsaver(geom3::depth, "3D depth");
   addsaver(geom3::camera, "3D camera level");
@@ -317,21 +320,39 @@ void initConfig() {
 #endif
   }
 
-void resetModes() {
+bool inSpecialMode() {
+  return chaosmode || nontruncated || peace::on || tour::on ||
+    yendor::on || tactic::on || randomPatternsMode ||
+    geometry != gNormal || pmodel != mdDisk || vid.alpha != 1 || vid.scale != 1 || 
+    rug::rugged || vid.monmode != DEFAULT_MONMODE ||
+    vid.wallmode != DEFAULT_WALLMODE;
+  }
+
+void resetModes(char leave = 'c') {
   popAllGames();
   firstland = laIce; vid.scfg.players = 1;
-  if(shmup::on) restartGame('s');
-  if(inv::on) restartGame('i');
-  if(chaosmode) restartGame('C');
-  if(nontruncated) restartGame('7');
-  if(peace::on) restartGame('P');
+  if(shmup::on != (leave == 's')) restartGame('s');
+  if(inv::on != (leave == 'i')) restartGame('i');
+  if(chaosmode != (leave == 'C')) restartGame('C');
+  if(nontruncated != (leave == '7')) restartGame('7');
+  if(peace::on != (leave == 'P')) restartGame('P');
 #if CAP_TOUR
-  if(tour::on) restartGame('T');
+  if(tour::on != (leave == 'T')) restartGame('T');
 #endif
-  if(yendor::on) restartGame('y');
-  if(tactic::on) restartGame('t');
-  if(randomPatternsMode) restartGame('r');
-  if(geometry != gNormal) { targetgeometry = gNormal; restartGame('g'); }
+  if(yendor::on != (leave == 'y')) restartGame('y');
+  if(tactic::on != (leave == 't')) restartGame('t');
+  if(randomPatternsMode != (leave == 'r')) restartGame('r');
+
+  if(geometry != gNormal && leave != 'g') { 
+    targetgeometry = gNormal;
+    restartGame('g'); 
+    }
+  
+  pmodel = mdDisk; vid.alpha = 1; vid.scale = 1;
+  if(rug::rugged) rug::close();
+
+  vid.monmode = DEFAULT_MONMODE;
+  vid.wallmode = DEFAULT_WALLMODE;
   }
 
 #if CAP_CONFIG  
