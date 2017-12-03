@@ -1661,6 +1661,72 @@ namespace mapeditor {
   
   bool onelayeronly;
   
+  void loadPicFile(const string& s) {
+    FILE *f = fopen(picfile.c_str(), "rt");
+    if(!f) {
+      addMessage(XLAT("Failed to load pictures from %1", picfile));
+      return;
+      }
+    int err;
+    char buf[200];
+    if(!fgets(buf, 200, f)) { 
+      addMessage(XLAT("Failed to load pictures from %1", picfile));
+      fclose(f); return; 
+      }
+    int vernum; err = fscanf(f, "%x", &vernum);
+    printf("vernum = %x\n", vernum);
+    while(true) {
+      int i, j, l, sym, rots, color, siz;
+      err = fscanf(f, "%d%d%d%d%d%x%d", &i, &j, &l, &sym, &rots, &color, &siz);
+      if(i == -1 || err < 6) break;
+      if(siz < 0 || siz > 1000) break;
+      initShape(i, j);
+      usershapelayer& ds(usershapes[i][j]->d[l]);
+      ds.shift = readHyperpoint(f);
+      ds.spin = readHyperpoint(f);
+      ds.list.clear();
+      for(int i=0; i<siz; i++) {
+        ds.list.push_back(readHyperpoint(f));
+        writeHyperpoint(stdout, ds.list[i]);
+        }
+      ds.sym = sym;
+      ds.rots = rots;
+      ds.color = color;
+      }
+    fclose(f);
+    addMessage(XLAT("Pictures loaded from %1", picfile));
+    
+    buildpolys();
+    }
+  
+  void savePicFile(const string& s) {
+    FILE *f = fopen(picfile.c_str(), "wt");
+    if(!f) {
+      addMessage(XLAT("Failed to save pictures to %1", picfile));
+      return;
+      }
+    fprintf(f, "HyperRogue saved picture\n");
+    fprintf(f, "%x\n", VERNUM_HEX);
+    for(int i=0; i<USERSHAPEGROUPS; i++) for(int j=0; j<USERSHAPEIDS; j++) {
+      usershape *us = usershapes[i][j];
+      if(!us) continue;
+      
+      for(int l=0; l<USERLAYERS; l++) if(size(us->d[l].list)) {
+        usershapelayer& ds(us->d[l]);
+        fprintf(f, "\n%d %d %d %d %d %6x %d\n", 
+          i, j, l, ds.sym, ds.rots, ds.color, int(size(ds.list)));
+        writeHyperpoint(f, ds.shift);
+        writeHyperpoint(f, ds.spin);
+        fprintf(f,"\n");
+        for(int i=0; i<size(ds.list); i++)
+          writeHyperpoint(f, ds.list[i]);
+        }
+      }
+    fprintf(f, "\n-1\n");
+    fclose(f);
+    addMessage(XLAT("Pictures saved to %1", picfile));
+    }
+    
   void drawHandleKey(int sym, int uni) {
 
     handlePanning(sym, uni);
@@ -1724,71 +1790,11 @@ namespace mapeditor {
       return;
       }
 
-    if(sym == SDLK_F2) {
-      FILE *f = fopen(picfile.c_str(), "wt");
-      if(!f) {
-        addMessage(XLAT("Failed to save pictures to %1", picfile));
-        return;
-        }
-      fprintf(f, "HyperRogue saved picture\n");
-      fprintf(f, "%x\n", VERNUM_HEX);
-      for(int i=0; i<USERSHAPEGROUPS; i++) for(int j=0; j<USERSHAPEIDS; j++) {
-        usershape *us = usershapes[i][j];
-        if(!us) continue;
-        
-        for(int l=0; l<USERLAYERS; l++) if(size(us->d[l].list)) {
-          usershapelayer& ds(us->d[l]);
-          fprintf(f, "\n%d %d %d %d %d %6x %d\n", 
-            i, j, l, ds.sym, ds.rots, ds.color, int(size(ds.list)));
-          writeHyperpoint(f, ds.shift);
-          writeHyperpoint(f, ds.spin);
-          fprintf(f,"\n");
-          for(int i=0; i<size(ds.list); i++)
-            writeHyperpoint(f, ds.list[i]);
-          }
-        }
-      fprintf(f, "\n-1\n");
-      fclose(f);
-      addMessage(XLAT("Pictures saved to %1", picfile));
-      }
+    if(sym == SDLK_F2) 
+      savePicFile(picfile);
     
-    if(sym == SDLK_F3) {
-      FILE *f = fopen(picfile.c_str(), "rt");
-      if(!f) {
-        addMessage(XLAT("Failed to load pictures from %1", picfile));
-        return;
-        }
-      int err;
-      char buf[200];
-      if(!fgets(buf, 200, f)) { 
-        addMessage(XLAT("Failed to load pictures from %1", picfile));
-        fclose(f); return; 
-        }
-      int vernum; err = fscanf(f, "%x", &vernum);
-      printf("vernum = %x\n", vernum);
-      while(true) {
-        int i, j, l, sym, rots, color, siz;
-        err = fscanf(f, "%d%d%d%d%d%x%d", &i, &j, &l, &sym, &rots, &color, &siz);
-        if(i == -1 || err < 6) break;
-        if(siz < 0 || siz > 1000) break;
-        initShape(i, j);
-        usershapelayer& ds(usershapes[i][j]->d[l]);
-        ds.shift = readHyperpoint(f);
-        ds.spin = readHyperpoint(f);
-        ds.list.clear();
-        for(int i=0; i<siz; i++) {
-          ds.list.push_back(readHyperpoint(f));
-          writeHyperpoint(stdout, ds.list[i]);
-          }
-        ds.sym = sym;
-        ds.rots = rots;
-        ds.color = color;
-        }
-      fclose(f);
-      addMessage(XLAT("Pictures loaded from %1", picfile));
-      
-      buildpolys();
-      }
+    if(sym == SDLK_F3) 
+      loadPicFile(picfile);
     
     if(sym == SDLK_F7) {
       drawplayer = !drawplayer;
