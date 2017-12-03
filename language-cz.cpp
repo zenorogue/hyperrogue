@@ -6437,4 +6437,6 @@ S("This makes sense only in hyperbolic or Torus geometry.", "To dává smysl jen
 
 #undef Orb
 
+S("score: ", "skóre: ")
+S("kills: ", "zabitých netvorů: ")
 

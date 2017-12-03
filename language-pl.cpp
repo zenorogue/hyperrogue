@@ -6290,4 +6290,6 @@ S("This makes sense only in hyperbolic or Torus geometry.", "To ma sens tylko w 
 // for the map editor
 N("Dragon Head", GEN_F, "Głowa Smoka", "Głowy Smoka", "Głowę Smoka", "Głową Smoka")
 
+S("score: ", "wynik: ")
+S("kills: ", "zabicia: ")
 

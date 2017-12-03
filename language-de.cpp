@@ -4004,3 +4004,5 @@ S("A petrified creature.", "Eine versteinerte Kreatur.")
 
 #undef Orb
 
+S("score: ", "punkte: ")
+S("kills: ", "kills: ")

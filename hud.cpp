@@ -499,7 +499,7 @@ void drawStats() {
 
   string s0;
   if(!peace::on) {
-    if(displayButtonS(vid.xres - 8, vid.fsize, "score: " + its(gold()), forecolor, 16, vid.fsize)) {
+    if(displayButtonS(vid.xres - 8, vid.fsize, XLAT("score: %1", its(gold())), forecolor, 16, vid.fsize)) {
       mouseovers = XLAT("Your total wealth"),
       instat = true,
       getcstat = SDLK_F1,
@@ -512,7 +512,7 @@ void drawStats() {
         "Orbs of Yendor are worth 50 $$$ each.\n\n"
         );
       }
-    if(displayButtonS(8, vid.fsize, "kills: " + its(tkills()), forecolor, 0, vid.fsize)) {
+    if(displayButtonS(8, vid.fsize, XLAT("kills: %1", its(tkills())), forecolor, 0, vid.fsize)) {
       instat = true,
       getcstat = SDLK_F1,
       mouseovers = XLAT("Your total kills")+": " + its(tkills()),
@@ -524,7 +524,7 @@ void drawStats() {
         "but are not counted in the total kill count.");
       }
     }
-  if(displayButtonS(4, vid.yres - 4 - vid.fsize/2, s0+VER+ " fps: " + its(calcfps()), 0x202020, 0, vid.fsize/2)) {
+  if(displayButtonS(4, vid.yres - 4 - vid.fsize/2, s0+VER+ XLAT(" fps: ") + its(calcfps()), 0x202020, 0, vid.fsize/2)) {
     mouseovers = XLAT("frames per second"),
     getcstat = SDLK_F1,
     instat = true,
