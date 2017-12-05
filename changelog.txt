@@ -2117,3 +2117,27 @@ Other:
 - the factor of darkening the elements behind the sphere is is now configurable (in 3D menu); also works better with transparency now
 - fixed some bugs with the 'movement compass' for mobile devices (correct placement and rotation); it is now also available on all platforms (though probably not that useful not on mobiles)
 - some fixes for shmup in new geometries (untested)
+
+2017.12.03 20:02 version 10.2e
+
+UI improvements:
+- Improvements to the start menu. Selecting one of the options from the Start Menu resets all special modes you have configured, which should help in case if some weird mode has been set for some reason (if you have intentionally saved a weird config, you can just exit the start menu). You can now also go back to the start menu from the main menu, and selecting Shmup now takes you to the key configuration.
+- score/kills in the main HUD is translated now
+- Dog PC's nose is now black (previously it had the same color as eyes)
+
+Graphics editor / geometry experiments:
+- the graphics editor's tesselation editing feature is now made more powerful and intuitive. You can edit more sophisticated tesselations from the editor (previously you had to switch to the map editor to do this). Side menus are now used for regular patterns and line patterns. Some simple regular patterns have been created for the new geometries, and asymmetric tiles are now rotated more intelligently now.
+- selecting the field pattern on Euclidean does torus instead of crashing
+- fixed the bug with user-drawn shapes overtaking the screen in stereographic perspective on sphere
+- fixed the basic floor in nontruncated four hexagons
+- some new related commandline options
+
+Gameplay bugfixes:
+- friends are no longer crushed when Empathy should protect them
+- no more 'Ambushed' messages when picking up dead orbs etc.
+- fixed the incorrect lines in help description (incorrect repetitions, Guest states)
+- no more Prairie/Crossroads III borders (Prairie/C4 looks like a bug but is intentional)
+- no-escape Blizzard cells now generate OoSafety
+- Fixed the bug with instakillable Salamanders
+- Hunting Dogs are now slower in coop shmup
+- fixed a minor potential bug with non-orientable surfaces

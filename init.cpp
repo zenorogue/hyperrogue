@@ -14,9 +14,9 @@
 #define NOLICENSE
 #endif
 
-#define VER "10.2d"
-#define VERNUM 10204
-#define VERNUM_HEX 0xA094
+#define VER "10.2e"
+#define VERNUM 10205
+#define VERNUM_HEX 0xA095
 
 #define GEN_M 0
 #define GEN_F 1
