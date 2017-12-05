@@ -1110,8 +1110,8 @@ int isLandValid(eLand l) {
     return 0;
   
   // Graveyard pattern does not work on non-truncated weird geometries
-  if(l == laGraveyard && weirdhyperbolic && nontruncated)
-    return 0;
+  if(l == laGraveyard) 
+    return geosupport_graveyard();
   
   // Warped Coast does not work on non-truncated S3s (except standard heptagonal where we have to keep it)
   if(l == laWarpCoast && (S3==3) && nontruncated) {

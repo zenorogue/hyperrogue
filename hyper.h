@@ -660,9 +660,12 @@ namespace mapeditor {
   extern int displaycodes;
   int generateCanvas(cell *c);
   void applyModelcell(cell *c);
-  int realpattern(cell *c);
+
+  int realpattern(cell *c, char w = whichPattern);
   int patterndir(cell *c, char w = whichPattern);
-  int subpattern(cell *c);
+  bool reflectPatternAt(cell *c, char p = whichPattern);
+  int subpattern(cell *c, char w = whichPattern);
+  
   extern cell *drawcell;
   void initdraw(cell *c); 
   void showMapEditor();
@@ -1823,6 +1826,7 @@ namespace windmap {
   static const int NOWINDBELOW = 8;
   static const int NOWINDFROM = 120;
 
+  int getId(cell *c);
   int at(cell *c);
   }
 
@@ -2100,6 +2104,7 @@ int polarb50(cell *c);
 
 bool isGravityLand(eLand l);
 bool isWarped(eLand l);
+bool isWarped(cell *c);
 
 struct hrmap {
   virtual heptagon *getOrigin() { return NULL; }
@@ -2280,3 +2285,13 @@ void sdltogl(SDL_Surface *txt, struct glfont_t& f, int ch);
 void glcolor2(int color);
 
 void showStartMenu();
+
+bool polara50(int x);
+int polara50(cell *c);
+int fiftyval049(cell *c);
+
+namespace fieldpattern {
+  pair<int, bool> fieldval(cell *c);
+  }
+
+int emeraldval(cell *c);

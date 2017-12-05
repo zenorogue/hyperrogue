@@ -1,4 +1,4 @@
-// HyperRogue patterns
+// HyperRogue patterns: tables to give codes to heptagons
 
 // Copyright (C) 2011-2016 Zeno Rogue, see 'hyper.cpp' for details
 
@@ -1116,3 +1116,20 @@ int zebra_heptagon(int parent, int dir) {
   return zebratable[parent/10-4][(70+dir-(parent%10))%7];
   }
 
+int fifty_38(int f, int d) {
+  // This creates the 'p' pattern for the a38 geometry.
+  // Hexagons have codes 4 and 5, while octagons have 0, 1, 2.
+  
+  // f&1 is which direction is the hexagon with code '4'
+
+  // c=((f>>1)&3) is 0, 1, or 2
+  int c = ((f>>1)&3);
+
+  // f&8: in which direction is c increasing by one
+  int step = (f&8) ? 1 : 2; if(d&1) step ^= 3;
+
+  return
+    ((f ^ d ^ 1) & 1)
++ (((c + step) % 3) << 1)
+  + (step==2?8:0);
+  }

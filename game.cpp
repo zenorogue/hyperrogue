@@ -357,24 +357,6 @@ bool isWarped(cell *c) {
   return isWarped(c->land) || (!inmirrororwall(c->land) && (items[itOrb37] && c->cpdist <= 4));
   }
 
-// returns ishept in the normal tiling;
-// in the 'pure heptagonal' tiling, returns true for a set of cells
-// which roughly corresponds to the heptagons in the normal tiling
-bool pseudohept(cell *c) {
-  if(nontruncated) {
-    if(sphere) 
-      return 
-        c->master == getDodecahedron(3) ||
-        c->master == getDodecahedron(5) ||
-        c->master == getDodecahedron(6);
-    if(S3 > 3)
-      return c->master->distance & 1;
-    int z = zebra40(c);
-    return z == 5 || z == 8 || z == 15;
-    }
-  else return ishept(c);
-  }
-
 bool nonAdjacent(cell *c, cell *c2) {
   if(isWarped(c) && isWarped(c2) && !pseudohept(c) && !pseudohept(c2)) {
     /* int i = neighborId(c, c2);

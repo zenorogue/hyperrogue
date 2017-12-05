@@ -315,190 +315,51 @@ namespace mapeditor {
   char whichShape = 0;
   char whichCanvas = 0;
 
-    int nopattern(cell *c) {
-        if(isWarped(c) && !euclid) {
-            int u = ishept(c)?1:0;
-            int qhex = 0;
-            for(int v=0; v<c->type; v++) if(c->mov[v] && !isWarped(c->mov[v])) {
-                u += 2;
-                if(!ishept(c->mov[v])) qhex++;
-            }
-            if(u == 8 && qhex == 2) return 12;
-            if(u == 2 && qhex == 1) return 8;
-            if(u == 6 && qhex == 2) return 10;
-            return u;
-        }
-        return ishept(c) ? 1 : ishex1(c) ? 2 : 0; // 0 to 1
-    }
-    
-    bool reflectPatternAt(cell *c, char p = whichPattern) {
-        if(p == 'p' && sphere) return valsphere(c).reflect;
-        if(p == 'p' && polarb50(c)) return true;
-        if(p == 0) {
-          int np = nopattern(c);
-          if(np == 4) {
-            int d = patterndir(c);
-            return !isWarped(createMov(c, (d+1)%6));
-            }
-          if(np == 12) {
-            int d = patterndir(c);
-            return !isWarped(createMov(c, (d+1)%6));
-            }
-          }
-        return false;
-    }
-    
-    int downdir(cell *c, cellfunction *cf = coastvalEdge) {
-        cell *c2 = chosenDown(c, 1, 1, cf);
-        if(!c2) return 0;
-        return neighborId(c, c2);
-    }
-
-    int patterndir46(cell *c, int bits) {
-      if(ctof(c)) {
-        int b = c->master->emeraldval & bits;
-        return (b&1) ^ (b & 2 ? 1 : 0);
-        }
-      else
-        return ((c->mov[0]->master->emeraldval + c->spin(0)) & 1) ? 2 : 0;
+  bool symRotation, sym01, sym02, sym03;
+  
+  int subpattern(int i, char w) {  
+    if(euclid) {
+      if(w == 'p') 
+        return i;
+      if(w == 'z' || w == 'f')
+        return (symRotation && (i<3)) ? 0 : i;
       }
     
-    int patterndir38(cell *c) {
-      if(ctof(c)) return c->master->fiftyval;
-      return 0;
-      }
-          
-    int patterndir457(cell *c) {
-      if(!ctof(c)) {
-        int d = dir_truncated457(c);
-        if(d >= 0) return d;
-        return 0;
-        }
-      for(int i=0; i<c->type; i++)
-        if((zebra40(createStep(c->master, i + S7/2)->c7)&2) == (zebra40(createStep(c->master, i + 1 + S7/2)->c7)&2))
-          return i;
-      return 0;
+    if(a38 && w == 'p') {
+      if(sym01 && i == 5) i = 4;
+      if(symRotation && i < 4) i = 0;
+      return i;
       }
     
-    int patterndir(cell *c, char w) {
-        if(w != 'H') {
-          if(a46) return patterndir46(c, w == 'z' ? 3 : w == 'p' ? 2 : 1);
-          if(a4) return patterndir457(c);
-          if(a38) return patterndir38(c);
-          if(sphere) return valsphere(c).dir;
-          }
-        switch(w) {
-            case 'z': {
-                int t = zebra40(c);                
-
-                if(euclid) return (t*4) % 6;
-                
-                int t4 = t>>2, tcdir = 0;
-                
-                if(nontruncated) tcdir = t^1;
-                
-                else if(t4 == 10) tcdir = t-20;
-                else if(t4 >= 4 && t4 < 7) tcdir = 40 + (t&3);
-                else if(t4 >= 1 && t4 < 4) tcdir = t+12;
-                else if(t4 >= 7 && t4 < 10) tcdir = t-24;
-                
-                for(int i=0; i<c->type; i++) if(c->mov[i] && zebra40(c->mov[i]) == tcdir)
-                    return i;
-                
-                // printf("fail to fintd %d -> %d\n", t, tcdir);
-                
-                return 0;
-            }
-                
-            case 'f': {
-                int t = emeraldval(c);
-                if(euclid) return 0;
-                int tcdir = 0, tbest = (t&3);
-                for(int i=0; i<c->type; i++) {
-                    cell *c2 = c->mov[i];
-                    if(c2) {
-                        int t2 = emeraldval(c2);
-                        if((t&3) == (t2&3) && t2 > tbest)
-                            tbest = t2, tcdir = i;
-                    }
-                }
-                return tcdir;
-            }
-                
-            case 'p': {
-                int tcdir = -1, tbest = -1;
-                int pa = polara50(c);
-                int pb = polarb50(c);
-                for(int i=0; i<c->type; i++) {
-                    cell *c2 = c->mov[i];
-                    if(c2 && polara50(c2) == pa && polarb50(c2) == pb) {
-                        int t2 = fiftyval049(c2);
-                        if(t2 > tbest) tbest = t2, tcdir = i;
-                    }
-                }
-                return tcdir;
-            }
-                
-            case 'H':
-                return downdir(c);
-                
-            case 0: {
-                if(euclid) return 0;
-                int u = nopattern(c);
-                
-                if(u == 6) {
-                    for(int i=1; i<c->type; i+=2) if(!isWarped(createMov(c,i)))
-                        return i;
-                    }
-                
-                else if(u == 2 || u == 3 || u == 8) {
-                    for(int i=0; i<c->type; i++) if(!isWarped(createMov(c,i)))
-                        return i;
-                    }
-                
-                else if(u == 4 || u == 10) {
-                    for(int i=0; i<c->type; i+=2) if(!isWarped(createMov(c,i)))
-                        return i;
-                    }
-                
-                else if(u == 6) {
-                    for(int i=1; i<c->type; i+=2) if(!isWarped(createMov(c,i))) 
-                        return i;
-                    }
-                
-                else if(u == 5) {
-                    for(int i=0; i<c->type; i++) if(!isWarped(createMov(c,(i+3)%7)) && !isWarped(createMov(c,(i+4)%7))) 
-                        return i;
-                    }
-                
-                else if(u == 9) {
-                    for(int i=0; i<c->type; i++) if(!isWarped(createMov(c,(i+2)%7)) && !isWarped(createMov(c,(i+5)%7))) 
-                        return i;
-                    }
-                
-                else if(u == 11) {
-                    for(int i=0; i<c->type; i++) if(isWarped(createMov(c,(i)%7)) && isWarped(createMov(c,(i+1)%7))) 
-                        return i;
-                    }
-                
-                else if(u == 12) {
-                    for(int i=0; i<c->type; i+=2) if(isWarped(createMov(c,i)))
-                        return i;
-                    }
-
-                else if(u == 7) {
-                    for(int i=0; i<c->type; i++) if(!isWarped(createMov(c,(i+1)%7)) && !isWarped(createMov(c,(i+6)%7))) 
-                        return i;
-                    }
-            
-                else if(u < 2) return 0;
-
-#if LOCAL                
-                printf("unhandled: u=%d\n", u);
-#endif
-            }
+    if(w == 'z' || w == 'f' || w == 'p') {
+      if((sym01?1:0)+(sym02?1:0)+(sym03?1:0) >= 2) i &= ~3;
+      if(sym01 && (i&1)) i ^= 1;
+      if(sym02 && (i&2)) i ^= 2;
+      if(sym03 && (i&2)) i ^= 3;
+      }
+    
+    if(w == 'z' && symRotation) {
+      if(a4 && !a46) {
+        if(i >= 4 && i < 7) i -= 4;
         }
-        return 0;
+      else {
+        if(i >= 8 && i < 12) i -= 4;
+        if(i >= 12 && i < 16) i -= 8;
+        if(i >= 20 && i < 24) i -= 4;
+        if(i >= 24 && i < 28) i -= 8;
+        if(i >= 32 && i < 36) i -= 4;
+        if(i >= 36 && i < 40) i -= 8;
+        }
+      }
+    
+    if(w == 'p' && stdhyperbolic && symRotation && i >= 3)
+      i -= ((i/4-1) % 7) * 4;
+ 
+    return i;
+    }
+
+  int subpattern(cell *c, char w) {
+    return subpattern(realpattern(c, w), w);
     }
     
   string infix;
@@ -536,7 +397,6 @@ namespace mapeditor {
   
   cellwalker copysource;
   
-  bool symRotation, sym01, sym02, sym03;
   int whichpart;
     
   const char *mapeditorhelp = 
@@ -745,6 +605,8 @@ namespace mapeditor {
     dialog::addItem(XLAT("rainbow landscape"), 'l');
     dialog::addItem(XLAT("dark rainbow landscape"), 'd');
     dialog::addItem(XLAT("football"), 'F');
+
+    dialog::addItem(XLAT("nice coloring"), 'T');
 
     dialog::addSelItem(XLAT("emerald pattern"), "emerald", 'e');
 
@@ -970,99 +832,6 @@ namespace mapeditor {
     return 1;
     }
   
-  int subpatternEmerald(int i) {
-    if(euclid) return (symRotation && (i<3)) ? 0 : i;
-    if((sym01?1:0)+(sym02?1:0)+(sym03?1:0) >= 2) i &= ~3;
-    if(sym01 && (i&1)) i ^= 1;
-    if(sym02 && (i&2)) i ^= 2;
-    if(sym03 && (i&2)) i ^= 3;
-    return i;
-    }
-  
-  int subpatternZebra(int i) {
-    if(euclid) return (symRotation && (i<3)) ? 0 : i;
-    i = subpatternEmerald(i);
-    if(symRotation) {
-      if(a4 && !a46) {
-        if(i >= 4 && i < 7) i -= 4;
-        }
-      else {
-        if(i >= 8 && i < 12) i -= 4;
-        if(i >= 12 && i < 16) i -= 8;
-        if(i >= 20 && i < 24) i -= 4;
-        if(i >= 24 && i < 28) i -= 8;
-        if(i >= 32 && i < 36) i -= 4;
-        if(i >= 36 && i < 40) i -= 8;
-        }
-      }
-    return i;
-    }
-
-  int subpatternPalace(int i) {
-    if(euclid) return i;
-    i = subpatternEmerald(i);
-    if(symRotation && i >= 3) i -= ((i/4-1) % 7) * 4;
-    return i;
-    }
-  
-  int subpattern(cell *c) {
-    switch(whichPattern) { 
-      case 'z': 
-        return subpatternZebra(zebra40(c)); // 4 to 43
-      case 'f':
-        return subpatternEmerald(emeraldval(c)); // 44 to 99
-      case 'p': {
-        if(a46) return subpatternEmerald(val46(c));
-        if(a38) return val38(c);
-        if(sphere) return subpatternEmerald(valsphere(c).id);
-        int i = fiftyval049(c);
-        i *= 4;
-        if(polara50(c)) i|=1;
-        if(polarb50(c)) i|=2;
-        return subpatternPalace(i);
-        }
-      case 'P':
-        return fiftyval(c);
-      case 'H':
-      case 'F':
-        return realpattern(c);
-      }
-    return nopattern(c);
-    }
-
-  int realpattern(cell *c) {
-    switch(whichPattern) { 
-      case 'z':
-        return zebra40(c); // 4 to 43
-      case 'f':
-        return emeraldval(c); // 44 to 99
-      case 'p': {
-        if(a46) return val46(c);
-        if(a38) return val38(c);
-        if(sphere) return valsphere(c).id;
-        int i = fiftyval049(c);
-        i *= 4;
-        if(polara50(c)) i|=1;
-        if(polarb50(c)) i|=2;
-        return i;
-        }
-      case 'H': 
-        return towerval(c);
-      case 'F': {
-        if(euclid)
-          // use the torus ID
-          return fieldpattern::fieldval_uniq(c);
-        else if(nontruncated)
-          // use the actual field codes
-          return fieldpattern::fieldval(c).first;
-        else          
-          // use the small numbers from windmap
-          return windmap::getId(c);
-        }
-      }
-    return nopattern(c);
-    }
-
   int cellShapeGroup() {
     if(whichPattern == 'f') return 4;
     if(whichPattern == 'p') return 5;
@@ -1085,17 +854,10 @@ namespace mapeditor {
     return subpattern(drawcell);
     }
 
-  int subpatternShape(int i) {
-    if(whichPattern == 'z') return subpatternZebra(i);
-    if(whichPattern == 'f') return subpatternEmerald(i);
-    if(whichPattern == 'p') return subpatternPalace(i);
-    return i;
-    }
-  
   bool editingShape(int group, int id) {
     if(group != mapeditor::drawcellShapeGroup()) return false;
     if(group < 3) return id == drawcellShapeID();
-    return subpatternShape(id) == subpattern(drawcell);
+    return subpattern(id, whichPattern) == subpattern(drawcell);
     }
 
   void editCell(const pair<cellwalker, cellwalker>& where) {
@@ -2055,7 +1817,13 @@ namespace mapeditor {
       return (0x202020 + col[0] + (col[1] << 8) + (col[2] << 16)) >> (err?2:0);
       }
     if(whichCanvas == 'F') {
-      return ishept(c) ? 0x202020 : 0xC0C0C0;
+      return pseudohept(c) ? 0x202020 : 0xC0C0C0;
+      }
+    if(whichCanvas == 'T') {
+      static unsigned int fcol[8] = { 0x800000, 0x008000, 0x000080, 0x404040,
+        0x800080, 0x008080, 0x808000, 0xD0D0D0 };
+      int fv = pattern_threecolor(c);
+      return fcol[fv&7];
       }
     return canvasback;
     }
