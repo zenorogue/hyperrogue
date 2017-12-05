@@ -1202,6 +1202,7 @@ itemtype iinf[ittypes] = {
     "This ranged Orb will transform the target monster into one without any special powers. It also stuns them for one turn. "
     "Does not affect multi-tile monsters."},
   { '!', 0x80FF00, "Glowing Crystal", crystaldesc},
+  { '!', 0x80FF80, "Snake Oil", NODESCYET},
   };
 
 // --- wall types ---
@@ -1563,7 +1564,8 @@ const landtype linf[landtypes] = {
   { 0x207068, "Hunting Ground", huntingdesc},
   { 0xE2725B, "Terracotta Army", terraldesc},
   { 0xE2725B, "Terracotta Army", terraldesc},
-  { 0x80FF00, "Crystal World", crystaldesc}
+  { 0x80FF00, "Crystal World", crystaldesc},
+  { 0x306030, "Snake Nest", NODESCYET},
   };
 
 struct landtacinfo { eLand l; int tries, multiplier; };

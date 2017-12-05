@@ -21,6 +21,8 @@ bool survivalist;
 bool hardcore = false;
 int hardcoreAt;
 
+set<int> snaketypes;
+
 flagtype havewhat, hadwhat;
 
 #define HF_BUG        Flag(0)
@@ -2656,6 +2658,7 @@ void bfs() {
 
   hadwhat = havewhat;
   havewhat = 0;  
+  snaketypes.clear();
   if(!(hadwhat & HF_WARP)) { avengers = 0; }
   if(!(hadwhat & HF_MIRROR)) { mirrorspirits = 0; }
 
@@ -2793,6 +2796,8 @@ void bfs() {
             survivalist = false;
           if(c2->monst == moHexSnake || c2->monst == moHexSnakeTail) {
             havewhat |= HF_HEX;
+            if(c2->mondir != NODIR)
+              snaketypes.insert(snake_pair(c2));
             if(c2->monst == moHexSnake) hexsnakes.push_back(c2);
             else findWormIvy(c2);
             }
@@ -4374,8 +4379,16 @@ bool goodmount(cell *c, bool mounted) {
   else return !isMounted(c);
   }
 
+int inpair(cell *c, int colorpair) {
+  return (colorpair >> pattern_threecolor(c)) & 1;
+  }
+
+int snake_pair(cell *c) {
+  return (1 << pattern_threecolor(c)) | (1 << pattern_threecolor(c->mov[c->mondir]));
+  }
+
 // note: move from 'c' to 'from'!
-void hexvisit(cell *c, cell *from, int d, bool mounted) {
+void hexvisit(cell *c, cell *from, int d, bool mounted, int colorpair) {
   if(!c) return;
   if(cellUnstable(c) || cellEdgeUnstable(c)) return;
   if(eq(c->aitmp, sval)) return;
@@ -4387,10 +4400,10 @@ void hexvisit(cell *c, cell *from, int d, bool mounted) {
 
   if(from->cpdist && (!passable(from, c, P_MONSTER|P_WIND|P_FISH))) return;
   
-  if(c->monst == moHexSnake) {
+  if(c->monst == moHexSnake && snake_pair(c) == colorpair) {
     // printf("got snake\n");
     
-    if(pseudohept(from)) return;
+    if(!inpair(from, colorpair)) return;
     if(!goodmount(c, mounted)) return;
     
     if(canAttack(c, moHexSnake, from, from->monst, AF_EAT | (mounted ? AF_ONLY_ENEMY : AF_ONLY_FBUG | AF_GETPLAYER))) {
@@ -4410,7 +4423,7 @@ void hexvisit(cell *c, cell *from, int d, bool mounted) {
     hexdfs.push_back(c);
   }
 
-void movehex(bool mounted) {
+void movehex(bool mounted, int colorpair) {
   sval++;
   hexdfs.clear();
   
@@ -4429,29 +4442,29 @@ void movehex(bool mounted) {
   for(int i=0; i<size(hexdfs); i++) {
     cell *c = hexdfs[i];
     int dirtable[10], qdirtable=0;
-    for(int t=0; t<c->type; t++) if(c->mov[t] && !pseudohept(c->mov[t]))
+    for(int t=0; t<c->type; t++) if(c->mov[t] && inpair(c->mov[t], colorpair))
       dirtable[qdirtable++] = t;
       
     random_shuffle(dirtable, dirtable+qdirtable);
     while(qdirtable--) {
       int t = dirtable[qdirtable];
-      hexvisit(c->mov[t], c, t, mounted);
+      hexvisit(c->mov[t], c, t, mounted, colorpair);
       }
     }
   for(int i=0; i<size(hexsnakes); i++) {
     cell *c = hexsnakes[i];
-    if(c->monst == moHexSnake) {
+    if(c->monst == moHexSnake && snake_pair(c) == colorpair) {
       if(!goodmount(c, mounted)) continue;
       int t[MAX_EDGE];
       for(int i=0; i<c->type; i++) t[i] = i;
       for(int j=1; j<c->type; j++) swap(t[j], t[hrand(j+1)]);
       for(int u=0; u<c->type; u++) {
         createMov(c, t[u]);
-        if(!pseudohept(c->mov[t[u]]))
-          hexvisit(c, c->mov[t[u]], c->spn(t[u]), mounted);
+        if(inpair(c->mov[t[u]], colorpair))
+          hexvisit(c, c->mov[t[u]], c->spn(t[u]), mounted, colorpair);
         }
       }
-    if(c->monst == moHexSnake) {
+    if(c->monst == moHexSnake && snake_pair(c) == colorpair) {
       snakeAttack(c, mounted);
       kills[moHexSnake]++;
       playSound(c, "die-troll");
@@ -5479,6 +5492,13 @@ void checkAmbushState() {
     }
   
   }
+
+void movehex_all() {
+  for(int i: snaketypes) {
+    movehex(false, i);
+    if(!shmup::on && haveMount()) movehex(true, i);
+    }
+  }
   
 void movemonsters() {
   ambush_distance = 0;
@@ -5550,10 +5570,8 @@ void movemonsters() {
     savepos[i] = playerpos(i);
 
   moveworms();
-  if(havewhat & HF_HEX) {
-    movehex(false);
-    if(haveMount()) movehex(true);
-    }
+  if(havewhat & HF_HEX) 
+    movehex_all();
 
   if(havewhat & HF_KRAKEN) kraken::attacks(), groupmove(moKrakenH, 0);
   if(havewhat & HF_DRAGON) groupmove(moDragonHead, MF_NOFRIEND);

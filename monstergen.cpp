@@ -626,3 +626,37 @@ void wandering() {
     }
   }
 
+void generateSnake(cell *c, int i) {
+  c->monst = moHexSnake;
+  int cpair = (1<<pattern_threecolor(c)) | (1<<pattern_threecolor(c->mov[i]));
+  preventbarriers(c);
+  int len = nontruncated ? 2 : ROCKSNAKELENGTH;
+  cell *c2 = c;
+  vector<cell*> rocksnake;
+  while(--len) {
+    rocksnake.push_back(c2);
+    preventbarriers(c2);
+    c2->mondir = i;
+    createMov(c2, i);
+    int j = c2->spn(i);
+    cell *c3 = c2->mov[i];
+    if(c3->monst || c3->bardir != NODIR || c3->wall) break;
+    c2 = c3;
+    c2->monst = moHexSnakeTail;
+    i = (j + (c2->type%4 == 0 ? c2->type/2 : (len%2 ? 2 : c2->type - 2))) % S6;
+    createMov(c2, i);
+    if(!inpair(c2->mov[i], cpair)) {
+      vector<int> goodsteps;
+      for(int i=0; i<c2->type; i++)
+        if(inpair(c2->mov[i], cpair))
+        goodsteps.push_back(i);
+      if(!size(goodsteps)) break;
+      i = goodsteps[hrand(size(goodsteps))];
+      }
+    }
+  if(size(rocksnake) < ROCKSNAKELENGTH/2 && !nontruncated) {
+    for(int i=0; i<size(rocksnake); i++) 
+      rocksnake[i]->monst = moNone;
+    }
+  else c2->mondir = NODIR;
+  }

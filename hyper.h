@@ -2295,3 +2295,8 @@ namespace fieldpattern {
   }
 
 int emeraldval(cell *c);
+
+int inpair(cell *c, int colorpair);
+int snake_pair(cell *c);
+
+extern const unsigned int nestcolors[8];

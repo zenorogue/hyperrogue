@@ -1820,10 +1820,8 @@ namespace mapeditor {
       return pseudohept(c) ? 0x202020 : 0xC0C0C0;
       }
     if(whichCanvas == 'T') {
-      static unsigned int fcol[8] = { 0x800000, 0x008000, 0x000080, 0x404040,
-        0x800080, 0x008080, 0x808000, 0xD0D0D0 };
       int fv = pattern_threecolor(c);
-      return fcol[fv&7];
+      return nestcolors[fv&7];
       }
     return canvasback;
     }

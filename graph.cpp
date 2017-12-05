@@ -1717,6 +1717,12 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, int col) {
     
   if(isIvy(c) || isWorm(c) || isMutantIvy(c) || c->monst == moFriendlyIvy) {
     
+    if((m == moHexSnake || m == moHexSnakeTail) && c->land == laSnakeNest && c->mondir != NODIR) {
+      int c1 = nestcolors[pattern_threecolor(c)];
+      int c2 = nestcolors[pattern_threecolor(c->mov[c->mondir])];
+      col = (c1 + c2); // sum works because they are dark and should be brightened
+      }
+
     if(isDragon(c->monst) && c->stuntime == 0) col = 0xFF6000;
     
     transmatrix Vb0 = Vb;
@@ -1835,8 +1841,10 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, int col) {
           queuepoly(Vbb, shDragonWings, darkena(col, c->hitpoints?0:1, 0xFF));
           }
         }
-      else if(!(c->mondir == NODIR && (c->monst == moTentacletail || (c->monst == moWormtail && wormpos(c) < WORMLENGTH))))
-        queuepoly(Vb, shJoint, darkena(col, 0, 0xFF));
+      else {
+        if(!(c->mondir == NODIR && (c->monst == moTentacletail || (c->monst == moWormtail && wormpos(c) < WORMLENGTH))))
+          queuepoly(Vb, shJoint, darkena(col, 0, 0xFF));
+        }
       }
 
     if(!mmmon) return true;
@@ -2407,6 +2415,8 @@ ld wavefun(ld x) {
   else return 0; */
   }
 
+const unsigned int nestcolors[8] = { 0x800000, 0x008000, 0x000080, 0x404040, 0x700070, 0x007070, 0x707000, 0x606060 };
+
 void setcolors(cell *c, int& wcol, int &fcol) {
 
   wcol = fcol = winf[c->wall].color;
@@ -2707,6 +2717,14 @@ void setcolors(cell *c, int& wcol, int &fcol) {
       else
         fcol = gradient(0xD0D090, 0xD0D020, -1, sin((double) c->landparam), 1);
       break;
+    
+    case laSnakeNest: {
+      int fv = pattern_threecolor(c);
+      fcol = nestcolors[fv&7];
+      if(realred(c->wall))
+        wcol = fcol * (4 + snakelevel(c)) / 4;
+      break;
+      }
         
     default:
       if(isElemental(c->land)) fcol = linf[c->land].color;
@@ -3133,6 +3151,9 @@ int getfd(cell *c) {
     case laReptile:
     case laCanvas: 
       return 0;
+      
+    case laSnakeNest:
+      return realred(c->wall) ? 0 : 1;
     
     case laTerracotta:
     case laMercuryRiver:
@@ -3172,6 +3193,19 @@ int getfd(cell *c) {
     default:
       return 2;
     }    
+  }
+
+int getSnakelevColor(cell *c, int i, int last, int fd, int wcol) {
+  int col;
+  if(c->wall == waTower) 
+    col = 0xD0D0D0-i*0x101010;
+  else if(c->land == laSnakeNest)
+    return darkena(nestcolors[pattern_threecolor(c)] * (5 + i) / 4, 0, 0xFF);
+  else if(i == last-1)
+    col = wcol;
+  else
+    col = winf[waRed1+i].color;
+  return darkena(col, fd, 0xFF);
   }
                                
 void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
@@ -3843,7 +3877,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       else if(c->land == laLivefjord)
         qfloor(c, Vf, CAVEFLOOR, darkena(fcol, fd, 0xFF));
 
-      else if(c->land == laRedRock)
+      else if(c->land == laRedRock || c->land == laSnakeNest)
         qfloor_eswap(c, Vf, DESERTFLOOR, darkena(fcol, fd, 0xFF));
 
       else if(c->land == laPalace || c->land == laTerracotta)
@@ -3917,11 +3951,11 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       if(realred(c->wall) && !wmspatial) {
         int s = snakelevel(c);
         if(s >= 1)
-          qfloor(c, V, shRedRockFloor[0][ct6], darkena(winf[waRed1].color, 0, 0xFF));
+          qfloor(c, V, shRedRockFloor[0][ct6], getSnakelevColor(c, 0, 7, fd, wcol));
         if(s >= 2)
-          queuepoly(V, shRedRockFloor[1][ct6], darkena(winf[waRed2].color, 0, 0xFF));
+          queuepoly(V, shRedRockFloor[1][ct6], getSnakelevColor(c, 1, 7, fd, wcol));
         if(s >= 3)
-          queuepoly(V, shRedRockFloor[2][ct6], darkena(winf[waRed3].color, 0, 0xFF));
+          queuepoly(V, shRedRockFloor[2][ct6], getSnakelevColor(c, 2, 7, fd, wcol));
         }
       
       if(c->wall == waTower && !wmspatial) {
@@ -4076,13 +4110,11 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         bool w = isWarped(c);
         warpfloor(c, (*Vdp), darkena(wcol, fd, 0xFF), PPR_REDWALL-4+4*sl, w);
         floorShadow(c, V, SHADOW_SL * sl, w);
-        bool tower = c->wall == waTower;
         for(int s=0; s<sl; s++) 
         forCellIdEx(c2, i, c) {
           int sl2 = snakelevel(c2);
           if(s >= sl2)
-            placeSidewallX(c, i, SIDE_SLEV+s, V, w, false, 
-              darkena(tower?0xD0D0D0-i*0x101010 : s==sl-1?wcol:winf[waRed1+s].color, fd, 0xFF));
+            placeSidewallX(c, i, SIDE_SLEV+s, V, w, false, getSnakelevColor(c, s, sl, fd, wcol));
           }
         }
 

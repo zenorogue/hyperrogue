@@ -1477,34 +1477,26 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           int i = -1;
           for(int t=0; t<c->type; t++) if(c->mov[t]->mpdist > c->mpdist && !pseudohept(c->mov[t]))
             i = t;
-          if(i != -1 && !peace::on) {
-            c->monst = moHexSnake;
-            preventbarriers(c);
-            int len = nontruncated ? 2 : ROCKSNAKELENGTH;
-            cell *c2 = c;
-            vector<cell*> rocksnake;
-            while(--len) {
-              rocksnake.push_back(c2);
-              preventbarriers(c2);
-              c2->mondir = i;
-              createMov(c2, i);
-              int j = c2->spn(i);
-              cell *c3 = c2->mov[i];
-              if(c3->monst || c3->bardir != NODIR || c3->wall) break;
-              c2 = c3;
-              c2->monst = moHexSnakeTail;
-              i = (j + (S6==8 ? 4 : (len%2 ? 2 : 4))) % S6;
-              }
-            if(size(rocksnake) < ROCKSNAKELENGTH/2 && !nontruncated) {
-              for(int i=0; i<size(rocksnake); i++) 
-                rocksnake[i]->monst = moNone;
-              }
-            else c2->mondir = NODIR;
-            }
+          if(i != -1 && !peace::on) 
+            generateSnake(c, i);
           }
         else if(hrand(16000) < 50+items[itRedGem]+yendor::hardness() && (nontruncated?hrand(10)<3:!ishept(c)) && !c->monst)
           c->monst = moRedTroll,
           c->mondir = NODIR;
+        }
+      break;
+    
+    case laSnakeNest:
+      ONEMPTY {
+        if(hrand(30000) < 30+items[itRedGem]+yendor::hardness() && !c->monst && !c->wall && !peace::on) {
+          vector<int> gooddir;
+          for(int t=0; t<c->type; t++) if(c->mov[t]->mpdist > c->mpdist && !pseudohept(c->mov[t]))
+            gooddir.push_back(t);
+          if(size(gooddir))
+            generateSnake(c, gooddir[hrand(size(gooddir))]);
+          }
+        else if(hrand(16000) < kills[moHexSnake] * 100 && c->wall == waNone)
+          c->item = itSnake, c->wall = waRed3;
         }
       break;
     
@@ -2055,7 +2047,7 @@ void repairLandgen(cell *c) {
   if(c->wall == waIcewall && c->land != laIce && c->land != laCocytus && c->land != laBlizzard)
     c->wall = waNone;
   
-  if(c->wall == waRed3 && c->land != laRedRock)
+  if(c->wall == waRed3 && c->land != laRedRock && c->land != laSnakeNest)
     c->wall = waNone;
   
   if(c->item == itRedGem && c->land != laRedRock)

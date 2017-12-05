@@ -2961,7 +2961,7 @@ void turn(int delta) {
         moveworms();
         moveivy();
         movemutant();
-        if(havewhat&HF_HEX) movehex(false);
+        if(havewhat&HF_HEX) movehex_all();
         wandering();
         livecaves();
         terracotta();

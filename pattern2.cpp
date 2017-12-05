@@ -677,24 +677,13 @@ int pattern_threecolor(cell *c) {
   if(S7 == 3 && nontruncated)
     return c->master->fiftyval;
   if(euclid) return eupattern(c);
-  return 3;
+  return ishept(c);
   }
   
 // returns ishept in the normal tiling;
 // in the 'pure heptagonal' tiling, returns true for a set of cells
 // which roughly corresponds to the heptagons in the normal tiling
 bool pseudohept(cell *c) {
-  if(nontruncated) {
-    if(bigsphere) 
-      return 
-        c->master == getDodecahedron(3) ||
-        c->master == getDodecahedron(5) ||
-        c->master == getDodecahedron(6);
-    if(S7 == 3)
-      return c->master == getDodecahedron(0);
-    else
-      return pattern_threecolor(c) == 0;
-    }
-  else return ishept(c);
+  return pattern_threecolor(c) == 0;
   }
 
