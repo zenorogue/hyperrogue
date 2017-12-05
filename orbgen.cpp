@@ -212,7 +212,7 @@ eOrbLandRelation getOLR(eItem it, eLand l) {
   if(nativeOrbType(l) == it) return olrNative;
   
   for(const orbinfo& oi: orbinfos)
-    if(oi.flags && orbgenflags::GUEST && oi.l == l && oi.orb == it)
+    if((oi.flags & orbgenflags::GUEST) && oi.l == l && oi.orb == it)
       return olrGuest;
       
   if(it == itOrbLuck && l == laIvoryTower)
