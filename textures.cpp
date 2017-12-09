@@ -182,7 +182,7 @@ void perform_mapping() {
 
       ld z = ctof(c) ? rhexf : hexvdist;
       ld base = ctof(c) ? 0 : 0; // -hexshift;
-      if(!ctof(c)) base -= M_PI / c->type;
+      if(!ctof(c) || nontruncated) base -= M_PI / c->type;
 
       for(int i=0; i<c->type; i++) {
         hyperpoint h1 = spin(base + M_PI * (2*i) / c->type) * xpush(z) * C0;
@@ -269,7 +269,7 @@ void showTextureMenu() {
       dialog::reaction = perform_mapping;
       }    
     else if(uni == 'p') {
-      dialog::editNumber(irotate, -360, 360, 0, 60, XLAT("texture rotation"), 
+      dialog::editNumber(irotate, -360, 360, 15, 0, XLAT("texture rotation"), 
         XLAT("Texture rotation."));
       dialog::reaction = perform_mapping;
       }    
