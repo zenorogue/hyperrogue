@@ -120,6 +120,10 @@
 #define CAP_EDIT (CAP_FILES && !ISWEB && !ISMINI)
 #endif
 
+#ifndef CAP_TEXTURE
+#define CAP_TEXTURE CAP_PNG
+#endif
+
 #ifndef CAP_MODEL
 #define CAP_MODEL (!ISMOBWEB && !ISMINI && CAP_SDLGFX)
 #endif

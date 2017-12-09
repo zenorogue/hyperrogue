@@ -1902,6 +1902,13 @@ void drawqueue();
 typedef float GLfloat;
 #endif
 
+struct textureinfo {
+  transmatrix M;
+  int texture_id;
+  vector<GLfloat> vertices;
+  vector<GLfloat> tvertices; 
+  };
+
 struct qpoly {
       transmatrix V;
       GLfloat *tab;
@@ -1910,6 +1917,7 @@ struct qpoly {
       int outline;
       double minwidth;
       int flags;
+      textureinfo *tinf;
       };
 
 struct qline {
@@ -1930,7 +1938,7 @@ struct qcir {
       int x, y, size;
       };
 
-enum eKind { pkPoly, pkLine, pkString, pkCircle, pkShape, pkResetModel };
+enum eKind { pkPoly, pkLine, pkString, pkCircle, pkShape, pkResetModel, pkSpecial };
 
 struct polytodraw {
   eKind kind;
@@ -2300,3 +2308,6 @@ int inpair(cell *c, int colorpair);
 int snake_pair(cell *c);
 
 extern const unsigned int nestcolors[8];
+
+extern bool texture_on;
+void showTextureMenu();

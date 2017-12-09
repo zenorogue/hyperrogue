@@ -345,6 +345,11 @@ void showDisplayMode() {
   dialog::addBoolItem(XLAT("vector graphics editor"), (false), 'g');
 #endif
 
+#if CAP_TEXTURE
+  dialog::addBoolItem(XLAT("texture mode"), texture_on, 't');
+#endif
+
+
   // display modes  
 #if CAP_RUG
   dialog::addBoolItem(XLAT("hypersian rug mode"), (rug::rugged), 'u');
@@ -366,6 +371,8 @@ void showDisplayMode() {
     if(xuni == 'p') projectionDialog();
     
     if(xuni == 'z') editScale();
+    
+    if(xuni == 't') pushScreen(showTextureMenu);
     
     if(xuni == 'm') { vid.monmode += 60 + (shiftmul > 0 ? 1 : -1); vid.monmode %= 6; }
   

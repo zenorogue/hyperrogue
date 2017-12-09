@@ -677,7 +677,7 @@ int pattern_threecolor(cell *c) {
   if(S7 == 3 && nontruncated)
     return c->master->fiftyval;
   if(euclid) return eupattern(c);
-  return ishept(c);
+  return !ishept(c);
   }
   
 // returns ishept in the normal tiling;

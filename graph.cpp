@@ -2896,28 +2896,6 @@ void plainfloor(cell *c, bool warp, const transmatrix &V, int col, int prio) {
     }
   }
 
-void fullplainfloor(cell *c, bool warp, const transmatrix &V, int col, int prio) {
-  if(warp) {
-    if(euclid) {
-      if(ishex1(c))
-        queuepolyat(V * pispin, shTriheptaFloor[0], col, prio);
-      else
-        queuepolyat(V, shTriheptaFloor[ctof(c)], col, prio);
-      }
-    else 
-      queuepolyat(V * applyPatterndir(c), shTriheptaFloor[sphere ? ctof(c) : mapeditor::nopattern(c)], col, prio);
-    }
-  else if(c->land == laDual && !nontruncated) {
-    if(euclid && ishex1(c))
-      queuepolyat(V * pispin, shBigTriangle, col, prio);
-    else
-      queuepolyat(V, shBigTriangle, col, prio);
-    }    
-  else {
-    queuepolyat(V, shFullFloor[ctof(c)], col, prio);
-    }
-  }
-
 void qfloor_eswap(cell *c, const transmatrix& V, const hpcshape& sh, int col);
 
 void qplainfloor(cell *c, bool warp, const transmatrix &V, int col) {
@@ -2942,7 +2920,11 @@ int wavephase;
 
 void warpfloor(cell *c, const transmatrix& V, int col, int prio, bool warp) {
   if(shmup::on || nontruncated) warp = false;
-  if(wmescher && qfi.special)
+  if(qfi.tinf) {
+    queuetable(V*qfi.spin, &qfi.tinf->vertices[0], size(qfi.tinf->vertices) / 3, 0, col, prio);
+    lastptd().u.poly.tinf = qfi.tinf;
+    }
+  else if(wmescher && qfi.special)
     queuepolyat(V*qfi.spin, *qfi.shape, col, prio);
   else plainfloor(c, warp, V, col, prio);
   }
@@ -3013,7 +2995,7 @@ void placeSidewall(cell *c, int i, int sidepar, const transmatrix& V, bool warp,
   // prio += c->cpdist - c->mov[i]->cpdist;  
   
   queuepolyat(V2, 
-    (mirr?shMFloorSide:warp?shTriheptaSide:(c->land == laDual&&!nontruncated)?shBigTriSide:shFloorSide)[sidepar][ctof(c)], col, prio);
+    (qfi.tinf?shFullFloorSide:mirr?shMFloorSide:warp?shTriheptaSide:(c->land == laDual&&!nontruncated)?shBigTriSide:shFloorSide)[sidepar][ctof(c)], col, prio);
   }
 
 bool openorsafe(cell *c) {
@@ -3143,7 +3125,7 @@ void qfloor_eswap(cell *c, const transmatrix& V, const hpcshape& sh, int col) {
   else
     qfloor(c, V, sh, col);
   };
-                               
+
 // how much to darken
 int getfd(cell *c) {
   switch(c->land) {
@@ -3515,7 +3497,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       }
 
     poly_outline = OUTLINE_DEFAULT;
-
+    
     if(!wmascii) {
     
       // floor
@@ -3558,6 +3540,8 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
             shBigTriangle, darkena(fcol, fd, 0xFF));
         }
 #endif
+
+      else if(applyTextureMap(c, Vf, darkena(fcol, fd, 0xFF))) ;
       
       else if(c->land == laMirrorWall) {
         int d = mirror::mirrordir(c);

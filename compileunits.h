@@ -71,6 +71,7 @@ bool inv::on;
 #include "control.cpp"
 #include "hud.cpp"
 #include "hypgraph.cpp"
+#include "textures.cpp"
 #include "graph.cpp"
 #include "sound.cpp"
 #include "achievement.cpp"

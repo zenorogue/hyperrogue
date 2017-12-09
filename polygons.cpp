@@ -43,7 +43,6 @@ struct hpcshape {
   int flags;
   };
 
-
 hpcshape *last = NULL;
 
 vector<polytodraw> ptds;
@@ -288,7 +287,15 @@ void glapplymatrix(const transmatrix& V) {
   glMultMatrixf(mat);
   }
 
-void gldraw(int useV, const transmatrix& V, int ps, int pq, int col, int outline, int flags) {
+void gldraw(int useV, const transmatrix& V, int ps, int pq, int col, int outline, int flags, textureinfo *tinf) {
+
+    if(tinf) {
+      glEnable(GL_TEXTURE_2D);
+      glBindTexture(GL_TEXTURE_2D, tinf->texture_id);
+      glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+      glTexCoordPointer(3, GL_FLOAT, 0, &tinf->tvertices[0]);
+      }
+      
   for(int ed = vid.goteyes ? -1 : 0; ed<2; ed+=2) {
     if(ed) selectEyeGL(ed);
     bool draw = col;
@@ -371,6 +378,12 @@ void gldraw(int useV, const transmatrix& V, int ps, int pq, int col, int outline
  
     if(useV) glPopMatrix();
     }
+
+  if(tinf) {
+    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+    glDisable(GL_TEXTURE_2D);      
+    }
+      
   }
 #endif
 
@@ -491,8 +504,8 @@ void drawpolyline(polytodraw& p) {
     if(currentvertices != pp.tab)
       activateVertexArray(pp.tab, pq);
     const int ps=0;
-    glLineWidth(linewidthat(tC0(pp.V), pp.minwidth));
-    gldraw(1, pp.V, ps, pq, p.col, pp.outline, 0);
+    glLineWidth(linewidthat(tC0(pp.V), pp.minwidth));    
+    gldraw(1, pp.V, ps, pq, p.col, pp.outline, 0, pp.tinf);    
     return;
     }
 #endif
@@ -570,7 +583,7 @@ void drawpolyline(polytodraw& p) {
     if(vid.usingGL) {
       // if(pmodel == 0) for(int i=0; i<qglcoords; i++) glcoords[i][2] = vid.scrdist;
       activateGlcoords();    
-      gldraw(3, Id, 0, qglcoords, p.col, pp.outline, poly_flags);
+      gldraw(3, Id, 0, qglcoords, p.col, pp.outline, poly_flags, pp.tinf);
       continue;
       }
   #endif
@@ -655,6 +668,7 @@ void prettyline(hyperpoint h1, hyperpoint h2, int col, int lev) {
   p.col = 0;
   pp.outline = col;
   pp.flags = POLY_ISSIDE;
+  pp.tinf = NULL;
   drawpolyline(p);
   }
 
@@ -662,12 +676,18 @@ vector<GLfloat> curvedata;
 int curvestart = 0;
 bool keep_curvedata = false;
 
+hookset<void(polytodraw&)> *hooks_specialdraw;
+
 void drawqueueitem(polytodraw& ptd) {
 #if CAP_ROGUEVIZ
   svg::info = ptd.info;
 #endif
 
   // if(ptd.prio == 46) printf("eye size %d\n", polyi);
+  
+  if(ptd.kind == pkSpecial) {
+    callhooks(hooks_specialdraw, ptd);
+    }
   
   if(ptd.kind == pkResetModel) {
     pmodel = eModel(ptd.col);
@@ -748,7 +768,10 @@ ld xintval(const hyperpoint& h) {
 
 ld backbrightness = .25;
 
+purehookset hook_drawqueue;
+
 void drawqueue() {
+  callhooks(hook_drawqueue);
 
   int siz = size(ptds);
 
@@ -868,7 +891,7 @@ void drawqueue() {
   }
 
 hpcshape 
-  shFloorSide[SIDEPARS][2], shSemiFloorSide[SIDEPARS], shTriheptaSide[SIDEPARS][2], shMFloorSide[SIDEPARS][2],
+  shFloorSide[SIDEPARS][2], shSemiFloorSide[SIDEPARS], shTriheptaSide[SIDEPARS][2], shMFloorSide[SIDEPARS][2], shFullFloorSide[SIDEPARS][2],
   shFullFloor[2],
   shSeabed[2], shCloudSeabed[3], shCaveSeabed[3],
   shWave[8][2],  
@@ -1294,6 +1317,14 @@ void buildpolys() {
     
     bshape(shFloorSide[k][1], PPR_LAKEWALL);
     for(int t=0; t<=1; t++) hpcpush(ddi(t*S12-S6, floorrad1) * C0);
+    chasmifyPoly(dlow, dhi, k);
+
+    bshape(shFullFloorSide[k][0], PPR_LAKEWALL);
+    for(int t=0; t<=1; t++) hpcpush(ddi(t*S14-S7, hexvdist) * C0);
+    chasmifyPoly(dlow, dhi, k);
+    
+    bshape(shFullFloorSide[k][1], PPR_LAKEWALL);
+    for(int t=0; t<=1; t++) hpcpush(ddi(t*S12-S6, rhexf) * C0);
     chasmifyPoly(dlow, dhi, k);
 
     bshape(shSemiFloorSide[k], PPR_LAKEWALL);
@@ -2176,6 +2207,7 @@ void queuepolyat(const transmatrix& V, const hpcshape& h, int col, int prio) {
   ptd.u.poly.outline = poly_outline;
   ptd.u.poly.minwidth = minwidth_global;
   ptd.u.poly.flags = h.flags;
+  ptd.u.poly.tinf = NULL;
   }
 
 void addfloats(vector<GLfloat>& v, hyperpoint h) {
@@ -2201,6 +2233,7 @@ void queuetable(const transmatrix& V, GLfloat *f, int cnt, int linecol, int fill
   ptd.u.poly.outline = linecol;
   ptd.u.poly.minwidth = minwidth_global;
   ptd.u.poly.flags = 0;
+  ptd.u.poly.tinf = NULL;
   }
 
 void queuepoly(const transmatrix& V, const hpcshape& h, int col) {
@@ -2215,6 +2248,7 @@ struct qfloorinfo {
   bool special;
   transmatrix spin;
   const hpcshape *shape;
+  textureinfo *tinf;
   };
 
 qfloorinfo qfi;
@@ -2259,12 +2293,14 @@ void qfloor(cell *c, const transmatrix& V, const hpcshape& h, int col) {
   qfloor0(c, V, h, col);
   qfi.special = isSpecial(h);
   qfi.shape = &h, qfi.spin = Id; 
+  qfi.tinf = NULL;
   }
 
 void qfloor(cell *c, const transmatrix& V, const transmatrix& Vspin, const hpcshape& h, int col) {
   qfloor0(c, V*Vspin, h, col);  
   qfi.special = isSpecial(h);
   qfi.shape = &h, qfi.spin = Vspin;
+  qfi.tinf = NULL;
   }
 
 void curvepoint(const hyperpoint& H1) {
