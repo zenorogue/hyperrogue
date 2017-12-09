@@ -22,14 +22,14 @@ void setCanvas(presmode mode, char canv) {
   static char wc;
   static eLand ld;
   if(mode == pmStart) {
-    wc = mapeditor::whichCanvas;
-    mapeditor::whichCanvas = canv;
+    wc = patterns::whichCanvas;
+    patterns::whichCanvas = canv;
     ld = firstland;
     firstland = laCanvas;
     restartGame(0, true); 
     }
   if(mode == pmStop) {
-    mapeditor::whichCanvas = wc;
+    patterns::whichCanvas = wc;
     firstland = ld;
     popGame();
     }
@@ -595,11 +595,11 @@ slide default_slides[] = {
     [] (presmode mode) {
       setCanvas(mode, 't');
       if(mode == 1) 
-        mapeditor::displaycodes = 2,
-        mapeditor::whichPattern = 'z';
+        patterns::displaycodes = 2,
+        patterns::whichPattern = 'z';
       if(mode == 3) 
-        mapeditor::displaycodes = 0,
-        mapeditor::whichPattern = 0;
+        patterns::displaycodes = 0,
+        patterns::whichPattern = 0;
       SHOWLAND ( l == laCanvas );
       }
     },

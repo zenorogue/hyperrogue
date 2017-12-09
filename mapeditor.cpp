@@ -12,8 +12,6 @@
 #endif
 
 namespace mapeditor {
-  int subcanvas;
-  int displaycodes;
 
   struct editwhat {
     double dist;
@@ -30,9 +28,8 @@ namespace mapeditor {
   bool handleKeyFile(int sym, int uni);
 
   void applyModelcell(cell *c) {
-    if(mapeditor::whichPattern == 'H') return;
-    if(mapeditor::whichPattern == 'H') return;
-    int i = realpattern(c);
+    if(patterns::whichPattern == 'H') return;
+    int i = patterns::realpattern(c);
     cell *c2 = modelcell[i];
     if(c2) {
       c->wall = c2->wall;
@@ -45,7 +42,7 @@ namespace mapeditor {
       c->stuntime = c2->stuntime;
       c->hitpoints = c2->hitpoints;
       if(c2->mondir != NODIR)
-        c->mondir = (c2->mondir - patterndir(c2) + patterndir(c) + MODFIXER) % c->type;
+        c->mondir = (c2->mondir - patterns::patterndir(c2) + patterns::patterndir(c) + MODFIXER) % c->type;
       }
     }
 #endif
@@ -87,7 +84,7 @@ namespace mapstream {
     f = fopen(fname, "wb");
     if(!f) return false;
     int32_t i = VERNUM; save(i);
-    save(mapeditor::whichPattern);
+    save(patterns::whichPattern);
     save(geometry);
     save(nontruncated);
     if(geometry == gTorus) {
@@ -170,7 +167,7 @@ namespace mapstream {
     if(!f) return false;
     clearMemory();
     int vernum = loadInt();
-    if(vernum >= 7400) load(mapeditor::whichPattern);
+    if(vernum >= 7400) load(patterns::whichPattern);
     
     if(vernum >= 10203) {
       load(geometry);
@@ -241,8 +238,8 @@ namespace mapstream {
       c->stuntime = loadChar();
       c->hitpoints = loadChar();
 
-      if(mapeditor::whichPattern)
-        mapeditor::modelcell[mapeditor::realpattern(c)] = c;
+      if(patterns::whichPattern)
+        mapeditor::modelcell[patterns::realpattern(c)] = c;
       }
     
     int32_t whereami = loadInt();
@@ -311,57 +308,7 @@ namespace mapstream {
 namespace mapeditor {
 
   bool drawplayer = true;
-  char whichPattern = 0;
-  char whichShape = 0;
-  char whichCanvas = 0;
 
-  bool symRotation, sym01, sym02, sym03;
-  
-  int subpattern(int i, char w) {  
-    if(euclid) {
-      if(w == 'p') 
-        return i;
-      if(w == 'z' || w == 'f')
-        return (symRotation && (i<3)) ? 0 : i;
-      }
-    
-    if(a38 && w == 'p') {
-      if(sym01 && i == 5) i = 4;
-      if(symRotation && i < 4) i = 0;
-      return i;
-      }
-    
-    if(w == 'z' || w == 'f' || w == 'p') {
-      if((sym01?1:0)+(sym02?1:0)+(sym03?1:0) >= 2) i &= ~3;
-      if(sym01 && (i&1)) i ^= 1;
-      if(sym02 && (i&2)) i ^= 2;
-      if(sym03 && (i&2)) i ^= 3;
-      }
-    
-    if(w == 'z' && symRotation) {
-      if(a4 && !a46) {
-        if(i >= 4 && i < 7) i -= 4;
-        }
-      else {
-        if(i >= 8 && i < 12) i -= 4;
-        if(i >= 12 && i < 16) i -= 8;
-        if(i >= 20 && i < 24) i -= 4;
-        if(i >= 24 && i < 28) i -= 8;
-        if(i >= 32 && i < 36) i -= 4;
-        if(i >= 36 && i < 40) i -= 8;
-        }
-      }
-    
-    if(w == 'p' && stdhyperbolic && symRotation && i >= 3)
-      i -= ((i/4-1) % 7) * 4;
- 
-    return i;
-    }
-
-  int subpattern(cell *c, char w) {
-    return subpattern(realpattern(c, w), w);
-    }
-    
   string infix;
   
   bool hasInfix(const string &s) {
@@ -598,205 +545,6 @@ namespace mapeditor {
     v.push_back(make_pair(s, i));
     }
   
-  void showPrePattern() {
-    dialog::init("predesigned patterns");
-    dialog::addItem(XLAT("Gameboard"), 'g');
-    dialog::addItem(XLAT("random colors"), 'r');
-    dialog::addItem(XLAT("rainbow landscape"), 'l');
-    dialog::addItem(XLAT("dark rainbow landscape"), 'd');
-    dialog::addItem(XLAT("football"), 'F');
-
-    dialog::addItem(XLAT("nice coloring"), 'T');
-
-    dialog::addSelItem(XLAT("emerald pattern"), "emerald", 'e');
-
-    dialog::addSelItem(XLAT("four elements"), "palace", 'b');
-    dialog::addSelItem(XLAT("eight domains"), "palace", 'a');
-
-    dialog::addSelItem(XLAT("zebra pattern"), "zebra", 'z');
-    dialog::addSelItem(XLAT("four triangles"), "zebra", 't');
-    dialog::addSelItem(XLAT("three stripes"), "zebra", 'x');
-
-    dialog::addSelItem(XLAT("random black-and-white"), "current", 'w');
-
-    dialog::addSelItem(XLAT("field pattern C"), "field", 'C');
-    dialog::addSelItem(XLAT("field pattern D"), "field", 'D');
-    dialog::addSelItem(XLAT("field pattern N"), "field", 'N');
-    dialog::addSelItem(XLAT("field pattern S"), "field", 'S');
-
-    dialog::display();
-    
-    keyhandler = [] (int sym, int uni) {
-      dialog::handleNavigation(sym, uni);
-      if((uni >= 'a' && uni <= 'z') || (uni >= 'A' && uni <= 'Z')) {
-        whichCanvas = uni;
-        subcanvas = rand();
-        firstland = specialland = laCanvas; 
-        randomPatternsMode = false;
-        restartGame();
-        }
-      else if(doexiton(sym, uni)) popScreen();
-      };    
-    }
-  
-  void showPattern() {
-    cmode = sm::SIDE | sm::MAYDARK;
-    {
-    dynamicval<int> dc(displaycodes, displaycodes ? displaycodes : 2);
-    gamescreen(0);
-    }
-    dialog::init();
-
-    if(a46) {
-      dialog::addBoolItem(XLAT("two colors"), (whichPattern == 'f'), 'f');
-      dialog::addBoolItem(XLAT("two colors rotated"), (whichPattern == 'z'), 'z');
-      }
-    else if(a4) {
-      dialog::addBoolItem(XLAT("Zebra Pattern"), (whichPattern == 'z'), 'z');
-      }
-    else if(a38) {
-      dialog::addBoolItem(XLAT("Zebra Pattern"), (whichPattern == 'z'), 'z');
-      dialog::addBoolItem(XLAT("broken Emerald Pattern"), (whichPattern == 'f'), 'f');
-      dialog::addBoolItem(XLAT("rotated pattern"), (whichPattern == 'p'), 'p');
-      }
-    else if(euclid) {
-      dialog::addBoolItem(XLAT("three colors"), (whichPattern == 'f'), 'f');
-      dialog::addBoolItem(XLAT("Palace Pattern"), (whichPattern == 'p'), 'p');
-      dialog::addBoolItem(XLAT("three colors rotated"), (whichPattern == 'z'), 'z');
-      }
-    else if(sphere) {
-      dialog::addBoolItem(XLAT("siblings"), (whichPattern == 'p'), 'p');
-      }
-    else {
-      if(!stdhyperbolic) 
-        dialog::addInfo("patterns do not work correctly in this geometry!");
-
-      dialog::addBoolItem(XLAT("Emerald Pattern"), (whichPattern == 'f'), 'f');
-      dialog::addBoolItem(XLAT("Palace Pattern"), (whichPattern == 'p'), 'p');
-      dialog::addBoolItem(XLAT("Zebra Pattern"), (whichPattern == 'z'), 'z');
-      }
-    if(euclid)
-      dialog::addBoolItem(XLAT("torus pattern"), (whichPattern == 'F'), 'F');
-    else if(sphere)
-      dialog::addBoolItem(XLAT("single cells"), (whichPattern == 'F'), 'F');
-    else
-      dialog::addBoolItem(XLAT("field pattern"), (whichPattern == 'F'), 'F');
-
-    if(whichPattern == 'f' && stdhyperbolic) symRotation = true;
-    if(whichPattern == 'F') ;
-    else if(!euclid) {
-      dialog::addBoolItem(XLAT("rotational symmetry"), (symRotation), '0');
-      dialog::addBoolItem(XLAT("symmetry 0-1"), (sym01), '1');
-      dialog::addBoolItem(XLAT("symmetry 0-2"), (sym02), '2');
-      dialog::addBoolItem(XLAT("symmetry 0-3"), (sym03), '3');
-      }
-    else
-      dialog::addBoolItem(XLAT("edit all three colors"), (symRotation), '0');
-
-    dialog::addBoolItem(XLAT("display pattern codes (full)"), (displaycodes == 1), 'd');
-    dialog::addBoolItem(XLAT("display pattern codes (simplified)"), (displaycodes == 2), 's');
-
-    dialog::addBoolItem(XLAT("display only hexagons"), (whichShape == '6'), '6');
-    dialog::addBoolItem(XLAT("display only heptagons"), (whichShape == '7'), '7');
-    dialog::addBoolItem(XLAT("display the triheptagonal grid"), (whichShape == '8'), '8');
-    if(cheater || autocheat) dialog::addItem(XLAT("line patterns"), 'l');
-    else dialog::addInfo("enable the cheat mode to use line patterns");
-
-    if(!needConfirmation()) dialog::addItem(XLAT("predesigned patterns"), 'r');
-    else dialog::addInfo("start a new game to use predesigned patterns");
-
-    dialog::display();
-    
-    keyhandler = [] (int sym, int uni) {
-      dialog::handleNavigation(sym, uni);
-      if(uni == 'f' || uni == 'p' || uni == 'z' || uni == 'H' || uni == 'F') {
-        if(whichPattern == uni) whichPattern = 0;
-        else whichPattern = uni;
-        modelcell.clear();
-        }
-      
-      else if(uni == '0') symRotation = !symRotation;
-      else if(uni == '1') sym01 = !sym01;
-      else if(uni == '2') sym02 = !sym02;
-      else if(uni == '3') sym03 = !sym03;
-      else if(uni == '6' || uni == '7' || uni == '8') {
-        if(whichShape == uni) whichShape = 0;
-        else whichShape = uni;
-        }
-      else if(uni == '3') sym03 = !sym03;
-      else if(uni == 'd') displaycodes = displaycodes == 1 ? 0 : 1;
-      else if(uni == 's') displaycodes = displaycodes == 2 ? 0 : 2;
-      
-      else if(uni == 'l' && (cheater || autocheat))
-        pushScreen(linepatterns::showMenu);
-
-      else if(uni == 'r' && !needConfirmation()) pushScreen(showPrePattern);
-      
-      else if(doexiton(sym, uni)) popScreen();
-      };
-    }
-  
-  void showList() {
-    v.clear();
-    if(painttype == 4) painttype = 0;
-    switch(painttype) {
-      case 0: 
-        for(int i=0; i<motypes; i++) {
-          eMonster m = eMonster(i);
-          if(
-            m == moTongue || m == moPlayer || m == moFireball || m == moBullet ||
-            m == moFlailBullet || m == moShadow || m == moAirball ||
-            m == moWolfMoved || m == moGolemMoved ||
-            m == moTameBomberbirdMoved || m == moKnightMoved ||
-            m == moDeadBug || m == moLightningBolt || m == moDeadBird ||
-            m == moMouseMoved || m == moPrincessMoved || m == moPrincessArmedMoved) ;
-          else if(m == moDragonHead) vpush(i, "Dragon Head");
-          else vpush(i, minf[i].name);
-          }
-        break;
-      case 1:
-        for(int i=0; i<ittypes; i++) vpush(i, iinf[i].name);
-        break;
-      case 2:
-        for(int i=0; i<landtypes; i++) vpush(i, linf[i].name);
-        break;
-      case 3:
-        for(int i=0; i<walltypes; i++) if(i != waChasmD) vpush(i, winf[i].name);
-        break;
-      }
-    // sort(v.begin(), v.end());
-    
-    if(infix != "") mouseovers = infix;
-    
-    int q = v.size();
-    int percolumn = vid.yres / (vid.fsize+5) - 4;
-    int columns = 1 + (q-1) / percolumn;
-    
-    for(int i=0; i<q; i++) {
-      int x = 16 + (vid.xres * (i/percolumn)) / columns;
-      int y = (vid.fsize+5) * (i % percolumn) + vid.fsize*2;
-      
-      int actkey = 1000 + i;
-      string vv = v[i].first;
-      if(i < 9) { vv += ": "; vv += ('1' + i); }
-      
-      displayButton(x, y, vv, actkey, 0);
-      }
-    keyhandler = [] (int sym, int uni) {
-      if(uni >= '1' && uni <= '9') uni = 1000 + uni - '1';
-      if(sym == SDLK_RETURN || sym == SDLK_KP_ENTER || sym == '-' || sym == SDLK_KP_MINUS) uni = 1000;
-      for(int z=0; z<size(v); z++) if(1000 + z == uni) {
-        paintwhat = v[z].second;
-        paintwhat_str = v[z].first;
-        mousepressed = false;
-        popScreen();
-        return;
-        }
-      if(editInfix(uni)) ;
-      else if(doexiton(sym, uni)) popScreen();
-      };    
-    }
-  
   void showMapEditor() {
     cmode = sm::MAP;
     gamescreen(0);
@@ -833,6 +581,7 @@ namespace mapeditor {
     }
   
   int cellShapeGroup() {
+    using namespace patterns;
     if(whichPattern == 'f') return 4;
     if(whichPattern == 'p') return 5;
     if(whichPattern == 'z') return 6;
@@ -851,13 +600,13 @@ namespace mapeditor {
     if(drawcell == cwt.c) return vid.cs.charid;
     if(drawcell->monst) return drawcell->monst;
     if(drawcell->item) return drawcell->item;
-    return subpattern(drawcell);
+    return patterns::subpattern(drawcell);
     }
 
   bool editingShape(int group, int id) {
     if(group != mapeditor::drawcellShapeGroup()) return false;
     if(group < 3) return id == drawcellShapeID();
-    return subpattern(id, whichPattern) == subpattern(drawcell);
+    return patterns::subpattern(id, patterns::whichPattern) == patterns::subpattern(drawcell);
     }
 
   void editCell(const pair<cellwalker, cellwalker>& where) {
@@ -982,7 +731,7 @@ namespace mapeditor {
   
   void allInPattern(cellwalker where) {
 
-    if(!whichPattern) {
+    if(!patterns::whichPattern) {
       editAt(where);
       return;
       }
@@ -1004,13 +753,13 @@ namespace mapeditor {
     
     int cdir = where.spin;
     if(cdir >= 0) 
-      cdir = cdir - patterndir(where.c);
-    int sp = subpattern(where.c);
+      cdir = cdir - patterns::patterndir(where.c);
+    int sp = patterns::subpattern(where.c);
     
     for(cell* c2: v)
-      if(subpattern(c2) == sp) {
-        editAt(cellwalker(c2, cdir>=0 ? fixdir(cdir + patterndir(c2), c2) : -1));
-        modelcell[realpattern(c2)] = c2;
+      if(patterns::subpattern(c2) == sp) {
+        editAt(cellwalker(c2, cdir>=0 ? fixdir(cdir + patterns::patterndir(c2), c2) : -1));
+        modelcell[patterns::realpattern(c2)] = c2;
         }
     }
   
@@ -1063,6 +812,67 @@ namespace mapeditor {
     return cellwalker(mouseover, d);
     }
   
+  void showList() {
+    v.clear();
+    if(painttype == 4) painttype = 0;
+    switch(painttype) {
+      case 0: 
+        for(int i=0; i<motypes; i++) {
+          eMonster m = eMonster(i);
+          if(
+            m == moTongue || m == moPlayer || m == moFireball || m == moBullet ||
+            m == moFlailBullet || m == moShadow || m == moAirball ||
+            m == moWolfMoved || m == moGolemMoved ||
+            m == moTameBomberbirdMoved || m == moKnightMoved ||
+            m == moDeadBug || m == moLightningBolt || m == moDeadBird ||
+            m == moMouseMoved || m == moPrincessMoved || m == moPrincessArmedMoved) ;
+          else if(m == moDragonHead) vpush(i, "Dragon Head");
+          else vpush(i, minf[i].name);
+          }
+        break;
+      case 1:
+        for(int i=0; i<ittypes; i++) vpush(i, iinf[i].name);
+        break;
+      case 2:
+        for(int i=0; i<landtypes; i++) vpush(i, linf[i].name);
+        break;
+      case 3:
+        for(int i=0; i<walltypes; i++) if(i != waChasmD) vpush(i, winf[i].name);
+        break;
+      }
+    // sort(v.begin(), v.end());
+    
+    if(infix != "") mouseovers = infix;
+    
+    int q = v.size();
+    int percolumn = vid.yres / (vid.fsize+5) - 4;
+    int columns = 1 + (q-1) / percolumn;
+    
+    for(int i=0; i<q; i++) {
+      int x = 16 + (vid.xres * (i/percolumn)) / columns;
+      int y = (vid.fsize+5) * (i % percolumn) + vid.fsize*2;
+      
+      int actkey = 1000 + i;
+      string vv = v[i].first;
+      if(i < 9) { vv += ": "; vv += ('1' + i); }
+      
+      displayButton(x, y, vv, actkey, 0);
+      }
+    keyhandler = [] (int sym, int uni) {
+      if(uni >= '1' && uni <= '9') uni = 1000 + uni - '1';
+      if(sym == SDLK_RETURN || sym == SDLK_KP_ENTER || sym == '-' || sym == SDLK_KP_MINUS) uni = 1000;
+      for(int z=0; z<size(v); z++) if(1000 + z == uni) {
+        paintwhat = v[z].second;
+        paintwhat_str = v[z].first;
+        mousepressed = false;
+        popScreen();
+        return;
+        }
+      if(editInfix(uni)) ;
+      else if(doexiton(sym, uni)) popScreen();
+      };    
+    }
+  
   void handleKeyMap(int sym, int uni) {
     handlePanning(sym, uni);
 
@@ -1081,7 +891,7 @@ namespace mapeditor {
     else if(uni == 'i') pushScreen(showList), painttype = 1, infix = "";
     else if(uni == 'l') pushScreen(showList), painttype = 2, infix = "";
     else if(uni == 'w') pushScreen(showList), painttype = 3, infix = "";
-    else if(uni == 'r') pushScreen(showPattern);
+    else if(uni == 'r') pushScreen(patterns::showPattern);
     else if(uni == 't' && mouseover) {
       playermoved = true;
       cwt = mouseover_cw(true);
@@ -1242,7 +1052,7 @@ namespace mapeditor {
       
       default:
         line1 = XLAT("floor/pattern");
-        line2 = "#" + its(subpattern(drawcell));
+        line2 = "#" + its(patterns::subpattern(drawcell));
         break;
       }
     
@@ -1602,7 +1412,7 @@ namespace mapeditor {
     if(uni == 'b') autochoose = !autochoose;
     
     if(uni == 'r') {
-      pushScreen(showPattern);
+      pushScreen(patterns::showPattern);
       if(drawplayer) 
         addMessage(XLAT("Hint: use F7 to edit floor under the player"));
       }
@@ -1690,141 +1500,11 @@ namespace mapeditor {
       mapeditor::paintwhat_str = "clear monster";
     mapeditor::copysource.c = NULL;
     mapeditor::undo.clear();
-    if(!cheater) mapeditor::displaycodes = 0;
-    if(!cheater) mapeditor::whichShape = 0;
+    if(!cheater) patterns::displaycodes = 0;
+    if(!cheater) patterns::whichShape = 0;
     modelcell.clear();
     });  
 #endif
-
-  int canvasback = linf[laCanvas].color >> 2;
-
-  int generateCanvas(cell *c) {
-    if(whichCanvas == 'C' && !torus) {
-      using namespace fieldpattern;
-      int z = currfp.getdist(fieldval(c), make_pair(0,false));
-      if(z < currfp.circrad) return 0x00C000;
-      int z2 = currfp.getdist(fieldval(c), make_pair(currfp.otherpole,false));
-      if(z2 < currfp.disthep[currfp.otherpole] - currfp.circrad)
-        return 0x3000;
-      return 0x6000;
-      }
-    if(whichCanvas == 'D' && !torus) {
-      using namespace fieldpattern;
-      int z = currfp.getdist(fieldval(c), make_pair(0,false));
-      return 255 * (currfp.maxdist+1-z) / currfp.maxdist;
-      }
-    if(whichCanvas == 'N' && !torus) {
-      using namespace fieldpattern;
-      int z = currfp.getdist(fieldval(c), make_pair(0,false));
-      int z2 = currfp.getdist(fieldval(c), make_pair(currfp.otherpole,false));
-      if(z < z2) return 0x00C000;
-      if(z > z2) return 0xC00000;
-      return 0xCCCC00;
-      }
-    if(whichCanvas == 'S' && !torus) {
-      return 0x3F1F0F * fieldpattern::subval(c).second + 0x000080;
-      }
-    if(whichCanvas == 'g')
-      return canvasback;
-    if(whichCanvas == 'r')
-      return hrand(0xFFFFFF + 1);
-    if(whichCanvas == 'e') {
-      static unsigned int fcol[4] = { 0x404040, 0x800000, 0x008000, 0x000080 };
-      int fv = emeraldval(c);
-      return fcol[fv&3];
-      }
-    if(whichCanvas == 'a') {
-      static unsigned int fcol8[8] = { 
-        0x800000,
-        0x503000,
-        0x206000,
-        0x007010,
-        0x004040,
-        0x001070,
-        0x200060,
-        0x500030
-        };
-        
-      if(c->wall == waNone) {
-        int col = fcol8[land50(c)];
-        if(polara50(c)) col += 0x181818;
-        return col;
-        }
-      }
-    if(whichCanvas == 'b') {
-      static unsigned int fcol[4] = { 0x404040, 0x800000, 0x008000, 0x000080 };
-      return fcol[polara50(c) + 2 * polarb50(c)];
-      }
-    if(whichCanvas == 'z') {
-      static unsigned int fcol[4] = { 0xC0C0C0, 0xE0E0E0, 0x404040, 0x606060 };
-      int fv = zebra40(c);
-      return fcol[fv&3];
-      }
-    if(whichCanvas == 't') {
-      static unsigned int fcol[4] = { 0x804040, 0x408040, 0x404080, 0x808040 };
-      int fv = zebra40(c);
-      if(fv/4 == 4 || fv/4 == 6 || fv/4 == 5 || fv/4 == 10) fv ^= 2;
-      return fcol[fv&3];
-      }
-    if(whichCanvas == 'x') {
-      static unsigned int fcol[4] = { 0xC0C0C0, 0x800000, 0x008000, 0x000080 };
-      return fcol[zebra3(c)];
-      }
-    if(whichCanvas == 'w') {
-      static unsigned int fcol[2] = { 0x303030, 0xC0C0C0 };
-      return fcol[randpattern(c, subcanvas) ? 1 : 0];
-      }
-    if(whichCanvas == 'l') {
-      int col[4];
-      bool err = false;
-      for(int j=0; j<4; j++) {
-        col[j] = getCdata(c, j);
-        col[j] *= 3;
-        col[j] %= 240;
-        if(col[j] > 120) col[j] = 240 - col[j];
-        if(col[j] < -120) col[j] = -240 - col[j];
-        }
-      return (0x808080 + col[0] + (col[1] << 8) + (col[2] << 16)) >> (err?2:0);
-      }
-    if(whichCanvas == 'd') {
-      int col[4];
-      bool err = false;
-      for(int j=0; j<4; j++) {
-        col[j] = getCdata(c, j);
-        col[j] *= 6;
-        col[j] %= 240;
-        if(col[j] > 120) col[j] = 240 - col[j];
-        if(col[j] < -120) col[j] = -240 - col[j];
-        }
-      col[0] /= 8;
-      col[1] /= 8;
-      col[2] /= 8;
-      return (0x101010 + col[0] + (col[1] << 8) + (col[2] << 16)) >> (err?2:0);
-      }
-    if(whichCanvas == 'h') {
-      int col[4];
-      bool err = false;
-      for(int j=0; j<4; j++) {
-        col[j] = getCdata(c, j);
-        col[j] *= 6;
-        col[j] %= 240;
-        if(col[j] > 120) col[j] = 240 - col[j];
-        if(col[j] < -120) col[j] = -240 - col[j];
-        }
-      col[0] /= 4;
-      col[1] /= 4;
-      col[2] /= 4;
-      return (0x202020 + col[0] + (col[1] << 8) + (col[2] << 16)) >> (err?2:0);
-      }
-    if(whichCanvas == 'F') {
-      return pseudohept(c) ? 0x202020 : 0xC0C0C0;
-      }
-    if(whichCanvas == 'T') {
-      int fv = pattern_threecolor(c);
-      return nestcolors[fv&7];
-      }
-    return canvasback;
-    }
 
   void initdraw(cell *c) {
     mapeditor::drawcell = c;
@@ -1958,273 +1638,3 @@ namespace mapeditor {
   
   }
 
-namespace linepatterns {
-
-  int lessalpha(int col, int m) {
-    part(col, 0) /= m;
-    return col;
-    }
-  
-  int lessalphaif(int col, bool b) {
-    return b?lessalpha(col, 4):col;
-    }
-    
-  int lessalphaif(int col, bool b1, bool b2) {
-    if(b1) col = lessalpha(col, 2);
-    if(b2) col = lessalpha(col, 2);
-    return col;
-    }
-    
-  struct {
-    int id;
-    const char *lpname;
-    unsigned int color;
-    } patterns[] = {
-
-    {patTriNet, "triangle grid: not rings", 0xFFFFFF00},
-    {patTriRings, "triangle grid: rings", 0xFFFFFF00},
-    {patHepta, "heptagonal grid", 0x0000C000},
-    {patRhomb, "rhombic tesselation", 0x0000C000},
-    {patTrihepta, "triheptagonal tesselation", 0x0000C000},
-    {patNormal, "normal tesselation", 0x0000C000},
-    {patBigTriangles, "big triangular grid", 0x00606000},
-    {patBigRings, "big triangles: rings", 0x0000C000},
-    
-    {patTree, "underlying tree", 0x00d0d000},
-    {patAltTree, "circle/horocycle tree", 0xd000d000},
-
-    {patZebraTriangles, "zebra triangles", 0x40FF4000},
-    {patZebraLines, "zebra lines", 0xFF000000},
-    {patVine, "vineyard pattern", 0x8438A400},
-    {patPalacelike, "firewall lines", 0xFF400000},
-    {patPalace, "firewall lines: Palace", 0xFFD50000},
-    {patPower, "firewall lines: Power", 0xFFFF0000},
-    {0, NULL, 0}
-    };
-
-  void clearAll() {
-    for(int k=0; patterns[k].lpname; k++) patterns[k].color &= ~255;
-    }
-
-  bool any() {
-    for(int k=0; patterns[k].lpname; k++) if(patterns[k].color & 255) return true;
-    return false;
-    }
-
-  void setColor(ePattern id, int col) {
-    for(int k=0; patterns[k].lpname; k++)
-      if(patterns[k].id == id) patterns[k].color = col;
-    }
-  
-  void switchAlpha(ePattern id, int col) {
-    for(int k=0; patterns[k].lpname; k++)
-      if(patterns[k].id == id) patterns[k].color ^= col;
-    }
-
-  void drawPattern(int id, int col, cell *c, const transmatrix& V) {
-
-    switch(id) {
-
-      case patZebraTriangles:
-        if(zebra40(c) / 4 == 10) {
-          bool all = true;
-          hyperpoint tri[3];
-          for(int i=0; i<3; i++) {
-            cell *c2 = createMov(c, i*2);
-            if(!gmatrix.count(c2)) all = false;
-            else tri[i] = tC0(gmatrix[c2]);
-            }
-          
-          if(all) for(int i=0; i<3; i++)
-            queueline(tri[i], tri[(i+1)%3], col, 3);
-          }
-        break;
-      
-      case patZebraLines:
-        if(!pseudohept(c)) for(int i=0; i<c->type; i+=2) {
-          cell *c2 = createMov(c, i);
-          int fv1 = zebra40(c);
-          if(fv1/4 == 4 || fv1/4 == 6 || fv1/4 == 5 || fv1/4 == 10) fv1 ^= 2;
-          int fv2 = zebra40(c2);
-          if(fv2/4 == 4 || fv2/4 == 6 || fv2/4 == 5 || fv2/4 == 10) fv2 ^= 2;
-          if((fv1&1) == (fv2&1)) continue;
-          
-          double x = sphere?.3651:euclid?.2611:.2849;
-
-          queueline(V * ddspin(c,i,-S14) * xpush0(x), 
-            V * ddspin(c,i,+S14) * xpush0(x), 
-            col, 1);
-          }
-        break;
-      
-      case patNormal: {
-        double x = sphere?.401:euclid?.3 : .328;
-        if(euclid || !pseudohept(c)) for(int t=0; t<c->type; t++) 
-          if(euclid ? c->mov[t]<c : (((t^1)&1) || c->mov[t] < c))
-            queueline(V * ddspin(c,t,-S7) * xpush0(x), 
-                V * ddspin(c,t,+S7) * xpush0(x), 
-                col, 1);
-        break;
-        }
-      
-      case patTrihepta:
-        if(!pseudohept(c)) for(int i=0; i<6; i++) {
-          cell *c2 = c->mov[i];
-          if(!c2 || !pseudohept(c2)) continue;
-          double x = sphere?.3651:euclid?.2611:.2849;
-          queueline(V * ddspin(c,i,-S14) * xpush0(x), 
-            V * ddspin(c,i,+S14) * xpush0(x), 
-            col, 1);
-          }
-        break;
-      
-      case patTriNet:
-        forCellEx(c2, c) if(c2 > c) if(gmatrix.count(c2)) if(celldist(c) != celldist(c2)) {
-          queueline(tC0(V), gmatrix[c2]*C0, 
-            darkena(backcolor ^ 0xFFFFFF, 0, col),
-            2);
-          }
-        break;
-
-      case patTriRings:
-        forCellEx(c2, c) if(c2 > c) if(gmatrix.count(c2) && celldist(c) == celldist(c2)) 
-          queueline(tC0(V), gmatrix[c2]*C0, 
-            darkena(backcolor ^ 0xFFFFFF, 0, col),
-            2);
-        break;
-
-      case patHepta:
-        forCellEx(c2, c) if(c2 > c) if(gmatrix.count(c2) && pseudohept(c) == pseudohept(c2)) 
-          queueline(tC0(V), gmatrix[c2]*C0, 
-            darkena(backcolor ^ 0xFFFFFF, 0, col),
-            2);
-        break;
-
-      case patRhomb:
-        forCellEx(c2, c) if(c2 > c) if(gmatrix.count(c2) && pseudohept(c) != pseudohept(c2)) 
-          queueline(tC0(V), gmatrix[c2]*C0, 
-            darkena(backcolor ^ 0xFFFFFF, 0, col),
-            2);
-        break;
-      
-      case patPalace: {
-        int a = polarb50(c);
-        if(pseudohept(c)) for(int i=0; i<7; i++) {
-            cell *c1 = createMov(c, (i+3) % 7);
-            cell *c2 = createMov(c, (i+4) % 7);
-            if(polarb50(c1) != a && polarb50(c2) != a)
-                queueline(V * ddspin(c,i,84*5/14) * xpush0(tessf/2),
-                          V * ddspin(c,i,84*9/14) * xpush0(tessf/2),
-                                    col, 1);
-            }
-        break;
-        }
-      
-      case patPalacelike:
-        if(pseudohept(c)) for(int i=0; i<7; i++) 
-          queueline(V * ddspin(c,i,84*5/14) * xpush0(tessf/2),
-                    V * ddspin(c,i,84*9/14) * xpush0(tessf/2),
-                              col, 1);
-        break;
-      
-      case patBigTriangles: {
-        if(pseudohept(c) && !euclid) for(int i=0; i<S7; i++) 
-          if(c->master->move[i] < c->master) {
-            queueline(tC0(V), V*xspinpush0((nontruncated?M_PI:0) -2*M_PI*i/S7, tessf), col, 2);
-            }
-        break;
-        }
-        
-      case patBigRings: {
-        if(pseudohept(c) && !euclid) for(int i=0; i<S7; i++) 
-          if(c->master->move[i] && c->master->move[i] < c->master && c->master->move[i]->dm4 == c->master->dm4)
-            queueline(tC0(V), V*xspinpush0((nontruncated?M_PI:0) -2*M_PI*i/S7, tessf), col, 2);
-        break;
-        }
-        
-      case patTree:
-        if(ctof(c) && !euclid) 
-          queueline(tC0(V), V*ddi0(nontruncated?S42:0, tessf), col, 2);
-        break;
-      
-      case patAltTree:
-        if(ctof(c) && !euclid && c->master->alt) {
-          for(int i=0; i<S7; i++)
-            if(c->master->move[i] && c->master->move[i]->alt == c->master->alt->move[0])
-              queueline(tC0(V), V*xspinpush0((nontruncated?M_PI:0) -2*M_PI*i/S7, tessf), col, 2);
-          }
-        break;
-      
-      case patVine: {
-        int p = emeraldval(c);
-        double hdist = hdist0(heptmove[0] * heptmove[2] * C0);
-        if(pseudohept(c) && (p/4 == 10 || p/4 == 8))
-        for(int i=0; i<S7; i++) if(c->mov[i] && emeraldval(c->mov[i]) == p-4) {
-          queueline(tC0(V), V*tC0(heptmove[i]), col, 2);
-          queueline(tC0(V), V*tC0(spin(-i * ALPHA) * xpush(-hdist/2)), col, 2);
-          }
-        break;
-        }
-      
-      case patPower: {
-        int a = emeraldval(c);
-        if(pseudohept(c) && a/4 == 8) for(int i=0; i<7; i++) {
-            heptagon *h1 = c->master->move[(i+1)%7];
-            heptagon *h2 = c->master->move[(i+6)%7];
-            if(!h1 || !h2) continue;
-            if(emeraldval(h1->c7)/4 == 8 && emeraldval(h2->c7)/4 == 8)
-                queueline(V * ddspin(c,i,84*5/14) * xpush0(tessf/2),
-                          V * ddspin(c,i,84*9/14) * xpush0(tessf/2),
-                                    col, 1);
-            }
-        break;
-        }
-      }
-    }  
-
-  void drawAll() {
-
-    if(any()) for(map<cell*, transmatrix>::iterator it = gmatrix.begin(); it != gmatrix.end(); it++) {
-      cell *c = it->first;
-      transmatrix& V = it->second;
-      
-      for(int k=0; patterns[k].lpname; k++) {
-        int col = patterns[k].color;
-        if(!(col & 255)) continue;
-        int id = patterns[k].id;
-        
-        drawPattern(id, col, c, V);
-        }
-      }
-    }
-  
-  int numpat = 0;
-  
-  void showMenu() {
-    cmode = sm::SIDE | sm::MAYDARK;
-    gamescreen(0);
-
-    dialog::init(XLAT("line patterns"));
-    
-    for(numpat=0; patterns[numpat].lpname; numpat++)
-      dialog::addColorItem(XLAT(patterns[numpat].lpname), patterns[numpat].color, 'a'+numpat);
-  
-    dialog::addBreak(50);
-    dialog::addItem(XLAT("exit menu"), 'v');
-    
-    dialog::addBreak(50);
-    dialog::addInfo("change the alpha parameter to show the lines");
-  
-    dialog::display();
-    
-    keyhandler = [] (int sym, int uni) {
-      dialog::handleNavigation(sym, uni);
-      if(uni >= 'a' && uni < 'a' + numpat) {
-        dialog::openColorDialog(patterns[uni - 'a'].color, NULL);
-        dialog::dialogflags |= sm::MAYDARK | sm::SIDE;
-        }
-      else if(doexiton(sym,uni)) popScreen();
-      }; 
-    }
-  
-  };

@@ -2187,17 +2187,17 @@ int countMinesAround(cell *c) {
   return mines;
   }
 
-transmatrix applyPatterndir(cell *c, char patt = mapeditor::whichPattern) {
-  transmatrix V = ddspin(c, mapeditor::patterndir(c, patt), S42);
+transmatrix applyPatterndir(cell *c, char patt = patterns::whichPattern) {
+  transmatrix V = ddspin(c, patterns::patterndir(c, patt), S42);
   
-  if(mapeditor::reflectPatternAt(c, patt)) 
+  if(patterns::reflectPatternAt(c, patt)) 
     return V * Mirror;
   
   return V;
   }
 
 transmatrix applyDowndir(cell *c, cellfunction *cf) {
-  return ddspin(c, mapeditor::downdir(c, cf), S42);
+  return ddspin(c, patterns::downdir(c, cf), S42);
   }
 
 void drawTowerFloor(const transmatrix& V, cell *c, int col, cellfunction *cf = coastvalEdge) {
@@ -2883,7 +2883,7 @@ void plainfloor(cell *c, bool warp, const transmatrix &V, int col, int prio) {
         queuepolyat(V, shTriheptaFloor[ctof(c)], col, prio);
       }
     else 
-      queuepolyat(V * applyPatterndir(c), shTriheptaFloor[sphere ? ctof(c) : mapeditor::nopattern(c)], col, prio);
+      queuepolyat(V * applyPatterndir(c), shTriheptaFloor[sphere ? ctof(c) : patterns::nopattern(c)], col, prio);
     }
   else if(c->land == laDual && !nontruncated) {
     if(euclid && ishex1(c))
@@ -2907,7 +2907,7 @@ void qplainfloor(cell *c, bool warp, const transmatrix &V, int col) {
         qfloor(c, V, applyPatterndir(c), shTriheptaFloor[ctof(c)], col);
       }
     else 
-      qfloor(c, V, applyPatterndir(c), shTriheptaFloor[sphere ? ctof(c) : mapeditor::nopattern(c)], col);
+      qfloor(c, V, applyPatterndir(c), shTriheptaFloor[sphere ? ctof(c) : patterns::nopattern(c)], col);
     }
   else if(c->land == laDual && !nontruncated)
     qfloor_eswap(c, V, shBigTriangle, col);
@@ -3518,21 +3518,21 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         }
               
 #if CAP_EDIT
-      if(mapeditor::drawUserShape(Vpdir, mapeditor::cellShapeGroup(), mapeditor::realpattern(c),
+      if(mapeditor::drawUserShape(Vpdir, mapeditor::cellShapeGroup(), patterns::realpattern(c),
         darkena(fcol, fd, (cmode & sm::DRAW) ? 0xC0 : 0xFF), c));
       
-      else if(mapeditor::whichShape == '7') {
+      else if(patterns::whichShape == '7') {
         if(ishept(c))
           qfloor(c, Vf, wmblack ? shBFloor[ct6] : 
             euclid ? shBigHex :
             shBigHepta, darkena(fcol, fd, 0xFF));
         }
       
-      else if(mapeditor::whichShape == '8') {
+      else if(patterns::whichShape == '8') {
         qfloor_eswap(c, Vf, shTriheptaFloor[ctof(c)], darkena(fcol, fd, 0xFF));
         }
       
-      else if(mapeditor::whichShape == '6') {
+      else if(patterns::whichShape == '6') {
         if(!ishept(c))
           qfloor(c, Vf, 
             wmblack ? shBFloor[ct6] : 
@@ -3675,7 +3675,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         }
 
       else if(isWarped(c) && !nontruncated && !shmup::on) {
-        int np = mapeditor::nopattern(c);
+        int np = patterns::nopattern(c);
         if(c->landparam == 1337) np = 0; // for the achievement screenshot
         if(np < 13)
           qfloor(c, Vf, applyPatterndir(c), shTriheptaFloor[np], darkena(fcol, fd, 0xFF));
@@ -3903,9 +3903,9 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
 
 #if CAP_EDIT
 
-      if(mapeditor::displaycodes) {
+      if(patterns::displaycodes) {
 
-        int labeli = mapeditor::displaycodes == 1 ? mapeditor::realpattern(c) : mapeditor::subpattern(c);
+        int labeli = patterns::displaycodes == 1 ? patterns::realpattern(c) : patterns::subpattern(c);
         
         string label = its(labeli);
         queuestr(V, .5, label, 0xFF000000 + forecolor);
@@ -4582,7 +4582,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
 #if CAP_EDIT
     if((cmode & sm::MAP) && lmouseover && darken == 0 &&
       !mouseout() && 
-      (mapeditor::whichPattern ? mapeditor::subpattern(c) == mapeditor::subpattern(lmouseover) : c == lmouseover)) {
+      (patterns::whichPattern ? patterns::subpattern(c) == patterns::subpattern(lmouseover) : c == lmouseover)) {
       queuecircle(V, .78, 0x00FFFFFF);
       }
 
@@ -5157,7 +5157,7 @@ void drawfullmap() {
   if(pmodel == mdPolygonal || pmodel == mdPolynomial) 
     polygonal::drawBoundary(darkena(0xFF, 0, 0xFF));
   
-  /* if(vid.wallmode < 2 && !euclid && !mapeditor::whichShape) {
+  /* if(vid.wallmode < 2 && !euclid && !patterns::whichShape) {
     int ls = size(lines);
     if(ISMOBILE) ls /= 10;
     for(int t=0; t<ls; t++) queueline(View * lines[t].P1, View * lines[t].P2, lines[t].col >> (darken+1));

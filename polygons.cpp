@@ -2315,7 +2315,7 @@ void queuecurve(int linecol, int fillcol, int prio) {
   curvestart = size(curvedata);
   }
 
-void queueline(const hyperpoint& H1, const hyperpoint& H2, int col, int prf = 0, int prio = PPR_LINE) {
+void queueline(const hyperpoint& H1, const hyperpoint& H2, int col, int prf, int prio) {
   polytodraw& ptd = nextptd();
   ptd.kind = pkLine;
   ptd.u.line.H1 = H1;

@@ -72,8 +72,8 @@ int arg::readCommon() {
   else if(argis("-canvas")) {
     firstland = specialland = laCanvas;
     shift();
-    if(args()[1] == 0) mapeditor::whichCanvas = args()[0];
-    else mapeditor::canvasback = strtol(args(), NULL, 16);
+    if(args()[1] == 0) patterns::whichCanvas = args()[0];
+    else patterns::canvasback = strtol(args(), NULL, 16);
     }
   else if(argis("-noplayer")) 
     mapeditor::drawplayer = !mapeditor::drawplayer;
@@ -81,7 +81,7 @@ int arg::readCommon() {
     PHASE(3);
     shift();
     char *c = args();
-    using namespace mapeditor;
+    using namespace patterns;
     sym01 = sym02 = sym03 = symRotation = false;
     while(*c) { 
       if(*c == '1') sym01 = true; 

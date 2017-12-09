@@ -345,6 +345,7 @@ using namespace std;
 
 void addMessage(string s, char spamtype = 0);
 
+#define ALPHA (M_PI*2/S7)
 #define S7 ginf[geometry].sides
 #define S3 ginf[geometry].vertex
 #define weirdhyperbolic (S7 > 7 || S3 > 3)

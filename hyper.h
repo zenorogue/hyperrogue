@@ -652,19 +652,28 @@ extern string mouseovers;
 
 extern struct SDL_Surface *s;
 
-namespace mapeditor { 
-  extern bool drawplayer; 
-  extern char whichPattern, whichShape;
-  extern char whichCanvas;
+namespace patterns {
+  extern char whichShape;
+  extern char whichPattern;
   extern bool symRotation, sym01, sym02, sym03;
-  extern int displaycodes;
-  int generateCanvas(cell *c);
-  void applyModelcell(cell *c);
+  extern char whichCanvas;
 
+  extern int displaycodes;
+
+  int generateCanvas(cell *c);
   int realpattern(cell *c, char w = whichPattern);
   int patterndir(cell *c, char w = whichPattern);
   bool reflectPatternAt(cell *c, char p = whichPattern);
   int subpattern(cell *c, char w = whichPattern);
+  }
+
+namespace mapeditor { 
+#if CAP_EDIT
+  extern map<int, cell*> modelcell;
+#endif
+
+  extern bool drawplayer; 
+  void applyModelcell(cell *c);
   
   extern cell *drawcell;
   void initdraw(cell *c); 
@@ -2311,3 +2320,9 @@ extern const unsigned int nestcolors[8];
 
 extern bool texture_on;
 void showTextureMenu();
+
+void queueline(const hyperpoint& H1, const hyperpoint& H2, int col, int prf = 0, int prio = PPR_LINE);
+
+hyperpoint ddi0(ld dir, ld dist);
+extern ld tessf, crossf, hexf, hcrossf, hexhexdist, hexvdist, hepvdist, rhexf;
+unsigned char& part(int& col, int i);

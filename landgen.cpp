@@ -2161,7 +2161,7 @@ void setdist(cell *c, int d, cell *from) {
     }
   
   if(d == BARLEV && c->land == laCanvas)  {
-    c->landparam = mapeditor::generateCanvas(c);
+    c->landparam = patterns::generateCanvas(c);
     }
 
   if(d >= BARLEV-1 && c->land == laPrairie)
@@ -2225,7 +2225,7 @@ void setdist(cell *c, int d, cell *from) {
   if(d == 7) playSeenSound(c);
   
 #if CAP_EDIT
-  if(d >= 7 && mapeditor::whichPattern)
+  if(d >= 7 && patterns::whichPattern)
     mapeditor::applyModelcell(c);
 #endif
   }

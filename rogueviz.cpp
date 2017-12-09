@@ -1380,7 +1380,7 @@ void rvvideo(const char *fname) {
     pngformat = 2;
     sightrange = 12;
     overgenerate = true;
-    dronemode = true; vid.camera_angle = -45; rog3 = true; mapeditor::whichShape = '8';
+    dronemode = true; vid.camera_angle = -45; rog3 = true; patterns::whichShape = '8';
     vid.aurastr = 512;
     long long reached = 763ll;
     while(reached < (1ll<<60)) {
@@ -1666,7 +1666,7 @@ int readArgs() {
     shift(); collatz::cshift = argf();
     }
   else if(argis("-rvwarp")) {
-    mapeditor::whichShape = '8';
+    patterns::whichShape = '8';
     }
   else if(argis("-lq")) {
     shift(); linequality = argf();

@@ -118,7 +118,7 @@ void mapTextureTriangle(textureinfo &mi, array<hyperpoint, 3> v) {
 map<int, textureinfo> texture_map;
 
 bool applyTextureMap(cell *c, const transmatrix &V, int col) {
-  using namespace mapeditor;
+  using namespace patterns;
   int t = subpattern(c, whichPattern);
   try {
     auto& mi = texture_map.at(t);
@@ -154,7 +154,7 @@ bool applyTextureMap(cell *c, const transmatrix &V, int col) {
   }
   
 void perform_mapping() {
-  using namespace mapeditor;
+  using namespace patterns;
   if(!texture_read) readtexture();
   texture_map.clear();
   glfont_t& f(textures); int tabid = 1;
@@ -251,7 +251,7 @@ void showTextureMenu() {
   keyhandler = [] (int sym, int uni) {
     dialog::handleNavigation(sym, uni);
     if(uni == 'r')
-      pushScreen(mapeditor::showPattern);
+      pushScreen(patterns::showPattern);
     else if(uni == 'f') {
       mapeditor::cfileptr = &texturename;
       mapeditor::filecaption = XLAT("texture to load:");
