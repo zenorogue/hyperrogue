@@ -25,7 +25,6 @@ namespace mapeditor {
   map<int, cell*> modelcell;
 
   void handleKeyMap(int sym, int uni);
-  bool handleKeyFile(int sym, int uni);
 
   void applyModelcell(cell *c) {
     if(patterns::whichPattern == 'H') return;
@@ -309,31 +308,6 @@ namespace mapeditor {
 
   bool drawplayer = true;
 
-  string infix;
-  
-  bool hasInfix(const string &s) {
-    if(infix == "") return true;
-    string t = "";
-    for(int i=0; i<size(s); i++) {
-      char c = s[i];
-      char tt = 0;
-      if(c >= 'a' && c <= 'z') tt += c - 32;
-      else if(c >= 'A' && c <= 'Z') tt += c;
-      else if(c == '@') tt += c;
-      if(tt) t += tt;
-      }
-    return t.find(infix) != string::npos;
-    }
-  
-  bool editInfix(int uni) {
-    if(uni >= 'A' && uni <= 'Z') infix += uni;
-    else if(uni >= 'a' && uni <= 'z') infix += uni-32;
-    else if(infix != "" && uni == 8) infix = infix.substr(0, size(infix)-1);
-    else if(infix != "" && uni != 0) infix = "";
-    else return false;
-    return true;
-    }
-    
   cell *drawcell;
 
 #if CAP_EDIT
@@ -387,8 +361,6 @@ namespace mapeditor {
     return XLAT(mapeditorhelp) + XLAT(patthelp);
     }
 
-  vector<pair<string, int> > v;
-  
   struct undo_info {
     cell *c;
     eWall w;
@@ -451,77 +423,9 @@ namespace mapeditor {
     }
 
   bool choosefile = false;
-  bool editext = false;
 
   #define CDIR 0xC0C0C0
   #define CFILE forecolor
-  
-  bool filecmp(const pair<string,int> &f1, const pair<string,int> &f2) {
-    if(f1.first == "../") return true;
-    if(f2.first == "../") return false;
-    if(f1.second != f2.second)
-      return f1.second == CDIR;
-    return f1.first < f2.first;
-    }
-  
-  string filecaption, cfileext;
-  string *cfileptr;
-  
-  void drawFileDialog() {
-    displayfr(vid.xres/2, 30 + vid.fsize, 2, vid.fsize, 
-      filecaption, forecolor, 8);
-      
-    string& cfile = *cfileptr;
-
-    displayfr(vid.xres/2, 34 + vid.fsize * 2, 2, vid.fsize, 
-      cfile, editext ? 0xFF00FF : 0xFFFF00, 8);
-    
-    displayButton(vid.xres*1/5, 38+vid.fsize * 3, 
-      "F2 = save", 2000+SDLK_F2, 8);
-    displayButton(vid.xres*2/5, 38+vid.fsize * 3, 
-      "F3 = load", 2000+SDLK_F3, 8);
-    displayButton(vid.xres*3/5, 38+vid.fsize * 3, 
-      "F4 = extension", 2000+SDLK_F4, 8);
-    displayButton(vid.xres*4/5, 38+vid.fsize * 3, 
-      "Enter = back", 2000+SDLK_RETURN, 8);
-
-    v.clear();
-    
-    DIR           *d;
-    struct dirent *dir;
-    
-    string where = ".";
-    for(int i=0; i<size(cfile); i++)
-      if(cfile[i] == '/' || cfile[i] == '\\')
-        where = cfile.substr(0, i+1);
-    
-    d = opendir(where.c_str());
-    if (d) {
-      while ((dir = readdir(d)) != NULL) {
-        string s = dir->d_name;
-        if(s != ".." && s[0] == '.') ;
-        else if(size(s) > 4 && s.substr(size(s)-4) == cfileext)
-          v.push_back(make_pair(s, CFILE));
-        else if(dir->d_type & DT_DIR)
-          v.push_back(make_pair(s+"/", CDIR));
-        }
-      closedir(d);
-      }
-    sort(v.begin(), v.end(), filecmp);
-
-    int q = v.size();
-    int percolumn = (vid.yres-38) / (vid.fsize+5) - 4;
-    int columns = 1 + (q-1) / percolumn;
-      
-    for(int i=0; i<q; i++) {
-      int x = 16 + (vid.xres * (i/percolumn)) / columns;
-      int y = 42 + vid.fsize * 4 + (vid.fsize+5) * (i % percolumn);
-        
-      displayColorButton(x, y, v[i].first, 1000 + i, 0, 0, v[i].second, 0xFFFF00);
-      }
-
-    keyhandler = handleKeyFile;
-    }
   
   void displayFunctionKeys() {
     int fs = min(vid.fsize + 5, vid.yres/26);
@@ -539,12 +443,6 @@ namespace mapeditor {
     displayButton(8, vid.yres-8-fs*2, XLAT("ESC = return to the game"), SDLK_ESCAPE, 0);
     }
 
-  void vpush(int i, const char *name) {
-    string s = XLATN(name);
-    if(!hasInfix(s)) return;
-    v.push_back(make_pair(s, i));
-    }
-  
   void showMapEditor() {
     cmode = sm::MAP;
     gamescreen(0);
@@ -763,49 +661,6 @@ namespace mapeditor {
         }
     }
   
-  bool handleKeyFile(int uni, int sym) {
-    string& s(*cfileptr);
-    int i = size(s) - (editext?0:4);
-    if(uni > 2000) sym = uni - 2000;
-    if(sym == SDLK_RETURN || sym == SDLK_KP_ENTER || sym == SDLK_ESCAPE) {
-      popScreen();
-      return true;
-      }
-    else if(sym == SDLK_F2 || sym == SDLK_F3) {
-      popScreen();
-      return false;
-      }
-    else if(sym == SDLK_F4) {
-      editext = !editext;
-      }
-    else if(sym == SDLK_BACKSPACE && i) {
-      s.erase(i-1, 1);
-      }
-    else if(uni >= 32 && uni < 127) {
-      s.insert(i, s0 + char(uni));
-      }
-    else if(uni >= 1000 && uni <= 1000+size(v)) {
-      string where = "", what = s, whereparent = "../";
-      for(int i=0; i<size(s); i++)
-        if(s[i] == '/') {
-          if(i >= 2 && s.substr(i-2,3) == "../")
-            whereparent = s.substr(0, i+1) + "../";
-          else
-            whereparent = where;
-          where = s.substr(0, i+1), what = s.substr(i+1);
-          }
-      int i = uni - 1000;
-      if(v[i].first == "../") {
-        s = whereparent + what;
-        }
-      else if(v[i].second == CDIR)
-        s = where + v[i].first + what;
-      else
-        s = where + v[i].first;
-      }
-    return true;
-    }
-  
   cellwalker mouseover_cw(bool fix) {
     int d = neighborId(mouseover, mouseover2);
     if(d == -1 && fix) d = hrand(mouseover->type);
@@ -813,7 +668,7 @@ namespace mapeditor {
     }
   
   void showList() {
-    v.clear();
+    dialog::v.clear();
     if(painttype == 4) painttype = 0;
     switch(painttype) {
       case 0: 
@@ -826,25 +681,25 @@ namespace mapeditor {
             m == moTameBomberbirdMoved || m == moKnightMoved ||
             m == moDeadBug || m == moLightningBolt || m == moDeadBird ||
             m == moMouseMoved || m == moPrincessMoved || m == moPrincessArmedMoved) ;
-          else if(m == moDragonHead) vpush(i, "Dragon Head");
-          else vpush(i, minf[i].name);
+          else if(m == moDragonHead) dialog::vpush(i, "Dragon Head");
+          else dialog::vpush(i, minf[i].name);
           }
         break;
       case 1:
-        for(int i=0; i<ittypes; i++) vpush(i, iinf[i].name);
+        for(int i=0; i<ittypes; i++) dialog::vpush(i, iinf[i].name);
         break;
       case 2:
-        for(int i=0; i<landtypes; i++) vpush(i, linf[i].name);
+        for(int i=0; i<landtypes; i++) dialog::vpush(i, linf[i].name);
         break;
       case 3:
-        for(int i=0; i<walltypes; i++) if(i != waChasmD) vpush(i, winf[i].name);
+        for(int i=0; i<walltypes; i++) if(i != waChasmD) dialog::vpush(i, winf[i].name);
         break;
       }
     // sort(v.begin(), v.end());
     
-    if(infix != "") mouseovers = infix;
+    if(dialog::infix != "") mouseovers = dialog::infix;
     
-    int q = v.size();
+    int q = dialog::v.size();
     int percolumn = vid.yres / (vid.fsize+5) - 4;
     int columns = 1 + (q-1) / percolumn;
     
@@ -853,7 +708,7 @@ namespace mapeditor {
       int y = (vid.fsize+5) * (i % percolumn) + vid.fsize*2;
       
       int actkey = 1000 + i;
-      string vv = v[i].first;
+      string vv = dialog::v[i].first;
       if(i < 9) { vv += ": "; vv += ('1' + i); }
       
       displayButton(x, y, vv, actkey, 0);
@@ -861,14 +716,14 @@ namespace mapeditor {
     keyhandler = [] (int sym, int uni) {
       if(uni >= '1' && uni <= '9') uni = 1000 + uni - '1';
       if(sym == SDLK_RETURN || sym == SDLK_KP_ENTER || sym == '-' || sym == SDLK_KP_MINUS) uni = 1000;
-      for(int z=0; z<size(v); z++) if(1000 + z == uni) {
-        paintwhat = v[z].second;
-        paintwhat_str = v[z].first;
+      for(int z=0; z<size(dialog::v); z++) if(1000 + z == uni) {
+        paintwhat = dialog::v[z].second;
+        paintwhat_str = dialog::v[z].first;
         mousepressed = false;
         popScreen();
         return;
         }
-      if(editInfix(uni)) ;
+      if(dialog::editInfix(uni)) ;
       else if(doexiton(sym, uni)) popScreen();
       };    
     }
@@ -887,10 +742,10 @@ namespace mapeditor {
     if(uni == 'u') applyUndo();
     else if(uni == 'v' || sym == SDLK_F10 || sym == SDLK_ESCAPE) popScreen();
     else if(uni >= '0' && uni <= '9') radius = uni - '0';
-    else if(uni == 'm') pushScreen(showList), painttype = 0, infix = "";
-    else if(uni == 'i') pushScreen(showList), painttype = 1, infix = "";
-    else if(uni == 'l') pushScreen(showList), painttype = 2, infix = "";
-    else if(uni == 'w') pushScreen(showList), painttype = 3, infix = "";
+    else if(uni == 'm') pushScreen(showList), painttype = 0, dialog::infix = "";
+    else if(uni == 'i') pushScreen(showList), painttype = 1, dialog::infix = "";
+    else if(uni == 'l') pushScreen(showList), painttype = 2, dialog::infix = "";
+    else if(uni == 'w') pushScreen(showList), painttype = 3, dialog::infix = "";
     else if(uni == 'r') pushScreen(patterns::showPattern);
     else if(uni == 't' && mouseover) {
       playermoved = true;
@@ -917,13 +772,9 @@ namespace mapeditor {
       else
         addMessage(XLAT("Failed to load map from %1", levelfile));
       }
-    else if(sym == SDLK_F4) {
-      cfileptr = &levelfile;
-      filecaption = XLAT("level to save/load:");
-      cfileext = ".lev";
-      pushScreen(drawFileDialog);
-      }
-#if CAP_SDL    
+    else if(sym == SDLK_F4) 
+      dialog::openFileDialog(levelfile, XLAT("level to save/load:"), ".lev");
+#if CAP_SDL
     else if(sym == SDLK_F6) {
       saveHighQualityShot();
       }
@@ -1446,13 +1297,8 @@ namespace mapeditor {
       colorkey = true;
       }
 
-    if(sym == SDLK_F4) {
-      filecaption = XLAT("pics to save/load:");
-      cfileptr = &picfile;
-      cfileext = ".pic";
-      pushScreen(drawFileDialog);
-      return;
-      }
+    if(sym == SDLK_F4) 
+      dialog::openFileDialog(picfile, XLAT("pics to save/load:"), ".pic");
 
     if(sym == SDLK_F2) 
       savePicFile(picfile);

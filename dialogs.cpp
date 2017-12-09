@@ -838,4 +838,161 @@ namespace dialog {
     editNumber(x, vmin, vmax, step, dft, title, help);
     }
   
+  //-- choose file dialog--
+
+  bool filecmp(const pair<string,int> &f1, const pair<string,int> &f2) {
+    if(f1.first == "../") return true;
+    if(f2.first == "../") return false;
+    if(f1.second != f2.second)
+      return f1.second == CDIR;
+    return f1.first < f2.first;
+    }
+  
+  string filecaption, cfileext;
+  string *cfileptr;
+  bool editext = false;
+  
+  bool handleKeyFile(int sym, int uni);
+
+  void drawFileDialog() {
+    displayfr(vid.xres/2, 30 + vid.fsize, 2, vid.fsize, 
+      filecaption, forecolor, 8);
+      
+    string& cfile = *cfileptr;
+
+    displayfr(vid.xres/2, 34 + vid.fsize * 2, 2, vid.fsize, 
+      cfile, editext ? 0xFF00FF : 0xFFFF00, 8);
+    
+    displayButton(vid.xres*1/5, 38+vid.fsize * 3, 
+      "F2 = save", 2000+SDLK_F2, 8);
+    displayButton(vid.xres*2/5, 38+vid.fsize * 3, 
+      "F3 = load", 2000+SDLK_F3, 8);
+    displayButton(vid.xres*3/5, 38+vid.fsize * 3, 
+      "F4 = extension", 2000+SDLK_F4, 8);
+    displayButton(vid.xres*4/5, 38+vid.fsize * 3, 
+      "Enter = back", 2000+SDLK_RETURN, 8);
+
+    v.clear();
+    
+    DIR           *d;
+    struct dirent *dir;
+    
+    string where = ".";
+    for(int i=0; i<size(cfile); i++)
+      if(cfile[i] == '/' || cfile[i] == '\\')
+        where = cfile.substr(0, i+1);
+    
+    d = opendir(where.c_str());
+    if (d) {
+      while ((dir = readdir(d)) != NULL) {
+        string s = dir->d_name;
+        if(s != ".." && s[0] == '.') ;
+        else if(size(s) > 4 && s.substr(size(s)-4) == cfileext)
+          v.push_back(make_pair(s, CFILE));
+        else if(dir->d_type & DT_DIR)
+          v.push_back(make_pair(s+"/", CDIR));
+        }
+      closedir(d);
+      }
+    sort(v.begin(), v.end(), filecmp);
+
+    int q = v.size();
+    int percolumn = (vid.yres-38) / (vid.fsize+5) - 4;
+    int columns = 1 + (q-1) / percolumn;
+      
+    for(int i=0; i<q; i++) {
+      int x = 16 + (vid.xres * (i/percolumn)) / columns;
+      int y = 42 + vid.fsize * 4 + (vid.fsize+5) * (i % percolumn);
+        
+      displayColorButton(x, y, v[i].first, 1000 + i, 0, 0, v[i].second, 0xFFFF00);
+      }
+
+    keyhandler = handleKeyFile;
+    }
+  
+  bool handleKeyFile(int uni, int sym) {
+    string& s(*cfileptr);
+    int i = size(s) - (editext?0:4);
+    if(uni > 2000) sym = uni - 2000;
+    if(sym == SDLK_RETURN || sym == SDLK_KP_ENTER || sym == SDLK_ESCAPE) {
+      popScreen();
+      return true;
+      }
+/*    else if(sym == SDLK_F2 || sym == SDLK_F3) {
+      popScreen();
+      return false;
+      } */
+    else if(sym == SDLK_F4) {
+      editext = !editext;
+      }
+    else if(sym == SDLK_BACKSPACE && i) {
+      s.erase(i-1, 1);
+      }
+    else if(uni >= 32 && uni < 127) {
+      s.insert(i, s0 + char(uni));
+      }
+    else if(uni >= 1000 && uni <= 1000+size(v)) {
+      string where = "", what = s, whereparent = "../";
+      for(int i=0; i<size(s); i++)
+        if(s[i] == '/') {
+          if(i >= 2 && s.substr(i-2,3) == "../")
+            whereparent = s.substr(0, i+1) + "../";
+          else
+            whereparent = where;
+          where = s.substr(0, i+1), what = s.substr(i+1);
+          }
+      int i = uni - 1000;
+      if(v[i].first == "../") {
+        s = whereparent + what;
+        }
+      else if(v[i].second == CDIR)
+        s = where + v[i].first + what;
+      else
+        s = where + v[i].first;
+      }
+    return true;
+    }
+
+  void openFileDialog(string& filename, string fcap, string ext) {
+    cfileptr = &filename;
+    filecaption = fcap;
+    cfileext = ext;
+    pushScreen(dialog::drawFileDialog);
+    }
+  
+  // infix/v/vpush
+
+  string infix;
+  
+  bool hasInfix(const string &s) {
+    if(infix == "") return true;
+    string t = "";
+    for(int i=0; i<size(s); i++) {
+      char c = s[i];
+      char tt = 0;
+      if(c >= 'a' && c <= 'z') tt += c - 32;
+      else if(c >= 'A' && c <= 'Z') tt += c;
+      else if(c == '@') tt += c;
+      if(tt) t += tt;
+      }
+    return t.find(infix) != string::npos;
+    }
+  
+  bool editInfix(int uni) {
+    if(uni >= 'A' && uni <= 'Z') infix += uni;
+    else if(uni >= 'a' && uni <= 'z') infix += uni-32;
+    else if(infix != "" && uni == 8) infix = infix.substr(0, size(infix)-1);
+    else if(infix != "" && uni != 0) infix = "";
+    else return false;
+    return true;
+    }
+    
+  vector<pair<string, int> > v;  
+
+  void vpush(int i, const char *name) {
+    string s = XLATN(name);
+    if(!hasInfix(s)) return;
+    dialog::v.push_back(make_pair(s, i));
+    }
+  
   };

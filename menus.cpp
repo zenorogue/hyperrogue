@@ -20,8 +20,8 @@ void showOverview() {
   cmode = sm::ZOOMABLE | sm::OVERVIEW;  
   DEBB(DF_GRAPH, (debugfile,"show overview\n"));
 
-  if(mapeditor::infix != "")
-    mouseovers = mapeditor::infix;
+  if(dialog::infix != "")
+    mouseovers = dialog::infix;
   else {
     mouseovers = XLAT("world overview");
     mouseovers += "       ";
@@ -39,7 +39,7 @@ void showOverview() {
   
   generateLandList(isLandValid);
   
-  if(mapeditor::infix != "") {
+  if(dialog::infix != "") {
     vector<eLand> filtered;
     for(eLand l: landlist) {
       string s = dnameof(l);
@@ -47,7 +47,7 @@ void showOverview() {
       s += dnameof(treasureType(l));
       s += "@";
       s += dnameof(nativeOrbType(l));
-      if(mapeditor::hasInfix(s))
+      if(dialog::hasInfix(s))
         filtered.push_back(l);
       }
     if(filtered.size()) 
@@ -183,7 +183,7 @@ void showOverview() {
       "mousewheel to gain or lose treasures and orbs quickly (Ctrl = precise, Shift = reverse)."
       );
     else if(dialog::handlePageButtons(uni)) ;
-    else if(mapeditor::editInfix(uni)) ;
+    else if(dialog::editInfix(uni)) ;
     else if(doexiton(sym, uni)) popScreen();
     };
   }
@@ -709,7 +709,7 @@ void setAppropriateOverview() {
     runGeometryExperiments();
     }
   else {
-    mapeditor::infix = "";
+    dialog::infix = "";
     pushScreen(showOverview);
     }
   }

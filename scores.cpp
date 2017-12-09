@@ -133,7 +133,7 @@ void showPickScores() {
     scoredisplay = i;
     if(!fakescore()) {
       string s = displayfor(NULL);
-      if(mapeditor::hasInfix(s))
+      if(dialog::hasInfix(s))
         if(monsbox[scoredisplay] == monsterpage)
           pickscore_options.push_back(make_pair(s, i));
       }
@@ -159,9 +159,9 @@ void showPickScores() {
 
   scoredisplay = d;
 
-  mouseovers = mapeditor::infix;
+  mouseovers = dialog::infix;
   keyhandler = [] (int sym, int uni) {
-    if(uni == '/' && mapeditor::infix == "") monsterpage = !monsterpage; else
+    if(uni == '/' && dialog::infix == "") monsterpage = !monsterpage; else
     if(uni >= '1' && uni <= '9') uni = uni + 1000 - '1';
     else if(uni >= 1000 && uni < 1000 + size(pickscore_options)) {
       scoredisplay = pickscore_options[uni - 1000].second;
@@ -169,7 +169,7 @@ void showPickScores() {
         if(columns[i] == scoredisplay) swap(columns[i], columns[curcol]);
       popScreen();
       }
-    else if(mapeditor::editInfix(uni)) ;
+    else if(dialog::editInfix(uni)) ;
     else if(doexiton(sym, uni)) popScreen();
     };
   }
@@ -249,7 +249,7 @@ void show() {
       }
     else if(sym >= 1000 && sym <= 1000+POSSCORE)
       curcol = sym - 1000;
-    else if(sym == 't') { mapeditor::infix = ""; pushScreen(showPickScores); }
+    else if(sym == 't') { dialog::infix = ""; pushScreen(showPickScores); }
     else if(sym == SDLK_UP || sym == 'k' || sym == 'w')
       scorefrom -= 5;
     else if(sym == SDLK_DOWN || sym == 'j' || sym == 'x')

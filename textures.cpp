@@ -252,12 +252,8 @@ void showTextureMenu() {
     dialog::handleNavigation(sym, uni);
     if(uni == 'r')
       pushScreen(patterns::showPattern);
-    else if(uni == 'f') {
-      mapeditor::cfileptr = &texturename;
-      mapeditor::filecaption = XLAT("texture to load:");
-      mapeditor::cfileext = ".png";
-      pushScreen(mapeditor::drawFileDialog);
-      }
+    else if(uni == 'f') 
+      dialog::openFileDialog(texturename, XLAT("texture to load:"), ".png");
     else if(uni == 'm') {
       texture_on = !texture_on;
       if(texture_on) perform_mapping();

@@ -1133,6 +1133,15 @@ namespace dialog {
   extern bool sidedialog;
   extern int dialogflags;
   extern int dcenter;
+
+  void openFileDialog(string& filename, string fcap, string ext);
+  
+  extern string infix;
+  bool hasInfix(const string &s);
+  bool editInfix(int uni);
+
+  void vpush(int i, const char *name);
+  extern vector<pair<string, int> > v;  
   }
 
 void checkStunKill(cell *dest);
