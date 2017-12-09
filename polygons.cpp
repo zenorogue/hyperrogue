@@ -989,6 +989,8 @@ hpcshape
 
   shTerraArmor1, shTerraArmor2, shTerraArmor3, shTerraHead, shTerraFace, 
   shJiangShi, shJiangShiDress, shJiangShiCap1, shJiangShiCap2,
+  
+  shAsymmetric,
 
   shDodeca;
 
@@ -1038,7 +1040,6 @@ hyperpoint turtlevertex(int u, double x, double y, double z) {
   if(u) scale /= 2;
   return hpxd(scale, x, y, z);
   }
-
 
 void finishshape() {
   last->e = qhpc;
@@ -1792,6 +1793,8 @@ void buildpolys() {
 
   bshape(shLeafFloor[0], PPR_FLOOR_DRAGON, 1*spzoom6, 313);
   bshape(shLeafFloor[1], PPR_FLOOR_DRAGON, 1*spzoomd7, 314);
+  
+  bshape(shAsymmetric, PPR_TEXT, scalef, 374);
   
   bshape(shTriheptaFloor[2], PPR_FLOOR,  scalef, 32);
   bshape(shTriheptaFloor[3], PPR_FLOOR,  scalef, 33);
@@ -3328,6 +3331,8 @@ NEWSHAPE, 370, 7, 1, 1.034599,-1.366924, 0.528060,-0.892063, 0.490794,-1.701844,
 NEWSHAPE, 371, 1, 1, -0.013726,-0.304365, 0.244972,-0.147728, 0.266167,0.130112, 0.156825,0.210539, -0.271641,0.147226, -0.281599,-0.145412,
 NEWSHAPE, 372, 1, 1, -0.514563,-0.238476, -0.340659,0.172987, -0.100245,0.368967, 0.214334,0.276255, 0.349294,-0.008293, 0.203063,-0.280225, -0.078470,-0.352806, 
 NEWSHAPE, 373, 1, 1, -0.019312,0.304743, -0.289045,0.177117, -0.127176,-0.240665, 0.007400,-0.336712, 0.257684,-0.184398, 0.234654,0.191587,
+
+NEWSHAPE, 374, 1, 1, -0.229502,-0.051000, 0.320183,0.006447, 0.148302,0.144065, 0.173317,0.054954, -0.253447,0.021298,
 
 NEWSHAPE
 };

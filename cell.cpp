@@ -524,6 +524,9 @@ void cwrevstep(cellwalker& cw) {
 
 // very similar to createMove in heptagon.cpp
 cell *createMov(cell *c, int d) {
+  if(d<0 || d>= c->type) {
+    printf("ERROR createmov\n");
+    }
 
   if(euclid && !c->mov[d]) {
     eucoord x, y;
@@ -641,6 +644,7 @@ void clearcell(cell *c) {
     DEBMEM ( printf("mov %p [%p] S%d\n", c->mov[t], c->mov[t]->mov[c->spn(t)], c->spn(t)); )
     if(c->mov[t]->mov[c->spn(t)] != NULL &&
       c->mov[t]->mov[c->spn(t)] != c) {
+        printf("type = %d %d -> %d\n", c->type, t, c->spn(t));
         printf("cell error\n");
         exit(1);
         }

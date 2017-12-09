@@ -654,17 +654,46 @@ extern struct SDL_Surface *s;
 
 namespace patterns {
   extern char whichShape;
+
   extern char whichPattern;
-  extern bool symRotation, sym01, sym02, sym03;
+  
+  static const char PAT_WARP = 0;
+  static const char PAT_ZEBRA = 'z';
+  static const char PAT_EMERALD = 'f';
+  static const char PAT_PALACE = 'p';
+  static const char PAT_FIELD = 'F';
+  static const char PAT_DOWN = 'H';
+  static const char PAT_COLORING = 'C';
+  static const char PAT_SIBLING = 'S';
+
+  extern int subpattern_flags;
+  
+  static const int SPF_ROT = 1;
+  static const int SPF_SYM01 = 2;
+  static const int SPF_SYM02 = 4;
+  static const int SPF_SYM03 = 8;
+  static const int SPF_CHANGEROT = 16;
+  static const int SPF_TWOCOL = 32;
+
+  static const int SPF_SYM0123 = 14;
+  
   extern char whichCanvas;
 
   extern int displaycodes;
 
   int generateCanvas(cell *c);
-  int realpattern(cell *c, char w = whichPattern);
-  int patterndir(cell *c, char w = whichPattern);
-  bool reflectPatternAt(cell *c, char p = whichPattern);
-  int subpattern(cell *c, char w = whichPattern);
+
+  struct patterninfo {
+    int id;
+    int dir;
+    bool reflect;
+    };
+    
+  patterninfo getpatterninfo(cell *c, char pat, int sub);
+
+  patterninfo getpatterninfo0(cell *c) {
+    return getpatterninfo(c, whichPattern, subpattern_flags);
+    }
   }
 
 namespace mapeditor { 
@@ -1598,8 +1627,8 @@ void pushThumper(cell *th, cell *cto);
 template<class T> T pick(T x, T y) { return hrand(2) ? x : y; }
 template<class T> T pick(T x, T y, T z) { switch(hrand(3)) { case 0: return x; case 1: return y; case 2: return z; } return x; }
 template<class T> T pick(T x, T y, T z, T v) { switch(hrand(4)) { case 0: return x; case 1: return y; case 2: return z; case 3: return v; } return x; }
-template<class T, class... U> bool among(T x, T y) { return x == y; }
-template<class T, class... U> bool among(T x, T y, U... u) { return x==y || among(x,u...); }
+template<class T, class V, class... U> bool among(T x, V y) { return x == y; }
+template<class T, class V, class... U> bool among(T x, V y, U... u) { return x==y || among(x,u...); }
 
 eLand getNewSealand(eLand old);
 bool createOnSea(eLand old);
@@ -2335,3 +2364,5 @@ void queueline(const hyperpoint& H1, const hyperpoint& H2, int col, int prf = 0,
 hyperpoint ddi0(ld dir, ld dist);
 extern ld tessf, crossf, hexf, hcrossf, hexhexdist, hexvdist, hepvdist, rhexf;
 unsigned char& part(int& col, int i);
+
+transmatrix applyPatterndir(cell *c, const patterns::patterninfo& si);

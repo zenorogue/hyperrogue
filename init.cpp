@@ -356,6 +356,7 @@ void addMessage(string s, char spamtype = 0);
 #define a45 (S3 == 4 && S7 == 5)
 #define a46 (S3 == 4 && S7 == 6)
 #define a47 (S3 == 4 && S7 == 7)
+#define a457 (S3 == 4 && S7 != 6)
 #define a467 (S3 == 4 && S7 >= 6)
 #define a38 (S7 == 8)
 #define sphere4 (sphere && S7 == 4)

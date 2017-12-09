@@ -28,8 +28,8 @@ namespace mapeditor {
 
   void applyModelcell(cell *c) {
     if(patterns::whichPattern == 'H') return;
-    int i = patterns::realpattern(c);
-    cell *c2 = modelcell[i];
+    auto si = patterns::getpatterninfo0(c);
+    cell *c2 = modelcell[si.id];
     if(c2) {
       c->wall = c2->wall;
       c->land = c2->land;
@@ -40,8 +40,11 @@ namespace mapeditor {
       c->mondir = c2->mondir;
       c->stuntime = c2->stuntime;
       c->hitpoints = c2->hitpoints;
-      if(c2->mondir != NODIR)
-        c->mondir = (c2->mondir - patterns::patterndir(c2) + patterns::patterndir(c) + MODFIXER) % c->type;
+      if(c2->mondir != NODIR) {
+        auto si2 = patterns::getpatterninfo0(c2);
+        c->mondir = (c2->mondir - si2.dir + si.dir + MODFIXER) % c->type;
+        // todo reflect
+        }
       }
     }
 #endif
@@ -238,7 +241,7 @@ namespace mapstream {
       c->hitpoints = loadChar();
 
       if(patterns::whichPattern)
-        mapeditor::modelcell[patterns::realpattern(c)] = c;
+        mapeditor::modelcell[patterns::getpatterninfo0(c).id] = c;
       }
     
     int32_t whereami = loadInt();
@@ -498,13 +501,15 @@ namespace mapeditor {
     if(drawcell == cwt.c) return vid.cs.charid;
     if(drawcell->monst) return drawcell->monst;
     if(drawcell->item) return drawcell->item;
-    return patterns::subpattern(drawcell);
+    return patterns::getpatterninfo0(drawcell).id;
     }
 
   bool editingShape(int group, int id) {
     if(group != mapeditor::drawcellShapeGroup()) return false;
     if(group < 3) return id == drawcellShapeID();
-    return patterns::subpattern(id, patterns::whichPattern) == patterns::subpattern(drawcell);
+    // todo fix this
+    return id == drawcellShapeID();
+    // return patterns::getpatterninfo0(id).id == patterns::getpatterninfo0(drawcell).id;
     }
 
   void editCell(const pair<cellwalker, cellwalker>& where) {
@@ -649,16 +654,17 @@ namespace mapeditor {
           c3->aitmp = sval, v.push_back(c3);
       }
     
+    auto si = patterns::getpatterninfo0(where.c);
     int cdir = where.spin;
-    if(cdir >= 0) 
-      cdir = cdir - patterns::patterndir(where.c);
-    int sp = patterns::subpattern(where.c);
+    if(cdir >= 0) cdir = cdir - si.dir;
     
-    for(cell* c2: v)
-      if(patterns::subpattern(c2) == sp) {
-        editAt(cellwalker(c2, cdir>=0 ? fixdir(cdir + patterns::patterndir(c2), c2) : -1));
-        modelcell[patterns::realpattern(c2)] = c2;
+    for(cell* c2: v) {
+      auto si2 = patterns::getpatterninfo0(c2);
+      if(si2.id == si.id) {
+        editAt(cellwalker(c2, cdir>=0 ? fixdir(cdir + si2.dir, c2) : -1));
+        modelcell[si2.id] = c2;
         }
+      }
     }
   
   cellwalker mouseover_cw(bool fix) {
@@ -903,7 +909,7 @@ namespace mapeditor {
       
       default:
         line1 = XLAT("floor/pattern");
-        line2 = "#" + its(patterns::subpattern(drawcell));
+        line2 = "#" + its(patterns::getpatterninfo0(drawcell).id);
         break;
       }
     

@@ -119,16 +119,11 @@ map<int, textureinfo> texture_map;
 
 bool applyTextureMap(cell *c, const transmatrix &V, int col) {
   using namespace patterns;
-  int t = subpattern(c, whichPattern);
+  auto si = getpatterninfo0(c);
   try {
-    auto& mi = texture_map.at(t);
-    qfi.spin = Id;
+    auto& mi = texture_map.at(si.id);
+    qfi.spin = applyPatterndir(c, si);
     
-    int d = patterndir(c, whichPattern);
-      qfi.spin = qfi.spin * spin(-M_PI * 2 * d / c->type);
-    if(reflectPatternAt(c)) 
-      qfi.spin = qfi.spin * Mirror;
-
     int n = mi.vertices.size() / 3;
     
     qfi.special = false;
@@ -160,25 +155,21 @@ void perform_mapping() {
   glfont_t& f(textures); int tabid = 1;
   for(auto p: gmatrix) {
     cell *c = p.first;
-    int t = subpattern(c, whichPattern);
+    auto si = getpatterninfo0(c);
     bool replace = false;
 
-    if(!texture_map.count(t)) 
+    if(!texture_map.count(si.id)) 
       replace = true;
-    else if(p.second[2][2] < texture_map[t].M[2][2])
+    else if(p.second[2][2] < texture_map[si.id].M[2][2])
       replace = true;
 
     if(replace) {
-      auto& mi = texture_map[t];
+      auto& mi = texture_map[si.id];
       mi.M = p.second;
       mi.vertices.clear();
       mi.tvertices.clear();
 
-      int d = patterndir(c, whichPattern);
-      if(d) 
-        mi.M = mi.M * spin(-M_PI * 2 * d / c->type);
-      if(reflectPatternAt(c, whichPattern)) 
-        mi.M = mi.M * Mirror;
+      mi.M = mi.M * applyPatterndir(c, si);
 
       ld z = ctof(c) ? rhexf : hexvdist;
       ld base = ctof(c) ? 0 : 0; // -hexshift;

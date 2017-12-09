@@ -2187,12 +2187,9 @@ int countMinesAround(cell *c) {
   return mines;
   }
 
-transmatrix applyPatterndir(cell *c, char patt = patterns::whichPattern) {
-  transmatrix V = ddspin(c, patterns::patterndir(c, patt), S42);
-  
-  if(patterns::reflectPatternAt(c, patt)) 
-    return V * Mirror;
-  
+transmatrix applyPatterndir(cell *c, const patterns::patterninfo& si) {
+  transmatrix V = ddspin(c, si.dir, S42);  
+  if(si.reflect) return V * Mirror;  
   return V;
   }
 
@@ -2238,42 +2235,40 @@ void drawZebraFloor(const transmatrix& V, cell *c, int col) {
     qfloor(c, V, PLAINFLOOR, col); return;
     }
   
-  int i = zebra40(c);
-  i &= ~3;
+  auto si = patterns::getpatterninfo(c, 'z', patterns::SPF_SYM0123);
   
   int j;
-
   if(nontruncated) j = 4;
-  else if(i >=4 && i < 16) j = 2;
-  else if(i >= 16 && i < 28) j = 1;
-  else if(i >= 28 && i < 40) j = 3;
+  else if(si.id >=4 && si.id < 16) j = 2;
+  else if(si.id >= 16 && si.id < 28) j = 1;
+  else if(si.id >= 28 && si.id < 40) j = 3;
   else j = 0;
 
-  qfloor(c, V, applyPatterndir(c, 'z'), shZebra[j], col);
+  qfloor(c, V, applyPatterndir(c, si), shZebra[j], col);
   }
 
 void qplainfloor(cell *c, bool warp, const transmatrix &V, int col);
 
 void drawReptileFloor(const transmatrix& V, cell *c, int col, bool usefloor) {
 
-  int i = zebra40(c);
-  i &= ~3;
+  auto si = patterns::getpatterninfo(c, 'z', patterns::SPF_SYM0123);
   
   int j;
 
   if(!wmescher) j = 4;
   else if(nontruncated) j = 0;
-  else if(i < 4) j = 0;
-  else if(i >=4 && i < 16) j = 1;
-  else if(i >= 16 && i < 28) j = 2;
-  else if(i >= 28 && i < 40) j = 3;
+  else if(si.id < 4) j = 0;
+  else if(si.id >=4 && si.id < 16) j = 1;
+  else if(si.id >= 16 && si.id < 28) j = 2;
+  else if(si.id >= 28 && si.id < 40) j = 3;
   else j = 4;
-
-  transmatrix V2 = V * applyPatterndir(c, 'z');
+  
+  transmatrix D = applyPatterndir(c, si);
+  transmatrix V2 = V * D;
   
   if(wmescher) {
     if(usefloor)
-      qfloor(c, V, applyPatterndir(c, 'z'), shReptile[j][0], darkena(col, 0, 0xFF));
+      qfloor(c, V, D, shReptile[j][0], darkena(col, 0, 0xFF));
     else
       queuepoly(V2, shReptile[j][0], darkena(col, 0, 0xFF));
     }
@@ -2317,24 +2312,26 @@ void drawReptileFloor(const transmatrix& V, cell *c, int col, bool usefloor) {
   }
 
 void drawEmeraldFloor(const transmatrix& V, cell *c, int col) {
-  int j = -1;
-  
   if(!euclid && !nontruncated) {
-    int i = emeraldval(c) & ~3;
-    if(i == 8) j = 0;
-    else if(i == 12) j = 1;
-    else if(i == 16) j = 2;
-    else if(i == 20) j = 3;
-    else if(i == 28) j = 4;
-    else if(i == 36) j = 5;
-    }
-    
-  int ct6 = ctof(c);
+    auto si = patterns::getpatterninfo(c, 'f', patterns::SPF_SYM0123);
+  
+    int j = -1;
 
-  if(j >= 0)
-    qfloor(c, V, applyPatterndir(c, 'f'), shEmeraldFloor[j], col);
-  else
-    qfloor(c, V, CAVEFLOOR, col);
+    if(si.id == 8) j = 0;
+    else if(si.id == 12) j = 1;
+    else if(si.id == 16) j = 2;
+    else if(si.id == 20) j = 3;
+    else if(si.id == 28) j = 4;
+    else if(si.id == 36) j = 5;
+
+    if(j >= 0) {
+      qfloor(c, V, applyPatterndir(c, si), shEmeraldFloor[j], col);
+      return;
+      }
+    }
+  
+  int ct6 = ctof(c);
+  qfloor(c, V, CAVEFLOOR, col);
   }
 
 double fanframe;
@@ -2856,8 +2853,10 @@ void floorShadow(cell *c, const transmatrix& V, int col, bool warp) {
       else
         queuepolyat(V, shTriheptaFloorShadow[ctof(c)], col, PPR_WALLSHADOW);
       }
-    else 
-      queuepolyat(V * applyPatterndir(c), shTriheptaFloorShadow[ctof(c)], col, PPR_WALLSHADOW);
+    else {
+      auto si = patterns::getpatterninfo(c, 0, 0);
+      queuepolyat(V * applyPatterndir(c, si), shTriheptaFloorShadow[ctof(c)], col, PPR_WALLSHADOW);
+      }
     }
   else if(c->land == laDual && !nontruncated) {
     if(euclid && ishex1(c))
@@ -2873,17 +2872,15 @@ void floorShadow(cell *c, const transmatrix& V, int col, bool warp) {
 void plainfloor(cell *c, bool warp, const transmatrix &V, int col, int prio) {
   if(warp) {
     if(euclid) {
-      /* if(ishex1(c))
-        queuepolyat(V * pispin * applyPatterndir(c), shTriheptaFloor[0], col, prio);
-      else
-        queuepolyat(V * applyPatterndir(c), shTriheptaFloor[ctof(c)], col, prio); */
       if(ishex1(c))
         queuepolyat(V * pispin, shTriheptaFloor[ctof(c)], col, prio);        
       else
         queuepolyat(V, shTriheptaFloor[ctof(c)], col, prio);
       }
-    else 
-      queuepolyat(V * applyPatterndir(c), shTriheptaFloor[sphere ? ctof(c) : patterns::nopattern(c)], col, prio);
+    else {
+      auto si = patterns::getpatterninfo(c, 0, 0);
+      queuepolyat(V * applyPatterndir(c, si), shTriheptaFloor[sphere ? ctof(c) : si.id], col, prio);
+      }
     }
   else if(c->land == laDual && !nontruncated) {
     if(euclid && ishex1(c))
@@ -2900,14 +2897,8 @@ void qfloor_eswap(cell *c, const transmatrix& V, const hpcshape& sh, int col);
 
 void qplainfloor(cell *c, bool warp, const transmatrix &V, int col) {
   if(warp) {
-    if(euclid) {
-      if(ishex1(c))
-        qfloor(c, V, applyPatterndir(c) * pispin, shTriheptaFloor[0], col);
-      else
-        qfloor(c, V, applyPatterndir(c), shTriheptaFloor[ctof(c)], col);
-      }
-    else 
-      qfloor(c, V, applyPatterndir(c), shTriheptaFloor[sphere ? ctof(c) : patterns::nopattern(c)], col);
+    auto si = patterns::getpatterninfo(c, 0, 0);
+    qfloor(c, V, applyPatterndir(c, si), shTriheptaFloor[si.id], col);
     }
   else if(c->land == laDual && !nontruncated)
     qfloor_eswap(c, V, shBigTriangle, col);
@@ -3503,7 +3494,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       // floor
       
 #if CAP_EDIT
-      transmatrix Vpdir = V * applyPatterndir(c);
+      auto si = patterns::getpatterninfo0(c);
 #endif
         
       bool eoh = euclid || nontruncated;
@@ -3518,7 +3509,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         }
               
 #if CAP_EDIT
-      if(mapeditor::drawUserShape(Vpdir, mapeditor::cellShapeGroup(), patterns::realpattern(c),
+      if(mapeditor::drawUserShape(V * applyPatterndir(c, si), mapeditor::cellShapeGroup(), si.id,
         darkena(fcol, fd, (cmode & sm::DRAW) ? 0xC0 : 0xFF), c));
       
       else if(patterns::whichShape == '7') {
@@ -3675,10 +3666,9 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         }
 
       else if(isWarped(c) && !nontruncated && !shmup::on) {
-        int np = patterns::nopattern(c);
-        if(c->landparam == 1337) np = 0; // for the achievement screenshot
-        if(np < 13)
-          qfloor(c, Vf, applyPatterndir(c), shTriheptaFloor[np], darkena(fcol, fd, 0xFF));
+        auto si = patterns::getpatterninfo(c, 0, 0);
+        if(si.id < 13)
+          qfloor(c, Vf, applyPatterndir(c, si), shTriheptaFloor[si.id], darkena(fcol, fd, 0xFF));
         else
           qfloor(c, Vf, shFloor[ctof(c)], darkena(fcol, fd, 0xFF));
         }
@@ -3904,15 +3894,15 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
 #if CAP_EDIT
 
       if(patterns::displaycodes) {
-
-        int labeli = patterns::displaycodes == 1 ? patterns::realpattern(c) : patterns::subpattern(c);
+      
+        int pf = patterns::displaycodes == 2 ? patterns::subpattern_flags : 0;
+      
+        auto si = patterns::getpatterninfo(c, patterns::whichPattern, pf);
         
-        string label = its(labeli);
+        queuepoly(V * applyPatterndir(c,si), shAsymmetric, darkena(0x000000, 0, 0xC0));
+        
+        string label = its(si.id);
         queuestr(V, .5, label, 0xFF000000 + forecolor);
-        
-        /* transmatrix V2 = V * applyPatterndir(c);
-        qfloor(c, V2, shNecro, 0x80808080);
-        qfloor(c, V2, shStatue, 0x80808080); */
         }
 #endif
 
@@ -4582,7 +4572,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
 #if CAP_EDIT
     if((cmode & sm::MAP) && lmouseover && darken == 0 &&
       !mouseout() && 
-      (patterns::whichPattern ? patterns::subpattern(c) == patterns::subpattern(lmouseover) : c == lmouseover)) {
+      (patterns::whichPattern ? patterns::getpatterninfo0(c).id == patterns::getpatterninfo0(lmouseover).id : c == lmouseover)) {
       queuecircle(V, .78, 0x00FFFFFF);
       }
 

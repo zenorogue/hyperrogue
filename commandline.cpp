@@ -82,12 +82,9 @@ int arg::readCommon() {
     shift();
     char *c = args();
     using namespace patterns;
-    sym01 = sym02 = sym03 = symRotation = false;
+    subpattern_flags = 0;
     while(*c) { 
-      if(*c == '1') sym01 = true; 
-      else if(*c == '2') sym02 = true; 
-      else if(*c == '3') sym03 = true; 
-      else if(*c == '0') symRotation = true;
+      if(*c >= '0' && *c <= '9') subpattern_flags ^= (*c - '0'); 
       else whichPattern = *c;
       c++; 
       }
