@@ -674,6 +674,7 @@ namespace patterns {
   static const int SPF_SYM03 = 8;
   static const int SPF_CHANGEROT = 16;
   static const int SPF_TWOCOL = 32;
+  static const int SPF_EXTRASYM = 64;
 
   static const int SPF_SYM0123 = 14;
   
@@ -687,11 +688,12 @@ namespace patterns {
     int id;
     int dir;
     bool reflect;
+    int symmetries;
     };
     
   patterninfo getpatterninfo(cell *c, char pat, int sub);
 
-  patterninfo getpatterninfo0(cell *c) {
+  inline patterninfo getpatterninfo0(cell *c) {
     return getpatterninfo(c, whichPattern, subpattern_flags);
     }
   }
@@ -2366,3 +2368,7 @@ extern ld tessf, crossf, hexf, hcrossf, hexhexdist, hexvdist, hepvdist, rhexf;
 unsigned char& part(int& col, int i);
 
 transmatrix applyPatterndir(cell *c, const patterns::patterninfo& si);
+
+int pattern_threecolor(cell *c);
+int fiftyval200(cell *c);
+

@@ -129,7 +129,21 @@ int elhextable[28][3] = {
   };
 
 int fiftyval049(cell *c) {
-  if(c->type != 6 || euclid) return fiftyval(c) / 32;
+  if(euclid) return fiftyval(c) / 32;
+  else if(ctof(c)) {
+    int i = fiftyval(c) / 32;
+    if(i <= 7) return i;
+    vector<int> allcodes;
+    for(int k=0; k<7; k++) {
+      cell *c2 = createStep(c->master, k)->c7;
+      if(polara50(c2) == polara50(c) && polarb50(c2) == polarb50(c))        
+        allcodes.push_back(fiftyval049(c2));
+      }
+    int d = allcodes[1] - allcodes[0];
+    if(d == -1 || d == 6) swap(allcodes[0], allcodes[1]);
+    // printf("%d,%d: %d\n", allcodes[0], allcodes[1], allcodes[0] + 7);
+    return allcodes[0] + 7;
+    }
   else if(sphere) return 0;
   else {
     int a[3], qa=0;
@@ -144,16 +158,32 @@ int fiftyval049(cell *c) {
     if(qa == 1) return 43+a[0]-1;
     if(qa == 2 && a[1] == a[0]+7) return 36+a[0]-1;
     if(qa == 2 && a[1] != a[0]+7) return 29+a[0]-1;
-    if(a[1] == 1 && a[2] == 7)
-      return 15 + 6;
-    if(a[2] >= 1 && a[2] <= 7)
-      return 15 + a[1]-1;
+    // 3: zgodnie
+    // 1: zgodnie
+    // 0: przeciwnie
+    // 2: przeciwnie
+    // 168: 
+    if(a[1] == 1 && a[2] == 7) 
+      return 15 + 6; // (polarb50(c) ? 0 : 6);
+    if(a[2] >= 1 && a[2] <= 7) {
+      return 15 + a[1] - 1; // (polarb50(c) ? a[1]%7 : a[1]-1);
+      }
     if(a[0] == 1 && a[1] == 7 && a[2] == 8)
       return 22;
+    if(a[0] == 1 && a[1] == 7 && a[2] == 14)
+      return 22; 
     if(a[1] <= 7 && a[2] >= 8)
       return 22 + a[1]-1;
     return 0;
     }
+  }
+
+int fiftyval200(cell *c) {
+  int i = fiftyval049(c);
+  i *= 4;
+  if(polara50(c)) i|=1;
+  if(polarb50(c)) i|=2;
+  return i;
   }
 
 /*
@@ -393,6 +423,10 @@ namespace patterns {
           int d = c->mov[i*2]->master->fieldval;
           if(!(ids & (1<<siblings[d]))) si.dir = 2*i;
           }
+        /* if(!(sub & SPF_ROT)) {
+          int d0 = c->mov[(si.dir+2)%c->type]->master->fieldval;
+          if(d0 < siblings[d0]) si.id += 8;
+          } */
         si.reflect = false;
         }
       else {
@@ -404,6 +438,7 @@ namespace patterns {
         di %= S7; 
         if(di<0) di += S7;
         si.reflect = di > S7/2;
+        if(sub & SPF_ROT) si.symmetries = 2;
         }
       }
     }
@@ -424,28 +459,38 @@ namespace patterns {
     if(sym03 && (i&2)) i ^= 3;
     }
 
-  void val46(cell *c, patterninfo &si, int sub) {
-    int bits = (sub & SPF_CHANGEROT) ? 1 : 2;
+  void val46(cell *c, patterninfo &si, int sub, int pat) {
     if(ctof(c)) {
       si.id = c->master->emeraldval >> 1;
       applySym0123(si.id, sub);
-      int b = c->master->emeraldval & bits;
-      si.dir = (b&1) ^ (b & 2 ? 1 : 0);
+      si.dir = (c->master->emeraldval&1) ^ (c->master->emeraldval>>1);
+      si.symmetries = 2;
+      /* printf("[%3d] ", c->master->emeraldval);
+      for(int i=0; i<6; i++) printf("%2d", val46(createMov(c, i)));
+      printf("\n"); */
       }
     else {
-      if(sub & SPF_TWOCOL) si.id = 4;
-      else
-        si.id = ((c->master->emeraldval & 1) ^ ((c->master->emeraldval & 2)>>1) ^ (c->spin(0)&1)) ? 8 : 4;
+      si.id = ((c->master->emeraldval & 1) ^ ((c->master->emeraldval & 2)>>1) ^ (c->spin(0)&1)) ? 8 : 4;
       si.dir = ((c->mov[0]->master->emeraldval + c->spin(0)) & 1) ? 2 : 0;
       if(createMov(c, si.dir)->master->emeraldval & 4)
         si.dir += 4;
+
+      if((sub & SPF_TWOCOL) && (pat == PAT_COLORING)) si.id = 4;
+      else if(si.id == 4) si.dir++;
+      
+      if(sub & SPF_SYM01) si.symmetries = 2;
+      else if(sub & SPF_SYM03) si.symmetries = 2;
+      else if(sub & SPF_SYM02) si.symmetries = 4;
       }
     }
   
   // if(a46) return patterndir46(c, w == PAT_ZEBRA ? 3 : w == PAT_PALACE ? 2 : 1);
 
+  int inr(int a, int b, int c) { return a >= b && a < c; }
+
   void val457(cell *c, patterninfo &si, int sub) {
     si.id = zebra40(c);
+    if(inr(si.id, 8, 12)) si.symmetries = 4;
     applySym0123(si.id, sub);
     if(sub & SPF_ROT) {
       if(si.id >= 4 && si.id < 7) si.id -= 4;
@@ -463,42 +508,53 @@ namespace patterns {
       }
     }
 
-  void val38(cell *c, patterninfo &si, int sub) {
+  void val38(cell *c, patterninfo &si, int sub, int pat) {
     bool symRotation = sub & SPF_ROT;
-    bool sym01 = sub & SPF_TWOCOL;
 
     if(ctof(c)) {
       if(!symRotation) 
         si.id = (c->master->fiftyval >> 1) & 3;
-      si.dir = c->master->fiftyval | (c->master->fiftyval & 8 ? 0 : 2);
+      else
+        si.id = 0;
+      if(nontruncated)
+        si.id *= 4;
+      else 
+        si.id += 4;
+      si.dir = (pat == PAT_COLORING ? 1 : 0) + (c->master->fiftyval | (c->master->fiftyval & 8 ? 0 : 2));
+      si.symmetries = 2;
       }
     else {
-      if(sym01)
-        si.id = 4;
-      else
-        si.id = 4 ^ (c->master->fiftyval & 1) ^ (c->spin(0) & 1);
+      si.id = 8 * ((c->master->fiftyval & 1) ^ (c->spin(0) & 1));
+      for(int i=0; i<c->type; i+=2) {
+        int fv = (createMov(c, i)->master->fiftyval >> 1) & 3;
+        if(fv == 0) si.dir = (si.id == 8 && pat == PAT_COLORING ? 1 : 0) + i;
+        }
+      if(symRotation) si.symmetries = 2;
       }
+    
     }
   
   void valEuclid(cell *c, patterninfo &si, int sub) {
     bool symRotation = sub & SPF_ROT;
-    si.id = ishept(c) ? 1 : ishex1(c) ? 2 : 0;
-    if(sub & SPF_CHANGEROT)
+    si.id = ishept(c) ? 4 : ishex1(c) ? 8 : 0;
+    if(sub & SPF_CHANGEROT) {
       si.dir = (zebra40(c)*4) % 6;
+      }
     if(symRotation) si.id = 0;
     }
 
-  void val_all(cell *c, patterninfo &si, int sub) {
-    if(a46) val46(c, si, sub);
-    else if(a38) val38(c, si, sub);
+  void val_all(cell *c, patterninfo &si, int sub, int pat) {
+    if(a46) val46(c, si, sub, pat);
+    else if(a38) val38(c, si, sub, pat);
     else if(sphere) valSibling(c, si, sub);
     else if(euclid) valEuclid(c, si, sub);
     else if(a4) val457(c, si, sub);
+    else si.symmetries = ctof(c) ? 1 : 2;
     }
 
-  void val_warped(cell *c, patterninfo& si) {
+  void val_warped(cell *c, patterninfo& si, int sub) {
     // use val_all for nicer rotation
-    val_all(c, si, 0);
+    val_all(c, si, 0, 0);
     
     // get id:
     if(stdhyperbolic && isWarped(c)) {
@@ -565,19 +621,58 @@ namespace patterns {
       }
     else {
       si.id = ishept(c) ? 1 : 0;
-      if(euclid) si.dir = ishex1(c) ? 3 : 0;
+      if(euclid) {
+        si.dir = ishex1(c) ? 3 : 0;
+        if(ctof(c)) si.symmetries = 3;
+        if(subpattern_flags & SPF_EXTRASYM) 
+          si.symmetries /= 3;
+        }      
+      if(sphere && !(nontruncated) && !(S7 == 3))
+        si.symmetries = ctof(c) ? 1 : 2;
+      if(a38)
+        si.symmetries = (ctof(c) && !nontruncated) ? 1 : 2;
+      if(a457) {
+        si.symmetries = ctof(c) ? 1 : 2;
+        if(!ctof(c)) si.dir = 0;
+        }
+      if(a46) {
+        si.symmetries = ctof(c) ? 1 : 2;
+        }
       }
     }
   
   char whichPattern = 0;
 
   int subpattern_flags;
+ 
+   // also works with 38
+  void val_threecolors(cell *c, patterninfo& si, int sub) {
+    int pcol = pattern_threecolor(c);
+    si.id = pcol * 4;
+    pcol = (pcol+1) % 3;
+    si.dir = -1;
+    for(int i=0; i<c->type; i++) 
+      if(pattern_threecolor(createMov(c, i)) == pcol) {
+        if(si.dir == -1) si.dir = i;
+        else {
+          si.symmetries = i - si.dir;
+          break;
+          }
+        }
+    if(euclid && (sub & SPF_CHANGEROT)) si.dir = 0;
+    if(sub & SPF_ROT) si.id = 0;
+    if(!(sub & SPF_EXTRASYM)) {
+      if(euclid) si.symmetries = 6;
+      }
+    }
   
   patterninfo getpatterninfo(cell *c, char pat, int sub) {
     bool symRotation = sub & SPF_ROT;
+    // bool sym0 = sub & (SPF_SYM01 | SPF_SYM02 | SPF_SYM03);
 
     patterninfo si;
     si.dir = 0; si.reflect = false; si.id = ctof(c);
+    si.symmetries = c->type;
     
     if(pat == PAT_ZEBRA && stdhyperbolic) {
 
@@ -604,6 +699,12 @@ namespace patterns {
         if(si.id >= 32 && si.id < 36) si.id -= 4;
         if(si.id >= 36 && si.id < 40) si.id -= 8;
         }
+      
+      if(si.id >= 40 && si.id < 44 && symRotation)
+        si.symmetries = 2;
+
+      if(si.id >= 40 && si.id < 44 && (sub & (SPF_SYM02 | SPF_SYM03)))
+        si.symmetries = 2;
       }
     
     else if(pat == PAT_EMERALD && (stdhyperbolic || a38)) {
@@ -621,35 +722,50 @@ namespace patterns {
         si.dir = tcdir;
         }
       applySym0123(si.id, sub);
+      if(si.id >= 44 && si.id < 48)
+        si.symmetries = 2;
       }
     
     else if(pat == PAT_PALACE && stdhyperbolic) {
-      int i = fiftyval049(c);
-      i *= 4;
-      if(polara50(c)) i|=1;
-      if(polarb50(c)) i|=2;
-      si.id = i;
+      si.id = fiftyval200(c);
 
-      int tcdir = -1, tbest = -1;
-      int pa = polara50(c);
-      int pb = polarb50(c);
-      si.reflect = pb;
+      si.reflect = polara50(c);
+    
+      int look_for = -1;
+      int shft = 0;
+      if(inr(si.id, 0, 4)) {
+        look_for = si.id + (nontruncated ? 4 : 60);
+        if(symRotation) si.symmetries = 1;
+        }
+      else if(inr(si.id, 4, 32)) look_for = si.id + (nontruncated ? 28 : 168);
+      else if(inr(si.id, 32, 60)) look_for = si.id + (nontruncated ? -28 : 112);
+      else if(inr(si.id, 60, 88)) look_for = si.id - 56, shft = si.reflect ? 1 : 5;
+      else if(inr(si.id, 88, 116)) look_for = si.id - 84, shft = 3;
+      else if(inr(si.id, 116, 144)) look_for = si.id + 56;
+      else if(inr(si.id, 144, 172)) look_for = si.id + 28;
+      else if(inr(si.id, 172, 200)) look_for = si.id - 28;
+
+      si.dir = -1;
       for(int i=0; i<c->type; i++) {
-          cell *c2 = c->mov[i];
-          if(c2 && polara50(c2) == pa && polarb50(c2) == pb) {
-              int t2 = fiftyval049(c2);
-              if(t2 > tbest) tbest = t2, tcdir = i;
+          cell *c2 = createMov(c, i);
+          if(fiftyval200(c2) == look_for)
+            si.dir = (i + shft) % c->type;
           }
-      }
-      si.dir = tcdir;
+      
+      if(si.dir == -1) {
+        si.dir = 0;
+        if(c->cpdist <= 1) printf("Not found for ID = %d (lf=%d)\n", si.id, look_for);
+        c->item = itBuggy;
+        }
       applySym0123(si.id, sub);
 
-      if(symRotation && si.id >= 3)
+      if(symRotation && si.id >= 4)
         si.id -= ((si.id/4-1) % 7) * 4; 
       }
     
     else if(pat == PAT_PALACE && euclid) {
       si.id = fiftyval049(c);
+      si.symmetries = 6;
       }
 
     else if(pat == PAT_DOWN) {
@@ -671,19 +787,23 @@ namespace patterns {
       }
     
     else if(sphere && pat == PAT_SIBLING) {
-      val_all(c, si, sub);
+      val_all(c, si, sub, pat);
       }
 
     else if(a457 && pat == PAT_ZEBRA) {
-      val_all(c, si, sub);
+      val_all(c, si, sub, pat);
       }
 
-    else if(pat == PAT_COLORING && (a46 || euclid)) {
-      val_all(c, si, sub);
+    else if(pat == PAT_COLORING && (S7 == 4 || euclid)) {
+      val_threecolors(c, si, sub);
+      }
+
+    else if(pat == PAT_COLORING && (a46 || a38)) {
+      val_all(c, si, sub, pat);
       }
 
     else 
-      val_warped(c, si);
+      val_warped(c, si, sub);
     
     return si;
     }
@@ -711,14 +831,14 @@ int geosupport_graveyard() {
 int pattern_threecolor(cell *c) {
   if(a38) {
     patterns::patterninfo si;
-    patterns::val38(c, si, 0);
+    patterns::val38(c, si, 0, patterns::PAT_COLORING);
     int i = si.id;
     if(nontruncated) return i;
     else return i < 4 ? 0 : (1+(i&1));
     }
   if(a46 && !nontruncated) {
     patterns::patterninfo si;
-    patterns::val46(c, si, 0);
+    patterns::val46(c, si, 0, patterns::PAT_COLORING);
     int i = si.id;
     return i >> 2;
     }
@@ -956,7 +1076,7 @@ namespace patterns {
     if(stdhyperbolic || euclid)
       dialog::addBoolItem(XLAT("Palace Pattern"), (whichPattern == PAT_PALACE), PAT_PALACE);
 
-    if(a38 || a46 || euclid)
+    if(a38 || a46 || euclid || S3 == 4)
       dialog::addBoolItem(XLAT("coloring"), (whichPattern == PAT_COLORING), PAT_COLORING);
     
     if(sphere)
@@ -979,15 +1099,14 @@ namespace patterns {
       }
     
     if((euclid && whichPattern == PAT_COLORING) ||
-      (a38 && whichPattern == PAT_COLORING))
+      (a38 && nontruncated && whichPattern == PAT_COLORING) ||
+      (S3 == 4 && nontruncated && whichPattern == PAT_COLORING))
       dialog::addBoolItem(XLAT("edit all three colors"), subpattern_flags & SPF_ROT, '0');
 
-    if(euclid && whichPattern == PAT_COLORING)
+    if(euclid  && whichPattern == PAT_COLORING)
       dialog::addBoolItem(XLAT("rotate the color groups"), subpattern_flags & SPF_CHANGEROT, '4');
 
-    if((a38 && whichPattern == PAT_COLORING && !nontruncated) ||
-      (a46 && whichPattern == PAT_COLORING && !nontruncated)
-      )
+    if(a46 && whichPattern == PAT_COLORING && !nontruncated)
       dialog::addBoolItem(XLAT("edit both truncated colors"), subpattern_flags & SPF_TWOCOL, '5');
 
     if(
@@ -1001,6 +1120,8 @@ namespace patterns {
       dialog::addBoolItem(XLAT("symmetry 0-2"), subpattern_flags & SPF_SYM02, '2');
       dialog::addBoolItem(XLAT("symmetry 0-3"), subpattern_flags & SPF_SYM03, '3');
       }
+    if(euclid && among(whichPattern, PAT_COLORING, 0))
+      dialog::addBoolItem(XLAT("extra symmetries"), subpattern_flags & SPF_EXTRASYM, '=');
     
     dialog::addBoolItem(XLAT("display pattern codes (full)"), (displaycodes == 1), 'd');
     dialog::addBoolItem(XLAT("display pattern codes (simplified)"), (displaycodes == 2), 's');
@@ -1026,6 +1147,9 @@ namespace patterns {
       
       else if(uni >= '0' && uni <= '5') 
         subpattern_flags ^= (1 << (uni - '0'));
+
+      else if(uni >= '=') 
+        subpattern_flags ^= SPF_EXTRASYM;
 
       else if(uni == '6' || uni == '7' || uni == '8') {
         if(whichShape == uni) whichShape = 0;
@@ -1318,7 +1442,7 @@ namespace linepatterns {
 
 int val46(cell *c) {
   patterns::patterninfo si;
-  patterns::val46(c, si, 0);
+  patterns::val46(c, si, 0, 0);
   return si.id;
   }
 
