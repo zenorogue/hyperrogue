@@ -1620,10 +1620,6 @@ int readArgs() {
     spiral::place(N, mul);
     }
 
-  else if(argis("-nogui")) {
-    noGUI = true;
-    }
-
   else if(argis("-net")) {
     PHASE(3);
     init(); kind = kFullNet;

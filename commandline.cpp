@@ -84,10 +84,13 @@ int arg::readCommon() {
     using namespace patterns;
     subpattern_flags = 0;
     while(*c) { 
-      if(*c >= '0' && *c <= '9') subpattern_flags ^= (*c - '0'); 
+      if(*c >= '0' && *c <= '9') subpattern_flags ^= 1 << (*c - '0'); 
       else whichPattern = *c;
       c++; 
       }
+    }
+  else if(argis("-nogui")) {
+    noGUI = true;
     }
   else if(argis("-back")) {
     shift(); backcolor = strtol(args(), NULL, 16);
