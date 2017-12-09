@@ -225,7 +225,7 @@ struct fpattern {
       int fmax = Field;
   #endif
   
-      if(Prime == 13 && wsquare) {
+      if(Prime == 13 && wsquare && false) {
         for(int i=0; i<Prime; i++) printf("%3d", sqrts[i]);
         printf("\n");
         }
