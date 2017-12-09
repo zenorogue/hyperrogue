@@ -2160,7 +2160,7 @@ void buildpolys() {
     }
   
   static int qhpc0;
-  if(qhpc != qhpc0)
+  if(qhpc != qhpc0 && debug_geometry)
     printf("qhpc = %d (%d+%d)\n", qhpc0 = qhpc, prehpc, qhpc-prehpc);
   
   initPolyForGL();

@@ -3,6 +3,7 @@
 
 // Copyright (C) 2011-2012 Zeno Rogue, see 'hyper.cpp' for details
 
+bool debug_geometry = false;
 
 ld tessf, crossf, hexf, hcrossf, hexhexdist, hexvdist, hepvdist, rhexf;
 
@@ -130,9 +131,9 @@ void precalc() {
   
   hexvdist = hdist(tC0(xpush(hexf)), spin(ALPHA/2) * tC0(xpush(hcrossf)));
 
+  if(debug_geometry) 
   printf("S7=%d S6=%d hexf = " LDF" hcross = " LDF" tessf = " LDF" hexshift = " LDF " hexhex = " LDF " hexv = " LDF "\n", S7, S6, hexf, hcrossf, tessf, hexshift, 
-    hexhexdist, hexvdist);
-  
+    hexhexdist, hexvdist);  
   
   for(int i=0; i<S84; i++) spinmatrix[i] = spin(i * M_PI / S42);
   }
