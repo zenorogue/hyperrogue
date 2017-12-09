@@ -157,10 +157,12 @@ void perform_mapping() {
     cell *c = p.first;
     auto si = getpatterninfo0(c);
     bool replace = false;
+    
+    int sgn = sphere ? -1 : 1;
 
     if(!texture_map.count(si.id)) 
       replace = true;
-    else if(p.second[2][2] < texture_map[si.id].M[2][2])
+    else if(sgn * p.second[2][2] < sgn * texture_map[si.id].M[2][2])
       replace = true;
 
     if(replace) {
