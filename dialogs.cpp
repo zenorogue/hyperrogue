@@ -304,6 +304,8 @@ namespace dialog {
         }
       else if(I.type == diItem || I.type == diBigItem) {
         bool xthis = (mousey >= top && mousey < tothei);
+        if(cmode && sm::DIALOG_STRICT_X)
+          xthis = xthis && (mousex >= dcenter - dialogwidth/2 && mousex <= dcenter + dialogwidth/2);
 #if ISMOBILE
         if(xthis && mousepressed) 
           I.color = I.colorc;
