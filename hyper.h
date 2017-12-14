@@ -57,6 +57,8 @@ inline transmatrix operator * (const transmatrix& T, const transmatrix& U) {
   return R;
   }
 
+extern int cellcount, heptacount;
+
 // cell information for the game
 
 struct gcell {
@@ -106,6 +108,9 @@ struct gcell {
       } fi;
   
   } LHU;
+  
+  gcell() { cellcount++; }
+  ~gcell() { cellcount--; }
   };
 
 #define landparam LHU.landpar
@@ -160,6 +165,8 @@ struct heptagon {
   // functions
   heptagon*& modmove(int i) { return move[fixrot(i)]; }
   unsigned char gspin(int i) { return spin(fixrot(i)); }
+  heptagon () { heptacount++; }
+  ~heptagon () { heptacount--; }
   };
 
 struct heptspin {
@@ -587,6 +594,7 @@ struct videopar {
   // paramaters calculated from the above
   int xcenter, ycenter;
   int radius;
+  int scrsize;
   ld alphax, beta;
   
   bool grid;
@@ -1573,6 +1581,7 @@ namespace sm {
   static const int ZOOMABLE = 4096;
   static const int TORUSCONFIG = 8192;
   static const int MAYDARK = 16384;
+  static const int DIALOG_STRICT_X = 32768; // do not interpret dialog clicks outside of the X region
   };
 
 namespace linepatterns {
@@ -1956,6 +1965,10 @@ struct textureinfo {
   int texture_id;
   vector<GLfloat> vertices;
   vector<GLfloat> tvertices; 
+  cell *c;
+  
+  // these are required to adjust to geometry changes
+  int current_geometry, current_type, symmetries, current_trunc;
   };
 
 struct qpoly {
@@ -2320,8 +2333,6 @@ void display(const transmatrix& T);
 transmatrix rgpushxto0(const hyperpoint& H);
 char *display(const hyperpoint& H);
 
-extern int cellcount, heptacount;
-
 string its(int i);
 
 double hdist0(const hyperpoint& mh);
@@ -2358,8 +2369,15 @@ int snake_pair(cell *c);
 
 extern const unsigned int nestcolors[8];
 
-extern bool texture_on;
-void showTextureMenu();
+namespace texture {
+  enum eTextureState {
+    tsOff, tsAdjusting, tsActive
+    };
+  
+  extern eTextureState tstate;
+  
+  void showMenu();
+  }
 
 void queueline(const hyperpoint& H1, const hyperpoint& H2, int col, int prf = 0, int prio = PPR_LINE);
 
@@ -2372,3 +2390,9 @@ transmatrix applyPatterndir(cell *c, const patterns::patterninfo& si);
 int pattern_threecolor(cell *c);
 int fiftyval200(cell *c);
 
+// T * C0, optimized
+inline hyperpoint tC0(const transmatrix &T) {
+  hyperpoint z;
+  z[0] = T[0][2]; z[1] = T[1][2]; z[2] = T[2][2];
+  return z;
+  }

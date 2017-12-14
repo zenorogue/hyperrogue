@@ -21,7 +21,6 @@ void initcell(cell *c); // from game.cpp
 
 cell *newCell(int type, heptagon *master) {
   cell *c = new cell;
-  cellcount++;
   c->type = type;
   c->master = master;
   for(int i=0; i<MAX_EDGE; i++) c->mov[i] = NULL;
