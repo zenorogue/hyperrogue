@@ -1062,7 +1062,6 @@ void restartGame(char switchWhat, bool push) {
     princess::forceMouse = false;
     knighted = 0;
     // items[itGreenStone] = 100;
-    cellcount = 0;
     clearMemory();
     }
   if(switchWhat == 'P') {
@@ -1100,10 +1099,23 @@ void restartGame(char switchWhat, bool push) {
     resetGeometry();
     }
   if(switchWhat == 'g') {
+    // transform coloring
+    eGeometry old = geometry;
+
+    if(euclid && targetgeometry == gOctagon && patterns::whichPattern == 'C')
+      patterns::subpattern_flags |= patterns::SPF_ROT;
+
+    if(euclid && targetgeometry == g46 && patterns::whichPattern == 'C')
+      patterns::subpattern_flags |= patterns::SPF_SYM01 | patterns::SPF_SYM02 | patterns::SPF_SYM03;
+
     if(geometry == targetgeometry) geometry = gNormal;
     else geometry = targetgeometry;
     if(chaosmode && (euclid || sphere || quotient)) chaosmode = false;
     if(nontruncated && euclid) nontruncated = false;
+
+    if(euclid && old == gOctagon && patterns::whichPattern == 'C')
+      patterns::subpattern_flags |= patterns::SPF_EXTRASYM;
+
     resetGeometry();
     }
   if(switchWhat == 'y') {
