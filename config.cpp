@@ -504,6 +504,7 @@ void loadOldConfig(FILE *f) {
 map<string, shared_ptr<supersaver> > allconfigs;
 
 void parseline(const string& str) {
+  if(str[0] == '#') return;
   for(int i=0; i<size(str); i++) if(str[i] == '=') {
     string cname = str.substr(0, i);
     if(!allconfigs.count(cname)) {
