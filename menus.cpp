@@ -346,7 +346,7 @@ void showDisplayMode() {
 #endif
 
 #if CAP_TEXTURE
-  dialog::addBoolItem(XLAT("texture mode"), texture_on, 't');
+  dialog::addBoolItem(XLAT("texture mode"), texture::tstate == texture::tsActive, 't');
 #endif
 
 
@@ -372,8 +372,8 @@ void showDisplayMode() {
     
     if(xuni == 'z') editScale();
     
-    if(xuni == 't') pushScreen(showTextureMenu);
-    
+    if(xuni == 't') pushScreen(texture::showMenu);
+
     if(xuni == 'm') { vid.monmode += 60 + (shiftmul > 0 ? 1 : -1); vid.monmode %= 6; }
   
     if(xuni == '9') pushScreen(show3D);

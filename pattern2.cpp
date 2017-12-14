@@ -552,77 +552,79 @@ namespace patterns {
     else si.symmetries = ctof(c) ? 1 : 2;
     }
 
-  void val_warped(cell *c, patterninfo& si, int sub) {
+  void val_warped(cell *c, patterninfo& si) {
+    int u = ishept(c)?1:0;
+    int qhex = 0;
+    for(int v=0; v<c->type; v++) if(c->mov[v] && !isWarped(c->mov[v])) {
+      u += 2;
+      if(!ishept(c->mov[v])) qhex++;
+      }
+    if(u == 8 && qhex == 2) si.id = 12;
+    else if(u == 2 && qhex == 1) si.id = 8;
+    else if(u == 6 && qhex == 2) si.id = 10;
+    si.id = u;
+
+    if(u == 6) {
+        for(int i=1; i<c->type; i+=2) if(!isWarped(createMov(c,i)))
+            si.dir = i;
+        }
+    
+    else if(u == 2 || u == 3 || u == 8) {
+        for(int i=0; i<c->type; i++) if(!isWarped(createMov(c,i)))
+            si.dir = i;
+        }
+    
+    else if(u == 4 || u == 10) {
+        for(int i=0; i<c->type; i+=2) if(!isWarped(createMov(c,i)))
+            si.dir = i;
+        if(u == 4)
+          si.reflect = !isWarped(createMov(c, (si.dir+1)%6));
+        }
+    
+    else if(u == 6) {
+        for(int i=1; i<c->type; i+=2) if(!isWarped(createMov(c,i))) 
+            si.dir = i;
+        }
+    
+    else if(u == 5) {
+        for(int i=0; i<c->type; i++) if(!isWarped(createMov(c,(i+3)%7)) && !isWarped(createMov(c,(i+4)%7))) 
+            si.dir = i;
+        }
+    
+    else if(u == 9) {
+        for(int i=0; i<c->type; i++) if(!isWarped(createMov(c,(i+2)%7)) && !isWarped(createMov(c,(i+5)%7))) 
+            si.dir = i;
+        }
+    
+    else if(u == 11) {
+        for(int i=0; i<c->type; i++) if(isWarped(createMov(c,(i)%7)) && isWarped(createMov(c,(i+1)%7))) 
+            si.dir = i;
+        }
+    
+    else if(u == 12) {
+        for(int i=0; i<c->type; i+=2) if(isWarped(createMov(c,i))) {
+            si.dir = i;
+            si.reflect = !isWarped(createMov(c, (i+1)%6));
+            }
+        }
+
+    else if(u == 7) {
+        for(int i=0; i<c->type; i++) if(!isWarped(createMov(c,(i+1)%7)) && !isWarped(createMov(c,(i+6)%7))) 
+            si.dir = i;
+        }
+    }
+
+  void val_nopattern(cell *c, patterninfo& si, int sub) {
     // use val_all for nicer rotation
     val_all(c, si, 0, 0);
     
     // get id:
-    if(stdhyperbolic && isWarped(c)) {
-      int u = ishept(c)?1:0;
-      int qhex = 0;
-      for(int v=0; v<c->type; v++) if(c->mov[v] && !isWarped(c->mov[v])) {
-        u += 2;
-        if(!ishept(c->mov[v])) qhex++;
-        }
-      if(u == 8 && qhex == 2) si.id = 12;
-      else if(u == 2 && qhex == 1) si.id = 8;
-      else if(u == 6 && qhex == 2) si.id = 10;
-      si.id = u;
-
-      if(u == 6) {
-          for(int i=1; i<c->type; i+=2) if(!isWarped(createMov(c,i)))
-              si.dir = i;
-          }
-      
-      else if(u == 2 || u == 3 || u == 8) {
-          for(int i=0; i<c->type; i++) if(!isWarped(createMov(c,i)))
-              si.dir = i;
-          }
-      
-      else if(u == 4 || u == 10) {
-          for(int i=0; i<c->type; i+=2) if(!isWarped(createMov(c,i)))
-              si.dir = i;
-          if(u == 4)
-            si.reflect = !isWarped(createMov(c, (si.dir+1)%6));
-          }
-      
-      else if(u == 6) {
-          for(int i=1; i<c->type; i+=2) if(!isWarped(createMov(c,i))) 
-              si.dir = i;
-          }
-      
-      else if(u == 5) {
-          for(int i=0; i<c->type; i++) if(!isWarped(createMov(c,(i+3)%7)) && !isWarped(createMov(c,(i+4)%7))) 
-              si.dir = i;
-          }
-      
-      else if(u == 9) {
-          for(int i=0; i<c->type; i++) if(!isWarped(createMov(c,(i+2)%7)) && !isWarped(createMov(c,(i+5)%7))) 
-              si.dir = i;
-          }
-      
-      else if(u == 11) {
-          for(int i=0; i<c->type; i++) if(isWarped(createMov(c,(i)%7)) && isWarped(createMov(c,(i+1)%7))) 
-              si.dir = i;
-          }
-      
-      else if(u == 12) {
-          for(int i=0; i<c->type; i+=2) if(isWarped(createMov(c,i))) {
-              si.dir = i;
-              si.reflect = !isWarped(createMov(c, (i+1)%6));
-              }
-          }
-  
-      else if(u == 7) {
-          for(int i=0; i<c->type; i++) if(!isWarped(createMov(c,(i+1)%7)) && !isWarped(createMov(c,(i+6)%7))) 
-              si.dir = i;
-          }
-  
-      }
+    if(stdhyperbolic && isWarped(c)) 
+      val_warped(c, si);
     else {
       si.id = ishept(c) ? 1 : 0;
       if(euclid) {
-        si.dir = ishex1(c) ? 3 : 0;
+        si.dir = ishex1(c) ? 0 : 3;
         if(ctof(c)) si.symmetries = 3;
         if(subpattern_flags & SPF_EXTRASYM) 
           si.symmetries /= 3;
@@ -803,7 +805,7 @@ namespace patterns {
       }
 
     else 
-      val_warped(c, si, sub);
+      val_nopattern(c, si, sub);
     
     return si;
     }
@@ -870,7 +872,7 @@ int pattern_threecolor(cell *c) {
     }
   if(S7 == 3 && nontruncated)
     return c->master->fiftyval;
-  if(euclid) return eupattern(c);
+  if(euclid) return (eupattern(c)+1) % 3;
   return !ishept(c);
   }
   
@@ -1099,7 +1101,7 @@ namespace patterns {
       }
     
     if((euclid && whichPattern == PAT_COLORING) ||
-      (a38 && nontruncated && whichPattern == PAT_COLORING) ||
+      (a38 && whichPattern == PAT_COLORING) ||
       (S3 == 4 && nontruncated && whichPattern == PAT_COLORING))
       dialog::addBoolItem(XLAT("edit all three colors"), subpattern_flags & SPF_ROT, '0');
 
@@ -1139,16 +1141,20 @@ namespace patterns {
     
     keyhandler = [] (int sym, int uni) {
       dialog::handleNavigation(sym, uni);
+      printf("uni = %c\n", uni);
+      
       if(among(uni, PAT_EMERALD, PAT_PALACE, PAT_ZEBRA, PAT_DOWN, PAT_FIELD, PAT_COLORING, PAT_SIBLING)) {
         if(whichPattern == uni) whichPattern = 0;
         else whichPattern = uni;
         mapeditor::modelcell.clear();
         }
       
+      else if(printf("not among\n"), 0) ;
+      
       else if(uni >= '0' && uni <= '5') 
         subpattern_flags ^= (1 << (uni - '0'));
 
-      else if(uni >= '=') 
+      else if(uni == '=') 
         subpattern_flags ^= SPF_EXTRASYM;
 
       else if(uni == '6' || uni == '7' || uni == '8') {

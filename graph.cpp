@@ -2912,7 +2912,7 @@ int wavephase;
 void warpfloor(cell *c, const transmatrix& V, int col, int prio, bool warp) {
   if(shmup::on || nontruncated) warp = false;
   if(qfi.tinf) {
-    queuetable(V*qfi.spin, &qfi.tinf->vertices[0], size(qfi.tinf->vertices) / 3, 0, col, prio);
+    queuetable(V*qfi.spin, &qfi.tinf->vertices[0], size(qfi.tinf->vertices) / 3, 0, texture::recolor(col), prio);
     lastptd().u.poly.tinf = qfi.tinf;
     }
   else if(wmescher && qfi.special)
@@ -3532,7 +3532,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         }
 #endif
 
-      else if(applyTextureMap(c, Vf, darkena(fcol, fd, 0xFF))) ;
+      else if(texture::apply(c, Vf, darkena(fcol, fd, 0xFF))) ;
       
       else if(c->land == laMirrorWall) {
         int d = mirror::mirrordir(c);
@@ -3899,7 +3899,10 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       
         auto si = patterns::getpatterninfo(c, patterns::whichPattern, pf);
         
-        queuepoly(V * applyPatterndir(c,si), shAsymmetric, darkena(0x000000, 0, 0xC0));
+        for(int i=0; i<c->type; i += si.symmetries) {
+          queuepoly(V * applyPatterndir(c,si), shAsymmetric, darkena(0x000000, 0, 0xC0));
+          si.dir += si.symmetries;
+          }
         
         string label = its(si.id);
         queuestr(V, .5, label, 0xFF000000 + forecolor);
@@ -5073,8 +5076,10 @@ void calcparam() {
   vid.ycenter = vid.yres / 2;
   
   int realradius = min(vid.xcenter, vid.ycenter);
+  
+  vid.scrsize = vid.ycenter - (ISANDROID ? 2 : ISIOS ? 40 : 40);
 
-  vid.radius = int(vid.scale * vid.ycenter) - (ISANDROID ? 2 : ISIOS ? 40 : 40);
+  vid.radius = vid.scale * vid.scrsize;
   
   realradius = min(realradius, vid.radius);
   

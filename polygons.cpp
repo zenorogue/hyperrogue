@@ -340,7 +340,7 @@ void gldraw(int useV, const transmatrix& V, int ps, int pq, int col, int outline
       glStencilOp( GL_INVERT, GL_INVERT, GL_INVERT);
       glStencilFunc( GL_ALWAYS, 0x1, 0x1 );
       glColor4f(1,1,1,1);
-      glDrawArrays(GL_TRIANGLE_FAN, ps, pq);
+      glDrawArrays(tinf ? GL_TRIANGLES : GL_TRIANGLE_FAN, ps, pq);
       
       if(flags & POLY_INVERSE) {
         selectEyeMask(ed);
@@ -356,7 +356,7 @@ void gldraw(int useV, const transmatrix& V, int ps, int pq, int col, int outline
         GLfloat *cur = currentvertices;
         activateVertexArray(scr, 4);
         if(useV) glPopMatrix();
-        glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+        glDrawArrays(tinf ? GL_TRIANGLES : GL_TRIANGLE_FAN, 0, 4);
         activateVertexArray(cur, 0);
         draw = false; goto again;
         }
@@ -365,7 +365,7 @@ void gldraw(int useV, const transmatrix& V, int ps, int pq, int col, int outline
         glcolor2(col);
         glStencilOp( GL_ZERO, GL_ZERO, GL_ZERO);
         glStencilFunc( GL_EQUAL, 1, 1);
-        glDrawArrays(GL_TRIANGLE_FAN, ps, pq);
+        glDrawArrays(tinf ? GL_TRIANGLES : GL_TRIANGLE_FAN, ps, pq);
         }
       
       glDisable(GL_STENCIL_TEST);
@@ -892,7 +892,7 @@ void drawqueue() {
 
 hpcshape 
   shFloorSide[SIDEPARS][2], shSemiFloorSide[SIDEPARS], shTriheptaSide[SIDEPARS][2], shMFloorSide[SIDEPARS][2], shFullFloorSide[SIDEPARS][2],
-  shFullFloor[2],
+  shFullFloor[2], shFullCross[2],
   shSeabed[2], shCloudSeabed[3], shCaveSeabed[3],
   shWave[8][2],  
   shFloor[2], shBFloor[2], shMFloor2[2], shMFloor3[2], shMFloor4[2],
@@ -1268,6 +1268,17 @@ void buildpolys() {
   x *= bscale7;
   bshape(shFullFloor[1], PPR_FLOOR);
   for(int t=0; t<=S7; t++) hpcpush(ddi(t*S12+td, x) * C0);
+  }
+
+  {double x = hexvdist;
+  bshape(shFullCross[0], PPR_FLOOR);
+  x *= bscale6;
+  for(int t=0; t<=S6; t++) { hpcpush(C0); if(t) hpcpush(ddi(S7 + t*S14, x) * C0); }
+
+  x = rhexf;
+  x *= bscale7;
+  bshape(shFullCross[1], PPR_FLOOR);
+  for(int t=0; t<=S7; t++) { hpcpush(C0); if(t) hpcpush(ddi(t*S12+td, x) * C0); }
   }
 
   bool strict = false;

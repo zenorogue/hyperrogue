@@ -150,13 +150,6 @@ const transmatrix MirrorX = {{{-1,0,0}, {0,1,0}, {0,0,1}}};
 // rotate by PI
 const transmatrix pispin = {{{-1,0,0}, {0,-1,0}, {0,0,1}}};
 
-// T * C0, optimized
-inline hyperpoint tC0(const transmatrix &T) {
-  hyperpoint z;
-  z[0] = T[0][2]; z[1] = T[1][2]; z[2] = T[2][2];
-  return z;
-  }
-
 // rotate by alpha degrees
 transmatrix spin(ld alpha) {
   transmatrix T = Id;
@@ -170,6 +163,29 @@ transmatrix eupush(ld x, ld y) {
   transmatrix T = Id;
   T[0][2] = x;
   T[1][2] = y;
+  return T;
+  }
+
+transmatrix eupush(hyperpoint h) {
+  transmatrix T = Id;
+  T[0][2] = h[0];
+  T[1][2] = h[1];
+  return T;
+  }
+
+transmatrix euscalezoom(hyperpoint h) {
+  transmatrix T = Id;
+  T[0][0] = h[0];
+  T[0][1] = -h[1];
+  T[1][0] = h[1];
+  T[1][1] = h[0];
+  return T;
+  }
+
+transmatrix euaffine(hyperpoint h) {
+  transmatrix T = Id;
+  T[1][0] = h[0];
+  T[1][2] = h[1];
   return T;
   }
 
