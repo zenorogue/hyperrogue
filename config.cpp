@@ -63,7 +63,9 @@ struct supersaver {
   virtual void reset() = 0;
   };
 
-vector<shared_ptr<supersaver>> savers;
+typedef vector<shared_ptr<supersaver>> saverlist;
+
+saverlist savers;
 
 template<class T> struct dsaver : supersaver {
   T& val;
@@ -77,7 +79,7 @@ template<class T> struct saver : dsaver<T> {};
 
 template<class T, class U, class V> void addsaver(T& i, U name, V dft) {
   auto s = make_shared<saver<T>> (i);
-  s->dft = i = dft;
+  s->dft = dft;
   s->name = name;
   savers.push_back(s);
   }
@@ -96,11 +98,15 @@ template<class T> struct saverenum : supersaver {
   void load(const string& s) { val = (T) atoi(s.c_str()); }
   };
 
-template<class T, class U> void addsaverenum(T& i, U name) {
+template<class T, class U> void addsaverenum(T& i, U name, T dft) {
   auto s = make_shared<saverenum<T>> (i);
-  s->dft = i;
+  s->dft = dft;
   s->name = name;
   savers.push_back(s);
+  }
+
+template<class T, class U> void addsaverenum(T& i, U name) {
+  addsaverenum(i, name, i);
   }
 
 template<> struct saver<int> : dsaver<int> {
@@ -125,6 +131,12 @@ template<> struct saver<unsigned> : dsaver<unsigned> {
   saver<unsigned>(unsigned& val) : dsaver<unsigned>(val) { }
   string save() { return itsh(val); }
   void load(const string& s) { val = (unsigned) strtoll(s.c_str(), NULL, 16); }
+  };
+
+template<> struct saver<string> : dsaver<string> {
+  saver<string>(string& val) : dsaver<string>(val) { }
+  string save() { return val; }
+  void load(const string& s) { val = s; }
   };
 
 template<> struct saver<ld> : dsaver<ld> {
@@ -318,6 +330,8 @@ void initConfig() {
 #if CAP_SHMUP  
   shmup::initConfig();
 #endif
+
+  for(auto s: savers) s->reset();
   }
 
 bool inSpecialMode() {

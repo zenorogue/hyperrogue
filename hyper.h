@@ -569,6 +569,7 @@ extern bool mousepressed, anyshiftclick;
 extern string help;
 
 typedef function<void()> reaction_t;
+typedef function<bool()> bool_reaction_t;
 
 extern reaction_t help_delegate;  
 
@@ -1173,7 +1174,7 @@ namespace dialog {
   extern int dialogflags;
   extern int dcenter;
 
-  void openFileDialog(string& filename, string fcap, string ext);
+  void openFileDialog(string& filename, string fcap, string ext, bool_reaction_t action);
   
   extern string infix;
   bool hasInfix(const string &s);

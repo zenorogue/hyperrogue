@@ -854,6 +854,8 @@ namespace dialog {
   string *cfileptr;
   bool editext = false;
   
+  bool_reaction_t file_action;
+  
   bool handleKeyFile(int sym, int uni);
 
   void drawFileDialog() {
@@ -916,14 +918,14 @@ namespace dialog {
     string& s(*cfileptr);
     int i = size(s) - (editext?0:4);
     if(uni > 2000) sym = uni - 2000;
-    if(sym == SDLK_RETURN || sym == SDLK_KP_ENTER || sym == SDLK_ESCAPE) {
+    if(sym == SDLK_ESCAPE) {
       popScreen();
-      return true;
       }
-/*    else if(sym == SDLK_F2 || sym == SDLK_F3) {
+    else if(sym == SDLK_RETURN || sym == SDLK_KP_ENTER) {
+      // we pop and re-push, in case if action opens something
       popScreen();
-      return false;
-      } */
+      if(!file_action()) pushScreen(drawFileDialog);
+      }
     else if(sym == SDLK_F4) {
       editext = !editext;
       }
@@ -955,10 +957,11 @@ namespace dialog {
     return true;
     }
 
-  void openFileDialog(string& filename, string fcap, string ext) {
+  void openFileDialog(string& filename, string fcap, string ext, bool_reaction_t action) {
     cfileptr = &filename;
     filecaption = fcap;
     cfileext = ext;
+    file_action = action;
     pushScreen(dialog::drawFileDialog);
     }
   

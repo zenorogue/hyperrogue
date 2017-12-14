@@ -2,7 +2,7 @@
 
 namespace texture {
 
-GLuint textureid;
+GLuint textureid = 0;
 
 SDL_Surface *convertSurface(SDL_Surface* s) {
   SDL_PixelFormat fmt;
@@ -29,15 +29,15 @@ SDL_Surface *convertSurface(SDL_Surface* s) {
   return SDL_ConvertSurface(s, &fmt, SDL_SWSURFACE);
   }
 
-bool texture_read = false;
-
 int twidth = 2048;
 
 vector<int> expanded_data;
 
 string texturename;
+string configname = "hyperrogue.txc";
 
 eTextureState tstate;
+eTextureState tstate_max;
 
 template<class T, class U> void scale_colorarray(int origdim, const T& src, const U& dest) {
   int ox = 0, tx = 0, partials[4];
@@ -65,12 +65,15 @@ template<class T, class U> void scale_colorarray(int origdim, const T& src, cons
     }
   }
   
-void readtexture() {
-  texture_read = true;
+bool readtexture() {
   
-  glGenTextures(1, &textureid );
+  if(textureid == 0) glGenTextures(1, &textureid );
 
   SDL_Surface *txt = IMG_Load(texturename.c_str());
+  if(!txt) {
+    addMessage(XLAT("Failed to load %1", texturename));
+    return false;
+    }
   auto txt2 = convertSurface(txt);
   
   int tx = txt->w, ty = txt->h;
@@ -111,6 +114,7 @@ void readtexture() {
     GL_BGRA, GL_UNSIGNED_BYTE, 
     &expanded_data[0] );
  
+  return true;
   }
 
 transmatrix itt = Id;
@@ -258,7 +262,6 @@ void perform_mapping() {
   if(gsplits < 0) gsplits = 0;
   if(gsplits > 4) gsplits = 4;
   using namespace patterns;
-  if(!texture_read) readtexture();
   texture_map.clear();
   for(auto p: gmatrix) {
     cell *c = p.first;
@@ -286,12 +289,16 @@ int forgeArgs() {
   using namespace arg;
            
   if(0) ;
-  else if(argis("-forge")) {
+  else if(argis("-txpic")) {
     shift(); texturename = args();
     }
 
   else if(argis("-fsp")) {
     shift(); gsplits = argf();
+    }
+
+  else if(argis("-txc")) {
+    shift(); configname = args();
     }
 
   else return 1;
@@ -304,7 +311,6 @@ auto texture_hook =
   addHook(hooks_args, 100, forgeArgs);
 
 void drawRawTexture() {
-  if(!texture_read) readtexture();
   glDisable(GL_LIGHTING);  
   glEnable(GL_TEXTURE_2D);
   glMatrixMode(GL_MODELVIEW);
@@ -339,6 +345,157 @@ void drawRawTexture() {
 enum eTexturePanstate {tpsModel, tpsMove, tpsScale, tpsAffine, tpsZoom, tpsProjection};
 eTexturePanstate panstate;
 
+void mousemovement() {
+  static hyperpoint lastmouse;
+  
+  hyperpoint mouseeu = hpxyz((mousex - vid.xcenter + .0) / vid.scrsize, (mousey - vid.ycenter + .0) / vid.scrsize, 1);
+  bool nonzero = mouseeu[0] || mouseeu[1];
+
+  switch(panstate) {
+    case tpsModel:
+      if(!newmove && mouseh[2] < 50 && lastmouse[2] < 50) {
+        panning(lastmouse, mouseh);
+        perform_mapping();
+        }
+      lastmouse = mouseh; newmove = false;
+      break;
+    
+    case tpsMove: {
+      if(!newmove) 
+        itt = itt * inverse(eupush(mouseeu)) * eupush(lastmouse);
+      lastmouse = mouseeu; newmove = false;
+      break;
+      }
+    
+    case tpsScale: {
+      if(nonzero && !newmove) 
+        itt = itt * inverse(euscalezoom(mouseeu)) * euscalezoom(lastmouse);
+      if(nonzero) lastmouse = mouseeu;
+      newmove = false;
+      break;
+      }
+    
+    case tpsAffine: {
+      if(!newmove) 
+        itt = itt * inverse(euaffine(mouseeu)) * euaffine(lastmouse);
+      lastmouse = mouseeu; newmove = false;
+      break;
+      }
+
+    case tpsZoom: {
+      // do not zoom in portrait!
+      if(nonzero && !newmove) {
+        View = View * inverse(spintox(mouseeu)) * spintox(lastmouse);
+        vid.scale = vid.scale * sqrt(intvalxy(C0, mouseeu)) / sqrt(intvalxy(C0, lastmouse));
+        }
+      if(nonzero) lastmouse = mouseeu;
+      newmove = false;
+      break;
+      }
+    
+    case tpsProjection: {
+      if(nonzero && !newmove) {          
+        vid.alpha = vid.alpha * sqrt(intvalxy(C0, mouseeu)) / sqrt(intvalxy(C0, lastmouse));
+        }
+      if(nonzero) lastmouse = mouseeu;
+      newmove = false;
+      }
+    
+    default: break;
+    }
+  }
+
+patterns::patterninfo si_save;  
+
+saverlist texturesavers;
+
+bool target_nontrunc;
+
+void init_textureconfig() {
+  texturesavers = move(savers);  
+  for(int i=0; i<3; i++)
+  for(int j=0; j<3; j++)
+    addsaver(itt[i][j], "texturematrix_" + its(i) + its(j), i==j ? 1 : 0);
+
+  for(int i=0; i<3; i++)
+  for(int j=0; j<3; j++)
+    addsaver(View[i][j], "viewmatrix_" + its(i) + its(j), i==j ? 1 : 0);
+
+  addsaverenum(targetgeometry, "geometry", gNormal);
+  addsaverenum(target_nontrunc, "chamfering", false);
+  // ... geometry parameters
+
+  addsaver(patterns::whichPattern, "pattern", 0);
+  addsaver(patterns::subpattern_flags, "pattern flags", 0);
+
+  cell *ctr = euclid ? centerover : viewctr.h->c7;
+  si_save = patterns::getpatterninfo0(ctr);
+  
+  addsaver(si_save.id, "center type", 1);
+  addsaver(si_save.dir, "center direction", 0);
+  addsaver(si_save.reflect, "center reflection", false);
+  addsaver(twidth, "texture resolution", 2048);
+  addsaver(gsplits, "precision", 1);
+  
+  addsaver(grid_alpha, "alpha grid", 0);
+  addsaver(color_alpha, "alpha color", 0);
+  addsaver(mesh_alpha, "alpha mesh", 0);
+  
+  addsaver(vid.alpha, "projection", 1);
+  addsaver(vid.scale, "scale", 1);
+  
+  addsaver(texturename, "texture filename", "");
+  
+  swap(texturesavers, savers);
+  }
+
+bool save_textureconfig() {
+  init_textureconfig();
+  FILE *f = fopen(configname.c_str(), "wt");
+  if(!f) return false;
+
+  targetgeometry = geometry;
+  target_nontrunc = nontruncated;
+
+  for(auto s: texturesavers) if(s->dosave())
+    fprintf(f, "%s=%s\n", s->name.c_str(), s->save().c_str());
+  
+  fclose(f);
+  return true;
+  }
+
+bool load_textureconfig() {
+  init_textureconfig();
+
+  FILE *f = fopen(configname.c_str(), "rt");
+  if(!f) return false;
+  swap(texturesavers, savers);
+  for(auto s: savers) s->reset();
+  loadNewConfig(f);
+  swap(texturesavers, savers);
+  fclose(f);
+  
+  if(1) {
+    dynamicval<char> d1(patterns::whichPattern, patterns::whichPattern);
+    dynamicval<int> d2(patterns::subpattern_flags, patterns::subpattern_flags);
+
+    if(targetgeometry != geometry) {
+      restartGame('g');
+      return load_textureconfig();
+      }
+    
+    if(nontruncated != target_nontrunc) {
+      restartGame('7');
+      }
+    }
+  
+  if(!readtexture()) return false;
+  drawthemap();
+  perform_mapping();
+  tstate = tstate_max = tsActive;
+  return true;
+  }
+
 void showMenu() {
   cmode = sm::SIDE | sm::MAYDARK | sm::DIALOG_STRICT_X;
   gamescreen(0);  
@@ -348,17 +505,25 @@ void showMenu() {
   
   dialog::init(XLAT("texture mode"));
 
-  dialog::addSelItem(XLAT("select the texture's pattern"), XLAT("..."), 'r');
-  dialog::addSelItem(XLAT("texture file"), texturename, 'f');
-  dialog::addSelItem(XLAT("texture mode enabled"), its(tstate), 't');
+  if(tstate == tsOff) {
+    dialog::addSelItem(XLAT("select the texture's pattern"), XLAT("..."), 'r');
+    if(tstate_max == tsAdjusting)
+      dialog::addSelItem(XLAT("readjust the texture"), texturename, 't');
+    if(tstate_max == tsActive)
+      dialog::addSelItem(XLAT("reactivate the texture"), texturename, 't');
+    dialog::addSelItem(XLAT("open texture file"), texturename, 'o');
+    dialog::addSelItem(XLAT("load texture config"), "...", 'l');
+    }
 
   if(tstate == tsAdjusting) {
+    dialog::addSelItem(XLAT("enable the texture"), texturename, 't');
     dialog::addBoolItem(XLAT("move the model"), panstate == tpsModel, 'm');
     dialog::addBoolItem(XLAT("move the texture"), panstate == tpsMove, 'a');
     dialog::addBoolItem(XLAT("zoom/scale the texture"), panstate == tpsScale, 'x');
     dialog::addBoolItem(XLAT("zoom/scale the model"), panstate == tpsZoom, 'z');
     dialog::addBoolItem(XLAT("projection"), panstate == tpsProjection, 'p');
     dialog::addBoolItem(XLAT("affine transformations"), panstate == tpsAffine, 'y');
+    dialog::addSelItem(XLAT("precision"), its(gsplits), 'p');
     }
   
   if(tstate == tsActive) {
@@ -366,10 +531,12 @@ void showMenu() {
     dialog::addSelItem(XLAT("texture angle"), fts(irotate), 'a');
     dialog::addSelItem(XLAT("texture position X"), fts(ix), 'x');
     dialog::addSelItem(XLAT("texture position Y"), fts(iy), 'y'); */
+    dialog::addBoolItem(XLAT("deactivate the texture"), true, 't');
+    dialog::addBoolItem(XLAT("readjust the texture"), true, 'r');
     dialog::addSelItem(XLAT("grid alpha"), its(grid_alpha), 'g');
     dialog::addSelItem(XLAT("mesh alpha"), its(mesh_alpha), 'm');
-    dialog::addSelItem(XLAT("precision"), its(gsplits), 'p');
     dialog::addSelItem(XLAT("color alpha"), its(color_alpha), 'c');
+    dialog::addSelItem(XLAT("save the texture config"), "...", 's');
     }
   
   dialog::addItem(XLAT("help"), SDLK_F1);  
@@ -379,65 +546,7 @@ void showMenu() {
 
   dialog::display();
   
-  if(holdmouse) {
-    static hyperpoint lastmouse;
-    
-    hyperpoint mouseeu = hpxyz((mousex - vid.xcenter + .0) / vid.scrsize, (mousey - vid.ycenter + .0) / vid.scrsize, 1);
-    bool nonzero = mouseeu[0] || mouseeu[1];
-
-    switch(panstate) {
-      case tpsModel:
-        if(!newmove && mouseh[2] < 50 && lastmouse[2] < 50) {
-          panning(lastmouse, mouseh);
-          perform_mapping();
-          }
-        lastmouse = mouseh; newmove = false;
-        break;
-      
-      case tpsMove: {
-        if(!newmove) 
-          itt = itt * inverse(eupush(mouseeu)) * eupush(lastmouse);
-        lastmouse = mouseeu; newmove = false;
-        break;
-        }
-      
-      case tpsScale: {
-        if(nonzero && !newmove) 
-          itt = itt * inverse(euscalezoom(mouseeu)) * euscalezoom(lastmouse);
-        if(nonzero) lastmouse = mouseeu;
-        newmove = false;
-        break;
-        }
-      
-      case tpsAffine: {
-        if(!newmove) 
-          itt = itt * inverse(euaffine(mouseeu)) * euaffine(lastmouse);
-        lastmouse = mouseeu; newmove = false;
-        break;
-        }
-
-      case tpsZoom: {
-        // do not zoom in portrait!
-        if(nonzero && !newmove) {
-          View = View * inverse(spintox(mouseeu)) * spintox(lastmouse);
-          vid.scale = vid.scale * sqrt(intvalxy(C0, mouseeu)) / sqrt(intvalxy(C0, lastmouse));
-          }
-        if(nonzero) lastmouse = mouseeu;
-        newmove = false;
-        break;
-        }
-      
-      case tpsProjection: {
-        if(nonzero && !newmove) {          
-          vid.alpha = vid.alpha * sqrt(intvalxy(C0, mouseeu)) / sqrt(intvalxy(C0, lastmouse));
-          }
-        if(nonzero) lastmouse = mouseeu;
-        newmove = false;
-        }
-      
-      default: break;
-      }
-    }
+  if(holdmouse) mousemovement();
   
   keyhandler = [] (int sym, int uni) {
     // handlePanning(sym, uni);
@@ -456,38 +565,62 @@ void showMenu() {
     else if(uni == 'y' && tstate == tsAdjusting) panstate = tpsAffine;
     else if(uni == 'z' && tstate == tsAdjusting) panstate = tpsZoom;
     else if(uni == 'p' && tstate == tsAdjusting) panstate = tpsProjection;
+    
+    else if(uni == 's' && tstate == tsActive) 
+      dialog::openFileDialog(configname, XLAT("texture config to save:"), ".txc", 
+        [] () {
+          return save_textureconfig();
+          });
 
-    else if(uni == 'r')
+    else if(uni == 'l' && tstate == tsOff) 
+      dialog::openFileDialog(configname, XLAT("texture config to load:"), ".txc", 
+        [] () {
+          return load_textureconfig();
+          });
+
+    else if(uni == 'r' && tstate == tsOff)
       pushScreen(patterns::showPattern);
-    else if(uni == 'f') 
-      dialog::openFileDialog(texturename, XLAT("texture to load:"), ".png");
-    else if(uni == 't') {
-      if(tstate == tsOff) {
-        tstate = tsAdjusting;
-        perform_mapping();
-        }
-      else if(tstate == tsAdjusting) {
-        tstate = tsActive;
-        perform_mapping();
-        }
-      else {
-        tstate = tsOff;
-        texture_map.clear();
-        }
+
+    else if(uni == 'o' && tstate == tsOff) 
+      dialog::openFileDialog(texturename, XLAT("texture to load:"), ".png", 
+        [] () {
+          if(readtexture()) {
+            if(tstate_max == tsOff) tstate_max = tsAdjusting;
+            tstate = tstate_max;
+            return true;
+            }
+          else return false;
+          });
+
+    else if(uni == 't' && tstate == tsOff) 
+      tstate = tstate_max;
+    
+    else if((uni == 't' || uni == 'r') && tstate == tsAdjusting) {
+      tstate = tstate_max = tsActive;
+      perform_mapping();
       }
-    else if(uni == 'g') {
+
+    else if(uni == 't' && tstate == tsActive) 
+      tstate = tsOff;
+      
+    else if(uni == 'r' && tstate == tsActive) {
+      tstate = tsAdjusting;
+      texture_map.clear();
+      }
+        
+    else if(uni == 'g' && tstate == tsActive) {
       dialog::editNumber(grid_alpha, 0, 255, 15, 0, XLAT("grid alpha"), 
         XLAT("Grid alpha."));
       }    
-    else if(uni == 'm') {
+    else if(uni == 'm' && tstate == tsActive) {
       dialog::editNumber(mesh_alpha, 0, 255, 15, 0, XLAT("mesh alpha"),
         XLAT("Mesh alpha."));
       }    
-    else if(uni == 'c') {
+    else if(uni == 'c' && tstate == tsActive) {
       dialog::editNumber(color_alpha, 0, 255, 15, 0, XLAT("color alpha"),
         XLAT("The higher the value, the less important the color of underlying terrain is."));
       }    
-    else if(uni == 'p') {
+    else if(uni == 'p' && tstate == tsAdjusting) {
       dialog::editNumber(gsplits, 0, 4, 1, 1, XLAT("precision"),
         XLAT("precision"));
       dialog::reaction = perform_mapping;
@@ -498,6 +631,6 @@ void showMenu() {
   }
 
 }
-// - dual grid
-// todo save/load texture configuration
+
 // todo texture editor
+// todo `three octagons` with two colors

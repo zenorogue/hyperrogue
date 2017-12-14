@@ -435,7 +435,6 @@ namespace mapeditor {
     displayButton(8, vid.yres-8-fs*11, XLAT("F1 = help"), SDLK_F1, 0);
     displayButton(8, vid.yres-8-fs*10, XLAT("F2 = save"), SDLK_F2, 0);
     displayButton(8, vid.yres-8-fs*9, XLAT("F3 = load"), SDLK_F3, 0);
-    displayButton(8, vid.yres-8-fs*8, XLAT("F4 = file"), SDLK_F3, 0);
     displayButton(8, vid.yres-8-fs*7, XLAT("F5 = restart"), SDLK_F5, 0);
     displayButton(8, vid.yres-8-fs*6, XLAT("F6 = HQ shot"), SDLK_F6, 0);
     displayButton(8, vid.yres-8-fs*5, XLAT("F7 = player on/off"), SDLK_F7, 0);
@@ -763,23 +762,32 @@ namespace mapeditor {
       paintwhat_str = "paint";
       dialog::openColorDialog((unsigned&)(paintwhat = (painttype ==6 ? paintwhat : 0x808080)));
       }
-    else if(sym == SDLK_F2) {
-      if(mapstream::saveMap(levelfile.c_str()))
-        addMessage(XLAT("Map saved to %1", levelfile));
-      else
-        addMessage(XLAT("Failed to save map to %1", levelfile));
-      }
     else if(sym == SDLK_F5) {
       restartGame();
       }
-    else if(sym == SDLK_F3) {
-      if(mapstream::loadMap(levelfile.c_str()))
-        addMessage(XLAT("Map loaded from %1", levelfile));
-      else
-        addMessage(XLAT("Failed to load map from %1", levelfile));
+    else if(sym == SDLK_F2) {
+      dialog::openFileDialog(levelfile, XLAT("level to save/load:"), ".lev", [] () {
+        if(mapstream::saveMap(levelfile.c_str())) {
+          addMessage(XLAT("Map saved to %1", levelfile));
+          return true;
+          }
+        else {
+          addMessage(XLAT("Failed to save map to %1", levelfile));
+          return false;
+          }
+        });
       }
-    else if(sym == SDLK_F4) 
-      dialog::openFileDialog(levelfile, XLAT("level to save/load:"), ".lev");
+    else if(sym == SDLK_F3)
+      dialog::openFileDialog(levelfile, XLAT("level to save/load:"), ".lev", [] () {
+        if(mapstream::loadMap(levelfile.c_str())) {
+          addMessage(XLAT("Map loaded from %1", levelfile));
+          return true;
+          }
+        else {
+          addMessage(XLAT("Failed to load map from %1", levelfile));
+          return false;
+          }
+        });
 #if CAP_SDL
     else if(sym == SDLK_F6) {
       saveHighQualityShot();
@@ -1177,17 +1185,17 @@ namespace mapeditor {
   
   bool onelayeronly;
   
-  void loadPicFile(const string& s) {
+  bool loadPicFile(const string& s) {
     FILE *f = fopen(picfile.c_str(), "rt");
     if(!f) {
       addMessage(XLAT("Failed to load pictures from %1", picfile));
-      return;
+      return false;
       }
     int err;
     char buf[200];
     if(!fgets(buf, 200, f)) { 
       addMessage(XLAT("Failed to load pictures from %1", picfile));
-      fclose(f); return; 
+      fclose(f); return false; 
       }
     int vernum; err = fscanf(f, "%x", &vernum);
     printf("vernum = %x\n", vernum);
@@ -1213,13 +1221,14 @@ namespace mapeditor {
     addMessage(XLAT("Pictures loaded from %1", picfile));
     
     buildpolys();
+    return true;
     }
   
-  void savePicFile(const string& s) {
+  bool savePicFile(const string& s) {
     FILE *f = fopen(picfile.c_str(), "wt");
     if(!f) {
       addMessage(XLAT("Failed to save pictures to %1", picfile));
-      return;
+      return false;
       }
     fprintf(f, "HyperRogue saved picture\n");
     fprintf(f, "%x\n", VERNUM_HEX);
@@ -1241,6 +1250,7 @@ namespace mapeditor {
     fprintf(f, "\n-1\n");
     fclose(f);
     addMessage(XLAT("Pictures saved to %1", picfile));
+    return true;
     }
     
   void drawHandleKey(int sym, int uni) {
@@ -1303,14 +1313,17 @@ namespace mapeditor {
       colorkey = true;
       }
 
-    if(sym == SDLK_F4) 
-      dialog::openFileDialog(picfile, XLAT("pics to save/load:"), ".pic");
-
     if(sym == SDLK_F2) 
-      savePicFile(picfile);
+      dialog::openFileDialog(picfile, XLAT("pics to save/load:"), ".pic", 
+        [] () {
+          return savePicFile(picfile);
+          });
     
     if(sym == SDLK_F3) 
-      loadPicFile(picfile);
+      dialog::openFileDialog(picfile, XLAT("pics to save/load:"), ".pic", 
+        [] () {
+          return loadPicFile(picfile);
+          });
     
     if(sym == SDLK_F7) {
       drawplayer = !drawplayer;
