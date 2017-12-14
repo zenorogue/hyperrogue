@@ -67,6 +67,7 @@ int arg::readCommon() {
   else if(argis("-lev")) { shift(); levelfile = args(); }
   else if(argis("-pic")) { shift(); picfile = args(); }
   else if(argis("-load")) { PHASE(3); shift(); mapstream::loadMap(args()); }
+  else if(argis("-font")) { PHASE(1); shift(); fontpath = args(); }
   else if(argis("-picload")) { PHASE(3); shift(); mapeditor::loadPicFile(args()); }
 #endif
   else if(argis("-canvas")) {
@@ -301,6 +302,12 @@ else if(args()[0] == '-' && args()[1] == x && args()[2] == '0') { showstartmenu 
     }
   else if(argis("--run")) {
     PHASE(3); mainloop(); quitmainloop = false;
+    }
+  else if(argis("--msg")) {
+    shift(); addMessage(args());
+    }
+  else if(argis("--msg0")) {
+    clearMessages();
     }
 #if CAP_TOUR
   else if(argis("--tour")) {

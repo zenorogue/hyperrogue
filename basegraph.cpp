@@ -55,9 +55,12 @@ int qpixel3(SDL_Surface *surf, int x, int y) {
 #endif
 
 #if CAP_SDLTTF
+
+string fontpath = ISWEB ? "sans-serif" : HYPERPATH "DejaVuSans-Bold.ttf";
+
 void loadfont(int siz) {
   if(!font[siz]) {
-    font[siz] = TTF_OpenFont(ISWEB ? "sans-serif" : HYPERPATH "DejaVuSans-Bold.ttf", siz);
+    font[siz] = TTF_OpenFont(fontpath.c_str(), siz);
     // Destination set by ./configure (in the GitHub repository)
     #ifdef FONTDESTDIR
     if (font[siz] == NULL) {
@@ -65,7 +68,7 @@ void loadfont(int siz) {
       }
     #endif
     if (font[siz] == NULL) {
-      printf("error: Font file not found\n");
+      printf("error: Font file not found: %s\n", fontpath.c_str());
       exit(1);
       }
     }
