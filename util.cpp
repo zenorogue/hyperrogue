@@ -27,6 +27,10 @@ string itsh(int i) {static char buf[16]; sprintf(buf, "%03X", i); return buf; }
 string itsh2(int i) {static char buf[16]; sprintf(buf, "%02X", i); return buf; }
 string itsh8(int i) {static char buf[16]; sprintf(buf, "%08X", i); return buf; }
 
+int gcd(int i, int j) {
+  return i ? gcd(j%i, i) : j;
+  }
+
 // debug utilities
 
 extern FILE *debugfile;
