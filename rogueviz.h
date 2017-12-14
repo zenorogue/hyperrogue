@@ -1,5 +1,7 @@
 namespace rogueviz {
 
+  void init();
+  
 struct edgeinfo {
   int i, j;
   double weight, weight2;
@@ -29,6 +31,8 @@ struct vertexdata {
   };
 
 extern vector<vertexdata> vdata;
+ 
+  void storeall();
 
   namespace anygraph {
     extern double R, alpha, T;
@@ -40,4 +44,5 @@ extern vector<vertexdata> vdata;
     }
   
   extern ld ggamma;
+  extern bool showlabels;
 }

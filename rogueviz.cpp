@@ -147,7 +147,7 @@ hyperpoint where(int i) {
   auto m = vdata[i].m;
   if(m->base == currentmap->gamestart()) return tC0(m->at);
   else { 
-    notimpl(); // actually probably that's a buug
+    // notimpl(); // actually probably that's a buug
     return inverse(shmup::ggmatrix(currentmap->gamestart())) * (shmup::ggmatrix(m->base) * tC0(m->at));
     }
   }
@@ -169,7 +169,7 @@ void addedge(int i, int j, edgeinfo *ei) {
     
     addedge(i, id, ei);
     addedge(id, j, ei);
-    shmup::virtualRebase(vd.m, true);
+    shmup::virtualRebase(vdata[i].m, true);
     }
   else addedge0(i, j, ei);
   }
@@ -309,7 +309,7 @@ namespace anygraph {
     vdata.reserve(N);
     while(true) {
       string s = readLabel_s(f);
-      if(s == "" || s == "-1") break;
+      if(s == "" || s == "#ROGUEVIZ_ENDOFDATA") break;
       int id = getid(s);
       vertexdata& vd(vdata[id]);
       vd.name = s;
@@ -1774,7 +1774,7 @@ string cname() {
 
 template<class T> function<void(presmode)> roguevizslide(char c, T t) {
   return [c,t] (presmode mode) {
-    mapeditor::canvasback = 0x101010;
+    patterns::canvasback = 0x101010;
     setCanvas(mode, c);
     if(mode == 1 || mode == pmGeometryStart) t();
   
@@ -1792,7 +1792,7 @@ template<class T> function<void(presmode)> roguevizslide(char c, T t) {
 
 template<class T, class T1> function<void(presmode)> roguevizslide_action(char c, T t, T1 act) {
   return [c,t,act] (presmode mode) {
-    mapeditor::canvasback = 0x101010;
+    patterns::canvasback = 0x101010;
     setCanvas(mode, c);
     if(mode == pmStart || mode == pmGeometryStart) t();
   
