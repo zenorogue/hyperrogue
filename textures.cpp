@@ -33,7 +33,7 @@ int twidth = 2048;
 
 vector<int> expanded_data;
 
-string texturename;
+string texturename = "hyperrogue-texture.png";
 string configname = "hyperrogue.txc";
 
 eTextureState tstate;
