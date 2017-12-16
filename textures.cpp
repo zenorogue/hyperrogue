@@ -171,14 +171,13 @@ void mapTexture(cell *c, textureinfo& mi, patterns::patterninfo &si, const trans
 
   ld z = ctof(c) ? rhexf : hexvdist;
   
-  int sym = si.symmetries;
+  // int sym = si.symmetries;
 
   for(int i=0; i<c->type; i++) {
-    int is = i % sym;
     hyperpoint h1 =  spin(M_PI + M_PI * (2*i +1) / c->type) * xpush(z) * C0;
     hyperpoint h2 =  spin(M_PI + M_PI * (2*i -1) / c->type) * xpush(z) * C0;
-    hyperpoint hm1 = spin(M_PI + M_PI * (2*is+1) / c->type) * xpush(z) * C0;
-    hyperpoint hm2 = spin(M_PI + M_PI * (2*is-1) / c->type) * xpush(z) * C0;
+    hyperpoint hm1 = spin(M_PI + M_PI * (2*i +1) / c->type) * xpush(z) * C0;
+    hyperpoint hm2 = spin(M_PI + M_PI * (2*i -1) / c->type) * xpush(z) * C0;
     mapTextureTriangle(mi, {C0, h1, h2}, {C0, hm1, hm2});
     }  
   }
@@ -272,7 +271,7 @@ void perform_mapping() {
 
     if(!texture_map.count(si.id)) 
       replace = true;
-    else if(hdist0(p.second*C0) < hdist0(texture_map[si.id].M * C0))
+    else if(hdist0(p.second*sphereflip * C0) < hdist0(texture_map[si.id].M * sphereflip * C0))
       replace = true;
 
     if(replace) {
@@ -342,7 +341,82 @@ void drawRawTexture() {
   glDisable(GL_TEXTURE_2D);    
   }
 
-enum eTexturePanstate {tpsModel, tpsMove, tpsScale, tpsAffine, tpsZoom, tpsProjection};
+struct magicmapper_point {
+  cell *c;
+  hyperpoint cell_relative;
+  hyperpoint texture_coords;
+  };
+
+vector<magicmapper_point> amp;
+
+struct magic_param {
+  bool do_spin;
+  ld spinangle, scale, proj, moveangle, shift;
+
+  void shuffle() {
+    do_spin = hrand(2);
+    spinangle = hrandf() - hrandf();
+    moveangle = hrandf() * 2 * M_PI;
+    shift = hrandf() - hrandf();
+    scale = hrandf() - hrandf();
+    proj = hrandf() - hrandf();
+    }
+  
+  void apply(ld delta) {
+    vid.alpha *= exp(delta * proj);
+    vid.scale *= exp(delta * scale);
+
+    if(do_spin)
+      View = spin(delta * spinangle) * View;
+    else
+      View = spin(moveangle) * xpush(delta*shift) * spin(-moveangle) * View;
+    
+    fixmatrix(View);
+    }
+  };
+
+ld magic_quality() {
+  gmatrix.clear();
+  calcparam();
+
+  ld q = 0;
+  for(auto& p: amp) {
+    hyperpoint inmodel;
+    applymodel(shmup::ggmatrix(p.c) * p.cell_relative, inmodel);
+    inmodel[0] *= vid.radius * 1. / vid.scrsize;
+    inmodel[1] *= vid.radius * 1. / vid.scrsize;
+    q += intvalxy(inmodel, p.texture_coords);
+    }
+  return q;
+  }
+
+void applyMagic() {
+  ld cq = magic_quality();
+  
+  int last_success = 0;
+  
+  for(int s=0; s<50000 &&  s<last_success + 1000; s++) {
+    magic_param p;
+    p.shuffle();
+    
+    bool failed = false;
+    
+    for(ld delta = 1; delta > 1e-9; delta *= (failed ? -.7 : 1.2)) {
+      p.apply(delta);
+      ld nq = magic_quality();
+      if(nq < cq) {
+        cq = nq; 
+        last_success = s;
+        }
+      else {
+        p.apply(-delta);
+        failed = true;
+        }
+      }
+    }
+  }
+
+enum eTexturePanstate {tpsModel, tpsMove, tpsScale, tpsAffine, tpsZoom, tpsProjection, tpsMagic};
 eTexturePanstate panstate;
 
 void mousemovement() {
@@ -385,7 +459,7 @@ void mousemovement() {
     case tpsZoom: {
       // do not zoom in portrait!
       if(nonzero && !newmove) {
-        View = View * inverse(spintox(mouseeu)) * spintox(lastmouse);
+        View = inverse(spintox(mouseeu)) * spintox(lastmouse) * View;
         vid.scale = vid.scale * sqrt(intvalxy(C0, mouseeu)) / sqrt(intvalxy(C0, lastmouse));
         }
       if(nonzero) lastmouse = mouseeu;
@@ -399,6 +473,18 @@ void mousemovement() {
         }
       if(nonzero) lastmouse = mouseeu;
       newmove = false;
+      }
+    
+    case tpsMagic: {
+      if(!mouseover) return;
+      if(newmove) {
+        magicmapper_point newpoint;
+        newpoint.c = mouseover;
+        newpoint.cell_relative = inverse(gmatrix[mouseover]) * mouseh;
+        amp.push_back(newpoint);
+        newmove = false;
+        }
+      amp.back().texture_coords = mouseeu;
       }
     
     default: break;
@@ -490,6 +576,7 @@ bool load_textureconfig() {
     }
   
   if(!readtexture()) return false;
+  calcparam();
   drawthemap();
   perform_mapping();
   tstate = tstate_max = tsActive;
@@ -523,6 +610,13 @@ void showMenu() {
     dialog::addBoolItem(XLAT("zoom/scale the model"), panstate == tpsZoom, 'z');
     dialog::addBoolItem(XLAT("projection"), panstate == tpsProjection, 'p');
     dialog::addBoolItem(XLAT("affine transformations"), panstate == tpsAffine, 'y');
+    dialog::addBoolItem(XLAT("magic"), panstate == tpsMagic, 'A');
+    
+    if(panstate == tpsMagic) {
+      dialog::addSelItem(XLAT("delete markers"), its(size(amp)), 'D');
+      dialog::addSelItem(XLAT("perform auto-adjustment"), "...", 'R');
+      }
+
     dialog::addSelItem(XLAT("precision"), its(gsplits), 'p');
     }
   
@@ -546,6 +640,33 @@ void showMenu() {
 
   dialog::display();
   
+  if(tstate == tsAdjusting) {
+    initquickqueue();
+    char letter = 'A';
+    for(auto& am: amp) {
+      hyperpoint h = shmup::ggmatrix(am.c) * am.cell_relative;
+      display(h);
+      queuechr(h, vid.fsize, letter, 0xC00000, 1);
+
+      hyperpoint inmodel;
+      applymodel(h, inmodel);
+      inmodel[0] *= vid.radius * 1. / vid.scrsize;
+      inmodel[1] *= vid.radius * 1. / vid.scrsize;
+      queuechr(
+        vid.xcenter + vid.scrsize * inmodel[0], 
+        vid.ycenter + vid.scrsize * inmodel[1],
+        0, vid.fsize/2, letter, 0xC0C0C0, 1);
+
+      queuechr(
+        vid.xcenter + vid.scrsize * am.texture_coords[0], 
+        vid.ycenter + vid.scrsize * am.texture_coords[1],
+        0, vid.fsize, letter, 0x00C000, 1);
+      
+      letter++;
+      }
+    quickqueue();
+    }
+  
   if(holdmouse) mousemovement();
   
   keyhandler = [] (int sym, int uni) {
@@ -565,7 +686,10 @@ void showMenu() {
     else if(uni == 'y' && tstate == tsAdjusting) panstate = tpsAffine;
     else if(uni == 'z' && tstate == tsAdjusting) panstate = tpsZoom;
     else if(uni == 'p' && tstate == tsAdjusting) panstate = tpsProjection;
-    
+    else if(uni == 'A' && tstate == tsAdjusting) panstate = tpsMagic;
+    else if(uni == 'D' && tstate == tsAdjusting) amp.clear();
+    else if(uni == 'R' && tstate == tsAdjusting) applyMagic();
+
     else if(uni == 's' && tstate == tsActive) 
       dialog::openFileDialog(configname, XLAT("texture config to save:"), ".txc", 
         [] () {

@@ -145,6 +145,10 @@ int hrand(int i) {
   return r() % i;
   }
 
+ld hrandf() { 
+  return (r() & HRANDMAX) / (HRANDMAX + 1.0);
+  }
+
 void initcell(cell *c) {
   c->mpdist = INFD;   // minimum distance from the player, ever
   c->cpdist = INFD;   // current distance from the player

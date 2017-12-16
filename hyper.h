@@ -2397,3 +2397,6 @@ inline hyperpoint tC0(const transmatrix &T) {
   z[0] = T[0][2]; z[1] = T[1][2]; z[2] = T[2][2];
   return z;
   }
+
+transmatrix actualV(const heptspin& hs, const transmatrix& V);
+transmatrix cview();

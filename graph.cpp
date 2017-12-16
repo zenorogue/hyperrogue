@@ -4855,6 +4855,12 @@ bool allowIncreasedSight() {
 
 purehookset hooks_drawmap;
 
+transmatrix cview() {
+  sphereflip = Id;
+  if(sphereflipped()) sphereflip[2][2] = -1;
+  return ypush(vid.yshift) * sphereflip * View;
+  }
+
 void drawthemap() {
 
   callhooks(hooks_drawmap);
@@ -4924,12 +4930,10 @@ void drawthemap() {
   
   arrowtraps.clear();
 
-  sphereflip = Id;
   profile_start(1);
   if(euclid)
     drawEuclidean();
   else {
-    if(sphereflipped()) sphereflip[2][2] = -1;
     int sr = max(sightrange, ambush_distance);
     maxreclevel = 
       conformal::on ? sr + 2:
@@ -4937,9 +4941,7 @@ void drawthemap() {
     
     if(S3>3) maxreclevel+=2;
     
-    drawrec(viewctr, 
-      maxreclevel,
-      hsOrigin, ypush(vid.yshift) * sphereflip * View);
+    drawrec(viewctr, maxreclevel, hsOrigin, cview());
     }
   drawBlizzards();
   drawArrowTraps();

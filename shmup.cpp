@@ -3276,6 +3276,16 @@ void destroyBoats(cell *c) {
   }
 
 transmatrix calc_relative_matrix(cell *c, heptagon *h1) {
+
+  if(sphere) {
+    if(gmatrix0.count(c) && gmatrix0.count(h1->c7))
+    return inverse(gmatrix0[h1->c7]) * gmatrix0[c];
+    else {
+      printf("error: gmatrix0 not known\n");
+      exit(1);
+      }
+    }
+
   transmatrix gm = Id;
   heptagon *h2 = c->master;
   transmatrix where = Id;
@@ -3316,13 +3326,7 @@ transmatrix calc_relative_matrix(cell *c, heptagon *h1) {
 transmatrix &ggmatrix(cell *c) {
   transmatrix& t = gmatrix[c];
   if(t[2][2] == 0) {
-    if(sphere && gmatrix0.count(c))
-      t = gmatrix[cwt.c] * inverse(gmatrix0[cwt.c]) * gmatrix0[c];
-    else if(sphere) {
-      printf("error: gmatrix0 not known\n");
-      exit(1);
-      }
-    else if(torus) {
+    if(torus) {
       forCellIdEx(c2, i, c)
         if(celldistance(c2, centerover) < celldistance(c, centerover))
           t = ggmatrix(c2) * eumovedir(3+i);
@@ -3338,11 +3342,8 @@ transmatrix &ggmatrix(cell *c) {
       printf("gmatrix0 = \n");
       display(gmatrix0[c]); */
       }
-    else {
-      t = 
-        View * spin(viewctr.spin * 2 * M_PI / S7) * calc_relative_matrix(c, viewctr.h);
-      if(nontruncated) t = t * pispin;
-      }
+    else
+      t = actualV(viewctr, cview()) * calc_relative_matrix(c, viewctr.h);
     }
   return t;
   }

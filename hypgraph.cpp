@@ -329,6 +329,10 @@ bool confusingGeometry() {
   return elliptic || quotient == 1 || torus;
   }
 
+transmatrix actualV(const heptspin& hs, const transmatrix& V) {
+  return (hs.spin || nontruncated) ? V * spin(hs.spin*2*M_PI/S7 + (nontruncated ? M_PI:0)) : V;
+  }
+
 void drawrec(const heptspin& hs, int lev, hstate s, const transmatrix& V) {
 
   // shmup::calc_relative_matrix(cwt.c, hs.h);
@@ -340,8 +344,7 @@ void drawrec(const heptspin& hs, int lev, hstate s, const transmatrix& V) {
   
   if(dodrawcell(c)) {
     reclevel = maxreclevel - lev;
-    drawcell(c, (hs.spin || nontruncated) ? V1 * spin(hs.spin*2*M_PI/S7 + (nontruncated ? M_PI:0)) : V1, 0,
-      hs.mirrored);
+    drawcell(c, actualV(hs, V1), 0, hs.mirrored);
     }
   
   if(lev <= 0) return;
