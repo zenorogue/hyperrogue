@@ -65,10 +65,29 @@ template<class T, class U> void scale_colorarray(int origdim, const T& src, cons
     }
   }
   
-bool readtexture() {
-  
+bool loadTextureGL() {
+
   if(textureid == 0) glGenTextures(1, &textureid );
 
+  glBindTexture( GL_TEXTURE_2D, textureid);
+  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
+  
+  glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, twidth, twidth, 0,
+    GL_BGRA, GL_UNSIGNED_BYTE, 
+    &expanded_data[0] );
+ 
+  return true;
+  }
+
+bool whitetexture() {
+  expanded_data.resize(0);
+  expanded_data.resize(twidth * twidth, 0xFFFFFFFF);
+  return true;
+  }
+
+bool readtexture() {
+  
   SDL_Surface *txt = IMG_Load(texturename.c_str());
   if(!txt) {
     addMessage(XLAT("Failed to load %1", texturename));
@@ -86,19 +105,12 @@ bool readtexture() {
   int origdim = max(tx, ty);
   int base_x = tx/2 - origdim/2;
   int base_y = ty/2 - origdim/2;
-  ZZ = 0;
+
+  ZZ = 0; // outside is black
 
 /*  for(int y=0; y<twidth; y++)
   for(int x=0; x<twidth; x++)
     expanded_data[y*twidth+x] = qpixel(txt2, y%ty, x%tx); */
-
-  for(int y=0; y<ty; y++)
-    scale_colorarray(origdim, 
-      [&] (int x) { return qpixel(txt2, base_x + x, y); }, 
-      [&] (int x, int v) { half_expanded[twidth * y + x] = v; }
-      );
-
-  SDL_FreeSurface(txt2);
 
   for(int x=0; x<twidth; x++)
     scale_colorarray(origdim, 
@@ -106,24 +118,25 @@ bool readtexture() {
       [&] (int y, int v) { expanded_data[twidth * y + x] = v; }
       );
   
-  glBindTexture( GL_TEXTURE_2D, textureid);
-  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
+  for(int y=0; y<ty; y++)
+    scale_colorarray(origdim, 
+      [&] (int x) { return qpixel(txt2, base_x + x, y); }, 
+      [&] (int x, int v) { half_expanded[twidth * y + x] = v; }
+      );
+
+  SDL_FreeSurface(txt2);
   
-  glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, twidth, twidth, 0,
-    GL_BGRA, GL_UNSIGNED_BYTE, 
-    &expanded_data[0] );
- 
   return true;
   }
 
 transmatrix itt = Id;
 
-int grid_alpha = 0;
-int mesh_alpha = 0;
-int color_alpha = 0;
+unsigned grid_color = 0;
+unsigned mesh_color = 0;
+unsigned master_color = 0xFFFFFF10;
+unsigned slave_color = 0xFF000008;
 
-unsigned int glc = 0xFFFFFFDD;
+int color_alpha = 0;
 
 int gsplits = 1;
 
@@ -198,9 +211,9 @@ bool apply(cell *c, const transmatrix &V, int col) {
 
   if(tstate == tsAdjusting) {
     queuepolyat(V, shFullCross[ctof(c)], 0, PPR_LINE);
-    lastptd().u.poly.outline = models.count(c) ? 0xFFFFFF08 : 0xFF000008;
+    lastptd().u.poly.outline = models.count(c) ? master_color : slave_color;
     queuepolyat(V, shFullFloor[ctof(c)], 0, PPR_LINE);
-    lastptd().u.poly.outline = models.count(c) ? 0xFFFFFF10 : 0xFF000010;
+    lastptd().u.poly.outline = models.count(c) ? master_color : slave_color;
     return false;
     }
   try {
@@ -237,16 +250,16 @@ bool apply(cell *c, const transmatrix &V, int col) {
     if(chasmg == 2) return false;
     else if(chasmg && wmspatial) {
       if(detaillevel == 0) return false;
-      queuetable(V * qfi.spin, &mi.vertices[0], n, mesh_alpha, recolor(c->land == laCocytus ? 0x080808FF : 0x101010FF), PPR_LAKEBOTTOM);
+      queuetable(V * qfi.spin, &mi.vertices[0], n, mesh_color, recolor(c->land == laCocytus ? 0x080808FF : 0x101010FF), PPR_LAKEBOTTOM);
       }
     else {
-      queuetable(V * qfi.spin, &mi.vertices[0], n, mesh_alpha, recolor(col), PPR_FLOOR);
+      queuetable(V * qfi.spin, &mi.vertices[0], n, mesh_color, recolor(col), PPR_FLOOR);
       }
         
     lastptd().u.poly.tinf = &mi;
-    if(grid_alpha) {
+    if(grid_color) {
       queuepolyat(V, shFullFloor[ctof(c)], 0, PPR_FLOOR);
-      lastptd().u.poly.outline = grid_alpha;
+      lastptd().u.poly.outline = grid_color;
       }
     
     return true;
@@ -278,7 +291,8 @@ void perform_mapping() {
       auto& mi = texture_map[si.id];
       mapTexture(c, mi, si, p.second);
       mi.texture_id = textureid;
-      }    
+      }
+    texture_map[si.id].matrices.push_back(p.second);
     }
   models.clear();
   for(auto& t: texture_map) models.insert(t.second.c);
@@ -523,9 +537,9 @@ void init_textureconfig() {
   addsaver(twidth, "texture resolution", 2048);
   addsaver(gsplits, "precision", 1);
   
-  addsaver(grid_alpha, "alpha grid", 0);
+  addsaver(grid_color, "grid color", 0);
   addsaver(color_alpha, "alpha color", 0);
-  addsaver(mesh_alpha, "alpha mesh", 0);
+  addsaver(mesh_color, "mesh color", 0);
   
   addsaver(vid.alpha, "projection", 1);
   addsaver(vid.scale, "scale", 1);
@@ -576,6 +590,7 @@ bool load_textureconfig() {
     }
   
   if(!readtexture()) return false;
+  if(!loadTextureGL()) return false;
   calcparam();
   drawthemap();
   perform_mapping();
@@ -611,6 +626,9 @@ void showMenu() {
     dialog::addBoolItem(XLAT("projection"), panstate == tpsProjection, 'p');
     dialog::addBoolItem(XLAT("affine transformations"), panstate == tpsAffine, 'y');
     dialog::addBoolItem(XLAT("magic"), panstate == tpsMagic, 'A');
+
+    dialog::addBoolItem(XLAT("grid color (master)"), "...", 'M');
+    dialog::addBoolItem(XLAT("grid color (copy)"), "...", 'C');
     
     if(panstate == tpsMagic) {
       dialog::addSelItem(XLAT("delete markers"), its(size(amp)), 'D');
@@ -627,8 +645,8 @@ void showMenu() {
     dialog::addSelItem(XLAT("texture position Y"), fts(iy), 'y'); */
     dialog::addBoolItem(XLAT("deactivate the texture"), true, 't');
     dialog::addBoolItem(XLAT("readjust the texture"), true, 'r');
-    dialog::addSelItem(XLAT("grid alpha"), its(grid_alpha), 'g');
-    dialog::addSelItem(XLAT("mesh alpha"), its(mesh_alpha), 'm');
+    dialog::addSelItem(XLAT("grid alpha"), "...", 'g');
+    dialog::addSelItem(XLAT("mesh alpha"), "...", 'm');
     dialog::addSelItem(XLAT("color alpha"), its(color_alpha), 'c');
     dialog::addSelItem(XLAT("save the texture config"), "...", 's');
     }
@@ -708,13 +726,24 @@ void showMenu() {
     else if(uni == 'o' && tstate == tsOff) 
       dialog::openFileDialog(texturename, XLAT("texture to load:"), ".png", 
         [] () {
-          if(readtexture()) {
+          if(readtexture() && loadTextureGL()) {
             if(tstate_max == tsOff) tstate_max = tsAdjusting;
             tstate = tstate_max;
             return true;
             }
           else return false;
           });
+
+    else if(uni == 'n' && tstate == tsOff) {
+      addMessage("white");
+      if(whitetexture() && loadTextureGL()) {
+        tstate = tstate_max = tsActive;
+        perform_mapping();
+        mapeditor::colortouse = 0xFFFF00FF;
+        mapeditor::initdraw(cwt.c);
+        pushScreen(mapeditor::showDrawEditor);
+        }
+      }
 
     else if(uni == 't' && tstate == tsOff) 
       tstate = tstate_max;
@@ -732,14 +761,16 @@ void showMenu() {
       texture_map.clear();
       }
         
-    else if(uni == 'g' && tstate == tsActive) {
-      dialog::editNumber(grid_alpha, 0, 255, 15, 0, XLAT("grid alpha"), 
-        XLAT("Grid alpha."));
-      }    
-    else if(uni == 'm' && tstate == tsActive) {
-      dialog::editNumber(mesh_alpha, 0, 255, 15, 0, XLAT("mesh alpha"),
-        XLAT("Mesh alpha."));
-      }    
+    else if(uni == 'g' && tstate == tsActive) 
+      dialog::openColorDialog(grid_color, NULL);
+    else if(uni == 'm' && tstate == tsActive) 
+      dialog::openColorDialog(mesh_color, NULL);
+
+    else if(uni == 'M' && tstate == tsAdjusting) 
+      dialog::openColorDialog(master_color, NULL);
+    else if(uni == 'C' && tstate == tsActive) 
+      dialog::openColorDialog(slave_color, NULL);
+
     else if(uni == 'c' && tstate == tsActive) {
       dialog::editNumber(color_alpha, 0, 255, 15, 0, XLAT("color alpha"),
         XLAT("The higher the value, the less important the color of underlying terrain is."));
@@ -754,7 +785,80 @@ void showMenu() {
     };
   }
 
+int lastupdate;
+
+void update() {
+  if(lastupdate && ticks > lastupdate + 100) {
+    loadTextureGL(); 
+    lastupdate = 0;
+    }
+  }
+
+pair<int,int> ptc(hyperpoint h) {
+  hyperpoint inmodel;
+  applymodel(h, inmodel);
+  inmodel = itt * inmodel;
+  inmodel[0] *= vid.radius * 1. / vid.scrsize;
+  inmodel[1] *= vid.radius * 1. / vid.scrsize;
+  int x = (1 + inmodel[0]) * twidth / 2;
+  int y = (1 + inmodel[1]) * twidth / 2;
+  return make_pair(x,y);
+  }
+
+int near(pair<int, int> p1, pair<int, int> p2) {
+  return max(abs(p1.first-p2.first), abs(p1.second - p2.second));
+  }
+
+void filltriangle(array<hyperpoint, 3> v, int col, int lev) {
+  pair<int,int> p[3] = {ptc(v[0]), ptc(v[1]), ptc(v[2])};
+  
+  if(0) for(int i=0; i<3; i++) 
+    printf("#%d fillt #%d %s -> %d,%d\n", lev, i, display(v[i]), p[i].first, p[i].second);
+  int d2 = near(p[0], p[1]), d1 = near(p[0], p[2]), d0 = near(p[1], p[2]);
+  
+  if((d0 <= 1 && d1 <= 1 && d2 <= 1) || lev >= 5) {
+    for(int i=0; i<3; i++)
+      expanded_data[((p[i].first) & (twidth-1)) + (p[i].second & (twidth-1)) * twidth] = col;
+    return;
+    }
+  else if(d1 >= d0 && d1 >= d2)
+    swap(v[0], v[1]);
+  else if(d2 >= d0 && d2 >= d1)
+    swap(v[0], v[2]);
+  
+  hyperpoint v3 = mid(v[1], v[2]);
+  filltriangle({v[0], v[1], v3}, col, lev+1);
+  filltriangle({v[0], v[2], v3}, col, lev+1);
+  }
+
+void fillcircle(hyperpoint h, int col) {
+  transmatrix A = rgpushxto0(h);
+
+  ld rad = .02;
+
+  filltriangle({A * xpush(rad) * C0, A * spin(M_PI * 2/3) * C0, A * spin(-M_PI * 2/3) * C0}, col, 0);
+  }
+
+void drawPixel(cell *c, hyperpoint h, int col) {
+  printf("s = %d\n", size(gmatrix));
+  
+  try {
+    transmatrix M = gmatrix.at(c);
+    auto si = patterns::getpatterninfo0(c);
+    h = inverse(M * applyPatterndir(c, si)) * h;
+    auto& tinf = texture_map[si.id];
+    for(auto& M2: tinf.matrices) for(int i = 0; i<c->type; i += si.symmetries) {
+      hyperpoint inmodel;
+      
+      fillcircle(M2 * spin(2 * M_PI * i / c->type) * h, col);
+      lastupdate = ticks;
+      }
+    }
+  catch(out_of_range) {}
+  }
+  
 }
 
 // todo texture editor
 // todo `three octagons` with two colors
+

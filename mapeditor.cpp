@@ -888,40 +888,53 @@ namespace mapeditor {
     callhandlers(false, hooks_prestats);
 
     if(!mouseout()) getcstat = '-';
-
-    int sg = drawcellShapeGroup();
     
+    int sg;
     string line1, line2;
-    
-    switch(sg) {
-      case 0:
-        line1 = XLAT("character");
-        line2 = csname(vid.cs);
-        break;
-      
-      case 1:
-        line1 = XLAT("monster");
-        line2 = XLAT1(minf[drawcell->monst].name);
-        break;
+  
+    usershape *us = NULL;
         
-      case 2:
-        line1 = XLAT("item");
-        line2 = XLAT1(iinf[drawcell->item].name);
-        break;
-      
-      case 3:
-        line1 = XLAT("floor");
-        line2 = XLAT(ishept(drawcell) ? "heptagonal" : 
-          ishex1(drawcell) ? "hexagonal #1" : "hexagonal");
-        break;
-      
-      default:
-        line1 = XLAT("floor/pattern");
-        line2 = "#" + its(patterns::getpatterninfo0(drawcell).id);
-        break;
+    if(texture::tstate == texture::tsActive) {
+      sg = 16;
+      line1 = "texture";
+      line2 = "";
+      texture::update();
       }
     
-    usershape *us =usershapes[drawcellShapeGroup()][drawcellShapeID()];
+    else {
+
+      int sg = drawcellShapeGroup();
+      
+      switch(sg) {
+        case 0:
+          line1 = XLAT("character");
+          line2 = csname(vid.cs);
+          break;
+        
+        case 1:
+          line1 = XLAT("monster");
+          line2 = XLAT1(minf[drawcell->monst].name);
+          break;
+          
+        case 2:
+          line1 = XLAT("item");
+          line2 = XLAT1(iinf[drawcell->item].name);
+          break;
+        
+        case 3:
+          line1 = XLAT("floor");
+          line2 = XLAT(ishept(drawcell) ? "heptagonal" : 
+            ishex1(drawcell) ? "hexagonal #1" : "hexagonal");
+          break;
+        
+        default:
+          line1 = XLAT("floor/pattern");
+          line2 = "#" + its(patterns::getpatterninfo0(drawcell).id);
+          break;
+        }
+      
+      usershape *us =usershapes[drawcellShapeGroup()][drawcellShapeID()];
+      }
     
     int fs = min(vid.fsize + 5, vid.yres/28);
 
@@ -932,6 +945,7 @@ namespace mapeditor {
     else
       displayfr(8, 8+fs*2, 2, vid.fsize, line2, 0xC0C0C0, 0);
     displayButton(8, 8+fs*3, XLAT("l = layers: %1", its(dslayer)), 'l', 0);
+
     if(us && size(us->d[dslayer].list)) {
       usershapelayer& ds(us->d[dslayer]);
       displayButton(8, 8+fs*4, XLAT("1-9 = rotations: %1", its(ds.rots)), '1' + (ds.rots % 9), 0);
@@ -955,6 +969,8 @@ namespace mapeditor {
       displayButton(8, 8+fs*16, XLAT("p = paint"), 'p', 0);
 
       }
+    else if(texture::tstate == texture::tsActive) {
+      }
     else {
       displaymm('n', 8, 8+fs*5, 2, vid.fsize, XLAT("'n' to start"), 0);
       displaymm('u', 8, 8+fs*6, 2, vid.fsize, XLAT("'u' to load current"), 0);
@@ -965,7 +981,9 @@ namespace mapeditor {
     displaymm('g', vid.xres-8, 8+fs*4, 2, vid.fsize, XLAT("g = grid"), 16);
     displayButton(vid.xres-8, 8+fs*3, XLAT("z = zoom in"), 'z', 16);
     displayButton(vid.xres-8, 8+fs*2, XLAT("o = zoom out"), 'o', 16);
-    displaymm('e', vid.xres-8, 8+fs, 2, vid.fsize, XLAT("e = edit this"), 16);
+    
+    if(texture::tstate != texture::tsActive)
+      displaymm('e', vid.xres-8, 8+fs, 2, vid.fsize, XLAT("e = edit this"), 16);
 
     if(!mouseout()) {
       hyperpoint mh = inverse(drawtrans * rgpushxto0(ccenter)) * mouseh;
@@ -1258,25 +1276,6 @@ namespace mapeditor {
     handlePanning(sym, uni);
   
     if(uni == SETMOUSEKEY) mousekey = newmousekey;
-  
-    dslayer %= USERLAYERS;
-    hyperpoint mh = inverse(drawtrans) * mouseh;
-    
-    int sg = drawcellShapeGroup();
-    
-    for(int i=0; i<USERSHAPEIDS; i++) if(editingShape(sg, i))
-      applyToShape(sg, i, uni, mh);
-      
-    if(uni == 'e' || (uni == '-' && mousekey == 'e')) {
-      initdraw(mouseover ? mouseover : cwt.c);
-      }
-    if(uni == 'l') { dslayer++; dslayer %= USERLAYERS; }
-    if(uni == 'L') { dslayer--; if(dslayer < 0) dslayer += USERLAYERS; }
-    if(uni == 'l' - 96) onelayeronly = !onelayeronly;
-    
-    if(uni == 'g') coldcenter = ccenter, ccenter = mh;
-    if(uni == 'c') ew = ewsearch;
-    if(uni == 'b') autochoose = !autochoose;
     
     if(uni == 'r') {
       pushScreen(patterns::showPattern);
@@ -1284,22 +1283,9 @@ namespace mapeditor {
         addMessage(XLAT("Hint: use F7 to edit floor under the player"));
       }
     
-    if(uni == 'S') {
-      for(int i=0; i<USERSHAPEGROUPS; i++) for(int j=0; j<USERSHAPEIDS; j++) {
-        usershape *us = usershapes[i][j];
-        if(!us) continue;
-        
-        for(int l=0; l<USERLAYERS; l++) if(size(us->d[l].list)) {
-          usershapelayer& ds(us->d[l]);
-          printf("// %d %d %d [%06X]\n", i, j, l, ds.color);
-          printf(" ID, %d, %d, ", us->d[l].rots, us->d[l].sym?2:1); 
-          for(int i=0; i<size(us->d[l].list); i++) 
-            printf("%lf,%lf, ", double(us->d[l].list[i][0]), double(us->d[l].list[i][1]));
-          printf("\n");
-          }
-        }
-      }
-
+    hyperpoint mh = inverse(drawtrans) * mouseh;
+    if(uni == 'g') coldcenter = ccenter, ccenter = mh;
+      
     if(uni == 'z') vid.scale *= 2;
     if(uni == 'o') vid.scale /= 2;
 
@@ -1308,23 +1294,6 @@ namespace mapeditor {
       pushScreen(showMapEditor);
       }
 
-    if(uni == 'p') {
-      dialog::openColorDialog(colortouse);
-      colorkey = true;
-      }
-
-    if(sym == SDLK_F2) 
-      dialog::openFileDialog(picfile, XLAT("pics to save/load:"), ".pic", 
-        [] () {
-          return savePicFile(picfile);
-          });
-    
-    if(sym == SDLK_F3) 
-      dialog::openFileDialog(picfile, XLAT("pics to save/load:"), ".pic", 
-        [] () {
-          return loadPicFile(picfile);
-          });
-    
     if(sym == SDLK_F7) {
       drawplayer = !drawplayer;
       }
@@ -1341,12 +1310,6 @@ namespace mapeditor {
       }
 #endif
     
-    if(sym == SDLK_F5) {
-      for(int i=0; i<USERSHAPEGROUPS; i++)
-      for(int j=0; j<USERSHAPEIDS; j++)
-        if(usershapes[i][j]) delete usershapes[i][j];
-      }
-    
     if(sym == SDLK_ESCAPE) popScreen();
 
     if(sym == SDLK_F1) {
@@ -1354,6 +1317,71 @@ namespace mapeditor {
       }
 
     if(sym == SDLK_F10) popScreen();
+
+    if(texture::tstate == texture::tsActive) {
+      if(uni == '-') {
+        texture::drawPixel(mouseover, mouseh, colortouse);
+        holdmouse = true;
+        }        
+      }
+    
+    else {
+      dslayer %= USERLAYERS;
+  
+      int sg = drawcellShapeGroup();
+      
+      for(int i=0; i<USERSHAPEIDS; i++) if(editingShape(sg, i))
+        applyToShape(sg, i, uni, mh);
+        
+      if(uni == 'e' || (uni == '-' && mousekey == 'e')) {
+        initdraw(mouseover ? mouseover : cwt.c);
+        }
+      if(uni == 'l') { dslayer++; dslayer %= USERLAYERS; }
+      if(uni == 'L') { dslayer--; if(dslayer < 0) dslayer += USERLAYERS; }
+      if(uni == 'l' - 96) onelayeronly = !onelayeronly;
+    
+      if(uni == 'c') ew = ewsearch;
+      if(uni == 'b') autochoose = !autochoose;
+      
+      if(uni == 'S') {
+        for(int i=0; i<USERSHAPEGROUPS; i++) for(int j=0; j<USERSHAPEIDS; j++) {
+          usershape *us = usershapes[i][j];
+          if(!us) continue;
+          
+          for(int l=0; l<USERLAYERS; l++) if(size(us->d[l].list)) {
+            usershapelayer& ds(us->d[l]);
+            printf("// %d %d %d [%06X]\n", i, j, l, ds.color);
+            printf(" ID, %d, %d, ", us->d[l].rots, us->d[l].sym?2:1); 
+            for(int i=0; i<size(us->d[l].list); i++) 
+              printf("%lf,%lf, ", double(us->d[l].list[i][0]), double(us->d[l].list[i][1]));
+            printf("\n");
+            }
+          }
+        }
+  
+      if(uni == 'p') {
+        dialog::openColorDialog(colortouse);
+        colorkey = true;
+        }
+
+      if(sym == SDLK_F2) 
+        dialog::openFileDialog(picfile, XLAT("pics to save/load:"), ".pic", 
+          [] () {
+            return savePicFile(picfile);
+            });
+      
+      if(sym == SDLK_F3) 
+        dialog::openFileDialog(picfile, XLAT("pics to save/load:"), ".pic", 
+          [] () {
+            return loadPicFile(picfile);
+            });
+
+      if(sym == SDLK_F5) {
+        for(int i=0; i<USERSHAPEGROUPS; i++)
+        for(int j=0; j<USERSHAPEIDS; j++)
+          if(usershapes[i][j]) delete usershapes[i][j];
+        }      
+      }
 
     if(rebuildPolys)
       buildpolys(), rebuildPolys = false;
@@ -1380,6 +1408,8 @@ namespace mapeditor {
     ew.side = 0;
     ewsearch = ew;
     }
+  
+  transmatrix textrans;
     
   bool drawUserShape(transmatrix V, int group, int id, int color, cell *c) {
   #if !CAP_EDIT
@@ -1400,99 +1430,116 @@ namespace mapeditor {
         }
       }
   
-    if((cmode & sm::DRAW) && mapeditor::editingShape(group, id)) {
-  
-      /* for(int a=0; a<size(ds.list); a++) {
-        hyperpoint P2 = V * ds.list[a];
-  
-        int xc, yc, sc;
-        getcoord(P2, xc, yc, sc);
-        queuechr(xc, yc, sc, 10, 'x', 
-          a == 0 ? 0x00FF00 : 
-          a == size(ds.list)-1 ? 0xFF0000 :
-          0xFFFF00);
-        } */
-      
-      if(c == ew.c) mapeditor::drawtrans = V;
-      
-      if(!us) return false;
-   
-      usershapelayer &ds(us->d[mapeditor::dslayer]);
-      
-      hyperpoint mh = inverse(mapeditor::drawtrans) * mouseh;
-  
-      for(int a=0; a<ds.rots; a++) 
-      for(int b=0; b<(ds.sym?2:1); b++) {
-  
-        if(mouseout()) break;
-  
-        hyperpoint P2 = V * spin(2*M_PI*a/ds.rots) * (b?Mirror*mh:mh);
-      
-        queuechr(P2, 10, 'x', 0xFF00FF);
+    if(cmode & sm::DRAW) {
+    
+      if(texture::tstate == texture::tsActive && mouseover && !mouseout()) {
+        auto sio = patterns::getpatterninfo0(mouseover);
+        auto sih = patterns::getpatterninfo0(c);
+        
+        if(sio.id == sih.id) {
+          if(c == mouseover) textrans = V * applyPatterndir(mouseover, sio);
+          hyperpoint mh = inverse(mapeditor::textrans) * mouseh;
+          for(int i=0; i<c->type; i += sih.symmetries) {
+            hyperpoint P2 = V * spin(2*M_PI*i/c->type) * mh;
+            queuechr(P2, 10, 'x', 0xFF00FF);
+            }
+          }        
         }
       
-      if(size(ds.list) == 0) return us;
-      
-      hyperpoint Plast = V * spin(-2*M_PI/ds.rots) * (ds.sym?Mirror*ds.list[0]:ds.list[size(ds.list)-1]);
-      int state = 0;
-      int gstate = 0;
-      double dist2 = 0;
-      hyperpoint lpsm;
-      
-      for(int a=0; a<ds.rots; a++) 
-      for(int b=0; b<(ds.sym?2:1); b++) {
-      
-        hyperpoint mh2 = spin(2*M_PI*-ew.rotid/ds.rots) * mh;
-        if(ew.symid) mh2 = Mirror * mh2;
-        hyperpoint pseudomouse = V * spin(2*M_PI*a/ds.rots) * mirrorif(mh2, b);      
-      
-        for(int t=0; t<size(ds.list); t++) {
-          int ti = b ? size(ds.list)-1-t : t;
-
-          hyperpoint P2 = V * spin(2*M_PI*a/ds.rots) * mirrorif(ds.list[ti], b);
-          
-          if(!mouseout()) {
-            double d = hdist(mouseh, P2);
-            if(d < ewsearch.dist)
-              ewsearch.dist = d,
-              ewsearch.rotid = a,
-              ewsearch.symid = b,
-              ewsearch.pointid = ti,
-              ewsearch.c = c,
-              ewsearch.side = b,
-              state = 1,
-              dist2 = d + hdist(mouseh, Plast) - hdist(P2, Plast);
-          
-            else if(state == 1) {
-              double dist3 = d + hdist(mouseh, Plast) - hdist(P2, Plast);
-              if(dist3 < dist2) 
-                ewsearch.side = !ewsearch.side;
-              state = 2;
-              }
-            }
-          
-          queuechr(P2, 10, 'o', 
-            0xC000C0);
-          
-          if(!mouseout()) {
-            if(gstate == 1) queueline(lpsm, P2, 0x90000080), gstate = 0;
-            if(ti == ew.pointid) {
-              queueline(pseudomouse, P2, 0xF0000080);
-              if(ew.side == b) queueline(pseudomouse, Plast, 0x90000080);
-              else gstate = 1, lpsm = pseudomouse;
-              }
-            }
+      if(mapeditor::editingShape(group, id)) {
   
-          Plast = P2;           
+        /* for(int a=0; a<size(ds.list); a++) {
+          hyperpoint P2 = V * ds.list[a];
+    
+          int xc, yc, sc;
+          getcoord(P2, xc, yc, sc);
+          queuechr(xc, yc, sc, 10, 'x', 
+            a == 0 ? 0x00FF00 : 
+            a == size(ds.list)-1 ? 0xFF0000 :
+            0xFFFF00);
+          } */
+        
+        if(c == ew.c) mapeditor::drawtrans = V;
+        
+        if(!us) return false;
+     
+        usershapelayer &ds(us->d[mapeditor::dslayer]);
+        
+        hyperpoint mh = inverse(mapeditor::drawtrans) * mouseh;
+    
+        for(int a=0; a<ds.rots; a++) 
+        for(int b=0; b<(ds.sym?2:1); b++) {
+    
+          if(mouseout()) break;
+    
+          hyperpoint P2 = V * spin(2*M_PI*a/ds.rots) * (b?Mirror*mh:mh);
+        
+          queuechr(P2, 10, 'x', 0xFF00FF);
           }
+        
+        if(size(ds.list) == 0) return us;
+        
+        hyperpoint Plast = V * spin(-2*M_PI/ds.rots) * (ds.sym?Mirror*ds.list[0]:ds.list[size(ds.list)-1]);
+        int state = 0;
+        int gstate = 0;
+        double dist2 = 0;
+        hyperpoint lpsm;
+        
+        for(int a=0; a<ds.rots; a++) 
+        for(int b=0; b<(ds.sym?2:1); b++) {
+        
+          hyperpoint mh2 = spin(2*M_PI*-ew.rotid/ds.rots) * mh;
+          if(ew.symid) mh2 = Mirror * mh2;
+          hyperpoint pseudomouse = V * spin(2*M_PI*a/ds.rots) * mirrorif(mh2, b);      
+        
+          for(int t=0; t<size(ds.list); t++) {
+            int ti = b ? size(ds.list)-1-t : t;
   
-        }
-      
-      if(gstate == 1) queueline(lpsm, V * ds.list[0], 0x90000080), gstate = 0;
-      if(state == 1) {
-        hyperpoint P2 = V * ds.list[0];
-        if(hdist(mouseh, P2) + hdist(mouseh, Plast) - hdist(P2, Plast) < dist2) 
-          ewsearch.side = 1;
+            hyperpoint P2 = V * spin(2*M_PI*a/ds.rots) * mirrorif(ds.list[ti], b);
+            
+            if(!mouseout()) {
+              double d = hdist(mouseh, P2);
+              if(d < ewsearch.dist)
+                ewsearch.dist = d,
+                ewsearch.rotid = a,
+                ewsearch.symid = b,
+                ewsearch.pointid = ti,
+                ewsearch.c = c,
+                ewsearch.side = b,
+                state = 1,
+                dist2 = d + hdist(mouseh, Plast) - hdist(P2, Plast);
+            
+              else if(state == 1) {
+                double dist3 = d + hdist(mouseh, Plast) - hdist(P2, Plast);
+                if(dist3 < dist2) 
+                  ewsearch.side = !ewsearch.side;
+                state = 2;
+                }
+              }
+            
+            queuechr(P2, 10, 'o', 
+              0xC000C0);
+            
+            if(!mouseout()) {
+              if(gstate == 1) queueline(lpsm, P2, 0x90000080), gstate = 0;
+              if(ti == ew.pointid) {
+                queueline(pseudomouse, P2, 0xF0000080);
+                if(ew.side == b) queueline(pseudomouse, Plast, 0x90000080);
+                else gstate = 1, lpsm = pseudomouse;
+                }
+              }
+    
+            Plast = P2;           
+            }
+    
+          }
+                
+        if(gstate == 1) queueline(lpsm, V * ds.list[0], 0x90000080), gstate = 0;
+        if(state == 1) {
+          hyperpoint P2 = V * ds.list[0];
+          if(hdist(mouseh, P2) + hdist(mouseh, Plast) - hdist(P2, Plast) < dist2) 
+            ewsearch.side = 1;
+          }
         }
       
       }

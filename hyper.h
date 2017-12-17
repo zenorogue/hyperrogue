@@ -1967,6 +1967,7 @@ struct textureinfo {
   vector<GLfloat> vertices;
   vector<GLfloat> tvertices; 
   cell *c;
+  vector<transmatrix> matrices; 
   
   // these are required to adjust to geometry changes
   int current_geometry, current_type, symmetries, current_trunc;
@@ -2378,6 +2379,9 @@ namespace texture {
   extern eTextureState tstate;
   
   void showMenu();
+
+  void update();
+  void drawPixel(cell *c, hyperpoint h, int col);
   }
 
 void queueline(const hyperpoint& H1, const hyperpoint& H2, int col, int prf = 0, int prio = PPR_LINE);
@@ -2400,3 +2404,4 @@ inline hyperpoint tC0(const transmatrix &T) {
 
 transmatrix actualV(const heptspin& hs, const transmatrix& V);
 transmatrix cview();
+
