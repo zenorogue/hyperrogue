@@ -158,6 +158,7 @@ void drawSpeed(const transmatrix& V) {
 
 int ctof(cell *c) {
   if(nontruncated) return 1;
+  if(euclid && a4) return !(eupattern(c) & 1);
   // if(euclid) return 0;
   return ishept(c) ? 1 : 0;
   // c->type == 6 ? 0 : 1;

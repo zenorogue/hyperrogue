@@ -1620,5 +1620,6 @@ geometryinfo ginf[gGUARD] = {
   {"four heptagons",      "4x7",      7, 4, 0,      0, {{4, 3}}},
   {"cube",                "3x4",      4, 3, 0,      2, {{SEE_ALL, SEE_ALL}}},
   {"tetrahedron (buggy)", "3x3",      3, 3, 0,      2, {{SEE_ALL, SEE_ALL}}},
+  {"square grid",         "4x4",      4, 4, 0,      1, {{7, 7}}}
   };
 

@@ -53,14 +53,37 @@ void precalc() {
     // dynamicval<eGeometry> g(geometry, gNormal);
     // precalc(); }
     // for(int i=0; i<S84; i++) spinmatrix[i] = spin(i * M_PI / S42);
-    crossf = .5;
-    tessf = crossf * sqrt(3);
-    hexf = tessf/3;
-    hcrossf = crossf;
-    hexhexdist = crossf;
-    hexvdist = hexf;
-    hepvdist = crossf;
-    rhexf = hexf;
+    if(a4 && nontruncated) {
+      crossf = .5;
+      hexf = .5;
+      hcrossf = crossf * sqrt(2) / 2;
+      hexhexdist = crossf;
+      hexvdist = hexf;
+      hepvdist = hexf;
+      rhexf = crossf * sqrt(2) / 2;
+      }
+    else if(a4) {
+      ld s2 = sqrt(2);
+      ld xx = 1 - s2 / 2;
+      crossf = .5;
+      tessf = crossf * s2;
+      hexf = .5 * xx * s2;
+      hcrossf = crossf;
+      hexhexdist = crossf * s2;
+      hexvdist = crossf * hypot(1-xx, xx);
+      hepvdist = crossf;
+      rhexf = hexf;
+      }
+    else {
+      crossf = .5;
+      tessf = crossf * sqrt(3);
+      hexf = tessf/3;
+      hcrossf = crossf;
+      hexhexdist = crossf;
+      hexvdist = hexf;
+      hepvdist = crossf;
+      rhexf = hexf;
+      }
     goto finish;
     }
 

@@ -374,26 +374,47 @@ int mindx=-7, mindy=-7, maxdx=7, maxdy=7;
 transmatrix eumove(ld x, ld y) {
   transmatrix Mat = Id;
   Mat[2][2] = 1;
-  Mat[0][2] += (x + y * .5) * eurad;
-  // Mat[2][0] += (x + y * .5) * eurad;
-  Mat[1][2] += y * q3 /2 * eurad;
-  // Mat[2][1] += y * q3 /2 * eurad;
+  
+  if(a4) {
+    Mat[0][2] += x * eurad;
+    Mat[1][2] += y * eurad;
+    }
+  else {
+    Mat[0][2] += (x + y * .5) * eurad;
+    // Mat[2][0] += (x + y * .5) * eurad;
+    Mat[1][2] += y * q3 /2 * eurad;
+    // Mat[2][1] += y * q3 /2 * eurad;
+    }
+  
+  ld v = a4 ? 1 : q3;
+
   while(Mat[0][2] <= -16384 * eurad) Mat[0][2] += 32768 * eurad;
   while(Mat[0][2] >= 16384 * eurad) Mat[0][2] -= 32768 * eurad;
-  while(Mat[1][2] <= -16384 * q3 * eurad) Mat[1][2] += 32768 * q3 * eurad;
-  while(Mat[1][2] >= 16384 * q3 * eurad) Mat[1][2] -= 32768 * q3 * eurad;
+  while(Mat[1][2] <= -16384 * v * eurad) Mat[1][2] += 32768 * v * eurad;
+  while(Mat[1][2] >= 16384 * v * eurad) Mat[1][2] -= 32768 * v * eurad;
   return Mat;
   }
 
 transmatrix eumovedir(int d) {
-  d = fix6(d);
-  switch(d) {
-    case 0: return eumove(1,0);
-    case 1: return eumove(0,1);
-    case 2: return eumove(-1,1);
-    case 3: return eumove(-1,0);
-    case 4: return eumove(0,-1);
-    case 5: return eumove(1,-1);
+  if(a4) {
+    d = d & 3;
+    switch(d) {
+      case 0: return eumove(1,0);
+      case 1: return eumove(0,1);
+      case 2: return eumove(-1,0);
+      case 3: return eumove(0,-1);
+      }
+    }
+  else {
+    d = fix6(d);
+    switch(d) {
+      case 0: return eumove(1,0);
+      case 1: return eumove(0,1);
+      case 2: return eumove(-1,1);
+      case 3: return eumove(-1,0);
+      case 4: return eumove(0,-1);
+      case 5: return eumove(1,-1);
+      }
     }
   return eumove(0,0);
   }
@@ -404,6 +425,7 @@ ld matrixnorm(const transmatrix& Mat) {
   
 void drawEuclidean() {
   DEBB(DF_GRAPH, (debugfile,"drawEuclidean\n"));
+  sphereflip = Id;
   eucoord px=0, py=0;
   if(!centerover) centerover = cwt.c;
   // printf("centerover = %p player = %p [%d,%d]-[%d,%d]\n", lcenterover, cwt.c,

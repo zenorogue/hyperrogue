@@ -3,6 +3,12 @@
 // Copyright (C) 2011-2017 Zeno Rogue, see 'hyper.cpp' for details
 
 int eupattern(cell *c) {
+  if(a4) {
+    if(torus) return (decodeId(c->master)*2) % 3;
+    eucoord x, y;
+    decodeMaster(c->master, x, y);
+    return (x&1) + (y&1);  
+    }
   if(torus) return (decodeId(c->master)*2) % 3;
   eucoord x, y;
   decodeMaster(c->master, x, y);
@@ -844,7 +850,8 @@ int pattern_threecolor(cell *c) {
     int i = si.id;
     return i >> 2;
     }
-  if(S7 == 4) {
+  if(euclid) return (eupattern(c)+1) % 3;
+  if(S7 == 4 && S3 == 3) {
     int codesN[6] = {0,1,2,1,2,0};
     if(nontruncated) 
       return codesN[c->master->fiftyval];
@@ -872,7 +879,6 @@ int pattern_threecolor(cell *c) {
     }
   if(S7 == 3 && nontruncated)
     return c->master->fiftyval;
-  if(euclid) return (eupattern(c)+1) % 3;
   return !ishept(c);
   }
   

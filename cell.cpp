@@ -606,15 +606,34 @@ cell*& euclideanAt(eucoord x, eucoord y) {
 cell*& euclideanAtCreate(eucoord x, eucoord y) {
   cell*& c = euclideanAt(x,y);
   if(!c) {
-    c = newCell(6, NULL);
+    c = newCell(a4 ? (nontruncated || ((x^y^1) & 1) ? 4 : 8) : 6, NULL);
     c->master = encodeMaster(x,y);
     euclideanAt(x,y) = c;
-    eumerge(c, euclideanAt(x+1,y), 0, 3);
-    eumerge(c, euclideanAt(x,y+1), 1, 4);
-    eumerge(c, euclideanAt(x-1,y+1), 2, 5);
-    eumerge(c, euclideanAt(x-1,y), 3, 0);
-    eumerge(c, euclideanAt(x,y-1), 4, 1);
-    eumerge(c, euclideanAt(x+1,y-1), 5, 2);
+    if(c->type == 4) {
+      int m = nontruncated ? 1 : 2;
+      eumerge(c, euclideanAt(x+1,y), 0, 2 * m);        
+      eumerge(c, euclideanAt(x,y+1), 1, 3 * m);
+      eumerge(c, euclideanAt(x-1,y), 2, 0 * m);
+      eumerge(c, euclideanAt(x,y-1), 3, 1 * m);
+      }
+    else if(c->type == 8) {
+      eumerge(c, euclideanAt(x+1,y), 0, 2);
+      eumerge(c, euclideanAt(x+1,y+1), 1, 5);
+      eumerge(c, euclideanAt(x,y+1), 2, 3);
+      eumerge(c, euclideanAt(x-1,y+1), 3, 7);
+      eumerge(c, euclideanAt(x-1,y), 4, 0);
+      eumerge(c, euclideanAt(x-1,y-1), 5, 1);
+      eumerge(c, euclideanAt(x,y-1), 6, 1);
+      eumerge(c, euclideanAt(x+1,y-1), 7, 3);
+      }
+    else /* 6 */ {
+      eumerge(c, euclideanAt(x+1,y), 0, 3);
+      eumerge(c, euclideanAt(x,y+1), 1, 4);
+      eumerge(c, euclideanAt(x-1,y+1), 2, 5);
+      eumerge(c, euclideanAt(x-1,y), 3, 0);
+      eumerge(c, euclideanAt(x,y-1), 4, 1);
+      eumerge(c, euclideanAt(x+1,y-1), 5, 2);
+      }
     }
   return c;
   }
@@ -719,6 +738,7 @@ void verifycells(heptagon *at) {
 int eudist(short sx, short sy) {
   int z0 = abs(sx);
   int z1 = abs(sy);
+  if(a4) return z0 + z1;
   int z2 = abs(sx+sy);
   return max(max(z0,z1), z2);
   }
