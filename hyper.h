@@ -656,7 +656,7 @@ inline void popScreenAll() { while(size(screens)>1) popScreen(); }
 extern transmatrix View; // current rotation, relative to viewctr
 extern transmatrix cwtV; // player-relative view
 
-extern cell *mouseover, *mouseover2;
+extern cell *mouseover, *mouseover2, *lmouseover;
 extern string mouseovers;
 
 extern struct SDL_Surface *s;
@@ -2377,6 +2377,9 @@ namespace texture {
     };
   
   extern eTextureState tstate;
+  extern unsigned paint_color;
+  extern ld penwidth;
+  extern transmatrix itt;
   
   void showMenu();
 

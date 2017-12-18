@@ -31,6 +31,8 @@ SDL_Surface *convertSurface(SDL_Surface* s) {
 
 int twidth = 2048;
 
+unsigned paint_color = 0x000000FF;
+
 vector<int> expanded_data;
 
 string texturename = "hyperrogue-texture.png";
@@ -275,7 +277,8 @@ void perform_mapping() {
   if(gsplits > 4) gsplits = 4;
   using namespace patterns;
   texture_map.clear();
-  for(auto p: gmatrix) {
+
+  for(auto& p: gmatrix) {
     cell *c = p.first;
     auto si = getpatterninfo0(c);
     bool replace = false;
@@ -292,10 +295,22 @@ void perform_mapping() {
       mapTexture(c, mi, si, p.second);
       mi.texture_id = textureid;
       }
-    texture_map[si.id].matrices.push_back(p.second);
     }
+
   models.clear();
   for(auto& t: texture_map) models.insert(t.second.c);
+  
+  for(auto& p: gmatrix) {
+    cell *c = p.first;
+    bool nearmodel = models.count(c);
+    forCellEx(c2, c) 
+      if(models.count(c2)) 
+        nearmodel = true;
+    if(nearmodel) {
+      auto si = getpatterninfo0(c);
+      texture_map[si.id].matrices.push_back(p.second * applyPatterndir(c, si));
+      }
+    }
   }
 
 int forgeArgs() {
@@ -739,7 +754,6 @@ void showMenu() {
       if(whitetexture() && loadTextureGL()) {
         tstate = tstate_max = tsActive;
         perform_mapping();
-        mapeditor::colortouse = 0xFFFF00FF;
         mapeditor::initdraw(cwt.c);
         pushScreen(mapeditor::showDrawEditor);
         }
@@ -788,13 +802,15 @@ void showMenu() {
 int lastupdate;
 
 void update() {
-  if(lastupdate && ticks > lastupdate + 100) {
+  if(lastupdate && ticks > lastupdate + 50) {
     loadTextureGL(); 
     lastupdate = 0;
     }
   }
 
-pair<int,int> ptc(hyperpoint h) {
+typedef pair<int,int> point;
+
+point ptc(hyperpoint h) {
   hyperpoint inmodel;
   applymodel(h, inmodel);
   inmodel = itt * inmodel;
@@ -805,42 +821,72 @@ pair<int,int> ptc(hyperpoint h) {
   return make_pair(x,y);
   }
 
+array<point, 3> ptc(const array<hyperpoint, 3>& h) {
+  return {ptc(h[0]), ptc(h[1]), ptc(h[2])};
+  }
+
+ld penwidth = .02;
+
 int near(pair<int, int> p1, pair<int, int> p2) {
   return max(abs(p1.first-p2.first), abs(p1.second - p2.second));
   }
 
-void filltriangle(array<hyperpoint, 3> v, int col, int lev) {
-  pair<int,int> p[3] = {ptc(v[0]), ptc(v[1]), ptc(v[2])};
+void filltriangle(const array<hyperpoint, 3>& v, const array<point, 3>& p, int col, int lev) {
   
-  if(0) for(int i=0; i<3; i++) 
-    printf("#%d fillt #%d %s -> %d,%d\n", lev, i, display(v[i]), p[i].first, p[i].second);
   int d2 = near(p[0], p[1]), d1 = near(p[0], p[2]), d0 = near(p[1], p[2]);
   
-  if((d0 <= 1 && d1 <= 1 && d2 <= 1) || lev >= 5) {
+  int a, b, c;
+
+  if((d0 <= 1 && d1 <= 1 && d2 <= 1) || lev >= 20) {
     for(int i=0; i<3; i++)
       expanded_data[((p[i].first) & (twidth-1)) + (p[i].second & (twidth-1)) * twidth] = col;
     return;
     }
   else if(d1 >= d0 && d1 >= d2)
-    swap(v[0], v[1]);
+    a = 0, b = 2, c = 1;
   else if(d2 >= d0 && d2 >= d1)
-    swap(v[0], v[2]);
+    a = 0, b = 1, c = 2;
+  else
+    a = 1, b = 2, c = 0;
   
-  hyperpoint v3 = mid(v[1], v[2]);
-  filltriangle({v[0], v[1], v3}, col, lev+1);
-  filltriangle({v[0], v[2], v3}, col, lev+1);
+  hyperpoint v3 = mid(v[a], v[b]);
+  point p3 = ptc(v3);
+  filltriangle({v[c], v[a], v3}, {p[c], p[a], p3}, col, lev+1);
+  filltriangle({v[c], v[b], v3}, {p[c], p[b], p3}, col, lev+1);
+  }
+
+void splitseg(const transmatrix& A, const array<ld, 2>& angles, const array<hyperpoint, 2>& h, const array<point, 2>& p, int col, int lev) {
+  ld newangle = (angles[0] + angles[1]) / 2;
+  hyperpoint nh = A * spin(newangle) * xpush(penwidth) * C0;
+  auto np = ptc(nh);
+  
+  filltriangle({h[0],h[1],nh}, {p[0],p[1],np}, col, lev);
+  if(lev < 10) {
+    if(near(p[0],np) > 1)
+      splitseg(A, {angles[0], newangle}, {h[0], nh}, {p[0], np}, col, lev+1);
+    if(near(np,p[1]) > 1)
+      splitseg(A, {newangle, angles[1]}, {nh, h[1]}, {np, p[1]}, col, lev+1);
+    }
   }
 
 void fillcircle(hyperpoint h, int col) {
   transmatrix A = rgpushxto0(h);
+  
+  ld step = M_PI * 2/3;
+  
+  array<hyperpoint, 3> mh = {A * xpush(penwidth) * C0, A * spin(step) * xpush(penwidth) * C0, A * spin(-step) * xpush(penwidth) * C0};
+  auto mp = ptc(mh);
 
-  ld rad = .02;
-
-  filltriangle({A * xpush(rad) * C0, A * spin(M_PI * 2/3) * C0, A * spin(-M_PI * 2/3) * C0}, col, 0);
+  filltriangle(mh, mp, col, 0);
+  
+  for(int i=0; i<3; i++) {
+    int j = (i+1) % 3;
+    if(near(mp[i], mp[j]) > 1)
+      splitseg(A, {step*i, step*(i+1)}, {mh[i], mh[j]}, {mp[i], mp[j]}, col, 1);
+    }
   }
 
 void drawPixel(cell *c, hyperpoint h, int col) {
-  printf("s = %d\n", size(gmatrix));
   
   try {
     transmatrix M = gmatrix.at(c);
@@ -848,8 +894,6 @@ void drawPixel(cell *c, hyperpoint h, int col) {
     h = inverse(M * applyPatterndir(c, si)) * h;
     auto& tinf = texture_map[si.id];
     for(auto& M2: tinf.matrices) for(int i = 0; i<c->type; i += si.symmetries) {
-      hyperpoint inmodel;
-      
       fillcircle(M2 * spin(2 * M_PI * i / c->type) * h, col);
       lastupdate = ticks;
       }

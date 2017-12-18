@@ -933,7 +933,7 @@ namespace mapeditor {
           break;
         }
       
-      usershape *us =usershapes[drawcellShapeGroup()][drawcellShapeID()];
+      us =usershapes[drawcellShapeGroup()][drawcellShapeID()];
       }
     
     int fs = min(vid.fsize + 5, vid.yres/28);
@@ -970,6 +970,8 @@ namespace mapeditor {
 
       }
     else if(texture::tstate == texture::tsActive) {
+      displayButton(8, 8+fs*7, XLAT("p = color"), 'p', 0);
+      displayButton(8, 8+fs*8, XLAT("w = pen size: %1", fts4(texture::penwidth)), 'w', 0);
       }
     else {
       displaymm('n', 8, 8+fs*5, 2, vid.fsize, XLAT("'n' to start"), 0);
@@ -1286,8 +1288,8 @@ namespace mapeditor {
     hyperpoint mh = inverse(drawtrans) * mouseh;
     if(uni == 'g') coldcenter = ccenter, ccenter = mh;
       
-    if(uni == 'z') vid.scale *= 2;
-    if(uni == 'o') vid.scale /= 2;
+    if(uni == 'z') vid.scale *= 2, texture::itt = xyscale(texture::itt, .5);
+    if(uni == 'o') vid.scale /= 2, texture::itt = xyscale(texture::itt, 2);
 
     if(uni == ' ' && cheater) {
       popScreen();
@@ -1320,9 +1322,33 @@ namespace mapeditor {
 
     if(texture::tstate == texture::tsActive) {
       if(uni == '-') {
-        texture::drawPixel(mouseover, mouseh, colortouse);
+        texture::drawPixel(mouseover, mouseh, (texture::paint_color >> 8) | ((texture::paint_color & 0xFF) << 24));
         holdmouse = true;
         }        
+
+      if(uni == 'p') {
+        static unsigned texture_colors[] = {
+          11,
+          0x000000FF,
+          0xFFFFFFFF,
+          0xFF0000FF,
+          0xFFFF00FF,
+          0x00FF00FF,
+          0x00FFFFFF,
+          0x0000FFFF,
+          0xFF00FFFF,
+          0xC0C0C0FF,
+          0x808080FF,
+          0x404040FF,
+          0x804000FF
+          };
+        dialog::openColorDialog(colortouse, texture_colors);
+        dialog::openColorDialog(texture::paint_color);
+        colorkey = true;
+        }
+
+      if(uni == 'w') 
+        dialog::editNumber(texture::penwidth, 0, 0.1, 0.005, 0.02, XLAT("pen width"), XLAT("pen width"));
       }
     
     else {
@@ -1430,18 +1456,23 @@ namespace mapeditor {
         }
       }
   
-    if(cmode & sm::DRAW) {
+    if(cmode & sm::DRAW) if(!holdmouse) {
     
-      if(texture::tstate == texture::tsActive && mouseover && !mouseout()) {
-        auto sio = patterns::getpatterninfo0(mouseover);
+      if(texture::tstate == texture::tsActive && lmouseover && !mouseout()) {
+        auto sio = patterns::getpatterninfo0(lmouseover);
         auto sih = patterns::getpatterninfo0(c);
         
         if(sio.id == sih.id) {
-          if(c == mouseover) textrans = V * applyPatterndir(mouseover, sio);
-          hyperpoint mh = inverse(mapeditor::textrans) * mouseh;
+          if(c == lmouseover) 
+            textrans = inverse(V * applyPatterndir(mouseover, sio));
+          transmatrix mh = textrans * rgpushxto0(mouseh);
           for(int i=0; i<c->type; i += sih.symmetries) {
-            hyperpoint P2 = V * spin(2*M_PI*i/c->type) * mh;
-            queuechr(P2, 10, 'x', 0xFF00FF);
+            transmatrix M2 = V * spin(2*M_PI*i/c->type) * mh;
+            array<hyperpoint, 6> pts;
+            for(int j=0; j<6; j++)
+              pts[j] = M2 * tC0(spin(M_PI*j/3) * xpush(texture::penwidth));
+            for(int j=0; j<6; j++)
+              queueline(pts[j], pts[(j+1)%6], texture::paint_color, 0, PPR_LINE);
             }
           }        
         }
