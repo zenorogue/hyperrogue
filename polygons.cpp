@@ -246,12 +246,39 @@ void polylineColor(SDL_Surface *s, int *x, int *y, int polyi, int col) {
     lineColor(s, x[i-1], y[i-1], x[i], y[i], col);
   }
 
-void filledPolygonColorI(SDL_Surface *s, int* polyx, int *polyy, int polyi, int col) {
-  Sint16 spolyx[polyi], spolyy[polyi];
-  for(int i=0; i<polyi; i++) spolyx[i] = polyx[i], spolyy[i] = polyy[i];
-  filledPolygonColor(s, spolyx, spolyy, polyi, col);
+void filledPolygonColorI(SDL_Surface *s, int* px, int *py, int polyi, int col) {
+  Sint16 spx[polyi], spy[polyi];
+  for(int i=0; i<polyi; i++) spx[i] = px[i], spy[i] = py[i];
+  filledPolygonColor(s, spx, spy, polyi, col);
   }
 #endif
+
+void drawTexturedTriangle(SDL_Surface *s, int *px, int *py, GLfloat *tv, int col) {
+  transmatrix source = {{{ld(px[0]),ld(px[1]),ld(px[2])}, {ld(py[0]),ld(py[1]),ld(py[2])}, {1,1,1}}};
+  transmatrix target = {{{tv[0],tv[3],tv[6]}, {tv[1],tv[4],tv[7]}, {1,1,1}}};
+  transmatrix isource = inverse(source);
+  int minx = px[0], maxx = px[0];
+  int miny = py[0], maxy = py[0];
+  for(int i=1; i<3; i++)
+    minx = min(minx, px[i]), maxx = max(maxx, px[i]),
+    miny = min(miny, py[i]), maxy = max(maxy, py[i]);
+  for(int mx=minx; mx<maxx; mx++)
+  for(int my=miny; my<maxy; my++) {
+    hyperpoint h = isource * hpxyz(mx, my, 1);
+    if(h[0] >= -1e-7 && h[1] >= -1e-7 && h[2] >= -1e-7) {
+      hyperpoint ht = target * h;
+      int x = int(ht[0] * texture::twidth) & (texture::twidth-1);
+      int y = int(ht[1] * texture::twidth) & (texture::twidth-1);
+      int c = texture::texture_pixels[y * texture::twidth + x];
+      auto& pix = qpixel(s, mx, my);
+      for(int p=0; p<3; p++) {
+        int alpha = part(c, 3) * part(col, 0);
+        auto& v = part(pix, p);
+        v = ((255*255 - alpha) * 255 * v + alpha * part(col, p+1) * part(c, p) + 255 * 255 * 255/2 + 1) / (255 * 255 * 255);
+        }
+      }
+    }
+  }
 
 #if CAP_GL
 void glcolor2(int color) {
@@ -606,7 +633,12 @@ void drawpolyline(polytodraw& p) {
     for(int i=0; i<polyi; i++) gdpush(polyx[i]), gdpush(polyy[i]);
   #elif CAP_SDLGFX==1
   
-    if(poly_flags & POLY_INVERSE) {
+    if(pp.tinf) {
+      if(!(poly_flags & POLY_INVERSE))
+        for(int i=0; i<polyi; i += 3)
+          drawTexturedTriangle(s, polyx+i, polyy+i, &pp.tinf->tvertices[i*3], p.col);
+      }
+    else if(poly_flags & POLY_INVERSE) {
       int i = polyi;
       if(true) {
         polyx[i] = 0; polyy[i] = 0; i++;

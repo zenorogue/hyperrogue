@@ -1967,7 +1967,7 @@ struct textureinfo {
   vector<GLfloat> vertices;
   vector<GLfloat> tvertices; 
   cell *c;
-  vector<transmatrix> matrices; 
+  vector<transmatrix> matrices;
   
   // these are required to adjust to geometry changes
   int current_geometry, current_type, symmetries, current_trunc;
@@ -2380,6 +2380,8 @@ namespace texture {
   extern unsigned paint_color;
   extern ld penwidth;
   extern transmatrix itt;
+  extern int twidth;
+  extern vector<unsigned> texture_pixels;
   
   void showMenu();
 

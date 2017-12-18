@@ -33,7 +33,7 @@ int twidth = 2048;
 
 unsigned paint_color = 0x000000FF;
 
-vector<int> expanded_data;
+vector<unsigned> texture_pixels;
 
 string texturename = "hyperrogue-texture.png";
 string configname = "hyperrogue.txc";
@@ -77,14 +77,14 @@ bool loadTextureGL() {
   
   glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, twidth, twidth, 0,
     GL_BGRA, GL_UNSIGNED_BYTE, 
-    &expanded_data[0] );
+    &texture_pixels[0] );
  
   return true;
   }
 
 bool whitetexture() {
-  expanded_data.resize(0);
-  expanded_data.resize(twidth * twidth, 0xFFFFFFFF);
+  texture_pixels.resize(0);
+  texture_pixels.resize(twidth * twidth, 0xFFFFFFFF);
   return true;
   }
 
@@ -102,7 +102,7 @@ bool readtexture() {
   SDL_FreeSurface(txt);
 
   vector<int> half_expanded(twidth * ty);
-  expanded_data.resize(twidth * twidth);
+  texture_pixels.resize(twidth * twidth);
   
   int origdim = max(tx, ty);
   int base_x = tx/2 - origdim/2;
@@ -112,12 +112,12 @@ bool readtexture() {
 
 /*  for(int y=0; y<twidth; y++)
   for(int x=0; x<twidth; x++)
-    expanded_data[y*twidth+x] = qpixel(txt2, y%ty, x%tx); */
+    texture_pixels[y*twidth+x] = qpixel(txt2, y%ty, x%tx); */
 
   for(int x=0; x<twidth; x++)
     scale_colorarray(origdim, 
       [&] (int y) { return base_y+y < 0 || base_y+y >= ty ? 0 : half_expanded[x + (base_y + y) * twidth]; }, 
-      [&] (int y, int v) { expanded_data[twidth * y + x] = v; }
+      [&] (int y, int v) { texture_pixels[twidth * y + x] = v; }
       );
   
   for(int y=0; y<ty; y++)
@@ -198,8 +198,8 @@ void mapTexture(cell *c, textureinfo& mi, patterns::patterninfo &si, const trans
   }
 
 int recolor(int col) {
+  if(color_alpha == 255 || (cmode & sm::DRAW)) return col | 0xFFFFFF00;
   if(color_alpha == 0) return col;
-  if(color_alpha == 255) return col | 0xFFFFFF00;
   for(int i=1; i<4; i++)
     part(col, i) = color_alpha + ((255-color_alpha) * part(col,i) + 127) / 255;
   return col;
@@ -630,6 +630,8 @@ void showMenu() {
       dialog::addSelItem(XLAT("reactivate the texture"), texturename, 't');
     dialog::addSelItem(XLAT("open texture file"), texturename, 'o');
     dialog::addSelItem(XLAT("load texture config"), "...", 'l');
+    dialog::addSelItem(XLAT("texture size"), its(twidth), 'w');
+    dialog::addSelItem(XLAT("paint a new texture"), "...", 'n');
     }
 
   if(tstate == tsAdjusting) {
@@ -749,6 +751,12 @@ void showMenu() {
           else return false;
           });
 
+    else if(uni == 'w' && tstate == tsOff) {
+      twidth *= 2;
+      if(twidth > 9000) twidth = 256;
+      tstate_max = tsOff;
+      }
+    
     else if(uni == 'n' && tstate == tsOff) {
       addMessage("white");
       if(whitetexture() && loadTextureGL()) {
@@ -839,7 +847,7 @@ void filltriangle(const array<hyperpoint, 3>& v, const array<point, 3>& p, int c
 
   if((d0 <= 1 && d1 <= 1 && d2 <= 1) || lev >= 20) {
     for(int i=0; i<3; i++)
-      expanded_data[((p[i].first) & (twidth-1)) + (p[i].second & (twidth-1)) * twidth] = col;
+      texture_pixels[((p[i].first) & (twidth-1)) + (p[i].second & (twidth-1)) * twidth] = col;
     return;
     }
   else if(d1 >= d0 && d1 >= d2)
@@ -903,6 +911,5 @@ void drawPixel(cell *c, hyperpoint h, int col) {
   
 }
 
-// todo texture editor
 // todo `three octagons` with two colors
 
