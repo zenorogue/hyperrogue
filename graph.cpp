@@ -4510,11 +4510,11 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
                     V * ddspin(c,t,+S14) * xpush0(x), 
                     gridcolor(c, c->mov[t]), prec);
         }
-      else if(ishept(c) && !euclid) ;
+      else if(ishept(c) && !(euclid&&!a4)) ;
       else {
         double x = hexvdist;
         for(int t=0; t< S6; t++) 
-          if(euclid ? c->mov[t]<c : (((t^1)&1) || c->mov[t] < c))
+          if((euclid&&!a4) ? c->mov[t]<c : (((t^1)&1) || c->mov[t] < c))
           queueline(V * ddspin(c,t,-S7) * xpush0(x), 
                     V * ddspin(c,t,+S7) * xpush0(x), 
                     gridcolor(c, c->mov[t]), prec);
