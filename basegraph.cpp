@@ -945,7 +945,7 @@ ld textscale() {
   
 // bool notgl = false;
 
-int pngres = 2048;
+int pngres = 2000;
 int pngformat = 0;
 
 #if CAP_PNG
