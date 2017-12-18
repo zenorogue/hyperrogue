@@ -7,7 +7,7 @@ int eupattern(cell *c) {
     if(torus) return (decodeId(c->master)*2) % 3;
     eucoord x, y;
     decodeMaster(c->master, x, y);
-    return ((x&1) - (y&1)) % 3;
+    return ((x&1) + 2*(y&1)) % 3;
     }
   if(torus) return (decodeId(c->master)*2) % 3;
   eucoord x, y;
