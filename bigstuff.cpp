@@ -865,7 +865,7 @@ void setLandEuclid(cell *c) {
     eucoord x, y;
     decodeMaster(c->master, x, y);
     
-    int zz = 2*short(x)+short(y) + 10;
+    int zz = a4 ? short(x) : 2*short(x)+short(y) + 10;
     zz %= 30; if(zz<0) zz += 30;
     if(zz >= 15)
       setland(c, laWarpSea);
