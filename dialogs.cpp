@@ -551,7 +551,7 @@ namespace dialog {
     else return int(x-.5);
     }
   
-  string disp(ld x) { if(ne.intval) return its(ldtoint(x)); else return fts(x); }
+  string disp(ld x) { if(ne.intval) return its(ldtoint(x)); else if(ne.vmax-ne.vmin < 1) return fts4(x); else return fts(x); }
 
   reaction_t reaction;
 
