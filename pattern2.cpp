@@ -7,7 +7,7 @@ int eupattern(cell *c) {
     if(torus) return (decodeId(c->master)*2) % 3;
     eucoord x, y;
     decodeMaster(c->master, x, y);
-    return (x&1) + (y&1);  
+    return ((x&1) - (y&1)) % 3;
     }
   if(torus) return (decodeId(c->master)*2) % 3;
   eucoord x, y;
@@ -16,6 +16,12 @@ int eupattern(cell *c) {
   z %= 3;
   if(z<0) z += 3;
   return z;
+  }
+
+int eupattern4(cell *c) {
+  eucoord x, y;
+  decodeMaster(c->master, x, y);
+  return (x&1) + ((y&1)) * 2;
   }
 
 bool ishept(cell *c) {
@@ -850,7 +856,10 @@ int pattern_threecolor(cell *c) {
     int i = si.id;
     return i >> 2;
     }
-  if(euclid) return (eupattern(c)+1) % 3;
+  if(euclid) {
+    if(a4 && nontruncated) return eupattern4(c);
+    return eupattern(c) % 3;
+    }
   if(S7 == 4 && S3 == 3) {
     int codesN[6] = {0,1,2,1,2,0};
     if(nontruncated) 

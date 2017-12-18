@@ -360,7 +360,7 @@ void addMessage(string s, char spamtype = 0);
 #define a467 (S3 == 4 && S7 >= 6)
 #define a38 (S7 == 8)
 #define sphere4 (sphere && S7 == 4)
-#define stdeuc (geometry == gNormal || geometry == gEuclid)
+#define stdeuc (geometry == gNormal || geometry == gEuclid || geometry == gEuclidSquare)
 #define smallsphere (S7 < 5)
 #define bigsphere (S7 == 5)
 #define ap4 (a4 && nontruncated)

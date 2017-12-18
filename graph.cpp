@@ -158,7 +158,6 @@ void drawSpeed(const transmatrix& V) {
 
 int ctof(cell *c) {
   if(nontruncated) return 1;
-  if(euclid && a4) return !(eupattern(c) & 1);
   // if(euclid) return 0;
   return ishept(c) ? 1 : 0;
   // c->type == 6 ? 0 : 1;
@@ -2860,7 +2859,7 @@ void floorShadow(cell *c, const transmatrix& V, int col, bool warp) {
       }
     }
   else if(c->land == laDual && !nontruncated) {
-    if(euclid && ishex1(c))
+    if(euclid && !a4 && ishex1(c))
       queuepolyat(V * pispin, shBigTriShadow, col, PPR_WALLSHADOW);
     else
       queuepolyat(V, shBigTriShadow, col, PPR_WALLSHADOW);
@@ -2884,7 +2883,7 @@ void plainfloor(cell *c, bool warp, const transmatrix &V, int col, int prio) {
       }
     }
   else if(c->land == laDual && !nontruncated) {
-    if(euclid && ishex1(c))
+    if(euclid && !a4 && ishex1(c))
       queuepolyat(V * pispin, shBigTriangle, col, prio);
     else
       queuepolyat(V, shBigTriangle, col, prio);
@@ -2964,7 +2963,7 @@ void placeSidewall(cell *c, int i, int sidepar, const transmatrix& V, bool warp,
   if(warp && !ishept(c) && (!c->mov[i] || !ishept(c->mov[i]))) return;
   if(c->land == laDual && !nontruncated) {
     if(ctof(c)) return;
-    if(euclid ? (ishex1(c) ? !(i&1) : (i&1)) : !(i&1)) return;
+    if((euclid && !a4) ? (ishex1(c) ? !(i&1) : (i&1)) : !(i&1)) return;
     }
   int prio;
   /* if(mirr) prio = PPR_GLASS - 2;
