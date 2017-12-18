@@ -364,7 +364,7 @@ bool isWarped(cell *c) {
   }
 
 bool nonAdjacent(cell *c, cell *c2) {
-  if(isWarped(c) && isWarped(c2) && !pseudohept(c) && !pseudohept(c2)) {
+  if(isWarped(c) && isWarped(c2) && warptype(c) == warptype(c2)) {
     /* int i = neighborId(c, c2);
     cell *c3 = c->mov[(i+1)%6], *c4 = c->mov[(i+5)%6];
     if(c3 && !isTrihepta(c3)) return false;

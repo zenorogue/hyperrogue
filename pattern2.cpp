@@ -898,6 +898,16 @@ bool pseudohept(cell *c) {
   return pattern_threecolor(c) == 0;
   }
 
+bool warptype(cell *c) {
+  if(a4 && nontruncated) {
+    if(euclid) 
+      return among(eupattern4(c), 1, 2);
+    else 
+      return c->master->distance & 1;
+    }
+  else return pattern_threecolor(c) == 0;
+  }
+
 namespace patterns {
   int canvasback = linf[laCanvas].color >> 2;
   int subcanvas;

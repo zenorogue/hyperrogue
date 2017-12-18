@@ -2444,7 +2444,7 @@ void setcolors(cell *c, int& wcol, int &fcol) {
     else if(c->land == laLivefjord)
       fcol = 0x000080;
     else if(isWarped(c->land))
-      fcol = 0x0000C0 + int((pseudohept(c)?30:-30) * sin(ticks / 600.));
+      fcol = 0x0000C0 + int((warptype(c)?30:-30) * sin(ticks / 600.));
     else
       fcol = wcol;
     }
@@ -2726,7 +2726,7 @@ void setcolors(cell *c, int& wcol, int &fcol) {
     default:
       if(isElemental(c->land)) fcol = linf[c->land].color;
       if(isWarped(c->land)) {
-        fcol = pseudohept(c) ? 0x80C080 : 0xA06020;
+        fcol = warptype(c) ? 0x80C080 : 0xA06020;
         if(c->wall == waSmallTree) wcol = 0x608000;
         }  
       if(isHaunted(c->land)) {
