@@ -4,6 +4,8 @@ namespace texture {
 
 GLuint textureid = 0;
 
+cpatterntype cgroup;
+
 SDL_Surface *convertSurface(SDL_Surface* s) {
   SDL_PixelFormat fmt;
   // fmt.format = SDL_PIXELFORMAT_BGRA8888;
@@ -311,6 +313,9 @@ void perform_mapping() {
       texture_map[si.id].matrices.push_back(p.second * applyPatterndir(c, si));
       }
     }
+    
+  computeCgroup();
+  texture::cgroup = patterns::cgroup;
   }
 
 int forgeArgs() {
@@ -623,19 +628,21 @@ void showMenu() {
   dialog::init(XLAT("texture mode"));
 
   if(tstate == tsOff) {
-    dialog::addSelItem(XLAT("select the texture's pattern"), XLAT("..."), 'r');
+    dialog::addItem(XLAT("select the texture's pattern"), 'r');
     if(tstate_max == tsAdjusting)
-      dialog::addSelItem(XLAT("readjust the texture"), texturename, 't');
+      dialog::addItem(XLAT("readjust the texture"), 't');
     if(tstate_max == tsActive)
-      dialog::addSelItem(XLAT("reactivate the texture"), texturename, 't');
-    dialog::addSelItem(XLAT("open texture file"), texturename, 'o');
-    dialog::addSelItem(XLAT("load texture config"), "...", 'l');
+      dialog::addItem(XLAT("reactivate the texture"), 't');
+    dialog::addItem(XLAT("open PNG as texture"), 'o');
+    dialog::addItem(XLAT("load texture config"), 'l');
     dialog::addSelItem(XLAT("texture size"), its(twidth), 'w');
-    dialog::addSelItem(XLAT("paint a new texture"), "...", 'n');
+    dialog::addItem(XLAT("paint a new texture"), 'n');
     }
 
   if(tstate == tsAdjusting) {
-    dialog::addSelItem(XLAT("enable the texture"), texturename, 't');
+    dialog::addItem(XLAT("select the texture's pattern"), 'r');
+    dialog::addItem(XLAT("enable the texture"), 't');
+    dialog::addItem(XLAT("cancel the texture"), 'T');
     dialog::addBoolItem(XLAT("move the model"), panstate == tpsModel, 'm');
     dialog::addBoolItem(XLAT("move the texture"), panstate == tpsMove, 'a');
     dialog::addBoolItem(XLAT("zoom/scale the texture"), panstate == tpsScale, 'x');
@@ -644,12 +651,12 @@ void showMenu() {
     dialog::addBoolItem(XLAT("affine transformations"), panstate == tpsAffine, 'y');
     dialog::addBoolItem(XLAT("magic"), panstate == tpsMagic, 'A');
 
-    dialog::addBoolItem(XLAT("grid color (master)"), "...", 'M');
-    dialog::addBoolItem(XLAT("grid color (copy)"), "...", 'C');
+    dialog::addColorItem(XLAT("grid color (master)"), master_color, 'M');
+    dialog::addColorItem(XLAT("grid color (copy)"), slave_color, 'C');
     
     if(panstate == tpsMagic) {
       dialog::addSelItem(XLAT("delete markers"), its(size(amp)), 'D');
-      dialog::addSelItem(XLAT("perform auto-adjustment"), "...", 'R');
+      dialog::addItem(XLAT("perform auto-adjustment"), 'R');
       }
 
     dialog::addSelItem(XLAT("precision"), its(gsplits), 'p');
@@ -660,12 +667,14 @@ void showMenu() {
     dialog::addSelItem(XLAT("texture angle"), fts(irotate), 'a');
     dialog::addSelItem(XLAT("texture position X"), fts(ix), 'x');
     dialog::addSelItem(XLAT("texture position Y"), fts(iy), 'y'); */
-    dialog::addBoolItem(XLAT("deactivate the texture"), true, 't');
-    dialog::addBoolItem(XLAT("readjust the texture"), true, 'r');
-    dialog::addSelItem(XLAT("grid alpha"), "...", 'g');
-    dialog::addSelItem(XLAT("mesh alpha"), "...", 'm');
+    dialog::addItem(XLAT("deactivate the texture"), 't');
+    dialog::addItem(XLAT("readjust the texture"), 'T');
+    dialog::addItem(XLAT("change the geometry"), 'r');
+    dialog::addColorItem(XLAT("grid color"), grid_color, 'g');
+    dialog::addColorItem(XLAT("mesh color"), mesh_color, 'm');
     dialog::addSelItem(XLAT("color alpha"), its(color_alpha), 'c');
-    dialog::addSelItem(XLAT("save the texture config"), "...", 's');
+    dialog::addItem(XLAT("save the texture image"), 'S');
+    dialog::addItem(XLAT("save the texture config"), 's');
     }
   
   dialog::addItem(XLAT("help"), SDLK_F1);  
@@ -737,8 +746,8 @@ void showMenu() {
           return load_textureconfig();
           });
 
-    else if(uni == 'r' && tstate == tsOff)
-      pushScreen(patterns::showPattern);
+    else if(uni == 'r')
+      patterns::pushChangeablePatterns();
 
     else if(uni == 'o' && tstate == tsOff) 
       dialog::openFileDialog(texturename, XLAT("texture to load:"), ".png", 
@@ -770,7 +779,7 @@ void showMenu() {
     else if(uni == 't' && tstate == tsOff) 
       tstate = tstate_max;
     
-    else if((uni == 't' || uni == 'r') && tstate == tsAdjusting) {
+    else if(uni == 't' && tstate == tsAdjusting) {
       tstate = tstate_max = tsActive;
       perform_mapping();
       }
@@ -778,7 +787,10 @@ void showMenu() {
     else if(uni == 't' && tstate == tsActive) 
       tstate = tsOff;
       
-    else if(uni == 'r' && tstate == tsActive) {
+    else if(uni == 'T' && tstate == tsAdjusting) 
+      tstate = tsOff;
+      
+    else if(uni == 'T' && tstate == tsActive) {
       tstate = tsAdjusting;
       texture_map.clear();
       }
@@ -910,6 +922,4 @@ void drawPixel(cell *c, hyperpoint h, int col) {
   }
   
 }
-
-// todo `three octagons` with two colors
 

@@ -471,12 +471,27 @@ namespace patterns {
     if(sym03 && (i&2)) i ^= 3;
     }
 
+  void applyAlt(patterninfo& si, int sub, int pat) {
+    if(sub & SPF_ALTERNATE) {
+      si.id += 4;
+      si.id %= 12;
+      }
+    if(pat == PAT_COLORING && (sub & SPF_FOOTBALL)) {
+      if(si.id == 4) si.dir++;
+      si.id = !si.id;
+      if(si.id && (sub & SPF_EXTRASYM))
+        si.symmetries = si.id ? 1 : 2;
+      return;
+      }
+    }
+
   void val46(cell *c, patterninfo &si, int sub, int pat) {
     if(ctof(c)) {
       si.id = c->master->emeraldval >> 1;
       applySym0123(si.id, sub);
       si.dir = (c->master->emeraldval&1) ^ (c->master->emeraldval>>1);
       si.symmetries = 2;
+      applyAlt(si, sub, pat);
       /* printf("[%3d] ", c->master->emeraldval);
       for(int i=0; i<6; i++) printf("%2d", val46(createMov(c, i)));
       printf("\n"); */
@@ -488,11 +503,13 @@ namespace patterns {
         si.dir += 4;
 
       if((sub & SPF_TWOCOL) && (pat == PAT_COLORING)) si.id = 4;
-      else if(si.id == 4) si.dir++;
+      else if(pat == PAT_COLORING && si.id == 4) si.dir++;
       
       if(sub & SPF_SYM01) si.symmetries = 2;
       else if(sub & SPF_SYM03) si.symmetries = 2;
       else if(sub & SPF_SYM02) si.symmetries = 4;
+      
+      applyAlt(si, sub, pat);
       }
     }
   
@@ -519,7 +536,7 @@ namespace patterns {
       else si.dir = (zebra40(createMov(c, 0)) & 4) ? 2 : 0;
       }
     }
-
+  
   void val38(cell *c, patterninfo &si, int sub, int pat) {
     bool symRotation = sub & SPF_ROT;
 
@@ -534,6 +551,9 @@ namespace patterns {
         si.id += 4;
       si.dir = (pat == PAT_COLORING ? 1 : 0) + (c->master->fiftyval | (c->master->fiftyval & 8 ? 0 : 2));
       si.symmetries = 2;
+      si.id += 8;
+      si.id %= 12;
+      applyAlt(si, sub, pat);
       }
     else {
       si.id = 8 * ((c->master->fiftyval & 1) ^ (c->spin(0) & 1));
@@ -542,11 +562,13 @@ namespace patterns {
         if(fv == 0) si.dir = (si.id == 8 && pat == PAT_COLORING ? 1 : 0) + i;
         }
       if(symRotation) si.symmetries = 2;
+      si.id += 8;
+      si.id %= 12;
+      applyAlt(si, sub, pat);
       }
-    
     }
   
-  void valEuclid(cell *c, patterninfo &si, int sub) {
+  void valEuclid6(cell *c, patterninfo &si, int sub) {
     bool symRotation = sub & SPF_ROT;
     si.id = ishept(c) ? 4 : ishex1(c) ? 8 : 0;
     if(sub & SPF_CHANGEROT) {
@@ -555,11 +577,28 @@ namespace patterns {
     if(symRotation) si.id = 0;
     }
 
+  void valEuclid4(cell *c, patterninfo &si, int sub) {
+    si.id = eupattern4(c);
+    applySym0123(si.id, sub);
+    if(sub & SPF_CHANGEROT) {
+      int dirt[] = {0,1,3,2};
+      si.dir = dirt[si.id];
+      if(c->type == 8) si.dir *= 2;
+      }
+    if(sub & SPF_SYM03) {
+      si.id *= 4;
+      applyAlt(si, sub, PAT_COLORING);
+      }
+    else
+      si.symmetries = (sub & SPF_EXTRASYM) ? c->type/4 : c->type;
+    }
+
   void val_all(cell *c, patterninfo &si, int sub, int pat) {
     if(a46) val46(c, si, sub, pat);
     else if(a38) val38(c, si, sub, pat);
     else if(sphere) valSibling(c, si, sub);
-    else if(euclid) valEuclid(c, si, sub);
+    else if(euclid4) valEuclid4(c, si, sub);
+    else if(euclid) valEuclid6(c, si, sub);
     else if(a4) val457(c, si, sub);
     else si.symmetries = ctof(c) ? 1 : 2;
     }
@@ -643,6 +682,9 @@ namespace patterns {
         }      
       if(sphere && !(nontruncated) && !(S7 == 3))
         si.symmetries = ctof(c) ? 1 : 2;
+      if(sphere && (sub & SPF_EXTRASYM)) {
+        si.symmetries = ctof(c) ? 1 : 2;
+        }
       if(a38)
         si.symmetries = (ctof(c) && !nontruncated) ? 1 : 2;
       if(a457) {
@@ -659,7 +701,6 @@ namespace patterns {
 
   int subpattern_flags;
  
-   // also works with 38
   void val_threecolors(cell *c, patterninfo& si, int sub) {
     int pcol = pattern_threecolor(c);
     si.id = pcol * 4;
@@ -673,11 +714,13 @@ namespace patterns {
           break;
           }
         }
-    if(euclid && (sub & SPF_CHANGEROT)) si.dir = 0;
+    if(euclid6 && (sub & SPF_CHANGEROT)) si.dir = 0;
     if(sub & SPF_ROT) si.id = 0;
-    if(!(sub & SPF_EXTRASYM)) {
-      if(euclid) si.symmetries = 6;
+    if(euclid6 && !(sub & SPF_EXTRASYM)) {
+      si.symmetries = 6;
       }
+    if(S7 == 4)
+      applyAlt(si, sub, PAT_COLORING);
     }
   
   patterninfo getpatterninfo(cell *c, char pat, int sub) {
@@ -815,6 +858,11 @@ namespace patterns {
     else if(pat == PAT_COLORING && (a46 || a38)) {
       val_all(c, si, sub, pat);
       }
+    
+    else if(pat == PAT_CHESS) {
+      val_nopattern(c, si, sub);
+      si.id = celldist(c) & 1;      
+      }
 
     else 
       val_nopattern(c, si, sub);
@@ -882,6 +930,11 @@ int pattern_threecolor(cell *c) {
     if(z == 14 || z == 11) return 4;
     return 1;
     }
+  if(a46 && nontruncated) {
+    patterns::patterninfo si;
+    patterns::val46(c, si, 0, patterns::PAT_COLORING);
+    return si.id;
+    }
   if(S7 == 5 && nontruncated) {
     const int codes[12] = {1, 2, 0, 3, 2, 0, 0, 1, 3, 1, 2, 3};
     return codes[c->master->fiftyval];
@@ -911,7 +964,7 @@ bool warptype(cell *c) {
 namespace patterns {
   int canvasback = linf[laCanvas].color >> 2;
   int subcanvas;
-  int displaycodes;
+  bool displaycodes;
   char whichShape = 0;
   char whichCanvas = 0;
 
@@ -1033,7 +1086,10 @@ namespace patterns {
       col[2] /= 4;
       return (0x202020 + col[0] + (col[1] << 8) + (col[2] << 16)) >> (err?2:0);
       }
-    if(whichCanvas == PAT_FIELD) {
+    if(whichPattern == 'c') {
+      return (c->master->distance&1) ? 0xC0C0C0 : 0x202020;
+      }
+    if(whichCanvas == 'F') {
       return pseudohept(c) ? 0x202020 : 0xC0C0C0;
       }
     if(whichCanvas == 'T') {
@@ -1045,18 +1101,25 @@ namespace patterns {
 
   void showPrePattern() {
     dialog::init("predesigned patterns");
-    dialog::addItem(XLAT("Gameboard"), 'g');
+    dialog::addItem(XLAT("single color"), 'g');
     dialog::addItem(XLAT("random colors"), 'r');
-    dialog::addItem(XLAT("rainbow landscape"), 'l');
-    dialog::addItem(XLAT("dark rainbow landscape"), 'd');
+    
+    if(stdeuc) {
+      dialog::addItem(XLAT("rainbow landscape"), 'l');
+      dialog::addItem(XLAT("dark rainbow landscape"), 'd');
+      }
+
     dialog::addItem(XLAT("football"), 'F');
+    if(S3 == 4 && nontruncated)
+      dialog::addItem(XLAT("chessboard"), 'c');
 
     dialog::addItem(XLAT("nice coloring"), 'T');
 
-    dialog::addSelItem(XLAT("emerald pattern"), "emerald", 'e');
-
-    dialog::addSelItem(XLAT("four elements"), "palace", 'b');
-    dialog::addSelItem(XLAT("eight domains"), "palace", 'a');
+    if(stdhyperbolic) {      
+      dialog::addSelItem(XLAT("emerald pattern"), "emerald", 'e');
+      dialog::addSelItem(XLAT("four elements"), "palace", 'b');
+      dialog::addSelItem(XLAT("eight domains"), "palace", 'a');
+      }
 
     dialog::addSelItem(XLAT("zebra pattern"), "zebra", 'z');
     dialog::addSelItem(XLAT("four triangles"), "zebra", 't');
@@ -1064,21 +1127,37 @@ namespace patterns {
 
     dialog::addSelItem(XLAT("random black-and-white"), "current", 'w');
 
-    dialog::addSelItem(XLAT("field pattern C"), "field", 'C');
-    dialog::addSelItem(XLAT("field pattern D"), "field", 'D');
-    dialog::addSelItem(XLAT("field pattern N"), "field", 'N');
-    dialog::addSelItem(XLAT("field pattern S"), "field", 'S');
+    if(!sphere) {
+      dialog::addSelItem(XLAT("field pattern C"), "field", 'C');
+      dialog::addSelItem(XLAT("field pattern D"), "field", 'D');
+      dialog::addSelItem(XLAT("field pattern N"), "field", 'N');
+      dialog::addSelItem(XLAT("field pattern S"), "field", 'S');
+      }
 
     dialog::display();
     
     keyhandler = [] (int sym, int uni) {
       dialog::handleNavigation(sym, uni);
-      if((uni >= 'a' && uni <= 'z') || (uni >= 'A' && uni <= 'Z')) {
+      if(uni == 'g') {
+        static unsigned c = (canvasback << 8) | 0xFF;
+        unsigned canvasbacks[] = {
+          5, 0xFFFFFFFF, 0x101010FF, 0x404040FF, 0x808080FF, 0x800000FF
+          }; 
+        dialog::openColorDialog(c, canvasbacks);
+        dialog::reaction = [] () {
+          whichCanvas = 'g';
+          canvasback = c >> 8;
+          firstland = specialland = laCanvas;
+          randomPatternsMode = false;
+          restartGame(0, false, true);
+          };
+        }
+      else if((uni >= 'a' && uni <= 'z') || (uni >= 'A' && uni <= 'Z')) {
         whichCanvas = uni;
         subcanvas = rand();
         firstland = specialland = laCanvas; 
         randomPatternsMode = false;
-        restartGame();
+        restartGame(0, false, true);
         }
       else if(doexiton(sym, uni)) popScreen();
       };    
@@ -1087,7 +1166,7 @@ namespace patterns {
   void showPattern() {
     cmode = sm::SIDE | sm::MAYDARK;
     {
-    dynamicval<int> dc(displaycodes, displaycodes ? displaycodes : 2);
+    dynamicval<bool> dc(displaycodes, true);
     gamescreen(0);
     }
     dialog::init();
@@ -1102,6 +1181,9 @@ namespace patterns {
     
     if(stdhyperbolic || euclid)
       dialog::addBoolItem(XLAT("Palace Pattern"), (whichPattern == PAT_PALACE), PAT_PALACE);
+    
+    if(nontruncated && S3 == 4)
+      dialog::addBoolItem(XLAT("chessboard"), (whichPattern == PAT_CHESS), PAT_CHESS);
 
     if(a38 || a46 || euclid || S3 == 4)
       dialog::addBoolItem(XLAT("coloring"), (whichPattern == PAT_COLORING), PAT_COLORING);
@@ -1149,9 +1231,21 @@ namespace patterns {
       }
     if(euclid && among(whichPattern, PAT_COLORING, 0))
       dialog::addBoolItem(XLAT("extra symmetries"), subpattern_flags & SPF_EXTRASYM, '=');
+
+    if(a38 && nontruncated && whichPattern == 0) {
+      dialog::addBoolItem(XLAT("extra symmetries"), subpattern_flags & SPF_EXTRASYM, '=');
+      }
+
+    if(a46 && nontruncated && whichPattern == PAT_COLORING) {
+      dialog::addBoolItem(XLAT("extra symmetries"), subpattern_flags & SPF_EXTRASYM, '=');
+      }
+
+    if((a38 || (sphere && S7 == 4) || euclid4 || a46) && !nontruncated) {
+      dialog::addBoolItem(XLAT("alternate coloring"), subpattern_flags & SPF_ALTERNATE, '\'');
+      dialog::addBoolItem(XLAT("football pattern"), subpattern_flags & SPF_FOOTBALL, '*');
+      }
     
-    dialog::addBoolItem(XLAT("display pattern codes (full)"), (displaycodes == 1), 'd');
-    dialog::addBoolItem(XLAT("display pattern codes (simplified)"), (displaycodes == 2), 's');
+    dialog::addBoolItem(XLAT("display pattern codes (full)"), displaycodes, 'd');
 
     dialog::addBoolItem(XLAT("display only hexagons"), (whichShape == '6'), '6');
     dialog::addBoolItem(XLAT("display only heptagons"), (whichShape == '7'), '7');
@@ -1166,15 +1260,12 @@ namespace patterns {
     
     keyhandler = [] (int sym, int uni) {
       dialog::handleNavigation(sym, uni);
-      printf("uni = %c\n", uni);
       
-      if(among(uni, PAT_EMERALD, PAT_PALACE, PAT_ZEBRA, PAT_DOWN, PAT_FIELD, PAT_COLORING, PAT_SIBLING)) {
+      if(among(uni, PAT_EMERALD, PAT_PALACE, PAT_ZEBRA, PAT_DOWN, PAT_FIELD, PAT_COLORING, PAT_SIBLING, PAT_CHESS)) {
         if(whichPattern == uni) whichPattern = 0;
         else whichPattern = uni;
         mapeditor::modelcell.clear();
         }
-      
-      else if(printf("not among\n"), 0) ;
       
       else if(uni >= '0' && uni <= '5') 
         subpattern_flags ^= (1 << (uni - '0'));
@@ -1182,12 +1273,21 @@ namespace patterns {
       else if(uni == '=') 
         subpattern_flags ^= SPF_EXTRASYM;
 
+      else if(uni == '\'') {
+        subpattern_flags ^= SPF_ALTERNATE;
+        subpattern_flags &= ~SPF_FOOTBALL;
+        }
+
+      else if(uni == '*') {
+        subpattern_flags ^= SPF_FOOTBALL;
+        subpattern_flags &= ~SPF_ALTERNATE;
+        }
+
       else if(uni == '6' || uni == '7' || uni == '8') {
         if(whichShape == uni) whichShape = 0;
         else whichShape = uni;
         }
-      else if(uni == 'd') displaycodes = displaycodes == 1 ? 0 : 1;
-      else if(uni == 's') displaycodes = displaycodes == 2 ? 0 : 2;
+      else if(uni == 'd') displaycodes = !displaycodes;
       
       else if(uni == 'l' && (cheater || autocheat))
         pushScreen(linepatterns::showMenu);
@@ -1198,6 +1298,145 @@ namespace patterns {
       };
     }
   
+  bool compatible(cpatterntype oldp, cpatterntype newp) {
+    // larges are not incompatible between themselves
+    if(newp == cpLarge) 
+      return false;
+    // other cps are compatible with themselves
+    if(newp == oldp) return true;
+    // Single can be upgraded to everything
+    if(oldp == cpSingle) return true;
+    // Football can be upgraded to Three colors
+    if(oldp == cpFootball) return newp == cpThree;
+    // incompatible otherwise
+    return false;
+    }
+  
+  struct changeable_pattern_geometry {
+    eGeometry geo;
+    bool nontrunc;
+    char whichPattern;
+    int subpattern_flags;
+    };
+  
+  struct changeable_pattern {
+    string name;
+    vector<changeable_pattern_geometry> geometries;
+    };
+  
+  vector<changeable_pattern> cpatterns = {
+    {"football", {
+      {gNormal, false, 0, 0}, 
+      {gSphere, false, 0, 0}, 
+      {gEuclid, false, 0, SPF_EXTRASYM}, 
+      {gOctagon, false, 0, 0}, 
+      {gOctagon, true, PAT_COLORING, SPF_FOOTBALL | SPF_EXTRASYM},
+      {g45, false, 0, 0}, 
+      {g46, false, 0, SPF_EXTRASYM}, 
+      {g47, false, 0, 0},
+      {gSmallSphere, false, 0, 0},
+      {gSmallSphere, true, PAT_COLORING, SPF_FOOTBALL | SPF_EXTRASYM},
+      {gTinySphere, false, 0, SPF_EXTRASYM},
+      {gEuclidSquare, false, 0, SPF_EXTRASYM},
+      }},
+    {"three colors", {
+      {gEuclid, false, PAT_COLORING, SPF_SYM0123 | SPF_EXTRASYM},
+      {gSmallSphere, false, PAT_COLORING, 0},
+      {gSmallSphere, false, PAT_COLORING, SPF_ALTERNATE},
+      {gSmallSphere, true, PAT_COLORING},
+      {gOctagon, false, PAT_COLORING, SPF_ROT | SPF_EXTRASYM},
+      {gOctagon, false, PAT_COLORING, SPF_ROT | SPF_EXTRASYM | SPF_ALTERNATE},
+      {gOctagon, true, PAT_COLORING, 0},
+      {gEuclidSquare, false, PAT_COLORING, SPF_SYM03 | SPF_EXTRASYM},
+      {gEuclidSquare, false, PAT_COLORING, SPF_SYM03 | SPF_EXTRASYM | SPF_ALTERNATE},
+      {g46, false, PAT_COLORING, SPF_SYM0123},
+      {g46, false, PAT_COLORING, SPF_SYM0123 | SPF_EXTRASYM | SPF_ALTERNATE}
+      }},
+    {"chessboard", {
+      {gEuclidSquare, true, PAT_CHESS, SPF_EXTRASYM}, 
+      {g45, true, PAT_CHESS, 0}, 
+      {g46, true, PAT_CHESS, 0}, 
+      {g47, true, PAT_CHESS, 0}
+      }},
+    {"single type", {
+      {gNormal, true, 0, 0}, 
+      {gSphere, true, 0, SPF_EXTRASYM}, 
+      {gEuclid, false, 0, SPF_EXTRASYM}, 
+      {gOctagon, true, 0, SPF_EXTRASYM}, 
+      {g45, true, 0, 0}, 
+      {g46, true, 0, 0}, 
+      {g47, true, 0, 0},
+      {gSmallSphere, true, 0, SPF_EXTRASYM},
+      {gTinySphere, true, 0, SPF_EXTRASYM},
+      {gEuclidSquare, true, 0, SPF_EXTRASYM},
+      }},
+    {"large picture", {
+      {gNormal, false, PAT_PALACE, SPF_SYM0123},
+      {gNormal, true, PAT_PALACE, SPF_SYM0123},
+      {gElliptic, false, PAT_FIELD, 0},
+      {gElliptic, true, PAT_FIELD, 0},
+      {gEuclid, false, PAT_PALACE, 0}
+      }}
+    };
+  
+  cpatterntype cgroup, old_cgroup;
+  
+  void showChangeablePatterns() {
+    cmode = sm::SIDE | sm::MAYDARK;
+    {
+    dynamicval<bool> dc(displaycodes, true);
+    gamescreen(0);
+    }
+    dialog::init();
+    for(int i=0; i<size(cpatterns); i++) 
+      dialog::addBoolItem(XLAT(cpatterns[i].name), cgroup == i, '0'+i);
+    dialog::addBreak(100);
+    if(cgroup != cpUnknown && cgroup < size(cpatterns))
+      for(int j=0; j<size(cpatterns[cgroup].geometries); j++) {
+        auto &g = cpatterns[cgroup].geometries[j];
+        string s = XLAT(ginf[g.geo].name);
+        s += truncatenames[g.nontrunc];
+        if(g.subpattern_flags & SPF_ALTERNATE) s += " (alt)";
+        dialog::addBoolItem(s, geometry == g.geo && nontruncated == g.nontrunc && whichPattern == g.whichPattern && subpattern_flags == g.subpattern_flags, 'a'+j);
+        if(texture::tstate == texture::tsActive && !compatible(texture::cgroup, (cpatterntype) j))
+          dialog::lastItem().value = XLAT("BAD");
+        }
+    dialog::addBreak(100);
+    dialog::addItem("more tuning", 'r');
+    dialog::display();
+  
+    keyhandler = [] (int sym, int uni) {
+      if(uni == 'r')
+        pushScreen(showPattern);
+      else if(uni >= '0' && uni < '0' + size(cpatterns))
+        cgroup = cpatterntype(uni - '0');
+      else if(cgroup != cpUnknown && uni >= 'a' && uni < 'a' + size(cpatterns[cgroup].geometries)) {
+        auto &g = cpatterns[cgroup].geometries[uni - 'a'];
+        if(g.geo != geometry) { targetgeometry = g.geo; restartGame('g', false, true); }
+        if(g.nontrunc != nontruncated) restartGame('7', false, true);
+        whichPattern = g.whichPattern;
+        subpattern_flags = g.subpattern_flags;
+        }
+      else if(doexiton(sym, uni))
+        popScreen();
+      };
+    }
+  
+  void computeCgroup() {
+    cgroup = cpUnknown;
+    for(int i=0; i<size(cpatterns); i++)
+      for(int j=0; j<size(cpatterns[i].geometries); j++) {
+        auto &g = cpatterns[i].geometries[j];
+        if(geometry == g.geo && nontruncated == g.nontrunc && whichPattern == g.whichPattern && subpattern_flags == g.subpattern_flags)
+          cgroup = cpatterntype(i);
+        }
+    old_cgroup = cgroup;
+    }
+
+  void pushChangeablePatterns() {
+    pushScreen(showChangeablePatterns);
+    computeCgroup(); 
+    }  
   }
 
 namespace linepatterns {
@@ -1468,7 +1707,7 @@ namespace linepatterns {
       else if(doexiton(sym,uni)) popScreen();
       }; 
     }
-  
+    
   };
 
 int val46(cell *c) {

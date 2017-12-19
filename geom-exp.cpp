@@ -136,6 +136,8 @@ void showTorusConfig() {
   dialog::display();
   }
 
+string truncatenames[2] = {" (t)", " (n)"};
+
 void showEuclideanMenu() {
   cmode = sm::SIDE;
   gamescreen(0);  
@@ -270,7 +272,6 @@ void showEuclideanMenu() {
     }
   else {
     dialog::init(XLAT("experiment with geometry"));
-    string truncatenames[2] = {" (t)", " (n)"};
   
     dialog::addSelItem(XLAT("geometry"), XLAT(ginf[geometry].name) + XLAT(truncatenames[nontruncated]), '5');
     dialog::addBreak(50);

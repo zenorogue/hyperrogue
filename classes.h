@@ -216,3 +216,8 @@ extern monstertype minf[motypes];
 extern itemtype iinf[ittypes];
 
 extern const landtype linf[landtypes];
+
+enum cpatterntype { 
+  cpFootball, cpThree, cpChess, cpSingle, cpLarge, cpUnknown
+  };
+  

@@ -364,6 +364,8 @@ void addMessage(string s, char spamtype = 0);
 #define smallsphere (S7 < 5)
 #define bigsphere (S7 == 5)
 #define ap4 (a4 && nontruncated)
+#define euclid4 (euclid && a4)
+#define euclid6 (euclid && !a4)
 
 #define S6 (S3*2)
 #define S42 (S7*S6)

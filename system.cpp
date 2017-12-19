@@ -1028,8 +1028,8 @@ void popAllGames() {
     }
   }
 
-void restartGame(char switchWhat, bool push) {
-  popScreenAll();
+void restartGame(char switchWhat, bool push, bool keep_screens) {
+  if(!keep_screens) popScreenAll();
   DEBB(DF_INIT, (debugfile,"restartGame\n"));
   
   
@@ -1094,27 +1094,15 @@ void restartGame(char switchWhat, bool push) {
     }
 #endif
   if(switchWhat == '7') {
-    if(euclid) geometry = gNormal;
+    if(euclid6) geometry = gNormal;
     nontruncated = !nontruncated;
     resetGeometry();
     }
   if(switchWhat == 'g') {
-    // transform coloring
-    eGeometry old = geometry;
-
-    if(euclid && targetgeometry == gOctagon && patterns::whichPattern == 'C')
-      patterns::subpattern_flags |= patterns::SPF_ROT;
-
-    if(euclid && targetgeometry == g46 && patterns::whichPattern == 'C')
-      patterns::subpattern_flags |= patterns::SPF_SYM01 | patterns::SPF_SYM02 | patterns::SPF_SYM03;
-
     if(geometry == targetgeometry) geometry = gNormal;
     else geometry = targetgeometry;
     if(chaosmode && (euclid || sphere || quotient)) chaosmode = false;
-    if(nontruncated && euclid) nontruncated = false;
-
-    if(euclid && old == gOctagon && patterns::whichPattern == 'C')
-      patterns::subpattern_flags |= patterns::SPF_EXTRASYM;
+    if(nontruncated && euclid6) nontruncated = false;
 
     resetGeometry();
     }

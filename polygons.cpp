@@ -1274,7 +1274,7 @@ void buildpolys() {
   double eps = hexhexdist * .05;
   if(euclid) trihepta0 = hexhexdist * .5 - eps * sqrt(3)/2, trihepta1 = hexhexdist * sqrt(3)/2 - eps; // .5-.1; .75-.05
   
-  if(euclid && a4) 
+  if(euclid4) 
     trihepta0 = trihepta1 = crossf * 1.35 / 2;
 
   if(sphere&&S7==3) trihepta0 *= 1.3, trihepta1 *= 1.6;
@@ -1327,7 +1327,7 @@ void buildpolys() {
   
   double floorrad1 = strict ? hcrossf : euclid ? shexf*fac80*spzoom : shexf*fac94;
   
-  if(euclid && a4) {
+  if(euclid4) {
     if(nontruncated)
       floorrad0 = floorrad1 = rhexf * .94;
     else
@@ -1764,7 +1764,7 @@ void buildpolys() {
   // if(euclid) espzoom6 *= 1.5, espzoomd7 *= 1.2;
   
   double octroll = a38 ? .2 : a46 ? -.2 : a47 ? .1 : 0;
-  if(euclid && a4) octroll += M_PI/4;
+  if(euclid4) octroll += M_PI/4;
 
   double ffscale6 = gsca(a4,.675);
   double ffspin6 = grot(a4,.125);
@@ -1791,7 +1791,7 @@ void buildpolys() {
   bshape(shChargedFloor[0], PPR_FLOOR, scalef*espzoom6*gsca(sphere,.9)*ffscale2, 7, ffspin2);
   bshape(shChargedFloor[1], PPR_FLOOR, scalef*spzoomd7, 9);
   bshape(shChargedFloor[2], PPR_FLOOR, scalef*espzoom6, 7);
-  bshape(shChargedFloor[3], 12, spzoomd7 * gsca(a4 && euclid, .4, a4,1.2,sphere&&nontruncated,.9)* ntscale, 10, ntrot + grot(euclid && a4 && nontruncated, M_PI/4 + .1)); // nontruncated variant
+  bshape(shChargedFloor[3], 12, spzoomd7 * gsca(a4 && euclid, .4, a4,1.2,sphere&&nontruncated,.9)* ntscale, 10, ntrot + grot(euclid4 && nontruncated, M_PI/4 + .1)); // nontruncated variant
 
   bshape(shSStarFloor[0], PPR_FLOOR, scalef*spzoom6*gsca(sphere,.8)*ffscale2, 11, grot(a4,.775));
   bshape(shSStarFloor[1], PPR_FLOOR, scalef*spzoomd7*gsca(a4,.85), 12, octroll);

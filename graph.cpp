@@ -3895,9 +3895,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
 
       if(patterns::displaycodes) {
       
-        int pf = patterns::displaycodes == 2 ? patterns::subpattern_flags : 0;
-      
-        auto si = patterns::getpatterninfo(c, patterns::whichPattern, pf);
+        auto si = patterns::getpatterninfo0(c);
         
         for(int i=0; i<c->type; i += si.symmetries) {
           queuepoly(V * applyPatterndir(c,si), shAsymmetric, darkena(0x000000, 0, 0xC0));

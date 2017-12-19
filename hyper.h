@@ -295,7 +295,7 @@ typedef int cellfunction(cell*);
 int towerval(cell *c, cellfunction* cf = &coastvalEdge);
 #define HRANDMAX 0x7FFFFFFF
 int hrandpos(); // 0 to HRANDMAX
-void restartGame(char switchWhat = 0, bool push = false);
+void restartGame(char switchWhat = 0, bool push = false, bool keep_screens = true);
 int landMultiplier(eLand l);
 eItem treasureType(eLand l);
 void buildBarrier(cell *c, int d, eLand l = laNone);
@@ -674,6 +674,7 @@ namespace patterns {
   static const char PAT_DOWN = 'H';
   static const char PAT_COLORING = 'C';
   static const char PAT_SIBLING = 'S';
+  static const char PAT_CHESS = 'c';
 
   extern int subpattern_flags;
   
@@ -684,12 +685,14 @@ namespace patterns {
   static const int SPF_CHANGEROT = 16;
   static const int SPF_TWOCOL = 32;
   static const int SPF_EXTRASYM = 64;
+  static const int SPF_ALTERNATE = 128;
+  static const int SPF_FOOTBALL = 256;
 
-  static const int SPF_SYM0123 = 14;
+  static const int SPF_SYM0123 = SPF_SYM01 | SPF_SYM02 | SPF_SYM03;
   
   extern char whichCanvas;
 
-  extern int displaycodes;
+  extern bool displaycodes;
 
   int generateCanvas(cell *c);
 
@@ -2384,9 +2387,11 @@ namespace texture {
   extern vector<unsigned> texture_pixels;
   
   void showMenu();
-
+  
   void update();
   void drawPixel(cell *c, hyperpoint h, int col);
+
+  extern cpatterntype cgroup;
   }
 
 void queueline(const hyperpoint& H1, const hyperpoint& H2, int col, int prf = 0, int prio = PPR_LINE);
@@ -2410,3 +2415,4 @@ inline hyperpoint tC0(const transmatrix &T) {
 transmatrix actualV(const heptspin& hs, const transmatrix& V);
 transmatrix cview();
 
+extern string truncatenames[2];
