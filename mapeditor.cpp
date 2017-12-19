@@ -836,7 +836,6 @@ namespace mapeditor {
   int dslayer;
   bool coloring;
   unsigned int colortouse = 0xC0C0C0FFu;
-  bool colorkey = false;
   // fake key sent to change the color
   static const int COLORKEY = (-10000); 
 
@@ -881,7 +880,6 @@ namespace mapeditor {
   void drawHandleKey(int sym, int uni);
 
   void showDrawEditor() {
-    if(colorkey) drawHandleKey(COLORKEY, COLORKEY), colorkey = false;
     cmode = sm::DRAW;
     gamescreen(0);
     drawGrid();
@@ -1342,9 +1340,7 @@ namespace mapeditor {
           0x404040FF,
           0x804000FF
           };
-        dialog::openColorDialog(colortouse, texture_colors);
-        dialog::openColorDialog(texture::paint_color);
-        colorkey = true;
+        dialog::openColorDialog(texture::paint_color, texture_colors);
         }
 
       if(uni == 'w') 
@@ -1387,7 +1383,9 @@ namespace mapeditor {
   
       if(uni == 'p') {
         dialog::openColorDialog(colortouse);
-        colorkey = true;
+        dialog::reaction = [] () {
+          drawHandleKey(COLORKEY, COLORKEY);
+          };
         }
 
       if(sym == SDLK_F2) 

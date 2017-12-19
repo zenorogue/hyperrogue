@@ -449,8 +449,10 @@ namespace dialog {
       unsigned char* pts = (unsigned char*) &color;
       pts[colorp] += abs(shiftmul) < .6 ? 1 : 17;
       }
-    else if(doexiton(sym, uni)) 
+    else if(doexiton(sym, uni)) {
+      if(reaction) reaction();
       popScreen();
+      }
     return false;
     }
   
@@ -516,6 +518,7 @@ namespace dialog {
     colorPointer = &col; palette = pal;
     dialogflags = 0;
     pushScreen(drawColorDialog);
+    reaction = reaction_t();
     }
   
   struct numberEditor {
