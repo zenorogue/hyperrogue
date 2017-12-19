@@ -144,23 +144,22 @@ int color_alpha = 0;
 
 int gsplits = 1;
 
-void mapTextureTriangle(textureinfo &mi, array<hyperpoint, 3> vview, array<hyperpoint, 3> vmap, int splits = gsplits) {
+void mapTextureTriangle(textureinfo &mi, array<hyperpoint, 3> v, int splits = gsplits) {
 
   if(splits) {
-    array<hyperpoint, 3> vview2 = { mid(vview[1], vview[2]), mid(vview[2], vview[0]), mid(vview[0], vview[1]) };
-    array<hyperpoint, 3> vmap2  = { mid(vmap [1], vmap [2]), mid(vmap [2], vmap [0]), mid(vmap [0], vmap [1]) };
-    mapTextureTriangle(mi, {vview[0], vview2[1], vview2[2]}, {vmap[0], vmap2[1], vmap2[2]}, splits-1);
-    mapTextureTriangle(mi, {vview[1], vview2[2], vview2[0]}, {vmap[1], vmap2[2], vmap2[0]}, splits-1);
-    mapTextureTriangle(mi, {vview[2], vview2[0], vview2[1]}, {vmap[2], vmap2[0], vmap2[1]}, splits-1);
-    mapTextureTriangle(mi, {vview2[0], vview2[1], vview2[2]}, {vmap2[0], vmap2[1], vmap2[2]}, splits-1);
+    array<hyperpoint, 3> v2 = { mid(v[1], v[2]), mid(v[2], v[0]), mid(v[0], v[1]) };
+    mapTextureTriangle(mi, {v[0], v2[1], v2[2]}, splits-1);
+    mapTextureTriangle(mi, {v[1], v2[2], v2[0]}, splits-1);
+    mapTextureTriangle(mi, {v[2], v2[0], v2[1]}, splits-1);
+    mapTextureTriangle(mi, {v2[0], v2[1], v2[2]}, splits-1);
     return;
     }
     
   for(int i=0; i<3; i++) {
     for(int j=0; j<3; j++) 
-      mi.vertices.push_back(vview[i][j]);
+      mi.vertices.push_back(v[i][j]);
     hyperpoint inmodel;
-    applymodel(mi.M * vmap[i], inmodel);
+    applymodel(mi.M * v[i], inmodel);
     inmodel = itt * inmodel;
     inmodel[0] *= vid.radius * 1. / vid.scrsize;
     inmodel[1] *= vid.radius * 1. / vid.scrsize;
@@ -170,17 +169,16 @@ void mapTextureTriangle(textureinfo &mi, array<hyperpoint, 3> vview, array<hyper
     }
   }
 
-map<int, textureinfo> texture_map;
+map<int, textureinfo> texture_map, texture_map_orig;
+
 set<cell*> models;
 
-void mapTexture(cell *c, textureinfo& mi, patterns::patterninfo &si, const transmatrix& T) {
+void mapTexture(cell *c, textureinfo& mi, patterns::patterninfo &si, const transmatrix& T, int shift = 0) {
   mi.c = c;
   mi.vertices.clear();
   mi.tvertices.clear();
   mi.symmetries = si.symmetries;
   mi.current_type = c->type;
-  mi.current_geometry = geometry;
-  mi.current_trunc = nontruncated;
   
   mi.M = T * applyPatterndir(c, si);
 
@@ -191,11 +189,10 @@ void mapTexture(cell *c, textureinfo& mi, patterns::patterninfo &si, const trans
   // int sym = si.symmetries;
 
   for(int i=0; i<c->type; i++) {
-    hyperpoint h1 =  spin(M_PI + M_PI * (2*i +1) / c->type) * xpush(z) * C0;
-    hyperpoint h2 =  spin(M_PI + M_PI * (2*i -1) / c->type) * xpush(z) * C0;
-    hyperpoint hm1 = spin(M_PI + M_PI * (2*i +1) / c->type) * xpush(z) * C0;
-    hyperpoint hm2 = spin(M_PI + M_PI * (2*i -1) / c->type) * xpush(z) * C0;
-    mapTextureTriangle(mi, {C0, h1, h2}, {C0, hm1, hm2});
+    int i2 = i+shift;
+    hyperpoint h1 =  spin(M_PI + M_PI * (2*i2 +1) / c->type) * xpush(z) * C0;
+    hyperpoint h2 =  spin(M_PI + M_PI * (2*i2 -1) / c->type) * xpush(z) * C0;
+    mapTextureTriangle(mi, {C0, h1, h2});
     }  
   }
 
@@ -227,26 +224,6 @@ bool apply(cell *c, const transmatrix &V, int col) {
     
     int n = mi.vertices.size() / 3;
 
-    if(geometry != mi.current_geometry || nontruncated != mi.current_trunc) {
-      // we can easily make it more symmetric
-      mi.symmetries = gcd(mi.symmetries, si.symmetries);
-
-      printf("Redrawing tile #%d from %d to %d\n", si.id, mi.current_type, c->type);
-      int nbase = n * mi.symmetries / mi.current_type;
-      int ntarget = nbase * c->type / mi.symmetries;
-      printf("n = %d nbase = %d ntarget = %d\n", n, nbase, ntarget);
-      vector<GLfloat> new_tvertices = move(mi.tvertices);
-      new_tvertices.resize(3*ntarget);
-      for(int i=3*nbase; i<3*ntarget; i++) {
-        new_tvertices[i] = new_tvertices[i - 3*nbase];
-        }
-      
-      mapTexture(c, mi, si, Id);
-      mi.tvertices = move(new_tvertices);
-      n = mi.vertices.size() / 3;
-      printf("new n = %d\n", n);
-      }    
-    
     qfi.special = false;
     qfi.shape = &shFullFloor[ctof(c)];
     qfi.tinf = &mi;
@@ -274,6 +251,12 @@ bool apply(cell *c, const transmatrix &V, int col) {
     }
   }
   
+typedef tuple<eGeometry, bool, char, int, eModel, ld, ld> texture_parameters; 
+
+static const auto current_texture_parameters = tie(geometry, nontruncated, patterns::whichPattern, patterns::subpattern_flags, pmodel, vid.scale, vid.alpha);
+
+texture_parameters orig_texture_parameters;
+
 void perform_mapping() {
   if(gsplits < 0) gsplits = 0;
   if(gsplits > 4) gsplits = 4;
@@ -316,6 +299,8 @@ void perform_mapping() {
     
   computeCgroup();
   texture::cgroup = patterns::cgroup;
+  texture_map_orig = texture_map;
+  orig_texture_parameters = current_texture_parameters;
   }
 
 int forgeArgs() {
@@ -637,6 +622,7 @@ void showMenu() {
     dialog::addItem(XLAT("load texture config"), 'l');
     dialog::addSelItem(XLAT("texture size"), its(twidth), 'w');
     dialog::addItem(XLAT("paint a new texture"), 'n');
+    dialog::addSelItem(XLAT("precision"), its(gsplits), 'P');
     }
 
   if(tstate == tsAdjusting) {
@@ -659,7 +645,7 @@ void showMenu() {
       dialog::addItem(XLAT("perform auto-adjustment"), 'R');
       }
 
-    dialog::addSelItem(XLAT("precision"), its(gsplits), 'p');
+    dialog::addSelItem(XLAT("precision"), its(gsplits), 'P');
     }
   
   if(tstate == tsActive) {
@@ -673,6 +659,7 @@ void showMenu() {
     dialog::addColorItem(XLAT("grid color"), grid_color, 'g');
     dialog::addColorItem(XLAT("mesh color"), mesh_color, 'm');
     dialog::addSelItem(XLAT("color alpha"), its(color_alpha), 'c');
+    dialog::addItem(XLAT("edit the texture"), 'e');
     dialog::addItem(XLAT("save the texture image"), 'S');
     dialog::addItem(XLAT("save the texture config"), 's');
     }
@@ -766,6 +753,11 @@ void showMenu() {
       tstate_max = tsOff;
       }
     
+    else if(uni == 'e' && tstate == tsActive) {
+      mapeditor::initdraw(cwt.c);
+      pushScreen(mapeditor::showDrawEditor);
+      }
+
     else if(uni == 'n' && tstate == tsOff) {
       addMessage("white");
       if(whitetexture() && loadTextureGL()) {
@@ -809,7 +801,7 @@ void showMenu() {
       dialog::editNumber(color_alpha, 0, 255, 15, 0, XLAT("color alpha"),
         XLAT("The higher the value, the less important the color of underlying terrain is."));
       }    
-    else if(uni == 'p' && tstate == tsAdjusting) {
+    else if(uni == 'P' && tstate <= tsAdjusting) {
       dialog::editNumber(gsplits, 0, 4, 1, 1, XLAT("precision"),
         XLAT("precision"));
       dialog::reaction = perform_mapping;
@@ -920,6 +912,66 @@ void drawPixel(cell *c, hyperpoint h, int col) {
     }
   catch(out_of_range) {}
   }
+
+void remap(eTextureState old_tstate, eTextureState old_tstate_max) {
+  if(!patterns::compatible(texture::cgroup, patterns::cgroup)) return;
+  texture_map.clear();
+  if(tstate_max == tsActive) {
+  
+    tstate = old_tstate;
+    tstate_max = old_tstate_max;
+    for(cell *c: dcal) {
+      auto si = patterns::getpatterninfo0(c);
+      
+      if(texture_map.count(si.id)) continue;
+      
+      int oldid = si.id;
+      int pshift = 0;
+      if(texture::cgroup == cpSingle) oldid = 1;
+      if(texture::cgroup == cpFootball && patterns::cgroup == cpThree) {
+        if(si.id == 4) pshift = 1;
+        oldid = !si.id;
+        }
+
+      try {
+
+        auto& mi = texture_map_orig.at(oldid);  
+        int ncurr = size(mi.tvertices);  
+        int ntarget = ncurr * c->type / mi.current_type;
+        vector<GLfloat> new_tvertices = mi.tvertices;
+        new_tvertices.resize(ntarget);
+        for(int i=ncurr; i<ntarget; i++) {
+          new_tvertices[i] = new_tvertices[i - ncurr];
+          }
+        
+        auto& mi2 = texture_map[si.id];
+        mi2 = mi;
+        mapTexture(c, mi2, si, Id, pshift);
+        mi2.tvertices = move(new_tvertices);
+  
+        printf("Redrawing tile #%d [%d] from %d (%d) to %d (%d)\n", si.id, oldid, mi.current_type, ncurr, c->type, ntarget);
+        printf("vertices: "); 
+        for(auto x: mi.vertices)
+          printf("%lf ", ld(x));
+        printf("\n");
+        printf("tvertices: ");
+        for(auto x: mi.tvertices)
+          printf("%lf ", ld(x));
+        printf("\n");
+        }
+      catch(out_of_range) { 
+        printf("Unexpected missing cell #%d/%d", si.id, oldid);
+        addMessage(XLAT("Unexpected missing cell #%d/%d", its(si.id), its(oldid)));
+        tstate_max = tstate = tsAdjusting;
+        return;
+        }
+      }     
+    }
+  }
   
 }
 
+// - fix spheres
+// - save texture image
+// - undo
+// - verify

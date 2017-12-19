@@ -1140,8 +1140,8 @@ namespace patterns {
       dialog::handleNavigation(sym, uni);
       if(uni == 'g') {
         static unsigned c = (canvasback << 8) | 0xFF;
-        unsigned canvasbacks[] = {
-          5, 0xFFFFFFFF, 0x101010FF, 0x404040FF, 0x808080FF, 0x800000FF
+        static unsigned canvasbacks[] = {
+          6, 0xFFFFFFFF, 0x101010FF, 0x404040FF, 0x808080FF, 0x800000FF, unsigned(linf[laCanvas].color >> 2) << 8
           }; 
         dialog::openColorDialog(c, canvasbacks);
         dialog::reaction = [] () {
@@ -1361,7 +1361,7 @@ namespace patterns {
     {"single type", {
       {gNormal, true, 0, 0}, 
       {gSphere, true, 0, SPF_EXTRASYM}, 
-      {gEuclid, false, 0, SPF_EXTRASYM}, 
+      {gEuclid, false, 0, SPF_EXTRASYM | SPF_ROT}, 
       {gOctagon, true, 0, SPF_EXTRASYM}, 
       {g45, true, 0, 0}, 
       {g46, true, 0, 0}, 
@@ -1388,8 +1388,11 @@ namespace patterns {
     gamescreen(0);
     }
     dialog::init();
-    for(int i=0; i<size(cpatterns); i++) 
+    for(int i=0; i<size(cpatterns); i++) {
       dialog::addBoolItem(XLAT(cpatterns[i].name), cgroup == i, '0'+i);
+      if(texture::tstate == texture::tsActive && !compatible(texture::cgroup, (cpatterntype) i))
+        dialog::lastItem().value = XLAT("BAD");
+      }
     dialog::addBreak(100);
     if(cgroup != cpUnknown && cgroup < size(cpatterns))
       for(int j=0; j<size(cpatterns[cgroup].geometries); j++) {
@@ -1398,8 +1401,6 @@ namespace patterns {
         s += truncatenames[g.nontrunc];
         if(g.subpattern_flags & SPF_ALTERNATE) s += " (alt)";
         dialog::addBoolItem(s, geometry == g.geo && nontruncated == g.nontrunc && whichPattern == g.whichPattern && subpattern_flags == g.subpattern_flags, 'a'+j);
-        if(texture::tstate == texture::tsActive && !compatible(texture::cgroup, (cpatterntype) j))
-          dialog::lastItem().value = XLAT("BAD");
         }
     dialog::addBreak(100);
     dialog::addItem("more tuning", 'r');
@@ -1411,11 +1412,14 @@ namespace patterns {
       else if(uni >= '0' && uni < '0' + size(cpatterns))
         cgroup = cpatterntype(uni - '0');
       else if(cgroup != cpUnknown && uni >= 'a' && uni < 'a' + size(cpatterns[cgroup].geometries)) {
+        auto old_tstate = texture::tstate;
+        auto old_tstate_max = texture::tstate_max;
         auto &g = cpatterns[cgroup].geometries[uni - 'a'];
         if(g.geo != geometry) { targetgeometry = g.geo; restartGame('g', false, true); }
         if(g.nontrunc != nontruncated) restartGame('7', false, true);
         whichPattern = g.whichPattern;
         subpattern_flags = g.subpattern_flags;
+        texture::remap(old_tstate, old_tstate_max);
         }
       else if(doexiton(sym, uni))
         popScreen();

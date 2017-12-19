@@ -1973,7 +1973,7 @@ struct textureinfo {
   vector<transmatrix> matrices;
   
   // these are required to adjust to geometry changes
-  int current_geometry, current_type, symmetries, current_trunc;
+  int current_type, symmetries;
   };
 
 struct qpoly {
@@ -2379,7 +2379,7 @@ namespace texture {
     tsOff, tsAdjusting, tsActive
     };
   
-  extern eTextureState tstate;
+  extern eTextureState tstate, tstate_max;
   extern unsigned paint_color;
   extern ld penwidth;
   extern transmatrix itt;
@@ -2390,6 +2390,8 @@ namespace texture {
   
   void update();
   void drawPixel(cell *c, hyperpoint h, int col);
+  
+  void remap(eTextureState old_tstate, eTextureState old_tstate_max);
 
   extern cpatterntype cgroup;
   }
