@@ -3465,7 +3465,7 @@ int pickDownDirection(cell *c, flagtype mf) {
   }
 
 template<class T> 
-cell *determinePush(cellwalker who, cell *c2, int subdir, T valid) {
+cell *determinePush(cellwalker who, cell *c2, int subdir, const T& valid) {
   cellwalker push = who;
   cwstep(push);
   cwspin(push, 3 * -subdir);
@@ -7062,4 +7062,3 @@ bool warningprotection() {
   items[itWarning] = 1;
   return true;
   }
-
