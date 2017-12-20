@@ -1038,8 +1038,6 @@ bool outlawNearby(cell *c, int dist) {
   return false;
   }
 
-// int monstersnear(cell *c, cell *nocount = NULL, eMonster who = moPlayer, cell *pushto = NULL) {
-
 namespace stalemate {
   bool anyKilled() {
     for(int i=0; i<size(moves); i++) if(moves[i].killed) return true;
@@ -1074,12 +1072,12 @@ bool krakensafe(cell *c) {
     (c->item == itOrbAether && c->wall == waBoat);
   }
   
-int monstersnear(stalemate1& sm) {
+bool monstersnear(stalemate1& sm) {
 
   cell *c = sm.moveto;
   bool eaten = false;
 
-  if(hardcore && sm.who == moPlayer) return 0;
+  if(hardcore && sm.who == moPlayer) return false;
   int res = 0;
   bool fast = false;
 
@@ -1156,12 +1154,12 @@ int monstersnear(stalemate1& sm) {
   if(sm.who == moPlayer && res && markOrb2(itOrbDomination) && c->monst)
     res = 0;
 
-  return res;
+  return !!res;
   }
 
 namespace multi { bool aftermove; }
 
-int monstersnear2();
+bool monstersnear2();
 
 int lastkills;
 
@@ -1194,9 +1192,9 @@ bool swordConflict(const stalemate1& sm1, const stalemate1& sm2) {
   return false;
   }
 
-int monstersnear2() {
+bool monstersnear2() {
   multi::cpid++;
-  int b = 0;
+  bool b = false;
   bool recorduse[ittypes];
   for(int i=0; i<ittypes; i++) recorduse[i] = orbused[i];
   if(multi::cpid == multi::players || multi::players == 1 || multi::checkonly) {
@@ -1210,13 +1208,13 @@ int monstersnear2() {
     for(int i=0; i<size(stalemate::moves); i++)
     for(int j=0; j<size(stalemate::moves); j++) if(i != j) {
       if(swordConflict(stalemate::moves[i], stalemate::moves[j])) {
-          b = 1;
+          b = true;
           which = moEnergySword;
           }
       if(multi::player[i].c == multi::player[j].c) 
-        { b = 1; which = moFireball; }
+        { b = true; which = moFireball; }
       if(celldistance(multi::player[i].c, multi::player[j].c) > 8) 
-        { b = 1; which = moAirball; }
+        { b = true; which = moAirball; }
       }
 
     for(int i=0; !b && i<size(stalemate::moves); i++)
@@ -1228,7 +1226,7 @@ int monstersnear2() {
   return b;
   }
 
-int monstersnear(cell *c, cell *nocount, eMonster who, cell *pushto, cell *comefrom) {
+bool monstersnear(cell *c, cell *nocount, eMonster who, cell *pushto, cell *comefrom) {
 
   if(peace::on) return 0; // you are safe
 
@@ -1260,7 +1258,7 @@ int monstersnear(cell *c, cell *nocount, eMonster who, cell *pushto, cell *comef
   
   // dynamicval<eMonster> x7(stalemate::who, who);
   
-  int b;
+  bool b;
   if(who == moPlayer && c->wall == waBigStatue) {
     eWall w = comefrom->wall;
     c->wall = waNone;
