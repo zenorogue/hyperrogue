@@ -27,7 +27,7 @@ namespace mapeditor {
   map<int, cell*> modelcell;
 
   void handleKeyMap(int sym, int uni);
-  bool handleKeyFile(int sym, int uni);
+  void handleKeyFile(int sym, int uni);
 
   void applyModelcell(cell *c) {
     if(mapeditor::whichPattern == 'H') return;
@@ -1085,17 +1085,17 @@ namespace mapeditor {
       }
     }
   
-  bool handleKeyFile(int uni, int sym) {
+  void handleKeyFile(int sym, int uni) {
     string& s(*cfileptr);
     int i = size(s) - (editext?0:4);
     if(uni > 2000) sym = uni - 2000;
     if(sym == SDLK_RETURN || sym == SDLK_KP_ENTER || sym == SDLK_ESCAPE) {
       popScreen();
-      return true;
+      return;
       }
     else if(sym == SDLK_F2 || sym == SDLK_F3) {
       popScreen();
-      return false;
+      return;
       }
     else if(sym == SDLK_F4) {
       editext = !editext;
@@ -1125,7 +1125,6 @@ namespace mapeditor {
       else
         s = where + v[i].first;
       }
-    return true;
     }
   
   void handleKeyMap(int sym, int uni) {

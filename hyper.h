@@ -1293,8 +1293,6 @@ void pushThumper(cell *th, cell *cto);
 template<class T> T pick(T x, T y) { return hrand(2) ? x : y; }
 template<class T> T pick(T x, T y, T z) { switch(hrand(3)) { case 0: return x; case 1: return y; case 2: return z; } return x; }
 template<class T> T pick(T x, T y, T z, T v) { switch(hrand(4)) { case 0: return x; case 1: return y; case 2: return z; case 3: return v; } return x; }
-template<class T, class... U> bool among(T x, T y) { return x == y; }
-template<class T, class... U> bool among(T x, T y, U... u) { return x==y || among(x,u...); }
 
 eLand getNewSealand(eLand old);
 bool createOnSea(eLand old);
