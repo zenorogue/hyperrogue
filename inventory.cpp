@@ -359,7 +359,7 @@ namespace inv {
     }
   
   map<char, eItem> orbmap;
-  string orbkeys = "zfwplSetsTaMIYgCcPOWAFydLGRUkouE.,bVNxDjJZnrvhBm0123456789";
+  string orbkeys = "zfwplSetsTaMIYgCcPOWAFydLGRUkouE.,bVNxDjJZnrvhBm123456789";
   
   typedef pair<int, int> pxy;
   vector<pxy> orbcoord;
