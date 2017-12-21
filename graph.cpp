@@ -3186,6 +3186,11 @@ int getSnakelevColor(cell *c, int i, int last, int fd, int wcol) {
                                
 void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
 
+  if(texture::saving) {
+    texture::apply(c, V, 0xFFFFFFFF);
+    return;
+    }
+
   qfi.shape = NULL; qfi.special = false;
   ivoryz = isGravityLand(c->land);
 
@@ -5082,7 +5087,7 @@ void calcparam() {
   
   int realradius = min(vid.xcenter, vid.ycenter);
   
-  vid.scrsize = vid.ycenter - (ISANDROID ? 2 : ISIOS ? 40 : 40);
+  vid.scrsize = vid.ycenter - (inHighQual ? 0 : ISANDROID ? 2 : ISIOS ? 40 : 40);
 
   vid.radius = vid.scale * vid.scrsize;
   
@@ -5090,7 +5095,7 @@ void calcparam() {
   
   sidescreen = false;
   
-  if(vid.xres < vid.yres) {
+  if(vid.xres < vid.yres && !inHighQual) {
     vid.radius = int(vid.scale * vid.xcenter) - (ISIOS ? 10 : 2);
     vid.ycenter = vid.yres - realradius - vid.fsize - (ISIOS ? 10 : 0);
     }

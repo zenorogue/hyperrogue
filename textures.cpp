@@ -42,8 +42,10 @@ unsigned paint_color = 0x000000FF;
 
 vector<unsigned> texture_pixels;
 
-string texturename = "texture/hyperrogue-texture.png";
-string configname = "texture/hyperrogue.txc";
+string texturename = "textures/hyperrogue-texture.png";
+string configname = "textures/hyperrogue.txc";
+
+bool saving = false;
 
 eTextureState tstate;
 eTextureState tstate_max;
@@ -97,6 +99,8 @@ bool whitetexture() {
 
 bool readtexture() {
 
+  texture_pixels.resize(twidth * twidth);
+  
 #if CAP_SDL_IMG  
   SDL_Surface *txt = IMG_Load(texturename.c_str());
   if(!txt) {
@@ -183,7 +187,6 @@ bool readtexture() {
         [&] (int x, int v) { half_expanded[twidth * y + x] = v; }
         );
 
-    texture_pixels.resize(twidth * twidth);
     for(int x=0; x<twidth; x++)
       scale_colorarray(origdim, 
         [&] (int y) { return base_y+y < 0 || base_y+y >= ty ? 0 : half_expanded[x + (base_y + y) * twidth]; }, 
@@ -206,6 +209,7 @@ void saveRawTexture() {
     qpixel(sraw,x,y) = texture_pixels[y * twidth + x];
   IMAGESAVE(sraw, texturename.c_str());
   SDL_FreeSurface(sraw);
+  addMessage(XLAT("Saved the raw texture to %1", texturename));
   }
 
 transmatrix itt = Id;
@@ -317,6 +321,28 @@ bool apply(cell *c, const transmatrix &V, int col) {
       queuepolyat(V, shFullFloor[ctof(c)], 0, PPR_FLOOR);
       lastptd().u.poly.outline = grid_color;
       }
+      
+    if(texture::saving) {
+      // create a nicer aura for saved texture
+      for(int i=0; i<size(mi.tvertices); i += 9) {
+        ld p[3];
+        while(true) {
+          p[0] = hrandf();
+          p[1] = hrandf();
+          p[2] = 1 - p[0] - p[1];
+          if(p[2] >= 0) break;
+          }
+        ld v[2] = {0,0};
+        for(int j=0; j<2; j++) for(int k=0; k<3; k++)
+          v[j] += mi.tvertices[3*k+j] * p[k];
+  
+        int vi[2] = {int(v[0] * twidth), int(v[1] * twidth)};
+  
+        col = texture_pixels[(vi[0] & (twidth-1)) + (vi[1] & (twidth-1)) * twidth];
+        hyperpoint h = hpxyz(mi.vertices[i], mi.vertices[i+1], mi.vertices[i+2]);
+        addaura(V*h, col, 0);
+        }
+      }
     
     return true;
     }
@@ -378,30 +404,24 @@ void perform_mapping() {
   orig_texture_parameters = current_texture_parameters;
   }
 
-int forgeArgs() {
-  using namespace arg;
-           
-  if(0) ;
-  else if(argis("-txpic")) {
-    shift(); texturename = args();
-    }
+void saveFullTexture() {
+  addMessage(XLAT("Saving full texture to %1...", texturename));
+  dynamicval<unsigned> dd(grid_color, 0);
+  dynamicval<unsigned> dm(mesh_color, 0);
+  texture::saving = true;
+  drawscreen();
 
-  else if(argis("-fsp")) {
-    shift(); gsplits = argf();
-    }
-
-  else if(argis("-txc")) {
-    shift(); configname = args();
-    }
-
-  else return 1;
-  return 0;
+  dynamicval<int> dv(pngres, twidth);
+  saveHighQualityShot(texturename.c_str());
+  texture::saving = false;
+  
+  drawscreen();
+  itt = xyscale(Id, vid.scrsize * 1. / vid.radius);
+  readtexture();
+  perform_mapping();
   }
 
 bool newmove = false;
-
-auto texture_hook = 
-  addHook(hooks_args, 100, forgeArgs);
 
 void drawRawTexture() {
   glDisable(GL_LIGHTING);  
@@ -690,7 +710,7 @@ void showMenu() {
   if(tstate == tsOff) {
     dialog::addItem(XLAT("select geometry/pattern"), 'r');
     if(tstate_max == tsAdjusting)
-      dialog::addItem(XLAT("readjust the texture"), 't');
+      dialog::addItem(XLAT("readjust/save raw texture"), 't');
     if(tstate_max == tsActive)
       dialog::addItem(XLAT("reactivate the texture"), 't');
     dialog::addItem(XLAT("open PNG as texture"), 'o');
@@ -736,7 +756,7 @@ void showMenu() {
     dialog::addColorItem(XLAT("mesh color"), mesh_color, 'm');
     dialog::addSelItem(XLAT("color alpha"), its(color_alpha), 'c');
     dialog::addItem(XLAT("edit the texture"), 'e');
-    dialog::addItem(XLAT("save the texture image"), 'S');
+    dialog::addItem(XLAT("save the full texture image"), 'S');
     dialog::addItem(XLAT("save the texture config"), 's');
     }
   
@@ -884,6 +904,8 @@ void showMenu() {
       }    
     else if(uni == 'S' && tstate == tsAdjusting) 
       saveRawTexture();
+    else if(uni == 'S' && tstate == tsActive) 
+      saveFullTexture();
     else if(doexiton(sym, uni))
       popScreen();
     };
@@ -1037,5 +1059,38 @@ void remap(eTextureState old_tstate, eTextureState old_tstate_max) {
     }
   }
   
+int textureArgs() {
+  using namespace arg;
+           
+  if(0) ;
+  else if(argis("-txpic")) {
+    shift(); texturename = args();
+    }
+
+  else if(argis("-txp")) {
+    shift(); gsplits = argf();
+    }
+
+  else if(argis("-txc")) {
+    shift(); configname = args();
+    }
+
+  else if(argis("-txc")) {
+    shift(); configname = args();
+    }
+
+  else if(argis("-txcl")) {
+    PHASE(3); drawscreen();
+    load_textureconfig();
+    }
+
+  else return 1;
+  return 0;
+  }
+
+auto texture_hook = 
+  addHook(hooks_args, 100, textureArgs);
+
+
 }
 #endif

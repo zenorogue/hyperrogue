@@ -2384,8 +2384,10 @@ namespace texture {
   extern eTextureState tstate, tstate_max;
   extern unsigned paint_color;
   extern ld penwidth;
-  extern transmatrix itt;
+  extern transmatrix itt;  
   extern int twidth;
+  extern bool saving;
+  
   extern vector<unsigned> texture_pixels;
   
   void showMenu();
