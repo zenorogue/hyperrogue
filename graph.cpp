@@ -3011,7 +3011,7 @@ int gridcolor(cell *c1, cell *c2) {
     }
   if(chasmgraph(c1) != chasmgraph(c2))
     return Dark(0x808080);
-  if(c1->land == laAlchemist && c2->land == laAlchemist && c1->wall != c2->wall)
+  if(c1->land == laAlchemist && c2->land == laAlchemist && c1->wall != c2->wall && !c1->item && !c2->item)
     return Dark(0xC020C0);
   if((c1->land == laWhirlpool || c2->land == laWhirlpool) && (celldistAlt(c1) != celldistAlt(c2)))
     return Dark(0x2020A0);
