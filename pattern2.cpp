@@ -899,10 +899,8 @@ int geosupport_graveyard() {
 int pattern_threecolor(cell *c) {
   if(a38) {
     patterns::patterninfo si;
-    patterns::val38(c, si, 0, patterns::PAT_COLORING);
-    int i = si.id;
-    if(nontruncated) return i;
-    else return i < 4 ? 0 : (1+(i&1));
+    patterns::val38(c, si, patterns::SPF_ROT, patterns::PAT_COLORING);
+    return si.id >> 2;
     }
   if(a46 && !nontruncated) {
     patterns::patterninfo si;
