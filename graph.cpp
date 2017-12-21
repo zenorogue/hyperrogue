@@ -2911,11 +2911,14 @@ int wavephase;
 
 void warpfloor(cell *c, const transmatrix& V, int col, int prio, bool warp) {
   if(shmup::on || nontruncated) warp = false;
+#if CAP_TEXTURE
   if(qfi.tinf) {
     queuetable(V*qfi.spin, &qfi.tinf->vertices[0], size(qfi.tinf->vertices) / 3, 0, texture::recolor(col), prio);
     lastptd().u.poly.tinf = qfi.tinf;
     }
-  else if(wmescher && qfi.special)
+  else 
+#endif
+  if(wmescher && qfi.special)
     queuepolyat(V*qfi.spin, *qfi.shape, col, prio);
   else plainfloor(c, warp, V, col, prio);
   }
@@ -3532,7 +3535,9 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         }
 #endif
 
+#if CAP_TEXTURE
       else if(texture::apply(c, Vf, darkena(fcol, fd, 0xFF))) ;
+#endif
       
       else if(c->land == laMirrorWall) {
         int d = mirror::mirrordir(c);

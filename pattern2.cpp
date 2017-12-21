@@ -574,7 +574,9 @@ namespace patterns {
     if(sub & SPF_CHANGEROT) {
       si.dir = (zebra40(c)*4) % 6;
       }
-    if(symRotation) si.id = 0;
+    if(symRotation) si.id = 1;
+    if(euclid6 && (sub & SPF_FULLSYM))
+      si.symmetries = 1;
     }
 
   void valEuclid4(cell *c, patterninfo &si, int sub) {
@@ -679,6 +681,8 @@ namespace patterns {
         if(ctof(c)) si.symmetries = 3;
         if(subpattern_flags & SPF_EXTRASYM) 
           si.symmetries /= 3;
+        if(subpattern_flags & SPF_FULLSYM) 
+          si.symmetries = 1;
         }      
       if(sphere && !(nontruncated) && !(S7 == 3))
         si.symmetries = ctof(c) ? 1 : 2;
@@ -715,10 +719,12 @@ namespace patterns {
           }
         }
     if(euclid6 && (sub & SPF_CHANGEROT)) si.dir = 0;
-    if(sub & SPF_ROT) si.id = 0;
+    if(sub & SPF_ROT) si.id = 1;
     if(euclid6 && !(sub & SPF_EXTRASYM)) {
       si.symmetries = 6;
       }
+    if(euclid6 && (sub & SPF_FULLSYM))
+      si.symmetries = 1;
     if(S7 == 4)
       applyAlt(si, sub, PAT_COLORING);
     }
@@ -1232,6 +1238,9 @@ namespace patterns {
     if(euclid && among(whichPattern, PAT_COLORING, 0))
       dialog::addBoolItem(XLAT("extra symmetries"), subpattern_flags & SPF_EXTRASYM, '=');
 
+    if(euclid && among(whichPattern, PAT_COLORING, 0))
+      dialog::addBoolItem(XLAT("full symmetry"), subpattern_flags & SPF_FULLSYM, '!');
+
     if(a38 && nontruncated && whichPattern == 0) {
       dialog::addBoolItem(XLAT("extra symmetries"), subpattern_flags & SPF_EXTRASYM, '=');
       }
@@ -1281,6 +1290,10 @@ namespace patterns {
       else if(uni == '*') {
         subpattern_flags ^= SPF_FOOTBALL;
         subpattern_flags &= ~SPF_ALTERNATE;
+        }
+
+      else if(uni == '!') {
+        subpattern_flags ^= SPF_FULLSYM;
         }
 
       else if(uni == '6' || uni == '7' || uni == '8') {
@@ -1361,7 +1374,7 @@ namespace patterns {
     {"single type", {
       {gNormal, true, 0, 0}, 
       {gSphere, true, 0, SPF_EXTRASYM}, 
-      {gEuclid, false, 0, SPF_EXTRASYM | SPF_ROT}, 
+      {gEuclid, false, PAT_COLORING, SPF_EXTRASYM | SPF_ROT | SPF_FULLSYM}, 
       {gOctagon, true, 0, SPF_EXTRASYM}, 
       {g45, true, 0, 0}, 
       {g46, true, 0, 0}, 
@@ -1390,8 +1403,10 @@ namespace patterns {
     dialog::init();
     for(int i=0; i<size(cpatterns); i++) {
       dialog::addBoolItem(XLAT(cpatterns[i].name), cgroup == i, '0'+i);
+#if CAP_TEXTURE
       if(texture::tstate == texture::tsActive && !compatible(texture::cgroup, (cpatterntype) i))
         dialog::lastItem().value = XLAT("BAD");
+#endif
       }
     dialog::addBreak(100);
     if(cgroup != cpUnknown && cgroup < size(cpatterns))
@@ -1412,14 +1427,18 @@ namespace patterns {
       else if(uni >= '0' && uni < '0' + size(cpatterns))
         cgroup = cpatterntype(uni - '0');
       else if(cgroup != cpUnknown && uni >= 'a' && uni < 'a' + size(cpatterns[cgroup].geometries)) {
+#if CAP_TEXTURE      
         auto old_tstate = texture::tstate;
         auto old_tstate_max = texture::tstate_max;
+#endif
         auto &g = cpatterns[cgroup].geometries[uni - 'a'];
         if(g.geo != geometry) { targetgeometry = g.geo; restartGame('g', false, true); }
         if(g.nontrunc != nontruncated) restartGame('7', false, true);
         whichPattern = g.whichPattern;
         subpattern_flags = g.subpattern_flags;
+#if CAP_TEXTURE
         texture::remap(old_tstate, old_tstate_max);
+#endif
         }
       else if(doexiton(sym, uni))
         popScreen();

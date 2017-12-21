@@ -687,6 +687,7 @@ namespace patterns {
   static const int SPF_EXTRASYM = 64;
   static const int SPF_ALTERNATE = 128;
   static const int SPF_FOOTBALL = 256;
+  static const int SPF_FULLSYM = 512;
 
   static const int SPF_SYM0123 = SPF_SYM01 | SPF_SYM02 | SPF_SYM03;
   
@@ -2374,6 +2375,7 @@ int snake_pair(cell *c);
 
 extern const unsigned int nestcolors[8];
 
+#if CAP_TEXTURE
 namespace texture {
   enum eTextureState {
     tsOff, tsAdjusting, tsActive
@@ -2395,6 +2397,7 @@ namespace texture {
 
   extern cpatterntype cgroup;
   }
+#endif
 
 void queueline(const hyperpoint& H1, const hyperpoint& H2, int col, int prf = 0, int prio = PPR_LINE);
 

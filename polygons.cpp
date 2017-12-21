@@ -253,6 +253,7 @@ void filledPolygonColorI(SDL_Surface *s, int* px, int *py, int polyi, int col) {
   }
 #endif
 
+#if CAP_TEXTURE
 void drawTexturedTriangle(SDL_Surface *s, int *px, int *py, GLfloat *tv, int col) {
   transmatrix source = {{{ld(px[0]),ld(px[1]),ld(px[2])}, {ld(py[0]),ld(py[1]),ld(py[2])}, {1,1,1}}};
   transmatrix target = {{{tv[0],tv[3],tv[6]}, {tv[1],tv[4],tv[7]}, {1,1,1}}};
@@ -279,6 +280,7 @@ void drawTexturedTriangle(SDL_Surface *s, int *px, int *py, GLfloat *tv, int col
       }
     }
   }
+#endif
 
 #if CAP_GL
 void glcolor2(int color) {
@@ -634,9 +636,11 @@ void drawpolyline(polytodraw& p) {
   #elif CAP_SDLGFX==1
   
     if(pp.tinf) {
+      #if CAP_TEXTURE
       if(!(poly_flags & POLY_INVERSE))
         for(int i=0; i<polyi; i += 3)
           drawTexturedTriangle(s, polyx+i, polyy+i, &pp.tinf->tvertices[i*3], p.col);
+      #endif
       }
     else if(poly_flags & POLY_INVERSE) {
       int i = polyi;

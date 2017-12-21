@@ -1097,10 +1097,12 @@ void restartGame(char switchWhat, bool push, bool keep_screens) {
     if(euclid6) geometry = gNormal;
     nontruncated = !nontruncated;
     resetGeometry();
+    #if CAP_TEXTURE
     if(texture::tstate == texture::tsActive) 
       texture::tstate = texture::tsAdjusting;
     if(texture::tstate_max == texture::tsActive)
       texture::tstate = texture::tsAdjusting;
+    #endif
     }
   if(switchWhat == 'g') {
     if(geometry == targetgeometry) geometry = gNormal;
@@ -1109,8 +1111,12 @@ void restartGame(char switchWhat, bool push, bool keep_screens) {
     if(nontruncated && euclid6) nontruncated = false;
 
     resetGeometry(); 
+    #if CAP_TEXTURE
     if(texture::tstate == texture::tsActive) 
       texture::tstate = texture::tsOff;
+    if(texture::tstate_max == texture::tsActive)
+      texture::tstate = texture::tsAdjusting;
+    #endif
     }
   if(switchWhat == 'y') {
     yendor::on = !yendor::on;

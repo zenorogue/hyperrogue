@@ -372,7 +372,9 @@ void showDisplayMode() {
     
     if(xuni == 'z') editScale();
     
+    #if CAP_TEXTURE
     if(xuni == 't') pushScreen(texture::showMenu);
+    #endif
 
     if(xuni == 'm') { vid.monmode += 60 + (shiftmul > 0 ? 1 : -1); vid.monmode %= 6; }
   

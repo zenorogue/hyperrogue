@@ -891,17 +891,21 @@ namespace mapeditor {
     string line1, line2;
   
     usershape *us = NULL;
-        
+
+#if CAP_TEXTURE        
     if(texture::tstate == texture::tsActive) {
       sg = 16;
       line1 = "texture";
       line2 = "";
       texture::update();
       }
+#else
+    if(0);
+#endif
     
     else {
 
-      int sg = drawcellShapeGroup();
+      sg = drawcellShapeGroup();
       
       switch(sg) {
         case 0:
@@ -967,10 +971,12 @@ namespace mapeditor {
       displayButton(8, 8+fs*16, XLAT("p = paint"), 'p', 0);
 
       }
+#if CAP_TEXTURE
     else if(texture::tstate == texture::tsActive) {
       displayButton(8, 8+fs*7, XLAT("p = color"), 'p', 0);
       displayButton(8, 8+fs*8, XLAT("w = pen size: %1", fts4(texture::penwidth)), 'w', 0);
       }
+#endif
     else {
       displaymm('n', 8, 8+fs*5, 2, vid.fsize, XLAT("'n' to start"), 0);
       displaymm('u', 8, 8+fs*6, 2, vid.fsize, XLAT("'u' to load current"), 0);
@@ -981,9 +987,11 @@ namespace mapeditor {
     displaymm('g', vid.xres-8, 8+fs*4, 2, vid.fsize, XLAT("g = grid"), 16);
     displayButton(vid.xres-8, 8+fs*3, XLAT("z = zoom in"), 'z', 16);
     displayButton(vid.xres-8, 8+fs*2, XLAT("o = zoom out"), 'o', 16);
-    
+
+#if CAP_TEXTURE    
     if(texture::tstate != texture::tsActive)
       displaymm('e', vid.xres-8, 8+fs, 2, vid.fsize, XLAT("e = edit this"), 16);
+#endif
 
     if(!mouseout()) {
       hyperpoint mh = inverse(drawtrans * rgpushxto0(ccenter)) * mouseh;
@@ -1286,8 +1294,18 @@ namespace mapeditor {
     hyperpoint mh = inverse(drawtrans) * mouseh;
     if(uni == 'g') coldcenter = ccenter, ccenter = mh;
       
-    if(uni == 'z') vid.scale *= 2, texture::itt = xyscale(texture::itt, .5);
-    if(uni == 'o') vid.scale /= 2, texture::itt = xyscale(texture::itt, 2);
+    if(uni == 'z') { 
+      vid.scale *= 2;
+      #if CAP_TEXTURE
+      texture::itt = xyscale(texture::itt, .5);
+      #endif
+      }
+    if(uni == 'o') {
+      vid.scale /= 2;
+      #if CAP_TEXTURE
+      texture::itt = xyscale(texture::itt, 2);
+      #endif
+      }
 
     if(uni == ' ' && cheater) {
       popScreen();
@@ -1318,6 +1336,7 @@ namespace mapeditor {
 
     if(sym == SDLK_F10) popScreen();
 
+#if CAP_TEXTURE
     if(texture::tstate == texture::tsActive) {
       if(uni == '-') {
         texture::drawPixel(mouseover, mouseh, (texture::paint_color >> 8) | ((texture::paint_color & 0xFF) << 24));
@@ -1346,7 +1365,10 @@ namespace mapeditor {
       if(uni == 'w') 
         dialog::editNumber(texture::penwidth, 0, 0.1, 0.005, 0.02, XLAT("pen width"), XLAT("pen width"));
       }
-    
+#else
+    if(0);
+#endif    
+
     else {
       dslayer %= USERLAYERS;
   
@@ -1455,7 +1477,8 @@ namespace mapeditor {
       }
   
     if(cmode & sm::DRAW) if(!holdmouse) {
-    
+
+#if CAP_TEXTURE    
       if(texture::tstate == texture::tsActive && lmouseover && !mouseout()) {
         auto sio = patterns::getpatterninfo0(lmouseover);
         auto sih = patterns::getpatterninfo0(c);
@@ -1474,7 +1497,8 @@ namespace mapeditor {
             }
           }        
         }
-      
+#endif
+
       if(mapeditor::editingShape(group, id)) {
   
         /* for(int a=0; a<size(ds.list); a++) {

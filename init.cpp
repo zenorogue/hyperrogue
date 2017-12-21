@@ -121,7 +121,7 @@
 #endif
 
 #ifndef CAP_TEXTURE
-#define CAP_TEXTURE CAP_PNG
+#define CAP_TEXTURE 0 // CAP_PNG
 #endif
 
 #ifndef CAP_MODEL
@@ -179,6 +179,11 @@
 #ifndef CAP_SDLJOY
 #define CAP_SDLJOY (CAP_SDL && !ISWEB)
 #endif
+
+#ifndef CAP_SDL_IMG
+#define CAP_SDL_IMG 0
+#endif
+
 
 #ifndef CAP_SDLTTF
 #define CAP_SDLTTF (CAP_SDL && !ISMOBILE && !ISWEB)

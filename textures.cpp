@@ -1,5 +1,6 @@
 #include <SDL/SDL_image.h>
 
+#if CAP_TEXTURE
 namespace texture {
 
 GLuint textureid = 0;
@@ -106,27 +107,37 @@ bool readtexture() {
   vector<int> half_expanded(twidth * ty);
   texture_pixels.resize(twidth * twidth);
   
-  int origdim = max(tx, ty);
-  int base_x = tx/2 - origdim/2;
-  int base_y = ty/2 - origdim/2;
-
-  ZZ = 0; // outside is black
-
-/*  for(int y=0; y<twidth; y++)
-  for(int x=0; x<twidth; x++)
-    texture_pixels[y*twidth+x] = qpixel(txt2, y%ty, x%tx); */
-
-  for(int x=0; x<twidth; x++)
-    scale_colorarray(origdim, 
-      [&] (int y) { return base_y+y < 0 || base_y+y >= ty ? 0 : half_expanded[x + (base_y + y) * twidth]; }, 
-      [&] (int y, int v) { texture_pixels[twidth * y + x] = v; }
-      );
+  if(tx == twidth && ty == twidth) {
+    int i = 0;
+    for(int y=0; y<ty; y++)
+    for(int x=0; x<tx; x++)
+      texture_pixels[i++] = qpixel(txt2, x, y);
+    }
+   
+  else {
   
-  for(int y=0; y<ty; y++)
-    scale_colorarray(origdim, 
-      [&] (int x) { return qpixel(txt2, base_x + x, y); }, 
-      [&] (int x, int v) { half_expanded[twidth * y + x] = v; }
-      );
+    int origdim = max(tx, ty);
+    int base_x = tx/2 - origdim/2;
+    int base_y = ty/2 - origdim/2;
+  
+    ZZ = 0; // outside is black
+  
+  /*  for(int y=0; y<twidth; y++)
+    for(int x=0; x<twidth; x++)
+      texture_pixels[y*twidth+x] = qpixel(txt2, y%ty, x%tx); */
+  
+    for(int x=0; x<twidth; x++)
+      scale_colorarray(origdim, 
+        [&] (int y) { return base_y+y < 0 || base_y+y >= ty ? 0 : half_expanded[x + (base_y + y) * twidth]; }, 
+        [&] (int y, int v) { texture_pixels[twidth * y + x] = v; }
+        );
+    
+    for(int y=0; y<ty; y++)
+      scale_colorarray(origdim, 
+        [&] (int x) { return qpixel(txt2, base_x + x, y); }, 
+        [&] (int x, int v) { half_expanded[twidth * y + x] = v; }
+        );
+    }
 
   SDL_FreeSurface(txt2);
   
@@ -970,8 +981,4 @@ void remap(eTextureState old_tstate, eTextureState old_tstate_max) {
   }
   
 }
-
-// - fix spheres
-// - save texture image
-// - undo
-// - verify
+#endif
