@@ -1,4 +1,4 @@
-#define ORBLINES 62
+#define ORBLINES 63
 
 // orbgen flags
 
@@ -107,6 +107,7 @@ const orbinfo orbinfos[ORBLINES] = {
   {orbgenflags::S_NATIVE, laBlizzard, 0, 2000, itOrbWinter},
   {orbgenflags::S_NATIVE, laTerracotta, 800, 2500, itOrbSide1},
   {orbgenflags::S_NATIVE, laDual, 600, 2500, itOrbSide2},
+  {orbgenflags::S_GUEST, laSnakeNest, 2000, 0, itOrbDomination},
   {orbgenflags::S_NATIVE, laWhirlpool, 0, 2000, itOrbWater}, // needs to be last
   };
 

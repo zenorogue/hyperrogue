@@ -647,7 +647,7 @@ namespace tactic {
     
     { 
     dynamicval<bool> t(tactic::on, true);
-    generateLandList(isLandValid);
+    generateLandList(isLandValid2);
     }
     
     int nl = size(landlist);

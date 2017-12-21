@@ -403,7 +403,7 @@ bool landUnlocked(eLand l) {
     case laStorms: case laWhirlwind: 
       return gold() >= R60;
     
-    case laWildWest: case laHalloween: case laDual: case laSnakeNest:
+    case laWildWest: case laHalloween: 
       return false;
       
     case laIce: case laJungle: case laCaves: case laDesert: 
@@ -525,6 +525,10 @@ bool landUnlocked(eLand l) {
     
     case laCrossroads5:
       return gold() >= R300;
+    
+    case laDual:
+    case laSnakeNest:
+      return gold() >= R90;
     }
   return false;
   }
@@ -647,13 +651,13 @@ eLand pickluck(eLand l1, eLand l2) {
 #define LIKELY for(int u=0; u<5; u++)
 #define LIKELY2 for(int u=0; u<2; u++)
 
-bool noChaos(eLand l) {
+/* bool noChaos(eLand l) {
   if(l == laOcean || l == laTemple) return false;
   return 
     isCrossroads(l) || isCyclic(l) || isHaunted(l) || 
     l == laCaribbean || isGravityLand(l) || l == laPrincessQuest ||
     l == laPrairie || l == laHalloween;
-  }
+  } */
 
 eLand getNewSealand(eLand old) {
   while(true) {
@@ -662,7 +666,7 @@ eLand getNewSealand(eLand old) {
     if(p == laKraken && peace::on) continue;
     if(incompatible(old, p)) continue;
     if(p == old) continue;
-    if(chaosmode && noChaos(p)) continue;
+    if(!isLandValid2(p)) continue;
     return p;
     }
   }
@@ -693,7 +697,7 @@ eLand getNewLand(eLand old) {
       eLand n = eLand(hrand(landtypes));
       if(n == old) continue;
       if(incompatible(n,old)) continue;
-      if(noChaos(n)) continue;
+      if(!isLandValid2(n)) continue;
       if(n == laElementalWall || isTechnicalLand(n)) continue;
       if(n == laWildWest) continue;
       if(isElemental(n) && hrand(100) >= 25) continue;
@@ -854,6 +858,7 @@ eLand getNewLand(eLand old) {
     tab[cnt++] = laTerracotta;
     tab[cnt++] = laRose;
     if(chaosmode && geometry) tab[cnt++] = laDual;
+    if(chaosmode && geosupport_threecolor()) tab[cnt++] = laSnakeNest;
     }
   
   if(gold() >= R300)
@@ -917,7 +922,7 @@ eLand getNewLand(eLand old) {
   // for(int i=0; i<20; i++) tab[cnt++] = laCrossroads;
 
   eLand n = old;
-  while(incompatible(n, old) || (chaosmode && noChaos(n))) n = tab[hrand(cnt)];
+  while(incompatible(n, old) || !isLandValid2(n)) n = tab[hrand(cnt)];
   
   return n;  
   }
@@ -940,7 +945,7 @@ vector<eLand> land_over = {
   laHell, laCrossroads3, laCocytus, laPower, laCrossroads4,
   laCrossroads5,  
   // EXTRA
-  laWildWest, laHalloween, laDual, laCA
+  laWildWest, laHalloween, laDual, laSnakeNest, laCA
   };
 
 vector<eLand> landlist;
@@ -1012,6 +1017,9 @@ int isLandValid(eLand l) {
   
   // Crystal World is designed for truncated geometries
   if(l == laDual && nontruncated)
+    return 0;
+  
+  if(l == laHaunted && chaosmode)
     return 0;
   
   // standard, non-PTM specific
@@ -1185,12 +1193,16 @@ int isLandValid(eLand l) {
   if(l == laHalloween || l == laDual)
     return 3;
   
+  if(l == laSnakeNest)
+    return geosupport_threecolor() ? 3 : 0;
+  
   if(l == laStorms && torus) 
     return 3;
 
   return 2;
   }
 
+bool isLandValid2(eLand l) { return isLandValid(l) >= 2; }
 /*
 int checkLands() {
   for(int i=0; i<landtypes; i++) {

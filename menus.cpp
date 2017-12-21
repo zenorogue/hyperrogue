@@ -37,7 +37,7 @@ void showOverview() {
   
   bool pages;
   
-  generateLandList(isLandValid);
+  generateLandList(isLandValid2);
   
   if(dialog::infix != "") {
     vector<eLand> filtered;
@@ -76,7 +76,6 @@ void showOverview() {
     int i0 = 56 + vid.fsize + i * vf;
     int col;
     if(landUnlocked(l)) col = linf[l].color; else col = 0x404040;
-    if(chaosmode && noChaos(l)) col = 0x400000;
     if(l == curland)
       displayfrZ(1, i0, 1, vf-4, "*", forecolor, 0);
     if(displayfrZ(xr*1, i0, 1, vf-4, XLAT1(linf[l].name), col, 0))
@@ -87,7 +86,6 @@ void showOverview() {
     else if(lv >= 10) col = 0x00D500;
     else if(items[it]) col = 0xC0C0C0;
     else col = BLACKISH;
-    if(chaosmode && noChaos(l)) col = REDDISH;
     int c8 = (vf+2)/3;
     if(displayfrZ(xr*24-c8*6, i0, 1, vf-4, its(items[it]), col, 16))
       getcstat = 2000+it;
@@ -95,7 +93,6 @@ void showOverview() {
     if(displayfrZ(xr*24, i0, 1, vf-4, its(hiitems[modecode()][it]), col, 16))
       getcstat = 2000+it;
     if(items[it]) col = iinf[it].color; else col = BLACKISH;
-    if(chaosmode && noChaos(l)) col = REDDISH;
     if(displayfrZ(xr*24+c8*4, i0, 1, vf-4, s0 + iinf[it].glyph, col, 16))
       getcstat = 2000+it;
     if(displayfrZ(xr*24+c8*5, i0, 1, vf-4, XLAT1(iinf[it].name), col, 0))
@@ -103,7 +100,6 @@ void showOverview() {
     eItem io = nativeOrbType(l);
     if(io == itShard) {
       if(items[it] >= 10) col = winf[waMirror].color; else col = BLACKISH;
-      if(chaosmode && noChaos(l)) col = REDDISH;
       if(displayfrZ(xr*46, i0, 1, vf-4, XLAT1(winf[waMirror].name), col, 0))
         getcstat = 3000+waMirror;
       if(getcstat == 3000+waMirror)
@@ -114,11 +110,9 @@ void showOverview() {
       if(lv >= 25) col = 0xFFD500;
       else if(lv >= 10) col = 0xC0C0C0;
       else col = BLACKISH;
-      if(chaosmode && noChaos(l)) col = REDDISH;
       if(displayfrZ(xr*46-c8*4, i0, 1, vf-4, its(items[io]), col, 16))
         getcstat = 2000+io;
       if(lv >= 10) col = iinf[io].color; else col = BLACKISH;
-      if(chaosmode && noChaos(l)) col = REDDISH;
       if(displayfrZ(xr*46-c8, i0, 1, vf-4, s0 + iinf[io].glyph, col, 16))
         getcstat = 2000+io;
       if(displayfrZ(xr*46, i0, 1, vf-4, XLAT1(iinf[io].name), col, 0))

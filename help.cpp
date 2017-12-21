@@ -572,8 +572,8 @@ string generateHelpForLand(eLand l) {
     s += XLAT("Unavailable in the multiplayer mode.\n");
     }
   
-  if(noChaos(l))
-    s += XLAT("Unavailable in the Chaos mode.\n");
+  /* if(noChaos(l))
+    s += XLAT("Unavailable in the Chaos mode.\n"); */
   
   if(l == laWildWest)
     s += XLAT("Bonus land, available only in some special modes.\n");

@@ -325,9 +325,11 @@ namespace inv {
     gainOrbs(itHunting, itOrbSide3);
     gainOrbs(itBlizzard, itOrbWinter);
     gainOrbs(itTerra, itOrbSide1);
-
+    
     for(auto& it: lateextraorbs) gainLate(it.treasure, it.orb);
     
+    gainOrbs(itGlowCrystal, itOrbSide2);
+
     if(items[itOrbLove] && !items[itSavedPrincess]) items[itSavedPrincess] = 1;
     
     int& r = remaining[itGreenStone];

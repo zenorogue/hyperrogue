@@ -275,7 +275,7 @@ int itemclass(eItem i) {
     i == itSlime || i == itAmethyst || i == itDodeca ||
     i == itGreenGrass || i == itBull ||
     i == itLavaLily || i == itHunting ||
-    i == itBlizzard || i == itTerra || i == itGlowCrystal
+    i == itBlizzard || i == itTerra || i == itGlowCrystal || i == itSnake
     )
     return IC_TREASURE;
   if(i == itSavedPrincess || i == itStrongWind || i == itWarning)
