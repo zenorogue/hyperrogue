@@ -1014,16 +1014,6 @@ void remap(eTextureState old_tstate, eTextureState old_tstate_max) {
         mi2 = mi;
         mapTexture(c, mi2, si, Id, pshift);
         mi2.tvertices = move(new_tvertices);
-  
-        printf("Redrawing tile #%d [%d] from %d (%d) to %d (%d)\n", si.id, oldid, mi.current_type, ncurr, c->type, ntarget);
-        printf("vertices: "); 
-        for(auto x: mi.vertices)
-          printf("%lf ", ld(x));
-        printf("\n");
-        printf("tvertices: ");
-        for(auto x: mi.tvertices)
-          printf("%lf ", ld(x));
-        printf("\n");
         }
       catch(out_of_range) { 
         printf("Unexpected missing cell #%d/%d", si.id, oldid);
