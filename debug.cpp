@@ -100,6 +100,22 @@ bool applyCheat(char u, cell *c = NULL) {
         }
     return true;
     }
+  if(u == 'H') {
+    cheater++; addMessage(XLAT("Thumper summoned!"));
+    if (flipplayer) {
+      cwspin(cwt, 3);
+      mirror::act(3, mirror::SPINSINGLE);
+      flipplayer = false;
+      }
+    for(int i=0; i<cwt.c->type; i++) {
+      int dir = (cwt.spin + i) % cwt.c->type;
+      if(passable(cwt.c->mov[dir], NULL, 0)) {
+        cwt.c->mov[dir]->wall = waThumperOff;
+        break;
+        }
+      }
+    return true;
+    }
   if(u == 'F') {
     if(hardcore && !canmove) { 
       canmove = true; 
@@ -156,9 +172,12 @@ bool applyCheat(char u, cell *c = NULL) {
     return true;
     }
   if(u == 'Z') {
-    flipplayer = false;
-    mirror::act(1, mirror::SPINSINGLE);
+    if (flipplayer) {
+      cwspin(cwt, 3);
+      flipplayer = false;
+      }
     cwspin(cwt, 1);
+    mirror::act(1, mirror::SPINSINGLE);
     return true;
     }
   if(u == 'J') {
@@ -314,6 +333,7 @@ void showCheatMenu() {
   dialog::addBreak(50);
   dialog::addItem(XLAT("gain orb powers"), 'F');
   dialog::addItem(XLAT("summon treasure"), 'T');
+  dialog::addItem(XLAT("summon thumper"), 'H');
   dialog::addItem(XLAT("summon dead orbs"), 'D');
   dialog::addItem(XLAT("lose all treasure"), 'J');
   dialog::addItem(XLAT("gain kills"), 'K');
