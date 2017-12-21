@@ -99,6 +99,12 @@ namespace dialog {
   void addBoolItem(string body, bool value, int key) {
     addSelItem(body, ONOFF(value), key);
     }
+  
+  int displaycolor(int col) {
+    int c = col >> 8;
+    if(!c) return 0x181818;
+    return c;
+    }
 
   void addColorItem(string body, int value, int key) {
     item it;
@@ -107,7 +113,7 @@ namespace dialog {
     it.value = COLORBAR;
     it.keycaption = keyname(key);
     it.key = key;
-    it.color = it.colorv = value >> 8;
+    it.color = it.colorv = displaycolor(value);
     it.colors = it.color ^ 0x404040;
     it.colorc = it.color ^ 0x808080;
     it.colork = 0x808080;
