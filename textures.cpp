@@ -227,9 +227,9 @@ void mapTextureTriangle(textureinfo &mi, array<hyperpoint, 3> v, int splits = gs
 
   if(splits) {
     array<hyperpoint, 3> v2 = { mid(v[1], v[2]), mid(v[2], v[0]), mid(v[0], v[1]) };
-    mapTextureTriangle(mi, {v[0], v2[1], v2[2]}, splits-1);
-    mapTextureTriangle(mi, {v[1], v2[2], v2[0]}, splits-1);
-    mapTextureTriangle(mi, {v[2], v2[0], v2[1]}, splits-1);
+    mapTextureTriangle(mi, {v[0], v2[2], v2[1]}, splits-1);
+    mapTextureTriangle(mi, {v[1], v2[0], v2[2]}, splits-1);
+    mapTextureTriangle(mi, {v[2], v2[1], v2[0]}, splits-1);
     mapTextureTriangle(mi, {v2[0], v2[1], v2[2]}, splits-1);
     return;
     }
@@ -245,7 +245,7 @@ void mapTextureTriangle(textureinfo &mi, array<hyperpoint, 3> v, int splits = gs
     mi.tvertices.push_back((inmodel[0]+1)/2);
     mi.tvertices.push_back((inmodel[1]+1)/2);
     mi.tvertices.push_back(0);
-    }
+    }  
   }
 
 map<int, textureinfo> texture_map, texture_map_orig;
@@ -269,8 +269,8 @@ void mapTexture(cell *c, textureinfo& mi, patterns::patterninfo &si, const trans
 
   for(int i=0; i<c->type; i++) {
     int i2 = i+shift;
-    hyperpoint h1 =  spin(M_PI + M_PI * (2*i2 +1) / c->type) * xpush(z) * C0;
-    hyperpoint h2 =  spin(M_PI + M_PI * (2*i2 -1) / c->type) * xpush(z) * C0;
+    hyperpoint h1 =  spin(M_PI + M_PI * (2*i2 -1) / c->type) * xpush(z) * C0;
+    hyperpoint h2 =  spin(M_PI + M_PI * (2*i2 +1) / c->type) * xpush(z) * C0;
     mapTextureTriangle(mi, {C0, h1, h2});
     }  
   }

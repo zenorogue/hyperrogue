@@ -317,13 +317,15 @@ void glapplymatrix(const transmatrix& V) {
   glMultMatrixf(mat);
   }
 
+int tinfshift;
+
 void gldraw(int useV, const transmatrix& V, int ps, int pq, int col, int outline, int flags, textureinfo *tinf) {
 
     if(tinf) {
       glEnable(GL_TEXTURE_2D);
       glBindTexture(GL_TEXTURE_2D, tinf->texture_id);
       glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-      glTexCoordPointer(3, GL_FLOAT, 0, &tinf->tvertices[0]);
+      glTexCoordPointer(3, GL_FLOAT, 0, &tinf->tvertices[tinfshift]);
       }
       
   for(int ed = vid.goteyes ? -1 : 0; ed<2; ed+=2) {
@@ -519,7 +521,21 @@ unsigned char& part(int& col, int i) {
   }
 
 void drawpolyline(polytodraw& p) {
-  auto pp = p.u.poly;
+  auto& pp = p.u.poly;
+
+  if(sphere && pp.tinf && pp.cnt > 3) {
+    int i = pp.cnt;
+    pp.cnt = 3;
+    for(int j=0; j<i; j+=3) {
+      drawpolyline(p);
+      pp.tab += 9;
+      tinfshift += 9;
+      }
+    pp.tab -= 3*i;
+    tinfshift = 0;
+    pp.cnt = i;
+    return;
+    }
   
   if(spherespecial && p.prio == PPR_MOBILE_ARROW) {
     if(spherephase == 0) return;
@@ -571,6 +587,7 @@ void drawpolyline(polytodraw& p) {
     double rarea = 0;
     for(int i=0; i<qglcoords-1; i++) 
       rarea += glcoords[i][0] * glcoords[i+1][1] - glcoords[i][1] * glcoords[i+1][0];
+    rarea += glcoords[qglcoords-1][0] * glcoords[0][1] - glcoords[qglcoords-1][1] * glcoords[0][0];
     
     if(d < 0) poly_flags ^= POLY_INVERSE;
     
@@ -592,6 +609,7 @@ void drawpolyline(polytodraw& p) {
   for(int l=mercator_loop_min; l <= mercator_loop_max; l++) {
   
     if(l || lastl) { 
+      if(pp.tinf) return;
       for(int i=0; i<qglcoords; i++)
         glcoords[i][mercator_coord] += vid.radius * 4 * (l - lastl);
       lastl = l;
@@ -612,7 +630,10 @@ void drawpolyline(polytodraw& p) {
   #if CAP_GL
     if(vid.usingGL) {
       // if(pmodel == 0) for(int i=0; i<qglcoords; i++) glcoords[i][2] = vid.scrdist;
-      activateGlcoords();    
+      if(pp.tinf && (poly_flags & POLY_INVERSE)) {
+        return; 
+        }
+      activateGlcoords();
       gldraw(3, Id, 0, qglcoords, p.col, pp.outline, poly_flags, pp.tinf);
       continue;
       }
@@ -639,7 +660,7 @@ void drawpolyline(polytodraw& p) {
       #if CAP_TEXTURE
       if(!(poly_flags & POLY_INVERSE))
         for(int i=0; i<polyi; i += 3)
-          drawTexturedTriangle(s, polyx+i, polyy+i, &pp.tinf->tvertices[i*3], p.col);
+          drawTexturedTriangle(s, polyx+i, polyy+i, &pp.tinf->tvertices[tinfshift + i*3], p.col);
       #endif
       }
     else if(poly_flags & POLY_INVERSE) {
