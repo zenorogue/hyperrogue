@@ -561,6 +561,8 @@ bool incompatible1(eLand l1, eLand l2) {
   if(l1 == laMirrorOld && l2 == laMotion) return true;
   if(l1 == laPower && l2 == laWineyard) return true;
   if(l1 == laPower && l2 == laDryForest) return true;
+  if(l1 == laVolcano && l2 == laDryForest) return true;
+  if(l1 == laVolcano && l2 == laWineyard) return true;
   if(l1 == laDragon && l2 == laDryForest) return true;
   if(l1 == laEFire && l2 == laWineyard) return true;
   if(l1 == laEFire && l2 == laDryForest) return true;
