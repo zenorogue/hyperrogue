@@ -42,8 +42,8 @@ unsigned paint_color = 0x000000FF;
 
 vector<unsigned> texture_pixels;
 
-string texturename = "hyperrogue-texture.png";
-string configname = "hyperrogue.txc";
+string texturename = "texture/hyperrogue-texture.png";
+string configname = "texture/hyperrogue.txc";
 
 eTextureState tstate;
 eTextureState tstate_max;
