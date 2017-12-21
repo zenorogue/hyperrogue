@@ -199,6 +199,15 @@ bool readtexture() {
   return true;
   }
 
+void saveRawTexture() {
+  SDL_Surface *sraw = SDL_CreateRGBSurface(SDL_SWSURFACE,twidth,twidth,32,0,0,0,0);
+  for(int y=0; y<twidth; y++)
+  for(int x=0; x<twidth; x++)
+    qpixel(sraw,x,y) = texture_pixels[y * twidth + x];
+  IMAGESAVE(sraw, texturename.c_str());
+  SDL_FreeSurface(sraw);
+  }
+
 transmatrix itt = Id;
 
 unsigned grid_color = 0;
@@ -712,6 +721,7 @@ void showMenu() {
       }
 
     dialog::addSelItem(XLAT("precision"), its(gsplits), 'P');
+    dialog::addItem(XLAT("save the raw texture"), 'S');
     }
   
   if(tstate == tsActive) {
@@ -872,6 +882,8 @@ void showMenu() {
         XLAT("precision"));
       dialog::reaction = perform_mapping;
       }    
+    else if(uni == 'S' && tstate == tsAdjusting) 
+      saveRawTexture();
     else if(doexiton(sym, uni))
       popScreen();
     };
