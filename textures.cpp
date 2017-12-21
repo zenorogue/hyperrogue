@@ -679,7 +679,7 @@ void showMenu() {
   dialog::init(XLAT("texture mode"));
 
   if(tstate == tsOff) {
-    dialog::addItem(XLAT("select the texture's pattern"), 'r');
+    dialog::addItem(XLAT("select geometry/pattern"), 'r');
     if(tstate_max == tsAdjusting)
       dialog::addItem(XLAT("readjust the texture"), 't');
     if(tstate_max == tsActive)
