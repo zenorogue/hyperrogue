@@ -1957,7 +1957,8 @@ namespace heat {
       if(eq(c->aitmp, sval)) continue;
       c->aitmp = sval;
       
-      if(isFire(c)) {
+      if(isFireOrMagma(c)) {
+        if(c->wall == waMagma) c->wparam = 20;
       
         cell *last = c->mov[c->type-1];
         
