@@ -1,4 +1,8 @@
+#if CAP_SDL_IMG
 #include <SDL/SDL_image.h>
+#elif CAP_PNG
+#include <png.h>
+#endif
 
 #if CAP_TEXTURE
 namespace texture {
@@ -92,26 +96,72 @@ bool whitetexture() {
   }
 
 bool readtexture() {
-  
+
+#if CAP_SDL_IMG  
   SDL_Surface *txt = IMG_Load(texturename.c_str());
   if(!txt) {
     addMessage(XLAT("Failed to load %1", texturename));
     return false;
     }
   auto txt2 = convertSurface(txt);
-  
-  int tx = txt->w, ty = txt->h;
-  
   SDL_FreeSurface(txt);
 
-  vector<int> half_expanded(twidth * ty);
-  texture_pixels.resize(twidth * twidth);
+  int tx = txt2->w, ty = txt2->h;
+  
+  auto pix = [&] (int x, int y) { return qpixel(txt2, x, y); };
+
+#elif CAP_PNG
+  
+  FILE *f = fopen(texturename.c_str(), "r");  
+  png_structp png = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+  if(!png) return false;  
+  if(setjmp(png_jmpbuf(png))) return false;  
+  png_init_io(png, f);
+
+  // set the expected format
+  png_infop info = png_create_info_struct(png);
+  png_read_info(png, info);
+  int tx = png_get_image_width(png, info);
+  int ty = png_get_image_height(png, info);    
+  png_byte color_type = png_get_color_type(png, info);
+  png_byte bit_depth = png_get_bit_depth(png, info);
+  if(bit_depth == 16) png_set_strip_16(png);  
+  if(color_type == PNG_COLOR_TYPE_PALETTE) png_set_palette_to_rgb(png);
+  if(color_type == PNG_COLOR_TYPE_GRAY && bit_depth < 8) png_set_expand_gray_1_2_4_to_8(png);
+  if(png_get_valid(png, info, PNG_INFO_tRNS)) png_set_tRNS_to_alpha(png);  
+  if(color_type == PNG_COLOR_TYPE_RGB ||
+     color_type == PNG_COLOR_TYPE_GRAY ||
+     color_type == PNG_COLOR_TYPE_PALETTE)
+    png_set_filler(png, 0xFF, PNG_FILLER_AFTER);
+
+  if(color_type == PNG_COLOR_TYPE_GRAY ||
+     color_type == PNG_COLOR_TYPE_GRAY_ALPHA)
+    png_set_gray_to_rgb(png);  
+  png_read_update_info(png, info);
+
+  // read png
+  vector<png_bytep> row_pointers(ty);
+
+  vector<int> origpixels(ty * tx);
+
+  for(int y = 0; y < ty; y++) 
+    row_pointers[y] = (png_bytep) & origpixels[y * tx];
+
+  png_read_image(png, &row_pointers[0]);
+  fclose(f);
+
+  auto pix = [&] (int x, int y) { 
+    if(x<0 || y<0 || x >= tx || y >= ty) return 0;
+    return origpixels[y*tx + x];
+    };
+
+#endif
   
   if(tx == twidth && ty == twidth) {
     int i = 0;
     for(int y=0; y<ty; y++)
     for(int x=0; x<tx; x++)
-      texture_pixels[i++] = qpixel(txt2, x, y);
+      texture_pixels[i++] = pix(x, y);
     }
    
   else {
@@ -126,20 +176,25 @@ bool readtexture() {
     for(int x=0; x<twidth; x++)
       texture_pixels[y*twidth+x] = qpixel(txt2, y%ty, x%tx); */
   
+    vector<int> half_expanded(twidth * ty);  
+    for(int y=0; y<ty; y++)
+      scale_colorarray(origdim,
+        [&] (int x) { return pix(base_x + x,y); },
+        [&] (int x, int v) { half_expanded[twidth * y + x] = v; }
+        );
+
+    texture_pixels.resize(twidth * twidth);
     for(int x=0; x<twidth; x++)
       scale_colorarray(origdim, 
         [&] (int y) { return base_y+y < 0 || base_y+y >= ty ? 0 : half_expanded[x + (base_y + y) * twidth]; }, 
         [&] (int y, int v) { texture_pixels[twidth * y + x] = v; }
         );
     
-    for(int y=0; y<ty; y++)
-      scale_colorarray(origdim, 
-        [&] (int x) { return qpixel(txt2, base_x + x, y); }, 
-        [&] (int x, int v) { half_expanded[twidth * y + x] = v; }
-        );
     }
 
+#if CAP_SDL_IMG
   SDL_FreeSurface(txt2);
+#endif
   
   return true;
   }
