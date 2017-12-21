@@ -439,8 +439,8 @@ double linewidthat(const hyperpoint& h, double minwidth) {
 int mercator_coord;
 int mercator_loop_min = 0, mercator_loop_max = 0;
 
-void fixMercator() {
-  
+void fixMercator(bool tinf) {
+
   ld period = 4 * vid.radius;
   ld hperiod = period / 2;
   
@@ -469,10 +469,15 @@ void fixMercator() {
     maxcoord = max<ld>(maxcoord, glcoords[i][mercator_coord]);
     }
   
+  if(abs(mincoord) > 50000 || abs(maxcoord) > 50000 || isnan(mincoord) || isnan(maxcoord)) {
+    mercator_loop_max--;
+    return;
+    }
+  
   ld last = first;
   while(last < next - hperiod) last += period;
   while(last > next + hperiod) last -= period;
-  
+    
   if(first == last) {
     while(mincoord > cmin)
       mercator_loop_min--, mincoord -= period;
@@ -480,6 +485,10 @@ void fixMercator() {
       mercator_loop_max++, maxcoord += period;
     }
   else {
+    if(tinf) { 
+      // this cannot work in Mercator
+      mercator_loop_max--; return; 
+      }
     if(last < first) {
       reverse(glcoords, glcoords+qglcoords);
       swap(first, last);
@@ -572,7 +581,7 @@ void drawpolyline(polytodraw& p) {
   
   mercator_loop_min = mercator_loop_max = 0;
   if(sphere && pmodel == mdBand)
-    fixMercator();
+    fixMercator(pp.tinf);
     
   int poly_limit = max(vid.xres, vid.yres) * 2;
   
@@ -609,7 +618,6 @@ void drawpolyline(polytodraw& p) {
   for(int l=mercator_loop_min; l <= mercator_loop_max; l++) {
   
     if(l || lastl) { 
-      if(pp.tinf) return;
       for(int i=0; i<qglcoords; i++)
         glcoords[i][mercator_coord] += vid.radius * 4 * (l - lastl);
       lastl = l;
