@@ -237,7 +237,7 @@ eOrbLandRelation getOLR(eItem it, eLand l) {
     return olrGuest;
   if(it == itOrbDragon && l == laRlyeh)
     return olrMonster;
-    
+  
   if(it == itOrbSafety && l == laWhirlpool)
     return olrAlways;
   if(it == itOrbSafety && l == laPrairie)
@@ -326,7 +326,11 @@ eOrbLandRelation getOLR(eItem it, eLand l) {
       return olrForbidden;
     
   if(l == laEndorian)
-    if(it == itOrbDragon || it == itOrbFire || it == itOrbLightning)
+    if(it == itOrbDragon || it == itOrbFire || it == itOrbLightning || it == itOrbLava)
+      return olrDangerous;
+    
+  if(l == laDryForest)
+    if(it == itOrbFire || it == itOrbLightning || it == itOrbLava)
       return olrDangerous;
     
   if(l == laDungeon) {
