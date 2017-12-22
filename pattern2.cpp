@@ -489,7 +489,10 @@ namespace patterns {
     if(ctof(c)) {
       si.id = c->master->emeraldval >> 1;
       applySym0123(si.id, sub);
-      si.dir = (c->master->emeraldval&1) ^ (c->master->emeraldval>>1);
+      if(sub & SPF_CHANGEROT)
+        si.dir = (c->master->emeraldval&1);
+      else
+        si.dir = (c->master->emeraldval&1) ^ (c->master->emeraldval>>1);
       si.symmetries = 2;
       applyAlt(si, sub, pat);
       /* printf("[%3d] ", c->master->emeraldval);
@@ -1123,11 +1126,13 @@ namespace patterns {
       dialog::addSelItem(XLAT("emerald pattern"), "emerald", 'e');
       dialog::addSelItem(XLAT("four elements"), "palace", 'b');
       dialog::addSelItem(XLAT("eight domains"), "palace", 'a');
+      dialog::addSelItem(XLAT("zebra pattern"), "zebra", 'z');
+      dialog::addSelItem(XLAT("four triangles"), "zebra", 't');
+      dialog::addSelItem(XLAT("three stripes"), "zebra", 'x');
       }
-
-    dialog::addSelItem(XLAT("zebra pattern"), "zebra", 'z');
-    dialog::addSelItem(XLAT("four triangles"), "zebra", 't');
-    dialog::addSelItem(XLAT("three stripes"), "zebra", 'x');
+    
+    if(a4)
+      dialog::addSelItem(XLAT("zebra pattern"), "coloring", 'z');
 
     dialog::addSelItem(XLAT("random black-and-white"), "current", 'w');
 
@@ -1162,6 +1167,14 @@ namespace patterns {
         firstland = specialland = laCanvas; 
         randomPatternsMode = false;
         restartGame(0, false, true);
+        if(uni == 'x' || uni == 'z' || uni == 't')
+          whichPattern = PAT_ZEBRA, subpattern_flags = SPF_SYM0123 | SPF_ROT;
+        if(uni == 'e')
+          whichPattern = PAT_EMERALD, subpattern_flags = SPF_SYM0123 | SPF_ROT;
+        if(uni == 'b')
+          whichPattern = PAT_PALACE, subpattern_flags = SPF_SYM0123 | SPF_ROT;
+        if(uni == 'z' && a46)
+          whichPattern = PAT_COLORING, subpattern_flags = SPF_CHANGEROT | SPF_SYM0123;
         }
       else if(doexiton(sym, uni)) popScreen();
       };    
@@ -1213,10 +1226,13 @@ namespace patterns {
     
     if((euclid && whichPattern == PAT_COLORING) ||
       (a38 && whichPattern == PAT_COLORING) ||
-      (S3 == 4 && nontruncated && whichPattern == PAT_COLORING))
+      (a4 && nontruncated && whichPattern == PAT_COLORING && !a46))
       dialog::addBoolItem(XLAT("edit all three colors"), subpattern_flags & SPF_ROT, '0');
 
     if(euclid  && whichPattern == PAT_COLORING)
+      dialog::addBoolItem(XLAT("rotate the color groups"), subpattern_flags & SPF_CHANGEROT, '4');
+
+    if(a46 && whichPattern == PAT_COLORING)
       dialog::addBoolItem(XLAT("rotate the color groups"), subpattern_flags & SPF_CHANGEROT, '4');
 
     if(a46 && whichPattern == PAT_COLORING && !nontruncated)
