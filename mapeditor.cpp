@@ -864,6 +864,25 @@ namespace mapeditor {
 
   void drawHandleKey(int sym, int uni);
   
+  static ld brush_sizes[10] = {
+    0.001, 0.002, 0.005, 0.0075, 0.01, 0.015, 0.02, 0.05, 0.075, 0.1};
+  
+  static unsigned texture_colors[] = {
+    11,
+    0x000000FF,
+    0xFFFFFFFF,
+    0xFF0000FF,
+    0xFFFF00FF,
+    0x00FF00FF,
+    0x00FFFFFF,
+    0x0000FFFF,
+    0xFF00FFFF,
+    0xC0C0C0FF,
+    0x808080FF,
+    0x404040FF,
+    0x804000FF
+    };
+    
   void showDrawEditor() {
     cmode = sm::DRAW;
     gamescreen(0);
@@ -969,7 +988,7 @@ namespace mapeditor {
     else if(texture::tstate == texture::tsActive) {
       displayButton(8, 8+fs*2, XLAT(texture::texturesym ? "0 = symmetry" : "0 = asymmetry"), '0', 0);
       displayButton(8, 8+fs*3, XLAT("p = color"), 'p', 0);
-      displayButton(8, 8+fs*4, XLAT("w = pen size: %1", fts4(texture::penwidth)), 'w', 0);
+      displayButton(8, 8+fs*4, XLAT("b = brush size: %1", fts4(texture::penwidth)), 'b', 0);
       displayButton(8, 8+fs*5, XLAT("u = undo"), 'u', 0);
       }
 #endif
@@ -983,6 +1002,14 @@ namespace mapeditor {
     displaymm('g', vid.xres-8, 8+fs*4, 2, vid.fsize, XLAT("g = grid"), 16);
     displayButton(vid.xres-8, 8+fs*3, XLAT("z = zoom in"), 'z', 16);
     displayButton(vid.xres-8, 8+fs*2, XLAT("o = zoom out"), 'o', 16);
+    
+    if(intexture) for(int i=0; i<10; i++) {
+      if(8 + fs * (6+i) < vid.yres - 8 - fs * 7)
+        displayColorButton(vid.xres-8, 8+fs*(6+i), "###", 1000 + i, 16, 1, dialog::displaycolor(texture_colors[i+1]));
+      
+      if(displayfr(vid.xres-8 - fs * 3, 8+fs*(6+i), 0, vid.fsize, its(i+1), texture::penwidth == brush_sizes[i] ? 0xFF8000 : 0xC0C0C0, 16))
+        getcstat = 2000+i;
+      }
 
 #if CAP_TEXTURE    
     if(texture::tstate != texture::tsActive)
@@ -1292,7 +1319,7 @@ namespace mapeditor {
     addMessage(XLAT("Pictures saved to %1", picfile));
     return true;
     }
-    
+
   void drawHandleKey(int sym, int uni) {
 
     handlePanning(sym, uni);
@@ -1378,7 +1405,13 @@ namespace mapeditor {
         if(!holdmouse) texture::undoLock();
         texture::drawPixel(mouseover, mouseh, (texture::paint_color >> 8) | ((texture::paint_color & 0xFF) << 24));
         holdmouse = true;
-        }        
+        }
+      
+      if(uni >= 1000 && uni < 1010)
+        texture::paint_color = texture_colors[uni - 1000 + 1];
+
+      if(uni >= 2000 && uni < 2010)
+        texture::penwidth = brush_sizes[uni - 2000];
 
       if(uni == '0')
         texture::texturesym = !texture::texturesym;
@@ -1388,26 +1421,11 @@ namespace mapeditor {
         }        
 
       if(uni == 'p') {
-        static unsigned texture_colors[] = {
-          11,
-          0x000000FF,
-          0xFFFFFFFF,
-          0xFF0000FF,
-          0xFFFF00FF,
-          0x00FF00FF,
-          0x00FFFFFF,
-          0x0000FFFF,
-          0xFF00FFFF,
-          0xC0C0C0FF,
-          0x808080FF,
-          0x404040FF,
-          0x804000FF
-          };
         dialog::openColorDialog(texture::paint_color, texture_colors);
         }
 
-      if(uni == 'w') 
-        dialog::editNumber(texture::penwidth, 0, 0.1, 0.005, 0.02, XLAT("pen width"), XLAT("pen width"));
+      if(uni == 'b') 
+        dialog::editNumber(texture::penwidth, 0, 0.1, 0.005, 0.02, XLAT("brush size"), XLAT("brush size"));
       }
 #else
     if(0);

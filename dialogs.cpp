@@ -100,7 +100,7 @@ namespace dialog {
     addSelItem(body, ONOFF(value), key);
     }
   
-  int displaycolor(int col) {
+  int displaycolor(unsigned col) {
     int c = col >> 8;
     if(!c) return 0x181818;
     return c;

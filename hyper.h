@@ -1177,6 +1177,7 @@ namespace dialog {
   extern bool sidedialog;
   extern int dialogflags;
   extern int dcenter;
+  int displaycolor(unsigned col);
 
   void openFileDialog(string& filename, string fcap, string ext, bool_reaction_t action);
   
