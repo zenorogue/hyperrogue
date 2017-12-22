@@ -219,7 +219,7 @@ unsigned mesh_color = 0;
 unsigned master_color = 0xFFFFFF10;
 unsigned slave_color = 0xFF000008;
 
-int color_alpha = 0;
+int color_alpha = 128;
 
 int gsplits = 1;
 
@@ -276,7 +276,6 @@ void mapTexture(cell *c, textureinfo& mi, patterns::patterninfo &si, const trans
   }
 
 int recolor(int col) {
-  if(color_alpha == 255 || (cmode & sm::DRAW)) return col | 0xFFFFFF00;
   if(color_alpha == 0) return col;
   for(int i=1; i<4; i++)
     part(col, i) = color_alpha + ((255-color_alpha) * part(col,i) + 127) / 255;
@@ -705,13 +704,10 @@ void showMenu() {
   if(tstate == tsAdjusting) 
     drawRawTexture();
   
-  dialog::init(XLAT("texture mode"));
-
   if(tstate == tsOff) {
+    dialog::init(XLAT("texture mode (off)"));
     dialog::addItem(XLAT("select geometry/pattern"), 'r');
-    if(tstate_max == tsAdjusting)
-      dialog::addItem(XLAT("readjust/save raw texture"), 't');
-    if(tstate_max == tsActive)
+    if(tstate_max == tsAdjusting || tstate_max == tsActive)
       dialog::addItem(XLAT("reactivate the texture"), 't');
     dialog::addItem(XLAT("open PNG as texture"), 'o');
     dialog::addItem(XLAT("load texture config"), 'l');
@@ -721,6 +717,7 @@ void showMenu() {
     }
 
   if(tstate == tsAdjusting) {
+    dialog::init(XLAT("texture mode (overlay)"));
     dialog::addItem(XLAT("select the texture's pattern"), 'r');
     dialog::addItem(XLAT("enable the texture"), 't');
     dialog::addItem(XLAT("cancel the texture"), 'T');
@@ -745,12 +742,13 @@ void showMenu() {
     }
   
   if(tstate == tsActive) {
+    dialog::init(XLAT("texture mode (active)"));
     /* dialog::addSelItem(XLAT("texture scale"), fts(iscale), 's');
     dialog::addSelItem(XLAT("texture angle"), fts(irotate), 'a');
     dialog::addSelItem(XLAT("texture position X"), fts(ix), 'x');
     dialog::addSelItem(XLAT("texture position Y"), fts(iy), 'y'); */
     dialog::addItem(XLAT("deactivate the texture"), 't');
-    dialog::addItem(XLAT("readjust the texture"), 'T');
+    dialog::addItem(XLAT("back to overlay mode"), 'T');
     dialog::addItem(XLAT("change the geometry"), 'r');
     dialog::addColorItem(XLAT("grid color"), grid_color, 'g');
     dialog::addColorItem(XLAT("mesh color"), mesh_color, 'm');
@@ -838,6 +836,7 @@ void showMenu() {
           if(readtexture() && loadTextureGL()) {
             if(tstate_max == tsOff) tstate_max = tsAdjusting;
             tstate = tstate_max;
+            perform_mapping();
             return true;
             }
           else return false;
@@ -890,7 +889,7 @@ void showMenu() {
 
     else if(uni == 'M' && tstate == tsAdjusting) 
       dialog::openColorDialog(master_color, NULL);
-    else if(uni == 'C' && tstate == tsActive) 
+    else if(uni == 'C' && tstate == tsAdjusting) 
       dialog::openColorDialog(slave_color, NULL);
 
     else if(uni == 'c' && tstate == tsActive) {
