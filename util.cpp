@@ -16,6 +16,29 @@ string ftssmart(ld x) {
   return buf;
   }
 
+/*
+string fts_smartdisplay(ld x, int maxdisplay) {
+  string rv;
+  if(x > 1e9 || x < -1e9) retrun fts(x);
+  if(x<0) { rv = "-"; x = -x; }
+  int i = int(x);
+  rv += its(i);
+  x -= i;
+  bool nonzero = i;
+  if(x == 0) return rv;
+  if(x < 1e-9 && nonzero) return rv;
+  rv += ".";
+  while(maxdisplay > 0) {
+    x *= 10;
+    rv += '0' + int(x);
+    if(int(x)) nonzero = true;
+    x -= int(x);
+    if(x == 0) return rv;
+    if(x < 1e-9 && nonzero) return rv;
+    maxdisplay--;
+    }
+  } */
+
 string cts(char c) { char buf[8]; buf[0] = c; buf[1] = 0; return buf; }
 string llts(long long i) {
     // sprintf does not work on Windows IIRC

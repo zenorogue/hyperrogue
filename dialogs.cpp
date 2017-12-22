@@ -577,7 +577,7 @@ namespace dialog {
         if(ne.positive && x <= 0) return;
         *ne.editwhat = x;
         }
-      if(kind == 'v') ne.s = fts(*ne.editwhat);
+      if(kind == 'v') ne.s = disp(*ne.editwhat);
       }
     
     if(reaction) reaction();
@@ -758,7 +758,7 @@ namespace dialog {
         double d = exp(shiftmul/10);
         vid.alpha *= d;
         vid.scale *= d;
-        ne.s = fts(vid.alpha);
+        ne.s = disp(vid.alpha);
         }
       else if(doexiton(sym, uni)) popScreen();
       };
@@ -815,7 +815,7 @@ namespace dialog {
   
   void editNumber(ld& x, ld vmin, ld vmax, ld step, ld dft, string title, string help) {
     ne.editwhat = &x;
-    ne.s = fts(x);
+    ne.s = disp(x);
     ne.vmin = vmin;
     ne.vmax = vmax;
     ne.step = step;
