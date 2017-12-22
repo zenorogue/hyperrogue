@@ -863,7 +863,7 @@ namespace mapeditor {
     }
 
   void drawHandleKey(int sym, int uni);
-
+  
   void showDrawEditor() {
     cmode = sm::DRAW;
     gamescreen(0);
@@ -876,6 +876,8 @@ namespace mapeditor {
     string line1, line2;
   
     usershape *us = NULL;
+    
+    bool intexture = false;
 
 #if CAP_TEXTURE        
     if(texture::tstate == texture::tsActive) {
@@ -883,6 +885,7 @@ namespace mapeditor {
       line1 = "texture";
       line2 = "";
       texture::update();
+      intexture = true;
       }
 #else
     if(0);
@@ -927,11 +930,14 @@ namespace mapeditor {
 
     // displayButton(8, 8+fs*9, XLAT("l = lands"), 'l', 0);
     displayfr(8, 8+fs, 2, vid.fsize, line1, 0xC0C0C0, 0);
-    if(sg >= 3)
-      displayButton(8, 8+fs*2, line2 + XLAT(" (r = complex tesselations)"), 'r', 0);
-    else
-      displayfr(8, 8+fs*2, 2, vid.fsize, line2, 0xC0C0C0, 0);
-    displayButton(8, 8+fs*3, XLAT("l = layers: %1", its(dslayer)), 'l', 0);
+    
+    if(!intexture) {
+      if(sg >= 3)
+        displayButton(8, 8+fs*2, line2 + XLAT(" (r = complex tesselations)"), 'r', 0);
+      else
+        displayfr(8, 8+fs*2, 2, vid.fsize, line2, 0xC0C0C0, 0);
+      displayButton(8, 8+fs*3, XLAT("l = layers: %1", its(dslayer)), 'l', 0);
+      }
 
     if(us && size(us->d[dslayer].list)) {
       usershapelayer& ds(us->d[dslayer]);
@@ -961,9 +967,10 @@ namespace mapeditor {
       }
 #if CAP_TEXTURE
     else if(texture::tstate == texture::tsActive) {
-      displayButton(8, 8+fs*7, XLAT("p = color"), 'p', 0);
-      displayButton(8, 8+fs*8, XLAT("w = pen size: %1", fts4(texture::penwidth)), 'w', 0);
-      displayButton(8, 8+fs*9, XLAT("u = undo"), 'u', 0);
+      displayButton(8, 8+fs*2, XLAT(texture::texturesym ? "0 = symmetry" : "0 = asymmetry"), '0', 0);
+      displayButton(8, 8+fs*3, XLAT("p = color"), 'p', 0);
+      displayButton(8, 8+fs*4, XLAT("w = pen size: %1", fts4(texture::penwidth)), 'w', 0);
+      displayButton(8, 8+fs*5, XLAT("u = undo"), 'u', 0);
       }
 #endif
     else {
@@ -1367,11 +1374,14 @@ namespace mapeditor {
 
 #if CAP_TEXTURE
     if(texture::tstate == texture::tsActive) {
-      if(uni == '-') {
+      if(uni == '-' && mousekey != 'g') {
         if(!holdmouse) texture::undoLock();
         texture::drawPixel(mouseover, mouseh, (texture::paint_color >> 8) | ((texture::paint_color & 0xFF) << 24));
         holdmouse = true;
         }        
+
+      if(uni == '0')
+        texture::texturesym = !texture::texturesym;
 
       if(uni == 'u') {
         texture::undo();
@@ -1521,8 +1531,11 @@ namespace mapeditor {
           if(c == lmouseover) 
             textrans = inverse(V * applyPatterndir(mouseover, sio));
           transmatrix mh = textrans * rgpushxto0(mouseh);
+          for(int j=0; j<=texture::texturesym; j++)
           for(int i=0; i<c->type; i += sih.symmetries) {
-            transmatrix M2 = V * spin(2*M_PI*i/c->type) * mh;
+            transmatrix M2 = V * spin(2*M_PI*i/c->type);
+            if(j) M2 = M2 * Mirror;
+            M2 = M2 * mh;
             array<hyperpoint, 6> pts;
             for(int j=0; j<6; j++)
               pts[j] = M2 * tC0(spin(M_PI*j/3) * xpush(texture::penwidth));

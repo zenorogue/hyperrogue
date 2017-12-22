@@ -2400,6 +2400,7 @@ namespace texture {
   
   void undoLock();
   void undo();
+  extern bool texturesym;
 
   extern cpatterntype cgroup;
   }

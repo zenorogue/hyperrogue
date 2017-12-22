@@ -1045,6 +1045,8 @@ void fillcircle(hyperpoint h, int col) {
     }
   }
 
+bool texturesym = false;
+
 void drawPixel(cell *c, hyperpoint h, int col) {
   
   try {
@@ -1054,6 +1056,8 @@ void drawPixel(cell *c, hyperpoint h, int col) {
     auto& tinf = texture_map[si.id];
     for(auto& M2: tinf.matrices) for(int i = 0; i<c->type; i += si.symmetries) {
       fillcircle(M2 * spin(2 * M_PI * i / c->type) * h, col);
+      if(texturesym)
+        fillcircle(M2 * spin(2 * M_PI * i / c->type) * Mirror * h, col);
       lastupdate = ticks;
       }
     }
