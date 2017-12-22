@@ -630,6 +630,9 @@ void init_textureconfig() {
     addsaver(View[i][j], "viewmatrix_" + its(i) + its(j), i==j ? 1 : 0);
 
   addsaverenum(targetgeometry, "geometry", gNormal);
+  addsaverenum(pmodel, "used model", pmNormal);
+  addsaver(vid.yshift, "Y shift", 0);
+  addsaver(vid.camera_angle, "camera angle", 0);
   addsaverenum(target_nontrunc, "chamfering", false);
   // ... geometry parameters
 
