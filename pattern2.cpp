@@ -408,7 +408,7 @@ int getHemisphere(cell *c, int which) {
 
 namespace patterns {
 
-  void valSibling(cell *c, patterninfo& si, int sub) {
+  void valSibling(cell *c, patterninfo& si, int sub, int pat) {
     if(ctof(c)) {
       int d = c->master->fieldval;
       si.id = (d < siblings[d]) ? 0 : 1;
@@ -445,11 +445,11 @@ namespace patterns {
         si.id = 8;
         si.dir = 0; // whatever 
         patterninfo si2;
-        valSibling(c->mov[0], si2, sub);
+        valSibling(c->mov[0], si2, sub, pat);
         int di = si2.dir - c->spin(0);
         di %= S7; 
         if(di<0) di += S7;
-        si.reflect = di > S7/2;
+        if(pat == PAT_SIBLING) si.reflect = di > S7/2;
         if(sub & SPF_ROT) si.symmetries = 2;
         }
       }
@@ -601,7 +601,7 @@ namespace patterns {
   void val_all(cell *c, patterninfo &si, int sub, int pat) {
     if(a46) val46(c, si, sub, pat);
     else if(a38) val38(c, si, sub, pat);
-    else if(sphere) valSibling(c, si, sub);
+    else if(sphere) valSibling(c, si, sub, pat);
     else if(euclid4) valEuclid4(c, si, sub);
     else if(euclid) valEuclid6(c, si, sub);
     else if(a4) val457(c, si, sub);
