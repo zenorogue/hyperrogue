@@ -34,10 +34,10 @@ TTF_Font *font[256];
 #if CAP_SDL
 SDL_Surface *s;
 
-int ZZ;
+int qpixel_pixel_outside;
 
 int& qpixel(SDL_Surface *surf, int x, int y) {
-  if(x<0 || y<0 || x >= surf->w || y >= surf->h) return ZZ;
+  if(x<0 || y<0 || x >= surf->w || y >= surf->h) return qpixel_pixel_outside;
   char *p = (char*) surf->pixels;
   p += y * surf->pitch;
   int *pi = (int*) (p);
@@ -45,7 +45,7 @@ int& qpixel(SDL_Surface *surf, int x, int y) {
   }
 
 int qpixel3(SDL_Surface *surf, int x, int y) {
-  if(x<0 || y<0 || x >= surf->w || y >= surf->h) return ZZ;
+  if(x<0 || y<0 || x >= surf->w || y >= surf->h) return qpixel_pixel_outside;
   char *p = (char*) surf->pixels;
   p += y * surf->pitch;
   p += x;

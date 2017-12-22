@@ -187,7 +187,7 @@ bool readtexture() {
     int base_x = tx/2 - origdim/2;
     int base_y = ty/2 - origdim/2;
   
-    ZZ = 0; // outside is black
+    qpixel_pixel_outside = 0; // outside is black
   
     vector<int> half_expanded(twidth * ty);  
     for(int y=0; y<ty; y++)
