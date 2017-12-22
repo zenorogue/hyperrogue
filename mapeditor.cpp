@@ -855,26 +855,23 @@ namespace mapeditor {
   hyperpoint ccenter = C0;
   hyperpoint coldcenter = C0;
   
+  unsigned gridcolor = 0xC0C0C040;
+  
   void drawGrid() {
-    for(int d=0; d<84; d++) {
-      transmatrix d2 = drawtrans * rgpushxto0(ccenter);
-      int lalpha;
-      if(d % (84/drawcell->type) == 0)
-        lalpha = 0x40;
-      else
-        lalpha = 0x20;
-      int col = darkena(0xC0C0C0, 0, lalpha);
-      queueline(d2 * C0, d2 * spin(M_PI*d/42)* xpush(1) * C0, col);
+    for(int d=0; d<S84; d++) {
+      transmatrix d2 = drawtrans * rgpushxto0(ccenter) * rspintox(inverse(drawtrans * rgpushxto0(ccenter)) * coldcenter);
+      unsigned lightgrid = gridcolor;
+      lightgrid -= (lightgrid & 0xFF) / 2;
+      unsigned col = (d % (S84/drawcell->type) == 0) ? gridcolor : lightgrid;
+      queueline(d2 * C0, d2 * spin(M_PI*d/S42)* xpush(1) * C0, col, 4);
       for(int u=2; u<=20; u++) {
-        if(u % 5 == 0) lalpha = 0x40;
-        else lalpha = 0x20;
         queueline(
-          d2 * spin(M_PI*d/42)* xpush(u/20.) * C0, 
-          d2 * spin(M_PI*(d+1)/42)* xpush(u/20.) * C0, 
-          darkena(0xC0C0C0, 0, lalpha));
+          d2 * spin(M_PI*d/S42)* xpush(u/20.) * C0, 
+          d2 * spin(M_PI*(d+1)/S42)* xpush(u/20.) * C0, 
+          (u%5==0) ? gridcolor : lightgrid, 0);
         }
       }
-    queueline(drawtrans*ccenter, drawtrans*coldcenter, darkena(0xC0C0C0, 0, 0x20));
+    queueline(drawtrans*ccenter, drawtrans*coldcenter, gridcolor, 4);
     }
 
   void drawHandleKey(int sym, int uni);
@@ -968,7 +965,10 @@ namespace mapeditor {
 
       displayfr(8, 8+fs*14, 2, vid.fsize, XLAT("t = shift"), 0xC0C0C0, 0);
       displayfr(8, 8+fs*15, 2, vid.fsize, XLAT("y = spin"), 0xC0C0C0, 0);
-      displayButton(8, 8+fs*16, XLAT("p = paint"), 'p', 0);
+      if(mousekey == 'g')
+        displayButton(8, 8+fs*16, XLAT("p = grid color"), 'p', 0);
+      else
+        displayButton(8, 8+fs*16, XLAT("p = paint"), 'p', 0);
 
       }
 #if CAP_TEXTURE
@@ -995,7 +995,7 @@ namespace mapeditor {
 #endif
 
     if(!mouseout()) {
-      hyperpoint mh = inverse(drawtrans * rgpushxto0(ccenter)) * mouseh;
+      hyperpoint mh = inverse(drawtrans * rgpushxto0(ccenter) * rspintox(inverse(drawtrans * rgpushxto0(ccenter)) * coldcenter)) * mouseh;
       displayfr(vid.xres-8, vid.yres-8-fs*6, 2, vid.fsize, XLAT("x: %1", fts4(mh[0])), 0xC0C0C0, 16);
       displayfr(vid.xres-8, vid.yres-8-fs*5, 2, vid.fsize, XLAT("y: %1", fts4(mh[1])), 0xC0C0C0, 16);
       displayfr(vid.xres-8, vid.yres-8-fs*4, 2, vid.fsize, XLAT("z: %1", fts4(mh[2])), 0xC0C0C0, 16);
@@ -1284,7 +1284,12 @@ namespace mapeditor {
 
     handlePanning(sym, uni);
   
-    if(uni == SETMOUSEKEY) mousekey = newmousekey;
+    if(uni == SETMOUSEKEY) {
+       if(mousekey == 'g' && newmousekey == 'g')
+         mousekey = '-';
+       else
+         mousekey = newmousekey;
+       }
     
     if(uni == 'r') {
       pushScreen(patterns::showPattern);
@@ -1293,8 +1298,25 @@ namespace mapeditor {
       }
     
     hyperpoint mh = inverse(drawtrans) * mouseh;
-    if(uni == 'g') coldcenter = ccenter, ccenter = mh;
+
+    if((uni == 'p' && mousekey == 'g') || (uni == 'g' && coldcenter == ccenter && ccenter == mh)) {
+      static unsigned grid_colors[] = {
+        8,
+        0x00000040,
+        0xFFFFFF40,
+        0xFF000040,
+        0x0000F040,
+        0x00000080,
+        0xFFFFFF80,
+        0xFF000080,
+        0x0000F080,
+        };
+      dialog::openColorDialog(gridcolor, grid_colors);
+      }
       
+    if(uni == 'g' || (uni == '-' && mousekey == 'g')) 
+      coldcenter = ccenter, ccenter = mh;
+
     if(uni == 'z') { 
       vid.scale *= 2;
       #if CAP_TEXTURE

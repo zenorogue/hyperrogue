@@ -459,3 +459,6 @@ transmatrix mzscale(const transmatrix& t, double fac) {
 
 transmatrix pushone() { return euclid ? eupush(1, 0) : xpush(sphere?.5 : 1); }
 
+bool operator == (hyperpoint h1, hyperpoint h2) {
+  return h1[0] == h2[0] && h1[1] == h2[1] && h1[2] == h2[2];
+  }
