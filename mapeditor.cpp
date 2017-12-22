@@ -975,6 +975,7 @@ namespace mapeditor {
     else if(texture::tstate == texture::tsActive) {
       displayButton(8, 8+fs*7, XLAT("p = color"), 'p', 0);
       displayButton(8, 8+fs*8, XLAT("w = pen size: %1", fts4(texture::penwidth)), 'w', 0);
+      displayButton(8, 8+fs*9, XLAT("u = undo"), 'u', 0);
       }
 #endif
     else {
@@ -1339,8 +1340,13 @@ namespace mapeditor {
 #if CAP_TEXTURE
     if(texture::tstate == texture::tsActive) {
       if(uni == '-') {
+        if(!holdmouse) texture::undoLock();
         texture::drawPixel(mouseover, mouseh, (texture::paint_color >> 8) | ((texture::paint_color & 0xFF) << 24));
         holdmouse = true;
+        }        
+
+      if(uni == 'u') {
+        texture::undo();
         }        
 
       if(uni == 'p') {

@@ -2397,6 +2397,9 @@ namespace texture {
   void drawPixel(cell *c, hyperpoint h, int col);
   
   void remap(eTextureState old_tstate, eTextureState old_tstate_max);
+  
+  void undoLock();
+  void undo();
 
   extern cpatterntype cgroup;
   }

@@ -42,6 +42,10 @@ unsigned paint_color = 0x000000FF;
 
 vector<unsigned> texture_pixels;
 
+unsigned& get_texture_pixel(int x, int y) {
+  return texture_pixels[(y&(twidth-1))*twidth+(x&(twidth-1))];
+  }
+
 string texturename = "textures/hyperrogue-texture.png";
 string configname = "textures/hyperrogue.txc";
 
@@ -49,6 +53,13 @@ bool saving = false;
 
 eTextureState tstate;
 eTextureState tstate_max;
+
+struct undo {
+  unsigned* pix;
+  unsigned last;
+  };
+
+vector<pair<unsigned*, unsigned>> undos;
 
 template<class T, class U> void scale_colorarray(int origdim, const T& src, const U& dest) {
   int ox = 0, tx = 0, partials[4];
@@ -92,6 +103,7 @@ bool loadTextureGL() {
   }
 
 bool whitetexture() {
+  undos.clear();
   texture_pixels.resize(0);
   texture_pixels.resize(twidth * twidth, 0xFFFFFFFF);
   return true;
@@ -99,6 +111,7 @@ bool whitetexture() {
 
 bool readtexture() {
 
+  undos.clear();
   texture_pixels.resize(twidth * twidth);
   
 #if CAP_SDL_IMG  
@@ -176,10 +189,6 @@ bool readtexture() {
   
     ZZ = 0; // outside is black
   
-  /*  for(int y=0; y<twidth; y++)
-    for(int x=0; x<twidth; x++)
-      texture_pixels[y*twidth+x] = qpixel(txt2, y%ty, x%tx); */
-  
     vector<int> half_expanded(twidth * ty);  
     for(int y=0; y<ty; y++)
       scale_colorarray(origdim,
@@ -190,7 +199,7 @@ bool readtexture() {
     for(int x=0; x<twidth; x++)
       scale_colorarray(origdim, 
         [&] (int y) { return base_y+y < 0 || base_y+y >= ty ? 0 : half_expanded[x + (base_y + y) * twidth]; }, 
-        [&] (int y, int v) { texture_pixels[twidth * y + x] = v; }
+        [&] (int y, int v) { get_texture_pixel(x, y) = v; }
         );
     
     }
@@ -206,7 +215,7 @@ void saveRawTexture() {
   SDL_Surface *sraw = SDL_CreateRGBSurface(SDL_SWSURFACE,twidth,twidth,32,0,0,0,0);
   for(int y=0; y<twidth; y++)
   for(int x=0; x<twidth; x++)
-    qpixel(sraw,x,y) = texture_pixels[y * twidth + x];
+    qpixel(sraw,x,y) = get_texture_pixel(x, y);
   IMAGESAVE(sraw, texturename.c_str());
   SDL_FreeSurface(sraw);
   addMessage(XLAT("Saved the raw texture to %1", texturename));
@@ -337,7 +346,7 @@ bool apply(cell *c, const transmatrix &V, int col) {
   
         int vi[2] = {int(v[0] * twidth), int(v[1] * twidth)};
   
-        col = texture_pixels[(vi[0] & (twidth-1)) + (vi[1] & (twidth-1)) * twidth];
+        col = get_texture_pixel(vi[0], vi[1]);
         hyperpoint h = hpxyz(mi.vertices[i], mi.vertices[i+1], mi.vertices[i+2]);
         addaura(V*h, col, 0);
         }
@@ -942,6 +951,45 @@ int near(pair<int, int> p1, pair<int, int> p2) {
   return max(abs(p1.first-p2.first), abs(p1.second - p2.second));
   }
 
+void fillpixel(int x, int y, unsigned col) {
+  if(x<0 || y<0 || x >= twidth || y >= twidth) return;
+  auto& pix = get_texture_pixel(x, y);
+  if(pix != col) {
+    undos.emplace_back(&pix, pix);
+    pix = col;
+    }
+  }
+
+void undo() {
+  while(!undos.empty()) {
+    auto p = undos.back();
+    undos.pop_back();
+    if(!p.first) {
+      loadTextureGL(); 
+      return;
+      }
+    *p.first = p.second;
+    }
+  }
+
+void undoLock() {
+  printf("undos size = %d\n", size(undos));
+  if(size(undos) > 2000000) {
+    // limit undo memory
+    int moveto = 0;
+    for(int i=0; i < size(undos) - 1000000; i++)
+      if(!undos[i].first) moveto = i;
+    if(moveto) {
+      for(int i=0; i+moveto < size(undos); i++)
+        undos[i] = undos[i+moveto];
+      undos.resize(size(undos) - moveto);
+      printf("undos sized to = %d\n", size(undos));
+      }
+    }
+    
+  undos.emplace_back(nullptr, 1);
+  }
+
 void filltriangle(const array<hyperpoint, 3>& v, const array<point, 3>& p, int col, int lev) {
   
   int d2 = near(p[0], p[1]), d1 = near(p[0], p[2]), d0 = near(p[1], p[2]);
@@ -950,7 +998,7 @@ void filltriangle(const array<hyperpoint, 3>& v, const array<point, 3>& p, int c
 
   if((d0 <= 1 && d1 <= 1 && d2 <= 1) || lev >= 20) {
     for(int i=0; i<3; i++)
-      texture_pixels[((p[i].first) & (twidth-1)) + (p[i].second & (twidth-1)) * twidth] = col;
+      fillpixel(p[i].first, p[i].second, col);
     return;
     }
   else if(d1 >= d0 && d1 >= d2)
