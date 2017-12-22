@@ -5001,7 +5001,7 @@ void drawthemap() {
   Uint8 *keystate = SDL_GetKeyState(NULL);
   lmouseover = mouseover;
   bool useRangedOrb = (!(vid.shifttarget & 1) && haveRangedOrb() && lmouseover && lmouseover->cpdist > 1) || (keystate[SDLK_RSHIFT] | keystate[SDLK_LSHIFT]);
-  if(!useRangedOrb && !(cmode & sm::MAP) && DEFAULTCONTROL && !mouseout()) {
+  if(!useRangedOrb && !(cmode & sm::MAP) && !(cmode & sm::DRAW) && DEFAULTCONTROL && !mouseout()) {
     void calcMousedest();
     calcMousedest();
     cellwalker cw = cwt; bool f = flipplayer;
