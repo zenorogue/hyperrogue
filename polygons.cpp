@@ -1061,7 +1061,7 @@ hpcshape
   shDodeca;
 
 #define USERLAYERS 32
-#define USERSHAPEGROUPS 8
+#define USERSHAPEGROUPS 4
 #define USERSHAPEIDS 4096
 
 struct usershapelayer {

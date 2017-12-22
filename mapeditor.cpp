@@ -480,20 +480,11 @@ namespace mapeditor {
     return 1;
     }
   
-  int cellShapeGroup() {
-    using namespace patterns;
-    if(whichPattern == 'f') return 4;
-    if(whichPattern == 'p') return 5;
-    if(whichPattern == 'z') return 6;
-    if(whichPattern == 'H') return 7;
-    return 3;
-    }
-  
   int drawcellShapeGroup() {
     if(drawcell == cwt.c && drawplayer) return 0;
     if(drawcell->monst) return 1;
     if(drawcell->item) return 2;
-    return cellShapeGroup();
+    return 3;
     }
   
   int drawcellShapeID() {
@@ -505,10 +496,7 @@ namespace mapeditor {
 
   bool editingShape(int group, int id) {
     if(group != mapeditor::drawcellShapeGroup()) return false;
-    if(group < 3) return id == drawcellShapeID();
-    // todo fix this
     return id == drawcellShapeID();
-    // return patterns::getpatterninfo0(id).id == patterns::getpatterninfo0(drawcell).id;
     }
 
   void editCell(const pair<cellwalker, cellwalker>& where) {
@@ -1226,11 +1214,27 @@ namespace mapeditor {
       }
     int vernum; err = fscanf(f, "%x", &vernum);
     printf("vernum = %x\n", vernum);
+
+    if(vernum >= 0xA0A0) {
+      int tg, nt, wp;
+      fscanf(f, "%d%d%d%d\n", &tg, &nt, &wp, &patterns::subpattern_flags);
+      patterns::whichPattern = wp;
+      if(tg != geometry) { targetgeometry = eGeometry(tg); restartGame('g', 0, true); }
+      if(nt != nontruncated) { restartGame('7', 0, true); }
+      }
+
     while(true) {
       int i, j, l, sym, rots, color, siz;
       err = fscanf(f, "%d%d%d%d%d%x%d", &i, &j, &l, &sym, &rots, &color, &siz);
       if(i == -1 || err < 6) break;
       if(siz < 0 || siz > 1000) break;
+      
+      if(i >= 4) {
+        if(i < 8) patterns::whichPattern = "xxxxfpzH"[i];
+        patterns::subpattern_flags = 0;
+        i = 3;
+        }
+
       initShape(i, j);
       usershapelayer& ds(usershapes[i][j]->d[l]);
       ds.shift = readHyperpoint(f);
@@ -1259,6 +1263,8 @@ namespace mapeditor {
       }
     fprintf(f, "HyperRogue saved picture\n");
     fprintf(f, "%x\n", VERNUM_HEX);
+    if(VERNUM_HEX >= 0xA0A0)
+      fprintf(f, "%d %d %d %d\n", geometry, nontruncated, patterns::whichPattern, patterns::subpattern_flags);
     for(int i=0; i<USERSHAPEGROUPS; i++) for(int j=0; j<USERSHAPEIDS; j++) {
       usershape *us = usershapes[i][j];
       if(!us) continue;
@@ -1399,12 +1405,12 @@ namespace mapeditor {
 
     else {
       dslayer %= USERLAYERS;
-  
+
       int sg = drawcellShapeGroup();
-      
+
       for(int i=0; i<USERSHAPEIDS; i++) if(editingShape(sg, i))
         applyToShape(sg, i, uni, mh);
-        
+
       if(uni == 'e' || (uni == '-' && mousekey == 'e')) {
         initdraw(mouseover ? mouseover : cwt.c);
         }

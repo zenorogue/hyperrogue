@@ -3517,7 +3517,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         }
               
 #if CAP_EDIT
-      if(mapeditor::drawUserShape(V * applyPatterndir(c, si), mapeditor::cellShapeGroup(), si.id,
+      if(mapeditor::drawUserShape(V * applyPatterndir(c, si), 3, si.id,
         darkena(fcol, fd, (cmode & sm::DRAW) ? 0xC0 : 0xFF), c));
       
       else if(patterns::whichShape == '7') {
