@@ -218,6 +218,6 @@ extern itemtype iinf[ittypes];
 extern const landtype linf[landtypes];
 
 enum cpatterntype { 
-  cpFootball, cpThree, cpChess, cpSingle, cpLarge, cpUnknown
+  cpFootball, cpThree, cpChess, cpSingle, cpLarge, cpZebra, cpUnknown
   };
   

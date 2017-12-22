@@ -1327,7 +1327,7 @@ namespace patterns {
   
   bool compatible(cpatterntype oldp, cpatterntype newp) {
     // larges are not incompatible between themselves
-    if(newp == cpLarge) 
+    if(newp == cpLarge || newp == cpZebra) 
       return false;
     // other cps are compatible with themselves
     if(newp == oldp) return true;
@@ -1403,6 +1403,14 @@ namespace patterns {
       {gElliptic, false, PAT_FIELD, 0},
       {gElliptic, true, PAT_FIELD, 0},
       {gEuclid, false, PAT_PALACE, 0}
+      }},
+    {"periodic patterns", {
+      {gNormal, false, PAT_ZEBRA, SPF_SYM0123 | SPF_ROT},
+      {gNormal, false, PAT_PALACE, SPF_SYM0123 | SPF_ROT},
+      {gNormal, false, PAT_EMERALD, SPF_SYM0123 | SPF_ROT},
+      {g46, true, PAT_COLORING, SPF_SYM0123 | SPF_CHANGEROT},
+      {g45, true, PAT_ZEBRA, SPF_SYM0123 | SPF_ROT},
+      {g47, true, PAT_ZEBRA, SPF_SYM0123 | SPF_ROT},
       }}
     };
   
@@ -1429,6 +1437,11 @@ namespace patterns {
         string s = XLAT(ginf[g.geo].name);
         s += truncatenames[g.nontrunc];
         if(g.subpattern_flags & SPF_ALTERNATE) s += " (alt)";
+        if(cgroup == cpZebra) {
+          if(g.whichPattern == PAT_PALACE) s += " (Palace)";
+          else if(g.whichPattern == PAT_EMERALD) s += " (Emerald)";
+          else s += " (Zebra)";
+          }
         dialog::addBoolItem(s, geometry == g.geo && nontruncated == g.nontrunc && whichPattern == g.whichPattern && subpattern_flags == g.subpattern_flags, 'a'+j);
         }
     dialog::addBreak(100);
