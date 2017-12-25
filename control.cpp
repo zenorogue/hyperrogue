@@ -783,10 +783,10 @@ void displayabutton(int px, int py, string s, int col) {
 #endif
 
 void gmodekeys(int sym, int uni) {
-  if(uni == '1') { vid.alpha = 999; vid.scale = 998; }
-  if(uni == '2') { vid.alpha = 1; vid.scale = 0.4; }
-  if(uni == '3') { vid.alpha = 1; vid.scale = 1; }
-  if(uni == '4') { vid.alpha = 0; vid.scale = 1; }
+  if(uni == '1') { vid.alpha = 999; vid.scale = 998; vid.xposition = vid.yposition = 0; }
+  if(uni == '2') { vid.alpha = 1; vid.scale = 0.4; vid.xposition = vid.yposition = 0; }
+  if(uni == '3') { vid.alpha = 1; vid.scale = 1; vid.xposition = vid.yposition = 0; }
+  if(uni == '4') { vid.alpha = 0; vid.scale = 1; vid.xposition = vid.yposition = 0; }
   if(uni == '5') { vid.wallmode += 60 + (shiftmul > 0 ? 1 : -1); vid.wallmode %= 6; }
   if(uni == '6') vid.grid = !vid.grid;
   if(uni == '7') { vid.darkhepta = !vid.darkhepta; }

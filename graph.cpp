@@ -5111,6 +5111,9 @@ void calcparam() {
     }
   
   if(dronemode) { vid.ycenter -= vid.radius; vid.ycenter += vid.fsize/2; vid.ycenter += vid.fsize/2; vid.radius *= 2; }
+  
+  vid.xcenter += vid.scrsize * vid.xposition;
+  vid.ycenter += vid.scrsize * vid.yposition;
 
   ld eye = vid.eye; if(pmodel || rug::rugged) eye = 0;
   vid.beta = 1 + vid.alpha + eye;
@@ -5248,6 +5251,9 @@ void gamescreen(int _darken) {
   #endif
   
   darken = 0;
+
+  if(texture::tstate == texture::tsAdjusting) 
+    texture::drawRawTexture();  
   }
 
 void normalscreen() {

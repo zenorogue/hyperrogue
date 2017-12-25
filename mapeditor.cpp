@@ -1000,8 +1000,8 @@ namespace mapeditor {
       }
 
     displaymm('g', vid.xres-8, 8+fs*4, 2, vid.fsize, XLAT("g = grid"), 16);
-    displayButton(vid.xres-8, 8+fs*3, XLAT("z = zoom in"), 'z', 16);
-    displayButton(vid.xres-8, 8+fs*2, XLAT("o = zoom out"), 'o', 16);
+    displaymm('z', vid.xres-8, 8+fs*3, 2, vid.fsize, XLAT("z = zoom in"), 16);
+    displaymm('o', vid.xres-8, 8+fs*2, 2, vid.fsize, XLAT("o = zoom out"), 16);
     
     if(intexture) for(int i=0; i<10; i++) {
       if(8 + fs * (6+i) < vid.yres - 8 - fs * 7)
@@ -1320,12 +1320,34 @@ namespace mapeditor {
     return true;
     }
 
+  void scaleall(ld z) { 
+     
+     // (mx,my) = (xcb,ycb) + ss * (xpos,ypos) + (mrx,mry) * scale
+     
+     // (mrx,mry) * (scale-scale') =
+     // ss * ((xpos',ypos')-(xpos,ypos))
+     
+     // mx = xb + ssiz*xpos + mrx * scale
+     // mx = xb + ssiz*xpos' + mrx * scale' 
+     
+     ld mrx = (.0 + mousex - vid.xcenter) / vid.scale;
+     ld mry = (.0 + mousey - vid.ycenter) / vid.scale;
+     
+     vid.xposition += (vid.scale - vid.scale*z) * mrx / vid.scrsize;
+     vid.yposition += (vid.scale - vid.scale*z) * mry / vid.scrsize;
+
+     vid.scale *= z;
+     #if CAP_TEXTURE
+     texture::itt = xyscale(texture::itt, 1/z);
+     #endif
+     }
+
   void drawHandleKey(int sym, int uni) {
 
     handlePanning(sym, uni);
   
     if(uni == SETMOUSEKEY) {
-       if(mousekey == 'g' && newmousekey == 'g')
+       if(mousekey == newmousekey)
          mousekey = '-';
        else
          mousekey = newmousekey;
@@ -1353,22 +1375,16 @@ namespace mapeditor {
         };
       dialog::openColorDialog(gridcolor, grid_colors);
       }
+    
+    char mkuni = uni == '-' ? mousekey : uni;
+    
+    bool clickused = false;
       
-    if(uni == 'g' || (uni == '-' && mousekey == 'g')) 
-      coldcenter = ccenter, ccenter = mh;
+    if(mkuni == 'g') 
+      coldcenter = ccenter, ccenter = mh, clickused = true;
 
-    if(uni == 'z') { 
-      vid.scale *= 2;
-      #if CAP_TEXTURE
-      texture::itt = xyscale(texture::itt, .5);
-      #endif
-      }
-    if(uni == 'o') {
-      vid.scale /= 2;
-      #if CAP_TEXTURE
-      texture::itt = xyscale(texture::itt, 2);
-      #endif
-      }
+    if(mkuni == 'z') scaleall(2), clickused = true;
+    if(mkuni == 'o') scaleall(.5), clickused = true;
 
     if(uni == ' ' && cheater) {
       popScreen();
@@ -1401,7 +1417,7 @@ namespace mapeditor {
 
 #if CAP_TEXTURE
     if(texture::tstate == texture::tsActive) {
-      if(uni == '-' && mousekey != 'g') {
+      if(uni == '-' && !clickused) {
         if(!holdmouse) texture::undoLock();
         texture::drawPixel(mouseover, mouseh, (texture::paint_color >> 8) | ((texture::paint_color & 0xFF) << 24));
         holdmouse = true;

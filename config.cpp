@@ -230,6 +230,8 @@ void initConfig() {
   addsaver(vid.antialias, "antialias", AA_NOGL | AA_FONT | AA_LINES | AA_LINEWIDTH | AA_VERSION);
   addsaver(vid.linewidth, "linewidth", 1);
   addsaver(vid.scale, "scale", 1);
+  addsaver(vid.xposition, "xposition", 0);
+  addsaver(vid.yposition, "yposition", 0);
   addsaver(vid.alpha, "projection", 1);
   addsaver(vid.sspeed, "scrollingspeed", 0);
   addsaver(vid.mspeed, "movement speed", 1);
@@ -363,6 +365,7 @@ void resetModes(char leave = 'c') {
     }
   
   pmodel = mdDisk; vid.alpha = 1; vid.scale = 1;
+  vid.xposition = vid.yposition = 0;
   if(rug::rugged) rug::close();
 
   vid.monmode = DEFAULT_MONMODE;

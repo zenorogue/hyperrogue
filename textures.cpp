@@ -441,8 +441,8 @@ void drawRawTexture() {
   glBindTexture(GL_TEXTURE_2D, textureid);
   vector<GLfloat> tver, sver;
   for(int i=0; i<4; i++) {
-    int cx[4] = {1, -1, -1, 1};
-    int cy[4] = {1, 1, -1, -1};
+    int cx[4] = {2, -2, -2, 2};
+    int cy[4] = {2, 2, -2, -2};
     int x = cx[i];
     int y = cy[i];
     hyperpoint inmodel = hpxyz(x, y, 1);
@@ -630,8 +630,10 @@ void init_textureconfig() {
     addsaver(View[i][j], "viewmatrix_" + its(i) + its(j), i==j ? 1 : 0);
 
   addsaverenum(targetgeometry, "geometry", gNormal);
-  addsaverenum(pmodel, "used model", pmNormal);
+  addsaverenum(pmodel, "used model", mdDisk);
   addsaver(vid.yshift, "Y shift", 0);
+  addsaver(vid.yposition, "Y position", 0);
+  addsaver(vid.xposition, "X position", 0);
   addsaver(vid.camera_angle, "camera angle", 0);
   addsaverenum(target_nontrunc, "chamfering", false);
   // ... geometry parameters
@@ -712,9 +714,6 @@ bool load_textureconfig() {
 void showMenu() {
   cmode = sm::SIDE | sm::MAYDARK | sm::DIALOG_STRICT_X;
   gamescreen(0);  
-  
-  if(tstate == tsAdjusting) 
-    drawRawTexture();
   
   if(tstate == tsOff) {
     dialog::init(XLAT("texture mode (off)"));
