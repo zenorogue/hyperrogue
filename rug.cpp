@@ -959,8 +959,8 @@ void actDraw() {
     
     ld strafex = 0, strafey = 0;
     if(keystate[SDLK_LSHIFT]) {    
-      if(keystate[SDLK_LEFT]) strafex -= alpha;
-      if(keystate[SDLK_RIGHT]) strafex += alpha;
+      if(keystate[SDLK_LEFT]) strafex += alpha;
+      if(keystate[SDLK_RIGHT]) strafex -= alpha;
       if(keystate[SDLK_UP]) strafey -= alpha;
       if(keystate[SDLK_DOWN]) strafey += alpha;
       }
