@@ -386,8 +386,9 @@ void showDisplayMode() {
       }
   #if CAP_RUG
     else if(xuni == 'u') {
-      if(sphere) projectionDialog();
-      else rug::select();
+      //if(sphere) projectionDialog();
+      //else 
+      rug::select();
       }
   #endif
     else if(uni == 'a')

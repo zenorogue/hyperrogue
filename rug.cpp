@@ -33,8 +33,11 @@ GLAPI void APIENTRY glDeleteFramebuffers (GLsizei n, const GLuint *framebuffers)
 
 namespace rug {
 
-double rugzoom = .3;
+static const bool fast_euclidean = true;
+
 int torus_precision = 2;
+
+eGeometry gwhere = gEuclid;
 
 // hypersian rug datatypes and globals
 //-------------------------------------
@@ -47,6 +50,8 @@ bool renderonce  = false;
 bool rendernogl  = false;
 int  texturesize = 1024;
 ld scale = 1;
+
+ld err_zero = 1e-3;
 
 int queueiter, qvalid, dt;
 double err;
@@ -76,6 +81,100 @@ struct triangle {
 vector<rugpoint*> points;
 vector<triangle> triangles;
 
+bool rug_perspective = false;
+
+// extra geometry functions
+//--------------------------
+
+// returns a matrix M
+// such that inverse(M) * h1 = ( |h1|, 0, 0) and inverse(M) * h2 = ( .., .., 0)
+
+bool zero2(hyperpoint h) { using namespace hyperpoint_vec; return !(h|h); }
+
+transmatrix orthonormalize(hyperpoint h1, hyperpoint h2) {
+  using namespace hyperpoint_vec;
+
+  hyperpoint vec[3];
+  vec[2] = (h1 ^ h2);
+  if(zero2(vec[2])) vec[2] = hpxyz(.519, .4619, .136);
+
+  vec[2] = vec[2] / sqrt(vec[2]|vec[2]);
+  vec[0] = h1 - vec[2] * (h1|vec[2]);
+  if(zero2(vec[0])) {
+    vec[0] = hpxyz(1.641,2,3); 
+    vec[0] = vec[0] - vec[2] * (vec[0]|vec[2]);
+    }
+  vec[0] = vec[0] / sqrt(vec[0]|vec[0]);
+  vec[1] = h2 - vec[2] * (h2|vec[2]) - vec[0] * (h2|vec[0]);
+  if(zero2(vec[1])) {
+    vec[1] = hpxyz(1.713,3,5); 
+    vec[1] = vec[1] - vec[2] * (vec[1]|vec[2]) - vec[0] * (vec[1]|vec[0]);
+    }
+  vec[1] = vec[1] / sqrt(vec[1]|vec[1]);
+  
+  transmatrix M;
+  for(int i=0; i<3; i++) for(int j=0; j<3; j++)
+    M[i][j] = vec[j][i];
+  
+  return M;
+  }
+
+hyperpoint azeq_to_hyperboloid(hyperpoint h) {
+  if(abs(h[2])>1e-4) printf("Error: h[2] = %lf\n", h[2]);
+  if(euclid) {
+    h[2] = 1;
+    return h;
+    }
+  ld d = hypot(h[0], h[1]);
+  if(d == 0) {
+    h[2] = 1;
+    return h;
+    }
+  if(sphere) {
+    h[0] = sin(d) * h[0]/d;
+    h[1] = sin(d) * h[1]/d;
+    h[2] = cos(d);
+    }
+  else {
+    h[0] = sinh(d) * h[0]/d;
+    h[1] = sinh(d) * h[1]/d;
+    h[2] = cosh(d);
+    }
+  return h;
+  }
+
+hyperpoint hyperboloid_to_azeq(hyperpoint h) {
+  if(euclid) {
+    h[2] = 0;
+    return h;
+    }
+  else {
+    ld d = hdist0(h);
+    if(d == 0) { h[2] = 0; return h; }
+    ld d2 = hypot(h[0], h[1]);
+    if(d2 == 0) { h[2] = 0; return h; }
+    h[0] = d * h[0] / d2;
+    h[1] = d * h[1] / d2;
+    h[2] = 0;
+    return h;
+    }
+  }
+
+void push_all_points(int coord, ld val) {
+  if(!val) return;
+  else if(fast_euclidean && gwhere == gEuclid) {
+    for(int i=0; i<size(points); i++) 
+      points[i]->flat[coord] += val;
+    }
+  else for(int i=0; i<size(points); i++) {
+    dynamicval<eGeometry> gw(geometry, gwhere);
+    transmatrix M = orthonormalize(hpxyz(coord==0,coord==1,coord==2), points[i]->flat);
+    transmatrix Mi = inverse(M);
+    hyperpoint f = azeq_to_hyperboloid(Mi * points[i]->flat);
+    points[i]->flat = M * hyperboloid_to_azeq(xpush(val) * f);
+    }
+  }
+
 // construct the graph
 //---------------------
 
@@ -85,11 +184,21 @@ rugpoint *addRugpoint(hyperpoint h, double dist) {
   rugpoint *m = new rugpoint;
   m->h = h;
   
+  /*
   ld tz = vid.alphax+h[2];
   m->x1 = (1 + h[0] / tz) / 2;
   m->y1 = (1 + h[1] / tz) / 2;
+  */
+
+  hyperpoint onscreen;
+  applymodel(m->h, onscreen);
+  m->x1 = (1 + onscreen[0] * vid.scale) / 2;
+  m->y1 = (1 + onscreen[1] * vid.scale) / 2;
+
   m->flat = // hpxyz(h[0], h[1], sin(atan2(h[0], h[1]) * 3 + hyprand) * (h[2]-1) / 1000);
     hpxyz(h[0], h[1], (h[2]-1) * (rand() % 1000 - rand() % 1000) / 1000);
+  
+  if(rug_perspective && gwhere == gEuclid) m->flat[2] -= 3;
   m->valid = false;
   m->inqueue = false;
   m->dist = dist;
@@ -130,26 +239,29 @@ void addTriangle1(rugpoint *t1, rugpoint *t2, rugpoint *t3) {
   }
 
 bool psort(rugpoint *a, rugpoint *b) {
-  return a->h[2] < b->h[2];
+  return hdist0(a->h) < hdist0(b->h);
   }
 
+ld modelscale = 1;
+
 void calcLengths() {
-  for(int i=0; i<size(points); i++) for(int j=0; j<size(points[i]->edges); j++)
-    points[i]->edges[j].len = hdist(points[i]->h, points[i]->edges[j].target->h);
+  for(int i=0; i<size(points); i++) for(int j=0; j<size(points[i]->edges); j++) {
+    ld d = hdist(points[i]->h, points[i]->edges[j].target->h);
+    if(elliptic && d > M_PI/2) d = M_PI - d;
+    points[i]->edges[j].len = d * modelscale;
+    }
   }
 
 void setVidParam() {
-  vid.xres = vid.yres = TEXTURESIZE; vid.scale = 1; 
-  vid.radius = HTEXTURESIZE; vid.xcenter = HTEXTURESIZE; vid.ycenter = HTEXTURESIZE;
+  vid.xres = vid.yres = TEXTURESIZE;
+  vid.scrsize = HTEXTURESIZE;
+  vid.radius = vid.scrsize * vid.scale; vid.xcenter = HTEXTURESIZE; vid.ycenter = HTEXTURESIZE;
   vid.beta = 2; vid.alphax = 1; vid.eye = 0; vid.goteyes = false;
-  if(torus) vid.radius *= rugzoom;
   }
 
 void buildTorusRug() {
   using namespace torusconfig;
 
-  dynamicval<videopar> d(vid, vid);
-  rugzoom = 1;
   setVidParam();
 
   struct toruspoint {
@@ -157,7 +269,7 @@ void buildTorusRug() {
     toruspoint() { x=qty; y=qty; }
     toruspoint(int _x, int _y) : x(_x), y(_y) {}
     int d2() { 
-      return x*x+x*y+y*y;
+      return x*x+(euclid6?x*y:0)+y*y;
       }
     };
   
@@ -250,12 +362,11 @@ void buildTorusRug() {
   
   // maxz * rugzoom * vid.radius == vid.radius
   
-  rugzoom = 1 / maxz;
-  printf("rugzoom = %lf\n", rugzoom);
+  vid.scale = 1 / maxz;
   
   for(auto p: points)
-    p->x1 = (vid.xcenter + vid.radius * rugzoom * p->x1)/ vid.xres,
-    p->y1 = (vid.ycenter - vid.radius * rugzoom * p->y1)/ vid.yres;
+    p->x1 = (vid.xcenter + vid.radius * vid.scale * p->x1)/ vid.xres,
+    p->y1 = (vid.ycenter - vid.radius * vid.scale * p->y1)/ vid.yres;
   
   return;
   }
@@ -267,7 +378,6 @@ void buildRug() {
     return;
     }
   
-
   map<cell*, rugpoint *> vptr;
  
   for(int i=0; i<size(dcal); i++)
@@ -306,7 +416,7 @@ void enqueue(rugpoint *m) {
   m->inqueue = true;
   }
 
-void force(rugpoint& m1, rugpoint& m2, double rd, double d1=1, double d2=1) {
+void force_euclidean(rugpoint& m1, rugpoint& m2, double rd, double d1=1, double d2=1) {
   if(!m1.valid || !m2.valid) return;
   // double rd = hdist(m1.h, m2.h) * xd;
   // if(rd > rdz +1e-6 || rd< rdz-1e-6) printf("%lf %lf\n", rd, rdz);
@@ -315,7 +425,7 @@ void force(rugpoint& m1, rugpoint& m2, double rd, double d1=1, double d2=1) {
   t = sqrt(t);
   // printf("%lf %lf\n", t, rd);
   err += (t-rd) * (t-rd);
-  bool nonzero = t < rd-1e-9 || t > rd+1e-9;
+  bool nonzero = abs(t-rd) > err_zero;
   double force = (t - rd) / t / 2; // 20.0;
   for(int i=0; i<3; i++) {
     double di = (m2.flat[i] - m1.flat[i]) * force;
@@ -323,6 +433,60 @@ void force(rugpoint& m1, rugpoint& m2, double rd, double d1=1, double d2=1) {
     m2.flat[i] -= di * d2;
     if(nonzero && d2>0) enqueue(&m2);
     }  
+  }
+
+void force(rugpoint& m1, rugpoint& m2, double rd, double d1=1, double d2=1) {
+  if(!m1.valid || !m2.valid) return;
+  if(gwhere == gEuclid && fast_euclidean) {
+    force_euclidean(m1, m2, rd, d1, d2);
+    return;
+    }
+  // double rd = hdist(m1.h, m2.h) * xd;
+  // if(rd > rdz +1e-6 || rd< rdz-1e-6) printf("%lf %lf\n", rd, rdz);
+  using namespace hyperpoint_vec;
+  dynamicval<eGeometry> gw(geometry, gwhere);
+  transmatrix M = orthonormalize(m1.flat, m2.flat);
+  transmatrix Mi = inverse(M);
+  hyperpoint f1 = azeq_to_hyperboloid(Mi * m1.flat);
+  hyperpoint f2 = azeq_to_hyperboloid(Mi * m2.flat);
+  
+  ld t = hdist(f1, f2);
+  err += (t-rd) * (t-rd);
+  bool nonzero = abs(t-rd) > err_zero;
+  double forcev = (t - rd) / 2; // 20.0;
+  
+  transmatrix T = gpushxto0(f1);
+  transmatrix T1 = spintox(T * f2) * T;
+
+  transmatrix iT1 = inverse(T1);
+  
+  for(int i=0; i<3; i++) if(isnan(m1.flat[i])) { printf("NAN!\n"); exit(1); }
+
+/*  
+  printf("%p %p\n", &m1, &m2);
+
+  printf("m1      = %s\n", display(m1.flat));
+  printf("m2      = %s\n", display(m2.flat));
+  printf("Mi * m1 = %s\n", display(Mi*m1.flat));
+  printf("Mi * m2 = %s\n", display(Mi*m2.flat));
+
+  printf("     f1 = %s\n", display(f1));
+  printf(" T * f1 = %s\n", display(T * f1));
+  printf("T1 * f1 = %s\n", display(T1 * f1));
+  printf("     f2 = %s\n", display(f2));
+  printf(" T * f2 = %s\n", display(T * f2));
+  printf("T1 * f2 = %s\n", display(T1 * f2));
+  printf("iT1     = %s\n", display(iT1 * C0));
+  printf("iT1 + t = %s\n", display(iT1 * xpush(t) * C0));
+*/
+
+  f1 = iT1 * xpush(forcev) * C0;
+  f2 = iT1 * xpush(t-forcev) * C0;
+
+  m1.flat = M * hyperboloid_to_azeq(f1);
+  m2.flat = M * hyperboloid_to_azeq(f2);
+  
+  if(nonzero && d2>0) enqueue(&m2);
   }
 
 void preset(rugpoint *m) {
@@ -378,7 +542,8 @@ bool stop = false;
 
 void subdivide() {
   int N = size(points);
-  if(divides > 4) {stop = true; return; }
+  // if(euclid && gwhere == gEuclid) return;
+  if(N >= 8000) {stop = true; return; }
   printf("subdivide (%d,%d)\n", N, size(triangles));
   divides++;
   vector<triangle> otriangles = triangles;
@@ -413,14 +578,14 @@ void addNewPoints() {
     return;
     }
   
-  double dist = points[qvalid]->h[2] + .1e-6;
+  double dist = hdist0(points[qvalid]->h) + .1e-6;
   
   int oqvalid = qvalid;
 
   for(int i=0; i<size(points); i++) {
     rugpoint& m = *points[i];
     bool wasvalid = m.valid;
-    m.valid = wasvalid || (m.h[2] >= .5 && m.h[2] < dist);
+    m.valid = wasvalid || sphere || hdist0(m.h) <= dist;
     if(m.valid && !wasvalid) {
       qvalid++;
       if(i > 7) preset(&m);
@@ -438,7 +603,13 @@ void addNewPoints() {
 void physics() {
 
   if(torus) return;
-  for(int it=0; it<10000 && !stop; it++) 
+  
+  int t = SDL_GetTicks();
+  
+  err = 0;
+  
+  while(SDL_GetTicks() < t + 5 && !stop)
+  for(int it=0; it<50; it++)
     if(pqueue.empty()) addNewPoints();
     else {
       queueiter++;
@@ -448,6 +619,8 @@ void physics() {
       for(int j=0; j<size(m->edges); j++)
         force(*m, *m->edges[j].target, m->edges[j].len);      
       }
+    
+  if(!stop) printf("%5d %10.7lf D%d Q%3d Qv%5d\n", queueiter, err, divides, size(pqueue), qvalid);
   }
 
 // drawing the Rug
@@ -455,10 +628,20 @@ void physics() {
 
 int eyemod;
 
-void getco(rugpoint& m, double& x, double& y, double& z) {
+void getco(rugpoint& m, double& x, double& y, double& z, int &spherepoints) {
   x = m.flat[0];
   y = m.flat[1];
   z = m.flat[2];
+  if(gwhere == gSphere && z > 0) {
+    ld rad = sqrt(x*x + y*y + z*z);
+    // turn M_PI to -M_PI
+    ld rad_to = M_PI + M_PI - rad;
+    ld r = -rad_to / rad;
+    x *= r;
+    y *= r;
+    z *= r;
+    spherepoints++;
+    }
   if(eyemod) x += eyemod * z * vid.eye;
   }
 
@@ -472,12 +655,14 @@ void drawTriangle(triangle& t) {
   if(m1.dist >= sightrange+.51 || m2.dist >= sightrange+.51 || m3.dist >= sightrange+.51)
     return;
   dt++;
+  int spherepoints = 0;
   double x1, y1, z1;
   double x2, y2, z2;
   double x3, y3, z3;
-  getco(m1,x1,y1,z1);
-  getco(m2,x2,y2,z2);
-  getco(m3,x3,y3,z3);
+  getco(m1,x1,y1,z1, spherepoints);
+  getco(m2,x2,y2,z2, spherepoints);
+  getco(m3,x3,y3,z3, spherepoints);
+  if(spherepoints == 1 || spherepoints == 2) return;
   
   double xa = x2-x1, ya = y2-y1, za = z2-z1;
   double xb = x3-x1, yb = y3-y1, zb = z3-z1;
@@ -643,10 +828,18 @@ void drawRugScene() {
   glEnable(GL_DEPTH_TEST);
   glDepthFunc(GL_LESS);
   
-  xview = vid.xres/(vid.radius*scale);
-  yview = vid.yres/(vid.radius*scale);
+  if(rug_perspective) {
+    ld vnear = .05;
+    ld vfar = 10;
+    ld sca = vnear / 2 / vid.xres;
+    glFrustum(-sca * vid.xres, sca * vid.xres, -sca * vid.yres, sca * vid.yres, vnear, vfar);
+    }
+  else {
+    xview = vid.xres/(vid.scrsize*scale);
+    yview = vid.yres/(vid.scrsize*scale);
 
-  glOrtho(-xview, xview, -yview, yview, -1000, 1000);
+    glOrtho(-xview, xview, -yview, yview, -1000, 1000);
+    }
 
   glColor4f(1,1,1,1);
   
@@ -744,22 +937,57 @@ void actDraw() {
   drawRugScene();
   Uint8 *keystate = SDL_GetKeyState(NULL);
   int qm = 0;
-  transmatrix t = Id;
   double alpha = (ticks - lastticks) / 1000.0;
   lastticks = ticks;
 
-  if(keystate[SDLK_HOME]) qm++, t = inverse(currentrot);
-  if(keystate[SDLK_END]) qm++, t = currentrot * rotmatrix(alpha, 0, 1) * inverse(currentrot);
-  if(keystate[SDLK_DOWN]) qm++, t = t * rotmatrix(alpha, 1, 2);
-  if(keystate[SDLK_UP]) qm++, t =  t * rotmatrix(alpha, 2, 1);
-  if(keystate[SDLK_LEFT]) qm++, t = t * rotmatrix(alpha, 0, 2);
-  if(keystate[SDLK_RIGHT]) qm++, t =  t * rotmatrix(alpha, 2, 0);
-  if(keystate[SDLK_PAGEUP]) scale *= exp(alpha);
-  if(keystate[SDLK_PAGEDOWN]) scale /= exp(alpha);
+  transmatrix t = Id;
 
-  if(qm) {
-    currentrot = t * currentrot;
-    for(int i=0; i<size(points); i++) points[i]->flat = t * points[i]->flat;
+  if(rug_perspective) {
+    int qms = 0;
+    if(keystate[SDLK_HOME]) qm++, t = t * rotmatrix(alpha, 0, 1);
+    if(keystate[SDLK_END]) qm++, t = t * rotmatrix(alpha, 1, 0);
+    
+    if(!keystate[SDLK_LSHIFT]) {
+      if(keystate[SDLK_DOWN]) qm++, t = t * rotmatrix(alpha, 2, 1);
+      if(keystate[SDLK_UP]) qm++, t =  t * rotmatrix(alpha, 1, 2);
+      if(keystate[SDLK_LEFT]) qm++, t = t * rotmatrix(alpha, 2, 0);
+      if(keystate[SDLK_RIGHT]) qm++, t =  t * rotmatrix(alpha, 0, 2);
+      }
+    ld push = 0;
+    if(keystate[SDLK_PAGEDOWN]) push -= alpha;
+    if(keystate[SDLK_PAGEUP]) push += alpha;
+    
+    ld strafex = 0, strafey = 0;
+    if(keystate[SDLK_LSHIFT]) {    
+      if(keystate[SDLK_LEFT]) strafex -= alpha;
+      if(keystate[SDLK_RIGHT]) strafex += alpha;
+      if(keystate[SDLK_UP]) strafey -= alpha;
+      if(keystate[SDLK_DOWN]) strafey += alpha;
+      }
+
+    if(qm) 
+    for(int i=0; i<size(points); i++) {
+      points[i]->flat = t * points[i]->flat;
+      }
+    
+    push_all_points(2, push);
+    push_all_points(0, strafex);
+    push_all_points(1, strafey);
+    }
+  else {
+    if(keystate[SDLK_HOME]) qm++, t = inverse(currentrot);
+    if(keystate[SDLK_END]) qm++, t = currentrot * rotmatrix(alpha, 0, 1) * inverse(currentrot);
+    if(keystate[SDLK_DOWN]) qm++, t = t * rotmatrix(alpha, 1, 2);
+    if(keystate[SDLK_UP]) qm++, t =  t * rotmatrix(alpha, 2, 1);
+    if(keystate[SDLK_LEFT]) qm++, t = t * rotmatrix(alpha, 0, 2);
+    if(keystate[SDLK_RIGHT]) qm++, t =  t * rotmatrix(alpha, 2, 0);
+    if(keystate[SDLK_PAGEUP]) scale *= exp(alpha);
+    if(keystate[SDLK_PAGEDOWN]) scale /= exp(alpha);
+  
+    if(qm) {
+      currentrot = t * currentrot;
+      for(int i=0; i<size(points); i++) points[i]->flat = t * points[i]->flat;
+      }
     }
   }
 
@@ -854,7 +1082,7 @@ void show() {
     else if(uni == 'u') {
       if((euclid || sphere) && !torus)
         addMessage("This makes sense only in hyperbolic or Torus geometry.");
-      else {        
+      {        
         rug::init();
         popScreen();
         }
@@ -880,6 +1108,37 @@ void select() {
   if(rug::rugged) rug::close();
   else pushScreen(rug::show);
   }
+
+int rugArgs() {
+  using namespace arg;
+           
+  if(0) ;
+  else if(argis("-rugmodelscale")) {
+    shift(); modelscale = argf();
+    }
+
+  else if(argis("-ruggeo")) {
+    shift(); gwhere = (eGeometry) argi();
+    }
+
+  else if(argis("-rugpers")) {
+    rug_perspective = true;
+    }
+
+  else if(argis("-rugorth")) {
+    rug_perspective = false;
+    }
+
+  else if(argis("-rugerr")) {
+    err_zero = argf();
+    }
+
+  else return 1;
+  return 0;
+  }
+
+auto rug_hook = 
+  addHook(hooks_args, 100, rugArgs);
   
 }
 
