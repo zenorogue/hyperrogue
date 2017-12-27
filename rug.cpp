@@ -1120,8 +1120,14 @@ void actDraw() {
       if(keystate[SDLK_DOWN]) strafey += alpha;
       }
 
-    for(int i=0; i<size(points); i++) {
-      points[i]->flat = t * points[i]->flat;
+    if(qm) {
+      if(keystate[SDLK_LCTRL]) 
+        push_all_points(2, +model_distance);
+      for(int i=0; i<size(points); i++) {
+        points[i]->flat = t * points[i]->flat;
+        }
+      if(keystate[SDLK_LCTRL]) 
+        push_all_points(2, -model_distance);
       }
     
     model_distance -= push;
@@ -1197,7 +1203,7 @@ hyperpoint gethyper(ld x, ld y) {
     tx /= det; ty /= det;
     if(tx >= 0 && ty >= 0 && tx+ty <= 1) {
       double rz1 = p0[2] * (1-tx-ty) + p1[2] * tx + p2[2] * ty;
-      rz1 = -rz1;
+      rz1 = -rz1; if(!rug_perspective) rz1 += model_distance;
       if(rz1 < radar_distance) {
         radar_distance = rz1;
         rx1 = r0->x1 + (r1->x1 - r0->x1) * tx + (r2->x1 - r0->x1) * ty;
@@ -1291,7 +1297,7 @@ void show() {
       dialog::reaction = [] () { err_zero_current = err_zero; };
       }
     else if(uni == 'r') 
-      addMessage(XLAT("This just shows the distance from the camera to the cursor."));
+      addMessage(XLAT("This just shows the 'z' coordinate of the selected point."));
     else if(uni == 'm') {
       dialog::editNumber(modelscale, 0.1, 10, .1, 1, "model scale factor", 
         "This is relevant when the native geometry is not hyperbolic. "
