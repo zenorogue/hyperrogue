@@ -776,13 +776,15 @@ int eyemod;
 void getco(rugpoint *m, hyperpoint& h, int &spherepoints) {
   using namespace hyperpoint_vec;
   h = m->getglue()->flat;
-  if(gwhere == gSphere && h[2] > 0) {
-    ld rad = hypot3(h);
-    // turn M_PI to -M_PI
-    ld rad_to = M_PI + M_PI - rad;
-    ld r = -rad_to / rad;
-    h *= r;
-    spherepoints++;
+  if(rug_perspective && gwhere == gSphere) {
+    if(h[2] > 0) {
+      ld rad = hypot3(h);
+      // turn M_PI to -M_PI
+      ld rad_to = M_PI + M_PI - rad;
+      ld r = -rad_to / rad;
+      h *= r;
+      spherepoints++;
+      }
     }
   if(eyemod) h[0] += eyemod * h[2] * vid.eye;
   }
@@ -889,7 +891,7 @@ void prepareTexture() {
     setGLProjection();
     ptds.clear();
     drawthemap();
-    if(!renderonce) {
+    if(mousing && !renderonce) {
       for(int i=0; i<numplayers(); i++) if(multi::playerActive(i))
         queueline(tC0(shmup::ggmatrix(playerpos(i))), mouseh, 0xFF00FF, 8);
       }
@@ -973,8 +975,13 @@ void drawRugScene() {
     glOrtho(-xview, xview, -yview, yview, -1000, 1000);
     }
 
-  glColor4f(1,1,1,1);
-  
+  if(rug_perspective && gwhere == gSphere) {
+    glEnable(GL_FOG);
+    glFogi(GL_FOG_MODE, GL_LINEAR);
+    glFogf(GL_FOG_START, 0);
+    glFogf(GL_FOG_END, 10);
+    }
+
   if(vid.eye > .001 || vid.eye < -.001) { 
     selectEyeMask(1);
     glClear(GL_DEPTH_BUFFER_BIT);
@@ -1003,10 +1010,13 @@ void drawRugScene() {
   glDisable(GL_DEPTH_TEST);
   glDisable(GL_LIGHTING);
   glEnable(GL_BLEND);
+  glDisable(GL_FOG);
 
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
   selectEyeGL(0);
+  
+  need_mouseh = true;
   }
 
 // organization
@@ -1101,7 +1111,6 @@ void actDraw() {
       if(keystate[SDLK_DOWN]) strafey += alpha;
       }
 
-    if(qm) 
     for(int i=0; i<size(points); i++) {
       points[i]->flat = t * points[i]->flat;
       }
@@ -1129,9 +1138,8 @@ void actDraw() {
 
 int besti;
 
-void getco_pers(rugpoint *r, hyperpoint& p, bool& error) {
-  int sp;
-  getco(r, p, sp);
+void getco_pers(rugpoint *r, hyperpoint& p, int& spherepoints, bool& error) {
+  getco(r, p, spherepoints);
   if(rug_perspective) {
     if(p[2] >= 0)
       error = true;
@@ -1157,10 +1165,11 @@ hyperpoint gethyper(ld x, ld y) {
     auto r2 = triangles[i].m[2];
     hyperpoint p0, p1, p2;
     bool error = false;
-    getco_pers(r0, p0, error);
-    getco_pers(r1, p1, error);
-    getco_pers(r2, p2, error);
-    if(error) continue;
+    int spherepoints = 0;
+    getco_pers(r0, p0, spherepoints, error);
+    getco_pers(r1, p1, spherepoints, error);
+    getco_pers(r2, p2, spherepoints, error);
+    if(error || spherepoints == 1 || spherepoints == 2) continue;
     double dx1 = p1[0] - p0[0];
     double dy1 = p1[1] - p0[1];
     double dx2 = p2[0] - p0[0];
