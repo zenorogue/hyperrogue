@@ -732,7 +732,7 @@ namespace rug {
   extern bool renderonce;
   extern bool rendernogl;
   extern int  texturesize;
-  extern ld   scale;
+  extern ld   model_distance;
 #if CAP_RUG
   void show();
   void init();

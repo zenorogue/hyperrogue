@@ -38,8 +38,9 @@ bool keep_shape = true;
 bool good_shape;
 
 ld modelscale = 1;
+ld model_distance = 2;
 
-ld fov = 45;
+ld fov = 90;
 
 eGeometry gwhere = gEuclid;
 
@@ -260,6 +261,7 @@ rugpoint *addRugpoint(hyperpoint h, double dist) {
       // point on an equdistant going through C0 in distance d along the guiding line
       // hpoint = hpxy(cosh(r) * sinh(r) * (cosh(d) - 1), sinh(d) * cosh(r));
       hpoint = xpush(r) * ypush(d) * xpush(-r) * C0;
+      hpoint[0] = -hpoint[0];
       }
 
     ld hpdist = hdist0(hpoint);
@@ -961,17 +963,19 @@ void drawRugScene() {
   glEnable(GL_DEPTH_TEST);
   glDepthFunc(GL_LESS);
   
+  ld tanfov = tan(fov * M_PI / 360);
+  
   if(rug_perspective) {
     ld vnear = .001;
     ld vfar = 1000;
-    ld sca = vnear / 2 / vid.xres;
-    xview = -.5;
-    yview = -.5 * vid.yres / vid.xres;
+    ld sca = vnear * tanfov / vid.xres;
+    xview = -tanfov;
+    yview = -tanfov * vid.yres / vid.xres;
     glFrustum(-sca * vid.xres, sca * vid.xres, -sca * vid.yres, sca * vid.yres, vnear, vfar);
     }
   else {
-    xview = vid.xres/(vid.scrsize*scale);
-    yview = vid.yres/(vid.scrsize*scale);
+    xview = tanfov * model_distance;
+    yview = tanfov * model_distance * vid.yres / vid.xres;
 
     glOrtho(-xview, xview, -yview, yview, -1000, 1000);
     }
@@ -1064,7 +1068,7 @@ void init() {
   buildRug();
   while(good_shape && subdivide_further()) subdivide();
   if(rug_perspective)
-    push_all_points(2, -1);
+    push_all_points(2, -model_distance);
 
   currentrot = Id;
   }
@@ -1081,6 +1085,8 @@ void close() {
 
 int lastticks;
 
+ld protractor = 0;
+
 void actDraw() { 
   if(!renderonce) prepareTexture();
   physics();
@@ -1093,14 +1099,14 @@ void actDraw() {
   transmatrix t = Id;
 
   if(rug_perspective) {
-    if(keystate[SDLK_HOME]) qm++, t = t * rotmatrix(alpha, 0, 1);
-    if(keystate[SDLK_END]) qm++, t = t * rotmatrix(alpha, 1, 0);
+    if(keystate[SDLK_HOME]) qm++, t = t * rotmatrix(alpha, 0, 1), protractor += alpha;
+    if(keystate[SDLK_END]) qm++, t = t * rotmatrix(alpha, 1, 0), protractor -= alpha;
     
     if(!keystate[SDLK_LSHIFT]) {
-      if(keystate[SDLK_DOWN]) qm++, t = t * rotmatrix(alpha, 2, 1);
-      if(keystate[SDLK_UP]) qm++, t =  t * rotmatrix(alpha, 1, 2);
-      if(keystate[SDLK_LEFT]) qm++, t = t * rotmatrix(alpha, 2, 0);
-      if(keystate[SDLK_RIGHT]) qm++, t =  t * rotmatrix(alpha, 0, 2);
+      if(keystate[SDLK_DOWN]) qm++, t = t * rotmatrix(alpha, 2, 1), protractor += alpha;
+      if(keystate[SDLK_UP]) qm++, t =  t * rotmatrix(alpha, 1, 2), protractor -= alpha;
+      if(keystate[SDLK_LEFT]) qm++, t = t * rotmatrix(alpha, 2, 0), protractor += alpha;
+      if(keystate[SDLK_RIGHT]) qm++, t =  t * rotmatrix(alpha, 0, 2), protractor -= alpha;
       }
     ld push = 0;
     if(keystate[SDLK_PAGEDOWN]) push -= alpha;
@@ -1118,6 +1124,7 @@ void actDraw() {
       points[i]->flat = t * points[i]->flat;
       }
     
+    model_distance -= push;
     push_all_points(2, push);
     push_all_points(0, strafex);
     push_all_points(1, strafey);
@@ -1129,8 +1136,8 @@ void actDraw() {
     if(keystate[SDLK_UP]) qm++, t =  t * rotmatrix(alpha, 2, 1);
     if(keystate[SDLK_LEFT]) qm++, t = t * rotmatrix(alpha, 0, 2);
     if(keystate[SDLK_RIGHT]) qm++, t =  t * rotmatrix(alpha, 2, 0);
-    if(keystate[SDLK_PAGEUP]) scale *= exp(alpha);
-    if(keystate[SDLK_PAGEDOWN]) scale /= exp(alpha);
+    if(keystate[SDLK_PAGEUP]) model_distance /= exp(alpha);
+    if(keystate[SDLK_PAGEDOWN]) model_distance *= exp(alpha);
   
     if(qm) {
       currentrot = t * currentrot;
@@ -1235,11 +1242,12 @@ void show() {
   if(rug::rugged)
     dialog::lastItem().value += " (" + its(qvalid) + ")";
   
+  dialog::addSelItem(XLAT("model distance"), fts(model_distance), 'd');
   dialog::addBoolItem(XLAT("projection"), rug_perspective, 'p');
-  dialog::lastItem().value = XLAT(rug_perspective ? "perspective" : "orthogonal");
-  if(!rug_perspective && !rug::rugged) gwhere = gNormal;
+  dialog::lastItem().value = XLAT(rug_perspective ? "perspective" : 
+    gwhere == gEuclid ? "orthogonal" : "azimuthal equidistant");
   if(!rug::rugged)
-    dialog::addSelItem(XLAT("native geometry"), ginf[gwhere].name, 'n');
+    dialog::addSelItem(XLAT("native geometry"), XLAT(gwhere ? ginf[gwhere].name : "hyperbolic"), 'n');
   else
     dialog::addSelItem(XLAT("radar"), radar_distance == RADAR_INF ? "∞" : fts4(radar_distance), 'r');
   if(!rug::rugged)
@@ -1247,6 +1255,7 @@ void show() {
   else
     dialog::addSelItem(XLAT("model iterations"), its(queueiter), 0);
   dialog::addSelItem(XLAT("field of view"), fts(fov) + "°", 'f');
+  // dialog::addSelItem(XLAT("protractor"), fts(protractor * 180 / M_PI) + "°", 'f');
   if(rug::rugged && torus)
     dialog::addBoolItem(XLAT("keep shape"), keep_shape, 'k');
   if(!(keep_shape && good_shape)) {
@@ -1291,8 +1300,17 @@ void show() {
         );
       dialog::scaleLog();
       }
-    else if(uni == 'p')
+    else if(uni == 'p') {
       rug_perspective = !rug_perspective;
+      if(rugged) {
+        if(rug_perspective) 
+          push_all_points(2, -model_distance);
+        else
+          push_all_points(2, +model_distance);
+        }
+      }
+    else if(uni == 'd')
+      dialog::editNumber(model_distance, -10, 10, .1, 1, "model distance", "model distance");
     else if(uni == 'e') {
       dialog::editNumber(err_zero, 1e-9, 1, .1, 1e-3, "error", "error");
       dialog::scaleLog();
@@ -1305,9 +1323,8 @@ void show() {
         "Horizontal field of view."
         );
       }
-    else if(uni == 'n' && !rug::rugged) {
-      gwhere = eGeometry((gwhere+1) % 3);
-      }
+    else if(uni == 'n' && !rug::rugged)
+      gwhere = eGeometry((gwhere+1) % 4);
   #if !ISPANDORA
     else if(uni == 'g' && !rug::rugged)
       rendernogl = !rendernogl;

@@ -272,7 +272,7 @@ void initConfig() {
   addsaver(rug::renderonce, "rug-renderonce");
   addsaver(rug::rendernogl, "rug-rendernogl");
   addsaver(rug::texturesize, "rug-texturesize");
-  addsaver(rug::scale, "rug-scale");
+  addsaver(rug::model_distance, "rug-model-distance");
 
   addsaverenum(pmodel, "used model");
   addsaver(polygonal::SI, "polygon sides");
@@ -456,10 +456,10 @@ void loadOldConfig(FILE *f) {
 
   aa = rug::renderonce; bb = rug::rendernogl; cc = nontruncated; dd = chaosmode; 
   int ee = vid.steamscore;
-  double rs = rug::scale;
+  double rs = 1/rug::model_distance;
   err=fscanf(f, "%d%d%d%d%lf%d%d", &aa, &bb, &rug::texturesize, &cc, &rs, &ee, &dd);
   rug::renderonce = aa; rug::rendernogl = bb; nontruncated = cc; chaosmode = dd; vid.steamscore = ee;
-  rug::scale = rs;
+  rug::model_distance = 1/rs;
 
   aa=conformal::autobandhistory;
   double ps = polygonal::STAR, lv = conformal::lvspeed;
