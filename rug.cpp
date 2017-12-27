@@ -959,9 +959,11 @@ void drawRugScene() {
   glDepthFunc(GL_LESS);
   
   if(rug_perspective) {
-    ld vnear = .05;
-    ld vfar = 10;
+    ld vnear = .001;
+    ld vfar = 1000;
     ld sca = vnear / 2 / vid.xres;
+    xview = -.5;
+    yview = -.5 * vid.yres / vid.xres;
     glFrustum(-sca * vid.xres, sca * vid.xres, -sca * vid.yres, sca * vid.yres, vnear, vfar);
     }
   else {
@@ -1127,6 +1129,19 @@ void actDraw() {
 
 int besti;
 
+void getco_pers(rugpoint *r, hyperpoint& p, bool& error) {
+  int sp;
+  getco(r, p, sp);
+  if(rug_perspective) {
+    if(p[2] >= 0)
+      error = true;
+    else {
+      p[0] /= p[2];
+      p[1] /= p[2];
+      }
+    }
+  }
+
 hyperpoint gethyper(ld x, ld y) {
   double mx = ((x*2 / vid.xres)-1) * xview;
   double my = (1-(y*2 / vid.yres)) * yview;
@@ -1140,12 +1155,18 @@ hyperpoint gethyper(ld x, ld y) {
     auto r0 = triangles[i].m[0];
     auto r1 = triangles[i].m[1];
     auto r2 = triangles[i].m[2];
-    double dx1 = r1->getglue()->flat[0] - r0->getglue()->flat[0];
-    double dy1 = r1->getglue()->flat[1] - r0->getglue()->flat[1];
-    double dx2 = r2->getglue()->flat[0] - r0->getglue()->flat[0];
-    double dy2 = r2->getglue()->flat[1] - r0->getglue()->flat[1];
-    double dxm = mx - r0->getglue()->flat[0];
-    double dym = my - r0->getglue()->flat[1];
+    hyperpoint p0, p1, p2;
+    bool error = false;
+    getco_pers(r0, p0, error);
+    getco_pers(r1, p1, error);
+    getco_pers(r2, p2, error);
+    if(error) continue;
+    double dx1 = p1[0] - p0[0];
+    double dy1 = p1[1] - p0[1];
+    double dx2 = p2[0] - p0[0];
+    double dy2 = p2[1] - p0[1];
+    double dxm = mx - p0[0];
+    double dym = my - p0[1];
     // A (dx1,dy1) = (1,0)
     // B (dx2,dy2) = (0,1)
     double det = dx1*dy2 - dy1*dx2;
@@ -1153,7 +1174,7 @@ hyperpoint gethyper(ld x, ld y) {
     double ty = -(dxm * dy1 - dym * dx1);
     tx /= det; ty /= det;
     if(tx >= 0 && ty >= 0 && tx+ty <= 1) {
-      double rz1 = r0->flat[2] * (1-tx-ty) + r1->flat[2] * tx + r2->flat[2] * ty;
+      double rz1 = p0[2] * (1-tx-ty) + p1[2] * tx + p2[2] * ty;
       rz1 = -rz1;
       if(rz1 < bdist) {
         bdist = rz1;
