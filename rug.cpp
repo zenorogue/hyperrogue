@@ -34,9 +34,10 @@ GLAPI void APIENTRY glDeleteFramebuffers (GLsizei n, const GLuint *framebuffers)
 namespace rug {
 
 bool fast_euclidean = true;
-bool keep_torus = false;
+bool keep_shape = true;
+bool good_shape;
 
-int torus_precision = 2;
+ld modelscale = 1;
 
 eGeometry gwhere = gEuclid;
 
@@ -47,15 +48,16 @@ bool rugged = false;
 bool genrug = false;
 bool glew   = false;
 
+int vertex_limit = 20000;
+
 bool renderonce  = false;
 bool rendernogl  = false;
 int  texturesize = 1024;
 ld scale = 1;
 
-ld err_zero = 1e-3, err_zero_current;
+ld err_zero = 1e-3, err_zero_current, current_total_error;
 
 int queueiter, qvalid, dt;
-double err;
 
 struct edge {
   struct rugpoint *target;
@@ -103,29 +105,21 @@ bool rug_perspective = false;
 // returns a matrix M
 // such that inverse(M) * h1 = ( |h1|, 0, 0) and inverse(M) * h2 = ( .., .., 0)
 
-bool zero2(hyperpoint h) { using namespace hyperpoint_vec; return !(h|h); }
-
 transmatrix orthonormalize(hyperpoint h1, hyperpoint h2) {
   using namespace hyperpoint_vec;
 
-  hyperpoint vec[3];
-  vec[2] = (h1 ^ h2);
-  if(zero2(vec[2])) vec[2] = hpxyz(.519, .4619, .136);
-
-  vec[2] = vec[2] / sqrt(vec[2]|vec[2]);
-  vec[0] = h1 - vec[2] * (h1|vec[2]);
-  if(zero2(vec[0])) {
-    vec[0] = hpxyz(1.641,2,3); 
-    vec[0] = vec[0] - vec[2] * (vec[0]|vec[2]);
-    }
-  vec[0] = vec[0] / sqrt(vec[0]|vec[0]);
-  vec[1] = h2 - vec[2] * (h2|vec[2]) - vec[0] * (h2|vec[0]);
-  if(zero2(vec[1])) {
-    vec[1] = hpxyz(1.713,3,5); 
-    vec[1] = vec[1] - vec[2] * (vec[1]|vec[2]) - vec[0] * (vec[1]|vec[0]);
-    }
-  vec[1] = vec[1] / sqrt(vec[1]|vec[1]);
+  hyperpoint vec[3] = {h1, h2, h1 ^ h2};
   
+  for(int i=0; i<3; i++) {
+    for(int j=0; j<i; j++) vec[i] -= vec[j] * (vec[i] | vec[j]);
+    if(zero3(vec[i])) {
+      // 'random' direction
+      vec[i] = hpxyz(1.12, 1.512+i, 1.12904+i);
+      for(int j=0; j<i; j++) vec[i] -= vec[j] * (vec[i] | vec[j]);
+      }
+    vec[i] /= hypot3(vec[i]);
+    }
+
   transmatrix M;
   for(int i=0; i<3; i++) for(int j=0; j<3; j++)
     M[i][j] = vec[j][i];
@@ -145,13 +139,15 @@ hyperpoint azeq_to_hyperboloid(hyperpoint h) {
     return h;
     }
   if(sphere) {
-    h[0] = sin(d) * h[0]/d;
-    h[1] = sin(d) * h[1]/d;
+    ld d0 = d ? d : 1;
+    h[0] = sin(d) * h[0]/d0;
+    h[1] = sin(d) * h[1]/d0;
     h[2] = cos(d);
     }
   else {
-    h[0] = sinh(d) * h[0]/d;
-    h[1] = sinh(d) * h[1]/d;
+    ld d0 = d ? d : 1;
+    h[0] = sinh(d) * h[0]/d0;
+    h[1] = sinh(d) * h[1]/d0;
     h[2] = cosh(d);
     }
   return h;
@@ -165,7 +161,7 @@ hyperpoint hyperboloid_to_azeq(hyperpoint h) {
   else {
     ld d = hdist0(h);
     if(d == 0) { h[2] = 0; return h; }
-    ld d2 = hypot(h[0], h[1]);
+    ld d2 = hypot2(h);
     if(d2 == 0) { h[2] = 0; return h; }
     h[0] = d * h[0] / d2;
     h[1] = d * h[1] / d2;
@@ -174,19 +170,24 @@ hyperpoint hyperboloid_to_azeq(hyperpoint h) {
     }
   }
 
+void push_point(hyperpoint& h, int coord, ld val) {
+  if(fast_euclidean && gwhere == gEuclid) 
+    h[coord] += val;
+  else if(!val) return;
+  else {
+    // if(zero3(h)) { h[0] = 1e-9; h[1] = 1e-10; h[2] = 1e-11; }
+    dynamicval<eGeometry> gw(geometry, gwhere);
+    transmatrix M = orthonormalize(hpxyz(coord==0,coord==1,coord==2), h);
+    transmatrix Mi = inverse(M);
+    hyperpoint f = azeq_to_hyperboloid(Mi * h);
+    h = M * hyperboloid_to_azeq(xpush(val) * f);
+    }
+  }
+  
 void push_all_points(int coord, ld val) {
   if(!val) return;
-  else if(fast_euclidean && gwhere == gEuclid) {
-    for(int i=0; i<size(points); i++) 
-      points[i]->flat[coord] += val;
-    }
-  else for(int i=0; i<size(points); i++) {
-    dynamicval<eGeometry> gw(geometry, gwhere);
-    transmatrix M = orthonormalize(hpxyz(coord==0,coord==1,coord==2), points[i]->flat);
-    transmatrix Mi = inverse(M);
-    hyperpoint f = azeq_to_hyperboloid(Mi * points[i]->flat);
-    points[i]->flat = M * hyperboloid_to_azeq(xpush(val) * f);
-    }
+  else for(int i=0; i<size(points); i++)
+    push_point(points[i]->flat, coord, val);
   }
 
 // construct the graph
@@ -208,12 +209,27 @@ rugpoint *addRugpoint(hyperpoint h, double dist) {
   applymodel(m->h, onscreen);
   m->x1 = (1 + onscreen[0] * vid.scale) / 2;
   m->y1 = (1 + onscreen[1] * vid.scale) / 2;
+  m->valid = false;
 
-  m->flat = // hpxyz(h[0], h[1], sin(atan2(h[0], h[1]) * 3 + hyprand) * (h[2]-1) / 1000);
+  if(euclid && gwhere == gNormal) {
+    m->valid = good_shape = true;
+    using namespace hyperpoint_vec;
+    h *= modelscale;
+    ld d = hypot2(h);
+    // point on a horocycle going through C0 in distance d along the horocycle
+    hyperpoint horocycle_point = hpxy(d*d/2, d);
+    ld horodist = hdist0(horocycle_point);
+    ld z = hypot2(horocycle_point);
+    if(z==0) z = 1;
+    if(d==0) d = 1;
+    m->flat = 
+      hpxyz(horodist * h[0]/d * horocycle_point[1] / z, horodist * h[1]/d * horocycle_point[1] / z, -horodist * horocycle_point[0] / z);
+    }
+  
+  else m->flat = // hpxyz(h[0], h[1], sin(atan2(h[0], h[1]) * 3 + hyprand) * (h[2]-1) / 1000);
     hpxyz(h[0], h[1], (h[2]-1) * (rand() % 1000 - rand() % 1000) / 1000);
   
-  if(rug_perspective && gwhere == gEuclid) m->flat[2] -= 3;
-  m->valid = false;
+  // if(rug_perspective && gwhere == gEuclid) m->flat[2] -= 3;
   m->inqueue = false;
   m->dist = dist;
   points.push_back(m);
@@ -232,9 +248,9 @@ rugpoint *findOrAddRugpoint(hyperpoint h, double dist) {
   }
 
 void addNewEdge(rugpoint *e1, rugpoint *e2, ld len = 1) {
-  edge e; e.target = e2; e1->edges.push_back(e);
+  edge e; e.len = len;
+  e.target = e2; e1->edges.push_back(e);
   e.target = e1; e2->edges.push_back(e);
-  e.len = len;
   }
 
 void addEdge(rugpoint *e1, rugpoint *e2, ld len = 1) {
@@ -250,10 +266,17 @@ void addTriangle(rugpoint *t1, rugpoint *t2, rugpoint *t3, ld len = 1) {
   triangles.push_back(triangle(t1,t2,t3));
   }
 
+map<pair<rugpoint*, rugpoint*>, rugpoint*> halves;
+
+rugpoint* findhalf(rugpoint *r1, rugpoint *r2) {
+  if(r1 > r2) swap(r1, r2);
+  return halves[{r1,r2}];
+  }
+
 void addTriangle1(rugpoint *t1, rugpoint *t2, rugpoint *t3) {
-  rugpoint *t12 = findOrAddRugpoint(mid(t1->h, t2->h), (t1->dist+ t2->dist)/2);
-  rugpoint *t23 = findOrAddRugpoint(mid(t2->h, t3->h), (t1->dist+ t2->dist)/2);
-  rugpoint *t31 = findOrAddRugpoint(mid(t3->h, t1->h), (t1->dist+ t2->dist)/2);
+  rugpoint *t12 = findhalf(t1, t2);
+  rugpoint *t23 = findhalf(t2, t3);
+  rugpoint *t31 = findhalf(t3, t1);
   addTriangle(t1,  t12, t31);
   addTriangle(t12, t2,  t23);
   addTriangle(t23, t3,  t31);
@@ -263,8 +286,6 @@ void addTriangle1(rugpoint *t1, rugpoint *t2, rugpoint *t3) {
 bool psort(rugpoint *a, rugpoint *b) {
   return hdist0(a->h) < hdist0(b->h);
   }
-
-ld modelscale = 1;
 
 void calcLengths() {
   for(int i=0; i<size(points); i++) for(int j=0; j<size(points[i]->edges); j++) {
@@ -356,14 +377,18 @@ void buildTorusRug() {
     double beta = -h2[1] * 2 * M_PI;
     // r->flat = {alpha, beta, 0}; 
     double sc = (factor+1)/4;
-    r->flat = hpxyz((factor+cos(alpha)) * cos(beta) * sc, (factor+cos(alpha)) * sin(beta) * sc, -sin(alpha) * sc);
+    r->flat = r->h = hpxyz((factor+cos(alpha)) * cos(beta) * sc, (factor+cos(alpha)) * sin(beta) * sc, -sin(alpha) * sc);
     r->valid = true;
     rugpoint *r2 = findRugpoint(r->flat);
+    printf("(%lf %lf) %p .. %p\n", x, y, r, r2);
     if(r2 && r2 != r) r->glueto(r2);
     return r;
     };
+    
+  int rugmax = (int) sqrt(vertex_limit / qty);
+  if(rugmax < 1) rugmax = 1;
+  if(rugmax > 16) rugmax = 16;
   
-  int rugmax = min(torus_precision, 16);
   ld rmd = rugmax;
     
   for(int i=0; i<qty; i++) {
@@ -375,8 +400,8 @@ void buildTorusRug() {
     
     for(int yy=0; yy<rugmax; yy++)
     for(int xx=0; xx<rugmax; xx++)
-      addTriangle(rugarr[yy][xx], rugarr[yy+1][xx], rugarr[yy+1][xx+1], 1./rugmax),
-      addTriangle(rugarr[yy][xx], rugarr[yy][xx+1], rugarr[yy+1][xx+1], 1./rugmax);
+      addTriangle(rugarr[yy][xx], rugarr[yy+1][xx], rugarr[yy+1][xx+1], modelscale/rugmax),
+      addTriangle(rugarr[yy][xx], rugarr[yy][xx+1], rugarr[yy+1][xx+1], modelscale/rugmax);
     }
   
   double maxz = 0;
@@ -401,6 +426,7 @@ void buildTorusRug() {
 void buildRug() {
 
   if(torus) {
+    good_shape = true;
     buildTorusRug();
     return;
     }
@@ -443,15 +469,17 @@ void enqueue(rugpoint *m) {
   m->inqueue = true;
   }
 
-void force_euclidean(rugpoint& m1, rugpoint& m2, double rd, double d1=1, double d2=1) {
-  if(!m1.valid || !m2.valid) return;
+bool force_euclidean(rugpoint& m1, rugpoint& m2, double rd, double d1=1, double d2=1) {
+  if(!m1.valid || !m2.valid) return false;
   // double rd = hdist(m1.h, m2.h) * xd;
   // if(rd > rdz +1e-6 || rd< rdz-1e-6) printf("%lf %lf\n", rd, rdz);
   double t = 0;
   for(int i=0; i<3; i++) t += (m1.flat[i] - m2.flat[i]) * (m1.flat[i] - m2.flat[i]);
   t = sqrt(t);
-  // printf("%lf %lf\n", t, rd);
-  err += (t-rd) * (t-rd);
+  /* printf("%s ", display(m1.flat));
+  printf("%s ", display(m2.flat));
+  printf("%lf/%lf\n", t, rd); */
+  current_total_error += (t-rd) * (t-rd);
   bool nonzero = abs(t-rd) > err_zero_current;
   double force = (t - rd) / t / 2; // 20.0;
   for(int i=0; i<3; i++) {
@@ -460,13 +488,13 @@ void force_euclidean(rugpoint& m1, rugpoint& m2, double rd, double d1=1, double 
     m2.flat[i] -= di * d2;
     if(nonzero && d2>0) enqueue(&m2);
     }  
+  return nonzero;
   }
 
-void force(rugpoint& m1, rugpoint& m2, double rd, double d1=1, double d2=1) {
-  if(!m1.valid || !m2.valid) return;
+bool force(rugpoint& m1, rugpoint& m2, double rd, double d1=1, double d2=1) {
+  if(!m1.valid || !m2.valid) return false;
   if(gwhere == gEuclid && fast_euclidean) {
-    force_euclidean(m1, m2, rd, d1, d2);
-    return;
+    return force_euclidean(m1, m2, rd, d1, d2);
     }
   // double rd = hdist(m1.h, m2.h) * xd;
   // if(rd > rdz +1e-6 || rd< rdz-1e-6) printf("%lf %lf\n", rd, rdz);
@@ -478,7 +506,7 @@ void force(rugpoint& m1, rugpoint& m2, double rd, double d1=1, double d2=1) {
   hyperpoint f2 = azeq_to_hyperboloid(Mi * m2.flat);
   
   ld t = hdist(f1, f2);
-  err += (t-rd) * (t-rd);
+  current_total_error += (t-rd) * (t-rd);
   bool nonzero = abs(t-rd) > err_zero_current;
   double forcev = (t - rd) / 2; // 20.0;
   
@@ -514,6 +542,7 @@ void force(rugpoint& m1, rugpoint& m2, double rd, double d1=1, double d2=1) {
   m2.flat = M * hyperboloid_to_azeq(f2);
   
   if(nonzero && d2>0) enqueue(&m2);
+  return nonzero;
   }
 
 void preset(rugpoint *m) {
@@ -567,11 +596,17 @@ void preset(rugpoint *m) {
 int divides = 0;
 bool stop = false;
 
+bool subdivide_further() {
+  if(torus) return false;
+  return size(points) * 4 < vertex_limit;
+  }
+
 void subdivide() {
   int N = size(points);
   // if(euclid && gwhere == gEuclid) return;
-  if(N >= 8000 || torus) {
-    err_zero /= 2;
+  if(!subdivide_further()) {
+    err_zero_current /= 2;
+    printf("increasing precision to %lg\n", err_zero_current);
     for(auto p: points) enqueue(p);
     return; 
     }
@@ -580,12 +615,16 @@ void subdivide() {
   vector<triangle> otriangles = triangles;
   triangles.clear();
   
+  halves.clear();
+  
   // subdivide edges
   for(int i=0; i<N; i++) {
     rugpoint *m = points[i];
     for(int j=0; j<size(m->edges); j++) {
       rugpoint *m2 = m->edges[j].target;
+      if(m2 < m) continue;
       rugpoint *mm = addRugpoint(mid(m->h, m2->h), (m->dist+m2->dist)/2);
+      halves[{m, m2}] = mm;
       using namespace hyperpoint_vec;
       mm->flat = (m->flat + m2->flat) / 2;
       mm->valid = true; qvalid++;
@@ -621,23 +660,24 @@ void addNewPoints() {
       qvalid++;
       if(i > 7) preset(&m);
       
-      for(int it=0; it<50; it++) 
+      if(good_shape) ;
+      else for(int it=0; it<50; it++) 
       for(int j=0; j<size(m.edges); j++)
         force(m, *m.edges[j].target, m.edges[j].len, 1, 0);
 
       enqueue(&m);
       }
     }
-  if(qvalid != oqvalid) { printf("%4d %4d %4d %.9lf %9d %9d\n", oqvalid, qvalid, size(points), dist, dt, queueiter); }
+  if(qvalid != oqvalid) { printf("adding new points %4d %4d %4d %.9lf %9d %9d\n", oqvalid, qvalid, size(points), dist, dt, queueiter); }
   }
 
 void physics() {
 
-  if(keep_torus && torus) return;
+  if(keep_shape && good_shape) return;
+
+  auto t = SDL_GetTicks();
   
-  int t = SDL_GetTicks();
-  
-  err = 0;
+  current_total_error = 0;
   
   while(SDL_GetTicks() < t + 5 && !stop)
   for(int it=0; it<50; it++)
@@ -647,11 +687,14 @@ void physics() {
       rugpoint *m = pqueue.front();
       pqueue.pop();
       m->inqueue = false;
+      bool moved = false;
       for(int j=0; j<size(m->edges); j++)
-        force(*m, *m->edges[j].target, m->edges[j].len);
+        moved = force(*m, *m->edges[j].target, m->edges[j].len) || moved;
+      
+      if(moved) enqueue(m);
       }
     
-  if(!stop) printf("%5d %10.7lf D%d Q%3d Qv%5d\n", queueiter, err, divides, size(pqueue), qvalid);
+  if(!stop) printf("%5d %10.7lf D%d Q%3d Qv%5d\n", queueiter, current_total_error, divides, size(pqueue), qvalid);
   }
 
 // drawing the Rug
@@ -930,9 +973,10 @@ void init() {
   genrug = false;
   
   qvalid = 0; dt = 0; queueiter = 0;
-  err_zero = err_zero_current;
+  err_zero_current = err_zero;
   
   buildRug();
+  while(good_shape && subdivide_further()) subdivide();
   if(rug_perspective)
     push_all_points(2, -1);
 
@@ -963,7 +1007,6 @@ void actDraw() {
   transmatrix t = Id;
 
   if(rug_perspective) {
-    int qms = 0;
     if(keystate[SDLK_HOME]) qm++, t = t * rotmatrix(alpha, 0, 1);
     if(keystate[SDLK_END]) qm++, t = t * rotmatrix(alpha, 1, 0);
     
@@ -1079,9 +1122,7 @@ void show() {
   dialog::addBoolItem(XLAT("render texture without OpenGL"), (rendernogl), 'g');  
   dialog::addSelItem(XLAT("texture size"), its(texturesize)+"x"+its(texturesize), 's');
   if(torus) {
-    if(torus_precision < 1) torus_precision = 1;
-    if(torus_precision > 16) torus_precision = 16;
-    dialog::addSelItem(XLAT("precision"), its(torus_precision), 'p');
+    dialog::addSelItem(XLAT("vertex_limit"), its(vertex_limit), 'p');
     }
   dialog::display();
   keyhandler = [] (int sym, int uni) {
@@ -1109,8 +1150,8 @@ void show() {
       }
     else if(uni == 'o')
       renderonce = !renderonce;
-    else if(uni == 'p' && torus_precision)
-      dialog::editNumber(torus_precision, 0, 16, 1, 2, "precision", "precision");
+    else if(uni == 'p')
+      dialog::editNumber(vertex_limit, 0, 16, 1, 2, "vertex limit", "vertex limit");
   #if !ISPANDORA
     else if(uni == 'g')
       rendernogl = !rendernogl;
@@ -1150,7 +1191,11 @@ int rugArgs() {
     }
 
   else if(argis("-rugerr")) {
-    err_zero = argf();
+    shift(); err_zero = argf();
+    }
+
+  else if(argis("-rugv")) {
+    shift(); vertex_limit = argi();
     }
 
   else return 1;

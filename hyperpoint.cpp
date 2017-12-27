@@ -69,6 +69,10 @@ const hyperpoint Cx1 = { {1,0,1.41421356237} };
 // through the interior, not on the surface)
 // also used to verify whether a point h1 is on the hyperbolic plane by using Hypc for h2
 
+bool zero2(hyperpoint h) { return h[0] == 0 && h[1] == 0; }
+
+bool zero3(hyperpoint h) { return h[0] == 0 && h[1] == 0 && h[2] == 0; }
+
 ld intval(const hyperpoint &h1, const hyperpoint &h2) {
   if(elliptic) {
     double d1 = squar(h1[0]-h2[0]) + squar(h1[1]-h2[1]) + squar(h1[2]-h2[2]);
@@ -86,8 +90,20 @@ ld intvalxyz(const hyperpoint &h1, const hyperpoint &h2) {
   return squar(h1[0]-h2[0]) + squar(h1[1]-h2[1]) + squar(h1[2]-h2[2]);
   }
 
+ld hypot2(const hyperpoint& h) {
+  return sqrt(h[0]*h[0]+h[1]*h[1]);
+  }
+  
 ld hypot3(const hyperpoint& h) {
   return sqrt(h[0]*h[0]+h[1]*h[1]+h[2]*h[2]);
+  }
+  
+ld sqhypot2(const hyperpoint& h) {
+  return h[0]*h[0]+h[1]*h[1];
+  }
+  
+ld sqhypot3(const hyperpoint& h) {
+  return h[0]*h[0]+h[1]*h[1]+h[2]*h[2];
   }
   
 ld zlevel(const hyperpoint &h) {
