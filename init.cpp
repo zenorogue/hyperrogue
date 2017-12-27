@@ -356,6 +356,17 @@ void addMessage(string s, char spamtype = 0);
 #define weirdhyperbolic (S7 > 7 || S3 > 3)
 #define stdhyperbolic (S7 == 7 && S3 == 3)
 
+#define cgclass (ginf[geometry].cclass)
+#define euclid (cgclass == gcEuclid)
+#define sphere (cgclass == gcSphere)
+#define hyperbolic (cgclass == gcHyperbolic)
+#define elliptic (ginf[geometry].quotientstyle & qELLIP)
+#define quotient (ginf[geometry].quotientstyle & (qZEBRA | qFIELD))
+#define torus (ginf[geometry].quotientstyle & qTORUS)
+#define doall (ginf[geometry].quotientstyle)
+#define smallbounded (sphere || (quotient & qZEBRA) || torus)
+#define bounded (sphere || quotient || torus)
+
 #define a4 (S3 == 4)
 #define a45 (S3 == 4 && S7 == 5)
 #define a46 (S3 == 4 && S7 == 6)

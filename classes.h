@@ -189,13 +189,15 @@ enum eLand { laNone, laBarrier, laCrossroads, laDesert, laIce, laCaves, laJungle
 
 enum eGeometry {gNormal, gEuclid, gSphere, gElliptic, gQuotient, gQuotient2, gTorus, gOctagon, g45, g46, g47, gSmallSphere, gTinySphere, gEuclidSquare, gGUARD};
 
+enum eGeometryClass { gcHyperbolic, gcEuclid, gcSphere };
+
 struct geometryinfo {
   const char* name;
   const char* shortname;
   int sides;
   int vertex;
   int quotientstyle;
-  int cclass; // 0-hyperbolic, 1-Euclidean, 2-spherical
+  eGeometryClass cclass;
   array<int,2> distlimit; // truncated, non-truncated
   };
 

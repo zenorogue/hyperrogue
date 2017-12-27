@@ -2077,15 +2077,6 @@ int celldistAlt(cell *c);
 int celldist(cell *c);
 int getHemisphere(cell *c, int which);
 
-#define euclid (ginf[geometry].cclass == 1)
-#define sphere (ginf[geometry].cclass == 2)
-#define elliptic (ginf[geometry].quotientstyle & 4)
-#define quotient (ginf[geometry].quotientstyle & 3)
-#define torus (ginf[geometry].quotientstyle & 8)
-#define doall (ginf[geometry].quotientstyle)
-#define smallbounded (sphere || quotient == 1 || torus)
-#define bounded (sphere || quotient || torus)
-
 namespace tactic {
   extern bool on;
   extern bool trailer;
