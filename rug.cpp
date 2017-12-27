@@ -175,17 +175,30 @@ hyperpoint hyperboloid_to_azeq(hyperpoint h) {
     }
   }
 
+struct normalizer {
+
+  transmatrix M, Mi;
+  
+  dynamicval<eGeometry> gw;
+ 
+  normalizer (hyperpoint h1, hyperpoint h2) : gw(geometry, gwhere == gElliptic ? gSphere : gwhere) {
+    M = orthonormalize(h1, h2);
+    Mi = inverse(M);
+    }
+  
+  hyperpoint operator() (hyperpoint h) { return azeq_to_hyperboloid(Mi*h); }
+  hyperpoint operator[] (hyperpoint h) { return M*hyperboloid_to_azeq(h); }
+  };
+
 void push_point(hyperpoint& h, int coord, ld val) {
   if(fast_euclidean && gwhere == gEuclid) 
     h[coord] += val;
   else if(!val) return;
   else {
     // if(zero3(h)) { h[0] = 1e-9; h[1] = 1e-10; h[2] = 1e-11; }
-    USING_NATIVE_GEOMETRY;
-    transmatrix M = orthonormalize(hpxyz(coord==0,coord==1,coord==2), h);
-    transmatrix Mi = inverse(M);
-    hyperpoint f = azeq_to_hyperboloid(Mi * h);
-    h = M * hyperboloid_to_azeq(xpush(val) * f);
+    normalizer n(hpxyz(coord==0,coord==1,coord==2), h);
+    hyperpoint f = n(h);
+    h = n[xpush(val) * f];
     }
   }
   
@@ -483,11 +496,9 @@ void verify() {
       auto m2 = e.target;
       ld l = e.len;
       
-      USING_NATIVE_GEOMETRY;
-      transmatrix M = orthonormalize(m->flat, m2->flat);
-      transmatrix Mi = inverse(M);
-      hyperpoint h1 = azeq_to_hyperboloid(Mi * m->flat);
-      hyperpoint h2 = azeq_to_hyperboloid(Mi * m2->flat);
+      normalizer n(m->flat, m2->flat);
+      hyperpoint h1 = n(m->flat);
+      hyperpoint h2 = n(m2->flat);
       ld l0 = hdist(h1, h2);
       ratios.push_back(l0 / l);
       }
@@ -577,11 +588,9 @@ bool force(rugpoint& m1, rugpoint& m2, double rd, double d1=1, double d2=1) {
   // double rd = hdist(m1.h, m2.h) * xd;
   // if(rd > rdz +1e-6 || rd< rdz-1e-6) printf("%lf %lf\n", rd, rdz);
   using namespace hyperpoint_vec;
-  USING_NATIVE_GEOMETRY;
-  transmatrix M = orthonormalize(m1.flat, m2.flat);
-  transmatrix Mi = inverse(M);
-  hyperpoint f1 = azeq_to_hyperboloid(Mi * m1.flat);
-  hyperpoint f2 = azeq_to_hyperboloid(Mi * m2.flat);
+  normalizer n(m1.flat, m2.flat);
+  hyperpoint f1 = n(m1.flat);
+  hyperpoint f2 = n(m2.flat);
   
   ld t = hdist(f1, f2);
   current_total_error += (t-rd) * (t-rd);
@@ -616,18 +625,22 @@ bool force(rugpoint& m1, rugpoint& m2, double rd, double d1=1, double d2=1) {
   f1 = iT1 * xpush(forcev) * C0;
   f2 = iT1 * xpush(t-forcev) * C0;
 
-  m1.flat = M * hyperboloid_to_azeq(f1);
-  m2.flat = M * hyperboloid_to_azeq(f2);
+  m1.flat = n[f1];
+  m2.flat = n[f2];
   
   if(nonzero && d2>0) enqueue(&m2);
   return nonzero;
   }
+
+vector<pair<ld, rugpoint*> > preset_points;
 
 void preset(rugpoint *m) {
   int q = 0;
   hyperpoint h;
   for(int i=0; i<3; i++) h[i] = 0;
   using namespace hyperpoint_vec;
+  
+  preset_points.clear();
   
   for(int j=0; j<size(m->edges); j++)
   for(int k=0; k<j; k++) {
@@ -664,11 +677,59 @@ void preset(rugpoint *m) {
       
       for(int i=0; i<3; i++) h[i] += res[i];
       
+      preset_points.emplace_back(hypot(blen * (ah+ch), blen * (az-cz)), c);
       q++;
       }
     }
     
   if(q>0) for(int i=0; i<3; i++) m->flat[i] = h[i]/q;
+  }
+
+ld sse(hyperpoint h) {
+  ld sse = 0;
+  for(auto& p: preset_points) {
+    ld l = p.first;
+    normalizer n(h, p.second->flat);
+    hyperpoint h1 = n(h);
+    hyperpoint h2 = n(p.second->flat);
+    ld l0 = hdist(h1, h2);
+    sse += (l0-l) * (l0-l);
+    }
+  
+  return sse;
+  }
+
+void optimize(rugpoint *m, bool do_preset) {
+
+  if(do_preset) {
+    preset(m);
+    int ed0 = size(preset_points);
+    for(auto& e: m->edges) if(e.target->valid) 
+      preset_points.emplace_back(e.len, e.target);
+    if(gwhere >= gSphere) {
+      ld cur = sse(m->flat);
+      for(int it=0; it<500; it++) {
+        ld ex = exp(-it/60);
+        again:
+        hyperpoint last = m->flat;
+        switch(it%6) {
+          case 0: m->flat[0] += ex; break;
+          case 1: m->flat[0] -= ex; break;
+          case 2: m->flat[1] += ex; break;
+          case 3: m->flat[1] -= ex; break;
+          case 4: m->flat[2] += ex; break;
+          case 5: m->flat[2] -= ex; break;
+          }
+        ld now = sse(m->flat);
+        if(now < cur) { cur = now; ex *= 1.2; goto again; }
+        else m->flat = last;
+        }
+      printf("edges = [%d] %d sse = %lf\n",ed0, size(preset_points), cur);
+      }
+    }
+  for(int it=0; it<50; it++) 
+    for(int j=0; j<size(m->edges); j++)
+      force(*m, *m->edges[j].target, m->edges[j].len, 1, 0);
   }
 
 int divides = 0;
@@ -700,7 +761,7 @@ void subdivide() {
   triangles.clear();
   
   halves.clear();
-  
+
   // subdivide edges
   for(int i=0; i<N; i++) {
     rugpoint *m = points[i];
@@ -710,12 +771,10 @@ void subdivide() {
       rugpoint *mm = addRugpoint(mid(m->h, m2->h), (m->dist+m2->dist)/2);
       halves[{m, m2}] = mm;
       using namespace hyperpoint_vec;
-      USING_NATIVE_GEOMETRY;
-      transmatrix M = orthonormalize(m->flat, m2->flat);
-      transmatrix Mi = inverse(M);
-      hyperpoint h1 = azeq_to_hyperboloid(Mi * m->flat);
-      hyperpoint h2 = azeq_to_hyperboloid(Mi * m2->flat);
-      mm->flat = M * hyperboloid_to_azeq(mid(h1, h2));
+      normalizer n(m->flat, m2->flat);
+      hyperpoint h1 = n(m->flat);
+      hyperpoint h2 = n(m2->flat);
+      mm->flat = n[mid(h1, h2)];
       mm->valid = true; qvalid++;
       mm->inqueue = false; enqueue(mm);
       }
@@ -728,6 +787,7 @@ void subdivide() {
   calcLengths();
 
   printf("result (%d,%d)\n", size(points), size(triangles));
+
   }
 
 void addNewPoints() {
@@ -747,12 +807,8 @@ void addNewPoints() {
     m.valid = wasvalid || sphere || hdist0(m.h) <= dist;
     if(m.valid && !wasvalid) {
       qvalid++;
-      if(i > 7) preset(&m);
       
-      if(good_shape) ;
-      else for(int it=0; it<50; it++) 
-      for(int j=0; j<size(m.edges); j++)
-        force(m, *m.edges[j].target, m.edges[j].len, 1, 0);
+      if(!good_shape) optimize(&m, i > 7);
 
       enqueue(&m);
       }
@@ -782,6 +838,7 @@ void physics() {
       
       if(moved) enqueue(m);
       }    
+
   }
 
 // drawing the Rug
