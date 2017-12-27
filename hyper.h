@@ -2422,3 +2422,4 @@ transmatrix actualV(const heptspin& hs, const transmatrix& V);
 transmatrix cview();
 
 extern string truncatenames[2];
+extern bool need_mouseh;

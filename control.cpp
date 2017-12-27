@@ -423,6 +423,7 @@ void fix_mouseh() {
   else
 #endif
     mouseh = gethyper(mousex, mousey);
+  need_mouseh = false;
   }
 
 void handlekey(int sym, int uni) {
