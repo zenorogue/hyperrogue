@@ -19,6 +19,7 @@ int eupattern(cell *c) {
   }
 
 int eupattern4(cell *c) {
+  if(torus) return 0;
   eucoord x, y;
   decodeMaster(c->master, x, y);
   return (x&1) + ((y&1)) * 2;

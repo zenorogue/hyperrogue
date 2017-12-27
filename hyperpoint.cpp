@@ -86,6 +86,10 @@ ld intvalxyz(const hyperpoint &h1, const hyperpoint &h2) {
   return squar(h1[0]-h2[0]) + squar(h1[1]-h2[1]) + squar(h1[2]-h2[2]);
   }
 
+ld hypot3(const hyperpoint& h) {
+  return sqrt(h[0]*h[0]+h[1]*h[1]+h[2]*h[2]);
+  }
+  
 ld zlevel(const hyperpoint &h) {
   if(euclid) return h[2];
   else if(sphere) return sqrt(intval(h, Hypc));
@@ -394,25 +398,31 @@ double hdist(const hyperpoint& h1, const hyperpoint& h2) {
 
 namespace hyperpoint_vec {
 
-  hyperpoint operator * (ld d, hyperpoint h) { 
-    return hpxyz(h[0]*d, h[1]*d, h[2]*d);
+  hyperpoint& operator *= (hyperpoint& h, ld d) {
+    h[0] *= d; h[1] *= d; h[2] *= d;
+    return h;
     }
   
-  hyperpoint operator * (hyperpoint h, ld d) { 
-    return hpxyz(h[0]*d, h[1]*d, h[2]*d);
+  hyperpoint& operator /= (hyperpoint& h, ld d) { 
+    h[0] /= d; h[1] /= d; h[2] /= d;
+    return h;
     }
   
-  hyperpoint operator / (hyperpoint h, ld d) { 
-    return hpxyz(h[0]/d, h[1]/d, h[2]/d);
+  hyperpoint operator += (hyperpoint& h, hyperpoint h2) { 
+    for(int i: {0,1,2}) h[i] += h2[i];
+    return h;
     }
-  
-  hyperpoint operator + (hyperpoint h, hyperpoint h2) { 
-    return hpxyz(h[0]+h2[0], h[1]+h2[1], h[2]+h2[2]);
+
+  hyperpoint operator -= (hyperpoint& h, hyperpoint h2) { 
+    for(int i: {0,1,2}) h[i] -= h2[i];
+    return h;
     }
-  
-  hyperpoint operator - (hyperpoint h, hyperpoint h2) { 
-    return hpxyz(h[0]-h2[0], h[1]-h2[1], h[2]-h2[2]);
-    }
+
+  hyperpoint operator * (ld d, hyperpoint h) { return h *= d; }  
+  hyperpoint operator * (hyperpoint h, ld d) { return h *= d; }  
+  hyperpoint operator / (hyperpoint h, ld d) { return h /= d; }  
+  hyperpoint operator + (hyperpoint h, hyperpoint h2) { return h += h2; }
+  hyperpoint operator - (hyperpoint h, hyperpoint h2) { return h -= h2; }
 
   // cross product  
   hyperpoint operator ^ (hyperpoint h1, hyperpoint h2) {

@@ -33,7 +33,8 @@ GLAPI void APIENTRY glDeleteFramebuffers (GLsizei n, const GLuint *framebuffers)
 
 namespace rug {
 
-static const bool fast_euclidean = true;
+bool fast_euclidean = true;
+bool keep_torus = false;
 
 int torus_precision = 2;
 
@@ -51,7 +52,7 @@ bool rendernogl  = false;
 int  texturesize = 1024;
 ld scale = 1;
 
-ld err_zero = 1e-3;
+ld err_zero = 1e-3, err_zero_current;
 
 int queueiter, qvalid, dt;
 double err;
@@ -69,6 +70,19 @@ struct rugpoint {
   hyperpoint h;
   hyperpoint flat;
   vector<edge> edges;
+  // Find-Union algorithm
+  rugpoint *glue = NULL;
+  rugpoint *getglue() {
+    return glue ? (glue = glue->getglue()) : this;
+    }
+  hyperpoint& glueflat() {
+    return glue->flat;
+    }
+  void glueto(rugpoint *x) {
+    x = x->getglue();
+    auto y = getglue();
+    if(x != y) y->glue = x;
+    }
   };
 
 struct triangle {
@@ -206,32 +220,40 @@ rugpoint *addRugpoint(hyperpoint h, double dist) {
   return m;
   }
 
-rugpoint *findRugpoint(hyperpoint h, double dist) {
+rugpoint *findRugpoint(hyperpoint h) {
   for(int i=0; i<size(points); i++) 
     if(intval(points[i]->h, h) < 1e-5) return points[i];
-  return addRugpoint(h, dist);
+  return NULL;
   }
 
-void addNewEdge(rugpoint *e1, rugpoint *e2) {
+rugpoint *findOrAddRugpoint(hyperpoint h, double dist) {
+  rugpoint *r = findRugpoint(h);
+  return r ? r : addRugpoint(h, dist);
+  }
+
+void addNewEdge(rugpoint *e1, rugpoint *e2, ld len = 1) {
   edge e; e.target = e2; e1->edges.push_back(e);
   e.target = e1; e2->edges.push_back(e);
+  e.len = len;
   }
 
-void addEdge(rugpoint *e1, rugpoint *e2) {
+void addEdge(rugpoint *e1, rugpoint *e2, ld len = 1) {
   for(int i=0; i<size(e1->edges); i++) 
     if(e1->edges[i].target == e2) return;
-  addNewEdge(e1, e2);
+  addNewEdge(e1, e2, len);
   }
 
-void addTriangle(rugpoint *t1, rugpoint *t2, rugpoint *t3) {
-  addEdge(t1, t2); addEdge(t2, t3); addEdge(t3, t1);
+void addTriangle(rugpoint *t1, rugpoint *t2, rugpoint *t3, ld len = 1) {
+  addEdge(t1->getglue(), t2->getglue(), len); 
+  addEdge(t2->getglue(), t3->getglue(), len); 
+  addEdge(t3->getglue(), t1->getglue(), len);
   triangles.push_back(triangle(t1,t2,t3));
   }
 
 void addTriangle1(rugpoint *t1, rugpoint *t2, rugpoint *t3) {
-  rugpoint *t12 = findRugpoint(mid(t1->h, t2->h), (t1->dist+ t2->dist)/2);
-  rugpoint *t23 = findRugpoint(mid(t2->h, t3->h), (t1->dist+ t2->dist)/2);
-  rugpoint *t31 = findRugpoint(mid(t3->h, t1->h), (t1->dist+ t2->dist)/2);
+  rugpoint *t12 = findOrAddRugpoint(mid(t1->h, t2->h), (t1->dist+ t2->dist)/2);
+  rugpoint *t23 = findOrAddRugpoint(mid(t2->h, t3->h), (t1->dist+ t2->dist)/2);
+  rugpoint *t31 = findOrAddRugpoint(mid(t3->h, t1->h), (t1->dist+ t2->dist)/2);
   addTriangle(t1,  t12, t31);
   addTriangle(t12, t2,  t23);
   addTriangle(t23, t3,  t31);
@@ -336,6 +358,8 @@ void buildTorusRug() {
     double sc = (factor+1)/4;
     r->flat = hpxyz((factor+cos(alpha)) * cos(beta) * sc, (factor+cos(alpha)) * sin(beta) * sc, -sin(alpha) * sc);
     r->valid = true;
+    rugpoint *r2 = findRugpoint(r->flat);
+    if(r2 && r2 != r) r->glueto(r2);
     return r;
     };
   
@@ -351,8 +375,8 @@ void buildTorusRug() {
     
     for(int yy=0; yy<rugmax; yy++)
     for(int xx=0; xx<rugmax; xx++)
-      addTriangle(rugarr[yy][xx], rugarr[yy+1][xx], rugarr[yy+1][xx+1]),
-      addTriangle(rugarr[yy][xx], rugarr[yy][xx+1], rugarr[yy+1][xx+1]);
+      addTriangle(rugarr[yy][xx], rugarr[yy+1][xx], rugarr[yy+1][xx+1], 1./rugmax),
+      addTriangle(rugarr[yy][xx], rugarr[yy][xx+1], rugarr[yy+1][xx+1], 1./rugmax);
     }
   
   double maxz = 0;
@@ -367,6 +391,9 @@ void buildTorusRug() {
   for(auto p: points)
     p->x1 = (vid.xcenter + vid.radius * vid.scale * p->x1)/ vid.xres,
     p->y1 = (vid.ycenter - vid.radius * vid.scale * p->y1)/ vid.yres;
+  
+  qvalid = size(points);
+  printf("qvalid = %d\n", qvalid);
   
   return;
   }
@@ -425,7 +452,7 @@ void force_euclidean(rugpoint& m1, rugpoint& m2, double rd, double d1=1, double 
   t = sqrt(t);
   // printf("%lf %lf\n", t, rd);
   err += (t-rd) * (t-rd);
-  bool nonzero = abs(t-rd) > err_zero;
+  bool nonzero = abs(t-rd) > err_zero_current;
   double force = (t - rd) / t / 2; // 20.0;
   for(int i=0; i<3; i++) {
     double di = (m2.flat[i] - m1.flat[i]) * force;
@@ -452,7 +479,7 @@ void force(rugpoint& m1, rugpoint& m2, double rd, double d1=1, double d2=1) {
   
   ld t = hdist(f1, f2);
   err += (t-rd) * (t-rd);
-  bool nonzero = abs(t-rd) > err_zero;
+  bool nonzero = abs(t-rd) > err_zero_current;
   double forcev = (t - rd) / 2; // 20.0;
   
   transmatrix T = gpushxto0(f1);
@@ -543,7 +570,11 @@ bool stop = false;
 void subdivide() {
   int N = size(points);
   // if(euclid && gwhere == gEuclid) return;
-  if(N >= 8000) {stop = true; return; }
+  if(N >= 8000 || torus) {
+    err_zero /= 2;
+    for(auto p: points) enqueue(p);
+    return; 
+    }
   printf("subdivide (%d,%d)\n", N, size(triangles));
   divides++;
   vector<triangle> otriangles = triangles;
@@ -602,7 +633,7 @@ void addNewPoints() {
 
 void physics() {
 
-  if(torus) return;
+  if(keep_torus && torus) return;
   
   int t = SDL_GetTicks();
   
@@ -617,7 +648,7 @@ void physics() {
       pqueue.pop();
       m->inqueue = false;
       for(int j=0; j<size(m->edges); j++)
-        force(*m, *m->edges[j].target, m->edges[j].len);      
+        force(*m, *m->edges[j].target, m->edges[j].len);
       }
     
   if(!stop) printf("%5d %10.7lf D%d Q%3d Qv%5d\n", queueiter, err, divides, size(pqueue), qvalid);
@@ -628,58 +659,43 @@ void physics() {
 
 int eyemod;
 
-void getco(rugpoint& m, double& x, double& y, double& z, int &spherepoints) {
-  x = m.flat[0];
-  y = m.flat[1];
-  z = m.flat[2];
-  if(gwhere == gSphere && z > 0) {
-    ld rad = sqrt(x*x + y*y + z*z);
+void getco(rugpoint *m, hyperpoint& h, int &spherepoints) {
+  using namespace hyperpoint_vec;
+  h = m->getglue()->flat;
+  if(gwhere == gSphere && h[2] > 0) {
+    ld rad = hypot3(h);
     // turn M_PI to -M_PI
     ld rad_to = M_PI + M_PI - rad;
     ld r = -rad_to / rad;
-    x *= r;
-    y *= r;
-    z *= r;
+    h *= r;
     spherepoints++;
     }
-  if(eyemod) x += eyemod * z * vid.eye;
+  if(eyemod) h[0] += eyemod * h[2] * vid.eye;
   }
 
 extern int besti;
 
 void drawTriangle(triangle& t) {
-  rugpoint& m1 = *t.m[0];
-  rugpoint& m2 = *t.m[1];
-  rugpoint& m3 = *t.m[2];
-  if(!m1.valid || !m2.valid || !m3.valid) return;
-  if(m1.dist >= sightrange+.51 || m2.dist >= sightrange+.51 || m3.dist >= sightrange+.51)
-    return;
+  using namespace hyperpoint_vec;
+  for(int i: {0,1,2}) {
+    if(!t.m[i]->valid) return;
+    if(t.m[i]->dist >= sightrange+.51) return;
+    }
   dt++;
   int spherepoints = 0;
-  double x1, y1, z1;
-  double x2, y2, z2;
-  double x3, y3, z3;
-  getco(m1,x1,y1,z1, spherepoints);
-  getco(m2,x2,y2,z2, spherepoints);
-  getco(m3,x3,y3,z3, spherepoints);
+  array<hyperpoint,3> h;
+  for(int i: {0,1,2}) getco(t.m[i], h[i], spherepoints);
   if(spherepoints == 1 || spherepoints == 2) return;
   
-  double xa = x2-x1, ya = y2-y1, za = z2-z1;
-  double xb = x3-x1, yb = y3-y1, zb = z3-z1;
+  hyperpoint hc = (h[1] - h[0]) ^ (h[2] - h[0]);  
+  double hch = hypot3(hc);
   
-  double xn = ya * zb - za * yb;
-  double yn = za * xb - xa * zb;
-  double zn = xa * yb - ya * xb;
-  double h = sqrt(xn*xn+yn*yn+zn*zn);
+  glNormal3f(hc[0]/hch,hc[1]/hch,hc[2]/hch);
   
-  glNormal3f(xn/h,yn/h,zn/h);
-  
-  glTexCoord2f(m1.x1, m1.y1); 
-  glVertex3f(x1, y1, z1);
-  glTexCoord2f(m2.x1, m2.y1); 
-  glVertex3f(x2, y2, z2);
-  glTexCoord2f(m3.x1, m3.y1); 
-  glVertex3f(x3, y3, z3);
+  for(int i: {0,1,2}) {
+    glTexCoord2f(t.m[i]->x1, t.m[i]->y1);
+    glVertex3f(h[i][0], h[i][1], h[i][2]);
+    }
   }
 
 GLuint FramebufferName = 0;
@@ -913,9 +929,13 @@ void init() {
   drawthemap();
   genrug = false;
   
-  buildRug();
   qvalid = 0; dt = 0; queueiter = 0;
+  err_zero = err_zero_current;
   
+  buildRug();
+  if(rug_perspective)
+    push_all_points(2, -1);
+
   currentrot = Id;
   }
 
@@ -1006,12 +1026,12 @@ hyperpoint gethyper(ld x, ld y) {
     auto r0 = triangles[i].m[0];
     auto r1 = triangles[i].m[1];
     auto r2 = triangles[i].m[2];
-    double dx1 = r1->flat[0] - r0->flat[0];
-    double dy1 = r1->flat[1] - r0->flat[1];
-    double dx2 = r2->flat[0] - r0->flat[0];
-    double dy2 = r2->flat[1] - r0->flat[1];
-    double dxm = mx - r0->flat[0];
-    double dym = my - r0->flat[1];
+    double dx1 = r1->getglue()->flat[0] - r0->getglue()->flat[0];
+    double dy1 = r1->getglue()->flat[1] - r0->getglue()->flat[1];
+    double dx2 = r2->getglue()->flat[0] - r0->getglue()->flat[0];
+    double dy2 = r2->getglue()->flat[1] - r0->getglue()->flat[1];
+    double dxm = mx - r0->getglue()->flat[0];
+    double dym = my - r0->getglue()->flat[1];
     // A (dx1,dy1) = (1,0)
     // B (dx2,dy2) = (0,1)
     double det = dx1*dy2 - dy1*dx2;
