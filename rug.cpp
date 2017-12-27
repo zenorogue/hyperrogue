@@ -39,6 +39,8 @@ bool good_shape;
 
 ld modelscale = 1;
 
+ld fov = 45;
+
 eGeometry gwhere = gEuclid;
 
 // hypersian rug datatypes and globals
@@ -457,7 +459,8 @@ void buildTorusRug() {
     p->x1 = (vid.xcenter + vid.radius * vid.scale * p->x1)/ vid.xres,
     p->y1 = (vid.ycenter - vid.radius * vid.scale * p->y1)/ vid.yres;
   
-  qvalid = size(points);
+  qvalid = 0;
+  for(auto p: points) if(!p->glue) qvalid++;
   printf("qvalid = %d\n", qvalid);
   
   return;
@@ -714,7 +717,7 @@ void subdivide() {
 
 void addNewPoints() {
 
-  if(qvalid == size(points)) {
+  if(torus || qvalid == size(points)) {
     subdivide();
     return;
     }
@@ -763,9 +766,7 @@ void physics() {
         moved = force(*m, *m->edges[j].target, m->edges[j].len) || moved;
       
       if(moved) enqueue(m);
-      }
-    
-  if(!stop) printf("%5d %10.7lf D%d Q%3d Qv%5d\n", queueiter, current_total_error, divides, size(pqueue), qvalid);
+      }    
   }
 
 // drawing the Rug
@@ -975,6 +976,8 @@ void drawRugScene() {
     glOrtho(-xview, xview, -yview, yview, -1000, 1000);
     }
 
+  glColor4f(1.f, 1.f, 1.f, 1.f);
+
   if(rug_perspective && gwhere == gSphere) {
     glEnable(GL_FOG);
     glFogi(GL_FOG_MODE, GL_LINEAR);
@@ -1150,10 +1153,13 @@ void getco_pers(rugpoint *r, hyperpoint& p, int& spherepoints, bool& error) {
     }
   }
 
+static const ld RADAR_INF = 1e12;
+ld radar_distance = RADAR_INF;
+
 hyperpoint gethyper(ld x, ld y) {
   double mx = ((x*2 / vid.xres)-1) * xview;
   double my = (1-(y*2 / vid.yres)) * yview;
-  double bdist = 1e12;
+  radar_distance = RADAR_INF;
   
   double rx1=0, ry1=0;
   
@@ -1185,8 +1191,8 @@ hyperpoint gethyper(ld x, ld y) {
     if(tx >= 0 && ty >= 0 && tx+ty <= 1) {
       double rz1 = p0[2] * (1-tx-ty) + p1[2] * tx + p2[2] * ty;
       rz1 = -rz1;
-      if(rz1 < bdist) {
-        bdist = rz1;
+      if(rz1 < radar_distance) {
+        radar_distance = rz1;
         rx1 = r0->x1 + (r1->x1 - r0->x1) * tx + (r2->x1 - r0->x1) * ty;
         ry1 = r0->y1 + (r1->y1 - r0->y1) * tx + (r2->y1 - r0->y1) * ty;
         }
@@ -1207,6 +1213,8 @@ hyperpoint gethyper(ld x, ld y) {
   }
 
 void show() {
+  cmode = sm::SIDE | sm::MAYDARK;
+  gamescreen(0);
   dialog::init(XLAT("hypersian rug mode"), iinf[itPalace].color, 150, 100);
   
   if((euclid || sphere) && !torus) {
@@ -1217,14 +1225,36 @@ void show() {
   dialog::addItem(XLAT("what's this?"), 'h');
   dialog::addItem(XLAT("take me back"), 'q');
 
-  dialog::addItem(XLAT("enable the Hypersian Rug mode"), 'u');
-    
+  dialog::addBoolItem(XLAT("enable the Hypersian Rug mode"), rug::rugged, 'u');
+  
   dialog::addBoolItem(XLAT("render the texture only once"), (renderonce), 'o');
-  dialog::addBoolItem(XLAT("render texture without OpenGL"), (rendernogl), 'g');  
+  dialog::addBoolItem(XLAT("render texture without OpenGL"), (rendernogl), 'g');
   dialog::addSelItem(XLAT("texture size"), its(texturesize)+"x"+its(texturesize), 's');
-  if(torus) {
-    dialog::addSelItem(XLAT("vertex_limit"), its(vertex_limit), 'p');
+
+  dialog::addSelItem(XLAT("vertex limit"), its(vertex_limit), 'v');
+  if(rug::rugged)
+    dialog::lastItem().value += " (" + its(qvalid) + ")";
+  
+  dialog::addBoolItem(XLAT("projection"), rug_perspective, 'p');
+  dialog::lastItem().value = XLAT(rug_perspective ? "perspective" : "orthogonal");
+  if(!rug_perspective && !rug::rugged) gwhere = gNormal;
+  if(!rug::rugged)
+    dialog::addSelItem(XLAT("native geometry"), ginf[gwhere].name, 'n');
+  else
+    dialog::addSelItem(XLAT("radar"), radar_distance == RADAR_INF ? "∞" : fts4(radar_distance), 'r');
+  if(!rug::rugged)
+    dialog::addSelItem(XLAT("scale model"), fts(modelscale), 'm');
+  else
+    dialog::addSelItem(XLAT("model iterations"), its(queueiter), 0);
+  dialog::addSelItem(XLAT("field of view"), fts(fov) + "°", 'f');
+  if(rug::rugged && torus)
+    dialog::addBoolItem(XLAT("keep shape"), keep_shape, 'k');
+  if(!(keep_shape && good_shape)) {
+    dialog::addSelItem(XLAT("error"), ftsg(err_zero), 'e');
+    if(rug::rugged)
+      dialog::lastItem().value += " (" + ftsg(err_zero_current) + ")";
     }
+
   dialog::display();
   keyhandler = [] (int sym, int uni) {
   #if ISPANDORA
@@ -1242,33 +1272,56 @@ void show() {
       "Use arrow keys to rotate, Page Up/Down to zoom."
       );
     else if(uni == 'u') {
-      if((euclid || sphere) && !torus)
-        addMessage("This makes sense only in hyperbolic or Torus geometry.");
-      {        
-        rug::init();
-        popScreen();
-        }
+      if(rug::rugged) rug::close();
+      else rug::init();
       }
-    else if(uni == 'o')
+    else if(uni == 'o' && !rug::rugged)
       renderonce = !renderonce;
+    else if(uni == 'v') {
+      dialog::editNumber(vertex_limit, 0, 50000, 500, 3000, "vertex limit", "vertex limit");
+      dialog::reaction = [] () { err_zero_current = err_zero; };
+      }
+    else if(uni == 'r') 
+      addMessage(XLAT("This just shows the distance from the camera to the cursor."));
+    else if(uni == 'm') {
+      dialog::editNumber(modelscale, 0.1, 10, .1, 1, "model scale factor", 
+        "This is relevant when the native geometry is not hyperbolic. "
+        "For example, if the native geometry is spherical, and scale < 1, a 2d sphere will be rendered as a subsphere; "
+        "if the native geometry is hyperbolic, and scale > 1, a hyperbolic plane will be rendered as an equidistant surface. "
+        );
+      dialog::scaleLog();
+      }
     else if(uni == 'p')
-      dialog::editNumber(vertex_limit, 0, 16, 1, 2, "vertex limit", "vertex limit");
+      rug_perspective = !rug_perspective;
+    else if(uni == 'e') {
+      dialog::editNumber(err_zero, 1e-9, 1, .1, 1e-3, "error", "error");
+      dialog::scaleLog();
+      dialog::reaction = [] () { err_zero_current = err_zero; };
+      }
+    else if(uni == 'k')
+      keep_shape = !keep_shape;
+    else if(uni == 'f') {
+      dialog::editNumber(fov, 1, 170, 1, 45, "field of view", 
+        "Horizontal field of view."
+        );
+      }
+    else if(uni == 'n' && !rug::rugged) {
+      gwhere = eGeometry((gwhere+1) % 3);
+      }
   #if !ISPANDORA
-    else if(uni == 'g')
+    else if(uni == 'g' && !rug::rugged)
       rendernogl = !rendernogl;
   #endif
-    else if(uni == 's') {
+    else if(uni == 's' && !rug::rugged) {
       texturesize *= 2;
       if(texturesize == 8192) texturesize = 128;
-      dialog::scaleLog();
       }
     else if(doexiton(sym, uni)) popScreen();
     };
   }
 
 void select() {
-  if(rug::rugged) rug::close();
-  else pushScreen(rug::show);
+  pushScreen(rug::show);
   }
 
 int rugArgs() {
@@ -1293,6 +1346,14 @@ int rugArgs() {
 
   else if(argis("-rugerr")) {
     shift(); err_zero = argf();
+    }
+
+  else if(argis("-rugkeep")) {
+    shift(); keep_shape = true;
+    }
+
+  else if(argis("-rugnokeep")) {
+    shift(); keep_shape = false;
     }
 
   else if(argis("-rugv")) {
