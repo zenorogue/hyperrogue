@@ -44,6 +44,8 @@ ld fov = 90;
 
 eGeometry gwhere = gEuclid;
 
+#define USING_NATIVE_GEOMETRY dynamicval<eGeometry> gw(geometry, gwhere == gElliptic ? gSphere : gwhere)
+
 // hypersian rug datatypes and globals
 //-------------------------------------
 
@@ -179,7 +181,7 @@ void push_point(hyperpoint& h, int coord, ld val) {
   else if(!val) return;
   else {
     // if(zero3(h)) { h[0] = 1e-9; h[1] = 1e-10; h[2] = 1e-11; }
-    dynamicval<eGeometry> gw(geometry, gwhere);
+    USING_NATIVE_GEOMETRY;
     transmatrix M = orthonormalize(hpxyz(coord==0,coord==1,coord==2), h);
     transmatrix Mi = inverse(M);
     hyperpoint f = azeq_to_hyperboloid(Mi * h);
@@ -226,7 +228,7 @@ rugpoint *addRugpoint(hyperpoint h, double dist) {
       // sinh(scale) = modelscale
       scale = asinh(modelscale);
       }
-    else if(gwhere == gSphere) {
+    else /* sphere/elliptic*/ {
       if(modelscale >= 1) 
         // do as good as we can...
         scale = M_PI / 2 - 1e-3, good_shape = false;
@@ -248,7 +250,7 @@ rugpoint *addRugpoint(hyperpoint h, double dist) {
     
     hyperpoint hpoint;
     bool orig_euclid = euclid;
-    dynamicval<eGeometry> gw(geometry, gwhere);    
+    USING_NATIVE_GEOMETRY;
     
     if(orig_euclid) {
       d *= modelscale;
@@ -271,7 +273,10 @@ rugpoint *addRugpoint(hyperpoint h, double dist) {
     }
   
   else m->flat = // hpxyz(h[0], h[1], sin(atan2(h[0], h[1]) * 3 + hyprand) * (h[2]-1) / 1000);
-    hpxyz(h[0], h[1], (h[2]- (euclid ? 0 : 1)) * (rand() % 1000 - rand() % 1000) / 1000);
+    hpxyz(h[0], h[1], (h[2] - .99) * (rand() % 1000 - rand() % 1000) / 1000);
+
+  if(rug_perspective)
+    push_point(m->flat, 2, -model_distance);
   
   // if(rug_perspective && gwhere == gEuclid) m->flat[2] -= 3;
   m->inqueue = false;
@@ -464,6 +469,9 @@ void buildTorusRug() {
   qvalid = 0;
   for(auto p: points) if(!p->glue) qvalid++;
   printf("qvalid = %d\n", qvalid);
+
+  if(rug_perspective)
+    push_all_points(2, -model_distance);  
   
   return;
   }
@@ -475,7 +483,7 @@ void verify() {
       auto m2 = e.target;
       ld l = e.len;
       
-      dynamicval<eGeometry> gw(geometry, gwhere);
+      USING_NATIVE_GEOMETRY;
       transmatrix M = orthonormalize(m->flat, m2->flat);
       transmatrix Mi = inverse(M);
       hyperpoint h1 = azeq_to_hyperboloid(Mi * m->flat);
@@ -569,7 +577,7 @@ bool force(rugpoint& m1, rugpoint& m2, double rd, double d1=1, double d2=1) {
   // double rd = hdist(m1.h, m2.h) * xd;
   // if(rd > rdz +1e-6 || rd< rdz-1e-6) printf("%lf %lf\n", rd, rdz);
   using namespace hyperpoint_vec;
-  dynamicval<eGeometry> gw(geometry, gwhere);
+  USING_NATIVE_GEOMETRY;
   transmatrix M = orthonormalize(m1.flat, m2.flat);
   transmatrix Mi = inverse(M);
   hyperpoint f1 = azeq_to_hyperboloid(Mi * m1.flat);
@@ -702,7 +710,12 @@ void subdivide() {
       rugpoint *mm = addRugpoint(mid(m->h, m2->h), (m->dist+m2->dist)/2);
       halves[{m, m2}] = mm;
       using namespace hyperpoint_vec;
-      mm->flat = (m->flat + m2->flat) / 2;
+      USING_NATIVE_GEOMETRY;
+      transmatrix M = orthonormalize(m->flat, m2->flat);
+      transmatrix Mi = inverse(M);
+      hyperpoint h1 = azeq_to_hyperboloid(Mi * m->flat);
+      hyperpoint h2 = azeq_to_hyperboloid(Mi * m2->flat);
+      mm->flat = M * hyperboloid_to_azeq(mid(h1, h2));
       mm->valid = true; qvalid++;
       mm->inqueue = false; enqueue(mm);
       }
@@ -779,11 +792,13 @@ int eyemod;
 void getco(rugpoint *m, hyperpoint& h, int &spherepoints) {
   using namespace hyperpoint_vec;
   h = m->getglue()->flat;
-  if(rug_perspective && gwhere == gSphere) {
+  if(rug_perspective && gwhere >= gSphere) {
     if(h[2] > 0) {
       ld rad = hypot3(h);
       // turn M_PI to -M_PI
-      ld rad_to = M_PI + M_PI - rad;
+      // the only difference between sphere and elliptic is here:
+      // in elliptic, we subtract PI from the distance
+      ld rad_to = (gwhere == gSphere ? M_PI + M_PI : M_PI) - rad;
       ld r = -rad_to / rad;
       h *= r;
       spherepoints++;
@@ -982,11 +997,11 @@ void drawRugScene() {
 
   glColor4f(1.f, 1.f, 1.f, 1.f);
 
-  if(rug_perspective && gwhere == gSphere) {
+  if(rug_perspective && gwhere >= gSphere) {
     glEnable(GL_FOG);
     glFogi(GL_FOG_MODE, GL_LINEAR);
     glFogf(GL_FOG_START, 0);
-    glFogf(GL_FOG_END, 10);
+    glFogf(GL_FOG_END, gwhere == gSphere ? 10 : 4);
     }
 
   if(vid.eye > .001 || vid.eye < -.001) { 
@@ -1067,8 +1082,6 @@ void init() {
   
   buildRug();
   while(good_shape && subdivide_further()) subdivide();
-  if(rug_perspective)
-    push_all_points(2, -model_distance);
 
   currentrot = Id;
   }

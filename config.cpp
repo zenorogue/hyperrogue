@@ -456,10 +456,10 @@ void loadOldConfig(FILE *f) {
 
   aa = rug::renderonce; bb = rug::rendernogl; cc = nontruncated; dd = chaosmode; 
   int ee = vid.steamscore;
-  double rs = 1/rug::model_distance;
+  double rs = 2/rug::model_distance;
   err=fscanf(f, "%d%d%d%d%lf%d%d", &aa, &bb, &rug::texturesize, &cc, &rs, &ee, &dd);
   rug::renderonce = aa; rug::rendernogl = bb; nontruncated = cc; chaosmode = dd; vid.steamscore = ee;
-  rug::model_distance = 1/rs;
+  rug::model_distance = 2/rs;
 
   aa=conformal::autobandhistory;
   double ps = polygonal::STAR, lv = conformal::lvspeed;
