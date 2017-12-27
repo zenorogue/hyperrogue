@@ -211,23 +211,63 @@ rugpoint *addRugpoint(hyperpoint h, double dist) {
   m->y1 = (1 + onscreen[1] * vid.scale) / 2;
   m->valid = false;
 
-  if(euclid && gwhere == gNormal) {
+  using namespace hyperpoint_vec;
+
+  if(sphere) {
     m->valid = good_shape = true;
-    using namespace hyperpoint_vec;
-    h *= modelscale;
-    ld d = hypot2(h);
-    // point on a horocycle going through C0 in distance d along the horocycle
-    hyperpoint horocycle_point = hpxy(d*d/2, d);
-    ld horodist = hdist0(horocycle_point);
-    ld z = hypot2(horocycle_point);
+    ld scale;
+    if(gwhere == gEuclid) {
+      scale = modelscale;
+      }
+    else if(gwhere == gNormal) {
+      // sinh(scale) = modelscale
+      scale = asinh(modelscale);
+      }
+    else if(gwhere == gSphere) {
+      if(modelscale >= 1) 
+        // do as good as we can...
+        scale = M_PI / 2 - 1e-3, good_shape = false;
+      else scale = asin(modelscale);
+      }
+    m->flat = h * scale;
+    }
+
+  else if(euclid && gwhere == gEuclid) {
+    m->flat = h * modelscale;
+    }
+  
+  else if(gwhere == gNormal && (euclid || (hyperbolic && modelscale >= 1))) {
+    m->valid = good_shape = true;
+
+
+    ld d = hdist0(h);
+    ld d0 = hypot2(h); if(!d0) d0 = 1;
+    
+    hyperpoint hpoint;
+    bool orig_euclid = euclid;
+    dynamicval<eGeometry> gw(geometry, gwhere);    
+    
+    if(orig_euclid) {
+      d *= modelscale;
+      // point on a horocycle going through C0, in distance d along the horocycle
+      hpoint = hpxy(d*d/2, d);
+      }
+    else {
+      // radius of the equidistant
+      ld r = acosh(modelscale);
+      // point on an equdistant going through C0 in distance d along the guiding line
+      // hpoint = hpxy(cosh(r) * sinh(r) * (cosh(d) - 1), sinh(d) * cosh(r));
+      hpoint = xpush(r) * ypush(d) * xpush(-r) * C0;
+      }
+
+    ld hpdist = hdist0(hpoint);
+    ld z = hypot2(hpoint);
     if(z==0) z = 1;
-    if(d==0) d = 1;
-    m->flat = 
-      hpxyz(horodist * h[0]/d * horocycle_point[1] / z, horodist * h[1]/d * horocycle_point[1] / z, -horodist * horocycle_point[0] / z);
+    m->flat = hpxyz(hpdist * h[0]/d0 * hpoint[1] / z, hpdist * h[1]/d0 * hpoint[1] / z, -hpdist * hpoint[0] / z);    
     }
   
   else m->flat = // hpxyz(h[0], h[1], sin(atan2(h[0], h[1]) * 3 + hyprand) * (h[2]-1) / 1000);
-    hpxyz(h[0], h[1], (h[2]-1) * (rand() % 1000 - rand() % 1000) / 1000);
+    hpxyz(h[0], h[1], (h[2]- (euclid ? 0 : 1)) * (rand() % 1000 - rand() % 1000) / 1000);
   
   // if(rug_perspective && gwhere == gEuclid) m->flat[2] -= 3;
   m->inqueue = false;
@@ -423,6 +463,29 @@ void buildTorusRug() {
   return;
   }
 
+void verify() {
+  vector<ld> ratios;
+  for(auto m: points)
+    for(auto& e: m->edges) {
+      auto m2 = e.target;
+      ld l = e.len;
+      
+      dynamicval<eGeometry> gw(geometry, gwhere);
+      transmatrix M = orthonormalize(m->flat, m2->flat);
+      transmatrix Mi = inverse(M);
+      hyperpoint h1 = azeq_to_hyperboloid(Mi * m->flat);
+      hyperpoint h2 = azeq_to_hyperboloid(Mi * m2->flat);
+      ld l0 = hdist(h1, h2);
+      ratios.push_back(l0 / l);
+      }
+    
+  printf("Length verification:\n");
+  sort(ratios.begin(), ratios.end());
+  for(int i=0; i<size(ratios); i += size(ratios) / 10)
+    printf("%lf\n", ratios[i]);
+  printf("\n");
+  }
+
 void buildRug() {
 
   if(torus) {
@@ -458,6 +521,8 @@ void buildRug() {
 
   calcLengths();
   sort(points.begin(), points.end(), psort);
+  
+  verify();
   }
 
 // rug physics
@@ -605,9 +670,15 @@ void subdivide() {
   int N = size(points);
   // if(euclid && gwhere == gEuclid) return;
   if(!subdivide_further()) {
-    err_zero_current /= 2;
-    printf("increasing precision to %lg\n", err_zero_current);
-    for(auto p: points) enqueue(p);
+    if(euclid && !bounded && gwhere == gEuclid) {
+      printf("Euclidean -- full precision\n");
+      stop = true; 
+      }
+    else {
+      err_zero_current /= 2;
+      printf("increasing precision to %lg\n", err_zero_current);
+      for(auto p: points) enqueue(p);
+      }
     return; 
     }
   printf("subdivide (%d,%d)\n", N, size(triangles));
@@ -680,7 +751,7 @@ void physics() {
   current_total_error = 0;
   
   while(SDL_GetTicks() < t + 5 && !stop)
-  for(int it=0; it<50; it++)
+  for(int it=0; it<50 && !stop; it++)
     if(pqueue.empty()) addNewPoints();
     else {
       queueiter++;
