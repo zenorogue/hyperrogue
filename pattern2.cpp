@@ -722,6 +722,9 @@ namespace patterns {
           break;
           }
         }
+    if(euclid6 && !(sub & SPF_CHANGEROT)) {
+      si.dir = (zebra40(c)*4) % 6;
+      }
     if(euclid6 && (sub & SPF_CHANGEROT)) si.dir = 0;
     if(sub & SPF_ROT) si.id = 1;
     if(euclid6 && !(sub & SPF_EXTRASYM)) {

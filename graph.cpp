@@ -2251,7 +2251,11 @@ void qplainfloor(cell *c, bool warp, const transmatrix &V, int col);
 
 void drawReptileFloor(const transmatrix& V, cell *c, int col, bool usefloor) {
 
-  auto si = patterns::getpatterninfo(c, 'z', patterns::SPF_SYM0123);
+  auto si = 
+    euclid6 ? 
+      patterns::getpatterninfo(c, patterns::PAT_COLORING, 0)
+    :
+      patterns::getpatterninfo(c, patterns::PAT_ZEBRA, patterns::SPF_SYM0123);
   
   int j;
 
@@ -2263,6 +2267,8 @@ void drawReptileFloor(const transmatrix& V, cell *c, int col, bool usefloor) {
   else if(si.id >= 28 && si.id < 40) j = 3;
   else j = 4;
   
+  if(euclid6) j = 0;
+
   transmatrix D = applyPatterndir(c, si);
   transmatrix V2 = V * D;
   
