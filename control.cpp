@@ -413,6 +413,18 @@ void handleKeyNormal(int sym, int uni) {
 #endif
   }
 
+bool need_mouseh = false;
+
+void fix_mouseh() {
+  if(!need_mouseh) ;
+#if CAP_RUG
+  else if(rug::rugged)
+    mouseh = rug::gethyper(mousex, mousey);
+  else
+#endif
+    mouseh = gethyper(mousex, mousey);
+  }
+
 void handlekey(int sym, int uni) {
 
   if(callhandlers(false, hooks_handleKey, sym, uni)) return;
@@ -519,6 +531,7 @@ void mainloopiter() {
   DEBB(DF_GRAPH, (debugfile,"polling for events\n"));
   
   achievement_pump();
+  
   while(SDL_PollEvent(&ev)) {
     DEBB(DF_GRAPH, (debugfile,"got event type #%d\n", ev.type));
     int sym = 0;
@@ -660,6 +673,8 @@ void mainloopiter() {
       bool anyctrl = keystate[SDLK_LCTRL] || keystate[SDLK_RCTRL];
       bool anyshift = keystate[SDLK_LSHIFT] || keystate[SDLK_RSHIFT];
       
+      if(ev.type != SDL_MOUSEMOTION) fix_mouseh();
+      
       if(!act) ;
 
       else if(ev.button.button==SDL_BUTTON_RIGHT || leftclick) 
@@ -711,14 +726,9 @@ void mainloopiter() {
       mousemoved = true;
       mousex = ev.motion.x;
       mousey = ev.motion.y;
+      
+      need_mouseh = true;
 
-#if CAP_RUG
-      if(rug::rugged)
-        mouseh = rug::gethyper(mousex, mousey);
-      else
-#endif
-        mouseh = gethyper(mousex, mousey);
-        
       if(holdmouse && getcstat == '-') sym = uni = getcstat;
 
       if((rightclick || (SDL_GetMouseState(NULL, NULL) & SDL_BUTTON_MMASK)) && !mouseout2() && 
@@ -746,6 +756,8 @@ void mainloopiter() {
 
     handlekey(sym, uni);
     }
+
+  fix_mouseh();
   }
 #endif
 
