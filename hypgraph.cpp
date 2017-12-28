@@ -395,6 +395,12 @@ transmatrix eumove(ld x, ld y) {
   return Mat;
   }
 
+transmatrix eumove(int vec) {
+  int x, y;
+  tie(x,y) = vec_to_pair(vec);
+  return eumove(x, y);
+  }
+
 transmatrix eumovedir(int d) {
   if(a4) {
     d = d & 3;
@@ -426,16 +432,10 @@ ld matrixnorm(const transmatrix& Mat) {
 void drawEuclidean() {
   DEBB(DF_GRAPH, (debugfile,"drawEuclidean\n"));
   sphereflip = Id;
-  eucoord px=0, py=0;
-  if(!centerover) centerover = cwt.c;
+  if(!centerover.c) centerover = cwt;
   // printf("centerover = %p player = %p [%d,%d]-[%d,%d]\n", lcenterover, cwt.c,
   //   mindx, mindy, maxdx, maxdy);
-  int pid;
-  const bool b = torus;
-  if(b)
-    pid = decodeId(centerover->master);
-  else
-    decodeMaster(centerover->master, px, py);
+  int pvec = cellwalker_to_vec(centerover);
     
   int minsx = mindx-1, maxsx=maxdx+1, minsy=mindy-1, maxsy=maxdy+1;
   mindx=maxdx=mindy=maxdy=0;
@@ -451,25 +451,16 @@ void drawEuclidean() {
     torusconfig::torus_cx = dx;
     torusconfig::torus_cy = dy;
     reclevel = eudist(dx, dy);
-    cell *c;
-    transmatrix Mat;
-    if(b) {
-      reclevel = eudist(dx, dy);
-      c = getTorusId(pid+torusconfig::dx*dx+torusconfig::dy*dy);
-      Mat = eumove(dx,dy);
-      }
-    else {
-      eucoord x = dx+px;
-      eucoord y = dy+py;
-      c = euclideanAt(x,y);
-      Mat = eumove(x, y);
-      }
-    if(!c) continue;
+    cellwalker cw = vec_to_cellwalker(pvec + euclid_getvec(dx, dy));
+    transmatrix Mat = eumove(dx,dy);
+    
+    if(!cw.c) continue;
+
     Mat = View0 * Mat;
     
-    if(torus) {
+    if(true) {
       ld locald = matrixnorm(Mat);
-      if(locald < centerd) centerd = locald, centerover = c, View = View0 * eumove(dx, dy);
+      if(locald < centerd) centerd = locald, centerover = cw, View = View0 * eumove(dx, dy);
       }
     
     // Mat[0][0] = -1;
@@ -488,8 +479,8 @@ void drawEuclidean() {
       if(dy > maxdy) maxdy = dy;
       }
     if(cx >= -cellrad && cy >= -cellrad && cx < vid.xres+cellrad && cy < vid.yres+cellrad)
-      if(dodrawcell(c)) {
-        drawcell(c, Mat, 0, false);
+      if(dodrawcell(cw.c)) {
+        drawcell(cw.c, cw.mirrored ? Mat * Mirror : Mat, cw.spin, cw.mirrored);
         }
     }
   }
@@ -596,7 +587,7 @@ void resetview() {
   if(!euclid) 
     viewctr.h = cwt.c->master,
     viewctr.spin = cwt.spin;
-  else centerover = cwt.c;
+  else centerover = cwt;
   // SDL_LockSurface(s);
   // SDL_UnlockSurface(s);
   }

@@ -30,7 +30,8 @@ movedir joydir;
 movedir mousedest;
 ld shiftmul = 1;
 
-cell *mouseover, *mouseover2, *lmouseover, *centerover;
+cell *mouseover, *mouseover2, *lmouseover;
+cellwalker centerover;
 ld modist, modist2, centdist;
 
 int lastt;
@@ -340,7 +341,7 @@ void handleKeyNormal(int sym, int uni) {
       // vid.yshift = 1 - vid.yshift;
       // vid.drawmousecircle = true;
       }
-    if(sym == 'm' && canmove && (centerover == cwt.c ? mouseover : centerover))
+    if(sym == 'm' && canmove && (centerover == cwt ? mouseover : centerover.c))
       performMarkCommand(mouseover);
     }
   
@@ -351,9 +352,9 @@ void handleKeyNormal(int sym, int uni) {
     if(sym == 't' && uni != 'T' && uni != 'T'-64 && canmove) {
       if(playermoved && items[itStrongWind]) { 
         cell *c = whirlwind::jumpDestination(cwt.c);
-        if(c) centerover = c;
+        if(c) centerover.c = c;
         }
-      targetRangedOrb(centerover, roKeyboard);
+      targetRangedOrb(centerover.c, roKeyboard);
       sym = 0; uni = 0;
       }
     }

@@ -3,25 +3,21 @@
 // Copyright (C) 2011-2017 Zeno Rogue, see 'hyper.cpp' for details
 
 int eupattern(cell *c) {
+  int v = cell_to_vec(c);
   if(a4) {
-    if(torus) return (decodeId(c->master)*2) % 3;
-    eucoord x, y;
-    decodeMaster(c->master, x, y);
+    int x, y;
+    tie(x,y) = vec_to_pair(v);
     return ((x&1) + 2*(y&1)) % 3;
     }
-  if(torus) return (decodeId(c->master)*2) % 3;
-  eucoord x, y;
-  decodeMaster(c->master, x, y);
-  short z = (short(y+2*x))%3;
-  z %= 3;
-  if(z<0) z += 3;
-  return z;
+  else {
+    return gmod(v*2, 3);
+    }
   }
 
 int eupattern4(cell *c) {
-  if(torus) return 0;
-  eucoord x, y;
-  decodeMaster(c->master, x, y);
+  int v = cell_to_vec(c);
+  int x, y;
+  tie(x,y) = vec_to_pair(v);
   return (x&1) + ((y&1)) * 2;
   }
 
@@ -58,14 +54,14 @@ unsigned bitmajority(unsigned a, unsigned b, unsigned c) {
   }
 
 int eufifty(cell *c) {
-  eucoord x, y;
   if(torus) {
-    if(c->land == laWildWest) return decodeId(c->master) % 37;
-    else return decodeId(c->master) % 27;
+    if(c->land == laWildWest) return cell_to_vec(c) % 37;
+    else return cell_to_vec(c) % 27;
     }
-  decodeMaster(c->master, x, y);
-  int ix = short(x) + 99999 + short(y);
-  int iy = short(y) + 99999;
+  int x, y;
+  tie(x,y) = cell_to_pair(c);
+  int ix = x + 99999 + y;
+  int iy = y + 99999;
   if(c->land == laWildWest) 
     return (ix + iy * 26 + 28) % 37;
   else {
@@ -314,12 +310,7 @@ int fieldval_uniq(cell *c) {
     return decodeId(c->master);
     }
   else if(euclid) {
-    eucoord x, y;
-    decodeMaster(c->master, x, y);
-    int i = (short int)(x) * torusconfig::dx + (short int)(y) * torusconfig::dy;
-    i %= torusconfig::qty;
-    if(i<0) i += torusconfig::qty;
-    return i;
+    return torusconfig::vec_to_id(cell_to_vec(c));
     }
   if(ctof(c)) return c->master->fieldval/S7;
   else {

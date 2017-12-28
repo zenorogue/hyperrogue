@@ -541,7 +541,7 @@ void drawCircle(int x, int y, int size, int color);
 void fixcolor(int& col);
 int displaydir(cell *c, int d);
 hyperpoint gethyper(ld x, ld y);
-void resetview(); extern heptspin viewctr; extern cell *centerover;
+void resetview(); extern heptspin viewctr; extern cellwalker centerover;
 void drawthemap();
 void drawfullmap();
 bool displaystr(int x, int y, int shift, int size, const char *str, int color, int align);
@@ -829,7 +829,6 @@ bool isElemental(eLand l);
 int coastval(cell *c, eLand base);
 int getHauntedDepth(cell *c);
 eLand randomElementalLand();
-extern eLand euland[65536];
 bool notDippingForExtra(eItem i, eItem x);
 void placePrizeOrb(cell *c);
 void wandering();
@@ -1388,6 +1387,7 @@ void movecost(cell* from, cell *to);
 void checkmove();
 
 transmatrix eumove(ld x, ld y);
+transmatrix eumove(int vec);
 transmatrix eumovedir(int d);
 
 int reptilemax();
@@ -1690,7 +1690,7 @@ template<class T, class U> int addHook(hookset<T>*& m, int prio, const U& hook) 
   return 0;
   }
 
-extern purehookset hooks_frame, hooks_stats, clearmemory, hooks_config;
+extern purehookset hooks_frame, hooks_stats, clearmemory, hooks_config, hooks_tests;
 
 template<class T, class... U> void callhooks(hookset<T> *h, U... args) {
   if(h) for(auto& p: *h) p.second(args...);
@@ -2252,9 +2252,6 @@ struct celllister {
   
   };
 
-typedef unsigned short eucoord;
-void decodeMaster(heptagon *h, eucoord& x, eucoord& y);
-
 hrmap *newAltMap(heptagon *o);
 
 #define currfp fieldpattern::getcurrfp()
@@ -2423,3 +2420,7 @@ transmatrix cview();
 
 extern string truncatenames[2];
 extern bool need_mouseh;
+
+extern int whateveri, whateveri2;
+
+void clear_euland(eLand first);

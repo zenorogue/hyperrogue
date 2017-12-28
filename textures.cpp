@@ -641,7 +641,7 @@ void init_textureconfig() {
   addsaver(patterns::whichPattern, "pattern", 0);
   addsaver(patterns::subpattern_flags, "pattern flags", 0);
 
-  cell *ctr = euclid ? centerover : viewctr.h->c7;
+  cell *ctr = euclid ? centerover.c : viewctr.h->c7;
   si_save = patterns::getpatterninfo0(ctr);
   
   addsaver(si_save.id, "center type", 1);

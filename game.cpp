@@ -5795,8 +5795,7 @@ void activateSafety(eLand l) {
   firstland = l;
   safetyland = l;
   safetyseed = time(NULL);
-  for(int i=0; i<65536; i++) euland[i] = laNone;
-  euland[0] = euland[1] = firstland;
+  clear_euland(firstland);
   safety = true; avengers = 0;
   clearMemory();
   initcells();

@@ -664,10 +664,10 @@ void preset(rugpoint *m) {
       double c2 = b->edges[k2].len/blen;
       
       double cz = (c1*c1-c2*c2+1) / 2;
-      double ch = sqrt(c2*c2 - cz*cz);
+      double ch = sqrt(c2*c2 - cz*cz + 1e-10);
 
       double az = (a1*a1-a2*a2+1) / 2;
-      double ah = sqrt(a2*a2 - az*az);
+      double ah = sqrt(a2*a2 - az*az + 1e-10);
       
       // c->h = a->h + (b->h-a->h) * cz + ch * ort
       hyperpoint ort = (c->flat - a->flat - cz * (b->flat-a->flat)) / ch;
@@ -675,14 +675,17 @@ void preset(rugpoint *m) {
       // m->h = a->h + (b->h-a->h) * az - ah * ort
       hyperpoint res = a->flat + (b->flat-a->flat) * az - ah * ort;
       
-      for(int i=0; i<3; i++) h[i] += res[i];
+      h += res;
       
       preset_points.emplace_back(hypot(blen * (ah+ch), blen * (az-cz)), c);
       q++;
+      
+      printf("A %lf %lf %lf %lf C %lf %lf %lf %lf\n", a1, a2, az, ah, c1, c2, cz, ch);
       }
     }
     
-  if(q>0) for(int i=0; i<3; i++) m->flat[i] = h[i]/q;
+  if(q>0) m->flat = h/q;
+  printf("preset (%d) -> %s\n", q, display(m->flat));
   }
 
 ld sse(hyperpoint h) {
@@ -1164,6 +1167,7 @@ void actDraw() {
   Uint8 *keystate = SDL_GetKeyState(NULL);
   int qm = 0;
   double alpha = (ticks - lastticks) / 1000.0;
+  alpha /= 2.5;
   lastticks = ticks;
 
   transmatrix t = Id;

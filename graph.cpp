@@ -3284,12 +3284,12 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       mouseover2 = c;
       }
 
-    if(!torus) {
+    if(!euclid) {
       double dfc = euclid ? intval(VC0, C0) : VC0[2];
     
       if(dfc < centdist) {
         centdist = dfc;
-        centerover = c;
+        centerover = cellwalker(c, spinv, mirrored);
         }
       }
     
@@ -3380,10 +3380,19 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
     
     if(cmode & sm::TORUSCONFIG) {
       using namespace torusconfig;
-      int cd = torus_cx * dx + torus_cy * newdy;
-      cd %= newqty; if(cd<0) cd += newqty;
-      string label = its(cd);
-      queuestr(V, cd ? .2 : .6, label, cd == 0 ? 0xFFFF0040 : 0xFFFFFFD0, 1);
+      string label;
+      bool small;
+      if(tmflags() & TF_SINGLE) {
+        int cd = torus_cx * dx + torus_cy * newdy;
+        cd %= newqty; if(cd<0) cd += newqty;
+        label = its(cd);
+        small = cd;
+        }
+      else {
+        small = true;
+        label = its(torus_cx) + "," + its(torus_cy);
+        }
+      queuestr(V, small ? .2 : .6, label, small ? 0xFFFFFFD0 : 0xFFFF0040, 1);
       }
 
     asciicol = wcol;
@@ -4744,8 +4753,8 @@ void drawMarkers() {
 #if CAP_MODEL
     m = netgen::mode == 0;
 #endif
-    if(centerover && !playermoved && m && !conformal::on)
-      queuecircleat(centerover, .70 - .06 * sin(ticks/200.0), 
+    if(centerover.c && !playermoved && m && !conformal::on)
+      queuecircleat(centerover.c, .70 - .06 * sin(ticks/200.0), 
         darkena(int(175 + 25 * sin(ticks / 200.0)), 0, 0xFF));
 
     if(multi::players > 1 || multi::alwaysuse) for(int i=0; i<numplayers(); i++) {
@@ -4925,7 +4934,7 @@ void drawthemap() {
   modist2 = 1e20; mouseover2 = NULL; 
 
   centdist = 1e20; 
-  if(!torus) centerover = NULL; 
+  if(!euclid) centerover.c = NULL; 
 
   for(int i=0; i<multi::players; i++) {
     multi::ccdist[i] = 1e20; multi::ccat[i] = NULL;
@@ -5406,7 +5415,7 @@ void restartGraph() {
   linepatterns::clearAll();
   if(currentmap) {
     if(euclid) {
-      centerover = torus ? getTorusId(0) : euclideanAtCreate(0,0);
+      centerover = vec_to_cellwalker(0);
       }
     else {
       viewctr.h = currentmap->getOrigin();
@@ -5419,7 +5428,7 @@ void restartGraph() {
 
 auto graphcm = addHook(clearmemory, 0, [] () {
   DEBB(DF_INIT, (debugfile,"clear graph memory\n"));
-  mouseover = centerover = lmouseover = NULL;  
+  mouseover = centerover.c = lmouseover = NULL;  
   for(int i=0; i<ANIMLAYERS; i++) animations[i].clear();
   gmatrix.clear(); gmatrix0.clear();
   flashes.clear();
@@ -5505,7 +5514,7 @@ void drawBug(const cellwalker& cw, int col) {
   }
 
 cell *viewcenter() {
-  if(euclid) return centerover;
+  if(euclid) return centerover.c;
   else return viewctr.h->c7;
   }
 

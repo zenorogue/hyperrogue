@@ -84,20 +84,76 @@ void showQuotientConfig() {
   dialog::display();
   }
 
+bool torus_chamfer;
+
 void showTorusConfig() {
   cmode = sm::SIDE | sm::TORUSCONFIG;
   gamescreen(2);
   
   dialog::init(XLAT("advanced configuration"));
   
-  dialog::addSelItem(XLAT("number of cells (n)"), its(torusconfig::newqty), 'n');
-  dialog::addSelItem(XLAT("cell bottom-right from 0 (d)"), its(torusconfig::newdy), 'd');
+  auto& mode = torusconfig::tmodes[torusconfig::newmode];
   
-  if(torusconfig::newqty % 3)
-    dialog::addInfo("best if n is divisible by 3", 0x808080);
+  dialog::addSelItem(XLAT("mode"), XLAT(mode.name), 'm');
+  
+  bool single = (mode.flags & torusconfig::TF_SINGLE);
+  bool square = (mode.flags & torusconfig::TF_SQUARE);
+  bool simple = (mode.flags & torusconfig::TF_SIMPLE);
+  
+  if(single) {
+    dialog::addSelItem(XLAT("number of cells (n)"), its(torusconfig::newqty), 'n');
+    if(torusconfig::TF_HEX)
+      dialog::addSelItem(XLAT("cell bottom-right from 0 (d)"), its(torusconfig::newdy), 'd');
+    else
+      dialog::addSelItem(XLAT("cell below 0 (d)"), its(torusconfig::newdy), 'd');
+    }
+  else {
+    if(torusconfig::newsdx < 1) torusconfig::newsdx = 1;
+    if(torusconfig::newsdy < 1) torusconfig::newsdy = 1;
+    dialog::addSelItem(XLAT("width (x)"), its(torusconfig::newsdx), 'x');
+    dialog::addSelItem(XLAT("height (y)"), its(torusconfig::newsdy), 'y');
+    }
 
-  if((torusconfig::newdy + 999999) % 3 != 2)
-    dialog::addInfo("best if d+1 is divisible by 3", 0x808080);
+  if(square) dialog::addBoolItem(XLAT("chamfering"), !torus_chamfer, 't');
+  else dialog::addInfo("", 100);
+  
+  int valid = 2;
+
+  if(single) {  
+    if(square) {
+      dialog::addInfo("this mode has bad patterns", 0x808080), valid = 1;
+      if(!torus_chamfer && valid == 1)
+        dialog::addInfo("incompatible with chamfering", 0x808080), valid = 0;
+      }
+    else {
+      if(torusconfig::newqty % 3)
+        dialog::addInfo(XLAT("best if %1 is divisible by %2", "n", "3"), 0x808080), valid = 1;
+      if((torusconfig::newdy + 999999) % 3 != 2)
+        dialog::addInfo(XLAT("best if %1 is divisible by %2", "d+1", "3"), 0x808080), valid = 1;
+      }
+    }
+  else {
+    if(square) {
+      if(torusconfig::newsdx & 1)
+        dialog::addInfo(XLAT("best if %1 is divisible by %2", "x", "2"), 0x808080), valid = 1;
+      if(torusconfig::newsdy & 1)
+        dialog::addInfo(XLAT("best if %1 is divisible by %2", "y", "2"), 0x808080), valid = 1;
+      if(!torus_chamfer && valid == 1)
+        dialog::addInfo("incompatible with chamfering", 0x808080), valid = 0;
+      }
+    else if(simple) {
+      if(torusconfig::newsdx & 1)
+        dialog::addInfo(XLAT("best if %1 is divisible by %2", "x", "3"), 0x808080), valid = 1;
+      if(torusconfig::newsdy & 1)
+        dialog::addInfo(XLAT("best if %1 is divisible by %2", "y", "3"), 0x808080), valid = 1;
+      }
+    else {
+      if(torusconfig::newsdx & 1)
+        dialog::addInfo(XLAT("best if %1 is divisible by %2", "x", "3"), 0x808080), valid = 1;
+      if(torusconfig::newsdy & 1)
+        dialog::addInfo(XLAT("best if %1 is divisible by %2", "y", "2"), 0x808080), valid = 0;
+      }
+    }
   
   dialog::addSelItem(XLAT("scale factor"), fts(vid.scale), 'z');
 
@@ -108,22 +164,39 @@ void showTorusConfig() {
   dialog::addItem("activate", 'a');
   dialog::addItem("default", 'c');
 
-  keyhandler = [] (int sym, int uni) {
-    if(uni == 'n')
+  keyhandler = [=] (int sym, int uni) {
+    if(uni == 'm') {
+      int i = torusconfig::newmode + 1;
+      if(i >= size(torusconfig::tmodes)) i = 0;
+      torusconfig::newmode = torusconfig::eTorusMode(i);
+      }
+    else if(uni == 'n' && single)
       dialog::editNumber(torusconfig::newqty, 0, 1000, 3, torusconfig::def_qty, XLAT("number of cells (n)"), "");
-    else if(uni == 'd')
-      dialog::editNumber(torusconfig::newdy, -1000, 1000, 3, -torusconfig::def_dy, XLAT("cell bottom-right from 0 (d)"), "");
-    else if((uni == 'a' || uni == '\n') && torusconfig::newqty >= 3 && abs(torusconfig::newdy) < torusconfig::newqty ) {
-      targetgeometry = gEuclid; restartGame('g');
+    else if(uni == 'd' && single)
+      dialog::editNumber(torusconfig::newdy, -1000, 1000, 3, -torusconfig::def_dy, XLAT("cell below 0 (d)"), "");
+    else if(uni == 'x' && !single)
+      dialog::editNumber(torusconfig::newsdx, 0, 1000, square ? 2 : 3, 12, XLAT("width (x)"), "");
+    else if(uni == 'y' && !single)
+      dialog::editNumber(torusconfig::newsdy, 0, 1000, square ? 2 : simple ? 3 : 2, 12, XLAT("height (y)"), "");
+    else if(uni == 't')
+      torus_chamfer = !torus_chamfer;
+    else if((uni == 'a' || uni == '\n') && torusconfig::newqty >= 3 && valid) {
+      targetgeometry = gNormal; restartGame('g', false, true);
+      torusconfig::torus_mode = torusconfig::newmode;
       torusconfig::qty = torusconfig::newqty;
       torusconfig::dy = torusconfig::newdy;
-      targetgeometry = gTorus; restartGame('g');
+      torusconfig::sdx = torusconfig::newsdx;
+      torusconfig::sdy = torusconfig::newsdy;
+      torusconfig::activate();
+      if((square && torus_chamfer) != nontruncated) restartGame('7', false, true);
+      targetgeometry = gTorus; restartGame('g', false, true);
       }
     else if(uni == 'c') {
-      targetgeometry = gEuclid; restartGame('g');
+      targetgeometry = gEuclid; restartGame('g', false, true);
+      torusconfig::torus_mode = torusconfig::tmSingle;
       torusconfig::qty = torusconfig::def_qty;
       torusconfig::dy = torusconfig::def_dy;
-      targetgeometry = gTorus; restartGame('g');
+      targetgeometry = gTorus; restartGame('g', false, true);
       }
     else if(uni == 'z') editScale();
 #if CAP_RUG
@@ -263,6 +336,10 @@ void showEuclideanMenu() {
         if(torus) 
           torusconfig::newdy = torusconfig::dy,
           torusconfig::newqty = torusconfig::qty,
+          torusconfig::newsdx = torusconfig::sdx,
+          torusconfig::newsdy = torusconfig::sdy,
+          torusconfig::newmode = torusconfig::torus_mode,
+          torus_chamfer = nontruncated,
           pushScreen(showTorusConfig);
         if(quotient==2) pushScreen(showQuotientConfig);
         }

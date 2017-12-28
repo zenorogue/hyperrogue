@@ -650,7 +650,7 @@ int windtotal;
 void describeMouseover() {
   DEBB(DF_GRAPH, (debugfile,"describeMouseover\n"));
 
-  cell *c = mousing ? mouseover : playermoved ? NULL : centerover;
+  cell *c = mousing ? mouseover : playermoved ? NULL : centerover.c;
   string& out = mouseovers;
   if(!c || instat || getcstat != '-') { }
   else if(c->wall != waInvisibleFloor) {
@@ -701,12 +701,10 @@ void describeMouseover() {
       out += " " + describeRPM(c->land);
       
     if(euclid && cheater) {
-      if(torus) {
-        out += " ("+its(decodeId(c->master))+")";
-        }
-      else {
-        eucoord x, y;
-        decodeMaster(c->master, x, y);
+      out += " ("+its(cell_to_vec(c))+")";
+      if(!torus || torusconfig::torus_mode != torusconfig::tmSingle) {
+        int x, y;
+        tie(x,y) = cell_to_pair(c);
         out += " ("+its(short(x))+","+its(short(y))+")";
         }
       }

@@ -324,8 +324,8 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           c->wall = waCavefloor;
           }
         else if(euclid) {
-          eucoord x, y;
-          decodeMaster(c->master, x, y);
+          int x, y;
+          tie(x,y) = cell_to_pair(c);
           if(((y-2)&7) < 4) c->wall = waCavewall;
           else c->wall = waCavefloor;
           }
@@ -407,10 +407,9 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           v = hrand(100) < 25 ? 24 : 16;
           }
         else if(euclid) {
-          eucoord x, y;
-          decodeMaster(c->master, x, y);
-          int y0 = ((short)y) % 6;
-          if(y0<0) y0+=6;
+          int x, y;
+          tie(x,y) = cell_to_pair(c);
+          int y0 = gmod(y, 6);
           if(y0 == 3 || y0 == 4) v=24; else v=0;
           }
         else v = emeraldval(c);
@@ -466,8 +465,8 @@ void giantLandSwitch(cell *c, int d, cell *from) {
       if(d==8) {
         if(torus) ;
         else if(euclid) {
-          eucoord x, y;
-          decodeMaster(c->master, x, y);
+          int x,y;
+          tie(x,y) = cell_to_pair(c);
           if(y&1) c->wall = waTrapdoor;
           else c->wall = waNone;
           }
@@ -486,9 +485,9 @@ void giantLandSwitch(cell *c, int d, cell *from) {
       if(d==8) {
         if(torus) ;
         else if(euclid) {
-          eucoord x, y;
-          decodeMaster(c->master, x, y);
-          int dy = ((short)y)%3; if(dy<0) dy += 3;
+          int x,y;
+          tie(x,y) = cell_to_pair(c);
+          int dy = gmod(y, 3);
           if(dy == 1) c->wall = waVinePlant;
           }
         else {
@@ -1033,9 +1032,9 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           if(pid == torusconfig::qty*2/3) c->wall = waGrounded;
           }
         else if(euclid) {
-          eucoord x, y;
-          decodeMaster(c->master, x, y);
-          if(short(x+1)%3 == 0 && short(y)%3 == 0) {
+          int x,y;
+          tie(x,y) = cell_to_pair(c);
+          if((x+1)%3 == 0 && y%3 == 0) {
             if(hrand(100) < 50)
               c->wall = hrand(2) ? waCharged : waGrounded;
             }
@@ -1043,8 +1042,8 @@ void giantLandSwitch(cell *c, int d, cell *from) {
             bool sand = false;
             for(int i=0; i<c->type; i++) {
               createMov(c, i);
-              decodeMaster(c->mov[i]->master, x, y);
-              if(short(x+1)%3 == 0 && short(y)%3 == 0) sand = true;
+              tie(x,y) = cell_to_pair(c->mov[i]);
+              if((x+1)%3 == 0 && (y)%3 == 0) sand = true;
               }
             if(sand && hrand(100) < 20)
               c->wall = waSandstone;

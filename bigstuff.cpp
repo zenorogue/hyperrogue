@@ -732,9 +732,18 @@ void setLandSphere(cell *c) {
     }
   }
 
-eLand euland[65536];
+eLand euland[max_vec];
 
-eLand switchable(eLand nearland, eLand farland, eucoord c) {
+eLand& get_euland(int c) {
+  return euland[c & (max_vec-1)];
+  }
+
+void clear_euland(eLand first) {
+  for(int i=0; i<max_vec; i++) euland[i] = laNone;
+  euland[0] = euland[1] = euland[max_vec-1] = first;
+  }
+
+eLand switchable(eLand nearland, eLand farland, int c) {
   if(specialland == laCrossroads4) {
     if(hrand(15) == 0)
       return getNewLand(nearland);
@@ -755,37 +764,36 @@ eLand switchable(eLand nearland, eLand farland, eucoord c) {
     }
   }
 
-eLand getEuclidLand(eucoord c) {
-  if(euland[c]) return euland[c];
-  if(c == 0 || c == eucoord(-1) || c == 1)
-    return euland[c] = specialland;
-  if(euland[eucoord(c-2)] && ! euland[eucoord(c-1)]) getEuclidLand(c-1);
-  if(euland[eucoord(c+2)] && ! euland[eucoord(c+1)]) getEuclidLand(c+1);
-  if(euland[eucoord(c-1)]) return 
-    euland[c] = switchable(euland[c-1], euland[eucoord(c-2)], c);
-  if(euland[eucoord(c+1)]) return 
-    euland[c] = switchable(euland[c+1], euland[eucoord(c+2)], c);
-  return euland[c] = laCrossroads;
+eLand getEuclidLand(int c) {
+  auto& la = get_euland(c);
+  if(la) return la;
+  if(get_euland(c-2) && !get_euland(c-1)) getEuclidLand(c-1);
+  if(get_euland(c-1)) return 
+    la = switchable(get_euland(c-1), get_euland(c-2), c);
+  if(get_euland(c+2) && !get_euland(c+1)) getEuclidLand(c+1);
+  if(get_euland(c+1)) return 
+    la = switchable(get_euland(c+1), get_euland(c+2), c);
+  return la = laCrossroads;
   }
 
 void setLandEuclid(cell *c) {
   setland(c, specialland);
   if(specialland == laCrossroads) {
-    eucoord x, y;
-    decodeMaster(c->master, x, y);
+    int x, y;
+    tie(x,y) = cell_to_pair(c);
     setland(c, getEuclidLand(y+2*x));
     }
   if(specialland == laTerracotta) {
-    eucoord x, y;
-    decodeMaster(c->master, x, y);
-    if((y+2*x) % 16 == 1) {
+    int x, y;
+    tie(x,y) = cell_to_pair(c);
+    if(((y+2*x) & 15) == 1) {
       setland(c, laMercuryRiver);
       c->wall = waMercury;
       }
     }
   if(specialland == laCrossroads4) {
-    eucoord x, y;
-    decodeMaster(c->master, x, y);
+    int x, y;
+    tie(x,y) = cell_to_pair(c);
     c->land = getEuclidLand(y);
     }
   if(specialland == laWhirlpool) {
@@ -794,30 +802,29 @@ void setLandEuclid(cell *c) {
     }
   if(specialland == laPrincessQuest) setland(c, laPalace);
   if(specialland == laOcean) {
-    eucoord x, y;
-    decodeMaster(c->master, x, y);
-    int y0 = y; if(y>50000) y0 -= 65536; y0 += 10;
-    if(y0 == 0) 
+    int x, y;
+    tie(x,y) = cell_to_pair(c);
+    y += 10;
+    if(y == 0) 
       { setland(c, laBarrier); if(ishept(c)) c->land = laRlyeh; }
-    else if(y0<0) setland(c, laRlyeh);
-    else c->landparam = y0;
+    else if(y<0) setland(c, laRlyeh);
+    else c->landparam = y;
     }
   if(specialland == laIvoryTower || specialland == laDungeon) {
-    eucoord x, y;
-    decodeMaster(c->master, x, y);
-    int y0 = y; if(y>50000) y0 -= 65536; y0 = -y0; y0 -= 5;
-    if(y0 == 0) 
+    int x, y;
+    tie(x,y) = cell_to_pair(c); y -= 5;
+    if(y == 0) 
       {setland(c, laBarrier); if(ishept(c)) setland(c, laAlchemist); }
-    else if(y0<0) setland(c, laAlchemist);
+    else if(y<0) setland(c, laAlchemist);
     else {
-      c->landparam = y0;
+      c->landparam = y;
       }
     }
   if(specialland == laElementalWall) {
-    eucoord x, y;
-    decodeMaster(c->master, x, y);
-    int y0 = y; if(y>32768) y0 -= 65536;
-    int x0 = x +y/2;
+    int x, y;
+    tie(x,y) = cell_to_pair(c);
+    int x0 = x + (y>>1);
+    int y0 = y;
     
     int id = 0;
     if(y0&16) id += 2;
@@ -843,10 +850,10 @@ void setLandEuclid(cell *c) {
       }
     }
   if(specialland == laCrossroads3) {
-    eucoord x, y;
-    decodeMaster(c->master, x, y);
-    int y0 = y; if(y>32768) y0 -= 65536;
-    int x0 = x +y/2;
+    int x, y;
+    tie(x,y) = cell_to_pair(c);
+    int y0 = y; 
+    int x0 = x + y/2;
     
     x0 += 24; y0 += 8;
     
@@ -862,11 +869,11 @@ void setLandEuclid(cell *c) {
       }
     }
   if(specialland == laWarpCoast) {
-    eucoord x, y;
-    decodeMaster(c->master, x, y);
+    int x, y;
+    tie(x,y) = cell_to_pair(c);
     
-    int zz = a4 ? short(x) : 2*short(x)+short(y) + 10;
-    zz %= 30; if(zz<0) zz += 30;
+    int zz = a4 ? x : 2*x+y + 10;
+    zz = gmod(zz, 30);
     if(zz >= 15)
       setland(c, laWarpSea);
     else

@@ -150,11 +150,11 @@ void initgame() {
   yendor::lastchallenge = yendor::challenge;
   
   yendor::init(2);
-
-  for(int i=0; i<65536; i++) euland[i] = laNone;
   
+  clear_euland(specialland);
+
   if(euclid && specialland == laPrincessQuest) {
-    cell *c = euclideanAtCreate(EPX, EPY);
+    cell *c = euclideanAtCreate(pair_to_vec(EPX, EPY));
     princess::generating = true;
     c->land = laPalace;
     for(int j=BARLEV; j>=0; j--) setdist(c, j, NULL);

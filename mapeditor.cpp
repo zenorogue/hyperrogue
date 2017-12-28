@@ -102,7 +102,7 @@ namespace mapstream {
         save(fgeomextras[current_extra].current_prime_id);
         }
       }
-    addToQueue(bounded ? currentmap->gamestart() : cwt.c->master->c7);
+    addToQueue((bounded || euclid) ? currentmap->gamestart() : cwt.c->master->c7);
     for(int i=0; i<size(cellbyid); i++) {
       cell *c = cellbyid[i];
       if(i) {

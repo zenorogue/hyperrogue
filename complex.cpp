@@ -12,8 +12,8 @@ namespace whirlwind {
   int fzebra3(cell *c) {
     if(euclid) {
       if(torus) return 0;
-      eucoord x, y;
-      decodeMaster(c->master, x, y);
+      int x, y;
+      tie(x,y) = cell_to_pair(c);
       return 1+((((signed short)(y)+int(50000))/3)%3);
       }
     if(S7 == 5) return getHemisphere(c, 0) > 0 ? 1 : 2;
@@ -809,8 +809,9 @@ namespace clearing {
       if(pseudohept(c)) return;
       c->monst = moMutant;
       
-      eucoord x, y;
-      decodeMaster(c->master, x, y);
+      int x, y;
+      tie(x,y) = cell_to_pair(c);
+
       int xco = x * 2 + y + 1;
       c->stuntime = (8-xco/2) & 15;
       // 2, 4, 5, 7
@@ -2701,8 +2702,8 @@ namespace prairie {
       c->LHU.fi.rval = 0;
       }
     else if(euclid) {
-      eucoord x, y;
-      decodeMaster(c->master, x, y);
+      int x, y;
+      tie(x,y) = cell_to_pair(c);
       c->LHU.fi.rval = (y&15);
       }
     else if(sphere) {
@@ -3391,8 +3392,8 @@ namespace dungeon {
     
     if(euclid) {
       if(torus) return;
-      eucoord x, y;
-      decodeMaster(c->master, x, y);
+      int x, y;
+      tie(x, y) = cell_to_pair(c);
       string tab[] = {
         ".####...",
         "L...L...",

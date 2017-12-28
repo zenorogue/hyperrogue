@@ -1613,7 +1613,7 @@ geometryinfo ginf[gGUARD] = {
   {"elliptic",            "elliptic", 5, 3, qELLIP, gcSphere,     {{SEE_ALL, SEE_ALL}}},
   {"Zebra quotient",      "Zebra",    7, 3, qZEBRA, gcHyperbolic, {{7, 5}}},
   {"field quotient",      "field",    7, 3, qFIELD, gcHyperbolic, {{7, 5}}},
-  {"torus",               "torus",    6, 3, qTORUS, gcEuclid,     {{7, FORBIDDEN}}},
+  {"torus/Klein bottle",  "torus",    6, 3, qTORUS, gcEuclid,     {{7, FORBIDDEN}}},
   {"octagons",            "oct",      8, 3, 0,      gcHyperbolic, {{6, 4}}},
   {"four pentagons",      "4x5",      5, 4, 0,      gcHyperbolic, {{6, 4}}},
   {"four hexagons",       "4x6",      6, 4, 0,      gcHyperbolic, {{5, 3}}},

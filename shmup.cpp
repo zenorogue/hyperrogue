@@ -3328,19 +3328,11 @@ transmatrix &ggmatrix(cell *c) {
   if(t[2][2] == 0) {
     if(torus) {
       forCellIdEx(c2, i, c)
-        if(celldistance(c2, centerover) < celldistance(c, centerover))
+        if(celldistance(c2, centerover.c) < celldistance(c, centerover.c))
           t = ggmatrix(c2) * eumovedir(3+i);
       }
     else if(euclid) {
-      eucoord xh, yh, xc, yc;
-      decodeMaster(c->master, xh, yh);
-      decodeMaster(centerover->master, xc, yc);
-      short xd(xh-xc), yd(yh-yc);
-      t = gmatrix[centerover] * eumove(xd, yd);
-      /* printf("H[%d,%d] C[%d,%d] ", int(xh),int(yh), int(xc),int(yc));
-      printf("%d,%d t = \n", xd, yd); display(t);
-      printf("gmatrix0 = \n");
-      display(gmatrix0[c]); */
+      t = gmatrix[centerover.c] * eumove(cell_to_vec(c) - cellwalker_to_vec(centerover));
       }
     else
       t = actualV(viewctr, cview()) * calc_relative_matrix(c, viewctr.h);

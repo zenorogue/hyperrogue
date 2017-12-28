@@ -192,7 +192,20 @@ heptagon *getDodecahedron(int i) {
 
 // --- euclidean geometry ---
 
-cell*& euclideanAtCreate(eucoord x, eucoord y);
+cell*& euclideanAtCreate(int vec);
+
+static const int max_vec = (1<<15);
+
+int pair_to_vec(int x, int y) {
+  return x + (y << 15);
+  }
+
+pair<int, int> vec_to_pair(int vec) {
+  int x = vec & ((1<<15)-1);
+  int y = (vec >> 15);
+  if(x >= (1<<14)) x -= (1<<15), y++;
+  return {x, y};
+  }
 
 namespace torusconfig {
   // the configuration of the torus topology.
@@ -208,13 +221,175 @@ namespace torusconfig {
   int def_qty = 127*3, dx = 1, def_dy = -11*2;
   int qty = def_qty, dy = def_dy;
   
+  int sdx = 12, sdy = 12;
+
   // new values to change
-  int newqty, newdy;
+  int newqty, newdy, newsdx, newsdy;
   int torus_cx, torus_cy;
+  
+  enum eTorusMode { 
+    tmSingleHex, 
+    tmSingle, 
+    tmSlantedHex, 
+    tmStraight, 
+    tmStraightHex,
+    tmKlein,
+    tmKleinHex
+    };
+  
+  static const flagtype TF_SINGLE = 1;
+  static const flagtype TF_SIMPLE = 2;
+  static const flagtype TF_WEIRD  = 4;
+
+  static const flagtype TF_HEX    = 16;
+  static const flagtype TF_SQUARE = 32;
+
+  static const flagtype TF_KLEIN = 256;
+  
+  struct torusmode_info {
+    string name;
+    flagtype flags;
+    };
+  
+  vector<torusmode_info> tmodes = {
+    {"single row (hex)", TF_SINGLE | TF_HEX},
+    {"single row (squares)", TF_SINGLE | TF_SQUARE},
+    {"parallelogram (hex)", TF_SIMPLE | TF_HEX},
+    {"rectangle (squares)", TF_SIMPLE | TF_SQUARE},
+    {"rectangle (hex)", TF_WEIRD | TF_HEX},
+    {"Klein bottle (squares)", TF_SIMPLE | TF_KLEIN | TF_SQUARE},
+    {"Klein bottle (hex)", TF_WEIRD | TF_KLEIN | TF_HEX},
+    };    
+  
+  eTorusMode torus_mode, newmode;
+  flagtype tmflags() { return tmodes[torus_mode].flags; }
+  
+  int getqty() {
+    if(tmflags() & TF_SINGLE)
+      return qty;
+    else
+      return sdx * sdy;
+    }
+  
+  int getvec(int x, int y) {
+    if(tmflags() & TF_SINGLE)
+      return x * dx + y * dy;
+    else if(tmflags() & TF_SIMPLE)
+      return pair_to_vec(x, y);
+    else
+      return pair_to_vec(-y - 2 * x, 3 * y);
+    }
+  
+  int id_to_vec(int id, bool mirrored = false) {
+    if(tmflags() & TF_SINGLE)
+      return id;
+    else {
+      int dx = id % sdx;
+      int dy = id / sdx;
+      if(mirrored) 
+        dy = -dy, dx += sdx;
+      if(tmflags() & TF_SIMPLE)
+        return pair_to_vec(dx, dy);
+      else
+        return pair_to_vec(- 2 * dx - (dy & 1), 3 * dy);
+      }
+    }
+  
+  pair<int, bool> vec_to_id_mirror(int vec) {
+    if(tmflags() & TF_SINGLE) {
+      return {gmod(vec, qty), false};
+      }
+    else {
+      int x, y;
+      tie(x,y) = vec_to_pair(vec);
+      bool mirror = false;
+      if(tmflags() & TF_KLEIN) {
+        if(tmflags() & TF_WEIRD) {
+          x = gmod(x, 4 * sdx);
+          mirror = x > 0 && x <= 2 * sdx;
+          }
+        else {
+          x = gmod(x, 2 * sdx);
+          mirror = x >= sdx;
+          }
+        if(mirror) y = -y;
+        }
+      if(tmflags() & TF_WEIRD) {
+        y /= 3; x = (x + (y&1)) / -2;
+        }
+      x = gmod(x, sdx), y = gmod(y, sdy);
+      return {y * sdx + x, mirror};
+      }
+    }
+
+  int vec_to_id(int vec) {
+    return vec_to_id_mirror(vec).first;
+    }
+
+  void torus_test() {
+    printf("Testing torus vec_to_pair/pair_to_vec...\n");
+    for(int x=-10; x<=10; x++)
+    for(int y=-10; y<=10; y++) {
+      auto p = vec_to_pair(pair_to_vec(x, y));
+      if(p.first != x || p.second != y)
+        printf("Failed for (%d,%d) -> [%d] -> (%d,%d)\n", x, y, pair_to_vec(x,y), p.first, p.second);
+      }
+    printf("Testing id_to_vec / vec_to_id...\n");
+    for(int i=0; i < getqty(); i++) 
+    for(int m=0; m< (torus_mode == tmKlein ? 2 : 1); m++)
+      if(vec_to_id_mirror(id_to_vec(i, m)) != pair<int,bool> (i,m))
+        printf("Failed for id %d.%d [%d] (%d.%d)\n", i, m, id_to_vec(i,m), vec_to_id(id_to_vec(i,m)), vec_to_id_mirror(id_to_vec(i,m)).second);
+    }
+
+  int tester = addHook(hooks_tests, 0, torus_test);
+  
+  void activate() {
+    if(tmflags() & TF_HEX)
+      ginf[gTorus].vertex = 3, ginf[gTorus].sides = 6;
+    else
+      ginf[gTorus].vertex = 4, ginf[gTorus].sides = 4;
+    }
   }
 
 int decodeId(heptagon* h);
 heptagon* encodeId(int id);
+
+int euclid_getvec(int dx, int dy) {
+  if(torus) return torusconfig::getvec(dx, dy);
+  else return pair_to_vec(dx, dy);
+  }
+
+template<class T> void build_euclidean_moves(cell *c, int vec, const T& builder) {
+  int x, y;
+  tie(x,y) = vec_to_pair(vec);
+  c->type = a4 ? (nontruncated || ((x^y^1) & 1) ? 4 : 8) : 6;
+
+  if(c->type == 4) {
+    int m = nontruncated ? 1 : 2;
+    builder(euclid_getvec(+1,+0), 0, 2 * m);        
+    builder(euclid_getvec(+0,+1), 1, 3 * m);
+    builder(euclid_getvec(-1,+0), 2, 0 * m);
+    builder(euclid_getvec(+0,-1), 3, 1 * m);
+    }
+  else if(c->type == 8) {
+    builder(euclid_getvec(+1,+0), 0, 2);
+    builder(euclid_getvec(+1,+1), 1, 5);
+    builder(euclid_getvec(+0,+1), 2, 3);
+    builder(euclid_getvec(-1,+1), 3, 7);
+    builder(euclid_getvec(-1,+0), 4, 0);
+    builder(euclid_getvec(-1,-1), 5, 1);
+    builder(euclid_getvec(+0,-1), 6, 1);
+    builder(euclid_getvec(+1,-1), 7, 3);
+    }
+  else /* 6 */ {
+    builder(euclid_getvec(+1,+0), 0, 3);
+    builder(euclid_getvec(+0,+1), 1, 4);
+    builder(euclid_getvec(-1,+1), 2, 5);
+    builder(euclid_getvec(-1,+0), 3, 0);
+    builder(euclid_getvec(+0,-1), 4, 1);
+    builder(euclid_getvec(+1,-1), 5, 2);
+    }
+  }
 
 struct hrmap_torus : hrmap {
 
@@ -229,25 +404,27 @@ struct hrmap_torus : hrmap {
 
   hrmap_torus() {
     using namespace torusconfig;
-    all.resize(qty);
-    for(int i=0; i<qty; i++) {
-      all[i] = newCell(6, NULL);
-      all[i]->master = encodeId(i);
+    int q = getqty();
+    all.resize(q);
+    for(int i=0; i<q; i++) {
+      all[i] = newCell(8, encodeId(i));
       }
-    dx %= qty;
-    dy %= qty;
-    for(int i=0; i<qty; i++) {
-      all[i]->mov[0] = all[(i+dx+2*qty)%qty];
-      all[i]->mov[1] = all[(i+dy+2*qty)%qty];
-      all[i]->mov[2] = all[(i+dy-dx+2*qty)%qty];
-      all[i]->mov[3] = all[(i-dx+2*qty)%qty];
-      all[i]->mov[4] = all[(i-dy+2*qty)%qty];
-      all[i]->mov[5] = all[(i-dy+dx+2*qty)%qty];
-      for(int j=0; j<6; j++)
-        tsetspin(all[i]->spintable, j, (j+3) % 6);
+    for(int i=0; i<q; i++) {
+      int iv = id_to_vec(i);
+      build_euclidean_moves(all[i], iv, [&] (int delta, int d, int d2) {
+        auto im = vec_to_id_mirror(iv + delta);
+        all[i]->mov[d] = all[im.first];
+        tsetspin(all[i]->spintable, d, im.second);
+        });
+      }
+    for(cell *c: all) for(int d=0; d<c->type; d++) {
+      cell *c2 = c->mov[d];
+      for(int d2=0; d2<c2->type; d2++) 
+        if(c2->mov[d2] == c)
+          tsetspin(c->spintable, d, d2 + (8 * c->spin(d)));
       }
     celllister cl(gamestart(), 100, 100000000, NULL);
-    dists.resize(qty);
+    dists.resize(q);
     for(int i=0; i<size(cl.lst); i++)
       dists[decodeId(cl.lst[i]->master)] = cl.dists[i];
     }
@@ -257,27 +434,20 @@ struct hrmap_torus : hrmap {
     }
   };
 
-int toridMod(int id) {
-  using namespace torusconfig;
-  id %= qty; if(id < 0) id += qty;
-  return id;
-  }
-
 hrmap_torus *torusmap() {
   return dynamic_cast<hrmap_torus*> (currentmap);
   }
 
-cell *getTorusId(int id) {
+/* cell *getTorusId(int id) {
   hrmap_torus *cur = torusmap();
   if(!cur) return NULL;
-  return cur->all[toridMod(id)];
-  }
-
+  return cur->all[id];
+  } */
 
 struct hrmap_euclidean : hrmap {
 
   cell *gamestart() {
-    return euclideanAtCreate(0,0);
+    return euclideanAtCreate(0);
     }
 
   struct euclideanSlab {
@@ -299,8 +469,10 @@ struct hrmap_euclidean : hrmap {
       euclidean[y][x] = NULL;
     }
   
-  cell*& at(eucoord x, eucoord y) {
-    euclideanSlab*& slab = euclidean[y>>8][x>>8];
+  cell*& at(int vec) {
+    auto p = vec_to_pair(vec);
+    int x = p.first, y = p.second;
+    euclideanSlab*& slab = euclidean[(y>>8)&255][(x>>8)&255];
     if(!slab) slab = new hrmap_euclidean::euclideanSlab;
     return slab->a[y&255][x&255];
     }
@@ -317,28 +489,41 @@ struct hrmap_euclidean : hrmap {
     }
   };
 
+cellwalker vec_to_cellwalker(int vec) {
+  if(!torus) 
+    return cellwalker(euclideanAtCreate(vec), 0, false);
+  else {
+    hrmap_torus *cur = torusmap();
+    if(!cur) return cellwalker(NULL, 0);
+    auto p = torusconfig::vec_to_id_mirror(vec);
+    return cellwalker(cur->all[p.first], 0, p.second);
+    }
+  }
+
+int cellwalker_to_vec(cellwalker cw) {
+  int id = decodeId(cw.c->master);
+  if(!torus) return id;
+  return torusconfig::id_to_vec(id, cw.mirrored);
+  }
+
+int cell_to_vec(cell *c) {
+  int id = decodeId(c->master);
+  if(!torus) return id;
+  return torusconfig::id_to_vec(id, false);
+  }
+
+auto cell_to_pair(cell *c) {
+  return vec_to_pair(cell_to_vec(c));
+  }
+
 union heptacoder {
   heptagon *h;
-  struct { eucoord x; eucoord y; } c;
   int id;
   };
-
-void decodeMaster(heptagon *h, eucoord& x, eucoord& y) {
-  if(torus) { printf("decodeMaster on torus\n"); exit(1); }
-  heptacoder u;
-  u.h = h; x = u.c.x; y = u.c.y;
-  }
 
 int decodeId(heptagon* h) {
   heptacoder u;
   u.h = h; return u.id;
-  }
-
-heptagon* encodeMaster(eucoord x, eucoord y) {
-  if(torus) { printf("encodeMaster on torus\n"); exit(1); }
-  heptacoder u;
-  u.c.x = x; u.c.y = y;
-  return u.h;
   }
 
 heptagon* encodeId(int id) {
@@ -528,11 +713,10 @@ cell *createMov(cell *c, int d) {
     }
 
   if(euclid && !c->mov[d]) {
-    eucoord x, y;
-    decodeMaster(c->master, x, y);
+    int id = decodeId(c->master);
     for(int dx=-1; dx<=1; dx++)
     for(int dy=-1; dy<=1; dy++)
-      euclideanAtCreate(x+dx, y+dy);
+      euclideanAtCreate(id + pair_to_vec(dx, dy));
     if(!c->mov[d]) { printf("fail!\n"); }
     }
   
@@ -597,43 +781,18 @@ void eumerge(cell* c1, cell *c2, int s1, int s2) {
 
 //  map<pair<eucoord, eucoord>, cell*> euclidean;
 
-cell*& euclideanAt(eucoord x, eucoord y) {
+cell*& euclideanAt(int vec) {
   if(torus) { printf("euclideanAt called\n"); exit(1); }
   hrmap_euclidean* euc = dynamic_cast<hrmap_euclidean*> (currentmap);
-  return euc->at(x, y);
+  return euc->at(vec);
   }
 
-cell*& euclideanAtCreate(eucoord x, eucoord y) {
-  cell*& c = euclideanAt(x,y);
+cell*& euclideanAtCreate(int vec) {
+  cell*& c = euclideanAt(vec);
   if(!c) {
-    c = newCell(a4 ? (nontruncated || ((x^y^1) & 1) ? 4 : 8) : 6, NULL);
-    c->master = encodeMaster(x,y);
-    euclideanAt(x,y) = c;
-    if(c->type == 4) {
-      int m = nontruncated ? 1 : 2;
-      eumerge(c, euclideanAt(x+1,y), 0, 2 * m);        
-      eumerge(c, euclideanAt(x,y+1), 1, 3 * m);
-      eumerge(c, euclideanAt(x-1,y), 2, 0 * m);
-      eumerge(c, euclideanAt(x,y-1), 3, 1 * m);
-      }
-    else if(c->type == 8) {
-      eumerge(c, euclideanAt(x+1,y), 0, 2);
-      eumerge(c, euclideanAt(x+1,y+1), 1, 5);
-      eumerge(c, euclideanAt(x,y+1), 2, 3);
-      eumerge(c, euclideanAt(x-1,y+1), 3, 7);
-      eumerge(c, euclideanAt(x-1,y), 4, 0);
-      eumerge(c, euclideanAt(x-1,y-1), 5, 1);
-      eumerge(c, euclideanAt(x,y-1), 6, 1);
-      eumerge(c, euclideanAt(x+1,y-1), 7, 3);
-      }
-    else /* 6 */ {
-      eumerge(c, euclideanAt(x+1,y), 0, 3);
-      eumerge(c, euclideanAt(x,y+1), 1, 4);
-      eumerge(c, euclideanAt(x-1,y+1), 2, 5);
-      eumerge(c, euclideanAt(x-1,y), 3, 0);
-      eumerge(c, euclideanAt(x,y-1), 4, 1);
-      eumerge(c, euclideanAt(x+1,y-1), 5, 2);
-      }
+    c = newCell(8, encodeId(vec));
+    euclideanAt(vec) = c;
+    build_euclidean_moves(c, vec, [c,vec] (int delta, int d, int d2) { eumerge(c, euclideanAt(vec + delta), d, d2); });
     }
   return c;
   }
@@ -735,12 +894,17 @@ void verifycells(heptagon *at) {
   verifycell(at->c7);
   }
 
-int eudist(short sx, short sy) {
+int eudist(int sx, int sy) {
   int z0 = abs(sx);
   int z1 = abs(sy);
   if(a4) return z0 + z1;
   int z2 = abs(sx+sy);
   return max(max(z0,z1), z2);
+  }
+
+int eudist(int vec) {
+  auto p = vec_to_pair(vec);
+  return eudist(p.first, p.second);
   }
 
 int compdist(int dx[]) {
@@ -764,9 +928,7 @@ int celldist(cell *c) {
   if(euclid) {
     if(torus) 
       return torusmap()->dists[decodeId(c->master)];
-    eucoord x, y;
-    decodeMaster(c->master, x, y);
-    return eudist(x, y);
+    return eudist(decodeId(c->master));
     }
   if(sphere) return celldistance(c, currentmap->gamestart());
   if(ctof(c)) return c->master->distance;
@@ -787,8 +949,8 @@ int euclidAlt(short x, short y);
 int celldistAlt(cell *c) {
   if(euclid) {
     if(torus) return celldist(c);
-    eucoord x, y;
-    decodeMaster(c->master, x, y);
+    int x, y;
+    tie(x,y) = vec_to_pair(decodeId(c->master));
     return euclidAlt(x, y);
     }
   if(sphere || quotient) {
@@ -1046,11 +1208,11 @@ cdata *getEuclidCdata(heptagon *h) {
     return &xx;
     }
     
-  eucoord x, y;
+  int x, y;
   hrmap_euclidean* euc = dynamic_cast<hrmap_euclidean*> (currentmap);
   if(euc->eucdata.count(h)) return &(euc->eucdata[h]);
   
-  decodeMaster(h, x, y);
+  tie(x,y) = vec_to_pair(decodeId(h));
 
   if(x == 0 && y == 0) {
     cdata xx;
@@ -1062,14 +1224,14 @@ cdata *getEuclidCdata(heptagon *h) {
   while(!((x|y)&ord)) ord <<= 1, bid++;
   
   for(int k=0; k<3; k++) {
-    eucoord x1 = x + (k<2 ? ord : 0);
-    eucoord y1 = y - (k>0 ? ord : 0);
+    int x1 = x + (k<2 ? ord : 0);
+    int y1 = y - (k>0 ? ord : 0);
     if((x1&ord) || (y1&ord)) continue;
-    eucoord x2 = x - (k<2 ? ord : 0);
-    eucoord y2 = y + (k>0 ? ord : 0);
+    int x2 = x - (k<2 ? ord : 0);
+    int y2 = y + (k>0 ? ord : 0);
 
-    cdata *d1 = getEuclidCdata(encodeMaster(x1,y1));
-    cdata *d2 = getEuclidCdata(encodeMaster(x2,y2));
+    cdata *d1 = getEuclidCdata(encodeId(pair_to_vec(x1,y1)));
+    cdata *d2 = getEuclidCdata(encodeId(pair_to_vec(x2,y2)));
     cdata xx;
     double disp = pow(2, bid/2.) * 6;
     
@@ -1134,11 +1296,8 @@ int celldistance(cell *c1, cell *c2) {
   
   if(euclid) {
     if(torus) 
-      return torusmap()->dists[toridMod(decodeId(c1->master)-decodeId(c2->master))];
-    eucoord x1, y1, x2, y2;
-    decodeMaster(c1->master, x1, y1);
-    decodeMaster(c2->master, x2, y2);
-    return eudist(x1-x2, y1-y2);
+      return torusmap()->dists[torusconfig::vec_to_id(decodeId(c1->master)-decodeId(c2->master))];
+    return eudist(decodeId(c1->master) - decodeId(c2->master));
     }
   
   if(sphere || quotient == 1) {

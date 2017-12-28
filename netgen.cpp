@@ -674,7 +674,7 @@ namespace netgen {
           }
         if(!created) {
           View = Id;
-          if(centerover) viewctr.h = centerover->master;
+          if(centerover.c) viewctr.h = centerover.c->master;
           else viewctr.h = cwt.c->master;
           playermoved = false;
           dataFromHR();
@@ -690,7 +690,7 @@ namespace netgen {
         }
       if(uni == 's') {
         View = Id;
-        if(centerover) viewctr.h = centerover->master;
+        if(centerover.c) viewctr.h = centerover.c->master;
         else viewctr.h = cwt.c->master;
         playermoved = false;
         }

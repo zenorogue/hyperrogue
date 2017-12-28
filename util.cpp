@@ -55,6 +55,11 @@ int gcd(int i, int j) {
   return i ? gcd(j%i, i) : j;
   }
 
+int gmod(int i, int j) {
+  i %= j; if(i<0) i += j;
+  return i;
+  }
+
 // debug utilities
 
 extern FILE *debugfile;
@@ -116,3 +121,6 @@ void profile_info() {
 #define profile_info()
 #endif
 
+int whateveri, whateveri2;
+
+purehookset hooks_tests;

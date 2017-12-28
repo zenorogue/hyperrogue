@@ -228,12 +228,26 @@ else if(args()[0] == '-' && args()[1] == x && args()[2] == '0') { showstartmenu 
     autocheat = true;
     currfp.init(p); 
     }
+  else if(argis("-test")) 
+    callhooks(hooks_tests);
   else if(argis("-tpar")) { 
+    torusconfig::torus_mode = torusconfig::tmSingle;
     shift(); sscanf(args(), "%d,%d,%d", 
       &torusconfig::qty, 
       &torusconfig::dx,
       &torusconfig::dy
       );
+    }
+  else if(argis("-tparx")) {
+    shift(); sscanf(args(), "%d,%d,%d", 
+      (int*) &torusconfig::torus_mode,
+      &torusconfig::sdx,
+      &torusconfig::sdy
+      );
+    if(torusconfig::torus_mode == torusconfig::tmSingle)
+      torusconfig::qty = torusconfig::sdx,
+      torusconfig::dy = torusconfig::sdy;
+    torusconfig::activate();
     }
   else if(argis("-cs")) {
     shift(); 
@@ -344,6 +358,14 @@ else if(args()[0] == '-' && args()[1] == x && args()[2] == '0') { showstartmenu 
   else if(argis("-we")) {    
     PHASEFROM(2);
     shift(); whatever = argf(); resetGeometry();
+    }
+  else if(argis("-wei")) {    
+    PHASEFROM(2);
+    shift(); whateveri = argf(); resetGeometry();
+    }
+  else if(argis("-wei2")) {
+    PHASEFROM(2);
+    shift(); whateveri2 = argf(); resetGeometry();
     }
   else if(argis("-rch")) {    
     PHASEFROM(2);
