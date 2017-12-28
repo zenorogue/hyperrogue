@@ -60,6 +60,12 @@ int gmod(int i, int j) {
   return i;
   }
 
+ld frac(ld x) {
+  x -= int(x);
+  if(x < 0) x++;
+  return x;
+  }
+
 // debug utilities
 
 extern FILE *debugfile;

@@ -505,3 +505,15 @@ transmatrix pushone() { return euclid ? eupush(1, 0) : xpush(sphere?.5 : 1); }
 bool operator == (hyperpoint h1, hyperpoint h2) {
   return h1[0] == h2[0] && h1[1] == h2[1] && h1[2] == h2[2];
   }
+
+// rotation matrix in R^3
+
+transmatrix rotmatrix(double rotation, int c0, int c1) {
+  transmatrix t = Id;
+  t[c0][c0] = cos(rotation);
+  t[c1][c1] = cos(rotation);
+  t[c0][c1] = sin(rotation);
+  t[c1][c0] = -sin(rotation);
+  return t;
+  }
+

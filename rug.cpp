@@ -300,7 +300,7 @@ rugpoint *addRugpoint(hyperpoint h, double dist) {
 
 rugpoint *findRugpoint(hyperpoint h) {
   for(int i=0; i<size(points); i++) 
-    if(intval(points[i]->h, h) < 1e-5) return points[i];
+    if(intvalxyz(points[i]->h, h) < 1e-5) return points[i];
   return NULL;
   }
 
@@ -371,7 +371,7 @@ void buildTorusRug() {
 
   struct toruspoint {
     int x,y;
-    toruspoint() { x=qty; y=qty; }
+    toruspoint() { x=y=getqty(); }
     toruspoint(int _x, int _y) : x(_x), y(_y) {}
     int d2() { 
       return x*x+(euclid6?x*y:0)+y*y;
@@ -381,37 +381,57 @@ void buildTorusRug() {
   vector<toruspoint> zeropoints;
   vector<toruspoint> tps(qty);
   
-  for(int ax=-qty; ax<qty; ax++)
-  for(int ay=-qty; ay<qty; ay++) {
-    int v = (ax*dx + ay*dy) % qty;
-    if(v<0) v += qty;
-    toruspoint tp(ax, ay);
-    if(tps[v].d2() > tp.d2()) tps[v] = tp;
-    if(v == 0) 
-      zeropoints.emplace_back(ax, ay);
-    }
+  auto& mode = tmodes[torus_mode];
+  bool single = mode.flags & TF_SINGLE;
+  bool klein = mode.flags & TF_KLEIN;
   
   pair<toruspoint, toruspoint> solution;
-  ld bestsol = 1e12;
-    
-  for(auto p1: zeropoints)
-  for(auto p2: zeropoints) {
-    int det = p1.x * p2.y - p2.x * p1.y;
-    if(det < 0) continue;
-    if(det != qty && det != -qty) continue;
-    ld quality = ld(p1.d2()) * p2.d2();
-    if(quality < bestsol * 3)
-    if(quality < bestsol)
-      bestsol = quality, solution.first = p1, solution.second = p2;
-    }
   
-  if(solution.first.d2() > solution.second.d2())
-    swap(solution.first, solution.second);
+  if(single) {
+    for(int ax=-qty; ax<qty; ax++) 
+    for(int ay=-qty; ay<qty; ay++) {
+      int v = (ax*dx + ay*dy) % qty;
+      if(v<0) v += qty;
+      toruspoint tp(ax, ay);
+      if(tps[v].d2() > tp.d2()) tps[v] = tp;
+      if(v == 0) 
+        zeropoints.emplace_back(ax, ay);
+      }
+    
+    ld bestsol = 1e12;
+    
+    for(auto p1: zeropoints)
+    for(auto p2: zeropoints) {
+      int det = p1.x * p2.y - p2.x * p1.y;
+      if(det < 0) continue;
+      if(det != qty && det != -qty) continue;
+      ld quality = ld(p1.d2()) * p2.d2();
+      if(quality < bestsol * 3)
+      if(quality < bestsol)
+        bestsol = quality, solution.first = p1, solution.second = p2;
+      }
+    
+    if(solution.first.d2() > solution.second.d2())
+      swap(solution.first, solution.second);
+    }
+  else {
+    if(klein)
+      solution.first = toruspoint(2*sdx, 0);
+    else
+      solution.first = toruspoint(sdx, 0);
+    if(mode.flags & TF_WEIRD)
+      solution.second = toruspoint(sdy/2, sdy);
+    else
+      solution.second = toruspoint(0, sdy);
+
+    if(solution.first.d2() > solution.second.d2())
+      swap(solution.first, solution.second);
+    }
     
   ld factor = sqrt(ld(solution.second.d2()) / solution.first.d2());
   
   printf("factor = %lf\n", factor);
-  if(factor < 2) factor = 2.2;
+  if(factor <= 2.05) factor = 2.2;
   factor -= 1;
         
   // 22,1
@@ -420,6 +440,8 @@ void buildTorusRug() {
   // transmatrix z1 = {{{22,7,0}, {1,-17,0}, {0,0,1}}};
   transmatrix z1 = {{{(ld)solution.first.x,(ld)solution.second.x,0}, {(ld)solution.first.y,(ld)solution.second.y,0}, {0,0,1}}};
   transmatrix z2 = inverse(z1);
+  
+  map<pair<int, int>, rugpoint*> glues;
   
   auto addToruspoint = [&] (ld x, ld y) {
     auto r = addRugpoint(C0, 0);
@@ -439,11 +461,15 @@ void buildTorusRug() {
     double beta = -h2[1] * 2 * M_PI;
     // r->flat = {alpha, beta, 0}; 
     double sc = (factor+1)/4;
+    
     r->flat = r->h = hpxyz((factor+cos(alpha)) * cos(beta) * sc, (factor+cos(alpha)) * sin(beta) * sc, -sin(alpha) * sc);
     r->valid = true;
-    rugpoint *r2 = findRugpoint(r->flat);
-    printf("(%lf %lf) %p .. %p\n", x, y, r, r2);
-    if(r2 && r2 != r) r->glueto(r2);
+    
+    static const int X = 100003; // a prime
+    auto gluefun = [] (ld z) { return int(frac(z + .5/X) * X); };
+    auto p = make_pair(gluefun(h2[0]), gluefun(h2[1]));
+    auto& r2 = glues[p];
+    if(r2) r->glueto(r2); else r2 = r;
     return r;
     };
     
@@ -452,13 +478,31 @@ void buildTorusRug() {
   if(rugmax > 16) rugmax = 16;
   
   ld rmd = rugmax;
+
+  for(int leaf=0; leaf<(klein ? 2 : 1); leaf++)
+  for(int i=0; i<getqty(); i++) {
+    int x, y;
     
-  for(int i=0; i<qty; i++) {
-    int x = tps[i].x, y = tps[i].y;
+    if(single) {
+      x = tps[i].x;
+      y = tps[i].y;
+      }
+    else {
+      x = i % sdx;
+      y = i / sdx;
+      if(x > sdx/2) x -= sdx;
+      if(y > sdy/2) y -= sdy;
+      
+      if(leaf) { 
+        x += sdx;
+        if(x > sdx) x -= 2 * sdx;
+        }
+      }
+    
     rugpoint *rugarr[32][32];
     for(int yy=0; yy<=rugmax; yy++)
     for(int xx=0; xx<=rugmax; xx++)
-      rugarr[yy][xx] = addToruspoint(x+(xx-yy)/rmd, y+yy/rmd);
+      rugarr[yy][xx] = addToruspoint(x+xx/rmd, y+(yy-xx)/rmd);
     
     for(int yy=0; yy<rugmax; yy++)
     for(int xx=0; xx<rugmax; xx++)
@@ -1104,15 +1148,6 @@ void drawRugScene() {
 // organization
 //--------------
 
-transmatrix rotmatrix(double rotation, int c0, int c1) {
-  transmatrix t = Id;
-  t[c0][c0] = cos(rotation);
-  t[c1][c1] = cos(rotation);
-  t[c0][c1] = sin(rotation);
-  t[c1][c0] = -sin(rotation);
-  return t;
-  }
-
 transmatrix currentrot;
     
 void init() {
@@ -1167,7 +1202,6 @@ void actDraw() {
   Uint8 *keystate = SDL_GetKeyState(NULL);
   int qm = 0;
   double alpha = (ticks - lastticks) / 1000.0;
-  alpha /= 2.5;
   lastticks = ticks;
 
   transmatrix t = Id;
