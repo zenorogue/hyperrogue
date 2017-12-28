@@ -194,7 +194,10 @@ heptagon *getDodecahedron(int i) {
 
 cell*& euclideanAtCreate(int vec);
 
-static const int max_vec = (1<<15);
+static const int max_vec = (1<<14);
+
+// NOTE: patterns assume that pair_to_vec(0,1) % 3 == 2!
+// Thus, pair_to_vec(0,1) must not be e.g. a power of four
 
 int pair_to_vec(int x, int y) {
   return x + (y << 15);
@@ -462,17 +465,19 @@ struct hrmap_euclidean : hrmap {
       }
     };
   
-  euclideanSlab* euclidean[256][256];
+  static const int slabs = max_vec / 256;
+  
+  euclideanSlab* euclidean[slabs][slabs];
   
   hrmap_euclidean() {
-    for(int y=0; y<256; y++) for(int x=0; x<256; x++)
+    for(int y=0; y<slabs; y++) for(int x=0; x<slabs; x++)
       euclidean[y][x] = NULL;
     }
   
   cell*& at(int vec) {
     auto p = vec_to_pair(vec);
     int x = p.first, y = p.second;
-    euclideanSlab*& slab = euclidean[(y>>8)&255][(x>>8)&255];
+    euclideanSlab*& slab = euclidean[(y>>8)&(slabs-1)][(x>>8)&(slabs-1)];
     if(!slab) slab = new hrmap_euclidean::euclideanSlab;
     return slab->a[y&255][x&255];
     }
@@ -480,7 +485,7 @@ struct hrmap_euclidean : hrmap {
   map<heptagon*, struct cdata> eucdata;
 
   ~hrmap_euclidean() {
-    for(int y=0; y<256; y++) for(int x=0; x<256; x++)
+    for(int y=0; y<slabs; y++) for(int x=0; x<slabs; x++)
       if(euclidean[y][x]) { 
         delete euclidean[y][x];
         euclidean[y][x] = NULL;
