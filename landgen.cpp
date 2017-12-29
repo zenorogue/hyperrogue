@@ -1879,13 +1879,16 @@ void giantLandSwitch(cell *c, int d, cell *from) {
     case laDocks: {
       if(d == 8) {
         patterns::patterninfo si;
-        patterns::val38(c, si, patterns::SPF_DOCKS, patterns::PAT_COLORING);
+        if(a38) 
+          patterns::val38(c, si, patterns::SPF_DOCKS, patterns::PAT_COLORING);
+        else
+          si.id = (zebra40(c)&2) ? 0 : zebra40(c) == 4 ? 8 : 1;
         c->wall = waSea;
         if(among(si.id, 0, 4, 16, nontruncated ? -1 : 24))
           c->wall = waDock;
         if(si.id == 8 && hrand(100) < 75) {
           c->wall = waBoat;
-          for(int i=0; i<c->type; i++) {
+          if(a38) for(int i=0; i<c->type; i++) {
             patterns::val38(createMov(c, i), si, patterns::SPF_DOCKS, patterns::PAT_COLORING);
             if(si.id == 0) c->mondir = i;
             }
@@ -1893,7 +1896,10 @@ void giantLandSwitch(cell *c, int d, cell *from) {
         }
       if(d == 7 && !safety) {
         patterns::patterninfo si;
-        patterns::val38(c, si, patterns::SPF_DOCKS, patterns::PAT_COLORING);
+        if(a38)
+          patterns::val38(c, si, patterns::SPF_DOCKS, patterns::PAT_COLORING);
+        else
+          si.id = hrand(20);
         if(si.id == 16 && hrand(250) < PT(30 + kills[moRatling] + kills[moCShark] + kills[moAlbatross] + kills[moPirate] + kills[moFireFairy], 100))
           c->item = itDock;
         if(c->wall == waDock && hrand(6000) < 25 + items[itDock] + yendor::hardness())
