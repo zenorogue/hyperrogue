@@ -1994,7 +1994,8 @@ namespace heat {
             }
           else if(c2->wall == waVinePlant || c2->wall == waRose || c2->wall == waSaloon ||
             c2->wall == waWeakBranch || c2->wall == waCanopy || c2->wall == waTrunk || c2->wall == waSolidBranch ||
-            c2->wall == waBigBush || c2->wall == waSmallBush || c2->wall == waBonfireOff || c2->wall == waSmallTree)
+            c2->wall == waBigBush || c2->wall == waSmallBush || c2->wall == waBonfireOff || c2->wall == waSmallTree ||
+            c2->wall == waDock)
             newfires.emplace_back(c2, 12);
           else if(cellHalfvine(c2) && last && last->wall == c2->wall)
             newfires.emplace_back(c2, 12);
@@ -2005,7 +2006,7 @@ namespace heat {
         }
 
       if(hasTimeout(c)) {
-        if(c->mpdist == 8 && (c->land == laWineyard || c->land == laEndorian)) {
+        if(c->mpdist == 8 && (c->land == laWineyard || c->land == laEndorian || c->land == laDocks)) {
           // do not expire, do not store in 'offscreen', do not generate more land
           }
         else {

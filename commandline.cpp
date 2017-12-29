@@ -84,8 +84,12 @@ int arg::readCommon() {
     char *c = args();
     using namespace patterns;
     subpattern_flags = 0;
+    whichPattern = 0;
     while(*c) { 
       if(*c >= '0' && *c <= '9') subpattern_flags ^= 1 << (*c - '0'); 
+      else if(*c == '@') subpattern_flags ^= 1 << 10; 
+      else if(*c == '-') subpattern_flags ^= 1 << 11; 
+      else if(*c == '~') subpattern_flags ^= 1 << 12; 
       else whichPattern = *c;
       c++; 
       }

@@ -46,7 +46,7 @@ bool boatStrandable(cell *c) {
 // monster/wall types
 
 bool isFire(cell *w) {
-  return w->wall == waFire || w->wall == waPartialFire || w->wall == waEternalFire;
+  return w->wall == waFire || w->wall == waPartialFire || w->wall == waEternalFire || w->wall == waBurningDock;
   }
 
 bool isFireOrMagma(cell *w) {
@@ -68,7 +68,7 @@ bool isActivable(cell *c) {
 bool hasTimeout(cell *c) {
   return c->wall == waThumperOn || c->wall == waFire || c->wall == waPartialFire ||
     c->wall == waTempWall || c->wall == waTempFloor || c->wall == waTempBridge ||
-    c->wall == waTempBridgeBlocked;
+    c->wall == waTempBridgeBlocked || c->wall == waBurningDock;
   }
 
 bool isMimic(eMonster m) {
@@ -275,7 +275,8 @@ int itemclass(eItem i) {
     i == itSlime || i == itAmethyst || i == itDodeca ||
     i == itGreenGrass || i == itBull ||
     i == itLavaLily || i == itHunting ||
-    i == itBlizzard || i == itTerra || i == itGlowCrystal || i == itSnake
+    i == itBlizzard || i == itTerra || i == itGlowCrystal || i == itSnake ||
+    i == itDock || i == itInvix
     )
     return IC_TREASURE;
   if(i == itSavedPrincess || i == itStrongWind || i == itWarning)
@@ -338,7 +339,8 @@ bool isWall(cell *w) {
     w->wall == waWeakBranch || w->wall == waCanopy || w->wall == waTower ||
     w->wall == waSmallBush || w->wall == waBigBush ||
     w->wall == waReptile || w->wall == waReptileBridge || w->wall == waInvisibleFloor ||
-    w->wall == waSlime1 || w->wall == waSlime2 || w->wall == waArrowTrap || w->wall == waMagma) 
+    w->wall == waSlime1 || w->wall == waSlime2 || w->wall == waArrowTrap || w->wall == waMagma ||
+    w->wall == waDock) 
     return false;
   if(isWatery(w) || isChasmy(w) || isFire(w)) return false;
   return true;

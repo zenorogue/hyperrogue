@@ -408,6 +408,11 @@ void wandering() {
         playSeenSound(c);
         continue;
         }
+      if(c->land == laDocks && wchance(items[itDock], 25) && canReachPlayer(c, moEagle)) {
+        c->monst = moAlbatross;
+        playSeenSound(c);
+        continue;
+        }
       if(!peace::on && c->land == laLivefjord && wchance(items[itFjord], 80) && items[itFjord] >= 10 && canReachPlayer(c, moWaterElemental)) {
         c->monst = moWaterElemental;
         playSeenSound(c);

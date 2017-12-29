@@ -68,7 +68,7 @@ struct genderswitch_t {
 
 #define NUM_GS 6
 
-static const int ittypes = 123;
+static const int ittypes = 125;
 
 struct itemtype {
   char  glyph;
@@ -112,10 +112,11 @@ enum eItem {
   itInventory,
   itLavaLily, itHunting, itBlizzard, itTerra,
   itOrbSide1, itOrbSide2, itOrbSide3,
-  itOrbLava, itOrbMorph, itGlowCrystal, itSnake
+  itOrbLava, itOrbMorph, itGlowCrystal, itSnake,
+  itDock, itInvix
   };
 
-static const int walltypes = 105;
+static const int walltypes = 107;
 
 struct walltype {
   char  glyph;
@@ -155,10 +156,11 @@ enum eWall { waNone, waIcewall, waBarrier, waFloorA, waFloorB, waCavewall, waCav
   waPetrifiedBridge,
   waTempBridgeBlocked,
   waTerraWarrior, waBubble,
-  waArrowTrap, waMercury, waMagma
+  waArrowTrap, waMercury, waMagma,
+  waDock, waBurningDock
   };
 
-static const int landtypes = 79;
+static const int landtypes = 81;
 
 struct landtype {
   int color;
@@ -184,7 +186,7 @@ enum eLand { laNone, laBarrier, laCrossroads, laDesert, laIce, laCaves, laJungle
   laMirrorWall, laMirrored, laMirrorWall2, laMirrored2,
   laMirrorOld,
   laVolcano, laBlizzard, laHunting, laTerracotta, laMercuryRiver,
-  laDual, laSnakeNest
+  laDual, laSnakeNest, laDocks, laInvincible
   };
 
 enum eGeometry {gNormal, gEuclid, gSphere, gElliptic, gQuotient, gQuotient2, gTorus, gOctagon, g45, g46, g47, gSmallSphere, gTinySphere, gEuclidSquare, gGUARD};

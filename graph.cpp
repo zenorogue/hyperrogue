@@ -2443,6 +2443,9 @@ void setcolors(cell *c, int& wcol, int &fcol) {
       if(nearshore) mafcol += 30; */
       fcol = fcol + mafcol * (4+sin(ticks / 500. + ((euclid||c->master->alt) ? celldistAlt(c) : 0)*1.5))/5;
       }
+    else if(c->land == laDocks) {
+      fcol = 0x0000A0;
+      }
     else if(c->land == laAlchemist)
       fcol = 0x900090;
     else if(c->land == laWhirlpool)
@@ -2471,6 +2474,7 @@ void setcolors(cell *c, int& wcol, int &fcol) {
 
     case laDesert: fcol = 0xEDC9AF; break;
     case laKraken: fcol = 0x20A020; break;
+    case laDocks: fcol = 0x202020; break;
     case laCA: fcol = 0x404040; break;
     case laMotion: fcol = 0xF0F000; break;
     case laGraveyard: fcol = 0x107010; break;
@@ -2757,7 +2761,7 @@ void setcolors(cell *c, int& wcol, int &fcol) {
      fcol = wcol = winf[c->wall].color; */
 
   // floors become fcol
-  if(c->wall == waSulphur || c->wall == waSulphurC || c->wall == waPlatform || c->wall == waMercury)
+  if(c->wall == waSulphur || c->wall == waSulphurC || c->wall == waPlatform || c->wall == waMercury || c->wall == waDock)
     fcol = wcol;
   
   if(isAlch(c)) {
@@ -3142,6 +3146,7 @@ int getfd(cell *c) {
       return (c->wall == waMercury && wmspatial) ? 0 : 1;
 
     case laKraken:
+    case laDocks:
     case laBurial:
     case laIvoryTower:
     case laDungeon:
@@ -3873,6 +3878,9 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       else if(c->land == laKraken)
         qfloor(c, Vf, FULLFLOOR, darkena(fcol, fd, 0xFF));
 
+      else if(c->land == laDocks)
+        qfloor(c, Vf, FULLFLOOR, darkena(fcol, fd, 0xFF));
+
       else if(c->land == laLivefjord)
         qfloor(c, Vf, CAVEFLOOR, darkena(fcol, fd, 0xFF));
 
@@ -4263,6 +4271,8 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         queuepoly(V, shBigCarpet2, darkena(0x600000, 0, 0xFF));
         queuepoly(V, shBigCarpet3, darkena(0xC09F00, 0, 0xFF));
         }
+      
+      else if(c->wall == waDock) ;
 
       else if(xch != '.' && xch != '+' && xch != '>' && xch != ':'&& xch != '-' && xch != ';' && c->wall != waSulphur && c->wall != waMercury && xch != ',' && xch != '&')
         error = true;

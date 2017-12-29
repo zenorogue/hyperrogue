@@ -1203,6 +1203,8 @@ itemtype iinf[ittypes] = {
     "Does not affect multi-tile monsters."},
   { '!', 0x80FF00, "Glowing Crystal", crystaldesc},
   { '!', 0x80FF80, "Snake Oil", NODESCYET},
+  { '*', 0x80FF80, "Dock Treasure", NODESCYET},
+  { '*', 0x80FF80, "Invix Treasure", NODESCYET},
   };
 
 // --- wall types ---
@@ -1380,6 +1382,8 @@ walltype winf[walltypes] = {
   { '^', 0xD00000, "arrow trap", arrowtrapdesc},
   { '=', 0xE2E2E2, "mercury river", "A river of mercury."},
   { '&', 0xD00000, "lava", lavadesc},
+  { '=', 0x804000, "dock", "A dock."},
+  { '^', 0xFF8000, "burning dock", "A burning dock."},
   };
 
 // --- land types ---
@@ -1566,6 +1570,8 @@ const landtype linf[landtypes] = {
   { 0xE2725B, "Terracotta Army", terraldesc},
   { 0x80FF00, "Crystal World", crystaldesc},
   { 0x306030, "Snake Nest", NODESCYET},
+  { 0x80FF00, "Docks", NODESCYET},
+  { 0x306030, "Invisible", NODESCYET},
   };
 
 struct landtacinfo { eLand l; int tries, multiplier; };
@@ -1597,7 +1603,10 @@ vector<landtacinfo> land_tac = {
   {laCrossroads, 10, 1}, {laCrossroads2, 10, 1}, {laCrossroads3, 10, 1}, {laCrossroads4, 10, 1}, 
   
   {laCamelot, 1, 100},
-  {laWildWest, 10, 1}
+  {laWildWest, 10, 1},
+  {laDual, 10, 1},
+  {laSnakeNest, 10, 1},
+  {laDocks, 10, 1}
   };
 
 vector<eLand> randlands = {

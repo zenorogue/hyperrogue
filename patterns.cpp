@@ -1118,18 +1118,26 @@ int zebra_heptagon(int parent, int dir) {
 
 int fifty_38(int f, int d) {
   // This creates the 'p' pattern for the a38 geometry.
-  // Hexagons have codes 4 and 5, while octagons have 0, 1, 2.
+  // Hexagons have codes 4 and 8, while octagons have 0, 1, 2.
+  // Heptagons also have a 'dock flag' which is flipped
+  // for almost-adjacent octagons of the same code
   
   // f&1 is which direction is the hexagon with code '4'
 
   // c=((f>>1)&3) is 0, 1, or 2
   int c = ((f>>1)&3);
 
-  // f&8: in which direction is c increasing by one
-  int step = (f&8) ? 1 : 2; if(d&1) step ^= 3;
-
+  // (f>>3)&3: in which direction is c increasing by one (keeping the dock flag)
+  int ssub = (f>>3) & 3;
+  
+  // f&32: dock flags
+  int dockflip[2][4] = {{1+24, 2+0, 1+32+8, 2+32+0}, {1+8, 2+32+16, 1+32+24, 2+16}};
+  
+  int d2 = (d-ssub) & 3;
+  int dock = (f>>5) & 1;
+  
   return
     ((f ^ d ^ 1) & 1)
-+ (((c + step) % 3) << 1)
-  + (step==2?8:0);
+  + (((c + (dockflip[dock][d2]&3)) % 3) << 1)
+  + (dockflip[dock][d2]&~3);
   }

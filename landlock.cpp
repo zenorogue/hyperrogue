@@ -205,6 +205,9 @@ int isNative(eLand l, eMonster m) {
       return m == moHexSnake ? 2 : 0;
 
     case laCA: return 0;
+
+    case laDocks:
+      return among(m, moRatling, moPirate, moCShark, moAlbatross, moFireFairy) ? 2 : 0;
     }
   return false;
   }
@@ -298,6 +301,8 @@ eItem treasureType(eLand l) {
     case laHunting: return itHunting;
     case laDual: return itGlowCrystal;
     case laSnakeNest: return itSnake;
+    case laDocks: return itDock;
+    case laInvincible: return itInvix;
     
     case laCA: return itNone;
     }
@@ -412,6 +417,7 @@ bool landUnlocked(eLand l) {
 
     case laMirror: case laMinefield: case laPalace:
     case laOcean: case laLivefjord: case laMirrored: case laMirrorWall: case laMirrorWall2:
+    case laDocks:
     case laMirrored2: 
       return gold() >= R30;
     
@@ -945,7 +951,7 @@ vector<eLand> land_over = {
   laHell, laCrossroads3, laCocytus, laPower, laCrossroads4,
   laCrossroads5,  
   // EXTRA
-  laWildWest, laHalloween, laDual, laSnakeNest, laCA
+  laWildWest, laHalloween, laDual, laSnakeNest, laDocks, laInvincible, laCA
   };
 
 vector<eLand> landlist;
@@ -1195,6 +1201,9 @@ int isLandValid(eLand l) {
   
   if(l == laSnakeNest)
     return geosupport_threecolor() ? 3 : 0;
+  
+  if(l == laDocks)
+    return a38 ? 2 : 0;
   
   if(l == laStorms && torus) 
     return 3;

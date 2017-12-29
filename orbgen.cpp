@@ -1,4 +1,4 @@
-#define ORBLINES 63
+#define ORBLINES 66
 
 // orbgen flags
 
@@ -81,7 +81,7 @@ const orbinfo orbinfos[ORBLINES] = {
   {orbgenflags::S_NAT_NT, laLivefjord, 0, 1800, itOrbFish},
   {orbgenflags::S_NAT_NT, laPrincessQuest, 0, 200, itOrbLove},
   {orbgenflags::S_NATIVE, laIvoryTower, 500, 4000, itOrbMatter},
-  {orbgenflags::S_NAT_NT , laElementalWall, 1500, 4000, itOrbSummon},
+  {orbgenflags::S_NAT_NT, laElementalWall, 1500, 4000, itOrbSummon},
   {orbgenflags::S_NATIVE, laStorms, 1000, 2500, itOrbStunning},
   {orbgenflags::S_NAT_NT, laOvergrown, 1000, 800, itOrbLuck},
   {orbgenflags::S_NATIVE, laWhirlwind, 1250, 3000, itOrbAir},
@@ -108,6 +108,9 @@ const orbinfo orbinfos[ORBLINES] = {
   {orbgenflags::S_NATIVE, laTerracotta, 800, 2500, itOrbSide1},
   {orbgenflags::S_NATIVE, laDual, 600, 2500, itOrbSide2},
   {orbgenflags::S_GUEST, laSnakeNest, 2000, 0, itOrbDomination},
+  {orbgenflags::S_GUEST, laDocks, 3000, 0, itOrbFish},
+  {orbgenflags::S_GUEST, laDocks, 3000, 0, itOrbDragon},
+  {orbgenflags::S_GUEST, laDocks, 3000, 0, itOrbDash},
   {orbgenflags::S_NATIVE, laWhirlpool, 0, 2000, itOrbWater}, // needs to be last
   };
 

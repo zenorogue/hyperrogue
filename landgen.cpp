@@ -1876,6 +1876,34 @@ void giantLandSwitch(cell *c, int d, cell *from) {
          }
        break;
     
+    case laDocks: {
+      if(d == 8) {
+        patterns::patterninfo si;
+        patterns::val38(c, si, patterns::SPF_DOCKS, patterns::PAT_COLORING);
+        c->wall = waSea;
+        if(among(si.id, 0, 4, 16, nontruncated ? -1 : 24))
+          c->wall = waDock;
+        if(si.id == 8 && hrand(100) < 75) {
+          c->wall = waBoat;
+          for(int i=0; i<c->type; i++) {
+            patterns::val38(createMov(c, i), si, patterns::SPF_DOCKS, patterns::PAT_COLORING);
+            if(si.id == 0) c->mondir = i;
+            }
+          }
+        }
+      if(d == 7 && !safety) {
+        patterns::patterninfo si;
+        patterns::val38(c, si, patterns::SPF_DOCKS, patterns::PAT_COLORING);
+        if(si.id == 16 && hrand(250) < PT(30 + kills[moRatling] + kills[moCShark] + kills[moAlbatross] + kills[moPirate] + kills[moFireFairy], 100))
+          c->item = itDock;
+        if(c->wall == waDock && hrand(6000) < 25 + items[itDock] + yendor::hardness())
+          c->monst = pick(moPirate, moRatling, moFireFairy);
+        if(c->wall == waSea && hrand(6000) < 25 + items[itDock] + yendor::hardness())
+          c->monst = pick(moCShark, moAlbatross);
+        }
+      break;
+      }
+    
     case laEAir:
     case laEWater:
     case laEEarth:

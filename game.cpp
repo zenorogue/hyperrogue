@@ -825,7 +825,7 @@ void useup(cell *c) {
     drawParticles(c, c->wall == waFire ? 0xC00000 : winf[c->wall].color, 10, 50);
     if(c->wall == waTempFloor)
       c->wall = waChasm;
-    else if(c->wall == waTempBridge || c->wall == waTempBridgeBlocked)
+    else if(c->wall == waTempBridge || c->wall == waTempBridgeBlocked || c->wall == waBurningDock)
       placeWater(c, c);
     else 
       c->wall = c->land == laCaribbean ? waCIsland2 : waNone;
@@ -1640,6 +1640,12 @@ bool makeflame(cell *c, int timeout, bool checkonly) {
     c->wall != waSaloon && c->wall != waRose) return false;
   // reptiles are able to use the water to put the fire off
   else if(c->wall == waReptileBridge) return false;
+  else if(c->wall == waDock) {
+    if(checkonly) return true;
+    c->wall = waBurningDock;
+    c->wparam = 3;
+    return false;
+    }
   else {
     eWall w = eternalFire(c) ? waEternalFire : waFire;
     if(!checkonly) drawFireParticles(c, 10);
@@ -2909,6 +2915,10 @@ bool makeEmpty(cell *c) {
     ;
   else if(c->wall == waGiantRug)
     ;
+  else if(c->wall == waDock)
+    ;
+  else if(c->land == laDocks)
+    c->wall = waBoat;
   else if(c->wall == waFreshGrave && bounded)
     ;
   else if(isReptile(c->wall))
@@ -3264,7 +3274,10 @@ void moveMonster(cell *ct, cell *cf) {
         }
       else if(isFire(c2) && c2->wall != waEternalFire) {
         addMessage(XLAT("%The1 is extinguished!", c2->wall, moWaterElemental));
-        c2->wall = waNone;
+        if(c2->wall == waBurningDock)
+          c2->wall = waDock;
+        else
+          c2->wall = waNone;
         }
       if(shmup::on && isWatery(c2)) shmup::destroyBoats(c2);
       }

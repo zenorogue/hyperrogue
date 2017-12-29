@@ -549,17 +549,25 @@ namespace patterns {
       si.id += 8;
       si.id %= 12;
       applyAlt(si, sub, pat);
+      if((sub & SPF_DOCKS) && (c->master->fiftyval & 32))
+        si.id += 16, si.symmetries = 4;
       }
     else {
       si.id = 8 * ((c->master->fiftyval & 1) ^ (c->spin(0) & 1));
+      bool dock = false;
       for(int i=0; i<c->type; i+=2) {
-        int fv = (createMov(c, i)->master->fiftyval >> 1) & 3;
-        if(fv == 0) si.dir = (si.id == 8 && pat == PAT_COLORING ? 1 : 0) + i;
+        int fiv = createMov(c, i)->master->fiftyval;
+        int fv = (fiv >> 1) & 3;
+        if(fv == 0) {
+          si.dir = (si.id == 8 && pat == PAT_COLORING ? 1 : 0) + i;
+          if(fiv & 32) dock = true;
+          }
         }
       if(symRotation) si.symmetries = 2;
       si.id += 8;
       si.id %= 12;
       applyAlt(si, sub, pat);
+      if(dock && (sub & SPF_DOCKS)) si.id += 16;
       }
     }
   
@@ -829,6 +837,11 @@ namespace patterns {
       si.symmetries = 6;
       }
 
+    else if(pat == PAT_PALACE) {
+      val_nopattern(c, si, sub);
+      si.id = c->master->fiftyval;
+      }
+    
     else if(pat == PAT_DOWN) {
       si.id = towerval(c);
       si.dir = downdir(c);

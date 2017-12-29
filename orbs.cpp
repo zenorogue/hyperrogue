@@ -423,6 +423,7 @@ void castLightningBolt(cellwalker lig) {
       makeflame(c, 4, false);
       brk = true;
       }
+    if(c->wall == waDock)  makeflame(c, 5, false);
     if(c->wall == waCTree) makeflame(c, 12, false);
     if(c->wall == waRose)  makeflame(c, 60, false);
     if(cellHalfvine(c) && c->mov[lig.spin] && c->wall == c->mov[lig.spin]->wall) {
