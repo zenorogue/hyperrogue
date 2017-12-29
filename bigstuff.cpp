@@ -823,7 +823,7 @@ void setLandEuclid(cell *c) {
   if(specialland == laElementalWall) {
     int x, y;
     tie(x,y) = cell_to_pair(c);
-    int x0 = x + (y>>1);
+    int x0 = euclid4 ? x : x + (y>>1);
     int y0 = y;
     
     int id = 0;
@@ -852,8 +852,8 @@ void setLandEuclid(cell *c) {
   if(specialland == laCrossroads3) {
     int x, y;
     tie(x,y) = cell_to_pair(c);
-    int y0 = y; 
-    int x0 = x + y/2;
+    int y0 = euclid4 ? 2 * y - x : y; 
+    int x0 = euclid4 ? 2 * x + y : x + y/2;
     
     x0 += 24; y0 += 8;
     
@@ -863,7 +863,7 @@ void setLandEuclid(cell *c) {
     
     setland(c, id ? laCrossroads3 : laDesert);
     
-    if(((y0&15) == 15 && (x0&1)) || ((x0&15) == 0 && ((y0+1)&1))) {
+    if(euclid4 ? (!(y0&15) || !(x0&15)) : ((y0&15) == 15 && (x0&1)) || ((x0&15) == 0 && ((y0+1)&1))) {
       setland(c, laBarrier);
       c->wall = waBarrier;
       }
