@@ -2253,7 +2253,7 @@ void drawReptileFloor(const transmatrix& V, cell *c, int col, bool usefloor) {
 
   auto si = 
     euclid6 ? 
-      patterns::getpatterninfo(c, patterns::PAT_COLORING, 0)
+      patterns::getpatterninfo(c, patterns::PAT_COLORING, patterns::SPF_CHANGEROT)
     :
       patterns::getpatterninfo(c, patterns::PAT_ZEBRA, patterns::SPF_SYM0123);
   

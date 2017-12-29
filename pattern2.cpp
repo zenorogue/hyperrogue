@@ -544,7 +544,7 @@ namespace patterns {
         si.id *= 4;
       else 
         si.id += 4;
-      si.dir = (pat == PAT_COLORING ? 1 : 0) + (c->master->fiftyval | (c->master->fiftyval & 8 ? 0 : 2));
+      si.dir = (pat == PAT_COLORING && !nontruncated ? 1 : 0) + (c->master->fiftyval | (c->master->fiftyval & 8 ? 0 : 2));
       si.symmetries = 2;
       si.id += 8;
       si.id %= 12;
@@ -721,10 +721,8 @@ namespace patterns {
           break;
           }
         }
-    if(euclid6 && !(sub & SPF_CHANGEROT)) {
+    if(euclid6 && (sub & SPF_CHANGEROT))
       si.dir = (zebra40(c)*4) % 6;
-      }
-    if(euclid6 && (sub & SPF_CHANGEROT)) si.dir = 0;
     if(sub & SPF_ROT) si.id = 1;
     if(euclid6 && !(sub & SPF_EXTRASYM)) {
       si.symmetries = 6;
@@ -1237,7 +1235,7 @@ namespace patterns {
       (a4 && nontruncated && whichPattern == PAT_COLORING && !a46))
       dialog::addBoolItem(XLAT("edit all three colors"), subpattern_flags & SPF_ROT, '0');
 
-    if(euclid  && whichPattern == PAT_COLORING)
+    if(euclid && whichPattern == PAT_COLORING)
       dialog::addBoolItem(XLAT("rotate the color groups"), subpattern_flags & SPF_CHANGEROT, '4');
 
     if(a46 && whichPattern == PAT_COLORING)
