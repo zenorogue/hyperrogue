@@ -744,12 +744,12 @@ void preset(rugpoint *m) {
       preset_points.emplace_back(hypot(blen * (ah+ch), blen * (az-cz)), c);
       q++;
       
-      printf("A %lf %lf %lf %lf C %lf %lf %lf %lf\n", a1, a2, az, ah, c1, c2, cz, ch);
+      // printf("A %lf %lf %lf %lf C %lf %lf %lf %lf\n", a1, a2, az, ah, c1, c2, cz, ch);
       }
     }
     
   if(q>0) m->flat = h/q;
-  printf("preset (%d) -> %s\n", q, display(m->flat));
+  // printf("preset (%d) -> %s\n", q, display(m->flat));
   if(isnan(m->flat[0]) || isnan(m->flat[1]) || isnan(m->flat[2]))
     throw rug_exception();
   }
@@ -793,7 +793,7 @@ void optimize(rugpoint *m, bool do_preset) {
         if(now < cur) { cur = now; ex *= 1.2; goto again; }
         else m->flat = last;
         }
-      printf("edges = [%d] %d sse = %lf\n",ed0, size(preset_points), cur);
+      // printf("edges = [%d] %d sse = %lf\n",ed0, size(preset_points), cur);
       }
     }
   for(int it=0; it<50; it++) 
@@ -839,11 +839,13 @@ void subdivide() {
       if(m2 < m) continue;
       rugpoint *mm = addRugpoint(mid(m->h, m2->h), (m->dist+m2->dist)/2);
       halves[{m, m2}] = mm;
-      using namespace hyperpoint_vec;
-      normalizer n(m->flat, m2->flat);
-      hyperpoint h1 = n(m->flat);
-      hyperpoint h2 = n(m2->flat);
-      mm->flat = n[mid(h1, h2)];
+      if(!good_shape || (torus && !keep_shape)) {
+        using namespace hyperpoint_vec;
+        normalizer n(m->flat, m2->flat);
+        hyperpoint h1 = n(m->flat);
+        hyperpoint h2 = n(m2->flat);
+        mm->flat = n[mid(h1, h2)];
+        }
       mm->valid = true; qvalid++;
       mm->inqueue = false; enqueue(mm);
       }
@@ -1214,7 +1216,8 @@ void init() {
     if(!valid)
       gotoHelp(
         "Note: this mode is based on what you see on the screen -- but re-rendered in another way. "
-        "If not everything is shown on the screen (e.g., too zoomed in), the results will be incorrect. "
+        "If not everything is shown on the screen (e.g., too zoomed in), the results will be incorrect "
+        "(though possibly interesting). "
         "Use a different projection to fix this."
         );
     }
