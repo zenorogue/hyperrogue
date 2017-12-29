@@ -1202,6 +1202,21 @@ void init() {
     while(good_shape && subdivide_further()) subdivide();
   
     currentrot = Id;
+    
+    bool valid = true;
+    for(rugpoint *r: points)
+      if(r->x1<0 || r->x1>1 || r->y1<0 || r->y1 > 1)
+        valid = false;
+    
+    if(sphere && pmodel == mdDisk && vid.alpha > 1)
+      valid = false;
+    
+    if(!valid)
+      gotoHelp(
+        "Note: this mode is based on what you see on the screen -- but re-rendered in another way. "
+        "If not everything is shown on the screen (e.g., too zoomed in), the results will be incorrect. "
+        "Use a different projection to fix this."
+        );
     }
   catch(rug_exception) {
     close();
@@ -1370,11 +1385,6 @@ void show() {
   gamescreen(0);
   dialog::init(XLAT("hypersian rug mode"), iinf[itPalace].color, 150, 100);
   
-  if((euclid || sphere) && !torus) {
-    dialog::addInfo("This makes sense only in hyperbolic or Torus geometry.");
-    dialog::addBreak(50);
-    }
-
   dialog::addItem(XLAT("what's this?"), 'h');
   dialog::addItem(XLAT("take me back"), 'q');
 
