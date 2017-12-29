@@ -42,25 +42,36 @@ int celldistAltRelative(cell *c) {
 
 int euclidAlt(short x, short y) {
   if(specialland == laTemple || specialland == laClearing) {
-    return max(int(x), x+y);
+    if(euclid6)
+      return max(int(x), x+y);
+    else if(nontruncated)
+      return x + abs(y);
+    else
+      return max(x, y);
     }
   else if(specialland == laCaribbean || specialland == laWhirlpool || specialland == laMountain) {
-    return 
-      min(
-        min(max(int(-x), -x-y) + 3,
-        max(int(x+y), int(y)) + 3),
-        max(int(x), int(-y)) + 3
-        );
+    if(euclid6)
+      return 
+        min(
+          min(max(int(-x), -x-y) + 3,
+          max(int(x+y), int(y)) + 3),
+          max(int(x), int(-y)) + 3
+          );
+    else if(nontruncated)
+      return 3 - min(abs(x-y), abs(x+y));
+    else
+      return 3 - min(abs(x), abs(y));
     }
   else if(specialland == laPrincessQuest)
     return eudist(x-EPX, y-EPY);
-  else return eudist(x-20, y-10);
+  else return eudist(x-(a4 ? 21 : 20), y-10);
   }
 
 const int NOCOMPASS = 1000000;
 
 int compassDist(cell *c) {
-  if(c->master->alt) return celldistAlt(c);
+  if(sphere || quotient) return 0;
+  if(euclid || c->master->alt) return celldistAlt(c);
   if(isHaunted(c->land) || c->land == laGraveyard) return getHauntedDepth(c);
   return NOCOMPASS;
   }
@@ -70,7 +81,8 @@ cell *findcompass(cell *c) {
   if(d == NOCOMPASS) return NULL;
   
   while(inscreenrange(c)) {
-    generateAlts(c->master);
+    if(!euclid && !sphere && !quotient)
+      generateAlts(c->master);
     forCellEx(c2, c) if(compassDist(c2) < d) {
       c = c2;
       d = compassDist(c2);
@@ -238,14 +250,14 @@ void generateTreasureIsland(cell *c) {
     if((euclid || (c->master->alt && c2->master->alt)) && celldistAlt(c2) < celldistAlt(c)) {
       ctab[qc++] = c2;
       qlo = i; qhi = i;
-      while(true) {
+      while(true && qc < MAX_EDGE) {
         qlo--;
         c2 = createMovR(c, qlo);
         if(!euclid && !c2->master->alt) break;
         if(celldistAlt(c2) >= celldistAlt(c)) break;
         ctab[qc++] = c2;
         }
-      while(true) {
+      while(true && qc < MAX_EDGE) {
         qhi++;
         c2 = createMovR(c, qhi);
         if(!euclid && !c2->master->alt) break;
@@ -812,7 +824,8 @@ void setLandEuclid(cell *c) {
     }
   if(specialland == laIvoryTower || specialland == laDungeon) {
     int x, y;
-    tie(x,y) = cell_to_pair(c); y -= 5;
+    tie(x,y) = cell_to_pair(c); y = -5 - y;
+    if(specialland == laDungeon) y = -10 - y;
     if(y == 0) 
       {setland(c, laBarrier); if(ishept(c)) setland(c, laAlchemist); }
     else if(y<0) setland(c, laAlchemist);

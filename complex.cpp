@@ -3395,11 +3395,19 @@ namespace dungeon {
       if(torus) return;
       int x, y;
       tie(x, y) = cell_to_pair(c);
-      string tab[] = {
+      string tab6[] = {
         ".####...",
         "L...L...",
         ".L..L...",
         "L...L...",
+        "........",
+        "........"
+        };
+      string tab4[] = {
+        "L####L..",
+        "L....L..",
+        "L....L..",
+        "L....L..",
         "........",
         "........"
         };
@@ -3409,7 +3417,7 @@ namespace dungeon {
       
       if(y0 >= 6) { y0 -= 6; x += 4; }
       
-      char ch = tab[y0][(x+(y+1)/2)&7];
+      char ch = euclid6 ? tab6[y0][(x+(y+1)/2)&7] : tab4[y0][x&7];
       
       if(ch == '#')
         c->wall = waPlatform;

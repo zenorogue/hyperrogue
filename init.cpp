@@ -352,8 +352,7 @@ void addMessage(string s, char spamtype = 0);
 #define ALPHA (M_PI*2/S7)
 #define S7 ginf[geometry].sides
 #define S3 ginf[geometry].vertex
-#define weirdhyperbolic (S7 > 7 || S3 > 3)
-#define weirdhyperbolic (S7 > 7 || S3 > 3)
+#define weirdhyperbolic ((S7 > 7 || S3 > 3) && hyperbolic)
 #define stdhyperbolic (S7 == 7 && S3 == 3)
 
 #define cgclass (ginf[geometry].cclass)
