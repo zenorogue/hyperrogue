@@ -33,6 +33,8 @@ GLAPI void APIENTRY glDeleteFramebuffers (GLsizei n, const GLuint *framebuffers)
 
 namespace rug {
 
+struct rug_exception { };
+
 bool fast_euclidean = true;
 bool keep_shape = true;
 bool good_shape;
@@ -554,6 +556,12 @@ void verify() {
   printf("\n");
   }
 
+void comp(cell*& minimum, cell *next) {
+  int nc = next->cpdist, mc = minimum->cpdist;
+  if(tie(nc, next) < tie(mc, minimum))
+    minimum = next;
+  }
+  
 void buildRug() {
 
   if(torus) {
@@ -562,27 +570,36 @@ void buildRug() {
     return;
     }
   
-  map<cell*, rugpoint *> vptr;
- 
-  for(int i=0; i<size(dcal); i++)
-    if(gmatrix.count(dcal[i])) 
-      vptr[dcal[i]] = addRugpoint(gmatrix[dcal[i]]*C0, dcal[i]->cpdist);
+  celllister cl(centerover.c ? centerover.c : cwt.c, sightrange, vertex_limit, NULL);
 
-  for(int i=0; i<size(dcal); i++) {
-    cell *c = dcal[i];
-    rugpoint *v = vptr[c];
-    if(!v) continue;
-    for(int j=0; j<c->type; j++) {
+  map<cell*, rugpoint *> vptr;
+  
+  for(cell *c: cl.lst)
+    vptr[c] = addRugpoint(shmup::ggmatrix(c)*C0, c->cpdist);
+
+  for(auto& p: vptr) {
+    cell *c = p.first;
+    rugpoint *v = p.second;
+    for(int j=0; j<c->type; j++) try {
       cell *c2 = c->mov[j];
-      rugpoint *w = vptr[c2];
-      if(!w) continue;
+      rugpoint *w = vptr.at(c2);
       // if(v<w) addEdge(v, w);
       
       cell *c3 = c->mov[(j+1) % c->type];
-      rugpoint *w2 = vptr[c3];
-      if(!w2) continue;
-      if(ctof(c)) addTriangle(v, w, w2);
+      rugpoint *w2 = vptr.at(c3);
+      
+      if(a4) {
+        cellwalker cw(c, j);
+        cwstep(cw); cwspin(cw, -1); cwstep(cw);
+        cell *c4 = cw.c;
+        cell *cm = c; comp(cm, c); comp(cm, c2); comp(cm, c3); comp(cm, c4);
+        if(cm == c || cm == c4)
+          addTriangle(v, w, w2);
+        }
+      else if(v > w && v > w2)
+        addTriangle(v, w, w2);
       }
+    catch(out_of_range) {}
     }
 
   printf("vertices = %d triangles=  %d\n", size(points), size(triangles));
@@ -646,7 +663,10 @@ bool force(rugpoint& m1, rugpoint& m2, double rd, double d1=1, double d2=1) {
 
   transmatrix iT1 = inverse(T1);
   
-  for(int i=0; i<3; i++) if(isnan(m1.flat[i])) { printf("NAN!\n"); exit(1); }
+  for(int i=0; i<3; i++) if(isnan(m1.flat[i])) { 
+    addMessage("Failed!");
+    throw rug_exception();
+    }
 
 /*  
   printf("%p %p\n", &m1, &m2);
@@ -708,10 +728,10 @@ void preset(rugpoint *m) {
       double c2 = b->edges[k2].len/blen;
       
       double cz = (c1*c1-c2*c2+1) / 2;
-      double ch = sqrt(c2*c2 - cz*cz + 1e-10);
+      double ch = sqrt(c1*c1 - cz*cz + 1e-10);
 
       double az = (a1*a1-a2*a2+1) / 2;
-      double ah = sqrt(a2*a2 - az*az + 1e-10);
+      double ah = sqrt(a1*a1 - az*az + 1e-10);
       
       // c->h = a->h + (b->h-a->h) * cz + ch * ort
       hyperpoint ort = (c->flat - a->flat - cz * (b->flat-a->flat)) / ch;
@@ -730,6 +750,8 @@ void preset(rugpoint *m) {
     
   if(q>0) m->flat = h/q;
   printf("preset (%d) -> %s\n", q, display(m->flat));
+  if(isnan(m->flat[0]) || isnan(m->flat[1]) || isnan(m->flat[2]))
+    throw rug_exception();
   }
 
 ld sse(hyperpoint h) {
@@ -1175,10 +1197,15 @@ void init() {
   qvalid = 0; dt = 0; queueiter = 0;
   err_zero_current = err_zero;
   
-  buildRug();
-  while(good_shape && subdivide_further()) subdivide();
-
-  currentrot = Id;
+  try {
+    buildRug();
+    while(good_shape && subdivide_further()) subdivide();
+  
+    currentrot = Id;
+    }
+  catch(rug_exception) {
+    close();
+    }
   }
 
 void close() {
@@ -1196,6 +1223,7 @@ int lastticks;
 ld protractor = 0;
 
 void actDraw() { 
+  try {
   if(!renderonce) prepareTexture();
   physics();
   drawRugScene();
@@ -1257,6 +1285,10 @@ void actDraw() {
       currentrot = t * currentrot;
       for(int i=0; i<size(points); i++) points[i]->flat = t * points[i]->flat;
       }
+    }
+    }
+  catch(rug_exception) {
+    rug::close();
     }
   }
 
