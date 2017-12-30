@@ -276,7 +276,7 @@ int itemclass(eItem i) {
     i == itGreenGrass || i == itBull ||
     i == itLavaLily || i == itHunting ||
     i == itBlizzard || i == itTerra || i == itGlowCrystal || i == itSnake ||
-    i == itDock || i == itInvix
+    i == itDock || i == itInvix || i == itSwitch
     )
     return IC_TREASURE;
   if(i == itSavedPrincess || i == itStrongWind || i == itWarning)
@@ -385,7 +385,18 @@ bool normalMover(eMonster m) {
     m == moHunterDog || m == moTerraWarrior || m == moJiangshi || 
     m == moLavaWolf || m == moSalamander ||
     m == moHunterGuard || m == moHunterChanging ||
-    m == moIceGolem || slowMover(m);
+    m == moIceGolem || 
+    m == moNorthPole || m == moSouthPole ||
+    m == moSwitch1 || m == moSwitch2 ||
+    slowMover(m);
+  }
+
+bool isMagneticPole(eMonster m) {
+  return m == moNorthPole || m == moSouthPole;
+  }
+
+bool isSwitch(eMonster m) {
+  return m == moSwitch1 || m == moSwitch2;
   }
 
 // from-to
@@ -494,6 +505,7 @@ bool isInactiveEnemy(cell *w, eMonster forwho) {
 bool isActiveEnemy(cell *w, eMonster forwho) {
   if(((forwho == moPlayer) ? realstuntime(w) : realstuntime(w) > 1))
     return false;
+  if(w->monst == passive_switch) return false;
   if(w->monst == moNone) return false;
   if(isFriendly(w)) return false;
   if(isInactiveEnemy(w, forwho)) return false;

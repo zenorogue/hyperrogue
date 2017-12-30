@@ -651,6 +651,15 @@ void giantLandSwitch(cell *c, int d, cell *from) {
         }      
       break;
     
+    case laSwitch:
+      ONEMPTY {
+        if(hrand(5000) < PT(100 + 2 * (kills[moSwitch1] + kills[moSwitch2]), 200) && notDippingFor(itSwitch))
+          c->item = itSwitch;
+        if(hrand(8000) < 40 + 5 * (items[itSwitch] + yendor::hardness()))
+          c->monst = hrand(2) ? moSwitch1 : moSwitch2;
+        }      
+      break;
+    
     case laDragon:
       if(d == 9) {
         int cd = getCdata(c, 3);
@@ -1875,6 +1884,23 @@ void giantLandSwitch(cell *c, int d, cell *from) {
            }
          }
        break;
+    
+    case laMagnetic:
+      if(d == 8) {
+        if(hrand(10000) < 30 && !c->monst && !c->wall) {
+          cell *c1 = c;
+          cell *c2 = createMov(c1, hrand(c1->type));
+          if(c2->monst || c2->wall) return;
+          if(hrand(2)) swap(c1, c2);
+          forCellEx(c3, c1) if(c3->monst == moNorthPole) return;
+          forCellEx(c3, c2) if(c3->monst == moSouthPole) return;
+          c1->monst = moNorthPole;
+          c2->monst = moSouthPole;
+          c1->mondir = neighborId(c1, c2);
+          c2->mondir = neighborId(c2, c1);
+          }
+        }
+      break;
     
     case laDocks: {
       if(d == 8) {

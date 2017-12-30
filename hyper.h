@@ -2425,3 +2425,6 @@ extern bool need_mouseh;
 extern int whateveri, whateveri2;
 
 void clear_euland(eLand first);
+
+extern eMonster passive_switch;
+

@@ -208,6 +208,9 @@ int isNative(eLand l, eMonster m) {
 
     case laDocks:
       return among(m, moRatling, moPirate, moCShark, moAlbatross, moFireFairy) ? 2 : 0;
+    
+    case laSwitch:
+      return m == moSwitch1 || m == moSwitch2 ? 2 : 0;
     }
   return false;
   }
@@ -303,6 +306,7 @@ eItem treasureType(eLand l) {
     case laSnakeNest: return itSnake;
     case laDocks: return itDock;
     case laInvincible: return itInvix;
+    case laSwitch: return itSwitch;
     
     case laCA: return itNone;
     }
@@ -534,6 +538,9 @@ bool landUnlocked(eLand l) {
     
     case laDual:
     case laSnakeNest:
+      return gold() >= R90;
+      
+    case laSwitch:
       return gold() >= R90;
     }
   return false;
@@ -949,9 +956,9 @@ vector<eLand> land_over = {
   laPrairie, laBull, laTerracotta, laRose,
   laElementalWall, laTrollheim,
   laHell, laCrossroads3, laCocytus, laPower, laCrossroads4,
-  laCrossroads5,  
+  laCrossroads5,
   // EXTRA
-  laWildWest, laHalloween, laDual, laSnakeNest, laDocks, laInvincible, laCA
+  laWildWest, laHalloween, laDual, laSnakeNest, laDocks, laInvincible, laSwitch, laMagnetic, laCA
   };
 
 vector<eLand> landlist;

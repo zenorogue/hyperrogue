@@ -1212,6 +1212,13 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, int col, dou
     if(!peace::on) queuepoly(VBODY, shPSword, 0xFFFF00FF);
     queuepoly(VHEAD, shHood, 0xD0D000C0);
     }
+  else if(isSwitch(m)) {
+    otherbodyparts(V, darkena(col, 0, 0xC0), m, footphase);
+    ShadowV(V, shPBody);
+    queuepoly(VBODY, shPBody, darkena(col, 0, 0xC0));
+    if(!peace::on) queuepoly(VBODY, shPSword, 0xFFFF00FF);
+    queuepoly(VHEAD, shHood, darkena(col, 0, 0xFF));
+    }
   else if(m == moPalace || m == moFatGuard || m == moVizier || m == moSkeleton) {
     queuepoly(VBODY, shSabre, 0xFFFFFFFF);
     if(m == moSkeleton) {
@@ -1536,6 +1543,11 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, int col, dou
     int acol = col;
     if(xch == 'D') acol = 0xD0D0D0;
     queuepoly(VHEAD, shDemon, darkena(acol, 0, 0xFF));
+    }
+  else if(isMagneticPole(m)) {
+    if(m == moNorthPole)
+      queuepolyat(VBODY * spin(M_PI), shTentacle, 0x000000C0, PPR_TENTACLE1);
+    queuepolyat(VBODY, shDisk, darkena(col, 0, 0xFF), PPR_MONSTER_BODY);
     }
   else if(isMetalBeast(m)) {
     ShadowV(V, shTrylobite);
@@ -1916,7 +1928,8 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, int col) {
   // golems, knights, and hyperbugs don't face the player (mondir-controlled)
   // also whatever in the lineview mode
 
-  else if(isFriendly(c) || isBug(c) || (c->monst && conformal::on) || c->monst == moKrakenH || (isBull(c->monst) && c->mondir != NODIR) || c->monst == moButterfly) {
+  else if(isFriendly(c) || isBug(c) || (c->monst && conformal::on) || c->monst == moKrakenH || (isBull(c->monst) && c->mondir != NODIR) || c->monst == moButterfly || isMagneticPole(c->monst) ||
+    isSwitch(c->monst)) {
     if(c->monst == moKrakenH) Vs = Vb, nospins = nospinb;
     if(!nospins) Vs = Vs * ddspin(c, c->mondir, S42);
     if(isFriendly(c)) drawPlayerEffects(Vs, c, false);
@@ -2572,6 +2585,9 @@ void setcolors(cell *c, int& wcol, int &fcol) {
         fcol = gradient(fcol, 0xFF0000, 0, c->landparam, 100);
       if(c->bardir == NOBARRIERS && c->barleft) 
         fcol = minf[moBug0+c->barright].color;
+      break;
+    case laSwitch:
+      fcol = minf[passive_switch].color;
       break;
     case laTortoise:
       fcol = tortoise::getMatchColor(getBits(c));

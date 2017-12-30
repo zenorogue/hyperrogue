@@ -1,4 +1,4 @@
-static const int motypes = 152;
+static const int motypes = 156;
 
 struct monstertype {
   char  glyph;
@@ -52,6 +52,8 @@ enum eMonster {
   moButterfly, moNarciss, moMirrorSpirit,
   moHunterDog, moTerraWarrior, moJiangshi, moVoidBeast, moLavaWolf, moHunterGuard,
   moIceGolem, moSandBird, moSalamander, moHunterChanging,
+  moNorthPole, moSouthPole,
+  moSwitch1, moSwitch2,
   // shmup specials
   moPlayer, moBullet, moFlailBullet, moFireball, moTongue, moAirball,
   // temporary
@@ -68,7 +70,7 @@ struct genderswitch_t {
 
 #define NUM_GS 6
 
-static const int ittypes = 125;
+static const int ittypes = 127;
 
 struct itemtype {
   char  glyph;
@@ -113,7 +115,7 @@ enum eItem {
   itLavaLily, itHunting, itBlizzard, itTerra,
   itOrbSide1, itOrbSide2, itOrbSide3,
   itOrbLava, itOrbMorph, itGlowCrystal, itSnake,
-  itDock, itInvix
+  itDock, itInvix, itMagnet, itSwitch
   };
 
 static const int walltypes = 107;
@@ -160,7 +162,7 @@ enum eWall { waNone, waIcewall, waBarrier, waFloorA, waFloorB, waCavewall, waCav
   waDock, waBurningDock
   };
 
-static const int landtypes = 81;
+static const int landtypes = 83;
 
 struct landtype {
   int color;
@@ -186,7 +188,8 @@ enum eLand { laNone, laBarrier, laCrossroads, laDesert, laIce, laCaves, laJungle
   laMirrorWall, laMirrored, laMirrorWall2, laMirrored2,
   laMirrorOld,
   laVolcano, laBlizzard, laHunting, laTerracotta, laMercuryRiver,
-  laDual, laSnakeNest, laDocks, laInvincible
+  laDual, laSnakeNest, laDocks, laInvincible, laMagnetic,
+  laSwitch
   };
 
 enum eGeometry {gNormal, gEuclid, gSphere, gElliptic, gQuotient, gQuotient2, gTorus, gOctagon, g45, g46, g47, gSmallSphere, gTinySphere, gEuclidSquare, gGUARD};

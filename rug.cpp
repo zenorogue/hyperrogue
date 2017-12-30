@@ -772,7 +772,7 @@ void optimize(rugpoint *m, bool do_preset) {
 
   if(do_preset) {
     preset(m);
-    int ed0 = size(preset_points);
+    // int ed0 = size(preset_points);
     for(auto& e: m->edges) if(e.target->valid) 
       preset_points.emplace_back(e.len, e.target);
     if(gwhere >= gSphere) {

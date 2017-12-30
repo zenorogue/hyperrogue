@@ -728,12 +728,28 @@ void moveBoatIfUsingOne(cell *to, cell *from) {
     }
   }
 
+bool againstMagnet(cell *c1, cell *c2) { // (from, to)
+  if(!isMagneticPole(c1->monst))
+    return false;
+  forCellEx(c3, c2) 
+    if(c3 != c1 && c3->monst == c1->monst)
+      return true;
+  forCellEx(c3, c1) 
+    if(c3->monst != c1->monst && isMagneticPole(c3->monst))
+      if(!isNeighbor(c3, c2))
+        return true;
+  return false;
+  }
+
 bool passable_for(eMonster m, cell *w, cell *from, flagtype extra) {
   if(w->monst && !(extra & P_MONSTER) && !isPlayerOn(w)) 
     return false;
   if(m == moWolf) {
     return (isIcyLand(w) || w->land == laVolcano) && (isPlayerOn(w) || passable(w, from, extra));
     }
+  if(isMagneticPole(m) && w && from && againstMagnet(from, w))
+    return false;
+  if(m == passive_switch) return false;
   if(normalMover(m) || isBug(m) || isDemon(m) || m == moHerdBull) {
     if((isWitch(m) || m == moEvilGolem) && w->land != laPower && w->land != laHalloween)
       return false;
@@ -865,6 +881,8 @@ bool canAttack(cell *c1, eMonster m1, cell *c2, eMonster m2, flagtype flags) {
 
   // cannot eat worms
   if((flags & AF_EAT) && isWorm(m2)) return false;
+  
+  if(m1 == passive_switch || m2 == passive_switch) return false;
   
   if((flags & AF_GETPLAYER) && isPlayerOn(c2)) m2 = moPlayer;
   
@@ -1095,6 +1113,10 @@ bool krakensafe(cell *c) {
     (c->item == itOrbFish && c->wall == waBoat) || 
     (c->item == itOrbAether && c->wall == waBoat);
   }
+
+eMonster active_switch() {
+  return eMonster(passive_switch ^ moSwitch1 ^ moSwitch2);
+  }
   
 int monstersnear(stalemate1& sm) {
 
@@ -1102,6 +1124,10 @@ int monstersnear(stalemate1& sm) {
   bool eaten = false;
 
   if(hardcore && sm.who == moPlayer) return 0;
+  dynamicval<eMonster> sw(passive_switch, passive_switch);
+  if(sm.moveto->item && itemclass(sm.moveto->item) == IC_TREASURE)
+    passive_switch = active_switch();
+
   int res = 0;
   bool fast = false;
 
@@ -3201,7 +3227,7 @@ void makeTrollFootprints(cell *c) {
   }
 
 void moveMonster(cell *ct, cell *cf) {
-  eMonster m = cf->monst;                                 
+  eMonster m = cf->monst;
   bool fri = isFriendly(cf);
   if(isDragon(m)) {
     printf("called for Dragon\n");
@@ -3231,6 +3257,14 @@ void moveMonster(cell *ct, cell *cf) {
     }
   ct->hitpoints = cf->hitpoints;
   ct->stuntime = cf->stuntime;
+  
+  if(isMagneticPole(m)) {
+    cell *other_pole = cf->mov[cf->mondir];
+    if(other_pole) {
+      ct->mondir = neighborId(ct, other_pole),
+      other_pole->mondir = neighborId(other_pole, ct);
+      }
+    }
   
   if(fri || isBug(m) || items[itOrbDiscord]) stabbingAttack(cf, ct, m);
 
@@ -6787,7 +6821,10 @@ void terracotta() {
       }
   }
 
+eMonster passive_switch;
+
 void monstersTurn() {
+  passive_switch = (gold() & 1) ? moSwitch1 : moSwitch2;
   mirror::breakAll();
   DEBT("bfs");
   bfs();

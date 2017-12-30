@@ -757,6 +757,10 @@ monstertype minf[motypes] = {
     "are stunned for a longer time if you push them into lava, fire, or a solid obstacle."},
   { 'W', 0x202020, "Hunting Dog (regrouping)", 
     "When your plan has clearly failed, it is better to abandon it and go to a safe place, to have a chance of succeeding next time. This dog clearly knows this."},
+  { 'B', 0xC00000, "North Pole", NODESCYET}, 
+  { 'B', 0x0000C0, "South Pole", NODESCYET}, 
+  { '@', 0xC00000, "Switcher A", NODESCYET}, 
+  { '@', 0x0000C0, "Switcher B", NODESCYET}, 
   
   // shmup specials
   { '@', 0xC0C0C0, "Rogue", "In the Shoot'em Up mode, you are armed with thrown Knives."},
@@ -1203,8 +1207,10 @@ itemtype iinf[ittypes] = {
     "Does not affect multi-tile monsters."},
   { '!', 0x80FF00, "Glowing Crystal", crystaldesc},
   { '!', 0x80FF80, "Snake Oil", NODESCYET},
-  { '*', 0x80FF80, "Dock Treasure", NODESCYET},
+  { '*', 0x80FF80, "Sea Glass", NODESCYET},
   { '*', 0x80FF80, "Invix Treasure", NODESCYET},
+  { '*', 0x80FF80, "Monopole", NODESCYET},
+  { '*', 0xFFFF80, "Junk", NODESCYET},
   };
 
 // --- wall types ---
@@ -1571,7 +1577,9 @@ const landtype linf[landtypes] = {
   { 0x80FF00, "Crystal World", crystaldesc},
   { 0x306030, "Snake Nest", NODESCYET},
   { 0x80FF00, "Docks", NODESCYET},
-  { 0x306030, "Invisible", NODESCYET},
+  { 0x306030, "Invincible", NODESCYET},
+  { 0x306030, "Magnetosphere", NODESCYET},
+  { 0x306030, "Switch", NODESCYET},
   };
 
 struct landtacinfo { eLand l; int tries, multiplier; };
