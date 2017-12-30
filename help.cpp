@@ -844,12 +844,50 @@ void showHelp() {
     };
   }
 
+vector<string> extra_keys = {
+  "1 = orthogonal/Gans model",
+  "2 = small Poincare model/stereographic projection",
+  "3 = big Poincare model/stereographic projection",
+  "4 = Klein model/gnomonic projection",
+  "5 = change wall display mode",
+  "6 = change grid",
+  "7 = change heptagon marking",
+  "8 = change background color",
+  "9 = hyperboloid model",
+  "qweasdzxc = move/skip turn",
+  "hjklyubn = move/skip turn",
+  "numpad = move/skip turn",
+  "arrows = panning",
+  "o = world overview",
+  "v = menu",
+  "F1 = help",
+  "F5 = restart game",
+  "F10 = quit game",
+  "Esc = quest status",
+  "Alt = highlight interesting stuff",
+  "t = target the center (with Orb)",
+  "mouse = move/skip",
+  "mousewheel up = panning",
+  "hold middle button = panning",
+  "mousewheel down = move/skip",
+  "shift + mousewheel = change projection",
+  "ctrl + mousewheel = change zoom",
+  "ctrl + shift + mousewheel = change both projection and zoom",
+  "ctrl + hold middle button = move the screen",
+  "shift + middle button = reset position"
+  };
+
 void gotoHelp(const string& h) {
   help = h;
   help_extensions.clear();
   pushScreen(showHelp);
-  if(help == "@" || help == buildHelpText()) 
+  if(help == "@" || help == buildHelpText()) {
     help_extensions.push_back(help_extension{'c', XLAT("credits"), [] () { help = buildCredits(); }});
+    help_extensions.push_back(help_extension{'k', XLAT("advanced keyboard shortcuts"), [] () { 
+      help = "";
+      for(string s: extra_keys) help += s, help += "\n\n";
+      }});
+    }
   if(help == "HELPGEN") helpgenerator();
   }
 
