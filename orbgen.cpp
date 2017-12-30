@@ -1,4 +1,4 @@
-#define ORBLINES 66
+#define ORBLINES 70
 
 // orbgen flags
 
@@ -111,6 +111,10 @@ const orbinfo orbinfos[ORBLINES] = {
   {orbgenflags::S_GUEST, laDocks, 3000, 0, itOrbFish},
   {orbgenflags::S_GUEST, laDocks, 3000, 0, itOrbDragon},
   {orbgenflags::S_GUEST, laDocks, 3000, 0, itOrbDash},
+  {orbgenflags::S_GUEST, laSwitch, 2000, 0, itOrbSpace}, 
+  {orbgenflags::S_NATIVE, laSwitch, 2000, 3000, itOrbPhasing}, 
+  {orbgenflags::S_NATIVE, laMagnetic, 2000, 3000, itOrbMagnetism},
+  {orbgenflags::S_NATIVE, laInvincible, 2000, 3000, itOrbDestruction},
   {orbgenflags::S_NATIVE, laWhirlpool, 0, 2000, itOrbWater}, // needs to be last
   };
 

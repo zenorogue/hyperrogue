@@ -329,6 +329,9 @@ namespace inv {
     for(auto& it: lateextraorbs) gainLate(it.treasure, it.orb);
     
     gainOrbs(itGlowCrystal, itOrbSide2);
+    gainOrbs(itSwitch, itOrbPhasing);
+    gainOrbs(itMagnet, itOrbMagnetism);
+    gainOrbs(itInvix, itOrbDestruction);
 
     if(items[itOrbLove] && !items[itSavedPrincess]) items[itSavedPrincess] = 1;
     

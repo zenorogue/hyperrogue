@@ -1127,6 +1127,9 @@ int monstersnear(stalemate1& sm) {
   dynamicval<eMonster> sw(passive_switch, passive_switch);
   if(sm.moveto->item && itemclass(sm.moveto->item) == IC_TREASURE)
     passive_switch = active_switch();
+  if(items[itOrbMagnetism]) forCellEx(c2, sm.moveto)
+    if(canPickupItemWithMagnetism(c2, sm.comefrom) && itemclass(c2->item) == IC_TREASURE)
+      passive_switch = active_switch();
 
   int res = 0;
   bool fast = false;
@@ -3177,6 +3180,16 @@ void playerMoveEffects(cell *c1, cell *c2) {
     addMessage(XLAT("Better not to let your greed make you stray from your path."));
     playSound(c2, "nervous");
     }
+  
+  if(items[itOrbMagnetism])
+    forCellEx(c3, c2) if(canPickupItemWithMagnetism(c3, c2)) {
+      if(c3->item == itCompass) {
+        if(!c2->item)
+          moveItem(c3, c2, false);
+        }
+      else if(markOrb(itOrbMagnetism))
+        collectItem(c3, false);
+      }
   }
 
 void beastcrash(cell *c, cell *beast) {
@@ -6292,12 +6305,33 @@ int ambush(cell *c, eItem what) {
   return dogs + dogs0;
   }
 
+bool cannotPickupItem(cell *c, bool telekinesis) {
+  return itemHidden(c) && !telekinesis && !(isWatery(c) && markOrb(itOrbFish));
+  }
+
+bool canPickupItemWithMagnetism(cell *c, cell *from) {
+  if(!c->item || c->item == itOrbYendor || isWall(c) || cannotPickupItem(c, false))
+    return false;
+  if(c->item == itCompass && from->item) 
+    return false;
+  return true;
+  }
+
+void pickupMovedItems(cell *c) {
+  if(!c->item) return;
+  if(isPlayerOn(c)) collectItem(c, true);  
+  if(items[itOrbMagnetism])
+    forCellEx(c2, c)
+      if(isPlayerOn(c2) && canPickupItemWithMagnetism(c, c2))
+        collectItem(c, true);
+  }
+
 bool collectItem(cell *c2, bool telekinesis) {
 
   int pg = gold();
   bool dopickup = true;
   
-  if(itemHidden(c2) && !telekinesis && !(isWatery(c2) && markOrb(itOrbFish)))
+  if(cannotPickupItem(c2, telekinesis))
     return false;
   
   /* if(c2->item == itHolyGrail && telekinesis)
@@ -6823,8 +6857,12 @@ void terracotta() {
 
 eMonster passive_switch;
 
-void monstersTurn() {
+void checkSwitch() {
   passive_switch = (gold() & 1) ? moSwitch1 : moSwitch2;
+  }
+
+void monstersTurn() {
+  checkSwitch();
   mirror::breakAll();
   DEBT("bfs");
   bfs();
@@ -7099,7 +7137,7 @@ bool movepcto(int d, int subdir, bool checkonly) {
         }
 
       if(againstCurrent(c2, cwt.c) && !markOrb(itOrbWater)) {
-        if(markOrb(itOrbFish)) goto escape;
+        if(markOrb(itOrbFish) || markOrb(itOrbAether)) goto escape;
         if(!checkonly)
           addMessage(XLAT("You cannot go against the current!"));
         return false;

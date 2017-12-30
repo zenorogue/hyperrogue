@@ -1211,6 +1211,9 @@ itemtype iinf[ittypes] = {
   { '*', 0x80FF80, "Invix Treasure", NODESCYET},
   { '*', 0x80FF80, "Monopole", NODESCYET},
   { '*', 0xFFFF80, "Junk", NODESCYET},
+  { 'o', 0x80FF80, "Orb of Phasing", NODESCYET},
+  { 'o', 0xFFFF80, "Orb of Magnetism", NODESCYET},
+  { 'o', 0xFFFF80, "Orb of Destruction", NODESCYET},
   };
 
 // --- wall types ---

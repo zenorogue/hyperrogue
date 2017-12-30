@@ -139,8 +139,7 @@ namespace whirlwind {
         animateMovement(whirlline[i+1], whirlline[i], LAYER_BOAT);
       }
     for(int i=0; i<z; i++) 
-      if(isPlayerOn(whirlline[i]) && whirlline[i]->item)
-        collectItem(whirlline[i], true);
+      pickupMovedItems(whirlline[i]);
     }
   
   void move() {
@@ -985,6 +984,8 @@ namespace whirlpool {
       if(wfrom->item == itKey || wfrom->item == itOrbYendor)
         for(int i=0; i<wto->type; i++) createMov(wto, i);
       moveItem(wfrom, wto, false);
+      pickupMovedItems(wfrom);
+      pickupMovedItems(wto);
       }
     
     if(wto && !wfrom) 
@@ -2184,7 +2185,7 @@ void livecaves() {
         }
       if(c->aitmp < 0 && c->wall == waBoat) c->wall = waStrandedBoat;
       if(c->aitmp < 0 && c->wall == waSea) c->wall = waNone;
-      }     
+      }
     }
   
   for(int i=0; i<size(bringlife); i++) {

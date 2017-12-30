@@ -823,6 +823,7 @@ void setGLProjection();
 #define P_CLIMBDOWN  Flag(30) // allow climbing down
 #define P_REPTILE    Flag(31) // is reptile
 #define P_VOID       Flag(32) // void beast
+#define P_PHASE      Flag(33) // phasing movement
 
 bool passable(cell *w, cell *from, flagtype flags);
 
@@ -2430,3 +2431,6 @@ void clear_euland(eLand first);
 
 extern eMonster passive_switch;
 
+bool cannotPickupItem(cell *c, bool telekinesis);
+bool canPickupItemWithMagnetism(cell *c, cell *from);
+void pickupMovedItems(cell *c);

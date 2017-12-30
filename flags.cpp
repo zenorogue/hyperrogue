@@ -548,7 +548,7 @@ bool haveRangedOrb() {
     items[itOrbFrog] || items[itOrbSummon] || items[itOrbMatter] ||
     items[itRevolver] || items[itOrbStunning] || items[itStrongWind] ||
     items[itOrbDomination] || items[itOrbNature] || items[itOrbDash] ||
-    items[itOrbMorph];
+    items[itOrbMorph] || items[itOrbPhasing];
   }
 
 bool isOffensiveOrb(eItem it) {

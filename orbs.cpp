@@ -593,6 +593,11 @@ void jumpTo(cell *dest, eItem byWhat, int bonuskill = 0, eMonster dashmon = moNo
     addMessage(XLAT("You vault over %the1!", dashmon));
     }
   
+  if(byWhat == itOrbPhasing) {
+    useupOrb(itOrbPhasing, 5);
+    addMessage(XLAT("You jump!"));
+    }
+  
   mirror::destroyAll();
 
   for(int i=9; i>=0; i--)
@@ -619,9 +624,16 @@ void growIvyTo(cell *dest, cell *src) {
   monstersTurn();
   }
 
+pair<int, bool> spacedrain(cell *c) {
+  int d = c->cpdist;
+  bool usemagnet = items[itOrbMagnetism] && d > 0;
+  if(usemagnet) d--;
+  return {d * d, usemagnet};
+  }
+ 
 void telekinesis(cell *dest) {
-    
-  int cost = dest->cpdist * dest->cpdist;
+  
+  auto cost = spacedrain(dest); 
   
   if(dest->land == laAlchemist && isAlchAny(dest) && isAlchAny(cwt.c))
     dest->wall = cwt.c->wall;
@@ -642,9 +654,12 @@ void telekinesis(cell *dest) {
 
   moveItem(dest, cwt.c, true);
   collectItem(cwt.c, true);
-  useupOrb(itOrbSpace, cost);
+  useupOrb(itOrbSpace, cost.first);
+  if(cost.second) 
+    markOrb(itOrbMagnetism);
 
   createNoise(3);
+  checkSwitch();
   bfs();
   if(!shmup::on) checkmoveO();
   }
@@ -984,7 +999,7 @@ eItem targetRangedOrb(cell *c, orbAction a) {
     }
   
   // (0) telekinesis
-  if(c->item && !itemHiddenFromSight(c) && !cwt.c->item && items[itOrbSpace] >= fixpower(c->cpdist * c->cpdist) && !cantGetGrimoire(c, !isCheck(a))
+  if(c->item && !itemHiddenFromSight(c) && !cwt.c->item && items[itOrbSpace] >= fixpower(spacedrain(c).first) && !cantGetGrimoire(c, !isCheck(a))
     && c->item != itBarrow) {
     if(!isCheck(a)) telekinesis(c);
     return itOrbSpace;
@@ -1088,6 +1103,31 @@ eItem targetRangedOrb(cell *c, orbAction a) {
       jumpstate = 4;
       if(!isCheck(a)) jumpTo(c, itOrbFrog);
       return itOrbFrog;
+      }
+    }
+  
+  if(items[itOrbPhasing] && c->cpdist == 2) {
+    jumpstate = 21;
+    int i = items[itOrbAether];
+    if(i) items[itOrbAether] = i-1;
+    for(int i=0; i<cwt.c->type; i++) {
+      cell *c2 = cwt.c->mov[i];
+      if(isNeighbor(c2, c) && !nonAdjacent(cwt.c, c2) && !nonAdjacent(c2, c)) {
+        jumpthru = c2;
+        if(passable(c, cwt.c, P_ISPLAYER | P_PHASE)) {
+          jumpstate = 22;
+          if(c2->monst || isWall(c2)) {
+            jumpstate = 23;
+            break;
+            }
+          }
+        }
+      }
+    items[itOrbAether] = i;
+    if(jumpstate == 23 && !monstersnearO(a, c, NULL, moPlayer, NULL, cwt.c)) {
+      jumpstate = 24;
+      if(!isCheck(a)) jumpTo(c, itOrbPhasing);
+      return itOrbPhasing;
       }
     }
   
