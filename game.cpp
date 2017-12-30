@@ -1124,12 +1124,6 @@ int monstersnear(stalemate1& sm) {
   bool eaten = false;
 
   if(hardcore && sm.who == moPlayer) return 0;
-  dynamicval<eMonster> sw(passive_switch, passive_switch);
-  if(sm.moveto->item && itemclass(sm.moveto->item) == IC_TREASURE)
-    passive_switch = active_switch();
-  if(items[itOrbMagnetism]) forCellEx(c2, sm.moveto)
-    if(canPickupItemWithMagnetism(c2, sm.comefrom) && itemclass(c2->item) == IC_TREASURE)
-      passive_switch = active_switch();
 
   int res = 0;
   bool fast = false;
@@ -1256,12 +1250,24 @@ int monstersnear2() {
   for(int i=0; i<ittypes; i++) recorduse[i] = orbused[i];
   if(multi::cpid == multi::players || multi::players == 1 || multi::checkonly) {
   
-    // check for safe orbs first
-    for(int i=0; i<size(stalemate::moves); i++)
-      if(hasSafeOrb(stalemate::moves[i].moveto)) {
+    dynamicval<eMonster> sw(passive_switch, passive_switch);
+
+    // check for safe orbs and switching first
+    for(auto &sm: stalemate::moves) {
+      if(hasSafeOrb(sm.moveto)) {
         multi::cpid--; return 0;
         }
-    
+      if(sm.moveto->item && itemclass(sm.moveto->item) == IC_TREASURE)
+        passive_switch = active_switch();
+      if(items[itOrbMagnetism]) forCellEx(c2, sm.moveto)
+        if(canPickupItemWithMagnetism(c2, sm.comefrom)) {
+          if(itemclass(c2->item) == IC_TREASURE)
+            passive_switch = active_switch();
+          if(hasSafeOrb(c2))
+            return 0;
+          }
+      }    
+
     for(int i=0; i<size(stalemate::moves); i++)
     for(int j=0; j<size(stalemate::moves); j++) if(i != j) {
       if(swordConflict(stalemate::moves[i], stalemate::moves[j])) {
@@ -3179,17 +3185,7 @@ void playerMoveEffects(cell *c1, cell *c2) {
     addMessage(XLAT("You become a bit nervous..."));
     addMessage(XLAT("Better not to let your greed make you stray from your path."));
     playSound(c2, "nervous");
-    }
-  
-  if(items[itOrbMagnetism])
-    forCellEx(c3, c2) if(canPickupItemWithMagnetism(c3, c2)) {
-      if(c3->item == itCompass) {
-        if(!c2->item)
-          moveItem(c3, c2, false);
-        }
-      else if(markOrb(itOrbMagnetism))
-        collectItem(c3, false);
-      }
+    }  
   }
 
 void beastcrash(cell *c, cell *beast) {
@@ -6317,6 +6313,24 @@ bool canPickupItemWithMagnetism(cell *c, cell *from) {
   return true;
   }
 
+bool doPickupItemsWithMagnetism(cell *c) {
+  cell *csaf = NULL;
+  if(items[itOrbMagnetism])
+    forCellEx(c3, c) if(canPickupItemWithMagnetism(c3, c)) {
+      if(c3->item == itCompass) {
+        if(!c->item)
+          moveItem(c3, c, false);
+        }
+      else if(c3->item == itOrbSafety || c3->item == itBuggy || c3->item == itBuggy2)
+        csaf = c3;
+      else if(markOrb(itOrbMagnetism))
+        collectItem(c3, false);
+      }
+  if(csaf)
+    return collectItem(csaf, false);
+  return false;
+  }
+
 void pickupMovedItems(cell *c) {
   if(!c->item) return;
   if(isPlayerOn(c)) collectItem(c, true);  
@@ -7491,6 +7505,7 @@ bool movepcto(int d, int subdir, bool checkonly) {
         }
 
       if(!boatmove && collectItem(c2)) return true;
+      if(doPickupItemsWithMagnetism(c2)) return true;
 
       if(isIcyLand(cwt.c) && cwt.c->wall == waNone && markOrb(itOrbWinter)) {
         invismove = false;

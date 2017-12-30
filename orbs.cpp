@@ -108,12 +108,14 @@ void reduceOrbPowers() {
   reduceOrbPower(itOrbDigging, 100);
   reduceOrbPower(itOrbTeleport, 200);
   reduceOrbPower(itOrbSpace, 150);
+  reduceOrbPower(itOrbMagnetism, 150);
   reduceOrbPowerAlways(itOrbSafety);
   reduceOrbPower(itOrbThorns, 150);
   reduceOrbPower(itOrbWater, 150);
   reduceOrbPower(itOrbAir, 150);
   reduceOrbPower(itOrbFrog, 77);
   reduceOrbPower(itOrbDash, 77);
+  reduceOrbPower(itOrbPhasing, 77);
   reduceOrbPower(itOrbDiscord, 67);
   reduceOrbPower(itOrbSummon, 333);
   reduceOrbPower(itOrbMatter, 333);
@@ -1298,6 +1300,7 @@ int orbcharges(eItem it) {
       return 40;
     case itOrbFrog: 
     case itOrbDash:
+    case itOrbPhasing:
       return 45;
     case itOrb37:
     case itOrbEnergy:
@@ -1324,6 +1327,7 @@ int orbcharges(eItem it) {
     case itOrbPsi:
     case itOrbDigging:
     case itOrbTeleport:
+    case itOrbMagnetism:
       return 77;
     case itOrbDomination:
       return 90;
