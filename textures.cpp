@@ -60,6 +60,7 @@ struct undo {
   };
 
 vector<pair<unsigned*, unsigned>> undos;
+vector<tuple<cell*, hyperpoint, int> > pixels_to_draw;
 
 template<class T, class U> void scale_colorarray(int origdim, const T& src, const U& dest) {
   int ox = 0, tx = 0, partials[4];
@@ -106,6 +107,7 @@ bool whitetexture() {
   undos.clear();
   texture_pixels.resize(0);
   texture_pixels.resize(twidth * twidth, 0xFFFFFFFF);
+  pixels_to_draw.clear();
   return true;
   }
 
@@ -921,15 +923,6 @@ void showMenu() {
     };
   }
 
-int lastupdate;
-
-void update() {
-  if(lastupdate && ticks > lastupdate + 50) {
-    loadTextureGL(); 
-    lastupdate = 0;
-    }
-  }
-
 typedef pair<int,int> point;
 
 point ptc(hyperpoint h) {
@@ -1049,8 +1042,7 @@ void fillcircle(hyperpoint h, int col) {
 
 bool texturesym = false;
 
-void drawPixel(cell *c, hyperpoint h, int col) {
-  
+void actDrawPixel(cell *c, hyperpoint h, int col) {
   try {
     transmatrix M = gmatrix.at(c);
     auto si = patterns::getpatterninfo0(c);
@@ -1060,10 +1052,13 @@ void drawPixel(cell *c, hyperpoint h, int col) {
       fillcircle(M2 * spin(2 * M_PI * i / c->type) * h, col);
       if(texturesym)
         fillcircle(M2 * spin(2 * M_PI * i / c->type) * Mirror * h, col);
-      lastupdate = ticks;
       }
     }
   catch(out_of_range) {}
+  }
+  
+void drawPixel(cell *c, hyperpoint h, int col) {
+  pixels_to_draw.emplace_back(c, h, col);
   }
 
 void remap(eTextureState old_tstate, eTextureState old_tstate_max) {
@@ -1142,8 +1137,22 @@ int textureArgs() {
   }
 
 auto texture_hook = 
-  addHook(hooks_args, 100, textureArgs);
+  addHook(hooks_args, 100, textureArgs)
++ addHook(clearmemory, 100, [] () { pixels_to_draw.clear(); });
 
+int lastupdate;
+
+void update() {
+  if(!pixels_to_draw.empty()) {
+    auto t = SDL_GetTicks();
+    while(SDL_GetTicks() < t + 75 && !pixels_to_draw.empty()) {
+      auto p = pixels_to_draw.back();
+      actDrawPixel(get<0>(p), get<1>(p), get<2>(p));
+      pixels_to_draw.pop_back();
+      }
+    loadTextureGL(); 
+    }
+  }
 
 }
 #endif
