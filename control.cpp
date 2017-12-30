@@ -656,6 +656,9 @@ void mainloopiter() {
     
     bool rollchange = (cmode & sm::OVERVIEW) && getcstat >= 2000 && cheater;
 
+    bool anyctrl = keystate[SDLK_LCTRL] || keystate[SDLK_RCTRL];
+    bool anyshift = keystate[SDLK_LSHIFT] || keystate[SDLK_RSHIFT];
+
     if(ev.type == SDL_MOUSEBUTTONDOWN || ev.type == SDL_MOUSEBUTTONUP) {
       mousepressed = ev.type == SDL_MOUSEBUTTONDOWN;
       if(mousepressed) flashMessages();
@@ -670,10 +673,7 @@ void mainloopiter() {
       else {
         act = actonrelease && ev.type == SDL_MOUSEBUTTONUP;
         actonrelease = ev.type == SDL_MOUSEBUTTONDOWN;
-        }
-      
-      bool anyctrl = keystate[SDLK_LCTRL] || keystate[SDLK_RCTRL];
-      bool anyshift = keystate[SDLK_LSHIFT] || keystate[SDLK_RSHIFT];
+        }      
       
       if(ev.type != SDL_MOUSEMOTION) fix_mouseh();
       
@@ -681,20 +681,23 @@ void mainloopiter() {
 
       else if(ev.button.button==SDL_BUTTON_RIGHT || leftclick) 
         sym = SDLK_F1;
-      else if(ev.button.button==SDL_BUTTON_MIDDLE || rightclick) 
+      else if(ev.button.button==SDL_BUTTON_MIDDLE || rightclick) {
         sym = 1, didsomething = true;
+        if(anyshift)
+          vid.xposition = vid.yposition = 0;
+        }
       else if(ev.button.button == SDL_BUTTON_LEFT) {
         sym = getcstat, uni = getcstat, shiftmul = getcshift;
         }
       
       else if(ev.button.button==SDL_BUTTON_WHEELDOWN) {
-        if(anyctrl && anyshift) {
-          vid.scale /= 1.2;
+        if(anyctrl && anyshift && !rug::rugged) {
+          mapeditor::scaleall(1/1.2);
           vid.alpha /= 1.2;
           }
-        else if(anyctrl)
-          vid.scale *= pow(2, -.25);
-        else if(anyshift)
+        else if(anyctrl && !rug::rugged)
+          mapeditor::scaleall(pow(2, -.25));
+        else if(anyshift && !rug::rugged)
           vid.alpha -= 0.25;
         else if(rollchange) {
           sym = getcstat, uni = getcstat, shiftmul = getcshift, wheelclick = true;
@@ -704,13 +707,13 @@ void mainloopiter() {
           }
         }
       if(ev.button.button==SDL_BUTTON_WHEELUP) {
-        if(anyctrl && anyshift) {
-          vid.scale *= 1.2;
+        if(anyctrl && anyshift && !rug::rugged) {
+          mapeditor::scaleall(1.2);
           vid.alpha *= 1.2;
           }
-        else if(anyctrl)
-          vid.scale *= pow(2, .25);
-        else if(anyshift)
+        else if(anyctrl && !rug::rugged)
+          mapeditor::scaleall(pow(2, .25));
+        else if(anyshift && !rug::rugged)
           vid.alpha += 0.25;
         else if(rollchange) {
           sym = getcstat, uni = getcstat, shiftmul = -getcshift, wheelclick = true;
@@ -724,6 +727,8 @@ void mainloopiter() {
     if(ev.type == SDL_MOUSEMOTION) {
       mouseoh = mouseh;
       
+      int lmousex = mousex, lmousey = mousey;
+      
       mousing = true;
       mousemoved = true;
       mousex = ev.motion.x;
@@ -731,11 +736,17 @@ void mainloopiter() {
       
       need_mouseh = true;
 
-      if(holdmouse && getcstat == '-') sym = uni = getcstat;
+      if(holdmouse && getcstat == '-') sym = uni = getcstat, fix_mouseh();
 
-      if((rightclick || (SDL_GetMouseState(NULL, NULL) & SDL_BUTTON_MMASK)) && !mouseout2() && 
-         mouseh[2] < 50 && mouseoh[2] < 50) {
-        panning(mouseoh, mouseh);
+      if((rightclick || (SDL_GetMouseState(NULL, NULL) & SDL_BUTTON_MMASK)) && !mouseout2()) {
+        fix_mouseh();
+        if(anyctrl) {
+          vid.xposition += (mousex - lmousex) * 1. / vid.scrsize,
+          vid.yposition += (mousey - lmousey) * 1. / vid.scrsize;
+          }
+        else if(mouseh[2] < 50 && mouseoh[2] < 50) {
+          panning(mouseoh, mouseh);
+          }
         }
 
 #ifdef SIMULATE_JOYSTICK
@@ -755,7 +766,7 @@ void mainloopiter() {
       if(needConfirmation() && !(cmode & sm::MISSION)) showMissionScreen();
       else quitmainloop = true;
       }
-
+      
     handlekey(sym, uni);
     }
 
@@ -797,10 +808,10 @@ void displayabutton(int px, int py, string s, int col) {
 #endif
 
 void gmodekeys(int sym, int uni) {
-  if(uni == '1') { vid.alpha = 999; vid.scale = 998; vid.xposition = vid.yposition = 0; }
-  if(uni == '2') { vid.alpha = 1; vid.scale = 0.4; vid.xposition = vid.yposition = 0; }
-  if(uni == '3') { vid.alpha = 1; vid.scale = 1; vid.xposition = vid.yposition = 0; }
-  if(uni == '4') { vid.alpha = 0; vid.scale = 1; vid.xposition = vid.yposition = 0; }
+  if(uni == '1' && !rug::rugged) { vid.alpha = 999; vid.scale = 998; vid.xposition = vid.yposition = 0; }
+  if(uni == '2' && !rug::rugged) { vid.alpha = 1; vid.scale = 0.4; vid.xposition = vid.yposition = 0; }
+  if(uni == '3' && !rug::rugged) { vid.alpha = 1; vid.scale = 1; vid.xposition = vid.yposition = 0; }
+  if(uni == '4' && !rug::rugged) { vid.alpha = 0; vid.scale = 1; vid.xposition = vid.yposition = 0; }
   if(uni == '5') { vid.wallmode += 60 + (shiftmul > 0 ? 1 : -1); vid.wallmode %= 6; }
   if(uni == '6') vid.grid = !vid.grid;
   if(uni == '7') { vid.darkhepta = !vid.darkhepta; }

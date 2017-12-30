@@ -2390,6 +2390,8 @@ namespace texture {
   
   void remap(eTextureState old_tstate, eTextureState old_tstate_max);
   
+  void perform_mapping();
+  
   void undoLock();
   void undo();
   extern bool texturesym;

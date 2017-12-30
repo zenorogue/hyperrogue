@@ -1000,8 +1000,6 @@ namespace mapeditor {
       }
 
     displaymm('g', vid.xres-8, 8+fs*4, 2, vid.fsize, XLAT("g = grid"), 16);
-    displaymm('z', vid.xres-8, 8+fs*3, 2, vid.fsize, XLAT("z = zoom in"), 16);
-    displaymm('o', vid.xres-8, 8+fs*2, 2, vid.fsize, XLAT("o = zoom out"), 16);
     
     if(intexture) for(int i=0; i<10; i++) {
       if(8 + fs * (6+i) < vid.yres - 8 - fs * 7)
@@ -1333,12 +1331,20 @@ namespace mapeditor {
      ld mrx = (.0 + mousex - vid.xcenter) / vid.scale;
      ld mry = (.0 + mousey - vid.ycenter) / vid.scale;
      
-     vid.xposition += (vid.scale - vid.scale*z) * mrx / vid.scrsize;
-     vid.yposition += (vid.scale - vid.scale*z) * mry / vid.scrsize;
+     if(vid.xres > vid.yres) {      
+       vid.xposition += (vid.scale - vid.scale*z) * mrx / vid.scrsize;
+       vid.yposition += (vid.scale - vid.scale*z) * mry / vid.scrsize;
+       }
 
      vid.scale *= z;
+     printf("scale = " LDF "\n", vid.scale);
      #if CAP_TEXTURE
      texture::itt = xyscale(texture::itt, 1/z);
+     display(texture::itt);
+     if(texture::tstate) {
+       calcparam();
+       texture::perform_mapping();
+       }
      #endif
      }
 
@@ -1382,9 +1388,6 @@ namespace mapeditor {
       
     if(mkuni == 'g') 
       coldcenter = ccenter, ccenter = mh, clickused = true;
-
-    if(mkuni == 'z') scaleall(2), clickused = true;
-    if(mkuni == 'o') scaleall(.5), clickused = true;
 
     if(uni == ' ' && cheater) {
       popScreen();
