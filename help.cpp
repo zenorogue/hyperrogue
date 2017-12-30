@@ -864,10 +864,13 @@ vector<string> extra_keys = {
   "Esc = quest status",
   "Alt+Enter = full screen",
   "Alt = highlight interesting stuff",
-  "t = target the center (with Orb)",
-  "mouse = move/skip",
+  "t = use a ranged Orb (target center of the screen)",
+  "g = drop a Dead Orb",
+  "click left mouse button = move/skip",
+  "shift+click left mouse button = use ranged Orb",
+  "click right mouse button = context help",
   "mousewheel up = panning",
-  "hold middle button = panning",
+  "hold middle mouse button = panning",
   "mousewheel down = move/skip",
   "shift + mousewheel = change projection",
   "ctrl + mousewheel = change zoom",
@@ -882,10 +885,12 @@ void gotoHelp(const string& h) {
   pushScreen(showHelp);
   if(help == "@" || help == buildHelpText()) {
     help_extensions.push_back(help_extension{'c', XLAT("credits"), [] () { help = buildCredits(); }});
+#if ISMOBILE == 0
     help_extensions.push_back(help_extension{'k', XLAT("advanced keyboard shortcuts"), [] () { 
       help = "";
       for(string s: extra_keys) help += s, help += "\n\n";
       }});
+#endif
     }
   if(help == "HELPGEN") helpgenerator();
   }
