@@ -1902,6 +1902,40 @@ void giantLandSwitch(cell *c, int d, cell *from) {
         }
       break;
     
+    case laInvincible: {
+      int kf = 10 + items[itInvix] + yendor::hardness();
+      if(d == 8) {
+        if(windmap::at(c) >= 128) {
+          if(hrand(100) < 3)
+            c->wall = waColumn;
+          }
+        else if(hrand(100) < 75) {
+          forCellEx(c2, c) if(windmap::at(c2) >= 128)
+            c->wall = waColumn;
+          }
+        if(hrand(1000) < 2)
+          c->wall = waColumn;
+        if(hrand(50000) < kf && !c->monst && !c->wall) {
+          cell *c1 = c;
+          cell *c2 = createMov(c1, hrand(c1->type));
+          if(c2->monst || c2->wall) return;
+          c1->monst = moPair;
+          c2->monst = moPair;
+          c1->mondir = neighborId(c1, c2);
+          c2->mondir = neighborId(c2, c1);
+          }
+        }
+      ONEMPTY {
+        if(hrand(10000) < kf && !c->monst) {
+          c->monst = pick(moHexDemon, moAltDemon, moMonk, moSkeleton, moCrusher);
+          c->hitpoints = 3;
+          }
+        if(hrand(1500) < PT(30 + kills[moHexDemon] + kills[moSkeleton] + kills[moMonk] + kills[moPair], 100) && notDippingFor(itInvix))
+          c->item = itInvix;
+        }
+      break;
+      }
+    
     case laDocks: {
       if(d == 8) {
         patterns::patterninfo si;

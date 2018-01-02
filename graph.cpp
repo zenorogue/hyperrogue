@@ -1219,6 +1219,13 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, int col, dou
     if(!peace::on) queuepoly(VBODY, shPSword, 0xFFFF00FF);
     queuepoly(VHEAD, shHood, darkena(col, 0, 0xFF));
     }
+  else if(m == moPair || m == moAltDemon || m == moHexDemon || m == moMonk || m == moCrusher) {
+    otherbodyparts(V, darkena(col, 0, 0xC0), m, footphase);
+    ShadowV(V, shPBody);
+    queuepoly(VBODY, shPBody, darkena(col, 0, 0xC0));
+    if(!peace::on) queuepoly(VBODY, shPSword, 0xFFFF00FF);
+    queuepoly(VHEAD, shHood, darkena(col, 0, 0xFF));
+    }
   else if(m == moPalace || m == moFatGuard || m == moVizier || m == moSkeleton) {
     queuepoly(VBODY, shSabre, 0xFFFFFFFF);
     if(m == moSkeleton) {
@@ -1929,7 +1936,7 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, int col) {
   // also whatever in the lineview mode
 
   else if(isFriendly(c) || isBug(c) || (c->monst && conformal::on) || c->monst == moKrakenH || (isBull(c->monst) && c->mondir != NODIR) || c->monst == moButterfly || isMagneticPole(c->monst) ||
-    isSwitch(c->monst)) {
+    isSwitch(c->monst) || c->monst == moPair) {
     if(c->monst == moKrakenH) Vs = Vb, nospins = nospinb;
     if(!nospins) Vs = Vs * ddspin(c, c->mondir, S42);
     if(isFriendly(c)) drawPlayerEffects(Vs, c, false);
@@ -4724,6 +4731,9 @@ void queuecircleat(cell *c, double rad, int col) {
 void drawMarkers() {
 
   if(!(cmode & sm::NORMAL)) return;
+  
+  for(cell *c1: crush_now) 
+    queuecircleat(c1, .8, darkena(minf[moCrusher].color, 0, 0xFF));
 
   if(!inHighQual) {
 

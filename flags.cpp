@@ -362,6 +362,10 @@ bool slowMover(eMonster m) {
     m == moTortoise || m == moDraugr;
   }
 
+bool isMagneticPole(eMonster m) {
+  return m == moNorthPole || m == moSouthPole;
+  }
+
 bool normalMover(eMonster m) {
   return
     m == moYeti || m == moRanger || m == moGoblin || m == moTroll || m == moDesertman || 
@@ -386,13 +390,9 @@ bool normalMover(eMonster m) {
     m == moLavaWolf || m == moSalamander ||
     m == moHunterGuard || m == moHunterChanging ||
     m == moIceGolem || 
-    m == moNorthPole || m == moSouthPole ||
-    m == moSwitch1 || m == moSwitch2 ||
+    m == moSwitch1 || m == moSwitch2 || m == moCrusher || m == moPair || 
+    isMagneticPole(m) || 
     slowMover(m);
-  }
-
-bool isMagneticPole(eMonster m) {
-  return m == moNorthPole || m == moSouthPole;
   }
 
 bool isSwitch(eMonster m) {
@@ -519,7 +519,7 @@ bool isUnarmed(eMonster m) {
   }
 
 bool isArmedEnemy(cell *w, eMonster forwho) {
-  return w->monst != moCrystalSage && isActiveEnemy(w, forwho);
+  return w->monst != moCrystalSage && w->monst != moCrusher && isActiveEnemy(w, forwho);
   }
 
 bool isHive(eLand l) {

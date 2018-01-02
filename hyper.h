@@ -824,6 +824,7 @@ void setGLProjection();
 #define P_REPTILE    Flag(31) // is reptile
 #define P_VOID       Flag(32) // void beast
 #define P_PHASE      Flag(33) // phasing movement
+#define P_PULLMAGNET Flag(34) // pull the other part of the magnet
 
 bool passable(cell *w, cell *from, flagtype flags);
 
@@ -1007,6 +1008,7 @@ bool withRose(cell *cfrom, cell *cto);
 #define AF_HORNS             Flag(28)   // spear attack (always has APPROACH too)
 #define AF_BULL              Flag(29)   // bull attack
 #define AF_SIDE              Flag(30)   // side attack
+#define AF_CRUSH             Flag(31)   // Crusher's delayed attack
 
 bool canAttack(cell *c1, eMonster m1, cell *c2, eMonster m2, flagtype flags);
 
@@ -1645,9 +1647,8 @@ void displaymm(char c, int x, int y, int rad, int size, const string& title, int
 bool canPushThumperOn(cell *tgt, cell *thumper, cell *player);
 void pushThumper(cell *th, cell *cto);
 
-template<class T> T pick(T x, T y) { return hrand(2) ? x : y; }
-template<class T> T pick(T x, T y, T z) { switch(hrand(3)) { case 0: return x; case 1: return y; case 2: return z; } return x; }
-template<class T> T pick(T x, T y, T z, T v) { switch(hrand(4)) { case 0: return x; case 1: return y; case 2: return z; case 3: return v; } return x; }
+template<class T, class... U> T pick(T x, U... u) { std::initializer_list<T> i = {x,u...}; return *(i.begin() + hrand(1+sizeof...(u))); }
+
 template<class T, class V, class... U> bool among(T x, V y) { return x == y; }
 template<class T, class V, class... U> bool among(T x, V y, U... u) { return x==y || among(x,u...); }
 

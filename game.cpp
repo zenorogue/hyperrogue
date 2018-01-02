@@ -52,6 +52,11 @@ flagtype havewhat, hadwhat;
 #define HF_VOID       Flag(24)
 #define HF_HUNTER     Flag(25)
 #define HF_FAILED_AMBUSH     Flag(26)
+#define HF_MAGNET     Flag(27)
+#define HF_HEXD       Flag(28)
+#define HF_ALT        Flag(29)
+#define HF_MONK       Flag(30)
+
 
 bool seenSevenMines = false;
 
@@ -728,17 +733,39 @@ void moveBoatIfUsingOne(cell *to, cell *from) {
     }
   }
 
-bool againstMagnet(cell *c1, cell *c2) { // (from, to)
-  if(!isMagneticPole(c1->monst))
-    return false;
-  forCellEx(c3, c2) 
-    if(c3 != c1 && c3->monst == c1->monst)
+eMonster otherpole(eMonster m) {
+  return eMonster(m ^ moNorthPole ^ moSouthPole);
+  }
+  
+bool againstMagnet(cell *c1, cell *c2, eMonster m) { // (from, to)
+  if(false) forCellEx(c3, c2) { 
+    if(c3 == c1) continue;
+    if(c3->monst == m)
       return true;
+    /* if(c3->monst == otherpole(m) && c3->mov[c3->mondir] != c1) {
+      int i = 0;
+      forCellEx(c4, c3) if(c4->monst == m) i++;
+      if(i == 2) return true;
+      } */
+    }
+  if(c1->monst == m && !isNeighbor(c2, c1->mov[c1->mondir]))
+    return true;
   forCellEx(c3, c1) 
-    if(c3->monst != c1->monst && isMagneticPole(c3->monst))
+    if(c3->monst != m && isMagneticPole(c3->monst))
       if(!isNeighbor(c3, c2))
         return true;
   return false;
+  }
+
+bool againstPair(cell *c1, cell *c2, eMonster m) { // (from, to)
+  if(c1->monst == m && !isNeighbor(c2, c1->mov[c1->mondir]))
+    return true;
+  return false;
+  }
+
+bool notNearItem(cell *c) {
+  forCellCM(c2, c) if(c2->item) return false;
+  return true;
   }
 
 bool passable_for(eMonster m, cell *w, cell *from, flagtype extra) {
@@ -747,8 +774,10 @@ bool passable_for(eMonster m, cell *w, cell *from, flagtype extra) {
   if(m == moWolf) {
     return (isIcyLand(w) || w->land == laVolcano) && (isPlayerOn(w) || passable(w, from, extra));
     }
-  if(isMagneticPole(m) && w && from && againstMagnet(from, w))
-    return false;
+  if(isMagneticPole(m))
+    return !(w && from && againstMagnet(from, w, m)) && passable(w, from, extra);
+  if(m == moPair)
+    return !(w && from && againstPair(from, w, m)) && passable(w, from, extra);
   if(m == passive_switch) return false;
   if(normalMover(m) || isBug(m) || isDemon(m) || m == moHerdBull) {
     if((isWitch(m) || m == moEvilGolem) && w->land != laPower && w->land != laHalloween)
@@ -803,6 +832,12 @@ bool passable_for(eMonster m, cell *w, cell *from, flagtype extra) {
     return passable(w, from, extra) && !cellUnstable(w) && ((m != moWorm && m != moTentacle) || !cellEdgeUnstable(w));
   if(m == moVoidBeast)
     return passable(w, from, extra | P_VOID);
+  if(m == moHexDemon)
+    return !ctof(w) && passable(w, from, extra);
+  if(m == moAltDemon)
+    return (!w || !from || ctof(w) || ctof(from)) && passable(w, from, extra);
+  if(m == moMonk)
+    return notNearItem(w) && passable(w, from, extra);
   return false;
   }
 
@@ -812,6 +847,7 @@ eMonster movegroup(eMonster m) {
     if(m == moWitchWinter) return moWitchWinter;
     return moWitch;
     }
+  // if(isMagneticPole(m)) return m;
   if(normalMover(m)) return moYeti;
   if(m == moShark || m == moCShark) return moShark;
   if(isSlimeMover(m)) return moSlime;
@@ -832,6 +868,8 @@ eMonster movegroup(eMonster m) {
   if(m == moAirElemental) return moAirElemental;
   if(isBull(m)) return moRagingBull;
   if(m == moVoidBeast) return moVoidBeast;
+  if(m == moAltDemon || m == moHexDemon || m == moMonk)
+    return m;
   return moNone;
   }
 
@@ -893,8 +931,11 @@ bool canAttack(cell *c1, eMonster m1, cell *c2, eMonster m2, flagtype flags) {
   if((flags & AF_ONLY_FRIEND) && m2 != moPlayer && !isFriendly(c2)) return false;
   if((flags & AF_ONLY_FBUG)   && m2 != moPlayer && !isFriendlyOrBug(c2)) return false;
   if((flags & AF_ONLY_ENEMY) && (m2 == moPlayer || isFriendlyOrBug(c2))) return false;
-
-  if(m2 == moHedge && !(flags & (AF_STAB | AF_TOUGH | AF_EAT | AF_MAGIC | AF_LANCE | AF_SWORD_INTO | AF_HORNS | AF_BULL)))
+  
+  if(among(m2, moAltDemon, moHexDemon, moPair, moCrusher, moNorthPole, moSouthPole, moMonk) && !(flags & (AF_EAT | AF_MAGIC | AF_BULL | AF_CRUSH)))
+    return false;
+  
+  if(m2 == moHedge && !(flags & (AF_STAB | AF_TOUGH | AF_EAT | AF_MAGIC | AF_LANCE | AF_SWORD_INTO | AF_HORNS | AF_BULL | AF_CRUSH)))
     if(!checkOrb(m1, itOrbThorns)) return false;
   
   // krakens do not try to fight even with Discord
@@ -905,8 +946,8 @@ bool canAttack(cell *c1, eMonster m1, cell *c2, eMonster m2, flagtype flags) {
   if(m2 == moDraugr && !(flags & (AF_SWORD | AF_MAGIC | AF_SWORD_INTO | AF_HORNS))) return false;
 
   // if(m2 == moHerdBull && !(flags & AF_MAGIC)) return false;
-  if(isBull(m2) && !(flags & (AF_MAGIC | AF_HORNS | AF_SWORD_INTO))) return false;
-  if(m2 == moButterfly && !(flags & (AF_MAGIC | AF_BULL | AF_HORNS | AF_SWORD_INTO))) return false;
+  if(isBull(m2) && !(flags & (AF_MAGIC | AF_HORNS | AF_SWORD_INTO | AF_CRUSH))) return false;
+  if(m2 == moButterfly && !(flags & (AF_MAGIC | AF_BULL | AF_HORNS | AF_SWORD_INTO | AF_CRUSH))) return false;
   
   if(!(flags & AF_NOSHIELD) && ((flags & AF_NEXTTURN) ? checkOrb2 : checkOrb)(m2, itOrbShield)) return false;
   
@@ -928,7 +969,7 @@ bool canAttack(cell *c1, eMonster m1, cell *c2, eMonster m2, flagtype flags) {
   if(!(flags & AF_IGNORE_UNARMED) && isUnarmed(m1)) return false;
   
   if(m2 == moGreater || m2 == moGreaterM)
-    if(!(flags & (AF_MAGIC | AF_SWORD_INTO | AF_HORNS))) return false;
+    if(!(flags & (AF_MAGIC | AF_SWORD_INTO | AF_HORNS | AF_CRUSH))) return false;
     
   if(!(flags & AF_GUN)) {
 
@@ -964,10 +1005,10 @@ bool canAttack(cell *c1, eMonster m1, cell *c2, eMonster m2, flagtype flags) {
       return false;
   
   if(m2 == moFlailer && !c2->stuntime)
-    if(!(flags & (AF_MAGIC | AF_TOUGH | AF_EAT | AF_HORNS | AF_LANCE | AF_BACK | AF_SWORD_INTO | AF_BULL))) return false;
+    if(!(flags & (AF_MAGIC | AF_TOUGH | AF_EAT | AF_HORNS | AF_LANCE | AF_BACK | AF_SWORD_INTO | AF_BULL | AF_CRUSH))) return false;
 
   if(m2 == moVizier && c2->hitpoints > 1)
-    if(!(flags & (AF_MAGIC | AF_TOUGH | AF_EAT | AF_HORNS | AF_LANCE | AF_BACK | AF_FAST | AF_BULL))) return false;
+    if(!(flags & (AF_MAGIC | AF_TOUGH | AF_EAT | AF_HORNS | AF_LANCE | AF_BACK | AF_FAST | AF_BULL | AF_CRUSH))) return false;
                        
   return true;
   }
@@ -1117,6 +1158,8 @@ bool krakensafe(cell *c) {
 eMonster active_switch() {
   return eMonster(passive_switch ^ moSwitch1 ^ moSwitch2);
   }
+
+vector<cell*> crush_now, crush_next;
   
 int monstersnear(stalemate1& sm) {
 
@@ -1133,6 +1176,10 @@ int monstersnear(stalemate1& sm) {
   
   if(c->wall == waArrowTrap && c->wparam == 2) {
     which = moArrowTrap; res++;
+    }
+  
+  for(auto c1: crush_now) if(c == c1) {
+    which = moCrusher; res++;
     }
 
   if(sm.who == moPlayer || items[itOrbEmpathy]) {
@@ -2114,6 +2161,12 @@ void killMonster(cell *c, eMonster who, flagtype deathflags) {
     c->monst = moTentacletail;
   else c->monst = moNone;
 
+  if(m == moPair && c->mov[c->mondir]->monst == moPair)
+    killMonster(c->mov[c->mondir], who, deathflags);
+
+  if(isMagneticPole(m) && c->mov[c->mondir]->monst == otherpole(m))
+    killMonster(c->mov[c->mondir], who, deathflags);
+  
   if(m == moEarthElemental) earthWall(c);
   if(m == moAlbatross && items[itOrbLuck]) 
     useupOrb(itOrbLuck, items[itOrbLuck] / 2);
@@ -2262,6 +2315,7 @@ bool attackMonster(cell *c, flagtype flags, eMonster killer) {
     }
   
   if(c->monst == moSkeleton && (flags & AF_SWORD)) dostun = false;
+  if(c->monst == moSkeleton && killer == moCrusher) dostun = false;
 
   bool eu = elementalUnlocked();
   bool tu = trollUnlocked();
@@ -2893,6 +2947,10 @@ void bfs() {
           else if(c2->monst == moWaterElemental) havewhat |= HF_WATER;
           else if(c2->monst == moVoidBeast) havewhat |= HF_VOID;
           else if(c2->monst == moHunterDog) havewhat |= HF_HUNTER;
+          else if(isMagneticPole(c2->monst)) havewhat |= HF_MAGNET;
+          else if(c2->monst == moAltDemon) havewhat |= HF_ALT;
+          else if(c2->monst == moHexDemon) havewhat |= HF_HEXD;
+          else if(c2->monst == moMonk) havewhat |= HF_MONK;
           else if(c2->monst == moShark || c2->monst == moCShark) havewhat |= HF_SHARK;
           else if(c2->monst == moAirElemental) 
             havewhat |= HF_AIR, airmap.push_back(make_pair(c2,0));
@@ -3267,7 +3325,11 @@ void moveMonster(cell *ct, cell *cf) {
   ct->hitpoints = cf->hitpoints;
   ct->stuntime = cf->stuntime;
   
-  if(isMagneticPole(m)) {
+  if(isMagneticPole(m) || m == moPair) {
+    if(cf->mondir == 15) {
+      ct->monst = moPirate;
+      return;
+      }
     cell *other_pole = cf->mov[cf->mondir];
     if(other_pole) {
       ct->mondir = neighborId(ct, other_pole),
@@ -3397,6 +3459,8 @@ void moveMonster(cell *ct, cell *cf) {
   if(m == moAirElemental) airmap.push_back(make_pair(ct, 0));
   if(m == moWolf && ct->land == laVolcano) ct->monst = moLavaWolf;
   if(m == moLavaWolf && isIcyLand(ct)) ct->monst = moWolfMoved;
+  
+  if(m == moPair) ct->stuntime++;
 
   int inc = incline(cf, ct);
   if(inc == -3 && ct->monst == moReptile)
@@ -3806,12 +3870,25 @@ cell *moveNormal(cell *c, flagtype mf) {
   if(!quantum) {
     cell *c2 = c->mov[d];
     if(isPlayerOn(c2)) {
+      if(m == moCrusher) {
+        addMessage(XLAT("%The1 raises his weapon...", m));
+        crush_next.push_back(c2);
+        c->stuntime = 7;
+        return c2;
+        }      
       killThePlayerAt(m, c2, 0);
       return c2;
       }
   
     eMonster m2 = c2->monst;
-    if(m2) {
+    
+    if(m2 && m == moCrusher) {
+      addMessage(XLAT("%The1 raises his weapon...", m));
+      crush_next.push_back(c2);
+      c->stuntime = 7;
+      return c2;
+      }
+    else if(m2) {
       attackMonster(c2, AF_ORSTUN | AF_MSG, m);
       if(m == moFlailer && m2 == moIllusion) 
         attackMonster(c, 0, m2);
@@ -4274,6 +4351,21 @@ void groupmove2(cell *c, cell *from, int d, eMonster movtype, flagtype mf) {
   else if(canAttack(c, movtype, from, from->monst, AF_GETPLAYER)) ; */
   else if(passable_for(movtype, from, c, P_CHAIN | P_MONSTER)) ;
   else if(canAttack(c, movtype, from, from->monst, AF_GETPLAYER)) ;
+  else if(isMagneticPole(movtype)) {
+    // a special case here -- we have to ignore the illegality of 
+    // the 'second' move due to an adjacent opposite pole
+    forCellIdEx(c2, d, c)
+      if(c2->monst == movtype) {
+        cell *c3 = c2->mov[c2->mondir];
+        eMonster m2 = c3->monst;
+        c3->monst = moNone;
+        bool ok = 
+           passable_for(movtype, from, c, P_CHAIN | P_MONSTER) 
+        && passable_for(movtype, c, c2, P_CHAIN | P_MONSTER);
+        c3->monst = m2;
+        if(ok) groupmove2(c2, c, d, movtype, mf);
+        }
+    }
   else return;
 
   if(from->monst) {
@@ -4297,9 +4389,9 @@ void groupmove2(cell *c, cell *from, int d, eMonster movtype, flagtype mf) {
   // Kraken movement
   if(movtype == moKrakenH && c->monst == moKrakenT && c->stuntime == 0) 
     kraken::trymove(c);
-
-  if(movegroup(c->monst) == movtype) {
   
+  if(movegroup(c->monst) == movtype) {
+
     int af = AF_ONLY_FBUG | AF_GETPLAYER;
     if(mf & MF_MOUNT) af = 0;
 
@@ -5268,6 +5360,18 @@ void moverefresh(bool turn = true) {
     if(c->monst == moGreater && !cellEdgeUnstable(c)) c->monst = moGreaterM;
     else if(c->monst == moGreaterM) c->monst = moGreater;
     
+    if(c->monst == moPair && !c->stuntime) {
+      cell *c2 = c->mov[c->mondir];
+      if(c2->monst != moPair) continue;
+      if(!c2->stuntime) {
+        cell *c3 = c->mov[(c->mondir + 1) % c->type];
+        if(c3->wall == waColumn) {
+          drawParticles(c3, 0xC00000, 30);
+          c3->wall = waNone;
+          }
+        }
+      }
+    
     if(c->stuntime && !isMutantIvy(c)) {
       c->stuntime--;
       int breathrange = sphere ? 2 : 3;
@@ -5622,6 +5726,14 @@ void movemonsters() {
   if(havewhat & HF_WHIRLWIND) whirlwind::move();
   DEBT("river");
   if(havewhat & HF_RIVER) prairie::move();
+  /* DEBT("magnet");
+  if(havewhat & HF_MAGNET) 
+    groupmove(moSouthPole, 0),
+    groupmove(moNorthPole, 0); */
+  DEBT("bugs");
+  if(havewhat & HF_HEXD) groupmove(moHexDemon, 0);
+  if(havewhat & HF_ALT) groupmove(moAltDemon, 0);
+  if(havewhat & HF_MONK) groupmove(moMonk, 0);
 
   DEBT("worm");
   cell *savepos[MAXPLAYER];
@@ -6905,6 +7017,14 @@ void monstersTurn() {
   if(!phase1) livecaves();
   if(!phase1) ca::simulate();
   if(!phase1) heat::processfires();
+  
+  for(cell *c: crush_now)
+    if(canAttack(c, moCrusher, c, c->monst, AF_GETPLAYER | AF_CRUSH))
+      attackMonster(c, AF_ORSTUN | AF_MSG | AF_GETPLAYER | AF_CRUSH, moCrusher);
+  
+  crush_now = move(crush_next);
+  crush_next.clear();
+  
   DEBT("heat");
   heat::processheat();
   // if(elec::havecharge) elec::drawcharges();

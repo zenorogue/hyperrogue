@@ -1194,5 +1194,7 @@ auto cgm = addHook(clearmemory, 40, [] () {
   recallCell = NULL;
   butterflies.clear();
   buggycells.clear();
+  crush_next.clear(); 
+  crush_now.clear();
   });
 

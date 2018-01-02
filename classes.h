@@ -1,4 +1,4 @@
-static const int motypes = 156;
+static const int motypes = 161;
 
 struct monstertype {
   char  glyph;
@@ -53,6 +53,7 @@ enum eMonster {
   moHunterDog, moTerraWarrior, moJiangshi, moVoidBeast, moLavaWolf, moHunterGuard,
   moIceGolem, moSandBird, moSalamander, moHunterChanging,
   moNorthPole, moSouthPole,
+  moPair, moHexDemon, moAltDemon, moMonk, moCrusher,
   moSwitch1, moSwitch2,
   // shmup specials
   moPlayer, moBullet, moFlailBullet, moFireball, moTongue, moAirball,
