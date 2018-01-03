@@ -876,14 +876,12 @@ namespace dialog {
     displayfr(vid.xres/2, 34 + vid.fsize * 2, 2, vid.fsize, 
       cfile, editext ? 0xFF00FF : 0xFFFF00, 8);
     
-    displayButton(vid.xres*1/5, 38+vid.fsize * 3, 
-      "F2 = save", 2000+SDLK_F2, 8);
-    displayButton(vid.xres*2/5, 38+vid.fsize * 3, 
-      "F3 = load", 2000+SDLK_F3, 8);
-    displayButton(vid.xres*3/5, 38+vid.fsize * 3, 
+    displayButton(vid.xres*1/4, 38+vid.fsize * 3, 
       "F4 = extension", 2000+SDLK_F4, 8);
-    displayButton(vid.xres*4/5, 38+vid.fsize * 3, 
-      "Enter = back", 2000+SDLK_RETURN, 8);
+    displayButton(vid.xres*2/4, 38+vid.fsize * 3, 
+      "Enter = choose", 2000+SDLK_RETURN, 8);
+    displayButton(vid.xres*3/4, 38+vid.fsize * 3, 
+      "Esc = cancel", 2000+SDLK_RETURN, 8);
 
     v.clear();
     
