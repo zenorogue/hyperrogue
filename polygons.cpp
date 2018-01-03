@@ -1020,7 +1020,7 @@ hpcshape
   shFemaleBody, shFemaleHair, shFemaleDress, shWitchDress,
   shWitchHair, shBeautyHair, shFlowerHair, shFlowerHand, shSuspenders,
   shBugBody, shBugArmor, shBugLeg, shBugAntenna,
-  shPickAxe, shPike, shFlailBall, shFlailTrunk, shFlailChain,
+  shPickAxe, shPike, shFlailBall, shFlailTrunk, shFlailChain, shHammerHead,
   shBook, shBookCover, shGrail,
   shBoatOuter, shBoatInner, shCompass1, shCompass2, shCompass3,
   shKnife, shTongue, shFlailMissile, shTrapArrow,
@@ -2156,6 +2156,7 @@ void buildpolys() {
   bshape(shFlailBall, PPR_MONSTER_WPN, scalef, 151);
   bshape(shFlailTrunk, PPR_MONSTER_WPN, scalef, 152);
   bshape(shFlailChain, PPR_MONSTER_SUBWPN, scalef, 153);
+  bshape(shHammerHead, PPR_MONSTER_WPN, scalef, 376);
   // bshape(shScratch, 17, scalef, 156);
   bshape(shSkeletonBody, PPR_MONSTER_BODY, scalef, 157);
   bshape(shSkull, PPR_MONSTER_HEAD, scalef, 158);
@@ -3428,6 +3429,7 @@ NEWSHAPE, 374, 1, 1, -0.229502,-0.051000, 0.320183,0.006447, 0.148302,0.144065, 
 
 NEWSHAPE, 375, 1, 2, -0.090497,-0.016548, -0.072731,-0.044408, -0.058869,-0.063422, -0.031762,-0.071442, -0.001140,-0.143435, 0.032854,-0.162181, 0.080022,-0.161459, 0.108605,-0.129676, 0.112564,-0.096396, 0.102658,-0.077590, 0.088332,-0.113771, 0.046216,-0.129074, 0.017935,-0.063369, 0.049033,-0.046641, 0.032200,-0.027430, 
 
+NEWSHAPE, 376, 1, 1, 0.202167,-0.134605, 0.204591,-0.145446, 0.192856,-0.139999, 0.180908,-0.136821, 0.063679,-0.150430, 0.054862,-0.154571, 0.051985,-0.159521, 0.036546,-0.062257, 0.043529,-0.066187, 0.054300,-0.069873, 0.182749,-0.064458, 0.195918,-0.057169, 0.204973,-0.052339, 0.199643,-0.078121, 0.042703,-0.084239, 0.199470,-0.077992, 0.199531,-0.090084, 0.044591,-0.098658, 0.198774,-0.089982, 0.199787,-0.100708, 0.045748,-0.113148, 0.198272,-0.100502, 0.200147,-0.110605, 0.048127,-0.124053, 0.198630,-0.110398, 0.199672,-0.121163, 0.050049,-0.138713, 0.198913,-0.121059,
 
 NEWSHAPE
 };

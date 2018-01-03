@@ -846,6 +846,10 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, int col, dou
         queuepoly(VBODY, cs.charid >= 2 ? shSabre : shPSword, watercolor(0));
       else if(items[itRevolver])
         queuepoly(VBODY, shGunInHand, fc(314, cs.swordcolor, 3)); // 3 not colored
+      else if(items[itOrbSlaying]) {
+        queuepoly(VBODY, shFlailTrunk, fc(314, cs.swordcolor, 3));
+        queuepoly(VBODY, shHammerHead, fc(314, cs.swordcolor, 3));
+        }
       else if(!shmup::on)
         queuepoly(VBODY, cs.charid >= 2 ? shSabre : shPSword, fc(314, cs.swordcolor, 3)); // 3 not colored
       else if(shmup::curtime >= shmup::getPlayer()->nextshot)
@@ -1239,9 +1243,8 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, int col, dou
     queuepoly(VBODY, shTerraArmor1, darkena(col, 1, 0xFF));
     queuepoly(VBODY, shTerraArmor2, darkena(col, 0, 0xFF));
     queuepoly(VBODY, shTerraArmor3, darkena(col, 1, 0xFF));
-    queuepoly(VBODY, shFlailBall, darkena(col, 0, 0XFF));
-    queuepoly(VBODY, shFlailChain, darkena(col, 1, 0XFF));
-    queuepoly(VBODY, shFlailTrunk, darkena(col, 0, 0XFF));
+    queuepoly(VBODY, shFlailTrunk, darkena(col, 1, 0XFF));
+    queuepoly(VBODY, shHammerHead, darkena(col, 0, 0XFF));
     queuepoly(VHEAD, shRaiderHelmet, darkena(col, 0, 0XFF));
     queuepoly(VHEAD, shPFace, darkena(0xC0C0A0, 0, 0XFF));
     }
