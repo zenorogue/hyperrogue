@@ -682,6 +682,7 @@ void init_textureconfig() {
   addsaver(si_save.id, "center type", 1);
   addsaver(si_save.dir, "center direction", 0);
   addsaver(si_save.reflect, "center reflection", false);
+  addsaver(viewctr.spin, "center spin", 0);
   addsaver(twidth, "texture resolution", 2048);
   addsaver(gsplits, "precision", 1);
   
@@ -735,6 +736,23 @@ bool load_textureconfig() {
     if(nontruncated != target_nontrunc) {
       restartGame('7');
       }
+    }
+  
+  if(true) {
+    celllister cl(currentmap->gamestart(), 20, 10000, NULL);
+    bool found = false;
+    for(cell *c: cl.lst) if(euclid || ctof(c)) {
+      cell *ctr = euclid ? centerover.c : viewctr.h->c7;
+      auto si_here = patterns::getpatterninfo0(c);
+      if(si_here.id == si_save.id && si_here.reflect == si_save.reflect && si_here.dir == si_save.dir) {
+        if(euclid) centerover.c = ctr;
+        else viewctr.h = ctr->master;
+        found = true;
+        break;
+        }
+      }
+    if(!found)
+      addMessage(XLAT("warning: unable to find the center"));
     }
   
   if(!readtexture()) return false;
