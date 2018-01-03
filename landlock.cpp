@@ -212,7 +212,7 @@ int isNative(eLand l, eMonster m) {
     case laSwitch:
       return m == moSwitch1 || m == moSwitch2 ? 2 : 0;
     
-    case laInvincible:
+    case laRuins:
       return among(m, moPair, moHexDemon, moAltDemon, moMonk, moCrusher) ? 2 :
         m == moSkeleton ? 1 : 0;
     }
@@ -309,7 +309,7 @@ eItem treasureType(eLand l) {
     case laDual: return itGlowCrystal;
     case laSnakeNest: return itSnake;
     case laDocks: return itDock;
-    case laInvincible: return itInvix;
+    case laRuins: return itRuins;
     case laSwitch: return itSwitch;
     
     case laCA: return itNone;
@@ -547,7 +547,7 @@ bool landUnlocked(eLand l) {
     case laSwitch:
       return gold() >= R90;
     
-    case laInvincible:
+    case laRuins:
       return kills[moSkeleton];
     }
   return false;
@@ -808,7 +808,7 @@ eLand getNewLand(eLand old) {
     tab[cnt++] = laPalace;
     if(old == laDragon && items[itElixir] >= U10) LIKELY tab[cnt++] = laReptile;
     if(kills[moVizier]) tab[cnt++] = laEmerald;
-    if(kills[moSkeleton]) tab[cnt++] = laInvincible;
+    if(kills[moSkeleton]) tab[cnt++] = laRuins;
     if(items[itFeather] >= U10) {
       tab[cnt++] = laZebra;
       if(old == laMotion || old == laHunting) LIKELY2 tab[cnt++] = laZebra;
@@ -966,7 +966,7 @@ vector<eLand> land_over = {
   laHell, laCrossroads3, laCocytus, laPower, laCrossroads4,
   laCrossroads5,
   // EXTRA
-  laWildWest, laHalloween, laDual, laSnakeNest, laDocks, laInvincible, laSwitch, laMagnetic, laCA
+  laWildWest, laHalloween, laDual, laSnakeNest, laDocks, laRuins, laSwitch, laMagnetic, laCA
   };
 
 vector<eLand> landlist;

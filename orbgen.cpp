@@ -114,7 +114,7 @@ const orbinfo orbinfos[ORBLINES] = {
   {orbgenflags::S_GUEST, laSwitch, 2000, 0, itOrbSpace}, 
   {orbgenflags::S_NATIVE, laSwitch, 2000, 3000, itOrbPhasing}, 
   {orbgenflags::S_NATIVE, laMagnetic, 2000, 3000, itOrbMagnetism},
-  {orbgenflags::S_NATIVE, laInvincible, 2000, 3000, itOrbSlaying},
+  {orbgenflags::S_NATIVE, laRuins, 2000, 3000, itOrbSlaying},
   {orbgenflags::S_NATIVE, laWhirlpool, 0, 2000, itOrbWater}, // needs to be last
   };
 

@@ -1914,8 +1914,8 @@ void giantLandSwitch(cell *c, int d, cell *from) {
         }
       break;
     
-    case laInvincible: {
-      int kf = 10 + items[itInvix] + yendor::hardness();
+    case laRuins: {
+      int kf = 10 + items[itRuins] + yendor::hardness();
       if(d == 8) {
         if(out_ruin(c)) {
           if(hrand(100) < 3)
@@ -1940,8 +1940,8 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           c->monst = pick(moHexDemon, moHexDemon, moHexDemon, moAltDemon, moAltDemon, moMonk, moMonk, moSkeleton, moSkeleton, moCrusher);
           c->hitpoints = 3;
           }
-        if(hrand(1500) < PT(30 + kills[moHexDemon] + kills[moSkeleton] + kills[moMonk] + kills[moPair], 100) && notDippingFor(itInvix))
-          c->item = itInvix;
+        if(hrand(1500) < PT(30 + kills[moHexDemon] + kills[moSkeleton] + kills[moMonk] + kills[moPair], 100) && notDippingFor(itRuins))
+          c->item = itRuins;
         }
       break;
       }

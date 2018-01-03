@@ -2527,7 +2527,7 @@ void setcolors(cell *c, int& wcol, int &fcol) {
     case laDragon: case laStorms: case laTerracotta: case laMercuryRiver:
       fcol = linf[c->land].color; break;
     
-    case laInvincible:
+    case laRuins:
       fcol = pseudohept(c) ? 0xC0C0C0 : 0x40A040;
       break;
     

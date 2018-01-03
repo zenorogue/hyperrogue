@@ -116,7 +116,7 @@ enum eItem {
   itLavaLily, itHunting, itBlizzard, itTerra,
   itOrbSide1, itOrbSide2, itOrbSide3,
   itOrbLava, itOrbMorph, itGlowCrystal, itSnake,
-  itDock, itInvix, itMagnet, itSwitch,
+  itDock, itRuins, itMagnet, itSwitch,
   itOrbPhasing, itOrbMagnetism, itOrbSlaying
   };
 
@@ -190,7 +190,7 @@ enum eLand { laNone, laBarrier, laCrossroads, laDesert, laIce, laCaves, laJungle
   laMirrorWall, laMirrored, laMirrorWall2, laMirrored2,
   laMirrorOld,
   laVolcano, laBlizzard, laHunting, laTerracotta, laMercuryRiver,
-  laDual, laSnakeNest, laDocks, laInvincible, laMagnetic,
+  laDual, laSnakeNest, laDocks, laRuins, laMagnetic,
   laSwitch
   };
 

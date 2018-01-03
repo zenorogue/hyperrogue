@@ -545,7 +545,7 @@ string generateHelpForLand(eLand l) {
     KILLREQ(moAirElemental, laWhirlwind);
     }
   
-  if(l == laInvincible)
+  if(l == laRuins)
     KILLREQ(moSkeleton, laPalace);
     
   if(l == laTrollheim) {
