@@ -473,9 +473,32 @@ struct magicmapper_point {
 
 vector<magicmapper_point> amp;
 
+enum eMagicParameter {
+  mpScale,
+  mpProjection,
+  mpMove,
+  mpRotate,
+  mpSlant,
+  mpStretch,
+  mpMAX
+  };
+
+vector<string> mpnames = {
+  "affect model scale",
+  "affect model projection",
+  "affect model rotation",
+  "affect model position",
+  "affect texture slanting",
+  "affect texture stretching"
+  };
+
+flagtype current_magic = 15;
+
+bool have_mp(eMagicParameter i) { return (current_magic >> i) & 1; }
+
 struct magic_param {
-  bool do_spin;
-  ld spinangle, scale, proj, moveangle, shift;
+  bool do_spin, do_stretch;
+  ld spinangle, scale, proj, moveangle, shift, slant, stretch;
 
   void shuffle() {
     do_spin = hrand(2);
@@ -484,16 +507,38 @@ struct magic_param {
     shift = hrandf() - hrandf();
     scale = hrandf() - hrandf();
     proj = hrandf() - hrandf();
+    do_stretch = hrand(2);
+    slant = have_mp(mpSlant) ? hrandf() - hrandf() : 0;
+    stretch = have_mp(mpStretch) ? hrandf() - hrandf() : 0;
+    }
+  
+  void affect_itt(const transmatrix& T) {
+    transmatrix Ti = inverse(T);
+    for(auto& p: amp)
+      p.texture_coords = Ti * p.texture_coords;
+    itt = itt * T;
     }
   
   void apply(ld delta) {
-    vid.alpha *= exp(delta * proj);
-    vid.scale *= exp(delta * scale);
+    if(have_mp(mpProjection))
+      vid.alpha *= exp(delta * proj);
+    if(have_mp(mpScale))
+      vid.scale *= exp(delta * scale);
 
-    if(do_spin)
-      View = spin(delta * spinangle) * View;
-    else
-      View = spin(moveangle) * xpush(delta*shift) * spin(-moveangle) * View;
+    if(do_spin) {
+      if(have_mp(mpRotate))
+        View = spin(delta * spinangle) * View;
+      }
+    else {
+      if(have_mp(mpMove))
+        View = spin(moveangle) * xpush(delta*shift) * spin(-moveangle) * View;
+      }
+    
+    if(do_stretch && have_mp(mpStretch)) 
+      affect_itt(euaffine(hpxyz(0, delta * stretch, 0)));
+
+    if(!do_stretch && have_mp(mpSlant))
+      affect_itt(euaffine(hpxyz(delta * slant, 0, 0)));
     
     fixmatrix(View);
     }
@@ -540,7 +585,7 @@ void applyMagic() {
     }
   }
 
-enum eTexturePanstate {tpsModel, tpsMove, tpsScale, tpsAffine, tpsZoom, tpsProjection, tpsMagic};
+enum eTexturePanstate {tpsModel, tpsMove, tpsScale, tpsAffine, tpsZoom, tpsProjection};
 eTexturePanstate panstate;
 
 void mousemovement() {
@@ -597,18 +642,6 @@ void mousemovement() {
         }
       if(nonzero) lastmouse = mouseeu;
       newmove = false;
-      }
-    
-    case tpsMagic: {
-      if(!mouseover) return;
-      if(newmove) {
-        magicmapper_point newpoint;
-        newpoint.c = mouseover;
-        newpoint.cell_relative = inverse(gmatrix[mouseover]) * mouseh;
-        amp.push_back(newpoint);
-        newmove = false;
-        }
-      amp.back().texture_coords = mouseeu;
       }
     
     default: break;
@@ -713,6 +746,80 @@ bool load_textureconfig() {
   return true;
   }
 
+void showMagicMenu() {
+  cmode = sm::SIDE | sm::MAYDARK | sm::DIALOG_STRICT_X;
+  gamescreen(0);  
+
+  dialog::init(XLAT("texture auto-adjustment"));
+
+  dialog::addInfo(XLAT("drag from the model to the texture"));
+  
+  for(int i=0; i<mpMAX; i++)
+    dialog::addBoolItem(XLAT(mpnames[i]), have_mp(eMagicParameter(i)), 'a'+i);
+  
+  dialog::addSelItem(XLAT("delete markers"), its(size(amp)), 'D');
+  dialog::addItem(XLAT("perform auto-adjustment"), 'R');
+  dialog::addItem(XLAT("back"), '0');
+
+  getcstat = '-';
+
+  dialog::display();
+
+  if(holdmouse) {
+    hyperpoint mouseeu = hpxyz((mousex - vid.xcenter + .0) / vid.scrsize, (mousey - vid.ycenter + .0) / vid.scrsize, 1);
+    if(newmove) {
+      magicmapper_point newpoint;
+      newpoint.c = mouseover;
+      newpoint.cell_relative = inverse(gmatrix[mouseover]) * mouseh;
+      amp.push_back(newpoint);
+      newmove = false;
+      }
+    amp.back().texture_coords = mouseeu;
+    }
+  
+  if(tstate == tsAdjusting) {
+    initquickqueue();
+    char letter = 'A';
+    for(auto& am: amp) {
+      hyperpoint h = shmup::ggmatrix(am.c) * am.cell_relative;
+      display(h);
+      queuechr(h, vid.fsize, letter, 0xC00000, 1);
+
+      hyperpoint inmodel;
+      applymodel(h, inmodel);
+      inmodel[0] *= vid.radius * 1. / vid.scrsize;
+      inmodel[1] *= vid.radius * 1. / vid.scrsize;
+
+      queuechr(
+        vid.xcenter + vid.scrsize * am.texture_coords[0], 
+        vid.ycenter + vid.scrsize * am.texture_coords[1],
+        0, vid.fsize, letter, 0x00C000, 1);
+      
+      letter++;
+      }
+    quickqueue();
+    }
+  
+  keyhandler = [] (int sym, int uni) {
+    // handlePanning(sym, uni);
+    dialog::handleNavigation(sym, uni);
+    
+    if(uni == '-' && tstate == tsAdjusting) {
+      if(!holdmouse) {
+        holdmouse = true;
+        newmove = true;
+        }
+      }
+    else if(uni >= 'a' && uni < 'a' + mpMAX) 
+      current_magic ^= 1<<(uni - 'a');
+
+    else if(uni == 'D') amp.clear();
+    else if(uni == 'R') applyMagic();
+    else if(doexiton(sym, uni))
+      popScreen();
+    };
+  }
+  
 void showMenu() {
   cmode = sm::SIDE | sm::MAYDARK | sm::DIALOG_STRICT_X;
   gamescreen(0);  
@@ -740,16 +847,11 @@ void showMenu() {
     dialog::addBoolItem(XLAT("zoom/scale the model"), panstate == tpsZoom, 'z');
     dialog::addBoolItem(XLAT("projection"), panstate == tpsProjection, 'p');
     dialog::addBoolItem(XLAT("affine transformations"), panstate == tpsAffine, 'y');
-    dialog::addBoolItem(XLAT("magic"), panstate == tpsMagic, 'A');
+    dialog::addBoolItem(XLAT("magic"), false, 'A');
 
     dialog::addColorItem(XLAT("grid color (master)"), master_color, 'M');
     dialog::addColorItem(XLAT("grid color (copy)"), slave_color, 'C');
     
-    if(panstate == tpsMagic) {
-      dialog::addSelItem(XLAT("delete markers"), its(size(amp)), 'D');
-      dialog::addItem(XLAT("perform auto-adjustment"), 'R');
-      }
-
     dialog::addSelItem(XLAT("precision"), its(gsplits), 'P');
     dialog::addItem(XLAT("save the raw texture"), 'S');
     }
@@ -778,33 +880,6 @@ void showMenu() {
 
   dialog::display();
   
-  if(tstate == tsAdjusting) {
-    initquickqueue();
-    char letter = 'A';
-    for(auto& am: amp) {
-      hyperpoint h = shmup::ggmatrix(am.c) * am.cell_relative;
-      display(h);
-      queuechr(h, vid.fsize, letter, 0xC00000, 1);
-
-      hyperpoint inmodel;
-      applymodel(h, inmodel);
-      inmodel[0] *= vid.radius * 1. / vid.scrsize;
-      inmodel[1] *= vid.radius * 1. / vid.scrsize;
-      queuechr(
-        vid.xcenter + vid.scrsize * inmodel[0], 
-        vid.ycenter + vid.scrsize * inmodel[1],
-        0, vid.fsize/2, letter, 0xC0C0C0, 1);
-
-      queuechr(
-        vid.xcenter + vid.scrsize * am.texture_coords[0], 
-        vid.ycenter + vid.scrsize * am.texture_coords[1],
-        0, vid.fsize, letter, 0x00C000, 1);
-      
-      letter++;
-      }
-    quickqueue();
-    }
-  
   if(holdmouse) mousemovement();
   
   keyhandler = [] (int sym, int uni) {
@@ -824,9 +899,8 @@ void showMenu() {
     else if(uni == 'y' && tstate == tsAdjusting) panstate = tpsAffine;
     else if(uni == 'z' && tstate == tsAdjusting) panstate = tpsZoom;
     else if(uni == 'p' && tstate == tsAdjusting) panstate = tpsProjection;
-    else if(uni == 'A' && tstate == tsAdjusting) panstate = tpsMagic;
-    else if(uni == 'D' && tstate == tsAdjusting) amp.clear();
-    else if(uni == 'R' && tstate == tsAdjusting) applyMagic();
+    else if(uni == 'A' && tstate == tsAdjusting) 
+      pushScreen(showMagicMenu);
 
     else if(uni == 's' && tstate == tsActive) 
       dialog::openFileDialog(configname, XLAT("texture config to save:"), ".txc", 

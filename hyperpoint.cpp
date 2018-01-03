@@ -208,8 +208,8 @@ transmatrix euscalezoom(hyperpoint h) {
 
 transmatrix euaffine(hyperpoint h) {
   transmatrix T = Id;
-  T[1][0] = h[0];
-  T[1][2] = h[1];
+  T[0][1] = h[0];
+  T[1][1] = exp(h[1]);
   return T;
   }
 
