@@ -211,6 +211,10 @@ int isNative(eLand l, eMonster m) {
     
     case laSwitch:
       return m == moSwitch1 || m == moSwitch2 ? 2 : 0;
+    
+    case laInvincible:
+      return among(m, moPair, moHexDemon, moAltDemon, moMonk, moCrusher) ? 2 :
+        m == moSkeleton ? 1 : 0;
     }
   return false;
   }
@@ -542,6 +546,9 @@ bool landUnlocked(eLand l) {
       
     case laSwitch:
       return gold() >= R90;
+    
+    case laInvincible:
+      return kills[moSkeleton];
     }
   return false;
   }
@@ -801,6 +808,7 @@ eLand getNewLand(eLand old) {
     tab[cnt++] = laPalace;
     if(old == laDragon && items[itElixir] >= U10) LIKELY tab[cnt++] = laReptile;
     if(kills[moVizier]) tab[cnt++] = laEmerald;
+    if(kills[moSkeleton]) tab[cnt++] = laInvincible;
     if(items[itFeather] >= U10) {
       tab[cnt++] = laZebra;
       if(old == laMotion || old == laHunting) LIKELY2 tab[cnt++] = laZebra;

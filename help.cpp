@@ -545,6 +545,9 @@ string generateHelpForLand(eLand l) {
     KILLREQ(moAirElemental, laWhirlwind);
     }
   
+  if(l == laInvincible)
+    KILLREQ(moSkeleton, laPalace);
+    
   if(l == laTrollheim) {
     KILLREQ(moTroll, laCaves);
     KILLREQ(moFjordTroll, laLivefjord);
