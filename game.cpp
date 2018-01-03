@@ -4839,7 +4839,11 @@ void sideAttack(cell *mf, int dir, eMonster who, int bonus, eItem orb) {
   for(int k: {-1, 1}) {
     cell *mt = getMovR(mf, dir + k*bonus);
     eMonster m = mt->monst;
-    if(canAttack(mf, who, mt, m, AF_SIDE)) {
+    flagtype f = AF_SIDE;
+    if(items[itOrbSlaying]) f|= AF_CRUSH;
+    if(canAttack(mf, who, mt, m, f)) {
+      if((f & AF_CRUSH) && !canAttack(mf, who, mt, m, AF_SIDE | AF_MUSTKILL))
+        markOrb(itOrbSlaying);
       markOrb(orb);
       if(who != moPlayer) markOrb(itOrbEmpathy);
       if(attackMonster(mt, AF_NORMAL | AF_SIDE | AF_MSG, who)) 
