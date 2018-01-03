@@ -1418,7 +1418,7 @@ void show() {
   if(rug::rugged && torus)
     dialog::addBoolItem(XLAT("keep shape"), keep_shape, 'k');
   if(!(keep_shape && good_shape)) {
-    dialog::addSelItem(XLAT("error"), ftsg(err_zero), 'e');
+    dialog::addSelItem(XLAT("maximum error"), ftsg(err_zero), 'e');
     if(rug::rugged)
       dialog::lastItem().value += " (" + ftsg(err_zero_current) + ")";
     }
@@ -1480,7 +1480,9 @@ void show() {
         "In the orthogonal projection this just controls the scale."
         );
     else if(uni == 'e') {
-      dialog::editNumber(err_zero, 1e-9, 1, .1, 1e-3, "error", "error");
+      dialog::editNumber(err_zero, 1e-9, 1, .1, 1e-3, "maximum error", 
+        "New points are added when the current error in the model is smaller than this value."
+        );
       dialog::scaleLog();
       dialog::reaction = [] () { err_zero_current = err_zero; };
       }
