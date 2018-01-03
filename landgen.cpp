@@ -76,6 +76,18 @@ bool blizzard_no_escape(cell *c) {
   return blizzard_no_escape1(c);
   }
 
+bool out_ruin(cell *c) {
+  if(sphere)
+    return getHemisphere(c, 0) > 0;
+  else if(stdhyperbolic) {
+    int cd = getCdata(c, 3);
+    cd &= 31;
+    return cd >= 16;
+    }
+  else 
+    return windmap::at(c) >= 128;
+  }
+
 // the giant switch generating most of the lands...
 
 void giantLandSwitch(cell *c, int d, cell *from) {
@@ -1905,16 +1917,14 @@ void giantLandSwitch(cell *c, int d, cell *from) {
     case laInvincible: {
       int kf = 10 + items[itInvix] + yendor::hardness();
       if(d == 8) {
-        if(windmap::at(c) >= 128) {
+        if(out_ruin(c)) {
           if(hrand(100) < 3)
-            c->wall = waColumn;
+            c->wall = waRuinWall;
           }
         else if(hrand(100) < 75) {
-          forCellEx(c2, c) if(windmap::at(c2) >= 128)
-            c->wall = waColumn;
+          forCellEx(c2, c) if(out_ruin(c2))
+            c->wall = waRuinWall;
           }
-        if(hrand(1000) < 2)
-          c->wall = waColumn;
         if(hrand(50000) < kf && !c->monst && !c->wall) {
           cell *c1 = c;
           cell *c2 = createMov(c1, hrand(c1->type));
@@ -1927,7 +1937,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
         }
       ONEMPTY {
         if(hrand(10000) < kf && !c->monst) {
-          c->monst = pick(moHexDemon, moAltDemon, moMonk, moSkeleton, moCrusher);
+          c->monst = pick(moHexDemon, moHexDemon, moHexDemon, moAltDemon, moAltDemon, moMonk, moMonk, moSkeleton, moSkeleton, moCrusher);
           c->hitpoints = 3;
           }
         if(hrand(1500) < PT(30 + kills[moHexDemon] + kills[moSkeleton] + kills[moMonk] + kills[moPair], 100) && notDippingFor(itInvix))
