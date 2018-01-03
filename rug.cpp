@@ -1431,13 +1431,16 @@ void show() {
     dialog::handleNavigation(sym, uni);
 
     if(uni == 'h') gotoHelp(
+      XLAT(
       "In this mode, HyperRogue is played on a 3D model of a part of the hyperbolic plane, "
       "similar to one you get from the 'paper model creator' or by hyperbolic crocheting.\n\n"
       "This requires some OpenGL extensions and may crash or not work correctly -- enabling "
       "the 'render texture without OpenGL' options may be helpful in this case. Also the 'render once' option "
       "will make the rendering faster, but the surface will be rendered only once, so "
       "you won't be able to play a game on it.\n\n"
-      "Use arrow keys to rotate, Page Up/Down to zoom."
+      "Use arrow keys to rotate, Page Up/Down to zoom.")
+      + "\n\n" + 
+      XLAT("In the perspective projection, you can use arrows to rotate the camera, Page Up/Down to go forward/backward, Shift+arrows to strafe, and Ctrl+arrows to rotate the model.")
       );
     else if(uni == 'u') {
       if(rug::rugged) rug::close();
@@ -1446,7 +1449,10 @@ void show() {
     else if(uni == 'o' && !rug::rugged)
       renderonce = !renderonce;
     else if(uni == 'v') {
-      dialog::editNumber(vertex_limit, 0, 50000, 500, 3000, "vertex limit", "vertex limit");
+      dialog::editNumber(vertex_limit, 0, 50000, 500, 3000, "vertex limit", 
+        "The more vertices, the more accurate the Hypersian Rug model is. "
+        "However, too high might make the model slow to compute and render."
+        );
       dialog::reaction = [] () { err_zero_current = err_zero; };
       }
     else if(uni == 'r') 
@@ -1469,7 +1475,10 @@ void show() {
         }
       }
     else if(uni == 'd')
-      dialog::editNumber(model_distance, -10, 10, .1, 1, "model distance", "model distance");
+      dialog::editNumber(model_distance, -10, 10, .1, 1, "model distance", 
+        "In the perspective projection, this sets the distance from the camera to the center of the model. "
+        "In the orthogonal projection this just controls the scale."
+        );
     else if(uni == 'e') {
       dialog::editNumber(err_zero, 1e-9, 1, .1, 1e-3, "error", "error");
       dialog::scaleLog();
@@ -1479,7 +1488,8 @@ void show() {
       keep_shape = !keep_shape;
     else if(uni == 'f') {
       dialog::editNumber(fov, 1, 170, 1, 45, "field of view", 
-        "Horizontal field of view."
+        "Horizontal field of view, in the perspective projection. "
+        "In the orthogonal projection this just controls the scale."
         );
       }
     else if(uni == 'n' && !rug::rugged)
