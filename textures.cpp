@@ -169,6 +169,9 @@ bool readtexture() {
   png_read_image(png, &row_pointers[0]);
   fclose(f);
 
+  for(int i=0; i<ty*tx; i++)
+    swap(part(origpixels[i], 0), part(origpixels[i], 2));
+    
   auto pix = [&] (int x, int y) { 
     if(x<0 || y<0 || x >= tx || y >= ty) return 0;
     return origpixels[y*tx + x];
@@ -837,7 +840,20 @@ void showMagicMenu() {
       popScreen();
     };
   }
-  
+
+string texturehelp = 
+  "This mode lets you to change the floor tesselation easily -- "
+  "select 'paint a new texture' and draw like in a Paint program. "
+  "The obtained pattern can then be easily changed to another geometry, "
+  "or saved.\n\n"
+  "Instead of drawing, it is also possible to use an arbitrary image "
+  "as a texture. "
+  "Works best with spherical/Euclidean/hyperbolic tesselations "
+  "(e.g., a photo of a soccerball, or one of the tesselations by M. C. "
+  "Escher), but it can be also used on arbitrary photos to make them periodic "
+  "(these probably work best with the 'large picture' setting in geometry selection). "
+  "Again, tesselations can have their geometry changed.\n\n";
+
 void showMenu() {
   cmode = sm::SIDE | sm::MAYDARK | sm::DIALOG_STRICT_X;
   gamescreen(0);  
@@ -1010,6 +1026,8 @@ void showMenu() {
       saveRawTexture();
     else if(uni == 'S' && tstate == tsActive) 
       saveFullTexture();
+    else if(uni == SDLK_F1)
+      gotoHelp(texturehelp);
     else if(doexiton(sym, uni))
       popScreen();
     };
@@ -1154,9 +1172,8 @@ void drawPixel(cell *c, hyperpoint h, int col) {
   }
 
 void remap(eTextureState old_tstate, eTextureState old_tstate_max) {
-  if(!patterns::compatible(texture::cgroup, patterns::cgroup)) return;
   texture_map.clear();
-  if(tstate_max == tsActive) {
+  if(old_tstate == tsActive && patterns::compatible(texture::cgroup, patterns::cgroup)) {
   
     tstate = old_tstate;
     tstate_max = old_tstate_max;
@@ -1196,6 +1213,13 @@ void remap(eTextureState old_tstate, eTextureState old_tstate_max) {
         return;
         }
       }     
+    }
+  else if(old_tstate >= tsAdjusting) {
+    printf("perform_mapping %d/%d\n", tstate, tstate_max);
+    calcparam();
+    drawthemap();
+    perform_mapping();
+    printf("texture_map size = %d\n", size(texture_map));
     }
   }
   
