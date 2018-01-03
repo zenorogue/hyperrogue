@@ -215,6 +215,9 @@ int isNative(eLand l, eMonster m) {
     case laRuins:
       return among(m, moPair, moHexDemon, moAltDemon, moMonk, moCrusher) ? 2 :
         m == moSkeleton ? 1 : 0;
+      
+    case laMagnetic:
+      return isMagneticPole(m) ? 2 : 0;
     }
   return false;
   }
@@ -311,6 +314,7 @@ eItem treasureType(eLand l) {
     case laDocks: return itDock;
     case laRuins: return itRuins;
     case laSwitch: return itSwitch;
+    case laMagnetic: return itMagnet;
     
     case laCA: return itNone;
     }
@@ -549,6 +553,9 @@ bool landUnlocked(eLand l) {
     
     case laRuins:
       return kills[moSkeleton];
+    
+    case laMagnetic:
+      return false; // not implemented
     }
   return false;
   }
@@ -1222,6 +1229,9 @@ int isLandValid(eLand l) {
   
   if(l == laStorms && torus) 
     return 3;
+  
+  if(l == laMagnetic)
+    return 0;
 
   return 2;
   }

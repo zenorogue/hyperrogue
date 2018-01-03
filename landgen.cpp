@@ -1925,7 +1925,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           forCellEx(c2, c) if(out_ruin(c2))
             c->wall = waRuinWall;
           }
-        if(hrand(50000) < kf && !c->monst && !c->wall) {
+        if(hrand(40000) < kf && !c->monst && !c->wall) {
           cell *c1 = c;
           cell *c2 = createMov(c1, hrand(c1->type));
           if(c2->monst || c2->wall) return;
@@ -1936,7 +1936,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           }
         }
       ONEMPTY {
-        if(hrand(10000) < kf && !c->monst) {
+        if(hrand(7000) < kf && !c->monst) {
           c->monst = pick(moHexDemon, moHexDemon, moHexDemon, moAltDemon, moAltDemon, moMonk, moMonk, moSkeleton, moSkeleton, moCrusher);
           c->hitpoints = 3;
           }

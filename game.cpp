@@ -1054,6 +1054,9 @@ bool stalemate1::isKilled(cell *w) {
     if(head1 == head2 && dragon::totalhp(head1) ==1) return true;
     }
   
+  if((w->monst == moPair || isMagneticPole(w->monst)) && killed && w->mov[w->mondir] == killed)
+    return true;
+  
   if(w->monst == moKrakenT && killed && killed->monst == moKrakenT && killed->hitpoints) {
     cell *head1 = w->mov[w->mondir];
     cell *head2 = killed->mov[killed->mondir];
@@ -1485,7 +1488,7 @@ void prespill(cell* c, eWall t, int rad, cell *from) {
     c->wall == waVinePlant || isFire(c) || c->wall == waBonfireOff || c->wall == waVineHalfA || c->wall == waVineHalfB ||
     c->wall == waCamelotMoat || c->wall == waSea || c->wall == waCTree ||
     c->wall == waRubble || c->wall == waGargoyleFloor || c->wall == waGargoyle ||
-    c->wall == waRose || c->wall == waPetrified || c->wall == waPetrifiedBridge)
+    c->wall == waRose || c->wall == waPetrified || c->wall == waPetrifiedBridge || c->wall == waRuinWall)
       t = waTemporary;
 
   if(c->wall == waSulphur) {
@@ -1540,7 +1543,7 @@ bool earthFloor(cell *c) {
   if(c->wall == waDeadwall) { c->wall = waDeadfloor; return true; }
   if(c->wall == waDune) { c->wall = waNone; return true; }
   if(c->wall == waStone && c->land != laTerracotta) { c->wall = waNone; return true; }
-  if(c->wall == waAncientGrave || c->wall == waFreshGrave) {
+  if(c->wall == waAncientGrave || c->wall == waFreshGrave || c->wall == waRuinWall) {
     c->wall = waNone;
     return true;
     }
@@ -1589,6 +1592,11 @@ bool earthWall(cell *c) {
   if(c->wall == waNone && c->land == laDesert) {
     c->item = itNone;
     c->wall = waDune;
+    return true;
+    }
+  if(c->wall == waNone && c->land == laRuins) {
+    c->item = itNone;
+    c->wall = waRuinWall;
     return true;
     }
   if(c->wall == waNone && isElemental(c->land)) {
@@ -1768,7 +1776,7 @@ void explodeMine(cell *c) {
       placeWater(c, c);
       }
     else if(c2->wall == waPalace || c2->wall == waOpenGate || c2->wall == waClosedGate ||
-      c2->wall == waSandstone || c2->wall == waMetal || c2->wall == waSaloon) {
+      c2->wall == waSandstone || c2->wall == waMetal || c2->wall == waSaloon || c2->wall == waRuinWall) {
       c2->wall = waNone;
       makeflame(c2, 10, false);
       }
@@ -3962,6 +3970,7 @@ void explodeAround(cell *c) {
       if(c2->wall == waPlatform) c2->wall = waNone;
       if(c2->wall == waStone) c2->wall = waNone, destroyTrapsAround(c2);
       if(c2->wall == waRose) c2->wall = waNone;
+      if(c2->wall == waRuinWall) c2->wall = waNone;
       if(c2->wall == waLadder) c2->wall = waNone;
       if(c2->wall == waGargoyle) c2->wall = waNone;
       if(c2->wall == waSandstone) c2->wall = waNone;
