@@ -975,6 +975,8 @@ bool withRose(cell *cfrom, cell *cto);
 
 // canAttack/moveval flags
 
+#define AF_NORMAL            0          // nothing special about this attack
+
 #define AF_TOUGH             Flag(0)    // tough attacks: Hyperbugs
 #define AF_MAGIC             Flag(1)    // magical attacks: Flash
 #define AF_STAB              Flag(2)    // stabbing attacks (usually ignored except Hedgehogs)
@@ -1000,7 +1002,7 @@ bool withRose(cell *cfrom, cell *cto);
 #define AF_SWORD             Flag(20)   // big sword
 #define AF_SWORD_INTO        Flag(21)   // moving into big sword
 #define AF_MSG               Flag(22)   // produce a message
-#define AF_ORSTUN            Flag(23)   // attackMonster: allow stunning
+#define AF_MUSTKILL          Flag(23)   // when TRUE, stunning attacks are not accepted by canAttack
 #define AF_NEXTTURN          Flag(24)   // next turn -- don't count shield at power 1
 #define AF_FALL              Flag(25)   // death by falling
 #define MF_STUNNED           Flag(26)   // edgeunstable: ignore ladders (as stunned monsters do)
@@ -1108,7 +1110,7 @@ namespace sword {
   }
 
 void killThePlayer(eMonster m, int id, flagtype flags);
-bool attackJustStuns(cell *c2);
+bool attackJustStuns(cell *c2, flagtype flags);
 
 bool isTargetOrAdjacent(cell *c);
 bool warningprotection();

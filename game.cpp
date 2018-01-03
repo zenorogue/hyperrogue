@@ -928,6 +928,9 @@ bool canAttack(cell *c1, eMonster m1, cell *c2, eMonster m2, flagtype flags) {
   
   if(m2 == moPlayer && peace::on) return false;
   
+  if((flags & AF_MUSTKILL) && attackJustStuns(c2, flags))
+    return false;
+  
   if((flags & AF_ONLY_FRIEND) && m2 != moPlayer && !isFriendly(c2)) return false;
   if((flags & AF_ONLY_FBUG)   && m2 != moPlayer && !isFriendlyOrBug(c2)) return false;
   if((flags & AF_ONLY_ENEMY) && (m2 == moPlayer || isFriendlyOrBug(c2))) return false;
@@ -943,7 +946,7 @@ bool canAttack(cell *c1, eMonster m1, cell *c2, eMonster m2, flagtype flags) {
      (m2 == moKrakenT || m2 == moKrakenH))
     return false;
   
-  if(m2 == moDraugr && !(flags & (AF_SWORD | AF_MAGIC | AF_SWORD_INTO | AF_HORNS))) return false;
+  if(m2 == moDraugr && !(flags & (AF_SWORD | AF_MAGIC | AF_SWORD_INTO | AF_HORNS | AF_CRUSH))) return false;
 
   // if(m2 == moHerdBull && !(flags & AF_MAGIC)) return false;
   if(isBull(m2) && !(flags & (AF_MAGIC | AF_HORNS | AF_SWORD_INTO | AF_CRUSH))) return false;
@@ -998,7 +1001,7 @@ bool canAttack(cell *c1, eMonster m1, cell *c2, eMonster m2, flagtype flags) {
   // if(m2 == moTortoise && !(flags & AF_MAGIC)) return false;
   
   if(m2 == moRoseBeauty)
-    if(!(flags & (AF_MAGIC | AF_LANCE | AF_GUN | AF_SWORD_INTO | AF_BULL))) 
+    if(!(flags & (AF_MAGIC | AF_LANCE | AF_GUN | AF_SWORD_INTO | AF_BULL | AF_CRUSH))) 
     if(!isMimic(m1))
     if(!checkOrb(m1, itOrbBeauty) && !checkOrb(m1, itOrbAether) && !checkOrb(m1, itOrbShield))
     if(!c1 || !c2 || !withRose(c1,c2))
@@ -1007,7 +1010,7 @@ bool canAttack(cell *c1, eMonster m1, cell *c2, eMonster m2, flagtype flags) {
   if(m2 == moFlailer && !c2->stuntime)
     if(!(flags & (AF_MAGIC | AF_TOUGH | AF_EAT | AF_HORNS | AF_LANCE | AF_BACK | AF_SWORD_INTO | AF_BULL | AF_CRUSH))) return false;
 
-  if(m2 == moVizier && c2->hitpoints > 1)
+  if(m2 == moVizier && c2->hitpoints > 1 && !c2->stuntime)
     if(!(flags & (AF_MAGIC | AF_TOUGH | AF_EAT | AF_HORNS | AF_LANCE | AF_BACK | AF_FAST | AF_BULL | AF_CRUSH))) return false;
                        
   return true;
@@ -1800,7 +1803,7 @@ void stunMonster(cell *c2) {
     (c2->monst == moGreater || c2->monst == moGreaterM) ? 5 :
     c2->monst == moButterfly ? 2 :
     c2->monst == moDraugr ? 1 :
-    c2->monst == moVizier ? 1 :
+    c2->monst == moVizier ? 0 :
     c2->monst == moHedge ? 1 :
     c2->monst == moFlailer ? 1 :
     c2->monst == moSalamander ? 6 :
@@ -1816,8 +1819,15 @@ void stunMonster(cell *c2) {
   checkStunKill(c2);
   }
 
-bool attackJustStuns(cell *c2) {
-  return isStunnable(c2->monst) && c2->hitpoints > 1;
+bool attackJustStuns(cell *c2, flagtype f) {
+  if(f & AF_HORNS)
+    return hornStuns(c2);
+  else if((f & AF_SWORD) && c2->monst == moSkeleton)
+    return false;
+  else if(f & (AF_CRUSH | AF_MAGIC | AF_FALL | AF_EAT | AF_GUN))
+    return false;
+  else
+    return isStunnable(c2->monst) && c2->hitpoints > 1;
   }
   
 void moveEffect(cell *ct, cell *cf, eMonster m);
@@ -2306,17 +2316,13 @@ bool attackMonster(cell *c, flagtype flags, eMonster killer) {
   
   int tkt = killtypes();
   
-  bool dostun = (flags & AF_ORSTUN) && attackJustStuns(c);
+  bool dostun = attackJustStuns(c, flags);
   
-  if((flags & AF_HORNS) && hornStuns(c)) dostun = true;
   if((flags & AF_BULL) && c->monst == moVizier && c->hitpoints > 1) {
     dostun = true;
     c->stuntime = 2;
     }
   
-  if(c->monst == moSkeleton && (flags & AF_SWORD)) dostun = false;
-  if(c->monst == moSkeleton && killer == moCrusher) dostun = false;
-
   bool eu = elementalUnlocked();
   bool tu = trollUnlocked();
   
@@ -3400,7 +3406,7 @@ void moveMonster(cell *ct, cell *cf) {
     for(int u=2; u<=ct->type-2; u++) {
       cell *c3 = ct->mov[(ct->mondir+u)%ct->type]; 
       if(canAttack(ct, moLancer, c3, c3->monst, AF_LANCE | AF_GETPLAYER)) {
-        attackMonster(c3, AF_LANCE | AF_ORSTUN | AF_MSG | AF_GETPLAYER, m);
+        attackMonster(c3, AF_LANCE | AF_MSG | AF_GETPLAYER, m);
         }
       }
     }
@@ -3480,7 +3486,7 @@ void moveMonster(cell *ct, cell *cf) {
     fallMonster(ct);
     }
   if(sword::at(ct) && canAttack(NULL, moPlayer, ct, m, AF_SWORD_INTO)) {
-    attackMonster(ct, AF_SWORD_INTO | AF_ORSTUN | AF_MSG, moPlayer);
+    attackMonster(ct, AF_SWORD_INTO | AF_MSG, moPlayer);
     achievement_gain("GOSWORD");
     }
   }
@@ -3819,7 +3825,7 @@ void beastAttack(cell *c, bool player) {
   if(c->mondir == NODIR) return;
   forCellIdEx(c2, d, c) {
     bool opposite = angledist(c, d, c->mondir) >= 3;
-    int flags = AF_BULL | AF_ORSTUN;
+    int flags = AF_BULL;
     if(player) flags |= AF_GETPLAYER;
     if(!opposite) flags |= AF_ONLY_FBUG;
     if(canAttack(c, moRagingBull, c2, c2->monst, flags)) {
@@ -3889,7 +3895,7 @@ cell *moveNormal(cell *c, flagtype mf) {
       return c2;
       }
     else if(m2) {
-      attackMonster(c2, AF_ORSTUN | AF_MSG, m);
+      attackMonster(c2, AF_NORMAL | AF_MSG, m);
       if(m == moFlailer && m2 == moIllusion) 
         attackMonster(c, 0, m2);
       return c2;
@@ -3912,7 +3918,7 @@ cell *moveNormal(cell *c, flagtype mf) {
       else {
         eMonster m2 = c2->monst;
         if(m2) {
-          attackMonster(c2, AF_ORSTUN | AF_MSG, m);
+          attackMonster(c2, AF_NORMAL | AF_MSG, m);
           if(m == moFlailer && m2 == moIllusion) 
             attackMonster(c, 0, m2);
           attacking = true;
@@ -4007,7 +4013,7 @@ void killThePlayer(eMonster m, int id, flagtype flags) {
     }
   else if(items[itOrbDomination] && playerpos(id)->monst) {
     addMessage(XLAT("%The1 tries to dismount you!", m));
-    attackMonster(playerpos(id), AF_ORSTUN, m);
+    attackMonster(playerpos(id), AF_NORMAL, m);
     useupOrb(itOrbDomination, items[itOrbDomination]/2);
     }
   else if(items[itOrbShell] && !(flags & AF_EAT)) {
@@ -4080,7 +4086,7 @@ void moveWorm(cell *c) {
     // explodeAround(c);
     forCellEx(c2, c)
       if(canAttack(c, c->monst, c2, c2->monst, mounted ? AF_ONLY_ENEMY : (AF_GETPLAYER | AF_ONLY_FBUG))) {
-        attackMonster(c2, AF_ORSTUN | AF_MSG | AF_GETPLAYER, c->monst);
+        attackMonster(c2, AF_NORMAL | AF_MSG | AF_GETPLAYER, c->monst);
         }
     cell *c2 = c;
     vector<cell*> allcells;
@@ -4277,13 +4283,13 @@ void moveivy() {
           if(isPlayerOn(c->mov[j])) 
             killThePlayerAt(c->monst, c->mov[j], 0);
           else {
-            if(attackJustStuns(c->mov[j]))
+            if(attackJustStuns(c->mov[j], 0))
               addMessage(XLAT("The ivy attacks %the1!", c->mov[j]->monst));
             else if(isNonliving(c->mov[j]->monst))
               addMessage(XLAT("The ivy destroys %the1!", c->mov[j]->monst));
             else
               addMessage(XLAT("The ivy kills %the1!", c->mov[j]->monst));
-            attackMonster(c->mov[j], AF_ORSTUN, c->monst);
+            attackMonster(c->mov[j], AF_NORMAL, c->monst);
             }
           continue;
           }
@@ -4413,7 +4419,7 @@ void groupmove2(cell *c, cell *from, int d, eMonster movtype, flagtype mf) {
     // note: move from 'c' to 'from'!
     if(!(mf & MF_NOATTACKS)) for(int j=0; j<c->type; j++) 
       if(c->mov[j] && canAttack(c, c->monst, c->mov[j], c->mov[j]->monst, af)) {
-        attackMonster(c->mov[j], AF_ORSTUN | AF_GETPLAYER | AF_MSG, c->monst);
+        attackMonster(c->mov[j], AF_NORMAL | AF_GETPLAYER | AF_MSG, c->monst);
         c->aitmp = sval;
         // XLATC eagle
         return;
@@ -4521,7 +4527,7 @@ void snakeAttack(cell *c, bool mounted) {
     if(c->mov[j] && canAttack(c, moHexSnake, c->mov[j], c->mov[j]->monst, 
       mounted ? AF_ONLY_ENEMY : (AF_ONLY_FBUG | AF_GETPLAYER))) {
         eMonster m2 = c->mov[j]->monst;
-        attackMonster(c->mov[j], AF_ORSTUN | AF_GETPLAYER | AF_MSG, moHexSnake);
+        attackMonster(c->mov[j], AF_NORMAL | AF_GETPLAYER | AF_MSG, moHexSnake);
         produceGhost(c->mov[j], moHexSnake, m2);
         }
   }
@@ -4653,7 +4659,7 @@ void movemutant() {
       if(!c2) continue;
 
       if(c2->monst != moMutant && canAttack(c, moMutant, c2, c2->monst, AF_ONLY_FBUG | AF_GETPLAYER)) {
-        attackMonster(c2, AF_ORSTUN | AF_MSG | AF_GETPLAYER, moMutant);
+        attackMonster(c2, AF_NORMAL | AF_MSG | AF_GETPLAYER, moMutant);
         continue;
         }
       
@@ -4687,7 +4693,7 @@ void moveshadow() {
     if(c && c->monst == moShadow) {
       for(int j=0; j<c->type; j++) 
         if(c->mov[j] && canAttack(c, moShadow, c->mov[j], c->mov[j]->monst, AF_ONLY_FBUG | AF_GETPLAYER))
-          attackMonster(c->mov[j], AF_ORSTUN | AF_MSG | AF_GETPLAYER, c->monst);
+          attackMonster(c->mov[j], AF_NORMAL | AF_MSG | AF_GETPLAYER, c->monst);
       c->monst = moNone;
       shfrom = c;
       }
@@ -4741,7 +4747,7 @@ void moveghosts() {
         if(c->mov[j] && canAttack(c, c->monst, c->mov[j], c->mov[j]->monst, AF_GETPLAYER | AF_ONLY_FBUG)) {
           // XLATC ghost/greater shark
           
-          attackMonster(c->mov[j], AF_ORSTUN | AF_MSG | AF_GETPLAYER, c->monst);
+          attackMonster(c->mov[j], AF_NORMAL | AF_MSG | AF_GETPLAYER, c->monst);
           goto nextghost;
           }
     
@@ -4800,7 +4806,7 @@ bool swordAttack(cell *mt, eMonster who, cell *c, int bb) {
   if(!peace::on && canAttack(mt, who, c, m, AF_SWORD)) {
     markOrb(bb ? itOrbSword2: itOrbSword);
     int k = tkills();
-    attackMonster(c, AF_ORSTUN | AF_MSG | AF_SWORD, who);
+    attackMonster(c, AF_NORMAL | AF_MSG | AF_SWORD, who);
     if(c->monst == moShadow) c->monst = moNone;
     produceGhost(c, m, who);
     if(tkills() > k) return true;
@@ -4827,7 +4833,7 @@ void sideAttack(cell *mf, int dir, eMonster who, int bonus, eItem orb) {
     if(canAttack(mf, who, mt, m, AF_SIDE)) {
       markOrb(orb);
       if(who != moPlayer) markOrb(itOrbEmpathy);
-      if(attackMonster(mt, AF_ORSTUN | AF_SIDE | AF_MSG, who)) 
+      if(attackMonster(mt, AF_NORMAL | AF_SIDE | AF_MSG, who)) 
         produceGhost(mt, m, who);
       }
     else if(mt->wall == waBigTree)
@@ -4890,7 +4896,7 @@ void stabbingAttack(cell *mf, cell *mt, eMonster who, int bonuskill) {
         }
       eMonster m = c->monst;
       int k = tkills();
-      if(attackMonster(c, AF_ORSTUN | AF_STAB | AF_MSG, who)) 
+      if(attackMonster(c, AF_STAB | AF_MSG, who)) 
         produceGhost(c, m, who);
       if(tkills() > k) numsh++;
       }
@@ -5064,6 +5070,8 @@ int movevalue(eMonster m, cell *c, cell *c2, flagtype flags) {
 #define STRONGWIND 99
 
 void movegolems(flagtype flags) {
+  if(items[itOrbEmpathy] && items[itOrbSlaying])
+    flags |= AF_CRUSH;
   computePathdist(moMouse);
   int qg = 0;
   for(int i=0; i<size(golems); i++) {
@@ -5115,7 +5123,10 @@ void movegolems(flagtype flags) {
           playSound(c2, princessgender() ? "dzia-princess" : "dzia-prince");
           addMessage(XLAT("%The1 takes %his1 revenge on %the2!", m, c2->monst));
           }
-        attackMonster(c2, ((revenge||jealous)?0:AF_ORSTUN) | AF_MSG, m);
+        if(revenge || jealous) flags |= AF_CRUSH;
+        else if((flags & AF_CRUSH) && !canAttack(c, m, c2, c2->monst, flags ^ AF_CRUSH ^ AF_MUSTKILL))
+          markOrb(itOrbEmpathy), markOrb(itOrbSlaying);
+        attackMonster(c2, flags | AF_MSG, m);
         produceGhost(c2, m2, m);
         sideAttack(c, dir, m, 0);
         if(revenge) c->monst = m = moPrincessArmed;
@@ -5365,8 +5376,8 @@ void moverefresh(bool turn = true) {
       if(c2->monst != moPair) continue;
       if(!c2->stuntime) {
         cell *c3 = c->mov[(c->mondir + 1) % c->type];
-        if(c3->wall == waColumn) {
-          drawParticles(c3, 0xC00000, 30);
+        if(among(c3->wall, waRuinWall, waColumn, waStone, waVinePlant)) {
+          drawParticles(c3, winf[c3->wall].color, 30);
           c3->wall = waNone;
           }
         }
@@ -7020,7 +7031,7 @@ void monstersTurn() {
   
   for(cell *c: crush_now)
     if(canAttack(c, moCrusher, c, c->monst, AF_GETPLAYER | AF_CRUSH))
-      attackMonster(c, AF_ORSTUN | AF_MSG | AF_GETPLAYER | AF_CRUSH, moCrusher);
+      attackMonster(c, AF_MSG | AF_GETPLAYER | AF_CRUSH, moCrusher);
   
   crush_now = move(crush_next);
   crush_next.clear();
@@ -7144,7 +7155,7 @@ void killFriendlyIvy() {
   }
 
 bool monsterPushable(cell *c2) {
-  return (c2->monst != moFatGuard && !(isMetalBeast(c2->monst) && c2->stuntime < 2) && c2->monst != moTortoise && c2->monst != moTerraWarrior);
+  return (c2->monst != moFatGuard && !(isMetalBeast(c2->monst) && c2->stuntime < 2) && c2->monst != moTortoise && c2->monst != moTerraWarrior && c2->monst != moVizier);
   }  
 
 bool movepcto(int d, int subdir, bool checkonly) {
@@ -7387,9 +7398,11 @@ bool movepcto(int d, int subdir, bool checkonly) {
     else if(c2->monst && (!isFriendly(c2) || c2->monst == moTameBomberbird || isMountable(c2->monst))
       && !(peace::on && !isMultitile(c2->monst) && !goodTortoise)) {
     
-      bool fast = !((!items[itOrbSpeed]) || (items[itOrbSpeed]&1));
+      flagtype attackflags = AF_NORMAL;
+      if(items[itOrbSpeed]&1) attackflags |= AF_FAST;
+      if(items[itOrbSlaying]) attackflags |= AF_CRUSH;
       
-      if(!canAttack(cwt.c, moPlayer, c2, c2->monst, fast ? AF_FAST : 0)) {
+      if(!canAttack(cwt.c, moPlayer, c2, c2->monst, attackflags)) {
         if(checkonly) return false;
         if(c2->monst == moWorm || c2->monst == moWormtail || c2->monst == moWormwait) 
           addMessage(XLAT("You cannot attack Sandworms directly!"));
@@ -7411,7 +7424,7 @@ bool movepcto(int d, int subdir, bool checkonly) {
           addMessage(XLAT("You cannot attack %the1 directly!", c2->monst));
           addMessage(XLAT("Make him hit himself by walking away from him."));
           }
-        else if(c2->monst == moVizier && c2->hitpoints > 1 && !fast) {
+        else if(c2->monst == moVizier && c2->hitpoints > 1 && !(attackflags & AF_FAST)) {
           addMessage(XLAT("You cannot attack %the1 directly!", c2->monst));
           addMessage(XLAT("Hit him by walking away from him."));
           }
@@ -7476,24 +7489,16 @@ bool movepcto(int d, int subdir, bool checkonly) {
         c2->stuntime = 2;
         achievement_collection(itBabyTortoise, 0, 0);
         }
-      else if(isStunnable(c2->monst) && c2->hitpoints > 1) {
-        attackMonster(c2, AF_ORSTUN | AF_MSG, moPlayer);
-        // salamanders are stunned for longer time when pushed into a wall
-        if(c2->monst == moSalamander && (pushto == c2 || !pushto)) c2->stuntime = 10;
-        if(pushto && pushto != c2) pushMonster(pushto, c2);
-        }
-      else if(c2->monst == moVizier && c2->hitpoints > 1) {
-        fightmessage(c2->monst, moPlayer, true, 0);
-        c2->hitpoints--;
-        }
-      else if(isDragon(c2->monst) || isKraken(c2->monst)) {
-        attackMonster(c2, AF_ORSTUN | AF_MSG, moPlayer);
-        }
       else {
         eMonster m = c2->monst;
         if(m) {
-          attackMonster(c2, AF_MSG, moPlayer);
-          produceGhost(c2, m, moPlayer);
+          if((attackflags & AF_CRUSH) && !canAttack(cwt.c, moPlayer, c2, c2->monst, attackflags ^ AF_CRUSH ^ AF_MUSTKILL))
+            markOrb(itOrbSlaying);
+          attackMonster(c2, attackflags | AF_MSG, moPlayer);
+          // salamanders are stunned for longer time when pushed into a wall
+          if(c2->monst == moSalamander && (pushto == c2 || !pushto)) c2->stuntime = 10;
+          if(!c2->monst) produceGhost(c2, m, moPlayer);
+          if(pushto && pushto != c2) pushMonster(pushto, c2);
           }
         }
       

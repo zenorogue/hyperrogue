@@ -695,8 +695,9 @@ bool drawItemType(eItem it, cell *c, const transmatrix& V, int icol, int ticks, 
     if(it == itOrbAir) icol = 0xFFFFFF;
     if(it == itOrbUndeath) icol = minf[moFriendlyGhost].color;
     if(it == itOrbRecall) icol = 0x101010;
+    if(it == itOrbSlaying) icol = 0xFF0000;
     int col = darkena(icol, 0, int(0x80 + 0x70 * sin(ticks / 300.)));
-
+    
     if(it == itOrbFish)
       queuepolyat(V * spin(ticks / 1500.), shFishTail, col, PPR_ITEM_BELOW);
 
@@ -1219,12 +1220,52 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, int col, dou
     if(!peace::on) queuepoly(VBODY, shPSword, 0xFFFF00FF);
     queuepoly(VHEAD, shHood, darkena(col, 0, 0xFF));
     }
-  else if(m == moPair || m == moAltDemon || m == moHexDemon || m == moMonk || m == moCrusher) {
+  else if(m == moMonk) {
     otherbodyparts(V, darkena(col, 0, 0xC0), m, footphase);
     ShadowV(V, shPBody);
     queuepoly(VBODY, shPBody, darkena(col, 0, 0xC0));
-    if(!peace::on) queuepoly(VBODY, shPSword, 0xFFFF00FF);
-    queuepoly(VHEAD, shHood, darkena(col, 0, 0xFF));
+    if(!peace::on) queuepoly(VBODY, shPKnife, 0xFFC0C0C0);
+    queuepoly(VBODY, shTerraArmor1, darkena(col, 1, 0xFF));
+    queuepoly(VBODY, shTerraArmor2, darkena(col, 0, 0xFF));
+    queuepoly(VBODY, shTerraArmor3, darkena(col, 1, 0xFF));
+    queuepolyat(VBODY, shRatCape2, darkena(col, 2, 0xFF), PPR_MONSTER_ARMOR0);
+    queuepoly(VHEAD, shRaiderHelmet, darkena(col, 0, 0XFF));
+    queuepoly(VHEAD, shPFace, darkena(0xC0C0A0, 0, 0XFF));
+    }
+  else if(m == moCrusher) {
+    otherbodyparts(V, darkena(col, 1, 0xFF), m, footphase);
+    ShadowV(V, shPBody);
+    queuepoly(VBODY, shPBody, darkena(col, 0, 0xFF));
+    queuepoly(VBODY, shTerraArmor1, darkena(col, 1, 0xFF));
+    queuepoly(VBODY, shTerraArmor2, darkena(col, 0, 0xFF));
+    queuepoly(VBODY, shTerraArmor3, darkena(col, 1, 0xFF));
+    queuepoly(VBODY, shFlailBall, darkena(col, 0, 0XFF));
+    queuepoly(VBODY, shFlailChain, darkena(col, 1, 0XFF));
+    queuepoly(VBODY, shFlailTrunk, darkena(col, 0, 0XFF));
+    queuepoly(VHEAD, shRaiderHelmet, darkena(col, 0, 0XFF));
+    queuepoly(VHEAD, shPFace, darkena(0xC0C0A0, 0, 0XFF));
+    }
+  else if(m == moPair) {
+    otherbodyparts(V, darkena(col, 1, 0xFF), m, footphase);
+    ShadowV(V, shPBody);
+    queuepoly(VBODY, shPBody, darkena(col, 0, 0xC0));
+    queuepoly(VBODY, shTerraArmor1, darkena(col, 1, 0xFF));
+    queuepoly(VBODY, shTerraArmor2, darkena(col, 0, 0xFF));
+    queuepoly(VBODY, shTerraArmor3, darkena(col, 1, 0xFF));
+    queuepoly(VBODY, shPickAxe, darkena(0xA0A0A0, 0, 0XFF));
+    queuepoly(VHEAD, shRaiderHelmet, darkena(col, 0, 0XFF));
+    queuepoly(VHEAD, shPFace, darkena(0xC0C0A0, 0, 0XFF));
+    }
+  else if(m == moAltDemon || m == moHexDemon) {
+    otherbodyparts(V, darkena(col, 0, 0xC0), m, footphase);
+    ShadowV(V, shPBody);
+    queuepoly(VBODY, shPBody, darkena(col, 0, 0xC0));
+    queuepoly(VBODY, shTerraArmor1, darkena(col, 1, 0xFF));
+    queuepoly(VBODY, shTerraArmor2, darkena(col, 0, 0xFF));
+    queuepoly(VBODY, shTerraArmor3, darkena(col, 1, 0xFF));
+    if(!peace::on) queuepoly(VBODY, shPSword, 0xFFD0D0D0);
+    queuepoly(VHEAD, shRaiderHelmet, darkena(col, 0, 0XFF));
+    queuepoly(VHEAD, shPFace, darkena(0xC0C0A0, 0, 0XFF));
     }
   else if(m == moPalace || m == moFatGuard || m == moVizier || m == moSkeleton) {
     queuepoly(VBODY, shSabre, 0xFFFFFFFF);
@@ -1412,8 +1453,8 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, int col, dou
     queuepoly(VHEAD, shWolf3, darkena(0x202020, 0, 0xFF));
     
     if(m == moRatlingAvenger) {
-      queuepoly(VBODY, shRatCape1, 0x303030FF);
-      queuepoly(VHEAD, shRatCape2, 0x484848FF);
+      queuepoly(VBODY, shRatCape2, 0x484848FF);
+      queuepoly(VHEAD, shRatCape1, 0x303030FF);
       }
     }
   else if(m == moViking) {
@@ -1936,7 +1977,7 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, int col) {
   // also whatever in the lineview mode
 
   else if(isFriendly(c) || isBug(c) || (c->monst && conformal::on) || c->monst == moKrakenH || (isBull(c->monst) && c->mondir != NODIR) || c->monst == moButterfly || isMagneticPole(c->monst) ||
-    isSwitch(c->monst) || c->monst == moPair) {
+    isSwitch(c->monst)) {
     if(c->monst == moKrakenH) Vs = Vb, nospins = nospinb;
     if(!nospins) Vs = Vs * ddspin(c, c->mondir, S42);
     if(isFriendly(c)) drawPlayerEffects(Vs, c, false);
@@ -2485,6 +2526,10 @@ void setcolors(cell *c, int& wcol, int &fcol) {
     case laRose: case laPower: case laWildWest: case laHalloween: case laRedRock:
     case laDragon: case laStorms: case laTerracotta: case laMercuryRiver:
       fcol = linf[c->land].color; break;
+    
+    case laInvincible:
+      fcol = pseudohept(c) ? 0xC0C0C0 : 0x40A040;
+      break;
     
     case laDual:
       fcol = linf[c->land].color;

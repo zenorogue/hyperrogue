@@ -117,7 +117,8 @@ bool isMetalBeast(eMonster m) {
 bool isStunnable(eMonster m) {
   return m == moPalace || m == moFatGuard || m == moSkeleton || isPrincess(m) ||
     isMetalBeast(m) || m == moTortoise || isDragon(m) ||
-    m == moReptile || m == moTerraWarrior || m == moSalamander;
+    m == moReptile || m == moTerraWarrior || m == moSalamander ||
+    m == moVizier;
   }
 
 bool hasHitpoints(eMonster m) {
@@ -555,7 +556,8 @@ bool isOffensiveOrb(eItem it) {
   return it == itOrbLightning || it == itOrbFlash || it == itOrbThorns ||
     it == itOrbDragon || it == itOrbStunning || 
     it == itOrbFreedom || it == itOrbPsi ||
-    it == itOrbSide1 || it == itOrbSide2 || it == itOrbSide3;
+    it == itOrbSide1 || it == itOrbSide2 || it == itOrbSide3 ||
+    it == itOrbSlaying;
   }
 
 bool isRangedOrb(eItem i) {
@@ -575,7 +577,8 @@ bool isEmpathyOrb(eItem i) {
     i == itOrbUndeath || i == itOrbSpeed || i == itOrbShield ||
     i == itOrbAether || i == itOrbInvis || i == itOrbThorns ||
     i == itOrbWater || i == itOrbStone ||
-    i == itOrbSide1 || i == itOrbSide2 || i == itOrbSide3;
+    i == itOrbSide1 || i == itOrbSide2 || i == itOrbSide3 ||
+    i == itOrbSlaying;
   }
 
 bool isUtilityOrb(eItem i) {
@@ -720,8 +723,9 @@ bool hornStuns(cell *c) {
   return 
     m == moRagingBull || m == moSleepBull || m == moHerdBull ||
     m == moButterfly || m == moGreater || m == moGreaterM || m == moDraugr ||
-    m == moHedge || m == moFlailer || m == moVizier ||
-    attackJustStuns(c);
+    m == moHedge || m == moFlailer || m == moVizier || m == moReptile || m == moSalamander || 
+    m == moPair || m == moAltDemon || m == moHexDemon || m == moMonk || m == moCrusher ||
+    attackJustStuns(c, AF_NORMAL);
   }
 
 // generate all the world first in the quotient geometry

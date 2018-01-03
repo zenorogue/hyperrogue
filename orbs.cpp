@@ -140,6 +140,7 @@ void reduceOrbPowers() {
   reduceOrbPower(itOrbHorns, 77);
   reduceOrbPower(itOrbLava, 80);
   reduceOrbPower(itOrbMorph, 80);
+  reduceOrbPower(itOrbSlaying, 120);
 
   reduceOrbPower(itOrbSide1, 120);
   reduceOrbPower(itOrbSide2, 120);
@@ -615,7 +616,7 @@ void jumpTo(cell *dest, eItem byWhat, int bonuskill = 0, eMonster dashmon = moNo
 
 void growIvyTo(cell *dest, cell *src) {
   if(dest->monst) 
-    attackMonster(dest, AF_MSG | AF_ORSTUN, moFriendlyIvy);
+    attackMonster(dest, AF_NORMAL | AF_MSG, moFriendlyIvy);
   else {
     dest->monst = moFriendlyIvy;
     dest->mondir = neighborId(dest, src);
@@ -1075,7 +1076,7 @@ eItem targetRangedOrb(cell *c, orbAction a) {
       if(!isCheck(a)) {
         int k = tkills();
         eMonster m = c2->monst;
-        attackMonster(c2, AF_ORSTUN | AF_MSG, moPlayer);
+        attackMonster(c2, AF_NORMAL | AF_MSG, moPlayer);
         k = tkills() - k;
         jumpTo(c, itOrbDash, k, m);
         }
@@ -1317,6 +1318,7 @@ int orbcharges(eItem it) {
     case itOrbBull:
     case itOrbShell:
     case itOrbAir:
+    case itOrbSlaying:
       return 66;
     case itOrbTime:
     case itOrbSpace:

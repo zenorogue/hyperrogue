@@ -1008,7 +1008,7 @@ hpcshape
   shArrow,
   shPHead, shPFace, shGolemhead, shHood, shArmor, 
   shAztecHead, shAztecCap,
-  shSabre, shTurban1, shTurban2, shVikingHelmet,
+  shSabre, shTurban1, shTurban2, shVikingHelmet, shRaiderHelmet, 
   shWestHat1, shWestHat2, shGunInHand,
   shKnightArmor, shKnightCloak, shWightCloak,
   shGhost, shEyes, shSlime, shJoint, shWormHead, shTentHead, shShark,
@@ -2122,6 +2122,7 @@ void buildpolys() {
   bshape(shWestHat2, PPR_MONSTER_HAT1, scalef, 120);
   bshape(shGunInHand, PPR_MONSTER_WPN, scalef, 121);
   bshape(shVikingHelmet, PPR_MONSTER_HAT0, scalef, 122);
+  bshape(shRaiderHelmet, PPR_MONSTER_HAT0, scalef, 375);
   bshape(shHood, PPR_MONSTER_HAT0, scalef, 123);
   bshape(shPirateHood, PPR_MONSTER_HAT0, scalef, 125);
   bshape(shEyepatch, PPR_MONSTER_HAT1, scalef, 126);
@@ -3424,6 +3425,9 @@ NEWSHAPE, 372, 1, 1, -0.514563,-0.238476, -0.340659,0.172987, -0.100245,0.368967
 NEWSHAPE, 373, 1, 1, -0.019312,0.304743, -0.289045,0.177117, -0.127176,-0.240665, 0.007400,-0.336712, 0.257684,-0.184398, 0.234654,0.191587,
 
 NEWSHAPE, 374, 1, 1, -0.229502,-0.051000, 0.320183,0.006447, 0.148302,0.144065, 0.173317,0.054954, -0.253447,0.021298,
+
+NEWSHAPE, 375, 1, 2, -0.090497,-0.016548, -0.072731,-0.044408, -0.058869,-0.063422, -0.031762,-0.071442, -0.001140,-0.143435, 0.032854,-0.162181, 0.080022,-0.161459, 0.108605,-0.129676, 0.112564,-0.096396, 0.102658,-0.077590, 0.088332,-0.113771, 0.046216,-0.129074, 0.017935,-0.063369, 0.049033,-0.046641, 0.032200,-0.027430, 
+
 
 NEWSHAPE
 };

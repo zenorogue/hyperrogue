@@ -1199,7 +1199,7 @@ namespace mirror {
           c->monst = moMimic;
           eMonster m2 = c2->monst;
           if(!peace::on && canAttack(c,moMimic,c2,m2, 0)) {
-            attackMonster(c2, AF_MSG | AF_ORSTUN, moMimic);
+            attackMonster(c2, AF_NORMAL | AF_MSG, moMimic);
             if(!fwd) produceGhost(c2, m2, moMimic);
             sideAttack(c, m.second.spin, m2, 0);
             }
@@ -1642,7 +1642,7 @@ namespace hive {
         if(isBug(killed)) battlecount++;
         else if(killed != moPlayer && !fightspam(c2))
           addMessage(XLAT("%The1 fights with %the2!", c->monst, killed));
-        attackMonster(c2, AF_ORSTUN | AF_GETPLAYER, c->monst);
+        attackMonster(c2, AF_NORMAL | AF_GETPLAYER, c->monst);
         // killMonster(c);
         if(isBug(killed)) {
           c2->monst = moDeadBug, deadbug.push_back(c2);
@@ -2020,7 +2020,7 @@ namespace heat {
         c->wparam++;
         if(c->wparam == 3) {
           if(canAttack(c, moArrowTrap, c, c->monst, AF_GETPLAYER))
-            attackMonster(c, AF_ORSTUN | AF_MSG | AF_GETPLAYER, moArrowTrap);
+            attackMonster(c, AF_NORMAL | AF_MSG | AF_GETPLAYER, moArrowTrap);
           }
         if(c->wparam == 4) c->wparam = 0;
         }
@@ -2589,7 +2589,7 @@ namespace kraken {
       if(c->monst == moKrakenT && !c->stuntime) forCellEx(c2, c) {
         bool dboat = false;
         if(c2->monst && canAttack(c, moKrakenT, c2, c2->monst, AF_ONLY_FBUG)) {
-          attackMonster(c2, AF_ORSTUN | AF_MSG, c->monst);
+          attackMonster(c2, AF_NORMAL | AF_MSG, c->monst);
           sleep(c);
           }
         else for(int i=0; i<numplayers(); i++) if(playerpos(i) == c2) {
@@ -2869,7 +2869,7 @@ namespace prairie {
         cell *cn = whirlline[q+1];
         if(cp->monst == moHerdBull && !cp->stuntime) {
           forCellEx(c2, cp) {
-            int flags = AF_GETPLAYER | AF_BULL | AF_ORSTUN;
+            int flags = AF_GETPLAYER | AF_BULL;
             if(c2 != cn) flags |= AF_ONLY_FBUG;
             if(canAttack(c, moHerdBull, c2, c2->monst, flags))
               attackMonster(c2, flags | AF_MSG, moHerdBull);

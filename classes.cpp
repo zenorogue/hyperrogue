@@ -759,11 +759,11 @@ monstertype minf[motypes] = {
     "When your plan has clearly failed, it is better to abandon it and go to a safe place, to have a chance of succeeding next time. This dog clearly knows this."},
   { 'B', 0xC00000, "North Pole", NODESCYET}, 
   { 'B', 0x0000C0, "South Pole", NODESCYET}, 
-  { 'P', 0xC0D000, "Pair Demon", NODESCYET},
-  { 'H', 0x00C0D0, "Hex Demon", NODESCYET},
-  { 'A', 0xD000C0, "Alt Demon", NODESCYET},
-  { 'M', 0x904000, "Monk", NODESCYET},
-  { 'C', 0x004070, "Crusher", NODESCYET},
+  { 'P', 0xC03000, "Red Raider", NODESCYET},
+  { 'H', 0xC0C0C0, "Gray Raider", NODESCYET},
+  { 'A', 0x80B080, "Green Raider", NODESCYET},
+  { 'M', 0x904000, "Brown Raider", NODESCYET},
+  { 'C', 0x0060E0, "Blue Raider", NODESCYET},
   { '@', 0xC00000, "Switcher A", NODESCYET}, 
   { '@', 0x0000C0, "Switcher B", NODESCYET}, 
   
@@ -1213,12 +1213,13 @@ itemtype iinf[ittypes] = {
   { '!', 0x80FF00, "Glowing Crystal", crystaldesc},
   { '!', 0x80FF80, "Snake Oil", NODESCYET},
   { '*', 0x80FF80, "Sea Glass", NODESCYET},
-  { '*', 0xFFFFFF, "Invix Treasure", NODESCYET},
+  { '*', 0xD0D8ED, "Chalcedony", NODESCYET},
   { '*', 0x80FF80, "Monopole", NODESCYET},
-  { '*', 0xFFFF80, "Junk", NODESCYET},
+  { '*', 0xBBCC99, "Chrysoberyl", NODESCYET},
   { 'o', 0x80FF80, "Orb of Phasing", NODESCYET},
   { 'o', 0xFFFF80, "Orb of Magnetism", NODESCYET},
-  { 'o', 0xFFFF80, "Orb of Destruction", NODESCYET},
+  { 'o', 0x202020, "Orb of Slaying", NODESCYET},
+  // { '*', 0x26619C, "Lapis Lazuli", NODESCYET},
   };
 
 // --- wall types ---
@@ -1398,6 +1399,7 @@ walltype winf[walltypes] = {
   { '&', 0xD00000, "lava", lavadesc},
   { '=', 0x804000, "dock", "A dock."},
   { '^', 0xFF8000, "burning dock", "A burning dock."},
+  { '#', 0xE07070, "ruin wall", "A ruin wall."},
   };
 
 // --- land types ---
@@ -1585,7 +1587,7 @@ const landtype linf[landtypes] = {
   { 0x80FF00, "Crystal World", crystaldesc},
   { 0x306030, "Snake Nest", NODESCYET},
   { 0x80FF00, "Docks", NODESCYET},
-  { 0x306030, "Invincible", NODESCYET},
+  { 0x306030, "Ruined City", NODESCYET},
   { 0x306030, "Magnetosphere", NODESCYET},
   { 0x306030, "Switch", NODESCYET},
   };

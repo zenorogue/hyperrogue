@@ -331,7 +331,7 @@ namespace inv {
     gainOrbs(itGlowCrystal, itOrbSide2);
     gainOrbs(itSwitch, itOrbPhasing);
     gainOrbs(itMagnet, itOrbMagnetism);
-    gainOrbs(itInvix, itOrbDestruction);
+    gainOrbs(itInvix, itOrbSlaying);
 
     if(items[itOrbLove] && !items[itSavedPrincess]) items[itSavedPrincess] = 1;
     
