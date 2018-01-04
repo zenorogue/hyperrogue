@@ -1274,6 +1274,9 @@ namespace patterns {
       dialog::addBoolItem(XLAT("football pattern"), subpattern_flags & SPF_FOOTBALL, '*');
       }
     
+    if(a38 && whichPattern == PAT_COLORING)
+      dialog::addBoolItem(XLAT("Docks pattern"), subpattern_flags & SPF_DOCKS, '@');
+    
     dialog::addBoolItem(XLAT("display pattern codes (full)"), displaycodes, 'd');
 
     dialog::addBoolItem(XLAT("display only hexagons"), (whichShape == '6'), '6');
@@ -1417,6 +1420,7 @@ namespace patterns {
       {g46, true, PAT_COLORING, SPF_SYM0123 | SPF_CHANGEROT},
       {g45, true, PAT_ZEBRA, SPF_SYM0123 | SPF_ROT},
       {g47, true, PAT_ZEBRA, SPF_SYM0123 | SPF_ROT},
+      {gOctagon, true, PAT_COLORING, SPF_DOCKS},
       }}
     };
   
@@ -1443,6 +1447,7 @@ namespace patterns {
         string s = XLAT(ginf[g.geo].name);
         s += chamfernames[g.nonchamf];
         if(g.subpattern_flags & SPF_ALTERNATE) s += " (alt)";
+        if(g.subpattern_flags & SPF_DOCKS) s += " (Docks)";
         if(cgroup == cpZebra) {
           if(g.whichPattern == PAT_PALACE) s += " (Palace)";
           else if(g.whichPattern == PAT_EMERALD) s += " (Emerald)";

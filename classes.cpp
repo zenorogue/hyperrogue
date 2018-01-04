@@ -399,6 +399,15 @@ const char *thumpdesc = "A device that attracts sandworms and other enemies. You
 
 const char *twdesc = "This structure will disappear after some time.";
 
+const char *jellydesc = 
+  "Some of the Slime Beasts have decided to revolt against the color changing rules in the "
+  "Alchemist Lab, change their shape and consistency, and create their own Kingdom.\n\n"
+  "Jellies switch between being a wall and being a monster after every treasure you pick.";
+
+const char *ruindesc = 
+  "Once a beautiful city... but now overrun by the mighty Raiders of unknown origin.\n\n"
+  "Raiders cannot be harmed with mundane weapons, but each color has its movement restrictions.";
+
 monstertype minf[motypes] = {
   { 0,   0,        "no monster"       , NULL},
   { 'Y', 0x4040FF, "Yeti"       ,
@@ -759,13 +768,14 @@ monstertype minf[motypes] = {
     "When your plan has clearly failed, it is better to abandon it and go to a safe place, to have a chance of succeeding next time. This dog clearly knows this."},
   { 'B', 0xC00000, "North Pole", NODESCYET}, 
   { 'B', 0x0000C0, "South Pole", NODESCYET}, 
-  { 'P', 0xC03000, "Red Raider", NODESCYET},
-  { 'H', 0xC0C0C0, "Gray Raider", NODESCYET},
-  { 'A', 0x80B080, "Green Raider", NODESCYET},
-  { 'M', 0x904000, "Brown Raider", NODESCYET},
-  { 'C', 0x0060E0, "Blue Raider", NODESCYET},
-  { '@', 0xC00000, "Red Jelly", NODESCYET}, 
-  { '@', 0x0000C0, "Blue Jelly", NODESCYET}, 
+  { 'P', 0xC03000, "Red Raider", "Red Raiders travel in pairs. They are able to destroy walls on their way."},
+  { 'H', 0xC0C0C0, "Gray Raider", "Gray Raiders never step on gray cells."},
+  { 'A', 0x80B080, "Green Raider", "Green Raiders never step from one green cell to another."},
+  { 'M', 0x904000, "Brown Raider", "Brown Raiders never move adjacent to an item."},
+  { 'C', 0x0060E0, "Blue Raider", "Blue Raiders have a powerful attack which takes two turns to complete, and also makes the Blue Raider stunned "
+  "for a long time. This attack can destroy other Raiders if it hits them."},
+  { '@', 0xC00000, "Red Jelly", jellydesc}, 
+  { '@', 0x0000C0, "Blue Jelly", jellydesc}, 
   
   // shmup specials
   { '@', 0xC0C0C0, "Rogue", "In the Shoot'em Up mode, you are armed with thrown Knives."},
@@ -1211,15 +1221,18 @@ itemtype iinf[ittypes] = {
     "This ranged Orb will transform the target monster into one without any special powers. It also stuns them for one turn. "
     "Does not affect multi-tile monsters."},
   { '!', 0x80FF00, "Glowing Crystal", crystaldesc},
-  { '!', 0x80FF80, "Snake Oil", NODESCYET},
+  { '!', 0x80FF80, "Snake Oil", "Made of actual snakes!"},
   { '!', 0x80FF80, "Sea Glass", NODESCYET},
-  { '*', 0xBBCC99, "Chrysoberyl", NODESCYET},
+  { '*', 0xBBCC99, "Chrysoberyl", "Fragment of the past glory."},
 //  { '*', 0xD0D8ED, "Chalcedony", NODESCYET},
   { '*', 0x80FF80, "Monopole", NODESCYET},
-  { '!', 0xFF00FF, "Tasty Jelly", NODESCYET},
-  { 'o', 0x80FF80, "Orb of Phasing", NODESCYET},
+  { '!', 0xFF00FF, "Tasty Jelly", "A tasty byproduct of the Jelly Revolution."},
+  { 'o', 0x80FF80, "Orb of Phasing", 
+    "This orb lets you pass through walls (one cell wide), and also through as long as they will not attack you in transit."},
   { 'o', 0xFFFF80, "Orb of Magnetism", NODESCYET},
-  { 'o', 0x202020, "Orb of Slaying", NODESCYET},
+  { 'o', 0x202020, "Orb of Slaying",
+    "This Orb lets you defeat Raiders and other tough single-cell monsters in melee."
+    },
   // { '*', 0x26619C, "Lapis Lazuli", NODESCYET},
   };
 
@@ -1400,7 +1413,7 @@ walltype winf[walltypes] = {
   { '&', 0xD00000, "lava", lavadesc},
   { '=', 0x804000, "dock", "A dock."},
   { '^', 0xFF8000, "burning dock", "A burning dock."},
-  { '#', 0xE04030, "ruin wall", "A ruin wall."},
+  { '#', 0xE04030, "ruin wall", ruindesc},
   };
 
 // --- land types ---
@@ -1588,9 +1601,9 @@ const landtype linf[landtypes] = {
   { 0x80FF00, "Crystal World", crystaldesc},
   { 0x306030, "Snake Nest", NODESCYET},
   { 0x80FF00, "Docks", NODESCYET},
-  { 0x306030, "Ruined City", NODESCYET},
+  { 0x306030, "Ruined City", ruindesc},
   { 0x306030, "Magnetosphere", NODESCYET},
-  { 0x306030, "Jelly Kingdom", NODESCYET},
+  { 0x306030, "Jelly Kingdom", jellydesc},
   };
 
 struct landtacinfo { eLand l; int tries, multiplier; };
@@ -1601,11 +1614,11 @@ vector<landtacinfo> land_tac = {
   {laMotion, 10, 1}, {laCaves, 10, 1}, {laAlchemist, 10, 1},
   {laJungle, 10, 1}, {laMirror, 10, 1}, {laZebra, 10, 1}, {laPalace, 10, 1}, 
   {laOcean, 10, 1}, {laLivefjord, 10, 1}, {laWarpCoast, 10, 1}, {laRlyeh, 10, 1}, {laHell, 10, 1}, 
-  {laDryForest, 10, 1}, {laWineyard, 10, 1}, {laReptile, 10, 1},
+  {laDryForest, 10, 1}, {laWineyard, 10, 1}, {laSwitch, 10, 1}, {laReptile, 10, 1},
   {laDeadCaves, 10, 1}, {laGraveyard, 10, 1}, 
   {laHaunted, 10, 1}, 
   {laIvoryTower, 10, 1}, {laEndorian, 10, 1}, {laMountain, 5, 2}, {laDungeon, 5, 2},
-  {laEmerald, 10, 1},
+  {laRuins, 10, 1}, {laEmerald, 10, 1}, 
   {laCocytus, 10, 1}, 
   
   {laCaribbean, 5, 2}, {laWhirlpool, 5, 2}, {laKraken, 5, 2}, 
@@ -1631,7 +1644,7 @@ vector<landtacinfo> land_tac = {
 vector<eLand> randlands = {
   laIce, laDesert, laCaves, laAlchemist, laGraveyard, laPower, laLivefjord, laZebra,
   laRlyeh, laDryForest, laEmerald, laWineyard, laDeadCaves, laRedRock,
-  laOvergrown, laWildWest, laWarpCoast
+  laOvergrown, laWildWest, laWarpCoast, laRuins
   };
 
 geometryinfo ginf[gGUARD] = {

@@ -1410,7 +1410,7 @@ void show() {
   else
     dialog::addSelItem(XLAT("radar"), radar_distance == RADAR_INF ? "∞" : fts4(radar_distance), 'r');
   if(!rug::rugged)
-    dialog::addSelItem(XLAT("scale model"), fts(modelscale), 'm');
+    dialog::addSelItem(XLAT("model scale factor"), fts(modelscale), 'm');
   else
     dialog::addSelItem(XLAT("model iterations"), its(queueiter), 0);
   dialog::addSelItem(XLAT("field of view"), fts(fov) + "°", 'f');
@@ -1451,7 +1451,7 @@ void show() {
     else if(uni == 'v') {
       dialog::editNumber(vertex_limit, 0, 50000, 500, 3000, "vertex limit", 
         "The more vertices, the more accurate the Hypersian Rug model is. "
-        "However, too high might make the model slow to compute and render."
+        "However, a number too high might make the model slow to compute and render."
         );
       dialog::reaction = [] () { err_zero_current = err_zero; };
       }
@@ -1459,7 +1459,7 @@ void show() {
       addMessage(XLAT("This just shows the 'z' coordinate of the selected point."));
     else if(uni == 'm') {
       dialog::editNumber(modelscale, 0.1, 10, .1, 1, "model scale factor", 
-        "This is relevant when the native geometry is not hyperbolic. "
+        "This is relevant when the native geometry is not Euclidean. "
         "For example, if the native geometry is spherical, and scale < 1, a 2d sphere will be rendered as a subsphere; "
         "if the native geometry is hyperbolic, and scale > 1, a hyperbolic plane will be rendered as an equidistant surface. "
         );

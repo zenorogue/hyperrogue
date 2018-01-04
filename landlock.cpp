@@ -549,7 +549,7 @@ bool landUnlocked(eLand l) {
       return gold() >= R90;
       
     case laSwitch:
-      return gold() >= R90;
+      return gold() >= R30 && items[itElixir] >= U10;
     
     case laRuins:
       return kills[moSkeleton];
@@ -958,7 +958,7 @@ eLand getNewLand(eLand old) {
 vector<eLand> land_over = {
   laIce, laCaves, laDesert, laHunting, laMotion, laJungle, laAlchemist, 
   laCrossroads, 
-  laMirror, laMinefield, laPalace, laPrincessQuest, laZebra, laReptile, 
+  laMirror, laMinefield, laPalace, laPrincessQuest, laZebra, laSwitch, laReptile, 
   laOcean, laWarpCoast, laLivefjord, laKraken, laCaribbean, laWhirlpool, laRlyeh, laTemple,
   laIvoryTower, laEndorian, laDungeon, laMountain, 
   laCrossroads2, 
@@ -967,13 +967,13 @@ vector<eLand> land_over = {
   laDragon, laTortoise,
   laOvergrown, laClearing, laStorms, laBurial, laWhirlwind, 
   laBlizzard,
-  laEmerald, laCamelot, 
+  laRuins, laEmerald, laCamelot, 
   laPrairie, laBull, laTerracotta, laRose,
   laElementalWall, laTrollheim,
   laHell, laCrossroads3, laCocytus, laPower, laCrossroads4,
   laCrossroads5,
   // EXTRA
-  laWildWest, laHalloween, laDual, laSnakeNest, laDocks, laRuins, laSwitch, laMagnetic, laCA
+  laWildWest, laHalloween, laDual, laSnakeNest, laDocks, laMagnetic, laCA
   };
 
 vector<eLand> landlist;

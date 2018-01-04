@@ -6282,14 +6282,304 @@ S("Useless in Euclidean geometry.", "Bezużyteczne w geometrii euklidesowej.");
 S("Not implemented for spherical geometry. Please tell me if you really want this.",
   "Nie zaimplementowane dla geometrii sferycznej. Jeśli bardzo tego chcesz, powiedz.")
 
-#undef Orb
-
-// Hypersian Rug
+// Hypersian Rug (NOT USED ANYMORE)
 // S("This makes sense only in hyperbolic or Torus geometry.", "To ma sens tylko w geometrii hiperbolicznej i na torusie.")
+
+// === 10.3 ===
+// ============
+
+// Missing/minor updated texts
+//-----------------------------
+
+// file selection dialog
+S("Enter = choose", "Enter = wybierz")
+S("Esc = cancel", "Esc = anuluj")
+S("hyperbolic", "hiperboliczna")
 
 // for the map editor
 N("Dragon Head", GEN_F, "Głowa Smoka", "Głowy Smoka", "Głowę Smoka", "Głową Smoka")
 
 S("score: %1", "wynik: %1")
 S("kills: %1", "zabicia: %1")
+
+// advanced config of quotient geometry
+//--------------------------------------
+
+S(
+  "This geometry is obtained by applying the same 'generators' which "
+  "lead to creating the given basic hyperbolic geometry, "
+  "but using a fixed finite field instead of the field of reals. "
+  "It can be also interpreted as a quotient of the given basic geometry. "
+  "Warning: field patterns based on large primes might generate for a long time.",
+  
+  "Ta geometria powstaje przez użycie tych samych 'generatorów', "
+  "których używamy do uzyskania zadanej podstawowej geometrii hiperbolicznej, "
+  "ale w pewnym ciele skończonym zamiast ciała liczb rzczywistych. "
+  "Można ją zrozumieć jako przestrzeń ilorazową zadanej geometrii. "
+  "Uwaga: generowanie tego typu geometrii opartej na dużej liczbie pierwszej może "
+  "zająć dużo czasu!")
+
+S("find the next prime", "znajdź następną liczbę pierwszą")
+S("activate", "uruchom")
+S("order %1%2 (non-chamfered cells: %3)", "rząd %1%2 (nieprzyciętych pól: %3)")
+
+// Torus/Klein bottle, Euclidean Squares, and their advanced configuration
+//-------------------------------------------------------------------------
+
+S("square grid", "siatka kwadratowa")
+
+S("torus/Klein bottle", "torus/butelka Kleina")
+S("mode", "tryb")
+
+S("single row (hex)", "jeden rząd (heksy)")
+S("single row (squares)", "jeden rząd (kwadraty)")
+S("parallelogram (hex)", "równoległobok (heksy)")
+S("rectangle (squares)", "prostokąt (kwadraty)")
+S("rectangle (hex)", "prostokąt (heksy)")
+S("Klein bottle (squares)", "butelka Kleina (kwadraty)")
+S("Klein bottle (hex)", "butelka Kleina (heksy)")
+
+S("this mode has bad patterns", "nieprawidłowe wzorki dla tego trybu")
+S("incompatible with chamfering", "niekompatybilne z przycinaniem")
+S("best if %1 is divisible by %2", "najlepiej gdy %1 jest podzielne przez %2")
+
+S("number of cells (n)", "liczba pól (n)")
+S("cell bottom-right from 0 (d)", "pole w dół i na prawo od 0 (d)")
+S("cell below 0 (d)", "pole pod 0 (d)")
+S("width (x)", "szerokość (x)")
+S("height (y)", "wysokość (y)")
+
+// upgraded Hypersian Rug mode
+//-----------------------------
+
+S("In the perspective projection, you can use arrows to rotate the camera, Page Up/Down to go forward/backward, Shift+arrows to strafe, and Ctrl+arrows to rotate the model.",
+  "W trybie perspektywy możesz używać strzałek by obracać kamerą, Page Up/Down by iść do przodu/w tył, Shift+strzałek by chodzić na boki, Ctrl+strzałek by obracać model.")
+
+S("Note: this mode is based on what you see on the screen -- but re-rendered in another way. "
+  "If not everything is shown on the screen (e.g., too zoomed in), the results will be incorrect "
+  "(though possibly interesting). "
+  "Use a different projection to fix this.",
+  
+  "Uwaga: ten tryb jest oparty na tym, co widzisz na ekranie -- tylko inaczej przedstawionym. "
+  "Jeśli nie wszystko jest na ekranie (np. za mocno zbliżenie), wyniki będą nieprawidłowe, "
+  "choć być może interesujące. Użyj innego rzutu, by to naprawić.")
+
+S("vertex limit", "ograniczenie na liczbę wierzchołków")
+S("The more vertices, the more accurate the Hypersian Rug model is. "
+  "However, a number too high might make the model slow to compute and render.",
+  "Im więcej wierzchołków, tym dokładniejszy model, "
+  "ale za duża liczba może spowodować, że model się będzie wolno liczył i rysował.")
+
+S("model distance", "odległość od modelu")
+S("In the perspective projection, this sets the distance from the camera to the center of the model. "
+  "In the orthogonal projection this just controls the scale.",
+  
+  "W perspektywie ten parametr ustawia odległość od kamery do centrum modelu. "
+  "W rzucie ortogonalnym zmienia skalę.")
+
+S("maximum error", "maksymalny błąd")
+S("New points are added when the current error in the model is smaller than this value.",
+  "Nowe punkty są dodawane, gdy obecny błąd jest mniejszy niż ta wartość.")
+
+S("field of view", "pole widzenia")
+S("Horizontal field of view, in the perspective projection. "
+  "In the orthogonal projection this just controls the scale.",
+  "Poziome pole widzenia, w rzucie perspektywicznym. "
+  "W rzucie ortogonalnym zmienia skalę.")
+
+S("native geometry", "rodzima geometria")
+S("scale model", "skala modelu")
+S("This is relevant when the native geometry is not Euclidean. "
+  "For example, if the native geometry is spherical, and scale < 1, a 2d sphere will be rendered as a subsphere; "
+  "if the native geometry is hyperbolic, and scale > 1, a hyperbolic plane will be rendered as an equidistant surface. ",
+  
+  "To ma znaczenie gdy rodzima geometria nie jest euklidesowa. "
+  "Przykładowo, dla rodzimej geometrii sferycznej i skali < 1 2-sfera będzie modelowana jako podsfera; "
+  "w rodzimej geometrii hiperbolicznej dla skali > 1 płaszczyzna hiperboliczna będzie modelowana jako powietrzchnia ekwidystantna.")
+
+S("This just shows the 'z' coordinate of the selected point.",
+  "To jedynie pokazuje współrzędną 'z' wybranego punktu.")
+
+S("radar", "radar")
+S("model iterations", "iteracje modelu")
+S("keep shape", "trzymaj kształt")
+
+// texture mode
+//--------------
+
+S("texture mode", "tryb tekstury")
+
+S(
+  "This mode lets you to change the floor tesselation easily -- "
+  "select 'paint a new texture' and draw like in a Paint program. "
+  "The obtained pattern can then be easily changed to another geometry, "
+  "or saved.\n\n"
+  "Instead of drawing, it is also possible to use an arbitrary image "
+  "as a texture. "
+  "Works best with spherical/Euclidean/hyperbolic tesselations "
+  "(e.g., a photo of a soccerball, or one of the tesselations by M. C. "
+  "Escher), but it can be also used on arbitrary photos to make them periodic "
+  "(these probably work best with the 'large picture' setting in geometry selection). "
+  "Again, tesselations can have their geometry changed.\n\n",
+  
+  "Ten tryb pozwala Ci łatwo zmienić teselację powierzchni -- "
+  "wybierz 'namaluj nową teksturę' i rysuj jak w programie typu Paint. "
+  "Otrzymany wzorek może być następnie przekształcony do innej geometrii "
+  "lub zapisany.\n\n"
+  "Zamiast rysowania jest też możliwe użycie dowolnego obrazka. "
+  "Działa najlepiej z parkietażami (np. zdjęcie piłki nożnej, albo "
+  "parkietaże M. C. Eschera), ale można też tego użyć na dowolnych zdjęciach, "
+  "by uzyskać ich okresową wersję (zazwyczaj najlepiej działają 'duże obrazki' "
+  "w wyborze geometrii). Tu również możemy przekształcić parkietaż do "
+  "innej geometrii.\n\n")
+
+S("texture mode (off)", "tryb tekstury (wyłączony)")
+S("select geometry/pattern", "wybierz geometrię/wzór")
+S("reactivate the texture", "reaktywuj teksturę")
+S("open PNG as texture", "otwórz PNG jako teksturę")
+S("load texture config", "ładuj konfigurację tekstury")
+S("warning: unable to find the center", "ostrzeżenie: nie udało się znaleźć centrum")
+S("texture size", "rozmiar tekstury")
+S("paint a new texture", "namaluj nową teksturę")
+S("precision", "precyzja")
+
+S("texture mode (overlay)", "tryb tekstury (nałożenie)")
+S("select the texture's pattern", "wybierz wzorek tekstury")
+S("enable the texture", "uruchom teksturę")
+S("cancel the texture", "anuluj teksturę")
+S("move the model", "przesuń model")
+S("move the texture", "przesuń teksturę")
+S("zoom/scale the texture", "obróć/zmień rozmiar tekstury")
+S("zoom/scale the model", "obróć/zmień rozmiar modelu")
+S("projection", "rzut")
+S("affine transformations", "przekszt. afiniczne")
+S("magic", "magia")
+
+S("grid color (master)", "kolor siatki (główny)")
+S("grid color (copy)", "kolor siatki (kopia)")
+S("save the raw texture", "zapisz surową teksturę")
+S("Saved the raw texture to %1", "Zapisano surową teksturę do %1")
+
+S("texture auto-adjustment", "auto-ustawianie tekstury")
+S("drag from the model to the texture", "przeciągaj z modelu na teksturę")
+S("affect model scale", "skala modelu")
+S("affect model projection", "projekcja")
+S("affect model rotation", "obrót modelu")
+S("affect model position", "pozycja modelu")
+S("affect texture slanting", "przechylenie tekstury")
+S("affect texture stretching", "rozciągnięcie tekstury")
+S("delete markers", "usuń markery")
+S("perform auto-adjustment", "wykonaj auto-ustawianie")
+
+S("texture mode (active)", "tryb tekstury (aktywny)")
+S("deactivate the texture", "wyłącz teksturę")
+S("back to overlay mode", "wróć do trybu nałożenia")
+S("change the geometry", "zmień geometrię")
+S("grid color", "kolor siatki")
+S("mesh color", "kolor siateczki")
+S("color alpha", "współczynnik koloru")
+S("The higher the value, the less important the color of underlying terrain is.",
+  "Im wyższa wartość, tym mniej istotny kolor podłoża.")
+S("edit the texture", "edytuj teksturę")
+S("save the full texture image", "zapisz pełną teksturę")
+S("Saving full texture to %1...", "Zapis pełnej tekstury do %1...")
+S("save texture config", "zapisz konfigurację tekstury")
+
+S("football", "piłka nożna")
+S("three colors", "trzy kolory")
+S("chessboard", "szachownica")
+S("single type", "pojedynczy typ")
+S("large picture", "duży obrazek")
+S("periodic patterns", "okresowe wzorki")
+S("more tuning", "dostrajanie")
+
+S("Docks pattern", "wzorek Doków")
+
+// Docks
+//-------
+
+N("Docks", GEN_O, "Dok", "Doki", "Dok", "w Doku")
+N("dock", GEN_O, "dok", "doki", "dok", "dokiem")
+S("A dock.", "Dok.")
+N("burning dock", GEN_O, "płonący dok", "płonące doki", "płonący dok", "płonącym dokiem")
+S("A burning dock.", "Płonący dok.")
+
+N("Sea Glass", GEN_N, "Morskie Szkło", "Morskie Szkła", "Morskie Szkło", "Morskim Szkłem")
+
+// Snake Nest
+
+N("Snake Nest", GEN_N, "Gniazdo Węży", "Gniazda Węży", "Gniazdo Węży", "w Gnieździe Węży")
+
+N("Snake Oil", GEN_O, "Wężowy Olej", "Wężowe Oleje", "Wężowy Olej", "Wężowym Olejem")
+
+S("Made of actual snakes!", "Zrobiony z prawdziwych węży!")
+
+// Ruined City
+
+N("Ruined City", GEN_N, "Zrujnowane Miasto", "Zrujnowane Miasta", "Zrujnowane Miasto", "w Zrujnowanym Mieście")
+
+S("Once a beautiful city... but now overrun by the mighty Raiders of unknown origin.\n\n"
+ "Raiders cannot be harmed with mundane weapons, but each color has its movement restrictions.",
+ 
+ "Niegdyś piękne miasto... ale obecnie zrujnowane przez potężnych Najeźdźców nieznanego pochodzenia.\n\n"
+ "Najeźdźców nie można zranić zwykłą bronią, ale każdy kolor ma pewne ograniczenie ruchu.")
+
+N("Chrysoberyl", GEN_O, "Chryzoberyl", "Chryzoberyle", "Chryzoberyl", "Chryzoberylem")
+S("Fragment of the past glory.", "Fragment dawnej chwały.")
+
+N("Red Raider", GEN_M, "Czerwony Najeźdźca", "Czerwoni Najeźdźcy", "Czerwonego Najeźdźcę", "Czerwonym Najeźdźcą")
+S("Red Raiders travel in pairs. They are able to destroy walls on their way.",
+  "Czerwoni Najeźdźcy podróżują parami. Mogą niszczyć ściany na swojej drodze.")
+
+N("Gray Raider", GEN_M, "Szary Najeźdźca", "Szarzy Najeźdźcy", "Szarego Najeźdźcę", "Szarym Najeźdźcą")
+S("Gray Raiders never step on gray cells.",
+  "Szarzy Najeźdźcy nie stają na szarych polach.")
+
+N("Green Raider", GEN_M, "Zielony Najeźdźca", "Zieloni Najeźdźcy", "Zielonego Najeźdźcę", "Zielonym Najeźdźcą")
+S("Green Raiders never step from one green cell to another.",
+  "Zieloni Najeźdźcy nie przechodzą z jednego zielonego pola na drugie.")
+
+N("Brown Raider", GEN_M, "Brązowy Najeźdźca", "Brązowi Najeźdźcy", "Brązowego Najeźdźcę", "Brązowym Najeźdźcą")
+S("Brown Raiders never move adjacent to an item.",
+  "Brązowi Najeźdźcy nie przechodzą koło przedmiotów.")
+
+
+N("Blue Raider", GEN_M, "Niebieski Najeźdźca", "Niebiescy Najeźdźcy", "Niebieskiego Najeźdźcę", "Niebieskim Najeźdźcą")
+S("Blue Raiders have a powerful attack which takes two turns to complete, and also makes the Blue Raider stunned "
+  "for a long time. This attack can destroy other Raiders if it hits them.",
+  "Niebiescy Najeźdźcy mają potężny atak, który trwa dwie kolejki, i powoduje, że Niebieski Najeźdźca jest "
+  "ogłoszony przez dłuższy czas. Ten atak jest w stanie zniszczyć innych Najeźdźców, gdy ich trafi."
+  )
+
+Orb("Slaying", "Pogromu")
+
+S("This Orb lets you defeat Raiders and other tough single-cell monsters in melee.",
+  "Ta Sfera pozwala Ci pokonywać Najeźdźców i inne potężne jednopolowe potwory w walce wręcz.")
+
+// Jelly Kingdom
+
+N("Jelly Kingdom", GEN_N, "Królestwo Galarety", "Królestwa Galarety", "Królestwo Galarety", "w Królestwie Galarety")
+
+S("Some of the Slime Beasts have decided to revolt against the color changing rules in the "
+  "Alchemist Lab, change their shape and consistency, and create their own Kingdom.\n\n"
+  "Jellies switch between being a wall and being a monster after every treasure you pick.",
+  
+  "Część Mazistych Stworów z Laboratorium postanowiło zbuntować się przeciwko regułom zmiany koloru w "
+  "Laboratorium, zmienić kształt i konsystencję, i stworzyć własne Królestwo.\n\n"
+  "Galareta zmienia swój stan z potwora na ścianę i odwrotnie z każdym zebranym skarbem."
+  )
+
+N("Red Jelly", GEN_F, "Czerwona Galareta", "Czerwone Galarety", "Czerwoną Galaretę", "Czerwoną Galaretą")
+N("Blue Jelly", GEN_F, "Niebieska Galareta", "Niebieskie Galarety", "Niebieską Galaretę", "Niebieską Galaretą")
+
+N("Tasty Jelly", GEN_F, "Pyszna Galaretka", "Pyszne Galaretki", "Pyszną Galaretkę", "Pyszną Galaretą")
+S("A tasty byproduct of the Jelly Revolution.",
+  "Pyszny produkt uboczny Galaretowej Rewolucji.")
+
+Orb("Phasing", "Fazy")
+S("This orb lets you pass through walls (one cell wide), and also through as long as they will not attack you in transit.",
+  "Ta Sfera pozwala Ci przechodzić przez ściany (o szerokości jednego pola), a także przez potwory, o ile "
+  "nie zaatakują one w trakcie ruchu.")
+
+#undef Orb
 

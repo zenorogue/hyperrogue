@@ -904,7 +904,7 @@ void showMenu() {
     dialog::addSelItem(XLAT("color alpha"), its(color_alpha), 'c');
     dialog::addItem(XLAT("edit the texture"), 'e');
     dialog::addItem(XLAT("save the full texture image"), 'S');
-    dialog::addItem(XLAT("save the texture config"), 's');
+    dialog::addItem(XLAT("save texture config"), 's');
     }
   
   dialog::addItem(XLAT("help"), SDLK_F1);  
@@ -937,13 +937,13 @@ void showMenu() {
       pushScreen(showMagicMenu);
 
     else if(uni == 's' && tstate == tsActive) 
-      dialog::openFileDialog(configname, XLAT("texture config to save:"), ".txc", 
+      dialog::openFileDialog(configname, XLAT("save texture config"), ".txc", 
         [] () {
           return save_textureconfig();
           });
 
     else if(uni == 'l' && tstate == tsOff) 
-      dialog::openFileDialog(configname, XLAT("texture config to load:"), ".txc", 
+      dialog::openFileDialog(configname, XLAT("load texture config"), ".txc", 
         [] () {
           return load_textureconfig();
           });
@@ -952,7 +952,7 @@ void showMenu() {
       patterns::pushChangeablePatterns();
 
     else if(uni == 'o' && tstate == tsOff) 
-      dialog::openFileDialog(texturename, XLAT("texture to load:"), ".png", 
+      dialog::openFileDialog(texturename, XLAT("open PNG as texture"), ".png", 
         [] () {
           if(readtexture() && loadTextureGL()) {
             if(tstate_max == tsOff) tstate_max = tsAdjusting;
@@ -1023,9 +1023,15 @@ void showMenu() {
       dialog::reaction = perform_mapping;
       }    
     else if(uni == 'S' && tstate == tsAdjusting) 
-      saveRawTexture();
+      dialog::openFileDialog(texturename, XLAT("save the raw texture"), ".png", 
+        [] () {
+          saveRawTexture(); return true;
+          });
     else if(uni == 'S' && tstate == tsActive) 
-      saveFullTexture();
+      dialog::openFileDialog(texturename, XLAT("save the full texture image"), ".png", 
+        [] () {
+          saveFullTexture(); return true;
+          });
     else if(uni == SDLK_F1)
       gotoHelp(texturehelp);
     else if(doexiton(sym, uni))

@@ -448,7 +448,7 @@ string generateHelpForLand(eLand l) {
   
   if(l == laMirror || l == laMinefield || l == laPalace ||
     l == laOcean || l == laLivefjord || l == laZebra || l == laWarpCoast || l == laWarpSea ||
-    l == laReptile || l == laIvoryTower)
+    l == laReptile || l == laIvoryTower || l == laSwitch)
       TREQ(R30)
 
   if(l == laPower && inv::on)
@@ -481,6 +481,8 @@ string generateHelpForLand(eLand l) {
     
   if(l == laReptile) TREQ2(U10, itElixir)
   if(l == laVolcano) TREQ2(U10, itElixir)
+  if(l == laSwitch) TREQ2(U10, itElixir)
+  
   if(l == laEndorian) TREQ2(U10, itIvory)
   if(l == laKraken) TREQ2(U10, itFjord)
   if(l == laBurial) TREQ2(U10, itKraken)
