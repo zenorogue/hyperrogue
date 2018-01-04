@@ -6524,6 +6524,8 @@ S("Once a beautiful city... but now overrun by the mighty Raiders of unknown ori
  "Niegdyś piękne miasto... ale obecnie zrujnowane przez potężnych Najeźdźców nieznanego pochodzenia.\n\n"
  "Najeźdźców nie można zranić zwykłą bronią, ale każdy kolor ma pewne ograniczenie ruchu.")
 
+N("ruin wall", GEN_F, "zrujnowana ściana", "zrujnowane ściany", "zrujnowaną ścianę", "zrujnowaną ścianą")
+
 N("Chrysoberyl", GEN_O, "Chryzoberyl", "Chryzoberyle", "Chryzoberyl", "Chryzoberylem")
 S("Fragment of the past glory.", "Fragment dawnej chwały.")
 
