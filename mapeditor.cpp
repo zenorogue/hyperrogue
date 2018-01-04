@@ -488,7 +488,7 @@ namespace mapeditor {
     }
   
   int drawcellShapeID() {
-    if(drawcell == cwt.c) return vid.cs.charid;
+    if(drawcell == cwt.c && drawplayer) return vid.cs.charid;
     if(drawcell->monst) return drawcell->monst;
     if(drawcell->item) return drawcell->item;
     return patterns::getpatterninfo0(drawcell).id;
