@@ -664,6 +664,7 @@ bool drawItemType(eItem it, cell *c, const transmatrix& V, int icol, int ticks, 
     
     if(it == itZebra) icol = 0xFFFFFF;
     if(it == itLotus) icol = 0x101010;
+    if(it == itSwitch) icol = minf[passive_switch].color;
     
     transmatrix V2 = V * spin(ticks / 1500.);
   
@@ -678,6 +679,8 @@ bool drawItemType(eItem it, cell *c, const transmatrix& V, int icol, int ticks, 
 
     if(it == itZebra)
       queuepolyat(V * spin(ticks / 1500. + M_PI/(ct6+6)), *xsh, darkena(0x202020, 0, hidden ? 0x40 : 0xF0), PPR_ITEMb);
+    if(it == itSwitch)
+      queuepolyat(V * spin(ticks / 1500. + M_PI/(ct6+6)), *xsh, darkena(minf[active_switch()].color, 0, hidden ? 0x40 : 0xF0), PPR_ITEMb);
     }
   
   else if(xch == 'o' || it == itInventory) {
