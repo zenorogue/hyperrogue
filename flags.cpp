@@ -735,3 +735,6 @@ bool generateAll(eLand l) {
     l == laCaves || l == laCA;
   }
 
+bool isRaider(eMonster m) {
+  return m == moPair || m == moMonk || m == moCrusher || m == moAltDemon || m == moHexDemon;
+  }

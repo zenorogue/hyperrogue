@@ -6553,6 +6553,8 @@ S("Blue Raiders have a powerful attack which takes two turns to complete, and al
   "ogłoszony przez dłuższy czas. Ten atak jest w stanie zniszczyć innych Najeźdźców, gdy ich trafi."
   )
 
+S("You cannot attack Raiders directly!", "Nie możesz atakować Najeźdźców bezpośrednio!")
+
 Orb("Slaying", "Pogromu")
 
 S("This Orb lets you defeat Raiders and other tough single-cell monsters in melee.",
@@ -6582,6 +6584,8 @@ Orb("Phasing", "Fazy")
 S("This orb lets you pass through walls (one cell wide), and also through as long as they will not attack you in transit.",
   "Ta Sfera pozwala Ci przechodzić przez ściany (o szerokości jednego pola), a także przez potwory, o ile "
   "nie zaatakują one w trakcie ruchu.")
+
+S("You cannot attack Jellies in their wall form!", "Nie możesz atakować Galarety w formie ściany!")
 
 #undef Orb
 

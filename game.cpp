@@ -7454,6 +7454,10 @@ bool movepcto(int d, int subdir, bool checkonly) {
           addMessage(XLAT("You cannot defeat the Greater Demon yet!"));
         else if(c2->monst == moDraugr)
           addMessage(XLAT("Your mundane weapon cannot hurt %the1!", c2->monst));
+        else if(isRaider(c2->monst))
+          addMessage(XLAT("You cannot attack Raiders directly!"));
+        else if(isSwitch(c2->monst))
+          addMessage(XLAT("You cannot attack Jellies in their wall form!"));
         else
           addMessage(XLAT("For some reason... cannot attack!"));
         return false;
