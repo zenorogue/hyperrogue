@@ -2391,6 +2391,11 @@ namespace texture {
   
   void update();
   void drawPixel(cell *c, hyperpoint h, int col);
+
+  extern cell *where;
+  // compute 'c' automatically, based on the hint in 'where'
+  void drawPixel(hyperpoint h, int col);
+  void drawLine(hyperpoint h1, hyperpoint h2, int col, int steps = 10);
   
   void remap(eTextureState old_tstate, eTextureState old_tstate_max);
   
@@ -2399,6 +2404,7 @@ namespace texture {
   void undoLock();
   void undo();
   extern bool texturesym;
+  
 
   extern cpatterntype cgroup;
   }

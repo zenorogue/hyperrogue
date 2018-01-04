@@ -407,6 +407,12 @@ double hdist0(const hyperpoint& mh) {
   return asinh(d);
   }
 
+ld circlelength(ld r) {
+  if(euclid) return 2 * M_PI * r;
+  else if(hyperbolic) return 2 * M_PI * sinh(r);
+  else return 2 * M_PI * sin(r);
+  }
+
 // distance between two points
 double hdist(const hyperpoint& h1, const hyperpoint& h2) {
   return hdist0(gpushxto0(h1) * h2);

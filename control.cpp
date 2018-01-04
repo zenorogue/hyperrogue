@@ -663,6 +663,7 @@ void mainloopiter() {
       mousepressed = ev.type == SDL_MOUSEBUTTONDOWN;
       if(mousepressed) flashMessages();
       mousing = true;
+      bool was_holdmouse = holdmouse;
       holdmouse = false;
       
       bool act = false;
@@ -675,7 +676,10 @@ void mainloopiter() {
         actonrelease = ev.type == SDL_MOUSEBUTTONDOWN;
         }      
       
-      if(ev.type != SDL_MOUSEMOTION) fix_mouseh();
+      fix_mouseh();
+      
+      if(was_holdmouse && ev.type == SDL_MOUSEBUTTONUP)
+        sym = uni = PSEUDOKEY_RELEASE;
       
       if(!act) ;
 

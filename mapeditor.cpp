@@ -987,9 +987,15 @@ namespace mapeditor {
 #if CAP_TEXTURE
     else if(texture::tstate == texture::tsActive) {
       displayButton(8, 8+fs*2, XLAT(texture::texturesym ? "0 = symmetry" : "0 = asymmetry"), '0', 0);
-      displayButton(8, 8+fs*3, XLAT("p = color"), 'p', 0);
+      if(mousekey == 'g')
+        displayButton(8, 8+fs*16, XLAT("p = grid color"), 'p', 0);
+      else
+        displayButton(8, 8+fs*16, XLAT("p = color"), 'p', 0);
       displayButton(8, 8+fs*4, XLAT("b = brush size: %1", fts4(texture::penwidth)), 'b', 0);
       displayButton(8, 8+fs*5, XLAT("u = undo"), 'u', 0);
+      displaymm('d', 8, 8+fs*7, 2, vid.fsize, XLAT("d = draw"), 0);
+      displaymm('l', 8, 8+fs*8, 2, vid.fsize, XLAT("l = line"), 0);
+      displaymm('c', 8, 8+fs*9, 2, vid.fsize, XLAT("c = circle"), 0);
       }
 #endif
     else {
@@ -1347,6 +1353,9 @@ namespace mapeditor {
        }
      #endif
      }
+  
+  hyperpoint lstart;
+  cell *lstartcell;
 
   void drawHandleKey(int sym, int uni) {
 
@@ -1367,6 +1376,8 @@ namespace mapeditor {
     
     hyperpoint mh = inverse(drawtrans) * mouseh;
 
+    bool clickused = false;
+    
     if((uni == 'p' && mousekey == 'g') || (uni == 'g' && coldcenter == ccenter && ccenter == mh)) {
       static unsigned grid_colors[] = {
         8,
@@ -1380,14 +1391,16 @@ namespace mapeditor {
         0x0000F080,
         };
       dialog::openColorDialog(gridcolor, grid_colors);
+      clickused = true;
       }
     
     char mkuni = uni == '-' ? mousekey : uni;
     
-    bool clickused = false;
-      
     if(mkuni == 'g') 
       coldcenter = ccenter, ccenter = mh, clickused = true;
+    
+    if(uni == 'd' || uni == 'l' || uni == 'c')
+      mousekey = uni;
 
     if(uni == ' ' && cheater) {
       popScreen();
@@ -1420,10 +1433,40 @@ namespace mapeditor {
 
 #if CAP_TEXTURE
     if(texture::tstate == texture::tsActive) {
+    
+      int tcolor = (texture::paint_color >> 8) | ((texture::paint_color & 0xFF) << 24);
+      
       if(uni == '-' && !clickused) {
-        if(!holdmouse) texture::undoLock();
-        texture::drawPixel(mouseover, mouseh, (texture::paint_color >> 8) | ((texture::paint_color & 0xFF) << 24));
-        holdmouse = true;
+        if(mousekey == 'l' || mousekey == 'c') {
+          if(!holdmouse) lstart = mouseh, lstartcell = mouseover, holdmouse = true;
+          }
+        else {
+          if(!holdmouse) texture::undoLock();
+          texture::drawPixel(mouseover, mouseh, tcolor);
+          holdmouse = true; lstartcell = NULL;
+          }
+        }
+      
+      if(sym == PSEUDOKEY_RELEASE) {
+        printf("release\n");
+        if(mousekey == 'l') { 
+          texture::undoLock();
+          texture::where = mouseover;
+          texture::drawPixel(mouseover, mouseh, tcolor);
+          texture::drawLine(mouseh, lstart, tcolor);
+          lstartcell = NULL;
+          }
+        if(mousekey == 'c') { 
+          texture::undoLock();
+          ld rad = hdist(lstart, mouseh);
+          int circp = int(1 + 3 * (circlelength(rad) / texture::penwidth));
+          if(circp > 1000) circp = 1000;
+          transmatrix T = rgpushxto0(lstart);
+          texture::where = lstartcell;
+          for(int i=0; i<circp; i++)
+            texture::drawPixel(T * spin(2 * M_PI * i / circp) * xpush(rad) * C0, tcolor);
+          lstartcell = NULL;
+          }
         }
       
       if(uni >= 1000 && uni < 1010)
@@ -1440,7 +1483,8 @@ namespace mapeditor {
         }        
 
       if(uni == 'p') {
-        dialog::openColorDialog(texture::paint_color, texture_colors);
+        if(!clickused)
+          dialog::openColorDialog(texture::paint_color, texture_colors);
         }
 
       if(uni == 'b') 
@@ -1537,6 +1581,18 @@ namespace mapeditor {
     }
   
   transmatrix textrans;
+
+  void queue_hcircle(transmatrix Ctr, ld radius) {
+    vector<hyperpoint> pts;
+    int circp = 6;
+    if(radius > 0.04) circp *= 2;
+    if(radius > .1) circp *= 2; 
+    
+    for(int j=0; j<circp; j++)
+      pts.push_back(Ctr * tC0(spin(M_PI*j*2/circp) * xpush(radius)));
+    for(int j=0; j<circp; j++)
+      queueline(pts[j], pts[(j+1)%circp], texture::paint_color, 0, PPR_LINE);
+    }
     
   bool drawUserShape(transmatrix V, int group, int id, int color, cell *c) {
   #if !CAP_EDIT
@@ -1557,29 +1613,37 @@ namespace mapeditor {
         }
       }
   
-    if(cmode & sm::DRAW) if(!holdmouse) {
+    if(cmode & sm::DRAW) {
 
 #if CAP_TEXTURE    
-      if(texture::tstate == texture::tsActive && lmouseover && !mouseout()) {
-        auto sio = patterns::getpatterninfo0(lmouseover);
+      if(texture::tstate == texture::tsActive && lmouseover && !mouseout() && (lstartcell || !holdmouse)) {
+        cell *ls = lstartcell ? lstartcell : lmouseover;
+        auto sio = patterns::getpatterninfo0(ls);
         auto sih = patterns::getpatterninfo0(c);
         
         if(sio.id == sih.id) {
-          if(c == lmouseover) 
-            textrans = inverse(V * applyPatterndir(mouseover, sio));
+          if(c == ls)
+            textrans = inverse(V * applyPatterndir(ls, sio));
+          
           transmatrix mh = textrans * rgpushxto0(mouseh);
+          transmatrix ml = textrans * rgpushxto0(lstart);
+          
           for(int j=0; j<=texture::texturesym; j++)
           for(int i=0; i<c->type; i += sih.symmetries) {
-            transmatrix M2 = V * spin(2*M_PI*i/c->type);
+            transmatrix M2 = V * applyPatterndir(c, sih) * spin(2*M_PI*i/c->type);
             if(j) M2 = M2 * Mirror;
-            M2 = M2 * mh;
-            array<hyperpoint, 6> pts;
-            for(int j=0; j<6; j++)
-              pts[j] = M2 * tC0(spin(M_PI*j/3) * xpush(texture::penwidth));
-            for(int j=0; j<6; j++)
-              queueline(pts[j], pts[(j+1)%6], texture::paint_color, 0, PPR_LINE);
+            switch(holdmouse ? mousekey : 'd') {
+              case 'c':
+                queue_hcircle(M2 * ml, hdist(lstart, mouseh));
+                break;
+              case 'l':
+                queueline(M2 * mh * C0, M2 * ml * C0, texture::paint_color, 4, PPR_LINE);
+                break;
+              default:
+                queue_hcircle(M2 * mh, texture::penwidth);
+              }                
             }
-          }        
+          }
         }
 #endif
 

@@ -1171,6 +1171,40 @@ void drawPixel(cell *c, hyperpoint h, int col) {
   pixels_to_draw.emplace_back(c, h, col);
   }
 
+cell *where;
+
+void drawPixel(hyperpoint h, int col) {
+  try {
+    again:
+    transmatrix g0 = gmatrix[where];
+    ld cdist0 = hdist(tC0(g0), h);
+
+    forCellEx(c, where) 
+      try {
+        transmatrix g = gmatrix[c];
+        ld cdist = hdist(tC0(g), h);
+        if(cdist < cdist0) {
+          cdist0 = cdist;
+          where = c; g0 = g;
+          goto again;
+          }
+        }
+      catch(out_of_range) {}
+    drawPixel(where, h, col);
+    }
+  catch(out_of_range) {}
+  }
+
+void drawLine(hyperpoint h1, hyperpoint h2, int col, int steps) {
+  if(steps > 0 && hdist(h1, h2) > penwidth / 3) {
+    hyperpoint h3 = mid(h1, h2);
+    drawLine(h1, h3, col, steps-1);
+    drawLine(h3, h2, col, steps-1);
+    }
+  else
+    drawPixel(h2, col);
+  }
+
 void remap(eTextureState old_tstate, eTextureState old_tstate_max) {
   texture_map.clear();
   if(old_tstate == tsActive && patterns::compatible(texture::cgroup, patterns::cgroup)) {
