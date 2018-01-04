@@ -1233,6 +1233,10 @@ int isLandValid(eLand l) {
   if(l == laStorms && torus) 
     return 3;
   
+  // not yet implemented in Shmup
+  if(shmup::on && (l == laSwitch || l == laRuins))
+    return 0;
+  
   if(l == laMagnetic)
     return 0;
 
