@@ -7005,7 +7005,7 @@ void terracotta() {
       }
   }
 
-eMonster passive_switch;
+eMonster passive_switch = moSwitch2;
 
 void checkSwitch() {
   passive_switch = (gold() & 1) ? moSwitch1 : moSwitch2;

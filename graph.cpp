@@ -3871,7 +3871,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       else if(isElemental(c->land) || c->land == laElementalWall)
         qfloor_eswap(c, Vf, NEWFLOOR, darkena(fcol, fd, 0xFF));
 
-      else if(c->land == laBurial)
+      else if(c->land == laBurial || c->land == laRuins)
         qfloor(c, Vf, BARROWFLOOR, darkena(fcol, fd, 0xFF));
 
       else if(c->land == laTrollheim && !eoh)
@@ -3907,6 +3907,12 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
 
       else if(c->land == laCocytus)
         qfloor_eswap(c, Vf, DESERTFLOOR, darkena(fcol, fd, 0xFF));
+
+      else if(c->land == laSwitch) {
+        qfloor_eswap(c, Vf, SWITCHFLOOR, darkena(fcol, fd, 0xFF));
+        if(ctof(c)) for(int i=0; i<c->type; i++)
+          queuepoly(Vf * spin(2 * M_PI * i / c->type) * xpush(rhexf), shSwitchDisk, darkena(minf[active_switch()].color, fd, 0xFF));
+        }
 
       else if(c->land == laStorms)
         qfloor_eswap(c, Vf, CHARGEDFLOOR, darkena(fcol, fd, 0xFF));
