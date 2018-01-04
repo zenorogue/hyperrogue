@@ -205,7 +205,7 @@ int fiftyval200(cell *c) {
 
 // zebraval
 
-int dir_truncated457(cell *c) {
+int dir_chamfered457(cell *c) {
   int wset = 0;
   int has1 = 0;
   for(int i=0; i<4; i++) {
@@ -233,7 +233,7 @@ int zebra40(cell *c) {
     }
   else if(ctof(c)) return (c->master->zebraval/10);
   else if(a4) {
-    int ws = dir_truncated457(c);
+    int ws = dir_chamfered457(c);
     if(ws < 0) return -ws;
     int tot = 0; 
     array<int, 4> zebras;
@@ -526,7 +526,7 @@ namespace patterns {
           si.dir = i;
       }
     else {
-      int d = dir_truncated457(c);
+      int d = dir_chamfered457(c);
       if(d >= 0) si.dir = d;
       else si.dir = (zebra40(createMov(c, 0)) & 4) ? 2 : 0;
       }
@@ -540,11 +540,11 @@ namespace patterns {
         si.id = (c->master->fiftyval >> 1) & 3;
       else
         si.id = 0;
-      if(nontruncated)
+      if(nonchamfered)
         si.id *= 4;
       else 
         si.id += 4;
-      si.dir = (pat == PAT_COLORING && !nontruncated ? 1 : 0) + (c->master->fiftyval | (c->master->fiftyval & 8 ? 0 : 2));
+      si.dir = (pat == PAT_COLORING && !nonchamfered ? 1 : 0) + (c->master->fiftyval | (c->master->fiftyval & 8 ? 0 : 2));
       si.symmetries = 2;
       si.id += 8;
       si.id %= 12;
@@ -687,13 +687,13 @@ namespace patterns {
         if(subpattern_flags & SPF_FULLSYM) 
           si.symmetries = 1;
         }      
-      if(sphere && !(nontruncated) && !(S7 == 3))
+      if(sphere && !(nonchamfered) && !(S7 == 3))
         si.symmetries = ctof(c) ? 1 : 2;
       if(sphere && (sub & SPF_EXTRASYM)) {
         si.symmetries = ctof(c) ? 1 : 2;
         }
       if(a38)
-        si.symmetries = (ctof(c) && !nontruncated) ? 1 : 2;
+        si.symmetries = (ctof(c) && !nonchamfered) ? 1 : 2;
       if(a457) {
         si.symmetries = ctof(c) ? 1 : 2;
         if(!ctof(c)) si.dir = 0;
@@ -746,7 +746,7 @@ namespace patterns {
       si.id = zebra40(c); // 4 to 43
       int t4 = si.id>>2, tcdir = 0;
       
-      if(nontruncated) tcdir = si.id^1;
+      if(nonchamfered) tcdir = si.id^1;
       
       else if(t4 == 10) tcdir = si.id-20;
       else if(t4 >= 4 && t4 < 7) tcdir = 40 + (si.id&3);
@@ -801,11 +801,11 @@ namespace patterns {
       int look_for = -1;
       int shft = 0;
       if(inr(si.id, 0, 4)) {
-        look_for = si.id + (nontruncated ? 4 : 60);
+        look_for = si.id + (nonchamfered ? 4 : 60);
         if(symRotation) si.symmetries = 1;
         }
-      else if(inr(si.id, 4, 32)) look_for = si.id + (nontruncated ? 28 : 168);
-      else if(inr(si.id, 32, 60)) look_for = si.id + (nontruncated ? -28 : 112);
+      else if(inr(si.id, 4, 32)) look_for = si.id + (nonchamfered ? 28 : 168);
+      else if(inr(si.id, 32, 60)) look_for = si.id + (nonchamfered ? -28 : 112);
       else if(inr(si.id, 60, 88)) look_for = si.id - 56, shft = si.reflect ? 1 : 5;
       else if(inr(si.id, 88, 116)) look_for = si.id - 84, shft = 3;
       else if(inr(si.id, 116, 144)) look_for = si.id + 56;
@@ -849,7 +849,7 @@ namespace patterns {
       if(euclid)
         // use the torus ID
         si.id = fieldpattern::fieldval_uniq(c);
-      else if(nontruncated)
+      else if(nonchamfered)
         // use the actual field codes
         si.id = fieldpattern::fieldval(c).first;
       else          
@@ -888,7 +888,7 @@ namespace patterns {
   }
 
 int geosupport_threecolor() {
-  if(!nontruncated) {
+  if(!nonchamfered) {
     if(S7 % 2) return 1;
     return 2;
     }
@@ -898,8 +898,8 @@ int geosupport_threecolor() {
   }
 
 int geosupport_graveyard() {
-  // always works in truncated geometries
-  if(!nontruncated) return 2;
+  // always works in chamfered geometries
+  if(!nonchamfered) return 2;
   
   // always works in patterns supporting three-color
   return geosupport_threecolor();
@@ -911,19 +911,19 @@ int pattern_threecolor(cell *c) {
     patterns::val38(c, si, patterns::SPF_ROT, patterns::PAT_COLORING);
     return si.id >> 2;
     }
-  if(a46 && !nontruncated) {
+  if(a46 && !nonchamfered) {
     patterns::patterninfo si;
     patterns::val46(c, si, 0, patterns::PAT_COLORING);
     int i = si.id;
     return i >> 2;
     }
   if(euclid) {
-    if(a4 && nontruncated) return eupattern4(c);
+    if(a4 && nonchamfered) return eupattern4(c);
     return eupattern(c) % 3;
     }
   if(S7 == 4 && S3 == 3) {
     int codesN[6] = {0,1,2,1,2,0};
-    if(nontruncated) 
+    if(nonchamfered) 
       return codesN[c->master->fiftyval];
     if(ctof(c))
       return 0;
@@ -935,7 +935,7 @@ int pattern_threecolor(cell *c) {
         return 2 - (c->spin(i)&1);
       }
     }
-  if(stdhyperbolic && nontruncated) {
+  if(stdhyperbolic && nonchamfered) {
     int z = zebra40(c);
     if(z == 5 || z == 8 || z == 15) return 0;
     if(z == 10 || z == 12 || z == 7) return 2;
@@ -943,16 +943,16 @@ int pattern_threecolor(cell *c) {
     if(z == 14 || z == 11) return 4;
     return 1;
     }
-  if(a46 && nontruncated) {
+  if(a46 && nonchamfered) {
     patterns::patterninfo si;
     patterns::val46(c, si, 0, patterns::PAT_COLORING);
     return si.id;
     }
-  if(S7 == 5 && nontruncated) {
+  if(S7 == 5 && nonchamfered) {
     const int codes[12] = {1, 2, 0, 3, 2, 0, 0, 1, 3, 1, 2, 3};
     return codes[c->master->fiftyval];
     }
-  if(S7 == 3 && nontruncated)
+  if(S7 == 3 && nonchamfered)
     return c->master->fiftyval;
   return !ishept(c);
   }
@@ -965,7 +965,7 @@ bool pseudohept(cell *c) {
   }
 
 bool warptype(cell *c) {
-  if(a4 && nontruncated) {
+  if(a4 && nonchamfered) {
     if(euclid) 
       return among(eupattern4(c), 1, 2);
     else 
@@ -1123,7 +1123,7 @@ namespace patterns {
       }
 
     dialog::addItem(XLAT("football"), 'F');
-    if(S3 == 4 && nontruncated)
+    if(S3 == 4 && nonchamfered)
       dialog::addItem(XLAT("chessboard"), 'c');
 
     dialog::addItem(XLAT("nice coloring"), 'T');
@@ -1205,7 +1205,7 @@ namespace patterns {
     if(stdhyperbolic || euclid)
       dialog::addBoolItem(XLAT("Palace Pattern"), (whichPattern == PAT_PALACE), PAT_PALACE);
     
-    if(nontruncated && S3 == 4)
+    if(nonchamfered && S3 == 4)
       dialog::addBoolItem(XLAT("chessboard"), (whichPattern == PAT_CHESS), PAT_CHESS);
 
     if(a38 || a46 || euclid || S3 == 4)
@@ -1232,7 +1232,7 @@ namespace patterns {
     
     if((euclid && whichPattern == PAT_COLORING) ||
       (a38 && whichPattern == PAT_COLORING) ||
-      (a4 && nontruncated && whichPattern == PAT_COLORING && !a46))
+      (a4 && nonchamfered && whichPattern == PAT_COLORING && !a46))
       dialog::addBoolItem(XLAT("edit all three colors"), subpattern_flags & SPF_ROT, '0');
 
     if(euclid && whichPattern == PAT_COLORING)
@@ -1241,8 +1241,8 @@ namespace patterns {
     if(a46 && whichPattern == PAT_COLORING)
       dialog::addBoolItem(XLAT("rotate the color groups"), subpattern_flags & SPF_CHANGEROT, '4');
 
-    if(a46 && whichPattern == PAT_COLORING && !nontruncated)
-      dialog::addBoolItem(XLAT("edit both truncated colors"), subpattern_flags & SPF_TWOCOL, '5');
+    if(a46 && whichPattern == PAT_COLORING && !nonchamfered)
+      dialog::addBoolItem(XLAT("edit both chamfered colors"), subpattern_flags & SPF_TWOCOL, '5');
 
     if(
       (whichPattern == PAT_EMERALD && (stdhyperbolic || a38)) ||
@@ -1261,15 +1261,15 @@ namespace patterns {
     if(euclid && among(whichPattern, PAT_COLORING, 0))
       dialog::addBoolItem(XLAT("full symmetry"), subpattern_flags & SPF_FULLSYM, '!');
 
-    if(a38 && nontruncated && whichPattern == 0) {
+    if(a38 && nonchamfered && whichPattern == 0) {
       dialog::addBoolItem(XLAT("extra symmetries"), subpattern_flags & SPF_EXTRASYM, '=');
       }
 
-    if(a46 && nontruncated && whichPattern == PAT_COLORING) {
+    if(a46 && nonchamfered && whichPattern == PAT_COLORING) {
       dialog::addBoolItem(XLAT("extra symmetries"), subpattern_flags & SPF_EXTRASYM, '=');
       }
 
-    if((a38 || (sphere && S7 == 4) || euclid4 || a46) && !nontruncated) {
+    if((a38 || (sphere && S7 == 4) || euclid4 || a46) && !nonchamfered) {
       dialog::addBoolItem(XLAT("alternate coloring"), subpattern_flags & SPF_ALTERNATE, '\'');
       dialog::addBoolItem(XLAT("football pattern"), subpattern_flags & SPF_FOOTBALL, '*');
       }
@@ -1347,7 +1347,7 @@ namespace patterns {
   
   struct changeable_pattern_geometry {
     eGeometry geo;
-    bool nontrunc;
+    bool nonchamf;
     char whichPattern;
     int subpattern_flags;
     };
@@ -1441,14 +1441,14 @@ namespace patterns {
       for(int j=0; j<size(cpatterns[cgroup].geometries); j++) {
         auto &g = cpatterns[cgroup].geometries[j];
         string s = XLAT(ginf[g.geo].name);
-        s += truncatenames[g.nontrunc];
+        s += chamfernames[g.nonchamf];
         if(g.subpattern_flags & SPF_ALTERNATE) s += " (alt)";
         if(cgroup == cpZebra) {
           if(g.whichPattern == PAT_PALACE) s += " (Palace)";
           else if(g.whichPattern == PAT_EMERALD) s += " (Emerald)";
           else s += " (Zebra)";
           }
-        dialog::addBoolItem(s, geometry == g.geo && nontruncated == g.nontrunc && whichPattern == g.whichPattern && subpattern_flags == g.subpattern_flags, 'a'+j);
+        dialog::addBoolItem(s, geometry == g.geo && nonchamfered == g.nonchamf && whichPattern == g.whichPattern && subpattern_flags == g.subpattern_flags, 'a'+j);
         }
     dialog::addBreak(100);
     dialog::addItem("more tuning", 'r');
@@ -1466,7 +1466,7 @@ namespace patterns {
 #endif
         auto &g = cpatterns[cgroup].geometries[uni - 'a'];
         if(g.geo != geometry) { targetgeometry = g.geo; restartGame('g', false, true); }
-        if(g.nontrunc != nontruncated) restartGame('7', false, true);
+        if(g.nonchamf != nonchamfered) restartGame('7', false, true);
         whichPattern = g.whichPattern;
         subpattern_flags = g.subpattern_flags;
 #if CAP_TEXTURE
@@ -1483,7 +1483,7 @@ namespace patterns {
     for(int i=0; i<size(cpatterns); i++)
       for(int j=0; j<size(cpatterns[i].geometries); j++) {
         auto &g = cpatterns[i].geometries[j];
-        if(geometry == g.geo && nontruncated == g.nontrunc && whichPattern == g.whichPattern && subpattern_flags == g.subpattern_flags)
+        if(geometry == g.geo && nonchamfered == g.nonchamf && whichPattern == g.whichPattern && subpattern_flags == g.subpattern_flags)
           cgroup = cpatterntype(i);
         }
     old_cgroup = cgroup;
@@ -1667,7 +1667,7 @@ namespace linepatterns {
       case patBigTriangles: {
         if(pseudohept(c) && !euclid) for(int i=0; i<S7; i++) 
           if(c->master->move[i] < c->master) {
-            queueline(tC0(V), V*xspinpush0((nontruncated?M_PI:0) -2*M_PI*i/S7, tessf), col, 2);
+            queueline(tC0(V), V*xspinpush0((nonchamfered?M_PI:0) -2*M_PI*i/S7, tessf), col, 2);
             }
         break;
         }
@@ -1675,20 +1675,20 @@ namespace linepatterns {
       case patBigRings: {
         if(pseudohept(c) && !euclid) for(int i=0; i<S7; i++) 
           if(c->master->move[i] && c->master->move[i] < c->master && c->master->move[i]->dm4 == c->master->dm4)
-            queueline(tC0(V), V*xspinpush0((nontruncated?M_PI:0) -2*M_PI*i/S7, tessf), col, 2);
+            queueline(tC0(V), V*xspinpush0((nonchamfered?M_PI:0) -2*M_PI*i/S7, tessf), col, 2);
         break;
         }
         
       case patTree:
         if(ctof(c) && !euclid) 
-          queueline(tC0(V), V*ddi0(nontruncated?S42:0, tessf), col, 2);
+          queueline(tC0(V), V*ddi0(nonchamfered?S42:0, tessf), col, 2);
         break;
       
       case patAltTree:
         if(ctof(c) && !euclid && c->master->alt) {
           for(int i=0; i<S7; i++)
             if(c->master->move[i] && c->master->move[i]->alt == c->master->alt->move[0])
-              queueline(tC0(V), V*xspinpush0((nontruncated?M_PI:0) -2*M_PI*i/S7, tessf), col, 2);
+              queueline(tC0(V), V*xspinpush0((nonchamfered?M_PI:0) -2*M_PI*i/S7, tessf), col, 2);
           }
         break;
       

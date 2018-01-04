@@ -6354,7 +6354,7 @@ S(
   "You can try many different geometries here. We start by gluing "
   "n-gons in such a way that k of them meet in every vertex. "
   "Depending on n and k, this either folds into a sphere, unfolds into a plane, "
-  "or requires a hyperbolic space. The result may be then 'truncated' by "
+  "or requires a hyperbolic space. The result may be then 'chamfered' by "
   "replacing each vertex by a 2k-gon. Furthermore, you can play "
   "with quotient geometries. For example, the elliptic geometry is "
   "obtained from the sphere by making the antipodes be the same point, "
@@ -6362,7 +6362,7 @@ S(
   "Have fun experimenting! "
   "Achievements and leaderboards do not work in geometry experiments, "
   "except some specific ones.\n\n"
-  "In standard geometry (truncated or not), you can play the full game, but in other geometries "
+  "In standard geometry (chamfered or not), you can play the full game, but in other geometries "
   "you select a particular land. Lands are unlocked by visiting them in this "
   "session, or permanently by collecting 25 treasure. Try Crossroads in Euclidean "
   "or chaos mode in non-standard non-quotient hyperbolic to visit many lands. "
@@ -6407,7 +6407,7 @@ S("tetrahedron (buggy)", "čtyřstěn (problémový)")
 S("tetrahedron", "čtyřstěn") // in case if it gets better
 
 S("land", "kraj")
-S("truncated", "seříznutí")
+S("chamfered", "seříznutí")
 S("does not matter", "nehraje roli")
 S("sides per face", "počet stran")
 S("faces per vertex", "stupeň vrcholů")
@@ -6418,8 +6418,8 @@ S("quotient space", "kvocientový prostor")
 S("size of the world", "velikost světa")
 S("flat", "placka")
 
-// truncated or not truncated
-S(" (t)", " (s)")
+// chamfered or not chamfered
+S(" (c)", " (s)")
 S(" (n)", " (n)")
 
 S("(locked)", "(uzamčeno)")

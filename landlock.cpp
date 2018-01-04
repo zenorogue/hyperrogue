@@ -1020,10 +1020,10 @@ int isLandValid(eLand l) {
     return 1;
   
   // not enough space
-  if(l == laStorms && nontruncated && elliptic) 
+  if(l == laStorms && nonchamfered && elliptic) 
     return 0;
 
-  if(l == laStorms && nontruncated && S3 == 3) 
+  if(l == laStorms && nonchamfered && S3 == 3) 
     return 0;
 
   // available only in weird geometries
@@ -1043,8 +1043,8 @@ int isLandValid(eLand l) {
   if((l == laWildWest || l == laDual) && normalgame)
     return 0;
   
-  // Crystal World is designed for truncated geometries
-  if(l == laDual && nontruncated)
+  // Crystal World is designed for chamfered geometries
+  if(l == laDual && nonchamfered)
     return 0;
   
   if(l == laHaunted && chaosmode)
@@ -1093,11 +1093,11 @@ int isLandValid(eLand l) {
 
   // works correctly only in some geometries
   if(l == laClearing)
-    if(chaosmode || !(stdeuc || a38 || (a45 && !nontruncated) || (a47 && !nontruncated)))
+    if(chaosmode || !(stdeuc || a38 || (a45 && !nonchamfered) || (a47 && !nonchamfered)))
       return 0;
 
-  // does not work in non-truncated a4
-  if(l == laOvergrown && a4 && nontruncated)
+  // does not work in non-chamfered a4
+  if(l == laOvergrown && a4 && nonchamfered)
     return 0;
 
   // does not work in bounded either
@@ -1116,9 +1116,9 @@ int isLandValid(eLand l) {
   if((l == laBlizzard || l == laVolcano) && elliptic && S7 < 5)
     return 0;
   
-  // Kraken does not really work in odd non-truncated geometries
+  // Kraken does not really work in odd non-chamfered geometries
   // (but we do have to allow it in Standard)
-  if(l == laKraken && nontruncated && (S7&1)) {
+  if(l == laKraken && nonchamfered && (S7&1)) {
     if(!geometry) return 1;
     return 0;
     }
@@ -1129,7 +1129,7 @@ int isLandValid(eLand l) {
   
   // works in most spheres, Zebra quotient, and stdeuc
   if(l == laWhirlwind)
-    if(!(stdeuc || quotient == 1 || (S7 == 4 && !nontruncated) || (bigsphere && nontruncated && !elliptic)))
+    if(!(stdeuc || quotient == 1 || (S7 == 4 && !nonchamfered) || (bigsphere && nonchamfered && !elliptic)))
       return 0;
     
   // needs standard/Euclidean (needs fractal landscape)
@@ -1151,12 +1151,12 @@ int isLandValid(eLand l) {
   if(l == laDragon && bounded)
     return 0;
   
-  // Graveyard pattern does not work on non-truncated weird geometries
+  // Graveyard pattern does not work on non-chamfered weird geometries
   if(l == laGraveyard) 
     return geosupport_graveyard();
   
-  // Warped Coast does not work on non-truncated S3s (except standard heptagonal where we have to keep it)
-  if(l == laWarpCoast && (S3==3) && nontruncated) {
+  // Warped Coast does not work on non-chamfered S3s (except standard heptagonal where we have to keep it)
+  if(l == laWarpCoast && (S3==3) && nonchamfered) {
     if(!geometry) return 1;
     return 0;
     }
@@ -1174,7 +1174,7 @@ int isLandValid(eLand l) {
   if(l == laTrollheim && !stdeuc)
     return 1;
   
-  if(l == laReptile && (!stdeuc || nontruncated))
+  if(l == laReptile && (!stdeuc || nonchamfered))
     return 1;
   
   if(l == laCrossroads && weirdhyperbolic) 
@@ -1190,14 +1190,14 @@ int isLandValid(eLand l) {
   if(l == laCrossroads4 && !(stdeuc || smallbounded))
     return 0;
 
-  if(l == laZebra && !(stdeuc || (a4 && nontruncated) || a46 || quotient == 1))
+  if(l == laZebra && !(stdeuc || (a4 && nonchamfered) || a46 || quotient == 1))
     return 0;
   
   if(l == laCrossroads3 && euclid)
     return 1; // because it is not accurate
 
   if(l == laPrairie) {
-    if(stdeuc || (bigsphere && !nontruncated && !elliptic) || (quotient == 2)) ;
+    if(stdeuc || (bigsphere && !nonchamfered && !elliptic) || (quotient == 2)) ;
     else if(!bounded) return 1;
     else return 0;
     }

@@ -53,7 +53,7 @@ void precalc() {
     // dynamicval<eGeometry> g(geometry, gNormal);
     // precalc(); }
     // for(int i=0; i<S84; i++) spinmatrix[i] = spin(i * M_PI / S42);
-    if(a4 && nontruncated) {
+    if(a4 && nonchamfered) {
       crossf = .5;
       hexf = .5;
       hcrossf = crossf * sqrt(2) / 2;
@@ -119,7 +119,7 @@ void precalc() {
   else {
     hcrossf = hdist(xpush(tessf) * C0, spin(2*M_PI/S7) * xpush(tessf) * C0) / 2;
     }
-  crossf = nontruncated ? tessf : hcrossf;
+  crossf = nonchamfered ? tessf : hcrossf;
   
   fmin = 0, fmax = tessf;
   for(int p=0; p<100; p++) {
@@ -132,9 +132,9 @@ void precalc() {
     }
   hexf = fmin;
   
-  rhexf = nontruncated ? hcrossf : hexf;
+  rhexf = nonchamfered ? hcrossf : hexf;
   
-  if(!euclid && !nontruncated && !(S7&1))
+  if(!euclid && !nonchamfered && !(S7&1))
     hexshift = ALPHA/2 + ALPHA * ((S7-1)/2) + M_PI;
 
   finish:

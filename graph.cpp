@@ -157,7 +157,7 @@ void drawSpeed(const transmatrix& V) {
   }
 
 int ctof(cell *c) {
-  if(nontruncated) return 1;
+  if(nonchamfered) return 1;
   // if(euclid) return 0;
   return ishept(c) ? 1 : 0;
   // c->type == 6 ? 0 : 1;
@@ -238,8 +238,8 @@ int displaydir(cell *c, int d) {
   }
 
 double hexshiftat(cell *c) {
-  if(ctof(c) && S7==6 && S3 == 4 && !nontruncated) return hexshift + 2*M_PI/S7;
-  if(ctof(c) && (S7==8 || S7 == 4) && S3 == 3 && !nontruncated) return hexshift + 2*M_PI/S7;
+  if(ctof(c) && S7==6 && S3 == 4 && !nonchamfered) return hexshift + 2*M_PI/S7;
+  if(ctof(c) && (S7==8 || S7 == 4) && S3 == 3 && !nonchamfered) return hexshift + 2*M_PI/S7;
   if(hexshift && ctof(c)) return hexshift;
   return 0;
   }
@@ -291,11 +291,11 @@ void drawPlayerEffects(const transmatrix& V, cell *c, bool onplayer) {
       if(!euclid) for(int a=0; a<S42; a++) {
         int dda = S42 + (-1-2*a);
         if(a == ang && items[itOrbSword]) continue;
-        if(nontruncated && a%3 != ang%3) continue;
+        if(nonchamfered && a%3 != ang%3) continue;
         if((a+S21)%S42 == ang && items[itOrbSword2]) continue;
         bool longer = sword::pos(cwt.c, a-1) != sword::pos(cwt.c, a+1);
         int col = darkena(0xC0C0C0, 0, 0xFF);
-        queueline(Vnow*ddi0(dda, nontruncated ? 0.6 : longer ? 0.36 : 0.4), Vnow*ddi0(dda, nontruncated ? 0.7 : longer ? 0.44 : 0.42), col, 1);
+        queueline(Vnow*ddi0(dda, nonchamfered ? 0.6 : longer ? 0.36 : 0.4), Vnow*ddi0(dda, nonchamfered ? 0.7 : longer ? 0.44 : 0.42), col, 1);
         }
 #endif
 
@@ -2284,7 +2284,7 @@ void drawTowerFloor(const transmatrix& V, cell *c, int col, cellfunction *cf = c
     if(i == 9) j = 4;
     if(i == 10) j = 5;
     if(i == 13) j = 6;
-    if(nontruncated) {
+    if(nonchamfered) {
       if(i == 7) j = 7;
       if(i == 11) j = 8;
       if(i == 15) j = 9;
@@ -2308,7 +2308,7 @@ void drawZebraFloor(const transmatrix& V, cell *c, int col) {
   auto si = patterns::getpatterninfo(c, 'z', patterns::SPF_SYM0123);
   
   int j;
-  if(nontruncated) j = 4;
+  if(nonchamfered) j = 4;
   else if(si.id >=4 && si.id < 16) j = 2;
   else if(si.id >= 16 && si.id < 28) j = 1;
   else if(si.id >= 28 && si.id < 40) j = 3;
@@ -2330,7 +2330,7 @@ void drawReptileFloor(const transmatrix& V, cell *c, int col, bool usefloor) {
   int j;
 
   if(!wmescher) j = 4;
-  else if(nontruncated) j = 0;
+  else if(nonchamfered) j = 0;
   else if(si.id < 4) j = 0;
   else if(si.id >=4 && si.id < 16) j = 1;
   else if(si.id >= 16 && si.id < 28) j = 2;
@@ -2388,7 +2388,7 @@ void drawReptileFloor(const transmatrix& V, cell *c, int col, bool usefloor) {
   }
 
 void drawEmeraldFloor(const transmatrix& V, cell *c, int col) {
-  if(!euclid && !nontruncated) {
+  if(!euclid && !nonchamfered) {
     auto si = patterns::getpatterninfo(c, 'f', patterns::SPF_SYM0123);
   
     int j = -1;
@@ -2928,7 +2928,7 @@ bool noAdjacentChasms(cell *c) {
 void floorShadow(cell *c, const transmatrix& V, int col, bool warp) {
   if(pmodel == mdHyperboloid || pmodel == mdBall) 
     return; // shadows break the depth testing
-  if(shmup::on || nontruncated) warp = false;
+  if(shmup::on || nonchamfered) warp = false;
   dynamicval<int> p(poly_outline, OUTLINE_TRANS);
   if(wmescher && qfi.special) {
     queuepolyat(V * qfi.spin * shadowmulmatrix, *qfi.shape, col, PPR_WALLSHADOW);
@@ -2945,7 +2945,7 @@ void floorShadow(cell *c, const transmatrix& V, int col, bool warp) {
       queuepolyat(V * applyPatterndir(c, si), shTriheptaFloorShadow[ctof(c)], col, PPR_WALLSHADOW);
       }
     }
-  else if(c->land == laDual && !nontruncated) {
+  else if(c->land == laDual && !nonchamfered) {
     if(euclid && !a4 && ishex1(c))
       queuepolyat(V * pispin, shBigTriShadow, col, PPR_WALLSHADOW);
     else
@@ -2969,7 +2969,7 @@ void plainfloor(cell *c, bool warp, const transmatrix &V, int col, int prio) {
       queuepolyat(V * applyPatterndir(c, si), shTriheptaFloor[sphere ? ctof(c) : si.id], col, prio);
       }
     }
-  else if(c->land == laDual && !nontruncated) {
+  else if(c->land == laDual && !nonchamfered) {
     if(euclid && !a4 && ishex1(c))
       queuepolyat(V * pispin, shBigTriangle, col, prio);
     else
@@ -2987,7 +2987,7 @@ void qplainfloor(cell *c, bool warp, const transmatrix &V, int col) {
     auto si = patterns::getpatterninfo(c, 0, 0);
     qfloor(c, V, applyPatterndir(c, si), shTriheptaFloor[si.id], col);
     }
-  else if(c->land == laDual && !nontruncated)
+  else if(c->land == laDual && !nonchamfered)
     qfloor_eswap(c, V, shBigTriangle, col);
   else {
     qfloor(c, V, shFloor[ctof(c)], col);
@@ -2997,7 +2997,7 @@ void qplainfloor(cell *c, bool warp, const transmatrix &V, int col) {
 int wavephase;
 
 void warpfloor(cell *c, const transmatrix& V, int col, int prio, bool warp) {
-  if(shmup::on || nontruncated) warp = false;
+  if(shmup::on || nonchamfered) warp = false;
 #if CAP_TEXTURE
   if(qfi.tinf) {
     queuetable(V*qfi.spin, &qfi.tinf->vertices[0], size(qfi.tinf->vertices) / 3, 0, texture::recolor(col), prio);
@@ -3049,9 +3049,9 @@ void escherSidewall(cell *c, int sidepar, const transmatrix& V, int col) {
   }
 
 void placeSidewall(cell *c, int i, int sidepar, const transmatrix& V, bool warp, bool mirr, int col) {
-  if(shmup::on || nontruncated) warp = false;
+  if(shmup::on || nonchamfered) warp = false;
   if(warp && !ishept(c) && (!c->mov[i] || !ishept(c->mov[i]))) return;
-  if(c->land == laDual && !nontruncated) {
+  if(c->land == laDual && !nonchamfered) {
     if(ctof(c)) return;
     if((euclid && !a4) ? (ishex1(c) ? !(i&1) : (i&1)) : !(i&1)) return;
     }
@@ -3076,7 +3076,7 @@ void placeSidewall(cell *c, int i, int sidepar, const transmatrix& V, bool warp,
   // prio += c->cpdist - c->mov[i]->cpdist;  
   
   queuepolyat(V2, 
-    (qfi.tinf?shFullFloorSide:mirr?shMFloorSide:warp?shTriheptaSide:(c->land == laDual&&!nontruncated)?shBigTriSide:shFloorSide)[sidepar][ctof(c)], col, prio);
+    (qfi.tinf?shFullFloorSide:mirr?shMFloorSide:warp?shTriheptaSide:(c->land == laDual&&!nonchamfered)?shBigTriSide:shFloorSide)[sidepar][ctof(c)], col, prio);
   }
 
 bool openorsafe(cell *c) {
@@ -3602,7 +3602,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       auto si = patterns::getpatterninfo0(c);
 #endif
         
-      bool eoh = euclid || nontruncated;
+      bool eoh = euclid || nonchamfered;
 
       if(c->wall == waChasm) {
         if(c->land == laZebra) fd++;
@@ -3648,7 +3648,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           onleft = !onleft;
         if(c->type == 6 && c->mov[d]->barleft == laMirror)
           onleft = !onleft;
-        if(nontruncated) onleft = !onleft;
+        if(nonchamfered) onleft = !onleft;
         
         if(d == -1) {
           for(d=0; d<6; d++) 
@@ -3768,11 +3768,11 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       else if(isWarped(c) && euclid) 
         qfloor_eswap(c, Vf, shTriheptaFloor[ctof(c)], darkena(fcol, fd, 0xFF));
 
-      else if(c->land == laDual && !nontruncated && !ctof(c)) {
+      else if(c->land == laDual && !nonchamfered && !ctof(c)) {
         qfloor_eswap(c, Vf, shBigTriangle, darkena(fcol, fd, 0xFF));
         }
 
-      else if(isWarped(c) && !nontruncated && !shmup::on) {
+      else if(isWarped(c) && !nonchamfered && !shmup::on) {
         auto si = patterns::getpatterninfo(c, 0, 0);
         if(si.id < 13)
           qfloor(c, Vf, applyPatterndir(c, si), shTriheptaFloor[si.id], darkena(fcol, fd, 0xFF));
@@ -3867,7 +3867,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       else if(c->land == laTortoise)
         qfloor_eswap(c, Vf, TURTLEFLOOR, darkena(fcol, fd, 0xFF));
 
-      else if(c->land == laDragon && !nontruncated) {
+      else if(c->land == laDragon && !nonchamfered) {
         /* if(!wmspatial || noAdjacentChasms(c)) */
           qfloor(c, Vf, DRAGONFLOOR, darkena(fcol, fd, 0xFF));
         /* if(wmspatial)
@@ -4056,7 +4056,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       if(pseudohept(c) && (
         c->land == laRedRock || 
         vid.darkhepta ||
-        (c->land == laClearing && nontruncated))) {
+        (c->land == laClearing && nonchamfered))) {
         queuepoly((*Vdp), shHeptaMarker, wmblack ? 0x80808080 : 0x00000080);
         }
 
@@ -4541,7 +4541,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
          calcAirdir(c2); // printf("airdir = %d\n", airdir);
          transmatrix V0 = ddspin(c, i, S42);
          
-         double ph = ticks / (nontruncated?150:75.0) + airdir * M_PI / (S21+.0);
+         double ph = ticks / (nonchamfered?150:75.0) + airdir * M_PI / (S21+.0);
          
          int aircol = 0x8080FF00 | int(32 + 32 * -cos(ph));
          
@@ -4586,7 +4586,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
  
         transmatrix V0 = spin((hdir) * M_PI / S42);
         
-        double ldist = nontruncated ? crossf : c->type == 6 ? .2840 : 0.3399;
+        double ldist = nonchamfered ? crossf : c->type == 6 ? .2840 : 0.3399;
  
         poly_outline = OUTLINE_TRANS;
         queuepoly((*Vdp)*V0*xpush(ldist*(2*ph1-1)), shDisk, aircol);
@@ -4611,7 +4611,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       
       int prec = sphere ? 3 : 1;
       
-      if(nontruncated) {
+      if(nonchamfered) {
         double x = hcrossf;
         for(int t=0; t<S7; t++) 
           if(c->mov[t] && c->mov[t] < c)
@@ -5010,7 +5010,7 @@ void drawthemap() {
   mmspatial = vid.monmode == 4 || vid.monmode == 5;
 
   DEBB(DF_GRAPH, (debugfile,"draw the map\n"));
-  fanframe = ticks / (nontruncated ? 300 : 150.0) / M_PI;
+  fanframe = ticks / (nonchamfered ? 300 : 150.0) / M_PI;
   
   for(int m=0; m<motypes; m++) if(isPrincess(eMonster(m))) 
     minf[m].name = princessgender() ? "Princess" : "Prince";
@@ -5615,6 +5615,6 @@ cell *viewcenter() {
   }
 
 bool inscreenrange(cell *c) {
-  return celldistance(viewcenter(), c) <= (euclid ? sightrange : nontruncated ? 9 : 13);
+  return celldistance(viewcenter(), c) <= (euclid ? sightrange : nonchamfered ? 9 : 13);
   }
 

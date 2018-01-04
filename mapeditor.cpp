@@ -88,7 +88,7 @@ namespace mapstream {
     int32_t i = VERNUM; save(i);
     save(patterns::whichPattern);
     save(geometry);
-    save(nontruncated);
+    save(nonchamfered);
     if(geometry == gTorus) {
       save(torusconfig::qty);
       save(torusconfig::dx);
@@ -173,7 +173,7 @@ namespace mapstream {
     
     if(vernum >= 10203) {
       load(geometry);
-      load(nontruncated);
+      load(nonchamfered);
       if(geometry == gTorus) {
         load(torusconfig::qty);
         load(torusconfig::dx);
@@ -609,7 +609,7 @@ namespace mapeditor {
     if(painttype == 4 && radius) {
       if(where.c->type != copysource.c->type) return;
       if(where.spin<0) where.spin=0;
-      if(!nontruncated && !ctof(mouseover) && ((where.spin&1) != (copysource.spin&1)))
+      if(!nonchamfered && !ctof(mouseover) && ((where.spin&1) != (copysource.spin&1)))
         cwspin(where, 1);
       }
     if(painttype != 4) copysource.c = NULL;
@@ -1258,7 +1258,7 @@ namespace mapeditor {
       fscanf(f, "%d%d%d%d\n", &tg, &nt, &wp, &patterns::subpattern_flags);
       patterns::whichPattern = wp;
       if(tg != geometry) { targetgeometry = eGeometry(tg); restartGame('g', 0, true); }
-      if(nt != nontruncated) { restartGame('7', 0, true); }
+      if(nt != nonchamfered) { restartGame('7', 0, true); }
       }
 
     while(true) {
@@ -1302,7 +1302,7 @@ namespace mapeditor {
     fprintf(f, "HyperRogue saved picture\n");
     fprintf(f, "%x\n", VERNUM_HEX);
     if(VERNUM_HEX >= 0xA0A0)
-      fprintf(f, "%d %d %d %d\n", geometry, nontruncated, patterns::whichPattern, patterns::subpattern_flags);
+      fprintf(f, "%d %d %d %d\n", geometry, nonchamfered, patterns::whichPattern, patterns::subpattern_flags);
     for(int i=0; i<USERSHAPEGROUPS; i++) for(int j=0; j<USERSHAPEIDS; j++) {
       usershape *us = usershapes[i][j];
       if(!us) continue;

@@ -367,7 +367,7 @@ bool apply(cell *c, const transmatrix &V, int col) {
   
 typedef tuple<eGeometry, bool, char, int, eModel, ld, ld> texture_parameters; 
 
-static const auto current_texture_parameters = tie(geometry, nontruncated, patterns::whichPattern, patterns::subpattern_flags, pmodel, vid.scale, vid.alpha);
+static const auto current_texture_parameters = tie(geometry, nonchamfered, patterns::whichPattern, patterns::subpattern_flags, pmodel, vid.scale, vid.alpha);
 
 texture_parameters orig_texture_parameters;
 
@@ -655,7 +655,7 @@ patterns::patterninfo si_save;
 
 saverlist texturesavers;
 
-bool target_nontrunc;
+bool target_nonchamf;
 
 void init_textureconfig() {
   texturesavers = move(savers);  
@@ -673,7 +673,7 @@ void init_textureconfig() {
   addsaver(vid.yposition, "Y position", 0);
   addsaver(vid.xposition, "X position", 0);
   addsaver(vid.camera_angle, "camera angle", 0);
-  addsaverenum(target_nontrunc, "chamfering", false);
+  addsaverenum(target_nonchamf, "chamfering", false);
   // ... geometry parameters
 
   addsaver(patterns::whichPattern, "pattern", 0);
@@ -707,7 +707,7 @@ bool save_textureconfig() {
   if(!f) return false;
 
   targetgeometry = geometry;
-  target_nontrunc = nontruncated;
+  target_nonchamf = nonchamfered;
 
   for(auto s: texturesavers) if(s->dosave())
     fprintf(f, "%s=%s\n", s->name.c_str(), s->save().c_str());
@@ -736,7 +736,7 @@ bool load_textureconfig() {
       return load_textureconfig();
       }
     
-    if(nontruncated != target_nontrunc) {
+    if(nonchamfered != target_nonchamf) {
       restartGame('7');
       }
     }

@@ -70,7 +70,7 @@ hrmap_hyperbolic::hrmap_hyperbolic() {
   h.spintable = 0;
   h.alt = NULL;
   h.distance = 0;
-  isnontruncated = nontruncated;
+  isnonchamfered = nonchamfered;
   h.c7 = newCell(S7, origin);
   }
 
@@ -89,10 +89,10 @@ vector<int> siblings;
   
 struct hrmap_spherical : hrmap {
   heptagon *dodecahedron[12];
-  bool isnontruncated;
+  bool isnonchamfered;
 
   hrmap_spherical() {
-    isnontruncated = nontruncated;
+    isnonchamfered = nonchamfered;
     for(int i=0; i<spherecells(); i++) {
       heptagon& h = *(dodecahedron[i] = new heptagon);
       h.s = hsOrigin;
@@ -162,7 +162,7 @@ struct hrmap_spherical : hrmap {
   heptagon *getOrigin() { return dodecahedron[0]; }
 
   ~hrmap_spherical() {
-    dynamicval<bool> ph(nontruncated, isnontruncated);
+    dynamicval<bool> ph(nonchamfered, isnonchamfered);
     for(int i=0; i<spherecells(); i++) clearHexes(dodecahedron[i]);
     for(int i=0; i<spherecells(); i++) delete dodecahedron[i];
     }    
@@ -365,10 +365,10 @@ int euclid_getvec(int dx, int dy) {
 template<class T> void build_euclidean_moves(cell *c, int vec, const T& builder) {
   int x, y;
   tie(x,y) = vec_to_pair(vec);
-  c->type = a4 ? (nontruncated || ((x^y^1) & 1) ? 4 : 8) : 6;
+  c->type = a4 ? (nonchamfered || ((x^y^1) & 1) ? 4 : 8) : 6;
 
   if(c->type == 4) {
-    int m = nontruncated ? 1 : 2;
+    int m = nonchamfered ? 1 : 2;
     builder(euclid_getvec(+1,+0), 0, 2 * m);        
     builder(euclid_getvec(+0,+1), 1, 3 * m);
     builder(euclid_getvec(-1,+0), 2, 0 * m);
@@ -726,7 +726,7 @@ cell *createMov(cell *c, int d) {
     }
   
   if(c->mov[d]) return c->mov[d];
-  else if(nontruncated) {
+  else if(nonchamfered) {
     heptagon *h2 = createStep(c->master, d);
     merge(c,d,h2->c7,c->master->spin(d),false);
     }
@@ -840,7 +840,7 @@ heptagon deletion_marker;
 
 void clearHexes(heptagon *at) {
   if(at->c7) {
-    if(!nontruncated) for(int i=0; i<7; i++)
+    if(!nonchamfered) for(int i=0; i<7; i++)
       clearcell(at->c7->mov[i]);
     clearcell(at->c7);
     }
@@ -880,7 +880,7 @@ void verifycell(cell *c) {
   for(int i=0; i<t; i++) {
     cell *c2 = c->mov[i];
     if(c2) {
-      if(!euclid && !nontruncated && c == c->master->c7) verifycell(c2);
+      if(!euclid && !nonchamfered && c == c->master->c7) verifycell(c2);
       if(c2->mov[c->spn(i)] && c2->mov[c->spn(i)] != c) {
         printf("cell error %p:%d [%d] %p:%d [%d]\n", c, i, c->type, c2, c->spn(i), c2->type);
         exit(1);
@@ -1341,7 +1341,7 @@ int celldistance(cell *c1, cell *c2) {
       if(ac == xtgt) return d;
       ac = chosenDown(ac, 1, 1, celldist);
       if(ac == tgt) return d+2;
-      if(!nontruncated) {
+      if(!nonchamfered) {
         ac = chosenDown(ac, 1, 1, celldist);
         if(ac == tgt) {
           if(chosenDown(ac0, 1, 0, celldist) ==

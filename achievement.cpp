@@ -82,7 +82,7 @@ vector<string> achievementsReceived;
 bool wrongMode(char flags) {
   if(cheater) return true;
   if(flags == 'x') return false;
-  if(nontruncated != (flags == '7')) return true;
+  if(nonchamfered != (flags == '7')) return true;
   if(euclid != (flags == 'e')) return true;
   if(flags == 'E' && S7 < 5) return false;
   if(sphere != (flags == 'E')) return true;
@@ -482,7 +482,7 @@ void achievement_score(int cat, int number) {
   if(sphere && cat != LB_HALLOWEEN) return;
   if(quotient) return;
   if(elliptic && cat != LB_HALLOWEEN) return;
-  if(nontruncated) return;
+  if(nonchamfered) return;
   if(randomPatternsMode) return;
   if(shmup::on && cat != LB_PURE_TACTICS_SHMUP && cat != LB_PURE_TACTICS_COOP) return;
   if(yendor::on && cat != LB_YENDOR_CHALLENGE) return;
@@ -567,7 +567,7 @@ void achievement_final(bool really_final) {
     }
 
   if(sphere && specialland == laHalloween) {
-    if(shmup::on || chaosmode || nontruncated || numplayers() > 1 || tactic::on || randomPatternsMode)
+    if(shmup::on || chaosmode || nonchamfered || numplayers() > 1 || tactic::on || randomPatternsMode)
       return;
     achievement_score(LB_HALLOWEEN, items[itTreat]);
     }
@@ -581,21 +581,21 @@ void achievement_final(bool really_final) {
   int specials = 0;
   if(shmup::on) specials++;
   if(chaosmode) specials++;
-  if(nontruncated) specials++;
+  if(nonchamfered) specials++;
   if(inv::on) specials++;
   if(specials > 1) return;
   
   if(numplayers() > 1 && chaosmode) return;
-  if(numplayers() > 1 && nontruncated) return;
+  if(numplayers() > 1 && nonchamfered) return;
   if(numplayers() > 1 && inv::on) return;
   
   int total_improved = 0;
   specific_improved = 0;
   specific_what = 0;
   
-  if(!shmup::on && !chaosmode && !nontruncated && numplayers() == 1 && !inv::on) improveItemScores(); 
+  if(!shmup::on && !chaosmode && !nonchamfered && numplayers() == 1 && !inv::on) improveItemScores(); 
   
-  int sid = nontruncated ? 57 : chaosmode ? 53 : shmup::on ? (numplayers() > 1 ? 44 : 28) : 
+  int sid = nonchamfered ? 57 : chaosmode ? 53 : shmup::on ? (numplayers() > 1 ? 44 : 28) : 
     inv::on ? 69 :
     (numplayers() > 1 ? 61 : 0);
   
@@ -654,7 +654,7 @@ void achievement_victory(bool hyper) {
   if(euclid) return;
   if(sphere) return;
   if(quotient) return;
-  if(nontruncated) return;
+  if(nonchamfered) return;
   if(randomPatternsMode) return;
   if(hyper && shmup::on) return;
   if(yendor::on) return;

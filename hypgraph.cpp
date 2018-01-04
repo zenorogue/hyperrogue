@@ -330,7 +330,7 @@ bool confusingGeometry() {
   }
 
 transmatrix actualV(const heptspin& hs, const transmatrix& V) {
-  return (hs.spin || nontruncated) ? V * spin(hs.spin*2*M_PI/S7 + (nontruncated ? M_PI:0)) : V;
+  return (hs.spin || nonchamfered) ? V * spin(hs.spin*2*M_PI/S7 + (nonchamfered ? M_PI:0)) : V;
   }
 
 void drawrec(const heptspin& hs, int lev, hstate s, const transmatrix& V) {
@@ -349,7 +349,7 @@ void drawrec(const heptspin& hs, int lev, hstate s, const transmatrix& V) {
   
   if(lev <= 0) return;
   
-  if(!nontruncated) for(int d=0; d<S7; d++) {
+  if(!nonchamfered) for(int d=0; d<S7; d++) {
     int ds = fixrot(hs.spin + d);
     reclevel = maxreclevel - lev + 1;
     // createMov(c, ds);

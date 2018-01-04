@@ -6206,7 +6206,7 @@ S(
   "You can try many different geometries here. We start by gluing "
   "n-gons in such a way that k of them meet in every vertex. "
   "Depending on n and k, this either folds into a sphere, unfolds into a plane, "
-  "or requires a hyperbolic space. The result may be then 'truncated' by "
+  "or requires a hyperbolic space. The result may be then 'chamfered' by "
   "replacing each vertex by a 2k-gon. Furthermore, you can play "
   "with quotient geometries. For example, the elliptic geometry is "
   "obtained from the sphere by making the antipodes be the same point, "
@@ -6214,7 +6214,7 @@ S(
   "Have fun experimenting! "
   "Achievements and leaderboards do not work in geometry experiments, "
   "except some specific ones.\n\n"
-  "In standard geometry (truncated or not), you can play the full game, but in other geometries "
+  "In standard geometry (chamfered or not), you can play the full game, but in other geometries "
   "you select a particular land. Lands are unlocked by visiting them in this "
   "session, or permanently by collecting 25 treasure. Try Crossroads in Euclidean "
   "or chaos mode in non-standard non-quotient hyperbolic to visit many lands. "
@@ -6257,7 +6257,7 @@ S("tetrahedron (buggy)", "czworościan (bugi)")
 S("tetrahedron", "czworościan") // in case if it gets better
 
 S("land", "kraina")
-S("truncated", "przycięte")
+S("chamfered", "przycięte")
 S("does not matter", "bez znaczenia")
 S("sides per face", "boki ścian")
 S("faces per vertex", "wierzchołki")
@@ -6268,8 +6268,8 @@ S("quotient space", "przestrzeń ilorazowa")
 S("size of the world", "wielkość świata")
 S("flat", "płaska")
 
-// truncated or not truncated
-S(" (t)", " (p)")
+// chamfered or not chamfered
+S(" (c)", " (p)")
 S(" (n)", " (n)")
 
 S("(locked)", "(blok)")
@@ -6285,7 +6285,7 @@ S("Not implemented for spherical geometry. Please tell me if you really want thi
 #undef Orb
 
 // Hypersian Rug
-S("This makes sense only in hyperbolic or Torus geometry.", "To ma sens tylko w geometrii hiperbolicznej i na torusie.")
+// S("This makes sense only in hyperbolic or Torus geometry.", "To ma sens tylko w geometrii hiperbolicznej i na torusie.")
 
 // for the map editor
 N("Dragon Head", GEN_F, "Głowa Smoka", "Głowy Smoka", "Głowę Smoka", "Głową Smoka")

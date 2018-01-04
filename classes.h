@@ -205,7 +205,7 @@ struct geometryinfo {
   int vertex;
   int quotientstyle;
   eGeometryClass cclass;
-  array<int,2> distlimit; // truncated, non-truncated
+  array<int,2> distlimit; // chamfered, non-chamfered
   };
 
 static const int qZEBRA = 1;

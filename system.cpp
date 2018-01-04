@@ -114,7 +114,7 @@ void initgame() {
   if(firstland == laElementalWall) cwt.c->land = randomElementalLand();
   
   if(tactic::on && (isGravityLand(firstland) || firstland == laOcean) && firstland != laMountain)
-    cwt.c->land = nontruncated ? laCrossroads : laCrossroads2;
+    cwt.c->land = nonchamfered ? laCrossroads : laCrossroads2;
   createMov(cwt.c, 0);
   
   setdist(cwt.c, BARLEV, NULL);
@@ -547,7 +547,7 @@ void applyBoxes() {
   applyBoxBool(survivalist);
   if(loadingHi) applyBoxI(itLotus);
   else applyBoxNum(truelotus, "lotus/escape");
-  applyBoxBool(nontruncated, "heptagons only"); 
+  applyBoxBool(nonchamfered, "heptagons only"); 
   applyBoxI(itRose);
   applyBoxOrb(itOrbBeauty);
   applyBoxI(itCoral);
@@ -686,7 +686,7 @@ void loadBoxHigh() {
   dynamicval<eGeometry> sp2(geometry, (eGeometry) savebox[116]);
   dynamicval<bool> sp3(shmup::on, savebox[119]);
   dynamicval<bool> sp4(chaosmode, savebox[196]);
-  dynamicval<bool> sp5(nontruncated, savebox[186]);
+  dynamicval<bool> sp5(nonchamfered, savebox[186]);
   if(savebox[238]) geometry = gSphere;
   if(savebox[239]) geometry = gElliptic;
 
@@ -822,7 +822,7 @@ void saveStats(bool emergency = false) {
   fprintf(f, "Total enemies killed: %d\n", tkills());
   fprintf(f, "cells generated: %d\n", cellcount);
   if(pureHardcore()) fprintf(f, "Pure hardcore mode\n");
-  if(nontruncated) fprintf(f, "Heptagons only mode\n");
+  if(nonchamfered) fprintf(f, "Heptagons only mode\n");
   if(chaosmode) fprintf(f, "Chaos mode\n");
   if(shmup::on) fprintf(f, "Shoot-em up mode\n");
   if(inv::on) fprintf(f, "Inventory mode\n");
@@ -1013,7 +1013,7 @@ namespace gamestack {
     gdn.View = View;
     gdn.geometry = geometry;
     gdn.shmup = shmup::on;
-    gdn.hepta = nontruncated;
+    gdn.hepta = nonchamfered;
     gd.push_back(gdn);
     }
     
@@ -1024,7 +1024,7 @@ namespace gamestack {
     viewctr = gdn.viewctr;
     View = gdn.View;
     geometry = gdn.geometry;
-    nontruncated = gdn.hepta;
+    nonchamfered = gdn.hepta;
     if(shmup::on) shmup::clearMonsters();
     shmup::on = gdn.shmup;
     resetGeometry();
@@ -1105,7 +1105,7 @@ void restartGame(char switchWhat, bool push, bool keep_screens) {
   if(switchWhat == 'T') {
     geometry = gNormal;
     yendor::on = tactic::on = princess::challenge = peace::on = inv::on = false;
-    chaosmode = nontruncated = randomPatternsMode = false;
+    chaosmode = nonchamfered = randomPatternsMode = false;
     shmup::on = false;
     resetGeometry();    
     tour::on = !tour::on;
@@ -1113,7 +1113,7 @@ void restartGame(char switchWhat, bool push, bool keep_screens) {
 #endif
   if(switchWhat == '7') {
     if(euclid6) geometry = gNormal;
-    nontruncated = !nontruncated;
+    nonchamfered = !nonchamfered;
     resetGeometry();
     #if CAP_TEXTURE
     if(texture::tstate == texture::tsActive) 
@@ -1126,7 +1126,7 @@ void restartGame(char switchWhat, bool push, bool keep_screens) {
     if(geometry == targetgeometry) geometry = gNormal;
     else geometry = targetgeometry;
     if(chaosmode && (euclid || sphere || quotient)) chaosmode = false;
-    if(nontruncated && euclid6) nontruncated = false;
+    if(nonchamfered && euclid6) nonchamfered = false;
 
     resetGeometry(); 
     #if CAP_TEXTURE

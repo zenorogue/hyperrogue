@@ -635,7 +635,7 @@ void generateSnake(cell *c, int i) {
   c->monst = moHexSnake;
   int cpair = (1<<pattern_threecolor(c)) | (1<<pattern_threecolor(c->mov[i]));
   preventbarriers(c);
-  int len = nontruncated ? 2 : ROCKSNAKELENGTH;
+  int len = nonchamfered ? 2 : ROCKSNAKELENGTH;
   cell *c2 = c;
   vector<cell*> rocksnake;
   while(--len) {
@@ -659,7 +659,7 @@ void generateSnake(cell *c, int i) {
       i = goodsteps[hrand(size(goodsteps))];
       }
     }
-  if(size(rocksnake) < ROCKSNAKELENGTH/2 && !nontruncated) {
+  if(size(rocksnake) < ROCKSNAKELENGTH/2 && !nonchamfered) {
     for(int i=0; i<size(rocksnake); i++) 
       rocksnake[i]->monst = moNone;
     }
