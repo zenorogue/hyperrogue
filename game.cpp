@@ -5387,9 +5387,9 @@ void moverefresh(bool turn = true) {
     if(c->monst == moPair && !c->stuntime) {
       cell *c2 = c->mov[c->mondir];
       if(c2->monst != moPair) continue;
-      if(!c2->stuntime) {
-        cell *c3 = c->mov[(c->mondir + 1) % c->type];
-        if(among(c3->wall, waRuinWall, waColumn, waStone, waVinePlant)) {
+      if(true) for(int i: {-1, 1}) {
+        cell *c3 = c->mov[(c->mondir + MODFIXER + i) % c->type];
+        if(among(c3->wall, waRuinWall, waColumn, waStone, waVinePlant, waPalace)) {
           drawParticles(c3, winf[c3->wall].color, 30);
           c3->wall = waNone;
           }
