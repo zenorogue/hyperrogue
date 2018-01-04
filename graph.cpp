@@ -2537,7 +2537,7 @@ void setcolors(cell *c, int& wcol, int &fcol) {
       fcol = linf[c->land].color; break;
     
     case laRuins:
-      fcol = pseudohept(c) ? 0xC0C0C0 : 0x40A040;
+      fcol = pseudohept(c) ? 0xC0E0C0 : 0x40A040;
       break;
     
     case laDual:

@@ -1400,7 +1400,7 @@ walltype winf[walltypes] = {
   { '&', 0xD00000, "lava", lavadesc},
   { '=', 0x804000, "dock", "A dock."},
   { '^', 0xFF8000, "burning dock", "A burning dock."},
-  { '#', 0xE07070, "ruin wall", "A ruin wall."},
+  { '#', 0xE04030, "ruin wall", "A ruin wall."},
   };
 
 // --- land types ---
