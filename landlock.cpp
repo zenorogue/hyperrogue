@@ -688,7 +688,7 @@ eLand pickluck(eLand l1, eLand l2) {
 
 eLand getNewSealand(eLand old) {
   while(true) {
-    eLand p = pick(laOcean, pick(laCaribbean, laLivefjord, laWarpSea, laKraken));
+    eLand p = pick(laOcean, pick(laCaribbean, laLivefjord, laWarpSea, laKraken, laDocks));
     if(p == laKraken && !landUnlocked(p)) continue;
     if(p == laKraken && peace::on) continue;
     if(incompatible(old, p)) continue;
@@ -702,6 +702,7 @@ bool createOnSea(eLand old) {
   return
     old == laWarpSea || old == laCaribbean || old == laKraken ||
     (old == laLivefjord && hrand(2)) || 
+    (old == laDocks && hrand(2)) ||
     (old == laOcean && (chaosmode ? hrand(2) : !generatingEquidistant));
   }
 
@@ -822,9 +823,11 @@ eLand getNewLand(eLand old) {
       }
     tab[cnt++] = laWarpCoast;
     if(euclid) tab[cnt++] = laWarpSea;
+    tab[cnt++] = laDocks;
     // Ivory Tower tends to crash while generating equidistant
     if(!generatingEquidistant) tab[cnt++] = laIvoryTower;
     if(items[itElixir] >= U10) tab[cnt++] = laReptile;
+    if(items[itElixir] >= U10) tab[cnt++] = laSwitch;
     if(items[itIvory] >= U10 && !generatingEquidistant) tab[cnt++] = laEndorian;
     
     if(items[itKraken] >= U10) tab[cnt++] = laBurial;
@@ -1222,7 +1225,7 @@ int isLandValid(eLand l) {
     return 3;
   
   if(l == laSnakeNest)
-    return geosupport_threecolor() ? 3 : 0;
+    return geosupport_threecolor() >= 2 ? 3 : 0;
   
   if(l == laDocks)
     return a38 ? 2 : 0;
