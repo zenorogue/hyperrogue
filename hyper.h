@@ -2443,3 +2443,4 @@ extern eMonster passive_switch;
 bool cannotPickupItem(cell *c, bool telekinesis);
 bool canPickupItemWithMagnetism(cell *c, cell *from);
 void pickupMovedItems(cell *c);
+eMonster genRuinMonster(cell *c);
