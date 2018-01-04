@@ -1,7 +1,7 @@
 // Hyperbolic Rogue -- achievements
 // Copyright (C) 2011-2016 Zeno Rogue, see 'hyper.cpp' for details
 
-#define NUMLEADER 76
+#define NUMLEADER 78
 
 #define SCORE_UNKNOWN (-1)
 #define NO_SCORE_YET (-2)
@@ -66,6 +66,8 @@ const char* leadernames[NUMLEADER] = {
   "Forgotten Relics", // 73
   "Lava Lilies", // 74
   "Turquoises", // 75
+  "Chrysoberyls", // 76
+  "Tasty Jellies" // 77
   };
 
 #define LB_STATISTICS 62
@@ -212,6 +214,9 @@ void achievement_collection(eItem it, int prevgold, int newgold) {
     if(it == itBlizzard) achievement_gain("BLIZZ1");
     if(it == itLavaLily) achievement_gain("LILY1");
     if(it == itTerra) achievement_gain("TERRAC1");
+    
+    if(it == itRuins) achievement_gain("RUIN1");
+    if(it == itSwitch) achievement_gain("JELLY1");
     }
 
   // 32
@@ -280,6 +285,9 @@ void achievement_collection(eItem it, int prevgold, int newgold) {
     if(it == itBlizzard) achievement_gain("BLIZZ2");
     if(it == itLavaLily) achievement_gain("LILY2");
     if(it == itTerra) achievement_gain("TERRAC2");
+
+    if(it == itRuins) achievement_gain("RUIN2");
+    if(it == itSwitch) achievement_gain("JELLY2");
     }
 
   if(q == (inv::on ? 50 : 25)) {
@@ -344,6 +352,9 @@ void achievement_collection(eItem it, int prevgold, int newgold) {
     if(it == itBlizzard) achievement_gain("BLIZZ3");
     if(it == itLavaLily) achievement_gain("LILY3");
     if(it == itTerra) achievement_gain("TERRAC3");
+
+    if(it == itRuins) achievement_gain("RUIN3");
+    if(it == itSwitch) achievement_gain("JELLY3");
     }
 
   if(q == 50 && !inv::on) {
@@ -405,6 +416,9 @@ void achievement_collection(eItem it, int prevgold, int newgold) {
     if(it == itBlizzard) achievement_gain("BLIZZ4");
     if(it == itLavaLily) achievement_gain("LILY4");
     if(it == itTerra) achievement_gain("TERRAC4");
+
+    if(it == itRuins) achievement_gain("RUIN4");
+    if(it == itSwitch) achievement_gain("JELLY4");
     }
   
   if(it == itOrbYendor) {
@@ -544,6 +558,9 @@ void improveItemScores() {
   improve_score(73, itBlizzard);
   improve_score(74, itLavaLily);
   improve_score(75, itHunting);
+  
+  improve_score(76, itRuins);
+  improve_score(77, itSwitch);
   }
 
 void achievement_final(bool really_final) {
