@@ -699,6 +699,7 @@ eMonster summonedAt(cell *dest) {
       dest->land == laLivefjord ? moViking : 
       dest->land == laKraken ? moViking : 
       dest->land == laWarpCoast ? moRatling : 
+      dest->land == laDocks ? moWaterElemental :
       moPirate;
   if(isReptile(dest->wall))
     return moReptile;
@@ -720,7 +721,7 @@ eMonster summonedAt(cell *dest) {
     return moWaterElemental;
   if(dest->wall == waBoat)
     return moAirElemental;
-  if(dest->wall == waStone)
+  if(dest->wall == waStone || dest->wall == waRuinWall)
     return moEarthElemental;
   if(dest->wall == waGiantRug)
     return moVizier;
@@ -766,6 +767,9 @@ eMonster summonedAt(cell *dest) {
     if(dest->land == laVolcano) return moFireElemental;
     if(dest->land == laBlizzard) return moAirElemental;
     if(dest->land == laTerracotta) return moEarthElemental;
+    if(dest->land == laRuins) return moEarthElemental;
+    if(dest->land == laSwitch) return passive_switch;
+    if(dest->land == laSnakeNest) return moEarthElemental;
     if(isHaunted(dest->land)) return moGhost;
     }
   return moNone;

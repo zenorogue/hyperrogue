@@ -1609,6 +1609,11 @@ bool earthWall(cell *c) {
     c->wall = waRed3;
     return true;
     }
+  if(c->wall == waNone && c->land == laSnakeNest) {
+    c->item = itNone;
+    c->wall = waRed3;
+    return true;
+    }
   if(c->wall == waNone && c->land == laBurial) {
     c->item = itNone;
     c->wall = waBarrowDig;
