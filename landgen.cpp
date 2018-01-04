@@ -88,6 +88,17 @@ bool out_ruin(cell *c) {
     return windmap::at(c) >= 128;
   }
 
+eMonster genRuinMonster(cell *c) {
+  eMonster m = pick(moHexDemon, moHexDemon, moHexDemon, moAltDemon, moAltDemon, moMonk, moMonk, moSkeleton, moSkeleton, moCrusher);
+  if(m == moHexDemon && ctof(c))
+    return genRuinMonster(c);
+  if(m == moMonk) {
+    if(c->item) return genRuinMonster(c);
+    forCellCM(c2, c) if(c2->item) return genRuinMonster(c);
+    }
+  return m;
+  }
+
 // the giant switch generating most of the lands...
 
 void giantLandSwitch(cell *c, int d, cell *from) {
@@ -1936,12 +1947,15 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           }
         }
       ONEMPTY {
+        if(hrand(1500) < PT(30 + kills[moHexDemon] + kills[moSkeleton] + kills[moMonk] + kills[moPair], 100) && notDippingFor(itRuins)) {
+          c->item = itRuins;
+          forCellEx(c2, c) if(c2->monst == moMonk)
+            c->item = itNone;
+          }
         if(hrand(7000) < kf && !c->monst) {
-          c->monst = pick(moHexDemon, moHexDemon, moHexDemon, moAltDemon, moAltDemon, moMonk, moMonk, moSkeleton, moSkeleton, moCrusher);
+          c->monst = genRuinMonster(c);
           c->hitpoints = 3;
           }
-        if(hrand(1500) < PT(30 + kills[moHexDemon] + kills[moSkeleton] + kills[moMonk] + kills[moPair], 100) && notDippingFor(itRuins))
-          c->item = itRuins;
         }
       break;
       }

@@ -349,6 +349,8 @@ int* killtable[] = {
     &kills[moHunterDog], &kills[moIceGolem], &kills[moVoidBeast],
     &kills[moJiangshi], &kills[moTerraWarrior],
     &kills[moSalamander], &kills[moLavaWolf],
+    &kills[moSwitch1], &kills[moSwitch2],
+    &kills[moMonk], &kills[moCrusher], &kills[moHexDemon], &kills[moAltDemon], &kills[moPair],
     NULL
     };
 
