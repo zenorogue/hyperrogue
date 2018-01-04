@@ -764,8 +764,8 @@ monstertype minf[motypes] = {
   { 'A', 0x80B080, "Green Raider", NODESCYET},
   { 'M', 0x904000, "Brown Raider", NODESCYET},
   { 'C', 0x0060E0, "Blue Raider", NODESCYET},
-  { '@', 0xC00000, "Switcher A", NODESCYET}, 
-  { '@', 0x0000C0, "Switcher B", NODESCYET}, 
+  { '@', 0xC00000, "Red Jelly", NODESCYET}, 
+  { '@', 0x0000C0, "Blue Jelly", NODESCYET}, 
   
   // shmup specials
   { '@', 0xC0C0C0, "Rogue", "In the Shoot'em Up mode, you are armed with thrown Knives."},
@@ -1212,11 +1212,11 @@ itemtype iinf[ittypes] = {
     "Does not affect multi-tile monsters."},
   { '!', 0x80FF00, "Glowing Crystal", crystaldesc},
   { '!', 0x80FF80, "Snake Oil", NODESCYET},
-  { '*', 0x80FF80, "Sea Glass", NODESCYET},
+  { '!', 0x80FF80, "Sea Glass", NODESCYET},
   { '*', 0xBBCC99, "Chrysoberyl", NODESCYET},
 //  { '*', 0xD0D8ED, "Chalcedony", NODESCYET},
   { '*', 0x80FF80, "Monopole", NODESCYET},
-  { '*', 0xFF00FF, "Agate", NODESCYET},
+  { '!', 0xFF00FF, "Tasty Jelly", NODESCYET},
   { 'o', 0x80FF80, "Orb of Phasing", NODESCYET},
   { 'o', 0xFFFF80, "Orb of Magnetism", NODESCYET},
   { 'o', 0x202020, "Orb of Slaying", NODESCYET},
@@ -1590,7 +1590,7 @@ const landtype linf[landtypes] = {
   { 0x80FF00, "Docks", NODESCYET},
   { 0x306030, "Ruined City", NODESCYET},
   { 0x306030, "Magnetosphere", NODESCYET},
-  { 0x306030, "Switch", NODESCYET},
+  { 0x306030, "Jelly Kingdom", NODESCYET},
   };
 
 struct landtacinfo { eLand l; int tries, multiplier; };
