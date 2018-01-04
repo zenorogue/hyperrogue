@@ -400,8 +400,8 @@ const char *thumpdesc = "A device that attracts sandworms and other enemies. You
 const char *twdesc = "This structure will disappear after some time.";
 
 const char *jellydesc = 
-  "Some of the Slime Beasts have decided to revolt against the color changing rules in the "
-  "Alchemist Lab, change their shape and consistency, and create their own Kingdom.\n\n"
+  "Some of the Slime Beasts have decided to revolt against the color rules in the "
+  "Alchemist Lab. They have changed their shape and consistency, declared independence, and established their own Kingdom.\n\n"
   "Jellies switch between being a wall and being a monster after every treasure you pick.";
 
 const char *ruindesc = 
@@ -768,7 +768,7 @@ monstertype minf[motypes] = {
     "When your plan has clearly failed, it is better to abandon it and go to a safe place, to have a chance of succeeding next time. This dog clearly knows this."},
   { 'B', 0xC00000, "North Pole", NODESCYET}, 
   { 'B', 0x0000C0, "South Pole", NODESCYET}, 
-  { 'P', 0xC03000, "Red Raider", "Red Raiders travel in pairs. They are able to destroy walls on their way."},
+  { 'P', 0xC03000, "Red Raider", "Red Raiders travel in pairs. They have promised to always watch another one's back. They are able to destroy walls on their way."},
   { 'H', 0xC0C0C0, "Gray Raider", "Gray Raiders never step on gray cells."},
   { 'A', 0x80B080, "Green Raider", "Green Raiders never step from one green cell to another."},
   { 'M', 0x904000, "Brown Raider", "Brown Raiders never move adjacent to an item."},

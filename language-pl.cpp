@@ -6530,8 +6530,8 @@ N("Chrysoberyl", GEN_O, "Chryzoberyl", "Chryzoberyle", "Chryzoberyl", "Chryzober
 S("Fragment of the past glory.", "Fragment dawnej chwały.")
 
 N("Red Raider", GEN_M, "Czerwony Najeźdźca", "Czerwoni Najeźdźcy", "Czerwonego Najeźdźcę", "Czerwonym Najeźdźcą")
-S("Red Raiders travel in pairs. They are able to destroy walls on their way.",
-  "Czerwoni Najeźdźcy podróżują parami. Mogą niszczyć ściany na swojej drodze.")
+S("Red Raiders travel in pairs. They have promised to always watch another one's back. They are able to destroy walls on their way",
+  "Czerwoni Najeźdźcy podróżują parami. Obiecali sobie nawzajem, że zawsze będą chronić swoje tyły. Mogą niszczyć ściany na swojej drodze.")
 
 N("Gray Raider", GEN_M, "Szary Najeźdźca", "Szarzy Najeźdźcy", "Szarego Najeźdźcę", "Szarym Najeźdźcą")
 S("Gray Raiders never step on gray cells.",
@@ -6562,12 +6562,12 @@ S("This Orb lets you defeat Raiders and other tough single-cell monsters in mele
 
 N("Jelly Kingdom", GEN_N, "Królestwo Galarety", "Królestwa Galarety", "Królestwo Galarety", "w Królestwie Galarety")
 
-S("Some of the Slime Beasts have decided to revolt against the color changing rules in the "
-  "Alchemist Lab, change their shape and consistency, and create their own Kingdom.\n\n"
+S("Some of the Slime Beasts have decided to revolt against the color rules in the "
+  "Alchemist Lab. They have changed their shape and consistency, declared independence, and established their own Kingdom.\n\n"
   "Jellies switch between being a wall and being a monster after every treasure you pick.",
   
-  "Część Mazistych Stworów z Laboratorium postanowiło zbuntować się przeciwko regułom zmiany koloru w "
-  "Laboratorium, zmienić kształt i konsystencję, i stworzyć własne Królestwo.\n\n"
+  "Część Mazistych Stworów z Laboratorium postanowiło zbuntować się przeciwko regułom koloru w "
+  "Laboratorium. Zmieniły kształt i konsystencję, ogłosiły niepodległość i stworzyły własne Królestwo.\n\n"
   "Galareta zmienia swój stan z potwora na ścianę i odwrotnie z każdym zebranym skarbem."
   )
 
