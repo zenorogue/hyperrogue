@@ -1932,6 +1932,7 @@ void buildpolys() {
 
   bshape(shSwitchFloor[0], PPR_FLOOR, scalef*spzoom6*ffscale2, 377, ffspin2);
   bshape(shSwitchFloor[1], PPR_FLOOR, scalef*spzoomd7*ffscale2, 378, ffspin2);  
+  bshape(shSwitchFloor[2], PPR_FLOOR, euclid?scalef*1.2:spzoom7, 379, ffspin2);  
 
   bshape(shSwitchDisk, PPR_FLOOR); for(int i=0; i<=S84; i+=S3) hpcpush(ddi(i, .06) * C0);
 
@@ -3439,6 +3440,7 @@ NEWSHAPE, 376, 1, 1, 0.202167,-0.134605, 0.204591,-0.145446, 0.192856,-0.139999,
 
 NEWSHAPE, 377, 6, 1, -0.206510,0.223410, 0.017622,0.231073, 0.048705,0.240382, 0.069206,0.259727, 
 NEWSHAPE, 378, 7, 1, 0.349494,-0.088062, 0.159923,-0.228824, 0.145483,-0.260010, 0.142821,-0.290692, 
+NEWSHAPE, 379, 7, 1, 0.649585,0.084560, 0.623391,0.075842, 0.599921,0.058309, 0.572892,0.035489, 0.552783,-0.024612, 
 
 NEWSHAPE
 };
@@ -3475,7 +3477,7 @@ NEWSHAPE
 #define MFLOOR2 shMFloor2[ct6]
 #define STARFLOOR shStarFloor[ECT]
 #define DRAGONFLOOR shDragonFloor[ECT]
-#define SWITCHFLOOR shSwitchFloor[ECT]
+#define SWITCHFLOOR shSwitchFloor[nontruncated?2:ct6]
 
 // fix Warp
 // fix Kraken

@@ -3911,7 +3911,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       else if(c->land == laSwitch) {
         qfloor_eswap(c, Vf, SWITCHFLOOR, darkena(fcol, fd, 0xFF));
         if(ctof(c)) for(int i=0; i<c->type; i++)
-          queuepoly(Vf * spin(2 * M_PI * i / c->type) * xpush(rhexf), shSwitchDisk, darkena(minf[active_switch()].color, fd, 0xFF));
+          queuepoly(Vf * ddspin(c, i, S6) * xpush(rhexf), shSwitchDisk, darkena(minf[active_switch()].color, fd, 0xFF));
         }
 
       else if(c->land == laStorms)
