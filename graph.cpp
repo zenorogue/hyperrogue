@@ -3279,10 +3279,12 @@ int getSnakelevColor(cell *c, int i, int last, int fd, int wcol) {
                                
 void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
 
+#if CAP_TEXTURE
   if(texture::saving) {
     texture::apply(c, V, 0xFFFFFFFF);
     return;
     }
+#endif
 
   qfi.shape = NULL; qfi.special = false;
   ivoryz = isGravityLand(c->land);
@@ -5368,8 +5370,10 @@ void gamescreen(int _darken) {
   
   darken = 0;
 
+#if CAP_TEXTURE
   if(texture::tstate == texture::tsAdjusting) 
-    texture::drawRawTexture();  
+    texture::drawRawTexture();
+#endif
   }
 
 void normalscreen() {

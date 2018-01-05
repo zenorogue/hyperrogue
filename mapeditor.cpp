@@ -1028,16 +1028,16 @@ namespace mapeditor {
       }
 
     displaymm('g', vid.xres-8, 8+fs*4, 2, vid.fsize, XLAT("g = grid"), 16);
-    
+
+#if CAP_TEXTURE    
     if(intexture) for(int i=0; i<10; i++) {
       if(8 + fs * (6+i) < vid.yres - 8 - fs * 7)
         displayColorButton(vid.xres-8, 8+fs*(6+i), "###", 1000 + i, 16, 1, dialog::displaycolor(texture_colors[i+1]));
-      
+
       if(displayfr(vid.xres-8 - fs * 3, 8+fs*(6+i), 0, vid.fsize, its(i+1), texture::penwidth == brush_sizes[i] ? 0xFF8000 : 0xC0C0C0, 16))
         getcstat = 2000+i;
       }
 
-#if CAP_TEXTURE    
     if(texture::tstate != texture::tsActive)
       displaymm('e', vid.xres-8, 8+fs, 2, vid.fsize, XLAT("e = edit this"), 16);
 #endif
@@ -1604,6 +1604,7 @@ namespace mapeditor {
   
   transmatrix textrans;
 
+#if CAP_TEXTURE
   void queue_hcircle(transmatrix Ctr, ld radius) {
     vector<hyperpoint> pts;
     int circp = 6;
@@ -1615,7 +1616,8 @@ namespace mapeditor {
     for(int j=0; j<circp; j++)
       queueline(pts[j], pts[(j+1)%circp], texture::paint_color, 0, PPR_LINE);
     }
-    
+#endif
+
   bool drawUserShape(transmatrix V, int group, int id, int color, cell *c) {
   #if !CAP_EDIT
     return false;
