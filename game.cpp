@@ -3276,7 +3276,7 @@ void beastcrash(cell *c, cell *beast) {
   else if(c->wall == waDeadwall || c->wall == waCavewall || c->wall == waSandstone ||
     c->wall == waVinePlant || c->wall == waIcewall ||
     c->wall == waMirror || c->wall == waCloud || c->wall == waBigTree || c->wall ==
-    waSmallTree || c->wall == waGlass || c->wall == waClosedGate || c->wall == waStone) {
+    waSmallTree || c->wall == waGlass || c->wall == waClosedGate || c->wall == waStone || c->wall == waRuinWall) {
     addMessage(XLAT("%The1 crashes into %the2!", beast->monst, c->wall));    
     c->wall = waNone;
     }
@@ -3289,7 +3289,7 @@ void beastcrash(cell *c, cell *beast) {
     c->wall = waThumperOn;
     c->wparam = 100;
     }  
-  else if(isBull(c->monst)) {
+  else if(isBull(c->monst) || isSwitch(c->monst)) {
     addMessage(XLAT("%The1 crashes into %the2!", beast->monst, c->monst));
     if(c->monst == moSleepBull) c->monst = moRagingBull, c->stuntime = 3;
     }
