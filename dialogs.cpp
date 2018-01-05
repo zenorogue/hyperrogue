@@ -874,14 +874,14 @@ namespace dialog {
     string& cfile = *cfileptr;
 
     displayfr(vid.xres/2, 34 + vid.fsize * 2, 2, vid.fsize, 
-      cfile, editext ? 0xFF00FF : 0xFFFF00, 8);
+      cfile, 0xFFFF00, 8);
     
-    displayButton(vid.xres*1/4, 38+vid.fsize * 3, 
-      "F4 = extension", 2000+SDLK_F4, 8);
+    displayColorButton(vid.xres*1/4, 38+vid.fsize * 3, 
+      XLAT("F4 = extension"), SDLK_F4, 8, 0, editext ? 0xFF00FF : 0xFFFF00, editext ? 0x800080 : 0x808000);
     displayButton(vid.xres*2/4, 38+vid.fsize * 3, 
-      "Enter = choose", 2000+SDLK_RETURN, 8);
+      XLAT("Enter = choose"), SDLK_RETURN, 8);
     displayButton(vid.xres*3/4, 38+vid.fsize * 3, 
-      "Esc = cancel", 2000+SDLK_RETURN, 8);
+      XLAT("Esc = cancel"), SDLK_ESCAPE, 8);
 
     v.clear();
     
@@ -921,10 +921,10 @@ namespace dialog {
     keyhandler = handleKeyFile;
     }
   
-  bool handleKeyFile(int uni, int sym) {
+  bool handleKeyFile(int sym, int uni) {
     string& s(*cfileptr);
     int i = size(s) - (editext?0:4);
-    if(uni > 2000) sym = uni - 2000;
+    
     if(sym == SDLK_ESCAPE) {
       popScreen();
       }
