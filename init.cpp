@@ -157,7 +157,7 @@
 #define PSEUDOKEY_RELEASE 2503
 
 #ifndef CAP_PNG
-#define CAP_PNG (!ISMOBWEB && !ISMAC && CAP_SDLGFX)
+#define CAP_PNG (!ISMOBWEB)
 #endif
 
 #ifndef CAP_COMMANDLINE

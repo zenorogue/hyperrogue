@@ -751,7 +751,7 @@ void preset(rugpoint *m) {
     
   if(q>0) m->flat = h/q;
   // printf("preset (%d) -> %s\n", q, display(m->flat));
-  if(isnan(m->flat[0]) || isnan(m->flat[1]) || isnan(m->flat[2]))
+  if(std::isnan(m->flat[0]) || std::isnan(m->flat[1]) || std::isnan(m->flat[2]))
     throw rug_exception();
   }
 
@@ -839,7 +839,7 @@ void subdivide() {
       rugpoint *m2 = m->edges[j].target;
       if(m2 < m) continue;
       rugpoint *mm = addRugpoint(mid(m->h, m2->h), (m->dist+m2->dist)/2);
-      halves[{m, m2}] = mm;
+      halves[make_pair(m, m2)] = mm;
       if(!good_shape || (torus && !keep_shape)) {
         using namespace hyperpoint_vec;
         normalizer n(m->flat, m2->flat);

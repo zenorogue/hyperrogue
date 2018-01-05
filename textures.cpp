@@ -131,10 +131,13 @@ bool readtexture() {
 
 #elif CAP_PNG
   
-  FILE *f = fopen(texturename.c_str(), "r");  
+  FILE *f = fopen(texturename.c_str(), "rb");
   png_structp png = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
   if(!png) return false;  
-  if(setjmp(png_jmpbuf(png))) return false;  
+  if(setjmp(png_jmpbuf(png))) { 
+    printf("failed to read\n");
+    return false;  
+    }
   png_init_io(png, f);
 
   // set the expected format
@@ -237,17 +240,17 @@ int color_alpha = 128;
 
 int gsplits = 1;
 
-template<class T> array<T, 3> make_array(T a, T b, T c) { array<T,3> x = {a,b,c}; return x; }
-template<class T> array<T, 2> make_array(T a, T b) { array<T,2> x = {a,b}; return x; }
+template<class T> array<T, 3> make_array(T a, T b, T c) { array<T,3> x; x[0] = a; x[1] = b; x[2] = c; return x; }
+template<class T> array<T, 2> make_array(T a, T b) { array<T,2> x; x[0] = a; x[1] = b; return x; }
 
 void mapTextureTriangle(textureinfo &mi, array<hyperpoint, 3> v, int splits = gsplits) {
 
   if(splits) {
-    array<hyperpoint, 3> v2 = { mid(v[1], v[2]), mid(v[2], v[0]), mid(v[0], v[1]) };
+    array<hyperpoint, 3> v2 = make_array( mid(v[1], v[2]), mid(v[2], v[0]), mid(v[0], v[1]) );
     mapTextureTriangle(mi, make_array(v[0], v2[2], v2[1]), splits-1);
     mapTextureTriangle(mi, make_array(v[1], v2[0], v2[2]), splits-1);
     mapTextureTriangle(mi, make_array(v[2], v2[1], v2[0]), splits-1);
-    mapTextureTriangle(mi, make_array(v[1], v2[0], v2[2]), splits-1);
+    mapTextureTriangle(mi, make_array(v2[0], v2[1], v2[2]), splits-1);
     return;
     }
     
@@ -1147,7 +1150,7 @@ void fillcircle(hyperpoint h, int col) {
   
   ld step = M_PI * 2/3;
   
-  array<hyperpoint, 3> mh = {A * xpush(penwidth) * C0, A * spin(step) * xpush(penwidth) * C0, A * spin(-step) * xpush(penwidth) * C0};
+  array<hyperpoint, 3> mh = make_array(A * xpush(penwidth) * C0, A * spin(step) * xpush(penwidth) * C0, A * spin(-step) * xpush(penwidth) * C0);
   auto mp = ptc(mh);
 
   filltriangle(mh, mp, col, 0);
