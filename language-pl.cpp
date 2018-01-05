@@ -6294,7 +6294,14 @@ S("Not implemented for spherical geometry. Please tell me if you really want thi
 // file selection dialog
 S("Enter = choose", "Enter = wybierz")
 S("Esc = cancel", "Esc = anuluj")
+
 S("hyperbolic", "hiperboliczna")
+S("reset special modes", "resetuj tryby specjalne")
+S("orthogonal projection", "rzut prostokątny")
+S("small Poincaré model", "mały model Poincaré")
+S("big Poincaré model", "duży model Poincaré")
+S("Klein-Beltrami model", "model Kleina-Beltramiego")
+S("bestiary of %the1", "bestiariusz: %1")
 
 // for the map editor
 N("Dragon Head", GEN_F, "Głowa Smoka", "Głowy Smoka", "Głowę Smoka", "Głową Smoka")
@@ -6485,6 +6492,8 @@ S("save the full texture image", "zapisz pełną teksturę")
 S("Saving full texture to %1...", "Zapis pełnej tekstury do %1...")
 S("save texture config", "zapisz konfigurację tekstury")
 
+// pattern groups
+
 S("football", "piłka nożna")
 S("three colors", "trzy kolory")
 S("chessboard", "szachownica")
@@ -6492,8 +6501,14 @@ S("single type", "pojedynczy typ")
 S("large picture", "duży obrazek")
 S("periodic patterns", "okresowe wzorki")
 S("more tuning", "dostrajanie")
+S("BAD", "ŹLE")
+
+// extra patterns
 
 S("Docks pattern", "wzorek Doków")
+S("broken Emerald pattern", "złamany szmaragdowy wzór")
+S("coloring", "kolorowanie")
+
 
 // Docks
 //-------
@@ -6586,6 +6601,46 @@ S("This orb lets you pass through walls (one cell wide), and also through as lon
   "nie zaatakują one w trakcie ruchu.")
 
 S("You cannot attack Jellies in their wall form!", "Nie możesz atakować Galarety w formie ściany!")
+
+// keyboard help
+//---------------
+
+S("advanced keyboard shortcuts", "zaawansowane skróty klawiaturowe")
+
+/* not yet translated to Polish
+  "1 = orthogonal/Gans model",
+  "2 = small Poincare model/stereographic projection",
+  "3 = big Poincare model/stereographic projection",
+  "4 = Klein model/gnomonic projection",
+  "5 = change wall display mode",
+  "6 = change grid",
+  "7 = change heptagon marking",
+  "8 = change background color",
+  "9 = hyperboloid model",
+  "qweasdzxc, hjklyubn, numpad = move/skip turn",
+  "arrows = panning",
+  "o = world overview",
+  "v = menu",
+  "F1 = help",
+  "F5 = restart game",
+  "F10 = quit game",
+  "Esc = quest status",
+  "Alt+Enter = full screen",
+  "Alt = highlight interesting stuff",
+  "t = use a ranged Orb (target center of the screen)",
+  "g = drop a Dead Orb",
+  "click left mouse button = move/skip",
+  "shift+click left mouse button = use ranged Orb",
+  "click right mouse button = context help",
+  "mousewheel up = panning",
+  "hold middle mouse button = panning",
+  "mousewheel down = move/skip",
+  "shift + mousewheel = change projection",
+  "ctrl + mousewheel = change zoom",
+  "ctrl + shift + mousewheel = change both projection and zoom",
+  "ctrl + hold middle button = move the screen",
+  "shift + middle button = reset position"
+*/
 
 #undef Orb
 
