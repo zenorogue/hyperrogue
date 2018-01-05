@@ -4625,9 +4625,14 @@ void movehex(bool mounted, int colorpair) {
       hexvisit(c->mov[t], c, t, mounted, colorpair);
       }
     }
+  }
+
+void movehex_rest(bool mounted) {
   for(int i=0; i<size(hexsnakes); i++) {
     cell *c = hexsnakes[i];
-    if(c->monst == moHexSnake && snake_pair(c) == colorpair) {
+    int colorpair;
+    if(c->monst == moHexSnake) {
+      colorpair = snake_pair(c);
       if(!goodmount(c, mounted)) continue;
       int t[MAX_EDGE];
       for(int i=0; i<c->type; i++) t[i] = i;
@@ -4638,7 +4643,7 @@ void movehex(bool mounted, int colorpair) {
           hexvisit(c, c->mov[t[u]], c->spn(t[u]), mounted, colorpair);
         }
       }
-    if(c->monst == moHexSnake && snake_pair(c) == colorpair) {
+    if(c->monst == moHexSnake) {
       snakeAttack(c, mounted);
       kills[moHexSnake]++;
       playSound(c, "die-troll");
@@ -5693,6 +5698,8 @@ void movehex_all() {
     movehex(false, i);
     if(!shmup::on && haveMount()) movehex(true, i);
     }
+  movehex_rest(false);
+  movehex_rest(true);
   }
   
 void movemonsters() {
