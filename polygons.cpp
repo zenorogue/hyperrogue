@@ -469,7 +469,7 @@ void fixMercator(bool tinf) {
     maxcoord = max<ld>(maxcoord, glcoords[i][mercator_coord]);
     }
   
-  if(abs(mincoord) > 50000 || abs(maxcoord) > 50000 || isnan(mincoord) || isnan(maxcoord)) {
+  if(abs(mincoord) > 50000 || abs(maxcoord) > 50000 || std::isnan(mincoord) || std::isnan(maxcoord)) {
     mercator_loop_max--;
     return;
     }

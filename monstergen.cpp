@@ -658,9 +658,9 @@ void generateSnake(cell *c, int i) {
     createMov(c2, i);
     if(!inpair(c2->mov[i], cpair)) {
       vector<int> goodsteps;
-      for(int i=0; i<c2->type; i++)
+      {for(int i=0; i<c2->type; i++)
         if(inpair(c2->mov[i], cpair))
-        goodsteps.push_back(i);
+        goodsteps.push_back(i);}
       if(!size(goodsteps)) break;
       i = goodsteps[hrand(size(goodsteps))];
       }

@@ -237,14 +237,17 @@ int color_alpha = 128;
 
 int gsplits = 1;
 
+template<class T> array<T, 3> make_array(T a, T b, T c) { array<T,3> x = {a,b,c}; return x; }
+template<class T> array<T, 2> make_array(T a, T b) { array<T,2> x = {a,b}; return x; }
+
 void mapTextureTriangle(textureinfo &mi, array<hyperpoint, 3> v, int splits = gsplits) {
 
   if(splits) {
     array<hyperpoint, 3> v2 = { mid(v[1], v[2]), mid(v[2], v[0]), mid(v[0], v[1]) };
-    mapTextureTriangle(mi, {v[0], v2[2], v2[1]}, splits-1);
-    mapTextureTriangle(mi, {v[1], v2[0], v2[2]}, splits-1);
-    mapTextureTriangle(mi, {v[2], v2[1], v2[0]}, splits-1);
-    mapTextureTriangle(mi, {v2[0], v2[1], v2[2]}, splits-1);
+    mapTextureTriangle(mi, make_array(v[0], v2[2], v2[1]), splits-1);
+    mapTextureTriangle(mi, make_array(v[1], v2[0], v2[2]), splits-1);
+    mapTextureTriangle(mi, make_array(v[2], v2[1], v2[0]), splits-1);
+    mapTextureTriangle(mi, make_array(v[1], v2[0], v2[2]), splits-1);
     return;
     }
     
@@ -285,7 +288,7 @@ void mapTexture(cell *c, textureinfo& mi, patterns::patterninfo &si, const trans
     int i2 = i+shift;
     hyperpoint h1 =  spin(M_PI + M_PI * (2*i2 -1) / c->type) * xpush(z) * C0;
     hyperpoint h2 =  spin(M_PI + M_PI * (2*i2 +1) / c->type) * xpush(z) * C0;
-    mapTextureTriangle(mi, {C0, h1, h2});
+    mapTextureTriangle(mi, make_array(C0, h1, h2));
     }  
   }
 
@@ -1053,12 +1056,12 @@ point ptc(hyperpoint h) {
   }
 
 array<point, 3> ptc(const array<hyperpoint, 3>& h) {
-  return {ptc(h[0]), ptc(h[1]), ptc(h[2])};
+  return make_array(ptc(h[0]), ptc(h[1]), ptc(h[2]));
   }
 
 ld penwidth = .02;
 
-int near(pair<int, int> p1, pair<int, int> p2) {
+int texture_distance(pair<int, int> p1, pair<int, int> p2) {
   return max(abs(p1.first-p2.first), abs(p1.second - p2.second));
   }
 
@@ -1103,7 +1106,7 @@ void undoLock() {
 
 void filltriangle(const array<hyperpoint, 3>& v, const array<point, 3>& p, int col, int lev) {
   
-  int d2 = near(p[0], p[1]), d1 = near(p[0], p[2]), d0 = near(p[1], p[2]);
+  int d2 = texture_distance(p[0], p[1]), d1 = texture_distance(p[0], p[2]), d0 = texture_distance(p[1], p[2]);
   
   int a, b, c;
 
@@ -1121,8 +1124,8 @@ void filltriangle(const array<hyperpoint, 3>& v, const array<point, 3>& p, int c
   
   hyperpoint v3 = mid(v[a], v[b]);
   point p3 = ptc(v3);
-  filltriangle({v[c], v[a], v3}, {p[c], p[a], p3}, col, lev+1);
-  filltriangle({v[c], v[b], v3}, {p[c], p[b], p3}, col, lev+1);
+  filltriangle(make_array(v[c], v[a], v3), make_array(p[c], p[a], p3), col, lev+1);
+  filltriangle(make_array(v[c], v[b], v3), make_array(p[c], p[b], p3), col, lev+1);
   }
 
 void splitseg(const transmatrix& A, const array<ld, 2>& angles, const array<hyperpoint, 2>& h, const array<point, 2>& p, int col, int lev) {
@@ -1130,12 +1133,12 @@ void splitseg(const transmatrix& A, const array<ld, 2>& angles, const array<hype
   hyperpoint nh = A * spin(newangle) * xpush(penwidth) * C0;
   auto np = ptc(nh);
   
-  filltriangle({h[0],h[1],nh}, {p[0],p[1],np}, col, lev);
+  filltriangle(make_array(h[0],h[1],nh), make_array(p[0],p[1],np), col, lev);
   if(lev < 10) {
-    if(near(p[0],np) > 1)
-      splitseg(A, {angles[0], newangle}, {h[0], nh}, {p[0], np}, col, lev+1);
-    if(near(np,p[1]) > 1)
-      splitseg(A, {newangle, angles[1]}, {nh, h[1]}, {np, p[1]}, col, lev+1);
+    if(texture_distance(p[0],np) > 1)
+      splitseg(A, make_array(angles[0], newangle), make_array(h[0], nh), make_array(p[0], np), col, lev+1);
+    if(texture_distance(np,p[1]) > 1)
+      splitseg(A, make_array(newangle, angles[1]), make_array(nh, h[1]), make_array(np, p[1]), col, lev+1);
     }
   }
 
@@ -1151,8 +1154,8 @@ void fillcircle(hyperpoint h, int col) {
   
   for(int i=0; i<3; i++) {
     int j = (i+1) % 3;
-    if(near(mp[i], mp[j]) > 1)
-      splitseg(A, {step*i, step*(i+1)}, {mh[i], mh[j]}, {mp[i], mp[j]}, col, 1);
+    if(texture_distance(mp[i], mp[j]) > 1)
+      splitseg(A, make_array(step*i, step*(i+1)), make_array(mh[i], mh[j]), make_array(mp[i], mp[j]), col, 1);
     }
   }
 

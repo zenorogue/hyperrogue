@@ -80,13 +80,14 @@ struct rugpoint {
   hyperpoint flat;
   vector<edge> edges;
   // Find-Union algorithm
-  rugpoint *glue = NULL;
+  rugpoint *glue;
   rugpoint *getglue() {
     return glue ? (glue = glue->getglue()) : this;
     }
   hyperpoint& glueflat() {
     return glue->flat;
     }
+  rugpoint() { glue = NULL; }
   void glueto(rugpoint *x) {
     x = x->getglue();
     auto y = getglue();
@@ -334,7 +335,7 @@ map<pair<rugpoint*, rugpoint*>, rugpoint*> halves;
 
 rugpoint* findhalf(rugpoint *r1, rugpoint *r2) {
   if(r1 > r2) swap(r1, r2);
-  return halves[{r1,r2}];
+  return halves[make_pair(r1,r2)];
   }
 
 void addTriangle1(rugpoint *t1, rugpoint *t2, rugpoint *t3) {
@@ -663,7 +664,7 @@ bool force(rugpoint& m1, rugpoint& m2, double rd, double d1=1, double d2=1) {
 
   transmatrix iT1 = inverse(T1);
   
-  for(int i=0; i<3; i++) if(isnan(m1.flat[i])) { 
+  for(int i=0; i<3; i++) if(std::isnan(m1.flat[i])) { 
     addMessage("Failed!");
     throw rug_exception();
     }

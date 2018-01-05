@@ -517,7 +517,7 @@ int cell_to_vec(cell *c) {
   return torusconfig::id_to_vec(id, false);
   }
 
-auto cell_to_pair(cell *c) {
+pair<int, int> cell_to_pair(cell *c) {
   return vec_to_pair(cell_to_vec(c));
   }
 
