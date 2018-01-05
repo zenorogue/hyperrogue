@@ -1785,9 +1785,14 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, int col) {
     
   if(isIvy(c) || isWorm(c) || isMutantIvy(c) || c->monst == moFriendlyIvy) {
     
-    if((m == moHexSnake || m == moHexSnakeTail) && c->land == laSnakeNest && c->mondir != NODIR) {
+    if((m == moHexSnake || m == moHexSnakeTail) && c->land == laSnakeNest) {
+      int d = c->mondir;
+      if(d == NODIR)
+        forCellIdEx(c2, i, c)
+          if(c2->monst == moHexSnakeTail && c2->mondir == c->spin(i))
+            d = i;
       int c1 = nestcolors[pattern_threecolor(c)];
-      int c2 = nestcolors[pattern_threecolor(c->mov[c->mondir])];
+      int c2 = nestcolors[pattern_threecolor(c->mov[d])];
       col = (c1 + c2); // sum works because they are dark and should be brightened
       }
 
