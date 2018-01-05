@@ -603,6 +603,28 @@ namespace mapeditor {
         }
       }
     }
+
+  void saveHighQualityShotX() {
+    static string hqfile = "hqshot.png";
+    if(anyshiftclick) 
+      saveHighQualityShot();
+    else
+      dialog::openFileDialog(hqfile, XLAT("F6 = HQ shot"), ".png", [] () {
+        saveHighQualityShot(hqfile.c_str());
+        return true;
+        });
+    }
+  
+  void saveSvgShotX() {
+    static string hqfile = "svgshot.svg";
+    if(anyshiftclick) 
+      svg::render();
+    else
+      dialog::openFileDialog(hqfile, XLAT("F8 = SVG shot"), ".svg", [] () {
+        svg::render(hqfile.c_str());
+        return true;
+        });
+    }
   
   void editAt(cellwalker where) {
 
@@ -778,12 +800,12 @@ namespace mapeditor {
         });
 #if CAP_SDL
     else if(sym == SDLK_F6) {
-      saveHighQualityShot();
+      saveHighQualityShotX();
       }
 #endif
 #if CAP_SVG
     else if(sym == SDLK_F8) {
-      svg::render();
+      saveSvgShotX();
       }
 #endif
     else if(sym == SDLK_F7) {
@@ -1413,13 +1435,13 @@ namespace mapeditor {
 
 #if CAP_SDL    
     if(sym == SDLK_F6) {
-      saveHighQualityShot();
+      saveHighQualityShotX();
       }
 #endif
 
 #if CAP_SVG    
     if(sym == SDLK_F8) {
-      svg::render();
+      saveSvgShotX();
       }
 #endif
     
