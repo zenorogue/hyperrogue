@@ -216,7 +216,7 @@ void achievement_collection(eItem it, int prevgold, int newgold) {
     if(it == itTerra) achievement_gain("TERRAC1");
     
     if(it == itRuins) achievement_gain("RUIN1");
-    if(it == itSwitch) achievement_gain("JELLY1");
+    if(it == itSwitch) achievement_gain("JELLZ1");
     }
 
   // 32
@@ -287,7 +287,7 @@ void achievement_collection(eItem it, int prevgold, int newgold) {
     if(it == itTerra) achievement_gain("TERRAC2");
 
     if(it == itRuins) achievement_gain("RUIN2");
-    if(it == itSwitch) achievement_gain("JELLY2");
+    if(it == itSwitch) achievement_gain("JELLZ2");
     }
 
   if(q == (inv::on ? 50 : 25)) {
@@ -354,7 +354,7 @@ void achievement_collection(eItem it, int prevgold, int newgold) {
     if(it == itTerra) achievement_gain("TERRAC3");
 
     if(it == itRuins) achievement_gain("RUIN3");
-    if(it == itSwitch) achievement_gain("JELLY3");
+    if(it == itSwitch) achievement_gain("JELLZ3");
     }
 
   if(q == 50 && !inv::on) {
@@ -418,7 +418,7 @@ void achievement_collection(eItem it, int prevgold, int newgold) {
     if(it == itTerra) achievement_gain("TERRAC4");
 
     if(it == itRuins) achievement_gain("RUIN4");
-    if(it == itSwitch) achievement_gain("JELLY4");
+    if(it == itSwitch) achievement_gain("JELLZ4");
     }
   
   if(it == itOrbYendor) {
