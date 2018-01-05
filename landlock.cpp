@@ -1228,7 +1228,7 @@ int isLandValid(eLand l) {
     return geosupport_threecolor() >= 2 ? 3 : 0;
   
   if(l == laDocks)
-    return a38 ? 2 : 0;
+    return a38 ? 3 : 0;
   
   if(l == laStorms && torus) 
     return 3;
