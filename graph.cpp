@@ -1981,18 +1981,6 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, int col) {
     return drawMonsterTypeDH(m, c, Vs, col, darkhistory, footphase);
     }
 
-  // golems, knights, and hyperbugs don't face the player (mondir-controlled)
-  // also whatever in the lineview mode
-
-  else if(isFriendly(c) || isBug(c) || (c->monst && conformal::on) || c->monst == moKrakenH || (isBull(c->monst) && c->mondir != NODIR) || c->monst == moButterfly || isMagneticPole(c->monst) ||
-    isSwitch(c->monst) || c->monst == moPair) {
-    if(c->monst == moKrakenH) Vs = Vb, nospins = nospinb;
-    if(!nospins) Vs = Vs * ddspin(c, c->mondir, S42);
-    if(c->monst == moPair) Vs = Vs * xpush(-.12);
-    if(isFriendly(c)) drawPlayerEffects(Vs, c, false);
-    return drawMonsterTypeDH(m, c, Vs, col, darkhistory, footphase);
-    }
-
   else if(c->monst == moKrakenT) {
     if(c->hitpoints == 0) col = 0x404040;
     if(nospinb) {
@@ -2003,6 +1991,18 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, int col) {
     if(weirdhyperbolic || sphere) Vb = Vb * xpush(-(hexhexdist - hcrossf7));
     if(ctof(c) && !euclid) Vb = Vb * xpush(hexhexdist - hcrossf);
     return drawMonsterTypeDH(m, c, Vb, col, darkhistory, footphase);
+    }
+
+  // golems, knights, and hyperbugs don't face the player (mondir-controlled)
+  // also whatever in the lineview mode, and whatever in the quotient geometry
+
+  else if(isFriendly(c) || isBug(c) || (c->monst && conformal::on) || c->monst == moKrakenH || (isBull(c->monst) && c->mondir != NODIR) || c->monst == moButterfly || isMagneticPole(c->monst) ||
+    isSwitch(c->monst) || c->monst == moPair || (c->monst && (quotient || torus))) {
+    if(c->monst == moKrakenH) Vs = Vb, nospins = nospinb;
+    if(!nospins) Vs = Vs * ddspin(c, c->mondir, S42);
+    if(c->monst == moPair) Vs = Vs * xpush(-.12);
+    if(isFriendly(c)) drawPlayerEffects(Vs, c, false);
+    return drawMonsterTypeDH(m, c, Vs, col, darkhistory, footphase);
     }
 
   else if(c->monst) {
