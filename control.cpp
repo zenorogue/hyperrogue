@@ -208,6 +208,7 @@ bool quitmainloop = false;
 bool doexiton(int sym, int uni) {
   if(sym == SDLK_ESCAPE) return true;
   if(sym == SDLK_F10) return true;
+  if(sym == PSEUDOKEY_RELEASE) return false;
   if(uni != 0) return true;
   return false;
   }
