@@ -227,6 +227,8 @@ void showEuclideanMenu() {
   landvisited[laWarpCoast] = true;
   landvisited[laGraveyard] = true;
   landvisited[laDual] = true;
+  landvisited[laDocks] |= landvisited[laWarpCoast];
+  landvisited[laSnakeNest] |= landvisited[laRedRock];
   landvisited[laCA] = true;
   // for(int i=2; i<lt; i++) landvisited[i] = true;
   
