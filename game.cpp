@@ -7057,9 +7057,12 @@ void monstersTurn() {
   if(!phase1) ca::simulate();
   if(!phase1) heat::processfires();
   
-  for(cell *c: crush_now)
-    if(canAttack(c, moCrusher, c, c->monst, AF_GETPLAYER | AF_CRUSH))
+  for(cell *c: crush_now) {
+    playSound(NULL, "closegate");
+    if(canAttack(c, moCrusher, c, c->monst, AF_GETPLAYER | AF_CRUSH)) {
       attackMonster(c, AF_MSG | AF_GETPLAYER | AF_CRUSH, moCrusher);
+      }
+    }
   
   crush_now = move(crush_next);
   crush_next.clear();
