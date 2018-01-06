@@ -45,7 +45,7 @@ namespace yendor {
   int challenge; // id of the challenge
   int lastchallenge;
   
-  #define YENDORLEVELS 30
+  #define YENDORLEVELS 31
   
   map<modecode_t, array<int, YENDORLEVELS>> bestscore;
 
@@ -83,7 +83,8 @@ namespace yendor {
     {laDragon,    YF_DEAD},
     {laReptile,   0},
     {laTortoise,  YF_RECALL},
-    {laCocytus,   YF_NEAR_FJORD}
+    {laCocytus,   YF_NEAR_FJORD},
+    {laRuins,     YF_DEAD}
     };
   
   int tscorelast;
@@ -653,7 +654,7 @@ namespace tactic {
     int nl = size(landlist);
 
     int nlm;
-    int ofs = dialog::handlePage(nl, nlm, nl/2);
+    int ofs = dialog::handlePage(nl, nlm, (nl+1)/2);
         
     int vf = min((vid.yres-64-vid.fsize) / nlm, vid.xres/40);
     
