@@ -778,19 +778,20 @@ void saveStats(bool emergency = false) {
         int c = 
           anticheat::certify(dnameof(tactic::lasttactic), turncount, t, (int) timerstart,
             xcode*999 + tactic::id + 256 * score);
-        fprintf(f, "TACTICS %s %d %d %d %d %d %d %d date: %s\n", VER,
+        fprintf(f, "TACTICS %s %d %d %d %d %d %d %d %d date: %s\n", VER,
           tactic::id, tactic::lasttactic, score, turncount, t, int(timerstart), 
-          c, buf);
+          c, xcode, buf);
         tactic::record(tactic::lasttactic, score);
         anticheat::nextid(tactic::id, VER, c);
         }
       }
 
     if(yendor::on)
-      fprintf(f, "YENDOR %s %d %d %d %d %d %d %d date: %s\n", VER,
+      fprintf(f, "YENDOR %s %d %d %d %d %d %d %d %d date: %s\n", VER,
         yendor::lastchallenge, items[itOrbYendor], yendor::won, turncount, t, int(timerstart), 
         anticheat::certify(yendor::won ? "WON" : "LOST", turncount, t, (int) timerstart,
           xcode*999 + yendor::lastchallenge + 256 * items[itOrbYendor]),
+        xcode,
         buf);
 
     fclose(f);
@@ -920,30 +921,38 @@ void loadsave() {
       ok = false;
       char buf1[80], ver[10];
       int tid, land, score, tc, t, ts, cert;
-      sscanf(buf, "%70s%10s%d%d%d%d%d%d%d",
-        buf1, ver, &tid, &land, &score, &tc, &t, &ts, &cert);
-
+      int xc = -1;
+      sscanf(buf, "%70s%10s%d%d%d%d%d%d%d%d",
+        buf1, ver, &tid, &land, &score, &tc, &t, &ts, &cert, &xc);
+      
       eLand l2 = eLand(land);
       if(land == laMirror && verless(ver, "10.0")) l2 = laMirrorOld;
+
+      if(xc == -1)
+        for(xc=0; xc<32768; xc++)
+          if(anticheat::check(cert, ver, dnameof(l2), tc, t, ts, xc*999+unsigned(tid) + 256 * score)) 
+            break;
       
-      for(int xc=0; xc<MODECODES; xc++)
-        if(tid == tactic::id && (anticheat::check(cert, ver, dnameof(l2), tc, t, ts, xc*999+tid + 256 * score))) {
-          if(score != 0 
-            && !(land == laOcean && verless(ver, "8.0f"))
-          ) tactic::record(l2, score, xc);
-          anticheat::nextid(tactic::id, ver, cert);
-          break;
-          }
+      if(tid == tactic::id && (anticheat::check(cert, ver, dnameof(l2), tc, t, ts, xc*unsigned(999)+ unsigned(tid) + 256 * score))) {
+        if(score != 0 
+          && !(land == laOcean && verless(ver, "8.0f"))
+        ) tactic::record(l2, score, xc);
+        anticheat::nextid(tactic::id, ver, cert);
+        }
       }
 
     if(buf[0] == 'Y' && buf[1] == 'E' && buf[2] == 'N') {
       char buf1[80], ver[10];
-      int cid, oy, won, tc, t, ts, cert=0;
-      sscanf(buf, "%70s%10s%d%d%d%d%d%d%d",
-        buf1, ver, &cid, &oy, &won, &tc, &t, &ts, &cert);
-            
-      if(won) for(int xc=0; xc<MODECODES; xc++)
-      if(anticheat::check(cert, ver, won ? "WON" : "LOST", tc, t, ts, xc*999 + cid + 256 * oy)) {
+      int cid, oy, won, tc, t, ts, cert=0, xc = -1;
+      sscanf(buf, "%70s%10s%d%d%d%d%d%d%d%d",
+        buf1, ver, &cid, &oy, &won, &tc, &t, &ts, &cert, &xc);
+
+      if(xc == -1)
+        for(xc=0; xc<32768; xc++)
+          if(anticheat::check(cert, ver, won ? "WON" : "LOST", tc, t, ts, xc*999 + cid + 256 * oy)) 
+            break;
+      
+      if(won) if(anticheat::check(cert, ver, won ? "WON" : "LOST", tc, t, ts, xc*999 + cid + 256 * oy)) {
         if(xc == 19 && cid == 25) xc = 0;
         if(cid > 0 && cid < YENDORLEVELS) 
         if(!(verless(ver, "8.0f") && oy > 1 && cid == 15)) 
@@ -951,7 +960,6 @@ void loadsave() {
           {
           yendor::bestscore[xc][cid] = max(yendor::bestscore[xc][cid], oy);
           }
-        break;
         }
       }
 
