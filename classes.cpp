@@ -1228,7 +1228,7 @@ itemtype iinf[ittypes] = {
   { '*', 0x80FF80, "Monopole", NODESCYET},
   { '!', 0xFF00FF, "Tasty Jelly", "A tasty byproduct of the Jelly Revolution."},
   { 'o', 0x80FF80, "Orb of Phasing", 
-    "This orb lets you pass through walls (one cell wide), and also through as long as they will not attack you in transit."},
+    "This orb lets you pass through walls (one cell wide), and also through monsters, as long as they will not attack you in transit."},
   { 'o', 0xFFFF80, "Orb of Magnetism", NODESCYET},
   { 'o', 0x202020, "Orb of Slaying",
     "This Orb lets you defeat Raiders and other tough single-cell monsters in melee."

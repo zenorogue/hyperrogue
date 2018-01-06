@@ -6596,7 +6596,7 @@ S("A tasty byproduct of the Jelly Revolution.",
   "Pyszny produkt uboczny Galaretowej Rewolucji.")
 
 Orb("Phasing", "Fazy")
-S("This orb lets you pass through walls (one cell wide), and also through as long as they will not attack you in transit.",
+S("This orb lets you pass through walls (one cell wide), and also through monsters, as long as they will not attack you in transit.",
   "Ta Sfera pozwala Ci przechodzić przez ściany (o szerokości jednego pola), a także przez potwory, o ile "
   "nie zaatakują one w trakcie ruchu.")
 
