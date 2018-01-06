@@ -908,7 +908,7 @@ int geosupport_graveyard() {
 int pattern_threecolor(cell *c) {
   if(a38) {
     patterns::patterninfo si;
-    patterns::val38(c, si, patterns::SPF_ROT, patterns::PAT_COLORING);
+    patterns::val38(c, si, nonbitrunc ? 0 : patterns::SPF_ROT, patterns::PAT_COLORING);
     return si.id >> 2;
     }
   if(a46 && !nonbitrunc) {
