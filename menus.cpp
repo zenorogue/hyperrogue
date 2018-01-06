@@ -679,7 +679,7 @@ void showStartMenu() {
     else if(sym == SDLK_F10)
       quitmainloop = true;
     else if(sym == SDLK_F1)
-      gotoHelp(help);
+      gotoHelp("@");
     else if(sym == SDLK_ESCAPE || sym == ' ') {
       popScreen();
       timerstart = time(NULL);
