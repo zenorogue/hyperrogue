@@ -656,7 +656,7 @@ void generateSnake(cell *c, int i) {
     if(c3->monst || c3->bardir != NODIR || c3->wall) break;
     c2 = c3;
     c2->monst = moHexSnakeTail;
-    i = (j + (c2->type%4 == 0 ? c2->type/2 : (len%2 ? 2 : c2->type - 2))) % S6;
+    i = (j + (c2->type%4 == 0 ? c2->type/2 : (len%2 ? 2 : c2->type - 2))) % c2->type;
     createMov(c2, i);
     if(!inpair(c2->mov[i], cpair)) {
       vector<int> goodsteps;

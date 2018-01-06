@@ -1789,8 +1789,9 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, int col) {
       int d = c->mondir;
       if(d == NODIR)
         forCellIdEx(c2, i, c)
-          if(c2->monst == moHexSnakeTail && c2->mondir == c->spin(i))
+          if(among(c2->monst, moHexSnakeTail, moHexSnake) && c2->mondir == c->spin(i))
             d = i;
+      if(d == NODIR) { d = hrand(c->type); createMov(c, d); }
       int c1 = nestcolors[pattern_threecolor(c)];
       int c2 = nestcolors[pattern_threecolor(c->mov[d])];
       col = (c1 + c2); // sum works because they are dark and should be brightened

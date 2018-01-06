@@ -1521,7 +1521,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
       ONEMPTY {
         if(hrand(30000) < 30+items[itRedGem]+yendor::hardness() && !c->monst && !c->wall && !peace::on) {
           vector<int> gooddir;
-          for(int t=0; t<c->type; t++) if(c->mov[t]->mpdist > c->mpdist && !pseudohept(c->mov[t]))
+          for(int t=0; t<c->type; t++) if(c->mov[t]->mpdist > c->mpdist)
             gooddir.push_back(t);
           if(size(gooddir))
             generateSnake(c, gooddir[hrand(size(gooddir))]);
