@@ -1648,19 +1648,19 @@ vector<eLand> randlands = {
   };
 
 geometryinfo ginf[gGUARD] = {
-  {"standard",            "HR",       7, 3, 0,      gcHyperbolic, {{7, 5}}},
-  {"Euclidean",           "euclid",   6, 3, 0,      gcEuclid,     {{7, FORBIDDEN}}},
-  {"spherical",           "sphere",   5, 3, 0,      gcSphere,     {{SEE_ALL, SEE_ALL}}},
-  {"elliptic",            "elliptic", 5, 3, qELLIP, gcSphere,     {{SEE_ALL, SEE_ALL}}},
-  {"Zebra quotient",      "Zebra",    7, 3, qZEBRA, gcHyperbolic, {{7, 5}}},
-  {"field quotient",      "field",    7, 3, qFIELD, gcHyperbolic, {{7, 5}}},
-  {"torus/Klein bottle",  "torus",    6, 3, qTORUS, gcEuclid,     {{7, FORBIDDEN}}},
-  {"octagons",            "oct",      8, 3, 0,      gcHyperbolic, {{6, 4}}},
-  {"four pentagons",      "4x5",      5, 4, 0,      gcHyperbolic, {{6, 4}}},
-  {"four hexagons",       "4x6",      6, 4, 0,      gcHyperbolic, {{5, 3}}},
-  {"four heptagons",      "4x7",      7, 4, 0,      gcHyperbolic, {{4, 3}}},
-  {"cube",                "3x4",      4, 3, 0,      gcSphere,     {{SEE_ALL, SEE_ALL}}},
-  {"tetrahedron (buggy)", "3x3",      3, 3, 0,      gcSphere,     {{SEE_ALL, SEE_ALL}}},
-  {"square grid",         "4x4",      4, 4, 0,      gcEuclid,     {{7, 7}}}
+  {"standard",            "HR",       7, 3, 0,      gcHyperbolic,       0, {{7, 5}}},
+  {"Euclidean",           "euclid",   6, 3, 0,      gcEuclid,           0, {{7, FORBIDDEN}}},
+  {"spherical",           "sphere",   5, 3, 0,      gcSphere,           0, {{SEE_ALL, SEE_ALL}}},
+  {"elliptic",            "elliptic", 5, 3, qELLIP, gcSphere,           0, {{SEE_ALL, SEE_ALL}}},
+  {"Zebra quotient",      "Zebra",    7, 3, qZEBRA, gcHyperbolic, 0x00400, {{7, 5}}},
+  {"field quotient",      "field",    7, 3, qFIELD, gcHyperbolic, 0x00200, {{7, 5}}},
+  {"torus/Klein bottle",  "torus",    6, 3, qTORUS, gcEuclid,     0x00600, {{7, FORBIDDEN}}},
+  {"octagons",            "oct",      8, 3, 0,      gcHyperbolic, 0x08000, {{6, 4}}},
+  {"four pentagons",      "4x5",      5, 4, 0,      gcHyperbolic, 0x08200, {{6, 4}}},
+  {"four hexagons",       "4x6",      6, 4, 0,      gcHyperbolic, 0x08400, {{5, 3}}},
+  {"four heptagons",      "4x7",      7, 4, 0,      gcHyperbolic, 0x08600, {{4, 3}}},
+  {"cube",                "3x4",      4, 3, 0,      gcSphere,     0x10000, {{SEE_ALL, SEE_ALL}}},
+  {"tetrahedron (buggy)", "3x3",      3, 3, 0,      gcSphere,     0x10200, {{SEE_ALL, SEE_ALL}}},
+  {"square grid",         "4x4",      4, 4, 0,      gcEuclid,     0x10400, {{7, 7}}}
   };
 

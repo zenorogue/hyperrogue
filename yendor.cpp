@@ -842,6 +842,9 @@ int modecode() {
   if(tour::on) mct += 8192;
 #endif
   if(numplayers() == 7) mct += 16384;
+  
+  mct += ginf[geometry].xcode;
+  
   return mct;
   }
 
