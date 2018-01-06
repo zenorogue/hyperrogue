@@ -840,7 +840,7 @@ heptagon deletion_marker;
 
 void clearHexes(heptagon *at) {
   if(at->c7) {
-    if(!nonbitrunc) for(int i=0; i<7; i++)
+    if(!nonbitrunc) for(int i=0; i<S7; i++)
       clearcell(at->c7->mov[i]);
     clearcell(at->c7);
     }
@@ -856,7 +856,7 @@ void clearfrom(heptagon *at) {
 //  if(q.size() > maxq) maxq = q.size();
     q.pop();
     DEBMEM ( printf("from %p\n", at); )
-    for(int i=0; i<7; i++) if(at->move[i]) {
+    for(int i=0; i<S7; i++) if(at->move[i]) {
       if(at->move[i]->alt != &deletion_marker)
         q.push(at->move[i]);    
       at->move[i]->alt = &deletion_marker;
