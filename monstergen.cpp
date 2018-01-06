@@ -551,8 +551,10 @@ void wandering() {
     else if(c->land == laSwitch && wchance(items[itSwitch], 80)) 
       c->monst = active_switch();
 
-    else if(c->land == laRuins && wchance(items[itRuins], 80)) 
+    else if(c->land == laRuins && wchance(items[itRuins], 80)) {
       c->monst = genRuinMonster(c);
+      c->hitpoints = 3;
+      }
 
     else if(c->land == laCaribbean && wchance(items[itPirate], 30))
       c->monst = moPirate;
