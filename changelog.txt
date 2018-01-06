@@ -2141,3 +2141,26 @@ Gameplay bugfixes:
 - Fixed the bug with instakillable Salamanders
 - Hunting Dogs are now slower in coop shmup
 - fixed a minor potential bug with non-orientable surfaces
+
+2018.01.05 19:15 version 10.3
+
+Major new features:
+- four new lands: Jelly Kingdom, Ruined City, Snake Nest (three-color geometry only), Docks (octagonal geometry only)
+- new special mode: texture mode
+- enhancements to the Hypersian Rug mode (native geometry change, perspective)
+
+UI enhancements:
+- most actions which deal with external files now let you choose the file
+- HQ/SVG shots in the editors now include the aura background (use Shift+F6 for the old way)
+- renamed 'truncated' to 'chamfered'
+- added advanced keyboard/mouse controls to the Help screen. Also added some new advanced mouse controls
+
+Gameplay bugfixes
+- monsters no longer inconsistently try to look at the player in quotient geometries
+- Orbs of Fire, Lightning, and Lava are now marked as dangerous in Dry Forest.
+- Orb of Lava is now marked as dangerous in Yendorian (Fire/Lightning/Dragon were already dangerous).
+- Volcanic Wasteland no longer spawns next to Dry Forest or Vineyard.
+- fire now spreads from lava to adjacent flammable materials.
+- fixed the grid markers for items in Alchemist Lab
+- fixed a bug with Orb of Slashing in OSM inventory
+- cleaned up some special cases wrt attacking a Vizier
