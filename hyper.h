@@ -295,7 +295,7 @@ typedef int cellfunction(cell*);
 int towerval(cell *c, cellfunction* cf = &coastvalEdge);
 #define HRANDMAX 0x7FFFFFFF
 int hrandpos(); // 0 to HRANDMAX
-void restartGame(char switchWhat = 0, bool push = false, bool keep_screens = true);
+void restartGame(char switchWhat = 0, bool push = false, bool keep_screens = false);
 int landMultiplier(eLand l);
 eItem treasureType(eLand l);
 void buildBarrier(cell *c, int d, eLand l = laNone);
