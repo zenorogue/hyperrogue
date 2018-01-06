@@ -961,7 +961,7 @@ eLand getNewLand(eLand old) {
 vector<eLand> land_over = {
   laIce, laCaves, laDesert, laHunting, laMotion, laJungle, laAlchemist, 
   laCrossroads, 
-  laMirror, laMinefield, laPalace, laPrincessQuest, laZebra, laSwitch, laReptile, 
+  laMirror, laMirrorOld, laMinefield, laPalace, laPrincessQuest, laZebra, laSwitch, laReptile, 
   laOcean, laWarpCoast, laLivefjord, laKraken, laCaribbean, laWhirlpool, laRlyeh, laTemple,
   laIvoryTower, laEndorian, laDungeon, laMountain, 
   laCrossroads2, 
