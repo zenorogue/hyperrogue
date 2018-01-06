@@ -249,9 +249,9 @@ void showEuclideanMenu() {
     dialog::addBreak(50);
   
     if(ts == 6 && tv == 3)
-      dialog::addSelItem(XLAT("bitrunc"), XLAT("does not matter"), 't');
+      dialog::addSelItem(XLAT("bitruncated"), XLAT("does not matter"), 't');
     else
-      dialog::addBoolItem(XLAT("bitrunc"), !nonbitrunc, 't');
+      dialog::addBoolItem(XLAT("bitruncated"), !nonbitrunc, 't');
   
     dialog::addBreak(50);
   
