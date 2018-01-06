@@ -315,7 +315,7 @@ void showEuclideanMenu() {
         pushScreen(showEuclideanMenu);
         }
       else if(uni == 't') {
-        if(!euclid) {
+        if(!euclid6) {
           restartGame('7');
           pushScreen(showEuclideanMenu);
           }
