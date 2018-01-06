@@ -3492,13 +3492,13 @@ void moveMonster(cell *ct, cell *cf) {
     ct->stuntime = 3;
   else if(inc == -3 && !survivesFall(ct->monst)) {
     addMessage(XLAT("%The1 falls!", ct->monst));
-    fallMonster(ct);
+    fallMonster(ct, AF_FALL);
     }
   if(isThorny(ct->wall) && !survivesThorns(ct->monst)) {
     addMessage(XLAT("%The1 is killed by thorns!", ct->monst));
     playSound(ct, "hit-rose");
     if(isBull(ct->monst)) ct->wall = waNone;
-    fallMonster(ct);
+    fallMonster(ct, AF_CRUSH);
     }
   if(sword::at(ct) && canAttack(NULL, moPlayer, ct, m, AF_SWORD_INTO)) {
     attackMonster(ct, AF_SWORD_INTO | AF_MSG, moPlayer);
@@ -5517,7 +5517,7 @@ void moverefresh(bool turn = true) {
           addMessage(XLAT("Fire is extinguished!"));
           c->wall = waNone;
           }
-        fallMonster(c);
+        fallMonster(c, AF_CRUSH);
         }
       if(c->item && itemBurns(c->item)) {
         addMessage(XLAT("%The1 burns!", c->item));
@@ -5571,7 +5571,7 @@ void moverefresh(bool turn = true) {
         c->monst = moGreaterM;
       else if(c->monst == moShark || c->monst == moCShark) {
         addMessage(XLAT("%The1 suffocates!", c->monst));
-        fallMonster(c);
+        fallMonster(c, AF_CRUSH);
         }
       else if(c->monst == moKrakenH) {
         addMessage(XLAT("%The1 suffocates!", c->monst));
@@ -5581,7 +5581,7 @@ void moverefresh(bool turn = true) {
     
     if(c->monst == moVineSpirit && !cellHalfvine(c) && c->wall != waVinePlant) {
       addMessage(XLAT("%The1 is destroyed!", c->monst));
-      fallMonster(c);
+      fallMonster(c, AF_CRUSH);
       }
     
     if(c->monst) mayExplodeMine(c, c->monst);
@@ -5589,7 +5589,7 @@ void moverefresh(bool turn = true) {
     if(c->monst && c->wall == waClosedGate && !survivesWall(c->monst)) {
       playSound(c, "hit-crush"+pick123());
       addMessage(XLAT("%The1 is crushed!", c->monst));
-      fallMonster(c);
+      fallMonster(c, AF_CRUSH);
       }
 
     if(c->monst && cellUnstable(c) && !ignoresPlates(c->monst) && !shmup::on) 
@@ -6096,14 +6096,15 @@ void placeGolem(cell *on, cell *moveto, eMonster m) {
     on->monst = m;
   else {
     on->monst = m;
+    flagtype f = AF_CRUSH;
     if(isFire(on))
       addMessage(XLAT("%The1 burns!", m));
     else if(on->wall == waChasm)
-      addMessage(XLAT("%The1 falls!", m));
+      addMessage(XLAT("%The1 falls!", m)), f = AF_FALL;
     else if(isWatery(on) && isNonliving(m))
-      addMessage(XLAT("%The1 sinks!", m));
+      addMessage(XLAT("%The1 sinks!", m)), f = AF_FALL;
     else if(isWatery(on))
-      addMessage(XLAT("%The1 drowns!", m));
+      addMessage(XLAT("%The1 drowns!", m)), f = AF_FALL;
     else if(isWall(on))
       addMessage(XLAT("%The1 is crushed!", m));
     else if(m == moTameBomberbird && cwt.c->wall == waBoat)
@@ -6112,8 +6113,8 @@ void placeGolem(cell *on, cell *moveto, eMonster m) {
       addMessage(XLAT("%The1 is destroyed!", m));
     
     printf("mondir = %d\n", on->mondir);
-    fallMonster(cwt.c);
-    }
+    fallMonster(cwt.c, f);
+    }                 
   }
 
 bool multiRevival(cell *on, cell *moveto) {
