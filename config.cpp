@@ -321,7 +321,7 @@ void initConfig() {
   addsaver(hardcore, "mode-hardcore", false);
   addsaver(chaosmode, "mode-chaos");
   addsaver(inv::on, "mode-Orb Strategy");
-  addsaver(nonchamfered, "mode-heptagonal", false);
+  addsaver(nonbitrunc, "mode-heptagonal", false);
   addsaver(peace::on, "mode-peace");
   addsaver(peace::otherpuzzles, "mode-peace-submode");
   addsaverenum(specialland, "land for special modes");
@@ -337,7 +337,7 @@ void initConfig() {
   }
 
 bool inSpecialMode() {
-  return chaosmode || nonchamfered || peace::on || tour::on ||
+  return chaosmode || nonbitrunc || peace::on || tour::on ||
     yendor::on || tactic::on || randomPatternsMode ||
     geometry != gNormal || pmodel != mdDisk || vid.alpha != 1 || vid.scale != 1 || 
     rug::rugged || vid.monmode != DEFAULT_MONMODE ||
@@ -350,7 +350,7 @@ void resetModes(char leave = 'c') {
   if(shmup::on != (leave == 's')) restartGame('s');
   if(inv::on != (leave == 'i')) restartGame('i');
   if(chaosmode != (leave == 'C')) restartGame('C');
-  if(nonchamfered != (leave == '7')) restartGame('7');
+  if(nonbitrunc != (leave == '7')) restartGame('7');
   if(peace::on != (leave == 'P')) restartGame('P');
 #if CAP_TOUR
   if(tour::on != (leave == 'T')) restartGame('T');
@@ -454,11 +454,11 @@ void loadOldConfig(FILE *f) {
 
   shmup::loadConfig(f);
 
-  aa = rug::renderonce; bb = rug::rendernogl; cc = nonchamfered; dd = chaosmode; 
+  aa = rug::renderonce; bb = rug::rendernogl; cc = nonbitrunc; dd = chaosmode; 
   int ee = vid.steamscore;
   double rs = 2/rug::model_distance;
   err=fscanf(f, "%d%d%d%d%lf%d%d", &aa, &bb, &rug::texturesize, &cc, &rs, &ee, &dd);
-  rug::renderonce = aa; rug::rendernogl = bb; nonchamfered = cc; chaosmode = dd; vid.steamscore = ee;
+  rug::renderonce = aa; rug::rendernogl = bb; nonbitrunc = cc; chaosmode = dd; vid.steamscore = ee;
   rug::model_distance = 2/rs;
 
   aa=conformal::autobandhistory;

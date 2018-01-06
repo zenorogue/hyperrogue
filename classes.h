@@ -205,8 +205,8 @@ struct geometryinfo {
   int vertex;
   int quotientstyle;
   eGeometryClass cclass;
-  array<int,2> distlimit; // chamfered, non-chamfered
   int xcode;
+  array<int,2> distlimit; // bitrunc, non-bitrunc
   };
 
 static const int qZEBRA = 1;

@@ -1201,7 +1201,7 @@ void checkStunKill(cell *dest);
 void clearMessages();
 
 void resetGeometry();
-extern bool nonchamfered;
+extern bool nonbitrunc;
 
 namespace svg {
   void circle(int x, int y, int size, int col);
@@ -2191,13 +2191,13 @@ struct hrmap {
 
 struct hrmap_hyperbolic : hrmap {
   heptagon *origin;
-  bool isnonchamfered;
+  bool isnonbitrunc;
   hrmap_hyperbolic();
   heptagon *getOrigin() { return origin; }
   ~hrmap_hyperbolic() {
     DEBMEM ( verifycells(origin); )
     // printf("Deleting hyperbolic map: %p\n", this);
-    dynamicval<bool> ph(nonchamfered, isnonchamfered);
+    dynamicval<bool> ph(nonbitrunc, isnonbitrunc);
     clearfrom(origin);
     }
   void verify() { verifycells(origin); }
@@ -2431,7 +2431,7 @@ inline hyperpoint tC0(const transmatrix &T) {
 transmatrix actualV(const heptspin& hs, const transmatrix& V);
 transmatrix cview();
 
-extern string chamfernames[2];
+extern string bitruncnames[2];
 extern bool need_mouseh;
 
 extern int whateveri, whateveri2;

@@ -182,7 +182,7 @@ else if(args()[0] == '-' && args()[1] == x && args()[2] == '0') { showstartmenu 
 
   TOGGLE('o', vid.usingGL, switchGL())
   TOGGLE('C', chaosmode, restartGame('C'))
-  TOGGLE('7', nonchamfered, restartGame('7'))
+  TOGGLE('7', nonbitrunc, restartGame('7'))
   TOGGLE('f', vid.full, switchFullscreen())
   TOGGLE('T', tactic::on, restartGame('t'))
   TOGGLE('S', shmup::on, restartGame('s'))

@@ -6429,7 +6429,7 @@ S(
   "You can try many different geometries here. We start by gluing "
   "n-gons in such a way that k of them meet in every vertex. "
   "Depending on n and k, this either folds into a sphere, unfolds into a plane, "
-  "or requires a hyperbolic space. The result may be then 'chamfered' by "
+  "or requires a hyperbolic space. The result may be then 'bitruncated' by "
   "replacing each vertex by a 2k-gon. Furthermore, you can play "
   "with quotient geometries. For example, the elliptic geometry is "
   "obtained from the sphere by making the antipodes be the same point, "
@@ -6437,7 +6437,7 @@ S(
   "Have fun experimenting! "
   "Achievements and leaderboards do not work in geometry experiments, "
   "except some specific ones.\n\n"
-  "In standard geometry (chamfered or not), you can play the full game, but in other geometries "
+  "In standard geometry (bitruncated or not), you can play the full game, but in other geometries "
   "you select a particular land. Lands are unlocked by visiting them in this "
   "session, or permanently by collecting 25 treasure. Try Crossroads in Euclidean "
   "or chaos mode in non-standard non-quotient hyperbolic to visit many lands. "
@@ -6478,7 +6478,7 @@ S("tetrahedron (buggy)", "тетраэдр (ошибки)")
 S("tetrahedron", "тетраэдр") // in case if it gets better
  
 S("land", "земля")
-S("chamfered", "усеченный")
+S("bitruncated", "усеченный")
 S("does not matter", "не важно")
 S("sides per face", "сторон у клетка")
 S("faces per vertex", "клеток в вершине")
@@ -6489,7 +6489,7 @@ S("quotient space", "факторпространство")
 S("size of the world", "размер мира")
 S("flat", "плоскость")
  
-// chamfered or not chamfered
+// bitruncated or not bitrunc
 S(" (c)", " (у)")
 S(" (n)", " (н)")
  

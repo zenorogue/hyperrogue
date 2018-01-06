@@ -6206,7 +6206,7 @@ S(
   "You can try many different geometries here. We start by gluing "
   "n-gons in such a way that k of them meet in every vertex. "
   "Depending on n and k, this either folds into a sphere, unfolds into a plane, "
-  "or requires a hyperbolic space. The result may be then 'chamfered' by "
+  "or requires a hyperbolic space. The result may be then 'bitruncated' by "
   "replacing each vertex by a 2k-gon. Furthermore, you can play "
   "with quotient geometries. For example, the elliptic geometry is "
   "obtained from the sphere by making the antipodes be the same point, "
@@ -6214,7 +6214,7 @@ S(
   "Have fun experimenting! "
   "Achievements and leaderboards do not work in geometry experiments, "
   "except some specific ones.\n\n"
-  "In standard geometry (chamfered or not), you can play the full game, but in other geometries "
+  "In standard geometry (bitruncated or not), you can play the full game, but in other geometries "
   "you select a particular land. Lands are unlocked by visiting them in this "
   "session, or permanently by collecting 25 treasure. Try Crossroads in Euclidean "
   "or chaos mode in non-standard non-quotient hyperbolic to visit many lands. "
@@ -6257,7 +6257,7 @@ S("tetrahedron (buggy)", "czworościan (bugi)")
 S("tetrahedron", "czworościan") // in case if it gets better
 
 S("land", "kraina")
-S("chamfered", "przycięte")
+S("bitruncated", "przycięte")
 S("does not matter", "bez znaczenia")
 S("sides per face", "boki ścian")
 S("faces per vertex", "wierzchołki")
@@ -6268,8 +6268,8 @@ S("quotient space", "przestrzeń ilorazowa")
 S("size of the world", "wielkość świata")
 S("flat", "płaska")
 
-// chamfered or not chamfered
-S(" (c)", " (p)")
+// bitruncated or not bitrunc
+S(" (b)", " (b)")
 S(" (n)", " (n)")
 
 S("(locked)", "(blok)")
@@ -6328,7 +6328,7 @@ S(
 
 S("find the next prime", "znajdź następną liczbę pierwszą")
 S("activate", "uruchom")
-S("order %1%2 (non-chamfered cells: %3)", "rząd %1%2 (nieprzyciętych pól: %3)")
+S("order %1%2 (non-bitrunc cells: %3)", "rząd %1%2 (nieprzyciętych pól: %3)")
 
 // Torus/Klein bottle, Euclidean Squares, and their advanced configuration
 //-------------------------------------------------------------------------
@@ -6347,7 +6347,7 @@ S("Klein bottle (squares)", "butelka Kleina (kwadraty)")
 S("Klein bottle (hex)", "butelka Kleina (heksy)")
 
 S("this mode has bad patterns", "nieprawidłowe wzorki dla tego trybu")
-S("incompatible with chamfering", "niekompatybilne z przycinaniem")
+S("incompatible with bitruncating", "niekompatybilne z przycinaniem")
 S("best if %1 is divisible by %2", "najlepiej gdy %1 jest podzielne przez %2")
 
 S("number of cells (n)", "liczba pól (n)")

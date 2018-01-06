@@ -431,7 +431,7 @@ void showChangeMode() {
   dialog::addBoolItem(XLAT("Tutorial"), tour::on, 'T');
 #endif
 
-  dialog::addBoolItem(XLAT("experiment with geometry"), geometry || nonchamfered || viewdists, 'e');
+  dialog::addBoolItem(XLAT("experiment with geometry"), geometry || nonbitrunc || viewdists, 'e');
   dialog::addBoolItem(XLAT(SHMUPTITLE), (shmup::on || multi::players > 1), 's');
   if(!shmup::on) dialog::addSelItem(XLAT("hardcore mode"),
     hardcore && !pureHardcore() ? XLAT("PARTIAL") : ONOFF(hardcore), 'h');

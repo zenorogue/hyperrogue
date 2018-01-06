@@ -378,7 +378,7 @@ void addMessage(string s, char spamtype = 0);
 #define stdeuc (geometry == gNormal || geometry == gEuclid || geometry == gEuclidSquare)
 #define smallsphere (S7 < 5)
 #define bigsphere (S7 == 5)
-#define ap4 (a4 && nonchamfered)
+#define ap4 (a4 && nonbitrunc)
 #define euclid4 (euclid && a4)
 #define euclid6 (euclid && !a4)
 

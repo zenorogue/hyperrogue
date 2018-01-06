@@ -44,7 +44,7 @@ int euclidAlt(short x, short y) {
   if(specialland == laTemple || specialland == laClearing) {
     if(euclid6)
       return max(int(x), x+y);
-    else if(nonchamfered)
+    else if(nonbitrunc)
       return x + abs(y);
     else
       return max(x, y);
@@ -57,7 +57,7 @@ int euclidAlt(short x, short y) {
           max(int(x+y), int(y)) + 3),
           max(int(x), int(-y)) + 3
           );
-    else if(nonchamfered)
+    else if(nonbitrunc)
       return 3 - min(abs(x-y), abs(x+y));
     else
       return 3 - min(abs(x), abs(y));
@@ -594,7 +594,7 @@ void buildEquidistant(cell *c) {
   if(c->landparam > 30 && b == laOcean && !generatingEquidistant && hrand(10) < 5) 
     buildAnotherEquidistant(c);
 
-  if(c->landparam > HAUNTED_RADIUS+5 && b == laGraveyard && !generatingEquidistant && hrand(100) < (nonchamfered?25:5) && items[itBone] >= 10) 
+  if(c->landparam > HAUNTED_RADIUS+5 && b == laGraveyard && !generatingEquidistant && hrand(100) < (nonbitrunc?25:5) && items[itBone] >= 10) 
     buildAnotherEquidistant(c);
   }
 
@@ -971,7 +971,7 @@ void buildBigStuff(cell *c, cell *from) {
   
   else if(weirdhyperbolic) ; // non-Nowall barriers not implemented yet in weird hyperbolic
   
-  else if(c->land == laCrossroads2 && !nonchamfered)
+  else if(c->land == laCrossroads2 && !nonbitrunc)
     buildCrossroads2(c);
   
   else if(c->land == laPrairie && c->LHU.fi.walldist == 0) {
@@ -1010,7 +1010,7 @@ void buildBigStuff(cell *c, cell *from) {
     c->land == laHaunted ? 0 :
     (c->land == laGraveyard && !deepOcean) ? 0 :
     (c->land == laGraveyard && items[itBone] >= 10) ? 120 :
-    c->land == laOcean ? (deepOcean ? (nonchamfered ? 250 : 2000) : 0) :
+    c->land == laOcean ? (deepOcean ? (nonbitrunc ? 250 : 2000) : 0) :
     c->land == laDragon ? 120 :
     50))
   {
@@ -1065,7 +1065,7 @@ void buildBigStuff(cell *c, cell *from) {
 
     if(c->land == laOcean && ctof(c) && deepOcean && !generatingEquidistant && !peace::on &&
       (quickfind(laWhirlpool) || (
-        hrand(2000) < (nonchamfered ? 500 : 1000) && !tactic::on && !yendor::on)))
+        hrand(2000) < (nonbitrunc ? 500 : 1000) && !tactic::on && !yendor::on)))
       createAlternateMap(c, 2, hsA);
 
     if(c->land == laCaribbean && ctof(c))
@@ -1178,7 +1178,7 @@ void moreBigStuff(cell *c) {
             }
           if(q == 1) buildCamelotWall(c);
           // towers of Camelot
-          if(q == 0 && !nonchamfered) {
+          if(q == 0 && !nonbitrunc) {
             c->monst = moKnight;
             c->wall = waTower;
             forCellEx(c2, c) {
@@ -1203,7 +1203,7 @@ void moreBigStuff(cell *c) {
         }
       if(d == 1) {
         // roughly as many knights as table cells
-        if(hrand(nonchamfered ? 2618 : 1720) < 1000) 
+        if(hrand(nonbitrunc ? 2618 : 1720) < 1000) 
           c->monst = moKnight;
         if(!euclid) for(int i=0; i<S7; i++) generateAlts(c->master->move[i]);
         for(int i=0; i<c->type; i++) 
@@ -1237,7 +1237,7 @@ void moreBigStuff(cell *c) {
         c->land = laTemple, c->wall = waNone, c->monst = moNone, c->item = itNone;
         }
       if(d % TEMPLE_EACH==0) {
-        if((weirdhyperbolic && nonchamfered) ? hrand(100) < 50 : pseudohept(c)) 
+        if((weirdhyperbolic && nonbitrunc) ? hrand(100) < 50 : pseudohept(c)) 
           c->wall = waColumn;
         else {
           if(!euclid) for(int i=0; i<S7; i++) generateAlts(c->master->move[i]);

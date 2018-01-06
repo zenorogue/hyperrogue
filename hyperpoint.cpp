@@ -4,7 +4,7 @@
 eGeometry geometry, targetgeometry;
 
 // for the pure heptagonal grid
-bool nonchamfered = false;
+bool nonbitrunc = false;
 
 // hyperbolic points and matrices
 

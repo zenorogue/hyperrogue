@@ -532,7 +532,7 @@ void sominit(int initto) {
       targetGeometry = gQuotient1;
       restartGame('g');
       }
-    if(!nonchamfered) restartGame('7'); */
+    if(!nonbitrunc) restartGame('7'); */
     
     printf("Initializing SOM (1)\n");
   

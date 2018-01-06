@@ -10,7 +10,7 @@ string euchelp =
   "You can try many different geometries here. We start by gluing "
   "n-gons in such a way that k of them meet in every vertex. "
   "Depending on n and k, this either folds into a sphere, unfolds into a plane, "
-  "or requires a hyperbolic space. The result may be then 'chamfered' by "
+  "or requires a hyperbolic space. The result may be then 'bitrunc' by "
   "replacing each vertex by a 2k-gon. Furthermore, you can play "
   "with quotient geometries. For example, the elliptic geometry is "
   "obtained from the sphere by making the antipodes be the same point, "
@@ -18,7 +18,7 @@ string euchelp =
   "Have fun experimenting! "
   "Achievements and leaderboards do not work in geometry experiments, "
   "except some specific ones.\n\n"
-  "In standard geometry (chamfered or not), you can play the full game, but in other geometries "
+  "In standard geometry (bitrunc or not), you can play the full game, but in other geometries "
   "you select a particular land. Lands are unlocked by visiting them in this "
   "session, or permanently by collecting 25 treasure. Try Crossroads in Euclidean "
   "or chaos mode in non-standard non-quotient hyperbolic to visit many lands. "
@@ -41,7 +41,7 @@ void showQuotientConfig() {
   nextPrimes(gxcur);
   for(int i=0; i<size(gxcur.primes); i++) {
     auto& p = gxcur.primes[i];
-    dialog::addBoolItem(XLAT("order %1%2 (non-chamfered cells: %3)", its(p.p), p.squared ? "²" : "", its(p.cells)), i == gxcur.current_prime_id, 'A'+i);
+    dialog::addBoolItem(XLAT("order %1%2 (non-bitrunc cells: %3)", its(p.p), p.squared ? "²" : "", its(p.cells)), i == gxcur.current_prime_id, 'A'+i);
     }
   
   if(size(gxcur.primes) < 6) {
@@ -84,7 +84,7 @@ void showQuotientConfig() {
   dialog::display();
   }
 
-bool torus_chamfer;
+bool torus_bitrunc;
 
 void showTorusConfig() {
   cmode = sm::SIDE | sm::TORUSCONFIG;
@@ -114,7 +114,7 @@ void showTorusConfig() {
     dialog::addSelItem(XLAT("height (y)"), its(torusconfig::newsdy), 'y');
     }
 
-  if(square) dialog::addBoolItem(XLAT("chamfering"), !torus_chamfer, 't');
+  if(square) dialog::addBoolItem(XLAT("bitruncated"), !torus_bitrunc, 't');
   else dialog::addInfo("", 100);
   
   int valid = 2;
@@ -122,8 +122,8 @@ void showTorusConfig() {
   if(single) {  
     if(square) {
       dialog::addInfo("this mode has bad patterns", 0x808080), valid = 1;
-      if(!torus_chamfer && valid == 1)
-        dialog::addInfo("incompatible with chamfering", 0x808080), valid = 0;
+      if(!torus_bitrunc && valid == 1)
+        dialog::addInfo("incompatible with bitruncating", 0x808080), valid = 0;
       }
     else {
       if(torusconfig::newqty % 3)
@@ -138,8 +138,8 @@ void showTorusConfig() {
         dialog::addInfo(XLAT("best if %1 is divisible by %2", "x", "2"), 0x808080), valid = 1;
       if(torusconfig::newsdy & 1)
         dialog::addInfo(XLAT("best if %1 is divisible by %2", "y", "2"), 0x808080), valid = 1;
-      if(!torus_chamfer && valid == 1)
-        dialog::addInfo("incompatible with chamfering", 0x808080), valid = 0;
+      if(!torus_bitrunc && valid == 1)
+        dialog::addInfo("incompatible with bitruncating", 0x808080), valid = 0;
       }
     else if(simple) {
       if(torusconfig::newsdx & 1)
@@ -179,7 +179,7 @@ void showTorusConfig() {
     else if(uni == 'y' && !single)
       dialog::editNumber(torusconfig::newsdy, 0, 1000, square ? 2 : simple ? 3 : 2, 12, XLAT("height (y)"), "");
     else if(uni == 't')
-      torus_chamfer = !torus_chamfer;
+      torus_bitrunc = !torus_bitrunc;
     else if((uni == 'a' || uni == '\n') && torusconfig::newqty >= 3 && valid) {
       targetgeometry = gNormal; restartGame('g', false, true);
       torusconfig::torus_mode = torusconfig::newmode;
@@ -188,7 +188,7 @@ void showTorusConfig() {
       torusconfig::sdx = torusconfig::newsdx;
       torusconfig::sdy = torusconfig::newsdy;
       torusconfig::activate();
-      if((square && torus_chamfer) != nonchamfered) restartGame('7', false, true);
+      if((square && torus_bitrunc) != nonbitrunc) restartGame('7', false, true);
       targetgeometry = gTorus; restartGame('g', false, true);
       }
     else if(uni == 'c') {
@@ -209,7 +209,7 @@ void showTorusConfig() {
   dialog::display();
   }
 
-string chamfernames[2] = {" (c)", " (n)"};
+string bitruncnames[2] = {" (b)", " (n)"};
 
 void showEuclideanMenu() {
   cmode = sm::SIDE;
@@ -237,7 +237,7 @@ void showEuclideanMenu() {
     int ts = ginf[geometry].sides;
     int tv = ginf[geometry].vertex;
     int tq = ginf[geometry].quotientstyle;
-    int nom = (nonchamfered ? tv : tv+ts) * ((tq & qELLIP) ? 2 : 4);
+    int nom = (nonbitrunc ? tv : tv+ts) * ((tq & qELLIP) ? 2 : 4);
     int denom = (2*ts + 2*tv - ts * tv);
     
     dialog::addSelItem(XLAT("land"), XLAT1(linf[specialland].name), '5');
@@ -249,18 +249,18 @@ void showEuclideanMenu() {
     dialog::addBreak(50);
   
     if(ts == 6 && tv == 3)
-      dialog::addSelItem(XLAT("chamfered"), XLAT("does not matter"), 't');
+      dialog::addSelItem(XLAT("bitrunc"), XLAT("does not matter"), 't');
     else
-      dialog::addBoolItem(XLAT("chamfered"), !nonchamfered, 't');
+      dialog::addBoolItem(XLAT("bitrunc"), !nonbitrunc, 't');
   
     dialog::addBreak(50);
   
     int worldsize = denom ? nom/denom : 0;
     if(tq & qTORUS) worldsize = torusconfig::qty;
-    if(tq & qZEBRA) worldsize = nonchamfered ? 12 : 40;
+    if(tq & qZEBRA) worldsize = nonbitrunc ? 12 : 40;
     if(tq & qFIELD) {
       worldsize = size(currfp.matrices) / ts;
-      if(!nonchamfered) worldsize = ((ts+tv)*worldsize) / tv;
+      if(!nonbitrunc) worldsize = ((ts+tv)*worldsize) / tv;
       }
   
     dialog::addSelItem(XLAT("sides per face"), its(ts), 0);
@@ -341,7 +341,7 @@ void showEuclideanMenu() {
           torusconfig::newsdx = torusconfig::sdx,
           torusconfig::newsdy = torusconfig::sdy,
           torusconfig::newmode = torusconfig::torus_mode,
-          torus_chamfer = nonchamfered,
+          torus_bitrunc = nonbitrunc,
           pushScreen(showTorusConfig);
         if(quotient==2) pushScreen(showQuotientConfig);
         }
@@ -352,7 +352,7 @@ void showEuclideanMenu() {
   else {
     dialog::init(XLAT("experiment with geometry"));
   
-    dialog::addSelItem(XLAT("geometry"), XLAT(ginf[geometry].name) + XLAT(chamfernames[nonchamfered]), '5');
+    dialog::addSelItem(XLAT("geometry"), XLAT(ginf[geometry].name) + XLAT(bitruncnames[nonbitrunc]), '5');
     dialog::addBreak(50);
     
     generateLandList(isLandValid);

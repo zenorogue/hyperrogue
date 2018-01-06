@@ -3344,7 +3344,7 @@ transmatrix calc_relative_matrix_help(cell *c, heptagon *h1) {
   transmatrix gm = Id;
   heptagon *h2 = c->master;
   transmatrix where = Id;
-  if(!nonchamfered) for(int d=0; d<S7; d++) if(h2->c7->mov[d] == c)
+  if(!nonbitrunc) for(int d=0; d<S7; d++) if(h2->c7->mov[d] == c)
     where = hexmove[d];
   // always add to last!
   while(h1 != h2) {
@@ -3413,8 +3413,8 @@ void virtualRebase(cell*& base, transmatrix& at, bool tohex) {
       hs.h = h;
       hs.spin = d;
       heptspin hs2 = hsstep(hs, 0);
-      transmatrix V2 = spin((nonchamfered?M_PI:0)-hs2.spin*2*M_PI/S7) * invheptmove[d];
-      if(nonchamfered) V2 = V2 * spin(M_PI);
+      transmatrix V2 = spin((nonbitrunc?M_PI:0)-hs2.spin*2*M_PI/S7) * invheptmove[d];
+      if(nonbitrunc) V2 = V2 * spin(M_PI);
       double newz = (V2 * at * C0) [2];
       if(newz < currz) {
         currz = newz;
@@ -3424,7 +3424,7 @@ void virtualRebase(cell*& base, transmatrix& at, bool tohex) {
       }
 
     if(!newbase) {
-      if(tohex && !nonchamfered) for(int d=0; d<S7; d++) {
+      if(tohex && !nonbitrunc) for(int d=0; d<S7; d++) {
         cell *c = createMov(base, d);
         transmatrix V2 = spin(-base->spn(d)*2*M_PI/S6) * invhexmove[d];
         double newz = (V2 *at * C0) [2];

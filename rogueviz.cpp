@@ -520,7 +520,7 @@ namespace sag {
     }
   
   void initSnake(int n) {
-    if(sphere && nonchamfered) n = 12;
+    if(sphere && nonbitrunc) n = 12;
     else if(sphere) n = 32;
     numsnake = n;
     snakecells.resize(numsnake);
@@ -1127,7 +1127,7 @@ void drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
       }
     
     hyperpoint h = tC0(V * m->at);
-    transmatrix V2 = rgpushxto0(h) * ypush(nonchamfered ? .3 : .2);
+    transmatrix V2 = rgpushxto0(h) * ypush(nonbitrunc ? .3 : .2);
     if(doshow) queuestr(V2, (svg::in ? .28 : .2) * crossf / hcrossf, vd.name, backcolor ? 0x000000 : 0xFFFF00, svg::in ? 0 : 1);
     lastptd().info = vd.info;
     }
@@ -1768,7 +1768,7 @@ using namespace tour;
 
 string cname() {
   if(euclid) return "coord-6.txt";
-  if(nonchamfered) return "coord-7.txt";
+  if(nonbitrunc) return "coord-7.txt";
   return "coord-67.txt";
   }
 

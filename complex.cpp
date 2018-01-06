@@ -747,7 +747,7 @@ namespace clearing {
       }
     int d = celldistAlt(c);
     
-    if(nonchamfered) {
+    if(nonbitrunc) {
       for(int i=0; i<S7; i++) {
         cell *c2 = createMov(c, i);
         if(!pseudohept(c2) && celldistAlt(c2) == d-1)
@@ -1111,7 +1111,7 @@ namespace mirror {
     }
   
   void createMirages(cellwalker cw, int cpid) {
-    if(nonchamfered) {
+    if(nonbitrunc) {
       for(int i=0; i<cw.c->type; i++) {
         cellwalker C2 = cw;
         cwstep(C2);
@@ -1321,9 +1321,9 @@ namespace mirror {
           v.push_back(1);
           stepcount++; if(stepcount > 10000) { printf("failhep\n"); return cw; }
           }
-        if(nonchamfered && cwpeek(cw,0) == cwcopy.c)
+        if(nonbitrunc && cwpeek(cw,0) == cwcopy.c)
           v.pop_back();
-        if(nonchamfered && cwpeek(cw,3)->land == laMirrored && cwpeek(cw,2)->land == laMirrorWall) {
+        if(nonbitrunc && cwpeek(cw,3)->land == laMirrored && cwpeek(cw,2)->land == laMirrorWall) {
           cw.mirrored = !cw.mirrored;
           auto p = traceback(v, cw);
           if(p.first) return p.second;
@@ -1828,7 +1828,7 @@ namespace heat {
       cell *c = playerpos(i);
       if(!c) continue;
       double xrate = (c->land == laCocytus && shmup::on) ? rate/3 : rate;
-      if(nonchamfered) xrate *= 1.7;
+      if(nonbitrunc) xrate *= 1.7;
       if(!shmup::on) xrate /= FIX94;
       if(isIcyLand(c))
         HEAT(c) += (markOrb(itOrbWinter) ? -1.2 : 1.2) * xrate;
@@ -1843,7 +1843,7 @@ namespace heat {
     for(int i=0; i<dcs; i++) {
       cell *c = allcells[i];
       double xrate = (c->land == laCocytus && shmup::on) ? 1/3. : 1;
-      if(nonchamfered) xrate *= 1.7;
+      if(nonbitrunc) xrate *= 1.7;
       if(!shmup::on) xrate /= FIX94;
       if(c->cpdist > 7 && !doall) break;
   
@@ -2524,7 +2524,7 @@ namespace sword {
     }
 
   void shuffle(int i) {
-    sword::angle[i] = euclid ? S7*hrand(6) : nonchamfered ? 3*hrand(S14)+1 : hrand(S42);
+    sword::angle[i] = euclid ? S7*hrand(6) : nonbitrunc ? 3*hrand(S14)+1 : hrand(S42);
     }
   
   void reset() {
@@ -2709,7 +2709,7 @@ namespace prairie {
       c->LHU.fi.rval = (y&15);
       }
     else if(sphere) {
-      c->LHU.fi.rval = celldistance(c, cwt.c) + 8 - (nonchamfered ? 2 : 3);
+      c->LHU.fi.rval = celldistance(c, cwt.c) + 8 - (nonbitrunc ? 2 : 3);
       }
     else if(weirdhyperbolic) {
       c->LHU.fi.rval = max(celldist(c), 15);
@@ -2771,8 +2771,8 @@ namespace prairie {
       }
     }
   
-  #define RLOW (sphere?(nonchamfered?7:6):nonchamfered?4:2)
-  #define RHIGH (sphere?(nonchamfered?8:9):nonchamfered?11:13)
+  #define RLOW (sphere?(nonbitrunc?7:6):nonbitrunc?4:2)
+  #define RHIGH (sphere?(nonbitrunc?8:9):nonbitrunc?11:13)
   
   bool isriver(cell *c) {
     return c->land == laPrairie && c->LHU.fi.rval <= RHIGH && c->LHU.fi.rval >= RLOW;
@@ -2934,7 +2934,7 @@ namespace prairie {
     else if(!enter && isriver(cwt.c)) enter = cwt.c;
     if(size(tchoices)) {
       if(lasttreasure && lasttreasure->item == itGreenGrass) {
-        if(celldistance(lasttreasure, cwt.c) >= (nonchamfered ? 7 : 10)) {
+        if(celldistance(lasttreasure, cwt.c) >= (nonbitrunc ? 7 : 10)) {
           lasttreasure->item = itNone;
           forCellEx(c2, lasttreasure) if(c2->item == itGreenGrass) c2->item = itNone;
           }
@@ -3310,7 +3310,7 @@ namespace halloween {
       else if(CHANCE(5) && itr >= 60) {
         dragoncount++;
         }
-      else if(dragoncount && !nonchamfered && !mcount) {
+      else if(dragoncount && !nonbitrunc && !mcount) {
         bool fill = false;
         for(int i=0; i<4; i++) 
           if(!dragoncells[i] || dragoncells[i]->monst)
