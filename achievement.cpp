@@ -85,11 +85,34 @@ bool wrongMode(char flags) {
   if(cheater) return true;
   if(flags == 'x') return false;
   if(nonbitrunc != (flags == '7')) return true;
-  if(euclid != (flags == 'e')) return true;
-  if(flags == 'E' && S7 < 5) return false;
-  if(sphere != (flags == 'E')) return true;
-  if((quotient == 1) != (flags == 'q')) return true;
-  if((quotient == 2) != (flags == 'Q')) return true;
+
+  switch(flags) {
+    case 'e':
+      if(geometry != gEuclid)
+        return true;
+      break;
+    
+    case 'E':
+      if(geometry != gSphere && geometry != gElliptic)
+        return true;
+      break;
+    
+    case 'q':
+      if(geometry != gQuotient)
+        return true;
+      break;
+  
+    case 'Q':
+      if(geometry != gQuotient2)
+        return true;
+      break;
+    
+    default:
+      if(geometry != gNormal)
+        return true;
+      break;
+    }
+
   if(shmup::on != (flags == 's')) return true;
   if(randomPatternsMode) return true;
   if(yendor::on) return true;
@@ -492,10 +515,11 @@ void achievement_score(int cat, int number) {
   if(offlineMode) return;
 #ifdef HAVE_ACHIEVEMENTS
   if(cheater) return;
-  if(euclid) return;
-  if(sphere && cat != LB_HALLOWEEN) return;
-  if(quotient) return;
-  if(elliptic && cat != LB_HALLOWEEN) return;
+  if(cat == LB_HALLOWEEN) {
+    if(geometry != gSphere && geometry != gElliptic)
+      return;
+    }
+  else if(geometry) return;
   if(nonbitrunc) return;
   if(randomPatternsMode) return;
   if(shmup::on && cat != LB_PURE_TACTICS_SHMUP && cat != LB_PURE_TACTICS_COOP) return;
@@ -587,12 +611,10 @@ void achievement_final(bool really_final) {
     if(shmup::on || chaosmode || nonbitrunc || numplayers() > 1 || tactic::on || randomPatternsMode)
       return;
     achievement_score(LB_HALLOWEEN, items[itTreat]);
+    return;
     }
   
-  if(euclid) return;
-  if(sphere) return;
-  if(elliptic) return;
-  
+  if(geometry) return;
   
   // no leaderboards for two special modes at once
   int specials = 0;
@@ -668,9 +690,7 @@ void achievement_victory(bool hyper) {
   if(offlineMode) return;
 #ifdef HAVE_ACHIEVEMENTS
   if(cheater) return;
-  if(euclid) return;
-  if(sphere) return;
-  if(quotient) return;
+  if(geometry) return;
   if(nonbitrunc) return;
   if(randomPatternsMode) return;
   if(hyper && shmup::on) return;
