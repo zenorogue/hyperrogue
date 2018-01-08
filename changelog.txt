@@ -2164,3 +2164,20 @@ Gameplay bugfixes
 - fixed the grid markers for items in Alchemist Lab
 - fixed a bug with Orb of Slashing in OSM inventory
 - cleaned up some special cases wrt attacking a Vizier
+
+2018.01.07 00:00 version 10.3a
+- fixed screens not disappearing when restarting
+- changed the word 'chamfered' to 'bitruncated' ('chamfered' was not correct either)
+- fixed the Snake Nest in non-bitruncated Octagons
+- fixed some bugs with Snake Nest generation
+- fixed some problems with memory clearing in other geometries (which could cause crashes or memory leaks)
+- a sound for Blue Raider's attack
+- Mirror Land is back in Euclidean
+- fixed the missing word
+- fixed killable wandering Skeletons in Ruined City
+- PTM did not display the last element if the list length was odd
+- a new Yendor Challenge added
+- bitruncation is now switchable for the square grid
+- fixed a bug which desynchronized the PTM scores on OSX
+- PTM/Yendor scores should be saved correctly for the new geometries
+- updated the Czech translation
