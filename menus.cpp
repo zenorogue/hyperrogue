@@ -37,7 +37,7 @@ void showOverview() {
   
   bool pages;
   
-  generateLandList(isLandValid2);
+  generateLandList(isLandIngame);
   
   if(dialog::infix != "") {
     vector<eLand> filtered;
@@ -702,7 +702,7 @@ void setAppropriateOverview() {
     pushScreen(yendor::showMenu);
   else if(peace::on)
     pushScreen(peace::showMenu);
-  else if(geometry != gNormal && !chaosmode && !(geometry == gEuclid && isCrossroads(specialland))) {
+  else if(geometry != gNormal && !chaosmode && !(geometry == gEuclid && isCrossroads(specialland)) && !(weirdhyperbolic && specialland == laCrossroads4)) {
     runGeometryExperiments();
     }
   else {

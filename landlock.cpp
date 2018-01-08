@@ -434,7 +434,7 @@ bool landUnlocked(eLand l) {
       return gold() >= R30;
     
     case laCaribbean: case laWhirlpool:
-      return exploreland[0][laOcean] || items[itCoast] || items[itStatue];
+      return gold() >= R30;
     
     case laRlyeh: case laDryForest: case laWineyard: case laCrossroads2:
       return gold() >= R60;
@@ -562,7 +562,7 @@ bool landUnlocked(eLand l) {
 
 void countHyperstoneQuest(int& i1, int& i2) {
   i1 = 0; i2 = 0;
-  generateLandList(isLandValid);
+  generateLandList(isLandIngame);
   for(eLand l: landlist) if(l != laCamelot && l != laPrincessQuest) {
     eItem ttype = treasureType(l);
     if(ttype != itHyperstone) {
@@ -693,7 +693,7 @@ eLand getNewSealand(eLand old) {
     if(p == laKraken && peace::on) continue;
     if(incompatible(old, p)) continue;
     if(p == old) continue;
-    if(!isLandValid2(p)) continue;
+    if(!isLandIngame(p)) continue;
     return p;
     }
   }
@@ -725,7 +725,7 @@ eLand getNewLand(eLand old) {
       eLand n = eLand(hrand(landtypes));
       if(n == old) continue;
       if(incompatible(n,old)) continue;
-      if(!isLandValid2(n)) continue;
+      if(!isLandIngame(n)) continue;
       if(n == laElementalWall || isTechnicalLand(n)) continue;
       if(n == laWildWest) continue;
       if(isElemental(n) && hrand(100) >= 25) continue;
@@ -953,7 +953,11 @@ eLand getNewLand(eLand old) {
   // for(int i=0; i<20; i++) tab[cnt++] = laCrossroads;
 
   eLand n = old;
-  while(incompatible(n, old) || !isLandValid2(n)) n = tab[hrand(cnt)];
+  while(incompatible(n, old) || !isLandIngame(n)) {
+    n = tab[hrand(cnt)];
+    if(weirdhyperbolic && specialland == laCrossroads4 && isCrossroads(n))
+      n = laCrossroads4;
+    }
   
   return n;  
   }
@@ -962,7 +966,7 @@ vector<eLand> land_over = {
   laIce, laCaves, laDesert, laHunting, laMotion, laJungle, laAlchemist, 
   laCrossroads, 
   laMirror, laMirrorOld, laMinefield, laPalace, laPrincessQuest, laZebra, laSwitch, laReptile, 
-  laOcean, laWarpCoast, laLivefjord, laKraken, laCaribbean, laWhirlpool, laRlyeh, laTemple,
+  laOcean, laDocks, laWarpCoast, laLivefjord, laKraken, laCaribbean, laWhirlpool, laRlyeh, laTemple,
   laIvoryTower, laEndorian, laDungeon, laMountain, 
   laCrossroads2, 
   laDryForest, laWineyard, laDeadCaves, laGraveyard, laHaunted, laHive, 
@@ -976,7 +980,7 @@ vector<eLand> land_over = {
   laHell, laCrossroads3, laCocytus, laPower, laCrossroads4,
   laCrossroads5,
   // EXTRA
-  laWildWest, laHalloween, laDual, laSnakeNest, laDocks, laMagnetic, laCA
+  laWildWest, laHalloween, laDual, laSnakeNest, laMagnetic, laCA
   };
 
 vector<eLand> landlist;
@@ -997,6 +1001,14 @@ eLand getLandForList(cell *c) {
     l = laPrincessQuest;
   // princess?
   return l;
+  }
+
+bool isLandIngame(eLand l) {
+  if(isLandValid(l) < 2)
+    return false;
+  if(l == laWildWest)
+    return false;
+  return true;
   }
 
 // check if the given land should appear in lists
@@ -1192,7 +1204,11 @@ int isLandValid(eLand l) {
   if(l == laCrossroads3 && !stdeuc && !bigsphere)
     return 0;
 
-  // OK in small bounded worlds, and in Euclidean
+  // Crossroads IV is great in weird hyperbolic
+  if(l == laCrossroads4 && weirdhyperbolic)
+    return 3;
+
+  // OK in small bounded worlds, and in Euclidean  
   if(l == laCrossroads4 && !(stdeuc || smallbounded))
     return 0;
 

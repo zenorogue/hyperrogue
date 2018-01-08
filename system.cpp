@@ -94,7 +94,7 @@ void initgame() {
   
   if(peace::on) firstland = specialland;
   
-  if(tactic::on && (euclid || sphere)) specialland = firstland;
+  if(tactic::on && geometry) specialland = firstland;
   
   if(firstland == laNone || firstland == laBarrier)
     firstland = laCrossroads;
@@ -107,7 +107,7 @@ void initgame() {
   if(isGravityLand(firstland) && !tactic::on) firstland = laCrossroads;
   
   cwt.c = currentmap->gamestart(); cwt.spin = 0; cwt.mirrored = false;
-  cwt.c->land = geometry ? specialland : firstland;
+  cwt.c->land = (geometry && !safety) ? specialland : firstland;
   
   chaosAchieved = false;
 
@@ -824,6 +824,7 @@ void saveStats(bool emergency = false) {
   fprintf(f, "cells generated: %d\n", cellcount);
   if(pureHardcore()) fprintf(f, "Pure hardcore mode\n");
   if(nonbitrunc) fprintf(f, "Heptagons only mode\n");
+  if(geometry) fprintf(f, "Geometry: %s\n", ginf[geometry].name);
   if(chaosmode) fprintf(f, "Chaos mode\n");
   if(shmup::on) fprintf(f, "Shoot-em up mode\n");
   if(inv::on) fprintf(f, "Inventory mode\n");

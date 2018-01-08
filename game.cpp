@@ -6153,7 +6153,7 @@ void movecost(cell* from, cell *to) {
     tour::checkGoodLand(to->land);
 #endif
   
-  if(to->land ==laCrossroads4 && !chaosUnlocked) {
+  if(to->land ==laCrossroads4 && !chaosUnlocked && !geometry) {
     achievement_gain("CR4");
     chaosUnlocked = true;
     }

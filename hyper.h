@@ -2283,6 +2283,7 @@ extern vector<eLand> landlist;
 template<class T> void generateLandList(T t);
 int isLandValid(eLand l);
 bool isLandValid2(eLand l);
+bool isLandIngame(eLand l);
 
 bool inmirrororwall(eLand l);
 extern bool holdmouse;

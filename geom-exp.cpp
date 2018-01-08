@@ -218,6 +218,7 @@ void showEuclideanMenu() {
   for(int i=0; i<landtypes; i++)
     if(hiitemsMax(treasureType(eLand(i))) >= 25) landvisited[i] = true;
   landvisited[laCrossroads] = true;
+  landvisited[laCrossroads4] = true;
   landvisited[laIce] = true;
   landvisited[laHunting] = true;
   landvisited[laMirrorOld] = true;
@@ -422,7 +423,8 @@ void showEuclideanMenu() {
   }
 
 void runGeometryExperiments() {
-  specialland = getLandForList(cwt.c);
+  if(!geometry)
+    specialland = getLandForList(cwt.c);
   pushScreen(showEuclideanMenu);
   }
 

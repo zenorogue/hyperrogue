@@ -909,6 +909,38 @@ bool quickfind(eLand l) {
 #define I2000 (INVLUCK?600:2000)
 #define I10000 (INVLUCK?3000:10000)
 
+int wallchance(cell *c, bool deepOcean) {
+  eLand l = c->land;
+  return
+    showoff ? (cwt.c->mpdist > 7 ? 0 : 10000) : 
+    inmirror(c) ? 0 :
+    isGravityLand(l) ? 0 :
+    generatingEquidistant ? 0 :
+    l == laPrairie ? 0 :
+    (yendor::on && yendor::nexttostart) ? 10000 :
+    princess::challenge ? 0 :
+    isElemental(l) ? 4000 : 
+    (yendor::on && (yendor::generating || !(yendor::clev().flags & YF_WALLS))) ? 0 :
+    l == laCrossroads3 ? 10000 : 
+    l == laCrossroads ? 5000 : 
+    l == laCrossroads2 ? 10000 : 
+    l == laCrossroads5 ? 10000 : 
+    l == laCrossroads4 ? (weirdhyperbolic ? 5000 : 0) :
+    (l == laMirror && !yendor::generating) ? 6000 :
+    l == laTerracotta ? 250 :
+    (tactic::on && !tactic::trailer) ? 0 :
+    l == laCaribbean ? 500 :
+    (l == laWarpSea || l == laWarpCoast) ? 500 :
+    l == laStorms ? 250 :
+    l == laCanvas ? 0 :
+    l == laHaunted ? 0 :
+    (l == laGraveyard && !deepOcean) ? 0 :
+    (l == laGraveyard && items[itBone] >= 10) ? 120 :
+    l == laOcean ? (deepOcean ? (nonbitrunc ? 250 : 2000) : 0) :
+    l == laDragon ? 120 :
+    50;
+  }
+
 void buildBigStuff(cell *c, cell *from) {
   if(sphere || quotient) return;
   bool deepOcean = false;
@@ -959,7 +991,8 @@ void buildBigStuff(cell *c, cell *from) {
   else if(ctof(c) && c->land == laCrossroads4 && hrand(10000) < 7000 && c->land && 
     buildBarrierNowall(c, getNewLand(laCrossroads4))) ;
   
-  else if(ctof(c) && hrand(I10000) < 20 && !generatingEquidistant && !yendor::on && !tactic::on && !isCrossroads(c->land) && gold() >= R200 &&
+  else if(ctof(c) && hrand(I10000) < 20 && !generatingEquidistant && !yendor::on && !tactic::on && !isCrossroads(c->land) && 
+    gold() >= R200 && !weirdhyperbolic &&
     !inmirror(c) && !isSealand(c->land) && !isHaunted(c->land) && !isGravityLand(c->land) && 
     (c->land != laRlyeh || rlyehComplete()) &&
     c->land != laTortoise && c->land != laPrairie && c->land && 
@@ -967,6 +1000,10 @@ void buildBigStuff(cell *c, cell *from) {
     && c->land != laCanvas
     ) {
     buildBarrierNowall(c, laCrossroads4) ;
+    }
+  
+  else if(weirdhyperbolic && specialland == laCrossroads4 && ctof(c) && hrand(I10000/4) < wallchance(c, deepOcean)) {
+    buildBarrierNowall(c, getNewLand(c->land));
     }
   
   else if(weirdhyperbolic) ; // non-Nowall barriers not implemented yet in weird hyperbolic
@@ -985,34 +1022,7 @@ void buildBigStuff(cell *c, cell *from) {
       }
     }
 
-  else if(ctof(c) && c->land && hrand(I10000) < (
-    showoff ? (cwt.c->mpdist > 7 ? 0 : 10000) : 
-    inmirror(c) ? 0 :
-    isGravityLand(c->land) ? 0 :
-    generatingEquidistant ? 0 :
-    c->land == laPrairie ? 0 :
-    (yendor::on && yendor::nexttostart) ? 10000 :
-    princess::challenge ? 0 :
-    isElemental(c->land) ? 4000 : 
-    (yendor::on && (yendor::generating || !(yendor::clev().flags & YF_WALLS))) ? 0 :
-    c->land == laCrossroads3 ? 10000 : 
-    c->land == laCrossroads ? 5000 : 
-    c->land == laCrossroads2 ? 10000 : 
-    c->land == laCrossroads5 ? 10000 : 
-    c->land == laCrossroads4 ? 0 : 
-    (c->land == laMirror && !yendor::generating) ? 6000 :
-    c->land == laTerracotta ? 250 :
-    (tactic::on && !tactic::trailer) ? 0 :
-    c->land == laCaribbean ? 500 :
-    (c->land == laWarpSea || c->land == laWarpCoast) ? 500 :
-    c->land == laStorms ? 250 :
-    c->land == laCanvas ? 0 :
-    c->land == laHaunted ? 0 :
-    (c->land == laGraveyard && !deepOcean) ? 0 :
-    (c->land == laGraveyard && items[itBone] >= 10) ? 120 :
-    c->land == laOcean ? (deepOcean ? (nonbitrunc ? 250 : 2000) : 0) :
-    c->land == laDragon ? 120 :
-    50))
+  else if(ctof(c) && c->land && hrand(I10000) < wallchance(c, deepOcean))
   {
     
     int bd = 2 + hrand(2) * 3;
@@ -1052,7 +1062,7 @@ void buildBigStuff(cell *c, cell *from) {
     if(c->land == laOvergrown && ctof(c) && 
       (quickfind(laClearing) || (hrand(I2000) < 25 && 
       !randomPatternsMode && items[itMutant] >= U5 &&
-      isLandValid(laClearing) &&
+      isLandIngame(laClearing) &&
       !tactic::on && !yendor::on))) {
       heptagon *h = createAlternateMap(c, 2, hsA);
       if(h) clearing::bpdata[h].root = NULL;
