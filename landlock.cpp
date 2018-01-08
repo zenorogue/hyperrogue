@@ -1110,6 +1110,9 @@ int isLandValid(eLand l) {
   // horocycle-based lands, not available in bounded geometries nor in Chaos mode
   if((l == laWhirlpool || l == laCamelot || l == laCaribbean || l == laTemple) && (bounded || chaosmode))
     return 0;
+  
+  if(chaosmode && isCrossroads(l))
+    return 0;
     
   // Temple and Hive has a special Chaos Mode variant, but they are still essentially unbounded
   if((l == laTemple || l == laHive) && bounded)
