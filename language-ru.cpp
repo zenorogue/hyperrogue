@@ -4134,7 +4134,7 @@ S(
     "у Викингов, охотников за сокровищами.")
 
 S(
-  "There are Krakens in your homeland too... huge sea monsters which "
+  "There are Krakens in your homeland, too... huge sea monsters which "
   "could easily destroy ships. The geometry of this strange world "
   "prevents quick movement of huge objects, "
   "so there are no large ships, only small boats, and "
@@ -6490,7 +6490,7 @@ S("size of the world", "размер мира")
 S("flat", "плоскость")
  
 // bitruncated or not bitrunc
-S(" (c)", " (у)")
+S(" (b)", " (у)")
 S(" (n)", " (н)")
  
 S("(locked)", "(закрыто)")
@@ -6506,8 +6506,442 @@ S("Not implemented for spherical geometry. Please tell me if you really want thi
 // Hypersian Rug
 S("This makes sense only in hyperbolic or Torus geometry.", "Имеет смысл только в гиперболической/тор геометрии.")
 
-#undef Orb
-
 S("score: %1", "Очки: %1")
 S("kills: %1", "Убийства: %1")
   
+ 
+// === 10.3 ===
+// ============
+ 
+// Missing/minor updated texts
+//-----------------------------
+ 
+// file selection dialog
+S("Enter = choose", "Enter = выбрать")
+S("Esc = cancel", "Esc = отменить")
+ 
+S("hyperbolic", "гиперболическая")
+S("reset special modes", "отключить специальные режимы")
+S("orthogonal projection", "ортогональная проекция")
+S("small Poincaré model", "малая модель Пуанкаре")
+S("big Poincaré model", "большая модель Пуанкаре")
+S("Klein-Beltrami model", "модель Бельтрами-Клейна")
+S("bestiary of %the1", "бестиарий: %1")
+ 
+// for the map editor
+N("Dragon Head", GEN_F, "Голова Дракона", "Головы Дракона", "Голову Дракона", "Головой Дракона")
+ 
+S("score: %1", "счет: %1")
+S("kills: %1", "убийств: %1")
+ 
+// advanced config of quotient geometry
+//--------------------------------------
+ 
+S(
+  "This geometry is obtained by applying the same 'generators' which "
+  "lead to creating the given basic hyperbolic geometry, "
+  "but using a fixed finite field instead of the field of reals. "
+  "It can be also interpreted as a quotient of the given basic geometry. "
+  "Warning: field patterns based on large primes might generate for a long time.",
+ 
+  "Эта геометрия получается применением тех же 'генераторов', "
+  "которые дают обычную гиперболическую геометрию, "
+  "не с использованием некоторого конечного поля вместо поля вещественных чисел. "
+  "Также можно смотреть на нее как на факторгеометрию. "
+  "Осторожно: генерация для больших простых чисел может занять много времени!")
+ 
+S("find the next prime", "найти следующее простое")
+S("activate", "активировать")
+S("order %1%2 (non-bitruncated cells: %3)", "порядок %1%2 (несрезанных клеток: %3)")
+ 
+// Torus/Klein bottle, Euclidean Squares, and their advanced configuration
+//-------------------------------------------------------------------------
+ 
+S("square grid", "квадратная сетка")
+ 
+S("torus/Klein bottle", "тор/бутылка Клейна")
+S("mode", "режим")
+ 
+S("single row (hex)", "один ряд (шестиугольники)")
+S("single row (squares)", "один ряд (квадраты)")
+S("parallelogram (hex)", "параллелограмм (шестиугольники)")
+S("rectangle (squares)", "прямоугольник (квадраты)")
+S("rectangle (hex)", "прямоугольник (шестиугольники)")
+S("Klein bottle (squares)", "бутылка Клейна (квадраты)")
+S("Klein bottle (hex)", "бутылка Клейна (шестиугольники)")
+ 
+S("this mode has bad patterns", "неправильный узор для данного режима")
+S("incompatible with bitruncating", "несовместимо со срезанием")
+S("best if %1 is divisible by %2", "лучше, если %1 делится на %2")
+ 
+S("number of cells (n)", "число клеток (n)")
+S("cell bottom-right from 0 (d)", "клетка снизу-справа от 0 (d)")
+S("cell below 0 (d)", "клетка ниже 0 (d)")
+S("width (x)", "ширина (x)")
+S("height (y)", "высота (y)")
+ 
+// upgraded Hypersian Rug mode
+//-----------------------------
+ 
+S("In the perspective projection, you can use arrows to rotate the camera, Page Up/Down to go forward/backward, Shift+arrows to strafe, and Ctrl+arrows to rotate the model.",
+  "В этой проекции можно использовать стрелки, чтобы вращать камеру, Page Up/Down, чтобы двигаться вперед/назад, Shift+стрелки, чтобы by двигаться вбок, Ctrl+стрелки, чтобы вращать модель.")
+ 
+S("Note: this mode is based on what you see on the screen -- but re-rendered in another way. "
+  "If not everything is shown on the screen (e.g., too zoomed in), the results will be incorrect "
+  "(though possibly interesting). "
+  "Use a different projection to fix this.",
+ 
+  "Внимание: это режим основан на том, что вы видите на экране -- но изображен иначе. "
+  "Если что-то не видно на экране (например, плохой масштаб), результат будет неправильный, "
+  "хотя, возможно, интересный. Используйте другую проекцию, чтобы исправить это.")
+ 
+S("vertex limit", "ограничение на число вершин")
+S("The more vertices, the more accurate the Hypersian Rug model is. "
+  "However, a number too high might make the model slow to compute and render.",
+  "Чем больше вершин, те более точна модель гиперсидского ковра. "
+  "С другой стороны, если вершин слишком много, модель будет долго обсчитываться.")
+ 
+S("model distance", "расстояние до модели")
+S("In the perspective projection, this sets the distance from the camera to the center of the model. "
+  "In the orthogonal projection this just controls the scale.",
+ 
+  "В перспективе это параметр задает расстояние от камеры до центра модели. "
+  "В ортогональной проекции он просто контролирует масштаб.")
+ 
+S("maximum error", "максимальная ошибка")
+S("New points are added when the current error in the model is smaller than this value.",
+  "Новые вершины добавляются, когда текущая ошибка меньше этой величины.")
+ 
+S("field of view", "поле зрения")
+S("Horizontal field of view, in the perspective projection. "
+  "In the orthogonal projection this just controls the scale.",
+  "В перспективе это параметр задает горизонтальное поле зрение. "
+  "В ортогональной проекции он просто контролирует масштаб.")
+ 
+S("native geometry", "родная геометрия")
+S("scale model", "масштабная модель")
+S("This is relevant when the native geometry is not Euclidean. "
+  "For example, if the native geometry is spherical, and scale < 1, a 2d sphere will be rendered as a subsphere; "
+  "if the native geometry is hyperbolic, and scale > 1, a hyperbolic plane will be rendered as an equidistant surface. ",
+ 
+  "Имеет смысл, если родная геометрия неевклидова. "
+  "Например, если родная геометрия сферическая и параметр < 1, двумерная сфера будет изображена как меньшая сфера; "
+  "если родная геометрия гиперболична, и параметр > 1, гиперболическая плоскость будет изображена эквидистантой.")
+ 
+S("This just shows the 'z' coordinate of the selected point.",
+  "Отображает координату 'z' данной точки.")
+ 
+S("radar", "радар")
+S("model iterations", "итерации модели")
+S("keep shape", "сохранять форму")
+ 
+// texture mode
+//--------------
+ 
+S("texture mode", "режим текстур")
+ 
+S(
+  "This mode lets you to change the floor tesselation easily -- "
+  "select 'paint a new texture' and draw like in a Paint program. "
+  "The obtained pattern can then be easily changed to another geometry, "
+  "or saved.\n\n"
+  "Instead of drawing, it is also possible to use an arbitrary image "
+  "as a texture. "
+  "Works best with spherical/Euclidean/hyperbolic tesselations "
+  "(e.g., a photo of a soccerball, or one of the tesselations by M. C. "
+  "Escher), but it can be also used on arbitrary photos to make them periodic "
+  "(these probably work best with the 'large picture' setting in geometry selection). "
+  "Again, tesselations can have their geometry changed.\n\n",
+ 
+  "Этот режим позволяет с легкостью менять замощение пола -- "
+  "выберите 'нарисовать новую текстуру' и рисуйте как в Paint. "
+  "полученный узор может быть перенесен в другую геометрию "
+  "или сохранен.\n\n"
+  "Также можно использовать произвольное изображение как узор. "
+  "Лучше всего работает со сферическими/гиперболическими замощениями (например, фото футбольного мяча, "
+  "паркеты Эшера), но может использоваться с любыми изображениями, "
+  "чтобы сделать их периодическими (вероятно, лучше работает с настройкой 'большие изображения' "
+  "при выборе геометрии). Опять же, геометрию замощений "
+  "легко поменять.\n\n")
+ 
+S("texture mode (off)", "режим текстур (выключен)")
+S("select geometry/pattern", "выбрать геометрию/узор")
+S("reactivate the texture", "восстановить текстуру")
+S("open PNG as texture", "открыть PNG как текстуру")
+S("load texture config", "загрузить настройки текстур")
+S("warning: unable to find the center", "осторожно: не найден центр")
+S("texture size", "размер текстура")
+S("paint a new texture", "нарисовать новую текстуру")
+S("precision", "точность")
+ 
+S("texture mode (overlay)", "режим текстур (наложение)")
+S("select the texture's pattern", "выбрать узор для текстуры")
+S("enable the texture", "включить текстуру")
+S("cancel the texture", "отключить текстуру")
+S("move the model", "передвинуть модель")
+S("move the texture", "передвинуть текстуру")
+S("zoom/scale the texture", "повернуть/изменить масштаб текстуры")
+S("zoom/scale the model", "повернуть/изменить масштаб модели")
+S("projection", "проекция")
+S("affine transformations", "аффинные преобразования")
+S("magic", "магия")
+ 
+S("grid color (master)", "цвет сетки (основной)")
+S("grid color (copy)", "цвет сетки (копия)")
+S("save the raw texture", "сохранить сырую текстуру")
+S("Saved the raw texture to %1", "Сырая текстура сохранена в %1")
+ 
+S("texture auto-adjustment", "авторегулировка текстуры")
+S("drag from the model to the texture", "перетащить из модели в текстуру")
+S("affect model scale", "масштаб модели")
+S("affect model projection", "проекция")
+S("affect model rotation", "поворот модели")
+S("affect model position", "позиция модели")
+S("affect texture slanting", "наклон текстуры")
+S("affect texture stretching", "растяжение текстуры")
+S("delete markers", "удалить маркеры")
+S("perform auto-adjustment", "выполнить авторегулировку")
+ 
+S("texture mode (active)", "режим текстур (активный)")
+S("deactivate the texture", "выключить текстуру")
+S("back to overlay mode", "назад в режим наложений")
+S("change the geometry", "изменить геометрию")
+S("grid color", "цвет сетки")
+S("mesh color", "цвет ячеек")
+S("color alpha", "соотношение цветов")
+S("The higher the value, the less important the color of underlying terrain is.",
+  "Чем больше значение, тем менее важен цвет базового ландшафта.")
+S("edit the texture", "редактировать текстуру")
+S("save the full texture image", "сохранить полное изображение")
+S("Saving full texture to %1...", "Полная текстура сохраняется в %1...")
+S("save texture config", "сохранить настройки текстур")
+ 
+// pattern groups
+ 
+S("football", "футбол")
+S("three colors", "три цвета")
+S("chessboard", "шахматная доска")
+S("single type", "один тип")
+S("large picture", "большая картинка")
+S("periodic patterns", "периодический узор")
+S("more tuning", "больше настроек")
+S("BAD", "ПЛОХИЕ")
+ 
+// extra patterns
+ 
+S("Docks pattern", "узор Доков")
+S("broken Emerald pattern", "сломанный изумрудный узор")
+S("coloring", "раскраска")
+ 
+ 
+// Docks
+//-------
+ 
+N("Docks", GEN_O, "Док", "Доки", "Док", "в Доке")
+N("dock", GEN_O, "док", "доки", "док", "доком")
+S("A dock.", "Док.")
+N("burning dock", GEN_O, "горящий док", "горящие дока", "горящий док", "горящим доком")
+S("A burning dock.", "Горящий док.")
+ 
+N("Sea Glass", GEN_N, "Морское Стекло", "Морские Стекла", "Морское Стекло", "Морским Стеклом")
+ 
+// Snake Nest
+ 
+N("Snake Nest", GEN_N, "Змеиное Гнездо", "Змеиные Гнезда", "Змеиное Гнездо", "в Змеином Гнезде")
+ 
+N("Snake Oil", GEN_N, "Змеиное Масло", "Змеиные Масла", "Змеиное Масло", "Змеиным Маслом")
+ 
+S("Made of actual snakes!", "Сделано из настоящих змей!")
+ 
+// Ruined City
+ 
+N("Ruined City", GEN_O, "Разрушенный Город", "Разрушенные Города", "Разрушенный Город", "в Разрушенном Городе")
+ 
+S("Once a beautiful city... but now overrun by the mighty Raiders of unknown origin.\n\n"
+ "Raiders cannot be harmed with mundane weapons, but each color has its movement restrictions.",
+ 
+ "Какой прекрасный город... но теперь он разрушен мощными Рейдерами неизвестного происхождения.\n\n"
+ "Их нельзя повредить обычным оружием, но каждый цвет имеет свои ограничения по перемещению.")
+ 
+N("ruin wall", GEN_F, "разрушенная стена", "разрушенные стены", "разрушенную стену", "разрушенной стеной")
+ 
+N("Chrysoberyl", GEN_O, "Хризоберилл", "Хризобериллы", "Хризоберилл", "Хризобериллом")
+S("Fragment of the past glory.", "Фрагмент былой славы.")
+ 
+N("Red Raider", GEN_M, "Красный Рейдер", "Красные Рейдеры", "Красного Рейдера", "Красным Рейдером")
+S("Red Raiders travel in pairs. They have promised to always watch another one's back. They are able to destroy walls on their way",
+  "Красные рейдеры путешествуют парами. Они обещали, что будут защищать спины друг друга. Они могут разрушать стены на своем пути.")
+ 
+N("Gray Raider", GEN_M, "Серый Рейдер", "Серые Рейдеры", "Серого Рейдера", "Серым Рейдером")
+S("Gray Raiders never step on gray cells.",
+  "Серые Рейдеры не наступают на серые клетки.")
+ 
+N("Green Raider", GEN_M, "Зеленый Рейдер", "Зеленые Рейдеры", "Зеленого Рейдера", "Зеленым Рейдером")
+S("Green Raiders never step from one green cell to another.",
+  "Зеленые Рейдеры не ходят с одной зеленой клетки на другую.")
+ 
+N("Brown Raider", GEN_M, "Коричневый Рейдер", "Коричневые Рейдеры", "Коричневого Рейдера", "Коричневым Рейдером")
+S("Brown Raiders never move adjacent to an item.",
+  "Коричневые Рейдеры не подходят к предметам.")
+ 
+ 
+N("Blue Raider", GEN_M, "Синий Рейдер", "Синие Рейдеры", "Синего Рейдера", "Синим Рейдером")
+S("Blue Raiders have a powerful attack which takes two turns to complete, and also makes the Blue Raider stunned "
+  "for a long time. This attack can destroy other Raiders if it hits them.",
+  "Синие Рейдеры имеет сильную атаку, которая требует двух ходов, и после которой Рейдер "
+  "оглушается надолго. Эта атака уничтожает других Рейдеров, если задевает их."
+  )
+ 
+S("You cannot attack Raiders directly!", "Вы не можете атаковать Рейдеров!")
+ 
+Orb("Slaying", "Разгрома")
+ 
+S("This Orb lets you defeat Raiders and other tough single-cell monsters in melee.",
+  "Эта сфера позволяет вам атаковать Рейдеров и других и мощных одноклеточных существ.")
+ 
+// Jelly Kingdom
+ 
+N("Jelly Kingdom", GEN_N, "Желейное Королевство", "Желейные Королевства", "Желейное Королевство", "в Желейном Королевстве")
+ 
+S("Some of the Slime Beasts have decided to revolt against the color rules in the "
+  "Alchemist Lab. They have changed their shape and consistency, declared independence, and established their own Kingdom.\n\n"
+  "Jellies switch between being a wall and being a monster after every treasure you pick.",
+ 
+  "Часть Живой Слизи выступила против правил цветов в Лаборатории. "
+  "Они изменили свою форму и густоту, провозгласили независимость и образовали свое Королевство.\n\n"
+  "Желе меняются между формами стены и существа с каждым поднятым вами сокровищем."
+  )
+ 
+N("Red Jelly", GEN_O, "Красное Желе", "Красные Желе", "Красное Желе", "Красным Желе")
+N("Blue Jelly", GEN_O, "Синее Желе", "Синие Желе", "Синее Желе", "Синим Желе")
+ 
+N("Tasty Jelly", GEN_O, "Вкусное Желе", "Вкусные Желе", "Вкусное Желе", "Вкусным Желе")
+S("A tasty byproduct of the Jelly Revolution.",
+  "Вкусный побочный продукт Желейное Революции.")
+ 
+Orb("Phasing", "Фазы")
+S("This orb lets you pass through walls (one cell wide), and also through as long as they will not attack you in transit.",
+  "Эта сфера позволяет проходить сквозь стены (ширины в одну клетку), если вас в пути не атакуют.")
+ 
+S("You cannot attack Jellies in their wall form!", "Вы не можете атаковать Желе в форме стен!")
+ 
+// keyboard help
+//---------------
+ 
+S("advanced keyboard shortcuts", "продвинутые комбинации клавиш")
+ 
+/* not yet translated to Polish
+  "1 = orthogonal/Gans model",
+  "2 = small Poincare model/stereographic projection",
+  "3 = big Poincare model/stereographic projection",
+  "4 = Klein model/gnomonic projection",
+  "5 = change wall display mode",
+  "6 = change grid",
+  "7 = change heptagon marking",
+  "8 = change background color",
+  "9 = hyperboloid model",
+  "qweasdzxc, hjklyubn, numpad = move/skip turn",
+  "arrows = panning",
+  "o = world overview",
+  "v = menu",
+  "F1 = help",
+  "F5 = restart game",
+  "F10 = quit game",
+  "Esc = quest status",
+  "Alt+Enter = full screen",
+  "Alt = highlight interesting stuff",
+  "t = use a ranged Orb (target center of the screen)",
+  "g = drop a Dead Orb",
+  "click left mouse button = move/skip",
+  "shift+click left mouse button = use ranged Orb",
+  "click right mouse button = context help",
+  "mousewheel up = panning",
+  "hold middle mouse button = panning",
+  "mousewheel down = move/skip",
+  "shift + mousewheel = change projection",
+  "ctrl + mousewheel = change zoom",
+  "ctrl + shift + mousewheel = change both projection and zoom",
+  "ctrl + hold middle button = move the screen",
+  "shift + middle button = reset position"
+ 
+  "1 = ортогональная модель/Ганса",
+  "2 = малая модель Пуанкаре/стереографическая проекция",
+  "3 = большая модель Пуанкаре/стереографическая проекция",
+  "4 = модель Клейна/гномонная проекция",
+  "5 = изменить режим отображения стен",
+  "6 = изменить сетку",
+  "7 = изменить пометку семиугольников",
+  "8 = изменить цвет фона",
+  "9 = модель гиперболоида",
+  "qweasdzxc, hjklyubn, numpad = пойти/пропустить ход",
+  "стрелки = панорама",
+  "o = обзор мира",
+  "v = меню",
+  "F1 = помощь",
+  "F5 = перезапуск",
+  "F10 = выйти из игры",
+  "Esc = состояние квеста",
+  "Alt+Enter = полный экран",
+  "Alt = подсветить интересные вещи",
+  "t = использовать сферу на расстоянии (выберите цель на экране)",
+  "g = бросить сферу Смерти",
+  "левая кнопка мыши = пойти/пропустить ход",
+  "shift+левая кнопка мыши = использовать сферу на расстоянии",
+  "правая кнопка мыши = помощь по элементу",
+  "колесо мыши вверх = панорама",
+  "зажать среднюю кнопку мыши = панорама",
+  "колесо мыши вниз = пойти/пропустить ход",
+  "shift + колесо мыши = изменить проекцию",
+  "ctrl + колесо мыши = изменить масштаб",
+  "ctrl + shift + колесо мыши = изменить проекцию и масштаб",
+  "ctrl + зажать среднюю кнопку мыши = подвинуть обзор",
+  "shift + средняя кнопка мыши = вернуть обзор"
+*/
+ 
+/* achievements
+ 
+        "NEW_ACHIEVEMENT_9_5_NAME"  "Reached the Ruined City"
+        "NEW_ACHIEVEMENT_9_5_DESC"  "Find and collect a Chrysoberyl."
+        "NEW_ACHIEVEMENT_9_6_NAME"  "Brown Raider"
+        "NEW_ACHIEVEMENT_9_6_DESC"  "Collect 10 Chrysoberyls (or 25 in the Orb Strategy mode)."
+        "NEW_ACHIEVEMENT_9_7_NAME"  "Blue Raider"
+        "NEW_ACHIEVEMENT_9_7_DESC"  "Collect 25 Chrysoberyls (or 50 in the Orb Strategy mode)."
+        "NEW_ACHIEVEMENT_9_8_NAME"  "Raider Master"
+        "NEW_ACHIEVEMENT_9_8_DESC"  "Collect 50 Chrysoberyls (not in the Orb Strategy mode)."
+        "NEW_ACHIEVEMENT_9_9_NAME"  "Reached the Jelly Kingdom"
+        "NEW_ACHIEVEMENT_9_9_DESC"  "Find and collect a Tasty Jelly."
+        "NEW_ACHIEVEMENT_9_10_NAME" "Tasty Jelly"
+        "NEW_ACHIEVEMENT_9_10_DESC" "Collect 10 Tasty Jellies (or 25 in the Orb Strategy mode)."
+        "NEW_ACHIEVEMENT_9_11_NAME" "Jelly"
+        "NEW_ACHIEVEMENT_9_11_DESC" "Collect 25 Tasty Jellies (or 50 in the Orb Strategy mode)."
+        "NEW_ACHIEVEMENT_9_12_NAME" "Jelly King"
+        "NEW_ACHIEVEMENT_9_12_DESC" "Collect 50 Tasty Jellies. (not in the Orb Strategy mode)"
+ 
+ 
+        "NEW_ACHIEVEMENT_9_5_NAME"  "Открыть Разрушенный Город"
+        "NEW_ACHIEVEMENT_9_5_DESC"  "Найдите и соберите Хризоберилл."
+        "NEW_ACHIEVEMENT_9_6_NAME"  "Коричневый Рейдер"
+        "NEW_ACHIEVEMENT_9_6_DESC"  "Соберите 10 Хризобериллов (или 25 в режиме Стратегии Сфер)."
+        "NEW_ACHIEVEMENT_9_7_NAME"  "Синий Рейдер"
+        "NEW_ACHIEVEMENT_9_7_DESC"  "Соберите 25 Хризобериллов (или 50 в режиме Стратегии Сфер)."
+        "NEW_ACHIEVEMENT_9_8_NAME"  "Рейдер Мастер"
+        "NEW_ACHIEVEMENT_9_8_DESC"  "Соберите 50 Хризобериллов (не в режиме Стратегии Сфер)."
+        "NEW_ACHIEVEMENT_9_9_NAME"  "Открыть Желейное Королевство"
+        "NEW_ACHIEVEMENT_9_9_DESC"  "Найдите и соберите Вкусное желе."
+        "NEW_ACHIEVEMENT_9_10_NAME" "Вкусное желе"
+        "NEW_ACHIEVEMENT_9_10_DESC" "Соберите 10 Вкусных Желе (или 25 в режиме Стратегии Сфер)."
+        "NEW_ACHIEVEMENT_9_11_NAME" "Желе"
+        "NEW_ACHIEVEMENT_9_11_DESC" "Соберите 25 Вкусных Желе (или 50 в режиме Стратегии Сфер)."
+        "NEW_ACHIEVEMENT_9_12_NAME" "Желейный Король"
+        "NEW_ACHIEVEMENT_9_12_DESC" "Соберите 50 Вкусных Желе (не в режиме Стратегии Сфер)."
+ 
+*/
+
+S("pics to save:", "картинки для сохранения:")
+S("level to save:", "карты для сохранения:")
+
+S("pics to load:", "картинки для загрузки:")
+S("level to load:", "карты для загрузки:")
+
+#undef Orb
+

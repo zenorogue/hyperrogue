@@ -41,7 +41,7 @@ void showQuotientConfig() {
   nextPrimes(gxcur);
   for(int i=0; i<size(gxcur.primes); i++) {
     auto& p = gxcur.primes[i];
-    dialog::addBoolItem(XLAT("order %1%2 (non-bitrunc cells: %3)", its(p.p), p.squared ? "²" : "", its(p.cells)), i == gxcur.current_prime_id, 'A'+i);
+    dialog::addBoolItem(XLAT("order %1%2 (non-bitruncated cells: %3)", its(p.p), p.squared ? "²" : "", its(p.cells)), i == gxcur.current_prime_id, 'A'+i);
     }
   
   if(size(gxcur.primes) < 6) {

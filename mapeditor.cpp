@@ -776,7 +776,7 @@ namespace mapeditor {
       restartGame();
       }
     else if(sym == SDLK_F2) {
-      dialog::openFileDialog(levelfile, XLAT("level to save/load:"), ".lev", [] () {
+      dialog::openFileDialog(levelfile, XLAT("level to save:"), ".lev", [] () {
         if(mapstream::saveMap(levelfile.c_str())) {
           addMessage(XLAT("Map saved to %1", levelfile));
           return true;
@@ -788,7 +788,7 @@ namespace mapeditor {
         });
       }
     else if(sym == SDLK_F3)
-      dialog::openFileDialog(levelfile, XLAT("level to save/load:"), ".lev", [] () {
+      dialog::openFileDialog(levelfile, XLAT("level to load:"), ".lev", [] () {
         if(mapstream::loadMap(levelfile.c_str())) {
           addMessage(XLAT("Map loaded from %1", levelfile));
           return true;
@@ -1558,13 +1558,13 @@ namespace mapeditor {
         }
 
       if(sym == SDLK_F2) 
-        dialog::openFileDialog(picfile, XLAT("pics to save/load:"), ".pic", 
+        dialog::openFileDialog(picfile, XLAT("pics to save:"), ".pic", 
           [] () {
             return savePicFile(picfile);
             });
       
       if(sym == SDLK_F3) 
-        dialog::openFileDialog(picfile, XLAT("pics to save/load:"), ".pic", 
+        dialog::openFileDialog(picfile, XLAT("pics to load:"), ".pic", 
           [] () {
             return loadPicFile(picfile);
             });

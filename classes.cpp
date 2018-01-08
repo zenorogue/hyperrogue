@@ -333,7 +333,7 @@ const char *tortoisedesc =
   "the given location of Galápagos, the brighter it is shown on your screen."; 
 
 const char *krakendesc =
-  "There are Krakens in your homeland too... huge sea monsters which "
+  "There are Krakens in your homeland, too... huge sea monsters which "
   "could easily destroy ships. The geometry of this strange world "
   "prevents quick movement of huge objects, "
   "so there are no large ships, only small boats, and "

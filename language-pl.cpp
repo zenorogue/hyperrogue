@@ -6328,7 +6328,7 @@ S(
 
 S("find the next prime", "znajdź następną liczbę pierwszą")
 S("activate", "uruchom")
-S("order %1%2 (non-bitrunc cells: %3)", "rząd %1%2 (nieprzyciętych pól: %3)")
+S("order %1%2 (non-bitruncated cells: %3)", "rząd %1%2 (nieprzyciętych pól: %3)")
 
 // Torus/Klein bottle, Euclidean Squares, and their advanced configuration
 //-------------------------------------------------------------------------
@@ -6643,4 +6643,9 @@ S("advanced keyboard shortcuts", "zaawansowane skróty klawiaturowe")
 */
 
 #undef Orb
+
+S("pics to save:", "obrazki do zapisu:")
+S("level to save:", "mapa do zapisu:")
+S("pics to load:", "obrazki do wczytania:")
+S("level to load:", "mapa do wczytania:")
 

@@ -4103,7 +4103,7 @@ S(
     "Sféru Ryby, ale ty se naštěstí dají ukrást vikingským lovcům pokladů.")
 
 S(
-  "There are Krakens in your homeland too... huge sea monsters which "
+  "There are Krakens in your homeland, too... huge sea monsters which "
   "could easily destroy ships. The geometry of this strange world "
   "prevents quick movement of huge objects, "
   "so there are no large ships, only small boats, and "
@@ -6419,7 +6419,7 @@ S("size of the world", "velikost světa")
 S("flat", "placka")
 
 // bitruncated or not bitrunc
-S(" (c)", " (s)")
+S(" (b)", " (s)")
 S(" (n)", " (n)")
 
 S("(locked)", "(uzamčeno)")
@@ -6441,26 +6441,29 @@ S("kills: %1", "zabitých netvorů: %1")
 // === 10.3 ===
 // ============
 
+// === 10.3 ===
+// ============
+
 // Missing/minor updated texts
 //-----------------------------
 
 // file selection dialog
-S("Enter = choose", "Enter = vbr")
-S("Esc = cancel", "Esc = zruit")
+S("Enter = choose", "Enter = výbìr")
+S("Esc = cancel", "Esc = zrušit")
 
-S("hyperbolic", "hyperbolick")
-S("reset special modes", "resetovat speciln mdy")
-S("orthogonal projection", "ortogonln projekce")
-S("small Poincar model", "mal Poincarho model")
-S("big Poincar model", "velk Poincarho model")
+S("hyperbolic", "hyperbolická")
+S("reset special modes", "resetovat speciální módy")
+S("orthogonal projection", "ortogonální projekce")
+S("small Poincaré model", "malý Poincarého model")
+S("big Poincaré model", "velký Poincarého model")
 S("Klein-Beltrami model", "Klein-Beltramiho model")
-S("bestiary of %the1", "besti: %1")
+S("bestiary of %the1", "bestiáø: %1")
 
 // for the map editor
-N("Dragon Head", GEN_F, "Dra hlava", "Dra hlavy", "Dra hlavu", "Dra hlavou")
+N("Dragon Head", GEN_F, "Draèí hlava", "Draèí hlavy", "Draèí hlavu", "Draèí hlavou")
 
-S("score: %1", "skre: %1")
-S("kills: %1", "zabit: %1")
+S("score: %1", "skóre: %1")
+S("kills: %1", "zabití: %1")
 
 // advanced config of quotient geometry
 //--------------------------------------
@@ -6472,104 +6475,104 @@ S(
   "It can be also interpreted as a quotient of the given basic geometry. "
   "Warning: field patterns based on large primes might generate for a long time.",
   
-  "Tato geometrie vznik poutm stejnch 'genertor', kter vedou k vytvoen "
-  "dan zkladn hyperbolick geometrie, ale msto tlesa relnch sel pouv "
-  "pevn dan konen tleso. Lze ho tak interpretovat jako kvocient dan "
-  "zkladn geometrie. Varovn: vzory zaloen na velkch prvoslech se mohou "
+  "Tato geometrie vzniká použítím stejných 'generátorù', které vedou k vytvoøení "
+  "dané základní hyperbolické geometrie, ale místo tìlesa reálných èísel používá "
+  "pevnì dané koneèné tìleso. Lze ho také interpretovat jako kvocient dané "
+  "základní geometrie. Varování: vzory založené na velkých prvoèíslech se mohou "
   "generovat velmi dlouho!")
 
-S("find the next prime", "najdi dal prvoslo")
+S("find the next prime", "najdi další prvoèíslo")
 S("activate", "aktivovat")
-S("order %1%2 (non-bitruncated cells: %3)", "d %1%2 (nezkosench polek: %3)")
+S("order %1%2 (non-bitruncated cells: %3)", "øád %1%2 (nezkosených políèek: %3)")
 
 // Torus/Klein bottle, Euclidean Squares, and their advanced configuration
 //-------------------------------------------------------------------------
 
-S("square grid", "tvercov s")
+S("square grid", "ètvercová sí ")
 
-S("torus/Klein bottle", "torus/Kleinova lhev")
-S("mode", "md")
+S("torus/Klein bottle", "torus/Kleinova láhev")
+S("mode", "mód")
 
-S("single row (hex)", "jedna ada (hexy)")
-S("single row (squares)", "jedna ada (tverce)")
-S("parallelogram (hex)", "rovnobnk (hexy)")
-S("rectangle (squares)", "obdlnk (tverce)")
-S("rectangle (hex)", "obdlnk (hexy)")
-S("Klein bottle (squares)", "Kleinova lhev (tverce)")
-S("Klein bottle (hex)", "Kleinova lhev (hexy)")
+S("single row (hex)", "jedna øada (hexy)")
+S("single row (squares)", "jedna øada (ètverce)")
+S("parallelogram (hex)", "rovnobìžník (hexy)")
+S("rectangle (squares)", "obdélník (ètverce)")
+S("rectangle (hex)", "obdélník (hexy)")
+S("Klein bottle (squares)", "Kleinova láhev (ètverce)")
+S("Klein bottle (hex)", "Kleinova láhev (hexy)")
 
-S("this mode has bad patterns", "v tomto mdu jsou patn vzory")
-S("incompatible with bitruncating", "nekompatibiln se zkosenm")
-S("best if %1 is divisible by %2", "nejlpe to funguje, kdy je %1 dliteln %2")
+S("this mode has bad patterns", "v tomto módu jsou špatné vzory")
+S("incompatible with bitruncating", "nekompatibilní se zkosením")
+S("best if %1 is divisible by %2", "nejlépe to funguje, když je %1 dìlitelné %2")
 
-S("number of cells (n)", "poet polek (n)")
-S("cell bottom-right from 0 (d)", "polko vpravo dole od 0 (d)")
-S("cell below 0 (d)", "polko pod 0 (d)")
-S("width (x)", "ka (x)")
-S("height (y)", "vka (y)")
+S("number of cells (n)", "poèet políèek (n)")
+S("cell bottom-right from 0 (d)", "políško vpravo dole od 0 (d)")
+S("cell below 0 (d)", "políèko pod 0 (d)")
+S("width (x)", "šíøka (x)")
+S("height (y)", "výška (y)")
 
 // upgraded Hypersian Rug mode
 //-----------------------------
 
 S("In the perspective projection, you can use arrows to rotate the camera, Page Up/Down to go forward/backward, Shift+arrows to strafe, and Ctrl+arrows to rotate the model.",
-  "V perspektivn projekci je mon otet kameru ipkami, Page Up/Down pro pohyb "
-  "vped/vzad, Shift+ipky pro pohyb do strany a Ctrl+ipky pro oten modelu.")
+  "V perspektivní projekci je možné otáèet kameru šipkami, Page Up/Down pro pohyb "
+  "vpøed/vzad, Shift+šipky pro pohyb do strany a Ctrl+šipky pro otáèení modelu.")
 
 S("Note: this mode is based on what you see on the screen -- but re-rendered in another way. "
   "If not everything is shown on the screen (e.g., too zoomed in), the results will be incorrect "
   "(though possibly interesting). "
   "Use a different projection to fix this.",
   
-  "Poznmka: tento md je zaloen na tom, co vidte na obrazovce -- je to pouze "
-  "re-renderovan jinm zpsobem. Pokud nen na obrazovce vechno vidt (napklad "
-  "proto, e pohled je pli piblen), budou vsledky nesprvn (i kdy "
-  "mon zajmav). Mete to opravit tm, e pouijete jinou projekci.")
+  "Poznámka: tento mód je založený na tom, co vidíte na obrazovce -- je to pouze "
+  "re-renderované jiným zpùsobem. Pokud není na obrazovce všechno vidìt (napøíklad "
+  "proto, že pohled je pøíliš pøiblížený), budou výsledky nesprávné (i když "
+  "možná zajímavé). Mùžete to opravit tím, že použijete jinou projekci.")
 
-S("vertex limit", "limit vrchol")
+S("vertex limit", "limit vrcholù")
 S("The more vertices, the more accurate the Hypersian Rug model is. "
   "However, a number too high might make the model slow to compute and render.",
-  "m vce vrchol, tm budfe model Hyperskho koberce pesnj. Pli "
-  "vysok slo vak me zpsobit, e se model bude pomalu potat a renderovat.")
+  "Èím více vrcholù, tím budfe model Hyperského koberce pøesnìjší. Pøíliš "
+  "vysoké èíslo však mùže zpùsobit, že se model bude pomalu poèítat a renderovat.")
 
-S("model distance", "vzdlenost modelu")
+S("model distance", "vzdálenost modelu")
 S("In the perspective projection, this sets the distance from the camera to the center of the model. "
   "In the orthogonal projection this just controls the scale.",
   
-  "V perspektivn projekci tento parametr nastavuje vzdlenost kamery od stedu "
-  "modelu. V ortogonln projekci pouze upravuje mtko.")
+  "V perspektivní projekci tento parametr nastavuje vzdálenost kamery od støedu "
+  "modelu. V ortogonální projekci pouze upravuje mìøítko.")
 
-S("maximum error", "maximln chyba")
+S("maximum error", "maximální chyba")
 S("New points are added when the current error in the model is smaller than this value.",
-  "Pokud je souasn chyba modelu men ne tato hodnota, pidaj se nov body.")
+  "Pokud je souèasná chyba modelu menší než tato hodnota, pøidají se nové body.")
 
-S("field of view", "zorn pole")
+S("field of view", "zorné pole")
 S("Horizontal field of view, in the perspective projection. "
   "In the orthogonal projection this just controls the scale.",
-  "Horizontln zorn pole, v perspektivn projekci. V ortogonln "
-  "projekci tento parametr pouze upravuje mtko.")
+  "Horizontální zorné pole, v perspektivní projekci. V ortogonální "
+  "projekci tento parametr pouze upravuje mìøítko.")
 
-S("native geometry", "rodn geometrie")
-S("scale model", "mtko modelu")
+S("native geometry", "rodná geometrie")
+S("scale model", "mìøítko modelu")
 S("This is relevant when the native geometry is not Euclidean. "
   "For example, if the native geometry is spherical, and scale < 1, a 2d sphere will be rendered as a subsphere; "
   "if the native geometry is hyperbolic, and scale > 1, a hyperbolic plane will be rendered as an equidistant surface. ",
   
-  "Toto je relevantn v situacch, kdy 'rodn geometrie' nen eukleidovsk. Pokud je "
-  "napklad sfrick a mtko je < 1, bude 2d koule vyrenderovan jako subsfra; "
-  "pokud je rodn geometrie hyperbolick a mtko je > 1, bude hyperbolick rovina "
-  "vyrenderovan jako ekvidistantn plocha.")
+  "Toto je relevantní v situacích, kdy 'rodná geometrie' není eukleidovská. Pokud je "
+  "napøíklad sférická a mìøítko je < 1, bude 2d koule vyrenderovaná jako subsféra; "
+  "pokud je rodná geometrie hyperbolická a mìøítko je > 1, bude hyperbolická rovina "
+  "vyrenderovaná jako ekvidistantní plocha.")
 
 S("This just shows the 'z' coordinate of the selected point.",
-  "Tohle jenom ukazuje souadnici 'z' vybranho bodu.")
+  "Tohle jenom ukazuje souøadnici 'z' vybraného bodu.")
 
 S("radar", "radar")
 S("model iterations", "iterace modelu")
-S("keep shape", "udrovat tvar")
+S("keep shape", "udržovat tvar")
 
 // texture mode
 //--------------
 
-S("texture mode", "texturov md")
+S("texture mode", "texturový mód")
 
 S(
   "This mode lets you to change the floor tesselation easily -- "
@@ -6584,84 +6587,84 @@ S(
   "(these probably work best with the 'large picture' setting in geometry selection). "
   "Again, tesselations can have their geometry changed.\n\n",
   
-  "Tento md vm umouje snadno mnit dlen podlahy -- vyberte 'namalovat "
-  "novou texturu' a kreslete jako v Malovn. Zskan vzor se pak d snadno "
-  "zmnit na jinou geometrii nebo uloit.\n\n"
-  "Msto kreslen tak mete pout jako texturu libovoln obrzek. "
-  "Nejlpe to funguje se sfrickmi/eukleidovskmi/hyperbolickmi dlenmi "
-  "(napklad s fotografi fotbalovho me nebo s jednm z dlen M. C. "
-  "Eschera), ale mete tak pout libovoln obrzky, abyste je udlali "
-  "periodickmi (nejlpe to funguje s nastavenm 'velk obrzek' ve vbru "
-  "geometrie). Geometrii dlen je opt mon mnit.\n\n")
+  "Tento mód vám umožòuje snadno mìnit dìlení podlahy -- vyberte 'namalovat "
+  "novou texturu' a kreslete jako v Malování. Získaný vzor se pak dá snadno "
+  "zmìnit na jinou geometrii nebo uložit.\n\n"
+  "Místo kreslení také mùžete použít jako texturu libovolný obrázek. "
+  "Nejlépe to funguje se sférickými/eukleidovskými/hyperbolickými dìleními "
+  "(napøíklad s fotografií fotbalového míèe nebo s jedním z dìlení M. C. "
+  "Eschera), ale mùžete také použít libovolné obrázky, abyste je udìlali "
+  "periodickými (nejlépe to funguje s nastavením 'velký obrázek' ve výbìru "
+  "geometrie). Geometrii dìlení je opìt možné mìnit.\n\n")
 
-S("texture mode (off)", "texturov md (vypnut)")
+S("texture mode (off)", "texturový mód (vypnutý)")
 S("select geometry/pattern", "vyber geometrii/vzor")
 S("reactivate the texture", "reaktivuj texturu")
-S("open PNG as texture", "otwrz PNG jako tekstur")
+S("open PNG as texture", "otwórz PNG jako teksturê")
 S("load texture config", "nahraj konfiguraci textury")
-S("warning: unable to find the center", "varovn: nemohu najt sted")
-S("texture size", "rozmr textury")
+S("warning: unable to find the center", "varování: nemohu najít støed")
+S("texture size", "rozmìr textury")
 S("paint a new texture", "namaluj novou texturu")
-S("precision", "pesnost")
+S("precision", "pøesnost")
 
-S("texture mode (overlay)", "texturov md (pekryv)")
+S("texture mode (overlay)", "texturový mód (pøekryv)")
 S("select the texture's pattern", "vyber vzor textury")
 S("enable the texture", "zapni texturu")
-S("cancel the texture", "zru texturu")
-S("move the model", "pesu model")
-S("move the texture", "pesu texturu")
-S("zoom/scale the texture", "zm piblen/mtko textury")
-S("zoom/scale the model", "zm piblen/mtko modelu")
+S("cancel the texture", "zruš texturu")
+S("move the model", "pøesuò model")
+S("move the texture", "pøesuò texturu")
+S("zoom/scale the texture", "zmìò pøiblížení/mìøítko textury")
+S("zoom/scale the model", "zmìò pøiblížení/mìøítko modelu")
 S("projection", "projekce")
-S("affine transformations", "afinn transformace")
+S("affine transformations", "afinní transformace")
 S("magic", "magie")
 
-S("grid color (master)", "barva mky (hlavn)")
-S("grid color (copy)", "barva mky (kopie)")
-S("save the raw texture", "ulo surovou texturu")
-S("Saved the raw texture to %1", "Surov textura uloena do %1")
+S("grid color (master)", "barva møížky (hlavní)")
+S("grid color (copy)", "barva møížky (kopie)")
+S("save the raw texture", "ulož surovou texturu")
+S("Saved the raw texture to %1", "Surová textura uložena do %1")
 
-S("texture auto-adjustment", "automatick prava textury")
-S("drag from the model to the texture", "pethni z modelu na texturu")
-S("affect model scale", "mtko modelu")
+S("texture auto-adjustment", "automatická úprava textury")
+S("drag from the model to the texture", "pøetáhni z modelu na texturu")
+S("affect model scale", "mìøítko modelu")
 S("affect model projection", "projekce")
 S("affect model rotation", "rotace modelu")
 S("affect model position", "poloha modelu")
-S("affect texture slanting", "zkosen textury")
-S("affect texture stretching", "nataen textury")
-S("delete markers", "vyma markery")
-S("perform auto-adjustment", "prove automatickou pravu")
+S("affect texture slanting", "zkosení textury")
+S("affect texture stretching", "natažení textury")
+S("delete markers", "vymaž markery")
+S("perform auto-adjustment", "proveï automatickou úpravu")
 
-S("texture mode (active)", "texturov md (aktivn)")
+S("texture mode (active)", "texturový mód (aktivní)")
 S("deactivate the texture", "deaktivuj texturu")
-S("back to overlay mode", "zptky do mdu pekryvu")
-S("change the geometry", "zm geometrii")
-S("grid color", "barva mky")
-S("mesh color", "barva sky")
+S("back to overlay mode", "zpátky do módu pøekryvu")
+S("change the geometry", "zmìò geometrii")
+S("grid color", "barva møížky")
+S("mesh color", "barva sí ky")
 S("color alpha", "alfa barva")
 S("The higher the value, the less important the color of underlying terrain is.",
-  "m vy hodnota, tm mn dleit je barva podlo.")
+  "Èím vyšší hodnota, tím ménì dùležitá je barva podloží.")
 S("edit the texture", "edituj texturu")
-S("save the full texture image", "ulo pln texturov obraz")
-S("Saving full texture to %1...", "Ukldm plnou texturu do %1...")
-S("save texture config", "ulo konfiguraci textury")
+S("save the full texture image", "ulož plný texturový obraz")
+S("Saving full texture to %1...", "Ukládám plnou texturu do %1...")
+S("save texture config", "ulož konfiguraci textury")
 
 // pattern groups
 
-S("football", "fotbalov m")
-S("three colors", "ti barvy")
-S("chessboard", "achovnice")
+S("football", "fotbalový míè")
+S("three colors", "tøi barvy")
+S("chessboard", "šachovnice")
 S("single type", "jeden typ")
-S("large picture", "velk obrzek")
-S("periodic patterns", "periodick vzory")
-S("more tuning", "doladn")
-S("BAD", "PATN")
+S("large picture", "velký obrázek")
+S("periodic patterns", "periodické vzory")
+S("more tuning", "doladìní")
+S("BAD", "ŠPATNÉ")
 
 // extra patterns
 
-S("Docks pattern", "vzor Dok")
-S("broken Emerald pattern", "polman smaragdov vzor")
-S("coloring", "barven")
+S("Docks pattern", "vzor Dokù")
+S("broken Emerald pattern", "polámaný smaragdový vzor")
+S("coloring", "barvení")
 
 
 // Docks
@@ -6670,95 +6673,95 @@ S("coloring", "barven")
 N("Docks", GEN_O, "Dok", "Doky", "Dok", "v Doku")
 N("dock", GEN_O, "dok", "doky", "dok", "dokem")
 S("A dock.", "Dok.")
-N("burning dock", GEN_O, "hoc dok", "hoc doky", "hoc dok", "hocm dokem")
-S("A burning dock.", "Hoc dok.")
+N("burning dock", GEN_O, "hoøící dok", "hoøící doky", "hoøící dok", "hoøícím dokem")
+S("A burning dock.", "Hoøící dok.")
 
-N("Sea Glass", GEN_N, "Mosk sklo", "Mosk skla", "Mosk sklo", "Moskm sklem")
+N("Sea Glass", GEN_N, "Moøské sklo", "Moøská skla", "Moøské sklo", "Moøským sklem")
 
 // Snake Nest
 
-N("Snake Nest", GEN_N, "Had hnzdo", "Had hnzda", "Had hnzdo", "v Hadm hnzd")
+N("Snake Nest", GEN_N, "Hadí hnízdo", "Hadí hnízda", "Hadí hnízdo", "v Hadím hnízdì")
 
-N("Snake Oil", GEN_O, "Had olej", "Had oleje", "Had olej", "Hadm olejem")
+N("Snake Oil", GEN_O, "Hadí olej", "Hadí oleje", "Hadí olej", "Hadím olejem")
 
-S("Made of actual snakes!", "Vyroben z pravch had!")
+S("Made of actual snakes!", "Vyrobený z pravých hadù!")
 
 // Ruined City
 
-N("Znien msto", GEN_N, "Znien msto", "Znien msta", "Znien msto", "ve Znienm mst")
+N("Ruined City", GEN_N, "Znièené mìsto", "Znièená mìsta", "Znièené mìsto", "ve Znièeném mìstì")
 
 S("Once a beautiful city... but now overrun by the mighty Raiders of unknown origin.\n\n"
  "Raiders cannot be harmed with mundane weapons, but each color has its movement restrictions.",
  
- "Kdysi to bylo krsn msto... ale te ho ovldli mocn Njezdnci neznmho pvodu.\n\n"
- "Njezdnkm nemohou ublit obyejn zbran, ale kad barva m sv omezen pohybu.")
+ "Kdysi to bylo krásné mìsto... ale teï ho ovládli mocní Nájezdníci neznámého pùvodu.\n\n"
+ "Nájezdníkùm nemohou ublížit obyèejné zbranì, ale každá barva má svá omezení pohybu.")
 
-N("ruin wall", GEN_F, "znien ze", "znien zdi", "znienou ze", "znienu zd")
+N("ruin wall", GEN_F, "znièená zeï", "znièené zdi", "znièenou zeï", "znièenóu zdí")
 
 N("Chrysoberyl", GEN_O, "Chryzoberyl", "Chryzoberyly", "Chryzoberyl", "Chryzoberylem")
-S("Fragment of the past glory.", "Fragment minul slvy.")
+S("Fragment of the past glory.", "Fragment minulé slávy.")
 
-N("Red Raider", GEN_M, "erven njezdnk", "erven njezdnci", "ervenho njezdnka", "ervenm njezdnkem")
+N("Red Raider", GEN_M, "Èervený nájezdník", "Èervení nájezdníci", "Èerveného nájezdníka", "Èerveným nájezdníkem")
 S("Red Raiders travel in pairs. They have promised to always watch another one's back. They are able to destroy walls on their way",
-  "erven njezdnci cestuj ve dvojicch. Slbili si, e si vdycky budou navzjem "
-  "hldat zda. Po cest mohou niit zdi.")
+  "Èervení nájezdníci cestují ve dvojicích. Slíbili si, že si vždycky budou navzájem "
+  "hlídat záda. Po cestì mohou nièit zdi.")
 
-N("Gray Raider", GEN_M, "ed njezdnk", "ed njezdnci", "edho njezdnka", "edm njezdnkem")
+N("Gray Raider", GEN_M, "Šedý nájezdník", "Šedí nájezdníci", "Šedého nájezdníka", "Šedým nájezdníkem")
 S("Gray Raiders never step on gray cells.",
-  "ed njezdnci nikdy nevstupuj na ed polka.")
+  "Šedí nájezdníci nikdy nevstupují na šedá políèka.")
 
-N("Green Raider", GEN_M, "Zelen njezdnk", "Zelen njezdnci", "Zelenho njezdnka", "Zelenm njezdnkem")
+N("Green Raider", GEN_M, "Zelený nájezdník", "Zelení nájezdníci", "Zeleného nájezdníka", "Zeleným nájezdníkem")
 S("Green Raiders never step from one green cell to another.",
-  "Zelen njezdnci nikdy nepechzej z jednoho zelenho polka na druh.")
+  "Zelení nájezdníci nikdy nepøecházejí z jednoho zeleného políèka na druhé.")
 
-N("Brown Raider", GEN_M, "Hnd njezdnk", "Hnd njezdnci", "Hndho njezdnka", "Hndm njezdnkem")
+N("Brown Raider", GEN_M, "Hnìdý nájezdník", "Hnìdí nájezdníci", "Hnìdého nájezdníka", "Hnìdým nájezdníkem")
 S("Brown Raiders never move adjacent to an item.",
-  "Hnd njezdnci nikdy nevstupuj na polka, kter soused s pedmtem.")
+  "Hnìdí nájezdníci nikdy nevstupují na políèka, která sousedí s pøedmìtem.")
 
 
-N("Blue Raider", GEN_M, "Modr njezdnk", "Mod njezdnci", "Modrho njezdnka", "Modrm njezdnkem")
+N("Blue Raider", GEN_M, "Modrý nájezdník", "Modøí nájezdníci", "Modrého nájezdníka", "Modrým nájezdníkem")
 S("Blue Raiders have a powerful attack which takes two turns to complete, and also makes the Blue Raider stunned "
   "for a long time. This attack can destroy other Raiders if it hits them.",
-  "Mod njezdnci maj mocn tok, kter trv dv kola a Modr njezdnk "
-  "po nm zstane dlouho omren. Tento tok doke zniit jin Njezdnky, pokud je zashne."
+  "Modøí nájezdníci mají mocný útok, který trvá dvì kola a Modrý nájezdník "
+  "po nìm zùstane dlouho omráèený. Tento útok dokáže znièit jiné Nájezdníky, pokud je zasáhne."
   )
 
-S("You cannot attack Raiders directly!", "Na Njezdnky neme toit pmo!")
+S("You cannot attack Raiders directly!", "Na Nájezdníky nemùžeš útoèit pøímo!")
 
-Orb("Slaying", "Zhuby")
+Orb("Slaying", "Záhuby")
 
 S("This Orb lets you defeat Raiders and other tough single-cell monsters in melee.",
-  "Tato Sgra ti umouje zabt v boji nablzko Njezdnky a jin odoln jednopolkov netvory.")
+  "Tato Sgéra ti umožòuje zabít v boji nablízko Nájezdníky a jiné odolné jednopolíèkové netvory.")
 
 // Jelly Kingdom
 
-N("Jelly Kingdom", GEN_N, "Krlovstv rosolu", "Krlovstv rosolu", "Krlovstv rosolu", "v Krlovstv rosolu")
+N("Jelly Kingdom", GEN_N, "Království rosolu", "Království rosolu", "Království rosolu", "v Království rosolu")
 
 S("Some of the Slime Beasts have decided to revolt against the color rules in the "
   "Alchemist Lab. They have changed their shape and consistency, declared independence, and established their own Kingdom.\n\n"
   "Jellies switch between being a wall and being a monster after every treasure you pick.",
   
-  "Nkte Slizov netvoi se rozhodli vzbouit proti barevnm pravidlm v Alchymistick laboratoi. Zmnili svj tvar a konzistencim vyhlsili nezvislost a zaloili si sv vlastn Krlovstv.\n\n"
-  "Kdykoli sebere njak poklad, rosoly se zmn ze zd na netvory a opan."
+  "Nìkteøí Slizoví netvoøi se rozhodli vzbouøit proti barevným pravidlùm v Alchymistické laboratoøi. Zmìnili svùj tvar a konzistencim vyhlásili nezávislost a založili si své vlastní Království.\n\n"
+  "Kdykoli sebereš nìjaký poklad, rosoly se zmìní ze zdí na netvory a opaènì."
   )
 
-N("Red Jelly", GEN_O, "erven rosol", "erven rosoly", "erven rosol", "ervenm rosolem")
-N("Blue Jelly", GEN_O, "Modr rosol", "Modr rosoly", "Modr rosol", "Modrm rosolem")
+N("Red Jelly", GEN_O, "Èervený rosol", "Èervené rosoly", "Èervený rosol", "Èerveným rosolem")
+N("Blue Jelly", GEN_O, "Modrý rosol", "Modré rosoly", "Modrý rosol", "Modrým rosolem")
 
-N("Tasty Jelly", GEN_O, "Chutn rosol", "Chutn rosoly", "Chutn rosol", "Chutnm rosolem")
+N("Tasty Jelly", GEN_O, "Chutný rosol", "Chutné rosoly", "Chutný rosol", "Chutným rosolem")
 S("A tasty byproduct of the Jelly Revolution.",
-  "Chutn vedlej produkt Rosolov revoluce.")
+  "Chutný vedlejší produkt Rosolové revoluce.")
 
-Orb("Phasing", "Fzovn")
+Orb("Phasing", "Fázování")
 S("This orb lets you pass through walls (one cell wide), and also through as long as they will not attack you in transit.",
-  "Tato Sfra ti umouje prochzet zdmi (o tlouce jednoho polka), a tak netvory, pokud na tebe pitom nemohou zatoit.")
+  "Tato Sféra ti umožòuje procházet zdmi (o tlouš ce jednoho políèka), a také netvory, pokud na tebe pøitom nemohou zaútoèit.")
 
-S("You cannot attack Jellies in their wall form!", "Na Rosoly neme toit, kdy jsou v podob zdi!")
+S("You cannot attack Jellies in their wall form!", "Na Rosoly nemùžeš útoèit, když jsou v podobì zdi!")
 
 // keyboard help
 //---------------
 
-S("advanced keyboard shortcuts", "pokroil klvesov zkratky")
+S("advanced keyboard shortcuts", "pokroèilé klávesové zkratky")
 
 /* not yet translated to Polish
   "1 = orthogonal/Gans model",
@@ -6796,59 +6799,64 @@ S("advanced keyboard shortcuts", "pokroil klvesov zkratky")
 */
 
 /* not yet translated to Polish
-  "1 = ortogonln/Gansv model",
-  "2 = mal Poincarho model/stereografick projekce",
-  "3 = velk Poincarho model/stereografick projekce",
-  "4 = Kleinv model/gnmonick projekce",
-  "5 = zmna mdu zobrazovn zd",
-  "6 = zmna mky",
-  "7 = zmna oznaovn sedmihelnk",
-  "8 = zmna barvy pozad",
+  "1 = ortogonální/Gansùv model",
+  "2 = malý Poincarého model/stereografická projekce",
+  "3 = velký Poincarého model/stereografická projekce",
+  "4 = Kleinùv model/gnómonická projekce",
+  "5 = zmìna módu zobrazování zdí",
+  "6 = zmìna møížky",
+  "7 = zmìna oznaèování sedmiúhelníkù",
+  "8 = zmìna barvy pozadí",
   "9 = model hyperboloidu",
-  "qweasdzxc, hjklyubn, numpad = pohyb/ekn na mst",
-  "ipky = scrollovn",
-  "o = pehled svta",
+  "qweasdzxc, hjklyubn, numpad = pohyb/èekání na místì",
+  "šipky = scrollování",
+  "o = pøehled svìta",
   "v = menu",
-  "F1 = npovda",
+  "F1 = nápovìda",
   "F5 = restart",
-  "F10 = ukonen hry",
-  "Esc = status kolu",
+  "F10 = ukonèení hry",
+  "Esc = status úkolu",
   "Alt+Enter = full screen",
-  "Alt = zvraznn zajmavch vc",
-  "t = pouit dlkov Sfry (zacluje sted obrazovky)",
-  "g = polo Mrtvou sfru",
-  "lev kliknut = pohyb/ekn na mst",
-  "shift+lev kliknut = pouit dlkov Sfry",
-  "prav kliknut = kontextov npovda",
-  "koleko myi nahoru = scrollovn",
-  "dren prostednho tlatka myi = scrollovn",
-  "koleko myi dol = pohyb/ekn na mst",
-  "shift + koleko myi = zmna projekce",
-  "ctrl + koleko myi = zmna piblen",
-  "ctrl + shift + koleko myi = zmna projekce a piblen najednou",
-  "ctrl + dret prostedn tlatko myi = pohyb obrazovky",
-  "shift + prostedn tlatko myi = reset polohy"
+  "Alt = zvýraznìní zajímavých vìcí",
+  "t = použití dálkové Sféry (zacíluje støed obrazovky)",
+  "g = polož Mrtvou sféru",
+  "levé kliknutí = pohyb/èekání na místì",
+  "shift+levé kliknutí = použití dálkové Sféry",
+  "pravé kliknutí = kontextová nápovìda",
+  "koleèko myši nahoru = scrollování",
+  "držení prostøedního tlaèítka myši = scrollování",
+  "koleèko myši dolù = pohyb/èekání na místì",
+  "shift + koleèko myši = zmìna projekce",
+  "ctrl + koleèko myši = zmìna pøiblížení",
+  "ctrl + shift + koleèko myši = zmìna projekce a pøiblížení najednou",
+  "ctrl + držet prostøední tlaèítko myši = pohyb obrazovky",
+  "shift + prostøední tlaèítko myši = reset polohy"
 */
 
 /* achievements 
 
-		"NEW_ACHIEVEMENT_9_5_NAME"	"Doel jsi do znienho msta"
-		"NEW_ACHIEVEMENT_9_5_DESC"	"Najdi a zskej Chryzoberyl."
-		"NEW_ACHIEVEMENT_9_6_NAME"	"Hnd njezdnk"
-		"NEW_ACHIEVEMENT_9_6_DESC"	"Zskej 10 Chryzoberyl (nebo 25 ve Sfrostrategickm mdu)."
-		"NEW_ACHIEVEMENT_9_7_NAME"	"Modr njezdnk"
-		"NEW_ACHIEVEMENT_9_7_DESC"	"Zskej 25 Chryzoberyl (nebo 50 ve Sfrostrategickm mdu)."
-		"NEW_ACHIEVEMENT_9_8_NAME"	"Pn njezdnk"
-		"NEW_ACHIEVEMENT_9_8_DESC"	"Zskej 50 Chryzoberyl (nikoli ve Sfrostrategickm mdu)."
-		"NEW_ACHIEVEMENT_9_9_NAME"	"Doel jsi do Krlovstv rosolu"
-		"NEW_ACHIEVEMENT_9_9_DESC"	"Najdi a zskej Chutn rosol."
-		"NEW_ACHIEVEMENT_9_10_NAME"	"Chutn rosol"
-		"NEW_ACHIEVEMENT_9_10_DESC"	"Zskej 10 Chutnch rosol (nebo 25 ve Sfrostrategickm mdu)."
+		"NEW_ACHIEVEMENT_9_5_NAME"	"Došel jsi do znièeného mìsta"
+		"NEW_ACHIEVEMENT_9_5_DESC"	"Najdi a získej Chryzoberyl."
+		"NEW_ACHIEVEMENT_9_6_NAME"	"Hnìdý nájezdník"
+		"NEW_ACHIEVEMENT_9_6_DESC"	"Získej 10 Chryzoberylù (nebo 25 ve Sférostrategickém módu)."
+		"NEW_ACHIEVEMENT_9_7_NAME"	"Modrý nájezdník"
+		"NEW_ACHIEVEMENT_9_7_DESC"	"Získej 25 Chryzoberylù (nebo 50 ve Sférostrategickém módu)."
+		"NEW_ACHIEVEMENT_9_8_NAME"	"Pán nájezdníkù"
+		"NEW_ACHIEVEMENT_9_8_DESC"	"Získej 50 Chryzoberylù (nikoli ve Sférostrategickém módu)."
+		"NEW_ACHIEVEMENT_9_9_NAME"	"Došel jsi do Království rosolu"
+		"NEW_ACHIEVEMENT_9_9_DESC"	"Najdi a získej Chutný rosol."
+		"NEW_ACHIEVEMENT_9_10_NAME"	"Chutný rosol"
+		"NEW_ACHIEVEMENT_9_10_DESC"	"Získej 10 Chutných rosolù (nebo 25 ve Sférostrategickém módu)."
 		"NEW_ACHIEVEMENT_9_11_NAME"	"Rosol"
-		"NEW_ACHIEVEMENT_9_11_DESC"	"Zskej 25 Chutnch rosol (nebo 50 ve Sfrostrategickm mdu)."
-		"NEW_ACHIEVEMENT_9_12_NAME"	"Krl rosolu"
-		"NEW_ACHIEVEMENT_9_12_DESC"	"Zskej 50 Chutnch rosol (nikoli ve Sfrostrategickm mdu)."
+		"NEW_ACHIEVEMENT_9_11_DESC"	"Získej 25 Chutných rosolù (nebo 50 ve Sférostrategickém módu)."
+		"NEW_ACHIEVEMENT_9_12_NAME"	"Král rosolu"
+		"NEW_ACHIEVEMENT_9_12_DESC"	"Získej 50 Chutných rosolù (nikoli ve Sférostrategickém módu)."
 
 */
+
+S("pics to save:", "obrázky k nahrání:")
+S("level to save:", "mapa k nahrání:")
+S("pics to load:", "obrázky k uložení:")
+S("level to load:", "mapa k uložení:")
 
 #undef Orb
