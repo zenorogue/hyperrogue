@@ -1012,7 +1012,7 @@ hpcshape
   shSabre, shTurban1, shTurban2, shVikingHelmet, shRaiderHelmet, shRaiderArmor, shRaiderBody, shRaiderShirt,
   shWestHat1, shWestHat2, shGunInHand,
   shKnightArmor, shKnightCloak, shWightCloak,
-  shGhost, shEyes, shSlime, shJelly, shJoint, shWormHead, shTentHead, shShark,
+  shGhost, shEyes, shSlime, shJelly, shJoint, shWormHead, shTentHead, shShark, shWormSegment, shSmallWormSegment, shWormTail, shSmallWormTail,
   shHedgehogBlade, shHedgehogBladePlayer,
   shWolfBody, shWolfHead, shWolfLegs, shWolfEyes,
   shWolfFrontLeg, shWolfRearLeg, shWolfFrontPaw, shWolfRearPaw,
@@ -2000,6 +2000,16 @@ void buildpolys() {
   copyshape(shJoint, shDisk, PPR_ONTENTACLE);
   bshape(shTentHead, PPR_ONTENTACLE, scalef, 79);
   bshape(shWormHead, PPR_ONTENTACLE, scalef, 80);
+  
+  bshape(shWormSegment, PPR_TENTACLE1);
+  for(int i=0; i<=S84; i+=S3)
+    hpcpush(ddi(i, .20 * scalef) * C0);
+  bshape(shSmallWormSegment, PPR_TENTACLE1);
+  for(int i=0; i<=S84; i+=S3)
+    hpcpush(ddi(i, .16 * scalef) * C0);
+  bshape(shWormTail, PPR_TENTACLE1, scalef, 383);
+  bshape(shSmallWormTail, PPR_TENTACLE1, scalef, 384);
+
   if(nonbitrunc) bshape(shDragonSegment, PPR_TENTACLE1, 1, 233);
   else bshape(shDragonSegment, PPR_TENTACLE1, scalef, 234);
   bshape(shDragonWings, PPR_ONTENTACLE, scalef, 237);
@@ -3451,6 +3461,11 @@ NEWSHAPE, 379, 7, 1, 0.649585,0.084560, 0.623391,0.075842, 0.599921,0.058309, 0.
 NEWSHAPE, 380, 1, 2, -0.157063,0.003936, -0.151414,0.044436, -0.065427,0.009052, -0.151414,0.044436, -0.151129,0.067964, -0.072440,0.024229, -0.150301,0.069258, -0.113069,0.110826, -0.037964,0.039249, -0.110463,0.109185, -0.011307,0.146227, -0.108855,0.111771, -0.113069,0.110826, -0.110452,0.155897, -0.007227,0.165082, -0.111749,0.156720, -0.114514,0.196200, 0.003252,0.188966, -0.009486,0.143350, 0.043508,0.083540, 0.057523,0.000604,
 NEWSHAPE, 381, 1, 2, -0.128015,0.002500, -0.121343,0.106487, -0.104134,0.121999, -0.063293,0.274181, 0.038783,0.286293, 0.071085,0.292868, 0.087907,0.266956, 0.077475,0.243894, 0.083000,0.234337, 0.068629,0.220991, 0.042226,0.206757, 0.023044,0.227068, -0.009573,0.218873, -0.027348,0.140245, -0.005432,-0.096462, 0.020544,-0.030837, 
 NEWSHAPE, 382, 1, 2, 0.024784,0.028900, -0.009988,0.111744, -0.018320,0.147991, -0.006519,0.215354, 0.020083,0.223620, 0.029811,0.291799, -0.066579,0.278718, -0.136927,0.082023, -0.147101,-0.050084,
+
+NEWSHAPE, 383, 1, 2, 0.164154,0.032677, 0.112722,0.126268, 0.093106,0.144972, 0.036998,0.184005, -0.028137,0.220088, -0.088953,0.208314, -0.221199,0.117397, -0.270025,0.057450, -0.290973,0.020569,
+NEWSHAPE, 384, 1, 2, 0.146470,0.021791, 0.134179,0.071381, 0.089857,0.116839, 0.039860,0.139410, -0.005910,0.150902, -0.047971,0.139775, -0.104973,0.100695, -0.147597,0.052809, -0.177722,0.017653, -0.186756,0.003107, 
+
+
 NEWSHAPE
 };
 

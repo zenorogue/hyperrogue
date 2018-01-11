@@ -1725,9 +1725,10 @@ double chainAngle(cell *c, transmatrix& V, cell *c2, double dft, const transmatr
   }
 
 // equivalent to V = V * spin(-chainAngle(c,V,c2,dft));
-bool chainAnimation(cell *c, transmatrix& V, cell *c2, int i, int b, const transmatrix &Vwhere) {
+bool chainAnimation(cell *c, transmatrix& V, cell *c2, int i, int b, const transmatrix &Vwhere, ld& length) {
   if(!gmatrix0.count(c2)) {
     V = V * ddspin(c,i,b);
+    length = cellgfxdist(c,i);
     return false;
     }
   hyperpoint h = C0;
@@ -1736,6 +1737,7 @@ bool chainAnimation(cell *c, transmatrix& V, cell *c2, int i, int b, const trans
     h = inverse(V) * Vwhere * inverse(gmatrix0[c]) * gmatrix0[c2] * h;
   else
     h = inverse(V) * gmatrix0[c2] * h;
+  length = hdist0(h);
   V = V * rspintox(h);
   return true;  
   }
@@ -1763,6 +1765,31 @@ int cellcolor(cell *c) {
 
   return OUTLINE_NONE;
   } 
+
+int taildist(cell *c) {
+  int s = 0;
+  while(s < 1000 && c->mondir != NODIR && isWorm(c->monst)) {
+    s++; c = c->mov[c->mondir];
+    }
+  return s;
+  }
+
+int last_wormsegment = -1;
+vector<vector< std::function<void()> > > wormsegments;
+
+void add_segment(int d, const std::function<void()>& s) {
+  if(size(wormsegments) <= d) wormsegments.resize(d+1);
+  last_wormsegment = max(last_wormsegment, d);
+  wormsegments[d].push_back(s);
+  }
+
+void drawWormSegments() {
+  for(int i=0; i<=last_wormsegment; i++) {
+    for(auto& f: wormsegments[i]) f();
+    wormsegments[i].clear();
+    }
+  last_wormsegment = -1;
+  }
 
 bool drawMonster(const transmatrix& Vparam, int ct, cell *c, int col) {
 
@@ -1803,20 +1830,27 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, int col) {
     if(c->mondir != NODIR) {
       
       if(mmmon) {
-        if(nospinb)
-          chainAnimation(c, Vb, c->mov[c->mondir], c->mondir, 0, Vparam);
-        else 
+        ld length;
+        // cell *c2 = c->mov[c->mondir];
+        if(nospinb) 
+          chainAnimation(c, Vb, c->mov[c->mondir], c->mondir, 0, Vparam, length);
+        else {
           Vb = Vb * ddspin(c, c->mondir);
+          length = cellgfxdist(c, c->mondir);
+          }
 
         if(mapeditor::drawUserShape(Vb, 1, c->monst, (col << 8) + 0xFF, c)) return false;
 
         if(isIvy(c) || isMutantIvy(c) || c->monst == moFriendlyIvy)
           queuepoly(Vb, shIBranch, (col << 8) + 0xFF);
-        else if(c->monst < moTentacle) {
+/*         else if(c->monst < moTentacle && wormstyle == 0) {
           ShadowV(Vb, shTentacleX, PPR_GIANTSHADOW);
           queuepoly(mmscale(Vb, geom3::ABODY), shTentacleX, 0xFF);
           queuepoly(mmscale(Vb, geom3::ABODY), shTentacle, (col << 8) + 0xFF);
-          }
+          } */
+//        else if(c->monst < moTentacle) {
+//          }
+
         else if(c->monst == moDragonHead || c->monst == moDragonTail) {
           char part = dragon::bodypart(c, dragon::findhead(c));
           if(part != '2') {
@@ -1832,9 +1866,32 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, int col) {
             drawMonsterType(moGhost, c, Vs, darkena(col, 0, 0xFF), footphase);
             col = minf[moTentacletail].color;
             }
+          /*
           queuepoly(mmscale(Vb, geom3::ABODY), shTentacleX, 0xFFFFFFFF);
           queuepoly(mmscale(Vb, geom3::ABODY), shTentacle, (col << 8) + 0xFF);
           ShadowV(Vb, shTentacleX, PPR_GIANTSHADOW);
+          */
+          bool hexsnake = c->monst == moHexSnake || c->monst == moHexSnakeTail;
+          bool thead = c->monst == moTentacle || c->monst == moTentaclewait || c->monst == moTentacleEscaping;
+          hpcshape& sh = hexsnake ? shWormSegment : shSmallWormSegment;
+          ld wav = hexsnake ? 0 : 
+            c->monst < moTentacle ? 1/1.5 :
+            1;
+          int col0 = col;
+          if(c->monst == moWorm || c->monst == moWormwait)
+            col0 = minf[moWormtail].color;
+          else if(thead)
+            col0 = minf[moTentacletail].color;
+          add_segment(taildist(c), [=] () {
+            for(int i=11; i>=0; i--) {
+              if(i < 3 && (c->monst == moTentacle || c->monst == moTentaclewait)) continue;
+              transmatrix Vbx = Vb * spin(sin(M_PI * i / 6.) * wav / (i+.1)) * xpush(length * (i) / 12.0);
+              // transmatrix Vbx2 = Vnext * xpush(length2 * i / 6.0);
+              // Vbx = Vbx * rspintox(inverse(Vbx) * Vbx2 * C0) * pispin;
+              ShadowV(Vbx, sh, PPR_GIANTSHADOW);
+              queuepoly(mmscale(Vbx, geom3::ABODY), sh, (col0 << 8) + 0xFF);
+              }
+            });
           }
         }
         
@@ -1883,7 +1940,8 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, int col) {
         char part = dragon::bodypart(c, dragon::findhead(c));
         if(part == 't') {
           if(nospinb) {
-            chainAnimation(c, Vb, c2, nd, 0, Vparam);
+            ld length;
+            chainAnimation(c, Vb, c2, nd, 0, Vparam, length);
             Vb = Vb * pispin;
             }
           else {
@@ -1895,7 +1953,8 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, int col) {
           }
         else if(true) {
           if(nospinb) {
-            chainAnimation(c, Vb, c2, nd, 0, Vparam);
+            ld length;
+            chainAnimation(c, Vb, c2, nd, 0, Vparam, length);
             Vb = Vb * pispin;
             double ang = chainAngle(c, Vb, c->mov[c->mondir], (displaydir(c, c->mondir) - displaydir(c, nd)) * M_PI / S42, Vparam);
             ang /= 2;
@@ -1916,8 +1975,29 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, int col) {
           }
         }
       else {
-        if(!(c->mondir == NODIR && (c->monst == moTentacletail || (c->monst == moWormtail && wormpos(c) < WORMLENGTH))))
-          queuepoly(Vb, shJoint, darkena(col, 0, 0xFF));
+        if(c->monst == moTentacletail && c->mondir == NODIR) {
+          queuepoly(Vb, shWormSegment, darkena(col, 0, 0xFF));
+          }
+        else if(c->mondir == NODIR) {
+          bool hexsnake = c->monst == moHexSnake || c->monst == moHexSnakeTail;
+          cell *c2 = NULL;
+          for(int i=0; i<c->type; i++)
+            if(c->mov[i] && isWorm(c->mov[i]->monst) && c->mov[i]->mondir == c->spn(i))
+              c2 = c->mov[i];
+          int nd = neighborId(c, c2);
+          if(nospinb) {
+            ld length;
+            chainAnimation(c, Vb, c2, nd, 0, Vparam, length);
+            Vb = Vb * pispin;
+            }
+          else {
+            Vb = Vb0 * ddspin(c, nd, S42);
+            }
+          transmatrix Vbb = mmscale(Vb, geom3::ABODY) * pispin;
+          hpcshape& sh = hexsnake ? shWormTail : shSmallWormTail;
+          queuepoly(Vbb, sh, darkena(col, 0, 0xFF));
+          ShadowV(Vb, sh, PPR_GIANTSHADOW);
+          }
         }
       }
 
@@ -1990,7 +2070,8 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, int col) {
   else if(c->monst == moKrakenT) {
     if(c->hitpoints == 0) col = 0x404040;
     if(nospinb) {
-      chainAnimation(c, Vb, c->mov[c->mondir], c->mondir, 0, Vparam);
+      ld length;
+      chainAnimation(c, Vb, c->mov[c->mondir], c->mondir, 0, Vparam, length);
       Vb = Vb * pispin;
       }
     else Vb = Vb * ddspin(c, c->mondir, S42);
@@ -5070,6 +5151,7 @@ void drawthemap() {
     
     drawrec(viewctr, maxreclevel, hsOrigin, cview());
     }
+  drawWormSegments();
   drawBlizzards();
   drawArrowTraps();
   ivoryz = false;
