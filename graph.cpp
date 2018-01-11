@@ -610,7 +610,7 @@ bool drawItemType(eItem it, cell *c, const transmatrix& V, int icol, int ticks, 
     }
   
   else if(it == itCompass) {
-    cell *c1 = findcompass(c);
+    cell *c1 = c ? findcompass(c) : NULL;
     transmatrix V2;
     if(c1) {
       transmatrix P = shmup::ggmatrix(c1);
