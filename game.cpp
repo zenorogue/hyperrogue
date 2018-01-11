@@ -4197,7 +4197,7 @@ void moveWorm(cell *c) {
       cell *c2 = c, *c3 = c2;
       while(c2->monst == moTentacletail || c2->monst == moTentacleGhost) {
         if(c2->mondir == NODIR) {
-          drawParticles(c2, (linf[c2->land].color & 0xF0F0F0), 16, 50);
+          // drawParticles(c2, (linf[c2->land].color & 0xF0F0F0), 16, 50);
           return;
           }
         c3 = c2, c2 = c3->mov[c2->mondir];
