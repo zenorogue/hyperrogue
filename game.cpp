@@ -4558,7 +4558,10 @@ int inpair(cell *c, int colorpair) {
   }
 
 int snake_pair(cell *c) {
-  return (1 << pattern_threecolor(c)) | (1 << pattern_threecolor(c->mov[c->mondir]));
+  if(c->mondir == NODIR)
+    return (1 << pattern_threecolor(c));
+  else
+    return (1 << pattern_threecolor(c)) | (1 << pattern_threecolor(c->mov[c->mondir]));
   }
 
 // note: move from 'c' to 'from'!
