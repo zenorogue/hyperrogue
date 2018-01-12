@@ -1363,17 +1363,22 @@ int monstersnear(cell *c, cell *nocount, eMonster who, cell *pushto, cell *comef
     who == moPlayer ? sword::shift(comefrom, c, sword::angle[multi::cpid]) :
     sword::angle[multi::cpid]);
   
-  if(who == moPlayer) for(int b=0; b<2; b++) {
-    sm.swordnext[b] = sword::pos(multi::cpid, b);
-    sm.swordtransit[b] = NULL;
-    if(sm.swordnext[b] && sm.swordnext[b] != sm.swordlast[b] && !isNeighbor(sm.swordlast[b], sm.swordnext[b])) {
-      forCellEx(c2, sm.swordnext[b])
-        if(c2 != c && c2 != comefrom && isNeighbor(c2, S3==3 ? sm.swordlast[b] : *wcw))
-          sm.swordtransit[b] = c2;
-      if(S3 == 4)
-        forCellEx(c2, c)
-          if(c2 != comefrom && isNeighbor(c2, sm.swordlast[b]))
+  for(int b=0; b<2; b++) {
+    if(who == moPlayer) {
+      sm.swordnext[b] = sword::pos(multi::cpid, b);
+      sm.swordtransit[b] = NULL;
+      if(sm.swordnext[b] && sm.swordnext[b] != sm.swordlast[b] && !isNeighbor(sm.swordlast[b], sm.swordnext[b])) {
+        forCellEx(c2, sm.swordnext[b])
+          if(c2 != c && c2 != comefrom && isNeighbor(c2, S3==3 ? sm.swordlast[b] : *wcw))
             sm.swordtransit[b] = c2;
+        if(S3 == 4)
+          forCellEx(c2, c)
+            if(c2 != comefrom && isNeighbor(c2, sm.swordlast[b]))
+              sm.swordtransit[b] = c2;
+        }
+      }
+    else {
+      sm.swordnext[b] = sm.swordtransit[b] = NULL;
       }
     }
 
