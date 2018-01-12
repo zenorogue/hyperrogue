@@ -2181,3 +2181,16 @@ Gameplay bugfixes
 - fixed a bug which desynchronized the PTM scores on OSX
 - PTM/Yendor scores should be saved correctly for the new geometries
 - updated the Czech translation
+
+2018.01.08 23:26 version 10.3b
+- you can now play Crossroads IV in alternate hyperbolic geometries, for a mostly complete game (not all lands though)
+- removed the Crossroads from the Chaos mode
+- updated the Russian translation
+- some translation/text fixes
+- fixed geometry restrictions for achievements/leaderboards -- which leaderboard entries should be removed?
+
+2018.01.11 23:37 version 10.3c
+- fixed the crash related to RRV
+- new graphics for Sandworm/Rocksnake/Tentacle tails
+- removed the sandworm/tentacle-from-the-ground dirt effect
+
