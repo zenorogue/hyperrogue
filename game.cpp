@@ -2474,7 +2474,7 @@ void findWormIvy(cell *c) {
       bool bug = true;
       for(int i=0; i<c->type; i++) {
         cell* c2 = c->mov[i];
-        if(c2 && isWorm(c2) && c2->mov[c2->mondir] == c) {
+        if(c2 && isWorm(c2) && c2->mondir != NODIR && c2->mov[c2->mondir] == c) {
           settemp(c);
           c = c2;
           bug = false;
