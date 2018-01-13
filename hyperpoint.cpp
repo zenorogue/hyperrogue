@@ -384,7 +384,13 @@ transmatrix inverse(const transmatrix& T) {
   
   ld d = det(T);
   transmatrix T2;
-  if(d == 0) return T2;
+  if(d == 0) { 
+    printf("Warning: inverting a singular matrix\n");
+    display(T);
+    display(T2);
+    T2 = Id; 
+    return T2; 
+    }
   
   for(int i=0; i<3; i++) 
   for(int j=0; j<3; j++) 
