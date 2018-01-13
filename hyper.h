@@ -109,7 +109,15 @@ struct gcell {
   
   } LHU;
   
-  gcell() { cellcount++; }
+  #ifdef CELLID
+  int cellid;
+  #endif
+  
+  gcell() { cellcount++; 
+    #ifdef CELLID
+    cellid = cellcount;  
+    #endif
+    }
   ~gcell() { cellcount--; }
   };
 
@@ -2445,3 +2453,8 @@ bool cannotPickupItem(cell *c, bool telekinesis);
 bool canPickupItemWithMagnetism(cell *c, cell *from);
 void pickupMovedItems(cell *c);
 eMonster genRuinMonster(cell *c);
+
+template<class T> void hrandom_shuffle(T* x, int n) {
+  for(int k=1; k<n; k++) swap(x[k], x[hrand(k+1)]);
+  }
+  

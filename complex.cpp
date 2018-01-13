@@ -1597,7 +1597,7 @@ namespace hive {
         }
       }
     
-    random_shuffle(bugtomove.begin(), bugtomove.end());
+    hrandom_shuffle(&bugtomove[0], size(bugtomove));
     sort(bugtomove.begin(), bugtomove.end());
     
     int battlecount = 0;
@@ -2613,7 +2613,7 @@ namespace kraken {
         int qdir = 0;
         cell *ctab[MAX_EDGE];
         forCellEx(c2, c) if(isWatery(c2)) ctab[qdir++] = c2;
-        random_shuffle(ctab, ctab+qdir);
+        hrandom_shuffle(ctab, qdir);
         while(qdir--) trymove(ctab[qdir]);
         }
       }
@@ -3083,7 +3083,7 @@ namespace windmap {
     bool inqueue[N];
     vector<int> tocheck;
     for(int i=0; i<N; i++) tocheck.push_back(i), inqueue[i] = true;
-    random_shuffle(tocheck.begin(), tocheck.end());    
+    hrandom_shuffle(&tocheck[0], size(tocheck));
     
     for(int a=0; a<size(tocheck); a++) {
       if(a >= 200*N) { printf("does not converge\n"); break; }

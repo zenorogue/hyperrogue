@@ -154,6 +154,11 @@ ld hrandf() {
   return (r() & HRANDMAX) / (HRANDMAX + 1.0);
   }
 
+int hrandstate() {
+  mt19937 r2 = r;
+  return r2() % 1000000;
+  }
+
 void initcell(cell *c) {
   c->mpdist = INFD;   // minimum distance from the player, ever
   c->cpdist = INFD;   // current distance from the player
@@ -1308,7 +1313,8 @@ int monstersnear2() {
     dynamicval<eMonster> sw(passive_switch, passive_switch);
 
     // check for safe orbs and switching first
-    for(auto &sm: stalemate::moves) {
+    for(auto &sm: stalemate::moves) if(sm.who == moPlayer) {
+
       if(hasSafeOrb(sm.moveto)) {
         multi::cpid--; return 0;
         }
@@ -1318,8 +1324,10 @@ int monstersnear2() {
         if(canPickupItemWithMagnetism(c2, sm.comefrom)) {
           if(itemclass(c2->item) == IC_TREASURE)
             passive_switch = active_switch();
-          if(hasSafeOrb(c2))
+          if(hasSafeOrb(c2)) {
+            multi::cpid--;
             return 0;
+            }
           }
       }    
 
@@ -4053,7 +4061,7 @@ void killThePlayer(eMonster m, int id, flagtype flags) {
     items[itOrbSafety] = 0;
     }
   else {
-    printf("confused!\n");
+//  printf("confused!\n");
     addMessage(XLAT("%The1 is confused!", m));
     }
   }
@@ -4495,7 +4503,8 @@ void groupmove(eMonster movtype, flagtype mf) {
     int dirtable[10], qdirtable=0;
     
     forCellIdAll(c2,t,c) dirtable[qdirtable++] = t;
-    random_shuffle(dirtable, dirtable + qdirtable);
+    hrandom_shuffle(dirtable, qdirtable);
+
     while(qdirtable--) {
       int t = dirtable[qdirtable];
       groupmove2(c->mov[t],c,t,movtype,mf);
@@ -5008,7 +5017,7 @@ int stayvalue(eMonster m, cell *c) {
 // friendly version of moveval
 int movevalue(eMonster m, cell *c, cell *c2, flagtype flags) {
   int val = 0;
-
+  
   if(isPlayerOn(c2)) val = -3000;
   else if(againstRose(c, c2)  && !ignoresSmell(m)) return -1200;
   else if(m == moPrincess && c2->stuntime && hasPrincessWeapon(c2->monst) && 
@@ -6008,7 +6017,7 @@ void activateSafety(eLand l) {
     l = laCrossroads;
   firstland = l;
   safetyland = l;
-  safetyseed = time(NULL);
+  safetyseed = 0;
   clear_euland(firstland);
   safety = true; avengers = 0;
   clearMemory();
