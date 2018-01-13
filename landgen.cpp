@@ -1490,11 +1490,11 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           }
         else if(ishept(c) && hrand(100) < (doCross?20:8) && !c->monst) {
           buildRedWall(c, 80);
-          int i = hrand(7);
+          int i = hrand(S7);
           buildRedWall(createMovR(c, i), 33);
           if(hrand(2) == 0) 
             buildRedWall(createMovR(createMovR(c, i), c->spn(i)+(hrand(2)?2:4)), 20);
-          i += 3 + hrand(2);
+          i = (i + 3 + hrand(2)) % S7;
           if(hrand(6) < 4)
             buildRedWall(createMovR(c, i), 33);
           if(hrand(2) == 0) 
