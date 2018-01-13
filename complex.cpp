@@ -311,8 +311,8 @@ namespace elec {
         }
       
       // printf("lowlink of %d [%s] = %d\n", id, dnameof(c->wall), ch.lowlink);
-      if(ch.lowlink < charges[from].lowlink)
-        charges[from].lowlink = ch.lowlink;
+      if(charges[id].lowlink < charges[from].lowlink)
+        charges[from].lowlink = charges[id].lowlink;
   
       if(charges[id].lowlink >= from) {
         while(xstack.back().first != from || xstack.back().second != id) {
