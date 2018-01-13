@@ -5615,13 +5615,17 @@ void restartGraph() {
     }
   }
 
+void clearAnimations() {
+  for(int i=0; i<ANIMLAYERS; i++) animations[i].clear();
+  flashes.clear();
+  fallanims.clear();
+  }
+  
 auto graphcm = addHook(clearmemory, 0, [] () {
   DEBB(DF_INIT, (debugfile,"clear graph memory\n"));
   mouseover = centerover.c = lmouseover = NULL;  
-  for(int i=0; i<ANIMLAYERS; i++) animations[i].clear();
   gmatrix.clear(); gmatrix0.clear();
-  flashes.clear();
-  fallanims.clear();
+  clearAnimations();
   });
 
 void resetGeometry() {
