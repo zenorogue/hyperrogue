@@ -395,6 +395,10 @@ void showCheatMenu() {
 
 void modalDebug(cell *c) {
   viewctr.h = c->master;
+  if(noGUI) {
+    fprintf(stderr, "fatal: modalDebug called on %p without GUI\n", c);
+    exit(1);
+    }
   pushScreen(debugScreen);
   debugmode = true;
   mainloop();
