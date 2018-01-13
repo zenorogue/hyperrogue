@@ -63,6 +63,7 @@ int arg::readCommon() {
 #if CAP_SDLAUDIO
   else if(argis("-se")) { PHASE(1); shift(); wheresounds = args(); }
 #endif
+  else if(argis("-svol")) { PHASE(1); shift(); effvolume = argi(); }
 #if CAP_EDIT
   else if(argis("-lev")) { shift(); levelfile = args(); }
   else if(argis("-pic")) { shift(); picfile = args(); }
