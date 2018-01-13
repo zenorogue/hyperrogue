@@ -588,6 +588,7 @@ void resetview() {
     viewctr.h = cwt.c->master,
     viewctr.spin = cwt.spin;
   else centerover = cwt;
+  cwtV = Id;
   // SDL_LockSurface(s);
   // SDL_UnlockSurface(s);
   }
