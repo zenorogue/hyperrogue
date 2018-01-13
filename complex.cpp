@@ -279,9 +279,11 @@ namespace elec {
     else {
       int id = size(charges);
       charges.push_back(chargedata());
-      chargedata& ch(charges[id]);
+
+      {chargedata& ch(charges[id]);
       ch.c = c; ch.otmp = c->aitmp; ch.lowlink = id; c->aitmp = id;
       ch.instack = true; ch.fire = false;
+      }
       // c->landparam = id;
       
       // printf("edge %d-%d [%s]\n", from, id, dnameof(c->wall));
@@ -292,11 +294,11 @@ namespace elec {
       
       if(chh == ecGrounded) {
         xstack.push_back(make_pair(id, 0));
-        ch.lowlink = 0;
+        charges[id].lowlink = 0;
         }
       else if(chh == ecCharged) {
         xstack.push_back(make_pair(id, 1));
-        if(from != 1) ch.lowlink = 1;
+        if(from != 1) charges[id].lowlink = 1;
         }
       
       for(int i=0; i<c->type; i++) {
@@ -322,7 +324,7 @@ namespace elec {
         // printf("\n");
         }
       
-      ch.instack = false;
+      charges[id].instack = false;
       }
     }
   
