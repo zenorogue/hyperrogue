@@ -4999,7 +4999,8 @@ void drawMarkers() {
 void drawFlashes() {
   for(int k=0; k<size(flashes); k++) {
     flashdata& f = flashes[k];
-    transmatrix V = gmatrix[f.where];
+    transmatrix V;
+    try { V = gmatrix.at(f.where); } catch(out_of_range) { continue; }    
     int tim = ticks - f.t;
     
     bool kill = tim > f.size;
