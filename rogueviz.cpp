@@ -1695,6 +1695,9 @@ int readArgs() {
 #endif
 
 void showMenu() {
+  cmode = sm::SIDE | sm::MAYDARK | sm::DIALOG_STRICT_X;
+  gamescreen(0);  
+
   dialog::init(XLAT("rogueviz configuration"));
 
   dialog::addSelItem(XLAT("temperature"), fts(sag::temperature), 't');
