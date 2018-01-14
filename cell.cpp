@@ -541,16 +541,16 @@ heptagon* encodeId(int id) {
 
 namespace quotientspace {
   struct code {
-    int c[8];
+    int c[MAX_EDGE+1];
     };
   
   bool operator == (const code& c1, const code &c2) {
-    for(int i=0; i<8; i++) if(c1.c[i] != c2.c[i]) return false;
+    for(int i=0; i<=S7; i++) if(c1.c[i] != c2.c[i]) return false;
     return true;
     }
 
   bool operator < (const code& c1, const code &c2) {
-    for(int i=0; i<8; i++) if(c1.c[i] != c2.c[i]) return c1.c[i] < c2.c[i];
+    for(int i=0; i<=S7; i++) if(c1.c[i] != c2.c[i]) return c1.c[i] < c2.c[i];
     return false;
     }  
 
@@ -561,7 +561,7 @@ namespace quotientspace {
   code get(heptspin hs) {
     code res;
     res.c[0] = cod(hs.h);
-    for(int i=1; i<8; i++) {
+    for(int i=1; i<=S7; i++) {
       res.c[i] = cod(hsstep(hs, 0).h);
       hs = hsspin(hs, 1);
       }
@@ -570,7 +570,7 @@ namespace quotientspace {
   
   int rvadd = 0, rvdir = 1;
   
-  int rv(int x) { return (rvadd+x*rvdir) % 7; }
+  int rv(int x) { return (rvadd+x*rvdir) % S7; }
   
 struct hrmap_quotient : hrmap {
 
