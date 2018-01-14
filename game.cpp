@@ -156,7 +156,7 @@ ld hrandf() {
 
 int hrandstate() {
   mt19937 r2 = r;
-  return r2() % 1000000;
+  return r2() & HRANDMAX;
   }
 
 void initcell(cell *c) {
@@ -6017,7 +6017,7 @@ void activateSafety(eLand l) {
     l = laCrossroads;
   firstland = l;
   safetyland = l;
-  safetyseed = 0;
+  safetyseed = hrandpos();
   clear_euland(firstland);
   safety = true; avengers = 0;
   clearMemory();
