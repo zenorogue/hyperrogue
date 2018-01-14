@@ -567,7 +567,7 @@ void teleportTo(cell *dest) {
     checkmoveO();
   }
 
-void jumpTo(cell *dest, eItem byWhat, int bonuskill = 0, eMonster dashmon = moNone) {
+void jumpTo(cell *dest, eItem byWhat, int bonuskill, eMonster dashmon) {
   if(byWhat != itStrongWind) playSound(dest, "orb-frog");
   movecost(cwt.c, dest);
   

@@ -344,7 +344,7 @@ bool inSpecialMode() {
     vid.wallmode != DEFAULT_WALLMODE;
   }
 
-void resetModes(char leave = 'c') {
+void resetModes(char leave) {
   popAllGames();
   firstland = laIce; vid.scfg.players = 1;
   if(shmup::on != (leave == 's')) restartGame('s');

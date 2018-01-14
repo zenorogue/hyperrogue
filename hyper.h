@@ -742,6 +742,7 @@ namespace rug {
   extern bool rendernogl;
   extern int  texturesize;
   extern ld   model_distance;
+  extern transmatrix currentrot;
 #if CAP_RUG
   void show();
   void init();
@@ -1107,6 +1108,11 @@ bool checkOrb(eMonster m1, eItem orb);
 
 movedir vectodir(const hyperpoint& P);
 
+namespace tortoise {
+  extern int seekbits;
+  int getRandomBits();
+  }
+
 namespace sword {
 
   extern int angle[MAXPLAYER];
@@ -1166,6 +1172,7 @@ namespace dialog {
   
   void addSelItem(string body, string value, int key);
   void addBoolItem(string body, bool value, int key);
+  void addBigItem(string body, int key);
   void addColorItem(string body, int value, int key);
   void openColorDialog(unsigned int& col, unsigned int *pal = palette);
   void addHelp(string body);
@@ -2457,4 +2464,21 @@ eMonster genRuinMonster(cell *c);
 template<class T> void hrandom_shuffle(T* x, int n) {
   for(int k=1; k<n; k++) swap(x[k], x[hrand(k+1)]);
   }
-  
+
+void resetModes(char leave = 'c');
+void activateSafety(eLand l);
+void showMainMenu();
+extern bool nomenukey;
+void resetConfig();
+void welcomeMessage();
+void jumpTo(cell *dest, eItem byWhat, int bonuskill = 0, eMonster dashmon = moNone);
+extern bool canmove;
+
+void activateSafety(eLand l);
+extern bool childbug;
+
+void fullcenter();
+void mainloop();
+void clearAnimations();
+
+transmatrix rotmatrix(double rotation, int c0, int c1);
