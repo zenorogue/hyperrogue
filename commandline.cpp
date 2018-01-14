@@ -235,6 +235,26 @@ else if(args()[0] == '-' && args()[1] == x && args()[2] == '0') { showstartmenu 
     }
   else if(argis("-test")) 
     callhooks(hooks_tests);
+  else if(argis("-qpar2")) {
+    if(curphase == 3) {
+      restartGame('g');
+      }
+    else {      
+      PHASE(2); 
+      }
+    if(geometry == gQuotient2) restartGame('g');
+    int a, b;
+    shift(); sscanf(args(), "%d,%d", &a, &b);
+    using namespace fieldpattern;
+    current_extra = a;
+    fgeomextras[current_extra].current_prime_id = b;
+    enableFieldChange();
+    if(curphase == 3) {
+      targetgeometry = gQuotient2; restartGame('g');
+      }
+    else
+      geometry = gQuotient2;
+    }
   else if(argis("-tpar")) { 
     torusconfig::torus_mode = torusconfig::tmSingle;
     shift(); sscanf(args(), "%d,%d,%d", 
