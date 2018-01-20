@@ -2221,7 +2221,7 @@ void killMonster(cell *c, eMonster who, flagtype deathflags) {
     fallingMonsterAnimation(c, m);
   }
 
-void fightmessage(eMonster victim, eMonster attacker, bool stun, int flags) {
+void fightmessage(eMonster victim, eMonster attacker, bool stun, flagtype flags) {
 
   if(isBird(attacker)) {
     playSound(NULL, "hit-axe"+pick123());
@@ -3586,7 +3586,7 @@ int landheattype(cell *c) {
   }
 
 // move value
-int moveval(cell *c1, cell *c2, int d, int mf) {
+int moveval(cell *c1, cell *c2, int d, flagtype mf) {
   if(!c2) return -5000;
   
   eMonster m = c1->monst;
