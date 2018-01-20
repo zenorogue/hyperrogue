@@ -539,7 +539,7 @@ void handleclick(MOBPAR_FORMAL) {
       else if(statkeys && getcstat == 't') {
         if(playermoved && items[itStrongWind]) {
           cell *c = whirlwind::jumpDestination(cwt.c);
-          if(c) centerover = c;
+          if(c) centerover.c = c, centerover.spin = 0;
           }
         targetRangedOrb(centerover, roKeyboard);
         getcstat = 0;
