@@ -215,6 +215,7 @@ void drawArrowTraps() {
       if((c->wparam & 7) == 3 && !shmup::on) {
 //        queueline(t0 * randomPointIn(r[0]->type), t1 * randomPointIn(r[1]->type), 0xFFFFFFFF, 4, PPR_ITEM);
         int tt = ticks % 401;
+        if(tt < 0) tt += 401;
         
         for(int u=0; u<2; u++) {
           transmatrix& tu = u ? t0 : t1;
