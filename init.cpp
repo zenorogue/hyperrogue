@@ -541,7 +541,7 @@ void handleclick(MOBPAR_FORMAL) {
           cell *c = whirlwind::jumpDestination(cwt.c);
           if(c) centerover.c = c, centerover.spin = 0;
           }
-        targetRangedOrb(centerover, roKeyboard);
+        targetRangedOrb(centerover.c, roKeyboard);
         getcstat = 0;
         }
 
