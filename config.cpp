@@ -366,7 +366,9 @@ void resetModes(char leave) {
   
   pmodel = mdDisk; vid.alpha = 1; vid.scale = 1;
   vid.xposition = vid.yposition = 0;
+  #if CAP_RUG
   if(rug::rugged) rug::close();
+  #endif
 
   vid.monmode = DEFAULT_MONMODE;
   vid.wallmode = DEFAULT_WALLMODE;
