@@ -422,8 +422,8 @@ void fix_mouseh() {
 #if CAP_RUG
   else if(rug::rugged)
     mouseh = rug::gethyper(mousex, mousey);
-  else
 #endif
+  else
     mouseh = gethyper(mousex, mousey);
   need_mouseh = false;
   }
