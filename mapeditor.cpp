@@ -604,6 +604,7 @@ namespace mapeditor {
       }
     }
 
+  #if CAP_SDL
   void saveHighQualityShotX() {
     static string hqfile = "hqshot.png";
     if(anyshiftclick) 
@@ -625,6 +626,7 @@ namespace mapeditor {
         return true;
         });
     }
+  #endif
   
   void editAt(cellwalker where) {
 
