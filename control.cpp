@@ -12,7 +12,7 @@ bool holdmouse;
 
 int getcstat, lgetcstat; ld getcshift; bool inslider;
 
-function <void(int sym, int uni)> keyhandler;
+function <void(int sym, int uni)> keyhandler = [] (int sym, int uni) {};
 
 // is the player using mouse? (used for auto-cross)
 bool mousing = true;
