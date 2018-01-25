@@ -5342,6 +5342,8 @@ void calcparam() {
 
 int ringcolor = darkena(0xFF, 0, 0xFF);
 
+function<void()> wrap_drawfullmap = drawfullmap;
+
 void drawfullmap() {
 
   DEBB(DF_GRAPH, (debugfile,"draw full map\n"));
@@ -5438,7 +5440,7 @@ void gamescreen(int _darken) {
     rug::actDraw();
     } else
 #endif
-  drawfullmap();
+  wrap_drawfullmap();
 
   if(conformal::includeHistory) conformal::restoreBack();
 

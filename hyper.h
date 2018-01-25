@@ -552,6 +552,7 @@ hyperpoint gethyper(ld x, ld y);
 void resetview(); extern heptspin viewctr; extern cellwalker centerover;
 void drawthemap();
 void drawfullmap();
+extern function<void()> wrap_drawfullmap;
 bool displaystr(int x, int y, int shift, int size, const char *str, int color, int align);
 bool displaystr(int x, int y, int shift, int size, const string& str, int color, int align);
 
