@@ -2693,7 +2693,7 @@ void buildRosemap() {
     int& r = it->second;
     if((r&7) == 1 || (r&7) == 2 || (r&7) == 3) r++;
     if(airdist(it->first) < 3 || whirlwind::cat(it->first)) r |= 7;
-    if(c2->land == laBlizzard) r |= 7;
+    if(it->first->land == laBlizzard) r |= 7;
     forCellEx(c2, it->first) if(airdist(c2) < 3) r |= 7;
     }
 
