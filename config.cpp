@@ -667,7 +667,6 @@ void showGraphConfig() {
   dialog::addSelItem(XLAT("font scale"), its(fontscale), 'b');
 
   dialog::addSelItem(XLAT("sight range"), its(sightrange), 'r');
-  dialog::addSelItem(XLAT("remove faraway cells from memory"), its(memory_saving_mode), 'y');
 
   dialog::addSelItem(XLAT("compass size"), its(vid.mobilecompasssize), 'c');
 
@@ -686,9 +685,7 @@ void showGraphConfig() {
   
     if(xuni == 'u') vid.particles = !vid.particles;
     if(xuni == 'd') vid.graphglyph = (1+vid.graphglyph)%3;
-    
-    if(xuni == 'y') memory_saving_mode = !memory_saving_mode;
-    
+        
     if(xuni == 'j') {
       dialog::editNumber(whatever, -10, 10, 1, 0, XLAT("whatever"), 
         XLAT("Whatever."));
@@ -844,6 +841,8 @@ void showBasicConfig() {
   dialog::addBoolItem(XLAT("quick mouse"), vid.quickmouse, 'M');
 #endif
 
+  dialog::addBoolItem(XLAT("remove faraway cells from memory"), memory_saving_mode, 'y');
+
   if(CAP_SHMUP && !ISMOBILE)
     dialog::addSelItem(XLAT("configure keys/joysticks"), "", 'p');
 
@@ -863,6 +862,8 @@ void showBasicConfig() {
     
     if(uni == 'M') vid.quickmouse = !vid.quickmouse;
     else if(xuni == 'm') vid.skipstart = !vid.skipstart;
+
+    if(xuni == 'y') memory_saving_mode = !memory_saving_mode;
   
     if(xuni == 'c') { vid.axes += 60 + (shiftmul > 0 ? 1 : -1); vid.axes %= 5; }
 
