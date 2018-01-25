@@ -430,6 +430,8 @@ namespace inv {
     if(us) s += XLAT(" (used %1 times)", its(us));
     return s;
     }
+  
+  bool activating;
 
   void show() {
   
@@ -595,7 +597,10 @@ namespace inv {
         else {
           eItem it = cwt.c->item; 
           cwt.c->item = orbmap[uni];
+          inv::activating = true;
           collectItem(cwt.c, true);
+          inv::activating = false;
+          addMessage(XLAT("You activate %the1.", orbmap[uni]));
           if(!cwt.c->item) usedup[orbmap[uni]]++;
           if(getOLR(it, getPrizeLand()) == olrForbidden)
             usedForbidden = true;
