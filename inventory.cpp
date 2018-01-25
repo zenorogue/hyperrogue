@@ -1,8 +1,9 @@
 namespace inv {
 
   bool on;
-  int usedup[ittypes];
-  int remaining[ittypes];
+  array<int, ittypes> usedup;
+  array<int, ittypes> remaining;
+  array<int, ittypes> extra_orbs;
 
   int rseed;
   bool usedForbidden;
@@ -254,7 +255,7 @@ namespace inv {
     extra = "";
     orbinfoline = "";
 
-    for(int i=0; i<ittypes; i++) remaining[i] = -usedup[i];
+    for(int i=0; i<ittypes; i++) remaining[i] = extra_orbs[i]-usedup[i];
     for(int i=0; i<ittypes; i++) if(usedup[i] >= TESTMIRRORED) {
       remaining[i] += MIRRORED;
       remaining[i] -= mirrorqty0(eItem(i));
@@ -360,7 +361,6 @@ namespace inv {
     for(int i=0; i<ittypes; i++) 
       if(i != itGreenStone && i != itOrbYendor) 
         items[itInventory] += remaining[i];
-    
     }
   
   map<char, eItem> orbmap;

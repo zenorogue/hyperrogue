@@ -127,6 +127,18 @@ int arg::readCommon() {
     shift(); int q = argi();
     placeItems(q, i);
     }
+  else if(argis("-IU")) {
+    PHASE(3) cheater++; timerghost = false;
+    shift(); eItem i = readItem(args());
+    shift(); inv::usedup[i] += argi();
+    inv::compute();
+    }
+  else if(argis("-IX")) {
+    PHASE(3) autocheat = true; cheater++; timerghost = false;
+    shift(); eItem i = readItem(args());
+    shift(); inv::extra_orbs[i] += argi();
+    inv::compute();
+    }
   else if(argis("-ambush")) {
     // make all ambushes use the given number of dogs
     // example: hyper -W Hunt -IP Shield 1 -ambush 60
@@ -139,6 +151,11 @@ int arg::readCommon() {
     shift(); int q = argi();
     printf("m = %s q = %d\n", dnameof(m), q);
     restoreGolems(q, m, 7);
+    }
+  else if(argis("-MK")) {
+    PHASE(3) cheater++; timerghost = false;
+    shift(); eMonster m = readMonster(args());
+    shift(); kills[m] += argi();
     }
   else if(argis("-L")) {
     printf("Treasures:\n");
