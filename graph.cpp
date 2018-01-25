@@ -5685,7 +5685,6 @@ void animateAttack(cell *src, cell *tgt, int layer) {
     a.attacking = 1;
     a.attackat = rspintox(tC0(inverse(gmatrix[src]) * gmatrix[tgt])) * xpush(hdist(gmatrix[src]*C0, gmatrix[tgt]*C0) / 3);
     if(newanim) a.wherenow = Id, a.ltick = ticks, a.footphase = 0;
-    display(a.attackat);
     }
   }
 
