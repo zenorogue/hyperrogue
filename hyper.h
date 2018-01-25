@@ -1254,6 +1254,8 @@ struct animation {
   int ltick;
   double footphase;
   transmatrix wherenow;
+  int attacking;
+  transmatrix attackat;
   };
 
 // we need separate animation layers for Orb of Domination and Tentacle+Ghost,
@@ -1265,6 +1267,8 @@ struct animation {
 
 extern map<cell*, animation> animations[ANIMLAYERS];
 extern unordered_map<cell*, transmatrix> gmatrix, gmatrix0;
+
+void animateAttack(cell *src, cell *tgt, int layer);
 
 void animateMovement(cell *src, cell *tgt, int layer);
 

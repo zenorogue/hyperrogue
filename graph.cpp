@@ -1694,20 +1694,31 @@ bool applyAnimation(cell *c, transmatrix& V, double& footphase, int layer) {
 
   int td = ticks - a.ltick;
   ld aspd = td / 1000.0 * exp(vid.mspeed);
-  ld R = hdist0(tC0(a.wherenow));
+  ld R;
+  again:
+  
+  if(a.attacking == 1) 
+    R = hdist(tC0(a.attackat), tC0(a.wherenow));
+  else
+    R = hdist0(tC0(a.wherenow));
   aspd *= (1+R+(shmup::on?1:0));
   
   if(R < aspd || std::isnan(R) || std::isnan(aspd) || R > 10) {
+    if(a.attacking == 1) { a.attacking = 2; goto again; }
     animations[layer].erase(c);
     return false;
     }
   else {
-    a.wherenow = a.wherenow * rspintox(tC0(inverse(a.wherenow)));
+    if(a.attacking == 1) 
+      a.wherenow = a.wherenow * rspintox(tC0(inverse(a.wherenow) * a.attackat));
+    else
+      a.wherenow = a.wherenow * rspintox(tC0(inverse(a.wherenow)));
     a.wherenow = a.wherenow * xpush(aspd);
     fixmatrix(a.wherenow);
-    a.footphase += aspd;
+    a.footphase += a.attacking == 2 ? -aspd : aspd;
     footphase = a.footphase;
     V = V * a.wherenow;
+    if(a.attacking == 2) V = V * pispin;
     a.ltick = ticks;
     return true;
     }
@@ -5654,12 +5665,25 @@ void animateMovement(cell *src, cell *tgt, int layer) {
       a = animations[layer][src];
       a.wherenow = inverse(gmatrix[tgt]) * gmatrix[src] * a.wherenow;
       animations[layer].erase(src);
+      a.attacking = 0;
       }
     else {
       a.ltick = ticks;
       a.wherenow = inverse(gmatrix[tgt]) * gmatrix[src];
       a.footphase = 0;
       }
+    }
+  }
+
+void animateAttack(cell *src, cell *tgt, int layer) {
+  if(vid.mspeed >= 5) return; // no animations!
+  if(gmatrix.count(src) && gmatrix.count(tgt)) {
+    bool newanim = !animations[layer].count(src);
+    animation& a = animations[layer][src];
+    a.attacking = 1;
+    a.attackat = rspintox(tC0(inverse(gmatrix[src]) * gmatrix[tgt])) * xpush(hdist(gmatrix[src]*C0, gmatrix[tgt]*C0) / 3);
+    if(newanim) a.wherenow = Id, a.ltick = ticks, a.footphase = 0;
+    display(a.attackat);
     }
   }
 

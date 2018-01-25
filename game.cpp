@@ -3927,6 +3927,7 @@ cell *moveNormal(cell *c, flagtype mf) {
       }
     else if(m2) {
       attackMonster(c2, AF_NORMAL | AF_MSG, m);
+      animateAttack(c, c2, LAYER_SMALL);
       if(m == moFlailer && m2 == moIllusion) 
         attackMonster(c, 0, m2);
       return c2;
@@ -3942,7 +3943,7 @@ cell *moveNormal(cell *c, flagtype mf) {
       cell *c2 = c->mov[posdir[i]];
 
       if(isPlayerOn(c2)) {
-        killThePlayerAt(m, c2, 0);
+        killThePlayerAt(m, c2, 0); 
         attacking = true;
         }
 
@@ -4452,6 +4453,7 @@ void groupmove2(cell *c, cell *from, int d, eMonster movtype, flagtype mf) {
     if(!(mf & MF_NOATTACKS)) for(int j=0; j<c->type; j++) 
       if(c->mov[j] && canAttack(c, c->monst, c->mov[j], c->mov[j]->monst, af)) {
         attackMonster(c->mov[j], AF_NORMAL | AF_GETPLAYER | AF_MSG, c->monst);
+        animateAttack(c, c->mov[j], LAYER_SMALL);
         c->aitmp = sval;
         // XLATC eagle
         return;
@@ -5172,6 +5174,7 @@ void movegolems(flagtype flags) {
         else if((flags & AF_CRUSH) && !canAttack(c, m, c2, c2->monst, flags ^ AF_CRUSH ^ AF_MUSTKILL))
           markOrb(itOrbEmpathy), markOrb(itOrbSlaying);
         attackMonster(c2, flags | AF_MSG, m);
+        animateAttack(c, c2, LAYER_SMALL);
         produceGhost(c2, m2, m);
         sideAttack(c, dir, m, 0);
         if(revenge) c->monst = m = moPrincessArmed;
@@ -7554,6 +7557,7 @@ bool movepcto(int d, int subdir, bool checkonly) {
           if(c2->monst == moSalamander && (pushto == c2 || !pushto)) c2->stuntime = 10;
           if(!c2->monst) produceGhost(c2, m, moPlayer);
           if(pushto && pushto != c2) pushMonster(pushto, c2);
+          animateAttack(cwt.c, c2, LAYER_SMALL);
           }
         }
       
