@@ -937,6 +937,7 @@ void loadsave() {
       if(tid == tactic::id && (anticheat::check(cert, ver, dnameof(l2), tc, t, ts, xc*unsigned(999)+ unsigned(tid) + 256 * score))) {
         if(score != 0 
           && !(land == laOcean && verless(ver, "8.0f"))
+          && !(land == laTerracotta && verless(ver, "10.3e"))
         ) tactic::record(l2, score, xc);
         anticheat::nextid(tactic::id, ver, cert);
         }
