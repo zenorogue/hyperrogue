@@ -2,6 +2,7 @@
 #define ISMAC 1
 #endif
 
+
 #ifdef LINUX
 #define ISLINUX 1
 #endif
@@ -14,9 +15,9 @@
 #define NOLICENSE
 #endif
 
-#define VER "10.3c"
-#define VERNUM 10303
-#define VERNUM_HEX 0xA0A3
+#define VER "10.3d"
+#define VERNUM 10304
+#define VERNUM_HEX 0xA0A4
 
 #define GEN_M 0
 #define GEN_F 1

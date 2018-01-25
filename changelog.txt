@@ -2194,3 +2194,9 @@ Gameplay bugfixes
 - new graphics for Sandworm/Rocksnake/Tentacle tails
 - removed the sandworm/tentacle-from-the-ground dirt effect
 
+2018.01.20 20:14 version 10.3d
+- Android/iOS versions updated
+- weirdly located trap arrows should be no more
+- fixed the octagonal/fieldquotient geometry
+- commandline option to change the effect volume
+- fixed some potential crash sources
