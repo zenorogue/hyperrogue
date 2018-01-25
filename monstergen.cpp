@@ -302,6 +302,7 @@ void wandering() {
   int seepcount = getSeepcount();
   int ghostcount = getGhostcount();
   if(cwt.c->land == laCA) ghostcount = 0;
+  bool genturn = hrand(100) < 30;
 
   if(cwt.c->land == laZebra && cwt.c->wall == waNone && wchance(items[itZebra], 20))
     wanderingZebra(cwt.c);
@@ -547,6 +548,9 @@ void wandering() {
 
     else if(c->land == laTerracotta && wchance(items[itTerra], 40)) 
       c->monst = moJiangshi;
+
+    else if(c->land == laTerracotta && wandering_jiangshi && genturn) 
+      wandering_jiangshi--, c->monst = moJiangshi;
 
     else if(c->land == laSwitch && wchance(items[itSwitch], 80)) 
       c->monst = active_switch();

@@ -932,7 +932,9 @@ void giantLandSwitch(cell *c, int d, cell *from) {
         forCellEx(c2, c) if(c2->wall == waTerraWarrior) nearwarrior = true;
         if(nearwarrior && hrand(5000) < PT(130 + 2 * kills[moJiangshi], 260) && notDippingFor(itTerra))
           c->item = itTerra;
-        if(hrand(20000) < 2 * (items[itTerra] + yendor::hardness()))
+        int t = 2 * (items[itTerra] + yendor::hardness());
+        if(t < 60) t += (60-t) * (60 - t) / 120;
+        if(hrand(20000) < t)
           c->monst = moJiangshi;
         }
       break;

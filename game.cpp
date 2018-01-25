@@ -7,7 +7,7 @@ int lastsafety;
 int mutantphase;
 int turncount;
 int rosewave, rosephase;
-int avengers, mirrorspirits;
+int avengers, mirrorspirits, wandering_jiangshi, jiangshi_on_screen;
 
 cell *lastmove;
 enum eLastmovetype {lmSkip, lmMove, lmAttack, lmSpecial, lmPush, lmTree};
@@ -2796,7 +2796,7 @@ void bfs() {
   hexsnakes.clear(); 
 
   hadwhat = havewhat;
-  havewhat = 0;  
+  havewhat = 0; jiangshi_on_screen = 0;
   snaketypes.clear();
   if(!(hadwhat & HF_WARP)) { avengers = 0; }
   if(!(hadwhat & HF_MIRROR)) { mirrorspirits = 0; }
@@ -2950,6 +2950,8 @@ void bfs() {
             havewhat |= HF_FAST;
           else if(c2->monst == moMutant)
             havewhat |= HF_MUTANT;
+          else if(c2->monst == moJiangshi)
+            jiangshi_on_screen++;
           else if(c2->monst == moOutlaw)
             havewhat |= HF_OUTLAW;
           else if(isGhostMover(c2->monst))
@@ -7555,6 +7557,10 @@ bool movepcto(int d, int subdir, bool checkonly) {
         if(m) {
           if((attackflags & AF_CRUSH) && !canAttack(cwt.c, moPlayer, c2, c2->monst, attackflags ^ AF_CRUSH ^ AF_MUSTKILL))
             markOrb(itOrbSlaying);
+          if(c2->monst == moTerraWarrior && hrand(100) > 2 * items[itTerra]) {
+            if(hrand(2 + jiangshi_on_screen) < 2)
+              wandering_jiangshi++;
+            }
           attackMonster(c2, attackflags | AF_MSG, moPlayer);
           // salamanders are stunned for longer time when pushed into a wall
           if(c2->monst == moSalamander && (pushto == c2 || !pushto)) c2->stuntime = 10;
