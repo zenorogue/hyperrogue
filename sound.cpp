@@ -191,8 +191,11 @@ string wheresounds = SOUNDDESTDIR;
 string wheresounds = HYPERPATH "sounds/";
 #endif
 
+hookset<bool(const string& s, int vol)> *hooks_sound;
+
 void playSound(cell *c, const string& fname, int vol) {
   if(effvolume == 0) return;
+  if(callhandlers(false, hooks_sound, fname, vol)) return;
   // printf("Play sound: %s\n", fname.c_str());
   if(!chunks.count(fname)) {
     string s = wheresounds+fname+".ogg";
