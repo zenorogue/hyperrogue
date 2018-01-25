@@ -3251,7 +3251,7 @@ void playerMoveEffects(cell *c1, cell *c2) {
   
   if(!nomine) {
     uncoverMines(c2,
-      items[itBombEgg] < 10 && hiitemsMax(itBombEgg) < 25 && !shmup::on ? 0 :
+      (items[itBombEgg] < 1 && !tactic::on) ? 0 :
       items[itBombEgg] < 20 ? 1 :
       items[itBombEgg] < 30 ? 2 :
       3, 0
