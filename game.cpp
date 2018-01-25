@@ -2374,7 +2374,7 @@ bool attackMonster(cell *c, flagtype flags, eMonster killer) {
     playSound(NULL, "message-roar");
     }
 
-  if(tk == 0 && ntk > 0 && !tactic::on && !euclid && !sphere) {
+  if(tk == 0 && ntk > 0 && !tactic::on && !euclid && !sphere && !cheater) {
     if(notthateasy(m))
       addMessage(XLAT("Quite tough, for your first fight."));
     else {
