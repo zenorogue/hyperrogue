@@ -1113,6 +1113,9 @@ namespace patterns {
     }
 
   void showPrePattern() {
+    cmode = sm::SIDE | sm::MAYDARK;
+    gamescreen(0);
+
     dialog::init("predesigned patterns");
     dialog::addItem(XLAT("single color"), 'g');
     dialog::addItem(XLAT("random colors"), 'r');
