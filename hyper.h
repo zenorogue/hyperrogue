@@ -1679,7 +1679,9 @@ bool createOnSea(eLand old);
 namespace inv {
   extern bool on;
   extern bool usedForbidden;
-  extern int remaining[ittypes];
+  extern bool activating;
+  extern array<int, ittypes> remaining;
+  extern array<int, ittypes> usedup;
   void compute();
   void applyBox(eItem it);
 
