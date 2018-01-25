@@ -327,6 +327,8 @@ void drawMobileArrow(cell *c, transmatrix V) {
   queuepolyat(atscreenpos(dx, dy, scale) * spin(-alpha), shArrow, col, PPR_MOBILE_ARROW);
   }
 
+bool nofps = false;
+
 void drawStats() {
   callhandlers(false, hooks_prestats);
 #if CAP_ROGUEVIZ
@@ -524,7 +526,9 @@ void drawStats() {
         "but are not counted in the total kill count.");
       }
     }
-  if(displayButtonS(4, vid.yres - 4 - vid.fsize/2, s0+VER+ XLAT(" fps: ") + its(calcfps()), 0x202020, 0, vid.fsize/2)) {
+  string vers = VER;
+  if(!nofps) vers += XLAT(" fps: ") + its(calcfps());
+  if(displayButtonS(4, vid.yres - 4 - vid.fsize/2, vers, 0x202020, 0, vid.fsize/2)) {
     mouseovers = XLAT("frames per second"),
     getcstat = SDLK_F1,
     instat = true,

@@ -98,6 +98,9 @@ int arg::readCommon() {
   else if(argis("-nogui")) {
     noGUI = true;
     }
+  else if(argis("-nofps")) {
+    nofps = true;
+    }
   else if(argis("-back")) {
     shift(); backcolor = strtol(args(), NULL, 16);
     }
