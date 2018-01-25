@@ -58,7 +58,8 @@ int isNative(eLand l, eMonster m) {
 
     case laCrossroads: case laCrossroads2: case laCrossroads3: case laCrossroads4: 
     case laCrossroads5:
-    case laNone: case laBarrier: case laOceanWall: case laCanvas: return 0;
+    case laNone: case laBarrier: case laOceanWall: case laCanvas: case laMemory: 
+      return 0;
     
     case laEmerald: 
       return (m == moFlailer || m == moLancer || m == moMiner) ? 2 : 
@@ -253,6 +254,7 @@ eItem treasureType(eLand l) {
     case laBarrier: return itNone;
     case laOceanWall: return itNone;
     case laCanvas: return itNone;
+    case laMemory: return itNone;
     
     case laEmerald: return itEmerald;
     case laWineyard: return itWine;
@@ -478,7 +480,7 @@ bool landUnlocked(eLand l) {
     case laEAir: case laEEarth: case laEWater: case laEFire:  case laElementalWall:
       return elementalUnlocked();
     
-    case laBarrier: case laNone: case laOceanWall: case laCanvas: case laCA:
+    case laBarrier: case laNone: case laOceanWall: case laCanvas: case laCA: case laMemory:
       return false;
     
     case laMirrorOld:

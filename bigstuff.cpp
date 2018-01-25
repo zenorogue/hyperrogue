@@ -142,6 +142,7 @@ void generateAlts(heptagon *h, int levs) {
       continue;
       }
     ho->alt = hm;
+    hm->cdata = (cdata*) ho;
     if(levs) generateAlts(ho, levs-1);
     }
   }
@@ -199,6 +200,7 @@ heptagon *createAlternateMap(cell *c, int rad, hstate firststate, int special) {
   alt->c7 = NULL;
   alt->alt = alt;
   h->alt = alt;
+  alt->cdata = (cdata*) h;
   
   for(int d=rad; d>=0; d--) {
     generateAlts(cx[d]->master);  

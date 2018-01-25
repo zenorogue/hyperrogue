@@ -268,6 +268,8 @@ void initConfig() {
   addsaver(geom3::tc_alpha, "3D TC alpha");
   addsaver(geom3::highdetail, "3D highdetail");
   addsaver(geom3::middetail, "3D middetail");
+  
+  addsaver(memory_saving_mode, "memory_saving_mode", (ISMOBILE || ISPANDORA) ? 1 : 0);
 
   addsaver(rug::renderonce, "rug-renderonce");
   addsaver(rug::rendernogl, "rug-rendernogl");
@@ -665,6 +667,7 @@ void showGraphConfig() {
   dialog::addSelItem(XLAT("font scale"), its(fontscale), 'b');
 
   dialog::addSelItem(XLAT("sight range"), its(sightrange), 'r');
+  dialog::addSelItem(XLAT("remove faraway cells from memory"), its(memory_saving_mode), 'y');
 
   dialog::addSelItem(XLAT("compass size"), its(vid.mobilecompasssize), 'c');
 
@@ -683,6 +686,8 @@ void showGraphConfig() {
   
     if(xuni == 'u') vid.particles = !vid.particles;
     if(xuni == 'd') vid.graphglyph = (1+vid.graphglyph)%3;
+    
+    if(xuni == 'y') memory_saving_mode = !memory_saving_mode;
     
     if(xuni == 'j') {
       dialog::editNumber(whatever, -10, 10, 1, 0, XLAT("whatever"), 

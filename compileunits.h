@@ -33,6 +33,7 @@
 #include "flags.cpp"
 #include "yendor.cpp"
 #include "complex.cpp"
+#include "savemem.cpp"
 #include "game.cpp"
 #include "orbgen.cpp"
 #include "monstergen.cpp"

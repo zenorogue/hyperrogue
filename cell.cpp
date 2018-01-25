@@ -839,6 +839,10 @@ void clearcell(cell *c) {
 heptagon deletion_marker;
 
 void clearHexes(heptagon *at) {
+  if(at->c7 && at->cdata) {
+    delete at->cdata;
+    at->cdata = NULL;
+    }
   if(at->c7) {
     if(!nonbitrunc) for(int i=0; i<S7; i++)
       clearcell(at->c7->mov[i]);
@@ -849,6 +853,10 @@ void clearHexes(heptagon *at) {
 void clearfrom(heptagon *at) {
   queue<heptagon*> q;
   q.push(at);
+  if(at->alt && at->c7) {
+    printf("disconnect %p -> %p (from real)\n", at, at->alt);
+    at->alt->cdata = NULL;
+    }
   at->alt = &deletion_marker;
 //int maxq = 0;
   while(!q.empty()) {
@@ -856,9 +864,21 @@ void clearfrom(heptagon *at) {
 //  if(q.size() > maxq) maxq = q.size();
     q.pop();
     DEBMEM ( printf("from %p\n", at); )
+    if(!at->c7) {
+      heptagon *h = (heptagon*) at->cdata;
+      if(h) {
+        if(h->alt != at) printf("alt error :: h->alt = %p\n", h->alt);
+        cell *c = h->c7;
+        destroycellcontents(c);
+        forCellEx(c2, c) destroycellcontents(c2);
+        h->alt = NULL;
+        at->cdata = NULL;
+        }
+      }
     for(int i=0; i<S7; i++) if(at->move[i]) {
       if(at->move[i]->alt != &deletion_marker)
         q.push(at->move[i]);    
+      if(at->move[i]->alt && at->move[i]->c7) at->move[i]->alt->cdata = NULL;
       at->move[i]->alt = &deletion_marker;
       DEBMEM ( printf("!mov %p [%p]\n", at->move[i], at->move[i]->move[at->spin(i)]); )
       if(at->move[i]->move[at->spin(i)] != NULL &&
@@ -1381,8 +1401,11 @@ int celldistance(cell *c1, cell *c2) {
   }
 
 void clearCellMemory() {
-  for(int i=0; i<size(allmaps); i++) delete allmaps[i];
+  for(int i=0; i<size(allmaps); i++) 
+    if(allmaps[i])
+      delete allmaps[i];
   allmaps.clear();
+  last_cleared = NULL;
   }
 
 auto cellhooks = addHook(clearmemory, 500, clearCellMemory);

@@ -7784,6 +7784,8 @@ bool movepcto(int d, int subdir, bool checkonly) {
   
   if(multi::players == 1) monstersTurn();
 
+  save_memory();
+  
   check_total_victory();
 
   if(items[itWhirlpool] && cwt.c->land != laWhirlpool && !whirlpool::escaped) {

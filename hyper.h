@@ -165,7 +165,7 @@ struct heptagon {
   int fieldval;
   // evolution data
   short rval0, rval1;
-  struct cdata *cdata;
+  struct cdata *cdata; // for alts, this contains the pointer to the original
   // central cell
   cell *c7;
   // associated generator of alternate structure, for Camelot and horocycles
@@ -2492,3 +2492,6 @@ void mainloop();
 void clearAnimations();
 
 transmatrix rotmatrix(double rotation, int c0, int c1);
+
+void destroycellcontents(cell *c);
+extern heptagon *last_cleared;

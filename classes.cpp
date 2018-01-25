@@ -1604,6 +1604,12 @@ const landtype linf[landtypes] = {
   { 0x306030, "Ruined City", ruindesc},
   { 0x306030, "Magnetosphere", NODESCYET},
   { 0x306030, "Jelly Kingdom", jellydesc},
+  { 0xFF00FF, "Lost Memory", 
+    "Because of the properties of hyperbolic geometry, it is extremely unlikely to randomly "
+    "get back to a faraway place you have been to. However, you have managed to get there "
+    "somehow. In the meantime, its memory has been cleared, since the 'remove faraway cells from the memory'"
+    " option was on."
+    },
   };
 
 struct landtacinfo { eLand l; int tries, multiplier; };

@@ -715,6 +715,7 @@ void describeMouseover() {
       }
       
     if(c->wall && !(c->wall == waChasm && c->land == laDual && ctof(c)) &&
+      !(c->land == laMemory) &&
       !((c->wall == waFloorA || c->wall == waFloorB) && c->item)) { 
       out += ", "; out += XLAT1(winf[c->wall].name); 
       

@@ -2142,6 +2142,12 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           c->monst = moRatling;
         }      
       break;
+    
+    case laMemory:
+      c->wall = waChasm;
+      if(d == 7 && !c->monst && hrand(2000) < 4)
+        c->monst = moGhost;
+      break;
     }
   }
 

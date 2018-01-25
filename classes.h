@@ -164,7 +164,7 @@ enum eWall { waNone, waIcewall, waBarrier, waFloorA, waFloorB, waCavewall, waCav
   waDock, waBurningDock, waRuinWall
   };
 
-static const int landtypes = 83;
+static const int landtypes = 84;
 
 struct landtype {
   int color;
@@ -191,7 +191,7 @@ enum eLand { laNone, laBarrier, laCrossroads, laDesert, laIce, laCaves, laJungle
   laMirrorOld,
   laVolcano, laBlizzard, laHunting, laTerracotta, laMercuryRiver,
   laDual, laSnakeNest, laDocks, laRuins, laMagnetic,
-  laSwitch
+  laSwitch, laMemory
   };
 
 enum eGeometry {gNormal, gEuclid, gSphere, gElliptic, gQuotient, gQuotient2, gTorus, gOctagon, g45, g46, g47, gSmallSphere, gTinySphere, gEuclidSquare, gGUARD};

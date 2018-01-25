@@ -89,6 +89,7 @@ heptagon *buildHeptagon(heptagon *parent, int d, hstate s, int pard = 0, int fix
     h->c7 = NULL;
     h->emeraldval = 0;
     h->fiftyval = 0;
+    h->cdata = NULL;
     }
 //generateEmeraldval(parent);
 //generateEmeraldval(h);
