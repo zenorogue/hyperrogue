@@ -428,11 +428,12 @@ namespace dialog {
       unsigned char* pts = (unsigned char*) &color;
       pts[uni - 'A'] = x;
       }
-    else if(uni == ' ') {
+    else if(uni == ' ' || uni == '\n') {
       bool inHistory = false;
       for(int i=0; i<10; i++) if(colorhistory[i] == (unsigned) color)
         inHistory = true;
       if(!inHistory) { colorhistory[lch] = color; lch++; lch %= 10; }
+      if(reaction) reaction();
       popScreen();
       }
     else if(uni >= '0' && uni <= '9') {
@@ -456,7 +457,6 @@ namespace dialog {
       pts[colorp] += abs(shiftmul) < .6 ? 1 : 17;
       }
     else if(doexiton(sym, uni)) {
-      if(reaction) reaction();
       popScreen();
       }
     return false;
