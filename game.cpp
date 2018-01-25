@@ -6082,7 +6082,7 @@ void checkmove() {
 
 #if CAP_INV  
   if(inv::on && !canmove && !inv::incheck) {
-    if(inv::remaining[itOrbSafety])
+    if(inv::remaining[itOrbSafety] || inv::remaining[itOrbFreedom])
       canmove = true;
     else {
       inv::check(1);
@@ -6252,7 +6252,7 @@ void collectMessage(cell *c2, eItem which) {
   else if(which == itGreenStone)
     addMessage(XLAT("Another Dead Orb."));
   else if(itemclass(which) != IC_TREASURE) {
-    if(c2->wall != waBoat)
+    if(c2->wall != waBoat && !inv::activating)
       addMessage(XLAT("You have found %the1!", which));
     }
   else if(which == itBabyTortoise) {
