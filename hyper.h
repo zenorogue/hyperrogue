@@ -884,7 +884,10 @@ bool isAlchAny(cell *c);
 extern cellwalker cwt; // player character position
 extern int sval;
 
-extern int items[ittypes], kills[motypes], explore[10], exploreland[10][landtypes], landcount[landtypes];
+extern array<int, ittypes> items;
+extern array<int, motypes> kills;
+
+extern int explore[10], exploreland[10][landtypes], landcount[landtypes];
 
 typedef int modecode_t;
 extern map<modecode_t, array<int, ittypes> > hiitems;

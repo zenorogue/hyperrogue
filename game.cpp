@@ -96,7 +96,10 @@ extern void DEBT(const char *buf);
 bool eq(short a, short b) { return a==b; }
 
 // game state
-int items[ittypes], kills[motypes], explore[10], exploreland[10][landtypes], landcount[landtypes];
+array<int, ittypes> items;
+array<int, motypes> kills;
+
+int explore[10], exploreland[10][landtypes], landcount[landtypes];
 map<modecode_t, array<int, ittypes> > hiitems;
 bool orbused[ittypes], lastorbused[ittypes];
 bool playermoved = true;  // center on the PC?
