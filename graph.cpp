@@ -3693,7 +3693,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       }
 
     poly_outline = OUTLINE_DEFAULT;
-    
+
     if(!wmascii) {
     
       // floor
@@ -4632,6 +4632,14 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
     if(c->wall == waChasm) zcol = 0;
     addaura(tC0(V), zcol, fd);
 
+    if(c->wall == waChasm) { 
+      int rd = rosedist(c);
+      if(rd == 1) 
+        queuepoly(V, shRoseFloor[ct6], 0x80406020);
+      if(rd == 2)
+        queuepoly(V, shRoseFloor[ct6], 0x80406040);
+      }
+    
     int ad = airdist(c);
     if(ad == 1 || ad == 2) {
 
