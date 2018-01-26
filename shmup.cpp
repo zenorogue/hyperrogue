@@ -2972,6 +2972,7 @@ void turn(int delta) {
         if(havewhat&HF_RIVER) prairie::move();
         }
       if(recallCell && !markOrb(itOrbRecall)) activateRecall();
+      save_memory();
       }
     if(elec::havecharge) elec::act();
     popmonsters();
@@ -3468,6 +3469,16 @@ void addShmupHelp(string& out) {
     }
   }  
 
-auto hooks = addHook(clearmemory, 0, shmup::clearMemory);
-
+auto hooks = addHook(clearmemory, 0, shmup::clearMemory) +
+  addHook(hooks_removecells, 0, [] () {
+    for(mit it = monstersAt.begin(); it != monstersAt.end();) {
+      if(is_cell_removed(it->first)) {
+        monstersAt.insert(make_pair(nullptr, it->second));
+        auto it0 = it; it++;
+        monstersAt.erase(it0);
+        }
+      else it++;
+      }
+    });
+    
 }

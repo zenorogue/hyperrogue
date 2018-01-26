@@ -549,6 +549,15 @@ namespace yendor {
   
   auto hooks = addHook(clearmemory, 0, [] () {
     yendor::yii = NOYENDOR; yendor::yi.clear();
+    }) + addHook(hooks_removecells, 0, [] () {
+    eliminate_if(yendor::yi, [] (yendorinfo& i) {
+      for(int j=0; j<YDIST; j++) if(is_cell_removed(i.path[j])) {
+        DEBSM(printf("removing a Yendor\n");)
+        if(&yi[yii] == &i) yii = NOYENDOR;
+        return true;
+        }
+      return false;
+      });
     });
   };
 

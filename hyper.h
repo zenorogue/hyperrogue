@@ -28,6 +28,8 @@ typedef long double ld;
 
 #define DEBMEM(x) // { x fflush(stdout); }
 
+#define DEBSM(x) 
+
 struct hyperpoint {
   ld tab[3];
   ld& operator [] (int i) { return tab[i]; }
@@ -1722,7 +1724,7 @@ template<class T, class U> int addHook(hookset<T>*& m, int prio, const U& hook) 
   return 0;
   }
 
-extern purehookset hooks_frame, hooks_stats, clearmemory, hooks_config, hooks_tests;
+extern purehookset hooks_frame, hooks_stats, clearmemory, hooks_config, hooks_tests, hooks_removecells;
 
 template<class T, class... U> void callhooks(hookset<T> *h, U... args) {
   if(h) for(auto& p: *h) p.second(args...);
@@ -2497,3 +2499,12 @@ transmatrix rotmatrix(double rotation, int c0, int c1);
 
 void destroycellcontents(cell *c);
 extern heptagon *last_cleared;
+
+template<class T, class U> void eliminate_if(vector<T>& data, U pred) {
+  for(int i=0; i<size(data); i++)
+    if(pred(data[i]))
+      data[i] = data.back(), data.pop_back(), i--;
+  }
+
+bool is_cell_removed(cell *c);
+void set_if_removed(cell*& c, cell *val);

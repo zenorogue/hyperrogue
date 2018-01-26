@@ -234,4 +234,7 @@ auto ccm_blizzard = addHook(clearmemory, 0, [] () {
   arrowtraps.clear();
   blizzardcells.clear();
   bcells.clear();
+  }) + 
+addHook(hooks_removecells, 0, [] () {
+  eliminate_if(arrowtraps, is_cell_removed);
   });

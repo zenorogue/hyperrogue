@@ -3025,7 +3025,28 @@ auto ccm = addHook(clearmemory, 0, [] () {
   prairie::tchoices.clear();
   prairie::beaststogen.clear();
   mirror::clearcache();
-  });
+  }) +
+  addHook(hooks_removecells, 0, [] () {
+    eliminate_if(heat::offscreen_heat, is_cell_removed);
+    eliminate_if(heat::offscreen_fire, is_cell_removed);
+    eliminate_if(princess::infos, [] (princess::info*& i) { 
+      if(is_cell_removed(i->princess) || is_cell_removed(i->prison)) { 
+        DEBSM(printf("removing a princess\n");)
+        if(i->princess && !is_cell_removed(i->princess)) {
+          DEBSM(printf("faking a princess\n");)
+          princess::newFakeInfo(i->princess);
+          }
+        delete i; 
+        return true;
+        }
+      return false; 
+      });
+    set_if_removed(prairie::lasttreasure, NULL);
+    set_if_removed(prairie::enter, NULL);
+    eliminate_if(prairie::tchoices, is_cell_removed);
+    eliminate_if(prairie::beaststogen, is_cell_removed);
+    for(auto& bpd: clearing::bpdata) set_if_removed(bpd.second.root, NULL);
+    });
 
 // windcode arrays precomputed for speed
 

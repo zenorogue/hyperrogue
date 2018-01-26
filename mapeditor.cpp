@@ -1591,7 +1591,11 @@ namespace mapeditor {
     if(!cheater) patterns::displaycodes = 0;
     if(!cheater) patterns::whichShape = 0;
     modelcell.clear();
-    });  
+    }) + 
+  addHook(hooks_removecells, 0, [] () {
+    modelcell.clear();
+    set_if_removed(mapeditor::copysource.c, NULL);
+    });;;  
 #endif
 
   void initdraw(cell *c) {

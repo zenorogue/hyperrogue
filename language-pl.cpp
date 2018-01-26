@@ -6649,3 +6649,14 @@ S("level to save:", "mapa do zapisu:")
 S("pics to load:", "obrazki do wczytania:")
 S("level to load:", "mapa do wczytania:")
 
+S("remove faraway cells from memory", "usuwaj odległe pola z pamięci")
+N("Lost Memory", GEN_F, "Utracona Pamięć", "Utracone Pamięci", "Utraconą Pamięć", "w Utraconej Pamięci")
+S(  "Because of the properties of hyperbolic geometry, it is extremely unlikely to randomly "
+    "get back to a faraway place you have been to. However, you have managed to get there "
+    "somehow. In the meantime, its memory has been cleared, since the 'remove faraway cells from the memory'"
+    " option was on.",
+    
+    "Ze względu na właściwości geometrii hiperbolicznej praktycznie niemożliwe jest, by "
+    "przypadkowo wrócić do odległego miejsca, w którym się było wcześniej. Ale jakoś Ci się to udało... "
+    "W międzyczasie pamięć została wyczyczona, ze względu na włączoną opcję 'usuwaj odległe pola z pamięci'.'"
+    )
