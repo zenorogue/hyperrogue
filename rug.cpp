@@ -938,13 +938,126 @@ void getco(rugpoint *m, hyperpoint& h, int &spherepoints) {
 
 extern int besti;
 
+/* these functions are for the ODS projection, used in VR videos */
+
+void cyclefix(ld& a, ld b) {
+  if(a > b + M_PI) a -= 2 * M_PI;
+  if(a < b - M_PI) a += 2 * M_PI;
+  }
+
+ld raddif(ld a, ld b) {
+  ld d = a-b;
+  if(d < 0) d = -d;
+  if(d > 2*M_PI) d -= 2*M_PI;
+  if(d > M_PI) d = 2 * M_PI-d;
+  return d;
+  }
+
+bool ods = false;
+ld ipd = 0.1;
+
+bool project_ods(hyperpoint azeq, hyperpoint& h1, hyperpoint& h2, bool eye) {
+  ld tanalpha = tan(ipd);
+  if(eye) tanalpha = -tanalpha;
+  
+  using namespace hyperpoint_vec;  
+  ld d = hypot3(azeq);
+  ld sindbd = sin(d)/d, cosd = cos(d);
+  
+  ld x = azeq[0] * sindbd;
+  ld y = azeq[2] * sindbd;
+  ld z = azeq[1] * sindbd;
+  ld t = cosd;
+  
+//  printf("%10.5lf %10.5lf %10.5lf ", azeq[0], azeq[1], azeq[2]);
+//  printf(" => %10.5lf %10.5lf %10.5lf %10.5lf", x, y, z, t);
+  
+  ld cottheta2 = (x*x + y*y - tanalpha*tanalpha*t*t) / (z*z);
+//  if(cottheta2 < 0) printf(" BAD\n");
+  if(cottheta2 < 0) return false;
+  ld theta = atan(sqrt(1 / cottheta2));
+  
+  for(int i=0; i<2; i++) {
+    hyperpoint& h = (i ? h1 : h2);
+    if(i == 1) theta = -theta;
+      
+    ld x0 = t * tanalpha;
+    ld y0 = -z / tan(theta);
+    
+    ld phi = atan2(y, x) - atan2(y0, x0);
+      
+    ld delta = atan2(z / sin(theta), t / cos(ipd));
+    
+    h[0] = phi;
+    h[1] = theta;
+    h[2] = delta;
+//    printf(" => %10.5lf %10.5lf %10.5lf", phi, theta, delta);
+    }
+  
+//  printf("\n");
+  return true;
+  }
+
 void drawTriangle(triangle& t) {
-  using namespace hyperpoint_vec;
+  using namespace hyperpoint_vec;  
   for(int i: {0,1,2}) {
     if(!t.m[i]->valid) return;
     if(t.m[i]->dist >= sightrange+.51) return;
     }
   dt++;
+
+  if(ods) {
+    hyperpoint pts[3];
+    for(int i=0; i<3; i++)
+      pts[i] = t.m[i]->getglue()->flat;    
+
+    hyperpoint hc = (pts[1] - pts[0]) ^ (pts[2] - pts[0]);  
+    double hch = hypot3(hc);
+    glNormal3f(hc[0]/hch,hc[1]/hch,hc[2]/hch);
+
+    bool ok = true;
+    array<hyperpoint, 6> h;
+    for(int eye=0; eye<2; eye++) {
+      if(true) {
+        for(int i=0; i<3; i++)
+          ok = ok && project_ods(pts[i], h[i], h[i+3], eye);
+        if(!ok) return;
+        for(int i=0; i<6; i++) {
+          // let Delta be from 0 to 2PI
+          if(h[i][2]<0) h[i][2] += 2 * M_PI;
+          // Theta is from -PI/2 to PI/2. Let it be from 0 to PI
+          h[i][1] += (eye?-1:1) * M_PI/2;
+          }
+        }
+      else {
+        for(int i=0; i<6; i++) 
+          h[i][0] = -h[i][0],
+          h[i][1] = -h[i][1],
+          h[i][2] = 2*M_PI-h[i][2];
+        }
+      if(raddif(h[4][0], h[0][0]) < raddif(h[1][0], h[0][0]))
+        swap(h[1], h[4]);
+      if(abs(h[1][1] - h[0][1]) > M_PI/2) return;
+      if(raddif(h[5][0], h[0][0]) < raddif(h[2][0], h[0][0]))
+        swap(h[5], h[2]);
+      if(abs(h[2][1] - h[0][1]) > M_PI/2) return;
+      cyclefix(h[1][0], h[0][0]);
+      cyclefix(h[2][0], h[0][0]);
+      cyclefix(h[4][0], h[3][0]);
+      cyclefix(h[5][0], h[3][0]);
+      for(int s: {0, 3}) {
+        int fst = 0, lst = 0;
+        if(h[s+1][0] < -M_PI || h[s+2][0] < -M_PI) lst++;
+        if(h[s+1][0] > +M_PI || h[s+2][0] > +M_PI) fst--;
+        for(int x=fst; x<=lst; x++) for(int i=0; i<3; i++) {
+          glTexCoord2f(t.m[i]->x1, t.m[i]->y1);
+          glVertex3f(h[s+i][0] + 2*M_PI*x, h[s+i][1], h[s+i][2]);
+          }
+        }
+      }
+    return;
+    }
+  
   int spherepoints = 0;
   array<hyperpoint,3> h;
   for(int i: {0,1,2}) getco(t.m[i], h[i], spherepoints);
@@ -1109,7 +1222,10 @@ void drawRugScene() {
   
   ld tanfov = tan(fov * M_PI / 360);
   
-  if(rug_perspective) {
+  if(ods) {
+    glOrtho(-M_PI, M_PI, -M_PI, M_PI, 0, -M_PI * 2);
+    }
+  else if(rug_perspective) {
     ld vnear = .001;
     ld vfar = 1000;
     ld sca = vnear * tanfov / vid.xres;
@@ -1547,6 +1663,11 @@ int rugArgs() {
 
   else if(argis("-rugv")) {
     shift(); vertex_limit = argi();
+    }
+
+  else if(argis("-ods")) {
+    ods = true;
+    shift(); ipd = argf();
     }
 
   else return 1;
