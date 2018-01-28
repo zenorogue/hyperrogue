@@ -36,7 +36,6 @@ namespace rug {
 struct rug_exception { };
 
 bool fast_euclidean = true;
-bool keep_shape = true;
 bool good_shape;
 
 ld modelscale = 1;
@@ -255,11 +254,11 @@ rugpoint *addRugpoint(hyperpoint h, double dist) {
 
   else if(euclid && gwhere == gEuclid) {
     m->flat = h * modelscale;
+    m->valid = good_shape = true;
     }
   
   else if(gwhere == gNormal && (euclid || (hyperbolic && modelscale >= 1))) {
     m->valid = good_shape = true;
-
 
     ld d = hdist0(h);
     ld d0 = hypot2(h); if(!d0) d0 = 1;
@@ -840,7 +839,7 @@ void subdivide() {
       if(m2 < m) continue;
       rugpoint *mm = addRugpoint(mid(m->h, m2->h), (m->dist+m2->dist)/2);
       halves[make_pair(m, m2)] = mm;
-      if(!good_shape || (torus && !keep_shape)) {
+      if(!good_shape) {
         using namespace hyperpoint_vec;
         normalizer n(m->flat, m2->flat);
         hyperpoint h1 = n(m->flat);
@@ -890,7 +889,7 @@ void addNewPoints() {
 
 void physics() {
 
-  if(keep_shape && good_shape) return;
+  if(good_shape) return;
 
   auto t = SDL_GetTicks();
   
@@ -1531,9 +1530,7 @@ void show() {
     dialog::addSelItem(XLAT("model iterations"), its(queueiter), 0);
   dialog::addSelItem(XLAT("field of view"), fts(fov) + "°", 'f');
   // dialog::addSelItem(XLAT("protractor"), fts(protractor * 180 / M_PI) + "°", 'f');
-  if(rug::rugged && torus)
-    dialog::addBoolItem(XLAT("keep shape"), keep_shape, 'k');
-  if(!(keep_shape && good_shape)) {
+  if(!good_shape) {
     dialog::addSelItem(XLAT("maximum error"), ftsg(err_zero), 'e');
     if(rug::rugged)
       dialog::lastItem().value += " (" + ftsg(err_zero_current) + ")";
@@ -1589,6 +1586,7 @@ void show() {
             enqueue(p);
             }
           last = modelscale;
+          good_shape = false;
           }
         }
       }
@@ -1613,8 +1611,6 @@ void show() {
       dialog::scaleLog();
       dialog::reaction = [] () { err_zero_current = err_zero; };
       }
-    else if(uni == 'k')
-      keep_shape = !keep_shape;
     else if(uni == 'f') {
       dialog::editNumber(fov, 1, 170, 1, 45, "field of view", 
         "Horizontal field of view, in the perspective projection. "
@@ -1663,16 +1659,8 @@ int rugArgs() {
     shift(); err_zero = argf();
     }
 
-  else if(argis("-rugkeep")) {
-    shift(); keep_shape = true;
-    }
-
   else if(argis("-rugtsize")) {
     shift(); rug::texturesize = argi();
-    }
-
-  else if(argis("-rugnokeep")) {
-    shift(); keep_shape = false;
     }
 
   else if(argis("-rugv")) {
