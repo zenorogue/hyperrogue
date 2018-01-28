@@ -1667,6 +1667,10 @@ int rugArgs() {
     shift(); keep_shape = true;
     }
 
+  else if(argis("-rugtsize")) {
+    shift(); rug::texturesize = argi();
+    }
+
   else if(argis("-rugnokeep")) {
     shift(); keep_shape = false;
     }
