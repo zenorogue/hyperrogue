@@ -2200,3 +2200,14 @@ Gameplay bugfixes
 - fixed the octagonal/fieldquotient geometry
 - commandline option to change the effect volume
 - fixed some potential crash sources
+
+2018.01.27 15:41 version 10.3e
+- attack animations
+- a feature to remove faraway (~150) cells for the memory (ones which probably cannot be reached anyway) -- this is now the default for low memory devices [ you will see if a cell has been removed :) ]
+- some rebalancing for the Terracotta Army: more Jiangshi at low treasure counts, attacking Terracotta Warriors directly may summon Jiangshi if there are not many on screen
+- You now get radius 1 minefield uncovering at 1 Bomberbird egg (no more permanent unlock)
+- rose scent is now visible over chasms
+- fixed the selection in color choosing dialog
+- a bit stronger Rose dispersion for elementals; Blizzard disperses Rose too
+- changed the message when activating orbs from OSM
+- some extra commandline options
