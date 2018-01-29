@@ -94,7 +94,9 @@ struct rugpoint {
     }
   };
 
-rugpoint *chosen;
+rugpoint *finger_center;
+ld finger_range = .1;
+ld finger_force = 1;
 
 struct triangle {
   rugpoint *m[3];
@@ -230,7 +232,7 @@ rugpoint *addRugpoint(hyperpoint h, double dist) {
   hyperpoint onscreen;
   applymodel(m->h, onscreen);
   m->x1 = (1 + onscreen[0] * vid.scale) / 2;
-  m->y1 = (1 + onscreen[1] * vid.scale) / 2;
+  m->y1 = (1 - onscreen[1] * vid.scale) / 2;
   m->valid = false;
 
   using namespace hyperpoint_vec;
@@ -1156,6 +1158,12 @@ void prepareTexture() {
       for(int i=0; i<numplayers(); i++) if(multi::playerActive(i))
         queueline(tC0(shmup::ggmatrix(playerpos(i))), mouseh, 0xFF00FF, 8);
       }
+    if(finger_center) {
+      transmatrix V = rgpushxto0(finger_center->h);
+      queuechr(V, 0.5, 'X', 0xFFFFFFFF, 2);
+      for(int i=0; i<72; i++)
+        queueline(tC0(V * spin(i*M_PI/32) * xpush(finger_range)), tC0(V * spin((i+1)*M_PI/32) * xpush(finger_range)), 0xFFFFFFFF, 0);
+      }
     drawqueue();  
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 #endif
@@ -1352,11 +1360,54 @@ void close() {
   for(int i=0; i<size(points); i++) delete points[i];
   points.clear();
   pqueue = queue<rugpoint*> ();
+  finger_center = NULL;
   }
 
 int lastticks;
 
 ld protractor = 0;
+
+void apply_rotation(const transmatrix& t) {
+  if(!rug_perspective) currentrot = t * currentrot;
+  for(auto p: points) p->flat = t * p->flat;
+  }
+
+bool handlekeys(int sym, int uni) {
+  if(uni == '4') {
+    ods = !ods;
+    return true;
+    }
+  else if(uni == '1') {
+    ld bdist = 1e12;
+    if(finger_center) 
+      finger_center = NULL;
+    else {
+      for(auto p: points) {
+        ld cdist = hdist(p->getglue()->h, mouseh);
+        if(cdist < bdist)
+          bdist = cdist, finger_center = p->getglue();
+        }
+      }
+    return true;
+    }
+  else if(uni == '2') {
+    apply_rotation(rotmatrix(M_PI, 0, 2));
+    return true;
+    }
+  else if(uni == '3') {
+    apply_rotation(rotmatrix(M_PI/2, 0, 2));
+    return true;
+    }
+  else return false;
+  }
+
+void finger_on(int coord, ld val) {
+  for(auto p: points) {
+    ld d = hdist(finger_center->h, p->getglue()->h);
+    push_point(p->flat, coord, val * finger_force * exp( - sqr(d / finger_range)));
+    }
+  enqueue(finger_center), good_shape = false;
+  }
 
 void actDraw() { 
   try {
@@ -1369,35 +1420,50 @@ void actDraw() {
   lastticks = ticks;
 
   transmatrix t = Id;
+  
+  auto perform_finger = [=] () {
+    if(keystate[SDLK_HOME]) finger_range /= exp(alpha);
+    if(keystate[SDLK_END]) finger_range *= exp(alpha);
+    if(keystate[SDLK_LEFT]) finger_on(0, -alpha);
+    if(keystate[SDLK_RIGHT]) finger_on(0, alpha);
+    if(keystate[SDLK_UP]) finger_on(1, alpha);
+    if(keystate[SDLK_DOWN]) finger_on(1, -alpha);
+    if(keystate[SDLK_PAGEDOWN]) finger_on(2, -alpha);
+    if(keystate[SDLK_PAGEUP]) finger_on(2, +alpha);
+    };
 
-  if(rug_perspective) {
-    if(keystate[SDLK_HOME]) qm++, t = t * rotmatrix(alpha, 0, 1), protractor += alpha;
-    if(keystate[SDLK_END]) qm++, t = t * rotmatrix(alpha, 1, 0), protractor -= alpha;
+  if(cmode & sm::NUMBER) {
+    }
+  else if(rug_perspective) {
     
-    if(!keystate[SDLK_LSHIFT]) {
-      if(keystate[SDLK_DOWN]) qm++, t = t * rotmatrix(alpha, 2, 1), protractor += alpha;
-      if(keystate[SDLK_UP]) qm++, t =  t * rotmatrix(alpha, 1, 2), protractor -= alpha;
-      if(keystate[SDLK_LEFT]) qm++, t = t * rotmatrix(alpha, 2, 0), protractor += alpha;
-      if(keystate[SDLK_RIGHT]) qm++, t =  t * rotmatrix(alpha, 0, 2), protractor -= alpha;
-      }
-    ld push = 0;
-    if(keystate[SDLK_PAGEDOWN]) push -= alpha;
-    if(keystate[SDLK_PAGEUP]) push += alpha;
-    
-    ld strafex = 0, strafey = 0;
-    if(keystate[SDLK_LSHIFT]) {    
-      if(keystate[SDLK_LEFT]) strafex += alpha;
-      if(keystate[SDLK_RIGHT]) strafex -= alpha;
-      if(keystate[SDLK_UP]) strafey -= alpha;
-      if(keystate[SDLK_DOWN]) strafey += alpha;
+    ld strafex = 0, strafey = 0, push = 0;
+
+    if(finger_center) 
+      perform_finger();
+    else {
+      if(keystate[SDLK_HOME]) qm++, t = t * rotmatrix(alpha, 0, 1), protractor += alpha;
+      if(keystate[SDLK_END]) qm++, t = t * rotmatrix(alpha, 1, 0), protractor -= alpha;
+      if(!keystate[SDLK_LSHIFT]) {
+        if(keystate[SDLK_DOWN]) qm++, t = t * rotmatrix(alpha, 2, 1), protractor += alpha;
+        if(keystate[SDLK_UP]) qm++, t =  t * rotmatrix(alpha, 1, 2), protractor -= alpha;
+        if(keystate[SDLK_LEFT]) qm++, t = t * rotmatrix(alpha, 2, 0), protractor += alpha;
+        if(keystate[SDLK_RIGHT]) qm++, t =  t * rotmatrix(alpha, 0, 2), protractor -= alpha;
+        }
+      if(keystate[SDLK_PAGEDOWN]) push -= alpha;
+      if(keystate[SDLK_PAGEUP]) push += alpha;
+      
+      if(keystate[SDLK_LSHIFT]) {    
+        if(keystate[SDLK_LEFT]) strafex += alpha;
+        if(keystate[SDLK_RIGHT]) strafex -= alpha;
+        if(keystate[SDLK_UP]) strafey -= alpha;
+        if(keystate[SDLK_DOWN]) strafey += alpha;
+        }
       }
 
     if(qm) {
       if(keystate[SDLK_LCTRL]) 
         push_all_points(2, +model_distance);
-      for(int i=0; i<size(points); i++) {
-        points[i]->flat = t * points[i]->flat;
-        }
+      apply_rotation(t);
       if(keystate[SDLK_LCTRL]) 
         push_all_points(2, -model_distance);
       }
@@ -1408,19 +1474,20 @@ void actDraw() {
     push_all_points(1, strafey);
     }
   else {
-    if(keystate[SDLK_HOME]) qm++, t = inverse(currentrot);
-    if(keystate[SDLK_END]) qm++, t = currentrot * rotmatrix(alpha, 0, 1) * inverse(currentrot);
-    if(keystate[SDLK_DOWN]) qm++, t = t * rotmatrix(alpha, 1, 2);
-    if(keystate[SDLK_UP]) qm++, t =  t * rotmatrix(alpha, 2, 1);
-    if(keystate[SDLK_LEFT]) qm++, t = t * rotmatrix(alpha, 0, 2);
-    if(keystate[SDLK_RIGHT]) qm++, t =  t * rotmatrix(alpha, 2, 0);
-    if(keystate[SDLK_PAGEUP]) model_distance /= exp(alpha);
-    if(keystate[SDLK_PAGEDOWN]) model_distance *= exp(alpha);
-  
-    if(qm) {
-      currentrot = t * currentrot;
-      for(int i=0; i<size(points); i++) points[i]->flat = t * points[i]->flat;
+    if(finger_center)
+      perform_finger();
+    else {
+      if(keystate[SDLK_HOME]) qm++, t = inverse(currentrot);
+      if(keystate[SDLK_END]) qm++, t = currentrot * rotmatrix(alpha, 0, 1) * inverse(currentrot);
+      if(keystate[SDLK_DOWN]) qm++, t = t * rotmatrix(alpha, 1, 2);
+      if(keystate[SDLK_UP]) qm++, t =  t * rotmatrix(alpha, 2, 1);
+      if(keystate[SDLK_LEFT]) qm++, t = t * rotmatrix(alpha, 0, 2);
+      if(keystate[SDLK_RIGHT]) qm++, t =  t * rotmatrix(alpha, 2, 0);
+      if(keystate[SDLK_PAGEUP]) model_distance /= exp(alpha);
+      if(keystate[SDLK_PAGEDOWN]) model_distance *= exp(alpha);
       }
+  
+    if(qm) apply_rotation(t);
     }
     }
   catch(rug_exception) {
@@ -1561,6 +1628,18 @@ void show() {
       if(rug::rugged) rug::close();
       else rug::init();
       }
+    else if(uni == 'I')
+      dialog::editNumber(ipd, 0, 1, .002, .05, "interpupilar distance",
+        "Used in the ODS projection."
+        );
+    else if(uni == 'R')
+      dialog::editNumber(finger_range, 0, 1, .01, .1, "finger range",
+        "Press 1 to enable the finger mode."
+        );
+    else if(uni == 'F')
+      dialog::editNumber(finger_force, 0, 1, .01, .1, "finger force",
+        "Press 1 to enable the finger force."
+        );
     else if(uni == 'o' && !rug::rugged)
       renderonce = !renderonce;
     else if(uni == 'v') {
@@ -1629,6 +1708,7 @@ void show() {
       texturesize *= 2;
       if(texturesize == 8192) texturesize = 128;
       }
+    else if(handlekeys(sym, uni)) ;
     else if(doexiton(sym, uni)) popScreen();
     };
   }
