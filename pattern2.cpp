@@ -310,7 +310,8 @@ int fieldval_uniq(cell *c) {
     return decodeId(c->master);
     }
   else if(euclid) {
-    return torusconfig::vec_to_id(cell_to_vec(c));
+    auto p = cell_to_pair(c);
+    return gmod(p.first * torusconfig::dx + p.second * torusconfig::dy, torusconfig::qty);
     }
   if(ctof(c)) return c->master->fieldval/S7;
   else {
