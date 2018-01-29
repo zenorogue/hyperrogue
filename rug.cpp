@@ -1663,12 +1663,12 @@ void show() {
         last = modelscale;
         dialog::reaction = [] () {
           for(auto p:points) {
-            for(auto& e: p->edge) e.len *= modelscale / last;
+            for(auto& e: p->edges) e.len *= modelscale / last;
             enqueue(p);
             }
           last = modelscale;
           good_shape = false;
-          }
+          };
         }
       }
     else if(uni == 'p') {
