@@ -75,8 +75,8 @@ struct rugpoint {
   bool valid;
   bool inqueue;
   double dist;
-  hyperpoint h;
-  hyperpoint flat;
+  hyperpoint h;    // point in the represented space
+  hyperpoint flat; // point in the native space, in azeq
   vector<edge> edges;
   // Find-Union algorithm
   rugpoint *glue;
