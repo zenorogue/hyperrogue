@@ -578,8 +578,8 @@ void buildRug() {
 
   map<cell*, rugpoint *> vptr;
   
-  for(cell *c: cl.lst)
-    vptr[c] = addRugpoint(shmup::ggmatrix(c)*C0, c->cpdist);
+  for(int i=0; i<size(cl.lst); i++)
+    vptr[cl.lst[i]] = addRugpoint(shmup::ggmatrix(cl.lst[i])*C0, cl.dists[i]);
 
   for(auto& p: vptr) {
     cell *c = p.first;
