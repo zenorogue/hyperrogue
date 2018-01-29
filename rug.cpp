@@ -94,6 +94,8 @@ struct rugpoint {
     }
   };
 
+rugpoint *chosen;
+
 struct triangle {
   rugpoint *m[3];
   triangle(rugpoint *m1, rugpoint *m2, rugpoint *m3) {
