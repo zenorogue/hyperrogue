@@ -957,10 +957,10 @@ ld raddif(ld a, ld b) {
   }
 
 bool ods = false;
-ld ipd = 0.1;
+ld ipd = 0.05;
 
 bool project_ods(hyperpoint azeq, hyperpoint& h1, hyperpoint& h2, bool eye) {
-  ld tanalpha = tan(ipd);
+  ld tanalpha = tan(ipd/2);
   if(eye) tanalpha = -tanalpha;
   
   using namespace hyperpoint_vec;  
@@ -989,7 +989,7 @@ bool project_ods(hyperpoint azeq, hyperpoint& h1, hyperpoint& h2, bool eye) {
     
     ld phi = atan2(y, x) - atan2(y0, x0);
       
-    ld delta = atan2(z / sin(theta), t / cos(ipd));
+    ld delta = atan2(z / sin(theta), t / cos(ipd/2));
     
     h[0] = phi;
     h[1] = theta;
@@ -1751,6 +1751,9 @@ int rugArgs() {
 
   else if(argis("-ods")) {
     ods = true;
+    }
+
+  else if(argis("-ipd")) {
     shift(); ipd = argf();
     }
 
