@@ -1418,6 +1418,7 @@ int monstersnear(cell *c, cell *nocount, eMonster who, cell *pushto, cell *comef
 
 bool petrify(cell *c, eWall walltype, eMonster m) {
   destroyHalfvine(c);
+  destroyTrapsOn(c);
   playSound(c, "die-troll");
   
   if(walltype == waIcewall && !isIcyLand(c->land))
