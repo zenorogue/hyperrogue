@@ -1802,6 +1802,8 @@ void drawWormSegments() {
   last_wormsegment = -1;
   }
 
+bool dont_face_pc = false;
+
 bool drawMonster(const transmatrix& Vparam, int ct, cell *c, int col) {
 
   bool darkhistory = conformal::includeHistory && eq(c->aitmp, sval);
@@ -2095,7 +2097,7 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, int col) {
   // also whatever in the lineview mode, and whatever in the quotient geometry
 
   else if(isFriendly(c) || isBug(c) || (c->monst && conformal::on) || c->monst == moKrakenH || (isBull(c->monst) && c->mondir != NODIR) || c->monst == moButterfly || isMagneticPole(c->monst) ||
-    isSwitch(c->monst) || c->monst == moPair || (c->monst && (quotient || torus))) {
+    isSwitch(c->monst) || c->monst == moPair || (c->monst && (quotient || torus || dont_face_pc))) {
     if(c->monst == moKrakenH) Vs = Vb, nospins = nospinb;
     if(!nospins) Vs = Vs * ddspin(c, c->mondir, S42);
     if(c->monst == moPair) Vs = Vs * xpush(-.12);

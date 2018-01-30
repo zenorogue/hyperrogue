@@ -155,6 +155,9 @@ int arg::readCommon() {
     printf("m = %s q = %d\n", dnameof(m), q);
     restoreGolems(q, m, 7);
     }
+  else if(argis("-dont_face_pc")) {
+    dont_face_pc = true;
+    }
   else if(argis("-MK")) {
     PHASE(3) cheater++; timerghost = false;
     shift(); eMonster m = readMonster(args());
