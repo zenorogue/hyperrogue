@@ -121,6 +121,10 @@
 #define CAP_EDIT (CAP_FILES && !ISWEB && !ISMINI)
 #endif
 
+#ifndef CAP_ODS
+#define CAP_ODS 0
+#endif
+
 #ifndef CAP_TEXTURE
 #define CAP_TEXTURE (CAP_GL && (CAP_PNG || CAP_SDL_IMG))
 #endif

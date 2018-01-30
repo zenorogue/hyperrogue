@@ -943,6 +943,7 @@ void getco(rugpoint *m, hyperpoint& h, int &spherepoints) {
 
 extern int besti;
 
+#if CAP_ODS
 /* these functions are for the ODS projection, used in VR videos */
 
 void cyclefix(ld& a, ld b) {
@@ -1002,6 +1003,7 @@ bool project_ods(hyperpoint azeq, hyperpoint& h1, hyperpoint& h2, bool eye) {
 //  printf("\n");
   return true;
   }
+#endif
 
 void drawTriangle(triangle& t) {
   using namespace hyperpoint_vec;  
@@ -1011,6 +1013,7 @@ void drawTriangle(triangle& t) {
     }
   dt++;
 
+#if CAP_ODS
   if(ods) {
     hyperpoint pts[3];
     for(int i=0; i<3; i++)
@@ -1062,7 +1065,8 @@ void drawTriangle(triangle& t) {
       }
     return;
     }
-  
+#endif  
+
   int spherepoints = 0;
   array<hyperpoint,3> h;
   for(int i: {0,1,2}) getco(t.m[i], h[i], spherepoints);
@@ -1233,10 +1237,13 @@ void drawRugScene() {
   
   ld tanfov = tan(fov * M_PI / 360);
   
+#if CAP_ODS
   if(ods) {
     glOrtho(-M_PI, M_PI, -M_PI, M_PI, 0, -M_PI * 2);
     }
-  else if(rug_perspective) {
+  else 
+#endif
+  if(rug_perspective) {
     ld vnear = .001;
     ld vfar = 1000;
     ld sca = vnear * tanfov / vid.xres;
@@ -1259,7 +1266,7 @@ void drawRugScene() {
     glFogf(GL_FOG_START, 0);
     glFogf(GL_FOG_END, gwhere == gSphere ? 10 : 4);
     }
-
+  
   if(vid.eye > .001 || vid.eye < -.001) { 
     selectEyeMask(1);
     glClear(GL_DEPTH_BUFFER_BIT);
@@ -1376,7 +1383,9 @@ void apply_rotation(const transmatrix& t) {
 
 bool handlekeys(int sym, int uni) {
   if(uni == '4') {
+#if CAP_ODS
     ods = !ods;
+#endif
     return true;
     }
   else if(uni == '1') {
@@ -1630,10 +1639,12 @@ void show() {
       if(rug::rugged) rug::close();
       else rug::init();
       }
+#if CAP_ODS
     else if(uni == 'I')
       dialog::editNumber(ipd, 0, 1, .002, .05, "interpupilar distance",
         "Used in the ODS projection."
         );
+#endif
     else if(uni == 'R')
       dialog::editNumber(finger_range, 0, 1, .01, .1, "finger range",
         "Press 1 to enable the finger mode."
@@ -1751,6 +1762,7 @@ int rugArgs() {
     shift(); vertex_limit = argi();
     }
 
+#if CAP_ODS
   else if(argis("-ods")) {
     ods = true;
     }
@@ -1758,6 +1770,7 @@ int rugArgs() {
   else if(argis("-ipd")) {
     shift(); ipd = argf();
     }
+#endif
 
   else return 1;
   return 0;
