@@ -1,4 +1,4 @@
-double randd() { return (rand() % 1000000) / 1000000. + .0000005; }
+double randd() { return (rand() + .5) / (RAND_MAX + 1.); }
 
 double cellgfxdist(cell *c, int i) {
   return nonbitrunc ? tessf : (c->type == 6 && (i&1)) ? hexhexdist : crossf;
