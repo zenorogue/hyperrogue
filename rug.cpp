@@ -250,7 +250,7 @@ rugpoint *addRugpoint(hyperpoint h, double dist) {
     else /* sphere/elliptic*/ {
       if(modelscale >= 1) 
         // do as good as we can...
-        scale = M_PI / 2 - 1e-3, good_shape = false;
+        scale = M_PI / 2 - 1e-3, good_shape = false, m->valid = false;
       else scale = asin(modelscale);
       }
     m->flat = h * scale;
@@ -612,6 +612,8 @@ void buildRug() {
   sort(points.begin(), points.end(), psort);
   
   verify();
+  
+  for(auto p: points) if(p->valid) qvalid++;
   }
 
 // rug physics
