@@ -72,6 +72,7 @@ int arg::readCommon() {
   else if(argis("-picload")) { PHASE(3); shift(); mapeditor::loadPicFile(args()); }
 #endif
   else if(argis("-canvas")) {
+    PHASE(2);
     firstland = specialland = laCanvas;
     shift();
     if(args()[1] == 0) patterns::whichCanvas = args()[0];
@@ -115,6 +116,7 @@ int arg::readCommon() {
     showstartmenu = false;
     }
   else if(argis("-W")) {
+    PHASE(2);
     shift(); 
     firstland0 = firstland = specialland = readland(args()); autocheat = true;
     showstartmenu = false;
