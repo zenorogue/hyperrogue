@@ -312,9 +312,9 @@ bool apply(cell *c, const transmatrix &V, int col) {
 
   if(tstate == tsAdjusting) {
     queuepolyat(V, shFullCross[ctof(c)], 0, PPR_LINE);
-    lastptd().u.poly.outline = models.count(c) ? master_color : slave_color;
+    lastptd().u.poly.outline = slave_color;
     queuepolyat(V, shFullFloor[ctof(c)], 0, PPR_LINE);
-    lastptd().u.poly.outline = models.count(c) ? master_color : slave_color;
+    lastptd().u.poly.outline = slave_color;
     return false;
     }
   try {
@@ -372,7 +372,19 @@ bool apply(cell *c, const transmatrix &V, int col) {
     return false;
     }
   }
-  
+
+void mark_triangles() {
+  if(tstate == tsAdjusting) 
+    for(auto& mi: texture_map) {
+      for(auto& t: mi.second.triangles) {
+        vector<hyperpoint> t2;
+        for(int i=0; i<3; i++)
+          t2.push_back(mi.second.M * t[i]);
+        prettypoly(t2, master_color, master_color, gsplits);
+        }
+      }
+  }
+
 typedef tuple<eGeometry, bool, char, int, eModel, ld, ld> texture_parameters; 
 
 static const auto current_texture_parameters = tie(geometry, nonbitrunc, patterns::whichPattern, patterns::subpattern_flags, pmodel, vid.scale, vid.alpha);
@@ -403,7 +415,7 @@ void perform_mapping() {
       mi.texture_id = textureid;
       }
     }
-
+  
   if(tstate == tsActive)
     for(auto& mi: texture_map)
       mapTexture2(mi.second);
@@ -427,6 +439,7 @@ void perform_mapping() {
   texture::cgroup = patterns::cgroup;
   texture_map_orig = texture_map;
   orig_texture_parameters = current_texture_parameters;
+  printf("texture_map has %d elements (S%d)\n", size(texture_map), tstate);
   }
 
 void saveFullTexture() {
@@ -774,8 +787,8 @@ bool load_textureconfig() {
   if(!loadTextureGL()) return false;
   calcparam();
   drawthemap();
-  perform_mapping();
   tstate = tstate_max = tsActive;
+  perform_mapping();
   return true;
   }
 
@@ -868,7 +881,12 @@ string texturehelp =
 
 void showMenu() {
   cmode = sm::SIDE | sm::MAYDARK | sm::DIALOG_STRICT_X;
-  gamescreen(0);  
+  gamescreen(0);
+  if(tstate == tsAdjusting) {
+    ptds.clear();
+    texture::mark_triangles();
+    drawqueue();
+    }
   
   if(tstate == tsOff) {
     dialog::init(XLAT("texture mode (off)"));
@@ -1011,10 +1029,8 @@ void showMenu() {
     else if(uni == 'T' && tstate == tsAdjusting) 
       tstate = tsOff;
       
-    else if(uni == 'T' && tstate == tsActive) {
+    else if(uni == 'T' && tstate == tsActive)
       tstate = tsAdjusting;
-      texture_map.clear();
-      }
         
     else if(uni == 'g' && tstate == tsActive) 
       dialog::openColorDialog(grid_color, NULL);
