@@ -49,9 +49,9 @@ void delete_heptagon(heptagon *h2) {
 
 void recursive_delete(heptagon *h, int i) {
   heptagon *h2 = h->move[i];
-  for(int i=1; i<S7; i++)
+  { for(int i=1; i<S7; i++)
     if(h2->move[i] && h2->move[i]->move[0] == h2)
-      recursive_delete(h2, i);
+      recursive_delete(h2, i); }
   if(h2->alt && h2->alt->alt == h2->alt) {
     DEBSM(printf("destroying alternate map %p\n", h2->alt);)
     for(hrmap *& hm: allmaps) {
