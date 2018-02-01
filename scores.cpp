@@ -5,18 +5,8 @@ namespace scores {
 vector<score> scores;
 score *currentgame;
 
-int scoresort = 2;
-int scoredisplay = 1;
 int scorefrom = 0;
 bool scorerev = false;
-
-bool scorecompare(const score& s1, const score &s2) {
-  return s1.box[scoresort] > s2.box[scoresort];
-  }
-
-bool fakescore() {
-  return fakebox[scoredisplay];
-  }
 
 string csub(const string& str, int q) {
   int i = 0;
@@ -24,7 +14,7 @@ string csub(const string& str, int q) {
   return str.substr(0, i);
   }
 
-int colwidth() {
+int colwidth(int scoredisplay) {
   if(scoredisplay == 0) return 5;
   if(scoredisplay == 1) return 16;
   if(scoredisplay == 5) return 8;
@@ -70,7 +60,7 @@ string modedesc(score *S) {
   return s;
   }
 
-string displayfor(score* S, bool shorten = false) {
+string displayfor(int scoredisplay, score* S, bool shorten = false) {
   // printf("S=%p, scoredisplay = %d\n", S, scoredisplay);
   if(S == NULL) {
     if(scoredisplay == POSSCORE) return "mode";
@@ -106,15 +96,6 @@ string displayfor(score* S, bool shorten = false) {
 
 vector<pair<string, int> > pickscore_options;
 
-void sortScores() {
-  if(scorerev) reverse(scores.begin(), scores.end());
-  else {
-    scorerev = true;
-    scoresort = scoredisplay; 
-    stable_sort(scores.begin(), scores.end(), scorecompare);
-    }
-  }
-
 int curcol;
 
 vector<int> columns;
@@ -123,16 +104,14 @@ bool monsterpage = false;
          
 void showPickScores() {
 
-  int d = scoredisplay = columns[curcol];
-  
   pickscore_options.clear();
 
   scorerev = false;
 
   for(int i=0; i<=POSSCORE; i++) {
-    scoredisplay = i;
-    if(!fakescore()) {
-      string s = displayfor(NULL);
+    int scoredisplay = i;
+    if(!fakebox[scoredisplay]) {
+      string s = displayfor(scoredisplay, NULL);
       if(dialog::hasInfix(s))
         if(monsbox[scoredisplay] == monsterpage)
           pickscore_options.push_back(make_pair(s, i));
@@ -148,23 +127,21 @@ void showPickScores() {
     int x = 16 + (vid.xres * (i/percolumn)) / qcolumns;
     int y = (vid.fsize+3) * (i % percolumn) + vid.fsize*2;
     
-    scoredisplay = pickscore_options[i].second;
+    int scoredisplay = pickscore_options[i].second;
     if(q <= 9)
       pickscore_options[i].first = pickscore_options[i].first + " [" + its(i+1) + "]";
-    if(!fakescore())
+    if(!fakebox[scoredisplay])
       displayButton(x, y, pickscore_options[i].first, 1000+i, 0);
     }
   
   displayButton(vid.xres/2, vid.yres - vid.fsize*2, "kills", '/', 8);
-
-  scoredisplay = d;
 
   mouseovers = dialog::infix;
   keyhandler = [] (int sym, int uni) {
     if(uni == '/' && dialog::infix == "") monsterpage = !monsterpage; else
     if(uni >= '1' && uni <= '9') uni = uni + 1000 - '1';
     else if(uni >= 1000 && uni < 1000 + size(pickscore_options)) {
-      scoredisplay = pickscore_options[uni - 1000].second;
+      int scoredisplay = pickscore_options[uni - 1000].second;
       for(int i=0; i<=POSSCORE; i++)
         if(columns[i] == scoredisplay) swap(columns[i], columns[curcol]);
       popScreen();
@@ -189,11 +166,11 @@ void show() {
   
   int at = 9;
   for(int i=0; i<=POSSCORE; i++) {
-    scoredisplay = columns[i];
+    int c = columns[i];
     if(bx*at > vid.xres) break;
-    if(displaystr(bx*at, vid.fsize, 0, vid.fsize, displayfor(NULL, true), i == curcol ? 0xFFD500 : forecolor, 0))
+    if(displaystr(bx*at, vid.fsize, 0, vid.fsize, displayfor(c, NULL, true), i == curcol ? 0xFFD500 : forecolor, 0))
       getcstat = 1000+i;
-    at += colwidth();
+    at += colwidth(c);
     }
   
   if(scorefrom < 0) scorefrom = 0;
@@ -223,10 +200,10 @@ void show() {
 
     int at = 9;
     for(int i=0; i<=POSSCORE; i++) {
-      scoredisplay = columns[i];
+      int c = columns[i];
       if(bx*at > vid.xres) break;
-      at += colwidth();
-      if(displaystr(bx*(at-1), y, 0, vid.fsize, displayfor(&S), col, 16))
+      at += colwidth(c);
+      if(displaystr(bx*(at-1), y, 0, vid.fsize, displayfor(c, &S), col, 16))
         getcstat = 1000+i;
       }
 
@@ -242,13 +219,17 @@ void show() {
 
   keyhandler = [] (int sym, int uni) {
     if(sym == SDLK_LEFT || sym == SDLK_KP4 || sym == 'h' || sym == 'a') {
+      scorerev = false;
       if(curcol > 0) curcol--;
       }
     else if(sym == SDLK_RIGHT || sym == SDLK_KP6 || sym == 'l' || sym == 'd') {
+      scorerev = false;
       if(curcol < POSSCORE) curcol++;
       }
-    else if(sym >= 1000 && sym <= 1000+POSSCORE)
+    else if(sym >= 1000 && sym <= 1000+POSSCORE) {
+      scorerev = false;
       curcol = sym - 1000;
+      }
     else if(sym == 't') { dialog::infix = ""; pushScreen(showPickScores); }
     else if(sym == SDLK_UP || sym == 'k' || sym == 'w')
       scorefrom -= 5;
@@ -258,7 +239,15 @@ void show() {
       scorefrom--;
     else if(sym == PSEUDOKEY_WHEELDOWN)
       scorefrom++;
-    else if(sym == 's') sortScores(); 
+    else if(sym == 's') {
+      if(scorerev) reverse(scores.begin(), scores.end());
+      else {
+        scorerev = true;
+        stable_sort(scores.begin(), scores.end(), [] (const score& s1, const score &s2) {
+          return s1.box[columns[curcol]] > s2.box[columns[curcol]];
+          });
+        }
+      }
     else if(doexiton(sym, uni)) popScreen();
 
     static int scoredragy;
@@ -337,8 +326,9 @@ void load() {
   boxid = 0; applyBoxes();
   reverse(scores.begin(), scores.end());
   scorefrom = 0;
-  scoresort = 2; stable_sort(scores.begin(), scores.end(), scorecompare);
-  scoresort = POSSCORE; stable_sort(scores.begin(), scores.end(), scorecompare);
+  stable_sort(scores.begin(), scores.end(), [] (const score& s1, const score& s2) {
+    return tie(s1.box[POSSCORE], s1.box[2]) > tie(s2.box[POSSCORE], s2.box[2]);
+    });
   }
 
 }
