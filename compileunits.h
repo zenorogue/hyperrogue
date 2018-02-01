@@ -57,6 +57,7 @@ bool inv::on;
 #include "nofont.cpp"
 #endif
 #include "basegraph.cpp"
+#include "renderbuffer.cpp"
 #include "help.cpp"
 #include "config.cpp"
 #include "scores.cpp"

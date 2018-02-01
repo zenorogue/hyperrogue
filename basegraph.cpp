@@ -32,7 +32,7 @@ TTF_Font *font[256];
 #endif
 
 #if CAP_SDL
-SDL_Surface *s;
+SDL_Surface *s, *s_screen;
 
 int qpixel_pixel_outside;
 
@@ -220,13 +220,13 @@ void selectEyeMask(int ed) {
     }
   }
 
-void setGLProjection() {
+void setGLProjection(int col) {
   DEBB(DF_GRAPH, (debugfile,"setGLProjection\n"));
 
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
   
-  unsigned char *c = (unsigned char*) (&backcolor);
+  unsigned char *c = (unsigned char*) (&col);
   glClearColor(c[2] / 255.0, c[1] / 255.0, c[0]/255.0, 1);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   
@@ -956,7 +956,7 @@ void IMAGESAVE(SDL_Surface *s, const char *fname) {
   }
 #endif
 
-hookset<void(SDL_Surface*)> *hooks_hqshot;
+hookset<void(renderbuffer*)> *hooks_hqshot;
 
 #if CAP_SDL
 void saveHighQualityShot(const char *fname, const char *caption, int fade) {
@@ -988,26 +988,30 @@ void saveHighQualityShot(const char *fname, const char *caption, int fade) {
     while(vid.xres & 15) vid.xres++;
     }
 
-  vid.usingGL = false;
   // if(vid.pmodel == 0) vid.scale = 0.99;
   calcparam();
   #if CAP_ROGUEVIZ
   rogueviz::fixparam();
   #endif
 
-  // printf("format = %d, %d x %d\n", pngformat, vid.xres, vid.yres);
+  renderbuffer glbuf(vid.xres, vid.yres, vid.usingGL);
+  glbuf.enable();
 
-  dynamicval<SDL_Surface*> v5(s, SDL_CreateRGBSurface(SDL_SWSURFACE,vid.xres,vid.yres,32,0,0,0,0));
+  // printf("format = %d, %d x %d\n", pngformat, vid.xres, vid.yres);
 
   darken = 0;
   
   int numi = (fname?1:2);
 
   for(int i=0; i<numi; i++) {
-    SDL_FillRect(s, NULL, numi==1 ? backcolor : i ? 0xFFFFFF : 0);
-    drawfullmap();
+    glbuf.clear(numi==1 ? backcolor : i ? 0xFFFFFF : 0);
     
-    callhooks(hooks_hqshot, s);
+    if(rug::rugged)
+      rug::drawRugScene();
+    else
+      drawfullmap();
+    
+    callhooks(hooks_hqshot, &glbuf);
 
     if(fade < 255) 
       for(int y=0; y<vid.yres; y++)
@@ -1024,13 +1028,12 @@ void saveHighQualityShot(const char *fname, const char *caption, int fade) {
     char buf[128]; strftime(buf, 128, "bigshota-%y%m%d-%H%M%S" IMAGEEXT, localtime(&timer));
     buf[7] += i;
     if(!fname) fname = buf;
-    IMAGESAVE(s, fname);
+    IMAGESAVE(glbuf.render(), fname);
     
-
     if(i == 0) addMessage(XLAT("Saved the high quality shot to %1", fname));
     }
   
-  SDL_FreeSurface(s);
+  glbuf.disable();
   }
 #endif
 
@@ -1069,13 +1072,13 @@ void setvideomode() {
 
   int sizeflag = (vid.full ? SDL_FULLSCREEN : SDL_RESIZABLE);
   
-  s= SDL_SetVideoMode(vid.xres, vid.yres, 32, flags | sizeflag);
+  s = s_screen = SDL_SetVideoMode(vid.xres, vid.yres, 32, flags | sizeflag);
   
   if(vid.full && !s) {
     vid.xres = vid.xscr;
     vid.yres = vid.yscr;
     do_setfsize();
-    s = SDL_SetVideoMode(vid.xres, vid.yres, 32, flags | SDL_FULLSCREEN);
+    s = s_screen = SDL_SetVideoMode(vid.xres, vid.yres, 32, flags | SDL_FULLSCREEN);
     }
 
   if(!s) {
@@ -1084,7 +1087,7 @@ void setvideomode() {
     vid.yres = 480;
     SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 0);
     vid.antialias &= ~AA_MULTI;
-    s = SDL_SetVideoMode(vid.xres, vid.yres, 32, flags | SDL_RESIZABLE);
+    s = s_screen = SDL_SetVideoMode(vid.xres, vid.yres, 32, flags | SDL_RESIZABLE);
     }
 
 #if CAP_GL

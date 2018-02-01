@@ -798,7 +798,10 @@ namespace polygonal {
 void selectEyeGL(int ed);
 void selectEyeMask(int ed);
 extern int ticks;
-void setGLProjection();
+
+extern unsigned backcolor, bordcolor, forecolor;
+
+void setGLProjection(int col = backcolor);
 
 // passable flags
 
@@ -1432,8 +1435,6 @@ extern cell *recallCell;
 
 extern eLand cheatdest;
 void cheatMoveTo(eLand l);
-
-extern unsigned backcolor, bordcolor, forecolor;
 
 extern bool overgenerate;
 void doOvergenerate();
@@ -2508,3 +2509,21 @@ template<class T, class U> void eliminate_if(vector<T>& data, U pred) {
 
 bool is_cell_removed(cell *c);
 void set_if_removed(cell*& c, cell *val);
+
+struct renderbuffer {
+  int x, y, tx, ty;
+  GLuint FramebufferName;
+  GLuint renderedTexture;
+  GLuint depth_stencil_rb;
+  SDL_Surface *srf;
+  Uint32 *expanded_data;
+  
+  void make_surface();
+  renderbuffer(int x, int y, bool gl);
+  ~renderbuffer();
+  void enable();
+  void disable();
+  SDL_Surface *render();
+  void use_as_texture();
+  void clear(int col);
+  };

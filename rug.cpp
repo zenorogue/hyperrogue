@@ -9,28 +9,6 @@
 #define TEXTURESIZE (texturesize)
 #define HTEXTURESIZE (texturesize/2)
 
-#if !CAP_GLEW
-#if ISLINUX
-extern "C" {
-GLAPI void APIENTRY glGenFramebuffers (GLsizei n, GLuint *framebuffers);
-GLAPI void APIENTRY glBindFramebuffer (GLenum target, GLuint framebuffer);
-GLAPI void APIENTRY glFramebufferTexture (GLenum target, GLenum attachment, GLuint texture, GLint level);
-GLAPI GLenum APIENTRY glCheckFramebufferStatus (GLenum target);
-GLAPI void APIENTRY glDrawBuffers (GLsizei n, const GLenum *bufs);
-GLAPI void APIENTRY glGenRenderbuffers (GLsizei n, GLuint *renderbuffers);
-GLAPI void APIENTRY glBindRenderbuffer (GLenum target, GLuint renderbuffer);
-GLAPI void APIENTRY glRenderbufferStorage (GLenum target, GLenum internalformat, GLsizei width, GLsizei height);
-GLAPI void APIENTRY glFramebufferRenderbuffer (GLenum target, GLenum attachment, GLenum renderbuffertarget, GLuint renderbuffer);
-GLAPI void APIENTRY glDeleteRenderbuffers (GLsizei n, const GLuint *renderbuffers);
-GLAPI void APIENTRY glDeleteFramebuffers (GLsizei n, const GLuint *framebuffers);
-}
-#endif
-
-#if ISMAC
-#define glFramebufferTexture glFramebufferTextureEXT 
-#endif
-#endif
-
 namespace rug {
 
 struct rug_exception { };
@@ -1083,114 +1061,32 @@ void drawTriangle(triangle& t) {
     }
   }
 
-GLuint FramebufferName = 0;
-GLuint renderedTexture = 0;
-GLuint depth_stencil_rb = 0;
-
-SDL_Surface *texture;
-Uint32 *expanded_data;
-
-void initTexture() {
-
-  if(!rendernogl) {
-#if !ISPANDORA
-    FramebufferName = 0;
-    glGenFramebuffers(1, &FramebufferName);
-    glBindFramebuffer(GL_FRAMEBUFFER, FramebufferName);
-    
-    glGenTextures(1, &renderedTexture);
-    glBindTexture(GL_TEXTURE_2D, renderedTexture);
-    glTexImage2D(GL_TEXTURE_2D, 0,GL_RGB, TEXTURESIZE, TEXTURESIZE, 0,GL_RGB, GL_UNSIGNED_BYTE, 0);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  
-#ifdef TEX
-    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, renderedTexture, 0);  
-#else
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, renderedTexture, 0);  
-#endif
-    GLenum DrawBuffers[1] = {GL_COLOR_ATTACHMENT0};
-    glDrawBuffers(1, DrawBuffers);
-    
-    glGenRenderbuffers(1, &depth_stencil_rb);
-    glBindRenderbuffer(GL_RENDERBUFFER, depth_stencil_rb);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, TEXTURESIZE, TEXTURESIZE);
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depth_stencil_rb);
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, depth_stencil_rb);
-    
-    if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-      addMessage("Failed to initialize the framebuffer");
-      rugged = false;
-      }  
-#endif
-    }
-  else {
-    texture = SDL_CreateRGBSurface(SDL_SWSURFACE,TEXTURESIZE,TEXTURESIZE,32,0,0,0,0);  
-    glGenTextures( 1, &renderedTexture );
-    glBindTexture( GL_TEXTURE_2D, renderedTexture);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
-    expanded_data = new Uint32[TEXTURESIZE * TEXTURESIZE];
-    }
-  }
+renderbuffer *glbuf;
 
 void prepareTexture() {
   videopar svid = vid;
   
   setVidParam();
   
-  if(rendernogl) {
-    vid.usingGL = false;
-    SDL_Surface *sav = s;
-    s = texture;
-    SDL_FillRect(s, NULL, 0);
-
-    drawfullmap();
-    s = sav;
-    for(int y=0; y<TEXTURESIZE; y++) for(int x=0; x<TEXTURESIZE; x++)
-      expanded_data[y*TEXTURESIZE + x] = qpixel(texture, x, TEXTURESIZE-1-y) | 0xFF000000;
-    glBindTexture( GL_TEXTURE_2D, renderedTexture);
-    glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, TEXTURESIZE, TEXTURESIZE, 0, GL_BGRA, GL_UNSIGNED_BYTE, expanded_data );    
-    }
-  else { 
-#if !ISPANDORA
-    glBindFramebuffer(GL_FRAMEBUFFER, FramebufferName);
-    glViewport(0,0,TEXTURESIZE,TEXTURESIZE);
+  glbuf->enable();
   
-    setGLProjection();
-    ptds.clear();
-    drawthemap();
-    if(mousing && !renderonce) {
-      for(int i=0; i<numplayers(); i++) if(multi::playerActive(i))
-        queueline(tC0(shmup::ggmatrix(playerpos(i))), mouseh, 0xFF00FF, 8);
-      }
-    if(finger_center) {
-      transmatrix V = rgpushxto0(finger_center->h);
-      queuechr(V, 0.5, 'X', 0xFFFFFFFF, 2);
-      for(int i=0; i<72; i++)
-        queueline(tC0(V * spin(i*M_PI/32) * xpush(finger_range)), tC0(V * spin((i+1)*M_PI/32) * xpush(finger_range)), 0xFFFFFFFF, 0);
-      }
-    drawqueue();  
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-#endif
-    }
-  vid = svid;
-  if(!rendernogl) glViewport(0,0,vid.xres,vid.yres);
-  }
+  glbuf->clear(0);
 
-void closeTexture() {
-  if(rendernogl) {
-    SDL_FreeSurface(texture);
-    glDeleteTextures(1, &renderedTexture);
-    delete[] expanded_data;
+  ptds.clear();
+  drawthemap();
+  if(mousing && !renderonce) {
+    for(int i=0; i<numplayers(); i++) if(multi::playerActive(i))
+      queueline(tC0(shmup::ggmatrix(playerpos(i))), mouseh, 0xFF00FF, 8);
     }
-  else {
-#if !ISPANDORA
-    glDeleteTextures(1, &renderedTexture);
-    glDeleteRenderbuffers(1, &depth_stencil_rb);
-    glDeleteFramebuffers(1, &FramebufferName);
-#endif
+  if(finger_center) {
+    transmatrix V = rgpushxto0(finger_center->h);
+    queuechr(V, 0.5, 'X', 0xFFFFFFFF, 2);
+    for(int i=0; i<72; i++)
+      queueline(tC0(V * spin(i*M_PI/32) * xpush(finger_range)), tC0(V * spin((i+1)*M_PI/32) * xpush(finger_range)), 0xFFFFFFFF, 0);
     }
+  drawqueue();
+  vid = svid;
+  glbuf->disable();
   }
 
 double xview, yview;
@@ -1214,8 +1110,8 @@ void drawRugScene() {
 
   glEnable(GL_LIGHTING);
   glEnable(GL_LIGHT0);
-
-  glBindTexture(GL_TEXTURE_2D, renderedTexture);
+  
+  glbuf->use_as_texture();
 
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
@@ -1310,20 +1206,10 @@ void drawRugScene() {
 transmatrix currentrot;
     
 void init() {
-#if CAP_GLEW
-  if(!glew) { 
-    glew = true; 
-    GLenum err = glewInit();
-    if (GLEW_OK != err) {
-      addMessage("Failed to initialize GLEW");
-      return;
-      }
-    }
-#endif
   if(rugged) return;
   rugged = true;
   if(scale < .01 || scale > 100) scale = 1;
-  initTexture();
+  glbuf = new renderbuffer(TEXTURESIZE, TEXTURESIZE, vid.usingGL && !rendernogl);
   if(renderonce) prepareTexture();
   if(!rugged) return;
   
@@ -1364,7 +1250,7 @@ void init() {
 void close() {
   if(!rugged) return;
   rugged = false;
-  closeTexture();
+  delete glbuf;
   triangles.clear();
   for(int i=0; i<size(points); i++) delete points[i];
   points.clear();
