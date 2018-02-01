@@ -746,6 +746,9 @@ namespace rug {
   extern int  texturesize;
   extern ld   model_distance;
   extern transmatrix currentrot;
+#if CAP_ODS
+  extern bool ods;
+#endif
 #if CAP_RUG
   void show();
   void init();
@@ -753,6 +756,11 @@ namespace rug {
   void actDraw();
   void select();
   void buildVertexInfo(cell *c, transmatrix V);
+  void drawRugScene();
+  void prepareTexture();
+  void drawRugScene();
+  void push_all_points(int coord, ld val);
+  void apply_rotation(const transmatrix& t);
 #endif
   }
 
