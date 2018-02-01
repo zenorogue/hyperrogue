@@ -738,6 +738,24 @@ void prettyline(hyperpoint h1, hyperpoint h2, int col, int lev) {
   drawpolyline(p);
   }
 
+void prettypoly(const vector<hyperpoint>& t, int fillcol, int linecol, int lev) {
+  prettylinepoints.clear();
+  prettypoint(t[0]);
+  for(int i=0; i<size(t); i++)
+    prettylinesub(t[i], t[(i+1)%3], lev);
+  polytodraw p;
+  auto& pp = p.u.poly;
+  pp.V = Id;
+  pp.tab = &prettylinepoints[0];
+  pp.cnt = size(prettylinepoints)/3;
+  pp.minwidth = minwidth_global;
+  p.col = fillcol;
+  pp.outline = linecol;
+  pp.flags = POLY_ISSIDE;
+  pp.tinf = NULL;
+  drawpolyline(p);
+  }
+  
 vector<GLfloat> curvedata;
 int curvestart = 0;
 bool keep_curvedata = false;
