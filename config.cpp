@@ -502,7 +502,7 @@ void loadOldConfig(FILE *f) {
   d = vid.mspeed;
   err=fscanf(f, "%d%d%d%f%d%d", &aa, &bb, &sightrange, &d, &effvolume, &vid.particles);
   vid.mspeed = d;
-  if(sightrange < 4) sightrange = 4;
+  if(sightrange < 3) sightrange = 3;
   if(sightrange > 7) sightrange = 7;
   vid.revcontrol = aa; vid.drawmousecircle = bb;
    
