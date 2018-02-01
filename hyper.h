@@ -2014,6 +2014,7 @@ typedef float GLfloat;
 struct textureinfo {
   transmatrix M;
   int texture_id;
+  vector<array<hyperpoint, 3>> triangles;
   vector<GLfloat> vertices;
   vector<GLfloat> tvertices; 
   cell *c;

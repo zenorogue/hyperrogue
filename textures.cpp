@@ -274,27 +274,29 @@ set<cell*> models;
 
 void mapTexture(cell *c, textureinfo& mi, patterns::patterninfo &si, const transmatrix& T, int shift = 0) {
   mi.c = c;
-  mi.vertices.clear();
-  mi.tvertices.clear();
   mi.symmetries = si.symmetries;
   mi.current_type = c->type;
   
   mi.M = T * applyPatterndir(c, si);
 
-  if(tstate == tsAdjusting) return;
-
   ld z = ctof(c) ? rhexf : hexvdist;
   
-  // int sym = si.symmetries;
-
+  mi.triangles.clear();
   for(int i=0; i<c->type; i++) {
     int i2 = i+shift;
     hyperpoint h1 =  spin(M_PI + M_PI * (2*i2 -1) / c->type) * xpush(z) * C0;
     hyperpoint h2 =  spin(M_PI + M_PI * (2*i2 +1) / c->type) * xpush(z) * C0;
-    mapTextureTriangle(mi, make_array(C0, h1, h2));
-    }  
+    mi.triangles.push_back(make_array(C0, h1, h2));
+    }
   }
 
+void mapTexture2(textureinfo& mi) {
+  mi.vertices.clear();
+  mi.tvertices.clear();
+  for(auto& t: mi.triangles)
+    mapTextureTriangle(mi, t);
+  }
+  
 int recolor(int col) {
   if(color_alpha == 0) return col;
   for(int i=1; i<4; i++)
@@ -401,6 +403,10 @@ void perform_mapping() {
       mi.texture_id = textureid;
       }
     }
+
+  if(tstate == tsActive)
+    for(auto& mi: texture_map)
+      mapTexture2(mi.second);
 
   models.clear();
   for(auto& t: texture_map) models.insert(t.second.c);
@@ -746,7 +752,7 @@ bool load_textureconfig() {
       restartGame('7');
       }
     }
-  
+
   if(true) {
     celllister cl(currentmap->gamestart(), 20, 10000, NULL);
     bool found = false;
@@ -908,6 +914,7 @@ void showMenu() {
     dialog::addColorItem(XLAT("grid color"), grid_color, 'g');
     dialog::addColorItem(XLAT("mesh color"), mesh_color, 'm');
     dialog::addSelItem(XLAT("color alpha"), its(color_alpha), 'c');
+    dialog::addSelItem(XLAT("precision"), its(gsplits), 'P');
     dialog::addItem(XLAT("edit the texture"), 'e');
     dialog::addItem(XLAT("save the full texture image"), 'S');
     dialog::addItem(XLAT("save texture config"), 's');
@@ -1023,11 +1030,14 @@ void showMenu() {
       dialog::editNumber(color_alpha, 0, 255, 15, 0, XLAT("color alpha"),
         XLAT("The higher the value, the less important the color of underlying terrain is."));
       }    
-    else if(uni == 'P' && tstate <= tsAdjusting) {
+    else if(uni == 'P') {
       dialog::editNumber(gsplits, 0, 4, 1, 1, XLAT("precision"),
         XLAT("precision"));
-      dialog::reaction = perform_mapping;
-      }    
+      if(tstate == tsActive) dialog::reaction = [] () {
+          for(auto& mi: texture_map)
+            mapTexture2(mi.second);
+        };
+      }
     else if(uni == 'S' && tstate == tsAdjusting) 
       dialog::openFileDialog(texturename, XLAT("save the raw texture"), ".png", 
         [] () {
@@ -1250,6 +1260,7 @@ void remap(eTextureState old_tstate, eTextureState old_tstate_max) {
         auto& mi2 = texture_map[si.id];
         mi2 = mi;
         mapTexture(c, mi2, si, Id, pshift);
+        mapTexture2(mi2);
         mi2.tvertices = move(new_tvertices);
         }
       catch(out_of_range) { 
