@@ -428,7 +428,7 @@ namespace dialog {
       unsigned char* pts = (unsigned char*) &color;
       pts[uni - 'A'] = x;
       }
-    else if(uni == ' ' || uni == '\n') {
+    else if(uni == ' ' || uni == '\n' || uni == '\r') {
       bool inHistory = false;
       for(int i=0; i<10; i++) if(colorhistory[i] == (unsigned) color)
         inHistory = true;
