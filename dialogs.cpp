@@ -851,6 +851,9 @@ namespace dialog {
   
   //-- choose file dialog--
 
+  #define CDIR 0xC0C0C0
+  #define CFILE forecolor
+  
   bool filecmp(const pair<string,int> &f1, const pair<string,int> &f2) {
     if(f1.first == "../") return true;
     if(f2.first == "../") return false;

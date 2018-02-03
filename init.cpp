@@ -299,9 +299,13 @@ void gdpush(int t);
 typedef int SDL_Event;
 #endif
 
-#if ISWEB
-inline Uint8 *SDL_GetKeyState(void *v) { static Uint8 tab[1024]; return tab; }
-#endif
+// #if ISWEB
+// inline Uint8 *SDL_GetKeyState(void *v) { static Uint8 tab[1024]; return tab; }
+// #endif
+
+extern "C" {
+  Uint8 *SDL_GetKeyState(void*);
+}
 
 #ifndef CAP_GLEW
 #define CAP_GLEW (CAP_GL && !ISMOBILE && !ISMAC && !ISLINUX)

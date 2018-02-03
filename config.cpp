@@ -268,7 +268,7 @@ void initConfig() {
   addsaver(geom3::highdetail, "3D highdetail");
   addsaver(geom3::middetail, "3D middetail");
   
-  addsaver(memory_saving_mode, "memory_saving_mode", (ISMOBILE || ISPANDORA) ? 1 : 0);
+  addsaver(memory_saving_mode, "memory_saving_mode", (ISMOBILE || ISPANDORA || ISWEB) ? 1 : 0);
 
   addsaver(rug::renderonce, "rug-renderonce");
   addsaver(rug::rendernogl, "rug-rendernogl");
@@ -342,7 +342,9 @@ void initConfig() {
   shmup::initConfig();
 #endif
 
+#if CAP_CONFIG
   for(auto s: savers) s->reset();
+#endif
   }
 
 bool inSpecialMode() {

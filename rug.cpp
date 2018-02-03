@@ -28,7 +28,6 @@ eGeometry gwhere = gEuclid;
 
 bool rugged = false;
 bool genrug = false;
-bool glew   = false;
 
 int vertex_limit = 20000;
 
@@ -1289,6 +1288,10 @@ bool handlekeys(int sym, int uni) {
     apply_rotation(rotmatrix(M_PI/2, 0, 2));
     return true;
     }
+#if !CAP_SDL
+  else if(uni == SDLK_PAGEUP || uni == '[') rug_perspective ? push_all_points(-.1) : model_distance /= exp(.1);
+  else if(uni == SDLK_PAGEDOWN || uni == ']') rug_perspective ? push_all_points(+.1) : model_distance *= exp(.1);
+#endif
   else return false;
   }
 
@@ -1305,6 +1308,8 @@ void actDraw() {
   if(!renderonce) prepareTexture();
   physics();
   drawRugScene();
+  
+  #if CAP_SDL
   Uint8 *keystate = SDL_GetKeyState(NULL);
   int qm = 0;
   double alpha = (ticks - lastticks) / 1000.0;
@@ -1380,6 +1385,7 @@ void actDraw() {
   
     if(qm) apply_rotation(t);
     }
+  #endif
     }
   catch(rug_exception) {
     rug::close();

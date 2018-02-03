@@ -6,6 +6,7 @@
 #define CAP_TOUR 1
 #define CAP_SDLTTF 0
 #define CAP_SHMUP 0
+#define CAP_RUG 1
 
 #ifdef FAKEWEB
 void mainloopiter();

@@ -22,6 +22,8 @@ GLAPI void APIENTRY glDeleteFramebuffers (GLsizei n, const GLuint *framebuffers)
 #endif
 #endif
 
+bool glew   = false;
+
 renderbuffer::renderbuffer(int x, int y, bool gl) : x(x), y(y) {
 
   valid = false;

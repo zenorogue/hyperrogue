@@ -1300,7 +1300,9 @@ namespace patterns {
       if(among(uni, PAT_EMERALD, PAT_PALACE, PAT_ZEBRA, PAT_DOWN, PAT_FIELD, PAT_COLORING, PAT_SIBLING, PAT_CHESS)) {
         if(whichPattern == uni) whichPattern = 0;
         else whichPattern = uni;
+        #if CAP_EDIT
         mapeditor::modelcell.clear();
+        #endif
         }
       
       else if(uni >= '0' && uni <= '5') 

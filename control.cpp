@@ -813,7 +813,9 @@ void displayabutton(int px, int py, string s, int col) {
 #endif
 
 void gmodekeys(int sym, int uni) {
+  #if CAP_RUG
   if(rug::rugged) rug::handlekeys(sym, uni);
+  #endif
   if(uni == '1' && !rug::rugged) { vid.alpha = 999; vid.scale = 998; vid.xposition = vid.yposition = 0; }
   if(uni == '2' && !rug::rugged) { vid.alpha = 1; vid.scale = 0.4; vid.xposition = vid.yposition = 0; }
   if(uni == '3' && !rug::rugged) { vid.alpha = 1; vid.scale = 1; vid.xposition = vid.yposition = 0; }

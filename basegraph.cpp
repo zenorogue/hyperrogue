@@ -1074,9 +1074,11 @@ void saveHighQualityShot(const char *fname, const char *caption, int fade) {
   for(int i=0; i<numi; i++) {
     glbuf.clear(numi==1 ? backcolor : i ? 0xFFFFFF : 0);
     
+    #if CAP_RUG
     if(rug::rugged)
       rug::drawRugScene();
     else
+    #endif
       drawfullmap();
     
     callhooks(hooks_hqshot, &glbuf);

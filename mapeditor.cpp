@@ -21,6 +21,36 @@ namespace mapeditor {
     } ew, ewsearch;
   bool autochoose = ISMOBILE;
   
+  void scaleall(ld z) { 
+     
+     // (mx,my) = (xcb,ycb) + ss * (xpos,ypos) + (mrx,mry) * scale
+     
+     // (mrx,mry) * (scale-scale') =
+     // ss * ((xpos',ypos')-(xpos,ypos))
+     
+     // mx = xb + ssiz*xpos + mrx * scale
+     // mx = xb + ssiz*xpos' + mrx * scale' 
+     
+     ld mrx = (.0 + mousex - vid.xcenter) / vid.scale;
+     ld mry = (.0 + mousey - vid.ycenter) / vid.scale;
+     
+     if(vid.xres > vid.yres) {      
+       vid.xposition += (vid.scale - vid.scale*z) * mrx / vid.scrsize;
+       vid.yposition += (vid.scale - vid.scale*z) * mry / vid.scrsize;
+       }
+
+     vid.scale *= z;
+     printf("scale = " LDF "\n", vid.scale);
+     #if CAP_TEXTURE
+     texture::itt = xyscale(texture::itt, 1/z);
+     display(texture::itt);
+     if(texture::tstate) {
+       calcparam();
+       texture::perform_mapping();
+       }
+     #endif
+     }
+  
 #if CAP_EDIT
   map<int, cell*> modelcell;
 
@@ -427,9 +457,6 @@ namespace mapeditor {
 
   bool choosefile = false;
 
-  #define CDIR 0xC0C0C0
-  #define CFILE forecolor
-  
   void displayFunctionKeys() {
     int fs = min(vid.fsize + 5, vid.yres/26);
     displayButton(8, vid.yres-8-fs*11, XLAT("F1 = help"), SDLK_F1, 0);
@@ -1348,36 +1375,6 @@ namespace mapeditor {
     return true;
     }
 
-  void scaleall(ld z) { 
-     
-     // (mx,my) = (xcb,ycb) + ss * (xpos,ypos) + (mrx,mry) * scale
-     
-     // (mrx,mry) * (scale-scale') =
-     // ss * ((xpos',ypos')-(xpos,ypos))
-     
-     // mx = xb + ssiz*xpos + mrx * scale
-     // mx = xb + ssiz*xpos' + mrx * scale' 
-     
-     ld mrx = (.0 + mousex - vid.xcenter) / vid.scale;
-     ld mry = (.0 + mousey - vid.ycenter) / vid.scale;
-     
-     if(vid.xres > vid.yres) {      
-       vid.xposition += (vid.scale - vid.scale*z) * mrx / vid.scrsize;
-       vid.yposition += (vid.scale - vid.scale*z) * mry / vid.scrsize;
-       }
-
-     vid.scale *= z;
-     printf("scale = " LDF "\n", vid.scale);
-     #if CAP_TEXTURE
-     texture::itt = xyscale(texture::itt, 1/z);
-     display(texture::itt);
-     if(texture::tstate) {
-       calcparam();
-       texture::perform_mapping();
-       }
-     #endif
-     }
-  
   hyperpoint lstart;
   cell *lstartcell;
 
