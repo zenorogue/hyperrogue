@@ -340,6 +340,13 @@ inline int next_p2 (int a )
     return rval;
 }
 
+void glError(const char* GLcall, const char* file, const int line) {
+  GLenum errCode = glGetError();
+  if(errCode!=GL_NO_ERROR) {
+    fprintf(stderr, "OPENGL ERROR #%i: in file %s on line %i :: %s\n",errCode,file, line, GLcall);
+    }
+  }
+
 #if CAP_GLFONT
 
 struct glfont_t {
@@ -352,13 +359,6 @@ struct glfont_t {
   };
 
 glfont_t *glfont[256];
-
-void glError(const char* GLcall, const char* file, const int line) {
-  GLenum errCode = glGetError();
-  if(errCode!=GL_NO_ERROR) {
-    // fprintf(stderr, "OPENGL ERROR #%i: in file %s on line %i :: %s\n",errCode,file, line, GLcall);
-    }
-  }
 
 void sdltogl(SDL_Surface *txt, glfont_t& f, int ch) {
 #if CAP_TABFONT

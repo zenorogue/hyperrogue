@@ -1124,10 +1124,10 @@ void drawRugScene() {
 
 #ifndef GLES_ONLY
   glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
-  GLERR("lighting");
 #else
   glLightModelx(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
 #endif
+  GLERR("lighting");
 
   glEnable(GL_LIGHTING);
   glEnable(GL_LIGHT0);
