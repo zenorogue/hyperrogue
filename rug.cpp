@@ -11,6 +11,8 @@
 
 namespace rug {
 
+int when_enabled;
+
 struct rug_exception { };
 
 bool fast_euclidean = true;
@@ -1196,6 +1198,7 @@ transmatrix currentrot;
     
 void init() {
   if(rugged) return;
+  when_enabled = ticks;
   glbuf = new renderbuffer(TEXTURESIZE, TEXTURESIZE, vid.usingGL && !rendernogl);
   if(!glbuf->valid) {
     addMessage(XLAT("Failed to enable"));
@@ -1303,11 +1306,23 @@ void finger_on(int coord, ld val) {
   enqueue(finger_center), good_shape = false;
   }
 
+transmatrix last_orientation;
+
 void actDraw() { 
   try {
   if(!renderonce) prepareTexture();
   physics();
   drawRugScene();
+  
+  #if CAP_ORIENTATION
+  if(ticks < when_enabled + 500)
+    last_orientation = getOrientation();
+  else {
+    transmatrix next_orientation = getOrientation();
+    apply_rotation(inverse(last_orientation) * next_orientation);
+    last_orientation = next_orientation;
+    }
+  #endif
   
   #if CAP_SDL
   Uint8 *keystate = SDL_GetKeyState(NULL);

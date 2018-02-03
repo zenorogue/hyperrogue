@@ -165,6 +165,10 @@
 #define CAP_PNG (!ISMOBWEB)
 #endif
 
+#ifndef CAP_ORIENTATION
+#define CAP_ORIENTATION ISMOBILE
+#endif
+
 #ifndef CAP_COMMANDLINE
 #define CAP_COMMANDLINE (!ISMOBILE)
 #endif
@@ -299,13 +303,13 @@ void gdpush(int t);
 typedef int SDL_Event;
 #endif
 
-// #if ISWEB
-// inline Uint8 *SDL_GetKeyState(void *v) { static Uint8 tab[1024]; return tab; }
-// #endif
+#if ISWEB
+inline Uint8 *SDL_GetKeyState(void *v) { static Uint8 tab[1024]; return tab; }
+#endif
 
-extern "C" {
+/* extern "C" {
   Uint8 *SDL_GetKeyState(void*);
-}
+} */
 
 #ifndef CAP_GLEW
 #define CAP_GLEW (CAP_GL && !ISMOBILE && !ISMAC && !ISLINUX)
