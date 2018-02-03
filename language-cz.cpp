@@ -5195,7 +5195,7 @@ S("The game starts in the Icy Lands. Collect the Ice Diamonds "
 S("Hypersian Rug model", "Model hyperského koberce")
 S(
   "New players think that the action of HyperRogue takes place on a sphere. "
-#if ISMOBWEB
+#if NORUG
   "This is not true -- try the Tutorial in the native desktop version shows "
   "the surface HyperRogue actually takes place on.",
 #else
@@ -5207,7 +5207,7 @@ S(
   
 
   "Noví hráči si často myslí, že se HyperRogue odehrává na povrchu koule. "
-#if ISMOBWEB
+#if NORUG
   "Není to pravda -- Tutoriál v desktopové verzi ti může ukázat povrch, "
   "na jakém se HyperRogue opravdu odehrává."
 #else

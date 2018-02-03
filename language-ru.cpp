@@ -1,3 +1,4 @@
+
 // HyperRogue Russian translation, by green orange <khadaev98@gmail.com>
 // Copyright (C) 2011-2016 Zeno Rogue, see 'hyper.cpp' for details
 
@@ -5290,7 +5291,7 @@ S("The game starts in the Icy Lands. Collect the Ice Diamonds "
 S("Hypersian Rug model", "Модель Гиперсидского ковра")
 S(
   "New players think that the action of HyperRogue takes place on a sphere. "
-#if ISMOBWEB
+#if NORUG
   "This is not true -- the Tutorial in the native desktop version shows "
   "the surface HyperRogue actually takes place on.",
 #else
@@ -5301,7 +5302,7 @@ S(
 #endif
  
   "Новички иногда думают, что действие в HyperRogue происходит на сфере. "
-#if ISMOBWEB
+#if NORUG
   "Это неправда -- Руководство в компьютерной версии покажет тебе "
   "настоящую поверхность HyperRogue."
 #else

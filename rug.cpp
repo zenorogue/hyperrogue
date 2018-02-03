@@ -1470,7 +1470,11 @@ void show() {
   dialog::addBoolItem(XLAT("enable the Hypersian Rug mode"), rug::rugged, 'u');
   
   dialog::addBoolItem(XLAT("render the texture only once"), (renderonce), 'o');
+  #if CAP_SDL
   dialog::addBoolItem(XLAT("render texture without OpenGL"), (rendernogl), 'g');
+  #else
+  rendernogl = false;
+  #endif
   dialog::addSelItem(XLAT("texture size"), its(texturesize)+"x"+its(texturesize), 's');
 
   dialog::addSelItem(XLAT("vertex limit"), its(vertex_limit), 'v');
@@ -1498,9 +1502,6 @@ void show() {
 
   dialog::display();
   keyhandler = [] (int sym, int uni) {
-  #if ISPANDORA
-    rendernogl = true;
-  #endif
     dialog::handleNavigation(sym, uni);
 
     if(uni == 'h') gotoHelp(
@@ -1589,10 +1590,8 @@ void show() {
       pushScreen(showStereo);
     else if(uni == 'n' && !rug::rugged)
       gwhere = eGeometry((gwhere+1) % 4);
-  #if !ISPANDORA
-    else if(uni == 'g' && !rug::rugged)
+    else if(uni == 'g' && !rug::rugged && CAP_SDL)
       rendernogl = !rendernogl;
-  #endif
     else if(uni == 's' && !rug::rugged) {
       texturesize *= 2;
       if(texturesize == 8192) texturesize = 64;

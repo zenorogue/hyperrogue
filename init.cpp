@@ -114,7 +114,7 @@
 #endif
 
 #ifndef CAP_RUG
-#define CAP_RUG (!ISMOBWEB && !ISMINI && CAP_SDL && CAP_GL)
+#define CAP_RUG (!ISMINI && CAP_GL)
 #endif
 
 #ifndef CAP_EDIT
