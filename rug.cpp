@@ -1315,6 +1315,11 @@ void apply_rotation(const transmatrix& t) {
   for(auto p: points) p->flat = t * p->flat;
   }
 
+void move_forward(ld distance) {
+  if(rug_perspective) push_all_points(2, -distance);
+  else model_distance /= exp(distance);
+  }
+
 bool handlekeys(int sym, int uni) {
   if(uni == '4') {
 #if CAP_ODS
@@ -1344,16 +1349,8 @@ bool handlekeys(int sym, int uni) {
     return true;
     }
 #if !CAP_SDL
-  else if(uni == SDLK_PAGEUP || uni == '[') {
-    if(rug_perspective) push_all_points(2, -.1);
-    else model_distance /= exp(.1);
-    return true;
-    }
-  else if(uni == SDLK_PAGEDOWN || uni == ']') {
-    if(rug_perspective) push_all_points(2, +.1);
-    else model_distance *= exp(.1);
-    return true;
-    }
+  else if(uni == SDLK_PAGEUP || uni == '[') move_forward(.1);
+  else if(uni == SDLK_PAGEDOWN || uni == ']') move_forward(-.1);
 #endif
   else return false;
   }

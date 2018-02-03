@@ -5473,7 +5473,7 @@ void gamescreen(int _darken) {
       }
     else {
       if(andmode != 0) displayabutton(-1, +1, XLAT("MOVE"),  andmode == 0 ? BTON : BTOFF);
-      displayabutton(+1, +1, XLAT(andmode == 1 ? "BACK" : "DRAG"),  andmode == 1 ? BTON : BTOFF);
+      displayabutton(+1, +1, rug::rugged ? "RUG" : XLAT(andmode == 1 ? "BACK" : "DRAG"),  andmode == 1 ? BTON : BTOFF);
       }
     displayabutton(-1, -1, XLAT("INFO"),  andmode == 12 ? BTON : BTOFF);
     displayabutton(+1, -1, XLAT("MENU"), andmode == 3 ? BTON : BTOFF);

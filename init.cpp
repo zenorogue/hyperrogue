@@ -751,10 +751,17 @@ void mobile_draw(MOBPAR_FORMAL) {
   #endif
 
   if(clicked && lclicked && andmode == 1 && (cmode & sm::NORMAL)) {
-    if(!mouseout2() && mouseoh[2] < 50 && mouseh[2] < 50) {
+    if(!mouseout2() && mouseoh[2] < 50 && mouseh[2] < 50 && !rug::rugged) {
       panning(mouseoh, mouseh);
       }
     }
+  
+  static int lticks_rug;
+  
+  if(andmode == 1 && !inmenu && rug::rugged && clicked)
+    rug::move_forward((ticks - lticks_rug) / 2500);
+  
+  lticks_rug = ticks;
 
   if(andmode == 1 && lclicked && !clicked && !inmenu && mouseover)
     performMarkCommand(mouseover);
