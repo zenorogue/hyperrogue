@@ -332,6 +332,14 @@ void setGLProjection(int col) {
   stereo::set_projection(0);
   }
 
+inline int next_p2 (int a )
+{
+    int rval=1;
+    // rval<<=1 Is A Prettier Way Of Writing rval*=2;
+    while(rval<a) rval<<=1;
+    return rval;
+}
+
 #if CAP_GLFONT
 
 struct glfont_t {
@@ -344,14 +352,6 @@ struct glfont_t {
   };
 
 glfont_t *glfont[256];
-
-inline int next_p2 (int a )
-{
-    int rval=1;
-    // rval<<=1 Is A Prettier Way Of Writing rval*=2;
-    while(rval<a) rval<<=1;
-    return rval;
-}
 
 void glError(const char* GLcall, const char* file, const int line) {
   GLenum errCode = glGetError();

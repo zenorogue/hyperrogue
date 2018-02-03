@@ -301,6 +301,7 @@ void gdpush(int t);
 #define SDLK_KP_ENTER (123054)
 #define SDLK_BACKSPACE (123055)
 typedef int SDL_Event;
+typedef unsigned int Uint32;
 #endif
 
 #if ISWEB
@@ -330,6 +331,8 @@ inline Uint8 *SDL_GetKeyState(void *v) { static Uint8 tab[1024]; return tab; }
     #include <GLES/gl.h>
     #include <GLES/glext.h>
     #include <GLES2/gl2.h>
+    #include <GLES3/gl3.h>
+    #define GLES_ONLY
   #else
     #include <GL/gl.h>
     #include <GL/glu.h>

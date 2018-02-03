@@ -871,6 +871,20 @@ void addNewPoints() {
   if(qvalid != oqvalid) { printf("adding new points %4d %4d %4d %.9lf %9d %9d\n", oqvalid, qvalid, size(points), dist, dt, queueiter); }
   }
 
+#if !CAP_SDL
+#include <stdlib.h>
+#include <sys/time.h>
+long long getVa() {
+  struct timeval tval;
+  gettimeofday(&tval, NULL);
+  return tval.tv_sec * 1000000 + tval.tv_usec;
+  }
+
+int SDL_GetTicks() {
+  return getVa() / 1000;
+  }
+#endif
+
 void physics() {
 
   if(good_shape) return;
@@ -981,6 +995,8 @@ bool project_ods(hyperpoint azeq, hyperpoint& h1, hyperpoint& h2, bool eye) {
   }
 #endif
 
+vector<GLfloat> vertex_array, tvertex_array;
+
 void drawTriangle(triangle& t) {
   using namespace hyperpoint_vec;  
   for(int i: {0,1,2}) {
@@ -1054,8 +1070,10 @@ void drawTriangle(triangle& t) {
   glNormal3f(hc[0]/hch,hc[1]/hch,hc[2]/hch);
   
   for(int i: {0,1,2}) {
-    glTexCoord2f(t.m[i]->x1, t.m[i]->y1);
-    glVertex3f(h[i][0], h[i][1], h[i][2]);
+    tvertex_array.push_back(t.m[i]->x1);
+    tvertex_array.push_back(t.m[i]->y1);
+    for(int j: {0,1,2})
+      vertex_array.push_back(h[i][j]);
     }
   }
 
@@ -1104,8 +1122,12 @@ void drawRugScene() {
   glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
   glLightfv(GL_LIGHT0, GL_POSITION, light_position);
 
+#ifndef GLES_ONLY
   glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
   GLERR("lighting");
+#else
+  glLightModelx(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
+#endif
 
   glEnable(GL_LIGHTING);
   glEnable(GL_LIGHT0);
@@ -1116,7 +1138,7 @@ void drawRugScene() {
     glClearColor(0.05,0.05,0.05,1);
   else
     glcolorClear(backcolor << 8 | 0xFF);
-  glClearDepth(1.0f); 
+  glClearDepthf(1.0f);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   
   glDisable(GL_BLEND);
@@ -1126,13 +1148,18 @@ void drawRugScene() {
   
   for(int ed=stereo::active() && stereo::mode != stereo::sODS ? -1 : 0; ed < 2; ed += 2) {
     use_precompute = false;
+    vertex_array.clear();
+    tvertex_array.clear();
     stereo::set_mask(ed), stereo::set_viewport(ed);
     if(ed == 1 && stereo::mode == stereo::sAnaglyph)
       glClear(GL_DEPTH_BUFFER_BIT);
     
     start_projection(ed);
-    if(stereo::mode == stereo::sODS) 
+    if(stereo::mode == stereo::sODS) {
+#ifndef GLES_ONLY
       glOrtho(-M_PI, M_PI, -M_PI, M_PI, 0, -M_PI * 2);
+#endif
+      }
     else if(rug_perspective || stereo::active()) {
 
       ld vnear = .001;
@@ -1140,7 +1167,15 @@ void drawRugScene() {
       ld sca = vnear * stereo::tanfov / vid.xres;
       xview = stereo::tanfov;
       yview = stereo::tanfov * vid.yres / vid.xres;
-      glFrustum(-sca * vid.xres, sca * vid.xres, -sca * vid.yres, sca * vid.yres, vnear, vfar);
+      
+      //glFrustum(-sca * vid.xres, sca * vid.xres, -sca * vid.yres, sca * vid.yres, vnear, vfar);
+      
+      GLfloat frustum[16] = {
+        GLfloat(vnear / sca / vid.xres), 0, 0, 0,
+        0, GLfloat(vnear / sca / vid.yres), 0, 0,
+        0, 0, GLfloat(-(vnear+vfar)/(vfar-vnear)), -1,
+        0, 0, GLfloat(-2*vnear*vfar/(vfar-vnear)), 1};
+      glMultMatrixf(frustum);
 
       glMatrixMode(GL_MODELVIEW);
       glLoadIdentity();
@@ -1160,21 +1195,38 @@ void drawRugScene() {
     else {
       xview = stereo::tanfov * model_distance;
       yview = stereo::tanfov * model_distance * vid.yres / vid.xres;
-      glOrtho(-xview, xview, yview, -yview, -1000, 1000);
+      // glOrtho(-xview, xview, yview, -yview, -1000, 1000);
+
+      GLfloat ortho[16] = {
+        GLfloat(1/xview), 0, 0, 0, 
+        0, GLfloat(1/yview), 0, 0, 
+        0, 0, GLfloat(.001), 0,
+        0, 0, 0, 1};
+      glMultMatrixf(ortho);
       }
     glColor4f(1.f, 1.f, 1.f, 1.f);
   
     if(rug_perspective && gwhere >= gSphere) {
       glEnable(GL_FOG);
+#ifndef GLES_ONLY
       glFogi(GL_FOG_MODE, GL_LINEAR);
+#else
+      glFogx(GL_FOG_MODE, GL_LINEAR);
+#endif
       glFogf(GL_FOG_START, 0);
       glFogf(GL_FOG_END, gwhere == gSphere ? 10 : 4);
       }
-    
-    glBegin(GL_TRIANGLES);
+
     for(int t=0; t<size(triangles); t++)
       drawTriangle(triangles[t]);
-    glEnd();
+
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glVertexPointer(3, GL_FLOAT, 0, &vertex_array[0]);
+    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+    glTexCoordPointer(2, GL_FLOAT, 0, &tvertex_array[0]);
+
+    glDrawArrays(GL_TRIANGLES, 0, size(vertex_array)/3);
+    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 
     stereo::set_mask(0);
     }
@@ -1292,8 +1344,16 @@ bool handlekeys(int sym, int uni) {
     return true;
     }
 #if !CAP_SDL
-  else if(uni == SDLK_PAGEUP || uni == '[') rug_perspective ? push_all_points(-.1) : model_distance /= exp(.1);
-  else if(uni == SDLK_PAGEDOWN || uni == ']') rug_perspective ? push_all_points(+.1) : model_distance *= exp(.1);
+  else if(uni == SDLK_PAGEUP || uni == '[') {
+    if(rug_perspective) push_all_points(2, -.1);
+    else model_distance /= exp(.1);
+    return true;
+    }
+  else if(uni == SDLK_PAGEDOWN || uni == ']') {
+    if(rug_perspective) push_all_points(2, +.1);
+    else model_distance *= exp(.1);
+    return true;
+    }
 #endif
   else return false;
   }
@@ -1321,9 +1381,9 @@ void actDraw() {
     transmatrix next_orientation = getOrientation();
     apply_rotation(inverse(last_orientation) * next_orientation);
     last_orientation = next_orientation;
-    }
+    }        
   #endif
-  
+
   #if CAP_SDL
   Uint8 *keystate = SDL_GetKeyState(NULL);
   int qm = 0;
@@ -1626,6 +1686,7 @@ void select() {
   pushScreen(rug::show);
   }
 
+#if CAP_COMMANDLINE
 int rugArgs() {
   using namespace arg;
            
@@ -1678,7 +1739,8 @@ int rugArgs() {
 
 auto rug_hook = 
   addHook(hooks_args, 100, rugArgs);
-  
+#endif
+
 }
 
 #else

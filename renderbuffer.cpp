@@ -40,7 +40,6 @@ renderbuffer::renderbuffer(int x, int y, bool gl) : x(x), y(y) {
   if(gl) {
     tx = next_p2(x);
     ty = next_p2(y);
-    s = NULL;
   #if CAP_GLEW
     if(!glew) { 
       glew = true; 
@@ -53,7 +52,7 @@ renderbuffer::renderbuffer(int x, int y, bool gl) : x(x), y(y) {
   #endif
   
     FramebufferName = renderedTexture = depth_stencil_rb = 0;
-    glGenFramebuffers(1, &FramebufferName);
+    glGenFramebuffers(1, &FramebufferName); //
     glBindFramebuffer(GL_FRAMEBUFFER, FramebufferName);
     
     glGenTextures(1, &renderedTexture);
@@ -67,8 +66,8 @@ renderbuffer::renderbuffer(int x, int y, bool gl) : x(x), y(y) {
   #else
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, renderedTexture, 0);  
   #endif
-    GLenum DrawBuffers[1] = {GL_COLOR_ATTACHMENT0};
-    glDrawBuffers(1, DrawBuffers);
+    // GLenum DrawBuffers[1] = {GL_COLOR_ATTACHMENT0};
+    // glDrawBuffers(1, DrawBuffers);
     
     glGenRenderbuffers(1, &depth_stencil_rb);
     glBindRenderbuffer(GL_RENDERBUFFER, depth_stencil_rb);
@@ -96,7 +95,7 @@ void renderbuffer::make_surface() {
   }
 
 SDL_Surface *renderbuffer::render() {
-  make_surface();
+  make_surface() ;
   if(FramebufferName) {
     glReadPixels(0, 0, vid.xres, vid.yres, GL_BGRA, GL_UNSIGNED_BYTE, srf->pixels);
     for(int y=0; y<vid.yres/2; y++)
@@ -127,7 +126,9 @@ void renderbuffer::disable() {
   #if CAP_GL
   if(FramebufferName) {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    #if CAP_SDL
     glViewport(0,0,s_screen->w,s_screen->h);
+    #endif
     return;
     }
   #endif
@@ -147,6 +148,7 @@ void renderbuffer::use_as_texture() {
   if(FramebufferName) {
     glBindTexture( GL_TEXTURE_2D, renderedTexture);
     }
+#if CAP_SDL
   else {
     if(!expanded_data)
       expanded_data = new Uint32[tx * ty];
@@ -155,6 +157,7 @@ void renderbuffer::use_as_texture() {
     glBindTexture( GL_TEXTURE_2D, renderedTexture);
     glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, tx, ty, 0, GL_BGRA, GL_UNSIGNED_BYTE, expanded_data );    
     }
+#endif
   }
 #endif
 
