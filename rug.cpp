@@ -19,8 +19,6 @@ bool good_shape;
 ld modelscale = 1;
 ld model_distance = 2;
 
-ld fov = 90;
-
 eGeometry gwhere = gEuclid;
 
 #define USING_NATIVE_GEOMETRY dynamicval<eGeometry> gw(geometry, gwhere == gElliptic ? gSphere : gwhere)
@@ -55,6 +53,7 @@ struct rugpoint {
   double dist;
   hyperpoint h;    // point in the represented space
   hyperpoint flat; // point in the native space, in azeq
+  hyperpoint precompute;
   vector<edge> edges;
   // Find-Union algorithm
   rugpoint *glue;
@@ -202,7 +201,7 @@ rugpoint *addRugpoint(hyperpoint h, double dist) {
   m->h = h;
   
   /*
-  ld tz = vid.alphax+h[2];
+  ld tz = vid.alpha+h[2];
   m->x1 = (1 + h[0] / tz) / 2;
   m->y1 = (1 + h[1] / tz) / 2;
   */
@@ -345,7 +344,7 @@ void setVidParam() {
   vid.xres = vid.yres = TEXTURESIZE;
   vid.scrsize = HTEXTURESIZE;
   vid.radius = vid.scrsize * vid.scale; vid.xcenter = HTEXTURESIZE; vid.ycenter = HTEXTURESIZE;
-  vid.beta = 2; vid.alphax = 1; vid.eye = 0; vid.goteyes = false;
+  vid.alpha = 1; 
   }
 
 void buildTorusRug() {
@@ -899,11 +898,11 @@ void physics() {
 // drawing the Rug
 //-----------------
 
-int eyemod;
+bool use_precompute;
 
 void getco(rugpoint *m, hyperpoint& h, int &spherepoints) {
   using namespace hyperpoint_vec;
-  h = m->getglue()->flat;
+  h = use_precompute ? m->getglue()->precompute : m->getglue()->flat;
   if(rug_perspective && gwhere >= gSphere) {
     if(h[2] > 0) {
       ld rad = hypot3(h);
@@ -916,7 +915,6 @@ void getco(rugpoint *m, hyperpoint& h, int &spherepoints) {
       spherepoints++;
       }
     }
-  if(eyemod) h[0] += eyemod * h[2] * vid.eye;
   }
 
 extern int besti;
@@ -938,7 +936,6 @@ ld raddif(ld a, ld b) {
   }
 
 bool ods = false;
-ld ipd = 0.05;
 
 bool project_ods(hyperpoint azeq, hyperpoint& h1, hyperpoint& h2, bool eye) {
   ld tanalpha = tan(ipd/2);
@@ -1067,6 +1064,7 @@ void prepareTexture() {
   videopar svid = vid;
   
   setVidParam();
+  dynamicval<stereo::eStereo> d(stereo::mode, stereo::sOFF);
   
   glbuf->enable();
   
@@ -1113,12 +1111,6 @@ void drawRugScene() {
   
   glbuf->use_as_texture();
 
-  glMatrixMode(GL_MODELVIEW);
-  glLoadIdentity();
-
-  glMatrixMode(GL_PROJECTION);
-  glLoadIdentity();
-
   if(backcolor == 0) 
     glClearColor(0.05,0.05,0.05,1);
   else
@@ -1131,60 +1123,59 @@ void drawRugScene() {
   glEnable(GL_DEPTH_TEST);
   glDepthFunc(GL_LESS);
   
-  ld tanfov = tan(fov * M_PI / 360);
+  for(int ed=stereo::active() && stereo::mode != stereo::sODS ? -1 : 0; ed < 2; ed += 2) {
+    use_precompute = false;
+    stereo::set_mask(ed), stereo::set_viewport(ed);
+    if(ed == 1 && stereo::mode == stereo::sAnaglyph)
+      glClear(GL_DEPTH_BUFFER_BIT);
+    
+    start_projection(ed);
+    if(stereo::mode == stereo::sODS) 
+      glOrtho(-M_PI, M_PI, -M_PI, M_PI, 0, -M_PI * 2);
+    else if(rug_perspective || stereo::active()) {
+
+      ld vnear = .001;
+      ld vfar = 1000;
+      ld sca = vnear * stereo::tanfov / vid.xres;
+      xview = stereo::tanfov;
+      yview = stereo::tanfov * vid.yres / vid.xres;
+      glFrustum(-sca * vid.xres, sca * vid.xres, -sca * vid.yres, sca * vid.yres, vnear, vfar);
+
+      glMatrixMode(GL_MODELVIEW);
+      glLoadIdentity();
+      if(!rug_perspective) glTranslatef(0, 0, -model_distance);
+      if(ed) {
+        if(gwhere == gEuclid)
+          glTranslatef(stereo::ipd*ed/2, 0, 0);
+        else {
+          use_precompute = true;
+          for(auto p: points) {
+            p->precompute = p->flat;
+            push_point(p->precompute, 0, stereo::ipd*ed/2);
+            }
+          }
+        }
+      }
+    else {
+      xview = stereo::tanfov * model_distance;
+      yview = stereo::tanfov * model_distance * vid.yres / vid.xres;
+      glOrtho(-xview, xview, yview, -yview, -1000, 1000);
+      }
+    glColor4f(1.f, 1.f, 1.f, 1.f);
   
-#if CAP_ODS
-  if(ods) {
-    glOrtho(-M_PI, M_PI, -M_PI, M_PI, 0, -M_PI * 2);
-    }
-  else 
-#endif
-  if(rug_perspective) {
-    ld vnear = .001;
-    ld vfar = 1000;
-    ld sca = vnear * tanfov / vid.xres;
-    xview = -tanfov;
-    yview = -tanfov * vid.yres / vid.xres;
-    glFrustum(-sca * vid.xres, sca * vid.xres, -sca * vid.yres, sca * vid.yres, vnear, vfar);
-    }
-  else {
-    xview = tanfov * model_distance;
-    yview = tanfov * model_distance * vid.yres / vid.xres;
-
-    glOrtho(-xview, xview, -yview, yview, -1000, 1000);
-    }
-
-  glColor4f(1.f, 1.f, 1.f, 1.f);
-
-  if(rug_perspective && gwhere >= gSphere) {
-    glEnable(GL_FOG);
-    glFogi(GL_FOG_MODE, GL_LINEAR);
-    glFogf(GL_FOG_START, 0);
-    glFogf(GL_FOG_END, gwhere == gSphere ? 10 : 4);
-    }
-  
-  if(vid.eye > .001 || vid.eye < -.001) { 
-    selectEyeMask(1);
-    glClear(GL_DEPTH_BUFFER_BIT);
-    glBegin(GL_TRIANGLES);
-    eyemod = 1;
-    for(int t=0; t<size(triangles); t++)
-      drawTriangle(triangles[t]);
-    glEnd();
-    selectEyeMask(-1);
-    eyemod = -1;
-    glClear(GL_DEPTH_BUFFER_BIT);
+    if(rug_perspective && gwhere >= gSphere) {
+      glEnable(GL_FOG);
+      glFogi(GL_FOG_MODE, GL_LINEAR);
+      glFogf(GL_FOG_START, 0);
+      glFogf(GL_FOG_END, gwhere == gSphere ? 10 : 4);
+      }
+    
     glBegin(GL_TRIANGLES);
     for(int t=0; t<size(triangles); t++)
       drawTriangle(triangles[t]);
     glEnd();
-    selectEyeMask(0);
-    }
-  else {
-    glBegin(GL_TRIANGLES);
-    for(int t=0; t<size(triangles); t++)
-      drawTriangle(triangles[t]);
-    glEnd();
+
+    stereo::set_mask(0);
     }
 
   glDisable(GL_TEXTURE_2D);
@@ -1193,9 +1184,8 @@ void drawRugScene() {
   glEnable(GL_BLEND);
   glDisable(GL_FOG);
 
-  glMatrixMode(GL_PROJECTION);
-  glLoadIdentity();
-  selectEyeGL(0);
+  stereo::set_mask(0), stereo::set_viewport(0);
+  stereo::set_projection(0);
   
   need_mouseh = true;
   }
@@ -1494,7 +1484,7 @@ void show() {
   dialog::addSelItem(XLAT("model scale factor"), fts(modelscale), 'm');
   if(rug::rugged)
     dialog::addSelItem(XLAT("model iterations"), its(queueiter), 0);
-  dialog::addSelItem(XLAT("field of view"), fts(fov) + "°", 'f');
+  dialog::addItem(XLAT("stereo vision config"), 'f');
   // dialog::addSelItem(XLAT("protractor"), fts(protractor * 180 / M_PI) + "°", 'f');
   if(!good_shape) {
     dialog::addSelItem(XLAT("maximum error"), ftsg(err_zero), 'e');
@@ -1591,12 +1581,8 @@ void show() {
       dialog::scaleLog();
       dialog::reaction = [] () { err_zero_current = err_zero; };
       }
-    else if(uni == 'f') {
-      dialog::editNumber(fov, 1, 170, 1, 45, "field of view", 
-        "Horizontal field of view, in the perspective projection. "
-        "In the orthogonal projection this just controls the scale."
-        );
-      }
+    else if(uni == 'f') 
+      pushScreen(showStereo);
     else if(uni == 'n' && !rug::rugged)
       gwhere = eGeometry((gwhere+1) % 4);
   #if !ISPANDORA
@@ -1646,6 +1632,10 @@ int rugArgs() {
 
   else if(argis("-rugv")) {
     shift(); vertex_limit = argi();
+    }
+
+  else if(argis("-rugon")) {
+    PHASE(3); rug::init();
     }
 
 #if CAP_ODS

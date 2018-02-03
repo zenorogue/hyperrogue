@@ -2209,8 +2209,9 @@ void sumaura(int v) {
   
 void drawaura() {
   if(!haveaura()) return;
+  if(stereo::mode) return;
   double rad = vid.radius;
-  if(sphere && !mdEqui()) rad /= sqrt(vid.alphax*vid.alphax - 1);
+  if(sphere && !mdEqui()) rad /= sqrt(vid.alpha*vid.alpha - 1);
   
   for(int v=0; v<4; v++) sumaura(v);
   for(auto& p: auraspecials) {
@@ -2297,7 +2298,7 @@ void drawaura() {
       cx[r][z][u+2] = bak[u] + (aurac[rm][u] / (aurac[rm][3]+.1) - bak[u]) * cmul[z];
     }
   
-  for(int u=0; u<4; u++) glcoords[u][2] = vid.scrdist;
+  for(int u=0; u<4; u++) glcoords[u][2] = stereo::scrdist;
   for(int u=0; u<4; u++) coltab[u][3] = 1;
 
   for(int r=0; r<AURA; r++) for(int z=0;z<10;z++) {
@@ -2693,7 +2694,7 @@ void setcolors(cell *c, int& wcol, int &fcol) {
       fcol = reptilecolor(c);
       break;
     case laCrossroads:
-      fcol = (vid.goteyes2 ? 0xFF3030 : 0xFF0000);
+      fcol = (stereo::in_anaglyph() ? 0xFF3030 : 0xFF0000);
       break;
     case laCaves: case laEmerald: case laDeadCaves:
       fcol = 0x202020;
@@ -2704,7 +2705,7 @@ void setcolors(cell *c, int& wcol, int &fcol) {
         }
       break;
     case laJungle:
-      fcol = (vid.goteyes2 ? 0x408040 : 0x008000);
+      fcol = (stereo::in_anaglyph() ? 0x408040 : 0x008000);
       break;
     case laMirror: case laMirrorWall: case laMirrorOld:
       fcol = 0x808080;
@@ -2719,10 +2720,10 @@ void setcolors(cell *c, int& wcol, int &fcol) {
       if(c->wall == waPlatform) wcol = 0xF0F0A0;
       break;
     case laRlyeh:
-      fcol = (vid.goteyes2 ? 0x4080C0 : 0x004080);
+      fcol = (stereo::in_anaglyph() ? 0x4080C0 : 0x004080);
       break;
     case laHell:
-      fcol = (vid.goteyes2 ? 0xC03030 : 0xC00000);
+      fcol = (stereo::in_anaglyph() ? 0xC03030 : 0xC00000);
       break;
     case laCanvas:
       fcol = c->landparam;
@@ -3166,7 +3167,7 @@ void placeSidewall(cell *c, int i, int sidepar, const transmatrix& V, bool warp,
   
   transmatrix V2 = V * ddspin(c, i);
   
-  // if(sphere && vid.alphax <= 1 && tC0(V2 * xpush(cellgfxdist(c, i)/2))[2] < -.5) return; 
+  // if(sphere && vid.alpha <= 1 && tC0(V2 * xpush(cellgfxdist(c, i)/2))[2] < -.5) return; 
  
   /* int aw = away(V2); prio += aw;
   if(!detaillevel && aw < 0) return;
@@ -5342,12 +5343,13 @@ void calcparam() {
   vid.xcenter += vid.scrsize * vid.xposition;
   vid.ycenter += vid.scrsize * vid.yposition;
 
-  ld eye = vid.eye; if(pmodel || rug::rugged) eye = 0;
-  vid.beta = 1 + vid.alpha + eye;
-  vid.alphax = vid.alpha + eye;
-  vid.goteyes = vid.eye > 0.001 || vid.eye < -0.001;
-  vid.goteyes2 = vid.goteyes;
-  vid.scrdist = vid.radius;
+  stereo::tanfov = tan(stereo::fov * M_PI / 360);
+  
+  if(pmodel) 
+    stereo::scrdist = vid.xres / 2 / stereo::tanfov;
+  else 
+    stereo::scrdist = vid.radius;
+  stereo::scrdist_text = stereo::scrdist;
   }
 
 int ringcolor = darkena(0xFF, 0, 0xFF);
@@ -5360,19 +5362,19 @@ void drawfullmap() {
     
   ptds.clear();
 
-  if(!vid.goteyes && !euclid && (pmodel == mdDisk || pmodel == mdBall || (sphere && mdEqui()))) {
+  if(!stereo::active() && !euclid && (pmodel == mdDisk || pmodel == mdBall || (sphere && mdEqui()))) {
     double rad = vid.radius;
     if(sphere) {
       if(mdEqui())
         ;
       else if(!vid.grid && !elliptic)
         rad = 0; 
-      else if(vid.alphax <= 0)
+      else if(vid.alpha <= 0)
         ;
-      else if(vid.alphax <= 1 && (vid.grid || elliptic)) // mark the equator
-        rad = rad * 1 / vid.alphax;
+      else if(vid.alpha <= 1 && (vid.grid || elliptic)) // mark the equator
+        rad = rad * 1 / vid.alpha;
       else if(vid.grid) // mark the edge
-        rad /= sqrt(vid.alphax*vid.alphax - 1);
+        rad /= sqrt(vid.alpha*vid.alpha - 1);
       }
     if(!haveaura()) queuecircle(vid.xcenter, vid.ycenter, rad, ringcolor,
       vid.usingGL ? PPR_CIRCLE : PPR_OUTCIRCLE);

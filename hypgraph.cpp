@@ -26,7 +26,7 @@ hyperpoint gethyper(ld x, ld y) {
     }
   
   if(euclid)
-    return hpxy(hx * (EUCSCALE + vid.alphax), hy * (EUCSCALE + vid.alphax));
+    return hpxy(hx * (EUCSCALE + vid.alpha), hy * (EUCSCALE + vid.alpha));
     
   if(vid.camera_angle) camrotate(hx, hy);
   
@@ -45,8 +45,8 @@ hyperpoint gethyper(ld x, ld y) {
   ld curv = sphere ? 1 : -1;
   
   A = 1+curv*hr;
-  B = 2*hr*vid.alphax*-curv;
-  C = 1 - curv*hr*vid.alphax*vid.alphax;
+  B = 2*hr*vid.alpha*-curv;
+  C = 1 - curv*hr*vid.alpha*vid.alpha;
   
   // Az^2 - Bz = C
   B /= A; C /= A;
@@ -56,13 +56,13 @@ hyperpoint gethyper(ld x, ld y) {
   // z = (B/2) + sqrt(C + B^2/4)
   
   ld rootsign = 1;
-  if(sphere && vid.alphax > 1) rootsign = -1;
+  if(sphere && vid.alpha > 1) rootsign = -1;
   
   ld hz = B / 2 + rootsign * sqrt(C + B*B/4);
   
   hyperpoint H;
-  H[0] = hx * (hz+vid.alphax);
-  H[1] = hy * (hz+vid.alphax);
+  H[0] = hx * (hz+vid.alpha);
+  H[1] = hy * (hz+vid.alpha);
   H[2] = hz;
   
   return H;
@@ -83,9 +83,21 @@ void ballmodel(hyperpoint& ret, double alpha, double d, double zl) {
   ret[2] = - ax * sa * cb - ay * sb;
   }
 
+void apply_depth(hyperpoint &f, ld z) {
+  if(vid.usingGL)
+    f[2] = z;
+  else {
+    z = z * vid.radius;
+    ld mul = stereo::scrdist / (stereo::scrdist + z);
+    f[0] = f[0] * mul;
+    f[1] = f[1] * mul;
+    f[2] = vid.xres * stereo::eyewidth() / 2 / vid.radius + stereo::ipd * mul / 2;
+    }
+  }
+
 void applymodel(hyperpoint H, hyperpoint& ret) {
   
-  ld tz = euclid ? (EUCSCALE+vid.alphax) : vid.alphax+H[2];
+  ld tz = euclid ? (EUCSCALE+vid.alpha) : vid.alpha+H[2];
   if(tz < BEHIND_LIMIT && tz > -BEHIND_LIMIT) tz = BEHIND_LIMIT;
   
   if(pmodel == mdUnchanged) { 
@@ -124,9 +136,9 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
   if(pmodel == mdDisk) {
   
     if(!vid.camera_angle) {
-      ret[0] = H[0] / tz;    
+      ret[0] = H[0] / tz;
       ret[1] = H[1] / tz;
-      ret[2] = (1 - vid.beta / tz);
+      ret[2] = vid.xres / vid.radius * stereo::eyewidth() / 2 - stereo::ipd / tz / 2;
       }
     else {
       ld tx = H[0];
@@ -137,7 +149,7 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
       ld ux = tx, uy = ty * cc - ss * tz, uz = tz * cc + ss * ty;
       ret[0] = ux / uz;
       ret[1] = uy / uz;
-      ret[2] = 1 - vid.beta / uz;
+      ret[2] = vid.xres / vid.radius * stereo::eyewidth() / 2 - stereo::ipd / uz / 2;
       }
     return;
     }
@@ -164,14 +176,14 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
     ret[0] = d * H[0] / rad / M_PI;
     ret[1] = d * H[1] / rad / M_PI;
     ret[2] = 0; 
-    if(zlev != 1 && vid.goteyes) 
-      ret[2] = geom3::factor_to_lev(zlev);
+    if(zlev != 1 && stereo::active()) 
+      apply_depth(ret, -geom3::factor_to_lev(zlev));
     ghcheck(ret,H);
 
     return;
     }
   
-  tz = H[2]+vid.alphax;
+  tz = H[2]+vid.alpha;
 
   if(pmodel == mdPolygonal || pmodel == mdPolynomial) {
     pair<long double, long double> p = polygonal::compute(H[0]/tz, H[1]/tz);
@@ -198,8 +210,8 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
     if(wmspatial || mmspatial) y0 *= zlev;
     ret[1] = 1 - y0;
     ret[2] = 0;
-    if(zlev != 1 && vid.goteyes) 
-      ret[2] = y0 * geom3::factor_to_lev(zlev);
+    if(zlev != 1 && stereo::active()) 
+      apply_depth(ret, -y0 * geom3::factor_to_lev(zlev));
     ghcheck(ret,H);
     return;
     }
@@ -229,8 +241,8 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
   ret[1] = -y0/M_PI*2;
   ret[2] = 0; 
 
-  if(zlev != 1 && vid.goteyes) 
-    ret[2] = geom3::factor_to_lev(zlev) / (1 + yv * yv);
+  if(zlev != 1 && stereo::active()) 
+    apply_depth(ret, -geom3::factor_to_lev(zlev) / (1 + yv * yv));
 
   ghcheck(ret,H);
   }
@@ -442,7 +454,7 @@ void drawEuclidean() {
   
   transmatrix View0 = View;
   
-  ld cellrad = vid.radius / (EUCSCALE + vid.alphax);
+  ld cellrad = vid.radius / (EUCSCALE + vid.alpha);
   
   ld centerd = matrixnorm(View0);
   
@@ -613,8 +625,8 @@ void fullcenter() {
 
 transmatrix screenpos(ld x, ld y) {
   transmatrix V = Id;
-  V[0][2] += (x - vid.xcenter) / vid.radius * (1+vid.alphax);
-  V[1][2] += (y - vid.ycenter) / vid.radius * (1+vid.alphax);
+  V[0][2] += (x - vid.xcenter) / vid.radius * (1+vid.alpha);
+  V[1][2] += (y - vid.ycenter) / vid.radius * (1+vid.alpha);
   return V;
   }
 
@@ -625,7 +637,7 @@ transmatrix atscreenpos(ld x, ld y, ld size) {
   V[1][2] += (y - vid.ycenter);
   V[0][0] = size * 2 * hcrossf / crossf;
   V[1][1] = size * 2 * hcrossf / crossf;
-  V[2][2] = vid.scrdist;
+  V[2][2] = stereo::scrdist;
   if(euclid) V[2][2] /= EUCSCALE;
 
   return V;

@@ -102,6 +102,9 @@ int arg::readCommon() {
   else if(argis("-nofps")) {
     nofps = true;
     }
+  else if(argis("-nohud")) {
+    nohud = true;
+    }
   else if(argis("-back")) {
     shift(); backcolor = strtol(args(), NULL, 16);
     }
@@ -131,6 +134,10 @@ int arg::readCommon() {
     shift(); eItem i = readItem(args());
     shift(); int q = argi();
     placeItems(q, i);
+    }
+  else if(argis("-SM")) {
+    PHASE(2);
+    shift(); stereo::mode = stereo::eStereo(argi());
     }
   else if(argis("-IU")) {
     PHASE(3) cheater++; timerghost = false;

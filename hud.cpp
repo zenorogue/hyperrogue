@@ -332,8 +332,9 @@ bool nofps = false;
 void drawStats() {
   callhandlers(false, hooks_prestats);
 #if CAP_ROGUEVIZ
-  if(rogueviz::on || nohud) return;
+  if(rogueviz::on) return;
 #endif
+  if(nohud || stereo::mode == stereo::sLR) return;
   if(viewdists && sidescreen) {
     distcolors[0] = forecolor;
     dialog::init("");
@@ -375,11 +376,11 @@ void drawStats() {
   {
   dynamicval<eModel> pm(pmodel, mdDisk);
   dynamicval<ld> va(vid.alpha, 1);
-  dynamicval<ld> vax(vid.alphax, 1);
+  dynamicval<ld> vax(vid.alpha, 1);
   dynamicval<videopar> v(vid, vid);
   calcparam();
 #if CAP_GL
-  selectEyeGL(0);
+  stereo::set_projection(0);
 #endif
 
   if(haveMobileCompass()) {
@@ -436,69 +437,77 @@ void drawStats() {
           }
         }
       }
-    return;
     }
   
-  instat = false;
-  bool portrait = vid.xres < vid.yres;
-  int colspace = portrait ? (vid.yres - vid.xres - vid.fsize*3) : (vid.xres - vid.yres - 16) / 2;
-  int rowspace = portrait ? vid.xres - 16 : vid.yres - vid.fsize * (vid.msgleft ? 9 : 4);
-  int colid[4], rowid[4];
-  int maxbyclass[4];
-  for(int z=0; z<4; z++) maxbyclass[z] = 0;
-  for(int i=0; i<glyphs; i++) if(ikappear(i))
-    if(!portrait || (glyphflags(i) | GLYPH_INPORTRAIT))
-      maxbyclass[glyphclass(i)]++;
-  int buttonsize;
-  int columns, rows;
-  bool imponly = false;
-  int minsize = vid.fsize * (portrait ? 4 : 2);  
-  rows = 0;
-  while((buttonsize = minsize - vid.killreduction)) {
-    columns = colspace / buttonsize;
-    rows = rowspace / buttonsize;
-    int coltaken = 0;
-    for(int z=0; z<4; z++) {
-      if(z == 2 && !portrait) {
-        if(coltaken > columns) { vid.killreduction++; continue; }
-        coltaken = 0;
+  else {
+  
+    instat = false;
+    bool portrait = vid.xres < vid.yres;
+    int colspace = portrait ? (vid.yres - vid.xres - vid.fsize*3) : (vid.xres - vid.yres - 16) / 2;
+    int rowspace = portrait ? vid.xres - 16 : vid.yres - vid.fsize * (vid.msgleft ? 9 : 4);
+    int colid[4], rowid[4];
+    int maxbyclass[4];
+    for(int z=0; z<4; z++) maxbyclass[z] = 0;
+    for(int i=0; i<glyphs; i++) if(ikappear(i))
+      if(!portrait || (glyphflags(i) | GLYPH_INPORTRAIT))
+        maxbyclass[glyphclass(i)]++;
+    int buttonsize;
+    int columns, rows;
+    bool imponly = false;
+    int minsize = vid.fsize * (portrait ? 4 : 2);  
+    rows = 0;
+    while((buttonsize = minsize - vid.killreduction)) {
+      columns = colspace / buttonsize;
+      rows = rowspace / buttonsize;
+      int coltaken = 0;
+      for(int z=0; z<4; z++) {
+        if(z == 2 && !portrait) {
+          if(coltaken > columns) { vid.killreduction++; continue; }
+          coltaken = 0;
+          }
+        colid[z] = coltaken, rowid[z] = 0,
+        coltaken += (maxbyclass[z] + rows-1) / rows;
         }
-      colid[z] = coltaken, rowid[z] = 0,
-      coltaken += (maxbyclass[z] + rows-1) / rows;
+      if(coltaken > columns) { vid.killreduction++; continue; }
+      break;
       }
-    if(coltaken > columns) { vid.killreduction++; continue; }
-    break;
-    }
-
-  if(buttonsize <= vid.fsize*3/4) {
-    imponly = true; buttonsize = minsize;
-    rows = rowspace / buttonsize; if(!rows) return;
-    colid[0] = 0; colid[2] = portrait ? 1 : 0;
-    }  
   
-  updatesort();
-  stable_sort(glyphorder, glyphorder+glyphs, glyphsort);
+    if(buttonsize <= vid.fsize*3/4) {
+      imponly = true; buttonsize = minsize;
+      rows = rowspace / buttonsize; if(!rows) return;
+      colid[0] = 0; colid[2] = portrait ? 1 : 0;
+      }  
+    
+    updatesort();
+    stable_sort(glyphorder, glyphorder+glyphs, glyphsort);
+    
+    for(int i0=0; i0<glyphs; i0++) {
+      int i = glyphorder[i0];
+      if(!ikappear(i)) continue;
+      int z = glyphclass(i);
+      int imp = glyphflags(i);
+      if(imponly) { z &=~1; if(!(imp & GLYPH_IMPORTANT)) continue; }
   
-  for(int i0=0; i0<glyphs; i0++) {
-    int i = glyphorder[i0];
-    if(!ikappear(i)) continue;
-    int z = glyphclass(i);
-    int imp = glyphflags(i);
-    if(imponly) { z &=~1; if(!(imp & GLYPH_IMPORTANT)) continue; }
-
-    int cx, cy;
-    if(portrait)
-      cx = 8 + buttonsize * rowid[z], cy = vid.fsize*2 + buttonsize * (colid[z]) + buttonsize/2;
-    else
-      cx = 8 + buttonsize * (colid[z]), cy = vid.fsize * 3 + buttonsize * rowid[z];
-    
-    if(!portrait && z < 2) cx = vid.xres - cx - buttonsize;
-
-    rowid[z]++; if(rowid[z] >= rows) rowid[z] = 0, colid[z]++;
-    
-    displayglyph2(cx, cy, buttonsize, i);    
+      int cx, cy;
+      if(portrait)
+        cx = 8 + buttonsize * rowid[z], cy = vid.fsize*2 + buttonsize * (colid[z]) + buttonsize/2;
+      else
+        cx = 8 + buttonsize * (colid[z]), cy = vid.fsize * 3 + buttonsize * rowid[z];
+      
+      if(!portrait && z < 2) cx = vid.xres - cx - buttonsize;
+  
+      rowid[z]++; if(rowid[z] >= rows) rowid[z] = 0, colid[z]++;
+      
+      displayglyph2(cx, cy, buttonsize, i);    
+      }
     }
+  }
 
+  calcparam();
+#if CAP_GL
+  stereo::set_projection(0);
+#endif
+  
   string s0;
   if(!peace::on) {
     if(displayButtonS(vid.xres - 8, vid.fsize, XLAT("score: %1", its(gold())), forecolor, 16, vid.fsize)) {
@@ -553,11 +562,5 @@ XLAT(
   achievement_display();
 
   callhooks(hooks_stats);
-  }
-  
-  calcparam();
-#if CAP_GL
-  selectEyeGL(0);
-#endif
   }
 

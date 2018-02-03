@@ -587,14 +587,13 @@ extern reaction_t help_delegate;
 #define HELPFUN(x) (help_delegate = x, "HELPFUN")
 
 struct videopar {
-  ld scale, eye, alpha, sspeed, mspeed, yshift, camera_angle;
+  ld scale, alpha, sspeed, mspeed, yshift, camera_angle;
   ld ballangle, ballproj;
   int mobilecompasssize;
   int aurastr, aurasmoothen;
 
   bool full;
-  bool goteyes;  // for rendering
-  bool goteyes2; // for choosing colors
+  
   int graphglyph; // graphical glyphs
   bool darkhepta;
   int shifttarget;
@@ -609,7 +608,6 @@ struct videopar {
   int xcenter, ycenter;
   int radius;
   int scrsize;
-  ld alphax, beta;
   
   bool grid;
   int particles;
@@ -622,9 +620,6 @@ struct videopar {
   
   int msgleft, msglimit;
 
-  // for OpenGL
-  float scrdist;
-  
   bool usingGL;
   int antialias;
   #define AA_NOGL      1
@@ -2536,3 +2531,25 @@ struct renderbuffer {
   void use_as_texture();
   void clear(int col);
   };
+
+namespace stereo {
+  enum eStereo { sOFF, sAnaglyph, sLR, sODS };
+
+  extern eStereo mode;
+  extern ld ipd;
+  extern ld lr_eyewidth, anaglyph_eyewidth;
+  extern ld fov, tanfov;
+
+  extern GLfloat scrdist, scrdist_text;
+
+  ld eyewidth();
+  bool active();
+  bool in_anaglyph();
+
+  void set_viewport(int ed);
+  void set_projection(int ed);
+  void set_mask(int ed);
+  }
+
+double randd();
+

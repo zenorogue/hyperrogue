@@ -248,7 +248,6 @@ void initConfig() {
   
   // special graphics
 
-  addsaver(vid.eye, "eye distance", 0);
   addsaver(vid.ballangle, "ball angle", 20);
   addsaver(vid.yshift, "Y shift", 0);
   addsaver(vid.camera_angle, "camera angle", 0);
@@ -332,6 +331,12 @@ void initConfig() {
   
   addsaver(viewdists, "expansion mode");
   addsaver(backbrightness, "brightness behind sphere");
+
+  addsaver(stereo::ipd, "interpupilar-distance", 0.05);
+  addsaver(stereo::lr_eyewidth, "eyewidth-lr", 0.5);
+  addsaver(stereo::anaglyph_eyewidth, "eyewidth-anaglyph", 0.1);
+  addsaver(stereo::fov, "field-of-vision", 90);
+  addsaverenum(stereo::mode, "stereo-mode");
   
 #if CAP_SHMUP  
   shmup::initConfig();
@@ -437,7 +442,7 @@ void loadOldConfig(FILE *f) {
   float a, b, c, d;
   err=fscanf(f, "%f%f%f%f\n", &a, &b, &c, &d);
   if(err == 4) {
-    vid.scale = a; vid.eye = b; vid.alpha = c; vid.sspeed = d;
+    vid.scale = a; vid.alpha = c; vid.sspeed = d;
     }
   err=fscanf(f, "%d%d%d%d%d%d%d", &vid.wallmode, &vid.monmode, &vid.axes, &musicvolume, &vid.framelimit, &gl, &vid.antialias);
   vid.usingGL = gl;
@@ -1047,6 +1052,66 @@ string explain3D(ld *param) {
   return "";
   }
 
+void showStereo() {
+  cmode = sm::SIDE | sm::A3 | sm::MAYDARK;
+  gamescreen(0);
+  using namespace geom3;
+  dialog::init(XLAT("stereo vision config"));
+
+  string modenames[4] = { "OFF", "anaglyph", "stereo", "ODS" };
+  
+  dialog::addSelItem(XLAT("stereo mode"), XLAT(modenames[stereo::mode]), 'm');
+  dialog::addSelItem(XLAT("interpupilar distance"), fts3(stereo::ipd), 'e');
+  
+  switch(stereo::mode) {
+    case stereo::sAnaglyph:
+      dialog::addSelItem(XLAT("distance between images"), fts(stereo::anaglyph_eyewidth), 'd');
+      break;
+    case stereo::sLR:
+      dialog::addSelItem(XLAT("distance between images"), fts(stereo::lr_eyewidth), 'd');
+      break;
+    default:
+      dialog::addBreak(100);
+      break;
+    }
+
+  dialog::addSelItem(XLAT("field of view"), fts(stereo::fov) + "°", 'f');
+
+  dialog::addItem(XLAT("exit stereo configuration"), 'v');
+  dialog::display();
+
+  keyhandler = [] (int sym, int uni) {
+    using namespace geom3;
+    dialog::handleNavigation(sym, uni);
+
+    if(uni == 'm')
+      { stereo::mode = stereo::eStereo((1 + stereo::mode) % 3); return; }
+    
+    else if(uni == 'e') 
+      dialog::editNumber(stereo::ipd, -10, 10, 0.01, 0, XLAT("interpupilar distance"),
+        XLAT("Watch the Minkowski hyperboloid or the hypersian rug mode with the "
+        "red/cyan 3D glasses."));
+      
+    else if(uni == 'd' && stereo::mode == stereo::sAnaglyph)
+      dialog::editNumber(stereo::anaglyph_eyewidth, -1, 1, 0.01, 0, XLAT("distance between images"),
+        XLAT("Watch the Minkowski hyperboloid or the hypersian rug mode with the "
+        "red/cyan 3D glasses."));
+
+    else if(uni == 'd' && stereo::mode == stereo::sLR)
+      dialog::editNumber(stereo::lr_eyewidth, -1, 1, 0.01, 0, XLAT("distance between images"),
+        XLAT("Watch the Minkowski hyperboloid or the hypersian rug mode with the "
+        "red/cyan 3D glasses."));
+      
+    else if(uni == 'f')
+      dialog::editNumber(stereo::fov, 1, 170, 1, 45, "field of view", 
+        "Horizontal field of view, in the perspective projection. "
+        "In the orthogonal projection this just controls the scale."
+        );
+
+    else if(doexiton(sym, uni)) popScreen();
+    };
+  }
+
 void show3D() {
   cmode = sm::SIDE | sm::A3 | sm::MAYDARK;
   gamescreen(0);
@@ -1072,7 +1137,6 @@ void show3D() {
   dialog::addBreak(50);
   dialog::addSelItem(XLAT("Y shift"), fts3(vid.yshift), 'y');
   dialog::addSelItem(XLAT("camera rotation"), fts3(vid.camera_angle), 's');
-  dialog::addSelItem(XLAT("distance between eyes"), fts3(vid.eye), 'e');
   dialog::addBreak(50);
   dialog::addBoolItem(XLAT("ball model"), pmodel == mdBall, 'B');
   dialog::addBoolItem(XLAT("hyperboloid model"), pmodel == mdHyperboloid, 'M');
@@ -1090,6 +1154,7 @@ void show3D() {
   else
     dialog::addInfo(XLAT("parameters set correctly"));
   dialog::addBreak(50);
+  dialog::addItem(XLAT("stereo vision config"), 'e');
   dialog::addItem(XLAT("exit 3D configuration"), 'v');
   dialog::display();
   
@@ -1121,13 +1186,10 @@ void show3D() {
       dialog::editNumber(geom3::rock_wall_ratio, 0, 1, .1, .9, XLAT("Rock-III to wall ratio"), "");
     else if(uni == 'h') 
       dialog::editNumber(geom3::human_wall_ratio, 0, 1, .1, .7, XLAT("Human to wall ratio"), "");
-    
+
     else if(uni == 'e')
-      cmode &= sm::A3,
-      dialog::editNumber(vid.eye, -10, 10, 0.01, 0, XLAT("distance between eyes"),
-        XLAT("Watch the Minkowski hyperboloid or the hypersian rug mode with the "
-        "red/cyan 3D glasses."));
-  
+      pushScreen(showStereo);
+    
     else if(uni == 'y') 
       cmode &= sm::A3,
       dialog::editNumber(vid.yshift, 0, 1, .1, 0, XLAT("Y shift"), 

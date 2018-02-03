@@ -467,7 +467,7 @@ void drawRawTexture() {
   glMatrixMode(GL_MODELVIEW);
   glcolor2(0xFFFFFF20);
   glPushMatrix();
-  glTranslatef(0, 0, vid.scrdist);
+  glTranslatef(0, 0, stereo::scrdist);
   glBindTexture(GL_TEXTURE_2D, textureid);
   vector<GLfloat> tver, sver;
   for(int i=0; i<4; i++) {

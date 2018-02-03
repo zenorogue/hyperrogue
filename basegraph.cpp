@@ -10,6 +10,29 @@ int utfsize(char c) {
   return 4;
   }
 
+namespace stereo {
+  eStereo mode;
+  ld ipd;
+  ld lr_eyewidth, anaglyph_eyewidth;
+  ld fov, tanfov;
+
+  GLfloat scrdist, scrdist_text;
+  }
+
+bool stereo::in_anaglyph() { return stereo::mode == stereo::sAnaglyph; }
+bool stereo::active() { return stereo::mode != sOFF; }
+
+ld stereo::eyewidth() { 
+  switch(stereo::mode) {
+    case stereo::sAnaglyph:
+      return stereo::anaglyph_eyewidth;
+    case stereo::sLR:
+      return stereo::lr_eyewidth;
+    default:
+      return 0;
+    }
+  }
+
 bool eqs(const char* x, const char* y) {
   return *y? *x==*y?eqs(x+1,y+1):false:true;
   }
@@ -152,36 +175,70 @@ void setcameraangle(bool b) {
     }
   }
 
-void selectEyeGL(int ed) {
-  DEBB(DF_GRAPH, (debugfile,"selectEyeGL\n"));
-
+void start_projection(int ed) {
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
   
   glTranslatef((vid.xcenter*2.)/vid.xres - 1, 1 - (vid.ycenter*2.)/vid.yres, 0);
 
-  if(pmodel) {
-    vid.scrdist = 4 * vid.radius;
+  if(ed) {
+    if(stereo::mode == stereo::sLR) {   
+      glTranslatef(ed * (stereo::eyewidth() - .5) * 4, 0, 0);
+      glScalef(2, 1, 1);
+      }
+    else {
+      glTranslatef(-ed * stereo::eyewidth(), 0, 0);
+      }
+    }
+  }
+
+void stereo::set_projection(int ed) {
+  DEBB(DF_GRAPH, (debugfile,"stereo::set_projection\n"));
+  
+  start_projection(ed);
+  
+  if(pmodel && !stereo::active()) {
 
     // simulate glOrtho
     GLfloat ortho[16] = {
       GLfloat(2. / vid.xres), 0, 0, 0, 
       0, GLfloat(-2. / vid.yres), 0, 0, 
-      0, 0, GLfloat(.4 / vid.scrdist), 0,
+      0, 0, GLfloat(.4 / stereo::scrdist), 0,
       0, 0, 0, 1};
   
-    vid.scrdist = -vid.scrdist;
     glMultMatrixf(ortho);
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     }
-  else {
-    float ve = ed*vid.eye;
-    ve *= 2; // vid.xres; ve /= vid.radius;
-    if(ve)
-      glTranslatef(-(ve * vid.radius) * (vid.alpha - (vid.radius*1./vid.xres) * vid.eye) / vid.xres, 0, 0);
+  else if(pmodel) {
 
+    float lowdepth = .1, hidepth = 1e9;
+    
+    ld right = vid.xres/2 * lowdepth / stereo::scrdist;
+    ld left = -right;
+    ld top = -vid.yres/2 * lowdepth / stereo::scrdist;
+    ld bottom = -top;
+
+    GLfloat frustum[16] = {
+      GLfloat(2 * lowdepth / (right-left)), 0, 0, 0, 
+      0, GLfloat(2 * lowdepth / (top-bottom)), 0, 0, 
+      0, 0, -(hidepth+lowdepth)/(hidepth-lowdepth), -1,
+      0, 0, -2*lowdepth*hidepth/(hidepth-lowdepth), 0};
+
+    glMultMatrixf(frustum);
+    
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+
+    if(ed) glTranslatef(stereo::ipd * vid.radius * ed/2, 0, 0);
+
+    glScalef(1, 1, -1);
+    glTranslatef(0, 0, stereo::scrdist);
+
+    stereo::scrdist_text = 0;
+    }
+  else {
     float lowdepth = .1;
     float hidepth = 1e9;
   
@@ -196,20 +253,22 @@ void selectEyeGL(int ed) {
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-  
+
     GLfloat sc = vid.radius / (vid.yres/2.);
     GLfloat mat[16] = {sc,0,0,0, 0,-sc,0,0, 0,0,-1,0, 0,0, 0,1};
+
     glMultMatrixf(mat);
     
-    if(ve) glTranslatef(ve, 0, vid.eye);
-    vid.scrdist = vid.yres * sc / 2;
+    if(ed) glTranslatef(stereo::ipd*ed/2, 0, 0);
+  
+    stereo::scrdist_text = vid.yres * sc / 2;
     }
   
   cameraangle_on = false;
   }
 
-void selectEyeMask(int ed) {
-  if(ed == 0) {    
+void stereo::set_mask(int ed) { 
+  if(ed == 0 || stereo::mode != stereo::sAnaglyph) {    
     glColorMask( GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE );
     }
   else if(ed == 1) {
@@ -219,6 +278,15 @@ void selectEyeMask(int ed) {
     glColorMask( GL_FALSE,GL_TRUE,GL_TRUE,GL_TRUE );
     }
   }
+
+void stereo::set_viewport(int ed) {
+  if(ed == 0 || stereo::mode != stereo::sLR)
+    glViewport(0, 0, vid.xres, vid.yres);
+  else if(ed == 1)
+    glViewport(0, 0, vid.xres/2, vid.yres);
+  else if(ed == -1)
+    glViewport(vid.xres/2, 0, vid.xres/2, vid.yres);
+  }    
 
 void setGLProjection(int col) {
   DEBB(DF_GRAPH, (debugfile,"setGLProjection\n"));
@@ -261,7 +329,7 @@ void setGLProjection(int col) {
   else
     glDisable(GL_DEPTH_TEST);
   
-  selectEyeGL(0);
+  stereo::set_projection(0);
   }
 
 #if CAP_GLFONT
@@ -475,7 +543,7 @@ bool gl_print(int x, int y, int shift, int size, const char *s, int color, int a
     displaystr(x+w, y+h, 1, 10, "X", 0xFFFFFF, 8);
     markcorner = true;
     } */
-    
+
   for(int i=0; s[i];) {
   
     // glListBase(f.list_base);
@@ -488,11 +556,11 @@ bool gl_print(int x, int y, int shift, int size, const char *s, int color, int a
     int hi = f.heights[tabid] * size/gsiz;
 
     GLERR("pre-print");
-    
-    for(int ed = (vid.goteyes && shift)?-1:0; ed<2; ed+=2) {
+
+    for(int ed = (stereo::active() && shift)?-1:0; ed<2; ed+=2) {
       glPushMatrix();
-      glTranslatef(x-ed*shift-vid.xcenter,y-vid.ycenter, vid.scrdist);
-      selectEyeMask(ed);
+      glTranslatef(x-ed*shift-vid.xcenter,y-vid.ycenter, stereo::scrdist_text);
+      stereo::set_mask(ed);
       glBindTexture(GL_TEXTURE_2D, f.textures[tabid]);
 
 #if 1
@@ -516,7 +584,7 @@ bool gl_print(int x, int y, int shift, int size, const char *s, int color, int a
       glPopMatrix();
       }
     
-    if(vid.goteyes) selectEyeMask(0);
+    if(stereo::active() && shift) stereo::set_mask(0);
     
     GLERR("print");
     
@@ -782,7 +850,7 @@ ld realradius() {
   ld vradius = vid.radius;
   if(sphere) {
     if(sphereflipped()) 
-      vradius /= sqrt(vid.alphax*vid.alphax - 1);
+      vradius /= sqrt(vid.alpha*vid.alpha - 1);
     else
       vradius = 1e12; // use the following
     }
@@ -885,7 +953,7 @@ void drawCircle(int x, int y, int size, int color) {
       float rr = (M_PI * 2 * r) / pts;
       glcoords[r][0] = x + size * sin(rr);
       glcoords[r][1] = y + size * cos(rr);
-      glcoords[r][2] = vid.scrdist;
+      glcoords[r][2] = stereo::scrdist;
       }
 
     qglcoords = pts; 
@@ -940,7 +1008,7 @@ void displayColorButton(int x, int y, const string& name, int key, int align, in
   }
 
 ld textscale() { 
-  return vid.fsize / (vid.radius * crossf) * (1+vid.alphax) * 2;
+  return vid.fsize / (vid.radius * crossf) * (1+vid.alpha) * 2;
   }
   
 // bool notgl = false;

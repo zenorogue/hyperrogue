@@ -430,6 +430,9 @@ void fix_mouseh() {
 
 void handlekey(int sym, int uni) {
 
+  if(uni == '=') { stereo::mode = stereo::eStereo((1 + stereo::mode) % 3); return; }
+  if(uni == '+') switchGL();
+
   if(callhandlers(false, hooks_handleKey, sym, uni)) return;
 
   keyhandler(sym, uni);

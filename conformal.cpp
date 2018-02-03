@@ -96,7 +96,7 @@ namespace polygonal {
       hyperpoint h;
       h[0] = z2.first * vid.radius;
       h[1] = z2.second * vid.radius;
-      h[2] = vid.scrdist;
+      h[2] = stereo::scrdist;
       curvepoint(h);
       }
     

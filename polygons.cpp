@@ -184,13 +184,13 @@ void addpoint(const hyperpoint& H) {
   if(qglcoords >= POLYMAX) return;
 
   if(true) {
-    hyperpoint Hscr;             
+    hyperpoint Hscr;
     applymodel(H, Hscr);
-    if(vid.alphax + H[2] <= BEHIND_LIMIT && pmodel == mdDisk) poly_flags |= POLY_BEHIND;
+    if(vid.alpha + H[2] <= BEHIND_LIMIT && pmodel == mdDisk) poly_flags |= POLY_BEHIND;
     
     if(spherespecial) {
       double curnorm = H[0]*H[0]+H[1]*H[1]+H[2]*H[2];
-      double horizon = curnorm / vid.alphax;
+      double horizon = curnorm / vid.alpha;
       
       if((spherespecial>0) ^ (H[2] <= -horizon)) poly_flags |= POLY_INFRONT;
       else {
@@ -198,7 +198,7 @@ void addpoint(const hyperpoint& H) {
           (sqrt(curnorm - horizon*horizon) / (vid.alpha - horizon)) / 
           (sqrt(curnorm - H[2]*H[2]) / (vid.alpha+H[2]));
             
-//      double coef = (vid.alphax + horizon) / (vid.alphax + H[2]); -< that one has a funny effect, seriously
+//      double coef = (vid.alpha + horizon) / (vid.alpha + H[2]); -< that one has a funny effect, seriously
         Hscr[0] *= coef;
         Hscr[1] *= coef;
         }
@@ -218,13 +218,11 @@ void addpoint(const hyperpoint& H) {
 void coords_to_poly() {
   polyi = qglcoords;
   for(int i=0; i<polyi; i++) {
-//  printf("%lf %lf\n", double(glcoords[i][0]), double(glcoords[i][1]));
-    ld x = vid.xcenter + glcoords[i][0];
-    ld y = vid.ycenter + glcoords[i][1];
-    ld xe = glcoords[i][2] * vid.eye;
-    polyx[i] = x-xe;
-    polyxr[i] = x+xe;
-    polyy[i] = y;
+    // printf("%lf %lf\n", double(glcoords[i][0]), double(glcoords[i][1]));
+
+    polyx[i]  = vid.xcenter + glcoords[i][0] - glcoords[i][2]; 
+    polyxr[i] = vid.xcenter + glcoords[i][0] + glcoords[i][2]; 
+    polyy[i]  = vid.ycenter + glcoords[i][1];
     }
   }
 
@@ -321,15 +319,15 @@ int tinfshift;
 
 void gldraw(int useV, const transmatrix& V, int ps, int pq, int col, int outline, int flags, textureinfo *tinf) {
 
-    if(tinf) {
-      glEnable(GL_TEXTURE_2D);
-      glBindTexture(GL_TEXTURE_2D, tinf->texture_id);
-      glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-      glTexCoordPointer(3, GL_FLOAT, 0, &tinf->tvertices[tinfshift]);
-      }
-      
-  for(int ed = vid.goteyes ? -1 : 0; ed<2; ed+=2) {
-    if(ed) selectEyeGL(ed);
+  if(tinf) {
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, tinf->texture_id);
+    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+    glTexCoordPointer(3, GL_FLOAT, 0, &tinf->tvertices[tinfshift]);
+    }
+  
+  for(int ed = stereo::active() ? -1 : 0; ed<2; ed+=2) {
+    if(ed) stereo::set_projection(ed), stereo::set_viewport(ed);
     bool draw = col;
     again:
     
@@ -338,7 +336,8 @@ void gldraw(int useV, const transmatrix& V, int ps, int pq, int col, int outline
       glPushMatrix();
       glapplymatrix(V);
       }
-      
+
+/*      
     if(useV == 2) {
       glMatrixMode(GL_MODELVIEW);
       glPushMatrix();
@@ -348,7 +347,7 @@ void gldraw(int useV, const transmatrix& V, int ps, int pq, int col, int outline
         0, 0, 1, 0,
         0, 0, 0, 1
         };
-      mat[8] += ed * vid.eye;
+      // EYETODO mat[8] += ed * vid.eye;
       glMultMatrixf(mat);
       }
       
@@ -359,11 +358,11 @@ void gldraw(int useV, const transmatrix& V, int ps, int pq, int col, int outline
         1, 0, 0, 0,
         0, 1, 0, 0,
         0, 0, 0, 0,
-        0, 0, vid.scrdist, 1
+        0, 0, stereo::scrdist, 1
         };
-      mat[8] += ed * vid.eye;
+      // EYETODO mat[8] += ed * vid.eye;
       glMultMatrixf(mat);
-      }
+      } */
       
     if(draw) {
       glEnable(GL_STENCIL_TEST);
@@ -375,15 +374,15 @@ void gldraw(int useV, const transmatrix& V, int ps, int pq, int col, int outline
       glDrawArrays(tinf ? GL_TRIANGLES : GL_TRIANGLE_FAN, ps, pq);
       
       if(flags & POLY_INVERSE) {
-        selectEyeMask(ed);
+        stereo::set_mask(ed);
         glcolor2(col);
         glStencilOp( GL_ZERO, GL_ZERO, GL_ZERO);
         glStencilFunc( GL_NOTEQUAL, 1, 1);
         GLfloat xx = vid.xres;
         GLfloat yy = vid.yres;
         GLfloat scr[12] = {
-          -xx, -yy, vid.scrdist, +xx, -yy, vid.scrdist, 
-          +xx, +yy, vid.scrdist, -xx, +yy, vid.scrdist
+          -xx, -yy, stereo::scrdist, +xx, -yy, stereo::scrdist, 
+          +xx, +yy, stereo::scrdist, -xx, +yy, stereo::scrdist
           };
         GLfloat *cur = currentvertices;
         activateVertexArray(scr, 4);
@@ -393,7 +392,7 @@ void gldraw(int useV, const transmatrix& V, int ps, int pq, int col, int outline
         draw = false; goto again;
         }
       else { 
-        selectEyeMask(ed);
+        stereo::set_mask(ed);
         glcolor2(col);
         glStencilOp( GL_ZERO, GL_ZERO, GL_ZERO);
         glStencilFunc( GL_EQUAL, 1, 1);
@@ -410,6 +409,8 @@ void gldraw(int useV, const transmatrix& V, int ps, int pq, int col, int outline
  
     if(useV) glPopMatrix();
     }
+  
+  if(stereo::active()) stereo::set_projection(0), stereo::set_viewport(0), stereo::set_mask(0);
 
   if(tinf) {
     glDisableClientState(GL_TEXTURE_COORD_ARRAY);
@@ -422,7 +423,7 @@ void gldraw(int useV, const transmatrix& V, int ps, int pq, int col, int outline
 double linewidthat(const hyperpoint& h, double minwidth) {
   if(vid.antialias & AA_LINEWIDTH) {
     double dz = h[2];
-    if(dz < 1 || abs(dz-vid.scrdist) < 1e-6) return vid.linewidth;
+    if(dz < 1 || abs(dz-stereo::scrdist) < 1e-6) return vid.linewidth;
     else {
       double dx = sqrt(dz * dz - 1);
       double dfc = dx/(dz+1);
@@ -576,7 +577,7 @@ void drawpolyline(polytodraw& p) {
   
   /* pp.outline = 0x80808080;
   p.col = 0; */
-
+  
   addpoly(pp.V, pp.tab, pp.cnt);
   
   mercator_loop_min = mercator_loop_max = 0;
@@ -587,7 +588,7 @@ void drawpolyline(polytodraw& p) {
   
   if(poly_flags & POLY_BEHIND) return;
 
-  for(int i=0; i<qglcoords; i++) {
+  if(0) for(int i=0; i<qglcoords; i++) {
     if(abs(glcoords[i][0]) > poly_limit || abs(glcoords[i][1]) > poly_limit)
       return; // too large!
     }
@@ -604,7 +605,7 @@ void drawpolyline(polytodraw& p) {
       poly_flags ^= POLY_INVERSE;
     
     if(poly_flags & POLY_INVERSE) {
-      if(curradius < vid.alphax - 1e-6) return;
+      if(curradius < vid.alpha - 1e-6) return;
       }
     }
   else poly_flags &=~ POLY_INVERSE;
@@ -629,7 +630,7 @@ void drawpolyline(polytodraw& p) {
         ld a = i * M_PI / 180 + h;
         glcoords[qglcoords][0] = vid.radius * sin(a);
         glcoords[qglcoords][1] = vid.radius * cos(a);
-        glcoords[qglcoords][2] = vid.scrdist;
+        glcoords[qglcoords][2] = stereo::scrdist;
         qglcoords++;
         }
       poly_flags ^= POLY_INVERSE;
@@ -637,7 +638,7 @@ void drawpolyline(polytodraw& p) {
   
   #if CAP_GL
     if(vid.usingGL) {
-      // if(pmodel == 0) for(int i=0; i<qglcoords; i++) glcoords[i][2] = vid.scrdist;
+      // if(pmodel == 0) for(int i=0; i<qglcoords; i++) glcoords[i][2] = stereo::scrdist;
       if(pp.tinf && (poly_flags & POLY_INVERSE)) {
         return; 
         }
@@ -685,12 +686,12 @@ void drawpolyline(polytodraw& p) {
     else  
       filledPolygonColorI(s, polyx, polyy, polyi, p.col);
   
-    if(vid.goteyes) filledPolygonColorI(aux, polyxr, polyy, polyi, p.col);
+    if(stereo::active()) filledPolygonColorI(aux, polyxr, polyy, polyi, p.col);
     
     // part(pp.outline, 0) = part(pp.outline, 0) * linewidthat(tC0(pp.V), pp.minwidth);
 
     ((vid.antialias & AA_NOGL) ?aapolylineColor:polylineColor)(s, polyx, polyy, polyi, pp.outline);
-    if(vid.goteyes) aapolylineColor(aux, polyxr, polyy, polyi, pp.outline);
+    if(stereo::active()) aapolylineColor(aux, polyxr, polyy, polyi, pp.outline);
     
     if(vid.xres >= 2000 || fatborder) {
       int xmi = 3000, xma = -3000;
@@ -808,20 +809,6 @@ void drawqueueitem(polytodraw& ptd) {
 #endif
     drawCircle(ptd.u.cir.x, ptd.u.cir.y, ptd.u.cir.size, ptd.col);
     }
-
-#if CAP_SDL
-  if(vid.goteyes && !vid.usingGL) {
-    int qty = s->w * s->h;
-    int *a = (int*) s->pixels;
-    int *b = (int*) aux->pixels;
-    SDL_LockSurface(aux);
-    while(qty) {
-      *a = ((*a) & 0xFF0000) | ((*b) & 0x00FFFF);
-      a++; b++; qty--;
-      }
-    SDL_UnlockSurface(aux);
-    }
-#endif
   }
 
 void initquickqueue() {
@@ -905,7 +892,7 @@ void drawqueue() {
   profile_stop(3);
 
 #if CAP_SDL
-  if(vid.goteyes && !vid.usingGL) {
+  if(stereo::active() && !vid.usingGL) {
 
     if(aux && (aux->w != s->w || aux->h != s->h))
       SDL_FreeSurface(aux);
@@ -965,7 +952,30 @@ void drawqueue() {
     }
   
 #if CAP_GL
-  if(vid.goteyes && vid.usingGL) selectEyeGL(0), selectEyeMask(0);
+  if(vid.usingGL) 
+    stereo::set_projection(0), stereo::set_mask(0), stereo::set_viewport(0);
+#endif
+
+#if CAP_SDL
+  if(stereo::mode == stereo::sAnaglyph && !vid.usingGL) {
+    int qty = s->w * s->h;
+    int *a = (int*) s->pixels;
+    int *b = (int*) aux->pixels;
+    SDL_LockSurface(aux);
+    while(qty) {
+      *a = ((*a) & 0xFF0000) | ((*b) & 0x00FFFF);
+      a++; b++; qty--;
+      }
+    SDL_UnlockSurface(aux);
+    }
+
+  if(stereo::mode == stereo::sLR && !vid.usingGL) {
+    SDL_LockSurface(aux);
+    for(int y=0; y<vid.yres; y++)
+    for(int x=vid.xres/2; x<vid.xres; x++)
+      qpixel(s,x,y) = qpixel(aux,x,y);
+    SDL_UnlockSurface(aux);
+    }
 #endif
 
   setcameraangle(false);
@@ -2707,7 +2717,8 @@ void getcoord0(const hyperpoint& h, int& xc, int &yc, int &sc) {
   applymodel(h, hscr);
   xc = vid.xcenter + vid.radius * hscr[0];
   yc = vid.ycenter + vid.radius * hscr[1];
-  sc = vid.eye * vid.radius * hscr[2];
+  sc = 0;
+  // EYETODO sc = vid.eye * vid.radius * hscr[2];
   }
 
 void queuechr(const hyperpoint& h, int size, char chr, int col, int frame = 0) {

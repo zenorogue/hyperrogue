@@ -1525,7 +1525,7 @@ void movePlayer(monster *m, int delta) {
     hyperpoint jh = hpxy(mdx/100.0, mdy/100.0);
     hyperpoint ctr = m->pat * C0;
 
-    if(sphere && vid.alphax > 1.001) for(int i=0; i<3; i++) ctr[i] = -ctr[i];
+    if(sphere && vid.alpha > 1.001) for(int i=0; i<3; i++) ctr[i] = -ctr[i];
 
     hyperpoint h = inverse(m->pat) * rgpushxto0(ctr) * jh;
     
