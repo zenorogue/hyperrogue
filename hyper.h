@@ -2560,3 +2560,7 @@ namespace stereo {
 
 double randd();
 
+#if CAP_ORIENTATION
+transmatrix getOrientation();
+#endif
+

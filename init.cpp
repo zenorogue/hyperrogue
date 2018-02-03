@@ -635,6 +635,8 @@ int getticks();
 void shareScore(MOBPAR_FORMAL);
 #endif
 
+transmatrix getOrientation() { return Id; }
+
 void mobile_draw(MOBPAR_FORMAL) {
 
   optimizeview();
