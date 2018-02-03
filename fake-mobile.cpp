@@ -19,6 +19,8 @@ std::string picfile = "fakemobile_pic.txt";
 
 #undef main
 
+transmatrix getOrientation() { return Id; }
+
 void playSound(cell *c, const string& fname, int vol) {
   printf("Play sound: %s\n", fname.c_str());
   }
