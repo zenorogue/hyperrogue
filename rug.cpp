@@ -1197,9 +1197,13 @@ transmatrix currentrot;
     
 void init() {
   if(rugged) return;
-  rugged = true;
-  if(scale < .01 || scale > 100) scale = 1;
   glbuf = new renderbuffer(TEXTURESIZE, TEXTURESIZE, vid.usingGL && !rendernogl);
+  if(!glbuf->valid) {
+    addMessage(XLAT("Failed to enable"));
+    delete glbuf;
+    return;
+    }
+  rugged = true;
   if(renderonce) prepareTexture();
   if(!rugged) return;
   
@@ -1591,7 +1595,7 @@ void show() {
   #endif
     else if(uni == 's' && !rug::rugged) {
       texturesize *= 2;
-      if(texturesize == 8192) texturesize = 128;
+      if(texturesize == 8192) texturesize = 64;
       }
     else if(handlekeys(sym, uni)) ;
     else if(doexiton(sym, uni)) popScreen();

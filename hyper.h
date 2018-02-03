@@ -2515,20 +2515,27 @@ bool is_cell_removed(cell *c);
 void set_if_removed(cell*& c, cell *val);
 
 struct renderbuffer {
-  int x, y, tx, ty;
+  bool valid;
+  int x, y;
+
+  #if CAP_GL
+  int tx, ty;
   GLuint FramebufferName;
   GLuint renderedTexture;
   GLuint depth_stencil_rb;
-  SDL_Surface *srf;
   Uint32 *expanded_data;
-  
+  void use_as_texture();
+  #endif
+  #if CAP_SDL
+  SDL_Surface *srf;
   void make_surface();
+  SDL_Surface *render();
+  #endif
+  
   renderbuffer(int x, int y, bool gl);
   ~renderbuffer();
   void enable();
   void disable();
-  SDL_Surface *render();
-  void use_as_texture();
   void clear(int col);
   };
 

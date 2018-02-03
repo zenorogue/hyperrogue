@@ -1,3 +1,4 @@
+#if CAP_GL
 #if !CAP_GLEW
 #if ISLINUX
 extern "C" {
@@ -19,12 +20,21 @@ GLAPI void APIENTRY glDeleteFramebuffers (GLsizei n, const GLuint *framebuffers)
 #define glFramebufferTexture glFramebufferTextureEXT 
 #endif
 #endif
+#endif
 
 renderbuffer::renderbuffer(int x, int y, bool gl) : x(x), y(y) {
 
-  FramebufferName = renderedTexture = depth_stencil_rb = 0;
-  srf = NULL; expanded_data = NULL;
+  valid = false;
+  
+  #if CAP_GL
+  FramebufferName = renderedTexture = depth_stencil_rb = 0; expanded_data = NULL;
+  #endif
+  
+  #if CAP_SDL
+  srf = NULL; 
+  #endif  
 
+  # if CAP_GL
   if(gl) {
     tx = next_p2(x);
     ty = next_p2(y);
@@ -66,30 +76,65 @@ renderbuffer::renderbuffer(int x, int y, bool gl) : x(x), y(y) {
     
     if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
       FramebufferName = renderedTexture = 0;
+    else
+      valid = true;
     }
-  
-  if(!FramebufferName)
+  #endif
+
+  #if CAP_SDL  
+  if(!valid)
     make_surface();
+  #endif
   }
 
+#if CAP_SDL
 void renderbuffer::make_surface() {
   if(!srf)
     srf = SDL_CreateRGBSurface(SDL_SWSURFACE, x, y, 32,0xff0000,0xff00,0xff,0xff000000);
   }
-  
+
+SDL_Surface *renderbuffer::render() {
+  make_surface();
+  if(FramebufferName) {
+    glReadPixels(0, 0, vid.xres, vid.yres, GL_BGRA, GL_UNSIGNED_BYTE, srf->pixels);
+    for(int y=0; y<vid.yres/2; y++)
+    for(int x=0; x<vid.xres; x++)
+      swap(qpixel(srf,x,y), qpixel(srf,x,vid.yres-1-y));
+    }
+  return srf;
+  }
+#endif
+
 void renderbuffer::enable() {
+  #if CAP_GL
   if(FramebufferName) {
     glBindFramebuffer(GL_FRAMEBUFFER, FramebufferName);
     glViewport(0,0,x,y);
     vid.usingGL = true;
+    return;
     }
-  else {
-    make_surface();
-    s = srf;
-    vid.usingGL = false;
-    }
+  #endif
+  #if CAP_SDL
+  make_surface();
+  s = srf;
+  vid.usingGL = false;
+  #endif
   }
 
+void renderbuffer::disable() {
+  #if CAP_GL
+  if(FramebufferName) {
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glViewport(0,0,s_screen->w,s_screen->h);
+    return;
+    }
+  #endif
+  #if CAP_SDL
+  s = s_screen;
+  #endif
+  }
+  
+#if CAP_GL
 void renderbuffer::use_as_texture() {
   if(!renderedTexture) {
     glGenTextures( 1, &renderedTexture);
@@ -109,44 +154,33 @@ void renderbuffer::use_as_texture() {
     glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, tx, ty, 0, GL_BGRA, GL_UNSIGNED_BYTE, expanded_data );    
     }
   }
+#endif
 
-void renderbuffer::disable() {
-  if(FramebufferName) {
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    glViewport(0,0,s_screen->w,s_screen->h);
-    }
-  else {
-    s = s_screen;
-    }
-  }
-  
 renderbuffer::~renderbuffer() {
+#if CAP_GL
   if(renderedTexture)
     glDeleteTextures(1, &renderedTexture);
   if(FramebufferName) {
     glDeleteRenderbuffers(1, &depth_stencil_rb);
     glDeleteFramebuffers(1, &FramebufferName);
     }
-  if(srf) 
-    SDL_FreeSurface(srf);
   if(expanded_data)
     delete[] expanded_data;
-  }
-
-SDL_Surface *renderbuffer::render() {
-  make_surface();
-  if(FramebufferName) {
-    glReadPixels(0, 0, vid.xres, vid.yres, GL_BGRA, GL_UNSIGNED_BYTE, srf->pixels);
-    for(int y=0; y<vid.yres/2; y++)
-    for(int x=0; x<vid.xres; x++)
-      swap(qpixel(srf,x,y), qpixel(srf,x,vid.yres-1-y));
-    }
-  return srf;
+#endif
+#if CAP_SDL
+  if(srf) 
+    SDL_FreeSurface(srf);
+#endif
   }
 
 void renderbuffer::clear(int col) {
-  if(FramebufferName)
+  #if CAP_GL
+  if(FramebufferName) {
     setGLProjection(0);
-  else
-    SDL_FillRect(srf, NULL, col);
+    return;
+    }
+  #endif
+  #if CAP_SDL
+  SDL_FillRect(srf, NULL, col);
+  #endif
   }
