@@ -86,7 +86,7 @@ struct triangle {
 vector<rugpoint*> points;
 vector<triangle> triangles;
 
-bool rug_perspective = false;
+bool rug_perspective = ISANDROID;
 
 // extra geometry functions
 //--------------------------
@@ -1138,7 +1138,11 @@ void drawRugScene() {
     glClearColor(0.05,0.05,0.05,1);
   else
     glcolorClear(backcolor << 8 | 0xFF);
+#ifdef GLES_ONLY
   glClearDepthf(1.0f);
+#else
+  glClearDepth(1.0f);
+#endif
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   
   glDisable(GL_BLEND);
@@ -1316,7 +1320,7 @@ void apply_rotation(const transmatrix& t) {
   }
 
 void move_forward(ld distance) {
-  if(rug_perspective) push_all_points(2, -distance);
+  if(rug_perspective) push_all_points(2, distance);
   else model_distance /= exp(distance);
   }
 
@@ -1349,8 +1353,14 @@ bool handlekeys(int sym, int uni) {
     return true;
     }
 #if !CAP_SDL
-  else if(uni == SDLK_PAGEUP || uni == '[') move_forward(.1);
-  else if(uni == SDLK_PAGEDOWN || uni == ']') move_forward(-.1);
+  else if(uni == SDLK_PAGEUP || uni == '[') {
+    move_forward(.1);
+    return true;
+    }
+  else if(uni == SDLK_PAGEDOWN || uni == ']') {
+    move_forward(-.1);
+    return true;
+    }
 #endif
   else return false;
   }

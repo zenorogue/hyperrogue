@@ -2219,3 +2219,11 @@ Gameplay bugfixes
 - you can now use '1' and arrows to move points in the Hypersian Rug mode, and '2' and '3' to rotate by 180 and 90 degrees ('4' to enable the ODS projection used in https://www.youtube.com/watch?v=tT80boNjP_A is compiled out)
 - fixed fieldpattern-based lands (Blizzard, Volcanic, Ruined City) on the torus
 - improved Ocean and Volcanic tides when sight range is set to more than 7
+
+2018.02.03 21:45 version 10.3g
+- fixed the sorting of local scores
+- high quality screenshots can now be saved with OpenGL (this works faster and works with Hypersian Rug)
+- rewritten the stereo vision -- it has more options now
+- Hypersian Rug now works on Android, and it is controllable by rotating the device (combined with "stereo version" Cardboard VR should be supported)
+- fixed a crash bug in the iOS version
+

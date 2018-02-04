@@ -15,9 +15,9 @@
 #define NOLICENSE
 #endif
 
-#define VER "10.3f"
-#define VERNUM 10306
-#define VERNUM_HEX 0xA0A6
+#define VER "10.3g"
+#define VERNUM 10307
+#define VERNUM_HEX 0xA0A7
 
 #define GEN_M 0
 #define GEN_F 1
@@ -758,8 +758,10 @@ void mobile_draw(MOBPAR_FORMAL) {
   
   static int lticks_rug;
   
+#if CAP_RUG
   if(andmode == 1 && !inmenu && rug::rugged && clicked)
-    rug::move_forward((ticks - lticks_rug) / 2500);
+    rug::move_forward((ticks - lticks_rug) / 2500.);
+#endif
   
   lticks_rug = ticks;
 

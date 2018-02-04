@@ -79,6 +79,7 @@ renderbuffer::renderbuffer(int x, int y, bool gl) : x(x), y(y) {
       FramebufferName = renderedTexture = 0;
     else
       valid = true;
+    GLERR("initialization");
     }
   #endif
 
