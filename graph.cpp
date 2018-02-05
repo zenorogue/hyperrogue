@@ -406,7 +406,7 @@ double footfun(double d) {
   }
 
 bool ivoryz;
-
+                                 
 void animallegs(const transmatrix& V, eMonster mo, int col, double footphase) {
 #if CAP_POLY
   footphase /= SCALE;
@@ -2937,16 +2937,72 @@ void setcolors(cell *c, int& wcol, int &fcol) {
   
    /* if(c->land == laCaribbean && (c->wall == waCIsland || c->wall == waCIsland2))
      fcol = wcol = winf[c->wall].color; */
-
-  // floors become fcol
-  if(c->wall == waSulphur || c->wall == waSulphurC || c->wall == waPlatform || c->wall == waMercury || c->wall == waDock)
-    fcol = wcol;
-  
-  if(isAlch(c)) {
-    if(c->item && !(conformal::includeHistory && eq(c->aitmp, sval)))
-      fcol = wcol = iinf[c->item].color;
-    else
+   
+  switch(c->wall) {
+    case waSulphur: case waSulphurC: case waPlatform: case waMercury: case waDock:
+    case waAncientGrave: case waFreshGrave: case waThumperOn: case waThumperOff: case waBonfireOff:
+    case waRoundTable:
+      // floors become fcol
       fcol = wcol;
+      break;
+    
+    case waDeadTroll2: case waPetrifiedBridge: case waPetrified: {
+      eMonster m = eMonster(c->wparam);
+      if(c->wall == waPetrified || c->wall == waPetrifiedBridge) 
+        wcol = gradient(wcol, minf[m].color, 0, .2, 1);
+      if(c->wall == waPetrified || isTroll(m)) if(!(m == moForestTroll && c->land == laOvergrown))
+        wcol = gradient(wcol, minf[m].color, 0, .4, 1);
+      break;
+      }
+    
+    case waFloorA: case waFloorB: // isAlch
+      if(c->item && !(conformal::includeHistory && eq(c->aitmp, sval)))
+        fcol = wcol = iinf[c->item].color;
+      else
+        fcol = wcol;
+      break;
+    
+    case waBoat:
+      if(wmascii) wcol = 0xC06000;
+      break;
+    
+    case waEternalFire:
+      fcol = wcol = weakfirecolor(1500);
+      break;
+    
+    case waFire: case waPartialFire: case waBurningDock:
+      fcol = wcol = firecolor(100);
+      break;
+    
+    case waDeadfloor: case waCavefloor:
+      fcol = wcol;
+      break;
+    
+    case waNone:
+      if(c->land == laNone)
+        wcol = fcol = 0x101010;
+      if(c->land == laHive) 
+        wcol = fcol;  
+      break;
+
+    case waMineUnknown: case waMineMine: 
+      if(mineMarkedSafe(c))
+        fcol = wcol = gradient(wcol, 0x40FF40, 0, 0.2, 1);
+      else if(mineMarked(c))
+        fcol = wcol = gradient(wcol, 0xFF4040, -1, sin(ticks/100.0), 1);
+      // fallthrough
+
+    case waMineOpen:
+      fcol = wcol;
+      if(wmblack || wmascii) fcol >>= 1, wcol >>= 1;
+      break;
+    
+    case waCavewall:
+      if(c->land != laEmerald) fcol = winf[waCavefloor].color;
+      break;
+  
+    default:
+      break;    
     }
 
   /* if(false && isAlch2(c, true)) {
@@ -2958,38 +3014,6 @@ void setcolors(cell *c, int& wcol, int &fcol) {
     fcol = wcol;
     } */
   
-  if(c->wall == waDeadTroll2 || c->wall == waPetrified || c->wall == waPetrifiedBridge) {
-    eMonster m = eMonster(c->wparam);
-    if(c->wall == waPetrified || c->wall == waPetrifiedBridge) 
-      wcol = gradient(wcol, minf[m].color, 0, .2, 1);
-    if(c->wall == waPetrified || isTroll(m)) if(!(m == moForestTroll && c->land == laOvergrown))
-      wcol = gradient(wcol, minf[m].color, 0, .4, 1);
-    }
-
-  if(c->land == laNone && c->wall == waNone) 
-    wcol = fcol = 0x101010;
-
-  if(isFire(c))
-    fcol = wcol = c->wall == waEternalFire ? weakfirecolor(1500) : firecolor(100);
-    
-  if(c->wall == waBoat && wmascii) {
-    wcol = 0xC06000;
-    }
-  
-  if(mightBeMine(c) || c->wall == waMineOpen) {
-    fcol = wcol;
-    if(wmblack || wmascii) fcol >>= 1, wcol >>= 1;
-    }
-  
-  if(c->wall == waAncientGrave || c->wall == waFreshGrave || c->wall == waThumperOn || c->wall == waThumperOff || c->wall == waBonfireOff)
-    fcol = wcol;
-    
-  if(mightBeMine(c) && mineMarkedSafe(c))
-    fcol = wcol = gradient(wcol, 0x40FF40, 0, 0.2, 1);
-    
-  if(mightBeMine(c) && mineMarked(c))
-    fcol = wcol = gradient(wcol, 0xFF4040, -1, sin(ticks/100.0), 1);
-
   int rd = rosedist(c);
   if(rd == 1) 
     wcol = gradient(0x804060, wcol, 0,1,3),
@@ -3002,23 +3026,14 @@ void setcolors(cell *c, int& wcol, int &fcol) {
     fcol = gradient(fcol, 0, 0, 25, 100),
     wcol = gradient(wcol, 0, 0, 25, 100);
     
-  if(c->wall == waDeadfloor || c->wall == waCavefloor) fcol = wcol;
-  if(c->wall == waDeadwall) fcol = winf[waDeadfloor].color;
-  if(c->wall == waCavewall && c->land != laEmerald) fcol = winf[waCavefloor].color;
-  
   if(highwall(c) && !wmspatial)
     fcol = wcol;
   
   if(wmascii && (c->wall == waNone || isWatery(c))) wcol = fcol;
   
-  if(c->wall == waNone && c->land == laHive) wcol = fcol;
-  
   if(!wmspatial && snakelevel(c) && !realred(c->wall)) fcol = wcol;
   
-  if(c->wall == waGlass && !wmspatial) fcol = wcol;
-  
-  if(c->wall == waRoundTable) fcol = wcol; 
-
+  if(c->wall == waGlass && !wmspatial) fcol = wcol;  
   }
 
 bool noAdjacentChasms(cell *c) {
@@ -3372,7 +3387,79 @@ int getSnakelevColor(cell *c, int i, int last, int fd, int wcol) {
     col = winf[waRed1+i].color;
   return darkena(col, fd, 0xFF);
   }
-                               
+
+void draw_wall(cell *c, const transmatrix& V, int wcol, int& zcol, int ct6, int fd) {
+  zcol = wcol;
+  int wcol0 = wcol;
+  int starcol = wcol;        
+  if(c->wall == waWarpGate) starcol = 0;
+  if(c->wall == waVinePlant) starcol = 0x60C000;
+
+  int wcol2 = gradient(0, wcol0, 0, .8, 1);
+
+  if(c->wall == waClosedGate) {
+    int hdir = 0;
+    for(int i=0; i<c->type; i++) if(c->mov[i]->wall == waClosedGate)
+      hdir = i;
+    transmatrix V2 = mscale(V, wmspatial?geom3::WALL:1) * ddspin(c, hdir, S42);
+    queuepolyat(V2, shPalaceGate, darkena(wcol, 0, 0xFF), wmspatial?PPR_WALL3A:PPR_WALL);
+    starcol = 0;
+    }
+  
+  hpcshape& shThisWall = isGrave(c->wall) ? shCross : shWall[ct6];
+  
+  if(conegraph(c)) {   
+    const int layers = 2 << detaillevel;
+    for(int z=1; z<layers; z++) {
+      double zg = zgrad0(0, geom3::wall_height, z, layers);
+      warpfloor(c, xyzscale(V, zg*(layers-z)/layers, zg),
+        darkena(gradient(0, wcol, -layers, z, layers), 0, 0xFF), PPR_WALL3+z-layers+2, isWarped(c));
+      }
+    floorShadow(c, V, SHADOW_WALL, isWarped(c));
+    }
+  
+  else if(true) {
+    if(!wmspatial) {
+      if(starcol) queuepoly(V, shThisWall, darkena(starcol, 0, 0xFF));
+      }
+    else {
+      transmatrix Vdepth = mscale(V, geom3::WALL);
+      int alpha = 0xFF;
+      if(c->wall == waIcewall)
+        alpha = 0xC0;
+
+      bool warp = isWarped(c);
+      
+      if(starcol && !(wmescher && c->wall == waPlatform)) 
+        queuepolyat(Vdepth, shThisWall, darkena(starcol, 0, 0xFF), PPR_WALL3A);
+
+      warpfloor(c, Vdepth, darkena(wcol0, fd, alpha), PPR_WALL3, warp);
+      floorShadow(c, V, SHADOW_WALL, warp);
+      
+      if(c->wall == waCamelot) {
+        forCellIdEx(c2, i, c) {
+          placeSidewallX(c, i, SIDE_SLEV, V, warp, false, darkena(wcol2, fd, alpha));
+          }
+        forCellIdEx(c2, i, c) {
+          placeSidewallX(c, i, SIDE_SLEV+1, V, warp, false, darkena(wcol2, fd, alpha));
+          }
+        forCellIdEx(c2, i, c) {
+          placeSidewallX(c, i, SIDE_SLEV+2, V, warp, false, darkena(wcol2, fd, alpha));
+          }
+        forCellIdEx(c2, i, c) {
+          placeSidewallX(c, i, SIDE_WTS3, V, warp, false, darkena(wcol2, fd, alpha));
+          }
+        }
+      else {
+        forCellIdEx(c2, i, c) 
+          if(!highwall(c2) || conegraph(c2)) {
+          placeSidewallX(c, i, SIDE_WALL, V, warp, false, darkena(wcol2, fd, alpha));
+          }
+        }
+      }
+    }
+  }
+
 void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
 
 #if CAP_TEXTURE
@@ -3424,12 +3511,6 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
   if(isPlayerOn(c) && !shmup::on) {
     playerfound = true;
 
-/*   if(euclid)
-    return d * S84 / c->type;
-  else
-    return S42 - d * S84 / c->type;
-    cwtV = V * spin(-cwt.spin * 2*M_PI/c->type) * pispin; */
-
     if(multi::players > 1) {
       for(int i=0; i<numplayers(); i++) 
         if(playerpos(i) == c) {
@@ -3447,13 +3528,6 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       }
     }
   
-  /* if(cwt.c->land == laEdge) {   
-    if(c == chosenDown(cwt.c, 1, 0)) 
-      playerfoundL = c, cwtVL = V;
-    if(c == chosenDown(cwt.c, -1, 0)) 
-      playerfoundR = c, cwtVR = V;
-    } */
-
   if(1) {
   
     hyperpoint VC0 = tC0(V);
@@ -3708,6 +3782,12 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       bool eoh = euclid || nonbitrunc;
 
       if(c->wall == waChasm) {
+        zcol = 0;
+        int rd = rosedist(c);
+        if(rd == 1) 
+          queuepoly(V, shRoseFloor[ct6], 0x80406020);
+        if(rd == 2)
+          queuepoly(V, shRoseFloor[ct6], 0x80406040);
         if(c->land == laZebra) fd++;
         if(c->land == laHalloween && !wmblack) {
           transmatrix Vdepth = wmspatial ? mscale(V, geom3::BOTTOM) : V;
@@ -3717,7 +3797,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         }
               
 #if CAP_EDIT
-      if(mapeditor::drawUserShape(V * applyPatterndir(c, si), 3, si.id,
+      else if(mapeditor::drawUserShape(V * applyPatterndir(c, si), 3, si.id,
         darkena(fcol, fd, (cmode & sm::DRAW) ? 0xC0 : 0xFF), c));
       
       else if(patterns::whichShape == '7') {
@@ -3924,190 +4004,232 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         drawTowerFloor(Vf, c, darkena(fcol, fd, 0xFF), 
           prairie::isleft(c) ? river::towerleft : river::towerright); */
       
-      else if(c->land == laPrairie)
-        qfloor(c, Vf, CLOUDFLOOR, darkena(fcol, fd, 0xFF));
-      
-      else if(c->land == laWineyard) {
-        qfloor(c, Vf, FEATHERFLOOR, darkena(fcol, fd, 0xFF));
-        }
+      else switch(c->land) {
+        case laPrairie:
+          qfloor(c, Vf, CLOUDFLOOR, darkena(fcol, fd, 0xFF));
+          break;
+        
+        case laWineyard:
+          qfloor(c, Vf, FEATHERFLOOR, darkena(fcol, fd, 0xFF));
+          break;
+        
+        case laZebra:
+          drawZebraFloor(Vf, c, darkena(fcol, fd, 0xFF));
+          break;
+        
+        case laMountain:
+          drawTowerFloor(Vf, c, darkena(fcol, fd, 0xFF), 
+            euclid ? celldist : c->master->alt ? celldistAltPlus : celldist);
+          break;
+        
+        case laEmerald:
+          drawEmeraldFloor(Vf, c, darkena(fcol, fd, 0xFF));
+          break;
+        
+        case laRlyeh:
+          qfloor_eswap(c, Vf, TRIFLOOR, darkena(fcol, fd, 0xFF));
+          break;
+        
+        case laTemple:
+          qfloor_eswap(c, Vf, TRIFLOOR, darkena(fcol, fd, 0xFF));
+          break;
+        
+        case laAlchemist:
+          qfloor(c, Vf, CLOUDFLOOR, darkena(fcol, fd, 0xFF));
+          break;
+        
+        case laVolcano:
+          qfloor_eswap(c, Vf, LAVAFLOOR, darkena(fcol, fd, 0xFF));
+          break;
+        
+        case laRose:
+          qfloor_eswap(c, Vf, ROSEFLOOR, darkena(fcol, fd, 0xFF));
+          break;
+        
+        case laTortoise:
+          qfloor_eswap(c, Vf, TURTLEFLOOR, darkena(fcol, fd, 0xFF));
+          break;
+        
+        case laBurial: case laRuins:
+          qfloor(c, Vf, BARROWFLOOR, darkena(fcol, fd, 0xFF));
+          break;
 
-      else if(c->land == laZebra) 
-        drawZebraFloor(Vf, c, darkena(fcol, fd, 0xFF));
-      
-      else if(c->wall == waTrunk) 
-        qfloor(c, Vf, PLAINFLOOR, darkena(fcol, fd, 0xFF));
+        case laTrollheim:
+          if(!eoh)
+            qfloor_eswap(c, Vf, TROLLFLOOR, darkena(fcol, fd, 0xFF));
+         else
+           qfloor(c, Vf, CAVEFLOOR, darkena(fcol, fd, 0xFF));
+         break;
 
-      else if(c->wall == waCanopy || c->wall == waSolidBranch || c->wall == waWeakBranch) 
-        qfloor(c, Vf, FEATHERFLOOR, darkena(fcol, fd, 0xFF));
+        case laJungle:
+          qfloor(c, Vf, FEATHERFLOOR, darkena(fcol, fd, 0xFF));
+          break;
+        
+        /*case laMountain:
+          qfloor(c, Vf, FEATHERFLOOR, darkena(fcol, fd, 0xFF));
+          break; */
+        
+        case laGraveyard:
+          qfloor_eswap(c, Vf, CROSSFLOOR, darkena(fcol, fd, 0xFF));
+          break;
+        
+        case laDeadCaves:
+          qfloor(c, Vf, CAVEFLOOR, darkena(fcol, fd, 0xFF));
+          break;
+        
+        case laMotion:
+          qfloor(c, Vf, MFLOOR1, darkena(fcol, fd, 0xFF));
+          break;
+        
+        case laWhirlwind:
+          qfloor_eswap(c, Vf, NEWFLOOR, darkena(fcol, fd, 0xFF));
+          break;
+        
+        case laHell:
+          qfloor_eswap(c, Vf, DEMONFLOOR, darkena(fcol, fd, 0xFF));
+          break;
+              
+        case laIce: case laBlizzard:
+          qfloor(c, Vf, STARFLOOR, darkena(fcol, fd, 0xFF));
+          break;
+        
+        case laCocytus:
+          qfloor_eswap(c, Vf, DESERTFLOOR, darkena(fcol, fd, 0xFF));
+          break;
+        
+        case laSwitch:
+          qfloor_eswap(c, Vf, SWITCHFLOOR, darkena(fcol, fd, 0xFF));
+          if(ctof(c)) for(int i=0; i<c->type; i++)
+            queuepoly(Vf * ddspin(c, i, S6) * xpush(rhexf), shSwitchDisk, darkena(minf[active_switch()].color, fd, 0xFF));
+          break;
 
-      else if(c->land == laMountain) 
-        drawTowerFloor(Vf, c, darkena(fcol, fd, 0xFF), 
-          euclid ? celldist : c->master->alt ? celldistAltPlus : celldist);
+        case laStorms:
+          qfloor_eswap(c, Vf, CHARGEDFLOOR, darkena(fcol, fd, 0xFF));
+          break;
+        
+        case laWildWest:
+          qfloor_eswap(c, Vf, SSTARFLOOR, darkena(fcol, fd, 0xFF));
+          break;
+        
+        case laPower:
+          qfloor_eswap(c, Vf, POWERFLOOR, darkena(fcol, fd, 0xFF));
+          break;
 
-      else if(isGravityLand(c->land)) 
-        drawTowerFloor(Vf, c, darkena(fcol, fd, 0xFF));
+        case laCaves:
+          qfloor(c, Vf, CAVEFLOOR, darkena(fcol, fd, 0xFF));
+          break;
+        
+        case laDesert:
+          qfloor_eswap(c, Vf, DESERTFLOOR, darkena(fcol, fd, 0xFF));
+          break;
 
-      else if(c->land == laEmerald) 
-        drawEmeraldFloor(Vf, c, darkena(fcol, fd, 0xFF));
+        case laBull:
+          qfloor_eswap(c, Vf, BUTTERFLYFLOOR, darkena(fcol, fd, 0xFF));
+          break;
+        
+        case laDryForest:
+          qfloor_eswap(c, Vf, DESERTFLOOR, darkena(fcol, fd, 0xFF));
+          break;
 
-      else if(c->land == laRlyeh)
-        qfloor_eswap(c, Vf, TRIFLOOR, darkena(fcol, fd, 0xFF));
-//      qfloor(c, Vf, shTriFloor[ct6], darkena(fcol, fd, 0xFF));
-
-      else if(c->land == laTemple)
-//      qfloor(c, Vf, (eoh ? shFloor: shTriFloor)[ct6], darkena(fcol, fd, 0xFF));
-        qfloor_eswap(c, Vf, TRIFLOOR, darkena(fcol, fd, 0xFF));
-
-      else if(c->land == laAlchemist)
-        qfloor(c, Vf, CLOUDFLOOR, darkena(fcol, fd, 0xFF));
-
-      else if(c->land == laVolcano)
-        qfloor_eswap(c, Vf, LAVAFLOOR, darkena(fcol, fd, 0xFF));
-
-      else if(c->land == laRose)
-        qfloor_eswap(c, Vf, ROSEFLOOR, darkena(fcol, fd, 0xFF));
-
-      else if(c->land == laTortoise)
-        qfloor_eswap(c, Vf, TURTLEFLOOR, darkena(fcol, fd, 0xFF));
-
-      else if(c->land == laDragon && !nonbitrunc) {
-        /* if(!wmspatial || noAdjacentChasms(c)) */
-          qfloor(c, Vf, DRAGONFLOOR, darkena(fcol, fd, 0xFF));
-        /* if(wmspatial)
-          qfloor(c, Vf, shFloor[euclid?2:ct6], darkena(fcol, fd, 0xFF)); */
-        }
-
-      else if(isElemental(c->land) || c->land == laElementalWall)
-        qfloor_eswap(c, Vf, NEWFLOOR, darkena(fcol, fd, 0xFF));
-
-      else if(c->land == laBurial || c->land == laRuins)
-        qfloor(c, Vf, BARROWFLOOR, darkena(fcol, fd, 0xFF));
-
-      else if(c->land == laTrollheim && !eoh)
-        qfloor_eswap(c, Vf, TROLLFLOOR, darkena(fcol, fd, 0xFF));
-
-      else if(c->land == laTrollheim)
-        qfloor(c, Vf, CAVEFLOOR, darkena(fcol, fd, 0xFF));
-
-      else if(c->land == laJungle)
-        qfloor(c, Vf, FEATHERFLOOR, darkena(fcol, fd, 0xFF));
-
-      else if(c->land == laMountain)
-        qfloor(c, Vf, FEATHERFLOOR, darkena(fcol, fd, 0xFF));
-
-      else if(c->land == laGraveyard)
-        qfloor_eswap(c, Vf, CROSSFLOOR, darkena(fcol, fd, 0xFF));
-
-      else if(c->land == laDeadCaves) {
-        qfloor(c, Vf, CAVEFLOOR, darkena(fcol, fd, 0xFF));
-        }
-
-      else if(c->land == laMotion)
-        qfloor(c, Vf, MFLOOR1, darkena(fcol, fd, 0xFF));
-
-      else if(c->land == laWhirlwind)
-        qfloor_eswap(c, Vf, NEWFLOOR, darkena(fcol, fd, 0xFF));
-
-      else if(c->land == laHell)
-        qfloor_eswap(c, Vf, DEMONFLOOR, darkena(fcol, fd, 0xFF));
-
-      else if(c->land == laIce || c->land == laBlizzard)
-        qfloor(c, Vf, STARFLOOR, darkena(fcol, fd, 0xFF));
-
-      else if(c->land == laCocytus)
-        qfloor_eswap(c, Vf, DESERTFLOOR, darkena(fcol, fd, 0xFF));
-
-      else if(c->land == laSwitch) {
-        qfloor_eswap(c, Vf, SWITCHFLOOR, darkena(fcol, fd, 0xFF));
-        if(ctof(c)) for(int i=0; i<c->type; i++)
-          queuepoly(Vf * ddspin(c, i, S6) * xpush(rhexf), shSwitchDisk, darkena(minf[active_switch()].color, fd, 0xFF));
-        }
-
-      else if(c->land == laStorms)
-        qfloor_eswap(c, Vf, CHARGEDFLOOR, darkena(fcol, fd, 0xFF));
-
-      else if(c->land == laWildWest)
-        qfloor_eswap(c, Vf, SSTARFLOOR, darkena(fcol, fd, 0xFF));
-
-      else if(c->land == laPower)
-        qfloor_eswap(c, Vf, POWERFLOOR, darkena(fcol, fd, 0xFF));
-
-      else if(c->land == laHive && c->wall != waFloorB && c->wall != waFloorA && c->wall != waMirror && c->wall != waCloud) {
-        qfloor(c, Vf, PLAINFLOOR, darkena(fcol, 1, 0xFF));
-        if(c->wall != waMirror && c->wall != waCloud)
-          qfloor(c, Vf, MFLOOR1, darkena(fcol, 2, 0xFF));
-        if(c->wall != waMirror && c->wall != waCloud)
-          qfloor(c, Vf, MFLOOR2, darkena(fcol, fcol==wcol ? 1 : 2, 0xFF));
-        }
-
-      else if(c->land == laCaves)
-        qfloor(c, Vf, CAVEFLOOR, darkena(fcol, fd, 0xFF));
-
-      else if(c->land == laDesert)
-        qfloor_eswap(c, Vf, DESERTFLOOR, darkena(fcol, fd, 0xFF));
-
-      else if(c->land == laOvergrown || c->land == laClearing || isHaunted(c->land))
-        qfloor(c, Vf, OVERFLOOR, darkena(fcol, fd, 0xFF));
-
-      else if(c->land == laBull)
-        qfloor_eswap(c, Vf, BUTTERFLYFLOOR, darkena(fcol, fd, 0xFF));
-
-      else if(c->land == laDryForest)
-        qfloor_eswap(c, Vf, DESERTFLOOR, darkena(fcol, fd, 0xFF));
-
-//      else if(c->land == laOcean && c->landparam > 25) 
-//        qfloor(c, Vf, shWave[wavephase][ct6], darkena(fcol, fd, 0xFF));
-
-      else if((c->land == laCaribbean || c->land == laOcean || c->land == laOceanWall || c->land == laWhirlpool))
-        qfloor(c, Vf, CLOUDFLOOR, darkena(fcol, fd, 0xFF));
-
-      else if(c->land == laKraken)
-        qfloor(c, Vf, FULLFLOOR, darkena(fcol, fd, 0xFF));
-
-      else if(c->land == laDocks)
-        qfloor(c, Vf, FULLFLOOR, darkena(fcol, fd, 0xFF));
-
-      else if(c->land == laLivefjord)
-        qfloor(c, Vf, CAVEFLOOR, darkena(fcol, fd, 0xFF));
-
-      else if(c->land == laRedRock || c->land == laSnakeNest)
-        qfloor_eswap(c, Vf, DESERTFLOOR, darkena(fcol, fd, 0xFF));
-
-      else if(c->land == laPalace || c->land == laTerracotta)
-        qfloor_eswap(c, Vf, PALACEFLOOR, darkena(fcol, fd, 0xFF));
-      
-      else if(c->land == laMercuryRiver) {
-        if(eoh)
-          qfloor(c, Vf, PLAINFLOOR, darkena(fcol, fd, 0xFF));
-        else {
-          int bridgedir = -1;
-          if(c->type == 6) {
-            for(int i=1; i<c->type; i+=2)
-              if(pseudohept(c->mov[(i+5)%6]) && c->mov[(i+5)%6]->land == laMercuryRiver)
-              if(pseudohept(c->mov[(i+1)%6]) && c->mov[(i+1)%6]->land == laMercuryRiver)
-                bridgedir = i;
-            }
-          if(bridgedir == -1)
-            qfloor_eswap(c, Vf, PALACEFLOOR, darkena(fcol, fd, 0xFF));
+        case laCaribbean: case laOcean: case laOceanWall: case laWhirlpool:
+          qfloor(c, Vf, CLOUDFLOOR, darkena(fcol, fd, 0xFF));
+          break;
+        
+        case laKraken:
+          qfloor(c, Vf, FULLFLOOR, darkena(fcol, fd, 0xFF));
+          break;
+        
+        case laDocks:
+          qfloor(c, Vf, FULLFLOOR, darkena(fcol, fd, 0xFF));
+          break;
+        
+        case laLivefjord:
+          qfloor(c, Vf, CAVEFLOOR, darkena(fcol, fd, 0xFF));
+          break;
+        
+        case laRedRock: case laSnakeNest:
+          qfloor_eswap(c, Vf, DESERTFLOOR, darkena(fcol, fd, 0xFF));
+          break;
+        
+        case laPalace: case laTerracotta:
+          qfloor_eswap(c, Vf, PALACEFLOOR, darkena(fcol, fd, 0xFF));
+          break;
+        
+        case laMercuryRiver: {
+          if(eoh)
+            qfloor(c, Vf, PLAINFLOOR, darkena(fcol, fd, 0xFF));
           else {
-            transmatrix bspin = ddspin(c, bridgedir);
-            qfloor(c, Vf, bspin, shMercuryBridge[0], darkena(fcol, fd, 0xFF));
-            // only needed in one direction
-            if(c < c->mov[bridgedir]) {
-              bspin = Vf * bspin;
-              queuepoly(bspin, shMercuryBridge[1], darkena(fcol, fd+1, 0xFF));
-              if(wmspatial) {
-                queuepolyat(mscale(bspin, geom3::LAKE), shMercuryBridge[1], darkena(gradient(0, winf[waMercury].color, 0, 0.8,1), 0, 0x80), PPR_LAKELEV);
-                queuepolyat(mscale(bspin, geom3::BOTTOM), shMercuryBridge[1], darkena(0x202020, 0, 0xFF), PPR_LAKEBOTTOM);
+            int bridgedir = -1;
+            if(c->type == 6) {
+              for(int i=1; i<c->type; i+=2)
+                if(pseudohept(c->mov[(i+5)%6]) && c->mov[(i+5)%6]->land == laMercuryRiver)
+                if(pseudohept(c->mov[(i+1)%6]) && c->mov[(i+1)%6]->land == laMercuryRiver)
+                  bridgedir = i;
+              }
+            if(bridgedir == -1)
+              qfloor_eswap(c, Vf, PALACEFLOOR, darkena(fcol, fd, 0xFF));
+            else {
+              transmatrix bspin = ddspin(c, bridgedir);
+              qfloor(c, Vf, bspin, shMercuryBridge[0], darkena(fcol, fd, 0xFF));
+              // only needed in one direction
+              if(c < c->mov[bridgedir]) {
+                bspin = Vf * bspin;
+                queuepoly(bspin, shMercuryBridge[1], darkena(fcol, fd+1, 0xFF));
+                if(wmspatial) {
+                  queuepolyat(mscale(bspin, geom3::LAKE), shMercuryBridge[1], darkena(gradient(0, winf[waMercury].color, 0, 0.8,1), 0, 0x80), PPR_LAKELEV);
+                  queuepolyat(mscale(bspin, geom3::BOTTOM), shMercuryBridge[1], darkena(0x202020, 0, 0xFF), PPR_LAKEBOTTOM);
+                  }
                 }
               }
             }
           }
-        }
+        
+        case laOvergrown: case laClearing: case laHauntedWall: case laHaunted: case laHauntedBorder:
+          qfloor(c, Vf, OVERFLOOR, darkena(fcol, fd, 0xFF));
+          break;
 
-      else {
-        qfloor(c, Vf, PLAINFLOOR, darkena(fcol, fd, 0xFF));
+        case laHive:
+          if(c->wall != waFloorB && c->wall != waFloorA && c->wall != waMirror && c->wall != waCloud) {
+            qfloor(c, Vf, PLAINFLOOR, darkena(fcol, 1, 0xFF));
+            if(c->wall != waMirror && c->wall != waCloud)
+              qfloor(c, Vf, MFLOOR1, darkena(fcol, 2, 0xFF));
+            if(c->wall != waMirror && c->wall != waCloud)
+              qfloor(c, Vf, MFLOOR2, darkena(fcol, fcol==wcol ? 1 : 2, 0xFF));
+            }
+          else
+            qfloor(c, Vf, PLAINFLOOR, darkena(fcol, fd, 0xFF));
+          break;
+        
+        case laEndorian:
+          if(c->wall == waTrunk) 
+            qfloor(c, Vf, PLAINFLOOR, darkena(fcol, fd, 0xFF));
+    
+          else if(c->wall == waCanopy || c->wall == waSolidBranch || c->wall == waWeakBranch) 
+            qfloor(c, Vf, FEATHERFLOOR, darkena(fcol, fd, 0xFF));
+          
+          else 
+            drawTowerFloor(Vf, c, darkena(fcol, fd, 0xFF));
+          break;
+        
+        case laDragon:
+          if(nonbitrunc) 
+            qfloor(c, Vf, PLAINFLOOR, darkena(fcol, fd, 0xFF));
+          else          
+            qfloor(c, Vf, DRAGONFLOOR, darkena(fcol, fd, 0xFF));
+          break;
+        
+        case laEFire: case laEAir: case laEWater: case laEEarth: case laElementalWall:
+          qfloor_eswap(c, Vf, NEWFLOOR, darkena(fcol, fd, 0xFF));
+          break;
+        
+        case laIvoryTower: case laDungeon: 
+          drawTowerFloor(Vf, c, darkena(fcol, fd, 0xFF));
+          break;
+
+        default: 
+          qfloor(c, Vf, PLAINFLOOR, darkena(fcol, fd, 0xFF));
         }
+        
       // walls
 
 #if CAP_EDIT
@@ -4168,300 +4290,258 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
 
       char xch = winf[c->wall].glyph;
       
-      if(c->wall == waBigBush) {
-        if(detaillevel >= 2)
-          queuepolyat(mmscale(V, zgrad0(0, geom3::slev, 1, 2)), shHeptaMarker, darkena(wcol, 0, 0xFF), PPR_REDWALL);
-        if(detaillevel >= 1)
-          queuepolyat(mmscale(V, geom3::SLEV[1]) * pispin, shWeakBranch, darkena(wcol, 0, 0xFF), PPR_REDWALL+1);
-        if(detaillevel >= 2)
-          queuepolyat(mmscale(V, zgrad0(0, geom3::slev, 3, 2)), shHeptaMarker, darkena(wcol, 0, 0xFF), PPR_REDWALL+2);
-        queuepolyat(mmscale(V, geom3::SLEV[2]), shSolidBranch, darkena(wcol, 0, 0xFF), PPR_REDWALL+3);
-        }
-
-      else if(c->wall == waSmallBush) {
-        if(detaillevel >= 2)
-          queuepolyat(mmscale(V, zgrad0(0, geom3::slev, 1, 2)), shHeptaMarker, darkena(wcol, 0, 0xFF), PPR_REDWALL);
-        if(detaillevel >= 1)
-          queuepolyat(mmscale(V, geom3::SLEV[1]) * pispin, shWeakBranch, darkena(wcol, 0, 0xFF), PPR_REDWALL+1);
-        if(detaillevel >= 2)
-          queuepolyat(mmscale(V, zgrad0(0, geom3::slev, 3, 2)), shHeptaMarker, darkena(wcol, 0, 0xFF), PPR_REDWALL+2);
-        queuepolyat(mmscale(V, geom3::SLEV[2]), shWeakBranch, darkena(wcol, 0, 0xFF), PPR_REDWALL+3);
-        }
-
-      else if(c->wall == waSolidBranch) {
-        queuepoly(V, shSolidBranch, darkena(wcol, 0, 0xFF));
-        }
-
-      else if(c->wall == waWeakBranch) {
-        queuepoly(V, shWeakBranch, darkena(wcol, 0, 0xFF));
-        }
-
-      else if(c->wall == waLadder) {
-        if(euclid) {
-          queuepoly(V, shMFloor[ct6], 0x804000FF);
-          queuepoly(V, shMFloor2[ct6], 0x000000FF);
-          }
-        else {
-          queuepolyat(V, shFloor[ct6], 0x804000FF, PPR_FLOOR+1);
-          queuepolyat(V, shMFloor[ct6], 0x000000FF, PPR_FLOOR+2);
-          }
-        }
-
-      if(c->wall == waReptileBridge) {
-        Vboat = &(Vboat0 = V);
-        dynamicval<qfloorinfo> qfi2(qfi, qfi);
-        int col = reptilecolor(c);
-        chasmg = 0;
-        drawReptileFloor(V, c, col, true);
-        forCellIdEx(c2, i, c) if(chasmgraph(c2)) 
-          placeSidewallX(c, i, SIDE_LAKE, V, isWarped(c), false, darkena(gradient(0, col, 0, .8, 1), fd, 0xFF));
-        chasmg = 1;
-        }
+      switch(c->wall) {
       
-      if(c->wall == waTerraWarrior) 
-        drawTerraWarrior(V, randterra ? (c->landparam & 7) : (5 - (c->landparam & 7)), 7, 0);
-
-      else if(c->wall == waBoat || c->wall == waStrandedBoat) {
-        double footphase;
-        bool magical = items[itOrbWater] && (isPlayerOn(c) || (isFriendly(c) && items[itOrbEmpathy]));
-        int outcol = magical ? watercolor(0) : 0xC06000FF;
-        int incol = magical ? 0x0060C0FF : 0x804000FF;
-        bool nospin = false;
-
-        Vboat = &(Vboat0 = *Vboat); 
-        if(wmspatial && c->wall == waBoat) {
-          nospin = c->wall == waBoat && applyAnimation(c, Vboat0, footphase, LAYER_BOAT);
-          if(!nospin) Vboat0 = Vboat0 * ddspin(c, c->mondir, S42);
-          queuepolyat(Vboat0, shBoatOuter, outcol, PPR_BOATLEV);
-          Vboat = &(Vboat0 = V);
-          }
-        if(c->wall == waBoat) {
-          nospin = applyAnimation(c, Vboat0, footphase, LAYER_BOAT);
-          }
-        if(!nospin) 
-          Vboat0 = Vboat0 * ddspin(c, c->mondir, S42);
-        else {
-          transmatrix Vx;
-          if(applyAnimation(c, Vx, footphase, LAYER_SMALL))
-            animations[LAYER_SMALL][c].footphase = 0;
-          }
-        if(wmspatial)
-          queuepolyat(mscale(Vboat0, (geom3::LAKE+1)/2), shBoatOuter, outcol, PPR_BOATLEV2);
-        queuepoly(Vboat0, shBoatOuter, outcol);
-        queuepoly(Vboat0, shBoatInner, incol);
-        }
-
-      else if(c->wall == waBigStatue) {
-        transmatrix V2 = V;
-        double footphase;
-        applyAnimation(c, V2, footphase, LAYER_BOAT);
+        case waBigBush:
+          if(detaillevel >= 2)
+            queuepolyat(mmscale(V, zgrad0(0, geom3::slev, 1, 2)), shHeptaMarker, darkena(wcol, 0, 0xFF), PPR_REDWALL);
+          if(detaillevel >= 1)
+            queuepolyat(mmscale(V, geom3::SLEV[1]) * pispin, shWeakBranch, darkena(wcol, 0, 0xFF), PPR_REDWALL+1);
+          if(detaillevel >= 2)
+            queuepolyat(mmscale(V, zgrad0(0, geom3::slev, 3, 2)), shHeptaMarker, darkena(wcol, 0, 0xFF), PPR_REDWALL+2);
+          queuepolyat(mmscale(V, geom3::SLEV[2]), shSolidBranch, darkena(wcol, 0, 0xFF), PPR_REDWALL+3);
+          break;
         
-        queuepolyat(V2, shStatue, 
-          darkena(winf[c->wall].color, 0, 0xFF),
-          PPR_BIGSTATUE
-          );
-        }
+        case waSmallBush:
+          if(detaillevel >= 2)
+            queuepolyat(mmscale(V, zgrad0(0, geom3::slev, 1, 2)), shHeptaMarker, darkena(wcol, 0, 0xFF), PPR_REDWALL);
+          if(detaillevel >= 1)
+            queuepolyat(mmscale(V, geom3::SLEV[1]) * pispin, shWeakBranch, darkena(wcol, 0, 0xFF), PPR_REDWALL+1);
+          if(detaillevel >= 2)
+            queuepolyat(mmscale(V, zgrad0(0, geom3::slev, 3, 2)), shHeptaMarker, darkena(wcol, 0, 0xFF), PPR_REDWALL+2);
+          queuepolyat(mmscale(V, geom3::SLEV[2]), shWeakBranch, darkena(wcol, 0, 0xFF), PPR_REDWALL+3);
+          break;
       
-      else if(c->wall == waSulphurC) {
-        if(drawstar(c)) {
-          zcol = wcol;
-          if(wmspatial) 
-            queuepolyat(mscale(V, geom3::HELLSPIKE), shGiantStar[ct6], darkena(wcol, 0, 0x40), PPR_HELLSPIKE);
-          else
-            queuepoly(V, shGiantStar[ct6], darkena(wcol, 0, 0xFF));
-          }
-        }
-
-      else if(c->wall == waClosePlate || c->wall == waOpenPlate || (c->wall == waTrapdoor && c->land != laZebra)) {
-        transmatrix V2 = V;
-        if((ctype&1) && wmescher) V2 = V * pispin;
-        queuepoly(V2, shMFloor[ct6], darkena(winf[c->wall].color, 0, 0xFF));
-        queuepoly(V2, shMFloor2[ct6], (!wmblack) ? darkena(fcol, 1, 0xFF) : darkena(0,1,0xFF));
-        }
-
-      else if(c->wall == waFrozenLake || c->wall == waLake || c->wall == waCamelotMoat ||
-        c->wall == waSea || c->wall == waClosePlate || c->wall == waOpenPlate ||
-        c->wall == waOpenGate || c->wall == waTrapdoor || c->wall == waBubble)
-        ;
-      
-      else if(c->wall == waRose) {
-        zcol = wcol;
-        wcol <<= 1;
-        if(c->cpdist > 5)
-          wcol = 0xC0C0C0;
-        else if(rosephase == 7)
-          wcol = 0xFF0000;
-        else 
-          wcol = gradient(wcol, 0xC00000, 0, rosephase, 6);
-        queuepoly(V, shThorns, 0xC080C0FF);
-
-        for(int u=0; u<4; u+=2)
-          queuepoly(V * spin(2*M_PI / 3 / 4 * u), shRose, darkena(wcol, 0, 0xC0));
-        }
-      
-      else if(sl && wmspatial) {
-      
-        bool w = isWarped(c);
-        warpfloor(c, (*Vdp), darkena(wcol, fd, 0xFF), PPR_REDWALL-4+4*sl, w);
-        floorShadow(c, V, SHADOW_SL * sl, w);
-        for(int s=0; s<sl; s++) 
-        forCellIdEx(c2, i, c) {
-          int sl2 = snakelevel(c2);
-          if(s >= sl2)
-            placeSidewallX(c, i, SIDE_SLEV+s, V, w, false, getSnakelevColor(c, s, sl, fd, wcol));
-          }
-        }
-
-      else if(c->wall == waRoundTable) ;
-
-      else if(c->wall == waGlass && wmspatial) {
-        int col = winf[waGlass].color;
-        int dcol = darkena(col, 0, 0x80);
-        transmatrix Vdepth = mscale((*Vdp), geom3::WALL);
-        queuepolyat(Vdepth, shMFloor[ct6], dcol, PPR_WALL); // GLASS
-        if(validsidepar[SIDE_WALL]) forCellIdEx(c2, i, c) 
-          placeSidewall(c, i, SIDE_WALL, (*Vdp), false, true, dcol);
-        }
-
-      else if(c->wall == waGlass && !wmspatial) ;
-      
-      else if(wmescher && wmspatial && c->wall == waBarrier && c->land == laOceanWall) {
-       const int layers = 2 << detaillevel;
-       dynamicval<const hpcshape*> ds(qfi.shape, &shCircleFloor);
-       dynamicval<bool> db(qfi.special, true);
-       for(int z=1; z<layers; z++) {
-         double zg = zgrad0(-geom3::lake_top, geom3::wall_height, z, layers);
-         warpfloor(c, xyzscale(V, zg*(layers-z)/layers, zg),
-           darkena(gradient(0, wcol, -layers, z, layers), 0, 0xFF), PPR_WALL3+z-layers+2, isWarped(c));
-         }
-        }
-
-      else if(c->wall == waMirrorWall) ;
-      
-      else if(highwall(c)) {
-        zcol = wcol;
-        int wcol0 = wcol;
-        int starcol = wcol;        
-        if(c->wall == waWarpGate) starcol = 0;
-        if(c->wall == waVinePlant) starcol = 0x60C000;
-
-        int wcol2 = gradient(0, wcol0, 0, .8, 1);
-
-        if(c->wall == waClosedGate) {
-          int hdir = 0;
-          for(int i=0; i<c->type; i++) if(c->mov[i]->wall == waClosedGate)
-            hdir = i;
-          transmatrix V2 = mscale(V, wmspatial?geom3::WALL:1) * ddspin(c, hdir, S42);
-          queuepolyat(V2, shPalaceGate, darkena(wcol, 0, 0xFF), wmspatial?PPR_WALL3A:PPR_WALL);
-          starcol = 0;
-          }
+        case waSolidBranch:
+          queuepoly(V, shSolidBranch, darkena(wcol, 0, 0xFF));
+          break;
         
-        hpcshape& shThisWall = isGrave(c->wall) ? shCross : shWall[ct6];
-        
-        if(conegraph(c)) {
-
-         const int layers = 2 << detaillevel;
-         for(int z=1; z<layers; z++) {
-           double zg = zgrad0(0, geom3::wall_height, z, layers);
-           warpfloor(c, xyzscale(V, zg*(layers-z)/layers, zg),
-             darkena(gradient(0, wcol, -layers, z, layers), 0, 0xFF), PPR_WALL3+z-layers+2, isWarped(c));
-           }
-         floorShadow(c, V, SHADOW_WALL, isWarped(c));
-         }
-        
-        else if(true) {
-          if(!wmspatial) {
-            if(starcol) queuepoly(V, shThisWall, darkena(starcol, 0, 0xFF));
+        case waWeakBranch:
+          queuepoly(V, shWeakBranch, darkena(wcol, 0, 0xFF));
+          break;
+      
+        case waLadder:
+          if(euclid) {
+            queuepoly(V, shMFloor[ct6], 0x804000FF);
+            queuepoly(V, shMFloor2[ct6], 0x000000FF);
             }
           else {
-            transmatrix Vdepth = mscale(V, geom3::WALL);
-            int alpha = 0xFF;
-            if(c->wall == waIcewall)
-              alpha = 0xC0;
-    
-            bool warp = isWarped(c);
-            
-            if(starcol && !(wmescher && c->wall == waPlatform)) 
-              queuepolyat(Vdepth, shThisWall, darkena(starcol, 0, 0xFF), PPR_WALL3A);
-    
-            warpfloor(c, Vdepth, darkena(wcol0, fd, alpha), PPR_WALL3, warp);
-            floorShadow(c, V, SHADOW_WALL, warp);
-            
-            if(c->wall == waCamelot) {
-              forCellIdEx(c2, i, c) {
-                placeSidewallX(c, i, SIDE_SLEV, V, warp, false, darkena(wcol2, fd, alpha));
-                }
-              forCellIdEx(c2, i, c) {
-                placeSidewallX(c, i, SIDE_SLEV+1, V, warp, false, darkena(wcol2, fd, alpha));
-                }
-              forCellIdEx(c2, i, c) {
-                placeSidewallX(c, i, SIDE_SLEV+2, V, warp, false, darkena(wcol2, fd, alpha));
-                }
-              forCellIdEx(c2, i, c) {
-                placeSidewallX(c, i, SIDE_WTS3, V, warp, false, darkena(wcol2, fd, alpha));
-                }
-              }
-            else {
-              forCellIdEx(c2, i, c) 
-                if(!highwall(c2) || conegraph(c2)) {
-                placeSidewallX(c, i, SIDE_WALL, V, warp, false, darkena(wcol2, fd, alpha));
-                }
+            queuepolyat(V, shFloor[ct6], 0x804000FF, PPR_FLOOR+1);
+            queuepolyat(V, shMFloor[ct6], 0x000000FF, PPR_FLOOR+2);
+            }
+          break;
+        
+        case waReptileBridge: {
+          Vboat = &(Vboat0 = V);
+          dynamicval<qfloorinfo> qfi2(qfi, qfi);
+          int col = reptilecolor(c);
+          chasmg = 0;
+          drawReptileFloor(V, c, col, true);
+          forCellIdEx(c2, i, c) if(chasmgraph(c2)) 
+            placeSidewallX(c, i, SIDE_LAKE, V, isWarped(c), false, darkena(gradient(0, col, 0, .8, 1), fd, 0xFF));
+          chasmg = 1;
+          break;
+          }
+        
+        case waTerraWarrior:
+          drawTerraWarrior(V, randterra ? (c->landparam & 7) : (5 - (c->landparam & 7)), 7, 0);
+          break;
+        
+        case waBoat: case waStrandedBoat: {
+          double footphase;
+          bool magical = items[itOrbWater] && (isPlayerOn(c) || (isFriendly(c) && items[itOrbEmpathy]));
+          int outcol = magical ? watercolor(0) : 0xC06000FF;
+          int incol = magical ? 0x0060C0FF : 0x804000FF;
+          bool nospin = false;
+  
+          Vboat = &(Vboat0 = *Vboat); 
+          if(wmspatial && c->wall == waBoat) {
+            nospin = c->wall == waBoat && applyAnimation(c, Vboat0, footphase, LAYER_BOAT);
+            if(!nospin) Vboat0 = Vboat0 * ddspin(c, c->mondir, S42);
+            queuepolyat(Vboat0, shBoatOuter, outcol, PPR_BOATLEV);
+            Vboat = &(Vboat0 = V);
+            }
+          if(c->wall == waBoat) {
+            nospin = applyAnimation(c, Vboat0, footphase, LAYER_BOAT);
+            }
+          if(!nospin) 
+            Vboat0 = Vboat0 * ddspin(c, c->mondir, S42);
+          else {
+            transmatrix Vx;
+            if(applyAnimation(c, Vx, footphase, LAYER_SMALL))
+              animations[LAYER_SMALL][c].footphase = 0;
+            }
+          if(wmspatial)
+            queuepolyat(mscale(Vboat0, (geom3::LAKE+1)/2), shBoatOuter, outcol, PPR_BOATLEV2);
+          queuepoly(Vboat0, shBoatOuter, outcol);
+          queuepoly(Vboat0, shBoatInner, incol);
+          break;
+          }
+        
+        case waBigStatue: {
+          transmatrix V2 = V;
+          double footphase;
+          applyAnimation(c, V2, footphase, LAYER_BOAT);
+          
+          queuepolyat(V2, shStatue, 
+            darkena(winf[c->wall].color, 0, 0xFF),
+            PPR_BIGSTATUE
+            );
+          break;
+          }
+        
+        case waSulphurC: {
+          if(drawstar(c)) {
+            zcol = wcol;
+            if(wmspatial) 
+              queuepolyat(mscale(V, geom3::HELLSPIKE), shGiantStar[ct6], darkena(wcol, 0, 0x40), PPR_HELLSPIKE);
+            else
+              queuepoly(V, shGiantStar[ct6], darkena(wcol, 0, 0xFF));
+            }
+          break;
+          }
+        
+        case waTrapdoor:
+          if(c->land == laZebra) break;
+          /* fallthrough */
+        
+        case waClosePlate: case waOpenPlate: {
+          transmatrix V2 = V;
+          if((ctype&1) && wmescher) V2 = V * pispin;
+          queuepoly(V2, shMFloor[ct6], darkena(winf[c->wall].color, 0, 0xFF));
+          queuepoly(V2, shMFloor2[ct6], (!wmblack) ? darkena(fcol, 1, 0xFF) : darkena(0,1,0xFF));
+          break;
+          }
+        
+        case waFrozenLake: case waLake: case waCamelotMoat:
+        case waSea: case waOpenGate: case waBubble: case waDock:
+        case waNone: case waSulphur: case waMercury:
+          break;
+        
+        case waRose: {
+          zcol = wcol;
+          wcol <<= 1;
+          if(c->cpdist > 5)
+            wcol = 0xC0C0C0;
+          else if(rosephase == 7)
+            wcol = 0xFF0000;
+          else 
+            wcol = gradient(wcol, 0xC00000, 0, rosephase, 6);
+          queuepoly(V, shThorns, 0xC080C0FF);
+  
+          for(int u=0; u<4; u+=2)
+            queuepoly(V * spin(2*M_PI / 3 / 4 * u), shRose, darkena(wcol, 0, 0xC0));
+          break;
+          }
+
+        case waRoundTable: 
+          if(wmspatial) goto wa_default;
+          break;
+        
+        case waMirrorWall:
+          break;
+        
+        case waGlass:
+          if(wmspatial) {
+            int col = winf[waGlass].color;
+            int dcol = darkena(col, 0, 0x80);
+            transmatrix Vdepth = mscale((*Vdp), geom3::WALL);
+            queuepolyat(Vdepth, shMFloor[ct6], dcol, PPR_WALL); // GLASS
+            if(validsidepar[SIDE_WALL]) forCellIdEx(c2, i, c) 
+              placeSidewall(c, i, SIDE_WALL, (*Vdp), false, true, dcol);
+            }
+          break;
+        
+        case waFan:
+          queuepoly(V * spin(M_PI/6 - fanframe * M_PI / 3), shFan, darkena(wcol, 0, 0xFF));
+          break;
+        
+        case waArrowTrap:
+          if(c->wparam >= 1)
+            queuepoly(V, shDisk, darkena(trapcol[c->wparam&3], 0, 0xFF));
+          if(isCentralTrap(c)) arrowtraps.push_back(c);
+          break;
+      
+        case waFreshGrave: case waAncientGrave:
+          zcol = wcol;
+          queuepoly(V, shCross, darkena(wcol, 0, 0xFF));
+          break;
+        
+        case waGiantRug:
+          queuepoly(V, shBigCarpet1, darkena(0xC09F00, 0, 0xFF));
+          queuepoly(V, shBigCarpet2, darkena(0x600000, 0, 0xFF));
+          queuepoly(V, shBigCarpet3, darkena(0xC09F00, 0, 0xFF));
+          break;
+        
+        case waBarrier:
+          if(c->land == laOceanWall && wmescher && wmspatial) {
+           const int layers = 2 << detaillevel;
+           dynamicval<const hpcshape*> ds(qfi.shape, &shCircleFloor);
+           dynamicval<bool> db(qfi.special, true);
+           for(int z=1; z<layers; z++) {
+             double zg = zgrad0(-geom3::lake_top, geom3::wall_height, z, layers);
+             warpfloor(c, xyzscale(V, zg*(layers-z)/layers, zg),
+               darkena(gradient(0, wcol, -layers, z, layers), 0, 0xFF), PPR_WALL3+z-layers+2, isWarped(c));
+             }
+            }
+          else goto wa_default;
+          break;
+        
+        case waMineOpen: {
+          int mines = countMinesAround(c);
+          if(mines)
+            queuepoly(V, shMineMark[ct6], (minecolors[mines] << 8) | 0xFF);
+          break;
+          }
+      
+        default: {
+          wa_default:
+          if(sl && wmspatial) {
+      
+            bool w = isWarped(c);
+            warpfloor(c, (*Vdp), darkena(wcol, fd, 0xFF), PPR_REDWALL-4+4*sl, w);
+            floorShadow(c, V, SHADOW_SL * sl, w);
+            for(int s=0; s<sl; s++) 
+            forCellIdEx(c2, i, c) {
+              int sl2 = snakelevel(c2);
+              if(s >= sl2)
+                placeSidewallX(c, i, SIDE_SLEV+s, V, w, false, getSnakelevColor(c, s, sl, fd, wcol));
               }
             }
+          
+          else if(highwall(c)) 
+            draw_wall(c, V, wcol, zcol, ct6, fd);
+ 
+          else if(xch == '%') {
+            if(doHighlight())
+              poly_outline = (c->land == laMirror) ? OUTLINE_TREASURE : OUTLINE_ORB;
+            
+            if(wmspatial) {
+              int col = winf[c->wall].color;
+              int dcol = darkena(col, 0, 0xC0);
+              transmatrix Vdepth = mscale((*Vdp), geom3::WALL);
+              queuepolyat(Vdepth, shMFloor[ct6], dcol, PPR_WALL); // GLASS
+              if(validsidepar[SIDE_WALL]) forCellIdEx(c2, i, c) 
+                placeSidewall(c, i, SIDE_WALL, (*Vdp), false, true, dcol);
+              }
+            else {
+              queuepoly(V, shMirror, darkena(wcol, 0, 0xC0));
+              }
+            poly_outline = OUTLINE_DEFAULT;
+            }
+          
+          else if(isFire(c) || isThumper(c) || c->wall == waBonfireOff) {
+            ld sp = 0;
+            if(hasTimeout(c)) sp = ticks / (c->land == laPower ? 5000. : 500.);
+            queuepoly(V * spin(sp), shStar, darkena(wcol, 0, 0xF0));
+            if(isFire(c) && rand() % 300 < ticks - lastt)
+              drawParticle(c, wcol, 75);
+            }
+          
+          else if(xch != '.' && xch != '+' && xch != '>' && xch != ':'&& xch != '-' && xch != ';' && xch != ',' && xch != '&')
+            error = true;
           }
         }
-      
-      else if(c->wall == waFan) {
-        queuepoly(V * spin(M_PI/6 - fanframe * M_PI / 3), shFan, darkena(wcol, 0, 0xFF));
-        }
-      
-      else if(c->wall == waArrowTrap) {
-        if(c->wparam >= 1)
-          queuepoly(V, shDisk, darkena(trapcol[c->wparam&3], 0, 0xFF));
-        if(isCentralTrap(c)) arrowtraps.push_back(c);
-        }
-      
-      else if(xch == '%') {
-        if(doHighlight())
-          poly_outline = (c->land == laMirror) ? OUTLINE_TREASURE : OUTLINE_ORB;
-        
-        if(wmspatial) {
-          int col = winf[c->wall].color;
-          int dcol = darkena(col, 0, 0xC0);
-          transmatrix Vdepth = mscale((*Vdp), geom3::WALL);
-          queuepolyat(Vdepth, shMFloor[ct6], dcol, PPR_WALL); // GLASS
-          if(validsidepar[SIDE_WALL]) forCellIdEx(c2, i, c) 
-            placeSidewall(c, i, SIDE_WALL, (*Vdp), false, true, dcol);
-          }
-        else {
-          queuepoly(V, shMirror, darkena(wcol, 0, 0xC0));
-          }
-        poly_outline = OUTLINE_DEFAULT;
-        }
-      
-      else if(isFire(c) || isThumper(c) || c->wall == waBonfireOff) {
-        ld sp = 0;
-        if(hasTimeout(c)) sp = ticks / (c->land == laPower ? 5000. : 500.);
-        queuepoly(V * spin(sp), shStar, darkena(wcol, 0, 0xF0));
-        if(isFire(c) && rand() % 300 < ticks - lastt)
-          drawParticle(c, wcol, 75);
-        }
-      
-      else if(c->wall == waFreshGrave || c->wall == waAncientGrave) {
-        zcol = wcol;
-        queuepoly(V, shCross, darkena(wcol, 0, 0xFF));
-        }
-        
-      else if(xch == '+' && c->wall == waGiantRug) {
-        queuepoly(V, shBigCarpet1, darkena(0xC09F00, 0, 0xFF));
-        queuepoly(V, shBigCarpet2, darkena(0x600000, 0, 0xFF));
-        queuepoly(V, shBigCarpet3, darkena(0xC09F00, 0, 0xFF));
-        }
-      
-      else if(c->wall == waDock) ;
-
-      else if(xch != '.' && xch != '+' && xch != '>' && xch != ':'&& xch != '-' && xch != ';' && c->wall != waSulphur && c->wall != waMercury && xch != ',' && xch != '&')
-        error = true;
       }
 
     else {
@@ -4469,6 +4549,15 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         asciicol = trapcol[c->wparam & 3];
       if(c->wall == waTerraWarrior)
         asciicol = terracol[c->landparam & 7];
+
+      if(c->wall == waMineOpen) {
+        int mines = countMinesAround(c);
+        if(ch == '.') {
+          if(mines == 0) ch = ' ';
+          else ch = '0' + mines, asciicol = minecolors[mines];
+          }
+        else if(ch == '@') asciicol = minecolors[mines];
+        }
       if(!(it || c->monst || c->cpdist == 0)) error = true;
       }
     
@@ -4580,27 +4669,6 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
          }
        }
 
-    if(c->wall == waMineOpen) {
-      int mines = countMinesAround(c);
-      
-      if(wmascii) {
-        if(ch == '.') {
-          if(mines == 0) ch = ' ';
-          else ch = '0' + mines, asciicol = minecolors[mines];
-          }
-        else if(ch == '@') asciicol = minecolors[mines];
-        }
-      else if(mines > 0)
-        queuepoly(V, shMineMark[ct6], (minecolors[mines] << 8) | 0xFF);
-      }
-    
-    // treasure
-    if(c->land == laWhirlwind && c->wall != waBoat) {
-      double footphase = 0;
-      Vboat = &(Vboat0 = *Vboat);
-      applyAnimation(c, Vboat0, footphase, LAYER_BOAT);
-      }
-    
 #if CAP_EDIT
     if(c == mapeditor::drawcell) {
       if(mapeditor::drawcellShapeGroup() == 2) {
@@ -4610,15 +4678,23 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       }
 #endif
 
-    if(it && cellHalfvine(c)) {
-      int i =-1;
-      for(int t=0;t<6; t++) if(c->mov[t] && c->mov[t]->wall == c->wall)
-        i = t;
-  
-      Vboat = &(Vboat0 = *Vboat * ddspin(c, i) * xpush(-.13));
-      }
+    if(it) {
+      if(c->land == laWhirlwind && c->wall != waBoat) {
+        double footphase = 0;
+        Vboat = &(Vboat0 = *Vboat);
+        applyAnimation(c, Vboat0, footphase, LAYER_BOAT);
+        }    
+
+      if(cellHalfvine(c)) {
+        int i =-1;
+        for(int t=0;t<6; t++) if(c->mov[t] && c->mov[t]->wall == c->wall)
+          i = t;
     
-    error |= drawItemType(it, c, *Vboat, icol, ticks, hidden);
+        Vboat = &(Vboat0 = *Vboat * ddspin(c, i) * xpush(-.13));
+        }
+    
+      error |= drawItemType(it, c, *Vboat, icol, ticks, hidden);
+      }
 
     if(true) {
       int q = ptds.size();
@@ -4632,17 +4708,8 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       queuepolyat(V, shDisk, 0xC0404040, PPR_SWORDMARK);
       }
     
-    if(c->wall == waChasm) zcol = 0;
     addaura(tC0(V), zcol, fd);
 
-    if(c->wall == waChasm) { 
-      int rd = rosedist(c);
-      if(rd == 1) 
-        queuepoly(V, shRoseFloor[ct6], 0x80406020);
-      if(rd == 2)
-        queuepoly(V, shRoseFloor[ct6], 0x80406040);
-      }
-    
     int ad = airdist(c);
     if(ad == 1 || ad == 2) {
 

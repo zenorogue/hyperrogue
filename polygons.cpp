@@ -770,44 +770,53 @@ void drawqueueitem(polytodraw& ptd) {
 
   // if(ptd.prio == 46) printf("eye size %d\n", polyi);
   
-  if(ptd.kind == pkSpecial) {
-    callhooks(hooks_specialdraw, ptd);
-    }
-  
-  if(ptd.kind == pkResetModel) {
-    pmodel = eModel(ptd.col);
-    return;
-    }
-
-  if(ptd.kind == pkPoly) {
-    if(ptd.u.poly.curveindex >= 0)
-      ptd.u.poly.tab = &curvedata[ptd.u.poly.curveindex];
-    drawpolyline(ptd);
-    }
-  else if(ptd.kind == pkLine) {
-    dynamicval<ld> d(vid.linewidth, ptd.u.line.width); 
-    prettyline(ptd.u.line.H1, ptd.u.line.H2, ptd.col, ptd.u.line.prf);
-    }
-  else if(ptd.kind == pkString) {
-    qchr& q(ptd.u.chr);
-#if ISMOBILE==0
-    if(svg::in) 
-      svg::text(q.x, q.y, q.size, q.str, q.frame, ptd.col, q.align);
-    else {
-      int fr = q.frame & 255;
-      displayfrSP(q.x, q.y, q.shift, fr, q.size, q.str, ptd.col, q.align, q.frame >> 8);
+  switch(ptd.kind) { 
+    case pkSpecial:
+      callhooks(hooks_specialdraw, ptd);
+      break;
+    
+    case pkResetModel:
+      pmodel = eModel(ptd.col);
+      break;
+    
+    case pkPoly:
+      if(ptd.u.poly.curveindex >= 0)
+        ptd.u.poly.tab = &curvedata[ptd.u.poly.curveindex];
+      drawpolyline(ptd);
+      break;
+    
+    case pkLine: {
+      dynamicval<ld> d(vid.linewidth, ptd.u.line.width); 
+      prettyline(ptd.u.line.H1, ptd.u.line.H2, ptd.col, ptd.u.line.prf);
+      break;
       }
-#else
-    displayfr(q.x, q.y, q.frame, q.size, q.str, ptd.col, q.align);
-#endif
-    }
-  else if(ptd.kind == pkCircle) {
-#if ISMOBILE==0
-    if(svg::in) 
-      svg::circle(ptd.u.cir.x, ptd.u.cir.y, ptd.u.cir.size, ptd.col);
-    else
-#endif
-    drawCircle(ptd.u.cir.x, ptd.u.cir.y, ptd.u.cir.size, ptd.col);
+    
+    case pkString: {
+      qchr& q(ptd.u.chr);
+      #if ISMOBILE==0
+      if(svg::in) 
+        svg::text(q.x, q.y, q.size, q.str, q.frame, ptd.col, q.align);
+      else {
+        int fr = q.frame & 255;
+        displayfrSP(q.x, q.y, q.shift, fr, q.size, q.str, ptd.col, q.align, q.frame >> 8);
+        }
+      #else
+      displayfr(q.x, q.y, q.frame, q.size, q.str, ptd.col, q.align);
+      #endif
+      break;
+      }
+    
+    case pkCircle: {
+      #if ISMOBILE==0
+      if(svg::in) 
+        svg::circle(ptd.u.cir.x, ptd.u.cir.y, ptd.u.cir.size, ptd.col);
+      else
+      #endif
+      drawCircle(ptd.u.cir.x, ptd.u.cir.y, ptd.u.cir.size, ptd.col);
+      break;
+      }
+    
+    case pkShape: ;
     }
   }
 
