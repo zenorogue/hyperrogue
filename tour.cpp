@@ -1,5 +1,5 @@
 // Hyperbolic Rogue -- the Tutorial/presentation
-// Copyright (C) 2011-2017 Zeno Rogue, see 'hyper.cpp' for details
+// Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
 
 namespace tour {
 

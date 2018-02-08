@@ -1,5 +1,6 @@
 // Hyperbolic Rogue
-// Copyright (C) 2011-2012 Zeno Rogue, see 'hyper.cpp' for details
+// This file contains hyperbolic points and matrices.
+// Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
 
 eGeometry geometry, targetgeometry;
 

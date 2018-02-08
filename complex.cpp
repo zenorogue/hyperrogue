@@ -3,7 +3,7 @@
 // namespaces for complex features (whirlwind, whirlpool, elec, princess, clearing, 
 // mirror, hive, heat + livecaves, etc.)
 
-// Copyright (C) 2011-2016 Zeno Rogue, see 'hyper.cpp' for details
+// Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
 
 #include <map>
 

@@ -1,3 +1,6 @@
+// Hyperbolic Rogue -- smart memory cleaner
+// Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
+
 bool memory_saving_mode = true;
 
 #define LIM 150

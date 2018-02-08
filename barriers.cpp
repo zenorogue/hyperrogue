@@ -1,4 +1,6 @@
+// Hyperbolic Rogue -- Barriers
 // This file implements routines related to barriers (Great Walls and similar).
+// Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
 
 bool checkBarriersFront(cellwalker bb, int q, bool cross) {
 

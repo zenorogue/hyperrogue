@@ -1,6 +1,6 @@
 // Hyperbolic Rogue
 
-// Copyright (C) 2011-2016 Zeno Rogue, see 'hyper.cpp' for details
+// Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
 
 // land generation routines
 

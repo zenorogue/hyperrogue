@@ -1,3 +1,5 @@
+// Hyperbolic Rogue -- implementation of the quotient geometries based on fields
+// Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
 
 namespace fieldpattern {
 

@@ -1,5 +1,5 @@
 // Hyperbolic Rogue
-// Copyright (C) 2011 Zeno Rogue
+// Copyright (C) 2011-2018 Zeno Rogue
 
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License

@@ -1,6 +1,6 @@
 // Hyperbolic Rogue pattern generator
 
-// Copyright (C) 2011-2016 Zeno Rogue, see 'hyper.cpp' for details
+// Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
 
 void spill50(cell *c, eWall w, int r) {
   c->wall = w;

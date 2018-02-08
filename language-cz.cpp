@@ -1,5 +1,5 @@
 // HyperRogue Czech translation, by Marek Čtrnáct <marek14@seznam.cz>
-// Copyright (C) 2011-2016 Zeno Rogue, see 'hyper.cpp' for details
+// Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
 
 // This translation file is encoded with UTF-8
 

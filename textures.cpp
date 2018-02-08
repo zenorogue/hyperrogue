@@ -1,3 +1,6 @@
+// Hyperbolic Rogue -- texture mode
+// Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
+
 #if CAP_SDL_IMG
 #include <SDL/SDL_image.h>
 #elif CAP_PNG

@@ -1,5 +1,5 @@
 // Hyperbolic Rogue
-// Copyright (C) 2011-2012 Zeno Rogue, see 'hyper.cpp' for details
+// Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
 
 // heptagon here refers to underlying heptagonal tesselation
 // (which you can see by changing the conditions in graph.cpp)

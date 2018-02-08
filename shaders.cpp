@@ -1,5 +1,8 @@
-// gl matrices
-//-------------
+// Hyperbolic Rogue -- basic GL transformations
+// If CAP_SHADER is 0, OpenGL 1.0 is used.
+// If CAP_SHADER is 1, GLSL is used.
+
+// Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
 
 // #undef CAP_SHADER
 // #define CAP_SHADER 0

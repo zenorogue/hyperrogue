@@ -1,9 +1,9 @@
 // Hyperbolic Rogue
 
-// Copyright (C) 2011-2016 Zeno Rogue, see 'hyper.cpp' for details
+// Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
 
 // Yendor Quest, together with the Yendor Challenge
-// also, the Pure Tactics Mode
+// also, the Pure Tactics Mode and the Peace Mode
 
 namespace peace { extern bool on; }
 

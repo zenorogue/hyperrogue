@@ -1,6 +1,6 @@
-// Hyperbolic Rogue -- graphics
+// Hyperbolic Rogue -- main graphics file
 
-// Copyright (C) 2011-2012 Zeno Rogue, see 'hyper.cpp' for details
+// Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
 
 // basic graphics:
 

@@ -1,3 +1,6 @@
+// Hyperbolic Rogue -- fake mobile target
+// Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
+
 #define ISFAKEMOBILE 1
 #define MOBPAR_FORMAL int
 #define MOBPAR_ACTUAL 0

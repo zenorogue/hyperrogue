@@ -1,3 +1,6 @@
+// Hyperbolic Rogue -- heads-up display
+// Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
+
 purehookset hooks_stats;
 
 int monsterclass(eMonster m) {

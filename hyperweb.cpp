@@ -1,3 +1,7 @@
+// Hyperbolic Rogue
+// This is the main file when the online version of HyperRogue is compiled with Emscripten.
+// Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
+
 #define ISWEB 1
 #define ISMINI 1
 #define CAP_AUDIO 0

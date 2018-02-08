@@ -1,5 +1,5 @@
 // Hyperbolic Rogue
-// Copyright (C) 2011-2017 Zeno and Tehora Rogue, see 'hyper.cpp' for details
+// Copyright (C) 2011-2018 Zeno and Tehora Rogue, see 'hyper.cpp' for details
 
 // Kohonen's self-organizing networks. 
 // This is a part of RogueViz, not a part of HyperRogue.

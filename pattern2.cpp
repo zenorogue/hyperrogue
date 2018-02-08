@@ -1,6 +1,6 @@
 // HyperRogue patterns: compute codes for actual cells
 
-// Copyright (C) 2011-2017 Zeno Rogue, see 'hyper.cpp' for details
+// Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
 
 int eupattern(cell *c) {
   int v = cell_to_vec(c);

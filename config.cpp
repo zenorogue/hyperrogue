@@ -1,6 +1,6 @@
 // Hyperbolic Rogue -- configuration
 
-// Copyright (C) 2017- Zeno Rogue, see 'hyper.cpp' for details
+// Copyright (C) 2017-2018 Zeno Rogue, see 'hyper.cpp' for details
 
 videopar vid;
 

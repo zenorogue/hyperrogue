@@ -1,3 +1,6 @@
+// Hyperbolic Rogue
+// Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
+
 // land statistics and flags
 
 bool nodisplay(eMonster m) {

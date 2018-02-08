@@ -1,3 +1,6 @@
+// Hyperbolic Rogue -- initialization, and stuff related to mobiles
+// Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
+
 #ifdef MAC
 #define ISMAC 1
 #endif

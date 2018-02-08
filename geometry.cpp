@@ -1,7 +1,7 @@
 // Hyperbolic Rogue
 // geometrical constants
 
-// Copyright (C) 2011-2012 Zeno Rogue, see 'hyper.cpp' for details
+// Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
 
 bool debug_geometry = false;
 

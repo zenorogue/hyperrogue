@@ -1,3 +1,6 @@
+// Hyperbolic Rogue -- hyperbolic graphics
+// Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
+
 ld ghx, ghy, ghgx, ghgy;
 hyperpoint ghpm = C0;
 

@@ -1,6 +1,6 @@
 // Hyperbolic Rogue language file generator
 
-// Copyright (C) 2011-2016 Zeno Rogue, see 'hyper.cpp' for details
+// Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
 
 #define GEN_M 0
 #define GEN_F 1

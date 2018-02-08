@@ -1,6 +1,8 @@
 
 // HyperRogue, shapes used for the vector graphics
-// Copyright (C) 2011-2016 Zeno Rogue, see 'hyper.cpp' for details
+// also the implementation of the rendering queue and svg renderer
+
+// Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
 
 // draw the lines
 static const int POLY_DRAWLINES = 1;

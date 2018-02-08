@@ -1,3 +1,6 @@
+// Hyperbolic Rogue -- debugging routines
+// Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
+
 int steplimit = 0;
 int cstep;
 

@@ -3,6 +3,7 @@
 // * routines related to equidistants
 // * 'setland' routines for other geometries
 // * the buildBigStuff function which calls equidistant/(horo)cycle/barrier generators.
+// Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
 
 // horocycles
 

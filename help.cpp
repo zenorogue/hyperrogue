@@ -1,3 +1,6 @@
+// Hyperbolic Rogue -- help routines
+// Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
+
 string help;
 
 function<void()> help_delegate;
