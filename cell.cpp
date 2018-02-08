@@ -592,8 +592,8 @@ struct hrmap_quotient : hrmap {
 
   vector<heptagon*> allh;
   
-  hrmap_quotient() {
-  
+  hrmap_quotient() {  
+
     if(quotient == 2) {
       connections = currfp.connections;
       }
@@ -643,7 +643,7 @@ struct hrmap_quotient : hrmap {
       }
   
     for(int i=0; i<TOT; i++) {
-      generateAlts(allh[i]);
+      generateAlts(allh[i], S3-3, false);
       allh[i]->emeraldval = allh[i]->alt->emeraldval;
       allh[i]->zebraval = allh[i]->alt->zebraval;
       allh[i]->fiftyval = allh[i]->alt->fiftyval;
@@ -840,19 +840,24 @@ void clearHexes(heptagon *at) {
     at->cdata = NULL;
     }
   if(at->c7) {
-    if(!nonbitrunc) for(int i=0; i<S7; i++)
+    if(!nonbitrunc) for(int i=0; i<S7; i++) {
       clearcell(at->c7->mov[i]);
+      }
     clearcell(at->c7);
+    }
+  }
+
+void unlink_cdata(heptagon *h) {
+  if(h->alt && h->c7) {
+    if(h->alt->cdata == (cdata*) h)
+      h->alt->cdata = NULL;
     }
   }
 
 void clearfrom(heptagon *at) {
   queue<heptagon*> q;
+  unlink_cdata(at);
   q.push(at);
-  if(at->alt && at->c7) {
-    printf("disconnect %p -> %p (from real)\n", at, at->alt);
-    at->alt->cdata = NULL;
-    }
   at->alt = &deletion_marker;
 //int maxq = 0;
   while(!q.empty()) {
@@ -874,7 +879,7 @@ void clearfrom(heptagon *at) {
     for(int i=0; i<S7; i++) if(at->move[i]) {
       if(at->move[i]->alt != &deletion_marker)
         q.push(at->move[i]);    
-      if(at->move[i]->alt && at->move[i]->c7) at->move[i]->alt->cdata = NULL;
+      unlink_cdata(at->move[i]);
       at->move[i]->alt = &deletion_marker;
       DEBMEM ( printf("!mov %p [%p]\n", at->move[i], at->move[i]->move[at->spin(i)]); )
       if(at->move[i]->move[at->spin(i)] != NULL &&

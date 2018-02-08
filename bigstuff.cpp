@@ -100,7 +100,7 @@ bool grailWasFound(cell *c) {
   return c->master->alt->alt->emeraldval & GRAIL_FOUND;
   }
 
-void generateAlts(heptagon *h, int levs) {
+void generateAlts(heptagon *h, int levs, bool link_cdata) {
   if(!h->alt) return;
   preventbarriers(h->c7);
   for(int i=0; i<S7; i++) preventbarriers(h->c7->mov[i]);
@@ -142,8 +142,8 @@ void generateAlts(heptagon *h, int levs) {
       continue;
       }
     ho->alt = hm;
-    hm->cdata = (cdata*) ho;
-    if(levs) generateAlts(ho, levs-1);
+    if(link_cdata) hm->cdata = (cdata*) ho;
+    if(levs) generateAlts(ho, levs-1, link_cdata);
     }
   }
 
