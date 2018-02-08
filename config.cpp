@@ -348,7 +348,10 @@ void initConfig() {
   }
 
 bool inSpecialMode() {
-  return chaosmode || nonbitrunc || peace::on || tour::on ||
+  return chaosmode || nonbitrunc || peace::on || 
+  #if CAP_TOUR
+    tour::on ||
+  #endif
     yendor::on || tactic::on || randomPatternsMode ||
     geometry != gNormal || pmodel != mdDisk || vid.alpha != 1 || vid.scale != 1 || 
     rug::rugged || vid.monmode != DEFAULT_MONMODE ||

@@ -1612,8 +1612,6 @@ const landtype linf[landtypes] = {
     },
   };
 
-struct landtacinfo { eLand l; int tries, multiplier; };
-
 vector<landtacinfo> land_tac = {
   {laIce, 10, 1}, {laDesert, 10, 1}, 
   {laHunting, 5, 2},

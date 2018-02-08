@@ -192,10 +192,6 @@ heptagon *getDodecahedron(int i) {
 
 // --- euclidean geometry ---
 
-cell*& euclideanAtCreate(int vec);
-
-static const int max_vec = (1<<14);
-
 // NOTE: patterns assume that pair_to_vec(0,1) % 3 == 2!
 // Thus, pair_to_vec(0,1) must not be e.g. a power of four
 
@@ -1061,8 +1057,6 @@ bool randpattern(cell *c, int rval) {
     }
   return 0;
   }
-
-extern int randompattern[landtypes];
 
 string describeRPM(eLand l) {
   int rval = randompattern[l];

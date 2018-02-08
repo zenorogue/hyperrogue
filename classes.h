@@ -231,3 +231,4 @@ enum cpatterntype {
   cpFootball, cpThree, cpChess, cpSingle, cpLarge, cpZebra, cpUnknown
   };
   
+struct landtacinfo { eLand l; int tries, multiplier; };

@@ -416,7 +416,6 @@ void gldraw(int useV, const transmatrix& V, int ps, int pq, int col, int outline
     glDisableClientState(GL_TEXTURE_COORD_ARRAY);
     glDisable(GL_TEXTURE_2D);      
     }
-      
   }
 #endif
 

@@ -1162,6 +1162,7 @@ extern bool timerghost;
 #endif
 
 namespace dialog {
+  extern string highlight_text;
 
   enum tDialogItem {diTitle, diItem, diBreak, diHelp, diInfo, diSlider, diBigItem};
 
@@ -2184,6 +2185,11 @@ namespace princess {
   extern bool gotoPrincess;
   extern bool forceMouse;
   extern bool challenge;
+  extern bool squeaked;
+  extern bool saved;
+  extern bool nodungeon;
+  extern int reviveAt;
+  extern bool forceVizier;
 
   struct info {
     int id;         // id of this info
@@ -2564,3 +2570,83 @@ double randd();
 transmatrix getOrientation();
 #endif
 
+bool showHalloween();
+extern bool havesave;
+extern vector<msginfo> gamelog;
+extern time_t savetime;
+extern bool cblind;
+extern void save_memory();
+namespace inv { void init(); }
+extern bool survivalist;
+extern bool hauntedWarning;
+extern bool usedSafety;
+
+namespace elec { extern int lightningfast; }
+extern int lastkills;
+extern map<cell*, int> rosemap;
+extern int hardcoreAt;
+extern flagtype havewhat, hadwhat;
+extern int safetyseed;
+extern int lastsafety;
+extern int knighted;
+extern int rosephase;
+extern int rosewave;
+extern eItem localTreasureType();
+extern void clearshadow();
+extern bool seenSevenMines;
+extern vector<cell*> dcal;   // queue for cpdist
+extern vector<cell*> pathq;  // queue for pathdist
+extern vector<pair<cell*, int> > butterflies;
+extern vector<cell*> crush_now, crush_next;
+extern void shrand(int seed);
+extern eLand safetyland;
+extern int sagephase;
+extern int lastsize;
+extern int noiseuntil;
+inline hyperpoint xpush0(ld x);
+extern eGeometry targetgeometry;
+inline hyperpoint xspinpush0(ld alpha, ld x);
+
+#define DF_INIT              0 // always display these
+#define DF_MSG               0 // always display these
+#define DF_STEAM             1
+#define DF_GRAPH             2
+#define DF_TURN              4
+#define DF_FIELD             8
+
+#if ISANDROID
+#define DEBB(r,x)
+#else
+#define DEBB(r,x) { if(debugfile && (!(r) || (debugflags & (r)))) { fprintf x; fflush(debugfile); } }
+#endif
+
+extern FILE *debugfile;
+extern int debugflags;
+int gmod(int i, int j);
+extern walltype winf[walltypes];
+extern vector<landtacinfo> land_tac;
+string llts(long long i);
+void clearMemoRPM();
+extern int randompattern[landtypes];
+extern int pair_to_vec(int x, int y);
+cell*& euclideanAtCreate(int vec);
+bool isCyclic(eLand l);
+bool generateAll(eLand l);
+void extendcheck(cell *c);
+void extendNowall(cell *c);
+bool isbar4(cell *c);
+void extendBarrierFront(cell *c);
+void extendBarrierBack(cell *c);
+void extendCR5(cell *c);
+
+bool mirrorwall(cell *c);
+extern void setbarrier(cell *c);
+extern function<void()> call_initgame;
+extern void initializeCLI();
+
+static const int max_vec = (1<<14);
+
+extern void popGame();
+string helptitle(string s, int col);
+pair<int, int> cell_to_pair(cell *c);
+extern bool nohud, nofps;

@@ -142,8 +142,6 @@ void setbarrier(cell *c) {
     c->wall = waBarrier;
     c->land = laBarrier;
     }
-/*if(isHive(c->barleft) && isHive(c->barright))
-    c->wall = waWaxWall, c->land = c->barleft; */
   }
 
 void setland(cell *c, eLand l) {
@@ -795,6 +793,6 @@ bool buildBarrierNowall(cell *c, eLand l2, bool force) {
       }
     }
   
-   return false;
+  return false;
   }
 

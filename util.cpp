@@ -68,22 +68,6 @@ ld frac(ld x) {
 
 // debug utilities
 
-extern FILE *debugfile;
-extern int debugflags;
-
-#if ISANDROID
-#define DEBB(r,x)
-#else
-#define DEBB(r,x) { if(debugfile && (!(r) || (debugflags & (r)))) { fprintf x; fflush(debugfile); } }
-#endif
-
-#define DF_INIT              0 // always display these
-#define DF_MSG               0 // always display these
-#define DF_STEAM             1
-#define DF_GRAPH             2
-#define DF_TURN              4
-#define DF_FIELD             8
-
 #if CAP_PROFILING
 
 #include <sys/time.h>

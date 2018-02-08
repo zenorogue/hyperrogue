@@ -333,8 +333,12 @@ void showMission() {
     dialog::addInfo(XLAT("CONGRATULATIONS!"), iinf[itOrbYendor].color);
     }
   else {
-    if(tour::on)
+    if(0)
       ;
+#if CAP_TOUR
+    else if(tour::on)
+      ;
+#endif
     else if(princess::challenge) 
       dialog::addInfo(XLAT("Follow the Mouse and escape with %the1!", moPrincess));
     else if(gold() < R30)

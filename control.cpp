@@ -842,6 +842,7 @@ bool handleCompass() {
   if(!haveMobileCompass()) return false;
   
   using namespace shmupballs;
+
   int dx = mousex - xmove;
   int dy = mousey - yb;
   int h = hypot(dx, dy);

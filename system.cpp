@@ -35,14 +35,7 @@ void welcomeMessage() {
       items[itGreenStone] = 99;
     addMessage(XLAT("Welcome to %the1 Challenge!", moPrincess));
     addMessage(XLAT("The more Hypersian Rugs you collect, the harder it is.", moPrincess));
-    }
-  /* if(tactic::on && isCrossroads(firstland)) {
-    for(int i=0; i<ittypes; i++) 
-      if(itemclass(eItem(i)) == IC_TREASURE && i != itHyperstone)
-        items[i] = 10;
-    kills[moYeti] = 1000;
-    } */
-  
+    }  
   else if(randomPatternsMode)
     addMessage(XLAT("Welcome to the Random Pattern mode!"));
   else if(tactic::on)
@@ -725,8 +718,6 @@ long long saveposition = -1;
 void remove_emergency_save() {
 #if !ISWINDOWS
   if(saveposition >= 0) { 
-/*    if(!timerghost) 
-      addMessage(XLAT("Emergency truncate to ") + its(saveposition)); */
     if(truncate(scorefile, saveposition)) {}
     saveposition = -1;
     }
@@ -831,16 +822,6 @@ void saveStats(bool emergency = false) {
   if(multi::players > 1) fprintf(f, "Multi-player (%d players)\n", multi::players);
   fprintf(f, "Number of cells explored, by distance from the player:\n"); 
   {for(int i=0; i<10; i++) fprintf(f, " %d", explore[i]);} fprintf(f, "\n");
-/*for(int j=0; j<landtypes; j++) {
-    bool haveland = false;
-    for(int i=0; i<10; i++) 
-      if(exploreland[i][j]) 
-        haveland = true;
-    if(haveland)
-      for(int i=0; i<10; i++) 
-        fprintf(f, " %d", exploreland[i][j]);
-    fprintf(f, " %s\n", linf[j].name);
-    } */
   if(kills[0]) fprintf(f, "walls melted: %d\n", kills[0]);
   fprintf(f, "cells travelled: %d\n", celldist(cwt.c));
   
@@ -1207,7 +1188,7 @@ void restartGame(char switchWhat, bool push, bool keep_screens) {
   resetmusic();
   resetmusic();
   }
-
+  
 purehookset clearmemory;
 
 void clearMemory() {
@@ -1233,4 +1214,3 @@ addHook(hooks_removecells, 0, [] () {
   for(int i=0; i<SHSIZE; i++) for(int p=0; p<MAXPLAYER; p++)
     set_if_removed(shpos[p][i], NULL);
   });;
-
