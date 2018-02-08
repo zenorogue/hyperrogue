@@ -506,7 +506,7 @@ namespace sag {
     
   int snakedist(int i, int j) {
     if(i < insnaketab && j < insnaketab) return sdist[i][j];
-    if(euclid || sphere) return celldistance(snakecells[i], snakecells[j]);
+    if(bounded) return celldistance(snakecells[i], snakecells[j]);
     int i0 = i, i1 = i, j0 = j, j1 = j;
     int cost = 0;
     // intersect
@@ -520,8 +520,7 @@ namespace sag {
     }
   
   void initSnake(int n) {
-    if(sphere && nonbitrunc) n = 12;
-    else if(sphere) n = 32;
+    if(bounded) n = size(currentmap->allcells());
     numsnake = n;
     snakecells.resize(numsnake);
     snakefirst.resize(numsnake);
@@ -529,20 +528,28 @@ namespace sag {
     snakenode.resize(numsnake);
     lpbak.resize(numsnake);
     wpbak.resize(numsnake);
-    cellwalker cw = cwt;
-    setsnake(cw, 0);
-    cwstep(cw);
-    setsnake(cw, 1);
-    for(int i=2; i<=numsnake; i++) {
-      if(i == numsnake && sphere) break;
-      cwstep(cw);
-      snakefirst[i-1] = cw.c->landparam;
-      while(cw.c->wparam == INSNAKE) {
-        snakelast[i-1] = cw.c->landparam;
-        cwstep(cw); cwspin(cw, 1); cwstep(cw);
+    if(bounded) {
+      for(int i=0; i<n; i++) {
+        cellwalker cw(currentmap->allcells()[i], 0);
+        setsnake(cw, i);
         }
-      if(i == numsnake) break;
-      setsnake(cw, i); cwspin(cw, 1);
+      }
+    else {
+      cellwalker cw = cwt;
+      setsnake(cw, 0);
+      cwstep(cw);
+      setsnake(cw, 1);
+      for(int i=2; i<=numsnake; i++) {
+        if(i == numsnake && sphere) break;
+        cwstep(cw);
+        snakefirst[i-1] = cw.c->landparam;
+        while(cw.c->wparam == INSNAKE) {
+          snakelast[i-1] = cw.c->landparam;
+          cwstep(cw); cwspin(cw, 1); cwstep(cw);
+          }
+        if(i == numsnake) break;
+        setsnake(cw, i); cwspin(cw, 1);
+        }
       }
     int stab = min(numsnake, MAXSNAKETAB);
     for(int i=0; i<stab; i++)
