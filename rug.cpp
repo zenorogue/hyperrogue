@@ -1147,6 +1147,7 @@ void drawRugScene() {
   
   glDisable(GL_BLEND);
   glEnable(GL_TEXTURE_2D);
+  glhr::be_textured();
   glEnable(GL_DEPTH_TEST);
   glDepthFunc(GL_LESS);
   
@@ -1179,14 +1180,13 @@ void drawRugScene() {
         0, GLfloat(vnear / sca / vid.yres), 0, 0,
         0, 0, GLfloat(-(vnear+vfar)/(vfar-vnear)), -1,
         0, 0, GLfloat(-2*vnear*vfar/(vfar-vnear)), 1};
-      glMultMatrixf(frustum);
+      glhr::projection_multiply(glhr::as_glmatrix(frustum));
 
-      glMatrixMode(GL_MODELVIEW);
-      glLoadIdentity();
-      if(!rug_perspective) glTranslatef(0, 0, -model_distance);
+      if(!rug_perspective) 
+        glhr::projection_multiply(glhr::translate(0, 0, -model_distance));
       if(ed) {
         if(gwhere == gEuclid)
-          glTranslatef(stereo::ipd*ed/2, 0, 0);
+          glhr::projection_multiply(glhr::translate(stereo::ipd*ed/2, 0, 0));
         else {
           use_precompute = true;
           for(auto p: points) {
@@ -1206,7 +1206,7 @@ void drawRugScene() {
         0, GLfloat(1/yview), 0, 0, 
         0, 0, GLfloat(.001), 0,
         0, 0, 0, 1};
-      glMultMatrixf(ortho);
+      glhr::projection_multiply(glhr::as_glmatrix(ortho));
       }
     glColor4f(1.f, 1.f, 1.f, 1.f);
   
@@ -1220,6 +1220,8 @@ void drawRugScene() {
       glFogf(GL_FOG_START, 0);
       glFogf(GL_FOG_END, gwhere == gSphere ? 10 : 4);
       }
+
+    glhr::set_modelview(glhr::id());
 
     for(int t=0; t<size(triangles); t++)
       drawTriangle(triangles[t]);

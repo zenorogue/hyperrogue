@@ -22,6 +22,7 @@
 #endif
 
 #if IN_CU(0)
+#include "shaders.cpp"
 #include "util.cpp"
 #include "hyperpoint.cpp"
 #include "patterns.cpp"

@@ -2268,6 +2268,8 @@ void drawaura() {
 #endif
 
 #if CAP_GL
+  glhr::be_nontextured();
+  glhr::set_modelview(glhr::id());
   setcameraangle(true);
   
   glEnableClientState(GL_COLOR_ARRAY);
@@ -2287,6 +2289,7 @@ void drawaura() {
     facs[d] = .99999 +  .00001 * exp(dd);
     }
   facs[10] = 10;
+  cmul[1] = cmul[0];
 
   for(int r=0; r<=AURA; r++) for(int z=0; z<11; z++) {
     float rr = (M_PI * 2 * r) / AURA;
@@ -2307,9 +2310,9 @@ void drawaura() {
       int bz = (c == 3 || c == 2) ? z+1 : z;
       glcoords[c][0] = cx[br][bz][0]; 
       glcoords[c][1] = cx[br][bz][1];   
-      coltab[c][0] = cx[br][bz][2]; 
-      coltab[c][1] = cx[br][bz][3]; 
-      coltab[c][2] = cx[br][bz][4]; 
+      coltab[c][0] = min<float>(cx[br][bz][2], 1);
+      coltab[c][1] = min<float>(cx[br][bz][3], 1); 
+      coltab[c][2] = min<float>(cx[br][bz][4], 1); 
       }
       
     glDrawArrays(GL_TRIANGLE_FAN, 0, 4);

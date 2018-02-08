@@ -17,6 +17,9 @@
 
 #define VER "10.3g"
 #define VERNUM 10307
+
+#define CAP_SHADER CAP_GL
+
 #define VERNUM_HEX 0xA0A7
 
 #define GEN_M 0

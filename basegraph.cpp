@@ -157,7 +157,6 @@ bool cameraangle_on;
 
 void setcameraangle(bool b) {
   if(cameraangle_on != b) {
-    glMatrixMode(GL_PROJECTION);
     cameraangle_on = b;
     ld cam = vid.camera_angle * M_PI / 180;
 
@@ -170,24 +169,22 @@ void setcameraangle(bool b) {
       0, -ss, cc, 0,
       0, 0, 0, 1
       };
-  
-    glMultMatrixf(yzspin);
+    
+    glhr::projection_multiply(glhr::as_glmatrix(yzspin));
     }
   }
 
 void start_projection(int ed) {
-  glMatrixMode(GL_PROJECTION);
-  glLoadIdentity();
-  
-  glTranslatef((vid.xcenter*2.)/vid.xres - 1, 1 - (vid.ycenter*2.)/vid.yres, 0);
+  glhr::new_projection();
+  glhr::projection_multiply(glhr::translate((vid.xcenter*2.)/vid.xres - 1, 1 - (vid.ycenter*2.)/vid.yres, 0));
 
   if(ed) {
-    if(stereo::mode == stereo::sLR) {   
-      glTranslatef(ed * (stereo::eyewidth() - .5) * 4, 0, 0);
-      glScalef(2, 1, 1);
+    if(stereo::mode == stereo::sLR) {
+      glhr::projection_multiply(glhr::translate(ed * (stereo::eyewidth() - .5) * 4, 0, 0));
+      glhr::projection_multiply(glhr::scale(2, 1, 1));
       }
     else {
-      glTranslatef(-ed * stereo::eyewidth(), 0, 0);
+      glhr::projection_multiply(glhr::translate(-ed * stereo::eyewidth(), 0, 0));
       }
     }
   }
@@ -205,11 +202,8 @@ void stereo::set_projection(int ed) {
       0, GLfloat(-2. / vid.yres), 0, 0, 
       0, 0, GLfloat(.4 / stereo::scrdist), 0,
       0, 0, 0, 1};
-  
-    glMultMatrixf(ortho);
-
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
+      
+    glhr::projection_multiply(glhr::as_glmatrix(ortho));
     }
   else if(pmodel) {
 
@@ -226,15 +220,12 @@ void stereo::set_projection(int ed) {
       0, 0, -(hidepth+lowdepth)/(hidepth-lowdepth), -1,
       0, 0, -2*lowdepth*hidepth/(hidepth-lowdepth), 0};
 
-    glMultMatrixf(frustum);
+    glhr::projection_multiply(glhr::as_glmatrix(frustum));
     
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
+    if(ed) glhr::projection_multiply(glhr::translate(stereo::ipd * vid.radius * ed/2, 0, 0));
 
-    if(ed) glTranslatef(stereo::ipd * vid.radius * ed/2, 0, 0);
-
-    glScalef(1, 1, -1);
-    glTranslatef(0, 0, stereo::scrdist);
+    glhr::projection_multiply(glhr::scale(1, 1, -1));
+    glhr::projection_multiply(glhr::translate(0, 0, stereo::scrdist));
 
     stereo::scrdist_text = 0;
     }
@@ -249,17 +240,14 @@ void stereo::set_projection(int ed) {
       0, 0, -(hidepth+lowdepth)/(hidepth-lowdepth), -1,
       0, 0, -2*lowdepth*hidepth/(hidepth-lowdepth), 0};
   
-    glMultMatrixf(frustum);
-
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
+    glhr::projection_multiply(glhr::as_glmatrix(frustum));
 
     GLfloat sc = vid.radius / (vid.yres/2.);
     GLfloat mat[16] = {sc,0,0,0, 0,-sc,0,0, 0,0,-1,0, 0,0, 0,1};
 
-    glMultMatrixf(mat);
+    glhr::projection_multiply(glhr::as_glmatrix(mat));
     
-    if(ed) glTranslatef(stereo::ipd*ed/2, 0, 0);
+    if(ed) glhr::projection_multiply(glhr::translate(stereo::ipd * ed/2, 0, 0));
   
     stereo::scrdist_text = vid.yres * sc / 2;
     }
@@ -291,9 +279,6 @@ void stereo::set_viewport(int ed) {
 void setGLProjection(int col) {
   DEBB(DF_GRAPH, (debugfile,"setGLProjection\n"));
 
-  glMatrixMode(GL_PROJECTION);
-  glLoadIdentity();
-  
   unsigned char *c = (unsigned char*) (&col);
   glClearColor(c[2] / 255.0, c[1] / 255.0, c[0]/255.0, 1);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -516,9 +501,8 @@ bool gl_print(int x, int y, int shift, int size, const char *s, int color, int a
   glDisable(GL_LIGHTING);
   
   glEnable(GL_TEXTURE_2D);
+  glhr::be_textured();
 
-  glMatrixMode(GL_MODELVIEW);
-  
   glcolor2((color << 8) | 0xFF);
 
   int tsize = 0;
@@ -533,22 +517,8 @@ bool gl_print(int x, int y, int shift, int size, const char *s, int color, int a
 
   bool clicked = (mousex >= x && mousey <= y && mousex <= x+tsize && mousey >= y-ysiz);
 
-  /* extern bool markcorner;
-  if(clicked && markcorner) {
-    markcorner = false;
-    int w = tsize, h = -ysiz;
-    displaystr(x, y, 1, 10, "X", 0xFFFFFF, 8);
-    displaystr(x+w, y, 1, 10, "X", 0xFFFFFF, 8);
-    displaystr(x, y+h, 1, 10, "X", 0xFFFFFF, 8);
-    displaystr(x+w, y+h, 1, 10, "X", 0xFFFFFF, 8);
-    markcorner = true;
-    } */
-
   for(int i=0; s[i];) {
   
-    // glListBase(f.list_base);
-    // glCallList(s[i]); // s[i]);
-    
     int tabid = getnext(s,i);
     float fx=f.tx[tabid];
     float fy=f.ty[tabid];
@@ -558,12 +528,10 @@ bool gl_print(int x, int y, int shift, int size, const char *s, int color, int a
     GLERR("pre-print");
 
     for(int ed = (stereo::active() && shift)?-1:0; ed<2; ed+=2) {
-      glPushMatrix();
-      glTranslatef(x-ed*shift-vid.xcenter,y-vid.ycenter, stereo::scrdist_text);
+      glhr::set_modelview(glhr::translate(x-ed*shift-vid.xcenter,y-vid.ycenter, stereo::scrdist_text));
       stereo::set_mask(ed);
       glBindTexture(GL_TEXTURE_2D, f.textures[tabid]);
 
-#if 1
       tver[1] = tver[10] = -hi;
       tver[6] = tver[9] = wi;
       tver[12+4] = tver[12+7] = fy;
@@ -573,30 +541,13 @@ bool gl_print(int x, int y, int shift, int size, const char *s, int color, int a
       glTexCoordPointer(3, GL_FLOAT, 0, &tver[12]);
       glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
       glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-#else
-      glBegin(GL_QUADS);
-      glTexCoord2d(0,0); glVertex2f(0, -hi);
-      glTexCoord2d(0,fy); glVertex2f(0, 0);
-      glTexCoord2d(fx,fy); glVertex2f(wi, 0);
-      glTexCoord2d(fx,0); glVertex2f(wi, -hi);
-      glEnd();
-#endif
-      glPopMatrix();
       }
     
     if(stereo::active() && shift) stereo::set_mask(0);
     
     GLERR("print");
     
-    // int tabid = s[i];
-    x += wi;
-    
-/*  
-    printf("point %d,%d\n", x, y);
-    glBegin(GL_POINTS);
-    glVertex3f(rand() % 100 - rand() % 100, rand() % 100 - rand() % 100, 100);
-    glEnd(); */
-
+    x += wi;    
     }
  
   glDisable(GL_TEXTURE_2D);
@@ -943,6 +894,8 @@ void drawCircle(int x, int y, int size, int color) {
   if(size < 0) size = -size;
   #if CAP_GL
   if(vid.usingGL) {
+    glhr::be_nontextured();
+    glhr::set_modelview(glhr::id());
     qglcoords = 0;
     glcolor2(color);
     x -= vid.xcenter; y -= vid.ycenter;
@@ -1028,11 +981,6 @@ hookset<void(renderbuffer*)> *hooks_hqshot;
 
 #if CAP_SDL
 void saveHighQualityShot(const char *fname, const char *caption, int fade) {
-
-#if !CAP_SDLGFX
-  addMessage(XLAT("High quality shots not available on this platform"));
-  return;
-#endif
 
   int maxrange = getDistLimit() * 3/2;
 
@@ -1168,6 +1116,7 @@ void setvideomode() {
       glDisable(GL_MULTISAMPLE);
   
     glViewport(0, 0, vid.xres, vid.yres);
+    glhr::init();
     resetGL();
     }
 #endif

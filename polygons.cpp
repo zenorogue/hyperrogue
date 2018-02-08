@@ -312,7 +312,7 @@ void glapplymatrix(const transmatrix& V) {
       mat[j+i] = -mat[j+i];
     }
   
-  glMultMatrixf(mat);
+  glhr::set_modelview(glhr::as_glmatrix(mat));
   }
 
 int tinfshift;
@@ -321,10 +321,12 @@ void gldraw(int useV, const transmatrix& V, int ps, int pq, int col, int outline
 
   if(tinf) {
     glEnable(GL_TEXTURE_2D);
+    glhr::be_textured();
     glBindTexture(GL_TEXTURE_2D, tinf->texture_id);
     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
     glTexCoordPointer(3, GL_FLOAT, 0, &tinf->tvertices[tinfshift]);
     }
+  else glhr::be_nontextured();
   
   for(int ed = stereo::active() ? -1 : 0; ed<2; ed+=2) {
     if(ed) stereo::set_projection(ed), stereo::set_viewport(ed);
@@ -332,38 +334,11 @@ void gldraw(int useV, const transmatrix& V, int ps, int pq, int col, int outline
     again:
     
     if(useV == 1) {
-      glMatrixMode(GL_MODELVIEW);
-      glPushMatrix();
       glapplymatrix(V);
       }
+    else
+      glhr::set_modelview(glhr::id());
 
-/*      
-    if(useV == 2) {
-      glMatrixMode(GL_MODELVIEW);
-      glPushMatrix();
-      GLfloat mat[16] = {
-        1, 0, 0, 0,
-        0, 1, 0, 0,
-        0, 0, 1, 0,
-        0, 0, 0, 1
-        };
-      // EYETODO mat[8] += ed * vid.eye;
-      glMultMatrixf(mat);
-      }
-      
-    if(useV == 3) {
-      glMatrixMode(GL_MODELVIEW);
-      glPushMatrix();
-      GLfloat mat[16] = {
-        1, 0, 0, 0,
-        0, 1, 0, 0,
-        0, 0, 0, 0,
-        0, 0, stereo::scrdist, 1
-        };
-      // EYETODO mat[8] += ed * vid.eye;
-      glMultMatrixf(mat);
-      } */
-      
     if(draw) {
       glEnable(GL_STENCIL_TEST);
  
@@ -386,7 +361,7 @@ void gldraw(int useV, const transmatrix& V, int ps, int pq, int col, int outline
           };
         GLfloat *cur = currentvertices;
         activateVertexArray(scr, 4);
-        if(useV) glPopMatrix();
+        glhr::set_modelview(glhr::id());
         glDrawArrays(tinf ? GL_TRIANGLES : GL_TRIANGLE_FAN, 0, 4);
         activateVertexArray(cur, 0);
         draw = false; goto again;
@@ -406,8 +381,6 @@ void gldraw(int useV, const transmatrix& V, int ps, int pq, int col, int outline
       glcolor2(outline);
       glDrawArrays(GL_LINE_STRIP, ps, pq);
       }
- 
-    if(useV) glPopMatrix();
     }
   
   if(stereo::active()) stereo::set_projection(0), stereo::set_viewport(0), stereo::set_mask(0);
