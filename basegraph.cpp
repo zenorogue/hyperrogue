@@ -501,12 +501,9 @@ bool gl_print(int x, int y, int shift, int size, const char *s, int color, int a
 
   glfont_t& f(*glfont[gsiz]);
   
-  glDisable(GL_LIGHTING);
-  
-  glEnable(GL_TEXTURE_2D);
   glhr::be_textured();
 
-  glcolor2((color << 8) | 0xFF);
+  glhr::color2((color << 8) | 0xFF);
 
   int tsize = 0;
   
@@ -537,13 +534,11 @@ bool gl_print(int x, int y, int shift, int size, const char *s, int color, int a
 
       tver[1] = tver[10] = -hi;
       tver[6] = tver[9] = wi;
-      tver[12+4] = tver[12+7] = fy;
-      tver[12+6] = tver[12+9] = fx;
-      activateVertexArray(tver, 8);
-      glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-      glTexCoordPointer(3, GL_FLOAT, 0, &tver[12]);
+      tver[12+3] = tver[12+5] = fy;
+      tver[12+4] = tver[12+6] = fx;
+      glhr::vertices(tver, 4);
+      glhr::texture_vertices(tver+12, 4);
       glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-      glDisableClientState(GL_TEXTURE_COORD_ARRAY);
       }
     
     if(stereo::active() && shift) stereo::set_mask(0);
@@ -553,8 +548,6 @@ bool gl_print(int x, int y, int shift, int size, const char *s, int color, int a
     x += wi;    
     }
  
-  glDisable(GL_TEXTURE_2D);
-  
   return clicked;
   }
 #endif
@@ -900,7 +893,7 @@ void drawCircle(int x, int y, int size, int color) {
     glhr::be_nontextured();
     glhr::set_modelview(glhr::id());
     qglcoords = 0;
-    glcolor2(color);
+    glhr::color2(color);
     x -= vid.xcenter; y -= vid.ycenter;
     int pts = size * 4;
     if(pts > 1500) pts = 1500;

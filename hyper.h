@@ -2389,7 +2389,6 @@ extern purehookset hooks_drawmap;
 extern hookset<bool(eLand&)> *hooks_music;
 extern hookset<bool()> *hooks_prestats;
 extern purehookset hooks_fixticks;
-void activateVertexArray(GLfloat *f, int qty);
 
 ld realradius();
 

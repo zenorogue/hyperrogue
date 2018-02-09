@@ -2268,7 +2268,7 @@ void drawaura() {
 #endif
 
 #if CAP_GL
-  glhr::be_nontextured();
+  glhr::switch_mode(glhr::gmVarColored);
   glhr::set_modelview(glhr::id());
   setcameraangle(true);
   

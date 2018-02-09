@@ -9,7 +9,17 @@
 
 namespace glhr {
 
-enum mode { gmColored, gmTextured, gmMAX};
+enum eMode { gmColored, gmTextured, gmVarColored, gmLightFog, gmMAX};
+
+static const flagtype GF_TEXTURE  = 1;
+static const flagtype GF_VARCOLOR = 2;
+static const flagtype GF_LIGHTFOG = 4;
+
+flagtype flags[gmMAX] = { 0, GF_TEXTURE, GF_VARCOLOR, GF_TEXTURE | GF_LIGHTFOG };
+
+eMode mode;
+
+void switch_mode(eMode m);
 
 struct glmatrix {
   GLfloat a[4][4];
@@ -84,9 +94,9 @@ void set_modelview(const glmatrix& m) {
   glLoadMatrixf(m.as_array());
   }
 
-void be_nontextured() { }
-void be_textured() { }
-void init() { }
+void init() {
+  glEnableClientState(GL_VERTEX_ARRAY);
+  }
 
 #endif
 
@@ -210,7 +220,7 @@ struct GLprogram {
   
   };
 
-GLprogram *textured, *nontextured;
+GLprogram *programs[gmMAX];
 
 void init() {
   projection = id();
@@ -219,7 +229,7 @@ void init() {
     auto texture_only = [=] (string s) -> string { if(i) return s; else return ""; };
     auto not_texture_only = [=] (string s) -> string { if(!i) return s; else return ""; };
    
-    (i==1?textured:nontextured) = new GLprogram(
+    programs[i] = new GLprogram(
       // "attribute vec4 position;"
       // "attribute vec3 normal;"
       
@@ -252,8 +262,13 @@ void init() {
       "  }"
       );
     }
+  
+  programs[2] = programs[0];
+  programs[3] = programs[1];
 
-  nontextured->enable();
+  glEnableClientState(GL_VERTEX_ARRAY);
+  switch_mode(gmColored);
+  programs[gmColored]->enable();
   }
 
 void set_modelview(const glmatrix& modelview) {
@@ -263,8 +278,83 @@ void set_modelview(const glmatrix& modelview) {
   // glUniformMatrix3fv(current->uniforms[UNIFORM_NORMAL_MATRIX], 1, 0, nm[0]);
   }
 
-void be_nontextured() { nontextured->enable(); }
-void be_textured() { textured->enable(); }
-
 #endif
+
+GLfloat *currentvertices;
+
+void vertices(GLfloat *f, int qty) {
+  currentvertices = f;
+  glVertexPointer(3, GL_FLOAT, 0, f);
+  }
+
+void texture_vertices(GLfloat *f, int qty, int stride = 2) {
+  glTexCoordPointer(stride, GL_FLOAT, 0, f);
+  }
+
+void color_vertices(GLfloat *f, int qty) {
+  glColorPointer(4, GL_FLOAT, 0, f);
+  }
+
+void color2(int color) {
+  unsigned char *c = (unsigned char*) (&color);
+  glColor4f(c[3] / 255.0, c[2] / 255.0, c[1]/255.0, c[0] / 255.0);
+  }
+
+void colorClear(int color) {
+  unsigned char *c = (unsigned char*) (&color);
+  glClearColor(c[3] / 255.0, c[2] / 255.0, c[1]/255.0, c[0] / 255.0);
+  }
+
+void be_nontextured() { switch_mode(gmColored); }
+void be_textured() { switch_mode(gmTextured); }
+
+void switch_mode(eMode m) {
+  if(m == mode) return;
+  #if CAP_SHADER
+  programs[m]->enable();
+  #endif
+  flagtype newflags = flags[m] &~ flags[mode];
+  flagtype oldflags = flags[mode] &~ flags[m];
+  if(newflags & GF_TEXTURE) {
+    glEnable(GL_TEXTURE_2D);
+    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+    }
+  if(oldflags & GF_TEXTURE) {
+    glDisable(GL_TEXTURE_2D);
+    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+    }
+  if(newflags & GF_VARCOLOR)
+    glEnableClientState(GL_COLOR_ARRAY);
+  if(oldflags & GF_VARCOLOR)
+    glDisableClientState(GL_COLOR_ARRAY);
+  if(newflags & GF_LIGHTFOG) {
+    GLfloat light_ambient[] = { 3.5, 3.5, 3.5, 1.0 };
+    GLfloat light_diffuse[] = { 1.0, 1.0, 1.0, 1.0 };
+    GLfloat light_position[] = { 0.0, 0.0, 0.0, 1.0 };
+  
+    glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient);
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
+    glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+  
+    glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
+    GLERR("lighting");
+  
+    glEnable(GL_LIGHTING);
+    glEnable(GL_LIGHT0);
+
+    glEnable(GL_FOG);
+    glFogi(GL_FOG_MODE, GL_LINEAR);
+    glFogf(GL_FOG_START, 0);
+    }
+  if(oldflags & GF_LIGHTFOG) {
+    glDisable(GL_FOG);
+    glDisable(GL_LIGHTING);
+    }
+  mode = m;
+  }
+
+void fog_max(ld fogmax) {
+  glFogf(GL_FOG_END, fogmax);
+  }
+
 }

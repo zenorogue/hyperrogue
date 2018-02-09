@@ -1108,36 +1108,13 @@ void prepareTexture() {
 
 double xview, yview;
 
-void glcolorClear(int color) {
-  unsigned char *c = (unsigned char*) (&color);
-  glClearColor(c[3] / 255.0, c[2] / 255.0, c[1]/255.0, c[0] / 255.0);
-  }
-
-void drawRugScene() {
-  GLfloat light_ambient[] = { 3.5, 3.5, 3.5, 1.0 };
-  GLfloat light_diffuse[] = { 1.0, 1.0, 1.0, 1.0 };
-  GLfloat light_position[] = { 0.0, 0.0, 0.0, 1.0 };
-
-  glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient);
-  glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
-  glLightfv(GL_LIGHT0, GL_POSITION, light_position);
-
-#ifndef GLES_ONLY
-  glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
-#else
-  glLightModelx(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
-#endif
-  GLERR("lighting");
-
-  glEnable(GL_LIGHTING);
-  glEnable(GL_LIGHT0);
-  
+void drawRugScene() {  
   glbuf->use_as_texture();
 
   if(backcolor == 0) 
     glClearColor(0.05,0.05,0.05,1);
   else
-    glcolorClear(backcolor << 8 | 0xFF);
+    glhr::colorClear(backcolor << 8 | 0xFF);
 #ifdef GLES_ONLY
   glClearDepthf(1.0f);
 #else
@@ -1146,8 +1123,7 @@ void drawRugScene() {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   
   glDisable(GL_BLEND);
-  glEnable(GL_TEXTURE_2D);
-  glhr::be_textured();
+  glhr::switch_mode(glhr::gmVarColored);
   glEnable(GL_DEPTH_TEST);
   glDepthFunc(GL_LESS);
   
@@ -1209,39 +1185,27 @@ void drawRugScene() {
       glhr::projection_multiply(glhr::as_glmatrix(ortho));
       }
     glColor4f(1.f, 1.f, 1.f, 1.f);
+    
+    fog_max(
+      gwhere == gSphere ? 10 : 
+      gwhere == gElliptic ? 4 :
+      100
+      );
   
-    if(rug_perspective && gwhere >= gSphere) {
-      glEnable(GL_FOG);
-#ifndef GLES_ONLY
-      glFogi(GL_FOG_MODE, GL_LINEAR);
-#else
-      glFogx(GL_FOG_MODE, GL_LINEAR);
-#endif
-      glFogf(GL_FOG_START, 0);
-      glFogf(GL_FOG_END, gwhere == gSphere ? 10 : 4);
-      }
-
     glhr::set_modelview(glhr::id());
 
     for(int t=0; t<size(triangles); t++)
       drawTriangle(triangles[t]);
-
-    glEnableClientState(GL_VERTEX_ARRAY);
-    glVertexPointer(3, GL_FLOAT, 0, &vertex_array[0]);
-    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-    glTexCoordPointer(2, GL_FLOAT, 0, &tvertex_array[0]);
-
+      
+    glhr::vertices(&vertex_array[0], 0);
+    glhr::texture_vertices(&tvertex_array[0], 0);
     glDrawArrays(GL_TRIANGLES, 0, size(vertex_array)/3);
-    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 
     stereo::set_mask(0);
     }
 
-  glDisable(GL_TEXTURE_2D);
   glDisable(GL_DEPTH_TEST);
-  glDisable(GL_LIGHTING);
   glEnable(GL_BLEND);
-  glDisable(GL_FOG);
 
   stereo::set_mask(0), stereo::set_viewport(0);
   stereo::set_projection(0);

@@ -465,9 +465,8 @@ void saveFullTexture() {
 bool newmove = false;
 
 void drawRawTexture() {
-  glEnable(GL_TEXTURE_2D);
   glhr::be_textured();
-  glcolor2(0xFFFFFF20);
+  glhr::color2(0xFFFFFF20);
   glhr::set_modelview(glhr::translate(0, 0, stereo::scrdist));
   glBindTexture(GL_TEXTURE_2D, textureid);
   vector<GLfloat> tver, sver;
@@ -485,12 +484,9 @@ void drawRawTexture() {
     sver.push_back(y * vid.scrsize);
     sver.push_back(0);            
     }
-  activateVertexArray(&sver[0], 4);
-  glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-  glTexCoordPointer(3, GL_FLOAT, 0, &tver[0]);
+  glhr::vertices(&sver[0], 4);
+  glhr::texture_vertices(&tver[0], 4, 3);
   glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-  glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-  glDisable(GL_TEXTURE_2D);
   }
 
 struct magicmapper_point {

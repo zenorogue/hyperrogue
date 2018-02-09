@@ -111,10 +111,6 @@ vector<polytodraw*> ptds2;
 GLfloat glcoords[POLYMAX][3];
 int qglcoords;
 
-#if CAP_GL
-GLfloat *currentvertices;
-#endif
-
 GLfloat *ourshape = NULL;
 
 void initPolyForGL() {
@@ -132,7 +128,7 @@ void initPolyForGL() {
     }
 
 #if CAP_GL  
-  currentvertices = NULL;
+  glhr::currentvertices = NULL;
 #endif
   }
 #endif
@@ -141,25 +137,16 @@ void initPolyForGL() {
 
 GLuint shapebuffer;
 
-extern void glcolor(int color);
-
-
-void activateVertexArray(GLfloat *f, int qty) {
-  currentvertices = f;
-  glEnableClientState(GL_VERTEX_ARRAY);
-  glVertexPointer(3, GL_FLOAT, 0, f);
-  }
-
 extern GLfloat *ourshape;
 
 void activateShapes() {
-  if(currentvertices != ourshape) {
-    activateVertexArray(ourshape, qhpc);
+  if(glhr::currentvertices != ourshape) {
+    glhr::vertices(ourshape, qhpc);
     }
   }
 
 void activateGlcoords() {
-  activateVertexArray(glcoords[0], qglcoords);
+  glhr::vertices(glcoords[0], qglcoords);
   }
 #endif
 
@@ -283,11 +270,6 @@ void drawTexturedTriangle(SDL_Surface *s, int *px, int *py, GLfloat *tv, int col
 #endif
 
 #if CAP_GL
-void glcolor2(int color) {
-  unsigned char *c = (unsigned char*) (&color);
-  glColor4f(c[3] / 255.0, c[2] / 255.0, c[1]/255.0, c[0] / 255.0);
-  }
-
 void glapplymatrix(const transmatrix& V) {
   GLfloat mat[16];
   int id = 0;
@@ -322,11 +304,9 @@ int tinfshift;
 void gldraw(int useV, const transmatrix& V, int ps, int pq, int col, int outline, int flags, textureinfo *tinf) {
 
   if(tinf) {
-    glEnable(GL_TEXTURE_2D);
     glhr::be_textured();
     glBindTexture(GL_TEXTURE_2D, tinf->texture_id);
-    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-    glTexCoordPointer(3, GL_FLOAT, 0, &tinf->tvertices[tinfshift]);
+    glhr::texture_vertices(&tinf->tvertices[tinfshift], 0, 3);
     }
   else glhr::be_nontextured();
   
@@ -352,7 +332,7 @@ void gldraw(int useV, const transmatrix& V, int ps, int pq, int col, int outline
       
       if(flags & POLY_INVERSE) {
         stereo::set_mask(ed);
-        glcolor2(col);
+        glhr::color2(col);
         glStencilOp( GL_ZERO, GL_ZERO, GL_ZERO);
         glStencilFunc( GL_NOTEQUAL, 1, 1);
         GLfloat xx = vid.xres;
@@ -361,16 +341,16 @@ void gldraw(int useV, const transmatrix& V, int ps, int pq, int col, int outline
           -xx, -yy, stereo::scrdist, +xx, -yy, stereo::scrdist, 
           +xx, +yy, stereo::scrdist, -xx, +yy, stereo::scrdist
           };
-        GLfloat *cur = currentvertices;
-        activateVertexArray(scr, 4);
+        GLfloat *cur = glhr::currentvertices;
+        glhr::vertices(scr, 4);
         glhr::set_modelview(glhr::id());
         glDrawArrays(tinf ? GL_TRIANGLES : GL_TRIANGLE_FAN, 0, 4);
-        activateVertexArray(cur, 0);
+        glhr::vertices(cur, 0);
         draw = false; goto again;
         }
       else { 
         stereo::set_mask(ed);
-        glcolor2(col);
+        glhr::color2(col);
         glStencilOp( GL_ZERO, GL_ZERO, GL_ZERO);
         glStencilFunc( GL_EQUAL, 1, 1);
         glDrawArrays(tinf ? GL_TRIANGLES : GL_TRIANGLE_FAN, ps, pq);
@@ -380,17 +360,12 @@ void gldraw(int useV, const transmatrix& V, int ps, int pq, int col, int outline
       }
     
     if(outline) {
-      glcolor2(outline);
+      glhr::color2(outline);
       glDrawArrays(GL_LINE_STRIP, ps, pq);
       }
     }
   
   if(stereo::active()) stereo::set_projection(0), stereo::set_viewport(0), stereo::set_mask(0);
-
-  if(tinf) {
-    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-    glDisable(GL_TEXTURE_2D);      
-    }
   }
 #endif
 
@@ -531,8 +506,8 @@ void drawpolyline(polytodraw& p) {
 #if CAP_GL
   if(vid.usingGL && pmodel == mdDisk && !spherespecial) {
     const int pq = pp.cnt;
-    if(currentvertices != pp.tab)
-      activateVertexArray(pp.tab, pq);
+    if(glhr::currentvertices != pp.tab)
+      glhr::vertices(pp.tab, pq);
     const int ps=0;
     glLineWidth(linewidthat(tC0(pp.V), pp.minwidth));    
     gldraw(1, pp.V, ps, pq, p.col, pp.outline, 0, pp.tinf);    
