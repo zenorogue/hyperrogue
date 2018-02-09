@@ -318,6 +318,15 @@ void gldraw(int useV, const transmatrix& V, int ps, int pq, int col, int outline
     if(useV == 1) {
       glapplymatrix(V);
       }
+    else if(useV == 3) {
+      GLfloat mat[16] = {
+        1, 0, 0, 0,
+        0, 1, 0, 0,
+        0, 0, 0, 0,
+        0, 0, stereo::scrdist, 1
+        };
+      glhr::set_modelview(glhr::as_glmatrix(mat));
+      }
     else
       glhr::set_modelview(glhr::id());
 
