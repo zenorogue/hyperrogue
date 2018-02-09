@@ -2227,3 +2227,8 @@ Gameplay bugfixes
 - Hypersian Rug now works on Android, and it is controllable by rotating the device (combined with "stereo version" Cardboard VR should be supported)
 - fixed a crash bug in the iOS version
 
+2018.02.09 08:08 version 10.3h
+- minor optimizations
+- fixed a crash bug when leaving quotient space
+- fixed the problems with incorrect display and mouse control in the Hypersian Rug mode
+- fixed the display in the spherical geometry
