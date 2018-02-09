@@ -995,7 +995,7 @@ bool project_ods(hyperpoint azeq, hyperpoint& h1, hyperpoint& h2, bool eye) {
   }
 #endif
 
-vector<GLfloat> vertex_array, tvertex_array;
+vector<GLfloat> vertex_array, tvertex_array, color_array;
 
 void drawTriangle(triangle& t) {
   using namespace hyperpoint_vec;  
@@ -1013,6 +1013,7 @@ void drawTriangle(triangle& t) {
 
     hyperpoint hc = (pts[1] - pts[0]) ^ (pts[2] - pts[0]);  
     double hch = hypot3(hc);
+    
     glNormal3f(hc[0]/hch,hc[1]/hch,hc[2]/hch);
 
     bool ok = true;
@@ -1067,13 +1068,22 @@ void drawTriangle(triangle& t) {
   hyperpoint hc = (h[1] - h[0]) ^ (h[2] - h[0]);  
   double hch = hypot3(hc);
   
+  ld col = (2 + hc[0]/hch) / 3;
+  
+  #if !CAP_SHADER
   glNormal3f(hc[0]/hch,hc[1]/hch,hc[2]/hch);
+  #endif
   
   for(int i: {0,1,2}) {
     tvertex_array.push_back(t.m[i]->x1);
     tvertex_array.push_back(t.m[i]->y1);
     for(int j: {0,1,2})
       vertex_array.push_back(h[i][j]);
+    
+    #if CAP_SHADER
+    for(int a=0; a<3; a++) color_array.push_back(col);
+    color_array.push_back(1);
+    #endif
     }
   }
 
@@ -1123,7 +1133,7 @@ void drawRugScene() {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   
   glDisable(GL_BLEND);
-  glhr::switch_mode(glhr::gmVarColored);
+  glhr::switch_mode(glhr::gmLightFog);
   glEnable(GL_DEPTH_TEST);
   glDepthFunc(GL_LESS);
   
@@ -1131,32 +1141,22 @@ void drawRugScene() {
     use_precompute = false;
     vertex_array.clear();
     tvertex_array.clear();
+    color_array.clear();
     stereo::set_mask(ed), stereo::set_viewport(ed);
     if(ed == 1 && stereo::mode == stereo::sAnaglyph)
       glClear(GL_DEPTH_BUFFER_BIT);
     
     start_projection(ed);
     if(stereo::mode == stereo::sODS) {
-#ifndef GLES_ONLY
-      glOrtho(-M_PI, M_PI, -M_PI, M_PI, 0, -M_PI * 2);
-#endif
+      glhr::projection_multiply(glhr::ortho(M_PI, M_PI, 2*M_PI));
       }
     else if(rug_perspective || stereo::active()) {
 
-      ld vnear = .001;
-      ld vfar = 1000;
-      ld sca = vnear * stereo::tanfov / vid.xres;
       xview = stereo::tanfov;
       yview = stereo::tanfov * vid.yres / vid.xres;
       
-      //glFrustum(-sca * vid.xres, sca * vid.xres, -sca * vid.yres, sca * vid.yres, vnear, vfar);
-      
-      GLfloat frustum[16] = {
-        GLfloat(vnear / sca / vid.xres), 0, 0, 0,
-        0, GLfloat(vnear / sca / vid.yres), 0, 0,
-        0, 0, GLfloat(-(vnear+vfar)/(vfar-vnear)), -1,
-        0, 0, GLfloat(-2*vnear*vfar/(vfar-vnear)), 1};
-      glhr::projection_multiply(glhr::as_glmatrix(frustum));
+      glhr::projection_multiply(glhr::frustum(xview, yview, .01, 100));
+      xview = -xview; yview = -yview;
 
       if(!rug_perspective) 
         glhr::projection_multiply(glhr::translate(0, 0, -model_distance));
@@ -1177,28 +1177,26 @@ void drawRugScene() {
       yview = stereo::tanfov * model_distance * vid.yres / vid.xres;
       // glOrtho(-xview, xview, yview, -yview, -1000, 1000);
 
-      GLfloat ortho[16] = {
-        GLfloat(1/xview), 0, 0, 0, 
-        0, GLfloat(1/yview), 0, 0, 
-        0, 0, GLfloat(.001), 0,
-        0, 0, 0, 1};
-      glhr::projection_multiply(glhr::as_glmatrix(ortho));
+      glhr::projection_multiply(glhr::ortho(xview, yview, -1000));
       }
     glColor4f(1.f, 1.f, 1.f, 1.f);
     
-    fog_max(
-      gwhere == gSphere ? 10 : 
-      gwhere == gElliptic ? 4 :
+    glhr::fog_max(
+      gwhere == gSphere && rug_perspective ? 10 : 
+      gwhere == gElliptic && rug_perspective ? 4 :
       100
       );
   
     glhr::set_modelview(glhr::id());
-
+    
     for(int t=0; t<size(triangles); t++)
       drawTriangle(triangles[t]);
       
     glhr::vertices(&vertex_array[0], 0);
     glhr::texture_vertices(&tvertex_array[0], 0);
+#if CAP_SHADER
+    glhr::color_vertices(&color_array[0], 0);
+#endif    
     glDrawArrays(GL_TRIANGLES, 0, size(vertex_array)/3);
 
     stereo::set_mask(0);
@@ -1458,8 +1456,8 @@ static const ld RADAR_INF = 1e12;
 ld radar_distance = RADAR_INF;
 
 hyperpoint gethyper(ld x, ld y) {
-  double mx = ((x*2 / vid.xres)-1) * xview;
-  double my = (1-(y*2 / vid.yres)) * yview;
+  double mx = (x - vid.xcenter)/vid.xres * 2 * xview;
+  double my = (vid.ycenter - y)/vid.yres * 2 * yview;
   radar_distance = RADAR_INF;
   
   double rx1=0, ry1=0;

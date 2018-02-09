@@ -7,6 +7,13 @@
 // #undef CAP_SHADER
 // #define CAP_SHADER 0
 
+void glError(const char* GLcall, const char* file, const int line) {
+  GLenum errCode = glGetError();
+  if(errCode!=GL_NO_ERROR) {
+    fprintf(stderr, "OPENGL ERROR #%i: in file %s on line %i :: %s\n",errCode,file, line, GLcall);
+    }
+  }
+
 namespace glhr {
 
 enum eMode { gmColored, gmTextured, gmVarColored, gmLightFog, gmMAX};
@@ -15,7 +22,11 @@ static const flagtype GF_TEXTURE  = 1;
 static const flagtype GF_VARCOLOR = 2;
 static const flagtype GF_LIGHTFOG = 4;
 
-flagtype flags[gmMAX] = { 0, GF_TEXTURE, GF_VARCOLOR, GF_TEXTURE | GF_LIGHTFOG };
+flagtype flags[gmMAX] = { 0, GF_TEXTURE, GF_VARCOLOR, GF_TEXTURE | GF_LIGHTFOG 
+#if CAP_SHADER
+  | GF_VARCOLOR 
+#endif
+  };
 
 eMode mode;
 
@@ -24,9 +35,19 @@ void switch_mode(eMode m);
 struct glmatrix {
   GLfloat a[4][4];
   GLfloat* operator[] (int i) { return a[i]; }
+  const GLfloat* operator[] (int i) const { return a[i]; }
   GLfloat* as_array() { return a[0]; }
   const GLfloat* as_array() const { return a[0]; }
   };
+
+void display(const glmatrix& m) {
+  for(int i=0; i<4; i++) {
+    for(int j=0; j<4; j++)
+      printf("%10.5f", m[i][j]);
+    printf("\n");
+    }
+  printf("\n");
+  }
 
 glmatrix operator * (glmatrix m1, glmatrix m2) {
   glmatrix res;
@@ -58,6 +79,24 @@ glmatrix scale(ld x, ld y, ld z) {
   return tmp;
   }
 
+glmatrix ortho(ld x, ld y, ld z) {
+  return scale(1/x, 1/y, 1/z);
+  }
+
+glmatrix& as_glmatrix(GLfloat o[16]) {
+  glmatrix& tmp = (glmatrix&) (o[0]);
+  return tmp;
+  }
+
+glmatrix frustum(ld x, ld y, ld vnear = 1e-3, ld vfar = 1e9) {
+  GLfloat frustum[16] = {
+    GLfloat(1 / x), 0, 0, 0,
+    0, GLfloat(1 / y), 0, 0,
+    0, 0, GLfloat(-(vnear+vfar)/(vfar-vnear)), -1,
+    0, 0, GLfloat(-2*vnear*vfar/(vfar-vnear)), 0};
+  return as_glmatrix(frustum);
+  }
+
 glmatrix translate(ld x, ld y, ld z) {
   glmatrix tmp;
   for(int i=0; i<4; i++)
@@ -66,11 +105,6 @@ glmatrix translate(ld x, ld y, ld z) {
   tmp[3][0] = x;
   tmp[3][1] = y;
   tmp[3][2] = z;
-  return tmp;
-  }
-
-glmatrix& as_glmatrix(GLfloat o[16]) {
-  glmatrix& tmp = (glmatrix&) (o[0]);
   return tmp;
   }
 
@@ -124,11 +158,14 @@ void projection_multiply(const glmatrix& m) {
 
 void init();
 
-int compileShader(int type, const char* s) {
+int compileShader(int type, const string& s) {
   GLint status;
   
+  printf("===\ns%s\n===\n", s.c_str());
+  
   GLint shader = glCreateShader(type);
-  glShaderSource(shader, 1, &s, NULL);
+  const char *ss = s.c_str();
+  glShaderSource(shader, 1, &ss, NULL);
   glCompileShader(shader);
   
   GLint logLength;
@@ -156,7 +193,7 @@ struct GLprogram *current = NULL;
 
 enum {
   UNIFORM_MODELVIEWPROJECTION_MATRIX,
-  UNIFORM_NORMAL_MATRIX,
+  UNIFORM_FOGFACTOR,
   NUM_UNIFORMS
   };
 
@@ -200,8 +237,8 @@ struct GLprogram {
     // glBindAttribLocation(_program, GLKVertexAttribNormal, "normal"); ??
   
     uniforms[UNIFORM_MODELVIEWPROJECTION_MATRIX] = glGetUniformLocation(_program, "modelViewProjectionMatrix");
-    uniforms[UNIFORM_NORMAL_MATRIX] = glGetUniformLocation(_program, "normalMatrix");    
-    printf("uniforms: %d %d\n", uniforms[UNIFORM_MODELVIEWPROJECTION_MATRIX], uniforms[UNIFORM_NORMAL_MATRIX]);
+    uniforms[UNIFORM_FOGFACTOR] = glGetUniformLocation(_program, "fogfactor");    
+    printf("uniforms: %d %d\n", uniforms[UNIFORM_MODELVIEWPROJECTION_MATRIX], uniforms[UNIFORM_FOGFACTOR]);
     }
   
   ~GLprogram() {
@@ -222,13 +259,24 @@ struct GLprogram {
 
 GLprogram *programs[gmMAX];
 
+/*
+string stringbuilder(bool i) { return ""; }
+
+template<class.. T> string stringbuilder(bool i, bool j, T... t) { return stringbuilder(j, t...); }
+template<class.. T> string stringbuilder(bool i, const string& s, T... t) { 
+  if(i) return s + stringbuilder(i, t...);
+  else return stringbuilder(i, t...); 
+  } */
+
 void init() {
   projection = id();
     
-  for(int i=0; i<2; i++) {
-    auto texture_only = [=] (string s) -> string { if(i) return s; else return ""; };
-    auto not_texture_only = [=] (string s) -> string { if(!i) return s; else return ""; };
-   
+  for(int i=0; i<4; i++) {
+    flagtype f = flags[i];
+    flagtype nf = ~f;
+    auto texture_only = [=] (string s) -> string { if(f & GF_TEXTURE) return s; else return ""; };
+    auto not_texture_only = [=] (string s) -> string { if(nf & GF_TEXTURE) return s; else return ""; };
+    
     programs[i] = new GLprogram(
       // "attribute vec4 position;"
       // "attribute vec3 normal;"
@@ -237,7 +285,7 @@ void init() {
       + texture_only( "varying vec2 vTexCoord;" ) +
       
       "uniform mat4 modelViewProjectionMatrix;"
-      "uniform mat3 normalMatrix;"
+      "uniform float fogfactor;"
       
       "void main() {"
   //      "vec3 eyeNormal = normalize(normalMatrix * normal);"
@@ -248,7 +296,9 @@ void init() {
                        
   //      "vColor = diffuseColor * nDotVP;"
         + texture_only("vTexCoord = gl_MultiTexCoord0.xy;") +
-        "vColor = gl_Color;"
+        + ((f & GF_LIGHTFOG) ? 
+            "vColor = gl_Color * clamp(1.0 + gl_Vertex.z * fogfactor, 0.0, 1.0);"
+          : "vColor = gl_Color;") +
           
         "gl_Position = modelViewProjectionMatrix * gl_Vertex;"
         "}",
@@ -263,9 +313,6 @@ void init() {
       );
     }
   
-  programs[2] = programs[0];
-  programs[3] = programs[1];
-
   glEnableClientState(GL_VERTEX_ARRAY);
   switch_mode(gmColored);
   programs[gmColored]->enable();
@@ -300,6 +347,11 @@ void color2(int color) {
   glColor4f(c[3] / 255.0, c[2] / 255.0, c[1]/255.0, c[0] / 255.0);
   }
 
+void color2(int color, ld part) {
+  unsigned char *c = (unsigned char*) (&color);
+  glColor4f(c[3] / 255.0 * part, c[2] / 255.0 * part, c[1]/255.0 * part, c[0] / 255.0);
+  }
+
 void colorClear(int color) {
   unsigned char *c = (unsigned char*) (&color);
   glClearColor(c[3] / 255.0, c[2] / 255.0, c[1]/255.0, c[0] / 255.0);
@@ -328,6 +380,7 @@ void switch_mode(eMode m) {
   if(oldflags & GF_VARCOLOR)
     glDisableClientState(GL_COLOR_ARRAY);
   if(newflags & GF_LIGHTFOG) {
+#if !CAP_SHADER    
     GLfloat light_ambient[] = { 3.5, 3.5, 3.5, 1.0 };
     GLfloat light_diffuse[] = { 1.0, 1.0, 1.0, 1.0 };
     GLfloat light_position[] = { 0.0, 0.0, 0.0, 1.0 };
@@ -345,16 +398,23 @@ void switch_mode(eMode m) {
     glEnable(GL_FOG);
     glFogi(GL_FOG_MODE, GL_LINEAR);
     glFogf(GL_FOG_START, 0);
+#endif
     }
   if(oldflags & GF_LIGHTFOG) {
+#if !CAP_SHADER
     glDisable(GL_FOG);
     glDisable(GL_LIGHTING);
+#endif
     }
   mode = m;
   }
 
 void fog_max(ld fogmax) {
+  #if CAP_SHADER
+  glUniform1f(current->uniforms[UNIFORM_FOGFACTOR], 1 / fogmax);
+  #else
   glFogf(GL_FOG_END, fogmax);
+  #endif
   }
 
 }

@@ -199,31 +199,16 @@ void stereo::set_projection(int ed) {
   
   if(pmodel && !stereo::active()) {
 
-    // simulate glOrtho
-    GLfloat ortho[16] = {
-      GLfloat(2. / vid.xres), 0, 0, 0, 
-      0, GLfloat(-2. / vid.yres), 0, 0, 
-      0, 0, GLfloat(.4 / stereo::scrdist), 0,
-      0, 0, 0, 1};
-      
-    glhr::projection_multiply(glhr::as_glmatrix(ortho));
+    glhr::projection_multiply(glhr::ortho(vid.xres/2, -vid.yres/2, stereo::scrdist/.4));
     }
   else if(pmodel) {
 
-    float lowdepth = .1, hidepth = 1e9;
-    
-    ld right = vid.xres/2 * lowdepth / stereo::scrdist;
+    ld right = vid.xres/2 / stereo::scrdist;
     ld left = -right;
-    ld top = -vid.yres/2 * lowdepth / stereo::scrdist;
+    ld top = -vid.yres/2 / stereo::scrdist;
     ld bottom = -top;
 
-    GLfloat frustum[16] = {
-      GLfloat(2 * lowdepth / (right-left)), 0, 0, 0, 
-      0, GLfloat(2 * lowdepth / (top-bottom)), 0, 0, 
-      0, 0, -(hidepth+lowdepth)/(hidepth-lowdepth), -1,
-      0, 0, -2*lowdepth*hidepth/(hidepth-lowdepth), 0};
-
-    glhr::projection_multiply(glhr::as_glmatrix(frustum));
+    glhr::projection_multiply(glhr::frustum((right-left)/2, (top-bottom)/2));
     
     if(ed) glhr::projection_multiply(glhr::translate(stereo::ipd * vid.radius * ed/2, 0, 0));
 
@@ -233,22 +218,11 @@ void stereo::set_projection(int ed) {
     stereo::scrdist_text = 0;
     }
   else {
-    float lowdepth = .1;
-    float hidepth = 1e9;
-  
-    // simulate glFrustum
-    GLfloat frustum[16] = {
-      GLfloat(vid.yres * 1./vid.xres), 0, 0, 0, 
-      0, 1, 0, 0, 
-      0, 0, -(hidepth+lowdepth)/(hidepth-lowdepth), -1,
-      0, 0, -2*lowdepth*hidepth/(hidepth-lowdepth), 0};
-  
-    glhr::projection_multiply(glhr::as_glmatrix(frustum));
+    glhr::projection_multiply(glhr::frustum(vid.xres * 1. / vid.yres, 1));
 
     GLfloat sc = vid.radius / (vid.yres/2.);
-    GLfloat mat[16] = {sc,0,0,0, 0,-sc,0,0, 0,0,-1,0, 0,0, 0,1};
 
-    glhr::projection_multiply(glhr::as_glmatrix(mat));
+    glhr::projection_multiply(glhr::scale(sc, -sc, -1));
     
     if(ed) glhr::projection_multiply(glhr::translate(stereo::ipd * ed/2, 0, 0));
   
@@ -327,13 +301,6 @@ inline int next_p2 (int a )
     while(rval<a) rval<<=1;
     return rval;
 }
-
-void glError(const char* GLcall, const char* file, const int line) {
-  GLenum errCode = glGetError();
-  if(errCode!=GL_NO_ERROR) {
-    fprintf(stderr, "OPENGL ERROR #%i: in file %s on line %i :: %s\n",errCode,file, line, GLcall);
-    }
-  }
 
 #if CAP_GLFONT
 
