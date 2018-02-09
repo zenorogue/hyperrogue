@@ -259,58 +259,49 @@ struct GLprogram {
 
 GLprogram *programs[gmMAX];
 
-/*
-string stringbuilder(bool i) { return ""; }
+string stringbuilder() { return ""; }
 
-template<class.. T> string stringbuilder(bool i, bool j, T... t) { return stringbuilder(j, t...); }
-template<class.. T> string stringbuilder(bool i, const string& s, T... t) { 
-  if(i) return s + stringbuilder(i, t...);
-  else return stringbuilder(i, t...); 
-  } */
+template<class... T> string stringbuilder(bool i, const string& s, T... t) { 
+  if(i) return s + stringbuilder(t...);
+  else return stringbuilder(t...); 
+  }
 
 void init() {
   projection = id();
     
   for(int i=0; i<4; i++) {
     flagtype f = flags[i];
-    flagtype nf = ~f;
-    auto texture_only = [=] (string s) -> string { if(f & GF_TEXTURE) return s; else return ""; };
-    auto not_texture_only = [=] (string s) -> string { if(nf & GF_TEXTURE) return s; else return ""; };
     
-    programs[i] = new GLprogram(
+    bool texture = f & GF_TEXTURE;
+    bool lightfog = f & GF_LIGHTFOG;
+    
+    programs[i] = new GLprogram(stringbuilder(
       // "attribute vec4 position;"
       // "attribute vec3 normal;"
       
-      "varying vec4 vColor;"
-      + texture_only( "varying vec2 vTexCoord;" ) +
+      1,       "varying vec4 vColor;",
+      texture, "varying vec2 vTexCoord;", 
       
-      "uniform mat4 modelViewProjectionMatrix;"
-      "uniform float fogfactor;"
+      1,       "uniform mat4 modelViewProjectionMatrix;",
+      1,       "uniform float fogfactor;",
       
-      "void main() {"
-  //      "vec3 eyeNormal = normalize(normalMatrix * normal);"
-  //      "vec3 lightPosition = vec3(0.0, 0.0, 1.0);"
-  //      "vec4 diffuseColor = vec4(0.4, 0.4, 1.0, 1.0);"
-          
-  //      "float nDotVP = max(0.0, dot(eyeNormal, normalize(lightPosition)));"
-                       
-  //      "vColor = diffuseColor * nDotVP;"
-        + texture_only("vTexCoord = gl_MultiTexCoord0.xy;") +
-        + ((f & GF_LIGHTFOG) ? 
-            "vColor = gl_Color * clamp(1.0 + gl_Vertex.z * fogfactor, 0.0, 1.0);"
-          : "vColor = gl_Color;") +
-          
-        "gl_Position = modelViewProjectionMatrix * gl_Vertex;"
-        "}",
+      1,       "void main() {",  
+      texture,   "vTexCoord = gl_MultiTexCoord0.xy;",
+      lightfog,  "vColor = gl_Color * clamp(1.0 + gl_Vertex.z * fogfactor, 0.0, 1.0);",
+      !lightfog, "vColor = gl_Color;",
+      1,         "gl_Position = modelViewProjectionMatrix * gl_Vertex;",
+      1,         "}"), 
+      
+      stringbuilder(
   
-      "uniform sampler2D myTexture;"
-      "varying vec4 vColor;"
-      + texture_only( "varying vec2 vTexCoord;" ) +
-      "void main() {"
-      + texture_only("  gl_FragColor = vColor * texture2D(myTexture, vTexCoord);")
-      + not_texture_only("  gl_FragColor = vColor;") +
-      "  }"
-      );
+      1,       "uniform sampler2D myTexture;",
+      1,       "varying vec4 vColor;",
+      texture, "varying vec2 vTexCoord;",
+      1,       "void main() {",
+      texture,   "gl_FragColor = vColor * texture2D(myTexture, vTexCoord);",
+      !texture,  "gl_FragColor = vColor;",
+      1,         "}"
+      ));
     }
   
   glEnableClientState(GL_VERTEX_ARRAY);
