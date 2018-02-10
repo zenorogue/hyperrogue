@@ -132,7 +132,7 @@
 #endif
 
 #ifndef CAP_TEXTURE
-#define CAP_TEXTURE (CAP_GL && (CAP_PNG || CAP_SDL_IMG))
+#define CAP_TEXTURE (CAP_GL && (CAP_PNG || CAP_SDL_IMG) && !ISMINI)
 #endif
 
 #ifndef CAP_MODEL
