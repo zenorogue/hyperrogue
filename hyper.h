@@ -65,6 +65,7 @@ extern int cellcount, heptacount;
 
 struct gcell {
 
+#if CAP_BITFIELD
   // main fields
   eLand land : 8;
   eWall wall : 8;
@@ -87,6 +88,18 @@ struct gcell {
     hitpoints : 4;      // hitpoints left (for Palace Guards, also reused as cpid for mirrors)
   
   unsigned landflags : 8;      // extra flags for land
+#else
+  eLand land;
+  eWall wall;
+  eMonster monst;
+  eItem item;
+  eLand barleft, barright;
+  bool ligon;
+  unsigned char pathdist, cpdist, mpdist;
+  
+  unsigned char mondir, bardir, stuntime, hitpoints;
+  unsigned char landflags;
+#endif
   
   // 'landparam' is used for: 
   // heat in Icy/Cocytus; 

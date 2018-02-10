@@ -226,6 +226,10 @@
 #define CAP_ACHIEVE 1
 #endif
 
+#ifndef CAP_BITFIELD
+#define CAP_BITFIELD (!ISWEB)
+#endif
+
 #ifndef CAP_ACHIEVE
 #define CAP_ACHIEVE 0
 #endif
