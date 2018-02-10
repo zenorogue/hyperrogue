@@ -330,7 +330,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           c->monst = moVizier;
           c->hitpoints = palaceHP();
           }
-        else if(princess::forceVizier && from->pathdist != INF) {
+        else if(princess::forceVizier && from->pathdist != PINFD) {
           c->monst = moVizier;
           c->hitpoints = palaceHP();
           princess::forceVizier = false;

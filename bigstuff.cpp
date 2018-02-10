@@ -1085,7 +1085,7 @@ void buildBigStuff(cell *c, cell *from) {
       createAlternateMap(c, 2, hsA);
 
     if(c->land == laPalace && ctof(c) && !princess::generating && !shmup::on && multi::players == 1 &&
-      (princess::forceMouse ? (from && from->pathdist != INF) : 
+      (princess::forceMouse ? (from && from->pathdist != PINFD) : 
         (hrand(2000) < (peace::on ? 100 : 20))) && 
       !c->master->alt && 
       (princess::challenge || kills[moVizier] || peace::on) && !tactic::on && !yendor::on) {
