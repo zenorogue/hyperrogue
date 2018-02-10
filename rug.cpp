@@ -1179,7 +1179,7 @@ void drawRugScene() {
 
       glhr::projection_multiply(glhr::ortho(xview, yview, -1000));
       }
-    glColor4f(1.f, 1.f, 1.f, 1.f);
+    glhr::color2(0xFFFFFFFF);
     
     glhr::fog_max(
       gwhere == gSphere && rug_perspective ? 10 : 

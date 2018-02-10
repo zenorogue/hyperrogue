@@ -336,7 +336,7 @@ void gldraw(int useV, const transmatrix& V, int ps, int pq, int col, int outline
       glColorMask( GL_FALSE,GL_FALSE,GL_FALSE,GL_FALSE );
       glStencilOp( GL_INVERT, GL_INVERT, GL_INVERT);
       glStencilFunc( GL_ALWAYS, 0x1, 0x1 );
-      glColor4f(1,1,1,1);
+      glhr::color2(0xFFFFFFFF);
       glDrawArrays(tinf ? GL_TRIANGLES : GL_TRIANGLE_FAN, ps, pq);
       
       if(flags & POLY_INVERSE) {

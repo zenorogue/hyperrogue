@@ -2207,6 +2207,8 @@ void sumaura(int v) {
   aurac[AURA][v] = aurac[0][v];
   }
   
+float coltab[4][4];
+
 void drawaura() {
   if(!haveaura()) return;
   if(stereo::mode) return;
@@ -2272,9 +2274,7 @@ void drawaura() {
   glhr::set_modelview(glhr::id());
   setcameraangle(true);
   
-  glEnableClientState(GL_COLOR_ARRAY);
-  float coltab[4][4];
-  glColorPointer(4, GL_FLOAT, 0, coltab); 
+  glhr::color_vertices(coltab[0], 4);
   activateGlcoords();
   
   float cx[AURA+1][11][5];
@@ -2318,7 +2318,6 @@ void drawaura() {
     glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
     }
 
-  glDisableClientState(GL_COLOR_ARRAY);
   setcameraangle(false);
 #endif
   }

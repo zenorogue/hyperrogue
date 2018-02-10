@@ -2,6 +2,8 @@
 // If CAP_SHADER is 0, OpenGL 1.0 is used.
 // If CAP_SHADER is 1, GLSL is used.
 
+#define DEBUG_GL 0
+
 // Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
 
 void glError(const char* GLcall, const char* file, const int line) {
@@ -155,8 +157,10 @@ void init();
 
 int compileShader(int type, const string& s) {
   GLint status;
-  
-  // printf("===\ns%s\n===\n", s.c_str());
+
+#if DEBUG_GL  
+  printf("===\n%s\n===\n", s.c_str());
+#endif
   
   GLint shader = glCreateShader(type);
   const char *ss = s.c_str();
@@ -186,17 +190,15 @@ int compileShader(int type, const string& s) {
 
 struct GLprogram *current = NULL;
 
-enum {
-  UNIFORM_MODELVIEWPROJECTION_MATRIX,
-  UNIFORM_FOGFACTOR,
-  NUM_UNIFORMS
-  };
+static const int aPosition = 0;
+static const int aColor = 3;
+static const int aTexture = 8;
 
 struct GLprogram {
   GLuint _program;
   GLuint vertShader, fragShader;
-
-  GLint uniforms[NUM_UNIFORMS];
+  
+  GLint uMVP, uFog, uColor, tTexture;
   
   GLprogram(string vsh, string fsh) {
     _program = glCreateProgram();
@@ -210,6 +212,10 @@ struct GLprogram {
     // Attach fragment shader to program.
     glAttachShader(_program, fragShader);
     
+    glBindAttribLocation(_program, aPosition, "aPosition");
+    glBindAttribLocation(_program, aTexture, "aTexture");
+    glBindAttribLocation(_program, aColor, "aColor");
+
     GLint status;
     glLinkProgram(_program);
       
@@ -231,9 +237,15 @@ struct GLprogram {
     // glBindAttribLocation(_program, GLKVertexAttribPosition, "position"); ??
     // glBindAttribLocation(_program, GLKVertexAttribNormal, "normal"); ??
   
-    uniforms[UNIFORM_MODELVIEWPROJECTION_MATRIX] = glGetUniformLocation(_program, "modelViewProjectionMatrix");
-    uniforms[UNIFORM_FOGFACTOR] = glGetUniformLocation(_program, "fogfactor");    
-    // printf("uniforms: %d %d\n", uniforms[UNIFORM_MODELVIEWPROJECTION_MATRIX], uniforms[UNIFORM_FOGFACTOR]);
+    uMVP = glGetUniformLocation(_program, "uMVP");
+    uFog = glGetUniformLocation(_program, "uFog");
+    uColor = glGetUniformLocation(_program, "uColor");
+    tTexture = glGetUniformLocation(_program, "tTexture");
+
+    #if DEBUG_GL
+    printf("uniforms: %d %d %d %d\n", uMVP, uFog, uColor, tTexture);
+    #endif
+    // printf("attributes: %d\n", position_index);
     }
   
   ~GLprogram() {
@@ -257,13 +269,17 @@ GLprogram *programs[gmMAX];
 string stringbuilder() { return ""; }
 
 template<class... T> string stringbuilder(bool i, const string& s, T... t) { 
-  if(i) return s + stringbuilder(t...);
+  if(i) return s + 
+    #if DEBUG_GL
+    "\n" + 
+    #endif
+    stringbuilder(t...);
   else return stringbuilder(t...); 
   }
 
 void set_modelview(const glmatrix& modelview) {
   glmatrix mvp = modelview * projection;
-  glUniformMatrix4fv(current->uniforms[UNIFORM_MODELVIEWPROJECTION_MATRIX], 1, 0, mvp.as_array());
+  glUniformMatrix4fv(current->uMVP, 1, 0, mvp.as_array());
   // glmatrix nm = modelview;
   // glUniformMatrix3fv(current->uniforms[UNIFORM_NORMAL_MATRIX], 1, 0, nm[0]);
   }
@@ -274,25 +290,40 @@ GLfloat *currentvertices;
 
 void vertices(GLfloat *f, int qty) {
   currentvertices = f;
+  #if CAP_SHADER
+  glVertexAttribPointer(aPosition, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), f);
+  #else
   glVertexPointer(3, GL_FLOAT, 0, f);
+  #endif
+  // #endif
   }
 
 void texture_vertices(GLfloat *f, int qty, int stride = 2) {
+  #if CAP_SHADER
+  glVertexAttribPointer(aTexture, stride, GL_FLOAT, GL_FALSE, stride * sizeof(GLfloat), f);
+  #else
   glTexCoordPointer(stride, GL_FLOAT, 0, f);
+  #endif
   }
 
 void color_vertices(GLfloat *f, int qty) {
+  #if CAP_SHADER
+  glVertexAttribPointer(aColor, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), f);
+  #else
   glColorPointer(4, GL_FLOAT, 0, f);
+  #endif
   }
 
-void color2(int color) {
+void color2(int color, ld part = 1) {
   unsigned char *c = (unsigned char*) (&color);
-  glColor4f(c[3] / 255.0, c[2] / 255.0, c[1]/255.0, c[0] / 255.0);
-  }
-
-void color2(int color, ld part) {
-  unsigned char *c = (unsigned char*) (&color);
-  glColor4f(c[3] / 255.0 * part, c[2] / 255.0 * part, c[1]/255.0 * part, c[0] / 255.0);
+  GLfloat cols[4];
+  for(int i=0; i<4; i++) cols[i] = c[3-i] / 255.0 * part;
+  #if CAP_SHADER
+  // glUniform4fv(current->uFog, 4, cols);
+  glUniform4f(current->uColor, cols[0], cols[1], cols[2], cols[3]);
+  #else
+  glColor4f(cols[0], cols[1], cols[2], cols[3]);
+  #endif
   }
 
 void colorClear(int color) {
@@ -312,16 +343,34 @@ void switch_mode(eMode m) {
   flagtype oldflags = flags[mode] &~ flags[m];
   if(newflags & GF_TEXTURE) {
     glEnable(GL_TEXTURE_2D);
+    #if CAP_SHADER
+    glEnableVertexAttribArray(aTexture);
+    #else
     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+    #endif
     }
   if(oldflags & GF_TEXTURE) {
     glDisable(GL_TEXTURE_2D);
+    #if CAP_SHADER
+    glDisableVertexAttribArray(aTexture);
+    #else
     glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+    #endif
     }
-  if(newflags & GF_VARCOLOR)
+  if(newflags & GF_VARCOLOR) {
+    #if CAP_SHADER
+    glEnableVertexAttribArray(aColor);
+    #else
     glEnableClientState(GL_COLOR_ARRAY);
-  if(oldflags & GF_VARCOLOR)
+    #endif
+    }
+  if(oldflags & GF_VARCOLOR) {
+    #if CAP_SHADER
+    glDisableVertexAttribArray(aColor);
+    #else
     glDisableClientState(GL_COLOR_ARRAY);
+    #endif
+    }
   if(newflags & GF_LIGHTFOG) {
 #if !CAP_SHADER    
     GLfloat light_ambient[] = { 3.5, 3.5, 3.5, 1.0 };
@@ -354,15 +403,13 @@ void switch_mode(eMode m) {
 
 void fog_max(ld fogmax) {
   #if CAP_SHADER
-  glUniform1f(current->uniforms[UNIFORM_FOGFACTOR], 1 / fogmax);
+  glUniform1f(current->uFog, 1 / fogmax);
   #else
   glFogf(GL_FOG_END, fogmax);
   #endif
   }
 
 void init() {
-  glEnableClientState(GL_VERTEX_ARRAY);
-
   #if CAP_GLEW
     if(!glew) { 
       glew = true; 
@@ -383,38 +430,42 @@ void init() {
     flagtype f = flags[i];
     
     bool texture = f & GF_TEXTURE;
-    bool lightfog = f & GF_LIGHTFOG;
+    bool lfog    = f & GF_LIGHTFOG;
+    bool varcol  = f & GF_VARCOLOR;
     
     programs[i] = new GLprogram(stringbuilder(
-      // "attribute vec4 position;"
+      1,       "attribute vec4 aPosition;",
+      texture, "attribute vec2 aTexture;",
+      varcol,  "attribute vec4 aColor;",
       // "attribute vec3 normal;"
       
       1,       "varying vec4 vColor;",
       texture, "varying vec2 vTexCoord;", 
       
-      1,       "uniform mat4 modelViewProjectionMatrix;",
-      1,       "uniform float fogfactor;",
+      1,       "uniform mat4 uMVP;",
+      1,       "uniform float uFog;",
+      !varcol, "uniform vec4 uColor;",
       
       1,       "void main() {",  
-      texture,   "vTexCoord = gl_MultiTexCoord0.xy;",
-      lightfog,  "vColor = gl_Color * clamp(1.0 + gl_Vertex.z * fogfactor, 0.0, 1.0);",
-      !lightfog, "vColor = gl_Color;",
-      1,         "gl_Position = modelViewProjectionMatrix * gl_Vertex;",
+      texture,   "vTexCoord = aTexture;",
+      varcol,    "vColor = aColor;",
+      !varcol,   "vColor = uColor;",
+      lfog,      "vColor = vColor * clamp(1.0 + aPosition.z * uFog, 0.0, 1.0);",
+      1,         "gl_Position = uMVP * aPosition;",
       1,         "}"), 
       
       stringbuilder(
   
-      1,       "uniform sampler2D myTexture;",
+      1,       "uniform sampler2D tTexture;",
       1,       "varying vec4 vColor;",
       texture, "varying vec2 vTexCoord;",
       1,       "void main() {",
-      texture,   "gl_FragColor = vColor * texture2D(myTexture, vTexCoord);",
+      texture,   "gl_FragColor = vColor * texture2D(tTexture, vTexCoord);",
       !texture,  "gl_FragColor = vColor;",
       1,         "}"
-      ));
+      ));    
     }
   
-  glEnableClientState(GL_VERTEX_ARRAY);
   switch_mode(gmColored);
   programs[gmColored]->enable();
   #endif
@@ -422,7 +473,13 @@ void init() {
   #if !CAP_SHADER
   switch_mode(gmColored);
   #endif
-  }
 
+  #if CAP_SHADER
+  glEnableVertexAttribArray(aPosition);
+  #else
+  glEnableClientState(GL_VERTEX_ARRAY);
+  #endif
+  // #endif
+  }
 
 }

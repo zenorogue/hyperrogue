@@ -319,7 +319,7 @@ inline Uint8 *SDL_GetKeyState(void *v) { static Uint8 tab[1024]; return tab; }
 } */
 
 #ifndef CAP_GLEW
-#define CAP_GLEW (CAP_GL && !ISMOBILE && !ISMAC && !ISLINUX)
+#define CAP_GLEW (CAP_GL && !ISMOBILE && !ISMAC && !ISLINUX && !ISWEB)
 #endif
 
 #if CAP_GL

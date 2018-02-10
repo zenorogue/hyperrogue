@@ -2393,7 +2393,6 @@ extern purehookset hooks_fixticks;
 ld realradius();
 
 void sdltogl(SDL_Surface *txt, struct glfont_t& f, int ch);
-void glcolor2(int color);
 
 void showStartMenu();
 
