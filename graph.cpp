@@ -4465,11 +4465,6 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           if(isCentralTrap(c)) arrowtraps.push_back(c);
           break;
       
-        case waFreshGrave: case waAncientGrave:
-          zcol = wcol;
-          queuepoly(V, shCross, darkena(wcol, 0, 0xFF));
-          break;
-        
         case waGiantRug:
           queuepoly(V, shBigCarpet1, darkena(0xC09F00, 0, 0xFF));
           queuepoly(V, shBigCarpet2, darkena(0x600000, 0, 0xFF));
