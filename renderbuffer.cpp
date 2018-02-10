@@ -29,8 +29,6 @@ GLAPI void APIENTRY glDeleteFramebuffers (GLsizei n, const GLuint *framebuffers)
 #endif
 #endif
 
-bool glew   = false;
-
 renderbuffer::renderbuffer(int x, int y, bool gl) : x(x), y(y) {
 
   valid = false;
@@ -47,16 +45,6 @@ renderbuffer::renderbuffer(int x, int y, bool gl) : x(x), y(y) {
   if(gl) {
     tx = next_p2(x);
     ty = next_p2(y);
-  #if CAP_GLEW
-    if(!glew) { 
-      glew = true; 
-      GLenum err = glewInit();
-      if (GLEW_OK != err) {
-        addMessage("Failed to initialize GLEW");
-        return;
-        }
-      }
-  #endif
   
     FramebufferName = renderedTexture = depth_stencil_rb = 0;
     glGenFramebuffers(1, &FramebufferName); //

@@ -4,9 +4,6 @@
 
 // Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
 
-// #undef CAP_SHADER
-// #define CAP_SHADER 0
-
 void glError(const char* GLcall, const char* file, const int line) {
   GLenum errCode = glGetError();
   if(errCode!=GL_NO_ERROR) {
@@ -15,6 +12,8 @@ void glError(const char* GLcall, const char* file, const int line) {
   }
 
 namespace glhr {
+
+bool glew   = false;
 
 enum eMode { gmColored, gmTextured, gmVarColored, gmLightFog, gmMAX};
 
@@ -128,10 +127,6 @@ void set_modelview(const glmatrix& m) {
   glLoadMatrixf(m.as_array());
   }
 
-void init() {
-  glEnableClientState(GL_VERTEX_ARRAY);
-  }
-
 #endif
 
 // /* shaders */
@@ -161,7 +156,7 @@ void init();
 int compileShader(int type, const string& s) {
   GLint status;
   
-  printf("===\ns%s\n===\n", s.c_str());
+  // printf("===\ns%s\n===\n", s.c_str());
   
   GLint shader = glCreateShader(type);
   const char *ss = s.c_str();
@@ -205,7 +200,7 @@ struct GLprogram {
   
   GLprogram(string vsh, string fsh) {
     _program = glCreateProgram();
-    printf("creating program %d\n", _program);
+    // printf("creating program %d\n", _program);
     vertShader = compileShader(GL_VERTEX_SHADER, vsh.c_str());
     fragShader = compileShader(GL_FRAGMENT_SHADER, fsh.c_str());
   
@@ -238,7 +233,7 @@ struct GLprogram {
   
     uniforms[UNIFORM_MODELVIEWPROJECTION_MATRIX] = glGetUniformLocation(_program, "modelViewProjectionMatrix");
     uniforms[UNIFORM_FOGFACTOR] = glGetUniformLocation(_program, "fogfactor");    
-    printf("uniforms: %d %d\n", uniforms[UNIFORM_MODELVIEWPROJECTION_MATRIX], uniforms[UNIFORM_FOGFACTOR]);
+    // printf("uniforms: %d %d\n", uniforms[UNIFORM_MODELVIEWPROJECTION_MATRIX], uniforms[UNIFORM_FOGFACTOR]);
     }
   
   ~GLprogram() {
@@ -264,49 +259,6 @@ string stringbuilder() { return ""; }
 template<class... T> string stringbuilder(bool i, const string& s, T... t) { 
   if(i) return s + stringbuilder(t...);
   else return stringbuilder(t...); 
-  }
-
-void init() {
-  projection = id();
-    
-  for(int i=0; i<4; i++) {
-    flagtype f = flags[i];
-    
-    bool texture = f & GF_TEXTURE;
-    bool lightfog = f & GF_LIGHTFOG;
-    
-    programs[i] = new GLprogram(stringbuilder(
-      // "attribute vec4 position;"
-      // "attribute vec3 normal;"
-      
-      1,       "varying vec4 vColor;",
-      texture, "varying vec2 vTexCoord;", 
-      
-      1,       "uniform mat4 modelViewProjectionMatrix;",
-      1,       "uniform float fogfactor;",
-      
-      1,       "void main() {",  
-      texture,   "vTexCoord = gl_MultiTexCoord0.xy;",
-      lightfog,  "vColor = gl_Color * clamp(1.0 + gl_Vertex.z * fogfactor, 0.0, 1.0);",
-      !lightfog, "vColor = gl_Color;",
-      1,         "gl_Position = modelViewProjectionMatrix * gl_Vertex;",
-      1,         "}"), 
-      
-      stringbuilder(
-  
-      1,       "uniform sampler2D myTexture;",
-      1,       "varying vec4 vColor;",
-      texture, "varying vec2 vTexCoord;",
-      1,       "void main() {",
-      texture,   "gl_FragColor = vColor * texture2D(myTexture, vTexCoord);",
-      !texture,  "gl_FragColor = vColor;",
-      1,         "}"
-      ));
-    }
-  
-  glEnableClientState(GL_VERTEX_ARRAY);
-  switch_mode(gmColored);
-  programs[gmColored]->enable();
   }
 
 void set_modelview(const glmatrix& modelview) {
@@ -407,5 +359,70 @@ void fog_max(ld fogmax) {
   glFogf(GL_FOG_END, fogmax);
   #endif
   }
+
+void init() {
+  glEnableClientState(GL_VERTEX_ARRAY);
+
+  #if CAP_GLEW
+    if(!glew) { 
+      glew = true; 
+      printf("Initializing GLEW\n");
+      GLenum err = glewInit();
+      if (GLEW_OK != err) {
+        addMessage("Failed to initialize GLEW");
+        printf("Failed to initialize GLEW\n");
+        return;
+        }
+      }
+  #endif
+  
+  #if CAP_SHADER
+  projection = id();
+      
+  for(int i=0; i<4; i++) {
+    flagtype f = flags[i];
+    
+    bool texture = f & GF_TEXTURE;
+    bool lightfog = f & GF_LIGHTFOG;
+    
+    programs[i] = new GLprogram(stringbuilder(
+      // "attribute vec4 position;"
+      // "attribute vec3 normal;"
+      
+      1,       "varying vec4 vColor;",
+      texture, "varying vec2 vTexCoord;", 
+      
+      1,       "uniform mat4 modelViewProjectionMatrix;",
+      1,       "uniform float fogfactor;",
+      
+      1,       "void main() {",  
+      texture,   "vTexCoord = gl_MultiTexCoord0.xy;",
+      lightfog,  "vColor = gl_Color * clamp(1.0 + gl_Vertex.z * fogfactor, 0.0, 1.0);",
+      !lightfog, "vColor = gl_Color;",
+      1,         "gl_Position = modelViewProjectionMatrix * gl_Vertex;",
+      1,         "}"), 
+      
+      stringbuilder(
+  
+      1,       "uniform sampler2D myTexture;",
+      1,       "varying vec4 vColor;",
+      texture, "varying vec2 vTexCoord;",
+      1,       "void main() {",
+      texture,   "gl_FragColor = vColor * texture2D(myTexture, vTexCoord);",
+      !texture,  "gl_FragColor = vColor;",
+      1,         "}"
+      ));
+    }
+  
+  glEnableClientState(GL_VERTEX_ARRAY);
+  switch_mode(gmColored);
+  programs[gmColored]->enable();
+  #endif
+
+  #if !CAP_SHADER
+  switch_mode(gmColored);
+  #endif
+  }
+
 
 }
