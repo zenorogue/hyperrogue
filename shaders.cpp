@@ -13,9 +13,17 @@ void glError(const char* GLcall, const char* file, const int line) {
     }
   }
 
+#define CAP_VERTEXBUFFER (!ISWEB)
+
 namespace glhr {
 
 bool glew   = false;
+
+typedef const void *constvoidptr;
+
+constvoidptr current_vertices, buffered_vertices;
+
+GLuint buf_current, buf_buffered;
 
 enum eMode { gmColored, gmTextured, gmVarColored, gmLightFog, gmMAX};
 
@@ -294,34 +302,6 @@ void set_modelview(const glmatrix& modelview) {
 
 #endif
 
-GLfloat *currentvertices;
-
-void vertices(GLfloat *f, int qty) {
-  currentvertices = f;
-  #if CAP_SHADER
-  glVertexAttribPointer(aPosition, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), f);
-  #else
-  glVertexPointer(3, GL_FLOAT, 0, f);
-  #endif
-  // #endif
-  }
-
-void texture_vertices(GLfloat *f, int qty, int stride = 2) {
-  #if CAP_SHADER
-  glVertexAttribPointer(aTexture, stride, GL_FLOAT, GL_FALSE, stride * sizeof(GLfloat), f);
-  #else
-  glTexCoordPointer(stride, GL_FLOAT, 0, f);
-  #endif
-  }
-
-void color_vertices(GLfloat *f, int qty) {
-  #if CAP_SHADER
-  glVertexAttribPointer(aColor, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), f);
-  #else
-  glColorPointer(4, GL_FLOAT, 0, f);
-  #endif
-  }
-
 void color2(int color, ld part = 1) {
   unsigned char *c = (unsigned char*) (&color);
   GLfloat cols[4];
@@ -421,6 +401,7 @@ void switch_mode(eMode m) {
     }
   mode = m;
   GLERR("after_switch_mode");
+  current_vertices = NULL;
   }
 
 void fog_max(ld fogmax) {
@@ -503,6 +484,179 @@ void init() {
   glEnableClientState(GL_VERTEX_ARRAY);
   #endif
   // #endif
+
+  #if CAP_VERTEXBUFFER
+  glGenBuffers(1, &buf_current);
+  glGenBuffers(1, &buf_buffered);
+  current_vertices = NULL;
+  buffered_vertices = (void*) &buffered_vertices; // point to nothing
+  glBindBuffer(GL_ARRAY_BUFFER, buf_current);
+  #endif
+  }
+
+hyperpoint gltopoint(const glvertex& t) {
+  hyperpoint h;
+  h[0] = t[0]; h[1] = t[1]; h[2] = t[2];
+  return h;
+  }
+
+glvertex pointtogl(const hyperpoint& t) {
+  glvertex h;
+  h[0] = t[0]; h[1] = t[1]; h[2] = t[2];
+  return h;
+  }
+
+struct colored_vertex {
+  glvec3 coords;
+  glvec4 color;
+  colored_vertex(GLfloat x, GLfloat y, GLfloat r, GLfloat g, GLfloat b) {
+    coords[0] = x;
+    coords[1] = y;
+    coords[2] = stereo::scrdist;
+    color[0] = r;
+    color[1] = g;
+    color[2] = b;
+    color[3] = 1;
+    }
+  };
+
+struct textured_vertex {
+  glvec3 coords;
+  glvec3 texture;
+  };
+
+struct ct_vertex {
+  glvec3 coords;
+  glvec4 color;
+  glvec3 texture;
+  ct_vertex(const hyperpoint& h, ld x1, ld y1, ld col) {
+    coords = pointtogl(h);
+    texture[0] = x1;
+    texture[1] = y1;
+    color[0] = color[1] = color[2] = col;
+    color[3] = 1;
+    }
+  };
+
+#if CAP_VERTEXBUFFER
+template<class T> void bindbuffer(T& v) {
+  if(current_vertices == buffered_vertices) {
+    glBindBuffer(GL_ARRAY_BUFFER, buf_current);
+    }
+  current_vertices = &v[0];
+  glBufferData(GL_ARRAY_BUFFER, size(v) * sizeof(v[0]), &v[0], GL_DYNAMIC_DRAW);    
+  }
+
+#define PTR(attrib, q, field) \
+  glVertexAttribPointer(attrib, q, GL_FLOAT, GL_FALSE, sizeof(v[0]), (void*) ((char*) &v[0].field - (char*) &v[0]));
+
+#endif
+
+void vertices(const vector<glvertex>& v) {
+  #if CAP_VERTEXBUFFER
+  if(&v[0] == buffered_vertices) {
+    if(&v[0] == current_vertices) return;
+    current_vertices = buffered_vertices;
+    glBindBuffer(GL_ARRAY_BUFFER, buf_buffered);
+    glBufferData(GL_ARRAY_BUFFER, size(v) * sizeof(v[0]), &v[0], GL_STATIC_DRAW);
+    glVertexAttribPointer(glhr::aPosition, 3, GL_FLOAT, GL_FALSE, sizeof(glvertex), 0);
+    return;
+    }
+  bindbuffer(v);
+  glVertexAttribPointer(glhr::aPosition, 3, GL_FLOAT, GL_FALSE, sizeof(glvertex), 0);
+  #else
+  if(current_vertices == &v[0]) return;
+  current_vertices = &v[0];
+  #if CAP_SHADER
+  glVertexAttribPointer(aPosition, 3, GL_FLOAT, GL_FALSE, sizeof(glvertex), &v[0]);
+  #else
+  glVertexPointer(3, GL_FLOAT, sizeof(glvertex), &v[0]);
+  #endif
+  #endif
+  }
+
+void vertices_texture(const vector<glvertex>& v, const vector<glvertex>& t) {
+  #if CAP_TEXTURE
+  vertices(v);
+  #if CAP_SHADER
+  glVertexAttribPointer(aTexture, 3, GL_FLOAT, GL_FALSE, sizeof(glvertex), &t[0]);
+  #else
+  glTexCoordPointer(stride, GL_FLOAT, 0, &v[0]);
+  #endif
+  #endif
+  }
+
+void prepare(vector<colored_vertex>& v) {
+  #if CAP_VERTEXBUFFER
+  bindbuffer(v);
+  PTR(glhr::aPosition, 3, coords);
+  PTR(glhr::aColor, 4, color);
+  #else
+  if(current_vertices == &v[0]) return;
+  current_vertices = &v[0];
+  #if CAP_SHADER
+  glVertexAttribPointer(aPosition, 3, GL_FLOAT, GL_FALSE, sizeof(colored_vertex), &v[0].coords);
+  glVertexAttribPointer(aColor, 4, GL_FLOAT, GL_FALSE, sizeof(colored_vertex), &v[0].color);
+  #else
+  glVertexPointer(3, GL_FLOAT, sizeof(colored_vertex), &v[0].coords);
+  glVertexPointer(3, GL_FLOAT, sizeof(colored_vertex), &v[0].color);
+  #endif
+  #endif
+  }
+
+void prepare(vector<textured_vertex>& v) {
+  #if CAP_VERTEXBUFFER
+  bindbuffer(v);
+  PTR(glhr::aPosition, 3, coords);
+  PTR(glhr::aTexture, 2, texture);
+  #else
+  if(current_vertices == &v[0]) return;
+  current_vertices = &v[0];
+  #if CAP_SHADER
+  glVertexAttribPointer(aPosition, 3, GL_FLOAT, GL_FALSE, sizeof(textured_vertex), &v[0].coords);
+  glVertexAttribPointer(aTexture, 3, GL_FLOAT, GL_FALSE, sizeof(textured_vertex), &v[0].texture);
+  #else
+  glVertexPointer(3, GL_FLOAT, sizeof(textured_vertex), &v[0].coords);
+  glVertexPointer(3, GL_FLOAT, sizeof(textured_vertex), &v[0].texture);
+  #endif
+  #endif
+  // color2(col);
+  }
+
+void prepare(vector<ct_vertex>& v) {
+  #if CAP_VERTEXBUFFER
+  bindbuffer(v);
+  PTR(glhr::aPosition, 3, coords);
+  PTR(glhr::aColor, 4, color);
+  PTR(glhr::aTexture, 2, texture);
+  #else
+  if(current_vertices == &v[0]) return;
+  current_vertices = &v[0];
+  #if CAP_SHADER
+  glVertexAttribPointer(aPosition, 3, GL_FLOAT, GL_FALSE, sizeof(ct_vertex), &v[0].coords);
+  glVertexAttribPointer(aColor, 4, GL_FLOAT, GL_FALSE, sizeof(ct_vertex), &v[0].color);
+  glVertexAttribPointer(aTexture, 3, GL_FLOAT, GL_FALSE, sizeof(ct_vertex), &v[0].texture);
+  #else
+  glVertexPointer(3, GL_FLOAT, sizeof(ct_vertex), &v[0].coords);
+  glVertexPointer(3, GL_FLOAT, sizeof(ct_vertex), &v[0].texture);
+  glVertexPointer(3, GL_FLOAT, sizeof(ct_vertex), &v[0].color);
+  #endif
+  #endif
+  }
+
+void store_in_buffer(vector<glvertex>& v) {
+#if CAP_VERTEXBUFFER
+  if(!buf_buffered) {
+    printf("no buffer yet\n");
+    return;
+    }
+  printf("storing %d in buffer: %p\n", size(v), &v[0]);
+  current_vertices = buffered_vertices = &v[0];
+  glBindBuffer(GL_ARRAY_BUFFER, buf_buffered);
+  glVertexAttribPointer(glhr::aPosition, 3, GL_FLOAT, GL_FALSE, sizeof(glvertex), 0);
+  glBufferData(GL_ARRAY_BUFFER, size(v) * sizeof(glvertex), &v[0], GL_STATIC_DRAW);
+  printf("Stored.\n");
+#endif
   }
 
 }

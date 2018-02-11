@@ -243,9 +243,6 @@ int color_alpha = 128;
 
 int gsplits = 1;
 
-template<class T> array<T, 3> make_array(T a, T b, T c) { array<T,3> x; x[0] = a; x[1] = b; x[2] = c; return x; }
-template<class T> array<T, 2> make_array(T a, T b) { array<T,2> x; x[0] = a; x[1] = b; return x; }
-
 void mapTextureTriangle(textureinfo &mi, array<hyperpoint, 3> v, int splits = gsplits) {
 
   if(splits) {
@@ -258,16 +255,13 @@ void mapTextureTriangle(textureinfo &mi, array<hyperpoint, 3> v, int splits = gs
     }
     
   for(int i=0; i<3; i++) {
-    for(int j=0; j<3; j++) 
-      mi.vertices.push_back(v[i][j]);
+    mi.vertices.push_back(glhr::pointtogl(v[i]));
     hyperpoint inmodel;
     applymodel(mi.M * v[i], inmodel);
     inmodel = itt * inmodel;
     inmodel[0] *= vid.radius * 1. / vid.scrsize;
     inmodel[1] *= vid.radius * 1. / vid.scrsize;
-    mi.tvertices.push_back((inmodel[0]+1)/2);
-    mi.tvertices.push_back((inmodel[1]+1)/2);
-    mi.tvertices.push_back(0);
+    mi.tvertices.push_back(make_array<GLfloat>((inmodel[0]+1)/2, (inmodel[1]+1)/2, 0));
     }  
   }
 
@@ -325,7 +319,7 @@ bool apply(cell *c, const transmatrix &V, int col) {
     
     qfi.spin = applyPatterndir(c, si);
     
-    int n = mi.vertices.size() / 3;
+    int n = mi.vertices.size();
 
     qfi.special = false;
     qfi.shape = &shFullFloor[ctof(c)];
@@ -334,10 +328,10 @@ bool apply(cell *c, const transmatrix &V, int col) {
     if(chasmg == 2) return false;
     else if(chasmg && wmspatial) {
       if(detaillevel == 0) return false;
-      queuetable(V * qfi.spin, &mi.vertices[0], n, mesh_color, recolor(c->land == laCocytus ? 0x080808FF : 0x101010FF), PPR_LAKEBOTTOM);
+      queuetable(V * qfi.spin, mi.vertices, n, mesh_color, recolor(c->land == laCocytus ? 0x080808FF : 0x101010FF), PPR_LAKEBOTTOM);
       }
     else {
-      queuetable(V * qfi.spin, &mi.vertices[0], n, mesh_color, recolor(col), PPR_FLOOR);
+      queuetable(V * qfi.spin, mi.vertices, n, mesh_color, recolor(col), PPR_FLOOR);
       }
         
     lastptd().u.poly.tinf = &mi;
@@ -348,7 +342,7 @@ bool apply(cell *c, const transmatrix &V, int col) {
       
     if(texture::saving) {
       // create a nicer aura for saved texture
-      for(int i=0; i<size(mi.tvertices); i += 9) {
+      for(int i=0; i<size(mi.tvertices); i += 3) {
         ld p[3];
         while(true) {
           p[0] = hrandf();
@@ -358,12 +352,12 @@ bool apply(cell *c, const transmatrix &V, int col) {
           }
         ld v[2] = {0,0};
         for(int j=0; j<2; j++) for(int k=0; k<3; k++)
-          v[j] += mi.tvertices[3*k+j] * p[k];
+          v[j] += mi.tvertices[i+k][j] * p[k];
   
         int vi[2] = {int(v[0] * twidth), int(v[1] * twidth)};
   
         col = get_texture_pixel(vi[0], vi[1]);
-        hyperpoint h = hpxyz(mi.vertices[i], mi.vertices[i+1], mi.vertices[i+2]);
+        hyperpoint h = glhr::gltopoint(mi.vertices[i]);
         addaura(V*h, col, 0);
         }
       }
@@ -464,12 +458,12 @@ void saveFullTexture() {
 
 bool newmove = false;
 
+vector<glhr::textured_vertex> rtver(4);
+
 void drawRawTexture() {
   glhr::be_textured();
   glhr::color2(0xFFFFFF20);
-  glhr::set_modelview(glhr::translate(0, 0, stereo::scrdist));
   glBindTexture(GL_TEXTURE_2D, textureid);
-  vector<GLfloat> tver, sver;
   for(int i=0; i<4; i++) {
     int cx[4] = {2, -2, -2, 2};
     int cy[4] = {2, 2, -2, -2};
@@ -477,15 +471,13 @@ void drawRawTexture() {
     int y = cy[i];
     hyperpoint inmodel = hpxyz(x, y, 1);
     inmodel = itt * inmodel;
-    tver.push_back((inmodel[0]+1)/2);
-    tver.push_back((inmodel[1]+1)/2);
-    tver.push_back(0);
-    sver.push_back(x * vid.scrsize);
-    sver.push_back(y * vid.scrsize);
-    sver.push_back(0);            
+    rtver[i].texture[0] = (inmodel[0]+1)/2;
+    rtver[i].texture[1] = (inmodel[1]+1)/2;
+    rtver[i].coords[0] = x * vid.scrsize;
+    rtver[i].coords[1] = y * vid.scrsize;
     }
-  glhr::vertices(&sver[0], 4);
-  glhr::texture_vertices(&tver[0], 4, 3);
+  glhr::set_modelview(glhr::translate(0, 0, stereo::scrdist));
+  glhr::prepare(rtver);
   glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
   }
 
@@ -1263,7 +1255,7 @@ void remap(eTextureState old_tstate, eTextureState old_tstate_max) {
         auto& mi = texture_map_orig.at(oldid);  
         int ncurr = size(mi.tvertices);  
         int ntarget = ncurr * c->type / mi.current_type;
-        vector<GLfloat> new_tvertices = mi.tvertices;
+        vector<glvertex> new_tvertices = mi.tvertices;
         new_tvertices.resize(ntarget);
         for(int i=ncurr; i<ntarget; i++) {
           new_tvertices[i] = new_tvertices[i - ncurr];

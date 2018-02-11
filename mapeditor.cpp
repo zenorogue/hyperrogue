@@ -1128,7 +1128,7 @@ namespace mapeditor {
       dsCur->rots = 1;
       
       for(auto& v: symmetriesAt)
-        if(p.tab == &ourshape[v[0]*3]) {
+        if(v[0] == p.offset) {
           dsCur->rots = v[1];
           dsCur->sym = v[2] == 2;
           }
@@ -1136,7 +1136,7 @@ namespace mapeditor {
       int d = dsCur->rots * (dsCur->sym ? 2 : 1);
       
       for(int i=0; i < cnt/d; i++)
-        dsCur->list.push_back(p.V * hpxyz(p.tab[3*i], p.tab[3*i+1], p.tab[3*i+2]));
+        dsCur->list.push_back(p.V * glhr::gltopoint((*p.tab)[i+p.offset]));
       
       layer++;      
       if(layer == USERLAYERS) break;

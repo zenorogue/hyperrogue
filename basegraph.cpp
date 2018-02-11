@@ -263,8 +263,8 @@ void setGLProjection(int col) {
 
   GLERR("setGLProjection #1");
 
-#ifndef GLES_ONLY  
   glEnable(GL_BLEND);
+#ifndef GLES_ONLY  
   if(vid.antialias & AA_LINES) {
     glEnable(GL_LINE_SMOOTH);
     glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
@@ -443,8 +443,6 @@ void init_glfont(int size) {
   GLERR("initfont");
   }
 
-GLfloat tver[24];
-
 int gl_width(int size, const char *s) {
   int gsiz = size;
   if(size > vid.fsize || size > 72) gsiz = 72;
@@ -467,8 +465,27 @@ int gl_width(int size, const char *s) {
   return x;
   }
 
-bool gl_print(int x, int y, int shift, int size, const char *s, int color, int align) {
+namespace glhr { void texture_vertices(GLfloat *f, int qty, int stride = 2) {
+  #if CAP_SHADER
+  glVertexAttribPointer(aTexture, stride, GL_FLOAT, GL_FALSE, stride * sizeof(GLfloat), f);
+  #else
+  glTexCoordPointer(stride, GL_FLOAT, 0, f);
+  #endif
+  } 
+ void oldvertices(GLfloat *f, int qty) {
+  #if CAP_SHADER
+  glVertexAttribPointer(aPosition, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), f);
+  #else
+  glVertexPointer(3, GL_FLOAT, 0, f);
+  #endif
+  // #endif
+  }
+ }
 
+GLfloat otver[24];
+vector<glhr::textured_vertex> tver(4);
+
+bool gl_print(int x, int y, int shift, int size, const char *s, int color, int align) {
   int gsiz = size;
   if(size > vid.fsize || size > 72) gsiz = 72;
 
@@ -512,12 +529,16 @@ bool gl_print(int x, int y, int shift, int size, const char *s, int color, int a
       stereo::set_mask(ed);
       glBindTexture(GL_TEXTURE_2D, f.textures[tabid]);
 
-      tver[1] = tver[10] = -hi;
-      tver[6] = tver[9] = wi;
-      tver[12+3] = tver[12+5] = fy;
-      tver[12+4] = tver[12+6] = fx;
-      glhr::vertices(tver, 4);
-      glhr::texture_vertices(tver+12, 4);
+      tver[0].coords[1] = -hi;
+      tver[3].coords[1] = -hi;
+      tver[2].coords[0] = wi;
+      tver[3].coords[0] = wi;
+      tver[1].texture[1] = fy;
+      tver[2].texture[1] = fy;
+      tver[2].texture[0] = fx;
+      tver[3].texture[0] = fx;
+      
+      glhr::prepare(tver);
       glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
       }
     
@@ -530,6 +551,7 @@ bool gl_print(int x, int y, int shift, int size, const char *s, int color, int a
  
   return clicked;
   }
+
 #endif
 
 purehookset hooks_resetGL;
@@ -872,7 +894,7 @@ void drawCircle(int x, int y, int size, int color) {
   if(vid.usingGL) {
     glhr::be_nontextured();
     glhr::set_modelview(glhr::id());
-    qglcoords = 0;
+    glcoords.clear();
     glhr::color2(color);
     x -= vid.xcenter; y -= vid.ycenter;
     int pts = size * 4;
@@ -880,13 +902,9 @@ void drawCircle(int x, int y, int size, int color) {
     if(ISMOBILE && pts > 72) pts = 72;
     for(int r=0; r<pts; r++) {
       float rr = (M_PI * 2 * r) / pts;
-      glcoords[r][0] = x + size * sin(rr);
-      glcoords[r][1] = y + size * cos(rr);
-      glcoords[r][2] = stereo::scrdist;
+      glcoords.push_back(make_array<GLfloat>(x + size * sin(rr), y + size * cos(rr), stereo::scrdist));
       }
-
-    qglcoords = pts; 
-    activateGlcoords();
+    glhr::vertices(glcoords);
     glDrawArrays(GL_LINE_LOOP, 0, pts);
     return;
     }
@@ -1057,12 +1075,12 @@ void setvideomode() {
   if(vid.usingGL) {
     flags = SDL_OPENGL | SDL_HWSURFACE | SDL_GL_DOUBLEBUFFER;
     SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 1);
-
+#if !ISWEB
     if(vid.antialias & AA_MULTI) {
       SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
       SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, (vid.antialias & AA_MULTI16) ? 16 : 4);
       }
-
+#endif
     }
 #endif
 
@@ -1088,10 +1106,12 @@ void setvideomode() {
 
 #if CAP_GL
   if(vid.usingGL) {
+#if !ISWEB
     if(vid.antialias & AA_MULTI) 
       glEnable(GL_MULTISAMPLE);
     else
       glDisable(GL_MULTISAMPLE);
+#endif
   
     glViewport(0, 0, vid.xres, vid.yres);
     glhr::init();

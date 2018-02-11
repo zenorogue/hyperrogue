@@ -75,8 +75,15 @@ renderbuffer::renderbuffer(int x, int y, bool gl) : x(x), y(y) {
     glBindRenderbuffer(GL_RENDERBUFFER, depth_stencil_rb);
     GLERR("BindRenderbuffer");
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, tx, ty);
+    bool has_depth = true;
+    if(glGetError() != GL_NO_ERROR) {
+      printf("Could not create: GL_DEPTH24_STENCIL8");
+      glRenderbufferStorage(GL_RENDERBUFFER, GL_STENCIL_INDEX8, tx, ty);
+      has_depth = false;
+      }
     GLERR("RbS");
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depth_stencil_rb);
+    if(has_depth)
+      glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depth_stencil_rb);
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, depth_stencil_rb);
     GLERR("FrRb");
     

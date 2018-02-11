@@ -2206,8 +2206,8 @@ void sumaura(int v) {
     }  
   aurac[AURA][v] = aurac[0][v];
   }
-  
-float coltab[4][4];
+
+vector<glhr::colored_vertex> auravertices;
 
 void drawaura() {
   if(!haveaura()) return;
@@ -2270,12 +2270,7 @@ void drawaura() {
 #endif
 
 #if CAP_GL
-  glhr::switch_mode(glhr::gmVarColored);
-  glhr::set_modelview(glhr::id());
   setcameraangle(true);
-  
-  glhr::color_vertices(coltab[0], 4);
-  activateGlcoords();
   
   float cx[AURA+1][11][5];
 
@@ -2301,22 +2296,21 @@ void drawaura() {
       cx[r][z][u+2] = bak[u] + (aurac[rm][u] / (aurac[rm][3]+.1) - bak[u]) * cmul[z];
     }
   
-  for(int u=0; u<4; u++) glcoords[u][2] = stereo::scrdist;
-  for(int u=0; u<4; u++) coltab[u][3] = 1;
-
+  auravertices.clear();
   for(int r=0; r<AURA; r++) for(int z=0;z<10;z++) {
-    for(int c=0; c<4; c++) {
-      int br = (c == 1 || c == 2) ? r+1 : r;
-      int bz = (c == 3 || c == 2) ? z+1 : z;
-      glcoords[c][0] = cx[br][bz][0]; 
-      glcoords[c][1] = cx[br][bz][1];   
-      coltab[c][0] = min<float>(cx[br][bz][2], 1);
-      coltab[c][1] = min<float>(cx[br][bz][3], 1); 
-      coltab[c][2] = min<float>(cx[br][bz][4], 1); 
+    for(int c=0; c<6; c++) {
+      int br = (c == 1 || c == 3 || c == 5) ? r+1 : r;
+      int bz = (c == 2 || c == 4 || c == 5) ? z+1 : z;
+      auravertices.emplace_back(
+        cx[br][bz][0], cx[br][bz][1], cx[br][bz][2], cx[br][bz][3], cx[br][bz][4]
+        );
       }
-      
-    glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
     }
+  glhr::switch_mode(glhr::gmVarColored);
+  glhr::set_modelview(glhr::id());
+  glhr::prepare(auravertices);
+  glDrawArrays(GL_TRIANGLES, 0, size(auravertices));    
+
 
   setcameraangle(false);
 #endif
@@ -3118,7 +3112,7 @@ void warpfloor(cell *c, const transmatrix& V, int col, int prio, bool warp) {
   if(shmup::on || nonbitrunc) warp = false;
 #if CAP_TEXTURE
   if(qfi.tinf) {
-    queuetable(V*qfi.spin, &qfi.tinf->vertices[0], size(qfi.tinf->vertices) / 3, 0, texture::recolor(col), prio);
+    queuetable(V*qfi.spin, qfi.tinf->vertices, size(qfi.tinf->vertices), 0, texture::recolor(col), prio);
     lastptd().u.poly.tinf = qfi.tinf;
     }
   else 

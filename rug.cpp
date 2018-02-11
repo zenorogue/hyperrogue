@@ -995,7 +995,7 @@ bool project_ods(hyperpoint azeq, hyperpoint& h1, hyperpoint& h2, bool eye) {
   }
 #endif
 
-vector<GLfloat> vertex_array, tvertex_array, color_array;
+vector<glhr::ct_vertex> ct_array;
 
 void drawTriangle(triangle& t) {
   using namespace hyperpoint_vec;  
@@ -1070,21 +1070,8 @@ void drawTriangle(triangle& t) {
   
   ld col = (2 + hc[0]/hch) / 3;
   
-  #if !CAP_SHADER
-  glNormal3f(hc[0]/hch,hc[1]/hch,hc[2]/hch);
-  #endif
-  
-  for(int i: {0,1,2}) {
-    tvertex_array.push_back(t.m[i]->x1);
-    tvertex_array.push_back(t.m[i]->y1);
-    for(int j: {0,1,2})
-      vertex_array.push_back(h[i][j]);
-    
-    #if CAP_SHADER
-    for(int a=0; a<3; a++) color_array.push_back(col);
-    color_array.push_back(1);
-    #endif
-    }
+  for(int i: {0,1,2}) 
+    ct_array.emplace_back(h[i], t.m[i]->x1, t.m[i]->y1, col);
   }
 
 renderbuffer *glbuf;
@@ -1143,9 +1130,7 @@ void drawRugScene() {
   
   for(int ed=stereo::active() && stereo::mode != stereo::sODS ? -1 : 0; ed < 2; ed += 2) {
     use_precompute = false;
-    vertex_array.clear();
-    tvertex_array.clear();
-    color_array.clear();
+    ct_array.clear();
     stereo::set_mask(ed), stereo::set_viewport(ed);
     if(ed == 1 && stereo::mode == stereo::sAnaglyph)
       glClear(GL_DEPTH_BUFFER_BIT);
@@ -1190,18 +1175,13 @@ void drawRugScene() {
       gwhere == gElliptic && rug_perspective ? 4 :
       100
       );
-  
-    glhr::set_modelview(glhr::id());
-    
+      
     for(int t=0; t<size(triangles); t++)
       drawTriangle(triangles[t]);
       
-    glhr::vertices(&vertex_array[0], 0);
-    glhr::texture_vertices(&tvertex_array[0], 0);
-#if CAP_SHADER
-    glhr::color_vertices(&color_array[0], 0);
-#endif    
-    glDrawArrays(GL_TRIANGLES, 0, size(vertex_array)/3);
+    glhr::set_modelview(glhr::id());
+    glhr::prepare(ct_array);
+    glDrawArrays(GL_TRIANGLES, 0, size(ct_array));
 
     stereo::set_mask(0);
     }
@@ -1293,6 +1273,8 @@ void move_forward(ld distance) {
   else model_distance /= exp(distance);
   }
 
+#define CAP_HOLDKEYS CAP_SDL // && !ISWEB)
+
 bool handlekeys(int sym, int uni) {
   if(uni == '4') {
 #if CAP_ODS
@@ -1321,7 +1303,7 @@ bool handlekeys(int sym, int uni) {
     apply_rotation(rotmatrix(M_PI/2, 0, 2));
     return true;
     }
-#if !CAP_SDL
+#if !CAP_HOLDKEYS
   else if(uni == SDLK_PAGEUP || uni == '[') {
     move_forward(.1);
     return true;
@@ -1330,6 +1312,12 @@ bool handlekeys(int sym, int uni) {
     move_forward(-.1);
     return true;
     }
+  else if(uni == SDLK_HOME)  { apply_rotation(rotmatrix(.1, 0, 1)); return true; }
+  else if(uni == SDLK_END)   { apply_rotation(rotmatrix(.1, 1, 0)); return true; }
+  else if(uni == SDLK_DOWN)  { apply_rotation(rotmatrix(.1, 2, 1)); return true; }
+  else if(uni == SDLK_UP)    { apply_rotation(rotmatrix(.1, 1, 2)); return true; }
+  else if(uni == SDLK_LEFT)  { apply_rotation(rotmatrix(.1, 2, 0)); return true; }
+  else if(uni == SDLK_RIGHT) { apply_rotation(rotmatrix(.1, 0, 2)); return true; }
 #endif
   else return false;
   }
@@ -1362,7 +1350,7 @@ void actDraw() {
     }        
   #endif
 
-  #if CAP_SDL
+  #if CAP_HOLDKEYS
   Uint8 *keystate = SDL_GetKeyState(NULL);
   int qm = 0;
   double alpha = (ticks - lastticks) / 1000.0;

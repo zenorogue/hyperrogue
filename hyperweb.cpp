@@ -11,6 +11,7 @@
 #define CAP_SDLTTF 0
 #define CAP_SHMUP 0
 #define CAP_RUG 1
+#define GLES_ONLY
 
 #ifdef FAKEWEB
 void mainloopiter();
@@ -62,7 +63,7 @@ void showDemo() {
   dialog::addItem(XLAT("play"), 'f');
   dialog::addItem(XLAT("tutorial"), 'T');
   dialog::addItem(XLAT("help"), 'h'); dialog::lastItem().keycaption += " / F1";
-  dialog::addItem(XLAT("toggle high detail"), 'a');
+  // dialog::addItem(XLAT("toggle high detail"), 'a');
   dialog::addBreak(100);
 
   dialog::addTitle("highlights", 0xC00000, 120);
@@ -110,7 +111,8 @@ void showDemo() {
   }
 
 void initweb() {
-  toggleanim(false);
-  // pushScreen(showDemo);
+  rug::renderonce = true;
+  // toggleanim(false);
+  pushScreen(showDemo);
   }
 

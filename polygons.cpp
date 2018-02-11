@@ -108,45 +108,16 @@ SDL_Surface *aux;
 vector<polytodraw*> ptds2;
 #define POLYMAX 60000
 
-GLfloat glcoords[POLYMAX][3];
-int qglcoords;
-
-GLfloat *ourshape = NULL;
+vector<array<GLfloat, 3>> glcoords, ourshape;
 
 void initPolyForGL() {
+
+  ourshape.clear();
   
-  if(ourshape) delete[] ourshape;
-  ourshape = new GLfloat[3 * qhpc];
+  for(int i=0; i<qhpc; i++)
+    ourshape.push_back(make_array<GLfloat>(hpc[i][0], hpc[i][1], hpc[i][2]));
   
-  // GLfloat ourshape[3*qhpc];
-  
-  int id = 0;
-  for(int i=0; i<qhpc; i++) {
-    ourshape[id++] = hpc[i][0];
-    ourshape[id++] = hpc[i][1];
-    ourshape[id++] = hpc[i][2];
-    }
-
-#if CAP_GL  
-  glhr::currentvertices = NULL;
-#endif
-  }
-#endif
-
-#if CAP_GL
-
-GLuint shapebuffer;
-
-extern GLfloat *ourshape;
-
-void activateShapes() {
-  if(glhr::currentvertices != ourshape) {
-    glhr::vertices(ourshape, qhpc);
-    }
-  }
-
-void activateGlcoords() {
-  glhr::vertices(glcoords[0], qglcoords);
+  glhr::store_in_buffer(ourshape);
   }
 #endif
 
@@ -157,21 +128,13 @@ int polyx[POLYMAX], polyxr[POLYMAX], polyy[POLYMAX];
 
 int poly_flags;
 
-hyperpoint gltopoint(GLfloat t[3]) {
-  hyperpoint h;
-  h[0] = t[0]; h[1] = t[1]; h[2] = t[2];
-  return h;
-  }
-
 void add1(const hyperpoint& H) {
-  for(int i=0; i<3; i++) glcoords[qglcoords][i] = H[i];
+  glcoords.push_back(make_array<GLfloat>(H[0], H[1], H[2])); 
   }  
 
 int spherespecial, spherephase;
 
 void addpoint(const hyperpoint& H) {
-  if(qglcoords >= POLYMAX) return;
-
   if(true) {
     hyperpoint Hscr;
     applymodel(H, Hscr);
@@ -201,11 +164,10 @@ void addpoint(const hyperpoint& H) {
     glcoords[qglcoords][2] += vid.alpha;
     // glcoords[qglcoords][2] = 1; // EUCSCALE;
     } */
-  qglcoords++;
   }
 
 void coords_to_poly() {
-  polyi = qglcoords;
+  polyi = size(glcoords);
   for(int i=0; i<polyi; i++) {
     // printf("%lf %lf\n", double(glcoords[i][0]), double(glcoords[i][1]));
 
@@ -215,11 +177,9 @@ void coords_to_poly() {
     }
   }
 
-void addpoly(const transmatrix& V, GLfloat *tab, int cnt) {
-  while(cnt--) {
-    addpoint(V*gltopoint(tab));
-    tab += 3;
-    }
+void addpoly(const transmatrix& V, const vector<glvertex> &tab, int ofs, int cnt) {
+  for(int i=ofs; i<ofs+cnt; i++)
+    addpoint(V*glhr::gltopoint(tab[i]));
   }
 
 #if CAP_SDLGFX
@@ -241,9 +201,9 @@ void filledPolygonColorI(SDL_Surface *s, int* px, int *py, int polyi, int col) {
 #endif
 
 #if CAP_TEXTURE
-void drawTexturedTriangle(SDL_Surface *s, int *px, int *py, GLfloat *tv, int col) {
+void drawTexturedTriangle(SDL_Surface *s, int *px, int *py, glvertex *tv, int col) {
   transmatrix source = {{{ld(px[0]),ld(px[1]),ld(px[2])}, {ld(py[0]),ld(py[1]),ld(py[2])}, {1,1,1}}};
-  transmatrix target = {{{tv[0],tv[3],tv[6]}, {tv[1],tv[4],tv[7]}, {1,1,1}}};
+  transmatrix target = {{{tv[0][0],tv[1][0],tv[2][0]}, {tv[0][1],tv[1][1],tv[2][1]}, {1,1,1}}};
   transmatrix isource = inverse(source);
   int minx = px[0], maxx = px[0];
   int miny = py[0], maxy = py[0];
@@ -299,36 +259,41 @@ void glapplymatrix(const transmatrix& V) {
   glhr::set_modelview(glhr::as_glmatrix(mat));
   }
 
-int tinfshift;
-
-void gldraw(int useV, const transmatrix& V, int ps, int pq, int col, int outline, int flags, textureinfo *tinf) {
+void setmatrix(int useV, const transmatrix& V) {
+  if(useV == 1) {
+    glapplymatrix(V);
+    }
+  else if(useV == 3) {
+    GLfloat mat[16] = {
+      1, 0, 0, 0,
+      0, 1, 0, 0,
+      0, 0, 0, 0,
+      0, 0, stereo::scrdist, 1
+      };
+    glhr::set_modelview(glhr::as_glmatrix(mat));
+    }
+  else
+    glhr::set_modelview(glhr::id());
+  }
+  
+void gldraw(int useV, const transmatrix& V, const vector<glvertex>& v, int ps, int pq, int col, int outline, int flags, textureinfo *tinf) {
 
   if(tinf) {
+    #if CAP_TEXTURE
     glhr::be_textured();
     glBindTexture(GL_TEXTURE_2D, tinf->texture_id);
-    glhr::texture_vertices(&tinf->tvertices[tinfshift], 0, 3);
+    glhr::vertices_texture(v, tinf->tvertices);
+    #endif
     }
-  else glhr::be_nontextured();
+  else { 
+    glhr::vertices(v);
+    glhr::be_nontextured();
+    }
   
   for(int ed = stereo::active() ? -1 : 0; ed<2; ed+=2) {
     if(ed) stereo::set_projection(ed), stereo::set_viewport(ed);
     bool draw = col;
-    again:
-    
-    if(useV == 1) {
-      glapplymatrix(V);
-      }
-    else if(useV == 3) {
-      GLfloat mat[16] = {
-        1, 0, 0, 0,
-        0, 1, 0, 0,
-        0, 0, 0, 0,
-        0, 0, stereo::scrdist, 1
-        };
-      glhr::set_modelview(glhr::as_glmatrix(mat));
-      }
-    else
-      glhr::set_modelview(glhr::id());
+    setmatrix(useV, V);
 
     if(draw) {
       glEnable(GL_STENCIL_TEST);
@@ -346,16 +311,17 @@ void gldraw(int useV, const transmatrix& V, int ps, int pq, int col, int outline
         glStencilFunc( GL_NOTEQUAL, 1, 1);
         GLfloat xx = vid.xres;
         GLfloat yy = vid.yres;
-        GLfloat scr[12] = {
-          -xx, -yy, stereo::scrdist, +xx, -yy, stereo::scrdist, 
-          +xx, +yy, stereo::scrdist, -xx, +yy, stereo::scrdist
+        vector<glvertex> scr = {
+          make_array<GLfloat>(-xx, -yy, stereo::scrdist), 
+          make_array<GLfloat>(+xx, -yy, stereo::scrdist), 
+          make_array<GLfloat>(+xx, +yy, stereo::scrdist), 
+          make_array<GLfloat>(-xx, +yy, stereo::scrdist)
           };
-        GLfloat *cur = glhr::currentvertices;
-        glhr::vertices(scr, 4);
+        glhr::vertices(scr);
         glhr::set_modelview(glhr::id());
         glDrawArrays(tinf ? GL_TRIANGLES : GL_TRIANGLE_FAN, 0, 4);
-        glhr::vertices(cur, 0);
-        draw = false; goto again;
+        glhr::vertices(v);
+        setmatrix(useV, V);
         }
       else { 
         stereo::set_mask(ed);
@@ -408,7 +374,7 @@ void fixMercator(bool tinf) {
   if(mercator_coord)
     swap(cmin, dmin), swap(cmax, dmax);
 
-  for(int i = 0; i<qglcoords; i++) {
+  for(int i = 0; i<size(glcoords); i++) {
     while(glcoords[0][mercator_coord] < hperiod) glcoords[0][mercator_coord] += period;
     while(glcoords[0][mercator_coord] > hperiod) glcoords[0][mercator_coord] -= period;
     }
@@ -418,7 +384,7 @@ void fixMercator(bool tinf) {
   
   ld mincoord = first, maxcoord = first;
 
-  for(int i = 0; i<qglcoords; i++) {
+  for(int i = 0; i<size(glcoords); i++) {
     while(glcoords[i][mercator_coord] < next - hperiod)
       glcoords[i][mercator_coord] += period;
     while(glcoords[i][mercator_coord] > next + hperiod)
@@ -449,33 +415,27 @@ void fixMercator(bool tinf) {
       mercator_loop_max--; return; 
       }
     if(last < first) {
-      reverse(glcoords, glcoords+qglcoords);
+      reverse(glcoords.begin(), glcoords.end());
       swap(first, last);
       }
     while(maxcoord > cmin) {
-      for(int i=0; i<qglcoords; i++) glcoords[i][mercator_coord] -= period;
+      for(int i=0; i<size(glcoords); i++) glcoords[i][mercator_coord] -= period;
       first -= period; last -= period;
       mincoord -= period; maxcoord -= period;
       }
-    int base = qglcoords;
+    int base = size(glcoords);
     int minto = mincoord;
     while(minto < cmax) {
       for(int i=0; i<base; i++) {
-        for(int c=0; c<3; c++) 
-          glcoords[qglcoords][c] = glcoords[qglcoords-base][c];
-        glcoords[qglcoords][mercator_coord] += period;
-        qglcoords++;
+        glcoords.push_back(glcoords[size(glcoords)-base]);
+        glcoords.back()[mercator_coord] += period;
         }
       minto += period;
       }
-    for(int r=0; r<3; r++)
-      glcoords[qglcoords][r] = glcoords[qglcoords-1][r];
-    qglcoords++;
-    for(int r=0; r<3; r++)
-      glcoords[qglcoords][r] = glcoords[0][r];
-    qglcoords++;
+    glcoords.push_back(glcoords.back());
+    glcoords.push_back(glcoords[0]);
     for(int u=1; u<=2; u++) {
-      auto& v = glcoords[qglcoords-u][1-mercator_coord];
+      auto& v = glcoords[size(glcoords)-u][1-mercator_coord];
       v = v < 0 ? dmin : dmax;
       }
     /* printf("cycling %d -> %d\n", base, qglcoords);
@@ -495,13 +455,11 @@ void drawpolyline(polytodraw& p) {
     int i = pp.cnt;
     pp.cnt = 3;
     for(int j=0; j<i; j+=3) {
+      pp.offset = j;
       drawpolyline(p);
-      pp.tab += 9;
-      tinfshift += 9;
       }
-    pp.tab -= 3*i;
-    tinfshift = 0;
     pp.cnt = i;
+    pp.offset = 0;
     return;
     }
   
@@ -514,17 +472,13 @@ void drawpolyline(polytodraw& p) {
 
 #if CAP_GL
   if(vid.usingGL && pmodel == mdDisk && !spherespecial) {
-    const int pq = pp.cnt;
-    if(glhr::currentvertices != pp.tab)
-      glhr::vertices(pp.tab, pq);
-    const int ps=0;
     glLineWidth(linewidthat(tC0(pp.V), pp.minwidth));    
-    gldraw(1, pp.V, ps, pq, p.col, pp.outline, 0, pp.tinf);    
+    gldraw(1, pp.V, *pp.tab, pp.offset, pp.cnt, p.col, pp.outline, 0, pp.tinf);    
     return;
     }
 #endif
   
-  qglcoords = 0;
+  glcoords.clear();
   poly_flags = pp.flags;
   
   double d = 0, curradius = 0;
@@ -536,7 +490,7 @@ void drawpolyline(polytodraw& p) {
   /* pp.outline = 0x80808080;
   p.col = 0; */
   
-  addpoly(pp.V, pp.tab, pp.cnt);
+  addpoly(pp.V, *pp.tab, pp.offset, pp.cnt);
   
   mercator_loop_min = mercator_loop_max = 0;
   if(sphere && pmodel == mdBand)
@@ -546,16 +500,16 @@ void drawpolyline(polytodraw& p) {
   
   if(poly_flags & POLY_BEHIND) return;
 
-  if(0) for(int i=0; i<qglcoords; i++) {
-    if(abs(glcoords[i][0]) > poly_limit || abs(glcoords[i][1]) > poly_limit)
+  if(0) for(auto& p: glcoords) {
+    if(abs(p[0]) > poly_limit || abs(p[1]) > poly_limit)
       return; // too large!
     }
 
   if((spherespecial > 0 || (sphere && mdEqui())) && !(poly_flags & POLY_ISSIDE)) {
     double rarea = 0;
-    for(int i=0; i<qglcoords-1; i++) 
+    for(int i=0; i<size(glcoords)-1; i++) 
       rarea += glcoords[i][0] * glcoords[i+1][1] - glcoords[i][1] * glcoords[i+1][0];
-    rarea += glcoords[qglcoords-1][0] * glcoords[0][1] - glcoords[qglcoords-1][1] * glcoords[0][0];
+    rarea += glcoords.back()[0] * glcoords[0][1] - glcoords.back()[1] * glcoords[0][0];
     
     if(d < 0) poly_flags ^= POLY_INVERSE;
     
@@ -577,7 +531,7 @@ void drawpolyline(polytodraw& p) {
   for(int l=mercator_loop_min; l <= mercator_loop_max; l++) {
   
     if(l || lastl) { 
-      for(int i=0; i<qglcoords; i++)
+      for(int i=0; i<size(glcoords); i++)
         glcoords[i][mercator_coord] += vid.radius * 4 * (l - lastl);
       lastl = l;
       }
@@ -586,10 +540,7 @@ void drawpolyline(polytodraw& p) {
       ld h = atan2(glcoords[0][0], glcoords[0][1]);
       for(int i=0; i<=360; i++) {
         ld a = i * M_PI / 180 + h;
-        glcoords[qglcoords][0] = vid.radius * sin(a);
-        glcoords[qglcoords][1] = vid.radius * cos(a);
-        glcoords[qglcoords][2] = stereo::scrdist;
-        qglcoords++;
+        glcoords.push_back(make_array<GLfloat>(vid.radius * sin(a), vid.radius * cos(a), stereo::scrdist));
         }
       poly_flags ^= POLY_INVERSE;
       }
@@ -600,8 +551,7 @@ void drawpolyline(polytodraw& p) {
       if(pp.tinf && (poly_flags & POLY_INVERSE)) {
         return; 
         }
-      activateGlcoords();
-      gldraw(3, Id, 0, qglcoords, p.col, pp.outline, poly_flags, pp.tinf);
+      gldraw(3, Id, glcoords, 0, size(glcoords), p.col, pp.outline, poly_flags, pp.tinf);
       continue;
       }
   #endif
@@ -627,7 +577,7 @@ void drawpolyline(polytodraw& p) {
       #if CAP_TEXTURE
       if(!(poly_flags & POLY_INVERSE))
         for(int i=0; i<polyi; i += 3)
-          drawTexturedTriangle(s, polyx+i, polyy+i, &pp.tinf->tvertices[tinfshift + i*3], p.col);
+          drawTexturedTriangle(s, polyx+i, polyy+i, &pp.tinf->tvertices[pp.offset + i], p.col);
       #endif
       }
     else if(poly_flags & POLY_INVERSE) {
@@ -665,10 +615,10 @@ void drawpolyline(polytodraw& p) {
     }
   }
 
-vector<float> prettylinepoints;
+vector<glvertex> prettylinepoints;
 
 void prettypoint(const hyperpoint& h) {
-  for(int i=0; i<3; i++) prettylinepoints.push_back(h[i]);
+  prettylinepoints.push_back(glhr::pointtogl(h));
   }
 
 void prettylinesub(const hyperpoint& h1, const hyperpoint& h2, int lev) {
@@ -687,7 +637,8 @@ void prettyline(hyperpoint h1, hyperpoint h2, int col, int lev) {
   polytodraw p;
   auto& pp = p.u.poly;
   pp.V = Id;
-  pp.tab = &prettylinepoints[0];
+  pp.tab = &prettylinepoints;
+  pp.offset = 0;
   pp.cnt = size(prettylinepoints)/3;
   pp.minwidth = minwidth_global;
   p.col = 0;
@@ -705,7 +656,8 @@ void prettypoly(const vector<hyperpoint>& t, int fillcol, int linecol, int lev) 
   polytodraw p;
   auto& pp = p.u.poly;
   pp.V = Id;
-  pp.tab = &prettylinepoints[0];
+  pp.tab = &prettylinepoints;
+  pp.offset = 0;
   pp.cnt = size(prettylinepoints)/3;
   pp.minwidth = minwidth_global;
   p.col = fillcol;
@@ -715,7 +667,7 @@ void prettypoly(const vector<hyperpoint>& t, int fillcol, int linecol, int lev) 
   drawpolyline(p);
   }
   
-vector<GLfloat> curvedata;
+vector<glvertex> curvedata;
 int curvestart = 0;
 bool keep_curvedata = false;
 
@@ -738,8 +690,6 @@ void drawqueueitem(polytodraw& ptd) {
       break;
     
     case pkPoly:
-      if(ptd.u.poly.curveindex >= 0)
-        ptd.u.poly.tab = &curvedata[ptd.u.poly.curveindex];
       drawpolyline(ptd);
       break;
     
@@ -2300,9 +2250,9 @@ void queuepolyat(const transmatrix& V, const hpcshape& h, int col, int prio) {
   polytodraw& ptd = nextptd();
   ptd.kind = pkPoly;
   ptd.u.poly.V = V;
+  ptd.u.poly.offset = h.s;
   ptd.u.poly.cnt = h.e-h.s;
-  ptd.u.poly.tab = &ourshape[3*h.s];
-  ptd.u.poly.curveindex = -1;
+  ptd.u.poly.tab = &ourshape;
   if(cblind) {
     // protanopia
     /* int r = (56 * part(col,3) + 43 * part(col,2)) / 100;
@@ -2336,13 +2286,13 @@ void queuereset(eModel md, int prio) {
   ptd.prio = prio << PSHIFT;
   }
 
-void queuetable(const transmatrix& V, GLfloat *f, int cnt, int linecol, int fillcol, int prio) {
+void queuetable(const transmatrix& V, const vector<glvertex>& f, int cnt, int linecol, int fillcol, int prio) {
   polytodraw& ptd = nextptd();
   ptd.kind = pkPoly;
   ptd.u.poly.V = V;
+  ptd.u.poly.tab = &f;
+  ptd.u.poly.offset = 0;
   ptd.u.poly.cnt = cnt;
-  ptd.u.poly.tab = f;
-  ptd.u.poly.curveindex = -1;
   ptd.col = fillcol;
   ptd.prio = prio << PSHIFT;
   ptd.u.poly.outline = linecol;
@@ -2419,14 +2369,12 @@ void qfloor(cell *c, const transmatrix& V, const transmatrix& Vspin, const hpcsh
   }
 
 void curvepoint(const hyperpoint& H1) {
-  curvedata.push_back(H1[0]);
-  curvedata.push_back(H1[1]);
-  curvedata.push_back(H1[2]);
+  curvedata.push_back(glhr::pointtogl(H1));
   }
 
 void queuecurve(int linecol, int fillcol, int prio) {
-  queuetable(Id, &curvedata[curvestart], (size(curvedata)-curvestart)/3, linecol, fillcol, prio);
-  lastptd().u.poly.curveindex = curvestart;
+  queuetable(Id, curvedata, size(curvedata)-curvestart, linecol, fillcol, prio);
+  lastptd().u.poly.offset = curvestart;
   curvestart = size(curvedata);
   }
 

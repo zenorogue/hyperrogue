@@ -2020,12 +2020,16 @@ void drawqueue();
 typedef float GLfloat;
 #endif
 
+typedef array<GLfloat, 3> glvec3;
+typedef array<GLfloat, 4> glvec4;
+typedef glvec3 glvertex;
+
 struct textureinfo {
   transmatrix M;
   int texture_id;
   vector<array<hyperpoint, 3>> triangles;
-  vector<GLfloat> vertices;
-  vector<GLfloat> tvertices; 
+  vector<glvertex> vertices;
+  vector<glvertex> tvertices; 
   cell *c;
   vector<transmatrix> matrices;
   
@@ -2035,9 +2039,8 @@ struct textureinfo {
 
 struct qpoly {
       transmatrix V;
-      GLfloat *tab;
-      int curveindex;
-      int cnt;
+      const vector<glvertex> *tab;
+      int offset, cnt;
       int outline;
       double minwidth;
       int flags;
@@ -2667,4 +2670,7 @@ extern void popGame();
 string helptitle(string s, int col);
 pair<int, int> cell_to_pair(cell *c);
 extern bool nohud, nofps;
+
+template<class T> array<T, 3> make_array(T a, T b, T c) { array<T,3> x; x[0] = a; x[1] = b; x[2] = c; return x; }
+template<class T> array<T, 2> make_array(T a, T b) { array<T,2> x; x[0] = a; x[1] = b; return x; }
 
