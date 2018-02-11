@@ -115,13 +115,17 @@ void showDemo() {
 
 EM_BOOL fsc_callback(int eventType, const EmscriptenFullscreenChangeEvent *fullscreenChangeEvent, void *userData) {
   if(fullscreenChangeEvent->isFullscreen) {
-    vid.xres = fullscreenChangeEvent->screenWidth;
-    vid.yres = fullscreenChangeEvent->screenHeight;
+    vid.xres = vid.xscr = fullscreenChangeEvent->screenWidth;
+    vid.yres = vid.yscr = fullscreenChangeEvent->screenHeight;
+    vid.full = true;
+    printf("set to %d x %d\n", vid.xres, vid.yres);
     setvideomode();
     }
   else {
-    vid.xres = 800;
-    vid.yres = 600;
+    vid.xres = vid.xres = 800;
+    vid.yres = vid.yres = 600;
+    vid.full = true;
+    printf("reset to %d x %d\n", vid.xres, vid.yres);
     setvideomode();
     }
   return true;
@@ -130,6 +134,7 @@ EM_BOOL fsc_callback(int eventType, const EmscriptenFullscreenChangeEvent *fulls
 void initweb() {
   rug::renderonce = true;
   // toggleanim(false);
+  emscripten_set_fullscreenchange_callback(0, NULL, false, fsc_callback);
   pushScreen(showDemo);
   }
 
@@ -138,7 +143,6 @@ transmatrix getOrientation() {
   alpha = EM_ASM_DOUBLE({ return rotation_alpha; });
   beta = EM_ASM_DOUBLE({ return rotation_beta; });
   gamma = EM_ASM_DOUBLE({ return rotation_gamma; });
-  printf("getOrientation %lf %lf %lf\n", alpha, beta, gamma);
   return 
     rotmatrix(0, 1, alpha * M_PI / 180) *
     rotmatrix(1, 2, beta * M_PI / 180) *
