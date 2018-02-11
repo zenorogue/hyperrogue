@@ -1212,7 +1212,7 @@ namespace mirror {
         else if(c2->wall == waSmallTree)
           c2->wall = waNone;
         if(fwd) {
-          if(noMirrorOn(c2) || !passable(c2, c, P_MONSTER | P_MIRROR | P_MIRRORWALL)) {
+          if(noMirrorOn(c2) || !passable_for(moMimic, c2, c, P_MONSTER | P_MIRROR | P_MIRRORWALL)) {
             survive = false;
             continue;
             }

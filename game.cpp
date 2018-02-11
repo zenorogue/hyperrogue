@@ -789,7 +789,7 @@ bool passable_for(eMonster m, cell *w, cell *from, flagtype extra) {
   if(m == moPair)
     return !(w && from && againstPair(from, w, m)) && passable(w, from, extra);
   if(m == passive_switch) return false;
-  if(normalMover(m) || isBug(m) || isDemon(m) || m == moHerdBull) {
+  if(normalMover(m) || isBug(m) || isDemon(m) || m == moHerdBull || m == moMimic) {
     if((isWitch(m) || m == moEvilGolem) && w->land != laPower && w->land != laHalloween)
       return false;
     return passable(w, from, extra);

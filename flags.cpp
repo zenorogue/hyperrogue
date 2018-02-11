@@ -470,7 +470,7 @@ bool survivesChasm(eMonster m) {
   }
 
 bool ignoresPlates(eMonster m) {
-  return m == moMouse || isFlying(m);
+  return m == moMouse || isFlying(m) || m == moIllusion;
   }
 
 bool itemBurns(eItem it) {
@@ -649,8 +649,7 @@ bool survivesThorns(eMonster m) {
   }
 
 bool survivesFall(eMonster m) {
-  return isBird(m) || m == moAirElemental || m == moSkeleton || isDragon(m) || m == moShadow ||
-    isGhost(m);
+  return isBird(m) || m == moAirElemental || m == moSkeleton || isDragon(m) || m == moShadow || isGhost(m);
   }
 
 bool isThorny(eWall w) { return w == waRose; }
