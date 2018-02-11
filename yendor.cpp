@@ -45,7 +45,7 @@ namespace yendor {
   int challenge; // id of the challenge
   int lastchallenge;
   
-  #define YENDORLEVELS 31
+  #define YENDORLEVELS 32
   
   map<modecode_t, array<int, YENDORLEVELS>> bestscore;
 
@@ -84,7 +84,8 @@ namespace yendor {
     {laReptile,   0},
     {laTortoise,  YF_RECALL},
     {laCocytus,   YF_NEAR_FJORD},
-    {laRuins,     YF_DEAD}
+    {laRuins,     YF_DEAD},
+    {laCaves,     YF_DEAD5}
     };
   
   int tscorelast;
