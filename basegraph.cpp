@@ -49,7 +49,7 @@ int getnext(const char* s, int& i) {
     if(eqs(s+i, natchars[k])) {
       i += siz; return 128+k;
       }
-  printf("Unknown character in: '%s'\n", s);
+  printf("Unknown character in: '%s' at position %d\n", s, i);
   i ++; return '?';
   }
 

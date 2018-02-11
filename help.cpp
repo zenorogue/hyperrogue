@@ -37,12 +37,14 @@ string buildHelpText() {
       "The monster could also kill you by moving into your location, but the game "
       "automatically cancels all moves which result in that.\n\n"
       );
-    
+
+#if CAP_INV    
   if(inv::on)
   h += XLAT(
     inv::helptext
     );
   else
+#endif
   h += XLAT(
     "There are many lands in HyperRogue. Collect 10 treasure "
     "in the given land type to complete it; this enables you to "
@@ -237,7 +239,8 @@ string generateHelpForItem(eItem it) {
         }
       }
     }
-  
+
+#if CAP_INV  
   if(inv::on) {
     if(it == itOrbYendor || it == itHell) {
       help += XLAT(
@@ -296,6 +299,7 @@ string generateHelpForItem(eItem it) {
     if(inv::orbinfoline != "") help += "\n\n" + inv::orbinfoline;
     if(inv::extra != "") help += "\n\nExtras:" + inv::extra;
     }
+#endif
   
   if(itemclass(it) == IC_ORB || it == itGreenStone || it == itOrbYendor) {
     for(int i=0; i<ORBLINES; i++) {
@@ -320,8 +324,10 @@ string generateHelpForItem(eItem it) {
       }
     }
 
+#if CAP_INV
   if(inv::on && it == itInventory)
     help += "\n\n" + XLAT(inv::helptext);
+#endif
   return help;
   }
 

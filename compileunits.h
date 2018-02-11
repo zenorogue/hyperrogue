@@ -45,6 +45,7 @@
 #include "inventory.cpp"
 #else
 bool inv::on;
+bool inv::activating;
 #endif
 #include "system.cpp"
 #include "debug.cpp"

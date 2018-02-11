@@ -142,6 +142,7 @@ int arg::readCommon() {
     PHASE(2);
     shift(); stereo::mode = stereo::eStereo(argi());
     }
+#if CAP_INV
   else if(argis("-IU")) {
     PHASE(3) cheater++; timerghost = false;
     shift(); eItem i = readItem(args());
@@ -154,6 +155,7 @@ int arg::readCommon() {
     shift(); inv::extra_orbs[i] += argi();
     inv::compute();
     }
+#endif
   else if(argis("-ambush")) {
     // make all ambushes use the given number of dogs
     // example: hyper -W Hunt -IP Shield 1 -ambush 60
