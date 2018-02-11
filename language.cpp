@@ -75,8 +75,8 @@ struct fullnoun {
   };
 
 #if !CAP_TRANS
-#define NUMEXTRA 5
-const char* natchars[NUMEXTRA] = {"°","é","á", "ᵈ", "δ"};
+#define NUMEXTRA 7
+const char* natchars[NUMEXTRA] = {"°","é","á", "ᵈ", "δ", "½", "∞"};
 #endif
 
 #if CAP_TRANS

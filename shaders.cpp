@@ -13,7 +13,7 @@ void glError(const char* GLcall, const char* file, const int line) {
     }
   }
 
-#define CAP_VERTEXBUFFER (!ISWEB)
+#define CAP_VERTEXBUFFER (ISWEB)
 
 namespace glhr {
 
