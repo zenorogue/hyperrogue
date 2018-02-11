@@ -1932,7 +1932,9 @@ void killMonster(cell *c, eMonster who, flagtype deathflags) {
     }
   if(isWorm(c) && m != moTentacleGhost) return;
   
-  int pcount = (deathflags & AF_FALL) ? 0 : 16; 
+  bool fallanim = (deathflags & AF_FALL) &&  m != moMimic;
+
+  int pcount = fallanim ? 0 : 16; 
   if(m == moShadow) return;
 
 #ifdef HASLINEVIEW
@@ -2221,9 +2223,19 @@ void killMonster(cell *c, eMonster who, flagtype deathflags) {
         airmap.push_back(make_pair(dcal[i],0));
     buildAirmap();
     }
+  if(m == moMimic) {
+    for(auto& m: mirror::mirrors) if(c == m.second.c) {
+      drawParticles(c, mirrorcolor(m.second.mirrored), pcount);
+      if(c->wall == waMirrorWall)
+        drawParticles(c, mirrorcolor(!m.second.mirrored), pcount);
+      }
+    pcount = 0;
+    }
+
   drawParticles(c, minf[m].color, pcount);
-  if(deathflags & AF_FALL)
+  if(fallanim) {
     fallingMonsterAnimation(c, m);
+    }
   }
 
 void fightmessage(eMonster victim, eMonster attacker, bool stun, flagtype flags) {
