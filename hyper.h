@@ -2552,8 +2552,14 @@ struct renderbuffer {
   renderbuffer(int x, int y, bool gl);
   ~renderbuffer();
   void enable();
-  void disable();
   void clear(int col);
+  };
+
+struct resetbuffer {
+  GLint drawFboId, readFboId;
+  SDL_Surface *sreset;
+  resetbuffer();
+  void reset();
   };
 
 namespace stereo {
@@ -2661,3 +2667,4 @@ extern void popGame();
 string helptitle(string s, int col);
 pair<int, int> cell_to_pair(cell *c);
 extern bool nohud, nofps;
+

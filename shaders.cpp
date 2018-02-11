@@ -2,7 +2,7 @@
 // If CAP_SHADER is 0, OpenGL 1.0 is used.
 // If CAP_SHADER is 1, GLSL is used.
 
-#define DEBUG_GL 0
+#define DEBUG_GL 1
 
 // Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
 
@@ -202,6 +202,14 @@ struct GLprogram {
   
   GLprogram(string vsh, string fsh) {
     _program = glCreateProgram();
+    
+    #ifndef GLES_ONLY
+    while(vsh.find("mediump ") != string::npos)
+      vsh.replace(vsh.find("mediump "), 7, "");
+    while(fsh.find("mediump ") != string::npos)
+      fsh.replace(fsh.find("mediump "), 7, "");
+    #endif
+
     // printf("creating program %d\n", _program);
     vertShader = compileShader(GL_VERTEX_SHADER, vsh.c_str());
     fragShader = compileShader(GL_FRAGMENT_SHADER, fsh.c_str());
@@ -336,39 +344,52 @@ void be_textured() { switch_mode(gmTextured); }
 
 void switch_mode(eMode m) {
   if(m == mode) return;
+  GLERR("pre_switch_mode");
   #if CAP_SHADER
   programs[m]->enable();
+  GLERR("after_enable");
   #endif
   flagtype newflags = flags[m] &~ flags[mode];
   flagtype oldflags = flags[mode] &~ flags[m];
   if(newflags & GF_TEXTURE) {
-    glEnable(GL_TEXTURE_2D);
+    GLERR("xsm");
     #if CAP_SHADER
     glEnableVertexAttribArray(aTexture);
+    GLERR("xsm");
     #else
+    glEnable(GL_TEXTURE_2D);
     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+    GLERR("xsm");
     #endif
     }
   if(oldflags & GF_TEXTURE) {
-    glDisable(GL_TEXTURE_2D);
+    GLERR("xsm");
     #if CAP_SHADER
     glDisableVertexAttribArray(aTexture);
+    GLERR("xsm");
     #else
     glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+    glDisable(GL_TEXTURE_2D);
+    GLERR("xsm");
     #endif
     }
   if(newflags & GF_VARCOLOR) {
     #if CAP_SHADER
+    GLERR("xsm");
     glEnableVertexAttribArray(aColor);
     #else
+    GLERR("xsm");
     glEnableClientState(GL_COLOR_ARRAY);
+    GLERR("xsm");
     #endif
     }
   if(oldflags & GF_VARCOLOR) {
     #if CAP_SHADER
     glDisableVertexAttribArray(aColor);
+    GLERR("xsm");
     #else
     glDisableClientState(GL_COLOR_ARRAY);
+    GLERR("xsm");
     #endif
     }
   if(newflags & GF_LIGHTFOG) {
@@ -399,6 +420,7 @@ void switch_mode(eMode m) {
 #endif
     }
   mode = m;
+  GLERR("after_switch_mode");
   }
 
 void fog_max(ld fogmax) {
@@ -434,17 +456,18 @@ void init() {
     bool varcol  = f & GF_VARCOLOR;
     
     programs[i] = new GLprogram(stringbuilder(
-      1,       "attribute vec4 aPosition;",
-      texture, "attribute vec2 aTexture;",
-      varcol,  "attribute vec4 aColor;",
+
+      1,       "attribute mediump vec4 aPosition;",
+      texture, "attribute mediump vec2 aTexture;",
+      varcol,  "attribute mediump vec4 aColor;",
       // "attribute vec3 normal;"
       
-      1,       "varying vec4 vColor;",
-      texture, "varying vec2 vTexCoord;", 
+      1,       "varying mediump vec4 vColor;",
+      texture, "varying mediump vec2 vTexCoord;", 
       
-      1,       "uniform mat4 uMVP;",
-      1,       "uniform float uFog;",
-      !varcol, "uniform vec4 uColor;",
+      1,       "uniform mediump mat4 uMVP;",
+      1,       "uniform mediump float uFog;",
+      !varcol, "uniform mediump vec4 uColor;",
       
       1,       "void main() {",  
       texture,   "vTexCoord = aTexture;",
@@ -456,9 +479,9 @@ void init() {
       
       stringbuilder(
   
-      1,       "uniform sampler2D tTexture;",
-      1,       "varying vec4 vColor;",
-      texture, "varying vec2 vTexCoord;",
+      1,       "uniform mediump sampler2D tTexture;",
+      1,       "varying mediump vec4 vColor;",
+      texture, "varying mediump vec2 vTexCoord;",
       1,       "void main() {",
       texture,   "gl_FragColor = vColor * texture2D(tTexture, vTexCoord);",
       !texture,  "gl_FragColor = vColor;",

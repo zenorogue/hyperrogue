@@ -1090,13 +1090,17 @@ void drawTriangle(triangle& t) {
 renderbuffer *glbuf;
 
 void prepareTexture() {
+  resetbuffer rb;
+  
   videopar svid = vid;
   
   setVidParam();
   dynamicval<stereo::eStereo> d(stereo::mode, stereo::sOFF);
   
   glbuf->enable();
-  
+  stereo::set_viewport(0);
+  stereo::set_projection(0);
+  stereo::set_mask(0);
   glbuf->clear(0);
 
   ptds.clear();
@@ -1113,7 +1117,7 @@ void prepareTexture() {
     }
   drawqueue();
   vid = svid;
-  glbuf->disable();
+  rb.reset();
   }
 
 double xview, yview;
@@ -1219,6 +1223,7 @@ transmatrix currentrot;
 void init() {
   if(rugged) return;
   when_enabled = ticks;
+  GLERR("before init");
   glbuf = new renderbuffer(TEXTURESIZE, TEXTURESIZE, vid.usingGL && !rendernogl);
   if(!glbuf->valid) {
     addMessage(XLAT("Failed to enable"));
@@ -1341,7 +1346,9 @@ transmatrix last_orientation;
 
 void actDraw() { 
   try {
+
   if(!renderonce) prepareTexture();
+  stereo::set_viewport(0);
   physics();
   drawRugScene();
   
@@ -1512,7 +1519,7 @@ hyperpoint gethyper(ld x, ld y) {
   }
 
 void show() {
-  cmode = sm::SIDE | sm::MAYDARK;
+  cmode = sm::SIDE;
   gamescreen(0);
   dialog::init(XLAT("hypersian rug mode"), iinf[itPalace].color, 150, 100);
   

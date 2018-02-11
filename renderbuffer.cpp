@@ -43,38 +43,52 @@ renderbuffer::renderbuffer(int x, int y, bool gl) : x(x), y(y) {
 
   # if CAP_GL
   if(gl) {
+    resetbuffer rb;
     tx = next_p2(x);
     ty = next_p2(y);
   
     FramebufferName = renderedTexture = depth_stencil_rb = 0;
+    GLERR("even before");
     glGenFramebuffers(1, &FramebufferName); //
+    GLERR("GenFramebuffer");
     glBindFramebuffer(GL_FRAMEBUFFER, FramebufferName);
+    GLERR("BindFramebuffer");
     
     glGenTextures(1, &renderedTexture);
     glBindTexture(GL_TEXTURE_2D, renderedTexture);
     glTexImage2D(GL_TEXTURE_2D, 0,GL_RGB, tx, ty, 0,GL_RGB, GL_UNSIGNED_BYTE, 0);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    GLERR("GenTextures");
   
   #ifdef TEX
     glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, renderedTexture, 0);  
   #else
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, renderedTexture, 0);  
   #endif
+    GLERR("FramebufferTexture");
     // GLenum DrawBuffers[1] = {GL_COLOR_ATTACHMENT0};
     // glDrawBuffers(1, DrawBuffers);
     
     glGenRenderbuffers(1, &depth_stencil_rb);
+    GLERR("GenRenderbuffer");
     glBindRenderbuffer(GL_RENDERBUFFER, depth_stencil_rb);
+    GLERR("BindRenderbuffer");
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, tx, ty);
+    GLERR("RbS");
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depth_stencil_rb);
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, depth_stencil_rb);
+    GLERR("FrRb");
     
     if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
       FramebufferName = renderedTexture = 0;
     else
       valid = true;
+
+    printf("Framebuffer remains = %d (%d)\n", FramebufferName, valid);
     GLERR("initialization");
+    
+    rb.reset();
     }
   #endif
 
@@ -94,6 +108,7 @@ SDL_Surface *renderbuffer::render() {
   make_surface() ;
   if(FramebufferName) {
     glReadPixels(0, 0, vid.xres, vid.yres, GL_BGRA, GL_UNSIGNED_BYTE, srf->pixels);
+    GLERR("readPixels");
     for(int y=0; y<vid.yres/2; y++)
     for(int x=0; x<vid.xres; x++)
       swap(qpixel(srf,x,y), qpixel(srf,x,vid.yres-1-y));
@@ -105,8 +120,9 @@ SDL_Surface *renderbuffer::render() {
 void renderbuffer::enable() {
   #if CAP_GL
   if(FramebufferName) {
+    GLERR("prebind");
     glBindFramebuffer(GL_FRAMEBUFFER, FramebufferName);
-    glViewport(0,0,x,y);
+    GLERR("bind");
     vid.usingGL = true;
     return;
     }
@@ -118,21 +134,6 @@ void renderbuffer::enable() {
   #endif
   }
 
-void renderbuffer::disable() {
-  #if CAP_GL
-  if(FramebufferName) {
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    #if CAP_SDL
-    glViewport(0,0,s_screen->w,s_screen->h);
-    #endif
-    return;
-    }
-  #endif
-  #if CAP_SDL
-  s = s_screen;
-  #endif
-  }
-  
 #if CAP_GL
 void renderbuffer::use_as_texture() {
   if(!renderedTexture) {
@@ -185,3 +186,24 @@ void renderbuffer::clear(int col) {
   SDL_FillRect(srf, NULL, col);
   #endif
   }
+
+resetbuffer::resetbuffer() {
+  #if CAP_GL
+  drawFboId = 0, readFboId = 0;
+  glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &drawFboId);
+  glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &readFboId);  
+  #endif
+  #if CAP_SDL
+  sreset = s;
+  #endif
+  }
+
+void resetbuffer::reset() {
+  #if CAP_GL
+  glBindFramebuffer(GL_FRAMEBUFFER, drawFboId);
+  #endif
+  #if CAP_SDL
+  s = sreset;
+  #endif
+  }
+

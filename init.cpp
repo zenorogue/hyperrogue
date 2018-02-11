@@ -645,6 +645,8 @@ int getticks();
 void shareScore(MOBPAR_FORMAL);
 #endif
 
+int mobile_xres, mobile_yres;
+
 void mobile_draw(MOBPAR_FORMAL) {
 
   optimizeview();
@@ -697,7 +699,13 @@ void mobile_draw(MOBPAR_FORMAL) {
       lmouseover = mousedest.d >= 0 ? cwt.c->mov[(cwt.spin + mousedest.d) % cwt.c->type] : cwt.c;
       }
     }
-  mouseh = gethyper(mousex, mousey);
+
+  #if CAP_RUG
+  if(rug::rugged)
+    mouseh = rug::gethyper(mousex, mousey);
+  else
+  #endif
+    mouseh = gethyper(mousex, mousey);
 
 //  if(debfile) fprintf(debfile, "d1\n"), fflush(debfile);
   frames++;

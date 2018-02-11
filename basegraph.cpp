@@ -255,26 +255,36 @@ void stereo::set_viewport(int ed) {
 
 void setGLProjection(int col) {
   DEBB(DF_GRAPH, (debugfile,"setGLProjection\n"));
+  GLERR("pre_setGLProjection");
 
   unsigned char *c = (unsigned char*) (&col);
   glClearColor(c[2] / 255.0, c[1] / 255.0, c[0]/255.0, 1);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  
+
+  GLERR("setGLProjection #1");
+
+#ifndef GLES_ONLY  
   glEnable(GL_BLEND);
   if(vid.antialias & AA_LINES) {
     glEnable(GL_LINE_SMOOTH);
     glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
     }
   else glDisable(GL_LINE_SMOOTH);
+#endif
+
   glLineWidth(vid.linewidth);
 
-#if !ISMOBILE
+  GLERR("setGLProjection #2");
+
+#ifndef GLES_ONLY
   if(vid.antialias & AA_POLY) {
     glEnable(GL_POLYGON_SMOOTH);
     glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
     }
   else glDisable(GL_POLYGON_SMOOTH);
 #endif
+
+  GLERR("setGLProjection #3");
 
   //glLineWidth(1.0f);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -291,7 +301,10 @@ void setGLProjection(int col) {
   else
     glDisable(GL_DEPTH_TEST);
   
+  GLERR("setGLProjection");
+  
   stereo::set_projection(0);
+  GLERR("after set_projection");
   }
 
 inline int next_p2 (int a )
@@ -945,6 +958,8 @@ hookset<void(renderbuffer*)> *hooks_hqshot;
 #if CAP_SDL
 void saveHighQualityShot(const char *fname, const char *caption, int fade) {
 
+  resetbuffer rb;
+
   int maxrange = getDistLimit() * 3/2;
 
   dynamicval<int> v3(sightrange, (cheater && sightrange < maxrange) ? maxrange : sightrange);
@@ -1014,7 +1029,7 @@ void saveHighQualityShot(const char *fname, const char *caption, int fade) {
     if(i == 0) addMessage(XLAT("Saved the high quality shot to %1", fname));
     }
   
-  glbuf.disable();
+  rb.reset();
   }
 #endif
 
