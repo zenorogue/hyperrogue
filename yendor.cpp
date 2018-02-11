@@ -423,6 +423,14 @@ namespace yendor {
     
     "You get 1000 points for each challenge won, and 1 extra point for "
     "each extra difficulty level.";
+  
+  int char_to_yendor(char c) {
+    if(c >= 'a' && c <= 'z')
+      return c - 'a' + 1;
+    if(c >= 'A' && c <= 'Z')
+      return c - 'A' + 1 + 26;
+    return 0;
+    }
 
   void showMenu() {
     int s = vid.fsize;
@@ -461,7 +469,7 @@ namespace yendor {
       else if(bestscore[modecode()][i])
         v = XLAT(" (won at level %1!)", its(bestscore[modecode()][i]));
       
-      dialog::addSelItem(s, v, 'a' + i-1);
+      dialog::addSelItem(s, v, i > 26 ? 'A' + i - 27 : 'a' + i-1);
       }
 
     dialog::addBreak(60);
@@ -472,7 +480,8 @@ namespace yendor {
     
     dialog::display();
     
-    int yc = getcstat - 'a' + 1;
+    int yc = char_to_yendor(getcstat);
+
     if(yc > 0 && yc < YENDORLEVELS) {
       subscoreboard scorehere;
 
@@ -491,9 +500,10 @@ namespace yendor {
     
     keyhandler = [] (int sym, int uni) {
       dialog::handleNavigation(sym, uni);
-      if(uni >= 'a' && uni < 'a'+YENDORLEVELS-1) {
-        challenge = uni-'a' + 1;
-        if(levelUnlocked(challenge) || autocheat) {
+      int new_challenge = char_to_yendor(uni);
+      if(new_challenge && new_challenge < YENDORLEVELS) {
+        if(levelUnlocked(new_challenge) || autocheat) {
+          challenge = new_challenge;
           restartGame(yendor::on ? 0 : 'y');
           }
         else 
