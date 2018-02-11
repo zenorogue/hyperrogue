@@ -5092,7 +5092,7 @@ void drawFlashes() {
     
     if(f.spd) {
       kill = tim > 300;
-      int partcol = darkena(f.color, 0, max(255 - kill/2, 0));
+      int partcol = darkena(f.color, 0, max(255 - tim*255/300, 0));
       poly_outline = OUTLINE_DEFAULT;
       queuepoly(V * spin(f.angle) * xpush(f.spd * tim / 50000.), shParticle[f.size], partcol);
       }
