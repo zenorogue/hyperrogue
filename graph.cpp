@@ -4178,6 +4178,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
                 }
               }
             }
+          break;
           }
         
         case laOvergrown: case laClearing: case laHauntedWall: case laHaunted: case laHauntedBorder:
