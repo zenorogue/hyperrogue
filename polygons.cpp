@@ -639,7 +639,7 @@ void prettyline(hyperpoint h1, hyperpoint h2, int col, int lev) {
   pp.V = Id;
   pp.tab = &prettylinepoints;
   pp.offset = 0;
-  pp.cnt = size(prettylinepoints)/3;
+  pp.cnt = size(prettylinepoints);
   pp.minwidth = minwidth_global;
   p.col = 0;
   pp.outline = col;
@@ -658,7 +658,7 @@ void prettypoly(const vector<hyperpoint>& t, int fillcol, int linecol, int lev) 
   pp.V = Id;
   pp.tab = &prettylinepoints;
   pp.offset = 0;
-  pp.cnt = size(prettylinepoints)/3;
+  pp.cnt = size(prettylinepoints);
   pp.minwidth = minwidth_global;
   p.col = fillcol;
   pp.outline = linecol;
