@@ -44,6 +44,9 @@ hookset<bool(int argc, char** argv)> *hooks_main;
 
 #ifndef NOMAIN
 int main(int argc, char **argv) {
+#if ISWEB
+  emscripten_get_commandline(argc, argv);
+#endif
   if(callhandlers(false, hooks_main, argc, argv)) return 0;
 #if !ISWEB
   #if ISLINUX

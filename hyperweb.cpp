@@ -24,6 +24,7 @@ template<class A, class B, class C> void emscripten_set_main_loop(A a, B b, C c)
 #endif
 
 void initweb();
+void emscripten_get_commandline(int argc, char ** argv);
 
 void loadCompressedChar(int &otwidth, int &otheight, int *tpix);
 
@@ -148,3 +149,43 @@ transmatrix getOrientation() {
     rotmatrix(1, 2, beta * M_PI / 180) *
     rotmatrix(0, 2, gamma * M_PI / 180);
   }
+
+vector<string> emscripten_args;
+vector<const char*> emscripten_args_c;
+
+void emscripten_get_commandline(int argc, char ** argv) {
+  char *str = (char*)EM_ASM_INT({
+    var jsString = document.location.href;
+    alert(jsString);
+    var lengthBytes = lengthBytesUTF8(jsString)+1;
+    var stringOnWasmHeap = _malloc(lengthBytes);
+    stringToUTF8(jsString, stringOnWasmHeap, lengthBytes+1);
+    return stringOnWasmHeap;
+    });
+  string s = str;
+  s += "+xxxxxx";
+  for(int i=0; i<size(s); i++) if(s[i] == '?') {
+    printf("Received command line arguments: %s\n", str);
+    emscripten_args.push_back("hyperweb");
+    string next = ""; i += 3;
+    for(; i<size(s); i++)  {
+      if(s[i] == '+') {
+        emscripten.push_back(next);
+        next = "";
+        }
+      else if(s[i] == '%') {
+        string s2 = "";
+        s2 += s[i+1];
+        s2 += s[i+2];
+        i += 2;
+        next += strtol(s2.c_str(), NULL, 16);
+        }
+      else next += s[i];
+      }
+    argc = size(emscripten_args);
+    for(string& s: emscripten_args) emscripten_args_c.push_back(s.c_str());
+    argv = &(emscripten_args_c[0]);
+    }
+  free(str);
+  }
+
