@@ -784,6 +784,7 @@ monstertype minf[motypes] = {
   { '*', 0xFFFF00, "Fireball", "This magical missile burns whatever it hits."},
   { '*', 0xFFFF00, "Tongue", "Some monsters have long tongues, which allow them to attack enemies in nearby cells."},
   { '*', 0xFFFFFF, "Airball", "This magical missile pushes back whatever it hits."},
+  { '*', 0x0060E0, "Blueball", "A powerful missile from a Blue Raider."},
   // technical
   { '?', 0x00C000, "dead bug", NODESC},
   { '?', 0xFFFF00, "electric discharge", elecdesc}, // appears as 'killed by electric discharge'

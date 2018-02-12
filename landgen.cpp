@@ -1938,7 +1938,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           forCellEx(c2, c) if(out_ruin(c2))
             c->wall = waRuinWall;
           }
-        if(hrand(40000) < kf && !c->monst && !c->wall) {
+        if(hrand(40000) < kf && !c->monst && !c->wall && !shmup::on) {
           cell *c1 = c;
           cell *c2 = createMov(c1, hrand(c1->type));
           if(c2->monst || c2->wall) return;

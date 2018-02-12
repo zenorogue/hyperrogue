@@ -842,12 +842,24 @@ bool passable_for(eMonster m, cell *w, cell *from, flagtype extra) {
     return passable(w, from, extra) && !cellUnstable(w) && ((m != moWorm && m != moTentacle) || !cellEdgeUnstable(w));
   if(m == moVoidBeast)
     return passable(w, from, extra | P_VOID);
-  if(m == moHexDemon)
+  if(m == moHexDemon) {
+    if(extra & P_ONPLAYER) {
+      if(isPlayerOn(w)) return true;
+      }
     return !ctof(w) && passable(w, from, extra);
-  if(m == moAltDemon)
-    return (!w || !from || ctof(w) || ctof(from)) && passable(w, from, extra);
-  if(m == moMonk)
+    }
+  if(m == moAltDemon) {
+    if(extra & P_ONPLAYER) {
+      if(isPlayerOn(w)) return true;
+      }
+    return (!w || !from || w==from || ctof(w) || ctof(from)) && passable(w, from, extra);
+    }
+  if(m == moMonk) {
+    if(extra & P_ONPLAYER) {
+      if(isPlayerOn(w)) return true;
+      }
     return notNearItem(w) && passable(w, from, extra);
+    }
   return false;
   }
 

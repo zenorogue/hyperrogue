@@ -526,6 +526,9 @@ namespace shmup {
   void addShmupHelp(string& out);
   void activateArrow(cell *c);
   transmatrix& ggmatrix(cell *c);
+  
+  void pushmonsters();
+  void popmonsters();
   }
 
 // graph

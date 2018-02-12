@@ -1596,7 +1596,15 @@ void movePlayer(monster *m, int delta) {
     
     // don't have several players in one spot
     // also don't let them run too far from each other!
-    monster* crashintomon = m->isVirtual ? NULL : playerCrash(m, nat*C0);
+    monster* crashintomon = NULL;
+    
+    if(!m->isVirtual) {
+      crashintomon = playerCrash(m, nat*C0);
+      for(monster *m2: nonvirtual) if(m2!=m && m2->type == passive_switch) {
+        double d = intval(m2->pat*C0, nat*C0);
+        if(d < SCALE2 * 0.2) crashintomon = m2;
+        }
+      }
     if(crashintomon) go = false;
   
     if(go && c2 != m->base) {
@@ -2082,6 +2090,8 @@ void moveBullet(monster *m, int delta) {
     m->vel = 1/300.;
   else if(m->type == moFireball)
     m->vel = 1/500.;
+  else if(m->type == moCrushball)
+    m->vel = 1/1000.;
   else if(m->type == moAirball)
     m->vel = 1/200.;
   else if(m->type == moArrowTrap)
@@ -2127,6 +2137,8 @@ void moveBullet(monster *m, int delta) {
       else if(isActivable(c2)) 
         activateActiv(c2, true);
       }
+    if(m->type == moCrushball && c2->wall == waRuinWall)
+      c2->wall = waNone;
     if(m->type == moFireball) {
       makeflame(c2, 20, false) || makeflame(m->base, 20, false);
       }
@@ -2143,6 +2155,10 @@ void moveBullet(monster *m, int delta) {
   if(!m->isVirtual) for(monster* m2: nonvirtual) {
     if(m2 == m || (m2 == m->parent && m->vel >= 0) || m2->parent == m->parent) 
       continue;
+
+    eMonster ptype = parentOrSelf(m)->type;
+    bool slayer = m->type == moCrushball ||
+      (markOrb(itOrbSlaying) && (markOrb(itOrbEmpathy) ? isPlayerOrImage(ptype) : ptype == moPlayer));
     
     // Flailers only killable by themselves
     if(m2->type == moFlailer && m2 != m->parent) continue;
@@ -2156,6 +2172,9 @@ void moveBullet(monster *m, int delta) {
     double d = intval(m2->pat*C0, m->pat*C0);
     
     if(d < SCALE2 * 0.1) {
+
+      if(m2->type == passive_switch) { m->dead = true; continue; }
+      
       if(m->type == moAirball && isBlowableMonster(m2->type)) {
 
         if(m2->blowoff < curtime) {
@@ -2167,7 +2186,7 @@ void moveBullet(monster *m, int delta) {
         continue;
         }
       // Hedgehog Warriors only killable outside of the 45 degree angle
-      if(m2->type == moHedge && !peace::on) {
+      if(m2->type == moHedge && !peace::on && !slayer) {
         hyperpoint h = inverse(m2->pat) * m->pat * C0;
         if(h[0] > fabsl(h[1])) { m->dead = true; continue; }
         }
@@ -2176,10 +2195,10 @@ void moveBullet(monster *m, int delta) {
         m2->stunoff = curtime + 600;
         continue;
         }
-      // 
+      // multi-HP monsters
       if((m2->type == moPalace || m2->type == moFatGuard || m2->type == moSkeleton ||
         m2->type == moVizier || isMetalBeast(m2->type) || m2->type == moTortoise ||
-        m2->type == moReptile || m2->type == moSalamander || m2->type == moTerraWarrior) && m2->hitpoints > 1) {
+        m2->type == moReptile || m2->type == moSalamander || m2->type == moTerraWarrior) && m2->hitpoints > 1 && !slayer) {
         m2->rebasePat(m2->pat * rspintox(inverse(m2->pat) * nat0 * C0));
         if(m2->type != moSkeleton && !isMetalBeast(m2->type) && m2->type != moReptile && m2->type != moSalamander) 
           m2->hitpoints--;
@@ -2202,8 +2221,14 @@ void moveBullet(monster *m, int delta) {
         continue;
         }
       // conventional missiles cannot hurt some monsters
-      bool conv = (m->type == moBullet || m->type == moFlailBullet || m->type == moTongue || m->type == moArrowTrap);
+      bool conv = (m->type == moBullet || m->type == moFlailBullet || m->type == moTongue || m->type == moArrowTrap) && !slayer;
 
+      // Raiders are unaffected
+      if((m2->type == moCrusher || m2->type == moPair || m2->type == moMonk ||
+        m2->type == moAltDemon || m2->type == moHexDemon) && conv) {
+        m->dead = true;
+        continue;
+        }
       if(m2->type == moGreater && conv) {
         m->dead = true;
         continue;
@@ -2292,7 +2317,7 @@ void moveMonster(monster *m, int delta) {
     else if(!survivesFire(m->type))
       killMonster(m, moNone);
     }
-
+  
   if(m->base->wall == waClosedGate && !survivesWall(m->type))
     killMonster(m, moNone);
 
@@ -2326,6 +2351,10 @@ void moveMonster(monster *m, int delta) {
     step /= 3;
   else if(isBull(m->type))
     step *= 1.5;
+  else if(m->type == moAltDemon || m->type == moHexDemon || m->type == moCrusher || m->type == moMonk)
+    step *= 1.4;
+
+  if(m->type == passive_switch) step = 0;
   
   if(items[itOrbBeauty] && !m->isVirtual) {
     bool nearplayer = false;
@@ -2395,7 +2424,7 @@ void moveMonster(monster *m, int delta) {
       closerTo = m->pat * C0;
       sort(bugtargets.begin(), bugtargets.end(), closer);
   
-      for(monster *m2: bugtargets)
+      if(step) for(monster *m2: bugtargets)
         if(trackroute(m, m2->pat, step)) {
           goal = m2->pat;
           direct = true;
@@ -2441,7 +2470,7 @@ void moveMonster(monster *m, int delta) {
       }
     else if(!direct && !invismove && !peace::on) {
       for(int i=0; i<players; i++) 
-        if(trackroute(m, pc[i]->pat, step) && (!direct || intval(pc[i]->pat*C0, m->pat*C0) < intval(goal*C0,m->pat*C0))) {
+        if(step && trackroute(m, pc[i]->pat, step) && (!direct || intval(pc[i]->pat*C0, m->pat*C0) < intval(goal*C0,m->pat*C0))) {
           goal = pc[i]->pat;
           direct = true;
           directi = i;
@@ -2450,7 +2479,7 @@ void moveMonster(monster *m, int delta) {
         }
   
     if(!direct && !peace::on) while(true) {
-      if(trackroute(m, gmatrix[c], step))
+      if(step && trackroute(m, gmatrix[c], step))
         goal = gmatrix[c];
       cell *cnext = c;
       for(int i=0; i<c->type; i++) {
@@ -2581,6 +2610,8 @@ void moveMonster(monster *m, int delta) {
     if(c2->wall == waChasm && !survivesChasm(m->type)) usetongue = true;
     if(isFireOrMagma(c2) && !survivesFire(m->type) && !m->inBoat) usetongue = true;
     if(isBird(m->type) && !passable_for(moEagle, c2, c, 0)) usetongue = true;
+    if((m->type == moMonk || m->type == moAltDemon || m->type == moHexDemon) && !passable_for(m->type, c2, c, 0))
+      usetongue = true;
     if(usetongue) {
       if(curtime < m->nextshot) return;
       // m->nextshot = curtime + 25;
@@ -2786,6 +2817,18 @@ void moveMonster(monster *m, int delta) {
       additional.push_back(bullet);
       break;
       }
+    for(int i=0; i<players; i++) if(!pc[i]->isVirtual)
+    if(m->type == moCrusher && intval(m->pat*C0, pc[i]->pat*C0) < SCALE2 * .75) {    
+      m->stunoff = curtime + 1500;
+      monster* bullet = new monster;
+      bullet->base = m->base;
+      bullet->at = m->at;
+      bullet->type = moCrushball;
+      bullet->parent = m;
+      bullet->pid = i;
+      additional.push_back(bullet);
+      break;
+      }
     }
   }
 
@@ -2830,6 +2873,7 @@ void fixStorage() {
 
 void turn(int delta) {
 
+  passive_switch = (gold() & 1) ? moSwitch1 : moSwitch2;
   lmousetarget = NULL;
   if(mousetarget && !mousetarget->isVirtual && intval(mouseh, mousetarget->pat*C0) < 0.1)
     lmousetarget = mousetarget;
@@ -2875,7 +2919,7 @@ void turn(int delta) {
         break;
       
       case moBullet: case moFlailBullet: case moFireball: case moTongue: case moAirball:
-      case moArrowTrap:
+      case moArrowTrap: case moCrushball:
         moveBullet(m, delta);
         break;
       
@@ -3205,7 +3249,7 @@ bool drawMonster(const transmatrix& V, cell *c, const transmatrix*& Vboat, trans
         ShadowV(view, shPHead);
         break;
         }
-      case moFlailBullet: {
+      case moFlailBullet: case moCrushball: {
         transmatrix t = view * spin(curtime / 50.0);
         queuepoly(mmscale(t, 1.15), shFlailMissile, (minf[m->type].color << 8) | 0xFF);
         ShadowV(view, shFlailMissile);

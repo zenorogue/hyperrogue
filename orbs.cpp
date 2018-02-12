@@ -1116,6 +1116,7 @@ eItem targetRangedOrb(cell *c, orbAction a) {
     }
   
   if(items[itOrbPhasing] && c->cpdist == 2) {
+    if(shmup::on) shmup::pushmonsters();
     jumpstate = 21;
     int i = items[itOrbAether];
     if(i) items[itOrbAether] = i-1;
@@ -1136,8 +1137,9 @@ eItem targetRangedOrb(cell *c, orbAction a) {
     if(jumpstate == 23 && !monstersnearO(a, c, NULL, moPlayer, NULL, cwt.c)) {
       jumpstate = 24;
       if(!isCheck(a)) jumpTo(c, itOrbPhasing);
-      return itOrbPhasing;
       }
+    if(shmup::on) shmup::popmonsters();
+    if(jumpstate == 24) return itOrbPhasing;
     }
   
   // (1) switch with an illusion
