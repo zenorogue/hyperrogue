@@ -2232,3 +2232,15 @@ Gameplay bugfixes
 - fixed a crash bug when leaving quotient space
 - fixed the problems with incorrect display and mouse control in the Hypersian Rug mode
 - fixed the display in the spherical geometry
+
+2018.02.12 16:122 version 10.3i
+- updated the iOS, Android, and online versions (Hypersian Rug works in all of them now)
+- magic texture adjustment: fixed the algorithm
+- magic texture adjustment: fixed the names of parameters; added texture position X/Y
+- Implemented the shmup versions of Ruined City and Jelly Kingdom.
+- fixed particle transparency
+- properly colored Mimic particles; no falling animations for Mimics
+- Illusions ignore plates (does not change much?)
+- capital letters used as hotkeys for later Yendor challenges, instead of weird symbols.
+- a new Yendor Challenge: Living Caves
+- fixed the 3D effect on graves and mercury rivers
