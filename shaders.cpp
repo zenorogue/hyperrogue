@@ -2,7 +2,9 @@
 // If CAP_SHADER is 0, OpenGL 1.0 is used.
 // If CAP_SHADER is 1, GLSL is used.
 
-#define DEBUG_GL 1
+#ifndef DEBUG_GL
+#define DEBUG_GL 0
+#endif
 
 // Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
 
@@ -13,7 +15,9 @@ void glError(const char* GLcall, const char* file, const int line) {
     }
   }
 
+#ifndef CAP_VERTEXBUFFER
 #define CAP_VERTEXBUFFER (ISWEB)
+#endif
 
 namespace glhr {
 
