@@ -164,7 +164,7 @@ void emscripten_get_commandline(int& argc, const char **& argv) {
   string s = str;
   s += "+xxxxxx";
   for(int i=0; i<size(s); i++) if(s[i] == '?') {
-    printf("Received command line arguments: %s\n", str);
+    printf("HREF: %s\n", str);
     emscripten_args.push_back("hyperweb");
     string next = ""; i += 3;
     for(; i<size(s); i++)  {
@@ -184,6 +184,7 @@ void emscripten_get_commandline(int& argc, const char **& argv) {
     argc = size(emscripten_args);
     for(string& s: emscripten_args) emscripten_args_c.push_back(s.c_str());
     argv = &(emscripten_args_c[0]);
+    printf("Arguments:"); for(int i=0; i<argc; i++) printf(" %s", argv[i]); printf("\n");
     }
   free(str);
   }
