@@ -496,16 +496,20 @@ enum eMagicParameter {
   mpRotate,
   mpSlant,
   mpStretch,
+  mpTexPosX,
+  mpTexPosY,
   mpMAX
   };
 
 vector<string> mpnames = {
   "affect model scale",
   "affect model projection",
+  "affect model central point",
   "affect model rotation",
-  "affect model position",
   "affect texture slanting",
-  "affect texture stretching"
+  "affect texture stretching",
+  "affect texture position X",
+  "affect texture position Y"
   };
 
 flagtype current_magic = 15;
@@ -513,8 +517,9 @@ flagtype current_magic = 15;
 bool have_mp(eMagicParameter i) { return (current_magic >> i) & 1; }
 
 struct magic_param {
-  bool do_spin, do_stretch;
-  ld spinangle, scale, proj, moveangle, shift, slant, stretch;
+  bool do_spin;
+  int texmode;
+  ld spinangle, scale, proj, moveangle, shift, slant, stretch, tx, ty;
 
   void shuffle() {
     do_spin = hrand(2);
@@ -523,9 +528,11 @@ struct magic_param {
     shift = hrandf() - hrandf();
     scale = hrandf() - hrandf();
     proj = hrandf() - hrandf();
-    do_stretch = hrand(2);
+    texmode = hrand(3);
     slant = have_mp(mpSlant) ? hrandf() - hrandf() : 0;
     stretch = have_mp(mpStretch) ? hrandf() - hrandf() : 0;
+    tx = have_mp(mpTexPosX) ? hrandf() - hrandf() : 0;
+    ty = have_mp(mpTexPosY) ? hrandf() - hrandf() : 0;
     }
   
   void affect_itt(const transmatrix& T) {
@@ -550,11 +557,14 @@ struct magic_param {
         View = spin(moveangle) * xpush(delta*shift) * spin(-moveangle) * View;
       }
     
-    if(do_stretch && have_mp(mpStretch)) 
+    if(texmode == 0 && have_mp(mpStretch)) 
       affect_itt(euaffine(hpxyz(0, delta * stretch, 0)));
 
-    if(!do_stretch && have_mp(mpSlant))
+    if(texmode == 1 && have_mp(mpSlant))
       affect_itt(euaffine(hpxyz(delta * slant, 0, 0)));
+    
+    if(texmode == 2 && (have_mp(mpTexPosX) || have_mp(mpTexPosY)))
+      affect_itt(eupush(delta * tx, delta * ty));
     
     fixmatrix(View);
     }
