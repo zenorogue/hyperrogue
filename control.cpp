@@ -301,7 +301,7 @@ purehookset hooks_fixticks;
   
 void handleKeyNormal(int sym, int uni) {
 
-  if(cheater) {
+  if(cheater && sym < 256 && sym > 0) {
     if(applyCheat(uni, mouseover))
       sym = 0;
     }
