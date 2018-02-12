@@ -34,6 +34,7 @@ bool genrug = false;
 int vertex_limit = 20000;
 
 bool renderonce  = false;
+int renderlate  = 0;
 bool rendernogl  = false;
 int  texturesize = 1024;
 ld scale = 1;
@@ -1337,6 +1338,10 @@ void actDraw() {
   try {
 
   if(!renderonce) prepareTexture();
+  else if(renderlate) {
+    renderlate--;
+    prepareTexture();
+    }
   stereo::set_viewport(0);
   physics();
   drawRugScene();
@@ -1671,6 +1676,19 @@ int rugArgs() {
 
   else if(argis("-rugpers")) {
     rug_perspective = true;
+    }
+
+  else if(argis("-rugonce")) {
+    renderonce = true;
+    }
+
+  else if(argis("-ruglate")) {
+    renderonce = false;
+    renderlate += 10;
+    }
+
+  else if(argis("-rugmany")) {
+    renderonce = false;
     }
 
   else if(argis("-rugauto")) {
