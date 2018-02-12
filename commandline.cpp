@@ -108,6 +108,11 @@ int arg::readCommon() {
   else if(argis("-nohud")) {
     nohud = true;
     }
+  else if(argis("-noscr")) {
+    PHASE(3);
+    popScreenAll();
+    showstartmenu = false;
+    }
   else if(argis("-back")) {
     shift(); backcolor = strtol(args(), NULL, 16);
     }
