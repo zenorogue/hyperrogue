@@ -378,7 +378,7 @@ void switch_mode(eMode m) {
     }
   if(newflags & GF_LIGHTFOG) {
 #if !CAP_SHADER    
-    GLfloat light_ambient[] = { 3.5, 3.5, 3.5, 1.0 };
+    /*GLfloat light_ambient[] = { 3.5, 3.5, 3.5, 1.0 };
     GLfloat light_diffuse[] = { 1.0, 1.0, 1.0, 1.0 };
     GLfloat light_position[] = { 0.0, 0.0, 0.0, 1.0 };
   
@@ -390,17 +390,22 @@ void switch_mode(eMode m) {
     GLERR("lighting");
   
     glEnable(GL_LIGHTING);
-    glEnable(GL_LIGHT0);
-
+    glEnable(GL_LIGHT0); */
+ 
     glEnable(GL_FOG);
+    #ifdef GLES_ONLY
+    glFogx(GL_FOG_MODE, GL_LINEAR);
+    #else
     glFogi(GL_FOG_MODE, GL_LINEAR);
+    #endif
     glFogf(GL_FOG_START, 0);
 #endif
     }
   if(oldflags & GF_LIGHTFOG) {
 #if !CAP_SHADER
     glDisable(GL_FOG);
-    glDisable(GL_LIGHTING);
+     /*
+    glDisable(GL_LIGHTING); */
 #endif
     }
   mode = m;
@@ -580,12 +585,14 @@ void vertices(const vector<glvertex>& v) {
   }
 
 void vertices_texture(const vector<glvertex>& v, const vector<glvertex>& t) {
-  #if CAP_TEXTURE
+  #if CAP_VERTEXBUFFER
+  // not implemented!
+  #else
   vertices(v);
   #if CAP_SHADER
   glVertexAttribPointer(aTexture, 3, GL_FLOAT, GL_FALSE, sizeof(glvertex), &t[0]);
   #else
-  glTexCoordPointer(stride, GL_FLOAT, 0, &v[0]);
+  glTexCoordPointer(3, GL_FLOAT, 0, &v[0]);
   #endif
   #endif
   }
@@ -603,7 +610,7 @@ void prepare(vector<colored_vertex>& v) {
   glVertexAttribPointer(aColor, 4, GL_FLOAT, GL_FALSE, sizeof(colored_vertex), &v[0].color);
   #else
   glVertexPointer(3, GL_FLOAT, sizeof(colored_vertex), &v[0].coords);
-  glVertexPointer(3, GL_FLOAT, sizeof(colored_vertex), &v[0].color);
+  glColorPointer(3, GL_FLOAT, sizeof(colored_vertex), &v[0].color);
   #endif
   #endif
   }
@@ -621,7 +628,7 @@ void prepare(vector<textured_vertex>& v) {
   glVertexAttribPointer(aTexture, 3, GL_FLOAT, GL_FALSE, sizeof(textured_vertex), &v[0].texture);
   #else
   glVertexPointer(3, GL_FLOAT, sizeof(textured_vertex), &v[0].coords);
-  glVertexPointer(3, GL_FLOAT, sizeof(textured_vertex), &v[0].texture);
+  glTexCoordPointer(3, GL_FLOAT, sizeof(textured_vertex), &v[0].texture);
   #endif
   #endif
   // color2(col);
@@ -642,8 +649,8 @@ void prepare(vector<ct_vertex>& v) {
   glVertexAttribPointer(aTexture, 3, GL_FLOAT, GL_FALSE, sizeof(ct_vertex), &v[0].texture);
   #else
   glVertexPointer(3, GL_FLOAT, sizeof(ct_vertex), &v[0].coords);
-  glVertexPointer(3, GL_FLOAT, sizeof(ct_vertex), &v[0].texture);
-  glVertexPointer(3, GL_FLOAT, sizeof(ct_vertex), &v[0].color);
+  glTexCoordPointer(3, GL_FLOAT, sizeof(ct_vertex), &v[0].texture);
+  glColorPointer(3, GL_FLOAT, sizeof(ct_vertex), &v[0].color);
   #endif
   #endif
   }

@@ -21,7 +21,9 @@
 #define VER "10.3h"
 #define VERNUM 10308
 
+#ifndef CAP_SHADER
 #define CAP_SHADER CAP_GL
+#endif
 
 #define VERNUM_HEX 0xA0A7
 
@@ -289,6 +291,7 @@ void gdpush(int t);
 #define SDLK_HOME (123013)
 #define SDLK_LEFT (123014)
 #define SDLK_RIGHT (123015)
+#define SDLK_END (123016)
 #define MIX_MAX_VOLUME 128
 #define SDLK_UP (123021)
 #define SDLK_DOWN (123022)
