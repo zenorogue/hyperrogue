@@ -1009,6 +1009,7 @@ eLand getLandForList(cell *c) {
   }
 
 bool isLandIngame(eLand l) {
+  if(isElemental(l)) l = laElementalWall;
   if(isLandValid(l) < 2)
     return false;
   if(l == laWildWest)
