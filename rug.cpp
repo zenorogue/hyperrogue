@@ -37,6 +37,7 @@ bool renderonce  = false;
 bool rendernogl  = false;
 int  texturesize = 1024;
 ld scale = 1;
+ld ruggo = 0;
 
 ld err_zero = 1e-3, err_zero_current, current_total_error;
 
@@ -1349,12 +1350,15 @@ void actDraw() {
     last_orientation = next_orientation;
     }        
   #endif
-
-  #if CAP_HOLDKEYS
-  Uint8 *keystate = SDL_GetKeyState(NULL);
+  
   int qm = 0;
   double alpha = (ticks - lastticks) / 1000.0;
   lastticks = ticks;
+
+  if(ruggo) move_forward(ruggo * alpha);
+
+  #if CAP_HOLDKEYS
+  Uint8 *keystate = SDL_GetKeyState(NULL);
 
   transmatrix t = Id;
   
@@ -1669,6 +1673,10 @@ int rugArgs() {
     rug_perspective = true;
     }
 
+  else if(argis("-rugauto")) {
+    shift(); ruggo = argf();
+    }
+
   else if(argis("-rugorth")) {
     rug_perspective = false;
     }
@@ -1686,7 +1694,9 @@ int rugArgs() {
     }
 
   else if(argis("-rugon")) {
-    PHASE(3); rug::init();
+    PHASE(3); 
+    calcparam();
+    rug::init();
     }
 
 #if CAP_ODS
