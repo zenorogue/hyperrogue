@@ -61,8 +61,10 @@ int main(int argc, const char **argv) {
 #if CAP_COMMANDLINE
   arg::read(3);
 #endif
+#if !ISWEB
   if(showstartmenu)
     pushScreen(showStartMenu);
+#endif
   mainloop();
   finishAll();  
   profile_info();

@@ -136,7 +136,8 @@ void initweb() {
   rug::renderonce = true;
   // toggleanim(false);
   emscripten_set_fullscreenchange_callback(0, NULL, false, fsc_callback);
-  pushScreen(showDemo);
+  printf("showstartmenu = %d\n", showstartmenu);
+  if(showstartmenu) pushScreen(showDemo);
   }
 
 transmatrix getOrientation() {
