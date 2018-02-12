@@ -596,7 +596,7 @@ void applyMagic() {
     
     bool failed = false;
     
-    for(ld delta = 1; delta > 1e-9; delta *= (failed ? -.7 : 1.2)) {
+    for(ld delta = 1; abs(delta) > 1e-9; delta *= (failed ? -.7 : 1.2)) {
       p.apply(delta);
       ld nq = magic_quality();
       if(nq < cq) {
