@@ -153,7 +153,7 @@ transmatrix getOrientation() {
 vector<string> emscripten_args;
 vector<const char*> emscripten_args_c;
 
-void emscripten_get_commandline(int argc, char ** argv) {
+void emscripten_get_commandline(int argc, const char ** argv) {
   char *str = (char*)EM_ASM_INT({
     var jsString = document.location.href;
     alert(jsString);
@@ -170,7 +170,7 @@ void emscripten_get_commandline(int argc, char ** argv) {
     string next = ""; i += 3;
     for(; i<size(s); i++)  {
       if(s[i] == '+') {
-        emscripten.push_back(next);
+        emscripten_args.push_back(next);
         next = "";
         }
       else if(s[i] == '%') {
