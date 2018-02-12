@@ -121,10 +121,17 @@ int arg::readCommon() {
     shift(); cheatdest = readland(args()); autocheat = true;
     showstartmenu = false;
     }
-  else if(argis("-W")) {
+  else if(argis("-W") && curphase <= 2) {
     PHASE(2);
     shift(); 
     firstland0 = firstland = specialland = readland(args()); autocheat = true;
+    showstartmenu = false;
+    }
+  else if(argis("-W") && curphase == 3) {
+    PHASE(3);
+    shift(); 
+    firstland0 = firstland = specialland = readland(args()); autocheat = true;
+    activateSafety(specialland);
     showstartmenu = false;
     }
   else if(argis("-I")) {
@@ -139,7 +146,7 @@ int arg::readCommon() {
     placeItems(q, i);
     }
   else if(argis("-SM")) {
-    PHASE(2);
+    PHASEFROM(2);
     shift(); stereo::mode = stereo::eStereo(argi());
     }
 #if CAP_INV
