@@ -24,7 +24,7 @@ template<class A, class B, class C> void emscripten_set_main_loop(A a, B b, C c)
 #endif
 
 void initweb();
-void emscripten_get_commandline(int argc, char ** argv);
+void emscripten_get_commandline(int& argc, const char **& argv);
 
 void loadCompressedChar(int &otwidth, int &otheight, int *tpix);
 
@@ -153,10 +153,9 @@ transmatrix getOrientation() {
 vector<string> emscripten_args;
 vector<const char*> emscripten_args_c;
 
-void emscripten_get_commandline(int argc, const char ** argv) {
+void emscripten_get_commandline(int& argc, const char **& argv) {
   char *str = (char*)EM_ASM_INT({
     var jsString = document.location.href;
-    alert(jsString);
     var lengthBytes = lengthBytesUTF8(jsString)+1;
     var stringOnWasmHeap = _malloc(lengthBytes);
     stringToUTF8(jsString, stringOnWasmHeap, lengthBytes+1);

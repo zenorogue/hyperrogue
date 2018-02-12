@@ -40,10 +40,10 @@ void moreStack() {
   }
 #endif
 
-hookset<bool(int argc, char** argv)> *hooks_main;
+hookset<bool(int argc, const char** argv)> *hooks_main;
 
 #ifndef NOMAIN
-int main(int argc, char **argv) {
+int main(int argc, const char **argv) {
 #if ISWEB
   emscripten_get_commandline(argc, argv);
 #endif

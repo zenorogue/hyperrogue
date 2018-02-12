@@ -1506,7 +1506,7 @@ extern int cshpos;
 
 namespace arg {
 #if CAP_COMMANDLINE
-  extern int argc; extern char **argv;
+  extern int argc; extern const char **argv;
   
   inline void lshift() {
     argc--; argv++;
@@ -1516,12 +1516,12 @@ namespace arg {
     lshift(); if(!argc) { printf("Missing parameter\n"); exit(1); }
     }
 
-  inline char* args() { return *argv; }
+  inline const char* args() { return *argv; }
   inline int argi() { return atoi(*argv); }
   inline ld argf() { return atof(*argv); }
   inline bool argis(const char *s) { return strcmp(*argv, s) == 0; }
   
-  inline void init(int _argc, char **_argv) { argc=_argc-1; argv=_argv+1; }
+  inline void init(int _argc, const char **_argv) { argc=_argc-1; argv=_argv+1; }
   
   extern int curphase;
   
@@ -1761,7 +1761,7 @@ template<class T, class V, class... U> V callhandlers(V zero, hookset<T> *h, U&.
 
 extern hookset<bool(int sym, int uni)> *hooks_handleKey;
 extern hookset<void(cell *c, const transmatrix& V)> *hooks_drawcell;
-extern hookset<bool(int argc, char** argv)> *hooks_main;
+extern hookset<bool(int argc, const char** argv)> *hooks_main;
 extern hookset<int()> *hooks_args;
 extern hookset<eLand(eLand)> *hooks_nextland;
 

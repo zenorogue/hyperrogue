@@ -86,7 +86,7 @@ int arg::readCommon() {
   else if(argis("-pattern")) {
     PHASE(3);
     shift();
-    char *c = args();
+    const char *c = args();
     using namespace patterns;
     subpattern_flags = 0;
     whichPattern = 0;
@@ -523,7 +523,7 @@ purehookset hooks_config;
 hookset<int()> *hooks_args;
 
 namespace arg {
-  int argc; char **argv;
+  int argc; const char **argv;
   int curphase;
 
   auto ah = addHook(hooks_args, 0, readCommon);
