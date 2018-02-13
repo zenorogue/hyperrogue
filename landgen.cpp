@@ -1534,15 +1534,21 @@ void giantLandSwitch(cell *c, int d, cell *from) {
     
     case laSnakeNest:
       ONEMPTY {
-        if(hrand(30000) < 30+items[itRedGem]+yendor::hardness() && !c->monst && !c->wall && !peace::on) {
+        if(hrand(30000) < 30+items[itSnake]+yendor::hardness() && !c->monst && !c->wall && !peace::on) {
           vector<int> gooddir;
           for(int t=0; t<c->type; t++) if(c->mov[t]->mpdist > c->mpdist)
             gooddir.push_back(t);
           if(size(gooddir))
             generateSnake(c, gooddir[hrand(size(gooddir))]);
           }
-        else if(hrand(16000) < kills[moHexSnake] * 100 && c->wall == waNone)
-          c->item = itSnake, c->wall = waRed3;
+        else if(hrand(10000) < items[itSnake] - 10 + yendor::hardness() && !c->monst && !c->wall && !peace::on) {
+          c->monst = pick(moRedTroll, moMiner, moSkeleton, moBomberbird);
+          c->hitpoints = 3;
+          }
+        else if(hrand(16000) < sqrt(kills[moHexSnake] * 10000) && c->wall == waNone) {
+          c->item = itSnake;
+          if(hrand(30) >= items[itSnake] - 10) c->wall = waRed3;
+          }
         }
       break;
     
