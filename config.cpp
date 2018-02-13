@@ -851,7 +851,7 @@ void showBasicConfig() {
   dialog::addBoolItem(XLAT("quick mouse"), vid.quickmouse, 'M');
 #endif
 
-  dialog::addBoolItem(XLAT("remove faraway cells from memory"), memory_saving_mode, 'y');
+  dialog::addBoolItem(XLAT("forget faraway cells"), memory_saving_mode, 'y');
 
   if(CAP_SHMUP && !ISMOBILE)
     dialog::addSelItem(XLAT("configure keys/joysticks"), "", 'p');
@@ -1058,15 +1058,15 @@ string explain3D(ld *param) {
   }
 
 void showStereo() {
-  cmode = sm::SIDE | sm::A3 | sm::MAYDARK;
+  cmode = sm::SIDE | sm::MAYDARK;
   gamescreen(0);
   using namespace geom3;
   dialog::init(XLAT("stereo vision config"));
 
-  string modenames[4] = { "OFF", "anaglyph", "stereo", "ODS" };
+  string modenames[4] = { "OFF", "anaglyph", "side-by-side", "ODS" };
   
   dialog::addSelItem(XLAT("stereo mode"), XLAT(modenames[stereo::mode]), 'm');
-  dialog::addSelItem(XLAT("interpupilar distance"), fts3(stereo::ipd), 'e');
+  dialog::addSelItem(XLAT("pupillary distance"), fts3(stereo::ipd), 'e');
   
   switch(stereo::mode) {
     case stereo::sAnaglyph:
@@ -1082,36 +1082,49 @@ void showStereo() {
 
   dialog::addSelItem(XLAT("field of view"), fts(stereo::fov) + "°", 'f');
 
-  dialog::addItem(XLAT("exit stereo configuration"), 'v');
+  dialog::addItem(XLAT("back"), 'v');
   dialog::display();
 
   keyhandler = [] (int sym, int uni) {
     using namespace geom3;
     dialog::handleNavigation(sym, uni);
+    
+    string help3 = XLAT(
+      "This allows you to view the world of HyperRogue in three dimensions. "
+      "Best used with the Hypersian Rug mode. When used in the disk model, "
+      "this lets you look at the Minkowski hyperboloid (which means the "
+      "depth of terrain features is actually reversed). It also works with non-disk models, "
+      "from the conformal menu."
+       ) + " " + XLAT(
+       "Currently, red-cyan anaglyph glasses and mobile VR googles are supported."
+        ) + "\n\n";
 
     if(uni == 'm')
       { stereo::mode = stereo::eStereo((1 + stereo::mode) % 3); return; }
     
     else if(uni == 'e') 
-      dialog::editNumber(stereo::ipd, -10, 10, 0.01, 0, XLAT("interpupilar distance"),
-        XLAT("Watch the Minkowski hyperboloid or the hypersian rug mode with the "
-        "red/cyan 3D glasses."));
+      dialog::editNumber(stereo::ipd, -10, 10, 0.01, 0, XLAT("pupillary distance"),
+        help3 + 
+        XLAT("The distance between your eyes in the represented 3D object. This is given in absolute units.")
+        );
       
     else if(uni == 'd' && stereo::mode == stereo::sAnaglyph)
       dialog::editNumber(stereo::anaglyph_eyewidth, -1, 1, 0.01, 0, XLAT("distance between images"),
-        XLAT("Watch the Minkowski hyperboloid or the hypersian rug mode with the "
-        "red/cyan 3D glasses."));
+        help3 +
+        XLAT("The distance between your eyes. 1 is the width of the screen."));
 
     else if(uni == 'd' && stereo::mode == stereo::sLR)
       dialog::editNumber(stereo::lr_eyewidth, -1, 1, 0.01, 0, XLAT("distance between images"),
-        XLAT("Watch the Minkowski hyperboloid or the hypersian rug mode with the "
-        "red/cyan 3D glasses."));
+        help3 +
+        XLAT("The distance between your eyes. 1 is the width of the screen."));
       
     else if(uni == 'f')
       dialog::editNumber(stereo::fov, 1, 170, 1, 45, "field of view", 
-        "Horizontal field of view, in the perspective projection. "
-        "In the orthogonal projection this just controls the scale."
-        );
+        help3 + XLAT(
+          "Horizontal field of view, in angles. "
+          "This affects the Hypersian Rug mode (even when stereo is OFF) "
+          "and non-disk models.")
+          );
 
     else if(doexiton(sym, uni)) popScreen();
     };

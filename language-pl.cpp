@@ -6649,14 +6649,78 @@ S("level to save:", "mapa do zapisu:")
 S("pics to load:", "obrazki do wczytania:")
 S("level to load:", "mapa do wczytania:")
 
-S("remove faraway cells from memory", "usuwaj odległe pola z pamięci")
+// new option
+S("forget faraway cells", "zapominaj odległe pola")
 N("Lost Memory", GEN_F, "Utracona Pamięć", "Utracone Pamięci", "Utraconą Pamięć", "w Utraconej Pamięci")
 S(  "Because of the properties of hyperbolic geometry, it is extremely unlikely to randomly "
     "get back to a faraway place you have been to. However, you have managed to get there "
-    "somehow. In the meantime, its memory has been cleared, since the 'remove faraway cells from the memory'"
+    "somehow. In the meantime, its memory has been cleared, since the 'forget faraway cells'"
     " option was on.",
     
     "Ze względu na właściwości geometrii hiperbolicznej praktycznie niemożliwe jest, by "
     "przypadkowo wrócić do odległego miejsca, w którym się było wcześniej. Ale jakoś Ci się to udało... "
-    "W międzyczasie pamięć została wyczyczona, ze względu na włączoną opcję 'usuwaj odległe pola z pamięci'.'"
+    "W międzyczasie pamięć została wyczyczona, ze względu na włączoną opcję 'zapominaj odległe pola'.'"
     )
+
+// shmup 
+N("Blueball", GEN_F, "Niebieska kula", "Niebieske kule", "Niebieską kulę", "Niebieską kulą")
+S("A powerful missile from a Blue Raider.", "Potężny pocisk Niebieskiego Jeźdźca.")
+
+// missing
+S(" fps: ", " fps: ")
+S("default value", "domyślna wartość")
+S("You can scroll with arrow keys -- Ctrl to fine-tune", "Przewijaj strzałkami -- Ctrl by dostroić")
+S("font scale", "rozmiar czcionki")
+S("background particle effects", "cząsteczki w tle")
+
+// not yet translated for Hypersian Rug mode
+S("orthogonal", "ortogonalny")
+S("perspective", "perspektywa")
+S("model scale factor", "współczynnik skali modelu")
+
+// stereo vision config
+S("stereo vision config", "konfiguracja trybu stereo")
+
+S("This allows you to view the world of HyperRogue in three dimensions. "
+  "Best used with the Hypersian Rug mode. When used in the disk model, "
+  "this lets you look at the Minkowski hyperboloid (which means the "
+  "depth of terrain features is actually reversed). It also works with non-disk models, "
+  "from the conformal menu.",
+  "Ten tryb pozwala oglądać świat HyperRogue w trzech wymiarach. "
+  "Najlepiej używać w trybie Hiperskiego Dywanu. Używane w modelu dysku "
+  "pozwala patrzeć na hiperboloidę Minkowskiego (co oznacza, że głębokość "
+  "terenu jest odwrócona). Działa też w innych modelach niż dysk, z trybu "
+  "konforemnego."
+  )
+
+S("Currently, red-cyan anaglyph glasses and mobile VR googles are supported.",
+  "Obecnie działa z czerwono-turkusowymi okularami i goglami VR do telefonów.")
+
+S("stereo mode", "tryb stereo")
+S("anaglyph", "anaglif")
+S("side-by-side", "stereopara")
+
+S("pupillary distance", "odległość źrenic")
+S("The distance between your eyes in the represented 3D object. This is given in absolute units.",
+  "Odległość między oczami w reprezentowanym obiekcie 3D. Podana w jednostkach absolutnych.")
+
+S("distance between images", "odległość między obrazami")
+S("The distance between your eyes. 1 is the width of the screen.",
+  "Odległość między oczami. 1 to szerokość ekranu.")
+
+// field of view
+S("Horizontal field of view, in angles. "
+  "This affects the Hypersian Rug mode (even when stereo is OFF) "
+  "and non-disk models.",
+  "Szerokość pola widzenia, w stopniach. "
+  "Ma wpływ na tryb Hiperskiego Dywanu (nawet gdy stereo jest wyłączone) "
+  "i modele inne niż dysk.")
+
+// more magic configuration
+S("affect model central point", "punkt centralny")
+S("affect texture position X", "położenie tekstury X")
+S("affect texture position Y", "położenie tekstury Y")
+
+S("select master cells", "wybierz główne pola")
+S("select master triangles", "wybierz główne trójkąty")
+S("fine tune vertices", "dostrajanie wierzchołków")

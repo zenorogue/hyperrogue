@@ -673,12 +673,12 @@ namespace dialog {
     addSlider(ne.scale(ne.vmin), ne.scale(*ne.editwhat), ne.scale(ne.vmax), 500);
     addBreak(100);
 #if ISMOBILE==0
-    addHelp("You can scroll with arrow keys -- Ctrl to fine-tune");
+    addHelp(XLAT("You can scroll with arrow keys -- Ctrl to fine-tune"));
     addBreak(100);
 #endif
     
-    addItem("return", ' ');
-    addSelItem("default value", disp(ne.dft), SDLK_HOME);
+    addItem(XLAT("return"), ' ');
+    addSelItem(XLAT("default value"), disp(ne.dft), SDLK_HOME);
 
     addBreak(100);
     

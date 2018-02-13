@@ -1576,36 +1576,30 @@ void show() {
       if(rug::rugged) rug::close();
       else rug::init();
       }
-#if CAP_ODS
-    else if(uni == 'I')
-      dialog::editNumber(ipd, 0, 1, .002, .05, "interpupilar distance",
-        "Used in the ODS projection."
-        );
-#endif
     else if(uni == 'R')
-      dialog::editNumber(finger_range, 0, 1, .01, .1, "finger range",
-        "Press 1 to enable the finger mode."
+      dialog::editNumber(finger_range, 0, 1, .01, .1, XLAT("finger range"),
+        XLAT("Press 1 to enable the finger mode.")
         );
     else if(uni == 'F')
-      dialog::editNumber(finger_force, 0, 1, .01, .1, "finger force",
-        "Press 1 to enable the finger force."
+      dialog::editNumber(finger_force, 0, 1, .01, .1, XLAT("finger force"),
+        XLAT("Press 1 to enable the finger force.")
         );
     else if(uni == 'o' && !rug::rugged)
       renderonce = !renderonce;
     else if(uni == 'v') {
-      dialog::editNumber(vertex_limit, 0, 50000, 500, 3000, "vertex limit", 
-        "The more vertices, the more accurate the Hypersian Rug model is. "
-        "However, a number too high might make the model slow to compute and render."
+      dialog::editNumber(vertex_limit, 0, 50000, 500, 3000, ("vertex limit"), 
+        XLAT("The more vertices, the more accurate the Hypersian Rug model is. "
+        "However, a number too high might make the model slow to compute and render.")
         );
       dialog::reaction = [] () { err_zero_current = err_zero; };
       }
     else if(uni == 'r') 
       addMessage(XLAT("This just shows the 'z' coordinate of the selected point."));
     else if(uni == 'm') {
-      dialog::editNumber(modelscale, 0.1, 10, rugged ? .001 : .1, 1, "model scale factor", 
-        "This is relevant when the native geometry is not Euclidean. "
+      dialog::editNumber(modelscale, 0.1, 10, rugged ? .001 : .1, 1, XLAT("model scale factor"), 
+        XLAT("This is relevant when the native geometry is not Euclidean. "
         "For example, if the native geometry is spherical, and scale < 1, a 2d sphere will be rendered as a subsphere; "
-        "if the native geometry is hyperbolic, and scale > 1, a hyperbolic plane will be rendered as an equidistant surface. "
+        "if the native geometry is hyperbolic, and scale > 1, a hyperbolic plane will be rendered as an equidistant surface. ")
         );
       dialog::scaleLog();
       if(rug::rugged) {
@@ -1631,13 +1625,13 @@ void show() {
         }
       }
     else if(uni == 'd')
-      dialog::editNumber(model_distance, -10, 10, .1, 1, "model distance", 
-        "In the perspective projection, this sets the distance from the camera to the center of the model. "
-        "In the orthogonal projection this just controls the scale."
+      dialog::editNumber(model_distance, -10, 10, .1, 1, XLAT("model distance"), 
+        XLAT("In the perspective projection, this sets the distance from the camera to the center of the model. "
+        "In the orthogonal projection this just controls the scale.")
         );
     else if(uni == 'e') {
-      dialog::editNumber(err_zero, 1e-9, 1, .1, 1e-3, "maximum error", 
-        "New points are added when the current error in the model is smaller than this value."
+      dialog::editNumber(err_zero, 1e-9, 1, .1, 1e-3, XLAT("maximum error"), 
+        XLAT("New points are added when the current error in the model is smaller than this value.")
         );
       dialog::scaleLog();
       dialog::reaction = [] () { err_zero_current = err_zero; };
