@@ -2027,10 +2027,16 @@ typedef array<GLfloat, 3> glvec3;
 typedef array<GLfloat, 4> glvec4;
 typedef glvec3 glvertex;
 
+struct texture_triangle {
+  array<hyperpoint, 3> v;
+  array<hyperpoint, 3> tv;
+  texture_triangle(array<hyperpoint, 3> _v, array<hyperpoint, 3> _tv) : v(_v), tv(_tv) {}
+  };
+
 struct textureinfo {
   transmatrix M;
   int texture_id;
-  vector<array<hyperpoint, 3>> triangles;
+  vector<texture_triangle> triangles;
   vector<glvertex> vertices;
   vector<glvertex> tvertices; 
   cell *c;

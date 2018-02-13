@@ -236,28 +236,29 @@ transmatrix itt = Id;
 
 unsigned grid_color = 0;
 unsigned mesh_color = 0;
-unsigned master_color = 0xFFFFFF10;
+unsigned master_color = 0xFFFFFF30;
 unsigned slave_color = 0xFF000008;
 
 int color_alpha = 128;
 
 int gsplits = 1;
 
-void mapTextureTriangle(textureinfo &mi, array<hyperpoint, 3> v, int splits = gsplits) {
+void mapTextureTriangle(textureinfo &mi, const array<hyperpoint, 3>& v, const array<hyperpoint, 3>& tv, int splits = gsplits) {
 
   if(splits) {
     array<hyperpoint, 3> v2 = make_array( mid(v[1], v[2]), mid(v[2], v[0]), mid(v[0], v[1]) );
-    mapTextureTriangle(mi, make_array(v[0], v2[2], v2[1]), splits-1);
-    mapTextureTriangle(mi, make_array(v[1], v2[0], v2[2]), splits-1);
-    mapTextureTriangle(mi, make_array(v[2], v2[1], v2[0]), splits-1);
-    mapTextureTriangle(mi, make_array(v2[0], v2[1], v2[2]), splits-1);
+    array<hyperpoint, 3> tv2 = make_array( mid(tv[1], tv[2]), mid(tv[2], tv[0]), mid(tv[0], tv[1]) );
+    mapTextureTriangle(mi, make_array(v[0], v2[2], v2[1]),  make_array(tv[0], tv2[2], tv2[1]),  splits-1);
+    mapTextureTriangle(mi, make_array(v[1], v2[0], v2[2]),  make_array(tv[1], tv2[0], tv2[2]),  splits-1);
+    mapTextureTriangle(mi, make_array(v[2], v2[1], v2[0]),  make_array(tv[2], tv2[1], tv2[0]),  splits-1);
+    mapTextureTriangle(mi, make_array(v2[0], v2[1], v2[2]), make_array(tv2[0], tv2[1], tv2[2]), splits-1);
     return;
     }
     
   for(int i=0; i<3; i++) {
     mi.vertices.push_back(glhr::pointtogl(v[i]));
     hyperpoint inmodel;
-    applymodel(mi.M * v[i], inmodel);
+    applymodel(tv[i], inmodel);
     inmodel = itt * inmodel;
     inmodel[0] *= vid.radius * 1. / vid.scrsize;
     inmodel[1] *= vid.radius * 1. / vid.scrsize;
@@ -265,9 +266,36 @@ void mapTextureTriangle(textureinfo &mi, array<hyperpoint, 3> v, int splits = gs
     }  
   }
 
+texture_triangle *edited_triangle;
+textureinfo *edited_tinfo;
+
+vector<hyperpoint*> tuned_vertices;
+
 map<int, textureinfo> texture_map, texture_map_orig;
 
 set<cell*> models;
+
+array<hyperpoint, 3> findTextureTriangle(cell *c, patterns::patterninfo& si, int i) {
+  // auto si = getpatterninfo0(c);
+  transmatrix M = shmup::ggmatrix(c) * applyPatterndir(c, si);  
+  ld z = ctof(c) ? rhexf : hexvdist;
+  hyperpoint h1 =  spin(M_PI + M_PI * (2*i -1) / c->type) * xpush(z) * C0;
+  hyperpoint h2 =  spin(M_PI + M_PI * (2*i +1) / c->type) * xpush(z) * C0;
+  return make_array(M * C0, M * h1, M * h2);
+  }
+
+// using: mouseh, mouseouver
+int getTriangleID(cell *c, patterns::patterninfo& si, hyperpoint h) {
+  // auto si = getpatterninfo0(c);
+  ld quality = 1e10;
+  int best = 0;
+  for(int i=0; i<c->type; i++) {
+    auto t = findTextureTriangle(c, si, i);
+    ld q = intval(t[1], h) + intval(t[2], h);
+    if(q < quality) quality = q, best = i;
+    }
+  return best;
+  }
 
 void mapTexture(cell *c, textureinfo& mi, patterns::patterninfo &si, const transmatrix& T, int shift = 0) {
   mi.c = c;
@@ -283,7 +311,7 @@ void mapTexture(cell *c, textureinfo& mi, patterns::patterninfo &si, const trans
     int i2 = i+shift;
     hyperpoint h1 =  spin(M_PI + M_PI * (2*i2 -1) / c->type) * xpush(z) * C0;
     hyperpoint h2 =  spin(M_PI + M_PI * (2*i2 +1) / c->type) * xpush(z) * C0;
-    mi.triangles.push_back(make_array(C0, h1, h2));
+    mi.triangles.emplace_back(make_array(C0, h1, h2), make_array(mi.M*C0, mi.M*h1, mi.M*h2));
     }
   }
 
@@ -291,7 +319,7 @@ void mapTexture2(textureinfo& mi) {
   mi.vertices.clear();
   mi.tvertices.clear();
   for(auto& t: mi.triangles)
-    mapTextureTriangle(mi, t);
+    mapTextureTriangle(mi, t.v, t.tv);
   }
   
 int recolor(int col) {
@@ -376,7 +404,7 @@ void mark_triangles() {
       for(auto& t: mi.second.triangles) {
         vector<hyperpoint> t2;
         for(int i=0; i<3; i++)
-          t2.push_back(mi.second.M * t[i]);
+          t2.push_back(t.tv[i]);
         prettypoly(t2, master_color, master_color, gsplits);
         }
       }
@@ -388,11 +416,25 @@ static const auto current_texture_parameters = tie(geometry, nonbitrunc, pattern
 
 texture_parameters orig_texture_parameters;
 
+bool texture_tuned = false;
+string texture_tuner;
+
+void clear_texture_map() {
+  texture_map.clear();
+  edited_triangle = nullptr;
+  edited_tinfo = nullptr;
+  tuned_vertices.clear();
+  models.clear();
+  texture_tuned = false;
+  texture_tuner = "";
+  }
+  
 void perform_mapping() {
   if(gsplits < 0) gsplits = 0;
   if(gsplits > 4) gsplits = 4;
   using namespace patterns;
-  texture_map.clear();
+  
+  clear_texture_map();
 
   for(auto& p: gmatrix) {
     cell *c = p.first;
@@ -413,11 +455,6 @@ void perform_mapping() {
       }
     }
   
-  if(tstate == tsActive)
-    for(auto& mi: texture_map)
-      mapTexture2(mi.second);
-
-  models.clear();
   for(auto& t: texture_map) models.insert(t.second.c);
   
   for(auto& p: gmatrix) {
@@ -436,7 +473,13 @@ void perform_mapping() {
   texture::cgroup = patterns::cgroup;
   texture_map_orig = texture_map;
   orig_texture_parameters = current_texture_parameters;
-  printf("texture_map has %d elements (S%d)\n", size(texture_map), tstate);
+  // printf("texture_map has %d elements (S%d)\n", size(texture_map), tstate);
+  }
+
+void finish_mapping() {
+  if(tstate == tsActive)
+    for(auto& mi: texture_map)
+      mapTexture2(mi.second);
   }
 
 void saveFullTexture() {
@@ -454,6 +497,7 @@ void saveFullTexture() {
   itt = xyscale(Id, vid.scrsize * 1. / vid.radius);
   readtexture();
   perform_mapping();
+  finish_mapping();
   }
 
 bool newmove = false;
@@ -611,7 +655,7 @@ void applyMagic() {
     }
   }
 
-enum eTexturePanstate {tpsModel, tpsMove, tpsScale, tpsAffine, tpsZoom, tpsProjection};
+enum eTexturePanstate {tpsModel, tpsMove, tpsScale, tpsAffine, tpsZoom, tpsProjection, tpsCell, tpsTriangle, tpsTune};
 eTexturePanstate panstate;
 
 void mousemovement() {
@@ -670,6 +714,64 @@ void mousemovement() {
       newmove = false;
       }
     
+    case tpsCell: {
+      cell *c = mouseover;
+      if(!c) break;
+      auto si = patterns::getpatterninfo0(c);
+      if(newmove) {
+        edited_tinfo = NULL;
+        if(texture_map.count(si.id)) {
+          edited_tinfo = &texture_map[si.id];
+          newmove = false;
+          }
+        }
+      if(edited_tinfo && size(edited_tinfo->triangles) == c->type) {
+        for(int i=0; i<c->type; i++)
+          edited_tinfo->triangles[i].tv = findTextureTriangle(c, si, i);
+        texture_tuned = true;
+        }
+      }
+    
+    case tpsTriangle: {
+      cell *c = mouseover;
+      if(!c) break;
+      auto si = patterns::getpatterninfo0(c);
+      int i = getTriangleID(c, si, mouseh);
+      if(newmove) {
+        edited_triangle = NULL;
+        if(texture_map.count(si.id)) {
+          edited_triangle = &texture_map[si.id].triangles[i];
+          newmove = false;
+          }
+        }
+      if(edited_triangle) {
+        edited_triangle->tv = findTextureTriangle(c, si, i);
+        texture_tuned = true;
+        }
+      }
+
+    case tpsTune: {
+      ld tdist = 1e20;
+      if(newmove) {
+        tuned_vertices.clear();
+        for(auto& a: texture_map)
+          for(auto& t: a.second.triangles)
+            for(auto& v: t.tv)
+              if(intval(v, mouseh) < tdist)
+                tdist = intval(v, mouseh);
+        for(auto& a: texture_map)
+          for(auto& t: a.second.triangles)
+            for(auto& v: t.tv)
+              if(intval(v, mouseh) < tdist * (1.000001))
+                tuned_vertices.push_back(&v);
+        newmove = false;
+        }
+      for(auto v: tuned_vertices) {
+        *v = mouseh;
+        texture_tuned = true;
+        }
+      }
+    
     default: break;
     }
   }
@@ -720,6 +822,7 @@ void init_textureconfig() {
   addsaver(vid.scale, "scale", 1);
   
   addsaver(texturename, "texture filename", "");
+  addsaver(texture_tuner, "texture tuning", "");
   
   swap(texturesavers, savers);
   }
@@ -728,6 +831,17 @@ bool save_textureconfig() {
   init_textureconfig();
   FILE *f = fopen(configname.c_str(), "wt");
   if(!f) return false;
+  
+  if(texture_tuned) {
+    texture_tuner = "";
+    for(auto& a: texture_map)
+      for(auto& t: a.second.triangles)
+        for(auto& v: t.tv) 
+          for(int i=0; i<3; i++) {
+            texture_tuner += ftssmart(v[i]);
+            texture_tuner += ';';
+            }
+    }
 
   targetgeometry = geometry;
   target_nonbitru = nonbitrunc;
@@ -786,7 +900,37 @@ bool load_textureconfig() {
   calcparam();
   drawthemap();
   tstate = tstate_max = tsActive;
+  string s = move(texture_tuner);
   perform_mapping();
+  
+  texture_tuner = move(s);
+  
+  if(texture_tuner != "") {
+    texture_tuned = true;
+    vector<ld*> coords;
+    for(auto& a: texture_map)
+      for(auto& t: a.second.triangles)
+        for(auto& v: t.tv) 
+          for(int i=0; i<3; i++) 
+            coords.push_back(&v[i]);
+    int semicounter = 0;
+    for(char c: texture_tuner) if(c == ';') semicounter++;
+    if(semicounter != size(coords))
+      addMessage("Tuning error: wrong number");
+    else {
+      string cur = "";
+      int index = 0;
+      for(char c: texture_tuner)
+        if(c == ';') {
+          *(coords[index++]) = atof(cur.c_str());
+          cur = "";
+          }
+        else cur += c;
+      printf("index = %d semi = %d sc = %d\n", index, semicounter, size(coords));
+      }
+    }
+    
+  finish_mapping();
   return true;
   }
 
@@ -910,9 +1054,17 @@ void showMenu() {
     dialog::addBoolItem(XLAT("projection"), panstate == tpsProjection, 'p');
     dialog::addBoolItem(XLAT("affine transformations"), panstate == tpsAffine, 'y');
     dialog::addBoolItem(XLAT("magic"), false, 'A');
+    
+    dialog::addBreak(50);
+
+    dialog::addBoolItem(XLAT("select master cells"), panstate == tpsCell, 'C');
+    dialog::addBoolItem(XLAT("select master triangles"), panstate == tpsTriangle, 'T');
+    dialog::addBoolItem(XLAT("fine tune vertices"), panstate == tpsTune, 'F');
 
     dialog::addColorItem(XLAT("grid color (master)"), master_color, 'M');
     dialog::addColorItem(XLAT("grid color (copy)"), slave_color, 'C');
+    
+    dialog::addBreak(50);
     
     dialog::addSelItem(XLAT("precision"), its(gsplits), 'P');
     dialog::addItem(XLAT("save the raw texture"), 'S');
@@ -962,6 +1114,9 @@ void showMenu() {
     else if(uni == 'y' && tstate == tsAdjusting) panstate = tpsAffine;
     else if(uni == 'z' && tstate == tsAdjusting) panstate = tpsZoom;
     else if(uni == 'p' && tstate == tsAdjusting) panstate = tpsProjection;
+    else if(uni == 'C' && tstate == tsAdjusting) panstate = tpsCell;
+    else if(uni == 'T' && tstate == tsAdjusting) panstate = tpsTriangle;
+    else if(uni == 'F' && tstate == tsAdjusting) panstate = tpsTune;
     else if(uni == 'A' && tstate == tsAdjusting) 
       pushScreen(showMagicMenu);
 
@@ -987,6 +1142,7 @@ void showMenu() {
             if(tstate_max == tsOff) tstate_max = tsAdjusting;
             tstate = tstate_max;
             perform_mapping();
+            finish_mapping();
             return true;
             }
           else return false;
@@ -1008,6 +1164,7 @@ void showMenu() {
       if(whitetexture() && loadTextureGL()) {
         tstate = tstate_max = tsActive;
         perform_mapping();
+        finish_mapping();
         mapeditor::initdraw(cwt.c);
         pushScreen(mapeditor::showDrawEditor);
         }
@@ -1018,7 +1175,7 @@ void showMenu() {
     
     else if(uni == 't' && tstate == tsAdjusting) {
       tstate = tstate_max = tsActive;
-      perform_mapping();
+      finish_mapping();
       }
 
     else if(uni == 't' && tstate == tsActive) 
@@ -1047,9 +1204,7 @@ void showMenu() {
     else if(uni == 'P') {
       dialog::editNumber(gsplits, 0, 4, 1, 1, XLAT("precision"),
         XLAT("precision"));
-      if(tstate == tsActive) dialog::reaction = [] () {
-          for(auto& mi: texture_map)
-            mapTexture2(mi.second);
+      if(tstate == tsActive) dialog::reaction = [] () { finish_mapping();
         };
       }
     else if(uni == 'S' && tstate == tsAdjusting) 
@@ -1242,7 +1397,7 @@ void drawLine(hyperpoint h1, hyperpoint h2, int col, int steps) {
   }
 
 void remap(eTextureState old_tstate, eTextureState old_tstate_max) {
-  texture_map.clear();
+  clear_texture_map();
   if(old_tstate == tsActive && patterns::compatible(texture::cgroup, patterns::cgroup)) {
   
     tstate = old_tstate;
@@ -1290,6 +1445,7 @@ void remap(eTextureState old_tstate, eTextureState old_tstate_max) {
     calcparam();
     drawthemap();
     perform_mapping();
+    finish_mapping();
     printf("texture_map size = %d\n", size(texture_map));
     }
   }
