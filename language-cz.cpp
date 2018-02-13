@@ -6859,4 +6859,84 @@ S("level to save:", "mapa k nahrání:")
 S("pics to load:", "obrázky k uložení:")
 S("level to load:", "mapa k uložení:")
 
+// === 10.3j extra texts ===
+// =========================
+
+// new option
+S("forget faraway cells", "zapomínání vzdálených políček")
+N("Lost Memory", GEN_F, "Ztracená paměť", "Ztracené paměti", "Ztracenou paměť", "ve Ztracené paměti")
+S(  "Because of the properties of hyperbolic geometry, it is extremely unlikely to randomly "
+    "get back to a faraway place you have been to. However, you have managed to get there "
+    "somehow. In the meantime, its memory has been cleared, since the 'forget faraway cells'"
+    " option was on.",
+    
+    "Díky vlastnostem hyperbolické geometrie je nesmírně nepravděpodobné, "
+    "že se ti podaří náhodně se vrátit na nějaké vzdálené místo z minulosti. "
+    "Ale tobě se to nějak povedlo. Vzpomínka na ně se ale mezitím vyčistila, "
+    "protože byla zapnutá možnost 'zapomínání vzdálených políček'"
+    )
+
+// shmup 
+N("Blueball", GEN_F, "Modrá koule", "Modré koule", "Modrou kouli", "Modrou koulí")
+S("A powerful missile from a Blue Raider.", "Mocná střela Modrého nájezdníka.")
+
+// missing
+S(" fps: ", " fps: ")
+S("default value", "defaultní hodnota")
+S("You can scroll with arrow keys -- Ctrl to fine-tune", "Scrolluj šipkami -- Ctrl pro jemné ladění")
+S("font scale", "velikost fontu")
+S("background particle effects", "částicové efekty na pozadí")
+
+// not yet translated for Hypersian Rug mode
+S("orthogonal", "ortogonální")
+S("perspective", "perspektiva")
+S("model scale factor", "faktor škálování modelu")
+
+// stereo vision config
+S("stereo vision config", "konfigurace stereovidění")
+
+S("This allows you to view the world of HyperRogue in three dimensions. "
+  "Best used with the Hypersian Rug mode. When used in the disk model, "
+  "this lets you look at the Minkowski hyperboloid (which means the "
+  "depth of terrain features is actually reversed). It also works with non-disk models, "
+  "from the conformal menu.",
+  "Tento mód ti umožňuje dívat se na svět HyperRogue trojrozměrně. Nejlepší "
+  "je kombinovat ho s módem Hyperského koberce. Při použití s diskovým modelem "
+  "se můžeš dívat na Minkowskiho hyperboloid (což znamená, že hloubka "
+  "terénních prvků bude převrácená). Funguje také s ne-diskovými modely "
+  "z konformního menu."
+  )
+
+S("Currently, red-cyan anaglyph glasses and mobile VR googles are supported.",
+  "V tuto chvíli jsou podporovány červeno-modré anaglyfové brýle a mobilní VR brýle.")
+
+S("stereo mode", "stereomód")
+S("anaglyph", "anaglyf")
+S("side-by-side", "vedle sebe")
+
+S("pupillary distance", "vzdálenost zorniček")
+S("The distance between your eyes in the represented 3D object. This is given in absolute units.",
+  "Vzdálenost mezi vašima očima v reprezentovaném 3D objektu. Udávaná "
+  "v absolutních jednotkách.")
+
+S("distance between images", "vzdálenost mezi obrazy")
+S("The distance between your eyes. 1 is the width of the screen.",
+  "Vzdálenost vašich očí. 1 je šířka obrazovky.")
+
+// field of view
+S("Horizontal field of view, in angles. "
+  "This affects the Hypersian Rug mode (even when stereo is OFF) "
+  "and non-disk models.",
+  "Horizontální zorné pole, ve stupních. Toto nastavení ovlivňuje mód "
+  "Hyperského koberce (i při vypnutém stereomódu) a ne-diskové modely.")
+
+// more magic configuration
+S("affect model central point", "ovlivňování centrálního bodu modelu")
+S("affect texture position X", "ovlivňování pozice textury X")
+S("affect texture position Y", "ovlivňování pozice textury Y")
+
+S("select master cells", "výběr hlavních buněk")
+S("select master triangles", "výběr hlavních trojúhelníků")
+S("fine tune vertices", "doladění vrcholů")
+
 #undef Orb
