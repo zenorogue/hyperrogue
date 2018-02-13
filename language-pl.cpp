@@ -6659,12 +6659,12 @@ S(  "Because of the properties of hyperbolic geometry, it is extremely unlikely 
     
     "Ze względu na właściwości geometrii hiperbolicznej praktycznie niemożliwe jest, by "
     "przypadkowo wrócić do odległego miejsca, w którym się było wcześniej. Ale jakoś Ci się to udało... "
-    "W międzyczasie pamięć została wyczyczona, ze względu na włączoną opcję 'zapominaj odległe pola'.'"
+    "W międzyczasie pamięć została wyczyczona, ze względu na włączoną opcję 'zapominaj odległe pola'."
     )
 
 // shmup 
 N("Blueball", GEN_F, "Niebieska kula", "Niebieske kule", "Niebieską kulę", "Niebieską kulą")
-S("A powerful missile from a Blue Raider.", "Potężny pocisk Niebieskiego Jeźdźca.")
+S("A powerful missile from a Blue Raider.", "Potężny pocisk Niebieskiego Najeźdźcy.")
 
 // missing
 S(" fps: ", " fps: ")
