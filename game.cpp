@@ -1674,6 +1674,7 @@ bool earthWall(cell *c) {
   }
 
 bool snakepile(cell *c, eMonster m) {
+  if(c->item && c->wall != waRed3) c->item = itNone;
   if(c->wall == waRed1 || c->wall == waOpenGate) c->wall = waRed2;
   else if(c->wall == waRed2) c->wall = waRed3;
   else if(doesFall(c)) return false;
