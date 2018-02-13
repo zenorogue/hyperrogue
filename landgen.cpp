@@ -542,20 +542,28 @@ void giantLandSwitch(cell *c, int d, cell *from) {
     
     case laReptile:
       if(d == 9) {
-        int i = zebra40(c);
-        if(i < 40) {
-          int cd = getCdata(c, 3);
-          cd &= 15;
-          if(cd >= 4 && cd < 12) c->wall = waChasm;
-          else {
-            int ch =  hrand(200);
-            c->wall = ch < (50 + items[itDodeca] + yendor::hardness()) ? waReptile : 
-             waNone;
-            }
+        if(randomPatternsMode) {
+          int ch =  hrand(200);
+          if(RANDPAT) c->wall = waChasm;
+          else c->wall = ch < (50 + items[itDodeca] + yendor::hardness()) ? waReptile : waNone;
           c->wparam = 1 + hrand(reptilemax());
           }
-        if(reptilecheat) {
-          c->wall = waReptile; c->wparam = 100;
+        else {
+          int i = zebra40(c);
+          if(i < 40) {
+            int cd = getCdata(c, 3);
+            cd &= 15;
+            if(cd >= 4 && cd < 12) c->wall = waChasm;
+            else {
+              int ch =  hrand(200);
+              c->wall = ch < (50 + items[itDodeca] + yendor::hardness()) ? waReptile : 
+               waNone;
+              }
+            c->wparam = 1 + hrand(reptilemax());
+            }
+          if(reptilecheat) {
+            c->wall = waReptile; c->wparam = 100;
+            }
           }
         }
       if(d == 7 && c->wall != waChasm) {
@@ -685,10 +693,15 @@ void giantLandSwitch(cell *c, int d, cell *from) {
     
     case laDragon:
       if(d == 9) {
-        int cd = getCdata(c, 3);
-        cd &= 31;
-        if(cd >= 6 && cd<12) c->wall = waChasm;
-        else if(hrand(1000) == 0) c->wall = waEternalFire;
+        if(randomPatternsMode) {
+          if(RANDPAT) c->wall = waChasm;
+          }
+        else {
+          int cd = getCdata(c, 3);
+          cd &= 31;
+          if(cd >= 6 && cd<12) c->wall = waChasm;
+          else if(hrand(1000) == 0) c->wall = waEternalFire;
+          }
         }
       ONEMPTY {
         // 40 is the usual rate of dragon generation
@@ -1588,7 +1601,13 @@ void giantLandSwitch(cell *c, int d, cell *from) {
         int ce = getCdata(c, 2);
         ce &= 15;
         if(cd >= 8 && ce >= 8) */
-        if(hrand(100) < 25)
+        
+        if(randomPatternsMode) {
+          int i = (RANDPAT ? 1 : 0)  + (RANDPATV(laHell) ? 2 : 0);
+          eWall w[4] = {waNone, waSmallTree, waBigTree, waStone};
+          c->wall = w[i];
+          }
+        else if(hrand(100) < 25)
           c->wall = safety ? pick(waBigTree, waSmallTree) : pick(waStone, waBigTree, waSmallTree);
         }    
 
@@ -1930,13 +1949,18 @@ void giantLandSwitch(cell *c, int d, cell *from) {
     case laRuins: {
       int kf = 10 + items[itRuins] + yendor::hardness();
       if(d == 8) {
-        if(out_ruin(c)) {
-          if(hrand(100) < 3)
-            c->wall = waRuinWall;
+        if(randomPatternsMode) {
+          c->wall = RANDPAT ? waRuinWall : waNone;
           }
-        else if(hrand(100) < 75) {
-          forCellEx(c2, c) if(out_ruin(c2))
-            c->wall = waRuinWall;
+        else {
+          if(out_ruin(c)) {
+            if(hrand(100) < 3)
+              c->wall = waRuinWall;
+            }
+          else if(hrand(100) < 75) {
+            forCellEx(c2, c) if(out_ruin(c2))
+              c->wall = waRuinWall;
+            }
           }
         if(hrand(40000) < kf && !c->monst && !c->wall && !shmup::on) {
           cell *c1 = c;
@@ -1964,30 +1988,42 @@ void giantLandSwitch(cell *c, int d, cell *from) {
     
     case laDocks: {
       if(d == 8) {
-        patterns::patterninfo si;
-        if(a38) 
-          patterns::val38(c, si, patterns::SPF_DOCKS, patterns::PAT_COLORING);
-        else
-          si.id = (zebra40(c)&2) ? 0 : zebra40(c) == 4 ? 8 : 1;
-        c->wall = waSea;
-        if(among(si.id, 0, 4, 16, nonbitrunc ? -1 : 24))
-          c->wall = waDock;
-        if(si.id == 8 && hrand(100) < 75) {
-          c->wall = waBoat;
-          if(a38) for(int i=0; i<c->type; i++) {
-            patterns::val38(createMov(c, i), si, patterns::SPF_DOCKS, patterns::PAT_COLORING);
-            if(si.id == 0) c->mondir = i;
+        if(randomPatternsMode) {
+          c->wall = RANDPAT ? waDock : waSea;
+          if(c->wall == waSea && RANDPATV(laEAir))
+            c->wall = waBoat;
+          }
+        else {
+          patterns::patterninfo si;
+          if(a38) 
+            patterns::val38(c, si, patterns::SPF_DOCKS, patterns::PAT_COLORING);
+          else
+            si.id = (zebra40(c)&2) ? 0 : zebra40(c) == 4 ? 8 : 1;
+          c->wall = waSea;
+          if(among(si.id, 0, 4, 16, nonbitrunc ? -1 : 24))
+            c->wall = waDock;
+          if(si.id == 8 && hrand(100) < 75) {
+            c->wall = waBoat;
+            if(a38) for(int i=0; i<c->type; i++) {
+              patterns::val38(createMov(c, i), si, patterns::SPF_DOCKS, patterns::PAT_COLORING);
+              if(si.id == 0) c->mondir = i;
+              }
             }
           }
         }
       if(d == 7 && !safety) {
-        patterns::patterninfo si;
-        if(a38)
-          patterns::val38(c, si, patterns::SPF_DOCKS, patterns::PAT_COLORING);
-        else
-          si.id = hrand(20);
-        if(si.id == 16 && hrand(250) < PT(30 + kills[moRatling] + kills[moCShark] + kills[moAlbatross] + kills[moPirate] + kills[moFireFairy], 100))
-          c->item = itDock;
+        if(randomPatternsMode) {
+          if(hrand(2000) < PT(30 + kills[moRatling] + kills[moCShark] + kills[moAlbatross] + kills[moPirate] + kills[moFireFairy], 100)) c->item = itDock;
+          }
+        else {
+          patterns::patterninfo si;
+          if(a38)
+            patterns::val38(c, si, patterns::SPF_DOCKS, patterns::PAT_COLORING);
+          else
+            si.id = hrand(20);
+          if(si.id == 16 && hrand(250) < PT(30 + kills[moRatling] + kills[moCShark] + kills[moAlbatross] + kills[moPirate] + kills[moFireFairy], 100))
+            c->item = itDock;
+          }
         if(c->wall == waDock && hrand(6000) < 25 + items[itDock] + yendor::hardness())
           c->monst = pick(moPirate, moRatling, moFireFairy);
         if(c->wall == waSea && hrand(6000) < 25 + items[itDock] + yendor::hardness())

@@ -585,7 +585,7 @@ bool hyperstonesUnlocked() {
 
 // 2 = always available, 1 = highscore required, 0 = never available
 int isRandland(eLand l) {
-  if(l == laIce || l == laDesert || l == laCaves || l == laWildWest)
+  if(l == laIce || l == laDesert || l == laCaves || l == laWildWest || l == laDocks)
     return 2;
   for(eLand ll: randlands) if(l == ll) return 1;
   return 0;
@@ -665,7 +665,7 @@ eLand pickLandRPM(eLand old) {
     eLand n = randlands[hrand(size(randlands))];
     if(incompatible(n, old)) continue;
     if(isRandland(n) == 2) return n;
-    if(hiitemsMax(treasureType(n)) < 10)
+    if(!autocheat && !cheater && hiitemsMax(treasureType(n)) < 10)
       continue;
     return n;
     }

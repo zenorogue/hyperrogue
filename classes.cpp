@@ -1649,7 +1649,7 @@ vector<landtacinfo> land_tac = {
 vector<eLand> randlands = {
   laIce, laDesert, laCaves, laAlchemist, laGraveyard, laPower, laLivefjord, laZebra,
   laRlyeh, laDryForest, laEmerald, laWineyard, laDeadCaves, laRedRock,
-  laOvergrown, laWildWest, laWarpCoast, laRuins
+  laOvergrown, laWildWest, laWarpCoast, laRuins, laBull, laDragon, laReptile, laDocks
   };
 
 geometryinfo ginf[gGUARD] = {
