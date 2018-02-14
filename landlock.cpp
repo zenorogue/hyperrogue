@@ -410,12 +410,16 @@ eLand firstland = laIce, specialland = laIce;
 
 bool chaosmode = false;
 
+bool landUnlockedRPM(eLand n) {
+  if(isRandland(n) == 2) return true;
+  if(isRandland(n) == 1)
+    return (autocheat || cheater || hiitemsMax(treasureType(n)) >= 10);
+  return false;
+  }
+
 bool landUnlocked(eLand l) {
   if(randomPatternsMode) {
-    int i = isRandland(l);
-    if(i == 2) return true;
-    if(i == 1) return hiitemsMax(treasureType(l)) >= 10;
-    return false;
+    return landUnlockedRPM(l);
     }
   
   switch(l) {
@@ -664,10 +668,7 @@ eLand pickLandRPM(eLand old) {
   while(true) {
     eLand n = randlands[hrand(size(randlands))];
     if(incompatible(n, old)) continue;
-    if(isRandland(n) == 2) return n;
-    if(!autocheat && !cheater && hiitemsMax(treasureType(n)) < 10)
-      continue;
-    return n;
+    if(landUnlockedRPM(n)) return n;
     }
   }
 
@@ -1252,7 +1253,7 @@ int isLandValid(eLand l) {
   if(l == laSnakeNest)
     return geosupport_threecolor() >= 2 ? 3 : 0;
   
-  if(l == laDocks)
+  if(l == laDocks && !randomPatternsMode)
     return a38 ? 3 : 0;
   
   if(l == laStorms && torus) 
