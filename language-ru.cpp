@@ -6946,3 +6946,82 @@ S("level to load:", "карты для загрузки:")
 
 #undef Orb
 
+ 
+// === 10.3j extra texts ===
+// =========================
+ 
+// new option
+S("forget faraway cells", "забывать далекие клетки")
+N("Lost Memory", GEN_F, "Потерянная память", "Потерянные памяти", "Потерянную память", "в Потерянной памяти")
+S(  "Because of the properties of hyperbolic geometry, it is extremely unlikely to randomly "
+    "get back to a faraway place you have been to. However, you have managed to get there "
+    "somehow. In the meantime, its memory has been cleared, since the 'forget faraway cells'"
+    " option was on.",
+   
+    "Из-за свойств гиперболической геометрии практически невозможно случайно попасть в далекую клетку, "
+    "в которой вы когда-то были. Но вы как-то смогли это сделать. "
+    "Память была очищена, так как опция 'забывать далекие клетки' была включена."
+    )
+ 
+// shmup
+N("Blueball", GEN_O, "Голубой шар", "Голубые шары", "Голубой шар", "Голубым шаром")
+S("A powerful missile from a Blue Raider.", "Мощный снаряд от Голубого Рейдера.")
+ 
+// missing
+S(" fps: ", " fps: ")
+S("default value", "значение по умолчанию")
+S("You can scroll with arrow keys -- Ctrl to fine-tune", "Перематывай стрелками -- Ctrl для тонкой настройки")
+S("font scale", "размер шрифта")
+S("background particle effects", "частицы на фоне")
+ 
+// not yet translated for Hypersian Rug mode
+S("orthogonal", "ортогональный")
+S("perspective", "перспектива")
+S("model scale factor", "коэффициент масштаба модели")
+ 
+// stereo vision config
+S("stereo vision config", "настройки режима стерео")
+ 
+S("This allows you to view the world of HyperRogue in three dimensions. "
+  "Best used with the Hypersian Rug mode. When used in the disk model, "
+  "this lets you look at the Minkowski hyperboloid (which means the "
+  "depth of terrain features is actually reversed). It also works with non-disk models, "
+  "from the conformal menu.",
+  "Этот режим позволяет видеть мир HyperRogue в трех измерениях. "
+  "Лучше всего использовать в режиме Гиперсидского ковра. Если используется в модели диска, "
+  "позволяет смотреть на гиперболоид Минковского (то есть глубина "
+  "поверхности перевернута). Это работает и в других моделях "
+  "из конформного меню."
+  )
+ 
+S("Currently, red-cyan anaglyph glasses and mobile VR googles are supported.",
+  "Поддерживаются красно-синие анаглиф-очки и очки виртуальной реальности для телефонов.")
+ 
+S("stereo mode", "режим стерео")
+S("anaglyph", "анаглиф")
+S("side-by-side", "стереопара")
+ 
+S("pupillary distance", "расстояние между зрачками")
+S("The distance between your eyes in the represented 3D object. This is given in absolute units.",
+  "Расстояние между глазами для 3D изображения. Измеряется в абсолютных единицах.")
+ 
+S("distance between images", "расстояние между изображениями")
+S("The distance between your eyes. 1 is the width of the screen.",
+  "Расстояние между вашими глазами. Единица -- ширина экрана.")
+ 
+// field of view
+S("Horizontal field of view, in angles. "
+  "This affects the Hypersian Rug mode (even when stereo is OFF) "
+  "and non-disk models.",
+  "Горизонтальное поле зрения, в градусах. "
+  "Влияет на режим Гиперсидского ковра (даже вне режима стерео) "
+  "и не дисковые модели.")
+ 
+// more magic configuration
+S("affect model central point", "центральная точка")
+S("affect texture position X", "положение текстуры X")
+S("affect texture position Y", "положение текстуры Y")
+ 
+S("select master cells", "выбери главные клетки")
+S("select master triangles", "выбери главные треугольники")
+S("fine tune vertices", "тонкая настройка вершин")
