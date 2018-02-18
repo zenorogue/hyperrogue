@@ -331,14 +331,14 @@ void showMission() {
       ;
     else if(princess::challenge) 
       dialog::addInfo(XLAT("Follow the Mouse and escape with %the1!", moPrincess));
-    else if(gold() < R30)
-      dialog::addInfo(XLAT("Collect %1 $$$ to access more worlds", its(R30)));
-    else if(gold() < R60)
-      dialog::addInfo(XLAT("Collect %1 $$$ to access even more lands", its(R60)));
+    else if(gold() < R_30)
+      dialog::addInfo(XLAT("Collect %1 $$$ to access more worlds", its(R_30)));
+    else if(gold() < R_60)
+      dialog::addInfo(XLAT("Collect %1 $$$ to access even more lands", its(R_60)));
     else if(!hellUnlocked())
-      dialog::addInfo(XLAT("Collect at least %1 treasures in each of 9 types to access Hell", its(R10)));
-    else if(items[itHell] < R10)
-      dialog::addInfo(XLAT("Collect at least %1 Demon Daisies to find the Orbs of Yendor", its(R10)));
+      dialog::addInfo(XLAT("Collect at least %1 treasures in each of 9 types to access Hell", its(R_10)));
+    else if(items[itHell] < R_10)
+      dialog::addInfo(XLAT("Collect at least %1 Demon Daisies to find the Orbs of Yendor", its(R_10)));
     else if(size(yendor::yi) == 0)
       dialog::addInfo(XLAT("Look for the Orbs of Yendor in Hell or in the Crossroads!"));
     else 
@@ -357,21 +357,21 @@ void showMission() {
   else if(tour::on) ;
 #endif
   else if(peace::on) ;
-  else if(tkills() < R100)
-    dialog::addInfo(XLAT("Defeat %1 enemies to access the Graveyard", its(R100)));
-  else if(kills[moVizier] == 0 && (items[itFernFlower] < U5 || items[itGold] < U5))
+  else if(tkills() < R_100)
+    dialog::addInfo(XLAT("Defeat %1 enemies to access the Graveyard", its(R_100)));
+  else if(kills[moVizier] == 0 && (items[itFernFlower] < U_5 || items[itGold] < U_5))
     dialog::addInfo(XLAT("Kill a Vizier in the Palace to access Emerald Mine"));
-  else if(items[itEmerald] < U5)
+  else if(items[itEmerald] < U_5)
     dialog::addInfo(XLAT("Collect 5 Emeralds to access Camelot"));
   else if(hellUnlocked() && !chaosmode) {
     bool b = true;
     for(int i=0; i<LAND_HYP; i++)
-      if(b && items[treasureType(land_hyp[i])] < R10) {
+      if(b && items[treasureType(land_hyp[i])] < R_10) {
         dialog::addInfo(
           XLAT(
             land_hyp[i] == laTortoise ? "Hyperstone Quest: collect at least %3 points in %the2" :
             "Hyperstone Quest: collect at least %3 %1 in %the2", 
-            treasureType(land_hyp[i]), land_hyp[i], its(R10)));
+            treasureType(land_hyp[i]), land_hyp[i], its(R_10)));
         b = false;
         }
     if(b) 

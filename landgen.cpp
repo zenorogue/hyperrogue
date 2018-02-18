@@ -651,10 +651,10 @@ bool landUnlocked(eLand l) {
   
   switch(l) {
     case laOvergrown: 
-      return gold() >= R60 && items[itRuby] >= U10;
+      return gold() >= R_60 && items[itRuby] >= U_10;
     
     case laStorms: case laWhirlwind: 
-      return gold() >= R60;
+      return gold() >= R_60;
     
     case laWildWest: case laHalloween:
       return false;
@@ -666,49 +666,49 @@ bool landUnlocked(eLand l) {
     case laMirror: case laMinefield: case laPalace:
     case laOcean: case laLivefjord: case laMirrored: case laMirrorWall: case laMirrorWall2:
     case laMirrored2: 
-      return gold() >= R30;
+      return gold() >= R_30;
     
     case laCaribbean: case laWhirlpool:
       return exploreland[0][laOcean] || items[itCoast] || items[itStatue];
     
     case laRlyeh: case laDryForest: case laWineyard: case laCrossroads2:
-      return gold() >= R60;
+      return gold() >= R_60;
     
     case laDeadCaves:
-      return gold() >= R60 && items[itGold] >= U10;
+      return gold() >= R_60 && items[itGold] >= U_10;
 
     case laGraveyard:
-      return tkills() >= R100;
+      return tkills() >= R_100;
 
     case laHive:
-      return tkills() >= R100 && gold() >= R60;
+      return tkills() >= R_100 && gold() >= R_60;
 
     case laRedRock:
-      return gold() >= R60 && items[itSpice] >= U10;
+      return gold() >= R_60 && items[itSpice] >= U_10;
     
     case laEmerald:
-      return (items[itFernFlower] >= U5 && items[itGold] >= U5) || kills[moVizier];
+      return (items[itFernFlower] >= U_5 && items[itGold] >= U_5) || kills[moVizier];
     
     case laCamelot:
-      return items[itEmerald] >= U5;
+      return items[itEmerald] >= U_5;
     
     case laHell: case laCrossroads3:
       return hellUnlocked();
       
     case laPower: 
-      return items[itHell] >= U10;
+      return items[itHell] >= U_10;
 
     case laCocytus: 
-      return items[itHell] >= U10 && items[itDiamond] >= U10;
+      return items[itHell] >= U_10 && items[itDiamond] >= U_10;
 
     case laTemple:
-      return items[itStatue] >= U5;
+      return items[itStatue] >= U_5;
 
     case laClearing:
-      return items[itMutant] >= U5;
+      return items[itMutant] >= U_5;
 
-    case laIvoryTower: return gold() >= R30;
-    case laZebra: return gold() >= R30 && items[itFeather] >= U10;
+    case laIvoryTower: return gold() >= R_30;
+    case laZebra: return gold() >= R_30 && items[itFeather] >= U_10;
 
     case laEAir: case laEEarth: case laEWater: case laEFire:  case laElementalWall:
       return elementalUnlocked();
@@ -720,55 +720,55 @@ bool landUnlocked(eLand l) {
       return false;
     
     case laHaunted: case laHauntedWall: case laHauntedBorder: 
-      return items[itBone] >= U10;
+      return items[itBone] >= U_10;
 
     case laPrincessQuest: return kills[moVizier] && !shmup::on && multi::players == 1;
     
     case laRose: 
-      return gold() >= R60;
+      return gold() >= R_60;
       
     case laWarpCoast: case laWarpSea: 
-      return gold() >= R30;
+      return gold() >= R_30;
       
     case laCrossroads4:
-      return gold() >= R200;
+      return gold() >= R_200;
     
     case laEndorian:
-      return items[itIvory] >= U10;
+      return items[itIvory] >= U_10;
     
     case laTortoise:
       return tortoise::seek();
     
     case laDragon:
-      return killtypes() >= R20;
+      return killtypes() >= R_20;
     
     case laKraken:
-      return items[itFjord] >= U10;
+      return items[itFjord] >= U_10;
 
     case laBurial:
-      return items[itKraken] >= U10;
+      return items[itKraken] >= U_10;
 
     case laTrollheim:
       return trollUnlocked();
     
     case laDungeon:
-      return items[itPalace] >= U5 && items[itIvory] >= U5;
+      return items[itPalace] >= U_5 && items[itIvory] >= U_5;
 
     case laMountain:
-      return items[itRuby] >= U5 && items[itIvory] >= U5;
+      return items[itRuby] >= U_5 && items[itIvory] >= U_5;
       
     case laReptile:
-      return gold() >= R30 && items[itElixir] >= U10;
+      return gold() >= R_30 && items[itElixir] >= U_10;
     
     case laPrairie:
     case laBull:
-      return gold() >= R90;
+      return gold() >= R_90;
     
     case laAlchemy2:
-      return gold() >= R30 && items[itElixir] >= U10;
+      return gold() >= R_30 && items[itElixir] >= U_10;
     
     case laCrossroads5:
-      return gold() >= R300;
+      return gold() >= R_300;
     }
   return false;
   }
@@ -776,7 +776,7 @@ bool landUnlocked(eLand l) {
 int orbsUnlocked() {
   int i = 0;
   for(int t=0; t<ittypes; t++) 
-    if(itemclass(eItem(t)) == IC_TREASURE && items[t] >= R10)
+    if(itemclass(eItem(t)) == IC_TREASURE && items[t] >= R_10)
       i++;
   return i;
   }
@@ -790,7 +790,7 @@ void countHyperstoneQuest(int& i1, int& i2) {
   for(int t=1; t<ittypes; t++) 
     if(t != itHyperstone && t != itBounty && t != itTreat &&
     itemclass(eItem(t)) == IC_TREASURE) {
-      i2++; if(items[t] >= R10) i1++;
+      i2++; if(items[t] >= R_10) i1++;
       }
   }  
 
@@ -1760,7 +1760,7 @@ eLand getNewLand(eLand old) {
   if(old == laGraveyard && generatingEquidistant)
     return laHaunted;
   
-  if(old == laOcean && gold() >= R60 && hrand(100) < 75 && !rlyehComplete()) 
+  if(old == laOcean && gold() >= R_60 && hrand(100) < 75 && !rlyehComplete()) 
     return laRlyeh;
     
   if(old == laRlyeh && !rlyehComplete())
@@ -1787,24 +1787,24 @@ eLand getNewLand(eLand old) {
   if(old != laDeadCaves) tab[cnt++] = laCaves;
   
   // the intermediate lands
-  if(gold() >= R30) {
+  if(gold() >= R_30) {
     tab[cnt++] = laCrossroads;
     tab[cnt++] = laMirror;
     tab[cnt++] = laOcean;
     tab[cnt++] = laLivefjord;
     tab[cnt++] = laMinefield;
     tab[cnt++] = laPalace;
-    if(old == laDragon && items[itElixir] >= U10) LIKELY tab[cnt++] = laReptile;
+    if(old == laDragon && items[itElixir] >= U_10) LIKELY tab[cnt++] = laReptile;
     if(kills[moVizier]) tab[cnt++] = laEmerald;
-    if(items[itFeather] >= U10) tab[cnt++] = laZebra;
+    if(items[itFeather] >= U_10) tab[cnt++] = laZebra;
     tab[cnt++] = laWarpCoast;
     if(euclid) tab[cnt++] = laWarpSea;
     // Ivory Tower tends to crash while generating equidistant
     if(!generatingEquidistant) tab[cnt++] = laIvoryTower;
-    if(items[itElixir] >= U10) tab[cnt++] = laReptile;
-    if(items[itIvory] >= U10 && !generatingEquidistant) tab[cnt++] = laEndorian;
+    if(items[itElixir] >= U_10) tab[cnt++] = laReptile;
+    if(items[itIvory] >= U_10 && !generatingEquidistant) tab[cnt++] = laEndorian;
     
-    if(items[itKraken] >= U10) tab[cnt++] = laBurial;
+    if(items[itKraken] >= U_10) tab[cnt++] = laBurial;
     }
 
   if(landUnlocked(laDungeon)) {
@@ -1813,29 +1813,29 @@ eLand getNewLand(eLand old) {
      }
   
   // the advanced lands
-  if(gold() >= R60) {
+  if(gold() >= R_60) {
     tab[cnt++] = laStorms;
     tab[cnt++] = laWhirlwind;
     tab[cnt++] = laCrossroads;
     if(!generatingEquidistant) tab[cnt++] = laCrossroads2;
-    if(items[itRuby] >= U10) {
+    if(items[itRuby] >= U_10) {
       tab[cnt++] = laOvergrown;
       if(old == laJungle) LIKELY tab[cnt++] = laOvergrown;
       }
     if(rlyehComplete()) tab[cnt++] = laRlyeh;
     else if(chaosmode && (old == laWarpCoast || old == laLivefjord || old == laOcean)) 
       tab[cnt++] = laRlyeh;
-    if(items[itStatue] >= U5 && chaosmode)
+    if(items[itStatue] >= U_5 && chaosmode)
       tab[cnt++] = laTemple;
     if(old == laCrossroads || old == laCrossroads2) tab[cnt++] = laOcean;
     if(old == laOcean) tab[cnt++] = laCrossroads;
-    if(items[itGold] >= U5 && items[itFernFlower] >= U5 && !kills[moVizier]) 
+    if(items[itGold] >= U_5 && items[itFernFlower] >= U_5 && !kills[moVizier]) 
       tab[cnt++] = laEmerald;
     tab[cnt++] = laDryForest;
     tab[cnt++] = laWineyard;
-    if(items[itGold] >= U10) tab[cnt++] = laDeadCaves;
+    if(items[itGold] >= U_10) tab[cnt++] = laDeadCaves;
     // tab[cnt++] = laCaribbean;
-    if(items[itSpice] >= U10) {
+    if(items[itSpice] >= U_10) {
       tab[cnt++] = laRedRock;
       if(old == laDesert) LIKELY tab[cnt++] = laRedRock;
       }
@@ -1844,22 +1844,22 @@ eLand getNewLand(eLand old) {
     tab[cnt++] = laRose;
     }
   
-  if(gold() >= R90) {
+  if(gold() >= R_90) {
     if(!chaosmode) tab[cnt++] = laPrairie;
     if(old == laPrairie) LIKELY tab[cnt++] = laBull;
     tab[cnt++] = laBull;
     if(old == laBull && !chaosmode) LIKELY tab[cnt++] = laPrairie;
     }
   
-  if(gold() >= R300)
+  if(gold() >= R_300)
     tab[cnt++] = laCrossroads5;
   
-  if(tkills() >= R100) {
+  if(tkills() >= R_100) {
     tab[cnt++] = laGraveyard;
-    if(gold() >= R60) tab[cnt++] = laHive;
+    if(gold() >= R_60) tab[cnt++] = laHive;
     }
   
-  if(killtypes() >= R20) {
+  if(killtypes() >= R_20) {
     tab[cnt++] = laDragon;
     if(old == laReptile) LIKELY tab[cnt++] = laDragon;
     }
@@ -1894,8 +1894,8 @@ eLand getNewLand(eLand old) {
     tab[cnt++] = laHell;
     }
   
-  if(items[itHell] >= U10) {
-    if(items[itDiamond] >= U10) {
+  if(items[itHell] >= U_10) {
+    if(items[itDiamond] >= U_10) {
       tab[cnt++] = laCocytus;
       if(old == laHell || old == laIce) LIKELY tab[cnt++] = laCocytus;
       }
@@ -2409,7 +2409,7 @@ cell *buildAnotherEquidistant(cell *c, int radius) {
   if(c2->land != c->land) return NULL;
   
   // else if(c->type == 7 && hrand(10000) < 20 && !isCrossroads(c->land) && gold() >= 200)
-  if(c2->type == 7 && gold() >= R200 && hrand(10) < 2 && buildBarrierNowall(c2, laCrossroads4, true))  {
+  if(c2->type == 7 && gold() >= R_200 && hrand(10) < 2 && buildBarrierNowall(c2, laCrossroads4, true))  {
     nowall = true;
     // raiseBuggyGeneration(c2, "check");
     // return;
@@ -3119,7 +3119,7 @@ void buildBigStuff(cell *c, cell *from) {
   else if(c->type == 7 && c->land == laCrossroads4 && hrand(10000) < 7000 && c->land && 
     buildBarrierNowall(c, getNewLand(laCrossroads4))) ;
   
-  else if(c->type == 7 && hrand(I10000) < 20 && !generatingEquidistant && !yendor::on && !tactic::on && !isCrossroads(c->land) && gold() >= R200 &&
+  else if(c->type == 7 && hrand(I10000) < 20 && !generatingEquidistant && !yendor::on && !tactic::on && !isCrossroads(c->land) && gold() >= R_200 &&
     !isSealand(c->land) && !isHaunted(c->land) && !isGravityLand(c->land) && 
     (c->land != laRlyeh || rlyehComplete()) &&
     c->land != laTortoise && c->land != laPrairie && c->land && 
@@ -3182,7 +3182,7 @@ void buildBigStuff(cell *c, cell *from) {
       
   if((!chaosmode) && bearsCamelot(c->land) && c->type == 7 && 
     (quickfind(laCamelot) || peace::on || (hrand(I2000) < 200 && 
-    items[itEmerald] >= U5 && !tactic::on))) {
+    items[itEmerald] >= U_5 && !tactic::on))) {
     int rtr = newRoundTableRadius();
     heptagon *alt = createAlternateMap(c, rtr+14, hsOrigin);
     if(alt) {
@@ -3197,7 +3197,7 @@ void buildBigStuff(cell *c, cell *from) {
 
     if(c->land == laRlyeh && c->type == 7 && 
       (quickfind(laTemple) || peace::on || (hrand(I2000) < 100 && 
-      items[itStatue] >= U5 && !randomPatternsMode && 
+      items[itStatue] >= U_5 && !randomPatternsMode && 
       !tactic::on && !yendor::on)))
       createAlternateMap(c, 2, hsA);
 
@@ -3208,7 +3208,7 @@ void buildBigStuff(cell *c, cell *from) {
 
     if(c->land == laOvergrown && c->type == 7 && 
       (quickfind(laClearing) || (hrand(I2000) < 25 && 
-      !randomPatternsMode && items[itMutant] >= U5 &&
+      !randomPatternsMode && items[itMutant] >= U_5 &&
       !tactic::on && !yendor::on))) {
       heptagon *h = createAlternateMap(c, 2, hsA);
       if(h) clearing::bpdata[h].root = NULL;
@@ -5491,7 +5491,7 @@ bool wchance(int a, int of) {
 //if(cwt.c->land == laWhirlwind && !nowhirl) a += items[itWindstone] * 3;
 
   for(int i=0; i<ittypes; i++) if(itemclass(eItem(i)) == IC_TREASURE)
-    a = max(a, (items[i]-R10) / 10);
+    a = max(a, (items[i]-R_10) / 10);
   return hrand(a+of) < a;
   }
 

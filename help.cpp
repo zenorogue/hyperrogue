@@ -436,7 +436,7 @@ string generateHelpForLand(eLand l) {
   if(l == laMirror || l == laMinefield || l == laPalace ||
     l == laOcean || l == laLivefjord || l == laZebra || l == laWarpCoast || l == laWarpSea ||
     l == laReptile || l == laIvoryTower)
-      TREQ(R30)
+      TREQ(R_30)
 
   if(l == laPower && inv::on)
     help += XLAT(
@@ -464,52 +464,52 @@ string generateHelpForLand(eLand l) {
   if(l == laDryForest || l == laWineyard || l == laDeadCaves || l == laHive || l == laRedRock ||
     l == laOvergrown || l == laStorms || l == laWhirlwind || l == laRose ||
     l == laCrossroads2 || l == laRlyeh)
-      TREQ(R60)
+      TREQ(R_60)
     
-  if(l == laReptile) TREQ2(U10, itElixir)
-  if(l == laEndorian) TREQ2(U10, itIvory)
-  if(l == laKraken) TREQ2(U10, itFjord)
-  if(l == laBurial) TREQ2(U10, itKraken)
+  if(l == laReptile) TREQ2(U_10, itElixir)
+  if(l == laEndorian) TREQ2(U_10, itIvory)
+  if(l == laKraken) TREQ2(U_10, itFjord)
+  if(l == laBurial) TREQ2(U_10, itKraken)
 
-  if(l == laDungeon) TREQ2(U5, itIvory)
-  if(l == laDungeon) TREQ2(U5, itPalace)
-  if(l == laMountain) TREQ2(U5, itIvory)
-  if(l == laMountain) TREQ2(U5, itRuby)
+  if(l == laDungeon) TREQ2(U_5, itIvory)
+  if(l == laDungeon) TREQ2(U_5, itPalace)
+  if(l == laMountain) TREQ2(U_5, itIvory)
+  if(l == laMountain) TREQ2(U_5, itRuby)
     
-  if(l == laPrairie) TREQ(R90)
-  if(l == laBull) TREQ(R90)
-  if(l == laCrossroads4) TREQ(R200)
-  if(l == laCrossroads5) TREQ(R300)
+  if(l == laPrairie) TREQ(R_90)
+  if(l == laBull) TREQ(R_90)
+  if(l == laCrossroads4) TREQ(R_200)
+  if(l == laCrossroads5) TREQ(R_300)
   
   if(l == laGraveyard || l == laHive) {
     s += XLAT("Kills required: %1.\n", "100");
-    buteol(s, tkills(), R100);
+    buteol(s, tkills(), R_100);
     }
   
   if(l == laDragon) {
     s += XLAT("Different kills required: %1.\n", "20");
-    buteol(s, killtypes(), R20);
+    buteol(s, killtypes(), R_20);
     }
   
   if(l == laTortoise) ACCONLY(laDragon)
   if(l == laTortoise) s += XLAT("Find a %1 in %the2.", itBabyTortoise, laDragon);
 
   if(l == laHell || l == laCrossroads3) {
-    s += XLAT("Finished lands required: %1 (collect %2 treasure)\n", "9", its(R10));
+    s += XLAT("Finished lands required: %1 (collect %2 treasure)\n", "9", its(R_10));
     buteol(s, orbsUnlocked(), 9);
     }
   
-  if(l == laCocytus || l == laPower) TREQ2(U10, itHell)
-  if(l == laRedRock) TREQ2(U10, itSpice)
-  if(l == laOvergrown) TREQ2(U10, itRuby)
-  if(l == laClearing) TREQ2(U5, itMutant)
-  if(l == laCocytus) TREQ2(U10, itDiamond)
-  if(l == laDeadCaves) TREQ2(U10, itGold)
-  if(l == laTemple) TREQ2(U5, itStatue)
-  if(l == laHaunted) TREQ2(U10, itBone)
-  if(l == laCamelot) TREQ2(U5, itEmerald)
+  if(l == laCocytus || l == laPower) TREQ2(U_10, itHell)
+  if(l == laRedRock) TREQ2(U_10, itSpice)
+  if(l == laOvergrown) TREQ2(U_10, itRuby)
+  if(l == laClearing) TREQ2(U_5, itMutant)
+  if(l == laCocytus) TREQ2(U_10, itDiamond)
+  if(l == laDeadCaves) TREQ2(U_10, itGold)
+  if(l == laTemple) TREQ2(U_5, itStatue)
+  if(l == laHaunted) TREQ2(U_10, itBone)
+  if(l == laCamelot) TREQ2(U_5, itEmerald)
   if(l == laEmerald) {
-    TREQ2(U5, itFernFlower) TREQ2(U5, itGold)
+    TREQ2(U_5, itFernFlower) TREQ2(U_5, itGold)
     s += XLAT("Alternatively: kill a %1 in %the2.\n", moVizier, laPalace);
     buteol(s, kills[moVizier], 1);
     }
@@ -535,7 +535,7 @@ string generateHelpForLand(eLand l) {
     KILLREQ(moRedTroll, laRedRock);
     }
   
-  if(l == laZebra) TREQ2(U10, itFeather)
+  if(l == laZebra) TREQ2(U_10, itFeather)
   
   if(l == laCamelot || l == laPrincessQuest)
     s += XLAT("Completing the quest in this land is not necessary for the Hyperstone Quest.");
