@@ -1,16 +1,31 @@
-all: hyper.exe
+# This Makefile works for MSYS2 and MinGW-w64.
+#
+# You might need to run commands such as "pacman -S mingw-w64-x86_64-SDL"
+# to install SDL and other required libraries.
+#
+# Run "make -f Makefile.mgw" to build HyperRogue as ./hyper.exe.
 
-# for simplicity we use NOPNG here
-# you can also include savepng.c and remove -DNOPNG
+CXXFLAGS += -std=c++11 -mwindows -DWINDOWS
+CXXFLAGS += -D_A_VOLID=8
+CXXFLAGS += -DCAP_PNG=0
+CXXFLAGS += ${EXTRA_CXXFLAGS}
 
-hyper.exe: hyper.cpp graph.cpp hyperpoint.cpp geometry.cpp cell.cpp heptagon.cpp game.cpp polygons.cpp classes.cpp hyper.res language-data.cpp
-	g++ -mwindows hyper.cpp hyper.res -o hyper.exe -lSDL -lSDL_mixer -lopengl32 SDL_ttf.dll SDL_gfx.dll -O3 -DNOPNG
+hyper.exe: hyper.obj hyper.res
+	$(CXX) $(CXXFLAGS) hyper.obj hyper.res -lSDL -lSDL_mixer -lopengl32 -lSDL_ttf -lSDL_gfx -lglew32 -o hyper.exe
+
+hyper.obj: *.cpp language-data.cpp hyper.res
+	$(CXX) $(CXXFLAGS) -O2 -c hyper.cpp -o hyper.obj
 
 hyper.res: hyper.rc hr-icon.ico
 	windres hyper.rc -O coff -o hyper.res
 
-langen.exe: langen.cpp language-cz.cpp language-pl.cpp language-tr.cpp language-ru.cpp
-	g++ langen.cpp -o langen.exe
+langen.exe: langen.cpp language-??.cpp language-ptbr.cpp
+	$(CXX) $(CXXFLAGS) -O0 -Wno-embedded-directive langen.cpp -o langen
 
 language-data.cpp: langen.exe
 	./langen.exe > language-data.cpp
+
+.PHONY: clean
+
+clean:
+	rm -f langen.exe language-data.cpp hyper.obj hyper.res hyper.exe
