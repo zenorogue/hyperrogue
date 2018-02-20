@@ -1070,7 +1070,9 @@ void do_setfsize() {
   }
 
 void disable_vsync() {
+#if !ISMOBWEB
   SDL_GL_SetAttribute( SDL_GL_SWAP_CONTROL, 0 ); 
+#endif
   }
   
 #if CAP_SDL
