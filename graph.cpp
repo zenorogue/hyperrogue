@@ -5376,15 +5376,10 @@ void calcparam() {
   
   vid.scrsize = vid.ycenter - (inHighQual ? 0 : ISANDROID ? 2 : ISIOS ? 40 : 40);
 
-  vid.radius = vid.scale * vid.scrsize;
-  
-  realradius = min(realradius, vid.radius);
-  
   sidescreen = false;
   
-  if(vid.xres < vid.yres && !inHighQual) {
-    vid.radius = int(vid.scale * vid.xcenter) - (ISIOS ? 10 : 2);
-    vid.ycenter = vid.yres - realradius - vid.fsize - (ISIOS ? 10 : 0);
+  if(vid.xres < vid.yres - 2 * vid.fsize && !inHighQual) {
+    vid.ycenter = vid.yres - vid.scrsize - vid.fsize;
     }
   else {
     if(vid.xres >= vid.yres * 5/4-16 && (cmode & sm::SIDE))
@@ -5396,6 +5391,9 @@ void calcparam() {
 
     if(sidescreen) vid.xcenter = vid.yres/2;
     }
+
+  vid.radius = vid.scale * vid.scrsize;  
+  realradius = min(realradius, vid.radius);
   
   if(dronemode) { vid.ycenter -= vid.radius; vid.ycenter += vid.fsize/2; vid.ycenter += vid.fsize/2; vid.radius *= 2; }
   
