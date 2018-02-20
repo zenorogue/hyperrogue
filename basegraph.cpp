@@ -218,6 +218,16 @@ void stereo::set_projection(int ed) {
     stereo::scrdist_text = 0;
     }
   else {
+
+    if(hyperbolic && vid.alpha > -1) {
+      // Because of the transformation from H3 to the Minkowski hyperboloid,
+      // points with negative Z can be generated in some 3D settings.
+      // This happens for points below the camera, but above the plane.
+      // These points should still be viewed, though, so we disable the
+      // depth clipping
+      glhr::projection_multiply(glhr::scale(1,1,0));
+      }
+
     glhr::projection_multiply(glhr::frustum(vid.xres * 1. / vid.yres, 1));
 
     GLfloat sc = vid.radius / (vid.yres/2.);
@@ -893,7 +903,7 @@ void drawCircle(int x, int y, int size, int color) {
   #if CAP_GL
   if(vid.usingGL) {
     glhr::be_nontextured();
-    glhr::set_modelview(glhr::id());
+    glhr::id_modelview();
     glcoords.clear();
     glhr::color2(color);
     x -= vid.xcenter; y -= vid.ycenter;

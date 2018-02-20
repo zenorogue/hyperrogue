@@ -1179,7 +1179,7 @@ void drawRugScene() {
     for(int t=0; t<size(triangles); t++)
       drawTriangle(triangles[t]);
       
-    glhr::set_modelview(glhr::id());
+    glhr::id_modelview();
     glhr::prepare(ct_array);
     glDrawArrays(GL_TRIANGLES, 0, size(ct_array));
 

@@ -73,13 +73,7 @@ glmatrix operator * (glmatrix m1, glmatrix m2) {
   return res;
   }
 
-glmatrix id() {
-  glmatrix M;
-  for(int i=0; i<4; i++)
-  for(int j=0; j<4; j++)
-    M[i][j] = (i == j);
-  return M;
-  }
+glmatrix id = {{{1,0,0,0}, {0,1,0,0}, {0,0,1,0}, {0,0,0,1}}};
 
 glmatrix scale(ld x, ld y, ld z) {
   glmatrix tmp;
@@ -141,6 +135,11 @@ void set_modelview(const glmatrix& m) {
   glLoadMatrixf(m.as_array());
   }
 
+void id_modelview() {
+  glMatrixMode(GL_MODELVIEW);
+  glLoadIdentity();
+  }
+
 #endif
 
 // /* shaders */
@@ -150,7 +149,7 @@ void set_modelview(const glmatrix& m) {
 glmatrix projection;
 
 void new_projection() {
-  projection = id();
+  projection = id;
   }
 
 void projection_multiply(const glmatrix& m) {
@@ -304,6 +303,10 @@ void set_modelview(const glmatrix& modelview) {
   // glUniformMatrix3fv(current->uniforms[UNIFORM_NORMAL_MATRIX], 1, 0, nm[0]);
   }
 
+void id_modelview() {
+  glUniformMatrix4fv(current->uMVP, 1, 0, projection.as_array());
+  }
+
 #endif
 
 void color2(int color, ld part = 1) {
@@ -436,7 +439,7 @@ void init() {
   #endif
   
   #if CAP_SHADER
-  projection = id();
+  projection = id;
       
   for(int i=0; i<4; i++) {
     flagtype f = flags[i];

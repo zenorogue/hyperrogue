@@ -2307,7 +2307,7 @@ void drawaura() {
       }
     }
   glhr::switch_mode(glhr::gmVarColored);
-  glhr::set_modelview(glhr::id());
+  glhr::id_modelview();
   glhr::prepare(auravertices);
   glDrawArrays(GL_TRIANGLES, 0, size(auravertices));    
 

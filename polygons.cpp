@@ -232,16 +232,11 @@ void glapplymatrix(const transmatrix& V) {
     for(int x=0; x<3; x++) mat[id++] = V[x][y];
     mat[id++] = 0;
     }
-  {for(int x=0; x<3; x++) mat[id++] = 0;} mat[id++] = 1;
-  
+  mat[12] = 0;
+  mat[13] = 0;
   mat[14] = GLfloat(vid.alpha);
+  mat[15] = 1;  
 
-  if(mat[10] + vid.alpha < 0 && !sphere && !euclid) {
-    for(int i=0; i<3; i++)
-    for(int j=0; j<16; j+=4)
-      mat[j+i] = -mat[j+i];
-    }
-  
   glhr::set_modelview(glhr::as_glmatrix(mat));
   }
 
@@ -259,7 +254,7 @@ void setmatrix(int useV, const transmatrix& V) {
     glhr::set_modelview(glhr::as_glmatrix(mat));
     }
   else
-    glhr::set_modelview(glhr::id());
+    glhr::id_modelview();
   }
   
 void gldraw(int useV, const transmatrix& V, const vector<glvertex>& v, int ps, int pq, int col, int outline, int flags, textureinfo *tinf) {
@@ -304,7 +299,7 @@ void gldraw(int useV, const transmatrix& V, const vector<glvertex>& v, int ps, i
           make_array<GLfloat>(-xx, +yy, stereo::scrdist)
           };
         glhr::vertices(scr);
-        glhr::set_modelview(glhr::id());
+        glhr::id_modelview();
         glDrawArrays(tinf ? GL_TRIANGLES : GL_TRIANGLE_FAN, 0, 4);
         glhr::vertices(v);
         setmatrix(useV, V);
