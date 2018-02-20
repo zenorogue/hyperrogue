@@ -1018,6 +1018,7 @@ void saveHighQualityShot(const char *fname, const char *caption, int fade) {
 
   renderbuffer glbuf(vid.xres, vid.yres, vid.usingGL);
   glbuf.enable();
+  stereo::set_viewport(0);
 
   // printf("format = %d, %d x %d\n", pngformat, vid.xres, vid.yres);
 
