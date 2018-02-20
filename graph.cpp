@@ -2288,7 +2288,7 @@ void drawaura() {
 
   for(int r=0; r<=AURA; r++) for(int z=0; z<11; z++) {
     float rr = (M_PI * 2 * r) / AURA;
-    float rad0 = rad * facs[z];
+    float rad0 = vid.alpha > -1 ? rad * facs[z] : rad / facs[z];
     int rm = r % AURA;
     cx[r][z][0] = rad0 * sin(rr);
     cx[r][z][1] = rad0 * cos(rr);
