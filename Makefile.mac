@@ -6,7 +6,8 @@
 # Run "brew install sdl_ttf".
 # Run "make -f Makefile.mac" to build HyperRogue as ./hyper.
 
-CXXFLAGS += -std=c++11 -DMAC
+CXXFLAGS += -std=c++11 -march=native -DMAC
+# CXXFLAGS += -DCAP_ROGUEVIZ
 CXXFLAGS += -W -Wall -Wextra -pedantic
 CXXFLAGS += -Wno-format-pedantic -Wno-unused-parameter -Wno-char-subscripts -Wno-missing-field-initializers -Wno-vla-extension
 CXXFLAGS += ${EXTRA_CXXFLAGS}
@@ -19,10 +20,9 @@ hyper: hyper.o
 hyper.o: *.cpp language-data.cpp
 	$(CXX) $(CXXFLAGS) -O2 -c hyper.cpp
 
-langen: langen.cpp
+langen: langen.cpp language-??.cpp language-ptbr.cpp
 	$(CXX) $(CXXFLAGS) -O0 -Wno-embedded-directive langen.cpp -o langen
 
-# Generation of language-data.cpp
 language-data.cpp: langen
 	./langen > language-data.cpp
 

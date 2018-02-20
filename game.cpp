@@ -2178,10 +2178,10 @@ bool attackMonster(cell *c, flagtype flags, eMonster killer) {
   if(tk < 10 && ntk >= 10 && !tactic::on && !euclid && !sphere && !inv::on)
     addMessage(XLAT("Good to know that your fighting skills serve you well in this strange world."));
 
-  if(tk < R100/2 && ntk >= R100/2 && !euclid && !sphere)
+  if(tk < R_100/2 && ntk >= R_100/2 && !euclid && !sphere)
     addMessage(XLAT("You wonder where all these monsters go, after their death..."));
 
-  if(tk < R100 && ntk >= R100 && !euclid && !sphere)
+  if(tk < R_100 && ntk >= R_100 && !euclid && !sphere)
     addMessage(XLAT("You feel that the souls of slain enemies pull you to the Graveyard..."));
   
   if(!tu && trollUnlocked()) {
@@ -5633,7 +5633,7 @@ void collectMessage(cell *c2, eItem which) {
     addMessage(XLAT("Prove yourself here, then find new lands, with new quests..."));
   else if(!items[which] && itemclass(which) == IC_TREASURE)
     addMessage(XLAT("You collect your first %1!", which));
-  else if(items[which] == 4 && maxgold() == U5-1 && !specialmode) {
+  else if(items[which] == 4 && maxgold() == U_5-1 && !specialmode) {
     addMessage(XLAT("You feel that %the2 become%s2 more dangerous.", which, c2->land));
     addMessage(XLAT("With each %1 you collect...", which, c2->land));
     }
@@ -5646,24 +5646,24 @@ void collectMessage(cell *c2, eItem which) {
     else
       addMessage(XLAT("Are there any magical orbs in %the1?...", c2->land));
     }
-  else if(items[which] == R10 && maxgold() == R10 && !specialmode && !inv::on) {
+  else if(items[which] == R_10 && maxgold() == R_10 && !specialmode && !inv::on) {
     addMessage(XLAT("You feel that %the1 slowly become%s1 dangerous...", c2->land));
     addMessage(XLAT("Better find some other place."));
     }
-  else if(which == itSpice && items[itSpice] == U10*7/10 && !specialmode)
+  else if(which == itSpice && items[itSpice] == U_10*7/10 && !specialmode)
     addMessage(XLAT("You have a vision of the future, fighting demons in Hell..."));
-  else if(which == itSpice && items[itSpice] == U10-1 && !specialmode)
+  else if(which == itSpice && items[itSpice] == U_10-1 && !specialmode)
     addMessage(XLAT("You will be fighting red rock snakes, too..."));
-  else if(which == itKraken && items[itKraken] == U10-1 && !specialmode)
+  else if(which == itKraken && items[itKraken] == U_10-1 && !specialmode)
     addMessage(XLAT("You feel that a magical weapon is waiting for you..."));
 //  else if(which == itFeather && items[itFeather] == 10)
 //    addMessage(XLAT("There should be a Palace somewhere nearby..."));
-  else if(which == itElixir && items[itElixir] == U5-1 && !specialmode)
+  else if(which == itElixir && items[itElixir] == U_5-1 && !specialmode)
     addMessage(XLAT("With this Elixir, your life should be long and prosperous..."));
-  else if(which == itRuby && items[itRuby] == U5-1 && !specialmode) {
+  else if(which == itRuby && items[itRuby] == U_5-1 && !specialmode) {
     addMessage(XLAT("You feel something strange about gravity here..."));
     }
-  else if(which == itPalace && items[itPalace] == U5-1 && !specialmode) {
+  else if(which == itPalace && items[itPalace] == U_5-1 && !specialmode) {
     addMessage(XLAT("The rug depicts a man in a deep dungeon, unable to leave."));
     }
   else if(which == itFeather && items[itFeather] == 25-1 && !specialmode && inv::on)
@@ -5678,22 +5678,22 @@ void collectMessage(cell *c2, eItem which) {
     addMessage(XLAT("You have gained an offensive power!"));
   else if(which == itHell && items[itHell] >= 100 && items[itHell] % 25 == 24 && !specialmode && inv::on)
     addMessage(XLAT("A small reward for braving the Hell."));
-  else if(which == itIvory && items[itIvory] == U5-1 && !specialmode) {
+  else if(which == itIvory && items[itIvory] == U_5-1 && !specialmode) {
     addMessage(XLAT("You feel attuned to gravity, ready to face mountains and dungeons."));
     }
-  else if(which == itBone && items[itBone] == U5+1 && !specialmode)
+  else if(which == itBone && items[itBone] == U_5+1 && !specialmode)
     addMessage(XLAT("The Necromancer's Totem contains hellish incantations..."));
-  else if(which == itStatue && items[itStatue] == U5+1 && !specialmode)
+  else if(which == itStatue && items[itStatue] == U_5+1 && !specialmode)
     addMessage(XLAT("The inscriptions on the Statue of Cthulhu point you toward your destiny..."));
-  else if(which == itStatue && items[itStatue] == U5-1 && !specialmode)
+  else if(which == itStatue && items[itStatue] == U_5-1 && !specialmode)
     addMessage(XLAT("There must be some temples of Cthulhu in R'Lyeh..."));
-  else if(which == itDiamond && items[itDiamond] == U10-2 && !specialmode)
+  else if(which == itDiamond && items[itDiamond] == U_10-2 && !specialmode)
     addMessage(XLAT("Still, even greater treasures lie ahead..."));
-  else if(which == itFernFlower && items[itFernFlower] == U5-1 && !specialmode)
+  else if(which == itFernFlower && items[itFernFlower] == U_5-1 && !specialmode)
     addMessage(XLAT("You overheard Hedgehog Warriors talking about emeralds..."));
-  else if(which == itEmerald && items[itEmerald] == U5-1 && !specialmode && !chaosmode)
+  else if(which == itEmerald && items[itEmerald] == U_5-1 && !specialmode && !chaosmode)
     addMessage(XLAT("You overhear miners talking about a castle..."));
-  else if(which == itEmerald && items[itEmerald] == U5 && !specialmode && !chaosmode)
+  else if(which == itEmerald && items[itEmerald] == U_5 && !specialmode && !chaosmode)
     addMessage(XLAT("A castle in the Crossroads..."));
   else if(which == itShard) ;
   else {
@@ -5879,24 +5879,24 @@ bool collectItem(cell *c2, bool telekinesis) {
       }
 
 #if ISMOBILE==1
-    if(pg < lastsafety + R30*3/2 && g2 >= lastsafety + R30*3/2)
+    if(pg < lastsafety + R_30*3/2 && g2 >= lastsafety + R_30*3/2)
       addMessage(XLAT("The Orb of Safety from the Land of Eternal Motion might save you."));
 #endif
     
 #define IF(x) if(pg < (x) && g2 >= x && !peace::on)
 
-    IF(R60/4) 
+    IF(R_60/4) 
       addMessage(XLAT("Collect treasure to access more different lands..."));
-    IF(R30)
+    IF(R_30)
       addMessage(XLAT("You feel that you have enough treasure to access new lands!"));
-    IF(R30*3/2)
+    IF(R_30*3/2)
       addMessage(XLAT("Collect more treasures, there are still more lands waiting..."));
-    IF(R60)
+    IF(R_60)
       addMessage(XLAT("You feel that the stars are right, and you can access R'Lyeh!"));
-    IF(R30*5/2)
+    IF(R_30*5/2)
       addMessage(XLAT("Kill monsters and collect treasures, and you may get access to Hell..."));
-    IF(R10 * 9) 
-      addMessage(XLAT("To access Hell, collect %1 treasures each of 9 kinds...", its(R10)));
+    IF(R_10 * 9) 
+      addMessage(XLAT("To access Hell, collect %1 treasures each of 9 kinds...", its(R_10)));
     if(hellUnlocked() && !lhu) {
       addMessage(XLAT("Abandon all hope, the gates of Hell are opened!"));
       addMessage(XLAT("And the Orbs of Yendor await!"));
