@@ -552,7 +552,7 @@ struct ct_vertex {
 
 #if CAP_VERTEXBUFFER
 template<class T> void bindbuffer(T& v) {
-  if(current_vertices == buffered_vertices) {
+  if(current_vertices == buffered_vertices || current_vertices == nullptr) {
     glBindBuffer(GL_ARRAY_BUFFER, buf_current);
     }
   current_vertices = &v[0];
@@ -570,7 +570,6 @@ void vertices(const vector<glvertex>& v) {
     if(&v[0] == current_vertices) return;
     current_vertices = buffered_vertices;
     glBindBuffer(GL_ARRAY_BUFFER, buf_buffered);
-    glBufferData(GL_ARRAY_BUFFER, size(v) * sizeof(v[0]), &v[0], GL_STATIC_DRAW);
     glVertexAttribPointer(glhr::aPosition, 3, GL_FLOAT, GL_FALSE, sizeof(glvertex), 0);
     return;
     }
