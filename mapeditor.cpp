@@ -42,11 +42,13 @@ namespace mapeditor {
      vid.scale *= z;
      // printf("scale = " LDF "\n", vid.scale);
      #if CAP_TEXTURE
-     texture::itt = xyscale(texture::itt, 1/z);
      // display(texture::itt);
-     if(texture::tstate) {
+     texture::itt = xyscale(texture::itt, 1/z);
+     if(false && texture::tstate) {
        calcparam();
        texture::perform_mapping();
+       if(texture::tstate == texture::tsAdjusting) 
+         texture::finish_mapping();
        }
      #endif
      }
