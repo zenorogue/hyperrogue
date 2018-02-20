@@ -1,9 +1,6 @@
 // This is the main header file of HyperRogue. Mostly everything is dumped here.
 // It is quite chaotic.
 
-// scale the Euclidean
-#define EUCSCALE 2.3
-
 #define NUMWITCH 7
 
 // achievements

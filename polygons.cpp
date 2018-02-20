@@ -157,13 +157,7 @@ void addpoint(const hyperpoint& H) {
       }
     for(int i=0; i<3; i++) Hscr[i] *= vid.radius;
     add1(Hscr);
-    } /*
-  else {
-    add1(H);
-    if(euclid) glcoords[qglcoords][2] *= EUCSCALE;
-    glcoords[qglcoords][2] += vid.alpha;
-    // glcoords[qglcoords][2] = 1; // EUCSCALE;
-    } */
+    }
   }
 
 void coords_to_poly() {
@@ -239,14 +233,6 @@ void glapplymatrix(const transmatrix& V) {
     mat[id++] = 0;
     }
   {for(int x=0; x<3; x++) mat[id++] = 0;} mat[id++] = 1;
-  
-  if(euclid) {
-    /* mat[2] = 0; mat[6] = 0; mat[10] = -zz; 
-    mat[12] = mat[8]; mat[13] = mat[9]; mat[14] = EUCSCALE+zz; */
-    // mat[8] = mat[9] = 0;
-    // mat[11] = -EUCSCALE;
-    for(int i=2; i<16; i+=4) mat[i] *= EUCSCALE;
-    }
   
   mat[14] = GLfloat(vid.alpha);
 

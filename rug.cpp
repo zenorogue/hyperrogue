@@ -435,12 +435,10 @@ void buildTorusRug() {
     applymodel(tC0(eumove(x, y)), onscreen);
     // take point (1,0)
     // apply eumove(1,0)
-    // divide by EUCSCALE
     // multiply by vid.radius (= HTEXTURESIZE * rugzoom)
     // add 1, divide by texturesize
     r->x1 = onscreen[0];
     r->y1 = onscreen[1];
-    // r->y1 = (1 + onscreen[1] * rugzoom / EUCSCALE)/2;
     hyperpoint h1 = hpxyz(x, y, 0);
     hyperpoint h2 = z2 * h1;
     double alpha = -h2[0] * 2 * M_PI;

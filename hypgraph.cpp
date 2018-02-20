@@ -28,11 +28,11 @@ hyperpoint gethyper(ld x, ld y) {
     return ghpm;
     }
   
-  if(euclid)
-    return hpxy(hx * (EUCSCALE + vid.alpha), hy * (EUCSCALE + vid.alpha));
-    
   if(vid.camera_angle) camrotate(hx, hy);
   
+  if(euclid)
+    return hpxy(hx * (1 + vid.alpha), hy * (1 + vid.alpha));
+    
   ld hr = hx*hx+hy*hy;
   
   if(hr > .9999 && !sphere) return Hypc;
@@ -100,7 +100,7 @@ void apply_depth(hyperpoint &f, ld z) {
 
 void applymodel(hyperpoint H, hyperpoint& ret) {
   
-  ld tz = euclid ? (EUCSCALE+vid.alpha) : vid.alpha+H[2];
+  ld tz = euclid ? (1+vid.alpha) : vid.alpha+H[2];
   if(tz < BEHIND_LIMIT && tz > -BEHIND_LIMIT) tz = BEHIND_LIMIT;
   
   if(pmodel == mdUnchanged) { 
@@ -457,7 +457,7 @@ void drawEuclidean() {
   
   transmatrix View0 = View;
   
-  ld cellrad = vid.radius / (EUCSCALE + vid.alpha);
+  ld cellrad = vid.radius / (1 + vid.alpha);
   
   ld centerd = matrixnorm(View0);
   
@@ -641,7 +641,6 @@ transmatrix atscreenpos(ld x, ld y, ld size) {
   V[0][0] = size * 2 * hcrossf / crossf;
   V[1][1] = size * 2 * hcrossf / crossf;
   V[2][2] = stereo::scrdist;
-  if(euclid) V[2][2] /= EUCSCALE;
 
   return V;
   }
