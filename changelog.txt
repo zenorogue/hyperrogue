@@ -2233,7 +2233,7 @@ Gameplay bugfixes
 - fixed the problems with incorrect display and mouse control in the Hypersian Rug mode
 - fixed the display in the spherical geometry
 
-2018.02.12 16:122 version 10.3i
+2018.02.12 16:12 version 10.3i
 - updated the iOS, Android, and online versions (Hypersian Rug works in all of them now)
 - magic texture adjustment: fixed the algorithm
 - magic texture adjustment: fixed the names of parameters; added texture position X/Y
@@ -2244,3 +2244,13 @@ Gameplay bugfixes
 - capital letters used as hotkeys for later Yendor challenges, instead of weird symbols.
 - a new Yendor Challenge: Living Caves
 - fixed the 3D effect on graves and mercury rivers
+
+2018.02.14 11:38 version 10.3j
+- fixed the Elemental Planes (did not appear because of a bug)
+- improved the Snake Nest at high treasure counts
+- added extra lands to the Random Pattern Mode
+- rock snakes/red trolls now destroy items when they die over them (except on Rock III)
+- when loading textures in the texture mode, you can now tune individual triangles
+- fixed the descriptions in the stereo vision config
+- updated the translations, added some previously untranslated texts
+ 
