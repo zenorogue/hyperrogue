@@ -74,6 +74,10 @@ int arg::readCommon() {
   else if(argis("-font")) { PHASE(1); shift(); fontpath = args(); }
   else if(argis("-picload")) { PHASE(3); shift(); mapeditor::loadPicFile(args()); }
 #endif
+  else if(argis("-vsync_off")) {
+    vsync_off = true;
+    if(curphase == 3) setvideomode();
+    }
   else if(argis("-canvas")) {
     PHASE(2);
     firstland = specialland = laCanvas;

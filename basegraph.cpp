@@ -1063,10 +1063,16 @@ void saveHighQualityShot(const char *fname, const char *caption, int fade) {
 
 bool setfsize = true;
 
+bool vsync_off;
+
 void do_setfsize() {
   vid.fsize = min(vid.yres * fontscale/ 3200, vid.xres * fontscale/ 4800), setfsize = false;
   }
 
+void disable_vsync() {
+  SDL_GL_SetAttribute( SDL_GL_SWAP_CONTROL, 0 ); 
+  }
+  
 #if CAP_SDL
 void setvideomode() {
 
@@ -1085,6 +1091,7 @@ void setvideomode() {
   if(vid.usingGL) {
     flags = SDL_OPENGL | SDL_HWSURFACE | SDL_GL_DOUBLEBUFFER;
     SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 1);
+    if(vsync_off) disable_vsync();
 #if !ISWEB
     if(vid.antialias & AA_MULTI) {
       SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
