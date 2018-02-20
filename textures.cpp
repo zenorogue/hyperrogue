@@ -135,8 +135,9 @@ bool readtexture() {
 #elif CAP_PNG
   
   FILE *f = fopen(texturename.c_str(), "rb");
+  if(!f) { printf("failed to open file\n"); return false; }
   png_structp png = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
-  if(!png) return false;  
+  if(!png) { printf("failed to create_read_struct\n"); return false; }
   if(setjmp(png_jmpbuf(png))) { 
     printf("failed to read\n");
     return false;  
@@ -182,6 +183,8 @@ bool readtexture() {
     if(x<0 || y<0 || x >= tx || y >= ty) return 0;
     return origpixels[y*tx + x];
     };
+  
+  printf("texture read OK\n");
 
 #endif
   
@@ -494,10 +497,11 @@ void saveFullTexture() {
   texture::saving = false;
   
   drawscreen();
-  itt = xyscale(Id, vid.scrsize * 1. / vid.radius);
-  readtexture();
-  perform_mapping();
-  finish_mapping();
+  if(readtexture() && loadTextureGL()) {
+    itt = Id; // xyscale(Id, vid.scrsize * 1. / vid.radius);
+    perform_mapping();
+    finish_mapping();
+    }
   }
 
 bool newmove = false;
