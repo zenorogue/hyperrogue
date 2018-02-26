@@ -1066,7 +1066,7 @@ void showMenu() {
     dialog::addBreak(50);
 
     dialog::addBoolItem(XLAT("select master cells"), panstate == tpsCell, 'C');
-    dialog::addBoolItem(XLAT("select master triangles"), panstate == tpsTriangle, 'T');
+    dialog::addBoolItem(XLAT("select master triangles"), panstate == tpsTriangle, 'X');
     dialog::addBoolItem(XLAT("fine tune vertices"), panstate == tpsTune, 'F');
 
     dialog::addColorItem(XLAT("grid color (master)"), master_color, 'M');
