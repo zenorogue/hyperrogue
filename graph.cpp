@@ -5413,6 +5413,8 @@ int ringcolor = darkena(0xFF, 0, 0xFF);
 
 function<void()> wrap_drawfullmap = drawfullmap;
 
+bool force_sphere_outline = false;
+
 void drawfullmap() {
 
   DEBB(DF_GRAPH, (debugfile,"draw full map\n"));
@@ -5421,20 +5423,24 @@ void drawfullmap() {
 
   if(!stereo::active() && !euclid && (pmodel == mdDisk || pmodel == mdBall || (sphere && mdEqui()))) {
     double rad = vid.radius;
+    bool isbnd = true;
     if(sphere) {
       if(mdEqui())
         ;
-      else if(!vid.grid && !elliptic)
+      else if(!vid.grid && !elliptic && !force_sphere_outline)
         rad = 0; 
       else if(vid.alpha <= 0)
         ;
       else if(vid.alpha <= 1 && (vid.grid || elliptic)) // mark the equator
-        rad = rad * 1 / vid.alpha;
-      else if(vid.grid) // mark the edge
+        rad = rad * 1 / vid.alpha, isbnd = false;
+      else if(vid.grid || force_sphere_outline) // mark the edge
         rad /= sqrt(vid.alpha*vid.alpha - 1);
       }
-    if(!haveaura()) queuecircle(vid.xcenter, vid.ycenter, rad, ringcolor,
-      vid.usingGL ? PPR_CIRCLE : PPR_OUTCIRCLE);
+    if(rad && !haveaura()) {
+      queuecircle(vid.xcenter, vid.ycenter, rad, ringcolor, 
+        vid.usingGL ? PPR_CIRCLE : PPR_OUTCIRCLE);
+      if(isbnd) lastptd().u.cir.boundary = true;
+      }
     if(pmodel == mdBall) ballgeometry();
     }
   

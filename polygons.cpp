@@ -806,10 +806,24 @@ void drawqueue() {
     }
 #endif
 
+  #ifdef STLSORT
+  #define GET_PTD(i) polytodraw& ptd (ptds[i]);
+  #else
+  #define GET_PTD(i) polytodraw& ptd (*ptds2[i]);
+  #endif
+
   spherespecial = 0;
   spherephase = 0;
   // on the sphere, parts on the back are drawn first
   if(sphere && pmodel == 0) {
+
+    // in SVG, draw boundary circle first
+    if(svg::in) for(int i=0; i<siz; i++)  {
+      GET_PTD(i);
+      if(ptd.kind == pkCircle && ptd.u.cir.boundary)
+        drawqueueitem(ptd);
+      }
+    
     spherespecial = sphereflipped() ? 1 : -1;
     #ifndef STLSORT
     for(int p: {PPR_REDWALLs, PPR_REDWALLs2, PPR_REDWALLs3, PPR_WALL3s,
@@ -817,11 +831,7 @@ void drawqueue() {
         reverse(&ptds2[qp0[p]], &ptds2[qp[p]]);
     #endif
     for(int i=siz-1; i>=0; i--) {
-  #ifdef STLSORT
-      polytodraw& ptd (ptds[i]);
-  #else
-      polytodraw& ptd (*ptds2[i]);
-  #endif
+      GET_PTD(i);
       if(ptd.kind == pkPoly || ptd.kind == pkLine) {
         unsigned c = ptd.col;
         int alpha = ptd.col & 255;
@@ -841,11 +851,8 @@ void drawqueue() {
     spherephase = 1;
     }
   for(int i=0; i<siz; i++) {
-#ifdef STLSORT
-    polytodraw& ptd (ptds[i]);
-#else
-    polytodraw& ptd (*ptds2[i]);
-#endif
+    GET_PTD(i);
+    if(spherespecial && svg::in && ptd.kind == pkCircle && ptd.u.cir.boundary) continue;
     drawqueueitem(ptd);
     }
   
@@ -2406,6 +2413,7 @@ void queuecircle(int x, int y, int size, int color, int prio = PPR_CIRCLE) {
   ptd.u.cir.x = x;
   ptd.u.cir.y = y;
   ptd.u.cir.size = size;
+  ptd.u.cir.boundary = false;
   ptd.col = color;
   ptd.prio = prio << PSHIFT;
   }

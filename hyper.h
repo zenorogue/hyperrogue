@@ -2063,6 +2063,7 @@ struct qchr {
       
 struct qcir {
       int x, y, size;
+      bool boundary;
       };
 
 enum eKind { pkPoly, pkLine, pkString, pkCircle, pkShape, pkResetModel, pkSpecial };
