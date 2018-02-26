@@ -164,6 +164,7 @@ void coords_to_poly() {
   polyi = size(glcoords);
   for(int i=0; i<polyi; i++) {
     // printf("%lf %lf\n", double(glcoords[i][0]), double(glcoords[i][1]));
+    if(!stereo::active()) glcoords[i][2] = 0;
 
     polyx[i]  = vid.xcenter + glcoords[i][0] - glcoords[i][2]; 
     polyxr[i] = vid.xcenter + glcoords[i][0] + glcoords[i][2]; 
