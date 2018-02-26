@@ -1513,6 +1513,23 @@ hyperpoint gethyper(ld x, ld y) {
   return h;
   }
 
+string makehelp() {
+  return
+    XLAT(
+    "In this mode, HyperRogue is played on a 3D model of a part of the hyperbolic plane, "
+    "similar to one you get from the 'paper model creator' or by hyperbolic crocheting.\n\n")
+    /*
+    "This requires some OpenGL extensions and may crash or not work correctly -- enabling "
+    "the 'render texture without OpenGL' options may be helpful in this case. Also the 'render once' option "
+    "will make the rendering faster, but the surface will be rendered only once, so "
+    "you won't be able to play a game on it.\n\n" */
+    #if !ISMOBILE
+  + XLAT("Use arrow keys to rotate, Page Up/Down to zoom.")
+    + "\n\n" + 
+    XLAT("In the perspective projection, you can use arrows to rotate the camera, Page Up/Down to go forward/backward, Shift+arrows to strafe, and Ctrl+arrows to rotate the model.");
+  #endif
+  }
+
 void show() {
   cmode = sm::SIDE;
   gamescreen(0);
@@ -1558,18 +1575,7 @@ void show() {
   keyhandler = [] (int sym, int uni) {
     dialog::handleNavigation(sym, uni);
 
-    if(uni == 'h') gotoHelp(
-      XLAT(
-      "In this mode, HyperRogue is played on a 3D model of a part of the hyperbolic plane, "
-      "similar to one you get from the 'paper model creator' or by hyperbolic crocheting.\n\n"
-      "This requires some OpenGL extensions and may crash or not work correctly -- enabling "
-      "the 'render texture without OpenGL' options may be helpful in this case. Also the 'render once' option "
-      "will make the rendering faster, but the surface will be rendered only once, so "
-      "you won't be able to play a game on it.\n\n"
-      "Use arrow keys to rotate, Page Up/Down to zoom.")
-      + "\n\n" + 
-      XLAT("In the perspective projection, you can use arrows to rotate the camera, Page Up/Down to go forward/backward, Shift+arrows to strafe, and Ctrl+arrows to rotate the model.")
-      );
+    if(uni == 'h') gotoHelp(makehelp());
     else if(uni == 'u') {
       if(rug::rugged) rug::close();
       else rug::init();

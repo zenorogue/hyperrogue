@@ -3297,21 +3297,23 @@ S("hypersian rug mode", "tryb hiperskiego dywanu")
 
 S(
   "In this mode, HyperRogue is played on a 3D model of a part of the hyperbolic plane, "
-  "similar to one you get from the 'paper model creator' or by hyperbolic crocheting.\n\n"
-  "This requires some OpenGL extensions and may crash or not work correctly -- enabling "
-  "the 'render texture without OpenGL' options may be helpful in this case. Also the 'render once' option "
-  "will make the rendering faster, but the surface will be rendered only once, so "
-  "you won't be able to play a game on it.\n\n"
-  "Use arrow keys to rotate, Page Up/Down to zoom.",
-
+  "similar to one you get from the 'paper model creator' or by hyperbolic crocheting.\n\n",
   "W tym trybie można grać w HyperRogue na trójwymiarowym modelu części płaszczyzny "
   "hiperbolicznej, podobnym do tego, który można otrzymać w kreatorze modeli "
-  "papierowych albo poprzez hiperboliczne szydełkowanie.\n\n"
+  "papierowych albo poprzez hiperboliczne szydełkowanie.\n\n")
+
+S("This requires some OpenGL extensions and may crash or not work correctly -- enabling "
+  "the 'render texture without OpenGL' options may be helpful in this case. Also the 'render once' option "
+  "will make the rendering faster, but the surface will be rendered only once, so "
+  "you won't be able to play a game on it.\n\n",
+
   "Działanie wymaga pewnych rozszerzeń OpenGL i może działać nieprawidłowo lub "
   "powodować zatrzymanie gry -- w takim przypadku może być przydatne włączenie opcji "
   "'renderuj bez OpenGL'. Opcja 'renderuj raz' spowoduje, że animacja będzie szybsza, "
   "ale tekstura powierzchni zostanie narysowana tylko raz, zatem nie będzie możliwe "
-  "granie na niej na żywo.\n\nMożesz obracać model strzałkami, a przybliżać i oddalać go "
+  "granie na niej na żywo.\n\n")
+
+S("Use arrow keys to rotate, Page Up/Down to zoom.", "Możesz obracać model strzałkami, a przybliżać i oddalać go "
   "klawiszami Page Up/Down.")
 
 S("what's this?", "co to jest?")

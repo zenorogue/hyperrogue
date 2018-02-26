@@ -3386,21 +3386,23 @@ S("\n\n(For the heptagonal mode, the radius has been reduced to 2 for closing pl
  
 S("hypersian rug mode", "режим гиперсидского ковра")
  
-S(
-  "In this mode, HyperRogue is played on a 3D model of a part of the hyperbolic plane, "
-  "similar to one you get from the 'paper model creator' or by hyperbolic crocheting.\n\n"
-  "This requires some OpenGL extensions and may crash or not work correctly -- enabling "
+S("In this mode, HyperRogue is played on a 3D model of a part of the hyperbolic plane, "
+  "similar to one you get from the 'paper model creator' or by hyperbolic crocheting.\n\n",
+
+  "В этом режиме Вы играете в HyperRogue на трёхмерной модели гиперболической "
+  "плоскости, похожей на те, что можно получить в 'создателе бумажных моделей'.\n\n"
+  )
+
+S("This requires some OpenGL extensions and may crash or not work correctly -- enabling "
   "the 'render texture without OpenGL' options may be helpful in this case. Also the 'render once' option "
   "will make the rendering faster, but the surface will be rendered only once, so "
-  "you won't be able to play a game on it.\n\n"
-  "Use arrow keys to rotate, Page Up/Down to zoom.",
- 
-  "В этом режиме Вы играете в HyperRogue на трёхмерной модели гиперболической "
-  "плоскости, похожей на те, что можно получить в 'создателе бумажных моделей'\n\n"
+  "you won't be able to play a game on it.\n\n",
   "Это требует некоторых расширений OpenGL, может работать некорректно или вызывать "
   "падение игры -- включение опции 'не использовать OpenGL' может помочь. "
   "Опция 'отрисовать один раз' ускоряет отрисовку, "
-  "но играть в таком режиме невозможно.\n\n"
+  "но играть в таком режиме невозможно.\n\n")
+  
+S("Use arrow keys to rotate, Page Up/Down to zoom.", 
   "Используйте стрелки для вращения, Page Up/Down для изменения масштаба.")
  
 S("what's this?", "что это?")

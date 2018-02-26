@@ -769,6 +769,7 @@ namespace rug {
   void drawRugScene();
   void push_all_points(int coord, ld val);
   void apply_rotation(const transmatrix& t);
+  string makehelp();
 #endif
   }
 
@@ -1781,8 +1782,8 @@ extern int lightat, safetyat;
 
 int watercolor(int phase);
 bool doHighlight();
-string buildHelpText();
-string buildCredits();
+void buildHelpText();
+void buildCredits();
 void setAppropriateOverview();
 bool quitsaves();
 extern bool sidescreen;

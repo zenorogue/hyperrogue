@@ -3363,21 +3363,21 @@ S("\n\n(For the heptagonal mode, the radius has been reduced to 2 for closing pl
 
 S("hypersian rug mode", "mód hyperského koberce")
 
-S(
-  "In this mode, HyperRogue is played on a 3D model of a part of the hyperbolic plane, "
-  "similar to one you get from the 'paper model creator' or by hyperbolic crocheting.\n\n"
-  "This requires some OpenGL extensions and may crash or not work correctly -- enabling "
+S("In this mode, HyperRogue is played on a 3D model of a part of the hyperbolic plane, "
+  "similar to one you get from the 'paper model creator' or by hyperbolic crocheting.\n\n",
+  "V tomto módu můžete hrát HyperRogue na 3D modelu části hyperbolické roviny "
+  "podobném tomu, co vytváří generátor papírových modelů nebo hyperbolické háčkování.\n\n")
+
+S("This requires some OpenGL extensions and may crash or not work correctly -- enabling "
   "the 'render texture without OpenGL' options may be helpful in this case. Also the 'render once' option "
   "will make the rendering faster, but the surface will be rendered only once, so "
-  "you won't be able to play a game on it.\n\n"
-  "Use arrow keys to rotate, Page Up/Down to zoom.",
-
-  "V tomto módu můžete hrát HyperRogue na 3D modelu části hyperbolické roviny "
-  "podobném tomu, co vytváří generátor papírových modelů nebo hyperbolické háčkování.\n\n"
+  "you won't be able to play a game on it.\n\n",
   "Je k tomu zapotřebí OpenGL a je možné, že v tomto módu hra spadne nebo nepoběží "
   "správně -- v takovém případě může pomoci zapnout možnost 'renderuj textury bez OpenGL'. "
   "Kromě toho je možné renderování urychlit volbou 'renderuj jednou', ale v takovém případě "
-  "bude povrch vygenerován pouze jednou, takže na něm není možné hrát.\n\n"
+  "bude povrch vygenerován pouze jednou, takže na něm není možné hrát.\n\n")
+  
+S("Use arrow keys to rotate, Page Up/Down to zoom.",
   "Model se otáčí šipkami a lze ho zoomovat klávesami Page Up/Down.")
 
 S("what's this?", "co to je?")

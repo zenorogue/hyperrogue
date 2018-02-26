@@ -3151,20 +3151,21 @@ S("\n\n(For the heptagonal mode, the radius has been reduced to 2 for closing pl
 S("hypersian rug mode", "Hypersischer-Teppich-Modus")
 
 S("In this mode, HyperRogue is played on a 3D model of a part of the hyperbolic plane, "
-  "similar to one you get from the 'paper model creator' or by hyperbolic crocheting.\n\n"
-  "This requires some OpenGL extensions and may crash or not work correctly -- enabling "
-  "the 'render texture without OpenGL' options may be helpful in this case. Also the 'render once' option "
-  "will make the rendering faster, but the surface will be rendered only once, so "
-  "you won't be able to play a game on it.\n\n"
-  "Use arrow keys to rotate, Page Up/Down to zoom.",
-
+  "similar to one you get from the 'paper model creator' or by hyperbolic crocheting.\n\n",
   "In diesem Modus wird HyperRogue auf einem 3D-Modell eines Teils einer hyperbolischen Ebene "
   "gespielt, ähnlich zu dem was man beim 'Papiermodell-Schöpfer' oder beim hyperbolischen Häkeln "
-  "erhält.\n\n"
+  "erhält.\n\n")
+
+S("This requires some OpenGL extensions and may crash or not work correctly -- enabling "
+  "the 'render texture without OpenGL' options may be helpful in this case. Also the 'render once' option "
+  "will make the rendering faster, but the surface will be rendered only once, so "
+  "you won't be able to play a game on it.\n\n",
   "Dieser Modus erfordert einige OpenGL-Erweiterungen und kann abstürzen oder fehlerhaft funktionieren "
   "-- das Einschalten der Option 'Rendere Textur ohne OpenGL' kann hilfreich sein. "
   "Auch die Option 'Rendere die Textur nur einmal' beschleunigt das Rendern, aber die Oberfläche "
-  "wird nur einmal gerendert und du kannst darauf nicht spielen.\n\n"
+  "wird nur einmal gerendert und du kannst darauf nicht spielen.\n\n")
+  
+S("Use arrow keys to rotate, Page Up/Down to zoom.",
   "Verwende die Pfeiltasten zum Rotieren, Bild auf/ab zum Zoomen.")
 
 S("what's this?", "Was ist das?")

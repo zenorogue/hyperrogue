@@ -5,34 +5,71 @@ string help;
 
 function<void()> help_delegate;
 
-string buildHelpText() {
+struct help_extension {
+  char key;
+  string text;
+  reaction_t action;
+  };
+vector<help_extension> help_extensions;
+
+vector<string> extra_keys = {
+  "1 = orthogonal/Gans model",
+  "2 = small Poincare model/stereographic projection",
+  "3 = big Poincare model/stereographic projection",
+  "4 = Klein model/gnomonic projection",
+  "5 = change wall display mode",
+  "6 = change grid",
+  "7 = change heptagon marking",
+  "8 = change background color",
+  "9 = hyperboloid model",
+  "qweasdzxc, hjklyubn, numpad = move/skip turn",
+  "arrows = panning",
+  "o = world overview",
+  "v = menu",
+  "F1 = help",
+  "F5 = restart game",
+  "F10 = quit game",
+  "Esc = quest status",
+  "Alt+Enter = full screen",
+  "Alt = highlight interesting stuff",
+  "t = use a ranged Orb (target center of the screen)",
+  "g = drop a Dead Orb",
+  "click left mouse button = move/skip",
+  "shift+click left mouse button = use ranged Orb",
+  "click right mouse button = context help",
+  "mousewheel up = panning",
+  "hold middle mouse button = panning",
+  "mousewheel down = move/skip",
+  "shift + mousewheel = change projection",
+  "ctrl + mousewheel = change zoom",
+  "ctrl + shift + mousewheel = change both projection and zoom",
+  "ctrl + hold middle button = move the screen",
+  "shift + middle button = reset position"
+  };
+
+void buildHelpText() {
   DEBB(DF_GRAPH, (debugfile,"buildHelpText\n"));
 
-#if CAP_ROGUEVIZ  
-  if(rogueviz::on) return rogueviz::makehelp();
-#endif
-  
-  string h;
-  h += XLAT("Welcome to HyperRogue");
+  help = XLAT("Welcome to HyperRogue");
 #if ISANDROID  
-  h += XLAT(" for Android");
+  help += XLAT(" for Android");
 #endif
 #if ISIOS
-  h += XLAT(" for iOS");
+  help += XLAT(" for iOS");
 #endif
-  h += XLAT("! (version %1)\n\n", VER);
+  help += XLAT("! (version %1)\n\n", VER);
   
-  h += XLAT(
+  help += XLAT(
     "You have been trapped in a strange, non-Euclidean world. Collect as much treasure as possible "
     "before being caught by monsters. The more treasure you collect, the more "
     "monsters come to hunt you, as long as you are in the same land type. The "
     "Orbs of Yendor are the ultimate treasure; get at least one of them to win the game!"
     );
-  h += XLAT(" (press ESC for some hints about it).");
-  h += "\n\n";
+  help += XLAT(" (press ESC for some hints about it).");
+  help += "\n\n";
   
   if(!shmup::on && !hardcore)
-    h += XLAT(
+    help += XLAT(
       "You can fight most monsters by moving into their location. "
       "The monster could also kill you by moving into your location, but the game "
       "automatically cancels all moves which result in that.\n\n"
@@ -40,22 +77,22 @@ string buildHelpText() {
 
 #if CAP_INV    
   if(inv::on)
-  h += XLAT(
+  help += XLAT(
     inv::helptext
     );
   else
 #endif
-  h += XLAT(
+  help += XLAT(
     "There are many lands in HyperRogue. Collect 10 treasure "
     "in the given land type to complete it; this enables you to "
     "find the magical Orbs of this land, and in some cases "
     "get access to new lands. At 25 treasures "
     "this type of Orbs starts appearing in other lands as well. Press 'o' to "
     "get the details of all the Lands.\n\n");
-  h += "\n\n";
+  help += "\n\n";
     
 #if ISMOBILE
-  h += XLAT(
+  help += XLAT(
     "Usually, you move by touching somewhere on the map; you can also touch one "
     "of the four buttons on the map corners to change this (to scroll the map "
     "or get information about map objects). You can also touch the "
@@ -63,57 +100,64 @@ string buildHelpText() {
     );
 #else
   if(DEFAULTCONTROL)
-    h += XLAT(
+    help += XLAT(
       "Move with mouse, num pad, qweadzxc, or hjklyubn. Wait by pressing 's' or '.'. Spin the world with arrows, PageUp/Down, and Home/Space. "
       "To save the game you need an Orb of Safety. Press 'v' for the main menu (configuration, special modes, etc.), ESC for the quest status.\n\n"
       );
-  h += XLAT(
+  help += XLAT(
     "You can right click any element to get more information about it.\n\n"
     );
 #if ISMAC
-  h += XLAT("(You can also use right Shift)\n\n");
+  help += XLAT("(You can also use right Shift)\n\n");
 #endif
 #endif
-  h += XLAT("See more on the website: ") 
+  help += XLAT("See more on the website: ") 
     + "http//roguetemple.com/z/hyper/\n\n";
   
 #if CAP_TOUR
-  h += XLAT("Try the Tutorial to help with understanding the "
+  help += XLAT("Try the Tutorial to help with understanding the "
     "geometry of HyperRogue (menu -> special modes).\n\n");
 #endif
   
-  h += XLAT("Still confused? Read the FAQ on the HyperRogue website!\n\n");
+  help += XLAT("Still confused? Read the FAQ on the HyperRogue website!\n\n");
   
-  return h;
+  help_extensions.clear();
+  
+  help_extensions.push_back(help_extension{'c', XLAT("credits"), [] () { buildCredits(); }});
+#if ISMOBILE == 0
+  help_extensions.push_back(help_extension{'k', XLAT("advanced keyboard shortcuts"), [] () { 
+    help = "";
+    for(string s: extra_keys) help += s, help += "\n\n";
+    }});
+#endif
   }
 
-string buildCredits() {
-  string h;
-  h += XLAT("game design, programming, texts and graphics by Zeno Rogue <zeno@attnam.com>\n\n");
+void buildCredits() {
+  help = "";
+  help += XLAT("game design, programming, texts and graphics by Zeno Rogue <zeno@attnam.com>\n\n");
   if(lang() != 0)
-    h += XLAT("add credits for your translation here");
+    help += XLAT("add credits for your translation here");
 #ifndef NOLICENSE
-  h += XLAT(
+  help += XLAT(
     "released under GNU General Public License version 2 and thus "
     "comes with absolutely no warranty; see COPYING for details\n\n"
     );
 #endif
-  h += XLAT(
+  help += XLAT(
     "special thanks to the following people for their bug reports, feature requests, porting, and other help:\n\n%1\n\n",
     "Konstantin Stupnik, ortoslon, chrysn, Adam Borowski, Damyan Ivanov, Ryan Farnsley, mcobit, Darren Grey, tricosahedron, Maciej Chojecki, Marek Čtrnáct, "
     "wonderfullizardofoz, Piotr Migdał, tehora, Michael Heerdegen, Sprite Guard, zelda0x181e, Vipul, snowyowl0, Patashu, phenomist, Alan Malloy, Tom Fryers, Sinquetica, _monad, CtrlAltDestroy, jruderman, "
     "Kojiguchi Kazuki, baconcow, Alan, SurelyYouJest, hotdogPi" 
     );
 #ifdef EXTRALICENSE
-  h += EXTRALICENSE;
+  help += EXTRALICENSE;
 #endif
 #if !ISMOBILE
-  h += XLAT(
+  help += XLAT(
     "\n\nSee sounds/credits.txt for credits for sound effects"
     );
   #endif
-  if(musiclicense != "") h += musiclicense;
-  return h;
+  if(musiclicense != "") help += musiclicense;
   }
 
 string pushtext(stringpar p) {
@@ -805,13 +849,6 @@ void describeMouseover() {
   if(mousey < vid.fsize * 3/2) getcstat = SDLK_F1;
   }
 
-struct help_extension {
-  char key;
-  string text;
-  reaction_t action;
-  };
-vector<help_extension> help_extensions;
-
 void showHelp() {
   gamescreen(2);
   cmode = sm::HELP | sm::DOTOUR;
@@ -821,8 +858,6 @@ void showHelp() {
     return;
     }
 
-  if(help == "@") help = buildHelpText();
-  
   string help2;
   if(help[0] == '@') {
     int iv = help.find("\t");
@@ -852,60 +887,40 @@ void showHelp() {
         act();
         return;
         }
-    if(sym == SDLK_F1 && help != "@") 
-      help = "@";
+    if(sym == SDLK_F1)  {
+      auto i = help;
+      buildHelpText();
+      if(help == i) popScreen();
+      }
     else if(doexiton(sym, uni))
       popScreen();
     };
   }
 
-vector<string> extra_keys = {
-  "1 = orthogonal/Gans model",
-  "2 = small Poincare model/stereographic projection",
-  "3 = big Poincare model/stereographic projection",
-  "4 = Klein model/gnomonic projection",
-  "5 = change wall display mode",
-  "6 = change grid",
-  "7 = change heptagon marking",
-  "8 = change background color",
-  "9 = hyperboloid model",
-  "qweasdzxc, hjklyubn, numpad = move/skip turn",
-  "arrows = panning",
-  "o = world overview",
-  "v = menu",
-  "F1 = help",
-  "F5 = restart game",
-  "F10 = quit game",
-  "Esc = quest status",
-  "Alt+Enter = full screen",
-  "Alt = highlight interesting stuff",
-  "t = use a ranged Orb (target center of the screen)",
-  "g = drop a Dead Orb",
-  "click left mouse button = move/skip",
-  "shift+click left mouse button = use ranged Orb",
-  "click right mouse button = context help",
-  "mousewheel up = panning",
-  "hold middle mouse button = panning",
-  "mousewheel down = move/skip",
-  "shift + mousewheel = change projection",
-  "ctrl + mousewheel = change zoom",
-  "ctrl + shift + mousewheel = change both projection and zoom",
-  "ctrl + hold middle button = move the screen",
-  "shift + middle button = reset position"
-  };
-
 void gotoHelp(const string& h) {
   help = h;
   help_extensions.clear();
   pushScreen(showHelp);
-  if(help == "@" || help == buildHelpText()) {
-    help_extensions.push_back(help_extension{'c', XLAT("credits"), [] () { help = buildCredits(); }});
-#if ISMOBILE == 0
-    help_extensions.push_back(help_extension{'k', XLAT("advanced keyboard shortcuts"), [] () { 
-      help = "";
-      for(string s: extra_keys) help += s, help += "\n\n";
-      }});
+  if(help == "@") {
+
+#if CAP_ROGUEVIZ  
+  if(rogueviz::on) {
+    help = rogueviz::makehelp();
+    help_extensions.push_back(help_extension{'u', XLAT("RogueViz menu"), [] () { popScreen(); pushScreen(rogueviz::showMenu); }});    
+    return;
+    }
 #endif
+
+#if CAP_RUG
+  if(rug::rugged) {
+    help = rug::makehelp();
+    help_extensions.push_back(help_extension{'m', XLAT("Hypersian Rug menu"), [] () { popScreen(); rug::select(); }});    
+    help_extensions.push_back(help_extension{'h', XLAT("HyperRogue help"), [] () { buildHelpText(); }});    
+    return;
+    }
+#endif
+  
+    buildHelpText();
     }
   if(help == "HELPGEN") helpgenerator();
   }
