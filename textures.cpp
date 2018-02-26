@@ -716,6 +716,7 @@ void mousemovement() {
         }
       if(nonzero) lastmouse = mouseeu;
       newmove = false;
+      break;
       }
     
     case tpsCell: {
@@ -734,6 +735,7 @@ void mousemovement() {
           edited_tinfo->triangles[i].tv = findTextureTriangle(c, si, i);
         texture_tuned = true;
         }
+      break;
       }
     
     case tpsTriangle: {
@@ -752,6 +754,7 @@ void mousemovement() {
         edited_triangle->tv = findTextureTriangle(c, si, i);
         texture_tuned = true;
         }
+      break;
       }
 
     case tpsTune: {
@@ -774,6 +777,7 @@ void mousemovement() {
         *v = mouseh;
         texture_tuned = true;
         }
+      break;
       }
     
     default: break;
@@ -1119,7 +1123,7 @@ void showMenu() {
     else if(uni == 'z' && tstate == tsAdjusting) panstate = tpsZoom;
     else if(uni == 'p' && tstate == tsAdjusting) panstate = tpsProjection;
     else if(uni == 'C' && tstate == tsAdjusting) panstate = tpsCell;
-    else if(uni == 'T' && tstate == tsAdjusting) panstate = tpsTriangle;
+    else if(uni == 'X' && tstate == tsAdjusting) panstate = tpsTriangle;
     else if(uni == 'F' && tstate == tsAdjusting) panstate = tpsTune;
     else if(uni == 'A' && tstate == tsAdjusting) 
       pushScreen(showMagicMenu);
