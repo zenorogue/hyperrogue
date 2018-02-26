@@ -278,8 +278,14 @@ void gldraw(int useV, const transmatrix& V, const vector<glvertex>& v, int ps, i
     setmatrix(useV, V);
 
     if(draw) {
+#ifdef DIRTY 
+#warning dirty
+      glhr::vertices(v);
+      glhr::color2(col);
+      glDrawArrays(tinf ? GL_TRIANGLES : GL_TRIANGLE_FAN, ps, pq);
+#else
       glEnable(GL_STENCIL_TEST);
- 
+
       glColorMask( GL_FALSE,GL_FALSE,GL_FALSE,GL_FALSE );
       glStencilOp( GL_INVERT, GL_INVERT, GL_INVERT);
       glStencilFunc( GL_ALWAYS, 0x1, 0x1 );
@@ -314,6 +320,7 @@ void gldraw(int useV, const transmatrix& V, const vector<glvertex>& v, int ps, i
         }
       
       glDisable(GL_STENCIL_TEST);
+#endif
       }
     
     if(outline) {
