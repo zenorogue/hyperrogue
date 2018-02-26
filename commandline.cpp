@@ -9,31 +9,32 @@ string picfile = "hyperrogue.pic";
 const char *musicfile = "";
 const char *loadlevel = NULL;
 
-eLand readland(const char *s) {
-  string ss = s;
+bool appears(const string& haystack, const string& needle) {
+  return haystack.find(needle) != string::npos;
+  }
+
+eLand readland(const string& ss) {
   if(ss == "II") return laCrossroads2;
   if(ss == "III") return laCrossroads3;
   if(ss == "IV") return laCrossroads4;
   if(ss == "V") return laCrossroads5;
-  for(int l=0; l<landtypes; l++) if(strstr(linf[l].name, s) != NULL) {
+  for(int l=0; l<landtypes; l++) if(appears(linf[l].name, ss)) {
     return eLand(l);
     break;
     }
   return laNone;
   }
 
-eItem readItem(const char *s) {
-  string ss = s;
-  for(int i=0; i<ittypes; i++) if(strstr(iinf[i].name, s) != NULL) {
+eItem readItem(const string& ss) {
+  for(int i=0; i<ittypes; i++) if(appears(iinf[i].name, ss)) {
     return eItem(i);
     break;
     }
   return itNone;
   }
 
-eMonster readMonster(const char *s) {
-  string ss = s;
-  for(int i=0; i<motypes; i++) if(strstr(minf[i].name, s) != NULL) {
+eMonster readMonster(const string& ss) {
+  for(int i=0; i<motypes; i++) if(appears(minf[i].name, ss)) {
     return eMonster(i);
     break;
     }
@@ -59,10 +60,36 @@ void initializeCLI() {
   #endif
   }
 
+namespace arg {
+  vector<string> argument;
+  int pos;
+
+  void lshift() { pos++; }
+
+  void shift() {
+    lshift(); if(pos >= size(argument)) { printf("Missing parameter\n"); exit(1); }
+    }
+  
+  const string& args() { return argument[pos]; }
+  const char* argcs() { return args().c_str(); }
+  int argi() { return atoi(argcs()); }
+  int arghex() { return strtol(argcs(), NULL, 16); }
+  ld argf() { return atof(argcs()); }
+  bool argis(const string& s) { return args() == s; }
+  
+  void init(int argc, char **argv) { for(int i=0; i<argc; i++) argument.push_back(argv[i]); shift(); }
+ 
+  void phaseerror(int x) {
+    printf("Command line error: cannot read command '%s' from phase %d in phase %d\n", args().c_str(), x, curphase);
+    exit(1);
+    }
+
+  }
+  
 int arg::readCommon() {
-  if(argis("-c")) { PHASE(1); shift(); conffile = args(); }
-  else if(argis("-s")) { PHASE(1); shift(); scorefile = args(); }
-  else if(argis("-m")) { PHASE(1); shift(); musicfile = args(); }
+  if(argis("-c")) { PHASE(1); shift(); conffile = argcs(); }
+  else if(argis("-s")) { PHASE(1); shift(); scorefile = argcs(); }
+  else if(argis("-m")) { PHASE(1); shift(); musicfile = argcs(); }
 #if CAP_SDLAUDIO
   else if(argis("-se")) { PHASE(1); shift(); wheresounds = args(); }
 #endif
@@ -82,15 +109,15 @@ int arg::readCommon() {
     PHASE(2);
     firstland = specialland = laCanvas;
     shift();
-    if(args()[1] == 0) patterns::whichCanvas = args()[0];
-    else patterns::canvasback = strtol(args(), NULL, 16);
+    if(args().size() == 1) patterns::whichCanvas = args()[0];
+    else patterns::canvasback = arghex();
     }
   else if(argis("-noplayer")) 
     mapeditor::drawplayer = !mapeditor::drawplayer;
   else if(argis("-pattern")) {
     PHASE(3);
     shift();
-    const char *c = args();
+    const char *c = argcs();
     using namespace patterns;
     subpattern_flags = 0;
     whichPattern = 0;
@@ -118,13 +145,13 @@ int arg::readCommon() {
     showstartmenu = false;
     }
   else if(argis("-back")) {
-    shift(); backcolor = strtol(args(), NULL, 16);
+    shift(); backcolor = arghex();
     }
   else if(argis("-borders")) {
-    shift(); bordcolor = strtol(args(), NULL, 16);
+    shift(); bordcolor = arghex();
     }
   else if(argis("-fore")) {
-    shift(); forecolor = strtol(args(), NULL, 16);
+    shift(); forecolor = arghex();
     }
   else if(argis("-W2")) {
     shift(); cheatdest = readland(args()); autocheat = true;
@@ -280,7 +307,7 @@ else if(args()[0] == '-' && args()[1] == x && args()[2] == '0') { showstartmenu 
     }
   else if(argis("-qpar")) { 
     int p;
-    shift(); sscanf(args(), "%d,%d,%d", 
+    shift(); sscanf(argcs(), "%d,%d,%d", 
       &p, &quotientspace::rvadd, &quotientspace::rvdir
       );
     autocheat = true;
@@ -297,7 +324,7 @@ else if(args()[0] == '-' && args()[1] == x && args()[2] == '0') { showstartmenu 
       }
     if(geometry == gQuotient2) restartGame('g');
     int a, b;
-    shift(); sscanf(args(), "%d,%d", &a, &b);
+    shift(); sscanf(argcs(), "%d,%d", &a, &b);
     using namespace fieldpattern;
     current_extra = a;
     fgeomextras[current_extra].current_prime_id = b;
@@ -310,14 +337,14 @@ else if(args()[0] == '-' && args()[1] == x && args()[2] == '0') { showstartmenu 
     }
   else if(argis("-tpar")) { 
     torusconfig::torus_mode = torusconfig::tmSingle;
-    shift(); sscanf(args(), "%d,%d,%d", 
+    shift(); sscanf(argcs(), "%d,%d,%d", 
       &torusconfig::qty, 
       &torusconfig::dx,
       &torusconfig::dy
       );
     }
   else if(argis("-tparx")) {
-    shift(); sscanf(args(), "%d,%d,%d", 
+    shift(); sscanf(argcs(), "%d,%d,%d", 
       (int*) &torusconfig::torus_mode,
       &torusconfig::sdx,
       &torusconfig::sdy
@@ -383,7 +410,7 @@ else if(args()[0] == '-' && args()[1] == x && args()[2] == '0') { showstartmenu 
     PHASEFROM(2);
     shift(); 
     int clWidth=0, clHeight=0, clFont=0;
-    sscanf(args(), "%dx%dx%d", &clWidth, &clHeight, &clFont);
+    sscanf(argcs(), "%dx%dx%d", &clWidth, &clHeight, &clFont);
     if(clWidth) vid.xres = clWidth;
     if(clHeight) vid.yres = clHeight;
     if(clFont) vid.fsize = clFont;
@@ -452,12 +479,12 @@ else if(args()[0] == '-' && args()[1] == x && args()[2] == '0') { showstartmenu 
 #if CAP_SDL
   else if(argis("-pngshot")) {
     PHASE(3); shift(); 
-    printf("saving PNG screenshot to %s\n", args());
-    saveHighQualityShot(args());
+    printf("saving PNG screenshot to %s\n", argcs());
+    saveHighQualityShot(argcs());
     }
 #endif
   else if(argis("-svgsize")) {
-    shift(); sscanf(args(), "%d/%d", &svg::svgsize, &svg::divby);
+    shift(); sscanf(argcs(), "%d/%d", &svg::svgsize, &svg::divby);
     }
   else if(argis("-svgfont")) {
     shift(); svg::font = args();
@@ -465,18 +492,18 @@ else if(args()[0] == '-' && args()[1] == x && args()[2] == '0') { showstartmenu 
     // (this is helpful with Inkscape's PDF+TeX output feature; define \myfont yourself)
     }
   else if(argis("-pngsize")) {
-    shift(); sscanf(args(), "%d", &pngres);
+    shift(); pngres = argi();
     }
   else if(argis("-pngformat")) {
-    shift(); sscanf(args(), "%d", &pngformat);
+    shift(); pngformat = argi();
     }
   else if(argis("-svggamma")) {
     shift(); svg::gamma = argf();
     }
   else if(argis("-svgshot")) {
     PHASE(3); shift(); 
-    printf("saving SVG screenshot to %s\n", args());
-    svg::render(args());
+    printf("saving SVG screenshot to %s\n", argcs());
+    svg::render(argcs());
     }
   else if(argis("--help") || argis("-h")) {
     printf("Press F1 while playing to get ingame options.\n\n");
@@ -532,7 +559,6 @@ purehookset hooks_config;
 hookset<int()> *hooks_args;
 
 namespace arg {
-  int argc; const char **argv;
   int curphase;
 
   auto ah = addHook(hooks_args, 0, readCommon);
@@ -540,11 +566,11 @@ namespace arg {
   void read(int phase) { 
     curphase = phase;
     callhooks(hooks_config);
-    while(argc) {
+    while(pos < size(argument)) {
       for(auto& h: *hooks_args) {
         int r = h.second(); if(r == 2) return; if(r == 0) { lshift(); goto cont; }
         }
-      printf("Unknown option: %s\n", args());
+      printf("Unknown option: %s\n", argcs());
       exit(3);
       cont: ;
       }

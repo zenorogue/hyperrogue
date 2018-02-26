@@ -24,7 +24,7 @@ template<class A, class B, class C> void emscripten_set_main_loop(A a, B b, C c)
 #endif
 
 void initweb();
-void emscripten_get_commandline(int& argc, const char **& argv);
+void emscripten_get_commandline();
 
 void loadCompressedChar(int &otwidth, int &otheight, int *tpix);
 
@@ -151,10 +151,10 @@ transmatrix getOrientation() {
     rotmatrix(0, 2, gamma * M_PI / 180);
   }
 
-vector<string> emscripten_args;
-vector<const char*> emscripten_args_c;
-
-void emscripten_get_commandline(int& argc, const char **& argv) {
+void emscripten_get_commandline() {
+#ifdef EMSCRIPTEN_FIXED_ARG
+  string s = EMSCRIPTEN_FIXED_ARG;
+#else
   char *str = (char*)EM_ASM_INT({
     var jsString = document.location.href;
     var lengthBytes = lengthBytesUTF8(jsString)+1;
@@ -163,14 +163,17 @@ void emscripten_get_commandline(int& argc, const char **& argv) {
     return stringOnWasmHeap;
     });
   string s = str;
+#endif
   s += "+xxxxxx";
   for(int i=0; i<size(s); i++) if(s[i] == '?') {
+#ifndef EMSCRIPTEN_FIXED_ARG
     printf("HREF: %s\n", str);
-    emscripten_args.push_back("hyperweb");
+#endif
+    arg::argument.push_back("hyperweb"); arg::lshift();
     string next = ""; i += 3;
     for(; i<size(s); i++)  {
       if(s[i] == '+') {
-        emscripten_args.push_back(next);
+        arg::argument.push_back(next);
         next = "";
         }
       else if(s[i] == '%') {
@@ -182,11 +185,12 @@ void emscripten_get_commandline(int& argc, const char **& argv) {
         }
       else next += s[i];
       }
-    argc = size(emscripten_args);
-    for(string& s: emscripten_args) emscripten_args_c.push_back(s.c_str());
-    argv = &(emscripten_args_c[0]);
-    printf("Arguments:"); for(int i=0; i<argc; i++) printf(" %s", argv[i]); printf("\n");
+    printf("Arguments:"); for(string s: arg::argument) printf(" %s", s.c_str()); printf("\n");
+    break;
     }
+
+#ifndef EMSCRIPTEN_FIXED_ARG
   free(str);
+#endif
   }
 

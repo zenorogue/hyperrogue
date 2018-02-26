@@ -1503,29 +1503,22 @@ extern int cshpos;
 
 namespace arg {
 #if CAP_COMMANDLINE
-  extern int argc; extern const char **argv;
   
-  inline void lshift() {
-    argc--; argv++;
-    }
+  void lshift();
 
-  inline void shift() {
-    lshift(); if(!argc) { printf("Missing parameter\n"); exit(1); }
-    }
+  void shift();
 
-  inline const char* args() { return *argv; }
-  inline int argi() { return atoi(*argv); }
-  inline ld argf() { return atof(*argv); }
-  inline bool argis(const char *s) { return strcmp(*argv, s) == 0; }
+  const string& args();
+  int argi();
+  ld argf();
+  bool argis(const string& s);
+  int arghex();
   
-  inline void init(int _argc, const char **_argv) { argc=_argc-1; argv=_argv+1; }
+  void init(int _argc, char **_argv);
   
   extern int curphase;
   
-  inline void phaseerror(int x) {
-    printf("Command line error: cannot read command '%s' from phase %d in phase %d\n", args(), x, curphase);
-    exit(1);
-    }
+  void phaseerror(int x);
   
   // returned values: 0 = ok, 1 = not recognized, 2 = shift phase
   int readCommon();
@@ -1758,7 +1751,7 @@ template<class T, class V, class... U> V callhandlers(V zero, hookset<T> *h, U&.
 
 extern hookset<bool(int sym, int uni)> *hooks_handleKey;
 extern hookset<void(cell *c, const transmatrix& V)> *hooks_drawcell;
-extern hookset<bool(int argc, const char** argv)> *hooks_main;
+extern hookset<bool(int argc, char** argv)> *hooks_main;
 extern hookset<int()> *hooks_args;
 extern hookset<eLand(eLand)> *hooks_nextland;
 

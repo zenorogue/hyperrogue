@@ -40,12 +40,14 @@ void moreStack() {
   }
 #endif
 
-hookset<bool(int argc, const char** argv)> *hooks_main;
+hookset<bool(int argc, char** argv)> *hooks_main;
 
 #ifndef NOMAIN
-int main(int argc, const char **argv) {
+int main(int argc, char **argv) {
 #if ISWEB
-  emscripten_get_commandline(argc, argv);
+  emscripten_get_commandline();
+#else
+  arg::init(argc, argv);
 #endif
   if(callhandlers(false, hooks_main, argc, argv)) return 0;
 #if !ISWEB
@@ -54,7 +56,6 @@ int main(int argc, const char **argv) {
   #endif
 #endif
 #if CAP_COMMANDLINE
-  arg::init(argc, argv);
   initializeCLI();
 #endif
   initAll();

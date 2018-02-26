@@ -196,8 +196,8 @@ namespace mapstream {
       return dir;
     }
   
-  bool loadMap(const char *fname) {
-    f = fopen(fname, "rb");
+  bool loadMap(const string& fname) {
+    f = fopen(fname.c_str(), "rb");
     if(!f) return false;
     clearMemory();
     int vernum = loadInt();
