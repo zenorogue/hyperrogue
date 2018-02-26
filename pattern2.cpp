@@ -1325,6 +1325,10 @@ namespace patterns {
         subpattern_flags ^= SPF_FULLSYM;
         }
 
+      else if(uni == '@') {
+        subpattern_flags ^= SPF_DOCKS;
+        }
+
       else if(uni == '6' || uni == '7' || uni == '8') {
         if(whichShape == uni) whichShape = 0;
         else whichShape = uni;
