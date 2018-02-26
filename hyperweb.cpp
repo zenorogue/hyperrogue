@@ -11,9 +11,12 @@
 #define CAP_SDLTTF 0
 #define CAP_SHMUP 0
 #define CAP_RUG 1
-#define CAP_ORIENTATION 1
 #define CAP_INV 0
 #define GLES_ONLY
+
+#ifndef CAP_ORIENTATION
+#define CAP_ORIENTATION 1
+#endif
 
 #ifdef FAKEWEB
 void mainloopiter();
