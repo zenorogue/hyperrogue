@@ -334,7 +334,7 @@ void gldraw(int useV, const transmatrix& V, const vector<glvertex>& v, int ps, i
 #endif
 
 double linewidthat(const hyperpoint& h, double minwidth) {
-  if(vid.antialias & AA_LINEWIDTH) {
+  if((vid.antialias & AA_LINEWIDTH) && hyperbolic) {
     double dz = h[2];
     if(dz < 1 || abs(dz-stereo::scrdist) < 1e-6) return vid.linewidth;
     else {
@@ -511,7 +511,7 @@ void drawpolyline(polytodraw& p) {
     }
   else poly_flags &=~ POLY_INVERSE;
     
-  if(sphereflipped()) {
+  if(spherespecial) {
     if(!hiliteclick && !(poly_flags & POLY_INFRONT)) return;
     }
     
@@ -540,6 +540,7 @@ void drawpolyline(polytodraw& p) {
       if(pp.tinf && (poly_flags & POLY_INVERSE)) {
         return; 
         }
+      glLineWidth(linewidthat(tC0(pp.V), pp.minwidth));    
       gldraw(3, Id, glcoords, 0, size(glcoords), p.col, pp.outline, poly_flags, pp.tinf);
       continue;
       }
@@ -629,7 +630,7 @@ void prettyline(hyperpoint h1, hyperpoint h2, int col, int lev) {
   pp.tab = &prettylinepoints;
   pp.offset = 0;
   pp.cnt = size(prettylinepoints);
-  pp.minwidth = minwidth_global;
+  pp.minwidth = vid.linewidth;
   p.col = 0;
   pp.outline = col;
   pp.flags = POLY_ISSIDE;
@@ -2558,8 +2559,8 @@ namespace svg {
   
     if(invisible(col) && invisible(outline)) return;
     if(polyi < 2) return;
-    double dfc = 0.8;
-    if(!pmodel && !euclid) {
+    double dfc;
+    if(!pmodel && hyperbolic) {
       int avgx = 0, avgy = 0;
       for(int i=0; i<polyi; i++) 
         avgx += polyx[i],
@@ -2574,8 +2575,9 @@ namespace svg {
       dfc = 1 - dfc;
       
       if(dfc < 0) dfc = 1;
-      dfc = max(dfc, minwidth);
+      dfc = max<double>(dfc, 1) * minwidth;
       }
+    else dfc = .8 * minwidth;
     
     startstring();
     for(int i=0; i<polyi; i++) {
@@ -2586,7 +2588,7 @@ namespace svg {
       fprintf(f, "%s %s", coord(polyx[i]), coord(polyy[i]));
       }
     
-    fprintf(f, "\" %s/>", stylestr(col, outline, vid.radius*dfc/256));
+    fprintf(f, "\" %s/>", stylestr(col, outline, (hyperbolic ? vid.radius : vid.scrsize) *dfc/256));
     stopstring();
     fprintf(f, "\n");
     }
