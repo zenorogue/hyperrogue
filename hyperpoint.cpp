@@ -403,26 +403,51 @@ transmatrix inverse(const transmatrix& T) {
 
 // distance between mh and 0
 double hdist0(const hyperpoint& mh) {
-  if(sphere) {
-    ld res = mh[2] >= 1 ? 0 : mh[2] <= -1 ? M_PI : acos(mh[2]);
-    if(elliptic && res > M_PI/2) res = 2*M_PI-res;
-    return res;
+  switch(cgclass) {
+    case gcHyperbolic:
+      if(mh[2] < 1) return 0;
+      return acosh(mh[2]);
+    case gcEuclid: {
+      ld d = sqrt(mh[0]*mh[0]+mh[1]*mh[1]);
+      return d;
+      }
+    case gcSphere: {
+      ld res = mh[2] >= 1 ? 0 : mh[2] <= -1 ? M_PI : acos(mh[2]);
+      if(elliptic && res > M_PI/2) res = M_PI-res;
+      return res;
+      }
+    default:
+      return 0;
     }
-  if(!euclid && mh[2] > 1.5) return acosh(mh[2]);
-  ld d = sqrt(mh[0]*mh[0]+mh[1]*mh[1]);
-  if(euclid) return d;
-  return asinh(d);
   }
 
 ld circlelength(ld r) {
-  if(euclid) return 2 * M_PI * r;
-  else if(hyperbolic) return 2 * M_PI * sinh(r);
-  else return 2 * M_PI * sin(r);
+  switch(cgclass) {
+    case gcEuclid:
+      return 2 * M_PI * r;
+    case gcHyperbolic:
+      return 2 * M_PI * sinh(r);
+    case gcSphere:
+      return 2 * M_PI * sin(r);
+    default:
+      return 0;
+    }
   }
 
 // distance between two points
 double hdist(const hyperpoint& h1, const hyperpoint& h2) {
   return hdist0(gpushxto0(h1) * h2);
+  ld iv = intval(h1, h2);
+  switch(cgclass) {
+    case gcEuclid:
+      return sqrt(iv);
+    case gcHyperbolic:
+      return 2 * asinh(sqrt(iv) / 2);
+    case gcSphere:
+      return 2 * asin(sqrt(iv) / 2);
+    default:
+      return 0;
+    }
   }
 
 namespace hyperpoint_vec {
