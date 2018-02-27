@@ -1100,7 +1100,7 @@ void showStereo() {
         ) + "\n\n";
 
     if(uni == 'm')
-      { stereo::mode = stereo::eStereo((1 + stereo::mode) % 3); return; }
+      { stereo::mode = stereo::eStereo((1 + stereo::mode) % (CAP_ODS ? 4 : 3)); return; }
     
     else if(uni == 'e') 
       dialog::editNumber(stereo::ipd, -10, 10, 0.01, 0, XLAT("pupillary distance"),

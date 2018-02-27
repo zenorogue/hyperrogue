@@ -754,9 +754,6 @@ namespace rug {
   extern int  texturesize;
   extern ld   model_distance;
   extern transmatrix currentrot;
-#if CAP_ODS
-  extern bool ods;
-#endif
 #if CAP_RUG
   void show();
   void init();
