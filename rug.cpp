@@ -1727,7 +1727,7 @@ void show() {
         );
       }
     else if(uni == 'A') {
-      dialog::editNumber(ruggo, 0, 1.5, .1, 0, XLAT("anti-crossing"),
+      dialog::editNumber(anticusp_factor, 0, 1.5, .1, 0, XLAT("anti-crossing"),
         XLAT("The anti-crossing algorithm prevents the model from crossing itself, "
           "by preventing points which should not be close from being close. "
           "The bigger number, the more sensitive it is, but the embedding is slower. Set 0 to disable.")
