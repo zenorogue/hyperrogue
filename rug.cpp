@@ -1699,6 +1699,8 @@ void show() {
     if(rug::rugged)
       dialog::lastItem().value += " (" + ftsg(err_zero_current) + ")";
     }
+  dialog::addSelItem(XLAT("automatic move speed"), fts(ruggo), 'G');
+  dialog::addSelItem(XLAT("anti-crossing"), fts(anticusp_factor), 'A');
 
   dialog::display();
   keyhandler = [] (int sym, int uni) {
@@ -1719,6 +1721,18 @@ void show() {
         );
     else if(uni == 'o' && !rug::rugged)
       renderonce = !renderonce;
+    else if(uni == 'G') {
+      dialog::editNumber(ruggo, -1, 1, .1, 0, XLAT("automatic move speed"),
+        XLAT("Move automatically without pressing any keys.")
+        );
+      }
+    else if(uni == 'A') {
+      dialog::editNumber(ruggo, 0, 1.5, .1, 0, XLAT("anti-crossing"),
+        XLAT("The anti-crossing algorithm prevents the model from crossing itself, "
+          "by preventing points which should not be close from being close. "
+          "The bigger number, the more sensitive it is, but the embedding is slower. Set 0 to disable.")
+        );
+      }
     else if(uni == 'v') {
       dialog::editNumber(vertex_limit, 0, 50000, 500, 3000, ("vertex limit"), 
         XLAT("The more vertices, the more accurate the Hypersian Rug model is. "
