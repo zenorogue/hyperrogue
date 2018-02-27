@@ -17,6 +17,10 @@ struct rug_exception { };
 
 bool fast_euclidean = true;
 bool good_shape;
+bool subdivide_first = false;
+
+bool subdivide_further();
+void subdivide();
 
 ld modelscale = 1;
 ld model_distance = 2;
@@ -586,8 +590,13 @@ void buildRug() {
 
   printf("vertices = %d triangles=  %d\n", size(points), size(triangles));
 
-  calcLengths();
+  if(subdivide_first) 
+    for(int i=0; i<20 && subdivide_further(); i++)
+      subdivide();
+  
   sort(points.begin(), points.end(), psort);
+
+  calcLengths();
   
   verify();
   
@@ -1715,15 +1724,13 @@ int rugArgs() {
     rug::init();
     }
 
-#if CAP_ODS
-  else if(argis("-ods")) {
-    ods = true;
+  else if(argis("-sdfoff")) {
+    subdivide_first = false;
     }
 
-  else if(argis("-ipd")) {
-    shift(); ipd = argf();
+  else if(argis("-sdfon")) {
+    subdivide_first = true;
     }
-#endif
 
   else return 1;
   return 0;
