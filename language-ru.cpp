@@ -3814,18 +3814,21 @@ S(
     "This Orb lets you ride Dragons and other worm-like creatures. "
    "Simply move onto such a creature to ride them; while riding, you are protected from dangerous terrains "
    "and partially from attacks (they cause you to lose half of your Domination power), "
-   "but you cannot collect items. When only one charge is left, "
-   "you have to dismount this turn -- be very careful to make this possible, "
-   "as your mount could attack you immediately!\n\n" "While riding, "
+   "but you cannot collect items.\n\n"
+//   "When only one charge is left, "
+//   "you have to dismount this turn -- be very careful to make this possible, "
+//   "as your mount could attack you immediately!\n\n" 
+   "While riding, "
    "click on a location to order your mount to move or attack there.",
    
    "Эта сфера позволяет вас ездить на драконах и других червеобразных существах. "
    "Просто пойди на клетку с таким монстром, чтобы оседлать его. "
    "Пока ты едешь на существе, на тебя не действуют никакие опасные объекты "
    "и, частично, атаки (от которых вы теряете половину силы "
-   "этой сферы), но вы не можете собирать предметы. Когда остаётся "
-   "только один заряд, вы должны слезть с существа -- будьте осторожны, "
-   "ведь оно может сразу же атаковать вас!\n\n"
+   "этой сферы), но вы не можете собирать предметы.\n\n"
+//   "Когда остаётся "
+//   "только один заряд, вы должны слезть с существа -- будьте осторожны, "
+//   "ведь оно может сразу же атаковать вас!\n\n"
    "Нажимайте на клетки, чтобы заставить существо туда пойти или атаковать."
    )
  

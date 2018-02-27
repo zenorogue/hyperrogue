@@ -3755,17 +3755,20 @@ S(
    "This Orb lets you ride Dragons and other worm-like creatures. "
    "Simply move onto such a creature to ride them; while riding, you are protected from dangerous terrains "
    "and partially from attacks (they cause you to lose half of your Domination power), "
-   "but you cannot collect items. When only one charge is left, "
-   "you have to dismount this turn -- be very careful to make this possible, "
-   "as your mount could attack you immediately!\n\n" "While riding, "
+   "but you cannot collect items.\n\n"
+//   "When only one charge is left, "
+//   "you have to dismount this turn -- be very careful to make this possible, "
+//   "as your mount could attack you immediately!\n\n" 
+   "While riding, "
    "click on a location to order your mount to move or attack there.",
 
    "Tato Sféra ti umožňuje jezdit na Dracích a jiných červovitých netvorech. "
    "Stačí se na ně pohnout, a můžeš nasednout; během jízdy jsi chráněn před nebezpečným terénem "
    "a částečně i před útoky (ty tě připraví o polovinu zbývající síly Dominance), "
-   "nemůžeš ale sbírat předměty. Ve chvíli, kdy ti zbývá pouze jeden náboj, "
-   "musíš v tomto kole sesednout -- dej si dobrý pozor, aby to bylo možné,  "
-   "protože tvůj oř na tebe může okamžitě zaútočit!\n\n "
+   "nemůžeš ale sbírat předměty.\n\n"
+//   "Ve chvíli, kdy ti zbývá pouze jeden náboj, "
+//   "musíš v tomto kole sesednout -- dej si dobrý pozor, aby to bylo možné,  "
+//   "protože tvůj oř na tebe může okamžitě zaútočit!\n\n "
    "Během jízdy můžeš kliknutím nařizovat svému oři, kam se "
    "má pohnout nebo zaútočit.")
 

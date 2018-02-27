@@ -5470,7 +5470,7 @@ void moverefresh(bool turn = true) {
           c->hitpoints = 0;
           }
         else if(dragon::totalhp(c) <= 2) ;
-        else if(items[itOrbDomination] && isMounted(c)) {
+        else if(isMounted(c)) {
           if(dragon::target && celldistance(c, dragon::target) <= breathrange && makeflame(dragon::target, 5, true)) {
             addMessage(XLAT("%The1 breathes fire!", subject));
             makeflame(dragon::target, 5, false);

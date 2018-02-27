@@ -3517,16 +3517,19 @@ Orb("Domination", "der Dominanz")
 S("This Orb lets you ride Dragons and other worm-like creatures. "
   "Simply move onto such a creature to ride them; while riding, you are protected from dangerous terrains "
   "and partially from attacks (they cause you to lose half of your Domination power), "
-  "but you cannot collect items. When only one charge is left, "
-  "you have to dismount this turn -- be very careful to make this possible, "
-  "as your mount could attack you immediately!\n\n" "While riding, "
+  "but you cannot collect items.\n\n"
+//  "When only one charge is left, "
+//  "you have to dismount this turn -- be very careful to make this possible, "
+//  "as your mount could attack you immediately!\n\n" 
+  "While riding, "
   "click on a location to order your mount to move or attack there.",
 
   "Diser Orb erlaubt es dir Drachen oder ondere wurmartige Wesen zu reiten. "
   "Tritt einfach auf solch ein Wesen um es zu reiten; während des Ritts bist du vor gefährlichen Gebieten "
   "und teilweise vor Angriffen (sie verursachen den Verlust der Hälfte deiner Kraft der Dominanz) geschützt. "
-  "Jedoch kannst du keine Gegenstände sammeln. Sobald nur noch eine Ladung übrig ist, musst du in diesem Zug absteigen -- "
-  "achte darauf dies zu ermöglichen, denn dein Reittier könnte dich unmittelbar angreifen!\n\n"
+  "Jedoch kannst du keine Gegenstände sammeln.\n\n"
+//  "Sobald nur noch eine Ladung übrig ist, musst du in diesem Zug absteigen -- "
+//  "achte darauf dies zu ermöglichen, denn dein Reittier könnte dich unmittelbar angreifen!\n\n"
   "Während du reitest, klicke auf eine Zelle um deinem Reittier zu befehlen dorthin zu "
   "gehen oder dort anzugreifen.")
 

@@ -1124,9 +1124,11 @@ itemtype iinf[ittypes] = {
     "This Orb lets you ride Dragons and other worm-like creatures. "
    "Simply move onto such a creature to ride them; while riding, you are protected from dangerous terrains "
    "and partially from attacks (they cause you to lose half of your Domination power), "
-   "but you cannot collect items. When only one charge is left, "
+   "but you cannot collect items.\n\n"
+   /*When only one charge is left, "
    "you have to dismount this turn -- be very careful to make this possible, "
-   "as your mount could attack you immediately!\n\n" "While riding, "
+   "as your mount could attack you immediately!\n\n" */
+   "While riding, "
    "click on a location to order your mount to move or attack there.",
     },
   { 'o', 0xFFFF80, "Orb of the Sword", 
