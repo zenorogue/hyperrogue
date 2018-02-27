@@ -1421,6 +1421,7 @@ bool handlekeys(int sym, int uni) {
           bdist = cdist, finger_center = p->getglue();
         }
       }
+    if(renderonce) renderlate+=10;
     return true;
     }
   else if(uni == '2') {
@@ -1809,7 +1810,7 @@ int rugArgs() {
     }
 
   else if(argis("-ruglate")) {
-    renderonce = false;
+    renderonce = true;
     renderlate += 10;
     }
 
