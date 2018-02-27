@@ -482,7 +482,7 @@ bool passable(cell *w, cell *from, flagtype flags) {
     if(w == pp && F(P_ONPLAYER)) return true;
     if(from == pp && F(P_ONPLAYER) && F(P_REVDIR)) return true;
 
-    if(from && !((flags & P_ISPLAYER) && getMount(i))) {
+    if(from && !((flags & P_ISPLAYER) && pp->monst)) {
       int i = vrevdir ? incline(w, from) : incline(from, w);
       if(i < -1 && F(P_ROSE)) return false;
       if((i > 1) && !F(P_JUMP1 | P_JUMP2 | P_BULLET | P_FLYING | P_BLOW | P_CLIMBUP | P_AETHER | P_REPTILE))
@@ -2760,14 +2760,10 @@ void computePathdist(eMonster param) {
       pathqm.push_back(c); 
       continue; // no paths going through monsters
       }
-    for(int i=0; i<numplayers(); i++) {
-      cell *pc = playerpos(i);
-      if(!pc) continue;
-      if(c->monst && c != pc && getMount(i) && !isDragon(c->monst) && sameMonster(c, pc)) {
-        // don't treat the Worm you are riding as passable
-        pathqm.push_back(c); 
-        continue; 
-        }
+    if(isMounted(c) && !isPlayerOn(c)) {
+      // don't treat the Worm you are riding as passable
+      pathqm.push_back(c); 
+      continue; 
       }
     if(c->cpdist > 7 && !(c->land == laTrollheim && turncount < c->landparam)) continue;
     int d = c->pathdist;
@@ -2853,7 +2849,8 @@ void bfs() {
   for(int i=0; i<numplayers(); i++) {
     cell *c = playerpos(i);
     if(!c) continue;
-    if(getMount(i) && (c->monst == moTentacle || c->monst == moTentaclewait || c->monst == moTentacleEscaping))
+    if(items[itOrbDomination])
+    if(c->monst == moTentacle || c->monst == moTentaclewait || c->monst == moTentacleEscaping)
       worms.push_back(c);
     }
   
@@ -4131,18 +4128,23 @@ void mountmove(cell *c, int spin, bool fp, int id) {
   }
 
 void mountmove(cell *c, int spin, bool fp, cell *ppos) {
-  for(int i=0; i<numplayers(); i++) if(playerpos(i) == ppos) {
-    animateMovement(ppos, c, LAYER_SMALL);
-    mountmove(c, spin, fp, i);
+  for(int i=0; i<numplayers(); i++) {
+    if(playerpos(i) == ppos) {
+      animateMovement(ppos, c, LAYER_SMALL);
+      mountmove(c, spin, fp, i);
+      }
+    if(lastmountpos[i] == ppos && ppos != NULL) {
+      lastmountpos[i] = c;
+      }
+    else if(lastmountpos[i] == c)  {
+      lastmountpos[i] = NULL;
+      }
     }
   }
 
 void moveWorm(cell *c) {
 
-  bool mounted = false;
-  for(int i=0; i<numplayers(); i++)
-    if(multi::playerActive(i) && getMount(i) && sameMonster(c, playerpos(i))) 
-      mounted = true;
+  bool mounted = isMounted(c);
   
   if(c->monst == moWormwait) { c->monst = moWorm; return; }
   else if(c->monst == moTentaclewait) { c->monst = moTentacle; return; }
@@ -4394,13 +4396,6 @@ bool earthMove(cell *from, int dir) {
   }
 
 vector<cell*> gendfs;
-
-bool isMounted(cell *c) {
-  for(int i=0; i<numplayers(); i++) 
-    if(multi::playerActive(i) && sameMonster(c, playerpos(i))) 
-      return true;
-  return false;
-  }
 
 int targetcount;
 
@@ -4752,6 +4747,8 @@ void movemutant() {
 
 cell *shpos[MAXPLAYER][SHSIZE];
 int cshpos = 0;
+
+cell *lastmountpos[MAXPLAYER];
 
 void clearshadow() {
   for(int i=0; i<SHSIZE; i++) for(int p=0; p<MAXPLAYER; p++)
@@ -7270,6 +7267,11 @@ bool movepcto(int d, int subdir, bool checkonly) {
   if(!checkonly) invismove = false;  
   bool boatmove = false;
   
+  if(multi::players > 1)
+    lastmountpos[multi::cpid] = cwt.c;
+  else
+    lastmountpos[0] = cwt.c;
+  
   if(againstRose(cwt.c, NULL) && d<0 && !scentResistant()) {
     if(checkonly) return false;
     addMessage("You just cannot stand in place, those roses smell too nicely.");
@@ -7922,6 +7924,7 @@ int wormpos(cell *c) {
   
 // currently works for worms only
 bool sameMonster(cell *c1, cell *c2) {
+  if(!c1 || !c2) return false;
   if(c1 == c2) return true;
   if(isWorm(c1->monst) && isWorm(c2->monst))
     return wormhead(c1) == wormhead(c2);
@@ -7930,14 +7933,9 @@ bool sameMonster(cell *c1, cell *c2) {
   return false;
   }
 
-eMonster getMount(int i) {
-  if(!items[itOrbDomination]) return moNone;
-  return playerpos(i)->monst;
-  }
-
 eMonster haveMount() {
   for(int i=0; i<numplayers(); i++) if(multi::playerActive(i)) {
-    eMonster m = getMount(i);
+    eMonster m = playerpos(i)->monst;
     if(m) return m;
     }
   return moNone;

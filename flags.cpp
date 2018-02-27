@@ -137,13 +137,20 @@ bool isFriendlyOrPlayer(eMonster m) {
   return isFriendly(m) || m == moPlayer;
   }
 
-bool isFriendly(cell *c) { 
-  if(items[itOrbDomination] && c->monst && c->monst != moTentacleGhost) {
-    for(int i=0; i<numplayers(); i++)
-      if(sameMonster(c, playerpos(i))) 
+bool isMounted(cell *c) {
+  if(c && c->monst && c->monst != moTentacleGhost) {
+    for(int i=0; i<numplayers(); i++) {
+      if(playerpos(i)->monst && sameMonster(c, playerpos(i))) 
         return true;
+      if(lastmountpos[i] && lastmountpos[i]->monst && sameMonster(c, lastmountpos[i]))
+        return true;
+      }
     }
-  return isFriendly(c->monst); 
+  return false;
+  }
+
+bool isFriendly(cell *c) { 
+  return isMounted(c) || isFriendly(c->monst); 
   }
 
 bool isBug(eMonster m) {

@@ -1199,6 +1199,7 @@ auto cgm = addHook(clearmemory, 40, [] () {
   pathq.clear();
   dcal.clear();
   clearshadow();
+  for(int i=0; i<MAXPLAYER; i++) lastmountpos[i] = NULL;
   seenSevenMines = false;
   recallCell = NULL;
   butterflies.clear();
