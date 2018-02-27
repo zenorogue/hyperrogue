@@ -7455,6 +7455,7 @@ bool movepcto(int d, int subdir, bool checkonly) {
         playSound(c2, "hit-axe" + pick123());
         c2->wall = waNone;
         sideAttack(cwt.c, d, moPlayer, 0);
+        animateAttack(cwt.c, c2, LAYER_SMALL);
         }
       else if(c2->wall == waBigTree) {
         drawParticles(c2, winf[c2->wall].color, 8);
@@ -7462,11 +7463,13 @@ bool movepcto(int d, int subdir, bool checkonly) {
         playSound(c2, "hit-axe" + pick123());
         c2->wall = waSmallTree;
         sideAttack(cwt.c, d, moPlayer, 0);
+        animateAttack(cwt.c, c2, LAYER_SMALL);
         }
       else {
         if(!peace::on) {
           addMessage(XLAT("You swing your sword at the mirror."));
           sideAttack(cwt.c, d, moPlayer, 0);
+          animateAttack(cwt.c, c2, LAYER_SMALL);
           }
         }
       if(survivalist && isHaunted(c2->land))
