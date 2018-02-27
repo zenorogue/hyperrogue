@@ -114,11 +114,11 @@ void renderbuffer::make_surface() {
 SDL_Surface *renderbuffer::render() {
   make_surface() ;
   if(FramebufferName) {
-    glReadPixels(0, 0, vid.xres, vid.yres, GL_BGRA, GL_UNSIGNED_BYTE, srf->pixels);
+    glReadPixels(0, 0, x, y, GL_BGRA, GL_UNSIGNED_BYTE, srf->pixels);
     GLERR("readPixels");
-    for(int y=0; y<vid.yres/2; y++)
-    for(int x=0; x<vid.xres; x++)
-      swap(qpixel(srf,x,y), qpixel(srf,x,vid.yres-1-y));
+    for(int iy=0; iy<y/2; iy++)
+    for(int ix=0; ix<x; ix++)
+      swap(qpixel(srf,ix,iy), qpixel(srf,ix,vid.yres-1-iy));
     }
   return srf;
   }
