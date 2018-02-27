@@ -1084,10 +1084,8 @@ ld raddif(ld a, ld b) {
   return d;
   }
 
-bool ods = false;
-
 bool project_ods(hyperpoint azeq, hyperpoint& h1, hyperpoint& h2, bool eye) {
-  ld tanalpha = tan(ipd/2);
+  ld tanalpha = tan(stereo::ipd/2);
   if(eye) tanalpha = -tanalpha;
   
   using namespace hyperpoint_vec;  
@@ -1116,7 +1114,7 @@ bool project_ods(hyperpoint azeq, hyperpoint& h1, hyperpoint& h2, bool eye) {
     
     ld phi = atan2(y, x) - atan2(y0, x0);
       
-    ld delta = atan2(z / sin(theta), t / cos(ipd/2));
+    ld delta = atan2(z / sin(theta), t / cos(stereo::ipd/2));
     
     h[0] = phi;
     h[1] = theta;
@@ -1140,7 +1138,7 @@ void drawTriangle(triangle& t) {
   dt++;
 
 #if CAP_ODS
-  if(ods) {
+  if(stereo::mode == stereo::sODS) {
     hyperpoint pts[3];
     for(int i=0; i<3; i++)
       pts[i] = t.m[i]->getglue()->flat;    
@@ -1148,8 +1146,8 @@ void drawTriangle(triangle& t) {
     hyperpoint hc = (pts[1] - pts[0]) ^ (pts[2] - pts[0]);  
     double hch = hypot3(hc);
     
-    glNormal3f(hc[0]/hch,hc[1]/hch,hc[2]/hch);
-
+    ld col = (2 + hc[0]/hch) / 3;
+    
     bool ok = true;
     array<hyperpoint, 6> h;
     for(int eye=0; eye<2; eye++) {
@@ -1185,8 +1183,10 @@ void drawTriangle(triangle& t) {
         if(h[s+1][0] < -M_PI || h[s+2][0] < -M_PI) lst++;
         if(h[s+1][0] > +M_PI || h[s+2][0] > +M_PI) fst--;
         for(int x=fst; x<=lst; x++) for(int i=0; i<3; i++) {
-          glTexCoord2f(t.m[i]->x1, t.m[i]->y1);
-          glVertex3f(h[s+i][0] + 2*M_PI*x, h[s+i][1], h[s+i][2]);
+          ct_array.emplace_back(
+            hpxyz(h[s+i][0] + 2*M_PI*x, h[s+i][1], h[s+i][2]),
+            t.m[i]->x1, t.m[i]->y1,
+            col);
           }
         }
       }
@@ -1410,13 +1410,7 @@ void move_forward(ld distance) {
 #define CAP_HOLDKEYS CAP_SDL // && !ISWEB)
 
 bool handlekeys(int sym, int uni) {
-  if(uni == '4') {
-#if CAP_ODS
-    ods = !ods;
-#endif
-    return true;
-    }
-  else if(uni == '1') {
+  if(uni == '1') {
     ld bdist = 1e12;
     if(finger_center) 
       finger_center = NULL;
