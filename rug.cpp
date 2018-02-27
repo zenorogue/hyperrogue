@@ -921,7 +921,7 @@ void generate_deltas(vector<bincode>& target, int dim, bincode offset) {
 int detect_cusp_at(rugpoint *p, rugpoint *q) {
   if(hdist(p->h, q->h) * modelscale <= anticusp_dist)
     return 0;
-  else if(modeldist(p->flat, q->flat) > anticusp_dist)
+  else if(modeldist(p->flat, q->flat) > anticusp_dist - err_zero_current)
     return 1;
   else {
     add_anticusp_edge(p, q);
