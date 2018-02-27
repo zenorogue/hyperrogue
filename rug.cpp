@@ -1866,6 +1866,10 @@ int rugArgs() {
     subdivide_first = true;
     }
 
+  else if(argis("-anticusp")) {
+    shift(); anticusp_factor = argf();
+    }
+
   else return 1;
   return 0;
   }
