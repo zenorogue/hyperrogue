@@ -44,6 +44,9 @@ int  texturesize = 1024;
 ld scale = 1;
 ld ruggo = 0;
 
+ld anticusp_factor = 1;
+ld anticusp_dist;
+
 ld err_zero = 1e-3, err_zero_current, current_total_error;
 
 int queueiter, qvalid, dt;
@@ -62,6 +65,7 @@ struct rugpoint {
   hyperpoint flat; // point in the native space, in azeq
   hyperpoint precompute;
   vector<edge> edges;
+  vector<edge> anticusp_edges;
   // Find-Union algorithm
   rugpoint *glue;
   rugpoint *getglue() {
@@ -305,10 +309,24 @@ void addNewEdge(rugpoint *e1, rugpoint *e2, ld len = 1) {
   e.target = e1; e2->edges.push_back(e);
   }
 
+bool edge_exists(rugpoint *e1, rugpoint *e2) {
+  for(auto& e: e1->edges)
+    if(e.target == e2)
+      return true;
+  return false;
+  }
+
 void addEdge(rugpoint *e1, rugpoint *e2, ld len = 1) {
-  for(int i=0; i<size(e1->edges); i++) 
-    if(e1->edges[i].target == e2) return;
-  addNewEdge(e1, e2, len);
+  if(!edge_exists(e1, e2))
+    addNewEdge(e1, e2, len);
+  }
+
+void add_anticusp_edge(rugpoint *e1, rugpoint *e2, ld len = 1) {
+  for(auto& e: e1->anticusp_edges)
+    if(e.target == e2) return;
+  edge e; e.len = len;
+  e.target = e2; e1->anticusp_edges.push_back(e);
+  e.target = e1; e2->anticusp_edges.push_back(e);
   }
 
 void addTriangle(rugpoint *t1, rugpoint *t2, rugpoint *t3, ld len = 1) {
@@ -340,11 +358,9 @@ bool psort(rugpoint *a, rugpoint *b) {
   }
 
 void calcLengths() {
-  for(int i=0; i<size(points); i++) for(int j=0; j<size(points[i]->edges); j++) {
-    ld d = hdist(points[i]->h, points[i]->edges[j].target->h);
-    if(elliptic && d > M_PI/2) d = M_PI - d;
-    points[i]->edges[j].len = d * modelscale;
-    }
+  for(auto p: points) 
+    for(auto& edge: p->edges) 
+      edge.len = hdist(p->h, edge.target->h) * modelscale;
   }
 
 void setVidParam() {
@@ -547,7 +563,7 @@ void comp(cell*& minimum, cell *next) {
   if(tie(nc, next) < tie(mc, minimum))
     minimum = next;
   }
-  
+
 void buildRug() {
 
   if(torus) {
@@ -595,9 +611,9 @@ void buildRug() {
       subdivide();
   
   sort(points.begin(), points.end(), psort);
-
-  calcLengths();
   
+  calcLengths();  
+
   verify();
   
   for(auto p: points) if(p->valid) qvalid++;
@@ -612,12 +628,13 @@ void enqueue(rugpoint *m) {
   m->inqueue = true;
   }
 
-bool force_euclidean(rugpoint& m1, rugpoint& m2, double rd, double d1=1, double d2=1) {
+bool force_euclidean(rugpoint& m1, rugpoint& m2, double rd, bool is_anticusp = false, double d1=1, double d2=1) {
   if(!m1.valid || !m2.valid) return false;
   // double rd = hdist(m1.h, m2.h) * xd;
   // if(rd > rdz +1e-6 || rd< rdz-1e-6) printf("%lf %lf\n", rd, rdz);
   double t = 0;
   for(int i=0; i<3; i++) t += (m1.flat[i] - m2.flat[i]) * (m1.flat[i] - m2.flat[i]);
+  if(is_anticusp && t > rd*rd) return false;
   t = sqrt(t);
   /* printf("%s ", display(m1.flat));
   printf("%s ", display(m2.flat));
@@ -634,10 +651,10 @@ bool force_euclidean(rugpoint& m1, rugpoint& m2, double rd, double d1=1, double 
   return nonzero;
   }
 
-bool force(rugpoint& m1, rugpoint& m2, double rd, double d1=1, double d2=1) {
+bool force(rugpoint& m1, rugpoint& m2, double rd, bool is_anticusp=false, double d1=1, double d2=1) {
   if(!m1.valid || !m2.valid) return false;
   if(gwhere == gEuclid && fast_euclidean) {
-    return force_euclidean(m1, m2, rd, d1, d2);
+    return force_euclidean(m1, m2, rd, is_anticusp, d1, d2);
     }
   // double rd = hdist(m1.h, m2.h) * xd;
   // if(rd > rdz +1e-6 || rd< rdz-1e-6) printf("%lf %lf\n", rd, rdz);
@@ -647,6 +664,7 @@ bool force(rugpoint& m1, rugpoint& m2, double rd, double d1=1, double d2=1) {
   hyperpoint f2 = n(m2.flat);
   
   ld t = hdist(f1, f2);
+  if(is_anticusp && t > rd) return false;
   current_total_error += (t-rd) * (t-rd);
   bool nonzero = abs(t-rd) > err_zero_current;
   double forcev = (t - rd) / 2; // 20.0;
@@ -661,26 +679,8 @@ bool force(rugpoint& m1, rugpoint& m2, double rd, double d1=1, double d2=1) {
     throw rug_exception();
     }
 
-/*  
-  printf("%p %p\n", &m1, &m2);
-
-  printf("m1      = %s\n", display(m1.flat));
-  printf("m2      = %s\n", display(m2.flat));
-  printf("Mi * m1 = %s\n", display(Mi*m1.flat));
-  printf("Mi * m2 = %s\n", display(Mi*m2.flat));
-
-  printf("     f1 = %s\n", display(f1));
-  printf(" T * f1 = %s\n", display(T * f1));
-  printf("T1 * f1 = %s\n", display(T1 * f1));
-  printf("     f2 = %s\n", display(f2));
-  printf(" T * f2 = %s\n", display(T * f2));
-  printf("T1 * f2 = %s\n", display(T1 * f2));
-  printf("iT1     = %s\n", display(iT1 * C0));
-  printf("iT1 + t = %s\n", display(iT1 * xpush(t) * C0));
-*/
-
-  f1 = iT1 * xpush(forcev) * C0;
-  f2 = iT1 * xpush(t-forcev) * C0;
+  f1 = iT1 * xpush(d1*forcev) * C0;
+  f2 = iT1 * xpush(t-d2*forcev) * C0;
 
   m1.flat = n[f1];
   m2.flat = n[f2];
@@ -791,7 +791,7 @@ void optimize(rugpoint *m, bool do_preset) {
     }
   for(int it=0; it<50; it++) 
     for(int j=0; j<size(m->edges); j++)
-      force(*m, *m->edges[j].target, m->edges[j].len, 1, 0);
+      force(*m, *m->edges[j].target, m->edges[j].len, false, 1, 0);
   }
 
 int divides = 0;
@@ -839,7 +839,8 @@ void subdivide() {
         hyperpoint h2 = n(m2->flat);
         mm->flat = n[mid(h1, h2)];
         }
-      mm->valid = true; qvalid++;
+      mm->valid = m->valid && m2->valid; 
+      if(mm->valid) qvalid++;
       mm->inqueue = false; enqueue(mm);
       }
      m->edges.clear();
@@ -854,7 +855,127 @@ void subdivide() {
 
   }
 
+ld slow_modeldist(const hyperpoint& h1, const hyperpoint& h2) {
+  normalizer n(h1, h2);
+  hyperpoint f1 = n(h1);
+  hyperpoint f2 = n(h2);
+  return hdist(f1, f2);
+  }
+
+typedef array<ld, 4> hyperpoint4;
+
+hyperpoint4 azeq_to_4(const hyperpoint& h) {
+  array<ld, 4> res;
+  ld rad = hypot3(h);
+  res[3] = cos(rad);
+  ld sr = sin(rad) / rad;
+  for(int j=0; j<3; j++) res[j] = h[j] * sr;
+  return res;
+  }
+
+ld modeldist(const hyperpoint& h1, const hyperpoint& h2) {
+  if(gwhere == gSphere) {
+    hyperpoint4 coord[2] = { azeq_to_4(h1), azeq_to_4(h2) };
+    ld edist = 0;
+    for(int j=0; j<4; j++) edist += sqr(coord[0][j] - coord[1][j]);
+    return 2 * asin(sqrt(edist) / 2);
+    }
+    
+  return slow_modeldist(h1, h2);
+  }
+
+typedef long long bincode;
+const bincode sY = (1<<16);
+const bincode sZ = sY * sY;
+const bincode sT = sY * sY * sY;
+
+bincode acd_bin(ld x) {
+  return (int) floor(x / anticusp_dist + .5);
+  }
+
+bincode get_bincode(hyperpoint h) {
+  switch(ginf[gwhere].cclass) {
+    case gcEuclid:
+      return acd_bin(h[0]) + acd_bin(h[1]) * sY + acd_bin(h[2]) * sZ;
+    case gcHyperbolic:
+      return acd_bin(hypot3(h));
+    case gcSphere: {
+      auto p = azeq_to_4(h);
+      return acd_bin(p[0]) + acd_bin(p[1]) * sY + acd_bin(p[2]) * sZ + acd_bin(p[3]) * sT;
+      }
+    }
+  return 0;
+  }
+
+void generate_deltas(vector<bincode>& target, int dim, bincode offset) {
+  if(dim == 0) {
+    if(offset > 0) target.push_back(offset);
+    }
+  else {
+    generate_deltas(target, dim-1, offset * sY);
+    generate_deltas(target, dim-1, offset * sY + 1);
+    generate_deltas(target, dim-1, offset * sY - 1);
+    }
+  }
+
+int detect_cusp_at(rugpoint *p, rugpoint *q) {
+  if(hdist(p->h, q->h) * modelscale <= anticusp_dist)
+    return 0;
+  else if(modeldist(p->flat, q->flat) > anticusp_dist)
+    return 1;
+  else {
+    add_anticusp_edge(p, q);
+    enqueue(p);
+    enqueue(q);
+    return 2;
+    }
+  }
+
+int detect_cusps() {
+  ld max_edge_length = 0;
+  for(auto p: points) 
+  for(auto e: p->edges)
+    max_edge_length = max(max_edge_length, e.len);
+  anticusp_dist = anticusp_factor * max_edge_length;
+  
+  int stats[3] = {0,0,0};
+
+  map<bincode, vector<rugpoint*> > code_to_point;
+  for(auto p: points) if(p->valid)
+    code_to_point[get_bincode(p->flat)].push_back(p);
+  
+  vector<bincode> deltas;
+  generate_deltas(deltas, gwhere == gEuclid ? 3 : gwhere == gNormal ? 1 : 4, 0);
+  
+  for(auto b: code_to_point) {
+    bincode at = b.first;
+    for(auto p: b.second) 
+    for(auto q: b.second) 
+      if(p < q) stats[detect_cusp_at(p, q)]++;
+    for(bincode bc: deltas)
+      if(code_to_point.count(at + bc))
+      for(auto p: b.second)
+      for(auto q: code_to_point[at+bc])
+        stats[detect_cusp_at(p, q)]++;
+    }
+  
+  /* printf("testing\n");
+  int stats2[3] = {0,0,0};
+  for(auto p: points) if(p->valid)
+  for(auto q: points) if(q->valid) if(p<q) {
+    stats2[detect_cusp_at(p, q)]++;
+    }
+
+  printf("cusp stats: %d/%d/%d | %d/%d/%d\n", stats[0], stats[1], stats[2], stats2[0], stats2[1], stats2[2]); */
+
+  printf("cusp stats: %d/%d/%d\n", stats[0], stats[1], stats[2]);
+  return stats[2];
+  }
+  
 void addNewPoints() {
+
+  if(anticusp_factor && detect_cusps())
+    return;
 
   if(torus || qvalid == size(points)) {
     subdivide();
@@ -911,8 +1032,12 @@ void physics() {
       pqueue.pop();
       m->inqueue = false;
       bool moved = false;
-      for(int j=0; j<size(m->edges); j++)
-        moved = force(*m, *m->edges[j].target, m->edges[j].len) || moved;
+      
+      for(auto& e: m->edges)
+        moved = force(*m, *e.target, e.len) || moved;
+      
+      for(auto& e: m->anticusp_edges)
+        moved = force(*m, *e.target, anticusp_dist, true) || moved;
       
       if(moved) enqueue(m);
       }    
