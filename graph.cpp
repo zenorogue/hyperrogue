@@ -5374,7 +5374,7 @@ void calcparam() {
   
   int realradius = min(vid.xcenter, vid.ycenter);
   
-  vid.scrsize = vid.ycenter - (inHighQual ? 0 : ISANDROID ? 2 : ISIOS ? 40 : 40);
+  vid.scrsize = realradius - (inHighQual ? 0 : ISANDROID ? 2 : ISIOS ? 40 : 40);
 
   sidescreen = false;
   
