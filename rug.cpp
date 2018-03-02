@@ -9,6 +9,14 @@
 #define TEXTURESIZE (texturesize)
 #define HTEXTURESIZE (texturesize/2)
 
+#if ISANDROID
+template<class...T> void Xprintf(T... t) { __android_log_print(ANDROID_LOG_VERBOSE, "RUG", t...); }
+#else
+template<class...T> void Xprintf(T... t) { printf(t...); }
+#endif
+
+bool rug_failure = false;
+
 namespace rug {
 
 int when_enabled;
@@ -127,7 +135,10 @@ transmatrix orthonormalize(hyperpoint h1, hyperpoint h2) {
   }
 
 hyperpoint azeq_to_hyperboloid(hyperpoint h) {
-  if(abs(h[2])>1e-4) printf("Error: h[2] = %lf\n", h[2]);
+  if(abs(h[2])>1e-4) {
+    Xprintf("Error: h[2] = %lf\n", h[2]);
+    rug_failure = true;
+    }
   if(euclid) {
     h[2] = 1;
     return h;
@@ -436,7 +447,7 @@ void buildTorusRug() {
     
   ld factor = sqrt(ld(solution.second.d2()) / solution.first.d2());
   
-  printf("factor = %lf\n", factor);
+  Xprintf("factor = %lf\n", factor);
   if(factor <= 2.05) factor = 2.2;
   factor -= 1;
         
@@ -529,7 +540,7 @@ void buildTorusRug() {
   
   qvalid = 0;
   for(auto p: points) if(!p->glue) qvalid++;
-  printf("qvalid = %d\n", qvalid);
+  Xprintf("qvalid = %d\n", qvalid);
 
   if(rug_perspective)
     push_all_points(2, -model_distance);  
@@ -551,11 +562,11 @@ void verify() {
       ratios.push_back(l0 / l);
       }
     
-  printf("Length verification:\n");
+  Xprintf("%s", "Length verification:\n");
   sort(ratios.begin(), ratios.end());
   for(int i=0; i<size(ratios); i += size(ratios) / 10)
-    printf("%lf\n", ratios[i]);
-  printf("\n");
+    Xprintf("%lf\n", ratios[i]);
+  Xprintf("%s", "\n");
   }
 
 void comp(cell*& minimum, cell *next) {
@@ -604,7 +615,7 @@ void buildRug() {
     catch(out_of_range) {}
     }
 
-  printf("vertices = %d triangles=  %d\n", size(points), size(triangles));
+  Xprintf("vertices = %d triangles=  %d\n", size(points), size(triangles));
 
   if(subdivide_first) 
     for(int i=0; i<20 && subdivide_further(); i++)
@@ -807,17 +818,17 @@ void subdivide() {
   // if(euclid && gwhere == gEuclid) return;
   if(!subdivide_further()) {
     if(euclid && !bounded && gwhere == gEuclid) {
-      printf("Euclidean -- full precision\n");
+      Xprintf("%s", "Euclidean -- full precision\n");
       stop = true; 
       }
     else {
       err_zero_current /= 2;
-      printf("increasing precision to %lg\n", err_zero_current);
+      Xprintf("increasing precision to %lg\n", err_zero_current);
       for(auto p: points) enqueue(p);
       }
     return; 
     }
-  printf("subdivide (%d,%d)\n", N, size(triangles));
+  Xprintf("subdivide (%d,%d)\n", N, size(triangles));
   divides++;
   vector<triangle> otriangles = triangles;
   triangles.clear();
@@ -851,7 +862,7 @@ void subdivide() {
     
   calcLengths();
 
-  printf("result (%d,%d)\n", size(points), size(triangles));
+  Xprintf("result (%d,%d)\n", size(points), size(triangles));
 
   }
 
@@ -968,7 +979,7 @@ int detect_cusps() {
 
   printf("cusp stats: %d/%d/%d | %d/%d/%d\n", stats[0], stats[1], stats[2], stats2[0], stats2[1], stats2[2]); */
 
-  printf("cusp stats: %d/%d/%d\n", stats[0], stats[1], stats[2]);
+  Xprintf("cusp stats: %d/%d/%d\n", stats[0], stats[1], stats[2]);
   return stats[2];
   }
   
@@ -998,7 +1009,7 @@ void addNewPoints() {
       enqueue(&m);
       }
     }
-  if(qvalid != oqvalid) { printf("adding new points %4d %4d %4d %.9lf %9d %9d\n", oqvalid, qvalid, size(points), dist, dt, queueiter); }
+  if(qvalid != oqvalid) { Xprintf("adding new points %4d %4d %4d %.9lf %9d %9d\n", oqvalid, qvalid, size(points), dist, dt, queueiter); }
   }
 
 #if !CAP_SDL
@@ -1243,7 +1254,7 @@ void prepareTexture() {
 
 double xview, yview;
 
-void drawRugScene() {  
+void drawRugScene() {
   glbuf->use_as_texture();
 
   if(backcolor == 0) 
@@ -1327,6 +1338,11 @@ void drawRugScene() {
   stereo::set_projection(0);
   
   need_mouseh = true;
+  
+  if(rug_failure) {
+    rug::close();
+    rug::init();
+    }
   }
 
 // organization
@@ -1655,8 +1671,9 @@ string makehelp() {
     #if !ISMOBILE
   + XLAT("Use arrow keys to rotate, Page Up/Down to zoom.")
     + "\n\n" + 
-    XLAT("In the perspective projection, you can use arrows to rotate the camera, Page Up/Down to go forward/backward, Shift+arrows to strafe, and Ctrl+arrows to rotate the model.");
-  #endif
+    XLAT("In the perspective projection, you can use arrows to rotate the camera, Page Up/Down to go forward/backward, Shift+arrows to strafe, and Ctrl+arrows to rotate the model.")
+    #endif
+     ;
   }
 
 void show() {
