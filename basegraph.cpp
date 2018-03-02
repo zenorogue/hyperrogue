@@ -813,6 +813,8 @@ ld realradius() {
     else
       vradius = 1e12; // use the following
     }
+  if(euclid)
+    vradius = vid.radius * sightrange / (1 + vid.alpha) / 2.5;
   vradius = min<ld>(vradius, min(vid.xres, vid.yres) / 2);
   return vradius;
   }
