@@ -2253,4 +2253,23 @@ Gameplay bugfixes
 - when loading textures in the texture mode, you can now tune individual triangles
 - fixed the descriptions in the stereo vision config
 - updated the translations, added some previously untranslated texts
+
+2018.03.02 13:09 version 10.3k
+- made dragon dismounting easier
+- added attack animations when attacking trees and mirrors
+- better quality Hypersian Rug rendering (do not cross itself)
+- reversed aura when projection < -1
+- fixed the high quality screenshot feature
+- fixed screensize/radius in portrait
+- fixed zoom while editing texture
+- fixed texture load-on-save
+- fixed SVG output of spheres
+- 'docks' subpattern can be changed now
+- fixed slightly wrong placement when stereo is off
+- fixed the hotkey clash in texture adjustment menu
+- fixed mousing doing several things in texture adjustment
+- made the zoom consistent (it worked differently in Euclidean)
+- disabled game playing if 'renderonce' is on
+- some new commandline options
+- map screen size computation in Euclidean now acknowledges projection and sightrange
  

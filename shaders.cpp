@@ -610,7 +610,7 @@ void prepare(vector<colored_vertex>& v) {
   glVertexAttribPointer(aColor, 4, GL_FLOAT, GL_FALSE, sizeof(colored_vertex), &v[0].color);
   #else
   glVertexPointer(3, GL_FLOAT, sizeof(colored_vertex), &v[0].coords);
-  glColorPointer(3, GL_FLOAT, sizeof(colored_vertex), &v[0].color);
+  glColorPointer(4, GL_FLOAT, sizeof(colored_vertex), &v[0].color);
   #endif
   #endif
   }
