@@ -67,7 +67,7 @@ namespace arg {
   void lshift() { pos++; }
 
   void shift() {
-    lshift(); if(pos >= size(argument)) { printf("Missing parameter\n"); exit(1); }
+    lshift(); if(pos > size(argument)) { printf("Missing parameter\n"); exit(1); }
     }
   
   const string& args() { return argument[pos]; }
