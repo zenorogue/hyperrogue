@@ -5525,7 +5525,7 @@ void gamescreen(int _darken) {
   
   buttonclicked = false;
   
-  if(cmode & sm::NORMAL) {
+  if((cmode & sm::NORMAL) && stereo::mode != stereo::sLR) {
     if(andmode == 0 && shmup::on) {
       using namespace shmupballs;
       calc();

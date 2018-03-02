@@ -756,6 +756,18 @@ void mobile_draw(MOBPAR_FORMAL) {
     }
 #endif
 
+  bool normal_reaction = !inmenu;
+
+  if(normal_reaction && stereo::mode == stereo::sLR) {
+    normal_reaction = false;
+    if(lclicked && !clicked) {
+      if(rug::rugged)
+        rug::select();
+      else
+        pushScreen(showStereo);
+      }
+    }
+
   if(andmode == 2 && size(screens) != 1) andmode = 12;
 
   if((cmode & sm::NORMAL) && getcstat == '-')
@@ -769,7 +781,7 @@ void mobile_draw(MOBPAR_FORMAL) {
   displayTexts();
   #endif
 
-  if(clicked && lclicked && andmode == 1 && (cmode & sm::NORMAL)) {
+  if(clicked && lclicked && andmode == 1 && normal_reaction) {
     if(!mouseout2() && mouseoh[2] < 50 && mouseh[2] < 50 && !rug::rugged) {
       panning(mouseoh, mouseh);
       }
@@ -778,16 +790,16 @@ void mobile_draw(MOBPAR_FORMAL) {
   static int lticks_rug;
   
 #if CAP_RUG
-  if(andmode == 1 && !inmenu && rug::rugged && clicked)
+  if(andmode == 1 && normal_reaction && rug::rugged && clicked)
     rug::move_forward((ticks - lticks_rug) / 2500.);
 #endif
   
   lticks_rug = ticks;
 
-  if(andmode == 1 && lclicked && !clicked && !inmenu && mouseover)
+  if(andmode == 1 && lclicked && !clicked && normal_reaction && mouseover)
     performMarkCommand(mouseover);
 
-  if(clicked && andmode == 2 && (mouseover != lmouseover || mouseovers != lmouseovers) && !inmenu) {
+  if(clicked && andmode == 2 && (mouseover != lmouseover || mouseovers != lmouseovers) && normal_reaction) {
     addMessage(mouseovers);
     lmouseovers = mouseovers;
     }

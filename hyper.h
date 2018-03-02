@@ -1159,7 +1159,7 @@ bool hasSafeOrb(cell *c);
 void placeWater(cell *c, cell *c2);
 bool againstCurrent(cell *w, cell *from);
 
-#define DEFAULTCONTROL (multi::players == 1 && !shmup::on && !multi::alwaysuse)
+#define DEFAULTCONTROL (multi::players == 1 && !shmup::on && !multi::alwaysuse && !(rug::rugged && rug::renderonce))
 #define DEFAULTNOR(sym) (DEFAULTCONTROL || multi::notremapped(sym))
 
 extern bool timerghost;

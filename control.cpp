@@ -349,7 +349,7 @@ void handleKeyNormal(int sym, int uni) {
       performMarkCommand(mouseover);
     }
   
-  if(DEFAULTCONTROL) {  
+  if(DEFAULTCONTROL) {
     if(sym == '.' || sym == 's') movepcto(-1, 1);
     if((sym == SDLK_DELETE || sym == SDLK_KP_PERIOD || sym == 'g') && uni != 'G' && uni != 'G'-64) 
       movepcto(MD_DROP, 1);
@@ -401,6 +401,8 @@ void handleKeyNormal(int sym, int uni) {
       targetclick && (!shmup::on || numplayers() == 1) && targetRangedOrb(mouseover, forcetarget ? roMouseForce : roMouse)) {
       }
     else if(forcetarget)
+      ;
+    else if(rug::rugged && rug::renderonce)
       ;
     else if(!DEFAULTCONTROL) {
       if(!shmup::on)
