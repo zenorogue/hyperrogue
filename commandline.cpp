@@ -139,6 +139,12 @@ int arg::readCommon() {
   else if(argis("-nohud")) {
     nohud = true;
     }
+  else if(argis("-nomenu")) {
+    nomenukey = true;
+    }
+  else if(argis("-nohelp")) {
+    nohelp = true;
+    }
   else if(argis("-noscr")) {
     PHASE(3);
     popScreenAll();

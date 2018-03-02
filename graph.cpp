@@ -5552,6 +5552,8 @@ void gamescreen(int _darken) {
 #endif
   }
 
+bool nohelp;
+
 void normalscreen() {
   help = "@";
 
@@ -5628,7 +5630,8 @@ void drawscreen() {
 #if !ISMOBILE
   int col = linf[cwt.c->land].color;
   if(cwt.c->land == laRedRock) col = 0xC00000;
-  displayfr(vid.xres/2, vid.fsize,   2, vid.fsize, mouseovers, col, 8);
+  if(!nohelp)
+    displayfr(vid.xres/2, vid.fsize,   2, vid.fsize, mouseovers, col, 8);
 #endif
 
   drawmessages();
