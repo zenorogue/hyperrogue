@@ -800,6 +800,7 @@ void displayabutton(int px, int py, string s, int col) {
   // TMP
   int siz = vid.yres > vid.xres ? vid.fsize*2 : vid.fsize * 3/2;
   int rad = (int) realradius();
+  if(stereo::mode == stereo::sLR) rad = 99999;
   int vrx = min(rad, vid.xres/2 - 40);
   int vry = min(rad, min(vid.ycenter, vid.yres - vid.ycenter) - 20);
   int x = vid.xcenter + px * vrx;
