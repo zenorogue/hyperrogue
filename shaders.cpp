@@ -35,10 +35,7 @@ static const flagtype GF_TEXTURE  = 1;
 static const flagtype GF_VARCOLOR = 2;
 static const flagtype GF_LIGHTFOG = 4;
 
-flagtype flags[gmMAX] = { 0, GF_TEXTURE, GF_VARCOLOR, GF_TEXTURE | GF_LIGHTFOG 
-#if CAP_SHADER
-  | GF_VARCOLOR 
-#endif
+flagtype flags[gmMAX] = { 0, GF_TEXTURE, GF_VARCOLOR, GF_TEXTURE | GF_LIGHTFOG | GF_VARCOLOR 
   };
 
 eMode mode;
@@ -407,6 +404,7 @@ void switch_mode(eMode m) {
   if(oldflags & GF_LIGHTFOG) {
 #if !CAP_SHADER
     glDisable(GL_FOG);
+
      /*
     glDisable(GL_LIGHTING); */
 #endif
@@ -652,7 +650,7 @@ void prepare(vector<ct_vertex>& v) {
   #else
   glVertexPointer(3, GL_FLOAT, sizeof(ct_vertex), &v[0].coords);
   glTexCoordPointer(3, GL_FLOAT, sizeof(ct_vertex), &v[0].texture);
-  glColorPointer(3, GL_FLOAT, sizeof(ct_vertex), &v[0].color);
+  glColorPointer(4, GL_FLOAT, sizeof(ct_vertex), &v[0].color);
   #endif
   #endif
   }
