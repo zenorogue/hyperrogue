@@ -262,7 +262,7 @@ transmatrix ypush(ld alpha) {
   return T;
   }
 
-// rotate the hyperplane around C0 such that H[1] == 0 and H[0] >= 0
+// rotate the hyperbolic plane around C0 such that H[1] == 0 and H[0] >= 0
 transmatrix spintox(const hyperpoint& H) {
   transmatrix T = Id;
   ld R = sqrt(H[0] * H[0] + H[1] * H[1]);
