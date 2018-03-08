@@ -2272,4 +2272,7 @@ Gameplay bugfixes
 - disabled game playing if 'renderonce' is on
 - some new commandline options
 - map screen size computation in Euclidean now acknowledges projection and sightrange
- 
+
+2018.03.02 XX:XX version 10.3l
+- fixed monster infighting caused by dragon dismounting changes
+- fixed Android slowdown

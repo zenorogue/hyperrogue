@@ -18,8 +18,8 @@
 #define NOLICENSE
 #endif
 
-#define VER "10.3k"
-#define VERNUM 10311
+#define VER "10.3l"
+#define VERNUM 10312
 
 #ifndef CAP_SHADER
 #define CAP_SHADER CAP_GL
