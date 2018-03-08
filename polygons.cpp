@@ -268,8 +268,19 @@ void gldraw(int useV, const transmatrix& V, const vector<glvertex>& v, int ps, i
     #endif
     }
   else { 
-    glhr::vertices(v);
     glhr::be_nontextured();
+    
+    #if !ISANDROID
+    glhr::vertices(v);
+    #else
+    if(glhr::current_vertices != &v[ps]) {
+      glhr::current_vertices = &v[ps];
+      glVertexAttribPointer(glhr::aPosition, 3, GL_FLOAT, GL_FALSE, sizeof(glvertex), &v[ps]);
+      // glVertexPointer(3, GL_FLOAT, sizeof(glvertex), &v[ps]);
+      // glhr::vertices(v);
+      }
+    ps = 0;
+    #endif
     }
   
   for(int ed = stereo::active() ? -1 : 0; ed<2; ed+=2) {
