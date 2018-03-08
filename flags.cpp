@@ -138,7 +138,7 @@ bool isFriendlyOrPlayer(eMonster m) {
   }
 
 bool isMounted(cell *c) {
-  if(c && c->monst && c->monst != moTentacleGhost) {
+  if(c && c->monst && c->monst != moTentacleGhost && isMountable(c->monst)) {
     for(int i=0; i<numplayers(); i++) {
       if(playerpos(i)->monst && sameMonster(c, playerpos(i))) 
         return true;
