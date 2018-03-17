@@ -43,12 +43,12 @@ namespace mapeditor {
      // printf("scale = " LDF "\n", vid.scale);
      #if CAP_TEXTURE
      // display(texture::itt);
-     texture::itt = xyscale(texture::itt, 1/z);
-     if(false && texture::tstate) {
+     texture::config.itt = xyscale(texture::config.itt, 1/z);
+     if(false && texture::config.tstate) {
        calcparam();
-       texture::perform_mapping();
-       if(texture::tstate == texture::tsAdjusting) 
-         texture::finish_mapping();
+       texture::config.perform_mapping();
+       if(texture::config.tstate == texture::tsAdjusting) 
+         texture::config.finish_mapping();
        }
      #endif
      }
@@ -952,11 +952,11 @@ namespace mapeditor {
     bool intexture = false;
 
 #if CAP_TEXTURE        
-    if(texture::tstate == texture::tsActive) {
+    if(texture::config.tstate == texture::tsActive) {
       sg = 16;
       line1 = "texture";
       line2 = "";
-      texture::update();
+      texture::config.data.update();
       intexture = true;
       }
 #else
@@ -1038,7 +1038,7 @@ namespace mapeditor {
 
       }
 #if CAP_TEXTURE
-    else if(texture::tstate == texture::tsActive) {
+    else if(texture::config.tstate == texture::tsActive) {
       displayButton(8, 8+fs*2, XLAT(texture::texturesym ? "0 = symmetry" : "0 = asymmetry"), '0', 0);
       if(mousekey == 'g')
         displayButton(8, 8+fs*16, XLAT("p = grid color"), 'p', 0);
@@ -1069,7 +1069,7 @@ namespace mapeditor {
         getcstat = 2000+i;
       }
 
-    if(texture::tstate != texture::tsActive)
+    if(texture::config.tstate != texture::tsActive)
       displaymm('e', vid.xres-8, 8+fs, 2, vid.fsize, XLAT("e = edit this"), 16);
 #endif
 
@@ -1455,16 +1455,16 @@ namespace mapeditor {
     if(sym == SDLK_F10) popScreen();
 
 #if CAP_TEXTURE
-    if(texture::tstate == texture::tsActive) {
+    if(texture::config.tstate == texture::tsActive) {
     
-      int tcolor = (texture::paint_color >> 8) | ((texture::paint_color & 0xFF) << 24);
+      int tcolor = (texture::config.paint_color >> 8) | ((texture::config.paint_color & 0xFF) << 24);
       
       if(uni == '-' && !clickused) {
         if(mousekey == 'l' || mousekey == 'c') {
           if(!holdmouse) lstart = mouseh, lstartcell = mouseover, holdmouse = true;
           }
         else {
-          if(!holdmouse) texture::undoLock();
+          if(!holdmouse) texture::config.data.undoLock();
           texture::drawPixel(mouseover, mouseh, tcolor);
           holdmouse = true; lstartcell = NULL;
           }
@@ -1473,14 +1473,14 @@ namespace mapeditor {
       if(sym == PSEUDOKEY_RELEASE) {
         printf("release\n");
         if(mousekey == 'l') { 
-          texture::undoLock();
+          texture::config.data.undoLock();
           texture::where = mouseover;
           texture::drawPixel(mouseover, mouseh, tcolor);
           texture::drawLine(mouseh, lstart, tcolor);
           lstartcell = NULL;
           }
         if(mousekey == 'c') { 
-          texture::undoLock();
+          texture::config.data.undoLock();
           ld rad = hdist(lstart, mouseh);
           int circp = int(1 + 3 * (circlelength(rad) / texture::penwidth));
           if(circp > 1000) circp = 1000;
@@ -1493,7 +1493,7 @@ namespace mapeditor {
         }
       
       if(uni >= 1000 && uni < 1010)
-        texture::paint_color = texture_colors[uni - 1000 + 1];
+        texture::config.paint_color = texture_colors[uni - 1000 + 1];
 
       if(uni >= 2000 && uni < 2010)
         texture::penwidth = brush_sizes[uni - 2000];
@@ -1502,12 +1502,12 @@ namespace mapeditor {
         texture::texturesym = !texture::texturesym;
 
       if(uni == 'u') {
-        texture::undo();
+        texture::config.data.undo();
         }        
 
       if(uni == 'p') {
         if(!clickused)
-          dialog::openColorDialog(texture::paint_color, texture_colors);
+          dialog::openColorDialog(texture::config.paint_color, texture_colors);
         }
 
       if(uni == 'b') 
@@ -1619,7 +1619,7 @@ namespace mapeditor {
     for(int j=0; j<circp; j++)
       pts.push_back(Ctr * tC0(spin(M_PI*j*2/circp) * xpush(radius)));
     for(int j=0; j<circp; j++)
-      queueline(pts[j], pts[(j+1)%circp], texture::paint_color, 0, PPR_LINE);
+      queueline(pts[j], pts[(j+1)%circp], texture::config.paint_color, 0, PPR_LINE);
     }
 #endif
 
@@ -1645,7 +1645,7 @@ namespace mapeditor {
     if(cmode & sm::DRAW) {
 
 #if CAP_TEXTURE    
-      if(texture::tstate == texture::tsActive && lmouseover && !mouseout() && (lstartcell || !holdmouse)) {
+      if(texture::config.tstate == texture::tsActive && lmouseover && !mouseout() && (lstartcell || !holdmouse)) {
         cell *ls = lstartcell ? lstartcell : lmouseover;
         auto sio = patterns::getpatterninfo0(ls);
         auto sih = patterns::getpatterninfo0(c);
@@ -1666,7 +1666,7 @@ namespace mapeditor {
                 queue_hcircle(M2 * ml, hdist(lstart, mouseh));
                 break;
               case 'l':
-                queueline(M2 * mh * C0, M2 * ml * C0, texture::paint_color, 4, PPR_LINE);
+                queueline(M2 * mh * C0, M2 * ml * C0, texture::config.paint_color, 4, PPR_LINE);
                 break;
               default:
                 queue_hcircle(M2 * mh, texture::penwidth);

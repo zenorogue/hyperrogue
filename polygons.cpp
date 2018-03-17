@@ -210,9 +210,10 @@ void drawTexturedTriangle(SDL_Surface *s, int *px, int *py, glvertex *tv, int co
     hyperpoint h = isource * hpxyz(mx, my, 1);
     if(h[0] >= -1e-7 && h[1] >= -1e-7 && h[2] >= -1e-7) {
       hyperpoint ht = target * h;
-      int x = int(ht[0] * texture::twidth) & (texture::twidth-1);
-      int y = int(ht[1] * texture::twidth) & (texture::twidth-1);
-      int c = texture::texture_pixels[y * texture::twidth + x];
+      int tw = texture::config.data.twidth;
+      int x = int(ht[0] * tw) & (tw-1);
+      int y = int(ht[1] * tw) & (tw-1);
+      int c = texture::config.data.texture_pixels[y * tw + x];
       auto& pix = qpixel(s, mx, my);
       for(int p=0; p<3; p++) {
         int alpha = part(c, 3) * part(col, 0);

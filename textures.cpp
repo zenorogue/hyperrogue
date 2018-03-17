@@ -10,8 +10,6 @@
 #if CAP_TEXTURE
 namespace texture {
 
-GLuint textureid = 0;
-
 cpatterntype cgroup;
 
 SDL_Surface *convertSurface(SDL_Surface* s) {
@@ -39,45 +37,28 @@ SDL_Surface *convertSurface(SDL_Surface* s) {
   return SDL_ConvertSurface(s, &fmt, SDL_SWSURFACE);
   }
 
-int twidth = 2048;
-
-unsigned paint_color = 0x000000FF;
-
-vector<unsigned> texture_pixels;
-
-unsigned& get_texture_pixel(int x, int y) {
-  return texture_pixels[(y&(twidth-1))*twidth+(x&(twidth-1))];
-  }
-
-string texturename = "textures/hyperrogue-texture.png";
-string configname = "textures/hyperrogue.txc";
-
-bool saving = false;
-
-eTextureState tstate;
-eTextureState tstate_max;
-
 struct undo {
   unsigned* pix;
   unsigned last;
   };
 
-vector<pair<unsigned*, unsigned>> undos;
-vector<tuple<cell*, hyperpoint, int> > pixels_to_draw;
+texture_config config;
 
-template<class T, class U> void scale_colorarray(int origdim, const T& src, const U& dest) {
+bool saving = false;
+
+template<class T, class U> void scale_colorarray(int origdim, int targetdim, const T& src, const U& dest) {
   int ox = 0, tx = 0, partials[4];
-  int omissing = twidth, tmissing = origdim;
+  int omissing = targetdim, tmissing = origdim;
   for(int p=0; p<4; p++) partials[p] = 0;
   
-  while(tx < twidth) {
+  while(tx < targetdim) {
     int fv = min(omissing, tmissing);
     int c = src(ox);
     for(int p=0; p<4; p++) 
       partials[p] += part(c, p) * fv;
     omissing -= fv; tmissing -= fv;
     if(omissing == 0) { 
-      ox++; omissing = twidth; 
+      ox++; omissing = targetdim; 
       }
     if(tmissing == 0) {
       int target;
@@ -91,11 +72,11 @@ template<class T, class U> void scale_colorarray(int origdim, const T& src, cons
     }
   }
   
-bool loadTextureGL() {
+bool texture_data::loadTextureGL() {
 
-  if(textureid == 0) glGenTextures(1, &textureid );
+  if(textureid == 0) glGenTextures(1, &textureid);
 
-  glBindTexture( GL_TEXTURE_2D, textureid);
+  glBindTexture( GL_TEXTURE_2D, config.data.textureid);
   glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
   glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
   
@@ -106,7 +87,7 @@ bool loadTextureGL() {
   return true;
   }
 
-bool whitetexture() {
+bool texture_data::whitetexture() {
   undos.clear();
   texture_pixels.resize(0);
   texture_pixels.resize(twidth * twidth, 0xFFFFFFFF);
@@ -114,13 +95,13 @@ bool whitetexture() {
   return true;
   }
 
-bool readtexture() {
+bool texture_data::readtexture(string tn) {
 
   undos.clear();
   texture_pixels.resize(twidth * twidth);
   
 #if CAP_SDL_IMG  
-  SDL_Surface *txt = IMG_Load(texturename.c_str());
+  SDL_Surface *txt = IMG_Load(tn.c_str());
   if(!txt) {
     addMessage(XLAT("Failed to load %1", texturename));
     return false;
@@ -134,7 +115,7 @@ bool readtexture() {
 
 #elif CAP_PNG
   
-  FILE *f = fopen(texturename.c_str(), "rb");
+  FILE *f = fopen(tn.c_str(), "rb");
   if(!f) { printf("failed to open file\n"); return false; }
   png_structp png = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
   if(!png) { printf("failed to create_read_struct\n"); return false; }
@@ -205,13 +186,13 @@ bool readtexture() {
   
     vector<int> half_expanded(twidth * ty);  
     for(int y=0; y<ty; y++)
-      scale_colorarray(origdim,
+      scale_colorarray(origdim, twidth,
         [&] (int x) { return pix(base_x + x,y); },
         [&] (int x, int v) { half_expanded[twidth * y + x] = v; }
         );
 
     for(int x=0; x<twidth; x++)
-      scale_colorarray(origdim, 
+      scale_colorarray(origdim, twidth,
         [&] (int y) { return base_y+y < 0 || base_y+y >= ty ? 0 : half_expanded[x + (base_y + y) * twidth]; }, 
         [&] (int y, int v) { get_texture_pixel(x, y) = v; }
         );
@@ -225,28 +206,17 @@ bool readtexture() {
   return true;
   }
 
-void saveRawTexture() {
+void texture_data::saveRawTexture(string tn) {
   SDL_Surface *sraw = SDL_CreateRGBSurface(SDL_SWSURFACE,twidth,twidth,32,0,0,0,0);
   for(int y=0; y<twidth; y++)
   for(int x=0; x<twidth; x++)
     qpixel(sraw,x,y) = get_texture_pixel(x, y);
-  IMAGESAVE(sraw, texturename.c_str());
+  IMAGESAVE(sraw, tn.c_str());
   SDL_FreeSurface(sraw);
-  addMessage(XLAT("Saved the raw texture to %1", texturename));
+  addMessage(XLAT("Saved the raw texture to %1", tn));
   }
 
-transmatrix itt = Id;
-
-unsigned grid_color = 0;
-unsigned mesh_color = 0;
-unsigned master_color = 0xFFFFFF30;
-unsigned slave_color = 0xFF000008;
-
-int color_alpha = 128;
-
-int gsplits = 1;
-
-void mapTextureTriangle(textureinfo &mi, const array<hyperpoint, 3>& v, const array<hyperpoint, 3>& tv, int splits = gsplits) {
+void texture_config::mapTextureTriangle(textureinfo &mi, const array<hyperpoint, 3>& v, const array<hyperpoint, 3>& tv, int splits) {
 
   if(splits) {
     array<hyperpoint, 3> v2 = make_array( mid(v[1], v[2]), mid(v[2], v[0]), mid(v[0], v[1]) );
@@ -271,12 +241,6 @@ void mapTextureTriangle(textureinfo &mi, const array<hyperpoint, 3>& v, const ar
 
 texture_triangle *edited_triangle;
 textureinfo *edited_tinfo;
-
-vector<hyperpoint*> tuned_vertices;
-
-map<int, textureinfo> texture_map, texture_map_orig;
-
-set<cell*> models;
 
 array<hyperpoint, 3> findTextureTriangle(cell *c, patterns::patterninfo& si, int i) {
   // auto si = getpatterninfo0(c);
@@ -318,27 +282,27 @@ void mapTexture(cell *c, textureinfo& mi, patterns::patterninfo &si, const trans
     }
   }
 
-void mapTexture2(textureinfo& mi) {
+void texture_config::mapTexture2(textureinfo& mi) {
   mi.vertices.clear();
   mi.tvertices.clear();
   for(auto& t: mi.triangles)
     mapTextureTriangle(mi, t.v, t.tv);
   }
   
-int recolor(int col) {
+int texture_config::recolor(int col) {
   if(color_alpha == 0) return col;
   for(int i=1; i<4; i++)
     part(col, i) = color_alpha + ((255-color_alpha) * part(col,i) + 127) / 255;
   return col;
   }
 
-bool apply(cell *c, const transmatrix &V, int col) {
-  if(tstate == tsOff) return false;
+bool texture_config::apply(cell *c, const transmatrix &V, int col) {
+  if(config.tstate == tsOff) return false;
 
   using namespace patterns;
   auto si = getpatterninfo0(c);
 
-  if(tstate == tsAdjusting) {
+  if(config.tstate == tsAdjusting) {
     queuepolyat(V, shFullCross[ctof(c)], 0, PPR_LINE);
     lastptd().u.poly.outline = slave_color;
     queuepolyat(V, shFullFloor[ctof(c)], 0, PPR_LINE);
@@ -385,9 +349,9 @@ bool apply(cell *c, const transmatrix &V, int col) {
         for(int j=0; j<2; j++) for(int k=0; k<3; k++)
           v[j] += mi.tvertices[i+k][j] * p[k];
   
-        int vi[2] = {int(v[0] * twidth), int(v[1] * twidth)};
+        int vi[2] = {int(v[0] * config.data.twidth), int(v[1] * config.data.twidth)};
   
-        col = get_texture_pixel(vi[0], vi[1]);
+        col = config.data.get_texture_pixel(vi[0], vi[1]);
         hyperpoint h = glhr::gltopoint(mi.vertices[i]);
         addaura(V*h, col, 0);
         }
@@ -401,8 +365,8 @@ bool apply(cell *c, const transmatrix &V, int col) {
     }
   }
 
-void mark_triangles() {
-  if(tstate == tsAdjusting) 
+void texture_config::mark_triangles() {
+  if(config.tstate == tsAdjusting) 
     for(auto& mi: texture_map) {
       for(auto& t: mi.second.triangles) {
         vector<hyperpoint> t2;
@@ -413,16 +377,9 @@ void mark_triangles() {
       }
   }
 
-typedef tuple<eGeometry, bool, char, int, eModel, ld, ld> texture_parameters; 
-
 static const auto current_texture_parameters = tie(geometry, nonbitrunc, patterns::whichPattern, patterns::subpattern_flags, pmodel, vid.scale, vid.alpha);
 
-texture_parameters orig_texture_parameters;
-
-bool texture_tuned = false;
-string texture_tuner;
-
-void clear_texture_map() {
+void texture_config::clear_texture_map() {
   texture_map.clear();
   edited_triangle = nullptr;
   edited_tinfo = nullptr;
@@ -432,7 +389,7 @@ void clear_texture_map() {
   texture_tuner = "";
   }
   
-void perform_mapping() {
+void texture_config::perform_mapping() {
   if(gsplits < 0) gsplits = 0;
   if(gsplits > 4) gsplits = 4;
   using namespace patterns;
@@ -454,7 +411,7 @@ void perform_mapping() {
     if(replace) {
       auto& mi = texture_map[si.id];
       mapTexture(c, mi, si, p.second);
-      mi.texture_id = textureid;
+      mi.texture_id = config.data.textureid;
       }
     }
   
@@ -476,28 +433,28 @@ void perform_mapping() {
   texture::cgroup = patterns::cgroup;
   texture_map_orig = texture_map;
   orig_texture_parameters = current_texture_parameters;
-  // printf("texture_map has %d elements (S%d)\n", size(texture_map), tstate);
+  // printf("texture_map has %d elements (S%d)\n", size(texture_map), config.tstate);
   }
 
-void finish_mapping() {
-  if(tstate == tsActive)
+void texture_config::finish_mapping() {
+  if(config.tstate == tsActive)
     for(auto& mi: texture_map)
       mapTexture2(mi.second);
   }
 
-void saveFullTexture() {
-  addMessage(XLAT("Saving full texture to %1...", texturename));
+void texture_config::saveFullTexture(string tn) {
+  addMessage(XLAT("Saving full texture to %1...", tn));
   dynamicval<unsigned> dd(grid_color, 0);
   dynamicval<unsigned> dm(mesh_color, 0);
   texture::saving = true;
   drawscreen();
 
-  dynamicval<int> dv(pngres, twidth);
-  saveHighQualityShot(texturename.c_str());
+  dynamicval<int> dv(pngres, data.twidth);
+  saveHighQualityShot(tn.c_str());
   texture::saving = false;
   
   drawscreen();
-  if(readtexture() && loadTextureGL()) {
+  if(data.readtexture(tn) && data.loadTextureGL()) {
     itt = Id; // xyscale(Id, vid.scrsize * 1. / vid.radius);
     perform_mapping();
     finish_mapping();
@@ -508,10 +465,10 @@ bool newmove = false;
 
 vector<glhr::textured_vertex> rtver(4);
 
-void drawRawTexture() {
+void texture_config::drawRawTexture() {
   glhr::be_textured();
   glhr::color2(0xFFFFFF20);
-  glBindTexture(GL_TEXTURE_2D, textureid);
+  glBindTexture(GL_TEXTURE_2D, config.data.textureid);
   for(int i=0; i<4; i++) {
     int cx[4] = {2, -2, -2, 2};
     int cy[4] = {2, 2, -2, -2};
@@ -587,7 +544,7 @@ struct magic_param {
     transmatrix Ti = inverse(T);
     for(auto& p: amp)
       p.texture_coords = Ti * p.texture_coords;
-    itt = itt * T;
+    config.itt = config.itt * T;
     }
   
   void apply(ld delta) {
@@ -672,21 +629,21 @@ void mousemovement() {
     case tpsModel:
       if(!newmove && mouseh[2] < 50 && lastmouse[2] < 50) {
         panning(lastmouse, mouseh);
-        perform_mapping();
+        config.perform_mapping();
         }
       lastmouse = mouseh; newmove = false;
       break;
     
     case tpsMove: {
       if(!newmove) 
-        itt = itt * inverse(eupush(mouseeu)) * eupush(lastmouse);
+        config.itt = config.itt * inverse(eupush(mouseeu)) * eupush(lastmouse);
       lastmouse = mouseeu; newmove = false;
       break;
       }
     
     case tpsScale: {
       if(nonzero && !newmove) 
-        itt = itt * inverse(euscalezoom(mouseeu)) * euscalezoom(lastmouse);
+        config.itt = config.itt * inverse(euscalezoom(mouseeu)) * euscalezoom(lastmouse);
       if(nonzero) lastmouse = mouseeu;
       newmove = false;
       break;
@@ -694,7 +651,7 @@ void mousemovement() {
     
     case tpsAffine: {
       if(!newmove) 
-        itt = itt * inverse(euaffine(mouseeu)) * euaffine(lastmouse);
+        config.itt = config.itt * inverse(euaffine(mouseeu)) * euaffine(lastmouse);
       lastmouse = mouseeu; newmove = false;
       break;
       }
@@ -725,15 +682,15 @@ void mousemovement() {
       auto si = patterns::getpatterninfo0(c);
       if(newmove) {
         edited_tinfo = NULL;
-        if(texture_map.count(si.id)) {
-          edited_tinfo = &texture_map[si.id];
+        if(config.texture_map.count(si.id)) {
+          edited_tinfo = &config.texture_map[si.id];
           newmove = false;
           }
         }
       if(edited_tinfo && size(edited_tinfo->triangles) == c->type) {
         for(int i=0; i<c->type; i++)
           edited_tinfo->triangles[i].tv = findTextureTriangle(c, si, i);
-        texture_tuned = true;
+        config.texture_tuned = true;
         }
       break;
       }
@@ -745,14 +702,14 @@ void mousemovement() {
       int i = getTriangleID(c, si, mouseh);
       if(newmove) {
         edited_triangle = NULL;
-        if(texture_map.count(si.id)) {
-          edited_triangle = &texture_map[si.id].triangles[i];
+        if(config.texture_map.count(si.id)) {
+          edited_triangle = &config.texture_map[si.id].triangles[i];
           newmove = false;
           }
         }
       if(edited_triangle) {
         edited_triangle->tv = findTextureTriangle(c, si, i);
-        texture_tuned = true;
+        config.texture_tuned = true;
         }
       break;
       }
@@ -760,22 +717,22 @@ void mousemovement() {
     case tpsTune: {
       ld tdist = 1e20;
       if(newmove) {
-        tuned_vertices.clear();
-        for(auto& a: texture_map)
+        config.tuned_vertices.clear();
+        for(auto& a: config.texture_map)
           for(auto& t: a.second.triangles)
             for(auto& v: t.tv)
               if(intval(v, mouseh) < tdist)
                 tdist = intval(v, mouseh);
-        for(auto& a: texture_map)
+        for(auto& a: config.texture_map)
           for(auto& t: a.second.triangles)
             for(auto& v: t.tv)
               if(intval(v, mouseh) < tdist * (1.000001))
-                tuned_vertices.push_back(&v);
+                config.tuned_vertices.push_back(&v);
         newmove = false;
         }
-      for(auto v: tuned_vertices) {
+      for(auto v: config.tuned_vertices) {
         *v = mouseh;
-        texture_tuned = true;
+        config.texture_tuned = true;
         }
       break;
       }
@@ -794,7 +751,7 @@ void init_textureconfig() {
   texturesavers = move(savers);  
   for(int i=0; i<3; i++)
   for(int j=0; j<3; j++)
-    addsaver(itt[i][j], "texturematrix_" + its(i) + its(j), i==j ? 1 : 0);
+    addsaver(config.itt[i][j], "texturematrix_" + its(i) + its(j), i==j ? 1 : 0);
 
   for(int i=0; i<3; i++)
   for(int j=0; j<3; j++)
@@ -819,30 +776,30 @@ void init_textureconfig() {
   addsaver(si_save.dir, "center direction", 0);
   addsaver(si_save.reflect, "center reflection", false);
   addsaver(viewctr.spin, "center spin", 0);
-  addsaver(twidth, "texture resolution", 2048);
-  addsaver(gsplits, "precision", 1);
+  addsaver(config.data.twidth, "texture resolution", 2048);
+  addsaver(config.gsplits, "precision", 1);
   
-  addsaver(grid_color, "grid color", 0);
-  addsaver(color_alpha, "alpha color", 0);
-  addsaver(mesh_color, "mesh color", 0);
+  addsaver(config.grid_color, "grid color", 0);
+  addsaver(config.color_alpha, "alpha color", 0);
+  addsaver(config.mesh_color, "mesh color", 0);
   
   addsaver(vid.alpha, "projection", 1);
   addsaver(vid.scale, "scale", 1);
   
-  addsaver(texturename, "texture filename", "");
-  addsaver(texture_tuner, "texture tuning", "");
+  addsaver(config.texturename, "texture filename", "");
+  addsaver(config.texture_tuner, "texture tuning", "");
   
   swap(texturesavers, savers);
   }
 
-bool save_textureconfig() {
+bool texture_config::save() {
   init_textureconfig();
   FILE *f = fopen(configname.c_str(), "wt");
   if(!f) return false;
   
   if(texture_tuned) {
     texture_tuner = "";
-    for(auto& a: texture_map)
+    for(auto& a: config.texture_map)
       for(auto& t: a.second.triangles)
         for(auto& v: t.tv) 
           for(int i=0; i<3; i++) {
@@ -861,7 +818,7 @@ bool save_textureconfig() {
   return true;
   }
 
-bool load_textureconfig() {
+bool texture_config::load() {
   init_textureconfig();
 
   FILE *f = fopen(configname.c_str(), "rt");
@@ -878,7 +835,7 @@ bool load_textureconfig() {
 
     if(targetgeometry != geometry) {
       restartGame('g');
-      return load_textureconfig();
+      return config.load();
       }
     
     if(nonbitrunc != target_nonbitru) {
@@ -903,11 +860,11 @@ bool load_textureconfig() {
       addMessage(XLAT("warning: unable to find the center"));
     }
   
-  if(!readtexture()) return false;
-  if(!loadTextureGL()) return false;
+  if(!data.readtexture(texturename)) return false;
+  if(!data.loadTextureGL()) return false;
   calcparam();
   drawthemap();
-  tstate = tstate_max = tsActive;
+  config.tstate = config.tstate_max = tsActive;
   string s = move(texture_tuner);
   perform_mapping();
   
@@ -916,7 +873,7 @@ bool load_textureconfig() {
   if(texture_tuner != "") {
     texture_tuned = true;
     vector<ld*> coords;
-    for(auto& a: texture_map)
+    for(auto& a: config.texture_map)
       for(auto& t: a.second.triangles)
         for(auto& v: t.tv) 
           for(int i=0; i<3; i++) 
@@ -973,7 +930,7 @@ void showMagicMenu() {
     amp.back().texture_coords = mouseeu;
     }
   
-  if(tstate == tsAdjusting) {
+  if(config.tstate == tsAdjusting) {
     initquickqueue();
     char letter = 'A';
     for(auto& am: amp) {
@@ -1000,7 +957,7 @@ void showMagicMenu() {
     // handlePanning(sym, uni);
     dialog::handleNavigation(sym, uni);
     
-    if(uni == '-' && tstate == tsAdjusting) {
+    if(uni == '-' && config.tstate == tsAdjusting) {
       if(!holdmouse) {
         holdmouse = true;
         newmove = true;
@@ -1032,25 +989,25 @@ string texturehelp =
 void showMenu() {
   cmode = sm::SIDE | sm::MAYDARK | sm::DIALOG_STRICT_X;
   gamescreen(0);
-  if(tstate == tsAdjusting) {
+  if(config.tstate == tsAdjusting) {
     ptds.clear();
-    texture::mark_triangles();
+    config.mark_triangles();
     drawqueue();
     }
   
-  if(tstate == tsOff) {
+  if(config.tstate == tsOff) {
     dialog::init(XLAT("texture mode (off)"));
     dialog::addItem(XLAT("select geometry/pattern"), 'r');
-    if(tstate_max == tsAdjusting || tstate_max == tsActive)
+    if(config.tstate_max == tsAdjusting || config.tstate_max == tsActive)
       dialog::addItem(XLAT("reactivate the texture"), 't');
     dialog::addItem(XLAT("open PNG as texture"), 'o');
     dialog::addItem(XLAT("load texture config"), 'l');
-    dialog::addSelItem(XLAT("texture size"), its(twidth), 'w');
+    dialog::addSelItem(XLAT("texture size"), its(config.data.twidth), 'w');
     dialog::addItem(XLAT("paint a new texture"), 'n');
-    dialog::addSelItem(XLAT("precision"), its(gsplits), 'P');
+    dialog::addSelItem(XLAT("precision"), its(config.gsplits), 'P');
     }
 
-  if(tstate == tsAdjusting) {
+  if(config.tstate == tsAdjusting) {
     dialog::init(XLAT("texture mode (overlay)"));
     dialog::addItem(XLAT("select the texture's pattern"), 'r');
     dialog::addItem(XLAT("enable the texture"), 't');
@@ -1069,16 +1026,16 @@ void showMenu() {
     dialog::addBoolItem(XLAT("select master triangles"), panstate == tpsTriangle, 'X');
     dialog::addBoolItem(XLAT("fine tune vertices"), panstate == tpsTune, 'F');
 
-    dialog::addColorItem(XLAT("grid color (master)"), master_color, 'M');
-    dialog::addColorItem(XLAT("grid color (copy)"), slave_color, 'C');
+    dialog::addColorItem(XLAT("grid color (master)"), config.master_color, 'M');
+    dialog::addColorItem(XLAT("grid color (copy)"), config.slave_color, 'C');
     
     dialog::addBreak(50);
     
-    dialog::addSelItem(XLAT("precision"), its(gsplits), 'P');
+    dialog::addSelItem(XLAT("precision"), its(config.gsplits), 'P');
     dialog::addItem(XLAT("save the raw texture"), 'S');
     }
   
-  if(tstate == tsActive) {
+  if(config.tstate == tsActive) {
     dialog::init(XLAT("texture mode (active)"));
     /* dialog::addSelItem(XLAT("texture scale"), fts(iscale), 's');
     dialog::addSelItem(XLAT("texture angle"), fts(irotate), 'a');
@@ -1087,10 +1044,10 @@ void showMenu() {
     dialog::addItem(XLAT("deactivate the texture"), 't');
     dialog::addItem(XLAT("back to overlay mode"), 'T');
     dialog::addItem(XLAT("change the geometry"), 'r');
-    dialog::addColorItem(XLAT("grid color"), grid_color, 'g');
-    dialog::addColorItem(XLAT("mesh color"), mesh_color, 'm');
-    dialog::addSelItem(XLAT("color alpha"), its(color_alpha), 'c');
-    dialog::addSelItem(XLAT("precision"), its(gsplits), 'P');
+    dialog::addColorItem(XLAT("grid color"), config.grid_color, 'g');
+    dialog::addColorItem(XLAT("mesh color"), config.mesh_color, 'm');
+    dialog::addSelItem(XLAT("color alpha"), its(config.color_alpha), 'c');
+    dialog::addSelItem(XLAT("precision"), its(config.gsplits), 'P');
     dialog::addItem(XLAT("edit the texture"), 'e');
     dialog::addItem(XLAT("save the full texture image"), 'S');
     dialog::addItem(XLAT("save texture config"), 's');
@@ -1109,121 +1066,122 @@ void showMenu() {
     // handlePanning(sym, uni);
     dialog::handleNavigation(sym, uni);
     
-    if(uni == '-' && tstate == tsAdjusting) {
+    if(uni == '-' && config.tstate == tsAdjusting) {
       if(!holdmouse) {
         holdmouse = true;
         newmove = true;
         }
       }
 
-    else if(uni == 'm' && tstate == tsAdjusting) panstate = tpsModel;
-    else if(uni == 'a' && tstate == tsAdjusting) panstate = tpsMove;
-    else if(uni == 'x' && tstate == tsAdjusting) panstate = tpsScale;
-    else if(uni == 'y' && tstate == tsAdjusting) panstate = tpsAffine;
-    else if(uni == 'z' && tstate == tsAdjusting) panstate = tpsZoom;
-    else if(uni == 'p' && tstate == tsAdjusting) panstate = tpsProjection;
-    else if(uni == 'C' && tstate == tsAdjusting) panstate = tpsCell;
-    else if(uni == 'X' && tstate == tsAdjusting) panstate = tpsTriangle;
-    else if(uni == 'F' && tstate == tsAdjusting) panstate = tpsTune;
-    else if(uni == 'A' && tstate == tsAdjusting) 
+    else if(uni == 'm' && config.tstate == tsAdjusting) panstate = tpsModel;
+    else if(uni == 'a' && config.tstate == tsAdjusting) panstate = tpsMove;
+    else if(uni == 'x' && config.tstate == tsAdjusting) panstate = tpsScale;
+    else if(uni == 'y' && config.tstate == tsAdjusting) panstate = tpsAffine;
+    else if(uni == 'z' && config.tstate == tsAdjusting) panstate = tpsZoom;
+    else if(uni == 'p' && config.tstate == tsAdjusting) panstate = tpsProjection;
+    else if(uni == 'C' && config.tstate == tsAdjusting) panstate = tpsCell;
+    else if(uni == 'X' && config.tstate == tsAdjusting) panstate = tpsTriangle;
+    else if(uni == 'F' && config.tstate == tsAdjusting) panstate = tpsTune;
+    else if(uni == 'A' && config.tstate == tsAdjusting) 
       pushScreen(showMagicMenu);
 
-    else if(uni == 's' && tstate == tsActive) 
-      dialog::openFileDialog(configname, XLAT("save texture config"), ".txc", 
+    else if(uni == 's' && config.tstate == tsActive) 
+      dialog::openFileDialog(config.configname, XLAT("save texture config"), ".txc", 
         [] () {
-          return save_textureconfig();
+          return config.save();
           });
 
-    else if(uni == 'l' && tstate == tsOff) 
-      dialog::openFileDialog(configname, XLAT("load texture config"), ".txc", 
+    else if(uni == 'l' && config.tstate == tsOff) 
+      dialog::openFileDialog(config.configname, XLAT("load texture config"), ".txc", 
         [] () {
-          return load_textureconfig();
+          return config.load();
           });
 
     else if(uni == 'r')
       patterns::pushChangeablePatterns();
 
-    else if(uni == 'o' && tstate == tsOff) 
-      dialog::openFileDialog(texturename, XLAT("open PNG as texture"), ".png", 
+    else if(uni == 'o' && config.tstate == tsOff) 
+      dialog::openFileDialog(config.texturename, XLAT("open PNG as texture"), ".png", 
         [] () {
-          if(readtexture() && loadTextureGL()) {
-            if(tstate_max == tsOff) tstate_max = tsAdjusting;
-            tstate = tstate_max;
-            perform_mapping();
-            finish_mapping();
+          if(config.data.readtexture(config.texturename) && config.data.loadTextureGL()) {
+            if(config.tstate_max == tsOff) config.tstate_max = tsAdjusting;
+            config.tstate = config.tstate_max;
+            config.perform_mapping();
+            config.finish_mapping();
             return true;
             }
           else return false;
           });
 
-    else if(uni == 'w' && tstate == tsOff) {
-      twidth *= 2;
-      if(twidth > 9000) twidth = 256;
-      tstate_max = tsOff;
+    else if(uni == 'w' && config.tstate == tsOff) {
+      config.data.twidth *= 2;
+      if(config.data.twidth > 9000) config.data.twidth = 256;
+      config.tstate_max = tsOff;
       }
     
-    else if(uni == 'e' && tstate == tsActive) {
+    else if(uni == 'e' && config.tstate == tsActive) {
       mapeditor::initdraw(cwt.c);
       pushScreen(mapeditor::showDrawEditor);
       }
 
-    else if(uni == 'n' && tstate == tsOff) {
+    else if(uni == 'n' && config.tstate == tsOff) {
       addMessage("white");
-      if(whitetexture() && loadTextureGL()) {
-        tstate = tstate_max = tsActive;
-        perform_mapping();
-        finish_mapping();
+      if(config.data.whitetexture() && config.data.loadTextureGL()) {
+        config.tstate = config.tstate_max = tsActive;
+        config.perform_mapping();
+        config.finish_mapping();
         mapeditor::initdraw(cwt.c);
         pushScreen(mapeditor::showDrawEditor);
         }
       }
 
-    else if(uni == 't' && tstate == tsOff) 
-      tstate = tstate_max;
+    else if(uni == 't' && config.tstate == tsOff) 
+      config.tstate = config.tstate_max;
     
-    else if(uni == 't' && tstate == tsAdjusting) {
-      tstate = tstate_max = tsActive;
-      finish_mapping();
+    else if(uni == 't' && config.tstate == tsAdjusting) {
+      config.tstate = config.tstate_max = tsActive;
+      config.finish_mapping();
       }
 
-    else if(uni == 't' && tstate == tsActive) 
-      tstate = tsOff;
+    else if(uni == 't' && config.tstate == tsActive) 
+      config.tstate = tsOff;
       
-    else if(uni == 'T' && tstate == tsAdjusting) 
-      tstate = tsOff;
+    else if(uni == 'T' && config.tstate == tsAdjusting) 
+      config.tstate = tsOff;
       
-    else if(uni == 'T' && tstate == tsActive)
-      tstate = tsAdjusting;
+    else if(uni == 'T' && config.tstate == tsActive)
+      config.tstate = tsAdjusting;
         
-    else if(uni == 'g' && tstate == tsActive) 
-      dialog::openColorDialog(grid_color, NULL);
-    else if(uni == 'm' && tstate == tsActive) 
-      dialog::openColorDialog(mesh_color, NULL);
+    else if(uni == 'g' && config.tstate == tsActive) 
+      dialog::openColorDialog(config.grid_color, NULL);
+    else if(uni == 'm' && config.tstate == tsActive) 
+      dialog::openColorDialog(config.mesh_color, NULL);
 
-    else if(uni == 'M' && tstate == tsAdjusting) 
-      dialog::openColorDialog(master_color, NULL);
-    else if(uni == 'C' && tstate == tsAdjusting) 
-      dialog::openColorDialog(slave_color, NULL);
+    else if(uni == 'M' && config.tstate == tsAdjusting) 
+      dialog::openColorDialog(config.master_color, NULL);
+    else if(uni == 'C' && config.tstate == tsAdjusting) 
+      dialog::openColorDialog(config.slave_color, NULL);
 
-    else if(uni == 'c' && tstate == tsActive) {
-      dialog::editNumber(color_alpha, 0, 255, 15, 0, XLAT("color alpha"),
+    else if(uni == 'c' && config.tstate == tsActive) {
+      dialog::editNumber(config.color_alpha, 0, 255, 15, 0, XLAT("color alpha"),
         XLAT("The higher the value, the less important the color of underlying terrain is."));
       }    
     else if(uni == 'P') {
-      dialog::editNumber(gsplits, 0, 4, 1, 1, XLAT("precision"),
+      dialog::editNumber(config.gsplits, 0, 4, 1, 1, XLAT("precision"),
         XLAT("precision"));
-      if(tstate == tsActive) dialog::reaction = [] () { finish_mapping();
+      if(config.tstate == tsActive) dialog::reaction = [] () { config.finish_mapping();
         };
       }
-    else if(uni == 'S' && tstate == tsAdjusting) 
-      dialog::openFileDialog(texturename, XLAT("save the raw texture"), ".png", 
+    else if(uni == 'S' && config.tstate == tsAdjusting) 
+      dialog::openFileDialog(config.texturename, XLAT("save the raw texture"), ".png", 
         [] () {
-          saveRawTexture(); return true;
+          config.data.saveRawTexture(config.texturename); return true;
           });
-    else if(uni == 'S' && tstate == tsActive) 
-      dialog::openFileDialog(texturename, XLAT("save the full texture image"), ".png", 
+    else if(uni == 'S' && config.tstate == tsActive) 
+      dialog::openFileDialog(config.texturename, XLAT("save the full texture image"), ".png", 
         [] () {
-          saveFullTexture(); return true;
+          config.saveFullTexture(config.texturename);
+          return true;
           });
     else if(uni == SDLK_F1)
       gotoHelp(texturehelp);
@@ -1237,11 +1195,11 @@ typedef pair<int,int> point;
 point ptc(hyperpoint h) {
   hyperpoint inmodel;
   applymodel(h, inmodel);
-  inmodel = itt * inmodel;
+  inmodel = config.itt * inmodel;
   inmodel[0] *= vid.radius * 1. / vid.scrsize;
   inmodel[1] *= vid.radius * 1. / vid.scrsize;
-  int x = (1 + inmodel[0]) * twidth / 2;
-  int y = (1 + inmodel[1]) * twidth / 2;
+  int x = (1 + inmodel[0]) * config.data.twidth / 2;
+  int y = (1 + inmodel[1]) * config.data.twidth / 2;
   return make_pair(x,y);
   }
 
@@ -1256,15 +1214,15 @@ int texture_distance(pair<int, int> p1, pair<int, int> p2) {
   }
 
 void fillpixel(int x, int y, unsigned col) {
-  if(x<0 || y<0 || x >= twidth || y >= twidth) return;
-  auto& pix = get_texture_pixel(x, y);
+  if(x<0 || y<0 || x >= config.data.twidth || y >= config.data.twidth) return;
+  auto& pix = config.data.get_texture_pixel(x, y);
   if(pix != col) {
-    undos.emplace_back(&pix, pix);
+    config.data.undos.emplace_back(&pix, pix);
     pix = col;
     }
   }
 
-void undo() {
+void texture_data::undo() {
   while(!undos.empty()) {
     auto p = undos.back();
     undos.pop_back();
@@ -1276,7 +1234,7 @@ void undo() {
     }
   }
 
-void undoLock() {
+void texture_data::undoLock() {
   printf("undos size = %d\n", size(undos));
   if(size(undos) > 2000000) {
     // limit undo memory
@@ -1356,7 +1314,7 @@ void actDrawPixel(cell *c, hyperpoint h, int col) {
     transmatrix M = gmatrix.at(c);
     auto si = patterns::getpatterninfo0(c);
     h = inverse(M * applyPatterndir(c, si)) * h;
-    auto& tinf = texture_map[si.id];
+    auto& tinf = config.texture_map[si.id];
     for(auto& M2: tinf.matrices) for(int i = 0; i<c->type; i += si.symmetries) {
       fillcircle(M2 * spin(2 * M_PI * i / c->type) * h, col);
       if(texturesym)
@@ -1367,7 +1325,7 @@ void actDrawPixel(cell *c, hyperpoint h, int col) {
   }
   
 void drawPixel(cell *c, hyperpoint h, int col) {
-  pixels_to_draw.emplace_back(c, h, col);
+  config.data.pixels_to_draw.emplace_back(c, h, col);
   }
 
 cell *where;
@@ -1404,12 +1362,12 @@ void drawLine(hyperpoint h1, hyperpoint h2, int col, int steps) {
     drawPixel(h2, col);
   }
 
-void remap(eTextureState old_tstate, eTextureState old_tstate_max) {
+void texture_config::remap(eTextureState old_tstate, eTextureState old_tstate_max) {
   clear_texture_map();
   if(old_tstate == tsActive && patterns::compatible(texture::cgroup, patterns::cgroup)) {
   
-    tstate = old_tstate;
-    tstate_max = old_tstate_max;
+    config.tstate = old_tstate;
+    config.tstate_max = old_tstate_max;
     for(cell *c: dcal) {
       auto si = patterns::getpatterninfo0(c);
       
@@ -1443,13 +1401,13 @@ void remap(eTextureState old_tstate, eTextureState old_tstate_max) {
       catch(out_of_range) { 
         printf("Unexpected missing cell #%d/%d", si.id, oldid);
         addMessage(XLAT("Unexpected missing cell #%d/%d", its(si.id), its(oldid)));
-        tstate_max = tstate = tsAdjusting;
+        config.tstate_max = config.tstate = tsAdjusting;
         return;
         }
       }     
     }
   else if(old_tstate >= tsAdjusting) {
-    printf("perform_mapping %d/%d\n", tstate, tstate_max);
+    printf("perform_mapping %d/%d\n", config.tstate, config.tstate_max);
     calcparam();
     drawthemap();
     perform_mapping();
@@ -1463,24 +1421,24 @@ int textureArgs() {
            
   if(0) ;
   else if(argis("-txpic")) {
-    shift(); texturename = args();
+    shift(); config.texturename = args();
     }
 
   else if(argis("-txp")) {
-    shift(); gsplits = argf();
+    shift(); config.gsplits = argf();
     }
 
   else if(argis("-txc")) {
-    shift(); configname = args();
+    shift(); config.configname = args();
     }
 
   else if(argis("-txc")) {
-    shift(); configname = args();
+    shift(); config.configname = args();
     }
 
   else if(argis("-txcl")) {
     PHASE(3); drawscreen();
-    load_textureconfig();
+    config.load();
     }
 
   else return 1;
@@ -1489,11 +1447,11 @@ int textureArgs() {
 
 auto texture_hook = 
   addHook(hooks_args, 100, textureArgs)
-+ addHook(clearmemory, 100, [] () { pixels_to_draw.clear(); });
++ addHook(clearmemory, 100, [] () { config.data.pixels_to_draw.clear(); });
 
 int lastupdate;
 
-void update() {
+void texture_data::update() {
   if(!pixels_to_draw.empty()) {
     auto t = SDL_GetTicks();
     while(SDL_GetTicks() < t + 75 && !pixels_to_draw.empty()) {

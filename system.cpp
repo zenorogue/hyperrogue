@@ -1107,10 +1107,10 @@ void restartGame(char switchWhat, bool push, bool keep_screens) {
     nonbitrunc = !nonbitrunc;
     resetGeometry();
     #if CAP_TEXTURE
-    if(texture::tstate == texture::tsActive) 
-      texture::tstate = texture::tsAdjusting;
-    if(texture::tstate_max == texture::tsActive)
-      texture::tstate = texture::tsAdjusting;
+    if(texture::config.tstate == texture::tsActive) 
+      texture::config.tstate = texture::tsAdjusting;
+    if(texture::config.tstate_max == texture::tsActive)
+      texture::config.tstate = texture::tsAdjusting;
     #endif
     }
   if(switchWhat == 'g') {
@@ -1121,10 +1121,10 @@ void restartGame(char switchWhat, bool push, bool keep_screens) {
 
     resetGeometry(); 
     #if CAP_TEXTURE
-    if(texture::tstate == texture::tsActive) 
-      texture::tstate = texture::tsOff;
-    if(texture::tstate_max == texture::tsActive)
-      texture::tstate = texture::tsAdjusting;
+    if(texture::config.tstate == texture::tsActive) 
+      texture::config.tstate = texture::tsOff;
+    if(texture::config.tstate_max == texture::tsActive)
+      texture::config.tstate = texture::tsAdjusting;
     #endif
     }
   if(switchWhat == 'y') {

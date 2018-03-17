@@ -340,7 +340,7 @@ void showDisplayMode() {
 #endif
 
 #if CAP_TEXTURE
-  dialog::addBoolItem(XLAT("texture mode"), texture::tstate == texture::tsActive, 't');
+  dialog::addBoolItem(XLAT("texture mode"), texture::config.tstate == texture::tsActive, 't');
 #endif
 
 

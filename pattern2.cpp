@@ -1446,7 +1446,7 @@ namespace patterns {
     for(int i=0; i<size(cpatterns); i++) {
       dialog::addBoolItem(XLAT(cpatterns[i].name), cgroup == i, '0'+i);
 #if CAP_TEXTURE
-      if(texture::tstate == texture::tsActive && !compatible(texture::cgroup, (cpatterntype) i))
+      if(texture::config.tstate == texture::tsActive && !compatible(texture::cgroup, (cpatterntype) i))
         dialog::lastItem().value = XLAT("BAD");
 #endif
       }
@@ -1476,8 +1476,8 @@ namespace patterns {
         cgroup = cpatterntype(uni - '0');
       else if(cgroup != cpUnknown && uni >= 'a' && uni < 'a' + size(cpatterns[cgroup].geometries)) {
 #if CAP_TEXTURE      
-        auto old_tstate = texture::tstate;
-        auto old_tstate_max = texture::tstate_max;
+        auto old_tstate = texture::config.tstate;
+        auto old_tstate_max = texture::config.tstate_max;
 #endif
         auto &g = cpatterns[cgroup].geometries[uni - 'a'];
         if(g.geo != geometry) { targetgeometry = g.geo; restartGame('g', false, true); }
@@ -1485,7 +1485,7 @@ namespace patterns {
         whichPattern = g.whichPattern;
         subpattern_flags = g.subpattern_flags;
 #if CAP_TEXTURE
-        texture::remap(old_tstate, old_tstate_max);
+        texture::config.remap(old_tstate, old_tstate_max);
 #endif
         }
       else if(doexiton(sym, uni))

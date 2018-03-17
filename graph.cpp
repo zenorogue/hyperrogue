@@ -3112,7 +3112,7 @@ void warpfloor(cell *c, const transmatrix& V, int col, int prio, bool warp) {
   if(shmup::on || nonbitrunc) warp = false;
 #if CAP_TEXTURE
   if(qfi.tinf) {
-    queuetable(V*qfi.spin, qfi.tinf->vertices, size(qfi.tinf->vertices), 0, texture::recolor(col), prio);
+    queuetable(V*qfi.spin, qfi.tinf->vertices, size(qfi.tinf->vertices), 0, texture::config.recolor(col), prio);
     lastptd().u.poly.tinf = qfi.tinf;
     }
   else 
@@ -3460,7 +3460,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
 
 #if CAP_TEXTURE
   if(texture::saving) {
-    texture::apply(c, V, 0xFFFFFFFF);
+    texture::config.apply(c, V, 0xFFFFFFFF);
     return;
     }
 #endif
@@ -3817,7 +3817,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
 #endif
 
 #if CAP_TEXTURE
-      else if(texture::apply(c, Vf, darkena(fcol, fd, 0xFF))) ;
+      else if(texture::config.apply(c, Vf, darkena(fcol, fd, 0xFF))) ;
 #endif
       
       else if(c->land == laMirrorWall) {
@@ -5547,8 +5547,8 @@ void gamescreen(int _darken) {
   darken = 0;
 
 #if CAP_TEXTURE
-  if(texture::tstate == texture::tsAdjusting) 
-    texture::drawRawTexture();
+  if(texture::config.tstate == texture::tsAdjusting) 
+    texture::config.drawRawTexture();
 #endif
   }
 

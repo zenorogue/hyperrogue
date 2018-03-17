@@ -2431,18 +2431,87 @@ namespace texture {
     tsOff, tsAdjusting, tsActive
     };
   
-  extern eTextureState tstate, tstate_max;
-  extern unsigned paint_color;
-  extern ld penwidth;
-  extern transmatrix itt;  
-  extern int twidth;
-  extern bool saving;
+  struct texture_data {
+    GLuint textureid = 0;
   
-  extern vector<unsigned> texture_pixels;
+    int twidth = 2048;
+  
+    vector<unsigned> texture_pixels;
+  
+    unsigned& get_texture_pixel(int x, int y) {
+      return texture_pixels[(y&(twidth-1))*twidth+(x&(twidth-1))];
+      }
+    
+    vector<pair<unsigned*, unsigned>> undos;
+    vector<tuple<cell*, hyperpoint, int> > pixels_to_draw;
+  
+    bool loadTextureGL();
+    bool whitetexture();
+    bool readtexture(string tn);
+    void saveRawTexture(string tn);
+  
+    void undo();
+    void undoLock();
+    void update();
+    };
+
+  struct texture_config {
+    string texturename = "textures/hyperrogue-texture.png";
+    string configname = "textures/hyperrogue.txc";
+    unsigned paint_color = 0x000000FF;
+    eTextureState tstate;
+    eTextureState tstate_max;
+  
+    transmatrix itt = Id;
+    
+    unsigned grid_color = 0;
+    unsigned mesh_color = 0;
+    unsigned master_color = 0xFFFFFF30;
+    unsigned slave_color = 0xFF000008;
+    
+    int color_alpha = 128;
+    
+    int gsplits = 1;
+    
+    int recolor(int col);
+  
+    typedef tuple<eGeometry, bool, char, int, eModel, ld, ld> texture_parameters; 
+    texture_parameters orig_texture_parameters;
+    
+    map<int, textureinfo> texture_map, texture_map_orig;
+    set<cell*> models;
+  
+    bool texture_tuned = false;
+    string texture_tuner;
+    vector<hyperpoint*> tuned_vertices;
+  
+    bool apply(cell *c, const transmatrix &V, int col);
+    void mark_triangles();
+  
+    void clear_texture_map();
+    void perform_mapping();
+    void mapTextureTriangle(textureinfo &mi, const array<hyperpoint, 3>& v, const array<hyperpoint, 3>& tv, int splits);
+    void mapTextureTriangle(textureinfo &mi, const array<hyperpoint, 3>& v, const array<hyperpoint, 3>& tv) { mapTextureTriangle(mi, v, tv, gsplits); }
+    void mapTexture2(textureinfo& mi);
+    void finish_mapping();
+    void remap(eTextureState old_tstate, eTextureState old_tstate_max);
+  
+    void drawRawTexture();
+    void saveFullTexture(string tn);
+  
+    bool save();
+    bool load();
+    
+    texture_data data;
+    };
+
+  extern texture_config config;
+  
+  extern ld penwidth;
+  extern bool saving;
   
   void showMenu();
   
-  void update();
   void drawPixel(cell *c, hyperpoint h, int col);
 
   extern cell *where;
@@ -2450,15 +2519,7 @@ namespace texture {
   void drawPixel(hyperpoint h, int col);
   void drawLine(hyperpoint h1, hyperpoint h2, int col, int steps = 10);
   
-  void remap(eTextureState old_tstate, eTextureState old_tstate_max);
-  
-  void perform_mapping();
-  void finish_mapping();
-  
-  void undoLock();
-  void undo();
   extern bool texturesym;
-  
 
   extern cpatterntype cgroup;
   }

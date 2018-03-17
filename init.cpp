@@ -368,6 +368,7 @@ extern "C" {
 #include <queue>
 #include <stdexcept>
 #include <array>
+#include <set>
 
 #ifdef USE_UNORDERED_MAP
 #include <unordered_map>
