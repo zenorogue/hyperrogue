@@ -2870,3 +2870,5 @@ ld hypot2(const hyperpoint& h);
 transmatrix pushxto0(const hyperpoint& H);
 transmatrix rpushxto0(const hyperpoint& H);
 transmatrix spintox(const hyperpoint& H);
+
+extern int ewhichscreen;

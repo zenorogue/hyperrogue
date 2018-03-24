@@ -4,8 +4,8 @@
 
 videopar vid;
 
-#define DEFAULT_WALLMODE ISMOBILE ? 3 : 5
-#define DEFAULT_MONMODE  ISMOBILE ? 2 : 4
+#define DEFAULT_WALLMODE (ISMOBILE ? 3 : 5)
+#define DEFAULT_MONMODE  (ISMOBILE ? 2 : 4)
 
 #if ISANDROID
 #define ANDROID_SETTINGS settingsChanged = true;
@@ -357,6 +357,30 @@ bool inSpecialMode() {
     geometry != gNormal || pmodel != mdDisk || vid.alpha != 1 || vid.scale != 1 || 
     rug::rugged || vid.monmode != DEFAULT_MONMODE ||
     vid.wallmode != DEFAULT_WALLMODE;
+  }
+
+bool have_current_settings() {
+  int modecount = 0;
+  if(inv::on) modecount++;
+  if(shmup::on) modecount += 10;
+  if(tour::on) modecount += 10;
+  if(chaosmode) modecount += 10;
+  if(nonbitrunc) modecount += 10;
+  if(peace::on) modecount += 10;
+  if(yendor::on) modecount += 10;
+  if(tactic::on) modecount += 10;
+  if(randomPatternsMode) modecount += 10;
+  if(geometry != gNormal) modecount += 10;
+  
+  if(vid.xposition || vid.yposition || vid.alpha != 1 || vid.scale != 1)
+    return true;
+  if(pmodel != mdDisk || vid.monmode != DEFAULT_MONMODE || vid.wallmode != DEFAULT_WALLMODE)
+    return true;
+  if(firstland != laIce || vid.scfg.players != 1 || rug::rugged)
+    return true;
+  if(modecount > 1)
+    return true;
+  return false;
   }
 
 void resetModes(char leave) {

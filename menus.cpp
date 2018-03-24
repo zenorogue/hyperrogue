@@ -421,6 +421,15 @@ void switchHardcore() {
   if(pureHardcore()) popScreenAll();
   }
 
+void help_nochaos() {
+  gotoHelp(
+    "In the Chaos mode, lands change very often, and "
+    "there are no walls between them. "
+    "Some lands are incompatible with this."
+    "\n\nYou need to reach Crossroads IV to unlock the Chaos mode."
+    );
+  }
+  
 void showChangeMode() {
   gamescreen(3);
   dialog::init(XLAT("special game modes"));
@@ -509,12 +518,7 @@ void showChangeMode() {
   #endif
     else if(uni == 'C') {
       if(chaosUnlocked) restartGame('C');
-      if(chaosmode) gotoHelp(
-        "In the Chaos mode, lands change very often, and "
-        "there are no walls between them. "
-        "Some lands are incompatible with this."
-        "\n\nYou need to reach Crossroads IV to unlock the Chaos mode."
-        );
+      if(chaosmode) help_nochaos();
       }
     else if(xuni == 'P') {
       if(!princess::everSaved)
@@ -565,7 +569,15 @@ bool showHalloween() {
   return false;
   }
 
+int daily;
+
 void showStartMenu() {
+  if(!daily) {
+    daily = hrand(10) + 1;
+    if(showHalloween())
+      daily = 20;
+    }
+  
   gamescreen(2);
 
   getcstat = ' ';
@@ -585,20 +597,63 @@ void showStartMenu() {
   dialog::addInfo(XLAT("use your Orbs in tough situations"));
 #endif
 
-#if CAP_SHMUP_GOOD
-  dialog::addBreak(100);
-  dialog::addBigItem(XLAT("shoot'em up mode"), 's');
-  dialog::addInfo(XLAT("continuous spacetime"));
-#if CAP_ACHIEVE
-  dialog::addInfo(XLAT("(most achievements are not available)"));
-#endif
-#endif
-
 #if CAP_TOUR
   dialog::addBreak(100);
   dialog::addBigItem(XLAT("tutorial"), 't');
   dialog::addInfo(XLAT("learn about hyperbolic geometry!"));
 #endif
+
+  switch(daily) { 
+    case 1:
+      #if CAP_SHMUP_GOOD
+        dialog::addBreak(100);
+        dialog::addBigItem(XLAT("shoot'em up mode"), 's');
+        dialog::addInfo(XLAT("continuous spacetime"));
+      #if CAP_ACHIEVE
+        dialog::addInfo(XLAT("(most achievements are not available)"));
+      #endif
+      #endif
+      break;
+    
+    case 2: 
+      dialog::addBreak(100);
+      dialog::addBigItem(XLAT("heptagonal mode"), '7');
+      dialog::addInfo(XLAT("more curvature"));
+      dialog::addInfo(XLAT("(most achievements are not available)"));
+      break;      
+    
+    case 3: 
+      dialog::addBreak(100);
+      dialog::addBigItem(XLAT("geometry experiments"), 'g');
+      dialog::addInfo(XLAT("(most achievements are not available)"));
+      break;      
+    
+    case 4: 
+      if(chaosUnlocked) {
+        dialog::addBreak(100);
+        dialog::addBigItem(XLAT("Chaos mode"), 'C');
+        dialog::addInfo(XLAT("(most achievements are not available)"));
+        }
+      break;      
+    
+    case 5:
+      dialog::addBreak(100);
+      dialog::addBigItem(XLAT("hypersian rug mode"), 'M');
+      dialog::addInfo(XLAT("see the true form"));
+      break;
+    
+    case 6:
+      dialog::addBreak(100);
+      dialog::addBigItem(XLAT("texture mode"), 'T');
+      dialog::addInfo(XLAT("paint pictures"));
+      break;
+    
+    case 20:
+      dialog::addBreak(100);
+      dialog::addBigItem(XLAT1("Halloween"), 'z');
+      dialog::addInfo(XLAT("Halloween mini-game"));
+      break;
+    }
 
 #if CAP_ROGUEVIZ && CAP_TOUR
   dialog::addBreak(100);
@@ -606,10 +661,9 @@ void showStartMenu() {
   dialog::addInfo(XLAT("see the visualizations"));
 #endif
 
-  if(showHalloween()) {
+  if(have_current_settings()) {
     dialog::addBreak(100);
-    dialog::addBigItem(XLAT1("Halloween"), 'z');
-    dialog::addInfo(XLAT("Halloween mini-game"));
+    dialog::addBigItem(XLAT1("use current/saved settings"), SDLK_ESCAPE);
     }
 
   dialog::addBreak(100);
@@ -635,7 +689,45 @@ void showStartMenu() {
   keyhandler = [] (int sym, int uni) {
     dialog::handleNavigation(sym, uni);
     if(uni == 'o') uni = 'i';
-    if(uni == 'c' || uni == 'i' || uni == 's') {
+    else if(uni == 'M') {
+      rug::init();
+      popScreenAll();
+      resetModes('c');
+      clearMessages();
+      welcomeMessage();
+      vid.wallmode = 3;
+      vid.monmode = 2;
+      rug::model_distance *= 2;
+      rug::init();
+      }
+    else if(uni == 'T') {
+      popScreenAll();
+      resetModes('c');
+      clearMessages();
+      welcomeMessage();
+      using namespace texture;
+      if(config.data.whitetexture() && config.data.loadTextureGL()) {
+        config.tstate = config.tstate_max = tsActive;
+        config.perform_mapping();
+        config.finish_mapping();
+        mapeditor::initdraw(cwt.c);
+        pushScreen(showMenu);
+        pushScreen(mapeditor::showDrawEditor);
+        }
+      }
+    else if(uni == 'g') {
+      popScreenAll();
+      resetModes('c');
+      clearMessages();
+      welcomeMessage();
+      pushScreen(showEuclideanMenu);
+      ewhichscreen = 2;
+      }
+    else if(uni == 'c' || uni == 'i' || uni == 's' || uni == 'C' || uni == '7') {
+      if(uni == 'C' && !chaosUnlocked) {
+        help_nochaos();
+        return;
+        }
       popScreenAll();
       resetModes(uni);
       clearMessages();
