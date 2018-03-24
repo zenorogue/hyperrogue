@@ -5186,7 +5186,7 @@ void drawthemap() {
   mmspatial = vid.monmode == 4 || vid.monmode == 5;
 
   DEBB(DF_GRAPH, (debugfile,"draw the map\n"));
-  fanframe = ticks / (nonbitrunc ? 300 : 150.0) / M_PI;
+  fanframe = ticks / (nonbitrunc ? 1000. : 500. ); // (nonbitrunc ? 300 : 150.0) / M_PI;
   
   for(int m=0; m<motypes; m++) if(isPrincess(eMonster(m))) 
     minf[m].name = princessgender() ? "Princess" : "Prince";
