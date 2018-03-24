@@ -3047,6 +3047,10 @@ bool makeEmpty(cell *c) {
 
   if(c->monst != moPrincess) {
     if(isAnyIvy(c->monst)) killMonster(c, moPlayer, 0);
+    else if(c->monst == moPair) {
+      if(c->mov[c->mondir]->monst == moPair)
+        c->mov[c->mondir]->monst = moNone;
+      }
     else if(isWorm(c->monst)) {
       if(!items[itOrbDomination]) return false;
       }
