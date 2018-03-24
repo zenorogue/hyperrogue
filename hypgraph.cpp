@@ -123,6 +123,42 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
     return;
     }
   
+  if(pmodel == mdHemisphere) {
+    ld ball = vid.ballangle * M_PI / 180;
+    using namespace hyperpoint_vec;
+    
+    switch(cgclass) {
+      case gcHyperbolic: {
+        ret = H / H[2];
+        ret[2] = sqrt(1 - sqhypot2(ret));
+        break;
+        }
+        
+      case gcEuclid: {
+        // stereographic projection to a sphere
+        auto hd = hdist0(H) / H[2];
+        if(hd == 0) H[2] = -1;
+        else {
+          ld x = 2 * hd / (1 + hd * hd);
+          ld y = x / hd;
+          H = H * x / (hd * H[2]);
+          H[2] = 1 - y;
+          }
+        break;
+        }
+      
+      case gcSphere: {
+        ret = H;
+        break;
+        }
+      }
+    
+    ret = rotmatrix(0, 2, ball) * ret;
+    
+    ghcheck(ret, H);
+    return;
+    }
+
   if(pmodel == mdHyperboloid) {
 
     ld ball = vid.ballangle * M_PI / 180;

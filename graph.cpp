@@ -452,7 +452,7 @@ void animallegs(const transmatrix& V, eMonster mo, int col, double footphase) {
 void ShadowV(const transmatrix& V, const hpcshape& bp, int prio) {
 #if CAP_POLY
   if(mmspatial) { 
-    if(pmodel == mdHyperboloid || pmodel == mdBall) 
+    if(pmodel == mdHyperboloid || pmodel == mdBall || pmodel == mdHemisphere) 
       return; // shadows break the depth testing
     dynamicval<int> p(poly_outline, OUTLINE_TRANS);
     queuepolyat(V, bp, SHADOW_MON, prio); 
@@ -3038,7 +3038,7 @@ bool noAdjacentChasms(cell *c) {
   }
 
 void floorShadow(cell *c, const transmatrix& V, int col, bool warp) {
-  if(pmodel == mdHyperboloid || pmodel == mdBall) 
+  if(pmodel == mdHyperboloid || pmodel == mdBall || pmodel == mdHemisphere) 
     return; // shadows break the depth testing
   if(shmup::on || nonbitrunc) warp = false;
   dynamicval<int> p(poly_outline, OUTLINE_TRANS);

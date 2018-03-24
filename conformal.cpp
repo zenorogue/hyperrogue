@@ -543,7 +543,7 @@ namespace conformal {
   const char *modelnames[MODELCOUNT] = {
     "disk", "half-plane", "band", "polygonal", "polynomial",
     "azimuthal equidistant", "azimuthal equi-area", 
-    "ball model", "hyperboloid"
+    "ball model", "hyperboloid", "hemisphere"
     };
   
   void show() {
@@ -561,13 +561,16 @@ namespace conformal {
       XLAT(
         pmodel == mdBand && sphere ? "Mercator" : 
         pmodel == mdHalfplane && euclid ? "inversion" : 
+        pmodel == mdHemisphere && !hyperbolic ? "sphere" :
+        pmodel == mdHyperboloid && euclid ? "plane" :
+        pmodel == mdHyperboloid && sphere ? "sphere" :
         modelnames[pmodel]), 'm');
     dialog::addSelItem(XLAT("rotation"), directions[pmodel][rotation&3], 'r');
     
     if(pmodel == mdBand && sphere)
       dialog::addSelItem(XLAT("scale factor"), fts(vid.scale), 'z');
 
-    if(abs(vid.alpha-1) > 1e-3 && pmodel != mdBall && pmodel != mdHyperboloid) {
+    if(abs(vid.alpha-1) > 1e-3 && pmodel != mdBall && pmodel != mdHyperboloid && pmodel != mdHemisphere) {
       dialog::addBreak(50);
       dialog::addInfo("NOTE: this works 'correctly' only if the Poincaré model/stereographic projection is used.");
       dialog::addBreak(50);
@@ -637,7 +640,7 @@ namespace conformal {
       switchagain: {
         pmodel = eModel((pmodel + (shiftmul > 0 ? 1 : -1) + MODELCOUNT) % MODELCOUNT);
         
-        if(!mdEqui() && pmodel != mdDisk && pmodel != mdPolynomial && pmodel != mdHyperboloid) {
+        if(!mdEqui() && pmodel != mdDisk && pmodel != mdPolynomial && pmodel != mdHyperboloid && pmodel != mdHemisphere) {
           if(sphere && pmodel != mdBand)
               goto switchagain;
           if(euclid && pmodel != mdHalfplane && pmodel != mdBall)

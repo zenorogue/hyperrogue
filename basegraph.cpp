@@ -299,7 +299,7 @@ void setGLProjection(int col) {
   //glLineWidth(1.0f);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   
-  if(pmodel == mdBall || pmodel == mdHyperboloid) {
+  if(pmodel == mdBall || pmodel == mdHyperboloid || pmodel == mdHemisphere) {
 #ifdef GL_ES
     glClearDepthf(1.0f);
 #else

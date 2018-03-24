@@ -1527,7 +1527,9 @@ void setcameraangle(bool b);
 
 enum eModel {
   mdDisk, mdHalfplane, mdBand, mdPolygonal, mdPolynomial,
-  mdEquidistant, mdEquiarea, mdBall, mdHyperboloid, mdGUARD, mdUnchanged };
+  mdEquidistant, mdEquiarea, mdBall, mdHyperboloid, 
+  mdHemisphere,
+  mdGUARD, mdUnchanged };
 
 #define MODELCOUNT ((int) mdGUARD)
 
