@@ -1268,7 +1268,7 @@ void drawRugScene() {
   
   glDisable(GL_BLEND);
   glhr::switch_mode(glhr::gmLightFog);
-  glEnable(GL_DEPTH_TEST);
+  glhr::set_depthtest(true);
   glDepthFunc(GL_LESS);
   
   for(int ed=stereo::active() && stereo::mode != stereo::sODS ? -1 : 0; ed < 2; ed += 2) {
