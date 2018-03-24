@@ -909,6 +909,9 @@ namespace conformal {
   extern vector<shmup::monster*> v;
   extern double phase;
   void applyIB();
+
+  void progress_screen();
+  void progress(string str);
   }
   
 namespace polygonal {
@@ -2852,3 +2855,18 @@ template<class T> array<T, 2> make_array(T a, T b) { array<T,2> x; x[0] = a; x[1
 
 extern cell *lastmountpos[MAXPLAYER];
 
+ld hypot3(const hyperpoint& h);
+
+extern const hyperpoint Hypc;
+ld det(const transmatrix& T);
+void queuechr(const hyperpoint& h, int size, char chr, int col, int frame = 0);
+
+string fts(float x);
+bool model_needs_depth();
+
+hyperpoint hpxy(ld x, ld y);
+ld sqhypot2(const hyperpoint& h);
+ld hypot2(const hyperpoint& h);
+transmatrix pushxto0(const hyperpoint& H);
+transmatrix rpushxto0(const hyperpoint& H);
+transmatrix spintox(const hyperpoint& H);
