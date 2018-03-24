@@ -19,6 +19,11 @@ bool rug_failure = false;
 
 namespace rug {
 
+bool computed = false;
+
+vector<rugpoint*> points;
+vector<triangle> triangles;
+
 int when_enabled;
 
 struct rug_exception { };
@@ -59,50 +64,9 @@ ld err_zero = 1e-3, err_zero_current, current_total_error;
 
 int queueiter, qvalid, dt;
 
-struct edge {
-  struct rugpoint *target;
-  double len;
-  };
-
-struct rugpoint {
-  double x1, y1;
-  bool valid;
-  bool inqueue;
-  double dist;
-  hyperpoint h;    // point in the represented space
-  hyperpoint flat; // point in the native space, in azeq
-  hyperpoint precompute;
-  vector<edge> edges;
-  vector<edge> anticusp_edges;
-  // Find-Union algorithm
-  rugpoint *glue;
-  rugpoint *getglue() {
-    return glue ? (glue = glue->getglue()) : this;
-    }
-  hyperpoint& glueflat() {
-    return glue->flat;
-    }
-  rugpoint() { glue = NULL; }
-  void glueto(rugpoint *x) {
-    x = x->getglue();
-    auto y = getglue();
-    if(x != y) y->glue = x;
-    }
-  };
-
 rugpoint *finger_center;
 ld finger_range = .1;
 ld finger_force = 1;
-
-struct triangle {
-  rugpoint *m[3];
-  triangle(rugpoint *m1, rugpoint *m2, rugpoint *m3) {
-    m[0] = m1; m[1] = m2; m[2] = m3;
-    }
-  };
-
-vector<rugpoint*> points;
-vector<triangle> triangles;
 
 bool rug_perspective = ISANDROID;
 
@@ -368,6 +332,10 @@ bool psort(rugpoint *a, rugpoint *b) {
   return hdist0(a->h) < hdist0(b->h);
   }
 
+void sort_rug_points() {
+  sort(points.begin(), points.end(), psort);
+  }
+
 void calcLengths() {
   for(auto p: points) 
     for(auto& edge: p->edges) 
@@ -577,6 +545,8 @@ void comp(cell*& minimum, cell *next) {
 
 void buildRug() {
 
+  need_mouseh = true;
+  good_shape = false;
   if(torus) {
     good_shape = true;
     buildTorusRug();
@@ -619,7 +589,7 @@ void buildRug() {
     for(int i=0; i<20 && subdivide_further(); i++)
       subdivide();
   
-  sort(points.begin(), points.end(), psort);
+  sort_rug_points();
   
   calcLengths();  
 
@@ -827,6 +797,7 @@ void subdivide() {
     return; 
     }
   Xprintf("subdivide (%d,%d)\n", N, size(triangles));
+  need_mouseh = true;  
   divides++;
   vector<triangle> otriangles = triangles;
   triangles.clear();
@@ -1001,6 +972,7 @@ void addNewPoints() {
     m.valid = wasvalid || sphere || hdist0(m.h) <= dist;
     if(m.valid && !wasvalid) {
       qvalid++;
+      need_mouseh = true;  
       
       if(!good_shape) optimize(&m, i > 7);
 
@@ -1048,7 +1020,7 @@ void physics() {
       for(auto& e: m->anticusp_edges)
         moved = force(*m, *e.target, anticusp_dist, true) || moved;
       
-      if(moved) enqueue(m);
+      if(moved) enqueue(m), need_mouseh = true;
       }    
 
   }
@@ -1329,16 +1301,14 @@ void drawRugScene() {
     stereo::set_mask(0);
     }
 
-  glDisable(GL_DEPTH_TEST);
   glEnable(GL_BLEND);
 
   stereo::set_mask(0), stereo::set_viewport(0);
   stereo::set_projection(0);
   
-  need_mouseh = true;
-  
   if(rug_failure) {
     rug::close();
+    rug::clear_model();
     rug::init();
     }
   }
@@ -1348,7 +1318,7 @@ void drawRugScene() {
 
 transmatrix currentrot;
     
-void init() {
+void reopen() {
   if(rugged) return;
   when_enabled = ticks;
   GLERR("before init");
@@ -1361,7 +1331,10 @@ void init() {
   rugged = true;
   if(renderonce) prepareTexture();
   if(!rugged) return;
-  
+  }
+
+void init_model() {
+  clear_model();
   genrug = true;
   drawthemap();
   genrug = false;
@@ -1393,17 +1366,26 @@ void init() {
     }
   catch(rug_exception) {
     close();
+    clear_model();
     }
   }
 
-void close() {
-  if(!rugged) return;
-  rugged = false;
-  delete glbuf;
+void init() {
+  reopen();
+  if(rugged) init_model();
+  }
+
+void clear_model() {
   triangles.clear();
   for(int i=0; i<size(points); i++) delete points[i];
   points.clear();
   pqueue = queue<rugpoint*> ();
+  }
+  
+void close() {
+  if(!rugged) return;
+  rugged = false;
+  delete glbuf;
   finger_center = NULL;
   }
 
@@ -1505,6 +1487,7 @@ void actDraw() {
 
   #if CAP_HOLDKEYS
   Uint8 *keystate = SDL_GetKeyState(NULL);
+  if(keystate[SDLK_LALT]) alpha /= 10;
 
   transmatrix t = Id;
   
@@ -1574,7 +1557,9 @@ void actDraw() {
       if(keystate[SDLK_PAGEDOWN]) model_distance *= exp(alpha);
       }
   
-    if(qm) apply_rotation(t);
+    if(qm) {
+      apply_rotation(t);
+      }
     }
   #endif
     }

@@ -795,6 +795,7 @@ namespace mapeditor {
 
 namespace rug {
   extern bool rugged;
+  extern bool computed;
   extern bool renderonce;
   extern bool rendernogl;
   extern int  texturesize;
@@ -802,8 +803,14 @@ namespace rug {
   extern transmatrix currentrot;
 #if CAP_RUG
   void show();
+  // initialize both the texture and the model
   void init();
+  // initialize only the texture (assume model already initialized)
+  void reopen();
+  // close the rug mode, remove the texture
   void close();
+  // clear the model
+  void clear_model();
   void actDraw();
   void select();
   void buildVertexInfo(cell *c, transmatrix V);
@@ -813,6 +820,66 @@ namespace rug {
   void push_all_points(int coord, ld val);
   void apply_rotation(const transmatrix& t);
   string makehelp();
+
+  struct edge {
+    struct rugpoint *target;
+    double len;
+    };
+  
+  struct dexp_data {
+    hyperpoint params;
+    hyperpoint cont;
+    ld remaining_distance;
+    };
+
+  struct rugpoint {
+    double x1, y1;
+    bool valid;
+    bool inqueue;
+    double dist;
+    hyperpoint h;    // point in the represented space
+    hyperpoint flat; // point in the native space, in azeq
+    hyperpoint precompute;
+    vector<edge> edges;
+    vector<edge> anticusp_edges;
+    // Find-Union algorithm
+    rugpoint *glue;
+    rugpoint *getglue() {
+      return glue ? (glue = glue->getglue()) : this;
+      }
+    hyperpoint& glueflat() {
+      return glue->flat;
+      }
+    rugpoint() { glue = NULL; }
+    void glueto(rugpoint *x) {
+      x = x->getglue();
+      auto y = getglue();
+      if(x != y) y->glue = x;
+      }
+    int dexp_id;
+    dexp_data surface_point;
+    };
+
+  struct triangle {
+    rugpoint *m[3];
+    triangle(rugpoint *m1, rugpoint *m2, rugpoint *m3) {
+      m[0] = m1; m[1] = m2; m[2] = m3;
+      }
+    };
+
+  extern vector<rugpoint*> points;
+  extern vector<triangle> triangles;
+
+  extern int qvalid;
+  extern bool subdivide_further();
+  extern void subdivide();
+  extern bool good_shape;
+  extern int vertex_limit;
+  extern void enqueue(rugpoint *p);
+  void sort_rug_points();
+  extern bool rug_perspective;
+  
+  bool handlekeys(int sym, int uni);
 #endif
   }
 
