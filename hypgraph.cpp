@@ -292,7 +292,7 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
 // game-related graphics
 
 transmatrix View; // current rotation, relative to viewctr
-transmatrix cwtV; // player-relative view
+transmatrix cwtV = Id; // player-relative view
 transmatrix sphereflip; // on the sphere, flip
 heptspin viewctr; // heptagon and rotation where the view is centered at
 bool playerfound; // has player been found in the last drawing?
