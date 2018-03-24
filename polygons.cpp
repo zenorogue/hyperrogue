@@ -2649,7 +2649,7 @@ void getcoord0(const hyperpoint& h, int& xc, int &yc, int &sc) {
   // EYETODO sc = vid.eye * vid.radius * hscr[2];
   }
 
-void queuechr(const hyperpoint& h, int size, char chr, int col, int frame = 0) {
+void queuechr(const hyperpoint& h, int size, char chr, int col, int frame) {
   int xc, yc, sc; getcoord0(h, xc, yc, sc);
   queuechr(xc, yc, sc, size, chr, col, frame);
   }
