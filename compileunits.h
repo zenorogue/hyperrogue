@@ -84,6 +84,7 @@ bool inv::activating;
 #if CAP_TOUR
 #include "tour.cpp"
 #endif
+#include "surface.cpp"
 #if ISMOBILE==0
 #include <unistd.h>
 #endif

@@ -1702,6 +1702,14 @@ void show() {
   dialog::addSelItem(XLAT("automatic move speed"), fts(ruggo), 'G');
   dialog::addSelItem(XLAT("anti-crossing"), fts(anticusp_factor), 'A');
 
+#if CAP_SURFACE  
+  if(hyperbolic) {
+    if(gwhere == gEuclid)
+      dialog::addItem(XLAT("smooth surfaces"), 'c');
+    else dialog::addBreak(100);
+    }
+#endif
+
   dialog::display();
   keyhandler = [] (int sym, int uni) {
     dialog::handleNavigation(sym, uni);
@@ -1709,7 +1717,12 @@ void show() {
     if(uni == 'h') gotoHelp(makehelp());
     else if(uni == 'u') {
       if(rug::rugged) rug::close();
-      else rug::init();
+      else { 
+        #if CAP_SURFACE
+        surface::sh = surface::dsNone; 
+        #endif
+        rug::init(); 
+        }
       }
     else if(uni == 'R')
       dialog::editNumber(finger_range, 0, 1, .01, .1, XLAT("finger range"),
@@ -1719,7 +1732,7 @@ void show() {
       dialog::editNumber(finger_force, 0, 1, .01, .1, XLAT("finger force"),
         XLAT("Press 1 to enable the finger force.")
         );
-    else if(uni == 'o' && !rug::rugged)
+    else if(uni == 'o')
       renderonce = !renderonce;
     else if(uni == 'G') {
       dialog::editNumber(ruggo, -1, 1, .1, 0, XLAT("automatic move speed"),
@@ -1793,6 +1806,10 @@ void show() {
       texturesize *= 2;
       if(texturesize == 8192) texturesize = 64;
       }
+#if CAP_SURFACE
+    else if(uni == 'c') 
+      pushScreen(surface::show_surfaces);
+#endif
     else if(handlekeys(sym, uni)) ;
     else if(doexiton(sym, uni)) popScreen();
     };

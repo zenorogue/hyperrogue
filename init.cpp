@@ -125,6 +125,10 @@
 #define CAP_RUG (!ISMINI && CAP_GL)
 #endif
 
+#ifndef CAP_SURFACE
+#define CAP_SURFACE CAP_RUG
+#endif
+
 #ifndef CAP_EDIT
 #define CAP_EDIT (CAP_FILES && !ISWEB && !ISMINI)
 #endif

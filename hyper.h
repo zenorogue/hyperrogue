@@ -2870,5 +2870,16 @@ ld hypot2(const hyperpoint& h);
 transmatrix pushxto0(const hyperpoint& H);
 transmatrix rpushxto0(const hyperpoint& H);
 transmatrix spintox(const hyperpoint& H);
+transmatrix ypush(ld alpha);
 
 extern int ewhichscreen;
+
+#if CAP_SURFACE
+namespace surface {
+
+  enum eShape { dsNone, dsTractricoid, dsDini, dsKuen, dsHyperlike, dsHyperboloid, dsHemisphere };
+  extern eShape sh;
+  void show_surfaces();
+  
+  }
+#endif
