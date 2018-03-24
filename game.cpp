@@ -3232,6 +3232,7 @@ void moveEffect(cell *ct, cell *cf, eMonster m) {
   if(cf && ct->item == itBabyTortoise && !cf->item) {
     cf->item = itBabyTortoise;
     ct->item = itNone;
+    animateMovement(ct, cf, LAYER_BOAT);
     tortoise::babymap[cf] = tortoise::babymap[ct];
     tortoise::babymap.erase(ct);
     }

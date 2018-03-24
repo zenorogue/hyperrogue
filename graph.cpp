@@ -4672,11 +4672,11 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
 #endif
 
     if(it) {
-      if(c->land == laWhirlwind && c->wall != waBoat) {
+      if((c->land == laWhirlwind || c->item == itBabyTortoise) && c->wall != waBoat) {
         double footphase = 0;
         Vboat = &(Vboat0 = *Vboat);
         applyAnimation(c, Vboat0, footphase, LAYER_BOAT);
-        }    
+        }
 
       if(cellHalfvine(c)) {
         int i =-1;
