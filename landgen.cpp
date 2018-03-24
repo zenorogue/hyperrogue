@@ -1047,7 +1047,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
             c->wall = waChasm;
           }
         else if(!euclid && zebra3(c) == 0) c->wall = waFan;
-        else if(pseudohept(c) && hrand(2000) < 150)
+        else if(pseudohept(c) && hrand(2000) < 150 && !reptilecheat)
           c->wall = waChasm;
         else if(c->type == 6 && buildPrizeMirror(c, 1000))
           {}
