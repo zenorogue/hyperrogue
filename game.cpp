@@ -5327,7 +5327,9 @@ void specialMoves() {
         cell *gr = gtab[hrand(gravenum)];
         gr->wall = waAncientGrave;
         gr->monst = moGhost;
+        gr->stuntime = 1;
         ztab[hrand(zombienum)]->monst = moZombie;
+        ztab[hrand(zombienum)]->stuntime = 1;
         addMessage(XLAT("%The1 raises some undead!", m));
         playSound(c, "necromancy");
         }
