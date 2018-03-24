@@ -75,13 +75,6 @@ eItem randomTreasure2(int cv) {
   return best;
   }
 
-bool isTechnicalLand(eLand l) {
-  return l == laNone || l == laOceanWall || l == laBarrier || l == laCanvas ||
-    l == laHauntedWall || l == laHauntedBorder || l == laCA ||
-    l == laMirrorWall || l == laMirrored || l == laMirrored2 ||
-    l == laMirrorWall2 || l == laMercuryRiver;
-  }
-
 eLand cheatdest;
 
 void cheatMoveTo(eLand l) {

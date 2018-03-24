@@ -744,3 +744,11 @@ bool generateAll(eLand l) {
 bool isRaider(eMonster m) {
   return m == moPair || m == moMonk || m == moCrusher || m == moAltDemon || m == moHexDemon;
   }
+
+bool isTechnicalLand(eLand l) {
+  return l == laNone || l == laOceanWall || l == laBarrier || l == laCanvas ||
+    l == laHauntedWall || l == laHauntedBorder || l == laCA ||
+    l == laMirrorWall || l == laMirrored || l == laMirrored2 ||
+    l == laMirrorWall2 || l == laMercuryRiver || l == laMemory;
+  }
+
