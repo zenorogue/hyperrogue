@@ -794,6 +794,8 @@ bool passable_for(eMonster m, cell *w, cell *from, flagtype extra) {
       return false;
     return passable(w, from, extra);
     }
+  if(m == moDragonHead && prairie::isriver(w))
+    return false;
   if(isShark(m))
     return sharkpassable(w, from);
   if(isSlimeMover(m))
@@ -2779,7 +2781,7 @@ void computePathdist(eMonster param) {
         if(qb >= qtarg) {
           if(param == moTortoise && nogoSlow(c, c2)) continue;
           if(param == moIvyRoot  && strictlyAgainstGravity(c, c2, false, MF_IVY)) continue;
-          if(param == moWorm && (cellUnstable(c) || cellEdgeUnstable(c))) continue;
+          if(param == moWorm && (cellUnstable(c) || cellEdgeUnstable(c) || prairie::no_worms(c))) continue;
           if(items[itOrbLava] && c2->cpdist <= 5 && pseudohept(c) && makeflame(c2, 1, true))
             continue;
           }

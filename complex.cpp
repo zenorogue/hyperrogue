@@ -2665,7 +2665,7 @@ namespace prairie {
     if(barrierhept(c3)) return btspin(fieldval(c3).first, c3->bardir)+1;
     return 0;
     }
-
+  
   void spread(cell *c, cell *from) {
     int rd;
     
@@ -2747,6 +2747,11 @@ namespace prairie {
   #define RLOW (sphere?(nonbitrunc?7:6):nonbitrunc?4:2)
   #define RHIGH (sphere?(nonbitrunc?8:9):nonbitrunc?11:13)
   
+  bool no_worms(cell *c) {
+    int rv = c->LHU.fi.rval;
+    return rv > RLOW+1 && rv < RHIGH-1;
+    }
+
   bool isriver(cell *c) {
     return c->land == laPrairie && c->LHU.fi.rval <= RHIGH && c->LHU.fi.rval >= RLOW;
     }
