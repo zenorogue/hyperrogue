@@ -274,15 +274,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           cell *c2 = NULL;
           for(int i=0; i<c->type; i++) {
             cellwalker cw(c, i);
-            cwstep(cw);
-            cwspin(cw, 4);
-            cwstep(cw);
-            cwspin(cw, 2);
-            cwstep(cw);
-            cwspin(cw, 4);
-            cwstep(cw);
-            cwspin(cw, 2 + hrand(3));
-            cwstep(cw);
+            cw = cw + wstep + 4 + wstep + 2 + wstep + 4 + wstep + (2 + hrand(3)) + wstep;
             if(!c2) c2 = cw.c;
             else if(celldist(cw.c) > celldist(c2)) c2 = cw.c;
             cw.c->monst = moMouse;
@@ -904,8 +896,8 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           cell* cc[5];
           cc[2] = c;
           cellwalker cw2 = cw;
-          cwstep(cw); cc[3] = cw.c; cwrevstep(cw); cc[4] = cw.c;
-          cwrevstep(cw2); cc[1] = cw2.c; cwrevstep(cw2); cc[0] = cw2.c;
+          cw += wstep; cc[3] = cw.c; cw += revstep; cc[4] = cw.c;
+          cw2 += revstep; cc[1] = cw2.c; cw2 += revstep; cc[0] = cw2.c;
           bool ok = true;
           for(int i=0; i<5; i++) {
             if(cc[i]->land != laNone && cc[i]->land != laTerracotta) ok = false;
@@ -1681,10 +1673,9 @@ void giantLandSwitch(cell *c, int d, cell *from) {
                 vector<pair<cell*, cell*>> next;
                 int bonus = c->type - 4;
                 for(int i=0; i<c->type; i++) {
-                  cellwalker cw0(c, i);
-                  cwstep(cw0); cwrevstep(cw0);
-                  cellwalker cw1(c, i+bonus);
-                  cwspin(cw1, 0); cwstep(cw1); cwrevstep(cw1);
+                  cellwalker ci(c, i);
+                  cellwalker cw0 = ci + wstep + revstep;
+                  cellwalker cw1 = ci + bonus + wstep + revstep;
                   if(cw0.c->mpdist > 7)
                   if(cw1.c->mpdist > 7)
                     next.emplace_back(cw0.c, cw1.c);

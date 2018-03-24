@@ -175,8 +175,7 @@ heptagon *createAlternateMap(cell *c, int rad, hstate firststate, int special) {
   cell *cx[rad+1];
   for(int i=0; i<rad; i++) {
     cx[i] = bf.c;
-    cwrev(bf);
-    cwstep(bf);
+    bf += revstep;
     }
   cx[rad] = bf.c;
   heptagon *h = bf.c->master;
@@ -331,8 +330,8 @@ cell *buildAnotherEquidistant(cell *c, int radius) {
       for(int i=0; i<size(coastpath); i++) coastpath[i]->item = itPirate;
       return NULL;
       }
-    cwstep(cw); cwspin(cw, 3); 
-    if(ctof(cw.c) && hrand(2) == 0) cwspin(cw, 1);
+    cw = cw + wstep + 3;
+    if(ctof(cw.c) && hrand(2) == 0) cw++;
     }
   coastpath.push_back(cw.c);
   // printf("setdists\n");

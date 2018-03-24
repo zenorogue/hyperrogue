@@ -1101,52 +1101,25 @@ namespace mirror {
     cell *c = cw.c;
     
     for(int i=0; i<cw.c->type; i++) {
-      cwstep(cw);
-      if(cw.c->type == c->type) {
-        cwspin(cw, i);
-        createMirror(cw, cpid);
-        cwspin(cw, -i);
-        }
-      cwstep(cw);
-      cwspin(cw, 1);
+      auto cws = cw + wstep;
+      if(cws.c->type == c->type) 
+        createMirror(cws+i, cpid);
+      cw += 1;
       }
     }
   
   void createMirages(cellwalker cw, int cpid) {
     if(nonbitrunc) {
-      for(int i=0; i<cw.c->type; i++) {
-        cellwalker C2 = cw;
-        cwstep(C2);
-        cwspin(C2, 3);
-        cwstep(C2);
-        cwspin(C2, 5);
-        cwstep(C2);
-        cwspin(C2, 3);
-        cwspin(C2, -i);
-        createMirror(C2, cpid);
-        cwspin(cw, 1);
-        }
+      for(int i=0; i<cw.c->type; i++)
+        createMirror(cw + i + wstep + 3 + wstep + 5 + wstep + 3 - i, cpid);
       return;
       }
     for(int i=0; i<S6; i++) {
-      cwstep(cw);
-      if(!ctof(cw.c)) {
-        cwspin(cw, 2);
-        cwstep(cw);
-        cwspin(cw, S6-2-i);
-        createMirror(cw, cpid);
-        cwspin(cw, 2+i);
-        cwstep(cw);
-        cwspin(cw, S6-4);
-        cwstep(cw);
-        cwspin(cw, 2-i);
-        createMirror(cw, cpid);
-        cwspin(cw, S6-2+i);
-        cwstep(cw);
-        cwspin(cw, 2);
+      auto cw0 = cw + i + wstep;
+      if(!ctof(cw0.c)) {
+        createMirror(cw0 + 2 + wstep - (2+i), cpid);
+        createMirror(cw0 - 2 + wstep + (2-i), cpid);
         }
-      cwstep(cw);
-      cwspin(cw, 1);
       }
     }
 
@@ -1174,7 +1147,7 @@ namespace mirror {
   
   bool isKilledByMirror(cell *c) {
     for(auto& m: mirrors) {
-      cell *c1 = cwpeek(m.second, 0);
+      cell *c1 = (m.second + wstep).c;
       if(inmirror(c1)) c1 = reflect(cellwalker(c1, 0, false)).c;
       if(c1 == c && canAttack(m.second.c, moMimic, c, c->monst, 0))
         return true;
@@ -1193,8 +1166,7 @@ namespace mirror {
       if(m.first == multi::cpid) {
         cell *c = m.second.c;
         if(!m.second.mirrored) nummirage++;
-        auto cw2 = m.second;
-        cwstep(cw2);
+        auto cw2 = m.second + wstep;
         if(inmirror(cw2)) cw2 = reflect(cw2);
         cell *c2 = cw2.c;
         if(c2->monst) {
@@ -1241,7 +1213,7 @@ namespace mirror {
     if(spinning && d) {
       for(auto& m: mirrors)
         if(m.first == multi::cpid)
-          cwspin(m.second, d);
+          m.second += d;
       }
     if(flags & ATTACK)
       go(flags & GO);
@@ -1281,9 +1253,9 @@ namespace mirror {
   pair<bool, cellwalker> traceback(vector<int>& v, cellwalker cw) {
     bool goout = false;
     for(int i=size(v)-1; i>=0; i--) {
-      if(v[i]) cwspin(cw, -v[i]);
+      if(v[i]) cw -= v[i];
       else { 
-        cwstep(cw);
+        cw += wstep;
         if(cw.c->land == laMirrorWall || cw.c->land == laMirror) goout = true;
         }
       }
@@ -1302,67 +1274,67 @@ namespace mirror {
       stepcount++; if(stepcount > 10000) {
          return cw; 
          }
-      cell *c0 = cwpeek(cw, 0);
+      cell *c0 = (cw+wstep).c;
       int go = 0;
       if(!inmirror(c0)) go = 2;
       else if(depth(c0) && depth(c0) < depth(cw.c)) go = 1;
       if(go) {
         v.push_back(0);
-        cwstep(cw);
+        cw += wstep;
         if(go == 2) break;
         }
       else {
         v.push_back(1);
-        cwspin(cw, 1);
+        cw += 1;
         }        
       }
     if(cw.c->land == laMirrorWall || cw.c->land == laMirrorWall2) {
       if(cw.c->type == 7) {
         while(cw.spin != cw.c->bardir) {
-          cwspin(cw, 1);
+          cw += 1;
           v.push_back(1);
           stepcount++; if(stepcount > 10000) { printf("failhep\n"); return cw; }
           }
-        if(nonbitrunc && cwpeek(cw,0) == cwcopy.c)
+        if(nonbitrunc && (cw+wstep).c == cwcopy.c)
           v.pop_back();
-        if(nonbitrunc && cwpeek(cw,3)->land == laMirrored && cwpeek(cw,2)->land == laMirrorWall) {
-          cw.mirrored = !cw.mirrored;
+        if(nonbitrunc && (cw+3+wstep).c->land == laMirrored && (cw+2+wstep).c->land == laMirrorWall) {
+          cw += wmirror;
           auto p = traceback(v, cw);
           if(p.first) return p.second;
-          cwspin(cw, 2); 
+          cw += 2;
           v.push_back(2);
-          cwstep(cw); 
+          cw += wstep;
           v.push_back(0);
-          cwspin(cw, 3); 
+          cw += 3;
           v.push_back(3);
           }
         }
       else {
-        while(cwpeek(cw,0)->type != 7) {
-          cwspin(cw, 1);
+        while((cw+wstep).c->type != 7) {
+          cw ++;
           v.push_back(1);
           }
         int icount = 0;
         for(int i=0; i<3; i++) {
-          if(cwpeek(cw, 0)->bardir == cw.c->spin(cw.spin))
+          if((cw+wstep).c->bardir == cw.c->spin(cw.spin))
             icount++;
-          cwspin(cw, 2);
+          cw += 2;
           }
         if(icount >= 2) {
           cellwalker cwcopy = cw;
           for(int a=0; a<3; a++) for(int m=0; m<2; m++) {
             cellwalker cw = cwcopy;
             if(m) cw.mirrored = !cw.mirrored;
-            cwspin(cw, a*2);
+            cw += (a*2);
             auto p = traceback(v,cw);
             if(p.first) return p.second;
             }
           printf("icount >= 2 but failed\n");
           return cw;
           }
-        while(cwpeek(cw, 0)->bardir != cw.c->spin(cw.spin)) {
+        while((cw+wstep).c->bardir != cw.c->spin(cw.spin)) {
           stepcount++; if(stepcount > 10000) { printf("fail2\n"); return cw; }
-          cwspin(cw, 2);
+          cw += 2;
           v.push_back(1);
           v.push_back(1);
           }
@@ -1405,8 +1377,7 @@ namespace mirror {
       while(inmirror(cache[cid].second.c) && tries--)
         cache[cid].second = reflect0(cache[cid].second);
       }
-    cellwalker res = cache[cid].second;
-    cwspin(res, cw.spin);
+    cellwalker res = cache[cid].second + cw.spin;
     if(cw.mirrored) res.mirrored = !res.mirrored;
     return res;
     }
@@ -1733,10 +1704,10 @@ namespace hive {
 
     for(int i=2; i<radius; i++) {
       if(bf.c->type == 6)
-        cwspin(bf, 3);
+        bf += 3;
       else
-        cwspin(bf, 3 + hrand(2));
-      cwstep(bf);
+        bf += 3 + hrand(2);
+      bf += wstep;
       }
     cell *citycenter = bf.c;
     buginfo.clear();

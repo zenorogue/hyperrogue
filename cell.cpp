@@ -172,12 +172,7 @@ struct hrmap_spherical : hrmap {
       heptspin hs;
       hs.h = dodecahedron[i];
       hs.spin = k;
-      hs = hsstep(hs, 0);
-      hs = hsspin(hs, S7-1);
-      hs = hsstep(hs, 0);
-      hs = hsspin(hs, S7-1);
-      hs = hsstep(hs, 0);
-      hs = hsspin(hs, S7-1);
+      hs = hs + wstep + (S7-1) + wstep + (S7-1) + wstep + (S7-1);
       if(hs.h != dodecahedron[i]) printf("error %d,%d\n", i, k);
       }
     for(int i=0; i<spherecells(); i++) verifycells(dodecahedron[i]);
@@ -558,8 +553,8 @@ namespace quotientspace {
     code res;
     res.c[0] = cod(hs.h);
     for(int i=1; i<=S7; i++) {
-      res.c[i] = cod(hsstep(hs, 0).h);
-      hs = hsspin(hs, 1);
+      res.c[i] = cod((hs + wstep).h);
+      hs += 1;
       }
     return res;
     }
@@ -586,7 +581,7 @@ struct hrmap_quotient : hrmap {
     if(!reachable.count(g)) {
       reachable[g] = bfsq.size();
       bfsq.push_back(hs);
-      add(hsspin(hs, 1));
+      add(hs + 1);
       }
     }
 
@@ -605,7 +600,7 @@ struct hrmap_quotient : hrmap {
       add(hs);
 
       for(int i=0; i<(int)bfsq.size(); i++) {
-        hs = hsstep(bfsq[i], 0);
+        hs = bfsq[i] + wstep;
         add(hs);
         connections.push_back(reachable[get(hs)]);
         }
@@ -674,37 +669,59 @@ struct hrmap_quotient : hrmap {
 
 cell *createMov(cell *c, int d);
 
-void cwspin(cellwalker& cw, int d) {
-  cw.spin = (cw.spin+(MIRR(cw)?-d:d) + MODFIXER) % cw.c->type;
+cellwalker& operator += (cellwalker& cw, int spin) {
+  cw.spin = (cw.spin+(MIRR(cw)?-spin:spin) + MODFIXER) % cw.c->type;
+  return cw;
   }
+
+cellwalker& operator += (cellwalker& cw, wstep_t) {
+  createMov(cw.c, cw.spin);
+  int nspin = cw.c->spn(cw.spin);
+  if(cw.c->mirror(cw.spin)) cw.mirrored = !cw.mirrored;
+  cw.c = cw.c->mov[cw.spin];
+  cw.spin = nspin;
+  return cw;
+  }
+
+cellwalker& operator -= (cellwalker& cw, int i) { return cw += (-i); }
+
+cellwalker& operator += (cellwalker& cw, wmirror_t) {
+  cw.mirrored = !cw.mirrored;
+  return cw;
+  }
+
+template <class T> cellwalker operator + (cellwalker h, T t) { return h += t; }
+template <class T> cellwalker operator - (cellwalker h, T t) { return h += (-t); }
+
+cellwalker& operator ++ (cellwalker& h, int) { return h += 1; }
+cellwalker& operator -- (cellwalker& h, int) { return h -= 1; }
 
 bool cwstepcreates(cellwalker& cw) {
   return cw.c->mov[cw.spin] == NULL;
   }
 
+/*
 cell *cwpeek(cellwalker cw, int dir) {
-  return createMov(cw.c, (cw.spin+MODFIXER+(MIRR(cw)?-dir:dir)) % cw.c->type);
-  }
+  return (cw+dir+wstep).c;.
+  // return createMov(cw.c, (cw.spin+MODFIXER+(MIRR(cw)?-dir:dir)) % cw.c->type);
+  } */
 
 void cwmirrorat(cellwalker& cw, int d) {
   cw.spin = (d+d - cw.spin + MODFIXER) % cw.c->type;
   cw.mirrored = !cw.mirrored;
   }
 
-void cwstep(cellwalker& cw) {
-  createMov(cw.c, cw.spin);
-  int nspin = cw.c->spn(cw.spin);
-  if(cw.c->mirror(cw.spin)) cw.mirrored = !cw.mirrored;
-  cw.c = cw.c->mov[cw.spin];
-  cw.spin = nspin;
+static const struct rev_t { } rev;
+
+cellwalker& operator += (cellwalker& cw, rev_t) {
+  cw += cw.c->type/2 + ((cw.c->type&1)?hrand(2):0);
+  return cw;
   }
 
-void cwrev(cellwalker& cw) {
-  cwspin(cw, cw.c->type/2 + ((cw.c->type&1)?hrand(2):0));
-  }
+static const struct revstep_t { } revstep;
 
-void cwrevstep(cellwalker& cw) {
-  cwrev(cw); cwstep(cw);
+cellwalker& operator += (cellwalker& cw, revstep_t) {
+  cw += rev; cw += wstep; return cw;
   }
 
 // very similar to createMove in heptagon.cpp
@@ -746,7 +763,7 @@ cell *createMov(cell *c, int d) {
     */
     
     for(int u=2; u<S6; u+=2) {
-      hs = hsstep(hsspin(hs, alt3), -alt4);
+      hs = hs + alt3 + wstep - alt4;
       merge(hs.h->c7, hs.spin, n, u, hs.mirrored);
       }
     
@@ -1171,15 +1188,17 @@ cdata *getHeptagonCdata(heptagon *h) {
       hstab[7] = hs;
       
       for(int i=8; i<12; i++) {
-        hstab[i] = hsspin(hstab[i-1], (i&1) ? 4 : 3);
-        hstab[i] = hsstep(hstab[i], 0);
-        hstab[i] = hsspin(hstab[i], (i&1) ? 3 : 4);
+        hstab[i] = hstab[i-1];
+        hstab[i] += ((i&1) ? 4 : 3);
+        hstab[i] += wstep;
+        hstab[i] += ((i&1) ? 3 : 4);
         }
 
       for(int i=6; i>=3; i--) {
-        hstab[i] = hsspin(hstab[i+1], (i&1) ? 3 : 4);
-        hstab[i] = hsstep(hstab[i], 0);
-        hstab[i] = hsspin(hstab[i], (i&1) ? 4 : 3);
+        hstab[i] = hstab[i+1];
+        hstab[i] += ((i&1) ? 3 : 4);
+        hstab[i] += wstep;
+        hstab[i] += ((i&1) ? 4 : 3);
         }
       
       if(hstab[3].h->distance < hstab[7].h->distance) {
@@ -1205,7 +1224,7 @@ cdata *getHeptagonCdata(heptagon *h) {
       
       break;
       }
-    hs = hsstep(hsspin(hs, 3), 0);
+    hs = hs + 3 + wstep;
     setHeptagonRval(hs.h);
     
     affect(mydata, hs.spin ? hs.h->rval0 : hs.h->rval1, signum);

@@ -353,7 +353,7 @@ void castLightningBolt(cellwalker lig) {
     
     if(lig.c->mov[lig.spin] == NULL) break;
 
-    cwstep(lig);
+    lig += wstep;
     if(inmirror(lig)) lig = mirror::reflect(lig);
     
     cell *c = lig.c;
@@ -440,7 +440,7 @@ void castLightningBolt(cellwalker lig) {
       drawParticles(c, winf[ow].color, 16);
 
     if(c == cwt.c)             {bnc++; if(bnc > 10) break; }
-    if(spin) cwspin(lig, hrand(lig.c->type));
+    if(spin) lig += hrand(lig.c->type);
     
     if(brk) break;
     
@@ -449,14 +449,13 @@ void castLightningBolt(cellwalker lig) {
       int right = 1;
       while(!reflectingBarrierAt(lig, left)) left--;
       while(!reflectingBarrierAt(lig, right)) right++;
-      cwspin(lig, right + left);
+      lig += right + left;
       if(c->wall == waBarrowWall) c->wall = waBarrowDig;
       else if(c->wall == waBarrowDig) c->wall = waNone;
       bnc++; if(bnc > 10) break;
       }
-    else {
-      cwrev(lig);
-      }
+    else 
+      lig += rev;
     
     if(lig.c->wall == waCloud) {
       lig.c->wall = waNone;

@@ -56,6 +56,52 @@ inline transmatrix operator * (const transmatrix& T, const transmatrix& U) {
   return R;
   }
 
+hyperpoint hpxyz(ld x, ld y, ld z);
+
+namespace hyperpoint_vec {
+
+  inline hyperpoint& operator *= (hyperpoint& h, ld d) {
+    h[0] *= d; h[1] *= d; h[2] *= d;
+    return h;
+    }
+  
+  inline hyperpoint& operator /= (hyperpoint& h, ld d) { 
+    h[0] /= d; h[1] /= d; h[2] /= d;
+    return h;
+    }
+  
+  inline hyperpoint operator += (hyperpoint& h, hyperpoint h2) { 
+    for(int i: {0,1,2}) h[i] += h2[i];
+    return h;
+    }
+
+  inline hyperpoint operator -= (hyperpoint& h, hyperpoint h2) { 
+    for(int i: {0,1,2}) h[i] -= h2[i];
+    return h;
+    }
+
+  inline hyperpoint operator * (ld d, hyperpoint h) { return h *= d; }  
+  inline hyperpoint operator * (hyperpoint h, ld d) { return h *= d; }  
+  inline hyperpoint operator / (hyperpoint h, ld d) { return h /= d; }  
+  inline hyperpoint operator + (hyperpoint h, hyperpoint h2) { return h += h2; }
+  inline hyperpoint operator - (hyperpoint h, hyperpoint h2) { return h -= h2; }
+
+  // cross product  
+  inline hyperpoint operator ^ (hyperpoint h1, hyperpoint h2) {
+    return hpxyz(
+      h1[1] * h2[2] - h1[2] * h2[1],
+      h1[2] * h2[0] - h1[0] * h2[2],
+      h1[0] * h2[1] - h1[1] * h2[0]
+      );
+    }
+
+  // inner product
+  inline ld operator | (hyperpoint h1, hyperpoint h2) {
+    return h1[0] * h2[0] + h1[1] * h2[1] + h1[2] * h2[2];
+    }    
+  }
+
+
 extern int cellcount, heptacount;
 
 // cell information for the game
@@ -2083,11 +2129,7 @@ struct polytodraw {
 
 extern int emeraldtable[100][7];
 
-extern void cwspin(cellwalker& cw, int d);
-extern cell *cwpeek(cellwalker cw, int dir);
-extern void cwstep(cellwalker& cw);
-extern void cwrevstep(cellwalker& cw);
-extern void cwrev(cellwalker& cw);
+// extern cell *cwpeek(cellwalker cw, int dir);
 
 const eLand NOWALLSEP = laNone;
 const eLand NOWALLSEP_USED = laWhirlpool;
@@ -2384,7 +2426,12 @@ extern int startseed;
 extern transmatrix heptmove[MAX_EDGE], hexmove[MAX_EDGE];
 extern transmatrix invheptmove[MAX_EDGE], invhexmove[MAX_EDGE];
 
-heptspin hsstep(const heptspin &hs, int spin);
+static const struct wstep_t { } wstep;
+static const struct wmirror_t { } wmirror;
+
+// heptspin hsstep(const heptspin &hs, int spin);
+
+template<class T> 
 
 extern void fixmatrix(transmatrix&);
 void display(const transmatrix& T);

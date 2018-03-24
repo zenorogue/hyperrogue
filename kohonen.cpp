@@ -300,8 +300,7 @@ struct cellcrawler {
     for(int i=0; i<size(data); i++) {
       cellwalker cw0 = data[i].orig;
       for(int j=0; j<cw0.c->type; j++) {
-        cellwalker cw = cw0;
-        cwspin(cw, j); cwstep(cw);
+        cellwalker cw = cw0 + j + wstep;
         if(!getNeuron(cw.c)) continue;
         store(cw, i, j);
         }
@@ -317,9 +316,9 @@ struct cellcrawler {
       cellcrawlerdata& s = data[i];
       s.target = data[s.from].target;
       if(!s.target.c) continue;
-      cwspin(s.target, s.spin);
+      s.target += s.spin;
       if(cwstepcreates(s.target)) s.target.c = NULL;
-      else cwstep(s.target);
+      else s.target += wstep;
       }
     }
   };

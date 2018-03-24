@@ -621,11 +621,11 @@ namespace mapeditor {
       auto sd = spill_list[i];
       for(int i=0; i<sd.first.c->type; i++) {
         auto sd2 = sd;
-        cwspin(sd2.first, i); cwstep(sd2.first);
+        sd2.first = sd2.first + i + wstep;
         if(eq(sd2.first.c->aitmp, sval)) continue; 
         sd2.first.c->aitmp = sval;
         if(sd2.second.c) {
-          cwspin(sd2.second, i); cwstep(sd2.second);
+          sd2.second = sd2.second + i + wstep;
           if(sd2.second.c->land == laNone) continue;
           }
         spill_list.push_back(sd2);
@@ -663,7 +663,7 @@ namespace mapeditor {
       if(where.c->type != copysource.c->type) return;
       if(where.spin<0) where.spin=0;
       if(!nonbitrunc && !ctof(mouseover) && ((where.spin&1) != (copysource.spin&1)))
-        cwspin(where, 1);
+        where += 1;
       }
     if(painttype != 4) copysource.c = NULL;
     list_spill(where, copysource);

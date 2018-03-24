@@ -3176,12 +3176,12 @@ array<cell*, 5> traplimits(cell *c) {
   res[2] = c;
   for(int d=0; d<c->type; d++) {
     cellwalker cw(c, d);
-    cwstep(cw);
+    cw += wstep;
     if(cw.c->wall != waArrowTrap) continue;
     res[1+q*2] = cw.c;
-    cwspin(cw, cw.c->type/2);
-    if((cw.c->type&1) && cwpeek(cw, 0)->wall != waStone) cwspin(cw, 1);
-    cwstep(cw);
+    cw += (cw.c->type/2);
+    if((cw.c->type&1) && (cw+wstep).c->wall != waStone) cw += 1;
+    cw += wstep;
     res[(q++)*4] = cw.c;
     }
   while(q<2) { res[q*4] = res[1+q*2] = NULL; q++; }
@@ -3790,12 +3790,12 @@ void determinizeBull(cell *c, int *posdir, int& nc) {
 int determinizeBullPush(cellwalker bull) {
   int nc = 2;
   int dirs[2], positive;
-  cwstep(bull);
+  bull += wstep;
   cell *c2 = bull.c;
   if(!(c2->type & 1)) return 1; // irrelevant
   int d = c2->type / 2;
-  cwspin(bull, d); dirs[0] = positive = bull.spin;
-  cwspin(bull, -2*d); dirs[1] = bull.spin;
+  bull += d; dirs[0] = positive = bull.spin;
+  bull -= 2*d; dirs[1] = bull.spin;
   determinizeBull(c2, dirs, nc);
   if(dirs[0] == positive) return -1;
   return 1;
@@ -3854,24 +3854,22 @@ cell *determinePush(cellwalker who, cell *c2, int subdir, T valid) {
       addMessage("bad push: " + its(subdir));
     }
   cellwalker push = who;
-  cwstep(push);
+  push += wstep;
   int pd = push.c->type/2;
-  cwspin(push, pd * -subdir);
-  cwstep(push);
+  push += pd * -subdir;
+  push += wstep;
   if(valid(push.c)) return push.c;
   if(c2->type&1) {
-    cwstep(push);
-    cwspin(push, 1 * -subdir);
-    cwstep(push);
+    push = push + wstep - subdir + wstep;
     if(valid(push.c)) return push.c;
     }
   if(gravityLevel(push.c) < gravityLevel(c2)) {
-    cwstep(push); cwspin(push, 1); cwstep(push);
+    push = push + wstep + 1 + wstep;
     if(gravityLevel(push.c) < gravityLevel(c2)) {
-      cwstep(push); cwspin(push, -2); cwstep(push);
+      push = push + wstep - 2 + wstep;
       }
     if(gravityLevel(push.c) < gravityLevel(c2)) {
-      cwstep(push); cwspin(push, 1); cwstep(push);
+      push = push + wstep + 1 + wstep;
       }
     if(valid(push.c)) return push.c;
     }
@@ -4290,21 +4288,21 @@ void ivynext(cell *c) {
   cw.c->monst = moIvyWait;
   bool findleaf = false;
   while(true) {
-    cwspin(cw, 1);
+    cw += 1;
     if(cw.spin == signed(cw.c->mondir)) {
       if(findleaf) { 
         cw.c->monst = moIvyHead; break;
         }
       cw.c->monst = moIvyWait;
-      cwstep(cw);
+      cw += wstep;
       continue;
       }
-    cwstep(cw);
+    cw += wstep;
     if(cw.c->monst == moIvyWait && signed(cw.c->mondir) == cw.spin) {
       cw.c->monst = moIvyBranch;
       findleaf = true; continue;
       }
-    cwstep(cw);
+    cw += wstep;
     }
   }
 
@@ -7259,7 +7257,7 @@ bool movepcto(int d, int subdir, bool checkonly) {
   if(!checkonly) { DEBB(DF_TURN, (debugfile,"movepc\n")); }
   int origd = d;
   if(d >= 0) {
-    cwspin(cwt, d);
+    cwt += d;
     mirror::act(d, mirror::SPINSINGLE);
     d = cwt.spin;
     }
@@ -7775,7 +7773,7 @@ bool movepcto(int d, int subdir, bool checkonly) {
 
       stabbingAttack(cwt.c, c2, moPlayer);
       cell *c1 = cwt.c;
-      cwstep(cwt);
+      cwt += wstep;
       if(switchplaces)
         animateReplacement(c1, cwt.c, LAYER_SMALL);
       else

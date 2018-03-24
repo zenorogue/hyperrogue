@@ -450,49 +450,6 @@ double hdist(const hyperpoint& h1, const hyperpoint& h2) {
     }
   }
 
-namespace hyperpoint_vec {
-
-  hyperpoint& operator *= (hyperpoint& h, ld d) {
-    h[0] *= d; h[1] *= d; h[2] *= d;
-    return h;
-    }
-  
-  hyperpoint& operator /= (hyperpoint& h, ld d) { 
-    h[0] /= d; h[1] /= d; h[2] /= d;
-    return h;
-    }
-  
-  hyperpoint operator += (hyperpoint& h, hyperpoint h2) { 
-    for(int i: {0,1,2}) h[i] += h2[i];
-    return h;
-    }
-
-  hyperpoint operator -= (hyperpoint& h, hyperpoint h2) { 
-    for(int i: {0,1,2}) h[i] -= h2[i];
-    return h;
-    }
-
-  hyperpoint operator * (ld d, hyperpoint h) { return h *= d; }  
-  hyperpoint operator * (hyperpoint h, ld d) { return h *= d; }  
-  hyperpoint operator / (hyperpoint h, ld d) { return h /= d; }  
-  hyperpoint operator + (hyperpoint h, hyperpoint h2) { return h += h2; }
-  hyperpoint operator - (hyperpoint h, hyperpoint h2) { return h -= h2; }
-
-  // cross product  
-  hyperpoint operator ^ (hyperpoint h1, hyperpoint h2) {
-    return hpxyz(
-      h1[1] * h2[2] - h1[2] * h2[1],
-      h1[2] * h2[0] - h1[0] * h2[2],
-      h1[0] * h2[1] - h1[1] * h2[0]
-      );
-    }
-
-  // inner product
-  ld operator | (hyperpoint h1, hyperpoint h2) {
-    return h1[0] * h2[0] + h1[1] * h2[1] + h1[2] * h2[2];
-    }    
-  }
-
 hyperpoint mscale(const hyperpoint& t, double fac) {
   hyperpoint res;
   for(int i=0; i<3; i++) 

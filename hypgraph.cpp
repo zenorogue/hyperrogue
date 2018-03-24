@@ -378,7 +378,7 @@ void drawrec(const heptspin& hs, int lev, hstate s, const transmatrix& V) {
   for(int d=0; d<S7; d++) {
     hstate s2 = transition(s, d);
     if(s2 == hsError) continue;
-    heptspin hs2 = hsstep(hsspin(hs, d), 0);
+    heptspin hs2 = hs + d + wstep;
     drawrec(hs2, lev-2, s2, V * heptmove[d]);
     }
   
@@ -566,8 +566,7 @@ void optimizeview() {
   if(turn >= 0) {
     View = View * TB;
     fixmatrix(View);
-    viewctr = hsspin(viewctr, turn);
-    viewctr = hsstep(viewctr, 0);
+    viewctr = viewctr + turn + wstep;
     }
   }
 

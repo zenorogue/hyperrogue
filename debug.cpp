@@ -198,7 +198,7 @@ bool applyCheat(char u, cell *c = NULL) {
   if(u == 'Z') {
     flipplayer = false;
     mirror::act(1, mirror::SPINSINGLE);
-    cwspin(cwt, 1);
+    cwt++;
     wavephase = (1+wavephase) & 7;
     return true;
     }

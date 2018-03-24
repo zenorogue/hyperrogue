@@ -2029,8 +2029,8 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, int col) {
       multi::cpid = m.first;
       auto cw = m.second;
       if(d&1) cwmirrorat(cw, xdir);
-      if(d>=2) cwspin(cw, 2);
-      if(d>=4) cwspin(cw, 2);
+      if(d>=2) cw += 2;
+      if(d>=4) cw += 2;
       transmatrix Vs = Vparam;
       bool mirr = cw.mirrored;
       Vs = Vs * ddspin(c, cw.spin-cwt.spin, euclid ? 0 : S42);
@@ -2538,7 +2538,7 @@ void drawMovementArrows(cell *c, transmatrix V) {
   
     movedir md = vectodir(spin(-d * M_PI/4) * tC0(pushone()));
     int u = md.d;
-    cellwalker xc = cwt; cwspin(xc, u); cwstep(xc);
+    cellwalker xc = cwt + u + wstep;
     if(xc.c == c) {
       transmatrix fixrot = rgpushxto0(tC0(V));
       // make it more transparent

@@ -171,22 +171,23 @@ extern int hrand(int);
 // a structure used to walk on the heptagonal tesselation
 // (remembers not only the heptagon, but also direction)
 
-heptspin hsstep(const heptspin &hs, int spin) {
+heptspin& operator += (heptspin& hs, int spin) {
+  hs.spin = fixrot(hs.spin + (MIRR(hs)?-spin:spin));
+  return hs;
+  }
+
+heptspin operator + (const heptspin& hs, wstep_t) {
   createStep(hs.h, hs.spin);
   heptspin res;
   res.h = hs.h->move[hs.spin];
   res.mirrored = hs.mirrored ^ hs.h->mirror(hs.spin);
-  res.spin = fixrot(hs.h->spin(hs.spin) + (MIRR(res)?-spin:spin));
+  res.spin = hs.h->spin(hs.spin);
   return res;
   }
 
-heptspin hsspin(const heptspin &hs, int val) {
-  heptspin res;
-  res.h = hs.h;
-  res.spin = fixrot(hs.spin + (MIRR(hs)?-val:val));
-  res.mirrored = hs.mirrored;
-  return res;
-  }
+heptspin operator + (heptspin h, int spin) { return h += spin; }
+heptspin operator - (heptspin h, int spin) { return h += -spin; }
+heptspin& operator += (heptspin& h, wstep_t) { h = h + wstep; return h; }
 
 heptagon *createStep(heptagon *h, int d) {
   d = fixrot(d);
@@ -211,9 +212,7 @@ heptagon *createStep(heptagon *h, int d) {
      hs.h = h;
       hs.spin = 0;
       hs.mirrored = false;
-      hs = hsstep(hs, -1);
-      hs = hsstep(hs, -1);
-      hs = hsstep(hs, -1);
+      hs = hs + wstep - 1 + wstep - 1 + wstep - 1;
       connectHeptagons(h, d, hs.h, hs.spin);
       }
     else if(h->s == hsB && d == S7-1) {
@@ -221,9 +220,7 @@ heptagon *createStep(heptagon *h, int d) {
       hs.h = h;
       hs.spin = 0;
       hs.mirrored = false;
-      hs = hsstep(hs, 1);
-      hs = hsstep(hs, 1);
-      hs = hsstep(hs, 1);
+      hs = hs + wstep + 1 + wstep + 1 + wstep + 1;
       connectHeptagons(h, d, hs.h, hs.spin);    
       }
     else 

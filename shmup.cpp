@@ -720,7 +720,8 @@ void handleInput(int delta) {
     int dir = multi::whereto[i].d;
     if(dir == MD_UNDECIDED) return NULL;
     if(dir == MD_USE_ORB) return multi::whereto[i].tgt;
-    if(dir >= 0) { cwspin(cwti, dir); cwstep(cwti); }
+    if(dir >= 0) 
+      cwti = cwti + dir + wstep;
     return cwti.c;
     }
   
@@ -1653,11 +1654,9 @@ void movePlayer(monster *m, int delta) {
           }
         visibleFor(300);
         cellwalker push(c2, dirfromto(c2, m->base));
-        cwspin(push, 3 * -subdir); cwstep(push);
+        push = push + 3 * (-subdir) + wstep;
         if(!canPushThumperOn(push.c, c2, m->base) && c2->type == 7) {
-          cwstep(push);
-          cwspin(push, 1 * -subdir);
-          cwstep(push);
+          push = push + wstep - subdir + wstep;
           }
         if(!canPushThumperOn(push.c, c2, m->base)) {
           go = false;
@@ -3457,7 +3456,7 @@ void virtualRebase(cell*& base, transmatrix& at, bool tohex) {
       heptspin hs;
       hs.h = h;
       hs.spin = d;
-      heptspin hs2 = hsstep(hs, 0);
+      heptspin hs2 = hs + wstep;
       transmatrix V2 = spin((nonbitrunc?M_PI:0)-hs2.spin*2*M_PI/S7) * invheptmove[d];
       if(nonbitrunc) V2 = V2 * spin(M_PI);
       double newz = (V2 * at * C0) [2];

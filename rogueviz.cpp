@@ -537,18 +537,18 @@ namespace sag {
     else {
       cellwalker cw = cwt;
       setsnake(cw, 0);
-      cwstep(cw);
+      cw += wstep;
       setsnake(cw, 1);
       for(int i=2; i<=numsnake; i++) {
         if(i == numsnake && sphere) break;
-        cwstep(cw);
+        cw += wstep;
         snakefirst[i-1] = cw.c->landparam;
         while(cw.c->wparam == INSNAKE) {
           snakelast[i-1] = cw.c->landparam;
-          cwstep(cw); cwspin(cw, 1); cwstep(cw);
+          cw = cw + wstep + 1 + wstep;
           }
         if(i == numsnake) break;
-        setsnake(cw, i); cwspin(cw, 1);
+        setsnake(cw, i); cw += 1;
         }
       }
     int stab = min(numsnake, MAXSNAKETAB);

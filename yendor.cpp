@@ -189,17 +189,17 @@ namespace yendor {
             in_endorian = false;
           nyi.path[i] = lig.c;
           
-          cwstep(lig);
+          lig += wstep;
           if(inmirror(lig)) lig = mirror::reflect(lig);
-          cwspin(lig, 3);
+          lig += 3;
           if(lig.c->type == 7) {
             if(in_endorian && endorian_change && i >= YDIST - 20) {
               // make the last leg a bit more difficult
-              cwspin(lig, hrand(2)*3-1);
+              lig += (hrand(2)*3-1);
               endorian_change = false;
               }
             else
-              cwspin(lig, hrand(2));
+              lig += hrand(2);
             }
           }
         nyi.path[YDIST-1] = lig.c;
