@@ -2352,7 +2352,7 @@ void setdist(cell *c, int d, cell *from) {
     if(d == BARLEV-2 && inmirror(c)) 
       buildEquidistant(c);
 
-    if(d == BARLEV-2 && (c->land == laGraveyard || c->land == laHauntedBorder || c->land == laHaunted))
+    if(d == BARLEV-2 && (c->land == laGraveyard || c->land == laHauntedBorder || c->land == laHaunted) && !tactic::on)
       buildEquidistant(c);
     }
   
