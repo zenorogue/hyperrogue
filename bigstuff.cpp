@@ -943,6 +943,15 @@ int wallchance(cell *c, bool deepOcean) {
     50;
   }
 
+bool mouse_reachability_test(cell *c) {
+  if(c->pathdist != PINFD) 
+    return true;
+  forCellEx(c2, c)
+    if(passable(c, c2, 0) && c2->mpdist < c->mpdist)
+      return mouse_reachability_test(c2);
+  return false;      
+  }
+
 void buildBigStuff(cell *c, cell *from) {
   if(sphere || quotient) return;
   bool deepOcean = false;
@@ -1084,7 +1093,7 @@ void buildBigStuff(cell *c, cell *from) {
       createAlternateMap(c, 2, hsA);
 
     if(c->land == laPalace && ctof(c) && !princess::generating && !shmup::on && multi::players == 1 &&
-      (princess::forceMouse ? (from && from->pathdist != PINFD) : 
+      (princess::forceMouse ? mouse_reachability_test(from) :
         (hrand(2000) < (peace::on ? 100 : 20))) && 
       !c->master->alt && 
       (princess::challenge || kills[moVizier] || peace::on) && !tactic::on && !yendor::on) {
