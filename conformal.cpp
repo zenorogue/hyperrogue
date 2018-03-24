@@ -537,6 +537,7 @@ namespace conformal {
      { "right", "up", "left", "down" },
      { "right", "up", "left", "down" },
      { "right", "up", "left", "down" },
+     { "right", "up", "left", "down" },
      { "right", "up", "left", "down" }
      };
      
@@ -577,7 +578,7 @@ namespace conformal {
       dialog::addBoolItem("Switch", false, '6');
       }      
     
-    if(pmodel == 4) {
+    if(pmodel == mdPolynomial) {
       dialog::addSelItem(XLAT("coefficient"), 
         fts4(polygonal::coefr[polygonal::coefid]), 'x');
       dialog::addSelItem(XLAT("coefficient (imaginary)"), 
@@ -585,12 +586,20 @@ namespace conformal {
       dialog::addSelItem(XLAT("which coefficient"), its(polygonal::coefid), 'n');
       }
 
-    if(pmodel == 3) {
+    if(pmodel == mdPolygonal) {
       dialog::addSelItem(XLAT("polygon sides"), its(polygonal::SI), 'x');
       dialog::addSelItem(XLAT("star factor"), fts(polygonal::STAR), 'y');
       dialog::addSelItem(XLAT("degree of the approximation"), its(polygonal::deg), 'n');
       }
     
+    if(pmodel == mdBall || pmodel == mdHyperboloid || pmodel == mdHemisphere) {
+      dialog::addSelItem(XLAT("camera rotation in 3D models"), fts3(vid.ballangle), 'b');
+      }    
+    
+    if(pmodel == mdHemisphere) {
+      dialog::addSelItem(XLAT("euclid to sphere projection"), fts3(vid.euclid_to_sphere), 'l');
+      }
+      
     if(!bounded && !euclid) dialog::addBoolItem(XLAT("prepare the line animation"), (on), 'e');
     if(on) dialog::addSelItem(XLAT("animation speed"), fts(lvspeed), 'a');
     
@@ -632,6 +641,14 @@ namespace conformal {
         if(canmove && cheater) cheater++;
         create();
         }
+      }
+    else if(uni == 'b') 
+      config_camera_rotation();
+    else if(uni == 'l')  {
+      dialog::editNumber(vid.euclid_to_sphere, 0, 10, .1, 1, XLAT("euclid to sphere projection"), 
+        "Stereographic projection to a sphere. Choose the radius of the sphere."
+        );
+      dialog::scaleLog();
       }
     else if(uni == 'o') 
       autoband = !autoband;

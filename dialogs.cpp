@@ -829,7 +829,7 @@ namespace dialog {
     ne.intval = NULL;
     ne.positive = false;
     dialogflags = (cmode & sm::A3);
-    if(cmode & sm::SIDE) dialogflags |= sm::MAYDARK;
+    if(cmode & sm::SIDE) dialogflags |= sm::MAYDARK | sm::SIDE;
     cmode |= sm::NUMBER;
     pushScreen(drawNumberDialog);
     reaction = reaction_t();

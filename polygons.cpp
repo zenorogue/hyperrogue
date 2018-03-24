@@ -250,7 +250,7 @@ void setmatrix(int useV, const transmatrix& V) {
     GLfloat mat[16] = {
       1, 0, 0, 0,
       0, 1, 0, 0,
-      0, 0, 0, 0,
+      0, 0, -1, 0,
       0, 0, stereo::scrdist, 1
       };
     glhr::set_modelview(glhr::as_glmatrix(mat));
@@ -299,14 +299,17 @@ void gldraw(int useV, const transmatrix& V, const vector<glvertex>& v, int ps, i
       glEnable(GL_STENCIL_TEST);
 
       glColorMask( GL_FALSE,GL_FALSE,GL_FALSE,GL_FALSE );
+      glhr::set_depthtest(false);
       glStencilOp( GL_INVERT, GL_INVERT, GL_INVERT);
       glStencilFunc( GL_ALWAYS, 0x1, 0x1 );
       glhr::color2(0xFFFFFFFF);
       glDrawArrays(tinf ? GL_TRIANGLES : GL_TRIANGLE_FAN, ps, pq);
       
+      stereo::set_mask(ed);
+      glhr::color2(col);
+      glhr::set_depthtest(model_needs_depth());
+
       if(flags & POLY_INVERSE) {
-        stereo::set_mask(ed);
-        glhr::color2(col);
         glStencilOp( GL_ZERO, GL_ZERO, GL_ZERO);
         glStencilFunc( GL_NOTEQUAL, 1, 1);
         GLfloat xx = vid.xres;
@@ -324,8 +327,6 @@ void gldraw(int useV, const transmatrix& V, const vector<glvertex>& v, int ps, i
         setmatrix(useV, V);
         }
       else { 
-        stereo::set_mask(ed);
-        glhr::color2(col);
         glStencilOp( GL_ZERO, GL_ZERO, GL_ZERO);
         glStencilFunc( GL_EQUAL, 1, 1);
         glDrawArrays(tinf ? GL_TRIANGLES : GL_TRIANGLE_FAN, ps, pq);
@@ -337,6 +338,7 @@ void gldraw(int useV, const transmatrix& V, const vector<glvertex>& v, int ps, i
     
     if(outline) {
       glhr::color2(outline);
+      glhr::set_depthtest(model_needs_depth());
       glDrawArrays(GL_LINE_STRIP, ps, pq);
       }
     }

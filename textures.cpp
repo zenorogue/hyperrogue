@@ -483,6 +483,7 @@ void texture_config::drawRawTexture() {
     }
   glhr::set_modelview(glhr::translate(0, 0, stereo::scrdist));
   glhr::prepare(rtver);
+  glhr::set_depthtest(false);
   glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
   }
 

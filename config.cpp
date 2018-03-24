@@ -337,6 +337,7 @@ void initConfig() {
   addsaver(stereo::anaglyph_eyewidth, "eyewidth-anaglyph", 0.1);
   addsaver(stereo::fov, "field-of-vision", 90);
   addsaverenum(stereo::mode, "stereo-mode");
+  addsaver(vid.euclid_to_sphere, "euclid to sphere projection", 1.5);
   
 #if CAP_SHMUP  
   shmup::initConfig();
@@ -1130,6 +1131,17 @@ void showStereo() {
     };
   }
 
+void config_camera_rotation() {
+  dialog::editNumber(vid.ballangle, 0, 90, 5, 0, XLAT("camera rotation in 3D models"), 
+    "Rotate the camera in 3D models (ball model, hyperboloid, and hemisphere). "
+    "Note that hyperboloid and hemisphere models are also available in the "
+    "Hypersian Rug surfaces menu, but they are rendered differently there -- "
+    "they are rendered by making a flat picture first, then mapping it to a surface. "
+    "This makes the output better in some ways, but 3D effects are lost. "
+    "Hypersian Rug model also allows more camera freedom."
+    );
+  }
+
 void show3D() {
   cmode = sm::SIDE | sm::A3 | sm::MAYDARK;
   gamescreen(0);
@@ -1158,7 +1170,7 @@ void show3D() {
   dialog::addBreak(50);
   dialog::addBoolItem(XLAT("ball model"), pmodel == mdBall, 'B');
   dialog::addBoolItem(XLAT("hyperboloid model"), pmodel == mdHyperboloid, 'M');
-  dialog::addSelItem(XLAT("camera rotation in ball model"), fts3(vid.ballangle), 'b');
+  dialog::addSelItem(XLAT("camera rotation in 3D models"), fts3(vid.ballangle), 'b');
   dialog::addSelItem(XLAT("projection in ball model"), fts3(vid.ballproj), 'x');
   
   if(sphere)
@@ -1181,10 +1193,8 @@ void show3D() {
     dialog::handleNavigation(sym, uni);
     
     if(uni == 'n') 
-      cmode &= sm::A3,
       dialog::editNumber(geom3::highdetail, 0, 5, .5, 7, XLAT("High detail range"), "");
     else if(uni == 'm') 
-      cmode &= sm::A3,
       dialog::editNumber(geom3::middetail, 0, 5, .5, 7, XLAT("Mid detail range"), "");
     else if(uni == 'c') 
       tc_camera = ticks,
@@ -1209,22 +1219,17 @@ void show3D() {
       pushScreen(showStereo);
     
     else if(uni == 'y') 
-      cmode &= sm::A3,
       dialog::editNumber(vid.yshift, 0, 1, .1, 0, XLAT("Y shift"), 
         "Don't center on the player character."
         );
     else if(uni == 's') 
-      cmode &= sm::A3,
       dialog::editNumber(vid.camera_angle, -180, 180, 5, 0, XLAT("camera rotation"), 
         "Rotate the camera. Can be used to obtain a first person perspective, "
         "or third person perspective when combined with Y shift."
         );
     else if(uni == 'b') 
-      cmode &= sm::A3,
-      dialog::editNumber(vid.ballangle, 0, 90, 5, 0, XLAT("camera rotation in ball model"), 
-        "Rotate the camera in ball/hyperboloid model.");
+      config_camera_rotation();
     else if(uni == 'x') 
-      cmode &= sm::A3,
       dialog::editNumber(vid.ballproj, 0, 100, .1, 0, XLAT("projection in ball model"), 
         "This parameter affects the ball model the same way as the projection parameter affects the disk model.");
     else if(uni == 'i') 

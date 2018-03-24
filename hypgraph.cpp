@@ -129,20 +129,23 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
     
     switch(cgclass) {
       case gcHyperbolic: {
+        ld zl = zlevel(H);
         ret = H / H[2];
         ret[2] = sqrt(1 - sqhypot2(ret));
+        ret = ret * (1 + (zl - 1) * ret[2]);
         break;
         }
         
       case gcEuclid: {
         // stereographic projection to a sphere
-        auto hd = hdist0(H) / H[2];
-        if(hd == 0) H[2] = -1;
+        auto hd = hdist0(H) / vid.euclid_to_sphere;
+        if(hd == 0) ret = hpxyz(0, 0, -1);
         else {
           ld x = 2 * hd / (1 + hd * hd);
           ld y = x / hd;
-          H = H * x / (hd * H[2]);
-          H[2] = 1 - y;
+          ret = H * x / hd / vid.euclid_to_sphere;
+          ret[2] = (1 - y);
+          ret = ret * (1 + (H[2]-1) * y / vid.euclid_to_sphere);
           }
         break;
         }
@@ -153,7 +156,7 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
         }
       }
     
-    ret = rotmatrix(0, 2, ball) * ret;
+    ret = rotmatrix(M_PI/2 + ball, 1, 2) * ret;
     
     ghcheck(ret, H);
     return;

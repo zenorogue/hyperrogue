@@ -2309,7 +2309,8 @@ void drawaura() {
   glhr::switch_mode(glhr::gmVarColored);
   glhr::id_modelview();
   glhr::prepare(auravertices);
-  glDrawArrays(GL_TRIANGLES, 0, size(auravertices));    
+  glhr::set_depthtest(false);
+  glDrawArrays(GL_TRIANGLES, 0, size(auravertices));
 
 
   setcameraangle(false);

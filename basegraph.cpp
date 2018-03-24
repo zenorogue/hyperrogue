@@ -263,6 +263,10 @@ void stereo::set_viewport(int ed) {
     glViewport(vid.xres/2, 0, vid.xres/2, vid.yres);
   }    
 
+bool model_needs_depth() {
+  return pmodel == mdBall || pmodel == mdHyperboloid || pmodel == mdHemisphere;
+  }
+
 void setGLProjection(int col) {
   DEBB(DF_GRAPH, (debugfile,"setGLProjection\n"));
   GLERR("pre_setGLProjection");
@@ -299,17 +303,17 @@ void setGLProjection(int col) {
   //glLineWidth(1.0f);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   
-  if(pmodel == mdBall || pmodel == mdHyperboloid || pmodel == mdHemisphere) {
+  if(model_needs_depth()) {
 #ifdef GL_ES
     glClearDepthf(1.0f);
 #else
     glClearDepth(1.0f);
 #endif
-    glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
+    glhr::set_depthtest(true);
     }
   else
-    glDisable(GL_DEPTH_TEST);
+    glhr::set_depthtest(false);
   
   GLERR("setGLProjection");
   
@@ -523,6 +527,8 @@ bool gl_print(int x, int y, int shift, int size, const char *s, int color, int a
   int ysiz = f.heights[32] * size / gsiz;
 
   bool clicked = (mousex >= x && mousey <= y && mousex <= x+tsize && mousey >= y-ysiz);
+  
+  glhr::set_depthtest(false);
 
   for(int i=0; s[i];) {
   
@@ -917,6 +923,7 @@ void drawCircle(int x, int y, int size, int color) {
       glcoords.push_back(make_array<GLfloat>(x + size * sin(rr), y + size * cos(rr), stereo::scrdist));
       }
     glhr::vertices(glcoords);
+    glhr::set_depthtest(false);
     glDrawArrays(GL_LINE_LOOP, 0, pts);
     return;
     }

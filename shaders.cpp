@@ -670,4 +670,13 @@ void store_in_buffer(vector<glvertex>& v) {
 #endif
   }
 
+bool current_depthtest;
+
+void set_depthtest(bool b) {
+  if(b != current_depthtest) {
+    current_depthtest = b;
+    if(b) glEnable(GL_DEPTH_TEST);
+    else glDisable(GL_DEPTH_TEST);
+    }
+  }
 }
