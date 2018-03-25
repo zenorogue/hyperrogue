@@ -351,7 +351,10 @@ void showDisplayMode() {
 #if CAP_MODEL
   dialog::addBoolItem(XLAT("paper model creator"), (false), 'n');
 #endif
-  dialog::addBoolItem(XLAT("conformal/history mode"), (conformal::on || pmodel || conformal::includeHistory), 'a');
+
+  dialog::addBoolItem(XLAT("models of hyperbolic geometry"), pmodel, 'a');
+
+  dialog::addBoolItem(XLAT("history mode"), (conformal::on || conformal::includeHistory), 'A');
 //  dialog::addBoolItem(XLAT("expansion"), viewdists, 'x');
   
   showAllConfig();
@@ -360,7 +363,7 @@ void showDisplayMode() {
   keyhandler = [] (int sym, int uni) {
     dialog::handleNavigation(sym, uni);
     char xuni = uni;
-    if((xuni >= 'A' && xuni <= 'Z') || (xuni >= 1 && xuni <= 26)) xuni |= 32;
+    // if((xuni >= 'A' && xuni <= 'Z') || (xuni >= 1 && xuni <= 26)) xuni |= 32;
   
     if(xuni == 'p') projectionDialog();
     
@@ -392,7 +395,9 @@ void showDisplayMode() {
       }
   #endif
     else if(uni == 'a')
-      pushScreen(conformal::show);
+      pushScreen(conformal::model_menu);
+    else if(uni == 'A')
+      pushScreen(conformal::history_menu);
   
   #if CAP_MODEL
     else if(xuni == 'n') 

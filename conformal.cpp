@@ -544,39 +544,55 @@ namespace conformal {
   const char *modelnames[MODELCOUNT] = {
     "disk", "half-plane", "band", "polygonal", "polynomial",
     "azimuthal equidistant", "azimuthal equi-area", 
-    "ball model", "hyperboloid", "hemisphere"
+    "ball model", "Minkowski hyperboloid", "hemisphere"
     };
   
-  void show() {
-    cmode = sm::SIDE;
+  string get_model_name(eModel pm) {
+    return XLAT(
+      pm == mdBand && sphere ? "Mercator" : 
+      pm == mdHalfplane && euclid ? "inversion" : 
+      pm == mdHemisphere && !hyperbolic ? "sphere" :
+      pm == mdHyperboloid && euclid ? "plane" :
+      pm == mdHyperboloid && sphere ? "sphere" :
+      modelnames[pm]);
+    }
+  
+  bool model_available(eModel pm) {
+    if(mdEqui() || pm == mdDisk || pm == mdPolynomial || pm == mdHyperboloid || pm == mdHemisphere)
+      return true;
+    if(sphere && pm == mdBand)
+      return true;
+    if(euclid && (pm == mdHalfplane || pm == mdBall))
+      return true;
+    if(hyperbolic)
+      return true;
+    return false;
+    }    
+  
+  void model_menu() {
+    cmode = sm::SIDE | sm::MAYDARK;
     gamescreen(0);
+    dialog::init(XLAT("models of hyperbolic geometry"));
+    for(int i=0; i<mdGUARD; i++) {
+      eModel m = eModel(i);
+      if(model_available(m))
+        dialog::addBoolItem(get_model_name(m), pmodel == m, '0' + i);
+      }
     
-    dialog::init(XLAT("conformal/history mode"));
+    dialog::addBreak(100);
 
-    dialog::addBoolItem(XLAT("include history"), (includeHistory), 'i');
+    // if(pmodel == mdBand && sphere)
+    dialog::addSelItem(XLAT("scale factor"), fts(vid.scale), 'z');
     
-    bool notconformal0 = (pmodel >= 5 && pmodel <= 6) && !euclid;
-    bool notconformal = notconformal0 || abs(vid.alpha-1) > 1e-3;
-
-    dialog::addSelItem(notconformal ? XLAT("model used (not conformal!)") : XLAT("model used"), 
-      XLAT(
-        pmodel == mdBand && sphere ? "Mercator" : 
-        pmodel == mdHalfplane && euclid ? "inversion" : 
-        pmodel == mdHemisphere && !hyperbolic ? "sphere" :
-        pmodel == mdHyperboloid && euclid ? "plane" :
-        pmodel == mdHyperboloid && sphere ? "sphere" :
-        modelnames[pmodel]), 'm');
-    dialog::addSelItem(XLAT("rotation"), directions[pmodel][rotation&3], 'r');
-    
-    if(pmodel == mdBand && sphere)
-      dialog::addSelItem(XLAT("scale factor"), fts(vid.scale), 'z');
-
-    if(abs(vid.alpha-1) > 1e-3 && pmodel != mdBall && pmodel != mdHyperboloid && pmodel != mdHemisphere) {
+    if(abs(vid.alpha-1) > 1e-3 && pmodel != mdBall && pmodel != mdHyperboloid && pmodel != mdHemisphere && pmodel != mdDisk) {
       dialog::addBreak(50);
       dialog::addInfo("NOTE: this works 'correctly' only if the Poincaré model/stereographic projection is used.");
       dialog::addBreak(50);
-      dialog::addBoolItem("Switch", false, '6');
-      }      
+      }
+    
+    if(pmodel == mdDisk || pmodel == mdBall || pmodel == mdHyperboloid) {
+      dialog::addSelItem(XLAT("Projection at the ground level"), fts3(vid.alpha), 'p');
+      }
     
     if(pmodel == mdPolynomial) {
       dialog::addSelItem(XLAT("coefficient"), 
@@ -585,6 +601,9 @@ namespace conformal {
         fts4(polygonal::coefi[polygonal::coefid]), 'y');
       dialog::addSelItem(XLAT("which coefficient"), its(polygonal::coefid), 'n');
       }
+
+    if(pmodel == mdBall)
+      dialog::addSelItem(XLAT("projection in ball model"), fts3(vid.ballproj), 'x');
 
     if(pmodel == mdPolygonal) {
       dialog::addSelItem(XLAT("polygon sides"), its(polygonal::SI), 'x');
@@ -597,9 +616,84 @@ namespace conformal {
       }    
     
     if(pmodel == mdHemisphere) {
-      dialog::addSelItem(XLAT("euclid to sphere projection"), fts3(vid.euclid_to_sphere), 'l');
+      dialog::addSelItem(XLAT("parameter"), fts3(vid.euclid_to_sphere), 'l');
       }
       
+    dialog::addBreak(100);
+    dialog::addItem(XLAT("history mode"), 'a');
+    dialog::addItem(XLAT("hypersian rug mode"), 'u');
+    dialog::addItem(XLAT("exit this menu"), 'q');
+    dialog::display();
+    
+    keyhandler = [] (int sym, int uni) {
+      dialog::handleNavigation(sym, uni);
+      
+      if(uni >= '0' && uni <= '9') {
+        pmodel = eModel(uni - '0');
+        polygonal::solve();
+        vid.alpha = 1; vid.scale = 1;
+        if(pmodel == mdBand && sphere)
+          vid.scale = .3;
+        if(pmodel == mdDisk && sphere)
+          vid.scale = .4;
+        }
+      else if(uni == '6')
+        vid.alpha = 1, vid.scale = 1;
+      else if(uni == 'z')
+        editScale();
+      else if(uni == 'p')
+        projectionDialog();
+      else if(uni == 'b') 
+        config_camera_rotation();
+      else if(uni == 'u')
+        pushScreen(rug::show);
+      else if(uni == 'a')
+        pushScreen(history_menu);
+      else if(uni == 'l')  {
+        dialog::editNumber(vid.euclid_to_sphere, 0, 10, .1, 1, XLAT("parameter"), 
+          "Stereographic projection to a sphere. Choose the radius of the sphere."
+          );
+        dialog::scaleLog();
+        }
+      else if(uni == 'x' && pmodel == mdBall) 
+        dialog::editNumber(vid.ballproj, 0, 100, .1, 0, XLAT("projection in ball model"), 
+          "This parameter affects the ball model the same way as the projection parameter affects the disk model.");
+      else if(sym == 'x' && pmodel == mdPolygonal)
+        dialog::editNumber(polygonal::SI, 3, 10, 1, 4, XLAT("polygon sides"), "");
+      else if(sym == 'y' && pmodel == mdPolygonal)
+        dialog::editNumber(polygonal::STAR, -1, 1, .1, 0, XLAT("star factor"), "");
+      else if(sym == 'n' && pmodel == mdPolygonal)
+        dialog::editNumber(polygonal::deg, 2, polygonal::MSI-1, 1, 2, XLAT("degree of the approximation"), "");
+      else if(sym == 'x' && pmodel == mdPolynomial)  {
+        polygonal::maxcoef = max(polygonal::maxcoef, polygonal::coefid);
+        int ci = polygonal::coefid + 1;
+        dialog::editNumber(polygonal::coefr[polygonal::coefid], -10, 10, .01/ci/ci, 0, XLAT("coefficient"), "");
+        }
+      else if(sym == 'y' && pmodel == mdPolynomial) {
+        polygonal::maxcoef = max(polygonal::maxcoef, polygonal::coefid);
+        int ci = polygonal::coefid + 1;
+        dialog::editNumber(polygonal::coefi[polygonal::coefid], -10, 10, .01/ci/ci, 0, XLAT("coefficient (imaginary)"), "");
+        }
+      else if(sym == 'n' && pmodel == mdPolynomial)
+        dialog::editNumber(polygonal::coefid, 0, polygonal::MSI-1, 1, 0, XLAT("which coefficient"), "");
+      else if(sym == 'r') rotation += (shiftmul > 0 ? 1:3);
+      else if(doexiton(sym, uni)) popScreen();
+      };
+    }
+  
+  void history_menu() {
+    cmode = sm::SIDE | sm::MAYDARK;
+    gamescreen(0);
+    
+    dialog::init(XLAT("history mode"));
+
+    dialog::addBoolItem(XLAT("include history"), (includeHistory), 'i');
+    
+    // bool notconformal0 = (pmodel >= 5 && pmodel <= 6) && !euclid;
+    // bool notconformal = notconformal0 || abs(vid.alpha-1) > 1e-3;
+
+    dialog::addSelItem(XLAT("model used"), get_model_name(pmodel), 'm');
+    
     if(!bounded && !euclid) dialog::addBoolItem(XLAT("prepare the line animation"), (on), 'e');
     if(on) dialog::addSelItem(XLAT("animation speed"), fts(lvspeed), 'a');
     
@@ -608,7 +702,7 @@ namespace conformal {
     if(autoband)
       dialog::addBoolItem(XLAT("include history when auto-rendering"), (autobandhistory), 'j');
     
-    bool renderable = on && pmodel == 2 && !euclid && !sphere;
+    bool renderable = on && pmodel == mdBand && !euclid && !sphere;
     if(renderable || autoband) {
       dialog::addSelItem(XLAT("band width"), "2*"+its(bandhalf), 'd');
       dialog::addSelItem(XLAT("length of a segment"), its(bandsegment), 's');
@@ -627,11 +721,7 @@ namespace conformal {
   void handleKeyC(int sym, int uni) {
     dialog::handleNavigation(sym, uni);
   
-    if(uni == '6')
-      vid.alpha = 1, vid.scale = 1;
-    else if(uni == 'z')
-      editScale();
-    else if(uni == 'e') {
+    if(uni == 'e') {
       if(on) clear();
       else {
         if(canmove && !cheater) {
@@ -642,54 +732,10 @@ namespace conformal {
         create();
         }
       }
-    else if(uni == 'b') 
-      config_camera_rotation();
-    else if(uni == 'l')  {
-      dialog::editNumber(vid.euclid_to_sphere, 0, 10, .1, 1, XLAT("euclid to sphere projection"), 
-        "Stereographic projection to a sphere. Choose the radius of the sphere."
-        );
-      dialog::scaleLog();
-      }
     else if(uni == 'o') 
       autoband = !autoband;
-    else if(uni == 'm' || uni == 'M') {
-
-      switchagain: {
-        pmodel = eModel((pmodel + (shiftmul > 0 ? 1 : -1) + MODELCOUNT) % MODELCOUNT);
-        
-        if(!mdEqui() && pmodel != mdDisk && pmodel != mdPolynomial && pmodel != mdHyperboloid && pmodel != mdHemisphere) {
-          if(sphere && pmodel != mdBand)
-              goto switchagain;
-          if(euclid && pmodel != mdHalfplane && pmodel != mdBall)
-              goto switchagain;
-          }
-        }
-      polygonal::solve();
-      vid.alpha = 1; vid.scale = 1;
-      if(pmodel == mdBand && sphere)
-        vid.scale = .3;
-      if(pmodel == mdDisk && sphere)
-        vid.scale = .4;
-      }
-    else if(sym == 'x' && pmodel == mdPolygonal)
-      dialog::editNumber(polygonal::SI, 3, 10, 1, 4, XLAT("polygon sides"), "");
-    else if(sym == 'y' && pmodel == mdPolygonal)
-      dialog::editNumber(polygonal::STAR, -1, 1, .1, 0, XLAT("star factor"), "");
-    else if(sym == 'n' && pmodel == mdPolygonal)
-      dialog::editNumber(polygonal::deg, 2, polygonal::MSI-1, 1, 2, XLAT("degree of the approximation"), "");
-    else if(sym == 'x' && pmodel == mdPolynomial)  {
-      polygonal::maxcoef = max(polygonal::maxcoef, polygonal::coefid);
-      int ci = polygonal::coefid + 1;
-      dialog::editNumber(polygonal::coefr[polygonal::coefid], -10, 10, .01/ci/ci, 0, XLAT("coefficient"), "");
-      }
-    else if(sym == 'y' && pmodel == mdPolynomial) {
-      polygonal::maxcoef = max(polygonal::maxcoef, polygonal::coefid);
-      int ci = polygonal::coefid + 1;
-      dialog::editNumber(polygonal::coefi[polygonal::coefid], -10, 10, .01/ci/ci, 0, XLAT("coefficient (imaginary)"), "");
-      }
-    else if(sym == 'n' && pmodel == mdPolynomial)
-      dialog::editNumber(polygonal::coefid, 0, polygonal::MSI-1, 1, 0, XLAT("which coefficient"), "");
-    else if(sym == 'r') rotation += (shiftmul > 0 ? 1:3);
+    else if(uni == 'm') 
+      pushScreen(model_menu);
     else if(sym == 'a') 
       dialog::editNumber(lvspeed, -5, 5, .1, 1, XLAT("animation speed"), "");
     else if(sym == 'd') 
@@ -697,9 +743,6 @@ namespace conformal {
     else if(sym == 's') 
       dialog::editNumber(bandsegment, 500, 32000, 500, 16000, XLAT("band segment"), "");
     else if(sym == 'g') { dospiral = !dospiral; }
-#if CAP_SDL
-    else if(uni == 'f' && pmodel == mdBand && on) createImage(dospiral);
-#endif
     else if(sym == 'i') { 
       if(canmove && !cheater) {
         addMessage("Enable cheat mode or GAME OVER to use this");
@@ -708,6 +751,9 @@ namespace conformal {
       if(canmove && cheater) cheater++;
       includeHistory = !includeHistory; 
       }
+#if CAP_SDL
+    else if(uni == 'f' && pmodel == mdBand && on) createImage(dospiral);
+#endif
     else if(sym == 'j') { 
       autobandhistory = !autobandhistory; 
       }

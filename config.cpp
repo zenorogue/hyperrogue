@@ -1192,10 +1192,7 @@ void show3D() {
   dialog::addSelItem(XLAT("Y shift"), fts3(vid.yshift), 'y');
   dialog::addSelItem(XLAT("camera rotation"), fts3(vid.camera_angle), 's');
   dialog::addBreak(50);
-  dialog::addBoolItem(XLAT("ball model"), pmodel == mdBall, 'B');
-  dialog::addBoolItem(XLAT("hyperboloid model"), pmodel == mdHyperboloid, 'M');
-  dialog::addSelItem(XLAT("camera rotation in 3D models"), fts3(vid.ballangle), 'b');
-  dialog::addSelItem(XLAT("projection in ball model"), fts3(vid.ballproj), 'x');
+  dialog::addSelItem(XLAT("model used"), conformal::get_model_name(pmodel), 'M');
   
   if(sphere)
     dialog::addSelItem(XLAT("brightness behind the sphere"), fts3(backbrightness), 'i');
@@ -1253,18 +1250,13 @@ void show3D() {
         );
     else if(uni == 'b') 
       config_camera_rotation();
-    else if(uni == 'x') 
-      dialog::editNumber(vid.ballproj, 0, 100, .1, 0, XLAT("projection in ball model"), 
-        "This parameter affects the ball model the same way as the projection parameter affects the disk model.");
     else if(uni == 'i') 
       dialog::editNumber(backbrightness, 0, 1, .01, 0.25, XLAT("brightness behind the sphere"), 
         "brightness behind the sphere");
-    else if(uni == 'B') 
-      pmodel = (pmodel == mdBall ? mdDisk : mdBall);
     else if(uni == 'M') 
-      pmodel = (pmodel == mdHyperboloid ? mdDisk : mdHyperboloid);
-  
-    else if(doexiton(sym, uni)) popScreen();
+      pushScreen(conformal::model_menu);  
+    else if(doexiton(sym, uni)) 
+      popScreen();
     };
   }
 

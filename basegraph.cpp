@@ -199,7 +199,7 @@ void stereo::set_projection(int ed) {
   
   if(pmodel && !stereo::active()) {
 
-    glhr::projection_multiply(glhr::ortho(vid.xres/2, -vid.yres/2, stereo::scrdist/.4));
+    glhr::projection_multiply(glhr::ortho(vid.xres/2, -vid.yres/2, abs(stereo::scrdist) + 30000));
     }
   else if(pmodel) {
 

@@ -885,6 +885,12 @@ namespace rug {
 
 #define HASLINEVIEW
 
+enum eModel {
+  mdDisk, mdHalfplane, mdBand, mdPolygonal, mdPolynomial,
+  mdEquidistant, mdEquiarea, mdBall, mdHyperboloid, 
+  mdHemisphere,
+  mdGUARD, mdUnchanged };
+
 namespace conformal {
   extern bool on;
   extern vector<pair<cell*, eMonster> > killhistory;
@@ -901,7 +907,9 @@ namespace conformal {
   
   void create();
   void clear();
-  void show();
+  void model_menu();
+  void history_menu();
+  string get_model_name(eModel);
   void apply();
   void movetophase();
   void renderAutoband();
@@ -1594,12 +1602,6 @@ int angledist(int t, int d1, int d2);
 int angledist(cell *c, int d1, int d2);
 
 void setcameraangle(bool b);
-
-enum eModel {
-  mdDisk, mdHalfplane, mdBand, mdPolygonal, mdPolynomial,
-  mdEquidistant, mdEquiarea, mdBall, mdHyperboloid, 
-  mdHemisphere,
-  mdGUARD, mdUnchanged };
 
 #define MODELCOUNT ((int) mdGUARD)
 

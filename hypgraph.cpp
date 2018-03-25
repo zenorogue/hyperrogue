@@ -83,7 +83,7 @@ void ballmodel(hyperpoint& ret, double alpha, double d, double zl) {
   
   ret[0] = ax * ca;
   ret[1] = ay * cb + ax * sa * sb;
-  ret[2] = - ax * sa * cb - ay * sb;
+  ret[2] = ax * sa * cb - ay * sb;
   }
 
 void apply_depth(hyperpoint &f, ld z) {
@@ -164,12 +164,12 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
 
   if(pmodel == mdHyperboloid) {
 
-    ld ball = vid.ballangle * M_PI / 180;
+    ld ball = -vid.ballangle * M_PI / 180;
     ld cb = cos(ball), sb = sin(ball);
 
     ret[0] = H[0] / 3;
-    ret[1] = (1 - H[2]) / 3 * cb + H[1] / 3 * sb;
-    ret[2] = H[1] / 3 * cb - (1 - H[2]) / 3 * sb;
+    ret[1] = (1 - H[2]) / 3 * cb - H[1] / 3 * sb;
+    ret[2] = -(-H[1] / 3 * cb - (1 - H[2]) / 3 * sb);
 
     ghcheck(ret,H);
     return;
