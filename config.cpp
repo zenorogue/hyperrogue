@@ -1160,7 +1160,7 @@ void config_camera_rotation() {
     "Rotate the camera in 3D models (ball model, hyperboloid, and hemisphere). "
     "Note that hyperboloid and hemisphere models are also available in the "
     "Hypersian Rug surfaces menu, but they are rendered differently there -- "
-    "they are rendered by making a flat picture first, then mapping it to a surface. "
+    "by making a flat picture first, then mapping it to a surface. "
     "This makes the output better in some ways, but 3D effects are lost. "
     "Hypersian Rug model also allows more camera freedom."
     );

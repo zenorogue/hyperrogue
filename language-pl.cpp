@@ -6728,3 +6728,109 @@ S("affect texture position Y", "położenie tekstury Y")
 S("select master cells", "wybierz główne pola")
 S("select master triangles", "wybierz główne trójkąty")
 S("fine tune vertices", "dostrajanie wierzchołków")
+
+// main menu
+// an option to keep the current settings
+S("use current/saved settings", "obecne/zapisane ustawienia")
+// randomly chosen mode: hypersian rug
+S("see the true form", "prawdziwy kształt")
+// randomly chosen mode: heptagonal mode
+S("more curvature", "większa krzywizna")
+
+// anti-crossing in the Hypersian Rug
+S("anti-crossing", "anty-krzyżowanie")
+S("The anti-crossing algorithm prevents the model from crossing itself, "
+  "by preventing points which should not be close from being close. "
+  "The bigger number, the more sensitive it is, but the embedding is slower. Set 0 to disable.",
+  
+  "Algorytm zabrania modelowi krzyżowania się samemu ze sobą "
+  "przez zabranianie odległym punktom znaleźć się blisko siebie. "
+  "Im większa liczba, tym większa czułość, ale konstrukcja modelu "
+  "jest wolniejsza. Ustaw 0, by wyłączyć."
+  )
+
+// new 3D models
+
+// various menu names
+
+S("constant curvature surfaces", "powierzchnie o stałej krzywiźnie")
+S("smooth surfaces", "gładkie powierzchnie")
+S("models of hyperbolic geometry", "modele geometrii hiperbolicznej")
+S("history mode", "tryb historii") // old 'conformal/history mode' has been split into two
+S("other 3D models", "inne modele 3D")
+
+// various models
+
+S("Minkowski hyperboloid", "hiperboloida")
+S("plane", "płaszczyzna")
+S("sphere", "sfera")
+S("hemisphere", "półsfera")
+S("tractricoid", "traktrysoida")
+S("concave barrel", "wklęsła beczka")
+S("Dini's surface", "powierzchnia Diniego")
+S("Kuen surface", "powierzchnia Kuena")
+S("inversion", "inwersja")
+
+S(
+  "In this menu you can choose from several known smooth surfaces of constant negative curvature. "
+  "Since the curvature of hyperbolic plane is also constant negative, these surfaces "
+  "are great to draw hyperbolic tesselations on. While they look great, only a small part "
+  "of the hyperbolic plane can be visibly represented in this way, so they are not "
+  "good for playing HyperRogue; however, the coverage extends far away in specific directions, "
+  "so first increasing sight range in graphics config and texture size in hypersian rug settings may improve the effect. "
+  "For convenience, you can also choose other 3D models from this menu.",
+  
+  "W tym trybie możesz wybrać spośród kilku znanych powierzchni o stałej ujemnej krzywiźnie. "
+  "Krzywizna płaszczyzny hiperbolicznej jest również stała ujemna, także powierzchnie te "
+  "świetnie się nadają do rysowania hiperbolicznych teselacji. Tylko mała część "
+  "płaszczyzny hiperbolicznej może być pokazana w ten sposób, także nie nadają się "
+  "one zbyt dobrze do grania w HyperRogue; pokrycie zato wybiega daleko w określonych kierunkach, "
+  "także powiększenie pola widzenia w konfiguracji grafiki oraz rozmiaru tekstury w ustawieniach "
+  "hiperskiego dywanu może poprawić efekt. Dla wygody możesz również wybrać inne tryby 3D "
+  "z tego menu."
+  )
+
+// coverage
+S("display coverage", "pokaż pokrycie")
+S("on surface", "na powierzchni")
+S("on H² (static)", "na H² (statycznie)")
+S("on H² (dynamic)", "na H² (dynamicznie)")
+
+S("Computing these models involves integrals and differential equations, which are currently solved numerically. This controls the precision.",
+  "Obliczanie tych modeli wymaga całek i równań różniczkowych, które są obecnie rozwiązywane numerycznie. Ten parametr określa dokładność.")
+
+// too bored for declension of %1 (either a surface name or a a part of a surface)
+S("solving the geodesics on: %1, %2/%3", "obliczanie geodezyjnych na: %1, %2/%3")
+
+S("the upper component", "górna składowa")
+S("the lower center", "dół środek")
+S("the lower left", "dół lewo")
+S("the lower right", "dół prawo")
+
+S("camera rotation in 3D models", "obrót kamery w trybach 3D")
+
+S("Rotate the camera in 3D models (ball model, hyperboloid, and hemisphere). "
+  "Note that hyperboloid and hemisphere models are also available in the "
+  "Hypersian Rug surfaces menu, but they are rendered differently there -- "
+  "by making a flat picture first, then mapping it to a surface. "
+  "This makes the output better in some ways, but 3D effects are lost. "
+  "Hypersian Rug model also allows more camera freedom.",
+  
+  "Obróć kamerę w modelach 3D (kula, hiperboloida, półsfera). "
+  "Uwaga: model hiperboloidy i półsfery są też dostępne w menu "
+  "powierzchni hiperskiego dywanu, ale są one tam renderowane w inny "
+  "sposób -- poprzez zrobienie najpierw płaskiego rysunku, a potem "
+  "odwzorowanie go na powierzchnię. To daje ładniejszy wynik pod "
+  "pewnymi względami, ale gubi efekty 3D. Tryb hiperskiego dywanu "
+  "pozwala za to na większą dowolność ustawienia kamery.")
+
+// parameter for the given model
+S("parameter", "parametr")
+S( "Stereographic projection to a sphere. Choose the radius of the sphere.",
+  "Rzut stereograficzny na sferę. Wybierz promień sfery.")
+// parameter for Dini
+S("The larger the number, the more twisted it is.",
+  "Im większa liczba, tym bardziej poskręcana jest ta powierzchnia.")
+// parameter for concave barrel
+S("Controls the inner radius.", "Określa promień wewnętrzny.")
+

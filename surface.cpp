@@ -673,9 +673,9 @@ void show_surfaces() {
 
   dialog::addBoolItem(XLAT("tractricoid"), b && sh == dsTractricoid, '1');
   dialog::addBoolItem(XLAT("concave barrel"), b && sh == dsHyperlike, '2');
-  dialog::addSelItem(XLAT("     parameter"), fts(hyper_b), '@');
+  dialog::addSelItem("     " + XLAT("parameter"), fts(hyper_b), '@');
   dialog::addBoolItem(XLAT("Dini's surface"), b && sh == dsDini, '3');
-  dialog::addSelItem(XLAT("     parameter") + " ", fts(dini_b), '#');
+  dialog::addSelItem("     " + XLAT("parameter") + " ", fts(dini_b), '#');
   dialog::addBoolItem(XLAT("Kuen surface"), b && sh == dsKuen, '4');
   
   dialog::addBreak(50);
@@ -684,7 +684,7 @@ void show_surfaces() {
 
   dialog::addBoolItem(XLAT("Hypersian Rug"), b && sh == dsNone, '5');
   dialog::addBoolItem(XLAT("Minkowski hyperboloid"), b && sh == dsHyperboloid, '6');
-  dialog::addBoolItem(XLAT("hemisphere model"), b && sh == dsHemisphere, '7');
+  dialog::addBoolItem(XLAT("hemisphere"), b && sh == dsHemisphere, '7');
 
   dialog::addBreak(100);
 

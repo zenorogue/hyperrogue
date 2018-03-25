@@ -6942,4 +6942,113 @@ S("select master cells", "výběr hlavních buněk")
 S("select master triangles", "výběr hlavních trojúhelníků")
 S("fine tune vertices", "doladění vrcholů")
 
+// === 10.3n extra texts ===
+// =========================
+
+// main menu
+// an option to keep the current settings
+S("use current/saved settings", "použít současné/uložené nastavení")
+// randomly chosen mode: hypersian rug
+S("see the true form", "skutečná podoba")
+// randomly chosen mode: heptagonal mode
+S("more curvature", "vyšší zakřivení")
+
+// anti-crossing in the Hypersian Rug
+S("anti-crossing", "bez křížení")
+S("The anti-crossing algorithm prevents the model from crossing itself, "
+  "by preventing points which should not be close from being close. "
+  "The bigger number, the more sensitive it is, but the embedding is slower. Set 0 to disable.",
+  
+  "Tento algoritmus brání tomu, aby se model křížil, a to tím, že brání "
+  "přibližování bodů, které by neměly být blízko u sebe. Čím vyšší číslo, "
+  "tím citlivější algoritmus je, ale tím pomalejší bude konstrukce. "
+  "Hodnota 0 tuto možnost vypne."
+  )
+
+// new 3D models
+
+// various menu names
+
+S("constant curvature surfaces", "plochy s konstantní křivostí")
+S("smooth surfaces", "hladké plochy")
+S("models of hyperbolic geometry", "modely hyperbolické geometrie")
+S("history mode", "mód historie") // old 'conformal/history mode' has been split into two
+S("other 3D models", "další 3D modely")
+
+// various models
+
+S("Minkowski hyperboloid", "Minkowskiho hyperboloid")
+S("plane", "rovina")
+S("sphere", "koule")
+S("hemisphere", "polokoule")
+S("tractricoid", "traktrikoida")
+S("concave barrel", "konkávní sud")
+S("Dini's surface", "Diniho plocha")
+S("Kuen surface", "Kuenova plocha")
+S("inversion", "inverze")
+
+S(
+  "In this menu you can choose from several known smooth surfaces of constant negative curvature. "
+  "Since the curvature of hyperbolic plane is also constant negative, these surfaces "
+  "are great to draw hyperbolic tesselations on. While they look great, only a small part "
+  "of the hyperbolic plane can be visibly represented in this way, so they are not "
+  "good for playing HyperRogue; however, the coverage extends far away in specific directions, "
+  "so first increasing sight range in graphics config and texture size in hypersian rug settings may improve the effect. "
+  "For convenience, you can also choose other 3D models from this menu.",
+  
+  "V tomto menu si můžeš vybrat z několika známých hladkých ploch s konstantní "
+  "zápornou křivostí. Vzhledem k tomu, že i hyperbolická rovina má konstantní "
+  "zápornou křivost, jsou tyto povrchy skvělé pro kreslení hyperbolických "
+  "dělení. I když vypadají skvěle, tímto způsobem je možné viditelně reprezentovat "
+  "pouze malou část hyperbolické roviny, takže na hraní HyperRogue se nehodí; "
+  "v některých směrech se však jejich pokrytí táhne velmi daleko, a proto se "
+  "dá efekt někdy vylepšit tím, že v konfiguraci grafiky zvýšíš dohled a "
+  "v nastavení hyperského koberce velikost textury. Kvůli pohodlí je z tohoto "
+  "menu možné vybrat i jiné 3D modely."
+  )
+
+// coverage
+S("display coverage", "zobraz pokrytí")
+S("on surface", "na ploše")
+S("on H² (static)", "na H² (statické)")
+S("on H² (dynamic)", "na H² (dynamické)")
+
+S("Computing these models involves integrals and differential equations, which are currently solved numerically. This controls the precision.",
+  "Výpočet těchto modelů zahrnuje integrály a diferenciální rovnice, které "
+  "se v současné době řeší numericky. Tento parametr řídí jejich přesnost.")
+
+// too bored for declension of %1 (either a surface name or a a part of a surface)
+S("solving the geodesics on: %1, %2/%3", "řešení geodetik na ploše: %1, %2/%3")
+
+S("the upper component", "horní komponenta")
+S("the lower center", "dole uprostřed")
+S("the lower left", "vlevo dole")
+S("the lower right", "vpravo dole")
+
+S("camera rotation in 3D models", "rotace kamery ve 3D modelech")
+
+S("Rotate the camera in 3D models (ball model, hyperboloid, and hemisphere). "
+  "Note that hyperboloid and hemisphere models are also available in the "
+  "Hypersian Rug surfaces menu, but they are rendered differently there -- "
+  "by making a flat picture first, then mapping it to a surface. "
+  "This makes the output better in some ways, but 3D effects are lost. "
+  "Hypersian Rug model also allows more camera freedom.",
+  
+  "Umožňuje rotaci kamery ve 3D modelech (koule, hyperboloid a polokoule). "
+  "Poznámka: modely hyperboloidu a polokoule jsou k dispozici také v menu "
+  "ploch hyperského koberce, ale tam se renderují jiným způsobem -- tím, "
+  "že se nejprve vytvoří plochý obrázek, a ten se pak namapuje na plochu. "
+  "V některých ohledech pak výstup vypadá lépe, ale ztratí se tím 3D "
+  "efekty. Model hyperského koberce také umožňuje větší volnost kamery.")
+
+// parameter for the given model
+S("parameter", "parametr")
+S( "Stereographic projection to a sphere. Choose the radius of the sphere.",
+  "Stereografická projekce na koule. Vyber si poloměr koule.")
+// parameter for Dini
+S("The larger the number, the more twisted it is.",
+  "Čím vyšší je hodnota parametru, tím víc bude tato plocha zkroucená.")
+// parameter for concave barrel
+S("Controls the inner radius.", "Ovládá vnitřní poloměr.")
+
 #undef Orb
