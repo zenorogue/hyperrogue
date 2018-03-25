@@ -306,7 +306,7 @@ void showMainMenu() {
 void editScale() {
   dialog::editNumber(vid.scale, .001, 1000, .1, 1, XLAT("scale factor"), 
     XLAT("Scale the displayed model."));
-  dialog::scaleLog();
+  dialog::scaleSinh();
   }
 
 void showDisplayMode() {

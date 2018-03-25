@@ -274,6 +274,7 @@ namespace conformal {
   int bandsegment = 16000;
   ld rotation = 0;
   int do_rotate = 1;
+  bool lower_halfplane;
   bool autoband = false;
   bool autobandhistory = false;
   bool dospiral = true;
@@ -529,19 +530,6 @@ namespace conformal {
     }
 #endif
 
-  const char* directions[MODELCOUNT][4] = {
-     { "right", "up", "left", "down" },
-     { "counterclockwise", "zoom out", "clockwise", "zoom in" },
-     { "left to right", "spin down", "right to left", "spin up" },
-     { "right", "up", "left", "down" },
-     { "right", "up", "left", "down" },
-     { "right", "up", "left", "down" },
-     { "right", "up", "left", "down" },
-     { "right", "up", "left", "down" },
-     { "right", "up", "left", "down" },
-     { "right", "up", "left", "down" }
-     };
-     
   const char *modelnames[MODELCOUNT] = {
     "disk", "half-plane", "band", "polygonal", "polynomial",
     "azimuthal equidistant", "azimuthal equi-area", 
@@ -607,6 +595,9 @@ namespace conformal {
       dialog::addSelItem(XLAT("which coefficient"), its(polygonal::coefid), 'n');
       }
 
+    if(pmodel == mdHalfplane)
+      dialog::addBoolItem(XLAT("lower half-plane"), lower_halfplane, 'l');
+
     if(pmodel == mdBall)
       dialog::addSelItem(XLAT("projection in ball model"), fts3(vid.ballproj), 'x');
 
@@ -652,6 +643,8 @@ namespace conformal {
         config_camera_rotation();
       else if(uni == 'u')
         pushScreen(rug::show);
+      else if(uni == 'l' && pmodel == mdHalfplane)
+        lower_halfplane = !lower_halfplane;
       else if(uni == 'a')
         pushScreen(history_menu);
       else if(uni == 'l')  {

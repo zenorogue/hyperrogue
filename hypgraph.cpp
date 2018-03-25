@@ -241,16 +241,22 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
   ld x0, y0;  
   x0 = H[0] / tz;
   y0 = H[1] / tz;
+  if(conformal::lower_halfplane) x0 = -x0, y0 = -y0;
   y0 += 1;
   double rad = x0*x0 + y0*y0;
   y0 /= rad;
   x0 /= rad;
   y0 -= .5;
+
+  if(conformal::lower_halfplane) x0 = -x0, y0 = -y0;
   
   if(pmodel == mdHalfplane) {
     ret[0] = x0;
-    if(wmspatial || mmspatial) y0 *= zlev;
-    ret[1] = 1 - y0;
+    if(wmspatial || mmspatial) {
+      if(conformal::lower_halfplane) y0 /= zlev;
+      else y0 *= zlev;
+      }
+    ret[1] = (conformal::lower_halfplane?-1:1) - y0;
     ret[2] = 0;
     if(zlev != 1 && stereo::active()) 
       apply_depth(ret, -y0 * geom3::factor_to_lev(zlev));

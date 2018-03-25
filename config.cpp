@@ -294,6 +294,7 @@ void initConfig() {
   addsaver(conformal::bandsegment, "band segment");
   addsaver(conformal::rotation, "conformal rotation");
   addsaver(conformal::do_rotate, "conformal rotation mode", 1);
+  addsaver(conformal::lower_halfplane, "lower halfplane", false);
   addsaver(conformal::autoband, "automatic band");
   addsaver(conformal::autobandhistory, "automatic band history");
   addsaver(conformal::dospiral, "do spiral");

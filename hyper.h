@@ -899,6 +899,7 @@ namespace conformal {
   extern bool includeHistory;
   extern ld rotation;
   extern int do_rotate;
+  extern bool lower_halfplane;
   extern bool autoband;
   extern bool autobandhistory;
   extern bool dospiral;
