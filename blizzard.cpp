@@ -141,12 +141,26 @@ void drawBlizzards() {
 
   for(int ii=0; ii<N; ii++) {
     auto& bc = *bcells[ii];
-    if(isNeighbor(bc.c, mouseover)) {
+
+    /* if(isNeighbor(bc.c, mouseover)) {
       if(againstWind(mouseover, bc.c))
         queuepoly(*bc.gm, shHeptaMarker, 0x00C00040);
       if(againstWind(bc.c, mouseover))
         queuepoly(*bc.gm, shHeptaMarker, 0xC0000040);
+      } */
+
+    forCellIdEx(c2, i, bc.c) if(bc.c == mouseover || c2 == mouseover) {
+      int col = 0x00C00080;
+      if(c2 == mouseover)
+        col ^= 0xC0C00000;
+      if(isPlayerOn(c2))
+        col ^= 0x00000040;
+      if(isPlayerOn(bc.c))
+        col ^= 0x00000040;
+      if(againstWind(bc.c, c2))
+        queuepoly(*bc.gm * ddspin(bc.c, i) * xpush(cellgfxdist(bc.c, i)/2), shWindArrow, col);
       }
+
     int B = size(bc.outorder);
     if(B<2) continue;
     int i = rand() % B;
