@@ -711,14 +711,14 @@ void cwmirrorat(cellwalker& cw, int d) {
   cw.mirrored = !cw.mirrored;
   }
 
-static const struct rev_t { } rev;
+static const struct rev_t { rev_t() {} } rev;
 
 cellwalker& operator += (cellwalker& cw, rev_t) {
   cw += cw.c->type/2 + ((cw.c->type&1)?hrand(2):0);
   return cw;
   }
 
-static const struct revstep_t { } revstep;
+static const struct revstep_t { revstep_t() {}} revstep;
 
 cellwalker& operator += (cellwalker& cw, revstep_t) {
   cw += rev; cw += wstep; return cw;

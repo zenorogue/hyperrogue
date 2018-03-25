@@ -2276,3 +2276,28 @@ Gameplay bugfixes
 2018.03.02 XX:XX version 10.3l
 - fixed monster infighting caused by dragon dismounting changes
 - fixed Android slowdown
+
+2018.03.24 17:22 version 10.3m
+
+For hyperbolic geometry nerds:
+- added smooth surfaces of constant negative curvature (in the hypersian rug menu)
+- Alt makes rotation slower in the Hypersian Rug model
+- added the hemisphere model
+- improved the quality of 3D models from conformal menu
+
+Gameplay bugfixes:
+- fixed the Princess Quest not appearing
+- worm-like creatures are no longer happy to get into bull herds
+- raised Zombies no longer move on their first turn
+- no more great walls in PTM Graveyard
+- no more Lost Memory areas in PTM Chaos
+- no more broken Red Raider pairs close to player start
+- Baby Tortoise movement is now animated (when switching places with an adult)
+
+User interface:
+- shmup mode in the start menu replaced with a special mode chosen randomly from a selection
+- the start menu now includes an explicit option to use the current/saved settings
+
+MINOR:
+- reptilecheat option ('-rch') disables Windy chasms
+- synchronized fanframe so that the period is 1000 ticks

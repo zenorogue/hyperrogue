@@ -67,7 +67,7 @@ hyperpoint coord(hyperpoint h) {
       ld r = 1 / cosh(t);
       ld x = t - tanh(t);
 
-      return { r * sin(v), r * cos(v), x };
+      return hpxyz( r * sin(v), r * cos(v), x );
       break;
       }
     
@@ -77,7 +77,7 @@ hyperpoint coord(hyperpoint h) {
       
       ld a = sqrt(1-dini_b*dini_b);
       
-      return { a * sin(v) * sin(t), a * cos(v) * sin(t),  a * (cos(t) + log(tan(t/2))) + dini_b * v };
+      return hpxyz( a * sin(v) * sin(t), a * cos(v) * sin(t),  a * (cos(t) + log(tan(t/2))) + dini_b * v );
       break;
       }
     
@@ -87,11 +87,11 @@ hyperpoint coord(hyperpoint h) {
       
       ld deno = 1 / (1 + u * u * sin(v) * sin(v));
       
-      return {
+      return hpxyz(
         2 * (cos(u) + u * sin(u)) * sin(v) * deno,
         2 * (sin(u) - u * cos(u)) * sin(v) * deno,
         log(tan(v/2)) + 2 * cos(v) * deno
-        };
+        );
       }
     
     case dsHyperlike: {
@@ -101,7 +101,7 @@ hyperpoint coord(hyperpoint h) {
       ld phi = hyper_b * cosh(v);
       ld psi = integral(v);
       
-      return { phi * cos(u), phi * sin(u), psi};
+      return hpxyz( phi * cos(u), phi * sin(u), psi );
       }
     
     default:
@@ -122,10 +122,10 @@ hyperpoint coord_derivative(hyperpoint h, int cc) {
       ld v = h[1];
       if(cc == 0) {
         ld phi = hyper_b * cosh(v);
-        return { phi * -sin(u), phi * cos(u), 0 };
+        return hpxyz( phi * -sin(u), phi * cos(u), 0 );
         }
       else {
-        return { hyper_b * sinh(v) * cos(u), hyper_b * sinh(v) * sin(u), f(v) };
+        return hpxyz( hyper_b * sinh(v) * cos(u), hyper_b * sinh(v) * sin(u), f(v) );
         }
       }
     case dsKuen: {
@@ -134,19 +134,20 @@ hyperpoint coord_derivative(hyperpoint h, int cc) {
       ld denom = pow(sin(v),2)*(u*u)+1;
       ld denom2 = denom * denom;
       if(cc == 1) 
-        return {
+        return hpxyz (
           2*sin(v)/denom*u*cos(u)+-4*(sin(u)*u+cos(u))*pow(sin(v),3)/denom2*u,
           -4*pow(sin(v),3)*(sin(u)-u*cos(u))/denom2*u+2*sin(u)*sin(v)/denom*u,
           -4*pow(sin(v),2)/denom2*u*cos(v)
-          };
-      else return {
+          );
+      else return hpxyz (
           2*(sin(u)*u+cos(u))/denom*cos(v)+-4*(sin(u)*u+cos(u))*pow(sin(v),2)/denom2*(u*u)*cos(v),
           2*(sin(u)-u*cos(u))/denom*cos(v)+-4*pow(sin(v),2)*(sin(u)-u*cos(u))/denom2*(u*u)*cos(v),
          -4*sin(v)/denom2*(u*u)*pow(cos(v),2)+1/tan(v/2)*(pow(tan(v/2),2)+1)/2+-2*sin(v)/denom
-         };
+         );
       break;
       }
     default:
+      // too lazy do differentiate
       return (coord(h + unit_vector[cc] * epsd) - coord(h)) / epsd;
     }
   }
@@ -488,7 +489,7 @@ void run_kuen() {
     int pid[5] = {0, 8, 1, 2, 4};
     string captions[5] = {"", "the upper component", "the lower center", "the lower left", "the lower right"};
     
-    vector<rug::rugpoint*> newmesh(size(mesh), NULL);
+    vector<rug::rugpoint*> newmesh(size(mesh), nullptr);
     for(auto p: mesh) {
       auto px = map_to_surface(p->h, m);
       p->surface_point = px;
@@ -738,12 +739,13 @@ void show_surfaces() {
         p->flat = p->surface_point.params;
     else if(uni == '#')
       dialog::editNumber(dini_b, -1, 1, .05, .15, XLAT("parameter"),
-        XLAT("The larger the number, the less twisted it is.")
+        XLAT("The larger the number, the more twisted it is.")
         );
     else if(uni == 'p') {
-      dialog::editNumber(precision, 1, 10000, .1, 100, XLAT("precision"),
+      dialog::editNumber(precision, 1, 10000, 0, 100, XLAT("precision"),
         XLAT("Computing these models involves integrals and differential equations, which are currently solved numerically. This controls the precision.")
         );
+      dialog::ne.step = .1;
       dialog::scaleLog();
       }
     else if(uni == 'c') {
