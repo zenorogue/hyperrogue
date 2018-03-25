@@ -563,7 +563,7 @@ void run_other() {
 
     p->surface_point = map_to_surface(h, dp);
     p->flat = coord(p->surface_point.params);
-    conformal::progress(XLAT("solving the geodesics on: %1, %2/%3", shape_name[sh], its(it), its(size(rug::points))));
+    conformal::progress(XLAT("solving the geodesics on: %1, %2/%3", XLAT(shape_name[sh]), its(it), its(size(rug::points))));
     if(p->surface_point.remaining_distance == 0)
       coverage.emplace_back(h, rchar(it) + 256 * 7);
     }
@@ -707,7 +707,7 @@ void show_surfaces() {
         "are great to draw hyperbolic tesselations on. While they look great, only a small part "
         "of the hyperbolic plane can be visibly represented in this way, so they are not "
         "good for playing HyperRogue; however, the coverage extends far away in specific directions, "
-        "so first increasing sight range in graphicss config and texture size in hypersian rug settings may improve the effect. "
+        "so first increasing sight range in graphics config and texture size in hypersian rug settings may improve the effect. "
         "For convenience, you can also choose other 3D models from this menu."
         );
 
