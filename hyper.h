@@ -2498,12 +2498,10 @@ extern int startseed;
 extern transmatrix heptmove[MAX_EDGE], hexmove[MAX_EDGE];
 extern transmatrix invheptmove[MAX_EDGE], invhexmove[MAX_EDGE];
 
-static const struct wstep_t { } wstep;
-static const struct wmirror_t { } wmirror;
+static const struct wstep_t { wstep_t() {} } wstep;
+static const struct wmirror_t { wmirror_t() {}} wmirror;
 
 // heptspin hsstep(const heptspin &hs, int spin);
-
-template<class T> 
 
 extern void fixmatrix(transmatrix&);
 void display(const transmatrix& T);
@@ -2551,9 +2549,11 @@ namespace texture {
     };
   
   struct texture_data {
-    GLuint textureid = 0;
+    GLuint textureid;
   
-    int twidth = 2048;
+    int twidth;
+    
+    texture_data() { textureid = 0; twidth = 2048; }
   
     vector<unsigned> texture_pixels;
   
@@ -2575,23 +2575,23 @@ namespace texture {
     };
 
   struct texture_config {
-    string texturename = "textures/hyperrogue-texture.png";
-    string configname = "textures/hyperrogue.txc";
-    unsigned paint_color = 0x000000FF;
+    string texturename;
+    string configname;
+    unsigned paint_color;
     eTextureState tstate;
     eTextureState tstate_max;
   
-    transmatrix itt = Id;
+    transmatrix itt;
     
-    unsigned grid_color = 0;
-    unsigned mesh_color = 0;
-    unsigned master_color = 0xFFFFFF30;
-    unsigned slave_color = 0xFF000008;
+    unsigned grid_color;
+    unsigned mesh_color;
+    unsigned master_color;
+    unsigned slave_color;
     
-    int color_alpha = 128;
+    int color_alpha;
     
-    int gsplits = 1;
-    
+    int gsplits;
+
     int recolor(int col);
   
     typedef tuple<eGeometry, bool, char, int, eModel, ld, ld> texture_parameters; 
@@ -2600,7 +2600,7 @@ namespace texture {
     map<int, textureinfo> texture_map, texture_map_orig;
     set<cell*> models;
   
-    bool texture_tuned = false;
+    bool texture_tuned;
     string texture_tuner;
     vector<hyperpoint*> tuned_vertices;
   
@@ -2622,6 +2622,22 @@ namespace texture {
     bool load();
     
     texture_data data;
+
+    texture_config() {
+      // argh, no member initialization in some of my compilers
+      texturename = "textures/hyperrogue-texture.png";
+      configname = "textures/hyperrogue.txc";
+      itt = Id; 
+      paint_color = 0x000000FF;
+      grid_color = 0;
+      mesh_color = 0;
+      master_color = 0xFFFFFF30;
+      slave_color = 0xFF000008;
+      color_alpha = 128;
+      gsplits = 1;
+      texture_tuned = false;
+      }
+    
     };
 
   extern texture_config config;
