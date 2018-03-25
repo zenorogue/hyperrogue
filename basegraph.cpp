@@ -997,9 +997,9 @@ void saveHighQualityShot(const char *fname, const char *caption, int fade) {
 
   resetbuffer rb;
 
-  int maxrange = getDistLimit() * 3/2;
+  // int maxrange = getDistLimit() * 3/2;
 
-  dynamicval<int> v3(sightrange, (cheater && sightrange < maxrange) ? maxrange : sightrange);
+  // dynamicval<int> v3(sightrange, (cheater && sightrange < maxrange) ? maxrange : sightrange);
 
   if(cheater) doOvergenerate();
 
