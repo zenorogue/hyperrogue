@@ -482,6 +482,9 @@ else if(args()[0] == '-' && args()[1] == x && args()[2] == '0') { showstartmenu 
     PHASEFROM(2);
     reptilecheat = true; autocheat = true; firstland = laReptile;
     }
+  else if(argis("-bright")) {    
+    bright = true;
+    }
 #if CAP_SDL
   else if(argis("-pngshot")) {
     PHASE(3); shift(); 

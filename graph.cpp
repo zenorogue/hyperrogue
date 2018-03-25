@@ -3320,8 +3320,11 @@ void qfloor_eswap(cell *c, const transmatrix& V, const hpcshape& sh, int col) {
     qfloor(c, V, sh, col);
   };
 
+bool bright;
+
 // how much to darken
 int getfd(cell *c) {
+  if(bright) return 0;
   switch(c->land) {
     case laRedRock:
     case laReptile:
