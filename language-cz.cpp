@@ -7051,4 +7051,20 @@ S("The larger the number, the more twisted it is.",
 // parameter for concave barrel
 S("Controls the inner radius.", "Ovládá vnitřní poloměr.")
 
+// improved rotation
+S(
+  "This controls the automatic rotation of the world. "
+  "It affects the line animation in the history mode, and "
+  "lands which have a special direction. Note that if finding this special direction is a part of the puzzle, "
+  "it works only in the cheat mode.",
+  
+  "Toto nastavení ovládá automatickou rotaci světa. "
+  "Ovlivňuje animace dráhy v módu historie a "
+  "země se speciálním směrem. Pozor -- pokud "
+  "je nalezení speciálního směru součástí hádanky, " 
+  "funguje toto nastavení pouze v cheat-módu."
+  )
+
+S("NEVER", "NIKDY")
+
 #undef Orb
