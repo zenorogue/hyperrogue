@@ -6834,3 +6834,17 @@ S("The larger the number, the more twisted it is.",
 // parameter for concave barrel
 S("Controls the inner radius.", "Określa promień wewnętrzny.")
 
+// improved rotation
+S(
+  "This controls the automatic rotation of the world. "
+  "It affects the line animation in the history mode, and "
+  "lands which have a special direction. Note that if finding this special direction is a part of the puzzle, "
+  "it works only in the cheat mode.",
+  
+  "To ustawienie steruje automatycznym obracaniem świata. "
+  "Ma wpływ na animację linii (tryb historii) i "
+  "krainy ze szczególnym kierunkiem. Jeśli znalezienie "
+  "tego szczególnego kierunku jest częścią zadania gracza, "
+  "opcja ta działa tylko w trybie oszusta."
+  );
+S("NEVER", "NIGDY")

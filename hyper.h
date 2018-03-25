@@ -897,7 +897,8 @@ namespace conformal {
   extern vector<pair<cell*, eItem> > findhistory;  
   extern vector<cell*> movehistory;
   extern bool includeHistory;
-  extern int rotation;
+  extern ld rotation;
+  extern int do_rotate;
   extern bool autoband;
   extern bool autobandhistory;
   extern bool dospiral;

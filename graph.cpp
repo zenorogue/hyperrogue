@@ -4816,15 +4816,16 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       
       if(isGravityLand(cwt.c->land)) {
         if(cwt.c->land == laDungeon) rev = true;
+        if(conformal::do_rotate >= 1)
         if(!straightDownSeek || edgeDepth(c) < edgeDepth(straightDownSeek)) {
           usethis = true;
           spd = cwt.c->landparam / 10.;
           }
         }
-
+      
       if(c->master->alt && cwt.c->master->alt &&
         (cwt.c->land == laMountain || 
-        (pmodel && 
+        (conformal::do_rotate >= 2 && 
           (cwt.c->land == laTemple || cwt.c->land == laWhirlpool || 
           (cheater && (cwt.c->land == laClearing || cwt.c->land == laCaribbean ||
           cwt.c->land == laCamelot || cwt.c->land == laPalace))) 
@@ -4837,7 +4838,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           }
         }
   
-      if(pmodel && cwt.c->land == laOcean && cwt.c->landparam < 25) {
+      if(conformal::do_rotate >= 2 && cwt.c->land == laOcean && cwt.c->landparam < 25) {
         if(!straightDownSeek || coastval(c, laOcean) < coastval(straightDownSeek, laOcean)) {
           usethis = true;
           spd = cwt.c->landparam / 10;
@@ -4850,7 +4851,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         downspin = atan2(VC0[1], VC0[0]);
         downspin -= M_PI/2;
         if(rev) downspin += M_PI;
-        downspin += M_PI/2 * (conformal::rotation%4);
+        downspin += M_PI/180 * conformal::rotation;
         while(downspin < -M_PI) downspin += 2*M_PI;
         while(downspin > +M_PI) downspin -= 2*M_PI;
         downspin = downspin * min(spd, (double)1);

@@ -549,11 +549,9 @@ void centerpc(ld aspd) {
   if(vid.sspeed >= 4.99) aspd = 1000;
   DEBB(DF_GRAPH, (debugfile,"center pc\n"));
   hyperpoint H = ypush(-vid.yshift) * sphereflip * tC0(cwtV);
-  if(H[0] == 0 && H[1] == 0) {
-    return; // either already centered or direction unknown
-    }
-  ld R = hdist0(H); // = sqrt(H[0] * H[0] + H[1] * H[1]);
+  ld R = H[0] == 0 && H[1] == 0 ? 0 : hdist0(H); // = sqrt(H[0] * H[0] + H[1] * H[1]);
   if(R < 1e-9) {
+    // either already centered or direction unknown
     /* if(playerfoundL && playerfoundR) {
       
       } */

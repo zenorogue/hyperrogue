@@ -272,7 +272,8 @@ namespace conformal {
   ld lvspeed = 1;
   int bandhalf = 200;
   int bandsegment = 16000;
-  int rotation = 0;
+  ld rotation = 0;
+  int do_rotate = 1;
   bool autoband = false;
   bool autobandhistory = false;
   bool dospiral = true;
@@ -366,7 +367,7 @@ namespace conformal {
     hyperpoint next = shmup::calc_relative_matrix(v[j+1]->base, v[j]->base->master) * 
       v[j+1]->at * C0;
   
-    View = spin(M_PI/2 * rotation) * xpush(-(phase-ph) * hdist(now, next)) * View;
+    View = spin(M_PI/180 * rotation) * xpush(-(phase-ph) * hdist(now, next)) * View;
     playermoved = false;
     }
   
@@ -570,7 +571,7 @@ namespace conformal {
     }    
   
   void model_menu() {
-    cmode = sm::SIDE | sm::MAYDARK;
+    cmode = sm::SIDE | sm::MAYDARK | sm::CENTER;
     gamescreen(0);
     dialog::init(XLAT("models of hyperbolic geometry"));
     for(int i=0; i<mdGUARD; i++) {
@@ -580,6 +581,10 @@ namespace conformal {
       }
     
     dialog::addBreak(100);
+
+    dialog::addBoolItem(XLAT("rotation"), do_rotate == 2, 'r');
+    if(do_rotate == 0) dialog::lastItem().value = XLAT("NEVER");
+    dialog::lastItem().value += " " + its(rotation) + "°";
 
     // if(pmodel == mdBand && sphere)
     dialog::addSelItem(XLAT("scale factor"), fts(vid.scale), 'z');
@@ -676,7 +681,15 @@ namespace conformal {
         }
       else if(sym == 'n' && pmodel == mdPolynomial)
         dialog::editNumber(polygonal::coefid, 0, polygonal::MSI-1, 1, 0, XLAT("which coefficient"), "");
-      else if(sym == 'r') rotation += (shiftmul > 0 ? 1:3);
+      else if(sym == 'r') {
+        if(rotation < 0) rotation = 0;
+        dialog::editNumber(rotation, 0, 360, 90, 0, XLAT("rotation"), 
+          "This controls the automatic rotation of the world. "
+          "It affects the line animation in the history mode, and "
+          "lands which have a special direction. Note that if finding this special direction is a part of the puzzle, "
+          "it works only in the cheat mode.");
+        dialog::dialogflags |= sm::CENTER;
+        }
       else if(doexiton(sym, uni)) popScreen();
       };
     }

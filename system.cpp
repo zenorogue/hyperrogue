@@ -265,6 +265,7 @@ void initgame() {
   lastsafety = gold();
   bfs();
   checkmove();
+  playermoved = true;
   }
 
 bool havesave = true;

@@ -293,6 +293,7 @@ void initConfig() {
   addsaver(conformal::bandhalf, "band width");
   addsaver(conformal::bandsegment, "band segment");
   addsaver(conformal::rotation, "conformal rotation");
+  addsaver(conformal::do_rotate, "conformal rotation mode", 1);
   addsaver(conformal::autoband, "automatic band");
   addsaver(conformal::autobandhistory, "automatic band history");
   addsaver(conformal::dospiral, "do spiral");
@@ -518,10 +519,12 @@ void loadOldConfig(FILE *f) {
   conformal::autobandhistory = aa; polygonal::STAR = ps; conformal::lvspeed = lv;
   
   aa=conformal::autoband; bb=conformal::autobandhistory; cc=conformal::dospiral;    
+  int crot;
   err=fscanf(f, "%d%d%d%d%d%d", 
-    &conformal::bandhalf, &conformal::bandsegment, &conformal::rotation,
+    &conformal::bandhalf, &conformal::bandsegment, &crot,
     &aa, &bb, &cc);
   conformal::autoband = aa; conformal::autobandhistory = bb; conformal::dospiral = cc;
+  conformal::rotation = crot * 90;
   
   err=fscanf(f, "%d", &polygonal::maxcoef);
   if(polygonal::maxcoef < 0) polygonal::maxcoef = 0;

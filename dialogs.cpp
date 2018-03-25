@@ -697,6 +697,13 @@ namespace dialog {
       addItem(sphere ? "towards orthographic" : "towards Gans model", 'o');
       }
     
+    if(ne.editwhat == &conformal::rotation) {
+      addBreak(100);
+      addBoolItem("line animation only", conformal::do_rotate == 0, 'n');
+      addBoolItem("gravity lands", conformal::do_rotate == 1, 'g');
+      addBoolItem("all directional lands", conformal::do_rotate == 2, 'd');
+      }
+    
     if(ne.editwhat == &ne.intbuf && ne.intval == &sightrange && cheater)
       addBoolItem("overgenerate", overgenerate, 'o');
 
@@ -747,6 +754,12 @@ namespace dialog {
           ne.inverse_scale(d * (ne.scale(ne.vmax) - ne.scale(ne.vmin)) + ne.scale(ne.vmin));
         affect('v');
         }
+      else if(uni == 'n' && ne.editwhat == &conformal::rotation)
+        conformal::do_rotate = 0;
+      else if(uni == 'g' && ne.editwhat == &conformal::rotation)
+        conformal::do_rotate = 1;
+      else if(uni == 'd' && ne.editwhat == &conformal::rotation)
+        conformal::do_rotate = 2;
       else if(uni == 'o' && ne.editwhat == &ne.intbuf && ne.intval == &sightrange && cheater)
         overgenerate = !overgenerate;
       else if(uni == 'o' && ne.editwhat == &vid.linewidth)
