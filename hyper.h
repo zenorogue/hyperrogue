@@ -647,7 +647,7 @@ extern reaction_t help_delegate;
 
 struct videopar {
   ld scale, alpha, sspeed, mspeed, yshift, camera_angle;
-  ld ballangle, ballproj, euclid_to_sphere;
+  ld ballangle, ballproj, euclid_to_sphere, twopoint_param;
   int mobilecompasssize;
   int aurastr, aurasmoothen;
 
@@ -888,7 +888,7 @@ namespace rug {
 enum eModel {
   mdDisk, mdHalfplane, mdBand, mdPolygonal, mdPolynomial,
   mdEquidistant, mdEquiarea, mdBall, mdHyperboloid, 
-  mdHemisphere,
+  mdHemisphere, mdBandEquidistant, mdBandEquiarea, mdSinusoidal, mdTwoPoint, 
   mdGUARD, mdUnchanged };
 
 namespace conformal {
@@ -1611,7 +1611,9 @@ void drawShape(pair<ld,ld>* coords, int qty, int color);
 
 extern eModel pmodel;
 
-inline bool mdEqui() { return pmodel == mdEquidistant || pmodel == mdEquiarea; }
+inline bool mdAzimuthalEqui() { return pmodel == mdEquidistant || pmodel == mdEquiarea; }
+
+inline bool mdBandAny() { return pmodel == mdBand || pmodel == mdBandEquidistant || pmodel == mdBandEquiarea || pmodel == mdSinusoidal; }
 
 int darkena(int c, int lev, int a);
 

@@ -203,8 +203,78 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
     using namespace hyperpoint_vec;
     H = H / zlev;
     }
+  
+  if(pmodel == mdTwoPoint || mdBandAny() || pmodel == mdSinusoidal) {
+    // map to plane
+    if(pmodel == mdTwoPoint) {
+      auto p = vid.twopoint_param;
+      ld dleft = hdist(H, xpush(-p) * C0);
+      ld dright = hdist(H, xpush(p) * C0);
+      ld x = (dright*dright-dleft*dleft) / 4 / p;
+      ld y = sqrt(dleft * dleft - (x-p)*(x-p) + 1e-9);
+      x = -x;
+      if(H[1] < 0) y = -y;
+      ret = hpxyz(x/M_PI, y/M_PI, 0);
+      }
+    else {
+      ld x, y;
+      switch(cgclass) {
+        case gcHyperbolic:
+          y = asinh(H[1]), x = asinh(H[0] / cosh(y));
+          break;
+        case gcSphere:
+          y = asin(H[1]), x = asin(H[0] / cos(y));
+          if(H[2] < 0 && x > 0) x = M_PI - x;
+          else if(H[2] < 0 && x <= 0) x = -M_PI - x;
+          break;
+        case gcEuclid:
+          y = H[1], x = H[0];
+          break;
+        }
+      if(pmodel == mdBand) switch(cgclass) {
+        case gcSphere:
+          y = atanh(sin(y) * zlev);
+          x *= 2; y *= 2;
+          break;
+        case gcHyperbolic:
+          y = 2 * atan(tanh(y/2) * zlev);
+          x *= 2; y *= 2;
+          break;
+        case gcEuclid:
+          y = y;
+          y *= 2; x *= 2;
+          break;
+        }
+      if(pmodel == mdBandEquiarea) switch(cgclass) {
+        case gcHyperbolic:
+          y = sinh(y);
+          break;
+        case gcSphere:
+          y = sin(y);
+          break;
+        default:
+          y = y;
+          break;
+        }
+      if(pmodel == mdSinusoidal) switch(cgclass) {
+        case gcHyperbolic:
+          x *= cosh(y);
+          break;
+        case gcSphere:
+          x *= cos(y);
+          break;
+        default:
+          x *= 1;
+          break;
+        }
+      ret = hpxyz(x / M_PI, y / M_PI, 0);
+      }
+    apply_depth(ret, -geom3::factor_to_lev(zlev));
+    ghcheck(ret, H);
+    return;
+    }
 
-  if(mdEqui()) {
+  if(mdAzimuthalEqui()) {
     ld rad = sqrt(H[0] * H[0] + H[1] * H[1]);
     if(rad == 0) rad = 1;
     ld d = hdist0(H);
@@ -236,21 +306,21 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
     return;
     }
   
-  // Poincare to half-plane
-  
-  ld x0, y0;  
-  x0 = H[0] / tz;
-  y0 = H[1] / tz;
-  if(conformal::lower_halfplane) x0 = -x0, y0 = -y0;
-  y0 += 1;
-  double rad = x0*x0 + y0*y0;
-  y0 /= rad;
-  x0 /= rad;
-  y0 -= .5;
-
-  if(conformal::lower_halfplane) x0 = -x0, y0 = -y0;
-  
   if(pmodel == mdHalfplane) {
+    // Poincare to half-plane
+    
+    ld x0, y0;  
+    x0 = H[0] / tz;
+    y0 = H[1] / tz;
+    if(conformal::lower_halfplane) x0 = -x0, y0 = -y0;
+    y0 += 1;
+    double rad = x0*x0 + y0*y0;
+    y0 /= rad;
+    x0 /= rad;
+    y0 -= .5;
+  
+    if(conformal::lower_halfplane) x0 = -x0, y0 = -y0;
+    
     ret[0] = x0;
     if(wmspatial || mmspatial) {
       if(conformal::lower_halfplane) y0 /= zlev;
@@ -263,36 +333,6 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
     ghcheck(ret,H);
     return;
     }
-
-  // center
-  x0 *= 2; y0 *= 2;
-  
-  // half-plane to band
-  double tau = (log((x0+1)*(x0+1) + y0*y0) - log((x0-1)*(x0-1) + y0*y0)) / 2;
-  double u=(1-x0*x0-y0*y0);
-  u = (1 - x0*x0 - y0*y0 + sqrt(u*u+4*y0*y0));
-  double yv = 2*y0 / u;
-  double sigma = 2 * atan(yv * zlev) - M_PI/2;
-  
-  x0 = tau; y0 = sigma;
-  
-  /* if(zlev != 1) {
-    double alp = (y0 * y0) / (1-y0*y0);
-    double gx = alp + sqrt(alp*alp-1);
-    double gy = y0 * (gx+1);
-    double yr = zlev * gy / (zlev * gx + 1);
-    printf("zlev = %10.5lf y0 = %20.10lf yr = %20.10lf\n", double(zlev), (double)y0, yr);
-    y0 = yr;
-    } */
-  
-  ret[0] = x0/M_PI*2;
-  ret[1] = -y0/M_PI*2;
-  ret[2] = 0; 
-
-  if(zlev != 1 && stereo::active()) 
-    apply_depth(ret, -geom3::factor_to_lev(zlev) / (1 + yv * yv));
-
-  ghcheck(ret,H);
   }
 
 // game-related graphics

@@ -533,7 +533,8 @@ namespace conformal {
   const char *modelnames[MODELCOUNT] = {
     "disk", "half-plane", "band", "polygonal", "polynomial",
     "azimuthal equidistant", "azimuthal equi-area", 
-    "ball model", "Minkowski hyperboloid", "hemisphere"
+    "ball model", "Minkowski hyperboloid", "hemisphere",
+    "band equidistant", "band equi-area", "sinusoidal", "two-point equidistant"
     };
   
   string get_model_name(eModel pm) {
@@ -547,7 +548,8 @@ namespace conformal {
     }
   
   bool model_available(eModel pm) {
-    if(mdEqui() || pm == mdDisk || pm == mdPolynomial || pm == mdHyperboloid || pm == mdHemisphere)
+    if(mdAzimuthalEqui() || pm == mdDisk || pm == mdPolynomial || pm == mdHyperboloid || pm == mdHemisphere ||
+      pm == mdBandEquidistant || pm == mdBandEquiarea || pm == mdSinusoidal || pm == mdTwoPoint)
       return true;
     if(sphere && pm == mdBand)
       return true;
@@ -565,7 +567,7 @@ namespace conformal {
     for(int i=0; i<mdGUARD; i++) {
       eModel m = eModel(i);
       if(model_available(m))
-        dialog::addBoolItem(get_model_name(m), pmodel == m, '0' + i);
+        dialog::addBoolItem(get_model_name(m), pmodel == m, "0123456789!@#$%^&*()" [m]);
       }
     
     dialog::addBreak(100);
@@ -611,8 +613,12 @@ namespace conformal {
       dialog::addSelItem(XLAT("camera rotation in 3D models"), fts3(vid.ballangle), 'b');
       }    
     
-    if(pmodel == mdHemisphere) {
+    if(pmodel == mdHemisphere && euclid) {
       dialog::addSelItem(XLAT("parameter"), fts3(vid.euclid_to_sphere), 'l');
+      }
+      
+    if(pmodel == mdTwoPoint) {
+      dialog::addSelItem(XLAT("parameter"), fts3(vid.twopoint_param), 'l');
       }
       
     dialog::addBreak(100);
@@ -633,6 +639,14 @@ namespace conformal {
         if(pmodel == mdDisk && sphere)
           vid.scale = .4;
         }
+      else if(uni == '!') 
+        pmodel = eModel(10);
+      else if(uni == '@') 
+        pmodel = eModel(11);
+      else if(uni == '#') 
+        pmodel = eModel(12);
+      else if(uni == '$') 
+        pmodel = eModel(13);
       else if(uni == '6')
         vid.alpha = 1, vid.scale = 1;
       else if(uni == 'z')
@@ -647,9 +661,17 @@ namespace conformal {
         lower_halfplane = !lower_halfplane;
       else if(uni == 'a')
         pushScreen(history_menu);
-      else if(uni == 'l')  {
+      else if(uni == 'l' && pmodel == mdHemisphere && euclid)  {
         dialog::editNumber(vid.euclid_to_sphere, 0, 10, .1, 1, XLAT("parameter"), 
           "Stereographic projection to a sphere. Choose the radius of the sphere."
+          );
+        dialog::scaleLog();
+        }
+      else if(uni == 'l' && pmodel == mdTwoPoint)  {
+        dialog::editNumber(vid.twopoint_param, 0, 10, .1, 1, XLAT("parameter"), 
+          "This model maps the world so that the distances from two points "
+          "are kept. This parameter gives the distance from the two points to "
+          "the center."
           );
         dialog::scaleLog();
         }

@@ -340,6 +340,7 @@ void initConfig() {
   addsaver(stereo::fov, "field-of-vision", 90);
   addsaverenum(stereo::mode, "stereo-mode");
   addsaver(vid.euclid_to_sphere, "euclid to sphere projection", 1.5);
+  addsaver(vid.twopoint_param, "twopoint parameter", 1);
   
 #if CAP_SHMUP  
   shmup::initConfig();

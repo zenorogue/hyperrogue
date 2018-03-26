@@ -366,20 +366,33 @@ double linewidthat(const hyperpoint& h, double minwidth) {
 
 int mercator_coord;
 int mercator_loop_min = 0, mercator_loop_max = 0;
+ld mercator_period;
 
 void fixMercator(bool tinf) {
 
-  ld period = 4 * vid.radius;
-  ld hperiod = period / 2;
+  if(pmodel == mdBand)
+    mercator_period = 4 * vid.radius;
+  else
+    mercator_period = 2 * vid.radius;
   
-  mercator_coord = 1;
+  if(pmodel == mdSinusoidal)
+    for(int i = 0; i<size(glcoords); i++) 
+      glcoords[i][mercator_coord] /= cos(glcoords[i][1] / vid.radius * M_PI);    
+    
+  ld hperiod = mercator_period / 2;
+  
+  mercator_coord = 0;
   ld cmin = -vid.xcenter, cmax = vid.xres - vid.xcenter, dmin = -vid.ycenter, dmax = vid.yres - vid.ycenter;
   if(mercator_coord)
     swap(cmin, dmin), swap(cmax, dmax);
+  if(pmodel == mdSinusoidal || pmodel == mdBandEquidistant)
+    dmin = -vid.radius / 2, dmax = vid.radius / 2;
+  if(pmodel == mdBandEquiarea)
+    dmin = -vid.radius / M_PI, dmax = vid.radius / M_PI;
 
   for(int i = 0; i<size(glcoords); i++) {
-    while(glcoords[0][mercator_coord] < hperiod) glcoords[0][mercator_coord] += period;
-    while(glcoords[0][mercator_coord] > hperiod) glcoords[0][mercator_coord] -= period;
+    while(glcoords[0][mercator_coord] < hperiod) glcoords[0][mercator_coord] += mercator_period;
+    while(glcoords[0][mercator_coord] > hperiod) glcoords[0][mercator_coord] -= mercator_period;
     }
     
   ld first = glcoords[0][mercator_coord];
@@ -389,9 +402,9 @@ void fixMercator(bool tinf) {
 
   for(int i = 0; i<size(glcoords); i++) {
     while(glcoords[i][mercator_coord] < next - hperiod)
-      glcoords[i][mercator_coord] += period;
+      glcoords[i][mercator_coord] += mercator_period;
     while(glcoords[i][mercator_coord] > next + hperiod)
-      glcoords[i][mercator_coord] -= period;
+      glcoords[i][mercator_coord] -= mercator_period;
     next = glcoords[i][mercator_coord];
     mincoord = min<ld>(mincoord, glcoords[i][mercator_coord]);
     maxcoord = max<ld>(maxcoord, glcoords[i][mercator_coord]);
@@ -403,14 +416,17 @@ void fixMercator(bool tinf) {
     }
   
   ld last = first;
-  while(last < next - hperiod) last += period;
-  while(last > next + hperiod) last -= period;
+  while(last < next - hperiod) last += mercator_period;
+  while(last > next + hperiod) last -= mercator_period;
     
   if(first == last) {
     while(mincoord > cmin)
-      mercator_loop_min--, mincoord -= period;
+      mercator_loop_min--, mincoord -= mercator_period;
     while(maxcoord < cmax)
-      mercator_loop_max++, maxcoord += period;
+      mercator_loop_max++, maxcoord += mercator_period;
+    if(pmodel == mdSinusoidal)
+      for(int i = 0; i<size(glcoords); i++) 
+        glcoords[i][mercator_coord] *= cos(glcoords[i][1] / vid.radius * M_PI);    
     }
   else {
     if(tinf) { 
@@ -422,19 +438,22 @@ void fixMercator(bool tinf) {
       swap(first, last);
       }
     while(maxcoord > cmin) {
-      for(int i=0; i<size(glcoords); i++) glcoords[i][mercator_coord] -= period;
-      first -= period; last -= period;
-      mincoord -= period; maxcoord -= period;
+      for(int i=0; i<size(glcoords); i++) glcoords[i][mercator_coord] -= mercator_period;
+      first -= mercator_period; last -= mercator_period;
+      mincoord -= mercator_period; maxcoord -= mercator_period;
       }
     int base = size(glcoords);
     int minto = mincoord;
     while(minto < cmax) {
       for(int i=0; i<base; i++) {
         glcoords.push_back(glcoords[size(glcoords)-base]);
-        glcoords.back()[mercator_coord] += period;
+        glcoords.back()[mercator_coord] += mercator_period;
         }
-      minto += period;
+      minto += mercator_period;
       }
+    if(pmodel == mdSinusoidal)
+      for(int i = 0; i<size(glcoords); i++) 
+        glcoords[i][mercator_coord] *= cos(glcoords[i][1] / vid.radius * M_PI);    
     glcoords.push_back(glcoords.back());
     glcoords.push_back(glcoords[0]);
     for(int u=1; u<=2; u++) {
@@ -445,6 +464,8 @@ void fixMercator(bool tinf) {
     for(int a=0; a<qglcoords; a++)
       printf("[%3d] %10.5lf %10.5lf\n", a, glcoords[a][0], glcoords[a][1]); */
     }
+
+    
   }
   
 unsigned char& part(int& col, int i) {
@@ -464,6 +485,31 @@ void drawpolyline(polytodraw& p) {
     pp.cnt = i;
     pp.offset = 0;
     return;
+    }
+
+  static vector<glvertex> v0, v1;
+  if(sphere && pmodel == mdTwoPoint) {
+    v0.clear(); v1.clear();
+    for(int i=0; i<pp.cnt; i++) {
+      glvertex h = glhr::pointtogl(pp.V * glhr::gltopoint((*pp.tab)[pp.offset+i]));
+      if(h[2] >= 0)
+        v0.push_back(h), v1.push_back(h);
+      else if(h[1] < 0)
+        v0.push_back(h);
+      else if(h[1] > 0)
+        v1.push_back(h);
+      }
+    pp.V = Id; pp.offset = 0;
+    if(size(v0) == pp.cnt) {
+      pp.tab = &v0;
+      }
+    else if(size(v1) == pp.cnt) {
+      pp.tab = &v1;
+      }
+    else {
+      if(size(v0) >= 3) { pp.tab = &v0; pp.cnt = size(v0); drawpolyline(p); }
+      if(size(v1) >= 3) { pp.tab = &v1; pp.cnt = size(v1); drawpolyline(p); }
+      }
     }
   
   if(spherespecial && p.prio == PPR_MOBILE_ARROW) {
@@ -496,7 +542,7 @@ void drawpolyline(polytodraw& p) {
   addpoly(pp.V, *pp.tab, pp.offset, pp.cnt);
   
   mercator_loop_min = mercator_loop_max = 0;
-  if(sphere && pmodel == mdBand)
+  if(sphere && mdBandAny())
     fixMercator(pp.tinf);
     
   int poly_limit = max(vid.xres, vid.yres) * 2;
@@ -508,7 +554,7 @@ void drawpolyline(polytodraw& p) {
       return; // too large!
     }
 
-  if((spherespecial > 0 || (sphere && mdEqui())) && !(poly_flags & POLY_ISSIDE)) {
+  if((spherespecial > 0 || (sphere && mdAzimuthalEqui())) && !(poly_flags & POLY_ISSIDE)) {
     double rarea = 0;
     for(int i=0; i<size(glcoords)-1; i++) 
       rarea += glcoords[i][0] * glcoords[i+1][1] - glcoords[i][1] * glcoords[i+1][0];
@@ -534,12 +580,15 @@ void drawpolyline(polytodraw& p) {
   for(int l=mercator_loop_min; l <= mercator_loop_max; l++) {
   
     if(l || lastl) { 
-      for(int i=0; i<size(glcoords); i++)
-        glcoords[i][mercator_coord] += vid.radius * 4 * (l - lastl);
+      for(int i=0; i<size(glcoords); i++) {
+        if(pmodel == mdSinusoidal)
+          mercator_period = 2 * vid.radius * cos(glcoords[i][1] / vid.radius * M_PI);
+        glcoords[i][mercator_coord] += mercator_period * (l - lastl);
+        }
       lastl = l;
       }
 
-    if(mdEqui() && (poly_flags & POLY_INVERSE)) {
+    if(mdAzimuthalEqui() && (poly_flags & POLY_INVERSE)) {
       ld h = atan2(glcoords[0][0], glcoords[0][1]);
       for(int i=0; i<=360; i++) {
         ld a = i * M_PI / 180 + h;

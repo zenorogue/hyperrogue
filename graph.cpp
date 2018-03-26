@@ -2158,7 +2158,7 @@ array<array<int,4>,AURA+1> aurac;
 
 bool haveaura() {
   if(!(vid.aurastr>0 && !svg::in && (auraNOGL || vid.usingGL))) return false;
-  if(sphere && mdEqui()) return true;
+  if(sphere && mdAzimuthalEqui()) return true;
   return pmodel == mdDisk && (!sphere || vid.alpha > 10) && !euclid;
   }
   
@@ -2213,7 +2213,7 @@ void drawaura() {
   if(!haveaura()) return;
   if(stereo::mode) return;
   double rad = vid.radius;
-  if(sphere && !mdEqui()) rad /= sqrt(vid.alpha*vid.alpha - 1);
+  if(sphere && !mdAzimuthalEqui()) rad /= sqrt(vid.alpha*vid.alpha - 1);
   
   for(int v=0; v<4; v++) sumaura(v);
   for(auto& p: auraspecials) {
@@ -4965,6 +4965,11 @@ void queuecircleat(cell *c, double rad, int col) {
 
 void drawMarkers() {
 
+  if(pmodel == mdTwoPoint) {
+    queuechr(xpush(+vid.twopoint_param) * C0, 8, 'X', 0xFFFF00);
+    queuechr(xpush(-vid.twopoint_param) * C0, 8, 'X', 0xFFFF00);
+    }
+  
   if(!(cmode & sm::NORMAL)) return;
   
   for(cell *c1: crush_now) 
@@ -5426,11 +5431,62 @@ void drawfullmap() {
     
   ptds.clear();
 
-  if(!stereo::active() && !euclid && (pmodel == mdDisk || pmodel == mdBall || (sphere && mdEqui()))) {
+  if(!stereo::active() && sphere && pmodel == mdTwoPoint) {
+    queuereset(vid.usingGL ? mdDisk : mdUnchanged, PPR_CIRCLE);
+
+    for(int a=0; a<=180; a++) {
+      using namespace hyperpoint_vec;
+      ld x = cos(a * M_PI / 90);
+      ld y = 0;
+      ld z = -sqrt(1 - x*x);
+      hyperpoint h1;
+      applymodel(hpxyz(x,y,z), h1);
+      if(h1[1] < 0) h1[1] = -h1[1];
+      if(a >= 90) h1[1] = -h1[1];
+      curvepoint(h1 * vid.radius);
+      }
+
+    queuecurve(ringcolor, 0, PPR_CIRCLE);
+    queuereset(pmodel, PPR_CIRCLE);
+    }
+  
+  if(!stereo::active() && sphere && pmodel == mdSinusoidal) {
+    queuereset(vid.usingGL ? mdDisk : mdUnchanged, PPR_CIRCLE);
+    
+    for(int a=-45; a<45; a++) {
+      curvepoint(hpxyz(cos(a * M_PI / 90) * vid.radius, a * vid.radius / 90, 0));
+      }
+    for(int a=45; a>=-45; a--) {
+      curvepoint(hpxyz(-cos(a * M_PI / 90) * vid.radius, a * vid.radius / 90, 0));
+      }
+    queuecurve(ringcolor, 0, PPR_CIRCLE);
+
+    queuereset(pmodel, PPR_CIRCLE);
+    }
+
+  if(!stereo::active() && vid.grid) {
+    ld rad = 0;
+    if(pmodel == mdBand && hyperbolic) rad = vid.radius;
+    if(pmodel == mdBandEquidistant && sphere) rad = vid.radius / 2;
+    if(pmodel == mdBandEquiarea && sphere) rad = vid.radius / M_PI;
+    
+    if(rad) {
+      queuereset(vid.usingGL ? mdDisk : mdUnchanged, PPR_CIRCLE);
+      curvepoint(hpxyz(-vid.xcenter, -rad, 0));
+      curvepoint(hpxyz(vid.xres-vid.xcenter, -rad, 0));
+      queuecurve(ringcolor, 0, PPR_CIRCLE);
+      curvepoint(hpxyz(-vid.xcenter, rad, 0));
+      curvepoint(hpxyz(vid.xres-vid.xcenter, rad, 0));
+      queuecurve(ringcolor, 0, PPR_CIRCLE);
+      queuereset(pmodel, PPR_CIRCLE);
+      }
+    }
+
+  if(!stereo::active() && !euclid && (pmodel == mdDisk || pmodel == mdBall || (sphere && mdAzimuthalEqui()))) {
     double rad = vid.radius;
     bool isbnd = true;
     if(sphere) {
-      if(mdEqui())
+      if(mdAzimuthalEqui())
         ;
       else if(!vid.grid && !elliptic && !force_sphere_outline)
         rad = 0; 

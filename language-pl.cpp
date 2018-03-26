@@ -6848,3 +6848,20 @@ S(
   "opcja ta działa tylko w trybie oszusta."
   );
 S("NEVER", "NIGDY")
+
+S("Mercator", "odwzorowanie Merkatora")
+S("band equidistant", "wstęga ekwidystantna")
+S("band equi-area", "wstęga ekwiwalentna")
+S("sinusoidal", "sinusoida")
+S("two-point equidistant", "rzut dwupunktowy ekwidystantny")
+
+S(
+  "This model maps the world so that the distances from two points "
+  "are kept. This parameter gives the distance from the two points to "
+  "the center.",
+  
+  "Ten model przekształca świat tak, że odległości od dwóch punktów "
+  "są zachowane. Ten parametr zadaje odległość tych dwóch punktów "
+  "od środka.")
+  
+
