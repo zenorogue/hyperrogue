@@ -760,8 +760,10 @@ namespace dialog {
         conformal::do_rotate = 1;
       else if(uni == 'd' && ne.editwhat == &conformal::rotation)
         conformal::do_rotate = 2;
-      else if(uni == 'o' && ne.editwhat == &ne.intbuf && ne.intval == &sightrange && cheater)
+      else if(uni == 'o' && ne.editwhat == &ne.intbuf && ne.intval == &sightrange && cheater) {
         overgenerate = !overgenerate;
+        if(overgenerate) doOvergenerate();
+        }
       else if(uni == 'o' && ne.editwhat == &vid.linewidth)
         vid.antialias ^= AA_LINEWIDTH;
       else if(uni == 'p' && ne.editwhat == &vid.alpha) {

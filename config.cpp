@@ -742,11 +742,13 @@ void showGraphConfig() {
       XLAT("movement animation speed"),
       XLAT("+5 = move instantly"));
   
-    if(xuni == 'r')
+    if(xuni == 'r') {
       dialog::editNumber(sightrange, 4, allowIncreasedSight() ? 10 : 7, 1, 7, XLAT("sight range"), 
         XLAT("Roughly 42% cells are on the edge of your sight range. Reducing "
         "the sight range makes HyperRogue work faster, but also makes "
         "the game effectively harder."));
+      dialog::reaction = [] () { if(overgenerate) doOvergenerate(); };
+      }
   
     if(xuni == 'k') {
       glyphsortorder = eGlyphsortorder((glyphsortorder+6+(shiftmul>0?1:-1)) % gsoMAX);
