@@ -589,12 +589,20 @@ void drawpolyline(polytodraw& p) {
       }
 
     if(mdAzimuthalEqui() && (poly_flags & POLY_INVERSE)) {
-      ld h = atan2(glcoords[0][0], glcoords[0][1]);
-      for(int i=0; i<=360; i++) {
-        ld a = i * M_PI / 180 + h;
-        glcoords.push_back(make_array<GLfloat>(vid.radius * sin(a), vid.radius * cos(a), stereo::scrdist));
+      if(abs(zlevel(pp.V * C0) - 1) < 1e-6) {
+        // we should fill the other side
+        ld h = atan2(glcoords[0][0], glcoords[0][1]);
+        for(int i=0; i<=360; i++) {
+          ld a = i * M_PI / 180 + h;
+          glcoords.push_back(make_array<GLfloat>(vid.radius * sin(a), vid.radius * cos(a), stereo::scrdist));
+          }
+        poly_flags ^= POLY_INVERSE;
         }
-      poly_flags ^= POLY_INVERSE;
+      else {
+        // If we are on a zlevel, the algorithm above will not work correctly.
+        // It is hard to tell what to do in this case. Just fill neither side
+        p.col = 0;
+        }
       }
   
   #if CAP_GL

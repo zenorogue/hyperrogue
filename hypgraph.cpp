@@ -98,6 +98,32 @@ void apply_depth(hyperpoint &f, ld z) {
     }
   }
 
+bool hypot_zlev(bool zlev_used, ld& d, ld zlev, ld& df, ld& zf, ld &z) {
+  if(!zlev_used) {
+    df = 1; zf = 0;
+    return false;
+    }
+  else {
+    // (0,0,1) -> (0, sin z, cos z) -> (sin d cos z, sin z, cos d cos z)
+    ld z = geom3::factor_to_lev(zlev);
+    ld tz = sin_auto(z);
+    ld td = sin_auto(abs(d)) * cos_auto(z);
+    ld h = hypot(td, tz);
+    if(d > 0)
+      d = hypot_auto(d, z);
+    else
+      d = -hypot_auto(d, z);
+    zf = tz / h, df = td / h;
+    return true;
+    }
+  }
+
+bool hypot_zlev(bool zlev_used, ld& d, ld zlev, ld& df, ld& zf) {
+  ld z;
+  return hypot_zlev(zlev_used, d, zlev, df, zf, z);
+  }
+
+
 void applymodel(hyperpoint H, hyperpoint& ret) {
   
   ld tz = euclid ? (1+vid.alpha) : vid.alpha+H[2];
@@ -197,47 +223,59 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
     }
 
   ld zlev = 1;
+  bool zlev_used = false;
 
   if(wmspatial || mmspatial) {
     zlev = zlevel(H);
     using namespace hyperpoint_vec;
-    H = H / zlev;
+    zlev_used = !((zlev > 1-1e-6 && zlev < 1+1e-6));
+    if(zlev_used) H /= zlev;
     }
   
   if(pmodel == mdTwoPoint || mdBandAny() || pmodel == mdSinusoidal) {
     // map to plane
-    if(pmodel == mdTwoPoint) {
+    if(false) {
       auto p = vid.twopoint_param;
       ld dleft = hdist(H, xpush(-p) * C0);
       ld dright = hdist(H, xpush(p) * C0);
+      ld yf = 1, zf = 0;
+      if(zlev_used) {
+        ld y_orig = asin_auto(H[1]);
+        ld z;
+        hypot_zlev(true, y_orig, zlev, yf, zf, z);
+        dleft = hypot_auto(dleft, z);
+        dright = hypot_auto(dright, z);
+        }
       ld x = (dright*dright-dleft*dleft) / 4 / p;
       ld y = sqrt(dleft * dleft - (x-p)*(x-p) + 1e-9);
       x = -x;
-      if(H[1] < 0) y = -y;
-      ret = hpxyz(x/M_PI, y/M_PI, 0);
+      ret = hpxyz(x/M_PI, y*(H[1]<0?-1:1)*yf/M_PI, 0);
+      if(zlev_used && stereo::active()) 
+        apply_depth(ret, y * zf / M_PI);
       }
     else {
-      ld x, y;
-      switch(cgclass) {
-        case gcHyperbolic:
-          y = asinh(H[1]), x = asinh(H[0] / cosh(y));
-          break;
-        case gcSphere:
-          y = asin(H[1]), x = asin(H[0] / cos(y));
-          if(H[2] < 0 && x > 0) x = M_PI - x;
-          else if(H[2] < 0 && x <= 0) x = -M_PI - x;
-          break;
-        case gcEuclid:
-          y = H[1], x = H[0];
-          break;
+      ld x, y, yf, zf;
+      y = asin_auto(H[1]);
+      x = asin_auto(H[0] / cos_auto(y));
+      if(sphere) {
+        if(H[2] < 0 && x > 0) x = M_PI - x;
+        else if(H[2] < 0 && x <= 0) x = -M_PI - x;
         }
-      if(pmodel == mdBand) switch(cgclass) {
+      hypot_zlev(zlev_used, y, zlev, yf, zf);
+      if(pmodel == mdTwoPoint) {
+        auto p = vid.twopoint_param;
+        ld dleft = hypot_auto(x-p, y);
+        ld dright = hypot_auto(x+p, y);
+        x = (dright*dright-dleft*dleft) / 4 / p;
+        y = (y>0?1:-1) * sqrt(dleft * dleft - (x-p)*(x-p) + 1e-9);
+        }
+      else if(pmodel == mdBand) switch(cgclass) {
         case gcSphere:
-          y = atanh(sin(y) * zlev);
+          y = atanh(sin(y));
           x *= 2; y *= 2;
           break;
         case gcHyperbolic:
-          y = 2 * atan(tanh(y/2) * zlev);
+          y = 2 * atan(tanh(y/2));
           x *= 2; y *= 2;
           break;
         case gcEuclid:
@@ -245,31 +283,14 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
           y *= 2; x *= 2;
           break;
         }
-      if(pmodel == mdBandEquiarea) switch(cgclass) {
-        case gcHyperbolic:
-          y = sinh(y);
-          break;
-        case gcSphere:
-          y = sin(y);
-          break;
-        default:
-          y = y;
-          break;
-        }
-      if(pmodel == mdSinusoidal) switch(cgclass) {
-        case gcHyperbolic:
-          x *= cosh(y);
-          break;
-        case gcSphere:
-          x *= cos(y);
-          break;
-        default:
-          x *= 1;
-          break;
-        }
-      ret = hpxyz(x / M_PI, y / M_PI, 0);
+      else if(pmodel == mdBandEquiarea) 
+        y = sin_auto(y);
+      else if(pmodel == mdSinusoidal) 
+        x *= cos_auto(y);
+      ret = hpxyz(x / M_PI, y * yf / M_PI, 0);
+      if(zlev_used && stereo::active()) 
+        apply_depth(ret, y * zf / M_PI);
       }
-    apply_depth(ret, -geom3::factor_to_lev(zlev));
     ghcheck(ret, H);
     return;
     }
@@ -278,6 +299,8 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
     ld rad = sqrt(H[0] * H[0] + H[1] * H[1]);
     if(rad == 0) rad = 1;
     ld d = hdist0(H);
+    ld yf, zf;
+    hypot_zlev(zlev_used, d, zlev, yf, zf);
     
     // 4 pi / 2pi = M_PI 
     
@@ -285,11 +308,11 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
       d = sqrt(2*(1 - cos(d))) * M_PI / 2;
     else if(pmodel == 6 && !euclid)
       d = sqrt(2*(cosh(d) - 1)) / 1.5;
-    ret[0] = d * H[0] / rad / M_PI;
-    ret[1] = d * H[1] / rad / M_PI;
+    ret[0] = d * yf * H[0] / rad / M_PI;
+    ret[1] = d * yf * H[1] / rad / M_PI;
     ret[2] = 0; 
-    if(zlev != 1 && stereo::active()) 
-      apply_depth(ret, -geom3::factor_to_lev(zlev));
+    if(zlev_used && stereo::active()) 
+      apply_depth(ret, d * zf / M_PI);
     ghcheck(ret,H);
 
     return;

@@ -39,6 +39,42 @@ ld squar(ld x) { return x*x; }
 
 int sig(int z) { return (sphere || z<2)?1:-1; }
 
+int curvature() {
+  switch(cgclass) {
+    case gcEuclid: return 0;
+    case gcHyperbolic: return -1;
+    case gcSphere: return 1;
+    default: return 0;
+    }
+  }
+
+ld sin_auto(ld x) {
+  switch(cgclass) {
+    case gcEuclid: return x;
+    case gcHyperbolic: return sinh(x);
+    case gcSphere: return sin(x);
+    default: return x;
+    }
+  }
+
+ld asin_auto(ld x) {
+  switch(cgclass) {
+    case gcEuclid: return x;
+    case gcHyperbolic: return asinh(x);
+    case gcSphere: return asin(x);
+    default: return x;
+    }
+  }
+
+ld cos_auto(ld x) {
+  switch(cgclass) {
+    case gcEuclid: return 1;
+    case gcHyperbolic: return cosh(x);
+    case gcSphere: return cos(x);
+    default: return 1;
+    }
+  }
+
 // hyperbolic point:
 //===================
 
@@ -118,6 +154,19 @@ char *display(const hyperpoint& H) {
   static char buf[100];
   sprintf(buf, "%8.4f:%8.4f:%8.4f", double(H[0]), double(H[1]), double(H[2]));
   return buf;
+  }
+
+ld hypot_auto(ld x, ld y) {
+  switch(cgclass) {
+    case gcEuclid:
+      return hypot(x, y);
+    case gcHyperbolic:
+      return acosh(cosh(x) * cosh(y));
+    case gcSphere:
+      return acos(cos(x) * cos(y));
+    default:
+      return hypot(x, y);
+    }
   }
 
 // get the center of the line segment from H1 to H2

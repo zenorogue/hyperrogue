@@ -548,16 +548,9 @@ namespace conformal {
     }
   
   bool model_available(eModel pm) {
-    if(mdAzimuthalEqui() || pm == mdDisk || pm == mdPolynomial || pm == mdHyperboloid || pm == mdHemisphere ||
-      pm == mdBandEquidistant || pm == mdBandEquiarea || pm == mdSinusoidal || pm == mdTwoPoint)
-      return true;
-    if(sphere && pm == mdBand)
-      return true;
-    if(euclid && (pm == mdHalfplane || pm == mdBall))
-      return true;
-    if(hyperbolic)
-      return true;
-    return false;
+    if(sphere && (pm == mdHalfplane || pm == mdBall))
+      return false;
+    return true;
     }    
   
   void model_menu() {
