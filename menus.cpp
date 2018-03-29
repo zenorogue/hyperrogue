@@ -640,18 +640,22 @@ void showStartMenu() {
         dialog::addInfo(XLAT("(most achievements are not available)"));
         }
       break;      
-    
+
+#if CAP_RUG    
     case 5:
       dialog::addBreak(100);
       dialog::addBigItem(XLAT("hypersian rug mode"), 'M');
       dialog::addInfo(XLAT("see the true form"));
       break;
-    
+#endif
+
+#if CAP_TEXTURE    
     case 6:
       dialog::addBreak(100);
       dialog::addBigItem(XLAT("texture mode"), 'T');
       dialog::addInfo(XLAT("paint pictures"));
       break;
+#endif
     
     case 20:
       dialog::addBreak(100);
@@ -694,6 +698,7 @@ void showStartMenu() {
   keyhandler = [] (int sym, int uni) {
     dialog::handleNavigation(sym, uni);
     if(uni == 'o') uni = 'i';
+#if CAP_RUG
     else if(uni == 'M') {
       rug::init();
       popScreenAll();
@@ -705,6 +710,8 @@ void showStartMenu() {
       rug::model_distance *= 2;
       rug::init();
       }
+#endif
+#if CAP_TEXTURE
     else if(uni == 'T') {
       popScreenAll();
       resetModes('c');
@@ -720,6 +727,7 @@ void showStartMenu() {
         pushScreen(mapeditor::showDrawEditor);
         }
       }
+#endif
     else if(uni == 'g') {
       popScreenAll();
       resetModes('c');
