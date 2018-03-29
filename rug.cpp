@@ -304,7 +304,7 @@ void add_anticusp_edge(rugpoint *e1, rugpoint *e2, ld len = 1) {
   e.target = e1; e2->anticusp_edges.push_back(e);
   }
 
-void addTriangle(rugpoint *t1, rugpoint *t2, rugpoint *t3, ld len = 1) {
+void addTriangle(rugpoint *t1, rugpoint *t2, rugpoint *t3, ld len) {
   addEdge(t1->getglue(), t2->getglue(), len); 
   addEdge(t2->getglue(), t3->getglue(), len); 
   addEdge(t3->getglue(), t1->getglue(), len);

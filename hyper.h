@@ -881,6 +881,10 @@ namespace rug {
   
   bool handlekeys(int sym, int uni);
 #endif
+
+  void addTriangle(rugpoint *t1, rugpoint *t2, rugpoint *t3, ld len = 1);
+  rugpoint *addRugpoint(hyperpoint h, double dist);
+  void buildRug();
   }
 
 #define HASLINEVIEW
@@ -1314,6 +1318,19 @@ namespace dialog {
     double param;
     int position;
     };
+ 
+  struct numberEditor {
+    ld *editwhat;
+    string s;
+    ld vmin, vmax, step, dft;
+    string title, help;
+    ld (*scale) (ld);
+    ld (*inverse_scale) (ld);
+    int *intval; ld intbuf;
+    bool positive;
+    };
+  
+  extern numberEditor ne;
 
   extern vector<item> items;
   
@@ -2905,3 +2922,20 @@ namespace surface {
   
   }
 #endif
+
+struct stringpar {
+  string v;
+  stringpar(string s) : v(s) { }
+  stringpar(const char* s) : v(s) { }
+  stringpar(eMonster m) { v= minf[m].name; }
+  stringpar(eLand l) { v= linf[l].name; }
+  stringpar(eWall w) { v= winf[w].name; }
+  stringpar(eItem i) { v= iinf[i].name; }  
+  };
+
+string XLAT(string x);
+string XLAT(string x, stringpar p1);
+string XLAT(string x, stringpar p1, stringpar p2);
+string XLAT(string x, stringpar p1, stringpar p2, stringpar p3);
+string XLAT(string x, stringpar p1, stringpar p2, stringpar p3, stringpar p4);
+string XLAT(string x, stringpar p1, stringpar p2, stringpar p3, stringpar p4, stringpar p5);

@@ -530,16 +530,7 @@ namespace dialog {
     reaction = reaction_t();
     }
   
-  struct numberEditor {
-    ld *editwhat;
-    string s;
-    ld vmin, vmax, step, dft;
-    string title, help;
-    ld (*scale) (ld);
-    ld (*inverse_scale) (ld);
-    int *intval; ld intbuf;
-    bool positive;
-    } ne;
+  numberEditor ne;
   
   bool editingDetail() {
     return ne.editwhat == &geom3::highdetail || ne.editwhat == &geom3::middetail;

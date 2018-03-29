@@ -80,15 +80,15 @@ bool inv::activating;
 #include "sound.cpp"
 #include "achievement.cpp"
 #include "barriers.cpp"
-#include "bigstuff.cpp"
+#include "surface.cpp"
 #if CAP_TOUR
 #include "tour.cpp"
 #endif
-#include "surface.cpp"
 #if ISMOBILE==0
 #include <unistd.h>
 #endif
 #include "commandline.cpp"
+#include "bigstuff.cpp"
 #endif
 
 #if IN_CU(1)

@@ -5,16 +5,6 @@
 
 #define NUMLAN 7
 
-struct stringpar {
-  string v;
-  stringpar(string s) : v(s) { }
-  stringpar(const char* s) : v(s) { }
-  stringpar(eMonster m) { v= minf[m].name; }
-  stringpar(eLand l) { v= linf[l].name; }
-  stringpar(eWall w) { v= winf[w].name; }
-  stringpar(eItem i) { v= iinf[i].name; }  
-  };
-
 const char *dnameof(eMonster m) { return minf[m].name; }
 const char *dnameof(eLand l) { return linf[l].name; }
 const char *dnameof(eWall w) { return winf[w].name; }
