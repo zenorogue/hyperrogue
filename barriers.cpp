@@ -607,18 +607,21 @@ bool buildBarrier4(cell *c, int d, int mode, eLand ll, eLand lr) {
   return true;
   }    
 
-void buildBarrierStrong(cell *c, int d, bool oldleft) {
+void buildBarrierStrong(cell *c, int d, bool oldleft, eLand newland) {
   d %= 7;
   cellwalker bb(c, d);
 
   c->bardir = d;
   eLand oldland = c->land;
-  eLand newland = getNewLand(oldland);
   landcount[newland]++;
 
   if(oldleft) c->barleft = oldland, c->barright = newland;
   else c->barleft = newland, c->barright = oldland;
   extendcheck(bb.c);
+  }
+
+void buildBarrierStrong(cell *c, int d, bool oldleft) {
+  buildBarrierStrong(c, d, oldleft, getNewLand(c->land));
   }
 
 void buildCrossroads2(cell *c) {

@@ -985,7 +985,11 @@ void buildBigStuff(cell *c, cell *from) {
   
   // buildgreatwalls
   
-  if(celldist(c) < 3) ;
+  if(celldist(c) < 3) {
+    if(c == cwt.c->master->move[3]->c7 && top_land) {
+      buildBarrierStrong(c, 6, true, top_land);
+      }
+    }
   
   else if(chaosmode) {
     if(ctof(c) && hrand(10000) < 9000 && c->land && !inmirror(c) && buildBarrierNowall(c, getNewLand(c->land))) 

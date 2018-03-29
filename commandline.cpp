@@ -163,6 +163,13 @@ int arg::readCommon() {
     shift(); cheatdest = readland(args()); autocheat = true;
     showstartmenu = false;
     }
+  else if(argis("-W3")) {
+    shift(); top_land = readland(args()); autocheat = true;
+    showstartmenu = false;
+    }
+  else if(argis("-top")) {
+    PHASE(3); View = View * spin(-M_PI/2);
+    }
   else if(argis("-W") && curphase <= 2) {
     PHASE(2);
     shift(); 

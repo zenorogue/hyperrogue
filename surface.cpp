@@ -777,11 +777,13 @@ int surface_args() {
            
   if(0) ;
   else if(argis("-kuen")) {
+    PHASE(3);
     calcparam();
     run_shape(dsKuen);
     }
 
   else if(argis("-dini")) {
+    PHASE(3);
     calcparam();
     shift();
     dini_b = argf();
@@ -789,6 +791,7 @@ int surface_args() {
     }
 
   else if(argis("-barrel")) {
+    PHASE(3);
     calcparam();
     shift();
     hyper_b = argf();
@@ -796,16 +799,19 @@ int surface_args() {
     }
 
   else if(argis("-tractricoid")) {
+    PHASE(3);
     calcparam();
     run_shape(dsTractricoid);
     }
 
   else if(argis("-hemi")) {
+    PHASE(3);
     calcparam();
     run_shape(dsHemisphere);
     }
 
   else if(argis("-hyperb")) {
+    PHASE(3);
     calcparam();
     run_shape(dsHyperboloid);
     }

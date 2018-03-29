@@ -15,6 +15,8 @@ bool timerstopped;
 int savecount;
 bool showoff = false, doCross = false;
 
+eLand top_land;
+
 bool verless(string v, string cmp) {
   if(isdigit(v[0]) && isdigit(v[1])) 
     v = "A" + v;
@@ -176,7 +178,7 @@ void initgame() {
     if(tactic::trailer && cwt.c->land != laClearing) safety = trailer_safety;
     setdist(cwt.c, i, NULL);
     if(tactic::trailer) safety = false;
-    
+
     currentmap->verify();
     }
   
