@@ -7030,3 +7030,141 @@ S("affect texture position Y", "положение текстуры Y")
 S("select master cells", "выбери главные клетки")
 S("select master triangles", "выбери главные треугольники")
 S("fine tune vertices", "тонкая настройка вершин")
+
+
+// === 10.3n extra texts ===
+// =========================
+
+// main menu
+// an option to keep the current settings
+S("use current/saved settings", "текущие/сохранённые настройки")
+// randomly chosen mode: hypersian rug
+S("see the true form", "настоящая форма")
+// randomly chosen mode: heptagonal mode
+S("more curvature", "большая кривизна")
+
+// anti-crossing in the Hypersian Rug
+S("anti-crossing", "анти-пересечение")
+S("The anti-crossing algorithm prevents the model from crossing itself, "
+  "by preventing points which should not be close from being close. "
+  "The bigger number, the more sensitive it is, but the embedding is slower. Set 0 to disable.",
+  
+  "Этот алгоритм не даёт модели пересечься с собой, "
+  "запрещая определённым точкам находиться близко. "
+  "Чем больше параметр, тем больше чувствительность, и тем медленнее "
+  "строится модель. Установите значение в 0, чтобы выключить."
+  )
+
+// new 3D models
+
+// various menu names
+
+S("constant curvature surfaces", "поверхности постоянной кривизны")
+S("smooth surfaces", "гладкие поверхности")
+S("models of hyperbolic geometry", "модели гиперболической геометрии")
+S("history mode", "режим истории") // old 'conformal/history mode' has been split into two
+S("other 3D models", "другие 3D модели")
+
+// various models
+
+S("Minkowski hyperboloid", "гиперболоид Минковского")
+S("plane", "плоскость")
+S("sphere", "сфера")
+S("hemisphere", "полусфера")
+S("tractricoid", "псевдосфера")
+S("concave barrel", "вогнутая бочка")
+S("Dini's surface", "поверхность Дини")
+S("Kuen surface", "поверхность Куэна")
+S("inversion", "инверсия")
+
+S("Mercator", "проекция Меркатора")
+S("band equidistant", "лента эквидистантная")
+S("band equi-area", "лента эквивалентная")
+S("sinusoidal", "синусоида")
+S("two-point equidistant", "двухточечная эквидистанта")
+
+S(
+  "This model maps the world so that the distances from two points "
+  "are kept. This parameter gives the distance from the two points to "
+  "the center.",
+  
+  "Эта модель отображает мир так, что расстояния от двух точек "
+  "сохраняются. Этот параметр задаёт расстояние от этих точек до центра."
+)
+
+S(
+  "In this menu you can choose from several known smooth surfaces of constant negative curvature. "
+  "Since the curvature of hyperbolic plane is also constant negative, these surfaces "
+  "are great to draw hyperbolic tesselations on. While they look great, only a small part "
+  "of the hyperbolic plane can be visibly represented in this way, so they are not "
+  "good for playing HyperRogue; however, the coverage extends far away in specific directions, "
+  "so first increasing sight range in graphics config and texture size in hypersian rug settings may improve the effect. "
+  "For convenience, you can also choose other 3D models from this menu.",
+  
+  "В этом меню можно выбрать одну их нескольких известных гладких поверхностей постоянной отрицательной кривизны. "
+  "Так как кривизна гиперболической плоскости также постоянна и отрицательна, на таких поверхностях "
+  "удобно рисовать гиперболические замощения. Однако только малая часть "
+  "гиперболической плоскости будет при этом видна, так что играть на них "
+  "в HyperRogue неудобно; однако покрытие распространяется далеко в определённых направлениях, "
+  "увеличение дальности обзора в настройках графики и размера текстуры "
+  "в настройках гиперсидского ковра могут помочь. Для удобства можно выбрать другую "
+  "модель из этого меню."
+  )
+
+// coverage
+S("display coverage", "показать покрытие")
+S("on surface", "на поверхности")
+S("on H² (static)", "на H² (статическая)")
+S("on H² (dynamic)", "на H² (динамическая)")
+
+S("Computing these models involves integrals and differential equations, which are currently solved numerically. This controls the precision.",
+  "Построение этих моделей использует интегралы и дифференциальные уравнения, которые сейчас решаются численно. Этот параметр контролирует точность.")
+
+// too bored for declension of %1 (either a surface name or a a part of a surface)
+S("solving the geodesics on: %1, %2/%3", "расчёт геодезических на: %1, %2/%3")
+
+S("the upper component", "верхняя часть")
+S("the lower center", "нижний центр")
+S("the lower left", "снизу слева")
+S("the lower right", "снизу справа")
+
+S("camera rotation in 3D models", "поворот камеры в 3D моделях")
+
+S("Rotate the camera in 3D models (ball model, hyperboloid, and hemisphere). "
+  "Note that hyperboloid and hemisphere models are also available in the "
+  "Hypersian Rug surfaces menu, but they are rendered differently there -- "
+  "by making a flat picture first, then mapping it to a surface. "
+  "This makes the output better in some ways, but 3D effects are lost. "
+  "Hypersian Rug model also allows more camera freedom.",
+  
+  "Поворот камеры в 3D моделях (шар, гиперболоид, полусфера). "
+  "Обратите внимание, что модели гиперболоида и полусферы также доступны "
+  "в меню гиперсидского ковра, но они рисуются иным "
+  "способом -- сначала рисуется плоское изображение, а потом оно "
+  "отображается на поверхность. Результат в некотором смысле лучше, но "
+  "эффект трёхмерности теряется. Также режим гиперсидского ковра "
+  "позволяет более свободно обращаться с камерой.")
+
+// parameter for the given model
+S("parameter", "параметр")
+S( "Stereographic projection to a sphere. Choose the radius of the sphere.",
+  "Стереографическая проекция на сферу. Выберите радиус сферы.")
+// parameter for Dini
+S("The larger the number, the more twisted it is.",
+  "Чем больше параметр, тем более скручена поверхность.")
+// parameter for concave barrel
+S("Controls the inner radius.", "Контролирует внутренний радиус.")
+
+S(
+  "This controls the automatic rotation of the world. "
+  "It affects the line animation in the history mode, and "
+  "lands which have a special direction. Note that if finding this special direction is a part of the puzzle, "
+  "it works only in the cheat mode.",
+  
+  "Эта настройка влияет на автоповорот мира. "
+  "Она влияет на анимацию в режиме истории и на земли "
+  "с выделенным направлением. Если нахождение этого направления "
+  "является частью игры, то это работает только в "
+  "режиме обманщика."
+  );
+S("NEVER", "НИКОГДА")
