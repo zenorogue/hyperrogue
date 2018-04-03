@@ -986,7 +986,7 @@ void buildBigStuff(cell *c, cell *from) {
   // buildgreatwalls
   
   if(celldist(c) < 3) {
-    if(c == cwt.c->master->move[3]->c7 && top_land) {
+    if(top_land && c == cwt.c->master->move[3]->c7) {
       buildBarrierStrong(c, 6, true, top_land);
       }
     }
