@@ -1416,7 +1416,7 @@ void rvvideo(const char *fname) {
       drawthemap();
       centerpc(100); optimizeview();
       fixmatrix(View);
-      bfs(); setdist(cwt.c, 0, NULL);
+      bfs(); setdist(cwt.c, 7 - getDistLimit() - genrange_bonus, NULL);
       vertexdata& vd = vdata[id];
       for(int e=0; e<size(vd.edges); e++) {
         int id2 = vd.edges[e].first;

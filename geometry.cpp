@@ -16,6 +16,8 @@ ld tessf, crossf, hexf, hcrossf, hexhexdist, hexvdist, hepvdist, rhexf;
 // hepvdist: distance between heptagon vertex and hexagon center (either hcrossf or something else)
 // rhexf: distance from heptagon center to heptagon vertex (either hexf or hcrossf)
 
+int base_distlimit;
+
 hyperpoint Crad[MAX_S84];
 
 transmatrix heptmove[MAX_EDGE], hexmove[MAX_EDGE];

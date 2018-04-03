@@ -540,10 +540,9 @@ void loadOldConfig(FILE *f) {
   
   aa=vid.revcontrol; bb=vid.drawmousecircle;
   d = vid.mspeed;
-  err=fscanf(f, "%d%d%d%f%d%d", &aa, &bb, &sightrange, &d, &effvolume, &vid.particles);
+  int sr;
+  err=fscanf(f, "%d%d%d%f%d%d", &aa, &bb, &sr, &d, &effvolume, &vid.particles);
   vid.mspeed = d;
-  if(sightrange < 3) sightrange = 3;
-  if(sightrange > 7) sightrange = 7;
   vid.revcontrol = aa; vid.drawmousecircle = bb;
    
   readf(f, geom3::depth); readf(f, geom3::camera); readf(f, geom3::wall_height);
@@ -706,7 +705,7 @@ void showGraphConfig() {
 
   dialog::addSelItem(XLAT("font scale"), its(fontscale), 'b');
 
-  dialog::addSelItem(XLAT("sight range"), its(sightrange), 'r');
+  dialog::addSelItem(XLAT("sight range"), its(sightrange_bonus), 'r');
 
   dialog::addSelItem(XLAT("compass size"), its(vid.mobilecompasssize), 'c');
 
@@ -743,11 +742,13 @@ void showGraphConfig() {
       XLAT("+5 = move instantly"));
   
     if(xuni == 'r') {
-      dialog::editNumber(sightrange, 4, allowIncreasedSight() ? 10 : 7, 1, 7, XLAT("sight range"), 
+      dialog::editNumber(sightrange_bonus, -3, allowIncreasedSight() ? 3 : 0, 1, 0, XLAT("sight range"), 
         XLAT("Roughly 42% cells are on the edge of your sight range. Reducing "
         "the sight range makes HyperRogue work faster, but also makes "
         "the game effectively harder."));
-      dialog::reaction = [] () { if(overgenerate) doOvergenerate(); };
+      dialog::reaction = [] () { 
+        doOvergenerate();
+        };
       }
   
     if(xuni == 'k') {

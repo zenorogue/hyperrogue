@@ -1135,16 +1135,6 @@ bool openplains(cell *c) {
     }    
   }
 
-void doOvergenerate() {
-  int dcs = size(dcal);
-  for(int i=0; i<dcs; i++) {
-    cell *c = dcal[i];
-    if(weirdhyperbolic && (c->land == laCaribbean)) continue;
-    if(weirdhyperbolic && (c->land == laStorms || c->land == laCamelot || c->land == laTemple || c->land == laOcean)) continue;
-    if(c->cpdist <= sightrange-6) setdist(c, 1, NULL);
-    }
-  }
-
 void buildCamelotWall(cell *c) {
   c->wall = waCamelot;
   for(int i=0; i<c->type; i++) {

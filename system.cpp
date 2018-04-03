@@ -152,7 +152,7 @@ void initgame() {
     cell *c = euclideanAtCreate(pair_to_vec(EPX, EPY));
     princess::generating = true;
     c->land = laPalace;
-    for(int j=BARLEV; j>=0; j--) setdist(c, j, NULL);
+    setdist(c, 7 - getDistLimit() - genrange_bonus, NULL);
     princess::generating = false;
     }
 
@@ -174,7 +174,7 @@ void initgame() {
   
   // extern int sightrange; sightrange = 9;
   // cwt.c->land = laHell; items[itHell] = 10;
-  for(int i=BARLEV; i>=0; i--) {
+  for(int i=BARLEV; i>=7 - getDistLimit() - genrange_bonus; i--) {
     if(tactic::trailer && cwt.c->land != laClearing) safety = trailer_safety;
     setdist(cwt.c, i, NULL);
     if(tactic::trailer) safety = false;
@@ -205,7 +205,7 @@ void initgame() {
       multi::player[1].c = cwt.c;
     if(firstland == laCrossroads2 && i == 6)
       multi::player[6].c = createMov(createMov(cwt.c, 0), 3);
-    setdist(cwt.c->mov[idir], 0, cwt.c);
+    setdist(cwt.c->mov[idir], 7 - getDistLimit() - genrange_bonus, cwt.c);
     multi::player[i].spin = 0;
     multi::flipped[i] = true;
     multi::whereto[i].d = MD_UNDECIDED;
@@ -268,6 +268,8 @@ void initgame() {
   bfs();
   checkmove();
   playermoved = true;
+
+  if(!cheater) gamerange_bonus = genrange_bonus = 0;
   }
 
 bool havesave = true;

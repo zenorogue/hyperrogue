@@ -38,7 +38,7 @@ bool camelotcheat;
 eItem orbToTarget;
 eMonster monsterToSummon;
 
-int sightrange = 7;
+int sightrange_bonus = 0;
 bool overgenerate = false; // generate a bigger area with high sightrange
 
 string mouseovers;
@@ -3268,7 +3268,7 @@ void pushdown(cell *c, int& q, const transmatrix &V, double down, bool rezoom, b
 
 bool dodrawcell(cell *c) {
   // todo: fix when scrolling
-  if(!buggyGeneration && !debugmode && c->land != laCanvas && sightrange < 10) {
+  if(!buggyGeneration && !debugmode && c->land != laCanvas && sightrange_bonus < 3) {
     // not yet created
     if(c->mpdist > 7 && !cheater) return false;
     // always show on the torus rug
@@ -3277,7 +3277,7 @@ bool dodrawcell(cell *c) {
     // in the Yendor Challenge, scrolling back is forbidden
     if(c->cpdist > 7 && (yendor::on && !cheater)) return false;
     // (incorrect comment) too far, no bugs nearby
-    if(playermoved && sightrange <= 7 && c->cpdist > sightrange && c->cpdist > ambush_distance) return false;
+    if(playermoved && c->cpdist > get_sightrange() && c->cpdist > ambush_distance) return false;
     }
   
   return true;
@@ -3505,7 +3505,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
 
   viewBuggyCells(c,V);
   
-  if(conformal::on || inHighQual || sightrange > 7) checkTide(c);
+  if(conformal::on || inHighQual || sightrange_bonus > gamerange_bonus) checkTide(c);
   
   // save the player's view center
   if(isPlayerOn(c) && !shmup::on) {
@@ -4993,7 +4993,7 @@ void drawMarkers() {
       cell *keycell = NULL;
       int i;
       for(i=0; i<YDIST; i++) 
-        if(yi[yii].path[i]->cpdist <= sightrange) {
+        if(yi[yii].path[i]->cpdist <= get_sightrange()) {
           keycell = yi[yii].path[i];
           break;
           }
@@ -5173,10 +5173,8 @@ void drawthemap() {
   
   wavephase = (-(ticks / 100)) & 7;
 
-  if(!allowIncreasedSight()) {
-    if(sightrange > 7) sightrange = 7;
-    overgenerate = false;
-    }
+  if(sightrange_bonus > 0 && !allowIncreasedSight()) 
+    sightrange_bonus = 0;
   
   profile_frame();
   profile_start(0);
@@ -5238,7 +5236,7 @@ void drawthemap() {
   if(euclid)
     drawEuclidean();
   else {
-    int sr = max(sightrange, ambush_distance);
+    int sr = max(get_sightrange(), ambush_distance);
     maxreclevel = 
       conformal::on ? sr + 2:
       (!playermoved) ? sr+1 : sr + 4;
@@ -5880,6 +5878,6 @@ cell *viewcenter() {
   }
 
 bool inscreenrange(cell *c) {
-  return celldistance(viewcenter(), c) <= (euclid ? sightrange : nonbitrunc ? 9 : 13);
+  return celldistance(viewcenter(), c) <= (euclid ? get_sightrange() : nonbitrunc ? 9 : 13);
   }
 

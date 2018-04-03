@@ -13,8 +13,16 @@ int lastexplore;
 bool randomPatternsMode = false;
 int randompattern[landtypes];
 
+int genrange_bonus = 0;
+
 bool chaosUnlocked = false;
 bool chaosAchieved = false;
+
+void doOvergenerate() {
+  if(overgenerate) 
+    for(int i=0; i<numplayers(); i++)
+      setdist(playerpos(i), 7 - getDistLimit() - genrange_bonus, NULL);
+  }
 
 bool notDippingFor(eItem i) {
   if(peace::on) return false;
@@ -2240,37 +2248,9 @@ void repairLandgen(cell *c) {
     }
   }
 
-int dnext(int d) {
-  switch(getDistLimit()&7) {
-    case 0:
-    case 1:
-      // 0,7
-      return d+(d<7?7:1);
-    case 2:
-      // 0,1,7
-      return d+(d>=1 && d<7?6:1);
-    case 3:
-      // 0,1,4,7
-      return d+(d>=1 && d<7?3:1);
-    case 4:
-      //0,1,3,5,7
-      return d+(d>=1 && d<7?2:1);
-    case 5:
-      // 0,1,2,3,5,7
-      return d+(d>=3 && d<7?2:1);
-    case 6:
-      // 0,1,2,3,4,5,7
-      return d+(d==5?2:1);
-    case 7:
-      //0,1,2,3,4,5,6,7
-      return d+1;
-    }
-  return d+1;
-  }
-  
 void setdist(cell *c, int d, cell *from) {
   
-  if(signed(c->mpdist) <= d) return;
+  if(c->mpdist <= d) return;
   if(c->mpdist > d+1 && d != BARLEV) setdist(c, d+1, from);
   c->mpdist = d;
   // printf("setdist %p %d [%p]\n", c, d, from);
@@ -2292,7 +2272,7 @@ void setdist(cell *c, int d, cell *from) {
 
   if(buggyGeneration) {
     if(d < BARLEV) for(int i=0; i<c->type; i++) {
-      setdist(createMov(c, i), d+(nonbitrunc?2:1), c);
+      setdist(createMov(c, i), d+1, c);
       }
     if(d >= BARLEV) c->item = itBuggy2;
     return;
@@ -2337,12 +2317,14 @@ void setdist(cell *c, int d, cell *from) {
   if(buggyGeneration) return;
   
   if(d < 10) {
-    explore[d]++;
-    exploreland[d][c->land]++;
+    if(d >= 0) {
+      explore[d]++;
+      exploreland[d][c->land]++;
+      }
     
     if(d < BARLEV) for(int i=0; i<c->type; i++) {
       
-      setdist(createMov(c, i), dnext(d), c);
+      setdist(createMov(c, i), d+1, c);
       if(buggyGeneration) return;
       }
     

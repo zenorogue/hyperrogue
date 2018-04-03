@@ -2620,7 +2620,7 @@ namespace svg {
       if(!uselatex)
         fprintf(f, "font-family='%s' font-size='%s' ", font.c_str(), coord(size));      
       fprintf(f, "%s>%s</text>",
-        stylestr(col, frame ? 0x0000000FF : 0, (1<<sightrange)*dfc/40), str2.c_str());
+        stylestr(col, frame ? 0x0000000FF : 0, (1<<get_sightrange())*dfc/40), str2.c_str());
       stopstring();
       fprintf(f, "\n");
       }
@@ -2673,7 +2673,7 @@ namespace svg {
     dynamicval<int> v5(ringcolor, 0x808080FF);
     
     vid.usingGL = false;
-    vid.xres = vid.yres = svgsize ? svgsize : min(1 << (sightrange+7), 16384);
+    vid.xres = vid.yres = svgsize ? svgsize : min(1 << (get_sightrange()+7), 16384);
     calcparam();
 #if CAP_ROGUEVIZ
     rogueviz::fixparam();
@@ -2692,7 +2692,7 @@ namespace svg {
     drawfullmap();
     fprintf(f, "</svg>\n");
     fclose(f);
-    addMessage(XLAT("Saved the SVG shot to %1 (sightrange %2)", fname, its(sightrange)));
+    addMessage(XLAT("Saved the SVG shot to %1 (sightrange %2)", fname, its(get_sightrange())));
     }
   }
 #endif

@@ -611,13 +611,13 @@ namespace dialog {
 
     // if(ne.editwhat == &whatever) resetGeometry();
 
-    if(ne.intval == &sightrange && sightrange < 4) 
-      *ne.editwhat = sightrange = 4, affect('v');
+    if(ne.intval == &sightrange_bonus && sightrange_bonus < -3) 
+      *ne.editwhat = sightrange_bonus = -3, affect('v');
     
-    int msr = allowIncreasedSight() ? 15 : 7;
+    int msr = allowIncreasedSight() ? 10 : 0;
 
-    if(ne.intval == &sightrange && sightrange > msr) 
-      *ne.editwhat = sightrange = msr, affect('v');
+    if(ne.intval == &sightrange_bonus && sightrange_bonus > msr) 
+      *ne.editwhat = sightrange_bonus = msr, affect('v');
     
     if(ne.intval == &conformal::bandhalf && conformal::bandhalf < 5) 
       *ne.editwhat = *ne.intval = 5, affect('v');
@@ -695,8 +695,10 @@ namespace dialog {
       addBoolItem("all directional lands", conformal::do_rotate == 2, 'd');
       }
     
-    if(ne.editwhat == &ne.intbuf && ne.intval == &sightrange && cheater)
-      addBoolItem("overgenerate", overgenerate, 'o');
+    if(ne.editwhat == &ne.intbuf && ne.intval == &sightrange_bonus && cheater) {
+      addSelItem("generation range bonus", its(genrange_bonus), 'o');
+      addSelItem("game range bonus", its(gamerange_bonus), 'O');
+      }
 
     if(ne.editwhat == &vid.linewidth)
       addBoolItem("finer lines at the boundary", vid.antialias & AA_LINEWIDTH, 'o');
@@ -751,9 +753,12 @@ namespace dialog {
         conformal::do_rotate = 1;
       else if(uni == 'd' && ne.editwhat == &conformal::rotation)
         conformal::do_rotate = 2;
-      else if(uni == 'o' && ne.editwhat == &ne.intbuf && ne.intval == &sightrange && cheater) {
-        overgenerate = !overgenerate;
-        if(overgenerate) doOvergenerate();
+      else if(uni == 'o' && ne.editwhat == &ne.intbuf && ne.intval == &sightrange_bonus && cheater) {
+        genrange_bonus = sightrange_bonus;
+        doOvergenerate();
+        }
+      else if(uni == 'O' && ne.editwhat == &ne.intbuf && ne.intval == &sightrange_bonus && cheater) {
+        gamerange_bonus = sightrange_bonus;
         }
       else if(uni == 'o' && ne.editwhat == &vid.linewidth)
         vid.antialias ^= AA_LINEWIDTH;

@@ -13,6 +13,8 @@ int utfsize(char c) {
   return 4;
   }
 
+int get_sightrange() { return getDistLimit() + sightrange_bonus; }
+
 namespace stereo {
   eStereo mode;
   ld ipd;
@@ -820,7 +822,7 @@ ld realradius() {
       vradius = 1e12; // use the following
     }
   if(euclid)
-    vradius = vid.radius * sightrange / (1 + vid.alpha) / 2.5;
+    vradius = vid.radius * get_sightrange() / (1 + vid.alpha) / 2.5;
   vradius = min<ld>(vradius, min(vid.xres, vid.yres) / 2);
   return vradius;
   }

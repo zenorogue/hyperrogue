@@ -430,7 +430,7 @@ namespace conformal {
 
     SDL_Surface *bbuf = SDL_CreateRGBSurface(SDL_SWSURFACE,bandfull,bandfull,32,0,0,0,0);
     s = bbuf;
-    int ssr = sightrange; sightrange = 10; int sch = cheater; cheater = 0;
+    int ssr = sightrange_bonus; sightrange_bonus = 3; int sch = cheater; cheater = 0;
     videopar vid2 = vid; vid.xres = vid.yres = bandfull; vid.scale = 1;
     calcparam();
     vid.radius = bandhalf;
@@ -518,7 +518,7 @@ namespace conformal {
       SDL_FreeSurface(band);
 
     SDL_FreeSurface(sav);
-    s = sav; vid = vid2; sightrange = ssr; cheater = sch;
+    s = sav; vid = vid2; sightrange_bonus = ssr; cheater = sch;
     if(includeHistory) restoreBack();
     
     if(dospiral) {

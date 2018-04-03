@@ -9,6 +9,9 @@ int turncount;
 int rosewave, rosephase;
 int avengers, mirrorspirits, wandering_jiangshi, jiangshi_on_screen;
 
+int gamerange_bonus = 0;
+int gamerange() { return getDistLimit() + gamerange_bonus; }
+
 cell *lastmove;
 enum eLastmovetype {lmSkip, lmMove, lmAttack, lmSpecial, lmPush, lmTree};
 eLastmovetype lastmovetype;
@@ -2731,7 +2734,7 @@ void buildRosemap() {
 
   }
 
-int getDistLimit() { return ginf[geometry].distlimit[nonbitrunc]; }
+int getDistLimit() { return base_distlimit; }
 
 bool nogoSlow(cell *to, cell *from) {
   if(cellEdgeUnstable(to) && gravityLevel(to) >= gravityLevel(from)) return true;
@@ -2754,6 +2757,8 @@ void computePathdist(eMonster param) {
     }
 
   int qtarg = size(targets);
+  
+  int limit = gamerange();
 
   for(int qb=0; qb < size(pathq); qb++) {
     int fd = reachedfrom[qb] + 3;
@@ -2767,7 +2772,7 @@ void computePathdist(eMonster param) {
       pathqm.push_back(c); 
       continue; 
       }
-    if(c->cpdist > 7 && !(c->land == laTrollheim && turncount < c->landparam)) continue;
+    if(c->cpdist > limit && !(c->land == laTrollheim && turncount < c->landparam)) continue;
     int d = c->pathdist;
     if(d == PINFD - 1) continue;
     for(int j=0; j<c->type; j++) {
@@ -2846,7 +2851,7 @@ void bfs() {
     if(!invismove) targets.push_back(c);
     }
   
-  int distlimit = getDistLimit();
+  int distlimit = gamerange();
 
   for(int i=0; i<numplayers(); i++) {
     cell *c = playerpos(i);
@@ -4110,7 +4115,7 @@ void killThePlayerAt(eMonster m, cell *c, flagtype flags) {
   }
 
 void afterplayermoved() {
-  setdist(cwt.c, 0, NULL);
+  setdist(cwt.c, 7 - getDistLimit() - genrange_bonus, NULL);
   prairie::treasures();
   if(generatingEquidistant) {
     printf("Warning: generatingEquidistant set to true\n");
@@ -6459,7 +6464,7 @@ int ambushSize(cell *c, eItem what) {
   }
 
 int ambush(cell *c, eItem what) {
-  int maxdist = getDistLimit();
+  int maxdist = gamerange();
   celllister cl(c, maxdist, 1000000, NULL);
   cell *c0 = c;
   int d = 0;

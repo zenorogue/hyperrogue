@@ -467,11 +467,11 @@ else if(args()[0] == '-' && args()[1] == x && args()[2] == '0') { showstartmenu 
     }
   else if(argis("-sr")) {    
     PHASEFROM(2);
-    shift(); sightrange = argi();
+    shift(); sightrange_bonus = argi();
     }
   else if(argis("-srx")) {    
     PHASEFROM(2);
-    shift(); sightrange = argi(); overgenerate = true; autocheat = true;
+    shift(); sightrange_bonus = genrange_bonus = gamerange_bonus = argi(); autocheat = true;
     }
   else if(argis("-we")) {    
     PHASEFROM(2);

@@ -1045,7 +1045,7 @@ namespace mirror {
   static const int LIGHTNING = -1; // passed instead of cpid
   
   bool noMirrorOn(cell *c) {
-    return c->monst || (!shmup::on && isPlayerOn(c)) || (geometry != gQuotient2 && geometry != gTorus && c->cpdist > 7);
+    return c->monst || (!shmup::on && isPlayerOn(c)) || (geometry != gQuotient2 && geometry != gTorus && c->cpdist > gamerange());
     }
 
   bool cellMirrorable(cell *c) {
@@ -1527,7 +1527,7 @@ namespace hive {
   #include <set>
   
   bool fightspam(cell *c) {
-    return c->cpdist >= 7 || 
+    return c->cpdist >= gamerange() || 
       isMetalBeast(c->monst) || c->monst == moSkeleton ||
       isIvy(c->monst) || isMutantIvy(c->monst);
     }
@@ -1780,8 +1780,10 @@ namespace heat {
     
     sval++;
     
+    int gr = gamerange();
+    
     for(cell *c: offscreen_heat) {
-      if(c->cpdist > 7 && !doall) {
+      if(c->cpdist > gr && !doall) {
         if(eq(c->aitmp, sval)) continue; 
         c->aitmp = sval;
         if(isIcyLand(c)) {
@@ -1818,7 +1820,7 @@ namespace heat {
       double xrate = (c->land == laCocytus && shmup::on) ? 1/3. : 1;
       if(nonbitrunc) xrate *= 1.7;
       if(!shmup::on) xrate /= FIX94;
-      if(c->cpdist > 7 && !doall) break;
+      if(c->cpdist > gr && !doall) break;
   
       if(isIcyLand(c)) {
         ld hmod = 0;
@@ -2027,10 +2029,11 @@ void livecaves() {
   int dcs = size(allcells);
   
   vector<cell*> bringlife;
+  int gr = gamerange();
   
   for(int i=0; i<dcs; i++) {
     cell *c = allcells[i];
-    if(!doall && c->cpdist > 8) break;
+    if(!doall && c->cpdist > gr+1) break;
     
     if(c->wall == waCavefloor || c->wall == waCavewall || c->wall == waDeadTroll) {
       c->aitmp = 0;
@@ -2134,7 +2137,7 @@ void livecaves() {
 
   for(int i=0; i<dcs; i++) {
     cell *c = allcells[i];
-    if(!doall && c->cpdist > 8) break;
+    if(!doall && c->cpdist > gr+1) break;
 
     if(c->wall == waCavefloor || c->wall == waCavewall) {
   //  if(c->land != laCaves) continue;
@@ -2834,7 +2837,7 @@ namespace prairie {
     int qty = size(whirlline);
     // for(int i=0; i<qty; i++) whirlline[i]->aitmp = sval;
     if(shmup::on) {
-      for(int i=0; i<qty; i++) if(whirlline[i]->cpdist <= 7) {
+      for(int i=0; i<qty; i++) if(whirlline[i]->cpdist <= gamerange()) {
         generateBeast(whirlline[i]);
         break;
         }

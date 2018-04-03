@@ -120,9 +120,10 @@ struct gcell {
 
   unsigned ligon : 1;    // is it sparkling with lightning?
 
-  unsigned 
-    pathdist : 7,       // player distance wrt usual movement
-    cpdist : 8, mpdist : 8; // current/minimum player distance
+  signed 
+    mpdist : 7,
+    pathdist : 8,       // player distance wrt usual movement
+    cpdist : 8;         // current/minimum player distance
 
   unsigned 
     mondir : 4,         // monster direction, for multi-tile monsters and graphics
@@ -1016,7 +1017,7 @@ extern bool safety;
 #define PRIZEMUL 7
 
 #define INF  9999
-#define INFD 20
+#define INFD 60
 #define PINFD 125
 #ifndef BARLEV
 #define BARLEV ((ISANDROID||ISIOS||ISFAKEMOBILE||getDistLimit()<7)?9:10)
@@ -1396,7 +1397,7 @@ namespace svg {
   void render(const char *fname = NULL);
   }
 
-extern int sightrange;
+extern int sightrange_bonus, genrange_bonus, gamerange_bonus;
 
 namespace halloween {
   void getTreat(cell *where);

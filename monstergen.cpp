@@ -426,7 +426,7 @@ void wandering() {
           playSeenSound(c);
           continue;
           }        
-        if(b) forCellEx(c2, c) if((sphere || c2->cpdist > 7) && !pseudohept(c2)) {
+        if(b) forCellEx(c2, c) if((sphere || c2->cpdist > gamerange()) && !pseudohept(c2)) {
           forCellCM(c3, c2) if(c3->monst || c3->wall != waSea) 
             goto notfound;
           c2->monst = moKrakenH;
