@@ -88,7 +88,7 @@ bool checkBarriersNowall(cellwalker bb, int q, int dir, eLand l1=laNone, eLand l
     bb = bb + dir + wstep + dir;
     }
   else if(nonbitrunc) {
-    bb = bb + (3*dir) + wstep - (3*dir);
+    bb = bb + (dir>0?3:4) + wstep - (dir>0?3:4);
     }
   else {
     bb = bb + wstep + (2*dir) + wstep + dir;
@@ -261,7 +261,8 @@ void extendNowall(cell *c) {
       cw0 = cw + i + wstep + i; 
       }
     else if(nonbitrunc) {
-      cw0 = cw + (3*i) + wstep - (3*i);
+      cw0 = cw + (i>0?3:4) + wstep - (i>0?3:4);
+      //cw0 = cw + (3*i) + wstep - (3*i);
       }
     else {
       cw0 = cw + (2*i) + wstep;

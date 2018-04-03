@@ -85,6 +85,7 @@ bool wrongMode(char flags) {
   if(cheater) return true;
   if(flags == 'x') return false;
   if(nonbitrunc != (flags == '7')) return true;
+  if(whirl::whirl) return true;
 
   switch(flags) {
     case 'e':
@@ -621,6 +622,7 @@ void achievement_final(bool really_final) {
   if(shmup::on) specials++;
   if(chaosmode) specials++;
   if(nonbitrunc) specials++;
+  if(whirl::whirl) specials++;
   if(inv::on) specials++;
   if(specials > 1) return;
   
