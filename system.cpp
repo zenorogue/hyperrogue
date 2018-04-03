@@ -99,7 +99,7 @@ void initgame() {
   if(firstland == laHauntedWall) firstland = laGraveyard; 
   if(firstland == laMercuryRiver) firstland = laTerracotta;
   if(firstland == laMountain && !tactic::on) firstland = laJungle;
-  if(isGravityLand(firstland) && !tactic::on) firstland = laCrossroads;
+  if(isGravityLand(firstland) && !tactic::on) firstland = weirdhyperbolic ? laCrossroads4 : laCrossroads;
   
   cwt.c = currentmap->gamestart(); cwt.spin = 0; cwt.mirrored = false;
   cwt.c->land = ((geometry || whirl::whirl) && !safety) ? specialland : firstland;
@@ -108,8 +108,8 @@ void initgame() {
 
   if(firstland == laElementalWall) cwt.c->land = randomElementalLand();
   
-  if(tactic::on && (isGravityLand(firstland) || firstland == laOcean) && firstland != laMountain)
-    cwt.c->land = nonbitrunc ? laCrossroads : laCrossroads2;
+  if((tactic::on || weirdhyperbolic) && (isGravityLand(firstland) || firstland == laOcean) && firstland != laMountain)
+    cwt.c->land = weirdhyperbolic ? laCrossroads4 : nonbitrunc ? laCrossroads : laCrossroads2;
   createMov(cwt.c, 0);
   
   setdist(cwt.c, BARLEV, NULL);

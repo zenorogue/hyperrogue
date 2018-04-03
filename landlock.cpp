@@ -757,6 +757,7 @@ eLand getNewLand(eLand old) {
   if(old == laEFire  && lchance(old)) return hrand(2) ? laEEarth : laEAir;
 
   if(tactic::on && !(tactic::trailer && old == firstland)) return firstland;
+  if(weirdhyperbolic && specialland != old) return specialland;
 
   if(yendor::on && (yendor::clev().flags & YF_WALLS)) {
     if(old != yendor::clev().l) return yendor::clev().l;

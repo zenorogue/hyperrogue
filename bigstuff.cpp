@@ -438,10 +438,10 @@ bool checkInTree(cell *c, int maxv) {
 void buildEquidistant(cell *c) {
   if(!c) return;
   if(c->landparam) return;
-  if(weirdhyperbolic) {
+  /* if(weirdhyperbolic) {
     c->landparam = 50;
     return;
-    }
+    } */
   if(geometry) return;
   eLand b = c->land;
   if(chaosmode && !inmirror(b)) return;
@@ -593,10 +593,10 @@ void buildEquidistant(cell *c) {
       }
     }
   
-  if(c->landparam > 30 && b == laOcean && !generatingEquidistant && hrand(10) < 5) 
+  if(c->landparam > 30 && b == laOcean && !generatingEquidistant && hrand(10) < 5 && !weirdhyperbolic) 
     buildAnotherEquidistant(c);
 
-  if(c->landparam > HAUNTED_RADIUS+5 && b == laGraveyard && !generatingEquidistant && hrand(100) < (nonbitrunc?25:5) && items[itBone] >= 10) 
+  if(c->landparam > HAUNTED_RADIUS+5 && b == laGraveyard && !generatingEquidistant && hrand(100) < (nonbitrunc?25:5) && items[itBone] >= 10 && !weirdhyperbolic) 
     buildAnotherEquidistant(c);
   }
 
@@ -680,13 +680,14 @@ int towerval(cell *c, cellfunction* cf) {
 /* other geometries */
 
 void setLandWeird(cell *c) {
-  if(specialland == laIvoryTower || specialland == laEndorian || specialland == laDungeon || specialland == laOcean) {
+  // replaced with standard CR4
+  /* if(specialland == laIvoryTower || specialland == laEndorian || specialland == laDungeon || specialland == laOcean) {
     int d = celldist(c) - (getDistLimit() - 2);
     if(d <= 0) 
       c->land = laCrossroads4;
     else
       c->land = specialland, c->landparam = d;
-    }
+    } */
   }
 
 void setLandQuotient(cell *c) {
