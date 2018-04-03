@@ -267,6 +267,8 @@ namespace whirl {
 //    ispin = rspintox(next);
       alpha = -atan2(next[1], next[0]);
       base_distlimit = (base_distlimit + log(scale) / log(2.618)) / scale;
+      if(base_distlimit > 30)
+        base_distlimit = 30;
       }
     else {
       scale = 1;
