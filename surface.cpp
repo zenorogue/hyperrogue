@@ -40,15 +40,6 @@ ld integral(ld x) {
   return last_int;
   }
 
-transmatrix build_matrix(hyperpoint h1, hyperpoint h2, hyperpoint h3) {
-  transmatrix T;
-  for(int i=0; i<3; i++)
-    T[i][0] = h1[i],
-    T[i][1] = h2[i],
-    T[i][2] = h3[i];
-  return T;
-  }
-
 hyperpoint coord(hyperpoint h) {
   // return { cos(u)*sin(v), cos(u)*cos(v), sin(u) };
   

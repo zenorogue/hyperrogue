@@ -169,38 +169,33 @@ ld hypot_auto(ld x, ld y) {
     }
   }
 
-// get the center of the line segment from H1 to H2
-hyperpoint mid(const hyperpoint& H1, const hyperpoint& H2) {
-
-  hyperpoint H3;
-  H3[0] = H1[0] + H2[0];
-  H3[1] = H1[1] + H2[1];
-  H3[2] = H1[2] + H2[2];
-  
-  ld Z = 2;
-  
-  if(sphere) Z = sqrt(intval(H3, Hypc));
+// move H back to the sphere/hyperboloid/plane
+hyperpoint normalize(hyperpoint H) {
+  ld Z;
+  if(sphere) Z = sqrt(intval(H, Hypc));
   else if(!euclid) { 
-    Z = intval(H3, Hypc); 
+    Z = intval(H, Hypc); 
     Z = sqrt(-Z);
     }
-  
-  for(int c=0; c<3; c++) H3[c] /= Z;
-  
-  return H3;
+  else Z = H[2];
+  for(int c=0; c<3; c++) H[c] /= Z;
+  return H;
+  }
+
+// get the center of the line segment from H1 to H2
+hyperpoint mid(const hyperpoint& H1, const hyperpoint& H2) {
+  using namespace hyperpoint_vec;
+  return normalize(H1 + H2);
   }
 
 // like mid, but take 3D into account
 hyperpoint midz(const hyperpoint& H1, const hyperpoint& H2) {
-
-  hyperpoint H3;
-  H3[0] = H1[0] + H2[0];
-  H3[1] = H1[1] + H2[1];
-  H3[2] = H1[2] + H2[2];
+  using namespace hyperpoint_vec;
+  hyperpoint H3 = H1 + H2;
   
   ld Z = 2;
   
-  if(sphere || !euclid) Z = zlevel(H3) * 2 / (zlevel(H1) + zlevel(H2));
+  if(!euclid) Z = zlevel(H3) * 2 / (zlevel(H1) + zlevel(H2));
   for(int c=0; c<3; c++) H3[c] /= Z;
   
   return H3;
@@ -325,6 +320,15 @@ transmatrix spintox(const hyperpoint& H) {
 void set_column(transmatrix& T, int i, const hyperpoint& H) {
   for(int j=0; j<3; j++)
     T[j][i] = H[j];
+  }
+
+transmatrix build_matrix(hyperpoint h1, hyperpoint h2, hyperpoint h3) {
+  transmatrix T;
+  for(int i=0; i<3; i++)
+    T[i][0] = h1[i],
+    T[i][1] = h2[i],
+    T[i][2] = h3[i];
+  return T;
   }
 
 // reverse of spintox(H)

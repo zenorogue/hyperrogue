@@ -253,6 +253,53 @@ namespace whirl {
     WHD( printf("DONE\n\n"); )
     }
   
+  hyperpoint loctoh_ort(loc at) {
+    return hpxyz(at.first, at.second, 1);
+    }
+  
+  hyperpoint atz(const transmatrix& T, const transmatrix& corners, loc at) {
+    int sp = 0;
+    again:
+    auto corner = corners * loctoh_ort(at);
+    if(corner[1] < -1e-6 || corner[2] < -1e-6) {
+      at = at * eudir(1);
+      sp++;
+      goto again;
+      }
+    if(sp>3) sp -= 6;
+
+    return normalize(spin(2*M_PI*sp/S7) * T * corner);
+    }
+  
+  transmatrix Tf[8][32][32][6];
+  
+  void prepare_matrices() {
+    transmatrix corners = inverse(build_matrix(
+      loctoh_ort(loc(0,0)),
+      loctoh_ort(param),
+      loctoh_ort(param * loc(0,1))
+      ));
+    printf("corners = \n");
+    display(corners);
+    for(int i=0; i<S7; i++) {
+      cell cc; cc.type = S7;
+      transmatrix T = spin(-alpha) * build_matrix(
+        C0, 
+        ddspin(&cc, i) * xpush(tessf) * C0,
+        ddspin(&cc, i+1) * xpush(tessf) * C0
+        );
+      for(int x=-10; x<10; x++)
+      for(int y=-10; y<10; y++)
+      for(int d=0; d<6; d++) {
+        loc at = loc(x, y);
+        
+        hyperpoint h = atz(T, corners, at);
+        hyperpoint hl = atz(T, corners, at + eudir(d));
+        Tf[i][x&31][y&31][d] = rgpushxto0(h) * rspintox(gpushxto0(h) * hl) * spin(M_PI);
+        }
+      }       
+    }
+    
   void compute_geometry() {
     if(whirl) {
       int x = param.first;
@@ -269,6 +316,7 @@ namespace whirl {
       base_distlimit = (base_distlimit + log(scale) / log(2.618)) / scale;
       if(base_distlimit > 30)
         base_distlimit = 30;
+      prepare_matrices();
       }
     else {
       scale = 1;

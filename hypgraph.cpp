@@ -472,31 +472,16 @@ void drawrec(cell *c, const transmatrix& V) {
     }
   } */
 
-  hyperpoint atz(const transmatrix& T, loc at) {
-    int sp = 0;
-    while(at.first < 0 || at.second < 0)
-      at = at * eudir(1), sp++;
-    if(sp>3) sp -= 6;
-
-    hyperpoint h = spin(2*M_PI*sp/S7) * T * hpxyz(at.first, at.second, 1);
-    h = mid(h,h);
-    return h;
-    }
-  
-  void drawrec(cell *c, const transmatrix& V, const transmatrix& T, whirl::loc at, int dir) {
+  void drawrec(cell *c, const transmatrix& V, whirl::loc at, int dir, int maindir) {
     if(dodrawcell(c)) {
-      hyperpoint h = atz(T, at);
-      hyperpoint hl = atz(T, at + eudir(dir));
-
-      transmatrix T1 = V * rgpushxto0(h) * rspintox(gpushxto0(h) * hl) * spin(M_PI);
-      drawcell(c, T1, 0, false);
+      drawcell(c, V * Tf[maindir][at.first&31][at.second&31][fix6(dir)], 0, false);
       }
     for(int i=0; i<c->type; i++) {
       cell *c2 = c->mov[i];
       if(!c2) continue;
       if(c2->mov[0] != c) continue;
       if(c2 == c2->master->c7) continue;
-      drawrec(c2, V, T, at + eudir(dir+i), dir + i + 3);
+      drawrec(c2, V, at + eudir(dir+i), dir + i + 3, maindir);
       }
     }
   
@@ -508,20 +493,8 @@ void drawrec(cell *c, const transmatrix& V) {
       if(!c2) continue;
       if(c2->mov[0] != c) continue;
       if(c2 == c2->master->c7) continue;
-      transmatrix T;
-      set_column(T, 0, C0);
-      set_column(T, 1, ddspin(c, i) * xpush(tessf) * C0);
-      set_column(T, 2, ddspin(c, i+1) * xpush(tessf) * C0);
-      transmatrix corners;
-      set_column(corners, 0, hpxyz(0, 0, 1));
-      set_column(corners, 1, hpxyz(whirl::param.first, whirl::param.second, 1));
-      loc nx = param * loc(0,1);
-      set_column(corners, 2, hpxyz(nx.first, nx.second, 1));
-      // corners * e[i] = corner[i]
-      T = T * inverse(corners);
-      
-      drawrec(c2, V, T, whirl::loc(1,0), 3);
-      }       
+      drawrec(c2, V, whirl::loc(1,0), 3, i);
+      }
     }
   }
        
