@@ -236,13 +236,19 @@ void showEuclideanMenu() {
   landvisited[laCA] = true;
   // for(int i=2; i<lt; i++) landvisited[i] = true;
   
-  if(geometry == gNormal || ewhichscreen == 2) {
+  if((geometry == gNormal && !whirl::whirl) || ewhichscreen == 2) {
     dialog::init(XLAT("experiment with geometry"));
     int ts = ginf[geometry].sides;
     int tv = ginf[geometry].vertex;
     int tq = ginf[geometry].quotientstyle;
     int nom = (nonbitrunc ? tv : tv+ts) * ((tq & qELLIP) ? 2 : 4);
     int denom = (2*ts + 2*tv - ts * tv);
+    
+    if(whirl::whirl) {
+      denom *= 2;
+      nom = nom / tv * (2*tv + ts * (whirl::area-1));
+      if(nom % 2 == 0) nom /= 2, denom /= 2;
+      }
     
     dialog::addSelItem(XLAT("land"), XLAT1(linf[specialland].name), '5');
     dialog::addBreak(50);
@@ -254,17 +260,25 @@ void showEuclideanMenu() {
   
     if(ts == 6 && tv == 3)
       dialog::addSelItem(XLAT("bitruncated"), XLAT("does not matter"), 't');
-    else
+    else if(S3 != 3)
       dialog::addBoolItem(XLAT("bitruncated"), !nonbitrunc, 't');
+    else {
+      dialog::addBoolItem(XLAT("operation"), nonbitrunc, 't');
+      dialog::lastItem().value = whirl::operation_name();
+      }
   
     dialog::addBreak(50);
   
     int worldsize = denom ? nom/denom : 0;
     if(tq & qTORUS) worldsize = torusconfig::qty;
-    if(tq & qZEBRA) worldsize = nonbitrunc ? 12 : 40;
+    if(tq & qZEBRA) worldsize = 
+      whirl::whirl ? 12 + 14 * (whirl::area - 1) :
+      nonbitrunc ? 12 : 
+      40;
     if(tq & qFIELD) {
       worldsize = size(currfp.matrices) / ts;
-      if(!nonbitrunc) worldsize = ((ts+tv)*worldsize) / tv;
+      if(whirl::whirl) worldsize = worldsize * (2*tv + ts * (whirl::area-1)) / tv / 2;
+      else if(!nonbitrunc) worldsize = ((ts+tv)*worldsize) / tv;
       }
   
     dialog::addSelItem(XLAT("sides per face"), its(ts), 0);
@@ -319,7 +333,10 @@ void showEuclideanMenu() {
         pushScreen(showEuclideanMenu);
         }
       else if(uni == 't') {
-        if(!euclid6) {
+        if(euclid6) ;
+        else if(S3 == 3) 
+          whirl::configure();
+        else {
           restartGame('7');
           pushScreen(showEuclideanMenu);
           }

@@ -30,6 +30,7 @@
 #include "heptagon.cpp"
 #include "language.cpp"
 #include "cell.cpp"
+#include "whirl.cpp"
 #include "pattern2.cpp"
 #include "flags.cpp"
 #include "yendor.cpp"

@@ -1804,6 +1804,7 @@ namespace linepatterns {
   };
 
 transmatrix ddspin(cell *c, int d, int bonus = 0);
+transmatrix iddspin(cell *c, int d, int bonus = 0);
 bool doexiton(int sym, int uni);
 void switchFullscreen();
 string turnstring(int i);
@@ -2940,3 +2941,16 @@ string XLAT(string x, stringpar p1, stringpar p2);
 string XLAT(string x, stringpar p1, stringpar p2, stringpar p3);
 string XLAT(string x, stringpar p1, stringpar p2, stringpar p3, stringpar p4);
 string XLAT(string x, stringpar p1, stringpar p2, stringpar p3, stringpar p4, stringpar p5);
+
+namespace whirl {
+  extern bool whirl;
+  void compute_geometry();
+  void extend_map(cell *c, int d);  
+  }
+
+int get_sightrange();
+int gamerange();
+
+int numplayers();
+
+extern int base_distlimit;

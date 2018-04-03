@@ -807,7 +807,7 @@ void setAppropriateOverview() {
     pushScreen(yendor::showMenu);
   else if(peace::on)
     pushScreen(peace::showMenu);
-  else if(geometry != gNormal && !chaosmode && !(geometry == gEuclid && isCrossroads(specialland)) && !(weirdhyperbolic && specialland == laCrossroads4)) {
+  else if((geometry != gNormal || whirl::whirl) && !chaosmode && !(geometry == gEuclid && isCrossroads(specialland)) && !(weirdhyperbolic && specialland == laCrossroads4)) {
     runGeometryExperiments();
     }
   else {

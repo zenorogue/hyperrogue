@@ -1299,7 +1299,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
     
     case laHive:
       if(d == 9) {
-        if(hrand(2000) < (chaosmode ? 1000 : nonbitrunc?200:2) && !safety) 
+        if(hrand(2000) < (chaosmode ? 1000 : (nonbitrunc && !whirl::whirl) ?200:2) && !safety) 
           hive::createBugArmy(c);
         if(hrand(2000) < 100 && !c->wall && !c->item && !c->monst) {
           int nww = 0;

@@ -739,6 +739,13 @@ cell *createMov(cell *c, int d) {
     }
   
   if(c->mov[d]) return c->mov[d];
+  else if(nonbitrunc && whirl::whirl) {
+    whirl::extend_map(c, d);
+    if(!c->mov[d]) {
+      printf("extend failed to create for %p/%d\n", c, d);
+      exit(1);
+      }
+    }
   else if(nonbitrunc) {
     heptagon *h2 = createStep(c->master, d);
     merge(c,d,h2->c7,c->master->spin(d),false);
@@ -928,6 +935,7 @@ void verifycell(cell *c) {
   }
 
 void verifycells(heptagon *at) {
+  if(whirl::whirl) return;
   for(int i=0; i<S7; i++) if(at->move[i] && at->move[i]->move[at->spin(i)] && at->move[i]->move[at->spin(i)] != at) {
     printf("hexmix error %p [%d s=%d] %p %p\n", at, i, at->spin(i), at->move[i], at->move[i]->move[at->spin(i)]);
     }
@@ -1343,10 +1351,11 @@ int celldistance(cell *c1, cell *c2) {
     return eudist(decodeId(c1->master) - decodeId(c2->master));
     }
   
-  if(sphere || quotient == 1) {
+  if(sphere || quotient == 1 || whirl::whirl) {
     celllister cl(c1, 64, 1000, c2);
     for(int i=0; i<size(cl.lst); i++)
       if(cl.lst[i] == c2) return cl.dists[i];
+    return 64;
     }
   
   if(quotient == 2)

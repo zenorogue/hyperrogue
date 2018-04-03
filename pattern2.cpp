@@ -36,7 +36,7 @@ bool ishex1(cell *c) {
 int emeraldval(cell *c) {
   if(euclid) return eupattern(c);
   if(sphere) return 0;
-  if(ctof(c))
+  if(ctof(c) || whirl::whirl)
     return c->master->emeraldval >> 3;
   else {
     return emerald_hexagon(
@@ -92,6 +92,7 @@ int cdist50(cell *c) {
     else return "012333321112322232222321123"[eufifty(c)] - '0';
     }
   if(c->type != 6) return cdist50(fiftyval(c));
+  if(whirl::whirl) return cdist50(c->master->c7);
   int a0 = cdist50(createMov(c,0));
   int a1 = cdist50(createMov(c,2));
   int a2 = cdist50(createMov(c,4));
@@ -313,7 +314,7 @@ int fieldval_uniq(cell *c) {
     auto p = cell_to_pair(c);
     return gmod(p.first * torusconfig::dx + p.second * torusconfig::dy, torusconfig::qty);
     }
-  if(ctof(c)) return c->master->fieldval/S7;
+  if(ctof(c) || whirl::whirl) return c->master->fieldval/S7;
   else {
     int z = 0;
     for(int u=0; u<S6; u+=2) 
@@ -962,6 +963,7 @@ int pattern_threecolor(cell *c) {
 // in the 'pure heptagonal' tiling, returns true for a set of cells
 // which roughly corresponds to the heptagons in the normal tiling
 bool pseudohept(cell *c) {
+  if(whirl::whirl) return whirl::pseudohept(c);
   return pattern_threecolor(c) == 0;
   }
 
@@ -1631,10 +1633,18 @@ namespace linepatterns {
         break;
       
       case patTriNet:
-        forCellEx(c2, c) if(c2 > c) if(gmatrix.count(c2)) if(celldist(c) != celldist(c2)) {
-          queueline(tC0(V), gmatrix[c2]*C0, 
-            darkena(backcolor ^ 0xFFFFFF, 0, col),
-            2);
+        if(whirl::whirl) {
+          if(c->master->c7 != c) if(gmatrix.count(c->mov[0]))
+            queueline(tC0(V), gmatrix[c->mov[0]]*C0, 
+              darkena(backcolor ^ 0xFFFFFF, 0, col),
+              2);
+          }
+        else {
+          forCellEx(c2, c) if(c2 > c) if(gmatrix.count(c2)) if(celldist(c) != celldist(c2)) {
+            queueline(tC0(V), gmatrix[c2]*C0, 
+              darkena(backcolor ^ 0xFFFFFF, 0, col),
+              2);
+            }
           }
         break;
 

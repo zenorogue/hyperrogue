@@ -322,6 +322,11 @@ transmatrix spintox(const hyperpoint& H) {
   return T;
   }
 
+void set_column(transmatrix& T, int i, const hyperpoint& H) {
+  for(int j=0; j<3; j++)
+    T[j][i] = H[j];
+  }
+
 // reverse of spintox(H)
 transmatrix rspintox(const hyperpoint& H) {
   transmatrix T = Id;

@@ -157,7 +157,7 @@ void drawSpeed(const transmatrix& V) {
   }
 
 int ctof(cell *c) {
-  if(nonbitrunc) return 1;
+  if(nonbitrunc && !whirl::whirl) return 1;
   // if(euclid) return 0;
   return ishept(c) ? 1 : 0;
   // c->type == 6 ? 0 : 1;
@@ -244,7 +244,6 @@ double hexshiftat(cell *c) {
   return 0;
   }
 
-
 transmatrix ddspin(cell *c, int d, int bonus) {
   int hdir = displaydir(c, d) + bonus;
   double ha = hexshiftat(c);
@@ -252,7 +251,7 @@ transmatrix ddspin(cell *c, int d, int bonus) {
   return getspinmatrix(hdir);
   }
 
-transmatrix iddspin(cell *c, int d, int bonus = 0) {
+transmatrix iddspin(cell *c, int d, int bonus) {
   int hdir = displaydir(c, d) + bonus;
   double ha = hexshiftat(c);
   if(ha) return spin(ha) * getspinmatrix(-hdir);
@@ -291,11 +290,11 @@ void drawPlayerEffects(const transmatrix& V, cell *c, bool onplayer) {
       if(!euclid) for(int a=0; a<S42; a++) {
         int dda = S42 + (-1-2*a);
         if(a == ang && items[itOrbSword]) continue;
-        if(nonbitrunc && a%3 != ang%3) continue;
+        if(nonbitrunc && !whirl::whirl && a%3 != ang%3) continue;
         if((a+S21)%S42 == ang && items[itOrbSword2]) continue;
         bool longer = sword::pos(cwt.c, a-1) != sword::pos(cwt.c, a+1);
         int col = darkena(0xC0C0C0, 0, 0xFF);
-        queueline(Vnow*ddi0(dda, nonbitrunc ? 0.6 : longer ? 0.36 : 0.4), Vnow*ddi0(dda, nonbitrunc ? 0.7 : longer ? 0.44 : 0.42), col, 1);
+        queueline(Vnow*ddi0(dda, nonbitrunc ? 0.6 * whirl::scale : longer ? 0.36 : 0.4), Vnow*ddi0(dda, nonbitrunc ? 0.7 * whirl::scale : longer ? 0.44 : 0.42), col, 1);
         }
 #endif
 
@@ -2088,8 +2087,11 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, int col) {
       Vb = Vb * pispin;
       }
     else Vb = Vb * ddspin(c, c->mondir, S42);
-    if(weirdhyperbolic || sphere) Vb = Vb * xpush(-(hexhexdist - hcrossf7));
-    if(ctof(c) && !euclid) Vb = Vb * xpush(hexhexdist - hcrossf);
+    if(whirl::whirl)  Vb = Vb * xpush(crossf * .6);
+    else {
+      if(weirdhyperbolic || sphere) Vb = Vb * xpush(-(hexhexdist - hcrossf7));
+      if(ctof(c) && !euclid) Vb = Vb * xpush(hexhexdist - hcrossf);
+      }
     return drawMonsterTypeDH(m, c, Vb, col, darkhistory, footphase);
     }
 

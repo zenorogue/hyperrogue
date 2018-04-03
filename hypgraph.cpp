@@ -453,9 +453,78 @@ bool confusingGeometry() {
   }
 
 transmatrix actualV(const heptspin& hs, const transmatrix& V) {
-  return (hs.spin || nonbitrunc) ? V * spin(hs.spin*2*M_PI/S7 + (nonbitrunc ? M_PI:0)) : V;
+  return (hs.spin || nonbitrunc) ? V * spin(hs.spin*2*M_PI/S7 + (nonbitrunc ? M_PI:0) + whirl::alpha) : V;
   }
 
+namespace whirl {
+
+/*
+void drawrec(cell *c, const transmatrix& V) {
+  if(dodrawcell(c))
+    drawcell(c, V, 0, false);
+  for(int i=0; i<c->type; i++) {
+    cell *c2 = c->mov[i];
+    if(!c2) continue;
+    if(c2->mov[0] != c) continue;
+    if(c2 == c2->master->c7) continue;
+    transmatrix V1 = V * ddspin(c, i) * xpush(crossf) * iddspin(c2, 0) * spin(M_PI);
+    drawrec(c2, V1);
+    }
+  } */
+
+  hyperpoint atz(const transmatrix& T, loc at) {
+    int sp = 0;
+    while(at.first < 0 || at.second < 0)
+      at = at * eudir(1), sp++;
+    if(sp>3) sp -= 6;
+
+    hyperpoint h = spin(2*M_PI*sp/S7) * T * hpxyz(at.first, at.second, 1);
+    h = mid(h,h);
+    return h;
+    }
+  
+  void drawrec(cell *c, const transmatrix& V, const transmatrix& T, whirl::loc at, int dir) {
+    if(dodrawcell(c)) {
+      hyperpoint h = atz(T, at);
+      hyperpoint hl = atz(T, at + eudir(dir));
+
+      transmatrix T1 = V * rgpushxto0(h) * rspintox(gpushxto0(h) * hl) * spin(M_PI);
+      drawcell(c, T1, 0, false);
+      }
+    for(int i=0; i<c->type; i++) {
+      cell *c2 = c->mov[i];
+      if(!c2) continue;
+      if(c2->mov[0] != c) continue;
+      if(c2 == c2->master->c7) continue;
+      drawrec(c2, V, T, at + eudir(dir+i), dir + i + 3);
+      }
+    }
+  
+  void drawrec(cell *c, const transmatrix& V) {
+    if(dodrawcell(c))
+      drawcell(c, V, 0, false);
+    for(int i=0; i<c->type; i++) {
+      cell *c2 = c->mov[i];
+      if(!c2) continue;
+      if(c2->mov[0] != c) continue;
+      if(c2 == c2->master->c7) continue;
+      transmatrix T;
+      set_column(T, 0, C0);
+      set_column(T, 1, ddspin(c, i) * xpush(tessf) * C0);
+      set_column(T, 2, ddspin(c, i+1) * xpush(tessf) * C0);
+      transmatrix corners;
+      set_column(corners, 0, hpxyz(0, 0, 1));
+      set_column(corners, 1, hpxyz(whirl::param.first, whirl::param.second, 1));
+      loc nx = param * loc(0,1);
+      set_column(corners, 2, hpxyz(nx.first, nx.second, 1));
+      // corners * e[i] = corner[i]
+      T = T * inverse(corners);
+      
+      drawrec(c2, V, T, whirl::loc(1,0), 3);
+      }       
+    }
+  }
+       
 void drawrec(const heptspin& hs, int lev, hstate s, const transmatrix& V) {
 
   // shmup::calc_relative_matrix(cwt.c, hs.h);
@@ -465,9 +534,14 @@ void drawrec(const heptspin& hs, int lev, hstate s, const transmatrix& V) {
   transmatrix V10;
   const transmatrix& V1 = hs.mirrored ? (V10 = V * Mirror) : V;
   
-  if(dodrawcell(c)) {
+  if(whirl::whirl) {
+    whirl::drawrec(c, actualV(hs, V1));
+    }
+  
+  else if(dodrawcell(c)) {
     reclevel = maxreclevel - lev;
-    drawcell(c, actualV(hs, V1), 0, hs.mirrored);
+    transmatrix V2 = actualV(hs, V1);
+    drawcell(c, V2, 0, hs.mirrored);
     }
   
   if(lev <= 0) return;

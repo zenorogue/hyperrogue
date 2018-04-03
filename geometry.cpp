@@ -161,6 +161,10 @@ void precalc() {
     hexhexdist, hexvdist);  
   
   for(int i=0; i<S84; i++) spinmatrix[i] = spin(i * M_PI / S42);
+
+  base_distlimit = ginf[geometry].distlimit[nonbitrunc];
+  
+  whirl::compute_geometry();  
   }
 
 transmatrix ddi(ld dir, ld dist) {
