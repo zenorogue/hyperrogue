@@ -708,6 +708,8 @@ namespace patterns {
         si.symmetries = ctof(c) ? 1 : 2;
         }
       }
+    
+    if(whirl::whirl && has_nice_dual() && !ishept(c) && ishex1(c)) si.dir = fix6(si.dir+3);
     }
   
   char whichPattern = 0;
@@ -967,7 +969,7 @@ int pattern_threecolor(cell *c) {
 // in the 'pure heptagonal' tiling, returns true for a set of cells
 // which roughly corresponds to the heptagons in the normal tiling
 bool pseudohept(cell *c) {
-  if(whirl::whirl) return whirl::pseudohept(c);
+  if(whirl::whirl) return whirl::pseudohept_val(c) == 0;
   return pattern_threecolor(c) == 0;
   }
 

@@ -59,9 +59,9 @@ namespace whirl {
     return at;
     }
   
-  bool pseudohept(cell *c) {
+  int pseudohept_val(cell *c) {
     loc v = get_coord(c);
-    return (v.first - v.second)%3 == 0;
+    return (v.first - v.second + MODFIXER)%3;
     }
   
   whirlmap_t whirlmap[20][20];

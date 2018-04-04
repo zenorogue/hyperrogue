@@ -369,7 +369,7 @@ cell *buildAnotherEquidistant(cell *c, int radius) {
   if(c2->land != c->land) return NULL;
   
   // else if(ctof(c) && hrand(10000) < 20 && !isCrossroads(c->land) && gold() >= 200)
-  if(ctof(c2) && gold() >= R200 && hrand(10) < 2 && buildBarrierNowall(c2, laCrossroads4, true))  {
+  if(pseudohept(c2) && gold() >= R200 && hrand(10) < 2 && buildBarrierNowall(c2, laCrossroads4, true))  {
     nowall = true;
     // raiseBuggyGeneration(c2, "check");
     // return;
@@ -986,14 +986,14 @@ void buildBigStuff(cell *c, cell *from) {
   
   // buildgreatwalls
   
-  if(celldist(c) < 3) {
+  if(celldist(c) < 3 && !whirl::whirl) {
     if(top_land && c == cwt.c->master->move[3]->c7) {
       buildBarrierStrong(c, 6, true, top_land);
       }
     }
   
   else if(chaosmode) {
-    if(ctof(c) && hrand(10000) < 9000 && c->land && !inmirror(c) && buildBarrierNowall(c, getNewLand(c->land))) 
+    if(pseudohept(c) && hrand(10000) < 9000 && c->land && !inmirror(c) && buildBarrierNowall(c, getNewLand(c->land))) 
       {}
     else if(ctof(c) && c->land == laMirror && hrand(10000) < 2000 && !weirdhyperbolic) {
       int bd = 2 + hrand(2) * 3;
@@ -1001,13 +1001,13 @@ void buildBigStuff(cell *c, cell *from) {
       }
     }
   
-  else if(ctof(c) && isWarped(c->land) && hrand(10000) < 3000 && c->land && 
+  else if(pseudohept(c) && isWarped(c->land) && hrand(10000) < 3000 && c->land && 
     buildBarrierNowall(c, eLand(c->land ^ laWarpSea ^ laWarpCoast))) ;
   
-  else if(ctof(c) && c->land == laCrossroads4 && hrand(10000) < 7000 && c->land && 
+  else if(pseudohept(c) && c->land == laCrossroads4 && hrand(10000) < 7000 && c->land && 
     buildBarrierNowall(c, getNewLand(laCrossroads4))) ;
   
-  else if(ctof(c) && hrand(I10000) < 20 && !generatingEquidistant && !yendor::on && !tactic::on && !isCrossroads(c->land) && 
+  else if(pseudohept(c) && hrand(I10000) < 20 && !generatingEquidistant && !yendor::on && !tactic::on && !isCrossroads(c->land) && 
     gold() >= R200 && !weirdhyperbolic &&
     !inmirror(c) && !isSealand(c->land) && !isHaunted(c->land) && !isGravityLand(c->land) && 
     (c->land != laRlyeh || rlyehComplete()) &&
@@ -1018,7 +1018,7 @@ void buildBigStuff(cell *c, cell *from) {
     buildBarrierNowall(c, laCrossroads4) ;
     }
   
-  else if(weirdhyperbolic && specialland == laCrossroads4 && ctof(c) && hrand(I10000/4) < wallchance(c, deepOcean)) {
+  else if(weirdhyperbolic && specialland == laCrossroads4 && /*pseudohept(c) &&*/ hrand(I10000/4) < wallchance(c, deepOcean)) {
     buildBarrierNowall(c, getNewLand(c->land));
     }
   

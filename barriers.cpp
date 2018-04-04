@@ -58,17 +58,22 @@ bool checkBarriersBack(cellwalker bb, int q, bool cross) {
   return checkBarriersFront(bb, q);
   }
 
+// warp coasts use a different algorithm when has_nice_dual() is on
+bool warped_version(eLand l1, eLand l2) {
+  return has_nice_dual() && (l1 == laWarpCoast || l1 == laWarpSea || l2 == laWarpSea || l2 == laWarpCoast);
+  }
+
 bool checkBarriersNowall(cellwalker bb, int q, int dir, eLand l1=laNone, eLand l2=laNone) {
-  if(bb.c->mpdist < BARLEV && l1 == laNone) return false;
-  if(bb.c->bardir != NODIR && l1 == laNone) return false;
+  if(bb.c->mpdist < BARLEV && l1 == l2) return false;
+  if(bb.c->bardir != NODIR && l1 == l2) return false;
   // if(bb.c->mov[dir] && bb.c->mov[dir]->bardir != NODIR && l1 == laNone) return false;
   // if(bb.c->mov[dir] && bb.c->mov[dir]->mpdist < BARLEV && l1 == laNone) return false;
   
-  if(l1 != laNone) { 
+  if(l1 != l2) { 
     bb.c->bardir = bb.spin; bb.c->barright = l2; bb.c->barleft = NOWALLSEP; 
     setland(bb.c, l1);
     }
-  if(q > 10) return true;
+  if(q > 20) return true;
   
   if(l1 == laNone) for(int i=0; i<bb.c->type; i++) {
     cell *c1 = bb.c->mov[i];
@@ -84,14 +89,14 @@ bool checkBarriersNowall(cellwalker bb, int q, int dir, eLand l1=laNone, eLand l
       }
     }
   
-  if(nonbitrunc && S3==4) {
+  if(warped_version(l1, l2)) {
+    bb = bb + wstep + (2*dir) + wstep + dir;
+    }
+  else if(S3==4) {
     bb = bb + dir + wstep + dir;
     }
-  else if(nonbitrunc) {
-    bb = bb + (dir>0?3:4) + wstep - (dir>0?3:4);
-    }
   else {
-    bb = bb + wstep + (2*dir) + wstep + dir;
+    bb = bb + (dir>0?3:4) + wstep - (dir>0?3:4);
     }
   return checkBarriersNowall(bb, q+1, -dir, l2, l1);
   }
@@ -242,12 +247,13 @@ void extendNowall(cell *c) {
   c->barleft = NOWALLSEP_USED;
   cellwalker cw(c, c->bardir);
   
-  if(!nonbitrunc) {
+  bool warpv = warped_version(c->land, c->barright);
+  
+  if(warpv) {
     cw += wstep;
     setland(cw.c, c->barright);
     }
-  
-  if(nonbitrunc && S3 == 4) {
+  else if(S3 == 4) {
     auto cw2 = cw + wstep;
     setland(cw2.c, c->barright);
     cw2.c->barleft = NOWALLSEP_USED;
@@ -257,15 +263,15 @@ void extendNowall(cell *c) {
   
   for(int i=-1; i<2; i+=2) {  
     cellwalker cw0;
-    if(nonbitrunc && S3==4) {
+    if(warpv) {
+      cw0 = cw + (2*i) + wstep;
+      }
+    else if(S3==4) {
       cw0 = cw + i + wstep + i; 
       }
-    else if(nonbitrunc) {
+    else {
       cw0 = cw + (i>0?3:4) + wstep - (i>0?3:4);
       //cw0 = cw + (3*i) + wstep - (3*i);
-      }
-    else {
-      cw0 = cw + (2*i) + wstep;
       }
     if(cw0.c->barleft != NOWALLSEP_USED) {
       cw0.c->barleft = NOWALLSEP;
@@ -281,9 +287,9 @@ void extendNowall(cell *c) {
           printf("barright\n"); 
           }// NONEDEBUG
         setland(cw0.c, c->barright);
-        if(!nonbitrunc) cw0 += i;
+        if(warpv) cw0 += i;
         cw0.c->bardir = cw0.spin;
-        if(!nonbitrunc) cw0 -= i;
+        if(warpv) cw0 -= i;
         }
       extendcheck(cw0.c);
       extendBarrier(cw0.c);
@@ -722,20 +728,33 @@ void buildCrossroads2(cell *c) {
 
 bool buildBarrierNowall(cell *c, eLand l2, bool force) {
 
-  int dtab[3] = {0,1,6};
-  
   if(c->land == laNone) {
     printf("barrier nowall! [%p]\n", c);
     raiseBuggyGeneration(c, "barrier nowall!");
     return false;
     }
   
-  for(int i=0; i<3; i++) {
-    int d = (S3>3 && nonbitrunc) ? (2+(i&1)) : dtab[i];
+  bool warpv = warped_version(c->land, l2);
+  if(warpv && !pseudohept(c)) return false;
+  
+  int ds[8];
+  for(int i=0; i<c->type; i++) ds[i] = i;
+  for(int j=0; j<c->type; j++) swap(ds[j], ds[hrand(j+1)]);
+
+  for(int i=0; i<c->type; i++) {
+    int d = ds[i];
+/*    if(warpv && whirl::whirl) {
+      d = hrand(c->type); */
+    if(warpv && c->mov[d] && c->mov[d]->mpdist < c->mpdist) continue;
+/*      }
+    else 
+      d = (S3>3 && !warpv) ? (2+(i&1)) : dtab[i]; */
     if(force) d=1;
     cellwalker cw(c, d);
     
-    if(force || (checkBarriersNowall(cw, 0, -1) && checkBarriersNowall(cw, 0, 1))) {
+    eLand ws = warpv ? laWarpCoast : laNone;
+    
+    if(force || (checkBarriersNowall(cw, 0, -1, ws, ws) && checkBarriersNowall(cw, 0, 1, ws, ws))) {
       eLand l1 = c->land;
       checkBarriersNowall(cw, 0, -1, l1, l2);
       checkBarriersNowall(cw, 0, 1, l1, l2);
