@@ -4315,11 +4315,11 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       if(realred(c->wall) && !wmspatial) {
         int s = snakelevel(c);
         if(s >= 1)
-          qfloor(c, V, shRedRockFloor[0][ct6], getSnakelevColor(c, 0, 7, fd, wcol));
+          qfloor(c, V, shRedRockFloor[0][xct6], getSnakelevColor(c, 0, 7, fd, wcol));
         if(s >= 2)
-          queuepoly(V, shRedRockFloor[1][ct6], getSnakelevColor(c, 1, 7, fd, wcol));
+          queuepoly(V, shRedRockFloor[1][xct6], getSnakelevColor(c, 1, 7, fd, wcol));
         if(s >= 3)
-          queuepoly(V, shRedRockFloor[2][ct6], getSnakelevColor(c, 2, 7, fd, wcol));
+          queuepoly(V, shRedRockFloor[2][xct6], getSnakelevColor(c, 2, 7, fd, wcol));
         }
       
       if(c->wall == waTower && !wmspatial) {
