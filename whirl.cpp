@@ -39,6 +39,13 @@ namespace whirl {
       default: return make_pair(0, 0);
       }
     }
+  
+  int last_dir(cell *c) {
+    int d = -1;
+    while(c != c->master->c7)
+      d = c->spin(0), c = c->mov[0];
+    return d;
+    }
 
   loc get_coord(cell *c) {
     if(c == c->master->c7) return loc(0,0);

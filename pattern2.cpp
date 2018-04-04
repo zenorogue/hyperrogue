@@ -34,6 +34,13 @@ bool ishex1(cell *c) {
   else return c->type != S6;
   }
 
+bool ishex2(cell *c) {
+  // EUCLIDEAN
+  if(euclid) return eupattern(c) == 1;
+  else if(whirl::whirl) return c->master->c7 != c && whirl::pseudohept_val(c) == 1;
+  else return c->type != S6;
+  }
+
 int emeraldval(cell *c) {
   if(euclid) return eupattern(c);
   if(sphere) return 0;
@@ -557,7 +564,12 @@ namespace patterns {
         si.id += 16, si.symmetries = 4;
       }
     else {
-      si.id = 8 * ((c->master->fiftyval & 1) ^ (c->spin(0) & 1));
+      int sp = c->spin(0);
+      if(whirl::whirl) {
+        sp = whirl::last_dir(c);
+        sp ^= ishex2(c);
+        }
+      si.id = 8 * ((c->master->fiftyval & 1) ^ (sp & 1));
       bool dock = false;
       for(int i=0; i<c->type; i+=2) {
         int fiv = createMov(c, i)->master->fiftyval;
@@ -917,6 +929,7 @@ int pattern_threecolor(cell *c) {
   if(a38) {
     patterns::patterninfo si;
     patterns::val38(c, si, nonbitrunc ? 0 : patterns::SPF_ROT, patterns::PAT_COLORING);
+    if(whirl::whirl && pseudohept(c)) return 0;
     return si.id >> 2;
     }
   if(a46 && !nonbitrunc) {
