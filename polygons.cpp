@@ -978,7 +978,7 @@ hpcshape
   shCircleFloor,
   shFloorShadow[2], shTriheptaFloorShadow[2], shTriheptaEucShadow[3],
   shWall[2], shMineMark[2], shFan,
-  shStarFloor[3], shCloudFloor[3], shTriFloor[2], shZebra[5],
+  shStarFloor[3], shCloudFloor[3], shTriFloor[3], shZebra[5],
   shSwitchFloor[3], shSwitchDisk,
   shButterflyFloor[2], shLavaFloor[2],
   shTower[11],
@@ -1148,7 +1148,7 @@ static const
 #endif
 double bscale7 = 1, brot7 = 0, bscale6 = 1, brot6 = 0;
 
-void bshape(hpcshape& sh, int p, double shzoom, int shapeid, double bonus = 0) {
+void bshape(hpcshape& sh, int p, double shzoom, int shapeid, double bonus = 0, flagtype flags = 0) {
   bshape(sh, p);
   int whereis = 0;
   while(polydata[whereis] != NEWSHAPE || polydata[whereis+1] != shapeid) whereis++;
@@ -1165,7 +1165,10 @@ void bshape(hpcshape& sh, int p, double shzoom, int shapeid, double bonus = 0) {
   int rots2 = rots;
   // shapes 368..370 are specially designed
   if(!(shapeid >= 368 && shapeid <= 370)) {
-    if(rots == 7) {
+    if(flags&1) {
+      rots2 = 6;
+      }
+    else if(rots == 7) {
       rots2 = S7;
       if(rots2 != 7 && !euclid) bonus += M_PI;
       shzoomx *= bscale7;
@@ -1206,6 +1209,11 @@ void bshape(hpcshape& sh, int p, double shzoom, int shapeid, double bonus = 0) {
       hpcpush(spin(2*M_PI*r/rots2) * ipoint(i, -1));
     }
   hpcpush(ipoint(0, 1));
+  }
+
+void bshape_whirl(hpcshape sh[3], int p, double shzoom, int shapeid, double bonus = 0) {
+  bshape(sh[1], p, shzoom, shapeid, bonus);
+  bshape(sh[2], p, shzoom * .8, shapeid, bonus + M_PI/S7 - (a38? .25 : .15), 1);
   }
 
 void copyshape(hpcshape& sh, hpcshape& orig, int p) {
@@ -1873,7 +1881,7 @@ void buildpolys() {
   else bshape(shOverFloor[1], PPR_FLOOR, scalef*spzoom7, 15);
   bshape(shOverFloor[2], PPR_FLOOR, euclid?scalef*1.2:spzoom7, 16);
   bshape(shTriFloor[0], PPR_FLOOR, scalef*espzoom6*gsca(sphere,.9, a4,.9)*ffscale2, 17, ffspin2 + grot(a47,.1));
-  bshape(shTriFloor[1], PPR_FLOOR, scalef*espzoomd7*ffscale2*gsca(a4,1.2, a47,1.5), 18, octroll + grot(a4,.25, a47,-.1, sphere4,.7) + grot(euclid&&a4, M_PI/8));
+  bshape_whirl(shTriFloor, PPR_FLOOR, scalef*espzoomd7*ffscale2*gsca(a4,1.2, a47,1.5), 18, octroll + grot(a4,.25, a47,-.1, sphere4,.7) + grot(euclid&&a4, M_PI/8));
   bshape(shFeatherFloor[0], PPR_FLOOR, scalef*spzoom6*ffscale2, 19, ffspin2);
   if(nonbitrunc) bshape(shFeatherFloor[1], PPR_FLOOR, sphere ? .83 : gsca(ap4,1.1) * ntscale, 20, ntrot);
   else bshape(shFeatherFloor[1], PPR_FLOOR, scalef*spzoom7*gsca(sphere,1.1,a4,1.1)*ffscale2*ntscale, 21, sphere?1.3:ntrot);
@@ -3507,6 +3515,8 @@ NEWSHAPE
 // need eswap
 #define nbtplain (nonbitrunc && !whirl::whirl)
 
+#define nbtnice (!has_nice_dual())
+
 #define DESERTFLOOR (nonbitrunc ? shCloudFloor : shDesertFloor)[ct6]
 #define BUTTERFLYFLOOR (nonbitrunc ? shFloor : shButterflyFloor)[ct6]
 #define PALACEFLOOR (nonbitrunc?shFloor:shPalaceFloor)[ct6]
@@ -3519,7 +3529,7 @@ NEWSHAPE
 #define TROLLFLOOR shTrollFloor[ct6]
 #define BARROWFLOOR shBarrowFloor[(euclid&&!a4)?0:nbtplain?2:ct6]
 #define LAVAFLOOR (nonbitrunc ? shFloor : shLavaFloor)[ct6]
-#define TRIFLOOR ((nonbitrunc ? shFloor : shTriFloor)[ct6])
+#define TRIFLOOR ((nbtnice ? shFloor : shTriFloor)[xct6])
 #define TURTLEFLOOR shTurtleFloor[nbtplain ? 2 : ct6]
 #define ROSEFLOOR shRoseFloor[ct6]
 

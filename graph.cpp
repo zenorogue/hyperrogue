@@ -3777,6 +3777,8 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
     
     int ctype = c->type;
     int ct6 = ctof(c);
+    int xct6 = ct6;
+    if(whirl::whirl && has_nice_dual() && pseudohept(c) && !ishept(c)) xct6 = 2;
 
     bool error = false;
     
