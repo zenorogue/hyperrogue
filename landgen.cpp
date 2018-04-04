@@ -2084,11 +2084,11 @@ void giantLandSwitch(cell *c, int d, cell *from) {
       ONEMPTY {
         if(nonbitrunc && c->land == laCrossroads5 && hrand(100) < 60)
           c->wall = waBarrier;
-        else if(!ctof(c) && !inv::on && items[itShard] >= 10 && hrand(8000) < 120*orbcrossfun(items[itShard]))
+        else if(!ctof(c) && !inv::on && items[itShard] >= 10 && hrand(8000) < 120*orbcrossfun(items[itShard]) && !whirl::whirl)
           c->wall = hrand(2) ? waMirror : waCloud;
-        else if(!ctof(c) && hyperstonesUnlocked() && hrand(8000) < 100)
+        else if(!ctof(c) && hyperstonesUnlocked() && hrand(8000) < 100 && !whirl::whirl)
           c->wall = hrand(2) ? waMirror : waCloud;
-        else if(!ctof(c) && tactic::on && isCrossroads(tactic::lasttactic) && hrand(8000) < 120)
+        else if(!ctof(c) && tactic::on && isCrossroads(tactic::lasttactic) && hrand(8000) < 120 && !whirl::whirl)
           c->wall = hrand(2) ? waMirror : waCloud;
         else if(c->land == laCrossroads4 && hrand(24000) < 10 && tactic::on)
           c->wall = waRose;

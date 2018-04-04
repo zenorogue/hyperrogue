@@ -155,6 +155,7 @@ int fiftyval049(cell *c) {
     // printf("%d,%d: %d\n", allcodes[0], allcodes[1], allcodes[0] + 7);
     return allcodes[0] + 7;
     }
+  else if(whirl::whirl) return fiftyval049(c->master->c7);
   else if(sphere) return 0;
   else {
     int a[3], qa=0;
