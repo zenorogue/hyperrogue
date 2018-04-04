@@ -976,7 +976,7 @@ hpcshape
   shWave[8][2],  
   shFloor[2], shBFloor[2], shMFloor2[2], shMFloor3[2], shMFloor4[2],
   shCircleFloor,
-  shFloorShadow[2], shTriheptaFloorShadow[2], shTriheptaEucShadow[3],
+  shFloorShadow[2], shTriheptaFloorShadow[3], shTriheptaEucShadow[3],
   shWall[2], shMineMark[2], shFan,
   shStarFloor[3], shCloudFloor[3], shTriFloor[3], shZebra[5],
   shSwitchFloor[3], shSwitchDisk,
@@ -993,7 +993,7 @@ hpcshape
   shMercuryBridge[2],
   shLeafFloor[2],
   shBarrowFloor[3],
-  shTriheptaFloor[13], shTriheptaFloor2[2], shTriheptaEuc[3],
+  shTriheptaFloor[14], shTriheptaFloor2[2], shTriheptaEuc[3],
   shCross, shGiantStar[2], shLake, shMirror,
   shHalfFloor[3], shHalfMirror[3],
   shGem[2], shStar, shDisk, shDiskT, shDiskS, shDiskM, shDiskSq, shRing,   
@@ -1349,6 +1349,12 @@ void buildpolys() {
 
   bshape(shTriheptaFloorShadow[1], PPR_FLOOR);
   for(int t=0; t<=S7; t++) hpcpush(ddi(t*S12 + tshift1, trihepta1*SHADMUL) * C0);
+  
+  bshape(shTriheptaFloor[13], PPR_FLOOR);
+  for(int t=0; t<=S6; t++) hpcpush(ddi(t*S14 + S7, trihepta0*1.6) * C0);
+
+  bshape(shTriheptaFloorShadow[2], PPR_FLOOR);
+  for(int t=0; t<=S6; t++) hpcpush(ddi(t*S14 + S7, trihepta0*SHADMUL*1.6) * C0);
 
   {double x = hexvdist;
   bshape(shFullFloor[0], PPR_FLOOR);

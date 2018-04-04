@@ -618,9 +618,11 @@ namespace patterns {
       u += 2;
       if(!ishept(c->mov[v])) qhex++;
       }
-    if(u == 8 && qhex == 2) si.id = 12;
-    else if(u == 2 && qhex == 1) si.id = 8;
-    else if(u == 6 && qhex == 2) si.id = 10;
+    if(u == 8 && qhex == 2) u = 12;
+    else if(u == 2 && qhex == 1) u = 8;
+    else if(u == 6 && qhex == 2) u = 10;
+    if(whirl::whirl && pseudohept(c) && !ishept(c))
+      u = 13;
     si.id = u;
 
     if(u == 6) {
@@ -678,7 +680,7 @@ namespace patterns {
     val_all(c, si, 0, 0);
     
     // get id:
-    if(stdhyperbolic && isWarped(c)) 
+    if((whirl::whirl? (S3==3) : !weirdhyperbolic) && isWarped(c)) 
       val_warped(c, si);
     else {
       si.id = ishept(c) ? 1 : 0;
@@ -975,7 +977,10 @@ bool warptype(cell *c) {
     else 
       return c->master->distance & 1;
     }
-  else return pattern_threecolor(c) == 0;
+  else if(whirl::whirl)
+    return pseudohept(c);
+  else
+    return pattern_threecolor(c) == 0;
   }
 
 namespace patterns {

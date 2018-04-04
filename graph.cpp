@@ -3062,7 +3062,7 @@ bool use_swapped_duals() {
 void floorShadow(cell *c, const transmatrix& V, int col, bool warp) {
   if(pmodel == mdHyperboloid || pmodel == mdBall || pmodel == mdHemisphere) 
     return; // shadows break the depth testing
-  if(shmup::on || nonbitrunc) warp = false;
+  if(shmup::on || nbtnice) warp = false;
   dynamicval<int> p(poly_outline, OUTLINE_TRANS);
   if(wmescher && qfi.special) {
     queuepolyat(V * qfi.spin * shadowmulmatrix, *qfi.shape, col, PPR_WALLSHADOW);
@@ -3076,7 +3076,7 @@ void floorShadow(cell *c, const transmatrix& V, int col, bool warp) {
       }
     else {
       auto si = patterns::getpatterninfo(c, 0, 0);
-      queuepolyat(V * applyPatterndir(c, si), shTriheptaFloorShadow[ctof(c)], col, PPR_WALLSHADOW);
+      queuepolyat(V * applyPatterndir(c, si), shTriheptaFloorShadow[si.id == 13 ? 2 : ctof(c)], col, PPR_WALLSHADOW);
       }
     }
   else if(is_nice_dual(c)) {
@@ -3131,7 +3131,7 @@ void qplainfloor(cell *c, bool warp, const transmatrix &V, int col) {
 int wavephase;
 
 void warpfloor(cell *c, const transmatrix& V, int col, int prio, bool warp) {
-  if(shmup::on || nonbitrunc) warp = false;
+  if(shmup::on || nbtnice) warp = false;
 #if CAP_TEXTURE
   if(qfi.tinf) {
     queuetable(V*qfi.spin, qfi.tinf->vertices, size(qfi.tinf->vertices), 0, texture::config.recolor(col), prio);
@@ -3183,7 +3183,7 @@ void escherSidewall(cell *c, int sidepar, const transmatrix& V, int col) {
   }
 
 void placeSidewall(cell *c, int i, int sidepar, const transmatrix& V, bool warp, bool mirr, int col) {
-  if(shmup::on || nonbitrunc) warp = false;
+  if(shmup::on || nbtnice) warp = false;
   if(warp && !ishept(c) && (!c->mov[i] || !ishept(c->mov[i]))) return;
   if(is_nice_dual(c)) {
     if(pseudohept(c)) return;
@@ -3998,9 +3998,9 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         qfloor_eswap(c, Vf, shBigTriangle, darkena(fcol, fd, 0xFF));
         }
 
-      else if(isWarped(c) && !nonbitrunc && !shmup::on) {
+      else if(isWarped(c) && !nbtnice && !shmup::on) {
         auto si = patterns::getpatterninfo(c, 0, 0);
-        if(si.id < 13)
+        if(si.id < 14)
           qfloor(c, Vf, applyPatterndir(c, si), shTriheptaFloor[si.id], darkena(fcol, fd, 0xFF));
         else
           qfloor(c, Vf, shFloor[ctof(c)], darkena(fcol, fd, 0xFF));
