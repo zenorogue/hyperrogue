@@ -1557,7 +1557,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
       if(d == 9 && randomPatternsMode)
         setland(c, RANDPAT ? laWarpCoast : laWarpSea); 
       
-      if(d == 8 && !weirdhyperbolic) {
+      if(d == 8) {
         if(c->land == laWarpCoast) {
           if(hrand(1000) < 150 && celldist(c) >= 3 && !pseudohept(c)) 
             c->wall = waSmallTree;
