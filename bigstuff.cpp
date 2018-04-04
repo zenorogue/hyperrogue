@@ -1050,7 +1050,7 @@ void buildBigStuff(cell *c, cell *from) {
     }
       
   if((!chaosmode) && bearsCamelot(c->land) && ctof(c) && 
-    (quickfind(laCamelot) || peace::on || (hrand(I2000) < 200 && 
+    (quickfind(laCamelot) || peace::on || (hrand(I2000) < 200 && !whirl::whirl && 
     items[itEmerald] >= U5 && !tactic::on))) {
     int rtr = newRoundTableRadius();
     heptagon *alt = createAlternateMap(c, rtr+14, hsOrigin);
@@ -1071,12 +1071,12 @@ void buildBigStuff(cell *c, cell *from) {
       createAlternateMap(c, 2, hsA);
 
     if(c->land == laJungle && ctof(c) && 
-      (quickfind(laMountain) || (hrand(I2000) < 100 && 
+      (quickfind(laMountain) || (hrand(I2000) < 100 && !whirl::whirl && 
       !randomPatternsMode && !tactic::on && !yendor::on && landUnlocked(laMountain))))
       createAlternateMap(c, 2, hsA);
 
     if(c->land == laOvergrown && ctof(c) && 
-      (quickfind(laClearing) || (hrand(I2000) < 25 && 
+      (quickfind(laClearing) || (hrand(I2000) < 25 && !whirl::whirl && 
       !randomPatternsMode && items[itMutant] >= U5 &&
       isLandIngame(laClearing) &&
       !tactic::on && !yendor::on))) {
@@ -1084,20 +1084,20 @@ void buildBigStuff(cell *c, cell *from) {
       if(h) clearing::bpdata[h].root = NULL;
       }
 
-    if(c->land == laStorms && ctof(c) && hrand(2000) < 1000 && !randomPatternsMode) {
+    if(c->land == laStorms && ctof(c) && hrand(2000) < 1000 && !whirl::whirl && !randomPatternsMode) {
       heptagon *h = createAlternateMap(c, 2, hsA);
       if(h) h->alt->emeraldval = hrand(2);
       }
 
-    if(c->land == laOcean && ctof(c) && deepOcean && !generatingEquidistant && !peace::on &&
+    if(c->land == laOcean && ctof(c) && deepOcean && !generatingEquidistant && !peace::on && !whirl::whirl && 
       (quickfind(laWhirlpool) || (
         hrand(2000) < (nonbitrunc ? 500 : 1000) && !tactic::on && !yendor::on)))
       createAlternateMap(c, 2, hsA);
 
-    if(c->land == laCaribbean && ctof(c))
+    if(c->land == laCaribbean && !whirl::whirl && ctof(c))
       createAlternateMap(c, 2, hsA);
 
-    if(c->land == laPalace && ctof(c) && !princess::generating && !shmup::on && multi::players == 1 &&
+    if(c->land == laPalace && ctof(c) && !princess::generating && !shmup::on && multi::players == 1 && !whirl::whirl && 
       (princess::forceMouse ? mouse_reachability_test(from) :
         (hrand(2000) < (peace::on ? 100 : 20))) && 
       !c->master->alt && 
