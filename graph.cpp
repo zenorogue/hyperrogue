@@ -2814,7 +2814,11 @@ void setcolors(cell *c, int& wcol, int &fcol) {
       int clev = cwt.c->land == laEndorian ? edgeDepth(cwt.c) : 0;
         // xcol = (c->landparam&1) ? 0xD00000 : 0x00D000;
       fcol = 0x10101 * (32 + (c->landparam&1) * 32) - 0x000010;
-      fcol = gradient(fcol, 0x0000D0, clev-10, edgeDepth(c), clev+10);
+      int ed = edgeDepth(c);
+      int sr = max(get_sightrange(), ambush_distance);
+      while(ed > clev + sr) ed -= 2;
+      while(ed < clev - sr) ed += 2;
+      fcol = gradient(fcol, 0x0000D0, clev-sr, edgeDepth(c), clev+sr);
       if(c->wall == waTrunk) fcol = winf[waTrunk].color;
   
       if(c->wall == waCanopy || c->wall == waSolidBranch || c->wall == waWeakBranch) {
