@@ -988,7 +988,7 @@ hpcshape
   shFeatherFloor[3], shDemonFloor[3], shCrossFloor[3], shMFloor[2], shCaveFloor[4],
   shSemiFeatherFloor[2], shPowerFloor[3],
   shSemiFloor[2], shSemiBFloor[2], shSemiFloorShadow,
-  shDesertFloor[3], shRedRockFloor[3][2],
+  shDesertFloor[3], shRedRockFloor[3][3],
   shPalaceFloor[3], shNewFloor[3], shTrollFloor[2],
   shMercuryBridge[2],
   shLeafFloor[2],
@@ -1212,7 +1212,10 @@ void bshape(hpcshape& sh, int p, double shzoom, int shapeid, double bonus = 0, f
   }
 
 void bshape_whirl(hpcshape sh[3], int p, double shzoom, int shapeid, double bonus = 0) {
-  bshape(sh[1], p, shzoom, shapeid, bonus);
+  ld bonus2 = bonus;
+  if(S7 == 8 && whirl::whirl)
+    bonus2 += M_PI / 8, bonus += M_PI / 6 + .4;
+  bshape(sh[1], p, shzoom, shapeid, bonus2);
   bshape(sh[2], p, shzoom * .8, shapeid, bonus + M_PI/S7 - (a38? .25 : .15), 1);
   }
 
@@ -1972,7 +1975,7 @@ void buildpolys() {
   bshape(shCaveFloor[3], PPR_FLOOR,  scalef*1.1, 54);  // Euclidean variant
   bshape(shDesertFloor[0], PPR_FLOOR,  scalef*espzoom6*ffscale6, 55, ffspin6);
   bshape_whirl(shDesertFloor, PPR_FLOOR,  scalef*espzoomd7*gsca(sphere,.9), 56, octroll+ffspin7);
-  for(int i=1; i<=3; i++) for(int j=0; j<2; j++) 
+  for(int i=1; i<=3; i++) for(int j=0; j<3; j++) 
     zoomShape(shDesertFloor[j], shRedRockFloor[i-1][j], 1 - .1 * i, PPR_FLOORa+i);
   bshape(shPowerFloor[0], PPR_FLOOR_DRAGON, scalef*espzoom6*gsca(sphere,.8)*ffscale2, 57, ffspin2);
   bshape_whirl(shPowerFloor, PPR_FLOOR_DRAGON, scalef*espzoomd7*ffscale2, 58, octroll);
