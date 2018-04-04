@@ -2954,3 +2954,5 @@ int gamerange();
 int numplayers();
 
 extern int base_distlimit;
+
+bool has_nice_dual();
