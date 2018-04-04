@@ -30,6 +30,7 @@ bool ishept(cell *c) {
 bool ishex1(cell *c) {
   // EUCLIDEAN
   if(euclid) return eupattern(c) == 1;
+  else if(whirl::whirl) return c->master->c7 != c && !pseudohept(c->mov[0]);
   else return c->type != S6;
   }
 

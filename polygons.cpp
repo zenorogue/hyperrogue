@@ -1383,6 +1383,8 @@ void buildpolys() {
   
   double floorrad1 = strict ? hcrossf : euclid ? shexf*fac80*spzoom : shexf*fac94;
   
+  double triangleside = hcrossf*.94 * (whirl::whirl ? 1.5 * whirl::scale : 1);
+  
   if(euclid4) {
     if(nonbitrunc)
       floorrad0 = floorrad1 = rhexf * .94;
@@ -1460,7 +1462,7 @@ void buildpolys() {
     chasmifyPoly(dlow, dhi, k);
 
     bshape(shBigTriSide[k][0], PPR_LAKEWALL);
-    for(int t=0; t<=1; t++) hpcpush(ddi(t*S28-S14, hcrossf*.94) * C0);
+    for(int t=0; t<=1; t++) hpcpush(ddi(t*S28-S14, triangleside) * C0);
     chasmifyPoly(dlow, dhi, k);
     }
 
@@ -1786,10 +1788,10 @@ void buildpolys() {
   for(int t=0; t<=S6; t++) hpcpush(ddi(t*S14, -shexf*1.3) * C0);
   
   bshape(shBigTriangle, PPR_FLOOR);
-  for(int t=0; t<=S3; t++) hpcpush(ddi(t*S28, -hcrossf*.94) * C0);
+  for(int t=0; t<=S3; t++) hpcpush(ddi(t*S28, -triangleside) * C0);
 
   bshape(shBigTriShadow, PPR_FLOOR);
-  for(int t=0; t<=S3; t++) hpcpush(ddi(t*S28 + S14 + (S3==4?S14:0), hcrossf*.94*SHADMUL) * C0);
+  for(int t=0; t<=S3; t++) hpcpush(ddi(t*S28 + S14 + (S3==4?S14:0), triangleside*SHADMUL) * C0);
 
   
 /*bshape(shBigHexTriangleRev, PPR_FLOOR);

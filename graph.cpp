@@ -3040,6 +3040,22 @@ bool noAdjacentChasms(cell *c) {
   return true;
   }
 
+// does the current geometry allow nice duals
+bool has_nice_dual() {
+  if(!nonbitrunc) return true;
+  if(!whirl::whirl) return false;
+  return (whirl::param.first + whirl::param.second * 2) % 3 == 0;
+  }
+
+// does the current geometry allow nice duals
+bool is_nice_dual(cell *c) {
+  return c->land == laDual && has_nice_dual();
+  }
+
+bool use_swapped_duals() {
+  return (euclid && !a4) || whirl::whirl;
+  }
+
 void floorShadow(cell *c, const transmatrix& V, int col, bool warp) {
   if(pmodel == mdHyperboloid || pmodel == mdBall || pmodel == mdHemisphere) 
     return; // shadows break the depth testing
@@ -3060,8 +3076,8 @@ void floorShadow(cell *c, const transmatrix& V, int col, bool warp) {
       queuepolyat(V * applyPatterndir(c, si), shTriheptaFloorShadow[ctof(c)], col, PPR_WALLSHADOW);
       }
     }
-  else if(c->land == laDual && !nonbitrunc) {
-    if(euclid && !a4 && ishex1(c))
+  else if(is_nice_dual(c)) {
+    if(use_swapped_duals() && ishex1(c))
       queuepolyat(V * pispin, shBigTriShadow, col, PPR_WALLSHADOW);
     else
       queuepolyat(V, shBigTriShadow, col, PPR_WALLSHADOW);
@@ -3084,8 +3100,8 @@ void plainfloor(cell *c, bool warp, const transmatrix &V, int col, int prio) {
       queuepolyat(V * applyPatterndir(c, si), shTriheptaFloor[sphere ? ctof(c) : si.id], col, prio);
       }
     }
-  else if(c->land == laDual && !nonbitrunc) {
-    if(euclid && !a4 && ishex1(c))
+  else if(is_nice_dual(c)) {
+    if(use_swapped_duals() && ishex1(c))
       queuepolyat(V * pispin, shBigTriangle, col, prio);
     else
       queuepolyat(V, shBigTriangle, col, prio);
@@ -3102,7 +3118,7 @@ void qplainfloor(cell *c, bool warp, const transmatrix &V, int col) {
     auto si = patterns::getpatterninfo(c, 0, 0);
     qfloor(c, V, applyPatterndir(c, si), shTriheptaFloor[si.id], col);
     }
-  else if(c->land == laDual && !nonbitrunc)
+  else if(is_nice_dual(c))
     qfloor_eswap(c, V, shBigTriangle, col);
   else {
     qfloor(c, V, shFloor[ctof(c)], col);
@@ -3166,9 +3182,14 @@ void escherSidewall(cell *c, int sidepar, const transmatrix& V, int col) {
 void placeSidewall(cell *c, int i, int sidepar, const transmatrix& V, bool warp, bool mirr, int col) {
   if(shmup::on || nonbitrunc) warp = false;
   if(warp && !ishept(c) && (!c->mov[i] || !ishept(c->mov[i]))) return;
-  if(c->land == laDual && !nonbitrunc) {
-    if(ctof(c)) return;
-    if((euclid && !a4) ? (ishex1(c) ? !(i&1) : (i&1)) : !(i&1)) return;
+  if(is_nice_dual(c)) {
+    if(pseudohept(c)) return;
+    bool b = !(i&1);
+    if(use_swapped_duals()) {
+      if(!ishex1(c)) b = !b;
+      if(whirl::whirl) b = !b;
+      }
+    if(b) return;
     }
   int prio;
   /* if(mirr) prio = PPR_GLASS - 2;
@@ -3191,7 +3212,7 @@ void placeSidewall(cell *c, int i, int sidepar, const transmatrix& V, bool warp,
   // prio += c->cpdist - c->mov[i]->cpdist;  
   
   queuepolyat(V2, 
-    (qfi.tinf?shFullFloorSide:mirr?shMFloorSide:warp?shTriheptaSide:(c->land == laDual&&!nonbitrunc)?shBigTriSide:shFloorSide)[sidepar][ctof(c)], col, prio);
+    (qfi.tinf?shFullFloorSide:mirr?shMFloorSide:warp?shTriheptaSide:is_nice_dual(c)?shBigTriSide:shFloorSide)[sidepar][ctof(c)], col, prio);
   }
 
 bool openorsafe(cell *c) {
@@ -3316,7 +3337,7 @@ static const int trapcol[4] = {0x904040, 0xA02020, 0xD00000, 0x303030};
 static const int terracol[8] = {0xD000, 0xE25050, 0xD0D0D0, 0x606060, 0x303030, 0x181818, 0x0080, 0x8080};
 
 void qfloor_eswap(cell *c, const transmatrix& V, const hpcshape& sh, int col) {
-  if(euclid && ishex1(c)) 
+  if((euclid || whirl::whirl) && ishex1(c)) 
     qfloor(c, V, pispin, sh, col);
   else
     qfloor(c, V, sh, col);
@@ -3461,6 +3482,21 @@ void draw_wall(cell *c, const transmatrix& V, int wcol, int& zcol, int ct6, int 
       }
     }
   }
+
+void qfloor_caves(cell* c, const transmatrix& Vf, int col, int ct6) {
+  if(whirl::whirl) {
+    if(pseudohept(c))
+      qfloor(c, Vf, shCaveFloor[1], col);
+    else if(ishex1(c))
+      qfloor(c, Vf, pispin, shCaveFloor[0], col);
+    else
+      qfloor(c, Vf, shCaveFloor[0], col);
+    }
+  else
+    qfloor(c, Vf, CAVEFLOOR, col);
+  }
+
+// ptrn qfloor(c, Vf, CAVEFLOOR, darkena(fcol, fd, 0xFF));
 
 void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
 
@@ -3953,7 +3989,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       else if(isWarped(c) && euclid) 
         qfloor_eswap(c, Vf, shTriheptaFloor[ctof(c)], darkena(fcol, fd, 0xFF));
 
-      else if(c->land == laDual && !nonbitrunc && !ctof(c)) {
+      else if(is_nice_dual(c) && !pseudohept(c)) {
         qfloor_eswap(c, Vf, shBigTriangle, darkena(fcol, fd, 0xFF));
         }
 
@@ -3991,7 +4027,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           case 7:  qfloor_eswap(c, Vf, DEMONFLOOR, dfcol); break;
           case 8:  qfloor_eswap(c, Vf, CROSSFLOOR, dfcol); break;
           case 9:  qfloor(c, Vf, MFLOOR1, dfcol); break;
-          case 10: qfloor(c, Vf, CAVEFLOOR, dfcol); break;
+          case 10: qfloor_caves(c, Vf, dfcol, ct6); break;
           case 11: qfloor_eswap(c, Vf, POWERFLOOR, dfcol); break;
           case 12: qfloor_eswap(c, Vf, DESERTFLOOR, dfcol); break;
           case 13: qfloor_eswap(c, Vf, CHARGEDFLOOR, dfcol); break;
@@ -4060,7 +4096,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           if(!eoh)
             qfloor_eswap(c, Vf, TROLLFLOOR, darkena(fcol, fd, 0xFF));
          else
-           qfloor(c, Vf, CAVEFLOOR, darkena(fcol, fd, 0xFF));
+           qfloor_caves(c, Vf, darkena(fcol, fd, 0xFF), ct6);
          break;
 
         case laJungle:
@@ -4076,7 +4112,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           break;
         
         case laDeadCaves:
-          qfloor(c, Vf, CAVEFLOOR, darkena(fcol, fd, 0xFF));
+          qfloor_caves(c, Vf, darkena(fcol, fd, 0xFF), ct6);
           break;
         
         case laMotion:
@@ -4118,7 +4154,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           break;
 
         case laCaves:
-          qfloor(c, Vf, CAVEFLOOR, darkena(fcol, fd, 0xFF));
+          qfloor_caves(c, Vf, darkena(fcol, fd, 0xFF), ct6);
           break;
         
         case laDesert:
@@ -4146,7 +4182,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           break;
         
         case laLivefjord:
-          qfloor(c, Vf, CAVEFLOOR, darkena(fcol, fd, 0xFF));
+          qfloor_caves(c, Vf, darkena(fcol, fd, 0xFF), ct6);
           break;
         
         case laRedRock: case laSnakeNest:

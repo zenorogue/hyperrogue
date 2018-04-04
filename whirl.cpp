@@ -279,8 +279,6 @@ namespace whirl {
       loctoh_ort(param),
       loctoh_ort(param * loc(0,1))
       ));
-    printf("corners = \n");
-    display(corners);
     for(int i=0; i<S7; i++) {
       cell cc; cc.type = S7;
       transmatrix T = spin(-alpha) * build_matrix(

@@ -2166,7 +2166,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
             c->landparam = 2;
             forCellCM(c2, c) {
               if(c2->landparam == 2) c->landparam = 3;
-              if(!ctof(c2)) forCellCM(c3, c2) if(c3->landparam == 3) c->landparam = 3;
+              if(!pseudohept(c2)) forCellCM(c3, c2) if(c3->landparam == 3) c->landparam = 3;
               }
             }
           int hr = hrand(100) / 5;
