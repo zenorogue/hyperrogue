@@ -2705,7 +2705,7 @@ void buildRosemap() {
     rosewave++;
     for(int k=0; k<size(dcal); k++) {
       cell *c = dcal[k];
-      if(c->wall == waRose && c->cpdist <= 5) 
+      if(c->wall == waRose && c->cpdist <= gamerange() - 2) 
         rosemap[c] = rosewave * 8 + 2;
       }
     }
