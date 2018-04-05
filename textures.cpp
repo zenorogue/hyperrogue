@@ -1029,7 +1029,7 @@ void showMenu() {
     dialog::addBoolItem(XLAT("fine tune vertices"), panstate == tpsTune, 'F');
 
     dialog::addColorItem(XLAT("grid color (master)"), config.master_color, 'M');
-    dialog::addColorItem(XLAT("grid color (copy)"), config.slave_color, 'C');
+    dialog::addColorItem(XLAT("grid color (copy)"), config.slave_color, 'K');
     
     dialog::addBreak(50);
     
@@ -1161,7 +1161,7 @@ void showMenu() {
 
     else if(uni == 'M' && config.tstate == tsAdjusting) 
       dialog::openColorDialog(config.master_color, NULL);
-    else if(uni == 'C' && config.tstate == tsAdjusting) 
+    else if(uni == 'K' && config.tstate == tsAdjusting) 
       dialog::openColorDialog(config.slave_color, NULL);
 
     else if(uni == 'c' && config.tstate == tsActive) {
