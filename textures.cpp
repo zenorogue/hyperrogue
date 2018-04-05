@@ -429,17 +429,18 @@ void texture_config::perform_mapping() {
       }
     }
     
-  computeCgroup();
-  texture::cgroup = patterns::cgroup;
-  texture_map_orig = texture_map;
-  orig_texture_parameters = current_texture_parameters;
-  // printf("texture_map has %d elements (S%d)\n", size(texture_map), config.tstate);
   }
 
 void texture_config::finish_mapping() {
   if(config.tstate == tsActive)
     for(auto& mi: texture_map)
       mapTexture2(mi.second);
+
+  patterns::computeCgroup();
+  texture::cgroup = patterns::cgroup;
+  texture_map_orig = texture_map;
+  orig_texture_parameters = current_texture_parameters;
+  // printf("texture_map has %d elements (S%d)\n", size(texture_map), config.tstate);
   }
 
 void texture_config::saveFullTexture(string tn) {
