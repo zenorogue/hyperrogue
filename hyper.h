@@ -731,8 +731,10 @@ extern struct SDL_Surface *s;
 
 namespace patterns {
   extern char whichShape;
+  extern int canvasback;
 
   extern char whichPattern;
+  extern cpatterntype cgroup, old_cgroup;
   
   static const char PAT_WARP = 0;
   static const char PAT_ZEBRA = 'z';
@@ -778,6 +780,14 @@ namespace patterns {
   inline patterninfo getpatterninfo0(cell *c) {
     return getpatterninfo(c, whichPattern, subpattern_flags);
     }
+
+  bool compatible(cpatterntype oldp, cpatterntype newp);
+  extern void pushChangeablePatterns();
+  void computeCgroup();
+  void showPattern();
+  void val38(cell *c, patterninfo &si, int sub, int pat);
+
+  int downdir(cell *c, cellfunction *cf = coastvalEdge);
   }
 
 namespace mapeditor { 
@@ -2943,9 +2953,34 @@ string XLAT(string x, stringpar p1, stringpar p2, stringpar p3, stringpar p4);
 string XLAT(string x, stringpar p1, stringpar p2, stringpar p3, stringpar p4, stringpar p5);
 
 namespace whirl {
+  typedef pair<int, int> loc;
   extern bool whirl;
   void compute_geometry();
   void extend_map(cell *c, int d);  
+  extern ld scale;
+  extern loc param;
+  extern loc eudir(int dir);
+  extern int area;
+  extern string operation_name();
+  extern int pseudohept_val(cell *);
+  extern int last_dir(cell *c);
+  extern void configure();
+  extern ld alpha;
+  extern transmatrix Tf[8][32][32][6];
+
+  loc operator+(loc e1, loc e2);
+  loc operator-(loc e1, loc e2);
+  loc operator*(loc e1, loc e2);
+
+  struct local_info {
+    int last_dir;
+    loc relative;
+    int first_dir;
+    int total_dir;
+    };
+  
+  local_info get_local_info(cell *c);
+  const char *disp(loc at);
   }
 
 int get_sightrange();
@@ -2956,3 +2991,216 @@ int numplayers();
 extern int base_distlimit;
 
 bool has_nice_dual();
+
+extern hyperpoint mid(const hyperpoint &h1, const hyperpoint &h2);
+void loadNewConfig(FILE *f);
+
+struct supersaver {
+  string name;
+  virtual string save() = 0;
+  virtual void load(const string& s) = 0;
+  virtual bool dosave() = 0;
+  virtual void reset() = 0;
+  };
+
+typedef vector<shared_ptr<supersaver>> saverlist;
+
+extern saverlist savers;
+
+extern const transmatrix Mirror;
+
+extern string ftssmart(ld x);
+
+string itsh(int i);
+
+#if CAP_CONFIG
+
+template<class T> struct dsaver : supersaver {
+  T& val;
+  T dft;
+  bool dosave() { return val != dft; }
+  void reset() { val = dft; }
+  dsaver(T& val) : val(val) { }
+  };
+
+template<class T> struct saver : dsaver<T> {};
+
+template<class T, class U, class V> void addsaver(T& i, U name, V dft) {
+  auto s = make_shared<saver<T>> (i);
+  s->dft = dft;
+  s->name = name;
+  savers.push_back(s);
+  }
+
+template<class T> void addsaver(T& i, string name) {
+  addsaver(i, name, i);
+  }
+
+template<class T> struct saverenum : supersaver {
+  T& val;
+  T dft;
+  bool dosave() { return val != dft; }
+  void reset() { val = dft; }
+  saverenum<T>(T& v) : val(v) { }
+  string save() { return its(val); }
+  void load(const string& s) { val = (T) atoi(s.c_str()); }
+  };
+
+template<class T, class U> void addsaverenum(T& i, U name, T dft) {
+  auto s = make_shared<saverenum<T>> (i);
+  s->dft = dft;
+  s->name = name;
+  savers.push_back(s);
+  }
+
+template<class T, class U> void addsaverenum(T& i, U name) {
+  addsaverenum(i, name, i);
+  }
+
+template<> struct saver<int> : dsaver<int> {
+  saver<int>(int& val) : dsaver<int>(val) { }
+  string save() { return its(val); }
+  void load(const string& s) { val = atoi(s.c_str()); }
+  };
+
+template<> struct saver<char> : dsaver<char> {
+  saver<char>(char& val) : dsaver<char>(val) { }
+  string save() { return its(val); }
+  void load(const string& s) { val = atoi(s.c_str()); }
+  };
+
+template<> struct saver<bool> : dsaver<bool> {
+  saver<bool>(bool& val) : dsaver<bool>(val) { }
+  string save() { return val ? "yes" : "no"; }
+  void load(const string& s) { val = size(s) && s[0] == 'y'; }
+  };
+
+template<> struct saver<unsigned> : dsaver<unsigned> {
+  saver<unsigned>(unsigned& val) : dsaver<unsigned>(val) { }
+  string save() { return itsh(val); }
+  void load(const string& s) { val = (unsigned) strtoll(s.c_str(), NULL, 16); }
+  };
+
+template<> struct saver<string> : dsaver<string> {
+  saver<string>(string& val) : dsaver<string>(val) { }
+  string save() { return val; }
+  void load(const string& s) { val = s; }
+  };
+
+template<> struct saver<ld> : dsaver<ld> {
+  saver<ld>(ld& val) : dsaver<ld>(val) { }
+  string save() { return ftssmart(val); }
+  void load(const string& s) { 
+    if(s == "0.0000000000e+000") ; // ignore!
+    else val = atof(s.c_str()); 
+    }
+  };
+
+#endif
+extern vector<polytodraw> ptds;
+extern ld intval(const hyperpoint &h1, const hyperpoint &h2);
+extern ld intvalxy(const hyperpoint &h1, const hyperpoint &h2);
+transmatrix euscalezoom(hyperpoint h);
+transmatrix euaffine(hyperpoint h);
+transmatrix eupush(ld x, ld y);
+transmatrix eupush(hyperpoint h);
+transmatrix rspintox(const hyperpoint& H);
+transmatrix gpushxto0(const hyperpoint& H);
+transmatrix build_matrix(hyperpoint h1, hyperpoint h2, hyperpoint h3);
+hyperpoint normalize(hyperpoint H);
+
+extern ld hrandf();
+
+namespace glhr {
+
+  struct glmatrix {
+    GLfloat a[4][4];
+    GLfloat* operator[] (int i) { return a[i]; }
+    const GLfloat* operator[] (int i) const { return a[i]; }
+    GLfloat* as_array() { return a[0]; }
+    const GLfloat* as_array() const { return a[0]; }
+    };
+  
+  void set_depthtest(bool b);
+  glmatrix translate(ld x, ld y, ld z);
+  void color2(int color, ld part = 1);
+  void be_textured();
+  void set_modelview(const glmatrix& m);  
+  hyperpoint gltopoint(const glvertex& t);
+  glvertex pointtogl(const hyperpoint& t);
+
+  struct colored_vertex {
+    glvec3 coords;
+    glvec4 color;
+    colored_vertex(GLfloat x, GLfloat y, GLfloat r, GLfloat g, GLfloat b) {
+      coords[0] = x;
+      coords[1] = y;
+      coords[2] = stereo::scrdist;
+      color[0] = r;
+      color[1] = g;
+      color[2] = b;
+      color[3] = 1;
+      }
+    };
+  
+  struct textured_vertex {
+    glvec3 coords;
+    glvec3 texture;
+    };
+  
+  struct ct_vertex {
+    glvec3 coords;
+    glvec4 color;
+    glvec3 texture;
+    ct_vertex(const hyperpoint& h, ld x1, ld y1, ld col) {
+      coords = pointtogl(h);
+      texture[0] = x1;
+      texture[1] = y1;
+      color[0] = color[1] = color[2] = col;
+      color[3] = 1;
+      }
+    };  
+
+  void prepare(vector<textured_vertex>& v);
+  void prepare(vector<colored_vertex>& v);
+  void prepare(vector<ct_vertex>& v);
+  }
+
+void prettypoly(const vector<hyperpoint>& t, int fillcol, int linecol, int lev);
+polytodraw& lastptd();
+void queuepolyat(const transmatrix& V, const hpcshape& h, int col, int prio);
+void queuetable(const transmatrix& V, const vector<glvertex>& f, int cnt, int linecol, int fillcol, int prio);
+
+struct qfloorinfo {
+  bool special;
+  transmatrix spin;
+  const hpcshape *shape;
+  textureinfo *tinf;
+  };
+
+extern qfloorinfo qfi;
+extern qfloorinfo qfi_dc;
+extern int chasmg;
+
+struct hpcshape {
+  int s, e, prio;
+  int flags;
+  };
+
+extern hpcshape
+  shFullFloor[2], shFullCross[2];
+
+int fix6(int a);
+int fix7(int a);
+int fixdir(int a, cell *c);
+cell *newCell(int type, heptagon *master);
+extern int qpixel_pixel_outside;
+
+void queuechr(int x, int y, int shift, int size, char chr, int col, int frame = 0, int align = 8);
+
+int zebra3(cell *c);
+int geosupport_threecolor();
+int geosupport_graveyard();
+bool ishex1(cell *c);
+namespace fieldpattern { int fieldval_uniq(cell *c);  int fieldval_uniq_rand(cell *c, int d); }
+bool warptype(cell *c);
