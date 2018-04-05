@@ -1365,6 +1365,7 @@ void drawLine(hyperpoint h1, hyperpoint h2, int col, int steps) {
   }
 
 void texture_config::remap(eTextureState old_tstate, eTextureState old_tstate_max) {
+  drawthemap();
   clear_texture_map();
   if(old_tstate == tsActive && patterns::compatible(texture::cgroup, patterns::cgroup)) {
   
@@ -1396,7 +1397,7 @@ void texture_config::remap(eTextureState old_tstate, eTextureState old_tstate_ma
         
         auto& mi2 = texture_map[si.id];
         mi2 = mi;
-        mapTexture(c, mi2, si, Id, pshift);
+        mapTexture(c, mi2, si, shmup::ggmatrix(c), pshift);
         mapTexture2(mi2);
         mi2.tvertices = move(new_tvertices);
         }
