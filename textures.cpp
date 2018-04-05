@@ -1418,6 +1418,8 @@ void texture_config::remap(eTextureState old_tstate, eTextureState old_tstate_ma
     printf("texture_map size = %d\n", size(texture_map));
     }
   }
+
+eTextureState old_tstate_cl, old_tstate_max_cl;  
   
 int textureArgs() {
   using namespace arg;
@@ -1442,6 +1444,12 @@ int textureArgs() {
   else if(argis("-txcl")) {
     PHASE(3); drawscreen();
     config.load();
+    old_tstate_cl = texture::config.tstate;
+    old_tstate_max_cl = texture::config.tstate_max;
+    }
+
+  else if(argis("-txremap")) {
+    texture::config.remap(old_tstate_cl, old_tstate_max_cl);
     }
 
   else return 1;
