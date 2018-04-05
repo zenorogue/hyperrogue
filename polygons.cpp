@@ -41,11 +41,6 @@ double minwidth_global;
 
 extern long double polydata[];
 
-struct hpcshape {
-  int s, e, prio;
-  int flags;
-  };
-
 hpcshape *last = NULL;
 
 vector<polytodraw> ptds;
@@ -2413,13 +2408,6 @@ void queuepolyb(const transmatrix& V, const hpcshape& h, int col, int b) {
   queuepolyat(V,h,col,h.prio+b);
   }
 
-struct qfloorinfo {
-  bool special;
-  transmatrix spin;
-  const hpcshape *shape;
-  textureinfo *tinf;
-  };
-
 qfloorinfo qfi;
 qfloorinfo qfi_dc;
 
@@ -2509,7 +2497,7 @@ void queuestr(int x, int y, int shift, int size, string str, int col, int frame 
   ptd.prio = PPR_TEXT << PSHIFT;
   }
 
-void queuechr(int x, int y, int shift, int size, char chr, int col, int frame = 0, int align = 8) {
+void queuechr(int x, int y, int shift, int size, char chr, int col, int frame, int align) {
   polytodraw& ptd = nextptd();
   ptd.kind = pkString;
   ptd.u.chr.x = x;

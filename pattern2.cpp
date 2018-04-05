@@ -458,7 +458,7 @@ namespace patterns {
       }
     }
   
-  int downdir(cell *c, cellfunction *cf = coastvalEdge) {
+  int downdir(cell *c, cellfunction *cf) {
     cell *c2 = chosenDown(c, 1, 1, cf);
     if(!c2) return 0;
     return neighborId(c, c2);

@@ -42,14 +42,6 @@ eMode mode;
 
 void switch_mode(eMode m);
 
-struct glmatrix {
-  GLfloat a[4][4];
-  GLfloat* operator[] (int i) { return a[i]; }
-  const GLfloat* operator[] (int i) const { return a[i]; }
-  GLfloat* as_array() { return a[0]; }
-  const GLfloat* as_array() const { return a[0]; }
-  };
-
 void display(const glmatrix& m) {
   for(int i=0; i<4; i++) {
     for(int j=0; j<4; j++)
@@ -306,7 +298,7 @@ void id_modelview() {
 
 #endif
 
-void color2(int color, ld part = 1) {
+void color2(int color, ld part) {
   unsigned char *c = (unsigned char*) (&color);
   GLfloat cols[4];
   for(int i=0; i<4; i++) cols[i] = c[3-i] / 255.0 * part;
@@ -515,38 +507,6 @@ glvertex pointtogl(const hyperpoint& t) {
   h[0] = t[0]; h[1] = t[1]; h[2] = t[2];
   return h;
   }
-
-struct colored_vertex {
-  glvec3 coords;
-  glvec4 color;
-  colored_vertex(GLfloat x, GLfloat y, GLfloat r, GLfloat g, GLfloat b) {
-    coords[0] = x;
-    coords[1] = y;
-    coords[2] = stereo::scrdist;
-    color[0] = r;
-    color[1] = g;
-    color[2] = b;
-    color[3] = 1;
-    }
-  };
-
-struct textured_vertex {
-  glvec3 coords;
-  glvec3 texture;
-  };
-
-struct ct_vertex {
-  glvec3 coords;
-  glvec4 color;
-  glvec3 texture;
-  ct_vertex(const hyperpoint& h, ld x1, ld y1, ld col) {
-    coords = pointtogl(h);
-    texture[0] = x1;
-    texture[1] = y1;
-    color[0] = color[1] = color[2] = col;
-    color[3] = 1;
-    }
-  };
 
 #if CAP_VERTEXBUFFER
 template<class T> void bindbuffer(T& v) {

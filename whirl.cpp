@@ -1,6 +1,5 @@
 namespace whirl {
   bool whirl;
-  typedef pair<int, int> loc;
   loc param(1, 0);
 
   hyperpoint next;
