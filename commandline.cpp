@@ -85,7 +85,7 @@ namespace arg {
     }
 
   }
-  
+
 int arg::readCommon() {
   if(argis("-c")) { PHASE(1); shift(); conffile = argcs(); }
   else if(argis("-s")) { PHASE(1); shift(); scorefile = argcs(); }
@@ -444,6 +444,7 @@ else if(args()[0] == '-' && args()[1] == x && args()[2] == '0') { showstartmenu 
     }
   else if(argis("--msg")) {
     shift(); addMessage(args());
+    printf("%s\n", args().c_str());
     }
   else if(argis("--msg0")) {
     clearMessages();
