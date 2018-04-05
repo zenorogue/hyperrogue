@@ -551,7 +551,7 @@ namespace patterns {
         si.id = (c->master->fiftyval >> 1) & 3;
       else
         si.id = 0;
-      if(nonbitrunc)
+      if(nonbitrunc && !whirl::whirl) 
         si.id *= 4;
       else 
         si.id += 4;
@@ -570,6 +570,7 @@ namespace patterns {
         sp ^= ishex2(c);
         }
       si.id = 8 * ((c->master->fiftyval & 1) ^ (sp & 1));
+      if(whirl::whirl && pseudohept(c)) si.id = 4;
       bool dock = false;
       for(int i=0; i<c->type; i+=2) {
         int fiv = createMov(c, i)->master->fiftyval;
@@ -582,6 +583,21 @@ namespace patterns {
       if(symRotation) si.symmetries = 2;
       si.id += 8;
       si.id %= 12;
+      if(whirl::whirl && pat == PAT_COLORING) 
+        for(int i=0; i<c->type; i++) {
+          cell *c2 = createMov(c, i);
+          int id2 = 4;
+          if(!pseudohept(c2)) {
+            int sp2 = c2->spin(0);
+            if(whirl::whirl) {
+              sp2 = whirl::last_dir(c2);
+              sp2 ^= ishex2(c2);
+              }
+            id2 = 8 * ((c2->master->fiftyval & 1) ^ (sp2 & 1));
+            }
+//          printf("%p %2d : %d %d\n", c, si.id, i, id2);
+          if((id2+4) % 12 == si.id) si.dir = i;
+          }
       applyAlt(si, sub, pat);
       if(dock && (sub & SPF_DOCKS)) si.id += 16;
       }

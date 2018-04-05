@@ -474,6 +474,10 @@ void drawrec(cell *c, const transmatrix& V) {
 
   void drawrec(cell *c, const transmatrix& V, whirl::loc at, int dir, int maindir) {
     if(dodrawcell(c)) {
+/*      auto li = get_local_info(c);
+      if(fix6(dir) != fix6(li.total_dir)) printf("totaldir %d/%d\n", dir, li.total_dir);
+      if(at != li.relative) printf("at %s/%s\n", disp(at), disp(li.relative));
+      if(maindir != li.last_dir) printf("ld %d/%d\n", maindir, li.last_dir); */
       drawcell(c, V * Tf[maindir][at.first&31][at.second&31][fix6(dir)], 0, false);
       }
     for(int i=0; i<c->type; i++) {

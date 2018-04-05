@@ -39,30 +39,52 @@ namespace whirl {
       }
     }
   
+  int get_code(const local_info& li) {
+    return 
+      ((li.relative.first & 15) << 0) +
+      ((li.relative.second & 15) << 4) +
+      ((fix6(li.total_dir)) << 8) +
+      ((li.last_dir & 15) << 12);
+    }
+  
+  local_info get_local_info(cell *c) {
+    local_info li;
+    if(c == c->master->c7) {
+      li.relative = loc(0,0);
+      li.first_dir = -1;
+      li.last_dir = -1;
+      li.total_dir = -1;
+      }
+    else {
+      vector<int> dirs;
+      while(c != c->master->c7) {
+        dirs.push_back(c->spin(0));
+        c = c->mov[0];
+        }
+      li.first_dir = dirs[0];
+      li.last_dir = dirs.back();
+
+      loc at(0,0);
+      int dir = 0;
+      at = at + eudir(dir);
+      dirs.pop_back();
+      while(dirs.size()) {
+        dir += dirs.back() + 3;
+        dirs.pop_back();
+        at = at + eudir(dir);
+        }
+      li.relative = at;
+      li.total_dir = dir + 3;
+      }
+    return li;
+    }
+    
   int last_dir(cell *c) {
-    int d = -1;
-    while(c != c->master->c7)
-      d = c->spin(0), c = c->mov[0];
-    return d;
+    return get_local_info(c).last_dir;
     }
 
   loc get_coord(cell *c) {
-    if(c == c->master->c7) return loc(0,0);
-    vector<int> dirs;
-    while(c != c->master->c7) {
-      dirs.push_back(c->spin(0));
-      c = c->mov[0];
-      }
-    loc at(0,0);
-    int dir = 0;
-    at = at + eudir(dir);
-    dirs.pop_back();
-    while(dirs.size()) {
-      dir += dirs.back() + 3;
-      dirs.pop_back();
-      at = at + eudir(dir);
-      }
-    return at;
+    return get_local_info(c).relative;
     }
   
   int pseudohept_val(cell *c) {
@@ -262,46 +284,76 @@ namespace whirl {
   hyperpoint loctoh_ort(loc at) {
     return hpxyz(at.first, at.second, 1);
     }
+
+  hyperpoint corner_coords[7] = {
+    hpxyz(2, -1, 0),
+    hpxyz(1, 1, 0),
+    hpxyz(-1, 2, 0),
+    hpxyz(-2, 1, 0),
+    hpxyz(-1, -1, 0),
+    hpxyz(1, -2, 0),
+    hpxyz(0, 0, 0) // center, not a corner
+    };
+    
+  int bak_sp;
   
-  hyperpoint atz(const transmatrix& T, const transmatrix& corners, loc at) {
+  hyperpoint atz(const transmatrix& T, const transmatrix& corners, loc at, int cornerid = 6, ld cf = 3) {
     int sp = 0;
     again:
-    auto corner = corners * loctoh_ort(at);
+    auto corner = corners * hyperpoint_vec::operator+ (loctoh_ort(at), hyperpoint_vec::operator/ (corner_coords[cornerid], cf));
     if(corner[1] < -1e-6 || corner[2] < -1e-6) {
       at = at * eudir(1);
+      if(cornerid < 6) cornerid = (1 + cornerid) % 6;
       sp++;
       goto again;
       }
-    if(sp>3) sp -= 6;
+    if(sp>3) sp -= 6; bak_sp = sp;
 
     return normalize(spin(2*M_PI*sp/S7) * T * corner);
     }
   
   transmatrix Tf[8][32][32][6];
   
+  transmatrix corners;
+  
+  transmatrix dir_matrix(int i) {
+    cell cc; cc.type = S7;
+    return spin(-alpha) * build_matrix(
+      C0, 
+      ddspin(&cc, i) * xpush(tessf) * C0,
+      ddspin(&cc, i+1) * xpush(tessf) * C0
+      );
+    }
+  
   void prepare_matrices() {
-    transmatrix corners = inverse(build_matrix(
+    corners = inverse(build_matrix(
       loctoh_ort(loc(0,0)),
       loctoh_ort(param),
       loctoh_ort(param * loc(0,1))
       ));
     for(int i=0; i<S7; i++) {
-      cell cc; cc.type = S7;
-      transmatrix T = spin(-alpha) * build_matrix(
-        C0, 
-        ddspin(&cc, i) * xpush(tessf) * C0,
-        ddspin(&cc, i+1) * xpush(tessf) * C0
-        );
+      transmatrix T = dir_matrix(i);
       for(int x=-10; x<10; x++)
       for(int y=-10; y<10; y++)
       for(int d=0; d<6; d++) {
         loc at = loc(x, y);
         
-        hyperpoint h = atz(T, corners, at);
-        hyperpoint hl = atz(T, corners, at + eudir(d));
+        hyperpoint h = atz(T, corners, at, 6);
+        hyperpoint hl = atz(T, corners, at + eudir(d), 6);
         Tf[i][x&31][y&31][d] = rgpushxto0(h) * rspintox(gpushxto0(h) * hl) * spin(M_PI);
         }
       }       
+    }
+  
+  hyperpoint get_corner_position(cell *c, int cid, ld cf = 3) {
+    auto li = get_local_info(c);
+    int i = li.last_dir;
+    if(i == -1) 
+      return atz(dir_matrix(cid), corners, li.relative, 0, cf);
+    else {
+      auto& cellmatrix = Tf[i][li.relative.first&31][li.relative.second&31][fix6(li.total_dir)];
+      return inverse(cellmatrix) * atz(dir_matrix(i), corners, li.relative, fix6(cid + li.total_dir), cf);
+      }
     }
     
   void compute_geometry() {

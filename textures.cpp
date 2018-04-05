@@ -264,21 +264,42 @@ int getTriangleID(cell *c, patterns::patterninfo& si, hyperpoint h) {
   return best;
   }
 
+int whirlcode(cell *c, const patterns::patterninfo& si) {
+  if(!whirl::whirl) return 0;
+  else if(c == c->master->c7) return (fixdir(si.dir, c) << 8);
+  else return (get_code(whirl::get_local_info(c)) << 16) | (fixdir(si.dir, c) << 8);
+  }
+
 void mapTexture(cell *c, textureinfo& mi, patterns::patterninfo &si, const transmatrix& T, int shift = 0) {
   mi.c = c;
   mi.symmetries = si.symmetries;
   mi.current_type = c->type;
   
-  mi.M = T * applyPatterndir(c, si);
-
-  ld z = ctof(c) ? rhexf : hexvdist;
+  if(whirl::whirl) {
+    mi.M = T;
+    mi.triangles.clear();
+    for(int i=0; i<c->type; i++) {
+      int d = si.dir;
+      int i0 = fixdir(i + d + 0, c);
+      int i1 = fixdir(i + d + 1, c);
+      hyperpoint h1 = whirl::get_corner_position(c, i0);
+      hyperpoint h2 = whirl::get_corner_position(c, i1);
+      mi.triangles.emplace_back(make_array(C0, h1, h2), make_array(mi.M*C0, mi.M*h1, mi.M*h2));
+      }
+    }
   
-  mi.triangles.clear();
-  for(int i=0; i<c->type; i++) {
-    int i2 = i+shift;
-    hyperpoint h1 =  spin(M_PI + M_PI * (2*i2 -1) / c->type) * xpush(z) * C0;
-    hyperpoint h2 =  spin(M_PI + M_PI * (2*i2 +1) / c->type) * xpush(z) * C0;
-    mi.triangles.emplace_back(make_array(C0, h1, h2), make_array(mi.M*C0, mi.M*h1, mi.M*h2));
+  else {
+    mi.M = T * applyPatterndir(c, si);
+  
+    ld z = ctof(c) ? rhexf : hexvdist;
+    
+    mi.triangles.clear();
+    for(int i=0; i<c->type; i++) {
+      int i2 = i+shift;
+      hyperpoint h1 =  spin(M_PI + M_PI * (2*i2 -1) / c->type) * xpush(z) * C0;
+      hyperpoint h2 =  spin(M_PI + M_PI * (2*i2 +1) / c->type) * xpush(z) * C0;
+      mi.triangles.emplace_back(make_array(C0, h1, h2), make_array(mi.M*C0, mi.M*h1, mi.M*h2));
+      }
     }
   }
 
@@ -310,9 +331,9 @@ bool texture_config::apply(cell *c, const transmatrix &V, int col) {
     return false;
     }
   try {
-    auto& mi = texture_map.at(si.id);
+    auto& mi = texture_map.at(si.id + whirlcode(c, si));
     
-    qfi.spin = applyPatterndir(c, si);
+    qfi.spin = whirl::whirl ? Id : applyPatterndir(c, si);
     
     int n = mi.vertices.size();
 
@@ -328,7 +349,7 @@ bool texture_config::apply(cell *c, const transmatrix &V, int col) {
     else {
       queuetable(V * qfi.spin, mi.vertices, n, mesh_color, recolor(col), PPR_FLOOR);
       }
-        
+
     lastptd().u.poly.tinf = &mi;
     if(grid_color) {
       queuepolyat(V, shFullFloor[ctof(c)], 0, PPR_FLOOR);
@@ -356,11 +377,11 @@ bool texture_config::apply(cell *c, const transmatrix &V, int col) {
         addaura(V*h, col, 0);
         }
       }
-    
+
     return true;
     }
   catch(out_of_range) {
-    // printf("Ignoring tile #%d : not mapped\n", si.id);
+    // printf("Ignoring tile #%d / %08x: not mapped\n", si.id, whirlcode(c, si));
     return false;
     }
   }
@@ -402,6 +423,8 @@ void texture_config::perform_mapping() {
     bool replace = false;
     
     // int sgn = sphere ? -1 : 1;
+    
+    si.id += whirlcode(c, si);
 
     if(!texture_map.count(si.id)) 
       replace = true;
@@ -1373,10 +1396,12 @@ void texture_config::remap(eTextureState old_tstate, eTextureState old_tstate_ma
     config.tstate_max = old_tstate_max;
     for(cell *c: dcal) {
       auto si = patterns::getpatterninfo0(c);
+      int oldid = si.id;
       
+      si.id += whirlcode(c, si);
+
       if(texture_map.count(si.id)) continue;
       
-      int oldid = si.id;
       int pshift = 0;
       if(texture::cgroup == cpSingle) oldid = 1;
       if(texture::cgroup == cpFootball && patterns::cgroup == cpThree) {
@@ -1400,6 +1425,7 @@ void texture_config::remap(eTextureState old_tstate, eTextureState old_tstate_ma
         mapTexture(c, mi2, si, shmup::ggmatrix(c), pshift);
         mapTexture2(mi2);
         mi2.tvertices = move(new_tvertices);
+        // printf("%08x remapping %d vertices to %d vertices\n", si.id, size(mi.tvertices), size(mi2.tvertices));
         }
       catch(out_of_range) { 
         printf("Unexpected missing cell #%d/%d", si.id, oldid);
