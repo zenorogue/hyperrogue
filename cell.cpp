@@ -983,6 +983,7 @@ int celldist(cell *c) {
     }
   if(sphere) return celldistance(c, currentmap->gamestart());
   if(ctof(c)) return c->master->distance;
+  if(whirl::whirl) return whirl::compute_dist(c, celldist);
   int dx[MAX_S3];
   for(int u=0; u<S3; u++)
     dx[u] = createMov(c, u+u)->master->distance;
@@ -1009,6 +1010,7 @@ int celldistAlt(cell *c) {
     }
   if(!c->master->alt) return 0;
   if(ctof(c)) return c->master->alt->distance;
+  if(whirl::whirl) return whirl::compute_dist(c, celldistAlt);
   int dx[MAX_S3]; dx[0] = 0;
   for(int u=0; u<S3; u++) if(createMov(c, u+u)->master->alt == NULL)
     return ALTDIST_UNKNOWN;

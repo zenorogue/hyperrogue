@@ -2981,6 +2981,8 @@ namespace whirl {
   
   local_info get_local_info(cell *c);
   const char *disp(loc at);
+
+  int compute_dist(cell *c, int master_function(cell*));
   }
 
 int get_sightrange();

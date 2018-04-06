@@ -488,5 +488,42 @@ namespace whirl {
     param = loc(config_x, config_y);
     pushScreen(whirl::show);
     }
+  
+  int compute_dist(cell *c, int master_function(cell*)) {
+    auto li = get_local_info(c);
+    
+    cell *cm = c->master->c7;
+    
+    int i = li.last_dir;
+    auto at = li.relative;
+
+    while(at.first < 0 || at.second < 0) {
+      at = at * eudir(1);
+      i = fixdir(i-1, cm);
+      }
+    
+    auto dmain = master_function(cm);
+    auto d0 = master_function(createStep(cm->master, i)->c7);
+    auto d1 = master_function(createStep(cm->master, fixdir(i+1, cm))->c7);
+        
+    int w = param.first;
+    
+    while(true) {
+      if(dmain < d0 && dmain < d1)
+        return dmain + at.first + at.second;
+      if(dmain > d0 && dmain > d1)
+        return dmain - at.first - at.second;
+      if(dmain == d0 && dmain == d1)
+        return dmain;
+      // main ~ (0,0)
+      // d0 ~ (w,0)
+      // d1 ~ (0,w)
+      tie(dmain, d0, d1) = make_tuple(d0, d1, dmain);
+      // (0,0) -> (0,w)
+      // (w,0) -> (0,0)
+      // (0,w) -> (w,0)
+      at = loc(at.second, w - at.first - at.second);
+      }
+    }
   }
 

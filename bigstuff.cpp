@@ -105,6 +105,8 @@ void generateAlts(heptagon *h, int levs, bool link_cdata) {
   if(!h->alt) return;
   preventbarriers(h->c7);
   for(int i=0; i<S7; i++) preventbarriers(h->c7->mov[i]);
+  if(whirl::whirl)
+    for(int i=0; i<S7; i++) preventbarriers(createStep(h, i)->c7);
   for(int i=0; i<S7; i++) 
     createStep(h->alt, i)->alt = h->alt->alt;
   int relspin = -4; // for horocycles it must go the other way
