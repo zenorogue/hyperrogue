@@ -1252,7 +1252,7 @@ namespace patterns {
     if(nonbitrunc && S3 == 4)
       dialog::addBoolItem(XLAT("chessboard"), (whichPattern == PAT_CHESS), PAT_CHESS);
 
-    if(a38 || a46 || euclid || S3 == 4)
+    if(a38 || a46 || euclid || S3 == 4 || S7 == 4)
       dialog::addBoolItem(XLAT("coloring"), (whichPattern == PAT_COLORING), PAT_COLORING);
     
     if(sphere)
