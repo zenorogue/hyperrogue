@@ -1255,7 +1255,10 @@ void moreBigStuff(cell *c) {
         c->land = laTemple, c->wall = waNone, c->monst = moNone, c->item = itNone;
         }
       if(d % TEMPLE_EACH==0) {
-        if((weirdhyperbolic && nonbitrunc) ? hrand(100) < 50 : pseudohept(c)) 
+        if(weirdhyperbolic && nonbitrunc) {
+          if(hrand(100) < 50) c->wall = waColumn;
+          }
+        else if(pseudohept(c)) 
           c->wall = waColumn;
         else {
           if(!euclid) for(int i=0; i<S7; i++) generateAlts(c->master->move[i]);
