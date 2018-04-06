@@ -295,8 +295,6 @@ namespace whirl {
     hpxyz(0, 0, 0) // center, not a corner
     };
     
-  int bak_sp;
-  
   hyperpoint atz(const transmatrix& T, const transmatrix& corners, loc at, int cornerid = 6, ld cf = 3) {
     int sp = 0;
     again:
@@ -307,7 +305,7 @@ namespace whirl {
       sp++;
       goto again;
       }
-    if(sp>3) sp -= 6; bak_sp = sp;
+    if(sp>3) sp -= 6;
 
     return normalize(spin(2*M_PI*sp/S7) * T * corner);
     }
