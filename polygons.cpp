@@ -607,7 +607,16 @@ void drawpolyline(polytodraw& p) {
         return; 
         }
       glLineWidth(linewidthat(tC0(pp.V), pp.minwidth));    
-      gldraw(3, Id, glcoords, 0, size(glcoords), p.col, pp.outline, poly_flags, pp.tinf);
+      if(pp.tinf && pp.offset) {
+        vector<glvertex> tv;
+        for(int i=0; i<pp.cnt; i++)
+          tv.push_back(pp.tinf->tvertices[pp.offset+i]);
+        swap(pp.tinf->tvertices, tv);
+        gldraw(3, Id, glcoords, 0, size(glcoords), p.col, pp.outline, poly_flags, pp.tinf);
+        swap(pp.tinf->tvertices, tv);
+        }
+      else
+        gldraw(3, Id, glcoords, 0, size(glcoords), p.col, pp.outline, poly_flags, pp.tinf);
       continue;
       }
   #endif
