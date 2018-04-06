@@ -456,6 +456,10 @@ transmatrix actualV(const heptspin& hs, const transmatrix& V) {
   return (hs.spin || nonbitrunc) ? V * spin(hs.spin*2*M_PI/S7 + (nonbitrunc ? M_PI:0) + whirl::alpha) : V;
   }
 
+transmatrix applyspin(const heptspin& hs, const transmatrix& V) {
+  return (hs.spin || nonbitrunc) ? V * spin(hs.spin*2*M_PI/S7) : V;
+  }
+
 namespace whirl {
 
 /*
