@@ -955,6 +955,13 @@ bool mouse_reachability_test(cell *c) {
   return false;      
   }
 
+bool horo_ok() {
+  if(!hyperbolic) return false;
+  if(!whirl::whirl) return true;
+  if(whirl::param.second) return false;
+  return true;
+  }
+  
 void buildBigStuff(cell *c, cell *from) {
   if(sphere || quotient) return;
   bool deepOcean = false;
@@ -1052,7 +1059,7 @@ void buildBigStuff(cell *c, cell *from) {
     }
       
   if((!chaosmode) && bearsCamelot(c->land) && ctof(c) && 
-    (quickfind(laCamelot) || peace::on || (hrand(I2000) < 200 && !whirl::whirl && 
+    (quickfind(laCamelot) || peace::on || (hrand(I2000) < 200 && horo_ok() && 
     items[itEmerald] >= U5 && !tactic::on))) {
     int rtr = newRoundTableRadius();
     heptagon *alt = createAlternateMap(c, rtr+14, hsOrigin);
@@ -1073,7 +1080,7 @@ void buildBigStuff(cell *c, cell *from) {
       createAlternateMap(c, 2, hsA);
 
     if(c->land == laJungle && ctof(c) && 
-      (quickfind(laMountain) || (hrand(I2000) < 100 && !whirl::whirl && 
+      (quickfind(laMountain) || (hrand(I2000) < 100 && horo_ok() && 
       !randomPatternsMode && !tactic::on && !yendor::on && landUnlocked(laMountain))))
       createAlternateMap(c, 2, hsA);
 
@@ -1086,20 +1093,20 @@ void buildBigStuff(cell *c, cell *from) {
       if(h) clearing::bpdata[h].root = NULL;
       }
 
-    if(c->land == laStorms && ctof(c) && hrand(2000) < 1000 && !whirl::whirl && !randomPatternsMode) {
+    if(c->land == laStorms && ctof(c) && hrand(2000) < 1000 && horo_ok() && !randomPatternsMode) {
       heptagon *h = createAlternateMap(c, 2, hsA);
       if(h) h->alt->emeraldval = hrand(2);
       }
 
-    if(c->land == laOcean && ctof(c) && deepOcean && !generatingEquidistant && !peace::on && !whirl::whirl && 
+    if(c->land == laOcean && ctof(c) && deepOcean && !generatingEquidistant && !peace::on && horo_ok() && 
       (quickfind(laWhirlpool) || (
         hrand(2000) < (nonbitrunc ? 500 : 1000) && !tactic::on && !yendor::on)))
       createAlternateMap(c, 2, hsA);
 
-    if(c->land == laCaribbean && !whirl::whirl && ctof(c))
+    if(c->land == laCaribbean && horo_ok() && ctof(c))
       createAlternateMap(c, 2, hsA);
 
-    if(c->land == laPalace && ctof(c) && !princess::generating && !shmup::on && multi::players == 1 && !whirl::whirl && 
+    if(c->land == laPalace && ctof(c) && !princess::generating && !shmup::on && multi::players == 1 && horo_ok() && 
       (princess::forceMouse ? mouse_reachability_test(from) :
         (hrand(2000) < (peace::on ? 100 : 20))) && 
       !c->master->alt && 
