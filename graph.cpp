@@ -5925,6 +5925,8 @@ cell *viewcenter() {
   }
 
 bool inscreenrange(cell *c) {
-  return celldistance(viewcenter(), c) <= (euclid ? get_sightrange() : nonbitrunc ? 9 : 13);
+  if(sphere) return true;
+  if(euclid) return celldistance(viewcenter(), c) <= get_sightrange();
+  return heptdistance(viewcenter(), c) <= 5;
   }
 

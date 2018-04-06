@@ -1344,6 +1344,23 @@ cell *heptatdir(cell *c, int d) {
   else return createMov(c, d);
   }
 
+int heptdistance(heptagon *h1, heptagon *h2) {
+  // very rough distance
+  int d = 0;
+  while(true) {
+    if(h1 == h2) return d;
+    for(int i=0; i<S7; i++) if(h1->move[i] == h2) return d + 1;
+    int d1 = h1->distance, d2 = h2->distance;
+    if(d1 >= d2) d++, h1 = h1->move[0];
+    if(d2 >= d1) d++, h2 = h2->move[0];
+    }
+  }
+
+int heptdistance(cell *c1, cell *c2) {
+  if(!hyperbolic || quotient) return celldistance(c1, c2);
+  else return heptdistance(c1->master, c2->master);
+  }
+
 int celldistance(cell *c1, cell *c2) {
   int d = 0;
   
