@@ -2,6 +2,12 @@
 
 // Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
 
+int gp_threecolor() {
+  if(!gp::on) return 0;
+  if((gp::param.first - gp::param.second) % 3 == 0) return 2;
+  return 1;
+  }
+
 int eupattern(cell *c) {
   int v = cell_to_vec(c);
   if(a4) {
@@ -551,7 +557,7 @@ namespace patterns {
         si.id = (c->master->fiftyval >> 1) & 3;
       else
         si.id = 0;
-      if(nonbitrunc && !gp::on) 
+      if(nonbitrunc && gp_threecolor() != 2)
         si.id *= 4;
       else 
         si.id += 4;
@@ -902,7 +908,7 @@ namespace patterns {
       val_all(c, si, sub, pat);
       }
 
-    else if(pat == PAT_COLORING && (S7 == 4 || euclid)) {
+    else if(pat == PAT_COLORING && (S7 == 4 || euclid || (a38 && gp_threecolor() == 1))) {
       val_threecolors(c, si, sub);
       }
 
@@ -928,6 +934,7 @@ int geosupport_threecolor() {
     if(S7 % 2) return 1;
     return 2;
     }
+  if(gp_threecolor() == 2) return 2;
   if((S7 % 2 == 0) && (S3 == 3))
     return 2;
   return 0;
@@ -942,10 +949,21 @@ int geosupport_graveyard() {
   }
 
 int pattern_threecolor(cell *c) {
+  if(S3 == 3 && !(S7&1) && gp_threecolor() == 1 && c->master->c7 != c) {
+    auto li = gp::get_local_info(c);
+    int rel = (li.relative.first - li.relative.second + MODFIXER) % 3;
+    int par = (gp::param.first - gp::param.second + MODFIXER) % 3;
+    if(rel == 0)
+      return pattern_threecolor(c->master->c7);
+    else if(rel == par)
+      return pattern_threecolor(createStep(c->master, li.last_dir)->c7);
+    else
+      return pattern_threecolor(createStep(c->master, fix7(li.last_dir+1))->c7);
+    }
   if(a38) {
+    // if(gp::on && gp_threecolor() == 2 && gp::pseudohept_val(c) == 0) return 0;
     patterns::patterninfo si;
     patterns::val38(c, si, nonbitrunc ? 0 : patterns::SPF_ROT, patterns::PAT_COLORING);
-    if(gp::on && pseudohept(c)) return 0;
     return si.id >> 2;
     }
   if(a46 && !nonbitrunc) {
@@ -960,7 +978,7 @@ int pattern_threecolor(cell *c) {
     }
   if(S7 == 4 && S3 == 3) {
     int codesN[6] = {0,1,2,1,2,0};
-    if(gp::on) {
+    if(gp_threecolor() == 2) {
       auto li = gp::get_local_info(c);
       int sp = (MODFIXER + li.relative.first + 2 * li.relative.second) % 3;
       if(sp != 0) {
@@ -1009,7 +1027,8 @@ int pattern_threecolor(cell *c) {
 // in the 'pure heptagonal' tiling, returns true for a set of cells
 // which roughly corresponds to the heptagons in the normal tiling
 bool pseudohept(cell *c) {
-  if(gp::on) return gp::pseudohept_val(c) == 0;
+  if(gp::on && gp_threecolor() == 2)
+    return gp::pseudohept_val(c) == 0;
   return pattern_threecolor(c) == 0;
   }
 
