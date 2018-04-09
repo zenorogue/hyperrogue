@@ -1,5 +1,5 @@
-namespace whirl {
-  bool whirl;
+namespace gp {
+  bool on;
   loc param(1, 0);
 
   hyperpoint next;
@@ -20,7 +20,7 @@ namespace whirl {
       e1.first*e2.second + e2.first*e1.second + e1.second*e2.second);
     }
   
-  struct whirlmap_t {
+  struct goldberg_mapping_t {
     cell *c;
     char rdir;
     int rspin;
@@ -92,16 +92,16 @@ namespace whirl {
     return (v.first - v.second + MODFIXER)%3;
     }
   
-  whirlmap_t whirlmap[20][20];
-  void whirl_clear() {
+  goldberg_mapping_t goldberg_map[20][20];
+  void clear_mapping() {
     for(int y=0; y<20; y++) for(int x=0; x<20; x++) {
-      whirlmap[y][x].c = NULL;
-      whirlmap[y][x].rdir = -1;
+      goldberg_map[y][x].c = NULL;
+      goldberg_map[y][x].rdir = -1;
       }
     }
   
-  whirlmap_t& whirl_get(loc c) {
-    return whirlmap[c.second + 10][c.first + 10];
+  goldberg_mapping_t& get_mapping(loc c) {
+    return goldberg_map[c.second + 10][c.first + 10];
     }
 
   const char *disp(loc at) { 
@@ -117,8 +117,8 @@ namespace whirl {
 #define WHD(x) // x
 
   void conn1(loc at, int dir, int dir1) {
-    auto& wc = whirl_get(at);
-    auto& wc1 = whirl_get(at + eudir(dir));
+    auto& wc = get_mapping(at);
+    auto& wc1 = get_mapping(at + eudir(dir));
     int cdir = fixdir(dir + wc.rspin, wc.c);
     WHD( printf("  connection %s/%d %p/%d ", disp(at), dir, wc.c, cdir); )
     if(!wc1.c) {
@@ -171,7 +171,7 @@ namespace whirl {
       return;
       }
 
-    whirl_clear();
+    clear_mapping();
 
     // we generate a local map from an Euclidean grid to the
     // hyperbolic grid we build.
@@ -183,21 +183,21 @@ namespace whirl {
     vc[1] = param;
     vc[2] = param * loc(0,1);
     
-    // whirl_get(loc) gives our local map. We set the vertices first
+    // get_mapping(loc) gives our local map. We set the vertices first
     {
     auto h = c->master;
-    auto& ac0 = whirl_get(vc[0]);
+    auto& ac0 = get_mapping(vc[0]);
     ac0.c = h->c7;
     ac0.rspin = d;
     
-    auto& ac1 = whirl_get(vc[1]);
+    auto& ac1 = get_mapping(vc[1]);
     ac1.c = createStep(h, d)->c7;
     WHD( printf("%s : %p\n", disp(vc[1]), ac1.c); )
  
     // 3 ~ h->spin(d)
     ac1.rspin = h->spin(d) - 3;
     
-    auto& ac2 = whirl_get(vc[2]);
+    auto& ac2 = get_mapping(vc[2]);
     ac2.c = createStep(h, (d+1)%S7)->c7;
     WHD( printf("%s : %p\n", disp(vc[2]), ac2.c); )
     // 4 ~ h->spin(d+1)
@@ -214,8 +214,8 @@ namespace whirl {
         int dx1 = dx + 2*i;
         WHD( printf("%s %d\n", disp(at), dx1); )
         conn(at, dx1);        
-        if(forward) whirl_get(at).rdir = fix6(dx1);
-        else whirl_get(at+eudir(dx1)).rdir = fix6(dx1+3);
+        if(forward) get_mapping(at).rdir = fix6(dx1);
+        else get_mapping(at+eudir(dx1)).rdir = fix6(dx1+3);
         at = at + eudir(dx1);
         };
       while(rel.first >= 2) {
@@ -242,10 +242,10 @@ namespace whirl {
     // now we can fill the interior of our big equilateral triangle
     loc at = vc[0];
     while(true) {
-      auto& wc = whirl_get(at);
+      auto& wc = get_mapping(at);
       int dx = wc.rdir;
       auto at1 = at + eudir(dx);
-      auto& wc1 = whirl_get(at1);
+      auto& wc1 = get_mapping(at1);
       WHD( printf("%s (%d) %s (%d)\n", disp(at), dx, disp(at1), wc1.rdir); )
       int df = wc1.rdir - dx;
       if(df < 0) df += 6;
@@ -263,7 +263,7 @@ namespace whirl {
           }
         case 1: {
           auto at2 = at + eudir(dx+1);
-          auto& wc2 = whirl_get(at2);
+          auto& wc2 = get_mapping(at2);
           if(wc2.c) { at = at1; continue; }
           wc.rdir = (dx+1) % 6;
           conn(at, (dx+1) % 6);
@@ -355,7 +355,7 @@ namespace whirl {
     }
     
   void compute_geometry() {
-    if(whirl) {
+    if(on) {
       int x = param.first;
       int y = param.second;
       area = ((2*x+y) * (2*x+y) + y*y*3) / 4;
@@ -379,7 +379,7 @@ namespace whirl {
     }
   
   string operation_name() {
-    if(!whirl::whirl) {
+    if(!gp::on) {
       if(nonbitrunc) return XLAT("OFF");
       else return XLAT("bitruncated");
       }
@@ -407,11 +407,11 @@ namespace whirl {
     param = loc(x, y);
     auto g = screens;
     if(x == 1 && y == 0) {
-      if(whirl::whirl) restartGame('7');
+      if(gp::on) restartGame('7');
       if(!nonbitrunc) restartGame('7');
       }
     else if(x == 1 && y == 1) {
-      if(whirl::whirl) restartGame('7');
+      if(gp::on) restartGame('7');
       if(nonbitrunc) restartGame('7');
       }
     else {
@@ -479,14 +479,14 @@ namespace whirl {
     }
   
   void configure() {
-    if(whirl::whirl)
+    if(gp::on)
       config_x = param.first, config_y = param.second;
     else if(nonbitrunc)
       config_x = 1, config_y = 0;
     else
       config_x = 1, config_y = 1;
     param = loc(config_x, config_y);
-    pushScreen(whirl::show);
+    pushScreen(gp::show);
     }
   
   int compute_dist(cell *c, int master_function(cell*)) {
