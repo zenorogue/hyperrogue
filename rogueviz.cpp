@@ -1340,7 +1340,7 @@ void init() {
 #if !ISWEB
   mapeditor::drawplayer = false;
   firstland = specialland = laCanvas;
-  if(!shmup::on) restartGame('s');
+  if(!shmup::on) restartGame(rg::shmup);
   else restartGame();
 #else
   firstland = specialland = laCanvas;
@@ -1834,7 +1834,7 @@ slide rvslides[] = {
         if(mode == pmStartAll) firstland = specialland = laPalace;
         if(mode == 4) {
           tour::slides = default_slides;
-          while(tour::on) restartGame('T', false);
+          while(tour::on) restartGame(rg::tour, false);
           firstland = specialland = laIce;
           tour::start();
           }
@@ -1959,7 +1959,7 @@ slide rvslides[] = {
     "Press '5' to leave the presentation.",
     [] (presmode mode) {
       firstland = specialland = laIce;
-      if(mode == 4) restartGame('T');
+      if(mode == 4) restartGame(rg::tour);
       }
     }
   };

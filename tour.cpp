@@ -150,7 +150,7 @@ bool handleKeyTour(int sym, int uni) {
     if(sym == '1') targetgeometry = gSphere;
     if(sym == '2') targetgeometry = gEuclid;
     firstland = specialland = cwt.c->land;
-    restartGame(sym == '3' ? '7' : 'g', true);
+    restartGame(sym == '3' ? rg::bitrunc : rg::geometry, true);
     presentation(pmGeometryStart);
     return true;
     }
@@ -258,7 +258,7 @@ namespace ss {
           presentation(pmGeometryReset);
           }
         if(slides != wts) {
-          while(tour::on) restartGame('T', false);
+          while(tour::on) restartGame(rg::tour, false);
           slides = wts;
           tour::start();
           }
@@ -292,7 +292,7 @@ void start() {
     presentation(pmStop);
     firstland = specialland = laIce;
     }
-  restartGame('T');
+  restartGame(rg::tour);
   if(tour::on) {
     slidehelp();
     presentation(pmStart);
@@ -345,7 +345,7 @@ slide default_slides[] = {
            "as an introduction to hyperbolic geometry.";         
        if(mode == 4) {
          slides = rogueviz::rvtour::rvslides;
-         while(tour::on) restartGame('T', false);
+         while(tour::on) restartGame(rg::tour, false);
          tour::start();
          }
 #endif            
@@ -742,7 +742,7 @@ slide default_slides[] = {
     [] (presmode mode) {
       if(mode == 1) {
         firstland = cwt.c->land;
-        restartGame('s', true);
+        restartGame(rg::shmup, true);
         }
       if(mode == 3) {
         shmup::clearMonsters();
@@ -759,7 +759,7 @@ slide default_slides[] = {
     "Press '5' to leave the tutorial mode.",
     [] (presmode mode) {
       slidecommand = "leave the Tutorial";
-      if(mode == 4) restartGame('T');
+      if(mode == 4) restartGame(rg::tour);
       }
     }
   };

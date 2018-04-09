@@ -4233,7 +4233,8 @@ void moveWorm(cell *c) {
       else
         addMessage(XLAT("The sandworm explodes!"));
       playSound(NULL, "explosion");
-      achievement_gain("ZEBRAWORM", 'q');
+      if(geometry == gQuotient)
+        achievement_gain("ZEBRAWORM", rg::geometry);
       }
     return;
     }
@@ -6726,7 +6727,7 @@ bool collectItem(cell *c2, bool telekinesis) {
       achievement_victory(true);
 
     if(chaosmode && gold() >= 300 && !chaosAchieved) {
-      achievement_gain("CHAOS", 'C');
+      achievement_gain("CHAOS", rg::chaos);
       chaosAchieved = true;
       }
 

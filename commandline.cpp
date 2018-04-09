@@ -275,29 +275,29 @@ else if(args()[0] == '-' && args()[1] == x && args()[2] == '1') { showstartmenu 
 else if(args()[0] == '-' && args()[1] == x && args()[2] == '0') { showstartmenu = false; if(curphase == 3 && param) {act;} else {PHASE(2); param = false;} }
 
   TOGGLE('o', vid.usingGL, switchGL())
-  TOGGLE('C', chaosmode, restartGame('C'))
-  TOGGLE('7', nonbitrunc, restartGame('7'))
+  TOGGLE('C', chaosmode, restartGame(rg::chaos))
+  TOGGLE('7', nonbitrunc, restartGame(rg::bitrunc))
   TOGGLE('f', vid.full, switchFullscreen())
-  TOGGLE('T', tactic::on, restartGame('t'))
-  TOGGLE('S', shmup::on, restartGame('s'))
+  TOGGLE('T', tactic::on, restartGame(rg::tactic))
+  TOGGLE('S', shmup::on, restartGame(rg::shmup))
   TOGGLE('H', hardcore, switchHardcore())
-  TOGGLE('R', randomPatternsMode, restartGame('r'))
-  TOGGLE('i', inv::on, restartGame('i'))
+  TOGGLE('R', randomPatternsMode, restartGame(rg::randpattern))
+  TOGGLE('i', inv::on, restartGame(rg::inv))
   
   else if(argis("-peace")) {
     peace::otherpuzzles = true;
-    if(curphase == 3) restartGame('P');
+    if(curphase == 3) restartGame(rg::peace);
     else peace::on = true;
     }
   else if(argis("-pmem")) {
     peace::otherpuzzles = false;
-    if(curphase == 3) restartGame('P');
+    if(curphase == 3) restartGame(rg::peace);
     else peace::on = true;
     }
   else if(argis("-geo")) { 
     if(curphase == 3) {
       shift(); targetgeometry = (eGeometry) argi();
-      restartGame('g');
+      restartGame(rg::geometry);
       }
     else {      
       PHASE(2); shift(); geometry = targetgeometry = (eGeometry) argi();
@@ -330,12 +330,12 @@ else if(args()[0] == '-' && args()[1] == x && args()[2] == '0') { showstartmenu 
     callhooks(hooks_tests);
   else if(argis("-qpar2")) {
     if(curphase == 3) {
-      restartGame('g');
+      restartGame(rg::geometry);
       }
     else {      
       PHASE(2); 
       }
-    if(geometry == gQuotient2) restartGame('g');
+    if(geometry == gQuotient2) restartGame(rg::geometry);
     int a, b;
     shift(); sscanf(argcs(), "%d,%d", &a, &b);
     using namespace fieldpattern;
@@ -343,7 +343,7 @@ else if(args()[0] == '-' && args()[1] == x && args()[2] == '0') { showstartmenu 
     fgeomextras[current_extra].current_prime_id = b;
     enableFieldChange();
     if(curphase == 3) {
-      targetgeometry = gQuotient2; restartGame('g');
+      targetgeometry = gQuotient2; restartGame(rg::geometry);
       }
     else
       geometry = gQuotient2;
@@ -388,10 +388,10 @@ else if(args()[0] == '-' && args()[1] == x && args()[2] == '0') { showstartmenu 
     }
   else if(argis("-gp")) {
     PHASE(3);
-    if(nonbitrunc) restartGame('7');
+    if(nonbitrunc) restartGame(rg::bitrunc);
     shift(); gp::param.first = argi();
     shift(); gp::param.second = argi();
-    restartGame('w');
+    restartGame(rg::gp);
     }
   else if(argis("-P")) { 
     PHASE(2); shift(); 

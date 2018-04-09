@@ -861,12 +861,12 @@ bool texture_config::load() {
     dynamicval<int> d2(patterns::subpattern_flags, patterns::subpattern_flags);
 
     if(targetgeometry != geometry) {
-      restartGame('g');
+      restartGame(rg::geometry);
       return config.load();
       }
     
     if(nonbitrunc != target_nonbitru) {
-      restartGame('7');
+      restartGame(rg::bitrunc);
       }
     }
 

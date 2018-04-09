@@ -407,7 +407,7 @@ help += XLAT("This menu can be also used to configure keys.\n\n");
       }
     else if(doexiton(sym, uni)) {
       popScreen();
-      if(shmup::on != shmupcfg) { restartGame('s'); resetScores(); }
+      if(shmup::on != shmupcfg) { restartGame(rg::shmup); resetScores(); }
       else if(vid.scfg.players != players) { restartGame(); resetScores(); }
       }
     }

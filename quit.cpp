@@ -179,7 +179,7 @@ hint hints[] = {
       },
     []() {
 #if CAP_INV
-      restartGame('i');
+      restartGame(rg::inv);
 #endif
       }
     },
@@ -273,7 +273,7 @@ hint hints[] = {
         resetModes();
         specialland = laHalloween;
         targetgeometry = gSphere;
-        restartGame('g');
+        restartGame(rg::geometry);
         vid.alpha = 999;
         vid.scale = 998;
         }

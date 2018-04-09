@@ -83,38 +83,13 @@ vector<string> achievementsReceived;
 
 bool wrongMode(char flags) {
   if(cheater) return true;
-  if(flags == 'x') return false;
-  if(nonbitrunc != (flags == '7')) return true;
+  if(flags == rg::global) return false;
+  if(nonbitrunc != (flags == rg::bitrunc)) return true;
   if(gp::on) return true;
 
-  switch(flags) {
-    case 'e':
-      if(geometry != gEuclid)
-        return true;
-      break;
-    
-    case 'E':
-      if(geometry != gSphere && geometry != gElliptic)
-        return true;
-      break;
-    
-    case 'q':
-      if(geometry != gQuotient)
-        return true;
-      break;
+  if((geometry != gNormal) != (flags == rg::geometry)) return true;
   
-    case 'Q':
-      if(geometry != gQuotient2)
-        return true;
-      break;
-    
-    default:
-      if(geometry != gNormal)
-        return true;
-      break;
-    }
-
-  if(shmup::on != (flags == 's')) return true;
+  if(shmup::on != (flags == rg::shmup)) return true;
   if(randomPatternsMode) return true;
   if(yendor::on) return true;
   if(peace::on) return true;
@@ -122,8 +97,8 @@ bool wrongMode(char flags) {
 #if CAP_TOUR
   if(tour::on) return true;
 #endif
-  if(chaosmode != (flags == 'C')) return true;
-  if((numplayers() > 1) != (flags == 'm')) return true;
+  if(chaosmode != (flags == rg::chaos)) return true;
+  if((numplayers() > 1) != (flags == rg::multi)) return true;
   return false;
   }
 
@@ -173,11 +148,11 @@ void achievement_collection(eItem it, int prevgold, int newgold) {
   if(randomPatternsMode) return;
   int q = items[it];
   
-  if(it == itTreat && q == 50) 
-    achievement_gain("HALLOWEEN1", 'E');
+  if(it == itTreat && q == 50 && (geometry == gSphere || geometry == gElliptic)) 
+    achievement_gain("HALLOWEEN1", rg::geometry);
 
-  if(it == itTreat && q == 100) 
-    achievement_gain("HALLOWEEN2", 'E');
+  if(it == itTreat && q == 100 && (geometry == gSphere || geometry == gElliptic)) 
+    achievement_gain("HALLOWEEN2", rg::geometry);
 
   if(q == 1) {
     if(it == itDiamond) achievement_gain("DIAMOND1");
@@ -245,7 +220,7 @@ void achievement_collection(eItem it, int prevgold, int newgold) {
 
   // 32
   if(it == itHolyGrail) {
-    if(q == 1) achievement_gain("GRAIL2"), achievement_gain("GRAILH", '7');
+    if(q == 1) achievement_gain("GRAIL2"), achievement_gain("GRAILH", rg::bitrunc);
     if(q == 3) achievement_gain("GRAIL3");
     if(q == 8) achievement_gain("GRAIL4");
     }
@@ -448,7 +423,7 @@ void achievement_collection(eItem it, int prevgold, int newgold) {
   if(it == itOrbYendor) {
     achievement_gain("YENDOR2");
     if(pureHardcore()) achievement_gain("HARDCORE");
-    if(shmup::on) achievement_gain("SHMUP", 's');
+    if(shmup::on) achievement_gain("SHMUP", rg::shmup);
     }
   }
 
@@ -486,8 +461,8 @@ void achievement_count(const string& s, int current, int prev) {
     achievement_gain("LIGHTNING2");
   if(s == "LIGHTNING" && current-prev >= 10)
     achievement_gain("LIGHTNING3");
-  if(s == "MIRAGE" && current >= 35)
-    achievement_gain("MIRAGE", 'e');
+  if(s == "MIRAGE" && current >= 35 && geometry == gEuclid)
+    achievement_gain("MIRAGE", rg::geometry);
   if(s == "ORB" && current >= 10)
     achievement_gain("ORB3");
   if(s == "BUG" && current >= 1000)

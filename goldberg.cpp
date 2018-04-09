@@ -407,17 +407,17 @@ namespace gp {
     param = loc(x, y);
     auto g = screens;
     if(x == 1 && y == 0) {
-      if(gp::on) restartGame('7');
-      if(!nonbitrunc) restartGame('7');
+      if(gp::on) restartGame(rg::bitrunc);
+      if(!nonbitrunc) restartGame(rg::bitrunc);
       }
     else if(x == 1 && y == 1) {
-      if(gp::on) restartGame('7');
-      if(nonbitrunc) restartGame('7');
+      if(gp::on) restartGame(rg::bitrunc);
+      if(nonbitrunc) restartGame(rg::bitrunc);
       }
     else {
-      if(nonbitrunc) restartGame('7');
+      if(nonbitrunc) restartGame(rg::bitrunc);
       param = loc(x, y);
-      restartGame('w');
+      restartGame(rg::gp);
       }
     screens = g;
     }

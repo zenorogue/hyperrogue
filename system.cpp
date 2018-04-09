@@ -1078,18 +1078,18 @@ void restartGame(char switchWhat, bool push, bool keep_screens) {
     // items[itGreenStone] = 100;
     clearMemory();
     }
-  if(switchWhat == 'P') {
+  if(switchWhat == rg::peace) {
     peace::on = !peace::on;
     tactic::on = yendor::on = princess::challenge = 
     randomPatternsMode = inv::on = false;
     }
-  if(switchWhat == 'i') {
+  if(switchWhat == rg::inv) {
     inv::on = !inv::on;
     if(tactic::on) firstland = laIce;
     tactic::on = yendor::on = princess::challenge = 
     randomPatternsMode = peace::on = false;
     }
-  if(switchWhat == 'C') {
+  if(switchWhat == rg::chaos) {
     if(euclid || sphere || quotient)
       geometry = gNormal;
     if(tactic::on) firstland = laIce;
@@ -1098,7 +1098,7 @@ void restartGame(char switchWhat, bool push, bool keep_screens) {
     chaosmode = !chaosmode;
     }
 #if CAP_TOUR
-  if(switchWhat == 'T') {
+  if(switchWhat == rg::tour) {
     geometry = gNormal;
     yendor::on = tactic::on = princess::challenge = peace::on = inv::on = false;
     chaosmode = nonbitrunc = randomPatternsMode = false;
@@ -1107,10 +1107,10 @@ void restartGame(char switchWhat, bool push, bool keep_screens) {
     tour::on = !tour::on;
     }
 #endif
-  if(switchWhat == '7' || switchWhat == 'w') {
+  if(switchWhat == rg::bitrunc || switchWhat == rg::gp) {
     if(euclid6) geometry = gNormal;
     nonbitrunc = !nonbitrunc;
-    gp::on = (switchWhat == 'w');
+    gp::on = (switchWhat == rg::gp);
     resetGeometry();
     #if CAP_TEXTURE
     if(texture::config.tstate == texture::tsActive) 
@@ -1119,7 +1119,7 @@ void restartGame(char switchWhat, bool push, bool keep_screens) {
       texture::config.tstate = texture::tsAdjusting;
     #endif
     }
-  if(switchWhat == 'g') {
+  if(switchWhat == rg::geometry) {
     if(geometry == targetgeometry) geometry = gNormal;
     else geometry = targetgeometry;
     if(chaosmode && (euclid || sphere || quotient)) chaosmode = false;
@@ -1134,7 +1134,7 @@ void restartGame(char switchWhat, bool push, bool keep_screens) {
       texture::config.tstate = texture::tsAdjusting;
     #endif
     }
-  if(switchWhat == 'y') {
+  if(switchWhat == rg::yendor) {
     yendor::on = !yendor::on;
     tactic::on = false;
     peace::on = false;
@@ -1144,7 +1144,7 @@ void restartGame(char switchWhat, bool push, bool keep_screens) {
     chaosmode = false;
     if(!yendor::on) firstland = laIce;
     }
-  if(switchWhat == 't') {
+  if(switchWhat == rg::tactic) {
     tactic::on = !tactic::on;
     yendor::on = false;
     peace::on = false;
@@ -1154,11 +1154,11 @@ void restartGame(char switchWhat, bool push, bool keep_screens) {
     chaosmode = false;
     if(!tactic::on) firstland = laIce;
     }
-  if(switchWhat == 's') {
+  if(switchWhat == rg::shmup) {
     shmup::on = !shmup::on;
     princess::challenge = false;
     }
-  if(switchWhat == 'r') {
+  if(switchWhat == rg::randpattern) {
     randomPatternsMode = !randomPatternsMode;
     tactic::on = false;
     yendor::on = false;
@@ -1166,7 +1166,7 @@ void restartGame(char switchWhat, bool push, bool keep_screens) {
     inv::on = false;
     princess::challenge = false;
     }
-  if(switchWhat == 'p') {
+  if(switchWhat == rg::princess) {
     princess::challenge = !princess::challenge;
     firstland = princess::challenge ? laPalace : laIce;
     shmup::on = false;

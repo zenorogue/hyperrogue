@@ -298,21 +298,21 @@ bool have_current_settings() {
 void resetModes(char leave) {
   popAllGames();
   firstland = laIce; vid.scfg.players = 1;
-  if(shmup::on != (leave == 's')) restartGame('s');
-  if(inv::on != (leave == 'i')) restartGame('i');
-  if(chaosmode != (leave == 'C')) restartGame('C');
-  if(nonbitrunc != (leave == '7')) restartGame('7');
-  if(peace::on != (leave == 'P')) restartGame('P');
+  if(shmup::on != (leave == rg::shmup)) restartGame(rg::shmup);
+  if(inv::on != (leave == rg::inv)) restartGame(rg::inv);
+  if(chaosmode != (leave == rg::chaos)) restartGame(rg::chaos);
+  if(nonbitrunc != (leave == rg::bitrunc)) restartGame(rg::bitrunc);
+  if(peace::on != (leave == rg::peace)) restartGame(rg::peace);
 #if CAP_TOUR
-  if(tour::on != (leave == 'T')) restartGame('T');
+  if(tour::on != (leave == rg::tour)) restartGame(rg::tour);
 #endif
-  if(yendor::on != (leave == 'y')) restartGame('y');
-  if(tactic::on != (leave == 't')) restartGame('t');
-  if(randomPatternsMode != (leave == 'r')) restartGame('r');
+  if(yendor::on != (leave == rg::yendor)) restartGame(rg::yendor);
+  if(tactic::on != (leave == rg::tactic)) restartGame(rg::tactic);
+  if(randomPatternsMode != (leave == rg::randpattern)) restartGame(rg::randpattern);
 
-  if(geometry != gNormal && leave != 'g') { 
+  if(geometry != gNormal && leave != rg::geometry) { 
     targetgeometry = gNormal;
-    restartGame('g'); 
+    restartGame(rg::geometry); 
     }
   
   pmodel = mdDisk; vid.alpha = 1; vid.scale = 1;

@@ -529,9 +529,9 @@ void sominit(int initto) {
     
     /* if(geometry != gQuotient1) {
       targetGeometry = gQuotient1;
-      restartGame('g');
+      restartGame(rg::geometry);
       }
-    if(!nonbitrunc) restartGame('7'); */
+    if(!nonbitrunc) restartGame(rg::bitrunc); */
     
     printf("Initializing SOM (1)\n");
   

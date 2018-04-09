@@ -1531,8 +1531,8 @@ namespace patterns {
         auto old_tstate_max = texture::config.tstate_max;
 #endif
         auto &g = cpatterns[cgroup].geometries[uni - 'a'];
-        if(g.geo != geometry) { targetgeometry = g.geo; restartGame('g', false, true); }
-        if(g.nonbitru != nonbitrunc) restartGame('7', false, true);
+        if(g.geo != geometry) { targetgeometry = g.geo; restartGame(rg::geometry, false, true); }
+        if(g.nonbitru != nonbitrunc) restartGame(rg::bitrunc, false, true);
         whichPattern = g.whichPattern;
         subpattern_flags = g.subpattern_flags;
 #if CAP_TEXTURE

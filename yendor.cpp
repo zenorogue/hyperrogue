@@ -98,9 +98,9 @@ namespace yendor {
 
     if(tscore > tscorelast) {
       tscorelast = tscore;
-      if(tscore >= 1000) achievement_gain("YENDC1", 'x');
-      if(tscore >= 5000) achievement_gain("YENDC2", 'x');
-      if(tscore >= 15000) achievement_gain("YENDC3", 'x');
+      if(tscore >= 1000) achievement_gain("YENDC1", rg::global);
+      if(tscore >= 5000) achievement_gain("YENDC2", rg::global);
+      if(tscore >= 15000) achievement_gain("YENDC3", rg::global);
       }
 
     achievement_score(LB_YENDOR_CHALLENGE, tscore);
@@ -504,13 +504,13 @@ namespace yendor {
       if(new_challenge && new_challenge < YENDORLEVELS) {
         if(levelUnlocked(new_challenge) || autocheat) {
           challenge = new_challenge;
-          restartGame(yendor::on ? 0 : 'y');
+          restartGame(yendor::on ? 0 : rg::yendor);
           }
         else 
           addMessage("Collect 10 treasures in various lands to unlock the challenges there");
         }
       else if(uni == '0') {
-        if(yendor::on) restartGame('y');
+        if(yendor::on) restartGame(rg::yendor);
         }
       else if(uni == '1') easy = !easy;
       else if(uni == '2' || sym == SDLK_F1) gotoHelp(chelp);
@@ -742,11 +742,11 @@ namespace tactic {
     keyhandler = [] (int sym, int uni) {
       if(uni >= 1000 && uni < 1000 + size(landlist)) {
         firstland = specialland = landlist[uni - 1000];
-        restartGame(tactic::on ? 0 : 't');
+        restartGame(tactic::on ? 0 : rg::tactic);
         }
       else if(uni == '0') {
         firstland = laIce;
-        if(tactic::on) restartGame('t');
+        if(tactic::on) restartGame(rg::tactic);
         else popScreen();
         }
 
@@ -1074,12 +1074,12 @@ namespace peace {
       if(uni == '1') otherpuzzles = !otherpuzzles;
       else if(uni >= 'a' && uni < 'a' + qty) {
         specialland = levellist[uni - 'a'];
-        restartGame(peace::on ? 0 : 'P');
+        restartGame(peace::on ? 0 : rg::peace);
         }
       else if(uni == '2') { hint = !hint; popScreen(); }
       else if(uni == '0') {
         firstland = laIce;
-        if(peace::on) restartGame('P');
+        if(peace::on) restartGame(rg::peace);
         }
       else if(uni == 'h' || sym == SDLK_F1) gotoHelp(chelp);
       else if(doexiton(sym, uni)) popScreen();

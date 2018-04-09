@@ -1310,8 +1310,8 @@ namespace mapeditor {
       int tg, nt, wp;
       fscanf(f, "%d%d%d%d\n", &tg, &nt, &wp, &patterns::subpattern_flags);
       patterns::whichPattern = wp;
-      if(tg != geometry) { targetgeometry = eGeometry(tg); restartGame('g', 0, true); }
-      if(nt != nonbitrunc) { restartGame('7', 0, true); }
+      if(tg != geometry) { targetgeometry = eGeometry(tg); restartGame(rg::geometry, 0, true); }
+      if(nt != nonbitrunc) { restartGame(rg::bitrunc, 0, true); }
       }
 
     while(true) {

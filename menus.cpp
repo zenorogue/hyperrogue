@@ -514,7 +514,7 @@ void showChangeMode() {
     else if(xuni == 'p')
       pushScreen(peace::showMenu);
     else if(xuni == 'i') {
-      restartGame('i');
+      restartGame(rg::inv);
       }
   #if CAP_TOUR
     else if(uni == 'T') {
@@ -522,14 +522,14 @@ void showChangeMode() {
       }
   #endif
     else if(uni == 'C') {
-      if(chaosUnlocked) restartGame('C');
+      if(chaosUnlocked) restartGame(rg::chaos);
       if(chaosmode) help_nochaos();
       }
     else if(xuni == 'P') {
       if(!princess::everSaved)
         addMessage(XLAT("Save %the1 first to unlock this challenge!", moPrincess));
       else
-        restartGame('p');
+        restartGame(rg::peace);
       }
   #if CAP_EDIT
     else if(xuni == 'm') {
@@ -545,7 +545,7 @@ void showChangeMode() {
   #endif
     else if(xuni == 's') {
   #if ISMOBILE==1
-      restartGame('s');
+      restartGame(rg::shmup);
   #else
       multi::shmupcfg = shmup::on;
       pushScreen(shmup::showShmupConfig);
@@ -555,7 +555,7 @@ void showChangeMode() {
       switchHardcore();
     else if(xuni == 'r') {
       firstland = laIce;
-      restartGame('r');
+      restartGame(rg::randpattern);
       }
     else if(doexiton(sym, uni))
       popScreen();
@@ -758,7 +758,7 @@ void showStartMenu() {
       if(!sphere) {
         specialland = laHalloween;
         targetgeometry = gSphere;
-        restartGame('g');
+        restartGame(rg::geometry);
         vid.alpha = 999;
         vid.scale = 998;
         }

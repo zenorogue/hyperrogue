@@ -362,7 +362,30 @@ typedef int cellfunction(cell*);
 int towerval(cell *c, cellfunction* cf = &coastvalEdge);
 #define HRANDMAX 0x7FFFFFFF
 int hrandpos(); // 0 to HRANDMAX
+
+namespace rg {
+  // possible parameters e.g. for restartGame and wrongmode
+  static const char nothing = 0;
+  static const char peace = 'P';
+  static const char inv = 'i';
+  static const char chaos = 'C';
+  static const char tactic = 't';
+  static const char tour = 'T';
+  static const char geometry = 'g'; // change targetgeometry first
+  static const char bitrunc = '7';
+  static const char gp = 'w';       // change gp::param first
+  static const char yendor = 'y';
+  static const char shmup = 's';
+  static const char randpattern = 'r';
+  static const char princess = 'p';
+  
+  // wrongmode only -- marks 'global' achievements not related to the current mode
+  static const char global = 'x'; 
+  // wrongmode only -- change vid.scfg.players then restartGame(rg::nothing) instead
+  static const char multi = 'm';
+  }
 void restartGame(char switchWhat = 0, bool push = false, bool keep_screens = false);
+
 int landMultiplier(eLand l);
 eItem treasureType(eLand l);
 void buildBarrier(cell *c, int d, eLand l = laNone);
