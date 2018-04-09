@@ -1098,7 +1098,7 @@ struct usershape {
 usershape *usershapes[USERSHAPEGROUPS][USERSHAPEIDS];
 
 void drawTentacle(hpcshape &h, ld rad, ld var, ld divby) {
-  double tlength = max(crossf, hexhexdist * whirl::scale);
+  double tlength = max(crossf, hexhexdist * gp::scale);
   for(int i=0; i<=20; i++)
     hpcpush(ddi(S21, rad + var * sin(i * M_PI/divby)) * ddi(0, tlength * i/20.) * C0);
   for(int i=20; i>=0; i--)
@@ -1215,9 +1215,9 @@ void bshape(hpcshape& sh, int p, double shzoom, int shapeid, double bonus = 0, f
   hpcpush(ipoint(0, 1));
   }
 
-void bshape_whirl(hpcshape sh[3], int p, double shzoom, int shapeid, double bonus = 0) {
+void bshape_goldberg(hpcshape sh[3], int p, double shzoom, int shapeid, double bonus = 0) {
   ld bonus2 = bonus;
-  if(S7 == 8 && whirl::whirl)
+  if(S7 == 8 && gp::on)
     bonus2 += M_PI / 8, bonus += M_PI / 6 + .4;
   bshape(sh[1], p, shzoom, shapeid, bonus2);
   bshape(sh[2], p, shzoom * .8, shapeid, bonus + M_PI/S7 - (a38? .25 : .15), 1);
@@ -1366,16 +1366,16 @@ void buildpolys() {
   {double x = hexvdist;
   bshape(shFullFloor[0], PPR_FLOOR);
   x *= bscale6;
-  x *= whirl::scale;
-  if(whirl::scale != 1) x *= 1.6;
-  // if(whirl::whirl::coords == whirl::euc_coord(2,0)) x /= 1.2;
-  // if(whirl::whirl::coords == whirl::euc_coord(3,0)) x /= 2;
+  x *= gp::scale;
+  if(gp::scale != 1) x *= 1.6;
+  // if(gp::gp::coords == gp::euc_coord(2,0)) x /= 1.2;
+  // if(gp::gp::coords == gp::euc_coord(3,0)) x /= 2;
   for(int t=0; t<=S6; t++) hpcpush(ddi(S7 + t*S14, x) * C0);
 
   x = rhexf;
   x *= bscale7;
-  x *= whirl::scale;
-  if(whirl::scale != 1) x *= 1.6;
+  x *= gp::scale;
+  if(gp::scale != 1) x *= 1.6;
   bshape(shFullFloor[1], PPR_FLOOR);
   for(int t=0; t<=S7; t++) hpcpush(ddi(t*S12+td, x) * C0);
   }
@@ -1383,13 +1383,13 @@ void buildpolys() {
   {double x = hexvdist;
   bshape(shFullCross[0], PPR_FLOOR);
   x *= bscale6;
-  x *= whirl::scale;
-  if(whirl::scale != 1) x /= 2;
+  x *= gp::scale;
+  if(gp::scale != 1) x /= 2;
   for(int t=0; t<=S6; t++) { hpcpush(C0); if(t) hpcpush(ddi(S7 + t*S14, x) * C0); }
 
   x = rhexf;
   x *= bscale7;
-  x *= whirl::scale;
+  x *= gp::scale;
   bshape(shFullCross[1], PPR_FLOOR);
   for(int t=0; t<=S7; t++) { hpcpush(C0); if(t) hpcpush(ddi(t*S12+td, x) * C0); }
   }
@@ -1404,7 +1404,7 @@ void buildpolys() {
   
   double floorrad1 = strict ? hcrossf : euclid ? shexf*fac80*spzoom : shexf*fac94;
   
-  double triangleside = hcrossf*.94 * (whirl::whirl ? 1.5 * whirl::scale : 1);
+  double triangleside = hcrossf*.94 * (gp::on ? 1.5 * gp::scale : 1);
   
   if(euclid4) {
     if(nonbitrunc)
@@ -1626,7 +1626,7 @@ void buildpolys() {
   else if(a38) disksize *= 1.5;
   else if(nonbitrunc && S6 == 8) disksize *= 1.5;
   
-  if(a38 && whirl::whirl) disksize /= 2;
+  if(a38 && gp::on) disksize /= 2;
 
   bshape(shDisk, PPR_ITEM);
   for(int i=0; i<=S84; i+=S3)
@@ -1844,11 +1844,11 @@ void buildpolys() {
   if(a46 && !nonbitrunc) spzoom6 *= .9;
   if(a47 && !nonbitrunc) spzoom6 *= .85;
   
-  ld whirlf = 1;
+  ld goldbf = 1;
   
-  if(whirl::scale != 1) whirlf = whirl::scale * 1.6;
+  if(gp::scale != 1) goldbf = gp::scale * 1.6;
   
-  ld whirlf2 = whirl::scale;
+  ld goldbf2 = gp::scale;
   
   double espzoom6 = spzoom6, espzoomd7 = spzoomd7;
   
@@ -1874,9 +1874,9 @@ void buildpolys() {
   bshape(shCloudFloor[2], PPR_FLOOR, euclid ? scalef2 : scalef2*spzoom6*.9, 3);
   
   bshape(shCrossFloor[0], PPR_FLOOR, scalef*espzoom6*gsca(sphere,.9)*ffscale2, 5, ffspin2);
-  bshape_whirl(shCrossFloor, PPR_FLOOR, scalef*espzoomd7*gsca(sphere,.9)*ffscale2 * gsca(a47,1.3), 6, octroll);
+  bshape_goldberg(shCrossFloor, PPR_FLOOR, scalef*espzoomd7*gsca(sphere,.9)*ffscale2 * gsca(a47,1.3), 6, octroll);
   
-  double ntscale = gsca(nonbitrunc, gsca(a38, 1.4, a47, 2, a46, 1.525)) * whirl::scale;
+  double ntscale = gsca(nonbitrunc, gsca(a38, 1.4, a47, 2, a46, 1.525)) * gp::scale;
   double ntrot = grot(a46&&nonbitrunc, .25, a38&&nonbitrunc, -.2);
 
   bshape(shChargedFloor[0], PPR_FLOOR, scalef*espzoom6*gsca(sphere,.9)*ffscale2, 7, ffspin2);
@@ -1885,34 +1885,34 @@ void buildpolys() {
   bshape(shChargedFloor[3], 12, spzoomd7 * gsca(a4 && euclid, .4, a4,1.2,sphere&&nonbitrunc,.9)* ntscale, 10, ntrot + grot(euclid4 && nonbitrunc, M_PI/4 + .1)); // nonbitrunc variant
 
   bshape(shSStarFloor[0], PPR_FLOOR, scalef*spzoom6*gsca(sphere,.8)*ffscale2, 11, grot(a4,.775));
-  bshape_whirl(shSStarFloor, PPR_FLOOR, scalef*spzoomd7*gsca(a4,.85), 12, octroll);
+  bshape_goldberg(shSStarFloor, PPR_FLOOR, scalef*spzoomd7*gsca(a4,.85), 12, octroll);
   bshape(shOverFloor[0], PPR_FLOOR, scalef*spzoom * gsca(a47,1.3, a45,1.3, a46,1.1), 13, grot(a47,-.75, a45,-.7, a46,.9));
   if(nonbitrunc) {
-    if(a4) bshape(shOverFloor[1], PPR_FLOOR, whirlf2, 368 + S7 - 5, 0);
-    else bshape(shOverFloor[1], PPR_FLOOR, whirlf2 * gsca(a38,1.3, sphere, .83), 14, octroll + grot(a38,.4));
+    if(a4) bshape(shOverFloor[1], PPR_FLOOR, goldbf2, 368 + S7 - 5, 0);
+    else bshape(shOverFloor[1], PPR_FLOOR, goldbf2 * gsca(a38,1.3, sphere, .83), 14, octroll + grot(a38,.4));
     }
   else bshape(shOverFloor[1], PPR_FLOOR, scalef*spzoom7, 15);
   bshape(shOverFloor[2], PPR_FLOOR, euclid?scalef*1.2:spzoom7, 16);
   bshape(shTriFloor[0], PPR_FLOOR, scalef*espzoom6*gsca(sphere,.9, a4,.9)*ffscale2, 17, ffspin2 + grot(a47,.1));
-  bshape_whirl(shTriFloor, PPR_FLOOR, scalef*espzoomd7*ffscale2*gsca(a4,1.2, a47,1.5), 18, octroll + grot(a4,.25, a47,-.1, sphere4,.7) + grot(euclid&&a4, M_PI/8));
+  bshape_goldberg(shTriFloor, PPR_FLOOR, scalef*espzoomd7*ffscale2*gsca(a4,1.2, a47,1.5), 18, octroll + grot(a4,.25, a47,-.1, sphere4,.7) + grot(euclid&&a4, M_PI/8));
   bshape(shFeatherFloor[0], PPR_FLOOR, scalef*spzoom6*ffscale2, 19, ffspin2);
   if(nonbitrunc) bshape(shFeatherFloor[1], PPR_FLOOR, sphere ? .83 : gsca(ap4,1.1) * ntscale, 20, ntrot);
   else bshape(shFeatherFloor[1], PPR_FLOOR, scalef*spzoom7*gsca(sphere,1.1,a4,1.1)*ffscale2*ntscale, 21, sphere?1.3:ntrot);
   bshape(shFeatherFloor[2], PPR_FLOOR, scalef*1.1, 22);  // Euclidean variant
-  bshape(shBarrowFloor[0], PPR_FLOOR, whirlf * gsca(euclid,.9) * spzoom6 * gsca(a467,1.7, a46,.8, a38,1.4) * gsca(euclid&&a4, .7), 23);
-  bshape(shBarrowFloor[1], PPR_FLOOR, whirlf * spzoomd7 * gsca(a4,1.15, a467,1.9, a46,.8, a38,1.5, sphere&&nonbitrunc,.9) * gsca(euclid&&a4, .5), 24, octroll - grot(a47,.1));
+  bshape(shBarrowFloor[0], PPR_FLOOR, goldbf * gsca(euclid,.9) * spzoom6 * gsca(a467,1.7, a46,.8, a38,1.4) * gsca(euclid&&a4, .7), 23);
+  bshape(shBarrowFloor[1], PPR_FLOOR, goldbf * spzoomd7 * gsca(a4,1.15, a467,1.9, a46,.8, a38,1.5, sphere&&nonbitrunc,.9) * gsca(euclid&&a4, .5), 24, octroll - grot(a47,.1));
   bshape(shBarrowFloor[2], PPR_FLOOR, ntscale*gsca(sphere||euclid,.9) * gsca(euclid&&a4&&nonbitrunc, .5), 25, ntrot + grot(euclid&&a4&&nonbitrunc, M_PI/4));
   bshape(shNewFloor[0], PPR_FLOOR, scalef*espzoom6 * ffscale2, 26, ffspin2);
-  bshape_whirl(shNewFloor, PPR_FLOOR, scalef*espzoomd7 * ffscale2, 27, octroll);
+  bshape_goldberg(shNewFloor, PPR_FLOOR, scalef*espzoomd7 * ffscale2, 27, octroll);
 
   bshape(shTrollFloor[0], PPR_FLOOR, spzoom6*gsca(a38,1.4, a467,1.6, a46,.8), 28);
   bshape(shTrollFloor[1], PPR_FLOOR, spzoomd7*gsca(a38, 1.6, a467,2.4, a46,.8), 29, octroll);
 
   bshape(shButterflyFloor[0], PPR_FLOOR, scalef*espzoom6*gsca(sphere,.9)*ffscale2, 325, ffspin2);
-  bshape_whirl(shButterflyFloor, PPR_FLOOR, scalef*espzoomd7*ffscale2, 326, sphere?.7:0);
+  bshape_goldberg(shButterflyFloor, PPR_FLOOR, scalef*espzoomd7*ffscale2, 326, sphere?.7:0);
 
   bshape(shLavaFloor[0], PPR_FLOOR, scalef*espzoom6 * ffscale2, 359, ffspin2);
-  bshape_whirl(shLavaFloor, PPR_FLOOR, scalef*espzoomd7 * ffscale2 * gsca(a467,1.4), 360, octroll);
+  bshape_goldberg(shLavaFloor, PPR_FLOOR, scalef*espzoomd7 * ffscale2 * gsca(a467,1.4), 360, octroll);
 
   bshape(shHalfFloor[0], PPR_FLOOR, scalef*spzoom6, 329);
   bshape(shHalfFloor[1], PPR_FLOOR, scalef*spzoom6, 327);
@@ -1927,7 +1927,7 @@ void buildpolys() {
   bshape(shCloudSeabed[1], PPR_FLOOR, scalef*spzoom6 * gsca(a46,.5, a47,.6, a38,1.25, a45,.35), 337, grot(a46,-.2, a38,.2));
   bshape(shCloudSeabed[2], PPR_FLOOR, scalef*espzoom6, 337);
   bshape(shCaveSeabed[0], PPR_FLOOR, scalef*spzoom6 * gsca(a45,.65, a46,.7, a47,.675), 338);
-  bshape_whirl(shCaveSeabed, PPR_FLOOR, scalef*spzoom6 * gsca(a45,.5, a46,.6, a47,.725), 339, grot(a46,-.3));
+  bshape_goldberg(shCaveSeabed, PPR_FLOOR, scalef*spzoom6 * gsca(a45,.5, a46,.6, a47,.725), 339, grot(a46,-.3));
   bshape(shCaveSeabed[3], PPR_FLOOR, scalef*spzoom6 * gsca(euclid,1.2), 54);
   
   if(false) for(int i=0; i<8; i++) {
@@ -1963,7 +1963,7 @@ void buildpolys() {
   bshape(shTriheptaEucShadow[1], PPR_FLOOR,  scalef*SHADMUL, 43);
   bshape(shTriheptaEucShadow[2], PPR_FLOOR,  scalef*SHADMUL, 44);
   bshape(shPalaceFloor[0], PPR_FLOOR,  scalef*espzoom6*ffscale2, 45, grot(a4,.775));
-  bshape_whirl(shPalaceFloor, PPR_FLOOR,  scalef*espzoomd7*gsca(a4,.85), 46, grot(a46,-.3, a38, -.6) + grot(euclid&&a4, M_PI/4));
+  bshape_goldberg(shPalaceFloor, PPR_FLOOR,  scalef*espzoomd7*gsca(a4,.85), 46, grot(a46,-.3, a38, -.6) + grot(euclid&&a4, M_PI/4));
 
   bshape(shMercuryBridge[0], PPR_FLOOR,  scalef*spzoom6, 365);
   bshape(shMercuryBridge[1], PPR_FLOOR,  scalef*spzoomd7, 366);
@@ -1972,20 +1972,20 @@ void buildpolys() {
   bshape(shPalaceGate, PPR_STRUCT1, scalef, 47);
   bshape(shSemiFeatherFloor[0], PPR_FLOOR,  scalef*spzoom6, 48);
   bshape(shSemiFeatherFloor[1], PPR_FLOOR,  scalef*spzoom6, 49);
-  bshape_whirl(shDemonFloor, PPR_FLOOR,  scalef*espzoomd7 * ffscale2 * gsca(ap4,1.6, sphere,.9), 50, grot(sphere,M_PI, a38, .2));
+  bshape_goldberg(shDemonFloor, PPR_FLOOR,  scalef*espzoomd7 * ffscale2 * gsca(ap4,1.6, sphere,.9), 50, grot(sphere,M_PI, a38, .2));
   bshape(shDemonFloor[0], PPR_FLOOR,  scalef*espzoom6*gsca(sphere,.9) * ffscale2, 51, ffspin2);
   bshape(shCaveFloor[0], PPR_FLOOR,  scalef*spzoom6 * ffscale2, 52, ffspin2);
-  bshape_whirl(shCaveFloor, PPR_FLOOR,  scalef*spzoomd7 * ffscale2 * gsca(sphere,.9, ap4,1.6), 53, octroll);
+  bshape_goldberg(shCaveFloor, PPR_FLOOR,  scalef*spzoomd7 * ffscale2 * gsca(sphere,.9, ap4,1.6), 53, octroll);
   bshape(shCaveFloor[3], PPR_FLOOR,  scalef*1.1, 54);  // Euclidean variant
   bshape(shDesertFloor[0], PPR_FLOOR,  scalef*espzoom6*ffscale6, 55, ffspin6);
-  bshape_whirl(shDesertFloor, PPR_FLOOR,  scalef*espzoomd7*gsca(sphere,.9), 56, octroll+ffspin7);
+  bshape_goldberg(shDesertFloor, PPR_FLOOR,  scalef*espzoomd7*gsca(sphere,.9), 56, octroll+ffspin7);
   for(int i=1; i<=3; i++) for(int j=0; j<3; j++) 
     zoomShape(shDesertFloor[j], shRedRockFloor[i-1][j], 1 - .1 * i, PPR_FLOORa+i);
   bshape(shPowerFloor[0], PPR_FLOOR_DRAGON, scalef*espzoom6*gsca(sphere,.8)*ffscale2, 57, ffspin2);
-  bshape_whirl(shPowerFloor, PPR_FLOOR_DRAGON, scalef*espzoomd7*ffscale2, 58, octroll);
-  bshape(shRoseFloor[2], PPR_FLOOR,  whirlf, 173); // nonbitrunc
-  bshape(shRoseFloor[0], PPR_FLOOR,  whirlf * gsca(euclid,.9), 174);
-  bshape(shRoseFloor[1], PPR_FLOOR,  whirlf * gsca(euclid,.9) * scalef * gsca(ap4,.85), 175, grot(ap4, M_PI/8));
+  bshape_goldberg(shPowerFloor, PPR_FLOOR_DRAGON, scalef*espzoomd7*ffscale2, 58, octroll);
+  bshape(shRoseFloor[2], PPR_FLOOR,  goldbf, 173); // nonbitrunc
+  bshape(shRoseFloor[0], PPR_FLOOR,  goldbf * gsca(euclid,.9), 174);
+  bshape(shRoseFloor[1], PPR_FLOOR,  goldbf * gsca(euclid,.9) * scalef * gsca(ap4,.85), 175, grot(ap4, M_PI/8));
 
   bshape(shSwitchFloor[0], PPR_FLOOR, scalef*spzoom6*ffscale2, 377, ffspin2);
   bshape(shSwitchFloor[1], PPR_FLOOR, scalef*spzoomd7*ffscale2, 378, ffspin2);  
@@ -1993,8 +1993,8 @@ void buildpolys() {
 
   bshape(shSwitchDisk, PPR_FLOOR); for(int i=0; i<=S84; i+=S3) hpcpush(ddi(i, .06) * C0);
 
-  bshape(shTurtleFloor[0], PPR_FLOOR, whirlf * gsca(euclid,.9, sphere, .9*1.3, a4, 1.6, a38, 1.3, a467, 1.4) * gsca(euclid&&a4, .9), 176);
-  bshape(shTurtleFloor[1], PPR_FLOOR, whirlf * scalef * gsca(euclid,.9, a4, .9, a47,1.3) * gsca(euclid&&a4, .8), 177, octroll - grot(a47,.1));
+  bshape(shTurtleFloor[0], PPR_FLOOR, goldbf * gsca(euclid,.9, sphere, .9*1.3, a4, 1.6, a38, 1.3, a467, 1.4) * gsca(euclid&&a4, .9), 176);
+  bshape(shTurtleFloor[1], PPR_FLOOR, goldbf * scalef * gsca(euclid,.9, a4, .9, a47,1.3) * gsca(euclid&&a4, .8), 177, octroll - grot(a47,.1));
   bshape(shTurtleFloor[2], PPR_FLOOR,  ntscale * gsca(sphere && nonbitrunc, .9) * gsca(euclid&&a4&&nonbitrunc, .5), 178, ntrot + grot(euclid&&a4&&nonbitrunc, M_PI/4)); // nonbitrunc
 
   bshape(shDragonFloor[0], PPR_FLOOR_DRAGON, gsca(a4,1.6, a38, 1.3) * gsca(euclid&&a4, .5), 181, ffspin2);
@@ -2063,17 +2063,17 @@ void buildpolys() {
   bshape(shWormTail, PPR_TENTACLE1, scalef, 383);
   bshape(shSmallWormTail, PPR_TENTACLE1, scalef, 384);
 
-  if(nonbitrunc) bshape(shDragonSegment, PPR_TENTACLE1, whirl::scale, 233);
+  if(nonbitrunc) bshape(shDragonSegment, PPR_TENTACLE1, gp::scale, 233);
   else bshape(shDragonSegment, PPR_TENTACLE1, scalef, 234);
   bshape(shDragonWings, PPR_ONTENTACLE, scalef, 237);
   bshape(shDragonLegs, PPR_TENTACLE0, scalef, 238);
-  if(nonbitrunc) bshape(shDragonTail, PPR_TENTACLE1, whirl::scale, 239);
+  if(nonbitrunc) bshape(shDragonTail, PPR_TENTACLE1, gp::scale, 239);
   else bshape(shDragonTail, PPR_TENTACLE1, scalef, 240);
   bshape(shDragonNostril, PPR_ONTENTACLE_EYES, scalef, 241);
   bshape(shDragonHead, PPR_ONTENTACLE, scalef, 242);
-  if(nonbitrunc) bshape(shSeaTentacle, PPR_TENTACLE1, whirl::scale, 245);
+  if(nonbitrunc) bshape(shSeaTentacle, PPR_TENTACLE1, gp::scale, 245);
   else bshape(shSeaTentacle, PPR_TENTACLE1, 1, 246);  
-  ld ksc = (nonbitrunc ? 1.8 : 1.5) * whirl::scale;  
+  ld ksc = (nonbitrunc ? 1.8 : 1.5) * gp::scale;  
   bshape(shKrakenHead, PPR_ONTENTACLE, ksc, 247);
   bshape(shKrakenEye, PPR_ONTENTACLE_EYES, ksc, 248);
   bshape(shKrakenEye2, PPR_ONTENTACLE_EYES2, ksc, 249);
@@ -2304,10 +2304,10 @@ void buildpolys() {
   for(int v=0; v<13; v++) for(int z=0; z<2; z++)
     copyshape(shTortoise[v][4+z], shTortoise[v][2+z], shTortoise[v][2+z].prio + (PPR_CARRIED-PPR_ITEM));
 
-  if(nonbitrunc) bshape(shMagicSword, PPR_MAGICSWORD, whirl::scale, 243);
+  if(nonbitrunc) bshape(shMagicSword, PPR_MAGICSWORD, gp::scale, 243);
   else bshape(shMagicSword, PPR_MAGICSWORD, 1, 244);
 
-  if(nonbitrunc) bshape(shMagicShovel, PPR_MAGICSWORD, whirl::scale, 333);
+  if(nonbitrunc) bshape(shMagicShovel, PPR_MAGICSWORD, gp::scale, 333);
   else bshape(shMagicShovel, PPR_MAGICSWORD, 1, 333);
   
   bshape(shBead0, 20, 1, 250);
@@ -3520,7 +3520,7 @@ NEWSHAPE
 /* floors */
 
 // need eswap
-#define nbtplain (nonbitrunc && !whirl::whirl)
+#define nbtplain (nonbitrunc && !gp::on)
 
 #define nbtnice (!has_nice_dual())
 

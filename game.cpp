@@ -3139,7 +3139,7 @@ void toggleGates(cell *ct, eWall type, int rad) {
 void toggleGates(cell *ct, eWall type) {
   playSound(ct, "click");
   numgates = 0;
-  if(type == waClosePlate && nonbitrunc && !whirl::whirl)
+  if(type == waClosePlate && nonbitrunc && !gp::on)
     toggleGates(ct, type, 2);
   else
     toggleGates(ct, type, 3);

@@ -3388,9 +3388,9 @@ transmatrix calc_relative_matrix_help(cell *c, heptagon *h1) {
   transmatrix gm = Id;
   heptagon *h2 = c->master;
   transmatrix where = Id;
-  if(whirl::whirl && c != c->master->c7) {
-    auto li = whirl::get_local_info(c);
-    where = whirl::Tf[li.last_dir][li.relative.first&31][li.relative.second&31][fix6(li.total_dir)];
+  if(gp::on && c != c->master->c7) {
+    auto li = gp::get_local_info(c);
+    where = gp::Tf[li.last_dir][li.relative.first&31][li.relative.second&31][fix6(li.total_dir)];
     }
   else if(!nonbitrunc) for(int d=0; d<S7; d++) if(h2->c7->mov[d] == c)
     where = hexmove[d];

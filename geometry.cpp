@@ -164,7 +164,7 @@ void precalc() {
 
   base_distlimit = ginf[geometry].distlimit[nonbitrunc];
   
-  whirl::compute_geometry();  
+  gp::compute_geometry();  
   }
 
 transmatrix ddi(ld dir, ld dist) {

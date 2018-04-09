@@ -2953,9 +2953,9 @@ string XLAT(string x, stringpar p1, stringpar p2, stringpar p3);
 string XLAT(string x, stringpar p1, stringpar p2, stringpar p3, stringpar p4);
 string XLAT(string x, stringpar p1, stringpar p2, stringpar p3, stringpar p4, stringpar p5);
 
-namespace whirl {
+namespace gp {
   typedef pair<int, int> loc;
-  extern bool whirl;
+  extern bool on;
   void compute_geometry();
   void extend_map(cell *c, int d);  
   extern ld scale;

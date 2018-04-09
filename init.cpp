@@ -388,8 +388,8 @@ void addMessage(string s, char spamtype = 0);
 #define S7 ginf[geometry].sides
 #define S3 ginf[geometry].vertex
 #define hyperbolic_not37 ((S7 > 7 || S3 > 3) && hyperbolic)
-#define weirdhyperbolic ((S7 > 7 || S3 > 3 || whirl::whirl) && hyperbolic)
-#define stdhyperbolic (S7 == 7 && S3 == 3 && !whirl::whirl)
+#define weirdhyperbolic ((S7 > 7 || S3 > 3 || gp::on) && hyperbolic)
+#define stdhyperbolic (S7 == 7 && S3 == 3 && !gp::on)
 
 #define cgclass (ginf[geometry].cclass)
 #define euclid (cgclass == gcEuclid)

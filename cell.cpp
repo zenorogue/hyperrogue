@@ -739,8 +739,8 @@ cell *createMov(cell *c, int d) {
     }
   
   if(c->mov[d]) return c->mov[d];
-  else if(nonbitrunc && whirl::whirl) {
-    whirl::extend_map(c, d);
+  else if(nonbitrunc && gp::on) {
+    gp::extend_map(c, d);
     if(!c->mov[d]) {
       printf("extend failed to create for %p/%d\n", c, d);
       exit(1);
@@ -935,7 +935,7 @@ void verifycell(cell *c) {
   }
 
 void verifycells(heptagon *at) {
-  if(whirl::whirl) return;
+  if(gp::on) return;
   for(int i=0; i<S7; i++) if(at->move[i] && at->move[i]->move[at->spin(i)] && at->move[i]->move[at->spin(i)] != at) {
     printf("hexmix error %p [%d s=%d] %p %p\n", at, i, at->spin(i), at->move[i], at->move[i]->move[at->spin(i)]);
     }
@@ -983,7 +983,7 @@ int celldist(cell *c) {
     }
   if(sphere) return celldistance(c, currentmap->gamestart());
   if(ctof(c)) return c->master->distance;
-  if(whirl::whirl) return whirl::compute_dist(c, celldist);
+  if(gp::on) return gp::compute_dist(c, celldist);
   int dx[MAX_S3];
   for(int u=0; u<S3; u++)
     dx[u] = createMov(c, u+u)->master->distance;
@@ -1010,7 +1010,7 @@ int celldistAlt(cell *c) {
     }
   if(!c->master->alt) return 0;
   if(ctof(c)) return c->master->alt->distance;
-  if(whirl::whirl) return whirl::compute_dist(c, celldistAlt);
+  if(gp::on) return gp::compute_dist(c, celldistAlt);
   int dx[MAX_S3]; dx[0] = 0;
   for(int u=0; u<S3; u++) if(createMov(c, u+u)->master->alt == NULL)
     return ALTDIST_UNKNOWN;
@@ -1370,7 +1370,7 @@ int celldistance(cell *c1, cell *c2) {
     return eudist(decodeId(c1->master) - decodeId(c2->master));
     }
   
-  if(sphere || quotient == 1 || whirl::whirl) {
+  if(sphere || quotient == 1 || gp::on) {
     celllister cl(c1, 64, 1000, c2);
     for(int i=0; i<size(cl.lst); i++)
       if(cl.lst[i] == c2) return cl.dists[i];

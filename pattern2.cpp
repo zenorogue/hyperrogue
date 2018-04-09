@@ -30,21 +30,21 @@ bool ishept(cell *c) {
 bool ishex1(cell *c) {
   // EUCLIDEAN
   if(euclid) return eupattern(c) == 1;
-  else if(whirl::whirl) return c->master->c7 != c && !pseudohept(c->mov[0]);
+  else if(gp::on) return c->master->c7 != c && !pseudohept(c->mov[0]);
   else return c->type != S6;
   }
 
 bool ishex2(cell *c) {
   // EUCLIDEAN
   if(euclid) return eupattern(c) == 1;
-  else if(whirl::whirl) return c->master->c7 != c && whirl::pseudohept_val(c) == 1;
+  else if(gp::on) return c->master->c7 != c && gp::pseudohept_val(c) == 1;
   else return c->type != S6;
   }
 
 int emeraldval(cell *c) {
   if(euclid) return eupattern(c);
   if(sphere) return 0;
-  if(ctof(c) || whirl::whirl)
+  if(ctof(c) || gp::on)
     return c->master->emeraldval >> 3;
   else {
     return emerald_hexagon(
@@ -100,7 +100,7 @@ int cdist50(cell *c) {
     else return "012333321112322232222321123"[eufifty(c)] - '0';
     }
   if(c->type != 6) return cdist50(fiftyval(c));
-  if(whirl::whirl) return cdist50(c->master->c7);
+  if(gp::on) return cdist50(c->master->c7);
   int a0 = cdist50(createMov(c,0));
   int a1 = cdist50(createMov(c,2));
   int a2 = cdist50(createMov(c,4));
@@ -162,7 +162,7 @@ int fiftyval049(cell *c) {
     // printf("%d,%d: %d\n", allcodes[0], allcodes[1], allcodes[0] + 7);
     return allcodes[0] + 7;
     }
-  else if(whirl::whirl) return fiftyval049(c->master->c7);
+  else if(gp::on) return fiftyval049(c->master->c7);
   else if(sphere) return 0;
   else {
     int a[3], qa=0;
@@ -323,7 +323,7 @@ int fieldval_uniq(cell *c) {
     auto p = cell_to_pair(c);
     return gmod(p.first * torusconfig::dx + p.second * torusconfig::dy, torusconfig::qty);
     }
-  if(ctof(c) || whirl::whirl) return c->master->fieldval/S7;
+  if(ctof(c) || gp::on) return c->master->fieldval/S7;
   else {
     int z = 0;
     for(int u=0; u<S6; u+=2) 
@@ -551,7 +551,7 @@ namespace patterns {
         si.id = (c->master->fiftyval >> 1) & 3;
       else
         si.id = 0;
-      if(nonbitrunc && !whirl::whirl) 
+      if(nonbitrunc && !gp::on) 
         si.id *= 4;
       else 
         si.id += 4;
@@ -565,12 +565,12 @@ namespace patterns {
       }
     else {
       int sp = c->spin(0);
-      if(whirl::whirl) {
-        sp = whirl::last_dir(c);
+      if(gp::on) {
+        sp = gp::last_dir(c);
         sp ^= ishex2(c);
         }
       si.id = 8 * ((c->master->fiftyval & 1) ^ (sp & 1));
-      if(whirl::whirl && pseudohept(c)) si.id = 4;
+      if(gp::on && pseudohept(c)) si.id = 4;
       bool dock = false;
       for(int i=0; i<c->type; i+=2) {
         int fiv = createMov(c, i)->master->fiftyval;
@@ -583,14 +583,14 @@ namespace patterns {
       if(symRotation) si.symmetries = 2;
       si.id += 8;
       si.id %= 12;
-      if(whirl::whirl && pat == PAT_COLORING) 
+      if(gp::on && pat == PAT_COLORING) 
         for(int i=0; i<c->type; i++) {
           cell *c2 = createMov(c, i);
           int id2 = 4;
           if(!pseudohept(c2)) {
             int sp2 = c2->spin(0);
-            if(whirl::whirl) {
-              sp2 = whirl::last_dir(c2);
+            if(gp::on) {
+              sp2 = gp::last_dir(c2);
               sp2 ^= ishex2(c2);
               }
             id2 = 8 * ((c2->master->fiftyval & 1) ^ (sp2 & 1));
@@ -650,7 +650,7 @@ namespace patterns {
     if(u == 8 && qhex == 2) u = 12;
     else if(u == 2 && qhex == 1) u = 8;
     else if(u == 6 && qhex == 2) u = 10;
-    if(whirl::whirl && pseudohept(c) && !ishept(c))
+    if(gp::on && pseudohept(c) && !ishept(c))
       u = 13;
     si.id = u;
 
@@ -709,7 +709,7 @@ namespace patterns {
     val_all(c, si, 0, 0);
     
     // get id:
-    if((whirl::whirl? (S3==3) : !weirdhyperbolic) && isWarped(c)) 
+    if((gp::on? (S3==3) : !weirdhyperbolic) && isWarped(c)) 
       val_warped(c, si);
     else {
       si.id = ishept(c) ? 1 : 0;
@@ -737,7 +737,7 @@ namespace patterns {
         }
       }
     
-    if(whirl::whirl && has_nice_dual() && !ishept(c) && ishex1(c)) si.dir = fix6(si.dir+3);
+    if(gp::on && has_nice_dual() && !ishept(c) && ishex1(c)) si.dir = fix6(si.dir+3);
     }
   
   char whichPattern = 0;
@@ -945,7 +945,7 @@ int pattern_threecolor(cell *c) {
   if(a38) {
     patterns::patterninfo si;
     patterns::val38(c, si, nonbitrunc ? 0 : patterns::SPF_ROT, patterns::PAT_COLORING);
-    if(whirl::whirl && pseudohept(c)) return 0;
+    if(gp::on && pseudohept(c)) return 0;
     return si.id >> 2;
     }
   if(a46 && !nonbitrunc) {
@@ -960,8 +960,8 @@ int pattern_threecolor(cell *c) {
     }
   if(S7 == 4 && S3 == 3) {
     int codesN[6] = {0,1,2,1,2,0};
-    if(whirl::whirl) {
-      auto li = whirl::get_local_info(c);
+    if(gp::on) {
+      auto li = gp::get_local_info(c);
       int sp = (MODFIXER + li.relative.first + 2 * li.relative.second) % 3;
       if(sp != 0) {
         if(li.last_dir & 1) 
@@ -1009,7 +1009,7 @@ int pattern_threecolor(cell *c) {
 // in the 'pure heptagonal' tiling, returns true for a set of cells
 // which roughly corresponds to the heptagons in the normal tiling
 bool pseudohept(cell *c) {
-  if(whirl::whirl) return whirl::pseudohept_val(c) == 0;
+  if(gp::on) return gp::pseudohept_val(c) == 0;
   return pattern_threecolor(c) == 0;
   }
 
@@ -1020,7 +1020,7 @@ bool warptype(cell *c) {
     else 
       return c->master->distance & 1;
     }
-  else if(whirl::whirl)
+  else if(gp::on)
     return pseudohept(c);
   else
     return pattern_threecolor(c) == 0;
@@ -1682,7 +1682,7 @@ namespace linepatterns {
         break;
       
       case patTriNet:
-        if(whirl::whirl) {
+        if(gp::on) {
           if(c->master->c7 != c) if(gmatrix.count(c->mov[0]))
             queueline(tC0(V), gmatrix[c->mov[0]]*C0, 
               darkena(backcolor ^ 0xFFFFFF, 0, col),

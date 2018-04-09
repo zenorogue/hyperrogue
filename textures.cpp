@@ -264,10 +264,10 @@ int getTriangleID(cell *c, patterns::patterninfo& si, hyperpoint h) {
   return best;
   }
 
-int whirlcode(cell *c, const patterns::patterninfo& si) {
-  if(!whirl::whirl) return 0;
+int goldbergcode(cell *c, const patterns::patterninfo& si) {
+  if(!gp::on) return 0;
   else if(c == c->master->c7) return (fixdir(si.dir, c) << 8);
-  else return (get_code(whirl::get_local_info(c)) << 16) | (fixdir(si.dir, c) << 8);
+  else return (get_code(gp::get_local_info(c)) << 16) | (fixdir(si.dir, c) << 8);
   }
 
 void mapTexture(cell *c, textureinfo& mi, patterns::patterninfo &si, const transmatrix& T, int shift = 0) {
@@ -275,15 +275,15 @@ void mapTexture(cell *c, textureinfo& mi, patterns::patterninfo &si, const trans
   mi.symmetries = si.symmetries;
   mi.current_type = c->type;
   
-  if(whirl::whirl) {
+  if(gp::on) {
     mi.M = T;
     mi.triangles.clear();
     for(int i=0; i<c->type; i++) {
       int d = si.dir;
       int i0 = fixdir(i + d + 0, c);
       int i1 = fixdir(i + d + 1, c);
-      hyperpoint h1 = whirl::get_corner_position(c, i0);
-      hyperpoint h2 = whirl::get_corner_position(c, i1);
+      hyperpoint h1 = gp::get_corner_position(c, i0);
+      hyperpoint h2 = gp::get_corner_position(c, i1);
       mi.triangles.emplace_back(make_array(C0, h1, h2), make_array(mi.M*C0, mi.M*h1, mi.M*h2));
       }
     }
@@ -331,9 +331,9 @@ bool texture_config::apply(cell *c, const transmatrix &V, int col) {
     return false;
     }
   try {
-    auto& mi = texture_map.at(si.id + whirlcode(c, si));
+    auto& mi = texture_map.at(si.id + goldbergcode(c, si));
     
-    qfi.spin = whirl::whirl ? Id : applyPatterndir(c, si);
+    qfi.spin = gp::on ? Id : applyPatterndir(c, si);
     
     int n = mi.vertices.size();
 
@@ -351,7 +351,7 @@ bool texture_config::apply(cell *c, const transmatrix &V, int col) {
       }
 
     lastptd().u.poly.tinf = &mi;
-    if(whirl::whirl) 
+    if(gp::on) 
       lastptd().u.poly.flags = POLY_INVERSE;
     if(grid_color) {
       queuepolyat(V, shFullFloor[ctof(c)], 0, PPR_FLOOR);
@@ -383,7 +383,7 @@ bool texture_config::apply(cell *c, const transmatrix &V, int col) {
     return true;
     }
   catch(out_of_range) {
-    // printf("Ignoring tile #%d / %08x: not mapped\n", si.id, whirlcode(c, si));
+    // printf("Ignoring tile #%d / %08x: not mapped\n", si.id, goldbergcode(c, si));
     return false;
     }
   }
@@ -426,7 +426,7 @@ void texture_config::perform_mapping() {
     
     // int sgn = sphere ? -1 : 1;
     
-    si.id += whirlcode(c, si);
+    si.id += goldbergcode(c, si);
 
     if(!texture_map.count(si.id)) 
       replace = true;
@@ -1403,7 +1403,7 @@ void texture_config::remap(eTextureState old_tstate, eTextureState old_tstate_ma
       auto si = patterns::getpatterninfo0(c);
       int oldid = si.id;
       
-      si.id += whirlcode(c, si);
+      si.id += goldbergcode(c, si);
 
       if(texture_map.count(si.id)) continue;
       

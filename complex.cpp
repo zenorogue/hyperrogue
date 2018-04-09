@@ -3055,7 +3055,7 @@ namespace windmap {
       cell *c = samples[k];
       neighbors.emplace_back();
       auto &v = neighbors.back();
-      if(whirl::whirl)
+      if(gp::on)
         for(int l=0; l<S7; l++) v.push_back(getId(createStep(c->master, l)->c7));
       else
         for(int l=0; l<c->type; l++) v.push_back(getId(createMov(c, l)));

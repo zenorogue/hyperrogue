@@ -157,7 +157,7 @@ void drawSpeed(const transmatrix& V) {
   }
 
 int ctof(cell *c) {
-  if(nonbitrunc && !whirl::whirl) return 1;
+  if(nonbitrunc && !gp::on) return 1;
   // if(euclid) return 0;
   return ishept(c) ? 1 : 0;
   // c->type == 6 ? 0 : 1;
@@ -290,11 +290,11 @@ void drawPlayerEffects(const transmatrix& V, cell *c, bool onplayer) {
       if(!euclid) for(int a=0; a<S42; a++) {
         int dda = S42 + (-1-2*a);
         if(a == ang && items[itOrbSword]) continue;
-        if(nonbitrunc && !whirl::whirl && a%3 != ang%3) continue;
+        if(nonbitrunc && !gp::on && a%3 != ang%3) continue;
         if((a+S21)%S42 == ang && items[itOrbSword2]) continue;
         bool longer = sword::pos(cwt.c, a-1) != sword::pos(cwt.c, a+1);
         int col = darkena(0xC0C0C0, 0, 0xFF);
-        queueline(Vnow*ddi0(dda, nonbitrunc ? 0.6 * whirl::scale : longer ? 0.36 : 0.4), Vnow*ddi0(dda, nonbitrunc ? 0.7 * whirl::scale : longer ? 0.44 : 0.42), col, 1);
+        queueline(Vnow*ddi0(dda, nonbitrunc ? 0.6 * gp::scale : longer ? 0.36 : 0.4), Vnow*ddi0(dda, nonbitrunc ? 0.7 * gp::scale : longer ? 0.44 : 0.42), col, 1);
         }
 #endif
 
@@ -2087,7 +2087,7 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, int col) {
       Vb = Vb * pispin;
       }
     else Vb = Vb * ddspin(c, c->mondir, S42);
-    if(whirl::whirl)  Vb = Vb * xpush(crossf * .6);
+    if(gp::on)  Vb = Vb * xpush(crossf * .6);
     else {
       if(weirdhyperbolic || sphere) Vb = Vb * xpush(-(hexhexdist - hcrossf7));
       if(ctof(c) && !euclid) Vb = Vb * xpush(hexhexdist - hcrossf);
@@ -2508,7 +2508,7 @@ void drawEmeraldFloor(const transmatrix& V, cell *c, int col) {
   
   int ct6 = ctof(c);
   int xct6 = ct6;
-  if(whirl::whirl && has_nice_dual() && pseudohept(c) && !ishept(c)) xct6 = 2;
+  if(gp::on && has_nice_dual() && pseudohept(c) && !ishept(c)) xct6 = 2;
 
   qfloor(c, V, CAVEFLOOR, col);
   }
@@ -3050,8 +3050,8 @@ bool noAdjacentChasms(cell *c) {
 // does the current geometry allow nice duals
 bool has_nice_dual() {
   if(!nonbitrunc) return true;
-  if(!whirl::whirl) return false;
-  return (whirl::param.first + whirl::param.second * 2) % 3 == 0;
+  if(!gp::on) return false;
+  return (gp::param.first + gp::param.second * 2) % 3 == 0;
   }
 
 // does the current geometry allow nice duals
@@ -3060,7 +3060,7 @@ bool is_nice_dual(cell *c) {
   }
 
 bool use_swapped_duals() {
-  return (euclid && !a4) || whirl::whirl;
+  return (euclid && !a4) || gp::on;
   }
 
 void floorShadow(cell *c, const transmatrix& V, int col, bool warp) {
@@ -3194,7 +3194,7 @@ void placeSidewall(cell *c, int i, int sidepar, const transmatrix& V, bool warp,
     bool b = !(i&1);
     if(use_swapped_duals()) {
       if(!ishex1(c)) b = !b;
-      if(whirl::whirl) b = !b;
+      if(gp::on) b = !b;
       }
     if(b) return;
     }
@@ -3344,7 +3344,7 @@ static const int trapcol[4] = {0x904040, 0xA02020, 0xD00000, 0x303030};
 static const int terracol[8] = {0xD000, 0xE25050, 0xD0D0D0, 0x606060, 0x303030, 0x181818, 0x0080, 0x8080};
 
 void qfloor_eswap(cell *c, const transmatrix& V, const hpcshape& sh, int col) {
-  if((euclid || whirl::whirl) && ishex1(c)) 
+  if((euclid || gp::on) && ishex1(c)) 
     qfloor(c, V, pispin, sh, col);
   else
     qfloor(c, V, sh, col);
@@ -3491,7 +3491,7 @@ void draw_wall(cell *c, const transmatrix& V, int wcol, int& zcol, int ct6, int 
   }
 
 void qfloor_caves(cell* c, const transmatrix& Vf, int col, int ct6, int xct6) {
-  /* if(whirl::whirl) {
+  /* if(gp::on) {
     if(pseudohept(c))
       qfloor(c, Vf, shCaveFloor[ishept(c) ? 1 : 2], col);
     else if(ishex1(c))
@@ -3785,7 +3785,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
     int ctype = c->type;
     int ct6 = ctof(c);
     int xct6 = ct6;
-    if(whirl::whirl && has_nice_dual() && pseudohept(c) && !ishept(c)) xct6 = 2;
+    if(gp::on && has_nice_dual() && pseudohept(c) && !ishept(c)) xct6 = 2;
 
     bool error = false;
     
@@ -4102,7 +4102,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           break;
 
         case laTrollheim:
-          if(!eoh && !whirl::whirl)
+          if(!eoh && !gp::on)
             qfloor_eswap(c, Vf, TROLLFLOOR, darkena(fcol, fd, 0xFF));
          else
            qfloor_caves(c, Vf, darkena(fcol, fd, 0xFF), ct6, xct6);

@@ -1299,7 +1299,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
     
     case laHive:
       if(d == 9) {
-        if(hrand(2000) < (chaosmode ? 1000 : (nonbitrunc && !whirl::whirl) ?200:2) && !safety) 
+        if(hrand(2000) < (chaosmode ? 1000 : (nonbitrunc && !gp::on) ?200:2) && !safety) 
           hive::createBugArmy(c);
         if(hrand(2000) < 100 && !c->wall && !c->item && !c->monst) {
           int nww = 0;
@@ -2084,11 +2084,11 @@ void giantLandSwitch(cell *c, int d, cell *from) {
       ONEMPTY {
         if(nonbitrunc && c->land == laCrossroads5 && hrand(100) < 60)
           c->wall = waBarrier;
-        else if(!ctof(c) && !inv::on && items[itShard] >= 10 && hrand(8000) < 120*orbcrossfun(items[itShard]) && !whirl::whirl)
+        else if(!ctof(c) && !inv::on && items[itShard] >= 10 && hrand(8000) < 120*orbcrossfun(items[itShard]) && !gp::on)
           c->wall = hrand(2) ? waMirror : waCloud;
-        else if(!ctof(c) && hyperstonesUnlocked() && hrand(8000) < 100 && !whirl::whirl)
+        else if(!ctof(c) && hyperstonesUnlocked() && hrand(8000) < 100 && !gp::on)
           c->wall = hrand(2) ? waMirror : waCloud;
-        else if(!ctof(c) && tactic::on && isCrossroads(tactic::lasttactic) && hrand(8000) < 120 && !whirl::whirl)
+        else if(!ctof(c) && tactic::on && isCrossroads(tactic::lasttactic) && hrand(8000) < 120 && !gp::on)
           c->wall = hrand(2) ? waMirror : waCloud;
         else if(c->land == laCrossroads4 && hrand(24000) < 10 && tactic::on)
           c->wall = waRose;

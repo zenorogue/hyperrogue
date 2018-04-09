@@ -4,7 +4,7 @@
 double randd() { return (rand() + .5) / (RAND_MAX + 1.); }
 
 double cellgfxdist(cell *c, int i) {
-  return nonbitrunc ? tessf * whirl::scale : (c->type == 6 && (i&1)) ? hexhexdist : crossf;
+  return nonbitrunc ? tessf * gp::scale : (c->type == 6 && (i&1)) ? hexhexdist : crossf;
   }
 
 transmatrix cellrelmatrix(cell *c, int i) {

@@ -105,7 +105,7 @@ void generateAlts(heptagon *h, int levs, bool link_cdata) {
   if(!h->alt) return;
   preventbarriers(h->c7);
   for(int i=0; i<S7; i++) preventbarriers(h->c7->mov[i]);
-  if(whirl::whirl)
+  if(gp::on)
     for(int i=0; i<S7; i++) preventbarriers(createStep(h, i)->c7);
   for(int i=0; i<S7; i++) 
     createStep(h->alt, i)->alt = h->alt->alt;
@@ -957,8 +957,8 @@ bool mouse_reachability_test(cell *c) {
 
 bool horo_ok() {
   if(!hyperbolic) return false;
-  if(!whirl::whirl) return true;
-  if(whirl::param.second) return false;
+  if(!gp::on) return true;
+  if(gp::param.second) return false;
   return true;
   }
   
@@ -995,7 +995,7 @@ void buildBigStuff(cell *c, cell *from) {
   
   // buildgreatwalls
   
-  if(celldist(c) < 3 && !whirl::whirl) {
+  if(celldist(c) < 3 && !gp::on) {
     if(top_land && c == cwt.c->master->move[3]->c7) {
       buildBarrierStrong(c, 6, true, top_land);
       }
@@ -1085,7 +1085,7 @@ void buildBigStuff(cell *c, cell *from) {
       createAlternateMap(c, 2, hsA);
 
     if(c->land == laOvergrown && ctof(c) && 
-      (quickfind(laClearing) || (hrand(I2000) < 25 && !whirl::whirl && 
+      (quickfind(laClearing) || (hrand(I2000) < 25 && !gp::on && 
       !randomPatternsMode && items[itMutant] >= U5 &&
       isLandIngame(laClearing) &&
       !tactic::on && !yendor::on))) {

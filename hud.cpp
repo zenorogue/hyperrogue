@@ -348,7 +348,7 @@ void drawStats() {
       int d = celldistance(ac[i], cwt.c);
       if(d >= 0 && d < 64) qty[d]++;
       }
-    if(geometry == gNormal && !whirl::whirl)
+    if(geometry == gNormal && !gp::on)
       for(int i=nonbitrunc?6:8; i<=15; i++) 
         qty[i] = 
           nonbitrunc ?
@@ -363,7 +363,7 @@ void drawStats() {
       dialog::addHelp("a(d+4) = a(d+3) + a(d+2) + a(d+1) - a(d)");
       dialog::addInfo("a(d) ~ 1.72208ᵈ", forecolor);
       }
-    if(geometry == gNormal && nonbitrunc && !whirl::whirl) {
+    if(geometry == gNormal && nonbitrunc && !gp::on) {
       dialog::addBreak(200);
       dialog::addHelp("a(d+2) = 3a(d+1) - a(d+2)");
       dialog::addInfo("a(d) ~ 2.61803ᵈ", forecolor);

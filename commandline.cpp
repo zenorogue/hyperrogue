@@ -386,11 +386,11 @@ else if(args()[0] == '-' && args()[1] == x && args()[2] == '0') { showstartmenu 
     quantum = true;
     autocheat = true;
     }
-  else if(argis("-whirl")) {
+  else if(argis("-gp")) {
     PHASE(3);
     if(nonbitrunc) restartGame('7');
-    shift(); whirl::param.first = argi();
-    shift(); whirl::param.second = argi();
+    shift(); gp::param.first = argi();
+    shift(); gp::param.second = argi();
     restartGame('w');
     }
   else if(argis("-P")) { 

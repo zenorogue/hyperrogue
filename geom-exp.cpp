@@ -236,7 +236,7 @@ void showEuclideanMenu() {
   landvisited[laCA] = true;
   // for(int i=2; i<lt; i++) landvisited[i] = true;
   
-  if((geometry == gNormal && !whirl::whirl) || ewhichscreen == 2) {
+  if((geometry == gNormal && !gp::on) || ewhichscreen == 2) {
     dialog::init(XLAT("experiment with geometry"));
     int ts = ginf[geometry].sides;
     int tv = ginf[geometry].vertex;
@@ -244,9 +244,9 @@ void showEuclideanMenu() {
     int nom = (nonbitrunc ? tv : tv+ts) * ((tq & qELLIP) ? 2 : 4);
     int denom = (2*ts + 2*tv - ts * tv);
     
-    if(whirl::whirl) {
+    if(gp::on) {
       denom *= 2;
-      nom = nom / tv * (2*tv + ts * (whirl::area-1));
+      nom = nom / tv * (2*tv + ts * (gp::area-1));
       if(nom % 2 == 0) nom /= 2, denom /= 2;
       }
     
@@ -264,7 +264,7 @@ void showEuclideanMenu() {
       dialog::addBoolItem(XLAT("bitruncated"), !nonbitrunc, 't');
     else {
       dialog::addBoolItem(XLAT("operation"), nonbitrunc, 't');
-      dialog::lastItem().value = whirl::operation_name();
+      dialog::lastItem().value = gp::operation_name();
       }
   
     dialog::addBreak(50);
@@ -272,12 +272,12 @@ void showEuclideanMenu() {
     int worldsize = denom ? nom/denom : 0;
     if(tq & qTORUS) worldsize = torusconfig::qty;
     if(tq & qZEBRA) worldsize = 
-      whirl::whirl ? 12 + 14 * (whirl::area - 1) :
+      gp::on ? 12 + 14 * (gp::area - 1) :
       nonbitrunc ? 12 : 
       40;
     if(tq & qFIELD) {
       worldsize = size(currfp.matrices) / ts;
-      if(whirl::whirl) worldsize = worldsize * (2*tv + ts * (whirl::area-1)) / tv / 2;
+      if(gp::on) worldsize = worldsize * (2*tv + ts * (gp::area-1)) / tv / 2;
       else if(!nonbitrunc) worldsize = ((ts+tv)*worldsize) / tv;
       }
   
@@ -335,7 +335,7 @@ void showEuclideanMenu() {
       else if(uni == 't') {
         if(euclid6) ;
         else if(S3 == 3) 
-          whirl::configure();
+          gp::configure();
         else {
           restartGame('7');
           pushScreen(showEuclideanMenu);

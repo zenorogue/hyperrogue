@@ -453,14 +453,14 @@ bool confusingGeometry() {
   }
 
 transmatrix actualV(const heptspin& hs, const transmatrix& V) {
-  return (hs.spin || nonbitrunc) ? V * spin(hs.spin*2*M_PI/S7 + (nonbitrunc ? M_PI:0) + whirl::alpha) : V;
+  return (hs.spin || nonbitrunc) ? V * spin(hs.spin*2*M_PI/S7 + (nonbitrunc ? M_PI:0) + gp::alpha) : V;
   }
 
 transmatrix applyspin(const heptspin& hs, const transmatrix& V) {
   return (hs.spin || nonbitrunc) ? V * spin(hs.spin*2*M_PI/S7) : V;
   }
 
-namespace whirl {
+namespace gp {
 
 /*
 void drawrec(cell *c, const transmatrix& V) {
@@ -476,7 +476,7 @@ void drawrec(cell *c, const transmatrix& V) {
     }
   } */
 
-  void drawrec(cell *c, const transmatrix& V, whirl::loc at, int dir, int maindir) {
+  void drawrec(cell *c, const transmatrix& V, gp::loc at, int dir, int maindir) {
     if(dodrawcell(c)) {
 /*      auto li = get_local_info(c);
       if(fix6(dir) != fix6(li.total_dir)) printf("totaldir %d/%d\n", dir, li.total_dir);
@@ -501,7 +501,7 @@ void drawrec(cell *c, const transmatrix& V) {
       if(!c2) continue;
       if(c2->mov[0] != c) continue;
       if(c2 == c2->master->c7) continue;
-      drawrec(c2, V, whirl::loc(1,0), 3, i);
+      drawrec(c2, V, gp::loc(1,0), 3, i);
       }
     }
   }
@@ -515,8 +515,8 @@ void drawrec(const heptspin& hs, int lev, hstate s, const transmatrix& V) {
   transmatrix V10;
   const transmatrix& V1 = hs.mirrored ? (V10 = V * Mirror) : V;
   
-  if(whirl::whirl) {
-    whirl::drawrec(c, actualV(hs, V1));
+  if(gp::on) {
+    gp::drawrec(c, actualV(hs, V1));
     }
   
   else if(dodrawcell(c)) {

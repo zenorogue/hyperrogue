@@ -743,7 +743,7 @@ bool buildBarrierNowall(cell *c, eLand l2, bool force) {
 
   for(int i=0; i<c->type; i++) {
     int d = ds[i];
-/*    if(warpv && whirl::whirl) {
+/*    if(warpv && gp::on) {
       d = hrand(c->type); */
     if(warpv && c->mov[d] && c->mov[d]->mpdist < c->mpdist) continue;
 /*      }

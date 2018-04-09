@@ -102,7 +102,7 @@ void initgame() {
   if(isGravityLand(firstland) && !tactic::on) firstland = weirdhyperbolic ? laCrossroads4 : laCrossroads;
   
   cwt.c = currentmap->gamestart(); cwt.spin = 0; cwt.mirrored = false;
-  cwt.c->land = ((geometry || whirl::whirl) && !safety) ? specialland : firstland;
+  cwt.c->land = ((geometry || gp::on) && !safety) ? specialland : firstland;
   
   chaosAchieved = false;
 
@@ -1110,7 +1110,7 @@ void restartGame(char switchWhat, bool push, bool keep_screens) {
   if(switchWhat == '7' || switchWhat == 'w') {
     if(euclid6) geometry = gNormal;
     nonbitrunc = !nonbitrunc;
-    whirl::whirl = (switchWhat == 'w');
+    gp::on = (switchWhat == 'w');
     resetGeometry();
     #if CAP_TEXTURE
     if(texture::config.tstate == texture::tsActive) 
@@ -1124,7 +1124,7 @@ void restartGame(char switchWhat, bool push, bool keep_screens) {
     else geometry = targetgeometry;
     if(chaosmode && (euclid || sphere || quotient)) chaosmode = false;
     if(nonbitrunc && euclid6) nonbitrunc = false;
-    if(whirl::whirl && (S3 != 3 || elliptic)) whirl::whirl = false;
+    if(gp::on && (S3 != 3 || elliptic)) gp::on = false;
 
     resetGeometry(); 
     #if CAP_TEXTURE
