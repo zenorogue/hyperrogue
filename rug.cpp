@@ -1840,6 +1840,10 @@ int rugArgs() {
     renderonce = true;
     }
 
+  else if(argis("-rugdist")) {
+    shift(); model_distance = argf();
+    }
+
   else if(argis("-ruglate")) {
     renderonce = true;
     renderlate += 10;
