@@ -3378,8 +3378,8 @@ transmatrix &ggmatrix(cell *c) {
     else if(euclid) {
       t = gmatrix[centerover.c] * eumove(cell_to_vec(c) - cellwalker_to_vec(centerover));
       }
-    else
-      t = actualV(viewctr, cview()) * calc_relative_matrix(c, viewctr.h);
+    else 
+      t = applyspin(viewctr, cview()) * calc_relative_matrix(c, viewctr.h);
     }
   return t;
   }
@@ -3388,7 +3388,11 @@ transmatrix calc_relative_matrix_help(cell *c, heptagon *h1) {
   transmatrix gm = Id;
   heptagon *h2 = c->master;
   transmatrix where = Id;
-  if(!nonbitrunc) for(int d=0; d<S7; d++) if(h2->c7->mov[d] == c)
+  if(whirl::whirl && c != c->master->c7) {
+    auto li = whirl::get_local_info(c);
+    where = whirl::Tf[li.last_dir][li.relative.first&31][li.relative.second&31][fix6(li.total_dir)];
+    }
+  else if(!nonbitrunc) for(int d=0; d<S7; d++) if(h2->c7->mov[d] == c)
     where = hexmove[d];
   // always add to last!
   while(h1 != h2) {

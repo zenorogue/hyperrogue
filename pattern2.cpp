@@ -960,6 +960,17 @@ int pattern_threecolor(cell *c) {
     }
   if(S7 == 4 && S3 == 3) {
     int codesN[6] = {0,1,2,1,2,0};
+    if(whirl::whirl) {
+      auto li = whirl::get_local_info(c);
+      int sp = (MODFIXER + li.relative.first + 2 * li.relative.second) % 3;
+      if(sp != 0) {
+        if(li.last_dir & 1) 
+          sp = 3 - sp;
+        if(among(c->master->fiftyval, 1, 3, 5))
+          sp = 3 - sp;
+        }
+      return sp;
+      }
     if(nonbitrunc) 
       return codesN[c->master->fiftyval];
     if(ctof(c))
@@ -1252,7 +1263,7 @@ namespace patterns {
     if(nonbitrunc && S3 == 4)
       dialog::addBoolItem(XLAT("chessboard"), (whichPattern == PAT_CHESS), PAT_CHESS);
 
-    if(a38 || a46 || euclid || S3 == 4)
+    if(a38 || a46 || euclid || S3 == 4 || S7 == 4)
       dialog::addBoolItem(XLAT("coloring"), (whichPattern == PAT_COLORING), PAT_COLORING);
     
     if(sphere)

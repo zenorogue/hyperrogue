@@ -2714,6 +2714,7 @@ inline hyperpoint tC0(const transmatrix &T) {
   }
 
 transmatrix actualV(const heptspin& hs, const transmatrix& V);
+transmatrix applyspin(const heptspin& hs, const transmatrix& V);
 transmatrix cview();
 
 extern string bitruncnames[2];
@@ -2981,6 +2982,8 @@ namespace whirl {
   
   local_info get_local_info(cell *c);
   const char *disp(loc at);
+
+  int compute_dist(cell *c, int master_function(cell*));
   }
 
 int get_sightrange();

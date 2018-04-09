@@ -351,6 +351,8 @@ bool texture_config::apply(cell *c, const transmatrix &V, int col) {
       }
 
     lastptd().u.poly.tinf = &mi;
+    if(whirl::whirl) 
+      lastptd().u.poly.flags = POLY_INVERSE;
     if(grid_color) {
       queuepolyat(V, shFullFloor[ctof(c)], 0, PPR_FLOOR);
       lastptd().u.poly.outline = grid_color;
@@ -1171,8 +1173,11 @@ void showMenu() {
     else if(uni == 't' && config.tstate == tsActive) 
       config.tstate = tsOff;
       
-    else if(uni == 'T' && config.tstate == tsAdjusting) 
+    else if(uni == 'T' && config.tstate == tsAdjusting) {
       config.tstate = tsOff;
+      if(config.tstate == tsActive)
+        config.tstate = tsOff;
+      }
       
     else if(uni == 'T' && config.tstate == tsActive)
       config.tstate = tsAdjusting;
