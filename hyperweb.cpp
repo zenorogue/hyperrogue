@@ -42,7 +42,7 @@ bool demoanim;
 void toggleanim(bool v) {
   demoanim = v;
   if(v) {
-    sightrange = 4;
+    sightrange_bonus = -3;
     vid.wallmode = 5;
     vid.particles = true;
     vid.sspeed = -1;
@@ -50,7 +50,7 @@ void toggleanim(bool v) {
     geom3::highdetail = geom3::middetail = 5;
     }
   else {
-    sightrange = 7;
+    sightrange_bonus = 0;
     vid.sspeed = 5;
     vid.mspeed = 5;
     vid.particles = false;
