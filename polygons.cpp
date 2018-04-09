@@ -967,7 +967,7 @@ void drawqueue() {
 hpcshape 
   shFloorSide[SIDEPARS][2], shSemiFloorSide[SIDEPARS], shTriheptaSide[SIDEPARS][2], shMFloorSide[SIDEPARS][2], shFullFloorSide[SIDEPARS][2],
   shFullFloor[2], shFullCross[2],
-  shSeabed[2], shCloudSeabed[3], shCaveSeabed[3],
+  shSeabed[2], shCloudSeabed[3], shCaveSeabed[4],
   shWave[8][2],  
   shFloor[2], shBFloor[2], shMFloor2[2], shMFloor3[2], shMFloor4[2],
   shCircleFloor,
