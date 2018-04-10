@@ -294,6 +294,12 @@ else if(args()[0] == '-' && args()[1] == x && args()[2] == '0') { showstartmenu 
     if(curphase == 3) restartGame(rg::peace);
     else peace::on = true;
     }
+  else if(argis("-pal")) {
+    PHASEFROM(2);
+    shift(); int id = argi();
+    shift(); linepatterns::patterns[id].color |= argi();
+    autocheat = true;
+    }
   else if(argis("-geo")) { 
     if(curphase == 3) {
       shift(); targetgeometry = (eGeometry) argi();
