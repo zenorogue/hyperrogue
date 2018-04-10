@@ -864,6 +864,12 @@ int modecode() {
 #endif
   if(numplayers() == 7) mct += 16384;
   
+  if(gp::on) { 
+    mct += 32768;
+    mct += gp::param.first << 16;
+    mct += gp::param.second << 21;
+    }
+  
   mct += ginf[geometry].xcode;
   
   return mct;

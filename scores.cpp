@@ -36,7 +36,8 @@ int modediff(score *S) {
   if(S->box[238]) g = gSphere;
   if(S->box[239]) g = gElliptic;
   if(max(S->box[197], 1) != multi::players) diff += 8;
-  if(S->box[186] != nonbitrunc) diff += 16;
+  if(S->box[186] != nonbitrunc || S->box[341] != gp::on || S->box[342] != gp::param.first || S->box[343] != gp::param.second) 
+    diff += 16;
   if(S->box[196] != chaosmode) diff += 32;
   if(S->box[119] != shmup::on) diff += 64;
   if(pureHardcore() && !isHardcore(S)) diff += 128;
@@ -54,7 +55,8 @@ string modedesc(score *S) {
   if(S->box[239]) g = gElliptic;
   string s = ginf[g].shortname;
   if(g != gNormal) s += " " + csub(XLATT1((eLand) S->box[120]), 3);
-  if(S->box[186]) s += "/7";
+  if(S->box[341]) s += "/GP(" + its(S->box[342])+","+its(S->box[343])+")";
+  else if(S->box[186]) s += "/7";
   if(S->box[196]) s += "/C";
   if(S->box[119]) s += "/s";
   if(S->box[197] > 1) s += "/P" + its(S->box[197]);

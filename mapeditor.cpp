@@ -120,7 +120,13 @@ namespace mapstream {
     int32_t i = VERNUM; save(i);
     save(patterns::whichPattern);
     save(geometry);
-    save(nonbitrunc);
+    char nbtype = nonbitrunc;
+    if(gp::on) nbtype = 2;
+    save(nbtype);
+    if(gp::on) {
+      save(gp::param.first);
+      save(gp::param.second);
+      }
     if(geometry == gTorus) {
       save(torusconfig::qty);
       save(torusconfig::dx);
@@ -205,7 +211,14 @@ namespace mapstream {
     
     if(vernum >= 10203) {
       load(geometry);
-      load(nonbitrunc);
+      char nbtype;
+      load(nbtype);
+      nonbitrunc = !!nbtype;
+      gp::on = nbtype == 2;
+      if(gp::on) {
+        load(gp::param.first);
+        load(gp::param.second);
+        }
       if(geometry == gTorus) {
         load(torusconfig::qty);
         load(torusconfig::dx);

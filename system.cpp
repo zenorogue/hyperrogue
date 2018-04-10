@@ -276,7 +276,7 @@ bool havesave = true;
 
 #if CAP_SAVE
 #define MAXBOX 500
-#define POSSCORE 341 // update this when new boxes are added!
+#define POSSCORE 344 // update this when new boxes are added!
 
 struct score {
   string ver;
@@ -665,6 +665,10 @@ void applyBoxes() {
   applyBoxM(moPair);
   applyBoxM(moCrusher);
   applyBoxM(moMonk);
+  
+  applyBoxBool(gp::on);
+  applyBox(gp::param.first);
+  applyBox(gp::param.second);
 
   if(POSSCORE != boxid) printf("ERROR: %d boxes\n", boxid);
   }
@@ -685,6 +689,10 @@ void loadBoxHigh() {
   dynamicval<bool> sp3(shmup::on, savebox[119]);
   dynamicval<bool> sp4(chaosmode, savebox[196]);
   dynamicval<bool> sp5(nonbitrunc, savebox[186]);
+  dynamicval<bool> sp6(gp::on, savebox[341]);
+  dynamicval<int> sp7(gp::param.first, savebox[342]);
+  dynamicval<int> sp8(gp::param.second, savebox[343]);
+
   if(savebox[238]) geometry = gSphere;
   if(savebox[239]) geometry = gElliptic;
 
