@@ -1032,6 +1032,11 @@ int isLandValid(eLand l) {
     // not good in Field quotient
     if(quotient == 2)
       return 0;
+    if(weirdhyperbolic)
+      return 0;
+    // works nice on a big non-tetrahedron-based sphere
+    if(sphere && S3 != 3 && gp::on)
+      return 3;
     }
   
   // does not agree with the pattern
@@ -1048,8 +1053,12 @@ int isLandValid(eLand l) {
 
   if(l == laStorms && nonbitrunc && S3 == 3) 
     return 0;
+  
+  // mirrors do not work in gp
+  if(among(l, laMirror, laMirrorOld) && gp::on)
+    return 0;
 
-  // available only in weird geometries
+  // available only in non-standard geometries
   if(l == laMirrorOld && !geometry)
     return 0;
   
@@ -1066,8 +1075,8 @@ int isLandValid(eLand l) {
   if((l == laWildWest || l == laDual) && normalgame)
     return 0;
   
-  // Crystal World is designed for bitrunc geometries
-  if(l == laDual && nonbitrunc)
+  // Crystal World is designed for nice_dual geometries
+  if(l == laDual && !has_nice_dual())
     return 0;
   
   if(l == laHaunted && chaosmode)
@@ -1098,9 +1107,9 @@ int isLandValid(eLand l) {
     // special Euclidean implementations
     if(euclid && (l == laIvoryTower || l == laMountain || l == laOcean)) 
       return 2;
-    // in other geometries, it works, but as circles, not equidistants
+    // in other geometries, it works
     if(geometry)
-      return 1;
+      return 2;
     }
   
   // equidistant-based lands, but also implemented in Euclidean
@@ -1116,7 +1125,7 @@ int isLandValid(eLand l) {
 
   // works correctly only in some geometries
   if(l == laClearing)
-    if(chaosmode || !(stdeuc || a38 || (a45 && !nonbitrunc) || (a47 && !nonbitrunc)))
+    if(chaosmode || !(stdeuc || a38 || (a45 && !nonbitrunc) || (a47 && !nonbitrunc)) || gp::on)
       return 0;
 
   // does not work in non-bitrunc a4
@@ -1133,6 +1142,9 @@ int isLandValid(eLand l) {
   
   if(chaosmode && isCrossroads(l))
     return 0;
+  
+  if(gp::on && !horo_ok() && isCyclic(l))
+    return 0;
     
   // Temple and Hive has a special Chaos Mode variant, but they are still essentially unbounded
   if((l == laTemple || l == laHive) && bounded)
@@ -1142,9 +1154,14 @@ int isLandValid(eLand l) {
   if((l == laBlizzard || l == laVolcano) && elliptic && S7 < 5)
     return 0;
   
-  // Kraken does not really work in odd non-bitrunc geometries
-  // (but we do have to allow it in Standard)
-  if(l == laKraken && nonbitrunc && (S7&1)) {
+  // ... and it works in gp only partially
+  if((l == laBlizzard || l == laVolcano) && gp::on)
+    return 1;
+  
+  // Kraken does not really work on odd-sided cells;
+  // a nice football pattern will solve the problem by forbidding the Kraken to go there
+  // (but we do have to allow it in non-bitrunc standard)
+  if(l == laKraken && (S7&1) && !has_nice_dual()) {
     if(!geometry) return 1;
     return 0;
     }
@@ -1152,11 +1169,18 @@ int isLandValid(eLand l) {
   // needs standard/Euclidean (needs vineyard pattern)
   if(l == laWineyard && !stdeuc)
     return 0;
+
+  // ... fake wineyard pattern
+  if(l == laWineyard && gp::on)
+    return 1;
   
   // works in most spheres, Zebra quotient, and stdeuc
-  if(l == laWhirlwind)
+  if(l == laWhirlwind) {
     if(!(stdeuc || quotient == 1 || (S7 == 4 && !nonbitrunc) || (bigsphere && nonbitrunc && !elliptic)))
       return 0;
+    if(gp::on)
+      return 1;
+    }
     
   // needs standard/Euclidean (needs fractal landscape)
   if(l == laTortoise && !stdeuc)
@@ -1182,13 +1206,16 @@ int isLandValid(eLand l) {
     return geosupport_graveyard();
   
   // Warped Coast does not work on non-bitrunc S3s (except standard heptagonal where we have to keep it)
-  if(l == laWarpCoast && (S3==3) && nonbitrunc) {
+  if(l == laWarpCoast && (S3==3) && !has_nice_dual()) {
     if(!geometry) return 1;
     return 0;
     }
   
   // laPower and laEmerald and laPalace -> [partial] in quotients and weirdhyperbolic
   if((l == laPower || l == laEmerald || l == laPalace) && !stdeuc && !bigsphere)
+    return 1;
+
+  if((l == laPower || l == laEmerald || l == laPalace) && gp::on)
     return 1;
 
   if(l == laDragon && !stdeuc)
@@ -1212,6 +1239,9 @@ int isLandValid(eLand l) {
   if(l == laCrossroads3 && !stdeuc && !bigsphere)
     return 0;
 
+  if(among(l, laCrossroads, laCrossroads2, laCrossroads3, laCrossroads5) && gp::on && hyperbolic)
+    return 0;
+
   // Crossroads IV is great in weird hyperbolic
   if(l == laCrossroads4 && weirdhyperbolic)
     return 3;
@@ -1223,11 +1253,15 @@ int isLandValid(eLand l) {
   if(l == laZebra && !(stdeuc || (a4 && nonbitrunc) || a46 || quotient == 1))
     return 0;
   
+  if(l == laZebra && gp::on)
+    return 1;
+  
   if(l == laCrossroads3 && euclid)
     return 1; // because it is not accurate
 
   if(l == laPrairie) {
-    if(stdeuc || (bigsphere && !nonbitrunc && !elliptic) || (quotient == 2)) ;
+    if(gp::on) return 0;
+    else if(stdeuc || (bigsphere && !nonbitrunc && !elliptic) || (quotient == 2)) ;
     else if(!bounded) return 1;
     else return 0;
     }
@@ -1254,8 +1288,11 @@ int isLandValid(eLand l) {
   if(l == laSnakeNest)
     return geosupport_threecolor() >= 2 ? 3 : 0;
   
-  if(l == laDocks && !randomPatternsMode)
-    return a38 ? 3 : 0;
+  if(l == laDocks && !randomPatternsMode) {
+    if(a38 && !gp::on) return 3;
+    if(a38) return 1;
+    return 0;
+    }
   
   if(l == laStorms && torus) 
     return 3;

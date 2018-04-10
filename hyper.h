@@ -3006,6 +3006,8 @@ namespace gp {
   local_info get_local_info(cell *c);
   const char *disp(loc at);
 
+  void be_in_triangle2(local_info& li);
+
   int compute_dist(cell *c, int master_function(cell*));
   }
 
@@ -3230,3 +3232,4 @@ int geosupport_graveyard();
 bool ishex1(cell *c);
 namespace fieldpattern { int fieldval_uniq(cell *c);  int fieldval_uniq_rand(cell *c, int d); }
 bool warptype(cell *c);
+bool horo_ok();

@@ -384,7 +384,7 @@ void showEuclideanMenu() {
       char ch;
       if(i < 26) ch = 'a' + i;
       else ch = 'A' + (i-26);
-      string validclasses[4] = {"", " (½)", "", " (!)"};
+      string validclasses[4] = {" (X)", " (½)", "", " (!)"};
       string s = XLAT1(linf[l].name);
 
       if(landvisited[l]) {

@@ -506,19 +506,39 @@ namespace gp {
     pushScreen([texture_remap] () { gp::show(texture_remap); });
     }
   
+  void be_in_triangle2(local_info& li) { // hyperpoint atz(const transmatrix& T, const transmatrix& corners, loc at, int cornerid = 6, ld cf = 3) {
+    int sp = 0;
+    auto& at = li.relative;
+    again:
+    auto corner = corners * loctoh_ort(at);
+    if(corner[1] < -1e-6 || corner[2] < -1e-6) {
+      at = at * eudir(1);
+      sp++;
+      goto again;
+      }
+    if(sp>3) sp -= 6;
+    li.last_dir = fix7(li.last_dir - sp);
+    }
+
+  void be_in_triangle(local_info& li) {
+    int& i = li.last_dir;
+    auto& at = li.relative;
+
+    while(at.first < 0 || at.second < 0) {
+      at = at * eudir(1);
+      i = fix7(i-1);
+      }    
+    }
+  
   int compute_dist(cell *c, int master_function(cell*)) {
     auto li = get_local_info(c);
+    be_in_triangle(li);
     
     cell *cm = c->master->c7;
     
     int i = li.last_dir;
     auto at = li.relative;
 
-    while(at.first < 0 || at.second < 0) {
-      at = at * eudir(1);
-      i = fixdir(i-1, cm);
-      }
-    
     auto dmain = master_function(cm);
     auto d0 = master_function(createStep(cm->master, i)->c7);
     auto d1 = master_function(createStep(cm->master, fixdir(i+1, cm))->c7);

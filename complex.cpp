@@ -805,6 +805,8 @@ namespace clearing {
     
     if(sphere) return;
     
+    if(gp::on) return;
+    
     if(euclid) {
       if(torus) return;
       if(pseudohept(c)) return;

@@ -379,6 +379,34 @@ pair<int, int> subval(cell *c, int _subpathid = subpathid, int _subpathorder = s
 
 int getHemisphere(cell *c, int which) {
   if(torus) return 0;
+  if(which == 0 && gp::on && has_nice_dual()) {
+    set<cell*> visited;
+    vector<cell*> q;
+    vector<int> type;
+    auto visit = [&] (cell *c, int t) {
+      if(visited.count(c)) return;
+      visited.insert(c);
+      q.push_back(c);
+      type.push_back(t);
+      };
+      
+    cellwalker cw(currentmap->gamestart(), 0);
+    int ct = 1;
+    visit(cw.c, ct);
+    do {
+      cw = cw + wstep;
+      visit(cw.c, -ct);
+      cw = cw + (2*ct) + wstep + ct;
+      ct = -ct;
+      }
+    while(cw.c != currentmap->gamestart());    
+    for(int i=0; i<size(q); i++)
+      forCellCM(c2, q[i])
+        if(pseudohept(q[i]) || pseudohept(c2))
+          visit(c2, type[i]);
+    for(int i=0; i<size(q); i++) if(q[i] == c) return type[i];
+    return 0;
+    }
   if(ctof(c)) {
     int id = c->master->fiftyval;
     if(S7 == 5) {
@@ -409,9 +437,25 @@ int getHemisphere(cell *c, int which) {
     }
   else {
     int score = 0;
-    for(int i=0; i<6; i+=2) 
-      score += getHemisphere(c->mov[i], which) * (c->mirror(i) ? -1 : 1);
-    return score/3;
+    if(gp::on) {
+      auto li = gp::get_local_info(c);
+      gp::be_in_triangle2(li);
+      auto corner = gp::corners * gp::loctoh_ort(li.relative);
+      ld scored = 
+        corner[0] * getHemisphere(c->master->c7, which)
+      + corner[1] * getHemisphere(c->master->move[li.last_dir]->c7, which)
+      + corner[2] * getHemisphere(c->master->move[fix7(1+li.last_dir)]->c7, which);
+      int score = int(scored + 10.5) - 10;
+      ld error = scored - score;
+      if(score == 0 && error > .001) score++;
+      if(score == 0 && error < -.001) score--;
+      return score;
+      }
+    else {
+      for(int i=0; i<6; i+=2) 
+        score += getHemisphere(c->mov[i], which) * (c->mirror(i) ? -1 : 1);
+      return score/3;
+      }
     }
   }
 

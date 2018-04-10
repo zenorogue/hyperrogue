@@ -3669,7 +3669,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       string label = its(c->landparam);
       queuestr(V, 1 * .2, label, 0xFFFFFFFF, 1);
       }
-      
+    
     if(viewdists) {
       int cd = celldistance(c, cwt.c);
       string label = its(cd);

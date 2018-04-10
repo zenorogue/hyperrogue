@@ -726,7 +726,7 @@ void setLandSphere(cell *c) {
       c->land = laElementalWall, c->barleft = laEEarth, c->barright = laEFire;
     else if(y < 0) 
       c->land = laElementalWall, c->barleft = laEAir, c->barright = laEWater;
-    if(c->land == laElementalWall && c->type != 6)
+    if(c->land == laElementalWall && (c->type != 6 || gp::on))
       c->wall = getElementalWall(hrand(2) ? c->barleft : c->barright);
     }
   if(!torus)
@@ -737,7 +737,7 @@ void setLandSphere(cell *c) {
     else if(x == 0 || (specialland == laCrossroads3 && getHemisphere(c, 2) == 0)) 
       setland(c, laBarrier), c->wall = waBarrier;
     else setland(c, specialland);
-    if(specialland == laCrossroads3 && c->type != 6 && c->master->fiftyval == 1)
+    if(specialland == laCrossroads3 && c->type != 6 && c->master->fiftyval == 1 && !gp::on)
       c->wall = waBigTree;        
     }
   if(specialland == laIvoryTower || specialland == laEndorian || specialland == laDungeon || specialland == laOcean || specialland == laMountain) {
