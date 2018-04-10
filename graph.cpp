@@ -4832,7 +4832,22 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       
       int prec = sphere ? 3 : 1;
       
-      if(nonbitrunc) {
+      if(gp::on) {
+        vid.linewidth *= gp::scale;
+        if(isWarped(c) && has_nice_dual()) {
+          if(pseudohept(c)) for(int t=0; t<c->type; t++)
+            queueline(V * gp::get_corner_position(c, t%c->type, 2),
+                      V * gp::get_corner_position(c, (t+1)%c->type, 2),
+                      gridcolor(c, c->mov[t]), prec);
+          }
+        else for(int t=0; t<c->type; t++)
+          if(c->mov[t] && c->mov[t] < c)
+          queueline(V * gp::get_corner_position(c, t),
+                    V * gp::get_corner_position(c, (t+1)%c->type),
+                    gridcolor(c, c->mov[t]), prec);
+        vid.linewidth /= gp::scale;
+        }
+      else if(nonbitrunc) {
         double x = hcrossf;
         for(int t=0; t<S7; t++) 
           if(c->mov[t] && c->mov[t] < c)
