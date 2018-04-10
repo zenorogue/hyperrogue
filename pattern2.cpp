@@ -1073,6 +1073,8 @@ int pattern_threecolor(cell *c) {
 bool pseudohept(cell *c) {
   if(gp::on && gp_threecolor() == 2)
     return gp::pseudohept_val(c) == 0;
+  if(gp::on && gp_threecolor() == 1 && (S7&1))
+    return gp::pseudohept_val(c) == 0;
   return pattern_threecolor(c) == 0;
   }
 
