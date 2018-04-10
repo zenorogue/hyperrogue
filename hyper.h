@@ -1628,7 +1628,6 @@ extern cell *recallCell;
 extern eLand cheatdest;
 void cheatMoveTo(eLand l);
 
-extern bool overgenerate;
 void doOvergenerate();
 
 void collectMessage(cell *c2, eItem which);

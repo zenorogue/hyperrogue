@@ -546,7 +546,7 @@ void drawrec(const heptspin& hs, int lev, hstate s, const transmatrix& V) {
     hstate s2 = transition(s, d);
     if(s2 == hsError) continue;
     heptspin hs2 = hs + d + wstep;
-    drawrec(hs2, lev-2, s2, V * heptmove[d]);
+    drawrec(hs2, lev-gp::dist_2(), s2, V * heptmove[d]);
     }
   
   }

@@ -651,7 +651,7 @@ void showGraphConfig() {
       XLAT("+5 = move instantly"));
   
     if(xuni == 'r') {
-      dialog::editNumber(sightrange_bonus, -3, allowIncreasedSight() ? 3 : 0, 1, 0, XLAT("sight range"), 
+      dialog::editNumber(sightrange_bonus, -5, allowIncreasedSight() ? 3 : 0, 1, 0, XLAT("sight range"), 
         XLAT("Roughly 42% cells are on the edge of your sight range. Reducing "
         "the sight range makes HyperRogue work faster, but also makes "
         "the game effectively harder."));

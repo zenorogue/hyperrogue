@@ -612,10 +612,10 @@ namespace dialog {
 
     // if(ne.editwhat == &whatever) resetGeometry();
 
-    if(ne.intval == &sightrange_bonus && sightrange_bonus < -3) 
-      *ne.editwhat = sightrange_bonus = -3, affect('v');
+    if(ne.intval == &sightrange_bonus && sightrange_bonus < 1-getDistLimit()) 
+      *ne.editwhat = sightrange_bonus = 1-getDistLimit(), affect('v');
     
-    int msr = allowIncreasedSight() ? 10 : 0;
+    int msr = allowIncreasedSight() ? gp::dist_2() * 5 : 0;
 
     if(ne.intval == &sightrange_bonus && sightrange_bonus > msr) 
       *ne.editwhat = sightrange_bonus = msr, affect('v');

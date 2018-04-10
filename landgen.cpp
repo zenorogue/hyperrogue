@@ -19,9 +19,8 @@ bool chaosUnlocked = false;
 bool chaosAchieved = false;
 
 void doOvergenerate() {
-  if(overgenerate) 
-    for(int i=0; i<numplayers(); i++)
-      setdist(playerpos(i), 7 - getDistLimit() - genrange_bonus, NULL);
+  for(int i=0; i<numplayers(); i++)
+    setdist(playerpos(i), 7 - getDistLimit() - genrange_bonus, NULL);
   }
 
 bool notDippingFor(eItem i) {

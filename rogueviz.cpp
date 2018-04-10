@@ -1385,8 +1385,8 @@ void fixparam() {
 void rvvideo(const char *fname) {
   if(kind == kCollatz) {
     pngformat = 2;
-    sightrange = 12;
-    overgenerate = true;
+    sightrange_bonus = 3;
+    genrange_bonus = 3;
     dronemode = true; vid.camera_angle = -45; rog3 = true; patterns::whichShape = '8';
     vid.aurastr = 512;
     long long reached = 763ll;

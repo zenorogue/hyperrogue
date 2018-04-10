@@ -39,7 +39,6 @@ eItem orbToTarget;
 eMonster monsterToSummon;
 
 int sightrange_bonus = 0;
-bool overgenerate = false; // generate a bigger area with high sightrange
 
 string mouseovers;
 
@@ -5304,6 +5303,7 @@ void drawthemap() {
       (!playermoved) ? sr+1 : sr + 4;
     
     if(S3>3) maxreclevel+=2;
+    if(gp::on) maxreclevel += gp::dist_2();
     
     drawrec(viewctr, maxreclevel, hsOrigin, cview());
     }

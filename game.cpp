@@ -3046,8 +3046,6 @@ void bfs() {
   for(int i=0; i<qtemp; i++) temps[i]->monst = tempval[i];
   
   buildAirmap();
-  
-  if(overgenerate) doOvergenerate();
   }
 
 bool makeEmpty(cell *c) {
