@@ -1679,6 +1679,7 @@ namespace linepatterns {
     {patPalacelike, "firewall lines", 0xFF400000},
     {patPalace, "firewall lines: Palace", 0xFFD50000},
     {patPower, "firewall lines: Power", 0xFFFF0000},
+    {patHorocycles, "horocycles", 0xd060d000},
     {0, NULL, 0}
     };
 
@@ -1700,7 +1701,7 @@ namespace linepatterns {
     for(int k=0; patterns[k].lpname; k++)
       if(patterns[k].id == id) patterns[k].color ^= col;
     }
-
+  
   void drawPattern(int id, int col, cell *c, const transmatrix& V) {
 
     switch(id) {
@@ -1729,8 +1730,8 @@ namespace linepatterns {
           if(fv2/4 == 4 || fv2/4 == 6 || fv2/4 == 5 || fv2/4 == 10) fv2 ^= 2;
           if((fv1&1) == (fv2&1)) continue;
           
-          double x = sphere?.3651:euclid?.2611:.2849;
-
+          double x = hexhexdist / 2; // sphere?.3651:euclid?.2611:.2849;
+          
           queueline(V * ddspin(c,i,-S14) * xpush0(x), 
             V * ddspin(c,i,+S14) * xpush0(x), 
             col, 1);
@@ -1738,39 +1739,47 @@ namespace linepatterns {
         break;
       
       case patNormal: {
-        double x = sphere?.401:euclid?.3 : .328;
-        if(euclid || !pseudohept(c)) for(int t=0; t<c->type; t++) 
-          if(euclid ? c->mov[t]<c : (((t^1)&1) || c->mov[t] < c))
+        double x = hexvdist; // sphere?.401:euclid?.3 : .328;
+        if(gp::on) {
+          for(int t=0; t<c->type; t++)
+            if(c->mov[t] && c->mov[t] < c)
+              queueline(V * gp::get_corner_position(c, t),
+                V * gp::get_corner_position(c, (t+1)%c->type),
+                col, 1);
+          }
+        else if(euclid || !pseudohept(c)) for(int t=0; t<c->type; t++) 
+          if(euclid ? c->mov[t]<c : (((t^1)&1) || c->mov[t] < c)) {
             queueline(V * ddspin(c,t,-S7) * xpush0(x), 
                 V * ddspin(c,t,+S7) * xpush0(x), 
                 col, 1);
+            }
         break;
         }
       
       case patTrihepta:
-        if(!pseudohept(c)) for(int i=0; i<6; i++) {
-          cell *c2 = c->mov[i];
-          if(!c2 || !pseudohept(c2)) continue;
-          double x = sphere?.3651:euclid?.2611:.2849;
-          queueline(V * ddspin(c,i,-S14) * xpush0(x), 
-            V * ddspin(c,i,+S14) * xpush0(x), 
-            col, 1);
+        if(gp::on) {
+          if(pseudohept(c)) for(int t=0; t<c->type; t++)
+            queueline(V * gp::get_corner_position(c, t%c->type, 2),
+                      V * gp::get_corner_position(c, (t+1)%c->type, 2),
+                      col, 1);
+          }
+        else {
+          if(!pseudohept(c)) for(int i=0; i<c->type; i++) {
+            cell *c2 = c->mov[i];
+            if(!c2 || !pseudohept(c2)) continue;
+            double x = hexhexdist / 2; // sphere?.3651:euclid?.2611:.2849;
+            queueline(V * ddspin(c,i,-S14) * xpush0(x), 
+              V * ddspin(c,i,+S14) * xpush0(x), 
+              col, 1);
+            }
           }
         break;
       
       case patTriNet:
-        if(gp::on) {
-          if(c->master->c7 != c) if(gmatrix.count(c->mov[0]))
-            queueline(tC0(V), gmatrix[c->mov[0]]*C0, 
-              darkena(backcolor ^ 0xFFFFFF, 0, col),
-              2);
-          }
-        else {
-          forCellEx(c2, c) if(c2 > c) if(gmatrix.count(c2)) if(celldist(c) != celldist(c2)) {
-            queueline(tC0(V), gmatrix[c2]*C0, 
-              darkena(backcolor ^ 0xFFFFFF, 0, col),
-              2);
-            }
+        forCellEx(c2, c) if(c2 > c) if(gmatrix.count(c2)) if(celldist(c) != celldist(c2)) {
+          queueline(tC0(V), gmatrix[c2]*C0, 
+            darkena(backcolor ^ 0xFFFFFF, 0, col),
+            2);
           }
         break;
 
@@ -1816,40 +1825,59 @@ namespace linepatterns {
         break;
       
       case patBigTriangles: {
-        if(pseudohept(c) && !euclid) for(int i=0; i<S7; i++) 
-          if(c->master->move[i] < c->master) {
-            queueline(tC0(V), V*xspinpush0((nonbitrunc?M_PI:0) -2*M_PI*i/S7, tessf), col, 2);
+       if(is_master(c) && !euclid) for(int i=0; i<S7; i++) 
+          if(c->master->move[i] && c->master->move[i] < c->master) {
+            queueline(tC0(V), V*xspinpush0(-2*M_PI*i/S7 - master_to_c7_angle(), tessf), col, 2);
             }
         break;
         }
         
       case patBigRings: {
-        if(pseudohept(c) && !euclid) for(int i=0; i<S7; i++) 
+        if(is_master(c) && !euclid) for(int i=0; i<S7; i++) 
           if(c->master->move[i] && c->master->move[i] < c->master && c->master->move[i]->dm4 == c->master->dm4)
-            queueline(tC0(V), V*xspinpush0((nonbitrunc?M_PI:0) -2*M_PI*i/S7, tessf), col, 2);
+            queueline(tC0(V), V*xspinpush0(-2*M_PI*i/S7 - master_to_c7_angle(), tessf), col, 2);
+            // V*xspinpush0((nonbitrunc?M_PI:0) -2*M_PI*i/S7
         break;
         }
         
       case patTree:
-        if(ctof(c) && !euclid) 
-          queueline(tC0(V), V*ddi0(nonbitrunc?S42:0, tessf), col, 2);
+        if(is_master(c)) 
+          queueline(tC0(V), V*xspinpush0(-master_to_c7_angle(), tessf), col, 2);
         break;
       
+      case patHorocycles:
+        if(c->master->alt) {
+          int d = celldistAlt(c);
+          forCellEx(c2, c) if(c2 > c && c2->master->alt && celldistAlt(c2) == d && gmatrix.count(c2))
+            queueline(tC0(V), gmatrix[c2]*C0, 
+              darkena(backcolor ^ 0xFFFFFF, 0, col),
+              2);
+          }
+        break;
+
       case patAltTree:
         if(ctof(c) && !euclid && c->master->alt) {
           for(int i=0; i<S7; i++)
             if(c->master->move[i] && c->master->move[i]->alt == c->master->alt->move[0])
-              queueline(tC0(V), V*xspinpush0((nonbitrunc?M_PI:0) -2*M_PI*i/S7, tessf), col, 2);
+              queueline(tC0(V), V*xspinpush0(-2*M_PI*i/S7-master_to_c7_angle(), tessf), col, 2);
           }
         break;
       
       case patVine: {
-        int p = emeraldval(c);
-        double hdist = hdist0(heptmove[0] * heptmove[2] * C0);
-        if(pseudohept(c) && (p/4 == 10 || p/4 == 8))
-        for(int i=0; i<S7; i++) if(c->mov[i] && emeraldval(c->mov[i]) == p-4) {
-          queueline(tC0(V), V*tC0(heptmove[i]), col, 2);
-          queueline(tC0(V), V*tC0(spin(-i * ALPHA) * xpush(-hdist/2)), col, 2);
+        if(gp::on) {
+          if(c->master->c7 != c) if(gmatrix.count(c->mov[0]))
+            queueline(tC0(V), gmatrix[c->mov[0]]*C0, 
+              darkena(backcolor ^ 0xFFFFFF, 0, col),
+              2);
+          }
+        else {
+          int p = emeraldval(c);
+          double hdist = hdist0(heptmove[0] * heptmove[2] * C0);
+          if(pseudohept(c) && (p/4 == 10 || p/4 == 8))
+          for(int i=0; i<S7; i++) if(c->mov[i] && emeraldval(c->mov[i]) == p-4) {
+            queueline(tC0(V), V*tC0(heptmove[i]), col, 2);
+            queueline(tC0(V), V*tC0(spin(-i * ALPHA) * xpush(-hdist/2)), col, 2);
+            }
           }
         break;
         }
@@ -1895,7 +1923,7 @@ namespace linepatterns {
     dialog::init(XLAT("line patterns"));
     
     for(numpat=0; patterns[numpat].lpname; numpat++)
-      dialog::addColorItem(XLAT(patterns[numpat].lpname), patterns[numpat].color, 'a'+numpat);
+      dialog::addColorItem(patterns[numpat].id == patVine && gp::on ? XLAT("Goldberg") : XLAT(patterns[numpat].lpname), patterns[numpat].color, 'a'+numpat);
   
     dialog::addBreak(50);
     dialog::addItem(XLAT("exit menu"), 'v');

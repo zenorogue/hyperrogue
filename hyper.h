@@ -1827,7 +1827,8 @@ namespace linepatterns {
     patNormal,
     patTrihepta,
     patBigTriangles,
-    patBigRings
+    patBigRings,
+    patHorocycles
     };
   
   void clearAll();
