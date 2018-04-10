@@ -1885,16 +1885,24 @@ namespace linepatterns {
         }
       
       case patPower: {
-        int a = emeraldval(c);
-        if(pseudohept(c) && a/4 == 8) for(int i=0; i<7; i++) {
-            heptagon *h1 = c->master->move[(i+1)%7];
-            heptagon *h2 = c->master->move[(i+6)%7];
-            if(!h1 || !h2) continue;
-            if(emeraldval(h1->c7)/4 == 8 && emeraldval(h2->c7)/4 == 8)
-                queueline(V * ddspin(c,i,84*5/14) * xpush0(tessf/2),
-                          V * ddspin(c,i,84*9/14) * xpush0(tessf/2),
-                                    col, 1);
-            }
+        if(gp::on) {
+          for(int i=0; i<S7; i++) if(c->mov[i] && c->mov[i]->master != c->master && gmatrix.count(c->mov[i]))
+            queueline(tC0(V), gmatrix[c->mov[i]]*C0, 
+              col,
+              1);
+          }
+        else {
+          int a = emeraldval(c);
+          if(pseudohept(c) && a/4 == 8) for(int i=0; i<7; i++) {
+              heptagon *h1 = c->master->move[(i+1)%7];
+              heptagon *h2 = c->master->move[(i+6)%7];
+              if(!h1 || !h2) continue;
+              if(emeraldval(h1->c7)/4 == 8 && emeraldval(h2->c7)/4 == 8)
+                  queueline(V * ddspin(c,i,84*5/14) * xpush0(tessf/2),
+                            V * ddspin(c,i,84*9/14) * xpush0(tessf/2),
+                                      col, 1);
+              }
+          }
         break;
         }
       }
@@ -1925,7 +1933,7 @@ namespace linepatterns {
     dialog::init(XLAT("line patterns"));
     
     for(numpat=0; patterns[numpat].lpname; numpat++)
-      dialog::addColorItem(patterns[numpat].id == patVine && gp::on ? XLAT("Goldberg") : XLAT(patterns[numpat].lpname), patterns[numpat].color, 'a'+numpat);
+      dialog::addColorItem(among(patterns[numpat].id, patVine, patPower) && gp::on ? XLAT("Goldberg") : XLAT(patterns[numpat].lpname), patterns[numpat].color, 'a'+numpat);
   
     dialog::addBreak(50);
     dialog::addItem(XLAT("exit menu"), 'v');
