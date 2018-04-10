@@ -6849,12 +6849,20 @@ long long circlesize[100], disksize[100];
 ld circlesizeD[10000];
 int lastsize;
 
+bool sizes_known() {
+  return euclid || (geometry == gNormal && !gp::on);
+  }
+
 void computeSizes() {
   lastsize = nonbitrunc ? 44 : 76;
 
   circlesize[0] = 1;
   
-  if(!nonbitrunc) {
+  if(euclid) {
+    for(int i=1; i<100; i++) circlesize[i] = 6 * i;
+    }
+  
+  else if(!nonbitrunc) {
     circlesize[1] = 1*7;
     circlesize[2] = 2*7;
     circlesize[3] = 4*7;
@@ -6922,13 +6930,13 @@ void knightFlavorMessage(cell *c2) {
   else if(msgid == 7 && items[itSpice] < 10 && !peace::on) {
     addMessage(XLAT("\"Train in the Desert first!\""));
     }
-  else if(msgid == 8) {
+  else if(msgid == 8 && sizes_known()) {
     if(rad <= lastsize)
       addMessage(XLAT("\"Our Table seats %1 Knights!\"", llts(circlesize[rad])));
     else
       addMessage(XLAT("\"By now, you should have your own formula, you know?\""));
     }
-  else if(msgid == 9 && rad <= lastsize) {
+  else if(msgid == 9 && rad <= lastsize && sizes_known()) {
       addMessage(XLAT("\"There are %1 floor tiles inside our Table!\"", llts(disksize[rad])));
     }
   else if(msgid == 10 && !items[itPirate] && !items[itWhirlpool] && !peace::on) {

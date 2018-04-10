@@ -242,7 +242,7 @@ hint hints[] = {
 
   {
     0,
-    []() { return !canmove && geometry == gNormal && celldist(cwt.c) >= 50; },
+    []() { return !canmove && sizes_known() && celldist(cwt.c) >= 50; },
     []() {
       int c = celldist(cwt.c);
       string s = circlesizestr(c);
