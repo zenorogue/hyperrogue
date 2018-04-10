@@ -1331,7 +1331,7 @@ void buildpolys() {
   int td = ((nonbitrunc || euclid) && !(S7&1)) ? S42+S6 : 0;
   
   double trihepta0 = scalef*spzoom6*(.2776+p) * gsca(a4, 1.3, a46, .975, a47, .85, a38, .9) * bscale6;
-  double trihepta1 = (sphere ? .54 : scalef*spzoom6*(.5273-2*p)) * gsca(a4, .8, a46, 1.075, sphere4, 1.3) * bscale7;
+  double trihepta1 = (sphere ? .54 * gp::scale : scalef*spzoom6*(.5273-2*p)) * gsca(a4, .8, a46, 1.075, sphere4, 1.3) * bscale7;
   
   double eps = hexhexdist * .05;
   if(euclid) trihepta0 = hexhexdist * .5 - eps * sqrt(3)/2, trihepta1 = hexhexdist * sqrt(3)/2 - eps; // .5-.1; .75-.05
@@ -1339,8 +1339,8 @@ void buildpolys() {
   if(euclid4) 
     trihepta0 = trihepta1 = crossf * 1.35 / 2;
 
-  if(sphere&&S7==3) trihepta0 *= 1.3, trihepta1 *= 1.6;
-
+  if(sphere&&S7==3&&!gp::on) trihepta0 *= 1.3, trihepta1 *= 1.6;
+  if(sphere&&S3==3&&gp::on) trihepta1 *= whatever;
 
   int tshift0 = (a4?S14:0);
   int tshift1 = (td + (!(S7&1))) ? S6:0; // +S6+(a4&(S7&1)?S6:0);
