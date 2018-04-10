@@ -62,6 +62,7 @@ namespace dialog {
     if(k == SDLK_ESCAPE) return "Esc";
     if(k == SDLK_F5) return "F5";
     if(k == SDLK_F10) return "F10";
+    if(k == SDLK_F1) return "F1";
     if(k == SDLK_HOME) return "Home";
     if(k == SDLK_BACKSPACE) return "Backspace";
     if(k == SDLK_RETURN) return "Enter";
