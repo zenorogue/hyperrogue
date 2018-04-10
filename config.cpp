@@ -251,6 +251,10 @@ void initConfig() {
   addsaver(vid.euclid_to_sphere, "euclid to sphere projection", 1.5);
   addsaver(vid.twopoint_param, "twopoint parameter", 1);
   
+  addsaver(gp::on, "goldberg", false);
+  addsaver(gp::param.first, "goldberg-x", gp::param.first);
+  addsaver(gp::param.second, "goldberg-y", gp::param.second);
+  
 #if CAP_SHMUP  
   shmup::initConfig();
 #endif
@@ -301,6 +305,7 @@ void resetModes(char leave) {
   if(shmup::on != (leave == rg::shmup)) restartGame(rg::shmup);
   if(inv::on != (leave == rg::inv)) restartGame(rg::inv);
   if(chaosmode != (leave == rg::chaos)) restartGame(rg::chaos);
+  if(gp::on != (leave == rg::gp)) restartGame(rg::gp);
   if(nonbitrunc != (leave == rg::bitrunc)) restartGame(rg::bitrunc);
   if(peace::on != (leave == rg::peace)) restartGame(rg::peace);
 #if CAP_TOUR

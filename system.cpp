@@ -1118,7 +1118,7 @@ void restartGame(char switchWhat, bool push, bool keep_screens) {
   if(switchWhat == rg::bitrunc || switchWhat == rg::gp) {
     if(euclid6) geometry = gNormal;
     nonbitrunc = !nonbitrunc;
-    gp::on = (switchWhat == rg::gp);
+    gp::on = (switchWhat == rg::gp && !gp::on);
     resetGeometry();
     #if CAP_TEXTURE
     if(texture::config.tstate == texture::tsActive) 
