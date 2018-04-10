@@ -740,7 +740,7 @@ extern videopar vid;
 
 extern vector< function<void()> > screens;
 
-template<class T> void pushScreen(T& x) { screens.push_back(x); } 
+template<class T> void pushScreen(const T& x) { screens.push_back(x); } 
 inline void popScreen() { screens.pop_back(); }
 inline void popScreenAll() { while(size(screens)>1) popScreen(); }
 
@@ -2988,7 +2988,7 @@ namespace gp {
   extern string operation_name();
   extern int pseudohept_val(cell *);
   extern int last_dir(cell *c);
-  extern void configure();
+  extern void configure(bool texture_remap);
   extern ld alpha;
   extern transmatrix Tf[8][32][32][6];
 

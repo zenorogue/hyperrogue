@@ -1535,11 +1535,16 @@ namespace patterns {
           }
         dialog::addBoolItem(s, geometry == g.geo && nonbitrunc == g.nonbitru && whichPattern == g.whichPattern && subpattern_flags == g.subpattern_flags, 'a'+j);
         }
-    dialog::addBreak(100);
+    bool have_goldberg = S3 == 3 && among(cgroup, cpFootball, cpThree) && !euclid;
+    if(have_goldberg) {
+      dialog::addBoolItem("Goldberg", gp::on, 'G');
+      dialog::lastItem().value = gp::operation_name();
+      }
+    else dialog::addBreak(100);
     dialog::addItem("more tuning", 'r');
     dialog::display();
   
-    keyhandler = [] (int sym, int uni) {
+    keyhandler = [have_goldberg] (int sym, int uni) {
       if(uni == 'r')
         pushScreen(showPattern);
       else if(uni >= '0' && uni < '0' + size(cpatterns))
@@ -1551,6 +1556,7 @@ namespace patterns {
 #endif
         auto &g = cpatterns[cgroup].geometries[uni - 'a'];
         if(g.geo != geometry) { targetgeometry = g.geo; restartGame(rg::geometry, false, true); }
+        if(gp::on) restartGame(rg::gp, false, true);
         if(g.nonbitru != nonbitrunc) restartGame(rg::bitrunc, false, true);
         whichPattern = g.whichPattern;
         subpattern_flags = g.subpattern_flags;
@@ -1558,6 +1564,8 @@ namespace patterns {
         texture::config.remap(old_tstate, old_tstate_max);
 #endif
         }
+      else if(uni == 'G' && have_goldberg)
+        gp::configure(true);
       else if(doexiton(sym, uni))
         popScreen();
       };
@@ -1568,7 +1576,8 @@ namespace patterns {
     for(int i=0; i<size(cpatterns); i++)
       for(int j=0; j<size(cpatterns[i].geometries); j++) {
         auto &g = cpatterns[i].geometries[j];
-        if(geometry == g.geo && nonbitrunc == g.nonbitru && whichPattern == g.whichPattern && subpattern_flags == g.subpattern_flags)
+        bool xnonbitrunc = gp::on ? gp_threecolor() : nonbitrunc;
+        if(geometry == g.geo && xnonbitrunc == g.nonbitru && whichPattern == g.whichPattern && subpattern_flags == g.subpattern_flags)
           cgroup = cpatterntype(i);
         }
     old_cgroup = cgroup;

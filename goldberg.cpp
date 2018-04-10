@@ -392,12 +392,14 @@ namespace gp {
     else if(param == loc(3, 0))
       return XLAT("2x bitruncated");
     else
-      return "(" + its(param.first) + "," + its(param.second) + ")";
+      return "GP(" + its(param.first) + "," + its(param.second) + ")";
     }
   
   int config_x, config_y;
   
-  void whirl_set(int x, int y) {
+  void whirl_set(int x, int y, bool texture_remap) {
+    auto old_tstate = texture::config.tstate;
+    auto old_tstate_max = texture::config.tstate_max;
     if(y < 0) { y = -y; x -= y; }
     if(x < 0) { x = -x; y = -y; }
     if(x < y) swap(x, y);
@@ -419,56 +421,69 @@ namespace gp {
       param = loc(x, y);
       restartGame(rg::gp);
       }
+    if(texture_remap)
+      texture::config.remap(old_tstate, old_tstate_max);
     screens = g;
     }
 
   string helptext() {
     return 
-      "HyperRogue's map is obtained by applying an operator to the basic regular tesselation. "
-      "Operator (x,y) means that, to get to a nearest non-hex from any non-hex, you should move x "
+      "Goldberg polyhedra are obtained by adding extra hexagons to a dodecahedron. "
+      "GP(x,y) means that, to get to a nearest non-hex from any non-hex, you should move x "
       "cells in any direction, turn right 60 degrees, and move y cells. "
-      "By default HyperRogue uses bitruncation, which corresponds to (1,1).";
+      "HyperRogue generalizes this to any tesselation with 3 faces per vertex. "
+      "By default HyperRogue uses bitruncation, which corresponds to GP(1,1).";
     }  
 
-  void show() {
+  void show(bool texture_remap) {
     cmode = sm::SIDE;
     gamescreen(0);  
-    dialog::init(XLAT("operators"));
+    dialog::init(XLAT("Goldberg"));
     
-    dialog::addBoolItem(XLAT("OFF"), param == loc(1,0), 'a');
-    dialog::lastItem().value = "(1,0)";
+    bool show_nonthree = !(texture_remap && (S7&1));
+    
+    if(show_nonthree) {
+      dialog::addBoolItem(XLAT("OFF"), param == loc(1,0), 'a');
+      dialog::lastItem().value = "GP(1,0)";
+      }
 
     dialog::addBoolItem(XLAT("bitruncated"), param == loc(1,1), 'b');
-    dialog::lastItem().value = "(1,1)";
+    dialog::lastItem().value = "GP(1,1)";
 
-    dialog::addBoolItem(XLAT("chamfered"), param == loc(2,0), 'c');
-    dialog::lastItem().value = "(2,0)";
+    if(show_nonthree) {
+      dialog::addBoolItem(XLAT("chamfered"), param == loc(2,0), 'c');
+      dialog::lastItem().value = "GP(2,0)";
+      }
 
     dialog::addBoolItem(XLAT("2x bitruncated"), param == loc(3,0), 'd');
-    dialog::lastItem().value = "(3,0)";
+    dialog::lastItem().value = "GP(3,0)";
 
     dialog::addBreak(100);
-    dialog::addSelItem("x", its(config_x), 0);
-    dialog::addSelItem("y", its(config_y), 0);
-    dialog::addBoolItem(XLAT("tuned"), param == loc(config_x, config_y), 'f');
+    dialog::addSelItem("x", its(config_x), 'x');
+    dialog::addSelItem("y", its(config_y), 'y');
 
+    if((config_x-config_y)%3 && !show_nonthree)
+      dialog::addInfo("This pattern needs x-y divisible by 3");
+    else
+      dialog::addBoolItem(XLAT("tuned"), param == loc(config_x, config_y), 'f');
+    
     dialog::addBreak(100);
     dialog::addItem(XLAT("help"), SDLK_F1);  
     dialog::addItem(XLAT("back"), '0');  
     dialog::display();
 
-    keyhandler = [] (int sym, int uni) {
+    keyhandler = [show_nonthree, texture_remap] (int sym, int uni) {
       dialog::handleNavigation(sym, uni);
-      if(uni == 'a') 
-        whirl_set(1, 0);
+      if(uni == 'a' && show_nonthree) 
+        whirl_set(1, 0, texture_remap);
       else if(uni == 'b')
-        whirl_set(1, 1);
-      else if(uni == 'c')
-        whirl_set(2, 0);
+        whirl_set(1, 1, texture_remap);
+      else if(uni == 'c' && show_nonthree)
+        whirl_set(2, 0, texture_remap);
       else if(uni == 'd')
-        whirl_set(3, 0);
-      else if(uni == 'f')
-        whirl_set(config_x, config_y);
+        whirl_set(3, 0, texture_remap);
+      else if(uni == 'f' && (show_nonthree || (config_x-config_y)%3 == 0))
+        whirl_set(config_x, config_y, texture_remap);
       else if(uni == 'x')
         dialog::editNumber(config_x, 1, 10, 1, 1, "x", helptext());
       else if(uni == 'y')
@@ -478,7 +493,7 @@ namespace gp {
       };
     }
   
-  void configure() {
+  void configure(bool texture_remap = false) {
     if(gp::on)
       config_x = param.first, config_y = param.second;
     else if(nonbitrunc)
@@ -486,7 +501,7 @@ namespace gp {
     else
       config_x = 1, config_y = 1;
     param = loc(config_x, config_y);
-    pushScreen(gp::show);
+    pushScreen([texture_remap] () { gp::show(texture_remap); });
     }
   
   int compute_dist(cell *c, int master_function(cell*)) {

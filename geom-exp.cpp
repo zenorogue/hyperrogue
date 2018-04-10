@@ -263,7 +263,7 @@ void showEuclideanMenu() {
     else if(S3 != 3)
       dialog::addBoolItem(XLAT("bitruncated"), !nonbitrunc, 't');
     else {
-      dialog::addBoolItem(XLAT("operation"), nonbitrunc, 't');
+      dialog::addBoolItem(XLAT("Goldberg"), nonbitrunc, 't');
       dialog::lastItem().value = gp::operation_name();
       }
   
