@@ -858,17 +858,23 @@ void clearcell(cell *c) {
 
 heptagon deletion_marker;
 
+template<class T> void subcell(cell *c, const T& t) {
+  if(gp::on) {
+    forCellEx(c2, c) if(c2->mov[0] == c && c2 != c2->master->c7) {
+      subcell(c2, t);
+      }
+    }
+  else if(!nonbitrunc)
+    forCellEx(c2, c) t(c2);
+  t(c);
+  }
+
 void clearHexes(heptagon *at) {
   if(at->c7 && at->cdata) {
     delete at->cdata;
     at->cdata = NULL;
     }
-  if(at->c7) {
-    if(!nonbitrunc) for(int i=0; i<S7; i++) {
-      clearcell(at->c7->mov[i]);
-      }
-    clearcell(at->c7);
-    }
+  if(at->c7) subcell(at->c7, clearcell);
   }
 
 void unlink_cdata(heptagon *h) {
@@ -894,8 +900,7 @@ void clearfrom(heptagon *at) {
       if(h) {
         if(h->alt != at) printf("alt error :: h->alt = %p\n", h->alt);
         cell *c = h->c7;
-        destroycellcontents(c);
-        forCellEx(c2, c) destroycellcontents(c2);
+        subcell(c, destroycellcontents);
         h->alt = NULL;
         at->cdata = NULL;
         }
