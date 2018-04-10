@@ -956,10 +956,9 @@ bool mouse_reachability_test(cell *c) {
   }
 
 bool horo_ok() {
-  if(!hyperbolic) return false;
-  if(!gp::on) return true;
-  if(gp::param.second) return false;
-  return true;
+  // do the horocycles work in the current geometry?
+  // (they work in ALL hyperbolic geometries currently!)
+  return hyperbolic;
   }
   
 void buildBigStuff(cell *c, cell *from) {

@@ -96,10 +96,7 @@ heptagon *buildHeptagon(heptagon *parent, int d, hstate s, int pard = 0, int fix
   if(pard == 0) {
     h->dm4 = parent->dm4+1;
     if(fixdistance != COMPUTE) h->distance = fixdistance;
-    else if(gp::on) h->distance = parent->distance + gp::param.first;
-    else if(nonbitrunc) h->distance = parent->distance + 1;
-    else if(parent->s == hsOrigin) h->distance = parent->distance + 2;
-    else if(S3 == 4) {
+    else if(S3 == 4 && !nonbitrunc) {
       h->distance = parent->distance + 2;
       if(h->spin(0) == 2 || (h->spin(0) == 3 && S7 <= 5))
         h->distance = min<short>(h->distance, createStep(h->move[0], 0)->distance + 3);
@@ -122,14 +119,32 @@ heptagon *buildHeptagon(heptagon *parent, int d, hstate s, int pard = 0, int fix
           createStep(h, S7-1)->distance + 1
           );
       }
-    else if(h->spin(0) == S7-2) 
-      h->distance = parent->distance + 1;
-    else if(h->spin(0) == S7-3 && h->move[0]->s == hsB)
-      h->distance = createStep(h->move[0], (h->spin(0)+2)%S7)->distance + 3;
-    else h->distance = parent->distance + 2;
+    else if(parent->s == hsOrigin) h->distance = parent->distance + gp::dist_2();
+    else if(h->spin(0) == S7-2) {
+      if(!gp::on)
+        h->distance = parent->distance + gp::dist_1();
+      else {
+        int d0 = parent->distance;
+        int d1 = createStep(parent, S7-1)->distance;
+        int dm = createStep(parent, 0)->distance;
+        h->distance = gp::solve_triangle(dm, d0, d1, gp::operator* (gp::param, gp::loc(1,1)));
+        }
+      }
+    else if(h->spin(0) == S7-3 && h->move[0]->s == hsB) {
+      if(!gp::on) {
+        h->distance = createStep(h->move[0], (h->spin(0)+2)%S7)->distance + gp::dist_3();
+        }
+      else {
+        int d0 = parent->distance;
+        int d1 = createStep(parent, S7-2)->distance;
+        int dm = createStep(parent, S7-1)->distance;
+        h->distance = gp::solve_triangle(dm, d0, d1, gp::operator* (gp::param, gp::loc(1,1)));
+        }
+      }
+    else h->distance = parent->distance + gp::dist_2();
     }
   else {
-    h->distance = parent->distance - (gp::on?gp::param.first:nonbitrunc?1:2);
+    h->distance = parent->distance - gp::dist_2();
     if(S3 == 4 && S7 == 5) {
       if(h->s == hsOrigin) {
         printf("had to cheat!\n");

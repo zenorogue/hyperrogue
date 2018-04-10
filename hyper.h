@@ -3009,6 +3009,10 @@ namespace gp {
   void be_in_triangle2(local_info& li);
 
   int compute_dist(cell *c, int master_function(cell*));
+  
+  int dist_1(), dist_2(), dist_3();
+
+  int solve_triangle(int dmain, int d0, int d1, loc at);
   }
 
 int get_sightrange();
@@ -3233,3 +3237,6 @@ bool ishex1(cell *c);
 namespace fieldpattern { int fieldval_uniq(cell *c);  int fieldval_uniq_rand(cell *c, int d); }
 bool warptype(cell *c);
 bool horo_ok();
+
+ld master_to_c7_angle();
+

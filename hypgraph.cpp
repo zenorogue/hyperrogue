@@ -452,8 +452,12 @@ bool confusingGeometry() {
   return elliptic || quotient == 1 || torus;
   }
 
+ld master_to_c7_angle() {
+  return nonbitrunc ? M_PI + gp::alpha : 0;
+  }
+
 transmatrix actualV(const heptspin& hs, const transmatrix& V) {
-  return (hs.spin || nonbitrunc) ? V * spin(hs.spin*2*M_PI/S7 + (nonbitrunc ? M_PI:0) + gp::alpha) : V;
+  return (hs.spin || nonbitrunc) ? V * spin(hs.spin*2*M_PI/S7 + master_to_c7_angle()) : V;
   }
 
 transmatrix applyspin(const heptspin& hs, const transmatrix& V) {

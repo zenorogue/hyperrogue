@@ -1633,6 +1633,11 @@ namespace patterns {
     }  
   }
 
+bool is_master(cell *c) { 
+  if(euclid) return pseudohept(c);
+  else return c->master->c7 == c;
+  }
+
 namespace linepatterns {
 
   int lessalpha(int col, int m) {

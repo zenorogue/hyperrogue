@@ -354,7 +354,10 @@ namespace gp {
       }
     }
     
+  map<pair<int, int>, loc> center_locs;
+  
   void compute_geometry() {
+    center_locs.clear();
     if(on) {
       int x = param.first;
       int y = param.second;
@@ -495,13 +498,15 @@ namespace gp {
       };
     }
   
+  loc univ_param() {
+    if(on) return param;
+    else if(nonbitrunc) return loc(1,0);
+    else return loc(1,1);
+    }
+  
   void configure(bool texture_remap = false) {
-    if(gp::on)
-      config_x = param.first, config_y = param.second;
-    else if(nonbitrunc)
-      config_x = 1, config_y = 0;
-    else
-      config_x = 1, config_y = 1;
+    auto l = univ_param();
+    config_x = l.first, config_y = l.second;
     param = loc(config_x, config_y);
     pushScreen([texture_remap] () { gp::show(texture_remap); });
     }
@@ -530,9 +535,40 @@ namespace gp {
       }    
     }
   
+  int length(loc p) {
+    return eudist(p.first, p.second);
+    }
+  
+  // from some point X, (0,0) is in distance dmain, param is in distance d0, and param*z is in distance d1
+  // what is the distance of at from X?
+
+  int solve_triangle(int dmain, int d0, int d1, loc at) {
+    loc centerloc(0, 0);
+    auto rel = make_pair(d0-dmain, d1-dmain);
+    if(center_locs.count(rel))
+      centerloc = center_locs[rel];
+    else {
+      bool found = false;
+      for(int y=-20; y<=20; y++)
+      for(int x=-20; x<=20; x++) {
+        loc c(x, y);
+        int cc = length(c);
+        int c0 = length(c - param);
+        int c1 = length(c - param*loc(0,1));
+        if(c0-cc == d0-dmain && c1-cc == d1-dmain)
+          found = true, centerloc = c;
+        }
+      if(!found)
+        printf("Warning: centerloc not found: %d,%d,%d\n", dmain, d0, d1);
+      center_locs[rel] = centerloc;
+      }
+    
+    return dmain + length(centerloc-at) - length(centerloc);
+    }
+  
   int compute_dist(cell *c, int master_function(cell*)) {
     auto li = get_local_info(c);
-    be_in_triangle(li);
+    be_in_triangle2(li);
     
     cell *cm = c->master->c7;
     
@@ -542,25 +578,21 @@ namespace gp {
     auto dmain = master_function(cm);
     auto d0 = master_function(createStep(cm->master, i)->c7);
     auto d1 = master_function(createStep(cm->master, fixdir(i+1, cm))->c7);
-        
-    int w = param.first;
     
-    while(true) {
-      if(dmain < d0 && dmain < d1)
-        return dmain + at.first + at.second;
-      if(dmain > d0 && dmain > d1)
-        return dmain - at.first - at.second;
-      if(dmain == d0 && dmain == d1)
-        return dmain;
-      // main ~ (0,0)
-      // d0 ~ (w,0)
-      // d1 ~ (0,w)
-      tie(dmain, d0, d1) = make_tuple(d0, d1, dmain);
-      // (0,0) -> (0,w)
-      // (w,0) -> (0,0)
-      // (0,w) -> (w,0)
-      at = loc(at.second, w - at.first - at.second);
-      }
+    return solve_triangle(dmain, d0, d1, at);
     }
+  
+  int dist_2() {
+    return length(univ_param());
+    }
+
+  int dist_3() {
+    return length(univ_param() * loc(1,1));
+    }
+  
+  int dist_1() {
+    return dist_3() - dist_2();
+    }
+
   }
 
