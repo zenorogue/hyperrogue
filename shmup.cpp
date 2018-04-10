@@ -3333,8 +3333,14 @@ transmatrix calc_relative_matrix(cell *c, heptagon *h1) {
   transmatrix gm = Id;
   heptagon *h2 = c->master;
   transmatrix where = Id;
-  for(int d=0; d<S7; d++) if(h2->c7->mov[d] == c)
-    where = hexmove[d];
+
+  if(gp::on && c != c->master->c7) {
+    auto li = gp::get_local_info(c);
+    where = gp::Tf[li.last_dir][li.relative.first&31][li.relative.second&31][fix6(li.total_dir)];
+    }
+  else if(!nonbitrunc)
+    for(int d=0; d<S7; d++) if(h2->c7->mov[d] == c)
+      where = hexmove[d];
   // always add to last!
 //bool hsol = false;
 //transmatrix sol;
