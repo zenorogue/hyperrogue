@@ -1361,6 +1361,8 @@ int heptdistance(cell *c1, cell *c2) {
   else return heptdistance(c1->master, c2->master);
   }
 
+map<pair<cell*, cell*>, int> saved_distances;
+
 int celldistance(cell *c1, cell *c2) {
   int d = 0;
   
@@ -1371,9 +1373,26 @@ int celldistance(cell *c1, cell *c2) {
     }
   
   if(sphere || quotient == 1 || gp::on) {
+    
+    if(saved_distances.count(make_pair(c1,c2)))
+      return saved_distances[make_pair(c1,c2)];
+
+    celllister cl(c1, 64, 1000, c2);
+    for(int i=0; i<size(cl.lst); i++)
+      saved_distances[make_pair(c1, cl.lst[i])] = cl.dists[i];
+
+    if(saved_distances.count(make_pair(c1,c2)))
+      return saved_distances[make_pair(c1,c2)];
+
+    return 64;
+    }
+  
+  if(gp::on) {
+    
     celllister cl(c1, 64, 1000, c2);
     for(int i=0; i<size(cl.lst); i++)
       if(cl.lst[i] == c2) return cl.dists[i];
+
     return 64;
     }
   
@@ -1452,6 +1471,7 @@ void clearCellMemory() {
       delete allmaps[i];
   allmaps.clear();
   last_cleared = NULL;
+  saved_distances.clear();
   }
 
 auto cellhooks = addHook(clearmemory, 500, clearCellMemory);
