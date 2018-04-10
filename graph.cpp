@@ -2716,7 +2716,7 @@ void setcolors(cell *c, int& wcol, int &fcol) {
       fcol = gradient(0x008000, 0x800000, 0, c->landparam, 10);
       break;    
     case laMountain:
-      if(euclid || c->master->alt)
+      if(euclid || sphere || c->master->alt)
         fcol = celldistAlt(c) & 1 ? 0x604020 : 0x302010;
       else fcol = 0;
       if(c->wall == waPlatform) wcol = 0xF0F0A0;
@@ -4833,7 +4833,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       int prec = sphere ? 3 : 1;
       
       if(gp::on) {
-        vid.linewidth *= gp::scale;
+        vid.linewidth *= gp::scale * 2;
         if(isWarped(c) && has_nice_dual()) {
           if(pseudohept(c)) for(int t=0; t<c->type; t++)
             queueline(V * gp::get_corner_position(c, t%c->type, 2),
@@ -4845,7 +4845,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           queueline(V * gp::get_corner_position(c, t),
                     V * gp::get_corner_position(c, (t+1)%c->type),
                     gridcolor(c, c->mov[t]), prec);
-        vid.linewidth /= gp::scale;
+        vid.linewidth /= gp::scale * 2;
         }
       else if(nonbitrunc) {
         double x = hcrossf;

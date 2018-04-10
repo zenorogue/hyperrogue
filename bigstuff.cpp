@@ -740,7 +740,7 @@ void setLandSphere(cell *c) {
     if(specialland == laCrossroads3 && c->type != 6 && c->master->fiftyval == 1)
       c->wall = waBigTree;        
     }
-  if(specialland == laIvoryTower || specialland == laEndorian || specialland == laDungeon || specialland == laOcean) {
+  if(specialland == laIvoryTower || specialland == laEndorian || specialland == laDungeon || specialland == laOcean || specialland == laMountain) {
     int d = celldist(c);
     if(d <= 0) 
       c->land = laCrossroads4;
