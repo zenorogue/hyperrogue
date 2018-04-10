@@ -92,16 +92,16 @@ namespace gp {
     return (v.first - v.second + MODFIXER)%3;
     }
   
-  goldberg_mapping_t goldberg_map[20][20];
+  goldberg_mapping_t goldberg_map[32][32];
   void clear_mapping() {
-    for(int y=0; y<20; y++) for(int x=0; x<20; x++) {
+    for(int y=0; y<32; y++) for(int x=0; x<32; x++) {
       goldberg_map[y][x].c = NULL;
       goldberg_map[y][x].rdir = -1;
       }
     }
   
   goldberg_mapping_t& get_mapping(loc c) {
-    return goldberg_map[c.second + 10][c.first + 10];
+    return goldberg_map[c.second&31][c.first&31];
     }
 
   const char *disp(loc at) { 
