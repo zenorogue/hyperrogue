@@ -465,10 +465,10 @@ namespace gp {
     if((config_x-config_y)%3 && !show_nonthree)
       dialog::addInfo("This pattern needs x-y divisible by 3");
     else
-      dialog::addBoolItem(XLAT("tuned"), param == loc(config_x, config_y), 'f');
+      dialog::addBoolItem(XLAT("select"), param == loc(config_x, config_y), 'f');
     
     dialog::addBreak(100);
-    dialog::addItem(XLAT("help"), SDLK_F1);  
+    dialog::addItem(XLAT("help"), SDLK_F1);
     dialog::addItem(XLAT("back"), '0');  
     dialog::display();
 
@@ -488,6 +488,8 @@ namespace gp {
         dialog::editNumber(config_x, 1, 10, 1, 1, "x", helptext());
       else if(uni == 'y')
         dialog::editNumber(config_y, 1, 10, 1, 1, "y", helptext());
+      else if(uni == '?' || sym == SDLK_F1 || uni == 'h' || uni == '2')
+        gotoHelp(helptext());
       else if(doexiton(sym, uni))
         popScreen();
       };
