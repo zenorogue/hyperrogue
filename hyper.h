@@ -3006,7 +3006,7 @@ namespace gp {
   local_info get_local_info(cell *c);
   const char *disp(loc at);
 
-  void be_in_triangle2(local_info& li);
+  void be_in_triangle(local_info& li);
 
   int compute_dist(cell *c, int master_function(cell*));
   

@@ -439,7 +439,7 @@ int getHemisphere(cell *c, int which) {
     int score = 0;
     if(gp::on) {
       auto li = gp::get_local_info(c);
-      gp::be_in_triangle2(li);
+      gp::be_in_triangle(li);
       auto corner = gp::corners * gp::loctoh_ort(li.relative);
       ld scored = 
         corner[0] * getHemisphere(c->master->c7, which)

@@ -511,7 +511,7 @@ namespace gp {
     pushScreen([texture_remap] () { gp::show(texture_remap); });
     }
   
-  void be_in_triangle2(local_info& li) { // hyperpoint atz(const transmatrix& T, const transmatrix& corners, loc at, int cornerid = 6, ld cf = 3) {
+  void be_in_triangle(local_info& li) {
     int sp = 0;
     auto& at = li.relative;
     again:
@@ -525,16 +525,6 @@ namespace gp {
     li.last_dir = fix7(li.last_dir - sp);
     }
 
-  void be_in_triangle(local_info& li) {
-    int& i = li.last_dir;
-    auto& at = li.relative;
-
-    while(at.first < 0 || at.second < 0) {
-      at = at * eudir(1);
-      i = fix7(i-1);
-      }    
-    }
-  
   int length(loc p) {
     return eudist(p.first, p.second);
     }
@@ -568,7 +558,7 @@ namespace gp {
   
   int compute_dist(cell *c, int master_function(cell*)) {
     auto li = get_local_info(c);
-    be_in_triangle2(li);
+    be_in_triangle(li);
     
     cell *cm = c->master->c7;
     
