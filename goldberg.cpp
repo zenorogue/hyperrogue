@@ -205,15 +205,17 @@ namespace gp {
     
     // 3 ~ h->spin(d)
     auto& ac1 = get_mapping(vc[1]);
-    ac1.cw = cellwalker(createStep(h, d)->c7, fix7(h->spin(d) - (h->mirror(d) ? -3 : 3)), h->mirror(d));
+    cell *c0 = createStep(h, d)->c7;
+    ac1.cw = cellwalker(c0, h->spin(d) - (h->mirror(d) ? -3 : 3), h->mirror(d));
     WHD( printf("%s : %s\n", disp(vc[1]), dcw(ac1.cw)); )
  
     
     auto& ac2 = get_mapping(vc[2]);
     int d1 = (d+1)%S7;
-    ac2.cw = cellwalker(createStep(h, d1)->c7, fix7(h->spin(d1) - (h->mirror(d1) ? -4 : 4)), h->mirror(d1));
+    cell *c1 = createStep(h, d1)->c7;
+    ac2.cw = cellwalker(c1, h->spin(d1) - (h->mirror(d1) ? -4 : 4), h->mirror(d1));
     WHD( printf("%s : %s\n", disp(vc[2]), dcw(ac2.cw)); )
-    // 4 ~ h->spin(d+1)
+    // 4 ~ h->spin(d1)
     }
 
     // then we set the edges of our big equilateral triangle (in a symmetric way)
