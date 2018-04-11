@@ -245,7 +245,7 @@ void setmatrix(int useV, const transmatrix& V) {
     GLfloat mat[16] = {
       1, 0, 0, 0,
       0, 1, 0, 0,
-      0, 0, -1, 0,
+      0, 0, GLfloat(stereo::mode ? -1 : 0), 0,
       0, 0, stereo::scrdist, 1
       };
     glhr::set_modelview(glhr::as_glmatrix(mat));
