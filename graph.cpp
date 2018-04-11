@@ -3107,7 +3107,7 @@ void plainfloor(cell *c, bool warp, const transmatrix &V, int col, int prio) {
       }
     else {
       auto si = patterns::getpatterninfo(c, 0, 0);
-      queuepolyat(V * applyPatterndir(c, si), shTriheptaFloor[sphere ? ctof(c) : si.id], col, prio);
+      queuepolyat(V * applyPatterndir(c, si), shTriheptaFloor[/*sphere ? ctof(c) :*/ si.id], col, prio);
       }
     }
   else if(is_nice_dual(c)) {
@@ -4662,6 +4662,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       int fd0 = fd ? fd-1 : 0;
       
       qfi.shape = &getSeabed(*qfi.shape);
+      // this draws the water surface
       warpfloor(c, (*Vdp), darkena(fcol, fd0, 0x80), PPR_LAKELEV, isWarped(c));
       }
     

@@ -1342,7 +1342,8 @@ void buildpolys() {
     trihepta0 = trihepta1 = crossf * 1.35 / 2;
 
   if(sphere&&S7==3&&!gp::on) trihepta0 *= 1.3, trihepta1 *= 1.6;
-  if(sphere&&S3==3&&gp::on) trihepta1 *= whatever;
+
+  if(sphere&&gp::on) trihepta1 *= 1.4;
 
   int tshift0 = (a4?S14:0);
   int tshift1 = (td + (!(S7&1))) ? S6:0; // +S6+(a4&(S7&1)?S6:0);
