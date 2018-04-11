@@ -2809,14 +2809,19 @@ void setcolors(cell *c, int& wcol, int &fcol) {
       }
     
     case laEndorian: {
-      int clev = cwt.c->land == laEndorian ? edgeDepth(cwt.c) : 0;
+      int clev = pd_from->land == laEndorian ? edgeDepth(pd_from) : 0;
         // xcol = (c->landparam&1) ? 0xD00000 : 0x00D000;
       fcol = 0x10101 * (32 + (c->landparam&1) * 32) - 0x000010;
       int ed = edgeDepth(c);
       int sr = get_sightrange_ambush();
-      while(ed > clev + sr) ed -= 2;
-      while(ed < clev - sr) ed += 2;
-      fcol = gradient(fcol, 0x0000D0, clev-sr, edgeDepth(c), clev+sr);
+      
+      if(clev == UNKNOWN || ed == UNKNOWN)
+        fcol = 0x0000D0;
+      else {
+        while(ed > clev + sr) ed -= 2;
+        while(ed < clev - sr) ed += 2;
+        fcol = gradient(fcol, 0x0000D0, clev-sr, edgeDepth(c), clev+sr);
+        }
       if(c->wall == waTrunk) fcol = winf[waTrunk].color;
   
       if(c->wall == waCanopy || c->wall == waSolidBranch || c->wall == waWeakBranch) {
