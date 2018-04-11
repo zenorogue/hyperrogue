@@ -991,7 +991,14 @@ void giantLandSwitch(cell *c, int d, cell *from) {
     
     case laHalloween:
       if(d == 9) {
-        if(nonbitrunc) {
+        if(gp::on) {
+          int fv = c->master->fiftyval;
+          if(fv == 1 || fv == 4 || fv == 10) 
+            c->wall = waChasm;
+          if(c == c->master->c7 && fv == 3)
+            c->item = itTreat;
+          }
+        else if(nonbitrunc) {
           int fv = c->master->fiftyval;
           if(fv == 1 || fv == 4 || fv == 2) 
             c->wall = waChasm;
