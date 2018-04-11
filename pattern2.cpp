@@ -1048,9 +1048,11 @@ int pattern_threecolor(cell *c) {
   if(stdhyperbolic && nonbitrunc) {
     int z = zebra40(c);
     if(z == 5 || z == 8 || z == 15) return 0;
-    if(z == 10 || z == 12 || z == 7) return 2;
-    if(z == 6 || z == 9) return 3;
-    if(z == 14 || z == 11) return 4;
+    if(c->land == laSnakeNest) {
+      if(z == 10 || z == 12 || z == 7) return 2;
+      if(z == 6 || z == 9) return 3;
+      if(z == 14 || z == 11) return 4;
+      }
     return 1;
     }
   if(a46 && nonbitrunc) {
@@ -1064,6 +1066,8 @@ int pattern_threecolor(cell *c) {
     }
   if(S7 == 3 && nonbitrunc)
     return c->master->fiftyval;
+  if(gp_threecolor() && (S7&1))
+    return gp::pseudohept_val(c) > 0;
   return !ishept(c);
   }
   
