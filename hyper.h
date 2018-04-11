@@ -2307,7 +2307,6 @@ int getHemisphere(cell *c, int which);
 namespace tactic {
   extern bool on;
   extern bool trailer;
-  extern eLand lasttactic;
   }
 
 namespace yendor {

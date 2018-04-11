@@ -87,9 +87,11 @@ void initgame() {
     firstland = safetyland;
     }
   
-  if(peace::on) firstland = specialland;
-  
-  if(tactic::on && geometry) specialland = firstland;
+  bool use_special_land =
+    !safety &&
+    (peace::on || tactic::on || geometry || gp::on);
+    
+  if(use_special_land) firstland = specialland;
   
   if(firstland == laNone || firstland == laBarrier)
     firstland = laCrossroads;
@@ -99,17 +101,16 @@ void initgame() {
   if(firstland == laHauntedWall) firstland = laGraveyard; 
   if(firstland == laMercuryRiver) firstland = laTerracotta;
   if(firstland == laMountain && !tactic::on) firstland = laJungle;
-  if(isGravityLand(firstland) && !tactic::on) firstland = weirdhyperbolic ? laCrossroads4 : laCrossroads;
+  if((isGravityLand(firstland) && !isCyclic(firstland)) || firstland == laOcean) 
+    firstland = weirdhyperbolic ? laCrossroads4 : laCrossroads;
   
   cwt.c = currentmap->gamestart(); cwt.spin = 0; cwt.mirrored = false;
-  cwt.c->land = ((geometry || gp::on) && !safety) ? specialland : firstland;
+  cwt.c->land = firstland;
   
   chaosAchieved = false;
 
   if(firstland == laElementalWall) cwt.c->land = randomElementalLand();
   
-  if((tactic::on || weirdhyperbolic) && (isGravityLand(firstland) || firstland == laOcean) && firstland != laMountain)
-    cwt.c->land = weirdhyperbolic ? laCrossroads4 : nonbitrunc ? laCrossroads : laCrossroads2;
   createMov(cwt.c, 0);
   
   setdist(cwt.c, BARLEV, NULL);
@@ -141,7 +142,6 @@ void initgame() {
   if(tactic::on && tactic::trailer)
     items[treasureType(firstland)] = trailer_cash0;
 
-  tactic::lasttactic = firstland;
   yendor::lastchallenge = yendor::challenge;
   
   yendor::init(2);
@@ -776,16 +776,16 @@ void saveStats(bool emergency = false) {
     int xcode = modecode();
 
     if(tactic::on) {
-      int score = items[treasureType(tactic::lasttactic)];
+      int score = items[treasureType(specialland)];
       
       if(score) {
         int c = 
-          anticheat::certify(dnameof(tactic::lasttactic), turncount, t, (int) timerstart,
+          anticheat::certify(dnameof(specialland), turncount, t, (int) timerstart,
             xcode*999 + tactic::id + 256 * score);
         fprintf(f, "TACTICS %s %d %d %d %d %d %d %d %d date: %s\n", VER,
-          tactic::id, tactic::lasttactic, score, turncount, t, int(timerstart), 
+          tactic::id, specialland, score, turncount, t, int(timerstart), 
           c, xcode, buf);
-        tactic::record(tactic::lasttactic, score);
+        tactic::record(specialland, score);
         anticheat::nextid(tactic::id, VER, c);
         }
       }

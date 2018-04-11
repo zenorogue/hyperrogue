@@ -582,7 +582,7 @@ void countHyperstoneQuest(int& i1, int& i2) {
 
 bool hyperstonesUnlocked() {
   int i1, i2;
-  if(tactic::on && isCrossroads(tactic::lasttactic) && !tactic::trailer) return true;
+  if(tactic::on && isCrossroads(specialland) && !tactic::trailer) return true;
   countHyperstoneQuest(i1, i2);
   return i1 == i2;
   }
@@ -756,7 +756,7 @@ eLand getNewLand(eLand old) {
   if(old == laEWater && lchance(old)) return hrand(2) ? laEEarth : laEAir;
   if(old == laEFire  && lchance(old)) return hrand(2) ? laEEarth : laEAir;
 
-  if(tactic::on && !(tactic::trailer && old == firstland)) return firstland;
+  if(tactic::on && !(tactic::trailer && old == specialland)) return specialland;
   if(weirdhyperbolic && specialland != old) return specialland;
 
   if(yendor::on && (yendor::clev().flags & YF_WALLS)) {

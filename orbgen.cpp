@@ -518,8 +518,8 @@ void placeCrossroadOrbs(cell *c) {
       else continue;
       }
     
-    if(tactic::on) {
-      if(isCrossroads(tactic::lasttactic) && (oi.flags & orbgenflags::NO_TACTIC))
+    if(tactic::on && isCrossroads(specialland)) {
+      if(oi.flags & orbgenflags::NO_TACTIC)
         continue;
       else mintreas = 0;
       }

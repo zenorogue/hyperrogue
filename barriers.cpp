@@ -60,7 +60,7 @@ bool checkBarriersBack(cellwalker bb, int q, bool cross) {
 
 // warp coasts use a different algorithm when has_nice_dual() is on
 bool warped_version(eLand l1, eLand l2) {
-  return has_nice_dual() && (l1 == laWarpCoast || l1 == laWarpSea || l2 == laWarpSea || l2 == laWarpCoast);
+  return (has_nice_dual() && (l1 == laWarpCoast || l1 == laWarpSea || l2 == laWarpSea || l2 == laWarpCoast)) || ((S3==4) && !nonbitrunc);
   }
 
 bool checkBarriersNowall(cellwalker bb, int q, int dir, eLand l1=laNone, eLand l2=laNone) {
@@ -742,7 +742,7 @@ bool buildBarrierNowall(cell *c, eLand l2, bool force) {
   for(int j=0; j<c->type; j++) swap(ds[j], ds[hrand(j+1)]);
 
   for(int i=0; i<c->type; i++) {
-    int d = ds[i];
+    int d = (S3>3 && nonbitrunc) ? (2+(i&1)) : ds[i];
 /*    if(warpv && gp::on) {
       d = hrand(c->type); */
     if(warpv && c->mov[d] && c->mov[d]->mpdist < c->mpdist) continue;

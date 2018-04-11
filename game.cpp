@@ -6083,7 +6083,7 @@ void activateSafety(eLand l) {
   if(l == laClearing) l = laOvergrown;
   if(l == laWhirlpool) l = laOcean;
   if(l == laCrossroads5) l = laCrossroads2; // could not fit!
-  if(l == laCamelot && !(tactic::on && tactic::lasttactic == laCamelot)) 
+  if(l == laCamelot && !(tactic::on && specialland == laCamelot)) 
     l = laCrossroads;
   firstland = l;
   safetyland = l;

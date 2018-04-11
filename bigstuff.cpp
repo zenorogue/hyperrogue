@@ -444,7 +444,7 @@ void buildEquidistant(cell *c) {
     c->landparam = 50;
     return;
     } */
-  if(geometry) return;
+  if(sphere || euclid) return;
   eLand b = c->land;
   if(chaosmode && !inmirror(b)) return;
   if(!b) { 
@@ -1305,7 +1305,7 @@ void moreBigStuff(cell *c) {
 
   if(c->land == laOcean || c->land == laWhirlpool) {
     bool fullwhirlpool = false;
-    if(tactic::on && tactic::lasttactic == laWhirlpool)
+    if(tactic::on && specialland == laWhirlpool)
       fullwhirlpool = true;
     if(yendor::on && yendor::clev().l == laWhirlpool)
       fullwhirlpool = true;

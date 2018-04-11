@@ -680,7 +680,7 @@ namespace tactic {
     
     int xr = vid.xres / 64;
     
-    if(on) record(firstland, items[treasureType(firstland)]);
+    if(on) record(specialland, items[treasureType(specialland)]);
     
     int xc = modecode();
     
@@ -725,7 +725,7 @@ namespace tactic {
     dialog::displayPageButtons(3, true);
 
     uploadScore();
-    if(on) unrecord(firstland);
+    if(on) unrecord(specialland);
     
     if(getcstat >= 1000 && getcstat < 1000 + size(landlist)) {
       int ld = landlist[getcstat-1000];
@@ -741,7 +741,7 @@ namespace tactic {
      
     keyhandler = [] (int sym, int uni) {
       if(uni >= 1000 && uni < 1000 + size(landlist)) {
-        firstland = specialland = landlist[uni - 1000];
+        specialland = landlist[uni - 1000];
         restartGame(tactic::on ? 0 : rg::tactic);
         }
       else if(uni == '0') {

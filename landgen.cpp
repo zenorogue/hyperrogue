@@ -2087,7 +2087,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           c->wall = hrand(2) ? waMirror : waCloud;
         else if(!ctof(c) && hyperstonesUnlocked() && hrand(8000) < 100 && !gp::on)
           c->wall = hrand(2) ? waMirror : waCloud;
-        else if(!ctof(c) && tactic::on && isCrossroads(tactic::lasttactic) && hrand(8000) < 120 && !gp::on)
+        else if(!ctof(c) && tactic::on && isCrossroads(specialland) && hrand(8000) < 120 && !gp::on)
           c->wall = hrand(2) ? waMirror : waCloud;
         else if(c->land == laCrossroads4 && hrand(24000) < 10 && tactic::on)
           c->wall = waRose;
