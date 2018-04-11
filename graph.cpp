@@ -5200,7 +5200,6 @@ void drawFlashes() {
 
 bool allowIncreasedSight() {
   if(cheater) return true;
-  if(inHighQual) return true;
   if(peace::on) return true;
 #if CAP_TOUR
   if(tour::on) return true;
@@ -5210,6 +5209,18 @@ bool allowIncreasedSight() {
 #endif
   if(randomPatternsMode) return true;
   if(quotient || !hyperbolic) return true;
+  return false;
+  }
+
+bool allowChangeRange() {
+  if(cheater || peace::on || randomPatternsMode) return true;
+#if CAP_TOUR
+  if(tour::on) return true;
+#endif
+#if CAP_ROGUEVIZ
+  if(rogueviz::on) return true;
+#endif
+  if(sightrange_bonus >= 0) return true;
   return false;
   }
 

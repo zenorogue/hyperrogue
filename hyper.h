@@ -2102,6 +2102,7 @@ void selectLanguageScreen();
 
 bool inscreenrange(cell *c);
 bool allowIncreasedSight();
+bool allowChangeRange();
 
 static inline bool orbProtection(eItem it) { return false; } // not implemented
 

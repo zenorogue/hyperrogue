@@ -696,7 +696,7 @@ namespace dialog {
       addBoolItem("all directional lands", conformal::do_rotate == 2, 'd');
       }
     
-    if(ne.editwhat == &ne.intbuf && ne.intval == &sightrange_bonus && allowIncreasedSight()) {
+    if(ne.editwhat == &ne.intbuf && ne.intval == &sightrange_bonus && allowChangeRange()) {
       addSelItem("generation range bonus", its(genrange_bonus), 'o');
       addSelItem("game range bonus", its(gamerange_bonus), 'O');
       }
@@ -754,11 +754,11 @@ namespace dialog {
         conformal::do_rotate = 1;
       else if(uni == 'd' && ne.editwhat == &conformal::rotation)
         conformal::do_rotate = 2;
-      else if(uni == 'o' && ne.editwhat == &ne.intbuf && ne.intval == &sightrange_bonus && allowIncreasedSight()) {
+      else if(uni == 'o' && ne.editwhat == &ne.intbuf && ne.intval == &sightrange_bonus && allowChangeRange()) {
         genrange_bonus = sightrange_bonus;
         doOvergenerate();
         }
-      else if(uni == 'O' && ne.editwhat == &ne.intbuf && ne.intval == &sightrange_bonus && allowIncreasedSight()) {
+      else if(uni == 'O' && ne.editwhat == &ne.intbuf && ne.intval == &sightrange_bonus && allowChangeRange()) {
         gamerange_bonus = sightrange_bonus;
         }
       else if(uni == 'o' && ne.editwhat == &vid.linewidth)
