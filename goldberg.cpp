@@ -21,9 +21,8 @@ namespace gp {
     }
   
   struct goldberg_mapping_t {
-    cell *c;
+    cellwalker cw;
     char rdir;
-    int rspin;
     };
 
   loc eudir(int d) {
@@ -92,10 +91,14 @@ namespace gp {
     return (v.first - v.second + MODFIXER)%3;
     }
   
+  // mapping of the local equilateral triangle
+  // goldberg_map[y][x].cw is the cellwalker in this triangle at position (x,y)
+  // facing local direction 0  
+  
   goldberg_mapping_t goldberg_map[32][32];
   void clear_mapping() {
     for(int y=0; y<32; y++) for(int x=0; x<32; x++) {
-      goldberg_map[y][x].c = NULL;
+      goldberg_map[y][x].cw.c = NULL;
       goldberg_map[y][x].rdir = -1;
       }
     }
@@ -112,6 +115,14 @@ namespace gp {
     return bufs[bufid];
     }
 
+  const char *dcw(cellwalker cw) { 
+    static char bufs[16][32];
+    static int bufid;
+    bufid++; bufid %= 16;
+    snprintf(bufs[bufid], 32, "[%p/%d:%d:%d]", cw.c, cw.c?cw.c->type:-1, cw.spin, cw.mirrored);
+    return bufs[bufid];
+    }
+
   int spawn;
   
 #define WHD(x) // x
@@ -119,37 +130,38 @@ namespace gp {
   void conn1(loc at, int dir, int dir1) {
     auto& wc = get_mapping(at);
     auto& wc1 = get_mapping(at + eudir(dir));
-    int cdir = fixdir(dir + wc.rspin, wc.c);
-    WHD( printf("  connection %s/%d %p/%d ", disp(at), dir, wc.c, cdir); )
-    if(!wc1.c) {
-      wc1.c = wc.c->mov[cdir];
-      if(wc1.c) {
+    int cdir = (wc.cw + dir).spin;
+    WHD( printf("  connection %s/%d %s ", disp(at), dir, dcw(wc.cw+dir)); )
+    if(!wc1.cw.c) {
+      wc1.cw.c = wc.cw.c->mov[cdir];
+      if(wc1.cw.c) {
         // wc1.c/wc.c->spin(cdir) == dir1
-        wc1.rspin = fixdir(wc.c->spin(cdir) - dir1, wc1.c);
+        wc1.cw = (wc.cw + dir + wstep - dir1);
         WHD( printf("(pulled) "); )
         }
-      if(!wc1.c) {
-        wc1.c = newCell(6, wc.c->master);
+      if(!wc1.cw.c) {
+        wc1.cw.c = newCell(6, wc.cw.c->master);
         spawn++;
         // 0 for wc1.c should be dir1
-        wc1.rspin = fix6(-dir1);
+        wc1.cw.mirrored = wc.cw.mirrored;
+        wc1.cw.spin = fix6(wc.cw.mirrored ? dir1 : -dir1);
         WHD( printf("(created) "); )
         }
       }
-    int cdir1 = fixdir(dir1 + wc1.rspin, wc1.c);
-    WHD( printf("(%p/%d) ", wc1.c, cdir1); )
-    if(wc.c->mov[cdir] && wc.c->mov[cdir] != wc1.c) {
-      WHD( printf("FAIL: %p\n", wc.c->mov[cdir]); exit(1); )
+    int cdir1 = (wc1.cw + dir1).spin;
+    WHD( printf("%s ", dcw(wc1.cw+dir1)); )
+    if(wc.cw.c->mov[cdir] && wc.cw.c->mov[cdir] != wc1.cw.c) {
+      WHD( printf("FAIL: %p\n", wc.cw.c->mov[cdir]); exit(1); )
       }
-    if(wc.c->mov[cdir]) {
-      if(wc.c->spin(cdir) != cdir1) {
-        printf("warning: wrong spin\n");
+    if(wc.cw.c->mov[cdir]) {
+      if(wc.cw.c->spin(cdir) != cdir1) {
+        printf("warning: wrong spin: %d vs %d\n", wc.cw.c->spin(cdir), cdir1);
         exit(1);
         }
       }
-    WHD( else printf("ok\n"); )
-    wc.c->mov[cdir] = wc1.c;
-    tsetspin(wc.c->spintable, cdir, cdir1);
+    WHD(printf("ok\n"); )
+    wc.cw.c->mov[cdir] = wc1.cw.c;
+    tsetspin(wc.cw.c->spintable, cdir, cdir1 + (wc.cw.mirrored != wc1.cw.mirrored ? 8 : 0));
     }
 
   void conn(loc at, int dir) {
@@ -161,6 +173,7 @@ namespace gp {
     WHD( printf("EXTEND %p %d\n", c, d); )
     if(c->master->c7 != c) {
       while(c->master->c7 != c) {
+        WHD( printf("%p direction 0 corresponds to %p direction %d\n", c, c->mov[0], c->spin(0)); )
         d = c->spin(0);
         c = c->mov[0];
         }
@@ -187,21 +200,20 @@ namespace gp {
     {
     auto h = c->master;
     auto& ac0 = get_mapping(vc[0]);
-    ac0.c = h->c7;
-    ac0.rspin = d;
+    ac0.cw = cellwalker(h->c7, d);
+    WHD( printf("%s : %s\n", disp(vc[0]), dcw(ac0.cw)); )
     
-    auto& ac1 = get_mapping(vc[1]);
-    ac1.c = createStep(h, d)->c7;
-    WHD( printf("%s : %p\n", disp(vc[1]), ac1.c); )
- 
     // 3 ~ h->spin(d)
-    ac1.rspin = h->spin(d) - 3;
+    auto& ac1 = get_mapping(vc[1]);
+    ac1.cw = cellwalker(createStep(h, d)->c7, fix7(h->spin(d) - (h->mirror(d) ? -3 : 3)), h->mirror(d));
+    WHD( printf("%s : %s\n", disp(vc[1]), dcw(ac1.cw)); )
+ 
     
     auto& ac2 = get_mapping(vc[2]);
-    ac2.c = createStep(h, (d+1)%S7)->c7;
-    WHD( printf("%s : %p\n", disp(vc[2]), ac2.c); )
+    int d1 = (d+1)%S7;
+    ac2.cw = cellwalker(createStep(h, d1)->c7, fix7(h->spin(d1) - (h->mirror(d1) ? -4 : 4)), h->mirror(d1));
+    WHD( printf("%s : %s\n", disp(vc[2]), dcw(ac2.cw)); )
     // 4 ~ h->spin(d+1)
-    ac2.rspin = h->spin((d+1)%S7) - 4;
     }
 
     // then we set the edges of our big equilateral triangle (in a symmetric way)
@@ -212,7 +224,7 @@ namespace gp {
       loc rel = param;
       auto build = [&] (loc& at, int dx, bool forward) {
         int dx1 = dx + 2*i;
-        WHD( printf("%s %d\n", disp(at), dx1); )
+        WHD( printf("%s %d .. %s %d\n", disp(at), dx1, disp(at + eudir(dx1)), fix6(dx1+3)); )
         conn(at, dx1);        
         if(forward) get_mapping(at).rdir = fix6(dx1);
         else get_mapping(at+eudir(dx1)).rdir = fix6(dx1+3);
@@ -264,7 +276,7 @@ namespace gp {
         case 1: {
           auto at2 = at + eudir(dx+1);
           auto& wc2 = get_mapping(at2);
-          if(wc2.c) { at = at1; continue; }
+          if(wc2.cw.c) { at = at1; continue; }
           wc.rdir = (dx+1) % 6;
           conn(at, (dx+1) % 6);
           conn(at1, (dx+2) % 6);
@@ -408,6 +420,13 @@ namespace gp {
     if(x < y) swap(x, y);
     if(x > 8) x = 8;
     if(y > 8) y = 8;
+    if(y && elliptic) {
+      if(x==y)
+        addMessage("GP(x,x) not implemented yet for elliptic geometry");
+      else
+        addMessage("This does not work in elliptic geometry");
+      y = 0;
+      }
     config_x = x; config_y = y;
     param = loc(x, y);
     auto g = screens;
