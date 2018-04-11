@@ -377,6 +377,7 @@ void showEuclideanMenu() {
     dialog::addBreak(50);
     
     generateLandList(isLandValid);
+    stable_sort(landlist.begin(), landlist.end(), [] (eLand l1, eLand l2) { return isLandValid(l1) > isLandValid(l2); });
     
     for(int i=0; i<euperpage; i++) {
       if(euperpage * eupage + i >= size(landlist)) { dialog::addBreak(100); break; }
