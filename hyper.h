@@ -2267,7 +2267,7 @@ const eLand NOWALLSEP_USED = laWhirlpool;
 
 bool hasbardir(cell *c);
 
-bool buildBarrierNowall(cell *c, eLand l2, bool force = false);
+bool buildBarrierNowall(cell *c, eLand l2, int forced_dir = NODIR);
 bool checkBarriersBack(cellwalker bb, int q=5, bool cross = false);
 bool checkBarriersFront(cellwalker bb, int q=5, bool cross = false);
 

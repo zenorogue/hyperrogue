@@ -339,7 +339,7 @@ eLand landof(eItem it) {
 
 bool isSealand(eLand l) {
   return l == laOcean || l == laCaribbean || l == laWhirlpool || l == laLivefjord ||
-    l == laOceanWall || l == laWarpSea || l == laKraken;
+    l == laOceanWall || l == laWarpSea || l == laKraken || l == laDocks;
   }
 
 bool isCoastal(eLand l) {
@@ -717,7 +717,7 @@ hookset<eLand(eLand)> *hooks_nextland;
 eLand getNewLand(eLand old) {
 
   if(old == laMirror && !chaosmode && hrand(10) >= (tactic::on ? 0 : markOrb(itOrbLuck) ? 5 : 2)) return laMirrored;
-  if(old == laTerracotta && !chaosmode && hrand(5) >= (tactic::on ? 0 : markOrb(itOrbLuck) ? 2 : 1)) return laTerracotta;
+  if(old == laTerracotta && !chaosmode && hrand(5) >= (tactic::on ? 0 : markOrb(itOrbLuck) ? 2 : 1) && !weirdhyperbolic) return laTerracotta;
     
   eLand l = callhandlers(laNone, hooks_nextland, old);
   if(l) return l;
@@ -757,7 +757,7 @@ eLand getNewLand(eLand old) {
   if(old == laEFire  && lchance(old)) return hrand(2) ? laEEarth : laEAir;
 
   if(tactic::on && !(tactic::trailer && old == specialland)) return specialland;
-  if(weirdhyperbolic && specialland != old) return specialland;
+  if(weirdhyperbolic && specialland != old && specialland != laCrossroads4) return specialland;
 
   if(yendor::on && (yendor::clev().flags & YF_WALLS)) {
     if(old != yendor::clev().l) return yendor::clev().l;

@@ -312,7 +312,8 @@ cell *buildAnotherEquidistant(cell *c, int radius) {
   
   cellwalker cw(c, (gdir+3) % c->type);
   vector<cell*> coastpath;
-  while(size(coastpath) < radius || cw.c->type != 7) {
+  
+  while(size(coastpath) < radius || (cw.c->type != 7 && !weirdhyperbolic)) {
     // this leads to bugs for some reason!
     if(cw.c->land == laCrossroads2) {
 #ifdef AUTOPLAY
@@ -321,6 +322,7 @@ cell *buildAnotherEquidistant(cell *c, int radius) {
       return NULL;
       }
     if(cw.c->bardir != NODIR) return NULL;
+    if(cw.c->landparam && cw.c->landparam < radius) return NULL;
 
     /* forCellEx(c2, cw.c) if(c2->bardir != NODIR) {
       generatingEquidistant = false;
@@ -350,7 +352,6 @@ cell *buildAnotherEquidistant(cell *c, int radius) {
     setdist(coastpath[i], BARLEV-1, coastpath[i-1]);
     if(i < size(coastpath) - 5) {
       coastpath[i]->bardir = NOBARRIERS;
-//      coastpath[i]->item = itSapphire;
 //      forCellEx(c2, coastpath[i]) c2->bardir = NOBARRIERS;
       }
     }
@@ -371,12 +372,15 @@ cell *buildAnotherEquidistant(cell *c, int radius) {
   if(c2->land != c->land) return NULL;
   
   // else if(ctof(c) && hrand(10000) < 20 && !isCrossroads(c->land) && gold() >= 200)
-  if(pseudohept(c2) && gold() >= R200 && hrand(10) < 2 && buildBarrierNowall(c2, laCrossroads4, true))  {
+  if(weirdhyperbolic && specialland == laCrossroads4 && buildBarrierNowall(c2, getNewLand(laOcean))) {
+    nowall = true;
+    }
+  else if(pseudohept(c2) && gold() >= R200 && hrand(10) < 2 && buildBarrierNowall(c2, laCrossroads4, 1)) {
     nowall = true;
     // raiseBuggyGeneration(c2, "check");
     // return;
     }
-  else buildBarrier(c2, bd);
+  else if(!weirdhyperbolic) buildBarrier(c2, bd);
   //printf("building barrier II\n");
   if(hasbardir(c2)) extendBarrier(c2);
 
@@ -417,7 +421,7 @@ int coastval(cell *c, eLand base) {
     }
   else {
     if(c->land == laOceanWall || c->land == laCaribbean || c->land == laWhirlpool ||
-      c->land == laLivefjord || c->land == laWarpSea || c->land == laKraken)
+      c->land == laLivefjord || c->land == laWarpSea || c->land == laKraken || c->land == laDocks)
       return 30;
     if(c->land  != laOcean && !isGravityLand(c->land) && c->land != laHaunted) {
       return 0;
@@ -595,10 +599,17 @@ void buildEquidistant(cell *c) {
       }
     }
   
-  if(c->landparam > 30 && b == laOcean && !generatingEquidistant && hrand(10) < 5 && !weirdhyperbolic) 
+  bool chance = true;
+  if(weirdhyperbolic) {
+    chance = false;
+    if(specialland == laCrossroads4)
+      chance = hrand(100) < 10;
+    }
+  
+  if(c->landparam > 30 && b == laOcean && !generatingEquidistant && hrand(10) < 5 && chance) 
     buildAnotherEquidistant(c);
 
-  if(c->landparam > HAUNTED_RADIUS+5 && b == laGraveyard && !generatingEquidistant && hrand(100) < (nonbitrunc?25:5) && items[itBone] >= 10 && !weirdhyperbolic) 
+  if(c->landparam > HAUNTED_RADIUS+5 && b == laGraveyard && !generatingEquidistant && hrand(100) < (nonbitrunc?25:5) && items[itBone] >= 10 && chance) 
     buildAnotherEquidistant(c);
   }
 
@@ -960,37 +971,39 @@ bool horo_ok() {
   // (they work in ALL hyperbolic geometries currently!)
   return hyperbolic;
   }
+
+bool gp_wall_test() {
+  if(gp::on) return hrand(gp::dist_3()) == 0;
+  return true;
+  }
   
 void buildBigStuff(cell *c, cell *from) {
   if(sphere || quotient) return;
   bool deepOcean = false;
   
-  if(!weirdhyperbolic) {
-        
-    if(c->land == laOcean) {
-      if(!from) deepOcean = true;
-      else for(int i=0; i<from->type; i++) {
-        cell *c2 = from->mov[i];
-        if(c2 && c2->land == laOcean && c2->landparam > 30) {
-          deepOcean = true;
-          }
-        if(c2) forCellEx(c3, c2) if(c3 && c3->land == laOcean && c3->landparam > 30)
-          deepOcean = true;
+  if(c->land == laOcean) {
+    if(!from) deepOcean = true;
+    else for(int i=0; i<from->type; i++) {
+      cell *c2 = from->mov[i];
+      if(c2 && c2->land == laOcean && c2->landparam > 30) {
+        deepOcean = true;
         }
+      if(c2) forCellEx(c3, c2) if(c3 && c3->land == laOcean && c3->landparam > 30)
+        deepOcean = true;
       }
-    
-    if(c->land == laGraveyard) {
-      if(!from) deepOcean = true;
-      else for(int i=0; i<from->type; i++) {
-        cell *c2 = from->mov[i];
-        if(c2 && c2->landparam > HAUNTED_RADIUS+5)
-          deepOcean = true;
-        }
+    }
+  
+  if(c->land == laGraveyard) {
+    if(!from) deepOcean = true;
+    else for(int i=0; i<from->type; i++) {
+      cell *c2 = from->mov[i];
+      if(c2 && c2->landparam > HAUNTED_RADIUS+5)
+        deepOcean = true;
       }
     }
   
   if(generatingEquidistant) deepOcean = false;
-  if(weirdhyperbolic && c->land == laOcean) deepOcean = c->landparam >= 30;
+  // if(weirdhyperbolic && c->land == laOcean) deepOcean = c->landparam >= 30;
   
   // buildgreatwalls
   
@@ -1026,7 +1039,7 @@ void buildBigStuff(cell *c, cell *from) {
     buildBarrierNowall(c, laCrossroads4) ;
     }
   
-  else if(weirdhyperbolic && specialland == laCrossroads4 && /*pseudohept(c) &&*/ hrand(I10000/4) < wallchance(c, deepOcean)) {
+  else if(weirdhyperbolic && specialland == laCrossroads4 && /*pseudohept(c) &&*/ hrand(I10000 /4) < wallchance(c, deepOcean) && gp_wall_test()) {
     buildBarrierNowall(c, getNewLand(c->land));
     }
   

@@ -726,7 +726,7 @@ void buildCrossroads2(cell *c) {
     }
   }
 
-bool buildBarrierNowall(cell *c, eLand l2, bool force) {
+bool buildBarrierNowall(cell *c, eLand l2, int forced_dir) {
 
   if(c->land == laNone) {
     printf("barrier nowall! [%p]\n", c);
@@ -742,19 +742,18 @@ bool buildBarrierNowall(cell *c, eLand l2, bool force) {
   for(int j=0; j<c->type; j++) swap(ds[j], ds[hrand(j+1)]);
 
   for(int i=0; i<c->type; i++) {
-    int d = (S3>3 && nonbitrunc) ? (2+(i&1)) : ds[i];
+    int d = forced_dir != NODIR ? forced_dir : (S3>3 && nonbitrunc) ? (2+(i&1)) : ds[i];
 /*    if(warpv && gp::on) {
       d = hrand(c->type); */
     if(warpv && c->mov[d] && c->mov[d]->mpdist < c->mpdist) continue;
 /*      }
     else 
       d = (S3>3 && !warpv) ? (2+(i&1)) : dtab[i]; */
-    if(force) d=1;
     cellwalker cw(c, d);
     
     eLand ws = warpv ? laWarpCoast : laNone;
     
-    if(force || (checkBarriersNowall(cw, 0, -1, ws, ws) && checkBarriersNowall(cw, 0, 1, ws, ws))) {
+    if(forced_dir != NODIR || (checkBarriersNowall(cw, 0, -1, ws, ws) && checkBarriersNowall(cw, 0, 1, ws, ws))) {
       eLand l1 = c->land;
       checkBarriersNowall(cw, 0, -1, l1, l2);
       checkBarriersNowall(cw, 0, 1, l1, l2);

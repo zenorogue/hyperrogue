@@ -1568,7 +1568,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           if(hrand(1000) < 150 && celldist(c) >= 3 && !pseudohept(c)) 
             c->wall = waSmallTree;
           int q = 0;
-          if(!nonbitrunc && !chaosmode) for(int i=0; i<c->type; i++) 
+          if(!nonbitrunc && !chaosmode && !weirdhyperbolic) for(int i=0; i<c->type; i++) 
             if(c->mov[i] && !isWarped(c->mov[i]->land) && c->mov[i]->land != laCrossroads4) 
               q++;
           if(q == 1) c->wall = waWarpGate;
@@ -1746,8 +1746,10 @@ void giantLandSwitch(cell *c, int d, cell *from) {
         if(c->landparam % TEMPLE_EACH == 0 && c->landparam <= 24) {
           int q = 0;
           forCellEx(c2, c)
-            if(c2->landparam % TEMPLE_EACH == 0 && !ishept(c2)) q++;
+            if(c2->landparam % TEMPLE_EACH == 0 && !pseudohept(c2)) q++;
           placecolumn = q == 2;
+          if(placecolumn && weirdhyperbolic && nonbitrunc && hrand(100) >= 50)
+            placecolumn = false;
           if(placecolumn) {
             placecolumn = false;
             cell *c2 = c;

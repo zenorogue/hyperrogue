@@ -101,7 +101,7 @@ void initgame() {
   if(firstland == laHauntedWall) firstland = laGraveyard; 
   if(firstland == laMercuryRiver) firstland = laTerracotta;
   if(firstland == laMountain && !tactic::on) firstland = laJungle;
-  if((isGravityLand(firstland) && !isCyclic(firstland)) || firstland == laOcean) 
+  if((isGravityLand(firstland) && !isCyclic(firstland)) || (firstland == laOcean && !safety)) 
     firstland = weirdhyperbolic ? laCrossroads4 : laCrossroads;
   
   cwt.c = currentmap->gamestart(); cwt.spin = 0; cwt.mirrored = false;
