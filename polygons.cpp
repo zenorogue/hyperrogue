@@ -974,7 +974,9 @@ void drawqueue() {
   }
 
 hpcshape 
-  shFloorSide[SIDEPARS][2], shSemiFloorSide[SIDEPARS], shTriheptaSide[SIDEPARS][2], shMFloorSide[SIDEPARS][2], shFullFloorSide[SIDEPARS][2],
+  shFloorSide[SIDEPARS][2], shSemiFloorSide[SIDEPARS], shTriheptaSide[SIDEPARS][2], 
+  shTriheptaSideGP[SIDEPARS][2],
+  shMFloorSide[SIDEPARS][2], shFullFloorSide[SIDEPARS][2],
   shFullFloor[2], shFullCross[2],
   shSeabed[2], shCloudSeabed[3], shCaveSeabed[4],
   shWave[8][2],  
@@ -1472,6 +1474,14 @@ void buildpolys() {
   
     bshape(shTriheptaSide[k][1], PPR_LAKEWALL);
     for(int t=0; t<=1; t++) hpcpush(ddi(t*S12-S6, trihepta1) * C0);
+    chasmifyPoly(dlow, dhi, k);
+
+    bshape(shTriheptaSideGP[k][0], PPR_LAKEWALL);
+    for(int t=0; t<=1; t++) hpcpush(ddi(t*S14-S7, trihepta0*1.6) * C0);
+    chasmifyPoly(dlow, dhi, k);
+
+    bshape(shTriheptaSideGP[k][1], PPR_LAKEWALL);
+    for(int t=0; t<=1; t++) hpcpush(ddi(t*S14-S7, trihepta0*1.6) * C0);
     chasmifyPoly(dlow, dhi, k);
 
     bshape(shMFloorSide[k][0], PPR_LAKEWALL);
@@ -2428,6 +2438,7 @@ bool isSpecial(const hpcshape &h) {
     &h != &shFloor[1] && 
     &h != &shTriheptaFloor[0] && 
     &h != &shTriheptaFloor[1] &&
+    &h != &shTriheptaFloor[13] &&
     &h != &shBigTriangle;
   }
 

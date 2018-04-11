@@ -3191,7 +3191,7 @@ void escherSidewall(cell *c, int sidepar, const transmatrix& V, int col) {
 
 void placeSidewall(cell *c, int i, int sidepar, const transmatrix& V, bool warp, bool mirr, int col) {
   if(shmup::on || nbtnice) warp = false;
-  if(warp && !ishept(c) && (!c->mov[i] || !ishept(c->mov[i]))) return;
+  if(warp && !pseudohept(c) && (!c->mov[i] || !pseudohept(c->mov[i]))) return;
   if(is_nice_dual(c)) {
     if(pseudohept(c)) return;
     bool b = !(i&1);
@@ -3222,7 +3222,7 @@ void placeSidewall(cell *c, int i, int sidepar, const transmatrix& V, bool warp,
   // prio += c->cpdist - c->mov[i]->cpdist;  
   
   queuepolyat(V2, 
-    (qfi.tinf?shFullFloorSide:mirr?shMFloorSide:warp?shTriheptaSide:is_nice_dual(c)?shBigTriSide:shFloorSide)[sidepar][ctof(c)], col, prio);
+    (qfi.tinf?shFullFloorSide:mirr?shMFloorSide:warp?(pseudohept(c)&&!ishept(c)?shTriheptaSideGP:shTriheptaSide):is_nice_dual(c)?shBigTriSide:shFloorSide)[sidepar][ctof(c)], col, prio);
   }
 
 bool openorsafe(cell *c) {
