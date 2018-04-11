@@ -3016,6 +3016,8 @@ namespace gp {
   }
 
 int get_sightrange();
+int get_sightrange_ambush();
+
 int gamerange();
 
 int numplayers();

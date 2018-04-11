@@ -14,6 +14,7 @@ int utfsize(char c) {
   }
 
 int get_sightrange() { return getDistLimit() + sightrange_bonus; }
+int get_sightrange_ambush() { return max(get_sightrange(), ambush_distance); }
 
 namespace stereo {
   eStereo mode;

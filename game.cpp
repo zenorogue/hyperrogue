@@ -2743,9 +2743,34 @@ bool nogoSlow(cell *to, cell *from) {
   }
 
 // pathdist begin
+cell *pd_from;
+int pd_range;
+
+void compute_graphical_distance() {
+  cell *c1 = centerover.c ? centerover.c : cwt.c;
+  int sr = get_sightrange_ambush();
+  if(pd_from == c1 && pd_range == sr) return;
+  for(auto c: pathq) c->pathdist = PINFD;
+  pathq.clear();
+  
+  pd_from = c1;
+  pd_range = sr;
+  c1->pathdist = 0;
+  pathq.push_back(pd_from);
+
+  for(int qb=0; qb<size(pathq); qb++) {
+    cell *c = pathq[qb];
+    if(c->pathdist == pd_range) break;
+    forCellEx(c1, c)
+      if(c1->pathdist == PINFD)
+        c1->pathdist = c->pathdist + 1,
+        pathq.push_back(c1);
+    }
+  }  
+
 void computePathdist(eMonster param) {
-  int pqs = size(pathq);
-  for(int i=0; i<pqs; i++) pathq[i]->pathdist = PINFD;
+  pd_from = NULL;
+  for(auto c: pathq) c->pathdist = PINFD;
   pathq.clear(); 
   pathqm.clear();
   reachedfrom.clear(); 

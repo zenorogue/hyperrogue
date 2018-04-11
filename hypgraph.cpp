@@ -464,6 +464,12 @@ transmatrix applyspin(const heptspin& hs, const transmatrix& V) {
   return (hs.spin || nonbitrunc) ? V * spin(hs.spin*2*M_PI/S7) : V;
   }
 
+// in hyperbolic quotient geometries, relying on pathdist is not sufficient
+bool in_qrange(const transmatrix& V) {
+  if(!quotient || !hyperbolic) return true;
+  return V[2][2] < cosh(crossf * get_sightrange_ambush());
+  }
+
 namespace gp {
 
 /*
@@ -486,7 +492,9 @@ void drawrec(cell *c, const transmatrix& V) {
       if(fix6(dir) != fix6(li.total_dir)) printf("totaldir %d/%d\n", dir, li.total_dir);
       if(at != li.relative) printf("at %s/%s\n", disp(at), disp(li.relative));
       if(maindir != li.last_dir) printf("ld %d/%d\n", maindir, li.last_dir); */
-      drawcell(c, V * Tf[maindir][at.first&31][at.second&31][fix6(dir)], 0, false);
+      transmatrix V1 = V * Tf[maindir][at.first&31][at.second&31][fix6(dir)];
+      if(in_qrange(V1))
+        drawcell(c, V1, 0, false);
       }
     for(int i=0; i<c->type; i++) {
       cell *c2 = c->mov[i];
@@ -509,8 +517,8 @@ void drawrec(cell *c, const transmatrix& V) {
       }
     }
   }
-       
-void drawrec(const heptspin& hs, int lev, hstate s, const transmatrix& V) {
+
+void drawrec(const heptspin& hs, hstate s, const transmatrix& V) {
 
   // shmup::calc_relative_matrix(cwt.c, hs.h);
     
@@ -523,30 +531,29 @@ void drawrec(const heptspin& hs, int lev, hstate s, const transmatrix& V) {
     gp::drawrec(c, actualV(hs, V1));
     }
   
-  else if(dodrawcell(c)) {
-    reclevel = maxreclevel - lev;
-    transmatrix V2 = actualV(hs, V1);
-    drawcell(c, V2, 0, hs.mirrored);
-    }
-  
-  if(lev <= 0) return;
-  
-  if(!nonbitrunc) for(int d=0; d<S7; d++) {
-    int ds = fixrot(hs.spin + d);
-    reclevel = maxreclevel - lev + 1;
-    // createMov(c, ds);
-    if(c->mov[ds] && c->spn(ds) == 0 && dodrawcell(c->mov[ds])) {
-      drawcell(c->mov[ds], V1 * hexmove[d], 0, hs.mirrored ^ c->mirror(ds));
+  else {
+    if(dodrawcell(c)) {
+      transmatrix V2 = actualV(hs, V1);
+      drawcell(c, V2, 0, hs.mirrored);
+      }
+    
+    if(!nonbitrunc) for(int d=0; d<S7; d++) {
+      int ds = fixrot(hs.spin + d);
+      // createMov(c, ds);
+      if(c->mov[ds] && c->spn(ds) == 0 && dodrawcell(c->mov[ds])) {
+        transmatrix V2 = V1 * hexmove[d];
+        if(in_qrange(V2))
+        drawcell(c->mov[ds], V2, 0, hs.mirrored ^ c->mirror(ds));
+        }
       }
     }
 
-  if(lev <= 1) return;
-  
+  if(c->pathdist < PINFD && in_qrange(V))
   for(int d=0; d<S7; d++) {
     hstate s2 = transition(s, d);
     if(s2 == hsError) continue;
     heptspin hs2 = hs + d + wstep;
-    drawrec(hs2, lev-gp::dist_2(), s2, V * heptmove[d]);
+    drawrec(hs2, s2, V * heptmove[d]);
     }
   
   }
@@ -632,7 +639,6 @@ void drawEuclidean() {
   for(int dy=minsy; dy<=maxsy; dy++) {
     torusconfig::torus_cx = dx;
     torusconfig::torus_cy = dy;
-    reclevel = eudist(dx, dy);
     cellwalker cw = vec_to_cellwalker(pvec + euclid_getvec(dx, dy));
     transmatrix Mat = eumove(dx,dy);
     

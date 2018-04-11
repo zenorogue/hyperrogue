@@ -8,7 +8,6 @@ int inmirrorcount = 0;
 
 bool wmspatial, wmescher, wmplain, wmblack, wmascii;
 bool mmspatial, mmhigh, mmmon, mmitem;
-int maxreclevel, reclevel;
 
 int detaillevel = 0;
 
@@ -2814,7 +2813,7 @@ void setcolors(cell *c, int& wcol, int &fcol) {
         // xcol = (c->landparam&1) ? 0xD00000 : 0x00D000;
       fcol = 0x10101 * (32 + (c->landparam&1) * 32) - 0x000010;
       int ed = edgeDepth(c);
-      int sr = max(get_sightrange(), ambush_distance);
+      int sr = get_sightrange_ambush();
       while(ed > clev + sr) ed -= 2;
       while(ed < clev - sr) ed += 2;
       fcol = gradient(fcol, 0x0000D0, clev-sr, edgeDepth(c), clev+sr);
@@ -3296,19 +3295,14 @@ void pushdown(cell *c, int& q, const transmatrix &V, double down, bool rezoom, b
   }
 
 bool dodrawcell(cell *c) {
-  // todo: fix when scrolling
-  if(!buggyGeneration && !debugmode && c->land != laCanvas && sightrange_bonus < 3) {
-    // not yet created
-    if(c->mpdist > 7 && !cheater) return false;
-    // always show on the torus rug
-    if(rug::rugged && torus) return true;
-    if(cmode & sm::TORUSCONFIG) return true;
-    // in the Yendor Challenge, scrolling back is forbidden
-    if(c->cpdist > 7 && (yendor::on && !cheater)) return false;
-    // (incorrect comment) too far, no bugs nearby
-    if(playermoved && c->cpdist > get_sightrange() && c->cpdist > ambush_distance) return false;
-    }
-  
+  // do not display out of range cells, unless on torus
+  if(c->pathdist == PINFD && geometry != gTorus)
+    return false;
+  // do not display not fully generated cells, unless a cheater
+  if(c->mpdist > 7 && !cheater) return false;
+  // in the Yendor Challenge, scrolling back is forbidden
+  if(c->cpdist > 7 && yendor::on && !cheater) return false;
+
   return true;
   }
 
@@ -5054,7 +5048,7 @@ void drawMarkers() {
       cell *keycell = NULL;
       int i;
       for(i=0; i<YDIST; i++) 
-        if(yi[yii].path[i]->cpdist <= get_sightrange()) {
+        if(yi[yii].path[i]->cpdist <= get_sightrange_ambush()) {
           keycell = yi[yii].path[i];
           break;
           }
@@ -5273,6 +5267,8 @@ void drawthemap() {
   modist = 1e20; mouseover = NULL; 
   modist2 = 1e20; mouseover2 = NULL; 
 
+  compute_graphical_distance();
+
   centdist = 1e20; 
   if(!euclid) centerover.c = NULL; 
 
@@ -5296,17 +5292,8 @@ void drawthemap() {
   profile_start(1);
   if(euclid)
     drawEuclidean();
-  else {
-    int sr = max(get_sightrange(), ambush_distance);
-    maxreclevel = 
-      conformal::on ? sr + 2:
-      (!playermoved) ? sr+1 : sr + 4;
-    
-    if(S3>3) maxreclevel+=2;
-    if(gp::on) maxreclevel += gp::dist_2();
-    
-    drawrec(viewctr, maxreclevel, hsOrigin, cview());
-    }
+  else
+    drawrec(viewctr, hsOrigin, cview());
   drawWormSegments();
   drawBlizzards();
   drawArrowTraps();
@@ -5941,7 +5928,7 @@ cell *viewcenter() {
 
 bool inscreenrange(cell *c) {
   if(sphere) return true;
-  if(euclid) return celldistance(viewcenter(), c) <= get_sightrange();
+  if(euclid) return celldistance(viewcenter(), c) <= get_sightrange_ambush();
   return heptdistance(viewcenter(), c) <= 5;
   }
 
