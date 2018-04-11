@@ -5209,6 +5209,7 @@ bool allowIncreasedSight() {
   if(rogueviz::on) return true;
 #endif
   if(randomPatternsMode) return true;
+  if(quotient || !hyperbolic) return true;
   return false;
   }
 
