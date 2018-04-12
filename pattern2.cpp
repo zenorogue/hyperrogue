@@ -128,6 +128,7 @@ int land50(cell *c) {
 int polara50(cell *c) {
   if(c->type != 6) return polara50(fiftyval(c));
   else if(sphere || euclid || S7>7 || S6>6) return 0;
+  else if(gp::on) return polara50(fiftyval(c->master->c7));
   else {
     if(cdist50(createMov(c,0)) < 3) return polara50(createMov(c,0));
     if(cdist50(createMov(c,2)) < 3) return polara50(createMov(c,2));
@@ -140,6 +141,7 @@ int polarb50(cell *c) {
   if(euclid) return true;
   if(c->type != 6) return polarb50(fiftyval(c));
   else if(sphere || euclid || S7>7 || S6>6) return true;
+  else if(gp::on) return polarb50(fiftyval(c->master->c7));
   else {
     if(cdist50(createMov(c,0)) < 3) return polarb50(createMov(c,0));
     if(cdist50(createMov(c,2)) < 3) return polarb50(createMov(c,2));
@@ -248,6 +250,7 @@ int zebra40(cell *c) {
     else return 4+(v-4)/2;
     }
   else if(ctof(c)) return (c->master->zebraval/10);
+  else if(gp::on) return zebra40(c->master->c7);
   else if(a4) {
     int ws = dir_bitrunc457(c);
     if(ws < 0) return -ws;
@@ -298,6 +301,7 @@ int zebra40(cell *c) {
 int zebra3(cell *c) {
   if(c->type != 6) return (c->master->zebraval/10)/4;
   else if(sphere || S7>7 || S6>6) return 0;
+  else if(gp::on) return zebra40(c->master->c7);
   else { 
     int ii[3];
     ii[0] = (c->mov[0]->master->zebraval/10)/4;

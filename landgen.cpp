@@ -164,7 +164,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
     
     case laPalace: // -------------------------------------------------------------
     
-      if(weirdhyperbolic || torus || S7 < 5) {
+      if(hyperbolic_not37 || torus || S7 < 5) {
         if(d == 9) {
           int i = hrand(100);
           if(i < 10) 
@@ -213,6 +213,14 @@ void giantLandSwitch(cell *c, int d, cell *from) {
         if(nonbitrunc) {
           int i = fiftyval049(c);
           if(i >= 8 && i <= 14 && !polarb50(c)) pgate = true;
+          if(gp::on) {
+            bool good = false;
+            forCellEx(c2, c) {
+              int i2 = fiftyval049(c2);
+              if((i2 < 8) && polarb50(c2)) good = true;
+              }
+            pgate = pgate && good;
+            }
           }
         
         if(pgate) {
@@ -425,7 +433,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           else
             v = 6;
           }
-        else if(torus || weirdhyperbolic || quotient) {
+        else if(torus || hyperbolic_not37 || quotient) {
           v = hrand(100) < 25 ? 24 : 16;
           }
         else if(euclid) {

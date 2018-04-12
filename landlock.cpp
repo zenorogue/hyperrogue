@@ -1215,9 +1215,6 @@ int isLandValid(eLand l) {
   if((l == laPower || l == laEmerald || l == laPalace) && !stdeuc && !bigsphere)
     return 1;
 
-  if((l == laPower || l == laEmerald || l == laPalace) && gp::on)
-    return 1;
-
   if(l == laDragon && !stdeuc)
     return 1;
 
@@ -1252,9 +1249,6 @@ int isLandValid(eLand l) {
 
   if(l == laZebra && !(stdeuc || (a4 && nonbitrunc) || a46 || quotient == 1))
     return 0;
-  
-  if(l == laZebra && gp::on)
-    return 1;
   
   if(l == laCrossroads3 && euclid)
     return 1; // because it is not accurate
