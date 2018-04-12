@@ -443,7 +443,8 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           int gs = getHemisphere(c, 0);
           if(gp::on) {
             v = 6;
-            forCellEx(c2, c) if(getHemisphere(c2, 0) != gs)
+            if(gs == 0) v = 24;
+            forCellEx(c2, c) if(getHemisphere(c2, 0) * gs < 0)
               v = 24;
             }
           else if(gs == -3 || gs == -1 || gs == 1 || gs == 3)

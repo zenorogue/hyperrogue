@@ -1166,14 +1166,6 @@ int isLandValid(eLand l) {
     return 0;
     }
   
-  // needs standard/Euclidean (needs vineyard pattern)
-  if(l == laWineyard && !stdeuc)
-    return 0;
-
-  // ... fake wineyard pattern
-  if(l == laWineyard && gp::on)
-    return 1;
-  
   // works in most spheres, Zebra quotient, and stdeuc
   if(l == laWhirlwind) {
     if(!(stdeuc || quotient == 1 || (S7 == 4 && !nonbitrunc) || (bigsphere && nonbitrunc && !elliptic)))
