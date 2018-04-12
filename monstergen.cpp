@@ -315,6 +315,15 @@ void wandering() {
     if(hrand(5) == 0) {
       // spawn treasure
       }
+    
+    if(smallbounded && hrand(100) < 2) {
+      auto& ac = currentmap->allcells();
+      cell *c1 = ac[hrand(size(ac))];
+      if(c1->wall == waVinePlant && !c1->monst) {
+        c1->monst = moVineSpirit;
+        c1->stuntime = 3;
+        }
+      }
     }
   
   while(first7 < size(dcal)) {
@@ -368,6 +377,12 @@ void wandering() {
     if((c->wall == waCavewall || c->wall == waDeadwall) && !c->monst &&
       wchance(items[treasureType(c->land)], 10) && canReachPlayer(c, moSlime)) {
       c->monst = moSeep;
+      playSeenSound(c);
+      continue;
+      }
+    
+    else if(smallbounded && c->wall == waVinePlant && !c->monst && wchance(items[treasureType(c->land)], 10) && canReachPlayer(c, moSlime)) {
+      c->monst = moVineSpirit;
       playSeenSound(c);
       continue;
       }
@@ -444,6 +459,11 @@ void wandering() {
         }
       notfound:
       break;
+      }
+    
+    else if(smallbounded && c->land == laPower && !c->monst) {
+      if(wchance(items[itPower], 10))
+        c->monst = eMonster(moWitch + hrand(NUMWITCH));
       }
     
     else if(c->monst || c->pathdist == PINFD) break;
