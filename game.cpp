@@ -3147,16 +3147,18 @@ void toggleGates(cell *c, eWall type, int rad) {
         if(ct->mov[i] && ct->mov[i]->wall == waOpenGate && isWorm(ct->mov[i])) onWorm = true;
       if(!onWorm) {
         ct->wall = waClosedGate, numgates++;
-        if(rad<1) rad=1;
         if(ct->item) {
           playSound(ct, "hit-crush"+pick123());
           addMessage(XLAT("%The1 is crushed!", ct->item));
           ct->item = itNone;
           }
+        toggleGates(ct, type, 1);
         }
       }
-    if(ct->wall == waClosedGate && type == waOpenPlate)
-      ct->wall = waOpenGate, rad = 1, numgates++;
+    if(ct->wall == waClosedGate && type == waOpenPlate) {
+      ct->wall = waOpenGate, numgates++;
+      toggleGates(ct, type, 1);
+      }
     }
   }
 
