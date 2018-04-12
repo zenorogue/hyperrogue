@@ -577,6 +577,18 @@ namespace gp {
     return dmain + length(centerloc-at) - length(centerloc);
     }
   
+  array<cell*, 3> get_masters(cell *c) {
+    if(gp::on) {
+      auto li = get_local_info(c);
+      be_in_triangle(li);      
+      auto cm = c->master;
+      int i = li.last_dir;
+      return make_array(cm->c7, createStep(cm, i)->c7, createStep(cm, fix7(i+1))->c7);
+      }
+    else 
+      return make_array(c->mov[0], c->mov[2], c->mov[4]);    
+    }
+  
   int compute_dist(cell *c, int master_function(cell*)) {
     auto li = get_local_info(c);
     be_in_triangle(li);

@@ -1211,10 +1211,14 @@ int isLandValid(eLand l) {
     return 0;
     }
   
-  // laPower and laEmerald and laPalace -> [partial] in quotients and weirdhyperbolic
-  if((l == laPower || l == laEmerald || l == laPalace) && !stdeuc && !bigsphere)
+  // laPower and laEmerald and laPalace -> [partial] in quotients and hyperbolic_non37
+  if((l == laPower || l == laEmerald || l == laPalace) && !euclid && !bigsphere && (quotient || !hyperbolic_37))
     return 1;
 
+  // ... wineyard pattern is GOOD only in the standard geometry or Euclidean
+  if(l == laWineyard && (gp::on || sphere))
+    return 1;
+  
   if(l == laDragon && !stdeuc)
     return 1;
 

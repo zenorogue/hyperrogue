@@ -184,12 +184,23 @@ void giantLandSwitch(cell *c, int d, cell *from) {
         }
 
       if(d == 9) {
-        if(cdist50(c) == 3 && polarb50(c) == 1)
+        cell *c2 = gp::on ? c->master->c7 : c;
+        if(cdist50(c2) == 3 && polarb50(c2) == 1)
           c->wall = waPalace;
         }
     
       if(d == 8 && sphere) {
         int gs = getHemisphere(c,0);
+        if(gp::on) {
+          int v = 1;
+          forCellEx(c2, c) if(getHemisphere(c2, 0) != gs)
+            v = 2;
+          if(v == 2)
+            c->wall = pick(waClosedGate, waOpenGate, waPalace);
+          else if(hrand(100) < 10)
+            c->wall = pick(waClosePlate, waOpenPlate, waTrapdoor);
+          }
+        else 
         if(gs == 1)
           c->wall = waPalace;
         if(gs == 3)
@@ -211,13 +222,13 @@ void giantLandSwitch(cell *c, int d, cell *from) {
         
         bool pgate = false;
         if(nonbitrunc) {
-          int i = fiftyval049(c);
-          if(i >= 8 && i <= 14 && !polarb50(c)) pgate = true;
+          int i = fiftyval049(c->master->c7);
+          if(i >= 8 && i <= 14 && !polarb50(c->master->c7)) pgate = true;
           if(gp::on) {
             bool good = false;
             forCellEx(c2, c) {
-              int i2 = fiftyval049(c2);
-              if((i2 < 8) && polarb50(c2)) good = true;
+              int i2 = fiftyval049(c2->master->c7);
+              if((i2 < 8) && polarb50(c2->master->c7)) good = true;
               }
             pgate = pgate && good;
             }
@@ -227,30 +238,32 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           switch(princess::generating ? 0 : hrand(2)) {
             case 0: 
               c->wall = waClosedGate;
+              toggleGates(c, waClosePlate, 1);
               break;
             case 1:
               c->wall = waOpenGate;
+              toggleGates(c, waOpenPlate, 1);
               break;
             }
-          for(int s=0; s<7; s++) if(c->mov[s] && 
-            (c->mov[s]->wall == waClosedGate || c->mov[s]->wall == waOpenGate))
-              c->wall = c->mov[s]->wall;
           }
-        else if(cdist50(c) == 3 && polarb50(c) == 1) {
-          int q = 0, s = 0;
-          if(!ishept(c)) for(int i=0; i<6; i++)
-            if(cdist50(c->mov[i]) == 3 && polarb50(c->mov[i]) == 1 && !ishept(c->mov[i]))
-              q++, s += i;
-          if(q == 1 && c->mov[s]->land == laPalace) {
-            switch(princess::generating ? 0 : hrand(2)) {
-              case 0: 
-                c->wall = waClosedGate;
-                c->mov[s]->wall = waClosedGate;
-                break;
-              case 1:
-                c->wall = waOpenGate;
-                c->mov[s]->wall = waOpenGate;
-                break;
+        else if(cdist50(c) == 3 && polarb50(c) == 1 && !ishept(c)) {
+          if(gp::on) ; 
+          else {
+            int q = 0, s = 0;
+            if(!ishept(c)) for(int i=0; i<6; i++)
+              if(cdist50(c->mov[i]) == 3 && polarb50(c->mov[i]) == 1 && !ishept(c->mov[i]))
+                q++, s += i;
+            if(q == 1 && c->mov[s]->land == laPalace) {
+              switch(princess::generating ? 0 : hrand(2)) {
+                case 0: 
+                  c->wall = waClosedGate;
+                  c->mov[s]->wall = waClosedGate;
+                  break;
+                case 1:
+                  c->wall = waOpenGate;
+                  c->mov[s]->wall = waOpenGate;
+                  break;
+                }
               }
             }
           }
@@ -428,7 +441,12 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           v = RANDPAT ? 24 : 0;
         else if(sphere) {
           int gs = getHemisphere(c, 0);
-          if(gs == -3 || gs == -1 || gs == 1 || gs == 3)
+          if(gp::on) {
+            v = 6;
+            forCellEx(c2, c) if(getHemisphere(c2, 0) != gs)
+              v = 24;
+            }
+          else if(gs == -3 || gs == -1 || gs == 1 || gs == 3)
             v = 24;
           else
             v = 6;
@@ -520,7 +538,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           int dy = gmod(y, 3);
           if(dy == 1) c->wall = waVinePlant;
           }
-        else if(a4)
+        else if(a4 || sphere)
           c->wall = hrand(100) < 50 ? waNone : waVinePlant;
         else {
           int v = emeraldval(c);
@@ -536,6 +554,11 @@ void giantLandSwitch(cell *c, int d, cell *from) {
             else if(v == 25 || v == 59 || v == 27 || v == 57)
               c->wall = waVineHalfB;
             else c->wall = waNone;
+            if(gp::on && cellHalfvine(c)) {
+              c->wall = waNone;
+              forCellCM(c2, c) if(emeraldval(c2) == (v^1))
+                c->wall = waVinePlant;
+              }
             }
           }
         }

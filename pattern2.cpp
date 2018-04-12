@@ -50,13 +50,14 @@ bool ishex2(cell *c) {
 int emeraldval(cell *c) {
   if(euclid) return eupattern(c);
   if(sphere) return 0;
-  if(ctof(c) || gp::on)
+  if(ctof(c))
     return c->master->emeraldval >> 3;
   else {
+    auto ar = gp::get_masters(c);
     return emerald_hexagon(
-      emeraldval(createMov(c,0)),
-      emeraldval(createMov(c,2)),
-      emeraldval(createMov(c,4))
+      emeraldval(ar[0]),
+      emeraldval(ar[1]),
+      emeraldval(ar[2])
       );
     }
   }
@@ -91,10 +92,11 @@ int fiftyval(cell *c) {
   if(ctof(c))
     return c->master->fiftyval;
   else {
+    auto ar = gp::get_masters(c);
     return bitmajority(
-      fiftyval(createMov(c,0)), 
-      fiftyval(createMov(c,2)), 
-      fiftyval(createMov(c,4))) + 512;
+      fiftyval(ar[0]), 
+      fiftyval(ar[1]), 
+      fiftyval(ar[2])) + 512;
     }
   }
 
@@ -106,10 +108,10 @@ int cdist50(cell *c) {
     else return "012333321112322232222321123"[eufifty(c)] - '0';
     }
   if(c->type != 6) return cdist50(fiftyval(c));
-  if(gp::on) return cdist50(c->master->c7);
-  int a0 = cdist50(createMov(c,0));
-  int a1 = cdist50(createMov(c,2));
-  int a2 = cdist50(createMov(c,4));
+  auto ar = gp::get_masters(c);
+  int a0 = cdist50(ar[0]);
+  int a1 = cdist50(ar[1]);
+  int a2 = cdist50(ar[2]);
   if(a0 == 0 || a1 == 0 || a2 == 0) return 1;
   return a0+a1+a2-5;
   }
@@ -118,9 +120,9 @@ int land50(cell *c) {
   if(c->type != 6) return land50(fiftyval(c));
   else if(sphere || euclid) return 0;
   else {
-    if(cdist50(createMov(c,0)) < 3) return land50(createMov(c,0));
-    if(cdist50(createMov(c,2)) < 3) return land50(createMov(c,2));
-    if(cdist50(createMov(c,4)) < 3) return land50(createMov(c,4));
+    auto ar = gp::get_masters(c);
+    for(int i=0; i<3; i++)
+      if(cdist50(ar[i]) < 3) return land50(ar[i]);
     return 0;
     }
   }
@@ -130,9 +132,9 @@ int polara50(cell *c) {
   else if(sphere || euclid || S7>7 || S6>6) return 0;
   else if(gp::on) return polara50(fiftyval(c->master->c7));
   else {
-    if(cdist50(createMov(c,0)) < 3) return polara50(createMov(c,0));
-    if(cdist50(createMov(c,2)) < 3) return polara50(createMov(c,2));
-    if(cdist50(createMov(c,4)) < 3) return polara50(createMov(c,4));
+    auto ar = gp::get_masters(c);
+    for(int i=0; i<3; i++)
+      if(cdist50(ar[i]) < 3) return polara50(ar[i]);
     return 0;
     }
   }
@@ -143,9 +145,9 @@ int polarb50(cell *c) {
   else if(sphere || euclid || S7>7 || S6>6) return true;
   else if(gp::on) return polarb50(fiftyval(c->master->c7));
   else {
-    if(cdist50(createMov(c,0)) < 3) return polarb50(createMov(c,0));
-    if(cdist50(createMov(c,2)) < 3) return polarb50(createMov(c,2));
-    if(cdist50(createMov(c,4)) < 3) return polarb50(createMov(c,4));
+    auto ar = gp::get_masters(c);
+    for(int i=0; i<3; i++)
+      if(cdist50(ar[i]) < 3) return polarb50(ar[i]);
     return 0;
     }
   }
@@ -170,16 +172,14 @@ int fiftyval049(cell *c) {
     // printf("%d,%d: %d\n", allcodes[0], allcodes[1], allcodes[0] + 7);
     return allcodes[0] + 7;
     }
-  else if(gp::on) return fiftyval049(c->master->c7);
   else if(sphere) return 0;
   else {
     int a[3], qa=0;
     int pa = polara50(c), pb = polarb50(c);
-    for(int i=0; i<6; i+=2) {
-      cell *c2 = c->mov[i];
-      if(polara50(c2) == pa && polarb50(c2) == pb)
-        a[qa++] = fiftyval049(c2);
-      }
+    auto ar = gp::get_masters(c);
+    for(int i=0; i<3; i++)
+      if(polara50(ar[i]) == pa && polarb50(ar[i]) == pb)
+        a[qa++] = fiftyval049(ar[i]);
     // 0-1-2
     sort(a, a+qa);
     if(qa == 1) return 43+a[0]-1;
@@ -250,7 +250,6 @@ int zebra40(cell *c) {
     else return 4+(v-4)/2;
     }
   else if(ctof(c)) return (c->master->zebraval/10);
-  else if(gp::on) return zebra40(c->master->c7);
   else if(a4) {
     int ws = dir_bitrunc457(c);
     if(ws < 0) return -ws;
@@ -280,9 +279,10 @@ int zebra40(cell *c) {
     }
   else {
     int ii[3], z;
-    ii[0] = (c->mov[0]->master->zebraval/10);
-    ii[1] = (c->mov[2]->master->zebraval/10);
-    ii[2] = (c->mov[4]->master->zebraval/10);
+    auto ar = gp::get_masters(c);
+    ii[0] = (ar[0]->master->zebraval/10);
+    ii[1] = (ar[1]->master->zebraval/10);
+    ii[2] = (ar[2]->master->zebraval/10);
     for(int r=0; r<2; r++) 
       if(ii[1] < ii[0] || ii[2] < ii[0]) 
         z = ii[0], ii[0] = ii[1], ii[1] = ii[2], ii[2] = z;
@@ -304,9 +304,10 @@ int zebra3(cell *c) {
   else if(gp::on) return zebra40(c->master->c7);
   else { 
     int ii[3];
-    ii[0] = (c->mov[0]->master->zebraval/10)/4;
-    ii[1] = (c->mov[2]->master->zebraval/10)/4;
-    ii[2] = (c->mov[4]->master->zebraval/10)/4;
+    auto ar = gp::get_masters(c);
+    ii[0] = (ar[0]->master->zebraval/10)/4;
+    ii[1] = (ar[1]->master->zebraval/10)/4;
+    ii[2] = (ar[2]->master->zebraval/10)/4;
     if(ii[0] == ii[1]) return ii[0];
     if(ii[1] == ii[2]) return ii[1];
     if(ii[2] == ii[0]) return ii[2];
