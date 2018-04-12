@@ -539,7 +539,7 @@ bool isIcyWall(cell *c) {
   }
 
 bool eternalFire(cell *c) {
-  return c->land == laDryForest || c->land == laPower || c->land == laMinefield ||
+  return c->land == laDryForest || (c->land == laPower && !smallbounded) || c->land == laMinefield ||
     c->land == laEFire || c->land == laElementalWall;
   }
   
