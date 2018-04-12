@@ -3168,7 +3168,7 @@ void toggleGates(cell *ct, eWall type) {
   if(type == waClosePlate && nonbitrunc && !gp::on)
     toggleGates(ct, type, 2);
   else
-    toggleGates(ct, type, gp::on ? gp::dist_3() : 3);
+    toggleGates(ct, type, (gp::on && !sphere && !a4) ? gp::dist_3() : 3);
   if(numgates && type == waClosePlate)
     playSound(ct, "closegate");
   if(numgates && type == waOpenPlate)
