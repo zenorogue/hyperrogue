@@ -364,13 +364,13 @@ void giantLandSwitch(cell *c, int d, cell *from) {
             c->wall = waCavewall;
           else c->wall = waCavefloor;
           }
+        else if(a4)
+          c->wall = hrand(100) < 50 ? waCavefloor : waCavewall;
         else if(nonbitrunc) {
           if(polarb50(c)) 
             c->wall = waCavewall;
           else c->wall = waCavefloor;
           }
-        else if(weirdhyperbolic && S7 != 8)
-          c->wall = waCavefloor;
         else {
           int v = emeraldval(c);
           if(v == 0)
@@ -520,6 +520,8 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           int dy = gmod(y, 3);
           if(dy == 1) c->wall = waVinePlant;
           }
+        else if(a4)
+          c->wall = hrand(100) < 50 ? waNone : waVinePlant;
         else {
           int v = emeraldval(c);
           if(v == 0) c->wall = waStone;
