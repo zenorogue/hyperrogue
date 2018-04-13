@@ -232,7 +232,7 @@ namespace gp {
         else get_mapping(at+eudir(dx1)).rdir = fix6(dx1+3);
         at = at + eudir(dx1);
         };
-      while(rel.first >= 2) {
+      while(rel.first >= 2 && rel.first >= 2 - rel.second) {
         build(start, 0, true);
         build(end, 3, false);
         rel.first -= 2;
@@ -242,7 +242,13 @@ namespace gp {
         build(end, 4, false);
         rel.second -= 2;
         }
-      while(rel.first>0 && rel.second) {
+      while(rel.second <= -2) {
+        build(start, 5, true);
+        build(end, 2, false);
+        rel.second += 2;
+        rel.first -= 2;
+        }
+      while((rel.first>0 && rel.second > 0) | (rel.first > 1 && rel.second < 0)) {
         build(start, 0, true);
         build(end, 3, false);
         rel.first -= 2;
@@ -394,6 +400,25 @@ namespace gp {
       alpha = 0;
       }
     }
+
+  loc config;
+  
+  loc internal_representation(loc v) {
+    int& x = v.first, &y = v.second;
+    while(x < 0 || y < 0 || (x == 0 && y > 0))
+      v = v * loc(0, 1);
+    if(x > 8) x = 8;
+    if(y > 8) y = 8;
+    if(y > x) v = v * loc(1, -1);
+    return v;
+    }
+  
+  loc human_representation(loc v) {
+    int& x = v.first, &y = v.second;
+    while(x < 0 || y < 0 || (x == 0 && y > 0))
+      v = v * loc(0, 1);
+    return v;
+    }
   
   string operation_name() {
     if(!gp::on) {
@@ -408,41 +433,37 @@ namespace gp {
       return XLAT("chamfered");
     else if(param == loc(3, 0))
       return XLAT("2x bitruncated");
-    else
-      return "GP(" + its(param.first) + "," + its(param.second) + ")";
+    else {
+      auto p = human_representation(param);
+      return "GP(" + its(p.first) + "," + its(p.second) + ")";
+      }
     }
   
-  int config_x, config_y;
-  
-  void whirl_set(int x, int y, bool texture_remap) {
+  void whirl_set(loc xy, bool texture_remap) {
     auto old_tstate = texture::config.tstate;
     auto old_tstate_max = texture::config.tstate_max;
-    if(y < 0) { y = -y; x -= y; }
-    if(x < 0) { x = -x; y = -y; }
-    if(x < y) swap(x, y);
-    if(x > 8) x = 8;
-    if(y > 8) y = 8;
-    if(y && elliptic) {
-      if(x==y)
+    xy = internal_representation(xy);
+    if(xy.second && elliptic) {
+      if(xy.second==xy.first)
         addMessage("GP(x,x) not implemented yet for elliptic geometry");
       else
         addMessage("This does not work in elliptic geometry");
-      y = 0;
+      xy.second = 0;
       }
-    config_x = x; config_y = y;
-    param = loc(x, y);
+    config = human_representation(xy);
     auto g = screens;
-    if(x == 1 && y == 0) {
+    if(xy.first == 0 && xy.second == 0) xy.first = 1;
+    if(xy.first == 1 && xy.second == 0) {
       if(gp::on) restartGame(rg::bitrunc);
       if(!nonbitrunc) restartGame(rg::bitrunc);
       }
-    else if(x == 1 && y == 1) {
+    else if(xy.first == 1 && xy.second == 1) {
       if(gp::on) restartGame(rg::bitrunc);
       if(nonbitrunc) restartGame(rg::bitrunc);
       }
     else {
       if(nonbitrunc) restartGame(rg::bitrunc);
-      param = loc(x, y);
+      param = xy;
       restartGame(rg::gp);
       }
     if(texture_remap)
@@ -483,13 +504,13 @@ namespace gp {
     dialog::lastItem().value = "GP(3,0)";
 
     dialog::addBreak(100);
-    dialog::addSelItem("x", its(config_x), 'x');
-    dialog::addSelItem("y", its(config_y), 'y');
+    dialog::addSelItem("x", its(config.first), 'x');
+    dialog::addSelItem("y", its(config.second), 'y');
 
-    if((config_x-config_y)%3 && !show_nonthree)
+    if((config.first-config.second)%3 && !show_nonthree)
       dialog::addInfo("This pattern needs x-y divisible by 3");
     else
-      dialog::addBoolItem(XLAT("select"), param == loc(config_x, config_y), 'f');
+      dialog::addBoolItem(XLAT("select"), param == internal_representation(config), 'f');
     
     dialog::addBreak(100);
     dialog::addItem(XLAT("help"), SDLK_F1);
@@ -499,19 +520,21 @@ namespace gp {
     keyhandler = [show_nonthree, texture_remap] (int sym, int uni) {
       dialog::handleNavigation(sym, uni);
       if(uni == 'a' && show_nonthree) 
-        whirl_set(1, 0, texture_remap);
+        whirl_set(loc(1, 0), texture_remap);
       else if(uni == 'b')
-        whirl_set(1, 1, texture_remap);
+        whirl_set(loc(1, 1), texture_remap);
       else if(uni == 'c' && show_nonthree)
-        whirl_set(2, 0, texture_remap);
+        whirl_set(loc(2, 0), texture_remap);
       else if(uni == 'd')
-        whirl_set(3, 0, texture_remap);
-      else if(uni == 'f' && (show_nonthree || (config_x-config_y)%3 == 0))
-        whirl_set(config_x, config_y, texture_remap);
+        whirl_set(loc(3, 0), texture_remap);
+      else if(uni == 'f' && (show_nonthree || (config.first-config.second)%3 == 0))
+        whirl_set(config, texture_remap);
       else if(uni == 'x')
-        dialog::editNumber(config_x, 1, 10, 1, 1, "x", helptext());
+        dialog::editNumber(config.first, 1, 10, 1, 1, "x", helptext());
       else if(uni == 'y')
-        dialog::editNumber(config_y, 1, 10, 1, 1, "y", helptext());
+        dialog::editNumber(config.second, 1, 10, 1, 1, "y", helptext());
+      else if(uni == 'z')
+        swap(config.first, config.second);
       else if(uni == '?' || sym == SDLK_F1 || uni == 'h' || uni == '2')
         gotoHelp(helptext());
       else if(doexiton(sym, uni))
@@ -527,8 +550,8 @@ namespace gp {
   
   void configure(bool texture_remap = false) {
     auto l = univ_param();
-    config_x = l.first, config_y = l.second;
-    param = loc(config_x, config_y);
+    param = l;
+    config = human_representation(l);
     pushScreen([texture_remap] () { gp::show(texture_remap); });
     }
   
