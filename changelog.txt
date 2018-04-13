@@ -2313,3 +2313,41 @@ MINOR:
 - four new models in "models of hyperbolic geometry"; improved the old ones (especially the 3D effects are now 'correct', except that they assume that the ground is a hyperbolic plane)
 - when changing the sight range, overgenerate works immediately now.
 
+2018.04.12 21:30 version 10.3o
+
+- New geometries based on the Goldberg polyhedron construction. This lets you
+  play on bigger (in term of cells) spherical worlds, or hyperbolic worlds
+  with a smaller proportion of heptagons/octagons.
+
+- You can select Crossroads IV in non-standard hyperbolic geometries to play a roughly
+  normal full game (except that all the straight line land borders are CR4-style).
+  This already existed, but it has been improved (e.g., Ocean should work correctly,
+  bad quality lands are still included so that you do not get unsatisfiable
+  unlock requirements). Additionally, the lands are now sorted in 'geometry experiments'
+  by quality, so Crossroads IV is easier to find.
+
+- Sight range is now handled more cleanly. You no longer get jagged edges while
+  scrolling the map. Drawing the Zebra quotient geometry is more efficient.
+  When adjusting the sight range, you give the value as a bonus (e.g. -2 = 
+  2 less than usual) -- this makes more sense as the default sight range depends
+  on the geometry. More options if cheat mode is on -- you can separately
+  adjust the "generation range" and the "game range" (essentially, monsters' sight range).
+
+- Fixed some bugs with the texture mode: 'cancel texture' actually cancels now, 
+  texture remapping, 'slave color' hotkey clash, textured spheres are drawn correctly.
+
+- Improved the small world geometries: Vine Spirits/Witches always appear in the
+  Land of Power and Vineyard; additional fire is no longer permanent in the
+  small Land of Power; fixed the Lost Mountain. Also more efficient generation.
+
+- Emerald Mines and Vineyard are now random in order 4 geometries, also Vineyard is random in spherical
+- some new commandline options
+- the key name F1 shows correctly
+- fixed the Red Rock Valley in non-bitruncated heptagonal.
+- fixed the stereographic projection of a sphere
+- fixed the Yendorian sky colors when scrolling
+- Knights and quit-menu now display circle sizes only if HyperRogue actually knows them
+- three-coloring appears in the menu for cube
+- no more orbs on Crossroads in the PTM equidistant lands
+- Temple of Cthulhu walls should no longer be impassable in non-standard geometries
+
