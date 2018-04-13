@@ -1167,6 +1167,9 @@ void buildCamelotWall(cell *c) {
   }
 
 void moreBigStuff(cell *c) {
+
+  if(quotient) return;
+
   if(c->land == laPalace && !euclid && c->master->alt) {
     int d = celldistAlt(c);
     if(d <= PRADIUS1) generateAlts(c->master);
@@ -1292,7 +1295,7 @@ void moreBigStuff(cell *c) {
       }
     }
 
- if((c->land == laOvergrown && !euclid) || c->land == laClearing) {
+  if((c->land == laOvergrown && !euclid) || c->land == laClearing) {
     if(euclid || (c->master->alt && (tactic::on || c->master->alt->distance <= 2))) {
       if(!euclid) generateAlts(c->master);
       preventbarriers(c);
@@ -1305,7 +1308,7 @@ void moreBigStuff(cell *c) {
       }
     }
 
- if((c->land == laJungle && !euclid) || c->land == laMountain) {
+  if((c->land == laJungle && !euclid) || c->land == laMountain) {
     if(euclid || (c->master->alt && (tactic::on || c->master->alt->distance <= 2))) {
       if(!euclid) generateAlts(c->master);
       preventbarriers(c);
