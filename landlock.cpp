@@ -1036,6 +1036,7 @@ namespace lv {
   land_validity_t out_of_theme = { 3, q2 &~ lv::appears_in_full, "Out of theme for the full game."};
   land_validity_t no_game = { 2, q2 &~ lv::appears_in_full, "No game here."};  
   land_validity_t not_in_chaos = { 0, q0, "Does not work in chaos mode."};  
+  land_validity_t not_in_full_game = {2, q2 &~ lv::appears_in_full, "Not in the full game."};
   land_validity_t special_chaos = { 2, q2, "Special construction in the Chaos mode." };
   land_validity_t special_euclidean = { 2, q2, "Special construction in the Euclidean mode." };  
   land_validity_t special_geo = { 2, q2, "Special construction in this geometry." };
@@ -1331,8 +1332,14 @@ land_validity_t& land_validity(eLand l) {
     return pattern_compatibility; 
   
   // these are highlighted whenever allowed
-  if(l == laHalloween || l == laDual)
+  if(l == laHalloween)
     return specially_designed;
+
+  if(l == laDual && geosupport_threecolor() == 2)
+    return specially_designed;
+  
+  if(l == laDual && !geometry && !gp::on)
+    return not_in_full_game;
   
   if(l == laSnakeNest) {
     if(geosupport_threecolor() < 2)
