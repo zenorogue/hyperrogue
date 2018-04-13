@@ -181,6 +181,11 @@ heptagon *createAlternateMap(cell *c, int rad, hstate firststate, int special) {
     }
   cx[rad] = bf.c;
   heptagon *h = bf.c->master;
+
+  if(h->alt) {
+    printf("Error: creatingAlternateMap while one already exists\n");
+    return NULL;
+    }
   
   if(special == waPalace) {  
   
@@ -1118,7 +1123,7 @@ void buildBigStuff(cell *c, cell *from) {
         hrand(2000) < (nonbitrunc ? 500 : 1000) && !tactic::on && !yendor::on)))
       createAlternateMap(c, 2, hsA);
 
-    if(c->land == laCaribbean && horo_ok() && ctof(c))
+    if(c->land == laCaribbean && horo_ok() && ctof(c) && !c->master->alt)
       createAlternateMap(c, 2, hsA);
 
     if(c->land == laPalace && ctof(c) && !princess::generating && !shmup::on && multi::players == 1 && horo_ok() && 
