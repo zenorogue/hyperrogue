@@ -1043,6 +1043,9 @@ void buildBigStuff(cell *c, cell *from) {
     buildBarrierNowall(c, getNewLand(c->land));
     }
   
+  else if(weirdhyperbolic && specialland == laElementalWall && hrand(I10000) < 1000 && gp_wall_test()) 
+    buildBarrierNowall(c, getNewLand(c->land));
+  
   else if(weirdhyperbolic) ; // non-Nowall barriers not implemented yet in weird hyperbolic
   
   else if(c->land == laCrossroads2 && !nonbitrunc)

@@ -659,7 +659,7 @@ bool rlyehComplete() {
   }
 
 bool lchance(eLand l) { 
-  if(tactic::on || yendor::on) return true;
+  if(tactic::on || yendor::on || ((geometry || gp::on) && specialland == laElementalWall)) return true;
   if(chaosmode) return hrand(100) < 25;
   return hrand(100) >= 40 * kills[elementalOf(l)] / (elementalKills()+1); 
   }
@@ -1039,7 +1039,7 @@ namespace lv {
   land_validity_t special_chaos = { 2, q2, "Special construction in the Chaos mode." };
   land_validity_t special_euclidean = { 2, q2, "Special construction in the Euclidean mode." };  
   land_validity_t special_geo = { 2, q2, "Special construction in this geometry." };
-  land_validity_t special_geo3 = { 2, q2, "Special construction in this geometry." };
+  land_validity_t special_geo3 = { 3, q2, "Special construction in this geometry." };
   land_validity_t not_implemented = {0, q0, "Not implemented."};  
   land_validity_t partially_implemented = {1, q1, "Partially implemented."};  
   land_validity_t ok = {2, q2 &~ lv::display_in_help, "No comments."};  
@@ -1047,7 +1047,7 @@ namespace lv {
   land_validity_t technical = {0, q0, "Technical."};  
   land_validity_t full_game = {3, q3, "Full game."};  
   land_validity_t inaccurate = {1, q1, "Somewhat inaccurate."};  
-  land_validity_t great_walls_missing = {1, q1, "Mercury rivers missing."};
+  land_validity_t great_walls_missing = {1, q1, "Mercury rivers not implemented (or could not work) in this geometry."};
   land_validity_t pattern_compatibility = {3, q3, "Patterns compatible."}; 
   land_validity_t specially_designed = {3, q3, "This land is specially designed for this geometry."};   
   land_validity_t needs_threecolor = {0, q0, "Three-colorability required."};  
@@ -1061,6 +1061,8 @@ namespace lv {
   land_validity_t some1 = {1, q1, "This land does not work well in the current settings. Reason not available."};
   land_validity_t known_buggy = {1, q1, "This combination is known to be buggy at the moment."};
   land_validity_t sloppy_pattern = {1, q1, "Somewhat sloppy pattern."};
+  land_validity_t no_fractal_landscapes = {1, q1, "Fractal landscapes not implemented in this geometry."};
+  land_validity_t simplified_walls = { 1, q1, "Only simplified walls implemented."};  
   }
 
 // check if the given land should appear in lists
@@ -1078,10 +1080,10 @@ land_validity_t& land_validity(eLand l) {
     // not good in Field quotient
     if(quotient == 2)
       return no_great_walls;
-    else
+    if(quotient == 1)
       return special_geo3;
     if(weirdhyperbolic)
-      return no_great_walls;
+      return simplified_walls;
     // works nice on a big non-tetrahedron-based sphere
     if(sphere && S3 != 3 && gp::on)
       return special_geo3;
@@ -1237,7 +1239,7 @@ land_validity_t& land_validity(eLand l) {
     return no_game;
   
   // Dragon Chasm requires unbounded space [partial]
-  if(l == laDragon && bounded)
+  if(l == laDragon && smallbounded)
     return unbounded_only;
   
   // Graveyard pattern does not work on non-bitrunc weird geometries
@@ -1268,17 +1270,17 @@ land_validity_t& land_validity(eLand l) {
   if(l == laWineyard && (gp::on || sphere))
     return pattern_not_implemented_random;
   
-  if(l == laDragon && !stdeuc)
-    return not_implemented;
-
   if(l == laTrollheim && quotient == 2)
     return not_enough_space;
   
   if(l == laTrollheim && !stdeuc && !bounded)
     return some1;
   
-  if(l == laReptile && (!stdeuc || nonbitrunc || gp::on || quotient == 2))
+  if(l == laReptile && (a38 || a4 || sphere || nonbitrunc || gp::on || quotient == 2))
     return bad_graphics;
+
+  if((l == laDragon || l == laReptile) && !stdeuc && !smallbounded)
+    return no_fractal_landscapes;
   
   if(l == laCrossroads && smallsphere) 
     return not_enough_space;
