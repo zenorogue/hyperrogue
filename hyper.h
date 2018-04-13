@@ -3026,6 +3026,8 @@ namespace gp {
   int dist_1(), dist_2(), dist_3();
 
   int solve_triangle(int dmain, int d0, int d1, loc at);
+
+  array<cell*, 3> get_masters(cell *c);
   }
 
 int get_sightrange();

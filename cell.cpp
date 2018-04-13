@@ -1318,11 +1318,12 @@ cdata *getEuclidCdata(heptagon *h) {
 int getCdata(cell *c, int j) {
   if(euclid) return getEuclidCdata(c->master)->val[j];
   else if(geometry) return 0;
-  else if(c->type != 6) return getHeptagonCdata(c->master)->val[j]*3;
+  else if(ctof(c)) return getHeptagonCdata(c->master)->val[j]*3;
   else {
     int jj = 0;
-    for(int k=0; k<6; k++) if(c->mov[k] && c->mov[k]->type == 7)
-      jj += getHeptagonCdata(c->mov[k]->master)->val[j];
+    auto ar = gp::get_masters(c);
+    for(int k=0; k<3; k++)
+      jj += getHeptagonCdata(ar[k]->master)->val[j];
     return jj;
     }
   }
@@ -1332,9 +1333,10 @@ int getBits(cell *c) {
   else if(geometry) return 0;
   else if(c->type != 6) return getHeptagonCdata(c->master)->bits;
   else {
-    int b0 = getHeptagonCdata(createMov(c, 0)->master)->bits;
-    int b1 = getHeptagonCdata(createMov(c, 2)->master)->bits;
-    int b2 = getHeptagonCdata(createMov(c, 4)->master)->bits;
+    auto ar = gp::get_masters(c);
+    int b0 = getHeptagonCdata(ar[0]->master)->bits;
+    int b1 = getHeptagonCdata(ar[1]->master)->bits;
+    int b2 = getHeptagonCdata(ar[2]->master)->bits;
     return (b0 & b1) | (b1 & b2) | (b2 & b0);
     }
   }
