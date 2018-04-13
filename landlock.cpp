@@ -1118,10 +1118,6 @@ land_validity_t& land_validity(eLand l) {
   if(l == laHalloween && !bounded)
     return bounded_only;
   
-  // these don't appear in normal game, but do appear in special modes
-  if(l == laWildWest)
-    return out_of_theme;
-
   // Crystal World is designed for nice_dual geometries
   if(l == laDual && !has_nice_dual())
     return dont_work;
@@ -1257,11 +1253,14 @@ land_validity_t& land_validity(eLand l) {
   if(l == laWarpCoast && (S3==3) && !has_nice_dual()) {
     return ugly_version;
     }
+
+  if(l == laWarpCoast && quotient == 2) 
+    return pattern_incompatibility;
   
   // laPower and laEmerald and laPalace -> [partial] in quotients and hyperbolic_non37
-  if(l == laPower || l == laEmerald || l == laPalace) {
+  if(l == laPower || l == laEmerald || l == laPalace || l == laWildWest) {
     if(euclid || bigsphere) ;
-    else if(!hyperbolic_37) return pattern_not_implemented_random;
+    else if(!hyperbolic_37) return l == laWildWest ? some0 : pattern_not_implemented_random;
     else if(quotient) return pattern_incompatibility;
     }
 
@@ -1278,7 +1277,7 @@ land_validity_t& land_validity(eLand l) {
   if(l == laTrollheim && !stdeuc && !bounded)
     return some1;
   
-  if(l == laReptile && (!stdeuc || nonbitrunc || gp::on))
+  if(l == laReptile && (!stdeuc || nonbitrunc || gp::on || quotient == 2))
     return bad_graphics;
   
   if(l == laCrossroads && smallsphere) 
@@ -1298,7 +1297,10 @@ land_validity_t& land_validity(eLand l) {
   if(l == laCrossroads4 && quotient)
     return some0;
 
-  if(l == laZebra && !(stdeuc || (a4 && nonbitrunc) || a46 || quotient == 1))
+  if(l == laZebra && quotient == 2)
+    return pattern_incompatibility;
+  
+  if(l == laZebra && !(stdeuc || (a4 && nonbitrunc) || a46))
     return pattern_not_implemented_weird;
   
   if(l == laCrossroads3 && euclid)
@@ -1319,7 +1321,7 @@ land_validity_t& land_validity(eLand l) {
     return full_game; 
   
   // highlight Zebra-based lands on Zebra Quotient!
-  if((l == laZebra || l == laWhirlwind || l == laStorms) && quotient == 1)
+  if((l == laZebra || l == laWhirlwind || l == laStorms || l == laWarpedCoast || l == laWarpSea) && quotient == 1)
     return pattern_compatibility;
   
   // highlight FP-based lands on Field Quotient!
@@ -1350,6 +1352,10 @@ land_validity_t& land_validity(eLand l) {
 
   if(shmup::on && among(l, laMirror, laMirrorOld) && among(geometry, gElliptic, gQuotient))
     return known_buggy;
+
+  // these don't appear in normal game, but do appear in special modes
+  if(l == laWildWest)
+    return out_of_theme;
 
   return ok;
   }
