@@ -2505,10 +2505,23 @@ void runGeometryExperiments();
 
 #define BEHIND_LIMIT 1e-6
 
+namespace lv {
+  static const flagtype appears_in_geom_exp = 1;
+  static const flagtype display_error_message = 2;
+  static const flagtype appears_in_full = 4;
+  static const flagtype appears_in_ptm = 8;
+  static const flagtype display_in_help = 16;
+  };
+
+struct land_validity_t {
+  int quality_level; // 0 (dont show), 1 (1/2), 2 (ok), 3(1!)
+  flagtype flags;
+  string msg;
+  };
+
 extern vector<eLand> landlist;
 template<class T> void generateLandList(T t);
-int isLandValid(eLand l);
-bool isLandValid2(eLand l);
+land_validity_t& land_validity(eLand l);
 bool isLandIngame(eLand l);
 
 bool inmirrororwall(eLand l);

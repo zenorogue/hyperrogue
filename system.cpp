@@ -62,8 +62,9 @@ void welcomeMessage() {
     addMessage(XLAT("Welcome to HyperRogue!"));
     }
 
-  if(shmup::on && (specialland == laMirror || specialland == laMirrorOld) && (geometry == gElliptic || geometry == gQuotient))
-    addMessage(XLAT("This combination is known to be buggy at the moment."));
+  auto lv = land_validity(specialland);
+  if(lv.flags & lv::display_error_message)
+    addMessage(XLAT(lv.msg));
 
 #if ISMAC
   addMessage(XLAT("Press F1 or right-shift-click things for help."));

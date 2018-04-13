@@ -1012,288 +1012,348 @@ eLand getLandForList(cell *c) {
 
 bool isLandIngame(eLand l) {
   if(isElemental(l)) l = laElementalWall;
-  if(isLandValid(l) < 1)
-    return false;
-  if(l == laWildWest)
-    return false;
-  return true;
+  return land_validity(l).flags & lv::appears_in_full;
+  }
+
+namespace lv {
+
+  flagtype q0 = lv::display_error_message | lv::display_in_help;
+  flagtype q1 = lv::display_error_message | lv::appears_in_geom_exp | lv::appears_in_full | lv::display_in_help;
+  flagtype q2 = lv::appears_in_geom_exp | lv::appears_in_full | lv::display_in_help;
+  flagtype q3 = lv::appears_in_geom_exp | lv::appears_in_full | lv::display_in_help;
+
+  land_validity_t no_randpattern_version = { 0, q0, "No random pattern version."};  
+  land_validity_t no_great_walls = { 0, q0, "Great Walls not implemented."};  
+  land_validity_t pattern_incompatibility = { 0, q0, "Pattern incompatible."};  
+  land_validity_t pattern_not_implemented_random = { 1, q1, "Pattern not implemented -- using random."};
+  land_validity_t pattern_not_implemented_weird = { 1, q1, "Pattern not implemented."};
+  land_validity_t pattern_not_implemented_exclude = { 0, q1 & ~ lv::appears_in_full, "Pattern not implemented -- using random."};
+  land_validity_t not_enough_space = { 0, q0, "Not enough space."};  
+  land_validity_t dont_work = { 0, q0, "Does not work in this geometry."};
+  land_validity_t bounded_only = { 0, q0, "This land is designed for bounded worlds."};
+  land_validity_t unbounded_only = { 0, q0, "This land is designed for infinite worlds."};                                   
+  land_validity_t unbounded_only_except_bigsphere = { 0, q0, "This land is designed for infinite worlds or big spheres."};
+  land_validity_t out_of_theme = { 3, q2 &~ lv::appears_in_full, "Out of theme for the full game."};
+  land_validity_t no_game = { 2, q2 &~ lv::appears_in_full, "No game here."};  
+  land_validity_t not_in_chaos = { 0, q0, "Does not work in chaos mode."};  
+  land_validity_t special_chaos = { 2, q2, "Special construction in the Chaos mode." };
+  land_validity_t special_euclidean = { 2, q2, "Special construction in the Euclidean mode." };  
+  land_validity_t special_geo = { 2, q2, "Special construction in this geometry." };
+  land_validity_t special_geo3 = { 2, q2, "Special construction in this geometry." };
+  land_validity_t not_implemented = {0, q0, "Not implemented."};  
+  land_validity_t partially_implemented = {1, q1, "Partially implemented."};  
+  land_validity_t ok = {2, q2 &~ lv::display_in_help, "No comments."};  
+  land_validity_t not_in_ptm = {0, q0, "Does not work in pure tactics mode."};  
+  land_validity_t technical = {0, q0, "Technical."};  
+  land_validity_t full_game = {3, q3, "Full game."};  
+  land_validity_t inaccurate = {1, q1, "Somewhat inaccurate."};  
+  land_validity_t great_walls_missing = {1, q1, "Mercury rivers missing."};
+  land_validity_t pattern_compatibility = {3, q3, "Patterns compatible."}; 
+  land_validity_t specially_designed = {3, q3, "This land is specially designed for this geometry."};   
+  land_validity_t needs_threecolor = {0, q0, "Three-colorability required."};  
+  land_validity_t land_not_implemented = {0, q0, "Land not implemented."};  
+  land_validity_t interesting = {3, q3, "Special interest."};
+  land_validity_t better_version_exists = {0, q0, "Better version exists."};
+  land_validity_t dont_work_but_ingame = {0, q0 | lv::appears_in_full, "Does not work in this geometry."};
+  land_validity_t ugly_version = {1, q1 | lv::appears_in_full, "Grid does not work in this geometry."};
+  land_validity_t bad_graphics = {1, q1, "Graphics not implemented in this geometry."};
+  land_validity_t some0 = {0, q0, "This land does not work in the current settings. Reason not available."};
+  land_validity_t some1 = {1, q1, "This land does not work well in the current settings. Reason not available."};
+  land_validity_t known_buggy = {1, q1, "This combination is known to be buggy at the moment."};
+  land_validity_t sloppy_pattern = {1, q1, "Somewhat sloppy pattern."};
   }
 
 // check if the given land should appear in lists
-int isLandValid(eLand l) {
+land_validity_t& land_validity(eLand l) {
+
+  using namespace lv;
 
   // Random Pattern allowed only in some specific lands
   if(randomPatternsMode && !isRandland(l))
-    return 0;
+    return no_randpattern_version;
 
   if(isElemental(l)) {
     if(l != laElementalWall)
-      return 0;
+      return technical;
     // not good in Field quotient
     if(quotient == 2)
-      return 0;
+      return no_great_walls;
+    else
+      return special_geo3;
     if(weirdhyperbolic)
-      return 0;
+      return no_great_walls;
     // works nice on a big non-tetrahedron-based sphere
     if(sphere && S3 != 3 && gp::on)
-      return 3;
+      return special_geo3;
     }
   
   // does not agree with the pattern
   if(l == laStorms && quotient == 2) 
-    return 0;
+    return pattern_incompatibility;
   
   // pattern not implemented
   if(l == laStorms && S7 == 8) 
-    return 1;
+    return pattern_not_implemented_random;
   
   // not enough space
   if(l == laStorms && nonbitrunc && elliptic) 
-    return 0;
+    return not_enough_space;
 
   if(l == laStorms && nonbitrunc && S3 == 3) 
-    return 0;
+    return not_enough_space;
   
   // mirrors do not work in gp
   if(among(l, laMirror, laMirrorOld) && gp::on)
-    return 0;
+    return dont_work;
 
   // available only in non-standard geometries
   if(l == laMirrorOld && !geometry)
-    return 0;
+    return better_version_exists;
   
   // available only in standard geometry
   if(l == laMirror && geometry)
-    return 0; 
+    return not_implemented; 
   
   // Halloween needs bounded world (can be big bounded)
   if(l == laHalloween && !bounded)
-    return 0;
+    return bounded_only;
   
   // these don't appear in normal game, but do appear in special modes
-  bool normalgame = !geometry && !tactic::on;  
-  if((l == laWildWest || l == laDual) && normalgame)
-    return 0;
-  
+  if(l == laWildWest)
+    return out_of_theme;
+
   // Crystal World is designed for nice_dual geometries
   if(l == laDual && !has_nice_dual())
-    return 0;
+    return dont_work;
   
   if(l == laHaunted && chaosmode)
-    return 0;
+    return not_in_chaos;
   
   // standard, non-PTM specific
   if(l == laCrossroads5 && tactic::on)
-    return 0;
+    return not_in_ptm;
     
   // standard non-PTM non-chaos specific
   if((l == laCrossroads5 || l == laCrossroads2) && (geometry || chaosmode))
-    return 0;
+    return some0;
     
   // equidistant-based lands
-  if(l == laDungeon || l == laEndorian || l == laIvoryTower || l == laMountain || l == laOcean) {
+  if(l == laDungeon || l == laEndorian || l == laIvoryTower || l == laOcean) {
     // special construction
     if(chaosmode && l == laOcean) 
-      return 2; 
+      return special_chaos;
     // no equidistants supported in chaos mode
     if(chaosmode) 
-      return 0;
+      return not_in_chaos;
     // no equidistants supported in these geometries (big sphere is OK though)
     if(quotient || elliptic || smallsphere || torus) 
-      return 0;
+      return unbounded_only_except_bigsphere;
     // Yendorian only implemented in standard
     if(l == laEndorian && geometry)
-      return 0;
+      return not_implemented;
     // special Euclidean implementations
-    if(euclid && (l == laIvoryTower || l == laMountain || l == laOcean)) 
-      return 2;
+    if(euclid && (l == laIvoryTower || l == laMountain || l == laOcean || l == laMountain)) 
+      return special_geo;
     // in other geometries, it works
     if(geometry)
-      return 2;
+      return ok;
     }
   
-  // equidistant-based lands, but also implemented in Euclidean
-  if((l == laIvoryTower || l == laMountain) && (!stdeuc || chaosmode)) {
-    if(quotient || euclid || elliptic || smallsphere || chaosmode)  
-      return 0; //CHECKMORE
-    if(l == laDungeon) return 1;
-    return 0;
-    }
-  
-  if(l == laPrincessQuest && (!stdeuc || chaosmode || tactic::on))
-    return 0;
+  if(l == laPrincessQuest && chaosmode)
+    return not_in_chaos;
+   
+  if(l == laPrincessQuest && tactic::on)
+    return not_in_ptm;
+    
+  if(l == laPrincessQuest && !stdeuc)
+    return not_implemented;
 
   // works correctly only in some geometries
+  if(l == laClearing && chaosmode)
+    return not_in_chaos;
+  
   if(l == laClearing)
-    if(chaosmode || !(stdeuc || a38 || (a45 && !nonbitrunc) || (a47 && !nonbitrunc)) || gp::on)
-      return 0;
+    if(!(stdeuc || a38 || (a45 && !nonbitrunc) || (a47 && !nonbitrunc)) || gp::on)
+      return not_implemented;
 
   // does not work in non-bitrunc a4
   if(l == laOvergrown && a4 && nonbitrunc)
-    return 0;
+    return some0;
 
   // does not work in bounded either
   if(l == laOvergrown && bounded)
-    return 0;
+    return some0;
   
   // horocycle-based lands, not available in bounded geometries nor in Chaos mode
-  if((l == laWhirlpool || l == laCamelot || l == laCaribbean || l == laTemple) && (bounded || chaosmode))
-    return 0;
+  if(l == laWhirlpool || l == laCamelot || l == laCaribbean || l == laTemple || l == laHive) {
+    if(chaosmode) {
+      if(l == laTemple || l == laHive) 
+        return special_chaos;
+      return not_in_chaos;
+      }
+    if(bounded) return unbounded_only;
+    }
   
   if(chaosmode && isCrossroads(l))
-    return 0;
+    return not_in_chaos;
   
-  if(gp::on && !horo_ok() && isCyclic(l))
-    return 0;
-    
-  // Temple and Hive has a special Chaos Mode variant, but they are still essentially unbounded
-  if((l == laTemple || l == laHive) && bounded)
-    return 0;
-    
   // this pattern does not work on elliptic and small spheres
   if((l == laBlizzard || l == laVolcano) && elliptic && S7 < 5)
-    return 0;
+    return not_enough_space;
   
   // ... and it works in gp only partially
   if((l == laBlizzard || l == laVolcano) && gp::on)
-    return 1;
+    return partially_implemented;
   
   // Kraken does not really work on odd-sided cells;
   // a nice football pattern will solve the problem by forbidding the Kraken to go there
   // (but we do have to allow it in non-bitrunc standard)
   if(l == laKraken && (S7&1) && !has_nice_dual()) {
-    if(!geometry) return 1;
-    return 0;
+    return dont_work_but_ingame;
     }
   
   // works in most spheres, Zebra quotient, and stdeuc
   if(l == laWhirlwind) {
-    if(!(stdeuc || quotient == 1 || (S7 == 4 && !nonbitrunc) || (bigsphere && nonbitrunc && !elliptic)))
-      return 0;
-    if(gp::on)
-      return 1;
+    if(quotient == 1)
+      return pattern_compatibility;
+    if(stdeuc) ;
+    else if(S7 == 4 && !nonbitrunc) return special_geo;
+    else if(bigsphere && nonbitrunc && !elliptic) return special_geo;
+    else return dont_work;
     }
     
   // needs standard/Euclidean (needs fractal landscape)
   if(l == laTortoise && !stdeuc)
-    return 0;
+    return not_implemented;
   
   // technical lands do not count
   if(l != laCA && isTechnicalLand(l))
-    return 0;
+    return technical;
   
   // only in bounded geometry, and not in PTM
   if(l == laCA && !bounded)
-    return 0;
+    return bounded_only;
 
   if(l == laCA && tactic::on)
-    return 0;
+    return not_in_ptm;
+
+  if(l == laCA)
+    return no_game;
   
   // Dragon Chasm requires unbounded space [partial]
   if(l == laDragon && bounded)
-    return 0;
+    return unbounded_only;
   
   // Graveyard pattern does not work on non-bitrunc weird geometries
-  if(l == laGraveyard) 
-    return geosupport_graveyard();
+  if(l == laGraveyard) switch(geosupport_graveyard()) {
+    case 0:
+      return dont_work;
+    case 1:
+      return sloppy_pattern;
+    default: ;
+    }
   
   // Warped Coast does not work on non-bitrunc S3s (except standard heptagonal where we have to keep it)
   if(l == laWarpCoast && (S3==3) && !has_nice_dual()) {
-    if(!geometry) return 1;
-    return 0;
+    return ugly_version;
     }
   
   // laPower and laEmerald and laPalace -> [partial] in quotients and hyperbolic_non37
-  if((l == laPower || l == laEmerald || l == laPalace) && !euclid && !bigsphere && (quotient || !hyperbolic_37))
-    return 1;
+  if(l == laPower || l == laEmerald || l == laPalace) {
+    if(euclid || bigsphere) ;
+    else if(!hyperbolic_37) return pattern_not_implemented_random;
+    else if(quotient) return pattern_incompatibility;
+    }
 
   // ... wineyard pattern is GOOD only in the standard geometry or Euclidean
   if(l == laWineyard && (gp::on || sphere))
-    return 1;
+    return pattern_not_implemented_random;
   
   if(l == laDragon && !stdeuc)
-    return 1;
+    return not_implemented;
 
   if(l == laTrollheim && quotient == 2)
-    return 0;
+    return not_enough_space;
   
-  if(l == laTrollheim && !stdeuc)
-    return 1;
+  if(l == laTrollheim && !stdeuc && !bounded)
+    return some1;
   
-  if(l == laReptile && (!stdeuc || nonbitrunc))
-    return 1;
-  
-  if(l == laCrossroads && weirdhyperbolic) 
-    return 0;
+  if(l == laReptile && (!stdeuc || nonbitrunc || gp::on))
+    return bad_graphics;
   
   if(l == laCrossroads && smallsphere) 
-    return 0;
+    return not_enough_space;
   
   if(l == laCrossroads3 && !stdeuc && !bigsphere)
-    return 0;
+    return not_enough_space;
 
-  if(among(l, laCrossroads, laCrossroads2, laCrossroads3, laCrossroads5) && gp::on && hyperbolic)
-    return 0;
+  if(among(l, laCrossroads, laCrossroads2, laCrossroads3, laCrossroads5) && weirdhyperbolic)
+    return no_great_walls;
 
   // Crossroads IV is great in weird hyperbolic
-  if(l == laCrossroads4 && weirdhyperbolic)
-    return 3;
+  if(l == laCrossroads4 && weirdhyperbolic && !quotient)
+    return full_game;
 
   // OK in small bounded worlds, and in Euclidean  
-  if(l == laCrossroads4 && !(stdeuc || smallbounded))
-    return 0;
+  if(l == laCrossroads4 && quotient)
+    return some0;
 
   if(l == laZebra && !(stdeuc || (a4 && nonbitrunc) || a46 || quotient == 1))
-    return 0;
+    return pattern_not_implemented_weird;
   
   if(l == laCrossroads3 && euclid)
-    return 1; // because it is not accurate
+    return inaccurate; // because it is not accurate
 
   if(l == laPrairie) {
-    if(gp::on) return 0;
+    if(gp::on) return not_implemented;
     else if(stdeuc || (bigsphere && !nonbitrunc && !elliptic) || (quotient == 2)) ;
-    else if(!bounded) return 1;
-    else return 0;
+    else if(!bounded) return not_implemented;
+    else return unbounded_only;
     }
   
   if(l == laTerracotta && !stdeuc && !(bigsphere))
-    return 1;
+    return great_walls_missing;
 
   // highlight Crossroads on Euclidean
   if(euclid && !torus && (l == laCrossroads || l == laCrossroads4))
-    return 3; 
+    return full_game; 
   
   // highlight Zebra-based lands on Zebra Quotient!
   if((l == laZebra || l == laWhirlwind || l == laStorms) && quotient == 1)
-    return 3;  
+    return pattern_compatibility;
   
   // highlight FP-based lands on Field Quotient!
   if((l == laPrairie || l == laVolcano || l == laBlizzard) && quotient == 2)
-    return 3;  
+    return pattern_compatibility; 
   
   // these are highlighted whenever allowed
   if(l == laHalloween || l == laDual)
-    return 3;
+    return specially_designed;
   
-  if(l == laSnakeNest)
-    return geosupport_threecolor() >= 2 ? 3 : 0;
+  if(l == laSnakeNest) {
+    if(geosupport_threecolor() < 2)
+      return needs_threecolor;
+    else return specially_designed;
+    }
   
   if(l == laDocks && !randomPatternsMode) {
-    if(a38 && !gp::on) return 3;
-    if(a38) return 1;
-    return 0;
+    if(a38 && !gp::on) return specially_designed;
+    if(a38) return pattern_not_implemented_weird;
+    return pattern_not_implemented_exclude;
     }
   
   if(l == laStorms && torus) 
-    return 3;
+    return interesting;
   
   if(l == laMagnetic)
-    return 0;
+    return land_not_implemented;
 
-  return 2;
+  if(shmup::on && among(l, laMirror, laMirrorOld) && among(geometry, gElliptic, gQuotient))
+    return known_buggy;
+
+  return ok;
   }
 
-bool isLandValid2(eLand l) { return isLandValid(l) >= 2; }
 /*
 int checkLands() {
   for(int i=0; i<landtypes; i++) {

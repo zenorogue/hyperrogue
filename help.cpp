@@ -658,6 +658,10 @@ string generateHelpForLand(eLand l) {
       "Avoid chopping trees, using Orbs, and non-graveyard monsters in the Haunted Woods."
       );
     }
+
+  auto lv = land_validity(specialland);
+  if(lv.flags & lv::display_in_help)
+    s += "\n\n" + XLAT(lv.msg);
   
 #if !ISMOBILE
   if(l == laCA)

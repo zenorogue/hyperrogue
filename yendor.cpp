@@ -668,7 +668,7 @@ namespace tactic {
     
     { 
     dynamicval<bool> t(tactic::on, true);
-    generateLandList(isLandValid2);
+    generateLandList([] (eLand l) { return land_validity(l).flags & lv::appears_in_ptm; });
     }
     
     int nl = size(landlist);

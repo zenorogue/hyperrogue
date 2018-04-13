@@ -376,8 +376,8 @@ void showEuclideanMenu() {
     dialog::addSelItem(XLAT("geometry"), XLAT(ginf[geometry].name) + XLAT(bitruncnames[nonbitrunc]), '5');
     dialog::addBreak(50);
     
-    generateLandList(isLandValid);
-    stable_sort(landlist.begin(), landlist.end(), [] (eLand l1, eLand l2) { return isLandValid(l1) > isLandValid(l2); });
+    generateLandList([] (eLand l) { return land_validity(l).flags & lv::appears_in_geom_exp; });
+    stable_sort(landlist.begin(), landlist.end(), [] (eLand l1, eLand l2) { return land_validity(l1).quality_level > land_validity(l2).quality_level; });
     
     for(int i=0; i<euperpage; i++) {
       if(euperpage * eupage + i >= size(landlist)) { dialog::addBreak(100); break; }
@@ -396,7 +396,7 @@ void showEuclideanMenu() {
         }
       
       dialog::lastItem().color = linf[l].color;
-      dialog::lastItem().value += validclasses[isLandValid(l)];
+      dialog::lastItem().value += validclasses[land_validity(l).quality_level];
       }
     dialog::addBreak(50);
     if(chaosUnlocked && !quotient && !euclid && !sphere)

@@ -125,7 +125,7 @@ bool handleKeyTour(int sym, int uni) {
     
     if(sym == '2') {
       dynamicval<eGeometry> g(geometry, gEuclid);
-      if(cwt.c->land != laCanvas && !isLandValid(cwt.c->land)) {
+      if(cwt.c->land != laCanvas && !land_validity(cwt.c->land).quality_level) {
         addMessage(XLAT("This land has no Euclidean version."));
         return true;
         }
@@ -133,7 +133,7 @@ bool handleKeyTour(int sym, int uni) {
     
     if(sym == '1') {
       dynamicval<eGeometry> g(geometry, gSphere);
-      if(cwt.c->land != laCanvas && !isLandValid(cwt.c->land)) {
+      if(cwt.c->land != laCanvas && !land_validity(cwt.c->land).quality_level) {
         addMessage(XLAT("This land has no spherical version."));
         return true;
         }
