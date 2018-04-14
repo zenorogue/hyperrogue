@@ -4747,9 +4747,9 @@ void movehex_rest(bool mounted) {
 
 void movemutant() {
   vector<cell*> young;
-  for(int i=0; i<size(dcal); i++) 
-    if(dcal[i]->monst == moMutant && dcal[i]->stuntime == mutantphase)
-      young.push_back(dcal[i]);
+  for(cell *c: currentmap->allcells())
+    if(c->monst == moMutant && c->stuntime == mutantphase)
+      young.push_back(c);
   
   for(int j=1; j<size(young); j++)
     swap(young[j], young[hrand(j+1)]);
@@ -4772,7 +4772,7 @@ void movemutant() {
       if(isPlayerOn(c2)) continue;
 
       if((c2->land == laOvergrown || !pseudohept(c2)) && passable(c2, c, 0)) {
-        if(c2->land == laClearing && c2->mpdist > 7) continue;
+        if(c2->land == laClearing && !bounded && c2->mpdist > 7) continue;
         c2->monst = moMutant;
         c2->mondir = c->spn(j);
         c2->stuntime = mutantphase;
@@ -5845,7 +5845,7 @@ void movemonsters() {
   DEBT("leader");
   if(havewhat & HF_LEADER) groupmove(moPirate, 0);
   DEBT("mutant");
-  if(havewhat & HF_MUTANT) movemutant();
+  if((havewhat & HF_MUTANT) || (bounded && among(specialland, laOvergrown, laClearing))) movemutant();
   DEBT("bugs");
   if(havewhat & HF_BUG) hive::movebugs();
   DEBT("whirlpool");

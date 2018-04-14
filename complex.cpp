@@ -741,6 +741,22 @@ namespace clearing {
   
   std::map<heptagon*, clearingdata> bpdata;
   
+  cell *current_root;
+  
+  void new_root() {
+    if(!current_root || current_root->monst != moMutant) {
+      auto& ac = currentmap->allcells();
+      int iter = 0;
+      while(!current_root || pseudohept(current_root) || current_root->cpdist < 3) {
+        if(iter++ > 100) return;
+        current_root = ac[hrand(size(ac))];
+        }
+      current_root->monst = moMutant;
+      current_root->mondir = NODIR;
+      current_root->stuntime = (mutantphase + 1) & 15;
+      }
+    }
+  
   int plantdir(cell *c) {
     if(!quotient) {
       generateAlts(c->master);
@@ -801,11 +817,10 @@ namespace clearing {
   vector<cell*> rpath;
     
   void generate(cell *c) {
-    if(buggyplant) return;
-    
-    if(sphere) return;
-    
+    if(buggyplant) return;    
+    if(sphere) return;    
     if(gp::on) return;
+    if(quotient) return;
     
     if(euclid) {
       if(torus) return;

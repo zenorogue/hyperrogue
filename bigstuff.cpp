@@ -715,6 +715,8 @@ void setLandQuotient(cell *c) {
     if(fv%4==0 || fv%4 == 2) setland(c, laWarpSea);
   if(specialland == laElementalWall)
     setland(c, eLand(laEFire + (fv%4)));
+  if(specialland == laClearing)
+    c->land = laClearing;
   if(specialland == laIvoryTower || specialland == laEndorian || specialland == laDungeon || specialland == laOcean) {
     int d = celldist(c) - 1;
     if(d <= 0) 
@@ -727,6 +729,8 @@ void setLandQuotient(cell *c) {
 void setLandSphere(cell *c) {
   if(specialland == laWarpCoast)
     setland(c, getHemisphere(c, 0) > 0 ? laWarpCoast : laWarpSea);
+  if(specialland == laClearing)
+    c->land = laClearing;
   if(specialland == laElementalWall) {
     int x = getHemisphere(c, 1);
     int y = getHemisphere(c, 2);

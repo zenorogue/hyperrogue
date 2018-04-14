@@ -1173,6 +1173,7 @@ land_validity_t& land_validity(eLand l) {
   
   if(l == laClearing)
     if(!(stdeuc || a38 || (a45 && !nonbitrunc) || (a47 && !nonbitrunc)) || gp::on)
+    if(!bounded)
       return not_implemented;
 
   // does not work in non-bitrunc a4

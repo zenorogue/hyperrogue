@@ -3257,3 +3257,4 @@ bool horo_ok();
 
 ld master_to_c7_angle();
 
+extern int mutantphase;

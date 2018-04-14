@@ -233,6 +233,7 @@ void initgame() {
     }
   
   princess::squeaked = false;
+  clearing::current_root = NULL;
   
   if(!safety) {
     usedSafety = false;

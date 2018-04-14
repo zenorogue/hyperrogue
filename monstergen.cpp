@@ -303,11 +303,16 @@ void wandering() {
   int ghostcount = getGhostcount();
   if(cwt.c->land == laCA) ghostcount = 0;
   bool genturn = hrand(100) < 30;
+  
+  if(bounded && specialland == laClearing)
+    clearing::new_root();
 
   if(cwt.c->land == laZebra && cwt.c->wall == waNone && wchance(items[itZebra], 20))
     wanderingZebra(cwt.c);
   
-  if(smallbounded) {
+  bool smallbounded_generation = smallbounded || (bounded && specialland == laClearing);
+  
+  if(smallbounded_generation) {
     int maxdist = 0;
     for(int i=0; i<size(dcal); i++) if(dcal[i]->cpdist > maxdist) maxdist = dcal[i]->cpdist;
     for(int i=0; i<size(dcal); i++) if(dcal[i]->cpdist >= maxdist-1) { first7 = i; break; }
@@ -338,7 +343,7 @@ void wandering() {
       if(isPlayerOn(c)) continue;
       }
     
-    if(smallbounded && !c->item && hrand(5) == 0 && c->land != laHalloween) {
+    if(smallbounded_generation && !c->item && hrand(5) == 0 && c->land != laHalloween) {
       if(passable(c, NULL, 0) || specialland == laKraken) {
         if(c->land != laGraveyard && !haveOrbPower() && specialland != laHell) for(int it=0; it<1000 && !c->item; it++)
           placeLocalOrbs(c);

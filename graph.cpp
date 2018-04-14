@@ -3669,7 +3669,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       }
     
     if(viewdists) {
-      int cd = celldistance(c, cwt.c);
+      int cd = (cwt.c == currentmap->gamestart() && numplayers() == 1) ? celldist(c) : celldistance(c, cwt.c);
       string label = its(cd);
       // string label = its(fieldpattern::getriverdistleft(c)) + its(fieldpattern::getriverdistright(c));
       int dc = distcolors[cd&7];
