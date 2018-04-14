@@ -2359,3 +2359,13 @@ MINOR:
 - Fractal landscapes fixed in Goldberg heptagonal geometries
 - No more Lost Mountains in quotient Jungle etc.
 - GP(x,y) with x<y can be selected now
+
+2018.04.14 10:28 version 10.3q
+
+- Clearing works in bounded geometries now.
+- Fixed the flash markers.
+- Fixed the geometry experiment games automatically marked as cheating.
+- Fixed score sorting.
+- Fixed Wild West not appearing in PTM.
+- Fixed the crash in PTM.
+- Fixed the particle scaling in Goldberg.
