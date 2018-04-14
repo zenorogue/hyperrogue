@@ -5151,13 +5151,15 @@ void drawMarkers() {
 void drawFlashes() {
   for(int k=0; k<size(flashes); k++) {
     flashdata& f = flashes[k];
-    transmatrix V = shmup::ggmatrix(f.where);
-    /*
-    try { V = gmatrix.at(f.where); } catch(out_of_range) { 
+    transmatrix V;
+    
+    if(f.spd) try { V = gmatrix.at(f.where); } catch(out_of_range) { 
       f = flashes[size(flashes)-1];
       flashes.pop_back(); k--;
       continue; 
-      } */
+      }
+    else V = shmup::ggmatrix(f.where);
+
     int tim = ticks - f.t;
     
     bool kill = tim > f.size;
@@ -5166,7 +5168,8 @@ void drawFlashes() {
       kill = tim > 300;
       int partcol = darkena(f.color, 0, max(255 - tim*255/300, 0));
       poly_outline = OUTLINE_DEFAULT;
-      queuepoly(V * spin(f.angle) * xpush(f.spd * tim / 50000.), shParticle[f.size], partcol);
+      ld gps = gp::on ? gp::scale * 1.6 : 1;
+      queuepoly(V * spin(f.angle) * xpush(f.spd * tim * gps / 50000.), shParticle[f.size], partcol);
       }
     
     else if(f.size == 1000) {

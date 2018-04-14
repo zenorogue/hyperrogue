@@ -1840,10 +1840,14 @@ void buildpolys() {
   for(int t=0; t<=60; t++) 
     hpcpush(spin(M_PI * t / 30.0) * xpush(crossf * ((t&1) ? 0.3 : 0.6)) * C0);
     
+  ld goldbf = 1;
+  
+  if(gp::on) goldbf = gp::scale * 1.6;
+  
   for(int i=0; i<16; i++) {
     bshape(shParticle[i], PPR_PARTICLE);
     for(int t=0; t<6; t++) 
-      hpcpush(spin(M_PI * t * 2 / 6 + M_PI * 2/6 * hrand(100) / 150.) * xpush(0.03 + hrand(100) * 0.0003) * C0);
+      hpcpush(spin(M_PI * t * 2 / 6 + M_PI * 2/6 * hrand(100) / 150.) * xpush((0.03 + hrand(100) * 0.0003) * goldbf) * C0);
     hpc[qhpc++] = hpc[last->s];
     }
   
@@ -1854,10 +1858,6 @@ void buildpolys() {
   if(a4 && !nonbitrunc) spzoom6 *= 1.9, spzoom7 *= .9, spzoomd7 *= .9;
   if(a46 && !nonbitrunc) spzoom6 *= .9;
   if(a47 && !nonbitrunc) spzoom6 *= .85;
-  
-  ld goldbf = 1;
-  
-  if(gp::scale != 1) goldbf = gp::scale * 1.6;
   
   ld goldbf2 = gp::scale;
   
