@@ -1019,8 +1019,8 @@ namespace lv {
 
   flagtype q0 = lv::display_error_message | lv::display_in_help;
   flagtype q1 = lv::display_error_message | lv::appears_in_geom_exp | lv::appears_in_full | lv::display_in_help;
-  flagtype q2 = lv::appears_in_geom_exp | lv::appears_in_full | lv::display_in_help;
-  flagtype q3 = lv::appears_in_geom_exp | lv::appears_in_full | lv::display_in_help;
+  flagtype q2 = lv::appears_in_geom_exp | lv::appears_in_full | lv::display_in_help | lv::appears_in_ptm;
+  flagtype q3 = lv::appears_in_geom_exp | lv::appears_in_full | lv::display_in_help | lv::appears_in_ptm;
 
   land_validity_t no_randpattern_version = { 0, q0, "No random pattern version."};  
   land_validity_t no_great_walls = { 0, q0, "Great Walls not implemented."};  
