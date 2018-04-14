@@ -303,20 +303,20 @@ namespace yendor {
       won = false;
       if(!easy) items[itOrbYendor] = bestscore[modecode()][challenge];
       chaosmode = (clev().flags & YF_CHAOS);
-      specialland = firstland = clev().l;
+      specialland = clev().l;
       if(clev().flags & YF_START_AL) {
-        firstland = laAlchemist;
+        specialland = laAlchemist;
         items[itElixir] = 50;
         items[itFeather] = 50;
         }
-      if(firstland == laPower) 
+      if(specialland == laPower) 
         items[itOrbSpeed] = 60, items[itOrbWinter] = 60;
       if(clev().flags & YF_START_CR) {
-        firstland = laCrossroads;
+        specialland = laCrossroads;
         }
-      if(firstland == laGraveyard) items[itBone] = 10;
-      if(firstland == laEmerald)   items[itEmerald] = 10;
-      if(firstland == laCocytus)   items[itFjord] = 10;
+      if(specialland == laGraveyard) items[itBone] = 10;
+      if(specialland == laEmerald)   items[itEmerald] = 10;
+      if(specialland == laCocytus)   items[itFjord] = 10;
       if(!euclid) {
         if(clev().flags & YF_DEAD)   items[itGreenStone] = 100;
         if(clev().flags & YF_DEAD5)  items[itGreenStone] = 5;

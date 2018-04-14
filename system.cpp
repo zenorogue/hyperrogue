@@ -90,7 +90,7 @@ void initgame() {
   
   bool use_special_land =
     !safety &&
-    (peace::on || tactic::on || geometry || gp::on);
+    (peace::on || tactic::on || geometry || gp::on || randomPatternsMode || yendor::on);
     
   if(use_special_land) firstland = specialland;
   
@@ -251,7 +251,7 @@ void initgame() {
 #if CAP_INV
     if(inv::on) inv::init();
 #endif
-    if(!randomPatternsMode && !tactic::on && !yendor::on && !peace::on) {
+    if(!use_special_land) {
       if(firstland != (princess::challenge ? laPalace : laIce)) cheater++;
       }
     welcomeMessage();
