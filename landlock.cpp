@@ -1245,7 +1245,7 @@ land_validity_t& land_validity(eLand l) {
     return unbounded_only;
   
   // Graveyard pattern does not work on non-bitrunc weird geometries
-  if(l == laGraveyard) switch(geosupport_graveyard()) {
+  if(l == laGraveyard && !randomPatternsMode) switch(geosupport_graveyard()) {
     case 0:
       return dont_work;
     case 1:
@@ -1258,18 +1258,18 @@ land_validity_t& land_validity(eLand l) {
     return ugly_version;
     }
 
-  if(l == laWarpCoast && quotient == 2) 
+  if(l == laWarpCoast && quotient == 2 && !randomPatternsMode) 
     return pattern_incompatibility;
   
   // laPower and laEmerald and laPalace -> [partial] in quotients and hyperbolic_non37
-  if(l == laPower || l == laEmerald || l == laPalace || l == laWildWest) {
+  if((l == laPower || l == laEmerald || l == laPalace || l == laWildWest) && !randomPatternsMode) {
     if(euclid || bigsphere) ;
     else if(!hyperbolic_37) return l == laWildWest ? some0 : pattern_not_implemented_random;
     else if(quotient) return pattern_incompatibility;
     }
 
   // ... wineyard pattern is GOOD only in the standard geometry or Euclidean
-  if(l == laWineyard && (gp::on || sphere))
+  if(l == laWineyard && (gp::on || sphere) && !randomPatternsMode)
     return pattern_not_implemented_random;
   
   if(l == laTrollheim && quotient == 2)
@@ -1281,7 +1281,7 @@ land_validity_t& land_validity(eLand l) {
   if(l == laReptile && (a38 || a4 || sphere || nonbitrunc || gp::on || quotient == 2))
     return bad_graphics;
 
-  if((l == laDragon || l == laReptile) && !stdeuc && !smallbounded)
+  if((l == laDragon || l == laReptile) && !stdeuc && !smallbounded && !randomPatternsMode)
     return no_fractal_landscapes;
   
   if(l == laCrossroads && smallsphere) 
@@ -1301,10 +1301,10 @@ land_validity_t& land_validity(eLand l) {
   if(l == laCrossroads4 && quotient)
     return some0;
 
-  if(l == laZebra && quotient == 2)
+  if(l == laZebra && quotient == 2 && !randomPatternsMode)
     return pattern_incompatibility;
   
-  if(l == laZebra && !(stdeuc || (a4 && nonbitrunc) || a46))
+  if(l == laZebra && !(stdeuc || (a4 && nonbitrunc) || a46) && !randomPatternsMode)
     return pattern_not_implemented_weird;
   
   if(l == laCrossroads3 && euclid)
@@ -1364,7 +1364,7 @@ land_validity_t& land_validity(eLand l) {
     return known_buggy;
 
   // these don't appear in normal game, but do appear in special modes
-  if(l == laWildWest)
+  if(l == laWildWest && !randomPatternsMode)
     return out_of_theme;
 
   return ok;
