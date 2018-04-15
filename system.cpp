@@ -25,6 +25,12 @@ bool verless(string v, string cmp) {
   return v < cmp;
   }
 
+bool do_use_special_land() {
+  return
+    !safety &&
+    (peace::on || tactic::on || geometry || gp::on || randomPatternsMode || yendor::on);
+  }
+
 void welcomeMessage() {
   if(tactic::trailer) return;
 #if CAP_TOUR
@@ -62,9 +68,11 @@ void welcomeMessage() {
     addMessage(XLAT("Welcome to HyperRogue!"));
     }
 
-  auto lv = land_validity(specialland);
-  if(lv.flags & lv::display_error_message)
-    addMessage(XLAT(lv.msg));
+  if(do_use_special_land() || firstland != laIce) {
+    auto lv = land_validity(specialland);
+    if(lv.flags & lv::display_error_message)
+      addMessage(XLAT(lv.msg));
+    }
 
 #if ISMAC
   addMessage(XLAT("Press F1 or right-shift-click things for help."));
@@ -88,9 +96,7 @@ void initgame() {
     firstland = safetyland;
     }
   
-  bool use_special_land =
-    !safety &&
-    (peace::on || tactic::on || geometry || gp::on || randomPatternsMode || yendor::on);
+  bool use_special_land = do_use_special_land();
     
   if(use_special_land) firstland = specialland;
   
