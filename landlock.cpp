@@ -1105,7 +1105,7 @@ land_validity_t& land_validity(eLand l) {
   if(l == laStorms && nonbitrunc && elliptic) 
     return not_enough_space;
 
-  if(l == laStorms && nonbitrunc && S3 == 3) 
+  if(l == laStorms && S7 == 3) 
     return not_enough_space;
   
   // mirrors do not work in gp
