@@ -267,6 +267,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
               }
             }
           }
+        else if(c->wall == waPalace) ;
         else if((hrand(100) < (lookingForPrincess ? (nonbitrunc ? 11 : 7) : 5) && cdist50(c)) ||
           (cdist50(c) == 0 && polarb50(c) && hrand(100) < 60)) {
           c->wall = hrand(100) < (lookingForPrincess ? (nonbitrunc ? 25 : 30):50) ? waClosePlate : waOpenPlate;
