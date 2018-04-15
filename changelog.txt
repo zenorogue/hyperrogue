@@ -2369,3 +2369,10 @@ MINOR:
 - Fixed Wild West not appearing in PTM.
 - Fixed the crash in PTM.
 - Fixed the particle scaling in Goldberg.
+
+2018.04.15 13:35 version 10.3r
+
+- Fixed the missing walls in the Palace
+- Geometry Experiments menu now lets you change land in the standard geometry too (but you will be marked as a cheater)
+- Allowed the sloppy Graveyard in heptagonal
+- Also allowed Land of Storms which was disabled by mistake
