@@ -1167,7 +1167,7 @@ land_validity_t& land_validity(eLand l) {
   if(l == laPrincessQuest && tactic::on)
     return not_in_ptm;
     
-  if(l == laPrincessQuest && !stdeuc)
+  if(l == laPrincessQuest && (!stdeuc || gp::on))
     return not_implemented;
 
   // works correctly only in some geometries
