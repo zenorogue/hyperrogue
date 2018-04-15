@@ -1017,45 +1017,48 @@ bool isLandIngame(eLand l) {
 
 namespace lv {
 
-  flagtype q0 = lv::display_error_message | lv::display_in_help;
+  flagtype q0 = lv::display_error_message | lv::display_in_help | lv::appears_in_geom_exp;
   flagtype q1 = lv::display_error_message | lv::appears_in_geom_exp | lv::appears_in_full | lv::display_in_help;
   flagtype q2 = lv::appears_in_geom_exp | lv::appears_in_full | lv::display_in_help | lv::appears_in_ptm;
   flagtype q3 = lv::appears_in_geom_exp | lv::appears_in_full | lv::display_in_help | lv::appears_in_ptm;
+  flagtype qm2= q2 | lv::display_error_message;
+  flagtype qm3= q3 | lv::display_error_message;
 
   land_validity_t no_randpattern_version = { 0, q0, "No random pattern version."};  
   land_validity_t no_great_walls = { 0, q0, "Great Walls not implemented."};  
   land_validity_t pattern_incompatibility = { 0, q0, "Pattern incompatible."};  
   land_validity_t pattern_not_implemented_random = { 1, q1, "Pattern not implemented -- using random."};
   land_validity_t pattern_not_implemented_weird = { 1, q1, "Pattern not implemented."};
-  land_validity_t pattern_not_implemented_exclude = { 0, q1 & ~ lv::appears_in_full, "Pattern not implemented -- using random."};
+  land_validity_t pattern_not_implemented_exclude = { 1, q1 & ~ lv::appears_in_full, "Pattern not implemented."};
   land_validity_t not_enough_space = { 0, q0, "Not enough space."};  
   land_validity_t dont_work = { 0, q0, "Does not work in this geometry."};
   land_validity_t bounded_only = { 0, q0, "This land is designed for bounded worlds."};
   land_validity_t unbounded_only = { 0, q0, "This land is designed for infinite worlds."};                                   
   land_validity_t unbounded_only_except_bigsphere = { 0, q0, "This land is designed for infinite worlds or big spheres."};
-  land_validity_t out_of_theme = { 3, q2 &~ lv::appears_in_full, "Out of theme for the full game."};
+  land_validity_t out_of_theme = { 3, qm2 &~ lv::appears_in_full, "Out of theme for the full game."};
   land_validity_t no_game = { 2, q2 &~ lv::appears_in_full, "No game here."};  
   land_validity_t not_in_chaos = { 0, q0, "Does not work in chaos mode."};  
-  land_validity_t not_in_full_game = {2, q2 &~ lv::appears_in_full, "Not in the full game."};
-  land_validity_t special_chaos = { 2, q2, "Special construction in the Chaos mode." };
-  land_validity_t special_euclidean = { 2, q2, "Special construction in the Euclidean mode." };  
-  land_validity_t special_geo = { 2, q2, "Special construction in this geometry." };
-  land_validity_t special_geo3 = { 3, q2, "Special construction in this geometry." };
+  land_validity_t not_in_full_game = {2, qm2 &~ lv::appears_in_full, "Not in the full game."};
+  land_validity_t not_in_full_game3 = {3, qm2 &~ lv::appears_in_full, "Not in the full game."};
+  land_validity_t special_chaos = { 2, qm2, "Special construction in the Chaos mode." };
+  land_validity_t special_euclidean = { 2, qm2, "Special construction in the Euclidean mode." };  
+  land_validity_t special_geo = { 2, qm2, "Special construction in this geometry." };
+  land_validity_t special_geo3 = { 3, qm2, "Special construction in this geometry." };
   land_validity_t not_implemented = {0, q0, "Not implemented."};  
   land_validity_t partially_implemented = {1, q1, "Partially implemented."};  
   land_validity_t ok = {2, q2 &~ lv::display_in_help, "No comments."};  
   land_validity_t not_in_ptm = {0, q0, "Does not work in pure tactics mode."};  
-  land_validity_t technical = {0, q0, "Technical."};  
+  land_validity_t technical = {0, q0 &~ lv::appears_in_geom_exp, "Technical."};  
   land_validity_t full_game = {3, q3, "Full game."};  
   land_validity_t inaccurate = {1, q1, "Somewhat inaccurate."};  
   land_validity_t great_walls_missing = {1, q1, "Mercury rivers not implemented (or could not work) in this geometry."};
-  land_validity_t pattern_compatibility = {3, q3, "Patterns compatible."}; 
-  land_validity_t specially_designed = {3, q3, "This land is specially designed for this geometry."};   
+  land_validity_t pattern_compatibility = {3, qm3, "Patterns compatible."}; 
+  land_validity_t specially_designed = {3, qm3, "This land is specially designed for this geometry."};   
   land_validity_t needs_threecolor = {0, q0, "Three-colorability required."};  
-  land_validity_t land_not_implemented = {0, q0, "Land not implemented."};  
+  land_validity_t land_not_implemented = {0, q0 &~ lv::appears_in_geom_exp, "Land not implemented."};  
   land_validity_t interesting = {3, q3, "Special interest."};
   land_validity_t better_version_exists = {0, q0, "Better version exists."};
-  land_validity_t dont_work_but_ingame = {0, q0 | lv::appears_in_full, "Does not work in this geometry."};
+  land_validity_t dont_work_but_ingame = {1, q0 | lv::appears_in_full, "Does not work in this geometry."};
   land_validity_t ugly_version = {1, q1 | lv::appears_in_full, "Grid does not work in this geometry."};
   land_validity_t bad_graphics = {1, q1, "Graphics not implemented in this geometry."};
   land_validity_t some0 = {0, q0, "This land does not work in the current settings. Reason not available."};
@@ -1340,7 +1343,7 @@ land_validity_t& land_validity(eLand l) {
     return specially_designed;
   
   if(l == laDual && !geometry && !gp::on)
-    return not_in_full_game;
+    return hyperbolic_37 ? not_in_full_game3 : not_in_full_game;
   
   if(l == laSnakeNest) {
     if(geosupport_threecolor() < 2)
