@@ -236,7 +236,7 @@ void showEuclideanMenu() {
   landvisited[laCA] = true;
   // for(int i=2; i<lt; i++) landvisited[i] = true;
   
-  if((geometry == gNormal && !gp::on) || ewhichscreen == 2) {
+  if(ewhichscreen == 2) {
     dialog::init(XLAT("experiment with geometry"));
     int ts = ginf[geometry].sides;
     int tv = ginf[geometry].vertex;
@@ -431,7 +431,7 @@ void showEuclideanMenu() {
       else if(lid >= 0 && lid < size(landlist)) {
         eLand nland = landlist[lid];
         if(landvisited[nland]) {
-          specialland = nland;
+          firstland = specialland = nland;
           restartGame(tactic::on ? rg::tactic : rg::nothing);
           pushScreen(showEuclideanMenu);
           }

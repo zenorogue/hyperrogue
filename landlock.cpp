@@ -1366,6 +1366,9 @@ land_validity_t& land_validity(eLand l) {
   // these don't appear in normal game, but do appear in special modes
   if(l == laWildWest && !randomPatternsMode)
     return out_of_theme;
+  
+  if(l == laIce && !gp::on && hyperbolic_37)
+    return full_game;
 
   return ok;
   }
