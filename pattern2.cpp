@@ -994,7 +994,12 @@ int geosupport_graveyard() {
   if(!nonbitrunc) return 2;
   
   // always works in patterns supporting three-color
-  return geosupport_threecolor();
+  int tc = geosupport_threecolor();
+  if(tc) return tc;
+  
+  if(S3 == 3 && S7 == 7) return 1;
+  if(S3 == 4 && !(S7&1)) return 2;
+  return 0;
   }
 
 int pattern_threecolor(cell *c) {
