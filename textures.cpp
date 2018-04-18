@@ -236,7 +236,19 @@ void texture_config::mapTextureTriangle(textureinfo &mi, const array<hyperpoint,
     inmodel[0] *= vid.radius * 1. / vid.scrsize;
     inmodel[1] *= vid.radius * 1. / vid.scrsize;
     mi.tvertices.push_back(make_array<GLfloat>((inmodel[0]+1)/2, (inmodel[1]+1)/2, 0));
-    }  
+    }
+  
+  // when reading a spherical band in a cylindrical projection,
+  // take care that texture vertices are mapped not around the sphere
+  if(sphere && mdBandAny()) {
+    int s = size(mi.tvertices)-3;
+    ld xmin = min(mi.tvertices[s][0], min(mi.tvertices[s+1][0], mi.tvertices[s+2][0]));
+    ld xmax = max(mi.tvertices[s][0], max(mi.tvertices[s+1][0], mi.tvertices[s+2][0]));
+    if(xmax - xmin > .5) {
+      for(int ss=s; ss<s+3; ss++) 
+        if(mi.tvertices[ss][0] < .5) mi.tvertices[ss][0] += 1;
+      }
+    }
   }
 
 texture_triangle *edited_triangle;
