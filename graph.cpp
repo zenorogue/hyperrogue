@@ -5209,7 +5209,7 @@ void drawFlashes() {
   }
 
 bool allowIncreasedSight() {
-  if(cheater) return true;
+  if(cheater || autocheat) return true;
   if(peace::on) return true;
 #if CAP_TOUR
   if(tour::on) return true;
