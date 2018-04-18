@@ -467,6 +467,8 @@ unsigned char& part(int& col, int i) {
   unsigned char* c = (unsigned char*) &col; return c[i];
   }
 
+bool in_twopoint = false;
+
 void drawpolyline(polytodraw& p) {
   auto& pp = p.u.poly;
 
@@ -482,8 +484,8 @@ void drawpolyline(polytodraw& p) {
     return;
     }
 
-  static vector<glvertex> v0, v1;
-  if(sphere && pmodel == mdTwoPoint) {
+  if(sphere && pmodel == mdTwoPoint && !in_twopoint) {
+    static vector<glvertex> v0, v1;
     v0.clear(); v1.clear();
     for(int i=0; i<pp.cnt; i++) {
       glvertex h = glhr::pointtogl(pp.V * glhr::gltopoint((*pp.tab)[pp.offset+i]));
@@ -494,17 +496,34 @@ void drawpolyline(polytodraw& p) {
       else if(h[1] > 0)
         v1.push_back(h);
       }
+    auto tV = pp.V;
+    auto toffset = pp.offset;
+    auto ttab = pp.tab;
+    auto tcnt = pp.cnt;
+    vector<glvertex> tv;
+    if(pp.tinf) {
+      for(int i=0; i<pp.cnt; i++)
+        tv.push_back(pp.tinf->tvertices[pp.offset+i]);
+      swap(pp.tinf->tvertices, tv);
+      }
     pp.V = Id; pp.offset = 0;
+    in_twopoint = true;
     if(size(v0) == pp.cnt) {
       pp.tab = &v0;
+      drawpolyline(p);      
       }
     else if(size(v1) == pp.cnt) {
       pp.tab = &v1;
+      drawpolyline(p);
       }
     else {
       if(size(v0) >= 3) { pp.tab = &v0; pp.cnt = size(v0); drawpolyline(p); }
       if(size(v1) >= 3) { pp.tab = &v1; pp.cnt = size(v1); drawpolyline(p); }
       }
+    in_twopoint = false;
+    pp.V = tV; pp.offset = toffset; pp.tab = ttab; pp.cnt = tcnt;
+    if(pp.tinf) swap(pp.tinf->tvertices, tv);
+    return;
     }
   
   if(spherespecial && p.prio == PPR_MOBILE_ARROW) {
