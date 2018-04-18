@@ -535,7 +535,7 @@ void drawpolyline(polytodraw& p) {
 
 #if CAP_GL
   if(vid.usingGL && pmodel == mdDisk && !spherespecial) {
-    glLineWidth(linewidthat(tC0(pp.V), pp.minwidth));    
+    glLineWidth(linewidthat(tC0(pp.V), pp.minwidth));
     gldraw(1, pp.V, *pp.tab, pp.offset, pp.cnt, p.col, pp.outline, 0, pp.tinf);    
     return;
     }
@@ -619,7 +619,7 @@ void drawpolyline(polytodraw& p) {
       else {
         // If we are on a zlevel, the algorithm above will not work correctly.
         // It is hard to tell what to do in this case. Just fill neither side
-        p.col = 0;
+        nofill = true;
         }
       }
   
@@ -630,7 +630,7 @@ void drawpolyline(polytodraw& p) {
         return; 
         }
       glLineWidth(linewidthat(tC0(pp.V), pp.minwidth));    
-      if(pp.tinf && pp.offset) {
+      if(pp.tinf && pp.offset && !nofill) {
         vector<glvertex> tv;
         for(int i=0; i<pp.cnt; i++)
           tv.push_back(pp.tinf->tvertices[pp.offset+i]);
@@ -639,7 +639,7 @@ void drawpolyline(polytodraw& p) {
         swap(pp.tinf->tvertices, tv);
         }
       else
-        gldraw(3, Id, glcoords, 0, size(glcoords), p.col, pp.outline, poly_flags, pp.tinf);
+        gldraw(3, Id, glcoords, 0, size(glcoords), nofill ? 0 : p.col, pp.outline, poly_flags, nofill ? NULL : pp.tinf);
       continue;
       }
   #endif
