@@ -440,8 +440,10 @@ namespace gp {
     }
   
   void whirl_set(loc xy, bool texture_remap) {
+#if CAP_TEXTURE
     auto old_tstate = texture::config.tstate;
     auto old_tstate_max = texture::config.tstate_max;
+#endif
     xy = internal_representation(xy);
     if(xy.second && elliptic) {
       if(xy.second==xy.first)
@@ -466,8 +468,10 @@ namespace gp {
       param = xy;
       restartGame(rg::gp);
       }
+#if CAP_TEXTURE
     if(texture_remap)
       texture::config.remap(old_tstate, old_tstate_max);
+#endif
     screens = g;
     }
 
