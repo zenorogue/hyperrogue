@@ -222,6 +222,16 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
     return;
     }
 
+  if(pmodel == mdFisheye) {
+    ret[0] = H[0] / tz;
+    ret[1] = H[1] / tz;
+    ld hypot = sqrt(1 + ret[0]*ret[0] + ret[1]*ret[1]);
+    ret[0] /= hypot;
+    ret[1] /= hypot;
+    ghcheck(ret, H);
+    return;
+    }
+
   ld zlev = 1;
   bool zlev_used = false;
 

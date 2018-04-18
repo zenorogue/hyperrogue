@@ -534,7 +534,8 @@ namespace conformal {
     "disk", "half-plane", "band", "polygonal", "polynomial",
     "azimuthal equidistant", "azimuthal equi-area", 
     "ball model", "Minkowski hyperboloid", "hemisphere",
-    "band equidistant", "band equi-area", "sinusoidal", "two-point equidistant"
+    "band equidistant", "band equi-area", "sinusoidal", "two-point equidistant",
+    "fisheye"
     };
   
   string get_model_name(eModel pm) {
@@ -640,6 +641,8 @@ namespace conformal {
         pmodel = eModel(12);
       else if(uni == '$') 
         pmodel = eModel(13);
+      else if(uni == '%') 
+        pmodel = eModel(14);
       else if(uni == '6')
         vid.alpha = 1, vid.scale = 1;
       else if(uni == 'z')

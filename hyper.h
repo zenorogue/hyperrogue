@@ -927,6 +927,7 @@ enum eModel {
   mdDisk, mdHalfplane, mdBand, mdPolygonal, mdPolynomial,
   mdEquidistant, mdEquiarea, mdBall, mdHyperboloid, 
   mdHemisphere, mdBandEquidistant, mdBandEquiarea, mdSinusoidal, mdTwoPoint, 
+  mdFisheye,
   mdGUARD, mdUnchanged };
 
 namespace conformal {

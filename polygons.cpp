@@ -548,8 +548,10 @@ void drawpolyline(polytodraw& p) {
     if(abs(p[0]) > poly_limit || abs(p[1]) > poly_limit)
       return; // too large!
     }
+  
+  bool equi = mdAzimuthalEqui() || pmodel == mdFisheye;
 
-  if((spherespecial > 0 || (sphere && mdAzimuthalEqui())) && !(poly_flags & POLY_ISSIDE)) {
+  if((spherespecial > 0 || (sphere && equi)) && !(poly_flags & POLY_ISSIDE)) {
     double rarea = 0;
     for(int i=0; i<size(glcoords)-1; i++) 
       rarea += glcoords[i][0] * glcoords[i+1][1] - glcoords[i][1] * glcoords[i+1][0];
@@ -582,9 +584,11 @@ void drawpolyline(polytodraw& p) {
         }
       lastl = l;
       }
+    
+    bool nofill = false;
 
-    if(mdAzimuthalEqui() && (poly_flags & POLY_INVERSE)) {
-      if(abs(zlevel(pp.V * C0) - 1) < 1e-6) {
+    if(equi && (poly_flags & POLY_INVERSE)) {
+      if(abs(zlevel(pp.V * C0) - 1) < 1e-6 && !pp.tinf) {
         // we should fill the other side
         ld h = atan2(glcoords[0][0], glcoords[0][1]);
         for(int i=0; i<=360; i++) {
