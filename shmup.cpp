@@ -3400,7 +3400,7 @@ transmatrix &ggmatrix(cell *c) {
       t = gmatrix[centerover.c] * eumove(cell_to_vec(c) - cellwalker_to_vec(centerover));
       }
     else 
-      t = applyspin(viewctr, cview()) * calc_relative_matrix(c, viewctr.h->c7);
+      t = actualV(viewctr, cview()) * calc_relative_matrix(c, viewctr.h->c7);
     }
   return t;
   }
@@ -3478,7 +3478,7 @@ void virtualRebase(cell*& base, transmatrix& at, bool tohex) {
       hs.h = h;
       hs.spin = d;
       heptspin hs2 = hs + wstep;
-      transmatrix& V2 = invheptmove[d];
+      transmatrix V2 = spin(-hs2.spin*2*M_PI/S7) * invheptmove[d];
       double newz = (V2 * at * C0) [2];
       if(newz < currz) {
         currz = newz;
