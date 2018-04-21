@@ -321,23 +321,18 @@ struct cellcrawler {
       else s.target += wstep;
       }
     }
-  };
 
-cellcrawler scc[2]; // hex and non-hex
+  vector<vector<ld>> dispersion;
+  };
 
 double dispersion_end_at = 1.5;
 
 double dispersion_precision = .0001;
 int dispersion_each = 1;
 
-vector<vector<ld>> dispersion[2]; 
-
 int dispersion_count;
 
-void buildcellcrawler(cell *c) {
-  int sccid = c->type != 6;
-  
-  cellcrawler& cr =  scc[sccid];
+void buildcellcrawler(cell *c, cellcrawler& cr) {
   cr.build(cellwalker(c,0));
 
   if(!gaussian) {
@@ -365,7 +360,7 @@ void buildcellcrawler(cell *c) {
     ld vmin = 0, vmax = 1;
     int iter;
     
-    auto &d = dispersion[sccid];
+    auto &d = cr.dispersion;
     
     d.clear();
   
@@ -399,6 +394,31 @@ void buildcellcrawler(cell *c) {
     }
   }
 
+map<int, cellcrawler> scc;
+
+int get_cellcrawler_id(cell *c) {
+  if(torus && (torusconfig::tmflags() & torusconfig::TF_KLEIN))
+    return cell_to_pair(c).second * 2 + ctof(c);
+  else {
+    int id = 0, ld = 0;
+    if(gp::on) {
+      gp::local_info li = gp::get_local_info(c);
+      id = (li.relative.first & 15) + (li.relative.second & 15) * 16 + fix6(li.total_dir) * 256;
+      ld = li.last_dir;
+      }
+    else {
+      id = c->type == S7;
+      if(id == 0) ld = c->spin(0);
+      }
+    if(quotient == 1) {
+      id = 8*id + ld;
+      id = 64 * id + c->master->zebraval;
+      return id;
+      }
+    return id;
+    }
+  }
+  
 bool finished() { return t == 0; }
 
 int krad;
@@ -447,12 +467,11 @@ void step() {
       n2.net[k] += nu * (irisdata[id][k] - n2.net[k]);
     } */
     
-  int sccid = n.where->type != 6;
-  cellcrawler& s = scc[sccid];
+  cellcrawler& s = scc[get_cellcrawler_id(n.where)];
   s.sprawl(cellwalker(n.where, 0));
 
   vector<double> fake(1,1);
-  auto it = gaussian ? fake.begin() : dispersion[sccid][dispid].begin();
+  auto it = gaussian ? fake.begin() : s.dispersion[dispid].begin();
 
   for(auto& sd: s.data) {
     neuron *n2 = getNeuron(sd.target.c);
@@ -589,10 +608,15 @@ void sominit(int initto) {
       }
       
     dispersion_count = 0;  
-    cell *c1 = currentmap->gamestart();
-    cell *c2 = createMov(c1, 0);
-    buildcellcrawler(c1);
-    if(c1->type != c2->type) buildcellcrawler(c2);
+    
+    scc.clear();
+    for(cell *c: currentmap->allcells()) {
+      int id = get_cellcrawler_id(c);
+      if(!scc.count(id)) {
+        printf("Building cellcrawler id = %x\n", id);
+        buildcellcrawler(c, scc[id]);
+        }
+      }
   
     lpct = -46130;
     }
