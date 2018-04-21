@@ -1011,7 +1011,6 @@ void saveHighQualityShot(const char *fname, const char *caption, int fade) {
 
   dynamicval<videopar> v(vid, vid);
   dynamicval<bool> v2(inHighQual, true);
-  dynamicval<int> v4(cheater, 0);
   dynamicval<bool> v6(auraNOGL, fname ? true : false);
   
   vid.xres = vid.yres = pngres;
