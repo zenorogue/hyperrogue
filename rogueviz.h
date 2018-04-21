@@ -6,7 +6,7 @@ struct edgeinfo {
   int i, j;
   double weight, weight2;
   bool visible;
-  vector<GLfloat> prec;
+  vector<glvertex> prec;
   cell *orig;
   int lastdraw;
   edgeinfo() { visible = true; orig = NULL; lastdraw = -1; }
