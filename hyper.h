@@ -2577,6 +2577,8 @@ extern transmatrix invheptmove[MAX_EDGE], invhexmove[MAX_EDGE];
 static const struct wstep_t { wstep_t() {} } wstep;
 static const struct wmirror_t { wmirror_t() {}} wmirror;
 
+heptspin operator + (const heptspin& hs, wstep_t);
+
 // heptspin hsstep(const heptspin &hs, int spin);
 
 extern void fixmatrix(transmatrix&);
