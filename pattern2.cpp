@@ -1807,31 +1807,23 @@ namespace linepatterns {
       
       case patTriNet:
         forCellEx(c2, c) if(c2 > c) if(gmatrix.count(c2)) if(celldist(c) != celldist(c2)) {
-          queueline(tC0(V), gmatrix[c2]*C0, 
-            darkena(backcolor ^ 0xFFFFFF, 0, col),
-            2);
+          queueline(tC0(V), gmatrix[c2]*C0, col, 2);
           }
         break;
 
       case patTriRings:
         forCellEx(c2, c) if(c2 > c) if(gmatrix.count(c2) && celldist(c) == celldist(c2)) 
-          queueline(tC0(V), gmatrix[c2]*C0, 
-            darkena(backcolor ^ 0xFFFFFF, 0, col),
-            2);
+          queueline(tC0(V), gmatrix[c2]*C0, col, 2);
         break;
 
       case patHepta:
         forCellEx(c2, c) if(c2 > c) if(gmatrix.count(c2) && pseudohept(c) == pseudohept(c2)) 
-          queueline(tC0(V), gmatrix[c2]*C0, 
-            darkena(backcolor ^ 0xFFFFFF, 0, col),
-            2);
+          queueline(tC0(V), gmatrix[c2]*C0, col, 2);
         break;
 
       case patRhomb:
         forCellEx(c2, c) if(c2 > c) if(gmatrix.count(c2) && pseudohept(c) != pseudohept(c2)) 
-          queueline(tC0(V), gmatrix[c2]*C0, 
-            darkena(backcolor ^ 0xFFFFFF, 0, col),
-            2);
+          queueline(tC0(V), gmatrix[c2]*C0, col, 2);
         break;
       
       case patPalace: {
