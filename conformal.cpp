@@ -179,9 +179,6 @@ namespace spiral {
 
   void loop(vector<SDL_Surface*> _band) {
 
-    bool saveGL = vid.usingGL;
-    if(saveGL) { vid.usingGL = false; setvideomode(); }
-
     band = _band;
     out = s;
     precompute();
@@ -189,6 +186,10 @@ namespace spiral {
     shiftx = shifty = 0;
     velx=1; vely=1;
     bool dosave = false;
+
+    bool saveGL = vid.usingGL;
+    if(saveGL) switchGL(); //  { vid.usingGL = false; setvideomode(); }
+
     while(true) {
 
       time_t timer;
@@ -228,7 +229,7 @@ namespace spiral {
     
     breakloop:
     quickmap.clear();
-    if(saveGL) { vid.usingGL = true; setvideomode(); }
+    if(saveGL) switchGL(); // { vid.usingGL = true; setvideomode(); }
     }
 
   }
