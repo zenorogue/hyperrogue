@@ -1135,6 +1135,10 @@ namespace patterns {
       if(z > z2) return 0xC00000;
       return 0xCCCC00;
       }
+    if(whichCanvas == 'M') {
+      int cd = celldist(c);
+      return gradient(0, canvasback, 0, min(1.8/(1+cd), 1.), 1);
+      }
     if(whichCanvas == 'S' && !torus) {
       return 0x3F1F0F * fieldpattern::subval(c).second + 0x000080;
       }
@@ -1250,6 +1254,7 @@ namespace patterns {
     dialog::init("predesigned patterns");
     dialog::addItem(XLAT("single color"), 'g');
     dialog::addItem(XLAT("random colors"), 'r');
+    dialog::addItem(XLAT("distance from origin"), 'M');
     
     if(stdeuc) {
       dialog::addItem(XLAT("rainbow landscape"), 'l');
