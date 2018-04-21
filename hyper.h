@@ -1683,6 +1683,7 @@ namespace arg {
   void shift();
 
   const string& args();
+  const char* argcs();
   int argi();
   ld argf();
   bool argis(const string& s);

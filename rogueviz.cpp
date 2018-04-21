@@ -406,7 +406,7 @@ namespace tree {
     tol[at].epos = ++xpos;
     }
     
-  void read(const char *fn) {
+  void read(string fn) {
     fname = fn;
     init(); kind = kTree;
     printf("Reading the tree of life...\n");
@@ -773,8 +773,8 @@ namespace sag {
       sag::cost);
     }
   
-  void savesnake(const char *fname) {
-    FILE *f = fopen(fname, "wt");
+  void savesnake(const string& fname) {
+    FILE *f = fopen(fname.c_str(), "wt");
     for(int i=0; i<N; i++)
       fprintf(f, "%s;%d\n", vdata[i].name.c_str(), snakeid[i]);
     fclose(f);
@@ -849,7 +849,7 @@ namespace sag {
   
   ld edgepower=1, edgemul=1;
 
-  void read(const char *fn) {
+  void read(string fn) {
     fname = fn;
     init(); kind = kSAG;
     temperature = 0; sagmode = sagOff;
@@ -967,13 +967,13 @@ void activate(shmup::monster *m) {
   else ealpha = 1; */
   }
 
-void storevertex(vector<GLfloat>& tab, const hyperpoint& h) {
-  for(int i=0; i<3; i++) tab.push_back(h[i]);
+void storevertex(vector<glvertex>& tab, const hyperpoint& h) {
+  tab.push_back(glhr::pointtogl(h));
   }
 
 double linequality = .1;
 
-void storelineto(vector<GLfloat>& tab, const hyperpoint& h1, const hyperpoint& h2) {
+void storelineto(vector<glvertex>& tab, const hyperpoint& h1, const hyperpoint& h2) {
   if(intval(h1, h2) < linequality)
     storevertex(tab, h2);
   else {
@@ -983,7 +983,7 @@ void storelineto(vector<GLfloat>& tab, const hyperpoint& h1, const hyperpoint& h
     }
   }
 
-void storeline(vector<GLfloat>& tab, const hyperpoint& h1, const hyperpoint& h2) {
+void storeline(vector<glvertex>& tab, const hyperpoint& h1, const hyperpoint& h2) {
   storevertex(tab, h1);
   storelineto(tab, h1, h2);
   }
@@ -1111,7 +1111,7 @@ void drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
           else 
             storeline(ei->prec, T*h1, T*h2);
           }
-        queuetable(shmup::ggmatrix(ei->orig), &ei->prec[0], size(ei->prec)/3, col, 0,
+        queuetable(shmup::ggmatrix(ei->orig), ei->prec, size(ei->prec), col, 0,
           PPR_STRUCT0);
         }
       }
@@ -1257,8 +1257,8 @@ void drawExtra() {
     }
   }
 
-void readcolor(const char *cfname) {
-  FILE *f = fopen(cfname, "rt");
+void readcolor(const string& cfname) {
+  FILE *f = fopen(cfname.c_str(), "rt");
   if(!f) { printf("color file missing\n"); exit(1); }
   while(true) {
     string lab = "";
@@ -1382,7 +1382,7 @@ void fixparam() {
   }
 
 #if CAP_SDL
-void rvvideo(const char *fname) {
+void rvvideo(const string &fname) {
   if(kind == kCollatz) {
     pngformat = 2;
     sightrange_bonus = 3;
@@ -1513,7 +1513,7 @@ struct storydata { int s; int e; const char *text; } story[] = {
       conformal::movetophase();
 
       char buf[500];
-      snprintf(buf, 500, fname, i);
+      snprintf(buf, 500, fname.c_str(), i);
       
       if(i == 0) drawthemap();
       shmup::turn(100);
@@ -1526,7 +1526,7 @@ struct storydata { int s; int e; const char *text; } story[] = {
     }
   for(int i=0; i<1800; i++) {
     char buf[500];
-    snprintf(buf, 500, fname, i);
+    snprintf(buf, 500, fname.c_str(), i);
     shmup::pc[0]->base = currentmap->gamestart();
     shmup::pc[0]->at = spin(i * 2 * M_PI / (58*30.)) * xpush(1.7);
     if(i == 0) drawthemap();
@@ -1546,7 +1546,7 @@ int readArgs() {
 // options before reading
   if(0) ;
   else if(argis("-dftcolor")) {
-    shift(); dftcolor = strtol(args(), NULL, 16);
+    shift(); dftcolor = strtol(args().c_str(), NULL, 16);
     }  
 
 // tree visualizer (e.g. Tree of Life)
@@ -1615,7 +1615,7 @@ int readArgs() {
   else if(argis("-collatz")) {
     PHASE(3); 
     using namespace collatz; 
-    shift(); sscanf(args(), "%lf,%lf,%lf,%lf", &s2, &p2, &s3, &p3);
+    shift(); sscanf(argcs(), "%lf,%lf,%lf,%lf", &s2, &p2, &s3, &p3);
     start();
     }
 
@@ -1623,7 +1623,7 @@ int readArgs() {
     PHASE(3); 
     ld mul = 2;
     int N = 1000;
-    shift(); sscanf(args(), LDF ",%d", &mul, &N);
+    shift(); sscanf(argcs(), LDF ",%d", &mul, &N);
     spiral::place(N, mul);
     }
 
@@ -1638,7 +1638,7 @@ int readArgs() {
     PHASE(3); 
     ld shft = 1;
     ld mul = 1;
-    shift(); sscanf(args(), LDF "," LDF, &shft, &mul);
+    shift(); sscanf(argcs(), LDF "," LDF, &shft, &mul);
     spiral::edge(shft, mul);
     }
 
@@ -1646,7 +1646,7 @@ int readArgs() {
     PHASE(3); 
     ld period = 1;
     ld start = 1;
-    shift(); sscanf(args(), LDF "," LDF, &period, &start);
+    shift(); sscanf(argcs(), LDF "," LDF, &period, &start);
     start--;
     shift();
     spiral::color(start, period, parse(args()));

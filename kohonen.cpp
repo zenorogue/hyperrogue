@@ -69,8 +69,8 @@ double vnorm(kohvec& a, kohvec& b) {
 void sominit(int);
 void uninit(int);
 
-void loadsamples(const char *fname) {
-  FILE *f = fopen(fname, "rt");
+void loadsamples(const string& fname) {
+  FILE *f = fopen(fname.c_str(), "rt");
   if(!f) {
     fprintf(stderr, "Could not load samples\n");
     return;
@@ -747,9 +747,9 @@ namespace levelline {
   
   }
 
-void ksave(const char *fname) {
+void ksave(const string& fname) {
   sominit(1);
-  FILE *f = fopen(fname, "wt");
+  FILE *f = fopen(fname.c_str(), "wt");
   if(!f) {
     fprintf(stderr, "Could not save the network\n");
     return;
@@ -763,10 +763,10 @@ void ksave(const char *fname) {
   fclose(f);
   }
 
-void kload(const char *fname) {
+void kload(const string& fname) {
   sominit(1);
   int xcells;
-  FILE *f = fopen(fname, "rt");
+  FILE *f = fopen(fname.c_str(), "rt");
   if(!f) {
     fprintf(stderr, "Could not load the network\n");
     return;
@@ -783,9 +783,9 @@ void kload(const char *fname) {
   analyze();
   }
 
-void ksavew(const char *fname) {
+void ksavew(const string& fname) {
   sominit(1);
-  FILE *f = fopen(fname, "wt");
+  FILE *f = fopen(fname.c_str(), "wt");
   if(!f) {
     fprintf(stderr, "Could not save the weights\n");
     return;
@@ -795,9 +795,9 @@ void ksavew(const char *fname) {
   fclose(f);
   }
 
-void kloadw(const char *fname) {
+void kloadw(const string& fname) {
   sominit(1);
-  FILE *f = fopen(fname, "rt");
+  FILE *f = fopen(fname.c_str(), "rt");
   if(!f) {
     fprintf(stderr, "Could not load the weights\n");
     return;
@@ -840,7 +840,7 @@ void progress(string s) {
     } 
   }
 
-void kclassify(const char *fname_classify) {
+void kclassify(const string& fname_classify) {
 
   sominit(1);
   vector<double> bdiffs(samples, 1e20);
@@ -871,9 +871,9 @@ void kclassify(const char *fname_classify) {
 
   for(int s=0; s<samples; s++) net[bids[s]].samples++;
   
-  if(fname_classify != NULL) {  
+  if(fname_classify != "") {  
     printf("Listing classification...\n");  
-    FILE *f = fopen(fname_classify, "wt");  
+    FILE *f = fopen(fname_classify.c_str(), "wt");  
     if(!f) {
       printf("Failed to open file\n");
       }
@@ -886,10 +886,10 @@ void kclassify(const char *fname_classify) {
   coloring();
   }
 
-void klistsamples(const char *fname_samples, bool best, bool colorformat) {
-  if(fname_samples != NULL) { 
+void klistsamples(const string& fname_samples, bool best, bool colorformat) {
+  if(fname_samples != "") { 
     printf("Listing samples...\n");
-    FILE *f = fopen(fname_samples, "wt");  
+    FILE *f = fopen(fname_samples.c_str(), "wt");  
     if(!f) {
       printf("Failed to open file\n");
       }
@@ -918,10 +918,10 @@ void klistsamples(const char *fname_samples, bool best, bool colorformat) {
     }
   }
 
-void neurondisttable(const char *fname) {
-  FILE *f = fopen(fname, "wt");
+void neurondisttable(const string &name) {
+  FILE *f = fopen(fname.c_str(), "wt");
   if(!f) {
-    printf("Could not open file: %s\n", fname);
+    printf("Could not open file: %s\n", fname.c_str());
     return;
     }
   int neurons = size(net);
