@@ -3251,6 +3251,10 @@ void moveEffect(cell *ct, cell *cf, eMonster m) {
 
   if((ct->wall == waClosePlate || ct->wall == waOpenPlate) && !ignoresPlates(m))
     toggleGates(ct, ct->wall);
+  if(m == moDeadBird && cf == ct && cellUnstable(cf)) {
+    fallingFloorAnimation(cf);
+    cf->wall = waChasm;
+    }
   
   if(ct->wall == waArrowTrap && !ignoresPlates(m))
     activateArrowTrap(ct);
@@ -3405,7 +3409,10 @@ void moveMonster(cell *ct, cell *cf) {
     }
   if(m != moMimic) animateMovement(cf, ct, LAYER_SMALL);
   // the following line is necessary because otherwise plates disappear only inside the sight range
-  if(cellUnstable(cf) && !ignoresPlates(m)) cf->wall = waChasm;
+  if(cellUnstable(cf) && !ignoresPlates(m)) {
+    fallingFloorAnimation(cf);
+    cf->wall = waChasm;
+    }
   moveEffect(ct, cf, m);
   if(ct->wall == waCamelotMoat && 
     (m == moShark || m == moCShark || m == moGreaterShark))
