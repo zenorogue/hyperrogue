@@ -1379,12 +1379,15 @@ int celldistance(cell *c1, cell *c2) {
     return eudist(decodeId(c1->master) - decodeId(c2->master));
     }
   
-  if(sphere || quotient == 1 || gp::on) {
+  if(quotient == 2 && !gp::on)
+    return currfp.getdist(fieldpattern::fieldval(c1), fieldpattern::fieldval(c2));
+
+  if(sphere || quotient) {
     
     if(saved_distances.count(make_pair(c1,c2)))
       return saved_distances[make_pair(c1,c2)];
 
-    celllister cl(c1, 64, 1000, c2);
+    celllister cl(c1, 100, 100000000, NULL);
     for(int i=0; i<size(cl.lst); i++)
       saved_distances[make_pair(c1, cl.lst[i])] = cl.dists[i];
 
@@ -1396,16 +1399,20 @@ int celldistance(cell *c1, cell *c2) {
   
   if(gp::on) {
     
+    if(saved_distances.count(make_pair(c1,c2)))
+      return saved_distances[make_pair(c1,c2)];
+
     celllister cl(c1, 64, 1000, c2);
+
     for(int i=0; i<size(cl.lst); i++)
-      if(cl.lst[i] == c2) return cl.dists[i];
+      saved_distances[make_pair(c1, cl.lst[i])] = cl.dists[i];
+
+    if(saved_distances.count(make_pair(c1,c2)))
+      return saved_distances[make_pair(c1,c2)];
 
     return 64;
     }
   
-  if(quotient == 2)
-    return currfp.getdist(fieldpattern::fieldval(c1), fieldpattern::fieldval(c2));
-
   int d1 = celldist(c1), d2 = celldist(c2);
 
   cell *cl1=c1, *cr1=c1, *cl2=c2, *cr2=c2;
