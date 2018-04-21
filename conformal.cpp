@@ -278,6 +278,8 @@ namespace conformal {
   bool autoband = false;
   bool autobandhistory = false;
   bool dospiral = true;
+  
+  ld extra_line_steps = 0;
 
   void clear() {
     on = false;
@@ -287,7 +289,7 @@ namespace conformal {
     }
   
   void create() {
-    if(celldist(cwt.c) <= 7) {
+    if(celldist(cwt.c) == 0) {
       addMessage("Must go a distance from the starting point");
       return;
       }
@@ -295,14 +297,6 @@ namespace conformal {
     on = true;
     cell *c = cwt.c;
     
-    for(int q=0; q<5; q++) {
-      for(int i=0; i<c->type; i++)
-        if(celldist(c->mov[i]) > celldist(c)) {
-          c = c->mov[i];
-          break;
-          }
-      }
-
     while(true) {
       shmup::monster *m = new shmup::monster;
       m->at = Id;
@@ -346,15 +340,27 @@ namespace conformal {
         fixmatrix(v[j]->at);
         }
       }
+    
+    hyperpoint next0 = shmup::calc_relative_matrix(v[1]->base, v[0]->base->master) * 
+      v[1]->at * C0;
+    v[0]->at = v[0]->at * rspintox(inverse(v[0]->at) * next0);
+    
     llv = ticks;
     phase = 0;
+
+      for(int j=0; j<=Q; j++) {
+        hyperpoint cur = v[j]->at * C0;
+        printf("%4d/%3d. %p [%3d] %s\n", j, Q, v[j]->base, celldist(v[j]->base), display(cur));
+        }
+
     }
   
   void movetophase() {
     
     int ph = int(phase);
     int siz = size(v);
-    if(ph<0 || ph >= siz-1) return;
+    if(ph<0) ph = 0;
+    if(ph >= siz-1) ph = siz-2;
     
     viewctr.h = v[ph]->base->master;
     viewctr.spin = 0;
@@ -370,6 +376,8 @@ namespace conformal {
   
     View = spin(M_PI/180 * rotation) * xpush(-(phase-ph) * hdist(now, next)) * View;
     playermoved = false;
+    centerover.c = v[ph]->base;
+    compute_graphical_distance();
     }
   
   void apply() {
@@ -379,20 +387,19 @@ namespace conformal {
     
     int siz = size(v);
     
-    while(phase < 1) phase += siz - 2;
-    while(phase >= siz-1) phase -= siz - 2;
+    while(phase > siz-1 + extra_line_steps) phase -= (siz + 2 * extra_line_steps-1);
+    while(phase < - extra_line_steps) phase += (siz + 2 * extra_line_steps-1);
     
     movetophase();
     }
   
-  int measureLength() {
-    int rad = vid.radius;
-    vid.radius = bandhalf;
+  ld measureLength() {
+    ld r = bandhalf * vid.scale;
     
-    int tpixels = 0;
+    ld tpixels = 0;
     int siz = size(v);
 
-    for(int j=1; j<siz-1; j++) {
+    for(int j=0; j<siz-1; j++) {
       hyperpoint next = 
         inverse(v[j]->at) *
         shmup::calc_relative_matrix(v[j+1]->base, v[j]->base->master) * 
@@ -400,10 +407,12 @@ namespace conformal {
         
       hyperpoint nextscr;
       applymodel(next, nextscr);
-      tpixels += nextscr[0] * vid.radius;
+      tpixels += nextscr[0] * r;
+      
+      if(j == 0 || j == siz-2)
+        tpixels += nextscr[0] * r * extra_line_steps;
       }
   
-    vid.radius = rad;
     return tpixels;
     }
   
@@ -413,120 +422,129 @@ namespace conformal {
 #if CAP_SDL
   void createImage(bool dospiral) {
     int segid = 1;
-    inHighQual = true;
     if(includeHistory) restore();
   
     int bandfull = 2*bandhalf;
-    int len = measureLength();
+    ld len = measureLength();
     
     time_t timer;
     timer = time(NULL);
     char timebuf[128]; 
     strftime(timebuf, 128, "%y%m%d-%H%M%S", localtime(&timer));
 
-    rotation = 0;
-
-    SDL_Surface *sav = s;
-
-    SDL_Surface *bbuf = SDL_CreateRGBSurface(SDL_SWSURFACE,bandfull,bandfull,32,0,0,0,0);
-    s = bbuf;
-    int ssr = sightrange_bonus; sightrange_bonus = 3; int sch = cheater; cheater = 0;
-    videopar vid2 = vid; vid.xres = vid.yres = bandfull; vid.scale = 1;
-    calcparam();
-    vid.radius = bandhalf;
-    
-    int xpos = 0;
-    
     vector<SDL_Surface*> bands;
     
-    SDL_Surface *band = SDL_CreateRGBSurface(SDL_SWSURFACE, min(len, bandsegment), bandfull,32,0,0,0,0);
+    resetbuffer rbuf;
     
-    if(!band) {
-      addMessage("Could not create an image of that size.");
-      }
-    else {
-
-      int siz = size(v);
-      for(int j=1; j<siz-1; j++) {
-        SDL_Surface *buffer = s;
-        s = sav; 
+    if(1) {
+      // block for RAII
+      dynamicval<videopar> dv(vid, vid);
+      dynamicval<ld> dr(rotation, 0);
+      dynamicval<bool> di(inHighQual, true);
+      
+      renderbuffer glbuf(bandfull, bandfull, vid.usingGL);
+      vid.xres = vid.yres = bandfull;
+      glbuf.enable(); vid.radius = bandhalf;
+      stereo::set_viewport(0);
+  
+      calcparam();
+      
+      ld xpos = 0;
+      
+      int seglen = min(int(len), bandsegment);
+      
+      SDL_Surface *band = SDL_CreateRGBSurface(SDL_SWSURFACE, seglen, bandfull,32,0,0,0,0);
+      
+      if(!band) {
+        addMessage("Could not create an image of that size.");
+        }
+      else {
+  
+        int siz = size(v);
         
-        pushScreen(progress_screen);
-
-        char buf[128];
-        sprintf(buf, "#%03d", segid);
-
-        progress(s0 + buf + " ("+its(j)+"/"+its(siz-2)+")");
-        calcparam();
-        vid.radius = bandhalf;
-
-        s = buffer;
-        viewctr.h = v[j]->base->master;
-        viewctr.spin = 0; 
-        View = inverse(v[j]->at);
-    
-        SDL_FillRect(s, NULL, 0);
-        bool ugl = vid.usingGL;
-        vid.usingGL = false;
-        drawfullmap();
-        vid.usingGL = ugl;
-    
-        hyperpoint next = 
-          inverse(v[j]->at) *
-          shmup::calc_relative_matrix(v[j+1]->base, v[j]->base->master) * 
-          v[j+1]->at * C0;
+        int bonus = ceil(extra_line_steps);
+  
+        cell *last_base = NULL;
+        hyperpoint last_relative;
+        
+        for(int j=-bonus; j<siz+bonus; j++) {
+          /*
+          SDL_Surface *buffer = s;
+          s = sav; 
           
-        int x, y, shift;
-        getcoord0(next, x, y, shift);
-        
-        int bwidth = x-bandhalf;
-        
-        popScreen();
-        
-        drawsegment:
-        
-        for(int cy=0; cy<bandfull; cy++) for(int cx=0; cx<bwidth; cx++)
-          qpixel(band, xpos+cx, cy) = qpixel(s, bandhalf+cx, cy);
-    
-        if(xpos+bwidth > bandsegment) {
+          pushScreen(progress_screen);
+  
           char buf[128];
-          sprintf(buf, "bandmodel-%s-%03d" IMAGEEXT, timebuf, segid++);
+          sprintf(buf, "#%03d", segid);
+  
+          progress(s0 + buf + " ("+its(j+bonus)+"/"+its(siz+bonus+bonus-1)+")"); */
+  
+          // calcparam(); vid.radius = bandhalf;
+          phase = j; movetophase();
+      
+          glbuf.clear(backcolor);
+          drawfullmap();
+          
+          if(last_base) {
+            hyperpoint last = shmup::ggmatrix(last_base) * last_relative;
+            hyperpoint hscr;
+            applymodel(last, hscr);
+            ld bwidth = -vid.radius * hscr[0];
+            printf("bwidth = %lf/%lf\n", bwidth, len);
+  
+            drawsegment:
+            SDL_Surface *gr = glbuf.render();
+  
+            for(int cy=0; cy<bandfull; cy++) for(int cx=0; cx<=bwidth+3; cx++)
+              qpixel(band, int(xpos+cx), cy) = qpixel(gr, int(bandhalf+cx-bwidth), cy);
+            
+            if(j == 1-bonus)
+              xpos = bwidth * (extra_line_steps - bonus);
+        
+            if(xpos+bwidth > bandsegment) {
+              char buf[128];
+              sprintf(buf, "bandmodel-%s-%03d" IMAGEEXT, timebuf, segid++);
+    
+              IMAGESAVE(band, buf);
+    
+              if(dospiral) 
+                bands.push_back(band);
+              else 
+                SDL_FreeSurface(band);
+    
+              len -= bandsegment; xpos -= bandsegment;
+              seglen = min(int(len), bandsegment);
+              band = SDL_CreateRGBSurface(SDL_SWSURFACE, seglen, bandfull,32,0,0,0,0);
+              goto drawsegment;
+              }  
+            xpos += bwidth;      
+            }
+          
+          last_base = viewctr.h->c7;
+          last_relative = inverse(shmup::ggmatrix(last_base)) * C0;        
+          }
+        }
 
-          IMAGESAVE(band, buf);
-
-          if(dospiral) 
-            bands.push_back(band);
-          else 
-            SDL_FreeSurface(band);
-
-          len -= bandsegment; xpos -= bandsegment;
-          band = SDL_CreateRGBSurface(SDL_SWSURFACE, min(len, bandsegment), bandfull,32,0,0,0,0);
-          goto drawsegment;
-          }  
-        xpos += bwidth;      
-        }  
+      char buf[128];
+      sprintf(buf, "bandmodel-%s-%03d" IMAGEEXT, timebuf, segid++);
+      IMAGESAVE(band, buf);
+      addMessage(XLAT("Saved the band image as: ") + buf);
+  
+      if(dospiral) 
+        bands.push_back(band);
+      else 
+        SDL_FreeSurface(band);
       }
 
-    char buf[128];
-    sprintf(buf, "bandmodel-%s-%03d" IMAGEEXT, timebuf, segid++);
-    IMAGESAVE(band, buf);
-    addMessage(XLAT("Saved the band image as: ") + buf);
+    rbuf.reset();
+    stereo::set_viewport(0);
 
-    if(dospiral) 
-      bands.push_back(band);
-    else 
-      SDL_FreeSurface(band);
-
-    SDL_FreeSurface(sav);
-    s = sav; vid = vid2; sightrange_bonus = ssr; cheater = sch;
     if(includeHistory) restoreBack();
     
     if(dospiral) {
       spiral::loop(bands);
       for(int i=0; i<size(bands); i++) SDL_FreeSurface(bands[i]);
       }
-
-    inHighQual = false;
     }
 #endif
 

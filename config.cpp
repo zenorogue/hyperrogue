@@ -192,6 +192,7 @@ void initConfig() {
   addsaver(polygonal::deg, "polygonal degree");
   addsaver(conformal::autobandhistory, "include history"); // check!
   addsaver(conformal::lvspeed, "lineview speed");
+  addsaver(conformal::extra_line_steps, "lineview extension");
   
   addsaver(polygonal::maxcoef, "polynomial degree");
   for(int i=0; i<polygonal::MSI; i++) {

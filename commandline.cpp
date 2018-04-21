@@ -493,6 +493,9 @@ else if(args()[0] == '-' && args()[1] == x && args()[2] == '0') { showstartmenu 
     PHASEFROM(2);
     shift(); sightrange_bonus = genrange_bonus = gamerange_bonus = argi(); autocheat = true;
     }
+  else if(argis("-els")) {
+    shift(); conformal::extra_line_steps = argf();
+    }
   else if(argis("-we")) {    
     PHASEFROM(2);
     shift(); whatever = argf(); resetGeometry();

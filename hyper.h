@@ -945,6 +945,7 @@ namespace conformal {
   extern ld lvspeed;
   extern int bandsegment;
   extern int bandhalf;  
+  extern ld extra_line_steps;
   
   void create();
   void clear();
