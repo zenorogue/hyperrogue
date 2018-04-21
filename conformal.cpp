@@ -729,6 +729,10 @@ namespace conformal {
       else if(doexiton(sym, uni)) popScreen();
       };
     }
+
+  bool band_renderable_now() {
+    return on && (pmodel == mdBand || pmodel == mdBandEquidistant || pmodel == mdBandEquiarea) && !euclid && !sphere;
+    }
   
   void history_menu() {
     cmode = sm::SIDE | sm::MAYDARK;
@@ -752,13 +756,12 @@ namespace conformal {
     if(autoband)
       dialog::addBoolItem(XLAT("include history when auto-rendering"), (autobandhistory), 'j');
     
-    bool renderable = on && pmodel == mdBand && !euclid && !sphere;
-    if(renderable || autoband) {
+    if(band_renderable_now() || autoband) {
       dialog::addSelItem(XLAT("band width"), "2*"+its(bandhalf), 'd');
       dialog::addSelItem(XLAT("length of a segment"), its(bandsegment), 's');
       dialog::addBoolItem(XLAT("spiral on rendering"), (dospiral), 'g');
-      if(renderable)
-        dialog::addItem(XLAT("render now (length: %1)", its(measureLength())), 'f');
+      if(band_renderable_now())
+        dialog::addItem(XLAT("render now (length: %1)", fts(measureLength())), 'f');
       }
 #endif
       
@@ -807,7 +810,7 @@ namespace conformal {
       includeHistory = !includeHistory; 
       }
 #if CAP_SDL
-    else if(uni == 'f' && pmodel == mdBand && on) createImage(dospiral);
+    else if(uni == 'f' && band_renderable_now()) createImage(dospiral);
 #endif
     else if(sym == 'j') { 
       autobandhistory = !autobandhistory; 
