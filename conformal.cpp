@@ -210,6 +210,12 @@ namespace spiral {
 
       SDL_Event event;
       while(SDL_PollEvent(&event)) switch (event.type) {
+
+        case SDL_VIDEORESIZE: {
+          resize_screen_to(event.resize.w, event.resize.h);
+          precompute();
+          break;
+          }
         case SDL_QUIT: case SDL_MOUSEBUTTONDOWN:
           goto breakloop;
 

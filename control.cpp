@@ -448,6 +448,15 @@ void mainloopiter() { printf("(compiled without SDL -- no action)\n"); quitmainl
 
 int cframelimit = 1000;
 
+void resize_screen_to(int x, int y) {
+  vid.xres = x;
+  vid.yres = y;
+  vid.killreduction = 0;
+  extern bool setfsize;
+  setfsize = true;
+  setvideomode();
+  }
+
 void mainloopiter() {
 
   DEBB(DF_GRAPH, (debugfile,"main loop\n"));
@@ -564,14 +573,8 @@ void mainloopiter() {
         }
       }
     
-    if(ev.type == SDL_VIDEORESIZE) {
-      vid.xres = ev.resize.w;
-      vid.yres = ev.resize.h;
-      vid.killreduction = 0;
-      extern bool setfsize;
-      setfsize = true;
-      setvideomode();
-      }
+    if(ev.type == SDL_VIDEORESIZE) 
+      resize_screen_to(ev.resize.w, ev.resize.h);
     
     if(ev.type == SDL_VIDEOEXPOSE) {
       drawscreen();

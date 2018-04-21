@@ -3260,3 +3260,4 @@ bool horo_ok();
 ld master_to_c7_angle();
 
 extern int mutantphase;
+void resize_screen_to(int x, int y);
