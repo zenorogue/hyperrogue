@@ -750,6 +750,9 @@ void switchGL() {
   ANDROID_SETTINGS;
 #if CAP_SDL
   setvideomode();
+  if(vid.usingGL) {
+    glhr::be_textured(); glhr::be_nontextured();
+    }
 #endif
   }
 
