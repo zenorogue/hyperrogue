@@ -943,9 +943,9 @@ void klistsamples(const string& fname_samples, bool best, bool colorformat) {
   }
 
 void neurondisttable(const string &name) {
-  FILE *f = fopen(fname.c_str(), "wt");
+  FILE *f = fopen(name.c_str(), "wt");
   if(!f) {
-    printf("Could not open file: %s\n", fname.c_str());
+    printf("Could not open file: %s\n", name.c_str());
     return;
     }
   int neurons = size(net);
