@@ -745,6 +745,7 @@ namespace conformal {
     
     if(!bounded && !euclid) dialog::addBoolItem(XLAT("prepare the line animation"), (on), 'e');
     if(on) dialog::addSelItem(XLAT("animation speed"), fts(lvspeed), 'a');
+    dialog::addSelItem(XLAT("extend the ends"), fts(extra_line_steps), 'p');
     
 #if CAP_SDL
     dialog::addBoolItem(XLAT("render bands automatically"), (autoband), 'o');
@@ -791,6 +792,11 @@ namespace conformal {
       dialog::editNumber(bandhalf, 5, 1000, 5, 200, XLAT("band width"), "");
     else if(sym == 's') 
       dialog::editNumber(bandsegment, 500, 32000, 500, 16000, XLAT("band segment"), "");
+    else if(sym == 'p') 
+      dialog::editNumber(extra_line_steps, 0, 5, 1, 1, XLAT("extend the ends"), 
+        "0 = start at the game start, endat the end position; "
+        "larger numbers give extra space at the ends."
+        );
     else if(sym == 'g') { dospiral = !dospiral; }
     else if(sym == 'i') { 
       if(canmove && !cheater) {
