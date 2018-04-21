@@ -320,41 +320,38 @@ namespace conformal {
     reverse(v.begin(), v.end());
   
     int Q = size(v)-1;
+    // virtualRebase(v[0], false);
+    // virtualRebase(v[Q], false);
   
     for(int i=0; i<1000; i++) {
       progress(XLAT("Preparing the line (%1/1000)...", its(i+1)));
 
-      /*for(int j=1; j<Q; j++) {
-        hyperpoint cur = v[j]->at * C0;
-        printf("%4d/%3d. %p [%3d] %Lf %Lf %Lf\n", i, j, v[j]->base, celldist(v[j]->base), cur[0], cur[1], cur[2]);
-        } */
-
       for(int j=1; j<Q; j++) if((j^i)&1) {
       
-        virtualRebase(v[j], false);
+        // virtualRebase(v[j], false);
         
-        hyperpoint prev = shmup::calc_relative_matrix(v[j-1]->base, v[j]->base->master) *
+        hyperpoint prev = shmup::calc_relative_matrix(v[j-1]->base, v[j]->base) *
           v[j-1]->at * C0;
 
-        hyperpoint next = shmup::calc_relative_matrix(v[j+1]->base, v[j]->base->master) * 
+        hyperpoint next = shmup::calc_relative_matrix(v[j+1]->base, v[j]->base) * 
           v[j+1]->at * C0;
         
         hyperpoint hmid = mid(prev, next);
-      
-        v[j]->at = rgpushxto0(hmid);
+        
+        transmatrix at = rgpushxto0(hmid);
 
-        v[j]->at = v[j]->at * rspintox(inverse(v[j]->at) * next);
+        v[j]->at = at * rspintox(inverse(at) * next);
         fixmatrix(v[j]->at);
         }
       }
     
-    hyperpoint next0 = shmup::calc_relative_matrix(v[1]->base, v[0]->base->master) * 
-      v[1]->at * C0;
+    hyperpoint next0 = shmup::calc_relative_matrix(v[1]->base, v[0]->base) * v[1]->at * C0;
     v[0]->at = v[0]->at * rspintox(inverse(v[0]->at) * next0);
     
     llv = ticks;
     phase = 0;
 
+    if(0)
       for(int j=0; j<=Q; j++) {
         hyperpoint cur = v[j]->at * C0;
         printf("%4d/%3d. %p [%3d] %s\n", j, Q, v[j]->base, celldist(v[j]->base), display(cur));
@@ -371,15 +368,13 @@ namespace conformal {
     
     viewctr.h = v[ph]->base->master;
     viewctr.spin = 0;
-  
-    View = inverse(v[ph]->at);
-  
-    int j = ph;
     
-    hyperpoint now = v[j]->at * C0;
+    View = inverse(shmup::master_relative(v[ph]->base) * v[ph]->at);
+  
+    hyperpoint now = v[ph]->at * C0;
 
-    hyperpoint next = shmup::calc_relative_matrix(v[j+1]->base, v[j]->base->master) * 
-      v[j+1]->at * C0;
+    hyperpoint next = shmup::calc_relative_matrix(v[ph+1]->base, v[ph]->base) * 
+      v[ph+1]->at * C0;
   
     View = spin(M_PI/180 * rotation) * xpush(-(phase-ph) * hdist(now, next)) * View;
     playermoved = false;
@@ -409,7 +404,7 @@ namespace conformal {
     for(int j=0; j<siz-1; j++) {
       hyperpoint next = 
         inverse(v[j]->at) *
-        shmup::calc_relative_matrix(v[j+1]->base, v[j]->base->master) * 
+        shmup::calc_relative_matrix(v[j+1]->base, v[j]->base) * 
         v[j+1]->at * C0;
         
       hyperpoint nextscr;

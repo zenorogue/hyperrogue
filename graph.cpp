@@ -5500,6 +5500,16 @@ void drawfullmap() {
     queuechr(xpush(-vid.twopoint_param) * C0, vid.xres / 100, 'X', 0xFF0000);
     }
   
+  /*
+  if(conformal::on) {
+    char ch = 'A';
+    for(auto& v: conformal::v) {
+      queuepoly(shmup::ggmatrix(v->base) * v->at, shTriangle, 0x306090C0);
+      queuechr(shmup::ggmatrix(v->base) * v->at * C0, 10, ch++, 0xFF0000);
+      }      
+    }
+  */
+  
   if(!twopoint_do_flips && !stereo::active() && sphere && pmodel == mdTwoPoint) {
     queuereset(vid.usingGL ? mdDisk : mdUnchanged, PPR_CIRCLE);
 

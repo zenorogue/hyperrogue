@@ -589,11 +589,12 @@ namespace shmup {
   
   void virtualRebase(cell*& base, transmatrix& at, bool tohex);
   void virtualRebase(shmup::monster *m, bool tohex);
-  transmatrix calc_relative_matrix(cell *c, heptagon *h1);
+  transmatrix calc_relative_matrix(cell *c, cell *c1);
   void fixStorage();
   void addShmupHelp(string& out);
   void activateArrow(cell *c);
   transmatrix& ggmatrix(cell *c);
+  transmatrix master_relative(cell *c, bool get_inverse = false);
   
   void pushmonsters();
   void popmonsters();

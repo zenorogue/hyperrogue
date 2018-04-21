@@ -3319,28 +3319,43 @@ void destroyBoats(cell *c) {
       m->inBoat = false;
   }
 
-transmatrix calc_relative_matrix(cell *c, heptagon *h1) {
+transmatrix master_relative(cell *c, bool get_inverse) {
+  if(gp::on) {
+    if(c == c->master->c7) {
+      return spin((get_inverse?-1:1) * master_to_c7_angle());
+      }
+    else {
+      auto li = gp::get_local_info(c);
+      transmatrix T = spin(master_to_c7_angle()) * gp::Tf[li.last_dir][li.relative.first&31][li.relative.second&31][fix6(li.total_dir)];
+      if(get_inverse) T = inverse(T);
+      return T;
+      }
+    }
+  else if(!nonbitrunc) {
+    for(int d=0; d<S7; d++) if(c->master->c7->mov[d] == c)
+      return (get_inverse?invhexmove:hexmove)[d];
+    return Id;
+    }
+  else
+    return pispin * Id;
+  }
+
+transmatrix calc_relative_matrix(cell *c2, cell *c1) {
 
   if(sphere) {
-    if(gmatrix0.count(c) && gmatrix0.count(h1->c7))
-    return inverse(gmatrix0[h1->c7]) * gmatrix0[c];
+    if(gmatrix0.count(c2) && gmatrix0.count(c1))
+    return inverse(gmatrix0[c1]) * gmatrix0[c2];
     else {
       printf("error: gmatrix0 not known\n");
       exit(1);
       }
     }
+  
+  heptagon *h1 = c1->master;
+  transmatrix gm = master_relative(c1, true);
+  heptagon *h2 = c2->master;
+  transmatrix where = master_relative(c2);
 
-  transmatrix gm = Id;
-  heptagon *h2 = c->master;
-  transmatrix where = Id;
-
-  if(gp::on && c != c->master->c7) {
-    auto li = gp::get_local_info(c);
-    where = gp::Tf[li.last_dir][li.relative.first&31][li.relative.second&31][fix6(li.total_dir)];
-    }
-  else if(!nonbitrunc)
-    for(int d=0; d<S7; d++) if(h2->c7->mov[d] == c)
-      where = hexmove[d];
   // always add to last!
 //bool hsol = false;
 //transmatrix sol;
@@ -3385,7 +3400,7 @@ transmatrix &ggmatrix(cell *c) {
       t = gmatrix[centerover.c] * eumove(cell_to_vec(c) - cellwalker_to_vec(centerover));
       }
     else 
-      t = applyspin(viewctr, cview()) * calc_relative_matrix(c, viewctr.h);
+      t = applyspin(viewctr, cview()) * calc_relative_matrix(c, viewctr.h->c7);
     }
   return t;
   }
@@ -3445,15 +3460,11 @@ void virtualRebase(cell*& base, transmatrix& at, bool tohex) {
     return;
     }
 
+  at = master_relative(base) * at;
+  base = base->master->c7;
+    
   while(true) {
   
-    if(!ctof(base)) {
-      cell *c7 = base->master->c7;
-      for(int d=0; d<S7; d++) if(c7->mov[d] == base)
-        at = hexmove[d] * at;
-      base = c7;
-      }
-    
     double currz = (at * C0)[2];
     
     heptagon *h = base->master;
@@ -3467,8 +3478,7 @@ void virtualRebase(cell*& base, transmatrix& at, bool tohex) {
       hs.h = h;
       hs.spin = d;
       heptspin hs2 = hs + wstep;
-      transmatrix V2 = spin((nonbitrunc?M_PI:0)-hs2.spin*2*M_PI/S7) * invheptmove[d];
-      if(nonbitrunc) V2 = V2 * spin(M_PI);
+      transmatrix& V2 = invheptmove[d];
       double newz = (V2 * at * C0) [2];
       if(newz < currz) {
         currz = newz;
@@ -3477,7 +3487,11 @@ void virtualRebase(cell*& base, transmatrix& at, bool tohex) {
         }
       }
 
-    if(!newbase) {
+    if(newbase) {
+      base = newbase;
+      at = bestV * at;
+      }
+    else {
       if(tohex && !nonbitrunc) for(int d=0; d<S7; d++) {
         cell *c = createMov(base, d);
         transmatrix V2 = spin(-base->spn(d)*2*M_PI/S6) * invhexmove[d];
@@ -3492,13 +3506,11 @@ void virtualRebase(cell*& base, transmatrix& at, bool tohex) {
         base = newbase;
         at = bestV * at;
         }
+      else at = master_relative(base, true) * at;
       break;
       }
-    
-    base = newbase;
-    at = bestV * at;
     }
-  
+
   }
 
 void virtualRebase(shmup::monster *m, bool tohex) {

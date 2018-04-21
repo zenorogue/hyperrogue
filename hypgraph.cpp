@@ -486,7 +486,7 @@ transmatrix actualV(const heptspin& hs, const transmatrix& V) {
   }
 
 transmatrix applyspin(const heptspin& hs, const transmatrix& V) {
-  return (hs.spin || nonbitrunc) ? V * spin(hs.spin*2*M_PI/S7) : V;
+  return hs.spin ? V * spin(hs.spin*2*M_PI/S7) : V;
   }
 
 // in hyperbolic quotient geometries, relying on pathdist is not sufficient
