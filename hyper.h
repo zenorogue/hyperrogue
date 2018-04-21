@@ -570,6 +570,7 @@ namespace shmup {
     };
 
   extern struct monster* mousetarget;
+  extern monster *pc[MAXPLAYER];
   extern eItem targetRangedOrb(orbAction a);
   void degradeDemons();
   void killThePlayer(eMonster m);
