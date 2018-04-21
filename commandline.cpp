@@ -300,6 +300,12 @@ else if(args()[0] == '-' && args()[1] == x && args()[2] == '0') { showstartmenu 
     shift(); linepatterns::patterns[id].color |= argi();
     autocheat = true;
     }
+  else if(argis("-palrgba")) {
+    PHASEFROM(2);
+    shift(); int id = argi();
+    shift(); linepatterns::patterns[id].color = arghex();
+    autocheat = true;
+    }
   else if(argis("-geo")) { 
     if(curphase == 3) {
       shift(); targetgeometry = (eGeometry) argi();
