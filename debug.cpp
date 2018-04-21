@@ -193,6 +193,7 @@ bool applyCheat(char u, cell *c = NULL) {
     mirror::act(1, mirror::SPINSINGLE);
     cwt++;
     wavephase = (1+wavephase) & 7;
+    if(shmup::on) shmup::pc[0]->at = Id;
     return true;
     }
   if(u == 'J') {
