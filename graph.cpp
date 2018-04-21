@@ -5837,7 +5837,7 @@ void restartGraph() {
   DEBB(DF_INIT, (debugfile,"restartGraph\n"));
   
   View = Id;
-  linepatterns::clearAll();
+  if(!autocheat) linepatterns::clearAll();
   if(currentmap) {
     if(euclid) {
       centerover = vec_to_cellwalker(0);
