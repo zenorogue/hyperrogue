@@ -6,6 +6,7 @@
 
 bool cblind;
 bool autocheat;
+bool canvas_invisible;
 
 int truelotus;
 int gamecount;

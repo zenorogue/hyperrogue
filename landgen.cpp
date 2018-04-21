@@ -2343,6 +2343,8 @@ void setdist(cell *c, int d, cell *from) {
   
   if(d == BARLEV && c->land == laCanvas)  {
     c->landparam = patterns::generateCanvas(c);
+    if(canvas_invisible)
+      c->wall = waInvisibleFloor;
     }
 
   if(d >= BARLEV-1 && c->land == laPrairie)

@@ -109,8 +109,10 @@ int arg::readCommon() {
     PHASE(2);
     firstland = specialland = laCanvas;
     shift();
-    if(args().size() == 1) patterns::whichCanvas = args()[0];
+    if(args() == "i") canvas_invisible = !canvas_invisible;
+    else if(args().size() == 1) patterns::whichCanvas = args()[0];
     else patterns::canvasback = arghex();
+    if(curphase == 3) restartGame();
     }
   else if(argis("-noplayer")) 
     mapeditor::drawplayer = !mapeditor::drawplayer;

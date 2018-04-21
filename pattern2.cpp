@@ -1283,6 +1283,9 @@ namespace patterns {
       dialog::addSelItem(XLAT("field pattern S"), "field", 'S');
       }
 
+    dialog::addBreak(100);
+    dialog::addBoolItem(XLATN(winf[waInvisibleFloor].name), canvas_invisible, 'i');
+
     dialog::display();
     
     keyhandler = [] (int sym, int uni) {
@@ -1300,6 +1303,12 @@ namespace patterns {
           randomPatternsMode = false;
           restartGame(0, false, true);
           };
+        }
+      else if(uni == 'i') {
+        canvas_invisible = !canvas_invisible;
+        firstland = specialland = laCanvas; 
+        randomPatternsMode = false;
+        restartGame(0, false, true);
         }
       else if((uni >= 'a' && uni <= 'z') || (uni >= 'A' && uni <= 'Z')) {
         whichCanvas = uni;
