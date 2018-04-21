@@ -253,13 +253,13 @@ void handlePanning(int sym, int uni) {
     if(conformal::on)
       conformal::rotation++;
     else
-      View = spin(M_PI/S21*shiftmul) * View, didsomething = true;
+      View = spin(M_PI/S21/2*shiftmul) * View, didsomething = true;
     }
   if(sym == SDLK_PAGEDOWN) {
     if(conformal::on)
       conformal::rotation++;
     else
-      View = spin(-M_PI/S21*shiftmul) * View, didsomething = true;
+      View = spin(-M_PI/S21/2*shiftmul) * View, didsomething = true;
     }
   
   if(sym == SDLK_PAGEUP || sym == SDLK_PAGEDOWN) 
