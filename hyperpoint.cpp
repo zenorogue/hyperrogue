@@ -66,6 +66,15 @@ ld asin_auto(ld x) {
     }
   }
 
+ld asin_auto_clamp(ld x) {
+  switch(cgclass) {
+    case gcEuclid: return x;
+    case gcHyperbolic: return asinh(x);
+    case gcSphere: return x>1 ? M_PI/2 : x<-1 ? -M_PI/2 : isnan(x) ? 0 : asin(x);
+    default: return x;
+    }
+  }
+
 ld cos_auto(ld x) {
   switch(cgclass) {
     case gcEuclid: return 1;

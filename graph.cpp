@@ -5026,11 +5026,6 @@ void queuecircleat(cell *c, double rad, int col) {
 
 void drawMarkers() {
 
-  if(pmodel == mdTwoPoint) {
-    queuechr(xpush(+vid.twopoint_param) * C0, 8, 'X', 0xFFFF00);
-    queuechr(xpush(-vid.twopoint_param) * C0, 8, 'X', 0xFFFF00);
-    }
-  
   if(!(cmode & sm::NORMAL)) return;
   
   for(cell *c1: crush_now) 
@@ -5500,18 +5495,24 @@ void drawfullmap() {
     
   ptds.clear();
 
-  if(!stereo::active() && sphere && pmodel == mdTwoPoint) {
+  if(pmodel == mdTwoPoint) {
+    queuechr(xpush(+vid.twopoint_param) * C0, vid.xres / 100, 'X', 0xFF0000);
+    queuechr(xpush(-vid.twopoint_param) * C0, vid.xres / 100, 'X', 0xFF0000);
+    }
+  
+  if(!twopoint_do_flips && !stereo::active() && sphere && pmodel == mdTwoPoint) {
     queuereset(vid.usingGL ? mdDisk : mdUnchanged, PPR_CIRCLE);
 
-    for(int a=0; a<=180; a++) {
+    for(int b=-1; b<=1; b+=2)
+    for(int a=-90; a<=90; a++) {
       using namespace hyperpoint_vec;
-      ld x = cos(a * M_PI / 90);
+      ld x = sin(a * vid.twopoint_param * b / 90);
       ld y = 0;
       ld z = -sqrt(1 - x*x);
       hyperpoint h1;
       applymodel(hpxyz(x,y,z), h1);
-      if(h1[1] < 0) h1[1] = -h1[1];
-      if(a >= 90) h1[1] = -h1[1];
+      
+      h1[1] = abs(h1[1]) * b;
       curvepoint(h1 * vid.radius);
       }
 

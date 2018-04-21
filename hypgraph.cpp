@@ -123,6 +123,8 @@ bool hypot_zlev(bool zlev_used, ld& d, ld zlev, ld& df, ld& zf) {
   return hypot_zlev(zlev_used, d, zlev, df, zf, z);
   }
 
+int twopoint_sphere_flips;
+bool twopoint_do_flips;
 
 void applymodel(hyperpoint H, hyperpoint& ret) {
   
@@ -266,7 +268,7 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
     else {
       ld x, y, yf, zf;
       y = asin_auto(H[1]);
-      x = asin_auto(H[0] / cos_auto(y));
+      x = asin_auto_clamp(H[0] / cos_auto(y));
       if(sphere) {
         if(H[2] < 0 && x > 0) x = M_PI - x;
         else if(H[2] < 0 && x <= 0) x = -M_PI - x;
@@ -276,6 +278,19 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
         auto p = vid.twopoint_param;
         ld dleft = hypot_auto(x-p, y);
         ld dright = hypot_auto(x+p, y);
+        if(sphere) {
+          int tss = twopoint_sphere_flips;
+          if(tss&1) { tss--; 
+            dleft = 2*M_PI - 2*p - dleft;
+            dright = 2*M_PI - 2*p - dright;
+            swap(dleft, dright);
+            y = -y;
+            }
+          while(tss) { tss -= 2;
+            dleft = 2*M_PI - 4*p + dleft;
+            dright = 2*M_PI - 4*p + dright;
+            }
+          }
         x = (dright*dright-dleft*dleft) / 4 / p;
         y = (y>0?1:-1) * sqrt(dleft * dleft - (x-p)*(x-p) + 1e-9);
         }

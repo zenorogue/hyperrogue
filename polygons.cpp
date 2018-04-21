@@ -469,6 +469,10 @@ unsigned char& part(int& col, int i) {
 
 bool in_twopoint = false;
 
+ld glhypot2(glvertex a, glvertex b) { 
+  return (a[0]-b[0]) * (a[0]-b[0]) + (a[1]-b[1]) * (a[1]-b[1]) + (a[2]-b[2]) * (a[2]-b[2]);
+  }
+
 void drawpolyline(polytodraw& p) {
   auto& pp = p.u.poly;
 
@@ -485,43 +489,79 @@ void drawpolyline(polytodraw& p) {
     }
 
   if(sphere && pmodel == mdTwoPoint && !in_twopoint) {
-    static vector<glvertex> v0, v1;
-    v0.clear(); v1.clear();
-    for(int i=0; i<pp.cnt; i++) {
-      glvertex h = glhr::pointtogl(pp.V * glhr::gltopoint((*pp.tab)[pp.offset+i]));
-      if(h[2] >= 0)
-        v0.push_back(h), v1.push_back(h);
-      else if(h[1] < 0)
-        v0.push_back(h);
-      else if(h[1] > 0)
-        v1.push_back(h);
+    #define MAX_PHASE 4
+    vector<glvertex> phases[MAX_PHASE];
+    extern int twopoint_sphere_flips;
+    extern bool twopoint_do_flips;
+    int pha;
+    if(twopoint_do_flips) {
+      for(int i=0; i<pp.cnt; i++) {
+        hyperpoint h1 = pp.V * glhr::gltopoint((*pp.tab)[pp.offset+i]);
+        for(int j=0; j<MAX_PHASE; j++) {
+          twopoint_sphere_flips = j;
+          hyperpoint h2; applymodel(h1, h2);
+          using namespace hyperpoint_vec;
+          glvertex h = glhr::pointtogl(h2 * vid.radius);
+          if(i == 0)
+            phases[j].push_back(h);
+          else {
+            int best = -1;
+            ld bhypot = 1e60;
+            for(int j0=0; j0<MAX_PHASE; j0++)
+              if(size(phases[j0]) == i) {
+                ld chypot = glhypot2(phases[j0].back(), h);
+                if(chypot < bhypot || best == -1) bhypot = chypot, best = j0;
+                }
+            phases[best].push_back(h);
+            }
+          }
+        }
+      twopoint_sphere_flips = 0;
+      pha = MAX_PHASE-1;
       }
-    auto tV = pp.V;
-    auto toffset = pp.offset;
-    auto ttab = pp.tab;
-    auto tcnt = pp.cnt;
+    else {
+      pha = 1;
+      if(true) {
+        // a
+        // b
+        // lin(a,b) is of form (x, 0, z)
+        int cpha = 0;
+        for(int i=0; i<pp.cnt; i++) {
+          using namespace hyperpoint_vec;
+
+          hyperpoint h1 = pp.V * glhr::gltopoint((*pp.tab)[pp.offset+i]);
+          hyperpoint mh1; applymodel(h1, mh1);
+          phases[cpha].push_back(glhr::pointtogl(mh1 * vid.radius));
+
+          // check if the i-th edge intersects the boundary of the ellipse
+          // (which corresponds to the segment between the antipodes of foci)
+          // if yes, switch cpha to the opposite
+          hyperpoint h2 = pp.V * glhr::gltopoint((*pp.tab)[pp.offset+(i+1)%pp.cnt]);
+          if(h1[1] * h2[1] > 0) continue;
+          ld c1 = h1[1], c2 = -h2[1];
+          if(c1 < 0) c1 = -c1, c2 = -c2;
+          hyperpoint h = h1 * c1 + h2 * c2;
+          h /= hypot3(h);
+          if(h[2] < 0 && abs(h[0]) < sin(vid.twopoint_param)) cpha = 1-cpha, pha = 2;
+          }
+        if(cpha == 1) pha = 0;
+        }
+      }
     vector<glvertex> tv;
     if(pp.tinf) {
       for(int i=0; i<pp.cnt; i++)
         tv.push_back(pp.tinf->tvertices[pp.offset+i]);
       swap(pp.tinf->tvertices, tv);
       }
-    pp.V = Id; pp.offset = 0;
-    in_twopoint = true;
-    if(size(v0) == pp.cnt) {
-      pp.tab = &v0;
-      drawpolyline(p);      
-      }
-    else if(size(v1) == pp.cnt) {
-      pp.tab = &v1;
+    dynamicval<eModel> d1(pmodel, mdUnchanged);
+    dynamicval<transmatrix> d2(pp.V, Id);
+    dynamicval<int> d3(pp.offset, 0);
+    dynamicval<decltype(pp.tab)> d4(pp.tab, pp.tab);
+    for(int j=0; j<pha; j++) {
+      dynamicval<int> d5(pp.cnt, size(phases[j]));
+      pp.tab = &phases[j];
       drawpolyline(p);
       }
-    else {
-      if(size(v0) >= 3) { pp.tab = &v0; pp.cnt = size(v0); drawpolyline(p); }
-      if(size(v1) >= 3) { pp.tab = &v1; pp.cnt = size(v1); drawpolyline(p); }
-      }
-    in_twopoint = false;
-    pp.V = tV; pp.offset = toffset; pp.tab = ttab; pp.cnt = tcnt;
     if(pp.tinf) swap(pp.tinf->tvertices, tv);
     return;
     }
