@@ -195,11 +195,11 @@ bool handleKeyTour(int sym, int uni) {
         canmove = true;
         }
       }
-    else addMessage(
+    else addMessage(XLAT(
       (vid.shifttarget&1) ? 
         "Shift-click a location to teleport there."
       : "Click a location to teleport there."
-      );
+      ));
     return true;
     }
   if(sym == '5') {
@@ -211,11 +211,11 @@ bool handleKeyTour(int sym, int uni) {
     static ld spd;
     if(sickmode == true) {
       spd = vid.sspeed, vid.sspeed = 5;
-      addMessage("Static mode enabled.");
+      addMessage(XLAT("Static mode enabled."));
       }
     else {
       vid.sspeed = spd;
-      addMessage("Static mode disabled.");
+      addMessage(XLAT("Static mode disabled."));
       }
     return true;
     }
@@ -543,8 +543,11 @@ slide default_slides[] = {
     "Press '5' to cheat by seeing the smaller circles too.\n\n"
     "Note: Camelot and some other lands are unlocked earlier in the Tutorial than in a real game.",
     [] (presmode mode) {
-      slidecommand = "enable the Camelot cheat";
-      if(mode == 4) camelotcheat = !camelotcheat;
+      slidecommand = 
+        camelotcheat ? XLAT("enable the Camelot cheat")
+        : XLAT("disable the Camelot cheat");
+      if(mode == 4)
+        camelotcheat = !camelotcheat;
       GETNEXT {
         if(!isCrossroads(old)) return laCrossroads;
         return laNone;
@@ -600,7 +603,7 @@ slide default_slides[] = {
     "This is related to the fact that the world of HyperRogue is curved, and "
     "the sum of angles in a triangle is not equal to 180 degrees.",
     [] (presmode mode) {
-      slidecommand = "gain Orb of the Sword";
+      slidecommand = XLAT("gain Orb of the Sword");
       if(mode == 4)
         items[itOrbSword] = 90;
       GETNEXT {

@@ -1611,11 +1611,11 @@ namespace patterns {
         }
     bool have_goldberg = S3 == 3 && among(cgroup, cpFootball, cpThree) && !euclid;
     if(have_goldberg) {
-      dialog::addBoolItem("Goldberg", gp::on, 'G');
+      dialog::addBoolItem(XLAT("Goldberg"), gp::on, 'G');
       dialog::lastItem().value = gp::operation_name();
       }
     else dialog::addBreak(100);
-    dialog::addItem("more tuning", 'r');
+    dialog::addItem(XLAT("more tuning"), 'r');
     dialog::display();
   
     keyhandler = [have_goldberg] (int sym, int uni) {
@@ -1953,7 +1953,7 @@ namespace linepatterns {
     dialog::init(XLAT("line patterns"));
     
     for(numpat=0; patterns[numpat].lpname; numpat++)
-      dialog::addColorItem(among(patterns[numpat].id, patVine, patPower) && gp::on ? XLAT("Goldberg") : XLAT(patterns[numpat].lpname), patterns[numpat].color, 'a'+numpat);
+      dialog::addColorItem(among(patterns[numpat].id, patVine, patPower) && gp::on ? XLAT("Goldberg") + (patterns[numpat].id == patVine ? " " : ""): XLAT(patterns[numpat].lpname), patterns[numpat].color, 'a'+numpat);
   
     dialog::addBreak(50);
     dialog::addItem(XLAT("exit menu"), 'v');
