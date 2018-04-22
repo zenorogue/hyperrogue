@@ -6863,5 +6863,28 @@ S(
   "Ten model przekształca świat tak, że odległości od dwóch punktów "
   "są zachowane. Ten parametr zadaje odległość tych dwóch punktów "
   "od środka.")
-  
 
+S("enable the Camelot cheat", "włącz oszustwo w Camelot")
+S("disable the Camelot cheat", "wyłącz oszustwo w Camelot")
+S("gain Orb of the Sword", "zdobądź Sferę Ostrza")
+S("Static mode enabled.", "Tryb statyczny włączony.")
+S("Static mode disabled.", "Tryb statyczny wyłączony.")
+
+S("Returned to your game.", "Wracasz do swojej gry.")
+S("Spherical version of %the1. ", "%1 w wersji sferycznej. ");
+S("Euclidean version of %the1. ", "%1 w wersji euklidesowej. ");
+S("Click again to go back to your game.", "Kliknij ponownie by wrócić do swojej gry.")
+S("Press %1 again to go back to your game.", "Wciśnij %1 ponownie by wrócić do swojej gry.")
+S("return to your game", "Wróć do gry")
+
+S("orthogonal projection", "rzut ortogonalny")
+S("stereographic projection", "rzut stereograficzny")
+S("zoomed stereographic projection", "zbliżony rzut stereograficzny")
+S("zoomed out", "oddalenie")
+S("zoomed in", "zbliżenie")
+S("gnomonic projection", "rzut gnomoniczny")
+S("Goldberg", "Goldberg")
+S("fisheye", "rybie oko")
+S("paint pictures", "maluj obrazki")
+S("list of slides", "lista slajdów")
+S("back to the start menu", "powrót do menu startowego")
