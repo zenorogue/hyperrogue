@@ -5241,7 +5241,7 @@ S("previous slide", "предыдущий слайд")
 S("This tutorial is different than most other game tutorials -- "
   "you are not forced to do anything, and you can go wherever you want.\n\n"
   "However, %the1 is not what we are talking about now. "
-  "We will not explain this land at the moment, and you could ponentially "
+  "We will not explain this land at the moment, and you could potentially "
   "get lost there.\n\n"
   "Remember that you can get to the next slide by pressing Enter.",
  
