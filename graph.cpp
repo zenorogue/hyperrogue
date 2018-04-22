@@ -3668,7 +3668,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       queuestr(V, 1 * .2, label, 0xFFFFFFFF, 1);
       }
     
-    if(viewdists) {
+    if(viewdists && !behindsphere(V)) {
       int cd = (cwt.c == currentmap->gamestart() && numplayers() == 1) ? celldist(c) : celldistance(c, cwt.c);
       string label = its(cd);
       // string label = its(fieldpattern::getriverdistleft(c)) + its(fieldpattern::getriverdistright(c));

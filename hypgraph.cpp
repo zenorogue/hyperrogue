@@ -434,12 +434,14 @@ double zgrad0(double l1, double l2, int nom, int den) {
 bool behindsphere(const hyperpoint& h) {
   if(!sphere) return false;
 
+  if(mdBandAny()) return false;
+
   if(vid.alpha > 1) {
      if(h[2] > -1/vid.alpha) return true;
      }  
   
   if(vid.alpha <= 1) {
-    if(h[2] < -.8) return true;
+    if(h[2] < .2-vid.alpha) return true;
     }
   
   return false;

@@ -1135,7 +1135,8 @@ void drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
     
     hyperpoint h = tC0(V * m->at);
     transmatrix V2 = rgpushxto0(h) * ypush(nonbitrunc ? .3 : .2);
-    if(doshow) queuestr(V2, (svg::in ? .28 : .2) * crossf / hcrossf, vd.name, backcolor ? 0x000000 : 0xFFFF00, svg::in ? 0 : 1);
+    if(doshow && !behindsphere(V2))
+      queuestr(V2, (svg::in ? .28 : .2) * crossf / hcrossf, vd.name, backcolor ? 0x000000 : 0xFFFF00, svg::in ? 0 : 1);
     lastptd().info = vd.info;
     }
 
