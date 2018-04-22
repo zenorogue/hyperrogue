@@ -1761,6 +1761,7 @@ namespace tour {
   static const int FINALSLIDE=16;
   static const int QUICKGEO=32;
   static const int SIDESCREEN = 64;
+  static const int USE_SLIDE_NAME = 128;
   
   extern slide slideHypersian;
   extern slide slideExpansion;

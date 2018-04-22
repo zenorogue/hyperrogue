@@ -72,6 +72,13 @@ void slidehelp() {
       );
   }
 
+void return_geometry() {
+  popGame();
+  vid.scale = 1; vid.alpha = 1;
+  presentation(pmGeometryReset);
+  addMessage(XLAT("Returned to your game."));
+  }
+
 bool handleKeyTour(int sym, int uni) {
   if(!tour::on) return false;
   if(!(cmode & sm::DOTOUR)) return false;
@@ -80,7 +87,7 @@ bool handleKeyTour(int sym, int uni) {
   if((sym == SDLK_RETURN || sym == SDLK_KP_ENTER) && (!inhelp || (flags & QUICKSKIP))) {
     popScreenAll();
     if(geometry || nonbitrunc) { 
-      popGame();
+      return_geometry();
       if(!(flags & QUICKGEO)) return true; 
       }
     if(flags & FINALSLIDE) return true;
@@ -103,10 +110,10 @@ bool handleKeyTour(int sym, int uni) {
     if(inhelp) slidehelp();
     return true;
     }
-  if(sym == '1' || sym == '2' || sym == '3') {
+  if(sym == '1' || sym == '2') { // || sym == '3') {
     int legal = slides[currentslide].flags & 7;
 
-    if(legal == LEGAL_NONE) {
+    if(legal == LEGAL_NONE || legal == LEGAL_HYPERBOLIC) {
       addMessage(XLAT("You cannot change geometry in this slide."));
       return true;
       }
@@ -140,18 +147,36 @@ bool handleKeyTour(int sym, int uni) {
       }
     
     if(geometry || nonbitrunc) {
-      popGame();
-      presentation(pmGeometryReset);
+      return_geometry();
       return true;
       }
 
     presentation(pmGeometry);
 
-    if(sym == '1') targetgeometry = gSphere;
-    if(sym == '2') targetgeometry = gEuclid;
+    if(sym == '1') targetgeometry = gSphere, vid.alpha = 1, vid.scale = .5;
+    if(sym == '2') targetgeometry = gEuclid, vid.alpha = 1, vid.scale = .5;
+
     firstland = specialland = cwt.c->land;
     restartGame(sym == '3' ? rg::bitrunc : rg::geometry, true);
     presentation(pmGeometryStart);
+    string x;
+    if(slides[currentslide].flags & USE_SLIDE_NAME) {
+      if(sym == '1') x = XLAT("Spherical version of %the1. ", s0 + "'" + slides[currentslide].name + "'");
+      if(sym == '2') x = XLAT("Euclidean version of %the1. ", s0 + "'" + slides[currentslide].name + "'");
+      }
+    else {
+      if(sym == '1') x = XLAT("Spherical version of %the1. ", cwt.c->land);
+      if(sym == '2') x = XLAT("Euclidean version of %the1. ", cwt.c->land);
+      }
+    if(mousing)
+      addMessage(x + XLAT("Click again to go back to your game."));
+    else
+      addMessage(x + XLAT("Press %1 again to go back to your game.", dialog::keyname(sym)));
+    return true;
+    }
+  if(sym == '3' && sphere) {
+    if(vid.alpha < 2) vid.scale = 400, vid.alpha = 400; else vid.scale = .5, vid.alpha = 1;
+    addMessage(XLAT("Changed the projection."));
     return true;
     }
   if(sym == '4') {
@@ -301,7 +326,7 @@ void start() {
 
 slide default_slides[] = {
 #if ISMOBILE
-  {"Note for mobiles", 10, LEGAL_HYPERBOLIC | QUICKSKIP,
+  {"Note for mobiles", 10, LEGAL_NONE | QUICKSKIP,
     "This tutorial is designed for computers, "
     "and keys are given for all actions. It will "
     "work without a keyboard though, although less "
@@ -319,7 +344,7 @@ slide default_slides[] = {
       }
     },
 #endif
-  {"Introduction", 10, LEGAL_HYPERBOLIC | QUICKSKIP,
+  {"Introduction", 10, LEGAL_NONE | QUICKSKIP,
     "This tutorial is mostly aimed to show what is "
     "special about the geometry used by HyperRogue. "
     "It also shows the basics of gameplay, and "
@@ -351,7 +376,7 @@ slide default_slides[] = {
 #endif            
       }
     },
-  {"Basics of gameplay", 11, LEGAL_HYPERBOLIC,
+  {"Basics of gameplay", 11, LEGAL_ANY,
     "The game starts in the Icy Lands. Collect the Ice Diamonds "
     "(press F1 if you do not know how to move). "
     "After you collect many of them, monsters will start to pose a challenge.\n"
@@ -408,7 +433,7 @@ slide default_slides[] = {
       SHOWLAND( l == laIce );
       }
     },
-  {"Expansion", 22, LEGAL_ANY,
+  {"Expansion", 22, LEGAL_ANY | USE_SLIDE_NAME,
     "The next slide shows the number of cells in distance 1, 2, 3, ... from you. "
     "It grows exponentially: there are more than 10^100 cells "
     "in radius 1000 around you, and you will move further away during the game!\n\n"
@@ -428,7 +453,7 @@ slide default_slides[] = {
       SHOWLAND( l == laIce );
       }
     },
-  {"Tiling and Tactics", 23, LEGAL_ANY, 
+  {"Tiling and Tactics", 23, LEGAL_ANY | USE_SLIDE_NAME, 
     "The tactics of fighting simple monsters, such as the Yetis from the Icy Lands, "
     "might appear shallow, but hyperbolic geometry is essential even there. "
     "In the next slide, you are attacked by two monsters at once. "
@@ -589,7 +614,7 @@ slide default_slides[] = {
       SHOWLAND ( l == laCrossroads || l == laBurial );
       }
     },
-  {"Periodic patterns", 30, LEGAL_UNLIMITED,
+  {"Periodic patterns", 30, LEGAL_UNLIMITED | USE_SLIDE_NAME,
     "Hyperbolic geometry yields much more interesting periodic patterns "
     "than Euclidean.",
     [] (presmode mode) {
@@ -623,7 +648,7 @@ slide default_slides[] = {
       l == laEmerald || l == laWineyard || l == laPower );
       }
     },
-  {"Fractal landscapes", 32, LEGAL_UNLIMITED,
+  {"Fractal landscapes", 32, LEGAL_UNLIMITED | USE_SLIDE_NAME,
     "On the following slide, the colors change smoothly in the whole infinite world. "
     "Again, this works better than in Euclidean geometry.",
     [] (presmode mode) {
@@ -682,24 +707,24 @@ slide default_slides[] = {
       if(mode == 3) pmodel = mdDisk;
       }
     },
-  {"Beltrami-Klein model", 43, LEGAL_ANY,
+  {"Beltrami-Klein model", 43, LEGAL_ANY | USE_SLIDE_NAME,
     "This model renders straight lines as straight, but it distorts angles.",
     [] (presmode mode) {
-      if(mode == 1) vid.alpha = 0;
+      if(mode == 1 || mode == pmGeometryReset || mode == pmGeometry) vid.alpha = 0;
       if(mode == 3) vid.alpha = 1;
       }
     },
-  {"Gans model", 44, LEGAL_ANY,
+  {"Gans model", 44, LEGAL_ANY | USE_SLIDE_NAME,
     "Yet another model, which corresponds to orthographic projection of the "
     "sphere. Poincaré disk model, Beltrami-Klein model, and the Gans "
     "model are all obtained by looking at either the hyperboloid model or an "
     "equidistant surface from various distances.",
     [] (presmode mode) {
-      if(mode == 1) vid.alpha = 400, vid.scale = 150;
+      if(mode == 1 || mode == pmGeometryReset || mode == pmGeometry) vid.alpha = 400, vid.scale = 150;
       if(mode == 3) vid.alpha = vid.scale = 1;
       }
     },
-  {"Band model", 45, LEGAL_NONEUC, 
+  {"Band model", 45, LEGAL_NONEUC | USE_SLIDE_NAME, 
     "The band model is the hyperbolic analog of the Mercator projection of the sphere: "
     "a given straight line is rendered as a straight line, and the rest of the "
     "world is mapped conformally, that is, angles are not distorted. "
@@ -733,7 +758,7 @@ slide default_slides[] = {
       }
     },
 #if !ISWEB
-  {"Shoot'em up mode", 52, LEGAL_NONE,
+  {"Shoot'em up mode", 52, LEGAL_NONE | USE_SLIDE_NAME,
     "In the shoot'em up mode, space and time is continuous. "
     "You attack by throwing knives. "
     "Very fun with two players!\n\n"

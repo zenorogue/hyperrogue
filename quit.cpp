@@ -411,9 +411,19 @@ void showMission() {
   if(intour) {
 #if CAP_TOUR
     if(canmove) {
-      dialog::addItem(XLAT("spherical geometry"), '1');
-      dialog::addItem(XLAT("Euclidean geometry"), '2');
-      dialog::addItem(XLAT("more curved hyperbolic geometry"), '3');
+      if(sphere) {
+        dialog::addItem(XLAT("return to your game"), '1');
+        dialog::addItem(XLAT(vid.alpha < 2 ? "orthogonal projection" : "stereographic projection"), '3');
+        }
+      else if(euclid) {
+        dialog::addItem(XLAT("return to your game"), '2');
+        dialog::addBreak(100);
+        }
+      else {       
+        dialog::addItem(XLAT("spherical geometry"), '1');
+        dialog::addItem(XLAT("Euclidean geometry"), '2');
+        }
+      // dialog::addItem(XLAT("more curved hyperbolic geometry"), '3');
       }
     if(!items[itOrbTeleport])
       dialog::addItem(XLAT("teleport away"), '4');
