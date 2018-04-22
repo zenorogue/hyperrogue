@@ -320,9 +320,9 @@ void showDisplayMode() {
     "3D", "high contrast/3D"};
 
   dialog::addBoolItem(XLAT("orthogonal projection"), vid.alpha >= 500, '1');
-  dialog::addBoolItem(XLAT("small Poincaré model"), vid.alpha == 1 && vid.scale < 1, '2');
-  dialog::addBoolItem(XLAT("big Poincaré model"), vid.alpha == 1 && vid.scale >= 1, '3');
-  dialog::addBoolItem(XLAT("Klein-Beltrami model"), vid.alpha == 0, '4');
+  dialog::addBoolItem(XLAT(sphere ? "stereographic projection" : euclid ? "zoomed out" : "small Poincaré model"), vid.alpha == 1 && vid.scale < 1, '2');
+  dialog::addBoolItem(XLAT(sphere ? "zoomed stereographic projection" : euclid ? "zoomed in" : "big Poincaré model"), vid.alpha == 1 && vid.scale >= 1, '3');
+  dialog::addBoolItem(XLAT((sphere || euclid) ? "gnomonic projection" : "Klein-Beltrami model"), vid.alpha == 0, '4');
   dialog::addSelItem(XLAT("wall display mode"), XLAT(wdmodes[vid.wallmode]), '5');
   if(getcstat == '5')
     mouseovers = XLAT("also hold Alt during the game to toggle high contrast");
