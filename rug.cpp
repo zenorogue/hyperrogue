@@ -36,7 +36,7 @@ bool subdivide_further();
 void subdivide();
 
 ld modelscale = 1;
-ld model_distance = 2;
+ld model_distance = 4;
 
 eGeometry gwhere = gEuclid;
 
