@@ -3347,7 +3347,7 @@ transmatrix calc_relative_matrix(cell *c2, cell *c1) {
     return inverse(gmatrix0[c1]) * gmatrix0[c2];
     else {
       printf("error: gmatrix0 not known\n");
-      exit(1);
+      return Id;
       }
     }
   
