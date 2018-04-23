@@ -6815,9 +6815,9 @@ bool collectItem(cell *c2, bool telekinesis) {
   }
 
 void dropGreenStone(cell *c) {
-  if(!passable(c, NULL, P_MONSTER)) {
+  if(items[itGreenStone] && !passable(c, NULL, P_MONSTER)) {
     // NOTE: PL/CZ translations assume that itGreenStone is dropped to avoid extra forms!
-    addMessage("Cannot drop %the1 here!", itGreenStone);
+    addMessage(XLAT("Cannot drop %the1 here!", itGreenStone));
     return;
     }
   if(items[itGreenStone] && c->item == itNone) {
@@ -6834,7 +6834,15 @@ void dropGreenStone(cell *c) {
       }
     }
   else {
-    if(gold() >= 300)
+    if(items[itGreenStone] && c->item == itGreenStone)
+      addMessage(XLAT("You juggle the Dead Orbs."));
+    else if(items[itGreenStone] && c->item)
+      addMessage(XLAT("You give %the1 a grim look.", c->item));
+    else if(items[itGreenStone]) {
+      addMessage(XLAT("Cannot drop %the1 here!", itGreenStone));
+      return;
+      }
+    else if(gold() >= 300)
       addMessage(XLAT("You feel great, like a true treasure hunter."));
     else if(gold() >= 200)
       addMessage(XLAT("Your eyes shine like gems."));
