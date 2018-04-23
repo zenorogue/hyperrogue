@@ -971,7 +971,6 @@ namespace polygonal {
   extern int SI;
   extern ld STAR;
   extern int deg;
-  typedef long double xld;
   extern ld coefr[MSI], coefi[MSI];
   extern int maxcoef, coefid;
   void solve();
