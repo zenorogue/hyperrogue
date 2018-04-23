@@ -376,11 +376,13 @@ cell *buildAnotherEquidistant(cell *c, int radius) {
   // prevent gravity anomalies
   if(c2->land != c->land) return NULL;
   
+  bool oc = c->land == laOcean;
+  
   // else if(ctof(c) && hrand(10000) < 20 && !isCrossroads(c->land) && gold() >= 200)
-  if(weirdhyperbolic && specialland == laCrossroads4 && buildBarrierNowall(c2, getNewLand(laOcean))) {
+  if(oc && weirdhyperbolic && specialland == laCrossroads4 && buildBarrierNowall(c2, getNewLand(laOcean))) {
     nowall = true;
     }
-  else if(pseudohept(c2) && gold() >= R200 && hrand(10) < 2 && buildBarrierNowall(c2, laCrossroads4, 1)) {
+  else if(oc && pseudohept(c2) && gold() >= R200 && hrand(10) < 2 && buildBarrierNowall(c2, laCrossroads4)) {
     nowall = true;
     // raiseBuggyGeneration(c2, "check");
     // return;
