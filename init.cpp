@@ -482,6 +482,7 @@ void initAll() {
     }
   
   firstland = firstland0;
+  polygonal::solve();
   }
 
 void finishAll() {

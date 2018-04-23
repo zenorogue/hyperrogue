@@ -476,6 +476,15 @@ ld glhypot2(glvertex a, glvertex b) {
 void drawpolyline(polytodraw& p) {
   auto& pp = p.u.poly;
 
+  if(!hyperbolic && among(pmodel, mdPolygonal, mdPolynomial)) {
+    bool any = false;
+    for(int i=0; i<pp.cnt; i++) {
+      hyperpoint h1 = pp.V * glhr::gltopoint((*pp.tab)[pp.offset+i]);
+      if(h1[2] > 0) any = true;
+      }
+    if(!any) return;
+    }
+  
   if(sphere && pp.tinf && pp.cnt > 3) {
     int i = pp.cnt;
     pp.cnt = 3;

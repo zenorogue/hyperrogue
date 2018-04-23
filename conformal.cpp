@@ -11,7 +11,9 @@ typedef long double precise;
 
 namespace polygonal {
 
-  typedef complex<ld> cld;
+  typedef long double xld;
+
+  typedef complex<xld> cld;
 
   int SI = 4;
   ld  STAR = 0;
@@ -66,6 +68,11 @@ namespace polygonal {
     }
   
   pair<ld, ld> compute(ld x, ld y, int prec) {
+    if(x*x+y*y > 1) {
+      xld r  = hypot(x,y);
+      x /= r;
+      y /= r;
+      }
     if(pmodel == mdPolynomial) {
       cld z(x,y);
       cld res (0,0);
@@ -92,7 +99,7 @@ namespace polygonal {
 
     for(int r=0; r<=2000; r++) {
       cld z = exp(cld(0, 2*M_PI * r / 2000.0));
-      pair<ld,ld> z2 = compute(real(z), imag(z), deg);
+      pair<xld,xld> z2 = compute(real(z), imag(z), deg);
       hyperpoint h;
       h[0] = z2.first * vid.radius;
       h[1] = z2.second * vid.radius;
