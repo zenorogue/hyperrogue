@@ -703,6 +703,9 @@ namespace dialog {
 
     if(ne.editwhat == &vid.linewidth)
       addBoolItem("finer lines at the boundary", vid.antialias & AA_LINEWIDTH, 'o');
+    
+    if(ne.editwhat == &geom3::wall_height)
+      addBoolItem("auto-adjust in Goldberg grids", geom3::gp_autoscale_heights, 'o');
 
     display();
     
@@ -757,6 +760,13 @@ namespace dialog {
       else if(uni == 'o' && ne.editwhat == &ne.intbuf && ne.intval == &sightrange_bonus && allowChangeRange()) {
         genrange_bonus = sightrange_bonus;
         doOvergenerate();
+        }
+      else if(uni == 'o' && ne.editwhat == &geom3::wall_height) {
+        geom3::gp_autoscale_heights = !geom3::gp_autoscale_heights;
+        buildpolys();
+  #if CAP_GL
+      resetGL();
+  #endif
         }
       else if(uni == 'O' && ne.editwhat == &ne.intbuf && ne.intval == &sightrange_bonus && allowChangeRange()) {
         gamerange_bonus = sightrange_bonus;

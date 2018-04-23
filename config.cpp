@@ -176,6 +176,7 @@ void initConfig() {
   addsaver(geom3::tc_alpha, "3D TC alpha");
   addsaver(geom3::highdetail, "3D highdetail");
   addsaver(geom3::middetail, "3D middetail");
+  addsaver(geom3::gp_autoscale_heights, "3D Goldberg autoscaling");
   
   addsaver(memory_saving_mode, "memory_saving_mode", (ISMOBILE || ISPANDORA || ISWEB) ? 1 : 0);
 
@@ -985,7 +986,7 @@ string explain3D(ld *param) {
       XLAT(
         "The height of walls, in absolute units. For the current values of g and c, "
         "wall height of %1 absolute units corresponds to projection value of %2.",
-        fts3(wall_height), fts3(factor_to_projection(geom3::WALL)));
+        fts3(actual_wall_height()), fts3(factor_to_projection(geom3::WALL)));
 
   if(param == &rock_wall_ratio)
     return

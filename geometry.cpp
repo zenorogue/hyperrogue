@@ -193,6 +193,7 @@ namespace geom3 {
   ld rock_wall_ratio = .9;
   ld human_wall_ratio = .7;
   ld human_height;
+  bool gp_autoscale_heights = true;
   
   ld highdetail = 8, middetail = 8;
   
@@ -247,6 +248,12 @@ namespace geom3 {
   
   string invalid;
   
+  ld actual_wall_height() {
+      if(gp::on && gp_autoscale_heights) 
+        return wall_height * min<ld>(4 * gp::scale, 1);
+      return wall_height;
+      }
+  
   void compute() {
     // tanh(depth) / tanh(camera) == vid.alpha
     invalid = "";
@@ -294,9 +301,10 @@ namespace geom3 {
       }
     else {
       INFDEEP = (euclid || sphere) ? 0.01 : lev_to_projection(0) * tanh(camera);
-      WALL = lev_to_factor(wall_height);
+      ld wh = actual_wall_height();
+      WALL = lev_to_factor(wh);
       
-      human_height = human_wall_ratio * wall_height;
+      human_height = human_wall_ratio * wh;
 
       LEG1  = lev_to_factor(human_height * .1);
       LEG   = lev_to_factor(human_height * .2);
@@ -311,13 +319,13 @@ namespace geom3 {
       
       ABODY = lev_to_factor(human_height * .4);
       AHEAD = lev_to_factor(human_height * .6);
-      BIRD = lev_to_factor((human_wall_ratio+1)/2 * wall_height * .8);
+      BIRD = lev_to_factor((human_wall_ratio+1)/2 * wh * .8);
       GHOST = lev_to_factor(human_height * .5);
       FLATEYE = lev_to_factor(human_height * .15);
       
-      slev = rock_wall_ratio * wall_height / 3;
+      slev = rock_wall_ratio * wh / 3;
       for(int s=0; s<=3; s++)
-        SLEV[s] = lev_to_factor(rock_wall_ratio * wall_height * s/3);
+        SLEV[s] = lev_to_factor(rock_wall_ratio * wh * s/3);
       LAKE = lev_to_factor(-lake_top);
       HELLSPIKE = lev_to_factor(-(lake_top+lake_bottom)/2);
       BOTTOM = lev_to_factor(-lake_bottom);

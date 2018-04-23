@@ -3169,7 +3169,7 @@ void escherSidewall(cell *c, int sidepar, const transmatrix& V, int col) {
   else if(sidepar == SIDE_WALL) {
     const int layers = 2 << detaillevel;
     for(int z=1; z<layers; z++) 
-      warpfloor(c, mscale(V, zgrad0(0, geom3::wall_height, z, layers)), col, PPR_WALL3+z-layers, false);
+      warpfloor(c, mscale(V, zgrad0(0, geom3::actual_wall_height(), z, layers)), col, PPR_WALL3+z-layers, false);
     }
   else if(sidepar == SIDE_LAKE) {
     const int layers = 1 << (detaillevel-1);
@@ -3439,7 +3439,7 @@ void draw_wall(cell *c, const transmatrix& V, int wcol, int& zcol, int ct6, int 
   if(conegraph(c)) {   
     const int layers = 2 << detaillevel;
     for(int z=1; z<layers; z++) {
-      double zg = zgrad0(0, geom3::wall_height, z, layers);
+      double zg = zgrad0(0, geom3::actual_wall_height(), z, layers);
       warpfloor(c, xyzscale(V, zg*(layers-z)/layers, zg),
         darkena(gradient(0, wcol, -layers, z, layers), 0, 0xFF), PPR_WALL3+z-layers+2, isWarped(c));
       }
@@ -3892,7 +3892,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           if(wmspatial) {
             const int layers = 2 << detaillevel;
             for(int z=1; z<layers; z++) 
-              queuepolyat(mscale(V2, zgrad0(0, geom3::wall_height, z, layers)), shHalfMirror[2], 0xC0C0C080, PPR_WALL3+z-layers);
+              queuepolyat(mscale(V2, zgrad0(0, geom3::actual_wall_height(), z, layers)), shHalfMirror[2], 0xC0C0C080, PPR_WALL3+z-layers);
             }
           else
             queuepolyat(V2, shHalfMirror[2], 0xC0C0C080, PPR_WALL3);
@@ -3910,7 +3910,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           if(wmspatial) {
             const int layers = 2 << detaillevel;
             for(int z=1; z<layers; z++) 
-              queuepolyat(mscale(V2, zgrad0(0, geom3::wall_height, z, layers)), shHalfMirror[ct6], 0xC0C0C080, PPR_WALL3+z-layers);
+              queuepolyat(mscale(V2, zgrad0(0, geom3::actual_wall_height(), z, layers)), shHalfMirror[ct6], 0xC0C0C080, PPR_WALL3+z-layers);
             }
           else 
             queuepolyat(V2, shHalfMirror[ct6], 0xC0C0C080, PPR_WALL3);
@@ -4520,7 +4520,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
            dynamicval<const hpcshape*> ds(qfi.shape, &shCircleFloor);
            dynamicval<bool> db(qfi.special, true);
            for(int z=1; z<layers; z++) {
-             double zg = zgrad0(-geom3::lake_top, geom3::wall_height, z, layers);
+             double zg = zgrad0(-geom3::lake_top, geom3::actual_wall_height(), z, layers);
              warpfloor(c, xyzscale(V, zg*(layers-z)/layers, zg),
                darkena(gradient(0, wcol, -layers, z, layers), 0, 0xFF), PPR_WALL3+z-layers+2, isWarped(c));
              }
