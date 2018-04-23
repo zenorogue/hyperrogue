@@ -1563,6 +1563,8 @@ namespace patterns {
     {"large picture", {
       {gNormal, false, PAT_PALACE, SPF_SYM0123},
       {gNormal, true, PAT_PALACE, SPF_SYM0123},
+      {gSphere, false, PAT_FIELD, 0},
+      {gSphere, true, PAT_FIELD, 0},
       {gElliptic, false, PAT_FIELD, 0},
       {gElliptic, true, PAT_FIELD, 0},
       {gEuclid, false, PAT_PALACE, 0}
