@@ -147,7 +147,7 @@ void buildCredits() {
     "special thanks to the following people for their bug reports, feature requests, porting, and other help:\n\n%1\n\n",
     "Konstantin Stupnik, ortoslon, chrysn, Adam Borowski, Damyan Ivanov, Ryan Farnsley, mcobit, Darren Grey, tricosahedron, Maciej Chojecki, Marek Čtrnáct, "
     "wonderfullizardofoz, Piotr Migdał, tehora, Michael Heerdegen, Sprite Guard, zelda0x181e, Vipul, snowyowl0, Patashu, phenomist, Alan Malloy, Tom Fryers, Sinquetica, _monad, CtrlAltDestroy, jruderman, "
-    "Kojiguchi Kazuki, baconcow, Alan, SurelyYouJest, hotdogPi" 
+    "Kojiguchi Kazuki, baconcow, Alan, SurelyYouJest, hotdogPi, DivisionByZero, xXxWeedGokuxXx, jpystynen" 
     );
 #ifdef EXTRALICENSE
   help += EXTRALICENSE;
