@@ -2747,7 +2747,7 @@ cell *pd_from;
 int pd_range;
 
 void compute_graphical_distance() {
-  cell *c1 = centerover.c ? centerover.c : cwt.c;
+  cell *c1 = centerover.c ? centerover.c : pd_from ? pd_from : cwt.c;
   int sr = get_sightrange_ambush();
   if(pd_from == c1 && pd_range == sr) return;
   for(auto c: pathq) c->pathdist = PINFD;
@@ -2761,6 +2761,7 @@ void compute_graphical_distance() {
   for(int qb=0; qb<size(pathq); qb++) {
     cell *c = pathq[qb];
     if(c->pathdist == pd_range) break;
+    if(qb == 0) forCellCM(c1, c) ;
     forCellEx(c1, c)
       if(c1->pathdist == PINFD)
         c1->pathdist = c->pathdist + 1,

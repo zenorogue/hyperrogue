@@ -1486,6 +1486,7 @@ void clearCellMemory() {
   allmaps.clear();
   last_cleared = NULL;
   saved_distances.clear();
+  pd_from = NULL;
   }
 
 auto cellhooks = addHook(clearmemory, 500, clearCellMemory);
