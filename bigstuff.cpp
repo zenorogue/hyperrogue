@@ -960,7 +960,7 @@ int wallchance(cell *c, bool deepOcean) {
     l == laCanvas ? 0 :
     l == laHaunted ? 0 :
     (l == laGraveyard && !deepOcean) ? 0 :
-    (l == laGraveyard && items[itBone] >= 10) ? 120 :
+    // (l == laGraveyard && items[itBone] >= 10) ? 120 :
     l == laOcean ? (deepOcean ? (nonbitrunc ? 250 : 2000) : 0) :
     l == laDragon ? 120 :
     50;
@@ -1007,6 +1007,8 @@ void buildBigStuff(cell *c, cell *from) {
     else for(int i=0; i<from->type; i++) {
       cell *c2 = from->mov[i];
       if(c2 && c2->landparam > HAUNTED_RADIUS+5)
+        deepOcean = true;
+      if(c2) forCellEx(c3, c2) if(c3 && c3->land == laGraveyard && c3->landparam > HAUNTED_RADIUS+5)
         deepOcean = true;
       }
     }
