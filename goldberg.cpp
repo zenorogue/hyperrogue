@@ -596,7 +596,7 @@ namespace gp {
         if(c0-cc == d0-dmain && c1-cc == d1-dmain)
           found = true, centerloc = c;
         }
-      if(!found)
+      if(!found && !quotient)
         printf("Warning: centerloc not found: %d,%d,%d\n", dmain, d0, d1);
       center_locs[rel] = centerloc;
       }
