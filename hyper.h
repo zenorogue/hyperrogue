@@ -297,6 +297,7 @@ struct cellwalker {
 #define R100 (inv::on ? 500 : 100)
 
 string XLAT(string x);
+string XLATN(string x);
 string cts(char c);
 string its(int i);
 int hrand(int i);
