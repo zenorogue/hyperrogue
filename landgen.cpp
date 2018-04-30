@@ -2333,10 +2333,16 @@ void setdist(cell *c, int d, cell *from) {
     if(c->land == laWhirlpool && !tactic::on && !yendor::on) setland(c, laOcean);
     if(c->land == laCamelot && !tactic::on) setland(c, laCrossroads);
 
-    if(sphere || torus) setLandSphere(c);
-    else if(euclid) setLandEuclid(c);
-    if(weirdhyperbolic) setLandWeird(c);
-    if(quotient) { setland(c, specialland); setLandQuotient(c); }
+#if CAP_DAILY
+    if(!daily::on) {
+#else
+    if(true) {
+#endif
+      if(sphere || torus) setLandSphere(c);
+      else if(euclid) setLandEuclid(c);
+      if(weirdhyperbolic) setLandWeird(c);
+      if(quotient) { setland(c, specialland); setLandQuotient(c); }
+      }
     
     // if(chaosmode) setland(c, getCLand(c));
     }

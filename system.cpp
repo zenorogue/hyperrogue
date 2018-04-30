@@ -181,6 +181,10 @@ void initgame() {
 
   if(shmup::on) shmup::init();
   
+  #if CAP_DAILY
+  daily::split();
+  #endif
+  
   // extern int sightrange; sightrange = 9;
   // cwt.c->land = laHell; items[itHell] = 10;
   for(int i=BARLEV; i>=7 - getDistLimit() - genrange_bonus; i--) {
@@ -1184,6 +1188,8 @@ void restartGame(char switchWhat, bool push, bool keep_screens) {
     inv::on = false;
     princess::challenge = false;
     }
+  if(switchWhat == rg::daily)
+    daily::setup();
   if(switchWhat == rg::princess) {
     princess::challenge = !princess::challenge;
     firstland = princess::challenge ? laPalace : laIce;

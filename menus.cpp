@@ -574,13 +574,13 @@ bool showHalloween() {
   return false;
   }
 
-int daily;
+int daily_mode;
 
 void showStartMenu() {
-  if(!daily) {
-    daily = hrand(10) + 1;
+  if(!daily_mode) {
+    daily_mode = hrand(10) + 1;
     if(showHalloween())
-      daily = 20;
+      daily_mode = 20;
     }
   
   gamescreen(2);
@@ -608,7 +608,7 @@ void showStartMenu() {
   dialog::addInfo(XLAT("learn about hyperbolic geometry!"));
 #endif
 
-  switch(daily) { 
+  switch(daily_mode) { 
     case 1:
       #if CAP_SHMUP_GOOD
         dialog::addBreak(100);

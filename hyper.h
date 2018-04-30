@@ -378,6 +378,7 @@ namespace rg {
   static const char shmup = 's';
   static const char randpattern = 'r';
   static const char princess = 'p';
+  static const char daily = 'd';
   
   // wrongmode only -- marks 'global' achievements not related to the current mode
   static const char global = 'x'; 
@@ -3269,3 +3270,33 @@ extern int mutantphase;
 void resize_screen_to(int x, int y);
 extern bool canvas_invisible;
 extern cell *pd_from;
+
+namespace daily {
+  extern bool on;
+  extern int daily_id;
+  void setup();
+  void split();
+  void gifts();
+  }
+
+enum eOrbLandRelation { 
+  olrForbidden, // never appears: forbidden
+  olrDangerous, // never appears: would be dangerous
+  olrUseless,   // never appears: useless here
+  olrNoPrizes,  // no prizes in this land
+  olrNoPrizeOrb,// orb not allowed as a prize
+  olrPrize25,   // prize for collecting 25
+  olrPrize3,    // prize for collecting 3
+  olrNative,    // native orb in this land
+  olrNative1,   // native orb in this land (1)
+  olrGuest,     // extra orb in this land
+  olrPNative,   // Land of Power: native
+  olrPBasic,    // Land of Power: basic orbs
+  olrPPrized,   // Land of Power: prized orbs
+  olrPNever,    // Land of Power: foreign orbs
+  olrHub,       // hub lands
+  olrMonster,   // available from a monster
+  olrAlways,    // always available
+  olrBurns      // burns
+  };
+

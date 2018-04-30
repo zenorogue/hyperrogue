@@ -337,6 +337,10 @@ namespace inv {
     gainOrbs(itMagnet, itOrbMagnetism);
     gainOrbs(itRuins, itOrbSlaying);
 
+#if CAP_DAILY    
+    daily::gifts();
+#endif
+
     if(items[itOrbLove] && !items[itSavedPrincess]) items[itSavedPrincess] = 1;
     
     int& r = remaining[itGreenStone];

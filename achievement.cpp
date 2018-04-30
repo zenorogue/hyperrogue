@@ -90,6 +90,9 @@ bool wrongMode(char flags) {
   if((geometry != gNormal) != (flags == rg::geometry)) return true;
   
   if(shmup::on != (flags == rg::shmup)) return true;
+#if CAP_DAILY
+  if(daily::on != (flags == rg::daily)) return true;
+#endif
   if(randomPatternsMode) return true;
   if(yendor::on) return true;
   if(peace::on) return true;
@@ -598,6 +601,9 @@ void achievement_final(bool really_final) {
   if(chaosmode) specials++;
   if(nonbitrunc) specials++;
   if(gp::on) specials++;
+  #if CAP_DALIY
+  if(daily::on) return;
+  #endif
   if(inv::on) specials++;
   if(specials > 1) return;
   
