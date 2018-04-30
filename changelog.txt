@@ -2376,3 +2376,37 @@ MINOR:
 - Geometry Experiments menu now lets you change land in the standard geometry too (but you will be marked as a cheater)
 - Allowed the sloppy Graveyard in heptagonal
 - Also allowed Land of Storms which was disabled by mistake
+
+2018.04.23 13:44 Version 10.3s
+
+Gameplay:
+- better messages when dropping Dead Orbs impossible
+- fixed odd stripes of CR4 in the Graveyard
+- fixed the bug which caused too low Great Wall generation in the Crossroads
+- falling birds now trigger trapdoors
+- non-standard-hyperbolic chaosmode no longer generates lots of the originally selected land
+- made some things in the Tutorial more clear: removed the '3' key for heptagonal mode
+  (probably more confusing than useful); the '1' and '2' keys now print a message that
+  you are temporarily leaving your game or returning to it; in the ESC menu, the button
+  captions are adjusted when they disable something rather than enable it  
+
+Graphics:
+- Yendor/Caribbean cross appears on the boundary again
+- map no longer disappears suddenly and irreparably if you scroll into the invisible region
+- 3D graphics are now automatically scaled vertically on high Goldberg settings
+- labels (e.g., numbers shown if you check the expansion rate) are no longer displayed on the cells which are behind the sphere 
+- predesigned patterns: 'distance from origin' option, an option to make all the floors invisible (possibly show line patterns only); fixed issues with line patterns drawing incorrectly
+- pageup/down spin 2x slower to make it possible to rotate by 90 degrees
+
+Models of hyperbolic geometry:
+- increased the default Hypersian Rug distance so that the whole model fits on the screen
+- the conformal square works better in non-hyperbolic geometries now
+- Earth included as a loadable (spherical) texture, also fixed some issues with loading such textures
+- in the 'display mode' menu, appropriate projection names are used in non-hyperbolic geometries
+- two-point equidistant model rendered better on the sphere
+- non-conformal band models can now be saved to a file too
+- line animation is now more precise -- it starts and ends strictly at the starting point and the current position
+  (unless you change an option), if these two cells are similar (e.g. move 15 cells in a straight line in the Zebra pattern) 
+  the back-to-start transition will be invisible, and thus line animation and spiral will be smooth
+- spiral mapping no longer crashes the game, and resizing the window works now
+- fisheye model (mostly for Euclidean geometry)
