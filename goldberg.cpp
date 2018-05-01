@@ -19,10 +19,15 @@ namespace gp {
     return make_pair(e1.first*e2.first-e1.second*e2.second, 
       e1.first*e2.second + e2.first*e1.second + e1.second*e2.second);
     }
+
+  loc operator*(loc e1, int i) {
+    return loc(e1.first*i, e1.second*i);
+    }
   
   struct goldberg_mapping_t {
     cellwalker cw;
     char rdir;
+    char mindir;
     };
 
   loc eudir(int d) {
@@ -100,6 +105,7 @@ namespace gp {
     for(int y=0; y<32; y++) for(int x=0; x<32; x++) {
       goldberg_map[y][x].cw.c = NULL;
       goldberg_map[y][x].rdir = -1;
+      goldberg_map[y][x].mindir = 0;
       }
     }
   
@@ -111,7 +117,7 @@ namespace gp {
     static char bufs[16][16];
     static int bufid;
     bufid++; bufid %= 16;
-    snprintf(bufs[bufid], 16, "[%d,%d]", at.first, at.second);
+    snprintf(bufs[bufid], 16, "[%2d,%2d]", at.first, at.second);
     return bufs[bufid];
     }
 
@@ -119,7 +125,7 @@ namespace gp {
     static char bufs[16][32];
     static int bufid;
     bufid++; bufid %= 16;
-    snprintf(bufs[bufid], 32, "[%p/%d:%d:%d]", cw.c, cw.c?cw.c->type:-1, cw.spin, cw.mirrored);
+    snprintf(bufs[bufid], 32, "[%p/%2d:%d:%d]", cw.c, cw.c?cw.c->type:-1, cw.spin, cw.mirrored);
     return bufs[bufid];
     }
 
@@ -127,41 +133,87 @@ namespace gp {
   
 #define WHD(x) // x
 
+  bool operator != (cellwalker cw1, cellwalker cw2) {
+    return cw1.c != cw2.c || cw1.spin != cw2.spin || cw1.mirrored != cw2.mirrored;
+    }
+
+  cell*& peek(cellwalker cw) {
+    return cw.c->mov[cw.spin];
+    }
+
+  cellwalker get_localwalk(const goldberg_mapping_t& wc, int dir) {
+    if(dir < wc.mindir) dir += 6;
+    if(dir >= wc.mindir + 6) dir -= 6;
+    return wc.cw + dir;
+    }
+
+  void set_localwalk(goldberg_mapping_t& wc, int dir, const cellwalker& cw) {
+    if(dir < wc.mindir) dir += 6;
+    if(dir >= wc.mindir + 6) dir -= 6;
+    wc.cw = cw - dir;
+    }
+
+  bool pull(loc at, int dir) {
+    auto& wc = get_mapping(at);
+    auto at1 = at + eudir(dir);
+    int dir1 = fix6(dir+3);
+    cellwalker wcw = get_localwalk(wc, dir);
+    auto& wc1= get_mapping(at1);
+    if(wc1.cw.c) {
+      if(peek(wcw)) {
+        auto wcw1 = get_localwalk(wc1, dir1);
+        if(wcw + wstep != wcw1) {
+          WHD( printf("%s : %s / %s (pull error from %s :: %s)\n", disp(at1), dcw(wcw+wstep), dcw(wcw1), disp(at), dcw(wcw)); )
+          exit(1);
+          }
+        }
+      return false;
+      }
+    if(peek(wcw)) {
+      set_localwalk(wc1, dir1, wcw + wstep);
+      WHD( printf("%s : %s (pulled from %s :: %s)\n", disp(at1), dcw(wcw + wstep), disp(at), dcw(wcw)); )
+      return true;
+      }
+    return false;
+    }
+  
   void conn1(loc at, int dir, int dir1) {
     auto& wc = get_mapping(at);
+    auto wcw = get_localwalk(wc, dir);
     auto& wc1 = get_mapping(at + eudir(dir));
-    int cdir = (wc.cw + dir).spin;
-    WHD( printf("  connection %s/%d %s ", disp(at), dir, dcw(wc.cw+dir)); )
+    WHD( printf("  connection %s/%d %s ~ %s/%d ", disp(at), dir, dcw(wc.cw+dir), disp(at+eudir(dir)), dir1); )
     if(!wc1.cw.c) {
-      wc1.cw.c = wc.cw.c->mov[cdir];
-      if(wc1.cw.c) {
-        // wc1.c/wc.c->spin(cdir) == dir1
-        wc1.cw = (wc.cw + dir + wstep - dir1);
+      if(peek(wcw)) {
         WHD( printf("(pulled) "); )
+        set_localwalk(wc1, dir1, wcw + wstep);
         }
-      if(!wc1.cw.c) {
-        wc1.cw.c = newCell(6, wc.cw.c->master);
+      else {
+        peek(wcw) = newCell(6, wc.cw.c->master);
+        tsetspin(wcw.c->spintable, wcw.spin, 0);
+        set_localwalk(wc1, dir1, wcw + wstep);
         spawn++;
-        // 0 for wc1.c should be dir1
-        wc1.cw.mirrored = wc.cw.mirrored;
-        wc1.cw.spin = fix6(wc.cw.mirrored ? dir1 : -dir1);
         WHD( printf("(created) "); )
         }
       }
-    int cdir1 = (wc1.cw + dir1).spin;
     WHD( printf("%s ", dcw(wc1.cw+dir1)); )
-    if(wc.cw.c->mov[cdir] && wc.cw.c->mov[cdir] != wc1.cw.c) {
-      WHD( printf("FAIL: %p\n", wc.cw.c->mov[cdir]); exit(1); )
+    auto wcw1 = get_localwalk(wc1, dir1);
+    if(peek(wcw)) {
+      if(wcw+wstep != wcw1) {
+        WHD( printf("FAIL: %s / %s\n", dcw(wcw), dcw(wcw1)); exit(1); )
+        }
+      else {
+        WHD(printf("(was there)\n");)
+        }
       }
-    if(wc.cw.c->mov[cdir]) {
-      if(wc.cw.c->spin(cdir) != cdir1) {
-        printf("warning: wrong spin: %d vs %d\n", wc.cw.c->spin(cdir), cdir1);
+    else {
+      WHD(printf("ok\n"); )
+      peek(wcw) = wcw1.c;
+      tsetspin(wcw.c->spintable, wcw.spin, wcw1.spin + (wcw.mirrored != wcw1.mirrored ? 8 : 0));
+      if(wcw+wstep != wcw1) {
+        printf("assertion failed\n");
         exit(1);
         }
       }
-    WHD(printf("ok\n"); )
-    wc.cw.c->mov[cdir] = wc1.cw.c;
-    tsetspin(wc.cw.c->spintable, cdir, cdir1 + (wc.cw.mirrored != wc1.cw.mirrored ? 8 : 0));
     }
 
   void conn(loc at, int dir) {
@@ -169,6 +221,13 @@ namespace gp {
     conn1(at + eudir(dir), fix6(dir+3), fix6(dir));
     }
   
+  goldberg_mapping_t& set_heptspin(loc at, heptspin hs) {
+    auto& ac0 = get_mapping(at);
+    ac0.cw = cellwalker(hs.h->c7, hs.spin, hs.mirrored);
+    WHD( printf("%s : %s\n", disp(at), dcw(ac0.cw)); )
+    return ac0;
+    }
+
   void extend_map(cell *c, int d) {
     WHD( printf("EXTEND %p %d\n", c, d); )
     if(c->master->c7 != c) {
@@ -196,27 +255,42 @@ namespace gp {
     vc[1] = param;
     vc[2] = param * loc(0,1);
     
-    // get_mapping(loc) gives our local map. We set the vertices first
-    {
-    auto h = c->master;
-    auto& ac0 = get_mapping(vc[0]);
-    ac0.cw = cellwalker(h->c7, d);
-    WHD( printf("%s : %s\n", disp(vc[0]), dcw(ac0.cw)); )
+    heptspin hs(c->master, d, false);
     
-    // 3 ~ h->spin(d)
-    auto& ac1 = get_mapping(vc[1]);
-    cell *c0 = createStep(h, d)->c7;
-    ac1.cw = cellwalker(c0, h->spin(d) - (h->mirror(d) ? -3 : 3), h->mirror(d));
-    WHD( printf("%s : %s\n", disp(vc[1]), dcw(ac1.cw)); )
- 
+    auto& ac0 = set_heptspin(vc[0], hs);
+    ac0.mindir = -1;
+    auto& ac1 = set_heptspin(vc[1], hs + wstep - 3);
+    auto& ac2 = set_heptspin(vc[2], hs + 1 + wstep - 4);
+    ac2.mindir = 1;
     
-    auto& ac2 = get_mapping(vc[2]);
-    int d1 = (d+1)%S7;
-    cell *c1 = createStep(h, d1)->c7;
-    ac2.cw = cellwalker(c1, h->spin(d1) - (h->mirror(d1) ? -4 : 4), h->mirror(d1));
-    WHD( printf("%s : %s\n", disp(vc[2]), dcw(ac2.cw)); )
-    // 4 ~ h->spin(d1)
-    }
+    if(elliptic && param.first == param.second) {
+      int x = param.first;
+      if(ac1.cw.mirrored != hs.mirrored) ac1.cw--;
+      if(ac2.cw.mirrored != hs.mirrored) ac2.cw--;
+      
+      for(int d=0; d<3; d++) for(int k=0; k<3; k++) 
+      for(int i=0; i<x; i++) {
+        int dd = (2*d+k);
+        loc cx = vc[d] + eudir(dd) * i;
+        if(!pull(cx, dd)) break;
+        }
+      
+      for(int i=0; i<=2*x; i++)
+      for(int d=0; d<3; d++) {
+        loc cx = vc[d] + eudir(1+2*d) * i;
+        if(i < 2*x) conn(cx, 1+2*d);
+        int jmax = x-i, drev = 2*d;
+        if(jmax < 0) drev += 3, jmax = -jmax;
+        for(int j=0; j<jmax; j++) {
+          loc cy = cx + eudir(drev) * j;
+          conn(cy, drev);
+          conn(cy, drev+1);
+          conn(cy, drev+2);
+          }
+        }
+      
+      return;
+      }
 
     // then we set the edges of our big equilateral triangle (in a symmetric way)
     for(int i=0; i<3; i++) {
@@ -298,7 +372,8 @@ namespace gp {
           exit(1);
         }
       }
-    WHD( printf("DONE\n\n"); )
+
+    WHD( printf("DONE\n\n"); )    
     }
   
   hyperpoint loctoh_ort(loc at) {
@@ -351,8 +426,8 @@ namespace gp {
       ));
     for(int i=0; i<S7; i++) {
       transmatrix T = dir_matrix(i);
-      for(int x=-10; x<10; x++)
-      for(int y=-10; y<10; y++)
+      for(int x=-16; x<16; x++)
+      for(int y=-16; y<16; y++)
       for(int d=0; d<6; d++) {
         loc at = loc(x, y);
         
@@ -445,11 +520,8 @@ namespace gp {
     auto old_tstate_max = texture::config.tstate_max;
 #endif
     xy = internal_representation(xy);
-    if(xy.second && elliptic) {
-      if(xy.second==xy.first)
-        addMessage("GP(x,x) not implemented yet for elliptic geometry");
-      else
-        addMessage("This does not work in elliptic geometry");
+    if(xy.second && xy.second != xy.first && elliptic) {
+      addMessage("This does not work in elliptic geometry");
       xy.second = 0;
       }
     config = human_representation(xy);
