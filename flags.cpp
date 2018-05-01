@@ -17,6 +17,12 @@ bool isGravityLand(eLand l) {
     l == laMountain || l == laDungeon;
   }
 
+bool isEquidLand(eLand l) {
+  return 
+    l == laIvoryTower || l == laEndorian || l == laDungeon ||
+    isHaunted(l) || l == laOcean;
+  }
+
 // watery
 
 bool isWatery(cell *c) {

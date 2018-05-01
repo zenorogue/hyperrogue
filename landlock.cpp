@@ -1139,11 +1139,12 @@ land_validity_t& land_validity(eLand l) {
   if((l == laCrossroads5 || l == laCrossroads2) && (geometry || chaosmode))
     return some0;
     
+  // special construction in the Chaos mode
+  if(chaosmode && (l == laTemple || l == laHive || l == laOcean || l == laHaunted))
+    return special_chaos;
+
   // equidistant-based lands
-  if(l == laDungeon || l == laEndorian || l == laIvoryTower || l == laOcean) {
-    // special construction
-    if(chaosmode && l == laOcean) 
-      return special_chaos;
+  if(isEquidLand(l)) {
     // no equidistants supported in chaos mode
     if(chaosmode) 
       return not_in_chaos;
