@@ -982,7 +982,6 @@ int geosupport_threecolor() {
     if(S7 % 2) return 1;
     return 2;
     }
-  if(gp_threecolor() == 2) return 2;
   if((S7 % 2 == 0) && (S3 == 3))
     return 2;
   return 0;
@@ -993,7 +992,7 @@ int geosupport_graveyard() {
   if(!nonbitrunc) return 2;
   
   // always works in patterns supporting three-color
-  int tc = geosupport_threecolor();
+  int tc = max(geosupport_threecolor(), gp_threecolor());
   if(tc) return tc;
   
   if(S3 == 3 && S7 == 7) return 1;
