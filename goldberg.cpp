@@ -389,6 +389,14 @@ namespace gp {
     hpxyz(1, -2, 0),
     hpxyz(0, 0, 0) // center, not a corner
     };
+  
+  hyperpoint cornmul(const transmatrix& corners, const hyperpoint& c) {
+    if(sphere) {
+      ld cmin = c[0] * c[1] * c[2] * (6 - S7);
+      return corners * hpxyz(c[0] + cmin, c[1] + cmin, c[2] + cmin);
+      }
+    else return corners * c;
+    }
     
   hyperpoint atz(const transmatrix& T, const transmatrix& corners, loc at, int cornerid = 6, ld cf = 3) {
     int sp = 0;
@@ -402,7 +410,7 @@ namespace gp {
       }
     if(sp>3) sp -= 6;
 
-    return normalize(spin(2*M_PI*sp/S7) * T * corner);
+    return normalize(spin(2*M_PI*sp/S7) * cornmul(T, corner));
     }
   
   transmatrix Tf[8][32][32][6];
@@ -459,6 +467,7 @@ namespace gp {
       area = ((2*x+y) * (2*x+y) + y*y*3) / 4;
       next = hpxyz(x+y/2., -y * sqrt(3) / 2, 0);
       scale = 1 / hypot2(next);
+      if(sphere) scale *= .7;
       crossf *= scale;
       hepvdist *= scale;
       rhexf *= scale;
