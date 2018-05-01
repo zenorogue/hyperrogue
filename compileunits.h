@@ -90,6 +90,10 @@ bool inv::activating;
 #endif
 #include "commandline.cpp"
 #include "bigstuff.cpp"
+
+#if CAP_DAILY
+#include "private/daily.cpp"
+#endif
 #endif
 
 #if IN_CU(1)

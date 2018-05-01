@@ -1188,8 +1188,10 @@ void restartGame(char switchWhat, bool push, bool keep_screens) {
     inv::on = false;
     princess::challenge = false;
     }
+#if CAP_DAILY
   if(switchWhat == rg::daily)
     daily::setup();
+#endif
   if(switchWhat == rg::princess) {
     princess::challenge = !princess::challenge;
     firstland = princess::challenge ? laPalace : laIce;
