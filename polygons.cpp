@@ -1387,7 +1387,7 @@ void buildpolys() {
   
   if(euclid) fac80 = fac94 = .9;
   
-  if(geometry == g47 || geometry == gSmallSphere || geometry == gTinySphere)
+  if(geometry == g47 || geometry == gSmallSphere || geometry == gTinySphere || geometry == gSmallElliptic)
     fac80 *= 1.2, fac94 *= .94;
 
   if(geometry == gTinySphere)

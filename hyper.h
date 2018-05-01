@@ -241,6 +241,7 @@ struct heptspin {
   int spin;
   bool mirrored;
   heptspin() { mirrored = false; }
+  heptspin(heptagon *h, int s = 0, bool m = false) : h(h), spin(s), mirrored(m) { }
   };
 
 struct cell : gcell {

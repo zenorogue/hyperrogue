@@ -111,7 +111,22 @@ struct hrmap_spherical : hrmap {
       siblings = {1, 0, 10, 4, 3, 8, 9, 11, 5, 6, 2, 7};
     else
       siblings = {1, 0, 3, 2, 5, 4};
-    for(int i=0; i<S7; i++) {
+      
+    if(S7 == 4 && elliptic) {
+      for(int i=0; i<3; i++) {
+        int i1 = (i+1)%3;
+        int i2 = (i+2)%3;
+        dodecahedron[i]->move[0] = dodecahedron[i1];
+        dodecahedron[i]->setspin(0, 1);
+        dodecahedron[i]->move[1] = dodecahedron[i2];
+        dodecahedron[i]->setspin(1, 0);
+        dodecahedron[i]->move[2] = dodecahedron[i1];
+        dodecahedron[i]->setspin(2, 3+8);
+        dodecahedron[i]->move[3] = dodecahedron[i2];
+        dodecahedron[i]->setspin(3, 2+8);
+        }
+      }
+    else for(int i=0; i<S7; i++) {
       dodecahedron[0]->move[i] = dodecahedron[i+1];
       dodecahedron[0]->setspin(i, 0);
       dodecahedron[i+1]->move[0] = dodecahedron[0];
@@ -169,11 +184,9 @@ struct hrmap_spherical : hrmap {
 
   void verify() {
     for(int i=0; i<spherecells(); i++) for(int k=0; k<S7; k++) {
-      heptspin hs;
-      hs.h = dodecahedron[i];
-      hs.spin = k;
-      hs = hs + wstep + (S7-1) + wstep + (S7-1) + wstep + (S7-1);
-      if(hs.h != dodecahedron[i]) printf("error %d,%d\n", i, k);
+      heptspin hs(dodecahedron[i], k, false);
+      heptspin hs2 = hs + wstep + (S7-1) + wstep + (S7-1) + wstep + (S7-1);
+      if(hs2.h != hs.h) printf("error %d,%d\n", i, k);
       }
     for(int i=0; i<spherecells(); i++) verifycells(dodecahedron[i]);
     }
@@ -753,37 +766,26 @@ cell *createMov(cell *c, int d) {
   else if(c == c->master->c7) {
     
     cell *n = newCell(S6, c->master);
-
-    merge(c,d,n,0,false);
     
-    heptspin hs; hs.h = c->master; hs.spin = d; hs.mirrored = false;
+    heptspin hs(c->master, d, false);
     
     int alt3 = c->type/2;
     int alt4 = alt3+1;
         
-    /*
-    heptspin hs2 = hsstep(hsspin(hs, a3), -alt4);
-    merge(hs2.h->c7, hs2.spin, n, 2, hs2.mirrored);
-    
-    heptspin hs3 = hsstep(hsspin(hs, a4), -alt3);
-    merge(hs3.h->c7, hs3.spin, n, S6-2, hs3.mirrored);
-    */
-    
-    for(int u=2; u<S6; u+=2) {
-      hs = hs + alt3 + wstep - alt4;
+    for(int u=0; u<S6; u+=2) {
+      if(hs.mirrored && geometry == gSmallElliptic) hs+=1;
       merge(hs.h->c7, hs.spin, n, u, hs.mirrored);
+      if(hs.mirrored && geometry == gSmallElliptic) hs+=-1;
+      hs = hs + alt3 + wstep - alt4;
       }
-    
     extern void verifycell(cell *c);
     verifycell(n);
     }
 
   else {
-    bool mirr = c->mirror(d-1);
-    int di = fixrot(c->spn(d-1)-(mirr?-1:1));
-    cell *c2 = createMov(c->mov[d-1], di);
-    bool nmirr = mirr ^ c->mov[d-1]->mirror(di);
-    merge(c, d, c2, fix6(c->mov[d-1]->spn(di) - (nmirr?-1:1)), nmirr);
+    cellwalker cw(c, d, false);
+    cellwalker cw2 = cw - 1 + wstep - 1 + wstep - 1;
+    merge(c, d, cw2.c, cw2.spin, cw2.mirrored);
     }
   return c->mov[d];
   }

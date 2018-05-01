@@ -107,6 +107,7 @@ void precalc() {
     if(sphere ? v1 < v2 : v1 > v2) fmin = f; else fmax = f;
     }
   tessf = fmin;
+  if(elliptic && S7 == 4) tessf = M_PI/2;
   
   if(vertexdegree == 3) {
     fmin = 0, fmax = sphere ? M_PI / 2 : 2;

@@ -1668,6 +1668,7 @@ geometryinfo ginf[gGUARD] = {
   {"four heptagons",      "4x7",      7, 4, 0,      gcHyperbolic, 0x08600, {{4, 3}}},
   {"cube",                "3x4",      4, 3, 0,      gcSphere,     0x10000, {{SEE_ALL, SEE_ALL}}},
   {"tetrahedron (buggy)", "3x3",      3, 3, 0,      gcSphere,     0x10200, {{SEE_ALL, SEE_ALL}}},
-  {"square grid",         "4x4",      4, 4, 0,      gcEuclid,     0x10400, {{7, 7}}}
+  {"square grid",         "4x4",      4, 4, 0,      gcEuclid,     0x10400, {{7, 7}}},
+  {"cube/elliptic",       "e3x4",     4, 3, qELLIP, gcSphere,     0x10600, {{SEE_ALL, SEE_ALL}}},
   };
 
