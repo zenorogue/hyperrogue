@@ -2520,6 +2520,7 @@ namespace lv {
   static const flagtype appears_in_full = 4;
   static const flagtype appears_in_ptm = 8;
   static const flagtype display_in_help = 16;
+  static const flagtype one_and_half = 32;
   };
 
 struct land_validity_t {

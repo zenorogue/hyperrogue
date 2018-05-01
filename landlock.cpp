@@ -1027,7 +1027,7 @@ namespace lv {
   land_validity_t no_randpattern_version = { 0, q0, "No random pattern version."};  
   land_validity_t no_great_walls = { 0, q0, "Great Walls not implemented."};  
   land_validity_t pattern_incompatibility = { 0, q0, "Pattern incompatible."};  
-  land_validity_t pattern_not_implemented_random = { 1, q1, "Pattern not implemented -- using random."};
+  land_validity_t pattern_not_implemented_random = { 1, q1 | one_and_half, "Pattern not implemented -- using random."};
   land_validity_t pattern_not_implemented_weird = { 1, q1, "Pattern not implemented."};
   land_validity_t pattern_not_implemented_exclude = { 1, q1 & ~ lv::appears_in_full, "Pattern not implemented."};
   land_validity_t not_enough_space = { 0, q0, "Not enough space."};  
@@ -1045,13 +1045,13 @@ namespace lv {
   land_validity_t special_geo = { 2, qm2, "Special construction in this geometry." };
   land_validity_t special_geo3 = { 3, qm2, "Special construction in this geometry." };
   land_validity_t not_implemented = {0, q0, "Not implemented."};  
-  land_validity_t partially_implemented = {1, q1, "Partially implemented."};  
+  land_validity_t partially_implemented = {1, q1 | one_and_half, "Partially implemented."};  
   land_validity_t ok = {2, q2 &~ lv::display_in_help, "No comments."};  
   land_validity_t not_in_ptm = {0, q0, "Does not work in pure tactics mode."};  
   land_validity_t technical = {0, q0 &~ lv::appears_in_geom_exp, "Technical."};  
   land_validity_t full_game = {3, q3, "Full game."};  
   land_validity_t inaccurate = {1, q1, "Somewhat inaccurate."};  
-  land_validity_t great_walls_missing = {1, q1, "Mercury rivers not implemented (or could not work) in this geometry."};
+  land_validity_t great_walls_missing = {1, q1 | one_and_half, "Mercury rivers not implemented (or could not work) in this geometry."};
   land_validity_t pattern_compatibility = {3, qm3, "Patterns compatible."}; 
   land_validity_t specially_designed = {3, qm3, "This land is specially designed for this geometry."};   
   land_validity_t needs_threecolor = {0, q0, "Three-colorability required."};  
@@ -1064,8 +1064,8 @@ namespace lv {
   land_validity_t some0 = {0, q0, "This land does not work in the current settings. Reason not available."};
   land_validity_t some1 = {1, q1, "This land does not work well in the current settings. Reason not available."};
   land_validity_t known_buggy = {1, q1, "This combination is known to be buggy at the moment."};
-  land_validity_t sloppy_pattern = {1, q1, "Somewhat sloppy pattern."};
-  land_validity_t no_fractal_landscapes = {1, q1, "Fractal landscapes not implemented in this geometry."};
+  land_validity_t sloppy_pattern = {1, q1 | one_and_half, "Somewhat sloppy pattern."};
+  land_validity_t no_fractal_landscapes = {1, q1 | one_and_half, "Fractal landscapes not implemented in this geometry."};
   land_validity_t simplified_walls = { 1, q1, "Only simplified walls implemented."};  
   }
 
