@@ -511,7 +511,7 @@ double hdist(const hyperpoint& h1, const hyperpoint& h2) {
     case gcHyperbolic:
       return 2 * asinh(sqrt(iv) / 2);
     case gcSphere:
-      return 2 * asin(sqrt(iv) / 2);
+      return 2 * asin_auto_clamp(sqrt(iv) / 2);
     default:
       return 0;
     }
