@@ -301,7 +301,6 @@ int zebra40(cell *c) {
 int zebra3(cell *c) {
   if(c->type != 6) return (c->master->zebraval/10)/4;
   else if(sphere || S7>7 || S6>6) return 0;
-  else if(gp::on) return zebra40(c->master->c7);
   else { 
     int ii[3];
     auto ar = gp::get_masters(c);
