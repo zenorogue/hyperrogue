@@ -113,7 +113,7 @@ heptagon *buildHeptagon(heptagon *parent, int d, hstate s, int pard = 0, int fix
         if(h1->distance <= h->move[0]->distance)
           h->distance = h->move[0]->distance+1;
         }
-      if(h->spin(0) == S7-1)
+      if(h->spin(0) == S7-1 && h->move[0]->distance != 0)
         h->distance = min(
           h->move[0]->move[0]->distance + 2,
           createStep(h, S7-1)->distance + 1
