@@ -653,6 +653,7 @@ void applyMagic() {
         }
       }
     }
+  config.perform_mapping();
   }
 
 enum eTexturePanstate {tpsModel, tpsMove, tpsScale, tpsAffine, tpsZoom, tpsProjection, tpsCell, tpsTriangle, tpsTune};
@@ -700,6 +701,7 @@ void mousemovement() {
       if(nonzero && !newmove) {
         View = inverse(spintox(mouseeu)) * spintox(lastmouse) * View;
         vid.scale = vid.scale * sqrt(intvalxy(C0, mouseeu)) / sqrt(intvalxy(C0, lastmouse));
+        config.perform_mapping();
         }
       if(nonzero) lastmouse = mouseeu;
       newmove = false;
@@ -1452,7 +1454,7 @@ void texture_config::remap(eTextureState old_tstate, eTextureState old_tstate_ma
         }
       }     
     }
-  else if(old_tstate >= tsAdjusting) {
+  else if(old_tstate >= tsAdjusting || old_tstate_max >= tsAdjusting) {
     printf("perform_mapping %d/%d\n", config.tstate, config.tstate_max);
     calcparam();
     drawthemap();
