@@ -1038,7 +1038,7 @@ void buildBigStuff(cell *c, cell *from) {
   else if(pseudohept(c) && isWarped(c->land) && hrand(10000) < 3000 && c->land && 
     buildBarrierNowall(c, eLand(c->land ^ laWarpSea ^ laWarpCoast))) ;
   
-  else if(pseudohept(c) && c->land == laCrossroads4 && hrand(10000) < 7000 && c->land && 
+  else if(pseudohept(c) && c->land == laCrossroads4 && hrand(10000) < 7000 && c->land && !c->master->alt && 
     buildBarrierNowall(c, getNewLand(laCrossroads4))) ;
   
   else if(pseudohept(c) && hrand(I10000) < 20 && !generatingEquidistant && !yendor::on && !tactic::on && !isCrossroads(c->land) && 
