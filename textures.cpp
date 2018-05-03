@@ -484,6 +484,10 @@ void texture_config::saveFullTexture(string tn) {
   addMessage(XLAT("Saving full texture to %1...", tn));
   dynamicval<unsigned> dd(grid_color, 0);
   dynamicval<unsigned> dm(mesh_color, 0);
+  dynamicval<ld> dx(vid.xposition, 0);
+  dynamicval<ld> dy(vid.yposition, 0);
+  dynamicval<ld> dvs(vid.scale, (pmodel == mdDisk && !euclid) ? 1 : vid.scale);
+  dynamicval<bool> dro(rug::rugged, false);
   texture::saving = true;
   drawscreen();
 
