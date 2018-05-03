@@ -180,135 +180,136 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           else if(i < 35) 
             c->wall = waOpenGate;
           }
-        break;
         }
+      else {
 
-      if(d == 9) {
-        cell *c2 = gp::on ? c->master->c7 : c;
-        if(cdist50(c2) == 3 && polarb50(c2) == 1)
-          c->wall = waPalace;
-        }
-    
-      if(d == 8 && sphere) {
-        int gs = getHemisphere(c,0);
-        if(gp::on) {
-          int v = 1;
-          forCellEx(c2, c) if(getHemisphere(c2, 0) != gs)
-            v = 2;
-          if(v == 2)
-            c->wall = pick(waClosedGate, waOpenGate, waPalace);
-          else if(hrand(100) < 10)
-            c->wall = pick(waClosePlate, waOpenPlate, waTrapdoor);
+        if(d == 9) {
+          cell *c2 = gp::on ? c->master->c7 : c;
+          if(cdist50(c2) == 3 && polarb50(c2) == 1)
+            c->wall = waPalace;
           }
-        else 
-        if(gs == 1)
-          c->wall = waPalace;
-        if(gs == 3)
-          c->wall = nonbitrunc ? waOpenGate : waClosedGate;
-        if(gs == 4 && hrand(100) < 40)
-          c->wall = waClosePlate;
-        if(gs == 6)
-          c->wall = waOpenPlate;
-        if(gs == -3)
-          c->wall = pick(waClosePlate, waOpenPlate);
-        if(gs == -6)
-          c->wall = waTrapdoor;
-        }
-  
-      if(d == 8 && !sphere) {
       
-        // note: Princess Challenge brings back the normal Palace generation
-        bool lookingForPrincess = !euclid && c->master->alt && !princess::challenge;
-        
-        bool pgate = false;
-        if(nonbitrunc) {
-          int i = fiftyval049(c->master->c7);
-          if(i >= 8 && i <= 14 && !polarb50(c->master->c7)) pgate = true;
+        if(d == 8 && sphere) {
+          int gs = getHemisphere(c,0);
           if(gp::on) {
-            bool good = false;
-            forCellEx(c2, c) {
-              int i2 = fiftyval049(c2->master->c7);
-              if((i2 < 8) && polarb50(c2->master->c7)) good = true;
-              }
-            pgate = pgate && good;
+            int v = 1;
+            forCellEx(c2, c) if(getHemisphere(c2, 0) != gs)
+              v = 2;
+            if(v == 2)
+              c->wall = pick(waClosedGate, waOpenGate, waPalace);
+            else if(hrand(100) < 10)
+              c->wall = pick(waClosePlate, waOpenPlate, waTrapdoor);
             }
+          else 
+          if(gs == 1)
+            c->wall = waPalace;
+          if(gs == 3)
+            c->wall = nonbitrunc ? waOpenGate : waClosedGate;
+          if(gs == 4 && hrand(100) < 40)
+            c->wall = waClosePlate;
+          if(gs == 6)
+            c->wall = waOpenPlate;
+          if(gs == -3)
+            c->wall = pick(waClosePlate, waOpenPlate);
+          if(gs == -6)
+            c->wall = waTrapdoor;
           }
+    
+        if(d == 8 && !sphere) {
         
-        if(pgate) {
-          switch(princess::generating ? 0 : hrand(2)) {
-            case 0: 
-              c->wall = waClosedGate;
-              toggleGates(c, waClosePlate, 1);
-              break;
-            case 1:
-              c->wall = waOpenGate;
-              toggleGates(c, waOpenPlate, 1);
-              break;
+          // note: Princess Challenge brings back the normal Palace generation
+          bool lookingForPrincess = !euclid && c->master->alt && !princess::challenge;
+          
+          bool pgate = false;
+          if(nonbitrunc) {
+            int i = fiftyval049(c->master->c7);
+            if(i >= 8 && i <= 14 && !polarb50(c->master->c7)) pgate = true;
+            if(gp::on) {
+              bool good = false;
+              forCellEx(c2, c) {
+                int i2 = fiftyval049(c2->master->c7);
+                if((i2 < 8) && polarb50(c2->master->c7)) good = true;
+                }
+              pgate = pgate && good;
+              }
             }
-          }
-        else if(cdist50(c) == 3 && polarb50(c) == 1 && !ishept(c)) {
-          if(gp::on) ; 
-          else {
-            int q = 0, s = 0;
-            if(!ishept(c)) for(int i=0; i<6; i++)
-              if(cdist50(c->mov[i]) == 3 && polarb50(c->mov[i]) == 1 && !ishept(c->mov[i]))
-                q++, s += i;
-            if(q == 1 && c->mov[s]->land == laPalace) {
-              switch(princess::generating ? 0 : hrand(2)) {
-                case 0: 
-                  c->wall = waClosedGate;
-                  c->mov[s]->wall = waClosedGate;
-                  break;
-                case 1:
-                  c->wall = waOpenGate;
-                  c->mov[s]->wall = waOpenGate;
-                  break;
+          
+          if(pgate) {
+            switch(princess::generating ? 0 : hrand(2)) {
+              case 0: 
+                c->wall = waClosedGate;
+                toggleGates(c, waClosePlate, 1);
+                break;
+              case 1:
+                c->wall = waOpenGate;
+                toggleGates(c, waOpenPlate, 1);
+                break;
+              }
+            }
+          else if(cdist50(c) == 3 && polarb50(c) == 1 && !ishept(c)) {
+            if(gp::on) ; 
+            else {
+              int q = 0, s = 0;
+              if(!ishept(c)) for(int i=0; i<6; i++)
+                if(cdist50(c->mov[i]) == 3 && polarb50(c->mov[i]) == 1 && !ishept(c->mov[i]))
+                  q++, s += i;
+              if(q == 1 && c->mov[s]->land == laPalace) {
+                switch(princess::generating ? 0 : hrand(2)) {
+                  case 0: 
+                    c->wall = waClosedGate;
+                    c->mov[s]->wall = waClosedGate;
+                    break;
+                  case 1:
+                    c->wall = waOpenGate;
+                    c->mov[s]->wall = waOpenGate;
+                    break;
+                  }
                 }
               }
             }
-          }
-        else if(c->wall == waPalace) ;
-        else if((hrand(100) < (lookingForPrincess ? (nonbitrunc ? 11 : 7) : 5) && cdist50(c)) ||
-          (cdist50(c) == 0 && polarb50(c) && hrand(100) < 60)) {
-          c->wall = hrand(100) < (lookingForPrincess ? (nonbitrunc ? 25 : 30):50) ? waClosePlate : waOpenPlate;
-          }
-        else if(hrand(100) < (lookingForPrincess ? 3 : 5))
-          c->wall = waTrapdoor;
-        
-        if(cdist50(c) == 0 && yendor::path) {
-          cell *c2 = c->mov[hrand(c->type)];
-          if(c2->wall == waNone) c2->wall = waTrapdoor;
+          else if(c->wall == waPalace) ;
+          else if((hrand(100) < (lookingForPrincess ? (nonbitrunc ? 11 : 7) : 5) && cdist50(c)) ||
+            (cdist50(c) == 0 && polarb50(c) && hrand(100) < 60)) {
+            c->wall = hrand(100) < (lookingForPrincess ? (nonbitrunc ? 25 : 30):50) ? waClosePlate : waOpenPlate;
+            }
+          else if(hrand(100) < (lookingForPrincess ? 3 : 5))
+            c->wall = waTrapdoor;
+          
+          if(cdist50(c) == 0 && yendor::path) {
+            cell *c2 = c->mov[hrand(c->type)];
+            if(c2->wall == waNone) c2->wall = waTrapdoor;
+            }
+    
+          if((c->wall == waClosePlate || c->wall == waTrapdoor) && peace::on) c->wall = waNone;
           }
   
-        if((c->wall == waClosePlate || c->wall == waTrapdoor) && peace::on) c->wall = waNone;
-        }
-
-      if(princess::generating) {
-        // no Opening Plates nearby
-        if(d <= 7 && c->wall == waOpenPlate && !nonbitrunc)
-          c->wall = waNone;
-        if(d <= 7 && c->wall == waClosePlate && nonbitrunc)
-          c->wall = waOpenPlate;
-        // no monsters nearby
-        if(d>0) c->monst = moNone;
-        // no Plates or Trapdoors in the Princess cell
-        if(d < 3 && (c->wall == waClosePlate || c->wall == waOpenPlate || c->wall == waTrapdoor))
-          c->wall = waNone;
-        if(d > 1) c->item = itNone;
-        // the Princess herself
-        if(d == 0) {
-          c->monst = moPrincess;
-          c->hitpoints = palaceHP();
-          c->wall = waGiantRug;
-          cell *c2 = NULL;
-          for(int i=0; i<c->type; i++) {
-            cellwalker cw(c, i);
-            cw = cw + wstep + 4 + wstep + 2 + wstep + 4 + wstep + (2 + hrand(3)) + wstep;
-            if(!c2) c2 = cw.c;
-            else if(celldist(cw.c) > celldist(c2)) c2 = cw.c;
-            cw.c->monst = moMouse;
+        if(princess::generating) {
+          // no Opening Plates nearby
+          if(d <= 7 && c->wall == waOpenPlate && !nonbitrunc)
+            c->wall = waNone;
+          if(d <= 7 && c->wall == waClosePlate && nonbitrunc)
+            c->wall = waOpenPlate;
+          // no monsters nearby
+          if(d>0) c->monst = moNone;
+          // no Plates or Trapdoors in the Princess cell
+          if(d < 3 && (c->wall == waClosePlate || c->wall == waOpenPlate || c->wall == waTrapdoor))
+            c->wall = waNone;
+          if(d > 1) c->item = itNone;
+          // the Princess herself
+          if(d == 0) {
+            c->monst = moPrincess;
+            c->hitpoints = palaceHP();
+            c->wall = waGiantRug;
+            cell *c2 = NULL;
+            for(int i=0; i<c->type; i++) {
+              cellwalker cw(c, i);
+              cw = cw + wstep + 4 + wstep + 2 + wstep + 4 + wstep + (2 + hrand(3)) + wstep;
+              if(!c2) c2 = cw.c;
+              else if(celldist(cw.c) > celldist(c2)) c2 = cw.c;
+              cw.c->monst = moMouse;
+              }
+            c2->wall = waOpenPlate;
             }
-          c2->wall = waOpenPlate;
           }
         }
       
@@ -2198,7 +2199,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
     case laMercuryRiver:
       // do nothing!
       break;
-    
+
     case laDual:
       if(d == 7) {
         if(pseudohept(c))
