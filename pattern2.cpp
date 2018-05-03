@@ -1232,7 +1232,7 @@ namespace patterns {
       col[2] /= 4;
       return (0x202020 + col[0] + (col[1] << 8) + (col[2] << 16)) >> (err?2:0);
       }
-    if(whichPattern == 'c') {
+    if(whichCanvas == 'c') {
       return (c->master->distance&1) ? 0xC0C0C0 : 0x202020;
       }
     if(whichCanvas == 'F') {
