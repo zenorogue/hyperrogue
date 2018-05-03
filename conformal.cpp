@@ -453,10 +453,9 @@ namespace conformal {
       
       renderbuffer glbuf(bandfull, bandfull, vid.usingGL);
       vid.xres = vid.yres = bandfull;
-      glbuf.enable(); vid.radius = bandhalf;
-      stereo::set_viewport(0);
-  
+      glbuf.enable(); vid.radius = bandhalf;  
       calcparam();
+      stereo::set_viewport(0);
       
       ld xpos = 0;
       
