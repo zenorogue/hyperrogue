@@ -1134,7 +1134,7 @@ void buildBigStuff(cell *c, cell *from) {
     if(c->land == laCaribbean && horo_ok() && ctof(c) && !c->master->alt)
       createAlternateMap(c, 2, hsA);
 
-    if(c->land == laPalace && ctof(c) && !princess::generating && !shmup::on && multi::players == 1 && horo_ok() && 
+    if(c->land == laPalace && ctof(c) && !princess::generating && !shmup::on && multi::players == 1 && horo_ok() && !weirdhyperbolic &&
       (princess::forceMouse ? mouse_reachability_test(from) :
         (hrand(2000) < (peace::on ? 100 : 20))) && 
       !c->master->alt && 
