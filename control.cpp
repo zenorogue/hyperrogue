@@ -373,8 +373,12 @@ void handleKeyNormal(int sym, int uni) {
     else restartGame();
     }
 
-  if(sym == SDLK_ESCAPE)
-    showMissionScreen();
+  if(sym == SDLK_ESCAPE) {
+    if(viewdists)
+      viewdists = false;
+    else
+      showMissionScreen();
+    }
 
   if(sym == SDLK_F10) {
     if(needConfirmation()) pushScreen(showMission);
