@@ -1777,6 +1777,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
       break;
     
     case laOcean:
+      if(d >= 8) c->wall = waSea;
       if(d == 7 && !safety) {
         bool placecolumn = false;
         if(c->landparam % TEMPLE_EACH == 0 && c->landparam <= 24) {
