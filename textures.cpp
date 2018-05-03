@@ -1189,8 +1189,7 @@ void showMenu() {
       
     else if(uni == 'T' && config.tstate == tsAdjusting) {
       config.tstate = tsOff;
-      if(config.tstate == tsActive)
-        config.tstate = tsOff;
+      config.tstate_max = tsOff;
       }
       
     else if(uni == 'T' && config.tstate == tsActive)
