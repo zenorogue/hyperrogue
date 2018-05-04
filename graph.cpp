@@ -2083,13 +2083,19 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, int col) {
       ld length;
       chainAnimation(c, Vb, c->mov[c->mondir], c->mondir, 0, Vparam, length);
       Vb = Vb * pispin;
+      Vb = Vb * xpush(tentacle_length - cellgfxdist(c, c->mondir));
       }
-    else Vb = Vb * ddspin(c, c->mondir, S42);
-    if(gp::on)  Vb = Vb * xpush(crossf * .6);
+    else if(gp::on) {
+      transmatrix T = shmup::calc_relative_matrix(c->mov[c->mondir], c);
+      Vb = Vb * T * rspintox(tC0(inverse(T))) * xpush(tentacle_length);
+      }
     else {
-      if(weirdhyperbolic || sphere) Vb = Vb * xpush(-(hexhexdist - hcrossf7));
-      if(ctof(c) && !euclid) Vb = Vb * xpush(hexhexdist - hcrossf);
+      Vb = Vb * ddspin(c, c->mondir, S42);
+      Vb = Vb * xpush(tentacle_length - cellgfxdist(c, c->mondir));
       }
+      
+      // if(ctof(c) && !euclid) Vb = Vb * xpush(hexhexdist - hcrossf);
+      // return nonbitrunc ? tessf * gp::scale : (c->type == 6 && (i&1)) ? hexhexdist : crossf;
     return drawMonsterTypeDH(m, c, Vb, col, darkhistory, footphase);
     }
 

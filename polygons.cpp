@@ -1165,6 +1165,8 @@ hpcshape
   shFloorGP[32][32][6],
   shFloorSideGP[SIDEPARS][32][32][6][8];
 
+ld tentacle_length;
+
 #define USERLAYERS 32
 #define USERSHAPEGROUPS 4
 #define USERSHAPEIDS 4096
@@ -2216,9 +2218,24 @@ void buildpolys() {
   else bshape(shDragonTail, PPR_TENTACLE1, scalef, 240);
   bshape(shDragonNostril, PPR_ONTENTACLE_EYES, scalef, 241);
   bshape(shDragonHead, PPR_ONTENTACLE, scalef, 242);
-  if(nonbitrunc) bshape(shSeaTentacle, PPR_TENTACLE1, gp::scale, 245);
-  else bshape(shSeaTentacle, PPR_TENTACLE1, 1, 246);  
-  ld ksc = (nonbitrunc ? 1.8 : 1.5) * gp::scale;  
+  
+  ld krsc = 1;
+  if(sphere) krsc *= 2;
+  if(S7 ==8) krsc *= 1.3;
+  
+  if(nonbitrunc && !gp::on) {
+    tentacle_length = 1.52;
+    bshape(shSeaTentacle, PPR_TENTACLE1, 1, 245);
+    }
+  else if(gp::on) {
+    tentacle_length = 0.566256 * 1.6 * gp::scale * krsc;
+    bshape(shSeaTentacle, PPR_TENTACLE1, 1.6 * gp::scale * krsc, 246);  
+    }
+  else {
+    tentacle_length = 0.566256 * gp::scale;
+    bshape(shSeaTentacle, PPR_TENTACLE1, gp::scale, 246);  
+    }
+  ld ksc = (nonbitrunc ? 1.8 : 1.5) * gp::scale * krsc;
   bshape(shKrakenHead, PPR_ONTENTACLE, ksc, 247);
   bshape(shKrakenEye, PPR_ONTENTACLE_EYES, ksc, 248);
   bshape(shKrakenEye2, PPR_ONTENTACLE_EYES2, ksc, 249);
