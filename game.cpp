@@ -851,13 +851,13 @@ bool passable_for(eMonster m, cell *w, cell *from, flagtype extra) {
     if(extra & P_ONPLAYER) {
       if(isPlayerOn(w)) return true;
       }
-    return !ctof(w) && passable(w, from, extra);
+    return !pseudohept(w) && passable(w, from, extra);
     }
   if(m == moAltDemon) {
     if(extra & P_ONPLAYER) {
       if(isPlayerOn(w)) return true;
       }
-    return (!w || !from || w==from || ctof(w) || ctof(from)) && passable(w, from, extra);
+    return (!w || !from || w==from || pseudohept(w) || pseudohept(from)) && passable(w, from, extra);
     }
   if(m == moMonk) {
     if(extra & P_ONPLAYER) {

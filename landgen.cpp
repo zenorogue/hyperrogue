@@ -97,7 +97,7 @@ bool out_ruin(cell *c) {
 
 eMonster genRuinMonster(cell *c) {
   eMonster m = pick(moHexDemon, moHexDemon, moHexDemon, moAltDemon, moAltDemon, moMonk, moMonk, moSkeleton, moSkeleton, moCrusher);
-  if(m == moHexDemon && ctof(c))
+  if(m == moHexDemon && pseudohept(c))
     return genRuinMonster(c);
   if(m == moMonk) {
     if(c->item) return genRuinMonster(c);
