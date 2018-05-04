@@ -2195,7 +2195,7 @@ void buildpolys() {
   bshape(shDragonHead, PPR_ONTENTACLE, scalef, 242);
   
   ld krsc = 1;
-  if(sphere) krsc *= 2;
+  if(sphere) krsc *= 1.4;
   if(S7 ==8) krsc *= 1.3;
   
   if(nonbitrunc && !gp::on) {
