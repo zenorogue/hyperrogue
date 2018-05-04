@@ -512,6 +512,8 @@ void drawrec(cell *c, const transmatrix& V) {
     drawrec(c2, V1);
     }
   } */
+  
+  gp::local_info draw_li;
 
   void drawrec(cell *c, const transmatrix& V, gp::loc at, int dir, int maindir) {
     if(dodrawcell(c)) {
