@@ -475,7 +475,7 @@ namespace gp {
       rhexf *= scale;
 //    spin = spintox(next);
 //    ispin = rspintox(next);
-      alpha = -atan2(next[1], next[0]);
+      alpha = -atan2(next[1], next[0]) * 6 / S7;
       base_distlimit = (base_distlimit + log(scale) / log(2.618)) / scale;
       if(base_distlimit > 30)
         base_distlimit = 30;
