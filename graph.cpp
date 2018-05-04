@@ -5276,9 +5276,6 @@ void drawthemap() {
   wmascii = vid.wallmode == 0;
   wmblack = vid.wallmode == 1;
   
-  if(wmescher && gp::on && S7 == 4 && gp::scale < .3)
-    wmescher = false, wmplain = true;
-  
   mmitem = vid.monmode >= 1;
   mmmon = vid.monmode >= 2;
   mmhigh = vid.monmode == 3 || vid.monmode == 5;
