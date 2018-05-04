@@ -2656,6 +2656,10 @@ void setcolors(cell *c, int& wcol, int &fcol) {
     case laWineyard: fcol = 0x006000; break;
     case laLivefjord: fcol = 0x306030; break;
     
+    case laBrownian:
+      fcol = wcol = gradient(0x002000, 0xFFFFFF, 0, c->landparam, 20);
+      break;
+      
     case laVolcano: {
       int id = lavatide(c, -1)/4;
       if(c->wall == waMagma) {

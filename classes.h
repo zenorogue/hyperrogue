@@ -120,7 +120,7 @@ enum eItem {
   itOrbPhasing, itOrbMagnetism, itOrbSlaying
   };
 
-static const int walltypes = 108;
+static const int walltypes = 109;
 
 struct walltype {
   char  glyph;
@@ -161,10 +161,10 @@ enum eWall { waNone, waIcewall, waBarrier, waFloorA, waFloorB, waCavewall, waCav
   waTempBridgeBlocked,
   waTerraWarrior, waBubble,
   waArrowTrap, waMercury, waMagma,
-  waDock, waBurningDock, waRuinWall
+  waDock, waBurningDock, waRuinWall, waBrownian
   };
 
-static const int landtypes = 84;
+static const int landtypes = 85;
 
 struct landtype {
   int color;
@@ -191,7 +191,7 @@ enum eLand { laNone, laBarrier, laCrossroads, laDesert, laIce, laCaves, laJungle
   laMirrorOld,
   laVolcano, laBlizzard, laHunting, laTerracotta, laMercuryRiver,
   laDual, laSnakeNest, laDocks, laRuins, laMagnetic,
-  laSwitch, laMemory
+  laSwitch, laMemory, laBrownian
   };
 
 enum eGeometry {gNormal, gEuclid, gSphere, gElliptic, gQuotient, gQuotient2, gTorus, gOctagon, g45, g46, g47, gSmallSphere, gTinySphere, gEuclidSquare, gSmallElliptic, gGUARD};

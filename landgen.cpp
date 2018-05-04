@@ -106,6 +106,35 @@ eMonster genRuinMonster(cell *c) {
   return m;
   }
 
+void start_brownian(cell *c, int d) {
+  while(true) {
+    if(c->wall == waBrownian) c->wall = waNone;
+    c->landparam++;
+    // snakepile(c, moRedTroll);
+    // c->wall = waSea;
+    c->bardir = NOBARRIERS; 
+    if(d == 0) {
+      if(c->mpdist >= BARLEV) {
+        c->wall = waBrownian;
+        return;
+        }
+      start_brownian(c, 1);
+      d = 1;
+      continue;
+      }
+    int q = 0;
+    cell *good = NULL;
+    forCellCM(c2, c)
+      if(c2->mpdist > 7 && (c2->land == laBrownian || c2->land == laNone)) {
+        q++;
+        if(q==1 || hrand(q) == 0) good = c2;
+        }
+    if(!q) break;
+    d++; if(d == 7) d = 0;
+    c = good;
+    }
+  }
+
 // the giant switch generating most of the lands...
 
 void giantLandSwitch(cell *c, int d, cell *from) {
@@ -2113,6 +2142,11 @@ void giantLandSwitch(cell *c, int d, cell *from) {
         }
       break;
     
+    case laBrownian:
+      if(c->wall == waBrownian || (d == 9 && hrand(10000) < 5))
+        start_brownian(c, 0);
+      break;
+    
     case laMirrored:
     case laMirrorWall:
     case laMirrorWall2:
@@ -2258,7 +2292,7 @@ void repairLandgen(cell *c) {
   if(c->wall == waIcewall && c->land != laIce && c->land != laCocytus && c->land != laBlizzard)
     c->wall = waNone;
   
-  if(c->wall == waRed3 && c->land != laRedRock && c->land != laSnakeNest)
+  if(c->wall == waRed3 && c->land != laRedRock && c->land != laSnakeNest && c->land != laBrownian)
     c->wall = waNone;
   
   if(c->item == itRedGem && c->land != laRedRock)

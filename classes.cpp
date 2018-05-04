@@ -1417,6 +1417,7 @@ walltype winf[walltypes] = {
   { '=', 0x804000, "dock", "A dock."},
   { '^', 0xFF8000, "burning dock", "A burning dock."},
   { '#', 0xE04030, "ruin wall", ruindesc},
+  { '#', 0xA04060, "Brownian generator", NODESC}
   };
 
 // --- land types ---
@@ -1613,6 +1614,7 @@ const landtype linf[landtypes] = {
     "somehow. In the meantime, its memory has been cleared, since the 'remove faraway cells from the memory'"
     " option was on."
     },
+  { 0xA04060, "Brownian", NODESCYET}
   };
 
 vector<landtacinfo> land_tac = {
