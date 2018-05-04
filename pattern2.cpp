@@ -1090,6 +1090,15 @@ bool pseudohept(cell *c) {
   return pattern_threecolor(c) == 0;
   }
 
+// while Krakens movement is usually restricted to non-pseudohept cells,
+// there is one special case when this does not work (because non-pseudohept cells have varying degrees)
+bool kraken_pseudohept(cell *c) {
+  if(!euclid && !(S7&1) && gp_threecolor() == 1)
+    return ishept(c);
+  else
+    return pseudohept(c);
+  }
+
 bool warptype(cell *c) {
   if(a4 && nonbitrunc) {
     if(euclid) 

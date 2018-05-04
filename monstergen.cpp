@@ -439,14 +439,14 @@ void wandering() {
         playSeenSound(c);
         continue;
         }
-      if(!peace::on && c->land == laKraken && ((sphere && !hrand(15)) || wchance(items[itKraken], 240)) && !pseudohept(c)) {
+      if(!peace::on && c->land == laKraken && ((sphere && !hrand(15)) || wchance(items[itKraken], 240)) && !kraken_pseudohept(c)) {
         bool b = sphere || canReachPlayer(c, moKrakenH);
         if(sphere && (haveKraken() || !items[itOrbFish])) { 
           c->monst = moViking; c->wall = waBoat; c->item = itOrbFish; 
           playSeenSound(c);
           continue;
           }        
-        if(b) forCellEx(c2, c) if((sphere || c2->cpdist > gamerange()) && !pseudohept(c2)) {
+        if(b) forCellEx(c2, c) if((sphere || c2->cpdist > gamerange()) && !kraken_pseudohept(c2)) {
           forCellCM(c3, c2) if(c3->monst || c3->wall != waSea) 
             goto notfound;
           c2->monst = moKrakenH;

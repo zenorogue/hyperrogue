@@ -809,7 +809,7 @@ bool passable_for(eMonster m, cell *w, cell *from, flagtype extra) {
       }
     if((extra & P_ONPLAYER) && isPlayerOn(w))
       return true;
-    if(pseudohept(w) || pseudohept(from)) return false;
+    if(kraken_pseudohept(w) || kraken_pseudohept(from)) return false;
     if(w->wall != waBoat && !slimepassable(w, from)) return false;
     forCellEx(w2, w) if(w2->wall != waBoat && !passable(w2, w, P_FISH | P_MONSTER)) return false;
     return true;

@@ -2612,7 +2612,7 @@ void setcolors(cell *c, int& wcol, int &fcol) {
       fcol = 0x2020FF;
     else if(c->land == laKraken) {
       fcol = 0x0000A0;
-      int mafcol = (pseudohept(c) ? 64 : 8);
+      int mafcol = (kraken_pseudohept(c) ? 64 : 8);
       /* bool nearshore = false;
       for(int i=0; i<c->type; i++) 
         if(c->mov[i]->wall != waSea && c->mov[i]->wall != waBoat)

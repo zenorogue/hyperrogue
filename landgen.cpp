@@ -1402,7 +1402,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
         forCellEx(c2, c) c2->wall = waNone;
         }
   
-      if(d == 8 && !pseudohept(c) && hrand(20000) < 10 + 3 * items[itKraken] + 2 * yendor::hardness() && c->wall == waSea && !c->item && !c->monst && !safety) {
+      if(d == 8 && !kraken_pseudohept(c) && hrand(20000) < 10 + 3 * items[itKraken] + 2 * yendor::hardness() && c->wall == waSea && !c->item && !c->monst && !safety) {
         bool ok = true;
         forCellEx(c2, c)
           if(c2->wall != waSea || c2->item || c2->monst) 
