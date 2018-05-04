@@ -440,7 +440,7 @@ void wandering() {
         continue;
         }
       if(!peace::on && c->land == laKraken && ((sphere && !hrand(15)) || wchance(items[itKraken], 240)) && !pseudohept(c)) {
-        bool b = canReachPlayer(c, moKrakenH);
+        bool b = sphere || canReachPlayer(c, moKrakenH);
         if(sphere && (haveKraken() || !items[itOrbFish])) { 
           c->monst = moViking; c->wall = waBoat; c->item = itOrbFish; 
           playSeenSound(c);
