@@ -3852,7 +3852,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         if(c->land == laZebra) fd++;
         if(c->land == laHalloween && !wmblack) {
           transmatrix Vdepth = wmspatial ? mscale(V, geom3::BOTTOM) : V;
-          queuepolyat(Vdepth, shFloor[ct6], darkena(firecolor(ticks / 10), 0, 0xDF),
+          queuepolyat(Vdepth, FULLFLOOR, darkena(firecolor(ticks / 10), 0, 0xDF),
             PPR_LAKEBOTTOM);
           }
         }
