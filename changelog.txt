@@ -2410,3 +2410,22 @@ Models of hyperbolic geometry:
   the back-to-start transition will be invisible, and thus line animation and spiral will be smooth
 - spiral mapping no longer crashes the game, and resizing the window works now
 - fisheye model (mostly for Euclidean geometry)
+
+2018.05.03 13:19 Version 10.3t
+
+- ESC clears the viewdistance option
+- fixed a bug with bitruncated order-4 geometries (caused crashes on OSX and no effect otherwise)
+- fixed some issues in the texture mode (incorrect saving, 'cancel texture', not remapping after changing the parameters)
+- fixed the 'land mirages' appearing in the Ocean
+- fixed the Crossroads IV/Camelot/Warped problem
+- fixed the chessboard pattern
+- fixed treasure/monster generation in randomized palaces
+- disabled quest in weirdhyperbolic palaces
+- fixed the Princess Challenge activation
+- line patterns now work correctly in elliptic geometry
+- fixed the validity information for the Snake Nest
+- fixed the zebra3 pattern on Goldberg geometries
+- added a "cube/elliptic" geometry
+- improved the vertex placement for Goldberg polyhedra on spheres
+- GP(x,x) implemented in elliptic geometry
+- more roses spawn in chaosmode

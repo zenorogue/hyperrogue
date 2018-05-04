@@ -724,19 +724,6 @@ fpattern& getcurrfp() {
 
 // extra information for field quotient extra configuration
 
-struct primeinfo {
-  int p;
-  int cells;
-  bool squared;
-  };  
-
-struct fgeomextra {
-  eGeometry base;
-  vector<primeinfo> primes;
-  int current_prime_id;
-  fgeomextra(eGeometry b, int i) : base(b), current_prime_id(i) {}
-  };
-
 vector<fgeomextra> fgeomextras = {
   fgeomextra(gNormal, 3),
   fgeomextra(gOctagon, 1),

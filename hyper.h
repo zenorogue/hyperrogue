@@ -3303,3 +3303,50 @@ enum eOrbLandRelation {
   olrBurns      // burns
   };
 
+namespace torusconfig {
+  extern int sdx, sdy;
+  
+  enum eTorusMode { 
+    tmSingleHex, 
+    tmSingle, 
+    tmSlantedHex, 
+    tmStraight, 
+    tmStraightHex,
+    tmKlein,
+    tmKleinHex
+    };
+  
+  extern eTorusMode torus_mode;
+  extern void activate();
+
+  struct torusmode_info {
+    string name;
+    flagtype flags;
+    };
+  
+  extern vector<torusmode_info> tmodes;
+  }
+
+namespace fieldpattern {
+  extern int current_extra;
+
+  struct primeinfo {
+    int p;
+    int cells;
+    bool squared;
+    };  
+  
+  struct fgeomextra {
+    eGeometry base;
+    vector<primeinfo> primes;
+    int current_prime_id;
+    fgeomextra(eGeometry b, int i) : base(b), current_prime_id(i) {}
+    };
+
+  extern vector<fgeomextra> fgeomextras;
+  extern void enableFieldChange();
+  }
+
+bool incompatible(eLand l1, eLand l2);
+eOrbLandRelation getOLR(eItem it, eLand l);
+
