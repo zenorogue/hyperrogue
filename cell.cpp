@@ -234,16 +234,6 @@ namespace torusconfig {
   int newqty, newdy, newsdx, newsdy;
   int torus_cx, torus_cy;
   
-  enum eTorusMode { 
-    tmSingleHex, 
-    tmSingle, 
-    tmSlantedHex, 
-    tmStraight, 
-    tmStraightHex,
-    tmKlein,
-    tmKleinHex
-    };
-  
   static const flagtype TF_SINGLE = 1;
   static const flagtype TF_SIMPLE = 2;
   static const flagtype TF_WEIRD  = 4;
@@ -252,11 +242,6 @@ namespace torusconfig {
   static const flagtype TF_SQUARE = 32;
 
   static const flagtype TF_KLEIN = 256;
-  
-  struct torusmode_info {
-    string name;
-    flagtype flags;
-    };
   
   vector<torusmode_info> tmodes = {
     {"single row (hex)", TF_SINGLE | TF_HEX},
