@@ -28,7 +28,8 @@ static const int POLY_PLAIN = 256;
 static const int POLY_FULL = 512;
 // floor shapes which have their shadows, or can use shFloorShadow
 static const int POLY_HASSHADOW = 1024;
-
+// Goldberg shapes
+static const int POLY_GP = 2048;
 
 vector<hyperpoint> hpc;
 
@@ -122,6 +123,15 @@ void initPolyForGL() {
   
   glhr::store_in_buffer(ourshape);
   }
+
+void extra_vertices() {
+  while(size(ourshape) < size(hpc))
+    ourshape.push_back(glhr::pointtogl(hpc[size(ourshape)]));
+  glhr::store_in_buffer(ourshape);
+  glhr::current_vertices = NULL;
+  prehpc = size(hpc);
+  }
+
 #endif
 
 #if CAP_POLY
@@ -1053,6 +1063,11 @@ void drawqueue() {
     }
   }
 
+struct plainshape {
+  bool active;
+  hpcshape shFloor, shFullFloor, shFloorSide[SIDEPARS][8], shFullFloorSide[SIDEPARS][8];
+  };
+
 hpcshape 
   shFloorSide[SIDEPARS][2], shSemiFloorSide[SIDEPARS], shTriheptaSide[SIDEPARS][2], 
   shTriheptaSideGP[SIDEPARS][2],
@@ -1158,13 +1173,8 @@ hpcshape
   
   shAsymmetric,
 
-  shDodeca,
+  shDodeca;
   
-  shFullFloorGP[32][32][6],
-  shFullFloorSideGP[SIDEPARS][32][32][6][8],
-  shFloorGP[32][32][6],
-  shFloorSideGP[SIDEPARS][32][32][6][8];
-
 ld tentacle_length;
 
 #define USERLAYERS 32
@@ -1368,10 +1378,13 @@ template<class... T> ld grot(bool geometry, ld factor, T... t) {
   else return grot(t...);
   }
 
+ld dlow_table[SIDEPARS], dhi_table[SIDEPARS];
+
 void buildpolys() {
 
   symmetriesAt.clear();
   geom3::compute();
+  gp::clear_plainshapes();
   DEBB(DF_INIT, (debugfile,"buildpolys\n"));
 
   // printf("crossf = %f euclid = %d sphere = %d\n", float(crossf), euclid, sphere);
@@ -1490,25 +1503,6 @@ void buildpolys() {
   last->flags |= POLY_HASWALLS | POLY_FULL | POLY_HASSHADOW;
   }
   
-  if(gp::on) {
-    for(int x=-16; x<16; x++)
-    for(int y=-16; y<16; y++)
-    for(int d=0; d<6; d++) {
-      bshape(shFullFloorGP[x&31][y&31][d], PPR_FLOOR);
-      int cor = (x||y) ? 6 : S7;
-
-      gp::local_info li; li.last_dir = (x||y) ? 0 : -1; li.relative = gp::loc(x, y); li.total_dir = d;
-      for(int j=0; j<=cor; j++)
-        hpcpush(get_corner_position(li, j));
-      last->flags |= POLY_HASWALLS | POLY_FULL;
-
-      bshape(shFloorGP[x&31][y&31][d], PPR_FLOOR);
-      for(int j=0; j<=cor; j++)
-        hpcpush(get_corner_position(li, j, 3.3));
-      last->flags |= POLY_HASWALLS | POLY_PLAIN;
-      }
-    }
-
   bool strict = false;
   
   if(a4 && nonbitrunc) fac94 *= 1.1;
@@ -1560,6 +1554,8 @@ void buildpolys() {
     else if(k==SIDE_BTOI) dlow = geom3::INFDEEP, dhi = geom3::BOTTOM;
     else if(k==SIDE_WTS3) dlow = geom3::SLEV[3], dhi = geom3::WALL;
     else dlow = geom3::SLEV[k-SIDE_SLEV], dhi = geom3::SLEV[k-SIDE_SLEV+1];
+    dlow_table[k] = dlow;
+    dhi_table[k] = dhi;
     
     validsidepar[k] = (dlow > 0 && dhi > 0) || (dlow < 0 && dhi < 0);
 
@@ -1609,28 +1605,7 @@ void buildpolys() {
 
     bshape(shBigTriSide[k][0], PPR_LAKEWALL);
     for(int t=0; t<=1; t++) hpcpush(ddi(t*S28-S14, triangleside) * C0);
-    chasmifyPoly(dlow, dhi, k);
-    
-    if(gp::on) {
-      for(int x=-16; x<16; x++)
-      for(int y=-16; y<16; y++)
-      for(int d=0; d<6; d++) {
-        int cor = (x||y) ? 6 : S7;
-        gp::local_info li; li.last_dir = (x||y) ? 0 : -1; li.relative = gp::loc(x, y); li.total_dir = d;
-        for(int c=0; c<cor; c++) {
-          bshape(shFullFloorSideGP[k][x&31][y&31][d][c], PPR_FLOOR);
-          hpcpush(get_corner_position(li, c));
-          hpcpush(get_corner_position(li, c+1));
-          chasmifyPoly(dlow, dhi, k);
-
-          bshape(shFloorSideGP[k][x&31][y&31][d][c], PPR_FLOOR);
-          hpcpush(get_corner_position(li, c, 3.3));
-          hpcpush(get_corner_position(li, c+1, 3.3));
-          chasmifyPoly(dlow, dhi, k);
-          }
-        }
-      }
-    
+    chasmifyPoly(dlow, dhi, k);    
     }
 
   for(int d=0; d<2; d++) {
@@ -2591,8 +2566,8 @@ const hpcshape& getSeabed(const hpcshape& c) {
   if(&c == &shCaveFloor[3]) return shCaveSeabed[3];
   if(&c == &shFloor[0]) return shFullFloor[0];
   if(&c == &shFloor[1]) return shFullFloor[1];
-  if(&c >= &shFloorGP[0][0][0] && &c <= &shFloorGP[32][0][0])
-    return *(&c - &shFloorGP[0][0][0] + &shFullFloorGP[0][0][0]);
+  if(c.flags & POLY_GP) if(c.flags & POLY_PLAIN)
+    return gp::get_plainshape().shFullFloor;
   if(nonbitrunc || euclid || sphere) return c;
   if(&c == &shCaveFloor[0]) return shCaveSeabed[0];
   if(&c == &shCaveFloor[1]) return shCaveSeabed[1];
@@ -3676,6 +3651,62 @@ NEWSHAPE, 384, 1, 2, 0.146470,0.021791, 0.134179,0.071381, 0.089857,0.116839, 0.
 NEWSHAPE
 };
 
+namespace gp {
+  plainshape psh[32][32][8];
+  extern gp::local_info draw_li;
+  
+  void clear_plainshapes() {
+    for(int i=0; i<32; i++)
+    for(int j=0; j<32; j++)
+    for(int k=0; k<8; k++)
+      clear_plainshape(psh[i][j][k]);
+    }
+    
+  plainshape& get_plainshape() {
+    auto& pshape = psh[draw_li.relative.first&31][draw_li.relative.second&31][fix6(draw_li.total_dir)];
+    if(!pshape.active) build_plainshape(pshape, draw_li);
+    return pshape;
+    }
+  }
+
+void clear_plainshape(plainshape& gsh) {
+  gsh.active = false;
+  }
+
+void build_plainshape(plainshape& gsh, gp::local_info& li) {
+
+  gsh.active = true;
+  bshape(gsh.shFullFloor, PPR_FLOOR);
+  bool master = !(li.relative.first||li.relative.second);
+  int cor = master ? S7 : 6;
+  printf("generating plainshape %d,%d,%d (%d)\n", li.relative.first, li.relative.second, li.total_dir, cor);
+  if(master) li.last_dir = -1;  
+
+  for(int j=0; j<=cor; j++)
+    hpcpush(get_corner_position(li, j));
+  last->flags |= POLY_HASWALLS | POLY_FULL | POLY_GP;
+
+  bshape(gsh.shFloor, PPR_FLOOR);
+  for(int j=0; j<=cor; j++)
+    hpcpush(get_corner_position(li, j, 3.3));
+  last->flags |= POLY_HASWALLS | POLY_PLAIN | POLY_GP;
+
+  for(int k=0; k<SIDEPARS; k++) 
+    for(int c=0; c<cor; c++) {
+      bshape(gsh.shFullFloorSide[k][c], PPR_FLOOR);
+      hpcpush(get_corner_position(li, c));
+      hpcpush(get_corner_position(li, c+1));
+      chasmifyPoly(dlow_table[k], dhi_table[k], k);
+
+      bshape(gsh.shFloorSide[k][c], PPR_FLOOR);
+      hpcpush(get_corner_position(li, c, 3.3));
+      hpcpush(get_corner_position(li, c+1, 3.3));
+      chasmifyPoly(dlow_table[k], dhi_table[k], k);
+      }
+    
+  extra_vertices();
+  }
+
 /* floors */
 
 // need eswap
@@ -3703,9 +3734,8 @@ NEWSHAPE
 #define ECT3 ((euclid&&!a4)?3:xct6)
 
 // no eswap
-#define PLAINFLOOR (gp::on ? shFloorGP[DRAW_INDICES] : shFloor[ct6])
-#define DRAW_INDICES gp::draw_li.relative.first&31][gp::draw_li.relative.second&31][fix6(gp::draw_li.total_dir)
-#define FULLFLOOR (gp::on ? shFullFloorGP[DRAW_INDICES] : shFullFloor[ct6])
+#define PLAINFLOOR (gp::on ? gp::get_plainshape().shFloor : shFloor[ct6])
+#define FULLFLOOR (gp::on ? gp::get_plainshape().shFullFloor : shFullFloor[ct6])
 #define CAVEFLOOR shCaveFloor[ECT3]
 #define OVERFLOOR shOverFloor[euclid&&a4&&nonbitrunc?2:ECT]
 #define CLOUDFLOOR shCloudFloor[ECT]

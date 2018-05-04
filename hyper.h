@@ -3349,3 +3349,13 @@ namespace fieldpattern {
 bool incompatible(eLand l1, eLand l2);
 eOrbLandRelation getOLR(eItem it, eLand l);
 
+struct plainshape;
+void clear_plainshape(plainshape& gsh);
+void build_plainshape(plainshape& gsh, gp::local_info& li);
+
+namespace gp {
+  void clear_plainshapes();
+  plainshape& get_plainshape();
+  }
+
+extern bool debug_geometry;

@@ -481,6 +481,8 @@ namespace gp {
       if(base_distlimit > 30)
         base_distlimit = 30;
       prepare_matrices();
+      if(debug_geometry)
+        printf("scale = " LDF "\n", scale);
       }
     else {
       scale = 1;

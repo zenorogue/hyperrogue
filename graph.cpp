@@ -3218,11 +3218,11 @@ void placeSidewall(cell *c, int i, int sidepar, const transmatrix& V, bool warp,
   
   flagtype f = qfi.shape->flags;
 
-  if(gp::on && !mirr) {
+  if((f & POLY_GP) && !mirr) {
     if(f & POLY_FULL) 
-      queuepolyat(V, shFullFloorSideGP[sidepar][DRAW_INDICES][i], col, prio);
+      queuepolyat(V, gp::get_plainshape().shFullFloorSide[sidepar][i], col, prio);
     if(f & POLY_PLAIN) 
-      queuepolyat(V, shFloorSideGP[sidepar][DRAW_INDICES][i], col, prio);
+      queuepolyat(V, gp::get_plainshape().shFloorSide[sidepar][i], col, prio);
     return;
     }
   
