@@ -3075,7 +3075,7 @@ void floorShadow(cell *c, const transmatrix& V, int col, bool warp) {
     return; // shadows break the depth testing
   if(shmup::on || nbtnice) warp = false;
   dynamicval<int> p(poly_outline, OUTLINE_TRANS);
-  if(wmescher && qfi.special) {
+  if(!(qfi.shape->flags & POLY_HASSHADOW)) {
     queuepolyat(V * qfi.spin * shadowmulmatrix, *qfi.shape, col, PPR_WALLSHADOW);
     }
   else if(warp) {
@@ -3120,9 +3120,8 @@ void plainfloor(cell *c, bool warp, const transmatrix &V, int col, int prio) {
     else
       queuepolyat(V, shBigTriangle, col, prio);
     }    
-  else {
-    queuepolyat(V, shFloor[ctof(c)], col, prio);
-    }
+  else
+    queuepolyat(V, *qfi.shape, col, prio);
   }
 
 void qfloor_eswap(cell *c, const transmatrix& V, const hpcshape& sh, int col);
@@ -3134,9 +3133,8 @@ void qplainfloor(cell *c, bool warp, const transmatrix &V, int col) {
     }
   else if(is_nice_dual(c))
     qfloor_eswap(c, V, shBigTriangle, col);
-  else {
+  else
     qfloor(c, V, shFloor[ctof(c)], col);
-    }
   }
 
 int wavephase;
@@ -3150,17 +3148,15 @@ void warpfloor(cell *c, const transmatrix& V, int col, int prio, bool warp) {
     }
   else 
 #endif
-  if(wmescher && qfi.special)
-    queuepolyat(V*qfi.spin, *qfi.shape, col, prio);
-  else plainfloor(c, warp, V, col, prio);
+  plainfloor(c, warp, V, col, prio);
   }
 
 #define placeSidewallX(a,b,c,d,e,f,g) \
-  { if((wmescher && qfi.special) || !validsidepar[c]) { \
+  { if(!(qfi.shape->flags & POLY_HASWALLS) || !validsidepar[c]) { \
     escherSidewall(a,c,d,g); break; } \
     else placeSidewall(a,b,c,d,e,f,g); }
 #define placeSidewallXB(a,b,c,d,e,f,g, Break) \
-  { if((wmescher && qfi.shape) || !validsidepar[c]) { \
+  { if(!(qfi.shape->flags & POLY_HASWALLS) || !validsidepar[c]) { \
     escherSidewall(a,c,d,g); Break; break; } \
     else placeSidewall(a,b,c,d,e,f,g); }
 
@@ -3214,6 +3210,16 @@ void placeSidewall(cell *c, int i, int sidepar, const transmatrix& V, bool warp,
   else if(sidepar == SIDE_BTOI) prio = PPR_BELOWBOTTOM;
   else prio = PPR_REDWALL-2+4*(sidepar-SIDE_SLEV);
   
+  flagtype f = qfi.shape->flags;
+
+  if(gp::on && !mirr) {
+    if(f & POLY_FULL) 
+      queuepolyat(V, shFullFloorSideGP[sidepar][DRAW_INDICES][i], col, prio);
+    if(f & POLY_PLAIN) 
+      queuepolyat(V, shFloorSideGP[sidepar][DRAW_INDICES][i], col, prio);
+    return;
+    }
+  
   transmatrix V2 = V * ddspin(c, i);
   
   // if(sphere && vid.alpha <= 1 && tC0(V2 * xpush(cellgfxdist(c, i)/2))[2] < -.5) return; 
@@ -3226,7 +3232,7 @@ void placeSidewall(cell *c, int i, int sidepar, const transmatrix& V, bool warp,
   // prio += c->cpdist - c->mov[i]->cpdist;  
   
   queuepolyat(V2, 
-    (qfi.tinf?shFullFloorSide:mirr?shMFloorSide:warp?(pseudohept(c)&&!ishept(c)?shTriheptaSideGP:shTriheptaSide):is_nice_dual(c)?shBigTriSide:shFloorSide)[sidepar][ctof(c)], col, prio);
+    ((f & POLY_FULL)?shFullFloorSide:mirr?shMFloorSide:warp?(pseudohept(c)&&!ishept(c)?shTriheptaSideGP:shTriheptaSide):is_nice_dual(c)?shBigTriSide:shFloorSide)[sidepar][ctof(c)], col, prio);
   }
 
 bool openorsafe(cell *c) {
@@ -3516,7 +3522,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
     }
 #endif
 
-  qfi.shape = NULL; qfi.special = false;
+  qfi.shape = &shFloor[ctof(c)];
   ivoryz = isGravityLand(c->land);
 
   bool orig = false;
@@ -3931,13 +3937,13 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         transmatrix V2 = V * qfi.spin;
         
         if(wmspatial && wmescher) {
-          qfi.shape = &shSemiFeatherFloor[0]; qfi.special = true;
+          qfi.shape = &shSemiFeatherFloor[0];
           int dk = 1;
           int vcol = winf[waVinePlant].color;
           warpfloor(c, mscale(V, geom3::WALL), darkena(vcol, dk, 0xFF), PPR_WALL3A, false);
           escherSidewall(c, SIDE_WALL, V, darkena(gradient(0, vcol, 0, .8, 1), dk, 0xFF));
           qfloor(c, V2, shSemiFeatherFloor[1], darkena(fcol, dk, 0xFF));
-          qfi.shape = &shFeatherFloor[0]; qfi.special = true;
+          qfi.shape = &shFeatherFloor[0];
           }
         
         else if(wmspatial) {
@@ -4013,8 +4019,10 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         }
 
       else if(wmplain) {
-        if(wmspatial && highwall(c)) ;
-        else qfloor(c, Vf, PLAINFLOOR, darkena(fcol, fd, 0xFF));
+        if(wmspatial && highwall(c)) 
+          qfloor_virtual(c, Vf, PLAINFLOOR);
+        else
+          qfloor(c, Vf, PLAINFLOOR, darkena(fcol, fd, 0xFF));
         }
 
       else if(randomPatternsMode && c->land != laBarrier && !isWarped(c->land)) {
@@ -4522,7 +4530,6 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           if(c->land == laOceanWall && wmescher && wmspatial) {
            const int layers = 2 << detaillevel;
            dynamicval<const hpcshape*> ds(qfi.shape, &shCircleFloor);
-           dynamicval<bool> db(qfi.special, true);
            for(int z=1; z<layers; z++) {
              double zg = zgrad0(-geom3::lake_top, geom3::actual_wall_height(), z, layers);
              warpfloor(c, xyzscale(V, zg*(layers-z)/layers, zg),

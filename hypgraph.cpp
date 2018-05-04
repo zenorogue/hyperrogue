@@ -519,7 +519,9 @@ void drawrec(cell *c, const transmatrix& V) {
       if(fix6(dir) != fix6(li.total_dir)) printf("totaldir %d/%d\n", dir, li.total_dir);
       if(at != li.relative) printf("at %s/%s\n", disp(at), disp(li.relative));
       if(maindir != li.last_dir) printf("ld %d/%d\n", maindir, li.last_dir); */
-      transmatrix V1 = V * Tf[maindir][at.first&31][at.second&31][fix6(dir)];
+      draw_li.relative = at;
+      draw_li.total_dir = fix6(dir);
+      transmatrix V1 = V * Tf[draw_li.last_dir][at.first&31][at.second&31][fix6(dir)];
       if(in_qrange(V1))
         drawcell(c, V1, 0, false);
       }
@@ -533,6 +535,8 @@ void drawrec(cell *c, const transmatrix& V) {
     }
   
   void drawrec(cell *c, const transmatrix& V) {
+    draw_li.relative = loc(0,0);
+    draw_li.total_dir = 0;
     if(dodrawcell(c))
       drawcell(c, V, 0, false);
     for(int i=0; i<c->type; i++) {
@@ -540,6 +544,7 @@ void drawrec(cell *c, const transmatrix& V) {
       if(!c2) continue;
       if(c2->mov[0] != c) continue;
       if(c2 == c2->master->c7) continue;
+      draw_li.last_dir = i;
       drawrec(c2, V, gp::loc(1,0), 3, i);
       }
     }

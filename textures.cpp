@@ -349,8 +349,8 @@ bool texture_config::apply(cell *c, const transmatrix &V, int col) {
     
     int n = mi.vertices.size();
 
-    qfi.special = false;
-    qfi.shape = &shFullFloor[ctof(c)];
+    int ct6 = ctof(c);
+    qfi.shape = &FULLFLOOR;
     qfi.tinf = &mi;
 
     if(chasmg == 2) return false;

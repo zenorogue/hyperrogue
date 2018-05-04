@@ -20,11 +20,19 @@ static const int POLY_TOOLARGE = 32;
 // on the sphere (orthogonal projection), do not draw without any points in front
 static const int POLY_INFRONT = 64;
 
-#define QHPC 512000
+// floor shapes which have their sidewalls
+static const int POLY_HASWALLS = 128;
+// plain floors
+static const int POLY_PLAIN = 256;
+// full floors
+static const int POLY_FULL = 512;
+// floor shapes which have their shadows, or can use shFloorShadow
+static const int POLY_HASSHADOW = 1024;
 
-int qhpc, prehpc;
 
-hyperpoint hpc[QHPC];
+vector<hyperpoint> hpc;
+
+int prehpc;
 
 bool first;
 
@@ -55,14 +63,14 @@ bool ptdsort(const polytodraw& p1, const polytodraw& p2) {
 
 void hpcpush(hyperpoint h) { 
   if(sphere) h = mid(h,h);
-  if(/*vid.usingGL && */!first && intval(hpc[qhpc-1], h) > (sphere ? (ISMOBWEB ? .04 : .0001) : 0.25)) {
-    hyperpoint md = mid(hpc[qhpc-1], h);
+  if(/*vid.usingGL && */!first && intval(hpc.back(), h) > (sphere ? (ISMOBWEB ? .04 : .0001) : 0.25)) {
+    hyperpoint md = mid(hpc.back(), h);
     hpcpush(md);
     hpcpush(h);
     return;
     }
   first = false;
-  hpc[qhpc++] = h;
+  hpc.push_back(h);
   }
 
 #define SIDE_SLEV 0
@@ -76,15 +84,15 @@ void hpcpush(hyperpoint h) {
 bool validsidepar[SIDEPARS];
 
 void chasmifyPoly(double fac, double fac2, int k) {
-  for(int i=qhpc-1; i >= last->s; i--) {
+  for(int i=size(hpc)-1; i >= last->s; i--) {
     hyperpoint H;
     for(int j=0; j<3; j++) {
       H[j] = hpc[i][j] * fac;
       hpc[i][j] *= fac2;
       }
-    hpc[qhpc++] = H;
+    hpc.push_back(H);
     }
-  hpc[qhpc++] = hpc[last->s];
+  hpc.push_back(hpc[last->s]);
   last->flags |= POLY_ISSIDE;
   }
 
@@ -109,8 +117,8 @@ void initPolyForGL() {
 
   ourshape.clear();
   
-  for(int i=0; i<qhpc; i++)
-    ourshape.push_back(make_array<GLfloat>(hpc[i][0], hpc[i][1], hpc[i][2]));
+  for(auto& h: hpc)
+    ourshape.push_back(glhr::pointtogl(h));
   
   glhr::store_in_buffer(ourshape);
   }
@@ -1150,7 +1158,12 @@ hpcshape
   
   shAsymmetric,
 
-  shDodeca;
+  shDodeca,
+  
+  shFullFloorGP[32][32][6],
+  shFullFloorSideGP[SIDEPARS][32][32][6][8],
+  shFloorGP[32][32][6],
+  shFloorSideGP[SIDEPARS][32][32][6][8];
 
 #define USERLAYERS 32
 #define USERSHAPEGROUPS 4
@@ -1200,7 +1213,7 @@ hyperpoint turtlevertex(int u, double x, double y, double z) {
   }
 
 void finishshape() {
-  last->e = qhpc;
+  last->e = size(hpc);
   double area = 0;
   for(int i=last->s; i<last->e-1; i++)
     area += hpc[i][0] * hpc[i+1][1] - hpc[i+1][0] * hpc[i][1];
@@ -1214,7 +1227,7 @@ void finishshape() {
 void bshape(hpcshape& sh, int p) {
   if(last) finishshape();
   last = &sh;
-  last->s = qhpc, last->prio = p;
+  last->s = size(hpc), last->prio = p;
   last->flags = 0;
   first = true; 
   }
@@ -1232,7 +1245,7 @@ void bshape(hpcshape& sh, int p, double shzoom, int shapeid, double bonus = 0, f
   while(polydata[whereis] != NEWSHAPE || polydata[whereis+1] != shapeid) whereis++;
   int rots = polydata[whereis+2]; int sym = polydata[whereis+3];
   array<int,3> arr;
-  arr[0] = qhpc; arr[1] = rots; arr[2] = sym;
+  arr[0] = size(hpc); arr[1] = rots; arr[2] = sym;
   symmetriesAt.emplace_back(arr);
   whereis += 4;
   int qty = 0;
@@ -1298,7 +1311,7 @@ void bshape_goldberg(hpcshape sh[3], int p, double shzoom, int shapeid, double b
   }
 
 void copyshape(hpcshape& sh, hpcshape& orig, int p) {
-  if(last) last->e = qhpc;
+  if(last) last->e = size(hpc);
   sh = orig; sh.prio = p;
   }
 
@@ -1360,7 +1373,7 @@ void buildpolys() {
   DEBB(DF_INIT, (debugfile,"buildpolys\n"));
 
   // printf("crossf = %f euclid = %d sphere = %d\n", float(crossf), euclid, sphere);
-  qhpc = 0;
+  hpc.clear();
 
   bshape(shMovestar, PPR_MOVESTAR);
   for(int i=0; i<=8; i++) {
@@ -1422,9 +1435,11 @@ void buildpolys() {
 
   bshape(shTriheptaFloor[0], PPR_FLOOR);
   for(int t=0; t<=S3; t++) hpcpush(ddi(t*S28 + tshift0, trihepta0) * C0);
+  last->flags |= POLY_HASWALLS | POLY_HASSHADOW;
 
   bshape(shTriheptaFloor[1], PPR_FLOOR);
   for(int t=0; t<=S7; t++) hpcpush(ddi(t*S12 + tshift1, trihepta1) * C0);
+  last->flags |= POLY_HASWALLS | POLY_HASSHADOW;
 
   bshape(shTriheptaFloorShadow[0], PPR_FLOOR);
   for(int t=0; t<=S3; t++) hpcpush(ddi(t*S28 + tshift0, trihepta0*SHADMUL) * C0);
@@ -1434,6 +1449,7 @@ void buildpolys() {
   
   bshape(shTriheptaFloor[13], PPR_FLOOR);
   for(int t=0; t<=S6; t++) hpcpush(ddi(t*S14 + S7, trihepta0*1.6) * C0);
+  last->flags |= POLY_HASWALLS | POLY_HASSHADOW;
 
   bshape(shTriheptaFloorShadow[2], PPR_FLOOR);
   for(int t=0; t<=S6; t++) hpcpush(ddi(t*S14 + S7, trihepta0*SHADMUL*1.6) * C0);
@@ -1460,14 +1476,36 @@ void buildpolys() {
   x *= bscale6;
   x *= gp::scale;
   if(gp::scale != 1) x /= 2;
-  for(int t=0; t<=S6; t++) { hpcpush(C0); if(t) hpcpush(ddi(S7 + t*S14, x) * C0); }
+  for(int t=0; t<=S6; t++) { hpcpush(C0); if(t) hpcpush(ddi(S7 + t*S14, x) * C0); 
+  last->flags |= POLY_HASWALLS | POLY_FULL | POLY_HASSHADOW;
+  }
 
   x = rhexf;
   x *= bscale7;
   // x *= gp::scale;
   bshape(shFullCross[1], PPR_FLOOR);
   for(int t=0; t<=S7; t++) { hpcpush(C0); if(t) hpcpush(ddi(t*S12+td, x) * C0); }
+  last->flags |= POLY_HASWALLS | POLY_FULL | POLY_HASSHADOW;
   }
+  
+  if(gp::on) {
+    for(int x=-16; x<16; x++)
+    for(int y=-16; y<16; y++)
+    for(int d=0; d<6; d++) {
+      bshape(shFullFloorGP[x&31][y&31][d], PPR_FLOOR);
+      int cor = (x||y) ? 6 : S7;
+
+      gp::local_info li; li.last_dir = (x||y) ? 0 : -1; li.relative = gp::loc(x, y); li.total_dir = d;
+      for(int j=0; j<=cor; j++)
+        hpcpush(get_corner_position(li, j));
+      last->flags |= POLY_HASWALLS | POLY_FULL;
+
+      bshape(shFloorGP[x&31][y&31][d], PPR_FLOOR);
+      for(int j=0; j<=cor; j++)
+        hpcpush(get_corner_position(li, j, 3.3));
+      last->flags |= POLY_HASWALLS | POLY_PLAIN;
+      }
+    }
 
   bool strict = false;
   
@@ -1491,12 +1529,14 @@ void buildpolys() {
   
   bshape(shFloor[0], PPR_FLOOR);
   for(int t=0; t<=S6; t++) hpcpush(ddi(S7 + t*S14, floorrad0) * C0);
+  last->flags |= POLY_HASWALLS | POLY_PLAIN | POLY_HASSHADOW;
 
   bshape(shCircleFloor, PPR_FLOOR);
   for(int t=0; t<=S84; t+=2) hpcpush(ddi(t, shexf*.7*spzoom) * C0);
   
   bshape(shFloor[1], PPR_FLOOR);
   for(int t=0; t<=S7; t++) hpcpush(ddi(t*S12 + td, floorrad1) * C0);
+  last->flags |= POLY_HASWALLS | POLY_PLAIN | POLY_HASSHADOW;
 
   for(int i=0; i<3; i++) for(int j=0; j<3; j++) shadowmulmatrix[i][j] =
     i==2&&j==2 ? 1:
@@ -1568,6 +1608,27 @@ void buildpolys() {
     bshape(shBigTriSide[k][0], PPR_LAKEWALL);
     for(int t=0; t<=1; t++) hpcpush(ddi(t*S28-S14, triangleside) * C0);
     chasmifyPoly(dlow, dhi, k);
+    
+    if(gp::on) {
+      for(int x=-16; x<16; x++)
+      for(int y=-16; y<16; y++)
+      for(int d=0; d<6; d++) {
+        int cor = (x||y) ? 6 : S7;
+        gp::local_info li; li.last_dir = (x||y) ? 0 : -1; li.relative = gp::loc(x, y); li.total_dir = d;
+        for(int c=0; c<cor; c++) {
+          bshape(shFullFloorSideGP[k][x&31][y&31][d][c], PPR_FLOOR);
+          hpcpush(get_corner_position(li, c));
+          hpcpush(get_corner_position(li, c+1));
+          chasmifyPoly(dlow, dhi, k);
+
+          bshape(shFloorSideGP[k][x&31][y&31][d][c], PPR_FLOOR);
+          hpcpush(get_corner_position(li, c, 3.3));
+          hpcpush(get_corner_position(li, c+1, 3.3));
+          chasmifyPoly(dlow, dhi, k);
+          }
+        }
+      }
+    
     }
 
   for(int d=0; d<2; d++) {
@@ -1893,6 +1954,7 @@ void buildpolys() {
   
   bshape(shBigTriangle, PPR_FLOOR);
   for(int t=0; t<=S3; t++) hpcpush(ddi(t*S28, -triangleside) * C0);
+  last->flags |= POLY_HASWALLS | POLY_HASSHADOW;
 
   bshape(shBigTriShadow, PPR_FLOOR);
   for(int t=0; t<=S3; t++) hpcpush(ddi(t*S28 + S14 + (S3==4?S14:0), triangleside*SHADMUL) * C0);
@@ -1920,7 +1982,7 @@ void buildpolys() {
     bshape(shParticle[i], PPR_PARTICLE);
     for(int t=0; t<6; t++) 
       hpcpush(spin(M_PI * t * 2 / 6 + M_PI * 2/6 * hrand(100) / 150.) * xpush((0.03 + hrand(100) * 0.0003) * goldbf) * C0);
-    hpc[qhpc++] = hpc[last->s];
+    hpc.push_back(hpc[last->s]);
     }
   
   // hand-drawn shapes
@@ -2399,8 +2461,8 @@ void buildpolys() {
   
   bshapeend();
 
-  prehpc = qhpc;
-  DEBB(DF_INIT, (debugfile,"hpc = %d\n", qhpc));
+  prehpc = size(hpc);
+  DEBB(DF_INIT, (debugfile,"hpc = %d\n", prehpc));
   
   for(int i=0; i<USERSHAPEGROUPS; i++) for(int j=0; j<USERSHAPEIDS; j++) {
     usershape *us = usershapes[i][j];
@@ -2413,6 +2475,7 @@ void buildpolys() {
     }
   
   static int qhpc0;
+  int qhpc = size(hpc);
   if(qhpc != qhpc0 && debug_geometry)
     printf("qhpc = %d (%d+%d)\n", qhpc0 = qhpc, prehpc, qhpc-prehpc);
   
@@ -2505,23 +2568,15 @@ qfloorinfo qfi_dc;
 
 int chasmg;
 
-bool isSpecial(const hpcshape &h) {
-  return
-    &h != &shFloor[0] && 
-    &h != &shFloor[1] && 
-    &h != &shTriheptaFloor[0] && 
-    &h != &shTriheptaFloor[1] &&
-    &h != &shTriheptaFloor[13] &&
-    &h != &shBigTriangle;
-  }
-
 const hpcshape& getSeabed(const hpcshape& c) {
   if(&c == &shCloudFloor[2]) return shCloudSeabed[2];
   if(&c == &shCaveFloor[2]) return shCaveSeabed[2];
   if(&c == &shCaveFloor[3]) return shCaveSeabed[3];
-  if(nonbitrunc || euclid || sphere) return c;
   if(&c == &shFloor[0]) return shFullFloor[0];
   if(&c == &shFloor[1]) return shFullFloor[1];
+  if(&c >= &shFloorGP[0][0][0] && &c <= &shFloorGP[32][0][0])
+    return *(&c - &shFloorGP[0][0][0] + &shFullFloorGP[0][0][0]);
+  if(nonbitrunc || euclid || sphere) return c;
   if(&c == &shCaveFloor[0]) return shCaveSeabed[0];
   if(&c == &shCaveFloor[1]) return shCaveSeabed[1];
   if(&c == &shCloudFloor[0]) return shCloudSeabed[0];
@@ -2542,14 +2597,17 @@ void qfloor0(cell *c, const transmatrix& V, const hpcshape& h, int col) {
   
 void qfloor(cell *c, const transmatrix& V, const hpcshape& h, int col) {
   qfloor0(c, V, h, col);
-  qfi.special = isSpecial(h);
+  qfi.shape = &h, qfi.spin = Id; 
+  qfi.tinf = NULL;
+  }
+
+void qfloor_virtual(cell *c, const transmatrix& V, const hpcshape& h) {
   qfi.shape = &h, qfi.spin = Id; 
   qfi.tinf = NULL;
   }
 
 void qfloor(cell *c, const transmatrix& V, const transmatrix& Vspin, const hpcshape& h, int col) {
   qfloor0(c, V*Vspin, h, col);  
-  qfi.special = isSpecial(h);
   qfi.shape = &h, qfi.spin = Vspin;
   qfi.tinf = NULL;
   }
@@ -3628,8 +3686,9 @@ NEWSHAPE
 #define ECT3 ((euclid&&!a4)?3:xct6)
 
 // no eswap
-#define PLAINFLOOR shFloor[ct6]
-#define FULLFLOOR shFullFloor[ct6]
+#define PLAINFLOOR (gp::on ? shFloorGP[DRAW_INDICES] : shFloor[ct6])
+#define DRAW_INDICES gp::draw_li.relative.first&31][gp::draw_li.relative.second&31][fix6(gp::draw_li.total_dir)
+#define FULLFLOOR (gp::on ? shFullFloorGP[DRAW_INDICES] : shFullFloor[ct6])
 #define CAVEFLOOR shCaveFloor[ECT3]
 #define OVERFLOOR shOverFloor[euclid&&a4&&nonbitrunc?2:ECT]
 #define CLOUDFLOOR shCloudFloor[ECT]

@@ -3233,7 +3233,6 @@ void queuepolyat(const transmatrix& V, const hpcshape& h, int col, int prio);
 void queuetable(const transmatrix& V, const vector<glvertex>& f, int cnt, int linecol, int fillcol, int prio);
 
 struct qfloorinfo {
-  bool special;
   transmatrix spin;
   const hpcshape *shape;
   textureinfo *tinf;

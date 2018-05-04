@@ -445,9 +445,8 @@ namespace gp {
         }
       }       
     }
-  
-  hyperpoint get_corner_position(cell *c, int cid, ld cf = 3) {
-    auto li = get_local_info(c);
+
+  hyperpoint get_corner_position(const local_info& li, int cid, ld cf = 3) {
     int i = li.last_dir;
     if(i == -1) 
       return atz(dir_matrix(cid), corners, li.relative, 0, cf);
@@ -455,6 +454,10 @@ namespace gp {
       auto& cellmatrix = Tf[i][li.relative.first&31][li.relative.second&31][fix6(li.total_dir)];
       return inverse(cellmatrix) * atz(dir_matrix(i), corners, li.relative, fix6(cid + li.total_dir), cf);
       }
+    }
+  
+  hyperpoint get_corner_position(cell *c, int cid, ld cf = 3) {
+    return get_corner_position(get_local_info(c), cid, cf);
     }
     
   map<pair<int, int>, loc> center_locs;
