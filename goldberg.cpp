@@ -470,7 +470,6 @@ namespace gp {
       area = ((2*x+y) * (2*x+y) + y*y*3) / 4;
       next = hpxyz(x+y/2., -y * sqrt(3) / 2, 0);
       scale = 1 / hypot2(next);
-      if(sphere) scale *= .7;
       crossf *= scale;
       hepvdist *= scale;
       rhexf *= scale;
