@@ -64,7 +64,7 @@ bool ptdsort(const polytodraw& p1, const polytodraw& p2) {
 
 void hpcpush(hyperpoint h) { 
   if(sphere) h = mid(h,h);
-  if(/*vid.usingGL && */!first && intval(hpc.back(), h) > (sphere ? (ISMOBWEB ? .04 : .0001) : 0.25)) {
+  if(/*vid.usingGL && */!first && intval(hpc.back(), h) > (sphere ? (ISMOBWEB || gp::on ? .04 : .0001) : 0.25)) {
     hyperpoint md = mid(hpc.back(), h);
     hpcpush(md);
     hpcpush(h);
