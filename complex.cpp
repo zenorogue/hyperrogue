@@ -2612,7 +2612,7 @@ namespace kraken {
 
   // c is the tentacle which will be the head after the move
   void trymove(cell *c) {
-    if(pseudohept(c)) return;
+    if(kraken_pseudohept(c)) return;
     cell *c2 = c->mov[c->mondir];
     if(!isWatery(c)) return;
     if(againstCurrent(c, c2)) return;
