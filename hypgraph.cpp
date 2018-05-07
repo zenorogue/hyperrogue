@@ -304,7 +304,7 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
           x *= 2; y *= 2;
           break;
         case gcEuclid:
-          y = y;
+          // y = y;
           y *= 2; x *= 2;
           break;
         }
@@ -517,7 +517,7 @@ void drawrec(cell *c, const transmatrix& V) {
 
   void drawrec(cell *c, const transmatrix& V, gp::loc at, int dir, int maindir) {
     if(dodrawcell(c)) {
-/*      auto li = get_local_info(c);
+      /* auto li = get_local_info(c);
       if(fix6(dir) != fix6(li.total_dir)) printf("totaldir %d/%d\n", dir, li.total_dir);
       if(at != li.relative) printf("at %s/%s\n", disp(at), disp(li.relative));
       if(maindir != li.last_dir) printf("ld %d/%d\n", maindir, li.last_dir); */
