@@ -867,7 +867,7 @@ void showMessageLog() {
   displayButton(xr*10, i0, IFM("c - ") + XLAT("clear"), '0', 8);
   displayButton(xr*40, i0, IFM("t - ") + XLAT(timeformats[timeformat]), '0', 8);
   
-  keyhandler = [lines, maxpos] (int sym, int uni) {
+  keyhandler = [lines] (int sym, int uni) {
     if(uni == PSEUDOKEY_WHEELDOWN) messagelogpos++;
     else if(uni == PSEUDOKEY_WHEELUP) messagelogpos--;
     else if(uni == SDLK_DOWN || uni == SDLK_KP2) messagelogpos++;
