@@ -633,7 +633,7 @@ bool drawItemType(eItem it, cell *c, const transmatrix& V, int icol, int ticks, 
 
   else if(it == itPalace) {
     if(ct6 >= size(shMFloor3.b)) ct6 = 0;
-    if(ct6 >= size(shMFloor3.b)) return;
+    if(ct6 >= size(shMFloor3.b)) return false;
     transmatrix V2 = V * spin(ticks / 1500.);
     queuepoly(V2, shMFloor3.b[ct6], 0xFFD500FF);
     queuepoly(V2, shMFloor4.b[ct6], darkena(icol, 0, 0xFF));
