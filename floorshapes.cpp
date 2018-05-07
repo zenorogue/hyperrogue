@@ -355,7 +355,8 @@ namespace gp {
     bool master = !(li.relative.first||li.relative.second);
     int cor = master ? S7 : 6;
     if(master) li.last_dir = -1;
-    printf("last=%d at=%d,%d tot=%d siid=%d sidir=%d cor=%d id=%d\n", li.last_dir, li.relative.first, li.relative.second, li.total_dir, siid, sidir, cor, id);
+    if(debug_geometry) 
+      printf("last=%d at=%d,%d tot=%d siid=%d sidir=%d cor=%d id=%d\n", li.last_dir, li.relative.first, li.relative.second, li.total_dir, siid, sidir, cor, id);
     
     for(auto pfsh: all_escher_floorshapes) {
       auto& fsh = *pfsh;
@@ -393,7 +394,7 @@ namespace gp {
         i += 4;
         }
       
-      if(i != size(m.v)) printf("i=%d sm=%d\n", i, size(m.v));
+      if(i != size(m.v)) printf("warning: i=%d sm=%d\n", i, size(m.v));
       if(just_matrices) return;
       usedml[c0] = m;
       
