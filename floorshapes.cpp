@@ -134,7 +134,7 @@ void generate_matrices_scale(ld scale, int noft) {
   mesher ohex = msh(gNormal, 6, 0.329036, 0.566256, 0.620672, 0, 1);
   mesher ohept = msh(gNormal, 7, hexf7, hcrossf7, hcrossf7, M_PI/7, 1);
   if(nonbitrunc) {
-    mesher nall = msh(geometry, S7, rhexf, tessf, tessf, M_PI/7, scale);
+    mesher nall = msh(geometry, S7, rhexf, tessf, tessf, -M_PI, scale);
     bool use = geosupport_graveyard() < 2;
     if(use && noft == 1) {
       mesher opure = msh(gNormal, 7, 0.620672, 1.090550, 1.090550, M_PI/7, 1);
@@ -192,6 +192,8 @@ void bshape2(hpcshape& sh, int p, int shapeid, matrixlist& m) {
   T = spin(m.o.bspi) * T;
   for(auto &p: lst) p = T * p;
   
+  if(osym % rots && rots % osym) printf("warning: rotation oddity (shapeid %d, osym=%d rots=%d)\n", shapeid, osym, rots);
+
   if(rots > osym && rots % osym == 0) {
     int rep = rots / osym;
     int s = lst.size();
@@ -200,8 +202,6 @@ void bshape2(hpcshape& sh, int p, int shapeid, matrixlist& m) {
     rots /= rep;
     }
   
-  if(osym % rots) printf("warning: rotation oddity (shapeid %d)\n", shapeid);
-
   bshape(sh, p);
 
   for(int r=0; r<nsym; r+=osym/rots) {
@@ -286,8 +286,7 @@ void generate_floorshapes() {
     auto& fsh = *pfsh;
     generate_matrices_scale(fsh.scale, fsh.noftype);
     fsh.b.resize(2);
-    if(nonbitrunc && (S7&1) && fsh.shapeid2) {
-      printf("using shapeid2: %d\n", fsh.shapeid2);
+    if(nonbitrunc && geosupport_graveyard() < 2 && fsh.shapeid2) {
       bshape2(fsh.b[0], fsh.prio, fsh.shapeid2, hept_matrices);
       bshape2(fsh.b[1], fsh.prio, fsh.shapeid2, hept_matrices);
       }

@@ -994,7 +994,8 @@ int geosupport_graveyard() {
   if(tc) return tc;
   
   if(S3 == 3 && S7 == 7) return 1;
-  if(S3 == 4 && !(S7&1)) return 2;
+  // nice chessboard pattern, but not the actual Graveyard
+  if(S3 == 4 && !(S7&1)) return 1;
   return 0;
   }
 
