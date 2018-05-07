@@ -1541,9 +1541,6 @@ void buildpolys() {
     if(t != S6) hpcpush(ddi(S14 + t*S14, floorrad0 * goldbf/4) * C0);
     }
   
-  printf("rad0 = %lf\n", floorrad0 * goldbf);
-  printf("rad1 = %lf\n", floorrad1 * goldbf);
-
   bshape(shWall[1], PPR_WALL);
   if(S7 == 6 || S7 == 4) {
     for(int t=0; t<=S6; t++) {
