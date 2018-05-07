@@ -1261,7 +1261,7 @@ land_validity_t& land_validity(eLand l) {
     }
   
   // Warped Coast does not work on non-bitrunc S3s (except standard heptagonal where we have to keep it)
-  if(l == laWarpCoast && (S3==3) && !has_nice_dual()) {
+  if(l == laWarpCoast && (S3==3) && geosupport_graveyard() != 2) {
     return ugly_version;
     }
 

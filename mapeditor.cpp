@@ -1120,7 +1120,7 @@ namespace mapeditor {
       drawItemType(eItem(id), drawcell, Id, iinf[id].color, 0, false);
       }
     else {
-      warpfloor(drawcell, Id, 0, PPR_FLOOR, isWarped(drawcell));
+      draw_qfi(drawcell, Id, 0, PPR_FLOOR);
       }
 
     sortquickqueue();

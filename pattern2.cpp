@@ -704,8 +704,6 @@ namespace patterns {
     if(u == 8 && qhex == 2) u = 12;
     else if(u == 2 && qhex == 1) u = 8;
     else if(u == 6 && qhex == 2) u = 10;
-    if(gp::on && pseudohept(c) && !ishept(c))
-      u = 13;
     si.id = u;
 
     if(u == 6) {

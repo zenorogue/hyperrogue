@@ -2131,7 +2131,6 @@ void buildEquidistant(cell *c);
 void produceGhost(cell *c, eMonster victim, eMonster who);
 void sideAttack(cell *mf, int dir, eMonster who, int bonus, eItem orb);
 void sideAttack(cell *mf, int dir, eMonster who, int bonuskill);
-void warpfloor(cell *c, const transmatrix& V, int col, int prio, bool warp);
 
 void orboflava(int i);
 
@@ -3232,9 +3231,12 @@ polytodraw& lastptd();
 void queuepolyat(const transmatrix& V, const hpcshape& h, int col, int prio);
 void queuetable(const transmatrix& V, const vector<glvertex>& f, int cnt, int linecol, int fillcol, int prio);
 
+struct floorshape;
+
 struct qfloorinfo {
   transmatrix spin;
   const hpcshape *shape;
+  const floorshape *fshape;
   textureinfo *tinf;
   };
 
@@ -3247,8 +3249,7 @@ struct hpcshape {
   int flags;
   };
 
-extern hpcshape
-  shFullFloor[2], shFullCross[2];
+extern hpcshape shFullCross[2];
 
 int fix6(int a);
 int fix7(int a);
@@ -3359,3 +3360,12 @@ namespace gp {
   }
 
 extern bool debug_geometry;
+
+void queuepoly(const transmatrix& V, const hpcshape& h, int col);
+void queuepolyat(const transmatrix& V, const hpcshape& h, int col, int prio);
+
+void queuestr(const hyperpoint& h, int size, const string& chr, int col, int frame = 0);
+void queuechr(const transmatrix& V, double size, char chr, int col, int frame = 0);
+
+extern bool just_gmatrix;
+void drawrec(const heptspin& hs, hstate s, const transmatrix& V);

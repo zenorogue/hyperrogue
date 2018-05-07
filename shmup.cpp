@@ -3343,8 +3343,18 @@ transmatrix master_relative(cell *c, bool get_inverse) {
 transmatrix calc_relative_matrix(cell *c2, cell *c1) {
 
   if(sphere) {
+    if(!gmatrix0.count(c2) || !gmatrix0.count(c1)) {
+      printf("building gmatrix0 (size=%d)\n", size(gmatrix0));
+      auto bak = gp::draw_li;
+      swap(gmatrix, gmatrix0);
+      just_gmatrix = true;
+      drawrec(viewctr, hsOrigin, Id);
+      just_gmatrix = false;
+      swap(gmatrix, gmatrix0);
+      gp::draw_li = bak;
+      }
     if(gmatrix0.count(c2) && gmatrix0.count(c1))
-    return inverse(gmatrix0[c1]) * gmatrix0[c2];
+      return inverse(gmatrix0[c1]) * gmatrix0[c2];
     else {
       printf("error: gmatrix0 not known\n");
       return Id;

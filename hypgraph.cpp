@@ -539,6 +539,7 @@ void drawrec(cell *c, const transmatrix& V) {
   void drawrec(cell *c, const transmatrix& V) {
     draw_li.relative = loc(0,0);
     draw_li.total_dir = 0;
+    draw_li.last_dir = -1;
     if(dodrawcell(c))
       drawcell(c, V, 0, false);
     for(int i=0; i<c->type; i++) {

@@ -338,35 +338,20 @@ bool texture_config::apply(cell *c, const transmatrix &V, int col) {
   if(config.tstate == tsAdjusting) {
     queuepolyat(V, shFullCross[ctof(c)], 0, PPR_LINE);
     lastptd().u.poly.outline = slave_color;
-    queuepolyat(V, shFullFloor[ctof(c)], 0, PPR_LINE);
+    
+    draw_floorshape(c, V, shFullFloor, 0, PPR_LINE);
     lastptd().u.poly.outline = slave_color;
     return false;
     }
   try {
-    auto& mi = texture_map.at(si.id + goldbergcode(c, si));
+    auto& mi = texture_map.at(si.id + goldbergcode(c, si));    
     
-    qfi.spin = gp::on ? Id : applyPatterndir(c, si);
-    
-    int n = mi.vertices.size();
-
-    int ct6 = ctof(c);
-    qfi.shape = &FULLFLOOR;
+    set_floor(shFullFloor);
     qfi.tinf = &mi;
+    qfi.spin = gp::on ? Id : applyPatterndir(c, si);
 
-    if(chasmg == 2) return false;
-    else if(chasmg && wmspatial) {
-      if(detaillevel == 0) return false;
-      queuetable(V * qfi.spin, mi.vertices, n, mesh_color, recolor(c->land == laCocytus ? 0x080808FF : 0x101010FF), PPR_LAKEBOTTOM);
-      }
-    else {
-      queuetable(V * qfi.spin, mi.vertices, n, mesh_color, recolor(col), PPR_FLOOR);
-      }
-
-    lastptd().u.poly.tinf = &mi;
-    if(gp::on) 
-      lastptd().u.poly.flags = POLY_INVERSE;
     if(grid_color) {
-      queuepolyat(V, shFullFloor[ctof(c)], 0, PPR_FLOOR);
+      draw_floorshape(c, V, shFullFloor, 0, PPR_FLOOR);
       lastptd().u.poly.outline = grid_color;
       }
       
