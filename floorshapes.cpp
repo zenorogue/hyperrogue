@@ -154,7 +154,7 @@ void generate_matrices_scale(ld scale, int noft) {
     }
   else {
     generate_matrices(hex_matrices, ohex, msh(geometry, S6, hexvdist, hexhexdist, hcrossf, (S3-3)*M_PI/S3, scale));
-    generate_matrices(hept_matrices, ohept, msh(geometry, S7, rhexf, hcrossf, hcrossf, euclid6?0:M_PI/S7, scale));
+    generate_matrices(hept_matrices, ohept, msh(geometry, S7, rhexf, hcrossf, hcrossf, euclid6?0:euclid4?0:M_PI/S7, scale));
     }
   }
 

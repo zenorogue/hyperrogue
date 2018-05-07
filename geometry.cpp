@@ -63,6 +63,7 @@ void precalc() {
       hexvdist = hexf;
       hepvdist = hexf;
       rhexf = crossf * sqrt(2) / 2;
+      tessf = crossf;
       }
     else if(a4) {
       ld s2 = sqrt(2);
@@ -75,6 +76,7 @@ void precalc() {
       hexvdist = crossf * hypot(1-xx, xx);
       hepvdist = crossf;
       rhexf = hexf;
+      tessf = crossf;
       }
     else {
       crossf = .5;
