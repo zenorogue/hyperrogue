@@ -481,10 +481,10 @@ void initConfig() {
   
   char* t = vid.scfg.keyaction;
   
-  t['w'] = 16 + 4;
-  t['d'] = 16 + 5;
-  t['s'] = 16 + 6;
-  t['a'] = 16 + 7;
+  t[(int)'w'] = 16 + 4;
+  t[(int)'d'] = 16 + 5;
+  t[(int)'s'] = 16 + 6;
+  t[(int)'a'] = 16 + 7;
 
 #if ISMOBILE==0
   t[SDLK_KP8] = 16 + 4;
@@ -493,21 +493,21 @@ void initConfig() {
   t[SDLK_KP4] = 16 + 7;
 #endif
 
-  t['f'] = 16 + pcFire;
-  t['g'] = 16 + pcFace;
-  t['h'] = 16 + pcFaceFire;
-  t['r'] = 16 + pcDrop;
-  t['t'] = 16 + pcOrbPower;
-  t['y'] = 16 + pcCenter;
+  t[(int)'f'] = 16 + pcFire;
+  t[(int)'g'] = 16 + pcFace;
+  t[(int)'h'] = 16 + pcFaceFire;
+  t[(int)'r'] = 16 + pcDrop;
+  t[(int)'t'] = 16 + pcOrbPower;
+  t[(int)'y'] = 16 + pcCenter;
 
-  t['i'] = 32 + 4;
-  t['k'] = 32 + 5;
-  t['j'] = 32 + 6;
-  t['l'] = 32 + 7;
-  t[';'] = 32 + 8;
-  t['\''] = 32 + 9;
-  t['p'] = 32 + 10;
-  t['['] = 32 + pcCenter;
+  t[(int)'i'] = 32 + 4;
+  t[(int)'k'] = 32 + 5;
+  t[(int)'j'] = 32 + 6;
+  t[(int)'l'] = 32 + 7;
+  t[(int)';'] = 32 + 8;
+  t[(int)'\''] = 32 + 9;
+  t[(int)'p'] = 32 + 10;
+  t[(int)'['] = 32 + pcCenter;
 
 #if ISMOBILE==0
   t[SDLK_UP] = 48 ;
