@@ -1538,7 +1538,7 @@ namespace patterns {
       {gEuclid, false, PAT_COLORING, SPF_SYM0123 | SPF_EXTRASYM},
       {gSmallSphere, false, PAT_COLORING, 0},
       {gSmallSphere, false, PAT_COLORING, SPF_ALTERNATE},
-      {gSmallSphere, true, PAT_COLORING},
+      {gSmallSphere, true, PAT_COLORING, 0},
       {gOctagon, false, PAT_COLORING, SPF_ROT | SPF_EXTRASYM},
       {gOctagon, false, PAT_COLORING, SPF_ROT | SPF_EXTRASYM | SPF_ALTERNATE},
       {gOctagon, true, PAT_COLORING, 0},
