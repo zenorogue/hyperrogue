@@ -15,6 +15,7 @@ bool nodisplay(eMonster m) {
 // returns: 2 = treasure increaser, 1 = just appears, 0 = does not appear
 int isNative(eLand l, eMonster m) {
   switch(l) {
+    case laBrownian: ;
     case laIce: 
       return (m == moWolf || m == moWolfMoved || m == moYeti) ? 2 : 0;
 
@@ -228,6 +229,7 @@ int isNative(eLand l, eMonster m) {
 
 eItem treasureType(eLand l) {
   switch(l) {
+    case laBrownian: 
     case laIce: return itDiamond;
     case laJungle: return itRuby;
     case laCaves: return itGold;
@@ -432,6 +434,7 @@ bool landUnlocked(eLand l) {
     case laWildWest: case laHalloween: 
       return false;
       
+    case laBrownian: 
     case laIce: case laJungle: case laCaves: case laDesert: 
     case laMotion: case laCrossroads:  case laAlchemist:
       return true;
