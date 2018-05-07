@@ -281,7 +281,9 @@ bool have_current_settings() {
   int modecount = 0;
   if(inv::on) modecount++;
   if(shmup::on) modecount += 10;
+#if CAP_TOUR
   if(tour::on) modecount += 10;
+#endif
   if(chaosmode) modecount += 10;
   if(nonbitrunc) modecount += 10;
   if(peace::on) modecount += 10;

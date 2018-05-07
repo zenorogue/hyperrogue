@@ -919,11 +919,11 @@ namespace rug {
   extern bool rug_perspective;
   
   bool handlekeys(int sym, int uni);
-#endif
 
   void addTriangle(rugpoint *t1, rugpoint *t2, rugpoint *t3, ld len = 1);
   rugpoint *addRugpoint(hyperpoint h, double dist);
   void buildRug();
+#endif
   }
 
 #define HASLINEVIEW

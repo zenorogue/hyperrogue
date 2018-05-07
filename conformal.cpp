@@ -643,7 +643,9 @@ namespace conformal {
       
     dialog::addBreak(100);
     dialog::addItem(XLAT("history mode"), 'a');
+#if CAP_RUG
     dialog::addItem(XLAT("hypersian rug mode"), 'u');
+#endif
     dialog::addItem(XLAT("exit this menu"), 'q');
     dialog::display();
     
@@ -677,8 +679,10 @@ namespace conformal {
         projectionDialog();
       else if(uni == 'b') 
         config_camera_rotation();
+#if CAP_RUG
       else if(uni == 'u')
         pushScreen(rug::show);
+#endif
       else if(uni == 'l' && pmodel == mdHalfplane)
         lower_halfplane = !lower_halfplane;
       else if(uni == 'a')
