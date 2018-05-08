@@ -1063,7 +1063,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           if(c == c->master->c7 && fv == 3)
             c->item = itTreat;
           }
-        else if(nonbitrunc) {
+        else if(nonbitrunc && !euclid) {
           int fv = c->master->fiftyval;
           if(fv == 1 || fv == 4 || fv == 2) 
             c->wall = waChasm;
