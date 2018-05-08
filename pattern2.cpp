@@ -161,6 +161,7 @@ int fiftyval049(cell *c) {
   else if(ctof(c)) {
     int i = fiftyval(c) / 32;
     if(i <= 7) return i;
+    if(quotient) return 0;
     vector<int> allcodes;
     for(int k=0; k<7; k++) {
       cell *c2 = createStep(c->master, k)->c7;
