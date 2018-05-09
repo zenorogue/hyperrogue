@@ -183,14 +183,14 @@ void bshape2(hpcshape& sh, int p, int shapeid, matrixlist& m) {
   
   hyperpoint lstmid = hpxyz(0,0,0);
   using namespace hyperpoint_vec;
-  for(auto p: lst) lstmid += p;
+  for(auto pp: lst) lstmid += pp;
   transmatrix T = spin(-m.o.bspi);
   while((spin(2*M_PI / rots) * T* lstmid)[0] < (T*lstmid)[0])
     T = spin(2*M_PI / rots) * T;
   while((spin(-2*M_PI / rots) * T* lstmid)[0] < (T*lstmid)[0])
     T = spin(-2*M_PI / rots) * T;
   T = spin(m.o.bspi) * T;
-  for(auto &p: lst) p = T * p;
+  for(auto &pp: lst) pp = T * pp;
   
   if(osym % rots && rots % osym) printf("warning: rotation oddity (shapeid %d, osym=%d rots=%d)\n", shapeid, osym, rots);
 
