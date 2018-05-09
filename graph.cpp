@@ -5728,7 +5728,7 @@ auto graphcm = addHook(clearmemory, 0, [] () {
 
 void resetGeometry() {
   precalc();
-  currfp.analyze();
+  if(hyperbolic) currfp.analyze();
 #if CAP_GL
   resetGL();
 #endif

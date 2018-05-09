@@ -1064,7 +1064,7 @@ void buildBigStuff(cell *c, cell *from) {
   else if(c->land == laCrossroads2 && !nonbitrunc)
     buildCrossroads2(c);
   
-  else if(c->land == laPrairie && c->LHU.fi.walldist == 0) {
+  else if(c->land == laPrairie && c->LHU.fi.walldist == 0 && !euclid) {
     for(int bd=0; bd<7; bd++) {
       int fval2 = createStep(c->master, bd)->fieldval;
       int wd = currfp_gmul(fval2, currfp_inverses(c->fval-1));

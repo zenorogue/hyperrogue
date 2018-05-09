@@ -697,7 +697,7 @@ void info() {
   printf("cases found = %d (%d hard)\n", cases, hard);
   }
 
-fpattern current_quotient_field(0);
+fpattern current_quotient_field(0), fp_invalid(0);
 bool quotient_field_changed;
 
 fpattern& getcurrfp() {
@@ -719,6 +719,7 @@ fpattern& getcurrfp() {
     static fpattern fp(13);
     return fp;
     }
+  if(sphere || euclid) return fp_invalid;
   return fp43;
   }
 
@@ -729,7 +730,12 @@ vector<fgeomextra> fgeomextras = {
   fgeomextra(gOctagon, 1),
   fgeomextra(g45, 0),
   fgeomextra(g46, 3),
-  fgeomextra(g47, 0)
+  fgeomextra(g47, 0),
+/*  fgeomextra(gSphere, 0),
+  fgeomextra(gSmallSphere, 0), -> does not find the prime
+  fgeomextra(gEuclid, 0),
+  fgeomextra(gEuclidSquare, 0),
+  fgeomextra(gTinySphere, 0) */
   };
 
 int current_extra = 0;

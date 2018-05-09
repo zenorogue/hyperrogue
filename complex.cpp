@@ -3087,7 +3087,7 @@ namespace windmap {
     if(N == 18920) precomp = windcodes18920;
     if(N == 5676) precomp = windcodes5676;
     
-    if(precomp && size(currfp.matrices)) {
+    if(precomp && hyperbolic && size(currfp.matrices)) {
       int randval = hrand(size(currfp.matrices));
       for(int i=0; i<N; i++)
         windcodes[i] = precomp[getid[fieldpattern::fieldval_uniq_rand(samples[i], randval)]-1];

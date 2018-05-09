@@ -1120,7 +1120,7 @@ namespace patterns {
   char whichCanvas = 0;
 
   int generateCanvas(cell *c) {
-    if(whichCanvas == 'C' && !torus) {
+    if(whichCanvas == 'C' && hyperbolic) {
       using namespace fieldpattern;
       int z = currfp.getdist(fieldval(c), make_pair(0,false));
       if(z < currfp.circrad) return 0x00C000;
@@ -1129,12 +1129,12 @@ namespace patterns {
         return 0x3000;
       return 0x6000;
       }
-    if(whichCanvas == 'D' && !torus) {
+    if(whichCanvas == 'D' && hyperbolic) {
       using namespace fieldpattern;
       int z = currfp.getdist(fieldval(c), make_pair(0,false));
       return 255 * (currfp.maxdist+1-z) / currfp.maxdist;
       }
-    if(whichCanvas == 'N' && !torus) {
+    if(whichCanvas == 'N' && hyperbolic) {
       using namespace fieldpattern;
       int z = currfp.getdist(fieldval(c), make_pair(0,false));
       int z2 = currfp.getdist(fieldval(c), make_pair(currfp.otherpole,false));
@@ -1146,7 +1146,7 @@ namespace patterns {
       int cd = celldist(c);
       return gradient(0, canvasback, 0, min(1.8/(1+cd), 1.), 1);
       }
-    if(whichCanvas == 'S' && !torus) {
+    if(whichCanvas == 'S' && hyperbolic) {
       return 0x3F1F0F * fieldpattern::subval(c).second + 0x000080;
       }
     if(whichCanvas == 'g')
