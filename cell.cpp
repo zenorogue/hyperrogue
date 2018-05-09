@@ -471,7 +471,7 @@ struct hrmap_euclidean : hrmap {
     return slab->a[y&255][x&255];
     }
   
-  map<heptagon*, struct cdata> eucdata;
+  map<int, struct cdata> eucdata;
 
   ~hrmap_euclidean() {
     for(int y=0; y<slabs; y++) for(int x=0; x<slabs; x++)
@@ -1246,18 +1246,18 @@ cdata *getHeptagonCdata(heptagon *h) {
   return h->cdata = new cdata(mydata);
   }
 
-cdata *getEuclidCdata(heptagon *h) {
+cdata *getEuclidCdata(int h) {
 
   if(torus) {
     static cdata xx;
     return &xx;
     }
-    
+  
   int x, y;
   hrmap_euclidean* euc = dynamic_cast<hrmap_euclidean*> (currentmap);
   if(euc->eucdata.count(h)) return &(euc->eucdata[h]);
   
-  tie(x,y) = vec_to_pair(decodeId(h));
+  tie(x,y) = vec_to_pair(h);
 
   if(x == 0 && y == 0) {
     cdata xx;
@@ -1275,8 +1275,8 @@ cdata *getEuclidCdata(heptagon *h) {
     int x2 = x - (k<2 ? ord : 0);
     int y2 = y + (k>0 ? ord : 0);
 
-    cdata *d1 = getEuclidCdata(encodeId(pair_to_vec(x1,y1)));
-    cdata *d2 = getEuclidCdata(encodeId(pair_to_vec(x2,y2)));
+    cdata *d1 = getEuclidCdata(pair_to_vec(x1,y1));
+    cdata *d2 = getEuclidCdata(pair_to_vec(x2,y2));
     cdata xx;
     double disp = pow(2, bid/2.) * 6;
     
@@ -1303,7 +1303,7 @@ cdata *getEuclidCdata(heptagon *h) {
   }
 
 int getCdata(cell *c, int j) {
-  if(euclid) return getEuclidCdata(c->master)->val[j];
+  if(euclid) return getEuclidCdata(decodeId(c->master))->val[j];
   else if(geometry) return 0;
   else if(ctof(c)) return getHeptagonCdata(c->master)->val[j]*3;
   else {
@@ -1316,7 +1316,7 @@ int getCdata(cell *c, int j) {
   }
 
 int getBits(cell *c) {
-  if(euclid) return getEuclidCdata(c->master)->bits;
+  if(euclid) return getEuclidCdata(decodeId(c->master))->bits;
   else if(geometry) return 0;
   else if(c->type != 6) return getHeptagonCdata(c->master)->bits;
   else {
