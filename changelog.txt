@@ -2429,3 +2429,13 @@ Models of hyperbolic geometry:
 - improved the vertex placement for Goldberg polyhedra on spheres
 - GP(x,x) implemented in elliptic geometry
 - more roses spawn in chaosmode
+
+2018.05.08 01:40 Update 10.3u:
+- A major rewrite of the floor pattern code. Patterns are now automatically remapped to all geometries, with great results. 
+Warped Coast and Crystal World in GP(2,1) octagonal (or similar) are especially interesting (also the 'show heptagons' option in map editor patterns
+in this geometry, but it is not playable).
+- Multi-tile monsters (especially Krakens) also look better in non-standard geometries now.
+- Reduced the line quality in (spherical) Goldberg polyhedra (high quality was good with just 32 cells, but renders too slow with more).
+- Green and Gray Raiders move correctly in non-standard geometries.
+- Krakens no longer change their number of tentacles in GP(2,1) octagonal and similar (they use their own rule for forbidden cells).
+- fixed crashes in some weird land/geometry combinations.
