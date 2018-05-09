@@ -4097,9 +4097,9 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
             fd = 1;
             set_floor(shFloor);
             if(c->wall != waMirror && c->wall != waCloud)
-              draw_floorshape(c, V, shMFloor, darkena(fcol, 2, 0xFF));
+              draw_floorshape(c, V, shMFloor, darkena(fcol, 2, 0xFF), PPR_FLOORa);
             if(c->wall != waMirror && c->wall != waCloud)
-              draw_floorshape(c, V, shMFloor2, darkena(fcol, fcol==wcol ? 1 : 2, 0xFF));
+              draw_floorshape(c, V, shMFloor2, darkena(fcol, fcol==wcol ? 1 : 2, 0xFF), PPR_FLOORb);
             }
           else
             set_floor(shFloor);
