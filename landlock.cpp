@@ -1116,6 +1116,9 @@ land_validity_t& land_validity(eLand l) {
   // mirrors do not work in gp
   if(among(l, laMirror, laMirrorOld) && gp::on)
     return dont_work;
+  
+  if(l == laWhirlwind && hyperbolic_non37)
+    return pattern_incompatibility;
 
   // available only in non-standard geometries
   if(l == laMirrorOld && !geometry)
