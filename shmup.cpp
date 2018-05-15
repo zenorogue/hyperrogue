@@ -3370,6 +3370,21 @@ transmatrix calc_relative_matrix(cell *c2, cell *c1) {
 //bool hsol = false;
 //transmatrix sol;
   while(h1 != h2) {
+    int confusion = 0;
+    if(quotient == 1 && gp::on) {
+      for(int d=0; d<S7; d++) if(h2->move[d] == h1) confusion++;
+      if(confusion > 1) {
+        transmatrix T;
+        confusion = 0;
+        for(int d=0; d<S7; d++) if(h2->move[d] == h1) {
+          int sp = h2->spin(d);
+          transmatrix T1 = gm * heptmove[sp] * spin(2*M_PI*d/S7) * where;
+          if(confusion == 0 || T1[2][2] < T[2][2]) T = T1;
+          confusion++;
+          }
+        return T;
+        }
+      }
     for(int d=0; d<S7; d++) if(h2->move[d] == h1) {
       int sp = h2->spin(d);
       return gm * heptmove[sp] * spin(2*M_PI*d/S7) * where;
