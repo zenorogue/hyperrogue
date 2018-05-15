@@ -657,9 +657,11 @@ namespace dialog {
      }
     }
   
+  int numberdark;
+
   void drawNumberDialog() {
     cmode = sm::NUMBER | dialogflags;
-    gamescreen(0);
+    gamescreen(numberdark);
     init(ne.title);
     addInfo(ne.s);
     addSlider(ne.scale(ne.vmin), ne.scale(*ne.editwhat), ne.scale(ne.vmax), 500);
@@ -855,6 +857,7 @@ namespace dialog {
     cmode |= sm::NUMBER;
     pushScreen(drawNumberDialog);
     reaction = reaction_t();
+    numberdark = 0;
     }
 
   void editNumber(int& x, int vmin, int vmax, int step, int dft, string title, string help) {
