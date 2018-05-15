@@ -513,8 +513,15 @@ int counthints() {
 void showMissionScreen() {
   cancel(); cancel = noaction;
   popScreenAll();
-  pushScreen(showMission);
   achievement_final(false);
+
+  if(daily::on) {
+    #if CAP_DAILY
+    pushScreen(daily::showMenu);
+    #endif
+    }
+  else
+    pushScreen(showMission);
 
 #if CAP_TOUR
   if(!tour::on)

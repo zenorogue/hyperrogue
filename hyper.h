@@ -378,6 +378,7 @@ namespace rg {
   static const char randpattern = 'r';
   static const char princess = 'p';
   static const char daily = 'd';
+  static const char daily_off = 'D';
   
   // wrongmode only -- marks 'global' achievements not related to the current mode
   static const char global = 'x'; 
@@ -1047,7 +1048,7 @@ extern bool safety;
 
 #define SAGEMELT .1
 #define TEMPLE_EACH 6
-#define PT(x, y) ((tactic::on || quotient == 2) ? (y) : inv::on ? min(2*(y),x) : (x))
+#define PT(x, y) ((tactic::on || quotient == 2 || daily::on) ? (y) : inv::on ? min(2*(y),x) : (x))
 #define ROCKSNAKELENGTH 50
 #define WORMLENGTH 15
 #define PUREHARDCORE_LEVEL 10
@@ -3277,6 +3278,9 @@ namespace daily {
   void setup();
   void split();
   void gifts();
+  void turnoff();
+  void showMenu();
+  int find_daily_lbid(int id);
   }
 
 enum eOrbLandRelation { 

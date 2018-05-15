@@ -379,6 +379,7 @@ eLand getPrizeLand(cell *c = cwt.c) {
 
 void placePrizeOrb(cell *c) {
   if(peace::on) return;
+  if(daily::on) return;
   
   eLand l = getPrizeLand(c);
 
@@ -437,6 +438,7 @@ void placeLocalOrbs(cell *c) {
   if(isGravityLand(l) && cellEdgeUnstable(c)) return;
   if(isElemental(l)) l = laElementalWall;
   if(peace::on) return;
+  if(daily::on) return;
   
   for(int i=0; i<ORBLINES; i++) {
     const orbinfo& oi(orbinfos[i]);
@@ -471,7 +473,7 @@ void placeLocalOrbs(cell *c) {
   }
 
 void placeLocalSpecial(cell *c, int outof, int loc=1, int priz=1) {
-  if(peace::on || safety) return;
+  if(peace::on || safety || daily::on) return;
   int i = hrand(outof);
   if(i < loc && items[treasureType(c->land)] >= treasureForLocal() && !inv::on) 
     c->item = nativeOrbType(c->land);
@@ -481,6 +483,7 @@ void placeLocalSpecial(cell *c, int outof, int loc=1, int priz=1) {
 
 void placeCrossroadOrbs(cell *c) {  
   if(peace::on) return;
+  if(daily::on) return;
   for(int i=0; i<ORBLINES; i++) {
     const orbinfo& oi(orbinfos[i]);
     if(!(oi.flags & orbgenflags::CROSS10)) continue;

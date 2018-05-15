@@ -93,6 +93,8 @@ bool inv::activating;
 
 #if CAP_DAILY
 #include "private/daily.cpp"
+#else
+namespace daily { bool on; }
 #endif
 #endif
 

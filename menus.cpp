@@ -460,6 +460,9 @@ void showChangeMode() {
   dialog::addBoolItem(XLAT("Yendor Challenge"), (yendor::on), 'y');
   dialog::addBoolItem(XLAT("%1 Challenge", moPrincess), (princess::challenge), 'P');
   dialog::addBoolItem(XLAT("random pattern mode"), (randomPatternsMode), 'r');
+#if CAP_DAILY
+  dialog::addBoolItem(XLAT("Strange Challenge"), (randomPatternsMode), 'z');
+#endif
 
   dialog::addBreak(50);
   // cheating and map editor
@@ -479,6 +482,11 @@ void showChangeMode() {
     char xuni = uni;
     
     if(xuni == 'v' || sym == SDLK_ESCAPE) popScreen();
+    
+    #if CAP_DAILY
+    else if(uni == 'z')
+      pushScreen(daily::showMenu);
+    #endif
     
     else if(uni == 'c') {
       if(tactic::on && gold()) {
@@ -799,7 +807,13 @@ void showStartMenu() {
 
 void setAppropriateOverview() {
   clearMessages();
-  if(viewdists)
+  if(daily::on) {
+#if CAP_DAILY
+    achievement_final(false);
+    pushScreen(daily::showMenu);
+#endif
+    }
+  else if(viewdists)
     runGeometryExperiments();
   else if(tactic::on)
     pushScreen(tactic::showMenu);

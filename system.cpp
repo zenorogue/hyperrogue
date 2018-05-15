@@ -69,7 +69,7 @@ void welcomeMessage() {
     addMessage(XLAT("Welcome to HyperRogue!"));
     }
 
-  if(do_use_special_land() || firstland != laIce) {
+  if(do_use_special_land() || firstland != laIce) if(!daily::on) {
     auto lv = land_validity(specialland);
     if(lv.flags & lv::display_error_message)
       addMessage(XLAT(lv.msg));
@@ -759,6 +759,7 @@ void saveStats(bool emergency = false) {
   if(tour::on) return;
   #endif
   if(randomPatternsMode) return;
+  if(daily::on) return;
   if(peace::on) return;
   if(!gold()) return;
   
@@ -1191,6 +1192,8 @@ void restartGame(char switchWhat, bool push, bool keep_screens) {
 #if CAP_DAILY
   if(switchWhat == rg::daily)
     daily::setup();
+  if(switchWhat == rg::daily_off)
+    daily::turnoff();
 #endif
   if(switchWhat == rg::princess) {
     princess::challenge = !princess::challenge;
