@@ -1240,6 +1240,10 @@ void prepareTexture() {
 
 double xview, yview;
 
+bool no_fog;
+
+ld lowrug = 1e-2, hirug = 1e3;
+
 void drawRugScene() {
   glbuf->use_as_texture();
 
@@ -1275,7 +1279,7 @@ void drawRugScene() {
       xview = stereo::tanfov;
       yview = stereo::tanfov * vid.yres / vid.xres;
       
-      glhr::projection_multiply(glhr::frustum(xview, yview, .01, 100));
+      glhr::projection_multiply(glhr::frustum(xview, yview, lowrug, hirug));
       xview = -xview; yview = -yview;
 
       if(!rug_perspective) 
@@ -1302,6 +1306,7 @@ void drawRugScene() {
     glhr::color2(0xFFFFFFFF);
     
     glhr::fog_max(
+      no_fog ? 1000 :
       gwhere == gSphere && rug_perspective ? 10 : 
       gwhere == gElliptic && rug_perspective ? 4 :
       100
