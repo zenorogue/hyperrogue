@@ -977,12 +977,14 @@ namespace patterns {
   }
 
 int geosupport_threecolor() {
-  if(!nonbitrunc) {
+  if(!nonbitrunc && S3 == 3) {
     if(S7 % 2) return 1;
     return 2;
     }
   if((S7 % 2 == 0) && (S3 == 3))
     return 2;
+  if(a46 && nonbitrunc)
+    return 1;
   return 0;
   }
 
@@ -1068,7 +1070,7 @@ int pattern_threecolor(cell *c) {
     patterns::val46(c, si, 0, patterns::PAT_COLORING);
     return si.id;
     }
-  if(S7 == 5 && nonbitrunc) {
+  if(S7 == 5 && nonbitrunc && S3 == 3) {
     const int codes[12] = {1, 2, 0, 3, 2, 0, 0, 1, 3, 1, 2, 3};
     return codes[c->master->fiftyval];
     }
