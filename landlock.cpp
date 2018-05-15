@@ -1252,7 +1252,7 @@ land_validity_t& land_validity(eLand l) {
     return unbounded_only;
   
   // Graveyard pattern does not work on non-bitrunc weird geometries
-  if(l == laGraveyard && !randomPatternsMode) switch(geosupport_graveyard()) {
+  if(among(l, laGraveyard, laRuins) && !randomPatternsMode) switch(geosupport_graveyard()) {
     case 0:
       return dont_work;
     case 1:
