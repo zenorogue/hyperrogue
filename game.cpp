@@ -1984,7 +1984,7 @@ void killMonster(cell *c, eMonster who, flagtype deathflags) {
     if(avenge) { avengers += 2; }
     }
   
-  if(m == moMirrorSpirit && who != moMimic && !(deathflags & AF_MAGIC)) {
+  if(m == moMirrorSpirit && who != moMimic && !(deathflags & (AF_MAGIC | AF_CRUSH))) {
     kills[m]--;
     mirrorspirits++;
     }
