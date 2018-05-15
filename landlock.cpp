@@ -1364,7 +1364,7 @@ land_validity_t& land_validity(eLand l) {
   if(l == laStorms && torus) 
     return interesting;
   
-  if(l == laMagnetic)
+  if(l == laMagnetic || l == laBrownian)
     return land_not_implemented;
 
   if(shmup::on && among(l, laMirror, laMirrorOld) && among(geometry, gElliptic, gQuotient))
