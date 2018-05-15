@@ -186,6 +186,11 @@ eOrbLandRelation getOLR(eItem it, eLand l) {
   if(it == itOrbDigging && l == laKraken) return olrUseless;
   if(it == itOrbIllusion && l == laKraken) return olrUseless;
   
+  if(it == itOrbSlaying && !among(l, 
+    laMirror, laHell, laEmerald, laDryForest, laCamelot, laPalace, laStorms, laRose, laTortoise, laBurial, laDungeon, laReptile, 
+    laPrairie, laBull, laVolcano, laTerracotta, laRuins))
+    return olrUseless;
+  
   // if(it == itOrbYendor && l == laWhirlpool) return olrUseless;
   if(it == itOrbYendor && l == laWhirlwind) return olrUseless;
   
