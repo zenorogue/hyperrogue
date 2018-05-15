@@ -261,7 +261,7 @@ void generate_floorshapes() {
     if(&fsh == &shBigHepta) td += S6;
   
     int b = 0;
-    if(euclid4 && !nonbitrunc) b += S14;
+    if(S3 == 4 && !nonbitrunc) b += S14;
 
     bshape(fsh.b[0], fsh.prio);
     if(nonbitrunc) {
