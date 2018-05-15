@@ -3,14 +3,9 @@
 
 #define NUMLEADER 78
 
-#define SCORE_UNKNOWN (-1)
-#define NO_SCORE_YET (-2)
-
 bool offlineMode = false;
 
 int syncstate = 0;
-
-int currentscore[NUMLEADER];
 
 const char* leadernames[NUMLEADER] = {
   "Score", "Diamonds", "Gold", "Spice", "Rubies", "Elixirs",
@@ -72,8 +67,6 @@ const char* leadernames[NUMLEADER] = {
 
 #define LB_STATISTICS 62
 #define LB_HALLOWEEN  63
-
-bool haveLeaderboard(int id);
 
 void upload_score(int id, int v);
 
@@ -480,9 +473,9 @@ int specific_what = 0;
 void improve_score(int i, eItem what) {
   if(offlineMode) return;
 #ifdef HAVE_ACHIEVEMENTS
-  if(haveLeaderboard(i)) updateHi(what, currentscore[i]);
+  if(haveLeaderboard(i)) updateHi(what, get_currentscore(i));
   if(items[what] && haveLeaderboard(i)) {
-    if(items[what] > currentscore[i] && currentscore[i] != SCORE_UNKNOWN) {
+    if(items[what] > get_currentscore(i) && score_loaded(i)) {
       specific_improved++; specific_what = what;
       }
     upload_score(i, items[what]);
@@ -592,6 +585,13 @@ void achievement_final(bool really_final) {
     achievement_score(LB_HALLOWEEN, items[itTreat]);
     return;
     }
+
+#ifdef CAP_DAILY
+  if(daily::on) {
+    upload_score(daily::find_daily_lbid(daily::daily_id), gold(NO_LOVE));
+    return;
+    }  
+#endif
   
   if(geometry) return;
   
@@ -623,8 +623,8 @@ void achievement_final(bool really_final) {
   
   int tg = gold();
   if(tg && haveLeaderboard(sid)) {
-    if(tg > currentscore[sid] && currentscore[sid] != SCORE_UNKNOWN) {
-      if(currentscore[sid] < 0) total_improved += 2;
+    if(tg > get_currentscore(sid) && score_loaded(sid)) {
+      if(get_currentscore(sid) <= 0) total_improved += 2;
       total_improved++; // currentscore[sid] = tg;
       }
     upload_score(sid, tg);
@@ -692,15 +692,17 @@ void achievement_victory(bool hyper) {
   int ih2 = hyper ? 16 : inv::on ? 71 : shmup::on ? 30 : 14;
   
   int improved = 0;
-  if(currentscore[ih1] == NO_SCORE_YET || currentscore[ih2] == NO_SCORE_YET)
-    improved += 4;
+  if(score_loaded(ih1) && score_loaded(ih2)) {
+    if(get_currentscore(ih1) == score_default(ih1) || get_currentscore(ih2) == score_default(ih2))
+      improved += 4;
     
-  if(currentscore[ih1] < 0 || currentscore[ih1] > t) {
-    improved++; // currentscore[ih1] = t;
-    }
-
-  if(currentscore[ih2] < 0 || currentscore[ih2] > turncount) {
-    improved+=2; // currentscore[ih2] = turncount;
+    if(get_currentscore(ih1) > t) {
+      improved++;
+      }
+  
+    if(get_currentscore(ih2) > turncount) {
+      improved+=2;
+      }
     }
 
   if(hyper)
@@ -768,3 +770,12 @@ bool isAscending(int i) {
   return i == 13 || i == 14 || i == 15 || i == 16 || i == 29 || i == 30 || i == 45;
   };
 
+int score_default(int i) {
+  if(isAscending(i)) return 1999999999;
+  else return 0;
+  }
+
+#ifndef HAVE_ACHIEVEMENTS
+int get_sync_status() { return 0; }
+void set_priority_board(int) { }
+#endif

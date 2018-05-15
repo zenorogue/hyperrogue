@@ -307,9 +307,6 @@ int hrand(int i);
 template<class T> int size(const T& x) {return int(x.size()); }
 #endif
 
-extern int currentscore[NUMLEADER];
-extern int syncstate;
-
 // initialize the achievement system.
 void achievement_init();
 
@@ -3369,3 +3366,10 @@ void queuechr(const transmatrix& V, double size, char chr, int col, int frame = 
 
 extern bool just_gmatrix;
 void drawrec(const heptspin& hs, hstate s, const transmatrix& V);
+
+bool haveLeaderboard(int id);
+int get_currentscore(int id);
+void set_priority_board(int id);
+int get_sync_status();
+bool score_loaded(int id);
+int score_default(int id);

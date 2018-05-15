@@ -20,7 +20,7 @@ typedef vector<pair<int, string> > subscoreboard;
 void displayScore(subscoreboard& s, int x) {
   int vf = min((vid.yres-64) / 70, vid.xres/80);
 
-  if(syncstate == 1) {
+  if(get_sync_status() == 1) {
     displayfr(x, 56, 1, vf, "(syncing)", 0xC0C0C0, 0);
     }
   else {
@@ -433,6 +433,7 @@ namespace yendor {
     }
 
   void showMenu() {
+    set_priority_board(LB_YENDOR_CHALLENGE);
     int s = vid.fsize;
     vid.fsize = vid.fsize * 4/5;
     dialog::init(XLAT("Yendor Challenge"), iinf[itOrbYendor].color, 150, 100);
@@ -663,6 +664,13 @@ namespace tactic {
     }
   
   void showMenu() {
+
+    int xc = modecode();
+    
+    if(xc == 0) set_priority_board(LB_PURE_TACTICS);
+    if(xc == 2) set_priority_board(LB_PURE_TACTICS_SHMUP);
+    if(xc == 4) set_priority_board(LB_PURE_TACTICS_COOP);
+
     cmode = sm::ZOOMABLE;
     mouseovers = XLAT("pure tactics mode") + " - " + mouseovers;
     
@@ -681,8 +689,6 @@ namespace tactic {
     int xr = vid.xres / 64;
     
     if(on) record(specialland, items[treasureType(specialland)]);
-    
-    int xc = modecode();
     
     getcstat = SDLK_ESCAPE;
 
