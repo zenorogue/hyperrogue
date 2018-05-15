@@ -84,6 +84,33 @@ ld cos_auto(ld x) {
     }
   }
 
+ld tan_auto(ld x) {
+  switch(cgclass) {
+    case gcEuclid: return x;
+    case gcHyperbolic: return tanh(x);
+    case gcSphere: return tan(x);
+    default: return 1;
+    }
+  }
+
+ld atan_auto(ld x) {
+  switch(cgclass) {
+    case gcEuclid: return x;
+    case gcHyperbolic: return atanh(x);
+    case gcSphere: return atan(x);
+    default: return 1;
+    }
+  }
+
+ld atan2_auto(ld y, ld x) {
+  switch(cgclass) {
+    case gcEuclid: return y/x;
+    case gcHyperbolic: return atanh(y/x);
+    case gcSphere: return atan2(y, x);
+    default: return 1;
+    }
+  }
+
 // hyperbolic point:
 //===================
 

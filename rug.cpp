@@ -1066,12 +1066,14 @@ ld raddif(ld a, ld b) {
   }
 
 bool project_ods(hyperpoint azeq, hyperpoint& h1, hyperpoint& h2, bool eye) {
-  ld tanalpha = tan(stereo::ipd/2);
+  USING_NATIVE_GEOMETRY;
+  ld tanalpha = tan_auto(stereo::ipd/2);
   if(eye) tanalpha = -tanalpha;
+  if(!sphere) tanalpha = -tanalpha;
   
   using namespace hyperpoint_vec;  
   ld d = hypot3(azeq);
-  ld sindbd = sin(d)/d, cosd = cos(d);
+  ld sindbd = sin_auto(d)/d, cosd = cos_auto(d);
   
   ld x = azeq[0] * sindbd;
   ld y = azeq[2] * sindbd;
@@ -1081,25 +1083,29 @@ bool project_ods(hyperpoint azeq, hyperpoint& h1, hyperpoint& h2, bool eye) {
 //  printf("%10.5lf %10.5lf %10.5lf ", azeq[0], azeq[1], azeq[2]);
 //  printf(" => %10.5lf %10.5lf %10.5lf %10.5lf", x, y, z, t);
   
-  ld cottheta2 = (x*x + y*y - tanalpha*tanalpha*t*t) / (z*z);
-//  if(cottheta2 < 0) printf(" BAD\n");
-  if(cottheta2 < 0) return false;
-  ld theta = atan(sqrt(1 / cottheta2));
-  
+  ld y02 = (x*x + y*y - tanalpha*tanalpha*t*t);
+  if(y02 < 0) return false;
+  ld y0 = sqrt(y02);
+  ld theta = atan(z / y0);
+
   for(int i=0; i<2; i++) {
     hyperpoint& h = (i ? h1 : h2);
-    if(i == 1) theta = -theta;
+    if(i == 1) theta = -theta, y0 = -y0;
       
     ld x0 = t * tanalpha;
-    ld y0 = -z / tan(theta);
     
-    ld phi = atan2(y, x) - atan2(y0, x0);
+    ld phi = atan2(y, x) - atan2(y0, x0) + M_PI;
       
-    ld delta = atan2(z / sin(theta), t / cos(stereo::ipd/2));
+    ld delta = euclid ? hypot(y0,z) : atan2_auto(z / sin(theta), t / cos_auto(stereo::ipd/2));
+    if(euclid || hyperbolic) phi -= M_PI;
+    if(hyperbolic) delta = -delta;
     
     h[0] = phi;
     h[1] = theta;
     h[2] = delta;
+    if(euclid || hyperbolic) h[1] = -theta;
+    
+    
 //    printf(" => %10.5lf %10.5lf %10.5lf", phi, theta, delta);
     }
   
@@ -1129,6 +1135,8 @@ void drawTriangle(triangle& t) {
     
     ld col = (2 + hc[0]/hch) / 3;
     
+    bool natsph = among(gwhere, gSphere, gElliptic);
+    
     bool ok = true;
     array<hyperpoint, 6> h;
     for(int eye=0; eye<2; eye++) {
@@ -1149,11 +1157,18 @@ void drawTriangle(triangle& t) {
           h[i][1] = -h[i][1],
           h[i][2] = 2*M_PI-h[i][2];
         }
-      if(raddif(h[4][0], h[0][0]) < raddif(h[1][0], h[0][0]))
-        swap(h[1], h[4]);
+      if(natsph) {
+        if(raddif(h[4][0], h[0][0]) < raddif(h[1][0], h[0][0]))
+          swap(h[1], h[4]);
+        if(raddif(h[5][0], h[0][0]) < raddif(h[2][0], h[0][0]))
+          swap(h[5], h[2]);
+        }
+      else {
+        if(h[0][2] < 0) swap(h[0], h[3]);
+        if(h[1][2] < 0) swap(h[1], h[4]);
+        if(h[2][2] < 0) swap(h[2], h[5]);
+        }
       if(abs(h[1][1] - h[0][1]) > M_PI/2) return;
-      if(raddif(h[5][0], h[0][0]) < raddif(h[2][0], h[0][0]))
-        swap(h[5], h[2]);
       if(abs(h[2][1] - h[0][1]) > M_PI/2) return;
       cyclefix(h[1][0], h[0][0]);
       cyclefix(h[2][0], h[0][0]);
@@ -1169,6 +1184,7 @@ void drawTriangle(triangle& t) {
             t.m[i]->x1, t.m[i]->y1,
             col);
           }
+        if(!natsph) break;
         }
       }
     return;
@@ -1252,7 +1268,7 @@ void drawRugScene() {
     
     start_projection(ed);
     if(stereo::mode == stereo::sODS) {
-      glhr::projection_multiply(glhr::ortho(M_PI, M_PI, 2*M_PI));
+      glhr::projection_multiply(glhr::ortho(M_PI, M_PI, 100)); // 2*M_PI));
       }
     else if(rug_perspective || stereo::active()) {
 
