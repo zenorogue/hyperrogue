@@ -2439,3 +2439,7 @@ in this geometry, but it is not playable).
 - Green and Gray Raiders move correctly in non-standard geometries.
 - Krakens no longer change their number of tentacles in GP(2,1) octagonal and similar (they use their own rule for forbidden cells).
 - fixed crashes in some weird land/geometry combinations.
+
+2018.05.09 21:38 Update 10.3v:
+- fixed Hive
+- fixed a memory error
