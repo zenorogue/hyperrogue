@@ -1286,6 +1286,9 @@ land_validity_t& land_validity(eLand l) {
   
   if(l == laTrollheim && quotient == 2)
     return not_enough_space;
+      
+  if(l == laStorms && hyperbolic_not37)
+    return pattern_incompatibility;
   
   if(l == laTrollheim && !stdeuc && !bounded)
     return some1;
