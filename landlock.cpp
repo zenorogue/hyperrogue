@@ -1026,6 +1026,8 @@ namespace lv {
   flagtype q3 = lv::appears_in_geom_exp | lv::appears_in_full | lv::display_in_help | lv::appears_in_ptm;
   flagtype qm2= q2 | lv::display_error_message;
   flagtype qm3= q3 | lv::display_error_message;
+  
+  land_validity_t hedgehogs = { 1, qm2 &~ lv::appears_in_full, "Cannot kill Hedgehog Warriors in this geometry."};
 
   land_validity_t no_randpattern_version = { 0, q0, "No random pattern version."};  
   land_validity_t no_great_walls = { 0, q0, "Great Walls not implemented."};  
@@ -1274,6 +1276,9 @@ land_validity_t& land_validity(eLand l) {
     else if(!hyperbolic_37) return l == laWildWest ? some0 : pattern_not_implemented_random;
     else if(quotient) return pattern_incompatibility;
     }
+
+  if(among(l, laEmerald, laCamelot, laDryForest) && a4 && nonbitrunc)
+    return hedgehogs;  
 
   // ... wineyard pattern is GOOD only in the standard geometry or Euclidean
   if(l == laWineyard && (gp::on || sphere) && !randomPatternsMode)
