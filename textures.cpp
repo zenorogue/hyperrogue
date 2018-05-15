@@ -12,6 +12,7 @@ namespace texture {
 
 cpatterntype cgroup;
 
+#if CAP_PNG
 SDL_Surface *convertSurface(SDL_Surface* s) {
   SDL_PixelFormat fmt;
   // fmt.format = SDL_PIXELFORMAT_BGRA8888;
@@ -36,6 +37,7 @@ SDL_Surface *convertSurface(SDL_Surface* s) {
   
   return SDL_ConvertSurface(s, &fmt, SDL_SWSURFACE);
   }
+#endif
 
 struct undo {
   unsigned* pix;
@@ -97,6 +99,7 @@ bool texture_data::whitetexture() {
 
 bool texture_data::readtexture(string tn) {
 
+#if CAP_SDL_IMG || CAP_PNG
   undos.clear();
   texture_pixels.resize(twidth * twidth);
   
@@ -204,6 +207,9 @@ bool texture_data::readtexture(string tn) {
 #endif
   
   return true;
+#else
+  return false;
+#endif
   }
 
 void texture_data::saveRawTexture(string tn) {
@@ -778,6 +784,7 @@ saverlist texturesavers;
 bool target_nonbitru;
 
 void init_textureconfig() {
+#if CAP_CONFIG
   texturesavers = move(savers);  
   for(int i=0; i<3; i++)
   for(int j=0; j<3; j++)
@@ -820,9 +827,11 @@ void init_textureconfig() {
   addsaver(config.texture_tuner, "texture tuning", "");
   
   swap(texturesavers, savers);
+#endif
   }
 
 bool texture_config::save() {
+#if CAP_CONFIG
   init_textureconfig();
   FILE *f = fopen(configname.c_str(), "wt");
   if(!f) return false;
@@ -845,10 +854,12 @@ bool texture_config::save() {
     fprintf(f, "%s=%s\n", s->name.c_str(), s->save().c_str());
   
   fclose(f);
+#endif
   return true;
   }
 
 bool texture_config::load() {
+#if CAP_CONFIG
   init_textureconfig();
 
   FILE *f = fopen(configname.c_str(), "rt");
@@ -926,6 +937,7 @@ bool texture_config::load() {
     }
     
   finish_mapping();
+#endif
   return true;
   }
 
@@ -1033,7 +1045,9 @@ void showMenu() {
     dialog::addItem(XLAT("open PNG as texture"), 'o');
     dialog::addItem(XLAT("load texture config"), 'l');
     dialog::addSelItem(XLAT("texture size"), its(config.data.twidth), 'w');
+#if CAP_EDIT
     dialog::addItem(XLAT("paint a new texture"), 'n');
+#endif
     dialog::addSelItem(XLAT("precision"), its(config.gsplits), 'P');
     }
 
@@ -1078,7 +1092,9 @@ void showMenu() {
     dialog::addColorItem(XLAT("mesh color"), config.mesh_color, 'm');
     dialog::addSelItem(XLAT("color alpha"), its(config.color_alpha), 'c');
     dialog::addSelItem(XLAT("precision"), its(config.gsplits), 'P');
+#if CAP_EDIT
     dialog::addItem(XLAT("edit the texture"), 'e');
+#endif
     dialog::addItem(XLAT("save the full texture image"), 'S');
     dialog::addItem(XLAT("save texture config"), 's');
     }
@@ -1148,7 +1164,8 @@ void showMenu() {
       if(config.data.twidth > 9000) config.data.twidth = 256;
       config.tstate_max = tsOff;
       }
-    
+
+#if CAP_EDIT    
     else if(uni == 'e' && config.tstate == tsActive) {
       mapeditor::initdraw(cwt.c);
       pushScreen(mapeditor::showDrawEditor);
@@ -1164,6 +1181,7 @@ void showMenu() {
         pushScreen(mapeditor::showDrawEditor);
         }
       }
+#endif
 
     else if(uni == 't' && config.tstate == tsOff) 
       config.tstate = config.tstate_max;

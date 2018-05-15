@@ -657,7 +657,7 @@ void showStartMenu() {
       break;
 #endif
 
-#if CAP_TEXTURE    
+#if CAP_TEXTURE && CAP_EDIT
     case 6:
       dialog::addBreak(100);
       dialog::addBigItem(XLAT("texture mode"), 'T');
@@ -719,7 +719,7 @@ void showStartMenu() {
       rug::init();
       }
 #endif
-#if CAP_TEXTURE
+#if CAP_TEXTURE && CAP_EDIT
     else if(uni == 'T') {
       popScreenAll();
       resetModes('c');
