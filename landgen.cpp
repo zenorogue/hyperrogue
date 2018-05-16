@@ -1141,7 +1141,8 @@ void giantLandSwitch(cell *c, int d, cell *from) {
         }
       break;
     
-    case laStorms:
+    case laStorms: {
+      bool randstorm = hyperbolic_not37 || gp::on || quotient == 2;
       if(d == 9) {
       
         if(torus) {
@@ -1194,6 +1195,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
               }
             }
           }
+        else if(randstorm) ;
         else if(nonbitrunc) {
           int i = zebra40(c);
           if((i == 5 || i == 8) && hrand(100) < 20) c->wall = hrand(2) ? waCharged : waGrounded;
@@ -1219,6 +1221,32 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           if(c->mov[i] && c->mov[i]->land != laStorms && c->mov[i]->land != laNone)
             c->wall = waNone;
         }
+      if(d == 8 && randstorm) {
+        c->landparam = hrand(1000000);
+        }
+      if(d == 7 && randstorm) {
+        forCellEx(c2, c) if(c2->landparam < c->landparam) setdist(c2, 7, c);
+        bool bad = false;
+        forCellEx(c2, c) if(c2->land != laStorms) bad = true;
+        if(!bad) {
+          int wallsnow = 0;
+          int slp = 0;
+          forCellEx(c2, c) {
+            if(c2->wall) wallsnow++;
+            if(c2->landparam == 1) slp++;
+            }
+          if(wallsnow == 0) {
+            if(hrand(100) < 10)
+              c->wall = pick(waCharged, waGrounded, waSandstone, waSandstone);
+            else c->landparam = 1;
+            }
+          else if(wallsnow == 1 && slp == 0) {
+            c->wall = waSandstone;
+            }
+          else if(slp == 1 && wallsnow == 0)
+            c->landparam = 1;
+          }
+        }
       ONEMPTY {
         if(hrand(7500) < 25 + (items[itFulgurite] + yendor::hardness()))
           c->monst = (hrand(5) ? moMetalBeast : moMetalBeast2),
@@ -1228,6 +1256,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           }
         }
       break;
+      }
     
     case laGraveyard:
       if(d == 9) {

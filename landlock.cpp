@@ -1100,7 +1100,7 @@ land_validity_t& land_validity(eLand l) {
   
   // does not agree with the pattern
   if(l == laStorms && quotient == 2) 
-    return pattern_incompatibility;
+    return pattern_not_implemented_random;
   
   // pattern not implemented
   if(l == laStorms && S7 == 8) 
@@ -1117,7 +1117,7 @@ land_validity_t& land_validity(eLand l) {
   if(among(l, laMirror, laMirrorOld) && gp::on)
     return dont_work;
   
-  if(l == laWhirlwind && hyperbolic_non37)
+  if(l == laWhirlwind && hyperbolic_not37)
     return pattern_incompatibility;
 
   // available only in non-standard geometries
@@ -1291,7 +1291,7 @@ land_validity_t& land_validity(eLand l) {
     return not_enough_space;
       
   if(l == laStorms && hyperbolic_not37)
-    return pattern_incompatibility;
+    return pattern_not_implemented_random;
   
   if(l == laTrollheim && !stdeuc && !bounded)
     return some1;
