@@ -1073,8 +1073,11 @@ void restartGame(char switchWhat, bool push, bool keep_screens) {
   DEBB(DF_INIT, (debugfile,"restartGame\n"));
   
   
-  if(push)
+  if(push) {
     gamestack::push();
+    pd_from = NULL;
+    centerover.c = NULL;
+    }
   else {
     popAllGames();
     achievement_final(true);
