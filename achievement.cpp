@@ -5,8 +5,6 @@
 
 bool offlineMode = false;
 
-int syncstate = 0;
-
 const char* leadernames[NUMLEADER] = {
   "Score", "Diamonds", "Gold", "Spice", "Rubies", "Elixirs",
   "Shards100", "Totems", "Daisies", "Statues", "Feathers", "Sapphires",
