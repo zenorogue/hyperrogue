@@ -1009,6 +1009,7 @@ namespace gamestack {
   struct gamedata {
     hrmap *hmap;
     cellwalker cwt;
+    cellwalker ctover;
     heptspin viewctr;
     transmatrix View;
     eGeometry geometry;
@@ -1033,6 +1034,7 @@ namespace gamestack {
     gdn.geometry = geometry;
     gdn.shmup = shmup::on;
     gdn.hepta = nonbitrunc;
+    gdn.ctover = centerover;
     gd.push_back(gdn);
     }
     
@@ -1048,6 +1050,7 @@ namespace gamestack {
     shmup::on = gdn.shmup;
     resetGeometry();
     gd.pop_back();
+    centerover = gdn.ctover;
     bfs();
     }
   

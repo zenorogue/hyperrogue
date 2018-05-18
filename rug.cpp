@@ -1244,8 +1244,12 @@ bool no_fog;
 
 ld lowrug = 1e-2, hirug = 1e3;
 
+GLuint alternate_texture;
+
 void drawRugScene() {
   glbuf->use_as_texture();
+  if(alternate_texture)
+    glBindTexture( GL_TEXTURE_2D, alternate_texture);
 
   if(backcolor == 0) 
     glClearColor(0.05,0.05,0.05,1);
@@ -1478,6 +1482,8 @@ void finger_on(int coord, ld val) {
 
 transmatrix last_orientation;
 
+ld ruggospeed = 1;
+
 void actDraw() { 
   try {
 
@@ -1560,9 +1566,9 @@ void actDraw() {
       }
     
     model_distance -= push;
-    push_all_points(2, push);
-    push_all_points(0, strafex);
-    push_all_points(1, strafey);
+    push_all_points(2, push * ruggospeed);
+    push_all_points(0, strafex * ruggospeed);
+    push_all_points(1, strafey * ruggospeed);
     }
   else {
     if(finger_center)
@@ -1574,8 +1580,8 @@ void actDraw() {
       if(keystate[SDLK_UP]) qm++, t =  t * rotmatrix(alpha, 2, 1);
       if(keystate[SDLK_LEFT]) qm++, t = t * rotmatrix(alpha, 0, 2);
       if(keystate[SDLK_RIGHT]) qm++, t =  t * rotmatrix(alpha, 2, 0);
-      if(keystate[SDLK_PAGEUP]) model_distance /= exp(alpha);
-      if(keystate[SDLK_PAGEDOWN]) model_distance *= exp(alpha);
+      if(keystate[SDLK_PAGEUP]) model_distance /= exp(alpha * ruggospeed);
+      if(keystate[SDLK_PAGEDOWN]) model_distance *= exp(alpha * ruggospeed);
       }
   
     if(qm) {

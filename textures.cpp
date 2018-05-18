@@ -78,7 +78,7 @@ bool texture_data::loadTextureGL() {
 
   if(textureid == 0) glGenTextures(1, &textureid);
 
-  glBindTexture( GL_TEXTURE_2D, config.data.textureid);
+  glBindTexture( GL_TEXTURE_2D, textureid);
   glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
   glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
   

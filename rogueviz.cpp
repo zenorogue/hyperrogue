@@ -914,7 +914,8 @@ bool edgecmp(edgeinfo *e1, edgeinfo *e2) {
   return e1->weight > e2->weight;
   }
 
-#include "kohonen.cpp"
+#include "rogueviz-kohonen.cpp"
+#include "rogueviz-staircase.cpp"
 
 void describe(cell *c) {
   if(kind == kKohonen) return kohonen::describe(c);
@@ -1704,6 +1705,7 @@ int readArgs() {
 #endif
 
 void showMenu() {
+  if(staircase::on) { staircase::showMenu(); return; }
   cmode = sm::SIDE | sm::MAYDARK | sm::DIALOG_STRICT_X;
   gamescreen(0);  
 
@@ -1799,6 +1801,7 @@ template<class T> function<void(presmode)> roguevizslide(char c, T t) {
     slidecommand = "toggle the player";
     if(mode == 4) 
       mapeditor::drawplayer = !mapeditor::drawplayer;
+    centerover.c = NULL; pd_from = NULL;
     };
   }
 
@@ -1880,7 +1883,7 @@ slide rvslides[] = {
     },
 
   {"Roguelikes", 63, LEGAL_UNLIMITED,
-    "A visualization of roguelikes, based on disccusion on /r/reddit. "
+    "A visualization of roguelikes, based on discussion on /r/reddit. "
     "See: http://www.roguetemple.com/z/hyper/reddit.php",
     roguevizslide('0', [] () {
       rogueviz::dftcolor = 0x282828FF;
@@ -1957,6 +1960,15 @@ slide rvslides[] = {
 
       rogueviz::tree::read(RVPATH "treeoflife/tol.txt");
       })},
+    {"Spiral Staircase", 62, LEGAL_NONE,
+     "Spiral Staircase Demo. Press '5' to change the curvature or other parameters.",
+     
+    [] (presmode mode) {
+      if(mode == 1) staircase::make_staircase();
+      if(mode == 3) rug::close();
+      slidecommand = "staircase menu";
+      if(mode == 4) pushScreen(staircase::showMenu);
+      }},
   {"THE END", 99, LEGAL_ANY | FINALSLIDE,
     "Press '5' to leave the presentation.",
     [] (presmode mode) {

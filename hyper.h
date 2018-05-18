@@ -830,6 +830,8 @@ namespace mapeditor {
   void showDrawEditor();
   }
 
+struct renderbuffer;
+
 namespace rug {
   extern bool rugged;
   extern bool computed;
@@ -921,6 +923,12 @@ namespace rug {
   void addTriangle(rugpoint *t1, rugpoint *t2, rugpoint *t3, ld len = 1);
   rugpoint *addRugpoint(hyperpoint h, double dist);
   void buildRug();
+
+extern renderbuffer *glbuf; 
+extern eGeometry gwhere;
+extern bool no_fog;
+extern ld lowrug, hirug, ruggospeed;
+extern GLuint alternate_texture;
 #endif
   }
 

@@ -3422,7 +3422,8 @@ transmatrix &ggmatrix(cell *c) {
           t = ggmatrix(c2) * eumovedir(3+i);
       }
     else if(euclid) {
-      t = gmatrix[centerover.c] * eumove(cell_to_vec(c) - cellwalker_to_vec(centerover));
+      if(!centerover.c) centerover = cwt;
+      t = View * eumove(cell_to_vec(c) - cellwalker_to_vec(centerover));
       }
     else 
       t = actualV(viewctr, cview()) * calc_relative_matrix(c, viewctr.h->c7);
