@@ -1352,6 +1352,7 @@ void init() {
   timerghost = false;
 
   gmatrix.clear();
+  calcparam();
   drawthemap();
   gmatrix0 = gmatrix;
   addMessage("RogueViz enabled");

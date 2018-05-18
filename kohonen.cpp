@@ -797,7 +797,7 @@ void kload(const string& fname) {
     }
   if(fscanf(f, "%d%d\n", &xcells, &t) != 2) return;
   if(xcells != cells) {
-    fprintf(stderr, "Error: bad number of cells\n");
+    fprintf(stderr, "Error: bad number of cells (x=%d c=%d)\n", xcells, cells);
     exit(1);
     }
   for(neuron& n: net) {
