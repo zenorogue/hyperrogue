@@ -6890,3 +6890,79 @@ S("list of slides", "lista slajdów")
 S("back to the start menu", "powrót do menu startowego")
 S("You juggle the Dead Orbs.", "Żonglujesz Martwymi Sferami.")
 S("You give %the1 a grim look.", "Spoglądasz ponuro na %a1.")
+
+S("Strange Challenge", "Dziwna Misja")
+S("compete with other players on random lands in random geometries", "konkuruj z innymi na losowych krainach w losowych geometriach");
+
+S("Strange Challenge #%1", "Dziwna Misja #%1")
+S("next challenge in %1", "do następna misji: %1")
+S("synchronizing scores...", "synchronizacja trwa...")
+S("already played", "już grał%eś0")
+S("play!", "graj!")
+S("See past challenges", "minione misje")
+S("Past Strange Challenges. You can see the setting and high scores, but you can no longer play them.",
+  "Minione Dziwne Misje. Możesz oglądać ustawienia i wyniki, ale nie możesz już w nie grać.")
+
+// land compatibility guides
+
+S("Cannot kill Hedgehog Warriors in this geometry.", "W tej geometrii nie da się zabić Wojownika-Jeża.")
+S("No random pattern version.", "Tej krainy nie ma w trybie losowych wzorów.")
+S("Great Walls not implemented.", "Wielkie ściany nie zaimplementowane w tej geometrii.")
+S("Pattern incompatible.", "Niekompatybilność wzoru.")
+S("Pattern not implemented -- using random.", "Wzór nie zaimplementowany -- generujemy losowo.")
+S("Pattern not implemented.", "Wzór nie zaimplementowany.")
+S("Not enough space.", "Za mało miejsca.")
+S("Does not work in this geometry.", "Nie działa w tej geometrii.")
+S("This land is designed for bounded worlds.", "Ta kraina jest zaprojektowana dla światów skończonych.")
+S("This land is designed for infinite worlds.", "Ta kraina jest zaprojektowana dla światów nieskończonych.")
+S("This land is designed for infinite worlds or big spheres.", "Ta kraina jest zaprojektowana dla światów nieskończonych i dużych sfer.")
+S("Out of theme for the full game.", "Nie pasuje tematycznie do pełnej gry.")
+S("No game here.", "Tu nie ma gry.")
+S("Does not work in chaos mode.", "Nie działa w trybie chaosu.")
+S("Not in the full game.", "Nie występuje w pełnej grze.")
+S("Special construction in the Chaos mode.", "Specjalna konstrukcja w trybie Chaosu.")
+S("Special construction in the Euclidean mode.", "Specjalna konstrukcja w geometrii euklidesowej.")
+S("Special construction in this geometry.", "Specjalna konstrukcja w tej geometrii.")
+S("Not implemented.", "Nie zaimplementowane.")
+S("Partially implemented.", "Częściowo zaimplementowane.")
+S("No comments.", "Brak komentarza.")
+S("Does not work in pure tactics mode.", "Nie działa w trybie taktycznym.")
+S("Technical.", "Kraina techniczna.")
+S("Full game.", "Pełna gra.")
+S("Somewhat inaccurate.", "Niezbyt dokładna realizacja.")
+S("Mercury rivers not implemented (or could not work) in this geometry.", "Rzeki rtęci nie zaimplementowane (lub nie działają) w tej geometrii.")
+S("Patterns compatible.", "Kompatybilność wzorów.")
+S("This land is specially designed for this geometry.", "Kraina specjalnie zaprojektowana dla tej geometrii.")
+S("Three-colorability required.", "Ta kraina wymaga trzy-kolorowalności.")
+S("Land not implemented.", "Kraina niezaimplementowana.")
+S("Special interest.", "Szczególnie interesująca kombinacja.")
+S("Better version exists.", "Istnieje lepsza wersja.")
+S("Grid does not work in this geometry.", "Siatka nie działa w tej geometrii.")
+S("Graphics not implemented in this geometry.", "Grafika nie zaimplementowana w tej geometrii.")
+S("This land does not work in the current settings. Reason not available.",
+  "Ta kraina nie działa w obecnych ustawieniach. Powód nieznany.")
+S("This land does not work well in the current settings. Reason not available.",
+  "Ta kraina źle działa w obecnych ustawieniach. Powód nieznany.")
+S("This combination is known to be buggy at the moment.", "Ta kombinacja działa w tym momencie błędnie.")
+S("Somewhat sloppy pattern.", "Lekko niedbały wzór.")
+S("Fractal landscapes not implemented in this geometry.", "Fraktalne krajobrazy nie zaimplementowane w tej geometrii.")
+S("Only simplified walls implemented.", "Tylko uproszczone ściany są zaimplementowane.")
+
+S("cube/elliptic", "sześcian/el")
+S("chamfered", "chamfered")
+S("2x chamfered", "2x chamfered")
+S("select", "wybierz")
+
+S("Goldberg polyhedra are obtained by adding extra hexagons to a dodecahedron. "
+  "GP(x,y) means that, to get to a nearest non-hex from any non-hex, you should move x "
+  "cells in any direction, turn right 60 degrees, and move y cells. "
+  "HyperRogue generalizes this to any tesselation with 3 faces per vertex. "
+  "By default HyperRogue uses bitruncation, which corresponds to GP(1,1).",
+  
+  "Wielościany Goldberga powstają przez dodanie dodatkowych sześciokątnych ścian do dwunastościanu. "
+  "GP(x,y) oznacza że, aby z danego nie-sześciokąta dostać się do najbliższego innego nie-sześciokąta, "
+  "trzeba się ruszyć x pól w pewnym kierunku, skręcić o 60 stopni w prwo, i ruszyć się jeszcze o y pól. "
+  "HyperRogue uogólnia powyższą konstrukcję na dowolną posadzkę z 3 ścianami stykającymi się w wierzchołku. "
+  "Domyślnie HyperRogue używa operacji GP(1,1).")
+  
+S("extend the ends", "rozszerz końce")
