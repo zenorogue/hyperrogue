@@ -255,6 +255,9 @@ const transmatrix MirrorX = {{{-1,0,0}, {0,1,0}, {0,0,1}}};
 // rotate by PI
 const transmatrix pispin = {{{-1,0,0}, {0,-1,0}, {0,0,1}}};
 
+// central symmetry
+const transmatrix centralsym = {{{-1,0,0}, {0,-1,0}, {0,0,-1}}};
+
 // rotate by alpha degrees
 transmatrix spin(ld alpha) {
   transmatrix T = Id;
