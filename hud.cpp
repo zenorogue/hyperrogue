@@ -130,7 +130,7 @@ int glyphflags(int gid) {
       f |= GLYPH_LOCAL | GLYPH_INSQUARE;
       if(i == localshardof(cwt.c->land)) f |= GLYPH_LOCAL2;
       }
-    if(i == treasureType(cwt.c->land)) 
+    if(i == treasureType(cwt.c->land) || daily::on) 
       f |= GLYPH_LOCAL | GLYPH_LOCAL2 | GLYPH_IMPORTANT | GLYPH_INSQUARE;
     if(i == itHolyGrail) {
       if(items[i] >= 3 && !inv::on) f |= GLYPH_MARKOVER;
