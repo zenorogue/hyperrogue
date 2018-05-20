@@ -561,12 +561,13 @@ namespace gp {
     }
 
   string helptext() {
-    return 
+    return XLAT(
       "Goldberg polyhedra are obtained by adding extra hexagons to a dodecahedron. "
       "GP(x,y) means that, to get to a nearest non-hex from any non-hex, you should move x "
       "cells in any direction, turn right 60 degrees, and move y cells. "
       "HyperRogue generalizes this to any tesselation with 3 faces per vertex. "
-      "By default HyperRogue uses bitruncation, which corresponds to GP(1,1).";
+      "By default HyperRogue uses bitruncation, which corresponds to GP(1,1)."
+      );
     }  
 
   void show(bool texture_remap) {
