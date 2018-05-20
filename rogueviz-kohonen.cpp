@@ -1133,7 +1133,9 @@ auto hooks2 = addHook(hooks_frame, 50, levelline::draw);
 
 void mark(cell *c) {
   using namespace kohonen;
-  distfrom = getNeuronSlow(c);
-  coloring();
+  if(kind == kKohonen && inited >= 1) {
+    distfrom = getNeuronSlow(c);
+    coloring();
+    }
   }
 
