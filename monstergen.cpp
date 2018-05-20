@@ -281,6 +281,9 @@ bool haveKraken() {
 
 eItem wanderingTreasure(cell *c) {
   eLand l = c->land;
+  #if CAP_DAILY
+  if(daily::on && daily::prevent_spawn_treasure_on(c)) return itNone;
+  #endif
   if(l == laEFire) return itFireShard;
   if(l == laEWater) return itWaterShard;
   if(l == laEAir) return itAirShard;

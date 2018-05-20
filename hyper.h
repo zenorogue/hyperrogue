@@ -3289,6 +3289,7 @@ namespace daily {
   void turnoff();
   void showMenu();
   int find_daily_lbid(int id);
+  bool prevent_spawn_treasure_on(cell *c);
   }
 
 enum eOrbLandRelation { 
