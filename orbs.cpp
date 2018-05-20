@@ -346,7 +346,9 @@ void killAdjacentSharks(cell *c) {
 
 void castLightningBolt(cellwalker lig) {
   int bnc = 0;
+  int counter = 1000;
   while(true) {
+    counter--; if(counter < 0) break;
     // printf("at: %p i=%d d=%d\n", lig.c, i, lig.spin);
 
     killAdjacentSharks(lig.c);
