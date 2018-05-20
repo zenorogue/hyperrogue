@@ -118,24 +118,18 @@ ld atan2_auto(ld y, ld x) {
 // by points in 3D space (Minkowski space) such that x^2+y^2-z^2 == -1, z > 0
 // (this is analogous to representing a sphere with points such that x^2+y^2+z^2 == 1)
 
-hyperpoint hpxyz(ld x, ld y, ld z) { 
-  // EUCLIDEAN
-  hyperpoint r; r[0] = x; r[1] = y; r[2] = z; return r; 
-  }
-
 hyperpoint hpxy(ld x, ld y) { 
-  // EUCLIDEAN
   return hpxyz(x,y, euclid ? 1 : sphere ? sqrt(1-x*x-y*y) : sqrt(1+x*x+y*y));
   }
 
 // center of the pseudosphere
-const hyperpoint Hypc = { {0,0,0} };
+const hyperpoint Hypc(0,0,0);
 
 // origin of the hyperbolic plane
-const hyperpoint C0 = { {0,0,1} };
+const hyperpoint C0(0,0,1);
 
 // a point (I hope this number needs no comments ;) )
-const hyperpoint Cx1 = { {1,0,1.41421356237} };
+const hyperpoint Cx1(1,0,1.41421356237);
 
 // this function returns approximate square of distance between two points
 // (in the spherical analogy, this would be the distance in the 3D space,
@@ -207,13 +201,7 @@ ld hypot_auto(ld x, ld y) {
 
 // move H back to the sphere/hyperboloid/plane
 hyperpoint normalize(hyperpoint H) {
-  ld Z;
-  if(sphere) Z = sqrt(intval(H, Hypc));
-  else if(!euclid) { 
-    Z = intval(H, Hypc); 
-    Z = sqrt(-Z);
-    }
-  else Z = H[2];
+  ld Z = zlevel(H);
   for(int c=0; c<3; c++) H[c] /= Z;
   return H;
   }

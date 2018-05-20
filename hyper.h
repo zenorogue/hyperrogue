@@ -27,10 +27,9 @@ typedef long double ld;
 
 #define DEBSM(x) 
 
-struct hyperpoint {
-  ld tab[3];
-  ld& operator [] (int i) { return tab[i]; }
-  const ld& operator [] (int i) const { return tab[i]; }
+struct hyperpoint : array<ld, 3> {
+  hyperpoint() {}
+  hyperpoint(ld x, ld y, ld z) : array<ld,3> {x,y,z} {}
   };
 
 struct transmatrix {
@@ -56,7 +55,7 @@ inline transmatrix operator * (const transmatrix& T, const transmatrix& U) {
   return R;
   }
 
-hyperpoint hpxyz(ld x, ld y, ld z);
+#define hpxyz hyperpoint
 
 namespace hyperpoint_vec {
 
@@ -2256,19 +2255,24 @@ struct qcir {
 
 enum eKind { pkPoly, pkLine, pkString, pkCircle, pkShape, pkResetModel, pkSpecial };
 
+union polyunion {
+  qpoly  poly;
+  qline  line;
+  qchr   chr;
+  qcir   cir;
+  double dvalue;
+  polyunion() {}
+  };
+
 struct polytodraw {
   eKind kind;
   int prio, col;
-  union {
-    qpoly  poly;
-    qline  line;
-    qchr   chr;
-    qcir   cir;
-    double dvalue;
-    } u;
+  polyunion u;
 #if CAP_ROGUEVIZ
   string* info;
   polytodraw() { info = NULL; }
+#else
+  polytodraw() {}
 #endif
   };
 
