@@ -664,6 +664,14 @@ void showStartMenu() {
       dialog::addInfo(XLAT("paint pictures"));
       break;
 #endif
+
+#if CAP_DAILY
+    case 7:
+      dialog::addBreak(100);
+      dialog::addBigItem(XLAT("Strange Challenge"), 'z');
+      dialog::addInfo(XLAT("compete with other players on random lands in random geometries"));
+      break;
+#endif
     
     case 20:
       dialog::addBreak(100);
