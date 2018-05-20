@@ -5336,7 +5336,7 @@ void specialMoves() {
     if(m == moHunterGuard && items[itHunting] >= 10)
       c->monst = moHunterChanging;
     
-    if(m == moHunterDog && (havewhat & HF_FAILED_AMBUSH))
+    if(m == moHunterDog && (havewhat & HF_FAILED_AMBUSH) && hyperbolic && !quotient)
       c->monst = moHunterChanging;
     
     if(m == moSleepBull && !peace::on) {
