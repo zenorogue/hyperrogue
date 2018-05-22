@@ -1801,7 +1801,7 @@ void buildpolys() {
   shMFloor2.configure(floorrad0*6/8, floorrad1*6/8);
   shMFloor3.configure(floorrad0*5/8, floorrad1*5/8);
   shMFloor4.configure(floorrad0*4/8, floorrad1*4/8);
-  shBigTriangle.configure(triangleside, 0);
+  shBigTriangle.configure(triangleside, 0); shBigTriangle.prio = PPR_FLOOR_TOWER;
   shBigHepta.configure(0, (nonbitrunc ? tessf : crossf) * .97);
   shTriheptaFloor.configure(trihepta0, trihepta1);
   shDragonFloor.prio = PPR_FLOOR_DRAGON;
