@@ -7068,3 +7068,133 @@ S(
 S("NEVER", "NIKDY")
 
 #undef Orb
+
+// Goldberg polyhedra
+
+S("cube/elliptic", "krychle/el")
+S("chamfered", "zkosené")
+S("2x chamfered", "2x zkosené")
+S("select", "výběr")
+
+S("Goldberg polyhedra are obtained by adding extra hexagons to a dodecahedron. "
+  "GP(x,y) means that, to get to a nearest non-hex from any non-hex, you should move x "
+  "cells in any direction, turn right 60 degrees, and move y cells. "
+  "HyperRogue generalizes this to any tesselation with 3 faces per vertex. "
+  "By default HyperRogue uses bitruncation, which corresponds to GP(1,1).",
+  
+  "Goldbergovy mnohostěny se získají tím, že k dvanáctistěnu přidáte nějaké šestiúhelníky navíc. "
+  "GP(x,y) znamená, že abyste se z ne-šestiúhelníku dostali do jiného nejbližšího "
+  "ne-šestiúhelníku, musíte jít x políček libovolným směrem, potom se otočit o 60 "
+  "stupňů doprava, a jít dalších y políček. HyperRogue toto zobecňuje na libovolné "
+  "dělení se třemi políčky kolem každého vrcholu. HyperRogue standardně používá "
+  "operaci dvojseříznutí, která odpovídá GP(1,1).")
+
+// land compatibility guides
+
+S("Cannot kill Hedgehog Warriors in this geometry.", "V této geometrii není možné zabít Ježčího válečníka.")
+S("No random pattern version.", "Tento kraj nemá žádnou verzi s náhodným vzorem.")
+S("Great Walls not implemented.", "V této geometrii nejsou implementovány Velké zdi.")
+S("Pattern incompatible.", "Nekompatibilní vzor.")
+S("Pattern not implemented -- using random.", "Vzor není implementován -- používám náhodný vzor.")
+S("Pattern not implemented.", "Vzor není implementován.")
+S("Not enough space.", "Není dost místa.")
+S("Does not work in this geometry.", "V této geometrii nefunguje.")
+S("This land is designed for bounded worlds.", "Tento kraj je navržen pro omezené světy.")
+S("This land is designed for infinite worlds.", "Tento kraj je navržen pro nekonečné světy.")
+S("This land is designed for infinite worlds or big spheres.", "Tento kraj je navržen pro nekonečné světy nebo velké koule.")
+S("Out of theme for the full game.", "Nezapadá do plné hry.")
+S("No game here.", "Zde se nedá hrát.")
+S("Does not work in chaos mode.", "Nefunguje v chaotickém módu.")
+S("Not in the full game.", "Není v plné hře.")
+S("Special construction in the Chaos mode.", "Speciální konstrukce v chaotickém módu.")
+S("Special construction in the Euclidean mode.", "Speciální konstrukce v eukleidovském módu.")
+S("Special construction in this geometry.", "Speciální konstrukce v této geometrii.")
+S("Not implemented.", "Neimplementováno.")
+S("Partially implemented.", "Částečně implementováno.")
+S("No comments.", "Bez komentáře.")
+S("Does not work in pure tactics mode.", "Nefunguje v taktickém módu.")
+S("Technical.", "Technický kraj.")
+S("Full game.", "Plná hra.")
+S("Somewhat inaccurate.", "Poněkud nepřesné.")
+S("Mercury rivers not implemented (or could not work) in this geometry.", "Rtuťové řeky nejsou v této geometrii implementovány (nebo by v ní nefungovaly).")
+S("Patterns compatible.", "Vzory jsou kompatibilní.")
+S("This land is specially designed for this geometry.", "Tento kraj je speciálně navržen pro tuto geometrii.")
+S("Three-colorability required.", "Tento kraj vyžaduje obarvitelnost třemi barvami.")
+S("Land not implemented.", "Tento kraj není implementován.")
+S("Special interest.", "Zvlášť zajímavá kombinace.")
+S("Better version exists.", "Existuje lepší verze.")
+S("Grid does not work in this geometry.", "Síť v této geometrii nefunguje.")
+S("Graphics not implemented in this geometry.", "Grafika není v této geometrii implementována.")
+S("This land does not work in the current settings. Reason not available.",
+  "Tento kraj při současném nastavení nefunguje. Důvod není znám.")
+S("This land does not work well in the current settings. Reason not available.",
+  "Tento kraj při současném nastavení nefunguje dobře. Důvod není znám.")
+S("This combination is known to be buggy at the moment.", "O této kombinaci se v současné době ví, že je chybová.")
+S("Somewhat sloppy pattern.", "Poněkud nedbalý vzor.")
+S("Fractal landscapes not implemented in this geometry.", "V této geometrii nejsou implementovány fraktální krajiny.")
+S("Only simplified walls implemented.", "Implementovány jsou pouze jednoduché zdi.")
+
+// new models of hyperbolic/spherical geometry, and related texts
+
+S("Mercator", "Mercatorova projekce")
+S("band equidistant", "pás, délkojevný")
+S("band equi-area", "pás, plochojevný")
+S("sinusoidal", "sinusoida")
+S("two-point equidistant", "dvoubodová okvidistantní projekce")
+S("orthogonal projection", "ortogonální projekce")
+S("stereographic projection", "stereografická projekce")
+S("zoomed stereographic projection", "přiblížená stereografická projekce")
+S("zoomed out", "oddálit")
+S("zoomed in", "přiblížit")
+S("gnomonic projection", "gnómonická projekce")
+S("Goldberg", "Goldberg")
+S("fisheye", "rybí oko")
+S("extend the ends", "rozšířit konce") // for the line animation
+
+S(
+  "This model maps the world so that the distances from two points "
+  "are kept. This parameter gives the distance from the two points to "
+  "the center.",
+  
+  "Tento model mapuje svět tak, aby zachovával vzdálenost od dvou daných "
+  "bodů. Tento parametr udává vzdálenost z těchto dvou bodů do středu.")
+
+// missing texts from the Tutorial
+
+S("enable the Camelot cheat", "zapnout Camelotový cheat")
+S("disable the Camelot cheat", "vypnout Camelotový cheat")
+S("gain Orb of the Sword", "získat Sféru meče")
+S("Static mode enabled.", "Statický mód zapnut.")
+S("Static mode disabled.", "Statický mód vypnut.")
+
+S("Returned to your game.", "Návrat do tvé hry.")
+S("Spherical version of %the1. ", "%1 ve sférické verzi. ");
+S("Euclidean version of %the1. ", "%1 v eukleidovské verzi. ");
+S("Click again to go back to your game.", "Dalším kliknutím se vrátíš do své hry.")
+S("Press %1 again to go back to your game.", "Dalším stisknutím %1 se vrátíš do své hry.")
+S("return to your game", "návrat do hry")
+S("list of slides", "seznam snímků")
+
+// main menu
+
+S("paint pictures", "maluj obrázky")
+S("back to the start menu", "zpět do startovního menu")
+
+// special texts for 'g' key
+
+S("You juggle the Dead Orbs.", "Žongluješ Mrtvými Sférami.")
+S("You give %the1 a grim look.", "Vrhl jsi pochmurný pohled na %a1.")
+
+// Strange Challenge
+
+S("Strange Challenge", "Podivná mise")
+S("compete with other players on random lands in random geometries", "soupeř s jinými hráči v náhodných krajích a náhodných geometriích");
+
+S("Strange Challenge #%1", "Podivná mise #%1")
+S("next challenge in %1", "do další mise: %1")
+S("synchronizing scores...", "synchronizuji skóre...")
+S("already played", "už jsi hrá%l0")
+S("play!", "hraj!")
+S("See past challenges", "předešlé mise")
+S("Past Strange Challenges. You can see the setting and high scores, but you can no longer play them.",
+  "Předešlé Divné mise. Můžeš se podívat na jejich nastavení a nejvyšší skóre, ale už je nemůžeš hrát.")

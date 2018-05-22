@@ -7168,3 +7168,134 @@ S(
   "режиме обманщика."
   );
 S("NEVER", "НИКОГДА")
+
+ 
+// Goldberg polyhedra
+ 
+S("cube/elliptic", "кубический/эллиптический")
+S("chamfered", "усеченный")
+S("2x chamfered", "2x усеченный")
+S("select", "выбрать")
+ 
+S("Goldberg polyhedra are obtained by adding extra hexagons to a dodecahedron. "
+  "GP(x,y) means that, to get to a nearest non-hex from any non-hex, you should move x "
+  "cells in any direction, turn right 60 degrees, and move y cells. "
+  "HyperRogue generalizes this to any tesselation with 3 faces per vertex. "
+  "By default HyperRogue uses bitruncation, which corresponds to GP(1,1).",
+ 
+  "Многогранники Гольдберга получаются из додекаэдра добавлением шестиугольников. "
+  "GP(x,y) означает, что для того, чтобы дойти от любого не-шестиугольника до ближайшего к нему, "
+  "не-шестиугольника, нужно пройти x клеток, повернуть на 60 градусов и пройти еще y клеток. "
+  "HyperRogue обобщает эту идею на любое замощение, в котором в каждой вершине сходятся три грани. "
+  "По умолчанию HyperRogue использует GP(1,1).")
+ 
+// land compatibility guides
+ 
+S("Cannot kill Hedgehog Warriors in this geometry.", "В этой геометрии невозможно убить Ежа-воина.")
+S("No random pattern version.", "Недоступен режим случайных узоров.")
+S("Great Walls not implemented.", "Великие Стены не реализованы в этой геометрии.")
+S("Pattern incompatible.", "Узор несовместим.")
+S("Pattern not implemented -- using random.", "Узор не реализован -- генерируем случайным образом.")
+S("Pattern not implemented.", "Узор не реализован.")
+S("Not enough space.", "Недостаточно места.")
+S("Does not work in this geometry.", "Не работаем в этой геометрии.")
+S("This land is designed for bounded worlds.", "Это земля разработана для ограниченных миров.")
+S("This land is designed for infinite worlds.", "Эта земля разработана для бесконечных миров.")
+S("This land is designed for infinite worlds or big spheres.", "Эта земля разработана для бесконечных миров или больших сфер.")
+S("Out of theme for the full game.", "Не подходит тематически для обычной игры.")
+S("No game here.", "Здесь нельзя играть.")
+S("Does not work in chaos mode.", "Не работает в режиме Хаоса.")
+S("Not in the full game.", "Не работает в обычной игре.")
+S("Special construction in the Chaos mode.", "Специальная конструкция в режиме Хаоса.")
+S("Special construction in the Euclidean mode.", "Специальная конструкция в евклидовой геометрии.")
+S("Special construction in this geometry.", "Специальная конструкция в этой геометрии.")
+S("Not implemented.", "Не реализовано.")
+S("Partially implemented.", "Частично реализовано.")
+S("No comments.", "Без комментариев.")
+S("Does not work in pure tactics mode.", "Не работает в тактическом режиме.")
+S("Technical.", "Техническая.")
+S("Full game.", "Полная игра.")
+S("Somewhat inaccurate.", "Неточная реализация.")
+S("Mercury rivers not implemented (or could not work) in this geometry.", "Реки ртути не реализованы (или не работают) в этой геометрии.")
+S("Patterns compatible.", "Узоры совместимы.")
+S("This land is specially designed for this geometry.", "Эта земля специально сделана для этой геометрии.")
+S("Three-colorability required.", "Необходима раскраска в три цвета.")
+S("Land not implemented.", "Земля не реализована.")
+S("Special interest.", "Особенно интересная комбинация.")
+S("Better version exists.", "Есть лучшая версия.")
+S("Grid does not work in this geometry.", "Сетка не работает в этой геометрии.")
+S("Graphics not implemented in this geometry.", "Графика не реализована в этой геометрии.")
+S("This land does not work in the current settings. Reason not available.",
+  "Эта земля не работает при данных настройках. Причина недоступна.")
+S("This land does not work well in the current settings. Reason not available.",
+  "Эта земля плохо работает при данных настройках. Причина недоступна.")
+S("This combination is known to be buggy at the moment.", "Эта комбинация сейчас может работать с ошибками.")
+S("Somewhat sloppy pattern.", "Небрежный узор.")
+S("Fractal landscapes not implemented in this geometry.", "Фракталы не реализованы в этой геометрии.")
+S("Only simplified walls implemented.", "Реализованы только упрощенные стены.")
+ 
+// new models of hyperbolic/spherical geometry, and related texts
+ 
+S("Mercator", "проекция Меркатора")
+S("band equidistant", "эквидистантная полоса")
+S("band equi-area", "полоса постоянной площади")
+S("sinusoidal", "синусоида")
+S("two-point equidistant", "двухточечная эквидистанта")
+S("orthogonal projection", "ортогональная проекция")
+S("stereographic projection", "стереографическая проекция")
+S("zoomed stereographic projection", "приближенная стереографическая проекция")
+S("zoomed out", "отдалить")
+S("zoomed in", "приблизить")
+S("gnomonic projection", "гномоническая проекция")
+S("Goldberg", "Гольдберг")
+S("fisheye", "рыбий глаз")
+S("extend the ends", "расширить концы") // for the line animation
+ 
+S(
+  "This model maps the world so that the distances from two points "
+  "are kept. This parameter gives the distance from the two points to "
+  "the center.",
+ 
+  "Эта модель отображает мир так, что расстояния от двух точек сохраняются. "
+  "Этот параметр задает расстояние от этих двух точек до центра. ")
+ 
+// missing texts from the Tutorial
+ 
+S("enable the Camelot cheat", "включить читы в Камелоте")
+S("disable the Camelot cheat", "выключить читы в Камелоте")
+S("gain Orb of the Sword", "дать сферу Меча")
+S("Static mode enabled.", "Статический режим включен.")
+S("Static mode disabled.", "Статический режим выключен.")
+ 
+S("Returned to your game.", "Вернуться в игру.")
+S("Spherical version of %the1. ", "%1 в сферической версии. ");
+S("Euclidean version of %the1. ", "%1 в евклидовой версии. ");
+S("Click again to go back to your game.", "Нажмите еще раз, чтобы вернуться в игру.")
+S("Press %1 again to go back to your game.", "Нажмите %1 еще раз, чтобы вернуться в игру.")
+S("return to your game", "вернуться в игру")
+S("list of slides", "список слайдов")
+ 
+// main menu
+ 
+S("paint pictures", "рисовать картинки")
+S("back to the start menu", "назад в стартовое меню")
+ 
+// special texts for 'g' key
+ 
+S("You juggle the Dead Orbs.", "Ты жонглируешь Мёртвыми сферами.")
+S("You give %the1 a grim look.", "Ты мрачно смотришь на %a1.")
+ 
+// Strange Challenge
+ 
+S("Strange Challenge", "Странная миссия")
+S("compete with other players on random lands in random geometries", "соревнуйся с другими игроками в случайных землях в случайных геометриях");
+ 
+S("Strange Challenge #%1", "Странная миссия #%1")
+S("next challenge in %1", "до следующей миссии: %1")
+S("synchronizing scores...", "синхронизация результатов...")
+S("already played", "уже играл%E0")
+S("play!", "играть!")
+S("See past challenges", "смотреть прошлые миссии")
+S("Past Strange Challenges. You can see the setting and high scores, but you can no longer play them.",
+  "Прошлые Странные миссии. Ты можешь смотреть настройки и результаты, но не играть.")
+  
