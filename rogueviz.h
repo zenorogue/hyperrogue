@@ -1,3 +1,5 @@
+// See: http://www.roguetemple.com/z/hyper/rogueviz.php
+
 namespace rogueviz {
 
   void init();
