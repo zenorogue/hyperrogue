@@ -2861,12 +2861,14 @@ void activateMonstersAt(cell *c) {
   }
 
 void fixStorage() {
+
   vector<monster*> restore;
-  for(auto it = monstersAt.begin(); it != monstersAt.end(); it++)
-    if(it->second->base != it->first) {
-      restore.push_back(it->second);
-      monstersAt.erase(it++);
-      }
+
+  for(auto it = monstersAt.begin(); it != monstersAt.end(); it++) 
+    restore.push_back(it->second);
+
+  monstersAt.clear();
+
   for(monster *m: restore) m->store();
   }
 
