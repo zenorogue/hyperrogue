@@ -69,9 +69,12 @@ void addTri(hyperpoint h, hyperpoint hx, hyperpoint hy, hyperpoint v, hyperpoint
 
 bool need_texture = true;
 
+#if CAP_TEXTURE
 texture::texture_data tdata; // = texture::config.data;
+#endif
 
 void make_texture() {
+#if CAP_TEXTURE
   printf("make texture\n");
   need_texture = false;
   tdata.whitetexture();
@@ -96,6 +99,7 @@ void make_texture() {
     }
 
   tdata.loadTextureGL();
+#endif
   }
 
 int savetex;
@@ -135,7 +139,9 @@ void make_staircase() {
     }
   if(need_texture) {
     make_texture();
+#if CAP_TEXTURE
     rug::alternate_texture = tdata.textureid;
+#endif
     }
   rug::clear_model(); 
   printf("compute\n");
