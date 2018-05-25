@@ -551,9 +551,15 @@ void mainloopiter() {
   SDL_Event ev;
   DEBB(DF_GRAPH, (debugfile,"polling for events\n"));
   
-  achievement_pump();
+  achievement_pump();  
+  while(SDL_PollEvent(&ev)) handle_event(ev);
+  fix_mouseh();
+  }
   
-  while(SDL_PollEvent(&ev)) {
+void handle_event(SDL_Event& ev) {
+  bool normal = cmode & sm::NORMAL;
+  Uint8 *keystate = SDL_GetKeyState(NULL);
+
     DEBB(DF_GRAPH, (debugfile,"got event type #%d\n", ev.type));
     int sym = 0;
     int uni = 0;
@@ -786,9 +792,6 @@ void mainloopiter() {
       
     handlekey(sym, uni);
     }
-
-  fix_mouseh();
-  }
 #endif
 
 void mainloop() {
