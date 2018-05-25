@@ -492,6 +492,9 @@ void showChangeMode() {
       if(tactic::on && gold()) {
         addMessage(XLAT("Not available in the pure tactics mode!"));
         }
+      else if(daily::on) {
+        addMessage(XLAT("Not available in the daily challenge!"));
+        }
       else if(!cheater) {
         cheater++;
         addMessage(XLAT("You activate your demonic powers!"));
