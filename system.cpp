@@ -85,10 +85,13 @@ void welcomeMessage() {
 int trailer_cash0 = 5;
 int trailer_cash1 = 15;
 bool trailer_safety = true;
-  
+
+hookset<void()> *hooks_initgame;
+
 // initialize the game
 void initgame() {
   DEBB(DF_INIT, (debugfile,"initGame\n"));
+  callhooks(hooks_initgame); 
 
   yendor::init(1);
   

@@ -1938,7 +1938,7 @@ template<class T, class V, class... U> V callhandlers(V zero, hookset<T> *h, U&.
   }
 
 extern hookset<bool(int sym, int uni)> *hooks_handleKey;
-extern hookset<void(cell *c, const transmatrix& V)> *hooks_drawcell;
+extern hookset<bool(cell *c, const transmatrix& V)> *hooks_drawcell;
 extern hookset<bool(int argc, char** argv)> *hooks_main;
 extern hookset<int()> *hooks_args;
 extern hookset<eLand(eLand)> *hooks_nextland;
