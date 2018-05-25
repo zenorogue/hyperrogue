@@ -29,7 +29,7 @@ typedef long double ld;
 
 struct hyperpoint : array<ld, 3> {
   hyperpoint() {}
-  hyperpoint(ld x, ld y, ld z) : array<ld,3> {x,y,z} {}
+  hyperpoint(ld x, ld y, ld z) { (*this)[0] = x; (*this)[1] = y; (*this)[2] = z; }
   };
 
 struct transmatrix {
