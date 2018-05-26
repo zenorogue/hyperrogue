@@ -212,6 +212,27 @@ void describeOrb(string& help, const orbinfo& oi) {
     }
   }
 
+string other_geometry() {
+  return XLAT("Note: the rules above correspond to the standard geometry; actual rules in other geometries may be different. ");
+  }
+
+string other_land() {
+  return XLAT("Note: the rules refer to colors which are not visible in other lands. ");
+  }
+
+string other_geometry_land() {
+  if(gp::on || S7 != 7 || nonbitrunc) return other_geometry();
+  else return other_land();
+  }
+
+string forbidden_marked() {
+  return XLAT("When the 'mark heptagons' option (hotkey '7') is on, forbidden moves are marked.");
+  }
+
+string forbidden_unmarked() {
+  return XLAT("When the 'mark heptagons' option (hotkey '7') is on, moves between unmarked cells are forbidden.");
+  }
+
 string generateHelpForItem(eItem it) {
 
    string help = helptitle(XLATN(iinf[it].name), iinf[it].color);
@@ -367,6 +388,15 @@ string generateHelpForItem(eItem it) {
         }
       }
     }
+  
+  if(it == itOrb37 && (gp::on || S7 != 7 || nonbitrunc))
+    help += "\n\n" + other_geometry() + forbidden_unmarked();
+
+  if(it == itOrbLava && (gp::on || S7 != 7 || nonbitrunc))
+    help += "\n\n" + other_geometry() + forbidden_unmarked();
+  
+  if(among(it, itOrbSide2, itOrbSide3) && !among(S7, 6, 7))
+    help += "\n\n" + other_geometry() + XLAT("This orb lets you attack adjacent cells %1 steps from the primary target.", its(it - itOrbSide1 + 1));
 
 #if CAP_INV
   if(inv::on && it == itInventory)
@@ -475,6 +505,15 @@ string generateHelpForMonster(eMonster m) {
     
   if(m == moBat || m == moEagle)
     s += XLAT("\n\nFast flying creatures may attack or go against gravity only in their first move.", m);
+  
+  if(m == moAltDemon)
+    s += "\n\n" + other_geometry_land() + forbidden_unmarked();
+
+  if(among(m, moHexDemon, moHexSnake, moHexSnakeTail))
+    s += "\n\n" + other_geometry_land() + forbidden_marked();
+
+  if(among(m, moKrakenT, moKrakenH) && (gp::on || S7 != 7 || nonbitrunc))
+    s += "\n\n" + other_geometry() + XLAT("Forbidden cells are marked with a different color.");
 
   return s;
   }
@@ -842,8 +881,12 @@ void describeMouseover() {
     if(isWarped(c) && !isWarped(c->land))
       out += ", warped";
 
-    if(isWarped(c)) 
-      appendHelp(string("\n\n") + warpdesc);
+    if(isWarped(c)) {
+      appendHelp(string("\n\n") + XLAT(warpdesc));
+
+      if(gp::on || S7 != 7 || nonbitrunc) if(c->item != itOrb37)
+        help += "\n\n" + other_geometry() + forbidden_unmarked();
+      }
     }
     
 #if CAP_ROGUEVIZ

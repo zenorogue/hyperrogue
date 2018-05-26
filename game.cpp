@@ -7675,7 +7675,7 @@ bool movepcto(int d, int subdir, bool checkonly) {
       if(checkonly) return false;
       if(nonAdjacent(cwt.c,c2))
         addMessage(XLAT(
-          nonbitrunc ? 
+          geosupport_graveyard() < 2 ? 
           "You cannot move between the cells without dots here!" :
           "You cannot move between the triangular cells here!"
           ));
