@@ -305,7 +305,7 @@ bool have_current_settings() {
 
 void resetModes(char leave) {
   popAllGames();
-  firstland = laIce; vid.scfg.players = 1;
+  firstland = laIce; specialland = laIce; vid.scfg.players = 1;
   if(shmup::on != (leave == rg::shmup)) restartGame(rg::shmup);
   if(inv::on != (leave == rg::inv)) restartGame(rg::inv);
   if(chaosmode != (leave == rg::chaos)) restartGame(rg::chaos);
