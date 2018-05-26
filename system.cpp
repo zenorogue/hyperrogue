@@ -1110,8 +1110,10 @@ void restartGame(char switchWhat, bool push, bool keep_screens) {
     // items[itGreenStone] = 100;
     clearMemory();
     }
+#if CAP_DAILY
   if(daily::on && !among(switchWhat, rg::daily, rg::daily_off))
     daily::turnoff();
+#endif
   if(switchWhat == rg::peace) {
     peace::on = !peace::on;
     tactic::on = yendor::on = princess::challenge = 
