@@ -2935,6 +2935,7 @@ void turn(int delta) {
 
   for(int t=1; t<motypes; t++) if(exists[t]) {
   
+    pd_from = NULL;
     // build the path data
     
     int pqs = size(pathq);
