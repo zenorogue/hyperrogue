@@ -26,8 +26,8 @@ namespace gp {
   
   struct goldberg_mapping_t {
     cellwalker cw;
-    char rdir;
-    char mindir;
+    signed char rdir;
+    signed char mindir;
     };
 
   loc eudir(int d) {
@@ -163,7 +163,7 @@ namespace gp {
       if(peek(wcw)) {
         auto wcw1 = get_localwalk(wc1, dir1);
         if(wcw + wstep != wcw1) {
-          WHD( printf("%s : %s / %s (pull error from %s :: %s)\n", disp(at1), dcw(wcw+wstep), dcw(wcw1), disp(at), dcw(wcw)); )
+          WHD( Xprintf("%s : %s / %s (pull error from %s :: %s)\n", disp(at1), dcw(wcw+wstep), dcw(wcw1), disp(at), dcw(wcw)); )
           exit(1);
           }
         }
@@ -171,7 +171,7 @@ namespace gp {
       }
     if(peek(wcw)) {
       set_localwalk(wc1, dir1, wcw + wstep);
-      WHD( printf("%s : %s (pulled from %s :: %s)\n", disp(at1), dcw(wcw + wstep), disp(at), dcw(wcw)); )
+      WHD( Xprintf("%s : %s (pulled from %s :: %s)\n", disp(at1), dcw(wcw + wstep), disp(at), dcw(wcw)); )
       return true;
       }
     return false;
@@ -181,10 +181,11 @@ namespace gp {
     auto& wc = get_mapping(at);
     auto wcw = get_localwalk(wc, dir);
     auto& wc1 = get_mapping(at + eudir(dir));
-    WHD( printf("  connection %s/%d %s ~ %s/%d ", disp(at), dir, dcw(wc.cw+dir), disp(at+eudir(dir)), dir1); )
+    WHD( Xprintf("  md:%d s:%d", wc.mindir, wc.cw.spin); )
+    WHD( Xprintf("  connection %s/%d %s=%s ~ %s/%d ", disp(at), dir, dcw(wc.cw+dir), dcw(wcw), disp(at+eudir(dir)), dir1); )
     if(!wc1.cw.c) {
       if(peek(wcw)) {
-        WHD( printf("(pulled) "); )
+        WHD( Xprintf("(pulled) "); )
         set_localwalk(wc1, dir1, wcw + wstep);
         }
       else {
@@ -192,25 +193,25 @@ namespace gp {
         tsetspin(wcw.c->spintable, wcw.spin, 0);
         set_localwalk(wc1, dir1, wcw + wstep);
         spawn++;
-        WHD( printf("(created) "); )
+        WHD( Xprintf("(created) "); )
         }
       }
-    WHD( printf("%s ", dcw(wc1.cw+dir1)); )
+    WHD( Xprintf("%s ", dcw(wc1.cw+dir1)); )
     auto wcw1 = get_localwalk(wc1, dir1);
     if(peek(wcw)) {
       if(wcw+wstep != wcw1) {
-        WHD( printf("FAIL: %s / %s\n", dcw(wcw), dcw(wcw1)); exit(1); )
+        WHD( Xprintf("FAIL: %s / %s\n", dcw(wcw), dcw(wcw1)); exit(1); )
         }
       else {
-        WHD(printf("(was there)\n");)
+        WHD(Xprintf("(was there)\n");)
         }
       }
     else {
-      WHD(printf("ok\n"); )
+      WHD(Xprintf("ok\n"); )
       peek(wcw) = wcw1.c;
       tsetspin(wcw.c->spintable, wcw.spin, wcw1.spin + (wcw.mirrored != wcw1.mirrored ? 8 : 0));
       if(wcw+wstep != wcw1) {
-        printf("assertion failed\n");
+        Xprintf("assertion failed\n");
         exit(1);
         }
       }
@@ -224,15 +225,15 @@ namespace gp {
   goldberg_mapping_t& set_heptspin(loc at, heptspin hs) {
     auto& ac0 = get_mapping(at);
     ac0.cw = cellwalker(hs.h->c7, hs.spin, hs.mirrored);
-    WHD( printf("%s : %s\n", disp(at), dcw(ac0.cw)); )
+    WHD( Xprintf("%s : %s\n", disp(at), dcw(ac0.cw)); )
     return ac0;
     }
 
   void extend_map(cell *c, int d) {
-    WHD( printf("EXTEND %p %d\n", c, d); )
+    WHD( Xprintf("EXTEND %p %d\n", c, d); )
     if(c->master->c7 != c) {
       while(c->master->c7 != c) {
-        WHD( printf("%p direction 0 corresponds to %p direction %d\n", c, c->mov[0], c->spin(0)); )
+        WHD( Xprintf("%p direction 0 corresponds to %p direction %d\n", c, c->mov[0], c->spin(0)); )
         d = c->spin(0);
         c = c->mov[0];
         }
@@ -260,6 +261,7 @@ namespace gp {
     auto& ac0 = set_heptspin(vc[0], hs);
     ac0.mindir = -1;
     auto& ac1 = set_heptspin(vc[1], hs + wstep - 3);
+    ac1.mindir = 0;
     auto& ac2 = set_heptspin(vc[2], hs + 1 + wstep - 4);
     ac2.mindir = 1;
     
@@ -296,11 +298,11 @@ namespace gp {
     for(int i=0; i<3; i++) {
       loc start = vc[i];
       loc end = vc[(i+1)%3];
-      WHD( printf("from %s to %s\n", disp(start), disp(end)); )
+      WHD( Xprintf("from %s to %s\n", disp(start), disp(end)); )
       loc rel = param;
       auto build = [&] (loc& at, int dx, bool forward) {
         int dx1 = dx + 2*i;
-        WHD( printf("%s %d .. %s %d\n", disp(at), dx1, disp(at + eudir(dx1)), fix6(dx1+3)); )
+        WHD( Xprintf("%s %d .. %s %d\n", disp(at), dx1, disp(at + eudir(dx1)), fix6(dx1+3)); )
         conn(at, dx1);        
         if(forward) get_mapping(at).rdir = fix6(dx1);
         else get_mapping(at+eudir(dx1)).rdir = fix6(dx1+3);
@@ -330,7 +332,7 @@ namespace gp {
       for(int k=0; k<6; k++)
         if(start + eudir(k+2*i) == end)
           build(start, k, true);                         
-      if(start != end) { printf("assertion failed: start %s == end %s\n", disp(start), disp(end)); exit(1); }
+      if(start != end) { Xprintf("assertion failed: start %s == end %s\n", disp(start), disp(end)); exit(1); }
       }
 
     // now we can fill the interior of our big equilateral triangle
@@ -340,7 +342,7 @@ namespace gp {
       int dx = wc.rdir;
       auto at1 = at + eudir(dx);
       auto& wc1 = get_mapping(at1);
-      WHD( printf("%s (%d) %s (%d)\n", disp(at), dx, disp(at1), wc1.rdir); )
+      WHD( Xprintf("%s (%d) %s (%d)\n", disp(at), dx, disp(at1), wc1.rdir); )
       int df = wc1.rdir - dx;
       if(df < 0) df += 6;
       if(df == 3) break;
@@ -368,12 +370,12 @@ namespace gp {
           break;
           }
         default:
-          printf("case unhandled %d\n", df);
+          Xprintf("case unhandled %d\n", df);
           exit(1);
         }
       }
 
-    WHD( printf("DONE\n\n"); )    
+    WHD( Xprintf("DONE\n\n"); )    
     }
   
   hyperpoint loctoh_ort(loc at) {
@@ -481,7 +483,7 @@ namespace gp {
         base_distlimit = 30;
       prepare_matrices();
       if(debug_geometry)
-        printf("scale = " LDF "\n", scale);
+        Xprintf("scale = " LDF "\n", scale);
       }
     else {
       scale = 1;
@@ -683,7 +685,7 @@ namespace gp {
           found = true, centerloc = c;
         }
       if(!found && !quotient)
-        printf("Warning: centerloc not found: %d,%d,%d\n", dmain, d0, d1);
+        Xprintf("Warning: centerloc not found: %d,%d,%d\n", dmain, d0, d1);
       center_locs[rel] = centerloc;
       }
     

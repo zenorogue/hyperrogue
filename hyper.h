@@ -3392,6 +3392,11 @@ void set_priority_board(int id);
 int get_sync_status();
 bool score_loaded(int id);
 int score_default(int id);
+#if CAP_SDL
 union SDL_Event;
 void handle_event(SDL_Event& ev);
+#endif
 
+#ifndef XPRINTF
+template<class...T> void Xprintf(const char *fmt, T... t) { printf(fmt, t...); }
+#endif

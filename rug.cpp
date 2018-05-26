@@ -9,12 +9,6 @@
 #define TEXTURESIZE (texturesize)
 #define HTEXTURESIZE (texturesize/2)
 
-#if ISANDROID
-template<class...T> void Xprintf(T... t) { __android_log_print(ANDROID_LOG_VERBOSE, "RUG", t...); }
-#else
-template<class...T> void Xprintf(T... t) { printf(t...); }
-#endif
-
 bool rug_failure = false;
 
 namespace rug {

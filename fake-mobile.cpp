@@ -116,12 +116,12 @@ int main(int argc, char **argv) {
   int mx = 0; int my = 0; bool _clicked = false;
   
   inv::on = true;
-  firstland = laMinefield;
-  activateSafety(laWhirlwind);
+  // firstland = laMinefield;
+  // activateSafety(laWhirlwind);
   
   items[itGreenStone] = 100;
-  items[itDiamond] = 50;
-  for(int i=1; i<10; i++) kills[i] = 5;
+  // items[itDiamond] = 50;
+  // for(int i=1; i<10; i++) kills[i] = 5;
   
   while(true) {
    
