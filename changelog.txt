@@ -2443,3 +2443,24 @@ in this geometry, but it is not playable).
 2018.05.09 21:38 Update 10.3v:
 - fixed Hive
 - fixed a memory error
+
+2018.05.26 12:00 Update 10.4:
+- Strange Challenge (on Steam)
+- leaderboards rewrite: faster sync of Yendor/PTM scores on Steam
+- translations updated
+- Orb of Slaying is no longer considered universally useful; it also permanently kills Mirror Spirits now
+- fixed the shmup mode
+
+many geometry-related fixes:
+- reduced the priority of Big Triangle so that it is below other floors -- looks better in Crystal sublands
+- lightning bolts should no longer freeze the game in some bounded geometry settings
+- Hunting Dogs no longer retreat outside of non-quotient hyperbolic geometry
+- fixed Goldberg graphics in elliptic and Zebra quotient geometry
+- fixed geometry changing in the Tutorial
+- improved compatibility ranking for Windy Plains and LoStorms ('pattern incompatible' in non37; LoS has randomized version for other geometries now), RedRock and RuinedCity (need good pseudohept pattern), Hedgehog lands (less fun in order-4 geometries), marked an incomplete land as in development
+- fixed plain floor shapes in order-4 geometries (previously only worked in Euclid Squares of these)
+- fixed threecolor pattern claiming to work when it does not, or producing weird effects
+
+non-game:
+- fixed a bug in fixStorage, and other fixes in RogueViz; added the 'staircase simulation' to RogueViz
+- ODS projection now works in Euclidean and hyperbolic
