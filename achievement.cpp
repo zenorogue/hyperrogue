@@ -557,10 +557,15 @@ void improveItemScores() {
   improve_score(77, itSwitch);
   }
 
+int next_stat_tick;
+
 void achievement_final(bool really_final) {
   if(offlineMode) return;
 #ifdef HAVE_ACHIEVEMENTS
-  upload_score(LB_STATISTICS, time(NULL));
+  if(ticks > next_stat_tick) {
+    upload_score(LB_STATISTICS, time(NULL));
+    next_stat_tick = ticks + 600000;
+    }
   if(cheater) return;
 #if CAP_TOUR
   if(tour::on) return;
@@ -584,9 +589,9 @@ void achievement_final(bool really_final) {
     return;
     }
 
-#ifdef CAP_DAILY
+#if CAP_DAILY
   if(daily::on) {
-    upload_score(daily::find_daily_lbid(daily::daily_id), gold(NO_LOVE));
+    daily::uploadscore(really_final);
     return;
     }  
 #endif

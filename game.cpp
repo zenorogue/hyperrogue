@@ -3286,6 +3286,9 @@ void gainItem(eItem it) {
   items[it]++; if(it != itLotus) updateHi(it, items[it]);
   achievement_collection(it, gold(), g);
   multi::treasures[multi::cpid]++;
+#if CAP_DAILY
+    if(daily::on) achievement_final(false);
+#endif
   }
 
 string itemcounter(int qty) {
