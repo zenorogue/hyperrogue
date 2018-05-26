@@ -678,7 +678,7 @@ void showStartMenu() {
     
     case 20:
       dialog::addBreak(100);
-      dialog::addBigItem(XLAT1("Halloween"), 'z');
+      dialog::addBigItem(XLAT1("Halloween"), 'Z');
       dialog::addInfo(XLAT("Halloween mini-game"));
       break;
     }
@@ -770,7 +770,7 @@ void showStartMenu() {
         pushScreen(multi::showShmupConfig);
         }
       }
-    else if(uni == 'z') {
+    else if(uni == 'Z') {
       popScreenAll();
       resetModes('g');
       stampbase = ticks;
@@ -787,6 +787,12 @@ void showStartMenu() {
       popScreenAll();
       resetModes('c');
       tour::start();
+      }
+#endif
+#if CAP_DAILY
+    else if(uni == 'z') {
+      popScreenAll();
+      pushScreen(daily::showMenu);
       }
 #endif
 #if CAP_ROGUEVIZ && CAP_TOUR

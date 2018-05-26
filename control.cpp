@@ -368,6 +368,10 @@ void handleKeyNormal(int sym, int uni) {
   // if(sym == SDLK_F4)  restartGameSwitchEuclid();
 
   if(sym == SDLK_F5) {
+    #if CAP_DAILY
+    if(daily::on) daily::handleQuit(1);
+    else
+    #endif
     if(needConfirmation()) 
       pushScreen(showMission);
     else restartGame();
@@ -381,6 +385,10 @@ void handleKeyNormal(int sym, int uni) {
     }
 
   if(sym == SDLK_F10) {
+    #if CAP_DAILY
+    if(daily::on) daily::handleQuit(2);
+    else
+    #endif
     if(needConfirmation()) pushScreen(showMission);
     else quitmainloop = true;
     }
@@ -786,6 +794,10 @@ void handle_event(SDL_Event& ev) {
       }
 
     if(ev.type == SDL_QUIT) {
+      #if CAP_DAILY
+      if(daily::on) daily::handleQuit(3);
+      else
+      #endif
       if(needConfirmation() && !(cmode & sm::MISSION)) showMissionScreen();
       else quitmainloop = true;
       }
