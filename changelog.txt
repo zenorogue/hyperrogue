@@ -2464,3 +2464,7 @@ many geometry-related fixes:
 non-game:
 - fixed a bug in fixStorage, and other fixes in RogueViz; added the 'staircase simulation' to RogueViz
 - ODS projection now works in Euclidean and hyperbolic
+
+2018.05.27 01:21 Update 10.4a:
+- Strange Challenge should exit correctly.
+- rules are described better in other geometries
