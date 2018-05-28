@@ -409,6 +409,9 @@ void buildTorusRug() {
     
   ld factor = sqrt(ld(solution.second.d2()) / solution.first.d2());
   
+  ld xfactor = sqrt(1/ (1+factor*factor));;
+  ld yfactor = xfactor * factor;
+  
   Xprintf("factor = %lf\n", factor);
   if(factor <= 2.05) factor = 2.2;
   factor -= 1;
@@ -439,7 +442,14 @@ void buildTorusRug() {
     // r->flat = {alpha, beta, 0}; 
     double sc = (factor+1)/4;
     
-    r->flat = r->h = hpxyz((factor+cos(alpha)) * cos(beta) * sc, (factor+cos(alpha)) * sin(beta) * sc, -sin(alpha) * sc);
+    if(gwhere == gSphere) {
+      ld ax = alpha + 1.124651, bx = beta + 1.214893;
+      ld x = xfactor * sin(ax), y = xfactor * cos(ax), z = yfactor * sin(bx), t = yfactor * cos(bx);
+      ld d = acos(t) / sqrt(x*x+y*y+z*z);
+      r->flat = r->h = hpxyz(x * d, y * d, z * d);
+      }
+    else 
+      r->flat = r->h = hpxyz((factor+cos(alpha)) * cos(beta) * sc, (factor+cos(alpha)) * sin(beta) * sc, -sin(alpha) * sc);
     r->valid = true;
     
     static const int X = 100003; // a prime
