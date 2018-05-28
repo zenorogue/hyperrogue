@@ -484,7 +484,7 @@ void buildTorusRug() {
     for(int yy=0; yy<rugmax; yy++)
     for(int xx=0; xx<rugmax; xx++)
       addTriangle(rugarr[yy][xx], rugarr[yy+1][xx], rugarr[yy+1][xx+1], modelscale/rugmax),
-      addTriangle(rugarr[yy][xx], rugarr[yy][xx+1], rugarr[yy+1][xx+1], modelscale/rugmax);
+      addTriangle(rugarr[yy][xx+1], rugarr[yy][xx], rugarr[yy+1][xx+1], modelscale/rugmax);
     }
   
   double maxz = 0;
