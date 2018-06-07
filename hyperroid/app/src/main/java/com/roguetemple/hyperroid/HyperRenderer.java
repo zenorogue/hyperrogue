@@ -27,7 +27,7 @@ public class HyperRenderer implements GLSurfaceView.Renderer {
 	int [] graphdata;
 	int gdpos;
 	int gdpop() { return graphdata[gdpos++]; }
-    boolean initialized;
+        boolean initialized;
 	
 	public void onDrawFrame(GL10 unused) {
 	  if(game.forceCanvas) return;
@@ -39,10 +39,10 @@ public class HyperRenderer implements GLSurfaceView.Renderer {
 
           GLES20.glClear(GL10.GL_COLOR_BUFFER_BIT);
 	  synchronized(game) {
-          if(!initialized) { game.glhrinit(); initialized = true; }
-          game.hv.updateGame();
-        game.draw();
-        graphdata = game.loadMap();
+            if(!initialized) { game.glhrinit(); initialized = true; }
+            game.hv.updateGame();
+            game.draw();
+            graphdata = game.loadMap();
             glText.shader.aPosition = game.getaPosition();
             glText.shader.aTexture = game.getaTexture();
             glText.shader.uColor = game.getuColor();
@@ -51,7 +51,8 @@ public class HyperRenderer implements GLSurfaceView.Renderer {
          if(graphdata == null) return;
 
         gdpos = 0;
-      while(gdpos < graphdata.length) {
+ 
+     while(gdpos < graphdata.length) {
         switch(gdpop()) {
           case 2: {
             int x = gdpop();
@@ -98,8 +99,8 @@ public class HyperRenderer implements GLSurfaceView.Renderer {
 		GLES20.glViewport(0, 0, width, height);
 
             // Save width and height
-      this.width = width;                             // Save Current Width
-      this.height = height;                           // Save Current Height
+        this.width = width;                             // Save Current Width
+        this.height = height;                           // Save Current Height
         initialized = false;
 	}
 
@@ -108,7 +109,7 @@ public class HyperRenderer implements GLSurfaceView.Renderer {
 		
                glText = new GLText( new Shader() );
                glText.load(Typeface.DEFAULT_BOLD, 48, 2, 2 );  // Create Font (Height: 48 Pixels / X+Y Padding 2 Pixels)
-        initialized = false;
+               initialized = false;
 	}
 	
 	
