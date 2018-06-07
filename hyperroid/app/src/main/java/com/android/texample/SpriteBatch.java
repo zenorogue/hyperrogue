@@ -5,17 +5,17 @@ package com.android.texample;
 
 // import android.util.FloatMath;
 
-import javax.microedition.khronos.opengles.GL10;
+import android.opengl.GLES20;
 
 public class SpriteBatch {
 
    //--Constants--//
-   final static int VERTEX_SIZE = 4;                  // Vertex Size (in Components) ie. (X,Y,U,V)
+   final static int VERTEX_SIZE = 6;                  // Vertex Size (in Components) ie. (X,Y,U,V)
    final static int VERTICES_PER_SPRITE = 4;          // Vertices Per Sprite
    final static int INDICES_PER_SPRITE = 6;           // Indices Per Sprite
 
    //--Members--//
-   GL10 gl;                                           // GL Instance
+   Shader shader;                                     // GL Instance
    Vertices vertices;                                 // Vertices Instance Used for Rendering
    float[] vertexBuffer;                              // Vertex Buffer
    int bufferIndex;                                   // Vertex Buffer Start Index
@@ -26,10 +26,10 @@ public class SpriteBatch {
    // D: prepare the sprite batcher for specified maximum number of sprites
    // A: gl - the gl instance to use for rendering
    //    maxSprites - the maximum allowed sprites per batch
-   public SpriteBatch(GL10 gl, int maxSprites)  {
-      this.gl = gl;                                   // Save GL Instance
+   public SpriteBatch(Shader sh, int maxSprites)  {
+      this.shader = sh;                                   // Save GL Instance
       this.vertexBuffer = new float[maxSprites * VERTICES_PER_SPRITE * VERTEX_SIZE];  // Create Vertex Buffer
-      this.vertices = new Vertices( gl, maxSprites * VERTICES_PER_SPRITE, maxSprites * INDICES_PER_SPRITE, false, true, false );  // Create Rendering Vertices
+      this.vertices = new Vertices( sh, maxSprites * VERTICES_PER_SPRITE, maxSprites * INDICES_PER_SPRITE);  // Create Rendering Vertices
       this.bufferIndex = 0;                           // Reset Buffer Index
       this.maxSprites = maxSprites;                   // Save Maximum Sprites
       this.numSprites = 0;                            // Clear Sprite Counter
@@ -54,7 +54,7 @@ public class SpriteBatch {
    // A: textureId - the ID of the texture to use for the batch
    // R: [none]
    public void beginBatch(int textureId)  {
-      gl.glBindTexture( GL10.GL_TEXTURE_2D, textureId );  // Bind the Texture
+      GLES20.glBindTexture( GLES20.GL_TEXTURE_2D, textureId );  // Bind the Texture
       numSprites = 0;                                 // Empty Sprite Counter
       bufferIndex = 0;                                // Reset Buffer Index (Empty)
    }
@@ -70,9 +70,8 @@ public class SpriteBatch {
    public void endBatch()  {
       if ( numSprites > 0 )  {                        // IF Any Sprites to Render
          vertices.setVertices( vertexBuffer, 0, bufferIndex );  // Set Vertices from Buffer
-         vertices.bind();                             // Bind Vertices
-         vertices.draw( GL10.GL_TRIANGLES, 0, numSprites * INDICES_PER_SPRITE );  // Render Batched Sprites
-         vertices.unbind();                           // Unbind Vertices
+         vertices.prepare();                             // Bind Vertices
+         vertices.draw( GLES20.GL_TRIANGLES, 0, numSprites * INDICES_PER_SPRITE );  // Render Batched Sprites
       }
    }
 
@@ -102,21 +101,29 @@ public class SpriteBatch {
 
       vertexBuffer[bufferIndex++] = x1;               // Add X for Vertex 0
       vertexBuffer[bufferIndex++] = y1;               // Add Y for Vertex 0
+      vertexBuffer[bufferIndex++] = 0;                // Add X for Vertex 0
+      vertexBuffer[bufferIndex++] = 1;                // Add Y for Vertex 0
       vertexBuffer[bufferIndex++] = region.u1;        // Add U for Vertex 0
       vertexBuffer[bufferIndex++] = region.v2;        // Add V for Vertex 0
 
       vertexBuffer[bufferIndex++] = x2;               // Add X for Vertex 1
       vertexBuffer[bufferIndex++] = y1;               // Add Y for Vertex 1
+      vertexBuffer[bufferIndex++] = 0;                // Add X for Vertex 0
+      vertexBuffer[bufferIndex++] = 1;                // Add Y for Vertex 0
       vertexBuffer[bufferIndex++] = region.u2;        // Add U for Vertex 1
       vertexBuffer[bufferIndex++] = region.v2;        // Add V for Vertex 1
 
       vertexBuffer[bufferIndex++] = x2;               // Add X for Vertex 2
       vertexBuffer[bufferIndex++] = y2;               // Add Y for Vertex 2
+      vertexBuffer[bufferIndex++] = 0;                // Add X for Vertex 0
+      vertexBuffer[bufferIndex++] = 1;                // Add Y for Vertex 0
       vertexBuffer[bufferIndex++] = region.u2;        // Add U for Vertex 2
       vertexBuffer[bufferIndex++] = region.v1;        // Add V for Vertex 2
 
       vertexBuffer[bufferIndex++] = x1;               // Add X for Vertex 3
       vertexBuffer[bufferIndex++] = y2;               // Add Y for Vertex 3
+      vertexBuffer[bufferIndex++] = 0;                // Add X for Vertex 0
+      vertexBuffer[bufferIndex++] = 1;                // Add Y for Vertex 0
       vertexBuffer[bufferIndex++] = region.u1;        // Add U for Vertex 3
       vertexBuffer[bufferIndex++] = region.v1;        // Add V for Vertex 3
 

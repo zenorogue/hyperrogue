@@ -28,7 +28,7 @@ android {
 
         ndk {
             moduleName "hyper"
-            ldLibs "GLESv1_CM -llog"
+            ldLibs "GLESv3 -llog"
             stl "stlport_static"
             // abiFilters 'armeabi', 'x86_64'
             abiFilters 'x86', 'x86_64', 'armeabi', 'armeabi-v7a', 'arm64-v8a', 'mips', 'mips64'

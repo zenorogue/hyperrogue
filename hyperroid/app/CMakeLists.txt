@@ -3,7 +3,7 @@
 # your build.
 
 cmake_minimum_required(VERSION 3.4.1)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11 -O3")
 
 # Specifies a library name, specifies whether the library is STATIC or
 # SHARED, and provides relative paths to the source code. You can
@@ -20,13 +20,14 @@ add_library( # Specifies the name of the library.
              # Provides a relative path to your source file(s).
              src/main/jni/hyper.cpp )
 
-# GLESv2
-find_path(GLES2_INCLUDE_DIR GLES2/gl2.h
-    HINTS ${ANDROID_NDK})
-find_library(GLES2_LIBRARY libGLESv1_CM.so
-    HINTS ${GLES2_INCLUDE_DIR}/../lib)
-target_include_directories(hyper PUBLIC ${GLES2_INCLUDE_DIR})
+find_path(GLES1_INCLUDE_DIR GLES/gl.h HINTS ${ANDROID_NDK})
+find_library(GLES1_LIBRARY libGLESv1_CM.so HINTS ${GLES1_INCLUDE_DIR}/../lib)
+target_include_directories(hyper PUBLIC ${GLES1_INCLUDE_DIR})
 
+# GLESv3
+find_path(GLES3_INCLUDE_DIR GLES3/gl3.h HINTS ${ANDROID_NDK})
+find_library(GLES3_LIBRARY libGLESv3.so HINTS ${GLES3_INCLUDE_DIR}/../lib)
+target_include_directories(hyper PUBLIC ${GLES3_INCLUDE_DIR})
 
 find_library( # Sets the name of the path variable.
               log-lib
@@ -45,6 +46,6 @@ target_link_libraries( # Specifies the target library.
                        # Links the target library to the log library
                        # included in the NDK.
                        ${log-lib} 
-                       # ${GLES2_LIBRARY}
-                       GLESv1_CM
+                       GLESv3
+                       # ${GLES1_LIBRARY}
                        )

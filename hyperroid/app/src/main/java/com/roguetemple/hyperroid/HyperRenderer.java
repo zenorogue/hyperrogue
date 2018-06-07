@@ -12,7 +12,9 @@ import android.os.Build;
 import android.os.PowerManager;
 // bimport android.widget.Toast;
 
+import android.opengl.GLES20;
 import com.android.texample.GLText;
+import com.android.texample.Shader;
 
 public class HyperRenderer implements GLSurfaceView.Renderer {
 	
@@ -25,8 +27,9 @@ public class HyperRenderer implements GLSurfaceView.Renderer {
 	int [] graphdata;
 	int gdpos;
 	int gdpop() { return graphdata[gdpos++]; }
+	boolean initialized;
 	
-	public void onDrawFrame(GL10 gl) {
+	public void onDrawFrame(GL10 unused) {
 	  if(game.forceCanvas) return;
 
           PowerManager pm = (PowerManager) game.getSystemService(Context.POWER_SERVICE);
@@ -34,11 +37,15 @@ public class HyperRenderer implements GLSurfaceView.Renderer {
           if(!isScreenOn) return;
           if(!game.activityVisible) return;
 
-          gl.glClear(GL10.GL_COLOR_BUFFER_BIT);
+          GLES20.glClear(GL10.GL_COLOR_BUFFER_BIT);
 	  synchronized(game) {
-		game.hv.updateGame();
-		game.draw();
-        graphdata = game.loadMap();
+            if(!initialized) { game.glhrinit(); initialized = true; }
+            game.hv.updateGame();
+            game.draw();
+            graphdata = game.loadMap();
+            glText.shader.aPosition = game.getaPosition();
+            glText.shader.aTexture = game.getaTexture();
+            glText.shader.uColor = game.getuColor();
 	    }
 
          if(graphdata == null) return;
@@ -80,7 +87,7 @@ public class HyperRenderer implements GLSurfaceView.Renderer {
               }
             
             String s = ss.toString();
-            
+
             y = height - y;
             glText.setScale(size / 48.0f);
             
@@ -104,25 +111,23 @@ public class HyperRenderer implements GLSurfaceView.Renderer {
             break;
           
         }}
-
-      // disable texture + alpha
-      gl.glDisable( GL10.GL_BLEND );                  // Disable Alpha Blend
-      gl.glDisable( GL10.GL_TEXTURE_2D );             // Disable Texture Mapping
-	  
 	}
 	
-	public void onSurfaceChanged(GL10 gl, int width, int height) {
-		gl.glViewport(0, 0, width, height);
+	public void onSurfaceChanged(GL10 unused, int width, int height) {
+		GLES20.glViewport(0, 0, width, height);
 
             // Save width and height
-      this.width = width;                             // Save Current Width
-      this.height = height;                           // Save Current Height
+        this.width = width;                             // Save Current Width
+        this.height = height;                           // Save Current Height
+        initialized = false;
 	}
 
-	public void onSurfaceCreated(GL10 gl, EGLConfig config) {
+	public void onSurfaceCreated(GL10 unused, EGLConfig config) {
+  
 		
-               glText = new GLText( gl );
+               glText = new GLText( new Shader() );
                glText.load(Typeface.DEFAULT_BOLD, 48, 2, 2 );  // Create Font (Height: 48 Pixels / X+Y Padding 2 Pixels)
+               initialized = false;
 	}
 	
 	

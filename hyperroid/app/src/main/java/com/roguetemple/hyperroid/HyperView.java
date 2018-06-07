@@ -168,10 +168,13 @@ public class HyperView extends View {
    }}
     }
 
+    long clockzero = 0;
+
     public void updateGame() {
     	lasttick = curtick;
-        curtick = (int)SystemClock.elapsedRealtime();
-
+    	if(clockzero == 0) clockzero = SystemClock.elapsedRealtime();
+        curtick = (int) (SystemClock.elapsedRealtime() - clockzero);
+        
         if(clickcnt > 0) clickcnt--;
         
         game.update(width, height, curtick, mousex, mousey, clicked | ((clickcnt & 1) > 0));
@@ -182,15 +185,18 @@ public class HyperView extends View {
     
     @Override
     public void onDraw(final Canvas canvas) {
-   
+
+
       super.onDraw(canvas);
 
-      PowerManager pm = (PowerManager) game.getSystemService(Context.POWER_SERVICE);
+
+        PowerManager pm = (PowerManager) game.getSystemService(Context.POWER_SERVICE);
       boolean isScreenOn = Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT_WATCH ? pm.isInteractive() : pm.isScreenOn();
       if(!isScreenOn) return;
+
       if(!game.activityVisible) return;
 
-      dc = canvas;
+        dc = canvas;
       width = getWidth();
       height = getHeight();      
 

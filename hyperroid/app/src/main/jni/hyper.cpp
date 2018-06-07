@@ -1,5 +1,5 @@
-// HyperRogue for Android
-// Copyright (C) 2012-2017 Zeno Rogue
+// Hyperbolic Rogue for Android
+// Copyright (C) 2012-2018 Zeno Rogue
 
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -17,9 +17,36 @@
 
 #define ISANDROID 1
 #define GL_ES
+#define CAP_ACHIEVE 1
+#define CAP_SHADER 1
+#define CAP_VERTEXBUFFER 0
+
+#define HNEW 1
 
 #define MOBPAR_FORMAL JNIEnv *env, jobject thiz
 #define MOBPAR_ACTUAL env, thiz
+
+#include <android/log.h>
+#include <stdio.h>
+
+char android_log_buf[1000000];
+int android_log_bufpos = 0;
+#define XPRINTF
+#pragma clang diagnostic ignored "-Wformat-security"
+template<class...T>
+// __attribute__((__format__ (__printf__, 1, 2)))
+void Xprintf(const char *fmt, T... t) { 
+  snprintf(android_log_buf+android_log_bufpos, 1000000-android_log_bufpos, fmt, t...); 
+  int last_cr = 0;
+  int i;
+  for(i=0; android_log_buf[i]; i++) if(android_log_buf[i] == 10) {
+    android_log_buf[i] = 0;
+    __android_log_print(ANDROID_LOG_VERBOSE, "RUG", "%s", android_log_buf+last_cr); 
+    last_cr = i+1;
+    }
+  android_log_bufpos = 0;
+  while(i > last_cr) android_log_buf[android_log_bufpos++] = android_log_buf[last_cr++];
+  }
 
 void gdpush(int t);
 
@@ -32,15 +59,14 @@ std::string levelfile, picfile;
 
 bool settingsChanged = false;
 
-#include "../../../../../init.cpp"
+struct transmatrix getOrientation();
+
+#include "/home/eryx/proj/rogue/hyper/init.cpp"
 
 // #define delref env->DeleteLocalRef(_thiz)
 
 int semaphore = 0;
 bool crash = false;
-
-
-#include <android/log.h>
 
 #define LOCK(s, x) \
   semaphore++; const char *xs = x; if(semaphore > 1) { crash = true; \
@@ -77,11 +103,15 @@ Java_com_roguetemple_hyperroid_HyperRogue_captureBack
   }
 
 void uploadAll(MOBPAR_FORMAL);
+void applyScoreCache(char whattodo);
+bool wantgoogle;
 
 extern "C" bool
 Java_com_roguetemple_hyperroid_HyperRogue_keepinmemory
   ( MOBPAR_FORMAL) {
   saveStats(true);
+  if(wantgoogle) applyScoreCache('s');
+  else applyScoreCache('d');
   uploadAll(MOBPAR_ACTUAL);
   if(!canmove) return false;
   if(items[itOrbSafety]) return false;
@@ -128,6 +158,34 @@ Java_com_roguetemple_hyperroid_HyperRogue_getGL(MOBPAR_FORMAL)
     return vid.usingGL;
     }
 
+extern "C" void
+Java_com_roguetemple_hyperroid_HyperRogue_glhrinit(MOBPAR_FORMAL)
+{
+    __android_log_print(ANDROID_LOG_WARN, "HyperRogue", "glhr::init %d\n", 0);
+    #if HNEW
+    glhr::init();
+    #endif
+    __android_log_print(ANDROID_LOG_WARN, "HyperRogue", "glhr::init done %d\n", 0);
+    }
+
+extern "C" int
+Java_com_roguetemple_hyperroid_HyperRogue_getaPosition(MOBPAR_FORMAL)
+{
+  return glhr::aPosition;
+  }
+
+extern "C" int
+Java_com_roguetemple_hyperroid_HyperRogue_getaTexture(MOBPAR_FORMAL)
+{
+  return glhr::aTexture;
+  }
+
+extern "C" int
+Java_com_roguetemple_hyperroid_HyperRogue_getuColor(MOBPAR_FORMAL)
+{
+  return glhr::current->uColor;
+  }
+
 string sscorefile, sconffile, scachefile;
 
 #include <sys/stat.h>
@@ -162,12 +220,14 @@ Java_com_roguetemple_hyperroid_HyperRogue_initGame(MOBPAR_FORMAL) {
   
 
   __android_log_print(ANDROID_LOG_VERBOSE, "HyperRogue", "Initializing game, gamerunning = %d\n", gamerunning);
+  printf("test\n");
   fflush(stdout);
   if(gamerunning) return 1;
-  gamerunning = true;  
+  gamerunning = true;
   initAll();
   if(showstartmenu) pushScreen(showStartMenu);
   uploadAll(MOBPAR_ACTUAL);
+  __android_log_print(ANDROID_LOG_VERBOSE, "HyperRogue", "Game initialized, gamerunning = %d\n", gamerunning);
   return 0;
   }
 
@@ -183,17 +243,29 @@ int textwidth(int siz, const string &str) {
   return res;
   }
 
+void achievement_init() {}
+
+bool achievementsConnected = false;
+string doViewLeaderboard;
+bool doViewAchievements;
 bool doOpenURL;
 
 bool currentlyConnecting() { return false; }
 bool currentlyConnected() { return false; }
 
+void viewLeaderboard(string what) { doViewLeaderboard = what; }
+void viewAchievements() { doViewAchievements = true; }
+
+vector<pair<int, int> > scoresToUpload;
+vector<const char *> achievementsToUpload;
 vector<pair<string, int> > soundsToPlay;
 
 void openURL() {
   doOpenURL = true;
   }
   
+int last_upload[NUMLEADER];
+
 void shareScore(MOBPAR_FORMAL) {
   string s = buildScoreDescription();
   jclass cls = env->GetObjectClass(thiz);
@@ -216,8 +288,34 @@ extern "C" void Java_com_roguetemple_hyperroid_HyperRogue_draw(MOBPAR_FORMAL) {
     infoticks = getticks();
     } */
   tw_thiz = thiz; tw_env = env;
+
+  #if HNEW
+  glhr::be_textured();
+  glhr::be_nontextured();
+
+  #if CAP_SHADER
+  glEnableVertexAttribArray(glhr::aPosition);
+  #else
+  glEnableClientState(GL_VERTEX_ARRAY);
+  #endif 
+  #endif
+
   mobile_draw(MOBPAR_ACTUAL);
   uploadAll(MOBPAR_ACTUAL);
+
+  #if HNEW
+  // text is drawn with 'textured'  
+  glhr::be_textured();
+  glhr::set_depthtest(false);
+  stereo::set_viewport(0);
+  stereo::set_mask(0);
+  glhr::new_projection();
+  glhr::projection_multiply(glhr::translate(-1,-1,0));
+  glhr::projection_multiply(glhr::ortho(vid.xres/2, vid.yres/2, 1));
+  glhr::set_modelview(glhr::id);
+    glhr::color2(0xC08040F0);
+  #endif
+
   UNLOCK
   }
 
@@ -261,9 +359,25 @@ void playSound(cell *c, const string& fname, int vol) {
   soundsToPlay.push_back(make_pair(fname, vol));
   }
 
+transmatrix orientation;
+bool orientation_requested;
+
+transmatrix getOrientation() {
+  orientation_requested = true;
+  return orientation;
+  }
+
 void uploadAll(JNIEnv *env, jobject thiz) {
 
   jclass cls = env->GetObjectClass(thiz);
+  
+  if(orientation_requested) {
+    jmethodID mid = env->GetMethodID(cls, "getOrientation", "(II)D");
+    for(int i=0; i<3; i++)
+    for(int j=0; j<3; j++)
+      orientation[i][j] = env->CallDoubleMethod(thiz, mid, i, j);
+    orientation_requested = false;
+    }
   
   for(int i=0; i<size(soundsToPlay); i++) {
     jmethodID mid = env->GetMethodID(cls, "playSound", "(Ljava/lang/String;I)V");

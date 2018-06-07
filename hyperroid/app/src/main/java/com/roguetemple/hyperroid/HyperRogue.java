@@ -24,6 +24,10 @@ import android.graphics.Bitmap;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Typeface;
+import android.hardware.Sensor;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
+import android.hardware.SensorEvent;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.opengl.GLSurfaceView;
@@ -44,7 +48,7 @@ import android.widget.FrameLayout.LayoutParams;
 import android.widget.Toast;
 import android.util.Log;
 
-public class HyperRogue extends Activity {
+public class HyperRogue extends Activity implements SensorEventListener {
 
     private static final int RESULT_SETTINGS = 1;
     private static final boolean isGold = false;
@@ -179,6 +183,8 @@ public class HyperRogue extends Activity {
       applyUserSettings();
 
       UiChangeListener();
+
+      mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
     }
     
     public native int initGame();
@@ -199,6 +205,10 @@ public class HyperRogue extends Activity {
     public native boolean getGoogleConnection();
     public native void setGoogleSignin(boolean issigned, boolean isconnecting);
     public native void handleKey(int keyCode);
+    public native void glhrinit();
+    public native int getaPosition();
+    public native int getaTexture();
+    public native int getuColor();
 
      static {
       System.loadLibrary("hyper");
@@ -323,6 +333,8 @@ public class HyperRogue extends Activity {
         
         if(usegl && glview == null) {      
           glview = new GLSurfaceView(this);
+          glview.setEGLContextClientVersion(2);
+
           HyperRenderer hr =new HyperRenderer();
           hr.game = this;
           glview.setEGLConfigChooser(new HRConfigChooser());
@@ -365,6 +377,10 @@ public class HyperRogue extends Activity {
         }
 
         if (backgroundmusic != null) backgroundmusic.stop();
+        if(listening) { 
+          mSensorManager.unregisterListener(this);
+          listening = false;
+          }
     }
 
     // remove for the lite version START
@@ -395,8 +411,8 @@ public class HyperRogue extends Activity {
      }
 
     protected void onResume() {
-        activityVisible = true;
     	super.onResume();
+        activityVisible = true;
         if(backgroundmusic != null) {
         	try {backgroundmusic.prepare(); } catch(Exception e) {}
         	backgroundmusic.start();
@@ -553,6 +569,18 @@ public class HyperRogue extends Activity {
   if(curland == 64) id = R.raw.mirror; // Bull Dash
   if(curland == 65) id = R.raw.mirror; // Crossroads V
   if(curland == 66) id = R.raw.laboratory; // CA land
+  if(curland >= 67 && curland <= 71) id = R.raw.mirror; // Reflection and old Mirror Land
+  if(curland == 72) id = R.raw.hell; // Volcanic Wasteland
+  if(curland == 73) id = R.raw.icyland; // Blizzard
+  if(curland == 74) id = R.raw.graveyard; // Hunting Ground
+  if(curland == 75 || curland == 76) id = R.raw.graveyard; // Terracotta (+Mercury River)
+
+  if(curland == 77) id = R.raw.desert; // Crystal World
+  if(curland == 78) id = R.raw.desert; // Snake Nest
+  if(curland == 79) id = R.raw.caves; // Docks
+  if(curland == 80) id = R.raw.graveyard; // Ruined City
+  if(curland == 81) id = R.raw.caves; // Magnetosphere
+  if(curland == 82) id = R.raw.laboratory; // Jelly Kingdom
 
           if(id > 0) backgroundmusic = MediaPlayer.create(this, id);
     	  if(backgroundmusic != null) {
@@ -588,6 +616,67 @@ public class HyperRogue extends Activity {
        pon.getTextBounds(s,0,s.length(),bounds);
        return bounds.width();
        }
+
+  private SensorManager mSensorManager;
+  private Sensor mSensor;
+  // private final float[] mAccelerometerReading = new float[3];
+  // private final float[] mMagnetometerReading = new float[3];
+
+  private final float[] mRotationMatrix = {1,0,0, 0,1,0, 0,0,1};
+  
+  boolean listening;
+
+     Sensor mRotation; // mAccelerometer, mMagneticField;
+
+     final int[] msgn = {1, 1, -1};
+     final int[] msgnl = {1, -1, 1};
+     final int[] lsc = {1, 0, 2};
+
+  double getOrientation(int i, int j) {
+    if(!listening) {
+        final HyperRogue act = this;
+        runOnUiThread(new Runnable() { public void run() {
+            listening = true;
+            /*act.mAccelerometer =  act.mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+            act.mMagneticField =  act.mSensorManager.getDefaultSensor(Sensor.TYPE_GAME_ROTATION_VECTOR);
+            act.mSensorManager.registerListener(act, act.mAccelerometer,
+                    SensorManager.SENSOR_DELAY_NORMAL, SensorManager.SENSOR_DELAY_UI);
+            act.mSensorManager.registerListener(act, act.mMagneticField,
+                    SensorManager.SENSOR_DELAY_NORMAL, SensorManager.SENSOR_DELAY_UI);*/
+            act.mRotation = act.mSensorManager.getDefaultSensor(Sensor.TYPE_GAME_ROTATION_VECTOR);
+            act.mSensorManager.registerListener(act, act.mRotation,
+                    SensorManager.SENSOR_DELAY_NORMAL, SensorManager.SENSOR_DELAY_UI);
+        }});
+      }
+      int rotation =  getWindowManager().getDefaultDisplay().getRotation();
+      if((rotation & 1) == 1)
+          return mRotationMatrix[lsc[j]+3*lsc[i]]*msgnl[i]*msgnl[j];
+
+
+      return mRotationMatrix[j+3*i]*msgn[i]*msgn[j];
+    }
+
+ @Override
+  public void onAccuracyChanged(Sensor sensor, int accuracy) {
+    // Do something here if sensor accuracy changes.
+    // You must implement this callback in your code.
+  }
+
+  public void onSensorChanged(SensorEvent event) {
+      /*if (event.sensor == mAccelerometer) {
+          System.arraycopy(event.values, 0, mAccelerometerReading,
+                  0, mAccelerometerReading.length);
+          mSensorManager.getRotationMatrix(mRotationMatrix, null,
+                  mAccelerometerReading, mMagnetometerReading);
+      } else if (event.sensor == mMagneticField) {
+          System.arraycopy(event.values, 0, mMagnetometerReading,
+                  0, mMagnetometerReading.length);
+          mSensorManager.getRotationMatrix(mRotationMatrix, null,
+                  mAccelerometerReading, mMagnetometerReading);
+      }*/
+      if(event.sensor.getType() == Sensor.TYPE_GAME_ROTATION_VECTOR)
+          mSensorManager.getRotationMatrixFromVector(mRotationMatrix, event.values);
+  }
 
     }
 

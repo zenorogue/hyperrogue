@@ -18,7 +18,7 @@
 
 package com.android.texample;
 
-import javax.microedition.khronos.opengles.GL10;
+import android.opengl.GLES20;
 
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
@@ -36,7 +36,7 @@ public class GLText {
      allchars = new StringBuffer();
      for(char c=32; c<=126; c++)
        allchars.append(c);
-     allchars.append("°´ÁÄÇÈÉÍÎÖÚÜßàáâãäçèéêìíîïòóôõöøùúüýąćČčĎďĘęĚěğİıŁłńňŘřŚśŞşŠšťůŹźŻżŽžδϕЁАБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЫЬЭЮЯабвгдежзийклмнопрстуфхцчшщъыьэюяёᵈ");
+      allchars.append("°²´½ÁÄÇÈÉÍÎÖÚÜßàáâãäçèéêìíîïòóôõöøùúüýąćČčĎďĘęĚěğİıŁłńňŘřŚśŞşŠšŤťůŹźŻżŽžδϕЁАБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЫЬЭЮЯабвгдежзийклмнопрстуфхцчшщъыьэюяёᵈ∞");
      }
 
    int numChars() {
@@ -60,7 +60,7 @@ public class GLText {
    public final static int CHAR_BATCH_SIZE = 100;     // Number of Characters to Render Per Batch
 
    //--Members--//
-   GL10 gl;                                           // GL10 Instance
+   public Shader shader;                              // GL10 Instance
    AssetManager assets;                               // Asset Manager
    SpriteBatch batch;                                 // Batch Renderer
 
@@ -88,12 +88,12 @@ public class GLText {
    //--Constructor--//
    // D: save GL instance + asset manager, create arrays, and initialize the members
    // A: gl - OpenGL ES 10 Instance
-   public GLText(GL10 gl) {
-      this.gl = gl;                                   // Save the GL10 Instance
+   public GLText(Shader sh) {
+      this.shader = sh;                                   // Save the GL10 Instance
 
       buildAllchars();
 
-      batch = new SpriteBatch( gl, CHAR_BATCH_SIZE );  // Create Sprite Batch (with Defined Size)
+      batch = new SpriteBatch( sh, CHAR_BATCH_SIZE );  // Create Sprite Batch (with Defined Size)
 
       charWidths = new float[numChars()];               // Create the Array of Character Widths
       charRgn = new TextureRegion[numChars()];          // Create the Array of Character Regions
@@ -195,7 +195,7 @@ public class GLText {
          textureSize = 2048;                          // Set 2048 Texture Size
 
       // create an empty bitmap (alpha only)
-      Bitmap bitmap = Bitmap.createBitmap( textureSize, textureSize, Bitmap.Config.ALPHA_8 );  // Create Bitmap
+      Bitmap bitmap = Bitmap.createBitmap( textureSize, textureSize, Bitmap.Config.ARGB_8888 );  // Create Bitmap
       Canvas canvas = new Canvas( bitmap );           // Create Canvas for Rendering to Bitmap
       bitmap.eraseColor( 0x00000000 );                // Set Transparent Background (ARGB)
 
@@ -221,19 +221,19 @@ public class GLText {
 
       // generate a new texture
       int[] textureIds = new int[1];                  // Array to Get Texture Id
-      gl.glGenTextures( 1, textureIds, 0 );           // Generate New Texture
+      GLES20.glGenTextures( 1, textureIds, 0 );           // Generate New Texture
       textureId = textureIds[0];                      // Save Texture Id
 
       // setup filters for texture
-      gl.glBindTexture( GL10.GL_TEXTURE_2D, textureId );  // Bind Texture
-      gl.glTexParameterf( GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MIN_FILTER, GL10.GL_NEAREST );  // Set Minification Filter
-      gl.glTexParameterf( GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MAG_FILTER, GL10.GL_LINEAR );  // Set Magnification Filter
-      gl.glTexParameterf( GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_S, GL10.GL_CLAMP_TO_EDGE );  // Set U Wrapping
-      gl.glTexParameterf( GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_T, GL10.GL_CLAMP_TO_EDGE );  // Set V Wrapping
+      GLES20.glBindTexture( GLES20.GL_TEXTURE_2D, textureId );  // Bind Texture
+      GLES20.glTexParameterf( GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_NEAREST );  // Set Minification Filter
+      GLES20.glTexParameterf( GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR );  // Set Magnification Filter
+      GLES20.glTexParameterf( GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_S, GLES20.GL_CLAMP_TO_EDGE );  // Set U Wrapping
+      GLES20.glTexParameterf( GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_CLAMP_TO_EDGE );  // Set V Wrapping
 
       // load the generated bitmap onto the texture
-      GLUtils.texImage2D( GL10.GL_TEXTURE_2D, 0, bitmap, 0 );  // Load Bitmap to Texture
-      gl.glBindTexture( GL10.GL_TEXTURE_2D, 0 );      // Unbind Texture
+      GLUtils.texImage2D( GLES20.GL_TEXTURE_2D, 0, bitmap, 0 );  // Load Bitmap to Texture
+      GLES20.glBindTexture( GLES20.GL_TEXTURE_2D, 0 );      // Unbind Texture
 
       // release the bitmap
       bitmap.recycle();                               // Release the Bitmap
@@ -270,13 +270,12 @@ public class GLText {
       begin( 1.0f, 1.0f, 1.0f, alpha );               // Begin with White (Explicit Alpha)
    }
    public void begin(float red, float green, float blue, float alpha)  {
-      gl.glColor4f( red, green, blue, alpha );        // Set Color+Alpha
-      gl.glBindTexture( GL10.GL_TEXTURE_2D, textureId );  // Bind the Texture
+      shader.setColor( red, green, blue, alpha );        // Set Color+Alpha
+      GLES20.glBindTexture( GLES20.GL_TEXTURE_2D, textureId );  // Bind the Texture
       batch.beginBatch();                             // Begin Batch
    }
    public void end()  {
       batch.endBatch();                               // End Batch
-      gl.glColor4f( 1.0f, 1.0f, 1.0f, 1.0f );         // Restore Default Color/Alpha
    }
 
    //--Draw Text--//
