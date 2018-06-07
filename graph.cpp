@@ -5010,7 +5010,7 @@ void drawFlashes() {
     flashdata& f = flashes[k];
     transmatrix V;
     
-    if(f.spd) try { V = gmatrix.at(f.where); } catch(out_of_range) { 
+    if(f.spd) try { V = gmatrix.at(f.where); } catch(out_of_range&) { 
       f = flashes[size(flashes)-1];
       flashes.pop_back(); k--;
       continue; 

@@ -584,7 +584,7 @@ void buildRug() {
       else if(v > w && v > w2)
         addTriangle(v, w, w2);
       }
-    catch(out_of_range) {}
+    catch(out_of_range&) {}
     }
 
   Xprintf("vertices = %d triangles=  %d\n", size(points), size(triangles));

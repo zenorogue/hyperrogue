@@ -385,7 +385,7 @@ bool texture_config::apply(cell *c, const transmatrix &V, int col) {
 
     return true;
     }
-  catch(out_of_range) {
+  catch(out_of_range&) {
     // printf("Ignoring tile #%d / %08x: not mapped\n", si.id, goldbergcode(c, si));
     return false;
     }
@@ -1371,7 +1371,7 @@ void actDrawPixel(cell *c, hyperpoint h, int col) {
         fillcircle(M2 * spin(2 * M_PI * i / c->type) * Mirror * h, col);
       }
     }
-  catch(out_of_range) {}
+  catch(out_of_range&) {}
   }
   
 void drawPixel(cell *c, hyperpoint h, int col) {
@@ -1396,10 +1396,10 @@ void drawPixel(hyperpoint h, int col) {
           goto again;
           }
         }
-      catch(out_of_range) {}
+      catch(out_of_range&) {}
     drawPixel(where, h, col);
     }
-  catch(out_of_range) {}
+  catch(out_of_range&) {}
   }
 
 void drawLine(hyperpoint h1, hyperpoint h2, int col, int steps) {
@@ -1452,7 +1452,7 @@ void texture_config::remap(eTextureState old_tstate, eTextureState old_tstate_ma
         mi2.tvertices = move(new_tvertices);
         // printf("%08x remapping %d vertices to %d vertices\n", si.id, size(mi.tvertices), size(mi2.tvertices));
         }
-      catch(out_of_range) { 
+      catch(out_of_range&) { 
         printf("Unexpected missing cell #%d/%d", si.id, oldid);
         addMessage(XLAT("Unexpected missing cell #%d/%d", its(si.id), its(oldid)));
         config.tstate_max = config.tstate = tsAdjusting;

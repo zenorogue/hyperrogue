@@ -245,7 +245,7 @@ void drawArrowTraps() {
           }
         }
       }
-    catch(out_of_range) {}
+    catch(out_of_range&) {}
     }
   }
 

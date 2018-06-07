@@ -1410,7 +1410,7 @@ void doTraps() {
         bullet->parenttype = moArrowTrap;
         additional.push_back(bullet);
         }
-      catch(out_of_range) {}
+      catch(out_of_range&) {}
       }
     else if(d == 3) {
       auto tl = traplimits(t.second);
