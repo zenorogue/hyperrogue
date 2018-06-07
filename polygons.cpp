@@ -31,6 +31,11 @@ static const int POLY_HASSHADOW = 1024;
 // Goldberg shapes
 static const int POLY_GP = 2048;
 
+// Convex shape (vertex)
+static const int POLY_VCONVEX = 4096;
+// Convex shape (central)
+static const int POLY_CCONVEX = 8192;
+
 vector<hyperpoint> hpc;
 
 int prehpc;
@@ -271,7 +276,15 @@ void setmatrix(int useV, const transmatrix& V) {
   else
     glhr::id_modelview();
   }
-  
+
+#ifndef MINIMIZE_GL_CALLS
+#ifdef EMSCRIPTEN
+#define MINIMIZE_GL_CALLS 1
+#else  
+#define MINIMIZE_GL_CALLS 0
+#endif
+#endif
+
 void gldraw(int useV, const transmatrix& V, const vector<glvertex>& v, int ps, int pq, int col, int outline, int flags, textureinfo *tinf) {
 
   if(tinf) {
@@ -303,50 +316,55 @@ void gldraw(int useV, const transmatrix& V, const vector<glvertex>& v, int ps, i
     setmatrix(useV, V);
 
     if(draw) {
-#ifdef DIRTY 
-#warning dirty
-      glhr::vertices(v);
-      glhr::color2(col);
-      glDrawArrays(tinf ? GL_TRIANGLES : GL_TRIANGLE_FAN, ps, pq);
-#else
-      glEnable(GL_STENCIL_TEST);
-
-      glColorMask( GL_FALSE,GL_FALSE,GL_FALSE,GL_FALSE );
-      glhr::set_depthtest(false);
-      glStencilOp( GL_INVERT, GL_INVERT, GL_INVERT);
-      glStencilFunc( GL_ALWAYS, 0x1, 0x1 );
-      glhr::color2(0xFFFFFFFF);
-      glDrawArrays(tinf ? GL_TRIANGLES : GL_TRIANGLE_FAN, ps, pq);
-      
-      stereo::set_mask(ed);
-      glhr::color2(col);
-      glhr::set_depthtest(model_needs_depth());
-
-      if(flags & POLY_INVERSE) {
-        glStencilOp( GL_ZERO, GL_ZERO, GL_ZERO);
-        glStencilFunc( GL_NOTEQUAL, 1, 1);
-        GLfloat xx = vid.xres;
-        GLfloat yy = vid.yres;
-        vector<glvertex> scr = {
-          make_array<GLfloat>(-xx, -yy, stereo::scrdist), 
-          make_array<GLfloat>(+xx, -yy, stereo::scrdist), 
-          make_array<GLfloat>(+xx, +yy, stereo::scrdist), 
-          make_array<GLfloat>(-xx, +yy, stereo::scrdist)
-          };
-        glhr::vertices(scr);
-        glhr::id_modelview();
-        glDrawArrays(tinf ? GL_TRIANGLES : GL_TRIANGLE_FAN, 0, 4);
+      if((flags & POLY_VCONVEX) && MINIMIZE_GL_CALLS) {
         glhr::vertices(v);
-        setmatrix(useV, V);
-        }
-      else { 
-        glStencilOp( GL_ZERO, GL_ZERO, GL_ZERO);
-        glStencilFunc( GL_EQUAL, 1, 1);
+        glhr::color2(col);
         glDrawArrays(tinf ? GL_TRIANGLES : GL_TRIANGLE_FAN, ps, pq);
         }
-      
-      glDisable(GL_STENCIL_TEST);
-#endif
+      else if((flags & POLY_CCONVEX) && MINIMIZE_GL_CALLS) {
+        glhr::vertices(v);
+        glhr::color2(col);
+        glDrawArrays(tinf ? GL_TRIANGLES : GL_TRIANGLE_FAN, ps-1, pq+1);
+        }
+      else {
+        glEnable(GL_STENCIL_TEST);
+  
+        glColorMask( GL_FALSE,GL_FALSE,GL_FALSE,GL_FALSE );
+        glhr::set_depthtest(false);
+        glStencilOp( GL_INVERT, GL_INVERT, GL_INVERT);
+        glStencilFunc( GL_ALWAYS, 0x1, 0x1 );
+        glhr::color2(0xFFFFFFFF);
+        glDrawArrays(tinf ? GL_TRIANGLES : GL_TRIANGLE_FAN, ps, pq);
+        
+        stereo::set_mask(ed);
+        glhr::color2(col);
+        glhr::set_depthtest(model_needs_depth());
+  
+        if(flags & POLY_INVERSE) {
+          glStencilOp( GL_ZERO, GL_ZERO, GL_ZERO);
+          glStencilFunc( GL_NOTEQUAL, 1, 1);
+          GLfloat xx = vid.xres;
+          GLfloat yy = vid.yres;
+          vector<glvertex> scr = {
+            make_array<GLfloat>(-xx, -yy, stereo::scrdist), 
+            make_array<GLfloat>(+xx, -yy, stereo::scrdist), 
+            make_array<GLfloat>(+xx, +yy, stereo::scrdist), 
+            make_array<GLfloat>(-xx, +yy, stereo::scrdist)
+            };
+          glhr::vertices(scr);
+          glhr::id_modelview();
+          glDrawArrays(tinf ? GL_TRIANGLES : GL_TRIANGLE_FAN, 0, 4);
+          glhr::vertices(v);
+          setmatrix(useV, V);
+          }
+        else { 
+          glStencilOp( GL_ZERO, GL_ZERO, GL_ZERO);
+          glStencilFunc( GL_EQUAL, 1, 1);
+          glDrawArrays(tinf ? GL_TRIANGLES : GL_TRIANGLE_FAN, ps, pq);
+          }
+        
+        glDisable(GL_STENCIL_TEST);
+        }
       }
     
     if(outline) {
@@ -603,7 +621,7 @@ void drawpolyline(polytodraw& p) {
 #if CAP_GL
   if(vid.usingGL && pmodel == mdDisk && !spherespecial) {
     glLineWidth(linewidthat(tC0(pp.V), pp.minwidth));
-    gldraw(1, pp.V, *pp.tab, pp.offset, pp.cnt, p.col, pp.outline, 0, pp.tinf);    
+    gldraw(1, pp.V, *pp.tab, pp.offset, pp.cnt, p.col, pp.outline, pp.flags &~ POLY_INVERSE, pp.tinf);
     return;
     }
 #endif
@@ -1205,6 +1223,8 @@ hyperpoint turtlevertex(int u, double x, double y, double z) {
   return hpxd(scale, x, y, z);
   }
 
+vector<hpcshape*> allshapes;
+
 void finishshape() {
   last->e = size(hpc);
   double area = 0;
@@ -1212,6 +1232,28 @@ void finishshape() {
     area += hpc[i][0] * hpc[i+1][1] - hpc[i+1][0] * hpc[i][1];
   if(abs(area) < 1e-9) last->flags |= POLY_ISSIDE;
   if(area >= 0) last->flags |= POLY_INVERSE;
+  
+  bool allplus = true, allminus = true;
+  for(int i=last->s; i<last->e-1; i++) {
+    ld v = hpc[i][0] * hpc[i+1][1] - hpc[i+1][0] * hpc[i][1];
+    if(v > 1e-6) allplus = false;
+    if(v < -1e-6) allminus = false;
+    }
+  if(allminus || allplus) last->flags |= POLY_CCONVEX;
+  
+  allplus = true, allminus = true;
+  ld cx = hpc[last->s][0], cy = hpc[last->s][1];
+
+  for(int i=last->s; i<last->e-1; i++) {
+    ld v = (hpc[i][0]-cx) * (hpc[i+1][1]-cy) - (hpc[i+1][0]-cx) * (hpc[i][1]-cy);
+    if(v > 1e-6) allplus = false;
+    if(v < -1e-6) allminus = false;
+    }
+  
+  if(allminus || allplus) last->flags |= POLY_VCONVEX;
+  
+  allshapes.push_back(last);
+
   /* if(isnan(area)) ;
   else if(intval(hpc[last->s], hpc[last->e-1]) > 1e-6)
     printf("bad end\n"); */
@@ -1219,6 +1261,7 @@ void finishshape() {
 
 void bshape(hpcshape& sh, int p) {
   if(last) finishshape();
+  hpc.push_back(hpxy(0,0));
   last = &sh;
   last->s = size(hpc), last->prio = p;
   last->flags = 0;
@@ -1360,6 +1403,7 @@ ld dlow_table[SIDEPARS], dhi_table[SIDEPARS];
 void buildpolys() {
 
   symmetriesAt.clear();
+  allshapes.clear();
   geom3::compute();
   gp::clear_plainshapes();
   DEBB(DF_INIT, (debugfile,"buildpolys\n"));
@@ -2186,8 +2230,21 @@ void buildpolys() {
   
   static int qhpc0;
   int qhpc = size(hpc);
-  if(qhpc != qhpc0 && debug_geometry)
+  if(qhpc != qhpc0 && debug_geometry) {
     printf("qhpc = %d (%d+%d)\n", qhpc0 = qhpc, prehpc, qhpc-prehpc);
+    printf("shapes = %d\n", size(allshapes));
+    int inve=0, issi=0, vcon=0, ccon=0;
+    for(auto sh: allshapes) {
+      if(sh->flags & POLY_INVERSE) inve++;
+      if(sh->flags & POLY_ISSIDE) issi++;
+      if(sh->flags & POLY_VCONVEX) vcon++;
+      if(sh->flags & POLY_CCONVEX) ccon++;
+      }
+    printf("triangle flags = %x\n", shTriangle.flags);
+    printf("plain floor flags = %x\n", shFloor.b[0].flags);
+    printf("ball flags = %x\n", shDisk.flags);
+    printf("inverse = %d isside = %d vcon = %d ccon = %d\n", inve, issi, vcon, ccon);
+    }
   
   initPolyForGL();
   }
