@@ -21,7 +21,7 @@ android {
                 // Provides a relative path to your CMake build script.
                 // ldLibs "-lGLESv1_CM -llog"
                 
-                cFlags "-no-integrated-as"
+                cFlags "-integrated-as"
 
             }
         }
@@ -88,10 +88,10 @@ dependencies {
     //
     // IDE setting pulls in the specific version of v4 support you have installed:
     //
-    //compile 'com.android.support:support-v4:21.0.3'
+    compile 'com.android.support:support-v4:21.0.3'
 
     //
     // generic directive pulls in any available version of v4 support:
     //
-    compile 'com.android.support:support-v4:+'
+    // compile 'com.android.support:support-v4:+'
 }

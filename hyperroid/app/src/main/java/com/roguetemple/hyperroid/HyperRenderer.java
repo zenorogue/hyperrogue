@@ -7,12 +7,12 @@ import javax.microedition.khronos.opengles.GL10;
 // import android.graphics.Path;
 import android.content.Context;
 import android.graphics.Typeface;
+import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.os.Build;
 import android.os.PowerManager;
 // bimport android.widget.Toast;
 
-import android.opengl.GLES20;
 import com.android.texample.GLText;
 import com.android.texample.Shader;
 
@@ -27,7 +27,7 @@ public class HyperRenderer implements GLSurfaceView.Renderer {
 	int [] graphdata;
 	int gdpos;
 	int gdpop() { return graphdata[gdpos++]; }
-	boolean initialized;
+    boolean initialized;
 	
 	public void onDrawFrame(GL10 unused) {
 	  if(game.forceCanvas) return;
@@ -39,10 +39,10 @@ public class HyperRenderer implements GLSurfaceView.Renderer {
 
           GLES20.glClear(GL10.GL_COLOR_BUFFER_BIT);
 	  synchronized(game) {
-            if(!initialized) { game.glhrinit(); initialized = true; }
-            game.hv.updateGame();
-            game.draw();
-            graphdata = game.loadMap();
+          if(!initialized) { game.glhrinit(); initialized = true; }
+          game.hv.updateGame();
+        game.draw();
+        graphdata = game.loadMap();
             glText.shader.aPosition = game.getaPosition();
             glText.shader.aTexture = game.getaTexture();
             glText.shader.uColor = game.getuColor();
@@ -50,26 +50,7 @@ public class HyperRenderer implements GLSurfaceView.Renderer {
 
          if(graphdata == null) return;
 
-      // Set to ModelView mode
-      gl.glMatrixMode( GL10.GL_MODELVIEW );           // Activate Model View Matrix
-      gl.glLoadIdentity();                            // Load Identity Matrix
-
-      // enable texture + alpha blending
-      // NOTE: this is required for text rendering! we could incorporate it into
-      // the GLText class, but then it would be called multiple times (which impacts performance).
-      gl.glEnable( GL10.GL_TEXTURE_2D );              // Enable Texture Mapping
-      gl.glEnable( GL10.GL_BLEND );                   // Enable Alpha Blend
-      gl.glBlendFunc( GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA );  // Set Alpha Blend Function
-
-      gl.glMatrixMode( GL10.GL_PROJECTION );          // Activate Projection Matrix
-      gl.glLoadIdentity();                            // Load Identity Matrix
-      gl.glOrthof(                                    // Set Ortho Projection (Left,Right,Bottom,Top,Front,Back)
-         0, width,
-         0, height,
-         1.0f, -1.0f
-      );
-
-      gdpos = 0;
+        gdpos = 0;
       while(gdpos < graphdata.length) {
         switch(gdpop()) {
           case 2: {
@@ -117,8 +98,8 @@ public class HyperRenderer implements GLSurfaceView.Renderer {
 		GLES20.glViewport(0, 0, width, height);
 
             // Save width and height
-        this.width = width;                             // Save Current Width
-        this.height = height;                           // Save Current Height
+      this.width = width;                             // Save Current Width
+      this.height = height;                           // Save Current Height
         initialized = false;
 	}
 
@@ -127,7 +108,7 @@ public class HyperRenderer implements GLSurfaceView.Renderer {
 		
                glText = new GLText( new Shader() );
                glText.load(Typeface.DEFAULT_BOLD, 48, 2, 2 );  // Create Font (Height: 48 Pixels / X+Y Padding 2 Pixels)
-               initialized = false;
+        initialized = false;
 	}
 	
 	

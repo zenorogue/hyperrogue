@@ -243,8 +243,6 @@ int textwidth(int siz, const string &str) {
   return res;
   }
 
-void achievement_init() {}
-
 bool achievementsConnected = false;
 string doViewLeaderboard;
 bool doViewAchievements;
