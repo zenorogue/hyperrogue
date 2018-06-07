@@ -143,6 +143,14 @@ void basicrep(string& x) {
     rep(x, "%l0", choose3(playergender(), "l", "la", "lo"));
     rep(x, "%d0", choose3(playergender(), "", "a", "o"));
     }
+
+  if(l == 4) {
+    rep(x, "%E0", choose3(playergender(), "", "а", "о"));
+    rep(x, "%A0", choose3(playergender(), "ый", "ая", "ое"));
+    rep(x, "%c0", choose3(playergender(), "ся", "ась", ""));
+    rep(x, "%y0", choose3(playergender(), "ый", "ая", "ое"));
+    }
+
 #endif
   }
 
