@@ -510,7 +510,7 @@ namespace conformal {
               xpos = bwidth * (extra_line_steps - bonus);
         
             if(xpos+bwidth > bandsegment) {
-              char buf[128];
+              char buf[154];
               sprintf(buf, "bandmodel-%s-%03d" IMAGEEXT, timebuf, segid++);
     
               IMAGESAVE(band, buf);
@@ -533,7 +533,7 @@ namespace conformal {
           }
         }
 
-      char buf[128];
+      char buf[154];
       sprintf(buf, "bandmodel-%s-%03d" IMAGEEXT, timebuf, segid++);
       IMAGESAVE(band, buf);
       addMessage(XLAT("Saved the band image as: ") + buf);
