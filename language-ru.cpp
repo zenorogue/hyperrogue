@@ -7298,4 +7298,30 @@ S("play!", "играть!")
 S("See past challenges", "смотреть прошлые миссии")
 S("Past Strange Challenges. You can see the setting and high scores, but you can no longer play them.",
   "Прошлые Странные миссии. Ты можешь смотреть настройки и результаты, но не играть.")
-  
+
+S("Forbidden cells are marked with a different color.", "Запрещенные клетки отмечены другим цветом.")
+
+S("This orb lets you attack adjacent cells %1 steps from the primary target.", "Эта сфера позволяет вам атаковать клетки на расстоянии %1 клеток от основной цели.")
+
+
+
+S("Note: the rules above correspond to the standard geometry; actual rules in other geometries may be different. ",
+
+  "Внимание: правила выше относятся к стандартной геометрии; правила в других геометриях могут несколько отличаться. ")
+
+
+
+S("Note: the rules refer to colors which are not visible in other lands. ", "Внимание: правила выше относятся к цветам, невидимым в других землях. ")
+
+
+
+S("When the 'mark heptagons' option (hotkey '7') is on, forbidden moves are marked.", 
+
+  "Когда опция 'отметить семиугольники' (клавиша '7') включена, запрещенные ходы отмечены.")
+
+
+
+S("When the 'mark heptagons' option (hotkey '7') is on, moves between unmarked cells are forbidden.",
+
+  "Когда опция 'отметить семиугольники' (клавиша '7') включена, ходы между неотмеченными клетками запрещены.")
+

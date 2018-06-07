@@ -7198,3 +7198,30 @@ S("play!", "hraj!")
 S("See past challenges", "předešlé mise")
 S("Past Strange Challenges. You can see the setting and high scores, but you can no longer play them.",
   "Předešlé Divné mise. Můžeš se podívat na jejich nastavení a nejvyšší skóre, ale už je nemůžeš hrát.")
+
+S("Forbidden cells are marked with a different color.", "Zakázaná políčka jsou označena odlišnou barvou.")
+
+S("This orb lets you attack adjacent cells %1 steps from the primary target.", "Tato Sféra ti umožňuje útočit na políčka %1 kroků od primárního cíle.")
+
+
+
+S("Note: the rules above correspond to the standard geometry; actual rules in other geometries may be different. ",
+
+  "Poznámka: tato pravidla platí pro standardní geometrii; v jiných geometriích se pravidla mohou lišit. ")
+
+
+
+S("Note: the rules refer to colors which are not visible in other lands. ", "Poznámka: tato pravidla odkazují na barvy, které v jiných krajích nejsou vidět. ")
+
+
+
+S("When the 'mark heptagons' option (hotkey '7') is on, forbidden moves are marked.", 
+
+  "Pokud je zapnutá možnost označování sedmiúhelníků (klávesa '7'), jsou vyznačené zakázané tahy.")
+
+
+
+S("When the 'mark heptagons' option (hotkey '7') is on, moves between unmarked cells are forbidden.",
+
+  "Pokud je zapnutá možnost označování sedmiúhelníků (klávesa '7'), je zakázán pohyb mezi neoznačenými políčky.")
+

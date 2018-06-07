@@ -4423,7 +4423,7 @@ S("Vampire Bats drain your magical powers!",
 
 S("Hint: use arrow keys to scroll.", "Wskazówka: przewijasz strzałkami.")
 S("Hint: press 1 2 3 4 to change the projection.", "Wskazówka: 1 2 3 4 zmienia rzut.")
-S("You gain a protective Shell!", "Zdobył%eś0 ochronną Skorupę!");
+S("You gain a protective Shell!", "Zdoby%łeś0 ochronną Skorupę!");
 S("Hint: magical powers from Treats expire after a number of uses.",
   "Wskazówka: magiczne moce Cukierków wyczerpują się po kilku użyciach.")
 S("A magical energy sword. Don't waste its power!",
@@ -6897,7 +6897,7 @@ S("compete with other players on random lands in random geometries", "konkuruj z
 S("Strange Challenge #%1", "Dziwna Misja #%1")
 S("next challenge in %1", "do następna misji: %1")
 S("synchronizing scores...", "synchronizacja trwa...")
-S("already played", "już grał%eś0")
+S("already played", "już gra%łeś0")
 S("play!", "graj!")
 S("See past challenges", "minione misje")
 S("Past Strange Challenges. You can see the setting and high scores, but you can no longer play them.",
@@ -6966,3 +6966,17 @@ S("Goldberg polyhedra are obtained by adding extra hexagons to a dodecahedron. "
   "Domyślnie HyperRogue używa operacji GP(1,1).")
   
 S("extend the ends", "rozszerz końce")
+
+S("Forbidden cells are marked with a different color.", "Zabronione pora są oznaczone innym kolorem.")
+S("This orb lets you attack adjacent cells %1 steps from the primary target.", "Ta Sfera pozwala atakować pola %1 kroków od głównego celu.")
+
+S("Note: the rules above correspond to the standard geometry; actual rules in other geometries may be different. ",
+  "Uwaga: reguły powyżej są dla standardowej geometrii; właściwe reguły w innych geometriach mogą być trochę inne. ")
+
+S("Note: the rules refer to colors which are not visible in other lands. ", "Uwaga: reguły powyżej się odnoszą do kolorów niewidocznych w innych krainach. ")
+
+S("When the 'mark heptagons' option (hotkey '7') is on, forbidden moves are marked.", 
+  "Kiedy opcja 'oznaczenia na siedmiokątach' (klawisz '7') jest włączona, zabronione ruchy są zaznaczone.")
+
+S("When the 'mark heptagons' option (hotkey '7') is on, moves between unmarked cells are forbidden.",
+  "Kiedy opcja 'oznaczenia na siedmiokątach' (klawisz '7') jest włączona, ruchy pomiędzy nieoznaczonymi polami są zabronione.")
