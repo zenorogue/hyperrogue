@@ -103,15 +103,11 @@ Java_com_roguetemple_hyperroid_HyperRogue_captureBack
   }
 
 void uploadAll(MOBPAR_FORMAL);
-void applyScoreCache(char whattodo);
-bool wantgoogle;
 
 extern "C" bool
 Java_com_roguetemple_hyperroid_HyperRogue_keepinmemory
   ( MOBPAR_FORMAL) {
   saveStats(true);
-  if(wantgoogle) applyScoreCache('s');
-  else applyScoreCache('d');
   uploadAll(MOBPAR_ACTUAL);
   if(!canmove) return false;
   if(items[itOrbSafety]) return false;
