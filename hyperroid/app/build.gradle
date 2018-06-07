@@ -6,8 +6,8 @@ android {
 
     defaultConfig {
         applicationId "com.roguetemple.hyperroid"
-        minSdkVersion 15
-        targetSdkVersion 15
+        minSdkVersion 18
+        targetSdkVersion 18
        // multiDexEnabled true
 
         //javaMaxHeapSize "4g"
