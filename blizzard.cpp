@@ -48,6 +48,10 @@ struct blizzardcell {
 
 map<cell*, blizzardcell> blizzardcells;
 
+void set_blizzard_frame(cell *c, int frameid) {
+  blizzardcells[c].frame = frameid;
+  }
+
 vector<blizzardcell*> bcells;
 
 int N;

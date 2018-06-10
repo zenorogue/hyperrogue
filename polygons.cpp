@@ -79,14 +79,6 @@ void hpcpush(hyperpoint h) {
   hpc.push_back(h);
   }
 
-#define SIDE_SLEV 0
-#define SIDE_WALL 3
-#define SIDE_LAKE 4
-#define SIDE_LTOB 5
-#define SIDE_BTOI 6
-#define SIDE_WTS3 7
-#define SIDEPARS 8
-
 bool validsidepar[SIDEPARS];
 
 void chasmifyPoly(double fac, double fac2, int k) {
@@ -1398,8 +1390,6 @@ ld dlow_table[SIDEPARS], dhi_table[SIDEPARS];
 
 #define SHADMUL (S3==4 ? 1.05 : 1.3)
 
-#include "floorshapes.cpp"
-  
 void buildpolys() {
 
   symmetriesAt.clear();

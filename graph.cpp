@@ -3275,8 +3275,6 @@ bool allemptynear(cell *c) {
   return true;
   }
 
-#include "blizzard.cpp"
-
 static const int trapcol[4] = {0x904040, 0xA02020, 0xD00000, 0x303030};
 static const int terracol[8] = {0xD000, 0xE25050, 0xD0D0D0, 0x606060, 0x303030, 0x181818, 0x0080, 0x8080};
 
@@ -4640,7 +4638,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
     if(c->land == laBlizzard) {
       if(vid.backeffects) {
         if(c->cpdist <= getDistLimit())
-          blizzardcells[c].frame = frameid;
+          set_blizzard_frame(c, frameid);
         }
       else {
         forCellIdEx(c2, i, c) if(againstWind(c, c2))

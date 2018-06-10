@@ -3407,3 +3407,54 @@ void switch_game_mode(char switchWhat);
 
 void stop_game_and_switch_mode(char switchWhat = rg::nothing); // stop_game + switch_game_mode
 void restart_game(char switchWhat = rg::nothing); // popAllScreens + popAllGames + stop_game + switch_game_mode + start_game
+
+void generate_floorshapes();
+void drawArrowTraps();
+void drawBlizzards();
+
+struct blizzardcell;
+
+extern vector<cell*> arrowtraps;
+extern map<cell*, blizzardcell> blizzardcells;
+extern vector<blizzardcell*> bcells;
+void set_blizzard_frame(cell *c, int frameid);
+
+#define SIDE_SLEV 0
+#define SIDE_WALL 3
+#define SIDE_LAKE 4
+#define SIDE_LTOB 5
+#define SIDE_BTOI 6
+#define SIDE_WTS3 7
+#define SIDEPARS 8
+
+struct floorshape {
+  bool is_plain;
+  int shapeid, prio;
+  vector<hpcshape> b, shadow, side[SIDEPARS], gpside[SIDEPARS][8];
+  floorshape() { prio = PPR_FLOOR; }
+  };
+
+extern vector<struct plain_floorshape*> all_plain_floorshapes;
+extern vector<struct escher_floorshape*> all_escher_floorshapes;
+
+struct plain_floorshape : floorshape {
+  ld rad0, rad1;
+  plain_floorshape() { is_plain = true; all_plain_floorshapes.push_back(this); }
+  void configure(ld r0, ld r1) { rad0 = r0; rad1 = r1; }
+  };
+
+// noftype: 0 (shapeid2 is heptagonal or just use shapeid1), 1 (shapeid2 is pure heptagonal), 2 (shapeid2 is Euclidean), 3 (shapeid2 is hexagonal)
+struct escher_floorshape : floorshape {
+  int shapeid0, shapeid1, noftype, shapeid2;
+  ld scale;
+  escher_floorshape(int s0, int s1, int noft=0, int s2=0) : shapeid0(s0), shapeid1(s1), noftype(noft), shapeid2(s2) {
+    all_escher_floorshapes.push_back(this); scale = 1; is_plain = false;
+    }
+  };
+
+extern plain_floorshape
+  shFloor, 
+  shMFloor, shMFloor2, shMFloor3, shMFloor4, shFullFloor,
+  shBigTriangle, shTriheptaFloor, shBigHepta;
+
+extern escher_floorshape shDragonFloor, shPowerFloor, shRedRockFloor[3];

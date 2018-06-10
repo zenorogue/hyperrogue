@@ -1,30 +1,5 @@
-struct plain_floorshape;
-struct escher_floorshape;
-
 vector<plain_floorshape*> all_plain_floorshapes;
 vector<escher_floorshape*> all_escher_floorshapes;
-
-struct floorshape {
-  bool is_plain;
-  int shapeid, prio;
-  vector<hpcshape> b, shadow, side[SIDEPARS], gpside[SIDEPARS][8];
-  floorshape() { prio = PPR_FLOOR; }
-  };
-
-struct plain_floorshape : floorshape {
-  ld rad0, rad1;
-  plain_floorshape() { is_plain = true; all_plain_floorshapes.push_back(this); }
-  void configure(ld r0, ld r1) { rad0 = r0; rad1 = r1; }
-  };
-
-// noftype: 0 (shapeid2 is heptagonal or just use shapeid1), 1 (shapeid2 is pure heptagonal), 2 (shapeid2 is Euclidean), 3 (shapeid2 is hexagonal)
-struct escher_floorshape : floorshape {
-  int shapeid0, shapeid1, noftype, shapeid2;
-  ld scale;
-  escher_floorshape(int s0, int s1, int noft=0, int s2=0) : shapeid0(s0), shapeid1(s1), noftype(noft), shapeid2(s2) {
-    all_escher_floorshapes.push_back(this); scale = 1; is_plain = false;
-    }
-  };
 
 plain_floorshape
   shFloor, 

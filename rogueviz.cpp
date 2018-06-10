@@ -914,9 +914,6 @@ bool edgecmp(edgeinfo *e1, edgeinfo *e2) {
   return e1->weight > e2->weight;
   }
 
-#include "rogueviz-kohonen.cpp"
-#include "rogueviz-staircase.cpp"
-
 void describe(cell *c) {
   if(kind == kKohonen) return kohonen::describe(c);
   }
@@ -1987,5 +1984,8 @@ auto hooks  =
 #endif
   addHook(clearmemory, 0, close);
 
+#include "rogueviz-kohonen.cpp"
+#include "rogueviz-staircase.cpp"
 
 };
+

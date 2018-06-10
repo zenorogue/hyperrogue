@@ -1,8 +1,6 @@
 // HyperRogue menus
 // Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
 
-#include "dialogs.cpp"
-
 // -- overview --
 
 #define BLACKISH 0x404040

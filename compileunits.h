@@ -52,6 +52,7 @@ bool inv::activating;
 #include "debug.cpp"
 #include "geometry.cpp"
 #include "polygons.cpp"
+#include "floorshapes.cpp"
 #include "mapeditor.cpp"
 #if CAP_MODEL
 #include "netgen.cpp"
@@ -64,6 +65,7 @@ bool inv::activating;
 #include "help.cpp"
 #include "config.cpp"
 #include "scores.cpp"
+#include "dialogs.cpp"
 #include "menus.cpp"
 #include "geom-exp.cpp"
 #include "quit.cpp"
@@ -78,6 +80,7 @@ bool inv::activating;
 #include "hypgraph.cpp"
 #include "textures.cpp"
 #include "graph.cpp"
+#include "blizzard.cpp"
 #include "sound.cpp"
 #include "achievement.cpp"
 #include "barriers.cpp"

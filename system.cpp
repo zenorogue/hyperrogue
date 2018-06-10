@@ -1078,6 +1078,7 @@ void popAllGames() {
 
 void stop_game() {
   if(!game_active) return;
+  DEBB(DF_INIT, (debugfile,"stop_game\n"));
   achievement_final(true);
 #if CAP_SAVE
   saveStats();
@@ -1119,6 +1120,7 @@ void push_game() {
   }
 
 void switch_game_mode(char switchWhat) {
+  DEBB(DF_INIT, (debugfile,"switch_game_mode\n"));
   switch(switchWhat) {
     case rg::peace:
       peace::on = !peace::on;
@@ -1243,6 +1245,7 @@ void switch_game_mode(char switchWhat) {
 
 void start_game() {
   if(game_active) return;
+  DEBB(DF_INIT, (debugfile,"start_game\n"));
   game_active = true;
   if(need_reset_geometry) resetGeometry();
   initcells();
