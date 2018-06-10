@@ -86,55 +86,44 @@ namespace arg {
 
   }
 
+#define CHEAT autocheat = true; cheater++; timerghost = false;
+
 int arg::readCommon() {
+
+// first phase options
+
   if(argis("-c")) { PHASE(1); shift(); conffile = argcs(); }
   else if(argis("-s")) { PHASE(1); shift(); scorefile = argcs(); }
   else if(argis("-m")) { PHASE(1); shift(); musicfile = argcs(); }
+  else if(argis("-nogui")) { PHASE(1); noGUI = true; }
+  else if(argis("-font")) { PHASE(1); shift(); fontpath = args(); }
 #if CAP_SDLAUDIO
   else if(argis("-se")) { PHASE(1); shift(); wheresounds = args(); }
 #endif
-  else if(argis("-svol")) { PHASE(1); shift(); effvolume = argi(); }
-#if CAP_EDIT
-  else if(argis("-lev")) { shift(); levelfile = args(); }
-  else if(argis("-pic")) { shift(); picfile = args(); }
-  else if(argis("-load")) { PHASE(3); shift(); mapstream::loadMap(args()); }
-  else if(argis("-font")) { PHASE(1); shift(); fontpath = args(); }
-  else if(argis("-picload")) { PHASE(3); shift(); mapeditor::loadPicFile(args()); }
-#endif
+
+// change the configuration from the command line
+  else if(argis("-svol")) { PHASEFROM(2); shift(); effvolume = argi(); }
+  else if(argis("-back")) {
+    PHASEFROM(2); shift(); backcolor = arghex();
+    }
+  else if(argis("-borders")) {
+    PHASEFROM(2); shift(); bordcolor = arghex();
+    }
+  else if(argis("-fore")) {
+    PHASEFROM(2); shift(); forecolor = arghex();
+    }
+  else if(argis("-aa")) { PHASEFROM(2); shift(); vid.antialias = argi(); }
+  else if(argis("-lw")) { PHASEFROM(2); shift(); vid.linewidth = argf(); }
+  else if(argis("-wm")) { PHASEFROM(2); shift(); vid.wallmode = argi(); }
+  else if(argis("-mm")) { PHASEFROM(2); shift(); vid.monmode = argi(); }
+
+// non-configurable options
   else if(argis("-vsync_off")) {
     vsync_off = true;
     if(curphase == 3) setvideomode();
     }
-  else if(argis("-canvas")) {
-    PHASE(2);
-    firstland = specialland = laCanvas;
-    shift();
-    if(args() == "i") canvas_invisible = !canvas_invisible;
-    else if(args().size() == 1) patterns::whichCanvas = args()[0];
-    else patterns::canvasback = arghex();
-    if(curphase == 3) restartGame();
-    }
   else if(argis("-noplayer")) 
     mapeditor::drawplayer = !mapeditor::drawplayer;
-  else if(argis("-pattern")) {
-    PHASE(3);
-    shift();
-    const char *c = argcs();
-    using namespace patterns;
-    subpattern_flags = 0;
-    whichPattern = 0;
-    while(*c) { 
-      if(*c >= '0' && *c <= '9') subpattern_flags ^= 1 << (*c - '0'); 
-      else if(*c == '@') subpattern_flags ^= 1 << 10; 
-      else if(*c == '-') subpattern_flags ^= 1 << 11; 
-      else if(*c == '~') subpattern_flags ^= 1 << 12; 
-      else whichPattern = *c;
-      c++; 
-      }
-    }
-  else if(argis("-nogui")) {
-    noGUI = true;
-    }
   else if(argis("-nofps")) {
     nofps = true;
     }
@@ -147,51 +136,31 @@ int arg::readCommon() {
   else if(argis("-nohelp")) {
     nohelp = true;
     }
-  else if(argis("-noscr")) {
+  else if(argis("-dont_face_pc")) {
+    dont_face_pc = true;
+    }
+  else if(argis("-rch")) {    
+    PHASEFROM(2); CHEAT reptilecheat = true;
+    }
+
+// cheats
+  else if(argis("-WT")) {
     PHASE(3);
-    popScreenAll();
-    showstartmenu = false;
-    }
-  else if(argis("-back")) {
-    shift(); backcolor = arghex();
-    }
-  else if(argis("-borders")) {
-    shift(); bordcolor = arghex();
-    }
-  else if(argis("-fore")) {
-    shift(); forecolor = arghex();
+    shift(); 
+    activateSafety(readland(args()));
+    CHEAT;
     }
   else if(argis("-W2")) {
-    shift(); cheatdest = readland(args()); autocheat = true;
-    showstartmenu = false;
-    }
-  else if(argis("-W3")) {
-    shift(); top_land = readland(args()); autocheat = true;
-    showstartmenu = false;
-    }
-  else if(argis("-top")) {
-    PHASE(3); View = View * spin(-M_PI/2);
-    }
-  else if(argis("-W") && curphase <= 2) {
-    PHASE(2);
-    shift(); 
-    firstland0 = firstland = specialland = readland(args()); autocheat = true;
-    showstartmenu = false;
-    }
-  else if(argis("-W") && curphase == 3) {
-    PHASE(3);
-    shift(); 
-    firstland0 = firstland = specialland = readland(args()); autocheat = true;
-    activateSafety(specialland);
+    shift(); cheatdest = readland(args()); CHEAT;
     showstartmenu = false;
     }
   else if(argis("-I")) {
-    PHASE(3) cheater++; timerghost = false;
+    PHASE(3) CHEAT
     shift(); eItem i = readItem(args());
     shift(); items[i] = argi(); 
     }
   else if(argis("-IP")) {
-    PHASE(3) cheater++; timerghost = false;
+    PHASE(3) CHEAT
     shift(); eItem i = readItem(args());
     shift(); int q = argi();
     placeItems(q, i);
@@ -202,13 +171,13 @@ int arg::readCommon() {
     }
 #if CAP_INV
   else if(argis("-IU")) {
-    PHASE(3) cheater++; timerghost = false;
+    PHASE(3) CHEAT
     shift(); eItem i = readItem(args());
     shift(); inv::usedup[i] += argi();
     inv::compute();
     }
   else if(argis("-IX")) {
-    PHASE(3) autocheat = true; cheater++; timerghost = false;
+    PHASE(3) CHEAT
     shift(); eItem i = readItem(args());
     shift(); inv::extra_orbs[i] += argi();
     inv::compute();
@@ -217,59 +186,23 @@ int arg::readCommon() {
   else if(argis("-ambush")) {
     // make all ambushes use the given number of dogs
     // example: hyper -W Hunt -IP Shield 1 -ambush 60
-    PHASE(3) cheater++; timerghost = false;
+    PHASE(3) CHEAT
     shift(); ambushval = argi();
     }
   else if(argis("-M")) {
-    PHASE(3) cheater++; timerghost = false;
+    PHASE(3) CHEAT
     shift(); eMonster m = readMonster(args());
     shift(); int q = argi();
     printf("m = %s q = %d\n", dnameof(m), q);
     restoreGolems(q, m, 7);
     }
-  else if(argis("-dont_face_pc")) {
-    dont_face_pc = true;
-    }
   else if(argis("-MK")) {
-    PHASE(3) cheater++; timerghost = false;
+    PHASE(3) CHEAT
     shift(); eMonster m = readMonster(args());
     shift(); kills[m] += argi();
     }
-  else if(argis("-L")) {
-    printf("Treasures:\n");
-    for(int i=1; i<ittypes; i++) 
-      if(itemclass(eItem(i)) == IC_TREASURE)
-        printf("    %s\n", iinf[i].name);
-    printf("\n");
-    printf("Orbs:\n");
-    for(int i=1; i<ittypes; i++) 
-      if(itemclass(eItem(i)) == IC_ORB)
-        printf("    %s\n", iinf[i].name);
-    printf("\n");
-    printf("Other items:\n");
-    for(int i=1; i<ittypes; i++) 
-      if(itemclass(eItem(i)) == IC_OTHER)
-        printf("    %s\n", iinf[i].name);
-    printf("\n");
-    printf("Monsters:\n");
-    for(int i=1; i<motypes; i++) 
-      printf("    %s\n", minf[i].name);
-    printf("\n");
-    printf("Lands:\n");
-    for(int i=1; i<landtypes; i++) 
-      printf("    %s\n", linf[i].name);
-    printf("\n");
-    printf("Walls:\n");
-    for(int i=0; i<walltypes; i++) 
-      printf("    %s\n", winf[i].name);
-    printf("\n");
-    exit(0);
-    }
 
-  else if(argis("-aa")) { PHASEFROM(2); shift(); vid.antialias = argi(); }
-  else if(argis("-lw")) { PHASEFROM(2); shift(); vid.linewidth = argf(); }
-  else if(argis("-wm")) { PHASEFROM(2); shift(); vid.wallmode = argi(); }
-  else if(argis("-mm")) { PHASEFROM(2); shift(); vid.monmode = argi(); }
+// mode changes:
 
 #define TOGGLE(x, param, act) \
 else if(args()[0] == '-' && args()[1] == x && !args()[2]) { showstartmenu = false; if(curphase == 3) {act;} else {PHASE(2); param = !param;} } \
@@ -289,24 +222,12 @@ else if(args()[0] == '-' && args()[1] == x && args()[2] == '0') { showstartmenu 
   else if(argis("-peace")) {
     peace::otherpuzzles = true;
     if(curphase == 3) restartGame(rg::peace);
-    else peace::on = true;
+    else peace::on = !peace::on;
     }
   else if(argis("-pmem")) {
     peace::otherpuzzles = false;
     if(curphase == 3) restartGame(rg::peace);
-    else peace::on = true;
-    }
-  else if(argis("-pal")) {
-    PHASEFROM(2);
-    shift(); int id = argi();
-    shift(); linepatterns::patterns[id].color |= argi();
-    autocheat = true;
-    }
-  else if(argis("-palrgba")) {
-    PHASEFROM(2);
-    shift(); int id = argi();
-    shift(); linepatterns::patterns[id].color = arghex();
-    autocheat = true;
+    else peace::on = !peace::on;
     }
   else if(argis("-geo")) { 
     if(curphase == 3) {
@@ -317,14 +238,68 @@ else if(args()[0] == '-' && args()[1] == x && args()[2] == '0') { showstartmenu 
       PHASE(2); shift(); geometry = targetgeometry = (eGeometry) argi();
       }
     }
+  else if(argis("-gp")) {
+    PHASEFROM(2);
+    if(nonbitrunc && curphase == 3) restartGame(rg::bitrunc);
+    shift(); gp::param.first = argi();
+    shift(); gp::param.second = argi();
+    if(curphase == 3) restartGame(rg::gp);
+    }
+// 'do something'
+  else if(argis("-W")) {
+    PHASEFROM(2);
+    shift(); 
+    firstland0 = firstland = specialland = readland(args());
+    if(curphase == 3) restartGame();
+    showstartmenu = false;
+    }
+  else if(argis("-canvas")) {
+    PHASEFROM(2); CHEAT
+    firstland = specialland = laCanvas;
+    shift();
+    if(args() == "i") canvas_invisible = !canvas_invisible;
+    else if(args().size() == 1) patterns::whichCanvas = args()[0];
+    else patterns::canvasback = arghex();
+    if(curphase == 3) restartGame();
+    }
+  else if(argis("-pattern")) {
+    PHASEFROM(2); CHEAT
+    shift();
+    const char *c = argcs();
+    using namespace patterns;
+    subpattern_flags = 0;
+    whichPattern = 0;
+    while(*c) { 
+      if(*c >= '0' && *c <= '9') subpattern_flags ^= 1 << (*c - '0'); 
+      else if(*c == '@') subpattern_flags ^= 1 << 10; 
+      else if(*c == '-') subpattern_flags ^= 1 << 11; 
+      else if(*c == '~') subpattern_flags ^= 1 << 12; 
+      else whichPattern = *c;
+      c++; 
+      }
+    }
+
+// non-categorized:
+  else if(argis("-pal")) {
+    PHASEFROM(2); CHEAT;
+    shift(); int id = argi();
+    shift(); linepatterns::patterns[id].color |= argi();
+    }
+  else if(argis("-palrgba")) {
+    PHASEFROM(2); CHEAT;
+    shift(); int id = argi();
+    shift(); linepatterns::patterns[id].color = arghex();
+    }
   else if(argis("-qs")) {
-    autocheat = true;
+    CHEAT;
     shift(); currfp.qpaths.push_back(args());
     }
   else if(argis("-fix")) {
+    PHASE(1);
     fixseed = true; autocheat = true;
     }
   else if(argis("-fixx")) {
+    PHASE(1);
     fixseed = true; autocheat = true;
     shift(); startseed = argi();
     }
@@ -392,24 +367,14 @@ else if(args()[0] == '-' && args()[1] == x && args()[2] == '0') { showstartmenu 
     autocheat = true;
     currfp.findsubpath();
     }
-  else if(argis("-fi")) {
-    fieldpattern::info();
-    exit(0);
-    } 
   else if(argis("-quantum")) {
+    CHEAT;
     quantum = true;
-    autocheat = true;
-    }
-  else if(argis("-gp")) {
-    PHASE(3);
-    if(nonbitrunc) restartGame(rg::bitrunc);
-    shift(); gp::param.first = argi();
-    shift(); gp::param.second = argi();
-    restartGame(rg::gp);
     }
   else if(argis("-P")) { 
     PHASE(2); shift(); 
     vid.scfg.players = argi(); 
+    // todo phase3 restart
     }
   else if(argis("-PM")) { 
     PHASEFROM(2); shift(); pmodel = eModel(argi());
@@ -492,8 +457,8 @@ else if(args()[0] == '-' && args()[1] == x && args()[2] == '0') { showstartmenu 
     shift(); sightrange_bonus = argi();
     }
   else if(argis("-srx")) {    
-    PHASEFROM(2);
-    shift(); sightrange_bonus = genrange_bonus = gamerange_bonus = argi(); autocheat = true;
+    PHASEFROM(2); CHEAT;
+    shift(); sightrange_bonus = genrange_bonus = gamerange_bonus = argi();
     }
   else if(argis("-els")) {
     shift(); conformal::extra_line_steps = argf();
@@ -509,10 +474,6 @@ else if(args()[0] == '-' && args()[1] == x && args()[2] == '0') { showstartmenu 
   else if(argis("-wei2")) {
     PHASEFROM(2);
     shift(); whateveri2 = argf(); resetGeometry();
-    }
-  else if(argis("-rch")) {    
-    PHASEFROM(2);
-    reptilecheat = true; autocheat = true; firstland = laReptile;
     }
   else if(argis("-bright")) {    
     bright = true;
@@ -545,6 +506,64 @@ else if(args()[0] == '-' && args()[1] == x && args()[2] == '0') { showstartmenu 
     PHASE(3); shift(); 
     printf("saving SVG screenshot to %s\n", argcs());
     svg::render(argcs());
+    }
+
+// other
+#if CAP_EDIT
+  else if(argis("-lev")) { shift(); levelfile = args(); }
+  else if(argis("-pic")) { shift(); picfile = args(); }
+  else if(argis("-load")) { PHASE(3); shift(); mapstream::loadMap(args()); }
+  else if(argis("-picload")) { PHASE(3); shift(); mapeditor::loadPicFile(args()); }
+#endif
+// graphical options
+  else if(argis("-noscr")) {
+    PHASE(3);
+    popScreenAll();
+    showstartmenu = false;
+    }
+
+  else if(argis("-W3")) {
+    shift(); top_land = readland(args()); CHEAT;
+    showstartmenu = false;
+    }
+  else if(argis("-top")) {
+    PHASE(3); View = View * spin(-M_PI/2);
+    }
+
+// informational
+  else if(argis("-fi")) {
+    fieldpattern::info();
+    exit(0);
+    } 
+  else if(argis("-L")) {
+    printf("Treasures:\n");
+    for(int i=1; i<ittypes; i++) 
+      if(itemclass(eItem(i)) == IC_TREASURE)
+        printf("    %s\n", iinf[i].name);
+    printf("\n");
+    printf("Orbs:\n");
+    for(int i=1; i<ittypes; i++) 
+      if(itemclass(eItem(i)) == IC_ORB)
+        printf("    %s\n", iinf[i].name);
+    printf("\n");
+    printf("Other items:\n");
+    for(int i=1; i<ittypes; i++) 
+      if(itemclass(eItem(i)) == IC_OTHER)
+        printf("    %s\n", iinf[i].name);
+    printf("\n");
+    printf("Monsters:\n");
+    for(int i=1; i<motypes; i++) 
+      printf("    %s\n", minf[i].name);
+    printf("\n");
+    printf("Lands:\n");
+    for(int i=1; i<landtypes; i++) 
+      printf("    %s\n", linf[i].name);
+    printf("\n");
+    printf("Walls:\n");
+    for(int i=0; i<walltypes; i++) 
+      printf("    %s\n", winf[i].name);
+    printf("\n");
+    exit(0);
     }
   else if(argis("--help") || argis("-h")) {
     printf("Press F1 while playing to get ingame options.\n\n");
