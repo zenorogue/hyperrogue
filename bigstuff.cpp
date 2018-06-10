@@ -7,6 +7,8 @@
 
 // horocycles
 
+namespace hr {
+
 int newRoundTableRadius() {
   return 28 + 2 * items[itHolyGrail];
   }
@@ -1351,3 +1353,5 @@ void moreBigStuff(cell *c) {
       }
     }      
   }
+
+}

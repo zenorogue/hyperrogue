@@ -40,10 +40,11 @@ void moreStack() {
   }
 #endif
 
-hookset<bool(int argc, char** argv)> *hooks_main;
+hr::hookset<bool(int argc, char** argv)> *hr::hooks_main;
 
 #ifndef NOMAIN
 int main(int argc, char **argv) {
+  using namespace hr; 
 #if ISWEB
   emscripten_get_commandline();
 #else

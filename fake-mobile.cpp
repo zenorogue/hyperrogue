@@ -5,17 +5,20 @@
 #define MOBPAR_FORMAL int
 #define MOBPAR_ACTUAL 0
 #define MIX_MAX_VOLUME 128
-
-const char *scorefile = "fakemobile_score.txt";
-const char *conffile = "fakemobile_config.txt";
-
 #include <string>
-std::string levelfile = "fakemobile_level.txt";
-std::string picfile = "fakemobile_pic.txt";
+
+namespace hr {
+  const char *scorefile = "fakemobile_score.txt";
+  const char *conffile = "fakemobile_config.txt";
+  
+  std::string levelfile = "fakemobile_level.txt";
+  std::string picfile = "fakemobile_pic.txt";
+  }
 
 #include <SDL/SDL.h>
 
 #include "init.cpp"
+using namespace hr;
 
 #include <SDL/SDL_ttf.h>
 #include <SDL/SDL_gfxPrimitives.h>

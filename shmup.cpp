@@ -4,6 +4,8 @@
 
 // implementation of the shoot'em up mode
 
+namespace hr {
+
 extern int mousex, mousey;
 extern bool clicked;
 
@@ -368,7 +370,7 @@ void handleConfig(int sym, int uni) {
       shmupcfg = !shmupcfg;
 #if CAP_CONFIG
     else if(uni == 'c')
-      ::saveConfig();
+      hr::saveConfig();
 #endif
     else if(uni == 'n' || uni == 'N') {
       vid.scfg.players += shiftmul > 0 ? 1 : -1;
@@ -2263,7 +2265,7 @@ void moveBullet(monster *m, int delta) {
       bool revive = m2->type == moMirrorSpirit && !m2->dead;
       killMonster(m2, m->parent ? m->parent->type : moNone);
       if(revive && m2->dead) {
-        ::kills[moMirrorSpirit]--;
+        hr::kills[moMirrorSpirit]--;
         multi::kills[cpid]--;
         mirrorspirits++;
         }
@@ -3575,4 +3577,5 @@ auto hooks = addHook(clearmemory, 0, shmup::clearMemory) +
       }
     });
     
+}
 }

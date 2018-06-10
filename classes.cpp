@@ -1,6 +1,8 @@
 // Hyperbolic Rogue -- items, monsters, walls, lands, descriptions, etc.
 // Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
 
+namespace hr {
+
 // --- help ---
 
 const char *wormdes = 
@@ -1674,3 +1676,4 @@ geometryinfo ginf[gGUARD] = {
   {"cube/elliptic",       "e3x4",     4, 3, qELLIP, gcSphere,     0x10600, {{SEE_ALL, SEE_ALL}}},
   };
 
+}

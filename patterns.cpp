@@ -2,6 +2,8 @@
 
 // Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
 
+namespace hr {
+
 // === EMERALD PATTERN ===
 
 // rules for the emeraldvalues of heptagons.
@@ -1141,3 +1143,4 @@ int fifty_38(int f, int d) {
   + (((c + (dockflip[dock][d2]&3)) % 3) << 1)
   + (dockflip[dock][d2]&~3);
   }
+}

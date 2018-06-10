@@ -5,6 +5,8 @@
 // Yendor Quest, together with the Yendor Challenge
 // also, the Pure Tactics Mode and the Peace Mode
 
+namespace hr {
+
 namespace peace { extern bool on; }
 
 int hiitemsMax(eItem it) {
@@ -1100,3 +1102,4 @@ namespace peace {
     
   auto aNext = addHook(hooks_nextland, 100, getNext);
   };
+}

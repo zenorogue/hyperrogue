@@ -3,6 +3,7 @@
 
 #define ORBLINES 70
 
+namespace hr {
 // orbgen flags
 
 namespace orbgenflags {
@@ -548,3 +549,4 @@ void placeOceanOrbs(cell *c) {
     }
   }
 
+}

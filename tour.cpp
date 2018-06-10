@@ -1,7 +1,7 @@
 // Hyperbolic Rogue -- the Tutorial/presentation
 // Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
 
-namespace tour {
+namespace hr::tour {
 
 bool on;
 
@@ -111,7 +111,7 @@ bool handleKeyTour(int sym, int uni) {
     if(inhelp) slidehelp();
     return true;
     }
-  if(sym == '1' || sym == '2') { // || sym == '3') {
+  if(sym == '1' || sym == '2') { // || sym == '3') 
     int legal = slides[currentslide].flags & 7;
 
     if(legal == LEGAL_NONE || legal == LEGAL_HYPERBOLIC) {

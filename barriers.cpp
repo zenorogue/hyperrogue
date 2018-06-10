@@ -2,6 +2,8 @@
 // This file implements routines related to barriers (Great Walls and similar).
 // Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
 
+namespace hr {
+
 bool checkBarriersFront(cellwalker bb, int q, bool cross) {
 
   if(!ctof(bb.c)) 
@@ -765,3 +767,4 @@ bool buildBarrierNowall(cell *c, eLand l2, int forced_dir) {
   return false;
   }
 
+}

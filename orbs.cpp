@@ -4,6 +4,8 @@
 
 // Orb-related routines
 
+namespace hr {
+
 bool markOrb(eItem it) {
   if(!items[it]) return false;
   orbused[it] = true;
@@ -1396,3 +1398,4 @@ void orboflava(int i) {
       forCellEx(c2, c) makelava(c2, i);
       }
   }
+}

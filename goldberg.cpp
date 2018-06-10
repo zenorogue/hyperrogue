@@ -1,4 +1,4 @@
-namespace gp {
+namespace hr::gp {
   bool on;
   loc param(1, 0);
 

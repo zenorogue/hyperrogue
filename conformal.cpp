@@ -3,6 +3,8 @@
 
 #include <complex>
 
+namespace hr {
+
 #if ISMOBWEB
 typedef double precise;
 #else
@@ -885,3 +887,5 @@ namespace conformal {
     });
 
   }
+
+}

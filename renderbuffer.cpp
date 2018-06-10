@@ -5,6 +5,8 @@
 
 // Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
 
+namespace hr {
+
 #if CAP_GL
 #if !CAP_GLEW
 #if ISLINUX
@@ -214,3 +216,4 @@ void resetbuffer::reset() {
   #endif
   }
 
+}

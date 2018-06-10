@@ -1,6 +1,8 @@
 // Hyperbolic Rogue -- built-in font
 // Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
 
+namespace hr {
+
 #if CAP_TABFONT
 // compile with -DCAP_CREATEFONT=1 to generate this table
 // this variant has been created for non-translated HyperRogue
@@ -164,3 +166,4 @@ void generateFont(int ch, SDL_Surface *txt) {
     }
   }
 #endif
+}

@@ -4,7 +4,7 @@
 // Kohonen's self-organizing networks. 
 // This is a part of RogueViz, not a part of HyperRogue.
 
-namespace staircase {
+namespace rogueviz::staircase {
 
 using namespace hyperpoint_vec;
 

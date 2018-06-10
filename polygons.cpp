@@ -4,6 +4,8 @@
 
 // Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
 
+namespace hr {
+
 // draw the lines
 static const int POLY_DRAWLINES = 1;
 // draw the area
@@ -3371,3 +3373,4 @@ NEWSHAPE
 
 #endif
 
+}

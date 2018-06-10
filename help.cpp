@@ -1,6 +1,8 @@
 // Hyperbolic Rogue -- help routines
 // Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
 
+namespace hr {
+
 string help;
 
 function<void()> help_delegate;
@@ -1015,3 +1017,4 @@ void gotoHelpFor(eLand l) {
      }});
   else listbeasts();  
   }
+}

@@ -11,8 +11,13 @@
 #define IN_CU(x) (CU == x)
 #endif
 
+#include "sysconfig.h"
 #include "classes.h"
 #include "hyper.h"
+
+#if CAP_ROGUEVIZ
+#include "rogueviz.h"
+#endif
 
 #define CU_INIT IN_CU(0)
 #define CU_HYPER IN_CU(0)
@@ -97,7 +102,7 @@ bool inv::activating;
 #if CAP_DAILY
 #include "private/daily.cpp"
 #else
-namespace daily { bool on; }
+namespace hr::daily { bool on; }
 #endif
 #endif
 

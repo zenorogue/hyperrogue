@@ -4,6 +4,8 @@
 // heptagon here refers to underlying heptagonal tesselation
 // (which you can see by changing the conditions in graph.cpp)
 
+namespace hr {
+
 #define MIRR(x) x.mirrored
 
 int heptacount = 0;
@@ -275,3 +277,4 @@ void hsshow(const heptspin& t) {
 // create h->move[d] if not created yet
 heptagon *createStep(heptagon *h, int d);
 
+}

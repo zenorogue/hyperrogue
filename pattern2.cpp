@@ -2,6 +2,8 @@
 
 // Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
 
+namespace hr {
+
 int gp_threecolor() {
   if(!gp::on) return 0;
   if((gp::param.first - gp::param.second) % 3 == 0) return 2;
@@ -2011,3 +2013,4 @@ int val46(cell *c) {
   return si.id;
   }
 
+}

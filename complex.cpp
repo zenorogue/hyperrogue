@@ -7,6 +7,8 @@
 
 #include <map>
 
+namespace hr {
+
 namespace whirlwind {
 
   int fzebra3(cell *c) {
@@ -3674,3 +3676,5 @@ namespace dungeon {
     if(d == 7 && c->land == laDungeon) buildPlates(c);
     }
   }
+
+}

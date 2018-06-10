@@ -3,6 +3,8 @@
 
 // Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
 
+namespace hr {
+
 int lastsafety;
 int mutantphase;
 int turncount;
@@ -141,8 +143,6 @@ cellwalker cwt;       // single player character position
 
 inline cell*& singlepos() { return cwt.c; }
 inline bool singleused() { return !(shmup::on || multi::players > 1); }
-
-#include <random>
 
 mt19937 r;
 
@@ -8053,3 +8053,4 @@ bool warningprotection() {
   return true;
   }
 
+}

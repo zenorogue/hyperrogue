@@ -1,3 +1,5 @@
+namespace hr {
+
 vector<plain_floorshape*> all_plain_floorshapes;
 vector<escher_floorshape*> all_escher_floorshapes;
 
@@ -587,3 +589,4 @@ if(0) {
     } */
   }
 
+}

@@ -14,6 +14,8 @@
 
 */
 
+namespace hr {
+
 const char* COLORBAR = "###";
 
 namespace dialog {
@@ -1039,3 +1041,5 @@ namespace dialog {
     }
   
   };
+
+}

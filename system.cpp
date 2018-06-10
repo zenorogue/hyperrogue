@@ -4,6 +4,8 @@
 
 // routines for: initializing/closing, loading/saving, and cheating
 
+namespace hr {
+
 bool need_reset_geometry = true;
 
 bool game_active;
@@ -1308,3 +1310,4 @@ addHook(hooks_removecells, 0, [] () {
   for(int i=0; i<SHSIZE; i++) for(int p=0; p<MAXPLAYER; p++)
     set_if_removed(shpos[p][i], NULL);
   });;
+}

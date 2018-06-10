@@ -4,6 +4,8 @@
 
 // basic graphics:
 
+namespace hr {
+
 int inmirrorcount = 0;
 
 bool wmspatial, wmescher, wmplain, wmblack, wmascii;
@@ -5825,3 +5827,4 @@ bool inscreenrange(cell *c) {
   return heptdistance(viewcenter(), c) <= 8;
   }
 
+}

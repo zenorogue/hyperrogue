@@ -5,6 +5,8 @@
 
 #define NUMLAN 7
 
+namespace hr {
+
 const char *dnameof(eMonster m) { return minf[m].name; }
 const char *dnameof(eLand l) { return linf[l].name; }
 const char *dnameof(eWall w) { return winf[w].name; }
@@ -391,3 +393,4 @@ string XLAT1(string x) {
 
 string XLATT1(stringpar p) { return XLAT1(p.v); }
 
+}

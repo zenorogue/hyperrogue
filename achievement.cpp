@@ -1,6 +1,8 @@
 // Hyperbolic Rogue -- achievements
 // Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
 
+namespace hr {
+
 #define NUMLEADER 78
 
 bool offlineMode = false;
@@ -782,3 +784,5 @@ int score_default(int i) {
 int get_sync_status() { return 0; }
 void set_priority_board(int) { }
 #endif
+
+}

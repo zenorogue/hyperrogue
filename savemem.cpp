@@ -1,9 +1,11 @@
 // Hyperbolic Rogue -- smart memory cleaner
 // Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
 
+namespace hr {
+
 bool memory_saving_mode = true;
 
-#define LIM 150
+static const int LIM = 150;
 
 heptagon *last_cleared;
 
@@ -168,3 +170,5 @@ bool is_cell_removed(cell *c) {
 void set_if_removed(cell*& c, cell *val) {
   if(is_cell_removed(c)) c = val;
   }
+
+}

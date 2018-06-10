@@ -1,6 +1,8 @@
 // Hyperbolic Rogue -- special graphical effects, such as the Blizzard
 // Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
 
+namespace hr {
+
 double randd() { return (rand() + .5) / (RAND_MAX + 1.); }
 
 double cellgfxdist(cell *c, int i) {
@@ -261,3 +263,5 @@ auto ccm_blizzard = addHook(clearmemory, 0, [] () {
 addHook(hooks_removecells, 0, [] () {
   eliminate_if(arrowtraps, is_cell_removed);
   });
+
+}

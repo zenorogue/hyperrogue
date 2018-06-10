@@ -1,6 +1,8 @@
 // Hyperbolic Rogue -- commandline options
 // Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
 
+namespace hr {
+
 #if CAP_COMMANDLINE
 const char *scorefile = "hyperrogue.log";
 const char *conffile = "hyperrogue.ini";
@@ -628,3 +630,5 @@ namespace arg {
     }
   }
 #endif
+
+}

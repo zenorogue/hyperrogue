@@ -1,6 +1,71 @@
 // This is the main header file of HyperRogue. Mostly everything is dumped here.
 // It is quite chaotic.
 
+// version numbers
+#define VER "10.4a"
+#define VERNUM 10401
+#define VERNUM_HEX 0xA0B1
+
+namespace hr {
+
+using namespace std;
+
+// genus (in grammar)
+#define GEN_M 0
+#define GEN_F 1
+#define GEN_N 2
+#define GEN_O 3
+
+void addMessage(string s, char spamtype = 0);
+
+// geometry-dependent constants
+
+#define ALPHA (M_PI*2/S7)
+#define S7 ginf[geometry].sides
+#define S3 ginf[geometry].vertex
+#define hyperbolic_37 (S7 == 7 && S3 == 3)
+#define hyperbolic_not37 ((S7 > 7 || S3 > 3) && hyperbolic)
+#define weirdhyperbolic ((S7 > 7 || S3 > 3 || gp::on) && hyperbolic)
+#define stdhyperbolic (S7 == 7 && S3 == 3 && !gp::on)
+
+#define cgclass (ginf[geometry].cclass)
+#define euclid (cgclass == gcEuclid)
+#define sphere (cgclass == gcSphere)
+#define hyperbolic (cgclass == gcHyperbolic)
+#define elliptic (ginf[geometry].quotientstyle & qELLIP)
+#define quotient (ginf[geometry].quotientstyle & (qZEBRA | qFIELD))
+#define torus (ginf[geometry].quotientstyle & qTORUS)
+#define doall (ginf[geometry].quotientstyle)
+#define smallbounded (sphere || (quotient & qZEBRA) || torus)
+#define bounded (sphere || quotient || torus)
+
+#define a4 (S3 == 4)
+#define a45 (S3 == 4 && S7 == 5)
+#define a46 (S3 == 4 && S7 == 6)
+#define a47 (S3 == 4 && S7 == 7)
+#define a457 (S3 == 4 && S7 != 6)
+#define a467 (S3 == 4 && S7 >= 6)
+#define a38 (S7 == 8)
+#define sphere4 (sphere && S7 == 4)
+#define stdeuc (geometry == gNormal || geometry == gEuclid || geometry == gEuclidSquare)
+#define smallsphere (S7 < 5)
+#define bigsphere (S7 == 5)
+#define ap4 (a4 && nonbitrunc)
+#define euclid4 (euclid && a4)
+#define euclid6 (euclid && !a4)
+
+#define S6 (S3*2)
+#define S42 (S7*S6)
+#define S12 (S6*2)
+#define S14 (S7*2)
+#define S21 (S7*S3)
+#define S28 (S7*4)
+#define S36 (S6*6)
+#define S84 (S7*S6*2)
+#define MAX_EDGE 8
+#define MAX_S3 4
+#define MAX_S84 240
+
 #define NUMWITCH 7
 
 // achievements
@@ -1598,25 +1663,6 @@ enum eGlyphsortorder {
 
 extern eGlyphsortorder glyphsortorder;
 
-#if CAP_ROGUEVIZ
-namespace rogueviz { 
-  extern bool on;
-  string describe(shmup::monster *m);
-  void describe(cell *c);
-  void activate(shmup::monster *m);
-  void drawVertex(const transmatrix &V, cell *c, shmup::monster *m);
-  bool virt(shmup::monster *m);
-  void turn(int delta);
-  void drawExtra();
-  void fixparam();
-  int readArgs();
-  void close();
-  void mark(cell *c);
-  void showMenu();
-  string makehelp();
-  }
-#endif
-
 void explodeMine(cell *c);
 bool mayExplodeMine(cell *c, eMonster who);
 
@@ -1780,16 +1826,6 @@ namespace tour {
 
   };
 #endif
-
-namespace rogueviz {
-  extern bool rog3;
-  extern bool rvwarp;
-#if CAP_TOUR
-  namespace rvtour {
-    extern tour::slide rvslides[];
-    }
-#endif
-  };
 
 extern bool doCross;
 void optimizeview();
@@ -3390,10 +3426,7 @@ void set_priority_board(int id);
 int get_sync_status();
 bool score_loaded(int id);
 int score_default(int id);
-#if CAP_SDL
-union SDL_Event;
 void handle_event(SDL_Event& ev);
-#endif
 
 #ifndef XPRINTF
 template<class...T> void Xprintf(const char *fmt, T... t) { printf(fmt, t...); }
@@ -3458,3 +3491,12 @@ extern plain_floorshape
   shBigTriangle, shTriheptaFloor, shBigHepta;
 
 extern escher_floorshape shDragonFloor, shPowerFloor, shRedRockFloor[3];
+
+#if ISMOBILE
+bool buttonclicked;
+void gdpush(int t);
+#endif
+
+extern int fontscale;
+
+}

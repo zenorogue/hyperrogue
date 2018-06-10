@@ -1,6 +1,8 @@
 // Hyperbolic Rogue -- heads-up display
 // Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
 
+namespace hr {
+
 purehookset hooks_stats;
 
 int monsterclass(eMonster m) {
@@ -567,3 +569,4 @@ XLAT(
   callhooks(hooks_stats);
   }
 
+}

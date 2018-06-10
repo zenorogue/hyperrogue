@@ -1,3 +1,5 @@
+namespace hr {
+
 static const int motypes = 162;
 
 struct monstertype {
@@ -206,7 +208,7 @@ struct geometryinfo {
   int quotientstyle;
   eGeometryClass cclass;
   int xcode;
-  array<int,2> distlimit; // bitrunc, non-bitrunc
+  std::array<int,2> distlimit; // bitrunc, non-bitrunc
   };
 
 static const int qZEBRA = 1;
@@ -232,3 +234,5 @@ enum cpatterntype {
   };
   
 struct landtacinfo { eLand l; int tries, multiplier; };
+
+}

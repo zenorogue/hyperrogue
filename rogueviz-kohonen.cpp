@@ -4,7 +4,7 @@
 // Kohonen's self-organizing networks. 
 // This is a part of RogueViz, not a part of HyperRogue.
 
-namespace kohonen {
+namespace rogueviz::kohonen {
 
 int cols;
 
@@ -1125,11 +1125,10 @@ auto hooks = addHook(hooks_args, 100, readArgs);
 auto hooks2 = addHook(hooks_frame, 50, levelline::draw);
 }
 
-void mark(cell *c) {
+void rogueviz::mark(cell *c) {
   using namespace kohonen;
   if(kind == kKohonen && inited >= 1) {
     distfrom = getNeuronSlow(c);
     coloring();
     }
   }
-

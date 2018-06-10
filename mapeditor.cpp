@@ -11,6 +11,8 @@
 #include <dirent.h>
 #endif
 
+namespace hr {
+
 namespace mapeditor {
 
   struct editwhat {
@@ -1794,3 +1796,4 @@ namespace mapeditor {
   
   }
 
+}

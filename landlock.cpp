@@ -3,6 +3,8 @@
 
 // land statistics and flags
 
+namespace hr {
+
 bool nodisplay(eMonster m) {
   return 
     m == moIvyDead ||
@@ -1415,3 +1417,4 @@ int checkLands() {
 
 auto hookcl = addHook(hooks_args, 100, checkLands); */
 
+}

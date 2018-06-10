@@ -4,6 +4,8 @@
 
 // Routines concentrating on monster generation.
 
+namespace hr {
+
 bool timerghost = true;
 
 int buildIvy(cell *c, int children, int minleaf) {
@@ -705,3 +707,4 @@ void generateSnake(cell *c, int i) {
     }
   else c2->mondir = NODIR;
   }
+}

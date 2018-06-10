@@ -2,6 +2,8 @@
 
 // Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
 
+namespace hr {
+
 // land generation routines
 
 bool safety = false;
@@ -2485,3 +2487,5 @@ void setdist(cell *c, int d, cell *from) {
     mapeditor::applyModelcell(c);
 #endif
   }
+
+}

@@ -1,6 +1,8 @@
 // Hyperbolic Rogue -- implementation of the quotient geometries based on fields
 // Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
 
+namespace hr {
+
 namespace fieldpattern {
 
 extern int subpathid;
@@ -398,7 +400,7 @@ struct fpattern {
     }
   
   void analyze() {
-    
+
     DEBB(DF_FIELD, (debugfile, "nonbitrunc = %d\n", nonbitrunc));
     int N = connections.size();
     
@@ -783,3 +785,4 @@ int currfp_gmul(int a, int b) { return currfp.gmul(a,b); }
 int currfp_inverses(int i) { return currfp.inverses[i]; }
 int currfp_distwall(int i) { return currfp.distwall[i]; }
 
+}

@@ -6,6 +6,7 @@
 #define BLACKISH 0x404040
 #define REDDISH 0x400000
 
+namespace hr {
 ld whatever = 0;
 
 int PREC(ld x) {
@@ -908,3 +909,4 @@ void showMessageLog() {
     else if(doexiton(sym, uni)) popScreen();
     };
   }
+}

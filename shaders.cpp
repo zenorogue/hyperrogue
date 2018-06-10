@@ -2,6 +2,8 @@
 // If CAP_SHADER is 0, OpenGL 1.0 is used.
 // If CAP_SHADER is 1, GLSL is used.
 
+namespace hr {
+
 #ifndef DEBUG_GL
 #define DEBUG_GL 0
 #endif
@@ -639,4 +641,5 @@ void set_depthtest(bool b) {
     else glDisable(GL_DEPTH_TEST);
     }
   }
+}
 }

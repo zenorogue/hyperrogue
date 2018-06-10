@@ -3,6 +3,8 @@
 
 // -- geometry menu --
 
+namespace hr {
+
 int eupage = 0;
 int euperpage = 21;
 
@@ -453,3 +455,4 @@ void runGeometryExperiments() {
   pushScreen(showEuclideanMenu);
   }
 
+}

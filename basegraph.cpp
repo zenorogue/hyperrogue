@@ -1,6 +1,8 @@
 // Hyperbolic Rogue -- basic graphics
 // Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
 
+namespace hr {
+
 unsigned backcolor = 0;
 unsigned bordcolor = 0;
 unsigned forecolor = 0xFFFFFF;
@@ -1256,3 +1258,4 @@ int calcfps() {
   return (1000 * CFPS) / ret;
   }
 
+}

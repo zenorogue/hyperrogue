@@ -1,6 +1,8 @@
 // Hyperbolic Rogue -- hyperbolic graphics
 // Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
 
+namespace hr {
+
 ld ghx, ghy, ghgx, ghgy;
 hyperpoint ghpm = C0;
 
@@ -850,3 +852,4 @@ transmatrix atscreenpos(ld x, ld y, ld size) {
   return V;
   }
 
+}

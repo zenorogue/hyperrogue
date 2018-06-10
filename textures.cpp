@@ -8,7 +8,7 @@
 #endif
 
 #if CAP_TEXTURE
-namespace texture {
+namespace hr::texture {
 
 cpatterntype cgroup;
 

@@ -3,6 +3,8 @@
 
 // cells the game is played on
 
+namespace hr {
+
 int fix6(int a) { return (a+MODFIXER)%S6; }
 int fix7(int a) { return (a+MODFIXER)%S7; }
 
@@ -1478,3 +1480,4 @@ void clearCellMemory() {
 
 auto cellhooks = addHook(clearmemory, 500, clearCellMemory);
 
+}

@@ -1,6 +1,8 @@
 // Hyperbolic Rogue -- routines related to sounds
 // Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
 
+namespace hr {
+
 bool audio;
 string musiclicense;
 string musfname[landtypes];
@@ -216,3 +218,4 @@ void playSound(cell *c, const string& fname, int vol) {
 void resetmusic() {}
 #endif
 
+}

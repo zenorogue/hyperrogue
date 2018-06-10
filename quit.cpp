@@ -1,6 +1,8 @@
 // Hyperbolic Rogue -- the mission screen
 // Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
 
+namespace hr {
+
 bool quitsaves() { return (items[itOrbSafety] && havesave); }
 
 bool needConfirmation() {
@@ -540,3 +542,4 @@ void showMissionScreen() {
   dialog::highlight_text = contstr();
   }
 
+}

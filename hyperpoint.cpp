@@ -2,6 +2,8 @@
 // This file contains hyperbolic points and matrices.
 // Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
 
+namespace hr {
+
 eGeometry geometry, targetgeometry;
 
 // for the pure heptagonal grid
@@ -597,3 +599,4 @@ transmatrix rotmatrix(double rotation, int c0, int c1) {
   return t;
   }
 
+}

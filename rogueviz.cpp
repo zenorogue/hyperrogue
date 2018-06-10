@@ -20,9 +20,9 @@
 
 // hyper -tess <parameter file> -- visualize a horocyclic tesselation,
 
-#include "rogueviz.h"
-
 namespace rogueviz {
+
+using namespace hr;
 
 void init();
 
@@ -935,9 +935,9 @@ string describe(shmup::monster *m) {
   
   sort(alledges.begin(), alledges.end(), edgecmp);
     
-  ::help = "Edges: ";
+  hr::help = "Edges: ";
 
-  if(vd.info) ::help = (*vd.info) + "\n" + help;
+  if(vd.info) hr::help = (*vd.info) + "\n" + help;
 
   for(int j=0; j<size(alledges); j++) {
     edgeinfo *ei = alledges[j];
@@ -1984,8 +1984,8 @@ auto hooks  =
 #endif
   addHook(clearmemory, 0, close);
 
+};
+
 #include "rogueviz-kohonen.cpp"
 #include "rogueviz-staircase.cpp"
-
-};
 

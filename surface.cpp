@@ -4,7 +4,7 @@
 // See http://webmath2.unito.it/paginepersonali/sergio.console/CurveSuperfici/AG15.pdf for a nice reference
 
 #if CAP_SURFACE
-namespace surface {
+namespace hr::surface {
 
 using namespace hyperpoint_vec;
 

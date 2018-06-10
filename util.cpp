@@ -3,6 +3,8 @@
 
 // basic utility functions
 
+namespace hr {
+
 long double sqr(long double x) { return x*x; }
 string its(int i) { char buf[64]; sprintf(buf, "%d", i); return buf; }
 string fts(float x) { char buf[64]; sprintf(buf, "%4.2f", x); return buf; }
@@ -114,3 +116,4 @@ void profile_info() {
 int whateveri, whateveri2;
 
 purehookset hooks_tests;
+}

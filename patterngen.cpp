@@ -2,6 +2,8 @@
 
 // Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
 
+namespace hr {
+
 void spill50(cell *c, eWall w, int r) {
   c->wall = w;
   if(r) for(int i=0; i<c->type; i++) spill50(createMov(c, i), w, r-1);
@@ -443,3 +445,4 @@ void buildAutomatonRule(cell *c) {
   }
 
 // #define BUILDZEBRA
+}

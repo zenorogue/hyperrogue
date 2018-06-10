@@ -3,6 +3,8 @@
 
 // Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
 
+namespace hr {
+
 bool isIcyLand(eLand l) {
   return l == laIce || l == laCocytus || l == laBlizzard;
   }
@@ -758,3 +760,4 @@ bool isTechnicalLand(eLand l) {
     l == laMirrorWall2 || l == laMercuryRiver || l == laMemory;
   }
 
+}

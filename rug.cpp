@@ -3,6 +3,7 @@
 
 // implementation of the Hypersian Rug mode
 
+namespace hr {
 
 #if CAP_RUG
 
@@ -1666,7 +1667,7 @@ hyperpoint gethyper(ld x, ld y) {
 
   videopar svid = vid;
   setVidParam();
-  hyperpoint h = ::gethyper(px, py);
+  hyperpoint h = hr::gethyper(px, py);
   vid = svid;
 
   return h;
@@ -1944,3 +1945,4 @@ namespace rug {
 }
 
 #endif
+}

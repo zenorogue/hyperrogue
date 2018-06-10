@@ -2,6 +2,8 @@
 
 // Copyright (C) 2017-2018 Zeno Rogue, see 'hyper.cpp' for details
 
+namespace hr {
+
 videopar vid;
 
 #define DEFAULT_WALLMODE (ISMOBILE ? 3 : 5)
@@ -1354,3 +1356,4 @@ void selectLanguageScreen() {
   }
 #endif
   
+}
