@@ -261,7 +261,7 @@ void showMainMenu() {
     else if(sym == 't') scores::load();
   #endif
     else if(uni == 'r' || sym == SDLK_F5) {
-      restartGame();
+      restart_game();
       }
     else if(sym == 'q' || sym == SDLK_F10) {
 #if ISMOBILE
@@ -414,7 +414,7 @@ void showDisplayMode() {
 
 void switchHardcore() {
   if(hardcore && !canmove) { 
-    restartGame();
+    restart_game();
     hardcore = false;
     }
   else if(hardcore && canmove) { hardcore = false; }
@@ -506,7 +506,7 @@ void showChangeMode() {
       else {
         popScreen();
         firstland = princess::challenge ? laPalace : laIce;
-        restartGame();
+        restart_game();
         }
       }
     
@@ -525,7 +525,7 @@ void showChangeMode() {
     else if(xuni == 'p')
       pushScreen(peace::showMenu);
     else if(xuni == 'i') {
-      restartGame(rg::inv);
+      restart_game(rg::inv);
       }
   #if CAP_TOUR
     else if(uni == 'T') {
@@ -533,14 +533,14 @@ void showChangeMode() {
       }
   #endif
     else if(uni == 'C') {
-      if(chaosUnlocked) restartGame(rg::chaos);
+      if(chaosUnlocked) restart_game(rg::chaos);
       if(chaosmode) help_nochaos();
       }
     else if(xuni == 'P') {
       if(!princess::everSaved)
         addMessage(XLAT("Save %the1 first to unlock this challenge!", moPrincess));
       else
-        restartGame(rg::princess);
+        restart_game(rg::princess);
       }
   #if CAP_EDIT
     else if(xuni == 'm') {
@@ -556,7 +556,7 @@ void showChangeMode() {
   #endif
     else if(xuni == 's') {
   #if ISMOBILE==1
-      restartGame(rg::shmup);
+      restart_game(rg::shmup);
   #else
       multi::shmupcfg = shmup::on;
       pushScreen(shmup::showShmupConfig);
@@ -566,7 +566,7 @@ void showChangeMode() {
       switchHardcore();
     else if(xuni == 'r') {
       firstland = laIce;
-      restartGame(rg::randpattern);
+      restart_game(rg::randpattern);
       }
     else if(doexiton(sym, uni))
       popScreen();
@@ -777,7 +777,7 @@ void showStartMenu() {
       if(!sphere) {
         specialland = laHalloween;
         targetgeometry = gSphere;
-        restartGame(rg::geometry);
+        restart_game(rg::geometry);
         vid.alpha = 999;
         vid.scale = 998;
         }

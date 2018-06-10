@@ -362,7 +362,7 @@ int towerval(cell *c, cellfunction* cf = &coastvalEdge);
 int hrandpos(); // 0 to HRANDMAX
 
 namespace rg {
-  // possible parameters e.g. for restartGame and wrongmode
+  // possible parameters e.g. for restart_game and wrongmode
   static const char nothing = 0;
   static const char peace = 'P';
   static const char inv = 'i';
@@ -381,10 +381,9 @@ namespace rg {
   
   // wrongmode only -- marks 'global' achievements not related to the current mode
   static const char global = 'x'; 
-  // wrongmode only -- change vid.scfg.players then restartGame(rg::nothing) instead
+  // wrongmode only -- change vid.scfg.players then restart_game(rg::nothing) instead
   static const char multi = 'm';
   }
-void restartGame(char switchWhat = 0, bool push = false, bool keep_screens = false);
 
 int landMultiplier(eLand l);
 eItem treasureType(eLand l);
@@ -2954,7 +2953,6 @@ extern void initializeCLI();
 
 static const int max_vec = (1<<14);
 
-extern void popGame();
 string helptitle(string s, int col);
 pair<int, int> cell_to_pair(cell *c);
 extern bool nohud, nofps;
@@ -3400,3 +3398,12 @@ void handle_event(SDL_Event& ev);
 #ifndef XPRINTF
 template<class...T> void Xprintf(const char *fmt, T... t) { printf(fmt, t...); }
 #endif
+
+void pop_game();
+void push_game();
+void start_game();
+void stop_game();
+void switch_game_mode(char switchWhat);
+
+void stop_game_and_switch_mode(char switchWhat = rg::nothing); // stop_game + switch_game_mode
+void restart_game(char switchWhat = rg::nothing); // popAllScreens + popAllGames + stop_game + switch_game_mode + start_game

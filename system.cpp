@@ -4,6 +4,10 @@
 
 // routines for: initializing/closing, loading/saving, and cheating
 
+bool need_reset_geometry = true;
+
+bool game_active;
+
 bool cblind;
 bool autocheat;
 bool canvas_invisible;
@@ -1059,9 +1063,10 @@ namespace gamestack {
   
   };
 
-void popGame() {
+void pop_game() {
   if(gamestack::pushed()) {
     gamestack::pop();
+    game_active = true;
     }
   }
 
@@ -1071,152 +1076,175 @@ void popAllGames() {
     }
   }
 
-void restartGame(char switchWhat, bool push, bool keep_screens) {
-  if(!keep_screens) popScreenAll();
-  DEBB(DF_INIT, (debugfile,"restartGame\n"));
-  
-  
-  if(push) {
-    gamestack::push();
-    pd_from = NULL;
-    centerover.c = NULL;
-    }
-  else {
-    popAllGames();
-    achievement_final(true);
-  #if CAP_SAVE
-    saveStats();
-  #endif
-    for(int i=0; i<ittypes; i++) items[i] = 0;
-    lastkills = 0; for(int i=0; i<motypes; i++) kills[i] = 0;
-    for(int i=0; i<10; i++) explore[i] = 0;
-    for(int i=0; i<10; i++) for(int l=0; l<landtypes; l++)
-      exploreland[i][l] = 0;
-  
-    for(int i=0; i<numplayers(); i++)
-      if(multi::playerActive(i)) 
-        multi::deaths[i]++;
-  
-  #if CAP_SAVE
-    anticheat::tampered = false; 
-  #endif
-    achievementsReceived.clear();
-    princess::saved = false;
-    princess::nodungeon = false;
-    princess::reviveAt = 0;
-    princess::forceVizier = false;
-    princess::forceMouse = false;
-    knighted = 0;
-    // items[itGreenStone] = 100;
-    clearMemory();
-    }
+void stop_game() {
+  if(!game_active) return;
+  achievement_final(true);
+#if CAP_SAVE
+  saveStats();
+#endif
+  for(int i=0; i<ittypes; i++) items[i] = 0;
+  lastkills = 0; for(int i=0; i<motypes; i++) kills[i] = 0;
+  for(int i=0; i<10; i++) explore[i] = 0;
+  for(int i=0; i<10; i++) for(int l=0; l<landtypes; l++)
+    exploreland[i][l] = 0;
+
+  for(int i=0; i<numplayers(); i++)
+    if(multi::playerActive(i)) 
+      multi::deaths[i]++;
+
+#if CAP_SAVE
+  anticheat::tampered = false; 
+#endif
+  achievementsReceived.clear();
+  princess::saved = false;
+  princess::nodungeon = false;
+  princess::reviveAt = 0;
+  princess::forceVizier = false;
+  princess::forceMouse = false;
+  knighted = 0;
+  // items[itGreenStone] = 100;
+  clearMemory();
+  game_active = false;
 #if CAP_DAILY
   if(daily::on && !among(switchWhat, rg::daily, rg::daily_off))
     daily::turnoff();
 #endif
-  if(switchWhat == rg::peace) {
-    peace::on = !peace::on;
-    tactic::on = yendor::on = princess::challenge = 
-    randomPatternsMode = inv::on = false;
-    }
-  if(switchWhat == rg::inv) {
-    inv::on = !inv::on;
-    if(tactic::on) firstland = laIce;
-    tactic::on = yendor::on = princess::challenge = 
-    randomPatternsMode = peace::on = false;
-    }
-  if(switchWhat == rg::chaos) {
-    if(euclid || sphere || quotient)
-      geometry = gNormal;
-    if(tactic::on) firstland = laIce;
-    yendor::on = tactic::on = princess::challenge = false;
-    resetGeometry();
-    chaosmode = !chaosmode;
-    }
-#if CAP_TOUR
-  if(switchWhat == rg::tour) {
-    geometry = gNormal;
-    yendor::on = tactic::on = princess::challenge = peace::on = inv::on = false;
-    chaosmode = nonbitrunc = randomPatternsMode = false;
-    shmup::on = false;
-    resetGeometry();    
-    tour::on = !tour::on;
-    }
-#endif
-  if(switchWhat == rg::bitrunc || switchWhat == rg::gp) {
-    if(euclid6) geometry = gNormal;
-    nonbitrunc = !nonbitrunc;
-    gp::on = (switchWhat == rg::gp && !gp::on);
-    resetGeometry();
-    #if CAP_TEXTURE
-    if(texture::config.tstate == texture::tsActive) 
-      texture::config.tstate = texture::tsAdjusting;
-    if(texture::config.tstate_max == texture::tsActive)
-      texture::config.tstate = texture::tsAdjusting;
-    #endif
-    }
-  if(switchWhat == rg::geometry) {
-    if(geometry == targetgeometry) geometry = gNormal;
-    else geometry = targetgeometry;
-    if(chaosmode && (euclid || sphere || quotient)) chaosmode = false;
-    if(nonbitrunc && euclid6) nonbitrunc = false;
-    if(gp::on && (S3 != 3 || elliptic)) gp::on = false;
+  }
 
-    resetGeometry(); 
-    #if CAP_TEXTURE
-    if(texture::config.tstate == texture::tsActive) 
-      texture::config.tstate = texture::tsOff;
-    if(texture::config.tstate_max == texture::tsActive)
-      texture::config.tstate = texture::tsAdjusting;
-    #endif
-    }
-  if(switchWhat == rg::yendor) {
-    yendor::on = !yendor::on;
-    tactic::on = false;
-    peace::on = false;
-    inv::on = false;
-    princess::challenge = false;
-    randomPatternsMode = false;
-    chaosmode = false;
-    if(!yendor::on) firstland = laIce;
-    }
-  if(switchWhat == rg::tactic) {
-    tactic::on = !tactic::on;
-    yendor::on = false;
-    peace::on = false;
-    inv::on = false;
-    randomPatternsMode = false;
-    princess::challenge = false;
-    chaosmode = false;
-    if(!tactic::on) firstland = laIce;
-    }
-  if(switchWhat == rg::shmup) {
-    shmup::on = !shmup::on;
-    princess::challenge = false;
-    }
-  if(switchWhat == rg::randpattern) {
-    randomPatternsMode = !randomPatternsMode;
-    tactic::on = false;
-    yendor::on = false;
-    peace::on = false;
-    inv::on = false;
-    princess::challenge = false;
-    }
-#if CAP_DAILY
-  if(switchWhat == rg::daily)
-    daily::setup();
-  if(switchWhat == rg::daily_off)
-    daily::turnoff();
+void push_game() {
+  gamestack::push();
+  pd_from = NULL;
+  centerover.c = NULL;
+  game_active = false;
+  }
+
+void switch_game_mode(char switchWhat) {
+  switch(switchWhat) {
+    case rg::peace:
+      peace::on = !peace::on;
+      tactic::on = yendor::on = princess::challenge = 
+      randomPatternsMode = inv::on = false;
+      break;
+    
+    case rg::inv:
+      inv::on = !inv::on;
+      if(tactic::on) firstland = laIce;
+      tactic::on = yendor::on = princess::challenge = 
+      randomPatternsMode = peace::on = false;
+      break;
+
+    case rg::chaos:
+      if(euclid || sphere || quotient)
+        geometry = gNormal;
+      if(tactic::on) firstland = laIce;
+      yendor::on = tactic::on = princess::challenge = false;
+      need_reset_geometry = true;
+      chaosmode = !chaosmode;
+      break;
+
+#if CAP_TOUR
+    case rg::tour:
+      geometry = gNormal;
+      yendor::on = tactic::on = princess::challenge = peace::on = inv::on = false;
+      chaosmode = nonbitrunc = randomPatternsMode = false;
+      shmup::on = false;
+      need_reset_geometry = true;    
+      tour::on = !tour::on;
+      break;
 #endif
-  if(switchWhat == rg::princess) {
-    princess::challenge = !princess::challenge;
-    firstland = princess::challenge ? laPalace : laIce;
-    shmup::on = false;
-    tactic::on = false;
-    yendor::on = false;
-    chaosmode = false;
-    inv::on = false;
+
+    case rg::bitrunc:
+    case rg::gp:
+      if(euclid6) geometry = gNormal;
+      nonbitrunc = !nonbitrunc;
+      gp::on = (switchWhat == rg::gp && !gp::on);
+      need_reset_geometry = true;
+      #if CAP_TEXTURE
+      if(texture::config.tstate == texture::tsActive) 
+        texture::config.tstate = texture::tsAdjusting;
+      if(texture::config.tstate_max == texture::tsActive)
+        texture::config.tstate = texture::tsAdjusting;
+      #endif
+      break;
+
+    case rg::geometry:
+      if(geometry == targetgeometry) geometry = gNormal;
+      else geometry = targetgeometry;
+      if(chaosmode && (euclid || sphere || quotient)) chaosmode = false;
+      if(nonbitrunc && euclid6) nonbitrunc = false;
+      if(gp::on && (S3 != 3 || elliptic)) gp::on = false;
+  
+      need_reset_geometry = true; 
+      #if CAP_TEXTURE
+      if(texture::config.tstate == texture::tsActive) 
+        texture::config.tstate = texture::tsOff;
+      if(texture::config.tstate_max == texture::tsActive)
+        texture::config.tstate = texture::tsAdjusting;
+      #endif
+      break;
+    
+    case rg::yendor:
+      yendor::on = !yendor::on;
+      tactic::on = false;
+      peace::on = false;
+      inv::on = false;
+      princess::challenge = false;
+      randomPatternsMode = false;
+      chaosmode = false;
+      if(!yendor::on) firstland = laIce;
+      break;
+
+    case rg::tactic:
+      tactic::on = !tactic::on;
+      yendor::on = false;
+      peace::on = false;
+      inv::on = false;
+      randomPatternsMode = false;
+      princess::challenge = false;
+      chaosmode = false;
+      if(!tactic::on) firstland = laIce;
+      break;
+    
+    case rg::shmup:
+      shmup::on = !shmup::on;
+      princess::challenge = false;
+      break;
+    
+    case rg::randpattern:
+      randomPatternsMode = !randomPatternsMode;
+      tactic::on = false;
+      yendor::on = false;
+      peace::on = false;
+      inv::on = false;
+      princess::challenge = false;
+      break;
+    
+    case rg::princess:
+      princess::challenge = !princess::challenge;
+      firstland = princess::challenge ? laPalace : laIce;
+      shmup::on = false;
+      tactic::on = false;
+      yendor::on = false;
+      chaosmode = false;
+      inv::on = false;
+      break;
+    
+#if CAP_DAILY
+    case rg::daily:
+      daily::setup();
+      break;
+    
+    case rg::daily_off:
+      daily::turnoff();
+      break;
+#endif
     }
+  }
+
+void start_game() {
+  if(game_active) return;
+  game_active = true;
+  if(need_reset_geometry) resetGeometry();
   initcells();
 
   if(randomPatternsMode) {
@@ -1237,7 +1265,20 @@ void restartGame(char switchWhat, bool push, bool keep_screens) {
   resetmusic();
   resetmusic();
   }
-  
+
+void restart_game(char switchWhat) {
+  popScreenAll();  
+  popAllGames();
+  stop_game();
+  switch_game_mode(switchWhat);
+  start_game();
+  }
+
+void stop_game_and_switch_mode(char switchWhat) {
+  stop_game();
+  switch_game_mode(switchWhat);
+  }
+
 purehookset clearmemory;
 
 void clearMemory() {

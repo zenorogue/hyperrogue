@@ -1166,10 +1166,6 @@ void initgraph() {
   
   restartGraph();
   
-  initgeo();
-
-  buildpolys();
-  
   if(noGUI) {
 #if CAP_COMMANDLINE
     arg::read(2);

@@ -546,12 +546,6 @@ void sominit(int initto) {
     
     init(); kind = kKohonen;
     
-    /* if(geometry != gQuotient1) {
-      targetGeometry = gQuotient1;
-      restartGame(rg::geometry);
-      }
-    if(!nonbitrunc) restartGame(rg::bitrunc); */
-    
     printf("Initializing SOM (1)\n");
   
     vector<cell*> allcells;

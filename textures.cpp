@@ -875,14 +875,16 @@ bool texture_config::load() {
     dynamicval<int> d2(patterns::subpattern_flags, patterns::subpattern_flags);
 
     if(targetgeometry != geometry) {
-      restartGame(rg::geometry);
+      stop_game_and_switch_mode(rg::geometry);
       return config.load();
       }
     
     if(nonbitrunc != target_nonbitru) {
-      restartGame(rg::bitrunc);
+      stop_game_and_switch_mode(rg::bitrunc);
       }
     }
+  
+  start_game();
 
   if(true) {
     celllister cl(currentmap->gamestart(), 20, 10000, NULL);

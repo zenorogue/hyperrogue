@@ -179,7 +179,7 @@ hint hints[] = {
       },
     []() {
 #if CAP_INV
-      restartGame(rg::inv);
+      restart_game(rg::inv);
 #endif
       }
     },
@@ -273,7 +273,7 @@ hint hints[] = {
         resetModes();
         specialland = laHalloween;
         targetgeometry = gSphere;
-        restartGame(rg::geometry);
+        restart_game(rg::geometry);
         vid.alpha = 999;
         vid.scale = 998;
         }
@@ -476,7 +476,7 @@ void handleKeyQuit(int sym, int uni) {
 
   if(sym == SDLK_RETURN || sym == SDLK_KP_ENTER || sym == SDLK_F10) quitmainloop = true;
   else if(uni == 'r' || sym == SDLK_F5) {
-    restartGame();
+    restart_game(rg::nothing);
     msgs.clear();
     }
   else if(uni == 'v') popScreenAll(), pushScreen(showMainMenu);

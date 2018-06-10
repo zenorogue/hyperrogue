@@ -89,8 +89,7 @@ void showDemo() {
       }
     else if(sym == 'f') {
       firstland = laIce;
-      if(tactic::on) restartGame(rg::tactic);
-      else restartGame();
+      restart_game(tactic::on ? rg::tactic : rg::nothing);
       }
 #if CAP_TOUR
     else if(sym == 'T') {
@@ -100,18 +99,15 @@ void showDemo() {
 #endif
     else if(sym == 't') {
       firstland = laTemple;
-      if(!tactic::on) restartGame(rg::tactic);
-      else restartGame();
+      restart_game(tactic::on ? rg::tactic : rg::nothing);
       }
     else if(sym == 'l') {
       firstland = laStorms;
-      if(!tactic::on) restartGame(rg::tactic);
-      else restartGame();
+      restart_game(tactic::on ? rg::tactic : rg::nothing);
       }
     else if(sym == 'b') {
       firstland = laBurial;
-      if(!tactic::on) restartGame(rg::tactic);
-      else restartGame();
+      restart_game(tactic::on ? rg::tactic : rg::nothing);
       items[itOrbSword] = 60;
       }
     };

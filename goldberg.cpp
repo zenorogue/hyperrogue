@@ -543,18 +543,19 @@ namespace gp {
     auto g = screens;
     if(xy.first == 0 && xy.second == 0) xy.first = 1;
     if(xy.first == 1 && xy.second == 0) {
-      if(gp::on) restartGame(rg::bitrunc);
-      if(!nonbitrunc) restartGame(rg::bitrunc);
+      if(gp::on) stop_game_and_switch_mode(rg::bitrunc);
+      if(!nonbitrunc) stop_game_and_switch_mode(rg::bitrunc);
       }
     else if(xy.first == 1 && xy.second == 1) {
-      if(gp::on) restartGame(rg::bitrunc);
-      if(nonbitrunc) restartGame(rg::bitrunc);
+      if(gp::on) stop_game_and_switch_mode(rg::bitrunc);
+      if(nonbitrunc) stop_game_and_switch_mode(rg::bitrunc);
       }
     else {
-      if(nonbitrunc) restartGame(rg::bitrunc);
+      if(nonbitrunc) stop_game_and_switch_mode(rg::bitrunc);
       param = xy;
-      restartGame(rg::gp);
+      stop_game_and_switch_mode(rg::gp);
       }
+    start_game();
 #if CAP_TEXTURE
     if(texture_remap)
       texture::config.remap(old_tstate, old_tstate_max);

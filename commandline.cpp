@@ -205,65 +205,58 @@ int arg::readCommon() {
 // mode changes:
 
 #define TOGGLE(x, param, act) \
-else if(args()[0] == '-' && args()[1] == x && !args()[2]) { showstartmenu = false; if(curphase == 3) {act;} else {PHASE(2); param = !param;} } \
-else if(args()[0] == '-' && args()[1] == x && args()[2] == '1') { showstartmenu = false; if(curphase == 3 && !param) {act;} else {PHASE(2); param = true;} } \
-else if(args()[0] == '-' && args()[1] == x && args()[2] == '0') { showstartmenu = false; if(curphase == 3 && param) {act;} else {PHASE(2); param = false;} }
+else if(args()[0] == '-' && args()[1] == x && !args()[2]) { showstartmenu = false; act; } \
+else if(args()[0] == '-' && args()[1] == x && args()[2] == '1') { showstartmenu = false; if(!param) act; } \
+else if(args()[0] == '-' && args()[1] == x && args()[2] == '0') { showstartmenu = false; if(param) act; }
 
   TOGGLE('o', vid.usingGL, switchGL())
-  TOGGLE('C', chaosmode, restartGame(rg::chaos))
-  TOGGLE('7', nonbitrunc, restartGame(rg::bitrunc))
+  TOGGLE('C', chaosmode, stop_game_and_switch_mode(rg::chaos))
+  TOGGLE('7', nonbitrunc, stop_game_and_switch_mode(rg::bitrunc))
   TOGGLE('f', vid.full, switchFullscreen())
-  TOGGLE('T', tactic::on, restartGame(rg::tactic))
-  TOGGLE('S', shmup::on, restartGame(rg::shmup))
+  TOGGLE('T', tactic::on, stop_game_and_switch_mode(rg::tactic))
+  TOGGLE('S', shmup::on, stop_game_and_switch_mode(rg::shmup))
   TOGGLE('H', hardcore, switchHardcore())
-  TOGGLE('R', randomPatternsMode, restartGame(rg::randpattern))
-  TOGGLE('i', inv::on, restartGame(rg::inv))
+  TOGGLE('R', randomPatternsMode, stop_game_and_switch_mode(rg::randpattern))
+  TOGGLE('i', inv::on, stop_game_and_switch_mode(rg::inv))
   
   else if(argis("-peace")) {
     peace::otherpuzzles = true;
-    if(curphase == 3) restartGame(rg::peace);
-    else peace::on = !peace::on;
+    stop_game_and_switch_mode(peace::on ? 0 : rg::peace);
     }
   else if(argis("-pmem")) {
     peace::otherpuzzles = false;
-    if(curphase == 3) restartGame(rg::peace);
-    else peace::on = !peace::on;
+    stop_game_and_switch_mode(peace::on ? 0 : rg::peace);
     }
   else if(argis("-geo")) { 
-    if(curphase == 3) {
-      shift(); targetgeometry = (eGeometry) argi();
-      restartGame(rg::geometry);
-      }
-    else {      
-      PHASE(2); shift(); geometry = targetgeometry = (eGeometry) argi();
-      }
+    shift(); targetgeometry = (eGeometry) argi();
+    stop_game_and_switch_mode(rg::geometry);
     }
   else if(argis("-gp")) {
     PHASEFROM(2);
-    if(nonbitrunc && curphase == 3) restartGame(rg::bitrunc);
+    stop_game_and_switch_mode(rg::nothing);
     shift(); gp::param.first = argi();
     shift(); gp::param.second = argi();
-    if(curphase == 3) restartGame(rg::gp);
+    stop_game_and_switch_mode(rg::gp);
     }
 // 'do something'
   else if(argis("-W")) {
     PHASEFROM(2);
     shift(); 
     firstland0 = firstland = specialland = readland(args());
-    if(curphase == 3) restartGame();
+    stop_game_and_switch_mode(rg::nothing);
     showstartmenu = false;
     }
   else if(argis("-canvas")) {
-    PHASEFROM(2); CHEAT
+    PHASEFROM(2);
     firstland = specialland = laCanvas;
     shift();
     if(args() == "i") canvas_invisible = !canvas_invisible;
     else if(args().size() == 1) patterns::whichCanvas = args()[0];
     else patterns::canvasback = arghex();
-    if(curphase == 3) restartGame();
+    stop_game_and_switch_mode(rg::nothing);
     }
   else if(argis("-pattern")) {
-    PHASEFROM(2); CHEAT
+    PHASEFROM(2);
     shift();
     const char *c = argcs();
     using namespace patterns;
@@ -318,24 +311,16 @@ else if(args()[0] == '-' && args()[1] == x && args()[2] == '0') { showstartmenu 
   else if(argis("-test")) 
     callhooks(hooks_tests);
   else if(argis("-qpar2")) {
-    if(curphase == 3) {
-      restartGame(rg::geometry);
-      }
-    else {      
-      PHASE(2); 
-      }
-    if(geometry == gQuotient2) restartGame(rg::geometry);
+    stop_game_and_switch_mode(rg::nothing);
     int a, b;
     shift(); sscanf(argcs(), "%d,%d", &a, &b);
     using namespace fieldpattern;
     current_extra = a;
     fgeomextras[current_extra].current_prime_id = b;
     enableFieldChange();
-    if(curphase == 3) {
-      targetgeometry = gQuotient2; restartGame(rg::geometry);
+    if(geometry != gQuotient2) {
+      targetgeometry = gQuotient2; stop_game_and_switch_mode(rg::geometry);
       }
-    else
-      geometry = gQuotient2;
     }
   else if(argis("-tpar")) { 
     torusconfig::torus_mode = torusconfig::tmSingle;
@@ -346,7 +331,8 @@ else if(args()[0] == '-' && args()[1] == x && args()[2] == '0') { showstartmenu 
       );
     }
   else if(argis("-tparx")) {
-    shift(); sscanf(argcs(), "%d,%d,%d", 
+    shift(); 
+    sscanf(argcs(), "%d,%d,%d", 
       (int*) &torusconfig::torus_mode,
       &torusconfig::sdx,
       &torusconfig::sdy
@@ -357,14 +343,13 @@ else if(args()[0] == '-' && args()[1] == x && args()[2] == '0') { showstartmenu 
     torusconfig::activate();
     }
   else if(argis("-cs")) {
-    shift(); 
+    shift(); CHEAT
     fieldpattern::matrix M = currfp.strtomatrix(args());
     fieldpattern::subpathid = currfp.matcode[M];
     fieldpattern::subpathorder = currfp.order(M);
-    autocheat = true;
     }
   else if(argis("-csp")) {
-    autocheat = true;
+    CHEAT
     currfp.findsubpath();
     }
   else if(argis("-quantum")) {
@@ -373,13 +358,16 @@ else if(args()[0] == '-' && args()[1] == x && args()[2] == '0') { showstartmenu 
     }
   else if(argis("-P")) { 
     PHASE(2); shift(); 
-    vid.scfg.players = argi(); 
-    // todo phase3 restart
+    vid.scfg.players = argi();
+    stop_game_and_switch_mode(rg::nothing);
     }
   else if(argis("-PM")) { 
     PHASEFROM(2); shift(); pmodel = eModel(argi());
     }
-  else if(argis("-offline")) offlineMode = true;
+  else if(argis("-offline")) {
+    PHASE(1);
+    offlineMode = true;
+    }
   else if(argis("-debugf")) {
     debugfile = fopen("hyperrogue-debug.txt", "w");
     shift(); debugflags = argi();
@@ -389,6 +377,7 @@ else if(args()[0] == '-' && args()[1] == x && args()[2] == '0') { showstartmenu 
     shift(); debugflags = argi();
     }
   else if(argis("-each")) {
+    PHASEFROM(2); start_game();
     shift(); int q = argi(); autocheat = true;
     for(int i=0; i<ittypes; i++)
       if(itemclass(eItem(i)) == IC_TREASURE)
@@ -414,12 +403,10 @@ else if(args()[0] == '-' && args()[1] == x && args()[2] == '0') { showstartmenu 
     if(clHeight) vid.yres = clHeight;
     if(clFont) vid.fsize = clFont;
     }    
-  else if(argis("--version") || argis("-v")) {
-    printf("HyperRogue version " VER "\n");
-    exit(0);
-    }
   else if(argis("--run")) {
-    PHASE(3); mainloop(); quitmainloop = false;
+    PHASE(3); 
+    start_game();
+    mainloop(); quitmainloop = false;
     }
   else if(argis("--msg")) {
     shift(); addMessage(args());
@@ -430,11 +417,11 @@ else if(args()[0] == '-' && args()[1] == x && args()[2] == '0') { showstartmenu 
     }
 #if CAP_TOUR
   else if(argis("--tour")) {
-    PHASE(3); tour::start();
+    PHASEFROM(2); start_game(); tour::start();
     }
   else if(argis("--presentation")) {
-    PHASE(3); tour::texts = false;
-    tour::start();
+    PHASEFROM(2); tour::texts = false;
+    start_game(); tour::start();
     }
 #endif
   else if(argis("--draw")) {
@@ -445,7 +432,7 @@ else if(args()[0] == '-' && args()[1] == x && args()[2] == '0') { showstartmenu 
     exit(0);
     }
   else if(argis("-gencells")) {
-    PHASE(3); shift(); 
+    PHASEFROM(2); shift(); start_game();
     printf("Generating %d cells...\n", argi());
     celllister cl(cwt.c, 50, argi(), NULL);
     printf("Cells generated: %d\n", size(cl.lst));
@@ -480,7 +467,7 @@ else if(args()[0] == '-' && args()[1] == x && args()[2] == '0') { showstartmenu 
     }
 #if CAP_SDL
   else if(argis("-pngshot")) {
-    PHASE(3); shift(); 
+    PHASE(3); shift(); start_game();
     printf("saving PNG screenshot to %s\n", argcs());
     saveHighQualityShot(argcs());
     }
@@ -503,7 +490,7 @@ else if(args()[0] == '-' && args()[1] == x && args()[2] == '0') { showstartmenu 
     shift(); svg::gamma = argf();
     }
   else if(argis("-svgshot")) {
-    PHASE(3); shift(); 
+    PHASE(3); shift(); start_game();
     printf("saving SVG screenshot to %s\n", argcs());
     svg::render(argcs());
     }
@@ -531,6 +518,10 @@ else if(args()[0] == '-' && args()[1] == x && args()[2] == '0') { showstartmenu 
     }
 
 // informational
+  else if(argis("--version") || argis("-v")) {
+    printf("HyperRogue version " VER "\n");
+    exit(0);
+    }
   else if(argis("-fi")) {
     fieldpattern::info();
     exit(0);

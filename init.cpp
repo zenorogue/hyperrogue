@@ -475,12 +475,9 @@ void initAll() {
 #if CAP_SAVE
   loadsave();
 #endif
-  resetGeometry();
-  initcells();
+  start_game();
   
   shmup::safety = safety;
-  initgame();
-  restartGraph();
 
   if(!shmup::on) {
     restoreGolems(items[itOrbLife], moGolem); items[itOrbLife] = 0;

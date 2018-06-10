@@ -1315,21 +1315,24 @@ namespace patterns {
           canvasback = c >> 8;
           firstland = specialland = laCanvas;
           randomPatternsMode = false;
-          restartGame(0, false, true);
+          stop_game();
+          start_game();
           };
         }
       else if(uni == 'i') {
         canvas_invisible = !canvas_invisible;
         firstland = specialland = laCanvas; 
         randomPatternsMode = false;
-        restartGame(0, false, true);
+        stop_game();
+        start_game();
         }
       else if((uni >= 'a' && uni <= 'z') || (uni >= 'A' && uni <= 'Z')) {
         whichCanvas = uni;
         subcanvas = rand();
         firstland = specialland = laCanvas; 
         randomPatternsMode = false;
-        restartGame(0, false, true);
+        stop_game();
+        start_game();
         if(uni == 'x' || uni == 'z' || uni == 't')
           whichPattern = PAT_ZEBRA, subpattern_flags = SPF_SYM0123 | SPF_ROT;
         if(uni == 'e')
@@ -1640,9 +1643,10 @@ namespace patterns {
         auto old_tstate_max = texture::config.tstate_max;
 #endif
         auto &g = cpatterns[cgroup].geometries[uni - 'a'];
-        if(g.geo != geometry) { targetgeometry = g.geo; restartGame(rg::geometry, false, true); }
-        if(gp::on) restartGame(rg::gp, false, true);
-        if(g.nonbitru != nonbitrunc) restartGame(rg::bitrunc, false, true);
+        if(g.geo != geometry) { targetgeometry = g.geo; stop_game_and_switch_mode(rg::geometry); }
+        if(gp::on) stop_game_and_switch_mode(rg::gp);
+        if(g.nonbitru != nonbitrunc) stop_game_and_switch_mode(rg::bitrunc);;
+        start_game();
         whichPattern = g.whichPattern;
         subpattern_flags = g.subpattern_flags;
 #if CAP_TEXTURE

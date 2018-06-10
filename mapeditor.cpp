@@ -817,7 +817,7 @@ namespace mapeditor {
       dialog::openColorDialog((unsigned&)(paintwhat = (painttype ==6 ? paintwhat : 0x808080)));
       }
     else if(sym == SDLK_F5) {
-      restartGame();
+      restart_game();
       }
     else if(sym == SDLK_F2) {
       dialog::openFileDialog(levelfile, XLAT("level to save:"), ".lev", [] () {
@@ -1323,8 +1323,9 @@ namespace mapeditor {
       int tg, nt, wp;
       fscanf(f, "%d%d%d%d\n", &tg, &nt, &wp, &patterns::subpattern_flags);
       patterns::whichPattern = wp;
-      if(tg != geometry) { targetgeometry = eGeometry(tg); restartGame(rg::geometry, 0, true); }
-      if(nt != nonbitrunc) { restartGame(rg::bitrunc, 0, true); }
+      if(tg != geometry) { targetgeometry = eGeometry(tg); stop_game_and_switch_mode(rg::geometry); }
+      if(nt != nonbitrunc) stop_game_and_switch_mode(rg::bitrunc);
+      start_game();
       }
 
     while(true) {

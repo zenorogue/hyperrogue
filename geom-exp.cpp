@@ -71,14 +71,16 @@ void showQuotientConfig() {
     else if(uni == 'p')
       nextPrime(gxcur);
     else if(uni == 'x' || uni == '\n') {
-      targetgeometry = gxcur.base; restartGame(rg::geometry);
+      targetgeometry = gxcur.base; stop_game_and_switch_mode(rg::geometry);
       enableFieldChange();
-      targetgeometry = gQuotient2; restartGame(rg::geometry);
+      targetgeometry = gQuotient2; stop_game_and_switch_mode(rg::geometry);
+      start_game();
       }
     else if(uni == 'c') {
-      targetgeometry = gEuclid; restartGame(rg::geometry);
+      targetgeometry = gEuclid; stop_game_and_switch_mode(rg::geometry);
       fieldpattern::quotient_field_changed = false;
-      targetgeometry = gQuotient2; restartGame(rg::geometry);
+      targetgeometry = gQuotient2; stop_game_and_switch_mode(rg::geometry);
+      start_game();
       }
     else if(doexiton(sym, uni))
       popScreen();
@@ -184,22 +186,24 @@ void showTorusConfig() {
     else if(uni == 't')
       torus_bitrunc = !torus_bitrunc;
     else if((uni == 'a' || uni == '\n') && torusconfig::newqty >= 3 && valid) {
-      targetgeometry = gNormal; restartGame(rg::geometry, false, true);
+      targetgeometry = gNormal; stop_game_and_switch_mode(rg::geometry);
       torusconfig::torus_mode = torusconfig::newmode;
       torusconfig::qty = torusconfig::newqty;
       torusconfig::dy = torusconfig::newdy;
       torusconfig::sdx = torusconfig::newsdx;
       torusconfig::sdy = torusconfig::newsdy;
       torusconfig::activate();
-      if((square && torus_bitrunc) != nonbitrunc) restartGame(rg::bitrunc, false, true);
-      targetgeometry = gTorus; restartGame(rg::geometry, false, true);
+      if((square && torus_bitrunc) != nonbitrunc) stop_game_and_switch_mode(rg::bitrunc);
+      targetgeometry = gTorus; stop_game_and_switch_mode(rg::geometry);
+      start_game();
       }
     else if(uni == 'c') {
-      targetgeometry = gEuclid; restartGame(rg::geometry, false, true);
+      targetgeometry = gEuclid; stop_game_and_switch_mode(rg::geometry);
       torusconfig::torus_mode = torusconfig::tmSingle;
       torusconfig::qty = torusconfig::def_qty;
       torusconfig::dy = torusconfig::def_dy;
-      targetgeometry = gTorus; restartGame(rg::geometry, false, true);
+      targetgeometry = gTorus; stop_game_and_switch_mode(rg::geometry);
+      start_game();
       }
     else if(uni == 'z') editScale();
 #if CAP_RUG
@@ -329,16 +333,16 @@ void showEuclideanMenu() {
       dialog::handleNavigation(sym, uni);
       if(uni >= 'a' && uni < 'a'+gGUARD) {
         targetgeometry = eGeometry(uni - 'a');
-        restartGame(geometry == targetgeometry ? rg::nothing : rg::geometry);
-        pushScreen(showEuclideanMenu);
+        stop_game_and_switch_mode(geometry == targetgeometry ? rg::nothing : rg::geometry);
+        start_game();
         }
       else if(uni == 't') {
         if(euclid6) ;
         else if(S3 == 3) 
           gp::configure();
         else {
-          restartGame(rg::bitrunc);
-          pushScreen(showEuclideanMenu);
+          stop_game_and_switch_mode(rg::bitrunc);
+          start_game();
           }
         }
       else if(uni == '2' || sym == SDLK_F1) gotoHelp(euchelp);
@@ -424,16 +428,16 @@ void showEuclideanMenu() {
         }
       else if(uni == '1') {
         if(chaosUnlocked) {
-          restartGame(rg::chaos);
-          pushScreen(showEuclideanMenu);
+          stop_game_and_switch_mode(rg::chaos);
+          start_game();
           }
         }
       else if(lid >= 0 && lid < size(landlist)) {
         eLand nland = landlist[lid];
         if(landvisited[nland]) {
           firstland = specialland = nland;
-          restartGame(tactic::on ? rg::tactic : rg::nothing);
-          pushScreen(showEuclideanMenu);
+          stop_game_and_switch_mode(tactic::on ? rg::tactic : rg::nothing);
+          start_game();
           }
         }
       else if(uni == '2' || sym == SDLK_F1) gotoHelp(euchelp);

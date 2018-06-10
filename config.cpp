@@ -306,22 +306,22 @@ bool have_current_settings() {
 void resetModes(char leave) {
   popAllGames();
   firstland = laIce; specialland = laIce; vid.scfg.players = 1;
-  if(shmup::on != (leave == rg::shmup)) restartGame(rg::shmup);
-  if(inv::on != (leave == rg::inv)) restartGame(rg::inv);
-  if(chaosmode != (leave == rg::chaos)) restartGame(rg::chaos);
-  if(gp::on != (leave == rg::gp)) restartGame(rg::gp);
-  if(nonbitrunc != (leave == rg::bitrunc)) restartGame(rg::bitrunc);
-  if(peace::on != (leave == rg::peace)) restartGame(rg::peace);
+  if(shmup::on != (leave == rg::shmup)) stop_game_and_switch_mode(rg::shmup);
+  if(inv::on != (leave == rg::inv)) stop_game_and_switch_mode(rg::inv);
+  if(chaosmode != (leave == rg::chaos)) stop_game_and_switch_mode(rg::chaos);
+  if(gp::on != (leave == rg::gp)) stop_game_and_switch_mode(rg::gp);
+  if(nonbitrunc != (leave == rg::bitrunc)) stop_game_and_switch_mode(rg::bitrunc);
+  if(peace::on != (leave == rg::peace)) stop_game_and_switch_mode(rg::peace);
 #if CAP_TOUR
-  if(tour::on != (leave == rg::tour)) restartGame(rg::tour);
+  if(tour::on != (leave == rg::tour)) stop_game_and_switch_mode(rg::tour);
 #endif
-  if(yendor::on != (leave == rg::yendor)) restartGame(rg::yendor);
-  if(tactic::on != (leave == rg::tactic)) restartGame(rg::tactic);
-  if(randomPatternsMode != (leave == rg::randpattern)) restartGame(rg::randpattern);
+  if(yendor::on != (leave == rg::yendor)) stop_game_and_switch_mode(rg::yendor);
+  if(tactic::on != (leave == rg::tactic)) stop_game_and_switch_mode(rg::tactic);
+  if(randomPatternsMode != (leave == rg::randpattern)) stop_game_and_switch_mode(rg::randpattern);
 
   if(geometry != gNormal && leave != rg::geometry) { 
     targetgeometry = gNormal;
-    restartGame(rg::geometry); 
+    stop_game_and_switch_mode(rg::geometry); 
     }
   
   pmodel = mdDisk; vid.alpha = 1; vid.scale = 1;
@@ -332,6 +332,7 @@ void resetModes(char leave) {
 
   vid.monmode = DEFAULT_MONMODE;
   vid.wallmode = DEFAULT_WALLMODE;
+  start_game();
   }
 
 #if CAP_CONFIG  

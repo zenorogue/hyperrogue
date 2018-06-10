@@ -365,8 +365,6 @@ void handleKeyNormal(int sym, int uni) {
 
   if(sym == SDLK_KP5 && DEFAULTCONTROL) movepcto(-1, 1);
 
-  // if(sym == SDLK_F4)  restartGameSwitchEuclid();
-
   if(sym == SDLK_F5) {
     #if CAP_DAILY
     if(daily::on) daily::handleQuit(1);
@@ -374,7 +372,7 @@ void handleKeyNormal(int sym, int uni) {
     #endif
     if(needConfirmation()) 
       pushScreen(showMission);
-    else restartGame();
+    else restart_game();
     }
 
   if(sym == SDLK_ESCAPE) {
