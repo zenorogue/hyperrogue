@@ -3467,6 +3467,8 @@ void moveMonster(cell *ct, cell *cf) {
   
   if(isTroll(m)) { makeTrollFootprints(ct); makeTrollFootprints(cf); }
     
+  int inc = incline(cf, ct);
+
   if(m == moEarthElemental) {
     if(!passable(ct, cf, 0)) earthFloor(ct);
     earthMove(cf, neighborId(cf, ct));
@@ -3578,7 +3580,6 @@ void moveMonster(cell *ct, cell *cf) {
   
   if(m == moPair) ct->stuntime++;
 
-  int inc = incline(cf, ct);
   if(inc == -3 && ct->monst == moReptile)
     ct->stuntime =3;
   else if(inc == 2 && ct->monst == moReptile)
