@@ -4,6 +4,12 @@
 namespace rogueviz {
 
 #if CAP_SDL
+
+// see: https://www.youtube.com/watch?v=4Vu3F95jpQ4&t=6s (Collatz)
+// see: https://www.youtube.com/watch?v=mDG3_f8R2Ns (SAG boardgames)
+// see: https://www.youtube.com/watch?v=WSyygk_3j9o (SAG roguelikes)
+// see: https://www.youtube.com/watch?v=HWQkDkeEUeM (SAG programming languages)
+
 void rvvideo(const string &fname) {
   if(kind == kCollatz) {
     pngformat = 2;
@@ -164,6 +170,8 @@ string its05(int i) { char buf[64]; sprintf(buf, "%05d", i); return buf; }
 
 #define TSIZE 4096
 
+// see: https://www.youtube.com/watch?v=HZNRo6mr5pk
+
 void staircase_video(int from, int num, int step) {
   resetbuffer rb;
   renderbuffer rbuf(TSIZE, TSIZE, true);
@@ -199,6 +207,9 @@ void staircase_video(int from, int num, int step) {
 #undef TSIZE
 
 #define TSIZE 2048
+
+// see: https://twitter.com/ZenoRogue/status/1001127253747658752
+// see also: https://twitter.com/ZenoRogue/status/1000043540985057280 (older version)
 
 void bantar_record() {
   resetbuffer rb;
