@@ -48,20 +48,25 @@ void Xprintf(const char *fmt, T... t) {
   while(i > last_cr) android_log_buf[android_log_bufpos++] = android_log_buf[last_cr++];
   }
 
+#include <jni.h>
+#include <string>
+
+namespace hr {
 void gdpush(int t);
 
-#include <jni.h>
 void shareScore(MOBPAR_FORMAL);
 
 const char *scorefile, *conffile;
-#include <string>
 std::string levelfile, picfile;
 
 bool settingsChanged = false;
 
 struct transmatrix getOrientation();
+}
 
 #include "/home/eryx/proj/rogue/hyper/init.cpp"
+
+using namespace hr;
 
 // #define delref env->DeleteLocalRef(_thiz)
 
