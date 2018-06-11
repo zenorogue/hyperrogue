@@ -3106,6 +3106,8 @@ bool makeEmpty(cell *c) {
     ;
   else if(c->wall == waOpenPlate && bounded)
     ;
+  else if(c->wall == waTrunk || c->wall == waSolidBranch || c->wall == waWeakBranch)
+    ;
   else if(c->wall == waGiantRug)
     ;
   else if(c->wall == waDock)
