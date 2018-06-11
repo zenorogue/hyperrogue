@@ -1825,4 +1825,6 @@ auto hooks  =
 
 #include "rogueviz-kohonen.cpp"
 #include "rogueviz-staircase.cpp"
+#include "rogueviz-banachtarski.cpp"
+#include "rogueviz-video.cpp"
 

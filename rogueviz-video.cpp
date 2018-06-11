@@ -159,14 +159,93 @@ struct storydata { int s; int e; const char *text; } story[] = {
     saveHighQualityShot(buf);
     }
   }
-#endif
 
-#if CAP_COMMANDLINE && CAP_SDL
-int videoArgs() {
-  if(argis("-rvvideo")) {
-    shift(); rvvideo(args());
+string its05(int i) { char buf[64]; sprintf(buf, "%05d", i); return buf; }
+
+#define TSIZE 4096
+
+void staircase_video(int from, int num, int step) {
+  resetbuffer rb;
+  renderbuffer rbuf(TSIZE, TSIZE, true);
+  stereo::mode = stereo::sODS;
+
+  for(int i=from; i<num; i+=step) { 
+    ld t = i * 1. / num;
+    t = pow(t, .3);
+    staircase::scurvature = t * t * (t-.95) * 4;
+    staircase::progress = i / 30.;
+    
+    staircase::strafex = (sin(i / 240.) - sin(i / 501.)) / 2.5;
+    staircase::strafey = (cos(i / 240.) - cos(i / 501.)) / 2.5;
+    
+    staircase::make_staircase();
+
+    rbuf.enable();
+    dynamicval<int> vx(vid.xres, TSIZE);
+    dynamicval<int> vy(vid.yres, TSIZE);
+    dynamicval<int> vxc(vid.xcenter, TSIZE/2);
+    dynamicval<int> vyc(vid.ycenter, TSIZE/2);
+    stereo::set_viewport(0);
+    printf("draw scene\n");
+    rug::drawRugScene();
+    
+    IMAGESAVE(rbuf.render(), ("staircase/" + its05(i) + IMAGEEXT).c_str());
+    printf("GL %5d/%5d\n", i, num);
     }
+  
+  rb.reset();
   }
+
+#undef TSIZE
+
+#define TSIZE 2048
+
+void bantar_record() {
+  resetbuffer rb;
+  renderbuffer rbuf(TSIZE, TSIZE, true);
+
+  int fr = 0;
+  
+  for(int i=0; i < 10000; i += 33) {
+    if(i % 1000 == 999) i++;
+    ticks = i;
+
+    rbuf.enable();
+    vid.xres = vid.yres = TSIZE;
+    stereo::set_viewport(0);
+    banachtarski::bantar_frame();
+    
+    IMAGESAVE(rbuf.render(), ("bantar/" + its05(fr) + IMAGEEXT).c_str());
+    printf("GL %5d/%5d\n", i, 10000);
+    fr++;
+    }
+  
+  rb.reset();
+  }
+#undef TSIZE
+
+#if CAP_COMMANDLINE
+int videoArgs() {
+  using namespace arg;
+  if(argis("-rvvideo")) {
+    shift(); rvvideo(arg::args());
+    }
+  else if(argis("-staircase_video")) {
+    staircase_video(0, 128*30, 1); // goal: 168*30
+    }
+  else if(argis("-bantar_record")) {
+    using namespace banachtarski;
+    PHASE(3);
+    peace::on = true;
+    airmap.clear();
+    ForInfos if(cci.second.c->monst == moAirElemental)
+      cci.second.c->monst = moFireElemental;
+    bantar_record();
+    }
+  else return 1;
+  return 0;
+  }
+#endif
 #endif
 
 auto rv_hooks = addHook(hooks_args, 100, videoArgs);
