@@ -307,7 +307,6 @@ bool have_current_settings() {
 
 void resetModes(char leave) {
   popAllGames();
-  firstland = laIce; specialland = laIce; vid.scfg.players = 1;
   if(shmup::on != (leave == rg::shmup)) stop_game_and_switch_mode(rg::shmup);
   if(inv::on != (leave == rg::inv)) stop_game_and_switch_mode(rg::inv);
   if(chaosmode != (leave == rg::chaos)) stop_game_and_switch_mode(rg::chaos);
@@ -320,6 +319,12 @@ void resetModes(char leave) {
   if(yendor::on != (leave == rg::yendor)) stop_game_and_switch_mode(rg::yendor);
   if(tactic::on != (leave == rg::tactic)) stop_game_and_switch_mode(rg::tactic);
   if(randomPatternsMode != (leave == rg::randpattern)) stop_game_and_switch_mode(rg::randpattern);
+  if(vid.scfg.players != 1) {
+    vid.scfg.players = 1; stop_game_and_switch_mode();
+    }
+  if(firstland != laIce || specialland != laIce) {
+    firstland = laIce; specialland = laIce; stop_game_and_switch_mode();
+    }
 
   if(geometry != gNormal && leave != rg::geometry) { 
     targetgeometry = gNormal;
