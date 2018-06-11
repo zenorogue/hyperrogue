@@ -1,7 +1,7 @@
 // Hyperbolic Rogue -- the Tutorial/presentation
 // Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
 
-namespace hr::tour {
+namespace hr { namespace tour {
 
 bool on;
 
@@ -803,4 +803,4 @@ auto a1 = addHook(hooks_frame, 100, [] () { if(tour::on) tour::presentation(tour
 auto a2 = addHook(hooks_handleKey, 100, handleKeyTour);
 auto a3 = addHook(hooks_nextland, 100, [] (eLand l) { return tour::on ? getNext(l) : laNone; });
 
-}
+}}

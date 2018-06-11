@@ -1,4 +1,4 @@
-namespace hr::gp {
+namespace hr { namespace gp {
   bool on;
   loc param(1, 0);
 
@@ -733,5 +733,4 @@ namespace hr::gp {
     return dist_3() - dist_2();
     }
 
-  }
-
+  }}

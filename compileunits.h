@@ -102,7 +102,7 @@ bool inv::activating;
 #if CAP_DAILY
 #include "private/daily.cpp"
 #else
-namespace hr::daily { bool on; }
+namespace hr { namespace daily { bool on; } }
 #endif
 #endif
 

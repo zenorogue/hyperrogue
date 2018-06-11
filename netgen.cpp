@@ -2,7 +2,7 @@
 // Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
 
 #if CAP_MODEL
-namespace hr::netgen {
+namespace hr { namespace netgen {
 
   // We need a two-dimensional vector class for this.
   
@@ -713,5 +713,5 @@ namespace hr::netgen {
     else
       pushScreen(show);
     }
-  }
+  }}
 #endif

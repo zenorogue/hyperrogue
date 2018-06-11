@@ -4,7 +4,7 @@
 // See http://webmath2.unito.it/paginepersonali/sergio.console/CurveSuperfici/AG15.pdf for a nice reference
 
 #if CAP_SURFACE
-namespace hr::surface {
+namespace hr { namespace surface {
 
 using namespace hyperpoint_vec;
 
@@ -829,5 +829,5 @@ void display_coverage() {
 
 auto surface_hook2 = addHook(hooks_frame, 0, display_coverage);
 
-}
+}}
 #endif

@@ -4,7 +4,7 @@
 // good parameters: -fixx 10 -W Cros -bantar_anim
 // use -bantar_map to see how it works
 
-namespace rogueviz::banachtarski {
+namespace rogueviz { namespace banachtarski {
 
 bool on;
 
@@ -518,5 +518,4 @@ auto hook = addHook(hooks_args, 100, readArgs)
   + addHook(hooks_initgame, 100, bantar)
   + addHook(hooks_frame, 100, bantar_stats);
 
-
-}
+}}

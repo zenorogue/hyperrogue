@@ -1,7 +1,7 @@
 // Hyperbolic Rogue -- Orb Strategy Mode
 // Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
 
-namespace hr::inv {
+namespace hr { namespace inv {
 
   bool on;
   array<int, ittypes> usedup;
@@ -645,6 +645,6 @@ namespace hr::inv {
       }
     }
 
-  }
+  }}
 
   

@@ -3,7 +3,7 @@
 
 #if CAP_SAVE
 
-namespace hr::scores {
+namespace hr { namespace scores {
 
 vector<score> scores;
 score *currentgame;
@@ -338,7 +338,7 @@ void load() {
     });
   }
 
-}
+}}
 
 #endif
 
