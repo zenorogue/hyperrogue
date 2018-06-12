@@ -410,8 +410,7 @@ void buildTorusRug() {
     
   ld factor = sqrt(ld(solution.second.d2()) / solution.first.d2());
   
-  ld xfactor = sqrt(1/ (1+factor*factor));;
-  ld yfactor = xfactor * factor;
+  ld xfactor, yfactor;
   
   Xprintf("factor = %lf\n", factor);
   if(factor <= 2.05) factor = 2.2;
@@ -423,6 +422,27 @@ void buildTorusRug() {
   // transmatrix z1 = {{{22,7,0}, {1,-17,0}, {0,0,1}}};
   transmatrix z1 = {{{(ld)solution.first.x,(ld)solution.second.x,0}, {(ld)solution.first.y,(ld)solution.second.y,0}, {0,0,1}}};
   transmatrix z2 = inverse(z1);
+  
+  if(gwhere == gSphere) {
+    hyperpoint xh = z2 * hpxyz(1, 0, 0);
+    hyperpoint yh = z2 * hpxyz(0, 1, 0);
+    // hypot(xh[0], factor * xh[1]) == hypot(yh[0], factor * yh[1])
+    // xh[0]*xh[0] - yh[0] * yh[0] = factor * factor * (yh[1] * yh[1] - (xh[1] * xh[1])
+    
+    ld factor2 = (xh[0]*xh[0] - yh[0] * yh[0]) / (yh[1] * yh[1] - xh[1] * xh[1]);
+    ld factor = sqrt(factor2);
+    xfactor = sqrt(1/(1+factor2));
+    yfactor = xfactor * factor;
+                                    
+    ld xscale = hypot(xfactor * xh[0] * 2 * M_PI, yfactor * xh[1] * 2 * M_PI);
+    ld yscale = hypot(xfactor * yh[0] * 2 * M_PI, yfactor * yh[1] * 2 * M_PI);
+    printf("xh = %s\n", display(xh));
+    printf("yh = %s\n", display(yh));
+    printf("factor = %lf %lf (%lf)\n", double(xfactor), double(yfactor), factor);
+    printf("scales = %fl %lf\n", double(xscale), double(yscale));
+    
+    modelscale = xscale / crossf;
+    }
   
   map<pair<int, int>, rugpoint*> glues;
   
