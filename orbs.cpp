@@ -947,12 +947,12 @@ void useOrbOfDragon(cell *c) {
   checkmoveO();
   }
 
-int monstersnearO(orbAction a, cell *c, cell *nocount, eMonster who, cell *pushto, cell *comefrom) {
+bool monstersnearO(orbAction a, cell *c, cell *nocount, eMonster who, cell *pushto, cell *comefrom) {
   // printf("[a = %d] ", a);
-  if(shmup::on) return 0;
+  if(shmup::on) return false;
   if(a == roCheck && multi::players > 1) 
-    return 1;
-  else if(a == roMultiCheck) return 0;
+    return true;
+  else if(a == roMultiCheck) return false;
   else return monstersnear(c, nocount, who, pushto, comefrom);
   }
 
