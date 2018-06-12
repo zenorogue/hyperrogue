@@ -222,6 +222,10 @@ bool applyCheat(char u, cell *c = NULL) {
       }
     cheater++; addMessage(XLAT("Collected the keys!"));
     }
+  if(u == 'Y'-64) {
+    yendor::collected(cwt.c);
+    cheater++;
+    }
   if(u == 'P') {
     items[itSavedPrincess]++;
     princess::saved = true;
@@ -360,7 +364,6 @@ void showCheatMenu() {
   dialog::addItem(XLAT("gain kills"), 'K');
   dialog::addItem(XLAT("Hyperstone Quest"), 'C');
   dialog::addItem(XLAT("summon orbs"), 'O');
-  dialog::addItem(XLAT("gain Orb of Yendor"), 'Y');
   dialog::addItem(XLAT("summon lots of treasure"), 'T'-64);
   dialog::addItem(XLAT("Safety (quick save)"), 'S');
   dialog::addItem(XLAT("Select the land ---"), 'L');
@@ -369,6 +372,7 @@ void showCheatMenu() {
   dialog::addItem(XLAT("deplete orb powers"), 'M');
   dialog::addItem(XLAT("save a Princess"), 'P');
   dialog::addItem(XLAT("unlock Orbs of Yendor"), 'Y');
+  dialog::addItem(XLAT("gain Orb of Yendor"), 'Y'-64);
   dialog::addItem(XLAT("switch ghost timer"), 'G'-64);
   dialog::addItem(XLAT("switch web display"), 'W'-64);
   dialog::addItem(XLAT("peaceful mode"), 'P'-64);
