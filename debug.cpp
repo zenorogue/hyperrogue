@@ -191,9 +191,13 @@ bool applyCheat(char u, cell *c = NULL) {
     return true;
     }
   if(u == 'Z') {
-    flipplayer = false;
-    mirror::act(1, mirror::SPINSINGLE);
+    if (flipplayer) {
+      cwt += cwt.c->type/2;
+      flipplayer = false;
+      }
     cwt++;
+    mirror::act(1, mirror::SPINSINGLE);
+
     wavephase = (1+wavephase) & 7;
     if(shmup::on) shmup::pc[0]->at = Id;
     return true;

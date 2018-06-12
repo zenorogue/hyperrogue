@@ -213,10 +213,6 @@ bool isDemon(cell *c) {
   return isDemon(c->monst);
   }
 
-bool isWormHead(eMonster m) {
-  return m == moWorm || m == moTentacle || m == moHexSnake || m == moDragonHead;
-  }
-
 bool isWorm(eMonster m) {
   return m == moWorm || m == moWormtail || m == moWormwait || 
     m == moTentacle || m == moTentacletail || m == moTentaclewait ||
@@ -650,10 +646,6 @@ bool survivesFire(eMonster m) {
     (isFriendly(m) && markOrb(itOrbWinter)) || m == moFireElemental ||
     isDragon(m) || m == moShadow;
   }
-
-/* bool survivesMine(eMonster m) {
-  return ignoresPlates(m) || isFlying(m);
-  } */
 
 bool survivesWall(eMonster m) {
   return isGhost(m);

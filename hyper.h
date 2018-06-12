@@ -461,7 +461,6 @@ bool isCrossroads(eLand l);
 enum orbAction { roMouse, roKeyboard, roCheck, roMouseForce, roMultiCheck, roMultiGo };
 void moveItem (cell *from, cell *to, bool activateYendor);
 void uncoverMines(cell *c, int lev, int dist);
-bool survivesMine(eMonster m);
 void killMonster(cell *c, eMonster who_killed, flagtype flags = 0);
 void toggleGates(cell *ct, eWall type, int rad);
 bool destroyHalfvine(cell *c, eWall newwall = waNone, int tval = 6);

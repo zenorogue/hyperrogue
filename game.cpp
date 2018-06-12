@@ -1422,12 +1422,14 @@ bool monstersnear(cell *c, cell *nocount, eMonster who, cell *pushto, cell *come
     comefrom->wall = w;
     c->wall = waBigStatue;
     }
-  if(who == moPlayer && c->wall == waThumperOn) {
+  else if(who == moPlayer && c->wall == waThumperOn) {
     c->wall = waNone;
     b = monstersnear2();
     c->wall = waThumperOn;
     }
-  b = monstersnear2();
+  else {
+    b = monstersnear2();
+    }
   stalemate::moves.pop_back();
   return b;
   }
