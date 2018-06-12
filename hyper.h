@@ -1360,7 +1360,6 @@ namespace stalemate {
   
   bool isKilled(cell *c);
 
-  bool anyKilled();
   bool isMoveto(cell *c);
   bool isKilledDirectlyAt(cell *c);
   bool isPushto(cell *c);

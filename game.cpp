@@ -942,6 +942,20 @@ bool isChild(cell *w, cell *killed) {
   return w == killed;
   }
 
+bool logical_adjacent(cell *c1, eMonster m1, cell *c2) {
+  if(!c1 || !c2) return true; // cannot really check
+  eMonster m2 = c2->monst;
+  if(!isNeighbor(c1, c2))
+    return false;
+  if(thruVine(c1, c2) && !attackThruVine(m1) && !attackThruVine(m2) &&
+    !checkOrb(m1, itOrbAether) && !checkOrb(m2, itOrbAether))
+    return false;
+  if(nonAdjacent(c1, c2) && !attackNonAdjacent(m1) && !attackNonAdjacent(m2) && 
+    !checkOrb(m1, itOrb37) && !checkOrb(m1, itOrbAether) && !checkOrb(m2, itOrbAether))
+    return false;
+  return true;
+  }
+
 bool canAttack(cell *c1, eMonster m1, cell *c2, eMonster m2, flagtype flags) {
 
   // cannot eat worms
@@ -1001,21 +1015,12 @@ bool canAttack(cell *c1, eMonster m1, cell *c2, eMonster m2, flagtype flags) {
   if(m2 == moGreater || m2 == moGreaterM)
     if(!(flags & (AF_MAGIC | AF_SWORD_INTO | AF_HORNS | AF_CRUSH))) return false;
     
-  if(!(flags & AF_GUN)) {
+  if(!(flags & (AF_GUN | AF_SWORD | AF_SWORD_INTO | AF_MAGIC)))
+    if(!logical_adjacent(c1, m1, c2)) return false;
 
-    if(c1 && c2 && nonAdjacent(c1,c2) && !attackNonAdjacent(m1) && !attackNonAdjacent(m2) && 
-      !checkOrb(m1, itOrb37) && !checkOrb(m1, itOrbAether) && !checkOrb(m2, itOrbAether))
-      return false;
-    
-    if(c1 && c2 && thruVine(c1,c2) && !attackThruVine(m1) && !attackThruVine(m2) &&
-      !checkOrb(m1, itOrbAether) && !checkOrb(m2, itOrbAether))
-      return false;
-  
-    if(!(flags & (AF_LANCE | AF_STAB | AF_BACK | AF_APPROACH)))
+  if(!(flags & (AF_LANCE | AF_STAB | AF_BACK | AF_APPROACH | AF_GUN | AF_MAGIC)))
     if(c1 && c2 && againstRose(c1, c2) && !ignoresSmell(m1))
       return false;
-    
-    }
   
   if(m2 == moShadow && !(flags & AF_SWORD)) return false;
   if(isWorm(m2) && m2 != moTentacleGhost && !isDragon(m2)) return false;
@@ -1051,7 +1056,7 @@ bool stalemate1::isKilled(cell *w) {
     if((w == swordnext[b] || w == swordtransit[b]) && canAttack(moveto, who, w, w->monst, AF_SWORD))
       return true;
   
-  if(isNeighbor(w, moveto) && moveto != comefrom) {
+  if(logical_adjacent(moveto, who, w) && moveto != comefrom) {
     int wid = neighborId(moveto, w);
     int wfrom = neighborId(moveto, comefrom);
     int flag = AF_APPROACH;
@@ -1067,7 +1072,7 @@ bool stalemate1::isKilled(cell *w) {
       return true;
     }
 
-  if(isNeighbor(w, comefrom) && isNeighbor(w, moveto) && moveto != comefrom)
+  if(logical_adjacent(comefrom, who, w) && logical_adjacent(moveto, who, w) && moveto != comefrom)
     if(canAttack(moveto, who, w, w->monst, AF_STAB))
       return true;
 
@@ -1155,11 +1160,6 @@ namespace stalemate {
   vector<stalemate1> moves;
   bool  nextturn;
 
-  bool anyKilled() {
-    for(int i=0; i<size(moves); i++) if(moves[i].killed) return true;
-    return false;
-    }
-
   bool isMoveto(cell *c) {
     for(int i=0; i<size(moves); i++) if(moves[i].moveto == c) return true;
     return false;
@@ -1228,16 +1228,15 @@ int monstersnear(stalemate1& sm) {
     cell *c2 = c->mov[t];
 
     // consider monsters who attack from distance 2
-    if(c2) for(int u=2; u<=c2->type-2; u++) {
-      cell *c3 = c2->mov[(c->spn(t)+u) % c2->type];
-      if(!c3) continue;
-      if(c3->monst != moWitchFlash)
-        if(nonAdjacent(c, c2) || nonAdjacent(c2,c3) || thruVine(c,c2) || thruVine(c2,c3))
-          continue;
+    if(c2) forCellEx(c3, c2) if(c3 != c) {
       // only these monsters can attack from two spots...
-      if(c3->monst != moLancer && c3->monst != moWitchSpeed && c3->monst != moWitchFlash) 
+      if(!among(c3->monst, moLancer, moWitchSpeed, moWitchFlash)) 
         continue;
-      if(elec::affected(c3)) continue;
+      // take logical_adjacent into account
+      if(c3->monst != moWitchFlash)
+        if(!logical_adjacent(c3, c3->monst, c2) || !logical_adjacent(c2, c3->monst, c))
+          continue;
+      if(elec::affected(c3) || stalemate::isKilled(c3)) continue;
       if(c3->stuntime) continue;
       // speedwitches can only attack not-fastened monsters,
       // others can only attack if the move is not fastened
@@ -1250,7 +1249,6 @@ int monstersnear(stalemate1& sm) {
         }
       // flashwitches cannot attack if it would kill another enemy
       if(c3->monst == moWitchFlash && flashWouldKill(c3, 0)) continue;
-      if(stalemate::anyKilled() && mirror::isKilledByMirror(c3)) continue;
       res++, which = c3->monst;
       } 
 
@@ -1258,7 +1256,7 @@ int monstersnear(stalemate1& sm) {
     if(c2 && 
       isArmedEnemy(c2, sm.who) && 
       !stalemate::isKilled(c2) &&
-      (c2->monst != moLancer || isUnarmed(sm.who))) {
+      (c2->monst != moLancer || isUnarmed(sm.who) || !logical_adjacent(c, sm.who, c2))) {
       eMonster m = c2->monst;
       if(elec::affected(c2)) continue;
       if(fast && c2->monst != moWitchSpeed) continue;
@@ -3515,12 +3513,10 @@ void moveMonster(cell *ct, cell *cf) {
   // lancers pierce our friends :(
   if(m == moLancer) { 
     // printf("lancer stab?\n");
-    for(int u=2; u<=ct->type-2; u++) {
-      cell *c3 = ct->mov[(ct->mondir+u)%ct->type]; 
+    forCellEx(c3, ct) if(!logical_adjacent(cf, m, c3))
       if(canAttack(ct, moLancer, c3, c3->monst, AF_LANCE | AF_GETPLAYER)) {
         attackMonster(c3, AF_LANCE | AF_MSG | AF_GETPLAYER, m);
         }
-      }
     }
   
   if(m == moWitchFire) makeflame(cf, 10, false);
@@ -3719,11 +3715,9 @@ int moveval(cell *c1, cell *c2, int d, flagtype mf) {
 
   if(m == moLancer) { 
     bool lancerok = true;
-    for(int u=2; u<=c2->type-2; u++) {
-      cell *c3 = c2->mov[(c1->spn(d)+u)%c2->type]; 
-      if(c3 && canAttack(c2, moLancer, c3, c3->monst, AF_LANCE | AF_ONLY_ENEMY))
+    forCellEx(c3, c2) if(c1 != c3 && !logical_adjacent(c1, m, c3))
+      if(canAttack(c2, moLancer, c3, c3->monst, AF_LANCE | AF_ONLY_ENEMY))
         lancerok = false;
-      }
     if(!lancerok) return 750;
     }
 
@@ -5014,7 +5008,7 @@ void stabbingAttack(cell *mf, cell *mt, eMonster who, int bonuskill) {
     if(!c) continue;
     
     bool stabthere = false, away = true;
-    for(int u=0; u<c->type; u++) if(c->mov[u] == mt) stabthere = true, away = false;
+    if(logical_adjacent(mt, who, c)) stabthere = true, away = false;
     
     if(stabthere && canAttack(mt,who,c,c->monst,AF_STAB)) {
       if(c->monst != moHedge) { 
@@ -5027,7 +5021,7 @@ void stabbingAttack(cell *mf, cell *mt, eMonster who, int bonuskill) {
       if(tkills() > k) numsh++;
       }
 
-    if(away && c != mt && canAttack(mt,who,c,c->monst,AF_BACK)) {
+    if(away && c != mt && canAttack(mf,who,c,c->monst,AF_BACK)) {
       if(c->monst == moVizier && c->hitpoints > 1) {
         fightmessage(c->monst, who, true, AF_BACK);
         c->hitpoints--;
@@ -5055,9 +5049,8 @@ void stabbingAttack(cell *mf, cell *mt, eMonster who, int bonuskill) {
       }
     }
 
-  if(!isUnarmed(who)) for(int t=0; t<mt->type; t++) {
-    cell *c = mt->mov[t];
-    if(!c) continue;
+  if(!isUnarmed(who)) forCellIdEx(c, t, mt) {
+    if(!logical_adjacent(mt, who, c)) continue;
     eMonster mm = c->monst;
     int flag = AF_APPROACH;
     if(angledist(mt, backdir, t) >= S7/2) flag |= AF_HORNS;
