@@ -1802,6 +1802,40 @@ slide rvslides[] = {
       slidecommand = "staircase menu";
       if(mode == 4) pushScreen(staircase::showMenu);
       }},
+    {"Banach-Tarski-like", 62, LEGAL_NONE,
+     "Banach-Tarski-like decomposition. Break a hyperbolic plane into two hyperbolic planes.\n\n"
+     "Press '5' to show the decomposition. Press any key to stop.\n\n"
+     "You will see a map of the decomposition. Press '5' again to return.",
+     
+    [] (presmode mode) {
+      slidecommand = "staircase menu";
+      if(mode == 3) {
+        while(gamestack::pushed()) pop_game();
+        banachtarski::bmap = false;
+        banachtarski::on = false;
+        }
+      if(mode == 4) {
+        if(!banachtarski::on) {
+          bool b = mapeditor::drawplayer;
+          specialland = cwt.c->land;
+          push_game();
+          banachtarski::init_bantar();
+          airmap.clear();
+          dynamicval<int> vs(sightrange_bonus, 3);
+          dynamicval<int> vg(genrange_bonus, 3);
+          doOvergenerate();
+          banachtarski::bantar_anim();
+          quitmainloop = false;
+          mapeditor::drawplayer = b;
+          banachtarski::init_bantar_map();
+          }
+        else if(banachtarski::on && banachtarski::bmap) {
+          banachtarski::bmap = false;
+          banachtarski::on = false;
+          pop_game();
+          }
+        }
+      }},
   {"THE END", 99, LEGAL_ANY | FINALSLIDE,
     "Press '5' to leave the presentation.",
     [] (presmode mode) {

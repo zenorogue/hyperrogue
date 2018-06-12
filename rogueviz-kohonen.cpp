@@ -1123,12 +1123,14 @@ auto hooks = addHook(hooks_args, 100, readArgs);
 #endif
 
 auto hooks2 = addHook(hooks_frame, 50, levelline::draw);
-}
+}}
 
-void rogueviz::mark(cell *c) {
-  using namespace kohonen;
-  if(kind == kKohonen && inited >= 1) {
-    distfrom = getNeuronSlow(c);
-    coloring();
-    }
-  }}
+namespace rogueviz {
+  void mark(cell *c) {
+    using namespace kohonen;
+    if(kind == kKohonen && inited >= 1) {
+      distfrom = getNeuronSlow(c);
+      coloring();
+      }
+    }}
+

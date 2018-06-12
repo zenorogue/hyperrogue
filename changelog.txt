@@ -2468,3 +2468,20 @@ non-game:
 2018.05.27 01:21 Update 10.4a:
 - Strange Challenge should exit correctly.
 - rules are described better in other geometries
+
+2018.06.12 XX:XX Update 10.4b:
+- Orb of Love does not give the 30$$$ bonus in the Strange Challenge -- this is now made clearer (the displayed score no longer includes this 30$$$, and a help text for Orb of Love is added).
+- a flat torus can be embedded in S^3 -- HyperRogue now knows about this when rendering torus in the Hypersian Rug mode in the spherical native geometry
+- it was possible to get another chance in the Strange Challenge by pressing ESC in specific circumstances -- this should be fixed.
+- fixed some issues with adjacency taken into account incorrectly with Hedgehogs/Flailguards/Pikemen and Warp/halfvines
+- orb of Horns, and other cases caring about opposite cells, should now work correctly in nonstandard geometries
+- marked Orb of Lava as useless in the Haunted Woods
+- fixed the Earth Elementals falling/dying in Red Rock Valley
+- Orb of Recall no longer creates holes in the Yendorian Forest
+- fixed a bug which caused forgetting the PTM game when 'reseting special modes'
+- added the 'Banach-Tarski-like' visualization to RogueViz
+- faster drawing of convex shapes in the online version
+- translation updated, fixed some player gender directives in Russian
+- torus rendering no longer creates darker areas because of the side difference
+- fixed the non-3D display of rock formations in Goldberg geometries
+- Hunter dogs (guarding/regrouping) and sometimes Ice Wolves no longer count as a different kill type (not counted in total kills)

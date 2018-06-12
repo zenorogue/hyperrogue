@@ -87,5 +87,13 @@ namespace rogueviz {
     void showMenu();
     void make_staircase();
     }
+  
+  namespace banachtarski {
+    extern bool on;
+    void init_bantar();
+    void bantar_anim();    
+    extern bool bmap;
+    extern void init_bantar_map();
+    }
 }
 

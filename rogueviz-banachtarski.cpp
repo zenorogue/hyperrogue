@@ -313,6 +313,8 @@ void bantar_frame() {
   stereo::set_projection(0);
   
   vector<polytodraw> subscr[4];
+  
+  compute_graphical_distance();
 
   const int tmax = 2000;
   int t = ticks % (5*tmax);
@@ -396,7 +398,7 @@ void bantar_frame() {
     drawrec(viewctr, hsOrigin, cview());
     if(0) for(auto p: parent) if(gmatrix.count(p.first) && gmatrix.count(p.second) && infos[p.first].gid == i && infos[p.second].gid == i)
       queueline(tC0(gmatrix[p.first]), tC0(gmatrix[p.second]), 0xFFFFFFFF, 2);
-    subscr[i] = ptds;
+    subscr[i] = move(ptds);
     }
   
   map<int, map<int, vector<polytodraw>>> xptds;
@@ -426,15 +428,23 @@ void bantar_frame() {
 void bantar_anim() {
 
   vid.aurastr = 0;
-  while(!quitmainloop) {
-    ticks = SDL_GetTicks();
+  bool breakanim = false;
+  int t = SDL_GetTicks();
+  drawthemap();
+  while(!breakanim) {
+    ticks = SDL_GetTicks() - t;
     
     bantar_frame();
     
     SDL_GL_SwapBuffers();
     SDL_Event ev;
-    while(SDL_PollEvent(&ev)) handle_event(ev);    
+    while(SDL_PollEvent(&ev)) 
+      if(ev.type == SDL_KEYDOWN || ev.type == SDL_MOUSEBUTTONDOWN)
+        breakanim = true;      
     }
+  mapeditor::drawplayer = true;
+  vid.xposition = vid.yposition = 0;
+  vid.scale = 1;
   }
 
 bool bmap;
@@ -463,6 +473,19 @@ void init_bantar() {
     stop_game();
     on = true;
     start_game();
+    }
+  }
+
+void init_bantar_map() {
+  bmap = true;
+  ForInfos {
+    int hsh = 0x202047;
+    for(int w: cci.second.way) hsh = (11301 * hsh + w * 37121) & 0x7F7F7F;
+    cci.second.c->landparam = hsh;
+    cci.second.c->land = laCanvas;
+    cci.second.c->wall = waNone;
+    cci.second.c->item = itNone;
+    cci.second.c->monst = moNone;
     }
   }
   
@@ -496,16 +519,7 @@ int readArgs() {
     }
   else if(argis("-bantar_map")) {
     init_bantar();
-    bmap = true;
-    ForInfos {
-      int hsh = 0x202047;
-      for(int w: cci.second.way) hsh = (11301 * hsh + w * 37121) & 0x7F7F7F;
-      cci.second.c->landparam = hsh;
-      cci.second.c->land = laCanvas;
-      cci.second.c->wall = waNone;
-      cci.second.c->item = itNone;
-      cci.second.c->monst = moNone;
-      }
+    init_bantar_map();
     }
   else if(argis("-btry")) {
     shift(); notry = argi();
