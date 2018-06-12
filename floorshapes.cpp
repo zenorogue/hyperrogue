@@ -353,8 +353,8 @@ namespace gp {
         hyperpoint center = hpxy(0,0);
   
         for(int c=0; c<cor; c++) {
-          hyperpoint nlcorner = get_corner_position(li, d+c+sidir+siid+1, 3);
-          hyperpoint nrcorner = get_corner_position(li, d+c+sidir+siid+2, 3);
+          hyperpoint nlcorner = get_corner_position(li, d+c+sidir+siid+1, 3 / fsh.scale);
+          hyperpoint nrcorner = get_corner_position(li, d+c+sidir+siid+2, 3 / fsh.scale);
           
           cellwalker cw(c0, c);
           cw += d+sidir+siid+1;
