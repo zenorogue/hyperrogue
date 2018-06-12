@@ -1970,10 +1970,10 @@ void killMonster(cell *c, eMonster who, flagtype deathflags) {
   if(m == moGreaterM) m = moLesser;
   if(isPrincess(m)) m = moPrincess;
   if(m == moTentacleGhost) m = moGhost;
-  if(!isBulletType(m)) kills[m]++;
   if(m == moHunterGuard) m = moHunterDog;
   if(m == moHunterChanging) m = moHunterDog;
   if(m == moWolfMoved) m = moWolf;
+  if(!isBulletType(m)) kills[m]++;
 
   if(!c->item) if(m == moButterfly && (deathflags & AF_BULL))
     c->item = itBull;
