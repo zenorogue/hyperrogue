@@ -1,16 +1,6 @@
 // HyperRogue map editor
 // Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
 
-#include <map>
-#include <stdint.h>
-
-#if ISWINDOWS
-#include "direntx.h"
-#include "direntx.c"
-#else
-#include <dirent.h>
-#endif
-
 namespace hr {
 
 namespace mapeditor {

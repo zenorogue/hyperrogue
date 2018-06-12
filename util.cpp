@@ -5,6 +5,20 @@
 
 namespace hr {
 
+#if CAP_TIMEOFDAY
+long long getms() {
+  struct timeval tval;
+  gettimeofday(&tval, NULL);
+  return tval.tv_sec * 1000000 + tval.tv_usec;
+  }
+
+#if !CAP_SDL
+int SDL_GetTicks() {
+  return getms() / 1000;
+  }
+#endif
+#endif
+
 long double sqr(long double x) { return x*x; }
 string its(int i) { char buf[64]; sprintf(buf, "%d", i); return buf; }
 string fts(float x) { char buf[64]; sprintf(buf, "%4.2f", x); return buf; }
@@ -71,13 +85,6 @@ ld frac(ld x) {
 // debug utilities
 
 #if CAP_PROFILING
-
-#include <sys/time.h>
-long long getms() {
-  struct timeval tval;
-  gettimeofday(&tval, NULL);
-  return tval.tv_sec * 1000000 + tval.tv_usec;
-  }
 
 #define FRAMES 64
 #define CATS 16

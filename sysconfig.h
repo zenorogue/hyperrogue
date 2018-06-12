@@ -366,11 +366,42 @@ extern "C" {
 #include <array>
 #include <set>
 #include <random>
+#include <complex>
 
 #ifdef USE_UNORDERED_MAP
 #include <unordered_map>
 #else
 #define unordered_map map
+#endif
+
+#include <stdint.h>
+
+#if ISWINDOWS
+#include "direntx.h"
+#include "direntx.c"
+#else
+#include <dirent.h>
+#endif
+
+#if CAP_TEXTURE
+#if CAP_SDL_IMG
+#include <SDL/SDL_image.h>
+#elif CAP_PNG
+#include <png.h>
+#endif
+#endif
+
+#if CAP_SAVE
+#include <unistd.h>
+#include <sys/types.h>
+#endif
+
+#if CAP_TIMEOFDAY
+#include <sys/time.h>
+#endif
+
+#ifdef BACKTRACE
+#include <execinfo.h>
 #endif
 
 #if CAP_SDL

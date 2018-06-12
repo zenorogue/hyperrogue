@@ -748,9 +748,6 @@ namespace anticheat {
 
 long long saveposition = -1;
 
-#include <unistd.h>
-#include <sys/types.h>
-
 void remove_emergency_save() {
 #if !ISWINDOWS
   if(saveposition >= 0) { 

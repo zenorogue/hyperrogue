@@ -1,8 +1,6 @@
 // Hyperbolic Rogue -- the conformal/history mode
 // Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
 
-#include <complex>
-
 namespace hr {
 
 #if ISMOBWEB

@@ -5,8 +5,6 @@
 
 // Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
 
-#include <map>
-
 namespace hr {
 
 namespace whirlwind {
@@ -1542,8 +1540,6 @@ namespace hive {
       bugtomove.push_back(bugtomove_t(d,goodmoves,i));
       }
     }
-  
-  #include <set>
   
   bool fightspam(cell *c) {
     return c->cpdist >= gamerange() || 

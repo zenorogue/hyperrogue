@@ -116,7 +116,6 @@ int playergender();
 int princessgender();
 int lang();
 
-#include <set>
 set<string> warnshown;
 
 void basicrep(string& x) { 

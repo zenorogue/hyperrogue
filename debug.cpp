@@ -398,11 +398,6 @@ void showCheatMenu() {
     };
   }
 
-
-#ifdef BACKTRACE
-#include <execinfo.h>
-#endif
-
 void modalDebug(cell *c) {
   viewctr.h = c->master;
   if(noGUI) {
