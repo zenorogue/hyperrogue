@@ -3758,7 +3758,7 @@ int moveval(cell *c1, cell *c2, int d, flagtype mf) {
     return 1500 + celldistance(c1, dragon::target) - celldistance(c2, dragon::target);
 
   // Goblins avoid getting near the Sword
-  if(m == moGoblin && sword::near(c2)) return 790;
+  if(m == moGoblin && sword::isnear(c2)) return 790;
   if(m == moBat && batsAfraid(c2)) return 790;
   
   if(m == moButterfly)
@@ -3778,7 +3778,7 @@ int moveval(cell *c1, cell *c2, int d, flagtype mf) {
   // goblins blocked by anglophobia prefer to move around than to stay
   if(m == moGoblin) {
     bool swn = false;
-    forCellEx(c3, c1) if(sword::near(c3)) swn = true;
+    forCellEx(c3, c1) if(sword::isnear(c3)) swn = true;
     if(swn) dd += 210;
     }
 
@@ -3797,7 +3797,7 @@ int stayval(cell *c, flagtype mf) {
   if(isRatling(c->monst) && lastmovetype != lmSkip)
     return 700;
   // Goblins avoid staying near the Sword (if there is no choice, movement is preferred)
-  if(c->monst == moGoblin && sword::near(c)) return 780;
+  if(c->monst == moGoblin && sword::isnear(c)) return 780;
   // Vikings move in a roughly straight line even if they cannot detect you
   if(c->monst == moViking && c->wall == waBoat)
     return 750;

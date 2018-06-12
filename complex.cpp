@@ -2496,7 +2496,7 @@ namespace sword {
     return false;
     }
   
-  bool near(cell *where) {
+  bool isnear(cell *where) {
     if(at(where, false)) return true;
     forCellEx(w2, where) if(at(w2, false)) return true;
     return false;
