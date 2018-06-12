@@ -20,6 +20,7 @@
 #define CAP_ACHIEVE 1
 #define CAP_SHADER 1
 #define CAP_VERTEXBUFFER 0
+#define CAP_TIMEOFDAY 1
 
 #define HNEW 1
 
@@ -66,7 +67,7 @@ struct transmatrix getOrientation();
 
 #include "/home/eryx/proj/rogue/hyper/init.cpp"
 
-using namespace hr;
+namespace hr {
 
 // #define delref env->DeleteLocalRef(_thiz)
 
@@ -405,5 +406,5 @@ void achievement_init() {}
 void achievement_close() {}
 void achievement_gain(const char* s, char flags) {}
 
-#include <unistd.h>
+}
 
