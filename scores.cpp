@@ -222,7 +222,7 @@ void show() {
 
   displayButton(xr*10, i0, IFM("s - ") + XLAT("sort"), 's', 8);
   displayButton(xr*30, i0, IFM("t - ") + XLAT("choose"), 't', 8);
-  displayButton(xr*50, i0, IFM(dialog::keyname(' ') + " - ") + XLAT("go back"), '0', 8);
+  displayButton(xr*50, i0, IFM(dialog::keyname(SDLK_ESCAPE) + " - ") + XLAT("go back"), '0', 8);
 
   keyhandler = [] (int sym, int uni) {
     if(sym == SDLK_LEFT || sym == SDLK_KP4 || sym == 'h' || sym == 'a') {

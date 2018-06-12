@@ -606,8 +606,8 @@ namespace hr { namespace gp {
       dialog::addBoolItem(XLAT("select"), param == internal_representation(config), 'f');
     
     dialog::addBreak(100);
-    dialog::addItem(XLAT("help"), SDLK_F1);
-    dialog::addItem(XLAT("back"), '0');  
+    dialog::addHelp();
+    dialog::addBack();
     dialog::display();
 
     keyhandler = [show_nonthree, texture_remap] (int sym, int uni) {

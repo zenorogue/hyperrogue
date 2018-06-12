@@ -379,7 +379,7 @@ void showCheatMenu() {
   dialog::addItem(XLAT("switch web display"), 'W'-64);
   dialog::addItem(XLAT("peaceful mode"), 'P'-64);
   dialog::addBreak(50);
-  dialog::addItem(XLAT("go back"), ' ');
+  dialog::addBack();
   dialog::display();
   keyhandler = []   (int sym, int uni) {
     dialog::handleNavigation(sym, uni);

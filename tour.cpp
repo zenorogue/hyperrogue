@@ -277,7 +277,7 @@ namespace ss {
       }
     dialog::addBreak(50);
     if(size(slideshows) > 1) dialog::addItem(XLAT("change slideshow"), '1');
-    dialog::addItem(XLAT("go back"), ' ');
+    dialog::addBack();
     dialog::display();
     keyhandler = [] (int sym, int uni) {
       if(uni >= 'a' && uni < 'a' + sssize) {

@@ -71,7 +71,7 @@ void showDemo() {
 
   dialog::addItem(XLAT("play"), 'f');
   dialog::addItem(XLAT("tutorial"), 'T');
-  dialog::addItem(XLAT("help"), 'h'); dialog::lastItem().keycaption += " / F1";
+  dialog::addHelp(); dialog::lastItem().keycaption += " / F1";
   // dialog::addItem(XLAT("toggle high detail"), 'a');
   dialog::addBreak(100);
 

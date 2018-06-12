@@ -1703,7 +1703,7 @@ void show() {
   dialog::init(XLAT("hypersian rug mode"), iinf[itPalace].color, 150, 100);
   
   dialog::addItem(XLAT("what's this?"), 'h');
-  dialog::addItem(XLAT("go back"), ' ');
+  dialog::addBack();
 
   dialog::addBoolItem(XLAT("enable the Hypersian Rug mode"), rug::rugged, 'u');
   

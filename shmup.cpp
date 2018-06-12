@@ -303,9 +303,9 @@ void showShmupConfig() {
     dialog::addItem(XLAT("save the configuration"), 'c');
 #endif
 
-    dialog::addItem(XLAT("help"), 'h');
+    dialog::addHelp();
 
-    dialog::addItem(XLAT("go back"), ' ');
+    dialog::addBack();
     dialog::display();
     }
   

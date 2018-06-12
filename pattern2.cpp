@@ -1988,7 +1988,7 @@ namespace linepatterns {
       dialog::addColorItem(among(patterns[numpat].id, patVine, patPower) && gp::on ? XLAT("Goldberg") + (patterns[numpat].id == patVine ? " " : ""): XLAT(patterns[numpat].lpname), patterns[numpat].color, 'a'+numpat);
   
     dialog::addBreak(50);
-    dialog::addItem(XLAT("go back"), ' ');
+    dialog::addBack();
     
     dialog::addBreak(50);
     dialog::addInfo("change the alpha parameter to show the lines");

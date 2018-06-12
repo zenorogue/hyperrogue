@@ -20,6 +20,14 @@ const char* COLORBAR = "###";
 
 namespace dialog {
 
+  void addBack() {
+    addItem(XLAT("go back"), SDLK_ESCAPE);
+    }
+
+  void addHelp() {
+    addItem(XLAT("help"), SDLK_F1);
+    }
+
   namespace zoom {
     int zoomf = 1, shiftx, shifty;
     bool zoomoff = false;
@@ -673,7 +681,7 @@ namespace dialog {
     addBreak(100);
 #endif
     
-    addItem("go back", ' ');
+    dialog::addBack();
     addSelItem(XLAT("default value"), disp(ne.dft), SDLK_HOME);
 
     addBreak(100);
@@ -826,7 +834,7 @@ namespace dialog {
       getcstat = '2';
     if(pages) if(displayfrZ(xr*40, i0, 1, vid.fsize, IFM("3 - ") + XLAT("all"), nlpage == 1 ? 0xD8D8C0 : 0xC0C0C0, 8))
       getcstat = '3';
-    if(i&1) if(displayfrZ(xr*56, i0, 1, vid.fsize, IFM(keyname(' ') + " - ") + XLAT("go back"), 0xC0C0C0, 8))
+    if(i&1) if(displayfrZ(xr*56, i0, 1, vid.fsize, IFM(keyname(SDLK_ESCAPE) + " - ") + XLAT("go back"), 0xC0C0C0, 8))
       getcstat = '0';
     if(i&2) if(displayfrZ(xr*72, i0, 1, vid.fsize, IFM("F1 - ") + XLAT("help"), 0xC0C0C0, 8))
       getcstat = SDLK_F1;

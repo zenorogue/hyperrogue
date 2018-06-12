@@ -770,7 +770,7 @@ namespace conformal {
       }
 #endif
       
-    dialog::addItem(XLAT("go back"), ' ');
+    dialog::addBack();
     dialog::display();
     mouseovers = XLAT("see http://www.roguetemple.com/z/hyper/models.php");
     keyhandler = handleKeyC;

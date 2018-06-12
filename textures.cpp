@@ -950,7 +950,7 @@ void showMagicMenu() {
   
   dialog::addSelItem(XLAT("delete markers"), its(size(amp)), 'D');
   dialog::addItem(XLAT("perform auto-adjustment"), 'R');
-  dialog::addItem(XLAT("back"), '0');
+  dialog::addBack();
 
   getcstat = '-';
 
@@ -1095,8 +1095,8 @@ void showMenu() {
     dialog::addItem(XLAT("save texture config"), 's');
     }
   
-  dialog::addItem(XLAT("help"), SDLK_F1);  
-  dialog::addItem(XLAT("back"), '0');  
+  dialog::addHelp();
+  dialog::addBack();
   
   getcstat = '-';
 

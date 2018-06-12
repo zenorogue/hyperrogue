@@ -327,8 +327,8 @@ void showEuclideanMenu() {
       dialog::addBoolItem(XLAT("Poincaré/Klein"), vid.alpha>.5, '1');
     if(torus || quotient == 2)
       dialog::addItem(XLAT("advanced parameters"), '4');  
-    dialog::addItem(XLAT("help"), SDLK_F1);  
-    dialog::addItem(XLAT("back"), '0');  
+    dialog::addHelp();
+    dialog::addBack();
     dialog::display();
   
     keyhandler = [] (int sym, int uni) {
@@ -409,8 +409,8 @@ void showEuclideanMenu() {
       dialog::addItem(XLAT("Chaos mode"), '1');
     dialog::addItem(XLAT("next page"), '-');
     
-    dialog::addItem(XLAT("help"), SDLK_F1);  
-    dialog::addItem(XLAT("back"), '0');
+    dialog::addHelp();
+    dialog::addBack();
     dialog::display();
   
     keyhandler = [] (int sym, int uni) {

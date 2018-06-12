@@ -198,7 +198,7 @@ void showMainMenu() {
 #if CAP_SAVE
   dialog::addItem(XLAT("local highscores"), 't');
 #endif
-  dialog::addItem(XLAT("help"), 'h'); dialog::lastItem().keycaption += " / F1";
+  dialog::addHelp();
   if(cheater)
     dialog::addItem(XLAT("cheats"), 'c');
   else dialog::addBreak(100);
@@ -473,7 +473,7 @@ void showChangeMode() {
 
   dialog::addBreak(50);
   
-  dialog::addItem(XLAT("go back"), ' ');
+  dialog::addBack();
   dialog::display();
   
   keyhandler = [] (int sym, int uni) {
@@ -893,9 +893,9 @@ void showMessageLog() {
   
   string timeformats[5] = {"turns", "real time", "game time", "precise", "no time"};
   
-  displayButton(xr*70, i0, IFM("0 - ") + XLAT("back"), '0', 8);
-  displayButton(xr*10, i0, IFM("c - ") + XLAT("clear"), '0', 8);
-  displayButton(xr*40, i0, IFM("t - ") + XLAT(timeformats[timeformat]), '0', 8);
+  displayButton(xr*70, i0, IFM(dialog::keyname(SDLK_ESCAPE) + " - ") + XLAT("go back"), SDLK_ESCAPE, 8);
+  displayButton(xr*10, i0, IFM("c - ") + XLAT("clear"), 'c', 8);
+  displayButton(xr*40, i0, IFM("t - ") + XLAT(timeformats[timeformat]), 't', 8);
   
   keyhandler = [lines] (int sym, int uni) {
     if(uni == PSEUDOKEY_WHEELDOWN) messagelogpos++;

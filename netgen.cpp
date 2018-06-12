@@ -658,7 +658,7 @@ namespace hr { namespace netgen {
       dialog::addItem(XLAT("create the model"), 'c');
       dialog::addItem(XLAT("design the net"), 'd');
       dialog::addBreak(50);
-      dialog::addItem(XLAT("go back"), ' ');
+      dialog::addBack();
       
       dialog::display();
       }

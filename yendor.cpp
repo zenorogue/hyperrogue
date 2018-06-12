@@ -482,6 +482,8 @@ namespace yendor {
       easy ? "Challenges do not get harder" : "Each challenge gets harder after each victory"),
       " " + XLAT(easy ? "easy" : "challenge"), '1');
     
+    dialog::addBack();
+    dialog::addHelp();
     dialog::display();
     
     int yc = char_to_yendor(getcstat);
@@ -1078,9 +1080,11 @@ namespace peace {
     dialog::addBreak(100);
     dialog::addItem(XLAT(otherpuzzles ? "memory game" : "puzzles and exploration"), '1');
     dialog::addBoolItem(XLAT("display hints"), hint, '2');
-    dialog::addItem(XLAT("help"), SDLK_F1);
     dialog::addItem(XLAT("Return to the normal game"), '0');
-    
+
+    dialog::addBreak(50);
+    dialog::addHelp();
+    dialog::addBack();    
     dialog::display();
     
     keyhandler = [] (int sym, int uni) {

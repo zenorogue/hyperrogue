@@ -554,7 +554,7 @@ void loadConfig() {
 
 void showAllConfig() {
   dialog::addBreak(50);
-  dialog::addItem(XLAT("go back"), ' ');
+  dialog::addBack();
 #if CAP_CONFIG
   dialog::addItem(XLAT("save the current config"), 's');
   if(getcstat == 's')
@@ -565,8 +565,7 @@ void showAllConfig() {
 void handleAllConfig(int sym, int uni) {
   if(sym == SDLK_F1 || uni == 'h') gotoHelp(help);
 
-  else if(uni == ' ') popScreen();
-  else if(sym == SDLK_ESCAPE) popScreen();
+  else if(uni == ' ' || sym == SDLK_ESCAPE) popScreen();
 #if CAP_CONFIG
   else if(uni == 's') saveConfig();
 #endif  
@@ -908,20 +907,19 @@ void showJoyConfig() {
   dialog::addSelItem(XLAT("second joystick: panning speed"), fts(vid.joypanspeed * 1000), 'd');
 
   dialog::addBreak(50);
-  dialog::addItem(XLAT("go back"), ' ');
+  dialog::addBack();
   dialog::display();
   
   keyhandler = [] (int sym, int uni) {
     dialog::handleNavigation(sym, uni);
-    char xuni = uni | 32;
-    if(xuni == 'p') autojoy = !autojoy;
-    else if(xuni == 'a') 
+    if(uni == 'p') autojoy = !autojoy;
+    else if(uni == 'a') 
       dialog::editNumber(vid.joyvalue, 0, 32768, 100, 4800, XLAT("first joystick: movement threshold"), "");
-    else if(xuni == 'b') 
+    else if(uni == 'b') 
       dialog::editNumber(vid.joyvalue2, 0, 32768, 100, 5600, XLAT("first joystick: execute movement threshold"), "");
-    else if(xuni == 'c')
+    else if(uni == 'c')
       dialog::editNumber(vid.joypanthreshold, 0, 32768, 100, 2500, XLAT("second joystick: pan threshold"), "");
-    else if(xuni == 'd') 
+    else if(uni == 'd') 
       dialog::editNumber(vid.joypanspeed, 0, 1e-2, 1e-5, 1e-4, XLAT("second joystick: panning speed"), "");
   
     else if(doexiton(sym, uni)) popScreen();
@@ -1047,7 +1045,7 @@ void showStereo() {
 
   dialog::addSelItem(XLAT("field of view"), fts(stereo::fov) + "°", 'f');
 
-  dialog::addItem(XLAT("back"), 'v');
+  dialog::addBack();
   dialog::display();
 
   keyhandler = [] (int sym, int uni) {
@@ -1146,7 +1144,7 @@ void show3D() {
     dialog::addInfo(XLAT("parameters set correctly"));
   dialog::addBreak(50);
   dialog::addItem(XLAT("stereo vision config"), 'e');
-  dialog::addItem(XLAT("go back"), ' ');
+  dialog::addBack();
   dialog::display();
   
   keyhandler = [] (int sym, int uni) {
@@ -1235,7 +1233,7 @@ void showCustomizeChar() {
   if(numplayers() > 1) dialog::addSelItem(XLAT("player"), its(shmup::cpid+1), 'a');
   
   dialog::addBreak(50);
-  dialog::addItem(XLAT("go back"), ' ');
+  dialog::addBack();
   dialog::display();
   
   int firsty = dialog::items[0].position / 2;
@@ -1250,25 +1248,24 @@ void showCustomizeChar() {
   
   keyhandler = [] (int sym, int uni) {
     dialog::handleNavigation(sym, uni);
-    char xuni = uni | 32;
   
     if(shmup::on || multi::players) shmup::cpid = shmup::cpid_edit % shmup::players;
     charstyle& cs = getcs();
-    if(xuni == 'a') { shmup::cpid_edit++; shmup::cpid_edit %= 60; }
-    if(xuni == 'g') {
+    bool cat = cs.charid >= 4;
+    if(uni == 'a') { shmup::cpid_edit++; shmup::cpid_edit %= 60; }
+    else if(uni == 'g') {
       cs.charid++;
       if(cs.charid == 2 && !princess::everSaved && !autocheat) cs.charid = 4;
       cs.charid %= 10;
       }
-    if(xuni == 'p') vid.samegender = !vid.samegender;
-    bool cat = cs.charid >= 4;
-    if(xuni == 's') switchcolor(cs.skincolor, cat ? haircolors : skincolors);
-    if(xuni == 'h') switchcolor(cs.haircolor, haircolors);
-    if(xuni == 'w') switchcolor(cs.swordcolor, cat ? eyecolors : swordcolors);
-    if(xuni == 'd') switchcolor(cs.dresscolor, cat ? haircolors : dresscolors);
-    if(xuni == 'f') switchcolor(cs.dresscolor2, dresscolors2);
-    if(xuni == 'u') switchcolor(cs.uicolor, eyecolors);
-    if(uni == ' ' || sym == SDLK_ESCAPE) popScreen();
+    else if(uni == 'p') vid.samegender = !vid.samegender;
+    else if(uni == 's') switchcolor(cs.skincolor, cat ? haircolors : skincolors);
+    else if(uni == 'h') switchcolor(cs.haircolor, haircolors);
+    else if(uni == 'w') switchcolor(cs.swordcolor, cat ? eyecolors : swordcolors);
+    else if(uni == 'd') switchcolor(cs.dresscolor, cat ? haircolors : dresscolors);
+    else if(uni == 'f') switchcolor(cs.dresscolor2, dresscolors2);
+    else if(uni == 'u') switchcolor(cs.uicolor, eyecolors);
+    else if(doexiton(sym, uni)) popScreen();
     };
   }
 
@@ -1320,7 +1317,7 @@ void selectLanguageScreen() {
   dialog::addBreak(50);
   vid.language = -1;
   dialog::addBoolItem(XLAT("default") + ": " + XLAT("EN"), v == -1, '0');
-  dialog::addItem(XLAT("go back"), ' ');
+  dialog::addBack();
 
   dialog::addBreak(50);
 
@@ -1347,14 +1344,13 @@ void selectLanguageScreen() {
   keyhandler = []   (int sym, int uni) {
     dialog::handleNavigation(sym, uni);
     
-    char xuni = uni | 32;
     if(uni == '0') {
       vid.language = -1;
       ANDROID_SETTINGS;
       }
 
-    else if(xuni >= 'a' && xuni < 'a'+NUMLAN) {
-      vid.language = xuni - 'a';
+    else if(uni >= 'a' && uni < 'a'+NUMLAN) {
+      vid.language = uni - 'a';
       ANDROID_SETTINGS;
       }
     

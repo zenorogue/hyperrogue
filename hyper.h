@@ -1488,6 +1488,9 @@ namespace dialog {
 
   void vpush(int i, const char *name);
   extern vector<pair<string, int> > v;  
+  
+  void addHelp();
+  void addBack();
   }
 
 void checkStunKill(cell *dest);
