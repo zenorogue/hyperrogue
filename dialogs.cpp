@@ -898,7 +898,7 @@ namespace dialog {
   
   bool_reaction_t file_action;
   
-  bool handleKeyFile(int sym, int uni);
+  void handleKeyFile(int sym, int uni);
 
   void drawFileDialog() {
     displayfr(vid.xres/2, 30 + vid.fsize, 2, vid.fsize, 
@@ -954,7 +954,7 @@ namespace dialog {
     keyhandler = handleKeyFile;
     }
   
-  bool handleKeyFile(int sym, int uni) {
+  void handleKeyFile(int uni, int sym) {
     string& s(*cfileptr);
     int i = size(s) - (editext?0:4);
     
@@ -994,7 +994,7 @@ namespace dialog {
       else
         s = where + v[i].first;
       }
-    return true;
+    return;
     }
 
   void openFileDialog(string& filename, string fcap, string ext, bool_reaction_t action) {
