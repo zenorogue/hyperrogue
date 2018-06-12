@@ -473,14 +473,14 @@ void showChangeMode() {
 
   dialog::addBreak(50);
   
-  dialog::addItem(XLAT("return to the game"), 'v');
+  dialog::addItem(XLAT("go back"), ' ');
   dialog::display();
   
   keyhandler = [] (int sym, int uni) {
     dialog::handleNavigation(sym, uni);    
     char xuni = uni;
-    
-    if(xuni == 'v' || sym == SDLK_ESCAPE) popScreen();
+
+    if(xuni == ' ' || sym == SDLK_ESCAPE) popScreen();
     
     #if CAP_DAILY
     else if(uni == 'z')

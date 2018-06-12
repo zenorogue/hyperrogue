@@ -359,8 +359,6 @@ void debugScreen() {
 void showCheatMenu() {
   gamescreen(1);
   dialog::init("cheat menu");
-  dialog::addItem(XLAT("return to the game"), ' ');
-  dialog::addBreak(50);
   dialog::addItem(XLAT("gain orb powers"), 'F');
   dialog::addItem(XLAT("summon treasure"), 'T');
   dialog::addItem(XLAT("summon dead orbs"), 'D');
@@ -380,6 +378,8 @@ void showCheatMenu() {
   dialog::addItem(XLAT("switch ghost timer"), 'G'-64);
   dialog::addItem(XLAT("switch web display"), 'W'-64);
   dialog::addItem(XLAT("peaceful mode"), 'P'-64);
+  dialog::addBreak(50);
+  dialog::addItem(XLAT("go back"), ' ');
   dialog::display();
   keyhandler = []   (int sym, int uni) {
     dialog::handleNavigation(sym, uni);

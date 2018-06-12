@@ -415,7 +415,6 @@ S("heptagonal game board", "sedmiúhelníková herní deska")
 S("triangular game board", "Trojúhelníková herní deska")
 S("HyperRogue game board", "herní deska HyperRogue")
 S("first page [Space]", "první stránka [mezerník]")
-S("exit configuration", "opustit nastavení")
 S("Configuration:", "Nastavení:")
 S("video resolution", "rozlišení")
 S("fullscreen mode", "zobrazení na celou obrazovku")
@@ -442,7 +441,6 @@ S("use Shift to decrease and Ctrl to fine tune ", "použij Shift ke zmenšení a
 S("(e.g. Shift+Ctrl+Z)", "ladění (například Shift+Ctrl+Z)")
 S("the second page [Space]", "druhá stránka [mezerník]")
 S("special features [Space]", "zvláštní možnosti [mezerník]")
-S("exit configuration", "opustit nastavení")
 S("see the help screen", "zobrazit obrazovku s nápovědou")
 S("save the current config", "uložit současné nastavení")
 S("(v) config", "(v) nast.")
@@ -2867,7 +2865,6 @@ S("paper model creator", "generátor papírových modelů")
 S("synchronize net and map", "synchronizuj síť a mapu")
 S("display the scope", "zobraz rozsah")
 S("create the model", "vytvoř model")
-S("back to HyperRogue", "zpět do HyperRogue")
 S("design the net", "vytvoř síť")
 
 S("The paper model created as papermodel-*.bmp", "Papírový model byl vytvořen jako papermodel-*.bmp")
@@ -3381,7 +3378,6 @@ S("Use arrow keys to rotate, Page Up/Down to zoom.",
   "Model se otáčí šipkami a lze ho zoomovat klávesami Page Up/Down.")
 
 S("what's this?", "co to je?")
-S("take me back", "návrat do menu")
 S("enable the Hypersian Rug mode", "aktivuj mód hyperského koberce")
 S("render the texture only once", "renderuj textury pouze jednou")
 S("render texture without OpenGL", "renderuj textury bez OpenGL")
@@ -3643,7 +3639,6 @@ S("band width", "šířka pásu")
 S("length of a segment", "délka segmentu")
 S("spiral on rendering", "spirála při renderování")
 S("render now (length: %1)", "renderovat hned (délka: %1)")
-S("exit this menu", "ven z menu")
 S("Enable cheat mode or GAME OVER to use this", "Dostupné pouze v cheat módu nebo po skončení hry")
 
 // remember to note it's in English
@@ -4370,7 +4365,7 @@ S("Watch the Minkowski hyperboloid or the hypersian rug mode with the "
   "koberce s pomocí červenomodrých 3D brýlí.")
 
 S("0 - return", "0 - návrat")
-S("return", "návrat")
+S("go back", "návrat")
 S("F1 - help", "F1 - nápověda")
 
 // for the conformal polynomial
@@ -4568,7 +4563,6 @@ S("Level of water bottom", "Úroveň dna")
 S("set 3D monsters or walls in basic config first",
   "nejprve musíš nastavit 3D netvory nebo zdi v základní konfiguraci")
 S("parameters set correctly", "správně nastavené parametry")
-S("exit 3D configuration", "opustit 3D konfiguraci")
 
 S("Objects at distance less than %1 absolute units "
   "from the center will be displayed with high "

@@ -390,7 +390,6 @@ S("heptagonal game board", "tabuleiro de jogo heptagonal")
 S("triangular game board", "tabuleiro de jogo triangular")
 S("HyperRogue game board", "tabuleiro de jogo HyperRogue")
 S("first page [Space]", "primeira página [Space]")
-S("exit configuration", "sair das configurações")
 S("Configuration:", "Configuração:")
 S("video resolution", "resolução de vídeo")
 S("fullscreen mode", "modo de tela cheia")
@@ -417,7 +416,6 @@ S("use Shift to decrease and Ctrl to fine tune ", "use Shift para diminuir e Ctr
 S("(e.g. Shift+Ctrl+Z)", " (ex: Shift+Ctrl+Z)")
 S("the second page [Space]", "a segunda página [Space]")
 S("special features [Space]", "características especiais [Space]")
-S("exit configuration", "sair das configurações")
 S("see the help screen", "veja a tela de ajuda")
 S("save the current config", "salvar as configurações")
 S("(v) config", "(v) configurações")
@@ -2900,7 +2898,6 @@ S("paper model creator", "kreator modeli papierowych")
 S("synchronize net and map", "synchronizuj siatkę z mapą")
 S("display the scope", "pokaż zasięg")
 S("create the model", "twórz model")
-S("back to HyperRogue", "powrót do HyperRogue")
 S("design the net", "projektuj siatkę")
 
 S("The paper model created as papermodel-*.bmp", "Model stworzony jako papermodel-*.bmp")
@@ -3406,7 +3403,6 @@ S(
   "klawiszami Page Up/Down.")
 
 S("what's this?", "co to jest?")
-S("take me back", "powrót do menu")
 S("enable the Hypersian Rug mode", "włącz tryb hiperskiego dywanu")
 S("render the texture only once", "renderuj teksturę tylko raz")
 S("render texture without OpenGL", "renderuj teksturę bez OpenGL")
@@ -3647,7 +3643,6 @@ S("band width", "szerokość wstęgi")
 S("length of a segment", "długość segmentu")
 S("spiral on rendering", "spirala przy renderowaniu")
 S("render now (length: %1)", "rysuj teraz (długość: %1)")
-S("exit this menu", "wyjdź")
 S("Enable cheat mode or GAME OVER to use this", "Dostępne tylko po końcu gry albo w trybie oszusta")
 
 // remember to note it's in English
@@ -4374,7 +4369,6 @@ S("Watch the Minkowski hyperboloid or the hypersian rug mode with the "
   "Oglądaj hiperboloidę Minkowskiego albo tryb hiperskiego dywanu przez czerwono-turkusowe okulary 3D.")
 
 S("0 - return", "0 - powrót")
-S("return", "powót")
 S("F1 - help", "F1 - pomoc")
 
 // for the conformal polynomial
@@ -4567,7 +4561,6 @@ S("Level of water bottom", "Poziom dna wody")
 S("set 3D monsters or walls in basic config first",
   "najpierw ustaw 3D potwory/ściany w konfiguracji podstawowej")
 S("parameters set correctly", "parametry prawidłowe")
-S("exit 3D configuration", "wyjdź z konfiguracji 3D")
 
 S("Objects at distance less than %1 absolute units "
   "from the center will be displayed with high "
