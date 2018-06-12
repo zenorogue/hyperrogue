@@ -5060,7 +5060,7 @@ void stabbingAttack(cell *mf, cell *mt, eMonster who, int bonuskill) {
     if(!c) continue;
     eMonster mm = c->monst;
     int flag = AF_APPROACH;
-    if(angledist(mt, backdir, t) >= 3) flag |= AF_HORNS;
+    if(angledist(mt, backdir, t) >= S7/2) flag |= AF_HORNS;
     if(canAttack(mt,who,c,c->monst, flag)) {
       if(attackMonster(c, flag | AF_MSG, who)) numlance++;
       produceGhost(c, mm, who);
