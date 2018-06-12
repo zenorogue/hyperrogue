@@ -1632,6 +1632,7 @@ namespace patterns {
       }
     else dialog::addBreak(100);
     dialog::addItem(XLAT("more tuning"), 'r');
+    dialog::addBack();
     dialog::display();
   
     keyhandler = [have_goldberg] (int sym, int uni) {

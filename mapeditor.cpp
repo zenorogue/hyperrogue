@@ -1431,7 +1431,7 @@ namespace mapeditor {
     if(uni == 'd' || uni == 'l' || uni == 'c')
       mousekey = uni;
 
-    if(uni == ' ' && cheater) {
+    if(uni == ' ' && (cheater || autocheat)) {
       popScreen();
       pushScreen(showMapEditor);
       }

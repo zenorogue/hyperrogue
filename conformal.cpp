@@ -646,7 +646,7 @@ namespace conformal {
 #if CAP_RUG
     dialog::addItem(XLAT("hypersian rug mode"), 'u');
 #endif
-    dialog::addItem(XLAT("exit this menu"), 'q');
+    dialog::addBack();
     dialog::display();
     
     keyhandler = [] (int sym, int uni) {

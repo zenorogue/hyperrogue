@@ -1702,9 +1702,6 @@ void show() {
   gamescreen(0);
   dialog::init(XLAT("hypersian rug mode"), iinf[itPalace].color, 150, 100);
   
-  dialog::addItem(XLAT("what's this?"), 'h');
-  dialog::addBack();
-
   dialog::addBoolItem(XLAT("enable the Hypersian Rug mode"), rug::rugged, 'u');
   
   dialog::addBoolItem(XLAT("render the texture only once"), (renderonce), 'o');
@@ -1748,11 +1745,15 @@ void show() {
     }
 #endif
 
+  dialog::addBreak(50);
+  dialog::addHelp();
+  dialog::addBack();
+
   dialog::display();
   keyhandler = [] (int sym, int uni) {
     dialog::handleNavigation(sym, uni);
 
-    if(uni == 'h') gotoHelp(makehelp());
+    if(uni == 'h' || uni == SDLK_F1) gotoHelp(makehelp());
     else if(uni == 'u') {
       if(rug::rugged) rug::close();
       else { 

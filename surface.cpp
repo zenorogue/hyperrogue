@@ -687,20 +687,21 @@ void show_surfaces() {
 
   dialog::addBreak(100);
 
-  dialog::addItem(XLAT("what's this?"), 'h');
   dialog::addSelItem(XLAT("precision"), its(precision), 'p');
   string cstyles[4] = { "OFF", "on surface", "on H² (static)", "on H² (dynamic)" };
   if((rug::rugged && sh && sh != dsHyperboloid && sh != dsHemisphere) || coverage_style)
     dialog::addSelItem(XLAT("display coverage"), cstyles[coverage_style], 'c');
   else dialog::addBreak(100);
-  dialog::addItem(XLAT("take me back"), 'q');
+
+  dialog::addHelp();
+  dialog::addBack();
   
   dialog::display();
   keyhandler = [] (int sym, int uni) {
     dialog::handleNavigation(sym, uni);
 
-    if(uni == 'h') 
-      gotoHelp(
+    if(uni == 'h' || uni == SDLK_F1) 
+      gotoHelp(XLAT(
         "In this menu you can choose from several known smooth surfaces of constant negative curvature. "
         "Since the curvature of hyperbolic plane is also constant negative, these surfaces "
         "are great to draw hyperbolic tesselations on. While they look great, only a small part "
@@ -708,7 +709,7 @@ void show_surfaces() {
         "good for playing HyperRogue; however, the coverage extends far away in specific directions, "
         "so first increasing sight range in graphics config and texture size in hypersian rug settings may improve the effect. "
         "For convenience, you can also choose other 3D models from this menu."
-        );
+        ));
 
     else if(uni == '1')
       run_shape(dsTractricoid);
