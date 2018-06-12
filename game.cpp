@@ -7235,7 +7235,7 @@ void pushThumper(cell *th, cell *cto) {
   }
 
 bool canPushThumperOn(cell *tgt, cell *thumper, cell *player) {
-  if(tgt->wall == waBoat) return false;
+  if(tgt->wall == waBoat || tgt->wall == waStrandedBoat) return false;
   if(isReptile(tgt->wall)) return false;
   if(isWatery(tgt) && !tgt->monst)
     return true;
