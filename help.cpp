@@ -404,6 +404,12 @@ string generateHelpForItem(eItem it) {
   if(inv::on && it == itInventory)
     help += "\n\n" + XLAT(inv::helptext);
 #endif
+
+#if CAP_DAILY
+  if(daily::on && it == itOrbLove)
+    help += "\n\n" + XLAT("The Orb of Love gives no bonus score in the Strange Challenge.");
+#endif
+
   return help;
   }
 

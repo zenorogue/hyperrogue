@@ -301,6 +301,9 @@ int gold(int no) {
     if(inv::on && inv::remaining[itOrbLove])
       love = true;
 #endif
+#if CAP_DAILY
+    if(daily::on) love = false;
+#endif
     if(love) i += 30;
     }
   
