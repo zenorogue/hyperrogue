@@ -410,7 +410,7 @@ void buildTorusRug() {
     
   ld factor = sqrt(ld(solution.second.d2()) / solution.first.d2());
   
-  ld xfactor, yfactor;
+  ld xfactor = 0, yfactor = 0;
   
   Xprintf("factor = %lf\n", factor);
   if(factor <= 2.05) factor = 2.2;
