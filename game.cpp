@@ -3892,7 +3892,7 @@ int pickDownDirection(cell *c, flagtype mf) {
   }
 
 template<class T> 
-cell *determinePush(cellwalker who, cell *c2, int subdir, T valid) {
+cell *determinePush(cellwalker who, cell *c2, int subdir, const T& valid) {
   if(subdir != 1 && subdir != -1) {
     subdir = 1;
     static bool first = true;

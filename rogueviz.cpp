@@ -1619,7 +1619,7 @@ string cname() {
   return "coord-67.txt";
   }
 
-template<class T> function<void(presmode)> roguevizslide(char c, T t) {
+template<class T> function<void(presmode)> roguevizslide(char c, const T& t) {
   return [c,t] (presmode mode) {
     patterns::canvasback = 0x101010;
     setCanvas(mode, c);
@@ -1638,7 +1638,8 @@ template<class T> function<void(presmode)> roguevizslide(char c, T t) {
     };
   }
 
-template<class T, class T1> function<void(presmode)> roguevizslide_action(char c, T t, T1 act) {
+template<class T, class U>
+function<void(presmode)> roguevizslide_action(char c, const T& t, const U& act) {
   return [c,t,act] (presmode mode) {
     patterns::canvasback = 0x101010;
     setCanvas(mode, c);
