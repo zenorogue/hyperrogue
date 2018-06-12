@@ -2485,3 +2485,6 @@ non-game:
 - torus rendering no longer creates darker areas because of the side difference
 - fixed the non-3D display of rock formations in Goldberg geometries
 - Hunter dogs (guarding/regrouping) and sometimes Ice Wolves no longer count as a different kill type (not counted in total kills)
+- uniformized the 'back' and 'help' options in menu (consistent hotkeys, consistent placement, added them where they were missing)
+- pushing a thumper through a stranded boat is no longer allowed
+- fixed a bug with pushing Thumpers through tentacles
