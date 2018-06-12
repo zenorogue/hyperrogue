@@ -1106,7 +1106,7 @@ void stop_game() {
   clearMemory();
   game_active = false;
 #if CAP_DAILY
-  if(daily::on && !among(switchWhat, rg::daily, rg::daily_off))
+  if(daily::on)
     daily::turnoff();
 #endif
   }
