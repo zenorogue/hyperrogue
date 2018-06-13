@@ -26,6 +26,8 @@ template<class A, class B, class C> void emscripten_set_main_loop(A a, B b, C c)
 #include <emscripten/html5.h>
 #endif
 
+#include <string>
+
 namespace hr { 
   void initweb();
   void emscripten_get_commandline();
@@ -34,6 +36,8 @@ namespace hr {
 
   const char *wheresounds;
   }
+
+#include "hyper.cpp"
 
 namespace hr {
 
@@ -196,4 +200,3 @@ void emscripten_get_commandline() {
   }
 }
 
-#include "hyper.cpp"

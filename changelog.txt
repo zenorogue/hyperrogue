@@ -2469,8 +2469,9 @@ non-game:
 - Strange Challenge should exit correctly.
 - rules are described better in other geometries
 
-2018.06.12 XX:XX Update 10.4b:
+2018.06.13 01:32 Update 10.4b:
 - Orb of Love does not give the 30$$$ bonus in the Strange Challenge -- this is now made clearer (the displayed score no longer includes this 30$$$, and a help text for Orb of Love is added).
+- Strange Challenge should reset OSM and Chaos mode correctly
 - a flat torus can be embedded in S^3 -- HyperRogue now knows about this when rendering torus in the Hypersian Rug mode in the spherical native geometry
 - it was possible to get another chance in the Strange Challenge by pressing ESC in specific circumstances -- this should be fixed.
 - fixed some issues with adjacency taken into account incorrectly with Hedgehogs/Flailguards/Pikemen and Warp/halfvines

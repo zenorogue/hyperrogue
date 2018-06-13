@@ -50,8 +50,7 @@
 #if CAP_INV
 #include "inventory.cpp"
 #else
-bool inv::on;
-bool inv::activating;
+namespace hr { namespace inv { bool on, activating; } }
 #endif
 #include "system.cpp"
 #include "debug.cpp"

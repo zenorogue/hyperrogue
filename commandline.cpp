@@ -98,7 +98,9 @@ int arg::readCommon() {
   else if(argis("-s")) { PHASE(1); shift(); scorefile = argcs(); }
   else if(argis("-m")) { PHASE(1); shift(); musicfile = argcs(); }
   else if(argis("-nogui")) { PHASE(1); noGUI = true; }
+#ifndef EMSCRIPTEN
   else if(argis("-font")) { PHASE(1); shift(); fontpath = args(); }
+#endif
 #if CAP_SDLAUDIO
   else if(argis("-se")) { PHASE(1); shift(); wheresounds = args(); }
 #endif
