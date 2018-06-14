@@ -37,7 +37,8 @@ The game dynamically generates new parts of the world as you move. Due to nature
 You can aim for the Orb of Yendor, or you can simply aim for as high score as possible. My best so far is $175 but it should be beatable (I mean, I have won fairly only once, and that was my end score in the winning game).
 
 ## Technical information ##
-The HyperRogue package includes a Windows executable, documentation, and C++ source which has been tested under Linux (you need SDL, SDL_ttf, and SDL_gfx). You should be able to compile on Ubuntu (or similar) with something like this:
+
+You should be able to compile on Ubuntu (or similar) with something like this (you need SDL, SDL_ttf, and SDL_gfx):
 
 ```
 sudo apt-get install gcc libsdl1.2-dev libsdl-ttf2.0-dev libsdl-gfx1.2-dev
@@ -47,6 +48,4 @@ cd hyperrogue-git
 make
 ```
 
-It should also compile under MacOS with something like `make -f Makefile.mac{ (note: I have no access to a MacOS machine to test this makefile myself, it is based on [this post by Konstantin Stupnik](http://groups.google.com/group/rec.games.roguelike.development/browse_thread/thread/9c02e09c0195dc16/3cbde3dc4a0b7e4e)).
-
-
+There are also makefiles for OSX `Makefile.mac` and Windows MinGW `Makefile.mgw` (note: I do not use these makefiles myself, so they might be a bit outdated).
