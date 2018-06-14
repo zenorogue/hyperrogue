@@ -65,7 +65,7 @@ bool settingsChanged = false;
 struct transmatrix getOrientation();
 }
 
-#include "/home/eryx/proj/rogue/hyper/init.cpp"
+#include "../../../../../init.cpp"
 
 namespace hr {
 
