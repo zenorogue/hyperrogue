@@ -1,6 +1,13 @@
 
 # HyperRogue
-**Current version: 9.4g**
+**Current version: 10.4b**
+
+A puzzle roguelike in the hyperbolic plane. See the [HyperRogue website](http://roguetemple.com/z/hyper.php) for detailed and most up-to-date information.
+
+Released under [GNU General Public License, version 2](http://www.gnu.org/licenses/gpl-2.0.html). As such, it comes with without any warranty.
+
+If you would like to thank me for HyperRogue, you can support the development by buying paid versions (with more up-to-date content and some social features), or [in other ways](http://www.roguetemple.com/z/donate.php?id=NotEye). 
+You can contact me at zeno@attnam.com, or at [my blog](http://zenorogue.blogspot.com/), or via [Twitter](https://twitter.com/ZenoRogue).
 
 ## The game ##
 You are a lone outsider in a strange, non-Euclidean world. You can move with the numpad, vi keys (hjklyubn), or mouse. You can also skip turns by pressing ".".
@@ -22,7 +29,7 @@ You can see tooltips by placing the mouse over stuff. You can also right click t
 Press v to configure the game. You can also rotate the world by pressing arrow keys, PageUp and PageDn (not numpad). You can center on the PC by pressing Home.
 
 Your scores and other stats about your games are recorded to file hyperrogue.log (in Linux, *~/.hyperrogue.log*). You can save your configation to file hyperrogue.ini (in Linux, *~/.hyperrogue.ini*).
-[See the website for some screenshots, and more detailed and up-to-date information!](http://roguetemple.com/z/hyper.php)
+
 The surface the game is played on is called a hyperbolic plane. It seems there is just a very small amount of games and other works of art which use hyperbolic geometry (the most well known are some works of M.C.Escher).
 
 The game dynamically generates new parts of the world as you move. Due to nature of the hyperbolic plane, the chances that you get back to a place where you have been before are very low (unless you go back exactly the same way). See more information about the geometry used [on the blog](http://zenorogue.blogspot.com/2012/03/hyperbolic-geometry-in-hyperbolic-rogue.html).
@@ -41,10 +48,5 @@ make
 ```
 
 It should also compile under MacOS with something like `make -f Makefile.mac{ (note: I have no access to a MacOS machine to test this makefile myself, it is based on [this post by Konstantin Stupnik](http://groups.google.com/group/rec.games.roguelike.development/browse_thread/thread/9c02e09c0195dc16/3cbde3dc4a0b7e4e)).
-
-Released under [GNU General Public License, version 2](http://www.gnu.org/licenses/gpl-2.0.html). As such, it comes with without any warranty.
-
-If you would like to thank me for HyperRogue, [donations are welcome](http://www.roguetemple.com/z/donate.php?id=NotEye). 
-You can contact me at zeno@attnam.com, or at RogueTemple or New Attnam forums (Z), or at [my blog](http://zenorogue.blogspot.com/).
 
 
