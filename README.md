@@ -36,7 +36,7 @@ The game dynamically generates new parts of the world as you move. Due to nature
 
 You can aim for the Orb of Yendor, or you can simply aim for as high score as possible. My best so far is $175 but it should be beatable (I mean, I have won fairly only once, and that was my end score in the winning game).
 
-##Technical information##
+## Technical information ##
 The HyperRogue package includes a Windows executable, documentation, and C++ source which has been tested under Linux (you need SDL, SDL_ttf, and SDL_gfx). You should be able to compile on Ubuntu (or similar) with something like this:
 
 ```
