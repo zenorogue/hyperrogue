@@ -767,7 +767,7 @@ namespace patterns {
     if((gp::on? (S3==3) : !weirdhyperbolic) && isWarped(c)) 
       val_warped(c, si);
     else {
-      si.id = ishept(c) ? 1 : 0;
+      si.id = pseudohept(c) ? 1 : 0;
       if(euclid) {
         si.dir = ishex1(c) ? 0 : 3;
         if(ctof(c)) si.symmetries = 3;
@@ -955,6 +955,12 @@ namespace patterns {
 
     else if(a457 && pat == PAT_ZEBRA) {
       val_all(c, si, sub, pat);
+      }
+    
+    else if(gp::on) {
+      bool football = (pat == PAT_COLORING && (sub & SPF_FOOTBALL)) || pat == 0;
+      if(football) val_nopattern(c, si, sub);
+      else val_threecolors(c, si, sub);
       }
 
     else if(pat == PAT_COLORING && (S7 == 4 || euclid || (a38 && gp_threecolor() == 1))) {
@@ -1626,6 +1632,7 @@ namespace patterns {
         dialog::addBoolItem(s, geometry == g.geo && nonbitrunc == g.nonbitru && whichPattern == g.whichPattern && subpattern_flags == g.subpattern_flags, 'a'+j);
         }
     bool have_goldberg = S3 == 3 && among(cgroup, cpFootball, cpThree) && !euclid;
+    if(!(S7&1) && !nonbitrunc) have_goldberg = false; // always start from non-bitruncated
     if(have_goldberg) {
       dialog::addBoolItem(XLAT("Goldberg"), gp::on, 'G');
       dialog::lastItem().value = gp::operation_name();

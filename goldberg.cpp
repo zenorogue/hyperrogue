@@ -579,14 +579,17 @@ namespace hr { namespace gp {
     dialog::init(XLAT("Goldberg"));
     
     bool show_nonthree = !(texture_remap && (S7&1));
+    bool show_bitrunc  = !(texture_remap && !(S7&1));
     
     if(show_nonthree) {
       dialog::addBoolItem(XLAT("OFF"), param == loc(1,0), 'a');
       dialog::lastItem().value = "GP(1,0)";
       }
 
-    dialog::addBoolItem(XLAT("bitruncated"), param == loc(1,1), 'b');
-    dialog::lastItem().value = "GP(1,1)";
+    if(show_bitrunc) {
+      dialog::addBoolItem(XLAT("bitruncated"), param == loc(1,1), 'b');  
+      dialog::lastItem().value = "GP(1,1)";
+      }
 
     if(show_nonthree) {
       dialog::addBoolItem(XLAT("chamfered"), param == loc(2,0), 'c');
@@ -599,10 +602,12 @@ namespace hr { namespace gp {
     dialog::addBreak(100);
     dialog::addSelItem("x", its(config.first), 'x');
     dialog::addSelItem("y", its(config.second), 'y');
-
+    
     if((config.first-config.second)%3 && !show_nonthree)
-      dialog::addInfo("This pattern needs x-y divisible by 3");
-    else
+      dialog::addInfo(XLAT("This pattern needs x-y divisible by 3"));
+    else if(config == loc(1,1) && !show_bitrunc)
+      dialog::addInfo(XLAT("Select bitruncated from the previous menu"));
+    else    
       dialog::addBoolItem(XLAT("select"), param == internal_representation(config), 'f');
     
     dialog::addBreak(100);
@@ -610,17 +615,17 @@ namespace hr { namespace gp {
     dialog::addBack();
     dialog::display();
 
-    keyhandler = [show_nonthree, texture_remap] (int sym, int uni) {
+    keyhandler = [show_nonthree, show_bitrunc, texture_remap] (int sym, int uni) {
       dialog::handleNavigation(sym, uni);
       if(uni == 'a' && show_nonthree) 
         whirl_set(loc(1, 0), texture_remap);
-      else if(uni == 'b')
+      else if(uni == 'b' && show_bitrunc)
         whirl_set(loc(1, 1), texture_remap);
       else if(uni == 'c' && show_nonthree)
         whirl_set(loc(2, 0), texture_remap);
       else if(uni == 'd')
         whirl_set(loc(3, 0), texture_remap);
-      else if(uni == 'f' && (show_nonthree || (config.first-config.second)%3 == 0))
+      else if(uni == 'f' && (config == loc(1,1) ? show_bitrunc : (show_nonthree || (config.first-config.second)%3 == 0)))
         whirl_set(config, texture_remap);
       else if(uni == 'x')
         dialog::editNumber(config.first, 1, 10, 1, 1, "x", helptext());
