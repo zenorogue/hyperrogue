@@ -144,7 +144,7 @@ cellwalker cwt;       // single player character position
 inline cell*& singlepos() { return cwt.c; }
 inline bool singleused() { return !(shmup::on || multi::players > 1); }
 
-mt19937 r;
+std::mt19937 r;
 
 void shrand(int i) {
   r.seed(i);
@@ -161,7 +161,7 @@ ld hrandf() {
   }
 
 int hrandstate() {
-  mt19937 r2 = r;
+  std::mt19937 r2 = r;
   return r2() & HRANDMAX;
   }
 

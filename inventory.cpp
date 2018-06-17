@@ -93,7 +93,7 @@ namespace hr { namespace inv {
     return int(mirrorqty0(orb) * sqrt(1.000001+items[itPower]/20.));
     }
     
-  mt19937 invr;
+  std::mt19937 invr;
   
   void sirand(int i) {
     invr.seed(i);

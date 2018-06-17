@@ -577,7 +577,7 @@ namespace sag {
     return cost;
     }
   
-  mt19937 los;
+  std::mt19937 los;
 
   bool infullsa;
   

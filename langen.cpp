@@ -9,14 +9,17 @@
 
 #include <map>
 #include <string>
-#include <stdio.h>
+#include <cstdio>
 #include <vector>
-#include <stdlib.h>
-using namespace std;
+#include <cstdlib>
+#include <set>
 
-#ifndef STDSIZE
+using std::string;
+using std::map;
+using std::vector;
+using std::set;
+
 template<class T> int size(const T& x) { return x.size(); }
-#endif
 
 #define NUMLAN 7
 
@@ -43,8 +46,6 @@ struct noun {
   };
 
 dictionary<noun> nouns[NUMLAN];
-
-#include <set>
 
 int utfsize(char c) {
   unsigned char cu = c;

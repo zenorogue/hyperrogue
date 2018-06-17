@@ -10,7 +10,34 @@
 
 namespace hr {
 
-using namespace std;
+// functions and types used from the standard library
+using std::vector;
+using std::map;
+using std::array;
+using std::unordered_map;
+using std::sort;
+using std::multimap;
+using std::set;
+using std::string;
+using std::function;
+using std::pair;
+using std::tuple;
+using std::shared_ptr;
+using std::make_shared;
+using std::min;
+using std::max;
+using std::make_pair;
+using std::tie;
+using std::queue;
+using std::swap;
+using std::complex;
+using std::reverse;
+using std::real;
+using std::imag;
+using std::stable_sort;
+using std::out_of_range;
+using std::get;
+using std::random_shuffle;
 
 // genus (in grammar)
 #define GEN_M 0
@@ -369,9 +396,7 @@ string cts(char c);
 string its(int i);
 int hrand(int i);
 
-#ifndef STDSIZE
 template<class T> int size(const T& x) {return x.size(); }
-#endif
 
 // initialize the achievement system.
 void achievement_init();
