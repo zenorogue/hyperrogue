@@ -1115,7 +1115,7 @@ void buildBigStuff(cell *c, cell *from) {
       createAlternateMap(c, 2, hsA);
 
     if(c->land == laOvergrown && ctof(c) && 
-      (quickfind(laClearing) || (hrand(I2000) < 25 && !gp::on && 
+      (quickfind(laClearing) || (hrand(I2000) < 25 && 
       !randomPatternsMode && items[itMutant] >= U5 &&
       isLandIngame(laClearing) &&
       !tactic::on && !yendor::on))) {
