@@ -1826,7 +1826,7 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, int col) {
     
   if(isIvy(c) || isWorm(c) || isMutantIvy(c) || c->monst == moFriendlyIvy) {
     
-    if((m == moHexSnake || m == moHexSnakeTail) && c->land == laSnakeNest) {
+    if((m == moHexSnake || m == moHexSnakeTail) && c->hitpoints == 2) {
       int d = c->mondir;
       if(d == NODIR)
         forCellIdEx(c2, i, c)

@@ -4613,7 +4613,7 @@ vector<cell*> hexdfs;
 void moveHexSnake(cell *from, cell *c, int d, bool mounted) {
   if(from->wall == waBoat) from->wall = waSea;
   moveEffect(from, c, c->monst);
-  from->monst = c->monst; from->mondir = d;
+  from->monst = c->monst; from->mondir = d; from->hitpoints = c->hitpoints;
   c->monst = moHexSnakeTail;
   preventbarriers(from);
   

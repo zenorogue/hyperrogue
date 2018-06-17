@@ -1626,7 +1626,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           for(int t=0; t<c->type; t++) if(c->mov[t]->mpdist > c->mpdist && !pseudohept(c->mov[t]))
             i = t;
           if(i != -1 && !peace::on) 
-            generateSnake(c, i);
+            generateSnake(c, i, 1);
           }
         else if(hrand(16000) < 50+items[itRedGem]+yendor::hardness() && (nonbitrunc?hrand(10)<3:!ishept(c)) && !c->monst)
           c->monst = moRedTroll,
@@ -1641,7 +1641,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           for(int t=0; t<c->type; t++) if(c->mov[t]->mpdist > c->mpdist)
             gooddir.push_back(t);
           if(size(gooddir))
-            generateSnake(c, gooddir[hrand(size(gooddir))]);
+            generateSnake(c, gooddir[hrand(size(gooddir))], 2);
           }
         else if(hrand(10000) < items[itSnake] - 10 + yendor::hardness() && !c->monst && !c->wall && !peace::on) {
           c->monst = pick(moRedTroll, moMiner, moSkeleton, moBomberbird);
