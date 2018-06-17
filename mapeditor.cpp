@@ -547,6 +547,12 @@ namespace mapeditor {
         if((isWorm(c) || isIvy(c) || isMutantIvy(c)) && c->mov[cdir] && 
           !isWorm(c->mov[cdir]) && !isIvy(c->mov[cdir]))
           c->mondir = NODIR;
+        
+        if(c->monst == moMimic) {
+          c->monst = moNone;
+          mirror::createMirror(cellwalker(c, cdir, true), 0);
+          c->monst = moMimic;
+          }
         break;
       case 1:
         c->item = eItem(paintwhat);
