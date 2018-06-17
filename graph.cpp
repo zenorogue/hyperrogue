@@ -3425,6 +3425,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
 #if CAP_TEXTURE
   if(texture::saving) {
     texture::config.apply(c, V, 0xFFFFFFFF);
+    draw_qfi(c, V, 0xFFFFFFFF);
     return;
     }
 #endif
