@@ -2090,7 +2090,7 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, int col) {
       Vb = Vb * xpush(tentacle_length - cellgfxdist(c, c->mondir));
       }
     else if(gp::on) {
-      transmatrix T = shmup::calc_relative_matrix(c->mov[c->mondir], c);
+      transmatrix T = shmup::calc_relative_matrix(c->mov[c->mondir], c, c->mondir);
       Vb = Vb * T * rspintox(tC0(inverse(T))) * xpush(tentacle_length);
       }
     else {
@@ -2138,6 +2138,10 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, int col) {
     if(!nospins) {
       Vs = playerV;
       if(multi::players > 1 ? multi::flipped[i] : flipplayer) Vs = Vs * pispin;
+      }
+    else {
+      bool mirr = multi::players > 1 ? multi::player[i].mirrored : cwt.mirrored;
+      if(mirr) Vs = Vs * Mirror;
       }
     shmup::cpid = i;
 
@@ -2562,7 +2566,7 @@ void drawMovementArrows(cell *c, transmatrix V) {
         int sd = md.subdir;
         queuepoly(inverse(Centered) * rgpushxto0(Centered * tC0(V)) * rspintox(Centered*tC0(V)) * spin(-sd * M_PI/S7) * xpush(0.2), shArrow, col);
         }
-      else break;
+      else if(!confusingGeometry()) break;
       }
     }
   }
@@ -4963,15 +4967,15 @@ void drawMarkers() {
 
     if((vid.axes == 4 || (vid.axes == 1 && !mousing)) && !shmup::on) {
       if(multi::players == 1) {
-        forCellAll(c2, cwt.c) IG(c2) drawMovementArrows(c2, Gm(c2));
+        forCellIdAll(c2, d, cwt.c) IG(c2) drawMovementArrows(c2, confusingGeometry() ? Gm(cwt.c) * shmup::calc_relative_matrix(c2, cwt.c, d) : Gm(c2));
         }
       else if(multi::players > 1) for(int p=0; p<multi::players; p++) {
         if(multi::playerActive(p) && (vid.axes == 4 || !drawstaratvec(multi::mdx[p], multi::mdy[p]))) 
-        forCellAll(c2, multi::player[p].c) IG(c2) {
+        forCellIdAll(c2, d, multi::player[p].c) IG(c2) {
           multi::cpid = p;
           dynamicval<transmatrix> ttm(cwtV, multi::whereis[p]);
           dynamicval<cellwalker> tcw(cwt, multi::player[p]);
-          drawMovementArrows(c2, Gm(c2));
+          drawMovementArrows(c2, confusingGeometry() ? Gm(cwt.c) * shmup::calc_relative_matrix(c2, cwt.c, d) : Gm(c2));
           }
         }
       }
@@ -5740,51 +5744,68 @@ void resetGeometry() {
 map<cell*, animation> animations[ANIMLAYERS];
 unordered_map<cell*, transmatrix> gmatrix, gmatrix0;
 
-void animateMovement(cell *src, cell *tgt, int layer) {
+int revhint(cell *c, int hint) {
+  if(hint >= 0 && hint < c->type) return c->spin(hint);
+  else return hint;
+  }
+
+bool compute_relamatrix(cell *src, cell *tgt, int direction_hint, transmatrix& T) {
+  if(confusingGeometry()) {
+    T = shmup::calc_relative_matrix(src, tgt, revhint(src, direction_hint));
+    }
+  else {
+    if(gmatrix.count(src) && gmatrix.count(tgt))
+      T = inverse(gmatrix[tgt]) * gmatrix[src];
+    else
+      return false;
+    }
+  return true;
+  }
+
+
+void animateMovement(cell *src, cell *tgt, int layer, int direction_hint) {
   if(vid.mspeed >= 5) return; // no animations!
-  if(confusingGeometry()) return;
-  if(gmatrix.count(src) && gmatrix.count(tgt)) {
-    animation& a = animations[layer][tgt];
-    if(animations[layer].count(src)) {
-      a = animations[layer][src];
-      a.wherenow = inverse(gmatrix[tgt]) * gmatrix[src] * a.wherenow;
-      animations[layer].erase(src);
-      a.attacking = 0;
-      }
-    else {
-      a.ltick = ticks;
-      a.wherenow = inverse(gmatrix[tgt]) * gmatrix[src];
-      a.footphase = 0;
-      }
+  transmatrix T;
+  if(!compute_relamatrix(src, tgt, direction_hint, T)) return;
+  animation& a = animations[layer][tgt];
+  if(animations[layer].count(src)) {
+    a = animations[layer][src];
+    a.wherenow = T * a.wherenow;
+    animations[layer].erase(src);
+    a.attacking = 0;
+    }
+  else {
+    a.ltick = ticks;
+    a.wherenow = T;
+    a.footphase = 0;
     }
   }
 
-void animateAttack(cell *src, cell *tgt, int layer) {
+void animateAttack(cell *src, cell *tgt, int layer, int direction_hint) {
   if(vid.mspeed >= 5) return; // no animations!
-  if(gmatrix.count(src) && gmatrix.count(tgt)) {
-    bool newanim = !animations[layer].count(src);
-    animation& a = animations[layer][src];
-    a.attacking = 1;
-    a.attackat = rspintox(tC0(inverse(gmatrix[src]) * gmatrix[tgt])) * xpush(hdist(gmatrix[src]*C0, gmatrix[tgt]*C0) / 3);
-    if(newanim) a.wherenow = Id, a.ltick = ticks, a.footphase = 0;
-    }
+  transmatrix T;
+  if(!compute_relamatrix(src, tgt, direction_hint, T)) return;
+  bool newanim = !animations[layer].count(src);
+  animation& a = animations[layer][src];
+  a.attacking = 1;
+  a.attackat = rspintox(tC0(inverse(T))) * xpush(hdist0(T*C0) / 3);
+  if(newanim) a.wherenow = Id, a.ltick = ticks, a.footphase = 0;
   }
 
 vector<pair<cell*, animation> > animstack;
 
-void indAnimateMovement(cell *src, cell *tgt, int layer) {
+void indAnimateMovement(cell *src, cell *tgt, int layer, int direction_hint) {
   if(vid.mspeed >= 5) return; // no animations!
-  if(confusingGeometry()) return;
   if(animations[layer].count(tgt)) {
     animation res = animations[layer][tgt];
     animations[layer].erase(tgt);
-    animateMovement(src, tgt, layer);
+    animateMovement(src, tgt, layer, direction_hint);
     if(animations[layer].count(tgt)) 
       animstack.push_back(make_pair(tgt, animations[layer][tgt]));
     animations[layer][tgt] = res;
     }
   else {
-    animateMovement(src, tgt, layer);
+    animateMovement(src, tgt, layer, direction_hint);
     if(animations[layer].count(tgt)) {
       animstack.push_back(make_pair(tgt, animations[layer][tgt]));
       animations[layer].erase(tgt);
@@ -5798,13 +5819,13 @@ void commitAnimations(int layer) {
   animstack.clear();
   }
 
-void animateReplacement(cell *a, cell *b, int layer) {
+void animateReplacement(cell *a, cell *b, int layer, int direction_hinta, int direction_hintb) {
   if(vid.mspeed >= 5) return; // no animations!
   static cell c1;
   gmatrix[&c1] = gmatrix[b];
   if(animations[layer].count(b)) animations[layer][&c1] = animations[layer][b];
-  animateMovement(a, b, layer);
-  animateMovement(&c1, a, layer);
+  animateMovement(a, b, layer, direction_hinta);
+  animateMovement(&c1, a, layer, direction_hintb);
   }
 
 void drawBug(const cellwalker& cw, int col) {

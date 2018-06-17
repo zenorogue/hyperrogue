@@ -136,7 +136,7 @@ namespace whirlwind {
     for(int i=0; i<z-1; i++) {
       moveItem(whirlline[i], whirlline[i+1], true);
       if(whirlline[i]->item)
-        animateMovement(whirlline[i+1], whirlline[i], LAYER_BOAT);
+        animateMovement(whirlline[i+1], whirlline[i], LAYER_BOAT, NOHINT);
       }
     for(int i=0; i<z; i++) 
       pickupMovedItems(whirlline[i]);
@@ -995,7 +995,7 @@ namespace whirlpool {
     if(wfrom && wto && wfrom->wall == waBoat && wto->wall == waSea && !wto->monst) {
       wfrom->wall = waSea; wto->wall = waBoat;
       wto->mondir = neighborId(wto, wfrom);
-      animateMovement(wfrom, wto, LAYER_BOAT);
+      animateMovement(wfrom, wto, LAYER_BOAT, NOHINT);
       }
     
     if(wfrom && wto && wfrom->item && !wto->item && wfrom->wall != waBoat) {
@@ -1206,7 +1206,7 @@ namespace mirror {
             continue;
             }
           c->monst = moMimic;
-          moveMonster(c2, c);
+          moveMonster(c2, c, m.second.spin);
           c2->monst = moNone;
           empathyMove(c, c2, neighborId(c2, c));
           m.second = cw2;
@@ -1639,7 +1639,7 @@ namespace hive {
   //    c->monst = moDeadBug, deadbug.push_back(c);
         }
       else {
-        moveMonster(c2, c);
+        moveMonster(c2, c, d);
         // pheromones!
         if(c->land == laHive && c->landparam < 90) c->landparam += 5;
         if(c2->land == laHive && c2->landparam < 90) c2->landparam += 5;
@@ -2297,7 +2297,7 @@ namespace dragon {
       mountmove(c, c->mondir, true, c2);
       c->monst = c2->monst;
       c->hitpoints = c2->hitpoints;
-      animateMovement(c2, c, LAYER_BIG);
+      animateMovement(c2, c, LAYER_BIG, c->spin(c->mondir));
       c->stuntime = 2;
       if(c2->mondir == NODIR) { c->mondir = NODIR; c2->monst = moNone; return; }
       c = c2;
@@ -2417,7 +2417,7 @@ namespace dragon {
           cmt->monst = cft->monst;
           cft->monst = moNone;
           mountmove(cmt, cmt->mondir, true, cft);
-          animateMovement(cft, cmt, LAYER_BIG);
+          animateMovement(cft, cmt, LAYER_BIG, allcells[i]->mondir);
           }
         while(c->mondir != NODIR) {
           c = c->mov[c->mondir];
@@ -2656,7 +2656,7 @@ namespace kraken {
             noconflict = false; */
         /* if(noconflict) */ {
           // found = true;
-          indAnimateMovement(acells[i].first, acells[i].second, LAYER_BIG);
+          indAnimateMovement(acells[i].first, acells[i].second, LAYER_BIG, NOHINT);
           acells[i] = acells[size(acells)-1];
           acells.resize(size(acells)-1);
           i--;
@@ -2872,7 +2872,7 @@ namespace prairie {
             }
               
           if(!cn->monst && !isPlayerOn(cn) && passable_for(cp->monst, cn, cp, P_DEADLY))
-            moveMonster(cn, cp);
+            moveMonster(cn, cp, NODIR);
           else {
             playSound(NULL, "hit-axe"+pick123());
             beastcrash(cn, cp);

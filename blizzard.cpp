@@ -6,12 +6,12 @@ namespace hr {
 double randd() { return (rand() + .5) / (RAND_MAX + 1.); }
 
 double cellgfxdist(cell *c, int i) {
-  if(gp::on) return hdist0(tC0(shmup::calc_relative_matrix(c->mov[i], c)));
+  if(gp::on) return hdist0(tC0(shmup::calc_relative_matrix(c->mov[i], c, i)));
   return nonbitrunc ? tessf * gp::scale : (c->type == 6 && (i&1)) ? hexhexdist : crossf;
   }
 
 transmatrix cellrelmatrix(cell *c, int i) {
-  if(gp::on) return shmup::calc_relative_matrix(c->mov[i], c);
+  if(gp::on) return shmup::calc_relative_matrix(c->mov[i], c, i);
   double d = cellgfxdist(c, i);
   return ddspin(c, i) * xpush(d) * iddspin(c->mov[i], c->spin(i), euclid ? 0 : S42);
   }

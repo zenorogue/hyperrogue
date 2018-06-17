@@ -734,18 +734,18 @@ bool canPushStatueOn(cell *c) {
     !isWorm(c->monst) && !isReptile(c->wall) && !peace::on;
   }
 
-void moveBoat(cell *to, cell *from) {
+void moveBoat(cell *to, cell *from, int direction_hint) {
   eWall x = to->wall; to->wall = from->wall; from->wall = x;
   to->mondir = neighborId(to, from);
   moveItem(from, to, false);
-  animateMovement(from, to, LAYER_BOAT);
+  animateMovement(from, to, LAYER_BOAT, direction_hint);
   }
 
-void moveBoatIfUsingOne(cell *to, cell *from) {
-  if(from->wall == waBoat && isWatery(to)) moveBoat(to, from);
+void moveBoatIfUsingOne(cell *to, cell *from, int direction_hint) {
+  if(from->wall == waBoat && isWatery(to)) moveBoat(to, from, direction_hint);
   else if(from->wall == waBoat && boatGoesThrough(to) && markEmpathy(itOrbWater)) {
     placeWater(to, from);
-    moveBoat(to, from);
+    moveBoat(to, from, direction_hint);
     }
   }
 
@@ -1881,7 +1881,7 @@ bool attackJustStuns(cell *c2, flagtype f) {
     return isStunnable(c2->monst) && c2->hitpoints > 1;
   }
   
-void moveEffect(cell *ct, cell *cf, eMonster m);
+void moveEffect(cell *ct, cell *cf, eMonster m, int direction_hint);
   
 void flameHalfvine(cell *c, int val) {
   if(itemBurns(c->item)) {
@@ -2087,7 +2087,7 @@ void killMonster(cell *c, eMonster who, flagtype deathflags) {
     }
   if(m == moVineBeast) 
     petrify(c, waVinePlant, m), pcount = 0;
-  if(isBird(m)) moveEffect(c, c, moDeadBird);
+  if(isBird(m)) moveEffect(c, c, moDeadBird, -1);
   if(m == moBomberbird || m == moTameBomberbird) {
     pcount = 0;
     playSound(c, "die-bomberbird");
@@ -2446,8 +2446,8 @@ bool attackMonster(cell *c, flagtype flags, eMonster killer) {
   return ntk > tk;
   }
 
-void pushMonster(cell *ct, cell *cf) {
-  moveMonster(ct, cf);
+void pushMonster(cell *ct, cell *cf, int direction_hint) {
+  moveMonster(ct, cf, direction_hint);
   }
 
 bool destroyHalfvine(cell *c, eWall newwall, int tval) {
@@ -3242,7 +3242,7 @@ void activateArrowTrap(cell *c) {
 // this is called from moveMonster, or separately from moveIvy/moveWorm,
 // or when a dead bird falls (then m == moDeadBird)
 
-void moveEffect(cell *ct, cell *cf, eMonster m) {
+void moveEffect(cell *ct, cell *cf, eMonster m, int direction_hint) {
 
   if(cf) destroyWeakBranch(cf, ct, m);
 
@@ -3273,7 +3273,7 @@ void moveEffect(cell *ct, cell *cf, eMonster m) {
   if(cf && ct->item == itBabyTortoise && !cf->item) {
     cf->item = itBabyTortoise;
     ct->item = itNone;
-    animateMovement(ct, cf, LAYER_BOAT);
+    animateMovement(ct, cf, LAYER_BOAT, direction_hint);
     tortoise::babymap[cf] = tortoise::babymap[ct];
     tortoise::babymap.erase(ct);
     }
@@ -3407,20 +3407,20 @@ void makeTrollFootprints(cell *c) {
   c->landparam = turncount + 100;
   }
 
-void moveMonster(cell *ct, cell *cf) {
+void moveMonster(cell *ct, cell *cf, int direction_hint) {
   eMonster m = cf->monst;
   bool fri = isFriendly(cf);
   if(isDragon(m)) {
     printf("called for Dragon\n");
     return;
     }
-  if(m != moMimic) animateMovement(cf, ct, LAYER_SMALL);
+  if(m != moMimic) animateMovement(cf, ct, LAYER_SMALL, direction_hint);
   // the following line is necessary because otherwise plates disappear only inside the sight range
   if(cellUnstable(cf) && !ignoresPlates(m)) {
     fallingFloorAnimation(cf);
     cf->wall = waChasm;
     }
-  moveEffect(ct, cf, m);
+  moveEffect(ct, cf, m, direction_hint);
   if(ct->wall == waCamelotMoat && 
     (m == moShark || m == moCShark || m == moGreaterShark))
       achievement_gain("MOATSHARK");
@@ -3460,10 +3460,10 @@ void moveMonster(cell *ct, cell *cf) {
     if(ct->wall == waBigStatue) {
       ct->wall = cf->wall;
       cf->wall = waBigStatue;
-      animateMovement(ct, cf, LAYER_BOAT);
+      animateMovement(ct, cf, LAYER_BOAT, revhint(cf, direction_hint));
       }
 
-    moveBoatIfUsingOne(ct, cf);
+    moveBoatIfUsingOne(ct, cf, revhint(cf, direction_hint));
     }
   
   if(isTroll(m)) { makeTrollFootprints(ct); makeTrollFootprints(cf); }
@@ -3894,7 +3894,7 @@ int pickDownDirection(cell *c, flagtype mf) {
   }
 
 template<class T> 
-cell *determinePush(cellwalker who, cell *c2, int subdir, const T& valid) {
+cell *determinePush(cellwalker who, cell *c2, int subdir, const T& valid, int& pushdir) {
   if(subdir != 1 && subdir != -1) {
     subdir = 1;
     static bool first = true;
@@ -3910,6 +3910,7 @@ cell *determinePush(cellwalker who, cell *c2, int subdir, const T& valid) {
   if(valid(push.c)) return push.c;
   if(c2->type&1) {
     push = push + wstep - subdir + wstep;
+    pushdir = (push+wstep).spin;
     if(valid(push.c)) return push.c;
     }
   if(gravityLevel(push.c) < gravityLevel(c2)) {
@@ -3920,6 +3921,7 @@ cell *determinePush(cellwalker who, cell *c2, int subdir, const T& valid) {
     if(gravityLevel(push.c) < gravityLevel(c2)) {
       push = push + wstep + 1 + wstep;
       }
+    pushdir = (push+wstep).spin;
     if(valid(push.c)) return push.c;
     }
   return c2;
@@ -3939,9 +3941,10 @@ void beastAttack(cell *c, bool player) {
       if(c2->monst && c2->stuntime) {
         cellwalker bull (c, d);
         int subdir = determinizeBullPush(bull);
-        cell *c3 = determinePush(bull, c2, subdir, [c2] (cell *c) { return passable(c, c2, P_BLOW); });
+        int pushdir;
+        cell *c3 = determinePush(bull, c2, subdir, [c2] (cell *c) { return passable(c, c2, P_BLOW); }, pushdir);
         if(c3 && c3 != c2)
-          pushMonster(c3, c2);
+          pushMonster(c3, c2, pushdir);
         }
       }
     if(c2->wall == waThumperOff) {
@@ -3951,7 +3954,8 @@ void beastAttack(cell *c, bool player) {
     if(c2->wall == waThumperOn) {
       cellwalker bull (c, d);
       int subdir = determinizeBullPush(bull);
-      cell *c3 = determinePush(bull, c2, subdir, [c2] (cell *c) { return canPushThumperOn(c, c2, c); });
+      int pushdir;
+      cell *c3 = determinePush(bull, c2, subdir, [c2] (cell *c) { return canPushThumperOn(c, c2, c); }, pushdir);
       if(c3 && c3 != c2)
         pushThumper(c2, c3);
       }
@@ -4002,13 +4006,13 @@ cell *moveNormal(cell *c, flagtype mf) {
       }
     else if(m2) {
       attackMonster(c2, AF_NORMAL | AF_MSG, m);
-      animateAttack(c, c2, LAYER_SMALL);
+      animateAttack(c, c2, LAYER_SMALL, d);
       if(m == moFlailer && m2 == moIllusion) 
         attackMonster(c, 0, m2);
       return c2;
       }
     
-    moveMonster(c2, c);
+    moveMonster(c2, c, d);
     if(m == moRagingBull) beastAttack(c2, false);
     return c2;
     }
@@ -4036,7 +4040,7 @@ cell *moveNormal(cell *c, flagtype mf) {
     if(!attacking) for(int i=0; i<nc; i++) {
       cell *c2 = c->mov[posdir[i]];
       if(!c->monst) c->monst = m;
-      moveMonster(c2, c);        
+      moveMonster(c2, c, posdir[i]);
       if(m == moRagingBull) beastAttack(c2, false);
       }
     return c->mov[d];
@@ -4177,7 +4181,7 @@ void mountmove(cell *c, int spin, bool fp, int id) {
 void mountmove(cell *c, int spin, bool fp, cell *ppos) {
   for(int i=0; i<numplayers(); i++) {
     if(playerpos(i) == ppos) {
-      animateMovement(ppos, c, LAYER_SMALL);
+      animateMovement(ppos, c, LAYER_SMALL, revhint(c, spin));
       mountmove(c, spin, fp, i);
       }
     if(lastmountpos[i] == ppos && ppos != NULL) {
@@ -4213,7 +4217,7 @@ void moveWorm(cell *c) {
       cell *cft = allcells[i];
       if(cft->monst != moTentacleGhost && cmt->monst != moTentacleGhost)
         mountmove(cmt, cft->spn(cft->mondir), false, cft);
-      animateMovement(cft, cmt, LAYER_BIG);
+      animateMovement(cft, cmt, LAYER_BIG, cft->mondir);
       }
     c->monst = moNone;
     if(c->mondir != NODIR) c->mov[c->mondir]->monst = moTentacleEscaping;
@@ -4283,9 +4287,9 @@ void moveWorm(cell *c) {
   
   for(int j=0; j<c->type; j++) if(c->mov[j] == goal) {
     goal->monst = eMonster(moWormwait + id);
-    moveEffect(goal, NULL, eMonster(moWormwait + id));
+    moveEffect(goal, NULL, eMonster(moWormwait + id), NOHINT);
       
-    animateMovement(c, goal, LAYER_BIG);
+    animateMovement(c, goal, LAYER_BIG, dir);
     c->monst = eMonster(moWormtail + id);
     goal->mondir = c->spn(j);
   
@@ -4301,7 +4305,7 @@ void moveWorm(cell *c) {
         c3 = c2, c2 = c3->mov[c2->mondir];
         if(c3->monst != moTentacleGhost && c2->monst != moTentacleGhost) 
           mountmove(c3, c3->mondir, true, c2);
-        animateMovement(c2, c3, LAYER_BIG);
+        animateMovement(c2, c3, LAYER_BIG, c2->spin(c2->mondir));
         }
       }
     
@@ -4314,7 +4318,7 @@ void moveWorm(cell *c) {
           }
         c3 = c2, c2 = c3->mov[c2->mondir];
         mountmove(c3, c3->mondir, true, c2);
-        animateMovement(c2, c3, LAYER_BIG);
+        animateMovement(c2, c3, LAYER_BIG, revhint(c2, c2->mondir));
         }
       }
     
@@ -4415,9 +4419,9 @@ void moveivy() {
       }
 
     if(mto && mto->cpdist) {
-      animateMovement(mto->mov[sp], mto, LAYER_BIG);
+      animateMovement(mto->mov[sp], mto, LAYER_BIG, mto->spin(sp));
       mto->monst = moIvyWait, mto->mondir = sp;
-      moveEffect(mto, NULL, moIvyWait);
+      moveEffect(mto, NULL, moIvyWait, NOHINT);
       // if this is the only branch, we want to move the head immediately to mto instead
       if(mto->mov[mto->mondir]->monst == moIvyHead) {
         mto->monst = moIvyHead; co->monst = moIvyBranch;
@@ -4527,7 +4531,7 @@ void groupmove2(cell *c, cell *from, int d, eMonster movtype, flagtype mf) {
     if(!(mf & MF_NOATTACKS)) for(int j=0; j<c->type; j++) 
       if(c->mov[j] && canAttack(c, c->monst, c->mov[j], c->mov[j]->monst, af)) {
         attackMonster(c->mov[j], AF_NORMAL | AF_GETPLAYER | AF_MSG, c->monst);
-        animateAttack(c, c->mov[j], LAYER_SMALL);
+        animateAttack(c, c->mov[j], LAYER_SMALL, j);
         c->aitmp = sval;
         // XLATC eagle
         return;
@@ -4540,7 +4544,7 @@ void groupmove2(cell *c, cell *from, int d, eMonster movtype, flagtype mf) {
       return;
       }
     
-    moveMonster(from, c);
+    moveMonster(from, c, revhint(from, d));
     from->aitmp = sval;
     }
   c->aitmp = sval;
@@ -4612,12 +4616,12 @@ vector<cell*> hexdfs;
 // note: move from 'c' to 'from'!
 void moveHexSnake(cell *from, cell *c, int d, bool mounted) {
   if(from->wall == waBoat) from->wall = waSea;
-  moveEffect(from, c, c->monst);
+  moveEffect(from, c, c->monst, revhint(from, d));
   from->monst = c->monst; from->mondir = d; from->hitpoints = c->hitpoints;
   c->monst = moHexSnakeTail;
   preventbarriers(from);
   
-  animateMovement(c, from, LAYER_BIG);
+  animateMovement(c, from, LAYER_BIG, revhint(from, d));
   mountmove(from, from->mondir, true, c);
   
   cell *c2 = c, *c3=c2;
@@ -4625,7 +4629,7 @@ void moveHexSnake(cell *from, cell *c, int d, bool mounted) {
     if(a == ROCKSNAKELENGTH) { c2->monst = moNone, c3->mondir = NODIR; break; }
     if(c2->mondir == NODIR) break;
     mountmove(c2, c2->mondir, true, c2->mov[c2->mondir]);
-    animateMovement(c2->mov[c2->mondir], c2, LAYER_BIG);
+    animateMovement(c2->mov[c2->mondir], c2, LAYER_BIG, revhint(c2, c2->mondir));
     c3 = c2, c2 = c3->mov[c2->mondir];
     }
     else break;
@@ -4787,7 +4791,7 @@ void movemutant() {
         c2->monst = moMutant;
         c2->mondir = c->spn(j);
         c2->stuntime = mutantphase;
-        animateMovement(c, c2, LAYER_BIG);
+        animateMovement(c, c2, LAYER_BIG, j);
         }
       }
     }  
@@ -4823,7 +4827,7 @@ void moveshadow() {
     cell* where = shpos[p][cshpos];
     if(where && where->monst == moNone && where->cpdist && where->land == laGraveyard &&
       !sword::at(where)) {
-      if(shfrom) animateMovement(shfrom, where, LAYER_SMALL);
+      if(shfrom) animateMovement(shfrom, where, LAYER_SMALL, NOHINT);
       where->monst = moShadow;
       where->hitpoints = p;
       where->stuntime = 0;
@@ -4881,7 +4885,7 @@ void moveghosts() {
         addMessage(XLAT("%The1 scares %the2 a bit!", c->monst, c2->monst));
         c2->stuntime = 1;
         }
-      else moveMonster(c2, c);
+      else moveMonster(c2, c, d);
       
       }
     nextghost: ;
@@ -5249,7 +5253,7 @@ void movegolems(flagtype flags) {
         else if((flags & AF_CRUSH) && !canAttack(c, m, c2, c2->monst, flags ^ AF_CRUSH ^ AF_MUSTKILL))
           markOrb(itOrbEmpathy), markOrb(itOrbSlaying);
         attackMonster(c2, flags | AF_MSG, m);
-        animateAttack(c, c2, LAYER_SMALL);
+        animateAttack(c, c2, LAYER_SMALL, dir);
         produceGhost(c2, m2, m);
         sideAttack(c, dir, m, 0);
         if(revenge) c->monst = m = moPrincessArmed;
@@ -5261,9 +5265,9 @@ void movegolems(flagtype flags) {
       else {
         passable_for(m, c2, c, P_DEADLY);
         DEBT("move");
-        moveMonster(c2, c);
+        moveMonster(c2, c, dir);
         if(m != moTameBomberbird && m != moFriendlyGhost) 
-          moveBoatIfUsingOne(c2, c);
+          moveBoatIfUsingOne(c2, c, dir);
           
         if(c2->monst == m) {          
           if(m == moGolem) c2->monst = moGolemMoved;
@@ -7396,7 +7400,8 @@ bool movepcto(int d, int subdir, bool checkonly) {
       }
 
     if(c2->wall == waThumperOn && !c2->monst && !nonAdjacentPlayer(c2, cwt.c)) {
-      cell *c3 = determinePush(cwt, c2, subdir, [c2] (cell *c) { return canPushThumperOn(c, c2, cwt.c); });
+      int pushdir;
+      cell *c3 = determinePush(cwt, c2, subdir, [c2] (cell *c) { return canPushThumperOn(c, c2, cwt.c); }, pushdir);
       if(c3 == c2) {
         if(checkonly) return false;
         addMessage(XLAT("No room to push %the1.", c2->wall));
@@ -7446,7 +7451,7 @@ bool movepcto(int d, int subdir, bool checkonly) {
         }
 
       if(checkonly) return true;
-      moveBoat(c2, cwt.c);
+      moveBoat(c2, cwt.c, d);
       boatmove = true;
       goto boatjump;
       }
@@ -7462,8 +7467,8 @@ bool movepcto(int d, int subdir, bool checkonly) {
       if(checkonly) return true;
       if(c2->item && !cwt.c->item) moveItem(c2, cwt.c, false), boatmove = true;
       placeWater(c2, cwt.c);
-      moveBoat(c2, cwt.c);
-      c2->mondir = neighborId(c2, cwt.c);
+      moveBoat(c2, cwt.c, d);
+      c2->mondir = revhint(cwt.c, d);
       if(c2->item) boatmove = !boatmove;
       goto boatjump;
       }
@@ -7495,7 +7500,7 @@ bool movepcto(int d, int subdir, bool checkonly) {
           
       if(checkonly) { c2->wall = save_c2; cwt.c->wall = save_cw; return true; }
       addMessage(XLAT("You push %the1 behind you!", waBigStatue));
-      animateMovement(c2, cwt.c, LAYER_BOAT);
+      animateMovement(c2, cwt.c, LAYER_BOAT, cwt.c->spin(d));
       goto statuejump;
       }
 
@@ -7522,7 +7527,7 @@ bool movepcto(int d, int subdir, bool checkonly) {
         playSound(c2, "hit-axe" + pick123());
         c2->wall = waNone;
         sideAttack(cwt.c, d, moPlayer, 0);
-        animateAttack(cwt.c, c2, LAYER_SMALL);
+        animateAttack(cwt.c, c2, LAYER_SMALL, d);
         }
       else if(c2->wall == waBigTree) {
         drawParticles(c2, winf[c2->wall].color, 8);
@@ -7530,13 +7535,13 @@ bool movepcto(int d, int subdir, bool checkonly) {
         playSound(c2, "hit-axe" + pick123());
         c2->wall = waSmallTree;
         sideAttack(cwt.c, d, moPlayer, 0);
-        animateAttack(cwt.c, c2, LAYER_SMALL);
+        animateAttack(cwt.c, c2, LAYER_SMALL, d);
         }
       else {
         if(!peace::on) {
           addMessage(XLAT("You swing your sword at the mirror."));
           sideAttack(cwt.c, d, moPlayer, 0);
-          animateAttack(cwt.c, c2, LAYER_SMALL);
+          animateAttack(cwt.c, c2, LAYER_SMALL, d);
           }
         }
       if(survivalist && isHaunted(c2->land))
@@ -7601,9 +7606,10 @@ bool movepcto(int d, int subdir, bool checkonly) {
       // pushto=c2 means that the monster is not killed and thus
       // still counts for lightning in monstersnear
       cell *pushto = NULL;
+      int pushdir = 0;
       if(isStunnable(c2->monst) && c2->hitpoints > 1) {
         if(monsterPushable(c2))
-          pushto = determinePush(cwt, c2, subdir, [c2] (cell *c) { return passable(c, c2, P_BLOW); });
+          pushto = determinePush(cwt, c2, subdir, [c2] (cell *c) { return passable(c, c2, P_BLOW); }, pushdir);
         else          
           pushto = c2;
         }
@@ -7661,8 +7667,8 @@ bool movepcto(int d, int subdir, bool checkonly) {
           // salamanders are stunned for longer time when pushed into a wall
           if(c2->monst == moSalamander && (pushto == c2 || !pushto)) c2->stuntime = 10;
           if(!c2->monst) produceGhost(c2, m, moPlayer);
-          if(pushto && pushto != c2) pushMonster(pushto, c2);
-          animateAttack(cwt.c, c2, LAYER_SMALL);
+          if(pushto && pushto != c2) pushMonster(pushto, c2, pushdir);
+          animateAttack(cwt.c, c2, LAYER_SMALL, d);
           }
         }
       
@@ -7840,11 +7846,12 @@ bool movepcto(int d, int subdir, bool checkonly) {
 
       stabbingAttack(cwt.c, c2, moPlayer);
       cell *c1 = cwt.c;
+      int d = cwt.spin;
       cwt += wstep;
       if(switchplaces)
-        animateReplacement(c1, cwt.c, LAYER_SMALL);
+        animateReplacement(c1, cwt.c, LAYER_SMALL, d, cwt.spin);
       else
-        animateMovement(c1, cwt.c, LAYER_SMALL);
+        animateMovement(c1, cwt.c, LAYER_SMALL, d);
       
       mirror::act(origd, mirror::SPINMULTI | mirror::ATTACK | mirror::GO);
 

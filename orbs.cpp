@@ -577,7 +577,7 @@ void jumpTo(cell *dest, eItem byWhat, int bonuskill, eMonster dashmon) {
   killFriendlyIvy();
 
   cell *c1 = cwt.c;
-  animateMovement(cwt.c, dest, LAYER_SMALL);
+  animateMovement(cwt.c, dest, LAYER_SMALL, NOHINT);
   cwt.c = dest; 
   forCellIdEx(c2, i, dest) if(c2->cpdist < dest->cpdist) {
     cwt.spin = i;
@@ -619,13 +619,13 @@ void jumpTo(cell *dest, eItem byWhat, int bonuskill, eMonster dashmon) {
     monstersTurn();
   }
 
-void growIvyTo(cell *dest, cell *src) {
+void growIvyTo(cell *dest, cell *src, int direction_hint) {
   if(dest->monst) 
     attackMonster(dest, AF_NORMAL | AF_MSG, moFriendlyIvy);
   else {
     dest->monst = moFriendlyIvy;
     dest->mondir = neighborId(dest, src);
-    moveEffect(dest, src, moFriendlyIvy);
+    moveEffect(dest, src, moFriendlyIvy, direction_hint);
     empathyMove(src, dest, neighborId(src, dest));
     }
   createNoise(1);
@@ -797,7 +797,7 @@ void summonAt(cell *dest) {
   if(dest->monst == moTortoise)
     tortoise::emap[dest] = dest;
   addMessage(XLAT("You summon %the1!", dest->monst));
-  moveEffect(dest, dest, dest->monst);
+  moveEffect(dest, dest, dest->monst, -1);
   if(dest->wall == waClosePlate || dest->wall == waOpenPlate)
     toggleGates(dest, dest->wall);
 
@@ -865,7 +865,7 @@ void gun_attack(cell *dest) {
 
 void checkStunKill(cell *dest) {
   if(isBird(dest->monst)) {
-    moveEffect(dest, dest, moDeadBird);
+    moveEffect(dest, dest, moDeadBird, NOHINT);
     doesFall(dest);
     if(isWatery(dest) || dest->wall == waChasm || isFire(dest)) {
       addMessage(XLAT("%The1 falls!", dest->monst));
@@ -925,10 +925,10 @@ void placeIllusion(cell *c) {
   checkmoveO();
   }
 
-void blowoff(cell *cf, cell *ct) {
+void blowoff(cell *cf, cell *ct, int direction_hint) {
   playSound(ct, "orb-ranged");
   addMessage(XLAT("You blow %the1 away!", cf->monst));
-  pushMonster(ct, cf);
+  pushMonster(ct, cf, direction_hint);
   if(cf->item == itBabyTortoise && !ct->item) 
     moveItem(cf, ct, true);
   items[itOrbAir]--;
@@ -1024,9 +1024,10 @@ eItem targetRangedOrb(cell *c, orbAction a) {
     for(; d<c->type; d++) if(c->mov[d] && c->mov[d]->cpdist < c->cpdist) break;
     if(d<c->type) for(int e=d; e<d+c->type; e++) {
       nowhereToBlow = true;
-      cell *c2 = c->mov[e % c->type];
+      int di = e % c->type;
+      cell *c2 = c->mov[di];
       if(c2 && c2->cpdist > c->cpdist && passable(c2, c, P_BLOW)) {
-        if(!isCheck(a)) blowoff(c, c2);
+        if(!isCheck(a)) blowoff(c, c2, di);
         return itOrbAir;
         }
       }
@@ -1035,8 +1036,9 @@ eItem targetRangedOrb(cell *c, orbAction a) {
   // nature
   if(items[itOrbNature] && numplayers() == 1 && c->monst != moFriendlyIvy) {
     cell *sides[8];
+    int dirs[8];
     int qsides = 0;
-    forCellCM(cf, c)
+    forCellIdCM(cf, d, c)
       if(cf->monst == moFriendlyIvy) {
 
         if(c->monst) {
@@ -1048,11 +1050,13 @@ eItem targetRangedOrb(cell *c, orbAction a) {
           if(strictlyAgainstGravity(c, cf, false, MF_IVY)) continue;
           if(monstersnear(cwt.c, NULL, moPlayer, c, cwt.c)) continue;
           }
+        dirs[qsides] = d;
         sides[qsides++] = cf;
         }
     
     if(qsides > 0) {
-      if(!isCheck(a)) growIvyTo(c, sides[hrand(qsides)]);
+      int di = hrand(qsides);
+      if(!isCheck(a)) growIvyTo(c, sides[di], revhint(c, dirs[di]));
       return itOrbNature;
       }
     }

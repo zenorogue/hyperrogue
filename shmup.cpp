@@ -1624,7 +1624,7 @@ void movePlayer(monster *m, int delta) {
           m->base->wall = waChasm; 
         else {
           m->base->wall = waBigStatue;
-          animateMovement(c2, m->base, LAYER_BOAT);
+          animateMovement(c2, m->base, LAYER_BOAT, NOHINT);
           }
         }
       else if(m->inBoat && !isWateryOrBoat(c2) && passable(c2, m->base, P_ISPLAYER | P_MIRROR | reflectflag)) {
@@ -2728,7 +2728,7 @@ void moveMonster(monster *m, int delta) {
           m->base->wall = waChasm;
         else
           m->base->wall = waBigStatue;
-        animateMovement(c2, m->base, LAYER_BOAT);
+        animateMovement(c2, m->base, LAYER_BOAT, NOHINT);
         }
       if(passable_for(m->type, c2, m->base, P_CHAIN | P_ONPLAYER | reflectflag) && !isWatery(c2) && m->inBoat) {
         if(isWatery(m->base)) 
@@ -3336,7 +3336,7 @@ transmatrix master_relative(cell *c, bool get_inverse) {
       return T;
       }
     }
-  else if(!nonbitrunc) {
+  else if(!nonbitrunc && !euclid) {
     for(int d=0; d<S7; d++) if(c->master->c7->mov[d] == c)
       return (get_inverse?invhexmove:hexmove)[d];
     return Id;
@@ -3345,7 +3345,8 @@ transmatrix master_relative(cell *c, bool get_inverse) {
     return pispin * Id;
   }
 
-transmatrix calc_relative_matrix(cell *c2, cell *c1) {
+// target, source, direction from source to target
+transmatrix calc_relative_matrix(cell *c2, cell *c1, int direction_hint) {
 
   if(sphere) {
     if(!gmatrix0.count(c2) || !gmatrix0.count(c1)) {
@@ -3358,14 +3359,46 @@ transmatrix calc_relative_matrix(cell *c2, cell *c1) {
       swap(gmatrix, gmatrix0);
       gp::draw_li = bak;
       }
-    if(gmatrix0.count(c2) && gmatrix0.count(c1))
-      return inverse(gmatrix0[c1]) * gmatrix0[c2];
+    if(gmatrix0.count(c2) && gmatrix0.count(c1)) {
+      transmatrix T = inverse(gmatrix0[c1]) * gmatrix0[c2];
+      if(elliptic && T[2][2] < 0)
+        T = centralsym * T;
+      return T;
+      }
     else {
       printf("error: gmatrix0 not known\n");
       return Id;
       }
     }
   
+  if(torus) {
+    transmatrix t = Id;
+    if(whateveri) printf("[%p,%d] ", c2, celldistance(c2, c1));
+    int mirrors = 0;
+    approach:
+    int d = celldistance(c2, c1);
+    forCellIdEx(c3, i, c2) {
+      if(celldistance(c3, c1) < d) {
+        if(whateveri) printf(" %d [%p,%d]", i, c3, celldistance(c3, c1));
+        if(c2->type < 8)
+          t = eumovedir(i+(euclid6?3:2)) * t;
+        else if(i&1)
+          t = eumovedir(2+i/2) * eumovedir(2+(i+1)/2) * t;
+        else
+          t = eumovedir(2+i/2) * t;
+        if(c2->mirror(i)) mirrors++;
+        c2 = c3;
+        goto approach;
+        }
+      }
+    if(d != 0) printf("ERROR not reached\n");
+    if(mirrors&1) t = Mirror * t * Mirror;
+    if(whateveri) printf(" => %p\n", c1);
+    return t;
+    }
+  
+  if(euclid) return inverse(gmatrix0[c1]) * gmatrix0[c2];
+
   heptagon *h1 = c1->master;
   transmatrix gm = master_relative(c1, true);
   heptagon *h2 = c2->master;
@@ -3375,20 +3408,26 @@ transmatrix calc_relative_matrix(cell *c2, cell *c1) {
 //bool hsol = false;
 //transmatrix sol;
   while(h1 != h2) {
-    int confusion = 0;
-    if(quotient == 1 && gp::on) {
-      for(int d=0; d<S7; d++) if(h2->move[d] == h1) confusion++;
-      if(confusion > 1) {
-        transmatrix T;
-        confusion = 0;
-        for(int d=0; d<S7; d++) if(h2->move[d] == h1) {
-          int sp = h2->spin(d);
-          transmatrix T1 = gm * heptmove[sp] * spin(2*M_PI*d/S7) * where;
-          if(confusion == 0 || T1[2][2] < T[2][2]) T = T1;
-          confusion++;
+    if(quotient == 1) {
+      transmatrix T;
+      hyperpoint hint = ddspin(c1, direction_hint) * xpush(1e-2) * C0;
+      ld bestdist = 1e9;
+      for(int d=0; d<S7; d++) if(h2->move[d]) {
+        int sp = h2->spin(d);
+        transmatrix S = heptmove[sp] * spin(2*M_PI*d/S7);
+        if(h2->move[d] == h1) {
+          transmatrix T1 = gm * S * where;
+          auto curdist = hdist(tC0(T1), hint);
+          if(curdist < bestdist) T = T1, bestdist = curdist;
           }
-        return T;
+        for(int e=0; e<S7; e++) if(h2->move[d]->move[e] == h1) {
+          int sp2 = h2->move[d]->spin(e);
+          transmatrix T1 = gm * heptmove[sp2] * spin(2*M_PI*e/S7) * S * where;
+          auto curdist = hdist(tC0(T1), hint);
+          if(curdist < bestdist) T = T1, bestdist = curdist;
+          }
         }
+      return T;
       }
     for(int d=0; d<S7; d++) if(h2->move[d] == h1) {
       int sp = h2->spin(d);
@@ -3421,17 +3460,14 @@ transmatrix calc_relative_matrix(cell *c2, cell *c1) {
 transmatrix &ggmatrix(cell *c) {
   transmatrix& t = gmatrix[c];
   if(t[2][2] == 0) {
-    if(torus) {
-      forCellIdEx(c2, i, c)
-        if(celldistance(c2, centerover.c) < celldistance(c, centerover.c))
-          t = ggmatrix(c2) * eumovedir(3+i);
-      }
+    if(torus && centerover.c) 
+      t = calc_relative_matrix(c, centerover.c, NOHINT);
     else if(euclid) {
       if(!centerover.c) centerover = cwt;
       t = View * eumove(cell_to_vec(c) - cellwalker_to_vec(centerover));
       }
     else 
-      t = actualV(viewctr, cview()) * calc_relative_matrix(c, viewctr.h->c7);
+      t = actualV(viewctr, cview()) * calc_relative_matrix(c, viewctr.h->c7, NOHINT);
     }
   return t;
   }
