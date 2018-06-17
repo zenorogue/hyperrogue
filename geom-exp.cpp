@@ -220,6 +220,15 @@ void showTorusConfig() {
 
 string bitruncnames[2] = {" (b)", " (n)"};
 
+void validity_info() {
+  int vccolors[4] = {0xFF0000, 0xFF8000, 0xFFFF00, 0x00FF00};
+  auto lv = land_validity(specialland);
+  if(lv.flags & lv::display_error_message)
+    dialog::addInfo(XLAT(lv.msg), vccolors[lv.quality_level]);
+  else
+    dialog::addBreak(100);
+  }
+
 void showEuclideanMenu() {
   cmode = sm::SIDE;
   gamescreen(0);  
@@ -241,6 +250,8 @@ void showEuclideanMenu() {
   landvisited[laSnakeNest] |= landvisited[laRedRock];
   landvisited[laCA] = true;
   // for(int i=2; i<lt; i++) landvisited[i] = true;
+
+  string validclasses[4] = {" (X)", " (½)", "", " (!)"};
   
   if(ewhichscreen == 2) {
     dialog::init(XLAT("experiment with geometry"));
@@ -259,8 +270,11 @@ void showEuclideanMenu() {
     dialog::addSelItem(XLAT("land"), XLAT1(linf[specialland].name), '5');
     dialog::addBreak(50);
 
-    for(int i=0; i<gGUARD; i++)
+    for(int i=0; i<gGUARD; i++) {
       dialog::addBoolItem(XLAT(ginf[i].name), geometry == i, 'a'+i);
+      dynamicval<eGeometry> cg(geometry, eGeometry(i));
+      dialog::lastItem().value += validclasses[land_validity(specialland).quality_level];
+      }
     
     dialog::addBreak(50);
   
@@ -273,7 +287,9 @@ void showEuclideanMenu() {
       dialog::lastItem().value = gp::operation_name();
       }
   
-    dialog::addBreak(50);
+    dialog::addBreak(25);
+    validity_info();    
+    dialog::addBreak(25);
   
     int worldsize = denom ? nom/denom : 0;
     if(tq & qTORUS) worldsize = torusconfig::qty;
@@ -391,7 +407,6 @@ void showEuclideanMenu() {
       char ch;
       if(i < 26) ch = 'a' + i;
       else ch = 'A' + (i-26);
-      string validclasses[4] = {" (X)", " (½)", "", " (!)"};
       string s = XLAT1(linf[l].name);
 
       if(landvisited[l]) {
@@ -408,6 +423,10 @@ void showEuclideanMenu() {
     if(chaosUnlocked && !quotient && !euclid && !sphere)
       dialog::addItem(XLAT("Chaos mode"), '1');
     dialog::addItem(XLAT("next page"), '-');
+
+    dialog::addBreak(25);
+    validity_info();    
+    dialog::addBreak(25);
     
     dialog::addHelp();
     dialog::addBack();
