@@ -1269,6 +1269,7 @@ void fillpixel(int x, int y, unsigned col) {
   }
 
 void texture_data::undo() {
+  texture::config.data.pixels_to_draw.clear();
   while(!undos.empty()) {
     auto p = undos.back();
     undos.pop_back();
