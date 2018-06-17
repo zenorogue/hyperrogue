@@ -1,4 +1,4 @@
-# This Makefile works for Mac OS X (Yosemite).
+# This Makefile works for Mac OS X (El Capitan).
 #
 # Run "brew install sdl" to install SDL in /usr/local.
 # Run "brew install sdl_gfx".
@@ -7,15 +7,31 @@
 # Run "make -f Makefile.mac" to build HyperRogue as ./hyper.
 
 CXXFLAGS += -std=c++11 -march=native -DMAC
-# CXXFLAGS += -DCAP_ROGUEVIZ
 CXXFLAGS += -W -Wall -Wextra -pedantic
-CXXFLAGS += -Wno-format-pedantic -Wno-unused-parameter -Wno-char-subscripts -Wno-missing-field-initializers -Wno-vla-extension
-CXXFLAGS += ${EXTRA_CXXFLAGS}
+CXXFLAGS += -Wno-format-pedantic -Wno-unused-parameter -Wno-missing-field-initializers -Wno-vla-extension
 CXXFLAGS += -I/usr/local/include
+CXXFLAGS += ${EXTRA_CXXFLAGS}
+
 LDFLAGS += -L/usr/local/lib
 
-hyper: hyper.o
-	$(CXX) $(CXXFLAGS) hyper.o $(LDFLAGS) -lSDL -lSDLMain -lSDL_gfx -lSDL_mixer -lSDL_ttf -framework AppKit -framework OpenGL -o hyper
+OBJS = hyper.o
+
+ifeq (a,b)
+# Enable PNG screenshots. Requires "brew install libpng".
+CXXFLAGS += -DCAP_PNG
+LDFLAGS += -lpng
+OBJS += savepng.o
+else
+CXXFLAGS += -DCAP_PNG=0
+endif
+
+ifeq (a,b)
+# Enable RogueViz.
+CXXFLAGS += -DCAP_ROGUEVIZ
+endif
+
+hyper: $(OBJS)
+	$(CXX) $(CXXFLAGS) $(OBJS) $(LDFLAGS) -lSDL -lSDLMain -lSDL_gfx -lSDL_mixer -lSDL_ttf -framework AppKit -framework OpenGL -o hyper
 
 hyper.o: *.cpp language-data.cpp
 	$(CXX) $(CXXFLAGS) -O2 -c hyper.cpp
@@ -23,11 +39,13 @@ hyper.o: *.cpp language-data.cpp
 langen: langen.cpp language-??.cpp language-ptbr.cpp
 	$(CXX) $(CXXFLAGS) -O0 -Wno-embedded-directive langen.cpp -o langen
 
-# Generation of language-data.cpp
 language-data.cpp: langen
 	./langen > language-data.cpp
+
+savepng.o: savepng.cpp
+	$(CXX) $(CXXFLAGS) -O2 -c savepng.cpp
 
 .PHONY: clean
 
 clean:
-	rm -f langen language-data.cpp hyper.o hyper
+	rm -f hyper hyper.o langen language-data.cpp savepng.o

@@ -6,6 +6,8 @@
 #define VERNUM 10403
 #define VERNUM_HEX 0xA0B3
 
+#include <stdarg.h>
+
 namespace hr {
 
 using namespace std;
@@ -368,7 +370,7 @@ string its(int i);
 int hrand(int i);
 
 #ifndef STDSIZE
-template<class T> int size(const T& x) {return int(x.size()); }
+template<class T> int size(const T& x) {return x.size(); }
 #endif
 
 // initialize the achievement system.
@@ -3433,7 +3435,15 @@ int score_default(int id);
 void handle_event(SDL_Event& ev);
 
 #ifndef XPRINTF
-template<class...T> void Xprintf(const char *fmt, T... t) { printf(fmt, t...); }
+#ifdef __GNUC__
+__attribute__((__format__ (__printf__, 1, 2)))
+#endif
+void Xprintf(const char *fmt, ...) {
+    va_list ap;
+    va_start(ap, fmt);
+    vprintf(fmt, ap);
+    va_end(ap);
+}
 #endif
 
 void pop_game();

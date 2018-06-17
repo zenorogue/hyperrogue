@@ -7,11 +7,26 @@
 
 CXXFLAGS += -std=c++11 -mwindows -DWINDOWS
 CXXFLAGS += -D_A_VOLID=8
-CXXFLAGS += -DCAP_PNG=0
 CXXFLAGS += ${EXTRA_CXXFLAGS}
 
-hyper.exe: hyper.obj hyper.res
-	$(CXX) $(CXXFLAGS) hyper.obj hyper.res -lSDL -lSDL_mixer -lopengl32 -lSDL_ttf -lSDL_gfx -lglew32 -o hyper.exe
+OBJS = hyper.obj
+
+ifeq (a,b)
+# Enable PNG screenshots. Requires libpng.
+CXXFLAGS += -DCAP_PNG
+LDFLAGS += -lpng
+OBJS += savepng.obj
+else
+CXXFLAGS += -DCAP_PNG=0
+endif
+
+ifeq (a,b)
+# Enable RogueViz.
+CXXFLAGS += -DCAP_ROGUEVIZ
+endif
+
+hyper.exe: $(OBJS) hyper.res
+	$(CXX) $(CXXFLAGS) $(OBJS) hyper.res -lSDL -lSDL_mixer -lopengl32 -lSDL_ttf -lSDL_gfx -lglew32 -o hyper.exe
 
 hyper.obj: *.cpp language-data.cpp hyper.res
 	$(CXX) $(CXXFLAGS) -O2 -c hyper.cpp -o hyper.obj
@@ -25,7 +40,10 @@ langen.exe: langen.cpp language-??.cpp language-ptbr.cpp
 language-data.cpp: langen.exe
 	./langen.exe > language-data.cpp
 
+savepng.obj: savepng.cpp
+	$(CXX) $(CXXFLAGS) -O2 -c savepng.cpp -o savepng.obj
+
 .PHONY: clean
 
 clean:
-	rm -f langen.exe language-data.cpp hyper.obj hyper.res hyper.exe
+	rm -f hyper.exe hyper.obj hyper.res langen.exe language-data.cpp savepng.obj 

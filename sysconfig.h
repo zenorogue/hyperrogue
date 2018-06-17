@@ -88,7 +88,7 @@
 #define CAP_SDL (!ISMOBILE)
 #endif
 
-#ifdef CAP_COMPASS
+#ifndef CAP_COMPASS
 #define CAP_COMPASS ISMOBILE
 #endif
 
