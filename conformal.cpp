@@ -337,10 +337,10 @@ namespace conformal {
       
         // virtualRebase(v[j], false);
         
-        hyperpoint prev = shmup::calc_relative_matrix(v[j-1]->base, v[j]->base) *
+        hyperpoint prev = shmup::calc_relative_matrix(v[j-1]->base, v[j]->base, NOHINT) *
           v[j-1]->at * C0;
 
-        hyperpoint next = shmup::calc_relative_matrix(v[j+1]->base, v[j]->base) * 
+        hyperpoint next = shmup::calc_relative_matrix(v[j+1]->base, v[j]->base, NOHINT) * 
           v[j+1]->at * C0;
         
         hyperpoint hmid = mid(prev, next);
@@ -352,7 +352,7 @@ namespace conformal {
         }
       }
     
-    hyperpoint next0 = shmup::calc_relative_matrix(v[1]->base, v[0]->base) * v[1]->at * C0;
+    hyperpoint next0 = shmup::calc_relative_matrix(v[1]->base, v[0]->base, NOHINT) * v[1]->at * C0;
     v[0]->at = v[0]->at * rspintox(inverse(v[0]->at) * next0);
     
     llv = ticks;
@@ -380,7 +380,7 @@ namespace conformal {
   
     hyperpoint now = v[ph]->at * C0;
 
-    hyperpoint next = shmup::calc_relative_matrix(v[ph+1]->base, v[ph]->base) * 
+    hyperpoint next = shmup::calc_relative_matrix(v[ph+1]->base, v[ph]->base, NOHINT) * 
       v[ph+1]->at * C0;
   
     View = spin(M_PI/180 * rotation) * xpush(-(phase-ph) * hdist(now, next)) * View;
@@ -411,7 +411,7 @@ namespace conformal {
     for(int j=0; j<siz-1; j++) {
       hyperpoint next = 
         inverse(v[j]->at) *
-        shmup::calc_relative_matrix(v[j+1]->base, v[j]->base) * 
+        shmup::calc_relative_matrix(v[j+1]->base, v[j]->base, NOHINT) * 
         v[j+1]->at * C0;
         
       hyperpoint nextscr;

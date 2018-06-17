@@ -303,7 +303,7 @@ namespace gp {
   hyperpoint nearcorner(cell *c, local_info& li, int i) {
     cellwalker cw(c, i);
     cw += wstep;
-    transmatrix cwm = shmup::calc_relative_matrix(cw.c, c);
+    transmatrix cwm = shmup::calc_relative_matrix(cw.c, c, i);
     if(elliptic && cwm[2][2] < 0) cwm = centralsym * cwm;
     return cwm * C0;
     }
@@ -311,7 +311,7 @@ namespace gp {
   hyperpoint hypercorner(cell *c, local_info& li, int i) {
     cellwalker cw(c, i);
     cw += wstep;
-    transmatrix cwm = shmup::calc_relative_matrix(cw.c, c);
+    transmatrix cwm = shmup::calc_relative_matrix(cw.c, c, i);
     if(elliptic && cwm[2][2] < 0) cwm = centralsym * cwm;
     auto li1 = get_local_info(cw.c);
     return cwm * get_corner_position(li1, (cw+2).spin);
@@ -358,8 +358,9 @@ namespace gp {
           
           cellwalker cw(c0, c);
           cw += d+sidir+siid+1;
+          int hint = cw.spin;
           cw += wstep;
-          transmatrix cwm = shmup::calc_relative_matrix(cw.c, c0);
+          transmatrix cwm = shmup::calc_relative_matrix(cw.c, c0, hint);
           hyperpoint nfar = cwm*C0;
           auto li1 = get_local_info(cw.c);
           hyperpoint nlfar = cwm * get_corner_position(li1, (cw+2).spin);

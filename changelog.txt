@@ -2489,3 +2489,8 @@ non-game:
 - uniformized the 'back' and 'help' options in menu (consistent hotkeys, consistent placement, added them where they were missing)
 - pushing a thumper through a stranded boat is no longer allowed
 - fixed a bug with pushing Thumpers through tentacles
+
+2018.06.14 16:39
+- fixed viewing the "past challenges"
+- fixed a bug which sometimes caused current scores to be copied to past challenge leaderboards. 
+

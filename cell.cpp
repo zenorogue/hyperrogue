@@ -1362,16 +1362,17 @@ map<pair<cell*, cell*>, int> saved_distances;
 int celldistance(cell *c1, cell *c2) {
   int d = 0;
   
-  if(euclid) {
-    if(torus) 
+  if(euclid6) {
+    if(!torus)
+      return eudist(decodeId(c1->master) - decodeId(c2->master));
+    else if(torus && torusconfig::torus_mode == 0) 
       return torusmap()->dists[torusconfig::vec_to_id(decodeId(c1->master)-decodeId(c2->master))];
-    return eudist(decodeId(c1->master) - decodeId(c2->master));
     }
   
   if(quotient == 2 && !gp::on)
     return currfp.getdist(fieldpattern::fieldval(c1), fieldpattern::fieldval(c2));
 
-  if(sphere || quotient) {
+  if(sphere || quotient || torus) {
     
     if(saved_distances.count(make_pair(c1,c2)))
       return saved_distances[make_pair(c1,c2)];

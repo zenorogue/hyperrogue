@@ -1626,7 +1626,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           for(int t=0; t<c->type; t++) if(c->mov[t]->mpdist > c->mpdist && !pseudohept(c->mov[t]))
             i = t;
           if(i != -1 && !peace::on) 
-            generateSnake(c, i);
+            generateSnake(c, i, 1);
           }
         else if(hrand(16000) < 50+items[itRedGem]+yendor::hardness() && (nonbitrunc?hrand(10)<3:!ishept(c)) && !c->monst)
           c->monst = moRedTroll,
@@ -1641,7 +1641,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           for(int t=0; t<c->type; t++) if(c->mov[t]->mpdist > c->mpdist)
             gooddir.push_back(t);
           if(size(gooddir))
-            generateSnake(c, gooddir[hrand(size(gooddir))]);
+            generateSnake(c, gooddir[hrand(size(gooddir))], 2);
           }
         else if(hrand(10000) < items[itSnake] - 10 + yendor::hardness() && !c->monst && !c->wall && !peace::on) {
           c->monst = pick(moRedTroll, moMiner, moSkeleton, moBomberbird);
@@ -1970,7 +1970,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           c->monst = moMonkey;
         else if(hrand(80000) < 5 + items[itRuby] + yendor::hardness())
           c->monst = moEagle;
-        else if(ishept(c) && c != currentmap->gamestart() && hrand(4000) < 300 + items[itRuby] && !c->monst) {
+        else if(pseudohept(c) && c != currentmap->gamestart() && hrand(4000) < 300 + items[itRuby] && !c->monst) {
           int hardchance = items[itRuby] + yendor::hardness();
           if(hardchance > 25) hardchance = 25;
           bool hardivy = hrand(100) < hardchance;

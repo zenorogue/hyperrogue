@@ -2,9 +2,9 @@
 // It is quite chaotic.
 
 // version numbers
-#define VER "10.4b"
-#define VERNUM 10402
-#define VERNUM_HEX 0xA0B2
+#define VER "10.4c"
+#define VERNUM 10403
+#define VERNUM_HEX 0xA0B3
 
 #include <stdarg.h>
 
@@ -480,7 +480,7 @@ bool movepcto(int d, int subdir = 1, bool checkonly = false);
 void stabbingAttack(cell *mf, cell *mt, eMonster who, int bonuskill = 0);
 bool earthMove(cell *from, int dir);
 void messageKill(eMonster killer, eMonster victim);
-void moveMonster(cell *ct, cell *cf);
+void moveMonster(cell *ct, cell *cf, int direction_hint);
 int palaceHP();
 void placeLocalOrbs(cell *c);
 int elementalKills();
@@ -654,7 +654,7 @@ namespace shmup {
   
   void virtualRebase(cell*& base, transmatrix& at, bool tohex);
   void virtualRebase(shmup::monster *m, bool tohex);
-  transmatrix calc_relative_matrix(cell *c, cell *c1);
+  transmatrix calc_relative_matrix(cell *c, cell *c1, int direction_hint);
   void fixStorage();
   void addShmupHelp(string& out);
   void activateArrow(cell *c);
@@ -664,6 +664,8 @@ namespace shmup {
   void pushmonsters();
   void popmonsters();
   }
+
+static const int NOHINT = -1;
 
 // graph
 
@@ -1552,16 +1554,16 @@ struct animation {
 extern map<cell*, animation> animations[ANIMLAYERS];
 extern unordered_map<cell*, transmatrix> gmatrix, gmatrix0;
 
-void animateAttack(cell *src, cell *tgt, int layer);
+void animateAttack(cell *src, cell *tgt, int layer, int direction_hint);
 
-void animateMovement(cell *src, cell *tgt, int layer);
+void animateMovement(cell *src, cell *tgt, int layer, int direction_hint);
 
 // for animations which might use the same locations,
 // such as replacements or multi-tile monsters
-void indAnimateMovement(cell *src, cell *tgt, int layer);
+void indAnimateMovement(cell *src, cell *tgt, int layer, int direction_hint);
 void commitAnimations(int layer);
 
-void animateReplacement(cell *a, cell *b, int layer);
+void animateReplacement(cell *a, cell *b, int layer, int direction_hinta, int direction_hintb);
 void fallingFloorAnimation(cell *c, eWall w = waNone, eMonster m = moNone);
 void fallingMonsterAnimation(cell *c, eMonster m, int id = multi::cpid);
 
@@ -2780,7 +2782,6 @@ namespace texture {
   void showMenu();
   
   void drawPixel(cell *c, hyperpoint h, int col);
-
   extern cell *where;
   // compute 'c' automatically, based on the hint in 'where'
   void drawPixel(hyperpoint h, int col);
@@ -3511,5 +3512,9 @@ void gdpush(int t);
 #endif
 
 extern int fontscale;
+
+bool confusingGeometry();
+
+int revhint(cell *c, int hint);
 
 }

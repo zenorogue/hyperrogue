@@ -110,7 +110,7 @@ void calcMousedest() {
   ld dists[MAX_EDGE];
   
   for(int i=0; i<cwt.c->type; i++)
-    dists[i] = intval(mouseh, tC0(shmup::ggmatrix(cwt.c->mov[i])));
+    dists[i] = intval(mouseh, tC0(confusingGeometry() ? shmup::ggmatrix(cwt.c) * shmup::calc_relative_matrix(cwt.c->mov[i], cwt.c, i) : shmup::ggmatrix(cwt.c->mov[i])));
   
   /* printf("curcell = %Lf\n", mousedist);
   for(int i=0; i<cwt.c->type; i++)

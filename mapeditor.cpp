@@ -547,6 +547,12 @@ namespace mapeditor {
         if((isWorm(c) || isIvy(c) || isMutantIvy(c)) && c->mov[cdir] && 
           !isWorm(c->mov[cdir]) && !isIvy(c->mov[cdir]))
           c->mondir = NODIR;
+        
+        if(c->monst == moMimic) {
+          c->monst = moNone;
+          mirror::createMirror(cellwalker(c, cdir, true), 0);
+          c->monst = moMimic;
+          }
         break;
       case 1:
         c->item = eItem(paintwhat);
@@ -1054,6 +1060,8 @@ namespace mapeditor {
       displaymm('d', 8, 8+fs*7, 2, vid.fsize, XLAT("d = draw"), 0);
       displaymm('l', 8, 8+fs*8, 2, vid.fsize, XLAT("l = line"), 0);
       displaymm('c', 8, 8+fs*9, 2, vid.fsize, XLAT("c = circle"), 0);
+      int s = size(texture::config.data.pixels_to_draw);
+      if(s) displaymm(0, 8, 8+fs*11, 2, vid.fsize, its(s), 0);
       }
 #endif
     else {
