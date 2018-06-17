@@ -2,9 +2,9 @@
 // It is quite chaotic.
 
 // version numbers
-#define VER "10.4b"
-#define VERNUM 10402
-#define VERNUM_HEX 0xA0B2
+#define VER "10.4c"
+#define VERNUM 10403
+#define VERNUM_HEX 0xA0B3
 
 namespace hr {
 
