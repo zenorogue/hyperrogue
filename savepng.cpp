@@ -35,6 +35,9 @@ static void png_write_SDL(png_structp png_ptr, png_bytep data, png_size_t length
 	SDL_RWwrite(rw, data, sizeof(png_byte), length);
 }
 
+#ifdef __cplusplus
+extern "C"
+#endif
 SDL_Surface *SDL_PNGFormatAlpha(SDL_Surface *src) 
 {
 	SDL_Surface *surf;
@@ -56,6 +59,9 @@ SDL_Surface *SDL_PNGFormatAlpha(SDL_Surface *src)
 	return surf;
 }
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int SDL_SavePNG_RW(SDL_Surface *surface, SDL_RWops *dst, int freedst) 
 {
 	png_structp png_ptr;

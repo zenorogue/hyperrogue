@@ -14,7 +14,9 @@
 #include <stdlib.h>
 using namespace std;
 
-template<class T> int size(T x) { return x.size(); }
+#ifndef STDSIZE
+template<class T> int size(const T& x) { return x.size(); }
+#endif
 
 #define NUMLAN 7
 
