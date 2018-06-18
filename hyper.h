@@ -38,6 +38,7 @@ using std::stable_sort;
 using std::out_of_range;
 using std::get;
 using std::random_shuffle;
+using std::abs;
 
 // genus (in grammar)
 #define GEN_M 0
