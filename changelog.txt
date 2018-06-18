@@ -2490,7 +2490,25 @@ non-game:
 - pushing a thumper through a stranded boat is no longer allowed
 - fixed a bug with pushing Thumpers through tentacles
 
-2018.06.14 16:39
+2018.06.14 16:39 Update 10.4c
 - fixed viewing the "past challenges"
 - fixed a bug which sometimes caused current scores to be copied to past challenge leaderboards. 
+
+2018.06.18 17:49 Update 10.4d
+- no more ambushes when summoning orbs in the Hunting Grounds (this problem affects the current Strange Challenge in a very negative way IMO, so I have removed the scores so far)
+- Land validity is displayed when selecting geometry after selecting land. Validity message appears in the geom-exp menu.
+- movement animations now work in quotient geometries
+- Rock Snakes from the Snake Nest now keep their colors in other lands
+- more Ivy in the Jungle in Goldberg geometries
+- fixed problems with computing distances in non-standard tori
+- creating Mimics in the map editor now works correctly
+- fixed saving the full texture
+- fixed some problems with adjusting textures to Goldberg geometries in the texture mode; improved the delayed pixel drawing
+
+
+
+
+
+
+
 
