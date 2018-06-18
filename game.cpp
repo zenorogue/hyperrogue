@@ -6618,7 +6618,7 @@ bool collectItem(cell *c2, bool telekinesis) {
     if(c2->item == itDodeca && peace::on) peace::simon::extend();
     }
 
-  if(c2->land == laHunting && c2->item) {
+  if(c2->land == laHunting && c2->item && !inv::activating) {
     int dogs = ambush(c2, c2->item);
     if(dogs)
       addMessage(XLAT("You are ambushed!"));
