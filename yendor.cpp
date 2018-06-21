@@ -863,9 +863,11 @@ int modecode() {
   
   int mct = modecodetable[xcode][np];
 
+/*
   if(geometry == gTorus) mct += 512;
-  if(geometry == gQuotient) mct += 1024;
-  if(geometry == gQuotient2) mct += 1536;
+  if(geometry == gZebraQuotient) mct += 1024;
+  if(geometry == gFieldQuotient) mct += 1536;
+  */
 #if CAP_INV
   if(inv::on) mct += 2048;
 #endif

@@ -265,7 +265,7 @@ namespace hr { namespace gp {
     auto& ac2 = set_heptspin(vc[2], hs + 1 + wstep - 4);
     ac2.mindir = 1;
     
-    if(elliptic && param.first == param.second) {
+    if(nonorientable && param.first == param.second) {
       int x = param.first;
       if(ac1.cw.mirrored != hs.mirrored) ac1.cw--;
       if(ac2.cw.mirrored != hs.mirrored) ac2.cw--;
@@ -535,8 +535,8 @@ namespace hr { namespace gp {
     auto old_tstate_max = texture::config.tstate_max;
 #endif
     xy = internal_representation(xy);
-    if(xy.second && xy.second != xy.first && elliptic) {
-      addMessage("This does not work in elliptic geometry");
+    if(xy.second && xy.second != xy.first && nonorientable) {
+      addMessage(XLAT("This does not work in non-orientable geometries"));
       xy.second = 0;
       }
     config = human_representation(xy);

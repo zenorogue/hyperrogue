@@ -626,7 +626,20 @@ namespace patterns {
         sp = gp::last_dir(c);
         sp ^= ishex2(c);
         }
-      si.id = 8 * ((c->master->fiftyval & 1) ^ (sp & 1));
+      if(geometry == gBolza2) {
+        patterninfo si0;
+        patterninfo si1;
+        patterninfo si2;
+        val38(c->mov[0], si0, 0, PAT_COLORING);
+        val38(c->mov[2], si1, 0, PAT_COLORING);
+        val38(c->mov[4], si2, 0, PAT_COLORING);
+        if((si0.id+1) % 3 == (si1.id) % 3)
+          si.id = 8;
+        else
+          si.id = 0;
+        }
+      else 
+        si.id = 8 * ((c->master->fiftyval & 1) ^ (sp & 1));
       if(gp::on && pseudohept(c)) si.id = 4;
       bool dock = false;
       for(int i=0; i<c->type; i+=2) {

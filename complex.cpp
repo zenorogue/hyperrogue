@@ -1062,7 +1062,7 @@ namespace mirror {
   static const int LIGHTNING = -1; // passed instead of cpid
   
   bool noMirrorOn(cell *c) {
-    return c->monst || (!shmup::on && isPlayerOn(c)) || (geometry != gQuotient2 && geometry != gTorus && c->cpdist > gamerange());
+    return c->monst || (!shmup::on && isPlayerOn(c)) || (geometry != gFieldQuotient && geometry != gTorus && c->cpdist > gamerange());
     }
 
   bool cellMirrorable(cell *c) {

@@ -588,23 +588,120 @@ struct hrmap_quotient : hrmap {
   vector<heptagon*> allh;
   
   hrmap_quotient() {  
+  
+    static int symmask = (1<<30);
 
-    if(quotient == 2) {
-      connections = currfp.connections;
-      }
-    else {
-      heptspin hs; hs.h = base.origin; hs.spin = 0;
-      reachable.clear();
-      bfsq.clear();
-      connections.clear();
-      add(hs);
-
-      for(int i=0; i<(int)bfsq.size(); i++) {
-        hs = bfsq[i] + wstep;
-        add(hs);
-        connections.push_back(reachable[get(hs)]);
+    connections.clear();
+    switch(geometry) {
+      case gFieldQuotient: {
+        connections = currfp.connections;
+        break;
         }
-
+        
+      case gZebraQuotient: {
+        heptspin hs; hs.h = base.origin; hs.spin = 0;
+        reachable.clear();
+        bfsq.clear();
+        add(hs);
+  
+        for(int i=0; i<(int)bfsq.size(); i++) {
+          hs = bfsq[i] + wstep;
+          add(hs);
+          connections.push_back(reachable[get(hs)]);
+          }
+        break;
+        }
+      
+      case gMinimal: {
+        int altzebra[6][7] = {  
+          { 16,125,111, 45, 32, 56, 20 },
+          { 26,102,146,152, 35,124, 00 },
+          { 06, 55,143,134,115,101, 10 },
+          { 41, 50, 04, 44,123, 14,153 },
+          { 51, 30,154,122, 33, 03,112 },
+          { 31, 40,113,136,142, 21, 05 }
+          };
+               
+        // int ok = 0;
+        for(int a=0; a<6; a++) {
+        for(int b=0; b<7; b++) {
+          int s = altzebra[a][b];
+          int mirr = s/100; s %= 100;
+          int which = s/10; s %= 10;
+          
+          int shouldbe = a*10+b+mirr*100;
+          
+          if(altzebra[which][s] != shouldbe) {
+            printf("error at %d:%d (is=%d shouldbe=%d)\n", a, b, altzebra[which][s], shouldbe);
+            }
+          
+          connections.push_back(which * 7 + s + (mirr ? symmask : 0) );
+          }
+          }
+        break;
+        }
+      
+      case gKleinQuartic: {
+        connections = {
+          /* 000 */ 7, 14, 21, 28, 35, 42, 49,
+          /* 001 */ 0, 55, 56, 63, 70, 77, 15,
+          /* 002 */ 1, 13, 83, 84, 91, 98, 22,
+          /* 003 */ 2, 20, 104, 105, 112, 119, 29,
+          /* 004 */ 3, 27, 125, 74, 126, 133, 36,
+          /* 005 */ 4, 34, 139, 95, 66, 140, 43,
+          /* 006 */ 5, 41, 146, 116, 87, 147, 50,
+          /* 007 */ 6, 48, 153, 130, 108, 57, 8,
+          /* 008 */ 9, 54, 107, 102, 154, 142, 64,
+          /* 009 */ 10, 62, 141, 39, 94, 161, 71,
+          /* 010 */ 11, 69, 167, 127, 31, 124, 78,
+          /* 011 */ 12, 76, 123, 158, 149, 85, 16,
+          /* 012 */ 17, 82, 148, 46, 115, 163, 92,
+          /* 013 */ 18, 90, 162, 67, 38, 138, 99,
+          /* 014 */ 19, 97, 137, 155, 59, 106, 23,
+          /* 015 */ 24, 103, 58, 53, 129, 165, 113,
+          /* 016 */ 25, 111, 164, 88, 45, 145, 120,
+          /* 017 */ 26, 118, 144, 159, 79, 75, 30,
+          /* 018 */ 32, 73, 166, 109, 52, 152, 134,
+          /* 019 */ 33, 132, 151, 156, 100, 96, 37,
+          /* 020 */ 40, 65, 61, 160, 121, 117, 44,
+          /* 021 */ 47, 86, 81, 157, 135, 131, 51,
+          /* 022 */ 60, 101, 136, 150, 80, 122, 143,
+          /* 023 */ 68, 93, 89, 114, 110, 128, 72,
+          };
+        break;
+        }
+      
+      case gBolza: {
+        connections = {
+          /* 000 */ 8, 16, 24, 32, 12, 20, 28, 36,
+          /* 001 */ 0, 35, 47, 21, 4, 39, 43, 17,
+          /* 002 */ 1, 15, 42, 29, 5, 11, 46, 25,
+          /* 003 */ 2, 23, 45, 37, 6, 19, 41, 33,
+          /* 004 */ 3, 31, 40, 9, 7, 27, 44, 13,
+          /* 005 */ 34, 30, 18, 14, 38, 26, 22, 10,
+          };
+        break;
+        }
+      
+      case gBolza2: {
+        connections = {
+/* 000 */ 16, 32, 48, 64, 24, 40, 56, 72,
+/* 001 */ 20, 44, 52, 76, 28, 36, 60, 68,
+/* 002 */ 0, 79, 83, 45, 8, 67, 95, 33,
+/* 003 */ 4, 71, 87, 37, 12, 75, 91, 41,
+/* 004 */ 1, 23, 94, 61, 13, 27, 86, 49,
+/* 005 */ 5, 31, 90, 53, 9, 19, 82, 57,
+/* 006 */ 2, 39, 85, 77, 10, 43, 89, 65,
+/* 007 */ 6, 47, 81, 69, 14, 35, 93, 73,
+/* 008 */ 3, 55, 88, 21, 15, 59, 80, 25,
+/* 009 */ 7, 63, 92, 29, 11, 51, 84, 17,
+/* 010 */ 70, 58, 46, 18, 78, 50, 38, 26,
+/* 011 */ 66, 54, 42, 30, 74, 62, 34, 22,
+          };
+        break;
+        }
+      
+      default: break; 
       }
     
     int TOT = connections.size() / S7;
@@ -632,13 +729,16 @@ struct hrmap_quotient : hrmap {
         h->c7 = newCell(S7, h);
         }
       for(int j=0; j<S7; j++) {
-        h->move[rv(j)] = allh[connections[i*S7+j]/S7];
-        h->setspin(rv(j), rv(connections[i*S7+j]%S7));
+        int co = connections[i*S7+j];
+        bool swapped = co & symmask;
+        co &= ~symmask;
+        h->move[rv(j)] = allh[co/S7];
+        h->setspin(rv(j), rv(co%S7) + (swapped ? 8 : 0));
         }
       }
   
     for(int i=0; i<TOT; i++) {
-      generateAlts(allh[i], S3-3, false);
+      generateAlts(allh[i], geometry == gBolza2 ? 3 : S3-3, false);
       allh[i]->emeraldval = allh[i]->alt->emeraldval;
       allh[i]->zebraval = allh[i]->alt->zebraval;
       allh[i]->fiftyval = allh[i]->alt->fiftyval;

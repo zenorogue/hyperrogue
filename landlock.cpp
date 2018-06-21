@@ -1089,10 +1089,10 @@ land_validity_t& land_validity(eLand l) {
     if(l != laElementalWall)
       return technical;
     // not good in Field quotient
-    if(quotient == 2)
-      return no_great_walls;
-    if(quotient == 1)
+    if(geometry == gZebraQuotient)
       return special_geo3;
+    if(quotient)
+      return no_great_walls;
     if(weirdhyperbolic)
       return simplified_walls;
     // works nice on a big non-tetrahedron-based sphere
@@ -1101,7 +1101,7 @@ land_validity_t& land_validity(eLand l) {
     }
   
   // does not agree with the pattern
-  if(l == laStorms && quotient == 2) 
+  if(l == laStorms && quotient && geometry != gZebraQuotient) 
     return pattern_not_implemented_random;
   
   // pattern not implemented
@@ -1228,7 +1228,7 @@ land_validity_t& land_validity(eLand l) {
   
   // works in most spheres, Zebra quotient, and stdeuc
   if(l == laWhirlwind) {
-    if(quotient == 1)
+    if(geometry == gZebraQuotient)
       return pattern_compatibility;
     if(stdeuc) ;
     else if(S7 == 4 && !nonbitrunc) return special_geo;
@@ -1272,7 +1272,7 @@ land_validity_t& land_validity(eLand l) {
     return ugly_version;
     }
 
-  if(l == laWarpCoast && quotient == 2 && !randomPatternsMode) 
+  if(l == laWarpCoast && quotient && geometry != gZebraQuotient && !randomPatternsMode) 
     return pattern_incompatibility;
   
   // laPower and laEmerald and laPalace -> [partial] in quotients and hyperbolic_non37
@@ -1289,7 +1289,7 @@ land_validity_t& land_validity(eLand l) {
   if(l == laWineyard && (gp::on || sphere) && !randomPatternsMode)
     return pattern_not_implemented_random;
   
-  if(l == laTrollheim && quotient == 2)
+  if(l == laTrollheim && quotient == qFIELD)
     return not_enough_space;
       
   if(l == laStorms && hyperbolic_not37)
@@ -1298,7 +1298,7 @@ land_validity_t& land_validity(eLand l) {
   if(l == laTrollheim && !stdeuc && !bounded)
     return some1;
   
-  if(l == laReptile && (a38 || a4 || sphere || nonbitrunc || gp::on || quotient == 2))
+  if(l == laReptile && (a38 || a4 || sphere || nonbitrunc || gp::on || (quotient && geometry != gZebraQuotient)))
     return bad_graphics;
 
   if((l == laDragon || l == laReptile) && !stdeuc && !smallbounded && !randomPatternsMode)
@@ -1321,7 +1321,7 @@ land_validity_t& land_validity(eLand l) {
   if(l == laCrossroads4 && quotient)
     return some0;
 
-  if(l == laZebra && quotient == 2 && !randomPatternsMode)
+  if(l == laZebra && quotient && geometry != gZebraQuotient && !randomPatternsMode)
     return pattern_incompatibility;
   
   if(l == laZebra && !(stdeuc || (a4 && nonbitrunc) || a46) && !randomPatternsMode)
@@ -1332,7 +1332,7 @@ land_validity_t& land_validity(eLand l) {
 
   if(l == laPrairie) {
     if(gp::on) return not_implemented;
-    else if(stdeuc || (bigsphere && !nonbitrunc && !elliptic) || (quotient == 2)) ;
+    else if(stdeuc || (bigsphere && !nonbitrunc && !elliptic) || (geometry == gFieldQuotient)) ;
     else if(!bounded) return not_implemented;
     else return unbounded_only;
     }
@@ -1345,11 +1345,15 @@ land_validity_t& land_validity(eLand l) {
     return full_game; 
   
   // highlight Zebra-based lands on Zebra Quotient!
-  if((l == laZebra || l == laWhirlwind || l == laStorms || l == laWarpCoast || l == laWarpSea) && quotient == 1)
+  if((l == laZebra || l == laWhirlwind || l == laStorms || l == laWarpCoast || l == laWarpSea) && geometry == gZebraQuotient)
     return pattern_compatibility;
   
   // highlight FP-based lands on Field Quotient!
-  if((l == laPrairie || l == laVolcano || l == laBlizzard) && quotient == 2)
+  if((l == laPrairie || l == laVolcano || l == laBlizzard) && geometry == gFieldQuotient)
+    return pattern_compatibility; 
+
+  // highlight Docks-based lands on Bolza and Bolza x2!
+  if(l == laDocks && among(geometry, gBolza, gBolza2))
     return pattern_compatibility; 
   
   // these are highlighted whenever allowed
@@ -1380,14 +1384,14 @@ land_validity_t& land_validity(eLand l) {
   if(l == laMagnetic || l == laBrownian)
     return land_not_implemented;
 
-  if(shmup::on && among(l, laMirror, laMirrorOld) && among(geometry, gElliptic, gQuotient))
+  if(shmup::on && among(l, laMirror, laMirrorOld) && among(geometry, gElliptic, gZebraQuotient, gKleinQuartic, gBolza, gBolza2, gMinimal))
     return known_buggy;
 
   // these don't appear in normal game, but do appear in special modes
   if(l == laWildWest && !randomPatternsMode)
     return out_of_theme;
   
-  if(l == laIce && !gp::on && hyperbolic_37)
+  if(l == laIce && !gp::on && hyperbolic_37 && !quotient)
     return full_game;
 
   return ok;

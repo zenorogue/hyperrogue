@@ -75,13 +75,13 @@ void showQuotientConfig() {
     else if(uni == 'x' || uni == '\n') {
       targetgeometry = gxcur.base; stop_game_and_switch_mode(rg::geometry);
       enableFieldChange();
-      targetgeometry = gQuotient2; stop_game_and_switch_mode(rg::geometry);
+      targetgeometry = gFieldQuotient; stop_game_and_switch_mode(rg::geometry);
       start_game();
       }
     else if(uni == 'c') {
       targetgeometry = gEuclid; stop_game_and_switch_mode(rg::geometry);
       fieldpattern::quotient_field_changed = false;
-      targetgeometry = gQuotient2; stop_game_and_switch_mode(rg::geometry);
+      targetgeometry = gFieldQuotient; stop_game_and_switch_mode(rg::geometry);
       start_game();
       }
     else if(doexiton(sym, uni))
@@ -229,6 +229,8 @@ void validity_info() {
     dialog::addBreak(100);
   }
 
+bool showquotients;
+
 void showEuclideanMenu() {
   cmode = sm::SIDE;
   gamescreen(0);  
@@ -258,7 +260,7 @@ void showEuclideanMenu() {
     int ts = ginf[geometry].sides;
     int tv = ginf[geometry].vertex;
     int tq = ginf[geometry].quotientstyle;
-    int nom = (nonbitrunc ? tv : tv+ts) * ((tq & qELLIP) ? 2 : 4);
+    int nom = (nonbitrunc ? tv : tv+ts) * ((tq & qNONORIENTABLE) ? 2 : 4);
     int denom = (2*ts + 2*tv - ts * tv);
     
     if(gp::on) {
@@ -271,11 +273,14 @@ void showEuclideanMenu() {
     dialog::addBreak(50);
 
     for(int i=0; i<gGUARD; i++) {
-      dialog::addBoolItem(XLAT(ginf[i].name), geometry == i, 'a'+i);
+      bool on = geometry == i;
       dynamicval<eGeometry> cg(geometry, eGeometry(i));
+      if(!!(quotient || elliptic || torus) != showquotients) continue;
+      dialog::addBoolItem(XLAT(ginf[i].name), on, 'a'+i);
       dialog::lastItem().value += validclasses[land_validity(specialland).quality_level];
       }
     
+    dialog::addBoolItem(XLAT("show quotient spaces"), showquotients, 'u');
     dialog::addBreak(50);
   
     if(ts == 6 && tv == 3)
@@ -286,21 +291,48 @@ void showEuclideanMenu() {
       dialog::addBoolItem(XLAT("Goldberg"), nonbitrunc, 't');
       dialog::lastItem().value = gp::operation_name();
       }
+    
   
     dialog::addBreak(25);
     validity_info();    
     dialog::addBreak(25);
   
-    int worldsize = denom ? nom/denom : 0;
-    if(tq & qTORUS) worldsize = torusconfig::qty;
-    if(tq & qZEBRA) worldsize = 
-      gp::on ? 12 + 14 * (gp::area - 1) :
-      nonbitrunc ? 12 : 
-      40;
-    if(tq & qFIELD) {
-      worldsize = size(currfp.matrices) / ts;
-      if(gp::on) worldsize = worldsize * (2*tv + ts * (gp::area-1)) / tv / 2;
-      else if(!nonbitrunc) worldsize = ((ts+tv)*worldsize) / tv;
+    int worldsize;
+    
+    int gar = 
+      gp::on ? gp::area - 1 :
+      nonbitrunc ? 0 :
+      2;    
+    
+    switch(geometry) {
+      case gTorus: 
+        worldsize = torusconfig::qty;
+        break;
+      
+      case gZebraQuotient:
+        worldsize = 12 + 14 * gar;
+        break;
+      
+      case gFieldQuotient:
+        worldsize = size(currfp.matrices) / ts;
+        worldsize = worldsize * (2*tv + ts * gar) / tv / 2;
+        break;
+      
+      case gKleinQuartic:
+        worldsize = 24 + 28 * gar;
+        break;
+      
+      case gBolza:
+        worldsize = 6 * (2*tv + ts * gar) / tv;
+        break;
+      
+      case gBolza2:
+        worldsize = 12 * (2*tv + ts * gar) / tv;
+        break;
+      
+      default:
+        worldsize = denom ? nom/denom : 0;
+        break;
       }
   
     dialog::addSelItem(XLAT("sides per face"), its(ts), 0);
@@ -311,9 +343,11 @@ void showEuclideanMenu() {
   
     else if(tq & qFIELD) qstring = "field";
   
-    else if(tq & qELLIP) qstring = "torus";
+    else if((tq & qNONORIENTABLE) && sphere) qstring = "elliptic";
   
     else if(tq & qTORUS) qstring = "torus";
+    
+    else if(tq & qSMALL) qstring = ginf[geometry].shortname;
   
     dialog::addSelItem(XLAT("quotient space"), XLAT(qstring), 0);
   
@@ -354,6 +388,8 @@ void showEuclideanMenu() {
         stop_game_and_switch_mode(geometry == targetgeometry ? rg::nothing : rg::geometry);
         start_game();
         }
+      else if(uni == 'u') 
+        showquotients = !showquotients;
       else if(uni == 't') {
         if(euclid6) ;
         else if(S3 == 3) 

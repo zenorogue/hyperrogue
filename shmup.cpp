@@ -1006,13 +1006,13 @@ cell *monster::findbase(const transmatrix& T) {
   }
 
 void monster::rebasePat(const transmatrix& new_pat) {
-  if(isVirtual) { 
+  if(isVirtual) {
     at = new_pat;
-    virtualRebase(this, true); 
+    virtualRebase(this, true);
     fixmatrix(at); pat = at;
     return;
     }
-  if(geometry == gQuotient || geometry == gTorus) {
+  if(among(geometry, gZebraQuotient, gTorus, gKleinQuartic, gBolza, gBolza2, gMinimal)) {
     at = inverse(gmatrix[base]) * new_pat;
     virtualRebase(this, true);
     fixmatrix(at);
@@ -3408,7 +3408,7 @@ transmatrix calc_relative_matrix(cell *c2, cell *c1, int direction_hint) {
 //bool hsol = false;
 //transmatrix sol;
   while(h1 != h2) {
-    if(quotient == 1) {
+    if(quotient & qSMALL) {
       transmatrix T;
       hyperpoint hint = ddspin(c1, direction_hint) * xpush(1e-2) * C0;
       ld bestdist = 1e9;
@@ -3427,7 +3427,7 @@ transmatrix calc_relative_matrix(cell *c2, cell *c1, int direction_hint) {
           if(curdist < bestdist) T = T1, bestdist = curdist;
           }
         }
-      return T;
+      if(bestdist < 1e8) return T;
       }
     for(int d=0; d<S7; d++) if(h2->move[d] == h1) {
       int sp = h2->spin(d);

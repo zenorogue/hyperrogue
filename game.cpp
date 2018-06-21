@@ -4274,7 +4274,7 @@ void moveWorm(cell *c) {
       else
         addMessage(XLAT("The sandworm explodes!"));
       playSound(NULL, "explosion");
-      if(geometry == gQuotient)
+      if(geometry == gZebraQuotient)
         achievement_gain("ZEBRAWORM", rg::geometry);
       }
     return;

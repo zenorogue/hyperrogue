@@ -124,7 +124,7 @@ namespace mapstream {
       save(torusconfig::dx);
       save(torusconfig::dy);
       }
-    if(geometry == gQuotient2) {
+    if(geometry == gFieldQuotient) {
       using namespace fieldpattern;
       save(quotient_field_changed);
       if(quotient_field_changed) {
@@ -216,7 +216,7 @@ namespace mapstream {
         load(torusconfig::dx);
         load(torusconfig::dy);
         }
-      if(geometry == gQuotient2) {
+      if(geometry == gFieldQuotient) {
         using namespace fieldpattern;
         load(quotient_field_changed);
         if(quotient_field_changed) {

@@ -771,7 +771,7 @@ void enableFieldChange() {
   fgeomextra& gxcur = fgeomextras[current_extra];
   fieldpattern::quotient_field_changed = true;
   nextPrimes(gxcur);
-  dynamicval<eGeometry> g(geometry, gQuotient2);
+  dynamicval<eGeometry> g(geometry, gFieldQuotient);
   ginf[geometry].sides = ginf[gxcur.base].sides;
   ginf[geometry].vertex = ginf[gxcur.base].vertex;
   ginf[geometry].distlimit = ginf[gxcur.base].distlimit;

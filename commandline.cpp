@@ -322,8 +322,8 @@ else if(args()[0] == '-' && args()[1] == x && args()[2] == '0') { showstartmenu 
     current_extra = a;
     fgeomextras[current_extra].current_prime_id = b;
     enableFieldChange();
-    if(geometry != gQuotient2) {
-      targetgeometry = gQuotient2; stop_game_and_switch_mode(rg::geometry);
+    if(geometry != gFieldQuotient) {
+      targetgeometry = gFieldQuotient; stop_game_and_switch_mode(rg::geometry);
       }
     }
   else if(argis("-tpar")) { 

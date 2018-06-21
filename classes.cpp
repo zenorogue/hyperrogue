@@ -1658,11 +1658,13 @@ vector<eLand> randlands = {
   laOvergrown, laWildWest, laWarpCoast, laRuins, laBull, laDragon, laReptile, laDocks
   };
 
+static const int qNONOR = qNONORIENTABLE;
+
 geometryinfo ginf[gGUARD] = {
   {"standard",            "HR",       7, 3, 0,      gcHyperbolic,       0, {{7, 5}}},
   {"Euclidean",           "euclid",   6, 3, 0,      gcEuclid,           0, {{7, FORBIDDEN}}},
   {"spherical",           "sphere",   5, 3, 0,      gcSphere,           0, {{SEE_ALL, SEE_ALL}}},
-  {"elliptic",            "elliptic", 5, 3, qELLIP, gcSphere,           0, {{SEE_ALL, SEE_ALL}}},
+  {"elliptic",            "elliptic", 5, 3, qNONOR, gcSphere,           0, {{SEE_ALL, SEE_ALL}}},
   {"Zebra quotient",      "Zebra",    7, 3, qZEBRA, gcHyperbolic, 0x00400, {{7, 5}}},
   {"field quotient",      "field",    7, 3, qFIELD, gcHyperbolic, 0x00200, {{7, 5}}},
   {"torus/Klein bottle",  "torus",    6, 3, qTORUS, gcEuclid,     0x00600, {{7, FORBIDDEN}}},
@@ -1673,7 +1675,11 @@ geometryinfo ginf[gGUARD] = {
   {"cube",                "3x4",      4, 3, 0,      gcSphere,     0x10000, {{SEE_ALL, SEE_ALL}}},
   {"tetrahedron (buggy)", "3x3",      3, 3, 0,      gcSphere,     0x10200, {{SEE_ALL, SEE_ALL}}},
   {"square grid",         "4x4",      4, 4, 0,      gcEuclid,     0x10400, {{7, 7}}},
-  {"cube/elliptic",       "e3x4",     4, 3, qELLIP, gcSphere,     0x10600, {{SEE_ALL, SEE_ALL}}},
+  {"cube/elliptic",       "e3x4",     4, 3, qNONOR, gcSphere,     0x10600, {{SEE_ALL, SEE_ALL}}},
+  {"Klein Quartic",       "Klein",    7, 3, qSMALL,          gcHyperbolic, 0x18000, {{7, 5}}},
+  {"Bolza Surface",       "Bolza",    8, 3, qSMALL | qDOCKS, gcHyperbolic, 0x18200, {{6, 4}}},
+  {"Bolza Surface x2",    "Bolza2",   8, 3, qSMALL | qDOCKS, gcHyperbolic, 0x18400, {{6, 4}}},
+  {"minimal quotient",    "minimal",  7, 3, qSMALL | qNONOR, gcHyperbolic, 0x18600, {{7, 5}}},
   };
 
 }

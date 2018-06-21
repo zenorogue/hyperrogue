@@ -196,7 +196,10 @@ enum eLand { laNone, laBarrier, laCrossroads, laDesert, laIce, laCaves, laJungle
   laSwitch, laMemory, laBrownian
   };
 
-enum eGeometry {gNormal, gEuclid, gSphere, gElliptic, gQuotient, gQuotient2, gTorus, gOctagon, g45, g46, g47, gSmallSphere, gTinySphere, gEuclidSquare, gSmallElliptic, gGUARD};
+enum eGeometry {
+  gNormal, gEuclid, gSphere, gElliptic, gZebraQuotient, gFieldQuotient, gTorus, gOctagon, g45, g46, g47, gSmallSphere, gTinySphere, gEuclidSquare, gSmallElliptic, 
+  gKleinQuartic, gBolza, gBolza2, gMinimal, 
+  gGUARD};
 
 enum eGeometryClass { gcHyperbolic, gcEuclid, gcSphere };
 
@@ -211,10 +214,12 @@ struct geometryinfo {
   std::array<int,2> distlimit; // bitrunc, non-bitrunc
   };
 
-static const int qZEBRA = 1;
+static const int qSMALL = 1;
 static const int qFIELD = 2;
-static const int qELLIP = 4;
+static const int qNONORIENTABLE = 4;
 static const int qTORUS = 8;
+static const int qDOCKS = 16;
+static const int qZEBRA = 32;
 
 // note: dnext assumes that x&7 equals 7
 static const int SEE_ALL = 15;
