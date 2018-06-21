@@ -1362,7 +1362,7 @@ map<pair<cell*, cell*>, int> saved_distances;
 int celldistance(cell *c1, cell *c2) {
   int d = 0;
   
-  if(euclid6) {
+  if(euclid6 || (euclid4 && nonbitrunc)) {
     if(!torus)
       return eudist(decodeId(c1->master) - decodeId(c2->master));
     else if(torus && torusconfig::torus_mode == 0) 
@@ -1387,10 +1387,12 @@ int celldistance(cell *c1, cell *c2) {
     return 64;
     }
   
-  if(gp::on) {
+  if(gp::on || euclid) {
     
     if(saved_distances.count(make_pair(c1,c2)))
       return saved_distances[make_pair(c1,c2)];
+      
+    if(size(saved_distances) > 1000000) saved_distances.clear();
 
     celllister cl(c1, 64, 1000, c2);
 
