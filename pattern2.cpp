@@ -626,13 +626,18 @@ namespace patterns {
         sp = gp::last_dir(c);
         sp ^= ishex2(c);
         }
-      if(geometry == gBolza2 && !gp::on) {
+      if(geometry == gBolza2 && (!gp::on || gp_threecolor() == 2)) {
         patterninfo si0;
         patterninfo si1;
-        patterninfo si2;
-        val38(c->mov[0], si0, 0, PAT_COLORING);
-        val38(c->mov[2], si1, 0, PAT_COLORING);
-        val38(c->mov[4], si2, 0, PAT_COLORING);
+        if(gp::on) {
+          auto li = gp::get_local_info(c);
+          val38(c->master->c7, si0, 0, PAT_COLORING);
+          val38(c->master->move[li.last_dir]->c7, si1, 0, PAT_COLORING);
+          }
+        else {
+          val38(c->mov[0], si0, 0, PAT_COLORING);
+          val38(c->mov[2], si1, 0, PAT_COLORING);
+          }
         if((si0.id+1) % 3 == (si1.id) % 3)
           si.id = 8;
         else
