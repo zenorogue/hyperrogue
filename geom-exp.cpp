@@ -324,11 +324,11 @@ void showEuclideanMenu() {
         break;
       
       case gBolza:
-        worldsize = 6 * (2*tv + ts * gar) / tv;
+        worldsize = 3 * (2*tv + ts * gar) / tv;
         break;
       
       case gBolza2:
-        worldsize = 12 * (2*tv + ts * gar) / tv;
+        worldsize = 6 * (2*tv + ts * gar) / tv;
         break;
       
       default:
