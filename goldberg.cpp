@@ -603,7 +603,10 @@ namespace hr { namespace gp {
     dialog::addSelItem("x", its(config.first), 'x');
     dialog::addSelItem("y", its(config.second), 'y');
     
-    if((config.first-config.second)%3 && !show_nonthree)
+    if(config.second && config.second != config.first && nonorientable) {
+      dialog::addInfo(XLAT("This does not work in non-orientable geometries"));
+      }
+    else if((config.first-config.second)%3 && !show_nonthree)
       dialog::addInfo(XLAT("This pattern needs x-y divisible by 3"));
     else if(config == loc(1,1) && !show_bitrunc)
       dialog::addInfo(XLAT("Select bitruncated from the previous menu"));
