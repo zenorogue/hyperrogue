@@ -626,7 +626,7 @@ namespace patterns {
         sp = gp::last_dir(c);
         sp ^= ishex2(c);
         }
-      if(geometry == gBolza2) {
+      if(geometry == gBolza2 && !gp::on) {
         patterninfo si0;
         patterninfo si1;
         patterninfo si2;
