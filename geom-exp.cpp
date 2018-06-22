@@ -280,6 +280,7 @@ void showEuclideanMenu() {
       dialog::lastItem().value += validclasses[land_validity(specialland).quality_level];
       }
     
+    dialog::addBreak(50);
     dialog::addBoolItem(XLAT("show quotient spaces"), showquotients, 'u');
     dialog::addBreak(50);
   
