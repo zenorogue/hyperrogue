@@ -332,8 +332,8 @@ int dispersion_each = 1;
 
 int dispersion_count;
 
-void buildcellcrawler(cell *c, cellcrawler& cr) {
-  cr.build(cellwalker(c,0));
+void buildcellcrawler(cell *c, cellcrawler& cr, int dir) {
+  cr.build(cellwalker(c,dir));
 
   if(!gaussian) {
     vector<ld> curtemp;
@@ -396,27 +396,85 @@ void buildcellcrawler(cell *c, cellcrawler& cr) {
 
 map<int, cellcrawler> scc;
 
-int get_cellcrawler_id(cell *c) {
+pair<int, int> get_cellcrawler_id(cell *c) {
+  if(among(geometry, gZebraQuotient, gMinimal)) {
+    // Zebra Quotient does exhibit some symmetries,
+    // but these are so small anyway that it is safer to just build
+    // a crawler for every neuron
+    return make_pair(neuronId(*getNeuronSlow(c)), 0);
+    }
   if(torus && (torusconfig::tmflags() & torusconfig::TF_KLEIN))
-    return cell_to_pair(c).second * 2 + ctof(c);
+    return make_pair(cell_to_pair(c).second * 2 + ctof(c), 0);
+  int id = 0, dir = 0;
+  if(gp::on) {
+    gp::local_info li = gp::get_local_info(c);
+    id = (li.relative.first & 15) + (li.relative.second & 15) * 16 + fix6(li.total_dir) * 256;
+    // ld = li.last_dir;
+    }
   else {
-    int id = 0, ld = 0;
-    if(gp::on) {
-      gp::local_info li = gp::get_local_info(c);
-      id = (li.relative.first & 15) + (li.relative.second & 15) * 16 + fix6(li.total_dir) * 256;
-      ld = li.last_dir;
+    id = c->type == S7;
+    // if(id == 0) ld = c->spin(0);
+    }
+  /* if(geometry == gZebraQuotient) {
+    id = 8*id + ld;
+    id = 64 * id + c->master->zebraval;
+    return make_pair(id, 0);
+    } */
+  return make_pair(id, dir);
+  }
+
+/* unit test: do the crawlers work correctly? */
+
+bool verify_crawler(cellcrawler& cc, cellwalker cw) {
+  cc.sprawl(cw);
+  for(auto& d: cc.data) if(celldistance(cw.c, d.target.c) != d.dist) 
+    return false;
+  vector<int> cellcounter(cells, 0);
+  for(auto& d: cc.data) cellcounter[d.target.c->landparam]++;
+  for(int i=0; i<cells; i++) if(cellcounter[i] != 1) return false;
+  return true;
+  }
+
+void verify_crawlers() {
+
+  setindex(false);
+  gaussian = 1;
+  auto& allcells = currentmap->allcells();
+  cells = size(allcells);
+  net.resize(cells);
+  for(int i=0; i<cells; i++) net[i].where = allcells[i];
+  setindex(true);
+  map<int, cellcrawler> allcrawlers;
+  
+  int uniq = 0, failures = 0;
+  
+  printf("Verifying crawlers...\n");  
+  for(cell *c: allcells) {
+    auto id = get_cellcrawler_id(c);
+    if(allcrawlers.count(id.first)) {
+      bool b = verify_crawler(allcrawlers[id.first], cellwalker(c, id.second));
+      if(!b) {
+        printf("cell %p: type = %d id = %d dir = %d / earlier crawler failed\n", c, c->type, id.first, id.second);
+        failures++;
+        }
       }
     else {
-      id = c->type == S7;
-      if(id == 0) ld = c->spin(0);
+      for(int i=0; i<c->type; i++)
+      for(auto& cc: allcrawlers) if(verify_crawler(cc.second, cellwalker(c, i))) {
+        printf("cell %p: type = %d id = %d dir = %d / also works id %d in direction %d\n", c, c->type, id.first, id.second, cc.first, i);
+        uniq--;
+        goto breakcheck;
+        }
+      breakcheck:
+      cellcrawler cr;
+      cr.build(cellwalker(c, id.second));
+      allcrawlers[id.first] = move(cr);
+      uniq++;
       }
-    if(quotient == 1) {
-      id = 8*id + ld;
-      id = 64 * id + c->master->zebraval;
-      return id;
-      }
-    return id;
     }
+  printf("Crawlers constructed: %d (%d unique, %d failures)\n", size(allcrawlers), uniq, failures);
+  setindex(false);
+  if(failures) exit(1);
   }
   
 bool finished() { return t == 0; }
@@ -467,8 +525,9 @@ void step() {
       n2.net[k] += nu * (irisdata[id][k] - n2.net[k]);
     } */
     
-  cellcrawler& s = scc[get_cellcrawler_id(n.where)];
-  s.sprawl(cellwalker(n.where, 0));
+  auto cid = get_cellcrawler_id(n.where);
+  cellcrawler& s = scc[cid.first];
+  s.sprawl(cellwalker(n.where, cid.second));
 
   vector<double> fake(1,1);
   auto it = gaussian ? fake.begin() : s.dispersion[dispid].begin();
@@ -605,10 +664,10 @@ void sominit(int initto) {
     
     scc.clear();
     for(cell *c: currentmap->allcells()) {
-      int id = get_cellcrawler_id(c);
-      if(!scc.count(id)) {
-        printf("Building cellcrawler id = %x\n", id);
-        buildcellcrawler(c, scc[id]);
+      auto cid = get_cellcrawler_id(c);
+      if(!scc.count(cid.first)) {
+        printf("Building cellcrawler id = %x\n", cid.first);
+        buildcellcrawler(c, scc[cid.first], cid.second);
         }
       }
   
@@ -1113,6 +1172,10 @@ int readArgs() {
     }
   else if(argis("-somshowbest")) {
     showbestsamples();
+    }
+  else if(argis("-somverify")) {
+    start_game();
+    verify_crawlers();
     }
 
   else return 1;

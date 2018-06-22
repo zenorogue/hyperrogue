@@ -1,0 +1,309 @@
+# Manually created Makefile for RogueViz.
+
+CXXFLAGS ?=
+
+DEB=-g
+FAST=-O3
+CHOOSE?=${FAST}
+CXX?=g++
+EXEC?=./hyper
+
+MYFLAGS = -DFHS -Wall ${CXXFLAGS} ${CPPFLAGS} -DCAP_ROGUEVIZ=1 -DLINUX -std=c++14 ${CHOOSE} -rdynamic -I/usr/include/SDL
+#-DOTHERSLIDES
+
+drogueviz=rogueviz.cpp tour.cpp rogueviz-kohonen.cpp rogueviz-staircase.cpp rogueviz-banachtarski.cpp
+
+PROF=
+
+GEO6=-geo 1 -zoom 0.63
+GEO7=-7
+
+CMD=${EXEC} -s xx -lab -svgsize 4000/5 -svgfont latex -svggamma 1
+CMDN=${EXEC} -nogui -s xx -lab -svgsize 4000/5 -svgfont latex -svggamma 1
+
+# select one of the 'SAG' visualizations
+DIR?=rogueviz/lang
+#DIR?=rogueviz/roguelikes
+#DIR?=rogueviz/boardgames
+
+MAIN?=hyper.cpp
+
+# time of running the embedder, in seconds
+# more time = better results
+SATIME?=3600
+
+CMDX=${CMD} `cat ${DIR}/options.txt`
+
+CMDXN=${CMDN} `cat ${DIR}/options.txt`
+
+VMUSIC=-i hr3-caves.ogg
+CMUSICI=collatz-bridges.wav
+CMUSIC=-i ${CMUSICI}
+
+SAG=-sag ${DIR}/edges.csv
+COLOR=-color ${DIR}/color.csv
+
+WHITE=-canvas F0F0F0 -back FFFFFF -borders FFFFFF -fore 000000 ${SAG} ${COLOR}
+BLACK=-canvas 101010 ${SAG} ${COLOR}
+
+SA=-fullsa ${SATIME}
+PRE=-TURN --draw
+PRE6=-TURN -nolegend -gencells 10000 --draw --draw --draw --draw --draw --draw -TURN -TURN --draw 
+
+# compile HyperRogue+RogueViz
+
+all: ${EXEC}
+
+${EXEC}: hyper-rogueviz.o savepng-loc.o
+	${CXX} ${PROF} savepng-loc.o hyper-rogueviz.o -o ${EXEC} -lSDL -lSDL_ttf -lSDL_mixer -lSDL_gfx ${CXXFLAGS} ${CPPFLAGS} ${LDFLAGS} -lGL -lGLEW -lpng -rdynamic
+
+savepng-loc.o: savepng.cpp
+	gcc${VER} savepng.cpp -c -o savepng-loc.o
+
+hyper-rogueviz.o: hyper.cpp graph.cpp hyperpoint.cpp geometry.cpp cell.cpp heptagon.cpp game.cpp classes.cpp polygons.cpp language.cpp language-data.cpp achievement.cpp shmup.cpp patterns.cpp mapeditor.cpp patterngen.cpp netgen.cpp yendor.cpp hyper.h rug.cpp flags.cpp system.cpp landgen.cpp orbs.cpp complex.cpp conformal.cpp menus.cpp init.cpp dialogs.cpp sound.cpp util.cpp ${drogueviz} fieldpattern.cpp ${MAIN} control.cpp commandline.cpp
+	${CXX} ${PROF} ${MAIN} -c -o hyper-rogueviz.o ${MYFLAGS}
+
+langen: langen.cpp language-cz.cpp language-pl.cpp language-tr.cpp language-ru.cpp language-de.cpp
+	${CXX} langen.cpp -o langen -g
+
+language-data.cpp: langen
+	./langen > language-data.cpp
+
+.PHONY: gencoords svgs pngs thumbs view play all
+
+play: ${EXEC}
+	${EXEC}
+# generate the coordinates for the SAG (lang/roguelikes) visualization
+# hint: make -j 3 gencoords to do all three variants at once
+
+gencoords: ${DIR}/coord-67.txt ${DIR}/coord-6.txt ${DIR}/coord-7.txt
+
+${DIR}/coord-67.txt: hyper ${DIR}/edges.csv
+	${CMDX} -nogui ${SAG} ${SA} -gsave $@ --exit > ${DIR}/sa-67.txt
+
+${DIR}/coord-6.txt: hyper ${DIR}/edges.csv
+	${CMDX} -nogui ${GEO6} ${SAG} ${SA} -gsave $@ --exit > ${DIR}/sa-6.txt
+
+${DIR}/coord-7.txt: hyper ${DIR}/edges.csv
+	${CMDX} -nogui ${GEO7} ${SAG} ${SA} -gsave $@ --exit > ${DIR}/sa-7.txt
+
+gencoords-4: gencoords-4a gencoords-4b gencoords-4c gencoords-4d 
+
+gencoords-4a:
+	${CMDXN} -sagpar 0 ${SAG} ${SA} -gsave ${DIR}/coord-67a.txt --exit > ${DIR}/sa-67a.txt
+
+gencoords-4b:
+	${CMDXN} -sagpar 1 ${SAG} ${SA} -gsave ${DIR}/coord-67b.txt --exit > ${DIR}/sa-67b.txt
+
+gencoords-4c:
+	${CMDXN} -sagpar 2 ${SAG} ${SA} -gsave ${DIR}/coord-67c.txt --exit > ${DIR}/sa-67c.txt
+
+gencoords-4d:
+	${CMDXN} -sagpar 3 ${SAG} ${SA} -gsave ${DIR}/coord-67d.txt --exit > ${DIR}/sa-67d.txt
+
+# generate the SVG images
+
+svgs: ${DIR}/white-67.svg ${DIR}/white-6.svg ${DIR}/white-7.svg
+
+${DIR}/lik67.txt ${DIR}/white-67.svg: hyper ${DIR}/color.csv
+	${CMDX} ${WHITE} -gload ${DIR}/coord-67.txt ${PRE} -svgshot ${DIR}/white-67.svg -lik --exit > ${DIR}/lik67.txt
+
+${DIR}/lik6.txt ${DIR}/white-6.svg: hyper ${DIR}/color.csv
+	${CMDX} ${GEO6} ${WHITE} -gload ${DIR}/coord-6.txt ${PRE6} -svgshot ${DIR}/white-6.svg -lik --exit > ${DIR}/lik6.txt
+
+${DIR}/lik7.txt ${DIR}/white-7.svg: hyper ${DIR}/color.csv
+	${CMDX} ${GEO7} ${WHITE} -gload ${DIR}/coord-7.txt ${PRE} -svgshot ${DIR}/white-7.svg -lik --exit > ${DIR}/lik7.txt
+
+# generate the black SVG images
+
+darksvgs: ${DIR}/black-67.svg
+
+${DIR}/black-67.svg: hyper ${DIR}/color.csv
+	${CMDX} ${BLACK} -gload ${DIR}/coord-67.txt ${PRE} -svgshot ${DIR}/black-67.svg --exit
+
+# generate the PNG images
+
+pngs: ${DIR}/black-67.png ${DIR}/black-6.png ${DIR}/black-7.png
+
+${DIR}/black-67.png: hyper ${DIR}/color.csv
+	${CMDX} ${BLACK} -gload ${DIR}/coord-67.txt ${PRE} -pngshot $@ --exit
+
+${DIR}/black-6.png: hyper ${DIR}/color.csv
+	${CMDX} ${GEO6} ${BLACK} -gload ${DIR}/coord-6.txt ${PRE6} -pngshot $@ --exit
+
+${DIR}/black-7.png: hyper ${DIR}/color.csv
+	${CMDX} ${GEO7} ${BLACK} -gload ${DIR}/coord-7.txt ${PRE} -pngshot $@ --exit
+
+# generate the thumbnails of PNG images
+
+thumbs: ${DIR}/black-67-thumb.png ${DIR}/black-6-thumb.png ${DIR}/black-7-thumb.png
+
+${DIR}/black-67-thumb.png: ${DIR}/black-67.png
+	convert $< -geometry 550x400 $@
+
+${DIR}/black-6-thumb.png: ${DIR}/black-6.png
+	convert $< -geometry 400x400 $@
+
+${DIR}/black-7-thumb.png: ${DIR}/black-7.png
+	convert $< -geometry 550x400 $@
+
+# generate the video
+
+video: hyper
+	mkdir -p ${DIR}/video
+	rm -rf ${DIR}/video/*.png
+	${CMDX} ${BLACK} -gload ${DIR}/coord-67.txt -pngsize 1080 -pngformat 3 -zoom 1 -video ${DIR}/video/frame%04d.png --exit
+
+video2: ${DIR}/graph.avi
+
+${DIR}/graph.avi: ${DIR}/video/frame0000.png
+	rm -rf ${DIR}/graph.avi
+	ffmpeg -r 30 -i ${DIR}/video/frame%04d.png ${VMUSIC} -vcodec libx264 -acodec libvorbis -shortest ${DIR}/graph.avi
+
+# just view the SAG (lang/roguelikes) visualization
+view: hyper
+	${CMDX} ${BLACK} -gload ${DIR}/coord-67.txt
+
+viewz: hyper
+	${CMDX} -qpar 13 -geo 5 ${BLACK}
+
+view6: hyper
+	${CMDX} ${GEO6} ${BLACK} -gload ${DIR}/coord-6.txt ${PRE6}
+
+view7: hyper
+	${CMDX} ${GEO7} ${BLACK} -gload ${DIR}/coord-7.txt
+
+# Fibonacci snakes
+fibsnakes: hyper
+	${CMD} -spiral 1.618033,100000 -spiraledge 0.5,1.618033
+
+# binary spiral
+binspiral: hyper
+	${CMD} -spiral 2,10000 -spiraledge 0,2 -spiraledge 1,1 -spiralcolor 2 FF4040FF
+
+# Tree of Life
+treeoflife: hyper
+	${CMD} -canvas 101010 -dftcolor 206020FF -ggamma 2 -tree rogueviz/treeoflife/tol.txt
+
+treeoflife-white: hyper
+	${CMD} -canvas F0F0F0 -back FFFFFF -borders FFFFFF -fore 000000 -dftcolor 206020FF -ggamma 2 -tree rogueviz/treeoflife/tol.txt
+
+collatz: hyper
+	${CMD} -canvas h -dftcolor 206020FF -ggamma 2 -collatz .3,.5,-.4,.4
+
+fullnet: hyper
+	${CMD} -dftcolor 808080FF -ggamma 2 -back FFFFFF -net
+
+fullnet7: hyper
+	${CMD} -7 -dftcolor 808080FF -ggamma 2 -back FFFFFF -net
+
+collatz-video/frame0001.png: hyper
+	mkdir -p collatz-video
+	${CMD} -canvas h -dftcolor 206020FF -ggamma 2 -cshift 5 -collatz .3,.55,-.4,.45 -video collatz-video/frame%04d.png --exit
+
+collatzvideo: collatz-video/frame0001.png ${CMUSICI}
+	ffmpeg -r 24 -i collatz-video/frame%04d.png ${CMUSIC} -vcodec libx264 -acodec libvorbis collatz-video.avi
+
+collatz-titleimage.png: hyper
+	${CMD} -canvas h -dftcolor 206020FF -ggamma 2 -collatz .3,.55,-.4,.45 -rog3 -rvwarp --run -pngshot $@ --exit
+
+collatz-titleimage.svg: hyper
+	${CMD} -canvas h -dftcolor 206020FF -ggamma 2 -collatz .3,.55,-.4,.45 -rog3 -rvwarp --run -svgshot $@ --exit
+
+stair: hyper
+	${CMD} -stair
+
+# with help texts
+rvtour: hyper
+	${EXEC} -s xx -W Palace -rvpres --tour
+
+# without help texts
+rvpres: hyper
+	${EXEC} -s xx -W Palace -rvpres --presentation
+
+KOHDIR=rogueviz/iris/
+KOHDATA=-som ${KOHDIR}/data.txt -color ${KOHDIR}/color.csv
+KOH=${KOHDATA} -somrun
+KOHLOAD=${KOHDATA} -somload ${KOHFILE}
+KOHFILE=${KOHDIR}/kohonen.txt
+KOHFILE13=${KOHDIR}/kohonen13.txt
+KOHCLASS=${KOHDIR}/kohonen-classify.txt
+KOHCLASS13=${KOHDIR}/kohonen-classify13.txt
+KOHSAMPLES=${KOHDIR}/kohonen-samples.txt
+KOHSAMPLES13=${KOHDIR}/kohonen-samples13.txt
+KOHSAMP=-som ${KOHSAMPLES} -color ${KOHDIR}/color.csv -somload ${KOHFILE}
+KOHSAMP13=-som ${KOHSAMPLES} -color ${KOHDIR}/color.csv -somload ${KOHFILE13}
+
+kohonen-live13: hyper
+	${CMD} -qpar 13 -canvas 100010 -geo 5 ${KOH} #-somclassify2 ${KOHCLASS} ${KOHSAMPLES} -somsave ${KOHFILE}
+
+kohonen-save-big: ${KOHFILE}
+
+${KOHFILE}: hyper
+	${CMD} -canvas 100010 -geo 5 ${KOH} -somfinish -somsave ${KOHFILE} --exit
+
+kohonen-load-big: hyper ${KOHFILE} #rogueviz/kohonen-iris.txt
+	${CMD} -canvas 100010 -geo 5 ${KOHLOAD}
+
+kohonen-live13gp: hyper
+	${CMD} -qpar 13 -canvas 100010 -geo 5 -gp 3 3 ${KOH} #-somclassify2 ${KOHCLASS} ${KOHSAMPLES} -somsave ${KOHFILE}
+
+kohonen-live19: hyper
+	${CMD} -qpar2 0,1 -canvas 100010 ${KOH} #-somclassify2 ${KOHCLASS} ${KOHSAMPLES} -somsave ${KOHFILE}
+
+kohonen-save13: ${KOHFILE13}
+
+${KOHFILE13}: hyper
+	${CMD} -qpar 13 -canvas 100010 -geo 5 ${KOH} -somfinish -somclassify ${KOHCLASS13} -somsave ${KOHFILE13} --exit
+
+kohonen-load13: hyper ${KOHFILE13}
+	${CMD} -qpar 13 -canvas 100010 -geo 5 ${KOHSAMP13} -color ${KOHDIR}/color.csv
+
+kohonen-live29: hyper
+	${CMD} -qpar 29 -canvas 100010 -geo 5 ${KOH}
+
+kohonen-live-sphere: hyper
+	${CMD} -qpar 29 -canvas 100010 -geo 2 ${KOH}
+
+kohonen-live-sgp: hyper
+	${CMD} -canvas 100010 -geo 2 -gp 3 3 ${KOH}
+
+kohonen-live-ell: hyper
+	${CMD} -qpar 29 -canvas 100010 -geo 3 ${KOH}
+
+kohonen-live-zgp: hyper
+	${CMD} -canvas 100010 -geo 4 -gp 3 3 ${KOH} #-somclassify2 ${KOHCLASS} ${KOHSAMPLES} -somsave ${KOHFILE}
+
+kohonen-live-zebra: hyper
+	${CMD} -qpar 29 -canvas 100010 -geo 4 ${KOH}
+
+kohonen-live-torus: hyper
+	${CMD} -qpar 29 -canvas 100010 -geo 6 ${KOH}
+
+kohonen-live-hex: hyper
+	${CMD} -qpar 29 -canvas 100010 -geo 1 ${KOH}
+
+kohonen-live-7: hyper
+	${CMD} -qpar 29 -canvas 100010 ${KOH}
+
+kohonen-live-torus-big: hyper
+	${CMD} -qpar 29 -canvas 100010 -tpar 1764,41,43 -geo 6 ${KOH} -zoom .4
+
+bantar: 
+	${EXEC} -s xx -fixx 10 -W Cros -srx 3 -bantar_anim
+
+tests: ${EXEC}
+	echo Testing the sprawlers...
+	${EXEC} -nogui -qpar 13 -gp 3 1 -geo 5 -somverify
+	${EXEC} -nogui -geo 4 -gp 3 1 -somverify
+	${EXEC} -nogui -geo 15 -gp 3 1 -somverify
+	${EXEC} -nogui -geo 16 -gp 3 1 -somverify
+	${EXEC} -nogui -geo 17 -gp 3 1 -somverify
+	${EXEC} -nogui -geo 18 -gp 2 2 -somverify
+	${EXEC} -nogui -geo 6 -tparx 2,6,6 -somverify
+	${EXEC} -nogui -geo 6 -tparx 3,6,6 -somverify
+	${EXEC} -nogui -geo 6 -tparx 4,6,6 -somverify
+	${EXEC} -nogui -geo 6 -tparx 5,6,6 -somverify
+	${EXEC} -nogui -geo 6 -tparx 6,6,6 -somverify
+	${EXEC} -nogui -geo 3 -gp 2 2 -somverify
+	${EXEC} -nogui -geo 2 -gp 3 1 -somverify
