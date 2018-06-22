@@ -38,6 +38,8 @@ using std::stable_sort;
 using std::out_of_range;
 using std::get;
 using std::random_shuffle;
+using std::move;
+using std::make_tuple;
 
 using std::abs;
 using std::isfinite;
