@@ -3489,7 +3489,7 @@ void handle_event(SDL_Event& ev);
 #ifdef __GNUC__
 __attribute__((__format__ (__printf__, 1, 2)))
 #endif
-void Xprintf(const char *fmt, ...) {
+inline void Xprintf(const char *fmt, ...) {
     va_list ap;
     va_start(ap, fmt);
     vprintf(fmt, ap);
