@@ -1122,8 +1122,10 @@ void buildBigStuff(cell *c, cell *from) {
       heptagon *h = createAlternateMap(c, 2, hsA);
       if(h) clearing::bpdata[h].root = NULL;
       }
+    
+    bool alts_okay = (S3 == 3 || (nonbitrunc && !gp::on));
 
-    if(c->land == laStorms && ctof(c) && hrand(2000) < 1000 && horo_ok() && !randomPatternsMode) {
+    if(alts_okay && c->land == laStorms && ctof(c) && hrand(2000) < 1000 && horo_ok() && !randomPatternsMode) {
       heptagon *h = createAlternateMap(c, 2, hsA);
       if(h) h->alt->emeraldval = hrand(2);
       }

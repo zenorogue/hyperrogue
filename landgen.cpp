@@ -1144,7 +1144,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
       break;
     
     case laStorms: {
-      bool randstorm = hyperbolic_not37 || gp::on || quotient == 2;
+      bool randstorm = hyperbolic_not37 || gp::on || (quotient && geometry != gZebraQuotient);
       if(d == 9) {
       
         if(torus) {
@@ -1223,11 +1223,19 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           if(c->mov[i] && c->mov[i]->land != laStorms && c->mov[i]->land != laNone)
             c->wall = waNone;
         }
-      if(d == 8 && randstorm) {
+      if(d == BARLEV && randstorm) {
         c->landparam = hrand(1000000);
         }
-      if(d == 7 && randstorm) {
-        forCellEx(c2, c) if(c2->landparam < c->landparam) setdist(c2, 7, c);
+      if(d == BARLEV-1 && randstorm) {
+        /* static int stormlevel, stormgroup;
+        if(!stormlevel) stormgroup = 0;
+        stormlevel++; stormgroup++; */
+        forCellEx(c2, c) if(c2->land == laStorms && c2->mpdist >= BARLEV && c2->landparam > c->landparam) {
+          setdist(c2, BARLEV-1, c);
+          }
+        /*
+        stormlevel--;
+        if(stormlevel == 0) printf("stormgroup = %4d (cellcount = %6d hcount = %6d)\n", stormgroup, cellcount, heptacount); */
         bool bad = false;
         forCellEx(c2, c) if(c2->land != laStorms) bad = true;
         if(!bad) {
@@ -1245,7 +1253,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           else if(wallsnow == 1 && slp == 0) {
             c->wall = waSandstone;
             }
-          else if(slp == 1 && wallsnow == 0)
+          else if(wallsnow)
             c->landparam = 1;
           }
         }
