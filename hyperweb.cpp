@@ -170,13 +170,13 @@ void emscripten_get_commandline() {
   string s = str;
 #endif
   s += "+xxxxxx";
-  for(int i=0; i<size(s); i++) if(s[i] == '?') {
+  for(int i=0; i<isize(s); i++) if(s[i] == '?') {
 #ifndef EMSCRIPTEN_FIXED_ARG
     printf("HREF: %s\n", str);
 #endif
     arg::argument.push_back("hyperweb"); arg::lshift();
     string next = ""; i += 3;
-    for(; i<size(s); i++)  {
+    for(; i<isize(s); i++)  {
       if(s[i] == '+') {
         arg::argument.push_back(next);
         next = "";

@@ -374,7 +374,7 @@ namespace gp {
         i += 4;
         }
       
-      if(i != size(m.v)) printf("warning: i=%d sm=%d\n", i, size(m.v));
+      if(i != isize(m.v)) printf("warning: i=%d sm=%d\n", i, isize(m.v));
       if(just_matrices) return;
       usedml[c0] = m;
       
@@ -545,7 +545,7 @@ void draw_qfi(cell *c, const transmatrix& V, int col, int prio = -1, vector<hpcs
   else if(!qfi.fshape) ;
 #if CAP_TEXTURE
   else if(qfi.tinf) {
-    queuetable(V * qfi.spin, qfi.tinf->vertices, size(qfi.tinf->vertices), texture::config.mesh_color, texture::config.recolor(col), prio == -1 ? PPR_FLOOR : prio);
+    queuetable(V * qfi.spin, qfi.tinf->vertices, isize(qfi.tinf->vertices), texture::config.mesh_color, texture::config.recolor(col), prio == -1 ? PPR_FLOOR : prio);
     lastptd().u.poly.tinf = qfi.tinf;
     if(gp::on) 
       lastptd().u.poly.flags = POLY_INVERSE;

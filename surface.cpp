@@ -479,18 +479,18 @@ void run_kuen() {
   
   int part = 0;
   
-  vector<int> coverages(size(mesh), 0);
+  vector<int> coverages(isize(mesh), 0);
   
   for(auto& m: { frontal_map, back0, back1, back2 } ) {
     part++;
     int pid[5] = {0, 8, 1, 2, 4};
     string captions[5] = {"", "the upper component", "the lower center", "the lower left", "the lower right"};
     
-    vector<rug::rugpoint*> newmesh(size(mesh), nullptr);
+    vector<rug::rugpoint*> newmesh(isize(mesh), nullptr);
     for(auto p: mesh) {
       auto px = map_to_surface(p->h, m);
       p->surface_point = px;
-      conformal::progress(XLAT("solving the geodesics on: %1, %2/%3", XLAT(captions[part]), its(p->dexp_id), its(size(mesh))));
+      conformal::progress(XLAT("solving the geodesics on: %1, %2/%3", XLAT(captions[part]), its(p->dexp_id), its(isize(mesh))));
       }
     for(auto p: mesh) {
       // make it a bit nicer by including the edges where only one endpoint is valid
@@ -562,7 +562,7 @@ void run_other() {
 
     p->surface_point = map_to_surface(h, dp);
     p->flat = coord(p->surface_point.params);
-    conformal::progress(XLAT("solving the geodesics on: %1, %2/%3", XLAT(shape_name[sh]), its(it), its(size(rug::points))));
+    conformal::progress(XLAT("solving the geodesics on: %1, %2/%3", XLAT(shape_name[sh]), its(it), its(isize(rug::points))));
     if(p->surface_point.remaining_distance == 0)
       coverage.emplace_back(h, rchar(it) + 256 * 7);
     }

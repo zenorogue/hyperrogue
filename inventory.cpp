@@ -198,7 +198,7 @@ namespace hr { namespace inv {
     }
   
   void gainRandomOrbs(vector<eItem> orblist, eItem which, int each, int reduce) {
-    const int qoff = size(orblist);
+    const int qoff = isize(orblist);
     for(int i=1; i<qoff; i++) swap(orblist[i], orblist[irand(1+i)]);
     for(int i=0; i<20; i++) {
       int nextat = (i+1)*each + reduce;

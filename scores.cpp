@@ -13,7 +13,7 @@ bool scorerev = false;
 
 string csub(const string& str, int q) {
   int i = 0;
-  for(int j=0; j<q && i<size(str); j++) getnext(str.c_str(), i);
+  for(int j=0; j<q && i<isize(str); j++) getnext(str.c_str(), i);
   return str.substr(0, i);
   }
 
@@ -147,7 +147,7 @@ void showPickScores() {
   keyhandler = [] (int sym, int uni) {
     if(uni == '/' && dialog::infix == "") monsterpage = !monsterpage; else
     if(uni >= '1' && uni <= '9') uni = uni + 1000 - '1';
-    else if(uni >= 1000 && uni < 1000 + size(pickscore_options)) {
+    else if(uni >= 1000 && uni < 1000 + isize(pickscore_options)) {
       int scoredisplay = pickscore_options[uni - 1000].second;
       for(int i=0; i<=POSSCORE; i++)
         if(columns[i] == scoredisplay) swap(columns[i], columns[curcol]);
@@ -185,7 +185,7 @@ void show() {
   int omit = scorefrom;
   int rank = 0;
   while(y < (ISMOBILE ? vid.yres - 5*vid.fsize : vid.yres - 2 * vid.fsize)) { 
-    if(id >= size(scores)) break;
+    if(id >= isize(scores)) break;
         
     score& S(scores[id]);
     
@@ -328,7 +328,7 @@ void load() {
   
   fclose(f);
   clearMessages();
-  // addMessage(its(size(scores))+" games have been recorded in "+scorefile);
+  // addMessage(its(isize(scores))+" games have been recorded in "+scorefile);
   pushScreen(show);
   boxid = 0; applyBoxes();
   reverse(scores.begin(), scores.end());

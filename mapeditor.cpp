@@ -84,7 +84,7 @@ namespace mapstream {
   
   void addToQueue(cell* c) {
     if(cellids.count(c)) return;
-    int numcells = size(cellbyid);
+    int numcells = isize(cellbyid);
     cellbyid.push_back(c);
     cellids[c] = numcells;
     }
@@ -133,7 +133,7 @@ namespace mapstream {
         }
       }
     addToQueue((bounded || euclid) ? currentmap->gamestart() : cwt.c->master->c7);
-    for(int i=0; i<size(cellbyid); i++) {
+    for(int i=0; i<isize(cellbyid); i++) {
       cell *c = cellbyid[i];
       if(i) {
         for(int j=0; j<c->type; j++) if(c->mov[j] && cellids.count(c->mov[j]) && 
@@ -161,7 +161,7 @@ namespace mapstream {
         if(c2 && c2->land != laNone) addToQueue(c2);
         }
       }
-    printf("cells saved = %d\n", size(cellbyid));
+    printf("cells saved = %d\n", isize(cellbyid));
     int32_t n = -1; save(n);
     int32_t id = cellids.count(cwt.c) ? cellids[cwt.c] : -1;
     save(id);
@@ -170,13 +170,13 @@ namespace mapstream {
       usershape *us = usershapes[i][j];
       if(!us) continue;
       
-      for(int l=0; l<USERLAYERS; l++) if(size(us->d[l].list)) {
+      for(int l=0; l<USERLAYERS; l++) if(isize(us->d[l].list)) {
         usershapelayer& ds(us->d[l]);
         save(i); save(j); save(l); save(ds.sym); save(ds.rots); save(ds.color);
-        n = size(ds.list); save(n);
+        n = isize(ds.list); save(n);
         savePoint(ds.shift);
         savePoint(ds.spin);
-        for(int i=0; i<size(ds.list); i++) savePoint(ds.list[i]);
+        for(int i=0; i<isize(ds.list); i++) savePoint(ds.list[i]);
         }
       }
     n = -1; save(n);
@@ -236,14 +236,14 @@ namespace mapstream {
       cell *c;
       int rspin;
       
-      if(size(cellbyid) == 0) {
+      if(isize(cellbyid) == 0) {
         c = currentmap->gamestart();
         rspin = 0;
         }
       else {
         int32_t parent = loadInt();
         
-        if(parent<0 || parent >= size(cellbyid)) break;
+        if(parent<0 || parent >= isize(cellbyid)) break;
         int dir = loadChar();
         cell *c2 = cellbyid[parent];
         dir  = fixspin(dir, relspin[parent], c2->type);
@@ -282,18 +282,18 @@ namespace mapstream {
       }
     
     int32_t whereami = loadInt();
-    if(whereami >= 0 && whereami < size(cellbyid))
+    if(whereami >= 0 && whereami < isize(cellbyid))
       cwt.c = cellbyid[whereami];
     else cwt.c = currentmap->gamestart();
 
-    for(int i=0; i<size(cellbyid); i++) {
+    for(int i=0; i<isize(cellbyid); i++) {
       cell *c = cellbyid[i];
       if(c->bardir != NODIR && c->bardir != NOBARRIERS) 
         extendBarrier(c);
       }
 
     for(int d=BARLEV-1; d>=0; d--)
-    for(int i=0; i<size(cellbyid); i++) {
+    for(int i=0; i<isize(cellbyid); i++) {
       cell *c = cellbyid[i];
       if(c->mpdist <= d) 
         for(int j=0; j<c->type; j++) {
@@ -426,17 +426,17 @@ namespace mapeditor {
     undo.push_back(u);
     }
 
-  undo_info& lastUndo() { return undo[size(undo)-1]; }
+  undo_info& lastUndo() { return undo[isize(undo)-1]; }
   
   void undoLock() {
-    if(!size(undo) || lastUndo().c) {
+    if(!isize(undo) || lastUndo().c) {
       undo_info i; i.c = NULL; undo.push_back(i);
       }
     }
 
   void applyUndo() {
-    while(size(undo) && !lastUndo().c) undo.pop_back();
-    while(size(undo)) {
+    while(isize(undo) && !lastUndo().c) undo.pop_back();
+    while(isize(undo)) {
       undo_info& i(lastUndo());
       if(!i.c) break;
       i.c->wall = i.w;
@@ -451,7 +451,7 @@ namespace mapeditor {
     }
   
   void checkUndo() {
-    if(checkEq(undo[size(undo)-1])) undo.pop_back();
+    if(checkEq(undo[isize(undo)-1])) undo.pop_back();
     }
   
   int itc(int k) {
@@ -624,9 +624,9 @@ namespace mapeditor {
     spill_list.clear(); sval++;
     spill_list.emplace_back(tgt, src);
     int crad = 0, nextstepat = 0;
-    for(int i=0; i<size(spill_list); i++) {
+    for(int i=0; i<isize(spill_list); i++) {
       if(i == nextstepat) {
-        crad++; nextstepat = size(spill_list);
+        crad++; nextstepat = isize(spill_list);
         if(crad > radius) break;
         }
       auto sd = spill_list[i];
@@ -696,7 +696,7 @@ namespace mapeditor {
     where.c->aitmp = sval;
     
     int at = 0;
-    while(at < size(v)) {
+    while(at < isize(v)) {
       cell *c2 = v[at];
       at++;
       
@@ -773,7 +773,7 @@ namespace mapeditor {
     keyhandler = [] (int sym, int uni) {
       if(uni >= '1' && uni <= '9') uni = 1000 + uni - '1';
       if(sym == SDLK_RETURN || sym == SDLK_KP_ENTER || sym == '-' || sym == SDLK_KP_MINUS) uni = 1000;
-      for(int z=0; z<size(dialog::v); z++) if(1000 + z == uni) {
+      for(int z=0; z<isize(dialog::v); z++) if(1000 + z == uni) {
         paintwhat = dialog::v[z].second;
         paintwhat_str = dialog::v[z].first;
         mousepressed = false;
@@ -1022,12 +1022,12 @@ namespace mapeditor {
       displayButton(8, 8+fs*3, XLAT("l = layers: %1", its(dslayer)), 'l', 0);
       }
 
-    if(us && size(us->d[dslayer].list)) {
+    if(us && isize(us->d[dslayer].list)) {
       usershapelayer& ds(us->d[dslayer]);
       displayButton(8, 8+fs*4, XLAT("1-9 = rotations: %1", its(ds.rots)), '1' + (ds.rots % 9), 0);
       displayButton(8, 8+fs*5, XLAT(ds.sym ? "0 = symmetry" : "0 = asymmetry"), '0', 0);
 
-      displayfr(8, 8+fs*7, 2, vid.fsize, XLAT("%1 vertices", its(size(ds.list))), 0xC0C0C0, 0);
+      displayfr(8, 8+fs*7, 2, vid.fsize, XLAT("%1 vertices", its(isize(ds.list))), 0xC0C0C0, 0);
       displaymm('a', 8, 8+fs*8, 2, vid.fsize, XLAT("a = add v"), 0);
       if(autochoose) {
         displaymm('m', 8, 8+fs*9, 2, vid.fsize, XLAT("m = move v"), 0);
@@ -1060,7 +1060,7 @@ namespace mapeditor {
       displaymm('d', 8, 8+fs*7, 2, vid.fsize, XLAT("d = draw"), 0);
       displaymm('l', 8, 8+fs*8, 2, vid.fsize, XLAT("l = line"), 0);
       displaymm('c', 8, 8+fs*9, 2, vid.fsize, XLAT("c = circle"), 0);
-      int s = size(texture::config.data.pixels_to_draw);
+      int s = isize(texture::config.data.pixels_to_draw);
       if(s) displaymm(0, 8, 8+fs*11, 2, vid.fsize, its(s), 0);
       }
 #endif
@@ -1129,7 +1129,7 @@ namespace mapeditor {
     
     initShape(sg, id);
     
-    for(int i=0; i<size(ptds); i++) { 
+    for(int i=0; i<isize(ptds); i++) { 
       auto& ptd = ptds[i];
       if(ptd.kind != pkPoly) continue;
       
@@ -1192,8 +1192,8 @@ namespace mapeditor {
       mh = spin(2*M_PI*-ew.rotid/dsCur->rots) * mh;
       if(ew.symid) mh = Mirror * mh;
     
-      if(ew.pointid < 0 || ew.pointid >= size(dsCur->list)) 
-        ew.pointid = size(dsCur->list)-1, ew.side = 1;
+      if(ew.pointid < 0 || ew.pointid >= isize(dsCur->list)) 
+        ew.pointid = isize(dsCur->list)-1, ew.side = 1;
 
       dsCur->list.insert(dsCur->list.begin()+ew.pointid+(ew.side?1:0), mh);
       if(ew.side) ew.pointid++;
@@ -1209,7 +1209,7 @@ namespace mapeditor {
 
       int i = ew.pointid;
 
-      if(i < 0 || i >= size(dsCur->list)) return;
+      if(i < 0 || i >= isize(dsCur->list)) return;
 
       mh = spin(2*M_PI*-ew.rotid/dsCur->rots) * mh;
       if(ew.symid) mh = Mirror * mh;
@@ -1374,14 +1374,14 @@ namespace mapeditor {
       usershape *us = usershapes[i][j];
       if(!us) continue;
       
-      for(int l=0; l<USERLAYERS; l++) if(size(us->d[l].list)) {
+      for(int l=0; l<USERLAYERS; l++) if(isize(us->d[l].list)) {
         usershapelayer& ds(us->d[l]);
         fprintf(f, "\n%d %d %d %d %d %6x %d\n", 
-          i, j, l, ds.sym, ds.rots, ds.color, int(size(ds.list)));
+          i, j, l, ds.sym, ds.rots, ds.color, int(isize(ds.list)));
         writeHyperpoint(f, ds.shift);
         writeHyperpoint(f, ds.spin);
         fprintf(f,"\n");
-        for(int i=0; i<size(ds.list); i++)
+        for(int i=0; i<isize(ds.list); i++)
           writeHyperpoint(f, ds.list[i]);
         }
       }
@@ -1554,11 +1554,11 @@ namespace mapeditor {
           usershape *us = usershapes[i][j];
           if(!us) continue;
           
-          for(int l=0; l<USERLAYERS; l++) if(size(us->d[l].list)) {
+          for(int l=0; l<USERLAYERS; l++) if(isize(us->d[l].list)) {
             usershapelayer& ds(us->d[l]);
             printf("// %d %d %d [%06X]\n", i, j, l, ds.color);
             printf(" ID, %d, %d, ", us->d[l].rots, us->d[l].sym?2:1); 
-            for(int i=0; i<size(us->d[l].list); i++) 
+            for(int i=0; i<isize(us->d[l].list); i++) 
               printf("%lf,%lf, ", double(us->d[l].list[i][0]), double(us->d[l].list[i][1]));
             printf("\n");
             }
@@ -1692,14 +1692,14 @@ namespace mapeditor {
 
       if(mapeditor::editingShape(group, id)) {
   
-        /* for(int a=0; a<size(ds.list); a++) {
+        /* for(int a=0; a<isize(ds.list); a++) {
           hyperpoint P2 = V * ds.list[a];
     
           int xc, yc, sc;
           getcoord(P2, xc, yc, sc);
           queuechr(xc, yc, sc, 10, 'x', 
             a == 0 ? 0x00FF00 : 
-            a == size(ds.list)-1 ? 0xFF0000 :
+            a == isize(ds.list)-1 ? 0xFF0000 :
             0xFFFF00);
           } */
         
@@ -1721,9 +1721,9 @@ namespace mapeditor {
           queuechr(P2, 10, 'x', 0xFF00FF);
           }
         
-        if(size(ds.list) == 0) return us;
+        if(isize(ds.list) == 0) return us;
         
-        hyperpoint Plast = V * spin(-2*M_PI/ds.rots) * (ds.sym?Mirror*ds.list[0]:ds.list[size(ds.list)-1]);
+        hyperpoint Plast = V * spin(-2*M_PI/ds.rots) * (ds.sym?Mirror*ds.list[0]:ds.list[isize(ds.list)-1]);
         int state = 0;
         int gstate = 0;
         double dist2 = 0;
@@ -1736,8 +1736,8 @@ namespace mapeditor {
           if(ew.symid) mh2 = Mirror * mh2;
           hyperpoint pseudomouse = V * spin(2*M_PI*a/ds.rots) * mirrorif(mh2, b);      
         
-          for(int t=0; t<size(ds.list); t++) {
-            int ti = b ? size(ds.list)-1-t : t;
+          for(int t=0; t<isize(ds.list); t++) {
+            int ti = b ? isize(ds.list)-1-t : t;
   
             hyperpoint P2 = V * spin(2*M_PI*a/ds.rots) * mirrorif(ds.list[ti], b);
             

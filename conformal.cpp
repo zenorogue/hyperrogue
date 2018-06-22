@@ -132,7 +132,7 @@ namespace spiral {
   
   int& bandpixel(int x, int y) {
     int i = 0;
-    while(i < size(band) && x >= band[i]->w)
+    while(i < isize(band) && x >= band[i]->w)
       x -= band[i]->w, i++;
     return qpixel(band[i], x, y);
     }
@@ -140,7 +140,7 @@ namespace spiral {
   void precompute() {
   
     CX = 0;
-    for(int i=0; i<size(band); i++) CX += band[i]->w;
+    for(int i=0; i<isize(band); i++) CX += band[i]->w;
     if(CX == 0) { printf("ERROR: no CX\n"); return; }
     CY = band[0]->h;
     SX = out->w;
@@ -297,7 +297,7 @@ namespace conformal {
 
   void clear() {
     on = false;
-    int N = size(v);
+    int N = isize(v);
     for(int i=0; i<N; i++) delete v[i];
     v.resize(0);
     }
@@ -326,7 +326,7 @@ namespace conformal {
   
     reverse(v.begin(), v.end());
   
-    int Q = size(v)-1;
+    int Q = isize(v)-1;
     // virtualRebase(v[0], false);
     // virtualRebase(v[Q], false);
   
@@ -369,7 +369,7 @@ namespace conformal {
   void movetophase() {
     
     int ph = int(phase);
-    int siz = size(v);
+    int siz = isize(v);
     if(ph<0) ph = 0;
     if(ph >= siz-1) ph = siz-2;
     
@@ -394,7 +394,7 @@ namespace conformal {
     phase += (t-llv) * lvspeed / 400.;
     llv = t;
     
-    int siz = size(v);
+    int siz = isize(v);
     
     while(phase > siz-1 + extra_line_steps) phase -= (siz + 2 * extra_line_steps-1);
     while(phase < - extra_line_steps) phase += (siz + 2 * extra_line_steps-1);
@@ -406,7 +406,7 @@ namespace conformal {
     ld r = bandhalf * vid.scale;
     
     ld tpixels = 0;
-    int siz = size(v);
+    int siz = isize(v);
 
     for(int j=0; j<siz-1; j++) {
       hyperpoint next = 
@@ -468,7 +468,7 @@ namespace conformal {
         }
       else {
   
-        int siz = size(v);
+        int siz = isize(v);
         
         int bonus = ceil(extra_line_steps);
   
@@ -551,7 +551,7 @@ namespace conformal {
     
     if(dospiral) {
       spiral::loop(bands);
-      for(int i=0; i<size(bands); i++) SDL_FreeSurface(bands[i]);
+      for(int i=0; i<isize(bands); i++) SDL_FreeSurface(bands[i]);
       }
     }
 #endif
@@ -825,17 +825,17 @@ namespace conformal {
   
   void restore() {
     sval++;
-    for(int i=0; i<size(movehistory); i++)
+    for(int i=0; i<isize(movehistory); i++)
       movehistory[i]->aitmp = sval;
     sval++;
-    int sk = size(killhistory);
+    int sk = isize(killhistory);
     for(int i=0; i<sk; i++) {
       eMonster m = killhistory[i].second;
       killhistory[i].second = killhistory[i].first->monst;
       killhistory[i].first->monst = m;
       killhistory[i].first->aitmp = sval;
       }
-    int si = size(findhistory);
+    int si = isize(findhistory);
     for(int i=0; i<si; i++) {
       eItem m = findhistory[i].second;
       findhistory[i].second = findhistory[i].first->item;
@@ -845,13 +845,13 @@ namespace conformal {
     }
 
   void restoreBack() {
-    int sk = size(killhistory);
+    int sk = isize(killhistory);
     for(int i=sk-1; i>=0; i--) {
       eMonster m = killhistory[i].second;
       killhistory[i].second = killhistory[i].first->monst;
       killhistory[i].first->monst = m;
       }
-    int si = size(findhistory);
+    int si = isize(findhistory);
     for(int i=si-1; i>=0; i--) {
       eItem m = findhistory[i].second;
       findhistory[i].second = findhistory[i].first->item;

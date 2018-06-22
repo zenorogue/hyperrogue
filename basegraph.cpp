@@ -108,14 +108,14 @@ void loadfont(int siz) {
 
 #if !ISFAKEMOBILE && !ISANDROID & !ISIOS
 int textwidth(int siz, const string &str) {
-  if(size(str) == 0) return 0;
+  if(isize(str) == 0) return 0;
 
 #if CAP_SDLTTF
   loadfont(siz);
   
   int w, h;
   TTF_SizeUTF8(font[siz], str.c_str(), &w, &h);
-  // printf("width = %d [%d]\n", w, size(str));
+  // printf("width = %d [%d]\n", w, isize(str));
   return w;
 
 #elif CAP_GL
@@ -608,7 +608,7 @@ bool displaychr(int x, int y, int shift, int size, char chr, int col) {
 
 void gdpush_utf8(const string& s) {
   int g = (int) graphdata.size(), q = 0;
-  gdpush((int) s.size()); for(int i=0; i<size(s); i++) {
+  gdpush((int) s.size()); for(int i=0; i<isize(s); i++) {
 #if ISANDROID
     unsigned char uch = (unsigned char) s[i];
     if(uch >= 192 && uch < 224) {
@@ -761,7 +761,7 @@ vector<msginfo> msgs;
 vector<msginfo> gamelog;
 
 void flashMessages() {
-  for(int i=0; i<size(msgs); i++) 
+  for(int i=0; i<isize(msgs); i++) 
     if(msgs[i].stamp < ticks - 1000 && !msgs[i].flashout) {
       msgs[i].flashout = true;
       msgs[i].stamp = ticks;
@@ -776,19 +776,19 @@ string fullmsg(msginfo& m) {
 
 void addMessageToLog(msginfo& m, vector<msginfo>& log) {
 
-  if(size(log) != 0) {
-    msginfo& last = log[size(log)-1];
+  if(isize(log) != 0) {
+    msginfo& last = log[isize(log)-1];
     if(last.msg == m.msg) {
       int q = m.quantity + last.quantity;
       last = m; last.quantity = q;
       return;
       }
     }
-  if(size(log) < 1000)
+  if(isize(log) < 1000)
     log.push_back(m);
   else {
-    for(int i=0; i<size(log)-1; i++) swap(log[i], log[i+1]);
-    log[size(log)-1] = m;
+    for(int i=0; i<isize(log)-1; i++) swap(log[i], log[i+1]);
+    log[isize(log)-1] = m;
     }
   }
 
@@ -850,7 +850,7 @@ void drawmessage(const string& s, int& y, int col) {
     return;
     }
 
-  for(int i=1; i<size(s); i++)
+  for(int i=1; i<isize(s); i++)
     if(s[i-1] == ' ' && textwidth(vid.fsize, "..."+s.substr(i)) <= space) {    
       displayfr(0, y, 1, vid.fsize, "..."+s.substr(i), col, 0);
       y -= vid.fsize;
@@ -868,11 +868,11 @@ void drawmessages() {
   DEBB(DF_GRAPH, (debugfile,"draw messages\n"));
   int i = 0;
   int t = ticks;
-  for(int j=0; j<size(msgs); j++) {
-    if(j < size(msgs) - vid.msglimit) continue;
+  for(int j=0; j<isize(msgs); j++) {
+    if(j < isize(msgs) - vid.msglimit) continue;
     int age = msgs[j].flashout * (t - msgs[j].stamp);
     if(msgs[j].spamtype) {
-      for(int i=j+1; i<size(msgs); i++) if(msgs[i].spamtype == msgs[j].spamtype)
+      for(int i=j+1; i<isize(msgs); i++) if(msgs[i].spamtype == msgs[j].spamtype)
         msgs[j].flashout = 2;
       }
     if(age < 256*vid.flashtime)
@@ -881,7 +881,7 @@ void drawmessages() {
   msgs.resize(i);
   if(vid.msgleft == 2) {
     int y = vid.yres - vid.fsize - (ISIOS ? 4 : 0);
-    for(int j=size(msgs)-1; j>=0; j--) {
+    for(int j=isize(msgs)-1; j>=0; j--) {
       int age = msgs[j].flashout * (t - msgs[j].stamp);
       poly_outline = gradient(bordcolor, backcolor, 0, age, 256*vid.flashtime) << 8;
       int col = gradient(forecolor, backcolor, 0, age, 256*vid.flashtime);
@@ -889,10 +889,10 @@ void drawmessages() {
       }
     }
   else {
-    for(int j=0; j<size(msgs); j++) {
+    for(int j=0; j<isize(msgs); j++) {
       int age = msgs[j].flashout * (t - msgs[j].stamp);
       int x = vid.msgleft ? 0 : vid.xres / 2;
-      int y = vid.yres - vid.fsize * (size(msgs) - j) - (ISIOS ? 4 : 0);
+      int y = vid.yres - vid.fsize * (isize(msgs) - j) - (ISIOS ? 4 : 0);
       poly_outline = gradient(bordcolor, backcolor, 0, age, 256*vid.flashtime) << 8;
       displayfr(x, y, 1, vid.fsize, fullmsg(msgs[j]), gradient(forecolor, backcolor, 0, age, 256*vid.flashtime), vid.msgleft ? 0 : 8);
       }

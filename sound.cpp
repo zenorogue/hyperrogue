@@ -124,7 +124,7 @@ bool loadMusicInfo(string dir) {
   FILE *f = fopen(dir.c_str(), "rt");
   if(f) {
     string dir2;
-    for(int i=0; i<size(dir); i++) if(dir[i] == '/' || dir[i] == '\\')
+    for(int i=0; i<isize(dir); i++) if(dir[i] == '/' || dir[i] == '\\')
       dir2 = dir.substr(0, i+1);
     char buf[1000];
     while(fgets(buf, 800, f) != NULL) {

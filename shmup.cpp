@@ -1104,7 +1104,7 @@ void pushmonsters() {
   }
 
 void popmonsters() {
-  for(int i=size(nonvirtual)-1; i>=0; i--) {
+  for(int i=isize(nonvirtual)-1; i>=0; i--) {
     monster *m = nonvirtual[i];
     if(!m->notpushed) {
       if(m->type == m->base->monst)
@@ -2940,19 +2940,19 @@ void turn(int delta) {
     pd_from = NULL;
     // build the path data
     
-    int pqs = size(pathq);
+    int pqs = isize(pathq);
     for(int i=0; i<pqs; i++) {
       pathq[i]->pathdist = PINFD;
       }
     pathq.clear(); 
 
-    for(int i=0; i<size(targets); i++) {
+    for(int i=0; i<isize(targets); i++) {
       targets[i]->pathdist = isPlayerOn(targets[i]) ? 0 : 1;
       pathq.push_back(targets[i]);
       }
 
     int qb = 0;
-    for(qb=0; qb < size(pathq); qb++) {
+    for(qb=0; qb < isize(pathq); qb++) {
       cell *c = pathq[qb];
       int d = c->pathdist;
       if(d == PINFD-1) continue;
@@ -3199,7 +3199,7 @@ bool drawMonster(const transmatrix& V, cell *c, const transmatrix*& Vboat, trans
         (isFriendly(m->type) || m->type == moPlayer) ? 0x00FF00FF : 0xFF0000FF;
 
     int q = ptds.size();
-    if(q != size(ptds) && !m->inBoat) pushdown(c, q, view, zlev, true, false);
+    if(q != isize(ptds) && !m->inBoat) pushdown(c, q, view, zlev, true, false);
 
     switch(m->type) {
       case moPlayer: 
@@ -3350,7 +3350,7 @@ transmatrix calc_relative_matrix(cell *c2, cell *c1, int direction_hint) {
 
   if(sphere) {
     if(!gmatrix0.count(c2) || !gmatrix0.count(c1)) {
-      printf("building gmatrix0 (size=%d)\n", size(gmatrix0));
+      printf("building gmatrix0 (size=%d)\n", isize(gmatrix0));
       auto bak = gp::draw_li;
       swap(gmatrix, gmatrix0);
       just_gmatrix = true;

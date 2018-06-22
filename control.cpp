@@ -863,7 +863,7 @@ bool haveMobileCompass() {
 #else
   if(forcetarget) return false;
 #endif
-  return canmove && !shmup::on && vid.mobilecompasssize > 0 && size(screens) == 1;
+  return canmove && !shmup::on && vid.mobilecompasssize > 0 && isize(screens) == 1;
   }
   
 bool handleCompass() {

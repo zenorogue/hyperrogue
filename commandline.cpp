@@ -69,7 +69,7 @@ namespace arg {
   void lshift() { pos++; }
 
   void shift() {
-    lshift(); if(pos > size(argument)) { printf("Missing parameter\n"); exit(1); }
+    lshift(); if(pos > isize(argument)) { printf("Missing parameter\n"); exit(1); }
     }
   
   const string& args() { return argument[pos]; }
@@ -439,8 +439,8 @@ else if(args()[0] == '-' && args()[1] == x && args()[2] == '0') { showstartmenu 
     PHASEFROM(2); shift(); start_game();
     printf("Generating %d cells...\n", argi());
     celllister cl(cwt.c, 50, argi(), NULL);
-    printf("Cells generated: %d\n", size(cl.lst));
-    for(int i=0; i<size(cl.lst); i++)
+    printf("Cells generated: %d\n", isize(cl.lst));
+    for(int i=0; i<isize(cl.lst); i++)
       setdist(cl.lst[i], 7, NULL);
     }
   else if(argis("-sr")) {    
@@ -621,7 +621,7 @@ namespace arg {
   void read(int phase) { 
     curphase = phase;
     callhooks(hooks_config);
-    while(pos < size(argument)) {
+    while(pos < isize(argument)) {
       for(auto& h: *hooks_args) {
         int r = h.second(); if(r == 2) return; if(r == 0) { lshift(); goto cont; }
         }

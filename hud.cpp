@@ -85,7 +85,7 @@ void updatesort() {
 
 void preparesort() {
   for(int i=0; i<glyphs; i++) glyphorder[i] = i;
-  for(int i=0; i<size(land_over); i++) {
+  for(int i=0; i<isize(land_over); i++) {
     eLand l = land_over[i];
     ikland[treasureType(l)] = i+1;
     for(int mi=0; mi<motypes; mi++) 
@@ -346,7 +346,7 @@ void drawStats() {
     int qty[64];
     vector<cell*>& ac = currentmap->allcells();
     for(int i=0; i<64; i++) qty[i] = 0;
-    for(int i=0; i<size(ac); i++) {
+    for(int i=0; i<isize(ac); i++) {
       int d = celldistance(ac[i], cwt.c);
       if(d >= 0 && d < 64) qty[d]++;
       }
@@ -429,7 +429,7 @@ void drawStats() {
           for(int u=vid.fsize; u<vid.xres/2-s; u += s)
           for(int v=vid.fsize; v<vid.yres/2-s; v += s)
             if(hypot(vid.xres/2-u-s, vid.yres/2-v-s) > rad) {
-              if(next >= size(glyphstoshow)) break;
+              if(next >= isize(glyphstoshow)) break;
 
               int cx = u;
               int cy = v + s/2;

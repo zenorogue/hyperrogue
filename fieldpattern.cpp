@@ -125,7 +125,7 @@ struct fpattern {
   matrix strtomatrix(string s) {
     matrix res = Id;
     matrix m = Id;
-    for(int i=size(s)-1; i>=0; i--)
+    for(int i=isize(s)-1; i>=0; i--)
       if(s[i] == 'R') res = mmul(R, res);
       else if (s[i] == 'P') res = mmul(P, res);
       else if (s[i] == 'x') { m[0][0] = -1; res = mmul(m, res); m[0][0] = +1; }
@@ -137,7 +137,7 @@ struct fpattern {
   void addas(const matrix& M, int i) {
     if(!matcode.count(M)) {
       matcode[M] = i;
-      for(int j=0; j<size(qcoords); j++)
+      for(int j=0; j<isize(qcoords); j++)
         addas(mmul(M, qcoords[j]), i);
       }
     }
@@ -146,7 +146,7 @@ struct fpattern {
     if(!matcode.count(M)) {
       int i = matrices.size();
       matcode[M] = i, matrices.push_back(M);
-      for(int j=0; j<size(qcoords); j++)
+      for(int j=0; j<isize(qcoords); j++)
         addas(mmul(M, qcoords[j]), i);
       add(mmul(R, M));
       }
@@ -282,7 +282,7 @@ struct fpattern {
   
   void build() { 
   
-    for(int i=0; i<size(qpaths); i++) {
+    for(int i=0; i<isize(qpaths); i++) {
       matrix M = strtomatrix(qpaths[i]);
       qcoords.push_back(M);
       printf("Solved %s as matrix of order %d\n", qpaths[i].c_str(), order(M));
@@ -290,7 +290,7 @@ struct fpattern {
     
     matcode.clear(); matrices.clear();
     add(Id);
-    if(size(matrices) != S7) { printf("Error: rotation crash #1 (%d)\n", size(matrices)); exit(1); }
+    if(isize(matrices) != S7) { printf("Error: rotation crash #1 (%d)\n", isize(matrices)); exit(1); }
     
     connections.clear();
     
@@ -302,7 +302,7 @@ struct fpattern {
       
       add(PM);
   
-      if(size(matrices) % S7) { printf("Error: rotation crash (%d)\n", size(matrices)); exit(1); }
+      if(isize(matrices) % S7) { printf("Error: rotation crash (%d)\n", isize(matrices)); exit(1); }
       
       if(!matcode.count(PM)) { printf("Error: not marked\n"); exit(1); }
   
@@ -310,7 +310,7 @@ struct fpattern {
       }
   
     DEBB(DF_FIELD, (debugfile, "Computing inverses...\n"));
-    int N = size(matrices);
+    int N = isize(matrices);
 
     DEBB(DF_FIELD, (debugfile, "Number of heptagons: %d\n", N));
   
@@ -334,7 +334,7 @@ struct fpattern {
     for(int i=0; i<N; i++) if(gmul(i, inverses[i])) errs++;
     if(errs) printf("errs = %d\n", errs);
       
-    if(0) for(int i=0; i<size(matrices); i++) {
+    if(0) for(int i=0; i<isize(matrices); i++) {
       printf("%5d/%4d", connections[i], inverses[i]);
       if(i%S7 == S7-1) printf("\n");       
       }
@@ -541,7 +541,7 @@ struct fpattern {
     int riverdist = dijkstra(nonbitrunc ? distflower : distriver, indist);
     DEBB(DF_FIELD, (debugfile, "river dist = %d\n", riverdist));
     
-    for(int i=0; i<size(currfp.matrices); i++)
+    for(int i=0; i<isize(currfp.matrices); i++)
       if(currfp.distflower[i] == 0) {
         distflower0 = currfp.inverses[i]+1;
         break;
@@ -629,7 +629,7 @@ struct fpattern {
     }
   
   void findsubpath() {
-    int N = size(matrices);
+    int N = isize(matrices);
     for(int i=1; i<N; i++)
       if(gpow(i, Prime) == 0) {
         subpathid = i;
@@ -641,7 +641,7 @@ struct fpattern {
   };
 
 int fpattern::orderstats() {
-  int N = size(matrices);
+  int N = isize(matrices);
 
   #define MAXORD 10000
   int ordcount[MAXORD];
@@ -686,7 +686,7 @@ void info() {
       #ifndef EASY
       printf("Not easy: %d\n", neasy);
       #endif
-      int N = size(fp.matrices);
+      int N = isize(fp.matrices);
       int left = N / fp.Prime;
       printf("Prime decomposition: %d = %d", N, fp.Prime);
       for(int p=2; p<=left; p++) while(left%p == 0) printf("*%d", p), left /= p;
@@ -745,7 +745,7 @@ int current_extra = 0;
 void nextPrime(fgeomextra& ex) {
   dynamicval<eGeometry> g(geometry, ex.base);
   int nextprime;
-  if(size(ex.primes))
+  if(isize(ex.primes))
     nextprime = ex.primes.back().p + 1;
   else
     nextprime = 2;
@@ -763,7 +763,7 @@ void nextPrime(fgeomextra& ex) {
   }
 
 void nextPrimes(fgeomextra& ex) {
-  while(size(ex.primes) < 4) 
+  while(isize(ex.primes) < 4) 
     nextPrime(ex);
   }
 

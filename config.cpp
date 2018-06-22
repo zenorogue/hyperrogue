@@ -499,7 +499,7 @@ map<string, shared_ptr<supersaver> > allconfigs;
 
 void parseline(const string& str) {
   if(str[0] == '#') return;
-  for(int i=0; i<size(str); i++) if(str[i] == '=') {
+  for(int i=0; i<isize(str); i++) if(str[i] == '=') {
     string cname = str.substr(0, i);
     if(!allconfigs.count(cname)) {
       printf("Warning: unknown config variable: %s\n", str.c_str());

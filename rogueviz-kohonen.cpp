@@ -90,12 +90,12 @@ void loadsamples(const string& fname) {
       if(c == '!' && s.name == "") shown = true;
       else if(c != 32 && c != 9) s.name += c;
       }
-    if(shown) samples_shown.push_back(size(data));
+    if(shown) samples_shown.push_back(isize(data));
     data.push_back(move(s));
     }
   bigbreak:
   fclose(f);
-  samples = size(data);
+  samples = isize(data);
   normalize();
   colnames.resize(cols);
   for(int i=0; i<cols; i++) colnames[i] = "Column " + its(i);
@@ -167,7 +167,7 @@ void coloring() {
         besttofind = false;
         for(neuron& n: net) {
           double bdiff = 1e20;
-          for(int i=0; i<size(samples_shown); i++) {
+          for(int i=0; i<isize(samples_shown); i++) {
             double diff = vnorm(n.net, data[samples_shown[i]].val);
             if(diff < bdiff) bdiff = diff, n.bestsample = i;
             }
@@ -239,14 +239,14 @@ void analyze() {
     
     for(neuron& n: net) n.samples = 0;
     
-    for(int id=0; id<size(samples_shown); id++) {
+    for(int id=0; id<isize(samples_shown); id++) {
       int s = samples_shown[id];
       auto& w = winner(s);
       whowon[s] = &w;
       w.samples++;
       }
     
-    for(int id=0; id<size(samples_shown); id++) {
+    for(int id=0; id<isize(samples_shown); id++) {
       int s = samples_shown[id];
       auto& w = *whowon[s];
       vdata[id].m->base = w.where;
@@ -297,7 +297,7 @@ struct cellcrawler {
     sval++;
     data.clear();
     store(start, 0, 0);
-    for(int i=0; i<size(data); i++) {
+    for(int i=0; i<isize(data); i++) {
       cellwalker cw0 = data[i].orig;
       for(int j=0; j<cw0.c->type; j++) {
         cellwalker cw = cw0 + j + wstep;
@@ -312,7 +312,7 @@ struct cellcrawler {
   void sprawl(const cellwalker& start) {
     data[0].target = start;
     
-    for(int i=1; i<size(data); i++) {
+    for(int i=1; i<isize(data); i++) {
       cellcrawlerdata& s = data[i];
       s.target = data[s.from].target;
       if(!s.target.c) continue;
@@ -340,7 +340,7 @@ void buildcellcrawler(cell *c, cellcrawler& cr, int dir) {
     vector<ld> newtemp;
     vector<int> qty;
     vector<pair<ld*, ld*> > pairs;
-    int N = size(net);
+    int N = isize(net);
     
     curtemp.resize(N, 0);
     newtemp.resize(N, 0);
@@ -371,7 +371,7 @@ void buildcellcrawler(cell *c, cellcrawler& cr, int dir) {
         d.emplace_back(N);
         auto& dispvec = d.back();
         for(int i=0; i<N; i++) dispvec[i] = curtemp[neuronId(*getNeuron(cr.data[i].orig.c))] / vmax;
-        if(size(d) == dispersion_count) break;
+        if(isize(d) == dispersion_count) break;
         }
       double df = dispersion_precision * (iter+1);
       double df0 = df / ceil(df);
@@ -389,7 +389,7 @@ void buildcellcrawler(cell *c, cellcrawler& cr, int dir) {
         else if(curtemp[i] > vmax) vmax = curtemp[i];
       }
   
-    dispersion_count = size(d);
+    dispersion_count = isize(d);
     printf("Dispersion count = %d\n", dispersion_count);
     }
   }
@@ -440,7 +440,7 @@ void verify_crawlers() {
   setindex(false);
   gaussian = 1;
   auto& allcells = currentmap->allcells();
-  cells = size(allcells);
+  cells = isize(allcells);
   net.resize(cells);
   for(int i=0; i<cells; i++) net[i].where = allcells[i];
   setindex(true);
@@ -472,7 +472,7 @@ void verify_crawlers() {
       uniq++;
       }
     }
-  printf("Crawlers constructed: %d (%d unique, %d failures)\n", size(allcrawlers), uniq, failures);
+  printf("Crawlers constructed: %d (%d unique, %d failures)\n", isize(allcrawlers), uniq, failures);
   setindex(false);
   if(failures) exit(1);
   }
@@ -615,7 +615,7 @@ void sominit(int initto) {
       }
     else allcells = currentmap->allcells();
   
-    cells = size(allcells);
+    cells = isize(allcells);
     net.resize(cells);
     for(int i=0; i<cells; i++) net[i].where = allcells[i], allcells[i]->landparam = i;
     for(int i=0; i<cells; i++) {
@@ -629,11 +629,11 @@ void sominit(int initto) {
       
     for(neuron& n: net) for(int d=BARLEV; d>=7; d--) setdist(n.where, d, NULL);
   
-    printf("samples = %d (%d) cells = %d\n", samples, size(samples_shown), cells);
+    printf("samples = %d (%d) cells = %d\n", samples, isize(samples_shown), cells);
 
     if(!noshow) {
-      vdata.resize(size(samples_shown));
-      for(int i=0; i<size(samples_shown); i++) {
+      vdata.resize(isize(samples_shown));
+      for(int i=0; i<isize(samples_shown); i++) {
         vdata[i].name = data[samples_shown[i]].name;
         vdata[i].cp = dftcolor;
         createViz(i, cwt.c, Id);
@@ -656,7 +656,7 @@ void sominit(int initto) {
       vector<double> mapdist;
       for(neuron &n2: net) mapdist.push_back(mydistance(c1,n2.where));
       sort(mapdist.begin(), mapdist.end());
-      maxdist = mapdist[size(mapdist)*5/6] * distmul;
+      maxdist = mapdist[isize(mapdist)*5/6] * distmul;
       printf("maxdist = %lf\n", maxdist);
       }
       
@@ -688,7 +688,7 @@ void describe(cell *c) {
   random_shuffle(v.begin(), v.end());
   sort(v.begin(), v.end(), [] (pair<double,int> a, pair<double,int> b) { return a.first < b.first; });
   
-  for(int i=0; i<size(v) && i<20; i++) {
+  for(int i=0; i<isize(v) && i<20; i++) {
     int s = v[i].second;
     help += "sample "+its(s)+":"; 
     for(int k=0; k<cols; k++) help += " " + fts(data[s].val[k]); 
@@ -804,7 +804,7 @@ namespace levelline {
     dialog::display();
     keyhandler = [] (int sym, int uni) {
       dialog::handleNavigation(sym, uni);
-      if(uni >= 'a' && uni - 'a' + size(levellines)) {
+      if(uni >= 'a' && uni - 'a' + isize(levellines)) {
         auto& l = levellines[uni - 'a'];
         dialog::editNumber(l.qty, 0, 10, 1, 0, colnames[l.column], 
           XLAT("Controls the number of level lines."));
@@ -813,7 +813,7 @@ namespace levelline {
           build();
           };
         }
-      else if(uni >= 'A' && uni - 'A' + size(levellines)) {
+      else if(uni >= 'A' && uni - 'A' + isize(levellines)) {
         auto& l = levellines[uni - 'A'];
         dialog::openColorDialog(l.color, NULL);
         }
@@ -988,7 +988,7 @@ void klistsamples(const string& fname_samples, bool best, bool colorformat) {
           klistsample(net[n].bestsample, n);
           }
       else
-        for(int i=0; i<size(samples_shown); i++) 
+        for(int i=0; i<isize(samples_shown); i++) 
           klistsample(samples_shown[i], neuronId(*(whowon[i])));  
       fclose(f);
       }
@@ -1001,7 +1001,7 @@ void neurondisttable(const string &name) {
     printf("Could not open file: %s\n", name.c_str());
     return;
     }
-  int neurons = size(net);
+  int neurons = isize(net);
   fprintf(f, "%d\n", neurons);
   for(int i=0; i<neurons; i++) {
     for(int j=0; j<neurons; j++) fprintf(f, "%3d", celldistance(net[i].where, net[j].where));

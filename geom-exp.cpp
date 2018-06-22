@@ -39,17 +39,17 @@ void showQuotientConfig() {
   gamescreen(2);
   dialog::init(XLAT("advanced configuration"));
   fgeomextra& gxcur = fgeomextras[current_extra];
-  for(int i=0; i<size(fgeomextras); i++) {
+  for(int i=0; i<isize(fgeomextras); i++) {
     auto& g = fgeomextras[i];
     dialog::addBoolItem(XLAT(ginf[g.base].name), g.base == gxcur.base, 'a'+i);
     }
   nextPrimes(gxcur);
-  for(int i=0; i<size(gxcur.primes); i++) {
+  for(int i=0; i<isize(gxcur.primes); i++) {
     auto& p = gxcur.primes[i];
     dialog::addBoolItem(XLAT("order %1%2 (non-bitruncated cells: %3)", its(p.p), p.squared ? "²" : "", its(p.cells)), i == gxcur.current_prime_id, 'A'+i);
     }
   
-  if(size(gxcur.primes) < 6) {
+  if(isize(gxcur.primes) < 6) {
     dialog::addBreak(100);
     dialog::addHelp(
       "This geometry is obtained by applying the same 'generators' which "
@@ -66,9 +66,9 @@ void showQuotientConfig() {
   dialog::addItem("default", 'c');
 
   keyhandler = [&gxcur] (int sym, int uni) {
-    if(uni >= 'a' && uni < 'a' + size(fgeomextras))
+    if(uni >= 'a' && uni < 'a' + isize(fgeomextras))
       current_extra = uni - 'a';
-    else if(uni >= 'A' && uni < 'A' + size(gxcur.primes))
+    else if(uni >= 'A' && uni < 'A' + isize(gxcur.primes))
       gxcur.current_prime_id = uni - 'A';
     else if(uni == 'p')
       nextPrime(gxcur);
@@ -174,7 +174,7 @@ void showTorusConfig() {
   keyhandler = [=] (int sym, int uni) {
     if(uni == 'm') {
       int i = torusconfig::newmode + 1;
-      if(i >= size(torusconfig::tmodes)) i = 0;
+      if(i >= isize(torusconfig::tmodes)) i = 0;
       torusconfig::newmode = torusconfig::eTorusMode(i);
       }
     else if(uni == 'n' && single)
@@ -315,7 +315,7 @@ void showEuclideanMenu() {
         break;
       
       case gFieldQuotient:
-        worldsize = size(currfp.matrices) / ts;
+        worldsize = isize(currfp.matrices) / ts;
         worldsize = worldsize * (2*tv + ts * gar) / tv / 2;
         break;
       
@@ -439,7 +439,7 @@ void showEuclideanMenu() {
     stable_sort(landlist.begin(), landlist.end(), [] (eLand l1, eLand l2) { return land_validity(l1).quality_level > land_validity(l2).quality_level; });
     
     for(int i=0; i<euperpage; i++) {
-      if(euperpage * eupage + i >= size(landlist)) { dialog::addBreak(100); break; }
+      if(euperpage * eupage + i >= isize(landlist)) { dialog::addBreak(100); break; }
       eLand l = landlist[euperpage * eupage + i];
       char ch;
       if(i < 26) ch = 'a' + i;
@@ -482,7 +482,7 @@ void showEuclideanMenu() {
         ewhichscreen ^= 3;
       else if(uni == '-' || uni == PSEUDOKEY_WHEELUP || uni == PSEUDOKEY_WHEELDOWN) {
         eupage++;
-        if(eupage * euperpage >= size(landlist)) eupage = 0;
+        if(eupage * euperpage >= isize(landlist)) eupage = 0;
         }
       else if(uni == '1') {
         if(chaosUnlocked) {
@@ -490,7 +490,7 @@ void showEuclideanMenu() {
           start_game();
           }
         }
-      else if(lid >= 0 && lid < size(landlist)) {
+      else if(lid >= 0 && lid < isize(landlist)) {
         eLand nland = landlist[lid];
         if(landvisited[nland]) {
           firstland = specialland = nland;

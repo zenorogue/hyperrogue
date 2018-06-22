@@ -634,8 +634,8 @@ bool drawItemType(eItem it, cell *c, const transmatrix& V, int icol, int ticks, 
     }
 
   else if(it == itPalace) {
-    if(ct6 >= size(shMFloor3.b)) ct6 = 0;
-    if(ct6 >= size(shMFloor3.b)) return false;
+    if(ct6 >= isize(shMFloor3.b)) ct6 = 0;
+    if(ct6 >= isize(shMFloor3.b)) return false;
     transmatrix V2 = V * spin(ticks / 1500.);
     queuepoly(V2, shMFloor3.b[ct6], 0xFFD500FF);
     queuepoly(V2, shMFloor4.b[ct6], darkena(icol, 0, 0xFF));
@@ -1790,7 +1790,7 @@ int last_wormsegment = -1;
 vector<vector< std::function<void()> > > wormsegments;
 
 void add_segment(int d, const std::function<void()>& s) {
-  if(size(wormsegments) <= d) wormsegments.resize(d+1);
+  if(isize(wormsegments) <= d) wormsegments.resize(d+1);
   last_wormsegment = max(last_wormsegment, d);
   wormsegments[d].push_back(s);
   }
@@ -2324,7 +2324,7 @@ void drawaura() {
   glhr::id_modelview();
   glhr::prepare(auravertices);
   glhr::set_depthtest(false);
-  glDrawArrays(GL_TRIANGLES, 0, size(auravertices));
+  glDrawArrays(GL_TRIANGLES, 0, isize(auravertices));
 
 
   setcameraangle(false);
@@ -2524,13 +2524,13 @@ void set_emeraldfloor(cell *c) {
 double fanframe;
 
 void viewBuggyCells(cell *c, transmatrix V) {
-  for(int i=0; i<size(buggycells); i++)
+  for(int i=0; i<isize(buggycells); i++)
     if(c == buggycells[i]) {
       queuepoly(V, shPirateX, 0xC000C080);
       return;
       }
 
-  for(int i=0; i<size(buggycells); i++) {
+  for(int i=0; i<isize(buggycells); i++) {
     cell *c1 = buggycells[i];
     cell *cf = cwt.c;
     
@@ -3203,7 +3203,7 @@ void pushdown(cell *c, int& q, const transmatrix &V, double down, bool rezoom, b
   // since we might be changing priorities, we have to make sure that we are sorting correctly
   if(down > 0 && repriority) { 
     int qq = q+1;
-    while(qq < size(ptds))
+    while(qq < isize(ptds))
       if(qq > q && ptds[qq].prio < ptds[qq-1].prio) {
         swap(ptds[qq], ptds[qq-1]);
         qq--;
@@ -3211,7 +3211,7 @@ void pushdown(cell *c, int& q, const transmatrix &V, double down, bool rezoom, b
       else qq++;
     }
   
-  while(q < size(ptds)) {
+  while(q < isize(ptds)) {
     polytodraw& ptd = ptds[q++];
     if(ptd.kind == pkPoly) {
     
@@ -4535,7 +4535,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       }
     
     if(chasmg) {
-      int q = size(ptds);
+      int q = isize(ptds);
       int maxtime = euclid || sphere ? 20000 : 1500;
       if(fallanims.count(c)) {
          fallanim& fa = fallanims[c];
@@ -4608,7 +4608,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
     if(true) {
       int q = ptds.size();
       error |= drawMonster(V, ctype, c, moncol); 
-      if(Vboat != &V && Vboat != &Vboat0 && q != size(ptds)) 
+      if(Vboat != &V && Vboat != &Vboat0 && q != isize(ptds)) 
         pushdown(c, q, V, -geom3::factor_to_lev(zlevel(tC0((*Vboat)))),
           !isMultitile(c->monst), false);
       }
@@ -4912,7 +4912,7 @@ void drawMarkers() {
     
     {
     using namespace yendor;
-    if(yii < size(yi) && !yi[yii].found) {
+    if(yii < isize(yi) && !yi[yii].found) {
       cell *keycell = NULL;
       int i;
       for(i=0; i<YDIST; i++) 
@@ -5011,12 +5011,12 @@ void drawMarkers() {
   }
 
 void drawFlashes() {
-  for(int k=0; k<size(flashes); k++) {
+  for(int k=0; k<isize(flashes); k++) {
     flashdata& f = flashes[k];
     transmatrix V;
     
     if(f.spd) try { V = gmatrix.at(f.where); } catch(out_of_range&) { 
-      f = flashes[size(flashes)-1];
+      f = flashes[isize(flashes)-1];
       flashes.pop_back(); k--;
       continue; 
       }
@@ -5064,7 +5064,7 @@ void drawFlashes() {
       }
 
     if(kill) {
-      f = flashes[size(flashes)-1];
+      f = flashes[isize(flashes)-1];
       flashes.pop_back(); k--;
       }
     }
@@ -5468,7 +5468,7 @@ void drawfullmap() {
     polygonal::drawBoundary(darkena(0xFF, 0, 0xFF));
   
   /* if(vid.wallmode < 2 && !euclid && !patterns::whichShape) {
-    int ls = size(lines);
+    int ls = isize(lines);
     if(ISMOBILE) ls /= 10;
     for(int t=0; t<ls; t++) queueline(View * lines[t].P1, View * lines[t].P2, lines[t].col >> (darken+1));
     } */
@@ -5632,7 +5632,7 @@ void drawscreen() {
 
   cmode = 0;
   keyhandler = [] (int sym, int uni) { return false; };
-  if(!size(screens)) pushScreen(normalscreen);
+  if(!isize(screens)) pushScreen(normalscreen);
   screens.back()();
 
 #if !ISMOBILE
@@ -5814,7 +5814,7 @@ void indAnimateMovement(cell *src, cell *tgt, int layer, int direction_hint) {
   }
 
 void commitAnimations(int layer) {
-  for(int i=0; i<size(animstack); i++)
+  for(int i=0; i<isize(animstack); i++)
     animations[layer][animstack[i].first] = animstack[i].second;
   animstack.clear();
   }

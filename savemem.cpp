@@ -65,7 +65,7 @@ void recursive_delete(heptagon *h, int i) {
         delete hm;
         hm = allmaps.back();
         allmaps.pop_back();
-        DEBSM(printf("map found (%d altmaps total)\n", size(allmaps));)
+        DEBSM(printf("map found (%d altmaps total)\n", isize(allmaps));)
         break;
         }
       }

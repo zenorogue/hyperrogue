@@ -88,10 +88,10 @@ Java_com_roguetemple_hyperroid_HyperRogue_loadMap
     LOCK(NULL, "loadMap")
 
     jintArray result;
-    result = env->NewIntArray(size(graphdata));
+    result = env->NewIntArray(isize(graphdata));
     if(result == NULL) return NULL;
     
-    env->SetIntArrayRegion(result, 0, size(graphdata), &*graphdata.begin());
+    env->SetIntArrayRegion(result, 0, isize(graphdata), &*graphdata.begin());
     // delref;
 //  env->DeleteLocalRef(result);
 //  if(debfile) fprintf(debfile, "loadmap finished.\n"), fflush(debfile);
@@ -379,7 +379,7 @@ void uploadAll(JNIEnv *env, jobject thiz) {
     orientation_requested = false;
     }
   
-  for(int i=0; i<size(soundsToPlay); i++) {
+  for(int i=0; i<isize(soundsToPlay); i++) {
     jmethodID mid = env->GetMethodID(cls, "playSound", "(Ljava/lang/String;I)V");
     jobject str = env->NewStringUTF(soundsToPlay[i].first.c_str());
     env->CallVoidMethod(thiz, mid, str, soundsToPlay[i].second);

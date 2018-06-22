@@ -106,7 +106,7 @@ void achievement_log(const char* s, char flags) {
   
   if(wrongMode(flags)) return;
   
-  for(int i=0; i<size(achievementsReceived); i++)
+  for(int i=0; i<isize(achievementsReceived); i++)
     if(achievementsReceived[i] == s) return;
   achievementsReceived.push_back(s);
   

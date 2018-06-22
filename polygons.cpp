@@ -61,9 +61,9 @@ hpcshape *last = NULL;
 
 vector<polytodraw> ptds;
 
-polytodraw& lastptd() { return ptds[size(ptds)-1]; }
+polytodraw& lastptd() { return ptds[isize(ptds)-1]; }
 
-polytodraw& nextptd() { ptds.resize(size(ptds)+1); return lastptd(); }
+polytodraw& nextptd() { ptds.resize(isize(ptds)+1); return lastptd(); }
 
 bool ptdsort(const polytodraw& p1, const polytodraw& p2) {
   return p1.prio < p2.prio;
@@ -84,7 +84,7 @@ void hpcpush(hyperpoint h) {
 bool validsidepar[SIDEPARS];
 
 void chasmifyPoly(double fac, double fac2, int k) {
-  for(int i=size(hpc)-1; i >= last->s; i--) {
+  for(int i=isize(hpc)-1; i >= last->s; i--) {
     hyperpoint H;
     for(int j=0; j<3; j++) {
       H[j] = hpc[i][j] * fac;
@@ -124,11 +124,11 @@ void initPolyForGL() {
   }
 
 void extra_vertices() {
-  while(size(ourshape) < size(hpc))
-    ourshape.push_back(glhr::pointtogl(hpc[size(ourshape)]));
+  while(isize(ourshape) < isize(hpc))
+    ourshape.push_back(glhr::pointtogl(hpc[isize(ourshape)]));
   glhr::store_in_buffer(ourshape);
   glhr::current_vertices = NULL;
-  prehpc = size(hpc);
+  prehpc = isize(hpc);
   }
 
 #endif
@@ -173,7 +173,7 @@ void addpoint(const hyperpoint& H) {
   }
 
 void coords_to_poly() {
-  polyi = size(glcoords);
+  polyi = isize(glcoords);
   for(int i=0; i<polyi; i++) {
     // printf("%lf %lf\n", double(glcoords[i][0]), double(glcoords[i][1]));
     if(!stereo::active()) glcoords[i][2] = 0;
@@ -401,7 +401,7 @@ void fixMercator(bool tinf) {
     mercator_period = 2 * vid.radius;
   
   if(pmodel == mdSinusoidal)
-    for(int i = 0; i<size(glcoords); i++) 
+    for(int i = 0; i<isize(glcoords); i++) 
       glcoords[i][mercator_coord] /= cos(glcoords[i][1] / vid.radius * M_PI);    
     
   ld hperiod = mercator_period / 2;
@@ -415,7 +415,7 @@ void fixMercator(bool tinf) {
   if(pmodel == mdBandEquiarea)
     dmin = -vid.radius / M_PI, dmax = vid.radius / M_PI;
 
-  for(int i = 0; i<size(glcoords); i++) {
+  for(int i = 0; i<isize(glcoords); i++) {
     while(glcoords[0][mercator_coord] < hperiod) glcoords[0][mercator_coord] += mercator_period;
     while(glcoords[0][mercator_coord] > hperiod) glcoords[0][mercator_coord] -= mercator_period;
     }
@@ -425,7 +425,7 @@ void fixMercator(bool tinf) {
   
   ld mincoord = first, maxcoord = first;
 
-  for(int i = 0; i<size(glcoords); i++) {
+  for(int i = 0; i<isize(glcoords); i++) {
     while(glcoords[i][mercator_coord] < next - hperiod)
       glcoords[i][mercator_coord] += mercator_period;
     while(glcoords[i][mercator_coord] > next + hperiod)
@@ -450,7 +450,7 @@ void fixMercator(bool tinf) {
     while(maxcoord < cmax)
       mercator_loop_max++, maxcoord += mercator_period;
     if(pmodel == mdSinusoidal)
-      for(int i = 0; i<size(glcoords); i++) 
+      for(int i = 0; i<isize(glcoords); i++) 
         glcoords[i][mercator_coord] *= cos(glcoords[i][1] / vid.radius * M_PI);    
     }
   else {
@@ -463,26 +463,26 @@ void fixMercator(bool tinf) {
       swap(first, last);
       }
     while(maxcoord > cmin) {
-      for(int i=0; i<size(glcoords); i++) glcoords[i][mercator_coord] -= mercator_period;
+      for(int i=0; i<isize(glcoords); i++) glcoords[i][mercator_coord] -= mercator_period;
       first -= mercator_period; last -= mercator_period;
       mincoord -= mercator_period; maxcoord -= mercator_period;
       }
-    int base = size(glcoords);
+    int base = isize(glcoords);
     int minto = mincoord;
     while(minto < cmax) {
       for(int i=0; i<base; i++) {
-        glcoords.push_back(glcoords[size(glcoords)-base]);
+        glcoords.push_back(glcoords[isize(glcoords)-base]);
         glcoords.back()[mercator_coord] += mercator_period;
         }
       minto += mercator_period;
       }
     if(pmodel == mdSinusoidal)
-      for(int i = 0; i<size(glcoords); i++) 
+      for(int i = 0; i<isize(glcoords); i++) 
         glcoords[i][mercator_coord] *= cos(glcoords[i][1] / vid.radius * M_PI);    
     glcoords.push_back(glcoords.back());
     glcoords.push_back(glcoords[0]);
     for(int u=1; u<=2; u++) {
-      auto& v = glcoords[size(glcoords)-u][1-mercator_coord];
+      auto& v = glcoords[isize(glcoords)-u][1-mercator_coord];
       v = v < 0 ? dmin : dmax;
       }
     /* printf("cycling %d -> %d\n", base, qglcoords);
@@ -547,7 +547,7 @@ void drawpolyline(polytodraw& p) {
             int best = -1;
             ld bhypot = 1e60;
             for(int j0=0; j0<MAX_PHASE; j0++)
-              if(size(phases[j0]) == i) {
+              if(isize(phases[j0]) == i) {
                 ld chypot = glhypot2(phases[j0].back(), h);
                 if(chypot < bhypot || best == -1) bhypot = chypot, best = j0;
                 }
@@ -597,7 +597,7 @@ void drawpolyline(polytodraw& p) {
     dynamicval<int> d3(pp.offset, 0);
     dynamicval<decltype(pp.tab)> d4(pp.tab, pp.tab);
     for(int j=0; j<pha; j++) {
-      dynamicval<int> d5(pp.cnt, size(phases[j]));
+      dynamicval<int> d5(pp.cnt, isize(phases[j]));
       pp.tab = &phases[j];
       drawpolyline(p);
       }
@@ -651,7 +651,7 @@ void drawpolyline(polytodraw& p) {
 
   if((spherespecial > 0 || (sphere && equi)) && !(poly_flags & POLY_ISSIDE)) {
     double rarea = 0;
-    for(int i=0; i<size(glcoords)-1; i++) 
+    for(int i=0; i<isize(glcoords)-1; i++) 
       rarea += glcoords[i][0] * glcoords[i+1][1] - glcoords[i][1] * glcoords[i+1][0];
     rarea += glcoords.back()[0] * glcoords[0][1] - glcoords.back()[1] * glcoords[0][0];
     
@@ -675,7 +675,7 @@ void drawpolyline(polytodraw& p) {
   for(int l=mercator_loop_min; l <= mercator_loop_max; l++) {
   
     if(l || lastl) { 
-      for(int i=0; i<size(glcoords); i++) {
+      for(int i=0; i<isize(glcoords); i++) {
         if(pmodel == mdSinusoidal)
           mercator_period = 2 * vid.radius * cos(glcoords[i][1] / vid.radius * M_PI);
         glcoords[i][mercator_coord] += mercator_period * (l - lastl);
@@ -714,11 +714,11 @@ void drawpolyline(polytodraw& p) {
         for(int i=0; i<pp.cnt; i++)
           tv.push_back(pp.tinf->tvertices[pp.offset+i]);
         swap(pp.tinf->tvertices, tv);
-        gldraw(3, Id, glcoords, 0, size(glcoords), p.col, pp.outline, poly_flags, pp.tinf);
+        gldraw(3, Id, glcoords, 0, isize(glcoords), p.col, pp.outline, poly_flags, pp.tinf);
         swap(pp.tinf->tvertices, tv);
         }
       else
-        gldraw(3, Id, glcoords, 0, size(glcoords), nofill ? 0 : p.col, pp.outline, poly_flags, nofill ? NULL : pp.tinf);
+        gldraw(3, Id, glcoords, 0, isize(glcoords), nofill ? 0 : p.col, pp.outline, poly_flags, nofill ? NULL : pp.tinf);
       continue;
       }
   #endif
@@ -806,7 +806,7 @@ void prettyline(hyperpoint h1, hyperpoint h2, int col, int lev) {
   pp.V = Id;
   pp.tab = &prettylinepoints;
   pp.offset = 0;
-  pp.cnt = size(prettylinepoints);
+  pp.cnt = isize(prettylinepoints);
   pp.minwidth = vid.linewidth;
   p.col = 0;
   pp.outline = col;
@@ -818,14 +818,14 @@ void prettyline(hyperpoint h1, hyperpoint h2, int col, int lev) {
 void prettypoly(const vector<hyperpoint>& t, int fillcol, int linecol, int lev) {
   prettylinepoints.clear();
   prettypoint(t[0]);
-  for(int i=0; i<size(t); i++)
+  for(int i=0; i<isize(t); i++)
     prettylinesub(t[i], t[(i+1)%3], lev);
   polytodraw p;
   auto& pp = p.u.poly;
   pp.V = Id;
   pp.tab = &prettylinepoints;
   pp.offset = 0;
-  pp.cnt = size(prettylinepoints);
+  pp.cnt = isize(prettylinepoints);
   pp.minwidth = minwidth_global;
   p.col = fillcol;
   pp.outline = linecol;
@@ -901,7 +901,7 @@ void initquickqueue() {
   }
 
 void sortquickqueue() {
-  for(int i=1; i<size(ptds);)
+  for(int i=1; i<isize(ptds);)
     if(i && ptds[i].prio < ptds[i-1].prio) {
       swap(ptds[i], ptds[i-1]);
       i--;
@@ -911,7 +911,7 @@ void sortquickqueue() {
 
 void quickqueue() {
   spherespecial = 0;
-  int siz = size(ptds);
+  int siz = isize(ptds);
   setcameraangle(false);
   for(int i=0; i<siz; i++) drawqueueitem(ptds[i]);
   }
@@ -928,7 +928,7 @@ purehookset hook_drawqueue;
 void drawqueue() {
   callhooks(hook_drawqueue);
 
-  int siz = size(ptds);
+  int siz = isize(ptds);
 
   setcameraangle(true);
 
@@ -1220,7 +1220,7 @@ hyperpoint turtlevertex(int u, double x, double y, double z) {
 vector<hpcshape*> allshapes;
 
 void finishshape() {
-  last->e = size(hpc);
+  last->e = isize(hpc);
   double area = 0;
   for(int i=last->s; i<last->e-1; i++)
     area += hpc[i][0] * hpc[i+1][1] - hpc[i+1][0] * hpc[i][1];
@@ -1257,7 +1257,7 @@ void bshape(hpcshape& sh, int p) {
   if(last) finishshape();
   hpc.push_back(hpxy(0,0));
   last = &sh;
-  last->s = size(hpc), last->prio = p;
+  last->s = isize(hpc), last->prio = p;
   last->flags = 0;
   first = true; 
   }
@@ -1275,7 +1275,7 @@ void bshape(hpcshape& sh, int p, double shzoom, int shapeid, double bonus = 0, f
   while(polydata[whereis] != NEWSHAPE || polydata[whereis+1] != shapeid) whereis++;
   int rots = polydata[whereis+2]; int sym = polydata[whereis+3];
   array<int,3> arr;
-  arr[0] = size(hpc); arr[1] = rots; arr[2] = sym;
+  arr[0] = isize(hpc); arr[1] = rots; arr[2] = sym;
   symmetriesAt.emplace_back(arr);
   whereis += 4;
   int qty = 0;
@@ -1333,7 +1333,7 @@ void bshape(hpcshape& sh, int p, double shzoom, int shapeid, double bonus = 0, f
   }
 
 void copyshape(hpcshape& sh, hpcshape& orig, int p) {
-  if(last) last->e = size(hpc);
+  if(last) last->e = isize(hpc);
   sh = orig; sh.prio = p;
   }
 
@@ -1362,13 +1362,13 @@ void pushShape(const usershapelayer& ds) {
   transmatrix T = rgpushxto0(ds.shift) * rspintox(ds.spin);
   
   for(int r=0; r<ds.rots; r++) {
-    for(int i=0; i<size(ds.list); i++)
+    for(int i=0; i<isize(ds.list); i++)
       hpcpush(T * spin(2*M_PI*r/ds.rots) * ds.list[i]);
 
     if(ds.sym) {
   
       transmatrix mirrortrans = Id; mirrortrans[1][1] = -1;
-      for(int i=size(ds.list)-1; i>=0; i--)
+      for(int i=isize(ds.list)-1; i>=0; i--)
         hpcpush(T * spin(2*M_PI*r/ds.rots) * mirrortrans * ds.list[i]);
       }
     }
@@ -2207,7 +2207,7 @@ void buildpolys() {
   
   bshapeend();
 
-  prehpc = size(hpc);
+  prehpc = isize(hpc);
   DEBB(DF_INIT, (debugfile,"hpc = %d\n", prehpc));
   
   for(int i=0; i<USERSHAPEGROUPS; i++) for(int j=0; j<USERSHAPEIDS; j++) {
@@ -2221,10 +2221,10 @@ void buildpolys() {
     }
   
   static int qhpc0;
-  int qhpc = size(hpc);
+  int qhpc = isize(hpc);
   if(qhpc != qhpc0 && debug_geometry) {
     printf("qhpc = %d (%d+%d)\n", qhpc0 = qhpc, prehpc, qhpc-prehpc);
-    printf("shapes = %d\n", size(allshapes));
+    printf("shapes = %d\n", isize(allshapes));
     int inve=0, issi=0, vcon=0, ccon=0;
     for(auto sh: allshapes) {
       if(sh->flags & POLY_INVERSE) inve++;
@@ -2329,9 +2329,9 @@ void curvepoint(const hyperpoint& H1) {
   }
 
 void queuecurve(int linecol, int fillcol, int prio) {
-  queuetable(Id, curvedata, size(curvedata)-curvestart, linecol, fillcol, prio);
+  queuetable(Id, curvedata, isize(curvedata)-curvestart, linecol, fillcol, prio);
   lastptd().u.poly.offset = curvestart;
-  curvestart = size(curvedata);
+  curvestart = isize(curvedata);
   }
 
 void queueline(const hyperpoint& H1, const hyperpoint& H2, int col, int prf, int prio) {

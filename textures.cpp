@@ -241,7 +241,7 @@ void texture_config::mapTextureTriangle(textureinfo &mi, const array<hyperpoint,
   // when reading a spherical band in a cylindrical projection,
   // take care that texture vertices are mapped not around the sphere
   if(sphere && mdBandAny()) {
-    int s = size(mi.tvertices)-3;
+    int s = isize(mi.tvertices)-3;
     ld xmin = min(mi.tvertices[s][0], min(mi.tvertices[s+1][0], mi.tvertices[s+2][0]));
     ld xmax = max(mi.tvertices[s][0], max(mi.tvertices[s+1][0], mi.tvertices[s+2][0]));
     if(xmax - xmin > .5) {
@@ -357,7 +357,7 @@ bool texture_config::apply(cell *c, const transmatrix &V, int col) {
       
     if(texture::saving) {
       // create a nicer aura for saved texture
-      for(int i=0; i<size(mi.tvertices); i += 3) {
+      for(int i=0; i<isize(mi.tvertices); i += 3) {
         ld p[3];
         while(true) {
           p[0] = hrandf();
@@ -462,7 +462,7 @@ void texture_config::finish_mapping() {
   texture::cgroup = patterns::cgroup;
   texture_map_orig = texture_map;
   orig_texture_parameters = current_texture_parameters;
-  // printf("texture_map has %d elements (S%d)\n", size(texture_map), config.tstate);
+  // printf("texture_map has %d elements (S%d)\n", isize(texture_map), config.tstate);
   }
 
 void texture_config::saveFullTexture(string tn) {
@@ -717,7 +717,7 @@ void mousemovement() {
           newmove = false;
           }
         }
-      if(edited_tinfo && size(edited_tinfo->triangles) == c->type) {
+      if(edited_tinfo && isize(edited_tinfo->triangles) == c->type) {
         for(int i=0; i<c->type; i++)
           edited_tinfo->triangles[i].tv = findTextureTriangle(c, si, i);
         config.texture_tuned = true;
@@ -917,7 +917,7 @@ bool texture_config::load() {
             coords.push_back(&v[i]);
     int semicounter = 0;
     for(char c: texture_tuner) if(c == ';') semicounter++;
-    if(semicounter != size(coords))
+    if(semicounter != isize(coords))
       addMessage("Tuning error: wrong number");
     else {
       string cur = "";
@@ -928,7 +928,7 @@ bool texture_config::load() {
           cur = "";
           }
         else cur += c;
-      printf("index = %d semi = %d sc = %d\n", index, semicounter, size(coords));
+      printf("index = %d semi = %d sc = %d\n", index, semicounter, isize(coords));
       }
     }
     
@@ -948,7 +948,7 @@ void showMagicMenu() {
   for(int i=0; i<mpMAX; i++)
     dialog::addBoolItem(XLAT(mpnames[i]), have_mp(eMagicParameter(i)), 'a'+i);
   
-  dialog::addSelItem(XLAT("delete markers"), its(size(amp)), 'D');
+  dialog::addSelItem(XLAT("delete markers"), its(isize(amp)), 'D');
   dialog::addItem(XLAT("perform auto-adjustment"), 'R');
   dialog::addBack();
 
@@ -1282,17 +1282,17 @@ void texture_data::undo() {
   }
 
 void texture_data::undoLock() {
-  printf("undos size = %d\n", size(undos));
-  if(size(undos) > 2000000) {
+  printf("undos size = %d\n", isize(undos));
+  if(isize(undos) > 2000000) {
     // limit undo memory
     int moveto = 0;
-    for(int i=0; i < size(undos) - 1000000; i++)
+    for(int i=0; i < isize(undos) - 1000000; i++)
       if(!undos[i].first) moveto = i;
     if(moveto) {
-      for(int i=0; i+moveto < size(undos); i++)
+      for(int i=0; i+moveto < isize(undos); i++)
         undos[i] = undos[i+moveto];
-      undos.resize(size(undos) - moveto);
-      printf("undos sized to = %d\n", size(undos));
+      undos.resize(isize(undos) - moveto);
+      printf("undos sized to = %d\n", isize(undos));
       }
     }
     
@@ -1434,7 +1434,7 @@ void texture_config::remap(eTextureState old_tstate, eTextureState old_tstate_ma
       try {
 
         auto& mi = texture_map_orig.at(oldid);  
-        int ncurr = size(mi.tvertices);  
+        int ncurr = isize(mi.tvertices);  
         int ntarget = ncurr * c->type / mi.current_type;
         vector<glvertex> new_tvertices = mi.tvertices;
         new_tvertices.resize(ntarget);
@@ -1447,7 +1447,7 @@ void texture_config::remap(eTextureState old_tstate, eTextureState old_tstate_ma
         mapTexture(c, mi2, si, shmup::ggmatrix(c), pshift);
         mapTexture2(mi2);
         mi2.tvertices = move(new_tvertices);
-        // printf("%08x remapping %d vertices to %d vertices\n", si.id, size(mi.tvertices), size(mi2.tvertices));
+        // printf("%08x remapping %d vertices to %d vertices\n", si.id, isize(mi.tvertices), isize(mi2.tvertices));
         }
       catch(out_of_range&) { 
         printf("Unexpected missing cell #%d/%d", si.id, oldid);
@@ -1463,7 +1463,7 @@ void texture_config::remap(eTextureState old_tstate, eTextureState old_tstate_ma
     drawthemap();
     perform_mapping();
     finish_mapping();
-    printf("texture_map size = %d\n", size(texture_map));
+    printf("texture_map size = %d\n", isize(texture_map));
     }
   }
 

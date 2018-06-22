@@ -444,7 +444,7 @@ string generateHelpForWall(eWall w) {
   }
 
 void buteol(string& s, int current, int req) {
-  int siz = size(s);
+  int siz = isize(s);
   if(s[siz-1] == '\n') s.resize(siz-1);
   char buf[100]; sprintf(buf, " (%d/%d)", current, req);
   s += buf; s += "\n";

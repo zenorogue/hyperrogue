@@ -419,7 +419,7 @@ struct hrmap_torus : hrmap {
       }
     celllister cl(gamestart(), 100, 100000000, NULL);
     dists.resize(q);
-    for(int i=0; i<size(cl.lst); i++)
+    for(int i=0; i<isize(cl.lst); i++)
       dists[decodeId(cl.lst[i]->master)] = cl.dists[i];
     }
   
@@ -754,7 +754,7 @@ struct hrmap_quotient : hrmap {
   heptagon *getOrigin() { return allh[0]; }
 
   ~hrmap_quotient() {
-    for(int i=0; i<size(allh); i++) {
+    for(int i=0; i<isize(allh); i++) {
       clearHexes(allh[i]);
       delete allh[i];
       }
@@ -1478,7 +1478,7 @@ int celldistance(cell *c1, cell *c2) {
       return saved_distances[make_pair(c1,c2)];
 
     celllister cl(c1, 100, 100000000, NULL);
-    for(int i=0; i<size(cl.lst); i++)
+    for(int i=0; i<isize(cl.lst); i++)
       saved_distances[make_pair(c1, cl.lst[i])] = cl.dists[i];
 
     if(saved_distances.count(make_pair(c1,c2)))
@@ -1492,11 +1492,11 @@ int celldistance(cell *c1, cell *c2) {
     if(saved_distances.count(make_pair(c1,c2)))
       return saved_distances[make_pair(c1,c2)];
       
-    if(size(saved_distances) > 1000000) saved_distances.clear();
+    if(isize(saved_distances) > 1000000) saved_distances.clear();
 
     celllister cl(c1, 64, 1000, c2);
 
-    for(int i=0; i<size(cl.lst); i++)
+    for(int i=0; i<isize(cl.lst); i++)
       saved_distances[make_pair(c1, cl.lst[i])] = cl.dists[i];
 
     if(saved_distances.count(make_pair(c1,c2)))
@@ -1572,7 +1572,7 @@ int celldistance(cell *c1, cell *c2) {
   }
 
 void clearCellMemory() {
-  for(int i=0; i<size(allmaps); i++) 
+  for(int i=0; i<isize(allmaps); i++) 
     if(allmaps[i])
       delete allmaps[i];
   allmaps.clear();

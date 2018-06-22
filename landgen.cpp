@@ -63,9 +63,9 @@ bool reptilecheat = false;
 vector<cell*> noescape_list;
 
 bool blizzard_no_escape1(cell *c) {
-  if(c->aitmp >= 0 && c->aitmp < size(noescape_list) && noescape_list[c->aitmp] == c)
+  if(c->aitmp >= 0 && c->aitmp < isize(noescape_list) && noescape_list[c->aitmp] == c)
     return true;
-  c->aitmp = size(noescape_list); noescape_list.push_back(c);
+  c->aitmp = isize(noescape_list); noescape_list.push_back(c);
   if(c->item == itOrbSafety)
     return false;
   forCellEx(c2, c) {
@@ -784,8 +784,8 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           // printf("dragon generated with dchance = %d\n", dchance);
           vector<int> possi;
           for(int t=0; t<c->type; t++) if(c->mov[t]->mpdist > c->mpdist) possi.push_back(t);
-          if(size(possi)) {
-            int i = possi[hrand(size(possi))];
+          if(isize(possi)) {
+            int i = possi[hrand(isize(possi))];
             int dragonlength = 6 + items[itDragon] / 2;
             c->monst = moDragonHead; c->hitpoints = 1;
             preventbarriers(c);
@@ -806,8 +806,8 @@ void giantLandSwitch(cell *c, int d, cell *from) {
               i = j + 2 + hrand(c2->type-3);
               i %= c2->type;
               }
-            if(size(dragon) < 5 || size(dragon) < dragonlength / 2) {
-              for(int i=0; i<size(dragon); i++) 
+            if(isize(dragon) < 5 || isize(dragon) < dragonlength / 2) {
+              for(int i=0; i<isize(dragon); i++) 
                 dragon[i]->monst = moNone;
               }
             else c2->mondir = NODIR;
@@ -1640,8 +1640,8 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           vector<int> gooddir;
           for(int t=0; t<c->type; t++) if(c->mov[t]->mpdist > c->mpdist)
             gooddir.push_back(t);
-          if(size(gooddir))
-            generateSnake(c, gooddir[hrand(size(gooddir))], 2);
+          if(isize(gooddir))
+            generateSnake(c, gooddir[hrand(isize(gooddir))], 2);
           }
         else if(hrand(10000) < items[itSnake] - 10 + yendor::hardness() && !c->monst && !c->wall && !peace::on) {
           c->monst = pick(moRedTroll, moMiner, moSkeleton, moBomberbird);
@@ -1790,9 +1790,9 @@ void giantLandSwitch(cell *c, int d, cell *from) {
                   if(cw1.c->mpdist > 7)
                     next.emplace_back(cw0.c, cw1.c);
                   }
-                if(size(next)) {
+                if(isize(next)) {
                   c->item = itHunting;
-                  auto& p = next[hrand(size(next))];
+                  auto& p = next[hrand(isize(next))];
                   p.first->monst = moHunterGuard;
                   p.second->monst = moHunterGuard;
                   }
@@ -1800,17 +1800,17 @@ void giantLandSwitch(cell *c, int d, cell *from) {
               else if(items[itHunting] < 10) {
                 vector<cell*> next;
                 forCellEx(c2, c) if(c2->mpdist > 7 && (nonbitrunc || !ctof(c2))) next.push_back(c2);
-                if(size(next)) {
+                if(isize(next)) {
                   c->item = itHunting;
-                  cell *c3 = next[hrand(size(next))];
+                  cell *c3 = next[hrand(isize(next))];
                   vector<cell*> dogcells;
                   forCellEx(c4, c3) if(c4->mpdist > 7 && !isNeighbor(c4, c))
                     dogcells.push_back(c4);
-                  if(items[itHunting] < 10 && size(dogcells) >= 2) {
+                  if(items[itHunting] < 10 && isize(dogcells) >= 2) {
                     for(int t=0;; t++) {
                       if(t == 50) { c->item = itNone; break; }
-                      cell *dog1 = dogcells[hrand(size(dogcells))];
-                      cell *dog2 = dogcells[hrand(size(dogcells))];
+                      cell *dog1 = dogcells[hrand(isize(dogcells))];
+                      cell *dog2 = dogcells[hrand(isize(dogcells))];
                       if(isNeighbor(dog1, dog2)) {
                         dog1->monst = moHunterGuard;
                         dog1->landparam = 0;
@@ -1820,9 +1820,9 @@ void giantLandSwitch(cell *c, int d, cell *from) {
                         }
                       }
                     }
-                  else if(size(dogcells)) {
+                  else if(isize(dogcells)) {
                     c->item = itHunting;
-                    dogcells[hrand(size(dogcells))]->monst = moHunterGuard;
+                    dogcells[hrand(isize(dogcells))]->monst = moHunterGuard;
                     }
                   }
                 }

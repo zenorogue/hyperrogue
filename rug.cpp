@@ -168,7 +168,7 @@ void push_point(hyperpoint& h, int coord, ld val) {
   
 void push_all_points(int coord, ld val) {
   if(!val) return;
-  else for(int i=0; i<size(points); i++)
+  else for(int i=0; i<isize(points); i++)
     push_point(points[i]->flat, coord, val);
   }
 
@@ -263,7 +263,7 @@ rugpoint *addRugpoint(hyperpoint h, double dist) {
   }
 
 rugpoint *findRugpoint(hyperpoint h) {
-  for(int i=0; i<size(points); i++) 
+  for(int i=0; i<isize(points); i++) 
     if(intvalxyz(points[i]->h, h) < 1e-5) return points[i];
   return NULL;
   }
@@ -557,7 +557,7 @@ void verify() {
     
   Xprintf("%s", "Length verification:\n");
   sort(ratios.begin(), ratios.end());
-  for(int i=0; i<size(ratios); i += size(ratios) / 10)
+  for(int i=0; i<isize(ratios); i += isize(ratios) / 10)
     Xprintf("%lf\n", ratios[i]);
   Xprintf("%s", "\n");
   }
@@ -582,7 +582,7 @@ void buildRug() {
 
   map<cell*, rugpoint *> vptr;
   
-  for(int i=0; i<size(cl.lst); i++)
+  for(int i=0; i<isize(cl.lst); i++)
     vptr[cl.lst[i]] = addRugpoint(shmup::ggmatrix(cl.lst[i])*C0, cl.dists[i]);
 
   for(auto& p: vptr) {
@@ -608,7 +608,7 @@ void buildRug() {
     catch(out_of_range&) {}
     }
 
-  Xprintf("vertices = %d triangles=  %d\n", size(points), size(triangles));
+  Xprintf("vertices = %d triangles=  %d\n", isize(points), isize(triangles));
 
   if(subdivide_first) 
     for(int i=0; i<20 && subdivide_further(); i++)
@@ -703,18 +703,18 @@ void preset(rugpoint *m) {
   
   preset_points.clear();
   
-  for(int j=0; j<size(m->edges); j++)
+  for(int j=0; j<isize(m->edges); j++)
   for(int k=0; k<j; k++) {
     rugpoint *a = m->edges[j].target;
     rugpoint *b = m->edges[k].target;
     if(!a->valid) continue;
     if(!b->valid) continue;
     double blen = -1;
-    for(int j2=0; j2<size(a->edges); j2++) 
+    for(int j2=0; j2<isize(a->edges); j2++) 
       if(a->edges[j2].target == b) blen = a->edges[j2].len;
     if(blen <= 0) continue;
-    for(int j2=0; j2<size(a->edges); j2++) 
-    for(int k2=0; k2<size(b->edges); k2++) 
+    for(int j2=0; j2<isize(a->edges); j2++) 
+    for(int k2=0; k2<isize(b->edges); k2++) 
     if(a->edges[j2].target == b->edges[k2].target && a->edges[j2].target != m) {    
       rugpoint *c = a->edges[j2].target;
       if(!c->valid) continue;
@@ -769,7 +769,7 @@ void optimize(rugpoint *m, bool do_preset) {
 
   if(do_preset) {
     preset(m);
-    // int ed0 = size(preset_points);
+    // int ed0 = isize(preset_points);
     for(auto& e: m->edges) if(e.target->valid) 
       preset_points.emplace_back(e.len, e.target);
     if(gwhere >= gSphere) {
@@ -790,11 +790,11 @@ void optimize(rugpoint *m, bool do_preset) {
         if(now < cur) { cur = now; ex *= 1.2; goto again; }
         else m->flat = last;
         }
-      // printf("edges = [%d] %d sse = %lf\n",ed0, size(preset_points), cur);
+      // printf("edges = [%d] %d sse = %lf\n",ed0, isize(preset_points), cur);
       }
     }
   for(int it=0; it<50; it++) 
-    for(int j=0; j<size(m->edges); j++)
+    for(int j=0; j<isize(m->edges); j++)
       force(*m, *m->edges[j].target, m->edges[j].len, false, 1, 0);
   }
 
@@ -803,11 +803,11 @@ bool stop = false;
 
 bool subdivide_further() {
   if(torus) return false;
-  return size(points) * 4 < vertex_limit;
+  return isize(points) * 4 < vertex_limit;
   }
 
 void subdivide() {
-  int N = size(points);
+  int N = isize(points);
   // if(euclid && gwhere == gEuclid) return;
   if(!subdivide_further()) {
     if(euclid && !bounded && gwhere == gEuclid) {
@@ -821,7 +821,7 @@ void subdivide() {
       }
     return; 
     }
-  Xprintf("subdivide (%d,%d)\n", N, size(triangles));
+  Xprintf("subdivide (%d,%d)\n", N, isize(triangles));
   need_mouseh = true;  
   divides++;
   vector<triangle> otriangles = triangles;
@@ -832,7 +832,7 @@ void subdivide() {
   // subdivide edges
   for(int i=0; i<N; i++) {
     rugpoint *m = points[i];
-    for(int j=0; j<size(m->edges); j++) {
+    for(int j=0; j<isize(m->edges); j++) {
       rugpoint *m2 = m->edges[j].target;
       if(m2 < m) continue;
       rugpoint *mm = addRugpoint(mid(m->h, m2->h), (m->dist+m2->dist)/2);
@@ -851,12 +851,12 @@ void subdivide() {
      m->edges.clear();
      }
     
-  for(int i=0; i<size(otriangles); i++)
+  for(int i=0; i<isize(otriangles); i++)
     addTriangle1(otriangles[i].m[0], otriangles[i].m[1], otriangles[i].m[2]);
     
   calcLengths();
 
-  Xprintf("result (%d,%d)\n", size(points), size(triangles));
+  Xprintf("result (%d,%d)\n", isize(points), isize(triangles));
 
   }
 
@@ -982,7 +982,7 @@ void addNewPoints() {
   if(anticusp_factor && detect_cusps())
     return;
 
-  if(torus || qvalid == size(points)) {
+  if(torus || qvalid == isize(points)) {
     subdivide();
     return;
     }
@@ -991,7 +991,7 @@ void addNewPoints() {
   
   int oqvalid = qvalid;
 
-  for(int i=0; i<size(points); i++) {
+  for(int i=0; i<isize(points); i++) {
     rugpoint& m = *points[i];
     bool wasvalid = m.valid;
     m.valid = wasvalid || sphere || hdist0(m.h) <= dist;
@@ -1004,7 +1004,7 @@ void addNewPoints() {
       enqueue(&m);
       }
     }
-  if(qvalid != oqvalid) { Xprintf("adding new points %4d %4d %4d %.9lf %9d %9d\n", oqvalid, qvalid, size(points), dist, dt, queueiter); }
+  if(qvalid != oqvalid) { Xprintf("adding new points %4d %4d %4d %.9lf %9d %9d\n", oqvalid, qvalid, isize(points), dist, dt, queueiter); }
   }
 
 void physics() {
@@ -1327,12 +1327,12 @@ void drawRugScene() {
       100
       );
       
-    for(int t=0; t<size(triangles); t++)
+    for(int t=0; t<isize(triangles); t++)
       drawTriangle(triangles[t]);
       
     glhr::id_modelview();
     glhr::prepare(ct_array);
-    glDrawArrays(GL_TRIANGLES, 0, size(ct_array));
+    glDrawArrays(GL_TRIANGLES, 0, isize(ct_array));
 
     stereo::set_mask(0);
     }
@@ -1413,7 +1413,7 @@ void init() {
 
 void clear_model() {
   triangles.clear();
-  for(int i=0; i<size(points); i++) delete points[i];
+  for(int i=0; i<isize(points); i++) delete points[i];
   points.clear();
   pqueue = queue<rugpoint*> ();
   }
@@ -1632,7 +1632,7 @@ hyperpoint gethyper(ld x, ld y) {
   
   bool found = false;
   
-  for(int i=0; i<size(triangles); i++) {
+  for(int i=0; i<isize(triangles); i++) {
     auto r0 = triangles[i].m[0];
     auto r1 = triangles[i].m[1];
     auto r2 = triangles[i].m[2];

@@ -12,8 +12,8 @@ typedef vector<int> cwpath;
 
 cwpath invertpath(cwpath p) {
   cwpath res;
-  for(int i=0; i<size(p); i++)
-    res.push_back(-p[size(p)-1-i]);
+  for(int i=0; i<isize(p); i++)
+    res.push_back(-p[isize(p)-1-i]);
   return res;
   }
 
@@ -159,7 +159,7 @@ void recursive_paint(cwpath& pinv, vector<int>& way, int noway) {
   infos[c].way = way;
   infos[c].pinv = pinv;
   
-  // c->landparam ^= ((size(way)&1) * 0x3F3F3F);
+  // c->landparam ^= ((isize(way)&1) * 0x3F3F3F);
   // c->landparam = hsh; // d * 5 + 256 * (hsh&0xFFFF) + 0x400000;
   if(cidd>112899) c->landparam = 0x101010;
   // c->landparam = cidd * 0x1241C3;

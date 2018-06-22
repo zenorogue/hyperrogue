@@ -27,7 +27,7 @@ void displayScore(subscoreboard& s, int x) {
     }
   else {
     sort(s.begin(), s.end());
-    for(int i=0; i<size(s); i++) {
+    for(int i=0; i<isize(s); i++) {
       int i0 = 56 + i * vf;
       displayfr(x, i0, 1, vf, its(-s[i].first), 0xC0C0C0, 16);
       displayfr(x+8, i0, 1, vf, s[i].second, 0xC0C0C0, 0);
@@ -137,7 +137,7 @@ namespace yendor {
     if(peace::on) return 15; // just to generate monsters
     if(!yendor::generating && !yendor::path && !yendor::on) return 0;
     int thf = 0;
-    for(int i=0; i<size(yi); i++) {
+    for(int i=0; i<isize(yi); i++) {
       yendorinfo& ye ( yi[i] );
       if(!ye.foundOrb && ye.howfar > 25)
         thf += (ye.howfar - 25);
@@ -150,16 +150,16 @@ namespace yendor {
   enum eState { ysUntouched, ysLocked, ysUnlocked };
   
   eState state(cell *yendor) {
-    for(int i=0; i<size(yi); i++) if(yi[i].path[0] == yendor)
+    for(int i=0; i<isize(yi); i++) if(yi[i].path[0] == yendor)
       return yi[i].found ? ysUnlocked : ysLocked;
     return ysUntouched;
     }
   
   bool check(cell *yendor) {
-    int byi = size(yi);
-    for(int i=0; i<size(yi); i++) if(yi[i].path[0] == yendor) byi = i;
-    if(byi < size(yi) && yi[byi].found) return false;
-    if(byi == size(yi)) {
+    int byi = isize(yi);
+    for(int i=0; i<isize(yi); i++) if(yi[i].path[0] == yendor) byi = i;
+    if(byi < isize(yi) && yi[byi].found) return false;
+    if(byi == isize(yi)) {
       yendorinfo nyi;
       nyi.path[0] = yendor;
       nyi.howfar = 0;
@@ -290,7 +290,7 @@ namespace yendor {
   
   void onpath() {
     path = false;
-    if(yii < size(yi)) {
+    if(yii < isize(yi)) {
       for(int i=0; i<YDIST; i++) if(yi[yii].path[i]->cpdist <= 7) {
         if(i > yi[yii].howfar) yi[yii].howfar = i;
         path = true;
@@ -491,7 +491,7 @@ namespace yendor {
     if(yc > 0 && yc < YENDORLEVELS) {
       subscoreboard scorehere;
 
-      for(int i=0; i<size(scoreboard); i++) {
+      for(int i=0; i<isize(scoreboard); i++) {
         int sc = scoreboard[i].scores[yc];
         if(sc > 0) 
           scorehere.push_back(
@@ -528,7 +528,7 @@ namespace yendor {
     int pg = gold();
     playSound(c2, "tada");
     items[itOrbShield] += 31;
-    for(int i=0; i<size(yendor::yi); i++)
+    for(int i=0; i<isize(yendor::yi); i++)
       if(yendor::yi[i].path[0] == c2) 
         yendor::yi[i].foundOrb = true;
     // Shielding always, so that we know that it protects!
@@ -684,7 +684,7 @@ namespace tactic {
     generateLandList([] (eLand l) { return land_validity(l).flags & lv::appears_in_ptm; });
     }
     
-    int nl = size(landlist);
+    int nl = isize(landlist);
 
     int nlm;
     int ofs = dialog::handlePage(nl, nlm, (nl+1)/2);
@@ -738,10 +738,10 @@ namespace tactic {
     uploadScore();
     if(on) unrecord(specialland);
     
-    if(getcstat >= 1000 && getcstat < 1000 + size(landlist)) {
+    if(getcstat >= 1000 && getcstat < 1000 + isize(landlist)) {
       int ld = landlist[getcstat-1000];
       subscoreboard scorehere;
-      for(int i=0; i<size(scoreboard[xc]); i++) {
+      for(int i=0; i<isize(scoreboard[xc]); i++) {
         int sc = scoreboard[xc][i].scores[ld];
         if(sc > 0) 
           scorehere.push_back(
@@ -751,7 +751,7 @@ namespace tactic {
       }
      
     keyhandler = [] (int sym, int uni) {
-      if(uni >= 1000 && uni < 1000 + size(landlist)) {
+      if(uni >= 1000 && uni < 1000 + isize(landlist)) {
         specialland = landlist[uni - 1000];
         restart_game(tactic::on ? rg::nothing : rg::tactic);
         }
@@ -1004,15 +1004,15 @@ namespace peace {
     
     void build() {
       if(otherpuzzles || !on) return;
-      while(size(path) < tobuild) {
-        cell *cp = path[size(path)-1];
-        cell *cp2 = path[size(path)-2];
+      while(isize(path) < tobuild) {
+        cell *cp = path[isize(path)-1];
+        cell *cp2 = path[isize(path)-2];
         vector<pair<cell*, cell*>> clister;
         clister.emplace_back(cp, cp);
         
         int id = 0;
         sval++;
-        while(id < size(clister)) {
+        while(id < isize(clister)) {
           cell *c = clister[id].first;
           cell *fr = clister[id].second;
           setdist(c, 5, NULL);
@@ -1044,7 +1044,7 @@ namespace peace {
   
     void extend() {
       int i = 0;
-      while(i<size(path) && path[i]->item != itDodeca) i++;
+      while(i<isize(path) && path[i]->item != itDodeca) i++;
       if(tobuild == i+9)
         addMessage("You must collect all the dodecahedra on the path!");
       tobuild = i + 9;
@@ -1066,7 +1066,7 @@ namespace peace {
       }
     
     void restore() {
-      for(int i=1; i<size(path); i++)
+      for(int i=1; i<isize(path); i++)
         if(path[i]->item == itNone && items[itDodeca])
           path[i]->item = itDodeca, items[itDodeca]--;
       }

@@ -320,7 +320,7 @@ cell *buildAnotherEquidistant(cell *c, int radius) {
   cellwalker cw(c, (gdir+3) % c->type);
   vector<cell*> coastpath;
   
-  while(size(coastpath) < radius || (cw.c->type != 7 && !weirdhyperbolic)) {
+  while(isize(coastpath) < radius || (cw.c->type != 7 && !weirdhyperbolic)) {
     // this leads to bugs for some reason!
     if(cw.c->land == laCrossroads2) {
 #ifdef AUTOPLAY
@@ -338,7 +338,7 @@ cell *buildAnotherEquidistant(cell *c, int radius) {
     coastpath.push_back(cw.c);
     if(cw.c->land == laNone && cw.c->mpdist <= 7) {
       raiseBuggyGeneration(cw.c, "landNone 1");
-      for(int i=0; i<size(coastpath); i++) coastpath[i]->item = itPirate;
+      for(int i=0; i<isize(coastpath); i++) coastpath[i]->item = itPirate;
       return NULL;
       }
     cw = cw + wstep + 3;
@@ -346,18 +346,18 @@ cell *buildAnotherEquidistant(cell *c, int radius) {
     }
   coastpath.push_back(cw.c);
   // printf("setdists\n");
-  for(int i=1; i<size(coastpath) - 1; i++) {
+  for(int i=1; i<isize(coastpath) - 1; i++) {
     if(coastpath[i-1]->land == laNone) {
       raiseBuggyGeneration(cwt.c, "landNone 3");
       int mpd[10];
       for(int i=0; i<10; i++) mpd[i] = coastpath[i]->mpdist;
       {for(int i=0; i<10; i++) printf("%d ", mpd[i]);} printf("\n");
-      for(int i=0; i<size(coastpath); i++) coastpath[i]->item = itPirate;
+      for(int i=0; i<isize(coastpath); i++) coastpath[i]->item = itPirate;
       return NULL;
       }
     setdist(coastpath[i], BARLEV, coastpath[i-1]);
     setdist(coastpath[i], BARLEV-1, coastpath[i-1]);
-    if(i < size(coastpath) - 5) {
+    if(i < isize(coastpath) - 5) {
       coastpath[i]->bardir = NOBARRIERS;
 //      forCellEx(c2, coastpath[i]) c2->bardir = NOBARRIERS;
       }
@@ -371,7 +371,7 @@ cell *buildAnotherEquidistant(cell *c, int radius) {
   
   if(c2->land == laNone) {
     raiseBuggyGeneration(c2, "landNone 2");
-    for(int i=0; i<size(coastpath); i++) coastpath[i]->item = itPirate;
+    for(int i=0; i<isize(coastpath); i++) coastpath[i]->item = itPirate;
     return NULL;
     }
 
@@ -393,7 +393,7 @@ cell *buildAnotherEquidistant(cell *c, int radius) {
   //printf("building barrier II\n");
   if(hasbardir(c2)) extendBarrier(c2);
 
-  for(int i=size(coastpath)-(nowall?1:2); i>=0; i--) {
+  for(int i=isize(coastpath)-(nowall?1:2); i>=0; i--) {
     for(int j=BARLEV; j>=6; j--)
       setdist(coastpath[i], j, NULL);
     }

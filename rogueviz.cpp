@@ -159,7 +159,7 @@ void addedge(int i, int j, edgeinfo *ei) {
   if(d >= 4) {
     // printf("splitting %lf\n", d);
     hyperpoint h = mid(hi, hj);
-    int id = size(vdata);
+    int id = isize(vdata);
     vdata.resize(id+1);
     vertexdata& vd(vdata[id]);
     vd.cp = colorpair(0x400000FF);
@@ -187,7 +187,7 @@ void addedge(int i, int j, double wei, bool subdiv) {
   }
 
 void storeall() {
-  for(int i=0; i<size(vdata); i++)
+  for(int i=0; i<isize(vdata); i++)
     if(vdata[i].m)
       vdata[i].m->store();
   }
@@ -225,7 +225,7 @@ namespace spiral {
     }
   
   void edge(ld shift, ld mul) {
-    int N = size(vdata);
+    int N = isize(vdata);
     for(int i=0; i<N; i++) {
       int i0 = i+1;
       int j0 = int(i0 * mul + shift) - 1;
@@ -234,7 +234,7 @@ namespace spiral {
     }
   
   void color(ld start, ld period, colorpair c) {
-    int N = size(vdata);
+    int N = isize(vdata);
     int maxw = N;
     while(start >= 0 && start < N) {
       int i = int(start);
@@ -283,8 +283,8 @@ namespace anygraph {
   int N;
                
   void fixedges() {
-    for(int i=N; i<size(vdata); i++) if(vdata[i].m) vdata[i].m->dead = true;
-    for(int i=0; i<size(vdata); i++) vdata[i].edges.clear();
+    for(int i=N; i<isize(vdata); i++) if(vdata[i].m) vdata[i].m->dead = true;
+    for(int i=0; i<isize(vdata); i++) vdata[i].edges.clear();
     vdata.resize(N);
     for(auto e: edgeinfos) {
       e->orig = NULL;
@@ -343,8 +343,8 @@ namespace anygraph {
   
     if(doRebase) {
       printf("Rebasing...\n");
-      for(int i=0; i<size(vdata); i++) {
-        if(i % 10000 == 0) printf("%d/%d\n", i, size(vdata));
+      for(int i=0; i<isize(vdata); i++) {
+        if(i % 10000 == 0) printf("%d/%d\n", i, isize(vdata));
         if(vdata[i].m) virtualRebase(vdata[i].m, true);
         }
       printf("Done.\n");
@@ -368,7 +368,7 @@ namespace tree {
   vector<treevertex> tol;
   
   void child(int pid, int id) {
-    if(size(tol) <= id) tol.resize(id+1);
+    if(isize(tol) <= id) tol.resize(id+1);
     
     treevertex& v = tol[id];
     v.parent = pid;
@@ -401,7 +401,7 @@ namespace tree {
   void spos(int at, int d) {
     tol[at].spos = xpos++;
     tol[at].depth = d;
-    for(int i=0; i<size(tol[at].children); i++)
+    for(int i=0; i<isize(tol[at].children); i++)
       spos(tol[at].children[i], d+1);
     tol[at].epos = ++xpos;
     }
@@ -418,7 +418,7 @@ namespace tree {
       }
     readnode(f, -1);
     fclose(f);
-    int N = size(vdata);
+    int N = isize(vdata);
     printf("N = %d\n", N);
     printf("Assigning spos/epos...\n");
     spos(0, 0);
@@ -441,7 +441,7 @@ namespace tree {
         addedge(i, tol[i].parent, 0, true);
       }
     
-    for(int i=0; i<size(vdata); i++) {
+    for(int i=0; i<isize(vdata); i++) {
       vertexdata& vd = vdata[i];
       virtualRebase(vd.m, true);
       }
@@ -563,7 +563,7 @@ namespace sag {
     if(vid < 0) return 0;
     double cost = 0;
     vertexdata& vd = vdata[vid];
-    for(int j=0; j<size(vd.edges); j++) {
+    for(int j=0; j<isize(vd.edges); j++) {
       edgeinfo *ei = vd.edges[j].second;
       int t2 = vd.edges[j].first;
       if(snakeid[t2] != -1) cost += snakedist(sid, snakeid[t2]) * ei->weight2;
@@ -587,7 +587,7 @@ namespace sag {
   vector<double> chgs;  
 
   void forgetedges(int id) {
-    for(int i=0; i<size(vdata[id].edges); i++) 
+    for(int i=0; i<isize(vdata[id].edges); i++) 
       vdata[id].edges[i].second->orig = NULL;
     }
 
@@ -610,7 +610,7 @@ namespace sag {
     
     else {
       cell *c;
-      if(s>=2 && size(vdata[t1].edges)) c = snakecells[snakeid[hrand(size(vdata[t1].edges))]];
+      if(s>=2 && isize(vdata[t1].edges)) c = snakecells[snakeid[hrand(isize(vdata[t1].edges))]];
       else c = snakecells[sid1];
       
       int it = s<2 ? (s+1) : s-2;
@@ -788,7 +788,7 @@ namespace sag {
     for(int j=0; j<i; j++)
       indist[snakedist(snakeid[i], snakeid[j])]++;
       
-    for(int i=0; i<size(sagedges); i++) {
+    for(int i=0; i<isize(sagedges); i++) {
       edgeinfo& ei = sagedges[i];
       if(snakedist(snakeid[ei.i], snakeid[ei.j]) == 0) {
         printf("zero between %d (%s) and %d (%s)\n", 
@@ -855,19 +855,19 @@ namespace sag {
     temperature = 0; sagmode = sagOff;
     readsag(fname.c_str());
 
-    N = size(vdata);
+    N = isize(vdata);
     // totwei.resize(N);
     // for(int i=0; i<N; i++) totwei[i] = 0;
     
     for(int i=0; i<N; i++) vdata[i].data = 0;
-    /* for(int i=0; i<size(sagedges); i++) {
+    /* for(int i=0; i<isize(sagedges); i++) {
       edgeinfo& ei = sagedges[i];
       // maxwei[ei.i] = max(maxwei[ei.i], ei.weight);
       // maxwei[ei.j] = max(maxwei[ei.j], ei.weight);
       // totwei[ei.i] += ei.weight;
       // totwei[ei.j] += ei.weight;
       } */
-    for(int i=0; i<size(sagedges); i++) {
+    for(int i=0; i<isize(sagedges); i++) {
       edgeinfo& ei = sagedges[i];
       ei.visible = ei.weight >= 0.1;
       // (ei.weight >= maxwei[ei.i] / 5 || ei.weight >= maxwei[ei.j] / 5);
@@ -922,15 +922,15 @@ string describe(shmup::monster *m) {
   int i = m->pid;
   vertexdata& vd = vdata[i];
 
-  string o = vd.name+", "+its(size(vd.edges))+" edges";
-  /* if(size(vd.edges) < 10) {
-    for(int i=0; i<size(vd.edges); i++) 
+  string o = vd.name+", "+its(isize(vd.edges))+" edges";
+  /* if(isize(vd.edges) < 10) {
+    for(int i=0; i<isize(vd.edges); i++) 
       o += " " + its(snakedist(vd.snakeid, vd.edges[i]->snakeid));
     } */
   
   vector<edgeinfo*> alledges;
   
-  for(int j=0; j<size(vd.edges); j++) 
+  for(int j=0; j<isize(vd.edges); j++) 
     alledges.push_back(vd.edges[j].second);
   
   sort(alledges.begin(), alledges.end(), edgecmp);
@@ -939,7 +939,7 @@ string describe(shmup::monster *m) {
 
   if(vd.info) hr::help = (*vd.info) + "\n" + help;
 
-  for(int j=0; j<size(alledges); j++) {
+  for(int j=0; j<isize(alledges); j++) {
     edgeinfo *ei = alledges[j];
     if(!ei->visible) continue;
     int k = ei->i ^ ei->j ^ i;
@@ -956,7 +956,7 @@ void activate(shmup::monster *m) {
 
   vd.cp = colorpair(rand() & 0xFFFFFFFF);
   
-  for(int i=0; i<size(vd.edges); i++) 
+  for(int i=0; i<isize(vd.edges); i++) 
       vd.edges[i].second->orig = NULL;
   
   /* if(ealpha == 1) ealpha = 8;
@@ -1020,7 +1020,7 @@ void drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
 
   int lid = shmup::lmousetarget ? shmup::lmousetarget->pid : -2;
   
-  if(!leftclick) for(int j=0; j<size(vd.edges); j++) {
+  if(!leftclick) for(int j=0; j<isize(vd.edges); j++) {
     edgeinfo *ei = vd.edges[j].second;
     if(!ei->visible) continue;
     vertexdata& vd1 = vdata[ei->i];
@@ -1145,7 +1145,7 @@ void drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
       string s = vd.name;
       colorpair cp = vd.cp;
       vd.data = 20;
-      int i0 = size(vdata);
+      int i0 = isize(vdata);
       vdata.resize(i0+1);
       vertexdata& vdn = vdata[i0];
       createViz(i0, m->base, m->at * spin(collatz::s2) * xpush(collatz::p2));
@@ -1157,7 +1157,7 @@ void drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
       vdn.m->store();
       int carry = 0;
       string s2 = s;
-      for(int i=size(s2)-1; i>=0; i--) {
+      for(int i=isize(s2)-1; i>=0; i--) {
         int x = 2*(s2[i] - '0') + carry;
         carry = x>=10;
         if(carry) x-=10;
@@ -1167,7 +1167,7 @@ void drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
       vdn.name = s2;
       
       int m3 = 0;
-      for(int i=0; i<size(s); i++) m3 += s[i] - '0';
+      for(int i=0; i<isize(s); i++) m3 += s[i] - '0';
       
       if(m3 % 3 == 2 && s != "2" && s != "1") {
         vdata.resize(i0+2);
@@ -1180,7 +1180,7 @@ void drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
         vdn.m->store();
         int carry = -1;
         string s2 = s;
-        for(int i=size(s2)-1; i>=0; i--) {
+        for(int i=isize(s2)-1; i>=0; i--) {
           carry += 2 * (s2[i] - '0');
           int ncarry = 0;
           while(carry % 3) carry += 10, ncarry--;
@@ -1222,12 +1222,12 @@ void drawExtra() {
     for(map<cell*, transmatrix>::iterator it = gmatrix.begin(); it != gmatrix.end(); it++) {
       cell *c = it->first;
       bool draw = true;
-      for(int i=0; i<size(named); i++) if(named[i] == c) draw = false;
+      for(int i=0; i<isize(named); i++) if(named[i] == c) draw = false;
       if(draw && gmatrix.count(c))
         queuepolyat(it->second, shDisk, dftcolor, PPR_LINE);
       }
     
-    for(int i=0; i<size(named); i++) if(gmatrix.count(named[i])) {
+    for(int i=0; i<isize(named); i++) if(gmatrix.count(named[i])) {
       string s = ""; s += 'A'+i;
       queuestr(gmatrix[named[i]], 1, s, forecolor, 1);
       }
@@ -1238,14 +1238,14 @@ void drawExtra() {
 #if CAP_RUG
   if(!rug::rugged) 
 #endif
-  for(int i=0; i<size(legend); i++) {
+  for(int i=0; i<isize(legend); i++) {
     int k = legend[i];
     vertexdata& vd = vdata[k];
     
     int rad = vid.radius/10;
     
     ld x = vid.xres - rad;
-    ld y = (vid.radius * (i+.5)) / size(legend) * 2 - vid.radius + vid.yres/2;
+    ld y = (vid.radius * (i+.5)) / isize(legend) * 2 - vid.radius + vid.yres/2;
 
     transmatrix V = atscreenpos(x, y, vid.radius/4);
     
@@ -1307,15 +1307,15 @@ void readcolor(const string& cfname) {
       if(err > 0) x = parse(buf);
       }
     
-    if(size(lab) && lab[0] == '*') {
+    if(isize(lab) && lab[0] == '*') {
       lab = lab.substr(1);
-      for(int i=0; i<size(vdata); i++)
+      for(int i=0; i<isize(vdata); i++)
         if(vdata[i].name.find(lab) != string::npos) {
           vdata[i].cp = x;
           }
       }
     else if(kohonen::samples) {
-      for(int i=0; i<size(vdata); i++)
+      for(int i=0; i<isize(vdata); i++)
         if(vdata[i].name == lab) {
           vdata[i].cp = x;
           }
@@ -1356,12 +1356,12 @@ void init() {
   }
 
 void close() { 
-  for(int i=0; i<size(vdata); i++)
+  for(int i=0; i<isize(vdata); i++)
     if(vdata[i].m) vdata[i].m->dead = true;
   vdata.clear();
   labeler.clear();
   legend.clear();
-  for(int i=0; i<size(edgeinfos); i++) delete edgeinfos[i];
+  for(int i=0; i<isize(edgeinfos); i++) delete edgeinfos[i];
   edgeinfos.clear();
   anygraph::coords.clear();
   sag::sagedges.clear();
@@ -1376,8 +1376,8 @@ void turn(int delta) {
   }
 
 void fixparam() {
-  if((svg::in || inHighQual) && size(legend) && pngformat == 0) vid.xres = vid.xres * 22/16;
-  if(size(legend)) vid.xcenter = vid.ycenter;
+  if((svg::in || inHighQual) && isize(legend) && pngformat == 0) vid.xres = vid.xres * 22/16;
+  if(isize(legend)) vid.xcenter = vid.ycenter;
   }
 
 #if CAP_COMMANDLINE
@@ -1577,10 +1577,10 @@ void showMenu() {
       dialog::dialogflags = sm::SIDE;
       }
     else if(uni == 'z') {
-      for(int i=0; i<size(named)-1; i++) if(named[i] == cwt.c)
+      for(int i=0; i<isize(named)-1; i++) if(named[i] == cwt.c)
         swap(named[i], named[i+1]);
-      if(!size(named) || named[size(named)-1] != cwt.c) named.push_back(cwt.c);
-      printf("named = %d\n", size(named));
+      if(!isize(named) || named[isize(named)-1] != cwt.c) named.push_back(cwt.c);
+      printf("named = %d\n", isize(named));
       popScreen();
       }
     else if(kind == kKohonen && kohonen::handleMenu(sym, uni)) ;

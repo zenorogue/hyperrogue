@@ -19,7 +19,7 @@ using std::map;
 using std::vector;
 using std::set;
 
-template<class T> int size(const T& x) { return x.size(); }
+template<class T> int isize(const T& x) { return x.size(); }
 
 #define NUMLAN 7
 
@@ -58,7 +58,7 @@ int utfsize(char c) {
 void addutftoset(set<string>& s, string& w) {
   int i = 0;
 //printf("%s\n", w.c_str());
-  while(i < size(w)) {
+  while(i < isize(w)) {
     int siz = utfsize(w[i]);
     s.insert(w.substr(i, siz));
     i += siz;
@@ -105,7 +105,7 @@ hashcode langhash(const string& s) {
     return langhash(s.substr(0, s.size() - 9)) + 1;
     }
   hashcode r = 0;
-  for(int i=0; i<size(s); i++) r = hashval * r + s[i];
+  for(int i=0; i<isize(s); i++) r = hashval * r + s[i];
   return r;
   }
 
@@ -123,7 +123,7 @@ const char *escape(string s, string dft) {
     }
   static string t;
   t = "\"";
-  for(int i=0; i<size(s); i++)
+  for(int i=0; i<isize(s); i++)
     if(s[i] == '\\') t += "\\\\";
     else if(s[i] == '\n') t += "\\n";
     else if(s[i] == '\"') t += "\\\"";
@@ -301,7 +301,7 @@ int main() {
 //printf("ALL:");
   for(set<string>::iterator it = allchars.begin(); it != allchars.end(); it++) {
 //  printf(" \"%s\",", it->c_str());
-    if(size(*it) >= 2) { javastring += (*it); vchars.push_back(*it); c++; }
+    if(isize(*it) >= 2) { javastring += (*it); vchars.push_back(*it); c++; }
     }
   printf("\n");
   printf("#define NUMEXTRA %d\n", c);
@@ -328,20 +328,20 @@ int main() {
     nouns[0][it->first] = n;
     }
   
-  printf("// total: %5d nouns, %5d sentences\n", int(nouns[1].m.size()), int(d[1].m.size()));
+  printf("// total: %5d nouns, %5d sentences\n", isize(nouns[1].m), isize(d[1].m));
 
   for(int i=0; i<NUMLAN; i++) {
     int bnouns = 0;
     int dict = 0;
 
     for(map<string, string>::iterator it = d[i].m.begin(); it != d[i].m.end(); it++)
-      dict += it->second.size();
+      dict += isize(it->second);
     for(map<string, noun>::iterator it = nouns[i].m.begin(); it != nouns[i].m.end(); it++) {
       noun& n = it->second;
-      bnouns += n.nom.size();
-      bnouns += n.nomp.size();
-      bnouns += n.acc.size();
-      bnouns += n.abl.size();
+      bnouns += isize(n.nom);
+      bnouns += isize(n.nomp);
+      bnouns += isize(n.acc);
+      bnouns += isize(n.abl);
       }
 
     printf("// %s: %5dB nouns, %5dB sentences\n",
@@ -364,7 +364,7 @@ int main() {
     ms = buildHashTable(allsent);
     mn = buildHashTable(allnouns);
     }
-  while(size(ms) != size(allsent) || size(mn) != size(allnouns));
+  while(isize(ms) != isize(allsent) || isize(mn) != isize(allnouns));
   
   printf("hashcode hashval = 0x%x;\n\n", hashval);
   

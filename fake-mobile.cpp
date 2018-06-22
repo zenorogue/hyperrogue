@@ -77,13 +77,13 @@ bool rawdisplaystr(int x, int y, int shift, int size, const char *str, int color
   }
 
 int textwidth(int siz, const string &str) {
-  if(size(str) == 0) return 0;
+  if(isize(str) == 0) return 0;
   
   if(!font[siz]) font[siz] = TTF_OpenFont("VeraBd.ttf", siz);
   
   int w, h;
   TTF_SizeUTF8(font[siz], str.c_str(), &w, &h);
-  // printf("width = %d [%d]\n", w, size(str));
+  // printf("width = %d [%d]\n", w, isize(str));
   return w;
   }
 
@@ -140,7 +140,7 @@ int main(int argc, char **argv) {
     action = 0;
     
     gdpos = 0;
-    while(gdpos < size(graphdata)) {
+    while(gdpos < isize(graphdata)) {
       switch(gdpop()) {
         case 2: {
           int x = gdpop(), y = gdpop(), al = gdpop();

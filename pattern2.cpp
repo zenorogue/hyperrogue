@@ -407,11 +407,11 @@ int getHemisphere(cell *c, int which) {
       ct = -ct;
       }
     while(cw.c != currentmap->gamestart());    
-    for(int i=0; i<size(q); i++)
+    for(int i=0; i<isize(q); i++)
       forCellCM(c2, q[i])
         if(pseudohept(q[i]) || pseudohept(c2))
           visit(c2, type[i]);
-    for(int i=0; i<size(q); i++) if(q[i] == c) return type[i];
+    for(int i=0; i<isize(q); i++) if(q[i] == c) return type[i];
     return 0;
     }
   if(ctof(c)) {
@@ -1627,7 +1627,7 @@ namespace patterns {
     gamescreen(0);
     }
     dialog::init();
-    for(int i=0; i<size(cpatterns); i++) {
+    for(int i=0; i<isize(cpatterns); i++) {
       dialog::addBoolItem(XLAT(cpatterns[i].name), cgroup == i, '0'+i);
 #if CAP_TEXTURE
       if(texture::config.tstate == texture::tsActive && !compatible(texture::cgroup, (cpatterntype) i))
@@ -1635,8 +1635,8 @@ namespace patterns {
 #endif
       }
     dialog::addBreak(100);
-    if(cgroup != cpUnknown && cgroup < size(cpatterns))
-      for(int j=0; j<size(cpatterns[cgroup].geometries); j++) {
+    if(cgroup != cpUnknown && cgroup < isize(cpatterns))
+      for(int j=0; j<isize(cpatterns[cgroup].geometries); j++) {
         auto &g = cpatterns[cgroup].geometries[j];
         string s = XLAT(ginf[g.geo].name);
         s += bitruncnames[g.nonbitru];
@@ -1663,9 +1663,9 @@ namespace patterns {
     keyhandler = [have_goldberg] (int sym, int uni) {
       if(uni == 'r')
         pushScreen(showPattern);
-      else if(uni >= '0' && uni < '0' + size(cpatterns))
+      else if(uni >= '0' && uni < '0' + isize(cpatterns))
         cgroup = cpatterntype(uni - '0');
-      else if(cgroup != cpUnknown && uni >= 'a' && uni < 'a' + size(cpatterns[cgroup].geometries)) {
+      else if(cgroup != cpUnknown && uni >= 'a' && uni < 'a' + isize(cpatterns[cgroup].geometries)) {
 #if CAP_TEXTURE      
         auto old_tstate = texture::config.tstate;
         auto old_tstate_max = texture::config.tstate_max;
@@ -1690,8 +1690,8 @@ namespace patterns {
   
   void computeCgroup() {
     cgroup = cpUnknown;
-    for(int i=0; i<size(cpatterns); i++)
-      for(int j=0; j<size(cpatterns[i].geometries); j++) {
+    for(int i=0; i<isize(cpatterns); i++)
+      for(int j=0; j<isize(cpatterns[i].geometries); j++) {
         auto &g = cpatterns[i].geometries[j];
         bool xnonbitrunc = gp::on ? gp_threecolor() : nonbitrunc;
         if(geometry == g.geo && xnonbitrunc == g.nonbitru && whichPattern == g.whichPattern && subpattern_flags == g.subpattern_flags)

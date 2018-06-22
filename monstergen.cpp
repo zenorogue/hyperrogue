@@ -245,7 +245,7 @@ bool canReachPlayer(cell *cf, eMonster m) {
   vector<cell*> v;
   sval++;
   v.push_back(cf); cf->aitmp = sval;
-  for(int i=0; i<size(v); i++) {
+  for(int i=0; i<isize(v); i++) {
     cell *c = v[i];
     for(int j=0; j<c->type; j++) {
       cell *c2 = c->mov[j];
@@ -261,7 +261,7 @@ bool canReachPlayer(cell *cf, eMonster m) {
 
 bool haveOrbPower() {
   for(int i=0; i<ittypes; i++) if(itemclass(eItem(i)) == IC_ORB && items[i]) return true;
-  if(quotient) for(int i=0; i<size(dcal); i++) {
+  if(quotient) for(int i=0; i<isize(dcal); i++) {
     cell *c = dcal[i];
     if(itemclass(c->item) == IC_ORB) return true;
     }
@@ -319,8 +319,8 @@ void wandering() {
   
   if(smallbounded_generation) {
     int maxdist = 0;
-    for(int i=0; i<size(dcal); i++) if(dcal[i]->cpdist > maxdist) maxdist = dcal[i]->cpdist;
-    for(int i=0; i<size(dcal); i++) if(dcal[i]->cpdist >= maxdist-1) { first7 = i; break; }
+    for(int i=0; i<isize(dcal); i++) if(dcal[i]->cpdist > maxdist) maxdist = dcal[i]->cpdist;
+    for(int i=0; i<isize(dcal); i++) if(dcal[i]->cpdist >= maxdist-1) { first7 = i; break; }
     
     if(hrand(5) == 0) {
       // spawn treasure
@@ -328,7 +328,7 @@ void wandering() {
     
     if(smallbounded && hrand(100) < 2) {
       auto& ac = currentmap->allcells();
-      cell *c1 = ac[hrand(size(ac))];
+      cell *c1 = ac[hrand(isize(ac))];
       if(c1->wall == waVinePlant && !c1->monst) {
         c1->monst = moVineSpirit;
         c1->stuntime = 3;
@@ -336,15 +336,15 @@ void wandering() {
       }
     }
   
-  while(first7 < size(dcal)) {
-    int i = first7 + hrand(size(dcal) - first7);
+  while(first7 < isize(dcal)) {
+    int i = first7 + hrand(isize(dcal) - first7);
     cell *c = dcal[i];
     if(inmirror(c)) continue;
     
     if(specialland == laStorms) {
       // place the sandstone wall completely randomly (but not on the player)
       vector<cell*>& ac = currentmap->allcells();
-      c = ac[hrand(size(ac))];
+      c = ac[hrand(isize(ac))];
       if(isPlayerOn(c)) continue;
       }
     
@@ -510,7 +510,7 @@ void wandering() {
     else if(c->land == laBull && wchance(items[itBull], 40))
       c->monst = moGadfly;
 
-    else if(items[itBull] >= 50 && size(butterflies) && wchance(items[itBull]-49, 25))
+    else if(items[itBull] >= 50 && isize(butterflies) && wchance(items[itBull]-49, 25))
       c->monst = moGadfly;
 
     else if(c->land == laPrairie && cwt.c->LHU.fi.flowerdist > 3 && wchance(items[itGreenGrass], prairie::isriver(cwt.c) ? 150 : 40))
@@ -698,12 +698,12 @@ void generateSnake(cell *c, int i, int color) {
       {for(int i=0; i<c2->type; i++)
         if(inpair(c2->mov[i], cpair))
         goodsteps.push_back(i);}
-      if(!size(goodsteps)) break;
-      i = goodsteps[hrand(size(goodsteps))];
+      if(!isize(goodsteps)) break;
+      i = goodsteps[hrand(isize(goodsteps))];
       }
     }
-  if(size(rocksnake) < ROCKSNAKELENGTH/2 && !nonbitrunc) {
-    for(int i=0; i<size(rocksnake); i++) 
+  if(isize(rocksnake) < ROCKSNAKELENGTH/2 && !nonbitrunc) {
+    for(int i=0; i<isize(rocksnake); i++) 
       rocksnake[i]->monst = moNone;
     }
   else c2->mondir = NODIR;

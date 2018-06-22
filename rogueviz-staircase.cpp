@@ -171,7 +171,7 @@ void make_staircase() {
   rug::push_all_points(1, strafey * acurvature);
   for(auto p: rug::points) p->valid = true;
   rug::good_shape = true;  
-  printf("done (%d points)\n", size(rug::points));
+  printf("done (%d points)\n", isize(rug::points));
   rug::lowrug = 1e-2 * acurvature;
   rug::hirug = 1e3 * acurvature;
   }

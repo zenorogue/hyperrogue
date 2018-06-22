@@ -76,7 +76,7 @@ const char* natchars[NUMEXTRA] = {"°","é","á", "ᵈ", "δ", "½", "∞"};
 
 hashcode langhash(const string& s) {
   hashcode r = 0;
-  for(int i=0; i<size(s); i++) r = hashval * r + s[i];
+  for(int i=0; i<isize(s); i++) r = hashval * r + s[i];
   return r;
   }
 

@@ -131,7 +131,7 @@ void handleclick(MOBPAR_FORMAL) {
 
     if(buttonclicked || mouseout()) {
 
-      bool statkeys = andmode == 0 && !shmup::on && size(screens) == 1;
+      bool statkeys = andmode == 0 && !shmup::on && isize(screens) == 1;
       
       if(statkeys && getcstat == 'g') {
         movepcto(MD_DROP);
@@ -156,7 +156,7 @@ void handleclick(MOBPAR_FORMAL) {
         int px = mousex < vid.xcenter ? 0 : 1;
         int py = mousey < vid.ycenter ? 0 : 1;
         
-        if(size(screens) == 1) {
+        if(isize(screens) == 1) {
           if(px == 0 && py == 1) {
             if(andmode == 0 && shmup::on) ; 
             else andmode = 10;
@@ -188,7 +188,7 @@ void handleclick(MOBPAR_FORMAL) {
         }
       }
     
-    if(andmode == 0 && size(screens) == 1 && !mouseout()) {
+    if(andmode == 0 && isize(screens) == 1 && !mouseout()) {
 
       bool forcetarget = longclick;
       
@@ -237,7 +237,7 @@ void mobile_draw(MOBPAR_FORMAL) {
   if(playermoved && vid.sspeed > -4.99)
     centerpc(tdiff / 1000.0 * exp(vid.sspeed));
 
-  if(shmup::on && (andmode == 0 || andmode == 10) && size(screens) == 1) 
+  if(shmup::on && (andmode == 0 || andmode == 10) && isize(screens) == 1) 
     shmup::turn(tdiff);
     
   safety = false;
@@ -302,7 +302,7 @@ void mobile_draw(MOBPAR_FORMAL) {
   shiftmul = getcshift;
   calcMousedest();
 
-  inmenu = size(screens) > 1;
+  inmenu = isize(screens) > 1;
 
   if(lclicked && !clicked && !inmenu) handleclick(MOBPAR_ACTUAL);
 
@@ -346,7 +346,7 @@ void mobile_draw(MOBPAR_FORMAL) {
       }
     }
 
-  if(andmode == 2 && size(screens) != 1) andmode = 12;
+  if(andmode == 2 && isize(screens) != 1) andmode = 12;
 
   if((cmode & sm::NORMAL) && getcstat == '-')
     getcstat = 0;

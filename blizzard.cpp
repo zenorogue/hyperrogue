@@ -77,7 +77,7 @@ void drawBlizzards() {
         bcells.push_back(&it->second);
         it++;
         }
-  N = size(bcells);
+  N = isize(bcells);
   for(int i=0; i<N; i++) {
     auto& bc = *bcells[i];
     bc.tmp = bc.c->aitmp,
@@ -105,7 +105,7 @@ void drawBlizzards() {
         bc.inward += z / 8, qty = -z/8;
       }
     bc.ward = max(bc.inward, bc.outward);
-    while(size(bc.inorder) < bc.ward) {
+    while(isize(bc.inorder) < bc.ward) {
       auto sb = new snowball(c->type);
       bc.inorder.push_back(sb);
       bc.outorder.push_back(sb);
@@ -169,7 +169,7 @@ void drawBlizzards() {
         queuepoly(*bc.gm * ddspin(bc.c, i) * xpush(cellgfxdist(bc.c, i)/2), shWindArrow, col);
       }
 
-    int B = size(bc.outorder);
+    int B = isize(bc.outorder);
     if(B<2) continue;
     int i = rand() % B;
     int j = rand() % (B-1);

@@ -422,7 +422,8 @@ string cts(char c);
 string its(int i);
 int hrand(int i);
 
-template<class T> int size(const T& x) {return x.size(); }
+// size casted to int, to prevent warnings and actual errors caused by the unsignedness of x.size()
+template<class T> int isize(const T& x) {return x.size(); }
 
 // initialize the achievement system.
 void achievement_init();
@@ -862,7 +863,7 @@ extern vector< function<void()> > screens;
 
 template<class T> void pushScreen(const T& x) { screens.push_back(x); } 
 inline void popScreen() { screens.pop_back(); }
-inline void popScreenAll() { while(size(screens)>1) popScreen(); }
+inline void popScreenAll() { while(isize(screens)>1) popScreen(); }
 
 extern transmatrix View; // current rotation, relative to viewctr
 extern transmatrix cwtV; // player-relative view
@@ -2558,8 +2559,8 @@ struct celllister {
     dists.push_back(d);
     }
   
-  ~celllister() {
-    for(int i=0; i<size(lst); i++) lst[i]->aitmp = tmps[i];
+  ~celllister() {     
+    for(int i=0; i<isize(lst); i++) lst[i]->aitmp = tmps[i];
     }
   
   celllister(cell *orig, int maxdist, int maxcount, cell *breakon) {
@@ -2569,27 +2570,27 @@ struct celllister {
     sval++;
     add(orig, 0);
     cell *last = orig;
-    for(int i=0; i<size(lst); i++) {
+    for(int i=0; i<isize(lst); i++) {
       cell *c = lst[i];
       if(maxdist) forCellCM(c2, c) {
         add(c2, dists[i]+1);
         if(c2 == breakon) return;
         }
       if(c == last) {
-        if(size(lst) >= maxcount || dists[i]+1 == maxdist) break;
-        last = lst[size(lst)-1];
+        if(isize(lst) >= maxcount || dists[i]+1 == maxdist) break;
+        last = lst[isize(lst)-1];
         }
       }
     }
 
   void prepare() {
-    for(int i=0; i<size(lst); i++) lst[i]->aitmp = i;
+    for(int i=0; i<isize(lst); i++) lst[i]->aitmp = i;
     }
   
   int getdist(cell *c) { return dists[c->aitmp]; }
   
   bool listed(cell *c) {
-    return c->aitmp >= 0 && c->aitmp < size(lst) && lst[c->aitmp] == c;
+    return c->aitmp >= 0 && c->aitmp < isize(lst) && lst[c->aitmp] == c;
     }
   
   };
@@ -2906,7 +2907,7 @@ void destroycellcontents(cell *c);
 extern heptagon *last_cleared;
 
 template<class T, class U> void eliminate_if(vector<T>& data, U pred) {
-  for(int i=0; i<size(data); i++)
+  for(int i=0; i<isize(data); i++)
     if(pred(data[i]))
       data[i] = data.back(), data.pop_back(), i--;
   }
@@ -3233,7 +3234,7 @@ template<> struct saver<char> : dsaver<char> {
 template<> struct saver<bool> : dsaver<bool> {
   saver<bool>(bool& val) : dsaver<bool>(val) { }
   string save() { return val ? "yes" : "no"; }
-  void load(const string& s) { val = size(s) && s[0] == 'y'; }
+  void load(const string& s) { val = isize(s) && s[0] == 'y'; }
   };
 
 template<> struct saver<unsigned> : dsaver<unsigned> {

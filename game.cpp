@@ -282,7 +282,7 @@ eItem localTreasureType() {
 void countLocalTreasure() {
   eItem i = localTreasureType();
   currentLocalTreasure = i ? items[i] : 0;
-  if(i != itHyperstone) for(int i=0; i<size(dcal); i++) {
+  if(i != itHyperstone) for(int i=0; i<isize(dcal); i++) {
     cell *c2 = dcal[i];
     if(c2->cpdist > 3) break;
     eItem i2 = treasureType(c2->land);
@@ -1102,7 +1102,7 @@ bool stalemate1::isKilled(cell *w) {
   }
 
 bool stalemate::isKilled(cell *w) {
-  for(int f=0; f<size(moves); f++)
+  for(int f=0; f<isize(moves); f++)
     if(moves[f].isKilled(w)) return true;
   
   return false;
@@ -1162,17 +1162,17 @@ namespace stalemate {
   bool  nextturn;
 
   bool isMoveto(cell *c) {
-    for(int i=0; i<size(moves); i++) if(moves[i].moveto == c) return true;
+    for(int i=0; i<isize(moves); i++) if(moves[i].moveto == c) return true;
     return false;
     }
 
   bool isKilledDirectlyAt(cell *c) {
-    for(int i=0; i<size(moves); i++) if(moves[i].killed == c) return true;
+    for(int i=0; i<isize(moves); i++) if(moves[i].killed == c) return true;
     return false;
     }
   
   bool isPushto(cell *c) {
-    for(int i=0; i<size(moves); i++) if(moves[i].pushto == c) return true;
+    for(int i=0; i<isize(moves); i++) if(moves[i].pushto == c) return true;
     return false;
     }
   }
@@ -1350,8 +1350,8 @@ bool monstersnear2() {
           }
       }    
 
-    for(int i=0; i<size(stalemate::moves); i++)
-    for(int j=0; j<size(stalemate::moves); j++) if(i != j) {
+    for(int i=0; i<isize(stalemate::moves); i++)
+    for(int j=0; j<isize(stalemate::moves); j++) if(i != j) {
       if(swordConflict(stalemate::moves[i], stalemate::moves[j])) {
           b = true;
           which = moEnergySword;
@@ -1362,7 +1362,7 @@ bool monstersnear2() {
         { b = true; which = moAirball; }
       }
 
-    for(int i=0; !b && i<size(stalemate::moves); i++)
+    for(int i=0; !b && i<isize(stalemate::moves); i++)
       b = monstersnear(stalemate::moves[i]);
     }
   else b = !multimove();
@@ -1562,7 +1562,7 @@ void spill(cell* c, eWall t, int rad) {
 
 void degradeDemons() {
   addMessage(XLAT("You feel more experienced in demon fighting!"));
-  int dcs = size(dcal);
+  int dcs = isize(dcal);
   for(int i=0; i<dcs; i++) {
     cell *c = dcal[i];
     if(c->monst == moGreaterM || c->monst == moGreater)
@@ -2237,7 +2237,7 @@ void killMonster(cell *c, eMonster who, flagtype deathflags) {
   
   if(m == moAirElemental) {
     airmap.clear();
-    for(int i=0; i<size(dcal); i++)
+    for(int i=0; i<isize(dcal); i++)
       if(dcal[i]->monst == moAirElemental)
         airmap.push_back(make_pair(dcal[i],0));
     buildAirmap();
@@ -2656,7 +2656,7 @@ void checkTide(cell *c) {
   }
 
 void buildAirmap() {
-  for(int k=0; k<size(airmap); k++) {
+  for(int k=0; k<isize(airmap); k++) {
     int d = airmap[k].second;
     if(d == 2) break;
     cell *c = airmap[k].first;
@@ -2704,7 +2704,7 @@ void buildRosemap() {
   
   if((havewhat&HF_ROSE) && !rosephase) {
     rosewave++;
-    for(int k=0; k<size(dcal); k++) {
+    for(int k=0; k<isize(dcal); k++) {
       cell *c = dcal[k];
       if(c->wall == waRose && c->cpdist <= gamerange() - 2) 
         rosemap[c] = rosewave * 8 + 2;
@@ -2759,7 +2759,7 @@ void compute_graphical_distance() {
   c1->pathdist = 0;
   pathq.push_back(pd_from);
 
-  for(int qb=0; qb<size(pathq); qb++) {
+  for(int qb=0; qb<isize(pathq); qb++) {
     cell *c = pathq[qb];
     if(c->pathdist == pd_range) break;
     if(qb == 0) forCellCM(c1, c) ;
@@ -2777,17 +2777,17 @@ void computePathdist(eMonster param) {
   pathqm.clear();
   reachedfrom.clear(); 
   
-  for(int i=0; i<size(targets); i++) {
+  for(int i=0; i<isize(targets); i++) {
     pathq.push_back(targets[i]);
     targets[i]->pathdist = isPlayerOn(targets[i]) ? 0 : 1;
     reachedfrom.push_back(hrand(targets[i]->type));
     }
 
-  int qtarg = size(targets);
+  int qtarg = isize(targets);
   
   int limit = gamerange();
 
-  for(int qb=0; qb < size(pathq); qb++) {
+  for(int qb=0; qb < isize(pathq); qb++) {
     int fd = reachedfrom[qb] + 3;
     cell *c = pathq[qb];
     if(c->monst && !isBug(c) && !(isFriendly(c) && !c->stuntime)) {
@@ -2829,7 +2829,7 @@ void computePathdist(eMonster param) {
 vector<pair<cell*, int> > butterflies;
 
 void addButterfly(cell *c) {
-  for(int i=0; i<size(butterflies); i++)
+  for(int i=0; i<isize(butterflies); i++)
     if(butterflies[i].first == c) {
       butterflies[i].second = 0;
       return;
@@ -2844,7 +2844,7 @@ void bfs() {
     
   yendor::onpath();
   
-  int dcs = size(dcal);
+  int dcs = isize(dcal);
   for(int i=0; i<dcs; i++) dcal[i]->cpdist = INFD;
   worms.clear(); ivies.clear(); ghosts.clear(); golems.clear(); 
   temps.clear(); tempval.clear(); targets.clear(); 
@@ -2890,7 +2890,7 @@ void bfs() {
   
   int qb = 0;
   while(true) {
-    if(qb == size(dcal)) break;
+    if(qb == isize(dcal)) break;
     int i, fd = reachedfrom[qb] + 3;
     cell *c = dcal[qb++];
     
@@ -3066,10 +3066,10 @@ void bfs() {
 
   while(recalcTide) {
     recalcTide = false;
-    for(int i=0; i<size(dcal); i++) checkTide(dcal[i]);
+    for(int i=0; i<isize(dcal); i++) checkTide(dcal[i]);
     }    
   
-  int qtemp = size(temps);
+  int qtemp = isize(temps);
   for(int i=0; i<qtemp; i++) temps[i]->monst = tempval[i];
   
   buildAirmap();
@@ -3613,7 +3613,7 @@ bool wantsToStay(eMonster m) {
 
 bool batsAfraid(cell *c) {
   // bats 
-  for(int i=-1; i<size(targets); i++)
+  for(int i=-1; i<isize(targets); i++)
     if(c == targets[i] || isNeighbor(c, targets[i])) {
       if(!targets[i]->monst && invismove) continue;
       bool enear = false;
@@ -4212,7 +4212,7 @@ void moveWorm(cell *c) {
       c2 = c2->mov[c2->mondir];
       }
     allcells.push_back(c2);
-    for(int i=size(allcells)-2; i>=0; i--) {
+    for(int i=isize(allcells)-2; i>=0; i--) {
       cell *cmt = allcells[i+1];
       cell *cft = allcells[i];
       if(cft->monst != moTentacleGhost && cmt->monst != moTentacleGhost)
@@ -4378,9 +4378,9 @@ void removeIvy(cell *c) {
   }
 
 void moveivy() {
-  if(size(ivies) == 0) return;
+  if(isize(ivies) == 0) return;
   computePathdist(moIvyRoot);
-  for(int i=0; i<size(ivies); i++) {
+  for(int i=0; i<isize(ivies); i++) {
     cell *c = ivies[i];
     cell *co = c;
     if(c->monst != moIvyHead) continue;
@@ -4549,7 +4549,7 @@ void groupmove2(cell *c, cell *from, int d, eMonster movtype, flagtype mf) {
     }
   c->aitmp = sval;
   // MAXGCELL
-  if(size(gendfs) < 1000 || c->cpdist <= 6) gendfs.push_back(c);
+  if(isize(gendfs) < 1000 || c->cpdist <= 6) gendfs.push_back(c);
   }
 
 void groupmove(eMonster movtype, flagtype mf) {
@@ -4559,7 +4559,7 @@ void groupmove(eMonster movtype, flagtype mf) {
   if(mf & MF_MOUNT) {
     if(dragon::target) gendfs.push_back(dragon::target);
     if(movtype == moDragonHead) {
-      for(int i=0; i<size(dcal); i++) {
+      for(int i=0; i<isize(dcal); i++) {
         cell *c = (i == 0 && dragon::target) ? dragon::target : dcal[i];
         if(!c->monst) continue;
         if(isFriendlyOrBug(c)) continue;
@@ -4570,7 +4570,7 @@ void groupmove(eMonster movtype, flagtype mf) {
       }
     }
   else {
-    if(!peace::on) for(int i=0; i<size(targets); i++) gendfs.push_back(targets[i]);
+    if(!peace::on) for(int i=0; i<isize(targets); i++) gendfs.push_back(targets[i]);
   
     if(invisfish && (movtype == moSlime || movtype == moShark || movtype == moKrakenH)) for(int i=0; i<numplayers(); i++) {
       cell *c = playerpos(i);
@@ -4579,9 +4579,9 @@ void groupmove(eMonster movtype, flagtype mf) {
       }
     }
   
-  targetcount = size(gendfs);
+  targetcount = isize(gendfs);
   
-  for(int i=0; i<size(gendfs); i++) {
+  for(int i=0; i<isize(gendfs); i++) {
     cell *c = gendfs[i];
     int dirtable[10], qdirtable=0;
     
@@ -4599,7 +4599,7 @@ void groupmove(eMonster movtype, flagtype mf) {
       }
     }
 
-  if(movtype != moDragonHead) for(int i=0; i<size(dcal); i++) {
+  if(movtype != moDragonHead) for(int i=0; i<isize(dcal); i++) {
     cell *c = dcal[i];
     if((mf & MF_ONLYEAGLE) && c->monst != moEagle && c->monst != moBat) return;
     if(movegroup(c->monst) == movtype && !eq(c->aitmp, sval)) {
@@ -4693,7 +4693,7 @@ void hexvisit(cell *c, cell *from, int d, bool mounted, int colorpair) {
   c->aitmp = sval;
 
   // MAXGCELL
-  if(size(hexdfs) < 2000 || c->cpdist <= 6) 
+  if(isize(hexdfs) < 2000 || c->cpdist <= 6) 
     hexdfs.push_back(c);
   }
 
@@ -4707,13 +4707,13 @@ void movehex(bool mounted, int colorpair) {
       dragon::target->aitmp = sval;
       }
     }
-  else for(int i=0; i<size(targets); i++) {
+  else for(int i=0; i<isize(targets); i++) {
     hexdfs.push_back(targets[i]);
     targets[i]->aitmp = sval;
     }
   //hexdfs.push_back(cwt.c);
   
-  for(int i=0; i<size(hexdfs); i++) {
+  for(int i=0; i<isize(hexdfs); i++) {
     cell *c = hexdfs[i];
     int dirtable[10], qdirtable=0;
     for(int t=0; t<c->type; t++) if(c->mov[t] && inpair(c->mov[t], colorpair))
@@ -4728,7 +4728,7 @@ void movehex(bool mounted, int colorpair) {
   }
 
 void movehex_rest(bool mounted) {
-  for(int i=0; i<size(hexsnakes); i++) {
+  for(int i=0; i<isize(hexsnakes); i++) {
     cell *c = hexsnakes[i];
     int colorpair;
     if(c->monst == moHexSnake) {
@@ -4766,13 +4766,13 @@ void movemutant() {
     if(c->monst == moMutant && c->stuntime == mutantphase)
       young.push_back(c);
   
-  for(int j=1; j<size(young); j++)
+  for(int j=1; j<isize(young); j++)
     swap(young[j], young[hrand(j+1)]);
 
   mutantphase++;
   mutantphase &= 15;
   
-  for(int i=0; i<size(young); i++) {
+  for(int i=0; i<isize(young); i++) {
     cell *c = young[i];
     if(clearing::buggyplant) {  if(c->monst == moMutant) c->monst=moNone; continue; }
     for(int j=0; j<c->type; j++) {
@@ -4842,7 +4842,7 @@ void moveghosts() {
   if(invismove) return;
   for(int d=0; d<8; d++) movesofgood[d].clear();  
 
-  for(int i=0; i<size(ghosts); i++) {
+  for(int i=0; i<isize(ghosts); i++) {
     cell *c = ghosts[i];
     
     if(c->stuntime) return;
@@ -4858,7 +4858,7 @@ void moveghosts() {
       }
     }
   
-  for(int d=0; d<8; d++) for(int i=0; i<size(movesofgood[d]); i++) {
+  for(int d=0; d<8; d++) for(int i=0; i<isize(movesofgood[d]); i++) {
     cell *c = movesofgood[d][i];
     if(c->stuntime) return;
     
@@ -5200,7 +5200,7 @@ void movegolems(flagtype flags) {
     flags |= AF_CRUSH;
   computePathdist(moMouse);
   int qg = 0;
-  for(int i=0; i<size(golems); i++) {
+  for(int i=0; i<isize(golems); i++) {
     cell *c = golems[i];
     eMonster m =  c->monst;
     if(c->stuntime) continue;
@@ -5310,7 +5310,7 @@ int nearestPathPlayer(cell *c) {
 // 2) to make sure that they move offscreen
 void moveButterflies() {
   int j = 0;
-  for(int i=0; i<size(butterflies); i++) {
+  for(int i=0; i<isize(butterflies); i++) {
     cell* c = butterflies[i].first;
     if(c->monst == moButterfly) {
       /* // don't move if under attack of a bull
@@ -5332,7 +5332,7 @@ void moveButterflies() {
 
 // assume pathdist
 void specialMoves() {
-  for(int i=0; i<size(dcal); i++) {
+  for(int i=0; i<isize(dcal); i++) {
     cell *c = dcal[i];
     
     if(c->stuntime) continue;
@@ -5351,7 +5351,7 @@ void specialMoves() {
         addMessage(XLAT("%The1 wakes up %the2.", c2->monst, m));
         wakeup = true;
         }
-      for(int i=0; i<size(targets); i++) {
+      for(int i=0; i<isize(targets); i++) {
         cell *t = targets[i];
         if(celldistance(c, t) <= 2) wakeup = true;
         }
@@ -5412,7 +5412,7 @@ void specialMoves() {
           addMessage(XLAT("Your brain is steaming."));
           }
         sagephase++;
-        for(int i=0; i<size(targets); i++) {
+        for(int i=0; i<isize(targets); i++) {
           cell *t = targets[i];
           if(celldistance(c, t) > 4) continue;
           sageheat(t, .0);
@@ -5428,7 +5428,7 @@ void specialMoves() {
       bool dont_approach = false;
       // smaller range on the sphere
       int firerange = sphere ? 2 : 4;
-      for(int i=0; i<size(targets); i++) {
+      for(int i=0; i<isize(targets); i++) {
         cell *t = targets[i];
         if(celldistance(c,t) <= firerange && makeflame(t, 20, true)) {
           if(isPlayerOn(t)) 
@@ -5446,7 +5446,7 @@ void specialMoves() {
       }
 
     else if(m == moVampire) {
-      for(int i=0; i<size(targets); i++) {
+      for(int i=0; i<isize(targets); i++) {
         cell *t = targets[i];
         if(celldistance(c,t) <= 2) {
           bool msg = false;
@@ -5464,9 +5464,9 @@ void specialMoves() {
   }
 
 void moveworms() {
-  if(!size(worms)) return;
+  if(!isize(worms)) return;
   computePathdist(moWorm);
-  int wrm = size(worms);
+  int wrm = isize(worms);
   for(int i=0; i<wrm; i++) {
     moveWorm(worms[i]);
     }
@@ -5482,7 +5482,7 @@ void refreshFriend(cell *c) {
   }
 
 void moverefresh(bool turn = true) {
-  int dcs = size(dcal);
+  int dcs = isize(dcal);
   
   for(int i=0; i<dcs; i++) {
     cell *c = dcal[i];
@@ -5532,7 +5532,7 @@ void moverefresh(bool turn = true) {
             }
           }
         else {
-          for(int i=0; i<size(targets); i++) {
+          for(int i=0; i<isize(targets); i++) {
             cell *t = targets[i];
             if(celldistance(c, t) <= breathrange && makeflame(t, 5, true)) {
               if(isPlayerOn(t)) addMessage(XLAT("%The1 breathes fire at you!", subject));
@@ -5732,16 +5732,16 @@ void moveNormals(eMonster param) {
 
   for(int d=0; d<8; d++) movesofgood[d].clear();
 
-  for(int i=0; i<size(pathqm); i++) 
+  for(int i=0; i<isize(pathqm); i++) 
     consMove(pathqm[i], param);
   
-  int dcs = size(dcal);
+  int dcs = isize(dcal);
   for(int i=0; i<dcs; i++) {
     cell *c = dcal[i];
     if(c->pathdist == PINFD) consMove(c, param);
     }
 
-  for(int d=0; d<8; d++) for(int i=0; i<size(movesofgood[d]); i++) {
+  for(int d=0; d<8; d++) for(int i=0; i<isize(movesofgood[d]); i++) {
     cell *c = movesofgood[d][i];
     if(normalMover(c->monst)) {
       moveNormal(c, MF_PATHDIST);
@@ -5991,7 +5991,7 @@ bool checkNeedMove(bool checkonly, bool attacking) {
   }
 
 int countMyGolems(eMonster m) {
-  int g=0, dcs = size(dcal);
+  int g=0, dcs = isize(dcal);
   for(int i=0; i<dcs; i++) {
     cell *c = dcal[i];
     if(c->monst == m) g++;
@@ -6000,7 +6000,7 @@ int countMyGolems(eMonster m) {
   }
 
 int savePrincesses() {
-  int g=0, dcs = size(dcal);
+  int g=0, dcs = isize(dcal);
   for(int i=0; i<dcs; i++) {
     cell *c = dcal[i];
     if(isPrincess(c->monst)) princess::save(c);
@@ -6009,7 +6009,7 @@ int savePrincesses() {
   }
 
 int countMyGolemsHP(eMonster m) {
-  int g=0, dcs = size(dcal);
+  int g=0, dcs = isize(dcal);
   for(int i=0; i<dcs; i++) {
     cell *c = dcal[i];
     if(c->monst == m) g += c->hitpoints;
@@ -6018,7 +6018,7 @@ int countMyGolemsHP(eMonster m) {
   }
 
 void restoreGolems(int qty, eMonster m, int hp = 0) {
-  int dcs = size(dcal);
+  int dcs = isize(dcal);
   for(int i=1; qty && i<dcs; i++) {
     cell *c = dcal[i];
     if(m == moTameBomberbird ? 
@@ -6033,7 +6033,7 @@ void restoreGolems(int qty, eMonster m, int hp = 0) {
   }
 
 void placeItems(int qty, eItem it) {
-  int dcs = size(dcal);
+  int dcs = isize(dcal);
   for(int i=1; qty && i<dcs; i++) {
     cell *c = dcal[i];
     if(!c->monst && !c->item && passable(c, NULL, 0))
@@ -6228,7 +6228,7 @@ bool multiRevival(cell *on, cell *moveto) {
   if(items[itOrbWinter]) fl |= P_WINTER;
   if(passable(on, moveto, fl)) {
     int id = multi::revive_queue[0];
-    for(int i=1; i<size(multi::revive_queue); i++)
+    for(int i=1; i<isize(multi::revive_queue); i++)
       multi::revive_queue[i-1] = multi::revive_queue[i];
     multi::revive_queue.pop_back();
     multi::player[id].c = on;
@@ -6537,7 +6537,7 @@ int ambush(cell *c, eItem what) {
     clast = ccur; ccur = c2;
     if(c2 == c0) break;
     }
-  int N = size(around);
+  int N = isize(around);
   int dogs = ambushSize(c, what);  
   
   int gaps = dogs;
@@ -6708,7 +6708,7 @@ bool collectItem(cell *c2, bool telekinesis) {
     }
   else if(c2->item == itKey) {
     playSound(c2, "pickup-key");
-    for(int i=0; i<size(yendor::yi); i++) if(yendor::yi[i].path[YDIST-1] == c2)
+    for(int i=0; i<isize(yendor::yi); i++) if(yendor::yi[i].path[YDIST-1] == c2)
       yendor::yi[i].found = true;
     items[itKey]++;
     }
@@ -7163,7 +7163,7 @@ void monstersTurn() {
   if(phase2 && markOrb(itOrbEmpathy)) {
     bfs();
     movegolems(AF_FAST);
-    for(int i=0; i<size(dcal); i++) {
+    for(int i=0; i<isize(dcal); i++) {
       if(dcal[i]->monst == moFriendlyGhost && dcal[i]->stuntime)
         dcal[i]->stuntime--;
       refreshFriend(dcal[i]);
@@ -7287,7 +7287,7 @@ bool havePushConflict(cell *pushto, bool checkonly) {
           addMessage(XLAT("Cannot push into another player!"));
         return true;
         }
-    for(int i=0; i<size(stalemate::moves); i++)  {
+    for(int i=0; i<isize(stalemate::moves); i++)  {
       if(pushto == stalemate::moves[i].pushto) {
         if(!checkonly)
           addMessage(XLAT("Cannot push into the same location!"));
@@ -7926,16 +7926,16 @@ bool movepcto(int d, int subdir, bool checkonly) {
 void moveItem1(cell *from, cell *to, bool activateYendor) {
   if(from->item == itOrbYendor) {
     bool xnew = true;
-    for(int i=0; i<size(yendor::yi); i++) 
+    for(int i=0; i<isize(yendor::yi); i++) 
       if(yendor::yi[i].path[0] == from) xnew = false;
     if(xnew && activateYendor) yendor::check(from);
-    for(int i=0; i<size(yendor::yi); i++) 
+    for(int i=0; i<isize(yendor::yi); i++) 
       if(yendor::yi[i].path[0] == from) 
         yendor::yi[i].path[0] = to;
     }
 
   if(from->item == itKey) {
-    for(int i=0; i<size(yendor::yi); i++) if(yendor::yi[i].path[YDIST-1] == from)
+    for(int i=0; i<isize(yendor::yi); i++) if(yendor::yi[i].path[YDIST-1] == from)
       yendor::yi[i].path[YDIST-1] = to;
     }
   

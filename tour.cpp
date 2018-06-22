@@ -276,7 +276,7 @@ namespace ss {
       if(wts[i].flags & FINALSLIDE) break;
       }
     dialog::addBreak(50);
-    if(size(slideshows) > 1) dialog::addItem(XLAT("change slideshow"), '1');
+    if(isize(slideshows) > 1) dialog::addItem(XLAT("change slideshow"), '1');
     dialog::addBack();
     dialog::display();
     keyhandler = [] (int sym, int uni) {
@@ -298,7 +298,7 @@ namespace ss {
         }
       else if(uni == '1') {
         list(wts);
-        for(int i=0; i<size(slideshows)-1; i++) if(slideshows[i] == wts) {
+        for(int i=0; i<isize(slideshows)-1; i++) if(slideshows[i] == wts) {
           wts = slideshows[i+1]; return;
           }
         wts = slideshows[0];

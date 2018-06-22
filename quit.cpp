@@ -352,7 +352,7 @@ void showMission() {
       dialog::addInfo(XLAT("Collect at least %1 treasures in each of 9 types to access Hell", its(R10)));
     else if(items[itHell] < R10)
       dialog::addInfo(XLAT("Collect at least %1 Demon Daisies to find the Orbs of Yendor", its(R10)));
-    else if(size(yendor::yi) == 0)
+    else if(isize(yendor::yi) == 0)
       dialog::addInfo(XLAT("Look for the Orbs of Yendor in Hell or in the Crossroads!"));
     else 
       dialog::addInfo(XLAT("Unlock the Orb of Yendor!"));
@@ -482,7 +482,7 @@ void handleKeyQuit(int sym, int uni) {
     msgs.clear();
     }
   else if(uni == 'v') popScreenAll(), pushScreen(showMainMenu);
-  else if(uni == 'l') popScreenAll(), pushScreen(showMessageLog), messagelogpos = size(gamelog);
+  else if(uni == 'l') popScreenAll(), pushScreen(showMessageLog), messagelogpos = isize(gamelog);
   else if(uni == 'z') hints[hinttoshow].action();
   else if(sym == SDLK_F3 || (sym == ' ' || sym == SDLK_HOME)) 
     fullcenter();

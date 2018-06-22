@@ -53,7 +53,7 @@ void showOverview() {
       landlist = filtered;
     }
   
-  int nl = size(landlist), nlm;
+  int nl = isize(landlist), nlm;
   
   int lstart = 0;
   
@@ -878,11 +878,11 @@ void showMessageLog() {
   DEBB(DF_GRAPH, (debugfile,"show message log\n"));
 
   int lines = vid.yres / vid.fsize - 2;
-  int maxpos = size(gamelog) - lines;
+  int maxpos = isize(gamelog) - lines;
   messagelogpos = min(messagelogpos, maxpos);
   messagelogpos = max(messagelogpos, 0);
     
-  for(int y=0; y<lines && messagelogpos+y < size(gamelog); y++) {
+  for(int y=0; y<lines && messagelogpos+y < isize(gamelog); y++) {
     msginfo& m = gamelog[messagelogpos+y];
     displaystr(vid.fsize*8, vid.fsize*(y+1), 0, vid.fsize, fullmsg(m), 0xC0C0C0, 0);
     displaystr(vid.fsize*7, vid.fsize*(y+1), 0, vid.fsize, gettimestamp(m), 0xC0C0C0, 16);

@@ -671,7 +671,7 @@ bool lchance(eLand l) {
 
 eLand pickLandRPM(eLand old) {
   while(true) {
-    eLand n = randlands[hrand(size(randlands))];
+    eLand n = randlands[hrand(isize(randlands))];
     if(incompatible(n, old)) continue;
     if(landUnlockedRPM(n)) return n;
     }

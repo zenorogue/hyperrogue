@@ -516,7 +516,7 @@ template<class T> void bindbuffer(T& v) {
     glBindBuffer(GL_ARRAY_BUFFER, buf_current);
     }
   current_vertices = &v[0];
-  glBufferData(GL_ARRAY_BUFFER, size(v) * sizeof(v[0]), &v[0], GL_DYNAMIC_DRAW);    
+  glBufferData(GL_ARRAY_BUFFER, isize(v) * sizeof(v[0]), &v[0], GL_DYNAMIC_DRAW);    
   }
 
 #define PTR(attrib, q, field) \
@@ -623,11 +623,11 @@ void store_in_buffer(vector<glvertex>& v) {
     printf("no buffer yet\n");
     return;
     }
-  printf("storing %d in buffer: %p\n", size(v), &v[0]);
+  printf("storing %d in buffer: %p\n", isize(v), &v[0]);
   current_vertices = buffered_vertices = &v[0];
   glBindBuffer(GL_ARRAY_BUFFER, buf_buffered);
   glVertexAttribPointer(glhr::aPosition, 3, GL_FLOAT, GL_FALSE, sizeof(glvertex), 0);
-  glBufferData(GL_ARRAY_BUFFER, size(v) * sizeof(glvertex), &v[0], GL_STATIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, isize(v) * sizeof(glvertex), &v[0], GL_STATIC_DRAW);
   printf("Stored.\n");
 #endif
   }

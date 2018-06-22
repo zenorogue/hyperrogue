@@ -46,12 +46,12 @@ void rvvideo(const string &fname) {
       fixmatrix(View);
       bfs(); setdist(cwt.c, 7 - getDistLimit() - genrange_bonus, NULL);
       vertexdata& vd = vdata[id];
-      for(int e=0; e<size(vd.edges); e++) {
+      for(int e=0; e<isize(vd.edges); e++) {
         int id2 = vd.edges[e].first;
         if(vdata[id2].name == seq[next]) {
           id = id2; next++;
           cwt.c = shmup::pc[0]->base = vdata[id2].m->base;
-          if(next == size(seq)) goto found;
+          if(next == isize(seq)) goto found;
           }
         }
       }
@@ -137,7 +137,7 @@ struct storydata { int s; int e; const char *text; } story[] = {
       
       vid.grid = drawnet;
       
-      conformal::phase = 1 + (size(conformal::v)-3) * i * .95 / FRAMECOUNT;
+      conformal::phase = 1 + (isize(conformal::v)-3) * i * .95 / FRAMECOUNT;
       conformal::movetophase();
 
       char buf[500];

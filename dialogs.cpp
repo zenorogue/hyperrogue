@@ -141,7 +141,7 @@ namespace dialog {
     it.body = body;
     it.scale = 100;
 
-    if(size(body) >= 500) it.scale = 70;
+    if(isize(body) >= 500) it.scale = 70;
 
     items.push_back(it);
     }
@@ -220,7 +220,7 @@ namespace dialog {
     else
       xs = vid.xres * 618/1000, xo = vid.xres * 186/1000;
     
-    for(int i=0; i<=size(str); i++) {
+    for(int i=0; i<=isize(str); i++) {
       int ls = 0;
       int prev = last;
       if(str[i] == ' ') lastspace = i;
@@ -228,7 +228,7 @@ namespace dialog {
         if(lastspace == last) ls = i-1, last = i-1;
         else ls = lastspace, last = ls+1;
         }
-      if(str[i] == 10 || i == size(str)) ls = i, last = i+1;
+      if(str[i] == 10 || i == isize(str)) ls = i, last = i+1;
       if(ls) {
         if(!measure) displayfr(xo, y, 2, siz, str.substr(prev, ls-prev), 0xC0C0C0, 0);
         if(ls == prev) y += siz/2;
@@ -372,19 +372,19 @@ namespace dialog {
   void handleNavigation(int &sym, int &uni) {
 #if !ISMOBILE
     if(uni == '\n' || uni == '\r' || sym == SDLK_KP5)
-      for(int i=0; i<size(items); i++) 
+      for(int i=0; i<isize(items); i++) 
         if(isitem(items[i]))
           if(items[i].body == highlight_text) {
             uni = sym = items[i].key;
             return;
             }
     if(sym == SDLK_PAGEDOWN || sym == SDLK_KP3) {
-      for(int i=0; i<size(items); i++)
+      for(int i=0; i<isize(items); i++)
         if(isitem(items[i]))
           highlight_text = items[i].body;
       }
     if(sym == SDLK_PAGEUP || sym == SDLK_KP9) {
-      for(int i=0; i<size(items); i++) 
+      for(int i=0; i<isize(items); i++) 
         if(isitem(items[i])) {
           highlight_text = items[i].body;
           break;
@@ -392,11 +392,11 @@ namespace dialog {
       }    
     if(sym == SDLK_UP || sym == SDLK_KP8) {
       string last = "";
-      for(int i=0; i<size(items); i++) 
+      for(int i=0; i<isize(items); i++) 
         if(isitem(items[i]))
           last = items[i].body;
       uni = sym = 0;
-      for(int i=0; i<size(items); i++)
+      for(int i=0; i<isize(items); i++)
         if(isitem(items[i])) {
           if(items[i].body == highlight_text) {
             highlight_text = last; return;
@@ -407,12 +407,12 @@ namespace dialog {
       }
     if(sym == SDLK_DOWN || sym == SDLK_KP2) {
       int state = 0;
-      for(int i=0; i<size(items); i++)
+      for(int i=0; i<isize(items); i++)
         if(isitem(items[i])) {
           if(state) { highlight_text = items[i].body; return; }
           else if(items[i].body == highlight_text) state = 1;
           }
-      for(int i=0; i<size(items); i++)
+      for(int i=0; i<isize(items); i++)
         if(isitem(items[i])) 
           highlight_text = items[i].body;
       uni = sym = 0;
@@ -690,7 +690,7 @@ namespace dialog {
 
     if(ne.help != "") {
       addHelp(ne.help);
-      // bool scal = !ISMOBILE && !ISPANDORA && size(ne.help) > 160;
+      // bool scal = !ISMOBILE && !ISPANDORA && isize(ne.help) > 160;
       // if(scal) lastItem().scale = 30;
       }
 
@@ -728,7 +728,7 @@ namespace dialog {
         affect('s');
         }
       else if(uni == '\b' || uni == '\t') {
-        ne.s = ne.s. substr(0, size(ne.s)-1);
+        ne.s = ne.s. substr(0, isize(ne.s)-1);
         sscanf(ne.s.c_str(), LDF, ne.editwhat);
         affect('s');
         }
@@ -930,7 +930,7 @@ namespace dialog {
     struct dirent *dir;
     
     string where = ".";
-    for(int i=0; i<size(cfile); i++)
+    for(int i=0; i<isize(cfile); i++)
       if(cfile[i] == '/' || cfile[i] == '\\')
         where = cfile.substr(0, i+1);
     
@@ -939,7 +939,7 @@ namespace dialog {
       while ((dir = readdir(d)) != NULL) {
         string s = dir->d_name;
         if(s != ".." && s[0] == '.') ;
-        else if(size(s) > 4 && s.substr(size(s)-4) == cfileext)
+        else if(isize(s) > 4 && s.substr(isize(s)-4) == cfileext)
           v.push_back(make_pair(s, CFILE));
         else if(dir->d_type & DT_DIR)
           v.push_back(make_pair(s+"/", CDIR));
@@ -964,7 +964,7 @@ namespace dialog {
   
   void handleKeyFile(int uni, int sym) {
     string& s(*cfileptr);
-    int i = size(s) - (editext?0:4);
+    int i = isize(s) - (editext?0:4);
     
     if(sym == SDLK_ESCAPE) {
       popScreen();
@@ -983,9 +983,9 @@ namespace dialog {
     else if(uni >= 32 && uni < 127) {
       s.insert(i, s0 + char(uni));
       }
-    else if(uni >= 1000 && uni <= 1000+size(v)) {
+    else if(uni >= 1000 && uni <= 1000+isize(v)) {
       string where = "", what = s, whereparent = "../";
-      for(int i=0; i<size(s); i++)
+      for(int i=0; i<isize(s); i++)
         if(s[i] == '/') {
           if(i >= 2 && s.substr(i-2,3) == "../")
             whereparent = s.substr(0, i+1) + "../";
@@ -1020,7 +1020,7 @@ namespace dialog {
   bool hasInfix(const string &s) {
     if(infix == "") return true;
     string t = "";
-    for(int i=0; i<size(s); i++) {
+    for(int i=0; i<isize(s); i++) {
       char c = s[i];
       char tt = 0;
       if(c >= 'a' && c <= 'z') tt += c - 32;
@@ -1034,7 +1034,7 @@ namespace dialog {
   bool editInfix(int uni) {
     if(uni >= 'A' && uni <= 'Z') infix += uni;
     else if(uni >= 'a' && uni <= 'z') infix += uni-32;
-    else if(infix != "" && uni == 8) infix = infix.substr(0, size(infix)-1);
+    else if(infix != "" && uni == 8) infix = infix.substr(0, isize(infix)-1);
     else if(infix != "" && uni != 0) infix = "";
     else return false;
     return true;
