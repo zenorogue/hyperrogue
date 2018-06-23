@@ -918,8 +918,8 @@ S("Euclidean mode", "Euklidischer Modus")
 S("Return to the hyperbolic world", "Zur hyperbolischen Welt zurückkehren")
 S("go back", "zurück")
 S("Choose from the lands visited this game.", "Wähle aus den Ländern, die diese Sitzung besucht wurden.")
-S("Scores and achievements are not", "Im euklidischem Modus werden");
-S("saved in the Euclidean mode!", "Punkte und Errungenschaften nicht gespeichert!");
+S("Scores and achievements are not", "Im euklidischem Modus werden")
+S("saved in the Euclidean mode!", "Punkte und Errungenschaften nicht gespeichert!")
 
 // Android buttons (some are not translated because there are no good short words in Polish)
 S("MOVE", "VOR")
@@ -1381,8 +1381,8 @@ S("A castle in the Crossroads...", "Ein Schloss in den Kreuzungen...")
   "Du kannst Tempel des Cthulhu in R'Lyeh finden, sobald du fünf seiner Statuen besitzt.")
 */
 
-S("You have to escape first!", "Du musst zuerst entkommen!");
-S("There is not enough space!", "Zu wenig Platz!");
+S("You have to escape first!", "Du musst zuerst entkommen!")
+S("There is not enough space!", "Zu wenig Platz!")
 
 S("Customize character", "Character anpassen")
 S("gender", "Geschlecht")
@@ -1437,7 +1437,7 @@ S("Cannot throw fire there!", "Du kannst dort kein Feuer hinwerfen!")
 
 S("or ESC to see how it ended", "oder ESC um zu sehen, wie alles endete")
 S("high contrast", "Hoher Kontrast")
-S("draw the heptagons darker", "Heptagone verdunkeln");
+S("draw the heptagons darker", "Heptagone verdunkeln")
 S("targetting ranged Orbs Shift+click only", "Zielen mit Distanzorbs per Shift-Klick")
 S("Shift+F, Shift+O, Shift+T, Shift+L, Shift+U, etc.",
   "Shift+F, Shift+O, Shift+T, Shift+L, Shift+U, etc.")
@@ -1600,8 +1600,8 @@ S("This Orb is able to bring faraway items to your location, even if there are "
 
 // missing sentences
 
-S("%The1 drowns!", "%Der1 %1 ertrinkt!");
-S("%The1 falls!", "%Der1 %1 fällt!");
+S("%The1 drowns!", "%Der1 %1 ertrinkt!")
+S("%The1 falls!", "%Der1 %1 fällt!")
 
 // these were missing from the translation for some reason
 
@@ -1611,17 +1611,17 @@ S("Hell has these lakes everywhere... They are shaped like evil stars, and fille
 // Hardcore Mode
 // -------------
 
-S("hardcore mode", "Hardcore Modus");
+S("hardcore mode", "Hardcore Modus")
 
-S("One wrong move and it is game over!", "Eine falsche Bewegung kostet dich den Kopf!");
-S("Not so hardcore?", "Doch nicht so hardcore?");
+S("One wrong move and it is game over!", "Eine falsche Bewegung kostet dich den Kopf!")
+S("Not so hardcore?", "Doch nicht so hardcore?")
 
 // Shoot'em up Mode
 // ----------------
 
-S("shoot'em up mode", "Ballermodus");
-S("Welcome to the Shoot'em Up mode!", "Willkommen im Ballermodus!");
-S("F/;/Space/Enter/KP5 = fire, WASD/IJKL/Numpad = move", "F/[;]/[LEER]/[ENTER]/[Numpad 5] = schießen, WASD/IJKL/[Numpad] = bewegen");
+S("shoot'em up mode", "Ballermodus")
+S("Welcome to the Shoot'em Up mode!", "Willkommen im Ballermodus!")
+S("F/;/Space/Enter/KP5 = fire, WASD/IJKL/Numpad = move", "F/[;]/[LEER]/[ENTER]/[Numpad 5] = schießen, WASD/IJKL/[Numpad] = bewegen")
 
 N("Rogue", GEN_M, "Schurke", "Schurken", "Schurken")
 N("Knife", GEN_N, "Messer", "Messer", "Messer")
@@ -1655,16 +1655,16 @@ S(", m - mode: shoot'em up", "m - Modus: Ballern")
 S("You would get hurt!", "Du würdest dir wehtun!")
 S("PARTIAL", "TEILWEISE")
 
-S("Cannot drop %the1 here!", "Du kannst %den1 %a1 hier nicht ablegen!");
+S("Cannot drop %the1 here!", "Du kannst %den1 %a1 hier nicht ablegen!")
 
 // Euclidean scores
 // ----------------
 
-S(" (E:%1)", " (E:%1)");
+S(" (E:%1)", " (E:%1)")
 
-S("You cannot attack Rock Snakes directly!", "Du kannst Felsschlangen nicht direkt angreifen!");
+S("You cannot attack Rock Snakes directly!", "Du kannst Felsschlangen nicht direkt angreifen!")
 
-S("\"I am lost...\"", "\"Ich bin verloren...\"");
+S("\"I am lost...\"", "\"Ich bin verloren...\"")
 
 S("You are killed by %the1!", "%Der1 %1 hat dich getötet!")
 
@@ -2124,7 +2124,7 @@ S("You destroy %the1 with a mental blast!", "Du zerstörst %den1 %a1 mit einem m
 S("The ivy kills %the1!", "Der Efeu tötet %den1 %a1!")
 S("You destroy %the1.", "Du zerstörst %den1 %a1.")
 S("%The1 kills %the2!", "%Der1 %1 tötet %den2 %a2!")
-S("%The1 sinks!", "%Der1 %1 sinkt!");
+S("%The1 sinks!", "%Der1 %1 sinkt!")
 
 S("Cannot jump on %the1!", "Du kannst nicht auf %den1 %a1 springen!")
 
@@ -2257,13 +2257,13 @@ N("Mouse", GEN_F, "Maus", "Mäuse", "Maus")
 
 S("You hear a distant squeak!", "Du hörst ein Piepsen in der Ferne!")
 S("%The1 squeaks in a confused way.", "%Die1 %1 piepst verwirrt.")
-S("%The1 squeaks gratefully!", "%Die1 %1 piepst dankbar!");
-S("%The1 squeaks hopelessly.", "%Die1 %1 piepst hoffnungslos.");
-S("%The1 squeaks in despair.", "%Die1 %1 piepst voll Verzweiflung.");
-S("%The1 squeaks sadly.", "%Die1 %1 piepst traurig.");
-S("%The1 squeaks with hope!", "%Die1 %1 piepst hoffnungsvoll!");
-S("%The1 squeaks happily!", "%Die1 %1 piepst fröhlich!");
-S("%The1 squeaks excitedly!", "%Die1 %1 piepst aufgeregt!");
+S("%The1 squeaks gratefully!", "%Die1 %1 piepst dankbar!")
+S("%The1 squeaks hopelessly.", "%Die1 %1 piepst hoffnungslos.")
+S("%The1 squeaks in despair.", "%Die1 %1 piepst voll Verzweiflung.")
+S("%The1 squeaks sadly.", "%Die1 %1 piepst traurig.")
+S("%The1 squeaks with hope!", "%Die1 %1 piepst hoffnungsvoll!")
+S("%The1 squeaks happily!", "%Die1 %1 piepst fröhlich!")
+S("%The1 squeaks excitedly!", "%Die1 %1 piepst aufgeregt!")
 
 N("giant rug", GEN_O, "Riesiger Teppich", "Riesige Teppiche", "Riesigen Teppich")
 
@@ -2319,7 +2319,7 @@ S("Save %the1 first to unlock this challenge!", "Rette zuerst %den1 %a1 um diese
 S("Welcome to %the1 Challenge!", "Willkommen zu der %a1-Herausforderung!")
 S("The more Hypersian Rugs you collect, the harder it is.", "Je mehr Hypersische Teppiche du sammelst desto schwieriger wird es.")
 S("Follow the Mouse and escape with %the1!", "Folge der Maus und entkomme mit %dem1!")
-S("Hardness frozen at %1.", "Festgefroren: %1.");
+S("Hardness frozen at %1.", "Festgefroren: %1.")
 S("Congratulations! Your score is %1.", "Glückwunsch! Deine Punktzahl beträgt %1.")
 
 S("u = undo",     "u = rückgängig")
@@ -2649,11 +2649,11 @@ N("Crossroads III", GEN_F, "Kreuzungen III", "Kreuzungen III", "auf den Kreuzung
 S("An alternate layout of the Crossroads. Great Walls cross here at right angles.",
   "Ein alternatives Layout der Kreuzungen. Große Mauern kreuzen sich hier in rechten Winkeln.")
 
-S("Cannot create temporary matter on a monster!", "Temporäre Materie kann nicht auf einem Monster erzeugt werden!");
-S("Cannot create temporary matter on an item!", "Temporäre Materie kann nicht auf einem Item erzeugt werden!");
-S("Cannot create temporary matter here!", "Hier kann keine temporäre Materie erzeugt werden!");
-S("Cannot summon on a monster!", "Kann nicht auf einem Monster beschworen werden!");
-S("No summoning possible here!", "Beschwören hier nicht möglich!");
+S("Cannot create temporary matter on a monster!", "Temporäre Materie kann nicht auf einem Monster erzeugt werden!")
+S("Cannot create temporary matter on an item!", "Temporäre Materie kann nicht auf einem Item erzeugt werden!")
+S("Cannot create temporary matter here!", "Hier kann keine temporäre Materie erzeugt werden!")
+S("Cannot summon on a monster!", "Kann nicht auf einem Monster beschworen werden!")
+S("No summoning possible here!", "Beschwören hier nicht möglich!")
 S("You summon %the1!", "Du beschwörst %den1 %a1!")
 
 S("F4 = file", "F4 = Datei")
@@ -2929,7 +2929,7 @@ S("Trees in this forest can be chopped down. Big trees take two turns to chop do
   "Bäume in diesem Wald können gefällt werden. Große Bäume zu fällen dauert zwei Züge.")
 
 S("Your power is drained by %the1!", "Deine Kraft wird von %dem1 %d1 ausgesaugt!")
-S("Wow! That was close.", "Wow! Das war knapp.");
+S("Wow! That was close.", "Wow! Das war knapp.")
 S("Collect four different Elemental Shards!", "Sammle vier verschiedene Elementscherben!")
 S("Unbalanced shards in your inventory are dangerous.",
   "Unbalancierte Scherben in deinem Inventar sind gefährlich.")

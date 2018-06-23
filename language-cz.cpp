@@ -965,8 +965,8 @@ S("Shift=random, Ctrl=mix", "Shift=náhodná, Ctrl=směs")
 S("Euclidean mode", "Eukleidovský mód")
 S("Return to the hyperbolic world", "Návrat do hyperbolického světa")
 S("Choose from the lands visited this game.", "Vyber si z krajů, které jsi v této hře navštívil.")
-S("Scores and achievements are not", "V Eukleidovském módu se");
-S("saved in the Euclidean mode!", "neukládají skóre a achievementy!");
+S("Scores and achievements are not", "V Eukleidovském módu se")
+S("saved in the Euclidean mode!", "neukládají skóre a achievementy!")
 
 S("MOVE", "POHYB")
 S("BACK", "ZPĚT")
@@ -1481,8 +1481,8 @@ S("A castle in the Crossroads...", "O hradu na Křižovatce...")
 //S("You can find Temples of Cthulhu in R'Lyeh once you collect five Statues of Cthulhu.",
 //  "Po sebrání pěti Cthulhuových sošek můžeš v R'Lyeh najít Cthulhuovy chrámy.")
 
-S("You have to escape first!", "Nejprve musíš utéct!");
-S("There is not enough space!", "Není tady dost místa!");
+S("You have to escape first!", "Nejprve musíš utéct!")
+S("There is not enough space!", "Není tady dost místa!")
 
 S("Customize character", "upravit postavu")
 S("gender", "pohlaví")
@@ -1540,7 +1540,7 @@ S("Cannot throw fire there!", "Sem nemůžeš vrhnout oheň!")
 
 S("or ESC to see how it ended", "nebo ESC, abys vidě%l0, jak to skončilo")
 S("high contrast", "vysoký kontrast")
-S("draw the heptagons darker", "tmavší sedmiúhelníky");
+S("draw the heptagons darker", "tmavší sedmiúhelníky")
 S("targetting ranged Orbs Shift+click only",
   "zaměřování dálkových Sfér pouze kombinací Shift + kliknutí")
 S("Shift+F, Shift+O, Shift+T, Shift+L, Shift+U, etc.",
@@ -1721,8 +1721,8 @@ S(
 
 // missing sentences
 
-S("%The1 drowns!", "%1 se utopi%l1!");
-S("%The1 falls!", "%1 spad%l1!");
+S("%The1 drowns!", "%1 se utopi%l1!")
+S("%The1 falls!", "%1 spad%l1!")
 
 // these were missing from the translation for some reason
 
@@ -1732,17 +1732,17 @@ S("Hell has these lakes everywhere... They are shaped like evil stars, and fille
 // Hardcore Mode
 // -------------
 
-S("hardcore mode", "hardcore mód");
+S("hardcore mode", "hardcore mód")
 
-S("One wrong move and it is game over!", "Jediný špatný tah a hra končí!");
-S("Not so hardcore?", "Že bys nebyl zas až tak hardcore?");
+S("One wrong move and it is game over!", "Jediný špatný tah a hra končí!")
+S("Not so hardcore?", "Že bys nebyl zas až tak hardcore?")
 
 // Shoot'em up Mode
 // ----------------
 
-S("shoot'em up mode", "mód střílečky");
-S("Welcome to the Shoot'em Up mode!", "Vítej v módu střílečky!");
-S("F/;/Space/Enter/KP5 = fire, WASD/IJKL/Numpad = move", "F/;/Space/Enter/KP5 = střelba, WASD/IJKL/Numpad = pohyb");
+S("shoot'em up mode", "mód střílečky")
+S("Welcome to the Shoot'em Up mode!", "Vítej v módu střílečky!")
+S("F/;/Space/Enter/KP5 = fire, WASD/IJKL/Numpad = move", "F/;/Space/Enter/KP5 = střelba, WASD/IJKL/Numpad = pohyb")
 
 N("Rogue", GEN_M, "Chytrák", "Chytráci", "Chytráka", "Chytrákem")
 N("Knife", GEN_O, "Nůž", "Nože", "Nůž", "Nožem")
@@ -1775,16 +1775,16 @@ S(", m - mode: shoot'em up", "m - mód střílečky")
 S("You would get hurt!", "To by bolelo!")
 S("PARTIAL", "CZĘŚCIOWO")
 
-S("Cannot drop %the1 here!", "Tady nelze položit Mrtvou Sféru!");
+S("Cannot drop %the1 here!", "Tady nelze položit Mrtvou Sféru!")
 
 // Euclidean scores
 // ----------------
 
-S(" (E:%1)", " (E:%1)");
+S(" (E:%1)", " (E:%1)")
 
-S("You cannot attack Rock Snakes directly!", "Na Kamenné hady nemůžeš útočit přímo!");
+S("You cannot attack Rock Snakes directly!", "Na Kamenné hady nemůžeš útočit přímo!")
 
-S("\"I am lost...\"", "\"I am lost...\"");
+S("\"I am lost...\"", "\"I am lost...\"")
 
 S("You are killed by %the1!", "Zabi%l1 tě %1!")
 
@@ -2273,7 +2273,7 @@ S("You destroy %the1 with a mental blast!", "Zniči%l0 jsi %a1 mentálním úder
 S("The ivy kills %the1!", "Břečťan zabil %a1!")
 S("You destroy %the1.", "Zniči%l0 jsi %a1.")
 S("%The1 kills %the2!", "%1 zabi%l1 %a2!")
-S("%The1 sinks!", "%1 zmize%l1 pod vodou!");
+S("%The1 sinks!", "%1 zmize%l1 pod vodou!")
 
 S("Cannot jump on %the1!", "Nemůžeš skočit na %1!")
 
@@ -2400,13 +2400,13 @@ N("Mouse", GEN_F, "Myška", "Myška", "Myšku", "Myškou")
 
 S("You hear a distant squeak!", "V dálce slyšíš zapištění!")
 S("%The1 squeaks in a confused way.", "%1 zmateně piští.")
-S("%The1 squeaks gratefully!", "%1 vděčně piští!");
-S("%The1 squeaks hopelessly.", "%1 zdrceně piští.");
-S("%The1 squeaks in despair.", "%1 zoufale piští.");
-S("%The1 squeaks sadly.", "%1 smutně piští.");
-S("%The1 squeaks with hope!", "%1 nadějně piští!");
-S("%The1 squeaks happily!", "%1 šťastně piští!");
-S("%The1 squeaks excitedly!", "%1 vzrušeně piští!");
+S("%The1 squeaks gratefully!", "%1 vděčně piští!")
+S("%The1 squeaks hopelessly.", "%1 zdrceně piští.")
+S("%The1 squeaks in despair.", "%1 zoufale piští.")
+S("%The1 squeaks sadly.", "%1 smutně piští.")
+S("%The1 squeaks with hope!", "%1 nadějně piští!")
+S("%The1 squeaks happily!", "%1 šťastně piští!")
+S("%The1 squeaks excitedly!", "%1 vzrušeně piští!")
 
 N("giant rug", GEN_O, "obří koberec", "obří koberce", "obří koberec", "obřím kobercem")
 
@@ -2462,7 +2462,7 @@ S("Save %the1 first to unlock this challenge!", "Pro aktivaci této mise musíš
 S("Welcome to %the1 Challenge!", "Vítej v Misi: %1!")
 S("The more Hypersian Rugs you collect, the harder it is.", "Čím víc Hyperských koberců sebereš, tím obtížnější bude.")
 S("Follow the Mouse and escape with %the1!", "Následuj Myšku a uteč s %abl1!")
-S("Hardness frozen at %1.", "Obtížnost nastavená na: %1.");
+S("Hardness frozen at %1.", "Obtížnost nastavená na: %1.")
 S("Congratulations! Your score is %1.", "Gratulujeme! Tvé skóre je %1.")
 
 S("u = undo",     "u = zpět")
@@ -3120,7 +3120,7 @@ S("Trees in this forest can be chopped down. Big trees take two turns to chop do
 
 S("Your power is drained by %the1!", "%1 vysává tvou sílu!")
 
-S("Wow! That was close.", "Uf! To bylo o chlup!");
+S("Wow! That was close.", "Uf! To bylo o chlup!")
 
 S("Collect four different Elemental Shards!", "Získej čtyři různé Elementální úlomky!")
 S("Unbalanced shards in your inventory are dangerous.",
@@ -3469,7 +3469,7 @@ S(
 
   "Tento kraj je plný krásných, ale nebezpečných tvorů a rostlin.")
 
-S("%The1 is killed by thorns!", "%1 se nabod%l na trny!");
+S("%The1 is killed by thorns!", "%1 se nabod%l na trny!")
 
 // Warped Sea/Coast
 // ----------------
@@ -4504,7 +4504,7 @@ S("Vampire Bats drain your magical powers!",
 
 S("Hint: use arrow keys to scroll.", "Nápověda: šipkami můžeš scrollovat.")
 S("Hint: press 1 2 3 4 to change the projection.", "Nápověda: Klávesy 1 2 3 4 mění projekci.")
-S("You gain a protective Shell!", "Získa%l0 jsi ochranný Krunýř!");
+S("You gain a protective Shell!", "Získa%l0 jsi ochranný Krunýř!")
 S("Hint: magical powers from Treats expire after a number of uses.",
   "Nápověda: magické schopnosti získané z Pochoutek zmizí po určitém počtu použití.")
 S("A magical energy sword. Don't waste its power!",
@@ -5571,7 +5571,7 @@ S(
   "co tam získáš 25 Èertových kvítek. Po získání 50 Èertových kvítek se "
   "zaènou objevovat na Køižovatce a v Oceánu, a po získání 100 Èertových "
   "kvítek všude."
-  );  
+  )  
 
 S(
   "\n\nIn the Orb Strategy Mode, dead orbs are available once you collect "
@@ -5648,7 +5648,7 @@ S("line width", "šíøka èar")
 S("configure panning and general keys", "konfigurace pøejíždìní a obecných kláves")
 
 S("\n\nHint: use 'm' to toggle cells quickly",
-  "\n\nTip: políèka lze rychle pøepínat klávesou 'm'");
+  "\n\nTip: políèka lze rychle pøepínat klávesou 'm'")
 
 // cell pattern names
 S("football", "fotbal")
@@ -5684,7 +5684,7 @@ S(
   "If you collect too many treasures in a given land, it will become "
   "extremely dangerous. Try other lands once you have enough!",
   "Pokud získáš pøíliš mnoho pokladù v jednom kraji, zaène být velmi "
-  "nebezpeèný. Až budeš mít dost, zkus jiné kraje!");
+  "nebezpeèný. Až budeš mít dost, zkus jiné kraje!")
 
 S(
   "Remember that you can right click almost anything for more information.",
@@ -5692,7 +5692,7 @@ S(
   "o tom více informací.")
 
 S("Want to understand the geometry in HyperRogue? Try the Tutorial!",
-  "Chceš porozumìt geometrii v HyperRogue? Zkus Tutoriál!");
+  "Chceš porozumìt geometrii v HyperRogue? Zkus Tutoriál!")
 
 S(
   "Collecting 25 treasures in a given land may be dangerous, "
@@ -5780,9 +5780,9 @@ N("Reflection", GEN_O, "Odraz", "Odrazy", "Odraz", "v Odraze")
 N("mirror wall", GEN_F, "zrcadlová stìna", "zrcadlové stìny", "zrcadlovou stìnu", "zrcadlovou stìnou")
 
 S("This would only move you deeper into the trap!",
-  "Tím by ses jen dostal dál do pasti!");
+  "Tím by ses jen dostal dál do pasti!")
 
-S("You swing your sword at the mirror.", "Udeøil jsi meèem do zrcadla.");
+S("You swing your sword at the mirror.", "Udeøil jsi meèem do zrcadla.")
 N("Mimic", GEN_M, "Mimik", "Mimikové", "Mimika", "Mimikem")
 N("Narcissist", GEN_M, "Narcis", "Narcisové", "Narcisa", "Narcisem")
 N("Mirror Spirit", GEN_M, "Zrcadlový duch", "Zrcadloví duchové", "Zrcadlového ducha", "Zrcadlovým duchem")
@@ -5950,7 +5950,7 @@ S("Extras:", "Extra:") // extra Orbs gained in OSM
 // ------
 
 S("unlock Orbs of Yendor", "odemkni Yendorské Sféry")
-S("Collected the keys!", "Získal jsi klíče!");
+S("Collected the keys!", "Získal jsi klíče!")
 S("Saved the Princess!", "Zachránil jsi Princeznu!")
 S("save a Princess", "zachraň Princeznu")
 
@@ -6020,7 +6020,7 @@ S(
 
 N("Kraken", GEN_M, "Kraken", "Krakeni", "Krakena", "Krakenem")
 N("Kraken Tentacle", GEN_N, "Krakení chapadlo", "Krakení chapadla", "Krakení chapadlo", "Krakením chapadlem")
-S(" (killing increases treasure spawn)", " (zabití zlepšuje výskyt pokladů)");
+S(" (killing increases treasure spawn)", " (zabití zlepšuje výskyt pokladů)")
 
 N("stepping stones", GEN_O, "Brod", "Brody", "Brod", "Brodem")
 
@@ -6275,7 +6275,7 @@ S("You are ambushed!", "Přepadení!")
 S("teleport", "teleport")
 S("ambush:", "přepadení:")
 
-S("The Hunting Dogs give up.", "Lovečtí psi vzdali pronásledování.");
+S("The Hunting Dogs give up.", "Lovečtí psi vzdali pronásledování.")
 
 /*
 		"NEW_ACHIEVEMENT_8_20_NAME"	"Kořist"
@@ -6338,7 +6338,7 @@ S("Yes, this is definitely a crystal. A very regular crystalline structure.\n\n"
   "Ano, tohle je rozhodně krystal. A navíc má velice pravidelnou krystalickou strukturu.\n\n"
   "Tento kraj byl navržený jako nástroj pro hraní s různými geometriemi a v normální hře se neobjevuje.")
 
-S("You cannot move there!", "Tam se nemůžeš pohnout!");
+S("You cannot move there!", "Tam se nemůžeš pohnout!")
 
 // geometry stuff
 
@@ -6425,7 +6425,7 @@ S("stereographic/orthogonal", "stereografická/ortogonální projekce")
 S("Poincaré/Klein", "Poincaré/Klein")
   
 // Paper Model Creator
-S("Useless in Euclidean geometry.", "V eukleidovské geometrii k ničemu.");
+S("Useless in Euclidean geometry.", "V eukleidovské geometrii k ničemu.")
 S("Not implemented for spherical geometry. Please tell me if you really want this.",
   "Není implementováno ve sférické geometrii. Pokud byste to opravdu chtěli, dejte mi vědět.")
 
@@ -7162,8 +7162,8 @@ S("Static mode enabled.", "Statický mód zapnut.")
 S("Static mode disabled.", "Statický mód vypnut.")
 
 S("Returned to your game.", "Návrat do tvé hry.")
-S("Spherical version of %the1. ", "%1 ve sférické verzi. ");
-S("Euclidean version of %the1. ", "%1 v eukleidovské verzi. ");
+S("Spherical version of %the1. ", "%1 ve sférické verzi. ")
+S("Euclidean version of %the1. ", "%1 v eukleidovské verzi. ")
 S("Click again to go back to your game.", "Dalším kliknutím se vrátíš do své hry.")
 S("Press %1 again to go back to your game.", "Dalším stisknutím %1 se vrátíš do své hry.")
 S("return to your game", "návrat do hry")
@@ -7182,7 +7182,7 @@ S("You give %the1 a grim look.", "Vrhl jsi pochmurný pohled na %a1.")
 // Strange Challenge
 
 S("Strange Challenge", "Podivná mise")
-S("compete with other players on random lands in random geometries", "soupeř s jinými hráči v náhodných krajích a náhodných geometriích");
+S("compete with other players on random lands in random geometries", "soupeř s jinými hráči v náhodných krajích a náhodných geometriích")
 
 S("Strange Challenge #%1", "Podivná mise #%1")
 S("next challenge in %1", "do další mise: %1")
