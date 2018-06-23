@@ -64,7 +64,7 @@ int main(int argc, char **argv) {
   arg::read(3);
 #endif
 #if !ISWEB
-  if(showstartmenu)
+  if(showstartmenu && !vid.skipstart)
     pushScreen(showStartMenu);
 #endif
   mainloop();
