@@ -2510,3 +2510,6 @@ non-game:
 - new quotient geometries: 'minimal quotient' (based on DivisionByZero's construction https://steamcommunity.com/app/342610/discussions/1/3051633726580659909/ ), Klein Quartic, Bolza Surface (aka the "Docks Quotient"), Bolza Surface x2
 - fixed some issues with the generation of Land of Storms in other geometries
 - bitruncated 'four hexagons' should no longer appear in SC; non-bitruncated 'four hexagons' will be rarer
+
+2018.06.24 01:19 Update 10.4g
+- fixed Arrow Traps not killing anything (and possibly other similar cases)
