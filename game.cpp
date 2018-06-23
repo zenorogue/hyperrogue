@@ -1019,7 +1019,7 @@ bool canAttack(cell *c1, eMonster m1, cell *c2, eMonster m2, flagtype flags) {
     if(!(flags & (AF_MAGIC | AF_SWORD_INTO | AF_HORNS | AF_CRUSH))) return false;
     
   if(!(flags & (AF_GUN | AF_SWORD | AF_SWORD_INTO | AF_MAGIC)))
-    if(!logical_adjacent(c1, m1, c2)) return false;
+    if(c1 != c2 && !logical_adjacent(c1, m1, c2)) return false;
 
   if(!(flags & (AF_LANCE | AF_STAB | AF_BACK | AF_APPROACH | AF_GUN | AF_MAGIC)))
     if(c1 && c2 && againstRose(c1, c2) && !ignoresSmell(m1))
