@@ -24,20 +24,29 @@ const char *escape(std::string s, const std::string& dft);
 
 template<class T> struct dictionary {
   std::map<std::string, T> m;
-  void add(const std::string& s, const T& val) {
-    if(m.count(s)) add(s + " [repeat]", val);
-    else m[s] = val; 
+  void add(const std::string& s, T val) {
+    if(m.count(s)) add(s + " [repeat]", std::move(val));
+    else m[s] = std::move(val);
     }
   T& operator [] (const std::string& s) { return m[s]; }
   int count(const std::string& s) { return m.count(s); }
-  void clear() { m.clear(); }
   };
 
 dictionary<std::string> d[NUMLAN];
 
+struct noun2 {
+  int genus;
+  const char *nom;
+  const char *nomp;
+  const char *acc;
+  const char *abl;
+  };
+
 struct noun {
   int genus;
   std::string nom, nomp, acc, abl;
+  noun() = default;
+  noun(const noun2& n) : genus(n.genus), nom(n.nom), nomp(n.nomp), acc(n.acc), abl(n.abl) {}
   };
 
 dictionary<noun> nouns[NUMLAN];
@@ -117,60 +126,118 @@ const char *escape(std::string s, const std::string& dft) {
 std::set<std::string> nothe;
 std::set<std::string> plural;
 
-void langPL() {
-  #define S(a,b) d[1].add(a,b); 
-  #define N(a,b,c,d,e,f) \
-    {noun n; n.genus = b; n.nom = c; n.nomp = d; n.acc = e; n.abl = f; nouns[1].add(a,n);}
-  #include "language-pl.cpp"
-  #undef N
-  #undef S
-  }
+ void langPL() {
+  static std::pair<const char *, const char *> ds[] = {
+    #define S(a,b) { a, b },
+    #define N(a,b,c,d,e,f)
+    #include "language-pl.cpp"
+    #undef N
+    #undef S
+    };
+  static std::pair<const char *, noun2> ns[] = {
+    #define S(a,b)
+    #define N(a,b,c,d,e,f) { a, noun2{ b, c, d, e, f } },
+    #include "language-pl.cpp"
+    #undef N
+    #undef S
+    };
+  for(auto&& elt : ds) d[1].add(elt.first, elt.second);
+  for(auto&& elt : ns) nouns[1].add(elt.first, elt.second);
+}
 
 void langTR() {
-#define S(a,b) d[2].add(a,b);
-#define N5(a,b,c,d,e) \
-  {noun n; n.genus = b; n.nom = c; n.nomp = d; n.acc = e; n.abl = e; nouns[2].add(a,n);}
-#define N(a,b,c,d,e,f) \
-  {noun n; n.genus = b; n.nom = c; n.nomp = d; n.acc = e; n.abl = f; nouns[2].add(a,n);}
-#include "language-tr.cpp"
-#undef N
-#undef S
+  static std::pair<const char *, const char *> ds[] = {
+    #define S(a,b) { a, b },
+    #define N(a,b,c,d,e,f)
+    #include "language-tr.cpp"
+    #undef N
+    #undef S
+    };
+  static std::pair<const char *, noun2> ns[] = {
+    #define S(a,b)
+    #define N(a,b,c,d,e,f) { a, noun2{ b, c, d, e, f } },
+    #include "language-tr.cpp"
+    #undef N
+    #undef S
+    };
+  for(auto&& elt : ds) d[2].add(elt.first, elt.second);
+  for(auto&& elt : ns) nouns[2].add(elt.first, elt.second);
   }
 
 void langCZ() {
-#define S(a,b) d[3].add(a,b);
-#define N(a,b,c,d,e,f) \
-  {noun n; n.genus = b; n.nom = c; n.nomp = d; n.acc = e; n.abl = f; nouns[3].add(a,n);}
-#include "language-cz.cpp"
-#undef N
-#undef S
+  static std::pair<const char *, const char *> ds[] = {
+    #define S(a,b) { a, b },
+    #define N(a,b,c,d,e,f)
+    #include "language-cz.cpp"
+    #undef N
+    #undef S
+    };
+  static std::pair<const char *, noun2> ns[] = {
+    #define S(a,b)
+    #define N(a,b,c,d,e,f) { a, noun2{ b, c, d, e, f } },
+    #include "language-cz.cpp"
+    #undef N
+    #undef S
+    };
+  for(auto&& elt : ds) d[3].add(elt.first, elt.second);
+  for(auto&& elt : ns) nouns[3].add(elt.first, elt.second);
   }
 
 void langRU() {
-#define S(a,b) d[4].add(a,b);
-#define N(a,b,c,d,e,f) \
-  {noun n; n.genus = b; n.nom = c; n.nomp = d; n.acc = e; n.abl = f; nouns[4].add(a,n);}
-#include "language-ru.cpp"
-#undef N
-#undef S
+  static std::pair<const char *, const char *> ds[] = {
+    #define S(a,b) { a, b },
+    #define N(a,b,c,d,e,f)
+    #include "language-ru.cpp"
+    #undef N
+    #undef S
+    };
+  static std::pair<const char *, noun2> ns[] = {
+    #define S(a,b)
+    #define N(a,b,c,d,e,f) { a, noun2{ b, c, d, e, f } },
+    #include "language-ru.cpp"
+    #undef N
+    #undef S
+    };
+  for(auto&& elt : ds) d[4].add(elt.first, elt.second);
+  for(auto&& elt : ns) nouns[4].add(elt.first, elt.second);
   }
 
 void langDE() {
-#define S(a,b) d[5].add(a,b);
-#define N(a,b,c,d,e) \
-  {noun n; n.genus = b; n.nom = c; n.nomp = d; n.acc = e; n.abl = e; nouns[5].add(a,n);}
-#include "language-de.cpp"
-#undef N
-#undef S
+  static std::pair<const char *, const char *> ds[] = {
+    #define S(a,b) { a, b },
+    #define N(a,b,c,d,e)
+    #include "language-de.cpp"
+    #undef N
+    #undef S
+    };
+  static std::pair<const char *, noun2> ns[] = {
+    #define S(a,b)
+    #define N(a,b,c,d,e) { a, noun2{ b, c, d, e, e } },
+    #include "language-de.cpp"
+    #undef N
+    #undef S
+    };
+  for(auto&& elt : ds) d[5].add(elt.first, elt.second);
+  for(auto&& elt : ns) nouns[5].add(elt.first, elt.second);
   }
 
 void langPT() {
-#define S(a,b) d[6].add(a,b);
-#define N(a,b,c,d,e) \
-  {noun n; n.genus = b; n.nom = c; n.nomp = d; n.abl = e; nouns[6].add(a,n);}
-#include "language-ptbr.cpp"
-#undef N
-#undef S
+  static std::pair<const char *, const char *> ds[] = {
+    #define S(a,b) { a, b },
+    #define N(a,b,c,d,e)
+    #include "language-ptbr.cpp"
+    #undef N
+    #undef S
+    };
+  static std::pair<const char *, noun2> ns[] = {
+    #define S(a,b)
+    #define N(a,b,c,d,e) { a, noun2{ b, c, d, "", e } },
+    #include "language-ptbr.cpp"
+    #undef N
+    #undef S
+    };
+  for(auto&& elt : ds) d[6].add(elt.first, elt.second);
+  for(auto&& elt : ns) nouns[6].add(elt.first, elt.second);
   }
 
 int completeness[NUMLAN];
