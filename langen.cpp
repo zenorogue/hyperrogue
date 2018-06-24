@@ -14,35 +14,30 @@
 #include <cstdlib>
 #include <set>
 
-using std::string;
-using std::map;
-using std::vector;
-using std::set;
-
 template<class T> int isize(const T& x) { return x.size(); }
 
 #define NUMLAN 7
 
 // language generator
 
-const char *escape(string s, string dft);
+const char *escape(std::string s, const std::string& dft);
 
 template<class T> struct dictionary {
-  map<string, T> m;
-  void add(const string& s, const T& val) { 
+  std::map<std::string, T> m;
+  void add(const std::string& s, const T& val) {
     if(m.count(s)) add(s + " [repeat]", val);
     else m[s] = val; 
     }
-  T& operator [] (const string& s) { return m[s]; }
-  int count(const string& s) { return m.count(s); }
+  T& operator [] (const std::string& s) { return m[s]; }
+  int count(const std::string& s) { return m.count(s); }
   void clear() { m.clear(); }
   };
 
-dictionary<string> d[NUMLAN];
+dictionary<std::string> d[NUMLAN];
 
 struct noun {
   int genus;
-  string nom, nomp, acc, abl;
+  std::string nom, nomp, acc, abl;
   };
 
 dictionary<noun> nouns[NUMLAN];
@@ -55,17 +50,16 @@ int utfsize(char c) {
   return 4;
   }
 
-void addutftoset(set<string>& s, string& w) {
-  int i = 0;
-//printf("%s\n", w.c_str());
-  while(i < isize(w)) {
+void addutftoset(std::set<std::string>& s, std::string& w) {
+  size_t i = 0;
+  while(i < w.size()) {
     int siz = utfsize(w[i]);
     s.insert(w.substr(i, siz));
     i += siz;
     }
   }
 
-void addutftoset(set<string>& s, noun& w) {
+void addutftoset(std::set<std::string>& s, noun& w) {
   addutftoset(s, w.nom);
   addutftoset(s, w.nomp);
   addutftoset(s, w.acc);
@@ -73,34 +67,22 @@ void addutftoset(set<string>& s, noun& w) {
   }
 
 template<class T>
-void addutftoset(set<string>& s, dictionary<T>& w) {
-  for(typename map<string,T>::iterator it = w.m.begin(); it != w.m.end(); it++)
-    addutftoset(s, it->second);
+void addutftoset(std::set<std::string>& s, dictionary<T>& w) {
+  for(auto&& elt : w.m)
+    addutftoset(s, elt.second);
   }
 
-set<string> allchars;
-
-void printletters(dictionary<string>& la, dictionary<noun>& nounla, const char *lang) {
-  set<string> s;
-  addutftoset(s, la);
-  addutftoset(s, nounla);
-  addutftoset(allchars, la);
-  addutftoset(allchars, nounla);
-//printf("%s:", lang);
-//for(set<string>::iterator it = s.begin(); it != s.end(); it++)
-//  printf(" \"%s\",", it->c_str());
-//printf("\n");
-  }
+std::set<std::string> allchars;
 
 typedef unsigned hashcode;
 
 hashcode hashval;
 
-bool isrepeat(const string& s) {
-  return s.find(" [repeat]") != string::npos;
+bool isrepeat(const std::string& s) {
+  return s.find(" [repeat]") != std::string::npos;
   }
   
-hashcode langhash(const string& s) {
+hashcode langhash(const std::string& s) {
   if(isrepeat(s)) {
     return langhash(s.substr(0, s.size() - 9)) + 1;
     }
@@ -109,19 +91,19 @@ hashcode langhash(const string& s) {
   return r;
   }
 
-map<hashcode, string> buildHashTable(set<string>& s) {
-  map<hashcode, string> res;
-  for(set<string>::iterator it = s.begin(); it != s.end(); it++) 
-    res[langhash(*it)] = *it;
+std::map<hashcode, std::string> buildHashTable(std::set<std::string>& s) {
+  std::map<hashcode, std::string> res;
+  for(auto&& elt : s)
+    res[langhash(elt)] = elt;
   return res;
   }
 
-const char *escape(string s, string dft) {
+const char *escape(std::string s, const std::string& dft) {
   if(s == "") {
     printf("/*MISSING*/ ");
     s = dft;
     }
-  static string t;
+  static std::string t;
   t = "\"";
   for(int i=0; i<isize(s); i++)
     if(s[i] == '\\') t += "\\\\";
@@ -132,21 +114,8 @@ const char *escape(string s, string dft) {
   return t.c_str();
   }
 
-set<string> nothe;
-set<string> plural;
-
-#ifdef CHECKALL
-const char* allstr[] = {
-#include "d"
-  };
-#endif
-
-void setstats(set<string>& s, const char* bn) {
-  int tlen=0, tc = 0;
-  for(set<string>::iterator it = s.begin(); it != s.end(); it++) 
-    tc++, tlen += it->size();
-  printf("// %-10s %5d %5d\n", bn, tc, tlen);
-  }
+std::set<std::string> nothe;
+std::set<std::string> plural;
 
 void langPL() {
   #define S(a,b) d[1].add(a,b); 
@@ -226,87 +195,68 @@ int main() {
   langTR(); langDE(); langPT();
 
   // verify
-  set<string> s;
+  std::set<std::string> s;
   for(int i=1; i<NUMLAN; i++) 
-    for(map<string,string>::iterator it = d[i].m.begin(); it != d[i].m.end(); it++)
-      s.insert(it->first);
+    for(auto&& elt : d[i].m)
+      s.insert(elt.first);
   
   printf("// DO NOT EDIT -- this file is generated automatically with langen\n\n");
 
-  for(set<string>::iterator x=s.begin(); x != s.end(); x++) {
-    string mis = "", mis1 = "";
-    for(int i=1; i<NUMLAN; i++) if(d[i].count(*x) == 0) {
-      string which = d[i]["EN"];
+  for(auto&& elt : s) {
+    std::string mis = "", mis1 = "";
+    for(int i=1; i<NUMLAN; i++) if(d[i].count(elt) == 0) {
+      std::string which = d[i]["EN"];
       if(which != "TR" && which != "DE" && which != "PT-BR")
         mis += which;
       else
         mis1 += which;
       }
-    if(mis != "" && !isrepeat(*x))
-      printf("// #warning Missing [%s/%s]: %s\n", mis.c_str(), mis1.c_str(), escape(*x, "?"));
+    if(mis != "" && !isrepeat(elt))
+      printf("// #warning Missing [%s/%s]: %s\n", mis.c_str(), mis1.c_str(), escape(elt, "?"));
 
-    if(!isrepeat(*x)) {
+    if(!isrepeat(elt)) {
       completeness[0]++;
-      for(int i=1; i<NUMLAN; i++) if(d[i].count(*x)) completeness[i]++;
+      for(int i=1; i<NUMLAN; i++) if(d[i].count(elt)) completeness[i]++;
       }
     }
   
   s.clear();
 
   for(int i=1; i<NUMLAN; i++) 
-    for(map<string,noun>::iterator it = nouns[i].m.begin(); it != nouns[i].m.end(); it++)
-      s.insert(it->first);
-  
-  for(set<string>::iterator x=s.begin(); x != s.end(); x++) {
-    string mis = "", mis1 = "";
-    for(int i=1; i<NUMLAN; i++) if(nouns[i].count(*x) == 0) {
-      string which = d[i]["EN"];
+    for(auto&& elt : nouns[i].m)
+      s.insert(elt.first);
+
+  for(auto&& elt : s) {
+    std::string mis = "", mis1 = "";
+    for(int i=1; i<NUMLAN; i++) if(nouns[i].count(elt) == 0) {
+      std::string which = d[i]["EN"];
       if(which != "TR" && which != "DE" && which != "PT-BR")
         mis += which;
       else mis1 += which;
       }
-    if(mis != "" && !isrepeat(*x))
-      printf("// #warning Missing [%s/%s]: %s\n", mis.c_str(), mis1.c_str(), escape(*x, "?"));
+    if(mis != "" && !isrepeat(elt))
+      printf("// #warning Missing [%s/%s]: %s\n", mis.c_str(), mis1.c_str(), escape(elt, "?"));
 
-    if(!isrepeat(*x)) {
+    if(!isrepeat(elt)) {
       completeness[0]++;
-      for(int i=1; i<NUMLAN; i++) if(nouns[i].count(*x)) completeness[i]++;
+      for(int i=1; i<NUMLAN; i++) if(nouns[i].count(elt)) completeness[i]++;
       }
     }
 
-#ifdef CHECKALL
-  for(int i=1; i<NUMLAN; i++) 
-    for(map<string,string>::iterator it = d[i].m.begin(); it != d[i].m.end(); it++)
-      s.insert(it->first);
-
-  int ca = sizeof(allstr) / sizeof(char*);
-  for(int i=0; i<ca; i++) if(!s.count(allstr[i])) {
-    printf("#warning GO %s\n", escape(allstr[i], "?"));
-    }
-
-  for(set<string>::iterator x=s.begin(); x != s.end(); x++) {
-    bool b = false;
-    for(int i=0; i<ca; i++) if(allstr[i] == *x) b = true;
-    if(!b) printf("#warning TO %s\n", escape(*x, "?"));
-    }
-#endif  
-
   for(int i=1; i<NUMLAN; i++) {
-    printletters(d[i], nouns[i], "SOMETHING");
+    addutftoset(allchars, d[i]);
+    addutftoset(allchars, nouns[i]);
     }
 
-  int c =0;
-  string javastring;
-  vector<string> vchars;
-//printf("ALL:");
-  for(set<string>::iterator it = allchars.begin(); it != allchars.end(); it++) {
-//  printf(" \"%s\",", it->c_str());
-    if(isize(*it) >= 2) { javastring += (*it); vchars.push_back(*it); c++; }
+  std::string javastring;
+  std::vector<std::string> vchars;
+  for(auto&& elt : allchars) {
+    if(isize(elt) >= 2) { javastring += elt; vchars.push_back(elt); }
     }
   printf("\n");
-  printf("#define NUMEXTRA %d\n", c);
+  printf("#define NUMEXTRA %zu\n", vchars.size());
   printf("#define NATCHARS {");
-  for(int i=0; i<c; i++) printf("\"%s\",", vchars[i].c_str());
+  for(auto&& elt : vchars) printf("\"%s\",", elt.c_str());
   printf("};\n");
   printf("const char* natchars[NUMEXTRA] = NATCHARS;");
   printf("//javastring = \"%s\";\n", javastring.c_str());
@@ -316,47 +266,47 @@ int main() {
   printf("};\n");
 
   for(int i=1; i<NUMLAN; i++) 
-    for(map<string,string>::iterator it = d[i].m.begin(); it != d[i].m.end(); it++)
-      s.insert(it->first);
+    for(auto&& elt : d[i].m)
+      s.insert(elt.first);
   
   printf("\n//statistics\n");
-  for(map<string, string>::iterator it = d[1].m.begin(); it != d[1].m.end(); it++)
-    d[0][it->first] = it->first;
-  for(map<string, noun>::iterator it = nouns[1].m.begin(); it != nouns[1].m.end(); it++) {
-    noun n = it->second;
-    n.nom = n.nomp = n.acc = n.abl = it->first;
-    nouns[0][it->first] = n;
+  for(auto&& elt : d[1].m)
+    d[0][elt.first] = elt.first;
+  for(auto&& elt : nouns[1].m) {
+    noun n = elt.second;
+    n.nom = n.nomp = n.acc = n.abl = elt.first;
+    nouns[0][elt.first] = n;
     }
-  
-  printf("// total: %5d nouns, %5d sentences\n", isize(nouns[1].m), isize(d[1].m));
+
+  printf("// total: %5zu nouns, %5zu sentences\n", nouns[1].m.size(), d[1].m.size());
 
   for(int i=0; i<NUMLAN; i++) {
-    int bnouns = 0;
-    int dict = 0;
+    size_t bnouns = 0;
+    size_t bdict = 0;
 
-    for(map<string, string>::iterator it = d[i].m.begin(); it != d[i].m.end(); it++)
-      dict += isize(it->second);
-    for(map<string, noun>::iterator it = nouns[i].m.begin(); it != nouns[i].m.end(); it++) {
-      noun& n = it->second;
-      bnouns += isize(n.nom);
-      bnouns += isize(n.nomp);
-      bnouns += isize(n.acc);
-      bnouns += isize(n.abl);
+    for(auto&& elt : d[i].m)
+      bdict += elt.second.size();
+    for(auto&& elt : nouns[i].m) {
+      const noun& n = elt.second;
+      bnouns += n.nom.size();
+      bnouns += n.nomp.size();
+      bnouns += n.acc.size();
+      bnouns += n.abl.size();
       }
 
-    printf("// %s: %5dB nouns, %5dB sentences\n",
-      d[i]["EN"].c_str(), bnouns, dict);
+    printf("// %s: %5zuB nouns, %5zuB sentences\n",
+      d[i]["EN"].c_str(), bnouns, bdict);
     }
   
-  set<string> allsent;
-  for(map<string, string>::iterator it = d[1].m.begin(); it != d[1].m.end(); it++)
-    allsent.insert(it->first);
+  std::set<std::string> allsent;
+  for(auto&& elt : d[1].m)
+    allsent.insert(elt.first);
 
-  set<string> allnouns;
-  for(map<string, noun>::iterator it = nouns[1].m.begin(); it != nouns[1].m.end(); it++)
-    allnouns.insert(it->first);
+  std::set<std::string> allnouns;
+  for(auto&& elt : nouns[1].m)
+    allnouns.insert(elt.first);
   
-  map<hashcode, string> ms, mn;
+  std::map<hashcode, std::string> ms, mn;
   
   do {
     hashval = rand();
@@ -364,16 +314,16 @@ int main() {
     ms = buildHashTable(allsent);
     mn = buildHashTable(allnouns);
     }
-  while(isize(ms) != isize(allsent) || isize(mn) != isize(allnouns));
+  while(ms.size() != allsent.size() || mn.size() != allnouns.size());
   
   printf("hashcode hashval = 0x%x;\n\n", hashval);
   
   printf("sentence all_sentences[] = {\n");
   
-  for(map<hashcode,string>::iterator it = ms.begin(); it != ms.end(); it++) {
-    string s = it->second;
+  for(auto&& elt : ms) {
+    const std::string& s = elt.second;
     if(isrepeat(s)) printf("#if REPEATED\n");    
-    printf("  {0x%x, { // %s\n", it->first, escape(s, s));
+    printf("  {0x%x, { // %s\n", elt.first, escape(s, s));
     for(int i=1; i<NUMLAN; i++) printf("   %s,\n", escape(d[i][s], s));
     printf("    }},\n");
     if(isrepeat(s)) printf("#endif\n");
@@ -382,10 +332,10 @@ int main() {
 
   printf("fullnoun all_nouns[] = {\n");
   
-  for(map<hashcode,string>::iterator it = mn.begin(); it != mn.end(); it++) {
-    string s = it->second;
+  for(auto&& elt : mn) {
+    const std::string& s = elt.second;
     if(isrepeat(s)) printf("#if REPEATED\n");
-    printf("  {0x%x, %d, { // \"%s\"\n", it->first, 
+    printf("  {0x%x, %d, { // \"%s\"\n", elt.first,
       (nothe.count(s) ? 1:0) + (plural.count(s) ? 2:0),
       escape(s, s));
     
@@ -404,4 +354,3 @@ int main() {
   printf("  };\n");
 
   }
-
