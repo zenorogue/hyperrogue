@@ -876,8 +876,8 @@ S("message flash time", "mesaj gösterme süresi")
 S("Euclidean mode", "Öklid modu")
 S("Return to the hyperbolic world", "Hiperbolik Dünyaya geri dön")
 S("Choose from the lands visited this game.", "Oyunda eriştiğin diyarlardan birini seç.")
-S("Scores and achievements are not", "Başarımlar ve puanlar Öklid");
-S("saved in the Euclidean mode!", "modunda kaydedilmeyecek!");
+S("Scores and achievements are not", "Başarımlar ve puanlar Öklid")
+S("saved in the Euclidean mode!", "modunda kaydedilmeyecek!")
 
 S("Your total treasure has been recorded in the Google Leaderboards.", "Toplam hazinen Google Listelerine kaydedildi.")
 S("You have improved your total high score on Google. Congratulations!", "Google'daki toplam yüksek puanını artırdın. Tebrikler!")
@@ -1324,8 +1324,8 @@ S("You overhear miners talking about a castle...",
 
 S("A castle in the Crossroads...", "Arayollarda bir Kale...")
 
-S("You have to escape first!", "Önce kaçman gerekiyor!");
-S("There is not enough space!", "Yeterince yer yok!");
+S("You have to escape first!", "Önce kaçman gerekiyor!")
+S("There is not enough space!", "Yeterince yer yok!")
 
 S("Customize character", "Karakteri düzenle.")
 S("gender", "cinsiyet")
@@ -1379,7 +1379,7 @@ S("Illusions are targeted "
 
 S("or ESC to see how it ended", "veya nasıl bittiğini görmek için ESC'ye bas")
 S("high contrast", "yüksek kontrast")
-S("draw the heptagons darker", "yedigenleri daha koyu çiz");
+S("draw the heptagons darker", "yedigenleri daha koyu çiz")
 S("targetting ranged Orbs Shift+click only",
   "menzilli küreler için sadece Shift+sol tık")
 S("Shift+F, Shift+O, Shift+T, Shift+L, Shift+U, etc.",
@@ -1550,8 +1550,8 @@ S(
 
 // missing sentences
 
-S("%The1 drowns!", "%1 boğuldu!");
-S("%The1 falls!", "%1 düştü!");
+S("%The1 drowns!", "%1 boğuldu!")
+S("%The1 falls!", "%1 düştü!")
 
 // these were missing from the translation for some reason
 
@@ -1561,17 +1561,17 @@ S("Hell has these lakes everywhere... They are shaped like evil stars, and fille
 // Hardcore Mode
 // -------------
 
-S("hardcore mode", "Aşmış mod");
+S("hardcore mode", "Aşmış mod")
 
-S("One wrong move and it is game over!", "Tek bir yanlış hamle ve oyun biter!");
-S("Not so hardcore?", "O kadar da aşmış değil?");
+S("One wrong move and it is game over!", "Tek bir yanlış hamle ve oyun biter!")
+S("Not so hardcore?", "O kadar da aşmış değil?")
 
 // Shoot'em up Mode
 // ----------------
 
-S("shoot'em up mode", "tryb strzelanki");
-S("Welcome to the Shoot'em Up mode!", "Witaj w trybie strzelanki!");
-S("F/;/Space/Enter/KP5 = fire, WASD/IJKL/Numpad = move", "F/;/Space/Enter/KP5 = strzał, WASD/IJKL/Numpad = ruch");
+S("shoot'em up mode", "tryb strzelanki")
+S("Welcome to the Shoot'em Up mode!", "Witaj w trybie strzelanki!")
+S("F/;/Space/Enter/KP5 = fire, WASD/IJKL/Numpad = move", "F/;/Space/Enter/KP5 = strzał, WASD/IJKL/Numpad = ruch")
 
 N("Rogue", GEN_M, "Seyyah", "Seyyahlar", "Seyyahı", "Seyyahla")
 N("Knife", GEN_M, "Bıçak", "Bıçaklar", "Bıçağı", "Bıçakla")
@@ -1604,16 +1604,16 @@ S(", m - mode: shoot'em up", "m - SHMUP modu")
 S("You would get hurt!", "Orada hasar alırsın!")
 S("PARTIAL", "KISMÎ")
 
-S("Cannot drop %the1 here!", "Ölü Küreyi buraya bırakamazsın!");
+S("Cannot drop %the1 here!", "Ölü Küreyi buraya bırakamazsın!")
 
 // Euclidean scores
 // ----------------
 
-S(" (E:%1)", " (Ö:%1)");
+S(" (E:%1)", " (Ö:%1)")
 
-S("You cannot attack Rock Snakes directly!", "Kaya Yılanlarına doğrudan saldıramazsın!");
+S("You cannot attack Rock Snakes directly!", "Kaya Yılanlarına doğrudan saldıramazsın!")
 
-S("\"I am lost...\"", "Kayboldum...");
+S("\"I am lost...\"", "Kayboldum...")
 
 S("You are killed by %the1!", "%1 tarafından öldürüldün!")
 
@@ -2126,7 +2126,7 @@ S("You destroy %the1 with a mental blast!", "%a1 bir zihin patlamasıyla yok ett
 S("The ivy kills %the1!", "Sarmaşık %a1 öldürdü!")
 S("You destroy %the1.", "%a1 yok ettin.")
 S("%The1 kills %the2!", "%1 %a2 öldürdü!")
-S("%The1 sinks!", "%1 battı!");
+S("%The1 sinks!", "%1 battı!")
 
 S("Cannot jump on %the1!", "%1 hücresine atlayamazsın!")
 
@@ -2254,13 +2254,13 @@ N("Mouse", GEN_F, "Fare", "Fareler", "Fareyi", "Fareyle")
 
 S("You hear a distant squeak!", "Uzaktan gelen bir ciyaklama duydun!")
 S("%The1 squeaks in a confused way.", "%1 şaşkın bir şekilde ciyaklıyor.")
-S("%The1 squeaks gratefully!", "%1 minnetle ciyaklıyor.");
-S("%The1 squeaks hopelessly.", "%1 umutsuzca ciyaklıyor.");
-S("%The1 squeaks in despair.", "%1 karamsarlıkla ciyaklıyor.");
-S("%The1 squeaks sadly.", "%1 üzüntüyle ciyaklıyor.");
-S("%The1 squeaks with hope!", "%1 umutla ciyaklıyor!");
-S("%The1 squeaks happily!", "%1 neşeyle ciyaklıyor!");
-S("%The1 squeaks excitedly!", "%1 heyecanla ciyaklıyor!");
+S("%The1 squeaks gratefully!", "%1 minnetle ciyaklıyor.")
+S("%The1 squeaks hopelessly.", "%1 umutsuzca ciyaklıyor.")
+S("%The1 squeaks in despair.", "%1 karamsarlıkla ciyaklıyor.")
+S("%The1 squeaks sadly.", "%1 üzüntüyle ciyaklıyor.")
+S("%The1 squeaks with hope!", "%1 umutla ciyaklıyor!")
+S("%The1 squeaks happily!", "%1 neşeyle ciyaklıyor!")
+S("%The1 squeaks excitedly!", "%1 heyecanla ciyaklıyor!")
 
 N("giant rug", GEN_O, "devasa kilim", "devasa kilimler", "devasa kilimi", "devasa kilimle")
 
@@ -2316,7 +2316,7 @@ S("Save %the1 first to unlock this challenge!", "Bu görevi açmak için önce %
 S("Welcome to %the1 Challenge!", "%1 görevine hoşgeldin!")
 S("The more Hypersian Rugs you collect, the harder it is.", "Ne kadar Aşkınlı Kilim toplarsan o kadar zor.")
 S("Follow the Mouse and escape with %the1!", "Fareyi takip et ve %abl1 kaç!")
-S("Hardness frozen at %1.", "Trudność zamrożona: %1.");
+S("Hardness frozen at %1.", "Trudność zamrożona: %1.")
 S("Congratulations! Your score is %1.", "Tebrikler! Puanın: %1.")
 
 S("u = undo",     "u = geri al")
@@ -2664,11 +2664,11 @@ S("An alternate layout of the Crossroads. Great Walls cross here at right angles
 		"NEW_ACHIEVEMENT_5_23_DESC"	"50 Unsurtaşı oluştur."
 */
 
-S("Cannot create temporary matter on a monster!", "Geçici maddenin üzerinde bir canavar çıkaramazsın!");
-S("Cannot create temporary matter on an item!", "Bir eşyanın üzerinde geçici madde oluşturamazsın!");
-S("Cannot create temporary matter here!", "Burada geçici madde oluşturamazsın!");
-S("Cannot summon on a monster!", "Bir canavarın üstüne çağıramazsın!");
-S("No summoning possible here!", "Çağırmak burada mümkün değil!");
+S("Cannot create temporary matter on a monster!", "Geçici maddenin üzerinde bir canavar çıkaramazsın!")
+S("Cannot create temporary matter on an item!", "Bir eşyanın üzerinde geçici madde oluşturamazsın!")
+S("Cannot create temporary matter here!", "Burada geçici madde oluşturamazsın!")
+S("Cannot summon on a monster!", "Bir canavarın üstüne çağıramazsın!")
+S("No summoning possible here!", "Çağırmak burada mümkün değil!")
 S("You summon %the1!", "%a1 çağırdın!")
 
 S("F4 = file", "F4 = dosya")
