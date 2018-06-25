@@ -121,6 +121,9 @@ int arg::readCommon() {
   else if(argis("-wm")) { PHASEFROM(2); shift(); vid.wallmode = argi(); }
   else if(argis("-mm")) { PHASEFROM(2); shift(); vid.monmode = argi(); }
 
+  else if(argis("-wsh")) { shift(); patterns::whichShape = args()[0]; }
+  else if(argis("-noshadow")) { noshadow = true; }
+
 // non-configurable options
   else if(argis("-vsync_off")) {
     vsync_off = true;

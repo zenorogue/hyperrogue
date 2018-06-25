@@ -448,10 +448,12 @@ void animallegs(const transmatrix& V, eMonster mo, int col, double footphase) {
 #endif
   }
 
+bool noshadow;
+
 void ShadowV(const transmatrix& V, const hpcshape& bp, int prio) {
 #if CAP_POLY
   if(mmspatial) { 
-    if(pmodel == mdHyperboloid || pmodel == mdBall || pmodel == mdHemisphere) 
+    if(pmodel == mdHyperboloid || pmodel == mdBall || pmodel == mdHemisphere || noshadow) 
       return; // shadows break the depth testing
     dynamicval<int> p(poly_outline, OUTLINE_TRANS);
     queuepolyat(V, bp, SHADOW_MON, prio); 
@@ -3082,7 +3084,7 @@ bool use_swapped_duals() {
   }
 
 void floorShadow(cell *c, const transmatrix& V, int col) {
-  if(pmodel == mdHyperboloid || pmodel == mdBall || pmodel == mdHemisphere) 
+  if(pmodel == mdHyperboloid || pmodel == mdBall || pmodel == mdHemisphere || noshadow) 
     return; // shadows break the depth testing
   dynamicval<int> p(poly_outline, OUTLINE_TRANS);
   if(qfi.shape) {
