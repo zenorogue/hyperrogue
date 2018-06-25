@@ -113,8 +113,8 @@ map<string, int> labeler;
 int getid(const string& s) {
   if(labeler.count(s)) return labeler[s];
   else {
-    int id = vdata.size();
-    vdata.resize(vdata.size() + 1);
+    int id = isize(vdata);
+    vdata.resize(isize(vdata) + 1);
     vdata[id].name = s;
     return labeler[s] = id;
     }
@@ -520,7 +520,7 @@ namespace sag {
     }
   
   void initSnake(int n) {
-    if(bounded) n = size(currentmap->allcells());
+    if(bounded) n = isize(currentmap->allcells());
     numsnake = n;
     snakecells.resize(numsnake);
     snakefirst.resize(numsnake);
@@ -1109,7 +1109,7 @@ void drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
           else 
             storeline(ei->prec, T*h1, T*h2);
           }
-        queuetable(shmup::ggmatrix(ei->orig), ei->prec, size(ei->prec), col, 0,
+        queuetable(shmup::ggmatrix(ei->orig), ei->prec, isize(ei->prec), col, 0,
           PPR_STRUCT0);
         }
       }
