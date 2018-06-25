@@ -1238,9 +1238,8 @@ eItem targetRangedOrb(cell *c, orbAction a) {
   else if(jumpstate == 2 && c->wall) {
     addMessage(XLAT("Cannot jump on %the1!", c->wall));
     }
-  else if(jumpstate == 3) {
-    addMessage(XLAT("%The1 would get you there!", which));
-    }
+  else if(jumpstate == 3) 
+    wouldkill("%The1 would get you there!");
   else if(items[itOrbAir] && c->monst) {
     addMessage(XLAT("%The1 is immune to wind!", c->monst));
     }  

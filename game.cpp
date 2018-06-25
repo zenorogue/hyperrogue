@@ -1124,7 +1124,7 @@ int neighborId(cell *ofWhat, cell *whichOne) {
   }
 
 // how many monsters are near
-eMonster which;
+eMonster who_kills_me;
 
 bool flashWouldKill(cell *c, flagtype extra) {
   for(int t=0; t<c->type; t++) {
@@ -1206,14 +1206,14 @@ bool monstersnear(stalemate1& sm) {
   bool fast = false;
 
   elec::builder b;
-  if(elec::affected(c)) { which = moLightningBolt; res++; }
+  if(elec::affected(c)) { who_kills_me = moLightningBolt; res++; }
   
   if(c->wall == waArrowTrap && c->wparam == 2) {
-    which = moArrowTrap; res++;
+    who_kills_me = moArrowTrap; res++;
     }
   
   for(auto c1: crush_now) if(c == c1) {
-    which = moCrusher; res++;
+    who_kills_me = moCrusher; res++;
     }
 
   if(sm.who == moPlayer || items[itOrbEmpathy]) {
@@ -1222,7 +1222,7 @@ bool monstersnear(stalemate1& sm) {
   
   if(havewhat&HF_OUTLAW)
     if(outlawNearby(c, 3)) {
-      res++; which = moOutlaw;
+      res++; who_kills_me = moOutlaw;
       }
   
   for(int t=0; t<c->type; t++) {
@@ -1250,7 +1250,7 @@ bool monstersnear(stalemate1& sm) {
         }
       // flashwitches cannot attack if it would kill another enemy
       if(c3->monst == moWitchFlash && flashWouldKill(c3, 0)) continue;
-      res++, which = c3->monst;
+      res++, who_kills_me = c3->monst;
       } 
 
     // consider normal monsters
@@ -1274,7 +1274,7 @@ bool monstersnear(stalemate1& sm) {
           eaten = true;
         else if(c2->monst != moHexSnake) continue;
         }
-      res++, which = m;
+      res++, who_kills_me = m;
       }
     }
 
@@ -1354,12 +1354,12 @@ bool monstersnear2() {
     for(int j=0; j<isize(stalemate::moves); j++) if(i != j) {
       if(swordConflict(stalemate::moves[i], stalemate::moves[j])) {
           b = true;
-          which = moEnergySword;
+          who_kills_me = moEnergySword;
           }
       if(multi::player[i].c == multi::player[j].c) 
-        { b = true; which = moFireball; }
+        { b = true; who_kills_me = moFireball; }
       if(celldistance(multi::player[i].c, multi::player[j].c) > 8) 
-        { b = true; which = moAirball; }
+        { b = true; who_kills_me = moAirball; }
       }
 
     for(int i=0; !b && i<isize(stalemate::moves); i++)
@@ -7269,14 +7269,14 @@ bool scentResistant() {
   }
 
 void wouldkill(const char *msg) {
-  if(which == moWarning)
+  if(who_kills_me == moWarning)
     addMessage(XLAT("This move appears dangerous -- are you sure?"));
-  else if(which == moFireball) 
+  else if(who_kills_me == moFireball) 
     addMessage(XLAT("Cannot move into the current location of another player!"));
-  else if(which == moAirball) 
+  else if(who_kills_me == moAirball) 
     addMessage(XLAT("Players cannot get that far away!"));
   else
-    addMessage(XLAT(msg, which));
+    addMessage(XLAT(msg, who_kills_me));
   }
 
 bool havePushConflict(cell *pushto, bool checkonly) {
@@ -7727,7 +7727,7 @@ bool movepcto(int d, int subdir, bool checkonly) {
           return true;
           }
 
-        if(which == moOutlaw && items[itRevolver]) {
+        if(who_kills_me == moOutlaw && items[itRevolver]) {
           for(int i=0; i<c2->type; i++) {
             cell *c3 = c2->mov[i];
             if(c3) for(int i=0; i<c3->type; i++) {
