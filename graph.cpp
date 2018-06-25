@@ -3775,6 +3775,9 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       
       else if(patterns::whichShape == '6')
         set_floor(shBigTriangle);
+
+      else if(patterns::whichShape == '9')
+        set_floor(shFullFloor);
 #endif
 
 #if CAP_TEXTURE
