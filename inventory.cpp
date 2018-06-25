@@ -179,7 +179,7 @@ namespace hr { namespace inv {
     int qtl = items[forwhich];
     while(qtl > 0) qtl >>= 1, remaining[itOrbMirror]++;
     if(whichorbinfo == itOrbMirror)
-      extra += extraline(forwhich, its(nextp2(items[which])));
+      extra += extraline(forwhich, its(nextp2(items[forwhich])));
     }
 
   vector<eItem> offensiveOrbs = {
@@ -646,5 +646,3 @@ namespace hr { namespace inv {
     }
 
   }}
-
-  
