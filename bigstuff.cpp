@@ -121,7 +121,7 @@ void generateAlts(heptagon *h, int levs, bool link_cdata) {
       break;
       }
     }
-  if(relspin == -4 && quotient != 2) {
+  if(relspin == -4 && geometry != gFieldQuotient) {
     if(h->alt != h->alt->alt) {
       printf("relspin {%p:%p}\n", h->alt, h->alt->alt);
       {for(int i=0; i<S7; i++) printf("%p ", h->alt->move[i]);} printf(" ALT\n");

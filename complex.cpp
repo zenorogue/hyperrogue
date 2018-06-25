@@ -2706,7 +2706,7 @@ namespace prairie {
       c->LHU.fi.rval = max(celldist(c), 15);
       }
     else {
-      if(quotient == 2 || !from) {
+      if(geometry == gFieldQuotient || !from) {
         c->fval = currfp.distflower0;
         }
       else if(from && from->land == laPrairie && from->fval)

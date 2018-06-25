@@ -376,7 +376,7 @@ void showEuclideanMenu() {
       dialog::addBoolItem(XLAT("stereographic/orthogonal"), vid.alpha>10, '1');
     else
       dialog::addBoolItem(XLAT("Poincaré/Klein"), vid.alpha>.5, '1');
-    if(torus || quotient == 2)
+    if(torus || geometry == gFieldQuotient)
       dialog::addItem(XLAT("advanced parameters"), '4');  
     dialog::addHelp();
     dialog::addBack();
@@ -423,7 +423,8 @@ void showEuclideanMenu() {
           torusconfig::newmode = torusconfig::torus_mode,
           torus_bitrunc = nonbitrunc,
           pushScreen(showTorusConfig);
-        if(quotient==2) pushScreen(showQuotientConfig);
+        if(geometry == gFieldQuotient) 
+          pushScreen(showQuotientConfig);
         }
       else if(doexiton(sym, uni))
         popScreen();

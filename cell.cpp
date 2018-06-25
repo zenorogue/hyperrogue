@@ -1469,7 +1469,7 @@ int celldistance(cell *c1, cell *c2) {
       return torusmap()->dists[torusconfig::vec_to_id(decodeId(c1->master)-decodeId(c2->master))];
     }
   
-  if(quotient == 2 && !gp::on)
+  if(geometry == gFieldQuotient && !gp::on)
     return currfp.getdist(fieldpattern::fieldval(c1), fieldpattern::fieldval(c2));
 
   if(sphere || quotient || torus) {
