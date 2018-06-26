@@ -1,7 +1,8 @@
 # HyperRogue
 <p align="right">
 <a href="https://travis-ci.org/zenorogue/hyperrogue/builds">
-<img align="right" src="https://badges.herokuapp.com/travis/zenorogue/hyperrogue?branch=master&label=autotools" alt="TravisCI badge">
+<img align="right" src="https://badges.herokuapp.com/travis/zenorogue/hyperrogue?branch=master&env=TRAVIS_BUILD_SYSTEM=autotools&label=autotools" alt="TravisCI badge">
+<img align="right" src="https://badges.herokuapp.com/travis/zenorogue/hyperrogue?branch=master&env=TRAVIS_BUILD_SYSTEM=Makefile&label=make" alt="TravisCI badge">
 </a>
 </p>
 <p align="left">
@@ -48,10 +49,17 @@ You should be able to compile on Ubuntu (or similar) with something like this (y
 
 ```
 sudo apt-get install gcc libsdl1.2-dev libsdl-ttf2.0-dev libsdl-gfx1.2-dev
-git clone https://github.com/zenorogue/hyperrogue.git hyperrogue-git
-cd hyperrogue-git
+git clone https://github.com/zenorogue/hyperrogue.git hyperrogue
+cd hyperrogue
+autoreconf -vi
 ./configure
 make
 ```
 
-There are also makefiles for OSX `Makefile.mac` and Windows MinGW `Makefile.mgw` (note: I do not use these makefiles myself, so they might be a bit outdated).
+There is also a standalone Makefile for Linux, OSX, and MinGW.
+
+```
+git clone https://github.com/zenorogue/hyperrogue.git
+cd hyperrogue
+make -f Makefile.simple
+```
