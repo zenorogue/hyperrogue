@@ -2,17 +2,23 @@
 
 // Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
 
-#define GEN_M 0
-#define GEN_F 1
-#define GEN_N 2
-#define GEN_O 3
-
 #include <map>
 #include <string>
 #include <cstdio>
 #include <vector>
 #include <cstdlib>
 #include <set>
+
+#define GEN_M 0
+#define GEN_F 1
+#define GEN_N 2
+#define GEN_O 3
+
+#if MAC
+ #define IF_MAC(y,z) y
+#else
+ #define IF_MAC(y,z) z
+#endif
 
 template<class T> int isize(const T& x) { return x.size(); }
 

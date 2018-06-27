@@ -5192,27 +5192,17 @@ S("The game starts in the Icy Lands. Collect the Ice Diamonds "
 S("Hypersian Rug model", "Model hyperského koberce")
 S(
   "New players think that the action of HyperRogue takes place on a sphere. "
-#if NORUG
-  "This is not true -- try the Tutorial in the native desktop version shows "
-  "the surface HyperRogue actually takes place on.",
-#else
   "This is not true -- the next slide will show the surface HyperRogue "
   "actually takes place on.\n\n"
   "Use arrow keys to rotate the model, and Page Up/Down to zoom.\n\n"
   "If you do not see anything, press '5' to try a safer renderer.",
-#endif
   
 
   "Noví hráči si často myslí, že se HyperRogue odehrává na povrchu koule. "
-#if NORUG
-  "Není to pravda -- Tutoriál v desktopové verzi ti může ukázat povrch, "
-  "na jakém se HyperRogue opravdu odehrává."
-#else
   "Není to pravda -- další snímek ti ukáže povrch, na jakém se "
   "HyperRogue opravdu odehrává.\n\n"
   "Model můžeš otáčet šipkami a zoomovat klávesami Page Up/Down.\n\n"
   "Pokud nic nevidíš, stiskni klávesu '5' pro aktivaci bezpečnějšího rendereru."
-#endif
   )
 
 S("Expansion", "Expanze")
@@ -5294,23 +5284,23 @@ S(
   "it will appear to go slower -- this is because you are running "
   "in a straight line, and the Running Dog has to run in a curve "
   "called an equidistant.\n\n"
-#if ISMAC
- "Remember that you can click with right Shift on anything to get more information.",
-#else
-  "Remember that you can right click on anything to get more information.",
-#endif
+IF_MAC(
+ "Remember that you can click with right Shift on anything to get more information."
+,
+  "Remember that you can right click on anything to get more information."
+),
   "Chceš-li se dozvědět víc o přímkách, běž dál a měl bys najít Zemi "
   "věčného pohybu. Pokus se tam běžet po přímce, zatímco vedle tebe běží "
   "Běžící pes. I když běží stejně rychle jako ty, bude se zdát, že je "
   "pomalejší -- to proto, že ty běžíš po přímce, zatímco Běžící pes musí "
   "běžet po křivce zvané 'ekvidistanta'.\n\n"
-#if ISMAC
+IF_MAC(
   "Nezapomeň, že pokud na cokoli klikneš s pravým shiftem, můžeš o tom "
   "získat víc informací."
-#else
+,
   "Nezapomeň, že pokud na cokoli klikneš pravým tlačítkem, můžeš o tom "
   "získat víc informací."
-#endif
+)
   )
 
 S("Equidistants", "Ekvidistanty")

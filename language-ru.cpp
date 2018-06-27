@@ -5290,25 +5290,14 @@ S("The game starts in the Icy Lands. Collect the Ice Diamonds "
 S("Hypersian Rug model", "Модель Гиперсидского ковра")
 S(
   "New players think that the action of HyperRogue takes place on a sphere. "
-#if NORUG
-  "This is not true -- the Tutorial in the native desktop version shows "
-  "the surface HyperRogue actually takes place on.",
-#else
   "This is not true -- the next slide will show the surface HyperRogue "
   "actually takes place on.\n\n"
   "Use arrow keys to rotate the model, and Page Up/Down to zoom.\n\n"
   "If you do not see anything, press '5' to try a safer renderer.",
-#endif
  
   "Новички иногда думают, что действие в HyperRogue происходит на сфере. "
-#if NORUG
   "Это неправда -- Руководство в компьютерной версии покажет тебе "
   "настоящую поверхность HyperRogue."
-#else
-  "Это неправда -- на следующем слайде показана настоящая поверхность HyperRogue.\n\n"
-  "Используйте стрелки, чтобы поворачивать модель, и Page Up/Down, чтобы менять размер.\n\n"
-  "Если ничего не видно, нажми '5' для безопасного визуализатора."
-#endif
   )
  
 S("Expansion", "Расширение")
@@ -5387,11 +5376,11 @@ S(
   "it will appear to go slower -- this is because you are running "
   "in a straight line, and the Running Dog has to run in a curve "
   "called an equidistant.\n\n"
-#if ISMAC
- "Remember that you can click with right Shift on anything to get more information.",
-#else
-  "Remember that you can right click on anything to get more information.",
-#endif
+IF_MAC(
+ "Remember that you can click with right Shift on anything to get more information."
+,
+  "Remember that you can right click on anything to get more information."
+),
   "Чтобы узнать больше о прямых линиях, "
   "найди Землю вечного движения. "
   "Попробуй двигаться по прямой вместе с собакой, бегущей рядом. "

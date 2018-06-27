@@ -5215,27 +5215,16 @@ S("The game starts in the Icy Lands. Collect the Ice Diamonds "
 S("Hypersian Rug model", "Model Hiperskiego Dywanu")
 S(
   "New players think that the action of HyperRogue takes place on a sphere. "
-#ifdef MOBWEB
-  "This is not true -- the Tutorial in the native desktop version shows "
-  "the surface HyperRogue actually takes place on.",
-#else
   "This is not true -- the next slide will show the surface HyperRogue "
   "actually takes place on.\n\n"
   "Use arrow keys to rotate the model, and Page Up/Down to zoom.\n\n"
   "If you do not see anything, press '5' to try a safer renderer.",
-#endif
-  
 
   "Nowi gracze myślą, że akcja HyperRogue toczy się na sferze. "
-#ifdef MOBWEB
-  "To nieprawda -- Podręcznik w komputerowej wersji wykonywalnej "
-  "pokazuje powierzchnię, na której w rzeczywistości toczy się rozgrywka."
-#else
   "To nieprawda -- kolejny slajd pokazuje powierzchnię, "
   "na której toczy się gra. "
   "Obracaj modelem strzałkami, Page Up/Down by skalować.\n\n"
   "Jeśli nic nie widzisz, naciśnij '5' dla bezpieczniejszego renderera."
-#endif
   )
 
 S("Expansion", "Ekspansja")
@@ -5313,22 +5302,22 @@ S(
   "it will appear to go slower -- this is because you are running "
   "in a straight line, and the Running Dog has to run in a curve "
   "called an equidistant.\n\n"
-#ifdef MAC
- "Remember that you can click with right Shift on anything to get more information.",
-#else
-  "Remember that you can right click on anything to get more information.",
-#endif
+IF_MAC(
+ "Remember that you can click with right Shift on anything to get more information."
+,
+  "Remember that you can right click on anything to get more information."
+),
   "By dowiedzieć się więcej o liniach prostych, "
   "podróżuj dalej, aż znajdziesz Krainę Wiecznego Ruchu. "
   "Biegnij w linii prostej z Psem biegnącym obok. "
   "Mimo że Pies biegnie z tą samą prędkością, nie będzie "
   "w stanie Cię dogonić -- ponieważ Ty ruszasz się w linii prostej, "
   "a Pies biegnie po krzywej zwanej ekwidystantą.\n\n"
-#ifdef MAC
+IF_MAC(
  "Pamiętaj, że możesz klikać z prawym Shiftem na różnych elementach gry, by dowiedzieć się o nich więcej."
-#else
+,
  "Pamiętaj, że możesz klikać prawym przyciskiem na różnych elementach gry, by dowiedzieć się o nich więcej."
-#endif
+)
   )
 
 S("Equidistants", "Ekwidystanty")

@@ -35,7 +35,7 @@ hyper.res: hyper.rc hr-icon.ico
 	windres hyper.rc -O coff -o hyper.res
 
 langen.exe: langen.cpp language-??.cpp language-ptbr.cpp
-	$(CXX) $(CXXFLAGS) -O0 -Wno-embedded-directive langen.cpp -o langen
+	$(CXX) $(CXXFLAGS) -O0 langen.cpp -o langen
 
 language-data.cpp: langen.exe
 	./langen.exe > language-data.cpp
