@@ -54,7 +54,7 @@ ifeq (${OS},linux)
 endif
 
 ifeq (${OS},mingw)
-  CXXFLAGS_EARLY += -DWINDOWS -mwindows -D_A_VOLID=8
+  CXXFLAGS_EARLY += -DWINDOWS -mwindows -D_A_VOLID=8 -I/msys2/mingw64/include
   EXE_EXTENSION := .exe
   LDFLAGS_GL := -lopengl32
   LDFLAGS_GLEW := -lglew32

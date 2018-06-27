@@ -1,0 +1,35 @@
+environment:
+  matrix:
+  - TRAVIS_OS_NAME: windows
+    TRAVIS_COMPILER_NAME: msvc
+    TRAVIS_BUILD_SYSTEM: msvc
+    HYPERROGUE_USE_GLEW: 1
+    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+    MSVC_SETUP_PATH: C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat
+    MSVC_SETUP_ARG: x64
+  - TRAVIS_OS_NAME: mingw
+    TRAVIS_COMPILER_NAME: gcc
+    TRAVIS_BUILD_SYSTEM: autotools
+    HYPERROGUE_USE_GLEW: 1
+    MSYS2_ARCH: x86_64
+    MSYS2_DIR: msys64
+    MSYSTEM: MINGW64
+  - TRAVIS_OS_NAME: mingw
+    TRAVIS_COMPILER_NAME: gcc
+    TRAVIS_BUILD_SYSTEM: Makefile
+    HYPERROGUE_USE_GLEW: 1
+    MSYS2_ARCH: x86_64
+    MSYS2_DIR: msys64
+    MSYSTEM: MINGW64
+
+before_build:
+- set TRAVIS_STAGE=before_build
+- call appveyor.bat
+
+build_script:
+- set TRAVIS_STAGE=build_script
+- call appveyor.bat
+
+test_script:
+- set TRAVIS_STAGE=test_script
+- call appveyor.bat
