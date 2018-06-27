@@ -279,30 +279,30 @@ typedef struct DIR DIR;
 
 
 /* Dirent functions */
-static DIR *opendir (const char *dirname);
-static _WDIR *_wopendir (const wchar_t *dirname);
+inline DIR *opendir (const char *dirname);
+inline _WDIR *_wopendir (const wchar_t *dirname);
 
-static struct dirent *readdir (DIR *dirp);
-static struct _wdirent *_wreaddir (_WDIR *dirp);
+inline struct dirent *readdir (DIR *dirp);
+inline struct _wdirent *_wreaddir (_WDIR *dirp);
 
-static int readdir_r(
+inline int readdir_r(
     DIR *dirp, struct dirent *entry, struct dirent **result);
-static int _wreaddir_r(
+inline int _wreaddir_r(
     _WDIR *dirp, struct _wdirent *entry, struct _wdirent **result);
 
-static int closedir (DIR *dirp);
-static int _wclosedir (_WDIR *dirp);
+inline int closedir (DIR *dirp);
+inline int _wclosedir (_WDIR *dirp);
 
-static void rewinddir (DIR* dirp);
-static void _wrewinddir (_WDIR* dirp);
+inline void rewinddir (DIR* dirp);
+inline void _wrewinddir (_WDIR* dirp);
 
-static int scandir (const char *dirname, struct dirent ***namelist,
+inline int scandir (const char *dirname, struct dirent ***namelist,
     int (*filter)(const struct dirent*),
     int (*compare)(const struct dirent**, const struct dirent**));
 
-static int alphasort (const struct dirent **a, const struct dirent **b);
+inline int alphasort (const struct dirent **a, const struct dirent **b);
 
-static int versionsort (const struct dirent **a, const struct dirent **b);
+inline int versionsort (const struct dirent **a, const struct dirent **b);
 
 
 /* For compatibility with Symbian */
@@ -315,24 +315,24 @@ static int versionsort (const struct dirent **a, const struct dirent **b);
 
 
 /* Internal utility functions */
-static WIN32_FIND_DATAW *dirent_first (_WDIR *dirp);
-static WIN32_FIND_DATAW *dirent_next (_WDIR *dirp);
+inline WIN32_FIND_DATAW *dirent_first (_WDIR *dirp);
+inline WIN32_FIND_DATAW *dirent_next (_WDIR *dirp);
 
-static int dirent_mbstowcs_s(
+inline int dirent_mbstowcs_s(
     size_t *pReturnValue,
     wchar_t *wcstr,
     size_t sizeInWords,
     const char *mbstr,
     size_t count);
 
-static int dirent_wcstombs_s(
+inline int dirent_wcstombs_s(
     size_t *pReturnValue,
     char *mbstr,
     size_t sizeInBytes,
     const wchar_t *wcstr,
     size_t count);
 
-static void dirent_set_errno (int error);
+inline void dirent_set_errno (int error);
 
 
 /*
@@ -340,7 +340,7 @@ static void dirent_set_errno (int error);
  * internal working area that is used to retrieve individual directory
  * entries.
  */
-static _WDIR*
+inline _WDIR*
 _wopendir(
     const wchar_t *dirname)
 {
@@ -454,7 +454,7 @@ _wopendir(
  * Returns pointer to static directory entry which may be overwritten by
  * subsequent calls to _wreaddir().
  */
-static struct _wdirent*
+inline struct _wdirent*
 _wreaddir(
     _WDIR *dirp)
 {
@@ -476,7 +476,7 @@ _wreaddir(
  * Returns zero on success.  If end of directory stream is reached, then sets
  * result to NULL and returns zero.
  */
-static int
+inline int
 _wreaddir_r(
     _WDIR *dirp,
     struct _wdirent *entry,
@@ -538,7 +538,7 @@ _wreaddir_r(
  * DIR structure as well as any directory entry read previously by
  * _wreaddir().
  */
-static int
+inline int
 _wclosedir(
     _WDIR *dirp)
 {
@@ -575,7 +575,7 @@ _wclosedir(
  * Rewind directory stream such that _wreaddir() returns the very first
  * file name again.
  */
-static void
+inline void
 _wrewinddir(
     _WDIR* dirp)
 {
@@ -591,7 +591,7 @@ _wrewinddir(
 }
 
 /* Get first directory entry (internal) */
-static WIN32_FIND_DATAW*
+inline WIN32_FIND_DATAW*
 dirent_first(
     _WDIR *dirp)
 {
@@ -622,7 +622,7 @@ dirent_first(
  *
  * Returns 
  */
-static WIN32_FIND_DATAW*
+inline WIN32_FIND_DATAW*
 dirent_next(
     _WDIR *dirp)
 {
@@ -661,7 +661,7 @@ dirent_next(
 /*
  * Open directory stream using plain old C-string.
  */
-static DIR*
+inline DIR*
 opendir(
     const char *dirname) 
 {
@@ -722,7 +722,7 @@ opendir(
 /*
  * Read next directory entry.
  */
-static struct dirent*
+inline struct dirent*
 readdir(
     DIR *dirp)
 {
@@ -744,7 +744,7 @@ readdir(
  * Returns zero on success.  If the end of directory stream is reached, then
  * sets result to NULL and returns zero.
  */
-static int
+inline int
 readdir_r(
     DIR *dirp,
     struct dirent *entry,
@@ -833,7 +833,7 @@ readdir_r(
 /*
  * Close directory stream.
  */
-static int
+inline int
 closedir(
     DIR *dirp)
 {
@@ -860,7 +860,7 @@ closedir(
 /*
  * Rewind directory stream to beginning.
  */
-static void
+inline void
 rewinddir(
     DIR* dirp)
 {
@@ -871,7 +871,7 @@ rewinddir(
 /*
  * Scan directory for entries.
  */
-static int
+inline int
 scandir(
     const char *dirname,
     struct dirent ***namelist,
@@ -1010,7 +1010,7 @@ scandir(
 }
 
 /* Alphabetical sorting */
-static int
+inline int
 alphasort(
     const struct dirent **a, const struct dirent **b)
 {
@@ -1018,7 +1018,7 @@ alphasort(
 }
 
 /* Sort versions */
-static int
+inline int
 versionsort(
     const struct dirent **a, const struct dirent **b)
 {
@@ -1028,7 +1028,7 @@ versionsort(
 
 
 /* Convert multi-byte string to wide character string */
-static int
+inline int
 dirent_mbstowcs_s(
     size_t *pReturnValue,
     wchar_t *wcstr,
@@ -1081,7 +1081,7 @@ dirent_mbstowcs_s(
 }
 
 /* Convert wide-character string to multi-byte string */
-static int
+inline int
 dirent_wcstombs_s(
     size_t *pReturnValue,
     char *mbstr,
@@ -1134,7 +1134,7 @@ dirent_wcstombs_s(
 }
 
 /* Set errno variable */
-static void
+inline void
 dirent_set_errno(
     int error)
 {
@@ -1150,7 +1150,6 @@ dirent_set_errno(
 
 #endif
 }
-
 
 #ifdef __cplusplus
 }
