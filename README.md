@@ -3,6 +3,7 @@
 <a href="https://travis-ci.org/zenorogue/hyperrogue/builds">
 <img align="right" src="https://badges.herokuapp.com/travis/zenorogue/hyperrogue?branch=master&env=TRAVIS_BUILD_SYSTEM=autotools&label=autotools" alt="TravisCI badge">
 <img align="right" src="https://badges.herokuapp.com/travis/zenorogue/hyperrogue?branch=master&env=TRAVIS_BUILD_SYSTEM=Makefile&label=make" alt="TravisCI badge">
+<img align="right" src="https://badges.herokuapp.com/travis/zenorogue/hyperrogue?branch=master&env=TRAVIS_BUILD_SYSTEM=emscripten&label=web" alt="TravisCI badge">
 </a>
 </p>
 <p align="left">

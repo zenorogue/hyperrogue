@@ -1,4 +1,6 @@
 language: cpp
+services:
+  - docker
 matrix:
   include:
   - os: linux
@@ -62,6 +64,11 @@ matrix:
       HYPERROGUE_USE_GLEW=0
       HYPERROGUE_USE_PNG=0
       HYPERROGUE_USE_ROGUEVIZ=0
+  - os: linux
+    env: >-
+      TRAVIS_OS_NAME=linux
+      TRAVIS_COMPILER_NAME=emscripten
+      TRAVIS_BUILD_SYSTEM=emscripten
 
 before_install:
 - |-
@@ -120,12 +127,18 @@ script:
     make
   elif [[ "$TRAVIS_BUILD_SYSTEM" == "Makefile" ]]; then
     make -f Makefile.simple
+  elif [[ "$TRAVIS_BUILD_SYSTEM" == "emscripten" ]]; then
+    docker run --rm -v $(pwd):/src trzeci/emscripten make -f Makefile.simple emscripten
   else
     exit 'Unsupported build system'
   fi
 - |-
   # Test hyperrogue.
-  ./hyperrogue --help
+  if [[ "$TRAVIS_BUILD_SYSTEM" == "emscripten" ]]; then
+    ls -lAF hyper.html hyper.js hyper.wasm
+  else
+    ./hyperrogue --help
+  fi
 - |-
   # Test "make dist". ("make distcheck" is expected to fail.)
   if [[ "$TRAVIS_BUILD_SYSTEM" == "autotools" ]]; then make dist; fi

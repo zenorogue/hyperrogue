@@ -136,7 +136,7 @@ hyperrogue$(EXE_EXTENSION): $(hyper_OBJS) $(hyper_RES)
 	$(CXX) $(CXXFLAGS) $(hyper_OBJS) $(hyper_RES) $(LDFLAGS) $(hyper_LDFLAGS) -o $@
 
 hyper$(OBJ_EXTENSION): *.cpp language-data.cpp
-	$(CXX) -O2 $(CXXFLAGS) $(hyper_CXXFLAGS) -c hyper.cpp
+	$(CXX) -O2 $(CXXFLAGS) $(hyper_CXXFLAGS) -c hyper.cpp -o $@
 
 hyper.res: hyper.rc hr-icon.ico
 	windres hyper.rc -O coff -o hyper.res
@@ -148,9 +148,17 @@ language-data.cpp: langen$(EXE_EXTENSION)
 	./langen > language-data.cpp
 
 savepng$(OBJ_EXTENSION): savepng.cpp
-	$(CXX) $(CXXFLAGS) -O2 -c savepng.cpp -o $@
+	$(CXX) -O2 $(CXXFLAGS) -c savepng.cpp -o $@
+
+emscripten: hyper.html
+
+%.html %.js %.wasm: %.emscripten-sources
+	emcc -std=c++11 -O3 -s LEGACY_GL_EMULATION=1 -s TOTAL_MEMORY=128*1024*1024 hyperweb.cpp -o hyper.html
+
+hyper.emscripten-sources: *.cpp
 
 .PHONY: clean
 
 clean:
 	rm -f hyperrogue$(EXE_EXTENSION) hyper$(OBJ_EXTENSION) $(hyper_RES) langen$(EXE_EXTENSION) language-data.cpp savepng$(OBJ_EXTENSION)
+	rm -f hyper.html hyper.js hyper.wasm
