@@ -4732,7 +4732,7 @@ void movehex(bool mounted, int colorpair) {
     for(int t=0; t<c->type; t++) if(c->mov[t] && inpair(c->mov[t], colorpair))
       dirtable[qdirtable++] = t;
       
-    random_shuffle(dirtable, dirtable+qdirtable);
+    hrandom_shuffle(dirtable, qdirtable);
     while(qdirtable--) {
       int t = dirtable[qdirtable];
       hexvisit(c->mov[t], c, t, mounted, colorpair);
