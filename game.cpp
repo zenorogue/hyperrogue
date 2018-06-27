@@ -6822,8 +6822,9 @@ bool collectItem(cell *c2, bool telekinesis) {
   
   if(dopickup && c2->item) {
 #ifdef HASLINEVIEW
-    // (eItem) to avoid the "cannot bind bitfield" problem in C++11
-    conformal::findhistory.push_back(make_pair(c2, (eItem) c2->item));
+    // temporary variable to avoid the "cannot bind bitfield" problem in C++11
+    eItem dummy = c2->item;
+    conformal::findhistory.emplace_back(c2, dummy);
 #endif
     c2->item = itNone;
     }
