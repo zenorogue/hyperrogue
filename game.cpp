@@ -3941,7 +3941,7 @@ void beastAttack(cell *c, bool player) {
       if(c2->monst && c2->stuntime) {
         cellwalker bull (c, d);
         int subdir = determinizeBullPush(bull);
-        int pushdir;
+        int pushdir = 0;
         cell *c3 = determinePush(bull, c2, subdir, [c2] (cell *c) { return passable(c, c2, P_BLOW); }, pushdir);
         if(c3 && c3 != c2)
           pushMonster(c3, c2, pushdir);
@@ -3954,7 +3954,7 @@ void beastAttack(cell *c, bool player) {
     if(c2->wall == waThumperOn) {
       cellwalker bull (c, d);
       int subdir = determinizeBullPush(bull);
-      int pushdir;
+      int pushdir = 0;
       cell *c3 = determinePush(bull, c2, subdir, [c2] (cell *c) { return canPushThumperOn(c, c2, c); }, pushdir);
       if(c3 && c3 != c2)
         pushThumper(c2, c3);
