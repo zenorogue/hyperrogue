@@ -383,7 +383,6 @@ extern "C" {
 
 #if ISWINDOWS
 #include "direntx.h"
-#include "direntx.c"
 #else
 #include <dirent.h>
 #endif
