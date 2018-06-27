@@ -928,6 +928,7 @@ namespace mapeditor {
 
   void drawHandleKey(int sym, int uni);
   
+#if CAP_TEXTURE
   static ld brush_sizes[10] = {
     0.001, 0.002, 0.005, 0.0075, 0.01, 0.015, 0.02, 0.05, 0.075, 0.1};
   
@@ -946,6 +947,7 @@ namespace mapeditor {
     0x404040FF,
     0x804000FF
     };
+#endif
     
   void showDrawEditor() {
     cmode = sm::DRAW;
@@ -1528,6 +1530,7 @@ namespace mapeditor {
         dialog::editNumber(texture::penwidth, 0, 0.1, 0.005, 0.02, XLAT("brush size"), XLAT("brush size"));
       }
 #else
+    (void)clickused;
     if(0);
 #endif    
 
