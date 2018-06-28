@@ -1011,7 +1011,7 @@ namespace peace {
         clister.emplace_back(cp, cp);
         
         int id = 0;
-        celllister cl(manual);
+        manual_celllister cl;
         while(id < isize(clister)) {
           cell *c = clister[id].first;
           cell *fr = clister[id].second;

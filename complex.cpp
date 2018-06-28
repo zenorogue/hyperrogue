@@ -104,7 +104,7 @@ namespace whirlwind {
         }
     }
   
-  void moveAt(cell *c, celllister& cl) {
+  void moveAt(cell *c, manual_celllister& cl) {
     if(cl.listed(c)) return;
     calcdirs(c);
     if(qdirs != 1) return;
@@ -143,7 +143,7 @@ namespace whirlwind {
     }
   
   void move() {
-    celllister cl(manual);
+    manual_celllister cl;
     for(int i=0; i<isize(dcal); i++) {
       cell *c = dcal[i];
       moveAt(c, cl);
@@ -349,7 +349,7 @@ namespace elec {
       c->wall = waMetal; */
     }
   
-  void listChargedCells(cell *c, celllister& cl, eCharge last = ecConductor) {
+  void listChargedCells(cell *c, manual_celllister& cl, eCharge last = ecConductor) {
     if(cl.listed(c)) return;
     eCharge here = getCharge(c);
     /* if(c->cpdist <= 2) {
@@ -370,8 +370,10 @@ namespace elec {
   void init() {
     chargecells.clear();
     if(!haveelec && !afterOrb) return;
-    celllister cl(manual);
-    for(int i=0; i<isize(dcal); i++) listChargedCells(dcal[i], cl);
+    if(1) {
+      manual_celllister cl;
+      for(int i=0; i<isize(dcal); i++) listChargedCells(dcal[i], cl);
+      }
     
     charges.resize(2); 
     charges[0].lowlink = 0; charges[1].lowlink = 1;
@@ -1011,7 +1013,7 @@ namespace whirlpool {
       generate(wto);
     }
   
-  void moveAt(cell *c, celllister& cl) {
+  void moveAt(cell *c, manual_celllister& cl) {
     if(c->land != laWhirlpool) return;
     if(cl.listed(c)) return;
     if(!(euclid || c->master->alt)) return;
@@ -1038,7 +1040,7 @@ namespace whirlpool {
     }
   
   void move() {
-    celllister cl(manual);
+    manual_celllister cl;
     for(int i=0; i<isize(dcal); i++) {
       cell *c = dcal[i];
       moveAt(c, cl);
@@ -1793,7 +1795,7 @@ namespace heat {
     
     vector<cell*> offscreen2;
     
-    celllister cl(manual);
+    manual_celllister cl;
     
     int gr = gamerange();
     
@@ -1940,7 +1942,7 @@ namespace heat {
     
     vector<cell*> offscreen2;
 
-    celllister cl(manual);
+    manual_celllister cl;
     
     vector<cell*>& allcells = currentmap->allcells();
 
@@ -2837,7 +2839,7 @@ namespace prairie {
     if(c2) c->mondir = neighborId(c, c2);
     }   
 
-  void moveAt(cell *c, celllister& cl) {
+  void moveAt(cell *c, manual_celllister& cl) {
     if(!cl.add(c)) return;
     vector<cell*> whirlline;
     whirlline.push_back(c);
@@ -2888,7 +2890,7 @@ namespace prairie {
     }
           
   void move() {
-    celllister cl(manual);
+    manual_celllister cl;
     for(int i=0; i<isize(dcal); i++) {
       cell *c = dcal[i];
       if(isriver(c)) moveAt(c, cl);

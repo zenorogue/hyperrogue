@@ -247,7 +247,7 @@ bool distanceBound(cell *c1, cell *c2, int d) {
   }
 
 void checkFreedom(cell *cf) {
-  celllister cl(manual);
+  manual_celllister cl;
   cl.add(cf);
   for(int i=0; i<isize(cl.lst); i++) {
     cell *c = cl.lst[i];

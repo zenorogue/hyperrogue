@@ -621,7 +621,7 @@ namespace mapeditor {
   
   vector<pair<cellwalker, cellwalker> > spill_list;
   
-  void list_spill(cellwalker tgt, cellwalker src, celllister& cl) {
+  void list_spill(cellwalker tgt, cellwalker src, manual_celllister& cl) {
     spill_list.clear(); sval++;
     spill_list.emplace_back(tgt, src);
     int crad = 0, nextstepat = 0;
@@ -668,7 +668,7 @@ namespace mapeditor {
     }
   #endif
   
-  void editAt(cellwalker where, celllister& cl) {
+  void editAt(cellwalker where, manual_celllister& cl) {
 
     if(painttype == 4 && radius) {
       if(where.c->type != copysource.c->type) return;
@@ -685,7 +685,7 @@ namespace mapeditor {
   
   void allInPattern(cellwalker where) {
 
-    celllister cl(manual);
+    manual_celllister cl;
     if(!patterns::whichPattern) {
       editAt(where, cl);
       return;

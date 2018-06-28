@@ -5766,7 +5766,7 @@ void moveNormals(eMonster param) {
     }
   }
 
-void markAmbush(cell *c, celllister& cl) {
+void markAmbush(cell *c, manual_celllister& cl) {
   if(!cl.add(c)) return;
   forCellEx(c2, c) 
     if(c2->cpdist < c->cpdist) 
@@ -5778,7 +5778,7 @@ bool ambushed;
 
 void checkAmbushState() {
   if(havewhat & HF_HUNTER) {
-    celllister cl(manual);
+    manual_celllister cl;
     for(cell *c: dcal) {
       if(c->monst == moHunterDog) {
         if(c->cpdist > ambush_distance)

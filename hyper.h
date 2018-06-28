@@ -2543,13 +2543,10 @@ extern vector<hrmap*> allmaps;
 
 // list all cells in distance at most maxdist, or until when maxcount cells are reached
 
-extern struct manual_t {} manual;
-
-struct celllister {
+struct manual_celllister {
   vector<cell*> lst;
   vector<int> tmps;
-  vector<int> dists;
-  
+
   bool listed(cell *c) {
     return c->listindex >= 0 && c->listindex < isize(lst) && lst[c->listindex] == c;
     }
@@ -2557,29 +2554,31 @@ struct celllister {
   bool add(cell *c) {
     if(listed(c)) return false;
     tmps.push_back(c->listindex);
-    lst.push_back(c);
     c->listindex = isize(lst);
+    lst.push_back(c);
     return true;
     }
 
-  void add(cell *c, int d) {
+  ~manual_celllister() {     
+    for(int i=0; i<isize(lst); i++) lst[i]->listindex = tmps[i];
+    }  
+  };
+  
+
+struct celllister : manual_celllister {
+  vector<int> dists;
+  
+  void add_at(cell *c, int d) {
     if(add(c)) dists.push_back(d);
     }
   
-  ~celllister() {     
-    for(int i=0; i<isize(lst); i++) lst[i]->listindex = tmps[i];
-    }
-  
-  celllister(manual_t) {
-    }
-  
   celllister(cell *orig, int maxdist, int maxcount, cell *breakon) {
-    add(orig, 0);
+    add_at(orig, 0);
     cell *last = orig;
     for(int i=0; i<isize(lst); i++) {
       cell *c = lst[i];
       if(maxdist) forCellCM(c2, c) {
-        add(c2, dists[i]+1);
+        add_at(c2, dists[i]+1);
         if(c2 == breakon) return;
         }
       if(c == last) {

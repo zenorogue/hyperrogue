@@ -60,7 +60,7 @@ bool reptilecheat = false;
 
 #define ONEMPTY if(d == 7 && passable(c, NULL, 0) && !safety)
 
-bool blizzard_no_escape1(cell *c, celllister &cl) {
+bool blizzard_no_escape1(cell *c, manual_celllister &cl) {
   if(!cl.add(c)) return true;
   if(c->item == itOrbSafety)
     return false;
@@ -76,7 +76,7 @@ bool blizzard_no_escape1(cell *c, celllister &cl) {
   }
 
 bool blizzard_no_escape(cell *c) {
-  celllister cl(manual);
+  manual_celllister cl;
   return blizzard_no_escape1(c, cl);
   }
 

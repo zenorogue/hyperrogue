@@ -242,7 +242,7 @@ int getSeepcount() {
   }
 
 bool canReachPlayer(cell *cf, eMonster m) {
-  celllister cl(manual);
+  manual_celllister cl;
   cl.add(cf);
   for(int i=0; i<isize(cl.lst) && i < 10000; i++) {
     cell *c = cl.lst[i];
