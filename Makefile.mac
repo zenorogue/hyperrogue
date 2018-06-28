@@ -37,7 +37,7 @@ hyper.o: *.cpp language-data.cpp
 	$(CXX) $(CXXFLAGS) -O2 -c hyper.cpp
 
 langen: langen.cpp language-??.cpp language-ptbr.cpp
-	$(CXX) $(CXXFLAGS) -O0 -Wno-embedded-directive langen.cpp -o langen
+	$(CXX) $(CXXFLAGS) -O0 langen.cpp -o langen
 
 language-data.cpp: langen
 	./langen > language-data.cpp

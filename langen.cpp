@@ -2,17 +2,23 @@
 
 // Copyright (C) 2011-2018 Zeno Rogue, see 'hyper.cpp' for details
 
-#define GEN_M 0
-#define GEN_F 1
-#define GEN_N 2
-#define GEN_O 3
-
 #include <map>
 #include <string>
 #include <cstdio>
 #include <vector>
 #include <cstdlib>
 #include <set>
+
+#define GEN_M 0
+#define GEN_F 1
+#define GEN_N 2
+#define GEN_O 3
+
+#if MAC
+ #define IF_MAC(y,z) y
+#else
+ #define IF_MAC(y,z) z
+#endif
 
 template<class T> int isize(const T& x) { return x.size(); }
 
@@ -29,7 +35,7 @@ template<class T> struct dictionary {
     else m[s] = std::move(val);
     }
   T& operator [] (const std::string& s) { return m[s]; }
-  int count(const std::string& s) { return m.count(s); }
+  int count(const std::string& s) const { return m.count(s); }
   };
 
 dictionary<std::string> d[NUMLAN];
@@ -242,7 +248,36 @@ void langPT() {
 
 int completeness[NUMLAN];
 
+template<class T>
+void compute_completeness(const T& dict)
+{
+  std::set<std::string> s;
+  for(int i=1; i<NUMLAN; i++) 
+    for(auto&& elt : dict[i].m)
+      s.insert(elt.first);
+  
+  for(auto&& elt : s) {
+    std::string mis = "", mis1 = "";
+    for(int i=1; i<NUMLAN; i++) if(dict[i].count(elt) == 0) {
+      std::string which = d[i]["EN"];
+      if(which != "TR" && which != "DE" && which != "PT-BR")
+        mis += which;
+      else
+        mis1 += which;
+      }
+    if(mis != "" && !isrepeat(elt))
+      printf("// #warning Missing [%s/%s]: %s\n", mis.c_str(), mis1.c_str(), escape(elt, "?"));
+
+    if(!isrepeat(elt)) {
+      completeness[0]++;
+      for(int i=1; i<NUMLAN; i++) if(dict[i].count(elt)) completeness[i]++;
+      }
+    }
+  }
+  
 int main() {
+
+  printf("// DO NOT EDIT -- this file is generated automatically with langen\n\n");
 
   nothe.insert("R'Lyeh");
   nothe.insert("Camelot");
@@ -257,58 +292,13 @@ int main() {
   allchars.insert("∞");
   allchars.insert("½");
   allchars.insert("²");
-  
+
   langPL(); langCZ(); langRU();
   langTR(); langDE(); langPT();
 
   // verify
-  std::set<std::string> s;
-  for(int i=1; i<NUMLAN; i++) 
-    for(auto&& elt : d[i].m)
-      s.insert(elt.first);
-  
-  printf("// DO NOT EDIT -- this file is generated automatically with langen\n\n");
-
-  for(auto&& elt : s) {
-    std::string mis = "", mis1 = "";
-    for(int i=1; i<NUMLAN; i++) if(d[i].count(elt) == 0) {
-      std::string which = d[i]["EN"];
-      if(which != "TR" && which != "DE" && which != "PT-BR")
-        mis += which;
-      else
-        mis1 += which;
-      }
-    if(mis != "" && !isrepeat(elt))
-      printf("// #warning Missing [%s/%s]: %s\n", mis.c_str(), mis1.c_str(), escape(elt, "?"));
-
-    if(!isrepeat(elt)) {
-      completeness[0]++;
-      for(int i=1; i<NUMLAN; i++) if(d[i].count(elt)) completeness[i]++;
-      }
-    }
-  
-  s.clear();
-
-  for(int i=1; i<NUMLAN; i++) 
-    for(auto&& elt : nouns[i].m)
-      s.insert(elt.first);
-
-  for(auto&& elt : s) {
-    std::string mis = "", mis1 = "";
-    for(int i=1; i<NUMLAN; i++) if(nouns[i].count(elt) == 0) {
-      std::string which = d[i]["EN"];
-      if(which != "TR" && which != "DE" && which != "PT-BR")
-        mis += which;
-      else mis1 += which;
-      }
-    if(mis != "" && !isrepeat(elt))
-      printf("// #warning Missing [%s/%s]: %s\n", mis.c_str(), mis1.c_str(), escape(elt, "?"));
-
-    if(!isrepeat(elt)) {
-      completeness[0]++;
-      for(int i=1; i<NUMLAN; i++) if(nouns[i].count(elt)) completeness[i]++;
-      }
-    }
+  compute_completeness(d);
+  compute_completeness(nouns);
 
   for(int i=1; i<NUMLAN; i++) {
     addutftoset(allchars, d[i]);
@@ -332,10 +322,6 @@ int main() {
   for(int i=0; i<NUMLAN; i++) printf("%d, ", completeness[i]);
   printf("};\n");
 
-  for(int i=1; i<NUMLAN; i++) 
-    for(auto&& elt : d[i].m)
-      s.insert(elt.first);
-  
   printf("\n//statistics\n");
   for(auto&& elt : d[1].m)
     d[0][elt.first] = elt.first;

@@ -250,6 +250,11 @@
 #define HYPERPATH ""
 #endif
 
+#if ISWINDOWS
+#define hyper fake_hyper // avoid "hyper" typedef in <_mingw.h>
+#define WIN32_LEAN_AND_MEAN // avoid "rad1" macro in <windows.h>
+#endif
+
 #include <stdio.h>
 
 #if CAP_SDL
@@ -406,4 +411,8 @@ extern "C" {
 
 #if CAP_SDL
 union SDL_Event;
+#endif
+
+#if ISWINDOWS
+#undef hyper  // avoid "hyper" typedef in <_mingw.h>
 #endif
