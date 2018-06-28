@@ -304,6 +304,7 @@ eItem wanderingTreasure(cell *c) {
 
 void wandering() {
   if(!canmove) return;
+  pathdata pd(moYeti);
   int seepcount = getSeepcount();
   int ghostcount = getGhostcount();
   if(cwt.c->land == laCA) ghostcount = 0;
