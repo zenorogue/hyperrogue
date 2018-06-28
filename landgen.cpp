@@ -60,12 +60,8 @@ bool reptilecheat = false;
 
 #define ONEMPTY if(d == 7 && passable(c, NULL, 0) && !safety)
 
-vector<cell*> noescape_list;
-
-bool blizzard_no_escape1(cell *c) {
-  if(c->aitmp >= 0 && c->aitmp < isize(noescape_list) && noescape_list[c->aitmp] == c)
-    return true;
-  c->aitmp = isize(noescape_list); noescape_list.push_back(c);
+bool blizzard_no_escape1(cell *c, celllister &cl) {
+  if(!cl.add(c)) return true;
   if(c->item == itOrbSafety)
     return false;
   forCellEx(c2, c) {
@@ -73,16 +69,15 @@ bool blizzard_no_escape1(cell *c) {
       continue;
     if(c2->land != laBlizzard && passable(c2, NULL, 0))
       return false;
-    if(!againstWind(c2, c) && !blizzard_no_escape1(c2))
+    if(!againstWind(c2, c) && !blizzard_no_escape1(c2, cl))
       return false;
     }
   return true;
   }
 
 bool blizzard_no_escape(cell *c) {
-  sval++;
-  noescape_list.resize(0);
-  return blizzard_no_escape1(c);
+  celllister cl(manual);
+  return blizzard_no_escape1(c, cl);
   }
 
 bool out_ruin(cell *c) {

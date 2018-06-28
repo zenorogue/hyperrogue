@@ -247,19 +247,16 @@ bool distanceBound(cell *c1, cell *c2, int d) {
   }
 
 void checkFreedom(cell *cf) {
-  sval++;
-  static vector<cell*> avcells;
-  avcells.clear();
-  avcells.push_back(cf);
-  cf->aitmp = sval;
-  for(int i=0; i<isize(avcells); i++) {
-    cell *c = avcells[i];
+  celllister cl(manual);
+  cl.add(cf);
+  for(int i=0; i<isize(cl.lst); i++) {
+    cell *c = cl.lst[i];
     if(c->cpdist >= 5) return;
     for(int i=0; i<c->type; i++) {
       cell *c2 = c->mov[i];
       // todo leader
+      if(cl.listed(c2)) continue;
       if(!passable(c2, c, P_ISPLAYER | P_MIRROR | P_LEADER)) continue;
-      if(eq(c2->aitmp, sval)) continue;
       if(c2->wall == waArrowTrap && c2->wparam == 2) continue;
       bool monsterhere = false;
       for(int j=0; j<c2->type; j++) {
@@ -267,10 +264,7 @@ void checkFreedom(cell *cf) {
         if(c3 && c3->monst && !isFriendly(c3)) 
           monsterhere = true;
         }
-      if(!monsterhere) {
-        c2->aitmp = sval;
-        avcells.push_back(c2);
-        }
+      if(!monsterhere) cl.add(c2);
       }
     }
   addMessage(XLAT("Your %1 activates!", itOrbFreedom));

@@ -369,10 +369,7 @@ struct cell : gcell {
   // wall parameter, used for remaining power of Bonfires and Thumpers
   char wparam;
 
-  // 'tmp' is used for:
-  // pathfinding algorithm used by monsters with atypical movement (which do not use pathdist)
-  // bugs' pathfinding algorithm
-  short aitmp;
+  int listindex;
 
   uint32_t spintable;
   int spin(int d) { return tspin(spintable, d); }
@@ -1064,6 +1061,7 @@ namespace conformal {
   extern vector<pair<cell*, eMonster> > killhistory;
   extern vector<pair<cell*, eItem> > findhistory;  
   extern vector<cell*> movehistory;
+  extern set<cell*> inmovehistory, inkillhistory, infindhistory;
   extern bool includeHistory;
   extern ld rotation;
   extern int do_rotate;
@@ -1199,7 +1197,6 @@ bool isAlchAny(cell *c);
 #define MODECODES 255
   
 extern cellwalker cwt; // player character position
-extern int sval;
 
 extern array<int, ittypes> items;
 extern array<int, motypes> kills;
@@ -2546,28 +2543,37 @@ extern vector<hrmap*> allmaps;
 
 // list all cells in distance at most maxdist, or until when maxcount cells are reached
 
+extern struct manual_t {} manual;
+
 struct celllister {
   vector<cell*> lst;
   vector<int> tmps;
   vector<int> dists;
   
-  void add(cell *c, int d) {
-    if(eq(c->aitmp, sval)) return;
-    c->aitmp = sval;
-    tmps.push_back(c->aitmp);
+  bool listed(cell *c) {
+    return c->listindex >= 0 && c->listindex < isize(lst) && lst[c->listindex] == c;
+    }
+  
+  bool add(cell *c) {
+    if(listed(c)) return false;
+    tmps.push_back(c->listindex);
     lst.push_back(c);
-    dists.push_back(d);
+    c->listindex = isize(lst);
+    return true;
+    }
+
+  void add(cell *c, int d) {
+    if(add(c)) dists.push_back(d);
     }
   
   ~celllister() {     
-    for(int i=0; i<isize(lst); i++) lst[i]->aitmp = tmps[i];
+    for(int i=0; i<isize(lst); i++) lst[i]->listindex = tmps[i];
+    }
+  
+  celllister(manual_t) {
     }
   
   celllister(cell *orig, int maxdist, int maxcount, cell *breakon) {
-    lst.clear();
-    tmps.clear();
-    dists.clear();
-    sval++;
     add(orig, 0);
     cell *last = orig;
     for(int i=0; i<isize(lst); i++) {
@@ -2583,16 +2589,7 @@ struct celllister {
       }
     }
 
-  void prepare() {
-    for(int i=0; i<isize(lst); i++) lst[i]->aitmp = i;
-    }
-  
-  int getdist(cell *c) { return dists[c->aitmp]; }
-  
-  bool listed(cell *c) {
-    return c->aitmp >= 0 && c->aitmp < isize(lst) && lst[c->aitmp] == c;
-    }
-  
+  int getdist(cell *c) { return dists[c->listindex]; }
   };
 
 hrmap *newAltMap(heptagon *o);
@@ -3568,5 +3565,29 @@ extern int fontscale;
 bool confusingGeometry();
 
 int revhint(cell *c, int hint);
+
+extern int pathlock;
+extern void computePathdist(eMonster m);
+extern void onpath(cell *c, int d);
+extern void clear_pathdata();
+
+struct pathdata {
+  void checklock() { 
+    if(pd_from) pd_from = NULL, clear_pathdata();
+    if(pathlock) printf("path error\n"); 
+    pathlock++; 
+    }
+  ~pathdata() {
+    pathlock--;
+    clear_pathdata();
+    }
+  pathdata(eMonster m) { 
+    checklock();
+    computePathdist(m); 
+    }
+  pathdata(int i) { 
+    checklock();
+    }
+  };
 
 }

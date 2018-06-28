@@ -242,18 +242,17 @@ int getSeepcount() {
   }
 
 bool canReachPlayer(cell *cf, eMonster m) {
-  vector<cell*> v;
-  sval++;
-  v.push_back(cf); cf->aitmp = sval;
-  for(int i=0; i<isize(v); i++) {
-    cell *c = v[i];
+  celllister cl(manual);
+  cl.add(cf);
+  for(int i=0; i<isize(cl.lst) && i < 10000; i++) {
+    cell *c = cl.lst[i];
     for(int j=0; j<c->type; j++) {
       cell *c2 = c->mov[j];
       if(!c2) continue;
-      if(eq(c2->aitmp, sval)) continue;
+      if(cl.listed(c2)) continue;
       if(!passable_for(m, c2, c, P_MONSTER | P_ONPLAYER | P_CHAIN)) continue;
       if(isPlayerOn(c2)) return true;
-      c2->aitmp = sval; v.push_back(c2);
+      cl.add(c2);
       }
     }
   return false;

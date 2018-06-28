@@ -170,7 +170,7 @@ void initcell(cell *c) {
   c->cpdist = INFD;   // current distance from the player
   c->pathdist = PINFD;// current distance from the player, along paths (used by yetis)
   c->landparam = 0; c->landflags = 0; c->wparam = 0;
-  c->aitmp = 0;
+  c->listindex = -1;
   c->wall  = waNone;
   c->item  = itNone;
   c->monst = moNone;
@@ -2835,26 +2835,6 @@ void computePathdist(eMonster param) {
     }
   }
 // pathdist end
-
-struct pathdata {
-  void checklock() { 
-    if(pd_from) pd_from = NULL, clear_pathdata();
-    if(pathlock) printf("path error\n"); 
-    pathlock++; 
-    }
-  ~pathdata() {
-    pathlock--;
-    clear_pathdata();
-    }
-  pathdata(eMonster m) { 
-    checklock();
-    computePathdist(m); 
-    }
-  pathdata(int i) { 
-    checklock();
-    }
-  };
-
 
 vector<pair<cell*, int> > butterflies;
 
@@ -5786,12 +5766,11 @@ void moveNormals(eMonster param) {
     }
   }
 
-void markAmbush(cell *c) {
-  if(eq(c->aitmp, sval)) return;
-  c->aitmp = sval;
+void markAmbush(cell *c, celllister& cl) {
+  if(!cl.add(c)) return;
   forCellEx(c2, c) 
     if(c2->cpdist < c->cpdist) 
-      markAmbush(c2);
+      markAmbush(c2, cl);
   }
 
 int ambush_distance;
@@ -5799,30 +5778,30 @@ bool ambushed;
 
 void checkAmbushState() {
   if(havewhat & HF_HUNTER) {
-    sval++;
+    celllister cl(manual);
     for(cell *c: dcal) {
       if(c->monst == moHunterDog) {
         if(c->cpdist > ambush_distance)
           ambush_distance = c->cpdist;
-        markAmbush(c);
+        markAmbush(c, cl);
         }
       if(c->monst == moHunterGuard && c->cpdist <= 4) 
-        markAmbush(c);
+        markAmbush(c, cl);
       }
     if(items[itHunting] > 5 && items[itHunting] <= 22) {
       int q = 0;
       for(int i=0; i<numplayers(); i++) 
         forCellEx(c2, playerpos(i))
-          if(eq(c2->aitmp, sval))
-            q++;      
+          if(cl.listed(c2))
+            q++;
       if(q == 1) havewhat |= HF_FAILED_AMBUSH;
       if(q == 2) {
         for(int i=0; i<numplayers(); i++) 
         forCellEx(c2, playerpos(i))
-          if(eq(c2->aitmp, sval))
+          if(cl.listed(c2))
             forCellEx(c3, playerpos(i)) 
               if(c3 != c2 && isNeighbor(c2,c3))
-              if(eq(c3->aitmp, sval))
+              if(cl.listed(c3))
                 havewhat |= HF_FAILED_AMBUSH;
         }
       if(havewhat & HF_FAILED_AMBUSH && ambushed) {
@@ -6546,7 +6525,6 @@ int ambush(cell *c, eItem what) {
   celllister cl(c, maxdist, 1000000, NULL);
   cell *c0 = c;
   int d = 0;
-  cl.prepare();
   int dogs0 = 0;
   for(cell *cx: cl.lst) {
     int dh = cl.getdist(cx);

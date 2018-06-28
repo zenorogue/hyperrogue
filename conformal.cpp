@@ -823,24 +823,28 @@ namespace conformal {
     else if(doexiton(sym, uni)) popScreen();
     }
   
+  set<cell*> inmovehistory, inkillhistory, infindhistory;
+  
   void restore() {
-    sval++;
+    inmovehistory.clear();
+    inkillhistory.clear();
+    infindhistory.clear();
     for(int i=0; i<isize(movehistory); i++)
-      movehistory[i]->aitmp = sval;
+      inmovehistory.insert(movehistory[i]);
     sval++;
     int sk = isize(killhistory);
     for(int i=0; i<sk; i++) {
       eMonster m = killhistory[i].second;
       killhistory[i].second = killhistory[i].first->monst;
       killhistory[i].first->monst = m;
-      killhistory[i].first->aitmp = sval;
+      inkillhistory.insert(killhistory[i].first);
       }
     int si = isize(findhistory);
     for(int i=0; i<si; i++) {
       eItem m = findhistory[i].second;
       findhistory[i].second = findhistory[i].first->item;
       findhistory[i].first->item = m;
-      findhistory[i].first->aitmp = sval;
+      infindhistory.insert(findhistory[i].first);
       }
     }
 
