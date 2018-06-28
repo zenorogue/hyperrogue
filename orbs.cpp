@@ -1180,11 +1180,13 @@ eItem targetRangedOrb(cell *c, orbAction a) {
     }
 
   // (4a) colt
-  if(!shmup::on && items[itRevolver] && c->monst && canAttack(cwt.c, moPlayer, c, c->monst, AF_GUN)
-    && c->pathdist <= GUNRANGE && !monstersnearO(a, cwt.c, c, moPlayer, NULL, cwt.c)) {
-    if(!isCheck(a)) gun_attack(c);
-    return itRevolver;
-    }    
+  if(!shmup::on && items[itRevolver] && c->monst && canAttack(cwt.c, moPlayer, c, c->monst, AF_GUN)) {
+    pathdata pd(moEagle);
+    if(c->pathdist <= GUNRANGE && !monstersnearO(a, cwt.c, c, moPlayer, NULL, cwt.c)) {
+      if(!isCheck(a)) gun_attack(c);
+      return itRevolver;
+      }
+    }
   
   // (5) psi blast (non-shmup variant)
   if(!shmup::on && items[itOrbPsi] && c->monst && (isDragon(c->monst) || !isWorm(c)) && c->monst != moShadow && c->monst != moKrakenH) {

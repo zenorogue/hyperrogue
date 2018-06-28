@@ -383,7 +383,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           c->monst = moVizier;
           c->hitpoints = palaceHP();
           }
-        else if(princess::forceVizier && from->pathdist != PINFD) {
+        else if(princess::forceVizier && hrand(100) < 10 && canReachPlayer(c, moVizier)) {
           c->monst = moVizier;
           c->hitpoints = palaceHP();
           princess::forceVizier = false;
