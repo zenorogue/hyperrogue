@@ -21,7 +21,7 @@ dist_sounds_DATA = sounds/*
 noinst_PROGRAMS = langen
 langen_SOURCES = langen.cpp 
 # Disable optimization, not needed
-langen_CXXFLAGS = -O0
+langen_CXXFLAGS = -O0 -std=c++11
 
 # Generation of language-data.cpp
 language-data.cpp: langen
