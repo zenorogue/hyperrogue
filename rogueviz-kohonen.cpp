@@ -287,15 +287,15 @@ struct cellcrawler {
   
   vector<cellcrawlerdata> data;
   
-  void store(const cellwalker& o, int from, int spin) {
-    if(eq(o.c->aitmp, sval)) return;
-    o.c->aitmp = sval;
+  void store(const cellwalker& o, int from, int spin, manual_celllister& cl) {
+    if(!add(o.c)) return;
     data.emplace_back(o, from, spin);
     }
   
   void build(const cellwalker& start) {
     sval++;
     data.clear();
+    manual_celllister cl;
     store(start, 0, 0);
     for(int i=0; i<isize(data); i++) {
       cellwalker cw0 = data[i].orig;
