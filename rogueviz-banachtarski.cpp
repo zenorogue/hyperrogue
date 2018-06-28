@@ -388,6 +388,8 @@ void bantar_frame() {
       case 4:
         xdst = .5, ydst = 0;
         break;
+      default:
+        xdst = ydst = 0;
       }
     
     /* ld xpos = (!(i&2)) ? xdst : -xdst;
