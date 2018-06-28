@@ -4977,8 +4977,10 @@ void sideAttack(cell *mf, int dir, eMonster who, int bonuskill) {
   sideAttack(mf, dir, who, 2, itOrbSide2);
   sideAttack(mf, dir, who, 3, itOrbSide3);
 
-  int kills = tkills() - k + bonuskill;
-  if(kills >= 5) achievement_gain("MELEE5");
+  if(who == moPlayer) {
+    int kills = tkills() - k + bonuskill;
+    if(kills >= 5) achievement_gain("MELEE5");
+    }
   }
 
 void stabbingAttack(cell *mf, cell *mt, eMonster who, int bonuskill) {
@@ -5067,15 +5069,17 @@ void stabbingAttack(cell *mf, cell *mt, eMonster who, int bonuskill) {
       }
     }
 
-  if(numsh) achievement_count("STAB", numsh, 0);
+  if(who == moPlayer) {
+    if(numsh) achievement_count("STAB", numsh, 0);
+    
+    if(numlance && numflail && numsh) achievement_gain("MELEE3");
   
-  if(numlance && numflail && numsh) achievement_gain("MELEE3");
-
-  if(numlance + numflail + numsh + numslash + bonuskill >= 5) achievement_gain("MELEE5");
-
-  if(numsh == 2) {
-    if(lastdouble == turncount-1) achievement_count("STAB", 4, 0);
-    lastdouble = turncount;
+    if(numlance + numflail + numsh + numslash + bonuskill >= 5) achievement_gain("MELEE5");
+  
+    if(numsh == 2) {
+      if(lastdouble == turncount-1) achievement_count("STAB", 4, 0);
+      lastdouble = turncount;
+      }
     }
   }
 
