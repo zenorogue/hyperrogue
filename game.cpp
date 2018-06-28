@@ -7647,6 +7647,8 @@ bool movepcto(int d, int subdir, bool checkonly) {
         } */
       
       mirror::act(origd, mirror::SPINMULTI | mirror::ATTACK);
+      
+      int tk = tkills();
 
       if(goodTortoise) {
         items[itBabyTortoise] += 4;
@@ -7676,7 +7678,7 @@ bool movepcto(int d, int subdir, bool checkonly) {
           }
         }
       
-      sideAttack(cwt.c, d, moPlayer, 0);
+      sideAttack(cwt.c, d, moPlayer, tkills() - tk);
       lastmovetype = lmAttack; lastmove = c2;
       swordAttackStatic();
       }
