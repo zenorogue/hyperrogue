@@ -4711,7 +4711,7 @@ void hexvisit(cell *c, cell *from, int d, bool mounted, int colorpair) {
   }
 
 void movehex(bool mounted, int colorpair) {
-  pathdata pd();
+  pathdata pd(3);
   hexdfs.clear();
   
   if(mounted) { 
