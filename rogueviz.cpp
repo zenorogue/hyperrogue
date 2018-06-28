@@ -706,6 +706,7 @@ namespace sag {
       forgetedges(i);
       }
 
+    shmup::fixStorage();
     }
   
   vector<edgeinfo> sagedges;
