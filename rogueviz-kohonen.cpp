@@ -593,6 +593,8 @@ void showbestsamples() {
     if(whowon[i])
       whowon[i]->samples++;
   }
+
+int kohrestrict = 1000000;
   
 void sominit(int initto) {
 
@@ -614,6 +616,11 @@ void sominit(int initto) {
       allcells = cl.lst;
       }
     else allcells = currentmap->allcells();
+    
+    if(isize(allcells) > kohrestrict) {
+      sort(allcells.begin(), allcells.end(), [] (cell *c1, cell *c2) { return hdist0(tC0(shmup::ggmatrix(c1))) < hdist0(tC0(shmup::ggmatrix(c2))); });
+      allcells.resize(kohrestrict);
+      }
   
     cells = isize(allcells);
     net.resize(cells);
@@ -1176,6 +1183,9 @@ int readArgs() {
   else if(argis("-somverify")) {
     start_game();
     verify_crawlers();
+    }
+  else if(argis("-somrestrict")) {
+    shift(); kohrestrict = argi();
     }
 
   else return 1;
