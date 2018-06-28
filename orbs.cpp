@@ -247,29 +247,24 @@ bool distanceBound(cell *c1, cell *c2, int d) {
   }
 
 void checkFreedom(cell *cf) {
-  sval++;
-  static vector<cell*> avcells;
-  avcells.clear();
-  avcells.push_back(cf);
-  cf->aitmp = sval;
-  for(int i=0; i<isize(avcells); i++) {
-    cell *c = avcells[i];
+  manual_celllister cl;
+  cl.add(cf);
+  for(int i=0; i<isize(cl.lst); i++) {
+    cell *c = cl.lst[i];
     if(c->cpdist >= 5) return;
     for(int i=0; i<c->type; i++) {
       cell *c2 = c->mov[i];
       // todo leader
+      if(cl.listed(c2)) continue;
       if(!passable(c2, c, P_ISPLAYER | P_MIRROR | P_LEADER)) continue;
-      if(eq(c2->aitmp, sval)) continue;
+      if(c2->wall == waArrowTrap && c2->wparam == 2) continue;
       bool monsterhere = false;
       for(int j=0; j<c2->type; j++) {
         cell *c3 = c2->mov[j];
         if(c3 && c3->monst && !isFriendly(c3)) 
           monsterhere = true;
         }
-      if(!monsterhere) {
-        c2->aitmp = sval;
-        avcells.push_back(c2);
-        }
+      if(!monsterhere) cl.add(c2);
       }
     }
   addMessage(XLAT("Your %1 activates!", itOrbFreedom));
@@ -541,8 +536,7 @@ void teleportTo(cell *dest) {
       drainOrb(itOrbTeleport);
       movecost(cwt.c, dest);
       playerMoveEffects(cwt.c, dest);
-      for(int i=9; i>=0; i--)
-        setdist(dest, i, NULL);
+      afterplayermoved();
       bfs();
       }
     return;
@@ -557,9 +551,7 @@ void teleportTo(cell *dest) {
   addMessage(XLAT("You teleport to a new location!"));
   mirror::destroyAll();
 
-  for(int i=9; i>=0; i--)
-    setdist(cwt.c, i, NULL);
-
+  afterplayermoved();
   bfs();
   
   sword::reset();
@@ -1179,11 +1171,13 @@ eItem targetRangedOrb(cell *c, orbAction a) {
     }
 
   // (4a) colt
-  if(!shmup::on && items[itRevolver] && c->monst && canAttack(cwt.c, moPlayer, c, c->monst, AF_GUN)
-    && c->pathdist <= GUNRANGE && !monstersnearO(a, cwt.c, c, moPlayer, NULL, cwt.c)) {
-    if(!isCheck(a)) gun_attack(c);
-    return itRevolver;
-    }    
+  if(!shmup::on && items[itRevolver] && c->monst && canAttack(cwt.c, moPlayer, c, c->monst, AF_GUN)) {
+    pathdata pd(moEagle);
+    if(c->pathdist <= GUNRANGE && !monstersnearO(a, cwt.c, c, moPlayer, NULL, cwt.c)) {
+      if(!isCheck(a)) gun_attack(c);
+      return itRevolver;
+      }
+    }
   
   // (5) psi blast (non-shmup variant)
   if(!shmup::on && items[itOrbPsi] && c->monst && (isDragon(c->monst) || !isWorm(c)) && c->monst != moShadow && c->monst != moKrakenH) {

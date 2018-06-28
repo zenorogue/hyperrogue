@@ -2513,3 +2513,15 @@ non-game:
 
 2018.06.24 01:19 Update 10.4g
 - fixed Arrow Traps not killing anything (and possibly other similar cases)
+- fixed the 'skip start menu' option
+
+2018.06.28 14:14 Update 10.4h
+- fixed the map not being generated far enough in non-std geometries after Teleport (and other orbs)
+- fixed the missing message when picking up orbs from a boat
+- rewritten various pathfinding (and similar) algorithms in a more robust way
+- Orb of Freedom is now checked after the Terracotta Warriors, and it consider active arrow traps as impassable
+- kills-at-once achievements now also count the 'original' kill; it no longer counts if a monster performs the killing
+- in quotient geometries, the whole world is now generated from the start (otherwise e.g. Blizzard breaks down); also the windmap (used in Blizzard/Volcanic) is now generated correctly in field quotient
+- an option to display all floors as 'full', i.e., without spaces between them ('r' in map/graphics editor)
+- new commandline options: -fsh (floor shape display) and -noshadow (disable shadows)
+- fixed a bug with Orb of Mirror display in OSM

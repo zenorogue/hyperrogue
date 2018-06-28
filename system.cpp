@@ -291,6 +291,9 @@ void initgame() {
   bfs();
   checkmove();
   playermoved = true;
+  
+  if(quotient || sphere)
+    for(cell *c: currentmap->allcells()) setdist(c, 8, NULL);
 
   if(!cheater) gamerange_bonus = genrange_bonus = 0;
   }

@@ -1011,14 +1011,14 @@ namespace peace {
         clister.emplace_back(cp, cp);
         
         int id = 0;
-        sval++;
+        manual_celllister cl;
         while(id < isize(clister)) {
           cell *c = clister[id].first;
           cell *fr = clister[id].second;
           setdist(c, 5, NULL);
           
           forCellEx(c2,c)
-            if(!eq(c2->aitmp, sval) && passable(c2, c, 0) && (c2->land == specialland || c2->land == laTemple) && !c2->item) {
+            if(!cl.listed(c2) && passable(c2, c, 0) && (c2->land == specialland || c2->land == laTemple) && !c2->item) {
               if(!id) fr = c2;
               bool next;
               if(specialland == laRlyeh)
@@ -1031,7 +1031,7 @@ namespace peace {
                 goto again;
                 }              
               clister.emplace_back(c2, fr); 
-              c2->aitmp = sval;
+              cl.add(c2);
               }
           id++;
           }

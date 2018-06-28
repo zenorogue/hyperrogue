@@ -59,7 +59,7 @@ vector<blizzardcell*> bcells;
 int N;
 
 blizzardcell* getbcell(cell *c) {
-  int i = c->aitmp;
+  int i = c->listindex;
   if(i<0 || i >= N) return NULL;
   if(bcells[i]->c != c) return NULL;
   return bcells[i];
@@ -80,8 +80,8 @@ void drawBlizzards() {
   N = isize(bcells);
   for(int i=0; i<N; i++) {
     auto& bc = *bcells[i];
-    bc.tmp = bc.c->aitmp,
-    bc.c->aitmp = i;
+    bc.tmp = bc.c->listindex,
+    bc.c->listindex = i;
     bc.gm = &gmatrix[bc.c];
     bc.wmap = windmap::at(bc.c);
     }
@@ -223,7 +223,7 @@ void drawBlizzards() {
     }
 
   for(auto bc: bcells)
-    bc->c->aitmp = bc->tmp;
+    bc->c->listindex = bc->tmp;
   }
        
 vector<cell*> arrowtraps;

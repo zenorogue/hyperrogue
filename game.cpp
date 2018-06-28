@@ -170,7 +170,7 @@ void initcell(cell *c) {
   c->cpdist = INFD;   // current distance from the player
   c->pathdist = PINFD;// current distance from the player, along paths (used by yetis)
   c->landparam = 0; c->landflags = 0; c->wparam = 0;
-  c->aitmp = 0;
+  c->listindex = -1;
   c->wall  = waNone;
   c->item  = itNone;
   c->monst = moNone;
@@ -2747,12 +2747,32 @@ bool nogoSlow(cell *to, cell *from) {
 cell *pd_from;
 int pd_range;
 
+void onpath(cell *c, int d) {
+  c->pathdist = d;
+  pathq.push_back(c);
+  }
+
+void onpath(cell *c, int d, int sp) {
+  c->pathdist = d;
+  pathq.push_back(c);
+  reachedfrom.push_back(sp);
+  }
+
+void clear_pathdata() {
+  for(auto c: pathq) c->pathdist = PINFD;
+  pathq.clear(); 
+  pathqm.clear();
+  reachedfrom.clear(); 
+  }
+
+int pathlock = 0;
+
 void compute_graphical_distance() {
+  if(pathlock) { printf("path error: compute_graphical_distance\n"); }
   cell *c1 = centerover.c ? centerover.c : pd_from ? pd_from : cwt.c;
   int sr = get_sightrange_ambush();
   if(pd_from == c1 && pd_range == sr) return;
-  for(auto c: pathq) c->pathdist = PINFD;
-  pathq.clear();
+  clear_pathdata();
   
   pd_from = c1;
   pd_range = sr;
@@ -2765,23 +2785,14 @@ void compute_graphical_distance() {
     if(qb == 0) forCellCM(c1, c) ;
     forCellEx(c1, c)
       if(c1->pathdist == PINFD)
-        c1->pathdist = c->pathdist + 1,
-        pathq.push_back(c1);
+        onpath(c1, c->pathdist + 1);
     }
-  }  
+  }
 
 void computePathdist(eMonster param) {
-  pd_from = NULL;
-  for(auto c: pathq) c->pathdist = PINFD;
-  pathq.clear(); 
-  pathqm.clear();
-  reachedfrom.clear(); 
   
-  for(int i=0; i<isize(targets); i++) {
-    pathq.push_back(targets[i]);
-    targets[i]->pathdist = isPlayerOn(targets[i]) ? 0 : 1;
-    reachedfrom.push_back(hrand(targets[i]->type));
-    }
+  for(cell *c: targets)
+    onpath(c, isPlayerOn(c) ? 0 : 1, hrand(c->type));
 
   int qtarg = isize(targets);
   
@@ -2818,8 +2829,7 @@ void computePathdist(eMonster param) {
             continue;
           }
 
-        c2->pathdist = d+1;
-        pathq.push_back(c2); reachedfrom.push_back(c->spn(i));
+        onpath(c2, d+1, c->spn(i));
         }
       }
     }
@@ -3770,6 +3780,8 @@ int moveval(cell *c1, cell *c2, int d, flagtype mf) {
   // actually they just run away
   if(m == moHunterChanging && c2->pathdist > c1->pathdist) return 1600;
   
+  if((mf & MF_PATHDIST) && !pathlock) printf("using MF_PATHDIST without path\n"); 
+
   if(hunt && (mf & MF_PATHDIST) && c2->pathdist < c1->pathdist && !peace::on) return 1500; // good move
   
   // prefer straight direction when wandering
@@ -3941,7 +3953,7 @@ void beastAttack(cell *c, bool player) {
       if(c2->monst && c2->stuntime) {
         cellwalker bull (c, d);
         int subdir = determinizeBullPush(bull);
-        int pushdir = 0;
+        int pushdir = NOHINT;
         cell *c3 = determinePush(bull, c2, subdir, [c2] (cell *c) { return passable(c, c2, P_BLOW); }, pushdir);
         if(c3 && c3 != c2)
           pushMonster(c3, c2, pushdir);
@@ -3954,7 +3966,7 @@ void beastAttack(cell *c, bool player) {
     if(c2->wall == waThumperOn) {
       cellwalker bull (c, d);
       int subdir = determinizeBullPush(bull);
-      int pushdir = 0;
+      int pushdir = NOHINT;
       cell *c3 = determinePush(bull, c2, subdir, [c2] (cell *c) { return canPushThumperOn(c, c2, c); }, pushdir);
       if(c3 && c3 != c2)
         pushThumper(c2, c3);
@@ -4379,7 +4391,7 @@ void removeIvy(cell *c) {
 
 void moveivy() {
   if(isize(ivies) == 0) return;
-  computePathdist(moIvyRoot);
+  pathdata pd(moIvyRoot);
   for(int i=0; i<isize(ivies); i++) {
     cell *c = ivies[i];
     cell *co = c;
@@ -4461,7 +4473,7 @@ bool isTargetOrAdjacent(cell *c) {
 void groupmove2(cell *c, cell *from, int d, eMonster movtype, flagtype mf) {
   if(!c) return;
 
-  if(eq(c->aitmp, sval)) return;  
+  if(c->pathdist == 0) return;
 
   if(movtype == moKrakenH && isTargetOrAdjacent(from)) ;
 /*  else if(passable_for(movtype, from, c, P_ONPLAYER | P_CHAIN | P_MONSTER)) ;
@@ -4518,7 +4530,8 @@ void groupmove2(cell *c, cell *from, int d, eMonster movtype, flagtype mf) {
       return;
     // in the gravity lands, eagles cannot ascend in their second move
     if((mf & MF_ONLYEAGLE) && gravityLevel(c) < gravityLevel(from)) {
-      c->aitmp = sval; return;
+      onpath(c, 0);
+      return;
       }
     if((mf & MF_NOFRIEND) && isFriendly(c)) return;
     if((mf & MF_MOUNT) && !isMounted(c)) return;
@@ -4532,12 +4545,12 @@ void groupmove2(cell *c, cell *from, int d, eMonster movtype, flagtype mf) {
       if(c->mov[j] && canAttack(c, c->monst, c->mov[j], c->mov[j]->monst, af)) {
         attackMonster(c->mov[j], AF_NORMAL | AF_GETPLAYER | AF_MSG, c->monst);
         animateAttack(c, c->mov[j], LAYER_SMALL, j);
-        c->aitmp = sval;
+        onpath(c, 0);
         // XLATC eagle
         return;
         }
     
-    if(from->cpdist == 0 || from->monst) { c->aitmp = sval; return; }
+    if(from->cpdist == 0 || from->monst) { onpath(c, 0); return; }
     
     if(movtype == moDragonHead) {
       dragon::move(from, c);
@@ -4545,15 +4558,15 @@ void groupmove2(cell *c, cell *from, int d, eMonster movtype, flagtype mf) {
       }
     
     moveMonster(from, c, revhint(from, d));
-    from->aitmp = sval;
+    onpath(from, 0);
     }
-  c->aitmp = sval;
+  onpath(c, 0);
   // MAXGCELL
   if(isize(gendfs) < 1000 || c->cpdist <= 6) gendfs.push_back(c);
   }
 
 void groupmove(eMonster movtype, flagtype mf) {
-  sval++;
+  pathdata pd(0);
   gendfs.clear();
   
   if(mf & MF_MOUNT) {
@@ -4602,9 +4615,9 @@ void groupmove(eMonster movtype, flagtype mf) {
   if(movtype != moDragonHead) for(int i=0; i<isize(dcal); i++) {
     cell *c = dcal[i];
     if((mf & MF_ONLYEAGLE) && c->monst != moEagle && c->monst != moBat) return;
-    if(movegroup(c->monst) == movtype && !eq(c->aitmp, sval)) {
+    if(movegroup(c->monst) == movtype && c->pathdist != 0) {
       cell *c2 = moveNormal(c, mf);
-      if(c2) c2->aitmp = sval;
+      onpath(c2, 0);
       }
     }
   }
@@ -4665,7 +4678,7 @@ int snake_pair(cell *c) {
 void hexvisit(cell *c, cell *from, int d, bool mounted, int colorpair) {
   if(!c) return;
   if(cellUnstable(c) || cellEdgeUnstable(c)) return;
-  if(eq(c->aitmp, sval)) return;
+  if(c->pathdist == 0) return;
   
   if(cellUnstableOrChasm(c) || cellUnstableOrChasm(from)) return;
   
@@ -4690,7 +4703,7 @@ void hexvisit(cell *c, cell *from, int d, bool mounted, int colorpair) {
     moveHexSnake(from, c, d, mounted);
     }
 
-  c->aitmp = sval;
+  onpath(c, 0);
 
   // MAXGCELL
   if(isize(hexdfs) < 2000 || c->cpdist <= 6) 
@@ -4698,18 +4711,18 @@ void hexvisit(cell *c, cell *from, int d, bool mounted, int colorpair) {
   }
 
 void movehex(bool mounted, int colorpair) {
-  sval++;
+  pathdata pd(3);
   hexdfs.clear();
   
   if(mounted) { 
     if(dragon::target && dragon::target->monst != moHexSnake) {
       hexdfs.push_back(dragon::target); 
-      dragon::target->aitmp = sval;
+      onpath(dragon::target, 0);
       }
     }
-  else for(int i=0; i<isize(targets); i++) {
-    hexdfs.push_back(targets[i]);
-    targets[i]->aitmp = sval;
+  else for(cell *c: targets) {
+    hexdfs.push_back(c);
+    onpath(c, 0);
     }
   //hexdfs.push_back(cwt.c);
   
@@ -4977,8 +4990,10 @@ void sideAttack(cell *mf, int dir, eMonster who, int bonuskill) {
   sideAttack(mf, dir, who, 2, itOrbSide2);
   sideAttack(mf, dir, who, 3, itOrbSide3);
 
-  int kills = tkills() - k + bonuskill;
-  if(kills >= 5) achievement_gain("MELEE5");
+  if(who == moPlayer) {
+    int kills = tkills() - k + bonuskill;
+    if(kills >= 5) achievement_gain("MELEE5");
+    }
   }
 
 void stabbingAttack(cell *mf, cell *mt, eMonster who, int bonuskill) {
@@ -5067,15 +5082,17 @@ void stabbingAttack(cell *mf, cell *mt, eMonster who, int bonuskill) {
       }
     }
 
-  if(numsh) achievement_count("STAB", numsh, 0);
+  if(who == moPlayer) {
+    if(numsh) achievement_count("STAB", numsh, 0);
+    
+    if(numlance && numflail && numsh) achievement_gain("MELEE3");
   
-  if(numlance && numflail && numsh) achievement_gain("MELEE3");
-
-  if(numlance + numflail + numsh + numslash + bonuskill >= 5) achievement_gain("MELEE5");
-
-  if(numsh == 2) {
-    if(lastdouble == turncount-1) achievement_count("STAB", 4, 0);
-    lastdouble = turncount;
+    if(numlance + numflail + numsh + numslash + bonuskill >= 5) achievement_gain("MELEE5");
+  
+    if(numsh == 2) {
+      if(lastdouble == turncount-1) achievement_count("STAB", 4, 0);
+      lastdouble = turncount;
+      }
     }
   }
 
@@ -5198,7 +5215,7 @@ int movevalue(eMonster m, cell *c, cell *c2, flagtype flags) {
 void movegolems(flagtype flags) {
   if(items[itOrbEmpathy] && items[itOrbSlaying])
     flags |= AF_CRUSH;
-  computePathdist(moMouse);
+  pathdata pd(moMouse);
   int qg = 0;
   for(int i=0; i<isize(golems); i++) {
     cell *c = golems[i];
@@ -5363,7 +5380,7 @@ void specialMoves() {
       }
     
     if(m == moNecromancer) {
-      computePathdist(moNecromancer);
+      pathdata pd(moNecromancer);
       int gravenum = 0, zombienum = 0;
       cell *gtab[8], *ztab[8];
       for(int j=0; j<c->type; j++) if(c->mov[j]) {
@@ -5465,7 +5482,7 @@ void specialMoves() {
 
 void moveworms() {
   if(!isize(worms)) return;
-  computePathdist(moWorm);
+  pathdata pd(moWorm);
   int wrm = isize(worms);
   for(int i=0; i<wrm; i++) {
     moveWorm(worms[i]);
@@ -5728,7 +5745,7 @@ void consMove(cell *c, eMonster param) {
   }
 
 void moveNormals(eMonster param) {
-  computePathdist(param);
+  pathdata pd(param);
 
   for(int d=0; d<8; d++) movesofgood[d].clear();
 
@@ -5749,12 +5766,11 @@ void moveNormals(eMonster param) {
     }
   }
 
-void markAmbush(cell *c) {
-  if(eq(c->aitmp, sval)) return;
-  c->aitmp = sval;
+void markAmbush(cell *c, manual_celllister& cl) {
+  if(!cl.add(c)) return;
   forCellEx(c2, c) 
     if(c2->cpdist < c->cpdist) 
-      markAmbush(c2);
+      markAmbush(c2, cl);
   }
 
 int ambush_distance;
@@ -5762,30 +5778,30 @@ bool ambushed;
 
 void checkAmbushState() {
   if(havewhat & HF_HUNTER) {
-    sval++;
+    manual_celllister cl;
     for(cell *c: dcal) {
       if(c->monst == moHunterDog) {
         if(c->cpdist > ambush_distance)
           ambush_distance = c->cpdist;
-        markAmbush(c);
+        markAmbush(c, cl);
         }
       if(c->monst == moHunterGuard && c->cpdist <= 4) 
-        markAmbush(c);
+        markAmbush(c, cl);
       }
     if(items[itHunting] > 5 && items[itHunting] <= 22) {
       int q = 0;
       for(int i=0; i<numplayers(); i++) 
         forCellEx(c2, playerpos(i))
-          if(eq(c2->aitmp, sval))
-            q++;      
+          if(cl.listed(c2))
+            q++;
       if(q == 1) havewhat |= HF_FAILED_AMBUSH;
       if(q == 2) {
         for(int i=0; i<numplayers(); i++) 
         forCellEx(c2, playerpos(i))
-          if(eq(c2->aitmp, sval))
+          if(cl.listed(c2))
             forCellEx(c3, playerpos(i)) 
               if(c3 != c2 && isNeighbor(c2,c3))
-              if(eq(c3->aitmp, sval))
+              if(cl.listed(c3))
                 havewhat |= HF_FAILED_AMBUSH;
         }
       if(havewhat & HF_FAILED_AMBUSH && ambushed) {
@@ -6330,7 +6346,7 @@ void collectMessage(cell *c2, eItem which) {
   else if(which == itGreenStone)
     addMessage(XLAT("Another Dead Orb."));
   else if(itemclass(which) != IC_TREASURE) {
-    if(c2->wall != waBoat && !inv::activating)
+    if(!inv::activating)
       addMessage(XLAT("You have found %the1!", which));
     }
   else if(which == itBabyTortoise) {
@@ -6509,7 +6525,6 @@ int ambush(cell *c, eItem what) {
   celllister cl(c, maxdist, 1000000, NULL);
   cell *c0 = c;
   int d = 0;
-  cl.prepare();
   int dogs0 = 0;
   for(cell *cx: cl.lst) {
     int dh = cl.getdist(cx);
@@ -7191,15 +7206,15 @@ void monstersTurn() {
   heat::processheat();
   // if(elec::havecharge) elec::drawcharges();
 
+  orbbull::check();
+
+  if(!phase1) terracotta();
+  
   if(items[itOrbFreedom])
     for(int i=0; i<numplayers(); i++)
       if(multi::playerActive(i))
         checkFreedom(playerpos(i));
 
-  orbbull::check();
-
-  if(!phase1) terracotta();
-  
   DEBT("check");
   checkmove();
   if(canmove) elec::checklightningfast();
@@ -7643,6 +7658,8 @@ bool movepcto(int d, int subdir, bool checkonly) {
         } */
       
       mirror::act(origd, mirror::SPINMULTI | mirror::ATTACK);
+      
+      int tk = tkills();
 
       if(goodTortoise) {
         items[itBabyTortoise] += 4;
@@ -7672,7 +7689,7 @@ bool movepcto(int d, int subdir, bool checkonly) {
           }
         }
       
-      sideAttack(cwt.c, d, moPlayer, 0);
+      sideAttack(cwt.c, d, moPlayer, tkills() - tk);
       lastmovetype = lmAttack; lastmove = c2;
       swordAttackStatic();
       }

@@ -2937,19 +2937,12 @@ void turn(int delta) {
 
   for(int t=1; t<motypes; t++) if(exists[t]) {
   
-    pd_from = NULL;
+    pathdata pd(1);
+        
     // build the path data
     
-    int pqs = isize(pathq);
-    for(int i=0; i<pqs; i++) {
-      pathq[i]->pathdist = PINFD;
-      }
-    pathq.clear(); 
-
-    for(int i=0; i<isize(targets); i++) {
-      targets[i]->pathdist = isPlayerOn(targets[i]) ? 0 : 1;
-      pathq.push_back(targets[i]);
-      }
+    for(cell *c: targets)
+      onpath(c, isPlayerOn(c) ? 0 : 1);
 
     int qb = 0;
     for(qb=0; qb < isize(pathq); qb++) {
@@ -2961,8 +2954,7 @@ void turn(int delta) {
         // printf("i=%d cd=%d\n", i, c->mov[i]->cpdist);
         if(c2 && c2->pathdist == PINFD && gmatrix.count(c2) && 
           (passable_for(eMonster(t), c, c2, P_CHAIN | P_ONPLAYER) || c->wall == waThumperOn)) {
-          c2->pathdist = d+1;
-          pathq.push_back(c2);
+          onpath(c2, d+1);
           }
         }
       }

@@ -586,7 +586,7 @@ bool drawItemType(eItem it, cell *c, const transmatrix& V, int icol, int ticks, 
       poly_outline = OUTLINE_OTHER;
     }
   
-  if(c && conformal::includeHistory && eq(c->aitmp, sval)) poly_outline = OUTLINE_DEAD;
+  if(c && conformal::includeHistory && conformal::infindhistory.count(c)) poly_outline = OUTLINE_DEAD;
     
   if(!mmitem && it) return true;
   
@@ -1809,7 +1809,7 @@ bool dont_face_pc = false;
 
 bool drawMonster(const transmatrix& Vparam, int ct, cell *c, int col) {
 
-  bool darkhistory = conformal::includeHistory && eq(c->aitmp, sval);
+  bool darkhistory = conformal::includeHistory && conformal::inkillhistory.count(c);
   
   if(doHighlight())
     poly_outline = 
@@ -2981,7 +2981,7 @@ void setcolors(cell *c, int& wcol, int &fcol) {
       }
     
     case waFloorA: case waFloorB: // isAlch
-      if(c->item && !(conformal::includeHistory && eq(c->aitmp, sval)))
+      if(c->item && !(conformal::includeHistory && conformal::infindhistory.count(c)))
         fcol = wcol = iinf[c->item].color;
       else
         fcol = wcol;
@@ -3648,7 +3648,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
     bool hidden = itemHidden(c);
     bool hiddens = itemHiddenFromSight(c);
     
-    if(conformal::includeHistory && eq(c->aitmp, sval)) {
+    if(conformal::includeHistory && conformal::infindhistory.count(c)) {
       hidden = true;
       hiddens = false;
       }
@@ -4211,7 +4211,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         queuepoly((*Vdp), shHeptaMarker, wmblack ? 0x80808080 : 0x00000080);
         }
 
-      if(conformal::includeHistory && eq(c->aitmp, sval-1))
+      if(conformal::includeHistory && conformal::inmovehistory.count(c))
         queuepoly((*Vdp), shHeptaMarker, 0x000000C0);
 
       char xch = winf[c->wall].glyph;

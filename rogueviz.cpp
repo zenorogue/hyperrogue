@@ -706,6 +706,7 @@ namespace sag {
       forgetedges(i);
       }
 
+    shmup::fixStorage();
     }
   
   vector<edgeinfo> sagedges;
@@ -815,6 +816,8 @@ namespace sag {
     printf("loglikelihood = %lf\n", (double) loglik);
     }
   
+  ld min_visible_weight = .1;
+  
   void readsag(const char *fname) {
     maxweight = 0;
     FILE *f = fopen(fname, "rt");
@@ -869,7 +872,7 @@ namespace sag {
       } */
     for(int i=0; i<isize(sagedges); i++) {
       edgeinfo& ei = sagedges[i];
-      ei.visible = ei.weight >= 0.1;
+      ei.visible = ei.weight >= min_visible_weight;
       // (ei.weight >= maxwei[ei.i] / 5 || ei.weight >= maxwei[ei.j] / 5);
 
       ei.weight2 = pow((double) ei.weight, (double) edgepower) * edgemul;
@@ -1409,6 +1412,9 @@ int readArgs() {
   else if(argis("-sagtemp")) {
     shift(); sag::hightemp = argf();
     shift(); sag::lowtemp = argf();
+    }
+  else if(argis("-sagmin")) {
+    shift(); sag::min_visible_weight = argf();
     }
 // (2) read the edge data
   else if(argis("-sagpar")) {

@@ -267,8 +267,9 @@ namespace mapstream {
       c->bardir = NOBARRIERS;
       // fixspin(rspin, loadChar(), c->type);
       if(vernum < 7400) {
-        load(c->aitmp);
-        c->wparam = c->aitmp;
+        short z;
+        load(z);
+        c->wparam = z;
         }
       else load(c->wparam);
       load(c->landparam);
@@ -620,7 +621,7 @@ namespace mapeditor {
   
   vector<pair<cellwalker, cellwalker> > spill_list;
   
-  void list_spill(cellwalker tgt, cellwalker src) {
+  void list_spill(cellwalker tgt, cellwalker src, manual_celllister& cl) {
     spill_list.clear(); sval++;
     spill_list.emplace_back(tgt, src);
     int crad = 0, nextstepat = 0;
@@ -633,8 +634,7 @@ namespace mapeditor {
       for(int i=0; i<sd.first.c->type; i++) {
         auto sd2 = sd;
         sd2.first = sd2.first + i + wstep;
-        if(eq(sd2.first.c->aitmp, sval)) continue; 
-        sd2.first.c->aitmp = sval;
+        if(!cl.add(sd2.first.c)) continue;
         if(sd2.second.c) {
           sd2.second = sd2.second + i + wstep;
           if(sd2.second.c->land == laNone) continue;
@@ -668,7 +668,7 @@ namespace mapeditor {
     }
   #endif
   
-  void editAt(cellwalker where) {
+  void editAt(cellwalker where, manual_celllister& cl) {
 
     if(painttype == 4 && radius) {
       if(where.c->type != copysource.c->type) return;
@@ -677,7 +677,7 @@ namespace mapeditor {
         where += 1;
       }
     if(painttype != 4) copysource.c = NULL;
-    list_spill(where, copysource);
+    list_spill(where, copysource, cl);
     
     for(auto& st: spill_list)
       editCell(st);
@@ -685,34 +685,30 @@ namespace mapeditor {
   
   void allInPattern(cellwalker where) {
 
+    manual_celllister cl;
     if(!patterns::whichPattern) {
-      editAt(where);
+      editAt(where, cl);
       return;
       }
 
-    vector<cell*> v;
-    v.push_back(where.c);
-    sval++;
-    where.c->aitmp = sval;
+    cl.add(where.c);
     
     int at = 0;
-    while(at < isize(v)) {
-      cell *c2 = v[at];
+    while(at < isize(cl.lst)) {
+      cell *c2 = cl.lst[at];
       at++;
       
-      forCellEx(c3, c2) 
-        if(!eq(c3->aitmp, sval))
-          c3->aitmp = sval, v.push_back(c3);
+      forCellEx(c3, c2) cl.add(c3);
       }
     
     auto si = patterns::getpatterninfo0(where.c);
     int cdir = where.spin;
     if(cdir >= 0) cdir = cdir - si.dir;
     
-    for(cell* c2: v) {
+    for(cell* c2: cl.lst) {
       auto si2 = patterns::getpatterninfo0(c2);
       if(si2.id == si.id) {
-        editAt(cellwalker(c2, cdir>=0 ? fixdir(cdir + si2.dir, c2) : -1));
+        editAt(cellwalker(c2, cdir>=0 ? fixdir(cdir + si2.dir, c2) : -1), cl);
         modelcell[si2.id] = c2;
         }
       }

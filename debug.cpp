@@ -333,7 +333,7 @@ void debugScreen() {
     dialog::addSelItem("celldist", its(celldist(mouseover)), 0);
     dialog::addSelItem("pathdist", its(mouseover->pathdist), 0);
     dialog::addSelItem("celldistAlt", mouseover->master->alt ? its(celldistAlt(mouseover)) : "--", 0);
-    dialog::addSelItem("temporary", its(mouseover->aitmp), 0);
+    dialog::addSelItem("temporary", its(mouseover->listindex), 0);
     if(gp::on)
       dialog::addSelItem("whirl", gp::disp(gp::get_local_info(mouseover).relative), 0);
     dialog::addBreak(50);
