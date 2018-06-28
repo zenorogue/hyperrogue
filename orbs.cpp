@@ -260,6 +260,7 @@ void checkFreedom(cell *cf) {
       // todo leader
       if(!passable(c2, c, P_ISPLAYER | P_MIRROR | P_LEADER)) continue;
       if(eq(c2->aitmp, sval)) continue;
+      if(c2->wall == waArrowTrap && c2->wparam == 2) continue;
       bool monsterhere = false;
       for(int j=0; j<c2->type; j++) {
         cell *c3 = c2->mov[j];
