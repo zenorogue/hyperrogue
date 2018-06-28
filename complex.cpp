@@ -3113,7 +3113,7 @@ namespace windmap {
     if(precomp && hyperbolic && isize(currfp.matrices)) {
       int randval = hrand(isize(currfp.matrices));
       for(int i=0; i<N; i++)
-        windcodes[i] = precomp[getid[fieldpattern::fieldval_uniq_rand(samples[i], randval)]-1];
+        windcodes[i] = precomp[getid[fieldpattern::fieldval_uniq_rand(samples[i].c, randval)]-1];
       return;
       }
     
