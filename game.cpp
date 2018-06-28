@@ -6346,7 +6346,7 @@ void collectMessage(cell *c2, eItem which) {
   else if(which == itGreenStone)
     addMessage(XLAT("Another Dead Orb."));
   else if(itemclass(which) != IC_TREASURE) {
-    if(c2->wall != waBoat && !inv::activating)
+    if(!inv::activating)
       addMessage(XLAT("You have found %the1!", which));
     }
   else if(which == itBabyTortoise) {
