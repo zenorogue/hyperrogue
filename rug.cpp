@@ -1263,7 +1263,7 @@ void drawRugScene() {
     glBindTexture( GL_TEXTURE_2D, alternate_texture);
 
   if(backcolor == 0) 
-    glClearColor(0.05,0.05,0.05,1);
+    glClearColor(0.05f,0.05f,0.05f,1.0f);
   else
     glhr::colorClear(backcolor << 8 | 0xFF);
 #ifdef GLES_ONLY

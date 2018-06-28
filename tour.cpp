@@ -626,10 +626,10 @@ slide default_slides[] = {
     [] (presmode mode) {
       setCanvas(mode, 't');
       if(mode == 1) 
-        patterns::displaycodes = 2,
+        patterns::displaycodes = true,
         patterns::whichPattern = 'z';
       if(mode == 3) 
-        patterns::displaycodes = 0,
+        patterns::displaycodes = false,
         patterns::whichPattern = 0;
       SHOWLAND ( l == laCanvas );
       }
