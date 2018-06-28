@@ -7195,15 +7195,15 @@ void monstersTurn() {
   heat::processheat();
   // if(elec::havecharge) elec::drawcharges();
 
+  orbbull::check();
+
+  if(!phase1) terracotta();
+  
   if(items[itOrbFreedom])
     for(int i=0; i<numplayers(); i++)
       if(multi::playerActive(i))
         checkFreedom(playerpos(i));
 
-  orbbull::check();
-
-  if(!phase1) terracotta();
-  
   DEBT("check");
   checkmove();
   if(canmove) elec::checklightningfast();
