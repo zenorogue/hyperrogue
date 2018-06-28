@@ -536,8 +536,7 @@ void teleportTo(cell *dest) {
       drainOrb(itOrbTeleport);
       movecost(cwt.c, dest);
       playerMoveEffects(cwt.c, dest);
-      for(int i=9; i>=0; i--)
-        setdist(dest, i, NULL);
+      afterplayermoved();
       bfs();
       }
     return;
@@ -552,9 +551,7 @@ void teleportTo(cell *dest) {
   addMessage(XLAT("You teleport to a new location!"));
   mirror::destroyAll();
 
-  for(int i=9; i>=0; i--)
-    setdist(cwt.c, i, NULL);
-
+  afterplayermoved();
   bfs();
   
   sword::reset();
