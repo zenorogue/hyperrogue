@@ -2530,3 +2530,4 @@ non-game:
 - fixed a crash introduced in the last update
 - the Strange Challenge ON/OFF switch now shows the correct state (not the state of Random Pattern Mode)
 - fixed the "chaos mode locked" help display 
+- fixed Wild West (gaining extra bullets, shooting)

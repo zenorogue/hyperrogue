@@ -3296,6 +3296,7 @@ void updateHi(eItem it, int v) {
 void gainItem(eItem it) {
   int g = gold();
   items[it]++; if(it != itLotus) updateHi(it, items[it]);
+  if(it == itRevolver && items[it] > 6) items[it] = 6;
   achievement_collection(it, gold(), g);
   multi::treasures[multi::cpid]++;
 #if CAP_DAILY
