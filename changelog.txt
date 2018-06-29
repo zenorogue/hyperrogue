@@ -2525,3 +2525,8 @@ non-game:
 - an option to display all floors as 'full', i.e., without spaces between them ('r' in map/graphics editor)
 - new commandline options: -fsh (floor shape display) and -noshadow (disable shadows)
 - fixed a bug with Orb of Mirror display in OSM
+
+2018.06.29 12:27 Update 10.4i
+- fixed a crash introduced in the last update
+- the Strange Challenge ON/OFF switch now shows the correct state (not the state of Random Pattern Mode)
+- fixed the "chaos mode locked" help display 
