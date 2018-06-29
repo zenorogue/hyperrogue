@@ -18,8 +18,6 @@ cell *lastmove;
 enum eLastmovetype {lmSkip, lmMove, lmAttack, lmSpecial, lmPush, lmTree};
 eLastmovetype lastmovetype;
 
-int sval = 100000000;
-
 bool hauntedWarning;
 bool survivalist;
 

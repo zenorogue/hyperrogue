@@ -831,7 +831,6 @@ namespace conformal {
     infindhistory.clear();
     for(int i=0; i<isize(movehistory); i++)
       inmovehistory.insert(movehistory[i]);
-    sval++;
     int sk = isize(killhistory);
     for(int i=0; i<sk; i++) {
       eMonster m = killhistory[i].second;

@@ -288,21 +288,20 @@ struct cellcrawler {
   vector<cellcrawlerdata> data;
   
   void store(const cellwalker& o, int from, int spin, manual_celllister& cl) {
-    if(!add(o.c)) return;
+    if(!cl.add(o.c)) return;
     data.emplace_back(o, from, spin);
     }
   
   void build(const cellwalker& start) {
-    sval++;
     data.clear();
     manual_celllister cl;
-    store(start, 0, 0);
+    store(start, 0, 0, cl);
     for(int i=0; i<isize(data); i++) {
       cellwalker cw0 = data[i].orig;
       for(int j=0; j<cw0.c->type; j++) {
         cellwalker cw = cw0 + j + wstep;
         if(!getNeuron(cw.c)) continue;
-        store(cw, i, j);
+        store(cw, i, j, cl);
         }
       }
     if(gaussian) for(cellcrawlerdata& s: data)
