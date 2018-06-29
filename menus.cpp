@@ -460,7 +460,7 @@ void showChangeMode() {
   dialog::addBoolItem(XLAT("%1 Challenge", moPrincess), (princess::challenge), 'P');
   dialog::addBoolItem(XLAT("random pattern mode"), (randomPatternsMode), 'r');
 #if CAP_DAILY
-  dialog::addBoolItem(XLAT("Strange Challenge"), (randomPatternsMode), 'z');
+  dialog::addBoolItem(XLAT("Strange Challenge"), daily::on, 'z');
 #endif
 
   dialog::addBreak(50);
@@ -533,7 +533,7 @@ void showChangeMode() {
   #endif
     else if(uni == 'C') {
       if(chaosUnlocked) restart_game(rg::chaos);
-      if(chaosmode) help_nochaos();
+      if(!chaosUnlocked) help_nochaos();
       }
     else if(xuni == 'P') {
       if(!princess::everSaved)
