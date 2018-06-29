@@ -4615,7 +4615,7 @@ void groupmove(eMonster movtype, flagtype mf) {
     if((mf & MF_ONLYEAGLE) && c->monst != moEagle && c->monst != moBat) return;
     if(movegroup(c->monst) == movtype && c->pathdist != 0) {
       cell *c2 = moveNormal(c, mf);
-      onpath(c2, 0);
+      if(c2) onpath(c2, 0);
       }
     }
   }
