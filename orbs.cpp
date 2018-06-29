@@ -1172,8 +1172,9 @@ eItem targetRangedOrb(cell *c, orbAction a) {
 
   // (4a) colt
   if(!shmup::on && items[itRevolver] && c->monst && canAttack(cwt.c, moPlayer, c, c->monst, AF_GUN)) {
-    pathdata pd(moEagle);
-    if(c->pathdist <= GUNRANGE && !monstersnearO(a, cwt.c, c, moPlayer, NULL, cwt.c)) {
+    bool inrange = false;
+    for(cell *c1: gun_targets(cwt.c)) if(c1 == c) inrange = true;
+    if(inrange && !monstersnearO(a, cwt.c, c, moPlayer, NULL, cwt.c)) {
       if(!isCheck(a)) gun_attack(c);
       return itRevolver;
       }

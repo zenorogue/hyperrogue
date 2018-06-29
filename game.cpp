@@ -1140,19 +1140,18 @@ bool flashWouldKill(cell *c, flagtype extra) {
   return false;
   }
 
-// this is not completely correct, but it works in the Wild West
-bool outlawNearby(cell *c, int dist) {
-  if(dist == 0) return false;
-  for(int i=0; i<c->type; i++) {
-    cell *c2 = c->mov[i];
-    if(!c2) continue;
-    if(c2->monst == moOutlaw && !stalemate::isKilled(c2)) 
-      return true;
-    if((passable(c2, NULL, 0) || (c2->monst && stalemate::isKilled(c2))) && 
-       outlawNearby(c2, dist-1))
-      return true;
+vector<cell*> gun_targets(cell *c) {
+  manual_celllister cl;
+  vector<int> dists;
+  cl.add(c); dists.push_back(0);
+  for(int i=0; i<isize(dists); i++) {
+    cell *c1 = cl.lst[i];
+    if(dists[i] <= 2)
+    forCellEx(c2, c1)
+      if(passable(c2, c1, P_BULLET | P_FLYING | P_MONSTER))
+        if(cl.add(c2)) dists.push_back(dists[i] + 1);
     }
-  return false;
+  return cl.lst;
   }
 
 namespace stalemate {
@@ -1218,11 +1217,13 @@ bool monstersnear(stalemate1& sm) {
     fast = (items[itOrbSpeed] && (items[itOrbSpeed] & 1));
     }
   
-  if(havewhat&HF_OUTLAW)
-    if(outlawNearby(c, 3)) {
-      res++; who_kills_me = moOutlaw;
-      }
-  
+  if(havewhat&HF_OUTLAW) {
+    for(cell *c1: gun_targets(c)) 
+      if(c1->monst == moOutlaw && !c1->stuntime && !stalemate::isKilled(c1)) {
+        res++; who_kills_me = moOutlaw;
+        }
+    }
+
   for(int t=0; t<c->type; t++) {
     cell *c2 = c->mov[t];
 
@@ -5398,9 +5399,13 @@ void specialMoves() {
         }
       }
     
-    else if(m == moOutlaw && c->pathdist <= GUNRANGE) {
-      killThePlayer(m, nearestPathPlayer(c), 0);
-      c->stuntime = 1;
+    else if(m == moOutlaw) {
+      for(cell *c1: gun_targets(c))
+        if(canAttack(c, moOutlaw, c1, c1->monst, AF_GETPLAYER | AF_ONLY_FBUG | AF_GUN)) {
+          attackMonster(c1, AF_GETPLAYER | AF_ONLY_FBUG | AF_GUN, moOutlaw);
+          c->stuntime = 1;
+          break;
+          }
       }
 
     else if(m == moWitchFlash && flashWouldKill(c, AF_GETPLAYER | AF_ONLY_FBUG) && !flashWouldKill(c, false)) {

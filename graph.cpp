@@ -3047,9 +3047,16 @@ void setcolors(cell *c, int& wcol, int &fcol) {
     wcol = gradient(0x804060, wcol, 0,2,3),
     fcol = gradient(0x804060, fcol, 0,2,3);
   
-  if(items[itRevolver] && c->pathdist > GUNRANGE && !shmup::on)
-    fcol = gradient(fcol, 0, 0, 25, 100),
-    wcol = gradient(wcol, 0, 0, 25, 100);
+  if(items[itRevolver] && !shmup::on) {
+    bool inrange = c->mpdist <= GUNRANGE;
+    if(inrange) {
+      inrange = false;
+      for(int i=0; i<numplayers(); i++) for(cell *c1: gun_targets(playerpos(i))) if(c1 == c) inrange = true;
+      }
+    if(!inrange)
+      fcol = gradient(fcol, 0, 0, 25, 100),
+      wcol = gradient(wcol, 0, 0, 25, 100);
+    }
     
   if(highwall(c) && !wmspatial)
     fcol = wcol;
