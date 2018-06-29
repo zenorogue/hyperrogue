@@ -808,7 +808,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
             else c2->mondir = NODIR;
             }
           }
-        if(!c->monst && !tactic::on && !yendor::on && !peace::on && !euclid && hrand(4000) < 10 && !safety) {
+        if(!c->monst && !tactic::on && !yendor::on && !randomPatternsMode && !peace::on && !euclid && hrand(4000) < 10 && !safety) {
           c->item = itBabyTortoise;
           tortoise::babymap[c] = getBits(c) ^ tortoise::getRandomBits();
           }

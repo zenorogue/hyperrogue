@@ -1260,7 +1260,7 @@ void start_game() {
         randompattern[i] -= (randompattern[i] % 5);
         }
       }
-    if(randomPatternsMode) firstland = pickLandRPM(laNone);
+    if(randomPatternsMode) specialland = pickLandRPM(laNone);
     clearMemoRPM();
     }
 
