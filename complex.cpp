@@ -2046,7 +2046,7 @@ void livecaves() {
   vector<cell*> bringlife;
   int gr = gamerange();
   
-  int heatvals[dcs];
+  std::vector<int> heatvals(dcs);
   
   for(int i=0; i<dcs; i++) {
     cell *c = allcells[i];
@@ -2991,7 +2991,7 @@ namespace ca {
     if(cwt.c->land != laCA) return;
     vector<cell*>& allcells = currentmap->allcells();
     int dcs = isize(allcells);
-    bool willlive[dcs];
+    std::vector<bool> willlive(dcs);
     for(int i=0; i<dcs; i++) {
       cell *c = allcells[i];
       if(c->land != laCA) return;
@@ -3126,9 +3126,9 @@ namespace windmap {
 
     for(int i=0; i<N; i++) windcodes[i] = hrand(256);
     
-    bool inqueue[N];
+    vector<bool> inqueue(N, true);
     vector<int> tocheck;
-    for(int i=0; i<N; i++) tocheck.push_back(i), inqueue[i] = true;
+    for(int i=0; i<N; i++) tocheck.push_back(i);
     hrandom_shuffle(&tocheck[0], isize(tocheck));
     
     for(int a=0; a<isize(tocheck); a++) {

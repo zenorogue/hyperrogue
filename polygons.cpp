@@ -201,9 +201,9 @@ void polylineColor(SDL_Surface *s, int *x, int *y, int polyi, int col) {
   }
 
 void filledPolygonColorI(SDL_Surface *s, int* px, int *py, int polyi, int col) {
-  Sint16 spx[polyi], spy[polyi];
-  for(int i=0; i<polyi; i++) spx[i] = px[i], spy[i] = py[i];
-  filledPolygonColor(s, spx, spy, polyi, col);
+  std::vector<Sint16> spx(px, px + polyi);
+  std::vector<Sint16> spy(py, py + polyi);
+  filledPolygonColor(s, spx.data(), spy.data(), polyi, col);
   }
 #endif
 

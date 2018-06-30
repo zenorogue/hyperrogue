@@ -8,7 +8,7 @@
 
 CXXFLAGS += -std=c++11 -march=native -DMAC
 CXXFLAGS += -W -Wall -Wextra -pedantic
-CXXFLAGS += -Wno-format-pedantic -Wno-unused-parameter -Wno-missing-field-initializers -Wno-vla-extension
+CXXFLAGS += -Wno-format-pedantic -Wno-unused-parameter -Wno-missing-field-initializers
 CXXFLAGS += -I/usr/local/include
 CXXFLAGS += ${EXTRA_CXXFLAGS}
 
