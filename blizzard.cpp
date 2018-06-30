@@ -56,11 +56,11 @@ void set_blizzard_frame(cell *c, int frameid) {
 
 vector<blizzardcell*> bcells;
 
-int N;
+int blizzard_N;
 
 blizzardcell* getbcell(cell *c) {
   int i = c->listindex;
-  if(i<0 || i >= N) return NULL;
+  if(i<0 || i >= blizzard_N) return NULL;
   if(bcells[i]->c != c) return NULL;
   return bcells[i];
   }
@@ -77,8 +77,8 @@ void drawBlizzards() {
         bcells.push_back(&it->second);
         it++;
         }
-  N = isize(bcells);
-  for(int i=0; i<N; i++) {
+  blizzard_N = isize(bcells);
+  for(int i=0; i<blizzard_N; i++) {
     auto& bc = *bcells[i];
     bc.tmp = bc.c->listindex,
     bc.c->listindex = i;
@@ -86,7 +86,7 @@ void drawBlizzards() {
     bc.wmap = windmap::at(bc.c);
     }
 
-  for(int i=0; i<N; i++) {
+  for(int i=0; i<blizzard_N; i++) {
     auto& bc = *bcells[i];
     cell *c = bc.c;
     bc.inward = bc.outward = 0;
@@ -116,13 +116,13 @@ void drawBlizzards() {
   
   double at = (ticks % 250) / 250.0;
 
-  for(int i=0; i<N; i++) {
+  for(int i=0; i<blizzard_N; i++) {
     auto& bc = *bcells[i];
     for(auto sb: bc.inorder)
       sb->global = (*bc.gm) * sb->T;
     }
 
-  for(int i=0; i<N; i++) {
+  for(int i=0; i<blizzard_N; i++) {
     auto& bc = *bcells[i];
     cell *c = bc.c;
     
@@ -147,7 +147,7 @@ void drawBlizzards() {
       }
     }
 
-  for(int ii=0; ii<N; ii++) {
+  for(int ii=0; ii<blizzard_N; ii++) {
     auto& bc = *bcells[ii];
 
     /* if(isNeighbor(bc.c, mouseover)) {
