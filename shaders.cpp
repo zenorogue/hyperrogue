@@ -172,10 +172,10 @@ int compileShader(int type, const string& s) {
   GLint logLength;
   glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &logLength);
   if (logLength > 0) {
-    char log[logLength];
-    glGetShaderInfoLog(shader, logLength, &logLength, log);
+    std::vector<char> log(logLength);
+    glGetShaderInfoLog(shader, logLength, &logLength, log.data());
     if(logLength > 0)
-      printf("compiler log (%d): '%s'\n", logLength, log);
+      printf("compiler log (%d): '%s'\n", logLength, log.data());
     }
   
   glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
@@ -232,10 +232,10 @@ struct GLprogram {
     GLint logLength;
     glGetProgramiv(_program, GL_INFO_LOG_LENGTH, &logLength);
     if (logLength > 0) {
-      char log[logLength];
-      glGetProgramInfoLog(_program, logLength, &logLength, log);
+      std::vector<char> log(logLength);
+      glGetProgramInfoLog(_program, logLength, &logLength, log.data());
       if(logLength > 0)
-        printf("linking log (%d): %s\n", logLength, log);
+        printf("linking log (%d): %s\n", logLength, log.data());
       }
      
     glGetProgramiv(_program, GL_LINK_STATUS, &status);

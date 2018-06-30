@@ -219,12 +219,11 @@ struct fpattern {
         } else wsquare = 0;
   
   #ifdef EASY        
-      int sqrts[Prime];
-      for(int k=0; k<Prime; k++) sqrts[k] = 0;
+      std::vector<int> sqrts(Prime, 0);
       for(int k=1-Prime; k<Prime; k++) sqrts[sqr(k)] = k;
       int fmax = Prime;
   #else
-      int sqrts[Field];
+      std::vector<int> sqrts(Field);
       for(int k=0; k<Field; k++) sqrts[sqr(k)] = k;
       int fmax = Field;
   #endif

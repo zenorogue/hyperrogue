@@ -176,7 +176,7 @@ heptagon *createAlternateMap(cell *c, int rad, hstate firststate, int special) {
 
   // okay, let's go then!
   cellwalker bf(c, gdir);
-  cell *cx[rad+1];
+  std::vector<cell *> cx(rad+1);
   for(int i=0; i<rad; i++) {
     cx[i] = bf.c;
     bf += revstep;

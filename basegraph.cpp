@@ -360,9 +360,9 @@ void sdltogl(SDL_Surface *txt, glfont_t& f, int ch) {
   int theight = next_p2( otheight );
 
 #if CAP_TABFONT
-  int expanded_data[twidth * theight];
+  std::vector<int> expanded_data(twidth * theight);
 #else
-  Uint16 expanded_data[twidth * theight];
+  std::vector<Uint16> expanded_data(twidth * theight);
 #endif
 
   for(int j=0; j <theight;j++) for(int i=0; i < twidth; i++) {
@@ -387,7 +387,7 @@ void sdltogl(SDL_Surface *txt, glfont_t& f, int ch) {
 #else
     GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE, 
 #endif
-    expanded_data );
+    expanded_data.data() );
  
   float x=(float)otwidth / (float)twidth;
   float y=(float)otheight / (float)theight;

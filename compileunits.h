@@ -92,9 +92,6 @@ namespace hr { namespace inv { bool on, activating; } }
 #if CAP_TOUR
 #include "tour.cpp"
 #endif
-#if ISMOBILE==0
-#include <unistd.h>
-#endif
 #include "commandline.cpp"
 #include "bigstuff.cpp"
 
