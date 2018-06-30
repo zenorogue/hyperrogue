@@ -615,7 +615,7 @@ namespace sag {
       
       int it = s<2 ? (s+1) : s-2;
       for(int ii=0; ii<it; ii++) {
-        int d = rand() % c->type;
+        int d = hrand(c->type);
         c = c->mov[d];
         if(!c) goto aiter;
         if(c->wparam != INSNAKE) goto aiter;
