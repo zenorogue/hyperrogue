@@ -691,7 +691,7 @@ void describe(cell *c) {
   help += "\n";
   vector<pair<double, int>> v;
   for(int s=0; s<samples; s++) if(whowon[s] == n) v.emplace_back(vnorm(n->net, data[s].val), s);
-  hrandom_shuffle(&v[0], isize(v));
+  for(int i=1; i<isize(v); i++) swap(v[i], v[rand() % (i+1)]);
   sort(v.begin(), v.end(), [] (pair<double,int> a, pair<double,int> b) { return a.first < b.first; });
   
   for(int i=0; i<isize(v) && i<20; i++) {

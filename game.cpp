@@ -142,24 +142,29 @@ cellwalker cwt;       // single player character position
 inline cell*& singlepos() { return cwt.c; }
 inline bool singleused() { return !(shmup::on || multi::players > 1); }
 
-std::mt19937 r;
+// the main random number generator for the game
+// all the random calls related to the game mechanics (land generation, AI...) should use hrngen
+// random calls not related to the game mechanics (graphical effects) should not use hrngen
+// this ensures that the game should unfold exactly the same if given the same seed and the same input
+
+std::mt19937 hrngen;
 
 void shrand(int i) {
-  r.seed(i);
+  hrngen.seed(i);
   }
 
-int hrandpos() { return r() & HRANDMAX; }
+int hrandpos() { return hrngen() & HRANDMAX; }
 
 int hrand(int i) { 
-  return r() % i;
+  return hrngen() % i;
   }
 
 ld hrandf() { 
-  return (r() & HRANDMAX) / (HRANDMAX + 1.0);
+  return (hrngen() & HRANDMAX) / (HRANDMAX + 1.0);
   }
 
 int hrandstate() {
-  std::mt19937 r2 = r;
+  std::mt19937 r2 = hrngen;
   return r2() & HRANDMAX;
   }
 
