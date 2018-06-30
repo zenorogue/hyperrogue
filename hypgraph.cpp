@@ -580,7 +580,7 @@ void drawrec(const heptspin& hs, hstate s, const transmatrix& V) {
       if(c->mov[ds] && c->spn(ds) == 0 && dodrawcell(c->mov[ds])) {
         transmatrix V2 = V1 * hexmove[d];
         if(in_qrange(V2))
-        drawcell(c->mov[ds], V2, 0, hs.mirrored ^ c->mirror(ds));
+        drawcell(c->mov[ds], V2, 0, boolean_xor(hs.mirrored, c->mirror(ds)));
         }
       }
     }

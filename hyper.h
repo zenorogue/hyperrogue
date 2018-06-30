@@ -421,6 +421,8 @@ int hrand(int i);
 // size casted to int, to prevent warnings and actual errors caused by the unsignedness of x.size()
 template<class T> int isize(const T& x) {return x.size(); }
 
+bool boolean_xor(bool a, bool b) { return a ^ b; }
+
 // initialize the achievement system.
 void achievement_init();
 
