@@ -746,7 +746,7 @@ void moveBoat(cell *to, cell *from, int direction_hint) {
 
 void moveBoatIfUsingOne(cell *to, cell *from, int direction_hint) {
   if(from->wall == waBoat && isWatery(to)) moveBoat(to, from, direction_hint);
-  else if(from->wall == waBoat && boatGoesThrough(to) && markEmpathy(itOrbWater)) {
+  else if(from->wall == waBoat && boatGoesThrough(to) && isFriendly(to) && markEmpathy(itOrbWater)) {
     placeWater(to, from);
     moveBoat(to, from, direction_hint);
     }
