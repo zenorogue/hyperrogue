@@ -2535,5 +2535,5 @@ non-game:
 
 2018.07.03 04:15 Update 10.4j
 - fixed Prairie
+- Orb of Empathy + Orb of Water no longer works on enemies too
 - fixed Strange Challenge leaderboard display
-
