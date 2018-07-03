@@ -2844,7 +2844,7 @@ namespace prairie {
     vector<cell*> whirlline;
     whirlline.push_back(c);
     cell *c2 = prev(c);
-    while(c2 && !cl.add(c2)) {
+    while(c2 && cl.add(c2)) {
       whirlline.push_back(c2);
       c2 = prev(c2);
       // in sphere/quotient geometries, never break before a bull
