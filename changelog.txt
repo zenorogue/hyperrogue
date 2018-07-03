@@ -2532,3 +2532,8 @@ non-game:
 - fixed the "chaos mode locked" help display 
 - fixed Wild West (gaining extra bullets, shooting)
 - Random Pattern Mode: randomized the starting land; Baby Tortoises no longer appear
+
+2018.07.03 04:15 Update 10.4j
+- fixed Prairie
+- fixed Strange Challenge leaderboard display
+
