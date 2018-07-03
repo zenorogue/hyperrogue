@@ -577,7 +577,7 @@ namespace sag {
     return cost;
     }
   
-  std::mt19937 los;
+  // std::mt19937 los;
 
   bool infullsa;
   
@@ -589,6 +589,15 @@ namespace sag {
   void forgetedges(int id) {
     for(int i=0; i<isize(vdata[id].edges); i++) 
       vdata[id].edges[i].second->orig = NULL;
+    }
+  
+  bool chance(double p) {
+    p *= double(hrngen.max()) + 1;
+    auto l = hrngen();
+    auto pv = (decltype(l)) p;
+    if(l < pv) return true;
+    if(l == pv) return chance(p-pv);
+    return false;
     }
 
   void saiter() {
@@ -635,7 +644,7 @@ namespace sag {
     
     if(change < 0) chgs.push_back(-change);
       
-    if(change > 0 && (sagmode == sagHC || los() > exp(-change * exp(-temperature)))) return;
+    if(change > 0 && (sagmode == sagHC || !chance(exp(-change * exp(-temperature))))) return;
 
     snakenode[sid1] = t2; snakenode[sid2] = t1;
     snakeid[t1] = sid2; if(t2 >= 0) snakeid[t2] = sid1;
