@@ -1,7 +1,7 @@
 // Hyperbolic Rogue
 // Copyright (C) 2011-2018 Zeno and Tehora Rogue, see 'hyper.cpp' for details
 
-// Kohonen's self-organizing networks. 
+// Kohonen's self-organizing maps. 
 // This is a part of RogueViz, not a part of HyperRogue.
 
 namespace rogueviz { namespace kohonen {
@@ -27,7 +27,8 @@ struct neuron {
   double udist;
   int lpbak;
   int col;
-  int samples, csample, bestsample;
+  int allsamples, drawn_samples, csample, bestsample;
+  neuron() { drawn_samples = allsamples = bestsample = 0; }
   };
 
 vector<string> colnames;
@@ -182,7 +183,7 @@ void coloring() {
       vector<double> listing;
       for(neuron& n: net) switch(c) {
         case -4:
-          listing.push_back(log(5+n.samples));
+          listing.push_back(log(5+n.allsamples));
           break;
           
         case -3:
@@ -215,6 +216,32 @@ void coloring() {
     }
   }
 
+void distribute_neurons() {
+  whowon.resize(samples);
+  
+  for(neuron& n: net) n.drawn_samples = 0;
+  
+  for(int s: samples_shown) {
+    auto& w = winner(s);
+    whowon[s] = &w;
+    w.drawn_samples++;
+    }
+  
+  ld rad = .25 * scalef;
+
+  for(int id=0; id<isize(samples_shown); id++) {
+    int s = samples_shown[id];
+    auto& w = *whowon[s];
+    vdata[id].m->base = w.where;
+    vdata[id].m->at = 
+      spin(2*M_PI*w.csample / w.drawn_samples) * xpush(rad * (w.drawn_samples-1) / w.drawn_samples);
+    w.csample++;
+    }
+  
+  shmup::fixStorage();  
+  setindex(false);
+  }
+
 void analyze() {
 
   setindex(true);
@@ -233,31 +260,7 @@ void analyze() {
     maxudist = max(maxudist, n.udist);
     }
     
-  if(!noshow) {
-
-    whowon.resize(samples);
-    
-    for(neuron& n: net) n.samples = 0;
-    
-    for(int id=0; id<isize(samples_shown); id++) {
-      int s = samples_shown[id];
-      auto& w = winner(s);
-      whowon[s] = &w;
-      w.samples++;
-      }
-    
-    for(int id=0; id<isize(samples_shown); id++) {
-      int s = samples_shown[id];
-      auto& w = *whowon[s];
-      vdata[id].m->base = w.where;
-      vdata[id].m->at = 
-        spin(2*M_PI*w.csample / w.samples) * xpush(.25 * (w.samples-1) / w.samples);
-      w.csample++;
-      }
-    
-    shmup::fixStorage();  
-    setindex(false);
-    }
+  if(!noshow) distribute_neurons();
   
   coloring();
   }
@@ -557,10 +560,29 @@ void uninit(int initto) {
   if(inited > initto) inited = initto;
   }
 
-void showsample(int id) {
-  for(int ii: samples_shown) 
-    if(ii == id) 
-      return;
+int max_group = 10;
+
+vector<double> bdiffs;
+vector<unsigned short> bids;
+vector<double> bdiffn;
+
+int showsample(int id) {
+  for(int i=0; i<isize(samples_shown); i++)
+    if(samples_shown[i] == id)
+      return i;
+  if(bids.size()) {
+    if(net[bids[id]].drawn_samples >= max_group) {
+      ld bdist = 1e18;
+      int whichid = -1;
+      for(int i=0; i<isize(samples_shown); i++)
+        if(bids[samples_shown[i]] == bids[id]) {
+          ld cdist = vnorm(data[samples_shown[i]].val, data[id].val);
+          if(cdist < bdist) bdist = cdist, whichid = i;
+          }
+      return whichid;
+      }
+    net[bids[id]].drawn_samples++;
+    }
   int i = vdata.size();
   samples_shown.push_back(id);
   vdata.emplace_back();
@@ -569,6 +591,7 @@ void showsample(int id) {
   v.cp = dftcolor;
   createViz(i, cwt.c, Id);
   v.m->store();
+  return isize(samples_shown) - 1;
   }
 
 void showsample(string s) {
@@ -584,13 +607,9 @@ void showsample(string s) {
 void showbestsamples() {
   vector<int> samplesbak;
   for(auto& n: net) 
-    if(n.samples)
+    if(n.allsamples)
       showsample(n.bestsample);
   analyze();
-  for(auto& n: net) n.samples = 0;
-  for(int i=0; i<samples; i++) 
-    if(whowon[i])
-      whowon[i]->samples++;
   }
 
 int kohrestrict = 1000000;
@@ -685,7 +704,7 @@ void describe(cell *c) {
   if(cmode & sm::HELP) return;
   neuron *n = getNeuronSlow(c);
   if(!n) return;
-  help += "cell number: " + its(neuronId(*n)) + " (" + its(n->samples) + ")\n";
+  help += "cell number: " + its(neuronId(*n)) + " (" + its(n->allsamples) + ")\n";
   help += "parameters:"; for(int k=0; k<cols; k++) help += " " + fts(n->net[k]); 
   help += ", u-matrix = " + fts(n->udist);
   help += "\n";
@@ -923,39 +942,66 @@ void progress(string s) {
     } 
   }
 
+template<class T> void save_raw(string fname, const vector<T>& v) {
+  FILE *f = fopen(fname.c_str(), "wb");
+  fwrite(&v[0], sizeof(v[0]), v.size(), f);
+  fclose(f);
+  }
+
+template<class T> void load_raw(string fname, vector<T>& v) {
+  FILE *f = fopen(fname.c_str(), "rb");
+  if(!f) { fprintf(stderr, "file does not exist: %s\n", fname.c_str()); exit(1); }
+  fseek(f, 0, SEEK_END);
+  auto s = ftell(f);
+  rewind(f);
+  v.resize(s / sizeof(v[0]));
+  fread(&v[0], sizeof(v[0]), v.size(), f);
+  fclose(f);
+  }
+
+void do_classify() {
+  sominit(1);
+  if(bids.empty()) {
+    printf("Classifying...\n");
+    bids.resize(samples, 0);
+    bdiffs.resize(samples, 1e20);
+    for(int s=0; s<samples; s++) {
+      for(int n=0; n<cells; n++) {
+        double diff = vnorm(net[n].net, data[s].val);
+        if(diff < bdiffs[s]) bdiffs[s] = diff, bids[s] = n, whowon[s] = &net[n];
+        }
+      if(!(s % 128))
+        progress("Classifying: " + its(s) + "/" + its(samples));
+      }
+    }
+  if(bdiffs.empty()) {
+    printf("Computing distances...\n");
+    bdiffs.resize(samples, 1e20);
+    for(int s=0; s<samples; s++) 
+      bdiffs[s] = vnorm(net[bids[s]].net, data[s].val);
+    }
+  if(bdiffn.empty()) {
+    printf("Finding samples...\n");
+    bdiffn.resize(cells, 1e20);
+    for(int s=0; s<samples; s++) {
+      int n = bids[s];
+      double diff = bdiffs[s];
+      if(diff < bdiffn[n]) bdiffn[n] = diff, net[n].bestsample = s;
+      }  
+    }
+  whowon.resize(samples);  
+  for(int i=0; i<samples; i++) whowon[i] = &net[bids[i]];
+  for(neuron& n: net) n.allsamples = 0;
+  for(int sn: bids) net[sn].allsamples++;
+  coloring();
+  }
+
 void kclassify(const string& fname_classify) {
 
-  sominit(1);
-  vector<double> bdiffs(samples, 1e20);
-  vector<int> bids(samples, 0);
+  do_classify();
 
-  printf("Classifying...\n");
-
-  for(neuron& n: net) n.samples = 0;
-
-  for(int s=0; s<samples; s++) {
-    for(int n=0; n<cells; n++) {
-      double diff = vnorm(net[n].net, data[s].val);
-      if(diff < bdiffs[s]) bdiffs[s] = diff, bids[s] = n, whowon[s] = &net[n];
-      }
-    if(!(s % 128))
-      progress("Classifying: " + its(s) + "/" + its(samples));
-    }
-  
-  vector<double> bdiffn(cells, 1e20);
-
-  printf("Finding samples...\n");
-
-  for(int s=0; s<samples; s++) {
-    int n = bids[s];
-    double diff = bdiffs[s];
-    if(diff < bdiffn[n]) bdiffn[n] = diff, net[n].bestsample = s;
-    }
-
-  for(int s=0; s<samples; s++) net[bids[s]].samples++;
-  
   if(fname_classify != "") {  
-    printf("Listing classification...\n");  
+    printf("Listing classification...\n");
     FILE *f = fopen(fname_classify.c_str(), "wt");  
     if(!f) {
       printf("Failed to open file\n");
@@ -966,7 +1012,33 @@ void kclassify(const string& fname_classify) {
       fclose(f);
       }
     }
-  coloring();
+  }
+
+void kclassify_save_raw(const string& fname_classify) {
+  do_classify();
+  save_raw(fname_classify, bids);
+  }
+
+void kclassify_load_raw(const string& fname_classify) {
+  load_raw(fname_classify, bids);
+  do_classify();
+  }
+
+void load_edges(const string& fname_edges, int pick = 0) {
+  do_classify();
+  vector<pair<int, int>> edgedata;
+  load_raw(fname_edges, edgedata);
+  int N = isize(edgedata);
+  if(pick > 0 && pick < N) {
+    for(int i=1; i<N; i++) swap(edgedata[i], edgedata[hrand(i+1)]);
+    edgedata.resize(N = pick);    
+    }
+  vector<pair<int, int>> edgedata2;
+  for(auto p: edgedata)
+    edgedata2.emplace_back(showsample(p.first), showsample(p.second));
+  distribute_neurons();
+  for(auto p: edgedata2)
+    addedge(p.first, p.second, 0, false);
   }
 
 void klistsamples(const string& fname_samples, bool best, bool colorformat) {
@@ -990,7 +1062,7 @@ void klistsamples(const string& fname_samples, bool best, bool colorformat) {
       if(!colorformat) fprintf(f, "%d\n", cols);
       if(best)
         for(int n=0; n<cells; n++) {
-          if(!net[n].samples) { if(!colorformat) fprintf(f, "\n"); continue; }
+          if(!net[n].allsamples && !net[n].drawn_samples) { if(!colorformat) fprintf(f, "\n"); continue; }
           klistsample(net[n].bestsample, n);
           }
       else
@@ -1156,9 +1228,21 @@ int readArgs() {
     PHASE(3);
     shift(); kohonen::kloadw(args());
     }
+  else if(argis("-somclassify0")) {
+    PHASE(3);
+    shift(); kohonen::do_classify();
+    }
   else if(argis("-somclassify")) {
     PHASE(3);
     shift(); kohonen::kclassify(args());
+    }
+  else if(argis("-somclassify-sr")) {
+    PHASE(3);
+    shift(); kohonen::kclassify_save_raw(args());
+    }
+  else if(argis("-somclassify-lr")) {
+    PHASE(3);
+    shift(); kohonen::kclassify_load_raw(args());
     }
   else if(argis("-somlistshown")) {
     PHASE(3);
@@ -1185,6 +1269,16 @@ int readArgs() {
     }
   else if(argis("-somrestrict")) {
     shift(); kohrestrict = argi();
+    }
+  else if(argis("-som_maxgroup")) {
+    shift(); max_group = argi();
+    }
+  else if(argis("-som_load_edges")) {
+    shift(); kohonen::load_edges(args(), 0);
+    }
+  else if(argis("-som_load_n_edges")) {
+    shift(); int n = argi();
+    shift(); kohonen::load_edges(args(), n);
     }
 
   else return 1;
