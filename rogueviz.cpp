@@ -30,6 +30,7 @@ bool showlabels = false;
 bool specialmark = false;
 
 bool rog3 = false;
+int vertex_shape = 1;
 
 ld ggamma = .5;
 
@@ -998,25 +999,32 @@ void storeline(vector<glvertex>& tab, const hyperpoint& h1, const hyperpoint& h2
   storelineto(tab, h1, h2);
   }
 
+hpcshape *vshapes[4] = { &shDisk, &shDisk, &shHeptaMarker, &shSnowball };
+
 void queuedisk(const transmatrix& V, const colorpair& cp, bool legend) {
   if(legend && (int) cp.color1 == (int) 0x000000FF && backcolor == 0)
     poly_outline = 0x606060FF;
   else
     poly_outline = 0x000000FF;
+    
+  transmatrix V1;
   
-  if(rog3) {
+  auto& sh = *(vshapes[vertex_shape]);
+  
+  if(vertex_shape == 0) ;
+  else if(rog3) {
     int p = poly_outline; poly_outline = OUTLINE_TRANS; 
-    queuepolyat(V, shDisk, 0x80, PPR_MONSTER_SHADOW); 
+    queuepolyat(V, sh, 0x80, PPR_MONSTER_SHADOW); 
     poly_outline = p; 
-    queuepolyat(mscale(V, geom3::BODY), shDisk, cp.color1, PPR_MONSTER_HEAD);
+    queuepolyat(V1 = mscale(V, geom3::BODY), sh, cp.color1, PPR_MONSTER_HEAD);
     }
   else {
-    queuepoly(V, shDisk, cp.color1);
+    queuepoly(V1 = V, sh, cp.color1);
     }
-  if(cp.shade == 't') queuepoly(V, shDiskT, cp.color2);
-  if(cp.shade == 's') queuepoly(V, shDiskS, cp.color2);
-  if(cp.shade == 'q') queuepoly(V, shDiskSq, cp.color2);
-  if(cp.shade == 'm') queuepoly(V, shDiskM, cp.color2);
+  if(cp.shade == 't') queuepoly(V1, shDiskT, cp.color2);
+  if(cp.shade == 's') queuepoly(V1, shDiskS, cp.color2);
+  if(cp.shade == 'q') queuepoly(V1, shDiskSq, cp.color2);
+  if(cp.shade == 'm') queuepoly(V1, shDiskM, cp.color2);
   }
 
 void drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
@@ -1539,6 +1547,9 @@ int readArgs() {
   else if(argis("-nolegend")) {
     legend.clear();
     }
+  else if(argis("-rvshape")) {
+    shift(); vertex_shape = argi() & 3;
+    }
   
 // graphical output 
 //------------------
@@ -1567,6 +1578,7 @@ void showMenu() {
   dialog::addSelItem(XLAT("background color"), itsh(backcolor), 'b');
   dialog::addSelItem(XLAT("gamma value for edges"), fts(ggamma), 'g');
   dialog::addBoolItem(XLAT("vertices in 3D"), rog3, 'v');
+  dialog::addSelItem(XLAT("vertex shape"), its(vertex_shape), 'w');
   
   if(kind == kKohonen)
     kohonen::showMenu();
@@ -1585,6 +1597,7 @@ void showMenu() {
       }
     else if(uni == 'l') showlabels = !showlabels;
     else if(uni == 'v') rog3 = !rog3;
+    else if(uni == 'w') vertex_shape = (1 + vertex_shape) & 3;
     else if(uni == 'x') specialmark = !specialmark;
     else if(uni == 'b') backcolor ^= 0xFFFFFF, bordcolor ^= 0xFFFFFF, forecolor ^= 0xFFFFFF;
     else if(uni == 'g') {
