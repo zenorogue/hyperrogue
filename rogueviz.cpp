@@ -29,6 +29,10 @@ void init();
 bool showlabels = false;
 bool specialmark = false;
 
+static const unsigned DEFAULT_COLOR = 0x47129371;
+
+unsigned edgecolor = DEFAULT_COLOR;
+
 bool rog3 = false;
 int vertex_shape = 1;
 
@@ -1086,7 +1090,7 @@ void drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
         } */
       
       int col = 
-        ((hilite ? 0xFF0000 : forecolor) << 8) + xlalpha;
+        ((hilite ? 0xFF0000 : ei->color != DEFAULT_COLOR ? ei->color : forecolor) << 8) + xlalpha;
 
       bool onspiral = kind == kSpiral && abs(ei->i - ei->j) == 1;      
       if(pmodel || onspiral) {
@@ -1528,6 +1532,9 @@ int readArgs() {
     }
   else if(argis("-rog3")) {
     rog3 = true;
+    }
+  else if(argis("-rvedge")) {
+    shift(); edgecolor = arghex();
     }
   else if(argis("-cshift")) {
     shift(); collatz::cshift = argf();

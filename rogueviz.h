@@ -17,6 +17,7 @@ namespace rogueviz {
   void mark(cell *c);
   void showMenu();
   string makehelp();
+  extern unsigned edgecolor;
 
   void init();
     
@@ -27,7 +28,8 @@ namespace rogueviz {
     vector<glvertex> prec;
     cell *orig;
     int lastdraw;
-    edgeinfo() { visible = true; orig = NULL; lastdraw = -1; }
+    unsigned color;
+    edgeinfo() { visible = true; orig = NULL; lastdraw = -1; color = edgecolor; }
     };
   
   struct colorpair {
