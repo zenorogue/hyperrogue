@@ -1059,8 +1059,10 @@ void drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
     else if(oi == lid || oj == lid) hilite = true;
 
     if(hilite) ghilite = true;
+    
+    bool multidraw = quotient || elliptic || torus;
 
-    if(ei->lastdraw < frameid || quotient) { 
+    if(ei->lastdraw < frameid || multidraw) { 
       ei->lastdraw = frameid;
       
       int xlalpha = (hilite || hiliteclick) ? 64 : 20;
@@ -1072,11 +1074,11 @@ void drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
       else xlalpha = int(pow(ld(.5), ggamma) * 255);
       
       if(svg::in && xlalpha < 16) continue;
-      if(quotient && &vd != &vd1) continue;
+      if(multidraw && &vd != &vd1) continue;
 
       transmatrix gm1 = V; // shmup::ggmatrix(vd1.m->base);
       transmatrix gm2 = 
-        quotient ? V * shmup::calc_relative_matrix(vd2.m->base, c, NOHINT) :
+        multidraw ? V * shmup::calc_relative_matrix(vd2.m->base, c, NOHINT) :
         shmup::ggmatrix(vd2.m->base);
                 
       hyperpoint h1 = gm1 * vd1.m->at * C0;
@@ -1115,9 +1117,9 @@ void drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
         }
       else {
       
-        if(!quotient && ei->orig && ei->orig->cpdist >= 3) ei->orig = NULL;
+        if(!multidraw && ei->orig && ei->orig->cpdist >= 3) ei->orig = NULL;
         if(!ei->orig) {
-          ei->orig = quotient ? c : euclid ? cwt.c : viewctr.h->c7; // cwt.c;
+          ei->orig = multidraw ? c : euclid ? cwt.c : viewctr.h->c7; // cwt.c;
           ei->prec.clear();
           
           transmatrix T = inverse(shmup::ggmatrix(ei->orig));
@@ -1136,7 +1138,7 @@ void drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
           else 
             storeline(ei->prec, T*h1, T*h2);
           }
-        queuetable(quotient ? V : shmup::ggmatrix(ei->orig), ei->prec, isize(ei->prec), col, 0,
+        queuetable(multidraw ? V : shmup::ggmatrix(ei->orig), ei->prec, isize(ei->prec), col, 0,
           PPR_STRUCT0);
         }
       }
