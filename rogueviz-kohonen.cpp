@@ -21,14 +21,16 @@ vector<int> samples_shown;
 
 int whattodraw[3] = {-2,-2,-2};
 
+int min_group = 10, max_group = 10;
+
 struct neuron {
   kohvec net;
   cell *where;
   double udist;
   int lpbak;
   int col;
-  int allsamples, drawn_samples, csample, bestsample;
-  neuron() { drawn_samples = allsamples = bestsample = 0; }
+  int allsamples, drawn_samples, csample, bestsample, max_group_here;
+  neuron() { drawn_samples = allsamples = bestsample = 0; max_group_here = max_group; }
   };
 
 vector<string> colnames;
@@ -560,8 +562,6 @@ void uninit(int initto) {
   if(inited > initto) inited = initto;
   }
 
-int max_group = 10;
-
 vector<double> bdiffs;
 vector<unsigned short> bids;
 vector<double> bdiffn;
@@ -571,7 +571,7 @@ int showsample(int id) {
     if(samples_shown[i] == id)
       return i;
   if(bids.size()) {
-    if(net[bids[id]].drawn_samples >= max_group) {
+    if(net[bids[id]].drawn_samples >= net[bids[id]].max_group_here) {
       ld bdist = 1e18;
       int whichid = -1;
       for(int i=0; i<isize(samples_shown); i++)
@@ -959,6 +959,8 @@ template<class T> void load_raw(string fname, vector<T>& v) {
   fclose(f);
   }
 
+bool groupsizes_known = false;
+
 void do_classify() {
   sominit(1);
   if(bids.empty()) {
@@ -993,7 +995,39 @@ void do_classify() {
   for(int i=0; i<samples; i++) whowon[i] = &net[bids[i]];
   for(neuron& n: net) n.allsamples = 0;
   for(int sn: bids) net[sn].allsamples++;
+  
+  if(!groupsizes_known) {
+    groupsizes_known = true;
+    
+    vector<int> neurons_to_sort;
+    for(int i=0; i<cells; i++) neurons_to_sort.push_back(i);
+    sort(neurons_to_sort.begin(), neurons_to_sort.end(), [] (int i, int j) { return net[i].allsamples < net[j].allsamples; });
+    int last = 0;
+    int lastfirst = 0, lastlast = 0;
+    for(int i=0; i<cells; i++) {
+      int ngroup = min_group + ((max_group - min_group) * i + (cells/2)) / (cells-1);
+      int as = net[neurons_to_sort[i]].allsamples;
+      if(ngroup != last) {  
+        if(last) printf("%d: %d - %d\n", last, lastfirst, lastlast);
+        last = ngroup; lastfirst = as;
+        }
+      net[neurons_to_sort[i]].max_group_here = ngroup;
+      lastlast = as;
+      }
+    if(last) printf("%d: %d - %d\n", last, lastfirst, lastlast);
+    }
+  
   coloring();
+  }
+
+void fillgroups() {
+  do_classify();
+  vector<int> samples_to_sort;
+  for(int i=0; i<samples; i++) samples_to_sort.push_back(i);
+  hrandom_shuffle(&samples_to_sort[0], samples);
+  for(int i=0; i<samples; i++) if(net[bids[i]].drawn_samples < net[bids[i]].max_group_here)
+    showsample(i);
+  distribute_neurons();
   }
 
 void kclassify(const string& fname_classify) {
@@ -1272,6 +1306,12 @@ int readArgs() {
     }
   else if(argis("-som_maxgroup")) {
     shift(); max_group = argi();
+    }
+  else if(argis("-som_mingroup")) {
+    shift(); min_group = argi();
+    }
+  else if(argis("-som_fillgroups")) {
+    fillgroups();
     }
   else if(argis("-som_load_edges")) {
     shift(); kohonen::load_edges(args(), 0);
