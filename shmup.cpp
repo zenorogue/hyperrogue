@@ -3425,7 +3425,17 @@ transmatrix calc_relative_matrix(cell *c2, cell *c1, int direction_hint) {
       int sp = h2->spin(d);
       return gm * heptmove[sp] * spin(2*M_PI*d/S7) * where;
       }
-    if(h1->distance < h2->distance) {
+    if(geometry == gFieldQuotient) {
+      int bestdist = 1000, bestd = 0;
+      for(int d=0; d<S7; d++) {
+        int dist = celldistance(h2->move[d]->c7, c1);
+        if(dist < bestdist) bestdist = dist, bestd = d;
+        }
+      int sp = h2->spin(bestd);
+      where = heptmove[sp] * spin(2*M_PI*bestd/S7) * where;
+      h2 = h2->move[bestd];
+      }
+    else if(h1->distance < h2->distance) {
       int sp = h2->spin(0);
       h2 = h2->move[0];
       where = heptmove[sp] * where;
