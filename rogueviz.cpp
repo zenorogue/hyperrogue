@@ -1037,6 +1037,8 @@ void queuedisk(const transmatrix& V, const colorpair& cp, bool legend) {
   if(cp.shade == 'm') queuepoly(V1, shDiskM, cp.color2);
   }
 
+unordered_map<pair<edgeinfo*, int>, int> drawn_edges;
+
 void drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
   if(m->dead) return;
   int i = m->pid;
@@ -1067,7 +1069,7 @@ void drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
     if(hilite) ghilite = true;
     
     bool multidraw = quotient || elliptic || torus;
-
+        
     if(ei->lastdraw < frameid || multidraw) { 
       ei->lastdraw = frameid;
       
@@ -1090,6 +1092,13 @@ void drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
       hyperpoint h1 = gm1 * vd1.m->at * C0;
       hyperpoint h2 = gm2 * vd2.m->at * C0;
       
+      if(multidraw) {
+        int code = int(h1[0]) + int(h1[1]) * 12789117 + int(h2[0]) * 126081253 + int(h2[1]) * 126891531;
+        int& lastdraw = drawn_edges[make_pair(ei, code)];
+        if(lastdraw == frameid) continue;
+        lastdraw = frameid;
+        }
+
       /* if(hdist0(h1) < .001 || hdist0(h2) < .001) {
         printf("h1 = %s\n", display(h1));
         printf("h2 = %s\n", display(h2));
