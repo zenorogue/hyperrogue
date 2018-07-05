@@ -148,18 +148,23 @@ void notimpl() {
   printf("Not implemented\n"); exit(1); 
   }
 
-hyperpoint where(int i) {
+hyperpoint where(int i, cell *base) {
   auto m = vdata[i].m;
-  if(m->base == currentmap->gamestart()) return tC0(m->at);
-  else { 
+  if(m->base == base) return tC0(m->at);
+  else if(quotient || elliptic || torus) {
+    return shmup::calc_relative_matrix(m->base, base, NOHINT) * tC0(m->at);
+    }
+  else {
     // notimpl(); // actually probably that's a buug
     return inverse(shmup::ggmatrix(currentmap->gamestart())) * (shmup::ggmatrix(m->base) * tC0(m->at));
     }
   }
-  
+
 void addedge(int i, int j, edgeinfo *ei) {
-  hyperpoint hi = where(i);
-  hyperpoint hj = where(j);
+  cell *base = 
+    (quotient || elliptic || torus) ? vdata[i].m->base : currentmap->gamestart();
+  hyperpoint hi = where(i, base);
+  hyperpoint hj = where(j, base);
   double d = hdist(hi, hj);
   if(d >= 4) {
     // printf("splitting %lf\n", d);
@@ -170,7 +175,7 @@ void addedge(int i, int j, edgeinfo *ei) {
     vd.cp = colorpair(0x400000FF);
     vd.virt = ei;
     
-    createViz(id, currentmap->gamestart(), rgpushxto0(h));
+    createViz(id, base, rgpushxto0(h));
     
     addedge(i, id, ei);
     addedge(id, j, ei);
