@@ -1082,7 +1082,6 @@ void drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
       else xlalpha = int(pow(ld(.5), ggamma) * 255);
       
       if(svg::in && xlalpha < 16) continue;
-      if(multidraw && &vd != &vd1) continue;
 
       transmatrix gm1 = V; // shmup::ggmatrix(vd1.m->base);
       transmatrix gm2 = 
