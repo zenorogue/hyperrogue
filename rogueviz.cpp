@@ -1298,8 +1298,17 @@ void readcolor(const string& cfname) {
     
     colorpair x;
     int c2 = fgetc(f);
+    int known_id = -1;
+    bool force = false;
+
+    if(kohonen::samples && c2 == '!') {
+      force = true;
+      c2 = fgetc(f);
+      if(c2 == 10 || c2 == 13) continue;
+      }
+    
     if(kohonen::samples && c2 == '+') {
-      kohonen::showsample(lab);
+      known_id = kohonen::showsample(lab);
       c2 = fgetc(f);
       if(c2 == 10 || c2 == 13) continue;
       }
@@ -1317,7 +1326,7 @@ void readcolor(const string& cfname) {
       x = vdata[getid(lab2)].cp;
       }
     else if(c2 == '@') {
-      legend.push_back(getid(lab));
+      legend.push_back(known_id == -1 ? getid(lab) : known_id);
       continue;
       }
     else if(c2 == '/') {
@@ -1341,7 +1350,7 @@ void readcolor(const string& cfname) {
           vdata[i].cp = x;
           }
       }
-    else if(kohonen::samples) {
+    else if(kohonen::samples && !force) {
       for(int i=0; i<isize(vdata); i++)
         if(vdata[i].name == lab) {
           vdata[i].cp = x;

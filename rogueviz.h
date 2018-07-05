@@ -77,7 +77,7 @@ namespace rogueviz {
   namespace kohonen {
     extern int samples;
     int showsample(int id);
-    void showsample(string id);
+    int showsample(string id);
     void describe(cell *c);
     void steps();
     void showMenu();

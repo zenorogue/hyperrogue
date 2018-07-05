@@ -594,14 +594,16 @@ int showsample(int id) {
   return isize(samples_shown) - 1;
   }
 
-void showsample(string s) {
-  if(s == "") return;
+int showsample(string s) {
+  if(s == "") return -1;
+  int ret = -1;
   for(int i=0; i<samples; i++) {
     if(s[0] != '*' && data[i].name == s)
-      showsample(i);
+      ret = showsample(i);
     if(s[0] == '*' && data[i].name.find(s.substr(1)) != string::npos)
-      showsample(i);
+      ret = showsample(i);
     }
+  return ret;
   }
 
 void showbestsamples() {
