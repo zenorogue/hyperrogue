@@ -52,7 +52,7 @@ namespace rogueviz {
   
   extern vector<vertexdata> vdata;
  
-  void storeall();
+  void storeall(int from = 0);
 
   namespace anygraph {
     extern double R, alpha, T;

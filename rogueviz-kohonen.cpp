@@ -17,7 +17,7 @@ struct sample {
 
 vector<sample> data;
 
-vector<int> samples_shown;
+map<int, int> sample_vdata_id;
 
 int whattodraw[3] = {-2,-2,-2};
 
@@ -72,6 +72,10 @@ double vnorm(kohvec& a, kohvec& b) {
 void sominit(int);
 void uninit(int);
 
+bool noshow = false;
+
+vector<int> samples_to_show;
+
 void loadsamples(const string& fname) {
   FILE *f = fopen(fname.c_str(), "rt");
   if(!f) {
@@ -93,8 +97,9 @@ void loadsamples(const string& fname) {
       if(c == '!' && s.name == "") shown = true;
       else if(c != 32 && c != 9) s.name += c;
       }
-    if(shown) samples_shown.push_back(isize(data));
     data.push_back(move(s));
+    if(shown) 
+      samples_to_show.push_back(isize(data)-1);
     }
   bigbreak:
   fclose(f);
@@ -154,8 +159,6 @@ double maxudist;
 
 neuron *distfrom;
 
-bool noshow = false;
-
 void coloring() {
   if(noshow) return;
   setindex(false);
@@ -170,9 +173,9 @@ void coloring() {
         besttofind = false;
         for(neuron& n: net) {
           double bdiff = 1e20;
-          for(int i=0; i<isize(samples_shown); i++) {
-            double diff = vnorm(n.net, data[samples_shown[i]].val);
-            if(diff < bdiff) bdiff = diff, n.bestsample = i;
+          for(auto p: sample_vdata_id) {
+            double diff = vnorm(n.net, data[p.first].val);
+            if(diff < bdiff) bdiff = diff, n.bestsample = p.second;
             }
           }
         }
@@ -223,16 +226,18 @@ void distribute_neurons() {
   
   for(neuron& n: net) n.drawn_samples = 0;
   
-  for(int s: samples_shown) {
+  for(auto p: sample_vdata_id) {
+    int s = p.first;
     auto& w = winner(s);
     whowon[s] = &w;
     w.drawn_samples++;
     }
   
   ld rad = .25 * scalef;
-
-  for(int id=0; id<isize(samples_shown); id++) {
-    int s = samples_shown[id];
+  
+  for(auto p: sample_vdata_id) {
+    int id = p.second;
+    int s = p.first;
     auto& w = *whowon[s];
     vdata[id].m->base = w.where;
     vdata[id].m->at = 
@@ -567,31 +572,32 @@ vector<unsigned short> bids;
 vector<double> bdiffn;
 
 int showsample(int id) {
-  for(int i=0; i<isize(samples_shown); i++)
-    if(samples_shown[i] == id)
-      return i;
+  if(sample_vdata_id.count(id))
+    return sample_vdata_id[id];
   if(bids.size()) {
     if(net[bids[id]].drawn_samples >= net[bids[id]].max_group_here) {
       ld bdist = 1e18;
       int whichid = -1;
-      for(int i=0; i<isize(samples_shown); i++)
-        if(bids[samples_shown[i]] == bids[id]) {
-          ld cdist = vnorm(data[samples_shown[i]].val, data[id].val);
-          if(cdist < bdist) bdist = cdist, whichid = i;
+      for(auto p: sample_vdata_id) {
+        int s = p.first;
+        if(bids[s] == bids[id]) {
+          ld cdist = vnorm(data[s].val, data[id].val);
+          if(cdist < bdist) bdist = cdist, whichid = p.second;
           }
+        }
       return whichid;
       }
     net[bids[id]].drawn_samples++;
     }
   int i = vdata.size();
-  samples_shown.push_back(id);
+  sample_vdata_id[id] = i;
   vdata.emplace_back();
   auto& v = vdata.back();
   v.name = data[id].name;
   v.cp = dftcolor;
-  createViz(i, cwt.c, Id);
+  createViz(i, bids.size() ? net[bids[id]].where : cwt.c, Id);
   v.m->store();
-  return isize(samples_shown) - 1;
+  return i;
   }
 
 int showsample(string s) {
@@ -656,18 +662,20 @@ void sominit(int initto) {
       
     for(neuron& n: net) for(int d=BARLEV; d>=7; d--) setdist(n.where, d, NULL);
   
-    printf("samples = %d (%d) cells = %d\n", samples, isize(samples_shown), cells);
+    printf("samples = %d (%d) cells = %d\n", samples, isize(sample_vdata_id), cells);
 
-    if(!noshow) {
-      vdata.resize(isize(samples_shown));
-      for(int i=0; i<isize(samples_shown); i++) {
-        vdata[i].name = data[samples_shown[i]].name;
-        vdata[i].cp = dftcolor;
-        createViz(i, cwt.c, Id);
-        }
-      
-      storeall();
+    if(!noshow) for(int s: samples_to_show) {
+      int vdid = isize(vdata);
+      sample_vdata_id[s] = vdid;
+      vdata.emplace_back();
+      auto &vd = vdata.back();
+      vd.name = data[s].name;
+      vd.cp = dftcolor;
+      createViz(vdid, cwt.c, Id);
+      storeall(vdid);
       }
+    
+    samples_to_show.clear();
 
     analyze();
     }
@@ -1074,7 +1082,7 @@ void load_edges(const string& fname_edges, int pick = 0) {
     edgedata2.emplace_back(showsample(p.first), showsample(p.second));
   distribute_neurons();
   for(auto p: edgedata2)
-    addedge(p.first, p.second, 0, false);
+    addedge(p.first, p.second, 0, true);
   }
 
 void klistsamples(const string& fname_samples, bool best, bool colorformat) {
@@ -1102,8 +1110,10 @@ void klistsamples(const string& fname_samples, bool best, bool colorformat) {
           klistsample(net[n].bestsample, n);
           }
       else
-        for(int i=0; i<isize(samples_shown); i++) 
-          klistsample(samples_shown[i], neuronId(*(whowon[i])));  
+        for(auto p: sample_vdata_id) {
+          int id = p.first;
+          klistsample(id, neuronId(*(whowon[id])));
+          }
       fclose(f);
       }
     }

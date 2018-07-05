@@ -191,8 +191,8 @@ void addedge(int i, int j, double wei, bool subdiv) {
   else addedge0(i, j, ei);
   }
 
-void storeall() {
-  for(int i=0; i<isize(vdata); i++)
+void storeall(int from) {
+  for(int i=from; i<isize(vdata); i++)
     if(vdata[i].m)
       vdata[i].m->store();
   }
