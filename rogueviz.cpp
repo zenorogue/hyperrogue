@@ -1564,6 +1564,9 @@ int readArgs() {
   else if(argis("-lab")) {
     showlabels = true;
     }
+  else if(argis("-lab-off")) {
+    showlabels = false;
+    }
   else if(argis("-rog3")) {
     rog3 = true;
     }
