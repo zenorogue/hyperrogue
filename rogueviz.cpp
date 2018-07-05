@@ -1083,7 +1083,9 @@ void drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
       
       if(svg::in && xlalpha < 16) continue;
 
-      transmatrix gm1 = V; // shmup::ggmatrix(vd1.m->base);
+      transmatrix gm1 = 
+        multidraw ? V * shmup::calc_relative_matrix(vd1.m->base, c, NOHINT) :
+        shmup::ggmatrix(vd1.m->base);
       transmatrix gm2 = 
         multidraw ? V * shmup::calc_relative_matrix(vd2.m->base, c, NOHINT) :
         shmup::ggmatrix(vd2.m->base);
@@ -1131,9 +1133,12 @@ void drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
         }
       else {
       
-        if(!multidraw && ei->orig && ei->orig->cpdist >= 3) ei->orig = NULL;
+        cell *center = multidraw ? c : euclid ? cwt.c : viewctr.h->c7;
+      
+        if(!multidraw && ei->orig && ei->orig != center && celldistance(ei->orig, center) > 3) 
+          ei->orig = NULL;
         if(!ei->orig) {
-          ei->orig = multidraw ? c : euclid ? cwt.c : viewctr.h->c7; // cwt.c;
+          ei->orig = center; // cwt.c;
           ei->prec.clear();
           
           transmatrix T = inverse(shmup::ggmatrix(ei->orig));
@@ -1162,7 +1167,7 @@ void drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
 
   if(!vd.virt) {
     queuedisk(V * m->at, ghilite ? colorpair(0xFF0000FF) : vd.cp, false);
-    lastptd().info = vd.info;
+    if(vertex_shape) lastptd().info = vd.info;
     }
   
   
@@ -1176,9 +1181,10 @@ void drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
     
     hyperpoint h = tC0(V * m->at);
     transmatrix V2 = rgpushxto0(h) * ypush(nonbitrunc ? .3 : .2);
-    if(doshow && !behindsphere(V2))
+    if(doshow && !behindsphere(V2)) {
       queuestr(V2, (svg::in ? .28 : .2) * crossf / hcrossf, vd.name, backcolor ? 0x000000 : 0xFFFF00, svg::in ? 0 : 1);
-    lastptd().info = vd.info;
+      lastptd().info = vd.info;
+      }
     }
 
   if(kind == kCollatz) {
