@@ -966,7 +966,8 @@ string describe(shmup::monster *m) {
     if(!ei->visible) continue;
     int k = ei->i ^ ei->j ^ i;
     help += vdata[k].name;
-    help += "/" + fts(ei->weight)+":" + fts(ei->weight2) + " ";
+    if(kind == kSAG)
+      help += "/" + fts(ei->weight)+":" + fts(ei->weight2) + " ";
     }
   
   return o;
