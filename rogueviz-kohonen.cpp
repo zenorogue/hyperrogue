@@ -224,7 +224,7 @@ void coloring() {
 void distribute_neurons() {
   whowon.resize(samples);
   
-  for(neuron& n: net) n.drawn_samples = 0;
+  for(neuron& n: net) n.drawn_samples = 0, n.csample = 0;
   
   for(auto p: sample_vdata_id) {
     int s = p.first;
