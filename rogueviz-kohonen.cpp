@@ -1085,6 +1085,15 @@ void load_edges(const string& fname_edges, int pick = 0) {
     addedge(p.first, p.second, 0, true);
   }
 
+void random_edges(int q) {
+  vector<int> ssamp;
+  for(auto p: sample_vdata_id) ssamp.push_back(p.second);
+  for(int i=0; i<q; i++) {
+    edgecolor = hrandpos();
+    addedge(ssamp[hrand(isize(ssamp))], ssamp[hrand(isize(ssamp))], 0, true);
+    }
+  }
+
 void klistsamples(const string& fname_samples, bool best, bool colorformat) {
   if(fname_samples != "") { 
     printf("Listing samples...\n");
@@ -1316,19 +1325,23 @@ int readArgs() {
   else if(argis("-somrestrict")) {
     shift(); kohrestrict = argi();
     }
-  else if(argis("-som_maxgroup")) {
+  else if(argis("-som-maxgroup")) {
     shift(); max_group = argi();
     }
-  else if(argis("-som_mingroup")) {
+  else if(argis("-som-mingroup")) {
     shift(); min_group = argi();
     }
-  else if(argis("-som_fillgroups")) {
+  else if(argis("-som-fillgroups")) {
     fillgroups();
     }
-  else if(argis("-som_load_edges")) {
+  else if(argis("-som-load-edges")) {
     shift(); kohonen::load_edges(args(), 0);
     }
-  else if(argis("-som_load_n_edges")) {
+  else if(argis("-som-random-edges")) {
+    shift();
+    random_edges(argi());
+    }
+  else if(argis("-som-load-n-edges")) {
     shift(); int n = argi();
     shift(); kohonen::load_edges(args(), n);
     }
