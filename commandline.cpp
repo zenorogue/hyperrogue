@@ -212,9 +212,9 @@ int arg::readCommon() {
 // mode changes:
 
 #define TOGGLE(x, param, act) \
-else if(args()[0] == '-' && args()[1] == x && !args()[2]) { showstartmenu = false; act; } \
-else if(args()[0] == '-' && args()[1] == x && args()[2] == '1') { showstartmenu = false; if(!param) act; } \
-else if(args()[0] == '-' && args()[1] == x && args()[2] == '0') { showstartmenu = false; if(param) act; }
+else if(args()[0] == '-' && args()[1] == x && !args()[2]) { PHASEFROM(2); showstartmenu = false; act; } \
+else if(args()[0] == '-' && args()[1] == x && args()[2] == '1') { PHASEFROM(2); showstartmenu = false; if(!param) act; } \
+else if(args()[0] == '-' && args()[1] == x && args()[2] == '0') { PHASEFROM(2); showstartmenu = false; if(param) act; }
 
   TOGGLE('o', vid.usingGL, switchGL())
   TOGGLE('C', chaosmode, stop_game_and_switch_mode(rg::chaos))
