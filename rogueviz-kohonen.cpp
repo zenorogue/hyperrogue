@@ -79,10 +79,14 @@ vector<int> samples_to_show;
 void loadsamples(const string& fname) {
   FILE *f = fopen(fname.c_str(), "rt");
   if(!f) {
-    fprintf(stderr, "Could not load samples\n");
+    fprintf(stderr, "Could not load samples: %s\n", fname.c_str());
     return;
     }
-  if(fscanf(f, "%d", &cols) != 1) { fclose(f); return; }
+  if(fscanf(f, "%d", &cols) != 1) { 
+    printf("Bad format: %s\n", fname.c_str());
+    fclose(f); return; 
+    }
+  printf("Loading samples: %s\n", fname.c_str());
   while(true) {
     sample s;
     bool shown = false;
@@ -880,10 +884,14 @@ void kload(const string& fname) {
   int xcells;
   FILE *f = fopen(fname.c_str(), "rt");
   if(!f) {
-    fprintf(stderr, "Could not load the network\n");
+    fprintf(stderr, "Could not load the network: %s\n", fname.c_str());
     return;
     }
-  if(fscanf(f, "%d%d\n", &xcells, &t) != 2) return;
+  if(fscanf(f, "%d%d\n", &xcells, &t) != 2) {
+    fprintf(stderr, "Bad network format: %s\n", fname.c_str());
+    return;
+    }
+  printf("Loading the network %s...\n", fname.c_str());
   if(xcells != cells) {
     fprintf(stderr, "Error: bad number of cells (x=%d c=%d)\n", xcells, cells);
     exit(1);
@@ -899,9 +907,10 @@ void ksavew(const string& fname) {
   sominit(1);
   FILE *f = fopen(fname.c_str(), "wt");
   if(!f) {
-    fprintf(stderr, "Could not save the weights\n");
+    fprintf(stderr, "Could not save the weights: %s\n", fname.c_str());
     return;
     }
+  printf("Saving the network to %s...\n", fname.c_str());
   for(int i=0; i<cols; i++)
     fprintf(f, "%s=%.9lf\n", colnames[i].c_str(), weights[i]);
   fclose(f);
@@ -1045,7 +1054,7 @@ void kclassify(const string& fname_classify) {
   do_classify();
 
   if(fname_classify != "") {  
-    printf("Listing classification...\n");
+    printf("Listing classification to %s...\n", fname_classify.c_str());
     FILE *f = fopen(fname_classify.c_str(), "wt");  
     if(!f) {
       printf("Failed to open file\n");
@@ -1059,11 +1068,13 @@ void kclassify(const string& fname_classify) {
   }
 
 void kclassify_save_raw(const string& fname_classify) {
+  printf("Saving raw classify to %s...\n", fname_classify.c_str());
   do_classify();
   save_raw(fname_classify, bids);
   }
 
 void kclassify_load_raw(const string& fname_classify) {
+  printf("Loading raw classify from %s...\n", fname_classify.c_str());
   load_raw(fname_classify, bids);
   do_classify();
   }
