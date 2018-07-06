@@ -236,7 +236,8 @@ else if(args()[0] == '-' && args()[1] == x && args()[2] == '0') { PHASEFROM(2); 
     }
   else if(argis("-geo")) { 
     shift(); targetgeometry = (eGeometry) argi();
-    stop_game_and_switch_mode(rg::geometry);
+    if(targetgeometry != rg::geometry)
+      stop_game_and_switch_mode(rg::geometry);
     }
   else if(argis("-gp")) {
     PHASEFROM(2);
@@ -323,6 +324,10 @@ else if(args()[0] == '-' && args()[1] == x && args()[2] == '0') { PHASEFROM(2); 
     shift(); sscanf(argcs(), "%d,%d", &a, &b);
     using namespace fieldpattern;
     current_extra = a;
+
+    auto& gxcur = fgeomextras[current_extra];
+    while(b >= isize(gxcur.primes)) nextPrime(gxcur);
+
     fgeomextras[current_extra].current_prime_id = b;
     enableFieldChange();
     if(geometry != gFieldQuotient) {
