@@ -478,7 +478,7 @@ ld spherity(const transmatrix& V) {
   }
 
 bool confusingGeometry() {
-  return elliptic || (quotient & qSMALL) || torus;
+  return elliptic || quotient || torus;
   }
 
 ld master_to_c7_angle() {
