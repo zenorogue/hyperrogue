@@ -198,7 +198,7 @@ heptspin operator + (const heptspin& hs, wstep_t) {
   createStep(hs.h, hs.spin);
   heptspin res;
   res.h = hs.h->move[hs.spin];
-  res.mirrored = hs.mirrored ^ hs.h->mirror(hs.spin);
+  res.mirrored = boolean_xor(hs.mirrored, hs.h->mirror(hs.spin));
   res.spin = hs.h->spin(hs.spin);
   return res;
   }

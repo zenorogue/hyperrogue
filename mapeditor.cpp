@@ -1322,7 +1322,7 @@ namespace mapeditor {
       fscanf(f, "%d%d%d%d\n", &tg, &nt, &wp, &patterns::subpattern_flags);
       patterns::whichPattern = wp;
       if(tg != geometry) { targetgeometry = eGeometry(tg); stop_game_and_switch_mode(rg::geometry); }
-      if(nt != nonbitrunc) stop_game_and_switch_mode(rg::bitrunc);
+      if(boolean_xor(nt, nonbitrunc)) stop_game_and_switch_mode(rg::bitrunc);
       start_game();
       }
 
@@ -1767,7 +1767,7 @@ namespace mapeditor {
               if(gstate == 1) queueline(lpsm, P2, 0x90000080), gstate = 0;
               if(ti == ew.pointid) {
                 queueline(pseudomouse, P2, 0xF0000080);
-                if(ew.side == b) queueline(pseudomouse, Plast, 0x90000080);
+                if(int(ew.side) == b) queueline(pseudomouse, Plast, 0x90000080);
                 else gstate = 1, lpsm = pseudomouse;
                 }
               }

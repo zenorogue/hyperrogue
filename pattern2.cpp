@@ -624,7 +624,7 @@ namespace patterns {
       int sp = c->spin(0);
       if(gp::on) {
         sp = gp::last_dir(c);
-        sp ^= ishex2(c);
+        sp = boolean_xor(sp, ishex2(c));
         }
       if(geometry == gBolza2 && (!gp::on || gp_threecolor() == 2)) {
         patterninfo si0;
@@ -666,7 +666,7 @@ namespace patterns {
             int sp2 = c2->spin(0);
             if(gp::on) {
               sp2 = gp::last_dir(c2);
-              sp2 ^= ishex2(c2);
+              sp2 = boolean_xor(sp2, ishex2(c2));
               }
             id2 = 8 * ((c2->master->fiftyval & 1) ^ (sp2 & 1));
             }
