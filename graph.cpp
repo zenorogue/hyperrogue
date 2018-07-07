@@ -3461,7 +3461,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
 
   // if(behindsphere(V)) return;
   
-  if(callhandlers(0, hooks_drawcell, c, V)) return;
+  if(callhandlers(false, hooks_drawcell, c, V)) return;
   
   ld dist0 = hdist0(tC0(V)) - 1e-6;
   if(dist0 < geom3::highdetail) detaillevel = 2;

@@ -3399,6 +3399,7 @@ transmatrix calc_relative_matrix(cell *c2, cell *c1, int direction_hint) {
   // always add to last!
 //bool hsol = false;
 //transmatrix sol;
+
   while(h1 != h2) {
     if(quotient & qSMALL) {
       transmatrix T;

@@ -308,7 +308,7 @@ struct gcell {
 
 inline void tsetspin(uint32_t& t, int d, int spin) { t &= ~(15 << (d<<2)); t |= spin << (d<<2); }
 inline int tspin(uint32_t& t, int d) { return (t >> (d<<2)) & 7; }
-inline int tmirror(uint32_t& t, int d) { return (t >> ((d<<2)+3)) & 1; }
+inline bool tmirror(uint32_t& t, int d) { return (t >> ((d<<2)+3)) & 1; }
 
 inline int fixrot(int a) { return (a+MODFIXER)% S7; }
 inline int fix42(int a) { return (a+MODFIXER)% S42; }
@@ -325,7 +325,7 @@ struct heptagon {
   // we are spin[i]-th neighbor of move[i]
   uint32_t spintable;
   int spin(int d) { return tspin(spintable, d); }
-  int mirror(int d) { return tmirror(spintable, d); }
+  bool mirror(int d) { return tmirror(spintable, d); }
   void setspin(int d, int sp) { tsetspin(spintable, d, sp); }
   // neighbors; move[0] always goes towards origin,
   // and then we go clockwise
@@ -373,7 +373,7 @@ struct cell : gcell {
   uint32_t spintable;
   int spin(int d) { return tspin(spintable, d); }
   int spn(int d) { return tspin(spintable, d); }
-  int mirror(int d) { return tmirror(spintable, d); }
+  bool mirror(int d) { return tmirror(spintable, d); }
 
   heptagon *master;
   cell *mov[MAX_EDGE]; // meaning very similar to heptagon::move
