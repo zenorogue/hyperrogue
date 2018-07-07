@@ -2537,3 +2537,8 @@ non-game:
 - fixed Prairie
 - Orb of Empathy + Orb of Water no longer works on enemies too
 - fixed Strange Challenge leaderboard display
+
+2018.07.07 11:06 Update 10.4k
+- fixed shards collectable in the old Land of Mirrors
+- fixed the animation in (small) field quotient geometry
+- fixed the "-geo" and "-qpar2" command line options
