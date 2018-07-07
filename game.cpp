@@ -1848,7 +1848,7 @@ void stunMonster(cell *c2) {
   int newtime = (
     c2->monst == moFatGuard ? 2 : 
     c2->monst == moSkeleton && c2->land != laPalace && c2->land != laHalloween ? 7 :
-    c2->monst == moTerraWarrior ? min(c2->stuntime + 8 - c2->hitpoints, 7) :
+    c2->monst == moTerraWarrior ? min(int(c2->stuntime + 8 - c2->hitpoints), 7) :
     isMetalBeast(c2->monst) ? 7 :
     c2->monst == moTortoise ? 7 :
     c2->monst == moReptile ? 7 :
