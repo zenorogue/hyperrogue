@@ -8,12 +8,31 @@ addons:
       - libsdl-gfx1.2-dev
       - libsdl-ttf2.0-dev
       - libglew-dev
+os:
+  - linux
+  - osx
 compiler:
   - gcc
   - clang
+before_install:
+  - |-
+    if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+      brew update && brew install sdl sdl_gfx sdl_mixer sdl_ttf
+      # work around https://stackoverflow.com/questions/51034399/ for now
+      (cd /usr/local/include && ln -sf SDL/SDL.h)
+    fi
 script:
-  - autoreconf -fiv
-  - ./configure
-  - make
-  - sudo make install
-  - ./hyperrogue --help
+- |-
+  # Build hyperrogue.
+  autoreconf -vi
+  ./configure
+  make
+- |-
+  # Test hyperrogue.
+  ./hyperrogue --help
+- |-
+  # Test "make dist". ("make distcheck" is expected to fail.)
+  make dist
+- |-
+  # Test "sudo make install".
+  sudo make install
