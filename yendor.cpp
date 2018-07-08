@@ -752,12 +752,16 @@ namespace tactic {
      
     keyhandler = [] (int sym, int uni) {
       if(uni >= 1000 && uni < 1000 + isize(landlist)) {
+        stop_game();
         specialland = landlist[uni - 1000];
         restart_game(tactic::on ? rg::nothing : rg::tactic);
         }
       else if(uni == '0') {
-        firstland = laIce;
-        if(tactic::on) restart_game(rg::tactic);
+        if(tactic::on) {
+          stop_game();          
+          firstland = laIce;
+          restart_game(rg::tactic);
+          }
         else popScreen();
         }
 
