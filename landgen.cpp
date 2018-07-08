@@ -466,7 +466,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
       if(d==8) {
         int v;
         if(randomPatternsMode)
-          v = RANDPAT ? 24 : 0;
+          v = RANDPAT ? 24 : 1;
         else if(sphere) {
           int gs = getHemisphere(c, 0);
           if(gp::on) {
@@ -608,6 +608,8 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           if(RANDPAT) c->wall = waChasm;
           else c->wall = ch < (50 + items[itDodeca] + yendor::hardness()) ? waReptile : waNone;
           c->wparam = 1 + hrand(reptilemax());
+          if(c->wall == waNone && hrand(5000) < 25)
+            c->item = itDodeca;
           }
         else {
           int i = zebra40(c);
