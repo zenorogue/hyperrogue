@@ -236,7 +236,7 @@ else if(args()[0] == '-' && args()[1] == x && args()[2] == '0') { PHASEFROM(2); 
     }
   else if(argis("-geo")) { 
     shift(); targetgeometry = (eGeometry) argi();
-    if(targetgeometry != rg::geometry)
+    if(targetgeometry != geometry)
       stop_game_and_switch_mode(rg::geometry);
     }
   else if(argis("-gp")) {
