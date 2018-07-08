@@ -25,7 +25,7 @@ script:
 - |-
   # Build hyperrogue.
   autoreconf -vi
-  ./configure
+  ./configure CXXFLAGS="-Wall -Werror -Wno-error=unused-result"
   make
 - |-
   # Test hyperrogue.
