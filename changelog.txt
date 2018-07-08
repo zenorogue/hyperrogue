@@ -2542,3 +2542,8 @@ non-game:
 - fixed shards collectable in the old Land of Mirrors
 - fixed the animation in (small) field quotient geometry
 - fixed the "-geo" and "-qpar2" command line options
+
+2018.07.08 14:22 Update 10.4l
+- fixed PTM games not recorded when switching modes
+- Random Pattern Mode: fixed the Land of Power, treasures appear in the Reptiles.
+- fixed the "-geo" parameter
