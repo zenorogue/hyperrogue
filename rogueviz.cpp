@@ -1467,6 +1467,7 @@ void init() {
   restart_game(rg::nothing);
 #endif
   on = true;
+  autocheat = true;
   items[itOrbLife] = 0;
   timerghost = false;
 

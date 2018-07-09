@@ -5089,9 +5089,6 @@ bool allowIncreasedSight() {
 #if CAP_TOUR
   if(tour::on) return true;
 #endif
-#if CAP_ROGUEVIZ
-  if(rogueviz::on) return true;
-#endif
   if(randomPatternsMode) return true;
   if(quotient || !hyperbolic) return true;
   return false;
@@ -5101,9 +5098,6 @@ bool allowChangeRange() {
   if(cheater || peace::on || randomPatternsMode) return true;
 #if CAP_TOUR
   if(tour::on) return true;
-#endif
-#if CAP_ROGUEVIZ
-  if(rogueviz::on) return true;
 #endif
   if(sightrange_bonus >= 0) return true;
   return false;
@@ -5582,9 +5576,6 @@ bool nohelp;
 void normalscreen() {
   help = "@";
 
-#if CAP_ROGUEVIZ
-  if(!rogueviz::on)
-#endif
   mouseovers = XLAT("Press F1 or right click for help");
 
 #if CAP_TOUR  
