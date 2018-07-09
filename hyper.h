@@ -3044,7 +3044,7 @@ static const int max_vec = (1<<14);
 
 string helptitle(string s, int col);
 pair<int, int> cell_to_pair(cell *c);
-extern bool nohud, nofps;
+extern bool nohud, nofps, nomap;
 
 template<class T> array<T, 3> make_array(T a, T b, T c) { array<T,3> x; x[0] = a; x[1] = b; x[2] = c; return x; }
 template<class T> array<T, 2> make_array(T a, T b) { array<T,2> x; x[0] = a; x[1] = b; return x; }

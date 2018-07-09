@@ -46,7 +46,10 @@ vector<string> extra_keys = {
   "ctrl + mousewheel = change zoom",
   "ctrl + shift + mousewheel = change both projection and zoom",
   "ctrl + hold middle button = move the screen",
-  "shift + middle button = reset position"
+  "shift + middle button = reset position",
+  "shift + F2 = disable the HUD",
+  "shift + F3 = disable the FPS",
+  "shift + F4 = disable the map"
   };
 
 void buildHelpText() {

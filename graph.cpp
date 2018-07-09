@@ -35,6 +35,7 @@ int ticks;
 int frameid;
 
 bool camelotcheat;
+bool nomap;
 
 eItem orbToTarget;
 eMonster monsterToSummon;
@@ -5486,7 +5487,7 @@ void drawfullmap() {
     } */
 
   clearaura();
-  drawthemap();
+  if(!nomap) drawthemap();
   if(!inHighQual) {
     if((cmode & sm::NORMAL) && !rug::rugged) {
       if(multi::players > 1) {

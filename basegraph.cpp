@@ -1049,6 +1049,8 @@ void saveHighQualityShot(const char *fname, const char *caption, int fade) {
     #endif
       drawfullmap();
     
+    drawStats();
+    
     callhooks(hooks_hqshot, &glbuf);
 
     if(fade < 255) 

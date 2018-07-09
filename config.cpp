@@ -259,6 +259,9 @@ void initConfig() {
   addsaver(gp::param.first, "goldberg-x", gp::param.first);
   addsaver(gp::param.second, "goldberg-y", gp::param.second);
   
+  addsaver(nohud, "no-hud", false);
+  addsaver(nofps, "no-fps", false);
+  
 #if CAP_SHMUP  
   shmup::initConfig();
 #endif

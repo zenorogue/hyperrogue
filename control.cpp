@@ -801,6 +801,21 @@ void handle_event(SDL_Event& ev) {
       if(needConfirmation() && !(cmode & sm::MISSION)) showMissionScreen();
       else quitmainloop = true;
       }
+    
+    if(sym == SDLK_F4 && anyshift) {
+      nomap = !nomap;
+      sym = 0;
+      }
+      
+    if(sym == SDLK_F2 && anyshift) {
+      nohud = !nohud;
+      sym = 0;
+      }
+      
+    if(sym == SDLK_F3 && anyshift) {
+      nofps = !nofps;
+      sym = 0;
+      }
       
     handlekey(sym, uni);
     }
