@@ -1646,7 +1646,7 @@ void configure_edge_display() {
     switch(mode) {
       case 0:
         dialog::addSelItem(t->name, itsh(t->color), 'a' + i);
-        dialog::lastItem().colorv = l.color >> 8;
+        dialog::lastItem().colorv = t->color >> 8;
         dialog::add_action([t] {
           dialog::openColorDialog(t->color, NULL);
           dialog::dialogflags |= sm::MAYDARK | sm::SIDE;
