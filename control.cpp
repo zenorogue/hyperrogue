@@ -426,10 +426,6 @@ void handleKeyNormal(int sym, int uni) {
     }
 
   if(sym == SDLK_F1) gotoHelp(help);
-
-#if CAP_ROGUEVIZ
-  rogueviz::processKey(sym, uni);
-#endif
   }
 
 bool need_mouseh = false;

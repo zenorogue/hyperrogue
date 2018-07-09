@@ -1778,8 +1778,6 @@ void showMenu() {
     };
   }
 
-void processKey(int sym, int uni) { }
-
 string makehelp() {
   string ret = 
     "This is RogueViz, a visualization engine based on HyperRogue.\n\nUse WASD to move, v for menu.\n\n"
