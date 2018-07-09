@@ -24,20 +24,17 @@ namespace rogueviz {
 
 using namespace hr;
 
+edgetype default_edgetype = { .1, DEFAULT_COLOR, "default" };
+
 void init();
 
 bool showlabels = false;
 bool specialmark = false;
 
-static const unsigned DEFAULT_COLOR = 0x47129371;
-
-unsigned edgecolor = DEFAULT_COLOR;
-
 bool rog3 = false;
 int vertex_shape = 1;
 
-ld ggamma = .5;
-
+string edgename;
 string fname;
 
 // const char *fname;
@@ -47,6 +44,13 @@ enum eVizkind { kNONE, kAnyGraph, kTree, kSpiral, kSAG, kCollatz, kFullNet, kKoh
 eVizkind kind;
 
 bool on;
+
+edgetype *add_edgetype(const string& name) {
+  auto e = make_shared<edgetype> (default_edgetype);
+  e->name = name;
+  edgetypes.push_back(e);
+  return &*e;
+  }
 
 colorpair parse(const string& s) {
   colorpair cp;
@@ -186,8 +190,8 @@ void addedge(int i, int j, edgeinfo *ei) {
 
 vector<edgeinfo*> edgeinfos;
 
-void addedge(int i, int j, double wei, bool subdiv) {
-  edgeinfo *ei = new edgeinfo;
+void addedge(int i, int j, double wei, bool subdiv, edgetype *t) {
+  edgeinfo *ei = new edgeinfo(t);
   edgeinfos.push_back(ei);
   ei->i = i;
   ei->j = j;
@@ -236,10 +240,12 @@ namespace spiral {
   
   void edge(ld shift, ld mul) {
     int N = isize(vdata);
+    auto t = add_edgetype(fts(shift)+" " + fts(mul));
+    t->visible_from = 1. / (N+.5);
     for(int i=0; i<N; i++) {
       int i0 = i+1;
       int j0 = int(i0 * mul + shift) - 1;
-      if(j0 >= 0 && j0 < N) addedge(i, j0, 0, false);
+      if(j0 >= 0 && j0 < N) addedge(i, j0, 1/(i+1), false, t);
       }
     }
   
@@ -260,18 +266,22 @@ namespace collatz {
   double s2, s3, p2, p3;
   double cshift = -1;
   
+  edgetype *collatz1, *collatz2;
+  
   void start() {
     init(); kind = kCollatz;
+    collatz1 = add_edgetype("1");
+    collatz2 = add_edgetype("2");
     vdata.resize(1);
     vertexdata& vd = vdata[0];
     createViz(0, cwt.c, xpush(cshift));
     virtualRebase(vd.m, true);
     vd.cp = perturb(dftcolor);
     vd.data = 0;
-    addedge(0, 0, 0, false);
-    vd.name = "1";    
+    addedge(0, 0, 0, false, collatz::collatz1);
+    vd.name = "1";
     storeall();
-    }  
+    }
   }
 
 string readLabel_s(FILE *f) {
@@ -290,6 +300,9 @@ namespace anygraph {
   double R, alpha, T;
   vector<pair<double, double> > coords;
   
+  edgetype *any;
+
+  
   int N;
                
   void fixedges() {
@@ -304,6 +317,7 @@ namespace anygraph {
 
   void read(string fn, bool subdiv, bool doRebase, bool doStore) {
     init(); kind = kAnyGraph;
+    any = add_edgetype("embedded edges");
     fname = fn;
     FILE *f = fopen((fn + "-coordinates.txt").c_str(), "rt");
     if(!f) {
@@ -346,7 +360,7 @@ namespace anygraph {
     while(true) {
       int i = readLabel(f), j = readLabel(f);
       if(i == -1 || j == -1) break;
-      addedge(i, j, 0, subdiv);
+      addedge(i, j, 0, subdiv, any);
       qlink++;
       }
     fclose(f);
@@ -366,6 +380,8 @@ namespace anygraph {
   }
 
 namespace tree {
+
+  edgetype *tree_edge;
 
   struct treevertex {
     int origid;
@@ -417,6 +433,7 @@ namespace tree {
     }
     
   void read(string fn) {
+    tree_edge = add_edgetype("tree edge");
     fname = fn;
     init(); kind = kTree;
     printf("Reading the tree of life...\n");
@@ -448,7 +465,7 @@ namespace tree {
       vd.cp = dftcolor; 
       
       if(tol[i].parent >= 0) 
-        addedge(i, tol[i].parent, 0, true);
+        addedge(i, tol[i].parent, 0, true, tree_edge);
       }
     
     for(int i=0; i<isize(vdata); i++) {
@@ -595,6 +612,8 @@ namespace sag {
   int N;
 
   vector<double> chgs;  
+  
+  edgetype *sag_edge;
 
   void forgetedges(int id) {
     for(int i=0; i<isize(vdata[id].edges); i++) 
@@ -815,7 +834,7 @@ namespace sag {
           snakeid[ei.i], vdata[ei.i].name.c_str(),
           snakeid[ei.j], vdata[ei.j].name.c_str());
         }
-      if(ei.visible)
+      if(ei.weight >= sag_edge->visible_from)
         pedge[snakedist(snakeid[ei.i], snakeid[ei.j])]++;
       }
     
@@ -835,10 +854,9 @@ namespace sag {
     printf("loglikelihood = %lf\n", (double) loglik);
     }
   
-  ld min_visible_weight = .1;
-  
   void readsag(const char *fname) {
     maxweight = 0;
+    sag_edge = add_edgetype("SAG edge");
     FILE *f = fopen(fname, "rt");
     if(!f) { printf("Failed to open SAG file: %s\n", fname); exit(1); }
     // while(fgetc(f) != 10 && fgetc(f) != 13 && !feof(f)) ;
@@ -861,7 +879,7 @@ namespace sag {
       double wei;
       int err = fscanf(f, "%lf", &wei);
       if(err < 1) continue;
-      edgeinfo ei;
+      edgeinfo ei(sag_edge);
       ei.i = getid(l1);
       ei.j = getid(l2);
       ei.weight = wei;
@@ -876,7 +894,7 @@ namespace sag {
     init(); kind = kSAG;
     temperature = 0; sagmode = sagOff;
     readsag(fname.c_str());
-
+    
     N = isize(vdata);
     // totwei.resize(N);
     // for(int i=0; i<N; i++) totwei[i] = 0;
@@ -891,7 +909,6 @@ namespace sag {
       } */
     for(int i=0; i<isize(sagedges); i++) {
       edgeinfo& ei = sagedges[i];
-      ei.visible = ei.weight >= min_visible_weight;
       // (ei.weight >= maxwei[ei.i] / 5 || ei.weight >= maxwei[ei.j] / 5);
 
       ei.weight2 = pow((double) ei.weight, (double) edgepower) * edgemul;
@@ -963,7 +980,7 @@ string describe(shmup::monster *m) {
 
   for(int j=0; j<isize(alledges); j++) {
     edgeinfo *ei = alledges[j];
-    if(!ei->visible) continue;
+    if(ei->weight < ei->type->visible_from) continue;
     int k = ei->i ^ ei->j ^ i;
     help += vdata[k].name;
     if(kind == kSAG)
@@ -1054,7 +1071,7 @@ void drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
   
   if(!leftclick) for(int j=0; j<isize(vd.edges); j++) {
     edgeinfo *ei = vd.edges[j].second;
-    if(!ei->visible) continue;
+    if(ei->weight < ei->type->visible_from) continue;
     vertexdata& vd1 = vdata[ei->i];
     vertexdata& vd2 = vdata[ei->j];
 
@@ -1073,15 +1090,17 @@ void drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
     if(ei->lastdraw < frameid || multidraw) { 
       ei->lastdraw = frameid;
       
-      int xlalpha = (hilite || hiliteclick) ? 64 : 20;
+      int col = ei->type->color;
+      auto& alpha = part(col, 0);
       
       if(kind == kSAG) {
         if(ei->weight2 > maxweight) maxweight = ei->weight2;
-        xlalpha = int(pow(ei->weight2/ maxweight, ggamma) * 255);
+        ld gamma = log(alpha / 256) / log(.5);
+        alpha = int(pow(ei->weight2 / maxweight, gamma) * 255);
         }
-      else xlalpha = int(pow(ld(.5), ggamma) * 255);
+      if(hilite || hiliteclick) alpha = (alpha + 256) / 2;
       
-      if(svg::in && xlalpha < 16) continue;
+      if(svg::in && alpha < 16) continue;
 
       transmatrix gm1 = 
         multidraw ? V * shmup::calc_relative_matrix(vd1.m->base, c, NOHINT) :
@@ -1110,8 +1129,15 @@ void drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
         display(shmup::calc_gmatrix(vd2.m->base));
         } */
       
-      int col = 
-        ((hilite ? 0xFF0000 : ei->color != DEFAULT_COLOR ? ei->color : forecolor) << 8) + xlalpha;
+      if(hilite) {
+        col &= 0xFF;
+        col |= 0xFF000000;
+        }
+
+      else if((col >> 8) == (DEFAULT_COLOR >> 8)) {
+        col &= 0xFF;
+        col |= (forecolor << 8);
+        }
 
       bool onspiral = kind == kSpiral && abs(ei->i - ei->j) == 1;      
       if(pmodel || onspiral) {
@@ -1202,7 +1228,7 @@ void drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
       virtualRebase(vdn.m, true);
       vdn.cp = perturb(cp);
       vdn.data = 0;
-      addedge(i, i0, 0, false);
+      addedge(i, i0, 0, false, collatz::collatz1);
       vdn.m->store();
       int carry = 0;
       string s2 = s;
@@ -1225,7 +1251,7 @@ void drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
         virtualRebase(vdn.m, true);
         vdn.cp = perturb(cp);
         vdn.data = 0;
-        addedge(i, i0+1, 0, false);
+        addedge(i, i0+1, 0, false, collatz::collatz2);
         vdn.m->store();
         int carry = -1;
         string s2 = s;
@@ -1423,6 +1449,7 @@ void close() {
   edgeinfos.clear();
   anygraph::coords.clear();
   sag::sagedges.clear();
+  edgetypes.clear();
   on = false;
   }
 
@@ -1445,7 +1472,7 @@ int readArgs() {
 // options before reading
   if(0) ;
   else if(argis("-dftcolor")) {
-    shift(); dftcolor = strtol(args().c_str(), NULL, 16);
+    shift(); dftcolor = arghex();
     }  
 
 // tree visualizer (e.g. Tree of Life)
@@ -1469,7 +1496,7 @@ int readArgs() {
     shift(); sag::lowtemp = argf();
     }
   else if(argis("-sagmin")) {
-    shift(); sag::min_visible_weight = argf();
+    shift(); default_edgetype.visible_from = argf();
     }
 // (2) read the edge data
   else if(argis("-sagpar")) {
@@ -1571,7 +1598,11 @@ int readArgs() {
     rog3 = true;
     }
   else if(argis("-rvedge")) {
-    shift(); edgecolor = arghex();
+    shift(); default_edgetype.color = arghex();
+    }
+  else if(argis("-ggamma")) {
+    // backward compatibility
+    shift(); part(default_edgetype.color, 0) = 255 * pow(.5, argf());
     }
   else if(argis("-cshift")) {
     shift(); collatz::cshift = argf();
@@ -1581,9 +1612,6 @@ int readArgs() {
     }
   else if(argis("-lq")) {
     shift(); linequality = argf();
-    }
-  else if(argis("-ggamma")) {
-    shift(); ggamma = argf();
     }
   else if(argis("-rvpres")) {
     tour::slides = rvtour::rvslides;
@@ -1607,6 +1635,59 @@ int readArgs() {
   }
 #endif
 
+void configure_edge_display() {
+  cmode = sm::SIDE | sm::MAYDARK | sm::DIALOG_STRICT_X;
+  static int mode = 0;
+  gamescreen(0);  
+  dialog::init(XLAT("rogueviz edges"));
+  string s3 = kind == kSAG ? "min weight" : kind == kKohonen ? "quantity" : "extent";
+  for(int i=0; i<isize(edgetypes); i++) {
+    auto t = edgetypes[i];
+    switch(mode) {
+      case 0:
+        dialog::addSelItem(t->name, itsh(t->color), 'a' + i);
+        dialog::lastItem().colorv = l.color >> 8;
+        dialog::add_action([t] {
+          dialog::openColorDialog(t->color, NULL);
+          dialog::dialogflags |= sm::MAYDARK | sm::SIDE;
+          });
+        break;
+      case 1:
+        if(kind == kSAG) {
+          dialog::addSelItem(t->name, fts(t->visible_from), 'a'+i);
+          dialog::add_action([t] {
+            dialog::editNumber(t->visible_from, 0.001, 1000, .1, .1, "min weight", "");
+            dialog::scaleLog();
+            });
+          }
+        else {
+          dialog::addSelItem(t->name, its(1 / t->visible_from), 'a'+i);
+          dialog::add_action([t,s3] {
+            static int i;
+            i = 1 / t->visible_from;
+            dialog::editNumber(i, 1, 1000000, .2, 500, s3, "");
+            dialog::reaction = [t] () { t->visible_from = i ? 1. / i : 5; };
+            dialog::scaleLog();
+            });
+          }
+        break;
+      default: break;
+      }
+    }
+  dialog::addBreak(100);
+  if(among(kind, kSAG, kKohonen, kSpiral)) {
+    dialog::addBoolItem("color/alpha", mode == 0, '1');
+    dialog::add_action([] () { mode = 0; });
+    dialog::addBoolItem(s3, mode == 1, '2');
+    dialog::add_action([] () { mode = 1; });
+    }
+  else mode = 0;
+  
+  dialog::addBreak(50);
+  dialog::addBack();
+  dialog::display();
+  }
+
 void showMenu() {
   if(staircase::on) { staircase::showMenu(); return; }
   cmode = sm::SIDE | sm::MAYDARK | sm::DIALOG_STRICT_X;
@@ -1620,7 +1701,8 @@ void showMenu() {
   dialog::addBoolItem(XLAT("show labels"), showlabels, 'l');
   dialog::addBoolItem(XLAT("mark special vertices"), specialmark, 'x');
   dialog::addSelItem(XLAT("background color"), itsh(backcolor), 'b');
-  dialog::addSelItem(XLAT("gamma value for edges"), fts(ggamma), 'g');
+  if(isize(edgetypes))
+    dialog::addSelItem(XLAT("edge types"), its(isize(edgetypes)), 'g');
   dialog::addBoolItem(XLAT("vertices in 3D"), rog3, 'v');
   dialog::addSelItem(XLAT("vertex shape"), its(vertex_shape), 'w');
   
@@ -1644,10 +1726,7 @@ void showMenu() {
     else if(uni == 'w') vertex_shape = (1 + vertex_shape) & 3;
     else if(uni == 'x') specialmark = !specialmark;
     else if(uni == 'b') backcolor ^= 0xFFFFFF, bordcolor ^= 0xFFFFFF, forecolor ^= 0xFFFFFF;
-    else if(uni == 'g') {
-      dialog::editNumber(ggamma, 0, 5, .01, 0.5, XLAT("gamma value for edges"), "");
-      dialog::dialogflags = sm::SIDE;
-      }
+    else if(uni == 'g') pushScreen(configure_edge_display);
     else if(uni == 'z') {
       for(int i=0; i<isize(named)-1; i++) if(named[i] == cwt.c)
         swap(named[i], named[i+1]);
@@ -1795,7 +1874,7 @@ slide rvslides[] = {
       rogueviz::dftcolor = 0x282828FF;
 
       rogueviz::showlabels = true;
-      rogueviz::ggamma = .5;
+      part(rogueviz::default_edgetype.color, 0) = 181;
       rogueviz::sag::edgepower = 1;
       rogueviz::sag::edgemul = 1;
       
@@ -1815,7 +1894,7 @@ slide rvslides[] = {
       rogueviz::dftcolor = 0x282828FF;
 
       rogueviz::showlabels = true;
-      rogueviz::ggamma = 1;
+      part(rogueviz::default_edgetype.color, 0) = 128;
       rogueviz::sag::edgepower = .4;
       rogueviz::sag::edgemul = .02;
       
@@ -1836,7 +1915,7 @@ slide rvslides[] = {
       rogueviz::dftcolor = 0x282828FF;
 
       rogueviz::showlabels = true;
-      rogueviz::ggamma = .7;
+      part(rogueviz::default_edgetype.color, 0) = 157;
       rogueviz::sag::edgepower = 1;
       rogueviz::sag::edgemul = 1;
       

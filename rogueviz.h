@@ -17,19 +17,29 @@ namespace rogueviz {
   void mark(cell *c);
   void showMenu();
   string makehelp();
-  extern unsigned edgecolor;
 
   void init();
+  
+  struct edgetype {
+    double visible_from;
+    unsigned color;
+    string name;
+    };
+  
+  static const unsigned DEFAULT_COLOR = 0x471293B5;
+
+  extern edgetype default_edgetype;
+  
+  vector<shared_ptr<edgetype>> edgetypes;
     
   struct edgeinfo {
     int i, j;
     double weight, weight2;
-    bool visible;
     vector<glvertex> prec;
     cell *orig;
     int lastdraw;
-    unsigned color;
-    edgeinfo() { visible = true; orig = NULL; lastdraw = -1; color = edgecolor; }
+    edgetype *type;
+    edgeinfo(edgetype *t) { orig = NULL; lastdraw = -1; type = t; }
     };
   
   struct colorpair {
@@ -63,7 +73,6 @@ namespace rogueviz {
     extern int N;
     }
   
-  extern ld ggamma;
   extern bool showlabels;
 
   extern bool rog3;

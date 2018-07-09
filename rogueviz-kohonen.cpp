@@ -749,7 +749,7 @@ namespace levelline {
   bool on;
   
   void create() {
-    int xlalpha = int(pow(ld(.5), ggamma) * 255);
+    int xlalpha = part(default_edgetype.color, 0);
     for(int i=0; i<cols; i++) {
       levellines.emplace_back();
       levelline& lv = levellines.back();
@@ -855,6 +855,7 @@ namespace levelline {
       else if(uni >= 'A' && uni - 'A' + isize(levellines)) {
         auto& l = levellines[uni - 'A'];
         dialog::openColorDialog(l.color, NULL);
+        dialog::dialogflags |= sm::MAYDARK | sm::SIDE;
         }
       else if(doexiton(sym, uni)) popScreen();
       };
@@ -1079,8 +1080,9 @@ void kclassify_load_raw(const string& fname_classify) {
   do_classify();
   }
 
-void load_edges(const string& fname_edges, int pick = 0) {
+void load_edges(const string& fname_edges, string edgename, int pick = 0) {
   do_classify();
+  auto t = add_edgetype(edgename);
   vector<pair<int, int>> edgedata;
   load_raw(fname_edges, edgedata);
   int N = isize(edgedata);
@@ -1088,21 +1090,22 @@ void load_edges(const string& fname_edges, int pick = 0) {
     for(int i=1; i<N; i++) swap(edgedata[i], edgedata[hrand(i+1)]);
     edgedata.resize(N = pick);    
     }
+  t->visible_from = 1. / N;
   vector<pair<int, int>> edgedata2;
   for(auto p: edgedata)
     edgedata2.emplace_back(showsample(p.first), showsample(p.second));
   distribute_neurons();
+  int i = 0;
   for(auto p: edgedata2)
-    addedge(p.first, p.second, 0, true);
+    addedge(p.first, p.second, 1 / (i+++.5), true, t);
   }
 
 void random_edges(int q) {
+  auto t = add_edgetype("random");
   vector<int> ssamp;
   for(auto p: sample_vdata_id) ssamp.push_back(p.second);
-  for(int i=0; i<q; i++) {
-    edgecolor = hrandpos();
-    addedge(ssamp[hrand(isize(ssamp))], ssamp[hrand(isize(ssamp))], 0, true);
-    }
+  for(int i=0; i<q; i++)
+    addedge(ssamp[hrand(isize(ssamp))], ssamp[hrand(isize(ssamp))], 0, true, t);
   }
 
 void klistsamples(const string& fname_samples, bool best, bool colorformat) {
@@ -1346,15 +1349,21 @@ int readArgs() {
     fillgroups();
     }
   else if(argis("-som-load-edges")) {
-    shift(); kohonen::load_edges(args(), 0);
+    shift(); string edgename = args();
+    shift(); kohonen::load_edges(args(), edgename,  0);
     }
   else if(argis("-som-random-edges")) {
     shift();
     random_edges(argi());
     }
   else if(argis("-som-load-n-edges")) {
+    shift(); string edgename = args();
     shift(); int n = argi();
-    shift(); kohonen::load_edges(args(), n);
+    shift(); kohonen::load_edges(args(), edgename, n);
+    }
+  else if(argis("-less-edges")) {
+    shift(); double d = argf();
+    for(auto t: edgetypes) t->visible_from *= d;
     }
 
   else return 1;
