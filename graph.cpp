@@ -5321,6 +5321,8 @@ bool sidescreen;
 
 bool dronemode;
 
+purehookset hooks_calcparam;
+
 void calcparam() {
   DEBB(DF_GRAPH, (debugfile,"calc param\n"));
   vid.xcenter = vid.xres / 2;
@@ -5361,6 +5363,8 @@ void calcparam() {
   else 
     stereo::scrdist = vid.radius;
   stereo::scrdist_text = stereo::scrdist;
+
+  callhooks(hooks_calcparam);
   }
 
 int ringcolor = darkena(0xFF, 0, 0xFF);
@@ -5616,9 +5620,6 @@ void drawscreen() {
 
   calcparam();
   // rug::setVidParam();
-  #if CAP_ROGUEVIZ
-  rogueviz::fixparam();
-  #endif
 
 #if CAP_GL
   if(vid.usingGL) setGLProjection();

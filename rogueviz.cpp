@@ -2045,7 +2045,8 @@ auto hooks  =
   addHook(hooks_config, 0, [] () { tour::ss::list(rogueviz::rvtour::rvslides); }) +
 #endif
   addHook(clearmemory, 0, close) +
-  addHook(hooks_prestats, 100, rogueviz_hud);
+  addHook(hooks_prestats, 100, rogueviz_hud) +
+  addHook(hooks_calcparam, 100, fixparam);
 
 };
 

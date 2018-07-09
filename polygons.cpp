@@ -2567,9 +2567,6 @@ namespace svg {
     vid.usingGL = false;
     vid.xres = vid.yres = svgsize ? svgsize : min(1 << (get_sightrange()+7), 16384);
     calcparam();
-#if CAP_ROGUEVIZ
-    rogueviz::fixparam();
-#endif
     dynamicval<bool> v6(inHighQual, true); 
     darken = 0;
     

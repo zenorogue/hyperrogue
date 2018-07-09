@@ -8044,10 +8044,10 @@ bool mightBeMine(cell *c) {
   return c->wall == waMineUnknown || c->wall == waMineMine;
   }
 
+hookset<bool(cell*)> *hooks_mark;
+
 void performMarkCommand(cell *c) {
-#if CAP_ROGUEVIZ
-  rogueviz::mark(c);
-#endif
+  if(callhandlers(false, hooks_mark, c)) return;
   if(c->land == laCA && c->wall == waNone) 
     c->wall = waFloorA;
   else if(c->land == laCA && c->wall == waFloorA)

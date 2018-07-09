@@ -11,10 +11,7 @@ namespace rogueviz {
   bool virt(shmup::monster *m);
   void turn(int delta);
   void drawExtra();
-  void fixparam();
-  int readArgs();
   void close();
-  void mark(cell *c);
   void showMenu();
   string makehelp();
 

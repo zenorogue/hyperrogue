@@ -1025,9 +1025,6 @@ void saveHighQualityShot(const char *fname, const char *caption, int fade) {
 
   // if(vid.pmodel == 0) vid.scale = 0.99;
   calcparam();
-  #if CAP_ROGUEVIZ
-  rogueviz::fixparam();
-  #endif
 
   renderbuffer glbuf(vid.xres, vid.yres, vid.usingGL);
   glbuf.enable();
