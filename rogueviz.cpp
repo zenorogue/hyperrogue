@@ -1056,6 +1056,15 @@ void queuedisk(const transmatrix& V, const colorpair& cp, bool legend) {
 
 unordered_map<pair<edgeinfo*, int>, int> drawn_edges;
 
+map<pair<cell*, cell*>, transmatrix> relmatrices;
+
+transmatrix& memo_relative_matrix(cell *c1, cell *c2) {
+  auto& p = relmatrices[make_pair(c1, c2)];
+  if(p[2][2] == 0)
+    p = shmup::calc_relative_matrix(c1, c2, NOHINT);
+  return p;
+  }
+
 void drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
   if(m->dead) return;
   int i = m->pid;
@@ -1103,10 +1112,10 @@ void drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
       if(svg::in && alpha < 16) continue;
 
       transmatrix gm1 = 
-        multidraw ? V * shmup::calc_relative_matrix(vd1.m->base, c, NOHINT) :
+        multidraw ? V * memo_relative_matrix(vd1.m->base, c) :
         shmup::ggmatrix(vd1.m->base);
       transmatrix gm2 = 
-        multidraw ? V * shmup::calc_relative_matrix(vd2.m->base, c, NOHINT) :
+        multidraw ? V * memo_relative_matrix(vd2.m->base, c) :
         shmup::ggmatrix(vd2.m->base);
                 
       hyperpoint h1 = gm1 * vd1.m->at * C0;
@@ -1477,6 +1486,7 @@ void close() {
   sag::sagedges.clear();
   edgetypes.clear();
   on = false;
+  relmatrices.clear();
   }
 
 void turn(int delta) {
