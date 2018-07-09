@@ -109,7 +109,7 @@ void showTorusConfig() {
   
   if(single) {
     dialog::addSelItem(XLAT("number of cells (n)"), its(torusconfig::newqty), 'n');
-    if(torusconfig::TF_HEX)
+    if(mode.flags & torusconfig::TF_HEX)
       dialog::addSelItem(XLAT("cell bottom-right from 0 (d)"), its(torusconfig::newdy), 'd');
     else
       dialog::addSelItem(XLAT("cell below 0 (d)"), its(torusconfig::newdy), 'd');
