@@ -1601,7 +1601,7 @@ namespace mapeditor {
       mapeditor::paintwhat_str = "clear monster";
     mapeditor::copysource.c = NULL;
     mapeditor::undo.clear();
-    if(!cheater) patterns::displaycodes = 0;
+    if(!cheater) patterns::displaycodes = false;
     if(!cheater) patterns::whichShape = 0;
     modelcell.clear();
     }) + 

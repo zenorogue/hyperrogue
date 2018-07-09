@@ -253,6 +253,7 @@
 #if ISWINDOWS
 #define hyper fake_hyper // avoid "hyper" typedef in <_mingw.h>
 #define WIN32_LEAN_AND_MEAN // avoid "rad1" macro in <windows.h>
+#define NOMINMAX // avoid "min" and "max" macros in <windows.h>
 #endif
 
 #include <stdio.h>
