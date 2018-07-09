@@ -4,10 +4,8 @@ namespace rogueviz {
   using namespace hr;
 
   extern bool on;
-  void describe(cell *c);
   void drawExtra();
   void close();
-  string makehelp();
 
   void init();
   

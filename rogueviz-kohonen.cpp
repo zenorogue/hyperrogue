@@ -714,8 +714,9 @@ void sominit(int initto) {
     }
   }
 
-void describe(cell *c) {
+void describe_cell(cell *c) {
   if(cmode & sm::HELP) return;
+  if(kind != kKohonen) return;
   neuron *n = getNeuronSlow(c);
   if(!n) return;
   help += "cell number: " + its(neuronId(*n)) + " (" + its(n->allsamples) + ")\n";
@@ -1373,7 +1374,8 @@ int readArgs() {
 auto hooks = addHook(hooks_args, 100, readArgs);
 #endif
 
-auto hooks2 = addHook(hooks_frame, 50, levelline::draw);
+auto hooks2 = addHook(hooks_frame, 50, levelline::draw)
+  + addHook(hooks_mouseover, 100, describe_cell);
 
 void clear() {
   printf("clearing Kohonen...\n");

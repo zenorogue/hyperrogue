@@ -954,10 +954,6 @@ bool edgecmp(edgeinfo *e1, edgeinfo *e2) {
   return e1->weight > e2->weight;
   }
 
-void describe(cell *c) {
-  if(kind == kKohonen) return kohonen::describe(c);
-  }
-
 bool describe_monster(shmup::monster *m, string& out) {
 
   if(m->type != moRogueviz) return false;
@@ -1783,25 +1779,6 @@ void showMenu() {
     };
   }
 
-string makehelp() {
-  string ret = 
-    "This is RogueViz, a visualization engine based on HyperRogue.\n\nUse WASD to move, v for menu.\n\n"
-    "Read more about RogueViz on : http://roguetemple.com/z/hyper/rogueviz.php\n\n";
-  if(kind == kAnyGraph)
-    ret += "Current visualization: any graph\n\n" + fname;
-  if(kind == kTree)
-    ret += "Current visualization: tree\n\n" + fname;
-  if(kind == kSpiral)
-    ret += "Current visualization: spiral\n\n";
-  if(kind == kSAG)
-    ret += "Current visualization: SAG\n\n" + fname;
-  if(kind == kCollatz)
-    ret += "Current visualization: Collatz conjecture\n\n";
-  if(kind == kFullNet)
-    ret += "Current visualization: full net\n\n";
-  return ret;
-  }
-
 namespace rvtour {
 
 using namespace tour;
@@ -2072,6 +2049,29 @@ int rvtour_hooks =
 
 }
 
+bool default_help() {
+  if(!rogueviz::on) return false;
+
+  help = 
+    "This is RogueViz, a visualization engine based on HyperRogue.\n\nUse WASD to move, v for menu.\n\n"
+    "Read more about RogueViz on : http://roguetemple.com/z/hyper/rogueviz.php\n\n";
+  if(kind == kAnyGraph)
+    help += "Current visualization: any graph\n\n" + fname;
+  if(kind == kTree)
+    help += "Current visualization: tree\n\n" + fname;
+  if(kind == kSpiral)
+    help += "Current visualization: spiral\n\n";
+  if(kind == kSAG)
+    help += "Current visualization: SAG\n\n" + fname;
+  if(kind == kCollatz)
+    help += "Current visualization: Collatz conjecture\n\n";
+  if(kind == kFullNet)
+    help += "Current visualization: full net\n\n";
+
+  help_extensions.push_back(help_extension{'u', XLAT("RogueViz menu"), [] () { popScreen(); pushScreen(showMenu); }});    
+  return true;
+  }
+
 auto hooks  = 
   addHook(hooks_frame, 0, drawExtra) +
 #if CAP_COMMANDLINE
@@ -2093,7 +2093,8 @@ auto hooks  =
     if(rogueviz::on) addMessage(XLAT("Welcome to RogueViz!"));
     return rogueviz::on;
     }) +
-  0;
+  addHook(hooks_default_help, 100, default_help) +
+ 0;
 
 };
 

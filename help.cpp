@@ -759,6 +759,8 @@ void appendHelp(string s) {
 unsigned char lastval;
 int windtotal;
 
+hookset<void(cell*)> *hooks_mouseover;
+
 void describeMouseover() {
   DEBB(DF_GRAPH, (debugfile,"describeMouseover\n"));
 
@@ -900,9 +902,7 @@ void describeMouseover() {
       }
     }
     
-#if CAP_ROGUEVIZ
-  rogueviz::describe(c);
-#endif
+  callhooks(hooks_mouseover, c);
   
   if(mousey < vid.fsize * 3/2) getcstat = SDLK_F1;
   }
@@ -955,29 +955,24 @@ void showHelp() {
     };
   }
 
+
+hookset<bool()> *hooks_default_help;
+
 void gotoHelp(const string& h) {
   help = h;
   help_extensions.clear();
   pushScreen(showHelp);
   if(help == "@") {
 
-/*
-#if CAP_ROGUEVIZ  
-  if(rogueviz::on) {
-    help = rogueviz::makehelp();
-    help_extensions.push_back(help_extension{'u', XLAT("RogueViz menu"), [] () { popScreen(); pushScreen(rogueviz::showMenu); }});    
-    return;
-    }
-#endif
-*/
-
+    if(callhandlers(false, hooks_default_help)) return;
+    
 #if CAP_RUG
-  if(rug::rugged) {
-    help = rug::makehelp();
-    help_extensions.push_back(help_extension{'m', XLAT("Hypersian Rug menu"), [] () { popScreen(); rug::select(); }});    
-    help_extensions.push_back(help_extension{'h', XLAT("HyperRogue help"), [] () { buildHelpText(); }});    
-    return;
-    }
+    if(rug::rugged) {
+      help = rug::makehelp();
+      help_extensions.push_back(help_extension{'m', XLAT("Hypersian Rug menu"), [] () { popScreen(); rug::select(); }});    
+      help_extensions.push_back(help_extension{'h', XLAT("HyperRogue help"), [] () { buildHelpText(); }});    
+      return;
+      }
 #endif
   
     buildHelpText();

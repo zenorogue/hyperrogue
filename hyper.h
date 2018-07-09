@@ -2040,7 +2040,8 @@ extern hookset<bool(int argc, char** argv)> *hooks_main;
 extern hookset<int()> *hooks_args;
 extern hookset<bool(cell*)> *hooks_mark;
 extern hookset<eLand(eLand)> *hooks_nextland;
-extern hookset<bool()> *hooks_welcome_message;
+extern hookset<bool()> *hooks_welcome_message, *hooks_default_help;
+extern hookset<void(cell*)> *hooks_mouseover;
 
 // hooks to extend HyperRogue with an external program
 // start compilation from another file which defines EXTRA_..., includes
