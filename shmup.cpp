@@ -3193,7 +3193,7 @@ bool drawMonster(const transmatrix& V, cell *c, const transmatrix*& Vboat, trans
     int q = ptds.size();
     if(q != isize(ptds) && !m->inBoat) pushdown(c, q, view, zlev, true, false);
 
-    if(callhandlers(false, hooks_draw, V, c, m)) return false;
+    if(callhandlers(false, hooks_draw, V, c, m)) continue;
 
     switch(m->type) {
       case moPlayer: 
