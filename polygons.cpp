@@ -497,6 +497,10 @@ unsigned char& part(int& col, int i) {
   unsigned char* c = (unsigned char*) &col; return c[i];
   }
 
+unsigned char& part(unsigned& col, int i) {
+  unsigned char* c = (unsigned char*) &col; return c[i];
+  }
+
 bool in_twopoint = false;
 
 ld glhypot2(glvertex a, glvertex b) { 

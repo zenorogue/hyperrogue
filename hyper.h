@@ -2845,6 +2845,7 @@ void queueline(const hyperpoint& H1, const hyperpoint& H2, int col, int prf = 0,
 hyperpoint ddi0(ld dir, ld dist);
 extern ld tessf, crossf, hexf, hcrossf, hexhexdist, hexvdist, hepvdist, rhexf;
 unsigned char& part(int& col, int i);
+unsigned char& part(unsigned& col, int i);
 
 transmatrix applyPatterndir(cell *c, const patterns::patterninfo& si);
 
