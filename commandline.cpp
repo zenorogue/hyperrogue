@@ -75,7 +75,7 @@ namespace arg {
   const string& args() { return argument[pos]; }
   const char* argcs() { return args().c_str(); }
   int argi() { return atoi(argcs()); }
-  int arghex() { return strtol(argcs(), NULL, 16); }
+  unsigned arghex() { return strtoll(argcs(), NULL, 16); }
   ld argf() { return atof(argcs()); }
   bool argis(const string& s) { return args() == s; }
   

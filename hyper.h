@@ -1797,7 +1797,7 @@ namespace arg {
   int argi();
   ld argf();
   bool argis(const string& s);
-  int arghex();
+  unsigned arghex();
   
   void init(int _argc, char **_argv);
   
