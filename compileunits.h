@@ -15,10 +15,6 @@
 #include "classes.h"
 #include "hyper.h"
 
-#if CAP_ROGUEVIZ
-#include "rogueviz.h"
-#endif
-
 #define CU_INIT IN_CU(0)
 #define CU_HYPER IN_CU(0)
 
@@ -74,9 +70,6 @@ namespace hr { namespace inv { bool on, activating; } }
 #include "geom-exp.cpp"
 #include "quit.cpp"
 #include "shmup.cpp"
-#if CAP_ROGUEVIZ
-#include "rogueviz.cpp"
-#endif
 #include "conformal.cpp"
 #include "rug.cpp"
 #include "control.cpp"
@@ -94,6 +87,10 @@ namespace hr { namespace inv { bool on, activating; } }
 #endif
 #include "commandline.cpp"
 #include "bigstuff.cpp"
+
+#if CAP_ROGUEVIZ
+#include "rogueviz.cpp"
+#endif
 
 #if CAP_DAILY
 #include "private/daily.cpp"
