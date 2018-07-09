@@ -7,11 +7,6 @@ string help;
 
 function<void()> help_delegate;
 
-struct help_extension {
-  char key;
-  string text;
-  reaction_t action;
-  };
 vector<help_extension> help_extensions;
 
 vector<string> extra_keys = {

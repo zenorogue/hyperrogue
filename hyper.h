@@ -720,6 +720,9 @@ namespace shmup {
   extern hookset<bool(const transmatrix&, cell*, shmup::monster*)> *hooks_draw;
   extern hookset<bool(shmup::monster*)> *hooks_kill;
   extern hookset<bool(shmup::monster*, string&)> *hooks_describe;
+
+  void turn(int);
+  extern monster *lmousetarget;
   }
 
 static const int NOHINT = -1;
@@ -1552,6 +1555,7 @@ namespace dialog {
   
   void addHelp();
   void addBack();
+  void add_action(reaction_t action);
   }
 
 void checkStunKill(cell *dest);
@@ -1589,6 +1593,7 @@ extern bool ivoryz;
 #define SHADOW_MON  0x30
 
 bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, int col, double footphase);
+
 void drawPlayerEffects(const transmatrix& V, cell *c, bool onPlayer);
 
 // monster movement animations
@@ -1948,6 +1953,7 @@ namespace linepatterns {
   void setColor(ePattern id, int col);
   void drawAll();
   void showMenu();
+  void switchAlpha(ePattern id, int col);
   };
 
 transmatrix ddspin(cell *c, int d, int bonus = 0);
@@ -3436,6 +3442,17 @@ namespace torusconfig {
     };
   
   extern vector<torusmode_info> tmodes;
+
+  enum : flagtype {
+    TF_SINGLE = 1,
+    TF_SIMPLE = 2,
+    TF_WEIRD  = 4,
+    TF_HEX    = 16,
+    TF_SQUARE = 32,
+    TF_KLEIN = 256
+    };
+
+  flagtype tmflags();
   }
 
 namespace fieldpattern {
@@ -3597,5 +3614,43 @@ struct pathdata {
   };
 
 extern int timetowait;
+
+extern vector<pair<cell*, int> > airmap;
+extern void compute_graphical_distance();
+extern ld scalef;
+
+struct help_extension {
+  char key;
+  string text;
+  reaction_t action;
+  };
+
+extern vector<help_extension> help_extensions;
+
+namespace gamestack {
+  bool pushed();
+  }
+
+namespace geom3 {
+  extern ld BODY;
+  }
+
+void queuestr(const transmatrix& V, double size, const string& chr, int col, int frame = 0, int align = 8);
+void queuestr(int x, int y, int shift, int size, string str, int col, int frame = 0, int align = 8);
+
+ld frac(ld x);
+
+cellwalker& operator += (cellwalker& cw, wstep_t);
+cellwalker& operator += (cellwalker& cw, int spin);
+
+template <class T> cellwalker operator + (cellwalker h, T t) { return h += t; }
+template <class T> cellwalker operator - (cellwalker h, T t) { return h += (-t); }
+
+bool cwstepcreates(cellwalker& cw);
+extern int poly_outline;
+
+extern hpcshape shDisk, shTriangle, shHeptaMarker, shSnowball, shDiskT, shDiskS, shDiskSq, shDiskM;
+
+extern std::mt19937 hrngen;
 
 }

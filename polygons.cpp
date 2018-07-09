@@ -2356,7 +2356,7 @@ void queueline(const hyperpoint& H1, const hyperpoint& H2, int col, int prf, int
   ptd.prio = prio << PSHIFT;
   }
 
-void queuestr(int x, int y, int shift, int size, string str, int col, int frame = 0, int align = 8) {
+void queuestr(int x, int y, int shift, int size, string str, int col, int frame, int align) {
   polytodraw& ptd = nextptd();
   ptd.kind = pkString;
   ptd.u.chr.x = x;
@@ -2618,7 +2618,7 @@ void queuestr(const hyperpoint& h, int size, const string& chr, int col, int fra
   queuestr(xc, yc, sc, size, chr, col, frame);
   }
   
-void queuestr(const transmatrix& V, double size, const string& chr, int col, int frame = 0, int align = 8) {
+void queuestr(const transmatrix& V, double size, const string& chr, int col, int frame, int align) {
   int xc, yc, sc; getcoord0(tC0(V), xc, yc, sc);
   int xs, ys, ss;  getcoord0(V * xpush0(.5), xs, ys, ss); 
   queuestr(xc, yc, sc, int(sqrt(squar(xc-xs)+squar(yc-ys)) * size), chr, col, frame, align);

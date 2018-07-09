@@ -236,15 +236,6 @@ namespace torusconfig {
   int newqty, newdy, newsdx, newsdy;
   int torus_cx, torus_cy;
   
-  static const flagtype TF_SINGLE = 1;
-  static const flagtype TF_SIMPLE = 2;
-  static const flagtype TF_WEIRD  = 4;
-
-  static const flagtype TF_HEX    = 16;
-  static const flagtype TF_SQUARE = 32;
-
-  static const flagtype TF_KLEIN = 256;
-  
   vector<torusmode_info> tmodes = {
     {"single row (hex)", TF_SINGLE | TF_HEX},
     {"single row (squares)", TF_SINGLE | TF_SQUARE},
@@ -789,9 +780,6 @@ cellwalker& operator += (cellwalker& cw, wmirror_t) {
   cw.mirrored = !cw.mirrored;
   return cw;
   }
-
-template <class T> cellwalker operator + (cellwalker h, T t) { return h += t; }
-template <class T> cellwalker operator - (cellwalker h, T t) { return h += (-t); }
 
 cellwalker& operator ++ (cellwalker& h, int) { return h += 1; }
 cellwalker& operator -- (cellwalker& h, int) { return h -= 1; }
