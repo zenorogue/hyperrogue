@@ -949,7 +949,7 @@ namespace mapeditor {
     cmode = sm::DRAW;
     gamescreen(0);
     drawGrid();
-    callhandlers(false, hooks_prestats);
+    if(callhandlers(false, hooks_prestats)) return;
 
     if(!mouseout()) getcstat = '-';
     

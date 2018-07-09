@@ -335,11 +335,8 @@ void drawMobileArrow(cell *c, transmatrix V) {
 bool nofps = false;
 
 void drawStats() {
-  callhandlers(false, hooks_prestats);
-#if CAP_ROGUEVIZ
-  if(rogueviz::on) return;
-#endif
   if(nohud || stereo::mode == stereo::sLR) return;
+  if(callhandlers(false, hooks_prestats)) return;
   if(viewdists && sidescreen) {
     distcolors[0] = forecolor;
     dialog::init("");

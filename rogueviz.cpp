@@ -1286,6 +1286,52 @@ vector<int> legend;
 
 vector<cell*> named;
 
+bool rogueviz_hud() {
+  if(!rogueviz::on) return false;
+  if(cmode & sm::DRAW) return false;
+  if(legend.empty()) return true;
+
+  initquickqueue();
+  int qet = isize(edgetypes);
+  if(qet == 1) qet = 0;
+  
+  int legit = qet + isize(legend);
+  
+  int rad = vid.radius/10;
+  ld x = vid.xres - rad;
+
+  for(int i=0; i<isize(legend); i++) {
+    int k = legend[i];
+    vertexdata& vd = vdata[k];
+    
+    ld y = (vid.radius * (i+.5)) / legit * 2 - vid.radius + vid.yres/2;
+
+    transmatrix V = atscreenpos(x, y, vid.radius/4);
+    
+    poly_outline = OUTLINE_NONE;
+    queuedisk(V, vd.cp, true);
+    poly_outline = OUTLINE_DEFAULT;
+    queuestr(int(x-rad), int(y), 0, rad*(svg::in?5:3)/4, vd.name, forecolor, 0, 16);
+    }
+
+  for(int i=0; i<qet; i++) {
+    auto t = edgetypes[i];
+        
+    ld y = (vid.radius * (i+isize(legend)+.5)) / legit * 2 - vid.radius + vid.yres/2;
+
+    transmatrix V = atscreenpos(x, y, vid.radius/8);
+    
+    poly_outline = t->color | 0xFF;
+    queuepolyat(V, shTriangle, 0, PPR_MONSTER_HEAD);
+    
+    poly_outline = OUTLINE_DEFAULT;
+    queuestr(int(x-rad), int(y), 0, rad*(svg::in?5:3)/4, t->name, forecolor, 0, 16);
+    }
+  
+  quickqueue();
+  return true;
+  }
+
 void drawExtra() {
   
   if(kind == kFullNet) {
@@ -1308,26 +1354,6 @@ void drawExtra() {
       }
     
     canmove = true; items[itOrbAether] = true;
-    }
-  
-#if CAP_RUG
-  if(!rug::rugged) 
-#endif
-  for(int i=0; i<isize(legend); i++) {
-    int k = legend[i];
-    vertexdata& vd = vdata[k];
-    
-    int rad = vid.radius/10;
-    
-    ld x = vid.xres - rad;
-    ld y = (vid.radius * (i+.5)) / isize(legend) * 2 - vid.radius + vid.yres/2;
-
-    transmatrix V = atscreenpos(x, y, vid.radius/4);
-    
-    poly_outline = OUTLINE_NONE;
-    queuedisk(V, vd.cp, true);
-    poly_outline = OUTLINE_DEFAULT;
-    queuestr(int(x-rad), int(y), 0, rad*(svg::in?5:3)/4, vd.name, forecolor, 0, 16);
     }
   }
 
@@ -1461,8 +1487,11 @@ void turn(int delta) {
   }
 
 void fixparam() {
-  if((svg::in || inHighQual) && isize(legend) && pngformat == 0) vid.xres = vid.xres * 22/16;
-  if(isize(legend)) vid.xcenter = vid.ycenter;
+  if(!legend.empty() && !nohud) {
+    if((svg::in || inHighQual) && pngformat == 0)
+      vid.xres = vid.xres * 22/16;
+    vid.xcenter = vid.ycenter;
+    }
   }
 
 #if CAP_COMMANDLINE
@@ -2005,7 +2034,8 @@ auto hooks  =
   addHook(hooks_args, 100, readArgs) +
   addHook(hooks_config, 0, [] () { tour::ss::list(rogueviz::rvtour::rvslides); }) +
 #endif
-  addHook(clearmemory, 0, close);
+  addHook(clearmemory, 0, close) +
+  addHook(hooks_prestats, 100, rogueviz_hud);
 
 };
 
