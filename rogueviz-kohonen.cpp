@@ -124,7 +124,7 @@ int t, lpct, cells;
 double maxdist;
 
 neuron& winner(int id) {
-  double bdiff = 1e20;
+  double bdiff = HUGE_VAL;
   neuron *bcell = NULL;
   for(neuron& n: net) {
     double diff = vnorm(n.net, data[id].val);
