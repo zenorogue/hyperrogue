@@ -65,7 +65,24 @@ namespace dialog {
   
   item& lastItem() { return items[items.size() - 1]; }
   
-  void init() { items.clear(); }
+  map<int, reaction_t> key_actions;
+  
+  void add_action(reaction_t action) {
+    int& key = lastItem().key;
+    while(key_actions.count(key)) key++;
+    key_actions[key] = action;
+    }
+  
+  void handler(int sym, int uni) {
+    dialog::handleNavigation(sym, uni);
+    if(doexiton(sym, uni)) popScreen();
+    };
+
+  void init() {
+    items.clear();
+    key_actions.clear(); 
+    keyhandler = dialog::handler;
+    }
   
   string keyname(int k) {
     if(k == 0) return "";
@@ -416,6 +433,16 @@ namespace dialog {
         if(isitem(items[i])) 
           highlight_text = items[i].body;
       uni = sym = 0;
+      }
+    if(key_actions.count(sym)) {
+      key_actions[sym]();
+      sym = uni = 0;
+      return;
+      }
+    if(key_actions.count(uni)) {
+      key_actions[uni]();
+      sym = uni = 0;
+      return;
       }
 #endif
     }
