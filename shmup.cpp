@@ -1063,14 +1063,11 @@ bool isBullet(monster *m) {
 bool isPlayer(monster *m) { return m->type == moPlayer; }
 bool isMonster(monster *m) { return m->type != moPlayer && m->type != moBullet; }
 
+hookset<bool(shmup::monster*)> *hooks_kill;
+
 void killMonster(monster* m, eMonster who_kills, int flags = 0) {
   int tk = tkills();
-#if CAP_ROGUEVIZ
-  if(m->type == moRogueviz) {
-    rogueviz::activate(m);
-    return;
-    }
-#endif
+  if(callhandlers(false, hooks_kill, m)) return;
   if(m->dead) return;
   m->dead = true;
   if(isBullet(m) || isPlayer(m)) return;
@@ -2006,9 +2003,7 @@ eItem targetRangedOrbKey(orbAction a) {
 
   for(monster *m2: nonvirtual) {
     if(m2->dead) continue;
-#if CAP_ROGUEVIZ
-    if(rogueviz::virt(m2)) continue;
-#endif
+    if(m2->no_targetting) continue;
     if(!mousetarget || intval(mouseh, mousetarget->pat*C0) > intval(mouseh, m2->pat*C0)) 
       mousetarget = m2;
     }
@@ -2874,7 +2869,11 @@ void fixStorage() {
   for(monster *m: restore) m->store();
   }
 
+hookset<bool(int)> *hooks_turn;
+
 void turn(int delta) {
+
+  if(callhandlers(false, hooks_turn, delta)) return;
 
   passive_switch = (gold() & 1) ? moSwitch1 : moSwitch2;
   lmousetarget = NULL;
@@ -3094,10 +3093,6 @@ void turn(int delta) {
     activateSafety(pc[0]->base->land);
     safety = false;
     }
-
-#if CAP_ROGUEVIZ
-  rogueviz::turn(delta);
-#endif
   }
 
 void recall() {
@@ -3150,6 +3145,8 @@ bool boatAt(cell *c) {
   return false;
   }
 
+hookset<bool(const transmatrix&, cell*, shmup::monster*)> *hooks_draw;
+
 bool drawMonster(const transmatrix& V, cell *c, const transmatrix*& Vboat, transmatrix& Vboat0, ld zlev) {
 
    pair<mit, mit> p = 
@@ -3164,9 +3161,7 @@ bool drawMonster(const transmatrix& V, cell *c, const transmatrix*& Vboat, trans
     transmatrix view = V * m->at;
     
     if(!mouseout()) {
-#if CAP_ROGUEVIZ
-      if(rogueviz::virt(m)) ; else
-#endif
+      if(m->no_targetting) ; else
       if(mapeditor::drawplayer || m->type != moPlayer)
       if(!mousetarget || intval(mouseh, mousetarget->pat*C0) > intval(mouseh, m->pat*C0)) 
         mousetarget = m;
@@ -3192,6 +3187,8 @@ bool drawMonster(const transmatrix& V, cell *c, const transmatrix*& Vboat, trans
 
     int q = ptds.size();
     if(q != isize(ptds) && !m->inBoat) pushdown(c, q, view, zlev, true, false);
+
+    if(callhandlers(false, hooks_draw, V, c, m)) return false;
 
     switch(m->type) {
       case moPlayer: 
@@ -3251,12 +3248,6 @@ bool drawMonster(const transmatrix& V, cell *c, const transmatrix*& Vboat, trans
         ShadowV(view, shFlailMissile);
         break;
         }
-
-#if CAP_ROGUEVIZ      
-      case moRogueviz:
-        rogueviz::drawVertex(V, c, m);
-        break;
-#endif
 
       default:
         if(m->inBoat) m->footphase = 0;
@@ -3587,22 +3578,15 @@ void virtualRebase(shmup::monster *m, bool tohex) {
   virtualRebase(m->base, m->at, tohex);
   }
 
+hookset<bool(shmup::monster*, string&)> *hooks_describe;
+
 void addShmupHelp(string& out) {
   if(shmup::mousetarget && intval(mouseh, tC0(shmup::mousetarget->pat)) < .1) {
-    out += ", "; 
-#if CAP_ROGUEVIZ
-    if(shmup::mousetarget->type == moRogueviz) {
-      help = XLAT(minf[shmup::mousetarget->type].help);
-      out += rogueviz::describe(shmup::mousetarget);
-      }
-    else 
-#endif
-    {
-      out += XLAT1(minf[shmup::mousetarget->type].name);
-      help = generateHelpForMonster(shmup::mousetarget->type);
-      }
+    if(callhandlers(false, hooks_describe, shmup::mousetarget, out)) return;
+    out += XLAT1(minf[shmup::mousetarget->type].name);
+    help = generateHelpForMonster(shmup::mousetarget->type);
     }
-  }  
+  }
 
 auto hooks = addHook(clearmemory, 0, shmup::clearMemory) +
   addHook(hooks_removecells, 0, [] () {

@@ -632,6 +632,9 @@ namespace multi {
   void showShmupConfig();
   }
 
+template<class T> class hookset : public map<int, function<T>> {};
+typedef hookset<void()> *purehookset;
+
 namespace shmup {
   using namespace multi;
   void recall();
@@ -655,6 +658,7 @@ namespace shmup {
     bool dead;
     bool notpushed;
     bool inBoat;
+    bool no_targetting;
     monster *parent; // who shot this missile
     eMonster parenttype; // type of the parent
     int nextshot;    // when will it be able to shot (players/flailers)
@@ -669,7 +673,7 @@ namespace shmup {
     
     monster() { 
       dead = false; inBoat = false; parent = NULL; nextshot = 0; 
-      stunoff = 0; blowoff = 0; footphase = 0;
+      stunoff = 0; blowoff = 0; footphase = 0; no_targetting = false;
       }
   
     void store();
@@ -711,6 +715,11 @@ namespace shmup {
   
   void pushmonsters();
   void popmonsters();
+
+  extern hookset<bool(int)> *hooks_turn;
+  extern hookset<bool(const transmatrix&, cell*, shmup::monster*)> *hooks_draw;
+  extern hookset<bool(shmup::monster*)> *hooks_kill;
+  extern hookset<bool(shmup::monster*, string&)> *hooks_describe;
   }
 
 static const int NOHINT = -1;
@@ -2000,9 +2009,6 @@ extern int antialiaslines;
 extern int ringcolor;
 
 #include <functional>
-
-template<class T> class hookset : public map<int, function<T>> {};
-typedef hookset<void()> *purehookset;
 
 template<class T, class U> int addHook(hookset<T>*& m, int prio, const U& hook) {
   if(!m) m = new hookset<T> ();

@@ -4,12 +4,7 @@ namespace rogueviz {
   using namespace hr;
 
   extern bool on;
-  string describe(shmup::monster *m);
   void describe(cell *c);
-  void activate(shmup::monster *m);
-  void drawVertex(const transmatrix &V, cell *c, shmup::monster *m);
-  bool virt(shmup::monster *m);
-  void turn(int delta);
   void drawExtra();
   void close();
   void showMenu();

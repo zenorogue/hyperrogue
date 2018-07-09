@@ -180,6 +180,7 @@ void addedge(int i, int j, edgeinfo *ei) {
     vd.virt = ei;
     
     createViz(id, base, rgpushxto0(h));
+    vd.m->no_targetting = true;
     
     addedge(i, id, ei);
     addedge(id, j, ei);
@@ -957,7 +958,10 @@ void describe(cell *c) {
   if(kind == kKohonen) return kohonen::describe(c);
   }
 
-string describe(shmup::monster *m) {
+bool describe_monster(shmup::monster *m, string& out) {
+
+  if(m->type != moRogueviz) return false;
+   
   int i = m->pid;
   vertexdata& vd = vdata[i];
 
@@ -987,10 +991,12 @@ string describe(shmup::monster *m) {
       help += "/" + fts(ei->weight)+":" + fts(ei->weight2) + " ";
     }
   
-  return o;
+  out += o;
+  return true;
   }
 
-void activate(shmup::monster *m) {
+bool activate(shmup::monster *m) {
+  if(m->type != moRogueviz) return false;
   int i = m->pid;
   vertexdata& vd = vdata[i];
 
@@ -998,6 +1004,8 @@ void activate(shmup::monster *m) {
   
   for(int i=0; i<isize(vd.edges); i++) 
       vd.edges[i].second->orig = NULL;
+  
+  return true;
   
   /* if(ealpha == 1) ealpha = 8;
   else if(ealpha == 8) ealpha = 32;
@@ -1065,8 +1073,8 @@ transmatrix& memo_relative_matrix(cell *c1, cell *c2) {
   return p;
   }
 
-void drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
-  if(m->dead) return;
+bool drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
+  if(m->dead) return true;
   int i = m->pid;
   vertexdata& vd = vdata[i];
   
@@ -1283,12 +1291,7 @@ void drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
       }
     }
 
-  }
-
-bool virt(shmup::monster *m) {
-  if(m->type != moRogueviz) return false;
-  vertexdata& vd = vdata[m->pid];
-  return vd.virt;
+  return true;
   }
 
 vector<int> legend;
@@ -1489,10 +1492,11 @@ void close() {
   relmatrices.clear();
   }
 
-void turn(int delta) {
-  if(!on) return;
+bool turn(int delta) {
+  if(!on) return false;
   if(kind == kSAG) sag::iterate();
   if(kind == kKohonen) kohonen::steps();
+  return false;
   // shmup::pc[0]->rebase();
   }
 
@@ -2044,7 +2048,12 @@ auto hooks  =
 #endif
   addHook(clearmemory, 0, close) +
   addHook(hooks_prestats, 100, rogueviz_hud) +
-  addHook(hooks_calcparam, 100, fixparam);
+  addHook(hooks_calcparam, 100, fixparam) +
+  addHook(shmup::hooks_draw, 100, drawVertex) +
+  addHook(shmup::hooks_describe, 100, describe_monster) +
+  addHook(shmup::hooks_turn, 100, turn) + 
+  addHook(shmup::hooks_kill, 100, activate) +
+  0;
 
 };
 
