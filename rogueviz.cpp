@@ -968,7 +968,7 @@ bool describe_monster(shmup::monster *m, string& out) {
   int i = m->pid;
   vertexdata& vd = vdata[i];
 
-  string o = vd.name+", "+its(isize(vd.edges))+" edges";
+  string o = vd.name + ", "+its(isize(vd.edges))+" edges";
   /* if(isize(vd.edges) < 10) {
     for(int i=0; i<isize(vd.edges); i++) 
       o += " " + its(snakedist(vd.snakeid, vd.edges[i]->snakeid));
@@ -994,7 +994,9 @@ bool describe_monster(shmup::monster *m, string& out) {
       help += "/" + fts(ei->weight)+":" + fts(ei->weight2) + " ";
     }
   
-  out += o;
+  if(out == XLATN("Canvas")) out = o;
+  else out = out + ", " + o;
+
   return true;
   }
 
