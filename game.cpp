@@ -1848,7 +1848,7 @@ void stunMonster(cell *c2) {
   int newtime = (
     c2->monst == moFatGuard ? 2 : 
     c2->monst == moSkeleton && c2->land != laPalace && c2->land != laHalloween ? 7 :
-    c2->monst == moTerraWarrior ? min(c2->stuntime + 8 - c2->hitpoints, 7) :
+    c2->monst == moTerraWarrior ? min(int(c2->stuntime + 8 - c2->hitpoints), 7) :
     isMetalBeast(c2->monst) ? 7 :
     c2->monst == moTortoise ? 7 :
     c2->monst == moReptile ? 7 :
@@ -6822,8 +6822,9 @@ bool collectItem(cell *c2, bool telekinesis) {
   
   if(dopickup && c2->item) {
 #ifdef HASLINEVIEW
-    // (eItem) to avoid the "cannot bind bitfield" problem in C++11
-    conformal::findhistory.push_back(make_pair(c2, (eItem) c2->item));
+    // temporary variable to avoid the "cannot bind bitfield" problem in C++11
+    eItem dummy = c2->item;
+    conformal::findhistory.emplace_back(c2, dummy);
 #endif
     c2->item = itNone;
     }
