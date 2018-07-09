@@ -1495,8 +1495,8 @@ void close() {
 
 bool turn(int delta) {
   if(!on) return false;
-  if(kind == kSAG) sag::iterate();
-  if(kind == kKohonen) kohonen::steps();
+  if(kind == kSAG) sag::iterate(), timetowait = 0;
+  if(kind == kKohonen) kohonen::steps(), timetowait = 0;
   return false;
   // shmup::pc[0]->rebase();
   }
