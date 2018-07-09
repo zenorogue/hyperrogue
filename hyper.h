@@ -2083,12 +2083,6 @@ int textwidth(int siz, const string &str);
 extern bool gtouched, mousepressed, mousemoved, actonrelease;
 extern bool inslider;
 
-#if CAP_ROGUEVIZ
-#define DOSHMUP (shmup::on || rogueviz::on)
-#else
-#define DOSHMUP shmup::on
-#endif
-
 extern bool outoffocus;
 extern int frames;
 extern transmatrix playerV;
@@ -3599,5 +3593,7 @@ struct pathdata {
     checklock();
     }
   };
+
+extern int timetowait;
 
 }

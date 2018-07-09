@@ -2874,6 +2874,8 @@ hookset<bool(int)> *hooks_turn;
 void turn(int delta) {
 
   if(callhandlers(false, hooks_turn, delta)) return;
+  if(!shmup::on) return;
+  timetowait = 0;
 
   passive_switch = (gold() & 1) ? moSwitch1 : moSwitch2;
   lmousetarget = NULL;
@@ -3147,10 +3149,13 @@ bool boatAt(cell *c) {
 
 hookset<bool(const transmatrix&, cell*, shmup::monster*)> *hooks_draw;
 
-bool drawMonster(const transmatrix& V, cell *c, const transmatrix*& Vboat, transmatrix& Vboat0, ld zlev) {
+bool drawMonster(const transmatrix& V, cell *c, const transmatrix*& Vboat, transmatrix& Vboat0, const transmatrix *Vdp) {
 
-   pair<mit, mit> p = 
+  pair<mit, mit> p = 
     monstersAt.equal_range(c);
+    
+  if(p.first == p.second) return false;
+  ld zlev = -geom3::factor_to_lev(zlevel(tC0((*Vdp))));
    
   vector<monster*> monsters;
 

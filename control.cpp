@@ -465,6 +465,8 @@ void resize_screen_to(int x, int y) {
   setvideomode();
   }
 
+int timetowait;
+
 void mainloopiter() {
 
   DEBB(DF_GRAPH, (debugfile,"main loop\n"));
@@ -481,17 +483,16 @@ void mainloopiter() {
   ticks = SDL_GetTicks();
   callhooks(hooks_fixticks);
     
-  int timetowait = lastt + 1000 / cframelimit - ticks;
+  timetowait = lastt + 1000 / cframelimit - ticks;
 
   cframelimit = vid.framelimit;
   if(outoffocus && cframelimit > 10) cframelimit = 10;  
   
   bool normal = cmode & sm::NORMAL;
 
-  if(DOSHMUP && normal) 
-    timetowait = 0, shmup::turn(ticks - lastt);
+  shmup::turn(ticks - lastt);
     
-  if(!DOSHMUP && (multi::alwaysuse || multi::players > 1) && normal)
+  if(!shmup::on && (multi::alwaysuse || multi::players > 1) && normal)
     timetowait = 0, multi::handleMulti(ticks - lastt);
 
   if(vid.sspeed >= 5 && gmatrix.count(cwt.c) && !elliptic) {

@@ -3740,10 +3740,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
 
     const transmatrix *Vboat = &(*Vdp);
       
-    if(DOSHMUP) {
-      ld zlev = -geom3::factor_to_lev(zlevel(tC0((*Vdp))));
-      shmup::drawMonster(V, c, Vboat, Vboat0, zlev);
-      }
+    shmup::drawMonster(V, c, Vboat, Vboat0, Vdp);
 
     poly_outline = OUTLINE_DEFAULT;
 
