@@ -91,6 +91,7 @@ namespace rogueviz {
     void steps();
     void showMenu();
     bool handleMenu(int sym, int uni);
+    void clear();
     }
   
   namespace staircase {

@@ -1374,6 +1374,22 @@ auto hooks = addHook(hooks_args, 100, readArgs);
 #endif
 
 auto hooks2 = addHook(hooks_frame, 50, levelline::draw);
+
+void clear() {
+  printf("clearing Kohonen...\n");
+  data.clear();
+  sample_vdata_id.clear();
+  colnames.clear();
+  weights.clear();
+  net.clear();
+  whowon.clear();
+  samples_to_show.clear();
+  scc.clear();
+  bdiffs.clear();
+  bids.clear();
+  bdiffn.clear();
+  }
+
 }}
 
 namespace rogueviz {
