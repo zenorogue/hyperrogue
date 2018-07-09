@@ -1888,6 +1888,7 @@ namespace tour {
     void list(slide*);
     }
 
+  extern hookset<void(int)> *hooks_slide;
   };
 #endif
 
@@ -2019,7 +2020,7 @@ template<class T, class U> int addHook(hookset<T>*& m, int prio, const U& hook) 
   return 0;
   }
 
-extern purehookset hooks_frame, hooks_stats, clearmemory, hooks_config, hooks_tests, hooks_removecells, hooks_initgame, hooks_calcparam;
+extern purehookset hooks_frame, hooks_stats, clearmemory, hooks_config, hooks_tests, hooks_removecells, hooks_initgame, hooks_calcparam, hooks_mainmenu, hooks_startmenu;
 
 template<class T, class... U> void callhooks(hookset<T> *h, U... args) {
   if(h) for(auto& p: *h) p.second(args...);
@@ -2039,6 +2040,7 @@ extern hookset<bool(int argc, char** argv)> *hooks_main;
 extern hookset<int()> *hooks_args;
 extern hookset<bool(cell*)> *hooks_mark;
 extern hookset<eLand(eLand)> *hooks_nextland;
+extern hookset<bool()> *hooks_welcome_message;
 
 // hooks to extend HyperRogue with an external program
 // start compilation from another file which defines EXTRA_..., includes

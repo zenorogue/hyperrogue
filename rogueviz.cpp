@@ -2038,6 +2038,37 @@ slide rvslides[] = {
     }
   };
 
+int rvtour_hooks = 
+  addHook(hooks_startmenu, 100, [] () {
+#if CAP_TOUR
+    dialog::addBreak(100);
+    dialog::addBigItem(XLAT("RogueViz"), 'r');
+    dialog::addInfo(XLAT("see the visualizations"));
+#endif
+    dialog::add_action([] () {
+      tour::slides = rogueviz::rvtour::rvslides;
+      popScreenAll();
+      tour::start();
+      });
+    }) +
+  addHook(hooks_slide, 100, [] (int mode) {
+    if(currentslide == 0 && slides == default_slides) {
+      slidecommand = "RogueViz presentation";
+      if(mode == 1)
+        help += 
+          "\n\nYour version of HyperRogue is compiled with RogueViz. "
+          "Press '5' to switch to the RogueViz slides. Watching the "
+          "common HyperRogue tutorial first is useful too, "
+          "as an introduction to hyperbolic geometry.";         
+      if(mode == 4) {
+        slides = rogueviz::rvtour::rvslides;
+        while(tour::on) restart_game(rg::tour);
+        tour::start();
+        }
+      }
+    }) +
+  0;
+
 }
 
 auto hooks  = 
@@ -2053,6 +2084,14 @@ auto hooks  =
   addHook(shmup::hooks_describe, 100, describe_monster) +
   addHook(shmup::hooks_turn, 100, turn) + 
   addHook(shmup::hooks_kill, 100, activate) +
+  addHook(hooks_mainmenu, 100, [] () {
+    dialog::addItem(XLAT("rogueviz menu"), 'u'); 
+    dialog::add_action([] () { pushScreen(rogueviz::showMenu); });
+    }) +
+  addHook(hooks_welcome_message, 100, [] () {
+    if(rogueviz::on) addMessage(XLAT("Welcome to RogueViz!"));
+    return rogueviz::on;
+    }) +
   0;
 
 };

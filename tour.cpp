@@ -48,6 +48,8 @@ function<bool(eLand)> showland;
 
 string slidecommand;
 
+hookset<void(int)> *hooks_slide;
+
 void presentation(presmode mode) {
 
   cheater = 0;
@@ -62,6 +64,7 @@ void presentation(presmode mode) {
   SHOWLAND(true);
   
   slides[currentslide].action(mode);
+  callhooks(hooks_slide, mode);
   }
 
 void slidehelp() {
@@ -363,20 +366,6 @@ slide default_slides[] = {
         else clearMessages();  
         }
       SHOWLAND( l == laIce );
-#if CAP_ROGUEVIZ
-       slidecommand = "RogueViz presentation";
-       if(mode == 1)
-         help += 
-           "\n\nYour version of HyperRogue is compiled with RogueViz. "
-           "Press '5' to switch to the RogueViz slides. Watching the "
-           "common HyperRogue tutorial first is useful too, "
-           "as an introduction to hyperbolic geometry.";         
-       if(mode == 4) {
-         slides = rogueviz::rvtour::rvslides;
-         while(tour::on) restart_game(rg::tour);
-         tour::start();
-         }
-#endif            
       }
     },
   {"Basics of gameplay", 11, LEGAL_ANY,

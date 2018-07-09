@@ -183,6 +183,8 @@ void showOverview() {
 
 // -- main menu --
 
+purehookset hooks_mainmenu;
+
 void showMainMenu() {
   gamescreen(2);
 
@@ -225,10 +227,6 @@ void showMainMenu() {
   if(inv::on)
     dialog::addItem(XLAT("inventory"), 'i');    
 
-#if CAP_ROGUEVIZ
-  dialog::addItem(XLAT("rogueviz menu"), 'u'); 
-#endif
-  
 #if ISMOBILE==1
 #if CAP_ACHIEVE
   dialog::addItem(XLAT("leaderboards/achievements"), '3'); 
@@ -238,6 +236,8 @@ void showMainMenu() {
 #if CAP_ANDROIDSHARE
   dialog::addItem("SHARE", 's'-96);
 #endif
+
+  callhooks(hooks_mainmenu);
   
   if(!canmove) q = "review the scene";
   else if(turncount > 0) q = "continue game";
@@ -289,9 +289,6 @@ void showMainMenu() {
       pushScreen(leader::showMenu);
       }
   #endif
-  #endif
-  #if CAP_ROGUEVIZ
-    else if(uni == 'u') pushScreen(rogueviz::showMenu);
   #endif
     else if(doexiton(sym, uni)) {
       popScreenAll();
@@ -586,6 +583,8 @@ bool showHalloween() {
 
 int daily_mode;
 
+purehookset hooks_startmenu;
+
 void showStartMenu() {
   if(!daily_mode) {
     daily_mode = hrand(10) + 1;
@@ -682,11 +681,7 @@ void showStartMenu() {
       break;
     }
 
-#if CAP_ROGUEVIZ && CAP_TOUR
-  dialog::addBreak(100);
-  dialog::addBigItem(XLAT("RogueViz"), 'r');
-  dialog::addInfo(XLAT("see the visualizations"));
-#endif
+  callhooks(hooks_startmenu);
 
   if(have_current_settings()) {
     dialog::addBreak(100);
@@ -792,13 +787,6 @@ void showStartMenu() {
     else if(uni == 'z') {
       popScreenAll();
       pushScreen(daily::showMenu);
-      }
-#endif
-#if CAP_ROGUEVIZ && CAP_TOUR
-    else if(uni == 'r') {
-      tour::slides = rogueviz::rvtour::rvslides;
-      popScreenAll();
-      tour::start();
       }
 #endif
     else if(sym == 'm') {

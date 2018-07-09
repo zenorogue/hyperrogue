@@ -961,6 +961,7 @@ void gotoHelp(const string& h) {
   pushScreen(showHelp);
   if(help == "@") {
 
+/*
 #if CAP_ROGUEVIZ  
   if(rogueviz::on) {
     help = rogueviz::makehelp();
@@ -968,6 +969,7 @@ void gotoHelp(const string& h) {
     return;
     }
 #endif
+*/
 
 #if CAP_RUG
   if(rug::rugged) {

@@ -7,7 +7,6 @@ namespace rogueviz {
   void describe(cell *c);
   void drawExtra();
   void close();
-  void showMenu();
   string makehelp();
 
   void init();

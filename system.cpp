@@ -38,8 +38,11 @@ bool do_use_special_land() {
     (peace::on || tactic::on || geometry || gp::on || randomPatternsMode || yendor::on);
   }
 
+hookset<bool()> *hooks_welcome_message;
+
 void welcomeMessage() {
-  if(tactic::trailer) return;
+  if(callhandlers(false, hooks_welcome_message)) return;
+  else if(tactic::trailer) return;
 #if CAP_TOUR
   else if(tour::on) return; // displayed by tour
 #endif
@@ -67,13 +70,8 @@ void welcomeMessage() {
     addMessage(XLAT("Good luck in the elliptic plane!"));
   else if(sphere)
     addMessage(XLAT("Welcome to Spherogue!"));
-#if CAP_ROGUEVIZ
-  else if(rogueviz::on)
-    addMessage(XLAT("Welcome to RogueViz!"));
-#endif
-  else {
-    addMessage(XLAT("Welcome to HyperRogue!"));
-    }
+  else 
+  addMessage(XLAT("Welcome to HyperRogue!"));
 
   if(do_use_special_land() || firstland != laIce) if(!daily::on) {
     auto lv = land_validity(specialland);
