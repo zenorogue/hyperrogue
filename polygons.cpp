@@ -845,13 +845,13 @@ bool keep_curvedata = false;
 hookset<void(polytodraw&)> *hooks_specialdraw;
 
 void drawqueueitem(polytodraw& ptd) {
-#if CAP_ROGUEVIZ
-  svg::info = ptd.info;
-#endif
-
   // if(ptd.prio == 46) printf("eye size %d\n", polyi);
   
   switch(ptd.kind) { 
+    case pkLink:
+      svg::link = ptd.u.link.link;
+      break;
+
     case pkSpecial:
       callhooks(hooks_specialdraw, ptd);
       break;
@@ -2338,6 +2338,13 @@ void queuecurve(int linecol, int fillcol, int prio) {
   curvestart = isize(curvedata);
   }
 
+void queuelink(const string *link, int prio) {
+  polytodraw& ptd = nextptd();
+  ptd.kind = pkLink;
+  ptd.prio = prio << PSHIFT;
+  ptd.u.link.link = link;
+  }
+
 void queueline(const hyperpoint& H1, const hyperpoint& H2, int col, int prf, int prio) {
   polytodraw& ptd = nextptd();
   ptd.kind = pkLine;
@@ -2465,14 +2472,14 @@ namespace svg {
       coord(x), coord(y), coord(size), stylestr(ba, col));
     }
   
-  string *info;
+  const string *link;
   
   void startstring() {
-    if(info) fprintf(f, "<a xlink:href=\"%s\" xlink:show=\"replace\">", info->c_str());
+    if(link) fprintf(f, "<a xlink:href=\"%s\" xlink:show=\"replace\">", link->c_str());
     }
 
   void stopstring() {
-    if(info) fprintf(f, "</a>");
+    if(link) fprintf(f, "</a>");
     }
 
   string font = "Times";

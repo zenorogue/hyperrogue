@@ -1032,7 +1032,7 @@ void storeline(vector<glvertex>& tab, const hyperpoint& h1, const hyperpoint& h2
 
 hpcshape *vshapes[4] = { &shDisk, &shDisk, &shHeptaMarker, &shSnowball };
 
-void queuedisk(const transmatrix& V, const colorpair& cp, bool legend) {
+void queuedisk(const transmatrix& V, const colorpair& cp, bool legend, const string* info) {
   if(legend && (int) cp.color1 == (int) 0x000000FF && backcolor == 0)
     poly_outline = 0x606060FF;
   else
@@ -1047,10 +1047,14 @@ void queuedisk(const transmatrix& V, const colorpair& cp, bool legend) {
     int p = poly_outline; poly_outline = OUTLINE_TRANS; 
     queuepolyat(V, sh, 0x80, PPR_MONSTER_SHADOW); 
     poly_outline = p; 
+    if(info) queuelink(info, PPR_MONSTER_HEAD);
     queuepolyat(V1 = mscale(V, geom3::BODY), sh, cp.color1, PPR_MONSTER_HEAD);
+    if(info) queuelink(NULL, PPR_MONSTER_HEAD);
     }
   else {
+    if(info) queuelink(info, sh.prio);
     queuepoly(V1 = V, sh, cp.color1);
+    if(info) queuelink(NULL, sh.prio);
     }
   if(cp.shade == 't') queuepoly(V1, shDiskT, cp.color2);
   if(cp.shade == 's') queuepoly(V1, shDiskS, cp.color2);
@@ -1205,8 +1209,7 @@ bool drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
     }
 
   if(!vd.virt) {
-    queuedisk(V * m->at, ghilite ? colorpair(0xFF0000FF) : vd.cp, false);
-    if(vertex_shape) lastptd().info = vd.info;
+    queuedisk(V * m->at, ghilite ? colorpair(0xFF0000FF) : vd.cp, false, vd.info);
     }
   
   
@@ -1221,8 +1224,9 @@ bool drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
     hyperpoint h = tC0(V * m->at);
     transmatrix V2 = rgpushxto0(h) * ypush(nonbitrunc ? .3 : .2);
     if(doshow && !behindsphere(V2)) {
+      if(vd.info) queuelink(vd.info, PPR_TEXT);
       queuestr(V2, (svg::in ? .28 : .2) * crossf / hcrossf, vd.name, backcolor ? 0x000000 : 0xFFFF00, svg::in ? 0 : 1);
-      lastptd().info = vd.info;
+      if(vd.info) queuelink(NULL, PPR_TEXT);
       }
     }
 
@@ -1317,7 +1321,7 @@ bool rogueviz_hud() {
     transmatrix V = atscreenpos(x, y, vid.radius/4);
     
     poly_outline = OUTLINE_NONE;
-    queuedisk(V, vd.cp, true);
+    queuedisk(V, vd.cp, true, NULL);
     poly_outline = OUTLINE_DEFAULT;
     queuestr(int(x-rad), int(y), 0, rad*(svg::in?5:3)/4, vd.name, forecolor, 0, 16);
     }

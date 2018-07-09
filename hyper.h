@@ -1566,7 +1566,7 @@ namespace svg {
   void polygon(int *polyx, int *polyy, int polyi, int col, int outline, double minwidth);
   void text(int x, int y, int size, const string& str, bool frame, int col, int align);
   extern bool in;
-  extern string *info;
+  extern const string *link;
   void render(const char *fname = NULL);
   }
 
@@ -2347,7 +2347,12 @@ struct qcir {
       bool boundary;
       };
 
-enum eKind { pkPoly, pkLine, pkString, pkCircle, pkShape, pkResetModel, pkSpecial };
+// set a link for SVG
+struct qlink {
+       const string *link;
+       };
+       
+enum eKind { pkPoly, pkLine, pkString, pkCircle, pkShape, pkResetModel, pkSpecial, pkLink };
 
 union polyunion {
   qpoly  poly;
@@ -2355,6 +2360,7 @@ union polyunion {
   qchr   chr;
   qcir   cir;
   double dvalue;
+  qlink  link;
   polyunion() {}
   };
 
@@ -2362,12 +2368,7 @@ struct polytodraw {
   eKind kind;
   int prio, col;
   polyunion u;
-#if CAP_ROGUEVIZ
-  string* info;
-  polytodraw() { info = NULL; }
-#else
   polytodraw() {}
-#endif
   };
 
 extern int emeraldtable[100][7];
@@ -2845,6 +2846,7 @@ namespace texture {
 #endif
 
 void queueline(const hyperpoint& H1, const hyperpoint& H2, int col, int prf = 0, int prio = PPR_LINE);
+void queuelink(const string *link, int prio);
 
 hyperpoint ddi0(ld dir, ld dist);
 extern ld tessf, crossf, hexf, hcrossf, hexhexdist, hexvdist, hepvdist, rhexf;
