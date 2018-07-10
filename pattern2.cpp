@@ -32,7 +32,7 @@ int eupattern4(cell *c) {
 bool ishept(cell *c) {
   // EUCLIDEAN
   if(euclid) return eupattern(c) == 0;
-  else return c->type != S6;
+  else return c->type == S7;
   }
 
 bool ishex1(cell *c) {
@@ -1025,6 +1025,7 @@ int geosupport_graveyard() {
   if(S3 == 3 && S7 == 7) return 1;
   // nice chessboard pattern, but not the actual Graveyard
   if(S3 == 4 && !(S7&1)) return 1;
+  if(S3 == 4 && gp::on) return 1;
   return 0;
   }
 
@@ -1045,6 +1046,22 @@ int pattern_threecolor(cell *c) {
     patterns::patterninfo si;
     patterns::val38(c, si, nonbitrunc ? 0 : patterns::SPF_ROT, patterns::PAT_COLORING);
     return si.id >> 2;
+    }
+  if(a4 && gp::on) {
+    patterns::patterninfo si;
+    auto li = gp::get_local_info(c);
+    if(S7 & 1) return (li.relative.first&1) + (li.relative.second&1)*2;
+    patterns::val46(c->master->c7, si, 0, patterns::PAT_COLORING);
+    int i = si.id;
+    if(i&2) i ^= 1;
+    patterns::val46(createStep(c->master, li.last_dir)->c7, si, 0, patterns::PAT_COLORING);
+    if(si.id&2) si.id ^= 1;
+    int i2 = i ^ si.id;
+    int i3 = 3 - i2;
+    if(gp::param.first % 2 == 0 && gp::param.second % 2 == 0) i = 0;
+    if(li.relative.first & 1) i ^= i3;
+    if(li.relative.second & 1) i ^= i2;
+    return i;
     }
   if(a46 && !nonbitrunc) {
     patterns::patterninfo si;
@@ -1113,7 +1130,7 @@ int pattern_threecolor(cell *c) {
 bool pseudohept(cell *c) {
   if(gp::on && gp_threecolor() == 2)
     return gp::pseudohept_val(c) == 0;
-  if(gp::on && gp_threecolor() == 1 && (S7&1))
+  if(gp::on && gp_threecolor() == 1 && (S7&1) && (S3 == 3))
     return gp::pseudohept_val(c) == 0;
   return pattern_threecolor(c) == 0;
   }
@@ -1121,7 +1138,9 @@ bool pseudohept(cell *c) {
 // while Krakens movement is usually restricted to non-pseudohept cells,
 // there is one special case when this does not work (because non-pseudohept cells have varying degrees)
 bool kraken_pseudohept(cell *c) {
-  if(!euclid && !(S7&1) && gp_threecolor() == 1)
+  if(!euclid && S3 == 4 && gp::on && (gp::param.first % 2 || gp::param.second % 2 || S7 % 2))
+    return ishept(c);
+  else if(!euclid && S3 == 3 && !(S7&1) && gp_threecolor() == 1)
     return ishept(c);
   else
     return pseudohept(c);
