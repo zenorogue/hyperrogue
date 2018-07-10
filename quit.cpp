@@ -309,7 +309,6 @@ void showMission() {
 
   cmode = sm::DOTOUR | sm::MISSION | sm::CENTER;
   gamescreen(1); drawStats();
-  keyhandler = handleKeyQuit;
 
   dialog::init(
 #if CAP_TOUR
@@ -322,6 +321,7 @@ void showMission() {
     XLAT("GAME OVER"), 
     0xC00000, 200, 100
     );
+  keyhandler = handleKeyQuit;
 
   if(!peace::on)
     dialog::addInfo(XLAT("Your score: %1", its(gold())));
