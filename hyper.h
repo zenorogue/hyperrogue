@@ -3659,4 +3659,6 @@ heptspin operator + (heptspin h, int spin);
 heptspin operator - (heptspin h, int spin);
 heptspin& operator += (heptspin& h, wstep_t);
 
+bool anglestraight(cell *c, int d1, int d2);
+
 }

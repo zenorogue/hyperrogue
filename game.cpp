@@ -1066,7 +1066,7 @@ bool stalemate1::isKilled(cell *w) {
     int wid = neighborId(moveto, w);
     int wfrom = neighborId(moveto, comefrom);
     int flag = AF_APPROACH;
-    if(wid >= 0 && wfrom >= 0 && angledist(moveto, wfrom, wid) >= 3) flag |= AF_HORNS;
+    if(wid >= 0 && wfrom >= 0 && anglestraight(moveto, wfrom, wid)) flag |= AF_HORNS;
     if(canAttack(moveto, who, w, w->monst, flag)) return true;
     }
 
@@ -3409,7 +3409,7 @@ void stayEffect(cell *c) {
   if(m == moRagingBull && c->mondir != NODIR) { 
     playSound(NULL, "hit-axe"+pick123());
     forCellIdEx(c2, d, c) {
-      bool opposite = angledist(c, d, c->mondir) >= 3;
+      bool opposite = anglestraight(c, d, c->mondir);
       if(opposite) beastcrash(c2, c);
       }
     c->mondir = NODIR; c->stuntime = 3; 
@@ -3663,6 +3663,10 @@ int angledist(cell *c, int d1, int d2) {
   return angledist(c->type, d1, d2);
   }
 
+bool anglestraight(cell *c, int d1, int d2) { 
+  return angledist(c->type, d1, d2) >= c->type / 2;
+  }
+
 int bulldist(cell *c) {
   int low = 0;
   forCellEx(c2, c) if(c2->cpdist < c->cpdist) low++;
@@ -3689,7 +3693,7 @@ int moveval(cell *c1, cell *c2, int d, flagtype mf) {
   eMonster m = c1->monst;
 
   // Angry Beasts can only go forward
-  if(m == moRagingBull && c1->mondir != NODIR && angledist(c1, c1->mondir, d) < 3) return -1700;
+  if(m == moRagingBull && c1->mondir != NODIR && !anglestraight(c1, c1->mondir, d)) return -1700;
 
   // never move against a rose
   if(againstRose(c1, c2) && !ignoresSmell(m)) return -1600;
@@ -3949,7 +3953,7 @@ cell *determinePush(cellwalker who, cell *c2, int subdir, const T& valid, int& p
 void beastAttack(cell *c, bool player) {
   if(c->mondir == NODIR) return;
   forCellIdEx(c2, d, c) {
-    bool opposite = angledist(c, d, c->mondir) >= 3;
+    bool opposite = anglestraight(c, d, c->mondir);
     int flags = AF_BULL;
     if(player) flags |= AF_GETPLAYER;
     if(!opposite) flags |= AF_ONLY_FBUG;
@@ -5080,7 +5084,7 @@ void stabbingAttack(cell *mf, cell *mt, eMonster who, int bonuskill) {
     if(!logical_adjacent(mt, who, c)) continue;
     eMonster mm = c->monst;
     int flag = AF_APPROACH;
-    if(angledist(mt, backdir, t) >= S7/2) flag |= AF_HORNS;
+    if(anglestraight(mt, backdir, t)) flag |= AF_HORNS;
     if(canAttack(mt,who,c,c->monst, flag)) {
       if(attackMonster(c, flag | AF_MSG, who)) numlance++;
       produceGhost(c, mm, who);
@@ -7082,7 +7086,7 @@ namespace orbbull {
   bool is(cell *c1, cell *c2, cell *c3) {
     int lp = neighborId(c2, c1);
     int ln = neighborId(c2, c3);
-    return lp >= 0 && ln >= 0 && angledist(c2, lp, ln) == 3;
+    return lp >= 0 && ln >= 0 && anglestraight(c2, lp, ln);
     }
   
   void gainBullPowers() {
