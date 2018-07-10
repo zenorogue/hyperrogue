@@ -710,8 +710,8 @@ namespace hr { namespace gp {
       dialog::lastItem().value = S3 == 3 ? "GP(1,1)" : XLAT(nonbitrunc ? "OFF" : "ON");
       }
 
-    if(show_nonthree && S3 == 3) {
-      dialog::addBoolItem(XLAT("chamfered"), param == loc(2,0), 'c');
+    if(show_nonthree) {
+      dialog::addBoolItem(XLAT(S3 == 3 ? "expanded" : "chamfered"), param == loc(2,0), 'c');
       dialog::lastItem().value = "GP(2,0)";
       }
 
