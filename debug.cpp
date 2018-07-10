@@ -433,7 +433,7 @@ void raiseBuggyGeneration(cell *c, const char *s) {
 
   // return;
   
-  if(cheater) {
+  if(cheater || autocheat) {
     drawbugs.emplace_back(cellwalker(c,0), 0xFF000080);
     modalDebug(c);
     drawbugs.pop_back();

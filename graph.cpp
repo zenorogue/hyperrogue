@@ -3260,9 +3260,9 @@ bool dodrawcell(cell *c) {
   if(c->pathdist == PINFD && geometry != gTorus)
     return false;
   // do not display not fully generated cells, unless a cheater
-  if(c->mpdist > 7 && !cheater) return false;
+  if(c->mpdist > 7 && !cheater && !autocheat) return false;
   // in the Yendor Challenge, scrolling back is forbidden
-  if(c->cpdist > 7 && yendor::on && !cheater) return false;
+  if(c->cpdist > 7 && yendor::on && !cheater && !autocheat) return false;
 
   return true;
   }
@@ -3555,7 +3555,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
     
     // int col = 0xFFFFFF - 0x20 * c->maxdist - 0x2000 * c->cpdist;
 
-    if(!buggyGeneration && c->mpdist > 8 && !cheater) return; // not yet generated
+    if(!buggyGeneration && c->mpdist > 8 && !cheater && !autocheat) return; // not yet generated
     /* if(!buggyGeneration && c->mpdist > 7 && !cheater) {
       int cd = c->mpdist;
       string label = its(cd);
