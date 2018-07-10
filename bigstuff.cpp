@@ -507,7 +507,7 @@ void buildEquidistant(cell *c) {
           mcv2 = coastval(c4, b);
           break;
           }
-        q = (bsid-j+42) % c2->type;
+        q = (bsid-j+MODFIXER) % c2->type;
         c3 = c2->mov[q];
         if(coastval(c3, b) < mcv) {
           cell *c4 = createMovR(c2, bsid-1);
