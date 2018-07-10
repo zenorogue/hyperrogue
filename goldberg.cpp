@@ -756,9 +756,9 @@ namespace hr { namespace gp {
       else if(uni == 'f' && (config == loc(1,1) ? show_bitrunc : (show_nonthree || (config.first-config.second)%3 == 0)))
         whirl_set(config, texture_remap);
       else if(uni == 'x')
-        dialog::editNumber(config.first, 1, 10, 1, 1, "x", helptext());
+        dialog::editNumber(config.first, 0, 8, 1, 1, "x", helptext());
       else if(uni == 'y')
-        dialog::editNumber(config.second, 1, 10, 1, 1, "y", helptext());
+        dialog::editNumber(config.second, 0, 8, 1, 1, "y", helptext());
       else if(uni == 'z')
         swap(config.first, config.second);
       else if(uni == '?' || sym == SDLK_F1 || uni == 'h' || uni == '2')
