@@ -227,6 +227,7 @@ int fiftyval200(cell *c) {
 // zebraval
 
 int dir_bitrunc457(cell *c) {
+  if(gp::on) return c->master->zebraval / 10;
   int wset = 0;
   int has1 = 0;
   for(int i=0; i<4; i++) {
@@ -254,6 +255,7 @@ int zebra40(cell *c) {
     }
   else if(ctof(c)) return (c->master->zebraval/10);
   else if(a4) {
+    if(gp::on) return zebra40(c->master->c7);
     int ws = dir_bitrunc457(c);
     if(ws < 0) return -ws;
     int tot = 0; 
