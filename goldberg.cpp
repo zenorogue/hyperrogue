@@ -594,7 +594,10 @@ namespace hr { namespace gp {
 //    spin = spintox(next);
 //    ispin = rspintox(next);
       alpha = -atan2(next[1], next[0]) * 6 / S7;
-      base_distlimit = (base_distlimit + log(scale) / log(2.618)) / scale;
+      if(S3 == 3)
+        base_distlimit = (base_distlimit + log(scale) / log(2.618)) / scale;
+      else
+        base_distlimit = 3 * max(param.first, param.second) + 2 * min(param.first, param.second);
       if(base_distlimit > 30)
         base_distlimit = 30;
       prepare_matrices();
