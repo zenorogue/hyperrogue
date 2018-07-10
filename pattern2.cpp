@@ -1891,8 +1891,11 @@ namespace linepatterns {
         break;
 
       case patTriRings:
-        forCellEx(c2, c) if(c2 > c) if(gmatrix.count(c2) && celldist(c) == celldist(c2)) 
-          queuelinef(tC0(V), gmatrix[c2]*C0, col, 2);
+        forCellIdEx(c2, i, c) {
+          if(S3 == 4) c2 = (cellwalker(c, i) + wstep + 1 + wstep).c;
+          if(c2 > c) if(gmatrix.count(c2) && celldist(c) == celldist(c2)) 
+            queuelinef(tC0(V), gmatrix[c2]*C0, col, 2);
+          }
         break;
 
       case patHepta:
