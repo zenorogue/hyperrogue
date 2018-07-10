@@ -1152,6 +1152,9 @@ land_validity_t& land_validity(eLand l) {
   // special construction in the Chaos mode
   if(chaosmode && (l == laTemple || l == laHive || l == laOcean || l == laHaunted))
     return special_chaos;
+  
+  if(l == laWhirlpool && a4)
+    return dont_work;
 
   // equidistant-based lands
   if(isEquidLand(l)) {
