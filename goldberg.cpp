@@ -7,6 +7,10 @@ namespace hr { namespace gp {
   ld alpha;
   int area;
   
+  int length(loc p) {
+    return eudist(p.first, p.second);
+    }
+  
   loc operator+(loc e1, loc e2) {
     return make_pair(e1.first+e2.first, e1.second+e2.second);
     }
@@ -28,6 +32,7 @@ namespace hr { namespace gp {
     cellwalker cw;
     signed char rdir;
     signed char mindir;
+    loc start;
     };
 
   loc eudir(int d) {
@@ -199,6 +204,7 @@ namespace hr { namespace gp {
     WHD( Xprintf("  md:%02d s:%d", wc.mindir, wc.cw.spin); )
     WHD( Xprintf("  connection %s/%d %s=%s ~ %s/%d ", disp(at), dir, dcw(wc.cw+dir), dcw(wcw), disp(at+eudir(dir)), dir1); )
     if(!wc1.cw.c) {
+      wc1.start = wc.start;
       if(peek(wcw)) {
         WHD( Xprintf("(pulled) "); )
         set_localwalk(wc1, dir1, wcw + wstep);
@@ -240,6 +246,7 @@ namespace hr { namespace gp {
   goldberg_mapping_t& set_heptspin(loc at, heptspin hs) {
     auto& ac0 = get_mapping(at);
     ac0.cw = cellwalker(hs.h->c7, hs.spin, hs.mirrored);
+    ac0.start = at;
     WHD( Xprintf("%s : %s\n", disp(at), dcw(ac0.cw)); )
     return ac0;
     }
@@ -451,8 +458,18 @@ namespace hr { namespace gp {
             wc.rdir = (dx+1)%4;
             wc1.rdir = -1;
             wc2.rdir = dx%4;
+            int bdir = -1;
+            int bdist = 100;
+            for(int d=0; d<4; d++) {
+              auto &wcm = get_mapping(at2 + eudir(d));
+              if(wcm.cw.c && length(wcm.start - at2) < bdist)
+                bdist = length(wcm.start - at2), bdir = d;
+              }
+            if(bdir != -1) conn(at2 + eudir(bdir), bdir ^ 2);
             conn(at, (dx+1)%4);
             conn(at2, dx%4);
+            
+            at = param * loc(1,0) + at * loc(0, 1);
             }
           break;
         }
@@ -775,10 +792,6 @@ namespace hr { namespace gp {
     li.last_dir = fix7(li.last_dir - sp);
     }
 
-  int length(loc p) {
-    return eudist(p.first, p.second);
-    }
-  
   // from some point X, (0,0) is in distance dmain, param is in distance d0, and param*z is in distance d1
   // what is the distance of at from X?
 

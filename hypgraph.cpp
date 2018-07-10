@@ -555,7 +555,7 @@ void drawrec(cell *c, const transmatrix& V) {
     }
   }
 
-void drawrec(const heptspin& hs, hstate s, const transmatrix& V) {
+void drawrec(const heptspin& hs, hstate s, const transmatrix& V, int boundary) {
 
   // shmup::calc_relative_matrix(cwt.c, hs.h);
     
@@ -585,12 +585,14 @@ void drawrec(const heptspin& hs, hstate s, const transmatrix& V) {
       }
     }
 
-  if(c->pathdist < PINFD && in_qrange(V))
-  for(int d=0; d<S7; d++) {
+  if(c->pathdist < PINFD && in_qrange(V)) boundary = 0;
+  else if(S3 == 4 && gp::on) boundary++; else boundary += 2;  
+  
+  if(boundary < 2) for(int d=0; d<S7; d++) {
     hstate s2 = transition(s, d);
     if(s2 == hsError) continue;
     heptspin hs2 = hs + d + wstep;
-    drawrec(hs2, s2, V * heptmove[d]);
+    drawrec(hs2, s2, V * heptmove[d], s);
     }
   
   }

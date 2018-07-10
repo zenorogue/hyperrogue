@@ -3496,7 +3496,7 @@ void queuestr(const hyperpoint& h, int size, const string& chr, int col, int fra
 void queuechr(const transmatrix& V, double size, char chr, int col, int frame = 0);
 
 extern bool just_gmatrix;
-void drawrec(const heptspin& hs, hstate s, const transmatrix& V);
+void drawrec(const heptspin& hs, hstate s, const transmatrix& V, int boundary = 0);
 
 bool haveLeaderboard(int id);
 int get_currentscore(int id);
