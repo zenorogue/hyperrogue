@@ -706,17 +706,23 @@ namespace hr { namespace gp {
       }
 
     if(show_bitrunc) {
-      dialog::addBoolItem(XLAT("bitruncated"), param == loc(1,1), 'b');  
-      dialog::lastItem().value = S3 == 3 ? "GP(1,1)" : "---";
+      dialog::addBoolItem(XLAT("bitruncated"), param == loc(1,1) && !nonbitrunc, 'b');  
+      dialog::lastItem().value = S3 == 3 ? "GP(1,1)" : XLAT(nonbitrunc ? "OFF" : "ON");
       }
 
-    if(show_nonthree) {
+    if(show_nonthree && S3 == 3) {
       dialog::addBoolItem(XLAT("chamfered"), param == loc(2,0), 'c');
       dialog::lastItem().value = "GP(2,0)";
       }
 
-    dialog::addBoolItem(XLAT("2x bitruncated"), param == loc(3,0), 'd');
-    dialog::lastItem().value = "GP(3,0)";
+    if(S3 == 3) {
+      dialog::addBoolItem(XLAT("2x bitruncated"), param == loc(3,0), 'd');
+      dialog::lastItem().value = "GP(3,0)";
+      }
+    else {
+      dialog::addBoolItem(XLAT("rectified"), param == loc(1,1) && nonbitrunc, 'd');
+      dialog::lastItem().value = "GP(1,0)";
+      }
 
     dialog::addBreak(100);
     dialog::addSelItem("x", its(config.first), 'x');
@@ -752,7 +758,7 @@ namespace hr { namespace gp {
       else if(uni == 'c' && show_nonthree)
         whirl_set(loc(2, 0), texture_remap);
       else if(uni == 'd')
-        whirl_set(loc(3, 0), texture_remap);
+        whirl_set(S3 == 3 ? loc(3, 0) : loc(1,1), texture_remap);
       else if(uni == 'f' && (config == loc(1,1) ? show_bitrunc : (show_nonthree || (config.first-config.second)%3 == 0)))
         whirl_set(config, texture_remap);
       else if(uni == 'x')
