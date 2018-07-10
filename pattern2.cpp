@@ -6,7 +6,7 @@ namespace hr {
 
 int gp_threecolor() {
   if(!gp::on) return 0;
-  if((gp::param.first - gp::param.second) % 3 == 0) return 2;
+  if(S3 == 3 && (gp::param.first - gp::param.second) % 3 == 0) return 2;
   return 1;
   }
 
