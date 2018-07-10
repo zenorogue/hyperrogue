@@ -96,6 +96,8 @@ bool checkBarriersNowall(cellwalker bb, int q, int dir, eLand l1=laNone, eLand l
     }
   else if(S3==4) {
     bb = bb + dir + wstep + dir;
+    dir = -dir;
+    swap(l1, l2);
     }
   else {
     bb = bb + (dir>0?3:4) + wstep - (dir>0?3:4);
@@ -744,10 +746,11 @@ bool buildBarrierNowall(cell *c, eLand l2, int forced_dir) {
   for(int j=0; j<c->type; j++) swap(ds[j], ds[hrand(j+1)]);
 
   for(int i=0; i<c->type; i++) {
-    int d = forced_dir != NODIR ? forced_dir : (S3>3 && nonbitrunc) ? (2+(i&1)) : ds[i];
+    int d = forced_dir != NODIR ? forced_dir : (S3>3 && nonbitrunc && !gp::on) ? (2+(i&1)) : ds[i];
 /*    if(warpv && gp::on) {
       d = hrand(c->type); */
     if(warpv && c->mov[d] && c->mov[d]->mpdist < c->mpdist) continue;
+    if(gp::on && a4 && c->mov[d] && c->mov[d]->mpdist <= c->mpdist) continue;
 /*      }
     else 
       d = (S3>3 && !warpv) ? (2+(i&1)) : dtab[i]; */
