@@ -1156,6 +1156,9 @@ land_validity_t& land_validity(eLand l) {
   if(l == laWhirlpool && a4)
     return dont_work;
 
+  if(isWarped(l) && a4 && gp::on)
+    return dont_work;
+  
   // equidistant-based lands
   if(isEquidLand(l)) {
     // no equidistants supported in chaos mode

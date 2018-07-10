@@ -3079,6 +3079,7 @@ bool has_nice_dual() {
   if(!nonbitrunc) return true;
   if((S7 & 1) == 0) return true;
   if(!gp::on) return false;
+  if(a4) return false;
   return (gp::param.first + gp::param.second * 2) % 3 == 0;
   }
 
