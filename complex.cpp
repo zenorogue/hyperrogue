@@ -2639,7 +2639,7 @@ namespace kraken {
     acells.push_back(make_pair(c2, c));
     forCellIdEx(c3, i, c) {
       c3->monst = moKrakenT, c3->mondir = c->spn(i), onpath(c3, 0);
-      int i0 = (i+c->spn(c->mondir)-c->mondir+99) % c2->type;
+      int i0 = (i+c->spn(c->mondir)-c->mondir+96+c->type/2) % c2->type;
       c3->hitpoints = hpcount[i0];
       acells.push_back(make_pair(c2->mov[i0], c3));
       if(c3->wall == waBoat) {
