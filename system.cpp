@@ -1174,7 +1174,13 @@ void switch_game_mode(char switchWhat) {
       else geometry = targetgeometry;
       if(chaosmode && (euclid || sphere || quotient)) chaosmode = false;
       if(nonbitrunc && euclid6) nonbitrunc = false;
-      if(gp::on && (S3 != 3 || elliptic)) gp::on = false;
+      if(gp::on && gp::param == gp::loc(1,1) && S3 == 3) {
+        gp::on = false; nonbitrunc = false;
+        }
+      if(gp::on && nonorientable) {
+        if(gp::param.second && gp::param.second != gp::param.first)
+          gp::param.second = 0;
+        }
   
       need_reset_geometry = true; 
       #if CAP_TEXTURE
