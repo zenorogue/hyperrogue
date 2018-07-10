@@ -3653,4 +3653,10 @@ extern hpcshape shDisk, shTriangle, shHeptaMarker, shSnowball, shDiskT, shDiskS,
 
 extern std::mt19937 hrngen;
 
+heptspin& operator += (heptspin& hs, int spin);
+heptspin operator + (const heptspin& hs, wstep_t);
+heptspin operator + (heptspin h, int spin);
+heptspin operator - (heptspin h, int spin);
+heptspin& operator += (heptspin& h, wstep_t);
+
 }

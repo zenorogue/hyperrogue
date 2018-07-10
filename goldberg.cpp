@@ -791,7 +791,7 @@ namespace hr { namespace gp {
       sp++;
       goto again;
       }
-    if(sp>3) sp -= 6;
+    if(sp>SG3) sp -= SG6;
     li.last_dir = fix7(li.last_dir - sp);
     }
 
@@ -814,8 +814,35 @@ namespace hr { namespace gp {
         if(c0-cc == d0-dmain && c1-cc == d1-dmain)
           found = true, centerloc = c;
         }
-      if(!found && !quotient)
+      if(!found && !quotient) {
         Xprintf("Warning: centerloc not found: %d,%d,%d\n", dmain, d0, d1);
+        }
+      center_locs[rel] = centerloc;
+      }
+    
+    return dmain + length(centerloc-at) - length(centerloc);
+    }
+
+  int solve_quad(int dmain, int d0, int d1, int dx, loc at) {
+    loc centerloc(0, 0);
+    auto rel = make_pair(d0-dmain, (d1-dmain) + 1000 * (dx-dmain) + 1000000);
+    if(center_locs.count(rel))
+      centerloc = center_locs[rel];
+    else {
+      bool found = false;
+      for(int y=-20; y<=20; y++)
+      for(int x=-20; x<=20; x++) {
+        loc c(x, y);
+        int cc = length(c);
+        int c0 = length(c - param);
+        int c1 = length(c - param*loc(0,1));
+        int c2 = length(c - param*loc(1,1));
+        if(c0-cc == d0-dmain && c1-cc == d1-dmain && c2-cc == dx-dmain)
+          found = true, centerloc = c;
+        }
+      if(!found && !quotient) {
+        Xprintf("Warning: centerloc not found: %d,%d,%d,%d\n", dmain, d0, d1, dx);
+        }
       center_locs[rel] = centerloc;
       }
     
@@ -846,6 +873,13 @@ namespace hr { namespace gp {
     auto dmain = master_function(cm);
     auto d0 = master_function(createStep(cm->master, i)->c7);
     auto d1 = master_function(createStep(cm->master, fixdir(i+1, cm))->c7);
+    
+    if(S3 == 4) {
+      heptspin hs(cm->master, i);
+      hs += wstep; hs+=-1; hs += wstep;
+      auto d2 = master_function(hs.h->c7);
+      return solve_quad(dmain, d0, d1, d2, at);
+      }
     
     return solve_triangle(dmain, d0, d1, at);
     }
