@@ -285,9 +285,11 @@ void showEuclideanMenu() {
     dialog::addBreak(50);
   
     if(ts == 6 && tv == 3)
-      dialog::addSelItem(XLAT("bitruncated"), XLAT("does not matter"), 't');
-    else if(S3 != 3)
-      dialog::addBoolItem(XLAT("bitruncated"), !nonbitrunc, 't');
+      dialog::addSelItem(XLAT("Goldberg"), XLAT("does not matter"), 't');
+    else if(S3 != 3) {
+      dialog::addBoolItem(XLAT("Goldberg") + "/" + XLAT("bitruncated"), nonbitrunc, 't');
+      dialog::lastItem().value = gp::operation_name();
+      }
     else {
       dialog::addBoolItem(XLAT("Goldberg"), nonbitrunc, 't');
       dialog::lastItem().value = gp::operation_name();
@@ -393,12 +395,12 @@ void showEuclideanMenu() {
         showquotients = !showquotients;
       else if(uni == 't') {
         if(euclid6) ;
-        else if(S3 == 3) 
+        else // if(S3 == 3) 
           gp::configure();
-        else {
+        /* else {
           stop_game_and_switch_mode(rg::bitrunc);
           start_game();
-          }
+          } */
         }
       else if(uni == '2' || sym == SDLK_F1) gotoHelp(euchelp);
       else if(uni == '3') { viewdists = !viewdists; if(viewdists) popScreenAll(); }

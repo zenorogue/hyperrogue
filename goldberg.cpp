@@ -17,7 +17,7 @@ namespace hr { namespace gp {
   
   loc operator*(loc e1, loc e2) {
     return make_pair(e1.first*e2.first-e1.second*e2.second, 
-      e1.first*e2.second + e2.first*e1.second + e1.second*e2.second);
+      e1.first*e2.second + e2.first*e1.second + (S3 == 3 ? e1.second*e2.second : 0));
     }
 
   loc operator*(loc e1, int i) {
@@ -31,23 +31,40 @@ namespace hr { namespace gp {
     };
 
   loc eudir(int d) {
-    d %= 6; if (d < 0) d += 6;
-    switch(d) {
+    if(S3 == 3) {
+      d %= 6; if (d < 0) d += 6;
+      switch(d) {
+        case 0: return make_pair(1, 0);
+        case 1: return make_pair(0, 1);
+        case 2: return make_pair(-1, 1);
+        case 3: return make_pair(-1, 0);
+        case 4: return make_pair(0, -1);
+        case 5: return make_pair(1, -1);
+        default: return make_pair(0, 0);
+        }
+      }
+    else switch(d&3) {
       case 0: return make_pair(1, 0);
       case 1: return make_pair(0, 1);
-      case 2: return make_pair(-1, 1);
-      case 3: return make_pair(-1, 0);
-      case 4: return make_pair(0, -1);
-      case 5: return make_pair(1, -1);
+      case 2: return make_pair(-1, 0);
+      case 3: return make_pair(0, -1);
       default: return make_pair(0, 0);
       }
     }
   
+#define SG6 (S3==3?6:4)
+#define SG3 (S3==3?3:2)
+#define SG2 (S3==3?2:1)
+
+  int fixg6(int x) { return (x + MODFIXER) % SG6; }
+  
+#define WHD(x) // x
+
   int get_code(const local_info& li) {
     return 
       ((li.relative.first & 15) << 0) +
       ((li.relative.second & 15) << 4) +
-      ((fix6(li.total_dir)) << 8) +
+      ((fixg6(li.total_dir)) << 8) +
       ((li.last_dir & 15) << 12);
     }
   
@@ -73,12 +90,12 @@ namespace hr { namespace gp {
       at = at + eudir(dir);
       dirs.pop_back();
       while(dirs.size()) {
-        dir += dirs.back() + 3;
+        dir += dirs.back() + SG3;
         dirs.pop_back();
         at = at + eudir(dir);
         }
       li.relative = at;
-      li.total_dir = dir + 3;
+      li.total_dir = dir + SG3;
       }
     return li;
     }
@@ -130,8 +147,6 @@ namespace hr { namespace gp {
     }
 
   int spawn;
-  
-#define WHD(x) // x
 
   bool operator != (cellwalker cw1, cellwalker cw2) {
     return cw1.c != cw2.c || cw1.spin != cw2.spin || cw1.mirrored != cw2.mirrored;
@@ -142,21 +157,21 @@ namespace hr { namespace gp {
     }
 
   cellwalker get_localwalk(const goldberg_mapping_t& wc, int dir) {
-    if(dir < wc.mindir) dir += 6;
-    if(dir >= wc.mindir + 6) dir -= 6;
+    if(dir < wc.mindir) dir += SG6;
+    if(dir >= wc.mindir + SG6) dir -= SG6;
     return wc.cw + dir;
     }
 
   void set_localwalk(goldberg_mapping_t& wc, int dir, const cellwalker& cw) {
-    if(dir < wc.mindir) dir += 6;
-    if(dir >= wc.mindir + 6) dir -= 6;
+    if(dir < wc.mindir) dir += SG6;
+    if(dir >= wc.mindir + SG6) dir -= SG6;
     wc.cw = cw - dir;
     }
 
   bool pull(loc at, int dir) {
     auto& wc = get_mapping(at);
     auto at1 = at + eudir(dir);
-    int dir1 = fix6(dir+3);
+    int dir1 = fixg6(dir+SG3);
     cellwalker wcw = get_localwalk(wc, dir);
     auto& wc1= get_mapping(at1);
     if(wc1.cw.c) {
@@ -176,12 +191,12 @@ namespace hr { namespace gp {
       }
     return false;
     }
-  
+
   void conn1(loc at, int dir, int dir1) {
     auto& wc = get_mapping(at);
     auto wcw = get_localwalk(wc, dir);
     auto& wc1 = get_mapping(at + eudir(dir));
-    WHD( Xprintf("  md:%d s:%d", wc.mindir, wc.cw.spin); )
+    WHD( Xprintf("  md:%02d s:%d", wc.mindir, wc.cw.spin); )
     WHD( Xprintf("  connection %s/%d %s=%s ~ %s/%d ", disp(at), dir, dcw(wc.cw+dir), dcw(wcw), disp(at+eudir(dir)), dir1); )
     if(!wc1.cw.c) {
       if(peek(wcw)) {
@@ -189,7 +204,7 @@ namespace hr { namespace gp {
         set_localwalk(wc1, dir1, wcw + wstep);
         }
       else {
-        peek(wcw) = newCell(6, wc.cw.c->master);
+        peek(wcw) = newCell(SG6, wc.cw.c->master);
         tsetspin(wcw.c->spintable, wcw.spin, 0);
         set_localwalk(wc1, dir1, wcw + wstep);
         spawn++;
@@ -218,8 +233,8 @@ namespace hr { namespace gp {
     }
 
   void conn(loc at, int dir) {
-    conn1(at, fix6(dir), fix6(dir+3));
-    conn1(at + eudir(dir), fix6(dir+3), fix6(dir));
+    conn1(at, fixg6(dir), fixg6(dir+SG3));
+    conn1(at + eudir(dir), fixg6(dir+SG3), fixg6(dir));
     }
   
   goldberg_mapping_t& set_heptspin(loc at, heptspin hs) {
@@ -241,9 +256,14 @@ namespace hr { namespace gp {
       extend_map(c, d);
       extend_map(c, fixdir(d-1, c));
       extend_map(c, fixdir(d+1, c));
+      if(S3 == 4 && !c->mov[d])
+        for(int i=0; i<S7; i++)
+        for(int j=0; j<S7; j++)
+          extend_map(createStep(c->master, i)->c7, j);
       return;
       }
 
+    if(S3 == 4 && param.first <= param.second) { d--; if(d<0) d += S7; }
     clear_mapping();
 
     // we generate a local map from an Euclidean grid to the
@@ -251,19 +271,35 @@ namespace hr { namespace gp {
     
     // we fill the equilateral triangle with the following vertices:
 
-    loc vc[3];
+    loc vc[4];
     vc[0] = loc(0,0);
     vc[1] = param;
-    vc[2] = param * loc(0,1);
+    if(S3 == 3)
+      vc[2] = param * loc(0,1);
+    else 
+      vc[2] = param * loc(1,1),
+      vc[3] = param * loc(0,1);
     
     heptspin hs(c->master, d, false);
     
     auto& ac0 = set_heptspin(vc[0], hs);
     ac0.mindir = -1;
-    auto& ac1 = set_heptspin(vc[1], hs + wstep - 3);
+    auto& ac1 = set_heptspin(vc[1], hs + wstep - SG3);
     ac1.mindir = 0;
-    auto& ac2 = set_heptspin(vc[2], hs + 1 + wstep - 4);
-    ac2.mindir = 1;
+    auto& ac2 = set_heptspin(vc[S3-1], S3 == 3 ? hs + 1 + wstep - 4 : hs + 1 + wstep + 1);
+    ac2.mindir = S3 == 3 ? 1 : -2;
+    if(S3 == 4) {
+      set_heptspin(vc[2], hs + wstep - 1 + wstep + 1).mindir = -3;
+      }
+    
+    if(S3 == 4 && param == loc(1,1)) {
+      conn(loc(0,0), 1);
+      conn(loc(0,1), 0);
+      conn(loc(0,1), 1);
+      conn(loc(0,1), 2);
+      conn(loc(0,1), 3);
+      return;
+      }
     
     if(nonorientable && param.first == param.second) {
       int x = param.first;
@@ -295,58 +331,74 @@ namespace hr { namespace gp {
       }
 
     // then we set the edges of our big equilateral triangle (in a symmetric way)
-    for(int i=0; i<3; i++) {
+    for(int i=0; i<S3; i++) {
       loc start = vc[i];
-      loc end = vc[(i+1)%3];
+      loc end = vc[(i+1)%S3];
       WHD( Xprintf("from %s to %s\n", disp(start), disp(end)); )
       loc rel = param;
       auto build = [&] (loc& at, int dx, bool forward) {
-        int dx1 = dx + 2*i;
-        WHD( Xprintf("%s %d .. %s %d\n", disp(at), dx1, disp(at + eudir(dx1)), fix6(dx1+3)); )
+        int dx1 = dx + SG2*i;
+        WHD( Xprintf("%s %d .. %s %d\n", disp(at), dx1, disp(at + eudir(dx1)), fixg6(dx1+SG3)); )
         conn(at, dx1);        
-        if(forward) get_mapping(at).rdir = fix6(dx1);
-        else get_mapping(at+eudir(dx1)).rdir = fix6(dx1+3);
+        if(forward) get_mapping(at).rdir = fixg6(dx1);
+        else get_mapping(at+eudir(dx1)).rdir = fixg6(dx1+SG3);
         at = at + eudir(dx1);
         };
-      while(rel.first >= 2 && rel.first >= 2 - rel.second) {
+      while(rel.first >= 2 && (S3 == 3 ? rel.first >= 2 - rel.second : true)) {
         build(start, 0, true);
-        build(end, 3, false);
+        build(end, SG3, false);
         rel.first -= 2;
         }
       while(rel.second >= 2) {
         build(start, 1, true);
-        build(end, 4, false);
+        build(end, 1+SG3, false);
         rel.second -= 2;
         }
-      while(rel.second <= -2) {
+      while(rel.second <= -2 && S3 == 3) {
         build(start, 5, true);
         build(end, 2, false);
         rel.second += 2;
         rel.first -= 2;
         }
-      while((rel.first>0 && rel.second > 0) | (rel.first > 1 && rel.second < 0)) {
+      if(S3 == 3) while((rel.first>0 && rel.second > 0) | (rel.first > 1 && rel.second < 0)) {
         build(start, 0, true);
         build(end, 3, false);
         rel.first -= 2;
         }
-      for(int k=0; k<6; k++)
-        if(start + eudir(k+2*i) == end)
+      if(S3 == 4 && rel == loc(1,1)) {
+        if(param == loc(3,1) || param == loc(5,1)) {
+          build(start, 1, true);
+          build(end, 2, false);
+          rel.first--;
+          rel.second--;
+          }
+        else {
+          build(start, 0, true);
+          build(end, 3, false);
+          rel.first--;
+          rel.second--;
+          }
+        }
+      for(int k=0; k<SG6; k++)
+        if(start + eudir(k+SG2*i) == end)
           build(start, k, true);                         
       if(start != end) { Xprintf("assertion failed: start %s == end %s\n", disp(start), disp(end)); exit(1); }
       }
 
     // now we can fill the interior of our big equilateral triangle
     loc at = vc[0];
+    int maxstep = 3000;
     while(true) {
+      maxstep--; if(maxstep < 0) { printf("maxstep exceeded\n"); exit(1); }
       auto& wc = get_mapping(at);
       int dx = wc.rdir;
       auto at1 = at + eudir(dx);
       auto& wc1 = get_mapping(at1);
       WHD( Xprintf("%s (%d) %s (%d)\n", disp(at), dx, disp(at1), wc1.rdir); )
       int df = wc1.rdir - dx;
-      if(df < 0) df += 6;
-      if(df == 3) break;
-      switch(df) {
+      if(df < 0) df += SG6;
+      if(df == SG3) break;
+      if(S3 == 3) switch(df) {
         case 0:
         case 4:
         case 5:
@@ -373,6 +425,37 @@ namespace hr { namespace gp {
           Xprintf("case unhandled %d\n", df);
           exit(1);
         }
+      else switch(df) {
+        case 0: 
+        case 3:
+          at = at1;
+          continue;
+        case 1:
+          auto at2 = at + eudir(dx+1);
+          auto& wc2 = get_mapping(at2);
+          if(wc2.cw.c) {
+            auto at3 = at1 + eudir(wc1.rdir);
+            auto& wc3 = get_mapping(at3);
+            auto at4 = at3 + eudir(wc3.rdir);
+            if(at4 == at2) {
+              wc.rdir = (dx+1)%4;
+              wc1.rdir = -1;
+              wc3.rdir = -1;
+              conn(at, (dx+1)%4);
+              }
+            else { 
+              at = at1;
+              }
+            }
+          else {
+            wc.rdir = (dx+1)%4;
+            wc1.rdir = -1;
+            wc2.rdir = dx%4;
+            conn(at, (dx+1)%4);
+            conn(at2, dx%4);
+            }
+          break;
+        }
       }
 
     WHD( Xprintf("DONE\n\n"); )    
@@ -382,7 +465,7 @@ namespace hr { namespace gp {
     return hpxyz(at.first, at.second, 1);
     }
 
-  hyperpoint corner_coords[7] = {
+  hyperpoint corner_coords6[7] = {
     hpxyz(2, -1, 0),
     hpxyz(1, 1, 0),
     hpxyz(-1, 2, 0),
@@ -391,6 +474,22 @@ namespace hr { namespace gp {
     hpxyz(1, -2, 0),
     hpxyz(0, 0, 0) // center, not a corner
     };
+
+  hyperpoint corner_coords4[7] = {
+    hpxyz(1.5, -1.5, 0),
+//    hpxyz(1, 0, 0),
+    hpxyz(1.5, 1.5, 0),
+//    hpxyz(0, 1, 0),
+    hpxyz(-1.5, 1.5, 0),
+//    hpxyz(-1, 0, 0),
+    hpxyz(-1.5, -1.5, 0),
+//    hpxyz(0, -1, 0),
+    hpxyz(0, 0, 0),
+    hpxyz(0, 0, 0),
+    hpxyz(0, 0, 0)
+    };
+
+  #define corner_coords (S3==3 ? corner_coords6 : corner_coords4)
   
   hyperpoint cornmul(const transmatrix& corners, const hyperpoint& c) {
     if(sphere) {
@@ -406,11 +505,11 @@ namespace hr { namespace gp {
     auto corner = corners * hyperpoint_vec::operator+ (loctoh_ort(at), hyperpoint_vec::operator/ (corner_coords[cornerid], cf));
     if(corner[1] < -1e-6 || corner[2] < -1e-6) {
       at = at * eudir(1);
-      if(cornerid < 6) cornerid = (1 + cornerid) % 6;
+      if(cornerid < SG6) cornerid = (1 + cornerid) % SG6;
       sp++;
       goto again;
       }
-    if(sp>3) sp -= 6;
+    if(sp>SG3) sp -= SG6;
 
     return normalize(spin(2*M_PI*sp/S7) * cornmul(T, corner));
     }
@@ -438,7 +537,7 @@ namespace hr { namespace gp {
       transmatrix T = dir_matrix(i);
       for(int x=-16; x<16; x++)
       for(int y=-16; y<16; y++)
-      for(int d=0; d<6; d++) {
+      for(int d=0; d<(S3==3?6:4); d++) {
         loc at = loc(x, y);
         
         hyperpoint h = atz(T, corners, at, 6);
@@ -453,8 +552,8 @@ namespace hr { namespace gp {
     if(i == -1) 
       return atz(dir_matrix(cid), corners, li.relative, 0, cf);
     else {
-      auto& cellmatrix = Tf[i][li.relative.first&31][li.relative.second&31][fix6(li.total_dir)];
-      return inverse(cellmatrix) * atz(dir_matrix(i), corners, li.relative, fix6(cid + li.total_dir), cf);
+      auto& cellmatrix = Tf[i][li.relative.first&31][li.relative.second&31][fixg6(li.total_dir)];
+      return inverse(cellmatrix) * atz(dir_matrix(i), corners, li.relative, fixg6(cid + li.total_dir), cf);
       }
     }
   
@@ -499,13 +598,13 @@ namespace hr { namespace gp {
       v = v * loc(0, 1);
     if(x > 8) x = 8;
     if(y > 8) y = 8;
-    if(y > x) v = v * loc(1, -1);
+    if(S3 == 3 && y > x) v = v * loc(1, -1);
     return v;
     }
   
   loc human_representation(loc v) {
     int& x = v.first, &y = v.second;
-    while(x < 0 || y < 0 || (x == 0 && y > 0))
+    if(S3 == 3) while(x < 0 || y < 0 || (x == 0 && y > 0))
       v = v * loc(0, 1);
     return v;
     }
@@ -517,11 +616,11 @@ namespace hr { namespace gp {
       }
     else if(param == loc(1, 0))
       return XLAT("OFF");
-    else if(param == loc(1, 1))
+    else if(param == loc(1, 1) && S3 == 3)
       return XLAT("bitruncated");
-    else if(param == loc(2, 0))
+    else if(param == loc(2, 0) && S3 == 3)
       return XLAT("chamfered");
-    else if(param == loc(3, 0))
+    else if(param == loc(3, 0) && S3 == 3)
       return XLAT("2x bitruncated");
     else {
       auto p = human_representation(param);
@@ -546,7 +645,7 @@ namespace hr { namespace gp {
       if(gp::on) stop_game_and_switch_mode(rg::bitrunc);
       if(!nonbitrunc) stop_game_and_switch_mode(rg::bitrunc);
       }
-    else if(xy.first == 1 && xy.second == 1) {
+    else if(xy.first == 1 && xy.second == 1 && S3 == 3) {
       if(gp::on) stop_game_and_switch_mode(rg::bitrunc);
       if(nonbitrunc) stop_game_and_switch_mode(rg::bitrunc);
       }
@@ -588,7 +687,7 @@ namespace hr { namespace gp {
 
     if(show_bitrunc) {
       dialog::addBoolItem(XLAT("bitruncated"), param == loc(1,1), 'b');  
-      dialog::lastItem().value = "GP(1,1)";
+      dialog::lastItem().value = S3 == 3 ? "GP(1,1)" : "---";
       }
 
     if(show_nonthree) {
@@ -622,8 +721,14 @@ namespace hr { namespace gp {
       dialog::handleNavigation(sym, uni);
       if(uni == 'a' && show_nonthree) 
         whirl_set(loc(1, 0), texture_remap);
-      else if(uni == 'b' && show_bitrunc)
-        whirl_set(loc(1, 1), texture_remap);
+      else if(uni == 'b' && show_bitrunc) {
+        if(S3 == 4) {
+          if(nonbitrunc || gp::on)
+            restart_game(rg::bitrunc);
+          }
+        else 
+          whirl_set(loc(1, 1), texture_remap);
+        }
       else if(uni == 'c' && show_nonthree)
         whirl_set(loc(2, 0), texture_remap);
       else if(uni == 'd')

@@ -332,7 +332,7 @@ namespace gp {
     id = nextid++;
   
     bool master = !(li.relative.first||li.relative.second);
-    int cor = master ? S7 : 6;
+    int cor = master ? S7 : SG6;
     if(master) li.last_dir = -1;
     if(debug_geometry) 
       printf("last=%d at=%d,%d tot=%d siid=%d sidir=%d cor=%d id=%d\n", li.last_dir, li.relative.first, li.relative.second, li.total_dir, siid, sidir, cor, id);
@@ -437,7 +437,7 @@ namespace gp {
         for(int j=0; j<cor; j++)
           cornerlist.push_back(get_corner_position(li, j, sca));
         }
-
+      
       bshape(fsh.b[id], fsh.prio);
       for(int i=0; i<=cor; i++) hpcpush(cornerlist[i%cor]);
       

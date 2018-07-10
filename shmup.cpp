@@ -3319,7 +3319,7 @@ transmatrix master_relative(cell *c, bool get_inverse) {
       }
     else {
       auto li = gp::get_local_info(c);
-      transmatrix T = spin(master_to_c7_angle()) * gp::Tf[li.last_dir][li.relative.first&31][li.relative.second&31][fix6(li.total_dir)];
+      transmatrix T = spin(master_to_c7_angle()) * gp::Tf[li.last_dir][li.relative.first&31][li.relative.second&31][gp::fixg6(li.total_dir)];
       if(get_inverse) T = inverse(T);
       return T;
       }
