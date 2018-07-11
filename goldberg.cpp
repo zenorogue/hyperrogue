@@ -721,7 +721,7 @@ namespace hr { namespace gp {
       }
     else {
       dialog::addBoolItem(XLAT("rectified"), param == loc(1,1) && nonbitrunc, 'd');
-      dialog::lastItem().value = "GP(1,0)";
+      dialog::lastItem().value = "GP(1,1)";
       }
 
     dialog::addBreak(100);
