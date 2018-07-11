@@ -273,6 +273,7 @@ hint hints[] = {
     [] () {
       if(!sphere) {
         resetModes();
+        stop_game();
         specialland = laHalloween;
         targetgeometry = gSphere;
         restart_game(rg::geometry);

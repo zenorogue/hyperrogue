@@ -1469,9 +1469,11 @@ void init() {
   showstartmenu = false;
 #if !ISWEB
   mapeditor::drawplayer = false;
+  stop_game();
   firstland = specialland = laCanvas;
   restart_game(shmup::on ? rg::shmup : rg::nothing);
 #else
+  stop_game();
   firstland = specialland = laCanvas;
   restart_game(rg::nothing);
 #endif

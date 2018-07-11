@@ -256,6 +256,7 @@ else if(args()[0] == '-' && args()[1] == x && args()[2] == '0') { PHASEFROM(2); 
     }
   else if(argis("-canvas")) {
     PHASEFROM(2);
+    stop_game();
     firstland = specialland = laCanvas;
     shift();
     if(args() == "i") canvas_invisible = !canvas_invisible;

@@ -1358,27 +1358,27 @@ namespace patterns {
           }; 
         dialog::openColorDialog(c, canvasbacks);
         dialog::reaction = [] () {
+          stop_game();
           whichCanvas = 'g';
           canvasback = c >> 8;
           firstland = specialland = laCanvas;
           randomPatternsMode = false;
-          stop_game();
           start_game();
           };
         }
       else if(uni == 'i') {
+        stop_game();
         canvas_invisible = !canvas_invisible;
         firstland = specialland = laCanvas; 
         randomPatternsMode = false;
-        stop_game();
         start_game();
         }
       else if((uni >= 'a' && uni <= 'z') || (uni >= 'A' && uni <= 'Z')) {
+        stop_game();
         whichCanvas = uni;
         subcanvas = rand();
         firstland = specialland = laCanvas; 
         randomPatternsMode = false;
-        stop_game();
         start_game();
         if(uni == 'x' || uni == 'z' || uni == 't')
           whichPattern = PAT_ZEBRA, subpattern_flags = SPF_SYM0123 | SPF_ROT;

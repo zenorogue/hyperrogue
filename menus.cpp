@@ -769,6 +769,7 @@ void showStartMenu() {
       resetModes('g');
       stampbase = ticks;
       if(!sphere) {
+        stop_game();
         specialland = laHalloween;
         targetgeometry = gSphere;
         restart_game(rg::geometry);

@@ -321,6 +321,7 @@ void start() {
   if(!tour::on) presentation(pmStartAll);
   else {
     presentation(pmStop);
+    stop_game();
     firstland = specialland = laIce;
     }
   restart_game(rg::tour);

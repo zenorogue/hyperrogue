@@ -326,6 +326,7 @@ void resetModes(char leave) {
     vid.scfg.players = 1; stop_game_and_switch_mode();
     }
   if(firstland != laIce || specialland != laIce) {
+    stop_game();
     firstland = laIce; specialland = laIce; stop_game_and_switch_mode();
     }
 

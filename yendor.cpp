@@ -1098,6 +1098,7 @@ namespace peace {
       
       if(uni == '1') otherpuzzles = !otherpuzzles;
       else if(uni >= 'a' && uni < 'a' + qty) {
+        stop_game();
         specialland = levellist[uni - 'a'];
         restart_game(peace::on ? 0 : rg::peace);
         }
