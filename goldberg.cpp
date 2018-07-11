@@ -639,7 +639,7 @@ namespace hr { namespace gp {
     else if(param == loc(1, 1) && S3 == 3)
       return XLAT("bitruncated");
     else if(param == loc(1, 1) && S3 == 4)
-      return XLAT("expanded");
+      return XLAT("rectified");
     else if(param == loc(2, 0))
       return S3 == 3 ? XLAT("chamfered") : XLAT("expanded");
     else if(param == loc(3, 0) && S3 == 3)
