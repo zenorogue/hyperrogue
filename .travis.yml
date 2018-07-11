@@ -1,38 +1,147 @@
 language: cpp
-sudo: required
-addons:
-  apt:
-    packages:
-      - libsdl-dev
-      - libsdl-mixer1.2-dev
-      - libsdl-gfx1.2-dev
-      - libsdl-ttf2.0-dev
-      - libglew-dev
-os:
-  - linux
-  - osx
-compiler:
-  - gcc
-  - clang
+services:
+  - docker
+matrix:
+  include:
+  - os: linux
+    compiler: gcc
+    env: >-
+      TRAVIS_OS_NAME=linux
+      TRAVIS_COMPILER_NAME=gcc
+      TRAVIS_BUILD_SYSTEM=autotools
+      HYPERROGUE_USE_GLEW=1
+      HYPERROGUE_USE_PNG=1
+  - os: osx
+    compiler: clang
+    env: >-
+      TRAVIS_OS_NAME=osx
+      TRAVIS_COMPILER_NAME=clang
+      TRAVIS_BUILD_SYSTEM=autotools
+      HYPERROGUE_USE_GLEW=1
+      HYPERROGUE_USE_PNG=1
+  - os: linux
+    compiler: gcc
+    env: >-
+      TRAVIS_OS_NAME=linux
+      TRAVIS_COMPILER_NAME=gcc
+      TRAVIS_BUILD_SYSTEM=Makefile
+      HYPERROGUE_USE_GLEW=1
+      HYPERROGUE_USE_PNG=1
+      HYPERROGUE_USE_ROGUEVIZ=1
+  - os: linux
+    compiler: clang
+    env: >-
+      TRAVIS_OS_NAME=linux
+      TRAVIS_COMPILER_NAME=clang
+      TRAVIS_BUILD_SYSTEM=Makefile
+      HYPERROGUE_USE_GLEW=1
+      HYPERROGUE_USE_PNG=1
+      HYPERROGUE_USE_ROGUEVIZ=1
+  - os: osx
+    compiler: gcc
+    env: >-
+      TRAVIS_OS_NAME=osx
+      TRAVIS_COMPILER_NAME=gcc
+      TRAVIS_BUILD_SYSTEM=Makefile
+      HYPERROGUE_USE_GLEW=1
+      HYPERROGUE_USE_PNG=1
+      HYPERROGUE_USE_ROGUEVIZ=1
+  - os: osx
+    compiler: clang
+    env: >-
+      TRAVIS_OS_NAME=osx
+      TRAVIS_COMPILER_NAME=clang
+      TRAVIS_BUILD_SYSTEM=Makefile
+      HYPERROGUE_USE_GLEW=1
+      HYPERROGUE_USE_PNG=1
+      HYPERROGUE_USE_ROGUEVIZ=1
+  - os: osx
+    compiler: clang
+    env: >-
+      TRAVIS_OS_NAME=osx
+      TRAVIS_COMPILER_NAME=clang
+      TRAVIS_BUILD_SYSTEM=Makefile
+      HYPERROGUE_USE_GLEW=0
+      HYPERROGUE_USE_PNG=0
+      HYPERROGUE_USE_ROGUEVIZ=0
+  - os: linux
+    env: >-
+      TRAVIS_OS_NAME=linux
+      TRAVIS_COMPILER_NAME=emscripten
+      TRAVIS_BUILD_SYSTEM=emscripten
+
 before_install:
-  - |-
-    if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-      brew update && brew install sdl sdl_gfx sdl_mixer sdl_ttf
-      # work around https://stackoverflow.com/questions/51034399/ for now
-      (cd /usr/local/include && ln -sf SDL/SDL.h)
+- |-
+  # Install SDL
+  if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+    sudo apt-get update -qq
+    sudo apt-get install -qq libsdl1.2-dev libsdl-gfx1.2-dev libsdl-mixer1.2-dev libsdl-ttf2.0-dev
+  elif [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+    brew update
+    brew install sdl sdl_gfx sdl_mixer sdl_ttf
+    # work around https://stackoverflow.com/questions/51034399/ for now
+    (cd /usr/local/include && ln -sf SDL/SDL.h)
+  else
+    exit 'Unsupported OS'
+  fi
+- |-
+  # Install GLEW if asked for
+  if [[ "$HYPERROGUE_USE_GLEW" == "1" ]]; then
+    if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+      sudo apt-get install -qq libglew-dev
+    elif [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+      brew install glew
+    else
+      exit 'Unsupported OS'
     fi
+  fi
+- |-
+  # Install libpng if asked for
+  if [[ "$HYPERROGUE_USE_PNG" == "1" ]]; then
+    if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+      echo 'libpng is installed by default'
+    elif [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+      brew install libpng
+    else
+      exit 'Unsupported OS'
+    fi
+  fi
+- |-
+  # Install autotools if asked for
+  if [[ "$TRAVIS_USE_AUTOTOOLS" == "1" ]]; then
+    if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+      echo 'autotools is installed by default'
+    elif [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+      brew install automake
+    else
+      exit 'Unsupported OS'
+    fi
+  fi
+
 script:
 - |-
   # Build hyperrogue.
-  autoreconf -vi
-  ./configure CXXFLAGS="-Wall -Werror -Wno-error=unused-result"
-  make
+  if [[ "$TRAVIS_BUILD_SYSTEM" == "autotools" ]]; then
+    autoreconf -vi
+    ./configure CXXFLAGS="-Wall -Werror -Wno-error=unused-result"
+    make
+  elif [[ "$TRAVIS_BUILD_SYSTEM" == "Makefile" ]]; then
+    make -f Makefile.simple
+  elif [[ "$TRAVIS_BUILD_SYSTEM" == "emscripten" ]]; then
+    docker run --rm -v $(pwd):/src trzeci/emscripten make -f Makefile.simple emscripten
+  else
+    exit 'Unsupported build system'
+  fi
 - |-
   # Test hyperrogue.
-  ./hyperrogue --help
+  if [[ "$TRAVIS_BUILD_SYSTEM" == "emscripten" ]]; then
+    ls -lAF hyper.html hyper.js hyper.wasm
+  else
+    ./hyperrogue --help
+  fi
 - |-
   # Test "make dist". ("make distcheck" is expected to fail.)
-  make dist
+  if [[ "$TRAVIS_BUILD_SYSTEM" == "autotools" ]]; then make dist; fi
 - |-
   # Test "sudo make install".
-  sudo make install
+  if [[ "$TRAVIS_BUILD_SYSTEM" == "autotools" ]]; then sudo make install; fi

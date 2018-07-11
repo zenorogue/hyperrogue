@@ -1,0 +1,164 @@
+# This Makefile works for Mac OS X (El Capitan), MinGW, and Linux.
+#
+# For Mac OS X:
+#   Run "brew install sdl" to install SDL in /usr/local.
+#   Run "brew install sdl_gfx".
+#   Run "brew install sdl_mixer".
+#   Run "brew install sdl_ttf".
+#   Run "make -f Makefile.simple" to build HyperRogue as ./hyperrogue.
+#
+# For MSYS2 and MinGW-w64:
+#   You might need to run commands such as "pacman -S mingw-w64-x86_64-SDL"
+#   to install SDL and other required libraries.
+#   Run "make -f Makefile.simple" to build HyperRogue as ./hyperrogue.exe.
+#
+# For Ubuntu Linux:
+#   Run "sudo apt-get install libsdl-dev" to install SDL in /usr/local.
+#   Run "make -f Makefile.simple" to build HyperRogue as ./hyperrogue.
+
+
+ifeq ($(OS),Windows_NT)
+  OS := mingw
+  TOOLCHAIN := mingw
+else
+  UNAME_S := $(shell uname -s)
+  ifeq ($(UNAME_S),Linux)
+    OS := linux
+  else
+    ifeq ($(UNAME_S),Darwin)
+      OS := osx
+    endif
+  endif
+  TOOLCHAIN_VERSION_S := $(shell $(CXX) --version)
+  ifneq (,$(findstring clang,$(TOOLCHAIN_VERSION_S)))
+    TOOLCHAIN := clang
+  else
+    TOOLCHAIN := gcc
+  endif
+endif
+
+
+## We have now finished inspecting the environment via $(shell).
+## Begin customization points for each OS and TOOLCHAIN we support.
+
+
+ifeq (${OS},linux)
+  CXXFLAGS_EARLY += -DLINUX
+  EXE_EXTENSION :=
+  LDFLAGS_GL := -lGL
+  LDFLAGS_GLEW := -lGLEW
+  LDFLAGS_PNG := -lpng
+  LDFLAGS_SDL := -lSDL -lSDL_gfx -lSDL_mixer -lSDL_ttf
+  OBJ_EXTENSION := .o
+  hyper_RES :=
+endif
+
+ifeq (${OS},mingw)
+  CXXFLAGS_EARLY += -DWINDOWS -mwindows -D_A_VOLID=8
+  EXE_EXTENSION := .exe
+  LDFLAGS_GL := -lopengl32
+  LDFLAGS_GLEW := -lglew32
+  LDFLAGS_PNG := -lpng
+  LDFLAGS_SDL := -lSDL -lSDL_gfx -lSDL_mixer -lSDL_ttf
+  OBJ_EXTENSION := .o
+  hyper_RES := hyper.res
+  ifeq (${HYPERROGUE_USE_GLEW},)
+    HYPERROGUE_USE_GLEW := 1
+  endif
+endif
+
+ifeq (${OS},osx)
+  CXXFLAGS_EARLY += -DMAC -I/usr/local/include
+  EXE_EXTENSION :=
+  LDFLAGS_EARLY += -L/usr/local/lib
+  LDFLAGS_GL := -framework AppKit -framework OpenGL
+  LDFLAGS_GLEW := -lGLEW
+  LDFLAGS_PNG := -lpng
+  LDFLAGS_SDL := -lSDL -lSDLMain -lSDL_gfx -lSDL_mixer -lSDL_ttf
+  OBJ_EXTENSION := .o
+  hyper_RES :=
+endif
+
+ifeq (${TOOLCHAIN},clang)
+  CXXFLAGS_EARLY += -std=c++11 -march=native
+  CXXFLAGS_EARLY += -W -Wall -Wextra -Werror -pedantic
+  CXXFLAGS_EARLY += -Wno-format-pedantic -Wno-missing-field-initializers -Wno-unused-parameter
+endif
+
+ifeq (${TOOLCHAIN},gcc)
+  CXXFLAGS_EARLY += -std=c++11 -march=native
+  CXXFLAGS_EARLY += -W -Wall -Wextra -Werror
+  CXXFLAGS_EARLY += -Wno-empty-body -Wno-maybe-uninitialized -Wno-missing-field-initializers -Wno-unused-parameter -Wno-unused-result
+endif
+
+ifeq (${TOOLCHAIN},mingw)
+  CXXFLAGS_EARLY += -std=c++11 -march=native
+  CXXFLAGS_EARLY += -W -Wall -Wextra -Werror
+endif
+
+
+## We have now finished OS-specific and TOOLCHAIN-specific computations.
+## Begin customization points for user-specifiable HYPERROGUE_USE_XXX macros.
+
+
+hyper_OBJS = hyper$(OBJ_EXTENSION)
+hyper_LDFLAGS = $(LDFLAGS_GL) $(LDFLAGS_SDL)
+
+ifeq (${HYPERROGUE_USE_GLEW},1)
+  CXXFLAGS_EARLY += -DCAP_GLEW=1
+  hyper_LDFLAGS += $(LDFLAGS_GLEW)
+else
+  CXXFLAGS_EARLY += -DCAP_GLEW=0
+endif
+
+ifeq (${HYPERROGUE_USE_PNG},1)
+  CXXFLAGS_EARLY += -DCAP_PNG=1
+  hyper_LDFLAGS += $(LDFLAGS_PNG)
+  hyper_OBJS += savepng$(OBJ_EXTENSION)
+else
+  CXXFLAGS_EARLY += -DCAP_PNG=0
+endif
+
+ifeq (${HYPERROGUE_USE_ROGUEVIZ},1)
+  # Enable RogueViz.
+  CXXFLAGS_EARLY += -DCAP_ROGUEVIZ=1
+endif
+
+
+## We have now finished HYPERROGUE_USE_XXX-specific computations.
+## Begin the Makefile proper.
+
+
+override CXXFLAGS := $(CXXFLAGS_EARLY) $(CXXFLAGS) ${EXTRA_CXXFLAGS}
+override LDFLAGS := $(LDFLAGS_EARLY) $(LDFLAGS) ${EXTRA_LDFLAGS}
+
+hyperrogue$(EXE_EXTENSION): $(hyper_OBJS) $(hyper_RES)
+	$(CXX) $(CXXFLAGS) $(hyper_OBJS) $(hyper_RES) $(LDFLAGS) $(hyper_LDFLAGS) -o $@
+
+hyper$(OBJ_EXTENSION): *.cpp language-data.cpp
+	$(CXX) -O2 $(CXXFLAGS) $(hyper_CXXFLAGS) -c hyper.cpp -o $@
+
+hyper.res: hyper.rc hr-icon.ico
+	windres hyper.rc -O coff -o hyper.res
+
+langen$(EXE_EXTENSION): langen.cpp language-??.cpp language-ptbr.cpp
+	$(CXX) -O0 $(CXXFLAGS) $(langen_CXXFLAGS) langen.cpp $(LDFLAGS) -o $@
+
+language-data.cpp: langen$(EXE_EXTENSION)
+	./langen > language-data.cpp
+
+savepng$(OBJ_EXTENSION): savepng.cpp
+	$(CXX) -O2 $(CXXFLAGS) -c savepng.cpp -o $@
+
+emscripten: hyper.html
+
+%.html %.js %.wasm: %.emscripten-sources
+	emcc -std=c++11 -O3 -s LEGACY_GL_EMULATION=1 -s TOTAL_MEMORY=128*1024*1024 hyperweb.cpp -o hyper.html
+
+hyper.emscripten-sources: *.cpp
+
+.PHONY: clean
+
+clean:
+	rm -f hyperrogue$(EXE_EXTENSION) hyper$(OBJ_EXTENSION) $(hyper_RES) langen$(EXE_EXTENSION) language-data.cpp savepng$(OBJ_EXTENSION)
+	rm -f hyper.html hyper.js hyper.wasm

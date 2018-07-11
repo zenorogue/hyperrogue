@@ -1720,7 +1720,7 @@ void configure_edge_display() {
           dialog::add_action([t,s3] {
             static int i;
             i = 1 / t->visible_from;
-            dialog::editNumber(i, 1, 1000000, .2, 500, s3, "");
+            dialog::editNumber(i, 1, 1000000, 1, 500, s3, "");
             dialog::reaction = [t] () { t->visible_from = i ? 1. / i : 5; };
             dialog::scaleLog();
             });
