@@ -638,8 +638,8 @@ namespace hr { namespace gp {
       return XLAT("OFF");
     else if(param == loc(1, 1) && S3 == 3)
       return XLAT("bitruncated");
-    else if(param == loc(2, 0) && S3 == 3)
-      return XLAT("chamfered");
+    else if(param == loc(2, 0))
+      return S3 == 3 ? XLAT("chamfered") : XLAT("expanded");
     else if(param == loc(3, 0) && S3 == 3)
       return XLAT("2x bitruncated");
     else {
@@ -711,7 +711,7 @@ namespace hr { namespace gp {
       }
 
     if(show_nonthree) {
-      dialog::addBoolItem(XLAT(S3 == 3 ? "expanded" : "chamfered"), param == loc(2,0), 'c');
+      dialog::addBoolItem(XLAT(S3 == 3 ? "chamfered" : "expanded"), param == loc(2,0), 'c');
       dialog::lastItem().value = "GP(2,0)";
       }
 
