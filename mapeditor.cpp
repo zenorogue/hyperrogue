@@ -1320,7 +1320,7 @@ namespace mapeditor {
     if(vernum >= 0xA0A0) {
       int tg, wp;
       int nt;
-      fscanf(f, "%d%d%d%d\n", &tg, &nt, &wp, &patterns::subpattern_flags);
+      hr::ignore(fscanf(f, "%d%d%d%d\n", &tg, &nt, &wp, &patterns::subpattern_flags));
       patterns::whichPattern = wp;
       if(tg != geometry) { targetgeometry = eGeometry(tg); stop_game_and_switch_mode(rg::geometry); }
       if(bool(nt) != nonbitrunc) stop_game_and_switch_mode(rg::bitrunc);

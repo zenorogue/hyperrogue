@@ -10,6 +10,11 @@
 
 namespace hr {
 
+template<class T>
+void ignore(T&&) {
+  // placate GCC's overzealous -Wunused-result
+  }
+
 // functions and types used from the standard library
 using std::vector;
 using std::map;

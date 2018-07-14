@@ -123,7 +123,7 @@ script:
   # Build hyperrogue.
   if [[ "$TRAVIS_BUILD_SYSTEM" == "autotools" ]]; then
     autoreconf -vi
-    ./configure CXXFLAGS="-Wall -Werror -Wno-error=unused-result"
+    ./configure CXXFLAGS="-Wall -Werror"
     make
   elif [[ "$TRAVIS_BUILD_SYSTEM" == "Makefile" ]]; then
     make -f Makefile.simple

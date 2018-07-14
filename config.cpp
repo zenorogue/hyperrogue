@@ -106,10 +106,8 @@ void loadcs(FILE *f, charstyle& cs, int xvernum) {
 
   if(err) cs.charid = gflags & 15;
   if(err) vid.samegender = (gflags & 16) ? true : false;
-  if(cs.charid == 3) if(fscanf(f, "%x", &cs.dresscolor2)) 
-    ;
-  if(xvernum >= 8990) if(fscanf(f, "%x", &cs.uicolor)) 
-    ;
+  if(cs.charid == 3) hr::ignore(fscanf(f, "%x", &cs.dresscolor2));
+  if(xvernum >= 8990) hr::ignore(fscanf(f, "%x", &cs.uicolor));
   }
 #endif
 
@@ -402,8 +400,7 @@ void saveConfig() {
 
 void readf(FILE *f, ld& x) {
   double fl = x; 
-  if(fscanf(f, "%lf", &fl)) 
-    ; 
+  hr::ignore(fscanf(f, "%lf", &fl));
   x = fl;
   }
 
