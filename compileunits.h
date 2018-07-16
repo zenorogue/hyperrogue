@@ -32,6 +32,7 @@
 #include "language.cpp"
 #include "cell.cpp"
 #include "goldberg.cpp"
+#include "irregular.cpp"
 #include "pattern2.cpp"
 #include "flags.cpp"
 #include "yendor.cpp"

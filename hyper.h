@@ -78,7 +78,7 @@ void addMessage(string s, char spamtype = 0);
 #define S3 ginf[geometry].vertex
 #define hyperbolic_37 (S7 == 7 && S3 == 3)
 #define hyperbolic_not37 ((S7 > 7 || S3 > 3) && hyperbolic)
-#define weirdhyperbolic ((S7 > 7 || S3 > 3 || gp::on) && hyperbolic)
+#define weirdhyperbolic ((S7 > 7 || S3 > 3 || gp::on || irr::on) && hyperbolic)
 #define stdhyperbolic (S7 == 7 && S3 == 3 && !gp::on)
 
 #define cgclass (ginf[geometry].cclass)
@@ -2549,6 +2549,20 @@ struct hrmap_hyperbolic : hrmap {
   void verify() { verifycells(origin); }
   };
 
+namespace quotientspace { hrmap *new_map(); }
+namespace irr { 
+  extern bool on;
+  void link_to_base(heptagon *h, heptspin base);
+  void link_start(heptagon *h);
+  void link_next(heptagon *h, int d);
+  void may_link_next(heptagon *h, int d);
+  void link_cell(cell *c, int d);
+  void clear_links(heptagon *h);
+  bool pseudohept(cell*);
+  array<heptagon*, 3> get_masters(cell *c);
+  bool ctof(cell* c);
+  }
+
 extern hrmap *currentmap;
 extern vector<hrmap*> allmaps;
 
@@ -3149,7 +3163,7 @@ namespace gp {
 
   int solve_triangle(int dmain, int d0, int d1, loc at);
 
-  array<cell*, 3> get_masters(cell *c);
+  array<heptagon*, 3> get_masters(cell *c);
   }
 
 int get_sightrange();

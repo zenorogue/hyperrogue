@@ -170,6 +170,7 @@ void precalc() {
   base_distlimit = ginf[geometry].distlimit[nonbitrunc];
   
   gp::compute_geometry();  
+  irr::compute_geometry();
   }
 
 transmatrix ddi(ld dir, ld dist) {

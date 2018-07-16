@@ -75,7 +75,10 @@ heptagon *buildHeptagon(heptagon *parent, int d, hstate s, int pard = 0, int fix
   h->move[pard] = parent; tsetspin(h->spintable, pard, d);
   parent->move[d] = h; tsetspin(parent->spintable, d, pard);
   if(parent->c7) {
-    h->c7 = newCell(S7, h);
+    if(irr::on)
+      irr::link_next(parent, d);
+    else
+      h->c7 = newCell(S7, h);
     h->rval0 = h->rval1 = 0; h->cdata = NULL;
     h->emeraldval = emerald_heptagon(parent->emeraldval, d);
     h->zebraval = zebra_heptagon(parent->zebraval, d);

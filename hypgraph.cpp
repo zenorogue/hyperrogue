@@ -486,6 +486,8 @@ ld master_to_c7_angle() {
   }
 
 transmatrix actualV(const heptspin& hs, const transmatrix& V) {
+  if(irr::on)
+    return V * spin(M_PI + 2 * M_PI / S7 * (hs.spin + irr::periodmap[hs.h].base.spin));
   return (hs.spin || nonbitrunc) ? V * spin(hs.spin*2*M_PI/S7 + master_to_c7_angle()) : V;
   }
 
@@ -564,8 +566,20 @@ void drawrec(const heptspin& hs, hstate s, const transmatrix& V) {
   transmatrix V10;
   const transmatrix& V1 = hs.mirrored ? (V10 = V * Mirror) : V;
   
+  bool draw = c->pathdist < PINFD;
+  
   if(gp::on) {
     gp::drawrec(c, actualV(hs, V1));
+    }
+  
+  else if(irr::on) {
+    auto& hi = irr::periodmap[hs.h];
+    transmatrix V0 = actualV(hs, V1);
+    auto& vc = irr::cells_of_heptagon[hi.base.h];
+    for(int i=0; i<isize(vc); i++)
+      if(dodrawcell(hi.subcells[i]) && in_qrange(V0 * irr::cells[vc[i]].pusher))
+        draw = true,
+        drawcell(hi.subcells[i], V0 * irr::cells[vc[i]].pusher, 0, false);
     }
   
   else {
@@ -585,7 +599,7 @@ void drawrec(const heptspin& hs, hstate s, const transmatrix& V) {
       }
     }
 
-  if(c->pathdist < PINFD && in_qrange(V)) for(int d=0; d<S7; d++) {
+  if(draw && in_qrange(V)) for(int d=0; d<S7; d++) {
     hstate s2 = transition(s, d);
     if(s2 == hsError) continue;
     heptspin hs2 = hs + d + wstep;

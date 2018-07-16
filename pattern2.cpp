@@ -49,11 +49,13 @@ bool ishex2(cell *c) {
   else return c->type != S6;
   }
 
+int emeraldval(heptagon *h) { return h->emeraldval >> 3; }
+
 int emeraldval(cell *c) {
   if(euclid) return eupattern(c);
   if(sphere) return 0;
   if(ctof(c))
-    return c->master->emeraldval >> 3;
+    return emeraldval(c->master);
   else {
     auto ar = gp::get_masters(c);
     return emerald_hexagon(
@@ -96,9 +98,9 @@ int fiftyval(cell *c) {
   else {
     auto ar = gp::get_masters(c);
     return bitmajority(
-      fiftyval(ar[0]), 
-      fiftyval(ar[1]), 
-      fiftyval(ar[2])) + 512;
+      ar[0]->fiftyval, 
+      ar[1]->fiftyval, 
+      ar[2]->fiftyval) + 512;
     }
   }
 
@@ -109,47 +111,47 @@ int cdist50(cell *c) {
       return "0123333332112332223322233211233333322"[eufifty(c)] - '0';
     else return "012333321112322232222321123"[eufifty(c)] - '0';
     }
-  if(c->type != 6) return cdist50(fiftyval(c));
+  if(ctof(c)) return cdist50(c->master->fiftyval);
   auto ar = gp::get_masters(c);
-  int a0 = cdist50(ar[0]);
-  int a1 = cdist50(ar[1]);
-  int a2 = cdist50(ar[2]);
+  int a0 = cdist50(ar[0]->fiftyval);
+  int a1 = cdist50(ar[1]->fiftyval);
+  int a2 = cdist50(ar[2]->fiftyval);
   if(a0 == 0 || a1 == 0 || a2 == 0) return 1;
   return a0+a1+a2-5;
   }
 
 int land50(cell *c) {
-  if(c->type != 6) return land50(fiftyval(c));
-  else if(sphere || euclid) return 0;
+  if(sphere || euclid) return 0;
+  else if(ctof(c)) return land50(fiftyval(c));
   else {
     auto ar = gp::get_masters(c);
     for(int i=0; i<3; i++)
-      if(cdist50(ar[i]) < 3) return land50(ar[i]);
+      if(cdist50(ar[i]->fiftyval) < 3) return land50(ar[i]->fiftyval);
     return 0;
     }
   }
 
 int polara50(cell *c) {
-  if(c->type != 6) return polara50(fiftyval(c));
-  else if(sphere || euclid || S7>7 || S6>6) return 0;
-  else if(gp::on) return polara50(fiftyval(c->master->c7));
+  if(sphere || euclid || S7>7 || S6>6) return 0;
+  else if(gp::on || irr::on) return polara50(fiftyval(c->master->c7));
+  else if(ctof(c)) return polara50(fiftyval(c));
   else {
     auto ar = gp::get_masters(c);
     for(int i=0; i<3; i++)
-      if(cdist50(ar[i]) < 3) return polara50(ar[i]);
+      if(cdist50(ar[i]->fiftyval) < 3) return polara50(ar[i]->fiftyval);
     return 0;
     }
   }
 
 int polarb50(cell *c) {
   if(euclid) return true;
-  if(c->type != 6) return polarb50(fiftyval(c));
-  else if(sphere || euclid || S7>7 || S6>6) return true;
-  else if(gp::on) return polarb50(fiftyval(c->master->c7));
+  if(sphere || euclid || S7>7 || S6>6) return true;
+  else if(gp::on || irr::on) return polarb50(fiftyval(c->master->c7));
+  else if(ctof(c)) return polarb50(fiftyval(c));
   else {
     auto ar = gp::get_masters(c);
     for(int i=0; i<3; i++)
-      if(cdist50(ar[i]) < 3) return polarb50(ar[i]);
+      if(cdist50(ar[i]->fiftyval) < 3) return polarb50(ar[i]->fiftyval);
     return 0;
     }
   }
@@ -158,30 +160,32 @@ int elhextable[28][3] = {
   {0,1,2}, {1,2,9}, {1,9,-1}, {1,8,-1}, {1,-1,-1}
   };
 
+int fiftyval049(heptagon *h) {
+  int i = h->fiftyval / 32;
+  if(i <= 7) return i;
+  if(quotient) return 0;
+  vector<int> allcodes;
+  for(int k=0; k<7; k++) {
+    heptagon *h2 = createStep(h, k);
+    if(polara50(h2->fiftyval) == polara50(h->fiftyval) && polarb50(h2->fiftyval) == polarb50(h->fiftyval))
+      allcodes.push_back(fiftyval049(h2));
+    }
+  int d = allcodes[1] - allcodes[0];
+  if(d == -1 || d == 6) swap(allcodes[0], allcodes[1]);
+  // printf("%d,%d: %d\n", allcodes[0], allcodes[1], allcodes[0] + 7);
+  return allcodes[0] + 7;
+  }
+
 int fiftyval049(cell *c) {
   if(euclid) return fiftyval(c) / 32;
-  else if(ctof(c)) {
-    int i = fiftyval(c) / 32;
-    if(i <= 7) return i;
-    if(quotient) return 0;
-    vector<int> allcodes;
-    for(int k=0; k<7; k++) {
-      cell *c2 = createStep(c->master, k)->c7;
-      if(polara50(c2) == polara50(c) && polarb50(c2) == polarb50(c))        
-        allcodes.push_back(fiftyval049(c2));
-      }
-    int d = allcodes[1] - allcodes[0];
-    if(d == -1 || d == 6) swap(allcodes[0], allcodes[1]);
-    // printf("%d,%d: %d\n", allcodes[0], allcodes[1], allcodes[0] + 7);
-    return allcodes[0] + 7;
-    }
+  else if(ctof(c)) return fiftyval049(c->master);
   else if(sphere) return 0;
   else {
     int a[3], qa=0;
     int pa = polara50(c), pb = polarb50(c);
     auto ar = gp::get_masters(c);
     for(int i=0; i<3; i++)
-      if(polara50(ar[i]) == pa && polarb50(ar[i]) == pb)
+      if(polara50(ar[i]->fiftyval) == pa && polarb50(ar[i]->fiftyval) == pb)
         a[qa++] = fiftyval049(ar[i]);
     // 0-1-2
     sort(a, a+qa);
@@ -248,6 +252,7 @@ int val46(cell *c);
 
 int zebra40(cell *c) {
   if(euclid) return eupattern(c);
+  else if(irr::on) return c->master->zebraval/10;
   else if(a46) {
     int v = val46(c);
     if(v<4) return v;
@@ -285,9 +290,9 @@ int zebra40(cell *c) {
   else {
     int ii[3], z;
     auto ar = gp::get_masters(c);
-    ii[0] = (ar[0]->master->zebraval/10);
-    ii[1] = (ar[1]->master->zebraval/10);
-    ii[2] = (ar[2]->master->zebraval/10);
+    ii[0] = (ar[0]->zebraval/10);
+    ii[1] = (ar[1]->zebraval/10);
+    ii[2] = (ar[2]->zebraval/10);
     for(int r=0; r<2; r++) 
       if(ii[1] < ii[0] || ii[2] < ii[0]) 
         z = ii[0], ii[0] = ii[1], ii[1] = ii[2], ii[2] = z;
@@ -304,14 +309,14 @@ int zebra40(cell *c) {
   }
 
 int zebra3(cell *c) {
-  if(c->type != 6) return (c->master->zebraval/10)/4;
-  else if(sphere || S7>7 || S6>6) return 0;
+  if(ctof(c)) return (c->master->zebraval/10)/4;
+  else if(euclid || sphere || S7>7 || S6>6) return 0;
   else { 
     int ii[3];
     auto ar = gp::get_masters(c);
-    ii[0] = (ar[0]->master->zebraval/10)/4;
-    ii[1] = (ar[1]->master->zebraval/10)/4;
-    ii[2] = (ar[2]->master->zebraval/10)/4;
+    ii[0] = (ar[0]->zebraval/10)/4;
+    ii[1] = (ar[1]->zebraval/10)/4;
+    ii[2] = (ar[2]->zebraval/10)/4;
     if(ii[0] == ii[1]) return ii[0];
     if(ii[1] == ii[2]) return ii[1];
     if(ii[2] == ii[0]) return ii[2];
@@ -328,7 +333,7 @@ pair<int, bool> fieldval(cell *c) {
 
 int fieldval_uniq(cell *c) {
   if(sphere) {
-    if(ctof(c)) return c->master->fieldval;
+    if(ctof(c) || gp::on || irr::on) return c->master->fieldval;
     else return createMov(c, 0)->master->fieldval + 256 * createMov(c,2)->master->fieldval + (1<<16) * createMov(c,4)->master->fieldval;
     }
   else if(torus) {
@@ -338,7 +343,7 @@ int fieldval_uniq(cell *c) {
     auto p = cell_to_pair(c);
     return gmod(p.first * torusconfig::dx + p.second * torusconfig::dy, torusconfig::qty);
     }
-  if(ctof(c) || gp::on) return c->master->fieldval/S7;
+  if(ctof(c) || gp::on || irr::on) return c->master->fieldval/S7;
   else {
     int z = 0;
     for(int u=0; u<S6; u+=2) 
@@ -348,7 +353,7 @@ int fieldval_uniq(cell *c) {
   }
 
 int fieldval_uniq_rand(cell *c, int randval) {
-  if(sphere || torus || euclid) 
+  if(sphere || torus || euclid || gp::on || irr::on) 
     // we do not care in these cases
     return fieldval_uniq(c);
   if(ctof(c)) return currfp.gmul(c->master->fieldval, randval)/7;
@@ -708,7 +713,8 @@ namespace patterns {
     }
 
   void val_all(cell *c, patterninfo &si, int sub, int pat) {
-    if(a46) val46(c, si, sub, pat);
+    if(irr::on) si.symmetries = 1;
+    else if(a46) val46(c, si, sub, pat);
     else if(a38) val38(c, si, sub, pat);
     else if(sphere) valSibling(c, si, sub, pat);
     else if(euclid4) valEuclid4(c, si, sub);
@@ -1005,6 +1011,7 @@ namespace patterns {
   }
 
 int geosupport_threecolor() {
+  if(irr::on) return 0;
   if(!nonbitrunc && S3 == 3) {
     if(S7 % 2) return 1;
     return 2;
@@ -1019,6 +1026,7 @@ int geosupport_threecolor() {
 int geosupport_graveyard() {
   // always works in bitrunc geometries
   if(!nonbitrunc) return 2;
+  if(irr::on) return 0;
   
   // always works in patterns supporting three-color
   int tc = max(geosupport_threecolor(), gp_threecolor());
@@ -1130,6 +1138,7 @@ int pattern_threecolor(cell *c) {
 // in the 'pure heptagonal' tiling, returns true for a set of cells
 // which roughly corresponds to the heptagons in the normal tiling
 bool pseudohept(cell *c) {
+  if(irr::on) return irr::pseudohept(c);
   if(gp::on && gp_threecolor() == 2)
     return gp::pseudohept_val(c) == 0;
   if(gp::on && gp_threecolor() == 1 && (S7&1) && (S3 == 3))

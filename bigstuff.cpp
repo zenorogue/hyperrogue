@@ -105,8 +105,10 @@ bool grailWasFound(cell *c) {
 
 void generateAlts(heptagon *h, int levs, bool link_cdata) {
   if(!h->alt) return;
-  preventbarriers(h->c7);
-  for(int i=0; i<S7; i++) preventbarriers(h->c7->mov[i]);
+  if(!irr::on) {
+    preventbarriers(h->c7);
+    for(int i=0; i<S7; i++) preventbarriers(h->c7->mov[i]);
+    }
   if(gp::on)
     for(int i=0; i<S7; i++) preventbarriers(createStep(h, i)->c7);
   for(int i=0; i<S7; i++) 
@@ -973,7 +975,7 @@ int wallchance(cell *c, bool deepOcean) {
 bool horo_ok() {
   // do the horocycles work in the current geometry?
   // (they work in ALL hyperbolic geometries currently!)
-  return hyperbolic;
+  return hyperbolic && !irr::on;
   }
 
 bool gp_wall_test() {

@@ -3094,7 +3094,7 @@ namespace windmap {
       // cw.spin = 0;
       neighbors.emplace_back();
       auto &v = neighbors.back();
-      if(gp::on)
+      if(gp::on || irr::on)
         for(int l=0; l<S7; l++) {
           heptspin hs(cw.c->master, cw.spin);
           hs = hs + l + wstep;

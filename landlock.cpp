@@ -1159,6 +1159,15 @@ land_validity_t& land_validity(eLand l) {
   if(isWarped(l) && a4 && gp::on)
     return dont_work;
   
+  if((isWarped(l) || l == laDual) && irr::on)
+    return dont_work;
+  
+  if(irr::on && among(l, laStorms, laPrairie, laBlizzard, laVolcano))
+    return dont_work;
+
+  if(irr::on && among(l, laWhirlpool, laCamelot, laCaribbean, laClearing, laTemple, laHive, laMirror, laMirrorOld, laReptile, laKraken, laBurial))
+    return dont_work;
+  
   // equidistant-based lands
   if(isEquidLand(l)) {
     // no equidistants supported in chaos mode

@@ -210,14 +210,14 @@ void giantLandSwitch(cell *c, int d, cell *from) {
       else {
 
         if(d == 9) {
-          cell *c2 = gp::on ? c->master->c7 : c;
+          cell *c2 = (gp::on || irr::on) ? c->master->c7 : c;
           if(cdist50(c2) == 3 && polarb50(c2) == 1)
             c->wall = waPalace;
           }
       
         if(d == 8 && sphere) {
           int gs = getHemisphere(c,0);
-          if(gp::on) {
+          if(gp::on || irr::on) {
             int v = 1;
             forCellEx(c2, c) if(getHemisphere(c2, 0) != gs)
               v = 2;
@@ -583,7 +583,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
             else if(v == 25 || v == 59 || v == 27 || v == 57)
               c->wall = waVineHalfB;
             else c->wall = waNone;
-            if(gp::on && cellHalfvine(c)) {
+            if((gp::on || irr::on) && cellHalfvine(c)) {
               c->wall = waNone;
               forCellCM(c2, c) if(emeraldval(c2) == (v^1))
                 c->wall = waVinePlant;

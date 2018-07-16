@@ -73,7 +73,10 @@ hrmap_hyperbolic::hrmap_hyperbolic() {
   h.alt = NULL;
   h.distance = 0;
   isnonbitrunc = nonbitrunc;
-  h.c7 = newCell(S7, origin);
+  if(irr::on)
+    irr::link_start(origin);
+  else
+    h.c7 = newCell(S7, origin);
   }
 
 // --- spherical geometry ---
@@ -107,7 +110,7 @@ struct hrmap_spherical : hrmap {
       h.spintable = 0;
       h.fieldval = i;
       for(int i=0; i<S7; i++) h.move[i] = NULL;
-      h.c7 = newCell(S7, &h);
+      if(!irr::on) h.c7 = newCell(S7, &h);
       }
     if(S7 == 5)
       siblings = {1, 0, 10, 4, 3, 8, 9, 11, 5, 6, 2, 7};
@@ -173,6 +176,13 @@ struct hrmap_spherical : hrmap {
         dodecahedron[i+1]->move[2] = dodecahedron[5];
         dodecahedron[i+1]->setspin(2, 3-i);
         }
+      }
+
+    if(irr::on) {
+      irr::link_start(dodecahedron[0]);
+      for(int i=0; i<spherecells(); i++)
+        for(int j=0; j<S7; j++)
+          irr::may_link_next(dodecahedron[i], j);
       }
     }
 
@@ -717,7 +727,7 @@ struct hrmap_quotient : hrmap {
         h->fieldval = S7*i;
         h->rval0 = h->rval1 = 0; h->cdata = NULL;
         h->distance = 0;
-        h->c7 = newCell(S7, h);
+        if(!irr::on) h->c7 = newCell(S7, h);
         }
       for(int j=0; j<S7; j++) {
         int co = connections[i*S7+j];
@@ -738,6 +748,13 @@ struct hrmap_quotient : hrmap {
         allh[i]->move[j]->alt = createStep(allh[i]->alt, j); */
       }    
     
+    if(irr::on) {
+      irr::link_start(allh[0]);
+      for(int i=0; i<TOT; i++)
+        for(int j=0; j<S7; j++)
+          irr::may_link_next(allh[i], j);
+      }
+
     celllister cl(gamestart(), 100, 100000000, NULL);
     celllist = cl.lst;
     }
@@ -827,6 +844,9 @@ cell *createMov(cell *c, int d) {
     }
   
   if(c->mov[d]) return c->mov[d];
+  else if(irr::on) {
+    irr::link_cell(c, d);
+    }
   else if(nonbitrunc && gp::on) {
     gp::extend_map(c, d);
     if(!c->mov[d]) {
@@ -951,7 +971,8 @@ void clearHexes(heptagon *at) {
     delete at->cdata;
     at->cdata = NULL;
     }
-  if(at->c7) subcell(at->c7, clearcell);
+  if(irr::on) irr::clear_links(at);
+  else if(at->c7) subcell(at->c7, clearcell);
   }
 
 void unlink_cdata(heptagon *h) {
@@ -1017,7 +1038,7 @@ void verifycell(cell *c) {
   }
 
 void verifycells(heptagon *at) {
-  if(gp::on) return;
+  if(gp::on || irr::on) return;
   for(int i=0; i<S7; i++) if(at->move[i] && at->move[i]->move[at->spin(i)] && at->move[i]->move[at->spin(i)] != at) {
     printf("hexmix error %p [%d s=%d] %p %p\n", at, i, at->spin(i), at->move[i], at->move[i]->move[at->spin(i)]);
     }
@@ -1066,6 +1087,7 @@ int celldist(cell *c) {
   if(sphere) return celldistance(c, currentmap->gamestart());
   if(ctof(c)) return c->master->distance;
   if(gp::on) return gp::compute_dist(c, celldist);
+  if(irr::on)  return c->master->distance;
   int dx[MAX_S3];
   for(int u=0; u<S3; u++)
     dx[u] = createMov(c, u+u)->master->distance;
@@ -1400,7 +1422,7 @@ int getCdata(cell *c, int j) {
     int jj = 0;
     auto ar = gp::get_masters(c);
     for(int k=0; k<3; k++)
-      jj += getHeptagonCdata(ar[k]->master)->val[j];
+      jj += getHeptagonCdata(ar[k])->val[j];
     return jj;
     }
   }
@@ -1411,9 +1433,9 @@ int getBits(cell *c) {
   else if(c->type != 6) return getHeptagonCdata(c->master)->bits;
   else {
     auto ar = gp::get_masters(c);
-    int b0 = getHeptagonCdata(ar[0]->master)->bits;
-    int b1 = getHeptagonCdata(ar[1]->master)->bits;
-    int b2 = getHeptagonCdata(ar[2]->master)->bits;
+    int b0 = getHeptagonCdata(ar[0])->bits;
+    int b1 = getHeptagonCdata(ar[1])->bits;
+    int b2 = getHeptagonCdata(ar[2])->bits;
     return (b0 & b1) | (b1 & b2) | (b2 & b0);
     }
   }
@@ -1475,7 +1497,7 @@ int celldistance(cell *c1, cell *c2) {
     return 64;
     }
   
-  if(gp::on || euclid) {
+  if(gp::on || euclid || irr::on) {
     
     if(saved_distances.count(make_pair(c1,c2)))
       return saved_distances[make_pair(c1,c2)];

@@ -1029,10 +1029,10 @@ namespace gamestack {
   bool pushed() { return isize(gd); }
   
   void push() {
-    if(geometry) {
+    /* if(geometry) {
       printf("ERROR: push implemented only in non-hyperbolic geometry\n");
       exit(1);
-      }
+      } */
     gamedata gdn;
     gdn.hmap = currentmap;
     gdn.cwt = cwt;

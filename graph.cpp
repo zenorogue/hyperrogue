@@ -158,6 +158,7 @@ void drawSpeed(const transmatrix& V) {
   }
 
 int ctof(cell *c) {
+  if(irr::on) return irr::ctof(c);
   if(nonbitrunc && !gp::on) return 1;
   // if(euclid) return 0;
   return ishept(c) ? 1 : 0;
@@ -232,7 +233,14 @@ void drawLightning(const transmatrix& V) {
   }
 
 int displaydir(cell *c, int d) {
-  if(euclid)
+  if(irr::on) {
+    auto id = irr::cellindex[c];
+    auto& vs = irr::cells[id];
+    if(d < 0 || d >= c->type) return 0;
+    auto& p = vs.jpoints[vs.neid[d]];
+    return -int(atan2(p[1], p[0]) * S84 / 2 / M_PI + MODFIXER + .5);
+    }
+  else if(euclid)
     return - d * S84 / c->type;
   else
     return S42 - d * S84 / c->type;
@@ -2092,7 +2100,7 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, int col) {
       Vb = Vb * pispin;
       Vb = Vb * xpush(tentacle_length - cellgfxdist(c, c->mondir));
       }
-    else if(gp::on) {
+    else if(gp::on || irr::on) {
       transmatrix T = shmup::calc_relative_matrix(c->mov[c->mondir], c, c->mondir);
       Vb = Vb * T * rspintox(tC0(inverse(T))) * xpush(tentacle_length);
       }
@@ -3076,6 +3084,7 @@ bool noAdjacentChasms(cell *c) {
 
 // does the current geometry allow nice duals
 bool has_nice_dual() {
+  if(irr::on) return false;
   if(!nonbitrunc) return true;
   if((S7 & 1) == 0) return true;
   if(!gp::on) return false;
@@ -3171,8 +3180,8 @@ bool placeSidewall(cell *c, int i, int sidepar, const transmatrix& V, int col) {
   else prio = PPR_REDWALL-2+4*(sidepar-SIDE_SLEV);
   
   transmatrix V2 = V * ddspin(c, i);
-  
-  if(gp::on) {
+ 
+  if(gp::on || irr::on) {
     draw_shapevec(c, V2, qfi.fshape->gpside[sidepar][i], col, prio);
     return false;
     }
@@ -4024,7 +4033,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         
         case laSwitch:
           set_floor(shSwitchFloor);
-          if(ctof(c)) for(int i=0; i<c->type; i++)
+          if(ctof(c) && !gp::on && !irr::on) for(int i=0; i<c->type; i++)
             queuepoly(Vf * ddspin(c, i, S6) * xpush(rhexf), shSwitchDisk, darkena(minf[active_switch()].color, fd, 0xFF));
           break;
 
@@ -4709,7 +4718,14 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       
       int prec = sphere ? 3 : 1;
       
-      if(gp::on) {
+      if(irr::on) {
+        int id = irr::cellindex[c];
+        auto &vs = irr::cells[id];
+        for(int t=0; t<c->type; t++)
+          if(c->mov[t] && c->mov[t] < c)
+            queueline(V * vs.vertices[t], V * vs.vertices[(1+t)%c->type], gridcolor(c, c->mov[t]), prec);
+        }
+      else if(gp::on) {
         vid.linewidth *= gp::scale * 2;
         if(isWarped(c) && has_nice_dual()) {
           if(pseudohept(c)) for(int t=0; t<c->type; t++)

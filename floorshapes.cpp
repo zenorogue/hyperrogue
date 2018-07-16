@@ -218,9 +218,17 @@ void bshape_regular(floorshape &fsh, int id, int sides, int shift, ld size) {
     }
   }
 
+namespace irr { void generate_floorshapes(); }
 
 void generate_floorshapes() {
 
+  if(irr::on) {
+    printf("generating irregular floorshapes...\n");
+    irr::generate_floorshapes();
+    printf("done\n");
+    return;
+    }
+    
   if(gp::on) {
     return;
     }
@@ -489,6 +497,103 @@ namespace gp {
     }
   }
 
+namespace irr {
+
+  map<int, matrixlist> usedml;
+
+  void generate_floorshapes() {
+  
+    if(irr::cells.empty()) return;
+
+    for(auto pfsh: all_escher_floorshapes) {
+      auto& fsh = *pfsh;
+      generate_matrices_scale(1, fsh.noftype);
+      auto& m = hept_matrices;
+      
+      /* if(siid == 0)
+        for(auto& ma: m.v) ma.first = ma.first * pispin; */
+  
+      fsh.b.resize(irr::sc);
+
+      for(int id=0; id<irr::sc; id++) {      
+        auto& vs = irr::cells[id];
+
+        int cor = isize(vs.vertices);
+        m.n.sym = cor;      
+        
+        int i = 0;
+  
+        for(int d=0; d<m.o.sym; d++) {
+          hyperpoint center = hpxy(0,0);
+    
+          for(int c=0; c<cor; c++) {
+            hyperpoint nlcorner = vs.vertices[(d+c+1) % cor];
+            hyperpoint nrcorner = vs.vertices[(d+c+2) % cor];
+            
+            hyperpoint nfar = vs.jpoints[vs.neid[(d+c+1) % cor]];
+            hyperpoint nlfar = nfar;
+            hyperpoint nrfar = nfar;
+            m.v[i].second[c] = build_matrix(center, nlcorner, nrcorner);
+            m.v[i+1].second[c] = build_matrix(nfar, nlcorner, nrcorner);
+            m.v[i+2].second[c] = build_matrix(nfar, nlcorner, nlfar);
+            m.v[i+3].second[c] = build_matrix(nfar, nrcorner, nrfar);
+            }
+          
+          i += 4;
+          }
+          
+        usedml[id] = m;
+      
+        m.n.sym = cor;
+        bshape2(fsh.b[id], fsh.prio, fsh.shapeid2 ? fsh.shapeid2 : fsh.shapeid1, m);
+        }
+      }
+    
+    for(auto pfsh: all_plain_floorshapes) {
+      auto& fsh = *pfsh;
+
+      ld sca = fsh.rad0 / shFullFloor.rad0;
+      
+      fsh.b.resize(irr::sc);
+      fsh.shadow.resize(irr::sc);        
+      
+      for(int i=0; i<irr::sc; i++) {      
+        auto& vs = irr::cells[i];
+        vector<hyperpoint> cornerlist;
+        
+        int cor = isize(vs.vertices);
+        for(int j=0; j<cor; j++)
+          cornerlist.push_back(rspintox(vs.vertices[j]) * xpush(hdist0(vs.vertices[j]) * sca) * C0);
+      
+        bshape(fsh.b[i], fsh.prio);
+        for(int i=0; i<=cor; i++) hpcpush(cornerlist[i%cor]);
+        
+        bshape(fsh.shadow[i], fsh.prio);
+        for(int i=0; i<=cor; i++)
+          hpcpush(mid_at(hpxy(0,0), cornerlist[i%cor], SHADMUL));
+        
+        cell fc;
+        fc.type = cor;
+        irr::cellindex[&fc] = i;
+        
+        // printf("at = %d,%d cor = %d sca = %lf\n", li.relative.first, li.relative.second, cor, sca);
+  
+        for(int k=0; k<SIDEPARS; k++) 
+          for(int c=0; c<cor; c++) {
+            fsh.gpside[k][c].resize(irr::sc);
+            bshape(fsh.gpside[k][c][i], fsh.prio);
+            hpcpush(iddspin(&fc, c) * cornerlist[c]);
+            hpcpush(iddspin(&fc, c) * cornerlist[(c+1)%cor]);
+            chasmifyPoly(dlow_table[k], dhi_table[k], k);
+            }
+        }
+      }
+    
+    finishshape(); last = NULL;
+    extra_vertices();
+    }
+  }
+
 qfloorinfo qfi;
 qfloorinfo qfi_dc;
 
@@ -519,6 +624,13 @@ void set_floor(const transmatrix& spin, hpcshape& sh) {
 void draw_shapevec(cell *c, const transmatrix& V, const vector<hpcshape> &shv, int col, int prio = -1) {
   if(gp::on) {
     int id = gp::get_plainshape_id(c);
+    queuepolyat(V, shv[id], col, prio);
+    }
+  else if(irr::on) {
+    int id = irr::cellindex[c];
+    if(id < 0 || id >= isize(shv)) {
+      return;
+      }
     queuepolyat(V, shv[id], col, prio);
     }
   else if((euclid || gp::on) && ishex1(c)) 
@@ -566,8 +678,13 @@ void viewmat() {
     gp::just_matrices = false;
     }
   // if(gp::on && !gp::usedml.count(cwt.c)) return;
-  for(auto& v: (pseudohept(cwt.c) ? hept_matrices : hex_matrices).v) {
+//  for(auto& v: (pseudohept(cwt.c) ? hept_matrices : hex_matrices).v) {
 //  for(auto& v: (gp::on ? gp::usedml[cwt.c] : pseudohept(cwt.c) ? hept_matrices : hex_matrices).v) {
+//    hyperpoint h1 = gmatrix[cwt.c] * v.second[0] * hpxyz(1,0,0);
+  id = irr::cellindex[cwt.c];
+  for(auto& v: irr::usedml[id].v) { 
+//  for(auto& v: (gp::on ? gp::usedml[cwt.c] : pseudohept(cwt.c) ? hept_matrices : hex_matrices).v) {
+    
     hyperpoint h1 = gmatrix[cwt.c] * v.second[0] * hpxyz(1,0,0);
     hyperpoint h2 = gmatrix[cwt.c] * v.second[0] * hpxyz(0,1,0);
     hyperpoint h3 = gmatrix[cwt.c] * v.second[0] * hpxyz(0,0,1);
