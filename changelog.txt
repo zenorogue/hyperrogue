@@ -2547,3 +2547,15 @@ non-game:
 - fixed PTM games not recorded when switching modes
 - Random Pattern Mode: fixed the Land of Power, treasures appear in the Reptiles.
 - fixed the "-geo" parameter
+
+2018.07.11 12:45 Update 10.4m
+- Goldberg-Coxeter construction in order-4 geometries
+- Raging Bull / Orb of the Bull / Orb of Horns worked correctly only on hexagons and heptagons
+- marked Whirlpool as not working in order-4 geometries
+- "triangle grid: rings" now works in order-4 geometries
+- fixed the size of Krakens and energy sword on the Euclidean square grid
+- fixed Kraken movement on squares
+- shift+f2 to shift+f4 can now disable HUD, FPS, and the map
+- fixed several instances when PTM score would not be recorded when changing modes
+
+
