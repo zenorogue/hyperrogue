@@ -276,7 +276,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
             if(gp::on) ; 
             else {
               int q = 0, s = 0;
-              if(!ishept(c)) for(int i=0; i<6; i++)
+              if(!ishept(c)) for(int i=0; i<c->type; i++)
                 if(cdist50(c->mov[i]) == 3 && polarb50(c->mov[i]) == 1 && !ishept(c->mov[i]))
                   q++, s += i;
               if(q == 1 && c->mov[s]->land == laPalace) {
@@ -509,14 +509,14 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           }
         }
       // seal entrances to the Land of Power.
-      if(d == 7 && c->type == 7) {
+      if(d == 7 && ctof(c)) {
         bool onwall = false;
         for(int i=0; i<7; i++) if(c->mov[i] && c->mov[i]->land == laBarrier)
           onwall = true;
-        if(!onwall) for(int i=0; i<7; i++) {
+        if(!onwall) for(int i=0; i<c->type; i++) {
           cell *c2 = c->mov[i];
           if(!c2) continue;
-          cell *c3 = c2->mov[(c->spn(i) + 3) % 6];
+          cell *c3 = c2->mov[(c->spn(i) + 3) % c2->type];
           if(c3->land != laPower && c3->land != laBarrier)
           if(c2->wall != waFire && c2->wall != waGlass) {
             if(isFire(c)) c->monst = moWitchWinter;
