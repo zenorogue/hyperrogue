@@ -53,20 +53,20 @@ bool mouseout2() {
 
 movedir vectodir(const hyperpoint& P) {
 
-  hyperpoint H = sphereflip * tC0(cwtV);
-  ld R = sqrt(H[0] * H[0] + H[1] * H[1]);
-  transmatrix Centered = sphereflip * cwtV;
-  if(!euclid)
-    Centered = gpushxto0(H) * Centered;
-  else if(R > 1e-9)
-    Centered = eupush(-H[0], -H[1]) * Centered;
+  transmatrix U = shmup::ggmatrix(cwt.c);
+
+  hyperpoint H = sphereflip * tC0(U);
+  transmatrix Centered = rgpushxto0(H) * sphereflip;
+
   ld binv = 99;
   
-  if(euclid) Centered = pispin * Centered;
-  
   ld dirdist[MAX_EDGE];
+
   for(int i=0; i<cwt.c->type; i++) {
-    dirdist[i] = intval(Centered * ddspin(cwt.c, i, 0) * xpush(-.5) * C0, P);
+    transmatrix T;
+    if(compute_relamatrix(cwt.c->mov[fixdir(cwt.spin + i, cwt.c)], cwt.c, i, T)) {
+      dirdist[i] = intval(U * T * C0, Centered * P);
+      }
     //xspinpush0(-i * 2 * M_PI /cwt.c->type, .5), P);
     }
     
@@ -109,8 +109,16 @@ void calcMousedest() {
   
   ld dists[MAX_EDGE];
   
-  for(int i=0; i<cwt.c->type; i++)
-    dists[i] = intval(mouseh, tC0(confusingGeometry() ? shmup::ggmatrix(cwt.c) * shmup::calc_relative_matrix(cwt.c->mov[i], cwt.c, i) : shmup::ggmatrix(cwt.c->mov[i])));
+  transmatrix U = shmup::ggmatrix(cwt.c);
+  
+  for(int i=0; i<cwt.c->type; i++) {
+    transmatrix T;
+    if(compute_relamatrix(cwt.c->mov[i], cwt.c, i, T))
+      dists[i] = intval(mouseh, U * T * C0);
+    else
+      dists[i] = HUGE_VAL;
+    }
+  // confusingGeometry() ? shmup::ggmatrix(cwt.c) * shmup::calc_relative_matrix(cwt.c->mov[i], cwt.c, i) : shmup::ggmatrix(cwt.c->mov[i])));
   
   /* printf("curcell = %Lf\n", mousedist);
   for(int i=0; i<cwt.c->type; i++)
