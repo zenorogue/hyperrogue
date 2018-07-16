@@ -2549,7 +2549,6 @@ struct hrmap_hyperbolic : hrmap {
   void verify() { verifycells(origin); }
   };
 
-namespace quotientspace { hrmap *new_map(); }
 namespace irr { 
   extern bool on;
   void link_to_base(heptagon *h, heptspin base);
