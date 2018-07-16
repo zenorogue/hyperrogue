@@ -1253,7 +1253,7 @@ void start_game() {
   if(game_active) return;
   DEBB(DF_INIT, (debugfile,"start_game\n"));
   game_active = true;
-  if(need_reset_geometry) resetGeometry();
+  if(need_reset_geometry) resetGeometry(), need_reset_geometry = false;
   initcells();
 
   if(randomPatternsMode) {
