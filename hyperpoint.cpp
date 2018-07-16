@@ -403,11 +403,13 @@ transmatrix rpushxto0(const hyperpoint& H) {
 
 // generalization: H[1] can be non-zero
 transmatrix gpushxto0(const hyperpoint& H) {
+  if(euclid) return eupush(-H[0], -H[1]);
   hyperpoint H2 = spintox(H) * H;
   return rspintox(H) * pushxto0(H2) * spintox(H);
   }
 
 transmatrix rgpushxto0(const hyperpoint& H) {
+  if(euclid) return eupush(H[0], H[1]);
   hyperpoint H2 = spintox(H) * H;
   return rspintox(H) * rpushxto0(H2) * spintox(H);
   }

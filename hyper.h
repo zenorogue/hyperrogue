@@ -213,7 +213,7 @@ namespace hyperpoint_vec {
       );
     }
 
-  // inner product
+  // inner product (in R^3)
   inline ld operator | (hyperpoint h1, hyperpoint h2) {
     return h1[0] * h2[0] + h1[1] * h2[1] + h1[2] * h2[2];
     }    
