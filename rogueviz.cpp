@@ -163,7 +163,7 @@ hyperpoint where(int i, cell *base) {
   auto m = vdata[i].m;
   if(m->base == base) return tC0(m->at);
   else if(quotient || elliptic || torus) {
-    return shmup::calc_relative_matrix(m->base, base, NOHINT) * tC0(m->at);
+    return shmup::calc_relative_matrix(m->base, base, C0) * tC0(m->at);
     }
   else {
     // notimpl(); // actually probably that's a buug
@@ -1078,7 +1078,7 @@ map<pair<cell*, cell*>, transmatrix> relmatrices;
 transmatrix& memo_relative_matrix(cell *c1, cell *c2) {
   auto& p = relmatrices[make_pair(c1, c2)];
   if(p[2][2] == 0)
-    p = shmup::calc_relative_matrix(c1, c2, NOHINT);
+    p = shmup::calc_relative_matrix(c1, c2,  C0);
   return p;
   }
 

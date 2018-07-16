@@ -3333,8 +3333,12 @@ transmatrix master_relative(cell *c, bool get_inverse) {
     return pispin * Id;
   }
 
-// target, source, direction from source to target
 transmatrix calc_relative_matrix(cell *c2, cell *c1, int direction_hint) {
+  return calc_relative_matrix(c2, c1, ddspin(c1, direction_hint) * xpush(1e-2) * C0);
+  }
+
+// target, source, direction from source to target
+transmatrix calc_relative_matrix(cell *c2, cell *c1, const hyperpoint& point_hint) {
 
   if(sphere) {
     if(!gmatrix0.count(c2) || !gmatrix0.count(c1)) {
@@ -3399,20 +3403,19 @@ transmatrix calc_relative_matrix(cell *c2, cell *c1, int direction_hint) {
   while(h1 != h2) {
     if(quotient & qSMALL) {
       transmatrix T;
-      hyperpoint hint = ddspin(c1, direction_hint) * xpush(1e-2) * C0;
       ld bestdist = 1e9;
       for(int d=0; d<S7; d++) if(h2->move[d]) {
         int sp = h2->spin(d);
         transmatrix S = heptmove[sp] * spin(2*M_PI*d/S7);
         if(h2->move[d] == h1) {
           transmatrix T1 = gm * S * where;
-          auto curdist = hdist(tC0(T1), hint);
+          auto curdist = hdist(tC0(T1), point_hint);
           if(curdist < bestdist) T = T1, bestdist = curdist;
           }
         for(int e=0; e<S7; e++) if(h2->move[d]->move[e] == h1) {
           int sp2 = h2->move[d]->spin(e);
           transmatrix T1 = gm * heptmove[sp2] * spin(2*M_PI*e/S7) * S * where;
-          auto curdist = hdist(tC0(T1), hint);
+          auto curdist = hdist(tC0(T1), point_hint);
           if(curdist < bestdist) T = T1, bestdist = curdist;
           }
         }
@@ -3460,13 +3463,13 @@ transmatrix &ggmatrix(cell *c) {
   transmatrix& t = gmatrix[c];
   if(t[2][2] == 0) {
     if(torus && centerover.c) 
-      t = calc_relative_matrix(c, centerover.c, NOHINT);
+      t = calc_relative_matrix(c, centerover.c, C0);
     else if(euclid) {
       if(!centerover.c) centerover = cwt;
       t = View * eumove(cell_to_vec(c) - cellwalker_to_vec(centerover));
       }
     else 
-      t = actualV(viewctr, cview()) * calc_relative_matrix(c, viewctr.h->c7, NOHINT);
+      t = actualV(viewctr, cview()) * calc_relative_matrix(c, viewctr.h->c7, C0);
     }
   return t;
   }

@@ -706,6 +706,7 @@ namespace shmup {
   
   void virtualRebase(cell*& base, transmatrix& at, bool tohex);
   void virtualRebase(shmup::monster *m, bool tohex);
+  transmatrix calc_relative_matrix(cell *c, cell *c1, const hyperpoint& point_hint);
   transmatrix calc_relative_matrix(cell *c, cell *c1, int direction_hint);
   void fixStorage();
   void addShmupHelp(string& out);
@@ -3661,4 +3662,12 @@ heptspin& operator += (heptspin& h, wstep_t);
 
 bool anglestraight(cell *c, int d1, int d2);
 
+hyperpoint randomPointIn(int t);
+
+void buildpolys();
+
+bool compute_relamatrix(cell *src, cell *tgt, int direction_hint, transmatrix& T);
+
+extern bool need_reset_geometry;
+extern ld hexshift;
 }
