@@ -1194,7 +1194,7 @@ struct usershape {
 usershape *usershapes[USERSHAPEGROUPS][USERSHAPEIDS];
 
 void drawTentacle(hpcshape &h, ld rad, ld var, ld divby) {
-  double tlength = max(crossf, hexhexdist * gp::scale);
+  double tlength = max(crossf, hexhexdist * gp::scale * irr::scale);
   for(int i=0; i<=20; i++)
     hpcpush(ddi(S21, rad + var * sin(i * M_PI/divby)) * ddi(0, tlength * i/20.) * C0);
   for(int i=20; i>=0; i--)
@@ -1943,11 +1943,11 @@ void buildpolys() {
   bshape(shWormTail, PPR_TENTACLE1, scalef, 383);
   bshape(shSmallWormTail, PPR_TENTACLE1, scalef, 384);
 
-  if(nonbitrunc) bshape(shDragonSegment, PPR_TENTACLE1, gp::scale, 233);
+  if(nonbitrunc) bshape(shDragonSegment, PPR_TENTACLE1, gp::scale * irr::scale, 233);
   else bshape(shDragonSegment, PPR_TENTACLE1, scalef, 234);
   bshape(shDragonWings, PPR_ONTENTACLE, scalef, 237);
   bshape(shDragonLegs, PPR_TENTACLE0, scalef, 238);
-  if(nonbitrunc) bshape(shDragonTail, PPR_TENTACLE1, gp::scale, 239);
+  if(nonbitrunc) bshape(shDragonTail, PPR_TENTACLE1, gp::scale * irr::scale, 239);
   else bshape(shDragonTail, PPR_TENTACLE1, scalef, 240);
   bshape(shDragonNostril, PPR_ONTENTACLE_EYES, scalef, 241);
   bshape(shDragonHead, PPR_ONTENTACLE, scalef, 242);
