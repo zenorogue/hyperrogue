@@ -326,13 +326,16 @@ bool step(int delta) {
   return false;
   }
 
+ld scale;
+
 void compute_geometry() {
   if(irr::on) {
-    ld scal = sqrt(isize(cells_of_heptagon) * 1. / sc);
-    crossf *= scal;
-    hepvdist *= scal;
-    rhexf *= scal;
+    scale = sqrt(isize(cells_of_heptagon) * 1. / sc);
+    crossf *= scale;
+    hepvdist *= scale;
+    rhexf *= scale;
     }
+  else scale = 1;
   }
 
 bool draw_cell_schematics(cell *c, transmatrix V) {

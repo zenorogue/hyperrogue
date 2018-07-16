@@ -2481,7 +2481,8 @@ namespace sword {
     s += S42/t;
     s %= S84;
     if(s<0) s += S84;
-    s /= (S84/t);
+    s *= t;
+    s /= S84;
     return c->mov[s];
     }
   

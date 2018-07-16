@@ -293,13 +293,13 @@ void drawPlayerEffects(const transmatrix& V, cell *c, bool onplayer) {
       int& ang = angle[multi::cpid];
       ang %= S42;
       
-      transmatrix Vnow = gmatrix[c] * rgpushxto0(inverse(gmatrix[c]) * tC0(V)) * spin(-hexshiftat(c));
+      transmatrix Vnow = gmatrix[c] * rgpushxto0(inverse(gmatrix[c]) * tC0(V)) * (irr::on ? ddspin(c,0,S42) : spin(-hexshiftat(c)));
       
 #if CAP_QUEUE
       if(!euclid) for(int a=0; a<S42; a++) {
         int dda = S42 + (-1-2*a);
         if(a == ang && items[itOrbSword]) continue;
-        if(nonbitrunc && !gp::on && a%3 != ang%3) continue;
+        if(nonbitrunc && !gp::on && !irr::on && a%3 != ang%3) continue;
         if((a+S21)%S42 == ang && items[itOrbSword2]) continue;
         bool longer = sword::pos(cwt.c, a-1) != sword::pos(cwt.c, a+1);
         int col = darkena(0xC0C0C0, 0, 0xFF);

@@ -1956,19 +1956,19 @@ void buildpolys() {
   if(sphere) krsc *= 1.4;
   if(S7 ==8) krsc *= 1.3;
   
-  if(nonbitrunc && !gp::on && !euclid4) {
+  if(nonbitrunc && !gp::on && !irr::on && !euclid4) {
     tentacle_length = 1.52;
     bshape(shSeaTentacle, PPR_TENTACLE1, 1, 245);
     }
-  else if(gp::on) {
-    tentacle_length = 0.566256 * 1.6 * gp::scale * krsc;
-    bshape(shSeaTentacle, PPR_TENTACLE1, 1.6 * gp::scale * krsc, 246);  
+  else if(gp::on || irr::on) {
+    tentacle_length = 0.566256 * 1.6 * gp::scale * irr::scale * krsc;
+    bshape(shSeaTentacle, PPR_TENTACLE1, 1.6 * gp::scale * irr::scale * krsc, 246);  
     }
   else {
-    tentacle_length = 0.566256 * gp::scale;
-    bshape(shSeaTentacle, PPR_TENTACLE1, gp::scale, 246);  
+    tentacle_length = 0.566256 * gp::scale * irr::scale;
+    bshape(shSeaTentacle, PPR_TENTACLE1, gp::scale * irr::scale, 246);  
     }
-  ld ksc = (nonbitrunc ? 1.8 : 1.5) * gp::scale * krsc;
+  ld ksc = (nonbitrunc ? 1.8 : 1.5) * gp::scale * irr::scale * krsc;
   if(euclid4 && nonbitrunc) ksc *= .5;
   bshape(shKrakenHead, PPR_ONTENTACLE, ksc, 247);
   bshape(shKrakenEye, PPR_ONTENTACLE_EYES, ksc, 248);
@@ -2200,10 +2200,10 @@ void buildpolys() {
   for(int v=0; v<13; v++) for(int z=0; z<2; z++)
     copyshape(shTortoise[v][4+z], shTortoise[v][2+z], shTortoise[v][2+z].prio + (PPR_CARRIED-PPR_ITEM));
 
-  if(nonbitrunc) bshape(shMagicSword, PPR_MAGICSWORD, euclid4 ? gp::scale / 2 : gp::scale, 243);
+  if(nonbitrunc) bshape(shMagicSword, PPR_MAGICSWORD, euclid4 ? gp::scale * irr::scale / 2 : gp::scale * irr::scale, 243);
   else bshape(shMagicSword, PPR_MAGICSWORD, 1, 244);
 
-  if(nonbitrunc) bshape(shMagicShovel, PPR_MAGICSWORD, euclid4 ? gp::scale / 2 : gp::scale, 333);
+  if(nonbitrunc) bshape(shMagicShovel, PPR_MAGICSWORD, euclid4 ? gp::scale * irr::scale / 2 : gp::scale * irr::scale, 333);
   else bshape(shMagicShovel, PPR_MAGICSWORD, 1, 333);
   
   bshape(shBead0, 20, 1, 250);

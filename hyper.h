@@ -2551,6 +2551,7 @@ struct hrmap_hyperbolic : hrmap {
 
 namespace irr { 
   extern bool on;
+  extern ld scale;
   void link_to_base(heptagon *h, heptspin base);
   void link_start(heptagon *h);
   void link_next(heptagon *h, int d);

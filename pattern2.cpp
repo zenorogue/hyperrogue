@@ -1151,6 +1151,8 @@ bool pseudohept(cell *c) {
 bool kraken_pseudohept(cell *c) {
   if(!euclid && S3 == 4 && gp::on && (gp::param.first % 2 || gp::param.second % 2 || S7 % 2))
     return ishept(c);
+  else if(irr::on)
+    return c->type != 6;
   else if(!euclid && S3 == 3 && !(S7&1) && gp_threecolor() == 1)
     return ishept(c);
   else
