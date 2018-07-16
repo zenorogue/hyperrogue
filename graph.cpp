@@ -645,11 +645,9 @@ bool drawItemType(eItem it, cell *c, const transmatrix& V, int icol, int ticks, 
     }
 
   else if(it == itPalace) {
-    if(ct6 >= isize(shMFloor3.b)) ct6 = 0;
-    if(ct6 >= isize(shMFloor3.b)) return false;
     transmatrix V2 = V * spin(ticks / 1500.);
-    queuepoly(V2, shMFloor3.b[ct6], 0xFFD500FF);
-    queuepoly(V2, shMFloor4.b[ct6], darkena(icol, 0, 0xFF));
+    draw_floorshape(c, V2, shMFloor3, 0xFFD500FF);
+    draw_floorshape(c, V2, shMFloor4, darkena(icol, 0, 0xFF));
     queuepoly(V2, shGem[ct6], 0xFFD500FF);
     xsh = NULL;
     }
@@ -4349,7 +4347,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         
         case waClosePlate: case waOpenPlate: {
           transmatrix V2 = V;
-          if((ctype&1) && wmescher) V2 = V * pispin;
+          if(wmescher && geosupport_graveyard() == 2 && pseudohept(c)) V2 = V * spin(M_PI / c->type);
           draw_floorshape(c, V2, shMFloor, darkena(winf[c->wall].color, 0, 0xFF));
           draw_floorshape(c, V2, shMFloor2, (!wmblack) ? darkena(fcol, 1, 0xFF) : darkena(0,1,0xFF));
           break;
