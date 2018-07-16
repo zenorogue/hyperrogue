@@ -1094,7 +1094,7 @@ void buildBigStuff(cell *c, cell *from) {
   
     // buildbigstuff
 
-    if(c->land == laRlyeh && ctof(c) && 
+    if(c->land == laRlyeh && ctof(c) && horo_ok() && 
       (quickfind(laTemple) || peace::on || (hrand(I2000) < 100 && 
       items[itStatue] >= U5 && !randomPatternsMode && 
       !tactic::on && !yendor::on)))
@@ -1105,7 +1105,7 @@ void buildBigStuff(cell *c, cell *from) {
       !randomPatternsMode && !tactic::on && !yendor::on && landUnlocked(laMountain))))
       createAlternateMap(c, 2, hsA);
 
-    if(c->land == laOvergrown && ctof(c) && 
+    if(c->land == laOvergrown && ctof(c) && horo_ok() &&
       (quickfind(laClearing) || (hrand(I2000) < 25 && 
       !randomPatternsMode && items[itMutant] >= U5 &&
       isLandIngame(laClearing) &&
