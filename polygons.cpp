@@ -1481,6 +1481,7 @@ void buildpolys() {
   
   ld goldbf = 1;
   if(gp::on) goldbf = gp::scale * 1.6;
+  if(irr::on) goldbf = irr::scale * 1.6;
   if(gp::on) floorrad1 /= 1.6;
   
   double triangleside = hcrossf*.94;
