@@ -12,6 +12,7 @@ int cellcount;
 
 struct cellinfo {
   cell *owner;
+  map<cell*, transmatrix> relmatrices;
   vector<hyperpoint> jpoints;
   hyperpoint p;
   transmatrix pusher, rpusher;
@@ -112,11 +113,13 @@ bool step(int delta) {
      cells_of_heptagon.clear();
      cellindex.clear();
      
-     if(cellcount <= isize(all) * 2) {
+     if(0) if(cellcount <= isize(all) * 2) {
        for(auto h: all) {
-         cellinfo s; s.patterndir = -1;
+         cells.emplace_back();
+         cellinfo& s = cells.back();
+         s.patterndir = -1;
          s.owner = h, s.p = spin(hrand(1000)) * xpush(.01) * C0;
-         cells.emplace_back(s);
+         for(auto c0: all) s.relmatrices[c0] = shmup::calc_relative_matrix(c0, s.owner, s.p);
          }
        }
       runlevel++;
@@ -126,21 +129,25 @@ bool step(int delta) {
     case 1: {
       while(isize(cells) < cellcount) {
         if(SDL_GetTicks() > t + 250) { make_cells_of_heptagon(); status[0] = its(isize(cells)) + " cells"; return false; }
-        cellinfo s; s.patterndir = -1;
+        cells.emplace_back();
+        cellinfo& s = cells.back();
+        s.patterndir = -1;
         ld bestval = 0;
         for(int j=0; j<place_attempts; j++) {
           int k = hrand(isize(all));
           cell *c = all[k];
+          map<cell*, transmatrix> relmatrices;
           hyperpoint h = randomPointIn(c->type);
+          for(auto c0: all) relmatrices[c0] = shmup::calc_relative_matrix(c0, c, h);
           ld mindist = 1e6;
           for(auto p: cells) {
-            ld val = hdist(h, shmup::calc_relative_matrix(p.owner, c, h) * p.p);
+            if(!relmatrices.count(p.owner)) continue;
+            ld val = hdist(h, relmatrices[p.owner] * p.p);
             if(val < mindist) mindist = val;
             }
-          if(mindist > bestval) bestval = mindist, s.owner = c, s.p = h;
+          if(mindist > bestval) bestval = mindist, s.owner = c, s.p = h, s.relmatrices = move(relmatrices);
           }
         // printf("%lf %p %s\n", bestval, s.owner, display(s.p));
-        cells.emplace_back(s);
         }
       make_cells_of_heptagon();
       runlevel++;
@@ -171,7 +178,7 @@ bool step(int delta) {
     
         for(int j=0; j<cellcount; j++) {
           auto &p2 = cells[j];
-          p1.jpoints.push_back(p1.rpusher * shmup::calc_relative_matrix(p2.owner, p1.owner, p1.p) * p2.p);
+          p1.jpoints.push_back(p1.rpusher * p1.relmatrices[p2.owner] * p2.p);
           }
     
         int j = 0;
