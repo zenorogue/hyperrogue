@@ -1406,7 +1406,7 @@ land_validity_t& land_validity(eLand l) {
   if(l == laWildWest && !randomPatternsMode)
     return out_of_theme;
   
-  if(l == laIce && !gp::on && hyperbolic_37 && !quotient)
+  if(l == laIce && !gp::on && !irr::on && hyperbolic_37 && !quotient)
     return full_game;
 
   return ok;
