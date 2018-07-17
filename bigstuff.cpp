@@ -980,6 +980,7 @@ bool horo_ok() {
 
 bool gp_wall_test() {
   if(gp::on) return hrand(gp::dist_3()) == 0;
+  if(irr::on) return hrand(irr::cellcount * 3) < isize(irr::cells_of_heptagon);
   return true;
   }
   
