@@ -391,6 +391,35 @@ pair<int, int> subval(cell *c, int _subpathid = subpathid, int _subpathorder = s
 
 }
 
+int getHemisphere(heptagon *h, int which) {
+  int id = h->fiftyval;
+  if(S7 == 5) {
+    int hemitable[3][12] = {
+      { 6, 3, 3, 3, 3, 3,-6,-3,-3,-3,-3,-3},
+      { 6, 3, 6, 3, 0, 0,-6,-3,-6,-3, 0, 0},
+      {-3, 0, 3, 0,-6,-6, 3, 0,-3, 0, 6, 6}
+      };
+    return hemitable[which][id];
+    }
+  else if(S7 == 4) {
+    int hemitable[3][6] = {
+      { 2, 2, 2,-1,-1,-1},
+      { 2,-1, 2, 2,-1,-1},
+      { 2,-1,-1, 2, 2,-1},
+      };
+    return hemitable[which][id];
+    }
+  else if(S7 == 3) {
+    int hemitable[3][4] = {
+      { 2, 2,-1,-1},
+      { 2,-1, 2,-1},
+      { 2,-1,-1, 2},
+      };
+    return hemitable[which][id];
+    }
+  else return 0;
+  }
+
 int getHemisphere(cell *c, int which) {
   if(torus) return 0;
   if(which == 0 && gp::on && has_nice_dual()) {
@@ -421,34 +450,8 @@ int getHemisphere(cell *c, int which) {
     for(int i=0; i<isize(q); i++) if(q[i] == c) return type[i];
     return 0;
     }
-  if(ctof(c)) {
-    int id = c->master->fiftyval;
-    if(S7 == 5) {
-      int hemitable[3][12] = {
-        { 6, 3, 3, 3, 3, 3,-6,-3,-3,-3,-3,-3},
-        { 6, 3, 6, 3, 0, 0,-6,-3,-6,-3, 0, 0},
-        {-3, 0, 3, 0,-6,-6, 3, 0,-3, 0, 6, 6}
-        };
-      return hemitable[which][id];
-      }
-    else if(S7 == 4) {
-      int hemitable[3][6] = {
-        { 2, 2, 2,-1,-1,-1},
-        { 2,-1, 2, 2,-1,-1},
-        { 2,-1,-1, 2, 2,-1},
-        };
-      return hemitable[which][id];
-      }
-    else if(S7 == 3) {
-      int hemitable[3][4] = {
-        { 2, 2,-1,-1},
-        { 2,-1, 2,-1},
-        { 2,-1,-1, 2},
-        };
-      return hemitable[which][id];
-      }
-    else return 0;
-    }
+  if(ctof(c)) 
+    return getHemisphere(c->master, which);
   else {
     int score = 0;
     if(gp::on) {
@@ -464,6 +467,12 @@ int getHemisphere(cell *c, int which) {
       if(score == 0 && error > .001) score++;
       if(score == 0 && error < -.001) score--;
       return score;
+      }
+    else if(irr::on) {
+      auto m = irr::get_masters(c);
+      for(int i=0; i<3; i++)
+        score += getHemisphere(m[i], which);
+      return score / 3;
       }
     else {
       for(int i=0; i<6; i+=2) 
