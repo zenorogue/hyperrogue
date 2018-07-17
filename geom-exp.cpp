@@ -285,13 +285,9 @@ void showEuclideanMenu() {
     dialog::addBreak(50);
   
     if(ts == 6 && tv == 3)
-      dialog::addSelItem(XLAT("Goldberg"), XLAT("does not matter"), 't');
-    else if(S3 != 3) {
-      dialog::addBoolItem(XLAT("Goldberg") + "/" + XLAT("bitruncated"), nonbitrunc, 't');
-      dialog::lastItem().value = gp::operation_name();
-      }
+      dialog::addSelItem(XLAT("variations"), XLAT("does not matter"), 't');
     else {
-      dialog::addBoolItem(XLAT("Goldberg"), nonbitrunc, 't');
+      dialog::addBoolItem(XLAT("variations"), nonbitrunc, 't');
       dialog::lastItem().value = gp::operation_name();
       }
     

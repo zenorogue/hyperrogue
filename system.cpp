@@ -1029,10 +1029,10 @@ namespace gamestack {
   bool pushed() { return isize(gd); }
   
   void push() {
-    /* if(geometry) {
+    if(geometry) {
       printf("ERROR: push implemented only in non-hyperbolic geometry\n");
       exit(1);
-      } */
+      }
     gamedata gdn;
     gdn.hmap = currentmap;
     gdn.cwt = cwt;
@@ -1148,7 +1148,8 @@ void switch_game_mode(char switchWhat) {
     case rg::tour:
       geometry = gNormal;
       yendor::on = tactic::on = princess::challenge = peace::on = inv::on = false;
-      chaosmode = nonbitrunc = randomPatternsMode = false;
+      chaosmode = nonbitrunc = randomPatternsMode = irr::on = gp::on = false;
+      gp::param = gp::loc(1, 1);
       shmup::on = false;
       need_reset_geometry = true;    
       tour::on = !tour::on;
@@ -1158,7 +1159,7 @@ void switch_game_mode(char switchWhat) {
     case rg::bitrunc:
     case rg::gp:
       if(euclid6) geometry = gNormal;
-      nonbitrunc = !nonbitrunc;
+      nonbitrunc = !nonbitrunc; irr::on = false;
       gp::on = (switchWhat == rg::gp && !gp::on);
       need_reset_geometry = true;
       #if CAP_TEXTURE
@@ -1174,6 +1175,7 @@ void switch_game_mode(char switchWhat) {
       else geometry = targetgeometry;
       if(chaosmode && (euclid || sphere || quotient)) chaosmode = false;
       if(nonbitrunc && euclid6) nonbitrunc = false;
+      if(irr::on) irr::on = false;
       if(gp::on && gp::param == gp::loc(1,1) && S3 == 3) {
         gp::on = false; nonbitrunc = false;
         }

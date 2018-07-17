@@ -2561,6 +2561,8 @@ namespace irr {
   bool pseudohept(cell*);
   array<heptagon*, 3> get_masters(cell *c);
   bool ctof(cell* c);
+  bool supports(eGeometry g);
+  void visual_creator();
   }
 
 extern hrmap *currentmap;

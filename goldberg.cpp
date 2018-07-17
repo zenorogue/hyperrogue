@@ -631,7 +631,8 @@ namespace hr { namespace gp {
   
   string operation_name() {
     if(!gp::on) {
-      if(nonbitrunc) return XLAT("OFF");
+      if(irr::on) return XLAT("irregular");
+      else if(nonbitrunc) return XLAT("OFF");
       else return XLAT("bitruncated");
       }
     else if(param == loc(1, 0))
@@ -664,6 +665,7 @@ namespace hr { namespace gp {
     auto g = screens;
     if(xy.first == 0 && xy.second == 0) xy.first = 1;
     if(xy.first == 1 && xy.second == 0) {
+      if(irr::on) stop_game_and_switch_mode(rg::bitrunc);
       if(gp::on) stop_game_and_switch_mode(rg::bitrunc);
       if(!nonbitrunc) stop_game_and_switch_mode(rg::bitrunc);
       }
@@ -697,13 +699,13 @@ namespace hr { namespace gp {
   void show(bool texture_remap) {
     cmode = sm::SIDE;
     gamescreen(0);  
-    dialog::init(XLAT("Goldberg"));
+    dialog::init(XLAT("variations"));
     
     bool show_nonthree = !(texture_remap && (S7&1));
     bool show_bitrunc  = !(texture_remap && !(S7&1));
     
     if(show_nonthree) {
-      dialog::addBoolItem(XLAT("OFF"), param == loc(1,0), 'a');
+      dialog::addBoolItem(XLAT("OFF"), param == loc(1,0) && !irr::on, 'a');
       dialog::lastItem().value = "GP(1,0)";
       }
 
@@ -738,7 +740,12 @@ namespace hr { namespace gp {
     else if(config == loc(1,1) && !show_bitrunc)
       dialog::addInfo(XLAT("Select bitruncated from the previous menu"));
     else    
-      dialog::addBoolItem(XLAT("select"), param == internal_representation(config), 'f');
+      dialog::addBoolItem(XLAT("select"), param == internal_representation(config) && !irr::on, 'f');
+      
+    if(!texture_remap && irr::supports(geometry)) {
+      dialog::addBoolItem(XLAT("irregular"), irr::on, 'i');
+      dialog::add_action([] () { if(!irr::on) irr::visual_creator(); });
+      }
     
     dialog::addBreak(100);
     dialog::addHelp();

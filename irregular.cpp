@@ -2,7 +2,11 @@ namespace hr { namespace irr {
 
 bool on;
 
-int sc = 100;
+ld density = 6;
+ld quality = .2;
+int rearrange_attempts;
+
+int sc;
 
 struct cellinfo {
   cell *owner;
@@ -82,6 +86,8 @@ void make_cells_of_heptagon() {
     }
   }
   
+string status[5];
+  
 hrmap *base;
 
 bool gridmaking;
@@ -100,6 +106,7 @@ bool step(int delta) {
 
      cells.clear();
      cells_of_heptagon.clear();
+     cellindex.clear();
      
      if(sc <= isize(all) * 2) {
        for(auto h: all) {
@@ -114,7 +121,7 @@ bool step(int delta) {
      
     case 1: {
       while(isize(cells) < sc) {
-        if(SDL_GetTicks() > t + 250) { make_cells_of_heptagon(); return false; }
+        if(SDL_GetTicks() > t + 250) { make_cells_of_heptagon(); status[0] = its(isize(cells)) + " cells"; return false; }
         cellinfo s; s.patterndir = -1;
         ld bestval = 0;
         for(int j=0; j<10; j++) {
@@ -133,6 +140,7 @@ bool step(int delta) {
         }
       make_cells_of_heptagon();
       runlevel++;
+      status[0] = "all " + its(isize(cells)) + " cells";
       break;
       }
     
@@ -218,22 +226,35 @@ bool step(int delta) {
       }
     
     case 3: {
+    
+      int errors = 0, toobig = 0;
   
-      for(int i=0; i<isize(cells); i++) if(isize(cells[i].vertices) > 8 || isize(cells[i].vertices) < 3) {
-        cells[i] = cells.back();
-        i--; cells.pop_back();
+      for(int i=0; i<isize(cells); i++) {
+        int v = isize(cells[i].vertices);
+        if(v > 8 || v< 3) {
+          if(v < 3 || v >= 15)
+            errors++;
+          else toobig++;
+          cells[i] = cells.back();
+          i--; cells.pop_back();
+          }
         }
+      
+      if(errors > 0) status[1] = XLAT("bad cells: %1", its(errors)); else status[1] = " ";
+      if(toobig > 0) status[2] = XLAT("too many edges: %1", its(toobig)); else status[2] = " ";
       if(isize(cells) < sc*3/4) runlevel = 0;
       else if(isize(cells) < sc) runlevel = 1;
-      else runlevel++;
+      else { rearrange_attempts = 20; runlevel++; }
       break;
       }
     
     case 4: {
   
-      ld minedge = edgelens[isize(edgelens) / 2] / 5;
+      ld median = edgelens[isize(edgelens) / 2];
+      ld minedge = median * quality;
+      status[3] = XLAT("median edge: %1 minimum: %2", fts4(median), fts4(edgelens[0]));
       if(edgelens[0] < minedge) {
-        printf("rearranging\n");
+        int tooshort = 0;
         for(int i=0; i<isize(cells); i++) {
           auto& p1 = cells[i];
           using namespace hyperpoint_vec;
@@ -241,11 +262,15 @@ bool step(int delta) {
           for(auto v: p1.vertices) h = h + v;
     
           for(int j=0; j<isize(p1.vertices); j++)
-            if(hdist(p1.vertices[j], p1.vertices[(j+1) % isize(p1.vertices)]) < minedge)
+            if(hdist(p1.vertices[j], p1.vertices[(j+1) % isize(p1.vertices)]) < minedge) {
+              tooshort++;
               h = h + p1.vertices[j] + p1.vertices[(j+1) % isize(p1.vertices)];
+              }
           cells[i].p = p1.pusher * normalize(h);
           }
+        status[3] += XLAT(" (edges too short: %1)", its(tooshort));
         runlevel = 2;
+        rearrange_attempts--; if(rearrange_attempts < 0) runlevel = 0;
         break;
         }
       runlevel++;
@@ -270,8 +295,7 @@ bool step(int delta) {
           }
         }
       
-      printf("notfound = %d\n", notfound);
-      if(notfound) { runlevel = 0; break; }
+      if(notfound) { status[4] = XLAT("cells badly paired: %1", its(notfound)); runlevel = 0; break; }
       
       int heptas = 0;
       for(auto p: cells_of_heptagon) {
@@ -280,18 +304,27 @@ bool step(int delta) {
         }
       
       if(heptas != isize(all)) {
+        status[4] = XLAT("cells not covered: %1", its(isize(all) - heptas));
         printf("heptas = %d\n", heptas);
         runlevel = 0; break;
         }
     
+      int faredge = 0;
       for(int i=0; i<sc; i++) {
         auto &p1 = cells[i];
         for(int j: p1.neid) {
           auto &p2 = cells[j];
           bool ok = p1.owner == p2.owner || isNeighbor(p1.owner, p2.owner);
-          if(!ok) { printf("far edge\n"); runlevel = 0; return false; }
+          if(!ok) faredge++;
           }
         }
+
+      if(faredge) {
+        status[4] = XLAT("adjacent cells from nonadjacent heptagons: %1", its(faredge));
+        runlevel = 0; return false;
+        }
+
+      status[4] = XLAT("OK");
       runlevel = 10;
       
       for(auto& s: cells) s.is_pseudohept = false;
@@ -334,6 +367,8 @@ void compute_geometry() {
     crossf *= scale;
     hepvdist *= scale;
     rhexf *= scale;
+    base_distlimit = (base_distlimit + log(scale) / log(2.618)) / scale;
+    if(base_distlimit > 25) base_distlimit = 25;
     }
   else scale = 1;
   }
@@ -440,31 +475,68 @@ void link_cell(cell *c, int d) {
   tsetspin(c2->spintable, sc.spin[d], d);
   }
 
+eGeometry orig_geometry;
+
 void show_gridmaker() {
   cmode = sm::SIDE;
   gamescreen(0);  
   dialog::init(XLAT("Irregular grid"));
-  dialog::addSelItem(XLAT("activate"), its(runlevel), 'f');
-  dialog::display();
+  dialog::addSelItem(XLAT("density"), fts(density), 'd');
+  dialog::add_action([] {
+    dialog::editNumber(density, 1, 10, .1, 4, "density", "");
+    dialog::reaction = [] () {
+      int s = sc;
+      if(density < 1) density = 1;
+      sc = int(isize(currentmap->allcells()) * density + .5);
+      printf("density = %lf sc = %d\n", double(density), sc);
+      if(sc > s) runlevel = 1;
+      if(sc < s) runlevel = 0;
+      };
+    });
+  dialog::addSelItem(XLAT("min edge to median"), fts(quality), 'q');
+  dialog::add_action([] {
+    dialog::editNumber(quality, 0, 1, .1, 4, "quality", "");
+    dialog::reaction = [] () {
+      printf("quality = %lf\n", double(density));
+      if(runlevel > 4) runlevel = 4;
+      };
+    });
+  dialog::addBreak(100);
+  for(int i=0; i<5; i++)
+    dialog::addInfo(status[i]);
+  dialog::addBreak(100);
+  dialog::addSelItem(XLAT("activate"), XLAT(runlevel == 10 ? "ready" : "wait..."), 'f');
   if(runlevel == 10) dialog::add_action([] {
     popScreen();
-    pop_game();
     for(hrmap *& hm : allmaps) if(hm == base) hm = NULL;
     stop_game();
+    geometry = orig_geometry;
     irr::on = true;
     nonbitrunc = true;
+    gp::on = false;
     need_reset_geometry = true;
     gridmaking = false;
     start_game();
     });
+  dialog::addItem(XLAT("cancel"), 'c');
+  dialog::add_action([] {
+    gridmaking = false;
+    stop_game();
+    geometry = orig_geometry;
+    need_reset_geometry = true;
+    start_game();
+    popScreen();
+    });
+  dialog::display();
   keyhandler = [] (int sym, int uni) {
     dialog::handleNavigation(sym, uni);
     // no exit
     };
   }
 
-void create_map() {
-  push_game();
+void visual_creator() {
+  stop_game();
+  orig_geometry = geometry;
   switch(geometry) {
     case gNormal:
       geometry = gKleinQuartic;
@@ -479,10 +551,12 @@ void create_map() {
     }
 
   nonbitrunc = true;
+  gp::on = false;
   need_reset_geometry = true;
   start_game();
   base = currentmap; 
   drawthemap();
+  sc = int(isize(base->allcells()) * density + .5);
   pushScreen(show_gridmaker);
   runlevel = 0;
   gridmaking = true;
@@ -492,11 +566,11 @@ int readArgs() {
   using namespace arg;
            
   if(0) ;
-  else if(argis("-irr")) {
+  else if(argis("-irrvis")) {
     PHASE(3);
-    shift(); sc = argi();
     restart_game();
-    create_map();
+    visual_creator();
+    showstartmenu = false;
     }
   else return 1;
   return 0;
@@ -508,6 +582,10 @@ bool pseudohept(cell* c) {
 
 bool ctof(cell* c) {
   return cells[cellindex[c]].patterndir == -1;
+  }
+
+bool supports(eGeometry g) {
+  return among(g, gNormal, gKleinQuartic, gOctagon, gBolza2, gFieldQuotient, gSphere, gSmallSphere, gTinySphere);
   }
 
 array<heptagon*, 3> get_masters(cell *c) {
