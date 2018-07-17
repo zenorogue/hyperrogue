@@ -4162,7 +4162,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         else if(qfi.fshape == &shCaveFloor)
           set_floor(shCaveSeabed);
         
-        draw_qfi(c, V, col, PPR_LAKEBOTTOM);
+        draw_qfi(c, mscale(V, geom3::BOTTOM), col, PPR_LAKEBOTTOM);
 
         int fd0 = fd ? fd-1 : 0;      
         draw_qfi(c, (*Vdp), darkena(fcol, fd0, 0x80), PPR_LAKELEV);
