@@ -157,7 +157,7 @@ bool step(int delta) {
     
     case 2: {
 
-      sort(cells.begin(), cells.end(), [] (cellinfo &s1, cellinfo &s2) { return hdist0(s1.p) < hdist0(s2.p); });
+      sort(cells.begin(), cells.end(), [] (const cellinfo &s1, const cellinfo &s2) { return hdist0(s1.p) < hdist0(s2.p); });
       make_cells_of_heptagon();
 
       edgelens.clear();
