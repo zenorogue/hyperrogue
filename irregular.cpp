@@ -578,6 +578,7 @@ void visual_creator() {
   }
 
 void auto_creator() {
+  irr::on = false;
   int cc = cellcount;
   visual_creator();
   cellcount = cc; density = cc / isize(base->allcells());
