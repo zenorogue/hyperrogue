@@ -265,16 +265,16 @@ namespace geom3 {
     invalid = "";
     
     if(tc_alpha < tc_depth && tc_alpha < tc_camera)
-      vid.alpha = tanh(depth) / tanh(camera);
+      vid.alpha = tan_auto(depth) / tan_auto(camera);
     else if(tc_depth < tc_alpha && tc_depth < tc_camera) {
-      ld v = vid.alpha * tanh(camera);
-      if(v<-1 || v>1) invalid = "cannot adjust depth", depth = camera;
-      else depth = atanh(v);
+      ld v = vid.alpha * tan_auto(camera);
+      if(hyperbolic && (v<1e-6-12 || v>1-1e-12)) invalid = "cannot adjust depth", depth = camera;
+      else depth = atan_auto(v);
       }
     else {
-      ld v = tanh(depth) / vid.alpha;
-      if(v<-1 || v>1) invalid = "cannot adjust camera", camera = depth;
-      else camera = atanh(v);
+      ld v = tan_auto(depth) / vid.alpha;
+      if(hyperbolic && (v<1e-12-1 || v>1-1e-12)) invalid = "cannot adjust camera", camera = depth;
+      else camera = atan_auto(v);
       }
     
     if(fabs(vid.alpha) < 1e-6) invalid = "does not work with perfect Klein";
