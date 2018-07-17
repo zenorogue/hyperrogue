@@ -795,6 +795,17 @@ namespace tactic {
 
   };
 
+// Identifiers for the current combinations of game modes
+// These are recorded in the save file, so it is somewhat
+// important that they do not change for already existing
+// modes, as otherwise the scores would be lost. 
+// Unfortunately, the codes assigned when HyperRogue had
+// just a few special modes did not really follow a specific
+// rule, so this system has grown rather ugly as the
+// number of special modes kept growing...
+
+// mode codes for 'old' modes, from 0 to 255
+
 int modecodetable[42][6] = {
   {  0, 38, 39, 40, 41, 42}, // softcore hyperbolic
   {  7, 43, 44, 45, 46, 47}, // hardcore hyperbolic
@@ -839,14 +850,14 @@ int modecodetable[42][6] = {
   {242,243,244,245,246,247}, // hardcore heptagonal elliptic chaosmode
   {248,249,250,251,252,253}, // shmup heptagonal elliptic chaosmode
   };
-// unused code: 25
-int newmodecode = 255;
+// unused codes: 6 (cheat/tampered), 25, 254, 255
 
 int modecode() {
 #if CAP_SAVE
   if(anticheat::tampered || cheater) return 6;
 #endif
 
+  // compute the old code
   int xcode = 0;
 
   if(shmup::on) xcode += 2;
@@ -858,82 +869,44 @@ int modecode() {
   if(sphere) {
     xcode += 9;
     if(elliptic) xcode += 6;
-    if(nonbitrunc) xcode += 3;
     }
   
   if(chaosmode) xcode += 21;
   
   int np = numplayers()-1; if(np<0 || np>5) np=5;
   
+  // bits: 0 to 7
   int mct = modecodetable[xcode][np];
 
-/*
-  if(geometry == gTorus) mct += 512;
-  if(geometry == gZebraQuotient) mct += 1024;
-  if(geometry == gFieldQuotient) mct += 1536;
-  */
-#if CAP_INV
-  if(inv::on) mct += 2048;
-#endif
-  if(peace::on) mct += 4096;
-#if CAP_TOUR
-  if(tour::on) mct += 8192;
-#endif
-  if(numplayers() == 7) mct += 16384;
-  
-  if(gp::on) { 
-    mct += 32768;
-    mct += gp::param.first << 16;
-    mct += gp::param.second << 21;
-    }
-  
+  // bits: 9, 10, 15, 16, (reserved for later) 17, 18
   mct += ginf[geometry].xcode;
   
-  return mct;
-  }
+#if CAP_INV
+  if(inv::on) mct += (1<<11);
+#endif
+  if(peace::on) mct += (1<<12);
+#if CAP_TOUR
+  if(tour::on) mct += (1<<13);
+#endif
+  if(numplayers() == 7) mct += (1<<14);
 
-void buildmodetable() {
-  bool codeused[600];
-  for(int q=0; q<600; q++) codeused[q] = 0;
+  // daily/Yendor/Tactics/standard are saved separately, but are using the same codes (Daily uses no code)
+  // randompattern never records its scores
+  // no specifics of the advanced configuration of torus/fieldquotient currently recorded
   
-  codeused[6] = true; // cheater
-  
-  printf("int modecodetable[42][6] = {\n");
-  
-  for(int b=0; b<42; b++) {
-    extern bool hardcore;
-    hardcore = (b%3 == 1);
-    shmup::on = (b%3 == 2);
-    nonbitrunc = (b/3)%7 == 1 || (b/3)%7 == 4 || (b/3)%7 == 6;
-    geometry = gNormal;
-    if((b/3)%7 == 2) geometry = gEuclid;
-    if((b/3)%7 >= 3) geometry = gSphere;
-    if((b/3)%7 >= 5) geometry = gElliptic;
-    chaosmode = b >= 21;
-    printf("  {");
-    for(int p=0; p<6; p++) {
-      multi::players = p+1;
-      if(p) printf(","); 
-      int mc = modecode();
-      if(codeused[mc]) mc = newmodecode++;
-      codeused[mc] = true;
-      printf("%3d", mc);
-      }
-    printf("}, //");
-    if(hardcore) printf(" hardcore");
-    else if(shmup::on) printf(" shmup");
-    else printf(" softcore");
-    if(nonbitrunc) printf(" heptagonal");
-    if(euclid) printf(" euclidean");
-    else if(elliptic) printf(" elliptic");
-    else if(sphere) printf(" spherical");
-    else printf(" hyperbolic");
-    if(chaosmode) printf(" chaosmode");
-    printf("\n");
+  if(gp::on) { 
+    mct += (1 << 19);
+    auto loc = gp::human_representation(gp::param);
+    mct += loc.first << 21; // 4 bits
+    mct += loc.second << 25; // 4 bits
     }
-  printf("  }\n");
-  for(int i=0; i<newmodecode; i++) if(!codeused[i]) printf("// unused code: %d\n", i);
-  printf("int newmodecode = %d;\n", newmodecode);
+  
+  if(irr::on) {
+    mct += (1 << 20);
+    mct += irr::density_code() << 21; // 8 bits
+    }
+  
+  return mct;
   }
 
 namespace peace {

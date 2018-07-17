@@ -576,6 +576,15 @@ int readArgs() {
   return 0;
   }
 
+unsigned char density_code() {
+  if(sc < 128) return sc;
+  else {
+    int t = 127, a = sc;
+    while(a > 127) a = a * 9/10, t++;
+    return t;
+    }
+  }
+
 bool pseudohept(cell* c) {
   return cells[cellindex[c]].is_pseudohept;
   }

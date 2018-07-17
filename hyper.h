@@ -2563,6 +2563,7 @@ namespace irr {
   bool ctof(cell* c);
   bool supports(eGeometry g);
   void visual_creator();
+  unsigned char density_code();
   }
 
 extern hrmap *currentmap;

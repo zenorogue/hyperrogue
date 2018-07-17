@@ -79,6 +79,7 @@ bool wrongMode(char flags) {
   if(flags == rg::global) return false;
   if(nonbitrunc != (flags == rg::bitrunc)) return true;
   if(gp::on) return true;
+  if(irr::on) return true;
 
   if((geometry != gNormal) != (flags == rg::geometry)) return true;
   
@@ -563,12 +564,14 @@ int next_stat_tick;
 
 void achievement_final(bool really_final) {
   if(offlineMode) return;
+
 #ifdef HAVE_ACHIEVEMENTS
   if(ticks > next_stat_tick) {
     upload_score(LB_STATISTICS, time(NULL));
     next_stat_tick = ticks + 600000;
     }
   if(cheater) return;
+
 #if CAP_TOUR
   if(tour::on) return;
 #endif
@@ -584,13 +587,6 @@ void achievement_final(bool really_final) {
     return;
     }
 
-  if(sphere && specialland == laHalloween) {
-    if(shmup::on || chaosmode || nonbitrunc || numplayers() > 1 || tactic::on || randomPatternsMode)
-      return;
-    achievement_score(LB_HALLOWEEN, items[itTreat]);
-    return;
-    }
-
 #if CAP_DAILY
   if(daily::on) {
     daily::uploadscore(really_final);
@@ -598,33 +594,42 @@ void achievement_final(bool really_final) {
     }  
 #endif
   
+  int specialcode = 0;
+  if(shmup::on) specialcode++;
+  if(chaosmode) specialcode+=2;
+  if(nonbitrunc) specialcode+=4;
+  if(numplayers() > 1) specialcode+=8;
+  if(inv::on) specialcode+=16;
+  
+  if(sphere && specialland == laHalloween) {
+    if(specialcode) return;
+    achievement_score(LB_HALLOWEEN, items[itTreat]);
+    return;
+    }
+
   if(geometry) return;
+  if(gp::on) return;
+  if(irr::on) return;
   
-  // no leaderboards for two special modes at once
-  int specials = 0;
-  if(shmup::on) specials++;
-  if(chaosmode) specials++;
-  if(nonbitrunc) specials++;
-  if(gp::on) specials++;
-  #if CAP_DALIY
-  if(daily::on) return;
-  #endif
-  if(inv::on) specials++;
-  if(specials > 1) return;
-  
-  if(numplayers() > 1 && chaosmode) return;
-  if(numplayers() > 1 && nonbitrunc) return;
-  if(numplayers() > 1 && inv::on) return;
-  
+  // determine the correct leaderboard ID for 'total score'
+  // or return if no leaderboard for the current mode
+  int sid;
+  switch(specialcode) {
+    case 0:  sid = 0; break;
+    case 1:  sid = 28; break;
+    case 2:  sid = 53; break;
+    case 4:  sid = 57; break;
+    case 8:  sid = 61; break;
+    case 9:  sid = 44; break;
+    case 16: sid = 69; break;
+    default: return;
+    }
+      
   int total_improved = 0;
   specific_improved = 0;
   specific_what = 0;
   
-  if(!shmup::on && !chaosmode && !nonbitrunc && numplayers() == 1 && !inv::on) improveItemScores(); 
-  
-  int sid = nonbitrunc ? 57 : chaosmode ? 53 : shmup::on ? (numplayers() > 1 ? 44 : 28) : 
-    inv::on ? 69 :
-    (numplayers() > 1 ? 61 : 0);
+  if(specials == 0) improveItemScores(); 
   
   int tg = gold();
   if(tg && haveLeaderboard(sid)) {
