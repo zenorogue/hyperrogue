@@ -262,6 +262,14 @@ void initConfig() {
   addsaver(nohud, "no-hud", false);
   addsaver(nofps, "no-fps", false);
   
+  addsaver(irr::on, "irregular", false);
+  addsaver(irr::density, "irregular-density", 6);
+  addsaver(irr::cellcount, "irregular-cellcount", 150);
+  addsaver(irr::quality, "irregular-quality", .2);
+  addsaver(irr::place_attempts, "irregular-place", 10);
+  addsaver(irr::rearrange_max_attempts, "irregular-rearrange-max", 50);
+  addsaver(irr::rearrange_less, "irregular-rearrangeless", 10);
+  
 #if CAP_SHMUP  
   shmup::initConfig();
 #endif

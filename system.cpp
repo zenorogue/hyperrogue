@@ -300,7 +300,7 @@ bool havesave = true;
 
 #if CAP_SAVE
 #define MAXBOX 500
-#define POSSCORE 344 // update this when new boxes are added!
+#define POSSCORE 346 // update this when new boxes are added!
 
 struct score {
   string ver;
@@ -693,6 +693,9 @@ void applyBoxes() {
   applyBoxBool(gp::on);
   applyBox(gp::param.first);
   applyBox(gp::param.second);
+  
+  applyBoxBool(irr::on);
+  applyBox(irr::cellcount);
 
   if(POSSCORE != boxid) printf("ERROR: %d boxes\n", boxid);
   }

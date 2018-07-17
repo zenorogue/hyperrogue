@@ -513,9 +513,9 @@ namespace irr {
       /* if(siid == 0)
         for(auto& ma: m.v) ma.first = ma.first * pispin; */
   
-      fsh.b.resize(irr::sc);
+      fsh.b.resize(irr::cellcount);
 
-      for(int id=0; id<irr::sc; id++) {      
+      for(int id=0; id<irr::cellcount; id++) {      
         auto& vs = irr::cells[id];
 
         int cor = isize(vs.vertices);
@@ -554,10 +554,10 @@ namespace irr {
 
       ld sca = fsh.rad0 / shFullFloor.rad0;
       
-      fsh.b.resize(irr::sc);
-      fsh.shadow.resize(irr::sc);        
+      fsh.b.resize(irr::cellcount);
+      fsh.shadow.resize(irr::cellcount);        
       
-      for(int i=0; i<irr::sc; i++) {      
+      for(int i=0; i<irr::cellcount; i++) {      
         auto& vs = irr::cells[i];
         vector<hyperpoint> cornerlist;
         
@@ -580,7 +580,7 @@ namespace irr {
   
         for(int k=0; k<SIDEPARS; k++) 
           for(int c=0; c<cor; c++) {
-            fsh.gpside[k][c].resize(irr::sc);
+            fsh.gpside[k][c].resize(irr::cellcount);
             bshape(fsh.gpside[k][c][i], fsh.prio);
             hpcpush(iddspin(&fc, c) * cornerlist[c]);
             hpcpush(iddspin(&fc, c) * cornerlist[(c+1)%cor]);

@@ -4,9 +4,11 @@ bool on;
 
 ld density = 6;
 ld quality = .2;
-int rearrange_attempts;
+int place_attempts = 10;
+int rearrange_max_attempts = 50;
+int rearrange_less = 10;
 
-int sc;
+int cellcount;
 
 struct cellinfo {
   cell *owner;
@@ -92,6 +94,8 @@ hrmap *base;
 
 bool gridmaking;
 
+int rearrange_index;
+
 bool step(int delta) {
 
   if(!gridmaking) return false;
@@ -108,7 +112,7 @@ bool step(int delta) {
      cells_of_heptagon.clear();
      cellindex.clear();
      
-     if(sc <= isize(all) * 2) {
+     if(cellcount <= isize(all) * 2) {
        for(auto h: all) {
          cellinfo s; s.patterndir = -1;
          s.owner = h, s.p = spin(hrand(1000)) * xpush(.01) * C0;
@@ -120,11 +124,11 @@ bool step(int delta) {
       }
      
     case 1: {
-      while(isize(cells) < sc) {
+      while(isize(cells) < cellcount) {
         if(SDL_GetTicks() > t + 250) { make_cells_of_heptagon(); status[0] = its(isize(cells)) + " cells"; return false; }
         cellinfo s; s.patterndir = -1;
         ld bestval = 0;
-        for(int j=0; j<10; j++) {
+        for(int j=0; j<place_attempts; j++) {
           int k = hrand(isize(all));
           cell *c = all[k];
           hyperpoint h = randomPointIn(c->type);
@@ -155,7 +159,7 @@ bool step(int delta) {
       int stats[16];
       for(int k=0; k<16; k++) stats[k] = 0;
       
-      for(int i=0; i<sc; i++) {
+      for(int i=0; i<cellcount; i++) {
         auto &p1 = cells[i];
         p1.vertices.clear();
         p1.neid.clear();
@@ -165,7 +169,7 @@ bool step(int delta) {
         
         p1.jpoints.clear();
     
-        for(int j=0; j<sc; j++) {
+        for(int j=0; j<cellcount; j++) {
           auto &p2 = cells[j];
           p1.jpoints.push_back(p1.rpusher * shmup::calc_relative_matrix(p2.owner, p1.owner, p1.p) * p2.p);
           }
@@ -173,7 +177,7 @@ bool step(int delta) {
         int j = 0;
         if(j == i) j = 1;
     
-        for(int k=0; k<sc; k++) if(k != i) {
+        for(int k=0; k<cellcount; k++) if(k != i) {
           if(hdist(p1.jpoints[k], C0) < hdist(p1.jpoints[j], C0))
             j = k;
           }
@@ -185,7 +189,7 @@ bool step(int delta) {
         do {
           int best_k = -1;
           hyperpoint best_h;
-          for(int k=0; k<sc; k++) if(k != i && k != j && k != oldj) {
+          for(int k=0; k<cellcount; k++) if(k != i && k != j && k != oldj) {
             hyperpoint h = circumscribe(C0, p1.jpoints[j], p1.jpoints[k]);
             if(h[2] < 0) continue;
             if(!clockwise(t, h)) continue;
@@ -242,9 +246,9 @@ bool step(int delta) {
       
       if(errors > 0) status[1] = XLAT("bad cells: %1", its(errors)); else status[1] = " ";
       if(toobig > 0) status[2] = XLAT("too many edges: %1", its(toobig)); else status[2] = " ";
-      if(isize(cells) < sc*3/4) runlevel = 0;
-      else if(isize(cells) < sc) runlevel = 1;
-      else { rearrange_attempts = 20; runlevel++; }
+      if(isize(cells) < cellcount*3/4) runlevel = 0;
+      else if(isize(cells) < cellcount) runlevel = 1;
+      else { rearrange_index = 0; runlevel++; }
       break;
       }
     
@@ -254,23 +258,29 @@ bool step(int delta) {
       ld minedge = median * quality;
       status[3] = XLAT("median edge: %1 minimum: %2", fts4(median), fts4(edgelens[0]));
       if(edgelens[0] < minedge) {
+        if(rearrange_index >= rearrange_max_attempts) {
+          runlevel = 0; break;
+          }
         int tooshort = 0;
         for(int i=0; i<isize(cells); i++) {
           auto& p1 = cells[i];
           using namespace hyperpoint_vec;
           hyperpoint h = hpxyz(0, 0, 0);
           for(auto v: p1.vertices) h = h + v;
+          
+          bool changed = rearrange_index < rearrange_less;
     
           for(int j=0; j<isize(p1.vertices); j++)
             if(hdist(p1.vertices[j], p1.vertices[(j+1) % isize(p1.vertices)]) < minedge) {
-              tooshort++;
+              tooshort++; changed = true;
               h = h + p1.vertices[j] + p1.vertices[(j+1) % isize(p1.vertices)];
               }
-          cells[i].p = p1.pusher * normalize(h);
+          if(changed)
+            cells[i].p = p1.pusher * normalize(h);
           }
         status[3] += XLAT(" (edges too short: %1)", its(tooshort));
         runlevel = 2;
-        rearrange_attempts--; if(rearrange_attempts < 0) runlevel = 0;
+        rearrange_index++;
         break;
         }
       runlevel++;
@@ -281,7 +291,7 @@ bool step(int delta) {
       
       int notfound = 0;
     
-      for(int i=0; i<sc; i++) {
+      for(int i=0; i<cellcount; i++) {
         auto &p1 = cells[i];
         int N = isize(p1.vertices);
         p1.spin.resize(N);
@@ -310,7 +320,7 @@ bool step(int delta) {
         }
     
       int faredge = 0;
-      for(int i=0; i<sc; i++) {
+      for(int i=0; i<cellcount; i++) {
         auto &p1 = cells[i];
         for(int j: p1.neid) {
           auto &p2 = cells[j];
@@ -363,7 +373,7 @@ ld scale;
 
 void compute_geometry() {
   if(irr::on) {
-    scale = sqrt(isize(cells_of_heptagon) * 1. / sc);
+    scale = sqrt(isize(cells_of_heptagon) * 1. / cellcount);
     crossf *= scale;
     hepvdist *= scale;
     rhexf *= scale;
@@ -477,6 +487,28 @@ void link_cell(cell *c, int d) {
 
 eGeometry orig_geometry;
 
+void start_game_on_created_map() {    
+  popScreen();
+  for(hrmap *& hm : allmaps) if(hm == base) hm = NULL;
+  stop_game();
+  geometry = orig_geometry;
+  irr::on = true;
+  nonbitrunc = true;
+  gp::on = false;
+  need_reset_geometry = true;
+  gridmaking = false;
+  start_game();
+  }
+
+void cancel_map_creation() {
+  popScreen();
+  gridmaking = false;
+  stop_game();
+  geometry = orig_geometry;
+  need_reset_geometry = true;
+  start_game();
+  }
+
 void show_gridmaker() {
   cmode = sm::SIDE;
   gamescreen(0);  
@@ -485,12 +517,12 @@ void show_gridmaker() {
   dialog::add_action([] {
     dialog::editNumber(density, 1, 10, .1, 4, "density", "");
     dialog::reaction = [] () {
-      int s = sc;
+      int s = cellcount;
       if(density < 1) density = 1;
-      sc = int(isize(currentmap->allcells()) * density + .5);
-      printf("density = %lf sc = %d\n", double(density), sc);
-      if(sc > s) runlevel = 1;
-      if(sc < s) runlevel = 0;
+      cellcount = int(isize(currentmap->allcells()) * density + .5);
+      printf("density = %lf cellcount = %d\n", double(density), cellcount);
+      if(cellcount > s) runlevel = 1;
+      if(cellcount < s) runlevel = 0;
       };
     });
   dialog::addSelItem(XLAT("min edge to median"), fts(quality), 'q');
@@ -506,27 +538,9 @@ void show_gridmaker() {
     dialog::addInfo(status[i]);
   dialog::addBreak(100);
   dialog::addSelItem(XLAT("activate"), XLAT(runlevel == 10 ? "ready" : "wait..."), 'f');
-  if(runlevel == 10) dialog::add_action([] {
-    popScreen();
-    for(hrmap *& hm : allmaps) if(hm == base) hm = NULL;
-    stop_game();
-    geometry = orig_geometry;
-    irr::on = true;
-    nonbitrunc = true;
-    gp::on = false;
-    need_reset_geometry = true;
-    gridmaking = false;
-    start_game();
-    });
+  if(runlevel == 10) dialog::add_action(start_game_on_created_map);
   dialog::addItem(XLAT("cancel"), 'c');
-  dialog::add_action([] {
-    gridmaking = false;
-    stop_game();
-    geometry = orig_geometry;
-    need_reset_geometry = true;
-    start_game();
-    popScreen();
-    });
+  dialog::add_action(cancel_map_creation);
   dialog::display();
   keyhandler = [] (int sym, int uni) {
     dialog::handleNavigation(sym, uni);
@@ -554,12 +568,22 @@ void visual_creator() {
   gp::on = false;
   need_reset_geometry = true;
   start_game();
+  if(base) delete base;
   base = currentmap; 
   drawthemap();
-  sc = int(isize(base->allcells()) * density + .5);
+  cellcount = int(isize(base->allcells()) * density + .5);
   pushScreen(show_gridmaker);
   runlevel = 0;
   gridmaking = true;
+  }
+
+void auto_creator() {
+  int cc = cellcount;
+  visual_creator();
+  cellcount = cc; density = cc / isize(base->allcells());
+  printf("Creating the irregular map automatically...\n");
+  while(runlevel < 10) step(1000);
+  start_game_on_created_map();
   }
   
 int readArgs() {
@@ -577,9 +601,9 @@ int readArgs() {
   }
 
 unsigned char density_code() {
-  if(sc < 128) return sc;
+  if(cellcount < 128) return cellcount;
   else {
-    int t = 127, a = sc;
+    int t = 127, a = cellcount;
     while(a > 127) a = a * 9/10, t++;
     return t;
     }
