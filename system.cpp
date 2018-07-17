@@ -35,7 +35,7 @@ bool verless(string v, string cmp) {
 bool do_use_special_land() {
   return
     !safety &&
-    (peace::on || tactic::on || geometry || gp::on || randomPatternsMode || yendor::on);
+    (peace::on || tactic::on || geometry || gp::on || irr::on || randomPatternsMode || yendor::on);
   }
 
 hookset<bool()> *hooks_welcome_message;
