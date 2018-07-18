@@ -976,7 +976,7 @@ template<class T> void load_raw(string fname, vector<T>& v) {
   auto s = ftell(f);
   rewind(f);
   v.resize(s / sizeof(v[0]));
-  fread(&v[0], sizeof(v[0]), v.size(), f);
+  hr::ignore(fread(&v[0], sizeof(v[0]), v.size(), f));
   fclose(f);
   }
 

@@ -88,7 +88,7 @@ endif
 ifeq (${TOOLCHAIN},gcc)
   CXXFLAGS_EARLY += -std=c++11 -march=native
   CXXFLAGS_EARLY += -W -Wall -Wextra -Werror
-  CXXFLAGS_EARLY += -Wno-empty-body -Wno-maybe-uninitialized -Wno-missing-field-initializers -Wno-unused-parameter -Wno-unused-result
+  CXXFLAGS_EARLY += -Wno-maybe-uninitialized -Wno-missing-field-initializers -Wno-unused-parameter
 endif
 
 ifeq (${TOOLCHAIN},mingw)
