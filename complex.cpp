@@ -2966,17 +2966,17 @@ namespace ca {
     using namespace arg;
     if(argis("-caprob")) {
       shift(); prob = argf();
-      return true;
+      return 0;
       }
-    if(args()[0] != '-') return false;
-    if(args()[1] != 'c') return false;
+    if(args()[0] != '-') return 1;
+    if(args()[1] != 'c') return 1;
     int livedead = args()[2] - '0';
-    if(livedead < 0 || livedead > 1) return false;
+    if(livedead < 0 || livedead > 1) return 1;
     int nei = -1;
     if(args()[3]) {
       nei = args()[3] - '0';
-      if(nei < 0 || nei > 7) return false;
-      if(args()[4]) return false;
+      if(nei < 0 || nei > 7) return 1;
+      if(args()[4]) return 1;
       }
     shift();
     string s = args(); s += "00000000";
@@ -2984,7 +2984,7 @@ namespace ca {
       carule[i][livedead] = s;
     else 
       carule[nei][livedead] = s;
-    return true;
+    return 0;
     }
 #endif
   
