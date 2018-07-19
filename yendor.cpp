@@ -1087,4 +1087,28 @@ namespace peace {
     
   auto aNext = addHook(hooks_nextland, 100, getNext);
   };
+
+#if CAP_COMMANDLINE
+int read_mode_args() {
+  using namespace arg;
+  if(argis("-Y")) { 
+    yendor::on = true;
+    shift(); yendor::challenge = argi();
+    }
+  else if(argis("-peace")) {
+    peace::otherpuzzles = true;
+    stop_game_and_switch_mode(peace::on ? 0 : rg::peace);
+    }
+  else if(argis("-pmem")) {
+    peace::otherpuzzles = false;
+    stop_game_and_switch_mode(peace::on ? 0 : rg::peace);
+    }
+  TOGGLE('T', tactic::on, stop_game_and_switch_mode(rg::tactic))
+
+  else return 1;
+  return 0;
+  }
+
+auto ah = addHook(hooks_args, 0, read_mode_args);
+#endif
 }

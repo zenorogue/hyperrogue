@@ -2988,6 +2988,8 @@ namespace ca {
     }
 #endif
   
+  auto ah = addHook(hooks_args, 0, readArg);
+
   void simulate() {
     if(cwt.c->land != laCA) return;
     vector<cell*>& allcells = currentmap->allcells();

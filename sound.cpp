@@ -3,6 +3,7 @@
 
 namespace hr {
 
+const char *musicfile = "";
 bool audio;
 string musiclicense;
 string musfname[landtypes];
@@ -216,6 +217,22 @@ void playSound(cell *c, const string& fname, int vol) {
 
 #else
 void resetmusic() {}
+#endif
+
+#if CAP_COMMANDLINE
+int read_sound_args() {
+  using namespace arg;
+  if(argis("-m")) { PHASE(1); shift(); musicfile = argcs(); }
+#if CAP_SDLAUDIO
+  else if(argis("-se")) { PHASE(1); shift(); wheresounds = args(); }
+#endif
+  else if(argis("-svol")) { PHASEFROM(2); shift(); effvolume = argi(); }
+  else return 1;
+  return 0;
+  }
+
+auto ah_sound = addHook(hooks_args, 0, read_sound_args);
+
 #endif
 
 }

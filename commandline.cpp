@@ -6,10 +6,6 @@ namespace hr {
 #if CAP_COMMANDLINE
 const char *scorefile = "hyperrogue.log";
 const char *conffile = "hyperrogue.ini";
-string levelfile = "hyperrogue.lev";
-string picfile = "hyperrogue.pic";
-const char *musicfile = "";
-const char *loadlevel = NULL;
 
 bool appears(const string& haystack, const string& needle) {
   return haystack.find(needle) != string::npos;
@@ -88,25 +84,18 @@ namespace arg {
 
   }
 
-#define CHEAT autocheat = true; cheater++; timerghost = false;
-
 int arg::readCommon() {
 
 // first phase options
 
   if(argis("-c")) { PHASE(1); shift(); conffile = argcs(); }
   else if(argis("-s")) { PHASE(1); shift(); scorefile = argcs(); }
-  else if(argis("-m")) { PHASE(1); shift(); musicfile = argcs(); }
   else if(argis("-nogui")) { PHASE(1); noGUI = true; }
 #ifndef EMSCRIPTEN
   else if(argis("-font")) { PHASE(1); shift(); fontpath = args(); }
 #endif
-#if CAP_SDLAUDIO
-  else if(argis("-se")) { PHASE(1); shift(); wheresounds = args(); }
-#endif
 
 // change the configuration from the command line
-  else if(argis("-svol")) { PHASEFROM(2); shift(); effvolume = argi(); }
   else if(argis("-back")) {
     PHASEFROM(2); shift(); backcolor = arghex();
     }
@@ -147,7 +136,7 @@ int arg::readCommon() {
     dont_face_pc = true;
     }
   else if(argis("-rch")) {    
-    PHASEFROM(2); CHEAT reptilecheat = true;
+    PHASEFROM(2); cheat(); reptilecheat = true;
     }
 
 // cheats
@@ -155,19 +144,19 @@ int arg::readCommon() {
     PHASE(3);
     shift(); 
     activateSafety(readland(args()));
-    CHEAT;
+    cheat();
     }
   else if(argis("-W2")) {
-    shift(); cheatdest = readland(args()); CHEAT;
+    shift(); cheatdest = readland(args()); cheat();
     showstartmenu = false;
     }
   else if(argis("-I")) {
-    PHASE(3) CHEAT
+    PHASE(3) cheat();
     shift(); eItem i = readItem(args());
     shift(); items[i] = argi(); 
     }
   else if(argis("-IP")) {
-    PHASE(3) CHEAT
+    PHASE(3) cheat();
     shift(); eItem i = readItem(args());
     shift(); int q = argi();
     placeItems(q, i);
@@ -178,13 +167,13 @@ int arg::readCommon() {
     }
 #if CAP_INV
   else if(argis("-IU")) {
-    PHASE(3) CHEAT
+    PHASE(3) cheat();
     shift(); eItem i = readItem(args());
     shift(); inv::usedup[i] += argi();
     inv::compute();
     }
   else if(argis("-IX")) {
-    PHASE(3) CHEAT
+    PHASE(3) cheat();
     shift(); eItem i = readItem(args());
     shift(); inv::extra_orbs[i] += argi();
     inv::compute();
@@ -193,59 +182,32 @@ int arg::readCommon() {
   else if(argis("-ambush")) {
     // make all ambushes use the given number of dogs
     // example: hyper -W Hunt -IP Shield 1 -ambush 60
-    PHASE(3) CHEAT
+    PHASE(3) cheat();
     shift(); ambushval = argi();
     }
   else if(argis("-M")) {
-    PHASE(3) CHEAT
+    PHASE(3) cheat();
     shift(); eMonster m = readMonster(args());
     shift(); int q = argi();
     printf("m = %s q = %d\n", dnameof(m), q);
     restoreGolems(q, m, 7);
     }
   else if(argis("-MK")) {
-    PHASE(3) CHEAT
+    PHASE(3) cheat();
     shift(); eMonster m = readMonster(args());
     shift(); kills[m] += argi();
     }
 
 // mode changes:
 
-#define TOGGLE(x, param, act) \
-else if(args()[0] == '-' && args()[1] == x && !args()[2]) { PHASEFROM(2); showstartmenu = false; act; } \
-else if(args()[0] == '-' && args()[1] == x && args()[2] == '1') { PHASEFROM(2); showstartmenu = false; if(!param) act; } \
-else if(args()[0] == '-' && args()[1] == x && args()[2] == '0') { PHASEFROM(2); showstartmenu = false; if(param) act; }
-
   TOGGLE('o', vid.usingGL, switchGL())
   TOGGLE('C', chaosmode, stop_game_and_switch_mode(rg::chaos))
-  TOGGLE('7', nonbitrunc, stop_game_and_switch_mode(rg::bitrunc))
   TOGGLE('f', vid.full, switchFullscreen())
-  TOGGLE('T', tactic::on, stop_game_and_switch_mode(rg::tactic))
   TOGGLE('S', shmup::on, stop_game_and_switch_mode(rg::shmup))
   TOGGLE('H', hardcore, switchHardcore())
   TOGGLE('R', randomPatternsMode, stop_game_and_switch_mode(rg::randpattern))
   TOGGLE('i', inv::on, stop_game_and_switch_mode(rg::inv))
   
-  else if(argis("-peace")) {
-    peace::otherpuzzles = true;
-    stop_game_and_switch_mode(peace::on ? 0 : rg::peace);
-    }
-  else if(argis("-pmem")) {
-    peace::otherpuzzles = false;
-    stop_game_and_switch_mode(peace::on ? 0 : rg::peace);
-    }
-  else if(argis("-geo")) { 
-    shift(); targetgeometry = (eGeometry) argi();
-    if(targetgeometry != geometry)
-      stop_game_and_switch_mode(rg::geometry);
-    }
-  else if(argis("-gp")) {
-    PHASEFROM(2);
-    stop_game_and_switch_mode(rg::nothing);
-    shift(); gp::param.first = argi();
-    shift(); gp::param.second = argi();
-    stop_game_and_switch_mode(rg::gp);
-    }
 // 'do something'
   else if(argis("-W")) {
     PHASEFROM(2);
@@ -283,17 +245,17 @@ else if(args()[0] == '-' && args()[1] == x && args()[2] == '0') { PHASEFROM(2); 
 
 // non-categorized:
   else if(argis("-pal")) {
-    PHASEFROM(2); CHEAT;
+    PHASEFROM(2); cheat();
     shift(); int id = argi();
     shift(); linepatterns::patterns[id].color |= argi();
     }
   else if(argis("-palrgba")) {
-    PHASEFROM(2); CHEAT;
+    PHASEFROM(2); cheat();
     shift(); int id = argi();
     shift(); linepatterns::patterns[id].color = arghex();
     }
   else if(argis("-qs")) {
-    CHEAT;
+    cheat();
     shift(); currfp.qpaths.push_back(args());
     }
   else if(argis("-fix")) {
@@ -309,64 +271,10 @@ else if(args()[0] == '-' && args()[1] == x && args()[2] == '0') { PHASEFROM(2); 
     fixseed = true; autocheat = true;
     shift(); steplimit = argi();
     }
-  else if(argis("-qpar")) { 
-    int p;
-    shift(); sscanf(argcs(), "%d,%d,%d", 
-      &p, &quotientspace::rvadd, &quotientspace::rvdir
-      );
-    autocheat = true;
-    currfp.init(p); 
-    }
   else if(argis("-test")) 
     callhooks(hooks_tests);
-  else if(argis("-qpar2")) {
-    stop_game_and_switch_mode(rg::nothing);
-    int a, b;
-    shift(); sscanf(argcs(), "%d,%d", &a, &b);
-    using namespace fieldpattern;
-    current_extra = a;
-
-    auto& gxcur = fgeomextras[current_extra];
-    while(b >= isize(gxcur.primes)) nextPrime(gxcur);
-
-    fgeomextras[current_extra].current_prime_id = b;
-    enableFieldChange();
-    if(geometry != gFieldQuotient) {
-      targetgeometry = gFieldQuotient; stop_game_and_switch_mode(rg::geometry);
-      }
-    }
-  else if(argis("-tpar")) { 
-    torusconfig::torus_mode = torusconfig::tmSingle;
-    shift(); sscanf(argcs(), "%d,%d,%d", 
-      &torusconfig::qty, 
-      &torusconfig::dx,
-      &torusconfig::dy
-      );
-    }
-  else if(argis("-tparx")) {
-    shift(); 
-    sscanf(argcs(), "%d,%d,%d", 
-      (int*) &torusconfig::torus_mode,
-      &torusconfig::sdx,
-      &torusconfig::sdy
-      );
-    if(torusconfig::torus_mode == torusconfig::tmSingle)
-      torusconfig::qty = torusconfig::sdx,
-      torusconfig::dy = torusconfig::sdy;
-    torusconfig::activate();
-    }
-  else if(argis("-cs")) {
-    shift(); CHEAT
-    fieldpattern::matrix M = currfp.strtomatrix(args());
-    fieldpattern::subpathid = currfp.matcode[M];
-    fieldpattern::subpathorder = currfp.order(M);
-    }
-  else if(argis("-csp")) {
-    CHEAT
-    currfp.findsubpath();
-    }
   else if(argis("-quantum")) {
-    CHEAT;
+    cheat();
     quantum = true;
     }
   else if(argis("-P")) { 
@@ -396,16 +304,12 @@ else if(args()[0] == '-' && args()[1] == x && args()[2] == '0') { PHASEFROM(2); 
       if(itemclass(eItem(i)) == IC_TREASURE)
         items[i] = q;
     }
-  else if(argis("-ch")) { autocheat = true; }
+  else if(argis("-ch")) { cheat(); }
   else if(argis("-zoom")) { 
     PHASEFROM(2); shift(); vid.scale = argf();
     }
   else if(argis("-alpha")) { 
     PHASEFROM(2); shift(); vid.alpha = argf();
-    }
-  else if(argis("-Y")) { 
-    yendor::on = true;
-    shift(); yendor::challenge = argi();
     }
   else if(argis("-r")) { 
     PHASEFROM(2);
@@ -457,7 +361,7 @@ else if(args()[0] == '-' && args()[1] == x && args()[2] == '0') { PHASEFROM(2); 
     shift(); sightrange_bonus = argi();
     }
   else if(argis("-srx")) {    
-    PHASEFROM(2); CHEAT;
+    PHASEFROM(2); cheat();
     shift(); sightrange_bonus = genrange_bonus = gamerange_bonus = argi();
     }
   else if(argis("-els")) {
@@ -478,43 +382,7 @@ else if(args()[0] == '-' && args()[1] == x && args()[2] == '0') { PHASEFROM(2); 
   else if(argis("-bright")) {    
     bright = true;
     }
-#if CAP_SDL
-  else if(argis("-pngshot")) {
-    PHASE(3); shift(); start_game();
-    printf("saving PNG screenshot to %s\n", argcs());
-    saveHighQualityShot(argcs());
-    }
-#endif
-  else if(argis("-svgsize")) {
-    shift(); sscanf(argcs(), "%d/%d", &svg::svgsize, &svg::divby);
-    }
-  else if(argis("-svgfont")) {
-    shift(); svg::font = args();
-    // note: use '-svgfont latex' to produce text output as: \myfont{size}{text}
-    // (this is helpful with Inkscape's PDF+TeX output feature; define \myfont yourself)
-    }
-  else if(argis("-pngsize")) {
-    shift(); pngres = argi();
-    }
-  else if(argis("-pngformat")) {
-    shift(); pngformat = argi();
-    }
-  else if(argis("-svggamma")) {
-    shift(); svg::gamma = argf();
-    }
-  else if(argis("-svgshot")) {
-    PHASE(3); shift(); start_game();
-    printf("saving SVG screenshot to %s\n", argcs());
-    svg::render(argcs());
-    }
 
-// other
-#if CAP_EDIT
-  else if(argis("-lev")) { shift(); levelfile = args(); }
-  else if(argis("-pic")) { shift(); picfile = args(); }
-  else if(argis("-load")) { PHASE(3); shift(); mapstream::loadMap(args()); }
-  else if(argis("-picload")) { PHASE(3); shift(); mapeditor::loadPicFile(args()); }
-#endif
 // graphical options
   else if(argis("-noscr")) {
     PHASE(3);
@@ -523,7 +391,7 @@ else if(args()[0] == '-' && args()[1] == x && args()[2] == '0') { PHASEFROM(2); 
     }
 
   else if(argis("-W3")) {
-    shift(); top_land = readland(args()); CHEAT;
+    shift(); top_land = readland(args()); cheat();
     showstartmenu = false;
     }
   else if(argis("-top")) {
@@ -535,10 +403,6 @@ else if(args()[0] == '-' && args()[1] == x && args()[2] == '0') { PHASEFROM(2); 
     printf("HyperRogue version " VER "\n");
     exit(0);
     }
-  else if(argis("-fi")) {
-    fieldpattern::info();
-    exit(0);
-    } 
   else if(argis("-L")) {
     printf("Treasures:\n");
     for(int i=1; i<ittypes; i++) 
@@ -613,7 +477,6 @@ else if(args()[0] == '-' && args()[1] == x && args()[2] == '0') { PHASEFROM(2); 
     printf("Not all options are documented, see hyper.cpp");
     exit(0);
     }
-  else if(ca::readArg()) ;
   else return 1;
   return 0;
   }

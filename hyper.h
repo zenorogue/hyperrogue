@@ -1832,6 +1832,14 @@ namespace arg {
 // an useful macro
 #define PHASE(x) { if(arg::curphase > x) phaseerror(x); else if(arg::curphase < x) return 2; }
 #define PHASEFROM(x) { if(arg::curphase < x) return 2; }
+
+  void cheat() { autocheat = true; cheater++; timerghost = false; }
+
+#define TOGGLE(x, param, act) \
+else if(args()[0] == '-' && args()[1] == x && !args()[2]) { PHASEFROM(2); showstartmenu = false; act; } \
+else if(args()[0] == '-' && args()[1] == x && args()[2] == '1') { PHASEFROM(2); showstartmenu = false; if(!param) act; } \
+else if(args()[0] == '-' && args()[1] == x && args()[2] == '0') { PHASEFROM(2); showstartmenu = false; if(param) act; }
+
   
   void read(int phase);
   

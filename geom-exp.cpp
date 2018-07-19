@@ -510,4 +510,85 @@ void runGeometryExperiments() {
   pushScreen(showEuclideanMenu);
   }
 
+#if CAP_COMMANDLINE
+int read_geom_args() {
+  using namespace arg;
+  if(argis("-qpar")) { 
+    int p;
+    shift(); sscanf(argcs(), "%d,%d,%d", 
+      &p, &quotientspace::rvadd, &quotientspace::rvdir
+      );
+    autocheat = true;
+    currfp.init(p); 
+    }
+  else if(argis("-qpar2")) {
+    stop_game_and_switch_mode(rg::nothing);
+    int a, b;
+    shift(); sscanf(argcs(), "%d,%d", &a, &b);
+    using namespace fieldpattern;
+    current_extra = a;
+
+    auto& gxcur = fgeomextras[current_extra];
+    while(b >= isize(gxcur.primes)) nextPrime(gxcur);
+
+    fgeomextras[current_extra].current_prime_id = b;
+    enableFieldChange();
+    if(geometry != gFieldQuotient) {
+      targetgeometry = gFieldQuotient; stop_game_and_switch_mode(rg::geometry);
+      }
+    }
+  else if(argis("-cs")) {
+    shift(); cheat();
+    fieldpattern::matrix M = currfp.strtomatrix(args());
+    fieldpattern::subpathid = currfp.matcode[M];
+    fieldpattern::subpathorder = currfp.order(M);
+    }
+  else if(argis("-csp")) {
+    cheat();
+    currfp.findsubpath();
+    }
+  else if(argis("-tpar")) { 
+    torusconfig::torus_mode = torusconfig::tmSingle;
+    shift(); sscanf(argcs(), "%d,%d,%d", 
+      &torusconfig::qty, 
+      &torusconfig::dx,
+      &torusconfig::dy
+      );
+    }
+  else if(argis("-tparx")) {
+    shift(); 
+    sscanf(argcs(), "%d,%d,%d", 
+      (int*) &torusconfig::torus_mode,
+      &torusconfig::sdx,
+      &torusconfig::sdy
+      );
+    if(torusconfig::torus_mode == torusconfig::tmSingle)
+      torusconfig::qty = torusconfig::sdx,
+      torusconfig::dy = torusconfig::sdy;
+    torusconfig::activate();
+    }
+  TOGGLE('7', nonbitrunc, stop_game_and_switch_mode(rg::bitrunc))
+  else if(argis("-geo")) { 
+    shift(); targetgeometry = (eGeometry) argi();
+    if(targetgeometry != geometry)
+      stop_game_and_switch_mode(rg::geometry);
+    }
+  else if(argis("-gp")) {
+    PHASEFROM(2);
+    stop_game_and_switch_mode(rg::nothing);
+    shift(); gp::param.first = argi();
+    shift(); gp::param.second = argi();
+    stop_game_and_switch_mode(rg::gp);
+    }
+  else if(argis("-fi")) {
+    fieldpattern::info();
+    exit(0);
+    } 
+  else return 1;
+  return 0;
+  }
+
+auto ah_geom = addHook(hooks_args, 0, read_geom_args);
+#endif
+
 }

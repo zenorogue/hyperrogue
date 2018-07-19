@@ -62,6 +62,7 @@ namespace hr { namespace inv { bool on, activating; } }
 #include "nofont.cpp"
 #endif
 #include "basegraph.cpp"
+#include "screenshot.cpp"
 #include "renderbuffer.cpp"
 #include "help.cpp"
 #include "config.cpp"

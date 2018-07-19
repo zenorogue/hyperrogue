@@ -1794,4 +1794,23 @@ namespace mapeditor {
   
   }
 
+#if CAP_EDIT
+#if CAP_COMMANDLINE
+string levelfile = "hyperrogue.lev";
+const char *loadlevel = NULL;
+string picfile = "hyperrogue.pic";
+
+int read_editor_args() {
+  using namespace arg;
+  if(argis("-lev")) { shift(); levelfile = args(); }
+  else if(argis("-pic")) { shift(); picfile = args(); }
+  else if(argis("-load")) { PHASE(3); shift(); mapstream::loadMap(args()); }
+  else if(argis("-picload")) { PHASE(3); shift(); mapeditor::loadPicFile(args()); }
+  else return 1;
+  return 0;
+  }
+
+auto ah_editor = addHook(hooks_args, 0, read_editor_args);
+#endif
+#endif
 }
