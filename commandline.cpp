@@ -91,16 +91,6 @@ int arg::readCommon() {
   else if(argis("-font")) { PHASE(1); shift(); fontpath = args(); }
 #endif
 
-// mode changes:
-
-  TOGGLE('o', vid.usingGL, switchGL())
-  TOGGLE('C', chaosmode, stop_game_and_switch_mode(rg::chaos))
-  TOGGLE('f', vid.full, switchFullscreen())
-  TOGGLE('S', shmup::on, stop_game_and_switch_mode(rg::shmup))
-  TOGGLE('H', hardcore, switchHardcore())
-  TOGGLE('R', randomPatternsMode, stop_game_and_switch_mode(rg::randpattern))
-  TOGGLE('i', inv::on, stop_game_and_switch_mode(rg::inv))
-  
   else if(argis("-test")) 
     callhooks(hooks_tests);
   else if(argis("-offline")) {

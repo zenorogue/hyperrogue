@@ -3712,4 +3712,5 @@ extern bool need_reset_geometry;
 extern ld hexshift;
 
 extern bool noshadow, bright, nohelp, dont_face_pc;
+extern void switchHardcore();
 }

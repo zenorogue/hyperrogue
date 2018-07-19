@@ -1445,6 +1445,17 @@ int read_config_args() {
   else if(argis("-els")) {
     shift(); conformal::extra_line_steps = argf();
     }
+
+// mode changes:
+
+  TOGGLE('o', vid.usingGL, switchGL())
+  TOGGLE('C', chaosmode, stop_game_and_switch_mode(rg::chaos))
+  TOGGLE('f', vid.full, switchFullscreen())
+  TOGGLE('S', shmup::on, stop_game_and_switch_mode(rg::shmup))
+  TOGGLE('H', hardcore, switchHardcore())
+  TOGGLE('R', randomPatternsMode, stop_game_and_switch_mode(rg::randpattern))
+  TOGGLE('i', inv::on, stop_game_and_switch_mode(rg::inv))
+  
   else return 1;
   return 0;
   }
