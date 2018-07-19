@@ -2106,7 +2106,8 @@ int read_pattern_args() {
       }
     }
 
-// non-categorized:
+  else if(argis("-wsh")) { shift(); patterns::whichShape = args()[0]; }
+
   else if(argis("-pal")) {
     PHASEFROM(2); cheat();
     shift(); int id = argi();
