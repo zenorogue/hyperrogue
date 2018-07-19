@@ -442,4 +442,143 @@ void raiseBuggyGeneration(cell *c, const char *s) {
     c->item = itBuggy;
   }
 
+#if CAP_COMMANDLINE
+
+int read_cheat_args() {
+  using namespace arg;
+  if(argis("-ch")) { cheat(); }
+  else if(argis("-rch")) {    
+    PHASEFROM(2); cheat(); reptilecheat = true;
+    }
+// cheats
+  else if(argis("-WT")) {
+    PHASE(3);
+    shift(); 
+    activateSafety(readland(args()));
+    cheat();
+    }
+  else if(argis("-W2")) {
+    shift(); cheatdest = readland(args()); cheat();
+    showstartmenu = false;
+    }
+  else if(argis("-I")) {
+    PHASE(3) cheat();
+    shift(); eItem i = readItem(args());
+    shift(); items[i] = argi(); 
+    }
+  else if(argis("-IP")) {
+    PHASE(3) cheat();
+    shift(); eItem i = readItem(args());
+    shift(); int q = argi();
+    placeItems(q, i);
+    }
+  else if(argis("-SM")) {
+    PHASEFROM(2);
+    shift(); stereo::mode = stereo::eStereo(argi());
+    }
+#if CAP_INV
+  else if(argis("-IU")) {
+    PHASE(3) cheat();
+    shift(); eItem i = readItem(args());
+    shift(); inv::usedup[i] += argi();
+    inv::compute();
+    }
+  else if(argis("-IX")) {
+    PHASE(3) cheat();
+    shift(); eItem i = readItem(args());
+    shift(); inv::extra_orbs[i] += argi();
+    inv::compute();
+    }
+#endif
+  else if(argis("-ambush")) {
+    // make all ambushes use the given number of dogs
+    // example: hyper -W Hunt -IP Shield 1 -ambush 60
+    PHASE(3) cheat();
+    shift(); ambushval = argi();
+    }
+  else if(argis("-M")) {
+    PHASE(3) cheat();
+    shift(); eMonster m = readMonster(args());
+    shift(); int q = argi();
+    printf("m = %s q = %d\n", dnameof(m), q);
+    restoreGolems(q, m, 7);
+    }
+  else if(argis("-MK")) {
+    PHASE(3) cheat();
+    shift(); eMonster m = readMonster(args());
+    shift(); kills[m] += argi();
+    }
+  else if(argis("-each")) {
+    PHASEFROM(2); start_game();
+    shift(); int q = argi(); autocheat = true;
+    for(int i=0; i<ittypes; i++)
+      if(itemclass(eItem(i)) == IC_TREASURE)
+        items[i] = q;
+    }
+  else if(argis("-we")) {    
+    PHASEFROM(2);
+    shift(); whatever = argf(); resetGeometry();
+    }
+  else if(argis("-wei")) {    
+    PHASEFROM(2);
+    shift(); whateveri = argf(); resetGeometry();
+    }
+  else if(argis("-wei2")) {
+    PHASEFROM(2);
+    shift(); whateveri2 = argf(); resetGeometry();
+    }
+  else if(argis("-W3")) {
+    shift(); top_land = readland(args()); cheat();
+    showstartmenu = false;
+    }
+  else if(argis("-top")) {
+    PHASE(3); View = View * spin(-M_PI/2);
+    }
+  else if(argis("-gencells")) {
+    PHASEFROM(2); shift(); start_game();
+    printf("Generating %d cells...\n", argi());
+    celllister cl(cwt.c, 50, argi(), NULL);
+    printf("Cells generated: %d\n", isize(cl.lst));
+    for(int i=0; i<isize(cl.lst); i++)
+      setdist(cl.lst[i], 7, NULL);
+    }
+  else if(argis("-sr")) {    
+    PHASEFROM(2);
+    shift(); sightrange_bonus = argi();
+    }
+  else if(argis("-srx")) {    
+    PHASEFROM(2); cheat();
+    shift(); sightrange_bonus = genrange_bonus = gamerange_bonus = argi();
+    }
+  else if(argis("-quantum")) {
+    cheat();
+    quantum = true;
+    }
+  else if(argis("-fix")) {
+    PHASE(1);
+    fixseed = true; autocheat = true;
+    }
+  else if(argis("-fixx")) {
+    PHASE(1);
+    fixseed = true; autocheat = true;
+    shift(); startseed = argi();
+    }
+  else if(argis("-steplimit")) {
+    fixseed = true; autocheat = true;
+    shift(); steplimit = argi();
+    }
+  else if(argis("-W")) {
+    PHASEFROM(2);
+    shift(); 
+    firstland0 = firstland = specialland = readland(args());
+    stop_game_and_switch_mode(rg::nothing);
+    showstartmenu = false;
+    }
+  else return 1;
+  return 0;
+  }
+
+auto ah_cheat = addHook(hooks_args, 0, read_cheat_args);
+#endif
+
 }

@@ -5,12 +5,8 @@ namespace hr {
 
 #if CAP_COMMANDLINE
 const char *scorefile = "hyperrogue.log";
-const char *conffile = "hyperrogue.ini";
 
-bool appears(const string& haystack, const string& needle) {
-  return haystack.find(needle) != string::npos;
-  }
-
+namespace arg {
 eLand readland(const string& ss) {
   if(ss == "II") return laCrossroads2;
   if(ss == "III") return laCrossroads3;
@@ -38,6 +34,7 @@ eMonster readMonster(const string& ss) {
     }
   return moNone;
   }
+}
 
 void initializeCLI() {
   printf("HyperRogue by Zeno Rogue <zeno@attnam.com>, version " VER "\n");
@@ -88,115 +85,11 @@ int arg::readCommon() {
 
 // first phase options
 
-  if(argis("-c")) { PHASE(1); shift(); conffile = argcs(); }
-  else if(argis("-s")) { PHASE(1); shift(); scorefile = argcs(); }
+  if(argis("-s")) { PHASE(1); shift(); scorefile = argcs(); }
   else if(argis("-nogui")) { PHASE(1); noGUI = true; }
 #ifndef EMSCRIPTEN
   else if(argis("-font")) { PHASE(1); shift(); fontpath = args(); }
 #endif
-
-// change the configuration from the command line
-  else if(argis("-back")) {
-    PHASEFROM(2); shift(); backcolor = arghex();
-    }
-  else if(argis("-borders")) {
-    PHASEFROM(2); shift(); bordcolor = arghex();
-    }
-  else if(argis("-fore")) {
-    PHASEFROM(2); shift(); forecolor = arghex();
-    }
-  else if(argis("-aa")) { PHASEFROM(2); shift(); vid.antialias = argi(); }
-  else if(argis("-lw")) { PHASEFROM(2); shift(); vid.linewidth = argf(); }
-  else if(argis("-wm")) { PHASEFROM(2); shift(); vid.wallmode = argi(); }
-  else if(argis("-mm")) { PHASEFROM(2); shift(); vid.monmode = argi(); }
-
-  else if(argis("-wsh")) { shift(); patterns::whichShape = args()[0]; }
-  else if(argis("-noshadow")) { noshadow = true; }
-
-// non-configurable options
-  else if(argis("-vsync_off")) {
-    vsync_off = true;
-    if(curphase == 3) setvideomode();
-    }
-  else if(argis("-noplayer")) 
-    mapeditor::drawplayer = !mapeditor::drawplayer;
-  else if(argis("-nofps")) {
-    nofps = true;
-    }
-  else if(argis("-nohud")) {
-    nohud = true;
-    }
-  else if(argis("-nomenu")) {
-    nomenukey = true;
-    }
-  else if(argis("-nohelp")) {
-    nohelp = true;
-    }
-  else if(argis("-dont_face_pc")) {
-    dont_face_pc = true;
-    }
-  else if(argis("-rch")) {    
-    PHASEFROM(2); cheat(); reptilecheat = true;
-    }
-
-// cheats
-  else if(argis("-WT")) {
-    PHASE(3);
-    shift(); 
-    activateSafety(readland(args()));
-    cheat();
-    }
-  else if(argis("-W2")) {
-    shift(); cheatdest = readland(args()); cheat();
-    showstartmenu = false;
-    }
-  else if(argis("-I")) {
-    PHASE(3) cheat();
-    shift(); eItem i = readItem(args());
-    shift(); items[i] = argi(); 
-    }
-  else if(argis("-IP")) {
-    PHASE(3) cheat();
-    shift(); eItem i = readItem(args());
-    shift(); int q = argi();
-    placeItems(q, i);
-    }
-  else if(argis("-SM")) {
-    PHASEFROM(2);
-    shift(); stereo::mode = stereo::eStereo(argi());
-    }
-#if CAP_INV
-  else if(argis("-IU")) {
-    PHASE(3) cheat();
-    shift(); eItem i = readItem(args());
-    shift(); inv::usedup[i] += argi();
-    inv::compute();
-    }
-  else if(argis("-IX")) {
-    PHASE(3) cheat();
-    shift(); eItem i = readItem(args());
-    shift(); inv::extra_orbs[i] += argi();
-    inv::compute();
-    }
-#endif
-  else if(argis("-ambush")) {
-    // make all ambushes use the given number of dogs
-    // example: hyper -W Hunt -IP Shield 1 -ambush 60
-    PHASE(3) cheat();
-    shift(); ambushval = argi();
-    }
-  else if(argis("-M")) {
-    PHASE(3) cheat();
-    shift(); eMonster m = readMonster(args());
-    shift(); int q = argi();
-    printf("m = %s q = %d\n", dnameof(m), q);
-    restoreGolems(q, m, 7);
-    }
-  else if(argis("-MK")) {
-    PHASE(3) cheat();
-    shift(); eMonster m = readMonster(args());
-    shift(); kills[m] += argi();
-    }
 
 // mode changes:
 
@@ -208,83 +101,8 @@ int arg::readCommon() {
   TOGGLE('R', randomPatternsMode, stop_game_and_switch_mode(rg::randpattern))
   TOGGLE('i', inv::on, stop_game_and_switch_mode(rg::inv))
   
-// 'do something'
-  else if(argis("-W")) {
-    PHASEFROM(2);
-    shift(); 
-    firstland0 = firstland = specialland = readland(args());
-    stop_game_and_switch_mode(rg::nothing);
-    showstartmenu = false;
-    }
-  else if(argis("-canvas")) {
-    PHASEFROM(2);
-    stop_game();
-    firstland = specialland = laCanvas;
-    shift();
-    if(args() == "i") canvas_invisible = !canvas_invisible;
-    else if(args().size() == 1) patterns::whichCanvas = args()[0];
-    else patterns::canvasback = arghex();
-    stop_game_and_switch_mode(rg::nothing);
-    }
-  else if(argis("-pattern")) {
-    PHASEFROM(2);
-    shift();
-    const char *c = argcs();
-    using namespace patterns;
-    subpattern_flags = 0;
-    whichPattern = 0;
-    while(*c) { 
-      if(*c >= '0' && *c <= '9') subpattern_flags ^= 1 << (*c - '0'); 
-      else if(*c == '@') subpattern_flags ^= 1 << 10; 
-      else if(*c == '-') subpattern_flags ^= 1 << 11; 
-      else if(*c == '~') subpattern_flags ^= 1 << 12; 
-      else whichPattern = *c;
-      c++; 
-      }
-    }
-
-// non-categorized:
-  else if(argis("-pal")) {
-    PHASEFROM(2); cheat();
-    shift(); int id = argi();
-    shift(); linepatterns::patterns[id].color |= argi();
-    }
-  else if(argis("-palrgba")) {
-    PHASEFROM(2); cheat();
-    shift(); int id = argi();
-    shift(); linepatterns::patterns[id].color = arghex();
-    }
-  else if(argis("-qs")) {
-    cheat();
-    shift(); currfp.qpaths.push_back(args());
-    }
-  else if(argis("-fix")) {
-    PHASE(1);
-    fixseed = true; autocheat = true;
-    }
-  else if(argis("-fixx")) {
-    PHASE(1);
-    fixseed = true; autocheat = true;
-    shift(); startseed = argi();
-    }
-  else if(argis("-steplimit")) {
-    fixseed = true; autocheat = true;
-    shift(); steplimit = argi();
-    }
   else if(argis("-test")) 
     callhooks(hooks_tests);
-  else if(argis("-quantum")) {
-    cheat();
-    quantum = true;
-    }
-  else if(argis("-P")) { 
-    PHASE(2); shift(); 
-    vid.scfg.players = argi();
-    stop_game_and_switch_mode(rg::nothing);
-    }
-  else if(argis("-PM")) { 
-    PHASEFROM(2); shift(); pmodel = eModel(argi());
-    }
   else if(argis("-offline")) {
     PHASE(1);
     offlineMode = true;
@@ -297,29 +115,6 @@ int arg::readCommon() {
     debugfile = stderr;
     shift(); debugflags = argi();
     }
-  else if(argis("-each")) {
-    PHASEFROM(2); start_game();
-    shift(); int q = argi(); autocheat = true;
-    for(int i=0; i<ittypes; i++)
-      if(itemclass(eItem(i)) == IC_TREASURE)
-        items[i] = q;
-    }
-  else if(argis("-ch")) { cheat(); }
-  else if(argis("-zoom")) { 
-    PHASEFROM(2); shift(); vid.scale = argf();
-    }
-  else if(argis("-alpha")) { 
-    PHASEFROM(2); shift(); vid.alpha = argf();
-    }
-  else if(argis("-r")) { 
-    PHASEFROM(2);
-    shift(); 
-    int clWidth=0, clHeight=0, clFont=0;
-    sscanf(argcs(), "%dx%dx%d", &clWidth, &clHeight, &clFont);
-    if(clWidth) vid.xres = clWidth;
-    if(clHeight) vid.yres = clHeight;
-    if(clFont) vid.fsize = clFont;
-    }    
   else if(argis("--run")) {
     PHASE(3); 
     start_game();
@@ -348,54 +143,12 @@ int arg::readCommon() {
     PHASE(3); printf("Success.\n");
     exit(0);
     }
-  else if(argis("-gencells")) {
-    PHASEFROM(2); shift(); start_game();
-    printf("Generating %d cells...\n", argi());
-    celllister cl(cwt.c, 50, argi(), NULL);
-    printf("Cells generated: %d\n", isize(cl.lst));
-    for(int i=0; i<isize(cl.lst); i++)
-      setdist(cl.lst[i], 7, NULL);
-    }
-  else if(argis("-sr")) {    
-    PHASEFROM(2);
-    shift(); sightrange_bonus = argi();
-    }
-  else if(argis("-srx")) {    
-    PHASEFROM(2); cheat();
-    shift(); sightrange_bonus = genrange_bonus = gamerange_bonus = argi();
-    }
-  else if(argis("-els")) {
-    shift(); conformal::extra_line_steps = argf();
-    }
-  else if(argis("-we")) {    
-    PHASEFROM(2);
-    shift(); whatever = argf(); resetGeometry();
-    }
-  else if(argis("-wei")) {    
-    PHASEFROM(2);
-    shift(); whateveri = argf(); resetGeometry();
-    }
-  else if(argis("-wei2")) {
-    PHASEFROM(2);
-    shift(); whateveri2 = argf(); resetGeometry();
-    }
-  else if(argis("-bright")) {    
-    bright = true;
-    }
 
 // graphical options
   else if(argis("-noscr")) {
     PHASE(3);
     popScreenAll();
     showstartmenu = false;
-    }
-
-  else if(argis("-W3")) {
-    shift(); top_land = readland(args()); cheat();
-    showstartmenu = false;
-    }
-  else if(argis("-top")) {
-    PHASE(3); View = View * spin(-M_PI/2);
     }
 
 // informational

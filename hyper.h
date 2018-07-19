@@ -1842,7 +1842,11 @@ else if(args()[0] == '-' && args()[1] == x && args()[2] == '0') { PHASEFROM(2); 
 
   
   void read(int phase);
-  
+
+  eLand readland(const string& ss);
+  eItem readItem(const string& ss);
+  eMonster readMonster(const string& ss);
+    
 #endif
   }
 
@@ -3706,4 +3710,6 @@ bool compute_relamatrix(cell *src, cell *tgt, int direction_hint, transmatrix& T
 
 extern bool need_reset_geometry;
 extern ld hexshift;
+
+extern bool noshadow, bright, nohelp, dont_face_pc;
 }

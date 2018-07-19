@@ -2085,4 +2085,44 @@ int val46(cell *c) {
   return si.id;
   }
 
+#if CAP_COMMANDLINE
+
+int read_pattern_args() {
+  using namespace arg;
+  if(argis("-pattern")) {
+    PHASEFROM(2);
+    shift();
+    const char *c = argcs();
+    using namespace patterns;
+    subpattern_flags = 0;
+    whichPattern = 0;
+    while(*c) { 
+      if(*c >= '0' && *c <= '9') subpattern_flags ^= 1 << (*c - '0'); 
+      else if(*c == '@') subpattern_flags ^= 1 << 10; 
+      else if(*c == '-') subpattern_flags ^= 1 << 11; 
+      else if(*c == '~') subpattern_flags ^= 1 << 12; 
+      else whichPattern = *c;
+      c++; 
+      }
+    }
+
+// non-categorized:
+  else if(argis("-pal")) {
+    PHASEFROM(2); cheat();
+    shift(); int id = argi();
+    shift(); linepatterns::patterns[id].color |= argi();
+    }
+  else if(argis("-palrgba")) {
+    PHASEFROM(2); cheat();
+    shift(); int id = argi();
+    shift(); linepatterns::patterns[id].color = arghex();
+    }
+
+  else return 1;
+  return 0;
+  }
+
+auto ah_pattern = addHook(hooks_args, 0, read_pattern_args);
+#endif
+
 }

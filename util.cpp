@@ -123,4 +123,9 @@ void profile_info() {
 int whateveri, whateveri2;
 
 purehookset hooks_tests;
+
+bool appears(const string& haystack, const string& needle) {
+  return haystack.find(needle) != string::npos;
+  }
+
 }

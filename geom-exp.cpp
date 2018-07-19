@@ -584,6 +584,10 @@ int read_geom_args() {
     fieldpattern::info();
     exit(0);
     } 
+  else if(argis("-qs")) {
+    cheat();
+    shift(); currfp.qpaths.push_back(args());
+    }
   else return 1;
   return 0;
   }

@@ -4,6 +4,8 @@
 
 namespace hr {
 
+const char *conffile = "hyperrogue.ini";
+
 videopar vid;
 
 #define DEFAULT_WALLMODE (ISMOBILE ? 3 : 5)
@@ -1367,6 +1369,87 @@ void selectLanguageScreen() {
       popScreen();
     };
   }
+#endif
+
+#if CAP_COMMANDLINE
+
+int read_config_args() {
+  using namespace arg;
+
+  if(argis("-c")) { PHASE(1); shift(); conffile = argcs(); }
+// change the configuration from the command line
+  else if(argis("-back")) {
+    PHASEFROM(2); shift(); backcolor = arghex();
+    }
+  else if(argis("-borders")) {
+    PHASEFROM(2); shift(); bordcolor = arghex();
+    }
+  else if(argis("-fore")) {
+    PHASEFROM(2); shift(); forecolor = arghex();
+    }
+  else if(argis("-aa")) { PHASEFROM(2); shift(); vid.antialias = argi(); }
+  else if(argis("-lw")) { PHASEFROM(2); shift(); vid.linewidth = argf(); }
+  else if(argis("-wm")) { PHASEFROM(2); shift(); vid.wallmode = argi(); }
+  else if(argis("-mm")) { PHASEFROM(2); shift(); vid.monmode = argi(); }
+
+  else if(argis("-wsh")) { shift(); patterns::whichShape = args()[0]; }
+  else if(argis("-noshadow")) { noshadow = true; }
+  else if(argis("-bright")) { bright = true; }
+
+// non-configurable options
+  else if(argis("-vsync_off")) {
+    vsync_off = true;
+    if(curphase == 3) setvideomode();
+    }
+  else if(argis("-noplayer")) 
+    mapeditor::drawplayer = !mapeditor::drawplayer;
+  else if(argis("-nofps")) {
+    nofps = true;
+    }
+  else if(argis("-nohud")) {
+    nohud = true;
+    }
+  else if(argis("-nomenu")) {
+    nomenukey = true;
+    }
+  else if(argis("-nohelp")) {
+    nohelp = true;
+    }
+  else if(argis("-dont_face_pc")) {
+    dont_face_pc = true;
+    }
+
+  else if(argis("-P")) { 
+    PHASE(2); shift(); 
+    vid.scfg.players = argi();
+    stop_game_and_switch_mode(rg::nothing);
+    }
+  else if(argis("-PM")) { 
+    PHASEFROM(2); shift(); pmodel = eModel(argi());
+    }
+  else if(argis("-zoom")) { 
+    PHASEFROM(2); shift(); vid.scale = argf();
+    }
+  else if(argis("-alpha")) { 
+    PHASEFROM(2); shift(); vid.alpha = argf();
+    }
+  else if(argis("-r")) { 
+    PHASEFROM(2);
+    shift(); 
+    int clWidth=0, clHeight=0, clFont=0;
+    sscanf(argcs(), "%dx%dx%d", &clWidth, &clHeight, &clFont);
+    if(clWidth) vid.xres = clWidth;
+    if(clHeight) vid.yres = clHeight;
+    if(clFont) vid.fsize = clFont;
+    }    
+  else if(argis("-els")) {
+    shift(); conformal::extra_line_steps = argf();
+    }
+  else return 1;
+  return 0;
+  }
+
+auto ah_config = addHook(hooks_args, 0, read_config_args);
 #endif
   
 }
