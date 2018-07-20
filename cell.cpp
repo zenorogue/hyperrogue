@@ -1085,9 +1085,9 @@ int celldist(cell *c) {
     return eudist(decodeId(c->master));
     }
   if(sphere) return celldistance(c, currentmap->gamestart());
+  if(irr::on) return irr::celldist(c, false);
   if(ctof(c)) return c->master->distance;
   if(gp::on) return gp::compute_dist(c, celldist);
-  if(irr::on)  return c->master->distance;
   int dx[MAX_S3];
   for(int u=0; u<S3; u++)
     dx[u] = createMov(c, u+u)->master->distance;
@@ -1113,6 +1113,7 @@ int celldistAlt(cell *c) {
     return celldist(c) - 3;
     }
   if(!c->master->alt) return 0;
+  if(irr::on) return irr::celldist(c, true);
   if(ctof(c)) return c->master->alt->distance;
   if(gp::on) return gp::compute_dist(c, celldistAlt);
   int dx[MAX_S3]; dx[0] = 0;

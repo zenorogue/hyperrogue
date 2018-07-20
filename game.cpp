@@ -6927,7 +6927,7 @@ ld circlesizeD[10000];
 int lastsize;
 
 bool sizes_known() {
-  return euclid || (geometry == gNormal && !gp::on);
+  return euclid || (geometry == gNormal && !gp::on && !irr::on);
   }
 
 void computeSizes() {

@@ -326,7 +326,7 @@ enum hstate { hsOrigin, hsA, hsB, hsError, hsA0, hsA1, hsB0, hsB1, hsC };
 struct heptagon {
   // automaton state
   hstate s : 6;
-  int dm4: 2;
+  unsigned int dm4: 2;
   // we are spin[i]-th neighbor of move[i]
   uint32_t spintable;
   int spin(int d) { return tspin(spintable, d); }
@@ -2587,6 +2587,7 @@ namespace irr {
   bool supports(eGeometry g);
   void visual_creator();
   unsigned char density_code();
+  int celldist(cell *c, bool alts);
   }
 
 extern hrmap *currentmap;

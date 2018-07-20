@@ -413,6 +413,7 @@ bool draw_cell_schematics(cell *c, transmatrix V) {
 struct heptinfo {
   heptspin base;
   vector<cell*> subcells;
+  vector<int> celldists[2];
   };
 
 map<heptagon*, heptinfo> periodmap;
@@ -490,6 +491,69 @@ void link_cell(cell *c, int d) {
   tsetspin(c->spintable, d, sc.spin[d]);
   c2->mov[sc.spin[d]] = c;
   tsetspin(c2->spintable, sc.spin[d], d);
+  }
+
+int hdist(heptagon *h1, heptagon *h2) {
+  if(h1 == h2) return 0;
+  for(int i=0; i<S7; i++) if(h1->move[i] == h2) return 1;
+  return 2;
+  }
+
+// compute celldist or celldistalt for all the subcells of h.
+// We use the following algorithm:
+// - assume that everything is computed for all the adjacent heptagons of h which are closer to the origin
+// - consider h and its two neighbors which are in the same distance to the origin ('siblings')
+// - compute celldists for all the cells in these three heptagons, by bfs, based on the 'parent' heptagons adjacent to h
+// - record the computed distances for h, but not for its siblings
+
+void compute_distances(heptagon *h, bool alts) {
+  auto dm4 = [alts, h] (heptagon *h1) -> unsigned {
+    if(!alts) return h1->dm4;
+    if(alts && !h1->alt) return 100; // error
+    if(alts && h1->alt->alt != h->alt->alt) return 100; // error
+    return h1->alt->dm4;
+    };
+  unsigned cdm = dm4(h), pdm = (cdm-1)&3;
+  vector<heptagon*> hs;
+  hs.push_back(h);
+  for(int i=0; i<S7; i++) if(dm4(createStep(h, i)) == cdm)
+    hs.push_back(h->move[i]);
+  
+  vector<vector<int>*> to_clear;
+
+  for(auto hx: hs) {  
+    auto &hi = periodmap[hx];
+    int ct = isize(hi.subcells);
+    auto& cd = hi.celldists[alts];
+    if(cd.empty() && hx != h) to_clear.push_back(&cd);
+    cd.resize(ct, 2000000000);
+    if(h == hx && (alts ? h->alt->s == hsOrigin : h->s == hsOrigin))
+      cd[0] = 0;
+    }
+  while(true) {
+    bool changed = false;
+    for(auto hx: hs) {
+      auto& hi = periodmap[hx];
+      auto& cd = hi.celldists[alts];
+      for(int i=0; i<isize(hi.subcells); i++)
+        forCellCM(c2, hi.subcells[i]) 
+          if(among(dm4(c2->master), cdm, pdm) && hdist(h, c2->master) < 2) {
+            int d = irr::celldist(c2, alts) + 1;
+            if(d < cd[i]) cd[i] = d, changed = true;
+            }
+      }
+    if(!changed) break;
+    }
+  for(auto x: to_clear) x->clear();
+  // for(int i: cd) printf(" %d", i); printf("\n");
+  }
+
+int celldist(cell *c, bool alts) {
+  heptagon *master = c->master;
+  auto &hi = periodmap[master];
+  if(isize(hi.celldists[alts]) == 0)
+    compute_distances(master, alts);
+  return hi.celldists[alts][cells[cellindex[c]].localindex];
   }
 
 eGeometry orig_geometry;

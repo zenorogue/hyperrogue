@@ -105,10 +105,8 @@ bool grailWasFound(cell *c) {
 
 void generateAlts(heptagon *h, int levs, bool link_cdata) {
   if(!h->alt) return;
-  if(!irr::on) {
-    preventbarriers(h->c7);
-    for(int i=0; i<S7; i++) preventbarriers(h->c7->mov[i]);
-    }
+  preventbarriers(h->c7);
+  for(int i=0; i<S7; i++) preventbarriers(h->c7->mov[i]);
   if(gp::on)
     for(int i=0; i<S7; i++) preventbarriers(createStep(h, i)->c7);
   for(int i=0; i<S7; i++) 
@@ -167,6 +165,10 @@ heptagon *createAlternateMap(cell *c, int rad, hstate firststate, int special) {
   if(weirdhyperbolic) {
     if(c->bardir == NOBARRIERS) return NULL;
     forCellEx(c1, c) if(c1->bardir == NOBARRIERS) return NULL;
+    if(irr::on)
+      for(int i=0; i<S7; i++)
+        if(createStep(c->master, i)->c7->bardir != NODIR)
+          return NULL;
     }
   
   // check for non-crossing
@@ -1082,8 +1084,8 @@ void buildBigStuff(cell *c, cell *from) {
     buildBarrier4(c, bd, 0, getNewLand(c->land), c->land); */
     }
       
-  if((!chaosmode) && bearsCamelot(c->land) && ctof(c) && 
-    (quickfind(laCamelot) || peace::on || (hrand(I2000) < 200 && horo_ok() && 
+  if((!chaosmode) && bearsCamelot(c->land) && is_master(c) && 
+    (quickfind(laCamelot) || peace::on || (hrand(I2000) < 200 && ((irr::on && hyperbolic) || horo_ok()) && 
     items[itEmerald] >= U5 && !tactic::on))) {
     int rtr = newRoundTableRadius();
     heptagon *alt = createAlternateMap(c, rtr+14, hsOrigin);
