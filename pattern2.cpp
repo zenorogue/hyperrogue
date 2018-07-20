@@ -1967,8 +1967,10 @@ namespace linepatterns {
         }
         
       case patTree:
-        if(is_master(c)) 
-          queuelinef(tC0(V), V*xspinpush0(-master_to_c7_angle(), tessf), col, 2);
+        if(is_master(c)) {
+          cell *c2 = c->master->move[0]->c7;
+          if(gmatrix.count(c2)) queuelinef(tC0(V), gmatrix[c2]*C0, col, 2);
+          }
         break;
       
       case patHorocycles:
@@ -1982,10 +1984,12 @@ namespace linepatterns {
         break;
 
       case patAltTree:
-        if(ctof(c) && !euclid && c->master->alt) {
+        if(is_master(c) && !euclid && c->master->alt) {
           for(int i=0; i<S7; i++)
-            if(c->master->move[i] && c->master->move[i]->alt == c->master->alt->move[0])
-              queuelinef(tC0(V), V*xspinpush0(-2*M_PI*i/S7-master_to_c7_angle(), tessf), col, 2);
+            if(c->master->move[i] && c->master->move[i]->alt == c->master->alt->move[0]) {
+              cell *c2 = c->master->move[i]->c7;
+              if(gmatrix.count(c2)) queuelinef(tC0(V), gmatrix[c2]*C0, col, 2);
+              }
           }
         break;
       
@@ -1993,6 +1997,12 @@ namespace linepatterns {
         if(gp::on) {
           if(c->master->c7 != c) if(gmatrix.count(c->mov[0]))
             queuelinef(tC0(V), gmatrix[c->mov[0]]*C0, 
+              darkena(backcolor ^ 0xFFFFFF, 0, col),
+              2);
+          }
+        else if(irr::on) {
+          if(c->master->c7 != c) if(gmatrix.count(c->master->c7))
+            queuelinef(tC0(V), gmatrix[c->master->c7]*C0, 
               darkena(backcolor ^ 0xFFFFFF, 0, col),
               2);
           }
