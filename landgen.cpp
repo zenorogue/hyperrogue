@@ -1141,7 +1141,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
       break;
     
     case laStorms: {
-      bool randstorm = hyperbolic_not37 || gp::on || (quotient && geometry != gZebraQuotient);
+      bool randstorm = hyperbolic_not37 || gp::on || irr::on || (quotient && geometry != gZebraQuotient);
       if(d == 9) {
       
         if(torus) {
