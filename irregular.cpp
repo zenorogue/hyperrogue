@@ -684,6 +684,56 @@ void start_game_on_created_map() {
   start_game();
   }
 
+bool save_map(const string& fname) {
+  FILE *f = fopen(fname.c_str(), "wt");
+  if(!f) return false;
+  auto& all = base->allcells();
+  fprintf(f, "%d %d %d\n", geometry, isize(all), cellcount);
+  
+  for(auto h: all) {
+    fprintf(f, "%d\n", isize(cells_of_heptagon[h->master]));
+    for(auto i: cells_of_heptagon[h->master]) {
+      auto &ci = cells[i];
+      fprintf(f, "%lf %lf %lf\n", double(ci.p[0]), double(ci.p[1]), double(ci.p[2]));
+      }
+    }
+  fclose(f);
+  return true;
+  }
+
+bool load_map(const string &fname) {
+  FILE *f = fopen(fname.c_str(), "rt");
+  if(!f) return false;
+  auto& all = base->allcells();
+  int g, sa;
+  fscanf(f, "%d %d %d\n", &g, &sa, &cellcount);
+  if(sa != isize(all) || g != geometry) { printf("bad parameters\n"); addMessage("bad format or bad map geometry"); return false; }
+  density = cellcount * 1. / isize(all);
+  
+  cells.clear();
+  
+  for(auto h: all) {
+    int q = 0;
+    fscanf(f, "%d\n", &q);
+    if(q < 0 || q > cellcount) { runlevel = 0; return false; }
+    while(q--) {
+      cells.emplace_back();
+      cellinfo& s = cells.back();
+      s.patterndir = -1;
+      double a, b, c;
+      fscanf(f, "%lf%lf%lf", &a, &b, &c);
+      s.p = hpxyz(a, b, c);
+      for(auto c0: all) s.relmatrices[c0] = shmup::calc_relative_matrix(c0, h, s.p);
+      s.owner = h;
+      }
+    }
+  fclose(f);
+
+  make_cells_of_heptagon();
+  runlevel = 2;
+  return true;
+  }
+
 void cancel_map_creation() {
   popScreen();
   gridmaking = false;
@@ -692,6 +742,8 @@ void cancel_map_creation() {
   need_reset_geometry = true;
   start_game();
   }
+
+string irrmapfile = "irregularmap.txt";
 
 void show_gridmaker() {
   cmode = sm::SIDE;
@@ -725,6 +777,34 @@ void show_gridmaker() {
   if(runlevel == 10) dialog::add_action(start_game_on_created_map);
   dialog::addItem(XLAT("cancel"), 'c');
   dialog::add_action(cancel_map_creation);
+  dialog::addItem(XLAT("save"), 's');
+  dialog::add_action([] () {
+    dialog::openFileDialog(irrmapfile, XLAT("irregular to save:"), ".txt", [] () {
+      if(save_map(irrmapfile)) {
+        addMessage(XLAT("Map saved to %1", irrmapfile));
+        return true;
+        }
+      else {
+        addMessage(XLAT("Failed to save map to %1", irrmapfile));
+        return false;
+        }
+      });
+    });
+  dialog::addItem(XLAT("load"), 'l');
+  dialog::add_action([] () {
+    dialog::openFileDialog(irrmapfile, XLAT("irregular to load:"), ".txt", [] () {
+      if(load_map(irrmapfile)) {
+        addMessage(XLAT("Map loaded from %1", irrmapfile));
+        return true;
+        }
+      else {
+        addMessage(XLAT("Failed to load map from %1", irrmapfile));
+        return false;
+        }
+      });
+    });
+  dialog::addItem(XLAT("reset"), 'r');
+  dialog::add_action([] () { runlevel = 0; });
   dialog::display();
   keyhandler = [] (int sym, int uni) {
     dialog::handleNavigation(sym, uni);
@@ -765,7 +845,7 @@ void auto_creator() {
   irr::on = false;
   int cc = cellcount;
   visual_creator();
-  cellcount = cc; density = cc / isize(base->allcells());
+  cellcount = cc; density = cc * 1. / isize(base->allcells());
   printf("Creating the irregular map automatically...\n");
   while(runlevel < 10) step(1000);
   start_game_on_created_map();
@@ -780,6 +860,16 @@ int readArgs() {
     restart_game();
     visual_creator();
     showstartmenu = false;
+    }
+  else if(argis("-irrload")) {
+    PHASE(3);
+    restart_game();
+    visual_creator();
+    showstartmenu = false;
+    shift();
+    load_map(args());
+    while(runlevel < 10) step(1000);
+    start_game_on_created_map();
     }
   else return 1;
   return 0;
