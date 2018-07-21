@@ -1400,8 +1400,6 @@ int read_config_args() {
     vsync_off = true;
     if(curphase == 3) setvideomode();
     }
-  else if(argis("-noplayer")) 
-    mapeditor::drawplayer = !mapeditor::drawplayer;
   else if(argis("-nofps")) {
     nofps = true;
     }
@@ -1418,11 +1416,6 @@ int read_config_args() {
     dont_face_pc = true;
     }
 
-  else if(argis("-P")) { 
-    PHASE(2); shift(); 
-    vid.scfg.players = argi();
-    stop_game_and_switch_mode(rg::nothing);
-    }
   else if(argis("-PM")) { 
     PHASEFROM(2); shift(); pmodel = eModel(argi());
     }
@@ -1444,12 +1437,23 @@ int read_config_args() {
   else if(argis("-els")) {
     shift(); conformal::extra_line_steps = argf();
     }
+  TOGGLE('o', vid.usingGL, switchGL())
+  TOGGLE('f', vid.full, switchFullscreen())
+  else return 1;
+  return 0;
+  }
 
 // mode changes:
 
-  TOGGLE('o', vid.usingGL, switchGL())
+int read_gamemode_args() {
+  using namespace arg;
+
+  if(argis("-P")) { 
+    PHASE(2); shift(); 
+    vid.scfg.players = argi();
+    stop_game_and_switch_mode(rg::nothing);
+    }
   TOGGLE('C', chaosmode, stop_game_and_switch_mode(rg::chaos))
-  TOGGLE('f', vid.full, switchFullscreen())
   TOGGLE('S', shmup::on, stop_game_and_switch_mode(rg::shmup))
   TOGGLE('H', hardcore, switchHardcore())
   TOGGLE('R', randomPatternsMode, stop_game_and_switch_mode(rg::randpattern))
@@ -1459,7 +1463,7 @@ int read_config_args() {
   return 0;
   }
 
-auto ah_config = addHook(hooks_args, 0, read_config_args);
+auto ah_config = addHook(hooks_args, 0, read_config_args) + addHook(hooks_args, 0, read_gamemode_args);
 #endif
   
 }
