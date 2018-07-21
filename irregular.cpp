@@ -506,7 +506,25 @@ int hdist(heptagon *h1, heptagon *h2) {
 // - compute celldists for all the cells in these three heptagons, by bfs, based on the 'parent' heptagons adjacent to h
 // - record the computed distances for h, but not for its siblings
 
+static const int NODISTANCE = 2000000000;
+
+map<heptagon*, heptagon*> last_on_horocycle;
+
+void compute_horocycle(heptagon *);
+
 void compute_distances(heptagon *h, bool alts) {
+  /* if(alts) printf("[%p] compute_distances %p\n", h->alt->alt, h);
+  printf("neighbors:"); for(int i=0; i<S7; i++) printf(" %p", createStep(h, i)); printf("\n"); */
+  
+  if(alts) {
+    if(!last_on_horocycle[h->alt->alt])
+      last_on_horocycle[h->alt->alt] = h;
+    
+    if(h->alt->alt->s != hsOrigin)
+    while(h->alt->distance <= last_on_horocycle[h->alt->alt]->alt->distance)
+      compute_horocycle(h->alt->alt);
+    }
+
   auto dm4 = [alts, h] (heptagon *h1) -> unsigned {
     if(!alts) return h1->dm4;
     if(alts && !h1->alt) return 100; // error
@@ -526,7 +544,7 @@ void compute_distances(heptagon *h, bool alts) {
     int ct = isize(hi.subcells);
     auto& cd = hi.celldists[alts];
     if(cd.empty() && hx != h) to_clear.push_back(&cd);
-    cd.resize(ct, 2000000000);
+    cd.resize(ct, NODISTANCE);
     if(h == hx && (alts ? h->alt->s == hsOrigin : h->s == hsOrigin))
       cd[0] = 0;
     }
@@ -544,14 +562,109 @@ void compute_distances(heptagon *h, bool alts) {
       }
     if(!changed) break;
     }
+
+  /* for(auto hx: hs) {
+    auto& hi = periodmap[hx];
+    auto& cd = hi.celldists[alts];
+    // for(int i: cd) if(i == NODISTANCE) printf("distances not computed\n");
+    } */
+
   for(auto x: to_clear) x->clear();
+
   // for(int i: cd) printf(" %d", i); printf("\n");
+  }
+
+void erase_alt(heptagon *alt) { 
+  last_on_horocycle.erase(alt);
+  }
+
+void compute_horocycle(heptagon *alt) {
+  heptagon *master = last_on_horocycle[alt];
+  // printf("computing horocycle, master distance = %d [M=%p, A=%p]\n", master->alt->distance, master, alt);
+  
+  static const int LOOKUP = 16;
+  set<heptagon*> hs[LOOKUP];
+  hs[0].insert(master);
+  set<heptagon*> region;
+  for(int i=0; i<LOOKUP-1; i++) {
+    for(auto h: hs[i]) {
+      generateAlts(h);
+      for(int j=0; j<S7; j++) {
+        if(h->move[j]->alt->alt != master->alt->alt) continue;
+        region.insert(h->move[j]);
+        if(h->move[j]->alt->distance < h->alt->distance)
+          hs[i+1].insert(h->move[j]);
+        }
+      }
+    if(hs[i+1].empty()) { printf("error: hs[%d] not found\n", i+1); exit(1); }
+    }
+  /* printf("[%p] compute_horocycle ");
+  for(int i=0; i<LOOKUP-1; i++) printf("%d -> ", isize(hs[i])); printf("%p\n", isize(hs[LOOKUP-1])); */
+  map<cell*, int> xdist; 
+  vector<cell*> xdqueue;
+  cell *orig = periodmap[*(hs[LOOKUP-1].begin())].subcells[0];
+  xdist[orig] = 0;
+  xdqueue.push_back(orig);
+  for(int i=0; i<isize(xdqueue); i++) {
+    forCellCM(c1, xdqueue[i])
+      if(!xdist.count(c1) && region.count(c1->master)) {
+        xdist[c1] = xdist[xdqueue[i]] + 1;
+        xdqueue.push_back(c1);
+        }
+    }
+  int delta = NODISTANCE;
+  for(int i=0; i<S7; i++) {
+    heptagon *h = master->move[i];
+    if(h->alt->alt != master->alt->alt) continue;
+    heptinfo& hi = periodmap[h];
+    if(!isize(hi.celldists[1])) continue;
+    for(int c=0; c<isize(hi.subcells); c++) {
+      if(hi.celldists[1][c] == NODISTANCE) continue;
+      int delta_candidate = hi.celldists[1][c] - xdist[hi.subcells[c]];
+      if(delta != NODISTANCE && delta_candidate != delta) {
+        printf("delta conflict: %d vs %d\n", delta, delta_candidate);
+        delta = max(delta, delta_candidate);
+        }
+      delta = delta_candidate;
+      }
+    }
+  if(delta == NODISTANCE) {
+    delta = master->alt->distance - xdist[periodmap[master].subcells[0]];
+    // printf("delta not found, set to %d\n", delta);
+    }
+  // printf("using delta = %d\n", delta);
+
+  for(int i=0; i<LOOKUP/2; i++) {
+    for(auto h: hs[i]) for(int j=-1; j<S7; j++) {
+      heptinfo& hi = periodmap[j == -1 ? h : h->move[j]];
+      hi.celldists[1].resize(isize(hi.subcells));
+      for(int c=0; c<isize(hi.subcells); c++)
+        hi.celldists[1][c] = delta + xdist[hi.subcells[c]];
+      }
+    }
+
+  last_on_horocycle[alt] = *(hs[LOOKUP/2].begin());
   }
 
 int celldist(cell *c, bool alts) {
   heptagon *master = c->master;
   auto &hi = periodmap[master];
-  if(isize(hi.celldists[alts]) == 0)
+  /* if(alts && master->alt->alt->s != hsOrigin && isize(hi.celldists[alts]) == 0) {
+    int doalts = 0;
+    for(int i=0; i<S7; i++) if(master->move[i]->alt == master->alt->move[0]) {
+      doalts = 1;
+      if(periodmap[master->move[i]].celldists[true].empty()) {
+        compute_horocycle(master);
+        doalts = 2;
+        }
+      }
+    if(doalts == 0) {
+      generateAlts(master);
+      for(int i=0; i<S7; i++) if(master->move[i]->alt == master->alt->move[0] && periodmap[master->move[i]].celldists[true].empty())
+        compute_horocycle(master);
+      }
+    } */
+  if(isize(hi.celldists[alts]) == 0) 
     compute_distances(master, alts);
   return hi.celldists[alts][cells[cellindex[c]].localindex];
   }

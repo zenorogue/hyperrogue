@@ -977,7 +977,7 @@ int wallchance(cell *c, bool deepOcean) {
 bool horo_ok() {
   // do the horocycles work in the current geometry?
   // (they work in ALL hyperbolic geometries currently!)
-  return hyperbolic && !irr::on;
+  return hyperbolic;
   }
 
 bool gp_wall_test() {
@@ -1085,7 +1085,7 @@ void buildBigStuff(cell *c, cell *from) {
     }
       
   if((!chaosmode) && bearsCamelot(c->land) && is_master(c) && 
-    (quickfind(laCamelot) || peace::on || (hrand(I2000) < 200 && ((irr::on && hyperbolic) || horo_ok()) && 
+    (quickfind(laCamelot) || peace::on || (hrand(I2000) < 200 && horo_ok() && 
     items[itEmerald] >= U5 && !tactic::on))) {
     int rtr = newRoundTableRadius();
     heptagon *alt = createAlternateMap(c, rtr+14, hsOrigin);

@@ -821,7 +821,7 @@ namespace clearing {
   void generate(cell *c) {
     if(buggyplant) return;    
     if(sphere) return;    
-    if(gp::on) return;
+    if(gp::on || irr::on) return;
     if(quotient) return;
     
     if(euclid) {

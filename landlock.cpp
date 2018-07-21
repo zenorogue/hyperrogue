@@ -1162,12 +1162,9 @@ land_validity_t& land_validity(eLand l) {
   if((isWarped(l) || l == laDual) && irr::on)
     return dont_work;
   
-  if(irr::on && among(l, laStorms, laPrairie, laBlizzard, laVolcano))
+  if(irr::on && among(l, laPrairie, laBlizzard, laVolcano, laMirror, laMirrorOld))
     return dont_work;
 
-  if(irr::on && among(l, laWhirlpool, laCamelot, laCaribbean, laClearing, laTemple, laHive, laMirror, laMirrorOld, laReptile))
-    return dont_work;
-  
   // equidistant-based lands
   if(isEquidLand(l)) {
     // no equidistants supported in chaos mode
@@ -1201,7 +1198,7 @@ land_validity_t& land_validity(eLand l) {
     return not_in_chaos;
   
   if(l == laClearing)
-    if(!(stdeuc || a38 || (a45 && !nonbitrunc) || (a47 && !nonbitrunc)) || gp::on)
+    if(!(stdeuc || a38 || (a45 && !nonbitrunc) || (a47 && !nonbitrunc)) || gp::on || irr::on)
     if(!bounded)
       return not_implemented;
 
@@ -1313,7 +1310,7 @@ land_validity_t& land_validity(eLand l) {
   if(l == laTrollheim && !stdeuc && !bounded)
     return some1;
   
-  if(l == laReptile && (a38 || a4 || sphere || nonbitrunc || gp::on || (quotient && geometry != gZebraQuotient)))
+  if(l == laReptile && (a38 || a4 || sphere || nonbitrunc || gp::on || irr::on || (quotient && geometry != gZebraQuotient)))
     return bad_graphics;
 
   if((l == laDragon || l == laReptile) && !stdeuc && !smallbounded && !randomPatternsMode)

@@ -522,7 +522,6 @@ bool destroyHalfvine(cell *c, eWall newwall = waNone, int tval = 6);
 void buildCrossroads2(cell *c);
 bool isHaunted(eLand l);
 heptagon *createAlternateMap(cell *c, int rad, hstate firststate, int special=0);
-void generateAlts(heptagon *h, int levs = S3-3, bool link_cdata = true);
 void setdist(cell *c, int d, cell *from);
 void checkOnYendorPath();
 void killThePlayerAt(eMonster m, cell *c, flagtype flags);
@@ -3714,4 +3713,6 @@ extern ld hexshift;
 
 extern bool noshadow, bright, nohelp, dont_face_pc;
 extern void switchHardcore();
+
+void generateAlts(heptagon *h, int levs = irr::on ? 1 : S3-3, bool link_cdata = true);
 }
