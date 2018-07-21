@@ -406,6 +406,7 @@ void switch_mode(eMode m) {
   mode = m;
   GLERR("after_switch_mode");
   current_vertices = NULL;
+  id_modelview();
   }
 
 void fog_max(ld fogmax) {

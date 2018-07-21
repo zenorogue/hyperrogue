@@ -182,45 +182,37 @@ void setcameraangle(bool b) {
     }
   }
 
-void start_projection(int ed) {
-  glhr::new_projection();
-  glhr::projection_multiply(glhr::translate((vid.xcenter*2.)/vid.xres - 1, 1 - (vid.ycenter*2.)/vid.yres, 0));
+bool using_perspective;
 
-  if(ed) {
-    if(stereo::mode == stereo::sLR) {
-      glhr::projection_multiply(glhr::translate(ed * (stereo::eyewidth() - .5) * 4, 0, 0));
-      glhr::projection_multiply(glhr::scale(2, 1, 1));
-      }
-    else {
-      glhr::projection_multiply(glhr::translate(-ed * stereo::eyewidth(), 0, 0));
-      }
-    }
+void start_projection(int ed, bool perspective) {
+  glhr::new_projection();
+  using_perspective = perspective;
+
+  if(ed && stereo::mode == stereo::sLR) {
+    glhr::projection_multiply(glhr::translate(ed, 0, 0));
+    glhr::projection_multiply(glhr::scale(2, 1, 1));
+    }      
+
+  glhr::projection_multiply(glhr::translate((vid.xcenter*2.)/vid.xres - 1, 1 - (vid.ycenter*2.)/vid.yres, 0));
+  }
+
+void eyewidth_translate(int ed) {
+  if(ed) glhr::projection_multiply(glhr::translate(-ed * stereo::eyewidth(), 0, 0));
   }
 
 void stereo::set_projection(int ed) {
   DEBB(DF_GRAPH, (debugfile,"stereo::set_projection\n"));
   
-  start_projection(ed);
-  
-  if(pmodel && !stereo::active()) {
+  start_projection(ed, pmodel == mdDisk && !spherespecial);
 
+  if(!using_perspective) {
     glhr::projection_multiply(glhr::ortho(vid.xres/2, -vid.yres/2, abs(stereo::scrdist) + 30000));
-    }
-  else if(pmodel) {
-
-    ld right = vid.xres/2 / stereo::scrdist;
-    ld left = -right;
-    ld top = -vid.yres/2 / stereo::scrdist;
-    ld bottom = -top;
-
-    glhr::projection_multiply(glhr::frustum((right-left)/2, (top-bottom)/2));
-    
-    if(ed) glhr::projection_multiply(glhr::translate(stereo::ipd * vid.radius * ed/2, 0, 0));
-
-    glhr::projection_multiply(glhr::scale(1, 1, -1));
-    glhr::projection_multiply(glhr::translate(0, 0, stereo::scrdist));
-
-    stereo::scrdist_text = 0;
+    if(ed) {
+      glhr::glmatrix m = glhr::id;
+      m[2][0] -= ed;
+      glhr::projection_multiply(m);
+      }
+    glhr::id_modelview();
     }
   else {
 
@@ -232,6 +224,8 @@ void stereo::set_projection(int ed) {
       // depth clipping
       glhr::projection_multiply(glhr::scale(1,1,0));
       }
+
+    eyewidth_translate(ed);
 
     glhr::projection_multiply(glhr::frustum(vid.xres * 1. / vid.yres, 1));
 
@@ -323,6 +317,7 @@ void setGLProjection(int col) {
   GLERR("setGLProjection");
   
   stereo::set_projection(0);
+  
   GLERR("after set_projection");
   }
 

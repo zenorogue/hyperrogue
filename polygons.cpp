@@ -149,7 +149,8 @@ int spherespecial, spherephase;
 void addpoint(const hyperpoint& H) {
   if(true) {
     hyperpoint Hscr;
-    applymodel(H, Hscr);
+    applymodel(H, Hscr); 
+    for(int i=0; i<3; i++) Hscr[i] *= vid.radius;
     if(vid.alpha + H[2] <= BEHIND_LIMIT && pmodel == mdDisk) poly_flags |= POLY_BEHIND;
     
     if(spherespecial) {
@@ -167,7 +168,6 @@ void addpoint(const hyperpoint& H) {
         Hscr[1] *= coef;
         }
       }
-    for(int i=0; i<3; i++) Hscr[i] *= vid.radius;
     add1(Hscr);
     }
   }
@@ -254,23 +254,6 @@ void glapplymatrix(const transmatrix& V) {
   glhr::set_modelview(glhr::as_glmatrix(mat));
   }
 
-void setmatrix(int useV, const transmatrix& V) {
-  if(useV == 1) {
-    glapplymatrix(V);
-    }
-  else if(useV == 3) {
-    GLfloat mat[16] = {
-      1, 0, 0, 0,
-      0, 1, 0, 0,
-      0, 0, GLfloat(stereo::mode ? -1 : 0), 0,
-      0, 0, stereo::scrdist, 1
-      };
-    glhr::set_modelview(glhr::as_glmatrix(mat));
-    }
-  else
-    glhr::id_modelview();
-  }
-
 #ifndef MINIMIZE_GL_CALLS
 #ifdef EMSCRIPTEN
 #define MINIMIZE_GL_CALLS 1
@@ -279,7 +262,7 @@ void setmatrix(int useV, const transmatrix& V) {
 #endif
 #endif
 
-void gldraw(int useV, const transmatrix& V, const vector<glvertex>& v, int ps, int pq, int col, int outline, int flags, textureinfo *tinf) {
+void gldraw(const transmatrix& V, const vector<glvertex>& v, int ps, int pq, int col, int outline, int flags, textureinfo *tinf) {
 
   if(tinf) {
     #if CAP_TEXTURE
@@ -307,7 +290,8 @@ void gldraw(int useV, const transmatrix& V, const vector<glvertex>& v, int ps, i
   for(int ed = stereo::active() ? -1 : 0; ed<2; ed+=2) {
     if(ed) stereo::set_projection(ed), stereo::set_viewport(ed);
     bool draw = col;
-    setmatrix(useV, V);
+    
+    if(using_perspective) glapplymatrix(V);
 
     if(draw) {
       if((flags & POLY_VCONVEX) && MINIMIZE_GL_CALLS) {
@@ -339,17 +323,18 @@ void gldraw(int useV, const transmatrix& V, const vector<glvertex>& v, int ps, i
           glStencilFunc( GL_NOTEQUAL, 1, 1);
           GLfloat xx = vid.xres;
           GLfloat yy = vid.yres;
+          GLfloat dist = using_perspective ? stereo::scrdist : 0;
           vector<glvertex> scr = {
-            make_array<GLfloat>(-xx, -yy, stereo::scrdist), 
-            make_array<GLfloat>(+xx, -yy, stereo::scrdist), 
-            make_array<GLfloat>(+xx, +yy, stereo::scrdist), 
-            make_array<GLfloat>(-xx, +yy, stereo::scrdist)
+            make_array<GLfloat>(-xx, -yy, dist), 
+            make_array<GLfloat>(+xx, -yy, dist), 
+            make_array<GLfloat>(+xx, +yy, dist), 
+            make_array<GLfloat>(-xx, +yy, dist)
             };
           glhr::vertices(scr);
           glhr::id_modelview();
           glDrawArrays(tinf ? GL_TRIANGLES : GL_TRIANGLE_FAN, 0, 4);
           glhr::vertices(v);
-          setmatrix(useV, V);
+          if(using_perspective) glapplymatrix(V);
           }
         else { 
           glStencilOp( GL_ZERO, GL_ZERO, GL_ZERO);
@@ -617,9 +602,9 @@ void drawpolyline(polytodraw& p) {
     }
 
 #if CAP_GL
-  if(vid.usingGL && pmodel == mdDisk && !spherespecial) {
+  if(vid.usingGL && using_perspective) {
     glLineWidth(linewidthat(tC0(pp.V), pp.minwidth));
-    gldraw(1, pp.V, *pp.tab, pp.offset, pp.cnt, p.col, pp.outline, pp.flags &~ POLY_INVERSE, pp.tinf);
+    gldraw(pp.V, *pp.tab, pp.offset, pp.cnt, p.col, pp.outline, pp.flags &~ POLY_INVERSE, pp.tinf);
     return;
     }
 #endif
@@ -718,11 +703,11 @@ void drawpolyline(polytodraw& p) {
         for(int i=0; i<pp.cnt; i++)
           tv.push_back(pp.tinf->tvertices[pp.offset+i]);
         swap(pp.tinf->tvertices, tv);
-        gldraw(3, Id, glcoords, 0, isize(glcoords), p.col, pp.outline, poly_flags, pp.tinf);
+        gldraw(Id, glcoords, 0, isize(glcoords), p.col, pp.outline, poly_flags, pp.tinf);
         swap(pp.tinf->tvertices, tv);
         }
       else
-        gldraw(3, Id, glcoords, 0, isize(glcoords), nofill ? 0 : p.col, pp.outline, poly_flags, nofill ? NULL : pp.tinf);
+        gldraw(Id, glcoords, 0, isize(glcoords), nofill ? 0 : p.col, pp.outline, poly_flags, nofill ? NULL : pp.tinf);
       continue;
       }
   #endif
@@ -914,10 +899,11 @@ void sortquickqueue() {
   }
 
 void quickqueue() {
-  spherespecial = 0;
+  spherespecial = 0; stereo::set_projection(0);
   int siz = isize(ptds);
   setcameraangle(false);
   for(int i=0; i<siz; i++) drawqueueitem(ptds[i]);
+  ptds.clear();
   }
 
 ld xintval(const hyperpoint& h) {
@@ -935,7 +921,7 @@ void drawqueue() {
   int siz = isize(ptds);
 
   setcameraangle(true);
-
+  
 #if CAP_GL
   if(vid.usingGL) 
     glClear(GL_STENCIL_BUFFER_BIT);
@@ -1004,6 +990,8 @@ void drawqueue() {
 
   spherespecial = 0;
   spherephase = 0;
+  stereo::set_projection(0);
+  
   // on the sphere, parts on the back are drawn first
   if(sphere && pmodel == 0) {
 
@@ -1015,6 +1003,8 @@ void drawqueue() {
       }
     
     spherespecial = sphereflipped() ? 1 : -1;
+    stereo::set_projection(0);
+
     #ifndef STLSORT
     for(int p: {PPR_REDWALLs, PPR_REDWALLs2, PPR_REDWALLs3, PPR_WALL3s,
       PPR_LAKEWALL, PPR_INLAKEWALL, PPR_BELOWBOTTOM}) 
@@ -1039,6 +1029,7 @@ void drawqueue() {
     #endif
     spherespecial *= -1;
     spherephase = 1;
+    stereo::set_projection(0);
     }
   for(int i=0; i<siz; i++) {
     GET_PTD(i);

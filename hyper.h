@@ -3714,5 +3714,7 @@ extern ld hexshift;
 extern bool noshadow, bright, nohelp, dont_face_pc;
 extern void switchHardcore();
 
+extern bool using_perspective;
+
 void generateAlts(heptagon *h, int levs = irr::on ? 1 : S3-3, bool link_cdata = true);
 }

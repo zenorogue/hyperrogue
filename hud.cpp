@@ -377,13 +377,9 @@ void drawStats() {
 
   {
   dynamicval<eModel> pm(pmodel, mdDisk);
-  dynamicval<ld> va(vid.alpha, 1);
-  dynamicval<ld> vax(vid.alpha, 1);
   dynamicval<videopar> v(vid, vid);
-  calcparam();
-#if CAP_GL
-  stereo::set_projection(0);
-#endif
+  vid.alpha = vid.scale = 1;
+  calcparam(); set_projection(0);
 
   if(haveMobileCompass()) {
     initquickqueue();
@@ -504,11 +500,7 @@ void drawStats() {
       }
     }
   }
-
-  calcparam();
-#if CAP_GL
-  stereo::set_projection(0);
-#endif
+  calcparam(); stereo::set_projection(0);
   
   string s0;
   if(!peace::on) {

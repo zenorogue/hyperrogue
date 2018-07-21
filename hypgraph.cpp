@@ -210,7 +210,7 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
     if(!vid.camera_angle) {
       ret[0] = H[0] / tz;
       ret[1] = H[1] / tz;
-      ret[2] = vid.xres / vid.radius * stereo::eyewidth() / 2 - stereo::ipd / tz / 2;
+      ret[2] = vid.xres * stereo::eyewidth() / 2 / vid.radius - stereo::ipd / tz / 2;
       }
     else {
       ld tx = H[0];
@@ -221,7 +221,7 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
       ld ux = tx, uy = ty * cc - ss * tz, uz = tz * cc + ss * ty;
       ret[0] = ux / uz;
       ret[1] = uy / uz;
-      ret[2] = vid.xres / vid.radius * stereo::eyewidth() / 2 - stereo::ipd / uz / 2;
+      ret[2] = vid.xres * stereo::eyewidth() / 2 / vid.radius - stereo::ipd / uz / 2;
       }
     return;
     }

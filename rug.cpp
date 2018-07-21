@@ -1285,7 +1285,9 @@ void drawRugScene() {
     if(ed == 1 && stereo::mode == stereo::sAnaglyph)
       glClear(GL_DEPTH_BUFFER_BIT);
     
-    start_projection(ed);
+    start_projection(ed, true);
+    eyewidth_translate(ed);
+
     if(stereo::mode == stereo::sODS) {
       glhr::projection_multiply(glhr::ortho(M_PI, M_PI, 100)); // 2*M_PI));
       }

@@ -606,6 +606,8 @@ void showGraphConfig() {
     dialog::addSelItem(XLAT("line width"), fts(vid.linewidth), 'w');
 //    dialog::addBoolItem(XLAT("finer lines at the boundary"), vid.antialias & AA_LINEWIDTH, 'b');
     }
+  else
+    dialog::addBreak(100);
 
   #if CAP_FRAMELIMIT
   dialog::addSelItem(XLAT("framerate limit"), its(vid.framelimit), 'l');
