@@ -850,7 +850,8 @@ void auto_creator() {
   while(runlevel < 10) step(1000);
   start_game_on_created_map();
   }
-  
+
+#if CAP_COMMANDLINE  
 int readArgs() {
   using namespace arg;
            
@@ -874,6 +875,7 @@ int readArgs() {
   else return 1;
   return 0;
   }
+#endif
 
 unsigned char density_code() {
   if(cellcount < 128) return cellcount;
@@ -904,7 +906,9 @@ array<heptagon*, 3> get_masters(cell *c) {
   }
 
 auto hook = 
+#if CAP_COMMANDLINE
   addHook(hooks_args, 100, readArgs) + 
+#endif
   addHook(hooks_drawcell, 100, draw_cell_schematics) +
   addHook(shmup::hooks_turn, 100, step);
 

@@ -27,6 +27,8 @@ bool mousepressed = false;
 bool mousemoved = false;
 bool actonrelease = false;
 
+int timetowait;
+
 #if CAP_SDLJOY
 int joyx, joyy, panjoyx, panjoyy; 
 movedir joydir;
@@ -472,8 +474,6 @@ void resize_screen_to(int x, int y) {
   setfsize = true;
   setvideomode();
   }
-
-int timetowait;
 
 void mainloopiter() {
 

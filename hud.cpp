@@ -379,7 +379,8 @@ void drawStats() {
   dynamicval<eModel> pm(pmodel, mdDisk);
   dynamicval<videopar> v(vid, vid);
   vid.alpha = vid.scale = 1;
-  calcparam(); set_projection(0);
+  calcparam(); 
+  stereo::set_projection(0);
 
   if(haveMobileCompass()) {
     initquickqueue();

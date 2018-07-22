@@ -780,7 +780,7 @@ namespace mapeditor {
       else if(doexiton(sym, uni)) popScreen();
       };    
     }
-  
+
   void handleKeyMap(int sym, int uni) {
     handlePanning(sym, uni);
 
@@ -1795,10 +1795,11 @@ namespace mapeditor {
   }
 
 #if CAP_EDIT
-#if CAP_COMMANDLINE
 string levelfile = "hyperrogue.lev";
 const char *loadlevel = NULL;
 string picfile = "hyperrogue.pic";
+
+#if CAP_COMMANDLINE
 
 int read_editor_args() {
   using namespace arg;

@@ -8,22 +8,19 @@
 #include <string>
 
 namespace hr {
-  const char *scorefile = "fakemobile_score.txt";
-  const char *conffile = "fakemobile_config.txt";
-  
-  std::string levelfile = "fakemobile_level.txt";
-  std::string picfile = "fakemobile_pic.txt";
+  const char *scorefile = "fakemobile_score.txt";  
   }
 
 #include <SDL/SDL.h>
 
 #include "init.cpp"
-using namespace hr;
 
 #include <SDL/SDL_ttf.h>
 #include <SDL/SDL_gfxPrimitives.h>
 
 #undef main
+
+namespace hr {
 
 transmatrix getOrientation() { return Id; }
 
@@ -100,6 +97,14 @@ void switchGoogleConnection() { printf("sgc\n"); }
 void shareScore(int) {
   printf("share\n");
   }
+
+void openURL() {
+  printf("< openURL > \n");
+  }
+
+}
+
+using namespace hr;
 
 int main(int argc, char **argv) {
 
@@ -240,6 +245,3 @@ int main(int argc, char **argv) {
   clearMemory();
   }
 
-void openURL() {
-  printf("< openURL > \n");
-  }

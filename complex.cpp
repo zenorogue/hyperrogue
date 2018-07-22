@@ -2986,9 +2986,9 @@ namespace ca {
       carule[nei][livedead] = s;
     return 0;
     }
-#endif
   
   auto ah = addHook(hooks_args, 0, readArg);
+#endif
 
   void simulate() {
     if(cwt.c->land != laCA) return;

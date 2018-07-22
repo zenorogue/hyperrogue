@@ -834,7 +834,9 @@ void drawqueueitem(polytodraw& ptd) {
   
   switch(ptd.kind) { 
     case pkLink:
+      #if CAP_SVG
       svg::link = ptd.u.link.link;
+      #endif
       break;
 
     case pkSpecial:
