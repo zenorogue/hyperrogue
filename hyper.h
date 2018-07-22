@@ -1474,7 +1474,8 @@ extern bool timerghost;
 #define CAP_MENUSCALING (ISPANDORA || ISMOBILE)
 
 #if CAP_MENUSCALING
-#define displayfrZ dialog::displayzoom
+#define displayfrZ dialog::zoom::displayfr
+#define displayfrZH dialog::zoom::displayfr_highlight
 #else
 #define displayfrZ displayfr
 #endif
@@ -1538,7 +1539,12 @@ namespace dialog {
   void scaleLog();
   void scaleSinh();
   void handleNavigation(int &sym, int &uni);
-  bool displayzoom(int x, int y, int b, int size, const string &s, int color, int align);
+  
+  namespace zoom {
+    bool displayfr(int x, int y, int b, int size, const string &s, int color, int align);
+    bool displayfr_highlight(int x, int y, int b, int size, const string &s, int color, int align, int hicolor = 0xFFFF00);
+    }
+
   bool editingDetail();
 
   int handlePage(int& nl, int& nlm, int perpage);

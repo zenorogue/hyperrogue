@@ -310,21 +310,15 @@ void mobile_draw(MOBPAR_FORMAL) {
   if(inmenu && !clicked && !lclicked) inmenu = false;
   
   bool keyreact = lclicked && !clicked;
-  
-  if(cmode & sm::ZOOMABLE) {
+
+#if CAP_MENUSCALING  
+  if(true) {
     using namespace dialog::zoom;
-    if(zoomoff) {
-      zoomf = 1; shiftx = shifty = 0; zoomoff = false; return; 
-      }
-    if(clicked && !lclicked) {
-      zoomf = 3;
-      }
-    if(zoomf == 3) { 
-      shiftx = -2*mousex;
-      shifty = -2*mousey;
-      }
-    if(!clicked && zoomf > 1) { zoomoff = true; }
-    }    
+    if(zoomoff || !(cmode & sm::ZOOMABLE)) nozoom();
+    else if(clicked && !lclicked) initzoom();
+    else if(!clicked && zoomf > 1) stopzoom();
+    }
+#endif
   
   if(inslider) keyreact = true;
 

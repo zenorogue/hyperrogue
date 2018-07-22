@@ -31,35 +31,46 @@ namespace dialog {
   namespace zoom {
     int zoomf = 1, shiftx, shifty;
     bool zoomoff = false;
+
+    void nozoom() {
+      zoomf = 1; shiftx = 0; shifty = 0; zoomoff = false;
+      }
+    
+    void initzoom() {
+      zoomf = 3;
+      shiftx = -2*mousex;
+      if(mousex < vid.xres / 6) shiftx = 0;
+      if(mousex > vid.xres * 5 / 6) shiftx = -2 * vid.xres;
+      shifty = -2*mousey;
+      if(mousey < vid.yres / 6) shifty = 0;
+      if(mousey > vid.yres * 5 / 6) shifty = -2 * vid.yres;
+      }
+    
+    void stopzoom() { zoomoff = true; }
+
+    bool displayfr(int x, int y, int b, int size, const string &s, int color, int align) {
+      return hr::displayfr(x * zoomf + shiftx, y * zoomf + shifty, b, size * zoomf, s, color, align);
+      }
+  
+    bool displayfr_highlight(int x, int y, int b, int size, const string &s, int color, int align, int hicolor) {
+      bool clicked = hr::displayfr(x * zoomf + shiftx, y * zoomf + shifty, b, size * zoomf, s, color, align);
+      if(clicked) hr::displayfr(x * zoomf + shiftx, y * zoomf + shifty, b, size * zoomf, s, hicolor, align);
+      return clicked;
+      }
     };
 
-#if CAP_MENUSCALING
-#if CAP_SDL
+#if CAP_MENUSCALING && CAP_SDL
   void handleZooming(SDL_Event &ev) {
     using namespace zoom;
-    if(zoomoff || (cmode != emOverview && cmode != emTactic)) { 
-      zoomf = 1; shiftx = shifty = 0; zoomoff = false; return; 
+    if(zoomoff || !(cmode & sm::ZOOMABLE)) { 
+      nozoom(); return; 
       }
-    if(ev.type == SDL_MOUSEBUTTONDOWN) {
-      zoomf = 3;
-      }
-    if(zoomf == 3) { 
-      shiftx = -2*mousex;
-      shifty = -2*mousey;
-      }
-    if(ev.type == SDL_MOUSEBUTTONUP && zoomf > 1) {
-      zoomoff = true;
-      }
+    if(ev.type == SDL_MOUSEBUTTONDOWN) initzoom();
+    if(ev.type == SDL_MOUSEBUTTONUP && zoomf > 1) stopzoom();
     }
-#endif
 #else
   inline void handleZooming(SDL_Event &ev) {}
 #endif
-
-  bool displayzoom(int x, int y, int b, int size, const string &s, int color, int align) {
-    using namespace zoom;
-    return displayfr(x * zoomf + shiftx, y * zoomf + shifty, b, size * zoomf, s, color, align);
-    }
   
   vector<item> items;
   
@@ -855,15 +866,15 @@ namespace dialog {
   void displayPageButtons(int i, bool pages) {
     int i0 = vid.yres - vid.fsize;
     int xr = vid.xres / 80;
-    if(pages) if(displayfrZ(xr*8, i0, 1, vid.fsize, IFM("1 - ") + XLAT("page") + " 1", nlpage == 1 ? 0xD8D8C0 : 0xC0C0C0, 8))
+    if(pages) if(displayfrZH(xr*8, i0, 1, vid.fsize, IFM("1 - ") + XLAT("page") + " 1", nlpage == 1 ? 0xD8D8C0 : 0xC0C0C0, 8))
       getcstat = '1';
-    if(pages) if(displayfrZ(xr*24, i0, 1, vid.fsize, IFM("2 - ") + XLAT("page") + " 2", nlpage == 1 ? 0xD8D8C0 : 0xC0C0C0, 8))
+    if(pages) if(displayfrZH(xr*24, i0, 1, vid.fsize, IFM("2 - ") + XLAT("page") + " 2", nlpage == 1 ? 0xD8D8C0 : 0xC0C0C0, 8))
       getcstat = '2';
-    if(pages) if(displayfrZ(xr*40, i0, 1, vid.fsize, IFM("3 - ") + XLAT("all"), nlpage == 1 ? 0xD8D8C0 : 0xC0C0C0, 8))
+    if(pages) if(displayfrZH(xr*40, i0, 1, vid.fsize, IFM("3 - ") + XLAT("all"), nlpage == 1 ? 0xD8D8C0 : 0xC0C0C0, 8))
       getcstat = '3';
-    if(i&1) if(displayfrZ(xr*56, i0, 1, vid.fsize, IFM(keyname(SDLK_ESCAPE) + " - ") + XLAT("go back"), 0xC0C0C0, 8))
+    if(i&1) if(displayfrZH(xr*56, i0, 1, vid.fsize, IFM(keyname(SDLK_ESCAPE) + " - ") + XLAT("go back"), 0xC0C0C0, 8))
       getcstat = '0';
-    if(i&2) if(displayfrZ(xr*72, i0, 1, vid.fsize, IFM("F1 - ") + XLAT("help"), 0xC0C0C0, 8))
+    if(i&2) if(displayfrZH(xr*72, i0, 1, vid.fsize, IFM("F1 - ") + XLAT("help"), 0xC0C0C0, 8))
       getcstat = SDLK_F1;
     }
   

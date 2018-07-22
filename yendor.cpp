@@ -712,16 +712,16 @@ namespace tactic {
       
       if(unlocked) col = linf[l].color; else col = 0x202020;
       
-      if(displayfrZ(xr*1, i0, 1, vf-4, XLAT1(linf[l].name), col, 0) && unlocked) {
+      if(displayfrZH(xr*1, i0, 1, vf-4, XLAT1(linf[l].name), col, 0) && unlocked) {
         getcstat = 1000 + i1;
         }
         
       if(unlocked || autocheat) {
         for(int ii=0; ii<ch; ii++)
-          if(displayfrZ(xr*(24+2*ii), i0, 1, (vf-4)*4/5, lsc[xc][l][ii] > 0 ? its(lsc[xc][l][ii]) : "-", col, 16)) 
+          if(displayfrZH(xr*(24+2*ii), i0, 1, (vf-4)*4/5, lsc[xc][l][ii] > 0 ? its(lsc[xc][l][ii]) : "-", col, 16)) 
             getcstat = 1000 + i1;
 
-        if(displayfrZ(xr*(24+2*10), i0, 1, (vf-4)*4/5, 
+        if(displayfrZH(xr*(24+2*10), i0, 1, (vf-4)*4/5, 
           its(recordsum[xc][l]) + " x" + its(tacmultiplier(l)), col, 0)) 
             getcstat = 1000 + i1;
         }

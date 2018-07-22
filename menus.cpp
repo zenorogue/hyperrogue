@@ -77,7 +77,7 @@ void showOverview() {
     if(landUnlocked(l)) col = linf[l].color; else col = 0x404040;
     if(l == curland)
       displayfrZ(1, i0, 1, vf-4, "*", forecolor, 0);
-    if(displayfrZ(xr*1, i0, 1, vf-4, XLAT1(linf[l].name), col, 0))
+    if(displayfrZH(xr*1, i0, 1, vf-4, XLAT1(linf[l].name), col, 0))
       getcstat = 1000 + l;
     eItem it = treasureType(l);
     int lv = items[it] * landMultiplier(l);
@@ -86,20 +86,20 @@ void showOverview() {
     else if(items[it]) col = 0xC0C0C0;
     else col = BLACKISH;
     int c8 = (vf+2)/3;
-    if(displayfrZ(xr*24-c8*6, i0, 1, vf-4, its(items[it]), col, 16))
+    if(displayfrZH(xr*24-c8*6, i0, 1, vf-4, its(items[it]), col, 16))
       getcstat = 2000+it;
     if(!cheater)
-    if(displayfrZ(xr*24, i0, 1, vf-4, its(hiitems[modecode()][it]), col, 16))
+    if(displayfrZH(xr*24, i0, 1, vf-4, its(hiitems[modecode()][it]), col, 16))
       getcstat = 2000+it;
     if(items[it]) col = iinf[it].color; else col = BLACKISH;
-    if(displayfrZ(xr*24+c8*4, i0, 1, vf-4, s0 + iinf[it].glyph, col, 16))
+    if(displayfrZH(xr*24+c8*4, i0, 1, vf-4, s0 + iinf[it].glyph, col, 16))
       getcstat = 2000+it;
-    if(displayfrZ(xr*24+c8*5, i0, 1, vf-4, XLAT1(iinf[it].name), col, 0))
+    if(displayfrZH(xr*24+c8*5, i0, 1, vf-4, XLAT1(iinf[it].name), col, 0))
       getcstat = 2000+it;
     eItem io = nativeOrbType(l);
     if(io == itShard) {
       if(items[it] >= 10) col = winf[waMirror].color; else col = BLACKISH;
-      if(displayfrZ(xr*46, i0, 1, vf-4, XLAT1(winf[waMirror].name), col, 0))
+      if(displayfrZH(xr*46, i0, 1, vf-4, XLAT1(winf[waMirror].name), col, 0))
         getcstat = 3000+waMirror;
       if(getcstat == 3000+waMirror)
         mouseovers = XLAT(
@@ -109,12 +109,12 @@ void showOverview() {
       if(lv >= 25) col = 0xFFD500;
       else if(lv >= 10) col = 0xC0C0C0;
       else col = BLACKISH;
-      if(displayfrZ(xr*46-c8*4, i0, 1, vf-4, its(items[io]), col, 16))
+      if(displayfrZH(xr*46-c8*4, i0, 1, vf-4, its(items[io]), col, 16))
         getcstat = 2000+io;
       if(lv >= 10) col = iinf[io].color; else col = BLACKISH;
-      if(displayfrZ(xr*46-c8, i0, 1, vf-4, s0 + iinf[io].glyph, col, 16))
+      if(displayfrZH(xr*46-c8, i0, 1, vf-4, s0 + iinf[io].glyph, col, 16))
         getcstat = 2000+io;
-      if(displayfrZ(xr*46, i0, 1, vf-4, XLAT1(iinf[io].name), col, 0))
+      if(displayfrZH(xr*46, i0, 1, vf-4, XLAT1(iinf[io].name), col, 0))
         getcstat = 2000+io;
       if(getcstat == 2000+io)
         mouseovers = XLAT(
