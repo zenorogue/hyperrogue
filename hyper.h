@@ -1478,6 +1478,7 @@ extern bool timerghost;
 #define displayfrZH dialog::zoom::displayfr_highlight
 #else
 #define displayfrZ displayfr
+#define displayfrZH dialog::zoom::displayfr_highlight
 #endif
 
 namespace dialog {
@@ -2225,6 +2226,8 @@ int gl_width(int size, const char *s);
 
 #ifdef ISMOBILE
 extern int andmode;
+extern bool longclick;
+extern bool useRangedOrb;
 #endif
 
 void addaura(const hyperpoint& h, int col, int fd);

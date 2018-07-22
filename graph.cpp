@@ -5522,10 +5522,6 @@ void drawfullmap() {
   profile_stop(2);
   }
 
-#ifdef ISMOBILE
-int andmode;
-#endif
-
 void gamescreen(int _darken) {
 
   if(ISMOBILE && (cmode & sm::SIDE)) {
@@ -5566,7 +5562,7 @@ void gamescreen(int _darken) {
       drawCircle(xfire, yb, rad/2, 0xFF0000FF);
       }
     else {
-      if(andmode != 0) displayabutton(-1, +1, XLAT("MOVE"),  andmode == 0 ? BTON : BTOFF);
+      if(!haveMobileCompass()) displayabutton(-1, +1, XLAT(andmode == 0 && useRangedOrb ? "FIRE" : "MOVE"),  andmode == 0 ? BTON : BTOFF);
       displayabutton(+1, +1, rug::rugged ? "RUG" : XLAT(andmode == 1 ? "BACK" : "DRAG"),  andmode == 1 ? BTON : BTOFF);
       }
     displayabutton(-1, -1, XLAT("INFO"),  andmode == 12 ? BTON : BTOFF);

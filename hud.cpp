@@ -317,7 +317,7 @@ void drawMobileArrow(cell *c, transmatrix V) {
   
   poly_outline = OUTLINE_DEFAULT;
   // transmatrix m2 = Id;
-  ld scale = vid.mobilecompasssize * 7;
+  ld scale = vid.mobilecompasssize * 5;
   // m2[0][0] = scale; m2[1][1] = scale; m2[2][2] = 1;
   
   transmatrix Centered = rgpushxto0(tC0(cwtV * sphereflip));

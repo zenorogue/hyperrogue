@@ -878,8 +878,8 @@ void gmodekeys(int sym, int uni) {
   }
 
 bool haveMobileCompass() {
-#if CAP_MOBILE
-  if(andmode || useRangedOrb) return false;
+#if ISMOBILE
+  if(longclick) return false;
 #else
   if(forcetarget) return false;
 #endif

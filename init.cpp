@@ -109,6 +109,8 @@ string buildScoreDescription() {
 
 #if ISMOBILE==1
 
+int andmode;
+
 bool lclicked = false, clicked = false;
 string lmouseovers;
 bool inmenu = false;
