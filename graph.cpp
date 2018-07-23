@@ -2563,12 +2563,12 @@ void drawMovementArrows(cell *c, transmatrix V) {
     int u = md.d;
     cellwalker xc = cwt + u + wstep;
     if(xc.c == c) {
-      transmatrix fixrot = rgpushxto0(tC0(V));
+      transmatrix fixrot = sphereflip * rgpushxto0(sphereflip * tC0(V));
       // make it more transparent
       int col = getcs().uicolor;
       col -= (col & 0xFF) >> 1;
       poly_outline = OUTLINE_DEFAULT;
-      queuepoly(fixrot * spin(-d * M_PI/4 + (sphereflipped()?M_PI:0))/* * eupush(1,0)*/, shArrow, col);
+      queuepoly(fixrot * spin(-d * M_PI/4), shArrow, col);
 
       if((c->type & 1) && (isStunnable(c->monst) || c->wall == waThumperOn)) {
         transmatrix Centered = rgpushxto0(tC0(cwtV));

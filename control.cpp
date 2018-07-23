@@ -58,7 +58,7 @@ movedir vectodir(const hyperpoint& P) {
   transmatrix U = shmup::ggmatrix(cwt.c);
 
   hyperpoint H = sphereflip * tC0(U);
-  transmatrix Centered = rgpushxto0(H) * sphereflip;
+  transmatrix Centered = sphereflip * rgpushxto0(H);
 
   ld binv = 99;
   
@@ -82,7 +82,7 @@ movedir vectodir(const hyperpoint& P) {
       res.subdir = dirdist[(i+1)%cwt.c->type] < dirdist[(i+cwt.c->type-1)%cwt.c->type] ? 1 : -1;
       }
     }
-  
+
   // if(euclid) bdir = (bdir + 3) % 6;
   return res;
   }
