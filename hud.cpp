@@ -301,12 +301,18 @@ bool nohud, nomenukey;
 
 hookset<bool()> *hooks_prestats;
 
-void drawMobileArrow(cell *c, transmatrix V) {
+void drawMobileArrow(int i) {
+
+  int dir = i;
+  cell *c = cwt.c->mov[i];
+  if(!c) return;
+
+  transmatrix T;
+  if(!compute_relamatrix(c, cwt.c, i, T)) return;
 
   // int col = getcs().uicolor;
   // col -= (col & 0xFF) >> 1;
   
-  int dir = neighborId(cwt.c, c);
   bool invalid = !legalmoves[dir];
   
   int col = cellcolor(c);
@@ -317,12 +323,15 @@ void drawMobileArrow(cell *c, transmatrix V) {
   
   poly_outline = OUTLINE_DEFAULT;
   // transmatrix m2 = Id;
-  ld scale = vid.mobilecompasssize * 5;
+  ld scale = vid.mobilecompasssize * (sphere ? 7 : euclid ? 6 : 5);
   // m2[0][0] = scale; m2[1][1] = scale; m2[2][2] = 1;
-  
-  transmatrix Centered = rgpushxto0(tC0(cwtV * sphereflip));
-  transmatrix t = inverse(Centered) * V;
-  double alpha = atan2(tC0(t)[1], tC0(t)[0]);
+
+  transmatrix U = shmup::ggmatrix(cwt.c);
+  hyperpoint H = sphereflip * tC0(U);
+  transmatrix Centered = sphereflip * rgpushxto0(H);
+
+  hyperpoint P = inverse(Centered) * U * T * C0;
+  double alpha = atan2(P[1], P[0]);
 
   using namespace shmupballs;
   
@@ -390,7 +399,7 @@ void drawStats() {
     queuecircle(xmove, yb, rad*SKIPFAC, 
       legalmoves[MAX_EDGE] ? 0xFF0000FF : 0xFF000080
       );
-    forCellEx(c2, cwt.c) if(gmatrix.count(c2)) drawMobileArrow(c2, gmatrix[c2]);
+    for(int i=0; i<cwt.c->type; i++) drawMobileArrow(i);
     if(hypot(mousex-xmove, mousey-yb) <= rad) getcstat = '-';
     quickqueue();
     }

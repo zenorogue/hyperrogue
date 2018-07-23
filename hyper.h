@@ -3738,5 +3738,5 @@ namespace ors {
   void rerotate(transmatrix& T);
   void reset();
   }
-  
+
 }

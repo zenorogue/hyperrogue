@@ -898,9 +898,11 @@ bool handleCompass() {
   if(h < rad) {
     if(h < rad*SKIPFAC) movepcto(MD_WAIT);
     else {
-      double d = vid.revcontrol ? -1 : 1;
-      mouseh = hpxy(dx * d / rad, dy * d / rad);
-      mousemovement();
+      hyperpoint param = hpxy(dx * 1. / rad, dy * 1. / rad);
+
+      movedir md = vectodir(param);
+    
+      if(!canmove) movepcto(md), remission(); else movepcto(md);
       }
     getcstat = 0;
     return true;
