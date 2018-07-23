@@ -215,7 +215,7 @@ void addpoly(const transmatrix& V, const vector<glvertex> &tab, int ofs, int cnt
   hyperpoint last = V * glhr::gltopoint(tab[ofs]);
   bool last_behind = is_behind(last);
   if(!last_behind) addpoint(last);
-  hyperpoint enter;
+  hyperpoint enter = C0;
   hyperpoint firstleave;
   int start_behind = last_behind ? 1 : 0;
   for(int i=ofs+1; i<ofs+cnt; i++) {
