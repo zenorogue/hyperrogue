@@ -276,8 +276,6 @@ void shareScore(MOBPAR_FORMAL) {
   env->DeleteLocalRef(cls);
   }
 
-int nticks; int getticks() { return nticks; }
-
 extern "C" void Java_com_roguetemple_hyperroid_HyperRogue_draw(MOBPAR_FORMAL) {
 //  if(debfile) fprintf(debfile, "draw started.\n"), fflush(debfile);
 

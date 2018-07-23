@@ -6,16 +6,21 @@
 namespace hr {
 
 #if CAP_TIMEOFDAY
-long long getms() {
-  struct timeval tval;
-  gettimeofday(&tval, NULL);
-  return tval.tv_sec * 1000000 + tval.tv_usec;
+#if !CAP_SDL
+int lastusec;
+int uticks;
+
+int SDL_GetTicks() {
+  struct timeval tim;
+  gettimeofday(&tim, NULL);
+  int newusec = tim.tv_usec;
+  uticks += newusec - lastusec;
+  if(newusec <= lastusec)
+    uticks += 1000000;
+  lastusec = newusec;
+  return uticks / 1000;
   }
 
-#if !CAP_SDL
-int SDL_GetTicks() {
-  return getms() / 1000;
-  }
 #endif
 #endif
 

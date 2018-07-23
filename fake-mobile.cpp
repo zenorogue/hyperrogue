@@ -86,8 +86,6 @@ int textwidth(int siz, const string &str) {
 
 char action;
 
-int getticks() { return SDL_GetTicks(); }
-
 bool currentlyConnecting() { return false; }
 bool currentlyConnected() { return false; }
 void viewAchievements() { printf("view Achievements\n"); }

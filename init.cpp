@@ -223,8 +223,6 @@ void handleclick(MOBPAR_FORMAL) {
 
 int touchedAt;
 
-int getticks();
-
 #if CAP_ANDROIDSHARE
 void shareScore(MOBPAR_FORMAL);
 #endif
@@ -233,7 +231,7 @@ void mobile_draw(MOBPAR_FORMAL) {
 
   optimizeview();
 
-  int lastt = ticks; ticks = getticks();
+  int lastt = ticks; ticks = SDL_GetTicks();
   if(lastt > ticks) lastt = ticks;
   int tdiff = ticks - lastt;
 
