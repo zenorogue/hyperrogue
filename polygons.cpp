@@ -946,6 +946,7 @@ void drawqueueitem(polytodraw& ptd) {
     
     case pkResetModel:
       pmodel = eModel(ptd.col);
+      stereo::set_projection(0);
       break;
     
     case pkPoly:
