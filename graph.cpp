@@ -4893,6 +4893,11 @@ void fallingMonsterAnimation(cell *c, eMonster m, int id) {
 void queuecircleat(cell *c, double rad, int col) {
   if(!c) return;
   if(!gmatrix.count(c)) return;
+  if(stereo::mode || sphere) {
+    dynamicval<int> p(poly_outline, col);
+    queuepolyat(gmatrix[c] * spin(ticks / 100.), shGem[1], 0, PPR_LINE);
+    return;
+    }
   queuecircle(gmatrix[c], rad, col);  
   if(!wmspatial) return;
   if(highwall(c))
