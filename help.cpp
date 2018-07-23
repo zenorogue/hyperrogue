@@ -903,7 +903,6 @@ void describeMouseover() {
   }
 
 void showHelp() {
-  gamescreen(2);
   cmode = sm::HELP | sm::DOTOUR;
   getcstat = SDLK_ESCAPE;
   if(help == "HELPFUN") {
@@ -911,6 +910,7 @@ void showHelp() {
     return;
     }
 
+  gamescreen(2);
   string help2;
   if(help[0] == '@') {
     int iv = help.find("\t");
