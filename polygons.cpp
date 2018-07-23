@@ -146,12 +146,24 @@ void add1(const hyperpoint& H) {
 
 int spherespecial, spherephase;
 
+bool is_behind(const hyperpoint& H) {
+  return pmodel == mdDisk && vid.alpha + H[2] <= BEHIND_LIMIT;
+  }
+
+hyperpoint be_just_on_view(const hyperpoint& H1, const hyperpoint &H2) {
+  using namespace hyperpoint_vec;
+  // H1[2] * t + H2[2] * (1-t) == BEHIND_LIMIT - vid.alpha
+  // H2[2]- BEHIND_LIMIT + vid.alpha = t * (H2[2] - H1[2])
+  ld t = (H2[2] - BEHIND_LIMIT + vid.alpha) / (H2[2] - H1[2]);
+  return H1 * t + H2 * (1-t);
+  }
+
 void addpoint(const hyperpoint& H) {
   if(true) {
     hyperpoint Hscr;
     applymodel(H, Hscr); 
     for(int i=0; i<3; i++) Hscr[i] *= vid.radius;
-    if(vid.alpha + H[2] <= BEHIND_LIMIT && pmodel == mdDisk) poly_flags |= POLY_BEHIND;
+    // if(vid.alpha + H[2] <= BEHIND_LIMIT && pmodel == mdDisk) poly_flags |= POLY_BEHIND;
     
     if(spherespecial) {
       double curnorm = H[0]*H[0]+H[1]*H[1]+H[2]*H[2];
@@ -185,8 +197,20 @@ void coords_to_poly() {
   }
 
 void addpoly(const transmatrix& V, const vector<glvertex> &tab, int ofs, int cnt) {
-  for(int i=ofs; i<ofs+cnt; i++)
-    addpoint(V*glhr::gltopoint(tab[i]));
+  hyperpoint last = V * glhr::gltopoint(tab[ofs]);
+  bool last_behind = is_behind(last);
+  if(!last_behind) addpoint(last);
+  for(int i=ofs+1; i<ofs+cnt; i++) {
+    hyperpoint curr = V*glhr::gltopoint(tab[i]);
+    if(is_behind(curr) != last_behind) {
+      addpoint(be_just_on_view(last, curr));
+      last = curr; last_behind = !last_behind;
+      }
+    else {
+      if(!last_behind) addpoint(curr);
+      last = curr;
+      }
+    }
   }
 
 #if CAP_SDLGFX
@@ -622,6 +646,8 @@ void drawpolyline(polytodraw& p) {
   p.col = 0; */
   
   addpoly(pp.V, *pp.tab, pp.offset, pp.cnt);
+  // if(poly_flags & POLY_BEHIND) return;
+  if(isize(glcoords) <= 1) return;
   
   mercator_loop_min = mercator_loop_max = 0;
   if(sphere && mdBandAny())
@@ -629,7 +655,6 @@ void drawpolyline(polytodraw& p) {
     
   int poly_limit = max(vid.xres, vid.yres) * 2;
   
-  if(poly_flags & POLY_BEHIND) return;
 
   if(0) for(auto& p: glcoords) {
     if(abs(p[0]) > poly_limit || abs(p[1]) > poly_limit)
