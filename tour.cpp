@@ -90,7 +90,7 @@ bool handleKeyTour(int sym, int uni) {
   int flags = slides[currentslide].flags;
   if((sym == SDLK_RETURN || sym == SDLK_KP_ENTER) && (!inhelp || (flags & QUICKSKIP))) {
     popScreenAll();
-    if(geometry || nonbitrunc) { 
+    if(gamestack::pushed()) { 
       return_geometry();
       if(!(flags & QUICKGEO)) return true; 
       }
@@ -102,7 +102,7 @@ bool handleKeyTour(int sym, int uni) {
     return true;
     }
   if(sym == SDLK_BACKSPACE) {
-    if(geometry || nonbitrunc) { 
+    if(gamestack::pushed()) { 
       pop_game();
       if(!(flags & QUICKGEO)) return true;
       }
