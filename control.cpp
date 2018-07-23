@@ -981,7 +981,7 @@ void show() {
     if(!sphere) { targetgeometry = gSphere; restart_game(rg::geometry); }
     mode = 0; fullcenter();
     mode = 2; sensitivity = 1;
-    stereo::mode = sLR; stereo::ipd = 0.2;
+    stereo::mode = stereo::sLR; stereo::ipd = 0.2;
     vid.alpha = 0; vid.scale = 1;
     });
 
