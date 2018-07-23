@@ -398,7 +398,6 @@ namespace dialog {
     }
   
   void handleNavigation(int &sym, int &uni) {
-#if !ISMOBILE
     if(uni == '\n' || uni == '\r' || sym == SDLK_KP5)
       for(int i=0; i<isize(items); i++) 
         if(isitem(items[i]))
@@ -455,7 +454,6 @@ namespace dialog {
       sym = uni = 0;
       return;
       }
-#endif
     }
 
   unsigned int colorhistory[10] = {
