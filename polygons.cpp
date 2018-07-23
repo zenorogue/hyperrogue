@@ -6,6 +6,18 @@
 
 namespace hr {
 
+ld signum(ld x) { return x<0?-1:x>0?1:0; }
+
+bool asign(ld y1, ld y2) {
+  return signum(y1) != signum(y2);
+  }
+
+ld xcross(ld x1, ld y1, ld x2, ld y2) {
+  return x1 + (x2 - x1) * y1 / (y1 - y2);
+  }
+
+hyperpoint intester;
+
 // draw the lines
 static const int POLY_DRAWLINES = 1;
 // draw the area
@@ -37,6 +49,9 @@ static const int POLY_GP = 2048;
 static const int POLY_VCONVEX = 4096;
 // Convex shape (central)
 static const int POLY_CCONVEX = 8192;
+
+// new system of side checking 
+static const int POLY_CENTERIN = 16384;
 
 vector<hyperpoint> hpc;
 
@@ -200,16 +215,41 @@ void addpoly(const transmatrix& V, const vector<glvertex> &tab, int ofs, int cnt
   hyperpoint last = V * glhr::gltopoint(tab[ofs]);
   bool last_behind = is_behind(last);
   if(!last_behind) addpoint(last);
+  hyperpoint enter;
+  hyperpoint firstleave;
+  int start_behind = last_behind ? 1 : 0;
   for(int i=ofs+1; i<ofs+cnt; i++) {
     hyperpoint curr = V*glhr::gltopoint(tab[i]);
     if(is_behind(curr) != last_behind) {
-      addpoint(be_just_on_view(last, curr));
-      last = curr; last_behind = !last_behind;
+      hyperpoint h = be_just_on_view(last, curr);
+      if(start_behind == 1) start_behind = 2, firstleave = h;
+      if(!last_behind) enter = h;
+      else if(h[0] * enter[0] + h[1] * enter[1] < 0) poly_flags |= POLY_BEHIND; /*{
+        using namespace hyperpoint_vec;
+        ld zl = zlevel(h);
+        ld sca2 = zl*zl - pow(vid.alpha - BEHIND_LIMIT, 2);
+        
+        // h[0]** + h[1]** + h[2]** == zl*zl
+        // he[0]** + he[1]** + he[2]** ==
+        // (he[0]** + he[1]**) * sca2 / sqhypot2(he) + he[2]**
+        
+        if(sca2 > 0) {
+          hyperpoint he = (h + enter) / 2;
+          ld sca = sqrt(sca2) / hypot2(he);
+          he[0] *= sca; h[1] *= sca;
+          printf("sca2 = %lf zl=%lf/%lf\n", sca2, zlevel(h), zlevel(he));
+          addpoint(he);
+          } 
+        } */
+      addpoint(h);
+      last_behind = !last_behind;
       }
-    else {
-      if(!last_behind) addpoint(curr);
-      last = curr;
-      }
+    if(!last_behind) addpoint(curr);
+    last = curr;
+    }
+  if(start_behind == 2) {
+    if(firstleave[0] * enter[0] + firstleave[1] * enter[1] < 0) poly_flags |= POLY_BEHIND;
+    else addpoint(firstleave);
     }
   }
 
@@ -646,7 +686,12 @@ void drawpolyline(polytodraw& p) {
   p.col = 0; */
   
   addpoly(pp.V, *pp.tab, pp.offset, pp.cnt);
-  // if(poly_flags & POLY_BEHIND) return;
+  for(int i=1; i<isize(glcoords); i++) {
+    ld dx = glcoords[i][0] - glcoords[i-1][0];
+    ld dy = glcoords[i][1] - glcoords[i-1][1];
+    if(dx > vid.xres * 2 || dy > vid.yres * 2) return;
+    }
+  if(poly_flags & POLY_BEHIND) return;
   if(isize(glcoords) <= 1) return;
   
   mercator_loop_min = mercator_loop_max = 0;
@@ -663,16 +708,49 @@ void drawpolyline(polytodraw& p) {
   
   bool equi = mdAzimuthalEqui() || pmodel == mdFisheye;
 
+  bool nofill = false;
+
   if((spherespecial > 0 || (sphere && equi)) && !(poly_flags & POLY_ISSIDE)) {
-    double rarea = 0;
-    for(int i=0; i<isize(glcoords)-1; i++) 
-      rarea += glcoords[i][0] * glcoords[i+1][1] - glcoords[i][1] * glcoords[i+1][0];
-    rarea += glcoords.back()[0] * glcoords[0][1] - glcoords.back()[1] * glcoords[0][0];
+  
+    if(true) {
     
-    if(d < 0) poly_flags ^= POLY_INVERSE;
+      hyperpoint hscr;
+      hyperpoint h1 = pp.V * intester;
+      if(is_behind(h1)) nofill = true; 
+      applymodel(h1, hscr); hscr[0] *= vid.radius; hscr[1] *= vid.radius;
+      for(int i=0; i<isize(glcoords)-1; i++) {
+        double x1 = glcoords[i][0] - hscr[0];
+        double y1 = glcoords[i][1] - hscr[1];
+        double x2 = glcoords[i+1][0] - hscr[0];
+        double y2 = glcoords[i+1][1] - hscr[1];
+        if(asign(y1, y2)) {
+          ld x = xcross(x1, y1, x2, y2);
+          if(x < -1e-6) poly_flags ^= POLY_CENTERIN;
+          else if (x < 1e-6) nofill = true;
+          }
+        }
+      
+      poly_flags &= ~POLY_INVERSE;
+      if(poly_flags & POLY_CENTERIN) {
+        poly_flags |= POLY_INVERSE;
+        /* nofill = true;
+        pp.outline = (pp.flags & POLY_CENTERIN) ? 0x00FF00FF : 0xFF0000FF;
+        addpoint(hscr); */
+        }
+      }
     
-    if(rarea>0)
-      poly_flags ^= POLY_INVERSE;
+    else {
+
+      double rarea = 0;
+      for(int i=0; i<isize(glcoords)-1; i++) 
+        rarea += glcoords[i][0] * glcoords[i+1][1] - glcoords[i][1] * glcoords[i+1][0];
+      rarea += glcoords.back()[0] * glcoords[0][1] - glcoords.back()[1] * glcoords[0][0];
+  
+      if(d < 0) poly_flags ^= POLY_INVERSE;
+      
+      if(rarea>0)
+        poly_flags ^= POLY_INVERSE;
+      }
     
     if(poly_flags & POLY_INVERSE) {
       if(curradius < vid.alpha - 1e-6) return;
@@ -697,8 +775,6 @@ void drawpolyline(polytodraw& p) {
       lastl = l;
       }
     
-    bool nofill = false;
-
     if(equi && (poly_flags & POLY_INVERSE)) {
       if(abs(zlevel(pp.V * C0) - 1) < 1e-6 && !pp.tinf) {
         // we should fill the other side
@@ -1248,6 +1324,17 @@ void finishshape() {
     area += hpc[i][0] * hpc[i+1][1] - hpc[i+1][0] * hpc[i][1];
   if(abs(area) < 1e-9) last->flags |= POLY_ISSIDE;
   if(area >= 0) last->flags |= POLY_INVERSE;
+
+  for(int i=last->s; i<last->e-1; i++) {
+    ld x1 = hpc[i][0] - intester[0], y1 = hpc[i][1] - intester[1], x2 = hpc[i+1][0] - intester[0], y2 = hpc[i+1][1] - intester[1];
+    if(asign(y1, y2)) {
+      ld x = xcross(x1, y1, x2, y2);
+      if(abs(x) < 1e-6 && !(last->flags & POLY_ISSIDE)) {
+        printf("close call, x = %lf\n", x);
+        }
+      if(x < 0) last->flags ^= POLY_CENTERIN;
+      }
+    }
   
   bool allplus = true, allminus = true;
   for(int i=last->s; i<last->e-1; i++) {
@@ -1415,6 +1502,8 @@ ld dlow_table[SIDEPARS], dhi_table[SIDEPARS];
 #define SHADMUL (S3==4 ? 1.05 : 1.3)
 
 void buildpolys() {
+ 
+  intester = hpxy(1e-3, 1.3e-3);
 
   symmetriesAt.clear();
   allshapes.clear();
@@ -1483,7 +1572,7 @@ void buildpolys() {
   x *= gp::scale;
   if(gp::scale != 1) x /= 2;
   for(int t=0; t<=S6; t++) { hpcpush(C0); if(t) hpcpush(ddi(S7 + t*S14, x) * C0); 
-  last->flags |= POLY_HASWALLS | POLY_FULL | POLY_HASSHADOW;
+  last->flags |= POLY_HASWALLS | POLY_FULL | POLY_HASSHADOW | POLY_ISSIDE;
   }
 
   x = rhexf;
@@ -1491,7 +1580,7 @@ void buildpolys() {
   // x *= gp::scale;
   bshape(shFullCross[1], PPR_FLOOR);
   for(int t=0; t<=S7; t++) { hpcpush(C0); if(t) hpcpush(ddi(t*S12+td, x) * C0); }
-  last->flags |= POLY_HASWALLS | POLY_FULL | POLY_HASSHADOW;
+  last->flags |= POLY_HASWALLS | POLY_FULL | POLY_HASSHADOW | POLY_ISSIDE;
   }
   
   double floorrad0 = hexvdist*0.92;
