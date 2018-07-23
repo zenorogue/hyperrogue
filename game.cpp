@@ -8051,6 +8051,7 @@ bool mightBeMine(cell *c) {
 hookset<bool(cell*)> *hooks_mark;
 
 void performMarkCommand(cell *c) {
+  if(!c) return;
   if(callhandlers(false, hooks_mark, c)) return;
   if(c->land == laCA && c->wall == waNone) 
     c->wall = waFloorA;
