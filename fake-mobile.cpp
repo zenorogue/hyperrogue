@@ -22,7 +22,23 @@ namespace hr {
 
 namespace hr {
 
-transmatrix getOrientation() { return Id; }
+transmatrix Orient = Id;
+
+int lasttick = 0;
+
+transmatrix getOrientation() { 
+  int curtick = SDL_GetTicks();
+  ld t = (curtick - lasttick) / 1000.0;
+  lasttick = curtick;
+  Uint8 *keystate = SDL_GetKeyState(NULL);
+  if(keystate[SDLK_LCTRL]) {
+    if(keystate['s']) Orient = Orient * rotmatrix(t, 2, 1);
+    if(keystate['w']) Orient = Orient * rotmatrix(t, 1, 2);
+    if(keystate['a']) Orient = Orient * rotmatrix(t, 2, 0);
+    if(keystate['d']) Orient = Orient * rotmatrix(t, 0, 2);
+    }
+  return Orient;
+  }
 
 void playSound(cell *c, const string& fname, int vol) {
   printf("Play sound: %s\n", fname.c_str());
@@ -227,6 +243,7 @@ int main(int argc, char **argv) {
           items[itGreenStone] = 100;
           }
         action = sym; */
+        if(ev.key.keysym.mod & KMOD_LCTRL) continue;
         mousing = false;
         handlekey(sym, sym);
         }
