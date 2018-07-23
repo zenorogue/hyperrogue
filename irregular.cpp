@@ -706,7 +706,7 @@ bool load_map(const string &fname) {
   if(!f) return false;
   auto& all = base->allcells();
   int g, sa;
-  fscanf(f, "%d %d %d\n", &g, &sa, &cellcount);
+  ignore(fscanf(f, "%d %d %d\n", &g, &sa, &cellcount));
   if(sa != isize(all) || g != geometry) { printf("bad parameters\n"); addMessage("bad format or bad map geometry"); return false; }
   density = cellcount * 1. / isize(all);
   
@@ -714,14 +714,14 @@ bool load_map(const string &fname) {
   
   for(auto h: all) {
     int q = 0;
-    fscanf(f, "%d\n", &q);
+    ignore(fscanf(f, "%d\n", &q));
     if(q < 0 || q > cellcount) { runlevel = 0; return false; }
     while(q--) {
       cells.emplace_back();
       cellinfo& s = cells.back();
       s.patterndir = -1;
       double a, b, c;
-      fscanf(f, "%lf%lf%lf", &a, &b, &c);
+      ignore(fscanf(f, "%lf%lf%lf", &a, &b, &c));
       s.p = hpxyz(a, b, c);
       for(auto c0: all) s.relmatrices[c0] = shmup::calc_relative_matrix(c0, h, s.p);
       s.owner = h;
