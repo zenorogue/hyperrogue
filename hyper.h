@@ -50,15 +50,11 @@ using std::isfinite;
 using std::isnan;
 using std::log;
 using std::exp;
-using std::hypot;
 using std::sin;
 using std::cos;
 using std::sinh;
-using std::asinh;
 using std::asin;
 using std::acos;
-using std::asinh;
-using std::acosh;
 using std::tan;
 using std::atan;
 using std::atan2;
@@ -67,6 +63,11 @@ using std::sqrt;
 using std::pow;
 using std::floor;
 using std::ceil;
+#ifndef ANDROID
+using std::hypot;
+using std::asinh;
+using std::acosh;
+#endif
 
 // genus (in grammar)
 #define GEN_M 0

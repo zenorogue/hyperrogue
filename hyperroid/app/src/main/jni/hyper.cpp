@@ -21,6 +21,7 @@
 #define CAP_SHADER 1
 #define CAP_VERTEXBUFFER 0
 #define CAP_TIMEOFDAY 1
+#define NO_STD_HYPOT
 
 #define HNEW 1
 
