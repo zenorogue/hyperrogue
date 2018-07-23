@@ -1034,7 +1034,7 @@ string explain3D(ld *param) {
   }
 
 void showStereo() {
-  cmode = sm::SIDE | sm::MAYDARK;
+  cmode = sm::SIDE;
   gamescreen(0);
   using namespace geom3;
   dialog::init(XLAT("stereo vision config"));
