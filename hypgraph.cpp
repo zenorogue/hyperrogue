@@ -730,8 +730,12 @@ void spinEdge(ld aspd) {
   }
 
 void centerpc(ld aspd) { 
+  if(ors::mode == 2 && vid.sspeed < 5) return;
   if(vid.sspeed >= 4.99) aspd = 1000;
   DEBB(DF_GRAPH, (debugfile,"center pc\n"));
+  
+  ors::unrotate(cwtV); ors::unrotate(View);
+  
   hyperpoint H = ypush(-vid.yshift) * sphereflip * tC0(cwtV);
   ld R = H[0] == 0 && H[1] == 0 ? 0 : hdist0(H); // = sqrt(H[0] * H[0] + H[1] * H[1]);
   if(R < 1e-9) {
@@ -741,6 +745,7 @@ void centerpc(ld aspd) {
       } */
     spinEdge(aspd);
     fixmatrix(View);
+    ors::rerotate(cwtV); ors::rerotate(View);
     return;
     }
   
@@ -766,6 +771,8 @@ void centerpc(ld aspd) {
     fixmatrix(View);
     spinEdge(aspd);
     }
+
+  ors::rerotate(cwtV); ors::rerotate(View);
   }
 
 void optimizeview() {

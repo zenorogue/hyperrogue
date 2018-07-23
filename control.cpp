@@ -517,6 +517,7 @@ void mainloopiter() {
   if(timetowait > 0)
     SDL_Delay(timetowait);
   else {
+    ors::check_orientation();
     if(cmode & sm::CENTER) {
       if(playermoved && vid.sspeed > -4.99 && !outoffocus)
         centerpc((ticks - lastt) / 1000.0 * exp(vid.sspeed));
@@ -907,5 +908,145 @@ bool handleCompass() {
 
   return false;
   }
+
+// orientation sensitivity
+namespace ors {
+
+int mode;
+double sensitivity = 1;
+
+int when_enabled;
+transmatrix last_orientation;
+transmatrix relative_matrix = Id;
+
+string choices[3] = {"OFF", "relative", "absolute"};
+
+#if CAP_ORIENTATION
+transmatrix getOrientation() {
+  return MirrorX * MirrorZ * hr::getOrientation() * MirrorX * MirrorZ;
+  }
+#endif
+
+void reset() {
+#if CAP_ORIENTATION
+  if(mode) last_orientation = getOrientation();
+  relative_matrix = Id;
+#endif
+  }
+
+void delayed_reset() {
+#if CAP_ORIENTATION
+  relative_matrix = Id; when_enabled = ticks;
+#endif
+  }
+
+void show() {
+#if CAP_ORIENTATION
+  cmode = sm::SIDE;
+  gamescreen(0);
+
+  dialog::init(XLAT("scrolling by device rotation"));
+  
+  dialog::addHelp(XLAT(
+    "This lets you scroll the map by rotating your device. It can be e.g. used to "
+    "play the spherical mode of HyperRogue in mobile VR goggles -- the \"spherical VR\" "
+    "button configures this; this VR mode can be disabled by touching the screen for 1 second."));
+  
+  dialog::addSelItem(XLAT("mode"), choices[mode], 'm');
+  dialog::add_action([] () { int m = (mode + 1) % 3; mode = 0; fullcenter(); mode = m; delayed_reset(); });
+  dialog::addSelItem(XLAT("sensitivity"), fts(sensitivity), 's');
+  dialog::add_action([] () { 
+    dialog::editNumber(sensitivity, -10, 10, 1, 1, XLAT("sensitivity"), 
+        XLAT("1 means that rotating the device by 1 radian corresponds to scrolling by 1 unit. In spherical geometry, 1 unit = 1 radian."));
+    });
+  
+  dialog::addBreak(100);
+
+  dialog::addItem(XLAT("stereo vision config"), 'e');
+  dialog::add_action([] () { pushScreen(showStereo); });
+
+  dialog::addItem(XLAT("experiment with geometry"), 'g');
+  dialog::add_action([] () { runGeometryExperiments(); });
+
+  dialog::addSelItem(XLAT("projection"), fts(vid.alpha), 'p');
+  dialog::add_action([] () { projectionDialog(); });
+
+  dialog::addSelItem(XLAT("scale factor"), fts(vid.scale), 'z');
+  dialog::add_action([] () { editScale(); });
+
+  dialog::addItem(XLAT("spherical VR"), 'v');
+  dialog::add_action([] () { 
+    if(!sphere) { targetgeometry = gSphere; restart_game(rg::geometry); }
+    mode = 0; fullcenter();
+    mode = 2; sensitivity = 1;
+    stereo::mode = sLR; stereo::ipd = 0.2;
+    vid.alpha = 0; vid.scale = 1;
+    });
+
+  dialog::addBreak(100);
+
+  dialog::addBack();
+
+  dialog::display();
+#endif
+  }
+
+void relative_apply() {
+  if(ors::mode == 1) View = relative_matrix * View;
+  }
+
+void relative_unapply() {
+  if(ors::mode == 1) View = inverse(relative_matrix) * View;
+  }
+
+transmatrix change_geometry(const transmatrix& T) {
+  if(sphere && sensitivity == 1) return T;
+  ld alpha, beta, push;
+  
+  {
+  dynamicval<eGeometry> g(geometry, gSphere);
+  hyperpoint h = T * C0;
+  push = hdist0(h);
+  alpha = atan2(h[1], h[0]);
+  if(push == 0) alpha = 0;
+  hyperpoint spinpoint = gpushxto0(h) * T * xpush(1) * C0;
+  beta = atan2(spinpoint[1], spinpoint[0]);
+  }
+  
+  // gpushxto0(h) * T * xpush(1) * C0 == spin(beta) * xpush(1) * C0
+  // gpushxto0(h) * T == spin(beta)
+  // T = rgpushxto0(h) * spin(beta)
+
+  
+  transmatrix U = spin(-alpha) * xpush(push * sensitivity) * spin(-beta+alpha);
+
+  return U;
+  }
+
+void unrotate(transmatrix& T) {
+  if(mode == 1) T = inverse(relative_matrix) * T;
+  }
+
+void rerotate(transmatrix& T) {
+  if(mode == 1) T = (relative_matrix) * T;
+  }
+
+void check_orientation() {
+#if CAP_ORIENTATION
+  if(!mode) return;
+  if(ticks < when_enabled + 500) {
+    last_orientation = getOrientation();
+    return;
+    }
+  transmatrix next_orientation = MirrorX * getOrientation();
+  transmatrix T = inverse(next_orientation) * last_orientation;
+  if(mode == 1) unrotate(View), unrotate(cwtV);
+  relative_matrix = change_geometry(T);
+  if(mode == 1) rerotate(View), rerotate(cwtV);
+  if(mode == 2) View = relative_matrix * View, last_orientation = next_orientation;
+#endif
+  }
+
+}
 
 }

@@ -661,7 +661,7 @@ void showGraphConfig() {
     char xuni = uni | 96;
   
     if(uni >= 32 && uni < 64) xuni = uni;
-
+    
     if(xuni == 'u') vid.particles = !vid.particles;
     if(xuni == 'd') vid.graphglyph = (1+vid.graphglyph)%3;
         
@@ -829,6 +829,8 @@ void showBasicConfig() {
 
   dialog::addBoolItem(XLAT("forget faraway cells"), memory_saving_mode, 'y');
 
+  dialog::addSelItem(XLAT("scrolling by device rotation"), ors::choices[ors::mode], '1');  
+
   if(CAP_SHMUP && !ISMOBILE)
     dialog::addSelItem(XLAT("configure keys/joysticks"), "", 'p');
 
@@ -846,6 +848,8 @@ void showBasicConfig() {
     
     if(uni >= 32 && uni < 64) xuni = uni;
     
+    if(xuni == '1') pushScreen(ors::show);
+
     if(uni == 'M') vid.quickmouse = !vid.quickmouse;
     else if(xuni == 'm') vid.skipstart = !vid.skipstart;
 
@@ -1467,5 +1471,5 @@ int read_gamemode_args() {
 
 auto ah_config = addHook(hooks_args, 0, read_config_args) + addHook(hooks_args, 0, read_gamemode_args);
 #endif
-  
+
 }

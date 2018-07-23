@@ -1176,6 +1176,7 @@ void switch_game_mode(char switchWhat) {
       break;
 
     case rg::geometry:
+      ors::reset();
       if(geometry == targetgeometry) geometry = gNormal;
       else geometry = targetgeometry;
       if(chaosmode && (euclid || sphere || quotient)) chaosmode = false;

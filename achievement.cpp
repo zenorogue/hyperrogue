@@ -629,7 +629,7 @@ void achievement_final(bool really_final) {
   specific_improved = 0;
   specific_what = 0;
   
-  if(specials == 0) improveItemScores(); 
+  if(specialcode == 0) improveItemScores(); 
   
   int tg = gold();
   if(tg && haveLeaderboard(sid)) {

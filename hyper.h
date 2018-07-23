@@ -3727,4 +3727,16 @@ extern void switchHardcore();
 extern bool using_perspective;
 
 void generateAlts(heptagon *h, int levs = irr::on ? 1 : S3-3, bool link_cdata = true);
+
+namespace ors {
+  extern int mode;
+  extern string choices[];
+  void show();
+  void apply();
+  void check_orientation();
+  void unrotate(transmatrix& T);
+  void rerotate(transmatrix& T);
+  void reset();
+  }
+  
 }

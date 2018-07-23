@@ -242,6 +242,9 @@ const transmatrix Mirror = {{{1,0,0}, {0,-1,0}, {0,0,1}}};
 // mirror image
 const transmatrix MirrorX = {{{-1,0,0}, {0,1,0}, {0,0,1}}};
 
+// mirror image
+const transmatrix MirrorZ = {{{1,0,0}, {0,1,0}, {0,0,-1}}};
+
 // rotate by PI
 const transmatrix pispin = {{{-1,0,0}, {0,-1,0}, {0,0,1}}};
 

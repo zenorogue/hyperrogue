@@ -168,6 +168,7 @@ void handleclick(MOBPAR_FORMAL) {
             if(andmode == 0 && shmup::on) ; // just fire, do not change modes
             else {
               if(andmode == 1) {
+                ors::reset();
                 centerpc(INF);
                 View = Id;
                 viewctr.h = cwt.c->master;
@@ -235,6 +236,8 @@ void mobile_draw(MOBPAR_FORMAL) {
   if(lastt > ticks) lastt = ticks;
   int tdiff = ticks - lastt;
 
+  ors::check_orientation();
+
   if(playermoved && vid.sspeed > -4.99)
     centerpc(tdiff / 1000.0 * exp(vid.sspeed));
 
@@ -287,6 +290,11 @@ void mobile_draw(MOBPAR_FORMAL) {
   #endif
     mouseh = gethyper(mousex, mousey);
 
+  inmenu = isize(screens) > 1;
+
+  if(!inmenu && stereo::mode == stereo::sLR && ors::mode)
+    mousex = vid.xres/2, mousey = vid.yres/2, mouseh = sphereflip * C0;
+
 //  if(debfile) fprintf(debfile, "d1\n"), fflush(debfile);
   frames++;
   if(conformal::on) conformal::apply();
@@ -302,8 +310,6 @@ void mobile_draw(MOBPAR_FORMAL) {
   drawscreen();
   shiftmul = getcshift;
   calcMousedest();
-
-  inmenu = isize(screens) > 1;
 
   if(lclicked && !clicked && !inmenu) handleclick(MOBPAR_ACTUAL);
 
@@ -336,6 +342,8 @@ void mobile_draw(MOBPAR_FORMAL) {
     if(lclicked && !clicked) {
       if(rug::rugged)
         rug::select();
+      else if(ors::mode && !longclick)
+        normal_reaction = true;
       else
         pushScreen(showStereo);
       }
