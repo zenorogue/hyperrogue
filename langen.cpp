@@ -292,6 +292,7 @@ int main() {
   allchars.insert("∞");
   allchars.insert("½");
   allchars.insert("²");
+  allchars.insert("π");
 
   langPL(); langCZ(); langRU();
   langTR(); langDE(); langPT();
