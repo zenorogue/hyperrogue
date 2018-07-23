@@ -116,6 +116,7 @@ string lmouseovers;
 bool inmenu = false;
 
 bool longclick;
+bool verylongclick;
 
 void handleScoreClick();
 void openURL();
@@ -251,6 +252,8 @@ void mobile_draw(MOBPAR_FORMAL) {
   gtouched = mousepressed = clicked;
 
   longclick = lclicked && ticks > touchedAt + 500;
+  verylongclick = longclick && ticks > touchedAt + 1000;
+
   useRangedOrb = 
     longclick || (!(vid.shifttarget & 2) && haveRangedOrb() && lmouseover && lmouseover->cpdist > 1);
 
@@ -342,7 +345,7 @@ void mobile_draw(MOBPAR_FORMAL) {
     if(lclicked && !clicked) {
       if(rug::rugged)
         rug::select();
-      else if(ors::mode && !longclick)
+      else if(ors::mode && !verylongclick)
         normal_reaction = true;
       else
         pushScreen(showStereo);
