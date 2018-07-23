@@ -63,7 +63,7 @@ using std::sqrt;
 using std::pow;
 using std::floor;
 using std::ceil;
-#ifndef ANDROID
+#ifndef NO_STD_HYPOT
 using std::hypot;
 using std::asinh;
 using std::acosh;
