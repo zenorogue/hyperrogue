@@ -712,7 +712,7 @@ void drawpolyline(polytodraw& p) {
 
   if((spherespecial > 0 || (sphere && equi)) && !(poly_flags & POLY_ISSIDE)) {
   
-    if(true) {
+    if(!pp.tinf) {
     
       hyperpoint hscr;
       hyperpoint h1 = pp.V * intester;
