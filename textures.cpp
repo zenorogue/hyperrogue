@@ -800,9 +800,6 @@ void init_textureconfig() {
   addsaver(patterns::whichPattern, "pattern", 0);
   addsaver(patterns::subpattern_flags, "pattern flags", 0);
 
-  cell *ctr = euclid ? centerover.c : viewctr.h->c7;
-  si_save = patterns::getpatterninfo0(ctr);
-  
   addsaver(si_save.id, "center type", 1);
   addsaver(si_save.dir, "center direction", 0);
   addsaver(si_save.reflect, "center reflection", false);
@@ -844,6 +841,9 @@ bool texture_config::save() {
   targetgeometry = geometry;
   target_nonbitru = nonbitrunc;
 
+  cell *ctr = euclid ? centerover.c : viewctr.h->c7;
+  si_save = patterns::getpatterninfo0(ctr);
+  
   for(auto s: texturesavers) if(s->dosave())
     fprintf(f, "%s=%s\n", s->name.c_str(), s->save().c_str());
   
