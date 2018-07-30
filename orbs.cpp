@@ -1248,6 +1248,8 @@ eItem targetRangedOrb(cell *c, orbAction a) {
     }
   else if(items[itOrbSpace] && c->item == itBarrow)
     addMessage(XLAT("%The1 is protected from this kind of magic!", c->item));
+  else if(items[itOrbSpace] && saved_tortoise_on(c))
+    addMessage(XLAT("No, that would be heartless!"));
   else if(c->item && items[itOrbSpace] && !itemHiddenFromSight(c)) {
     if(cwt.c->item)
       addMessage(XLAT("Cannot use %the1 here!", itOrbSpace));
