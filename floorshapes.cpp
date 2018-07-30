@@ -566,11 +566,11 @@ namespace irr {
           cornerlist.push_back(rspintox(vs.vertices[j]) * xpush(hdist0(vs.vertices[j]) * sca) * C0);
       
         bshape(fsh.b[i], fsh.prio);
-        for(int i=0; i<=cor; i++) hpcpush(cornerlist[i%cor]);
+        for(int j=0; j<=cor; j++) hpcpush(cornerlist[j%cor]);
         
         bshape(fsh.shadow[i], fsh.prio);
-        for(int i=0; i<=cor; i++)
-          hpcpush(mid_at(hpxy(0,0), cornerlist[i%cor], SHADMUL));
+        for(int j=0; j<=cor; j++)
+          hpcpush(mid_at(hpxy(0,0), cornerlist[j%cor], SHADMUL));
         
         cell fc;
         fc.type = cor;
