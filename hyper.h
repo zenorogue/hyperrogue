@@ -3739,4 +3739,6 @@ namespace ors {
   void reset();
   }
 
+bool saved_tortoise_on(cell *c);
+
 }

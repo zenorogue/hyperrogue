@@ -1981,6 +1981,8 @@ void killMonster(cell *c, eMonster who, flagtype deathflags) {
   if(m == moWolfMoved) m = moWolf;
   if(!isBulletType(m)) kills[m]++;
 
+  if(saved_tortoise_on(c)) c->item = itNone;
+
   if(!c->item) if(m == moButterfly && (deathflags & AF_BULL))
     c->item = itBull;
   
@@ -5513,6 +5515,12 @@ void refreshFriend(cell *c) {
   if(c->monst == moTameBomberbirdMoved) c->monst = moTameBomberbird;
   }
 
+bool saved_tortoise_on(cell *c) {
+  return 
+    (c->monst == moTortoise && c->item == itBabyTortoise &&
+    !((tortoise::getb(c) ^ tortoise::babymap[c]) & tortoise::mask));
+  }
+
 void moverefresh(bool turn = true) {
   int dcs = isize(dcal);
   
@@ -5582,9 +5590,8 @@ void moverefresh(bool turn = true) {
       }
     
     // tortoises who have found their children no longer move
-    if(c->monst == moTortoise && c->item == itBabyTortoise &&
-      !((tortoise::getb(c) ^ tortoise::babymap[c]) & tortoise::mask))
-        c->stuntime = 2;
+    if(saved_tortoise_on(c))
+      c->stuntime = 2;
     
     if(c->monst == moReptile) {
       if(c->wall == waChasm || cellUnstable(c)) {
