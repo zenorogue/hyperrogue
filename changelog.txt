@@ -2559,3 +2559,25 @@ non-game:
 - fixed several instances when PTM score would not be recorded when changing modes
 
 
+2018.07.30 09:22 Update 10.4n
+- Docks and Snake Nest no longer appear in Strange Challenge bounded geometries (SC#21 scores removed)
+- irregular grids (available in 'variations' in geometry experiments -- work in progress)
+- fix a crash bug in the texture mode
+- fixed a crash bug with the 'mark' command when no cell active
+- improved the controls (keyboard, compass) in non-standard geometries
+- fixed some graphical litches in the stereographic/gnomonic projections of the sphere
+- mark cells with stars instead of circles if in stereo mode or in spherical geometry
+- fixed some orbs not saved correctly in Orb Strategy Mode
+- highlight buttons on overview/PTM screens
+- fixed the seabed layer which was drawn incorrectly
+- close/open/trapdoors and Rugs now look better in non-standard geometries
+- faster startup on restarting the game
+Mobile version improvements (not yet released:)
+- device orientation-based scrolling on mobiles
+- dialog navigation enabled for mobiles
+- improvements to the mobile compass: can be used in modes other than MOVE (long click to switch mode to MOVE anyway); better arrow scaling
+- improved zoom feature (in Overview/PTM screens); fixed a bug with zoom spilling to the inventory screen
+- killing a Tortoise with a saved baby kills the baby too
+- blowing off a tortoise with baby now blows off the baby even if there is an item in the target location
+- summoned Tortoises no longer have 1 HP
+
