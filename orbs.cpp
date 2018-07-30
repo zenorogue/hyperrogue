@@ -921,8 +921,10 @@ void blowoff(cell *cf, cell *ct, int direction_hint) {
   playSound(ct, "orb-ranged");
   addMessage(XLAT("You blow %the1 away!", cf->monst));
   pushMonster(ct, cf, direction_hint);
-  if(cf->item == itBabyTortoise && !ct->item) 
+  if(cf->item == itBabyTortoise) {
+    if(ct->item) ct->item = itNone;
     moveItem(cf, ct, true);
+    }
   items[itOrbAir]--;
   createNoise(2);
   bfs();
