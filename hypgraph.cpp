@@ -276,44 +276,62 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
         else if(H[2] < 0 && x <= 0) x = -M_PI - x;
         }
       hypot_zlev(zlev_used, y, zlev, yf, zf);
-      if(pmodel == mdTwoPoint) {
-        auto p = vid.twopoint_param;
-        ld dleft = hypot_auto(x-p, y);
-        ld dright = hypot_auto(x+p, y);
-        if(sphere) {
-          int tss = twopoint_sphere_flips;
-          if(tss&1) { tss--; 
-            dleft = 2*M_PI - 2*p - dleft;
-            dright = 2*M_PI - 2*p - dright;
-            swap(dleft, dright);
-            y = -y;
+      
+      switch(pmodel) {
+        case mdTwoPoint: {
+          auto p = vid.twopoint_param;
+          ld dleft = hypot_auto(x-p, y);
+          ld dright = hypot_auto(x+p, y);
+          if(sphere) {
+            int tss = twopoint_sphere_flips;
+            if(tss&1) { tss--; 
+              dleft = 2*M_PI - 2*p - dleft;
+              dright = 2*M_PI - 2*p - dright;
+              swap(dleft, dright);
+              y = -y;
+              }
+            while(tss) { tss -= 2;
+              dleft = 2*M_PI - 4*p + dleft;
+              dright = 2*M_PI - 4*p + dright;
+              }
             }
-          while(tss) { tss -= 2;
-            dleft = 2*M_PI - 4*p + dleft;
-            dright = 2*M_PI - 4*p + dright;
-            }
+          x = (dright*dright-dleft*dleft) / 4 / p;
+          y = (y>0?1:-1) * sqrt(dleft * dleft - (x-p)*(x-p) + 1e-9);
+          break;
           }
-        x = (dright*dright-dleft*dleft) / 4 / p;
-        y = (y>0?1:-1) * sqrt(dleft * dleft - (x-p)*(x-p) + 1e-9);
+        case mdBand: {
+          switch(cgclass) {
+            case gcSphere:
+              y = atanh(sin(y));
+              x *= 2; y *= 2;
+              break;
+            case gcHyperbolic:
+              y = 2 * atan(tanh(y/2));
+              x *= 2; y *= 2;
+              break;
+            case gcEuclid:
+              // y = y;
+              y *= 2; x *= 2;
+              break;
+            }
+          break;
+          }
+        case mdBandEquiarea: {
+          y = sin_auto(y) * vid.stretch;
+          break;
+          }
+        case mdSinusoidal: {
+          x *= cos_auto(y);
+          break;
+          }
+        case mdBandEquidistant: {
+          y *= vid.stretch;
+          break;
+          }
+        default: {
+          printf("unknown model\n");
+          }
         }
-      else if(pmodel == mdBand) switch(cgclass) {
-        case gcSphere:
-          y = atanh(sin(y));
-          x *= 2; y *= 2;
-          break;
-        case gcHyperbolic:
-          y = 2 * atan(tanh(y/2));
-          x *= 2; y *= 2;
-          break;
-        case gcEuclid:
-          // y = y;
-          y *= 2; x *= 2;
-          break;
-        }
-      else if(pmodel == mdBandEquiarea) 
-        y = sin_auto(y);
-      else if(pmodel == mdSinusoidal) 
-        x *= cos_auto(y);
       ret = hpxyz(x / M_PI, y * yf / M_PI, 0);
       if(zlev_used && stereo::active()) 
         apply_depth(ret, y * zf / M_PI);

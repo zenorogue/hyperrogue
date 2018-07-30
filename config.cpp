@@ -254,6 +254,7 @@ void initConfig() {
   addsaverenum(stereo::mode, "stereo-mode");
   addsaver(vid.euclid_to_sphere, "euclid to sphere projection", 1.5);
   addsaver(vid.twopoint_param, "twopoint parameter", 1);
+  addsaver(vid.stretch, "stretch", 1);
   
   addsaver(gp::on, "goldberg", false);
   addsaver(gp::param.first, "goldberg-x", gp::param.first);

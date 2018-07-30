@@ -748,6 +748,11 @@ namespace dialog {
       addSelItem("generation range bonus", its(genrange_bonus), 'o');
       addSelItem("game range bonus", its(gamerange_bonus), 'O');
       }
+    
+    if(ne.editwhat == &vid.stretch && sphere && pmodel == mdBandEquiarea) {
+      addBoolItem("Gall-Peters", vid.stretch == 2, 'o');
+      add_action([] { vid.stretch = 2; });
+      }
 
     if(ne.editwhat == &vid.linewidth)
       addBoolItem("finer lines at the boundary", vid.antialias & AA_LINEWIDTH, 'o');

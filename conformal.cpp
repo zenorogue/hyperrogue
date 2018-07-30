@@ -640,6 +640,10 @@ namespace conformal {
     if(pmodel == mdTwoPoint) {
       dialog::addSelItem(XLAT("parameter"), fts3(vid.twopoint_param), 'l');
       }
+
+    if(among(pmodel, mdBandEquidistant, mdBandEquiarea)) {
+      dialog::addSelItem(XLAT("parameter"), fts3(vid.stretch), 'l');
+      }
       
     dialog::addBreak(100);
     dialog::addItem(XLAT("history mode"), 'a');
@@ -685,6 +689,10 @@ namespace conformal {
 #endif
       else if(uni == 'l' && pmodel == mdHalfplane)
         lower_halfplane = !lower_halfplane;
+      else if(uni == 'l' && among(pmodel, mdBandEquiarea, mdBandEquidistant))
+        dialog::editNumber(vid.stretch, 0, 10, .1, 1, XLAT("parameter"), 
+          "Vertical stretch factor."
+          );
       else if(uni == 'a')
         pushScreen(history_menu);
       else if(uni == 'l' && pmodel == mdHemisphere && euclid)  {

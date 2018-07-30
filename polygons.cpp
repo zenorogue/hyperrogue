@@ -451,7 +451,7 @@ void fixMercator(bool tinf) {
   
   if(pmodel == mdSinusoidal)
     for(int i = 0; i<isize(glcoords); i++) 
-      glcoords[i][mercator_coord] /= cos(glcoords[i][1] / vid.radius * M_PI);    
+      glcoords[i][mercator_coord] /= cos(glcoords[i][1] / vid.radius * M_PI);
     
   ld hperiod = mercator_period / 2;
   
@@ -459,10 +459,12 @@ void fixMercator(bool tinf) {
   ld cmin = -vid.xcenter, cmax = vid.xres - vid.xcenter, dmin = -vid.ycenter, dmax = vid.yres - vid.ycenter;
   if(mercator_coord)
     swap(cmin, dmin), swap(cmax, dmax);
-  if(pmodel == mdSinusoidal || pmodel == mdBandEquidistant)
+  if(pmodel == mdSinusoidal)
     dmin = -vid.radius / 2, dmax = vid.radius / 2;
+  if(pmodel == mdBandEquidistant)
+    dmin = -vid.stretch * vid.radius / 2, dmax = vid.stretch * vid.radius / 2;
   if(pmodel == mdBandEquiarea)
-    dmin = -vid.radius / M_PI, dmax = vid.radius / M_PI;
+    dmin = -vid.stretch * vid.radius / M_PI, dmax = vid.stretch * vid.radius / M_PI;
 
   for(int i = 0; i<isize(glcoords); i++) {
     while(glcoords[0][mercator_coord] < hperiod) glcoords[0][mercator_coord] += mercator_period;
