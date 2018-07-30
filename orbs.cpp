@@ -787,7 +787,7 @@ void summonAt(cell *dest) {
   if(dest->monst == moFireElemental && isFire(dest))
     dest->wall = waNone;
   if(dest->monst == moTortoise)
-    tortoise::emap[dest] = dest;
+    tortoise::emap[dest] = dest, dest->hitpoints = 3;
   addMessage(XLAT("You summon %the1!", dest->monst));
   moveEffect(dest, dest, dest->monst, -1);
   if(dest->wall == waClosePlate || dest->wall == waOpenPlate)
