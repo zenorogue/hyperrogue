@@ -161,6 +161,7 @@ int ctof(cell *c) {
   if(irr::on) return irr::ctof(c);
   if(nonbitrunc && !gp::on) return 1;
   // if(euclid) return 0;
+  if(!c) return 1;
   return ishept(c) ? 1 : 0;
   // c->type == 6 ? 0 : 1;
   }
