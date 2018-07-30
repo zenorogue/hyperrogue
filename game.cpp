@@ -1451,6 +1451,8 @@ bool petrify(cell *c, eWall walltype, eMonster m) {
     return false;
     }
   
+  if(c->wall == waRoundTable) return false;
+  
   if(walltype == waGargoyle && cellUnstableOrChasm(c)) 
     walltype = waGargoyleFloor;
   else if(walltype == waGargoyle && isWatery(c)) 
