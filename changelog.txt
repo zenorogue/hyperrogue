@@ -2572,12 +2572,17 @@ non-game:
 - fixed the seabed layer which was drawn incorrectly
 - close/open/trapdoors and Rugs now look better in non-standard geometries
 - faster startup on restarting the game
+- killing a Tortoise with a saved baby kills the baby too
+- blowing off a tortoise with baby now blows off the baby even if there is an item in the target location
+- summoned Tortoises no longer die on hit
+- it is no longer allowed to use Orb of Space on saved Baby Tortoises
+
 Mobile version improvements (not yet released:)
 - device orientation-based scrolling on mobiles
 - dialog navigation enabled for mobiles
 - improvements to the mobile compass: can be used in modes other than MOVE (long click to switch mode to MOVE anyway); better arrow scaling
 - improved zoom feature (in Overview/PTM screens); fixed a bug with zoom spilling to the inventory screen
-- killing a Tortoise with a saved baby kills the baby too
-- blowing off a tortoise with baby now blows off the baby even if there is an item in the target location
-- summoned Tortoises no longer have 1 HP
 
+2018.07.30 17:47 Update 10.4o
+- fixed a crash bug with displaying hypersian rugs in the inventory
+- added a stretch parameter for cylindrical equi-area and equidistant models
