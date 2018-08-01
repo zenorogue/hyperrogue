@@ -1249,7 +1249,7 @@ bool monstersnear(stalemate1& sm) {
       if(c3->monst != moWitchSpeed && fast) continue;
       // cannot attack if the immediate cell is impassable (except flashwitches)
       if(c3->monst != moWitchFlash) {
-        if(!passable(c2, c3, stalemate::isKilled(c2)?0:P_MONSTER)) continue;
+        if(!passable(c2, c3, stalemate::isKilled(c2)?P_MONSTER:0)) continue;
         if(isPlayerOn(c2) && items[itOrbFire]) continue;
         }
       // flashwitches cannot attack if it would kill another enemy
