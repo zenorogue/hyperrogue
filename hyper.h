@@ -1753,7 +1753,7 @@ bool mayExplodeMine(cell *c, eMonster who);
 
 int gravityLevel(cell *c);
 void fullcenter();
-void movecost(cell* from, cell *to);
+void movecost(cell* from, cell *to, int phase); // 1 = pre-collect, 2 = post-collect, 3 = both
 void checkmove();
 
 transmatrix eumove(ld x, ld y);

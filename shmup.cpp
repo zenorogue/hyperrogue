@@ -1713,7 +1713,7 @@ void movePlayer(monster *m, int delta) {
         items[itOrbAether] = 0;
         addMessage(XLAT("Your Aether powers are drained by %the1!", c2->wall));
         }
-      movecost(m->base, c2);
+      movecost(m->base, c2, 1);
 
       bool nomine = (c2->wall == waMineMine || c2->wall == waMineUnknown)  && markOrb(itOrbAether);
       
@@ -1743,6 +1743,7 @@ void movePlayer(monster *m, int delta) {
   
       if(c2->item == itOrbYendor && !peace::on) yendor::check(c2);
       collectItem(c2);
+      movecost(m->base, c2, 2);
       }
     }
 

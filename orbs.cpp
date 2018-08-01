@@ -534,7 +534,7 @@ void teleportTo(cell *dest) {
     if(b) {
       killFriendlyIvy();
       drainOrb(itOrbTeleport);
-      movecost(cwt.c, dest);
+      movecost(cwt.c, dest, 3);
       playerMoveEffects(cwt.c, dest);
       afterplayermoved();
       bfs();
@@ -543,7 +543,8 @@ void teleportTo(cell *dest) {
     }
   
   killFriendlyIvy();
-  movecost(cwt.c, dest);
+  cell *from = cwt.c;
+  movecost(from, dest, 1);
   playerMoveEffects(cwt.c, dest);
   cwt.c = dest; cwt.spin = hrand(dest->type); flipplayer = !!(hrand(2));
   drainOrb(itOrbTeleport);
@@ -560,11 +561,14 @@ void teleportTo(cell *dest) {
     shmup::teleported();
   else
     checkmoveO();
+
+  movecost(from, dest, 2);
   }
 
 void jumpTo(cell *dest, eItem byWhat, int bonuskill, eMonster dashmon) {
   if(byWhat != itStrongWind) playSound(dest, "orb-frog");
-  movecost(cwt.c, dest);
+  cell *from = cwt.c;
+  movecost(from, dest, 1);
   
   killFriendlyIvy();
 
@@ -582,7 +586,7 @@ void jumpTo(cell *dest, eItem byWhat, int bonuskill, eMonster dashmon) {
   playerMoveEffects(c1, dest);
   if(cwt.c->item != itOrbYendor && cwt.c->item != itHolyGrail)
     collectItem(cwt.c, true);
-    
+
   if(byWhat == itOrbFrog) {
     useupOrb(itOrbFrog, 5);
     addMessage(XLAT("You jump!"));
@@ -603,6 +607,8 @@ void jumpTo(cell *dest, eItem byWhat, int bonuskill, eMonster dashmon) {
   for(int i=9; i>=0; i--)
     setdist(cwt.c, i, NULL);
   
+  movecost(from, dest, 2);
+    
   createNoise(1);
 
   if(shmup::on)

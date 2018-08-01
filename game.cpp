@@ -6094,7 +6094,7 @@ bool activateRecall() {
     }
 
   killFriendlyIvy();
-  movecost(cwt.c, recallCell);
+  movecost(cwt.c, recallCell, 3);
   playerMoveEffects(cwt.c, recallCell);
   mirror::destroyAll();
   
@@ -6280,8 +6280,8 @@ bool multiRevival(cell *on, cell *moveto) {
   return false;
   }
 
-void movecost(cell* from, cell *to) {
-  if(from->land == laPower && to->land != laPower) {
+void movecost(cell* from, cell *to, int phase) {
+  if(from->land == laPower && to->land != laPower && (phase & 1)) {
     int n=0;
     for(int i=0; i<ittypes; i++)
       if(itemclass(eItem(i)) == IC_ORB && items[i] >= 2 && i != itOrbFire)
@@ -6291,16 +6291,16 @@ void movecost(cell* from, cell *to) {
     }
   
 #if CAP_TOUR
-  if(from->land != to->land && tour::on)
+  if(from->land != to->land && tour::on && (phase & 2))
     tour::checkGoodLand(to->land);
 #endif
   
-  if(to->land ==laCrossroads4 && !chaosUnlocked && !geometry) {
+  if(to->land ==laCrossroads4 && !chaosUnlocked && !geometry && (phase & 2)) {
     achievement_gain("CR4");
     chaosUnlocked = true;
     }
 
-  if(isHaunted(from->land) && !isHaunted(to->land)) {
+  if(isHaunted(from->land) && !isHaunted(to->land) && (phase & 2)) {
     updateHi(itLotus, truelotus = items[itLotus]);
     if(items[itLotus] >= 1) achievement_gain("LOTUS1");
     if(items[itLotus] >= (inv::on ? 25 : 10)) achievement_gain("LOTUS2");
@@ -6309,7 +6309,7 @@ void movecost(cell* from, cell *to) {
     achievement_final(false);
     }
   
-  if(celldist(to) == 0 && !usedSafety && gold() >= 100)
+  if(celldist(to) == 0 && !usedSafety && gold() >= 100 && (phase & 2))
     achievement_gain("COMEBACK");
   
   bool tortoiseOK = 
@@ -6317,7 +6317,7 @@ void movecost(cell* from, cell *to) {
     (to->land == laDragon && from->land != laTortoise) || 
     chaosmode;
   
-  if(tortoise::seek() && !from->item && !tortoiseOK && passable(from, NULL, 0)) {
+  if(tortoise::seek() && !from->item && !tortoiseOK && passable(from, NULL, 0) && (phase & 2)) {
     from->item = itBabyTortoise;
     tortoise::babymap[from] = tortoise::seekbits;
     addMessage(XLAT("You leave %the1.", itBabyTortoise));
@@ -7398,7 +7398,7 @@ bool movepcto(int d, int subdir, bool checkonly) {
     if(items[itOrbDomination] > ORBBASE && isMountable(c2->monst) && !monstersnear2()) {
       if(checkonly) return true;
       if(!isMountable(cwt.c->monst)) dragon::target = NULL;
-      movecost(cwt.c, c2);
+      movecost(cwt.c, c2, 3);
       
       flipplayer = true; if(multi::players > 1) multi::flipped[multi::cpid] = true;
       invismove = (turncount >= noiseuntil) && items[itOrbInvis] > 0;
@@ -7839,6 +7839,8 @@ bool movepcto(int d, int subdir, bool checkonly) {
         if(earthMove(cwt.c, d)) markOrb(itOrbDigging);
         }
 
+      movecost(cwt.c, c2, 1);
+
       if(!boatmove && collectItem(c2)) return true;
       if(doPickupItemsWithMagnetism(c2)) return true;
 
@@ -7851,7 +7853,7 @@ bool movepcto(int d, int subdir, bool checkonly) {
         forCellEx(c3, c2) if(c3->wall == waIcewall && c3->item)
           markOrb(itOrbWinter), collectItem(c3);
       
-      movecost(cwt.c, c2);
+      movecost(cwt.c, c2, 2);
 
       {
       bool pushpast = false;
