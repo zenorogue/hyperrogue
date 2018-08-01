@@ -6964,3 +6964,99 @@ S("When the 'mark heptagons' option (hotkey '7') is on, forbidden moves are mark
 
 S("When the 'mark heptagons' option (hotkey '7') is on, moves between unmarked cells are forbidden.",
   "Kiedy opcja 'oznaczenia na siedmiokątach' (klawisz '7') jest włączona, ruchy pomiędzy nieoznaczonymi polami są zabronione.")
+
+// 10.4p
+
+// in the sight range dialog
+S("note: enable the cheat mode for additional options", "uwaga: włącz tryb oszusta, by tu były dodatkowe opcje")
+
+// steal a baby tortoise with Orb of Space
+S("No, that would be heartless!", "Nie, to by było bez serca!")
+
+S("show quotient spaces", "pokazuj przestrzenie ilorazowe")
+S("minimal quotient", "minimalna ilorazowa")
+S("Klein Quartic", "Kwartyka Kleina")
+S("Bolza Surface", "Powierzchnia Bolzy")
+S("Bolza Surface x2", "Powierzchnia Bolzy x2")
+
+// extra texts for Goldberg 
+
+S("variations", "warianty")
+S("auto-adjust in Goldberg grids", "automatyczne dostrajanie w siatkach Goldberga")
+S("2x bitruncated", "2x bitruncated")
+S("expanded", "rozszerzona")
+S("rectified", "rectified")
+
+// irregular grids
+
+S("irregular", "nieregularna")
+S("bad cells: %1", "złe pola: %1")
+S("too many edges: %1", "za dużo krawędzi: %1")
+S("median edge: %1 minimum: %2", "mediana: %1 minimum: %2")
+S("cells badly paired: %1", "pola źle sparowane: %1")
+S("cells not covered: %1", "pola niezakryte: %1")
+S("adjacent cells from nonadjacent heptagons: %1", "sąsiednie pola niesąsiednich siedmiokątów: %1")
+S("bad format or bad map geometry", "zły format lub zła geometria mapy")
+S("irregular grid", "nieregularna siatka")
+S("density", "gęstość")
+S("min edge to median", "min krawędź / mediana")
+S("quality", "jakość")
+S("save", "zapisz")
+S("load", "wczytaj")
+S("irregular to save:", "mapa nieregularna do zapisu:")
+S("irregular to load:", "mapa nieregularna do wczytania:")
+S("Map saved to %1", "Mapa zapisana do %1")
+S("Failed to save map to %1", "Nie udało się zapisać mapy do %1")
+S("Map loaded from %1", "Mapa wczytana z %1")
+S("Failed to load map from %1", "Nie udało się wczytać mapy z %1")
+S("reset", "resetuj")
+S("OK", "OK")
+S("ready", "gotowe")
+
+S("This option creates irregular grids to play the game on. "
+  "Currently rather slow algorithms are used, "
+  "so not recommended with too high density or "
+  "with too large periodic base geometry. "
+  "For technical reasons, the density cannot be too small.",
+
+  "Ta opcja tworzy nieregularne siatki do gry. "
+  "Obecnie używane algorytmy ąs dosyć powolne, "
+  "zatem nie jest ona zalecana przy za dużej gęstości "
+  "lub za dużym okresie bazowej geometrii. "
+  "Z powodów technicznych gęstość nie może być za mała."
+  )
+
+// vertical stretch
+
+S("vertical stretch", "rozciągnięcie w pionie")
+S("Vertical stretch factor.", "Współczynnik rozciągnięcia w pionie.")
+S("Gall-Peters", "Gall-Peters")
+S("The current value makes the map conformal at the latitude of %1 (%2°).", "Obecna wartość powoduje, że mapa jest konforemna na szerokości %1 (%2°).")
+S("The current value makes the map conformal %1 units from the main line.", "Obecna wartość powoduje, że mapa jest konforemna %1 jednostek od głównej linii.")
+
+// line quality
+
+S("line quality", "jakość linii")
+
+S("Higher numbers make the curved lines smoother, but reduce the performance.",
+  "Wyższe liczby powodują, że linie krzywe są bardziej gładkie, ale pogarszają wydajność.")
+
+// new options in mobile
+
+S("FIRE", "CEL")
+
+S("scrolling by device rotation", "przewijanie przez obrót urządzenia")
+
+S(  "This lets you scroll the map by rotating your device. It can be e.g. used to "
+    "play the spherical mode of HyperRogue in mobile VR goggles -- the \"spherical VR\" "
+    "button configures this; this VR mode can be disabled by touching the screen for 1 second.",
+
+  "Ta opcja pozwala przewijać mapę poprzez obrót urządzenia. Można jej użyć np. "
+  "do grania w tryb sferyczny HyperRogue w mobilnych goglach VR -- przycisk \"sferyczna VR\" "
+  "to konfiguruje; ten tryb VR można wyłączyć dotykając ekranu przez 1 sekundę.")
+
+S("sensitivity", "czułość")
+S("1 means that rotating the device by 1 radian corresponds to scrolling by 1 unit. In spherical geometry, 1 unit = 1 radian.", 
+  "1 oznacza, że przekręcenie urządzenia o 1 radian odpowiada przesunięciu o 1 jednostkę. W geometrii sferycznej 1 jednostka = 1 radian.")
+
+S("spherical VR", "sferyczna VR")

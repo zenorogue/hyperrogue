@@ -743,7 +743,7 @@ void showGraphConfig() {
     
     if(xuni == 'L') {
       dialog::editNumber(vid.linequality, -3, 5, 1, 1, XLAT("line quality"), 
-        XLAT("Higher numbers make the curved lines smoother, but reduces the performance."));
+        XLAT("Higher numbers make the curved lines smoother, but reduce the performance."));
       dialog::reaction = [] () { resetGeometry(); };
       }
   
