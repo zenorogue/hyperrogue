@@ -1207,7 +1207,7 @@ void show3D() {
     else if(uni == 'w') {
       dialog::editNumber(geom3::wall_height, 0, 1, .1, .3, XLAT("Height of walls"), "");
       dialog::extra_options = [] () {
-        dialog::addBoolItem("auto-adjust in Goldberg grids", geom3::gp_autoscale_heights, 'o');
+        dialog::addBoolItem(XLAT("auto-adjust in Goldberg grids"), geom3::gp_autoscale_heights, 'o');
         dialog::add_action([] () {
           geom3::gp_autoscale_heights = !geom3::gp_autoscale_heights;
           buildpolys();
@@ -1231,12 +1231,12 @@ void show3D() {
     
     else if(uni == 'y') 
       dialog::editNumber(vid.yshift, 0, 1, .1, 0, XLAT("Y shift"), 
-        "Don't center on the player character."
+        XLAT("Don't center on the player character.")
         );
     else if(uni == 's') 
       dialog::editNumber(vid.camera_angle, -180, 180, 5, 0, XLAT("camera rotation"), 
-        "Rotate the camera. Can be used to obtain a first person perspective, "
-        "or third person perspective when combined with Y shift."
+        XLAT("Rotate the camera. Can be used to obtain a first person perspective, "
+        "or third person perspective when combined with Y shift.")
         );
     else if(uni == 'b') 
       config_camera_rotation();

@@ -707,7 +707,7 @@ bool load_map(const string &fname) {
   auto& all = base->allcells();
   int g, sa;
   ignore(fscanf(f, "%d %d %d\n", &g, &sa, &cellcount));
-  if(sa != isize(all) || g != geometry) { printf("bad parameters\n"); addMessage("bad format or bad map geometry"); return false; }
+  if(sa != isize(all) || g != geometry) { printf("bad parameters\n"); addMessage(XLAT("bad format or bad map geometry")); return false; }
   density = cellcount * 1. / isize(all);
   
   cells.clear();
@@ -748,7 +748,7 @@ string irrmapfile = "irregularmap.txt";
 void show_gridmaker() {
   cmode = sm::SIDE;
   gamescreen(0);  
-  dialog::init(XLAT("Irregular grid"));
+  dialog::init(XLAT("irregular grid"));
   dialog::addSelItem(XLAT("density"), fts(density), 'd');
   dialog::add_action([] {
     dialog::editNumber(density, 1, 10, .1, 4, "density", "");
@@ -763,7 +763,7 @@ void show_gridmaker() {
     });
   dialog::addSelItem(XLAT("min edge to median"), fts(quality), 'q');
   dialog::add_action([] {
-    dialog::editNumber(quality, 0, 1, .1, 4, "quality", "");
+    dialog::editNumber(quality, 0, 1, .1, 4, XLAT("quality"), "");
     dialog::reaction = [] () {
       printf("quality = %lf\n", double(density));
       if(runlevel > 4) runlevel = 4;
