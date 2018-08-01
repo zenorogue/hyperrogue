@@ -542,6 +542,8 @@ void teleportTo(cell *dest) {
     return;
     }
   
+  addMessage(XLAT("You teleport to a new location!"));
+
   killFriendlyIvy();
   cell *from = cwt.c;
   movecost(from, dest, 1);
@@ -549,7 +551,6 @@ void teleportTo(cell *dest) {
   cwt.c = dest; cwt.spin = hrand(dest->type); flipplayer = !!(hrand(2));
   drainOrb(itOrbTeleport);
 
-  addMessage(XLAT("You teleport to a new location!"));
   mirror::destroyAll();
 
   afterplayermoved();
@@ -568,6 +569,22 @@ void teleportTo(cell *dest) {
 void jumpTo(cell *dest, eItem byWhat, int bonuskill, eMonster dashmon) {
   if(byWhat != itStrongWind) playSound(dest, "orb-frog");
   cell *from = cwt.c;
+
+  if(byWhat == itOrbFrog) {
+    useupOrb(itOrbFrog, 5);
+    addMessage(XLAT("You jump!"));
+    }
+  
+  if(byWhat == itOrbDash) {
+    useupOrb(itOrbDash, 5);
+    addMessage(XLAT("You vault over %the1!", dashmon));
+    }
+  
+  if(byWhat == itOrbPhasing) {
+    useupOrb(itOrbPhasing, 5);
+    addMessage(XLAT("You jump!"));
+    }
+  
   movecost(from, dest, 1);
   
   killFriendlyIvy();
@@ -587,21 +604,6 @@ void jumpTo(cell *dest, eItem byWhat, int bonuskill, eMonster dashmon) {
   if(cwt.c->item != itOrbYendor && cwt.c->item != itHolyGrail)
     collectItem(cwt.c, true);
 
-  if(byWhat == itOrbFrog) {
-    useupOrb(itOrbFrog, 5);
-    addMessage(XLAT("You jump!"));
-    }
-  
-  if(byWhat == itOrbDash) {
-    useupOrb(itOrbDash, 5);
-    addMessage(XLAT("You vault over %the1!", dashmon));
-    }
-  
-  if(byWhat == itOrbPhasing) {
-    useupOrb(itOrbPhasing, 5);
-    addMessage(XLAT("You jump!"));
-    }
-  
   mirror::destroyAll();
 
   for(int i=9; i>=0; i--)
