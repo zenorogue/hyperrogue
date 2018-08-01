@@ -3747,5 +3747,6 @@ bool saved_tortoise_on(cell *c);
 #define RING(i) for(double i=0; i<=S84+1e-6; i+=S3 * pow(.5, vid.linequality))
 #define REVRING(i) for(double i=S84; i>=-1e-6; i-=S3 * pow(.5, vid.linequality))
 #define PRING(i) for(double i=0; i<=S84+1e-6; i+= pow(.5, vid.linequality))
+#define REVPRING(i) for(double i=S84; i>=-1e-6; i-=pow(.5, vid.linequality))
 
 }

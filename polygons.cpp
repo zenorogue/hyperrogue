@@ -1790,28 +1790,28 @@ void buildpolys() {
   bshape(shRing, PPR_ITEM);
   RING(i)
     hpcpush(ddi(i, disksize * .25) * C0);
-  REVRING(i)
+  REVPRING(i)
     hpcpush(ddi(i, disksize * .30) * C0);
   hpcpush(ddi(0, disksize * .25) * C0);
   
   bshape(shSpikedRing, PPR_ITEM);
   RING(i)
     hpcpush(ddi(i, disksize * .25) * C0);
-  REVRING(i)
+  REVPRING(i)
     hpcpush(ddi(i, disksize * (int(i)&1?.35:.30)) * C0);
   hpcpush(ddi(0, disksize * .25) * C0);
   
   bshape(shTargetRing, PPR_ITEM);
   RING(i)
     hpcpush(ddi(i, disksize * .25) * C0);
-  REVRING(i)
+  REVPRING(i)
     hpcpush(ddi(i, disksize * (i >= S42-6 && i <= S42+6 ?.36:.30)) * C0);
   hpcpush(ddi(0, disksize * .25) * C0);
   
   bshape(shSpearRing, PPR_ITEM);
   RING(i)
     hpcpush(ddi(i, disksize * .25) * C0);
-  REVRING(i) {
+  REVPRING(i) {
     double d = i - S42;
     if(d<0) d = -d;
     d = 8 - 2 * d;
@@ -1837,7 +1837,7 @@ void buildpolys() {
   
   bshape(shLoveRing, PPR_ITEM);
   RING(i) hpcpush(ddi(i, disksize * .25) * C0);
-  REVRING(i) {
+  REVPRING(i) {
     double j = i*3;
     while(j >= S84) j -= S84;
     double d = j - S42;
@@ -1855,28 +1855,28 @@ void buildpolys() {
   bshape(shSawRing, PPR_ITEM);
   RING(i)
     hpcpush(ddi(i, disksize * .25) * C0);
-  REVRING(i)
-    hpcpush(ddi(i, disksize * (.3 + (dmod(i, 4) * .02))) * C0);
+  REVPRING(i)
+    hpcpush(ddi(i, disksize * (.3 + (int(i) & 3) * .02)) * C0);
   hpcpush(ddi(0, disksize * .25) * C0);
   
   bshape(shGearRing, PPR_ITEM);
   RING(i)
     hpcpush(ddi(i, disksize * .25) * C0);
-  REVRING(i)
+  REVPRING(i)
     hpcpush(ddi(i, disksize * ((dmod(i, 6)<3)?.3:.36)) * C0);
   hpcpush(ddi(0, disksize * .25) * C0);
   
   bshape(shPeaceRing, PPR_ITEM);
   RING(i)
     hpcpush(ddi(i, disksize * .25) * C0);
-  REVRING(i)
+  REVPRING(i)
     hpcpush(ddi(i, disksize * (dmod(i, S28) < S7?.36 : .3)) * C0);
   hpcpush(ddi(0, disksize * .25) * C0);
   
   bshape(shHeptaRing, PPR_ITEM);
   RING(i)
     hpcpush(ddi(i, disksize * .25) * C0);
-  REVRING(i)
+  REVPRING(i)
     hpcpush(ddi(i, disksize * (dmod(i, S12) < S3?.4 : .27)) * C0);
   hpcpush(ddi(0, disksize * .25) * C0);
   
@@ -1885,7 +1885,7 @@ void buildpolys() {
     hpcpush(ddi(i, crossf * .35) * C0);
   
   bshape(shCompass2, PPR_ITEMa);
-  REVRING(i)
+  RING(i)
     hpcpush(ddi(i, crossf * .3) * C0);
   
   bshape(shCompass3, PPR_ITEMb);
