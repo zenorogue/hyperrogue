@@ -292,7 +292,7 @@ string generateHelpForItem(eItem it) {
        "if you are attacked with fire, it lets you stay in place in it.");
 
   if(it == itOrbWinter) 
-    help += XLAT("\n\nThis Orb also allows you to collect items encased in ice.");
+    help += XLAT("\n\nThis orb also allows you to collect items encased in ice.");
 
   if(it == itOrbEmpathy) {
     int cnt = 0;
