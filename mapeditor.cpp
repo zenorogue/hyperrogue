@@ -906,20 +906,21 @@ namespace mapeditor {
   unsigned gridcolor = 0xC0C0C040;
   
   void drawGrid() {
+    unsigned lightgrid = gridcolor;
+    lightgrid -= (lightgrid & 0xFF) / 2;
     for(int d=0; d<S84; d++) {
       transmatrix d2 = drawtrans * rgpushxto0(ccenter) * rspintox(inverse(drawtrans * rgpushxto0(ccenter)) * coldcenter);
-      unsigned lightgrid = gridcolor;
-      lightgrid -= (lightgrid & 0xFF) / 2;
       unsigned col = (d % (S84/drawcell->type) == 0) ? gridcolor : lightgrid;
-      queueline(d2 * C0, d2 * spin(M_PI*d/S42)* xpush(1) * C0, col, 4);
-      for(int u=2; u<=20; u++) {
-        queueline(
-          d2 * spin(M_PI*d/S42)* xpush(u/20.) * C0, 
-          d2 * spin(M_PI*(d+1)/S42)* xpush(u/20.) * C0, 
-          (u%5==0) ? gridcolor : lightgrid, 0);
-        }
+      queueline(d2 * C0, d2 * spin(M_PI*d/S42)* xpush(1) * C0, col, 4 + vid.linequality);
       }
-    queueline(drawtrans*ccenter, drawtrans*coldcenter, gridcolor, 4);
+    for(int u=2; u<=20; u++) {
+      PRING(d) {
+        transmatrix d2 = drawtrans * rgpushxto0(ccenter) * rspintox(inverse(drawtrans * rgpushxto0(ccenter)) * coldcenter);
+        curvepoint(d2 * spin(M_PI*d/S42)* xpush(u/20.) * C0);
+        }
+      queuecurve((u%5==0) ? gridcolor : lightgrid, 0, PPR_LINE);
+      }
+    queueline(drawtrans*ccenter, drawtrans*coldcenter, gridcolor, 4 + vid.linequality);
     }
 
   void drawHandleKey(int sym, int uni);
@@ -1626,14 +1627,15 @@ namespace mapeditor {
 #if CAP_TEXTURE
   void queue_hcircle(transmatrix Ctr, ld radius) {
     vector<hyperpoint> pts;
-    int circp = 6;
+    int circp = int(6 * pow(2, vid.linequality));
     if(radius > 0.04) circp *= 2;
     if(radius > .1) circp *= 2; 
     
     for(int j=0; j<circp; j++)
       pts.push_back(Ctr * tC0(spin(M_PI*j*2/circp) * xpush(radius)));
-    for(int j=0; j<circp; j++)
-      queueline(pts[j], pts[(j+1)%circp], texture::config.paint_color, 0, PPR_LINE);
+    for(int j=0; j<circp; j++) curvepoint(pts[j]);
+    curvepoint(pts[0]);
+    queuecurve(texture::config.paint_color, 0, PPR_LINE);
     }
 #endif
 
@@ -1680,7 +1682,7 @@ namespace mapeditor {
                 queue_hcircle(M2 * ml, hdist(lstart, mouseh));
                 break;
               case 'l':
-                queueline(M2 * mh * C0, M2 * ml * C0, texture::config.paint_color, 4, PPR_LINE);
+                queueline(M2 * mh * C0, M2 * ml * C0, texture::config.paint_color, 4 + vid.linequality, PPR_LINE);
                 break;
               default:
                 queue_hcircle(M2 * mh, texture::penwidth);

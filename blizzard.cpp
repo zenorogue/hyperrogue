@@ -236,7 +236,7 @@ void drawArrowTraps() {
       transmatrix& t0 = gmatrix.at(r[0]);
       transmatrix& t1 = gmatrix.at(r[4]);
 
-      queueline(tC0(t0), tC0(t1), 0xFF0000FF, 4, PPR_ITEM);
+      queueline(tC0(t0), tC0(t1), 0xFF0000FF, 4 + vid.linequality, PPR_ITEM);
       if((c->wparam & 7) == 3 && !shmup::on) {
 //        queueline(t0 * randomPointIn(r[0]->type), t1 * randomPointIn(r[1]->type), 0xFFFFFFFF, 4, PPR_ITEM);
         int tt = ticks % 401;

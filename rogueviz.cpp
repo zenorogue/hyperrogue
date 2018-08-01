@@ -1173,13 +1173,13 @@ bool drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
           hyperpoint l1 = T*tC0(spiral::at(1+ei->i));
           for(int z=1; z<=prec; z++) {
             hyperpoint l2 = T*tC0(spiral::at(1+ei->i+(ei->j-ei->i) * z / (prec+.0)));
-            queueline(l1, l2, col, 0);
+            queueline(l1, l2, col, vid.linequality);
             l1 = l2;
             lastptd().prio = PPR_STRUCT0;
             }
           }
         else {
-          queueline(h1, h2, col, 2);
+          queueline(h1, h2, col, 2 + vid.linequality);
           lastptd().prio = PPR_STRUCT0;
           }
         }

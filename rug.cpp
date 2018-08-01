@@ -1236,13 +1236,13 @@ void prepareTexture() {
   drawthemap();
   if(mousing && !renderonce) {
     for(int i=0; i<numplayers(); i++) if(multi::playerActive(i))
-      queueline(tC0(shmup::ggmatrix(playerpos(i))), mouseh, 0xFF00FF, 8);
+      queueline(tC0(shmup::ggmatrix(playerpos(i))), mouseh, 0xFF00FF, 8 + vid.linequality);
     }
   if(finger_center) {
     transmatrix V = rgpushxto0(finger_center->h);
     queuechr(V, 0.5, 'X', 0xFFFFFFFF, 2);
     for(int i=0; i<72; i++)
-      queueline(tC0(V * spin(i*M_PI/32) * xpush(finger_range)), tC0(V * spin((i+1)*M_PI/32) * xpush(finger_range)), 0xFFFFFFFF, 0);
+      queueline(tC0(V * spin(i*M_PI/32) * xpush(finger_range)), tC0(V * spin((i+1)*M_PI/32) * xpush(finger_range)), 0xFFFFFFFF, vid.linequality);
     }
   drawqueue();
   vid = svid;

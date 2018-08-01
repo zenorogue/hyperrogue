@@ -139,7 +139,7 @@ void drawShield(const transmatrix& V, eItem it) {
     col = 0;
   double d = it == itOrbShield ? hexf : hexf - .1;
   int mt = sphere ? 7 : 5;
-  for(int a=0; a<=S84*mt; a++)
+  for(ld a=0; a<=S84*mt+1e-6; a+=pow(.5, vid.linequality))
     curvepoint(V*ddi0(a, d + sin(ds + M_PI*2*a/4/mt)*.1));
   queuecurve(darkena(col, 0, 0xFF), 0x8080808, PPR_LINE);
 #endif
@@ -150,7 +150,7 @@ void drawSpeed(const transmatrix& V) {
   ld ds = ticks / 10.;
   int col = darkena(iinf[itOrbSpeed].color, 0, 0xFF);
   for(int b=0; b<S84; b+=S14) {
-    for(int a=0; a<=S84; a++)
+    PRING(a)
       curvepoint(V*ddi0(ds+b+a, hexf*a/S84));
     queuecurve(col, 0x8080808, PPR_LINE);
     }
@@ -175,7 +175,7 @@ void drawSafety(const transmatrix& V, int ct) {
   ld ds = ticks / 50.;
   int col = darkena(iinf[itOrbSafety].color, 0, 0xFF);
   for(int a=0; a<ct; a++)
-    queueline(V*ddi0(ds+a*S84/ct, 2*hexf), V*ddi0(ds+(a+(ct-1)/2)*S84/ct, 2*hexf), col);
+    queueline(V*ddi0(ds+a*S84/ct, 2*hexf), V*ddi0(ds+(a+(ct-1)/2)*S84/ct, 2*hexf), col, vid.linequality);
 #endif
   }
 
@@ -186,7 +186,7 @@ void drawFlash(const transmatrix& V) {
   col &= ~1;
   for(int u=0; u<5; u++) {
     ld rad = hexf * (2.5 + .5 * sin(ds+u*.3));
-    for(int a=0; a<=S84; a++) curvepoint(V*ddi0(a, rad));
+    PRING(a) curvepoint(V*ddi0(a, rad));
     queuecurve(col, 0x8080808, PPR_LINE);
     }
 #endif
@@ -198,9 +198,9 @@ void drawLove(const transmatrix& V, int hdir) {
   int col = darkena(iinf[itOrbLove].color, 0, 0xFF);
   col &= ~1;
   for(int u=0; u<5; u++) {
-    for(int a=0; a<=S84; a++) {
+    PRING(a) {
       double d = (1 + cos(a * M_PI/S42)) / 2;
-      int z = a; if(z>S42) z = S84-z;
+      double z = a; if(z>S42) z = S84-z;
       if(z <= 10) d += (10-z) * (10-z) * (10-z) / 3000.;
 
       ld rad = hexf * (2.5 + .5 * sin(ds+u*.3)) * d;
@@ -217,7 +217,7 @@ void drawWinter(const transmatrix& V, int hdir) {
   int col = darkena(iinf[itOrbWinter].color, 0, 0xFF);
   for(int u=0; u<20; u++) {
     ld rad = 6 * sin(ds+u * 2 * M_PI / 20);
-    queueline(V*ddi0(S42+hdir+rad, hexf*.5), V*ddi0(S42+hdir+rad, hexf*3), col, 2);
+    queueline(V*ddi0(S42+hdir+rad, hexf*.5), V*ddi0(S42+hdir+rad, hexf*3), col, 2 + vid.linequality);
     }
 #endif
   }
@@ -228,7 +228,7 @@ void drawLightning(const transmatrix& V) {
   for(int u=0; u<20; u++) {
     ld leng = 0.5 / (0.1 + (rand() % 100) / 100.0);
     ld rad = rand() % S84;
-    queueline(V*ddi0(rad, hexf*0.3), V*ddi0(rad, hexf*leng), col, 2);
+    queueline(V*ddi0(rad, hexf*0.3), V*ddi0(rad, hexf*leng), col, 2 + vid.linequality);
     }
 #endif
   }
@@ -335,8 +335,9 @@ void drawPlayerEffects(const transmatrix& V, cell *c, bool onplayer) {
       if((u-tim)%250) continue;
       ld rad = hexf * u / 250;
       int col = darkena(iinf[itOrbSafety].color, 0, 0xFF);
-      for(int a=0; a<S84; a++)
-        queueline(V*ddi0(a, rad), V*ddi0(a+1, rad), col, 0);
+      PRING(a)
+        curvepoint(V*ddi0(a, rad));
+      queuecurve(col, 0, PPR_LINE);
       }
     }
   }
@@ -1923,7 +1924,7 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, int col) {
         int hdir = displaydir(c, c->mondir);
         int col = darkena(0x606020, 0, 0xFF);
         for(int u=-1; u<=1; u++)
-          queueline(Vparam*ddi0(hdir+S21, u*crossf/5), Vparam*ddi(hdir, crossf)*ddi0(hdir+S21, u*crossf/5), col, 2);
+          queueline(Vparam*ddi0(hdir+S21, u*crossf/5), Vparam*ddi(hdir, crossf)*ddi0(hdir+S21, u*crossf/5), col, 2 + vid.linequality);
         }
       }
 
@@ -3649,8 +3650,9 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       for(int u=0; u<5; u++) {
         ld rad = hexf * (.3 * u + (ds%1000) * .0003);
         int tcol = darkena(gradient(forecolor, backcolor, 0, rad, 1.5 * hexf), 0, 0xFF);
-        for(int a=0; a<S84; a++)
-          queueline(V*ddi0(a, rad), V*ddi0(a+1, rad), tcol, 0);
+        PRING(a)
+          curvepoint(V*ddi0(a, rad));
+        queuecurve(tcol, 0, PPR_LINE);
         }
       }
   
@@ -3718,7 +3720,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       for(int t=0; t<c->type; t++) if(c->mov[t] && c->mov[t]->ligon) {
         int hdir = displaydir(c, t);
         int lcol = darkena(gradient(iinf[itOrbLightning].color, 0, 0, tim, 1100), 0, 0xFF);
-        queueline(V*ddi0(ticks, hexf/2), V*ddi0(hdir, crossf), lcol, 2);
+        queueline(V*ddi0(ticks, hexf/2), V*ddi0(hdir, crossf), lcol, 2 + vid.linequality);
         }
       }
     
@@ -4716,6 +4718,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       // hyper: 0.3798
       
       int prec = sphere ? 3 : 1;
+      prec += vid.linequality;
       
       if(irr::on) {
         int id = irr::cellindex[c];
@@ -4831,8 +4834,8 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
     if(vid.grid && c->bardir != NODIR && c->bardir != NOBARRIERS && c->land != laHauntedWall &&
       c->barleft != NOWALLSEP_USED) {
       int col = darkena(0x505050, 0, 0xFF);
-      queueline(tC0(V), V*tC0(heptmove[c->bardir]), col, 2);
-      queueline(tC0(V), V*tC0(hexmove[c->bardir]), col, 2);
+      queueline(tC0(V), V*tC0(heptmove[c->bardir]), col, 2 + vid.linequality);
+      queueline(tC0(V), V*tC0(hexmove[c->bardir]), col, 2 + vid.linequality);
       }
     
 #if CAP_MODEL
@@ -5075,7 +5078,7 @@ void drawFlashes() {
         int flashcol = f.color;
         if(u > 500) flashcol = gradient(flashcol, 0, 500, u, 1100);
         flashcol = darkena(flashcol, 0, 0xFF);
-        for(int a=0; a<=S84; a++) curvepoint(V*ddi0(a, rad));
+        PRING(a) curvepoint(V*ddi0(a, rad));
         queuecurve(flashcol, 0x8080808, PPR_LINE);
         }
       }
@@ -5089,7 +5092,7 @@ void drawFlashes() {
         int flashcol = f.color;
         if(u > 1000) flashcol = gradient(flashcol, 0, 1000, u, 2200);
         flashcol = darkena(flashcol, 0, 0xFF);
-        for(int a=0; a<=S84; a++) curvepoint(V*ddi0(a, rad));
+        PRING(a) curvepoint(V*ddi0(a, rad));
         queuecurve(flashcol, 0x8080808, PPR_LINE);
         }
       }
@@ -5319,10 +5322,10 @@ void drawmovestar(double dx, double dy) {
 
 #if CAP_QUEUE
     if(euclid)
-      queueline(tC0(Centered), Centered * ddi0(d * 10.5, 0.5) , col, 0);
+      queueline(tC0(Centered), Centered * ddi0(d * 10.5, 0.5) , col, vid.linequality);
     else
 //    queueline(tC0(Centered), Centered * spin(M_PI*d/4)* xpush(d==0?.7:d==2?.6:.5) * C0, col >> darken);
-      queueline(tC0(Centered), Centered * xspinpush0(M_PI*d/4, d==0?.7:d==2?.5:.2), col, 3);
+      queueline(tC0(Centered), Centered * xspinpush0(M_PI*d/4, d==0?.7:d==2?.5:.2), col, 3 + vid.linequality);
 #endif
     }
   }
@@ -5410,7 +5413,7 @@ void drawfullmap() {
     queuereset(vid.usingGL ? mdDisk : mdUnchanged, PPR_CIRCLE);
 
     for(int b=-1; b<=1; b+=2)
-    for(int a=-90; a<=90; a++) {
+    for(ld a=-90; a<=90+1e-6; a+=pow(.5, vid.linequality)) {
       using namespace hyperpoint_vec;
       ld x = sin(a * vid.twopoint_param * b / 90);
       ld y = 0;
@@ -5429,10 +5432,10 @@ void drawfullmap() {
   if(!stereo::active() && sphere && pmodel == mdSinusoidal) {
     queuereset(vid.usingGL ? mdDisk : mdUnchanged, PPR_CIRCLE);
     
-    for(int a=-45; a<45; a++) {
+    for(ld a=-45; a<45+1e-6; a+=pow(.5, vid.linequality)) {
       curvepoint(hpxyz(cos(a * M_PI / 90) * vid.radius, a * vid.radius / 90, 0));
       }
-    for(int a=45; a>=-45; a--) {
+    for(ld a=45; a>=-45-1e-6; a-=pow(.5, vid.linequality)) {
       curvepoint(hpxyz(-cos(a * M_PI / 90) * vid.radius, a * vid.radius / 90, 0));
       }
     queuecurve(ringcolor, 0, PPR_CIRCLE);

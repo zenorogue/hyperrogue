@@ -271,6 +271,8 @@ void initConfig() {
   addsaver(irr::rearrange_max_attempts, "irregular-rearrange-max", 50);
   addsaver(irr::rearrange_less, "irregular-rearrangeless", 10);
   
+  addsaver(vid.linequality, "line quality", 0);
+  
 #if CAP_SHMUP  
   shmup::initConfig();
 #endif
@@ -609,6 +611,8 @@ void showGraphConfig() {
     }
   else
     dialog::addBreak(100);
+  
+  dialog::addSelItem(XLAT("line quality"), its(vid.linequality), 'L');
 
   #if CAP_FRAMELIMIT
   dialog::addSelItem(XLAT("framerate limit"), its(vid.framelimit), 'l');
@@ -661,7 +665,7 @@ void showGraphConfig() {
     
     char xuni = uni | 96;
   
-    if(uni >= 32 && uni < 64) xuni = uni;
+    if((uni >= 32 && uni < 64) || uni == 'L') xuni = uni;
     
     if(xuni == 'u') vid.particles = !vid.particles;
     if(xuni == 'd') vid.graphglyph = (1+vid.graphglyph)%3;
@@ -735,6 +739,12 @@ void showGraphConfig() {
         dialog::addBoolItem("finer lines at the boundary", vid.antialias & AA_LINEWIDTH, 'o');
         dialog::add_action([] () { vid.antialias ^= AA_LINEWIDTH; });
         };
+      }
+    
+    if(xuni == 'L') {
+      dialog::editNumber(vid.linequality, -3, 5, 1, 1, XLAT("line quality"), 
+        XLAT("Higher numbers make the curved lines smoother, but reduces the performance."));
+      dialog::reaction = [] () { resetGeometry(); };
       }
   
     if(xuni == 'c') {

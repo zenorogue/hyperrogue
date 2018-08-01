@@ -86,7 +86,8 @@ bool ptdsort(const polytodraw& p1, const polytodraw& p2) {
 
 void hpcpush(hyperpoint h) { 
   if(sphere) h = mid(h,h);
-  if(/*vid.usingGL && */!first && intval(hpc.back(), h) > (sphere ? (ISMOBWEB || gp::on || irr::on ? .04 : .0001) : 0.1)) {
+  ld threshold = (sphere ? (ISMOBWEB || gp::on || irr::on ? .04 : .001) : 0.1) * pow(.25, vid.linequality);
+  if(/*vid.usingGL && */!first && intval(hpc.back(), h) > threshold) {
     hyperpoint md = mid(hpc.back(), h);
     hpcpush(md);
     hpcpush(h);
@@ -884,7 +885,7 @@ void prettypoint(const hyperpoint& h) {
   }
 
 void prettylinesub(const hyperpoint& h1, const hyperpoint& h2, int lev) {
-  if(lev) {
+  if(lev >= 0) {
     hyperpoint h3 = midz(h1, h2);
     prettylinesub(h1, h3, lev-1);
     prettylinesub(h3, h2, lev-1);
@@ -1295,11 +1296,12 @@ usershape *usershapes[USERSHAPEGROUPS][USERSHAPEIDS];
 
 void drawTentacle(hpcshape &h, ld rad, ld var, ld divby) {
   double tlength = max(crossf, hexhexdist * gp::scale * irr::scale);
-  for(int i=0; i<=20; i++)
-    hpcpush(ddi(S21, rad + var * sin(i * M_PI/divby)) * ddi(0, tlength * i/20.) * C0);
-  for(int i=20; i>=0; i--)
-    hpcpush(ddi(S21*3, rad - var * sin(i * M_PI/divby)) * ddi(0, tlength * i/20.) * C0);
-  hpcpush(ddi(S21, rad + var * sin(0 * M_PI/divby)) * ddi(0, tlength * 0/20.) * C0);
+  int max = int(20 * pow(2, vid.linequality));
+  for(ld i=0; i<=max; i++)
+    hpcpush(ddi(S21, rad + var * sin(i * M_PI/divby)) * ddi(0, tlength * i/max) * C0);
+  for(ld i=max; i>=0; i--)
+    hpcpush(ddi(S21*3, rad - var * sin(i * M_PI/divby)) * ddi(0, tlength * i/max) * C0);
+  hpcpush(ddi(S21, rad + var * sin(0 * M_PI/divby)) * C0);
   }
 
 hyperpoint hpxd(ld d, ld x, ld y, ld z) {
@@ -1780,35 +1782,36 @@ void buildpolys() {
     }
 
   bshape(shEgg, PPR_ITEM);
-  for(int i=0; i<=S84; i+=S3)
+
+  RING(i)
     hpcpush(hpxy(sin(i*2*M_PI/S84)*.15, cos(i*2*M_PI/S84)*.11));
   
   bshape(shRing, PPR_ITEM);
-  for(int i=0; i<=S84; i+=S3)
+  RING(i)
     hpcpush(ddi(i, disksize * .25) * C0);
-  for(int i=S84; i>=0; i--)
+  REVRING(i)
     hpcpush(ddi(i, disksize * .30) * C0);
   hpcpush(ddi(0, disksize * .25) * C0);
   
   bshape(shSpikedRing, PPR_ITEM);
-  for(int i=0; i<=S84; i+=S3)
+  RING(i)
     hpcpush(ddi(i, disksize * .25) * C0);
-  for(int i=S84; i>=0; i--)
-    hpcpush(ddi(i, disksize * (i&1?.35:.30)) * C0);
+  REVRING(i)
+    hpcpush(ddi(i, disksize * (int(i)&1?.35:.30)) * C0);
   hpcpush(ddi(0, disksize * .25) * C0);
   
   bshape(shTargetRing, PPR_ITEM);
-  for(int i=0; i<=S84; i+=S3)
+  RING(i)
     hpcpush(ddi(i, disksize * .25) * C0);
-  for(int i=S84; i>=0; i--)
+  REVRING(i)
     hpcpush(ddi(i, disksize * (i >= S42-6 && i <= S42+6 ?.36:.30)) * C0);
   hpcpush(ddi(0, disksize * .25) * C0);
   
   bshape(shSpearRing, PPR_ITEM);
-  for(int i=0; i<=S84; i+=S3)
+  RING(i)
     hpcpush(ddi(i, disksize * .25) * C0);
-  for(int i=S84; i>=0; i--) {
-    int d = i - S42;
+  REVRING(i) {
+    double d = i - S42;
     if(d<0) d = -d;
     d = 8 - 2 * d;
     if(d<0) d = 0;
@@ -1832,10 +1835,10 @@ void buildpolys() {
   */
   
   bshape(shLoveRing, PPR_ITEM);
-  for(int i=0; i<=S84; i+=S3)
-    hpcpush(ddi(i, disksize * .25) * C0);
-  for(int i=S84; i>=0; i--) {
-    int j = i*3 % S84;
+  RING(i) hpcpush(ddi(i, disksize * .25) * C0);
+  REVRING(i) {
+    double j = i*3;
+    while(j >= S84) j -= S84;
     double d = j - S42;
     d = d / 9;
     if(d<0) d = -d;
@@ -1846,40 +1849,42 @@ void buildpolys() {
     }
   hpcpush(ddi(0, disksize * .25) * C0);
   
+  auto dmod = [] (ld a, ld b) { return a - int(a/b)*b; };
+  
   bshape(shSawRing, PPR_ITEM);
-  for(int i=0; i<=S84; i+=S3)
+  RING(i)
     hpcpush(ddi(i, disksize * .25) * C0);
-  for(int i=S84; i>=0; i--)
-    hpcpush(ddi(i, disksize * (.3 + (i&3) * .02)) * C0);
+  REVRING(i)
+    hpcpush(ddi(i, disksize * (.3 + (dmod(i, 4) * .02))) * C0);
   hpcpush(ddi(0, disksize * .25) * C0);
   
   bshape(shGearRing, PPR_ITEM);
-  for(int i=0; i<=S84; i+=S3)
+  RING(i)
     hpcpush(ddi(i, disksize * .25) * C0);
-  for(int i=S84; i>=0; i--)
-    hpcpush(ddi(i, disksize * ((i%6<3)?.3:.36)) * C0);
+  REVRING(i)
+    hpcpush(ddi(i, disksize * ((dmod(i, 6)<3)?.3:.36)) * C0);
   hpcpush(ddi(0, disksize * .25) * C0);
   
   bshape(shPeaceRing, PPR_ITEM);
-  for(int i=0; i<=S84; i++)
+  RING(i)
     hpcpush(ddi(i, disksize * .25) * C0);
-  for(int i=S84; i>=0; i--)
-    hpcpush(ddi(i, disksize * (i%S28 < S7?.36 : .3)) * C0);
+  REVRING(i)
+    hpcpush(ddi(i, disksize * (dmod(i, S28) < S7?.36 : .3)) * C0);
   hpcpush(ddi(0, disksize * .25) * C0);
   
   bshape(shHeptaRing, PPR_ITEM);
-  for(int i=0; i<=S84; i+=S3)
+  RING(i)
     hpcpush(ddi(i, disksize * .25) * C0);
-  for(int i=S84; i>=0; i--)
-    hpcpush(ddi(i, disksize * (i%S12 < S3?.4 : .27)) * C0);
+  REVRING(i)
+    hpcpush(ddi(i, disksize * (dmod(i, S12) < S3?.4 : .27)) * C0);
   hpcpush(ddi(0, disksize * .25) * C0);
   
   bshape(shCompass1, PPR_ITEM);
-  for(int i=0; i<=S84; i+=S3)
+  RING(i)
     hpcpush(ddi(i, crossf * .35) * C0);
   
   bshape(shCompass2, PPR_ITEMa);
-  for(int i=0; i<=S84; i+=S3)
+  REVRING(i)
     hpcpush(ddi(i, crossf * .3) * C0);
   
   bshape(shCompass3, PPR_ITEMb);
@@ -1913,11 +1918,11 @@ void buildpolys() {
     }
 
   bshape(shSlime, 33);
-  for(int i=0; i<=S84; i++)
+  PRING(i)
     hpcpush(ddi(i, crossf * (0.7 + .2 * sin(i * M_PI * 2 / S84 * 9))) * C0);
 
   bshape(shJelly, 33);
-  for(int i=0; i<=S84; i++)
+  PRING(i)
     hpcpush(ddi(i, crossf * (0.4 + .03 * sin(i * M_PI * 2 / S84 * 7))) * C0);
 
   bshape(shHeptaMarker, PPR_HEPTAMARK);
@@ -1927,7 +1932,7 @@ void buildpolys() {
   for(int t=0; t<=S7*4; t++) hpcpush(ddi(t*S3, zhexf*.1) * C0);
   
   bshape(shRose, PPR_ITEM);
-  for(int t=0; t<=S84; t++) 
+  PRING(t)
     hpcpush(spin(M_PI * t / (S42+.0)) * xpush(crossf * (0.2 + .15 * sin(M_PI * t / (S42+.0) * 3))) * C0);
 
   bshape(shThorns, PPR_THORNS);
@@ -2049,10 +2054,10 @@ void buildpolys() {
   bshape(shWormHead, PPR_ONTENTACLE, scalef, 80);
   
   bshape(shWormSegment, PPR_TENTACLE1);
-  for(int i=0; i<=S84; i+=S3)
-    hpcpush(ddi(i, .20 * scalef) * C0);
+  RING(i)
+   hpcpush(ddi(i, .20 * scalef) * C0);
   bshape(shSmallWormSegment, PPR_TENTACLE1);
-  for(int i=0; i<=S84; i+=S3)
+  RING(i)
     hpcpush(ddi(i, .16 * scalef) * C0);
   bshape(shWormTail, PPR_TENTACLE1, scalef, 383);
   bshape(shSmallWormTail, PPR_TENTACLE1, scalef, 384);

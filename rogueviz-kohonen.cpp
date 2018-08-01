@@ -813,7 +813,7 @@ namespace levelline {
             queueline(
               tC0(T * ddspin(c1,i) * xpush(d2 * (vmid-val1) / (val2-val1))), 
               tC0(T * ddspin(c1,i-1) * xpush(d3 * (vmid-val1) / (val3-val1))), 
-              l.color);
+              l.color, vid.linequality);
             };
           while(v1 < v2 && v1 < v3) {
             draw();
