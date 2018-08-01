@@ -78,7 +78,7 @@ namespace svg {
         fprintf(f, "<circle cx='%s' cy='%s' r='%s' %s/>\n",
           coord(x), coord(y), coord(size), stylestr(ba, col));
       else
-        fprintf(f, "<circle cx='%s' cy='%s' rx='%s' ry='%s' %s/>\n",
+        fprintf(f, "<ellipse cx='%s' cy='%s' rx='%s' ry='%s' %s/>\n",
           coord(x), coord(y), coord(size), coord(size*vid.stretch), stylestr(ba, col));
       }
     }
