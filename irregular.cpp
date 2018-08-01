@@ -805,8 +805,16 @@ void show_gridmaker() {
     });
   dialog::addItem(XLAT("reset"), 'r');
   dialog::add_action([] () { runlevel = 0; });
+  dialog::addHelp();
   dialog::display();
   keyhandler = [] (int sym, int uni) {
+    if(uni == 'h' || sym == SDLK_F1) gotoHelp(XLAT(
+      "This option creates irregular grids to play the game on. "
+      "Currently rather slow algorithms are used, "
+      "so not recommended with too high density or "
+      "with too large periodic base geometry. "
+      "For technical reasons, the density cannot be too small."
+      ));
     dialog::handleNavigation(sym, uni);
     // no exit
     };
