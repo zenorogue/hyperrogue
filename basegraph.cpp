@@ -828,14 +828,14 @@ ld realradius() {
 void drawmessage(const string& s, int& y, int col) {
   int rrad = (int) realradius();
   int space;
-  if(y > vid.ycenter + rrad)
+  if(y > vid.ycenter + rrad * vid.stretch)
     space = vid.xres;
   else if(y > vid.ycenter)
-    space = vid.xcenter - rhypot(rrad, y-vid.ycenter);
+    space = vid.xcenter - rhypot(rrad, (y-vid.ycenter) / vid.stretch);
   else if(y > vid.ycenter - vid.fsize)
     space = vid.xcenter - rrad;
-  else if(y > vid.ycenter - vid.fsize - rrad)
-    space = vid.xcenter - rhypot(rrad, vid.ycenter-vid.fsize-y);
+  else if(y > vid.ycenter - vid.fsize - rrad * vid.stretch)
+    space = vid.xcenter - rhypot(rrad, (vid.ycenter-vid.fsize-y) / vid.stretch);
   else
     space = vid.xres;
 
@@ -920,7 +920,7 @@ void drawCircle(int x, int y, int size, int color) {
     if(ISMOBILE && pts > 72) pts = 72;
     for(int r=0; r<pts; r++) {
       float rr = (M_PI * 2 * r) / pts;
-      glcoords.push_back(make_array<GLfloat>(x + size * sin(rr), y + size * cos(rr), stereo::scrdist));
+      glcoords.push_back(make_array<GLfloat>(x + size * sin(rr), y + size * vid.stretch * cos(rr), stereo::scrdist));
       }
     glhr::vertices(glcoords);
     glhr::set_depthtest(false);
@@ -932,7 +932,10 @@ void drawCircle(int x, int y, int size, int color) {
 #if CAP_XGD
   gdpush(4); gdpush(color); gdpush(x); gdpush(y); gdpush(size);
 #elif CAP_SDLGFX
-  ((vid.antialias && AA_NOGL)?aacircleColor:circleColor) (s, x, y, size, color);
+  if(vid.stretch == 1)
+    ((vid.antialias && AA_NOGL)?aacircleColor:circleColor) (s, x, y, size, color);
+  else
+    ((vid.antialias && AA_NOGL)?aaellipseColor:ellipseColor) (s, x, y, size, size * vid.stretch, color);
 #elif CAP_SDL
   int pts = size * 4;
   if(pts > 1500) pts = 1500;

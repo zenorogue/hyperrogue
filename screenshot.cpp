@@ -73,9 +73,14 @@ namespace svg {
   
   void circle(int x, int y, int size, int col) {
     int ba = (backcolor << 8) + 0xFF;
-    if(!invisible(col))
-    fprintf(f, "<circle cx='%s' cy='%s' r='%s' %s/>\n",
-      coord(x), coord(y), coord(size), stylestr(ba, col));
+    if(!invisible(col)) {
+      if(vid.stretch == 1)
+        fprintf(f, "<circle cx='%s' cy='%s' r='%s' %s/>\n",
+          coord(x), coord(y), coord(size), stylestr(ba, col));
+      else
+        fprintf(f, "<circle cx='%s' cy='%s' rx='%s' ry='%s' %s/>\n",
+          coord(x), coord(y), coord(size), coord(size*vid.stretch), stylestr(ba, col));
+      }
     }
   
   const string *link;

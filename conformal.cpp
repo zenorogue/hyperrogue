@@ -641,9 +641,7 @@ namespace conformal {
       dialog::addSelItem(XLAT("parameter"), fts3(vid.twopoint_param), 'l');
       }
 
-    if(among(pmodel, mdBandEquidistant, mdBandEquiarea)) {
-      dialog::addSelItem(XLAT("parameter"), fts3(vid.stretch), 'l');
-      }
+    dialog::addSelItem(XLAT("vertical stretch"), fts3(vid.stretch), 's');
       
     dialog::addBreak(100);
     dialog::addItem(XLAT("history mode"), 'a');
@@ -689,10 +687,31 @@ namespace conformal {
 #endif
       else if(uni == 'l' && pmodel == mdHalfplane)
         lower_halfplane = !lower_halfplane;
-      else if(uni == 'l' && among(pmodel, mdBandEquiarea, mdBandEquidistant))
-        dialog::editNumber(vid.stretch, 0, 10, .1, 1, XLAT("parameter"), 
+      else if(uni == 's') {
+       dialog::editNumber(vid.stretch, 0, 10, .1, 1, XLAT("vertical stretch"), 
           "Vertical stretch factor."
           );
+        dialog::extra_options = [] () {
+          dialog::addBreak(100);
+          if(sphere && pmodel == mdBandEquiarea) {
+            dialog::addBoolItem("Gall-Peters", vid.stretch == 2, 'o');
+            dialog::add_action([] { vid.stretch = 2; dialog::ne.s = "2"; });
+            }
+          if(pmodel == mdBandEquiarea) {
+            // y = K * sin(phi)
+            // cos(phi) * cos(phi) = 1/K
+            if(sphere && vid.stretch >= 1) {
+              ld phi = acos(sqrt(1/vid.stretch));
+              dialog::addInfo(XLAT("The current value makes the map conformal at the latitude of %1 (%2°).", fts(phi), fts(phi * 180 / M_PI)));
+              }
+            else if(hyperbolic && abs(vid.stretch) <= 1 && abs(vid.stretch) >= 1e-9) {
+              ld phi = acosh(abs(sqrt(1/vid.stretch)));
+              dialog::addInfo(XLAT("The current value makes the map conformal %1 units from the main line.", fts(phi)));
+              }
+            else dialog::addInfo("");
+            }
+          };
+        }
       else if(uni == 'a')
         pushScreen(history_menu);
       else if(uni == 'l' && pmodel == mdHemisphere && euclid)  {

@@ -178,6 +178,7 @@ void addpoint(const hyperpoint& H) {
     hyperpoint Hscr;
     applymodel(H, Hscr); 
     for(int i=0; i<3; i++) Hscr[i] *= vid.radius;
+    Hscr[1] *= vid.stretch;
     // if(vid.alpha + H[2] <= BEHIND_LIMIT && pmodel == mdDisk) poly_flags |= POLY_BEHIND;
     
     if(spherespecial) {
@@ -314,6 +315,8 @@ void glapplymatrix(const transmatrix& V) {
   mat[13] = 0;
   mat[14] = GLfloat(vid.alpha);
   mat[15] = 1;  
+  
+  if(vid.stretch != 1) mat[1] *= vid.stretch, mat[5] *= vid.stretch, mat[9] *= vid.stretch, mat[13] *= vid.stretch;
 
   glhr::set_modelview(glhr::as_glmatrix(mat));
   }
@@ -451,7 +454,7 @@ void fixMercator(bool tinf) {
   
   if(pmodel == mdSinusoidal)
     for(int i = 0; i<isize(glcoords); i++) 
-      glcoords[i][mercator_coord] /= cos(glcoords[i][1] / vid.radius * M_PI);
+      glcoords[i][mercator_coord] /= cos(glcoords[i][1] / vid.radius / vid.stretch * M_PI);
     
   ld hperiod = mercator_period / 2;
   
@@ -460,7 +463,7 @@ void fixMercator(bool tinf) {
   if(mercator_coord)
     swap(cmin, dmin), swap(cmax, dmax);
   if(pmodel == mdSinusoidal)
-    dmin = -vid.radius / 2, dmax = vid.radius / 2;
+    dmin = -vid.stretch * vid.radius / 2, dmax = vid.stretch * vid.radius / 2;
   if(pmodel == mdBandEquidistant)
     dmin = -vid.stretch * vid.radius / 2, dmax = vid.stretch * vid.radius / 2;
   if(pmodel == mdBandEquiarea)
@@ -502,7 +505,7 @@ void fixMercator(bool tinf) {
       mercator_loop_max++, maxcoord += mercator_period;
     if(pmodel == mdSinusoidal)
       for(int i = 0; i<isize(glcoords); i++) 
-        glcoords[i][mercator_coord] *= cos(glcoords[i][1] / vid.radius * M_PI);    
+        glcoords[i][mercator_coord] *= cos(glcoords[i][1] / vid.radius / vid.stretch * M_PI);    
     }
   else {
     if(tinf) { 
@@ -529,7 +532,7 @@ void fixMercator(bool tinf) {
       }
     if(pmodel == mdSinusoidal)
       for(int i = 0; i<isize(glcoords); i++) 
-        glcoords[i][mercator_coord] *= cos(glcoords[i][1] / vid.radius * M_PI);    
+        glcoords[i][mercator_coord] *= cos(glcoords[i][1] / vid.radius / vid.stretch * M_PI);
     glcoords.push_back(glcoords.back());
     glcoords.push_back(glcoords[0]);
     for(int u=1; u<=2; u++) {
@@ -595,7 +598,7 @@ void drawpolyline(polytodraw& p) {
           twopoint_sphere_flips = j;
           hyperpoint h2; applymodel(h1, h2);
           using namespace hyperpoint_vec;
-          glvertex h = glhr::pointtogl(h2 * vid.radius);
+          glvertex h = glhr::pointtogl(h2 * vid.radius); h[1] *= vid.stretch;
           if(i == 0)
             phases[j].push_back(h);
           else {
@@ -624,7 +627,7 @@ void drawpolyline(polytodraw& p) {
           using namespace hyperpoint_vec;
 
           hyperpoint h1 = pp.V * glhr::gltopoint((*pp.tab)[pp.offset+i]);
-          hyperpoint mh1; applymodel(h1, mh1);
+          hyperpoint mh1; applymodel(h1, mh1); mh1[1] *= vid.stretch;
           phases[cpha].push_back(glhr::pointtogl(mh1 * vid.radius));
 
           // check if the i-th edge intersects the boundary of the ellipse
@@ -719,7 +722,7 @@ void drawpolyline(polytodraw& p) {
       hyperpoint hscr;
       hyperpoint h1 = pp.V * intester;
       if(is_behind(h1)) nofill = true; 
-      applymodel(h1, hscr); hscr[0] *= vid.radius; hscr[1] *= vid.radius;
+      applymodel(h1, hscr); hscr[0] *= vid.radius; hscr[1] *= vid.radius * vid.stretch;
       for(int i=0; i<isize(glcoords)-1; i++) {
         double x1 = glcoords[i][0] - hscr[0];
         double y1 = glcoords[i][1] - hscr[1];
@@ -771,7 +774,7 @@ void drawpolyline(polytodraw& p) {
     if(l || lastl) { 
       for(int i=0; i<isize(glcoords); i++) {
         if(pmodel == mdSinusoidal)
-          mercator_period = 2 * vid.radius * cos(glcoords[i][1] / vid.radius * M_PI);
+          mercator_period = 2 * vid.radius * cos(glcoords[i][1] / vid.radius / vid.stretch * M_PI);
         glcoords[i][mercator_coord] += mercator_period * (l - lastl);
         }
       lastl = l;
@@ -783,7 +786,7 @@ void drawpolyline(polytodraw& p) {
         ld h = atan2(glcoords[0][0], glcoords[0][1]);
         for(int i=0; i<=360; i++) {
           ld a = i * M_PI / 180 + h;
-          glcoords.push_back(make_array<GLfloat>(vid.radius * sin(a), vid.radius * cos(a), stereo::scrdist));
+          glcoords.push_back(make_array<GLfloat>(vid.radius * sin(a), vid.radius * vid.stretch * cos(a), stereo::scrdist));
           }
         poly_flags ^= POLY_INVERSE;
         }
@@ -2513,7 +2516,7 @@ void getcoord0(const hyperpoint& h, int& xc, int &yc, int &sc) {
   hyperpoint hscr;
   applymodel(h, hscr);
   xc = vid.xcenter + vid.radius * hscr[0];
-  yc = vid.ycenter + vid.radius * hscr[1];
+  yc = vid.ycenter + vid.radius * vid.stretch * hscr[1];
   sc = 0;
   // EYETODO sc = vid.eye * vid.radius * hscr[2];
   }

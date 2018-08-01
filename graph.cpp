@@ -2260,7 +2260,7 @@ void drawaura() {
     for(int x=0; x<vid.xres; x++) {
 
       ld hx = (x * 1. - vid.xcenter) / rad;
-      ld hy = (y * 1. - vid.ycenter) / rad;
+      ld hy = (y * 1. - vid.ycenter) / rad / vid.stretch;
   
       if(vid.camera_angle) camrotate(hx, hy);
       
@@ -2315,7 +2315,7 @@ void drawaura() {
     float rad0 = vid.alpha > -1 ? rad * facs[z] : rad / facs[z];
     int rm = r % AURA;
     cx[r][z][0] = rad0 * sin(rr);
-    cx[r][z][1] = rad0 * cos(rr);
+    cx[r][z][1] = rad0 * cos(rr) * vid.stretch;
     for(int u=0; u<3; u++)
       cx[r][z][u+2] = bak[u] + (aurac[rm][u] / (aurac[rm][3]+.1) - bak[u]) * cmul[z];
     }

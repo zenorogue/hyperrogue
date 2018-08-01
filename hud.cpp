@@ -418,7 +418,7 @@ void drawStats() {
         int spots = 0;
         for(int u=vid.fsize; u<vid.xres/2-s; u += s)
         for(int v=vid.fsize; v<vid.yres/2-s; v += s)
-          if(hypot(vid.xres/2-u-s, vid.yres/2-v-s) > rad) {
+          if(hypot(vid.xres/2-u-s, (vid.yres/2-v-s) / vid.stretch) > rad) {
             spots++;
             }
         if(spots >= bycorner[cor] && spots >= 3) {
@@ -431,7 +431,7 @@ void drawStats() {
             }
           for(int u=vid.fsize; u<vid.xres/2-s; u += s)
           for(int v=vid.fsize; v<vid.yres/2-s; v += s)
-            if(hypot(vid.xres/2-u-s, vid.yres/2-v-s) > rad) {
+            if(hypot(vid.xres/2-u-s, (vid.yres/2-v-s) / vid.stretch) > rad) {
               if(next >= isize(glyphstoshow)) break;
 
               int cx = u;

@@ -317,7 +317,7 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
           break;
           }
         case mdBandEquiarea: {
-          y = sin_auto(y) * vid.stretch;
+          y = sin_auto(y);
           break;
           }
         case mdSinusoidal: {
@@ -325,7 +325,6 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
           break;
           }
         case mdBandEquidistant: {
-          y *= vid.stretch;
           break;
           }
         default: {
