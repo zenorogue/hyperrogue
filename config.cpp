@@ -690,6 +690,15 @@ void showGraphConfig() {
       dialog::reaction = [] () { 
         doOvergenerate();
         };
+      dialog::extra_options = [] () {
+        if(allowChangeRange()) {
+          dialog::addSelItem("generation range bonus", its(genrange_bonus), 'o');
+          dialog::add_action([] () { genrange_bonus = sightrange_bonus; doOvergenerate(); });
+          dialog::addSelItem("game range bonus", its(gamerange_bonus), 'O');
+          dialog::add_action([] () { gamerange_bonus = sightrange_bonus; doOvergenerate(); });
+          }
+        else dialog::addInfo("note: enable the cheat mode for additional options");
+        };
       }
   
     if(xuni == 'k') {
@@ -720,8 +729,13 @@ void showGraphConfig() {
     
     // if(xuni == 'b') vid.antialias ^= AA_LINEWIDTH;
    
-    if(xuni == 'w' && vid.usingGL)
+    if(xuni == 'w' && vid.usingGL) {
       dialog::editNumber(vid.linewidth, 0, 10, 0.1, 1, XLAT("line width"), "");
+      dialog::extra_options = [] () {
+        dialog::addBoolItem("finer lines at the boundary", vid.antialias & AA_LINEWIDTH, 'o');
+        dialog::add_action([] () { vid.antialias ^= AA_LINEWIDTH; });
+        };
+      }
   
     if(xuni == 'c') {
       dialog::editNumber(vid.mobilecompasssize, 0, 100, 10, 20, XLAT("compass size"), "");
@@ -956,6 +970,15 @@ void projectionDialog() {
 //  "to the eye. "
     "See also the conformal mode (in the special modes menu) "
     "for more models."));
+  dialog::extra_options = [] () {
+    dialog::addBreak(100);
+    dialog::addSelItem(sphere ? "stereographic" : "Poincaré model", "1", 'p');
+    dialog::add_action([] () { *dialog::ne.editwhat = 1; vid.scale = 1; dialog::ne.s = "1"; });
+    dialog::addSelItem(sphere ? "gnomonic" : "Klein model", "0", 'k');
+    dialog::add_action([] () { *dialog::ne.editwhat = 0; vid.scale = 1; dialog::ne.s = "0"; });
+    dialog::addItem(sphere ? "towards orthographic" : "towards Gans model", 'o');
+    dialog::add_action([] () { double d = exp(shiftmul/10); vid.alpha *= d; vid.scale *= d; dialog::ne.s = dialog::disp(vid.alpha); });
+    };
   }
 
 string explain3D(ld *param) {
@@ -1181,8 +1204,19 @@ void show3D() {
       dialog::editNumber(geom3::depth, 0, 5, .1, 1, XLAT("Ground level below the plane"), "");
     else if(uni == 'a') 
       projectionDialog();
-    else if(uni == 'w') 
+    else if(uni == 'w') {
       dialog::editNumber(geom3::wall_height, 0, 1, .1, .3, XLAT("Height of walls"), "");
+      dialog::extra_options = [] () {
+        dialog::addBoolItem("auto-adjust in Goldberg grids", geom3::gp_autoscale_heights, 'o');
+        dialog::add_action([] () {
+          geom3::gp_autoscale_heights = !geom3::gp_autoscale_heights;
+          buildpolys();
+          #if CAP_GL
+          resetGL();
+          #endif
+          });
+        };
+      }
     else if(uni == 'l') 
       dialog::editNumber(geom3::lake_top, 0, 1, .1, .25, XLAT("Level of water surface"), "");
     else if(uni == 'k') 

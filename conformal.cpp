@@ -738,6 +738,15 @@ namespace conformal {
           "lands which have a special direction. Note that if finding this special direction is a part of the puzzle, "
           "it works only in the cheat mode.");
         dialog::dialogflags |= sm::CENTER;
+        dialog::extra_options = [] () {
+          dialog::addBreak(100);
+          dialog::addBoolItem("line animation only", conformal::do_rotate == 0, 'n');
+          dialog::add_action([] () { conformal::do_rotate = 0; });
+          dialog::addBoolItem("gravity lands", conformal::do_rotate == 1, 'g');
+          dialog::add_action([] () { conformal::do_rotate = 1; });
+          dialog::addBoolItem("all directional lands", conformal::do_rotate == 2, 'd');
+          dialog::add_action([] () { conformal::do_rotate = 2; });
+          };
         }
       else if(doexiton(sym, uni)) popScreen();
       };

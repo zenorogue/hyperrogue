@@ -566,6 +566,8 @@ namespace dialog {
       }
     
     displayColorButton(dcenter, vid.yres/2+vid.fsize * 6, XLAT("select this color") + " : " + itsh(color), ' ', 8, 0, color >> ash);
+
+    if(extra_options) extra_options();
     
     keyhandler = handleKeyColor;
     }
@@ -575,6 +577,7 @@ namespace dialog {
     dialogflags = 0;
     pushScreen(drawColorDialog);
     reaction = reaction_t();
+    extra_options = reaction_t();
     }
   
   numberEditor ne;
@@ -604,6 +607,8 @@ namespace dialog {
   string disp(ld x) { if(ne.intval) return its(ldtoint(x)); else if(ne.vmax-ne.vmin < 1) return fts4(x); else return fts(x); }
 
   reaction_t reaction;
+  
+  reaction_t extra_options;
 
   void affect(char kind) {
 
@@ -730,36 +735,8 @@ namespace dialog {
       // if(scal) lastItem().scale = 30;
       }
 
-    if(ne.editwhat == &vid.alpha) {
-      addBreak(100);
-      addSelItem(sphere ? "stereographic" : "Poincaré model", "1", 'p');
-      addSelItem(sphere ? "gnomonic" : "Klein model", "0", 'k');
-      addItem(sphere ? "towards orthographic" : "towards Gans model", 'o');
-      }
+    if(extra_options) extra_options();
     
-    if(ne.editwhat == &conformal::rotation) {
-      addBreak(100);
-      addBoolItem("line animation only", conformal::do_rotate == 0, 'n');
-      addBoolItem("gravity lands", conformal::do_rotate == 1, 'g');
-      addBoolItem("all directional lands", conformal::do_rotate == 2, 'd');
-      }
-    
-    if(ne.editwhat == &ne.intbuf && ne.intval == &sightrange_bonus && allowChangeRange()) {
-      addSelItem("generation range bonus", its(genrange_bonus), 'o');
-      addSelItem("game range bonus", its(gamerange_bonus), 'O');
-      }
-    
-    if(ne.editwhat == &vid.stretch && sphere && pmodel == mdBandEquiarea) {
-      addBoolItem("Gall-Peters", vid.stretch == 2, 'o');
-      add_action([] { vid.stretch = 2; });
-      }
-
-    if(ne.editwhat == &vid.linewidth)
-      addBoolItem("finer lines at the boundary", vid.antialias & AA_LINEWIDTH, 'o');
-    
-    if(ne.editwhat == &geom3::wall_height)
-      addBoolItem("auto-adjust in Goldberg grids", geom3::gp_autoscale_heights, 'o');
-
     display();
     
     keyhandler = [] (int sym, int uni) {
@@ -803,40 +780,6 @@ namespace dialog {
         *ne.editwhat = 
           ne.inverse_scale(d * (ne.scale(ne.vmax) - ne.scale(ne.vmin)) + ne.scale(ne.vmin));
         affect('v');
-        }
-      else if(uni == 'n' && ne.editwhat == &conformal::rotation)
-        conformal::do_rotate = 0;
-      else if(uni == 'g' && ne.editwhat == &conformal::rotation)
-        conformal::do_rotate = 1;
-      else if(uni == 'd' && ne.editwhat == &conformal::rotation)
-        conformal::do_rotate = 2;
-      else if(uni == 'o' && ne.editwhat == &ne.intbuf && ne.intval == &sightrange_bonus && allowChangeRange()) {
-        genrange_bonus = sightrange_bonus;
-        doOvergenerate();
-        }
-      else if(uni == 'o' && ne.editwhat == &geom3::wall_height) {
-        geom3::gp_autoscale_heights = !geom3::gp_autoscale_heights;
-        buildpolys();
-  #if CAP_GL
-      resetGL();
-  #endif
-        }
-      else if(uni == 'O' && ne.editwhat == &ne.intbuf && ne.intval == &sightrange_bonus && allowChangeRange()) {
-        gamerange_bonus = sightrange_bonus;
-        }
-      else if(uni == 'o' && ne.editwhat == &vid.linewidth)
-        vid.antialias ^= AA_LINEWIDTH;
-      else if(uni == 'p' && ne.editwhat == &vid.alpha) {
-        *ne.editwhat = 1; vid.scale = 1; ne.s = "1";
-        }
-      else if(uni == 'k' && ne.editwhat == &vid.alpha) {
-        *ne.editwhat = 0; vid.scale = 1; ne.s = "0";
-        }
-      else if((uni == 'i' || uni == 'I' || uni == 'o' || uni == 'O') && ne.editwhat == &vid.alpha) {
-        double d = exp(shiftmul/10);
-        vid.alpha *= d;
-        vid.scale *= d;
-        ne.s = disp(vid.alpha);
         }
       else if(doexiton(sym, uni)) popScreen();
       };
@@ -908,6 +851,7 @@ namespace dialog {
     cmode |= sm::NUMBER;
     pushScreen(drawNumberDialog);
     reaction = reaction_t();
+    extra_options = reaction_t();
     numberdark = 0;
     }
 

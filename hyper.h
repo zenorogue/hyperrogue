@@ -1514,13 +1514,14 @@ namespace dialog {
 
   extern vector<item> items;
   
-  extern reaction_t reaction;
+  extern reaction_t reaction, extra_options;
 
   item& lastItem();
   extern unsigned int *palette;
 
   string keyname(int k);
   
+  string disp(ld x);
   void addSelItem(string body, string value, int key);
   void addBoolItem(string body, bool value, int key);
   void addBigItem(string body, int key);
