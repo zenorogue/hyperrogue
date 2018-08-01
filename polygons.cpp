@@ -53,6 +53,9 @@ static const int POLY_CCONVEX = 8192;
 // new system of side checking 
 static const int POLY_CENTERIN = 16384;
 
+// force wide lines
+static const int POLY_FORCEWIDE = (1<<15);
+
 vector<hyperpoint> hpc;
 
 int prehpc;
@@ -62,7 +65,6 @@ bool first;
 bool fatborder;
 
 int poly_outline;
-double minwidth_global;
 
 #define PSHIFT 0
 // #define STLSORT
@@ -425,20 +427,19 @@ void gldraw(const transmatrix& V, const vector<glvertex>& v, int ps, int pq, int
   }
 #endif
 
-double linewidthat(const hyperpoint& h, double minwidth) {
-  if((vid.antialias & AA_LINEWIDTH) && hyperbolic) {
+double linewidthat(const hyperpoint& h, double linewidth, int flags) {
+  if((vid.antialias & AA_LINEWIDTH) && hyperbolic && !(flags & POLY_FORCEWIDE)) {
     double dz = h[2];
     if(dz < 1 || abs(dz-stereo::scrdist) < 1e-6) return vid.linewidth;
     else {
       double dx = sqrt(dz * dz - 1);
       double dfc = dx/(dz+1);
       dfc = 1 - dfc*dfc;
-      return max(dfc, minwidth) * vid.linewidth;
+      return max(dfc, linewidth) * vid.linewidth;
       }
     }
   return vid.linewidth;
   }
-
 
 // -radius to +3radius
 
@@ -673,7 +674,7 @@ void drawpolyline(polytodraw& p) {
 
 #if CAP_GL
   if(vid.usingGL && using_perspective) {
-    glLineWidth(linewidthat(tC0(pp.V), pp.minwidth));
+    glLineWidth(linewidthat(tC0(pp.V), pp.linewidth, pp.flags));
     gldraw(pp.V, *pp.tab, pp.offset, pp.cnt, p.col, pp.outline, pp.flags &~ POLY_INVERSE, pp.tinf);
     return;
     }
@@ -804,7 +805,7 @@ void drawpolyline(polytodraw& p) {
       if(pp.tinf && (poly_flags & POLY_INVERSE)) {
         return; 
         }
-      glLineWidth(linewidthat(tC0(pp.V), pp.minwidth));    
+      glLineWidth(linewidthat(tC0(pp.V), pp.linewidth, pp.flags));
       if(pp.tinf && pp.offset && !nofill) {
         vector<glvertex> tv;
         for(int i=0; i<pp.cnt; i++)
@@ -824,7 +825,7 @@ void drawpolyline(polytodraw& p) {
       coords_to_poly();
       int col = p.col;
       if(poly_flags & POLY_INVERSE) col = 0;
-      svg::polygon(polyx, polyy, polyi, col, pp.outline, pp.minwidth);
+      svg::polygon(polyx, polyy, polyi, col, pp.outline, pp.linewidth);
       continue;
       }
   #endif
@@ -903,7 +904,7 @@ void prettyline(hyperpoint h1, hyperpoint h2, int col, int lev) {
   pp.tab = &prettylinepoints;
   pp.offset = 0;
   pp.cnt = isize(prettylinepoints);
-  pp.minwidth = vid.linewidth;
+  pp.linewidth = vid.linewidth;
   p.col = 0;
   pp.outline = col;
   pp.flags = POLY_ISSIDE;
@@ -922,7 +923,7 @@ void prettypoly(const vector<hyperpoint>& t, int fillcol, int linecol, int lev) 
   pp.tab = &prettylinepoints;
   pp.offset = 0;
   pp.cnt = isize(prettylinepoints);
-  pp.minwidth = minwidth_global;
+  pp.linewidth = vid.linewidth;
   p.col = fillcol;
   pp.outline = linecol;
   pp.flags = POLY_ISSIDE;
@@ -2409,7 +2410,7 @@ void queuepolyat(const transmatrix& V, const hpcshape& h, int col, int prio) {
   ptd.col = (darkened(col >> 8) << 8) + (col & 0xFF);
   ptd.prio = prio << PSHIFT;
   ptd.u.poly.outline = poly_outline;
-  ptd.u.poly.minwidth = minwidth_global;
+  ptd.u.poly.linewidth = vid.linewidth;
   ptd.u.poly.flags = h.flags;
   ptd.u.poly.tinf = NULL;
   }
@@ -2435,7 +2436,7 @@ void queuetable(const transmatrix& V, const vector<glvertex>& f, int cnt, int li
   ptd.col = fillcol;
   ptd.prio = prio << PSHIFT;
   ptd.u.poly.outline = linecol;
-  ptd.u.poly.minwidth = minwidth_global;
+  ptd.u.poly.linewidth = vid.linewidth;
   ptd.u.poly.flags = 0;
   ptd.u.poly.tinf = NULL;
   }
@@ -2471,7 +2472,7 @@ void queueline(const hyperpoint& H1, const hyperpoint& H2, int col, int prf, int
   ptd.u.line.H1 = H1;
   ptd.u.line.H2 = H2;
   ptd.u.line.prf = prf;
-  ptd.u.line.width = (linewidthat(H1, minwidth_global) + linewidthat(H2, minwidth_global)) / 2;
+  ptd.u.line.width = (linewidthat(H1, vid.linewidth, 0) + linewidthat(H2, vid.linewidth, 0)) / 2;
   ptd.col = (darkened(col >> 8) << 8) + (col & 0xFF);
   ptd.prio = prio << PSHIFT;
   }

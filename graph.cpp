@@ -1143,7 +1143,6 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, int col, dou
 
     {
     dynamicval<int> dp(poly_outline);
-    dynamicval<double> dw(minwidth_global);
     int eyecolor = 0x202020;
     bool redeyes = false;
     if(m == moHunterDog) eyecolor = 0xFF0000, redeyes = true;
@@ -1151,9 +1150,11 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, int col, dou
     if(m == moHunterChanging) eyecolor = 0xFFFF00, redeyes = true;
     int eyes = darkena(eyecolor, 0, 0xFF);
 
-    if(redeyes) poly_outline = eyes, minwidth_global = 1;
+    if(redeyes) poly_outline = eyes;
     queuepoly(VAHEAD, shWolf1, eyes);
+    if(redeyes) lastptd().u.poly.flags |= POLY_FORCEWIDE;
     queuepoly(VAHEAD, shWolf2, eyes);
+    if(redeyes) lastptd().u.poly.flags |= POLY_FORCEWIDE;
     }
     queuepoly(VAHEAD, shWolf3, darkena(m == moRunDog ? 0x202020 : 0x000000, 0, 0xFF));
     }

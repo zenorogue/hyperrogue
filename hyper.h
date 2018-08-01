@@ -1583,7 +1583,7 @@ extern bool nonbitrunc;
 
 namespace svg {
   void circle(int x, int y, int size, int col);
-  void polygon(int *polyx, int *polyy, int polyi, int col, int outline, double minwidth);
+  void polygon(int *polyx, int *polyy, int polyi, int col, int outline, double linewidth);
   void text(int x, int y, int size, const string& str, bool frame, int col, int align);
   extern bool in;
   extern const string *link;
@@ -2359,7 +2359,7 @@ struct qpoly {
       const vector<glvertex> *tab;
       int offset, cnt;
       int outline;
-      double minwidth;
+      double linewidth;
       int flags;
       textureinfo *tinf;
       };

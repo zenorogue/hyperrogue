@@ -136,7 +136,7 @@ namespace svg {
       }
     }
   
-  void polygon(int *polyx, int *polyy, int polyi, int col, int outline, double minwidth) {
+  void polygon(int *polyx, int *polyy, int polyi, int col, int outline, double linewidth) {
   
     if(invisible(col) && invisible(outline)) return;
     if(polyi < 2) return;
@@ -148,17 +148,17 @@ namespace svg {
         avgy += polyy[i];
       avgx /= polyi;
       avgy /= polyi;
-      dfc = (avgx - vid.xcenter) * (avgx - vid.xcenter) + 
-        (avgy - vid.ycenter) * (avgy - vid.ycenter);
+      dfc = pow(avgx - vid.xcenter, 2) + 
+        pow((avgy - vid.ycenter) / vid.stretch, 2);
       dfc /= vid.radius;
       dfc /= vid.radius;
       // 0 = center, 1 = edge
       dfc = 1 - dfc;
       
       if(dfc < 0) dfc = 1;
-      dfc = max<double>(dfc, 1) * minwidth;
+      dfc = max<double>(dfc, 1) * linewidth;
       }
-    else dfc = .8 * minwidth;
+    else dfc = .8 * linewidth;
     
     startstring();
     for(int i=0; i<polyi; i++) {
