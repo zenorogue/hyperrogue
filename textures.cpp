@@ -277,7 +277,9 @@ int getTriangleID(cell *c, patterns::patterninfo& si, hyperpoint h) {
   }
 
 int goldbergcode(cell *c, const patterns::patterninfo& si) {
-  if(!gp::on) return 0;
+  if(irr::on)
+    return irr::cellindex[c] << 8;
+  else if(!gp::on) return 0;
   else if(c == c->master->c7) return (fixdir(si.dir, c) << 8);
   else return (get_code(gp::get_local_info(c)) << 16) | (fixdir(si.dir, c) << 8);
   }
@@ -296,6 +298,17 @@ void mapTexture(cell *c, textureinfo& mi, patterns::patterninfo &si, const trans
       int i1 = fixdir(i + d + 1, c);
       hyperpoint h1 = gp::get_corner_position(c, i0);
       hyperpoint h2 = gp::get_corner_position(c, i1);
+      mi.triangles.emplace_back(make_array(C0, h1, h2), make_array(mi.M*C0, mi.M*h1, mi.M*h2));
+      }
+    }
+  
+  else if(irr::on) {
+    mi.M = T;
+    mi.triangles.clear();
+    auto& vs = irr::cells[irr::cellindex[c]];
+    for(int i=0; i<c->type; i++) {
+      hyperpoint h1 = vs.vertices[i];
+      hyperpoint h2 = vs.vertices[(i+1)%c->type];
       mi.triangles.emplace_back(make_array(C0, h1, h2), make_array(mi.M*C0, mi.M*h1, mi.M*h2));
       }
     }
@@ -348,7 +361,7 @@ bool texture_config::apply(cell *c, const transmatrix &V, int col) {
     
     set_floor(shFullFloor);
     qfi.tinf = &mi;
-    qfi.spin = gp::on ? Id : applyPatterndir(c, si);
+    qfi.spin = (gp::on || irr::on) ? Id : applyPatterndir(c, si);
 
     if(grid_color) {
       draw_floorshape(c, V, shFullFloor, 0, PPR_FLOOR);

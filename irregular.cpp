@@ -672,6 +672,10 @@ int celldist(cell *c, bool alts) {
 eGeometry orig_geometry;
 
 void start_game_on_created_map() {    
+#if CAP_TEXTURE      
+  auto old_tstate = texture::config.tstate;
+  auto old_tstate_max = texture::config.tstate_max;
+#endif
   popScreen();
   for(hrmap *& hm : allmaps) if(hm == base) hm = NULL;
   stop_game();
@@ -682,6 +686,9 @@ void start_game_on_created_map() {
   need_reset_geometry = true;
   gridmaking = false;
   start_game();
+#if CAP_TEXTURE
+  texture::config.remap(old_tstate, old_tstate_max);
+#endif
   }
 
 bool save_map(const string& fname) {

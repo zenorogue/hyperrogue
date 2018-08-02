@@ -703,6 +703,11 @@ namespace hr { namespace gp {
     
     bool show_nonthree = !(texture_remap && (S7&1));
     bool show_bitrunc  = !(texture_remap && !(S7&1));
+    bool show_irregular = !texture_remap;
+    if(texture_remap) {
+      if(patterns::cgroup == cpSingle)
+        show_nonthree = true, show_bitrunc = false, show_irregular = true;
+      }
     
     if(show_nonthree) {
       dialog::addBoolItem(XLAT("OFF"), param == loc(1,0) && !irr::on, 'a');
@@ -742,7 +747,7 @@ namespace hr { namespace gp {
     else    
       dialog::addBoolItem(XLAT("select"), param == internal_representation(config) && !irr::on, 'f');
       
-    if(!texture_remap && irr::supports(geometry)) {
+    if(show_irregular && irr::supports(geometry)) {
       dialog::addBoolItem(XLAT("irregular"), irr::on, 'i');
       dialog::add_action([] () { if(!irr::on) irr::visual_creator(); });
       }

@@ -1724,10 +1724,15 @@ namespace patterns {
           }
         dialog::addBoolItem(s, geometry == g.geo && nonbitrunc == g.nonbitru && whichPattern == g.whichPattern && subpattern_flags == g.subpattern_flags, 'a'+j);
         }
-    bool have_goldberg = S3 == 3 && among(cgroup, cpFootball, cpThree) && !euclid;
+    bool have_goldberg = (S3 == 3 && among(cgroup, cpFootball, cpThree) && !euclid);
+    bool have_variations = (among(cgroup, cpSingle, cpSingleSym) && !euclid);
     if(!(S7&1) && !nonbitrunc) have_goldberg = false; // always start from non-bitruncated
     if(have_goldberg) {
       dialog::addBoolItem(XLAT("Goldberg"), gp::on, 'G');
+      dialog::lastItem().value = gp::operation_name();
+      }
+    if(have_variations) {
+      dialog::addBoolItem(XLAT("variations"), gp::on, 'G');
       dialog::lastItem().value = gp::operation_name();
       }
     else dialog::addBreak(100);
@@ -1735,7 +1740,7 @@ namespace patterns {
     dialog::addBack();
     dialog::display();
   
-    keyhandler = [have_goldberg] (int sym, int uni) {
+    keyhandler = [have_goldberg, have_variations] (int sym, int uni) {
       if(uni == 'r')
         pushScreen(showPattern);
       else if(uni >= '0' && uni < '0' + isize(cpatterns))
@@ -1756,7 +1761,7 @@ namespace patterns {
         texture::config.remap(old_tstate, old_tstate_max);
 #endif
         }
-      else if(uni == 'G' && have_goldberg)
+      else if(uni == 'G' && (have_goldberg || have_variations))
         gp::configure(true);
       else if(doexiton(sym, uni))
         popScreen();
