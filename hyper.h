@@ -905,6 +905,7 @@ namespace patterns {
   static const char PAT_COLORING = 'C';
   static const char PAT_SIBLING = 'S';
   static const char PAT_CHESS = 'c';
+  static const char PAT_SINGLETYPE = 't';
 
   extern int subpattern_flags;
   

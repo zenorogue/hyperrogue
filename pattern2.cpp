@@ -862,10 +862,17 @@ namespace patterns {
   patterninfo getpatterninfo(cell *c, char pat, int sub) {
     bool symRotation = sub & SPF_ROT;
     // bool sym0 = sub & (SPF_SYM01 | SPF_SYM02 | SPF_SYM03);
-
+    
     patterninfo si;
     si.dir = 0; si.reflect = false; si.id = ctof(c);
     si.symmetries = c->type;
+
+    if(pat == PAT_SINGLETYPE) {
+      si.id = 0; si.symmetries = 1;
+      if(sub & SPF_TWOCOL) si.id = c->type & 1;
+      if(sub & SPF_EXTRASYM) si.reflect = true;
+      return si;
+      }
     
     if(pat == PAT_ZEBRA && stdhyperbolic) {
 
@@ -1447,6 +1454,8 @@ namespace patterns {
       dialog::addBoolItem(XLAT("single cells"), (whichPattern == PAT_FIELD), PAT_FIELD);
     else
       dialog::addBoolItem(XLAT("field pattern"), (whichPattern == PAT_FIELD), PAT_FIELD);
+    
+    dialog::addBoolItem(XLAT("single type"), (whichPattern == PAT_SINGLETYPE), PAT_SINGLETYPE);
 
     if(
       (whichPattern == PAT_EMERALD && (stdhyperbolic || a38)) ||
@@ -1485,6 +1494,11 @@ namespace patterns {
     if(euclid && among(whichPattern, PAT_COLORING, 0))
       dialog::addBoolItem(XLAT("extra symmetries"), subpattern_flags & SPF_EXTRASYM, '=');
 
+    if(whichPattern == PAT_SINGLETYPE) {
+      dialog::addBoolItem(XLAT("odd/even"), subpattern_flags & SPF_TWOCOL, '5');
+      dialog::addBoolItem(XLAT("extra symmetries"), subpattern_flags & SPF_EXTRASYM, '=');
+      }
+
     if(euclid && among(whichPattern, PAT_COLORING, 0))
       dialog::addBoolItem(XLAT("full symmetry"), subpattern_flags & SPF_FULLSYM, '!');
 
@@ -1522,7 +1536,7 @@ namespace patterns {
     keyhandler = [] (int sym, int uni) {
       dialog::handleNavigation(sym, uni);
       
-      if(among(uni, PAT_EMERALD, PAT_PALACE, PAT_ZEBRA, PAT_DOWN, PAT_FIELD, PAT_COLORING, PAT_SIBLING, PAT_CHESS)) {
+      if(among(uni, PAT_EMERALD, PAT_PALACE, PAT_ZEBRA, PAT_DOWN, PAT_FIELD, PAT_COLORING, PAT_SIBLING, PAT_CHESS, PAT_SINGLETYPE)) {
         if(whichPattern == uni) whichPattern = 0;
         else whichPattern = uni;
         #if CAP_EDIT
@@ -1630,16 +1644,34 @@ namespace patterns {
       {g47, true, PAT_CHESS, 0}
       }},
     {"single type", {
-      {gNormal, true, 0, 0}, 
-      {gSphere, true, 0, SPF_EXTRASYM}, 
-      {gEuclid, false, PAT_COLORING, SPF_EXTRASYM | SPF_ROT | SPF_FULLSYM}, 
-      {gOctagon, true, 0, SPF_EXTRASYM}, 
-      {g45, true, 0, 0}, 
-      {g46, true, 0, 0}, 
-      {g47, true, 0, 0},
-      {gSmallSphere, true, 0, SPF_EXTRASYM},
-      {gTinySphere, true, 0, SPF_EXTRASYM},
-      {gEuclidSquare, true, 0, SPF_EXTRASYM},
+      {gNormal, true, PAT_SINGLETYPE, 0}, 
+      {gSphere, true, PAT_SINGLETYPE, 0}, 
+      {gEuclid, false, PAT_SINGLETYPE, 0}, 
+      {gOctagon, true, PAT_SINGLETYPE, 0}, 
+      {g45, true, PAT_SINGLETYPE, 0}, 
+      {g46, true, PAT_SINGLETYPE, 0}, 
+      {g47, true, PAT_SINGLETYPE, 0},
+      {gSmallSphere, true, PAT_SINGLETYPE, 0},
+      {gTinySphere, true, PAT_SINGLETYPE, 0},
+      {gEuclidSquare, true, PAT_SINGLETYPE, 0},
+      }},
+    {"single type+symmetry", {
+      {gNormal, true, PAT_SINGLETYPE, SPF_EXTRASYM}, 
+      {gSphere, true, PAT_SINGLETYPE, SPF_EXTRASYM}, 
+      {gEuclid, false, PAT_SINGLETYPE, SPF_EXTRASYM}, 
+      {gOctagon, true, PAT_SINGLETYPE, SPF_EXTRASYM}, 
+      {g45, true, PAT_SINGLETYPE, SPF_EXTRASYM}, 
+      {g46, true, PAT_SINGLETYPE, SPF_EXTRASYM}, 
+      {g47, true, PAT_SINGLETYPE, SPF_EXTRASYM},
+      {gSmallSphere, true, PAT_SINGLETYPE, SPF_EXTRASYM},
+      {gTinySphere, true, PAT_SINGLETYPE, SPF_EXTRASYM},
+      {gEuclidSquare, true, PAT_SINGLETYPE, SPF_EXTRASYM},
+      }},
+    {"odd/even", {
+      {gNormal, false, PAT_SINGLETYPE, SPF_TWOCOL}, 
+      {gSphere, false, PAT_SINGLETYPE, SPF_TWOCOL}, 
+      {g45, true, PAT_SINGLETYPE, SPF_TWOCOL}, 
+      {g47, true, PAT_SINGLETYPE, SPF_TWOCOL}
       }},
     {"large picture", {
       {gNormal, false, PAT_PALACE, SPF_SYM0123},

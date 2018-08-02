@@ -1425,7 +1425,7 @@ void texture_config::remap(eTextureState old_tstate, eTextureState old_tstate_ma
       if(texture_map.count(si.id)) continue;
       
       int pshift = 0;
-      if(texture::cgroup == cpSingle) oldid = 1;
+      if(texture::cgroup == cpSingle) oldid = 0;
       if(texture::cgroup == cpFootball && patterns::cgroup == cpThree) {
         if(si.id == 4) pshift = 1;
         oldid = !si.id;
@@ -1450,7 +1450,7 @@ void texture_config::remap(eTextureState old_tstate, eTextureState old_tstate_ma
         // printf("%08x remapping %d vertices to %d vertices\n", si.id, isize(mi.tvertices), isize(mi2.tvertices));
         }
       catch(out_of_range&) { 
-        printf("Unexpected missing cell #%d/%d", si.id, oldid);
+        printf("Unexpected missing cell #%d/%d\n", si.id, oldid);
         addMessage(XLAT("Unexpected missing cell #%d/%d", its(si.id), its(oldid)));
         config.tstate_max = config.tstate = tsAdjusting;
         return;

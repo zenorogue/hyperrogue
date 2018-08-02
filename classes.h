@@ -235,7 +235,7 @@ extern itemtype iinf[ittypes];
 extern const landtype linf[landtypes];
 
 enum cpatterntype { 
-  cpFootball, cpThree, cpChess, cpSingle, cpLarge, cpZebra, cpUnknown
+  cpFootball, cpThree, cpChess, cpSingle, cpSingleSym, cpOddEven, cpLarge, cpZebra, cpUnknown
   };
   
 struct landtacinfo { eLand l; int tries, multiplier; };
