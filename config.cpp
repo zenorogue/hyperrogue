@@ -273,6 +273,8 @@ void initConfig() {
   
   addsaver(vid.linequality, "line quality", 0);
   
+  addsaver(texture::texture_aura, "texture-aura", false);
+  
 #if CAP_SHMUP  
   shmup::initConfig();
 #endif

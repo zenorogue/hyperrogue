@@ -2903,6 +2903,9 @@ namespace texture {
   extern bool texturesym;
 
   extern cpatterntype cgroup;
+  
+  extern bool texture_aura;
+  bool using_aura();
   }
 #endif
 

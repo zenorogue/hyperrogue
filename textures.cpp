@@ -342,6 +342,12 @@ int texture_config::recolor(int col) {
   return col;
   }
 
+bool texture_aura;
+
+bool using_aura() {
+  return texture_aura && config.tstate == texture::tsActive;
+  }
+
 bool texture_config::apply(cell *c, const transmatrix &V, int col) {
   if(config.tstate == tsOff) return false;
 
@@ -368,8 +374,7 @@ bool texture_config::apply(cell *c, const transmatrix &V, int col) {
       lastptd().u.poly.outline = grid_color;
       }
       
-    if(texture::saving) {
-      // create a nicer aura for saved texture
+    if(using_aura()) {
       for(int i=0; i<isize(mi.tvertices); i += 3) {
         ld p[3];
         while(true) {
@@ -1101,6 +1106,8 @@ void showMenu() {
     dialog::addColorItem(XLAT("mesh color"), config.mesh_color, 'm');
     dialog::addSelItem(XLAT("color alpha"), its(config.color_alpha), 'c');
     dialog::addSelItem(XLAT("precision"), its(config.gsplits), 'P');
+    dialog::addBoolItem(XLAT("aura from texture"), texture_aura, 'a');
+    dialog::add_action([] () { texture_aura = !texture_aura; });
 #if CAP_EDIT
     dialog::addItem(XLAT("edit the texture"), 'e');
 #endif

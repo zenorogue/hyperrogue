@@ -4639,7 +4639,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       queuepolyat(V, shDisk, 0xC0404040, PPR_SWORDMARK);
       }
     
-    addaura(tC0(V), zcol, fd);
+    if(!texture::using_aura()) addaura(tC0(V), zcol, fd);
 
     int ad = airdist(c);
     if(ad == 1 || ad == 2) {
