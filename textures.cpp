@@ -881,6 +881,7 @@ bool texture_config::load() {
   loadNewConfig(f);
   swap(texturesavers, savers);
   fclose(f);
+  polygonal::solve();
   
   if(1) {
     dynamicval<char> d1(patterns::whichPattern, patterns::whichPattern);
