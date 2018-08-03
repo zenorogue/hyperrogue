@@ -491,6 +491,7 @@ void texture_config::saveFullTexture(string tn) {
   dynamicval<ld> dy(vid.yposition, 0);
   dynamicval<ld> dvs(vid.scale, (pmodel == mdDisk && !euclid) ? 1 : vid.scale);
   dynamicval<bool> dro(rug::rugged, false);
+  dynamicval<bool> dnh(nohud, true);
   texture::saving = true;
   drawscreen();
 
