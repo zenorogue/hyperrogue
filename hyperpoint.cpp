@@ -604,4 +604,15 @@ transmatrix rotmatrix(double rotation, int c0, int c1) {
   return t;
   }
 
+hyperpoint mid3(hyperpoint h1, hyperpoint h2, hyperpoint h3) {
+  using namespace hyperpoint_vec;
+  return mid(h1+h2+h3, h1+h2+h3);
+  }
+
+hyperpoint mid_at(hyperpoint h1, hyperpoint h2, ld v) {
+  using namespace hyperpoint_vec;
+  hyperpoint h = h1 * (1-v) + h2 * v;
+  return mid(h, h);
+  }  
+
 }
