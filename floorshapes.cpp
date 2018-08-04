@@ -607,12 +607,14 @@ void set_no_floor() {
 void set_floor(floorshape& sh) {
   qfi.fshape = &sh;
   qfi.shape = NULL;
+  qfi.tinf = NULL;
   }
 
 void set_floor(hpcshape& sh) {
   qfi.shape = &sh;
   qfi.fshape = NULL;
   qfi.spin = Id;
+  qfi.tinf = NULL;
   }
 
 void set_floor(const transmatrix& spin, hpcshape& sh) {
