@@ -890,15 +890,17 @@ bool texture_config::load() {
 
     if(targetgeometry != geometry) {
       stop_game_and_switch_mode(rg::geometry);
+      start_game();
       return config.load();
       }
     
     if(nonbitrunc != target_nonbitru) {
       stop_game_and_switch_mode(rg::bitrunc);
+      start_game();
+      return config.load();
       }
     }
   
-  start_game();
 
   if(true) {
     celllister cl(currentmap->gamestart(), 20, 10000, NULL);
