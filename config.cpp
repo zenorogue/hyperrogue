@@ -272,9 +272,11 @@ void initConfig() {
   addsaver(irr::rearrange_less, "irregular-rearrangeless", 10);
   
   addsaver(vid.linequality, "line quality", 0);
-  
+
+#if CAP_TEXTURE  
   addsaver(texture::texture_aura, "texture-aura", false);
-  
+#endif
+
 #if CAP_SHMUP  
   shmup::initConfig();
 #endif
