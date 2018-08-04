@@ -710,6 +710,7 @@ namespace shmup {
   bool boatAt(cell *c);
   
   void virtualRebase(cell*& base, transmatrix& at, bool tohex);
+  void virtualRebase(cell*& base, hyperpoint& h, bool tohex);
   void virtualRebase(shmup::monster *m, bool tohex);
   transmatrix calc_relative_matrix(cell *c, cell *c1, const hyperpoint& point_hint);
   transmatrix calc_relative_matrix(cell *c, cell *c1, int direction_hint);

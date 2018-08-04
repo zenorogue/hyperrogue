@@ -985,6 +985,11 @@ void fixelliptic(transmatrix& at) {
     }
   }
 
+void fixelliptic(hyperpoint& h) {
+  if(elliptic && h[2] < 0)
+    for(int i=0; i<3; i++) h[i] = -h[i];
+  }
+
 void monster::store() {
   monstersAt.insert(make_pair(base, this));
   }
@@ -3511,21 +3516,22 @@ transmatrix calc_relative_matrix_help(cell *c, heptagon *h1) {
   return gm * where;
   }
 
-void virtualRebase(cell*& base, transmatrix& at, bool tohex) {
+template<class T, class U> 
+void virtualRebase(cell*& base, T& at, bool tohex, const U& check) {
   if(euclid || sphere) {
     again:
     if(torus) for(int i=0; i<6; i++) {
-      transmatrix newat = eumovedir(3+i) * at;
-      if(hdist0(tC0(newat)) < hdist0(tC0(at))) {
+      auto newat = eumovedir(3+i) * at;
+      if(hdist0(check(newat)) < hdist0(check(at))) {
         at = newat;
         base = createMov(base, i);
         goto again;
         }
       }
     else forCellCM(c2, base) {
-      transmatrix newat = inverse(ggmatrix(c2)) * ggmatrix(base) * at;
-      if(hypot(tC0(newat)[0], tC0(newat)[1])
-        < hypot(tC0(at)[0], tC0(at)[1])) {
+      auto newat = inverse(ggmatrix(c2)) * ggmatrix(base) * at;
+      if(hypot(check(newat)[0], check(newat)[1])
+        < hypot(check(at)[0], check(at)[1])) {
         at = newat;
         base = c2;
         goto again;
@@ -3540,7 +3546,7 @@ void virtualRebase(cell*& base, transmatrix& at, bool tohex) {
     
   while(true) {
   
-    double currz = (at * C0)[2];
+    double currz = check(at)[2];
     
     heptagon *h = base->master;
     
@@ -3554,7 +3560,7 @@ void virtualRebase(cell*& base, transmatrix& at, bool tohex) {
       hs.spin = d;
       heptspin hs2 = hs + wstep;
       transmatrix V2 = spin(-hs2.spin*2*M_PI/S7) * invheptmove[d];
-      double newz = (V2 * at * C0) [2];
+      double newz = check(V2 * at) [2];
       if(newz < currz) {
         currz = newz;
         bestV = V2;
@@ -3570,7 +3576,7 @@ void virtualRebase(cell*& base, transmatrix& at, bool tohex) {
       if(tohex && !nonbitrunc) for(int d=0; d<S7; d++) {
         cell *c = createMov(base, d);
         transmatrix V2 = spin(-base->spn(d)*2*M_PI/S6) * invhexmove[d];
-        double newz = (V2 *at * C0) [2];
+        double newz = check(V2 *at) [2];
         if(newz < currz) {
           currz = newz;
           bestV = V2;
@@ -3586,6 +3592,14 @@ void virtualRebase(cell*& base, transmatrix& at, bool tohex) {
       }
     }
 
+  }
+
+void virtualRebase(cell*& base, transmatrix& at, bool tohex) {
+  virtualRebase(base, at, tohex, tC0);
+  }
+
+void virtualRebase(cell*& base, hyperpoint& h, bool tohex) {
+  virtualRebase(base, h, tohex, [] (const hyperpoint& h) { return h; });
   }
 
 void virtualRebase(shmup::monster *m, bool tohex) {
