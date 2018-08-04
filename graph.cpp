@@ -4418,6 +4418,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           if(c->land == laOceanWall && wmescher && wmspatial) {
            const int layers = 2 << detaillevel;
            dynamicval<const hpcshape*> ds(qfi.shape, &shCircleFloor);
+           dynamicval<transmatrix> dss(qfi.spin, Id);
            for(int z=1; z<layers; z++) {
              double zg = zgrad0(-geom3::lake_top, geom3::actual_wall_height(), z, layers);
              draw_qfi(c, xyzscale(V, zg*(layers-z)/layers, zg),
