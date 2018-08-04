@@ -4638,8 +4638,11 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
     if(!shmup::on && sword::at(c)) {
       queuepolyat(V, shDisk, 0xC0404040, PPR_SWORDMARK);
       }
-    
-    if(!texture::using_aura()) addaura(tC0(V), zcol, fd);
+
+#if CAP_TEXTURE    
+    if(!texture::using_aura()) 
+#endif 
+      addaura(tC0(V), zcol, fd);
 
     int ad = airdist(c);
     if(ad == 1 || ad == 2) {
