@@ -2602,6 +2602,7 @@ namespace irr {
   void visual_creator();
   unsigned char density_code();
   int celldist(cell *c, bool alts);
+  extern int bitruncations_requested, bitruncations_performed;
   }
 
 extern hrmap *currentmap;

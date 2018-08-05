@@ -1042,7 +1042,7 @@ int geosupport_threecolor() {
 int geosupport_graveyard() {
   // always works in bitrunc geometries
   if(!nonbitrunc) return 2;
-  if(irr::on) return 0;
+  if(irr::on) return irr::bitruncations_performed ? 2 : 1;
   
   // always works in patterns supporting three-color
   int tc = max(geosupport_threecolor(), gp_threecolor());
@@ -1182,7 +1182,7 @@ bool warptype(cell *c) {
     else 
       return c->master->distance & 1;
     }
-  else if(gp::on)
+  else if(gp::on || irr::on)
     return pseudohept(c);
   else
     return pattern_threecolor(c) == 0;

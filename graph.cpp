@@ -3085,7 +3085,7 @@ bool noAdjacentChasms(cell *c) {
 
 // does the current geometry allow nice duals
 bool has_nice_dual() {
-  if(irr::on) return false;
+  if(irr::on) return irr::bitruncations_performed > 0;
   if(!nonbitrunc) return true;
   if((S7 & 1) == 0) return true;
   if(!gp::on) return false;

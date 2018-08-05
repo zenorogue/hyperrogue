@@ -97,6 +97,130 @@ bool gridmaking;
 
 int rearrange_index;
 
+bool cell_sorting;
+
+int bitruncations_requested = 1, bitruncations_performed = 0;
+
+int black_adjacent, white_three;
+
+void set_relmatrices(cellinfo& ci) {
+  auto& all = base->allcells();
+  ci.relmatrices.clear();
+  for(auto c0: all) ci.relmatrices[c0] = shmup::calc_relative_matrix(c0, ci.owner, ci.p);
+  }
+
+void rebase(cellinfo& ci) {
+  cell *cx = ci.owner;
+  shmup::virtualRebase(ci.owner, ci.p, false);
+  if(ci.owner != cx) {
+    printf("rebased %p to %p\n", cx, ci.owner);
+    set_relmatrices(ci);
+    }
+  }
+
+void compute_jpoints() {
+  for(int i=0; i<isize(cells); i++) {
+    auto &ci = cells[i];
+
+    ci.pusher = rgpushxto0(ci.p);
+    ci.rpusher = gpushxto0(ci.p);
+    
+    ci.jpoints.clear();
+
+    for(int j=0; j<isize(cells); j++) {
+      auto &cj = cells[j];
+      ci.jpoints.push_back(ci.rpusher * ci.relmatrices[cj.owner] * cj.p);
+      }
+    }
+  }
+    
+void bitruncate() {
+  int cc = isize(cells);
+  map<pair<int, int>, int> bitruncated_id;
+  for(int i=0; i<cc; i++) {
+    int v = isize(cells[i].vertices);
+    for(int j=0; j<v; j++) {
+      int last = cells[i].neid[(j+v-1)%v];
+      int next = cells[i].neid[j];
+      if(!bitruncated_id.count(make_pair(i, last))) {
+        bitruncated_id[make_pair(i, last)] = 
+        bitruncated_id[make_pair(last, next)] = 
+        bitruncated_id[make_pair(next, i)] =                 
+          isize(cells);
+        cells.emplace_back();
+        cellinfo& s = cells.back();
+        s.patterndir = -1;
+        s.owner = cells[i].owner;
+        s.p = cells[i].pusher * cells[i].vertices[j];
+        s.neid.push_back(i);
+        s.neid.push_back(-1);
+        s.neid.push_back(last);
+        s.neid.push_back(-1);
+        s.neid.push_back(next);
+        s.neid.push_back(-1);
+        shmup::virtualRebase(s.owner, s.p, false);
+        set_relmatrices(s);
+        }
+      }
+    }
+  for(int i=0; i<cc; i++) {
+    int v = isize(cells[i].vertices);
+    vector<int> newnei;
+    for(int j=0; j<v; j++) {
+      int last = cells[i].neid[(j+v-1)%v];
+      int next = cells[i].neid[j];
+      auto id = bitruncated_id[make_pair(i, last)];
+      newnei.push_back(id);
+      for(int k=0; k<6; k++) 
+        if(cells[id].neid[k] == i) {
+          cells[id].neid[(k+5)%6] = bitruncated_id[make_pair(i, next)];
+          }
+      }
+    cells[i].neid = move(newnei);
+    }
+  make_cells_of_heptagon();
+  compute_jpoints();
+  for(int i=0; i<isize(cells); i++) {
+    auto &ci = cells[i];
+    ci.vertices.clear();
+
+    ci.pusher = rgpushxto0(ci.p);
+    ci.rpusher = gpushxto0(ci.p);
+
+    int v = isize(ci.neid);
+    for(int j=0; j<v; j++) {
+      int last = ci.neid[(j+v-1)%v];
+      int next = ci.neid[j];
+      hyperpoint h1 = ci.rpusher * ci.relmatrices[cells[last].owner] * cells[last].p;
+      hyperpoint h2 = ci.rpusher * ci.relmatrices[cells[next].owner] * cells[next].p;
+      ci.vertices.push_back(mid3(C0, h1, h2));
+      }
+    }
+  bitruncations_performed++;
+  cell_sorting = false;
+  }
+
+int rearrange(bool total, ld minedge) {
+  int tooshort = 0;
+  for(int i=0; i<isize(cells); i++) {
+    auto& p1 = cells[i];
+    using namespace hyperpoint_vec;
+    hyperpoint h = hpxyz(0, 0, 0);
+    for(auto v: p1.vertices) h = h + v;
+    
+    bool changed = total;
+
+    for(int j=0; j<isize(p1.vertices); j++)
+      if(hdist(p1.vertices[j], p1.vertices[(j+1) % isize(p1.vertices)]) < minedge) {
+        tooshort++; changed = true;
+        h = h + p1.vertices[j] + p1.vertices[(j+1) % isize(p1.vertices)];
+        }
+    if(changed)
+      cells[i].p = p1.pusher * normalize(h);
+    }
+  return tooshort;
+  }
+
 bool step(int delta) {
 
   if(!gridmaking) return false;
@@ -119,7 +243,7 @@ bool step(int delta) {
          cellinfo& s = cells.back();
          s.patterndir = -1;
          s.owner = h, s.p = spin(hrand(1000)) * xpush(.01) * C0;
-         for(auto c0: all) s.relmatrices[c0] = shmup::calc_relative_matrix(c0, s.owner, s.p);
+         set_relmatrices(s);
          }
        }
       runlevel++;
@@ -150,6 +274,7 @@ bool step(int delta) {
         // printf("%lf %p %s\n", bestval, s.owner, display(s.p));
         }
       make_cells_of_heptagon();
+      cell_sorting = true; bitruncations_performed = 0;
       runlevel++;
       status[0] = "all " + its(isize(cells)) + " cells";
       break;
@@ -157,7 +282,8 @@ bool step(int delta) {
     
     case 2: {
 
-      sort(cells.begin(), cells.end(), [] (const cellinfo &s1, const cellinfo &s2) { return hdist0(s1.p) < hdist0(s2.p); });
+      if(cell_sorting)
+        sort(cells.begin(), cells.end(), [] (const cellinfo &s1, const cellinfo &s2) { return hdist0(s1.p) < hdist0(s2.p); });
       make_cells_of_heptagon();
 
       edgelens.clear();
@@ -166,25 +292,18 @@ bool step(int delta) {
       int stats[16];
       for(int k=0; k<16; k++) stats[k] = 0;
       
-      for(int i=0; i<cellcount; i++) {
+      compute_jpoints();
+      
+      for(int i=0; i<isize(cells); i++) {
         auto &p1 = cells[i];
+    
         p1.vertices.clear();
         p1.neid.clear();
-    
-        p1.pusher = rgpushxto0(p1.p);
-        p1.rpusher = gpushxto0(p1.p);
-        
-        p1.jpoints.clear();
-    
-        for(int j=0; j<cellcount; j++) {
-          auto &p2 = cells[j];
-          p1.jpoints.push_back(p1.rpusher * p1.relmatrices[p2.owner] * p2.p);
-          }
     
         int j = 0;
         if(j == i) j = 1;
     
-        for(int k=0; k<cellcount; k++) if(k != i) {
+        for(int k=0; k<isize(cells); k++) if(k != i) {
           if(hdist(p1.jpoints[k], C0) < hdist(p1.jpoints[j], C0))
             j = k;
           }
@@ -196,7 +315,7 @@ bool step(int delta) {
         do {
           int best_k = -1;
           hyperpoint best_h;
-          for(int k=0; k<cellcount; k++) if(k != i && k != j && k != oldj) {
+          for(int k=0; k<isize(cells); k++) if(k != i && k != j && k != oldj) {
             hyperpoint h = circumscribe(C0, p1.jpoints[j], p1.jpoints[k]);
             if(h[2] < 0) continue;
             if(!clockwise(t, h)) continue;
@@ -264,27 +383,12 @@ bool step(int delta) {
       ld median = edgelens[isize(edgelens) / 2];
       ld minedge = median * quality;
       status[3] = XLAT("median edge: %1 minimum: %2", fts4(median), fts4(edgelens[0]));
-      if(edgelens[0] < minedge) {
+      if(!bitruncations_performed && edgelens[0] < minedge) {
         if(rearrange_index >= rearrange_max_attempts) {
           runlevel = 0; break;
           }
-        int tooshort = 0;
-        for(int i=0; i<isize(cells); i++) {
-          auto& p1 = cells[i];
-          using namespace hyperpoint_vec;
-          hyperpoint h = hpxyz(0, 0, 0);
-          for(auto v: p1.vertices) h = h + v;
-          
-          bool changed = rearrange_index < rearrange_less;
-    
-          for(int j=0; j<isize(p1.vertices); j++)
-            if(hdist(p1.vertices[j], p1.vertices[(j+1) % isize(p1.vertices)]) < minedge) {
-              tooshort++; changed = true;
-              h = h + p1.vertices[j] + p1.vertices[(j+1) % isize(p1.vertices)];
-              }
-          if(changed)
-            cells[i].p = p1.pusher * normalize(h);
-          }
+        int tooshort = rearrange(rearrange_index < rearrange_less, minedge);
+        
         status[3] += XLAT(" (edges too short: %1)", its(tooshort));
         runlevel = 2;
         rearrange_index++;
@@ -293,12 +397,20 @@ bool step(int delta) {
       runlevel++;
       break;
       }
-    
+      
     case 5: {
+      if(bitruncations_performed < bitruncations_requested) 
+        bitruncate();
+      else
+        runlevel = 6;
+      break;
+      }
+    
+    case 6: {
       
       int notfound = 0;
     
-      for(int i=0; i<cellcount; i++) {
+      for(int i=0; i<isize(cells); i++) {
         auto &p1 = cells[i];
         int N = isize(p1.vertices);
         p1.spin.resize(N);
@@ -327,7 +439,7 @@ bool step(int delta) {
         }
     
       int faredge = 0;
-      for(int i=0; i<cellcount; i++) {
+      for(int i=0; i<isize(cells); i++) {
         auto &p1 = cells[i];
         for(int j: p1.neid) {
           auto &p2 = cells[j];
@@ -340,6 +452,24 @@ bool step(int delta) {
         status[4] = XLAT("adjacent cells from nonadjacent heptagons: %1", its(faredge));
         runlevel = 0; return false;
         }
+      
+      /*
+      black_adjacent = 0;
+      white_three = 0;
+      for(int i=0; i<isize(cells); i++) {
+        if(!cells[i].by_bitruncation) {
+          for(int j: cells[i].neid) if(!cells[j].by_bitruncation) black_adjacent++;
+          }
+        else {
+          int v = isize(cells[i].neid);
+          for(int j=0; j<v; j++)
+            if(cells[cells[i].neid[j]].by_bitruncation)
+            if(cells[cells[i].neid[(j+1)%v]].by_bitruncation)
+              white_three++;
+          }
+        }
+      printf("black_adjacent = %d, white_three = %d\n", black_adjacent, white_three);
+      */
 
       status[4] = XLAT("OK");
       runlevel = 10;
@@ -380,7 +510,7 @@ ld scale;
 
 void compute_geometry() {
   if(irr::on) {
-    scale = sqrt(isize(cells_of_heptagon) * 1. / cellcount);
+    scale = sqrt(isize(cells_of_heptagon) * 1. / isize(cells));
     crossf *= scale;
     hepvdist *= scale;
     rhexf *= scale;
@@ -695,7 +825,7 @@ bool save_map(const string& fname) {
   FILE *f = fopen(fname.c_str(), "wt");
   if(!f) return false;
   auto& all = base->allcells();
-  fprintf(f, "%d %d %d\n", geometry, isize(all), cellcount);
+  fprintf(f, "%d %d %d\n", geometry, isize(all), isize(cells));
   
   for(auto h: all) {
     fprintf(f, "%d\n", isize(cells_of_heptagon[h->master]));
@@ -752,13 +882,20 @@ void cancel_map_creation() {
 
 string irrmapfile = "irregularmap.txt";
 
+string irrhelp = 
+  "This option creates irregular grids to play the game on. "
+  "Currently rather slow algorithms are used, "
+  "so not recommended with too high density or "
+  "with too large periodic base geometry. "
+  "For technical reasons, the density cannot be too small.";
+
 void show_gridmaker() {
   cmode = sm::SIDE;
   gamescreen(0);  
   dialog::init(XLAT("irregular grid"));
   dialog::addSelItem(XLAT("density"), fts(density), 'd');
   dialog::add_action([] {
-    dialog::editNumber(density, 1, 10, .1, 4, "density", "");
+    dialog::editNumber(density, 1, 10, .1, 4, XLAT("density"), XLAT(irrhelp));
     dialog::reaction = [] () {
       int s = cellcount;
       if(density < 1) density = 1;
@@ -770,7 +907,10 @@ void show_gridmaker() {
     });
   dialog::addSelItem(XLAT("min edge to median"), fts(quality), 'q');
   dialog::add_action([] {
-    dialog::editNumber(quality, 0, 1, .1, 4, XLAT("quality"), "");
+    dialog::editNumber(quality, 0, 1, .05, .2, XLAT("quality"), XLAT(
+      "The smallest allowed ratio of edge length to median edge length. "
+      "Tilings with low values are easier to generate, but tend to be more ugly."
+      ));
     dialog::reaction = [] () {
       printf("quality = %lf\n", double(density));
       if(runlevel > 4) runlevel = 4;
@@ -810,18 +950,22 @@ void show_gridmaker() {
         }
       });
     });
+  dialog::addSelItem(XLAT("bitruncation count"), its(bitruncations_requested), 'b');
+  dialog::add_action([] () { 
+    dialog::editNumber(bitruncations_requested, 0, 5, 1, 1, XLAT("bitruncation const"),
+      XLAT("Bitruncation introduces some regularity, allowing more sophisiticated floor tilings and textures."));
+    dialog::reaction = [] () {
+      if(bitruncations_requested > bitruncations_performed && runlevel > 5) runlevel = 5;
+      if(bitruncations_requested < bitruncations_performed) runlevel = 0;
+      };
+    });
   dialog::addItem(XLAT("reset"), 'r');
   dialog::add_action([] () { runlevel = 0; });
   dialog::addHelp();
   dialog::display();
   keyhandler = [] (int sym, int uni) {
-    if(uni == 'h' || sym == SDLK_F1) gotoHelp(XLAT(
-      "This option creates irregular grids to play the game on. "
-      "Currently rather slow algorithms are used, "
-      "so not recommended with too high density or "
-      "with too large periodic base geometry. "
-      "For technical reasons, the density cannot be too small."
-      ));
+    handlePanning(sym, uni);
+    if(uni == 'h' || sym == SDLK_F1) gotoHelp(XLAT(irrhelp));
     dialog::handleNavigation(sym, uni);
     // no exit
     };
@@ -859,6 +1003,7 @@ void visual_creator() {
 void auto_creator() {
   irr::on = false;
   int cc = cellcount;
+  bitruncations_requested = bitruncations_performed;
   visual_creator();
   cellcount = cc; density = cc * 1. / isize(base->allcells());
   printf("Creating the irregular map automatically...\n");
@@ -877,6 +1022,10 @@ int readArgs() {
     visual_creator();
     showstartmenu = false;
     }
+  else if(argis("-irrdens")) {
+    PHASE(2);
+    shift(); density = argf();
+    }
   else if(argis("-irrload")) {
     PHASE(3);
     restart_game();
@@ -893,9 +1042,9 @@ int readArgs() {
 #endif
 
 unsigned char density_code() {
-  if(cellcount < 128) return cellcount;
+  if(isize(cells) < 128) return isize(cells);
   else {
-    int t = 127, a = cellcount;
+    int t = 127, a = isize(cells);
     while(a > 127) a = a * 9/10, t++;
     return t;
     }

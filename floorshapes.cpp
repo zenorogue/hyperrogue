@@ -493,19 +493,21 @@ namespace irr {
   void generate_floorshapes() {
   
     if(irr::cells.empty()) return;
+    
+    int cc = isize(irr::cells);
 
     for(auto pfsh: all_escher_floorshapes) {
       auto& fsh = *pfsh;
       generate_matrices_scale(1, fsh.noftype);
-      auto& m = hept_matrices;
       
       /* if(siid == 0)
         for(auto& ma: m.v) ma.first = ma.first * pispin; */
   
-      fsh.b.resize(irr::cellcount);
+      fsh.b.resize(cc);
 
-      for(int id=0; id<irr::cellcount; id++) {      
+      for(int id=0; id<cc; id++) {
         auto& vs = irr::cells[id];
+        auto& m = (geosupport_graveyard() == 2 && !vs.is_pseudohept) ? hex_matrices : hept_matrices;
 
         int cor = isize(vs.vertices);
         m.n.sym = cor;      
@@ -519,9 +521,14 @@ namespace irr {
             hyperpoint nlcorner = vs.vertices[(d+c+1) % cor];
             hyperpoint nrcorner = vs.vertices[(d+c+2) % cor];
             
-            hyperpoint nfar = vs.jpoints[vs.neid[(d+c+1) % cor]];
-            hyperpoint nlfar = nfar;
-            hyperpoint nrfar = nfar;
+            int neid = vs.neid[(d+c+1) % cor];
+            int spin = vs.spin[(d+c+1) % cor];
+            auto &vs2 = irr::cells[neid];
+            int cor2 = isize(vs2.vertices);
+            hyperpoint nfar = vs.jpoints[neid];
+            transmatrix rel = vs.rpusher * vs.relmatrices[vs2.owner] * vs2.pusher;
+            hyperpoint nlfar = rel * vs2.vertices[(spin+2)%cor2];
+            hyperpoint nrfar = rel * vs2.vertices[(spin+cor2-1)%cor2];
             m.v[i].second[c] = build_matrix(center, nlcorner, nrcorner);
             m.v[i+1].second[c] = build_matrix(nfar, nlcorner, nrcorner);
             m.v[i+2].second[c] = build_matrix(nfar, nlcorner, nlfar);
@@ -534,7 +541,7 @@ namespace irr {
         usedml[id] = m;
       
         m.n.sym = cor;
-        bshape2(fsh.b[id], fsh.prio, fsh.shapeid2 ? fsh.shapeid2 : fsh.shapeid1, m);
+        bshape2(fsh.b[id], fsh.prio, (fsh.shapeid2 && geosupport_graveyard() < 2) ? fsh.shapeid2 : !vs.is_pseudohept?fsh.shapeid0:fsh.shapeid1, m);
         }
       }
     
@@ -543,16 +550,59 @@ namespace irr {
 
       ld sca = fsh.rad0 / shFullFloor.rad0;
       
-      fsh.b.resize(irr::cellcount);
-      fsh.shadow.resize(irr::cellcount);        
+      fsh.b.resize(cc);
+      fsh.shadow.resize(cc);        
       
-      for(int i=0; i<irr::cellcount; i++) {      
+      for(int i=0; i<cc; i++) {      
         auto& vs = irr::cells[i];
         vector<hyperpoint> cornerlist;
         
         int cor = isize(vs.vertices);
-        for(int j=0; j<cor; j++)
-          cornerlist.push_back(rspintox(vs.vertices[j]) * xpush(hdist0(vs.vertices[j]) * sca) * C0);
+
+        if(&fsh == &shBigTriangle) {
+          if(vs.is_pseudohept) {
+            for(int i=0; i<cor; i++) cornerlist.push_back(hpxy(0,0));
+            }
+          else for(int i=0; i<cor; i++) {
+            int ri = i;
+            if(!irr::cells[vs.neid[i]].is_pseudohept) ri--;
+            if(ri<0) ri += cor;
+            hyperpoint nc = vs.jpoints[vs.neid[ri]];
+            cornerlist.push_back(mid_at(C0, nc, .94));
+            }
+          }
+
+        else if(&fsh == &shBigHepta) {
+          if(vs.is_pseudohept) {
+            for(int i=0; i<cor; i++) {
+              cornerlist.push_back(mid_at(hpxy(0,0), vs.jpoints[vs.neid[i]], .94));
+              }
+            }
+          else {
+            for(int i=0; i<cor; i++) cornerlist.push_back(hpxy(0,0));
+            }
+          }
+  
+        else if(&fsh == &shTriheptaFloor) {
+          if(vs.is_pseudohept) {
+            for(int i=0; i<cor; i++) {
+              hyperpoint next = vs.jpoints[vs.neid[i]];
+              hyperpoint last = vs.jpoints[vs.neid[(i+cor-1)%cor]];
+              cornerlist.push_back(mid_at(C0, mid(next, last), .98));
+              }
+            }
+          else {
+            for(int i=0; i<cor; i++) {
+              int ri = i;
+              if(irr::cells[vs.neid[i]].is_pseudohept) ri--;
+              if(ri<0) ri += cor;
+              cornerlist.push_back(mid_at(C0, mid(vs.vertices[ri], vs.vertices[(ri+1)%cor]), .97));
+              }
+            }
+          }
+      
+        else for(int j=0; j<cor; j++)
+          cornerlist.push_back(mid_at_actual(vs.vertices[j], sca));
       
         bshape(fsh.b[i], fsh.prio);
         for(int j=0; j<=cor; j++) hpcpush(cornerlist[j%cor]);
@@ -569,7 +619,7 @@ namespace irr {
   
         for(int k=0; k<SIDEPARS; k++) 
           for(int c=0; c<cor; c++) {
-            fsh.gpside[k][c].resize(irr::cellcount);
+            fsh.gpside[k][c].resize(cc);
             bshape(fsh.gpside[k][c][i], fsh.prio);
             hpcpush(iddspin(&fc, c) * cornerlist[c]);
             hpcpush(iddspin(&fc, c) * cornerlist[(c+1)%cor]);

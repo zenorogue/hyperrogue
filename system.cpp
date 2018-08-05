@@ -300,7 +300,7 @@ bool havesave = true;
 
 #if CAP_SAVE
 #define MAXBOX 500
-#define POSSCORE 354 // update this when new boxes are added!
+#define POSSCORE 355 // update this when new boxes are added!
 
 struct score {
   string ver;
@@ -698,6 +698,8 @@ void applyBoxes() {
   applyBox(irr::cellcount);
 
   list_invorb();
+
+  applyBox(irr::bitruncations_performed);
 
   if(POSSCORE != boxid) printf("ERROR: %d boxes\n", boxid);
   }

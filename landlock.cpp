@@ -1159,7 +1159,7 @@ land_validity_t& land_validity(eLand l) {
   if(isWarped(l) && a4 && gp::on)
     return dont_work;
   
-  if((isWarped(l) || l == laDual) && irr::on)
+  if((isWarped(l) || l == laDual) && irr::on && !irr::bitruncations_performed)
     return dont_work;
   
   if(irr::on && among(l, laPrairie, laBlizzard, laVolcano, laMirror, laMirrorOld))
