@@ -586,9 +586,19 @@ namespace irr {
         else if(&fsh == &shTriheptaFloor) {
           if(vs.is_pseudohept) {
             for(int i=0; i<cor; i++) {
+              int neid = vs.neid[i];
+              int spin = vs.spin[i];
+              auto &vs2 = irr::cells[neid];
+              int cor2 = isize(vs2.vertices);
+              hyperpoint nfar = vs.vertices[i];
+              transmatrix rel = vs.rpusher * vs.relmatrices[vs2.owner] * vs2.pusher;
+              hyperpoint nlfar = rel * vs2.vertices[(spin+2)%cor2];
+              cornerlist.push_back(mid_at(nfar, nlfar, .49));
+              /*
               hyperpoint next = vs.jpoints[vs.neid[i]];
               hyperpoint last = vs.jpoints[vs.neid[(i+cor-1)%cor]];
               cornerlist.push_back(mid_at(C0, mid(next, last), .98));
+              */
               }
             }
           else {
