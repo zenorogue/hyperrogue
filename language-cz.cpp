@@ -7209,3 +7209,111 @@ S("When the 'mark heptagons' option (hotkey '7') is on, moves between unmarked c
 
   "Pokud je zapnutá možnost označování sedmiúhelníků (klávesa '7'), je zakázán pohyb mezi neoznačenými políčky.")
 
+// 10.4p
+
+// in the sight range dialog
+S("note: enable the cheat mode for additional options", "poznámka: pro další možnosti zapni cheat mód")
+
+// steal a baby tortoise with Orb of Space
+S("No, that would be heartless!", "Ne, to by bylo bezcitné!")
+
+S("show quotient spaces", "ukaž kvocientové prostory")
+S("minimal quotient", "minimální kvocient")
+S("Klein Quartic", "Kleinova kvartika")
+S("Bolza Surface", "Bolzův povrch")
+S("Bolza Surface x2", "Bolzův povrch x2")
+
+// extra texts for Goldberg 
+
+S("variations", "varianty")
+S("auto-adjust in Goldberg grids", "automatická úprava v Goldbergových mřížkách")
+S("2x bitruncated", "2x dvojseříznutá")
+S("expanded", "rozšířená")
+S("rectified", "rektifikovaná")
+
+// irregular grids
+
+S("irregular", "nepravidelná")
+S("bad cells: %1", "špatná políčka: %1")
+S("too many edges: %1", "příliš mnoho hran: %1")
+S("median edge: %1 minimum: %2", "medián hrany: %1 minimum: %2")
+S("cells badly paired: %1", "špatně spárovaná políčka: %1")
+S("cells not covered: %1", "nepokrytá políčka: %1")
+S("adjacent cells from nonadjacent heptagons: %1", "sousední políčka nesousedních sedmiúhelníků: %1")
+S("bad format or bad map geometry", "špatný formát nebo špatná geometrie mapy")
+S("irregular grid", "nepúravidelná mřížka")
+S("density", "hustota")
+S("min edge to median", "min hrana / medián")
+S("quality", "kvalita")
+S("save", "ulož")
+S("load", "nahraj")
+S("irregular to save:", "nepravidelná mapa k uložení:")
+S("irregular to load:", "nepravidelná mapa k nahrání:")
+S("Map saved to %1", "Mapa uložena do %1")
+S("Failed to save map to %1", "Uložení mapy do %1 se nezdařilo")
+S("Map loaded from %1", "Mapa nahrána z %1")
+S("Failed to load map from %1", "Nahrání mapy z %1 se nezdařilo")
+S("reset", "reset")
+S("OK", "OK")
+S("ready", "hotovo")
+
+S("This option creates irregular grids to play the game on. "
+  "Currently rather slow algorithms are used, "
+  "so not recommended with too high density or "
+  "with too large periodic base geometry. "
+  "For technical reasons, the density cannot be too small.",
+
+  "Tato možnost vytváří nepravidelné mřížky, na kterých můžeš "
+  "hrát. V současné době využívá poměrně pomalé algoritmy, a "
+  "proto se ji nedoporučuje používat s příliš vysokou hustotou "
+  "nebo s příliš velkým periodickým základem geometrie. Z "
+  "technických důvodů nemůže být hustota příliš malá."
+  )
+
+// vertical stretch
+
+S("vertical stretch", "svislé roztažení")
+S("Vertical stretch factor.", "Faktor svislého roztažení.")
+S("Gall-Peters", "Gall-Peters")
+S("The current value makes the map conformal at the latitude of %1 (%2°).", "Se současnou hodnotou je mapa konformní v zeměpisné šířce %1 (%2°).")
+S("The current value makes the map conformal %1 units from the main line.", "Se současnou hodnotou je mapa konformní %1 jednotek od hlavní linie.")
+
+// line quality
+
+S("line quality", "kvalita čar")
+
+S("Higher numbers make the curved lines smoother, but reduce the performance.",
+  "Na vyšších hodnotách budou zakřivené čáry hladší, ale zhorší se tím výkon.")
+
+// new options in mobile
+
+S("FIRE", "PAL")
+
+S("scrolling by device rotation", "scrollování rotací zařízení")
+
+S(  "This lets you scroll the map by rotating your device. It can be e.g. used to "
+    "play the spherical mode of HyperRogue in mobile VR goggles -- the \"spherical VR\" "
+    "button configures this; this VR mode can be disabled by touching the screen for 1 second.",
+
+  "Tato možnost umožňuje scrollovat mapu otáčením zařízení. Dá se "
+    "například použít k tomu, abyste mohli hrát sférický mód HyperRogue "
+    "s mobilními VR brýlemi -- tlačítko \"sférická VR\" toto konfiguruje; "
+    "tento VR mód lze vypnout tím, že se na 1 sekundu dotknete obrazovky.")
+
+S("sensitivity", "citlivost")
+S("1 means that rotating the device by 1 radian corresponds to scrolling by 1 unit. In spherical geometry, 1 unit = 1 radian.", 
+  "1 znamená, že otočení zařízení o 1 radián odpovídá scrollování "
+    "o 1 jednotku. Ve sférické geometrii se 1 jednotka rovná 1 radiánu.")
+
+S("spherical VR", "sférická VR")
+
+S("aura from texture", "aura z textury")
+
+// extra for irregular
+S("bitruncation count", "Počet dvojseříznutí")
+
+S("Bitruncation introduces some regularity, allowing more sophisticated floor tilings and textures.", "Dvojseříznutí zavede určitou pravidelnost, což umožňuje sofistikovanější dláždění a textury.")
+
+S(
+      "The smallest allowed ratio of edge length to median edge length. "
+      "Tilings with low values are easier to generate, but tend to be more ugly.", "Nejmenší povolený poměr délky strany k mediánu délky strany. Dláždění s nízkými hodnotami se snáze generují, ale bývají ošklivější.")

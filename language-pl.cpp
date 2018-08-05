@@ -7060,3 +7060,21 @@ S("1 means that rotating the device by 1 radian corresponds to scrolling by 1 un
   "1 oznacza, że przekręcenie urządzenia o 1 radian odpowiada przesunięciu o 1 jednostkę. W geometrii sferycznej 1 jednostka = 1 radian.")
 
 S("spherical VR", "sferyczna VR")
+
+
+
+S("aura from texture", "aura z tekstury")
+
+// extra for irregular
+S("bitruncation count", "liczba przycięć")
+
+S("Bitruncation introduces some regularity, allowing more sophisiticated floor tilings and textures.", 
+  "Przycięcie wprowadza pewną regularność, pozwalając na bardziej zaawansowane posadzki i tekstury."
+  )
+
+S(
+      "The smallest allowed ratio of edge length to median edge length. "
+      "Tilings with low values are easier to generate, but tend to be more ugly.", 
+      "Najmniejszy dozwolony stosunek długości krawędzi do mediany długości krawędzi. "
+      "Kafelki otrzymane dla małych wartości są łatwiejsze do wygenerowania, ale są zwykle brzydsze."
+      )
