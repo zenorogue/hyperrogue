@@ -734,6 +734,11 @@ namespace patterns {
 
   void val_warped(cell *c, patterninfo& si) {
     int u = ishept(c)?1:0;
+    if(S3 != 3 || S7 != 7) {
+      si.id = u;
+      si.dir = 1;
+      return;
+      }
     int qhex = 0;
     for(int v=0; v<c->type; v++) if(c->mov[v] && !isWarped(c->mov[v])) {
       u += 2;
@@ -758,7 +763,7 @@ namespace patterns {
         for(int i=0; i<c->type; i+=2) if(!isWarped(createMov(c,i)))
             si.dir = i;
         if(u == 4)
-          si.reflect = !isWarped(createMov(c, (si.dir+1)%6));
+          si.reflect = !isWarped(createMov(c, (si.dir+1)%S6));
         }
     
     else if(u == 6) {
@@ -767,29 +772,29 @@ namespace patterns {
         }
     
     else if(u == 5) {
-        for(int i=0; i<c->type; i++) if(!isWarped(createMov(c,(i+3)%7)) && !isWarped(createMov(c,(i+4)%7))) 
+        for(int i=0; i<c->type; i++) if(!isWarped(createMov(c,(i+S7/2)%S7)) && !isWarped(createMov(c,(i+(S7+1)/2)%S7))) 
             si.dir = i;
         }
     
     else if(u == 9) {
-        for(int i=0; i<c->type; i++) if(!isWarped(createMov(c,(i+2)%7)) && !isWarped(createMov(c,(i+5)%7))) 
+        for(int i=0; i<c->type; i++) if(!isWarped(createMov(c,(i+2)%S7)) && !isWarped(createMov(c,(i+S7-2)%S7))) 
             si.dir = i;
         }
     
     else if(u == 11) {
-        for(int i=0; i<c->type; i++) if(isWarped(createMov(c,(i)%7)) && isWarped(createMov(c,(i+1)%7))) 
+        for(int i=0; i<c->type; i++) if(isWarped(createMov(c,(i)%S7)) && isWarped(createMov(c,(i+1)%S7))) 
             si.dir = i;
         }
     
     else if(u == 12) {
         for(int i=0; i<c->type; i+=2) if(isWarped(createMov(c,i))) {
             si.dir = i;
-            si.reflect = !isWarped(createMov(c, (i+1)%6));
+            si.reflect = !isWarped(createMov(c, (i+1)%S6));
             }
         }
 
     else if(u == 7) {
-        for(int i=0; i<c->type; i++) if(!isWarped(createMov(c,(i+1)%7)) && !isWarped(createMov(c,(i+6)%7))) 
+        for(int i=0; i<c->type; i++) if(!isWarped(createMov(c,(i+1)%S7)) && !isWarped(createMov(c,(i+S7-1)%S7))) 
             si.dir = i;
         }
     }
