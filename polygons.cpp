@@ -56,6 +56,12 @@ static const int POLY_CENTERIN = 16384;
 // force wide lines
 static const int POLY_FORCEWIDE = (1<<15);
 
+// points not in front
+static const int POLY_NOTINFRONT = (1<<16);
+
+// points moved to the outline cross the image, disable
+static const int POLY_NIF_ERROR = (1<<17);
+
 vector<hyperpoint> hpc;
 
 int prehpc;
@@ -176,6 +182,12 @@ hyperpoint be_just_on_view(const hyperpoint& H1, const hyperpoint &H2) {
   return H1 * t + H2 * (1-t);
   }
 
+bool last_infront;
+
+bool nif_error_in(ld x1, ld y1, ld x2, ld y2) {
+  return pow(x1 * x2 + y2 * y2, 2) < (x1*x1+y1*y1)*(x2*x2+y2*y2)*.5;
+  }
+
 void addpoint(const hyperpoint& H) {
   if(true) {
     hyperpoint Hscr;
@@ -188,8 +200,13 @@ void addpoint(const hyperpoint& H) {
       double curnorm = H[0]*H[0]+H[1]*H[1]+H[2]*H[2];
       double horizon = curnorm / vid.alpha;
       
-      if((spherespecial>0) ^ (H[2] <= -horizon)) poly_flags |= POLY_INFRONT;
+      if((spherespecial>0) ^ (H[2] <= -horizon)) poly_flags |= POLY_INFRONT, last_infront = false;
       else {
+        poly_flags |= POLY_NOTINFRONT;
+        if(last_infront && nif_error_in(glcoords.back()[0], glcoords.back()[1], Hscr[0], Hscr[1]))
+          poly_flags |= POLY_NIF_ERROR;
+        last_infront = true;
+        
         double coef = 
           (sqrt(curnorm - horizon*horizon) / (vid.alpha - horizon)) / 
           (sqrt(curnorm - H[2]*H[2]) / (vid.alpha+H[2]));
@@ -228,23 +245,7 @@ void addpoly(const transmatrix& V, const vector<glvertex> &tab, int ofs, int cnt
       hyperpoint h = be_just_on_view(last, curr);
       if(start_behind == 1) start_behind = 2, firstleave = h;
       if(!last_behind) enter = h;
-      else if(h[0] * enter[0] + h[1] * enter[1] < 0) poly_flags |= POLY_BEHIND; /*{
-        using namespace hyperpoint_vec;
-        ld zl = zlevel(h);
-        ld sca2 = zl*zl - pow(vid.alpha - BEHIND_LIMIT, 2);
-        
-        // h[0]** + h[1]** + h[2]** == zl*zl
-        // he[0]** + he[1]** + he[2]** ==
-        // (he[0]** + he[1]**) * sca2 / sqhypot2(he) + he[2]**
-        
-        if(sca2 > 0) {
-          hyperpoint he = (h + enter) / 2;
-          ld sca = sqrt(sca2) / hypot2(he);
-          he[0] *= sca; h[1] *= sca;
-          printf("sca2 = %lf zl=%lf/%lf\n", sca2, zlevel(h), zlevel(he));
-          addpoint(he);
-          } 
-        } */
+      else if(h[0] * enter[0] + h[1] * enter[1] < 0) poly_flags |= POLY_BEHIND;
       addpoint(h);
       last_behind = !last_behind;
       }
@@ -692,8 +693,10 @@ void drawpolyline(polytodraw& p) {
   /* pp.outline = 0x80808080;
   p.col = 0; */
   
+  last_infront = false;
+  
   addpoly(pp.V, *pp.tab, pp.offset, pp.cnt);
-  for(int i=1; i<isize(glcoords); i++) {
+  if(!(sphere && vid.alpha < .9)) for(int i=1; i<isize(glcoords); i++) {
     ld dx = glcoords[i][0] - glcoords[i-1][0];
     ld dy = glcoords[i][1] - glcoords[i-1][1];
     if(dx > vid.xres * 2 || dy > vid.yres * 2) return;
@@ -717,13 +720,37 @@ void drawpolyline(polytodraw& p) {
 
   bool nofill = false;
 
+  if(poly_flags & POLY_NIF_ERROR) return;
+  
+  if(spherespecial == 1 && (poly_flags & POLY_INFRONT) && (poly_flags & POLY_NOTINFRONT) && vid.alpha <= 1) {
+    bool around_center = false;
+    for(int i=0; i<isize(glcoords)-1; i++) {
+      double x1 = glcoords[i][0];
+      double y1 = glcoords[i][1];
+      double x2 = glcoords[i+1][0];
+      double y2 = glcoords[i+1][1];
+      if(asign(y1, y2)) {
+        ld x = xcross(x1, y1, x2, y2);
+        if(x < -1e-6) around_center = !around_center;
+        }
+      }
+    if(around_center) return;
+    }
+    
   if((spherespecial > 0 || (sphere && equi)) && !(poly_flags & POLY_ISSIDE)) {
   
     if(!pp.tinf) {
     
       hyperpoint hscr;
       hyperpoint h1 = pp.V * intester;
-      if(is_behind(h1)) nofill = true; 
+      if(is_behind(h1)) {
+        if(sphere) {
+          for(int i=0; i<3; i++) h1[i] = -h1[i];
+          poly_flags &= ~POLY_CENTERIN;
+          }
+        else
+          nofill = true; 
+        }
       applymodel(h1, hscr); hscr[0] *= vid.radius; hscr[1] *= vid.radius * vid.stretch;
       for(int i=0; i<isize(glcoords)-1; i++) {
         double x1 = glcoords[i][0] - hscr[0];
@@ -764,7 +791,7 @@ void drawpolyline(polytodraw& p) {
       }
     }
   else poly_flags &=~ POLY_INVERSE;
-    
+
   if(spherespecial) {
     if(!hiliteclick && !(poly_flags & POLY_INFRONT)) return;
     }
@@ -1126,7 +1153,10 @@ void drawqueue() {
       if(ptd.kind == pkPoly || ptd.kind == pkLine) {
         unsigned c = ptd.col;
         int alpha = ptd.col & 255;
-        if(alpha == 255)
+        if(vid.alpha <= 1) {
+          ptd.col = 0;
+          }
+        else if(alpha == 255)
           ptd.col = (gradient(backcolor, c>>8, 0, backbrightness, 1)<<8) | 0xFF;
         else ptd.col = ptd.col - alpha + int(backbrightness * alpha);
         drawqueueitem(ptd);
