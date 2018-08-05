@@ -872,6 +872,8 @@ bool load_map(const string &fname) {
   }
 
 void cancel_map_creation() {
+  base = NULL;
+  runlevel = 0;
   popScreen();
   gridmaking = false;
   stop_game();
