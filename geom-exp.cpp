@@ -285,9 +285,11 @@ void showEuclideanMenu() {
     dialog::addBreak(50);
   
     if(ts == 6 && tv == 3)
-      dialog::addSelItem(XLAT("variations"), XLAT("does not matter"), 't');
+      dialog::addSelItem(XLAT("variations"), XLAT("does not matter"), 'v');
+    else if(binarytiling)
+      dialog::addSelItem(XLAT("variations"), XLAT("not implemented"), 'v');
     else {
-      dialog::addBoolItem(XLAT("variations"), nonbitrunc, 't');
+      dialog::addBoolItem(XLAT("variations"), nonbitrunc, 'v');
       dialog::lastItem().value = gp::operation_name();
       }
     
@@ -389,8 +391,8 @@ void showEuclideanMenu() {
         }
       else if(uni == 'u') 
         showquotients = !showquotients;
-      else if(uni == 't') {
-        if(euclid6) ;
+      else if(uni == 'v') {
+        if(euclid6 || binarytiling) ;
         else // if(S3 == 3) 
           gp::configure();
         /* else {

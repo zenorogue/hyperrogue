@@ -800,18 +800,36 @@ void optimizeview() {
   
   transmatrix TB = Id;
   
-  for(int i=-1; i<S7; i++) {
-
-    ld trot = -i * M_PI * 2 / (S7+.0);
-    transmatrix T = i < 0 ? Id : spin(trot) * xpush(tessf) * pispin;
-    hyperpoint H = View * tC0(T);
-    if(H[2] < best) best = H[2], turn = i, TB = T;
+  if(binarytiling) {
+    turn = -1, best = View[2][2];
+    for(int i=0; i<viewctr.h->c7->type; i++) {
+      heptagon *h2 = createStep(viewctr.h, i);
+      transmatrix T = binary::relative_matrix(h2, viewctr.h);
+      hyperpoint H = View * tC0(T);
+      if(H[2] < best) best = H[2], turn = i, TB = T;
+      }
+    if(turn >= 0) {
+      View = View * TB;
+      fixmatrix(View);
+      viewctr.h = createStep(viewctr.h, turn);
+      }
     }
-
-  if(turn >= 0) {
-    View = View * TB;
-    fixmatrix(View);
-    viewctr = viewctr + turn + wstep;
+  
+  else {
+  
+    for(int i=-1; i<S7; i++) {
+  
+      ld trot = -i * M_PI * 2 / (S7+.0);
+      transmatrix T = i < 0 ? Id : spin(trot) * xpush(tessf) * pispin;
+      hyperpoint H = View * tC0(T);
+      if(H[2] < best) best = H[2], turn = i, TB = T;
+      }
+  
+    if(turn >= 0) {
+      View = View * TB;
+      fixmatrix(View);
+      viewctr = viewctr + turn + wstep;
+      }
     }
   }
 

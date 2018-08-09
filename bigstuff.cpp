@@ -30,7 +30,7 @@ int getAnthraxData(cell *c, bool b) {
   }
 
 int roundTableRadius(cell *c) {
-  if(euclid) return 28;
+  if(eubinary) return 28;
   if(tactic::on) return getAnthraxData(c, true);
   return c->master->alt->alt->emeraldval & GRAIL_RADIUS_MASK;
   }
@@ -74,7 +74,7 @@ const int NOCOMPASS = 1000000;
 
 int compassDist(cell *c) {
   if(sphere || quotient) return 0;
-  if(euclid || c->master->alt) return celldistAlt(c);
+  if(eubinary || c->master->alt) return celldistAlt(c);
   if(isHaunted(c->land) || c->land == laGraveyard) return getHauntedDepth(c);
   return NOCOMPASS;
   }
@@ -84,7 +84,7 @@ cell *findcompass(cell *c) {
   if(d == NOCOMPASS) return NULL;
   
   while(inscreenrange(c)) {
-    if(!euclid && !sphere && !quotient)
+    if(!eubinary && !sphere && !quotient)
       generateAlts(c->master);
     forCellEx(c2, c) if(compassDist(c2) < d) {
       c = c2;
@@ -99,7 +99,7 @@ cell *findcompass(cell *c) {
   }
 
 bool grailWasFound(cell *c) {
-  if(euclid || quotient || sphere) return items[itHolyGrail];
+  if(eubinary || quotient || sphere) return items[itHolyGrail];
   return c->master->alt->alt->emeraldval & GRAIL_FOUND;
   }
 
@@ -249,7 +249,7 @@ void beCIsland(cell *c) {
   }
 
 void generateTreasureIsland(cell *c) {
-  if(!euclid) generateAlts(c->master);
+  if(!eubinary) generateAlts(c->master);
   if(isOnCIsland(c)) return;
   
   bool src = hrand(100) < 10;
@@ -261,21 +261,21 @@ void generateTreasureIsland(cell *c) {
   int qc = 0, qlo, qhi;
   for(int i=0; i<c->type; i++) {
     cell *c2 = createMov(c, i);
-    if(!euclid) generateAlts(c2->master);
-    if((euclid || (c->master->alt && c2->master->alt)) && celldistAlt(c2) < celldistAlt(c)) {
+    if(!eubinary) generateAlts(c2->master);
+    if((eubinary || (c->master->alt && c2->master->alt)) && celldistAlt(c2) < celldistAlt(c)) {
       ctab[qc++] = c2;
       qlo = i; qhi = i;
       while(true && qc < MAX_EDGE) {
         qlo--;
         c2 = createMovR(c, qlo);
-        if(!euclid && !c2->master->alt) break;
+        if(!eubinary && !c2->master->alt) break;
         if(celldistAlt(c2) >= celldistAlt(c)) break;
         ctab[qc++] = c2;
         }
       while(true && qc < MAX_EDGE) {
         qhi++;
         c2 = createMovR(c, qhi);
-        if(!euclid && !c2->master->alt) break;
+        if(!eubinary && !c2->master->alt) break;
         if(celldistAlt(c2) >= celldistAlt(c)) break;
         ctab[qc++] = c2;
         }
@@ -295,7 +295,7 @@ void generateTreasureIsland(cell *c) {
     if(c->wall != waCTree && hrand(100) < 15)
       c->wall = (c->wall == waCIsland ? waCIsland2 : waCIsland);
     }
-  if(src && c2->wall == waCTree && (euclid||c->master->alt) && celldistAlt(c) <= -10) {
+  if(src && c2->wall == waCTree && (eubinary||c->master->alt) && celldistAlt(c) <= -10) {
     bool end = true;
     for(int i=0; i<qc; i++) {
       generateTreasureIsland(ctab[i]);
@@ -976,8 +976,7 @@ int wallchance(cell *c, bool deepOcean) {
 
 bool horo_ok() {
   // do the horocycles work in the current geometry?
-  // (they work in ALL hyperbolic geometries currently!)
-  return hyperbolic;
+  return hyperbolic && !binarytiling;
   }
 
 bool gp_wall_test() {
@@ -1084,7 +1083,7 @@ void buildBigStuff(cell *c, cell *from) {
     buildBarrier4(c, bd, 0, getNewLand(c->land), c->land); */
     }
       
-  if((!chaosmode) && bearsCamelot(c->land) && is_master(c) && 
+  if((!chaosmode) && bearsCamelot(c->land) && is_master(c) && !binarytiling && 
     (quickfind(laCamelot) || peace::on || (hrand(I2000) < 200 && horo_ok() && 
     items[itEmerald] >= U5 && !tactic::on))) {
     int rtr = newRoundTableRadius();
@@ -1177,7 +1176,7 @@ void buildCamelotWall(cell *c) {
   c->wall = waCamelot;
   for(int i=0; i<c->type; i++) {
     cell *c2 = createMov(c, i);
-    if(c2->wall == waNone && (euclid || (c2->master->alt && c->master->alt)) && celldistAlt(c2) > celldistAlt(c) && c2->monst == moNone)
+    if(c2->wall == waNone && (eubinary || (c2->master->alt && c->master->alt)) && celldistAlt(c2) > celldistAlt(c) && c2->monst == moNone)
       c2->wall = waCamelotMoat;
     }
   }
@@ -1185,14 +1184,14 @@ void buildCamelotWall(cell *c) {
 void moreBigStuff(cell *c) {
 
   if(quotient) return;
-
-  if(c->land == laPalace && !euclid && c->master->alt) {
+  
+  if(c->land == laPalace && !eubinary && c->master->alt) {
     int d = celldistAlt(c);
     if(d <= PRADIUS1) generateAlts(c->master);
     }
 
   if(c->land == laStorms)
-    if(!euclid && !quotient && !sphere) {
+    if(!eubinary && !quotient && !sphere) {
       if(c->master->alt && c->master->alt->distance <= 2) {
         generateAlts(c->master);
         preventbarriers(c);
@@ -1210,15 +1209,15 @@ void moreBigStuff(cell *c) {
       }        
 
   if((bearsCamelot(c->land) && !euclid && !quotient) || c->land == laCamelot) 
-  if(euclid || c->master->alt) {
+  if(eubinary || binarytiling || c->master->alt) if(!(binarytiling && specialland != laCamelot)) {
     int d = celldistAltRelative(c);
     if(tactic::on || (d <= 14 && roundTableRadius(c) > 20)) {
-      if(!euclid) generateAlts(c->master);
+      if(!eubinary) generateAlts(c->master);
       preventbarriers(c);
       if(d == 10) {
         if(weirdhyperbolic ? hrand(100) < 50 : pseudohept(c)) buildCamelotWall(c);
         else {
-          if(!euclid) for(int i=0; i<S7; i++) generateAlts(c->master->move[i]);
+          if(!eubinary) for(int i=0; i<S7; i++) generateAlts(c->master->move[i]);
           int q = 0;
           if(weirdhyperbolic) {
             for(int t=0; t<c->type; t++) createMov(c, t);
@@ -1261,7 +1260,7 @@ void moreBigStuff(cell *c) {
         // roughly as many knights as table cells
         if(hrand(nonbitrunc ? 2618 : 1720) < 1000) 
           c->monst = moKnight;
-        if(!euclid) for(int i=0; i<S7; i++) generateAlts(c->master->move[i]);
+        if(!eubinary) for(int i=0; i<S7; i++) generateAlts(c->master->move[i]);
         for(int i=0; i<c->type; i++) 
           if(c->mov[i] && celldistAltRelative(c->mov[i]) < d)
             c->mondir = (i+3) % 6;
@@ -1271,7 +1270,7 @@ void moreBigStuff(cell *c) {
       if(d == 5 && tactic::on)
         c->item = itGreenStone;
       if(d <= 10) c->land = laCamelot;
-      if(d > 10 && !euclid && !tactic::on) {
+      if(d > 10 && !eubinary && !tactic::on) {
         setland(c, eLand(c->master->alt->alt->fiftyval));
         if(c->land == laNone) printf("Camelot\n"); // NONEDEBUG
         }
@@ -1284,9 +1283,9 @@ void moreBigStuff(cell *c) {
         c->wall = waColumn;
     }
   
-  else if((c->land == laRlyeh && !euclid) || c->land == laTemple) {
-    if(euclid || (c->master->alt && (tactic::on || c->master->alt->distance <= 2))) {
-      if(!euclid && !chaosmode) generateAlts(c->master);
+  else if((c->land == laRlyeh && !euclid) || c->land == laTemple) if(!(binarytiling && specialland != laTemple)) {
+    if(eubinary || (c->master->alt && (tactic::on || c->master->alt->distance <= 2))) {
+      if(!eubinary && !chaosmode) generateAlts(c->master);
       preventbarriers(c);
       int d = celldistAlt(c);
       if(d <= 0) {
@@ -1299,7 +1298,7 @@ void moreBigStuff(cell *c) {
         else if(pseudohept(c)) 
           c->wall = waColumn;
         else {
-          if(!euclid) for(int i=0; i<S7; i++) generateAlts(c->master->move[i]);
+          if(!eubinary) for(int i=0; i<S7; i++) generateAlts(c->master->move[i]);
           int q = 0;
           for(int t=0; t<c->type; t++) {
             createMov(c, t);
@@ -1311,22 +1310,22 @@ void moreBigStuff(cell *c) {
       }
     }
 
-  if((c->land == laOvergrown && !euclid) || c->land == laClearing) {
-    if(euclid || (c->master->alt && (tactic::on || c->master->alt->distance <= 2))) {
-      if(!euclid) generateAlts(c->master);
+  if((c->land == laOvergrown && !euclid) || c->land == laClearing) if(!(binarytiling && specialland != laClearing)) {
+    if(eubinary || (c->master->alt && (tactic::on || c->master->alt->distance <= 2))) {
+      if(!eubinary) generateAlts(c->master);
       preventbarriers(c);
       int d = celldistAlt(c);
       if(d <= 0) {
         c->land = laClearing, c->wall = waNone; // , c->monst = moNone, c->item = itNone;
         }
-      else if(d == 1 && !tactic::on && !euclid)
+      else if(d == 1 && !tactic::on && !eubinary)
         c->wall = waSmallTree, c->monst = moNone, c->item = itNone;
       }
     }
 
-  if((c->land == laJungle && !euclid) || c->land == laMountain) {
-    if(euclid || (c->master->alt && (tactic::on || c->master->alt->distance <= 2))) {
-      if(!euclid) generateAlts(c->master);
+  if((c->land == laJungle && !euclid) || c->land == laMountain) if(!(binarytiling && specialland != laMountain)) {
+    if(eubinary || (c->master->alt && (tactic::on || c->master->alt->distance <= 2))) {
+      if(!eubinary) generateAlts(c->master);
       preventbarriers(c);
       int d = celldistAlt(c);
       if(d <= 0 || (firstland == laMountain && tactic::on)) {
@@ -1335,14 +1334,14 @@ void moreBigStuff(cell *c) {
       }
     }
 
-  if(c->land == laOcean || c->land == laWhirlpool) {
+  if(c->land == laOcean || c->land == laWhirlpool) if(!(binarytiling && specialland != laWhirlpool)) {
     bool fullwhirlpool = false;
     if(tactic::on && specialland == laWhirlpool)
       fullwhirlpool = true;
     if(yendor::on && yendor::clev().l == laWhirlpool)
       fullwhirlpool = true;
-    if(euclid || (c->master->alt && (fullwhirlpool || c->master->alt->distance <= 2))) {
-      if(!euclid) generateAlts(c->master);
+    if(eubinary || (c->master->alt && (fullwhirlpool || c->master->alt->distance <= 2))) {
+      if(!eubinary) generateAlts(c->master);
       preventbarriers(c);
       int dd = celldistAlt(c);
       if(dd <= 0 || fullwhirlpool) {

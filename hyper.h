@@ -82,10 +82,13 @@ void addMessage(string s, char spamtype = 0);
 #define ALPHA (M_PI*2/S7)
 #define S7 ginf[geometry].sides
 #define S3 ginf[geometry].vertex
-#define hyperbolic_37 (S7 == 7 && S3 == 3)
-#define hyperbolic_not37 ((S7 > 7 || S3 > 3) && hyperbolic)
-#define weirdhyperbolic ((S7 > 7 || S3 > 3 || gp::on || irr::on) && hyperbolic)
-#define stdhyperbolic (S7 == 7 && S3 == 3 && !gp::on)
+#define hyperbolic_37 (S7 == 7 && S3 == 3 && !binarytiling)
+#define hyperbolic_not37 ((S7 > 7 || S3 > 3 || binarytiling) && hyperbolic)
+#define weirdhyperbolic ((S7 > 7 || S3 > 3 || gp::on || irr::on || binarytiling) && hyperbolic)
+#define stdhyperbolic (S7 == 7 && S3 == 3 && !gp::on && !irr::on && !binarytiling)
+
+#define binarytiling (geometry == gBinaryTiling)
+#define eubinary (euclid || binarytiling)
 
 #define cgclass (ginf[geometry].cclass)
 #define euclid (cgclass == gcEuclid)
@@ -3754,5 +3757,11 @@ bool saved_tortoise_on(cell *c);
 #define REVRING(i) for(double i=S84; i>=-1e-6; i-=S3 * pow(.5, vid.linequality))
 #define PRING(i) for(double i=0; i<=S84+1e-6; i+= pow(.5, vid.linequality))
 #define REVPRING(i) for(double i=S84; i>=-1e-6; i-=pow(.5, vid.linequality))
+
+void horopoint(ld y, ld x);
+
+namespace binary {
+  heptagon *createStep(heptagon *parent, int d);
+  }
 
 }

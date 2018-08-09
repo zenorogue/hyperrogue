@@ -29,6 +29,7 @@
 #include "patterns.cpp"
 #include "fieldpattern.cpp"
 #include "heptagon.cpp"
+#include "binary-tiling.cpp"
 #include "language.cpp"
 #include "cell.cpp"
 #include "goldberg.cpp"

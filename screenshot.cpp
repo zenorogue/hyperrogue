@@ -268,7 +268,7 @@ void saveHighQualityShot(const char *fname, const char *caption, int fade) {
     vid.xres = vid.yres * 22/16;
     while(vid.xres & 15) vid.xres++;
     }
-
+  
   // if(vid.pmodel == 0) vid.scale = 0.99;
   calcparam();
 

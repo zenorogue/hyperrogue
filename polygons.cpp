@@ -791,7 +791,7 @@ void drawpolyline(polytodraw& p) {
       }
     }
   else poly_flags &=~ POLY_INVERSE;
-
+  
   if(spherespecial) {
     if(!hiliteclick && !(poly_flags & POLY_INFRONT)) return;
     }
@@ -1622,6 +1622,8 @@ void buildpolys() {
   last->flags |= POLY_HASWALLS | POLY_FULL | POLY_HASSHADOW | POLY_ISSIDE;
   }
   
+  if(binarytiling) hexvdist = rhexf = 1, tessf = 1, gp::scale = 1, scalef = 1, crossf *= .8;
+  
   double floorrad0 = hexvdist*0.92;
   double floorrad1 = rhexf / gp::scale *0.94;
   
@@ -1629,7 +1631,7 @@ void buildpolys() {
   if(gp::on) goldbf = gp::scale * 1.6;
   if(irr::on) goldbf = irr::scale * 1.6;
   if(gp::on) floorrad1 /= 1.6;
-  
+
   double triangleside = hcrossf*.94;
   if(nonbitrunc)
     triangleside = tessf * .94;
@@ -1722,21 +1724,32 @@ void buildpolys() {
     for(int t=0; t<=6; t++) hpcpush(ddi(S7 + t*S14, floorrad0*7/8 * gp::scale) * C0);
     }
 
-  bshape(shWall[0], PPR_WALL);
-  for(int t=0; t<=S6; t++) {
-    hpcpush(ddi(S7 + t*S14, floorrad0 * goldbf) * C0);
-    if(t != S6) hpcpush(ddi(S14 + t*S14, floorrad0 * goldbf/4) * C0);
-    }
-  
-  bshape(shWall[1], PPR_WALL);
-  if(S7 == 6 || S7 == 4) {
-    for(int t=0; t<=S6; t++) {
-      hpcpush(ddi(S7 + t*S14, floorrad1 * goldbf) * C0);
-      if(t != S6) hpcpush(ddi(S14 + t*S14, floorrad1 * goldbf/4) * C0);
+  if(binarytiling) {
+    for(int i=0; i<2; i++) {
+      bshape(shWall[i], PPR_WALL);
+      horopoint(log(2)/8, .1);
+      horopoint(log(2)/8, -.1);
+      horopoint(-log(2)/8, 0);
       }
     }
-  else
-    for(int t=0; t<=S7; t++) hpcpush(ddi(t*S36+td, floorrad1 * goldbf) * C0);
+
+  else {
+    bshape(shWall[0], PPR_WALL);
+    for(int t=0; t<=S6; t++) {
+      hpcpush(ddi(S7 + t*S14, floorrad0 * goldbf) * C0);
+      if(t != S6) hpcpush(ddi(S14 + t*S14, floorrad0 * goldbf/4) * C0);
+      }
+    
+    bshape(shWall[1], PPR_WALL);
+    if(S7 == 6 || S7 == 4) {
+      for(int t=0; t<=S6; t++) {
+        hpcpush(ddi(S7 + t*S14, floorrad1 * goldbf) * C0);
+        if(t != S6) hpcpush(ddi(S14 + t*S14, floorrad1 * goldbf/4) * C0);
+        }
+      }
+    else
+      for(int t=0; t<=S7; t++) hpcpush(ddi(t*S36+td, floorrad1 * goldbf) * C0);
+    }
 
   bshape(shCross, PPR_WALL);
   for(int i=0; i<=84; i+=7)

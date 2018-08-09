@@ -162,6 +162,7 @@ int ctof(cell *c) {
   if(nonbitrunc && !gp::on) return 1;
   // if(euclid) return 0;
   if(!c) return 1;
+  if(binarytiling) return c->type == 7;
   return ishept(c) ? 1 : 0;
   // c->type == 6 ? 0 : 1;
   }
@@ -241,6 +242,12 @@ int displaydir(cell *c, int d) {
     auto& p = vs.jpoints[vs.neid[d]];
     return -int(atan2(p[1], p[0]) * S84 / 2 / M_PI + MODFIXER + .5);
     }
+  else if(binarytiling) {
+    if(d == NODIR) return 0;
+    if(d == c->type-1) d++;
+    int dirs[8] = {0, 11, 21, 31, 42, 53, 63, 73};
+    return -21-dirs[d];
+    }
   else if(euclid)
     return - d * S84 / c->type;
   else
@@ -248,6 +255,7 @@ int displaydir(cell *c, int d) {
   }
 
 double hexshiftat(cell *c) {
+  if(binarytiling) return 0;
   if(ctof(c) && S7==6 && S3 == 4 && !nonbitrunc) return hexshift + 2*M_PI/S7;
   if(ctof(c) && (S7==8 || S7 == 4) && S3 == 3 && !nonbitrunc) return hexshift + 2*M_PI/S7;
   if(hexshift && ctof(c)) return hexshift;
@@ -2642,7 +2650,7 @@ void setcolors(cell *c, int& wcol, int &fcol) {
     else if(c->land == laAlchemist)
       fcol = 0x900090;
     else if(c->land == laWhirlpool)
-      fcol = 0x0000C0 + int(32 * sin(ticks / 200. + ((euclid||c->master->alt) ? celldistAlt(c) : 0)*1.5));
+      fcol = 0x0000C0 + int(32 * sin(ticks / 200. + ((eubinary||c->master->alt) ? celldistAlt(c) : 0)*1.5));
     else if(c->land == laLivefjord)
       fcol = 0x000080;
     else if(isWarped(c->land))
@@ -2788,7 +2796,7 @@ void setcolors(cell *c, int& wcol, int &fcol) {
       else if(c->wall == waBigTree) wcol = 0x0080C0;
       break;
     case laTemple: {
-      int d = showoff ? 0 : (euclid||c->master->alt) ? celldistAlt(c) : 99;
+      int d = showoff ? 0 : (eubinary||c->master->alt) ? celldistAlt(c) : 99;
       if(chaosmode)
         fcol = 0x405090;
       else if(d % TEMPLE_EACH == 0)
@@ -3182,7 +3190,7 @@ bool placeSidewall(cell *c, int i, int sidepar, const transmatrix& V, int col) {
   
   transmatrix V2 = V * ddspin(c, i);
  
-  if(gp::on || irr::on) {
+  if(gp::on || irr::on || binarytiling) {
     draw_shapevec(c, V2, qfi.fshape->gpside[sidepar][i], col, prio);
     return false;
     }
@@ -4779,7 +4787,14 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       double spd = 1;
       bool rev = false;
       
-      if(isGravityLand(cwt.c->land)) {
+      if(binarytiling && conformal::do_rotate >= 2) {
+        if(!straightDownSeek || c->master->distance < straightDownSeek->master->distance) {
+          usethis = true;
+          spd = 1;
+          }
+        }
+      
+      else if(isGravityLand(cwt.c->land)) {
         if(cwt.c->land == laDungeon) rev = true;
         if(conformal::do_rotate >= 1)
         if(!straightDownSeek || edgeDepth(c) < edgeDepth(straightDownSeek)) {
@@ -4788,7 +4803,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           }
         }
       
-      if(c->master->alt && cwt.c->master->alt &&
+      else if(c->master->alt && cwt.c->master->alt &&
         (cwt.c->land == laMountain || 
         (conformal::do_rotate >= 2 && 
           (cwt.c->land == laTemple || cwt.c->land == laWhirlpool || 
@@ -4803,7 +4818,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           }
         }
   
-      if(conformal::do_rotate >= 2 && cwt.c->land == laOcean && cwt.c->landparam < 25) {
+      else if(conformal::do_rotate >= 2 && cwt.c->land == laOcean && cwt.c->landparam < 25) {
         if(!straightDownSeek || coastval(c, laOcean) < coastval(straightDownSeek, laOcean)) {
           usethis = true;
           spd = cwt.c->landparam / 10;
@@ -5209,6 +5224,8 @@ void drawthemap() {
   profile_start(1);
   if(euclid)
     drawEuclidean();
+  else if(binarytiling)
+    binary::draw();
   else
     drawrec(viewctr, hsOrigin, cview());
   drawWormSegments();

@@ -926,7 +926,7 @@ namespace whirlpool {
   // next == -1 -> prev
   cell *get(cell *c, int next) {
     int i = 0;
-    if(!euclid && !c->master->alt) return NULL;
+    if(!eubinary && !c->master->alt) return NULL;
     int d = celldistAlt(c);
     int d2;
     while(true) {
@@ -949,7 +949,7 @@ namespace whirlpool {
     cell *at = whirlline[isize(whirlline)-1];
     cell *prev = whirlline[isize(whirlline)-2];
     for(int i=0; i<at->type; i++) 
-      if(at->mov[i] && (euclid || at->mov[i]->master->alt) && celldistAlt(at->mov[i]) == d && at->mov[i] != prev) {
+      if(at->mov[i] && (eubinary || at->mov[i]->master->alt) && celldistAlt(at->mov[i]) == d && at->mov[i] != prev) {
         if(at->mov[i] == whirlline[0]) return; // loops in weird geometries?
         if(at->mov[i] == whirlline[isize(whirlline)/2]) return; // even weirder geometry?
         whirlline.push_back(at->mov[i]);
@@ -968,7 +968,7 @@ namespace whirlpool {
     else if(hrand(5000) < 500)
        wto->wall = waBoat;
     
-    if(wto->wall == waBoat && (euclid || wto->master->alt)) { 
+    if(wto->wall == waBoat && (eubinary || wto->master->alt)) { 
       int d = celldistAlt(wto);
       if(yendor::on) d -= 200;
       // 250 : hard
@@ -1016,7 +1016,7 @@ namespace whirlpool {
   void moveAt(cell *c, manual_celllister& cl) {
     if(c->land != laWhirlpool) return;
     if(cl.listed(c)) return;
-    if(!(euclid || c->master->alt)) return;
+    if(!(eubinary || c->master->alt)) return;
     cell *c2 = get(c, 1);
     if(!c2) return;
     int d = celldistAlt(c);

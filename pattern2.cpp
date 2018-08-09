@@ -343,6 +343,7 @@ int fieldval_uniq(cell *c) {
     auto p = cell_to_pair(c);
     return gmod(p.first * torusconfig::dx + p.second * torusconfig::dy, torusconfig::qty);
     }
+  else if(binarytiling) return 0;
   if(ctof(c) || gp::on || irr::on) return c->master->fieldval/S7;
   else {
     int z = 0;
@@ -734,7 +735,7 @@ namespace patterns {
 
   void val_warped(cell *c, patterninfo& si) {
     int u = ishept(c)?1:0;
-    if(S3 != 3 || S7 != 7) {
+    if(S3 != 3 || S7 != 7 || gp::on || irr::on) {
       si.id = u;
       si.dir = 1;
       return;
@@ -871,6 +872,12 @@ namespace patterns {
     patterninfo si;
     si.dir = 0; si.reflect = false; si.id = ctof(c);
     si.symmetries = c->type;
+    
+    if(binarytiling) {
+      if(pat == PAT_SINGLETYPE) si.id = 0;
+      si.dir = 2;
+      return si;
+      }
 
     if(pat == PAT_SINGLETYPE) {
       si.id = 0; si.symmetries = 1;
@@ -1160,6 +1167,7 @@ int pattern_threecolor(cell *c) {
 // which roughly corresponds to the heptagons in the normal tiling
 bool pseudohept(cell *c) {
   if(irr::on) return irr::pseudohept(c);
+  if(binarytiling) return c->type & c->master->distance & 1;
   if(gp::on && gp_threecolor() == 2)
     return gp::pseudohept_val(c) == 0;
   if(gp::on && gp_threecolor() == 1 && (S7&1) && (S3 == 3))
@@ -2010,7 +2018,7 @@ namespace linepatterns {
         
       case patTree:
         if(is_master(c)) {
-          cell *c2 = c->master->move[0]->c7;
+          cell *c2 = c->master->move[binarytiling ? 5 : 0]->c7;
           if(gmatrix.count(c2)) queuelinef(tC0(V), gmatrix[c2]*C0, col, 2 + vid.linequality);
           }
         break;

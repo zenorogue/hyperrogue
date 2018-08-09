@@ -73,7 +73,17 @@ hrmap_hyperbolic::hrmap_hyperbolic() {
   h.alt = NULL;
   h.distance = 0;
   isnonbitrunc = nonbitrunc;
-  if(irr::on)
+  if(binarytiling) {
+    #if DEBUG_BINARY_TILING
+    binary::xcode.clear();
+    binary::rxcode.clear();
+    binary::xcode[&h] = (1 << 16);
+    binary::rxcode[1<<16] = &h;
+    #endif
+    h.zebraval = 0,
+    h.c7 = newCell(6, origin);
+    }
+  else if(irr::on)
     irr::link_start(origin);
   else
     h.c7 = newCell(S7, origin);
@@ -972,7 +982,7 @@ void clearHexes(heptagon *at) {
     at->cdata = NULL;
     }
   if(irr::on) irr::clear_links(at);
-  else if(at->c7) subcell(at->c7, clearcell);
+  else if(at->c7 && !binarytiling) subcell(at->c7, clearcell);
   }
 
 void unlink_cdata(heptagon *h) {
@@ -1003,7 +1013,9 @@ void clearfrom(heptagon *at) {
         at->cdata = NULL;
         }
       }
-    for(int i=0; i<S7; i++) if(at->move[i]) {
+    int edges = S7;
+    if(binarytiling) edges = at->c7->type;
+    for(int i=0; i<edges; i++) if(at->move[i]) {
       if(at->move[i]->alt != &deletion_marker)
         q.push(at->move[i]);    
       unlink_cdata(at->move[i]);
@@ -1109,6 +1121,7 @@ int celldistAlt(cell *c) {
     tie(x,y) = vec_to_pair(decodeId(c->master));
     return euclidAlt(x, y);
     }
+  if(binarytiling) return celldist(c) + (specialland == laCamelot && !tactic::on? 30 : 0);
   if(sphere || quotient) {
     return celldist(c) - 3;
     }
@@ -1458,8 +1471,8 @@ int heptdistance(heptagon *h1, heptagon *h2) {
     if(h1 == h2) return d;
     for(int i=0; i<S7; i++) if(h1->move[i] == h2) return d + 1;
     int d1 = h1->distance, d2 = h2->distance;
-    if(d1 >= d2) d++, h1 = h1->move[0];
-    if(d2 >  d1) d++, h2 = h2->move[0];
+    if(d1 >= d2) d++, h1 = createStep(h1, binarytiling ? 5 : 0);
+    if(d2 >  d1) d++, h2 = createStep(h2, binarytiling ? 5 : 0);
     }
   }
 

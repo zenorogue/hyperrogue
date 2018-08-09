@@ -352,9 +352,9 @@ void giantLandSwitch(cell *c, int d, cell *from) {
         if(hrand(5000) < 20*PRIZEMUL && c->wall != waOpenGate)
           placePrizeOrb(c);
         if(c->wall == waNone) buildPrizeMirror(c, 250);
-        if(c->land == laPalace && (euclid || c->master->alt) && celldistAlt(c) <= 150 && !(havewhat&HF_MOUSE) && !princess::generating &&
+        if(c->land == laPalace && (eubinary || c->master->alt) && celldistAlt(c) <= 150 && !(havewhat&HF_MOUSE) && !princess::generating &&
           princess::getPrisonInfo(c) &&
-          (euclid || (princess::getPrisonInfo(c)->bestdist < 6 && princess::getPrisonInfo(c)->princess))) {
+          (eubinary || (princess::getPrisonInfo(c)->bestdist < 6 && princess::getPrisonInfo(c)->princess))) {
           c->monst = moMouse;
           if(!princess::squeaked) {
             addMessage(XLAT("You hear a distant squeak!"));
@@ -1329,7 +1329,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
         // depth!
         int d = 
           chaosmode ? -15 * items[itGrimoire]:
-          (euclid || c->master->alt) ? celldistAlt(c) : 10;
+          (eubinary || c->master->alt) ? celldistAlt(c) : 10;
         // remember: d is negative
         if(chaosmode ? hrand(100) < 25 : d % TEMPLE_EACH == 0) {
           if(hrand(5000) < 20 - 2*d && !c->monst && !peace::on)
@@ -1469,9 +1469,9 @@ void giantLandSwitch(cell *c, int d, cell *from) {
     
     case laCaribbean:
       if(d == 9) {
-        if(!euclid) {
+        if(!eubinary) {
           if(c->master->alt && c->master->alt->distance <= 2) {
-            if(!euclid) generateAlts(c->master);
+            if(!eubinary) generateAlts(c->master);
             preventbarriers(c);
             int d = celldistAlt(c);
             if(d <= 0) 
@@ -1490,11 +1490,11 @@ void giantLandSwitch(cell *c, int d, cell *from) {
             c->wall = waSea;
           }
         }
-      if(d == 8 && !euclid) {
+      if(d == 8 && !eubinary) {
         int mindist  = 9;
         for(int i=0; i<c->type; i++) {
           cell *c2 = c->mov[i];
-          if((euclid || c2->master->alt) && celldistAlt(c2) < mindist)
+          if((eubinary || c2->master->alt) && celldistAlt(c2) < mindist)
             mindist = celldistAlt(c2);
           }
         if(mindist == 0) beCIsland(c);
@@ -2372,7 +2372,7 @@ void setdist(cell *c, int d, cell *from) {
   
   // this fixes the following problem:
   // http://steamcommunity.com/app/342610/discussions/0/1470840994970724215/
-  if(!generatingEquidistant && from && d >= 7 && c->land) {
+  if(!generatingEquidistant && from && d >= 7 && c->land && !binarytiling) {
     int cdi = celldist(c);
     if(celldist(from) > cdi) {
       forCellCM(c2, c) if(celldist(c2) < cdi) {

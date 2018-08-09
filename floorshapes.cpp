@@ -199,8 +199,63 @@ void bshape2(hpcshape& sh, int p, int shapeid, matrixlist& m) {
   hpcpush(hpc[last->s]);
   }
 
+hyperpoint get_horopoint(ld y, ld x) {
+  return xpush(-y) * binary::parabolic(x) * C0;
+  }
+
+void horopoint(ld y, ld x) {
+  hpcpush(get_horopoint(y, x));
+  }
+
+void horopoint(ld y, ld x, cell &fc, int c) {
+  hpcpush(iddspin(&fc, c) * get_horopoint(y, x));
+  }
+
+void horoline(ld y, ld x1, ld x2) {
+  for(int a=0; a<=16; a++)
+    horopoint(y, x1 + (x2-x1) * a / 16.);
+  }
+
+void horoline(ld y, ld x1, ld x2, cell &fc, int c) {
+  for(int a=0; a<=16; a++)
+    horopoint(y, x1 + (x2-x1) * a / 16., fc, c);
+  }
 
 void bshape_regular(floorshape &fsh, int id, int sides, int shift, ld size) {
+  
+  if(binarytiling) {
+    bshape(fsh.b[id], fsh.prio);
+    
+    ld yx = size * log(2) / 2;
+    ld yy = yx;
+    ld xx = size / sqrt(2)/2;
+    horoline(-yx, -xx, xx); horoline(yx, xx*2, -xx*2); horopoint(-yx, -xx);
+
+    bshape(fsh.shadow[id], fsh.prio);
+    horoline(-yx*SHADMUL, -xx*SHADMUL, xx*SHADMUL); horoline(yx*SHADMUL, xx*SHADMUL*2, -xx*SHADMUL*2); horopoint(-yx*SHADMUL, -xx*SHADMUL);
+
+    cell fc;
+    fc.type = 6+id;
+
+    for(int k=0; k<SIDEPARS; k++) {
+      for(int i=0; i<fc.type; i++) fsh.gpside[k][i].resize(2);
+      bshape(fsh.gpside[k][0][id], PPR_LAKEWALL); horopoint(-yy, xx, fc, 0); horopoint(yy, 2*xx, fc, 0); chasmifyPoly(dlow_table[k], dhi_table[k], k);
+      bshape(fsh.gpside[k][1][id], PPR_LAKEWALL); horoline(yy, 2*xx, xx, fc, 1); chasmifyPoly(dlow_table[k], dhi_table[k], k);
+      bshape(fsh.gpside[k][2][id], PPR_LAKEWALL); horoline(yy, xx, -xx, fc, 2); chasmifyPoly(dlow_table[k], dhi_table[k], k);
+      bshape(fsh.gpside[k][3][id], PPR_LAKEWALL); horoline(yy, -xx, -2*xx, fc, 3); chasmifyPoly(dlow_table[k], dhi_table[k], k);
+      bshape(fsh.gpside[k][4][id], PPR_LAKEWALL); horopoint(yy, -2*xx, fc, 4); horopoint(-yy, -xx, fc, 4); chasmifyPoly(dlow_table[k], dhi_table[k], k);
+      if(id == 0) {
+        bshape(fsh.gpside[k][5][id], PPR_LAKEWALL); horoline(-yy, -xx, xx, fc, 5); chasmifyPoly(dlow_table[k], dhi_table[k], k);
+        }
+      else {
+        bshape(fsh.gpside[k][5][id], PPR_LAKEWALL); horoline(-yy, -xx, 0, fc, 5); chasmifyPoly(dlow_table[k], dhi_table[k], k);
+        bshape(fsh.gpside[k][6][id], PPR_LAKEWALL); horoline(-yy, -0, xx, fc, 6); chasmifyPoly(dlow_table[k], dhi_table[k], k);
+        }
+      }
+
+    return;
+    }
+  
   bshape(fsh.b[id], fsh.prio);
   for(int t=0; t<=sides; t++)
     hpcpush(ddi(t*S84 / sides + shift, size) * C0);
@@ -271,7 +326,59 @@ void generate_floorshapes() {
     auto& fsh = *pfsh;
     generate_matrices_scale(fsh.scale, fsh.noftype);
     fsh.b.resize(2);
-    if(nonbitrunc && geosupport_graveyard() < 2 && fsh.shapeid2) {
+    if(binarytiling) {
+      ld yx = log(2) / 2;
+      ld yy = yx;
+      ld xx = 1 / sqrt(2)/2;
+      auto& m = hept_matrices;
+      for(int id=0; id<2; id++) {
+        int cor = 6 + id;
+        hyperpoint vertices[7];
+        vertices[0] = get_horopoint(-yy, xx);
+        vertices[1] = get_horopoint(yy, 2*xx);
+        vertices[2] = get_horopoint(yy, xx);
+        vertices[3] = get_horopoint(yy, -xx);
+        vertices[4] = get_horopoint(yy, -2*xx);
+        vertices[5] = get_horopoint(-yy, -xx);
+        if(id) vertices[6] = get_horopoint(-yy, 0);
+        hyperpoint neis[7];
+        neis[0] = get_horopoint(0, 1);
+        neis[1] = get_horopoint(yy*2, 1);
+        neis[2] = get_horopoint(yy*2, 0);
+        neis[3] = get_horopoint(yy*2, -1);
+        neis[4] = get_horopoint(0, -1);
+        if(id)
+          neis[5] = get_horopoint(-yy*2, -.5),
+          neis[6] = get_horopoint(-yy*2, +.5);
+        else
+          neis[5] = get_horopoint(-yy*2, 0);
+          
+        int sid = fsh.shapeid2 ? fsh.shapeid2 : fsh.shapeid1;
+        int i = 0;
+        for(int d=0; d<m.o.sym; d++) {
+          hyperpoint center = hpxy(0,0);
+    
+          for(int c=0; c<cor; c++) {
+            hyperpoint nlcorner = vertices[(d+c+1) % cor];
+            hyperpoint nrcorner = vertices[(d+c+2) % cor];
+            
+            hyperpoint nfar = neis[(d+c+1) % cor];
+            hyperpoint nlfar = nfar;
+            hyperpoint nrfar = nfar;
+            m.v[i].second[c] = build_matrix(center, nlcorner, nrcorner);
+            m.v[i+1].second[c] = build_matrix(nfar, nlcorner, nrcorner);
+            m.v[i+2].second[c] = build_matrix(nfar, nlcorner, nlfar);
+            m.v[i+3].second[c] = build_matrix(nfar, nrcorner, nrfar);
+            }
+          
+          i += 4;
+          }
+        if(i != isize(m.v)) printf("warning: i=%d sm=%d\n", i, isize(m.v));      
+        m.n.sym = cor;
+        bshape2(fsh.b[id], fsh.prio, sid, hept_matrices);
+        }
+      }
+    else if(nonbitrunc && geosupport_graveyard() < 2 && fsh.shapeid2) {
       bshape2(fsh.b[0], fsh.prio, fsh.shapeid2, hept_matrices);
       bshape2(fsh.b[1], fsh.prio, fsh.shapeid2, hept_matrices);
       }
@@ -694,6 +801,8 @@ void draw_shapevec(cell *c, const transmatrix& V, const vector<hpcshape> &shv, i
     }
   else if(geosupport_threecolor() == 2)
     queuepolyat(V, shv[pseudohept(c)], col, prio);
+  else if(binarytiling)
+    queuepolyat(V, shv[c->type-6], col, prio);
   else
     queuepolyat(V, shv[ctof(c)], col, prio);
   }

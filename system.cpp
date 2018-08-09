@@ -1165,7 +1165,7 @@ void switch_game_mode(char switchWhat) {
 
     case rg::bitrunc:
     case rg::gp:
-      if(euclid6) geometry = gNormal;
+      if(euclid6 || binarytiling) geometry = gNormal;
       nonbitrunc = !nonbitrunc; irr::on = false;
       gp::on = (switchWhat == rg::gp && !gp::on);
       need_reset_geometry = true;
@@ -1191,6 +1191,7 @@ void switch_game_mode(char switchWhat) {
         if(gp::param.second && gp::param.second != gp::param.first)
           gp::param.second = 0;
         }
+      if(geometry == gBinaryTiling) nonbitrunc = true, gp::on = irr::on = false;
   
       need_reset_geometry = true; 
       #if CAP_TEXTURE

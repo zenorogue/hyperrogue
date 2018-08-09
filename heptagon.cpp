@@ -74,6 +74,7 @@ heptagon *buildHeptagon(heptagon *parent, int d, hstate s, int pard = 0, int fix
   h->spintable = 0;
   h->move[pard] = parent; tsetspin(h->spintable, pard, d);
   parent->move[d] = h; tsetspin(parent->spintable, d, pard);
+  if(binarytiling) return h;
   if(parent->c7) {
     if(irr::on)
       irr::link_next(parent, d);
@@ -238,7 +239,9 @@ heptspin& operator += (heptspin& h, wstep_t) { h = h + wstep; return h; }
 
 heptagon *createStep(heptagon *h, int d) {
   d = fixrot(d);
-  if(!h->move[0] && h->s != hsOrigin) {
+  if(!h->move[d] && binarytiling) 
+    return binary::createStep(h, d);
+  if(!h->move[0] && h->s != hsOrigin && !binarytiling) {
     // cheating: 
     int pard=0;
     if(S3 == 3) 

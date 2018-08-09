@@ -413,7 +413,7 @@ bool thruVine(cell *c, cell *c2) {
 bool againstCurrent(cell *w, cell *from) {
   if(from->land != laWhirlpool) return false;
   if(againstWind(from, w)) return false; // wind is stronger than current
-  if(!euclid && (!from->master->alt || !w->master->alt)) return false;
+  if(!eubinary && (!from->master->alt || !w->master->alt)) return false;
   int dfrom = celldistAlt(from);
   int dw = celldistAlt(w);
   if(dw < dfrom) return false;
@@ -2176,7 +2176,7 @@ void killMonster(cell *c, eMonster who, flagtype deathflags) {
     c->item = itOrbWater;
 
   if(m == moPirate && isOnCIsland(c) && c->item == itNone && (
-      euclid ||
+      eubinary ||
       (c->master->alt && celldistAlt(c) <= 2-getDistLimit()) ||
       isHaunted(c->land))) {
     bool toomany = false;
@@ -6740,7 +6740,7 @@ bool collectItem(cell *c2, bool telekinesis) {
     items[itOrbSpeed] += v;
     items[itHolyGrail]++;
     addMessage(XLAT("Congratulations! You have found the Holy Grail!"));
-    if(!euclid) c2->master->alt->emeraldval |= GRAIL_FOUND;
+    if(!eubinary) c2->master->alt->emeraldval |= GRAIL_FOUND;
     achievement_collection(c2->item, pg, gold());
     }
   else if(c2->item == itKey) {

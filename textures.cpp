@@ -313,6 +313,31 @@ void mapTexture(cell *c, textureinfo& mi, patterns::patterninfo &si, const trans
       }
     }
   
+  else if(binarytiling) {
+    mi.M = T;
+    mi.triangles.clear();
+
+    ld yx = log(2) / 2;
+    ld yy = yx;
+    ld xx = 1 / sqrt(2)/2;
+
+    hyperpoint vertices[8];
+    vertices[0] = get_horopoint(-yy, xx);
+    vertices[1] = get_horopoint(yy, 2*xx);
+    vertices[2] = get_horopoint(yy, xx);
+    vertices[3] = get_horopoint(yy, 0);
+    vertices[4] = get_horopoint(yy, -xx);
+    vertices[5] = get_horopoint(yy, -2*xx);
+    vertices[6] = get_horopoint(-yy, -xx);
+    vertices[7] = get_horopoint(-yy, 0);
+
+    for(int i=0; i<8; i++) {
+      hyperpoint h1 = vertices[i];
+      hyperpoint h2 = vertices[(i+1)%8];
+      mi.triangles.emplace_back(make_array(C0, h1, h2), make_array(mi.M*C0, mi.M*h1, mi.M*h2));
+      }
+    }
+
   else {
     mi.M = T * applyPatterndir(c, si);
   
