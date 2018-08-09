@@ -1492,6 +1492,9 @@ int read_config_args() {
   else if(argis("-els")) {
     shift(); conformal::extra_line_steps = argf();
     }
+  else if(argis("-stretch")) {
+    PHASEFROM(2); shift(); vid.stretch = argf();
+    }
   TOGGLE('o', vid.usingGL, switchGL())
   TOGGLE('f', vid.full, switchFullscreen())
   else return 1;

@@ -2,7 +2,7 @@ namespace hr { namespace irr {
 
 bool on;
 
-ld density = 6;
+ld density = 2;
 ld quality = .2;
 int place_attempts = 10;
 int rearrange_max_attempts = 50;
@@ -416,7 +416,11 @@ bool step(int delta) {
         p1.spin.resize(N);
         for(int j=0; j<N; j++) {
           auto i1 = p1.neid[j];
-          bool found = false;
+          if(i1 < 0 || i1 >= isize(cells)) {
+            runlevel = 0;
+            return false;
+            }
+          bool found = false;          
           for(int k=0; k < isize(cells[i1].vertices); k++)
             if(cells[i1].neid[k] == i)
               found = true, p1.spin[j] = k;
