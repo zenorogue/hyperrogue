@@ -2586,3 +2586,32 @@ Mobile version improvements (not yet released:)
 2018.07.30 17:47 Update 10.4o
 - fixed a crash bug with displaying hypersian rugs in the inventory
 - added a stretch parameter for cylindrical equi-area and equidistant models
+
+2018.08.05 17:40 Update 10.4p
+- Gameplay/bugfixes:
+- - fixed a crash with Orb of the Warp
+- - fixed the Ocean Yendor Challenge
+- - fixed the Crossroads IV in PTM
+- - fixed a bug which caused sea buoys to sometimes not appear
+- - fixed the message order for teleport/jump orbs
+- - fixed a checkmate rule bug with Pikeman and (potentially killed) monster on the way
+- - the cost of leaving Land of Power now happens before collecting items
+- irregular tilings:
+- - bitruncation (more tilings supported, including the Crystal World and Warped Coast)
+- - some help text
+- - singletype patterns now can be remapped to irregular grids
+- - fixed a crash when enabling irregular tiling multiple times
+- texture mode bugfixes:
+- - textures were scrolled incorrectly after loading -> fixed
+- - texture configs based on polygonal tilings now load correctly
+- - fixed singletype texture patterns
+- - texture aura option
+- graphics:
+- - line quality option
+- - fixed the lines in the svg screenshots
+- - vertical stretch parameter is now available in all models; more details in equi-area
+- - fixed some glitches in the stereographic projection of the sphere
+- Strange Challenge bans: Orb of the Warp and Orb of Lava in non-bitruncated geometries; Land of Storms in finite geometries
+- translation update (PL, CZ)
+
+
