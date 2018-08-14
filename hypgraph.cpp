@@ -23,7 +23,7 @@ void camrotate(ld& hx, ld& hy) {
 hyperpoint gethyper(ld x, ld y) {
 
   ld hx = (x - vid.xcenter) / vid.radius;
-  ld hy = (y - vid.ycenter) / vid.radius;
+  ld hy = (y - vid.ycenter) / vid.radius / vid.stretch;
   
   if(pmodel) {
     ghx = hx, ghy = hy;
