@@ -323,7 +323,7 @@ int goldbergcode(cell *c, const patterns::patterninfo& si) {
 void mapTexture(cell *c, textureinfo& mi, patterns::patterninfo &si, const transmatrix& T, int shift = 0) {
   mi.c = c;
   mi.symmetries = si.symmetries;
-  mi.current_type = c->type;
+  mi.current_type = celltriangles(c);
   
   if(gp::on) {
     mi.M = T;
@@ -882,6 +882,7 @@ void init_textureconfig() {
   addsaver(vid.alpha, "projection", 1);
   addsaver(vid.scale, "scale", 1);
   addsaver(vid.stretch, "stretch", 1);
+  addsaver(vid.binary_width, "binary-tiling-width", 1);
   
   addsaver(config.texturename, "texture filename", "");
   addsaver(config.texture_tuner, "texture tuning", "");
@@ -1504,7 +1505,7 @@ void texture_config::remap(eTextureState old_tstate, eTextureState old_tstate_ma
 
         auto& mi = texture_map_orig.at(oldid);  
         int ncurr = isize(mi.tvertices);  
-        int ntarget = ncurr * c->type / mi.current_type;
+        int ntarget = ncurr * celltriangles(c) / mi.current_type;
         vector<glvertex> new_tvertices = mi.tvertices;
         new_tvertices.resize(ntarget);
         for(int i=ncurr; i<ntarget; i++) {

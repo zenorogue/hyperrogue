@@ -287,7 +287,7 @@ void showEuclideanMenu() {
     if(ts == 6 && tv == 3)
       dialog::addSelItem(XLAT("variations"), XLAT("does not matter"), 'v');
     else if(binarytiling)
-      dialog::addSelItem(XLAT("variations"), XLAT("not implemented"), 'v');
+      dialog::addSelItem(XLAT("width"), fts(vid.binary_width), 'v');
     else {
       dialog::addBoolItem(XLAT("variations"), nonbitrunc, 'v');
       dialog::lastItem().value = gp::operation_name();
@@ -392,7 +392,15 @@ void showEuclideanMenu() {
       else if(uni == 'u') 
         showquotients = !showquotients;
       else if(uni == 'v') {
-        if(euclid6 || binarytiling) ;
+        if(euclid6) ;
+        else if(binarytiling) {
+          dialog::editNumber(vid.binary_width, 0, 2, 0.1, 1, XLAT("binary tiling width"), "");
+          dialog::reaction = [] () {
+            resetGeometry();
+            if(texture::config.tstate == texture::tsActive)
+              texture::config.remap(texture::tsActive, texture::tsActive);
+            };
+          }
         else // if(S3 == 3) 
           gp::configure();
         /* else {

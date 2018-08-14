@@ -810,7 +810,7 @@ extern reaction_t help_delegate;
 
 struct videopar {
   ld scale, alpha, sspeed, mspeed, yshift, camera_angle;
-  ld ballangle, ballproj, euclid_to_sphere, twopoint_param, stretch;
+  ld ballangle, ballproj, euclid_to_sphere, twopoint_param, stretch, binary_width;
   int mobilecompasssize;
   int aurastr, aurasmoothen;
   
