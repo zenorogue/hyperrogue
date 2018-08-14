@@ -4755,6 +4755,22 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
                     gridcolor(c, c->mov[t]), prec);
         vid.linewidth /= gp::scale * 2;
         }
+      else if(binarytiling) {
+        ld yx = log(2) / 2;
+        ld yy = yx;
+        ld xx = 1 / sqrt(2)/2;
+        queueline(V * get_horopoint(-yy, xx), V * get_horopoint(yy, 2*xx), gridcolor(c, c->mov[binary::bd_right]), prec);
+        auto horizontal = [&] (ld y, ld x1, ld x2, int steps, int dir) {
+          if(vid.linequality > 0) steps <<= vid.linequality;
+          if(vid.linequality < 0) steps >>= -vid.linequality;
+          for(int i=0; i<=steps; i++) curvepoint(V * get_horopoint(y, x1 + (x2-x1) * i / steps));
+          queuecurve(gridcolor(c, c->mov[dir]), 0, PPR_LINE);
+          lastptd().u.poly.linewidth = linewidthat(V * get_horopoint(y, (x1+x2)/2), vid.linewidth, 0);
+          };
+        horizontal(yy, 2*xx, xx, 4, binary::bd_up_right);
+        horizontal(yy, xx, -xx, 8, binary::bd_up);
+        horizontal(yy, -xx, -2*xx, 4, binary::bd_up_left);
+        }
       else if(nonbitrunc) {
         double x = hcrossf;
         for(int t=0; t<S7; t++) 
