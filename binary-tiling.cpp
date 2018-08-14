@@ -186,19 +186,19 @@ namespace binary {
     while(h1 != h2) {
       if(h1->distance <= h2->distance) {
         if(typeof(h2) == 6)
-          h2 = hr::createStep(h2, bd_down), where = xpush(log(2)) * where;
+          h2 = hr::createStep(h2, bd_down), where = xpush(-log(2)) * where;
         else if(mapside(h2) == 1)
-          h2 = hr::createStep(h2, bd_left), where = parabolic(-1) * where;
+          h2 = hr::createStep(h2, bd_left), where = parabolic(+1) * where;
         else if(mapside(h2) == -1)
-          h2 = hr::createStep(h2, bd_right), where = parabolic(1) * where;
+          h2 = hr::createStep(h2, bd_right), where = parabolic(-1) * where;
         }
       else {
         if(typeof(h1) == 6)
-          h1 = hr::createStep(h1, bd_down), gm = gm * xpush(-log(2));
+          h1 = hr::createStep(h1, bd_down), gm = gm * xpush(log(2));
         else if(mapside(h1) == 1)
-          h1 = hr::createStep(h1, bd_left), gm = gm * parabolic(1);
+          h1 = hr::createStep(h1, bd_left), gm = gm * parabolic(-1);
         else if(mapside(h1) == -1)
-          h1 = hr::createStep(h1, bd_right), gm = gm * parabolic(-1);
+          h1 = hr::createStep(h1, bd_right), gm = gm * parabolic(+1);
         }
       }
     return gm * where;
