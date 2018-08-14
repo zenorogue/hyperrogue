@@ -262,12 +262,40 @@ void texture_config::mapTextureTriangle(textureinfo &mi, const array<hyperpoint,
 texture_triangle *edited_triangle;
 textureinfo *edited_tinfo;
 
+hyperpoint *compute_binary_vertices() {
+  ld yx = log(2) / 2;
+  ld yy = yx;
+  ld xx = 1 / sqrt(2)/2;
+
+  static hyperpoint vertices[8];
+  vertices[0] = get_horopoint(-yy, xx);
+  vertices[1] = get_horopoint(yy, 2*xx);
+  vertices[2] = get_horopoint(yy, xx);
+  vertices[3] = get_horopoint(yy, 0);
+  vertices[4] = get_horopoint(yy, -xx);
+  vertices[5] = get_horopoint(yy, -2*xx);
+  vertices[6] = get_horopoint(-yy, -xx);
+  vertices[7] = get_horopoint(-yy, 0);
+  
+  return vertices;
+  }
+
+int celltriangles(cell *c) {
+  if(binarytiling) return 8;
+  else return c->type;
+  }
+
 array<hyperpoint, 3> findTextureTriangle(cell *c, patterns::patterninfo& si, int i) {
+  if(binarytiling) {
+    transmatrix M = shmup::ggmatrix(c);
+    auto vertices = compute_binary_vertices();
+    return make_array(M * C0, M * vertices[i], M * vertices[(i+1)%8]);
+    }
   // auto si = getpatterninfo0(c);
   transmatrix M = shmup::ggmatrix(c) * applyPatterndir(c, si);  
   ld z = ctof(c) ? rhexf : hexvdist;
-  hyperpoint h1 =  spin(M_PI + M_PI * (2*i -1) / c->type) * xpush(z) * C0;
-  hyperpoint h2 =  spin(M_PI + M_PI * (2*i +1) / c->type) * xpush(z) * C0;
+  hyperpoint h1 = spin(M_PI + M_PI * (2*i -1) / c->type) * xpush(z) * C0;
+  hyperpoint h2 = spin(M_PI + M_PI * (2*i +1) / c->type) * xpush(z) * C0;
   return make_array(M * C0, M * h1, M * h2);
   }
 
@@ -276,7 +304,7 @@ int getTriangleID(cell *c, patterns::patterninfo& si, hyperpoint h) {
   // auto si = getpatterninfo0(c);
   ld quality = 1e10;
   int best = 0;
-  for(int i=0; i<c->type; i++) {
+  for(int i=0; i<celltriangles(c); i++) {
     auto t = findTextureTriangle(c, si, i);
     ld q = intval(t[1], h) + intval(t[2], h);
     if(q < quality) quality = q, best = i;
@@ -324,20 +352,8 @@ void mapTexture(cell *c, textureinfo& mi, patterns::patterninfo &si, const trans
   else if(binarytiling) {
     mi.M = T;
     mi.triangles.clear();
-
-    ld yx = log(2) / 2;
-    ld yy = yx;
-    ld xx = 1 / sqrt(2)/2;
-
-    hyperpoint vertices[8];
-    vertices[0] = get_horopoint(-yy, xx);
-    vertices[1] = get_horopoint(yy, 2*xx);
-    vertices[2] = get_horopoint(yy, xx);
-    vertices[3] = get_horopoint(yy, 0);
-    vertices[4] = get_horopoint(yy, -xx);
-    vertices[5] = get_horopoint(yy, -2*xx);
-    vertices[6] = get_horopoint(-yy, -xx);
-    vertices[7] = get_horopoint(-yy, 0);
+    
+    auto vertices = compute_binary_vertices();
 
     for(int i=0; i<8; i++) {
       hyperpoint h1 = vertices[i];
@@ -400,7 +416,7 @@ bool texture_config::apply(cell *c, const transmatrix &V, int col) {
     
     set_floor(shFullFloor);
     qfi.tinf = &mi;
-    qfi.spin = (gp::on || irr::on) ? Id : applyPatterndir(c, si);
+    qfi.spin = (gp::on || irr::on || binarytiling) ? Id : applyPatterndir(c, si);
 
     if(grid_color) {
       draw_floorshape(c, V, shFullFloor, 0, PPR_FLOOR);
@@ -769,8 +785,8 @@ void mousemovement() {
           newmove = false;
           }
         }
-      if(edited_tinfo && isize(edited_tinfo->triangles) == c->type) {
-        for(int i=0; i<c->type; i++)
+      if(edited_tinfo && isize(edited_tinfo->triangles) == celltriangles(c)) {
+        for(int i=0; i<celltriangles(c); i++)
           edited_tinfo->triangles[i].tv = findTextureTriangle(c, si, i);
         config.texture_tuned = true;
         }
