@@ -2866,6 +2866,7 @@ namespace texture {
     void mapTexture2(textureinfo& mi);
     void finish_mapping();
     void remap(eTextureState old_tstate, eTextureState old_tstate_max);
+    hyperpoint texture_coordinates(hyperpoint);
   
     void drawRawTexture();
     void saveFullTexture(string tn);

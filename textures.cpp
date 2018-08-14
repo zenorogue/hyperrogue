@@ -216,6 +216,18 @@ void texture_data::saveRawTexture(string tn) {
   addMessage(XLAT("Saved the raw texture to %1", tn));
   }
 
+hyperpoint texture_config::texture_coordinates(hyperpoint h) {
+  hyperpoint inmodel;
+  applymodel(h, inmodel);
+  inmodel[0] *= vid.radius * 1. / vid.scrsize;
+  inmodel[1] *= vid.radius * vid.stretch / vid.scrsize;
+  inmodel[2] = 1;
+  inmodel = itt * inmodel;
+  inmodel[0] = (inmodel[0] + 1) / 2;
+  inmodel[1] = (inmodel[1] + 1) / 2;
+  return inmodel;
+  }
+
 void texture_config::mapTextureTriangle(textureinfo &mi, const array<hyperpoint, 3>& v, const array<hyperpoint, 3>& tv, int splits) {
 
   if(splits) {
@@ -231,11 +243,7 @@ void texture_config::mapTextureTriangle(textureinfo &mi, const array<hyperpoint,
   for(int i=0; i<3; i++) {
     mi.vertices.push_back(glhr::pointtogl(v[i]));
     hyperpoint inmodel;
-    applymodel(tv[i], inmodel);
-    inmodel = itt * inmodel;
-    inmodel[0] *= vid.radius * 1. / vid.scrsize;
-    inmodel[1] *= vid.radius * 1. / vid.scrsize;
-    mi.tvertices.push_back(make_array<GLfloat>((inmodel[0]+1)/2, (inmodel[1]+1)/2, 0));
+    mi.tvertices.push_back(glhr::pointtogl(texture_coordinates(tv[i])));
     }
   
   // when reading a spherical band in a cylindrical projection,
@@ -857,6 +865,7 @@ void init_textureconfig() {
   
   addsaver(vid.alpha, "projection", 1);
   addsaver(vid.scale, "scale", 1);
+  addsaver(vid.stretch, "stretch", 1);
   
   addsaver(config.texturename, "texture filename", "");
   addsaver(config.texture_tuner, "texture tuning", "");
@@ -1020,13 +1029,14 @@ void showMagicMenu() {
     char letter = 'A';
     for(auto& am: amp) {
       hyperpoint h = shmup::ggmatrix(am.c) * am.cell_relative;
-      display(h);
       queuechr(h, vid.fsize, letter, 0xC00000, 1);
 
+      /*
       hyperpoint inmodel;
       applymodel(h, inmodel);
       inmodel[0] *= vid.radius * 1. / vid.scrsize;
       inmodel[1] *= vid.radius * 1. / vid.scrsize;
+      */
 
       queuechr(
         vid.xcenter + vid.scrsize * am.texture_coords[0], 
@@ -1288,14 +1298,8 @@ void showMenu() {
 typedef pair<int,int> point;
 
 point ptc(hyperpoint h) {
-  hyperpoint inmodel;
-  applymodel(h, inmodel);
-  inmodel = config.itt * inmodel;
-  inmodel[0] *= vid.radius * 1. / vid.scrsize;
-  inmodel[1] *= vid.radius * 1. / vid.scrsize;
-  int x = (1 + inmodel[0]) * config.data.twidth / 2;
-  int y = (1 + inmodel[1]) * config.data.twidth / 2;
-  return make_pair(x,y);
+  hyperpoint inmodel = config.texture_coordinates(h);
+  return make_pair(int(inmodel[0] * config.data.twidth), int(inmodel[1] * config.data.twidth));
   }
 
 array<point, 3> ptc(const array<hyperpoint, 3>& h) {
