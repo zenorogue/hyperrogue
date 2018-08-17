@@ -3620,7 +3620,7 @@ void set_blizzard_frame(cell *c, int frameid);
 struct floorshape {
   bool is_plain;
   int shapeid, prio;
-  vector<hpcshape> b, shadow, side[SIDEPARS], gpside[SIDEPARS][8];
+  vector<hpcshape> b, shadow, side[SIDEPARS], gpside[SIDEPARS][MAX_EDGE];
   floorshape() { prio = PPR_FLOOR; }
   };
 
