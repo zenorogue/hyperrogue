@@ -1926,40 +1926,19 @@ namespace linepatterns {
         break;
       
       case patNormal: {
-        double x = hexvdist; // sphere?.401:euclid?.3 : .328;
-        if(gp::on) {
-          for(int t=0; t<c->type; t++)
-            if(c->mov[t] && c->mov[t] < c)
-              queuelinef(V * gp::get_corner_position(c, t),
-                V * gp::get_corner_position(c, (t+1)%c->type),
-                col, 1 + vid.linequality);
-          }
-        else if(euclid || !pseudohept(c)) for(int t=0; t<c->type; t++) 
-          if(euclid ? c->mov[t]<c : (((t^1)&1) || c->mov[t] < c)) {
-            queuelinef(V * ddspin(c,t,-S7) * xpush0(x), 
-                V * ddspin(c,t,+S7) * xpush0(x), 
-                col, 1 + vid.linequality);
-            }
+        for(int t=0; t<c->type; t++)
+          if(c->mov[t] && c->mov[t] < c)
+          queueline(V * get_corner_position(c, t),
+                    V * get_corner_position(c, (t+1)%c->type),
+                    col, 1 + vid.linequality);
         break;
         }
       
       case patTrihepta:
-        if(gp::on) {
-          if(pseudohept(c)) for(int t=0; t<c->type; t++)
-            queuelinef(V * gp::get_corner_position(c, t%c->type, 2),
-                      V * gp::get_corner_position(c, (t+1)%c->type, 2),
-                      col, 1 + vid.linequality);
-          }
-        else {
-          if(!pseudohept(c)) for(int i=0; i<c->type; i++) {
-            cell *c2 = c->mov[i];
-            if(!c2 || !pseudohept(c2)) continue;
-            double x = hexhexdist / 2; // sphere?.3651:euclid?.2611:.2849;
-            queuelinef(V * ddspin(c,i,-S14) * xpush0(x), 
-              V * ddspin(c,i,+S14) * xpush0(x), 
-              col, 1 + vid.linequality);
-            }
-          }
+        if(pseudohept(c)) for(int t=0; t<c->type; t++)
+          queueline(V * get_warp_corner(c, t%c->type),
+                    V * get_warp_corner(c, (t+1)%c->type),
+                    col, 1 + vid.linequality);
         break;
       
       case patTriNet:
