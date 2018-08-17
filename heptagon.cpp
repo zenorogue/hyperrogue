@@ -74,13 +74,14 @@ heptagon *buildHeptagon(heptagon *parent, int d, hstate s, int pard = 0, int fix
   h->spintable = 0;
   h->move[pard] = parent; tsetspin(h->spintable, pard, d);
   parent->move[d] = h; tsetspin(parent->spintable, d, pard);
+  h->cdata = NULL;
   if(binarytiling || syntetic) return h;
   if(parent->c7) {
     if(irr::on)
       irr::link_next(parent, d);
     else
       h->c7 = newCell(S7, h);
-    h->rval0 = h->rval1 = 0; h->cdata = NULL;
+    h->rval0 = h->rval1 = 0;
     h->emeraldval = emerald_heptagon(parent->emeraldval, d);
     h->zebraval = zebra_heptagon(parent->zebraval, d);
     h->fieldval = currfp.connections[fieldpattern::btspin(parent->fieldval, d)];
