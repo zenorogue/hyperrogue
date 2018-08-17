@@ -1214,7 +1214,6 @@ void drawqueue() {
 hpcshape 
   shSemiFloorSide[SIDEPARS],
   shBFloor[2],
-  shFullCross[2],
   shWave[8][2],  
   shCircleFloor,
   shWall[2], shMineMark[2], shFan,
@@ -1605,23 +1604,6 @@ void buildpolys() {
     trihepta0 = hdist0(xpush(-tessf) * spin(M_PI/S7) * xpush(rhexf+hedge/2) * C0) * .98;
     }
 
-  {double x = hexvdist;
-  bshape(shFullCross[0], PPR_FLOOR);
-  x *= bscale6;
-  x *= gp::scale;
-  if(gp::scale != 1) x /= 2;
-  for(int t=0; t<=S6; t++) { hpcpush(C0); if(t) hpcpush(ddi(S7 + t*S14, x) * C0); 
-  last->flags |= POLY_HASWALLS | POLY_FULL | POLY_HASSHADOW | POLY_ISSIDE;
-  }
-
-  x = rhexf;
-  x *= bscale7;
-  // x *= gp::scale;
-  bshape(shFullCross[1], PPR_FLOOR);
-  for(int t=0; t<=S7; t++) { hpcpush(C0); if(t) hpcpush(ddi(t*S12+td, x) * C0); }
-  last->flags |= POLY_HASWALLS | POLY_FULL | POLY_HASSHADOW | POLY_ISSIDE;
-  }
-  
   if(binarytiling) hexvdist = rhexf = 1, tessf = 1, gp::scale = 1, scalef = 1, crossf *= .8;
   
   double floorrad0 = hexvdist*0.92;

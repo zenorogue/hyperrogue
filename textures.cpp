@@ -336,11 +336,14 @@ bool texture_config::apply(cell *c, const transmatrix &V, int col) {
   auto si = getpatterninfo0(c);
 
   if(config.tstate == tsAdjusting) {
-    queuepolyat(V, shFullCross[ctof(c)], 0, PPR_LINE);
-    lastptd().u.poly.outline = slave_color;
-    
     draw_floorshape(c, V, shFullFloor, 0, PPR_LINE);
     lastptd().u.poly.outline = slave_color;
+    
+    curvepoint(V * C0);
+    for(int i=0; i<c->type; i++) 
+      curvepoint(V * get_corner_position(c, i)), curvepoint(V * C0);
+    queuecurve(slave_color, 0, PPR_LINE);
+
     return false;
     }
   try {
