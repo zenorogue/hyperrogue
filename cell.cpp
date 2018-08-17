@@ -1520,7 +1520,7 @@ int celldistance(cell *c1, cell *c2) {
     return 64;
     }
   
-  if(gp::on || stdeuclid || irr::on) {
+  if(gp::on || stdeuclid || irr::on || syntetic || binarytiling) {
     
     if(saved_distances.count(make_pair(c1,c2)))
       return saved_distances[make_pair(c1,c2)];
