@@ -981,7 +981,7 @@ template<class T> void subcell(cell *c, const T& t) {
       subcell(c2, t);
       }
     }
-  else if(!nonbitrunc)
+  else if(!nonbitrunc && !syntetic && !binarytiling)
     forCellEx(c2, c) t(c2);
   t(c);
   }
@@ -992,7 +992,7 @@ void clearHexes(heptagon *at) {
     at->cdata = NULL;
     }
   if(irr::on) irr::clear_links(at);
-  else if(at->c7 && !binarytiling) subcell(at->c7, clearcell);
+  else if(at->c7) subcell(at->c7, clearcell);
   }
 
 void unlink_cdata(heptagon *h) {
