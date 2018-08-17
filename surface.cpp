@@ -756,7 +756,7 @@ void show_surfaces() {
       if(coverage_style == 2) {
         if(rug::rugged) rug::close();
         }
-      coverage_matrix = inverse(shmup::ggmatrix(coverage_center = cwt.c));
+      coverage_matrix = inverse(ggmatrix(coverage_center = cwt.c));
       }
     else if(rug::handlekeys(sym, uni)) ;
     else if(doexiton(sym, uni)) popScreen();
@@ -818,7 +818,7 @@ auto surface_hook = addHook(hooks_args, 100, surface_args);
 void display_coverage() {
 
   transmatrix M = 
-    coverage_style == 3 ? shmup::ggmatrix(coverage_center) * coverage_matrix
+    coverage_style == 3 ? ggmatrix(coverage_center) * coverage_matrix
     : Id;
 
   if(coverage_style)

@@ -163,11 +163,11 @@ hyperpoint where(int i, cell *base) {
   auto m = vdata[i].m;
   if(m->base == base) return tC0(m->at);
   else if(quotient || elliptic || torus) {
-    return shmup::calc_relative_matrix(m->base, base, C0) * tC0(m->at);
+    return calc_relative_matrix(m->base, base, C0) * tC0(m->at);
     }
   else {
     // notimpl(); // actually probably that's a buug
-    return inverse(shmup::ggmatrix(currentmap->gamestart())) * (shmup::ggmatrix(m->base) * tC0(m->at));
+    return inverse(ggmatrix(currentmap->gamestart())) * (shmup::ggmatrix(m->base) * tC0(m->at));
     }
   }
 
@@ -191,7 +191,7 @@ void addedge(int i, int j, edgeinfo *ei) {
     
     addedge(i, id, ei);
     addedge(id, j, ei);
-    shmup::virtualRebase(vdata[i].m, true);
+    virtualRebase(vdata[i].m, true);
     }
   else addedge0(i, j, ei);
   }
@@ -1078,7 +1078,7 @@ map<pair<cell*, cell*>, transmatrix> relmatrices;
 transmatrix& memo_relative_matrix(cell *c1, cell *c2) {
   auto& p = relmatrices[make_pair(c1, c2)];
   if(p[2][2] == 0)
-    p = shmup::calc_relative_matrix(c1, c2,  C0);
+    p = calc_relative_matrix(c1, c2,  C0);
   return p;
   }
 
@@ -1130,10 +1130,10 @@ bool drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
 
       transmatrix gm1 = 
         multidraw ? V * memo_relative_matrix(vd1.m->base, c) :
-        shmup::ggmatrix(vd1.m->base);
+        ggmatrix(vd1.m->base);
       transmatrix gm2 = 
         multidraw ? V * memo_relative_matrix(vd2.m->base, c) :
-        shmup::ggmatrix(vd2.m->base);
+        ggmatrix(vd2.m->base);
                 
       hyperpoint h1 = gm1 * vd1.m->at * C0;
       hyperpoint h2 = gm2 * vd2.m->at * C0;
@@ -1169,7 +1169,7 @@ bool drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
       if(pmodel || onspiral) {
         if(onspiral) {
           const int prec = 20; 
-          transmatrix T = shmup::ggmatrix(currentmap->gamestart());
+          transmatrix T = ggmatrix(currentmap->gamestart());
           hyperpoint l1 = T*tC0(spiral::at(1+ei->i));
           for(int z=1; z<=prec; z++) {
             hyperpoint l2 = T*tC0(spiral::at(1+ei->i+(ei->j-ei->i) * z / (prec+.0)));
@@ -1193,7 +1193,7 @@ bool drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
           ei->orig = center; // cwt.c;
           ei->prec.clear();
           
-          transmatrix T = inverse(shmup::ggmatrix(ei->orig));
+          transmatrix T = inverse(ggmatrix(ei->orig));
 
           if(kind == kSpiral && abs(ei->i - ei->j) == 1) {
             ei->orig = currentmap->gamestart();
@@ -1209,7 +1209,7 @@ bool drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
           else 
             storeline(ei->prec, T*h1, T*h2);
           }
-        queuetable(multidraw ? V : shmup::ggmatrix(ei->orig), ei->prec, isize(ei->prec), col, 0,
+        queuetable(multidraw ? V : ggmatrix(ei->orig), ei->prec, isize(ei->prec), col, 0,
           PPR_STRUCT0);
         }
       }
@@ -1226,7 +1226,7 @@ bool drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
     bool doshow = true;
     if(kind == kTree && i > 0 && !vd.virt) {
       vertexdata& vdp = vdata[vd.data];
-      hyperpoint h2 = shmup::ggmatrix(vdp.m->base) * vdp.m->at * C0;
+      hyperpoint h2 = ggmatrix(vdp.m->base) * vdp.m->at * C0;
       if(hdist(h2, V * m->at * C0) < 0.1) doshow = false;
       }
     

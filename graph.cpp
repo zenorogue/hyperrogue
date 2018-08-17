@@ -633,7 +633,7 @@ bool drawItemType(eItem it, cell *c, const transmatrix& V, int icol, int ticks, 
     cell *c1 = c ? findcompass(c) : NULL;
     transmatrix V2;
     if(c1) {
-      transmatrix P = shmup::ggmatrix(c1);
+      transmatrix P = ggmatrix(c1);
       hyperpoint P1 = tC0(P);
       
       if(isPlayerOn(c)) {
@@ -2110,7 +2110,7 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, int col) {
       Vb = Vb * xpush(tentacle_length - cellgfxdist(c, c->mondir));
       }
     else if(gp::on || irr::on) {
-      transmatrix T = shmup::calc_relative_matrix(c->mov[c->mondir], c, c->mondir);
+      transmatrix T = calc_relative_matrix(c->mov[c->mondir], c, c->mondir);
       Vb = Vb * T * rspintox(tC0(inverse(T))) * xpush(tentacle_length);
       }
     else {
@@ -4721,7 +4721,10 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       }
     
     if(vid.grid) {
-      vid.linewidth *= 3;
+      dynamicval<ld> lw(vid.linewidth, vid.linewidth);
+
+      if(gp::on) vid.linewidth *= gp::scale * 2;
+
       // sphere: 0.3948
       // sphere heptagonal: 0.5739
       // sphere trihepta: 0.3467
@@ -4733,29 +4736,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       int prec = sphere ? 3 : 1;
       prec += vid.linequality;
       
-      if(irr::on) {
-        int id = irr::cellindex[c];
-        auto &vs = irr::cells[id];
-        for(int t=0; t<c->type; t++)
-          if(c->mov[t] && c->mov[t] < c)
-            queueline(V * vs.vertices[t], V * vs.vertices[(1+t)%c->type], gridcolor(c, c->mov[t]), prec);
-        }
-      else if(gp::on) {
-        vid.linewidth *= gp::scale * 2;
-        if(isWarped(c) && has_nice_dual()) {
-          if(pseudohept(c)) for(int t=0; t<c->type; t++)
-            queueline(V * gp::get_corner_position(c, t%c->type, 2),
-                      V * gp::get_corner_position(c, (t+1)%c->type, 2),
-                      gridcolor(c, c->mov[t]), prec);
-          }
-        else for(int t=0; t<c->type; t++)
-          if(c->mov[t] && c->mov[t] < c)
-          queueline(V * gp::get_corner_position(c, t),
-                    V * gp::get_corner_position(c, (t+1)%c->type),
-                    gridcolor(c, c->mov[t]), prec);
-        vid.linewidth /= gp::scale * 2;
-        }
-      else if(binarytiling) {
+      if(binarytiling) {
         ld yx = log(2) / 2;
         ld yy = yx;
         ld xx = 1 / sqrt(2)/2;
@@ -4771,31 +4752,19 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         horizontal(yy, xx, -xx, 8, binary::bd_up);
         horizontal(yy, -xx, -2*xx, 4, binary::bd_up_left);
         }
-      else if(nonbitrunc) {
-        double x = hcrossf;
-        for(int t=0; t<S7; t++) 
-          if(c->mov[t] && c->mov[t] < c)
-          queueline(V * ddspin(c,t,-S6) * xpush0(x), 
-                    V * ddspin(c,t,S6) * xpush0(x), 
+      else if(isWarped(c) && has_nice_dual()) {
+        if(pseudohept(c)) for(int t=0; t<c->type; t++)
+          queueline(V * get_warp_corner(c, t%c->type),
+                    V * get_warp_corner(c, (t+1)%c->type),
                     gridcolor(c, c->mov[t]), prec);
         }
-      else if(isWarped(c)) {
-        double x = hexhexdist/2;
-        if(!ishept(c)) for(int t=0; t<S6; t++) if(c->mov[t] && ishept(c->mov[t]))
-          queueline(V * ddspin(c,t,-S14) * xpush0(x), 
-                    V * ddspin(c,t,+S14) * xpush0(x), 
-                    gridcolor(c, c->mov[t]), prec);
-        }
-      else if(ishept(c) && !(euclid&&!a4)) ;
       else {
-        double x = hexvdist;
-        for(int t=0; t< S6; t++) 
-          if((euclid&&!a4) ? c->mov[t]<c : (((t^1)&1) || c->mov[t] < c))
-          queueline(V * ddspin(c,t,-S7) * xpush0(x), 
-                    V * ddspin(c,t,+S7) * xpush0(x), 
+        for(int t=0; t<c->type; t++)
+          if(true) // c->mov[t] && c->mov[t] < c)
+          queueline(V * get_corner_position(c, t),
+                    V * get_corner_position(c, (t+1)%c->type),
                     gridcolor(c, c->mov[t]), prec);
         }
-      vid.linewidth /= 3;
       }
 
     if(!euclid) {
@@ -4996,7 +4965,7 @@ void drawMarkers() {
           if(inscreenrange(c))
             keycell = c;
           }
-        hyperpoint H = tC0(shmup::ggmatrix(keycell));
+        hyperpoint H = tC0(ggmatrix(keycell));
         queuechr(H, 2*vid.fsize, 'X', 0x10101 * int(128 + 100 * sin(ticks / 150.)));
         queuestr(H, vid.fsize, its(celldistance(cwt.c, yi[yii].key())), 0x10101 * int(128 - 100 * sin(ticks / 150.)));
         addauraspecial(H, iinf[itOrbYendor].color, 0);
@@ -5037,7 +5006,7 @@ void drawMarkers() {
 
     if((vid.axes == 4 || (vid.axes == 1 && !mousing)) && !shmup::on) {
       if(multi::players == 1) {
-        forCellIdAll(c2, d, cwt.c) IG(c2) drawMovementArrows(c2, confusingGeometry() ? Gm(cwt.c) * shmup::calc_relative_matrix(c2, cwt.c, d) : Gm(c2));
+        forCellIdAll(c2, d, cwt.c) IG(c2) drawMovementArrows(c2, confusingGeometry() ? Gm(cwt.c) * calc_relative_matrix(c2, cwt.c, d) : Gm(c2));
         }
       else if(multi::players > 1) for(int p=0; p<multi::players; p++) {
         if(multi::playerActive(p) && (vid.axes == 4 || !drawstaratvec(multi::mdx[p], multi::mdy[p]))) 
@@ -5045,7 +5014,7 @@ void drawMarkers() {
           multi::cpid = p;
           dynamicval<transmatrix> ttm(cwtV, multi::whereis[p]);
           dynamicval<cellwalker> tcw(cwt, multi::player[p]);
-          drawMovementArrows(c2, confusingGeometry() ? Gm(cwt.c) * shmup::calc_relative_matrix(c2, cwt.c, d) : Gm(c2));
+          drawMovementArrows(c2, confusingGeometry() ? Gm(cwt.c) * calc_relative_matrix(c2, cwt.c, d) : Gm(c2));
           }
         }
       }
@@ -5090,7 +5059,7 @@ void drawFlashes() {
       flashes.pop_back(); k--;
       continue; 
       }
-    else V = shmup::ggmatrix(f.where);
+    else V = ggmatrix(f.where);
 
     int tim = ticks - f.t;
     
@@ -5443,8 +5412,8 @@ void drawfullmap() {
   if(conformal::on) {
     char ch = 'A';
     for(auto& v: conformal::v) {
-      queuepoly(shmup::ggmatrix(v->base) * v->at, shTriangle, 0x306090C0);
-      queuechr(shmup::ggmatrix(v->base) * v->at * C0, 10, ch++, 0xFF0000);
+      queuepoly(ggmatrix(v->base) * v->at, shTriangle, 0x306090C0);
+      queuechr(ggmatrix(v->base) * v->at * C0, 10, ch++, 0xFF0000);
       }      
     }
   */
@@ -5813,7 +5782,7 @@ int revhint(cell *c, int hint) {
 
 bool compute_relamatrix(cell *src, cell *tgt, int direction_hint, transmatrix& T) {
   if(confusingGeometry()) {
-    T = shmup::calc_relative_matrix(src, tgt, revhint(src, direction_hint));
+    T = calc_relative_matrix(src, tgt, revhint(src, direction_hint));
     }
   else {
     if(gmatrix.count(src) && gmatrix.count(tgt))
@@ -5893,7 +5862,7 @@ void animateReplacement(cell *a, cell *b, int layer, int direction_hinta, int di
 void drawBug(const cellwalker& cw, int col) {
 #if CAP_POLY
   initquickqueue();
-  transmatrix V = shmup::ggmatrix(cw.c);
+  transmatrix V = ggmatrix(cw.c);
   if(cw.spin) V = V * ddspin(cw.c, cw.spin, S42);
   queuepoly(V, shBugBody, col);
   quickqueue();

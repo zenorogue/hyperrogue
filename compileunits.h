@@ -54,6 +54,7 @@ namespace hr { namespace inv { bool on, activating; } }
 #include "system.cpp"
 #include "debug.cpp"
 #include "geometry.cpp"
+#include "geometry2.cpp"
 #include "polygons.cpp"
 #include "floorshapes.cpp"
 #include "mapeditor.cpp"

@@ -199,10 +199,6 @@ void bshape2(hpcshape& sh, int p, int shapeid, matrixlist& m) {
   hpcpush(hpc[last->s]);
   }
 
-hyperpoint get_horopoint(ld y, ld x) {
-  return xpush(-y) * binary::parabolic(x) * C0;
-  }
-
 void horopoint(ld y, ld x) {
   hpcpush(get_horopoint(y, x));
   }
@@ -223,6 +219,9 @@ void horoline(ld y, ld x1, ld x2, cell &fc, int c) {
 
 void bshape_regular(floorshape &fsh, int id, int sides, int shift, ld size) {
   
+  fsh.b.resize(2);
+  fsh.shadow.resize(2);
+
   if(binarytiling) {
     bshape(fsh.b[id], fsh.prio);
     
@@ -275,117 +274,210 @@ void bshape_regular(floorshape &fsh, int id, int sides, int shift, ld size) {
 
 namespace irr { void generate_floorshapes(); }
 
-void generate_floorshapes() {
+template<class T> void sizeto(T& t, int n) {
+  if(isize(t) <= n) t.resize(n+1);
+  }
 
-  if(irr::on) {
-    printf("generating irregular floorshapes...\n");
-    irr::generate_floorshapes();
-    printf("done\n");
-    return;
-    }
-    
-  if(gp::on) {
-    return;
-    }
+// !siid equals pseudohept(c)
+
+void generate_floorshapes_for(int id, cell *c, int siid, int sidir) {
 
   for(auto pfsh: all_plain_floorshapes) {
     auto& fsh = *pfsh;
-    
-    ld hexside = fsh.rad0, heptside = fsh.rad1;
-    
-    fsh.b.resize(2);
-    fsh.shadow.resize(2);
-    for(int k=0; k<SIDEPARS; k++) fsh.side[k].resize(2);
-    
-    int td = ((nonbitrunc || euclid) && !(S7&1)) ? S42+S6 : 0;
-    if(&fsh == &shBigHepta) td += S6;
-  
-    int b = 0;
-    if(S3 == 4 && !nonbitrunc) b += S14;
 
-    bshape(fsh.b[0], fsh.prio);
-    if(nonbitrunc) {
-      if(&fsh == &shTriheptaFloor)
-        bshape_regular(fsh, 0, S7/2, 0, hexside);
-      else if(&fsh == &shBigTriangle)
-        bshape_regular(fsh, 0, S7/2, S12, hexside);
-      else
-        bshape_regular(fsh, 0, S7, td, heptside);
-      }
-    else if(&fsh == &shBigTriangle) 
-      bshape_regular(fsh, 0, S3, b+S14, hexside);
-    else if(&fsh == &shTriheptaFloor)
-      bshape_regular(fsh, 0, S3, b, hexside);
-    else 
-      bshape_regular(fsh, 0, S6, S7, hexside);
+    if(!gp::on && !irr::on) {
+
+      // standard and binary
+      ld hexside = fsh.rad0, heptside = fsh.rad1;
+      
+      for(int k=0; k<SIDEPARS; k++) sizeto(fsh.side[k], id);
+      
+      int td = ((nonbitrunc || euclid) && !(S7&1)) ? S42+S6 : 0;
+      if(&fsh == &shBigHepta) td += S6;
+    
+      int b = 0;
+      if(S3 == 4 && !nonbitrunc) b += S14;
   
-    bshape_regular(fsh, 1, S7, td, heptside);
+      if(id == 1)
+        bshape_regular(fsh, 1, S7, td, heptside);
+      
+      else if(nonbitrunc) {
+        if(&fsh == &shTriheptaFloor)
+          bshape_regular(fsh, 0, S7/2, 0, hexside);
+        else if(&fsh == &shBigTriangle)
+          bshape_regular(fsh, 0, S7/2, S12, hexside);
+        else
+          bshape_regular(fsh, 0, S7, td, heptside);
+        }
+      else if(&fsh == &shBigTriangle) 
+        bshape_regular(fsh, 0, S3, b+S14, hexside);
+      else if(&fsh == &shTriheptaFloor)
+        bshape_regular(fsh, 0, S3, b, hexside);
+      else 
+        bshape_regular(fsh, 0, S6, S7, hexside);
+    
+      
+      continue;
+      }
+
+    // special
+    ld sca = 3 * shFullFloor.rad0 / fsh.rad0;
+    
+    vector<hyperpoint> cornerlist;
+    
+    int cor = c->type;
+
+    if(&fsh == &shTriheptaFloor) {
+      if(!siid) {
+        for(int i=0; i<cor; i++)
+          cornerlist.push_back(midcorner(c, i, .49));
+        }
+      else {
+        for(int i=0; i<cor; i++) {
+          int ri = i;
+          if((i&1) == ((sidir+siid)&1)) ri--;
+          ri = fixdir(ri, c);
+          cornerlist.push_back(mid(get_corner_position(c, ri, 3.1), get_corner_position(c, (ri+1) % c->type, 3.1)));
+          }
+        }
+      }
+    
+    else if(&fsh == &shBigTriangle) {
+      if(!siid) {
+        for(int i=0; i<cor; i++) cornerlist.push_back(hpxy(0,0));
+        }
+      else {
+        for(int i=0; i<cor; i++) {
+          int ri = i;
+          if((i&1) != ((sidir+siid)&1)) ri--;
+          ri = fixdir(ri, c);
+          hyperpoint nc = nearcorner(c, ri);
+          cornerlist.push_back(mid_at(hpxy(0,0), nc, .94));
+          }
+        }
+      }
+  
+    else if(&fsh == &shBigHepta) {
+      if(!siid) {
+        for(int i=0; i<cor; i++) {
+          hyperpoint nc = nearcorner(c, i);
+          cornerlist.push_back(mid_at(hpxy(0,0), nc, .94));
+          }
+        }
+      else {
+        for(int i=0; i<cor; i++) cornerlist.push_back(hpxy(0,0));
+        }
+      }
+  
+    else {
+      for(int j=0; j<cor; j++)
+        cornerlist.push_back(get_corner_position(c, j, sca));
+      }
+    
+    sizeto(fsh.b, id);
+    bshape(fsh.b[id], fsh.prio);
+    for(int i=0; i<=cor; i++) hpcpush(cornerlist[i%cor]);
+    
+    sizeto(fsh.shadow, id);
+    bshape(fsh.shadow[id], fsh.prio);
+    for(int i=0; i<=cor; i++)
+      hpcpush(mid_at(hpxy(0,0), cornerlist[i%cor], SHADMUL));
+    
+    // printf("at = %d,%d cor = %d sca = %lf\n", li.relative.first, li.relative.second, cor, sca);
+
+    for(int k=0; k<SIDEPARS; k++) 
+      for(int cid=0; cid<cor; cid++) {
+        sizeto(fsh.gpside[k][cid], id);
+        bshape(fsh.gpside[k][cid][id], fsh.prio);
+        hpcpush(iddspin(c, cid) * cornerlist[cid]);
+        hpcpush(iddspin(c, cid) * cornerlist[(cid+1)%cor]);
+        chasmifyPoly(dlow_table[k], dhi_table[k], k);
+        }
     }
     
   for(auto pfsh: all_escher_floorshapes) {
     auto& fsh = *pfsh;
-    generate_matrices_scale(fsh.scale, fsh.noftype);
-    fsh.b.resize(2);
-    if(binarytiling) {
-      ld yx = log(2) / 2;
-      ld yy = yx;
-      ld xx = 1 / sqrt(2)/2;
-      auto& m = hept_matrices;
-      for(int id=0; id<2; id++) {
-        int cor = 6 + id;
-        hyperpoint vertices[7];
-        vertices[0] = get_horopoint(-yy, xx);
-        vertices[1] = get_horopoint(yy, 2*xx);
-        vertices[2] = get_horopoint(yy, xx);
-        vertices[3] = get_horopoint(yy, -xx);
-        vertices[4] = get_horopoint(yy, -2*xx);
-        vertices[5] = get_horopoint(-yy, -xx);
-        if(id) vertices[6] = get_horopoint(-yy, 0);
-        hyperpoint neis[7];
-        neis[0] = get_horopoint(0, 1);
-        neis[1] = get_horopoint(yy*2, 1);
-        neis[2] = get_horopoint(yy*2, 0);
-        neis[3] = get_horopoint(yy*2, -1);
-        neis[4] = get_horopoint(0, -1);
-        if(id)
-          neis[5] = get_horopoint(-yy*2, -.5),
-          neis[6] = get_horopoint(-yy*2, +.5);
-        else
-          neis[5] = get_horopoint(-yy*2, 0);
-          
-        int sid = fsh.shapeid2 ? fsh.shapeid2 : fsh.shapeid1;
-        int i = 0;
-        for(int d=0; d<m.o.sym; d++) {
-          hyperpoint center = hpxy(0,0);
     
-          for(int c=0; c<cor; c++) {
-            hyperpoint nlcorner = vertices[(d+c+1) % cor];
-            hyperpoint nrcorner = vertices[(d+c+2) % cor];
-            
-            hyperpoint nfar = neis[(d+c+1) % cor];
-            hyperpoint nlfar = nfar;
-            hyperpoint nrfar = nfar;
-            m.v[i].second[c] = build_matrix(center, nlcorner, nrcorner);
-            m.v[i+1].second[c] = build_matrix(nfar, nlcorner, nrcorner);
-            m.v[i+2].second[c] = build_matrix(nfar, nlcorner, nlfar);
-            m.v[i+3].second[c] = build_matrix(nfar, nrcorner, nrfar);
-            }
-          
-          i += 4;
-          }
-        if(i != isize(m.v)) printf("warning: i=%d sm=%d\n", i, isize(m.v));      
-        m.n.sym = cor;
-        bshape2(fsh.b[id], fsh.prio, sid, hept_matrices);
+    sizeto(fsh.b, id);
+    
+    if(!gp::on && !irr::on && !binarytiling) {
+      generate_matrices_scale(fsh.scale, fsh.noftype);
+      if(nonbitrunc && geosupport_graveyard() < 2 && fsh.shapeid2) {
+        if(id == 0) bshape2(fsh.b[0], fsh.prio, fsh.shapeid2, hept_matrices);
+        if(id == 1) bshape2(fsh.b[1], fsh.prio, fsh.shapeid2, hept_matrices);
+        }
+      else {
+        if(id == 0) bshape2(fsh.b[0], fsh.prio, fsh.shapeid0, hex_matrices);
+        if(id == 1) bshape2(fsh.b[1], fsh.prio, fsh.shapeid1, hept_matrices);
         }
       }
-    else if(nonbitrunc && geosupport_graveyard() < 2 && fsh.shapeid2) {
-      bshape2(fsh.b[0], fsh.prio, fsh.shapeid2, hept_matrices);
-      bshape2(fsh.b[1], fsh.prio, fsh.shapeid2, hept_matrices);
-      }
+    
     else {
-      bshape2(fsh.b[0], fsh.prio, fsh.shapeid0, hex_matrices);
-      bshape2(fsh.b[1], fsh.prio, fsh.shapeid1, hept_matrices);
+      generate_matrices_scale(fsh.scale, fsh.noftype);
+
+      auto& m = (siid && geosupport_graveyard() == 2) ? hex_matrices : hept_matrices;
+      
+      int cor = c->type;
+          
+      m.n.sym = cor;
+
+      int i = 0;
+      
+      int v = sidir+siid;
+      
+      for(int d=0; d<m.o.sym; d++) {
+        hyperpoint center = hpxy(0,0);
+  
+        for(int cid=0; cid<cor; cid++) {
+          hyperpoint nlcorner = get_corner_position(c, (d+cid+v+1) % cor, 3 / fsh.scale);
+          hyperpoint nrcorner = get_corner_position(c, (d+cid+v+2) % cor, 3 / fsh.scale);
+          
+          hyperpoint nfar = nearcorner(c, (d+cid+v+1) % cor);
+          
+          hyperpoint nlfar = farcorner(c, (d+cid+v+1) % cor, 0);
+          hyperpoint nrfar = farcorner(c, (d+cid+v+1) % cor, 1);
+          m.v[i].second[cid] = build_matrix(center, nlcorner, nrcorner);
+          m.v[i+1].second[cid] = build_matrix(nfar, nlcorner, nrcorner);
+          m.v[i+2].second[cid] = build_matrix(nfar, nlcorner, nlfar);
+          m.v[i+3].second[cid] = build_matrix(nfar, nrcorner, nrfar);
+          }
+        
+        i += 4;
+        }
+
+      if(i != isize(m.v)) printf("warning: i=%d sm=%d\n", i, isize(m.v));      
+      bshape2(fsh.b[id], fsh.prio, (fsh.shapeid2 && geosupport_graveyard() < 2) ? fsh.shapeid2 : siid?fsh.shapeid0:fsh.shapeid1, m);
       }
+    }
+  }
+
+void generate_floorshapes() {
+
+  if(irr::on) {
+    printf("generating irregular floorshapes...\n");
+    cell model;
+
+    int cc = isize(irr::cells);
+    
+    for(int id=0; id<cc; id++) {
+      irr::cellindex[&model] = id;
+      auto& vs = irr::cells[id];
+      model.type = isize(vs.vertices);
+      int siid = !vs.is_pseudohept;
+      int sidir = 0;
+      if(siid) sidir = irr::cells[vs.neid[0]].is_pseudohept;
+      generate_floorshapes_for(id, &model, !vs.is_pseudohept, sidir);
+      }
+
+    printf("done\n");
+    }
+    
+  else if(gp::on) { /* will be generated on the fly */ }
+  
+  else {
+    cell model;
+    model.type = S6; generate_floorshapes_for(0, &model, 0, 0);
+    model.type = S7; generate_floorshapes_for(1, &model, 1, 0);
     }
   }
 
@@ -404,35 +496,11 @@ namespace gp {
     nextid = 0;
     }
 
-  hyperpoint nearcorner(cell *c, local_info& li, int i) {
-    cellwalker cw(c, i);
-    cw += wstep;
-    transmatrix cwm = shmup::calc_relative_matrix(cw.c, c, i);
-    if(elliptic && cwm[2][2] < 0) cwm = centralsym * cwm;
-    return cwm * C0;
-    }
-  
-  hyperpoint hypercorner(cell *c, local_info& li, int i) {
-    cellwalker cw(c, i);
-    cw += wstep;
-    transmatrix cwm = shmup::calc_relative_matrix(cw.c, c, i);
-    if(elliptic && cwm[2][2] < 0) cwm = centralsym * cwm;
-    auto li1 = get_local_info(cw.c);
-    return cwm * get_corner_position(li1, (cw+2).spin);
-    }
-
-  hyperpoint midcorner(cell *c, local_info& li, int i, ld v) {
-    auto hcor = hypercorner(c, li, i);
-    auto tcor = get_corner_position(li, i, 3);
-    return mid_at(tcor, hcor, v);
-    }
-  
   bool just_matrices = false;
   
   map<cell*, matrixlist> usedml;
   
   void build_plainshape(int& id, gp::local_info& li, cell *c0, int siid, int sidir) {
-    if(!just_matrices) 
     id = nextid++;
   
     bool master = !(li.relative.first||li.relative.second);
@@ -440,130 +508,8 @@ namespace gp {
     if(master) li.last_dir = -1;
     if(debug_geometry) 
       printf("last=%d at=%d,%d tot=%d siid=%d sidir=%d cor=%d id=%d\n", li.last_dir, li.relative.first, li.relative.second, li.total_dir, siid, sidir, cor, id);
-    
-    for(auto pfsh: all_escher_floorshapes) {
-      auto& fsh = *pfsh;
-      generate_matrices_scale(1, fsh.noftype);
-      auto& m = (siid && geosupport_graveyard() == 2) ? hex_matrices : hept_matrices;
       
-      m.n.sym = cor;
-      
-      int i = 0;
-      
-      /* if(siid == 0)
-        for(auto& ma: m.v) ma.first = ma.first * pispin; */
-  
-      for(int d=0; d<m.o.sym; d++) {
-        hyperpoint center = hpxy(0,0);
-  
-        for(int c=0; c<cor; c++) {
-          hyperpoint nlcorner = get_corner_position(li, d+c+sidir+siid+1, 3 / fsh.scale);
-          hyperpoint nrcorner = get_corner_position(li, d+c+sidir+siid+2, 3 / fsh.scale);
-          
-          cellwalker cw(c0, c);
-          cw += d+sidir+siid+1;
-          int hint = cw.spin;
-          cw += wstep;
-          transmatrix cwm = shmup::calc_relative_matrix(cw.c, c0, hint);
-          hyperpoint nfar = cwm*C0;
-          auto li1 = get_local_info(cw.c);
-          hyperpoint nlfar = cwm * get_corner_position(li1, (cw+2).spin);
-          hyperpoint nrfar = cwm * get_corner_position(li1, (cw-1).spin);
-          m.v[i].second[c] = build_matrix(center, nlcorner, nrcorner);
-          m.v[i+1].second[c] = build_matrix(nfar, nlcorner, nrcorner);
-          m.v[i+2].second[c] = build_matrix(nfar, nlcorner, nlfar);
-          m.v[i+3].second[c] = build_matrix(nfar, nrcorner, nrfar);
-          }
-        
-        i += 4;
-        }
-      
-      if(i != isize(m.v)) printf("warning: i=%d sm=%d\n", i, isize(m.v));
-      if(just_matrices) return;
-      usedml[c0] = m;
-      
-      fsh.b.resize(nextid);
-      m.n.sym = cor;
-      bshape2(fsh.b[id], fsh.prio, (fsh.shapeid2 && geosupport_graveyard() < 2) ? fsh.shapeid2 : siid?fsh.shapeid0:fsh.shapeid1, m);
-      }
-    
-    for(auto pfsh: all_plain_floorshapes) {
-      auto& fsh = *pfsh;
-        
-      ld sca = 3 * shFullFloor.rad0 / fsh.rad0;
-      
-      fsh.b.resize(nextid);
-      
-      vector<hyperpoint> cornerlist;
-
-      if(&fsh == &shTriheptaFloor) {
-        if(!siid) {
-          for(int i=0; i<cor; i++)
-            cornerlist.push_back(midcorner(c0, li, i, .49));
-          }
-        else {
-          for(int i=0; i<cor; i++) {
-            int ri = i;
-            if((i&1) == ((sidir+siid)&1)) ri--;
-            cornerlist.push_back(mid(get_corner_position(li, ri, 3.1), get_corner_position(li, ri+1, 3.1)));
-            }
-          }
-        }
-      
-      else if(&fsh == &shBigTriangle) {
-        if(!siid) {
-          for(int i=0; i<cor; i++) cornerlist.push_back(hpxy(0,0));
-          }
-        else {
-          for(int i=0; i<cor; i++) {
-            int ri = i;
-            if((i&1) != ((sidir+siid)&1)) ri--;
-            ri = fixdir(ri, c0);
-            hyperpoint nc = nearcorner(c0, li, ri);
-            cornerlist.push_back(mid_at(hpxy(0,0), nc, .94));
-            }
-          }
-        }
-
-      else if(&fsh == &shBigHepta) {
-        if(!siid) {
-          for(int i=0; i<cor; i++) {
-            hyperpoint nc = nearcorner(c0, li, i);
-            cornerlist.push_back(mid_at(hpxy(0,0), nc, .94));
-            }
-          }
-        else {
-          for(int i=0; i<cor; i++) cornerlist.push_back(hpxy(0,0));
-          }
-        }
-
-      else {
-        for(int j=0; j<cor; j++)
-          cornerlist.push_back(get_corner_position(li, j, sca));
-        }
-      
-      bshape(fsh.b[id], fsh.prio);
-      for(int i=0; i<=cor; i++) hpcpush(cornerlist[i%cor]);
-      
-      fsh.shadow.resize(nextid);
-      bshape(fsh.shadow[id], fsh.prio);
-      for(int i=0; i<=cor; i++)
-        hpcpush(mid_at(hpxy(0,0), cornerlist[i%cor], SHADMUL));
-      
-      cell fc;
-      fc.type = cor;
-      
-      // printf("at = %d,%d cor = %d sca = %lf\n", li.relative.first, li.relative.second, cor, sca);
-
-      for(int k=0; k<SIDEPARS; k++) 
-        for(int c=0; c<cor; c++) {
-          fsh.gpside[k][c].resize(nextid);
-          bshape(fsh.gpside[k][c][id], fsh.prio);
-          hpcpush(iddspin(&fc, c) * cornerlist[c]);
-          hpcpush(iddspin(&fc, c) * cornerlist[(c+1)%cor]);
-          chasmifyPoly(dlow_table[k], dhi_table[k], k);
-          }
-      }
+    generate_floorshapes_for(id, c0, siid, sidir);
     
     finishshape(); last = NULL;
     extra_vertices();
@@ -590,163 +536,6 @@ namespace gp {
     auto& id = pshid[siid][sidir][draw_li.relative.first&31][draw_li.relative.second&31][fix6(draw_li.total_dir)];
     if(id == -1 || just_matrices) build_plainshape(id, draw_li, c, siid, sidir);
     return id;
-    }
-  }
-
-namespace irr {
-
-  map<int, matrixlist> usedml;
-
-  void generate_floorshapes() {
-  
-    if(irr::cells.empty()) return;
-    
-    int cc = isize(irr::cells);
-
-    for(auto pfsh: all_escher_floorshapes) {
-      auto& fsh = *pfsh;
-      generate_matrices_scale(1, fsh.noftype);
-      
-      /* if(siid == 0)
-        for(auto& ma: m.v) ma.first = ma.first * pispin; */
-  
-      fsh.b.resize(cc);
-
-      for(int id=0; id<cc; id++) {
-        auto& vs = irr::cells[id];
-        auto& m = (geosupport_graveyard() == 2 && !vs.is_pseudohept) ? hex_matrices : hept_matrices;
-
-        int cor = isize(vs.vertices);
-        m.n.sym = cor;      
-        
-        int i = 0;
-  
-        for(int d=0; d<m.o.sym; d++) {
-          hyperpoint center = hpxy(0,0);
-    
-          for(int c=0; c<cor; c++) {
-            hyperpoint nlcorner = vs.vertices[(d+c+1) % cor];
-            hyperpoint nrcorner = vs.vertices[(d+c+2) % cor];
-            
-            int neid = vs.neid[(d+c+1) % cor];
-            int spin = vs.spin[(d+c+1) % cor];
-            auto &vs2 = irr::cells[neid];
-            int cor2 = isize(vs2.vertices);
-            hyperpoint nfar = vs.jpoints[neid];
-            transmatrix rel = vs.rpusher * vs.relmatrices[vs2.owner] * vs2.pusher;
-            hyperpoint nlfar = rel * vs2.vertices[(spin+2)%cor2];
-            hyperpoint nrfar = rel * vs2.vertices[(spin+cor2-1)%cor2];
-            m.v[i].second[c] = build_matrix(center, nlcorner, nrcorner);
-            m.v[i+1].second[c] = build_matrix(nfar, nlcorner, nrcorner);
-            m.v[i+2].second[c] = build_matrix(nfar, nlcorner, nlfar);
-            m.v[i+3].second[c] = build_matrix(nfar, nrcorner, nrfar);
-            }
-          
-          i += 4;
-          }
-          
-        usedml[id] = m;
-      
-        m.n.sym = cor;
-        bshape2(fsh.b[id], fsh.prio, (fsh.shapeid2 && geosupport_graveyard() < 2) ? fsh.shapeid2 : !vs.is_pseudohept?fsh.shapeid0:fsh.shapeid1, m);
-        }
-      }
-    
-    for(auto pfsh: all_plain_floorshapes) {
-      auto& fsh = *pfsh;
-
-      ld sca = fsh.rad0 / shFullFloor.rad0;
-      
-      fsh.b.resize(cc);
-      fsh.shadow.resize(cc);        
-      
-      for(int i=0; i<cc; i++) {      
-        auto& vs = irr::cells[i];
-        vector<hyperpoint> cornerlist;
-        
-        int cor = isize(vs.vertices);
-
-        if(&fsh == &shBigTriangle) {
-          if(vs.is_pseudohept) {
-            for(int i=0; i<cor; i++) cornerlist.push_back(hpxy(0,0));
-            }
-          else for(int i=0; i<cor; i++) {
-            int ri = i;
-            if(!irr::cells[vs.neid[i]].is_pseudohept) ri--;
-            if(ri<0) ri += cor;
-            hyperpoint nc = vs.jpoints[vs.neid[ri]];
-            cornerlist.push_back(mid_at(C0, nc, .94));
-            }
-          }
-
-        else if(&fsh == &shBigHepta) {
-          if(vs.is_pseudohept) {
-            for(int i=0; i<cor; i++) {
-              cornerlist.push_back(mid_at(hpxy(0,0), vs.jpoints[vs.neid[i]], .94));
-              }
-            }
-          else {
-            for(int i=0; i<cor; i++) cornerlist.push_back(hpxy(0,0));
-            }
-          }
-  
-        else if(&fsh == &shTriheptaFloor) {
-          if(vs.is_pseudohept) {
-            for(int i=0; i<cor; i++) {
-              int neid = vs.neid[i];
-              int spin = vs.spin[i];
-              auto &vs2 = irr::cells[neid];
-              int cor2 = isize(vs2.vertices);
-              hyperpoint nfar = vs.vertices[i];
-              transmatrix rel = vs.rpusher * vs.relmatrices[vs2.owner] * vs2.pusher;
-              hyperpoint nlfar = rel * vs2.vertices[(spin+2)%cor2];
-              cornerlist.push_back(mid_at(nfar, nlfar, .49));
-              /*
-              hyperpoint next = vs.jpoints[vs.neid[i]];
-              hyperpoint last = vs.jpoints[vs.neid[(i+cor-1)%cor]];
-              cornerlist.push_back(mid_at(C0, mid(next, last), .98));
-              */
-              }
-            }
-          else {
-            for(int i=0; i<cor; i++) {
-              int ri = i;
-              if(irr::cells[vs.neid[i]].is_pseudohept) ri--;
-              if(ri<0) ri += cor;
-              cornerlist.push_back(mid_at(C0, mid(vs.vertices[ri], vs.vertices[(ri+1)%cor]), .97));
-              }
-            }
-          }
-      
-        else for(int j=0; j<cor; j++)
-          cornerlist.push_back(mid_at_actual(vs.vertices[j], sca));
-      
-        bshape(fsh.b[i], fsh.prio);
-        for(int j=0; j<=cor; j++) hpcpush(cornerlist[j%cor]);
-        
-        bshape(fsh.shadow[i], fsh.prio);
-        for(int j=0; j<=cor; j++)
-          hpcpush(mid_at(hpxy(0,0), cornerlist[j%cor], SHADMUL));
-        
-        cell fc;
-        fc.type = cor;
-        irr::cellindex[&fc] = i;
-        
-        // printf("at = %d,%d cor = %d sca = %lf\n", li.relative.first, li.relative.second, cor, sca);
-  
-        for(int k=0; k<SIDEPARS; k++) 
-          for(int c=0; c<cor; c++) {
-            fsh.gpside[k][c].resize(cc);
-            bshape(fsh.gpside[k][c][i], fsh.prio);
-            hpcpush(iddspin(&fc, c) * cornerlist[c]);
-            hpcpush(iddspin(&fc, c) * cornerlist[(c+1)%cor]);
-            chasmifyPoly(dlow_table[k], dhi_table[k], k);
-            }
-        }
-      }
-    
-    finishshape(); last = NULL;
-    extra_vertices();
     }
   }
 

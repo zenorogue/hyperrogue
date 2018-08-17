@@ -326,7 +326,7 @@ void drawMobileArrow(int i) {
   ld scale = vid.mobilecompasssize * (sphere ? 7 : euclid ? 6 : 5);
   // m2[0][0] = scale; m2[1][1] = scale; m2[2][2] = 1;
 
-  transmatrix U = shmup::ggmatrix(cwt.c);
+  transmatrix U = ggmatrix(cwt.c);
   hyperpoint H = sphereflip * tC0(U);
   transmatrix Centered = sphereflip * rgpushxto0(H);
 

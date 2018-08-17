@@ -106,12 +106,12 @@ int black_adjacent, white_three;
 void set_relmatrices(cellinfo& ci) {
   auto& all = base->allcells();
   ci.relmatrices.clear();
-  for(auto c0: all) ci.relmatrices[c0] = shmup::calc_relative_matrix(c0, ci.owner, ci.p);
+  for(auto c0: all) ci.relmatrices[c0] = calc_relative_matrix(c0, ci.owner, ci.p);
   }
 
 void rebase(cellinfo& ci) {
   cell *cx = ci.owner;
-  shmup::virtualRebase(ci.owner, ci.p, false);
+  virtualRebase(ci.owner, ci.p, false);
   if(ci.owner != cx) {
     printf("rebased %p to %p\n", cx, ci.owner);
     set_relmatrices(ci);
@@ -158,7 +158,7 @@ void bitruncate() {
         s.neid.push_back(-1);
         s.neid.push_back(next);
         s.neid.push_back(-1);
-        shmup::virtualRebase(s.owner, s.p, false);
+        virtualRebase(s.owner, s.p, false);
         set_relmatrices(s);
         }
       }
@@ -262,7 +262,7 @@ bool step(int delta) {
           cell *c = all[k];
           map<cell*, transmatrix> relmatrices;
           hyperpoint h = randomPointIn(c->type);
-          for(auto c0: all) relmatrices[c0] = shmup::calc_relative_matrix(c0, c, h);
+          for(auto c0: all) relmatrices[c0] = calc_relative_matrix(c0, c, h);
           ld mindist = 1e6;
           for(auto p: cells) {
             if(!relmatrices.count(p.owner)) continue;
@@ -490,7 +490,7 @@ bool step(int delta) {
         ld dists[8];
         for(int i=0; i<S7; i++) {
           dists[i] = hdist(s.p, spin(hexshift - i * ALPHA) * xpush(-hcrossf) * C0);
-          // shmup::calc_relative_matrix(s.owner->mov[i], s.owner, s.p) * C0);
+          // calc_relative_matrix(s.owner->mov[i], s.owner, s.p) * C0);
           // spin(2 * M_PI * i / S7) * xpush(hcrossf) * C0);
           if(dists[i] < dist)
             d = i, dist = dists[i];            
@@ -537,7 +537,7 @@ bool draw_cell_schematics(cell *c, transmatrix V) {
 
         queueline(V * p.p, V * C0, 0xFF0000FF);
         if(p.patterndir != -1)
-          queueline(V * p.p, V * shmup::calc_relative_matrix(c->master->move[p.patterndir]->c7, c, p.p) * C0, 0x00FF00FF);
+          queueline(V * p.p, V * calc_relative_matrix(c->master->move[p.patterndir]->c7, c, p.p) * C0, 0x00FF00FF);
         }
       }
     }
@@ -864,7 +864,7 @@ bool load_map(const string &fname) {
       double a, b, c;
       ignore(fscanf(f, "%lf%lf%lf", &a, &b, &c));
       s.p = hpxyz(a, b, c);
-      for(auto c0: all) s.relmatrices[c0] = shmup::calc_relative_matrix(c0, h, s.p);
+      for(auto c0: all) s.relmatrices[c0] = calc_relative_matrix(c0, h, s.p);
       s.owner = h;
       }
     }
@@ -1087,7 +1087,7 @@ auto hook =
 /*
   if(mouseover && !ctof(mouseover)) {
     for(auto h: gp::get_masters(mouseover)) 
-      queueline(shmup::ggmatrix(h->c7)*C0, shmup::ggmatrix(mouseover)*C0, 0xFFFFFFFF);
+      queueline(ggmatrix(h->c7)*C0, shmup::ggmatrix(mouseover)*C0, 0xFFFFFFFF);
     }
     
 */

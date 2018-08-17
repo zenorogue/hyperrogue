@@ -337,10 +337,10 @@ namespace conformal {
       
         // virtualRebase(v[j], false);
         
-        hyperpoint prev = shmup::calc_relative_matrix(v[j-1]->base, v[j]->base, C0) *
+        hyperpoint prev = calc_relative_matrix(v[j-1]->base, v[j]->base, C0) *
           v[j-1]->at * C0;
 
-        hyperpoint next = shmup::calc_relative_matrix(v[j+1]->base, v[j]->base, C0) * 
+        hyperpoint next = calc_relative_matrix(v[j+1]->base, v[j]->base, C0) * 
           v[j+1]->at * C0;
         
         hyperpoint hmid = mid(prev, next);
@@ -352,7 +352,7 @@ namespace conformal {
         }
       }
     
-    hyperpoint next0 = shmup::calc_relative_matrix(v[1]->base, v[0]->base, C0) * v[1]->at * C0;
+    hyperpoint next0 = calc_relative_matrix(v[1]->base, v[0]->base, C0) * v[1]->at * C0;
     v[0]->at = v[0]->at * rspintox(inverse(v[0]->at) * next0);
     
     llv = ticks;
@@ -376,11 +376,11 @@ namespace conformal {
     viewctr.h = v[ph]->base->master;
     viewctr.spin = 0;
     
-    View = inverse(shmup::master_relative(v[ph]->base) * v[ph]->at);
+    View = inverse(master_relative(v[ph]->base) * v[ph]->at);
   
     hyperpoint now = v[ph]->at * C0;
 
-    hyperpoint next = shmup::calc_relative_matrix(v[ph+1]->base, v[ph]->base, C0) * 
+    hyperpoint next = calc_relative_matrix(v[ph+1]->base, v[ph]->base, C0) * 
       v[ph+1]->at * C0;
   
     View = spin(M_PI/180 * rotation) * xpush(-(phase-ph) * hdist(now, next)) * View;
@@ -411,7 +411,7 @@ namespace conformal {
     for(int j=0; j<siz-1; j++) {
       hyperpoint next = 
         inverse(v[j]->at) *
-        shmup::calc_relative_matrix(v[j+1]->base, v[j]->base, C0) * 
+        calc_relative_matrix(v[j+1]->base, v[j]->base, C0) * 
         v[j+1]->at * C0;
         
       hyperpoint nextscr;
@@ -494,7 +494,7 @@ namespace conformal {
           drawfullmap();
           
           if(last_base) {
-            hyperpoint last = shmup::ggmatrix(last_base) * last_relative;
+            hyperpoint last = ggmatrix(last_base) * last_relative;
             hyperpoint hscr;
             applymodel(last, hscr);
             ld bwidth = -vid.radius * hscr[0];
@@ -529,7 +529,7 @@ namespace conformal {
             }
           
           last_base = viewctr.h->c7;
-          last_relative = inverse(shmup::ggmatrix(last_base)) * C0;        
+          last_relative = inverse(ggmatrix(last_base)) * C0;        
           }
         }
 

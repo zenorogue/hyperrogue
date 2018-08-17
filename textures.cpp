@@ -262,41 +262,15 @@ void texture_config::mapTextureTriangle(textureinfo &mi, const array<hyperpoint,
 texture_triangle *edited_triangle;
 textureinfo *edited_tinfo;
 
-hyperpoint *compute_binary_vertices() {
-  ld yx = log(2) / 2;
-  ld yy = yx;
-  ld xx = 1 / sqrt(2)/2;
-
-  static hyperpoint vertices[8];
-  vertices[0] = get_horopoint(-yy, xx);
-  vertices[1] = get_horopoint(yy, 2*xx);
-  vertices[2] = get_horopoint(yy, xx);
-  vertices[3] = get_horopoint(yy, 0);
-  vertices[4] = get_horopoint(yy, -xx);
-  vertices[5] = get_horopoint(yy, -2*xx);
-  vertices[6] = get_horopoint(-yy, -xx);
-  vertices[7] = get_horopoint(-yy, 0);
-  
-  return vertices;
-  }
-
 int celltriangles(cell *c) {
-  if(binarytiling) return 8;
-  else return c->type;
+  return c->type;
   }
+
+#define no_patterndir (gp::on || irr::on || binarytiling)
 
 array<hyperpoint, 3> findTextureTriangle(cell *c, patterns::patterninfo& si, int i) {
-  if(binarytiling) {
-    transmatrix M = shmup::ggmatrix(c);
-    auto vertices = compute_binary_vertices();
-    return make_array(M * C0, M * vertices[i], M * vertices[(i+1)%8]);
-    }
-  // auto si = getpatterninfo0(c);
-  transmatrix M = shmup::ggmatrix(c) * applyPatterndir(c, si);  
-  ld z = ctof(c) ? rhexf : hexvdist;
-  hyperpoint h1 = spin(M_PI + M_PI * (2*i -1) / c->type) * xpush(z) * C0;
-  hyperpoint h2 = spin(M_PI + M_PI * (2*i +1) / c->type) * xpush(z) * C0;
-  return make_array(M * C0, M * h1, M * h2);
+  transmatrix M = no_patterndir ? ggmatrix(c) : ggmatrix(c) * applyPatterndir(c, si);
+  return make_array(M * C0, M * get_corner_position(c, i), M * get_corner_position(c, i+1));
   }
 
 // using: mouseh, mouseouver
@@ -325,55 +299,13 @@ void mapTexture(cell *c, textureinfo& mi, patterns::patterninfo &si, const trans
   mi.symmetries = si.symmetries;
   mi.current_type = celltriangles(c);
   
-  if(gp::on) {
-    mi.M = T;
-    mi.triangles.clear();
-    for(int i=0; i<c->type; i++) {
-      int d = si.dir;
-      int i0 = fixdir(i + d + 0, c);
-      int i1 = fixdir(i + d + 1, c);
-      hyperpoint h1 = gp::get_corner_position(c, i0);
-      hyperpoint h2 = gp::get_corner_position(c, i1);
-      mi.triangles.emplace_back(make_array(C0, h1, h2), make_array(mi.M*C0, mi.M*h1, mi.M*h2));
-      }
-    }
+  mi.M = no_patterndir ? T : T * applyPatterndir(c, si);
+  mi.triangles.clear();
   
-  else if(irr::on) {
-    mi.M = T;
-    mi.triangles.clear();
-    auto& vs = irr::cells[irr::cellindex[c]];
-    for(int i=0; i<c->type; i++) {
-      hyperpoint h1 = vs.vertices[i];
-      hyperpoint h2 = vs.vertices[(i+1)%c->type];
-      mi.triangles.emplace_back(make_array(C0, h1, h2), make_array(mi.M*C0, mi.M*h1, mi.M*h2));
-      }
-    }
-  
-  else if(binarytiling) {
-    mi.M = T;
-    mi.triangles.clear();
-    
-    auto vertices = compute_binary_vertices();
-
-    for(int i=0; i<8; i++) {
-      hyperpoint h1 = vertices[i];
-      hyperpoint h2 = vertices[(i+1)%8];
-      mi.triangles.emplace_back(make_array(C0, h1, h2), make_array(mi.M*C0, mi.M*h1, mi.M*h2));
-      }
-    }
-
-  else {
-    mi.M = T * applyPatterndir(c, si);
-  
-    ld z = ctof(c) ? rhexf : hexvdist;
-    
-    mi.triangles.clear();
-    for(int i=0; i<c->type; i++) {
-      int i2 = i+shift;
-      hyperpoint h1 =  spin(M_PI + M_PI * (2*i2 -1) / c->type) * xpush(z) * C0;
-      hyperpoint h2 =  spin(M_PI + M_PI * (2*i2 +1) / c->type) * xpush(z) * C0;
-      mi.triangles.emplace_back(make_array(C0, h1, h2), make_array(mi.M*C0, mi.M*h1, mi.M*h2));
-      }
+  for(int i=0; i<c->type; i++) {
+    hyperpoint h1 = get_corner_position(c, (i + shift) % c->type);
+    hyperpoint h2 = get_corner_position(c, (i + shift + 1) % c->type);
+    mi.triangles.emplace_back(make_array(C0, h1, h2), make_array(mi.M*C0, mi.M*h1, mi.M*h2));
     }
   }
 
@@ -416,7 +348,7 @@ bool texture_config::apply(cell *c, const transmatrix &V, int col) {
     
     set_floor(shFullFloor);
     qfi.tinf = &mi;
-    qfi.spin = (gp::on || irr::on || binarytiling) ? Id : applyPatterndir(c, si);
+    qfi.spin = no_patterndir ? Id : applyPatterndir(c, si);
 
     if(grid_color) {
       draw_floorshape(c, V, shFullFloor, 0, PPR_FLOOR);
@@ -678,7 +610,7 @@ ld magic_quality() {
   ld q = 0;
   for(auto& p: amp) {
     hyperpoint inmodel;
-    applymodel(shmup::ggmatrix(p.c) * p.cell_relative, inmodel);
+    applymodel(ggmatrix(p.c) * p.cell_relative, inmodel);
     inmodel[0] *= vid.radius * 1. / vid.scrsize;
     inmodel[1] *= vid.radius * 1. / vid.scrsize;
     q += intvalxy(inmodel, p.texture_coords);
@@ -1045,7 +977,7 @@ void showMagicMenu() {
     initquickqueue();
     char letter = 'A';
     for(auto& am: amp) {
-      hyperpoint h = shmup::ggmatrix(am.c) * am.cell_relative;
+      hyperpoint h = ggmatrix(am.c) * am.cell_relative;
       queuechr(h, vid.fsize, letter, 0xC00000, 1);
 
       /*
@@ -1514,7 +1446,7 @@ void texture_config::remap(eTextureState old_tstate, eTextureState old_tstate_ma
         
         auto& mi2 = texture_map[si.id];
         mi2 = mi;
-        mapTexture(c, mi2, si, shmup::ggmatrix(c), pshift);
+        mapTexture(c, mi2, si, ggmatrix(c), pshift);
         mapTexture2(mi2);
         mi2.tvertices = move(new_tvertices);
         // printf("%08x remapping %d vertices to %d vertices\n", si.id, isize(mi.tvertices), isize(mi2.tvertices));

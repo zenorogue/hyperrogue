@@ -55,7 +55,7 @@ bool mouseout2() {
 
 movedir vectodir(const hyperpoint& P) {
 
-  transmatrix U = shmup::ggmatrix(cwt.c);
+  transmatrix U = ggmatrix(cwt.c);
 
   hyperpoint H = sphereflip * tC0(U);
   transmatrix Centered = sphereflip * rgpushxto0(H);
@@ -104,14 +104,14 @@ void movepckeydir(int d) {
 void calcMousedest() {
   if(mouseout()) return;
   if(vid.revcontrol == true) { mouseh[0] = -mouseh[0]; mouseh[1] = -mouseh[1]; }
-  ld mousedist = intval(mouseh, tC0(shmup::ggmatrix(cwt.c)));
+  ld mousedist = intval(mouseh, tC0(ggmatrix(cwt.c)));
   mousedest.d = -1;
   
   cellwalker bcwt = cwt;
   
   ld dists[MAX_EDGE];
   
-  transmatrix U = shmup::ggmatrix(cwt.c);
+  transmatrix U = ggmatrix(cwt.c);
   
   for(int i=0; i<cwt.c->type; i++) {
     transmatrix T;
@@ -120,7 +120,7 @@ void calcMousedest() {
     else
       dists[i] = HUGE_VAL;
     }
-  // confusingGeometry() ? shmup::ggmatrix(cwt.c) * shmup::calc_relative_matrix(cwt.c->mov[i], cwt.c, i) : shmup::ggmatrix(cwt.c->mov[i])));
+  // confusingGeometry() ? ggmatrix(cwt.c) * calc_relative_matrix(cwt.c->mov[i], cwt.c, i) : shmup::ggmatrix(cwt.c->mov[i])));
   
   /* printf("curcell = %Lf\n", mousedist);
   for(int i=0; i<cwt.c->type; i++)

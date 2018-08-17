@@ -580,7 +580,7 @@ void drawrec(cell *c, const transmatrix& V) {
 
 void drawrec(const heptspin& hs, hstate s, const transmatrix& V) {
 
-  // shmup::calc_relative_matrix(cwt.c, hs.h);
+  // calc_relative_matrix(cwt.c, hs.h);
     
   cell *c = hs.h->c7;
   

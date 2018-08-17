@@ -3,29 +3,6 @@
 
 namespace hr {
 
-double randd() { return (rand() + .5) / (RAND_MAX + 1.); }
-
-double cellgfxdist(cell *c, int i) {
-  if(gp::on || irr::on) return hdist0(tC0(shmup::calc_relative_matrix(c->mov[i], c, i)));
-  return nonbitrunc ? tessf * gp::scale : (c->type == 6 && (i&1)) ? hexhexdist : crossf;
-  }
-
-transmatrix cellrelmatrix(cell *c, int i) {
-  if(gp::on) return shmup::calc_relative_matrix(c->mov[i], c, i);
-  double d = cellgfxdist(c, i);
-  return ddspin(c, i) * xpush(d) * iddspin(c->mov[i], c->spin(i), euclid ? 0 : S42);
-  }
-
-hyperpoint randomPointIn(int t) {
-  while(true) {
-    hyperpoint h = spin(2*M_PI*(randd()-.5)/t) * tC0(xpush(asinh(randd())));
-    double d =
-      nonbitrunc ? tessf : t == 6 ? hexhexdist : crossf;
-    if(hdist0(h) < hdist0(xpush(-d) * h))
-      return spin(2*M_PI/t * (rand() % t)) * h;
-    }
-  }
-
 struct snowball {
   transmatrix T;
   transmatrix global;

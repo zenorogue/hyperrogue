@@ -718,16 +718,9 @@ namespace shmup {
   void destroyBoats(cell *c);
   bool boatAt(cell *c);
   
-  void virtualRebase(cell*& base, transmatrix& at, bool tohex);
-  void virtualRebase(cell*& base, hyperpoint& h, bool tohex);
-  void virtualRebase(shmup::monster *m, bool tohex);
-  transmatrix calc_relative_matrix(cell *c, cell *c1, const hyperpoint& point_hint);
-  transmatrix calc_relative_matrix(cell *c, cell *c1, int direction_hint);
   void fixStorage();
   void addShmupHelp(string& out);
   void activateArrow(cell *c);
-  transmatrix& ggmatrix(cell *c);
-  transmatrix master_relative(cell *c, bool get_inverse = false);
   
   void pushmonsters();
   void popmonsters();
@@ -739,7 +732,15 @@ namespace shmup {
 
   void turn(int);
   extern monster *lmousetarget;
+  void virtualRebase(shmup::monster *m, bool tohex);
   }
+
+transmatrix& ggmatrix(cell *c);
+transmatrix master_relative(cell *c, bool get_inverse = false);
+void virtualRebase(cell*& base, transmatrix& at, bool tohex);
+void virtualRebase(cell*& base, hyperpoint& h, bool tohex);
+transmatrix calc_relative_matrix(cell *c, cell *c1, const hyperpoint& point_hint);
+transmatrix calc_relative_matrix(cell *c, cell *c1, int direction_hint);
 
 static const int NOHINT = -1;
 

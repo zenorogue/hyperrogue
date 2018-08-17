@@ -286,7 +286,7 @@ void analyze() {
 int gaussian = 0;
 
 double mydistance(cell *c1, cell *c2) {
-  if(gaussian == 2) return hdist(tC0(shmup::ggmatrix(c1)), tC0(shmup::ggmatrix(c2)));
+  if(gaussian == 2) return hdist(tC0(ggmatrix(c1)), tC0(shmup::ggmatrix(c2)));
   else return celldistance(c1, c2);
   }
 
@@ -648,7 +648,7 @@ void sominit(int initto) {
     else allcells = currentmap->allcells();
     
     if(isize(allcells) > kohrestrict) {
-      sort(allcells.begin(), allcells.end(), [] (cell *c1, cell *c2) { return hdist0(tC0(shmup::ggmatrix(c1))) < hdist0(tC0(shmup::ggmatrix(c2))); });
+      sort(allcells.begin(), allcells.end(), [] (cell *c1, cell *c2) { return hdist0(tC0(ggmatrix(c1))) < hdist0(tC0(shmup::ggmatrix(c2))); });
       allcells.resize(kohrestrict);
       }
   

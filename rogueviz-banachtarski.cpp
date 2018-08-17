@@ -201,8 +201,8 @@ void bantar_note(cell *c) {
 using bantar_config = pair<cell*, cell*>;
 
 tuple<ld,bool,ld> quality(bantar_config cp) {
-  hyperpoint h1 = tC0(shmup::ggmatrix(cp.first));
-  hyperpoint h2 = tC0(shmup::ggmatrix(cp.second));
+  hyperpoint h1 = tC0(ggmatrix(cp.first));
+  hyperpoint h2 = tC0(ggmatrix(cp.second));
   return make_tuple(hdist0(h1) * hdist0(h2), h2[1] > 0, abs(h2[0] / h2[1]));
   }
 
@@ -334,7 +334,7 @@ void bantar_frame() {
     
     View = Id;
     
-    transmatrix tView = actualV(cth(xcw), Id) * shmup::calc_relative_matrix(cwt.c, xcw.c, NOHINT) * inverse(actualV(cth(cwt), Id));
+    transmatrix tView = actualV(cth(xcw), Id) * calc_relative_matrix(cwt.c, xcw.c, NOHINT) * inverse(actualV(cth(cwt), Id));
     
     if(tphase < 2) part = 0;
     else if(tphase == 2)
