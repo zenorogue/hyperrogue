@@ -756,7 +756,7 @@ void show_surfaces() {
       if(coverage_style == 2) {
         if(rug::rugged) rug::close();
         }
-      coverage_matrix = inverse(ggmatrix(coverage_center = cwt.c));
+      coverage_matrix = inverse(ggmatrix(coverage_center = cwt.at));
       }
     else if(rug::handlekeys(sym, uni)) ;
     else if(doexiton(sym, uni)) popScreen();

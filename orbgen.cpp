@@ -378,7 +378,7 @@ bool buildPrizeMirror(cell *c, int freq) {
   return true;
   }                    
 
-eLand getPrizeLand(cell *c = cwt.c) {
+eLand getPrizeLand(cell *c = cwt.at) {
   eLand l = c->land;
   if(isElemental(l)) l = laElementalWall;
   if(l == laPalace && princess::dist(c) < OUT_OF_PRISON)

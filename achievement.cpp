@@ -529,7 +529,7 @@ void improveItemScores() {
   improve_score(42, itMutant);
   improve_score(43, itFulgurite);
 
-  if(!isHaunted(cwt.c->land)) improve_score(46, itLotus);
+  if(!isHaunted(cwt.at->land)) improve_score(46, itLotus);
   improve_score(47, itMutant2);
   improve_score(48, itWindstone);
   

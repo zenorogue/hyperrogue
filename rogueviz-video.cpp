@@ -44,13 +44,13 @@ void rvvideo(const string &fname) {
       drawthemap();
       centerpc(100); optimizeview();
       fixmatrix(View);
-      bfs(); setdist(cwt.c, 7 - getDistLimit() - genrange_bonus, NULL);
+      bfs(); setdist(cwt.at, 7 - getDistLimit() - genrange_bonus, NULL);
       vertexdata& vd = vdata[id];
       for(int e=0; e<isize(vd.edges); e++) {
         int id2 = vd.edges[e].first;
         if(vdata[id2].name == seq[next]) {
           id = id2; next++;
-          cwt.c = shmup::pc[0]->base = vdata[id2].m->base;
+          cwt.at = shmup::pc[0]->base = vdata[id2].m->base;
           if(next == isize(seq)) goto found;
           }
         }

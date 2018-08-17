@@ -490,7 +490,7 @@ bool step(int delta) {
         ld dists[8];
         for(int i=0; i<S7; i++) {
           dists[i] = hdist(s.p, spin(hexshift - i * ALPHA) * xpush(-hcrossf) * C0);
-          // calc_relative_matrix(s.owner->mov[i], s.owner, s.p) * C0);
+          // calc_relative_matrix(s.owner->move(i), s.owner, s.p) * C0);
           // spin(2 * M_PI * i / S7) * xpush(hcrossf) * C0);
           if(dists[i] < dist)
             d = i, dist = dists[i];            
@@ -537,7 +537,7 @@ bool draw_cell_schematics(cell *c, transmatrix V) {
 
         queueline(V * p.p, V * C0, 0xFF0000FF);
         if(p.patterndir != -1)
-          queueline(V * p.p, V * calc_relative_matrix(c->master->move[p.patterndir]->c7, c, p.p) * C0, 0x00FF00FF);
+          queueline(V * p.p, V * calc_relative_matrix(c->master->move(p.patterndir)->c7, c, p.p) * C0, 0x00FF00FF);
         }
       }
     }
@@ -553,10 +553,10 @@ struct heptinfo {
 map<heptagon*, heptinfo> periodmap;
 
 void link_to_base(heptagon *h, heptspin base) {
-  // printf("linking %p to %p/%d\n", h, base.h, base.spin);
+  // printf("linking %p to %p/%d\n", h, base.at, base.spin);
   auto &hi = periodmap[h];
   hi.base = base;
-  for(int k: cells_of_heptagon[base.h]) {
+  for(int k: cells_of_heptagon[base.at]) {
     cell *c = newCell(isize(cells[k].vertices), h);
     hi.subcells.push_back(c);
     cellindex[c] = k;
@@ -567,7 +567,7 @@ void link_to_base(heptagon *h, heptspin base) {
 void clear_links(heptagon *h) {
   auto& hi = periodmap[h];
   for(cell *c: hi.subcells) {
-    for(int i=0; i<c->type; i++) if(c->mov[i]) c->mov[i]->mov[c->spin(i)] = NULL;
+    for(int i=0; i<c->type; i++) if(c->move(i)) c->move(i)->move(c->c.spin(i)) = NULL;
     cellindex.erase(c);
     delete c;
     }
@@ -582,14 +582,14 @@ void link_start(heptagon *h) {
 void link_next(heptagon *parent, int d) {
   if(!periodmap.count(parent))
     link_to_base(parent, heptspin(cells[0].owner->master, 0));
-  // printf("linking next: %p direction %d [s%d]\n", parent, d, parent->spin(d));
-  auto *h = parent->move[d];
-  heptspin hs = periodmap[parent].base + d + wstep - parent->spin(d);
+  // printf("linking next: %p direction %d [s%d]\n", parent, d, parent->c.spin(d));
+  auto *h = parent->move(d);
+  heptspin hs = periodmap[parent].base + d + wstep - parent->c.spin(d);
   link_to_base(h, hs);
   }
 
 void may_link_next(heptagon *parent, int d) {
-  if(!periodmap.count(parent->move[d]))
+  if(!periodmap.count(parent->move(d)))
     link_next(parent, d);
   }
 
@@ -610,26 +610,23 @@ void link_cell(cell *c, int d) {
   else {
     int dirs = 0;
     int os = periodmap[c->master].base.spin;
-    for(int d=0; d<S7; d++) if(sc2.owner->master == sc.owner->master->move[(os+d)%S7]) {
+    for(int d=0; d<S7; d++) if(sc2.owner->master == sc.owner->master->modmove(os+d)) {
       heptspin hss(c->master, d);
       hss += wstep;
-      master2 = hss.h;
-      // printf("master2 is %p; base = %p; should be = %p\n", master2, periodmap[master2].base.h, sc2.owner->master);
+      master2 = hss.at;
+      // printf("master2 is %p; base = %p; should be = %p\n", master2, periodmap[master2].base.at, sc2.owner->master);
       dirs++;
       }
     if(dirs != 1) { printf("dirs error\n"); exit(1); }
     }
   
   cell *c2 = periodmap[master2].subcells[sc2.localindex];
-  c->mov[d] = c2;
-  tsetspin(c->spintable, d, sc.spin[d]);
-  c2->mov[sc.spin[d]] = c;
-  tsetspin(c2->spintable, sc.spin[d], d);
+  c->c.connect(d, c2, sc.spin[d], false);
   }
 
 int hdist(heptagon *h1, heptagon *h2) {
   if(h1 == h2) return 0;
-  for(int i=0; i<S7; i++) if(h1->move[i] == h2) return 1;
+  for(int i=0; i<S7; i++) if(h1->move(i) == h2) return 1;
   return 2;
   }
 
@@ -669,7 +666,7 @@ void compute_distances(heptagon *h, bool alts) {
   vector<heptagon*> hs;
   hs.push_back(h);
   for(int i=0; i<S7; i++) if(dm4(createStep(h, i)) == cdm)
-    hs.push_back(h->move[i]);
+    hs.push_back(h->move(i));
   
   vector<vector<int>*> to_clear;
 
@@ -724,10 +721,10 @@ void compute_horocycle(heptagon *alt) {
     for(auto h: hs[i]) {
       generateAlts(h);
       for(int j=0; j<S7; j++) {
-        if(h->move[j]->alt->alt != master->alt->alt) continue;
-        region.insert(h->move[j]);
-        if(h->move[j]->alt->distance < h->alt->distance)
-          hs[i+1].insert(h->move[j]);
+        if(h->move(j)->alt->alt != master->alt->alt) continue;
+        region.insert(h->move(j));
+        if(h->move(j)->alt->distance < h->alt->distance)
+          hs[i+1].insert(h->move(j));
         }
       }
     if(hs[i+1].empty()) { printf("error: hs[%d] not found\n", i+1); exit(1); }
@@ -748,7 +745,7 @@ void compute_horocycle(heptagon *alt) {
     }
   int delta = NODISTANCE;
   for(int i=0; i<S7; i++) {
-    heptagon *h = master->move[i];
+    heptagon *h = master->move(i);
     if(h->alt->alt != master->alt->alt) continue;
     heptinfo& hi = periodmap[h];
     if(!isize(hi.celldists[1])) continue;
@@ -770,7 +767,7 @@ void compute_horocycle(heptagon *alt) {
 
   for(int i=0; i<LOOKUP/2; i++) {
     for(auto h: hs[i]) for(int j=-1; j<S7; j++) {
-      heptinfo& hi = periodmap[j == -1 ? h : h->move[j]];
+      heptinfo& hi = periodmap[j == -1 ? h : h->move(j)];
       hi.celldists[1].resize(isize(hi.subcells));
       for(int c=0; c<isize(hi.subcells); c++)
         hi.celldists[1][c] = delta + xdist[hi.subcells[c]];
@@ -785,16 +782,16 @@ int celldist(cell *c, bool alts) {
   auto &hi = periodmap[master];
   /* if(alts && master->alt->alt->s != hsOrigin && isize(hi.celldists[alts]) == 0) {
     int doalts = 0;
-    for(int i=0; i<S7; i++) if(master->move[i]->alt == master->alt->move[0]) {
+    for(int i=0; i<S7; i++) if(master->move(i)->alt == master->alt->move[0]) {
       doalts = 1;
-      if(periodmap[master->move[i]].celldists[true].empty()) {
+      if(periodmap[master->move(i)].celldists[true].empty()) {
         compute_horocycle(master);
         doalts = 2;
         }
       }
     if(doalts == 0) {
       generateAlts(master);
-      for(int i=0; i<S7; i++) if(master->move[i]->alt == master->alt->move[0] && periodmap[master->move[i]].celldists[true].empty())
+      for(int i=0; i<S7; i++) if(master->move(i)->alt == master->alt->move[0] && periodmap[master->move(i)].celldists[true].empty())
         compute_horocycle(master);
       }
     } */
@@ -1072,7 +1069,7 @@ array<heptagon*, 3> get_masters(cell *c) {
   int d = cells[cellindex[c]].patterndir;
   heptspin s = periodmap[c->master].base;
   heptspin s0 = heptspin(c->master, 0) + (d - s.spin);
-  return make_array(s0.h, (s0 + wstep).h, (s0 + 1 + wstep).h);
+  return make_array(s0.at, (s0 + wstep).at, (s0 + 1 + wstep).at);
   }
 
 auto hook = 

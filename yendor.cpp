@@ -185,16 +185,16 @@ namespace yendor {
         bool in_endorian = false;
         cellwalker lig(yendor, hrand(yendor->type));  
         for(int i=0; i<YDIST-1; i++) {
-          if(lig.c->land == laEndorian)
+          if(lig.at->land == laEndorian)
             in_endorian = true;
-          else if(!isTechnicalLand(lig.c->land))
+          else if(!isTechnicalLand(lig.at->land))
             in_endorian = false;
-          nyi.path[i] = lig.c;
+          nyi.path[i] = lig.at;
           
           lig += wstep;
           if(inmirror(lig)) lig = mirror::reflect(lig);
           lig += 3;
-          if(lig.c->type == 7) {
+          if(lig.at->type == 7) {
             if(in_endorian && endorian_change && i >= YDIST - 20) {
               // make the last leg a bit more difficult
               lig += (hrand(2)*3-1);
@@ -204,7 +204,7 @@ namespace yendor {
               lig += hrand(2);
             }
           }
-        nyi.path[YDIST-1] = lig.c;
+        nyi.path[YDIST-1] = lig.at;
         }
       
       generating = true;
@@ -242,7 +242,7 @@ namespace yendor {
       for(int b=10; b>=5; b--) setdist(key, b, nyi.path[YDIST-2]);
 
       for(int i=-1; i<key->type; i++) {
-        cell *c2 = i >= 0 ? key->mov[i] : key;
+        cell *c2 = i >= 0 ? key->move(i) : key;
         checkTide(c2);
         c2->monst = moNone; c2->item = itNone;
         if(!passable(c2, NULL, P_MIRROR | P_MONSTER)) {
@@ -264,7 +264,7 @@ namespace yendor {
         if(c2->land == laLivefjord) {
           c2->wall = waSea;
           for(int i=0; i<c2->type; i++) 
-            c2->mov[i]->wall = waSea;
+            c2->move(i)->wall = waSea;
           }
         if(isGravityLand(c2->land) && key->land == c2->land &&
           c2->landparam < key->landparam && c2->wall != waTrunk)
@@ -337,7 +337,7 @@ namespace yendor {
       }
     
     if(phase == 2) {
-      cell *c2 = cwt.c->mov[0];
+      cell *c2 = cwt.at->move(0);
       c2->land = firstland;
       if(firstland == laRlyeh) c2->wall = waNone;
       yendor::check(c2);
@@ -371,11 +371,11 @@ namespace yendor {
       }
 
     if(phase == 3) {
-      cell *c2 = cwt.c->mov[0];
+      cell *c2 = cwt.at->move(0);
       makeEmpty(c2);
       c2->item = itOrbYendor;
       nexttostart = laNone;
-      if(clev().flags & YF_RECALL) recallCell = cwt.c;
+      if(clev().flags & YF_RECALL) recallCell = cwt.at;
       }
     }
   
@@ -1032,12 +1032,12 @@ namespace peace {
       tobuild = 0;
       if(!on) return;
       if(otherpuzzles) { items[itGreenStone] = 500; return; }
-      cell *c2 = cwt.c->mov[0];
+      cell *c2 = cwt.at->move(0);
       makeEmpty(c2);
       c2->item = itOrbYendor;
       
       path.clear();
-      path.push_back(cwt.c);
+      path.push_back(cwt.at);
       path.push_back(c2);
       extend(); 
       }

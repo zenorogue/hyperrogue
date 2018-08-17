@@ -116,7 +116,7 @@ namespace hr { namespace netgen {
       for(int j=0; j<CELLS; j++) {
         cell *c1 = dcal[i];
         cell *c2 = dcal[j];
-        for(int k=0; k<c1->type; k++) if(c1->mov[k] == c2)
+        for(int k=0; k<c1->type; k++) if(c1->move(k) == c2)
           nei[i][k] = j;
         }
       }
@@ -675,8 +675,8 @@ namespace hr { namespace netgen {
           }
         if(!created) {
           View = Id;
-          if(centerover.c) viewctr.h = centerover.c->master;
-          else viewctr.h = cwt.c->master;
+          if(centerover.at) viewctr.at = centerover.at->master;
+          else viewctr.at = cwt.at->master;
           playermoved = false;
           dataFromHR();
           designNet();
@@ -691,8 +691,8 @@ namespace hr { namespace netgen {
         }
       if(uni == 's') {
         View = Id;
-        if(centerover.c) viewctr.h = centerover.c->master;
-        else viewctr.h = cwt.c->master;
+        if(centerover.at) viewctr.at = centerover.at->master;
+        else viewctr.at = cwt.at->master;
         playermoved = false;
         }
       else if(uni == 'c') {

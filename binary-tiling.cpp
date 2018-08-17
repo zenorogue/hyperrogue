@@ -63,15 +63,15 @@ namespace binary {
       }
     #endif
     // printf("}\n");
-    if(h->move[d] && h->move[d] != h1) {
+    if(h->move(d) && h->move(d) != h1) {
       printf("already connected to something else (1)\n");
       breakhere();
       }
-    if(h1->move[d1] && h1->move[d1] != h) {
+    if(h1->move(d1) && h1->move(d1) != h) {
       printf("already connected to something else (2)\n");
       breakhere();
       }
-    connectHeptagons(h, d, h1, d1);
+    h->c.connect(d, h1, d1, false);
     rec--;
     return h1;
     }
@@ -176,7 +176,7 @@ namespace binary {
     }
 
   void draw() {
-    draw_rec(viewctr.h->c7, 63, cview());
+    draw_rec(viewctr.at->c7, 63, cview());
     }
   
   transmatrix relative_matrix(heptagon *h2, heptagon *h1) {

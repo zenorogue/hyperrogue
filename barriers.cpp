@@ -6,20 +6,20 @@ namespace hr {
 
 bool checkBarriersFront(cellwalker bb, int q, bool cross) {
 
-  if(!ctof(bb.c)) 
+  if(!ctof(bb.at)) 
     return false;
 
-  if(bb.c->mpdist < BARLEV) return false;
-  if(bb.c->mpdist == BUGLEV) return false;
-  if(bb.c->bardir != NODIR) return false;
+  if(bb.at->mpdist < BARLEV) return false;
+  if(bb.at->mpdist == BUGLEV) return false;
+  if(bb.at->bardir != NODIR) return false;
   if(bb.spin == (nonbitrunc ? 3 : 0)) {q--; if(!q) return true; }
 
   if(!cross) for(int i=0; i<7; i++) {
     cellwalker bb2 = bb + i + wstep;
-    if(bb2.c->bardir != NODIR) return false; 
+    if(bb2.at->bardir != NODIR) return false; 
     if(!nonbitrunc) { 
       bb2 = bb2 + 4 + wstep;
-      if(bb2.c->bardir != NODIR) return false;
+      if(bb2.at->bardir != NODIR) return false;
       }
     }
 
@@ -37,22 +37,22 @@ void preventbarriers(cell *c) {
   }
 
 bool checkBarriersBack(cellwalker bb, int q, bool cross) {
-  // printf("back, %p, s%d\n", bb.c, bb.spin);
+  // printf("back, %p, s%d\n", bb.at, bb.spin);
 
-  // if(mark) { printf("mpdist = %d [%d] bardir = %d spin=%d q=%d cross=%d\n", bb.c->mpdist, BARLEV, bb.c->bardir, bb.spin, q, cross); }
+  // if(mark) { printf("mpdist = %d [%d] bardir = %d spin=%d q=%d cross=%d\n", bb.at->mpdist, BARLEV, bb.at->bardir, bb.spin, q, cross); }
   
-  if(bb.c->mpdist < BARLEV) return false;
-  if(bb.c->mpdist == BUGLEV) return false;
-  if(bb.c->bardir != NODIR) return false;
+  if(bb.at->mpdist < BARLEV) return false;
+  if(bb.at->mpdist == BUGLEV) return false;
+  if(bb.at->bardir != NODIR) return false;
 
-  // if(bb.spin == 0 && bb.c->mpdist == INFD) return true;
+  // if(bb.spin == 0 && bb.at->mpdist == INFD) return true;
   
   if(!cross) for(int i=0; i<7; i++) {
     cellwalker bb2 = bb + i + wstep;
-    if(bb2.c->bardir != NODIR) return false;
+    if(bb2.at->bardir != NODIR) return false;
     if(!nonbitrunc) {
       bb2 = bb2 + 4 + wstep;
-      if(bb2.c->bardir != NODIR) return false;
+      if(bb2.at->bardir != NODIR) return false;
       }
     }
 
@@ -66,22 +66,22 @@ bool warped_version(eLand l1, eLand l2) {
   }
 
 bool checkBarriersNowall(cellwalker bb, int q, int dir, eLand l1=laNone, eLand l2=laNone) {
-  if(bb.c->mpdist < BARLEV && l1 == l2) return false;
-  if(bb.c->bardir != NODIR && l1 == l2) return false;
-  // if(bb.c->mov[dir] && bb.c->mov[dir]->bardir != NODIR && l1 == laNone) return false;
-  // if(bb.c->mov[dir] && bb.c->mov[dir]->mpdist < BARLEV && l1 == laNone) return false;
+  if(bb.at->mpdist < BARLEV && l1 == l2) return false;
+  if(bb.at->bardir != NODIR && l1 == l2) return false;
+  // if(bb.at->move(dir) && bb.at->move(dir)->bardir != NODIR && l1 == laNone) return false;
+  // if(bb.at->move(dir) && bb.at->move(dir)->mpdist < BARLEV && l1 == laNone) return false;
   
   if(l1 != l2) { 
-    bb.c->bardir = bb.spin; bb.c->barright = l2; bb.c->barleft = NOWALLSEP; 
-    setland(bb.c, l1);
+    bb.at->bardir = bb.spin; bb.at->barright = l2; bb.at->barleft = NOWALLSEP; 
+    setland(bb.at, l1);
     }
   if(q > 20) return true;
   
-  if(l1 == laNone) for(int i=0; i<bb.c->type; i++) {
-    cell *c1 = bb.c->mov[i];
+  if(l1 == laNone) for(int i=0; i<bb.at->type; i++) {
+    cell *c1 = bb.at->move(i);
     if(!c1) continue;
     for(int j=0; j<c1->type; j++) {
-      cell *c2 = c1->mov[j];
+      cell *c2 = c1->move(j);
       if(!c2) continue;
       if(c2 && c2->bardir == NOBARRIERS) 
         return false;
@@ -170,47 +170,47 @@ void extendBarrierFront(cell *c) {
   int ht = c->landparam;
   extendcheck(c);
 
-  cellwalker bb(c, c->bardir); setbarrier(bb.c);
+  cellwalker bb(c, c->bardir); setbarrier(bb.at);
   bb += wstep;
   
   if(!nonbitrunc) {
-    bb.c->barleft = c->barleft;
-    bb.c->barright = c->barright;
-    setbarrier(bb.c);
-    if(!mirrorwall(bb.c)) 
-      bb.c->landparam = (ht-4);
+    bb.at->barleft = c->barleft;
+    bb.at->barright = c->barright;
+    setbarrier(bb.at);
+    if(!mirrorwall(bb.at)) 
+      bb.at->landparam = (ht-4);
   //printf("[A heat %d]\n", ht-4);
   
-    setland((bb + 2 + wstep).c, c->barleft);
-    setland((bb + 4 + wstep).c, c->barright);
+    setland((bb + 2).cpeek(), c->barleft);
+    setland((bb + 4).cpeek(), c->barright);
     
     bb = bb + 3 + wstep; 
-    bb.c->barleft = c->barright;
-    bb.c->barright = c->barleft;
-    setbarrier(bb.c);
-    if(!mirrorwall(bb.c)) 
-      bb.c->landparam = (ht-4)^2;
+    bb.at->barleft = c->barright;
+    bb.at->barright = c->barleft;
+    setbarrier(bb.at);
+    if(!mirrorwall(bb.at)) 
+      bb.at->landparam = (ht-4)^2;
   //printf("[B heat %d]\n", (ht-4)^2);
     
     bb = bb + 3 + wstep;
     
-    bb.c->barleft = c->barleft;
-    bb.c->barright = c->barright;
-    if(!mirrorwall(bb.c)) 
-      bb.c->landparam = ht ^ 2;
+    bb.at->barleft = c->barleft;
+    bb.at->barright = c->barright;
+    if(!mirrorwall(bb.at)) 
+      bb.at->landparam = ht ^ 2;
     }
 
 //printf("[C heat %d]\n", (ht)^2);
-  bb.c->bardir = bb.spin;
-  bb.c->barleft = c->barright;
-  bb.c->barright = c->barleft;
+  bb.at->bardir = bb.spin;
+  bb.at->barleft = c->barright;
+  bb.at->barright = c->barleft;
   // printf("#1\n");
-  extendcheck(bb.c);
-  extendBarrier(bb.c);
+  extendcheck(bb.at);
+  extendBarrier(bb.at);
   
   for(int a=-3; a<=3; a++) if(a) {
-    bb.c = c; bb.spin = c->bardir; bb += (nonbitrunc?-a:a); bb += wstep; 
-    setland(bb.c, a > 0 ? c->barright : c->barleft);
+    bb.at = c; bb.spin = c->bardir; bb += (nonbitrunc?-a:a); bb += wstep; 
+    setland(bb.at, a > 0 ? c->barright : c->barleft);
     }
   }
 
@@ -220,30 +220,30 @@ void extendBarrierBack(cell *c) {
   int ht = c->landparam;
   extendcheck(c);
 
-  cellwalker bb(c, c->bardir); setbarrier(bb.c);
+  cellwalker bb(c, c->bardir); setbarrier(bb.at);
   bb = bb + 3 + wstep + (nonbitrunc?5:4); 
-  setland(bb.c, nonbitrunc ? c->barleft : c->barright); 
+  setland(bb.at, nonbitrunc ? c->barleft : c->barright); 
   bb = bb + wstep + 3;
-  bb.c->bardir = bb.spin;
-  bb.c->barleft = c->barright;
-  bb.c->barright = c->barleft;
-  if(!mirrorwall(bb.c)) 
-    bb.c->landparam = ht ^ 11;
-  extendcheck(bb.c);
+  bb.at->bardir = bb.spin;
+  bb.at->barleft = c->barright;
+  bb.at->barright = c->barleft;
+  if(!mirrorwall(bb.at)) 
+    bb.at->landparam = ht ^ 11;
+  extendcheck(bb.at);
 //printf("[D heat %d]\n", (ht^11));
 
   // needed for CR2 to work
   if(!nonbitrunc) { 
     auto bb2 = bb + wstep;
-    bb2.c->barleft = c->barright;
-    bb2.c->barright = c->barleft;
-    if(!mirrorwall(bb2.c)) 
-      bb2.c->landparam = (ht^11)-4;
+    bb2.at->barleft = c->barright;
+    bb2.at->barright = c->barleft;
+    if(!mirrorwall(bb2.at)) 
+      bb2.at->landparam = (ht^11)-4;
     }
 //printf("[E heat %d]\n", (ht^11));
 
   // printf("#2\n");
-  extendBarrier(bb.c);
+  extendBarrier(bb.at);
   }
 
 void extendNowall(cell *c) {
@@ -255,14 +255,14 @@ void extendNowall(cell *c) {
   
   if(warpv) {
     cw += wstep;
-    setland(cw.c, c->barright);
+    setland(cw.at, c->barright);
     }
   else if(S3 == 4) {
     auto cw2 = cw + wstep;
-    setland(cw2.c, c->barright);
-    cw2.c->barleft = NOWALLSEP_USED;
-    cw2.c->barright = c->land;
-    cw2.c->bardir = cw2.spin;
+    setland(cw2.at, c->barright);
+    cw2.at->barleft = NOWALLSEP_USED;
+    cw2.at->barright = c->land;
+    cw2.at->bardir = cw2.spin;
     }
   
   for(int i=-1; i<2; i+=2) {  
@@ -277,26 +277,26 @@ void extendNowall(cell *c) {
       cw0 = cw + (i>0?3:4) + wstep - (i>0?3:4);
       //cw0 = cw + (3*i) + wstep - (3*i);
       }
-    if(cw0.c->barleft != NOWALLSEP_USED) {
-      cw0.c->barleft = NOWALLSEP;
+    if(cw0.at->barleft != NOWALLSEP_USED) {
+      cw0.at->barleft = NOWALLSEP;
       if(S3 == 4 && nonbitrunc) {
-        cw0.c->barright = c->barright;
-        cw0.c->bardir = cw0.spin;
-        setland(cw0.c, c->land);
+        cw0.at->barright = c->barright;
+        cw0.at->bardir = cw0.spin;
+        setland(cw0.at, c->land);
         }
       else {
-        setland(cw0.c, c->barright);
-        cw0.c->barright = c->land;
+        setland(cw0.at, c->barright);
+        cw0.at->barright = c->land;
         if(c->barright == laNone) { 
           printf("barright\n"); 
           }// NONEDEBUG
-        setland(cw0.c, c->barright);
+        setland(cw0.at, c->barright);
         if(warpv) cw0 += i;
-        cw0.c->bardir = cw0.spin;
+        cw0.at->bardir = cw0.spin;
         if(warpv) cw0 -= i;
         }
-      extendcheck(cw0.c);
-      extendBarrier(cw0.c);
+      extendcheck(cw0.at);
+      extendBarrier(cw0.at);
       }
     }
   }
@@ -312,19 +312,19 @@ void extendCR5(cell *c) {
   for(int u=0; u<2; u++) {
     // if(gotit) break;
     cw = cw + 2 + wstep + 2 + wstep + 5;
-    if(cw.c->bardir == NODIR) {
-      cw.c->landparam = 40;
-      cw.c->bardir = cw.spin;
-      cw.c->barright = laCrossroads5;
+    if(cw.at->bardir == NODIR) {
+      cw.at->landparam = 40;
+      cw.at->bardir = cw.spin;
+      cw.at->barright = laCrossroads5;
       eLand nland = forbidden;
       for(int i=0; i<10 && (nland == forbidden || nland == forbidden2); i++)
         nland = getNewLand(laCrossroads5);
-      cw.c->barleft = forbidden2 = nland;
+      cw.at->barleft = forbidden2 = nland;
       landcount[nland]++;
-      extendBarrier(cw.c);
+      extendBarrier(cw.at);
       gotit = true;
       }
-    else forbidden2 = cw.c->barleft;
+    else forbidden2 = cw.at->barleft;
     }
   }
 
@@ -367,7 +367,7 @@ void extendBarrier(cell *c) {
   if(firstmirror && c->barleft == laMirror && hrand(100) < 60) {
     cellwalker cw(c, c->bardir);
     if(!nonbitrunc) cw += wstep;
-    if(cw.c->land != laMirrorWall)
+    if(cw.at->land != laMirrorWall)
       if(buildBarrier6(cw, 1)) return;
     }
     
@@ -390,9 +390,9 @@ void extendBarrier(cell *c) {
     cellwalker cw(c, c->bardir);
     if(nonbitrunc) {
       cw += wstep;
-      if(isbar4(cw.c)) {
+      if(isbar4(cw.at)) {
         cw = cw + wstep + 3 + wstep - 1 + wstep;
-        bool b = buildBarrier4(cw.c, cw.spin, 2, oppositeElement(c->barleft, c->barright), c->barright);
+        bool b = buildBarrier4(cw.at, cw.spin, 2, oppositeElement(c->barleft, c->barright), c->barright);
         if(b) return;
         }
       else {
@@ -402,10 +402,10 @@ void extendBarrier(cell *c) {
       }
     else {
       cw = cw + 3 + wstep;
-      cell *cp = (cw + 4 + wstep).c;
+      cell *cp = (cw + 4 + wstep).at;
       if(!isbar4(cp)) {
         cw = cw + 2 + wstep;
-        bool b = buildBarrier4(cw.c, cw.spin, 2, oppositeElement(c->barleft, c->barright), c->barright);
+        bool b = buildBarrier4(cw.at, cw.spin, 2, oppositeElement(c->barleft, c->barright), c->barright);
         if(b) return;
         }
       else {
@@ -445,7 +445,7 @@ void buildBarrier(cell *c, int d, eLand l) {
   }
 
 bool buildBarrier6(cellwalker cw, int type) {
-  limitgen("build6 %p/%d (%d)\n", cw.c, cw.spin, type); 
+  limitgen("build6 %p/%d (%d)\n", cw.at, cw.spin, type); 
   
   cellwalker b[4];
   
@@ -463,18 +463,18 @@ bool buildBarrier6(cellwalker cw, int type) {
     b[2] = cw - 2 + wstep - 3;
     b[3] = cw - 3 + wstep + 2 + wstep - 3;
 
-    if(type == 1 && b[3].c->land != laMirrorWall) return false;
-    if(type == 2 && (b[1] + wstep).c->land != laMirrorWall) return false;
-    // if(type == 2 && b[2].c->land != laMirrorWall) return false;
+    if(type == 1 && b[3].at->land != laMirrorWall) return false;
+    if(type == 2 && (b[1] + wstep).at->land != laMirrorWall) return false;
+    // if(type == 2 && b[2].at->land != laMirrorWall) return false;
     }
   
   if(false) {
     for(int z=0; z<4; z++) {
-      printf("%p/%d\n", b[z].c, b[z].spin);
-      b[z].c->wall = waStrandedBoat; b[z].c->land = laAlchemist;
-      b[z].c->mondir = b[z].spin;
-      b[z].c->mpdist = 7;
-      b[z].c->item = eItem(1+z);
+      printf("%p/%d\n", b[z].at, b[z].spin);
+      b[z].at->wall = waStrandedBoat; b[z].at->land = laAlchemist;
+      b[z].at->mondir = b[z].spin;
+      b[z].at->mpdist = 7;
+      b[z].at->item = eItem(1+z);
       buggyGeneration = true;
       }
     return true;
@@ -490,66 +490,66 @@ bool buildBarrier6(cellwalker cw, int type) {
     }
   
   for(int d=0; d<4; d++) {
-    b[d].c->bardir = b[d].spin;
+    b[d].at->bardir = b[d].spin;
     
     if(nonbitrunc) {
-      b[0].c->barleft = laMirrored, b[0].c->barright = laMirrored2;
-      b[1].c->barleft = laMirror, b[1].c->barright = laMirrored;
-      b[2].c->barleft = laMirrored2, b[2].c->barright = laMirrored;
-      b[3].c->barleft = laMirrored, b[3].c->barright = laMirror;
+      b[0].at->barleft = laMirrored, b[0].at->barright = laMirrored2;
+      b[1].at->barleft = laMirror, b[1].at->barright = laMirrored;
+      b[2].at->barleft = laMirrored2, b[2].at->barright = laMirrored;
+      b[3].at->barleft = laMirrored, b[3].at->barright = laMirror;
       }
     else {    
-      b[0].c->barleft = laMirror, b[0].c->barright = laMirrored;
-      b[1].c->barleft = laMirrored, b[1].c->barright = laMirror;
-      b[2].c->barleft = laMirrored, b[2].c->barright = laMirrored2;
-      b[3].c->barleft = laMirrored2, b[3].c->barright = laMirrored;
+      b[0].at->barleft = laMirror, b[0].at->barright = laMirrored;
+      b[1].at->barleft = laMirrored, b[1].at->barright = laMirror;
+      b[2].at->barleft = laMirrored, b[2].at->barright = laMirrored2;
+      b[3].at->barleft = laMirrored2, b[3].at->barright = laMirrored;
       }
   
-    (nonbitrunc?extendBarrierFront:extendBarrierBack)(b[d].c);
+    (nonbitrunc?extendBarrierFront:extendBarrierBack)(b[d].at);
     }  
 
   if(nonbitrunc && false) {
     for(int z=0; z<4; z++)
-      b[z].c->item = eItem(1+z+4*type);
+      b[z].at->item = eItem(1+z+4*type);
     for(int a=0; a<4; a++) 
-      extendBarrierBack((b[a]+wstep).c);
+      extendBarrierBack((b[a]+wstep).at);
     }
 
   if(!nonbitrunc) {
-    setland((cw+1+wstep).c, laMirrorWall);
-    setland((cw+2+wstep).c, laMirrored);
-    setland((cw+3+wstep).c, laMirrorWall2);
-    setland((cw+4+wstep).c, laMirrorWall2);
-    setland((cw+5+wstep).c, laMirrored);
-    setland((cw+0+wstep).c, laMirrorWall);
-    setland((b[0]+2+wstep).c, laMirrored);
-    setland((b[3]+6+wstep).c, laMirrored2);
-    setland((b[3]+5+wstep).c, laMirrored2);
-    setland((b[1]-1+wstep).c, laMirrored);
-    setland((b[2]-2+wstep).c, laMirrored);
-    setland((b[1]-2+wstep).c, laMirrored);
-    setland((b[0]-2+wstep).c, laMirror);
-    cw.c->land = laMirrorWall;
-    cw.c->wall = waMirrorWall;
-    cw.c->landparam = 1;
+    setland((cw+1).cpeek(), laMirrorWall);
+    setland((cw+2).cpeek(), laMirrored);
+    setland((cw+3).cpeek(), laMirrorWall2);
+    setland((cw+4).cpeek(), laMirrorWall2);
+    setland((cw+5).cpeek(), laMirrored);
+    setland((cw+0).cpeek(), laMirrorWall);
+    setland((b[0]+2).cpeek(), laMirrored);
+    setland((b[3]+6).cpeek(), laMirrored2);
+    setland((b[3]+5).cpeek(), laMirrored2);
+    setland((b[1]-1).cpeek(), laMirrored);
+    setland((b[2]-2).cpeek(), laMirrored);
+    setland((b[1]-2).cpeek(), laMirrored);
+    setland((b[0]-2).cpeek(), laMirror);
+    cw.at->land = laMirrorWall;
+    cw.at->wall = waMirrorWall;
+    cw.at->landparam = 1;
     }
   else {
-    setland(cw.c, laMirrorWall2);
-    setland((cw+0+wstep).c, laMirrorWall2);
-    setland((cw+1+wstep).c, laMirrored);
-    setland((cw+2+wstep).c, laMirrored);
-    setland((cw+3+wstep).c, laMirrorWall);
-    setland((cw+4+wstep).c, laMirrored);
-    setland((cw+5+wstep).c, laMirrorWall2);
-    setland((cw+6+wstep).c, laMirrored2);
+    setland(cw.at, laMirrorWall2);
+    setland((cw+0).cpeek(), laMirrorWall2);
+    setland((cw+1).cpeek(), laMirrored);
+    setland((cw+2).cpeek(), laMirrored);
+    setland((cw+3).cpeek(), laMirrorWall);
+    setland((cw+4).cpeek(), laMirrored);
+    setland((cw+5).cpeek(), laMirrorWall2);
+    setland((cw+6).cpeek(), laMirrored2);
 
-    setland((b[1]+wstep).c, laMirrorWall);
-    setland((b[1]+1+wstep).c, laMirror);
-    setland((b[1]+2+wstep).c, laMirrorWall);
-    setland((b[1]+6+wstep).c, laMirrored);
+    setland((b[1]).cpeek(), laMirrorWall);
+    setland((b[1]+1).cpeek(), laMirror);
+    setland((b[1]+2).cpeek(), laMirrorWall);
+    setland((b[1]+6).cpeek(), laMirrored);
 
-    setland((b[0] + wstep - 2 + wstep).c, laMirrored);
-    setland((b[3] + wstep - 2 + wstep).c, laMirrored);
+    setland((b[0] + wstep - 2).cpeek(), laMirrored);
+    setland((b[3] + wstep - 2).cpeek(), laMirrored);
     }
 
   return true;
@@ -589,29 +589,29 @@ bool buildBarrier4(cell *c, int d, int mode, eLand ll, eLand lr) {
 
   c->bardir = d, c->barleft = ll, c->barright = lr; extendBarrierBack(c);
   
-  c= b2.c; d=b2.spin;
+  c= b2.at; d=b2.spin;
   c->bardir = d, c->barleft = xl, c->barright = xr; extendBarrierBack(c);
 
-  c= b3.c; d=b3.spin;
+  c= b3.at; d=b3.spin;
   c->bardir = d, c->barleft = xl, c->barright = lr; extendBarrierFront(c);
 
-  c= b4.c; d=b4.spin;
+  c= b4.at; d=b4.spin;
   c->bardir = d, c->barleft = ll, c->barright = xr; extendBarrierFront(c);
   
   if(!nonbitrunc) for(int a=-3; a<=3; a++) if(a) {
-    setland((b1+a+wstep).c, a > 0 ? lr : ll);
-    setland((b2+a+wstep).c, a > 0 ? xr : xl);
-    setland((b3+a+wstep).c, a > 0 ? lr : xl);
-    setland((b4+a+wstep).c, a > 0 ? xr : ll);
+    setland((b1+a).cpeek(), a > 0 ? lr : ll);
+    setland((b2+a).cpeek(), a > 0 ? xr : xl);
+    setland((b3+a).cpeek(), a > 0 ? lr : xl);
+    setland((b4+a).cpeek(), a > 0 ? xr : ll);
     }
   
-  if(nonbitrunc) setbarrier(b1.c), setbarrier(b2.c), setbarrier(b3.c), setbarrier(b4.c);
+  if(nonbitrunc) setbarrier(b1.at), setbarrier(b2.at), setbarrier(b3.at), setbarrier(b4.at);
 
   if(!nonbitrunc) {
     cell *cp;
-    cp = (b1+wstep).c;
+    cp = (b1+wstep).at;
     cp->barleft = ll; cp->barright = lr; setbarrier(cp);
-    cp = (b2+wstep).c;
+    cp = (b2+wstep).at;
     cp->barleft = xl; cp->barright = xr; setbarrier(cp);
     }
   
@@ -628,7 +628,7 @@ void buildBarrierStrong(cell *c, int d, bool oldleft, eLand newland) {
 
   if(oldleft) c->barleft = oldland, c->barright = newland;
   else c->barleft = newland, c->barright = oldland;
-  extendcheck(bb.c);
+  extendcheck(bb.at);
   }
 
 void buildBarrierStrong(cell *c, int d, bool oldleft) {
@@ -642,8 +642,8 @@ void buildCrossroads2(cell *c) {
   if(!c) return;
   
   for(int i=0; i<c->type; i++)
-    if(c->mov[i] && !c->mov[i]->landparam && c->mov[i]->mpdist < c->mpdist)
-      buildCrossroads2(c->mov[i]);
+    if(c->move(i) && !c->move(i)->landparam && c->move(i)->mpdist < c->mpdist)
+      buildCrossroads2(c->move(i));
   
   if(hasbardir(c))
     extendBarrier(c);
@@ -656,7 +656,7 @@ void buildCrossroads2(cell *c) {
       if(c2 && c2->landparam && (c2->land == laCrossroads2 || c2->land == laBarrier)) {
         for(int j=0; j<c2->type; j++) {
           createMov(c2, j);
-          cell *c3 = c2->mov[j];
+          cell *c3 = c2->move(j);
           if(c3 && c3->landparam && (c3->land == laCrossroads2 || c3->land == laBarrier)) {
             int h2 = c2->landparam;
             int h3 = c3->landparam;
@@ -670,7 +670,7 @@ void buildCrossroads2(cell *c) {
             
             for(int d=0; d<c2->type; d++)
               if(emeraldtable[h2][d] == h3) {
-                int nh = emeraldtable[h2][(42+d + c->spn(i) - j) % c2->type];
+                int nh = emeraldtable[h2][(42+d + c->c.spin(i) - j) % c2->type];
                 if(c->landparam>0 && c->landparam != nh) { 
                   printf("CONFLICT\n"); 
                   raiseBuggyGeneration(c, "CONFLICT"); 
@@ -694,7 +694,7 @@ void buildCrossroads2(cell *c) {
     
     if(c->landparam) {
 //    for(int i=0; i<c->type; i++) { 
-//      cell *c2 = c->mov[i];
+//      cell *c2 = c->move(i);
 //      buildCrossroads2(c2);
 //      }
       }
@@ -715,10 +715,10 @@ void buildCrossroads2(cell *c) {
       }
     if(h/4 == 8 || h/4 == 10)
     for(int i=0; i<c->type; i++) { 
-      if(c->mov[i] && c->mov[i]->landparam == h-4) {
+      if(c->move(i) && c->move(i)->landparam == h-4) {
         bool oldleft = true;
         for(int j=1; j<=3; j++) 
-          if(c->mov[(i+j)%7] && c->mov[(i+j)%7]->mpdist < c->mpdist)
+          if(c->modmove(i+j) && c->modmove(i+j)->mpdist < c->mpdist)
             oldleft = false;
             
         c->landparam = h;
@@ -749,8 +749,8 @@ bool buildBarrierNowall(cell *c, eLand l2, int forced_dir) {
     int d = forced_dir != NODIR ? forced_dir : (S3>3 && nonbitrunc && !gp::on) ? (2+(i&1)) : ds[i];
 /*    if(warpv && gp::on) {
       d = hrand(c->type); */
-    if(warpv && c->mov[d] && c->mov[d]->mpdist < c->mpdist) continue;
-    if(gp::on && a4 && c->mov[d] && c->mov[d]->mpdist <= c->mpdist) continue;
+    if(warpv && c->move(d) && c->move(d)->mpdist < c->mpdist) continue;
+    if(gp::on && a4 && c->move(d) && c->move(d)->mpdist <= c->mpdist) continue;
 /*      }
     else 
       d = (S3>3 && !warpv) ? (2+(i&1)) : dtab[i]; */

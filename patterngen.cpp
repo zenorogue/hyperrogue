@@ -134,8 +134,8 @@ void patternFiftyAt(cell *c) {
       for(int i=0; i<c->type; i++) {
         cellwalker cw(c, i);
         cellwalker cw1 = cw + wstep + 4 + wstep;
-        (cw1+3+wstep).c->wall = waFloorA;
-        (cw1+4+wstep).c->wall = waFloorA;
+        (cw1+3+wstep).at->wall = waFloorA;
+        (cw1+4+wstep).at->wall = waFloorA;
         }
       }
    
@@ -182,13 +182,13 @@ void patternFiftyAt(cell *c) {
 
   for(int i=0; i<c->type; i++) {
     auto cw = cellwalker(c, sw) + (sgn1 * i) + wstep + (sgn * 4) + wstep;
-    if(cw.spin < 0 || cw.spin >= 7 || cw.c->type != 7) exit(1);
+    if(cw.spin < 0 || cw.spin >= 7 || cw.at->type != 7) exit(1);
     encode(cw.c, s, 1+i, cw.spin);
     }
   
   for(int i=0; i<c->type; i++) {
     auto cw = cellwalker(c, sw) + (sgn1 * i) + wstep + 3 + wstep + 3 + wstep;
-    if(cw.spin < 0 || cw.spin >= 7 || cw.c->type != 7) exit(1);
+    if(cw.spin < 0 || cw.spin >= 7 || cw.at->type != 7) exit(1);
     encode(cw.c, s, 8+i, cw.spin);
     }
   
@@ -198,31 +198,31 @@ void patternFiftyAt(cell *c) {
     cellwalker cw(c, s.wc2);
     cw += (sgn1 * i);
     cw += wstep;
-    if(style == 0) cw.c->wall = waCamelot;
-    // cw.c->item = itSilver;
+    if(style == 0) cw.at->wall = waCamelot;
+    // cw.at->item = itSilver;
     cw += (sgn*4); //6
-    cw += wstep; if(style == 0) cw.c->wall = waFloorA;
+    cw += wstep; if(style == 0) cw.at->wall = waFloorA;
 
-    // cw.c->item = itSilver;
+    // cw.at->item = itSilver;
     cw += (sgn*4); //7
-    cw += wstep; if(style == 0) cw.c->wall = waFloorA;
-    // cw.c->item = itSilver;
+    cw += wstep; if(style == 0) cw.at->wall = waFloorA;
+    // cw.at->item = itSilver;
     cw += (3); //6
-    cw += wstep; if(style == 0) cw.c->wall = waFloorA;
-    // cw.c->item = itSilver;
+    cw += wstep; if(style == 0) cw.at->wall = waFloorA;
+    // cw.at->item = itSilver;
     cw += (3); //6
-    cw += wstep; if(style == 0) cw.c->wall = waFloorA;
-    // cw.c->item = itSilver;
+    cw += wstep; if(style == 0) cw.at->wall = waFloorA;
+    // cw.at->item = itSilver;
     cw += (sgn*3); //7
-    cw += wstep; if(style == 0) cw.c->wall = waCamelot;
-    // cw.c->item = itSilver;
+    cw += wstep; if(style == 0) cw.at->wall = waCamelot;
+    // cw.at->item = itSilver;
     cw += (sgn*2); //6
-    cw += wstep; // cw.c->item = itGold;
+    cw += wstep; // cw.at->item = itGold;
     // setdist(cw.c, 8, NULL);
     state50 s2 = s; s2.polarity1 = !s.polarity1;
     s2.wc2 = (cw.spin + sgn1 * i + sgn + 42) % 7;
     progress(cw.c, s2);
-    // printf("heat set %f\n", cw.c->heat);
+    // printf("heat set %f\n", cw.at->heat);
     }
     
   int newcol = s.color2;
@@ -232,25 +232,25 @@ void patternFiftyAt(cell *c) {
   for(int i=0; i<c->type; i++) {
     cellwalker cw(c, s.wc2);
     cw += (sgn1 * i);
-    cw += wstep; // cw.c->item = itSilver;
-//  cw.c->item = itDiamond;
+    cw += wstep; // cw.at->item = itSilver;
+//  cw.at->item = itDiamond;
     cw += (3); // 6
-    cw += wstep; // cw.c->item = itSilver;
-//  cw.c->item = itDiamond;
+    cw += wstep; // cw.at->item = itSilver;
+//  cw.at->item = itDiamond;
     cw += (sgn*4); // 6
-    cw += wstep; // cw.c->item = itSilver;
-//  cw.c->item = itDiamond;
+    cw += wstep; // cw.at->item = itSilver;
+//  cw.at->item = itDiamond;
     cw += (sgn*2); // 6
-    cw += wstep; // cw.c->item = itSilver;
-//  cw.c->item = itDiamond;
+    cw += wstep; // cw.at->item = itSilver;
+//  cw.at->item = itDiamond;
     cw += (3); // 6
-    cw += wstep; // cw.c->item = itSilver;
-//  cw.c->item = itDiamond;
+    cw += wstep; // cw.at->item = itSilver;
+//  cw.at->item = itDiamond;
     cw += (sgn*3); // 7
-    cw += wstep; // cw.c->item = itSilver;
-//  cw.c->item = itDiamond;
+    cw += wstep; // cw.at->item = itSilver;
+//  cw.at->item = itDiamond;
     cw += (sgn*4); // 6
-    cw += wstep; // cw.c->item = itSilver;
+    cw += wstep; // cw.at->item = itSilver;
     // setdist(cw.c, 8, NULL);
     state50 s2 = s; 
     s2.polarity2 = !s.polarity2;
@@ -260,7 +260,7 @@ void patternFiftyAt(cell *c) {
     s2.wc2 = cw.spin;
     progress(cw.c, s2);
     while(true) { newcol++; newcol &= 7; if(newcol != s2.color && newcol != s.color) break; }
-    // printf("heat set %f\n", cw.c->heat);
+    // printf("heat set %f\n", cw.at->heat);
     }
   
   }
@@ -309,7 +309,7 @@ void setzebra(cellwalker cwb, int it, int type, string pathcode, int xmods) {
     exit(1);
     }
 
-  cwb.c->tmp = cwb.spin + 16 * type;
+  cwb.at->tmp = cwb.spin + 16 * type;
   }
 
 void zebra(cellwalker cwb, int it, int type, string pathcode, int xmods) {
@@ -325,21 +325,21 @@ void zebra(cellwalker cwb, int it, int type, string pathcode, int xmods) {
   // printf("%p+%d = 0%s\n", cwb.c, cwb.spin, pathcode.c_str());
   bool redraw = false;
   // int qval = Q + 99;
-  // redraw = cwb.c->heat == qval;
-  // cwb.c->heat = qval;
+  // redraw = cwb.at->heat == qval;
+  // cwb.at->heat = qval;
   eWall w = colorwalls[type];
-  cwb.c->wall = w;
+  cwb.at->wall = w;
   for(int i=0; i<6; i+=2) {
     cellwalker cw = cwb;
     cw += (i);
-    cw.c->heat = 4 + type + 4 * 9;
-    cw += wstep; cw += (3); cw.c->wall = w;
+    cw.at->heat = 4 + type + 4 * 9;
+    cw += wstep; cw += (3); cw.at->wall = w;
     int i0 = i; if(type&2 && i0) i0 = 6-i0; i0 /= 2;
-    cw.c->heat = 4 + type + 4 * (3+i0);
-    cw += wstep; cw += (3); cw.c->wall = w;
-    cw.c->heat = 4 + type + 4 * i0;
-    cw += wstep; cw += (3); cw.c->wall = w;
-    cw.c->heat = 4 + type + 4 * (6+i0);
+    cw.at->heat = 4 + type + 4 * (3+i0);
+    cw += wstep; cw += (3); cw.at->wall = w;
+    cw.at->heat = 4 + type + 4 * i0;
+    cw += wstep; cw += (3); cw.at->wall = w;
+    cw.at->heat = 4 + type + 4 * (6+i0);
     cw += wstep; cw += (-3); 
     cw += wstep; cw += (-3); 
     cw += wstep; cw += (-3); 
@@ -354,14 +354,14 @@ void zebra(cellwalker cwb, int it, int type, string pathcode, int xmods) {
     cw += wstep; cw += (3); 
     cw += wstep; cw += (5); 
     if(xmods < 2) {
-      if(cw.c->item && cw.c->item != (1+i) && redraw && i==0) {
+      if(cw.at->item && cw.at->item != (1+i) && redraw && i==0) {
         qconflict++;
         // allconflict += pathcode; allconflict += "-";
-        // cwb.c->item = itPalace;
-        // printf("Conflict at %p\n", cwb.c);
+        // cwb.at->item = itPalace;
+        // printf("Conflict at %p\n", cwb.at);
         }
-      // cw.c->item = eItem(1 + i);
-      // cw.c->heat = 4 + type + 4 * (i/2);
+      // cw.at->item = eItem(1 + i);
+      // cw.at->heat = 4 + type + 4 * (i/2);
       }
     cw += wstep; cw += (1); 
     if(type < 2) {
@@ -397,7 +397,7 @@ void zebraPattern() {
   cellwalker cw(cwt);
   cw += wstep; cw += (1);
   setzebra(cw, 7, 0, "", -999);
-  // cw.c->
+  // cw.at->
   // printf("Conflicts: %d\n", qconflict);
   }
 
@@ -434,8 +434,8 @@ void buildAutomatonRule(cell *c) {
     buildAutomatonRule(c->master);
   else {
     int ii[3];
-    for(int i=0; i<6; i+=2) if(!c->mov[i] || !c->mov[i]->heat || c->mov[i]->type != 7) return;
-    for(int i=0; i<6; i+=2) ii[i/2] = int(c->mov[i]->heat);
+    for(int i=0; i<6; i+=2) if(!c->move(i) || !c->move(i)->heat || c->move(i)->type != 7) return;
+    for(int i=0; i<6; i+=2) ii[i/2] = int(c->move(i)->heat);
     int z;
     for(int r=0; r<2; r++) 
       if(ii[1] < ii[0] || ii[2] < ii[0]) 

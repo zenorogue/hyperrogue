@@ -216,7 +216,7 @@ hint hints[] = {
 
   {
     0,
-    []() { return !canmove && geometry == gNormal && celldist(cwt.c) >= 50; },
+    []() { return !canmove && geometry == gNormal && celldist(cwt.at) >= 50; },
     []() { 
       dialog::addHelp(XLAT(
         "Did you know that the path you take during the game "
@@ -244,9 +244,9 @@ hint hints[] = {
 
   {
     0,
-    []() { return !canmove && sizes_known() && celldist(cwt.c) >= 50; },
+    []() { return !canmove && sizes_known() && celldist(cwt.at) >= 50; },
     []() {
-      int c = celldist(cwt.c);
+      int c = celldist(cwt.at);
       string s = circlesizestr(c);
       dialog::addHelp(XLAT(
         "You are %1 cells away from the starting point, or "

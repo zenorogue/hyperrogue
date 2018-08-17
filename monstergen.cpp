@@ -19,12 +19,12 @@ int buildIvy(cell *c, int children, int minleaf) {
   int leafchild = 0;
   for(int i=0; i<c->type; i++) {
     createMov(c, i);
-    if(passable(c->mov[i], c, 0) && c->mov[i]->land == c->land) {
+    if(passable(c->move(i), c, 0) && c->move(i)->land == c->land) {
       if(children && !child) 
-        child = c->mov[i], leafchild = buildIvy(c->mov[i], children-1, 5);
+        child = c->move(i), leafchild = buildIvy(c->move(i), children-1, 5);
       else 
-        c->mov[i]->monst = (leaf++ || peace::on) ? moIvyWait : moIvyHead,
-        c->mov[i]->mondir = c->spn(i);
+        c->move(i)->monst = (leaf++ || peace::on) ? moIvyWait : moIvyHead,
+        c->move(i)->mondir = c->c.spin(i);
       }
     }
   
@@ -43,8 +43,8 @@ void chasmify(cell *c) {
   c->wall = waChasm; c->item = itNone;
   int q = 0;
   cell *c2[10];
-  for(int i=0; i<c->type; i++) if(c->mov[i] && c->mov[i]->mpdist > c->mpdist && cellUnstable(c->mov[i]))
-    c2[q++] = c->mov[i];
+  for(int i=0; i<c->type; i++) if(c->move(i) && c->move(i)->mpdist > c->mpdist && cellUnstable(c->move(i)))
+    c2[q++] = c->move(i);
   if(q) {
     cell *c3 = c2[hrand(q)];
     c3->wall = waChasmD;
@@ -56,7 +56,7 @@ void chasmifyEarth(cell *c) {
   int d2[10];
   for(int i=2; i<=c->type-2; i++) {
     int j = (i+c->mondir)%c->type;
-    cell *c2 = c->mov[j];
+    cell *c2 = c->move(j);
     if(c2 && c2->mpdist > c->mpdist && (
       c2->wall == waDeadfloor || c2->wall == waDeadwall ||
       c2->wall == waDeadfloor2)) 
@@ -65,13 +65,13 @@ void chasmifyEarth(cell *c) {
   if(!q) printf("no further move!\n");
   if(q) {
     int d = d2[hrand(q)];
-    cell *c3 = c->mov[d];
+    cell *c3 = c->move(d);
     c3->wall = waEarthD;
     for(int i=0; i<c3->type; i++) {
       cell *c4 = createMov(c3, i);
       earthFloor(c4);
       }
-    c3->mondir = c->spn(d);
+    c3->mondir = c->c.spin(d);
     }
   earthWall(c); c->item = itNone;
   }
@@ -81,20 +81,20 @@ void chasmifyElemental(cell *c) {
   int d2[10];
   for(int i=2; i<=c->type-2; i++) {
     int j = (i+c->mondir)%c->type;
-    cell *c2 = c->mov[j];
+    cell *c2 = c->move(j);
     if(c2 && c2->mpdist > c->mpdist && c2->land == c->land)
       d2[q++] = j;
     }
   if(q) {
     int d = d2[hrand(q)];
-    cell *c3 = c->mov[d];
+    cell *c3 = c->move(d);
     if(!c3->monst) {
       c3->wall = waElementalD;
       for(int i=0; i<c3->type; i++) {
         cell *c4 = createMov(c3, i);
         if(c4->wall != waBarrier) c4->wall = waNone;
         }
-      c3->mondir = c->spn(d);
+      c3->mondir = c->c.spin(d);
       }
     }
   c->wall = getElementalWall(c->land);
@@ -188,10 +188,10 @@ int reptilemax() {
 bool wchance(int a, int of, int reduction = 0) {
   of *= 10; 
   a += yendor::hardness() + 1;
-  if(isCrossroads(cwt.c->land)) 
+  if(isCrossroads(cwt.at->land)) 
     a+= items[itHyperstone] * 10;
 
-//if(cwt.c->land == laWhirlwind && !nowhirl) a += items[itWindstone] * 3;
+//if(cwt.at->land == laWhirlwind && !nowhirl) a += items[itWindstone] * 3;
 
   for(int i=0; i<ittypes; i++) if(itemclass(eItem(i)) == IC_TREASURE)
     a = max(a, (items[i]-R10) / 10);
@@ -213,7 +213,7 @@ void wanderingZebra(cell *start) {
     int q = 0;
     cell *ctab[8];
     for(int i=0; i<c->type; i++) {
-      cell *c3 = c->mov[i];
+      cell *c3 = c->move(i);
       if(c3 && c3 != c2 && c3->land == laZebra && c3->wall == waNone)
         ctab[q++] = c3;
       }
@@ -247,7 +247,7 @@ bool canReachPlayer(cell *cf, eMonster m) {
   for(int i=0; i<isize(cl.lst) && i < 10000; i++) {
     cell *c = cl.lst[i];
     for(int j=0; j<c->type; j++) {
-      cell *c2 = c->mov[j];
+      cell *c2 = c->move(j);
       if(!c2) continue;
       if(cl.listed(c2)) continue;
       if(!passable_for(m, c2, c, P_MONSTER | P_ONPLAYER | P_CHAIN)) continue;
@@ -306,14 +306,14 @@ void wandering() {
   pathdata pd(moYeti);
   int seepcount = getSeepcount();
   int ghostcount = getGhostcount();
-  if(cwt.c->land == laCA) ghostcount = 0;
+  if(cwt.at->land == laCA) ghostcount = 0;
   bool genturn = hrand(100) < 30;
   
   if(bounded && specialland == laClearing)
     clearing::new_root();
 
-  if(cwt.c->land == laZebra && cwt.c->wall == waNone && wchance(items[itZebra], 20))
-    wanderingZebra(cwt.c);
+  if(cwt.at->land == laZebra && cwt.at->wall == waNone && wchance(items[itZebra], 20))
+    wanderingZebra(cwt.at);
   
   bool smallbounded_generation = smallbounded || (bounded && specialland == laClearing);
   
@@ -429,7 +429,7 @@ void wandering() {
         playSeenSound(c);
         continue;
         }
-      if(c->land == laOcean && (items[itCoast] > 50 || (cwt.c->landparam < 25 && c->landparam < 25)) && wchance(items[itCoast], 25) && canReachPlayer(c, moEagle)) {
+      if(c->land == laOcean && (items[itCoast] > 50 || (cwt.at->landparam < 25 && c->landparam < 25)) && wchance(items[itCoast], 25) && canReachPlayer(c, moEagle)) {
         c->monst = moAlbatross;
         playSeenSound(c);
         continue;
@@ -457,9 +457,9 @@ void wandering() {
           c2->monst = moKrakenH;
           playSeenSound(c2);
           for(int i=0; i<c2->type; i++) {
-            c2->mov[i]->monst = moKrakenT;
-            c2->mov[i]->hitpoints = 1;
-            c2->mov[i]->mondir = c2->spn(i);
+            c2->move(i)->monst = moKrakenT;
+            c2->move(i)->hitpoints = 1;
+            c2->move(i)->mondir = c2->c.spin(i);
             }
           goto found;
           }
@@ -513,7 +513,7 @@ void wandering() {
     else if(items[itBull] >= 50 && isize(butterflies) && wchance(items[itBull]-49, 25))
       c->monst = moGadfly;
 
-    else if(c->land == laPrairie && cwt.c->LHU.fi.flowerdist > 3 && wchance(items[itGreenGrass], prairie::isriver(cwt.c) ? 150 : 40))
+    else if(c->land == laPrairie && cwt.at->LHU.fi.flowerdist > 3 && wchance(items[itGreenGrass], prairie::isriver(cwt.at) ? 150 : 40))
       c->monst = moGadfly;
 
     else if(c->land == laHive && wchance(hive::hivehard(), 25))
@@ -676,7 +676,7 @@ void wandering() {
 void generateSnake(cell *c, int i, int color) {
   c->monst = moHexSnake;
   c->hitpoints = color;
-  int cpair = (1<<pattern_threecolor(c)) | (1<<pattern_threecolor(c->mov[i]));
+  int cpair = (1<<pattern_threecolor(c)) | (1<<pattern_threecolor(c->move(i)));
   preventbarriers(c);
   int len = nonbitrunc ? 2 : ROCKSNAKELENGTH;
   cell *c2 = c;
@@ -686,17 +686,17 @@ void generateSnake(cell *c, int i, int color) {
     preventbarriers(c2);
     c2->mondir = i;
     createMov(c2, i);
-    int j = c2->spn(i);
-    cell *c3 = c2->mov[i];
+    int j = c2->c.spin(i);
+    cell *c3 = c2->move(i);
     if(c3->monst || c3->bardir != NODIR || c3->wall) break;
     c2 = c3;
     c2->monst = moHexSnakeTail; c2->hitpoints = color;
     i = (j + (c2->type%4 == 0 ? c2->type/2 : (len%2 ? 2 : c2->type - 2))) % c2->type;
     createMov(c2, i);
-    if(!inpair(c2->mov[i], cpair)) {
+    if(!inpair(c2->move(i), cpair)) {
       vector<int> goodsteps;
       {for(int i=0; i<c2->type; i++)
-        if(inpair(c2->mov[i], cpair))
+        if(inpair(c2->move(i), cpair))
         goodsteps.push_back(i);}
       if(!isize(goodsteps)) break;
       i = goodsteps[hrand(isize(goodsteps))];

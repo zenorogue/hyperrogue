@@ -31,18 +31,18 @@ set<cell*> testlist;
 map<cell*, cell*> parent;
 
 bool test_uniq(cellwalker cw, int z, int lev, cell *par) {
-  if(testlist.count(cw.c)) return false;
-  testlist.insert(cw.c);
-  if(par) parent[cw.c] = par;
-  if(celldist(cw.c) > 9) return true;
+  if(testlist.count(cw.at)) return false;
+  testlist.insert(cw.at);
+  if(par) parent[cw.at] = par;
+  if(celldist(cw.at) > 9) return true;
 
-  /* if(cw.c->wall == waSea) {
+  /* if(cw.at->wall == waSea) {
     printf("test_uniq failed\n");
-    cw.c->wall = waEternalFire;
+    cw.at->wall = waEternalFire;
     }
-  cw.c->wall = waSea; */
+  cw.at->wall = waSea; */
   if(lev) for(int y=0; y<4; y++) if(y != z)
-    if(!test_uniq(trace(cw, gens[y]), y^2, lev-1, cw.c))
+    if(!test_uniq(trace(cw, gens[y]), y^2, lev-1, cw.at))
       return false;
   
   return true;
@@ -51,12 +51,8 @@ bool test_uniq(cellwalker cw, int z, int lev, cell *par) {
 template<class T> void recursively(cell *c, cell *c1, const T& t) {
   t(c);
   for(int i=0; i<c->type; i++) 
-    if(c->mov[i] && c->spin(i) == 0 && c->mov[i] != c1)
-      recursively(c->mov[i], c, t);
-  }
-
-bool operator != (cellwalker c1, cellwalker c2) {
-  return c1.c != c2.c || c1.spin != c2.spin;
+    if(c->move(i) && c->c.spin(i) == 0 && c->move(i) != c1)
+      recursively(c->move(i), c, t);
   }
 
 vector<cell*> allcells;
@@ -91,7 +87,7 @@ void debugpath(vector<int>& way, cwpath& pinv) {
 
   printf("way:"); for(int i: way) {
     cellwalker cw2 = trace(cw, pinv);
-    printf(" [%d]", lastd = celldist(cw2.c));
+    printf(" [%d]", lastd = celldist(cw2.at));
     printf(" %d", i);
     last_cw = cw;
     cw = trace(cw, gens[i]);
@@ -99,7 +95,7 @@ void debugpath(vector<int>& way, cwpath& pinv) {
 
   cellwalker cw2 = trace(cw, pinv);
   int curd;
-  printf(" [%d]", curd = celldist(cw2.c));
+  printf(" [%d]", curd = celldist(cw2.at));
   printf("\n"); 
 
   if(lastd == 10 && curd == 2) {
@@ -120,7 +116,7 @@ void recursive_paint(cwpath& pinv, vector<int>& way, int noway) {
   cellwalker cw = cwt;
   for(int i: way) cw = trace(cw, gens[i]);
   cw = trace(cw, pinv);
-  cell *c = cw.c;
+  cell *c = cw.at;
 
   /* if(cidd == 1 && way == vector<int>{1,2,3})
     c->item = itPirate; */
@@ -177,7 +173,7 @@ cwpath path_to(cell *c, int dir = 0) {
   cwpath p;
   cellwalker cw(c, dir);
   while(cw != cwt) {
-    if(celldist((cw+wstep).c) < celldist(cw.c))
+    if(celldist((cw+wstep).at) < celldist(cw.at))
       p.push_back(0), cw += wstep;
     else {
       if(p.size() && p.back()) p.back()++;
@@ -211,7 +207,7 @@ int notry = 0;
 void bantar() {
   if(!on) return;
   cwt = cellwalker(currentmap->gamestart(), 0);
-  viewctr = heptspin(cwt.c->master, 0);
+  viewctr = heptspin(cwt.at->master, 0);
   infos.clear();
   
   vector<bantar_config> genchoices;
@@ -219,7 +215,7 @@ void bantar() {
   int lnotry = notry;
   
   {
-  celllister clgen(cwt.c, 4, 1000000, NULL);
+  celllister clgen(cwt.at, 4, 1000000, NULL);
   for(cell *c1: clgen.lst) if(c1->type == S7)
   for(cell *c2: clgen.lst) if(c2->type == S7) 
     genchoices.emplace_back(c1, c2);
@@ -263,8 +259,8 @@ void bantar() {
   
   for(int i=0; i<4; i++) bttargets[i] = trace(cwt, gens[i]);
   
-  celllister cl(cwt.c, 8+more, 1000000, NULL);
-  // recursively(cwt.c, NULL, [] (cell *c) { allcells.push_back(c); } );
+  celllister cl(cwt.at, 8+more, 1000000, NULL);
+  // recursively(cwt.at, NULL, [] (cell *c) { allcells.push_back(c); } );
   for(cell* c: cl.lst) bantar_note(c);
   
   for(cell *c: cl.lst) if(infos.count(c) && infos[c].gid == 0) 
@@ -285,7 +281,7 @@ int curpart;
   } */
 
 heptspin cth(cellwalker cw) {
-  return heptspin(cw.c->master, cw.spin, cw.mirrored);
+  return heptspin(cw.at->master, cw.spin, cw.mirrored);
   }
 
 ld alphaof(hyperpoint h) {
@@ -334,7 +330,7 @@ void bantar_frame() {
     
     View = Id;
     
-    transmatrix tView = actualV(cth(xcw), Id) * calc_relative_matrix(cwt.c, xcw.c, NOHINT) * inverse(actualV(cth(cwt), Id));
+    transmatrix tView = actualV(cth(xcw), Id) * calc_relative_matrix(cwt.at, xcw.at, NOHINT) * inverse(actualV(cth(cwt), Id));
     
     if(tphase < 2) part = 0;
     else if(tphase == 2)
@@ -369,7 +365,7 @@ void bantar_frame() {
       cci.second.c->monst = moNone,
       cci.second.c->land = laNone;
     
-    mapeditor::drawplayer = cwt.c->wparam == i;
+    mapeditor::drawplayer = cwt.at->wparam == i;
     
     switch(tphase) {
       case 0:
@@ -459,8 +455,8 @@ bool bantar_stats() {
 
     double x = hexvdist;
     for(auto gm: gmatrix) for(cell *c: {gm.first})
-    if(euclid || !pseudohept(c)) for(int t=0; t<c->type; t++) if(infos.count(c) && infos.count(c->mov[t]) && c->mov[t] && infos[c].gid != infos[c->mov[t]].gid)
-      if(euclid ? c->mov[t]<c : (((t^1)&1) || c->mov[t] < c))
+    if(euclid || !pseudohept(c)) for(int t=0; t<c->type; t++) if(infos.count(c) && infos.count(c->move(t)) && c->move(t) && infos[c].gid != infos[c->move(t)].gid)
+      if(euclid ? c->move(t)<c : (((t^1)&1) || c->move(t) < c))
         queueline(gm.second * ddspin(c,t,-S7) * xpush(x) * C0, 
           gm.second * ddspin(c,t,+S7) * xpush(x) * C0, 
           0xFF0000FF, 1);

@@ -38,7 +38,7 @@ bool ishept(cell *c) {
 bool ishex1(cell *c) {
   // EUCLIDEAN
   if(euclid) return eupattern(c) == 1;
-  else if(gp::on) return c->master->c7 != c && !pseudohept(c->mov[0]);
+  else if(gp::on) return c->master->c7 != c && !pseudohept(c->move(0));
   else return c->type != S6;
   }
 
@@ -285,7 +285,7 @@ int zebra40(cell *c) {
   else if(sphere) return 0;
   else if(euclid) return eupattern(c);
   else if(S3 == 4 && S7 == 6) {
-    return 8 + ((c->master->zebraval / 10 + c->spin(0))%2) * 2;
+    return 8 + ((c->master->zebraval / 10 + c->c.spin(0))%2) * 2;
     }
   else {
     int ii[3], z;
@@ -328,7 +328,7 @@ namespace fieldpattern {
 
 pair<int, bool> fieldval(cell *c) {
   if(ctof(c)) return make_pair(c->master->fieldval, false);
-  else return make_pair(btspin(c->master->fieldval, c->spin(0)), true);
+  else return make_pair(btspin(c->master->fieldval, c->c.spin(0)), true);
   }
 
 int fieldval_uniq(cell *c) {
@@ -348,7 +348,7 @@ int fieldval_uniq(cell *c) {
   else {
     int z = 0;
     for(int u=0; u<S6; u+=2) 
-      z = max(z, btspin(createMov(c, u)->master->fieldval, c->spin(u)));
+      z = max(z, btspin(createMov(c, u)->master->fieldval, c->c.spin(u)));
     return -1-z;
     }
   }
@@ -361,7 +361,7 @@ int fieldval_uniq_rand(cell *c, int randval) {
   else {
     int z = 0;
     for(int u=0; u<6; u+=2) 
-      z = max(z, btspin(currfp.gmul(createMov(c, u)->master->fieldval, randval), c->spin(u)));
+      z = max(z, btspin(currfp.gmul(createMov(c, u)->master->fieldval, randval), c->c.spin(u)));
     return -1-z;
     }
   }
@@ -436,14 +436,14 @@ int getHemisphere(cell *c, int which) {
       
     cellwalker cw(currentmap->gamestart(), 0);
     int ct = 1;
-    visit(cw.c, ct);
+    visit(cw.at, ct);
     do {
       cw = cw + wstep;
-      visit(cw.c, -ct);
+      visit(cw.at, -ct);
       cw = cw + (2*ct) + wstep + ct;
       ct = -ct;
       }
-    while(cw.c != currentmap->gamestart());    
+    while(cw.at != currentmap->gamestart());    
     for(int i=0; i<isize(q); i++)
       forCellCM(c2, q[i])
         if(pseudohept(q[i]) || pseudohept(c2))
@@ -461,8 +461,8 @@ int getHemisphere(cell *c, int which) {
       auto corner = gp::corners * gp::loctoh_ort(li.relative);
       ld scored = 
         corner[0] * getHemisphere(c->master->c7, which)
-      + corner[1] * getHemisphere(c->master->move[li.last_dir]->c7, which)
-      + corner[2] * getHemisphere(c->master->move[fix7(1+li.last_dir)]->c7, which);
+      + corner[1] * getHemisphere(c->master->move(li.last_dir)->c7, which)
+      + corner[2] * getHemisphere(c->master->modmove(li.last_dir+1)->c7, which);
       int score = int(scored + 10.5) - 10;
       ld error = scored - score;
       if(score == 0 && error > .001) score++;
@@ -477,7 +477,7 @@ int getHemisphere(cell *c, int which) {
       }
     else {
       for(int i=0; i<6; i+=2) 
-        score += getHemisphere(c->mov[i], which) * (c->mirror(i) ? -1 : 1);
+        score += getHemisphere(c->move(i), which) * (c->c.mirror(i) ? -1 : 1);
       return score/3;
       }
     }
@@ -491,7 +491,7 @@ namespace patterns {
       si.id = (d < siblings[d]) ? 0 : 1;
       if(sub & SPF_ROT) si.id = 0;
       for(int i=0; i<S7; i++) {
-        int di = c->master->move[i]->fieldval;
+        int di = c->master->move(i)->fieldval;
         if(di == siblings[d]) si.dir = i;
         }
       si.reflect = false;
@@ -499,21 +499,21 @@ namespace patterns {
     else {
       int ids = 0, tids = 0, td = 0;
       for(int i=0; i<S3; i++) {
-        int d = c->mov[i*2]->master->fieldval;
+        int d = c->move(2*i)->master->fieldval;
         ids |= (1<<d); tids += d;
         }
       for(int i=0; i<S3; i++) {
-        int d = c->mov[i*2]->master->fieldval;
+        int d = c->move(2*i)->master->fieldval;
         if(ids & (1<<siblings[d])) td += d;
         }
       if(td) {
         si.id = 4;
         for(int i=0; i<S3; i++) {
-          int d = c->mov[i*2]->master->fieldval;
+          int d = c->move(2*i)->master->fieldval;
           if(!(ids & (1<<siblings[d]))) si.dir = 2*i;
           }
         /* if(!(sub & SPF_ROT)) {
-          int d0 = c->mov[(si.dir+2)%c->type]->master->fieldval;
+          int d0 = c->modmove(si.dir+2)->master->fieldval;
           if(d0 < siblings[d0]) si.id += 8;
           } */
         si.reflect = false;
@@ -522,8 +522,8 @@ namespace patterns {
         si.id = 8;
         si.dir = 0; // whatever 
         patterninfo si2;
-        valSibling(c->mov[0], si2, sub, pat);
-        int di = si2.dir - c->spin(0);
+        valSibling(c->move(0), si2, sub, pat);
+        int di = si2.dir - c->c.spin(0);
         di %= S7; 
         if(di<0) di += S7;
         if(pat == PAT_SIBLING) si.reflect = di > S7/2;
@@ -577,8 +577,8 @@ namespace patterns {
       printf("\n"); */
       }
     else {
-      si.id = ((c->master->emeraldval & 1) ^ ((c->master->emeraldval & 2)>>1) ^ (c->spin(0)&1)) ? 8 : 4;
-      si.dir = ((c->mov[0]->master->emeraldval + c->spin(0)) & 1) ? 2 : 0;
+      si.id = ((c->master->emeraldval & 1) ^ ((c->master->emeraldval & 2)>>1) ^ (c->c.spin(0)&1)) ? 8 : 4;
+      si.dir = ((c->move(0)->master->emeraldval + c->c.spin(0)) & 1) ? 2 : 0;
       if(createMov(c, si.dir)->master->emeraldval & 4)
         si.dir += 4;
 
@@ -638,7 +638,7 @@ namespace patterns {
         si.id += 16, si.symmetries = 4;
       }
     else {
-      int sp = c->spin(0);
+      int sp = c->c.spin(0);
       if(gp::on) {
         sp = gp::last_dir(c);
         sp ^= int(ishex2(c));
@@ -649,11 +649,11 @@ namespace patterns {
         if(gp::on) {
           auto li = gp::get_local_info(c);
           val38(c->master->c7, si0, 0, PAT_COLORING);
-          val38(c->master->move[li.last_dir]->c7, si1, 0, PAT_COLORING);
+          val38(c->master->move(li.last_dir)->c7, si1, 0, PAT_COLORING);
           }
         else {
-          val38(c->mov[0], si0, 0, PAT_COLORING);
-          val38(c->mov[2], si1, 0, PAT_COLORING);
+          val38(c->move(0), si0, 0, PAT_COLORING);
+          val38(c->move(2), si1, 0, PAT_COLORING);
           }
         if((si0.id+1) % 3 == (si1.id) % 3)
           si.id = 8;
@@ -680,7 +680,7 @@ namespace patterns {
           cell *c2 = createMov(c, i);
           int id2 = 4;
           if(!pseudohept(c2)) {
-            int sp2 = c2->spin(0);
+            int sp2 = c2->c.spin(0);
             if(gp::on) {
               sp2 = gp::last_dir(c2);
               sp2 ^= int(ishex2(c2));
@@ -741,9 +741,9 @@ namespace patterns {
       return;
       }
     int qhex = 0;
-    for(int v=0; v<c->type; v++) if(c->mov[v] && !isWarped(c->mov[v])) {
+    for(int v=0; v<c->type; v++) if(c->move(v) && !isWarped(c->move(v))) {
       u += 2;
-      if(!ishept(c->mov[v])) qhex++;
+      if(!ishept(c->move(v))) qhex++;
       }
     if(u == 8 && qhex == 2) u = 12;
     else if(u == 2 && qhex == 1) u = 8;
@@ -903,7 +903,7 @@ namespace patterns {
       else if(t4 >= 1 && t4 < 4) tcdir = si.id+12;
       else if(t4 >= 7 && t4 < 10) tcdir = si.id-24;
       
-      for(int i=0; i<c->type; i++) if(c->mov[i] && zebra40(c->mov[i]) == tcdir)
+      for(int i=0; i<c->type; i++) if(c->move(i) && zebra40(c->move(i)) == tcdir)
         si.dir = i;
       
       applySym0123(si.id, sub);
@@ -929,7 +929,7 @@ namespace patterns {
       if(!euclid) {
         int tcdir = 0, tbest = (si.id&3);
         for(int i=0; i<c->type; i++) {
-          cell *c2 = c->mov[i];
+          cell *c2 = c->move(i);
           if(c2) {
             int t2 = emeraldval(c2);
             if((si.id&3) == (t2&3) && t2 > tbest)
@@ -1134,11 +1134,11 @@ int pattern_threecolor(cell *c) {
     if(ctof(c))
       return 0;
     else for(int i=0; i<3; i++) {
-      cell *c2 = c->mov[i];
+      cell *c2 = c->move(i);
       if(c2->master->fiftyval == 0)
-        return 1 + (c->spin(i)&1);
+        return 1 + (c->c.spin(i)&1);
       if(c2->master->fiftyval == 5)
-        return 2 - (c->spin(i)&1);
+        return 2 - (c->c.spin(i)&1);
       }
     }
   if(stdhyperbolic && nonbitrunc) {
@@ -1927,7 +1927,7 @@ namespace linepatterns {
       
       case patNormal: {
         for(int t=0; t<c->type; t++)
-          if(c->mov[t] && c->mov[t] < c)
+          if(c->move(t) && c->move(t) < c)
           queueline(V * get_corner_position(c, t),
                     V * get_corner_position(c, (t+1)%c->type),
                     col, 1 + vid.linequality);
@@ -1949,7 +1949,7 @@ namespace linepatterns {
 
       case patTriRings:
         forCellIdEx(c2, i, c) {
-          if(S3 == 4) c2 = (cellwalker(c, i) + wstep + 1 + wstep).c;
+          if(S3 == 4) c2 = (cellwalker(c, i) + wstep + 1).cpeek();
           if(c2 > c) if(gmatrix.count(c2) && celldist(c) == celldist(c2)) 
             queuelinef(tC0(V), gmatrix[c2]*C0, col, 2 + vid.linequality);
           }
@@ -1987,7 +1987,7 @@ namespace linepatterns {
       
       case patBigTriangles: {
        if(is_master(c) && !euclid) for(int i=0; i<S7; i++) 
-          if(c->master->move[i] && c->master->move[i] < c->master) {
+          if(c->master->move(i) && c->master->move(i) < c->master) {
             queuelinef(tC0(V), V*xspinpush0(-2*M_PI*i/S7 - master_to_c7_angle(), tessf), col, 2 + vid.linequality);
             }
         break;
@@ -1995,7 +1995,7 @@ namespace linepatterns {
         
       case patBigRings: {
         if(is_master(c) && !euclid) for(int i=0; i<S7; i++) 
-          if(c->master->move[i] && c->master->move[i] < c->master && c->master->move[i]->dm4 == c->master->dm4)
+          if(c->master->move(i) && c->master->move(i) < c->master && c->master->move(i)->dm4 == c->master->dm4)
             queuelinef(tC0(V), V*xspinpush0(-2*M_PI*i/S7 - master_to_c7_angle(), tessf), col, 2 + vid.linequality);
             // V*xspinpush0((nonbitrunc?M_PI:0) -2*M_PI*i/S7
         break;
@@ -2003,7 +2003,7 @@ namespace linepatterns {
         
       case patTree:
         if(is_master(c)) {
-          cell *c2 = c->master->move[binarytiling ? 5 : 0]->c7;
+          cell *c2 = c->master->move(binarytiling ? 5 : 0)->c7;
           if(gmatrix.count(c2)) queuelinef(tC0(V), gmatrix[c2]*C0, col, 2 + vid.linequality);
           }
         break;
@@ -2021,8 +2021,8 @@ namespace linepatterns {
       case patAltTree:
         if(is_master(c) && !euclid && c->master->alt) {
           for(int i=0; i<S7; i++)
-            if(c->master->move[i] && c->master->move[i]->alt == c->master->alt->move[0]) {
-              cell *c2 = c->master->move[i]->c7;
+            if(c->master->move(i) && c->master->move(i)->alt == c->master->alt->move(0)) {
+              cell *c2 = c->master->move(i)->c7;
               if(gmatrix.count(c2)) queuelinef(tC0(V), gmatrix[c2]*C0, col, 2 + vid.linequality);
               }
           }
@@ -2030,8 +2030,8 @@ namespace linepatterns {
       
       case patVine: {
         if(gp::on) {
-          if(c->master->c7 != c) if(gmatrix.count(c->mov[0]))
-            queuelinef(tC0(V), gmatrix[c->mov[0]]*C0, 
+          if(c->master->c7 != c) if(gmatrix.count(c->move(0)))
+            queuelinef(tC0(V), gmatrix[c->move(0)]*C0, 
               darkena(backcolor ^ 0xFFFFFF, 0, col),
               2 + vid.linequality);
           }
@@ -2045,7 +2045,7 @@ namespace linepatterns {
           int p = emeraldval(c);
           double hdist = hdist0(heptmove[0] * heptmove[2] * C0);
           if(pseudohept(c) && (p/4 == 10 || p/4 == 8))
-          for(int i=0; i<S7; i++) if(c->mov[i] && emeraldval(c->mov[i]) == p-4) {
+          for(int i=0; i<S7; i++) if(c->move(i) && emeraldval(c->move(i)) == p-4) {
             queuelinef(tC0(V), V*tC0(heptmove[i]), col, 2 + vid.linequality);
             queuelinef(tC0(V), V*tC0(spin(-i * ALPHA) * xpush(-hdist/2)), col, 2 + vid.linequality);
             }
@@ -2055,22 +2055,22 @@ namespace linepatterns {
       
       case patPower: {
         if(gp::on) {
-          for(int i=0; i<S7; i++) if(c->mov[i] && c->mov[i]->master != c->master && gmatrix.count(c->mov[i]))
-            queuelinef(tC0(V), gmatrix[c->mov[i]]*C0, 
+          for(int i=0; i<S7; i++) if(c->move(i) && c->move(i)->master != c->master && gmatrix.count(c->move(i)))
+            queuelinef(tC0(V), gmatrix[c->move(i)]*C0, 
               col,
               1 + vid.linequality);
           }
         else if(syntetic) {
-          if(!pseudohept(c)) for(int i=0; i<c->type; i++) if(c->mov[i] && c < c->mov[i] && !pseudohept(c->mov[i]) && gmatrix.count(c->mov[i])) 
-            queuelinef(tC0(V), gmatrix[c->mov[i]]*C0, 
+          if(!pseudohept(c)) for(int i=0; i<c->type; i++) if(c->move(i) && c < c->move(i) && !pseudohept(c->move(i)) && gmatrix.count(c->move(i))) 
+            queuelinef(tC0(V), gmatrix[c->move(i)]*C0, 
               col,
               1 + vid.linequality);
           }
         else {
           int a = emeraldval(c);
           if(pseudohept(c) && a/4 == 8) for(int i=0; i<7; i++) {
-              heptagon *h1 = c->master->move[(i+1)%7];
-              heptagon *h2 = c->master->move[(i+6)%7];
+              heptagon *h1 = c->master->modmove(i+1);
+              heptagon *h2 = c->master->modmove(i-1);
               if(!h1 || !h2) continue;
               if(emeraldval(h1->c7)/4 == 8 && emeraldval(h2->c7)/4 == 8)
                   queuelinef(V * ddspin(c,i,84*5/14) * xpush0(tessf/2),

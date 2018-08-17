@@ -30,8 +30,7 @@ transmatrix spinmatrix[MAX_S84];
 ld hexshift;
 
 const transmatrix& getspinmatrix(int id) {
-  while(id>=S84) id -= S84;
-  while(id<0) id += S84;
+  id = (id + MODFIXER) % S84;
   return spinmatrix[id];
   }
 

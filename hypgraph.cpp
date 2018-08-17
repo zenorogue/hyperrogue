@@ -504,15 +504,15 @@ ld master_to_c7_angle() {
 
 transmatrix actualV(const heptspin& hs, const transmatrix& V) {
   if(irr::on)
-    return V * spin(M_PI + 2 * M_PI / S7 * (hs.spin + irr::periodmap[hs.h].base.spin));
-  if(syntetic) return V * spin(-synt::triangles[synt::id_of(hs.h)][hs.spin].first);
+    return V * spin(M_PI + 2 * M_PI / S7 * (hs.spin + irr::periodmap[hs.at].base.spin));
+  if(syntetic) return V * spin(-synt::triangles[synt::id_of(hs.at)][hs.spin].first);
   if(binarytiling) return V;
   return (hs.spin || nonbitrunc) ? V * spin(hs.spin*2*M_PI/S7 + master_to_c7_angle()) : V;
   }
 
 transmatrix applyspin(const heptspin& hs, const transmatrix& V) {
   if(binarytiling) return V;
-  if(syntetic) return V * spin(synt::triangles[synt::id_of(hs.h)][hs.spin].first);
+  if(syntetic) return V * spin(synt::triangles[synt::id_of(hs.at)][hs.spin].first);
   return hs.spin ? V * spin(hs.spin*2*M_PI/S7) : V;
   }
 
@@ -529,9 +529,9 @@ void drawrec(cell *c, const transmatrix& V) {
   if(dodrawcell(c))
     drawcell(c, V, 0, false);
   for(int i=0; i<c->type; i++) {
-    cell *c2 = c->mov[i];
+    cell *c2 = c->move(i);
     if(!c2) continue;
-    if(c2->mov[0] != c) continue;
+    if(c2->move(0) != c) continue;
     if(c2 == c2->master->c7) continue;
     transmatrix V1 = V * ddspin(c, i) * xpush(crossf) * iddspin(c2, 0) * spin(M_PI);
     drawrec(c2, V1);
@@ -553,9 +553,9 @@ void drawrec(cell *c, const transmatrix& V) {
         drawcell(c, V1, 0, false);
       }
     for(int i=0; i<c->type; i++) {
-      cell *c2 = c->mov[i];
+      cell *c2 = c->move(i);
       if(!c2) continue;
-      if(c2->mov[0] != c) continue;
+      if(c2->move(0) != c) continue;
       if(c2 == c2->master->c7) continue;
       drawrec(c2, V, at + eudir(dir+i), dir + i + SG3, maindir);
       }
@@ -568,9 +568,9 @@ void drawrec(cell *c, const transmatrix& V) {
     if(dodrawcell(c))
       drawcell(c, V, 0, false);
     for(int i=0; i<c->type; i++) {
-      cell *c2 = c->mov[i];
+      cell *c2 = c->move(i);
       if(!c2) continue;
-      if(c2->mov[0] != c) continue;
+      if(c2->move(0) != c) continue;
       if(c2 == c2->master->c7) continue;
       draw_li.last_dir = i;
       drawrec(c2, V, gp::loc(1,0), SG3, i);
@@ -580,9 +580,9 @@ void drawrec(cell *c, const transmatrix& V) {
 
 void drawrec(const heptspin& hs, hstate s, const transmatrix& V) {
 
-  // calc_relative_matrix(cwt.c, hs.h);
+  // calc_relative_matrix(cwt.c, hs.at);
     
-  cell *c = hs.h->c7;
+  cell *c = hs.at->c7;
   
   transmatrix V10;
   const transmatrix& V1 = hs.mirrored ? (V10 = V * Mirror) : V;
@@ -594,9 +594,9 @@ void drawrec(const heptspin& hs, hstate s, const transmatrix& V) {
     }
   
   else if(irr::on) {
-    auto& hi = irr::periodmap[hs.h];
+    auto& hi = irr::periodmap[hs.at];
     transmatrix V0 = actualV(hs, V1);
-    auto& vc = irr::cells_of_heptagon[hi.base.h];
+    auto& vc = irr::cells_of_heptagon[hi.base.at];
     for(int i=0; i<isize(vc); i++)
       if(dodrawcell(hi.subcells[i]) && in_qrange(V0 * irr::cells[vc[i]].pusher))
         draw = true,
@@ -610,12 +610,12 @@ void drawrec(const heptspin& hs, hstate s, const transmatrix& V) {
       }
     
     if(!nonbitrunc) for(int d=0; d<S7; d++) {
-      int ds = fixrot(hs.h, hs.spin + d);
+      int ds = hs.at->c.fix(hs.spin + d);
       // createMov(c, ds);
-      if(c->mov[ds] && c->spn(ds) == 0 && dodrawcell(c->mov[ds])) {
+      if(c->move(ds) && c->c.spin(ds) == 0 && dodrawcell(c->move(ds))) {
         transmatrix V2 = V1 * hexmove[d];
         if(in_qrange(V2))
-        drawcell(c->mov[ds], V2, 0, hs.mirrored ^ c->mirror(ds));
+        drawcell(c->move(ds), V2, 0, hs.mirrored ^ c->c.mirror(ds));
         }
       }
     }
@@ -692,7 +692,7 @@ ld matrixnorm(const transmatrix& Mat) {
 void drawEuclidean() {
   DEBB(DF_GRAPH, (debugfile,"drawEuclidean\n"));
   sphereflip = Id;
-  if(!centerover.c) centerover = cwt;
+  if(!centerover.at) centerover = cwt;
   // printf("centerover = %p player = %p [%d,%d]-[%d,%d]\n", lcenterover, cwt.c,
   //   mindx, mindy, maxdx, maxdy);
   int pvec = cellwalker_to_vec(centerover);
@@ -713,7 +713,7 @@ void drawEuclidean() {
     cellwalker cw = vec_to_cellwalker(pvec + euclid_getvec(dx, dy));
     transmatrix Mat = eumove(dx,dy);
     
-    if(!cw.c) continue;
+    if(!cw.at) continue;
 
     Mat = View0 * Mat;
     
@@ -738,8 +738,8 @@ void drawEuclidean() {
       if(dy > maxdy) maxdy = dy;
       }
     if(cx >= -cellrad && cy >= -cellrad && cx < vid.xres+cellrad && cy < vid.yres+cellrad)
-      if(dodrawcell(cw.c)) {
-        drawcell(cw.c, cw.mirrored ? Mat * Mirror : Mat, cw.spin, cw.mirrored);
+      if(dodrawcell(cw.at)) {
+        drawcell(cw.at, cw.mirrored ? Mat * Mirror : Mat, cw.spin, cw.mirrored);
         }
     }
   }
@@ -806,16 +806,16 @@ void optimizeview() {
   
   if(binarytiling || syntetic) {
     turn = -1, best = View[2][2];
-    for(int i=0; i<viewctr.h->c7->type; i++) {
-      heptagon *h2 = createStep(viewctr.h, i);
-      transmatrix T = (binarytiling) ? binary::relative_matrix(h2, viewctr.h) : synt::relative_matrix(h2, viewctr.h);
+    for(int i=0; i<viewctr.at->c7->type; i++) {
+      heptagon *h2 = createStep(viewctr.at, i);
+      transmatrix T = (binarytiling) ? binary::relative_matrix(h2, viewctr.at) : synt::relative_matrix(h2, viewctr.at);
       hyperpoint H = View * tC0(T);
       if(H[2] < best) best = H[2], turn = i, TB = T;
       }
     if(turn >= 0) {
       View = View * TB;
       fixmatrix(View);
-      viewctr.h = createStep(viewctr.h, turn);
+      viewctr.at = createStep(viewctr.at, turn);
       }
     }
   
@@ -866,7 +866,7 @@ void resetview() {
   View = Id;
   // EUCLIDEAN
   if(!stdeuclid) 
-    viewctr.h = cwt.c->master,
+    viewctr.at = cwt.at->master,
     viewctr.spin = cwt.spin;
   else centerover = cwt;
   cwtV = Id;

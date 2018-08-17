@@ -25,16 +25,9 @@ cell *newCell(int type, heptagon *master) {
   cell *c = new cell;
   c->type = type;
   c->master = master;
-  for(int i=0; i<MAX_EDGE; i++) c->mov[i] = NULL;
+  for(int i=0; i<MAX_EDGE; i++) c->move(i) = NULL;
   initcell(c);
   return c;
-  }
-
-void merge(cell *c, int d, cell *c2, int d2, bool mirrored = false) {
-  c->mov[d] = c2;
-  tsetspin(c->spintable, d, d2 + (mirrored?8:0));
-  c2->mov[d2] = c;
-  tsetspin(c2->spintable, d2, d + (mirrored?8:0));
   }
 
 struct cdata {
@@ -68,8 +61,7 @@ hrmap_hyperbolic::hrmap_hyperbolic() {
   h.fieldval = 0;
   h.rval0 = h.rval1 = 0;
   h.cdata = NULL;
-  for(int i=0; i<MAX_EDGE; i++) h.move[i] = NULL;
-  h.spintable = 0;
+  h.c.clear();
   h.alt = NULL;
   h.distance = 0;
   isnonbitrunc = nonbitrunc;
@@ -119,9 +111,8 @@ struct hrmap_spherical : hrmap {
       h.rval0 = h.rval1 = 0;
       h.alt = NULL;
       h.cdata = NULL;
-      h.spintable = 0;
+      h.c.clear();
       h.fieldval = i;
-      for(int i=0; i<S7; i++) h.move[i] = NULL;
       if(!irr::on) h.c7 = newCell(S7, &h);
       }
     if(S7 == 5)
@@ -133,60 +124,60 @@ struct hrmap_spherical : hrmap {
       for(int i=0; i<3; i++) {
         int i1 = (i+1)%3;
         int i2 = (i+2)%3;
-        dodecahedron[i]->move[0] = dodecahedron[i1];
-        dodecahedron[i]->setspin(0, 1);
-        dodecahedron[i]->move[1] = dodecahedron[i2];
-        dodecahedron[i]->setspin(1, 0);
-        dodecahedron[i]->move[2] = dodecahedron[i1];
-        dodecahedron[i]->setspin(2, 3+8);
-        dodecahedron[i]->move[3] = dodecahedron[i2];
-        dodecahedron[i]->setspin(3, 2+8);
+        dodecahedron[i]->move(0) = dodecahedron[i1];
+        dodecahedron[i]->c.setspin(0, 1, false);
+        dodecahedron[i]->move(1) = dodecahedron[i2];
+        dodecahedron[i]->c.setspin(1, 0, false);
+        dodecahedron[i]->move(2) = dodecahedron[i1];
+        dodecahedron[i]->c.setspin(2, 3, true);
+        dodecahedron[i]->move(3) = dodecahedron[i2];
+        dodecahedron[i]->c.setspin(3, 2, true);
         }
       }
     else for(int i=0; i<S7; i++) {
-      dodecahedron[0]->move[i] = dodecahedron[i+1];
-      dodecahedron[0]->setspin(i, 0);
-      dodecahedron[i+1]->move[0] = dodecahedron[0];
-      dodecahedron[i+1]->setspin(0, i);
+      dodecahedron[0]->move(i) = dodecahedron[i+1];
+      dodecahedron[0]->c.setspin(i, 0, false);
+      dodecahedron[i+1]->move(0) = dodecahedron[0];
+      dodecahedron[i+1]->c.setspin(0, i, false);
       
-      dodecahedron[i+1]->move[1] = dodecahedron[(i+S7-1)%S7+1];
-      dodecahedron[i+1]->setspin(1, S7-1);
-      dodecahedron[i+1]->move[S7-1] = dodecahedron[(i+1)%S7+1];
-      dodecahedron[i+1]->setspin(S7-1, 1);
+      dodecahedron[i+1]->move(1) = dodecahedron[(i+S7-1)%S7+1];
+      dodecahedron[i+1]->c.setspin(1, S7-1, false);
+      dodecahedron[i+1]->move(S7-1) = dodecahedron[(i+1)%S7+1];
+      dodecahedron[i+1]->c.setspin(S7-1, 1, false);
       
       if(S7 == 5 && elliptic) {
-        dodecahedron[i+1]->move[2] = dodecahedron[(i+2)%S7+1];
-        dodecahedron[i+1]->setspin(2, 3 + 8);
-        dodecahedron[i+1]->move[3] = dodecahedron[(i+3)%S7+1];
-        dodecahedron[i+1]->setspin(3, 2 + 8);
+        dodecahedron[i+1]->move(2) = dodecahedron[(i+2)%S7+1];
+        dodecahedron[i+1]->c.setspin(2, 3, true);
+        dodecahedron[i+1]->move(3) = dodecahedron[(i+3)%S7+1];
+        dodecahedron[i+1]->c.setspin(3, 2, true);
         }
 
       else if(S7 == 5) {
-        dodecahedron[6]->move[i] = dodecahedron[7+i];
-        dodecahedron[6]->setspin(i, 0);
-        dodecahedron[7+i]->move[0] = dodecahedron[6];
-        dodecahedron[7+i]->setspin(0, i);
+        dodecahedron[6]->move(i) = dodecahedron[7+i];
+        dodecahedron[6]->c.setspin(i, 0, false);
+        dodecahedron[7+i]->move(0) = dodecahedron[6];
+        dodecahedron[7+i]->c.setspin(0, i, false);
   
-        dodecahedron[i+7]->move[1] = dodecahedron[(i+4)%5+7];
-        dodecahedron[i+7]->setspin(1, 4);
-        dodecahedron[i+7]->move[4] = dodecahedron[(i+1)%5+7];
-        dodecahedron[i+7]->setspin(4, 1);
+        dodecahedron[i+7]->move(1) = dodecahedron[(i+4)%5+7];
+        dodecahedron[i+7]->c.setspin(1, 4, false);
+        dodecahedron[i+7]->move(4) = dodecahedron[(i+1)%5+7];
+        dodecahedron[i+7]->c.setspin(4, 1, false);
         
-        dodecahedron[i+1]->move[2] = dodecahedron[7+(10-i)%5];
-        dodecahedron[i+1]->setspin(2, 2);
-        dodecahedron[7+(10-i)%5]->move[2] = dodecahedron[1+i];
-        dodecahedron[7+(10-i)%5]->setspin(2, 2);
+        dodecahedron[i+1]->move(2) = dodecahedron[7+(10-i)%5];
+        dodecahedron[i+1]->c.setspin(2, 2, false);
+        dodecahedron[7+(10-i)%5]->move(2) = dodecahedron[1+i];
+        dodecahedron[7+(10-i)%5]->c.setspin(2, 2, false);
   
-        dodecahedron[i+1]->move[3] = dodecahedron[7+(9-i)%5];
-        dodecahedron[i+1]->setspin(3, 3);
-        dodecahedron[7+(9-i)%5]->move[3] = dodecahedron[i+1];
-        dodecahedron[7+(9-i)%5]->setspin(3, 3);
+        dodecahedron[i+1]->move(3) = dodecahedron[7+(9-i)%5];
+        dodecahedron[i+1]->c.setspin(3, 3, false);
+        dodecahedron[7+(9-i)%5]->move(3) = dodecahedron[i+1];
+        dodecahedron[7+(9-i)%5]->c.setspin(3, 3, false);
         }
       if(S7 == 4) {
-        dodecahedron[5]->move[3-i] = dodecahedron[i+1];
-        dodecahedron[5]->setspin(3-i, 2);
-        dodecahedron[i+1]->move[2] = dodecahedron[5];
-        dodecahedron[i+1]->setspin(2, 3-i);
+        dodecahedron[5]->move(3-i) = dodecahedron[i+1];
+        dodecahedron[5]->c.setspin(3-i, 2, false);
+        dodecahedron[i+1]->move(2) = dodecahedron[5];
+        dodecahedron[i+1]->c.setspin(2, 3-i, false);
         }
       }
 
@@ -210,7 +201,7 @@ struct hrmap_spherical : hrmap {
     for(int i=0; i<spherecells(); i++) for(int k=0; k<S7; k++) {
       heptspin hs(dodecahedron[i], k, false);
       heptspin hs2 = hs + wstep + (S7-1) + wstep + (S7-1) + wstep + (S7-1);
-      if(hs2.h != hs.h) printf("error %d,%d\n", i, k);
+      if(hs2.at != hs.at) printf("error %d,%d\n", i, k);
       }
     for(int i=0; i<spherecells(); i++) verifycells(dodecahedron[i]);
     }
@@ -420,15 +411,15 @@ struct hrmap_torus : hrmap {
       int iv = id_to_vec(i);
       build_euclidean_moves(all[i], iv, [&] (int delta, int d, int d2) {
         auto im = vec_to_id_mirror(iv + delta);
-        all[i]->mov[d] = all[im.first];
-        tsetspin(all[i]->spintable, d, im.second);
+        all[i]->move(d) = all[im.first];
+        all[i]->c.setspin(d, im.second, false);
         });
       }
     for(cell *c: all) for(int d=0; d<c->type; d++) {
-      cell *c2 = c->mov[d];
+      cell *c2 = c->move(d);
       for(int d2=0; d2<c2->type; d2++) 
-        if(c2->mov[d2] == c)
-          tsetspin(c->spintable, d, d2 + (8 * c->spin(d)));
+        if(c2->move(d2) == c)
+          c->c.setspin(d, d2, c->c.spin(d));
       }
     celllister cl(gamestart(), 100, 100000000, NULL);
     dists.resize(q);
@@ -510,7 +501,7 @@ cellwalker vec_to_cellwalker(int vec) {
   }
 
 int cellwalker_to_vec(cellwalker cw) {
-  int id = decodeId(cw.c->master);
+  int id = decodeId(cw.at->master);
   if(!torus) return id;
   return torusconfig::id_to_vec(id, cw.mirrored);
   }
@@ -564,9 +555,9 @@ namespace quotientspace {
   
   code get(heptspin hs) {
     code res;
-    res.c[0] = cod(hs.h);
+    res.c[0] = cod(hs.at);
     for(int i=1; i<=S7; i++) {
-      res.c[i] = cod((hs + wstep).h);
+      res.c[i] = cod((hs + wstep).at);
       hs += 1;
       }
     return res;
@@ -612,7 +603,7 @@ struct hrmap_quotient : hrmap {
         }
         
       case gZebraQuotient: {
-        heptspin hs; hs.h = base.origin; hs.spin = 0;
+        heptspin hs(base.origin);
         reachable.clear();
         bfsq.clear();
         add(hs);
@@ -745,8 +736,8 @@ struct hrmap_quotient : hrmap {
         int co = connections[i*S7+j];
         bool swapped = co & symmask;
         co &= ~symmask;
-        h->move[rv(j)] = allh[co/S7];
-        h->setspin(rv(j), rv(co%S7) + (swapped ? 8 : 0));
+        h->move(rv(j)) = allh[co/S7];
+        h->c.setspin(rv(j), rv(co%S7), swapped);
         }
       }
   
@@ -787,81 +778,27 @@ struct hrmap_quotient : hrmap {
 
 // --- general ---
 
-cell *createMov(cell *c, int d);
-
-cellwalker& operator += (cellwalker& cw, int spin) {
-  cw.spin = (cw.spin+(MIRR(cw)?-spin:spin) + MODFIXER) % cw.c->type;
-  return cw;
-  }
-
-cellwalker& operator += (cellwalker& cw, wstep_t) {
-  createMov(cw.c, cw.spin);
-  int nspin = cw.c->spn(cw.spin);
-  if(cw.c->mirror(cw.spin)) cw.mirrored = !cw.mirrored;
-  cw.c = cw.c->mov[cw.spin];
-  cw.spin = nspin;
-  return cw;
-  }
-
-cellwalker& operator -= (cellwalker& cw, int i) { return cw += (-i); }
-
-cellwalker& operator += (cellwalker& cw, wmirror_t) {
-  cw.mirrored = !cw.mirrored;
-  return cw;
-  }
-
-cellwalker& operator ++ (cellwalker& h, int) { return h += 1; }
-cellwalker& operator -- (cellwalker& h, int) { return h -= 1; }
-
-bool cwstepcreates(cellwalker& cw) {
-  return cw.c->mov[cw.spin] == NULL;
-  }
-
-/*
-cell *cwpeek(cellwalker cw, int dir) {
-  return (cw+dir+wstep).c;.
-  // return createMov(cw.c, (cw.spin+MODFIXER+(MIRR(cw)?-dir:dir)) % cw.c->type);
-  } */
-
-void cwmirrorat(cellwalker& cw, int d) {
-  cw.spin = (d+d - cw.spin + MODFIXER) % cw.c->type;
-  cw.mirrored = !cw.mirrored;
-  }
-
-static const struct rev_t { rev_t() {} } rev;
-
-cellwalker& operator += (cellwalker& cw, rev_t) {
-  cw += cw.c->type/2 + ((cw.c->type&1)?hrand(2):0);
-  return cw;
-  }
-
-static const struct revstep_t { revstep_t() {}} revstep;
-
-cellwalker& operator += (cellwalker& cw, revstep_t) {
-  cw += rev; cw += wstep; return cw;
-  }
-
 // very similar to createMove in heptagon.cpp
 cell *createMov(cell *c, int d) {
   if(d<0 || d>= c->type) {
     printf("ERROR createmov\n");
     }
 
-  if(masterless && !c->mov[d]) {
+  if(masterless && !c->move(d)) {
     int id = decodeId(c->master);
     for(int dx=-1; dx<=1; dx++)
     for(int dy=-1; dy<=1; dy++)
       euclideanAtCreate(id + pair_to_vec(dx, dy));
-    if(!c->mov[d]) { printf("fail!\n"); }
+    if(!c->move(d)) { printf("fail!\n"); }
     }
   
-  if(c->mov[d]) return c->mov[d];
+  if(c->move(d)) return c->move(d);
   else if(irr::on) {
     irr::link_cell(c, d);
     }
   else if(nonbitrunc && gp::on) {
     gp::extend_map(c, d);
-    if(!c->mov[d]) {
+    if(!c->move(d)) {
       printf("extend failed to create for %p/%d\n", c, d);
       exit(1);
       }
@@ -869,13 +806,13 @@ cell *createMov(cell *c, int d) {
   else if(nonbitrunc && syntetic) {
     if(synt::id_of(c->master) <= synt::N * 2) {
       heptspin hs = heptspin(c->master, d) + wstep + 2 + wstep + 1;
-      merge(c,d,hs.h->c7,hs.spin,false);
+      c->c.connect(d, hs.at->c7, hs.spin, hs.mirrored);
       }
-    else merge(c, d, c, d, false);
+    else c->c.connect(d, c, d, false);
     }
   else if(nonbitrunc || syntetic) {
     heptagon *h2 = createStep(c->master, d);
-    merge(c,d,h2->c7,c->master->spin(d),false);
+    c->c.connect(d, h2->c7,c->master->c.spin(d),false);
     }
   else if(c == c->master->c7) {
     
@@ -888,7 +825,7 @@ cell *createMov(cell *c, int d) {
         
     for(int u=0; u<S6; u+=2) {
       if(hs.mirrored && geometry == gSmallElliptic) hs+=1;
-      merge(hs.h->c7, hs.spin, n, u, hs.mirrored);
+      hs.at->c7->c.connect(hs.spin, n, u, hs.mirrored);
       if(hs.mirrored && geometry == gSmallElliptic) hs+=-1;
       hs = hs + alt3 + wstep - alt4;
       }
@@ -899,9 +836,9 @@ cell *createMov(cell *c, int d) {
   else {
     cellwalker cw(c, d, false);
     cellwalker cw2 = cw - 1 + wstep - 1 + wstep - 1;
-    merge(c, d, cw2.c, cw2.spin, cw2.mirrored);
+    c->c.connect(d, cw2);
     }
-  return c->mov[d];
+  return c->move(d);
   }
 
 cell *createMovR(cell *c, int d) {
@@ -911,14 +848,14 @@ cell *createMovR(cell *c, int d) {
 
 cell *getMovR(cell *c, int d) {
   d %= MODFIXER; d += MODFIXER; d %= c->type;
-  return c->mov[d];
+  return c->move(d);
   }
 
 void eumerge(cell* c1, cell *c2, int s1, int s2) {
   if(!c2) return;
-  c1->mov[s1] = c2; tsetspin(c1->spintable, s1, s2);
-  c2->mov[s2] = c1; tsetspin(c2->spintable, s2, s1);
-  }       
+  c1->move(s1) = c2; c1->c.setspin(s1, s2, false);
+  c2->move(s2) = c1; c2->c.setspin(s2, s1, false);
+  }
 
 //  map<pair<eucoord, eucoord>, cell*> euclidean;
 
@@ -959,15 +896,15 @@ void initcells() {
 void clearcell(cell *c) {
   if(!c) return;
   DEBMEM ( printf("c%d %p\n", c->type, c); )
-  for(int t=0; t<c->type; t++) if(c->mov[t]) {
-    DEBMEM ( printf("mov %p [%p] S%d\n", c->mov[t], c->mov[t]->mov[c->spn(t)], c->spn(t)); )
-    if(c->mov[t]->mov[c->spn(t)] != NULL &&
-      c->mov[t]->mov[c->spn(t)] != c) {
-        printf("type = %d %d -> %d\n", c->type, t, c->spn(t));
+  for(int t=0; t<c->type; t++) if(c->move(t)) {
+    DEBMEM ( printf("mov %p [%p] S%d\n", c->move(t), c->move(t)->move(c->c.spin(t)), c->c.spin(t)); )
+    if(c->move(t)->move(c->c.spin(t)) != NULL &&
+      c->move(t)->move(c->c.spin(t)) != c) {
+        printf("type = %d %d -> %d\n", c->type, t, c->c.spin(t));
         printf("cell error\n");
         exit(1);
         }
-    c->mov[t]->mov[c->spn(t)] = NULL;
+    c->move(t)->move(c->c.spin(t)) = NULL;
     }
   DEBMEM ( printf("DEL %p\n", c); )
   delete c;
@@ -977,7 +914,7 @@ heptagon deletion_marker;
 
 template<class T> void subcell(cell *c, const T& t) {
   if(gp::on) {
-    forCellEx(c2, c) if(c2->mov[0] == c && c2 != c2->master->c7) {
+    forCellEx(c2, c) if(c2->move(0) == c && c2 != c2->master->c7) {
       subcell(c2, t);
       }
     }
@@ -1025,19 +962,19 @@ void clearfrom(heptagon *at) {
       }
     int edges = S7;
     if(binarytiling) edges = at->c7->type;
-    for(int i=0; i<edges; i++) if(at->move[i]) {
-      if(at->move[i]->alt != &deletion_marker)
-        q.push(at->move[i]);    
-      unlink_cdata(at->move[i]);
-      at->move[i]->alt = &deletion_marker;
-      DEBMEM ( printf("!mov %p [%p]\n", at->move[i], at->move[i]->move[at->spin(i)]); )
-      if(at->move[i]->move[at->spin(i)] != NULL &&
-        at->move[i]->move[at->spin(i)] != at) {
+    for(int i=0; i<edges; i++) if(at->move(i)) {
+      if(at->move(i)->alt != &deletion_marker)
+        q.push(at->move(i));    
+      unlink_cdata(at->move(i));
+      at->move(i)->alt = &deletion_marker;
+      DEBMEM ( printf("!mov %p [%p]\n", at->move(i), at->move(i)->move[at->c.spin(i)]); )
+      if(at->move(i)->move(at->c.spin(i)) != NULL &&
+        at->move(i)->move(at->c.spin(i)) != at) {
           printf("hept error\n");
           exit(1);
           }
-      at->move[i]->move[at->spin(i)] = NULL;
-      at->move[i] = NULL;
+      at->move(i)->move(at->c.spin(i)) = NULL;
+      at->move(i) = NULL;
       }
     clearHexes(at);
     delete at;
@@ -1048,11 +985,11 @@ void clearfrom(heptagon *at) {
 void verifycell(cell *c) {
   int t = c->type;
   for(int i=0; i<t; i++) {
-    cell *c2 = c->mov[i];
+    cell *c2 = c->move(i);
     if(c2) {
       if(!stdeuclid && !nonbitrunc && c == c->master->c7) verifycell(c2);
-      if(c2->mov[c->spn(i)] && c2->mov[c->spn(i)] != c) {
-        printf("cell error %p:%d [%d] %p:%d [%d]\n", c, i, c->type, c2, c->spn(i), c2->type);
+      if(c2->move(c->c.spin(i)) && c2->move(c->c.spin(i)) != c) {
+        printf("cell error %p:%d [%d] %p:%d [%d]\n", c, i, c->type, c2, c->c.spin(i), c2->type);
         exit(1);
         }
       }
@@ -1061,12 +998,12 @@ void verifycell(cell *c) {
 
 void verifycells(heptagon *at) {
   if(gp::on || irr::on || syntetic) return;
-  for(int i=0; i<S7; i++) if(at->move[i] && at->move[i]->move[at->spin(i)] && at->move[i]->move[at->spin(i)] != at) {
-    printf("hexmix error %p [%d s=%d] %p %p\n", at, i, at->spin(i), at->move[i], at->move[i]->move[at->spin(i)]);
+  for(int i=0; i<S7; i++) if(at->move(i) && at->move(i)->move(at->c.spin(i)) && at->move(i)->move(at->c.spin(i)) != at) {
+    printf("hexmix error %p [%d s=%d] %p %p\n", at, i, at->c.spin(i), at->move(i), at->move(i)->move(at->c.spin(i)));
     }
   if(!sphere && !quotient) 
-    for(int i=0; i<S7; i++) if(at->move[i] && at->spin(i) == 0 && at->s != hsOrigin)
-      verifycells(at->move[i]);
+    for(int i=0; i<S7; i++) if(at->move(i) && at->c.spin(i) == 0 && at->s != hsOrigin)
+      verifycells(at->move(i));
   verifycell(at->c7);
   }
 
@@ -1154,7 +1091,7 @@ int celldistAlt(cell *c) {
   }
 
 int dirfromto(cell *cfrom, cell *cto) {
-  for(int i=0; i<cfrom->type; i++) if(cfrom->mov[i] == cto) return i;
+  for(int i=0; i<cfrom->type; i++) if(cfrom->move(i) == cto) return i;
   return -1;
   }
 
@@ -1315,10 +1252,10 @@ cdata *getHeptagonCdata(heptagon *h) {
     return h->cdata = new cdata(orig_cdata);
     }
   
-  cdata mydata = *getHeptagonCdata(h->move[0]);
+  cdata mydata = *getHeptagonCdata(h->move(0));
 
   for(int di=3; di<5; di++) {
-    heptspin hs; hs.h = h; hs.spin = di;
+    heptspin hs; hs.at = h; hs.spin = di;
     int signum = +1;
     while(true) {
       heptspin hstab[15];
@@ -1338,19 +1275,19 @@ cdata *getHeptagonCdata(heptagon *h) {
         hstab[i] += ((i&1) ? 4 : 3);
         }
       
-      if(hstab[3].h->distance < hstab[7].h->distance) {
+      if(hstab[3].at->distance < hstab[7].at->distance) {
         hs = hstab[3]; continue;
         }
 
-      if(hstab[11].h->distance < hstab[7].h->distance) {
+      if(hstab[11].at->distance < hstab[7].at->distance) {
         hs = hstab[11]; continue;
         }
       
       int jj = 7;
-      for(int k=3; k<12; k++) if(hstab[k].h->distance < hstab[jj].h->distance) jj = k;
+      for(int k=3; k<12; k++) if(hstab[k].at->distance < hstab[jj].at->distance) jj = k;
       
       int ties = 0, tiespos = 0;
-      for(int k=3; k<12; k++) if(hstab[k].h->distance == hstab[jj].h->distance) 
+      for(int k=3; k<12; k++) if(hstab[k].at->distance == hstab[jj].at->distance) 
         ties++, tiespos += (k-jj);
         
       // printf("ties=%d tiespos=%d jj=%d\n", ties, tiespos, jj);
@@ -1362,18 +1299,18 @@ cdata *getHeptagonCdata(heptagon *h) {
       break;
       }
     hs = hs + 3 + wstep;
-    setHeptagonRval(hs.h);
+    setHeptagonRval(hs.at);
     
-    affect(mydata, hs.spin ? hs.h->rval0 : hs.h->rval1, signum);
+    affect(mydata, hs.spin ? hs.at->rval0 : hs.at->rval1, signum);
 
-    /* if(!(spins[hs.h] & hs.spin)) {
-      spins[hs.h] |= (1<<hs.spin);
+    /* if(!(spins[hs.at] & hs.spin)) {
+      spins[hs.at] |= (1<<hs.spin);
       int t = 0;
-      for(int k=0; k<7; k++) if(spins[hs.h] & (1<<k)) t++;
+      for(int k=0; k<7; k++) if(spins[hs.at] & (1<<k)) t++;
       static bool wast[256];
-      if(!wast[spins[hs.h]]) {
-        printf("%p %4x\n", hs.h, spins[hs.h]);
-        wast[spins[hs.h]] = true;
+      if(!wast[spins[hs.at]]) {
+        printf("%p %4x\n", hs.at, spins[hs.at]);
+        wast[spins[hs.at]] = true;
         }
       } */
     }
@@ -1466,7 +1403,7 @@ int getBits(cell *c) {
 cell *heptatdir(cell *c, int d) {
   if(d&1) {
     cell *c2 = createMov(c, d);
-    int s = c->spin(d);
+    int s = c->c.spin(d);
     s += 3; s %= 6;
     return createMov(c2, s);
     }
@@ -1478,7 +1415,7 @@ int heptdistance(heptagon *h1, heptagon *h2) {
   int d = 0;
   while(true) {
     if(h1 == h2) return d;
-    for(int i=0; i<S7; i++) if(h1->move[i] == h2) return d + 1;
+    for(int i=0; i<S7; i++) if(h1->move(i) == h2) return d + 1;
     int d1 = h1->distance, d2 = h2->distance;
     if(d1 >= d2) d++, h1 = createStep(h1, binarytiling ? 5 : 0);
     if(d2 >  d1) d++, h2 = createStep(h2, binarytiling ? 5 : 0);

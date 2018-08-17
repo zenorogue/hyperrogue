@@ -120,25 +120,25 @@ void initgame() {
   if((isGravityLand(firstland) && !isCyclic(firstland)) || (firstland == laOcean && !safety && !yendor::on)) 
     firstland = weirdhyperbolic ? laCrossroads4 : laCrossroads;
   
-  cwt.c = currentmap->gamestart(); cwt.spin = 0; cwt.mirrored = false;
-  cwt.c->land = firstland;
+  cwt.at = currentmap->gamestart(); cwt.spin = 0; cwt.mirrored = false;
+  cwt.at->land = firstland;
   
   chaosAchieved = false;
 
-  if(firstland == laElementalWall) cwt.c->land = randomElementalLand();
+  if(firstland == laElementalWall) cwt.at->land = randomElementalLand();
   
-  createMov(cwt.c, 0);
+  createMov(cwt.at, 0);
   
-  setdist(cwt.c, BARLEV, NULL);
+  setdist(cwt.at, BARLEV, NULL);
 
   if((tactic::on || yendor::on || peace::on) && isCyclic(firstland)) {
     anthraxBonus = items[itHolyGrail];
-    cwt.c->mov[0]->land = firstland;
-    if(firstland == laWhirlpool) cwt.c->mov[0]->wall = waSea;
+    cwt.at->move(0)->land = firstland;
+    if(firstland == laWhirlpool) cwt.at->move(0)->wall = waSea;
     
-    setdist(cwt.c->mov[0], BARLEV-1, cwt.c);
+    setdist(cwt.at->move(0), BARLEV-1, cwt.at);
     if(!sphere && !euclid) {
-      heptagon *h = createAlternateMap(cwt.c, 2, hsA);
+      heptagon *h = createAlternateMap(cwt.at, 2, hsA);
       if(!h) printf("FAIL\n");
       }
     }
@@ -172,10 +172,10 @@ void initgame() {
     princess::generating = false;
     }
 
-  if(cwt.c->land == laCrossroads2) {
-    cwt.c->landparam = 12;
-    createMov(cwt.c, 0)->landparam = 44;
-    createMov(cwt.c, 0)->land = laCrossroads2;
+  if(cwt.at->land == laCrossroads2) {
+    cwt.at->landparam = 12;
+    createMov(cwt.at, 0)->landparam = 44;
+    createMov(cwt.at, 0)->land = laCrossroads2;
     }
     
   for(int i=0; i<numplayers(); i++) sword::angle[i] = 11;
@@ -193,10 +193,10 @@ void initgame() {
   #endif
   
   // extern int sightrange; sightrange = 9;
-  // cwt.c->land = laHell; items[itHell] = 10;
+  // cwt.at->land = laHell; items[itHell] = 10;
   for(int i=BARLEV; i>=7 - getDistLimit() - genrange_bonus; i--) {
-    if(tactic::trailer && cwt.c->land != laClearing) safety = trailer_safety;
-    setdist(cwt.c, i, NULL);
+    if(tactic::trailer && cwt.at->land != laClearing) safety = trailer_safety;
+    setdist(cwt.at, i, NULL);
     if(tactic::trailer) safety = false;
 
     currentmap->verify();
@@ -218,14 +218,14 @@ void initgame() {
 
   
   if(multi::players > 1 && !shmup::on) for(int i=0; i<numplayers(); i++) {
-    int idir = (3 * i) % cwt.c->type;
-    multi::player[i].c = cwt.c->mov[idir];
+    int idir = (3 * i) % cwt.at->type;
+    multi::player[i].at = cwt.at->move(idir);
     // special case -- otherwise they land on a wall
     if(firstland == laCrossroads2 && i == 1)
-      multi::player[1].c = cwt.c;
+      multi::player[1].at = cwt.at;
     if(firstland == laCrossroads2 && i == 6)
-      multi::player[6].c = createMov(createMov(cwt.c, 0), 3);
-    setdist(cwt.c->mov[idir], 7 - getDistLimit() - genrange_bonus, cwt.c);
+      multi::player[6].at = createMov(createMov(cwt.at, 0), 3);
+    setdist(cwt.at->move(idir), 7 - getDistLimit() - genrange_bonus, cwt.at);
     multi::player[i].spin = 0;
     multi::flipped[i] = true;
     multi::whereto[i].d = MD_UNDECIDED;
@@ -248,7 +248,7 @@ void initgame() {
     }
   else {
     for(int i=0; i<numplayers(); i++) 
-      makeEmpty(cwt.c);
+      makeEmpty(cwt.at);
     }
   
   princess::squeaked = false;
@@ -438,7 +438,7 @@ void applyBoxes() {
   applyBoxNum(cheater, "number of cheats");
   
   fakebox[boxid] = true;
-  if(saving) applyBoxSave(items[itOrbSafety] ? safetyland : cwt.c->land, "");
+  if(saving) applyBoxSave(items[itOrbSafety] ? safetyland : cwt.at->land, "");
   else if(loading) firstland = safetyland = eLand(applyBoxLoad());
   else lostin = eLand(savebox[boxid++]);
   
@@ -865,7 +865,7 @@ void saveStats(bool emergency = false) {
   fprintf(f, "Number of cells explored, by distance from the player:\n"); 
   {for(int i=0; i<10; i++) fprintf(f, " %d", explore[i]);} fprintf(f, "\n");
   if(kills[0]) fprintf(f, "walls melted: %d\n", kills[0]);
-  fprintf(f, "cells travelled: %d\n", celldist(cwt.c));
+  fprintf(f, "cells travelled: %d\n", celldist(cwt.at));
   
   fprintf(f, "\n");
 
@@ -1122,7 +1122,7 @@ void stop_game() {
 void push_game() {
   gamestack::push();
   pd_from = NULL;
-  centerover.c = NULL;
+  centerover.at = NULL;
   game_active = false;
   }
 

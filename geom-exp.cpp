@@ -516,7 +516,7 @@ void showEuclideanMenu() {
 
 void runGeometryExperiments() {
   if(!geometry)
-    specialland = getLandForList(cwt.c);
+    specialland = getLandForList(cwt.at);
   pushScreen(showEuclideanMenu);
   }
 

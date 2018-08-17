@@ -846,7 +846,7 @@ bool texture_config::save() {
   targetgeometry = geometry;
   target_nonbitru = nonbitrunc;
 
-  cell *ctr = euclid ? centerover.c : viewctr.h->c7;
+  cell *ctr = euclid ? centerover.at : viewctr.at->c7;
   si_save = patterns::getpatterninfo0(ctr);
   
   for(auto s: texturesavers) if(s->dosave())
@@ -892,11 +892,11 @@ bool texture_config::load() {
     celllister cl(currentmap->gamestart(), 20, 10000, NULL);
     bool found = false;
     for(cell *c: cl.lst) if(euclid || ctof(c)) {
-      cell *ctr = euclid ? centerover.c : viewctr.h->c7;
+      cell *ctr = euclid ? centerover.at : viewctr.at->c7;
       auto si_here = patterns::getpatterninfo0(c);
       if(si_here.id == si_save.id && si_here.reflect == si_save.reflect && si_here.dir == si_save.dir) {
-        if(euclid) centerover.c = ctr;
-        else viewctr.h = ctr->master;
+        if(euclid) centerover.at = ctr;
+        else viewctr.at = ctr->master;
         found = true;
         break;
         }
@@ -1174,7 +1174,7 @@ void showMenu() {
 
 #if CAP_EDIT    
     else if(uni == 'e' && config.tstate == tsActive) {
-      mapeditor::initdraw(cwt.c);
+      mapeditor::initdraw(cwt.at);
       pushScreen(mapeditor::showDrawEditor);
       }
 
@@ -1184,7 +1184,7 @@ void showMenu() {
         config.tstate = config.tstate_max = tsActive;
         config.perform_mapping();
         config.finish_mapping();
-        mapeditor::initdraw(cwt.c);
+        mapeditor::initdraw(cwt.at);
         pushScreen(mapeditor::showDrawEditor);
         }
       }

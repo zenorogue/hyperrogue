@@ -70,7 +70,7 @@ void drawBlizzards() {
     for(int i=0; i<c->type; i++) {
       int& qty = bc.qty[i];
       qty = 0;
-      cell *c2 = c->mov[i];
+      cell *c2 = c->move(i);
       if(!c2) continue;
       auto bc2 = getbcell(c2);
       if(!bc2) continue;
@@ -106,7 +106,7 @@ void drawBlizzards() {
     bc.outid = 0;
     
     for(int d=0; d<c->type; d++) for(int k=0; k<bc.qty[d]; k++) {
-      auto& bc2 = *getbcell(c->mov[d]);
+      auto& bc2 = *getbcell(c->move(d));
       auto& sball = *bc.outorder[bc.outid++];
       auto& sball2 = *bc2.inorder[bc2.inid++];
       sball.next = &sball2;

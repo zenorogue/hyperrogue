@@ -132,15 +132,15 @@ namespace mapstream {
         save(fgeomextras[current_extra].current_prime_id);
         }
       }
-    addToQueue((bounded || euclid) ? currentmap->gamestart() : cwt.c->master->c7);
+    addToQueue((bounded || euclid) ? currentmap->gamestart() : cwt.at->master->c7);
     for(int i=0; i<isize(cellbyid); i++) {
       cell *c = cellbyid[i];
       if(i) {
-        for(int j=0; j<c->type; j++) if(c->mov[j] && cellids.count(c->mov[j]) && 
-          cellids[c->mov[j]] < i) {
-          int32_t i = cellids[c->mov[j]];
+        for(int j=0; j<c->type; j++) if(c->move(j) && cellids.count(c->move(j)) && 
+          cellids[c->move(j)] < i) {
+          int32_t i = cellids[c->move(j)];
           save(i);
-          saveChar(c->spn(j));
+          saveChar(c->c.spin(j));
           saveChar(j);
           break;
           }
@@ -157,13 +157,13 @@ namespace mapstream {
       save(c->wparam); save(c->landparam);
       saveChar(c->stuntime); saveChar(c->hitpoints);
       for(int j=0; j<c->type; j++) {
-        cell *c2 = c->mov[j];
+        cell *c2 = c->move(j);
         if(c2 && c2->land != laNone) addToQueue(c2);
         }
       }
     printf("cells saved = %d\n", isize(cellbyid));
     int32_t n = -1; save(n);
-    int32_t id = cellids.count(cwt.c) ? cellids[cwt.c] : -1;
+    int32_t id = cellids.count(cwt.at) ? cellids[cwt.at] : -1;
     save(id);
 
     for(int i=0; i<USERSHAPEGROUPS; i++) for(int j=0; j<USERSHAPEIDS; j++) {
@@ -251,7 +251,7 @@ namespace mapstream {
         // printf("%p:%d,%d -> %p\n", c2, relspin[parent], dir, c);
         
         // spinval becomes xspinval
-        rspin = (c2->spn(dir) - loadChar() + MODFIXER) % c->type;
+        rspin = (c2->c.spin(dir) - loadChar() + MODFIXER) % c->type;
         }
       
       cellbyid.push_back(c);
@@ -284,8 +284,8 @@ namespace mapstream {
     
     int32_t whereami = loadInt();
     if(whereami >= 0 && whereami < isize(cellbyid))
-      cwt.c = cellbyid[whereami];
-    else cwt.c = currentmap->gamestart();
+      cwt.at = cellbyid[whereami];
+    else cwt.at = currentmap->gamestart();
 
     for(int i=0; i<isize(cellbyid); i++) {
       cell *c = cellbyid[i];
@@ -516,14 +516,14 @@ namespace mapeditor {
     }
   
   int drawcellShapeGroup() {
-    if(drawcell == cwt.c && drawplayer) return 0;
+    if(drawcell == cwt.at && drawplayer) return 0;
     if(drawcell->monst) return 1;
     if(drawcell->item) return 2;
     return 3;
     }
   
   int drawcellShapeID() {
-    if(drawcell == cwt.c && drawplayer) return vid.cs.charid;
+    if(drawcell == cwt.at && drawplayer) return vid.cs.charid;
     if(drawcell->monst) return drawcell->monst;
     if(drawcell->item) return drawcell->item;
     return patterns::getpatterninfo0(drawcell).id;
@@ -535,7 +535,7 @@ namespace mapeditor {
     }
 
   void editCell(const pair<cellwalker, cellwalker>& where) {
-    cell *c = where.first.c;
+    cell *c = where.first.at;
     int cdir = where.first.spin;
     saveUndo(c);
     switch(painttype) {
@@ -545,8 +545,8 @@ namespace mapeditor {
         c->stuntime = 0;
         c->mondir = cdir;
         
-        if((isWorm(c) || isIvy(c) || isMutantIvy(c)) && c->mov[cdir] && 
-          !isWorm(c->mov[cdir]) && !isIvy(c->mov[cdir]))
+        if((isWorm(c) || isIvy(c) || isMutantIvy(c)) && c->move(cdir) && 
+          !isWorm(c->move(cdir)) && !isIvy(c->move(cdir)))
           c->mondir = NODIR;
         
         if(c->monst == moMimic) {
@@ -603,7 +603,7 @@ namespace mapeditor {
         c->landparam = paintwhat >> 8;
         break;
       case 4:
-        cell *copywhat = where.second.c;
+        cell *copywhat = where.second.at;
         c->wall = copywhat->wall;
         c->item = copywhat->item;
         c->land = copywhat->land;
@@ -631,13 +631,13 @@ namespace mapeditor {
         if(crad > radius) break;
         }
       auto sd = spill_list[i];
-      for(int i=0; i<sd.first.c->type; i++) {
+      for(int i=0; i<sd.first.at->type; i++) {
         auto sd2 = sd;
         sd2.first = sd2.first + i + wstep;
-        if(!cl.add(sd2.first.c)) continue;
-        if(sd2.second.c) {
+        if(!cl.add(sd2.first.at)) continue;
+        if(sd2.second.at) {
           sd2.second = sd2.second + i + wstep;
-          if(sd2.second.c->land == laNone) continue;
+          if(sd2.second.at->land == laNone) continue;
           }
         spill_list.push_back(sd2);
         }
@@ -671,12 +671,12 @@ namespace mapeditor {
   void editAt(cellwalker where, manual_celllister& cl) {
 
     if(painttype == 4 && radius) {
-      if(where.c->type != copysource.c->type) return;
+      if(where.at->type != copysource.at->type) return;
       if(where.spin<0) where.spin=0;
       if(!nonbitrunc && !ctof(mouseover) && ((where.spin&1) != (copysource.spin&1)))
         where += 1;
       }
-    if(painttype != 4) copysource.c = NULL;
+    if(painttype != 4) copysource.at = NULL;
     list_spill(where, copysource, cl);
     
     for(auto& st: spill_list)
@@ -691,7 +691,7 @@ namespace mapeditor {
       return;
       }
 
-    cl.add(where.c);
+    cl.add(where.at);
     
     int at = 0;
     while(at < isize(cl.lst)) {
@@ -701,7 +701,7 @@ namespace mapeditor {
       forCellEx(c3, c2) cl.add(c3);
       }
     
-    auto si = patterns::getpatterninfo0(where.c);
+    auto si = patterns::getpatterninfo0(where.at);
     int cdir = where.spin;
     if(cdir >= 0) cdir = cdir - si.dir;
     
@@ -862,7 +862,7 @@ namespace mapeditor {
     else if(uni == ' ') {
       popScreen();
       pushScreen(showDrawEditor);
-      initdraw(mouseover ? mouseover : cwt.c);
+      initdraw(mouseover ? mouseover : cwt.at);
       }
     }
 
@@ -1541,7 +1541,7 @@ namespace mapeditor {
         applyToShape(sg, i, uni, mh);
 
       if(uni == 'e' || (uni == '-' && mousekey == 'e')) {
-        initdraw(mouseover ? mouseover : cwt.c);
+        initdraw(mouseover ? mouseover : cwt.at);
         }
       if(uni == 'l') { dslayer++; dslayer %= USERLAYERS; }
       if(uni == 'L') { dslayer--; if(dslayer < 0) dslayer += USERLAYERS; }
@@ -1600,7 +1600,7 @@ namespace mapeditor {
     if(mapeditor::painttype == 4) 
       mapeditor::painttype = 0, mapeditor::paintwhat = 0,
       mapeditor::paintwhat_str = "clear monster";
-    mapeditor::copysource.c = NULL;
+    mapeditor::copysource.at = NULL;
     mapeditor::undo.clear();
     if(!cheater) patterns::displaycodes = false;
     if(!cheater) patterns::whichShape = 0;
@@ -1608,7 +1608,7 @@ namespace mapeditor {
     }) + 
   addHook(hooks_removecells, 0, [] () {
     modelcell.clear();
-    set_if_removed(mapeditor::copysource.c, NULL);
+    set_if_removed(mapeditor::copysource.at, NULL);
     });;;  
 #endif
 

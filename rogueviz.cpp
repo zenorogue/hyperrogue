@@ -167,7 +167,7 @@ hyperpoint where(int i, cell *base) {
     }
   else {
     // notimpl(); // actually probably that's a buug
-    return inverse(ggmatrix(currentmap->gamestart())) * (shmup::ggmatrix(m->base) * tC0(m->at));
+    return inverse(ggmatrix(currentmap->gamestart())) * (ggmatrix(m->base) * tC0(m->at));
     }
   }
 
@@ -236,7 +236,7 @@ namespace spiral {
       
       transmatrix h = at(d);
   
-      createViz(i, cwt.c, h);
+      createViz(i, cwt.at, h);
       vd.name = its(i+1);
       virtualRebase(vd.m, true);
   
@@ -282,7 +282,7 @@ namespace collatz {
     collatz2 = add_edgetype("2");
     vdata.resize(1);
     vertexdata& vd = vdata[0];
-    createViz(0, cwt.c, xpush(cshift));
+    createViz(0, cwt.at, xpush(cshift));
     virtualRebase(vd.m, true);
     vd.cp = perturb(dftcolor);
     vd.data = 0;
@@ -469,7 +469,7 @@ namespace tree {
       vd.m = new shmup::monster;
       vd.m->pid = i;
       vd.data = lv.parent;
-      createViz(i, cwt.c, h);
+      createViz(i, cwt.at, h);
       vd.cp = dftcolor; 
       
       if(tol[i].parent >= 0) 
@@ -518,11 +518,11 @@ namespace sag {
   bool snake_enabled;
 
   void setsnake(cellwalker& cw, int i) {
-    lpbak[i] = cw.c->landparam;
-    wpbak[i] = cw.c->wparam;
-    cw.c->landparam = i; cw.c->wparam = INSNAKE;
-    // cw.c->monst = moWormtail; cw.c->mondir = cw.spin;
-    snakecells[i] = cw.c;
+    lpbak[i] = cw.at->landparam;
+    wpbak[i] = cw.at->wparam;
+    cw.at->landparam = i; cw.at->wparam = INSNAKE;
+    // cw.at->monst = moWormtail; cw.at->mondir = cw.spin;
+    snakecells[i] = cw.at;
     }
   
   void snakeswitch() { 
@@ -577,9 +577,9 @@ namespace sag {
       for(int i=2; i<=numsnake; i++) {
         if(i == numsnake && sphere) break;
         cw += wstep;
-        snakefirst[i-1] = cw.c->landparam;
-        while(cw.c->wparam == INSNAKE) {
-          snakelast[i-1] = cw.c->landparam;
+        snakefirst[i-1] = cw.at->landparam;
+        while(cw.at->wparam == INSNAKE) {
+          snakelast[i-1] = cw.at->landparam;
           cw = cw + wstep + 1 + wstep;
           }
         if(i == numsnake) break;
@@ -605,7 +605,7 @@ namespace sag {
       }
     /* cell *c = snakecells[id];
     for(int i=0; i<c->type; i++) {
-      cell *c2 = c->mov[i];
+      cell *c2 = c->move(i);
       if(c2 && c2->wparam == INSNAKE && snakenode[c2->landparam] >= 0)
         cost += 100;
       } */
@@ -662,7 +662,7 @@ namespace sag {
       int it = s<2 ? (s+1) : s-2;
       for(int ii=0; ii<it; ii++) {
         int d = hrand(c->type);
-        c = c->mov[d];
+        c = c->move(d);
         if(!c) goto aiter;
         if(c->wparam != INSNAKE) goto aiter;
         }
@@ -1185,12 +1185,12 @@ bool drawVertex(const transmatrix &V, cell *c, shmup::monster *m) {
         }
       else {
       
-        cell *center = multidraw ? c : euclid ? cwt.c : viewctr.h->c7;
+        cell *center = multidraw ? c : euclid ? cwt.at : viewctr.at->c7;
       
         if(!multidraw && ei->orig && ei->orig != center && celldistance(ei->orig, center) > 3) 
           ei->orig = NULL;
         if(!ei->orig) {
-          ei->orig = center; // cwt.c;
+          ei->orig = center; // cwt.at;
           ei->prec.clear();
           
           transmatrix T = inverse(ggmatrix(ei->orig));
@@ -1783,9 +1783,9 @@ void showMenu() {
     else if(uni == 'b') backcolor ^= 0xFFFFFF, bordcolor ^= 0xFFFFFF, forecolor ^= 0xFFFFFF;
     else if(uni == 'g') pushScreen(configure_edge_display);
     else if(uni == 'z') {
-      for(int i=0; i<isize(named)-1; i++) if(named[i] == cwt.c)
+      for(int i=0; i<isize(named)-1; i++) if(named[i] == cwt.at)
         swap(named[i], named[i+1]);
-      if(!isize(named) || named[isize(named)-1] != cwt.c) named.push_back(cwt.c);
+      if(!isize(named) || named[isize(named)-1] != cwt.at) named.push_back(cwt.at);
       printf("named = %d\n", isize(named));
       popScreen();
       }
@@ -1819,7 +1819,7 @@ template<class T> function<void(presmode)> roguevizslide(char c, const T& t) {
     slidecommand = "toggle the player";
     if(mode == 4) 
       mapeditor::drawplayer = !mapeditor::drawplayer;
-    centerover.c = NULL; pd_from = NULL;
+    centerover.at = NULL; pd_from = NULL;
     };
   }
 
@@ -2003,7 +2003,7 @@ slide rvslides[] = {
       if(mode == 4) {
         if(!banachtarski::on) {
           bool b = mapeditor::drawplayer;
-          specialland = cwt.c->land;
+          specialland = cwt.at->land;
           push_game();
           banachtarski::init_bantar();
           airmap.clear();

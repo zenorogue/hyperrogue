@@ -395,7 +395,7 @@ bool inmirror(cell *c) {
   }
 
 bool inmirror(const cellwalker& cw) {
-  return inmirror(cw.c->land);
+  return inmirror(cw.at->land);
   }
 
 eLand oppositeElement(eLand l, eLand l2) {
@@ -1009,7 +1009,7 @@ eLand getLandForList(cell *c) {
   if(l == laMercuryRiver) return laTerracotta;
   if(l == laBarrier) return laCrossroads;
   if(l == laOceanWall) return laOcean;
-  if(l == laPalace && princess::dist(cwt.c) < OUT_OF_PRISON)
+  if(l == laPalace && princess::dist(cwt.at) < OUT_OF_PRISON)
     l = laPrincessQuest;
   // princess?
   return l;

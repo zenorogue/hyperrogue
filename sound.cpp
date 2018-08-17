@@ -10,7 +10,7 @@ string musfname[landtypes];
 int musicvolume = 60, effvolume = 60;
 
 eLand getCurrentLandForMusic() {
-  eLand id = cwt.c->land;
+  eLand id = cwt.at->land;
   if(isHaunted(id)) id = laHaunted;
   if(id == laWarpSea) id = laWarpCoast;
   return id;

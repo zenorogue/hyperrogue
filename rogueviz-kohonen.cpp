@@ -286,7 +286,7 @@ void analyze() {
 int gaussian = 0;
 
 double mydistance(cell *c1, cell *c2) {
-  if(gaussian == 2) return hdist(tC0(ggmatrix(c1)), tC0(shmup::ggmatrix(c2)));
+  if(gaussian == 2) return hdist(tC0(ggmatrix(c1)), tC0(ggmatrix(c2)));
   else return celldistance(c1, c2);
   }
 
@@ -302,7 +302,7 @@ struct cellcrawler {
   vector<cellcrawlerdata> data;
   
   void store(const cellwalker& o, int from, int spin, manual_celllister& cl) {
-    if(!cl.add(o.c)) return;
+    if(!cl.add(o.at)) return;
     data.emplace_back(o, from, spin);
     }
   
@@ -312,14 +312,14 @@ struct cellcrawler {
     store(start, 0, 0, cl);
     for(int i=0; i<isize(data); i++) {
       cellwalker cw0 = data[i].orig;
-      for(int j=0; j<cw0.c->type; j++) {
+      for(int j=0; j<cw0.at->type; j++) {
         cellwalker cw = cw0 + j + wstep;
-        if(!getNeuron(cw.c)) continue;
+        if(!getNeuron(cw.at)) continue;
         store(cw, i, j, cl);
         }
       }
     if(gaussian) for(cellcrawlerdata& s: data)
-      s.dist = mydistance(s.orig.c, start.c);
+      s.dist = mydistance(s.orig.at, start.at);
     }
   
   void sprawl(const cellwalker& start) {
@@ -328,9 +328,9 @@ struct cellcrawler {
     for(int i=1; i<isize(data); i++) {
       cellcrawlerdata& s = data[i];
       s.target = data[s.from].target;
-      if(!s.target.c) continue;
+      if(!s.target.at) continue;
       s.target += s.spin;
-      if(cwstepcreates(s.target)) s.target.c = NULL;
+      if(!s.target.peek()) s.target.at = NULL;
       else s.target += wstep;
       }
     }
@@ -383,7 +383,7 @@ void buildcellcrawler(cell *c, cellcrawler& cr, int dir) {
       if(iter % dispersion_each == 0) {
         d.emplace_back(N);
         auto& dispvec = d.back();
-        for(int i=0; i<N; i++) dispvec[i] = curtemp[neuronId(*getNeuron(cr.data[i].orig.c))] / vmax;
+        for(int i=0; i<N; i++) dispvec[i] = curtemp[neuronId(*getNeuron(cr.data[i].orig.at))] / vmax;
         if(isize(d) == dispersion_count) break;
         }
       double df = dispersion_precision * (iter+1);
@@ -426,7 +426,7 @@ pair<int, int> get_cellcrawler_id(cell *c) {
     }
   else {
     id = c->type == S7;
-    // if(id == 0) ld = c->spin(0);
+    // if(id == 0) ld = c->c.spin(0);
     }
   /* if(geometry == gZebraQuotient) {
     id = 8*id + ld;
@@ -440,10 +440,10 @@ pair<int, int> get_cellcrawler_id(cell *c) {
 
 bool verify_crawler(cellcrawler& cc, cellwalker cw) {
   cc.sprawl(cw);
-  for(auto& d: cc.data) if(celldistance(cw.c, d.target.c) != d.dist) 
+  for(auto& d: cc.data) if(celldistance(cw.at, d.target.at) != d.dist) 
     return false;
   vector<int> cellcounter(cells, 0);
-  for(auto& d: cc.data) cellcounter[d.target.c->landparam]++;
+  for(auto& d: cc.data) cellcounter[d.target.at->landparam]++;
   for(int i=0; i<cells; i++) if(cellcounter[i] != 1) return false;
   return true;
   }
@@ -546,7 +546,7 @@ void step() {
   auto it = gaussian ? fake.begin() : s.dispersion[dispid].begin();
 
   for(auto& sd: s.data) {
-    neuron *n2 = getNeuron(sd.target.c);
+    neuron *n2 = getNeuron(sd.target.at);
     if(!n2) continue;
     double nu = learning_factor;
     
@@ -599,7 +599,7 @@ int showsample(int id) {
   auto& v = vdata.back();
   v.name = data[id].name;
   v.cp = dftcolor;
-  createViz(i, bids.size() ? net[bids[id]].where : cwt.c, Id);
+  createViz(i, bids.size() ? net[bids[id]].where : cwt.at, Id);
   v.m->store();
   return i;
   }
@@ -642,13 +642,13 @@ void sominit(int initto) {
     vector<cell*> allcells;
     
     if(krad) {
-      celllister cl(cwt.c, krad, 1000000, NULL);
+      celllister cl(cwt.at, krad, 1000000, NULL);
       allcells = cl.lst;
       }
     else allcells = currentmap->allcells();
     
     if(isize(allcells) > kohrestrict) {
-      sort(allcells.begin(), allcells.end(), [] (cell *c1, cell *c2) { return hdist0(tC0(ggmatrix(c1))) < hdist0(tC0(shmup::ggmatrix(c2))); });
+      sort(allcells.begin(), allcells.end(), [] (cell *c1, cell *c2) { return hdist0(tC0(ggmatrix(c1))) < hdist0(tC0(ggmatrix(c2))); });
       allcells.resize(kohrestrict);
       }
   
@@ -675,7 +675,7 @@ void sominit(int initto) {
       auto &vd = vdata.back();
       vd.name = data[s].name;
       vd.cp = dftcolor;
-      createViz(vdid, cwt.c, Id);
+      createViz(vdid, cwt.at, Id);
       storeall(vdid);
       }
     
@@ -786,9 +786,9 @@ namespace levelline {
       neuron *n1 = getNeuron(c1);
       if(!n1) continue;
       for(int i=0; i<c1->type; i++) {
-        cell *c2 = c1->mov[i];
+        cell *c2 = c1->move(i);
         if(!c2) continue;
-        cell *c3 = c1->mov[i ? i-1 : c1->type-1];
+        cell *c3 = c1->modmove(i-1);
         if(!c3) continue;
   
         if(!gmatrix.count(c2)) continue;

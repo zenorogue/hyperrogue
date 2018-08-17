@@ -136,7 +136,7 @@ bool handleKeyTour(int sym, int uni) {
     
     if(sym == '2') {
       dynamicval<eGeometry> g(geometry, gEuclid);
-      if(cwt.c->land != laCanvas && !land_validity(cwt.c->land).quality_level) {
+      if(cwt.at->land != laCanvas && !land_validity(cwt.at->land).quality_level) {
         addMessage(XLAT("This land has no Euclidean version."));
         return true;
         }
@@ -144,7 +144,7 @@ bool handleKeyTour(int sym, int uni) {
     
     if(sym == '1') {
       dynamicval<eGeometry> g(geometry, gSphere);
-      if(cwt.c->land != laCanvas && !land_validity(cwt.c->land).quality_level) {
+      if(cwt.at->land != laCanvas && !land_validity(cwt.at->land).quality_level) {
         addMessage(XLAT("This land has no spherical version."));
         return true;
         }
@@ -160,7 +160,7 @@ bool handleKeyTour(int sym, int uni) {
     if(sym == '1') targetgeometry = gSphere, vid.alpha = 1, vid.scale = .5;
     if(sym == '2') targetgeometry = gEuclid, vid.alpha = 1, vid.scale = .5;
 
-    firstland = specialland = cwt.c->land;
+    firstland = specialland = cwt.at->land;
     push_game();
     switch_game_mode(sym == '3' ? rg::bitrunc : rg::geometry);
     start_game();
@@ -171,8 +171,8 @@ bool handleKeyTour(int sym, int uni) {
       if(sym == '2') x = XLAT("Euclidean version of %the1. ", s0 + "'" + slides[currentslide].name + "'");
       }
     else {
-      if(sym == '1') x = XLAT("Spherical version of %the1. ", cwt.c->land);
-      if(sym == '2') x = XLAT("Euclidean version of %the1. ", cwt.c->land);
+      if(sym == '1') x = XLAT("Spherical version of %the1. ", cwt.at->land);
+      if(sym == '2') x = XLAT("Euclidean version of %the1. ", cwt.at->land);
       }
     if(mousing)
       addMessage(x + XLAT("Click again to go back to your game."));
@@ -383,9 +383,9 @@ slide default_slides[] = {
     [] (presmode mode) {
       slidecommand = "gain Ice Diamonds";
       if(mode == 4)
-        forCellEx(c2, cwt.c) 
+        forCellEx(c2, cwt.at) 
         forCellEx(c3, c2)
-        if(c3->wall == waNone && c3->item == itNone && c3->monst == moNone && c3 != cwt.c) 
+        if(c3->wall == waNone && c3->item == itNone && c3->monst == moNone && c3 != cwt.at) 
           c3->item = itDiamond;
       SHOWLAND( l == laIce );
       }
@@ -456,8 +456,8 @@ slide default_slides[] = {
     [] (presmode mode) {
       setCanvas(mode, 'F');
       if(mode == 5) {
-        cwt.c->mov[0]->monst = moRunDog;
-        cwt.c->mov[1]->monst = moGoblin;
+        cwt.at->move(0)->monst = moRunDog;
+        cwt.at->move(1)->monst = moGoblin;
         }
       SHOWLAND( l == laCanvas );
       }
@@ -582,7 +582,7 @@ slide default_slides[] = {
       if(mode == 1) 
         pmodel = mdHalfplane;
       if(mode == 2) 
-        conformal::rotation = cwt.c->land == laDungeon ? 0 : 2;
+        conformal::rotation = cwt.at->land == laDungeon ? 0 : 2;
       if(mode == 3) pmodel = mdDisk, conformal::rotation = 0;
       }
     },
@@ -664,7 +664,7 @@ slide default_slides[] = {
     [] (presmode mode) {
       slidecommand = "create a baby tortoise";
       if(mode == 4) {
-        cell *c = cwt.c->mov[0];
+        cell *c = cwt.at->move(0);
         c->item = itBabyTortoise;
         tortoise::babymap[c] = getBits(c) ^ tortoise::getRandomBits();
         }
@@ -762,7 +762,7 @@ slide default_slides[] = {
     "focus on a particular challenge.",
     [] (presmode mode) {
       if(mode == 1) {
-        firstland = cwt.c->land;
+        firstland = cwt.at->land;
         push_game();
         switch_game_mode(rg::shmup);
         start_game();

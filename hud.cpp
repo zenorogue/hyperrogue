@@ -130,9 +130,9 @@ int glyphflags(int gid) {
     if(itemclass(i) == IC_NAI) f |= GLYPH_NONUMBER;
     if(isElementalShard(i)) {
       f |= GLYPH_LOCAL | GLYPH_INSQUARE;
-      if(i == localshardof(cwt.c->land)) f |= GLYPH_LOCAL2;
+      if(i == localshardof(cwt.at->land)) f |= GLYPH_LOCAL2;
       }
-    if(i == treasureType(cwt.c->land) || daily::on) 
+    if(i == treasureType(cwt.at->land) || daily::on) 
       f |= GLYPH_LOCAL | GLYPH_LOCAL2 | GLYPH_IMPORTANT | GLYPH_INSQUARE;
     if(i == itHolyGrail) {
       if(items[i] >= 3 && !inv::on) f |= GLYPH_MARKOVER;
@@ -151,7 +151,7 @@ int glyphflags(int gid) {
   else {
     eMonster m = eMonster(gid-ittypes);
     if(m == moLesser) f |= GLYPH_IMPORTANT | GLYPH_DEMON | GLYPH_INPORTRAIT | GLYPH_INSQUARE;
-    int isnat = isNative(cwt.c->land, m);
+    int isnat = isNative(cwt.at->land, m);
     if(isnat) f |= GLYPH_LOCAL | GLYPH_IMPORTANT | GLYPH_INPORTRAIT | GLYPH_INSQUARE;
     if(isnat == 2) f |= GLYPH_LOCAL2;
     if(m == monsterToSummon) f |= GLYPH_TARGET;
@@ -304,11 +304,11 @@ hookset<bool()> *hooks_prestats;
 void drawMobileArrow(int i) {
 
   int dir = i;
-  cell *c = cwt.c->mov[i];
+  cell *c = cwt.at->move(i);
   if(!c) return;
 
   transmatrix T;
-  if(!compute_relamatrix(c, cwt.c, i, T)) return;
+  if(!compute_relamatrix(c, cwt.at, i, T)) return;
 
   // int col = getcs().uicolor;
   // col -= (col & 0xFF) >> 1;
@@ -326,7 +326,7 @@ void drawMobileArrow(int i) {
   ld scale = vid.mobilecompasssize * (sphere ? 7 : euclid ? 6 : 5);
   // m2[0][0] = scale; m2[1][1] = scale; m2[2][2] = 1;
 
-  transmatrix U = ggmatrix(cwt.c);
+  transmatrix U = ggmatrix(cwt.at);
   hyperpoint H = sphereflip * tC0(U);
   transmatrix Centered = sphereflip * rgpushxto0(H);
 
@@ -353,7 +353,7 @@ void drawStats() {
     vector<cell*>& ac = currentmap->allcells();
     for(int i=0; i<64; i++) qty[i] = 0;
     for(int i=0; i<isize(ac); i++) {
-      int d = celldistance(ac[i], cwt.c);
+      int d = celldistance(ac[i], cwt.at);
       if(d >= 0 && d < 64) qty[d]++;
       }
     if(geometry == gNormal && !gp::on)
@@ -399,7 +399,7 @@ void drawStats() {
     queuecircle(xmove, yb, rad*SKIPFAC, 
       legalmoves[MAX_EDGE] ? 0xFF0000FF : 0xFF000080
       );
-    for(int i=0; i<cwt.c->type; i++) drawMobileArrow(i);
+    for(int i=0; i<cwt.at->type; i++) drawMobileArrow(i);
     if(hypot(mousex-xmove, mousey-yb) <= rad) getcstat = '-';
     quickqueue();
     }

@@ -55,7 +55,7 @@ bool mouseout2() {
 
 movedir vectodir(const hyperpoint& P) {
 
-  transmatrix U = ggmatrix(cwt.c);
+  transmatrix U = ggmatrix(cwt.at);
 
   hyperpoint H = sphereflip * tC0(U);
   transmatrix Centered = sphereflip * rgpushxto0(H);
@@ -64,22 +64,22 @@ movedir vectodir(const hyperpoint& P) {
   
   ld dirdist[MAX_EDGE];
 
-  for(int i=0; i<cwt.c->type; i++) {
+  for(int i=0; i<cwt.at->type; i++) {
     transmatrix T;
-    if(compute_relamatrix(cwt.c->mov[fixdir(cwt.spin + i, cwt.c)], cwt.c, i, T)) {
+    if(compute_relamatrix(cwt.at->modmove(cwt.spin + i), cwt.at, i, T)) {
       dirdist[i] = intval(U * T * C0, Centered * P);
       }
-    //xspinpush0(-i * 2 * M_PI /cwt.c->type, .5), P);
+    //xspinpush0(-i * 2 * M_PI /cwt.at->type, .5), P);
     }
     
   movedir res;
   res.d = -1;
   
-  for(int i=0; i<cwt.c->type; i++) {
+  for(int i=0; i<cwt.at->type; i++) {
     if(dirdist[i] < binv) {
       binv = dirdist[i];
       res.d = i;
-      res.subdir = dirdist[(i+1)%cwt.c->type] < dirdist[(i+cwt.c->type-1)%cwt.c->type] ? 1 : -1;
+      res.subdir = dirdist[(i+1)%cwt.at->type] < dirdist[(i+cwt.at->type-1)%cwt.at->type] ? 1 : -1;
       }
     }
 
@@ -104,37 +104,37 @@ void movepckeydir(int d) {
 void calcMousedest() {
   if(mouseout()) return;
   if(vid.revcontrol == true) { mouseh[0] = -mouseh[0]; mouseh[1] = -mouseh[1]; }
-  ld mousedist = intval(mouseh, tC0(ggmatrix(cwt.c)));
+  ld mousedist = intval(mouseh, tC0(ggmatrix(cwt.at)));
   mousedest.d = -1;
   
   cellwalker bcwt = cwt;
   
   ld dists[MAX_EDGE];
   
-  transmatrix U = ggmatrix(cwt.c);
+  transmatrix U = ggmatrix(cwt.at);
   
-  for(int i=0; i<cwt.c->type; i++) {
+  for(int i=0; i<cwt.at->type; i++) {
     transmatrix T;
-    if(compute_relamatrix(cwt.c->mov[i], cwt.c, i, T))
+    if(compute_relamatrix(cwt.at->move(i), cwt.at, i, T))
       dists[i] = intval(mouseh, U * T * C0);
     else
       dists[i] = HUGE_VAL;
     }
-  // confusingGeometry() ? ggmatrix(cwt.c) * calc_relative_matrix(cwt.c->mov[i], cwt.c, i) : shmup::ggmatrix(cwt.c->mov[i])));
+  // confusingGeometry() ? ggmatrix(cwt.at) * calc_relative_matrix(cwt.at->move(i), cwt.at, i) : shmup::ggmatrix(cwt.at->move(i))));
   
   /* printf("curcell = %Lf\n", mousedist);
-  for(int i=0; i<cwt.c->type; i++)
+  for(int i=0; i<cwt.at->type; i++)
     printf("d%d = %Lf\n", i, dists[i]); */
 
-  for(int i=0; i<cwt.c->type; i++) if(dists[i] < mousedist) {
+  for(int i=0; i<cwt.at->type; i++) if(dists[i] < mousedist) {
     mousedist = dists[i];
-    mousedest.d = fixdir(i - cwt.spin, cwt.c);
+    mousedest.d = fixdir(i - cwt.spin, cwt.at);
     
     mousedest.subdir =
-       dists[(i+1)%cwt.c->type] < dists[(i+cwt.c->type-1)%cwt.c->type] ? 1 : -1;
+       dists[(i+1)%cwt.at->type] < dists[(i+cwt.at->type-1)%cwt.at->type] ? 1 : -1;
 
     if(cwt.mirrored) 
-      mousedest.d = fixdir(-mousedest.d, cwt.c), 
+      mousedest.d = fixdir(-mousedest.d, cwt.at), 
       mousedest.subdir = -mousedest.subdir;
     }
   
@@ -275,7 +275,7 @@ void handlePanning(int sym, int uni) {
     }
   
   if(sym == SDLK_PAGEUP || sym == SDLK_PAGEDOWN) 
-    if(isGravityLand(cwt.c->land)) playermoved = false;
+    if(isGravityLand(cwt.at->land)) playermoved = false;
 
   if(sym == PSEUDOKEY_WHEELUP) {
     ld jx = (mousex - vid.xcenter - .0) / vid.radius / 10;
@@ -357,7 +357,7 @@ void handleKeyNormal(int sym, int uni) {
       // vid.yshift = 1 - vid.yshift;
       // vid.drawmousecircle = true;
       }
-    if(sym == 'm' && canmove && (centerover == cwt ? mouseover : centerover.c))
+    if(sym == 'm' && canmove && (centerover == cwt ? mouseover : centerover.at))
       performMarkCommand(mouseover);
     }
   
@@ -367,10 +367,10 @@ void handleKeyNormal(int sym, int uni) {
       movepcto(MD_DROP, 1);
     if(sym == 't' && uni != 'T' && uni != 'T'-64 && canmove) {
       if(playermoved && items[itStrongWind]) { 
-        cell *c = whirlwind::jumpDestination(cwt.c);
-        if(c) centerover.c = c;
+        cell *c = whirlwind::jumpDestination(cwt.at);
+        if(c) centerover.at = c;
         }
-      targetRangedOrb(centerover.c, roKeyboard);
+      targetRangedOrb(centerover.at, roKeyboard);
       sym = 0; uni = 0;
       }
     }
@@ -503,8 +503,8 @@ void mainloopiter() {
   if(!shmup::on && (multi::alwaysuse || multi::players > 1) && normal)
     timetowait = 0, multi::handleMulti(ticks - lastt);
 
-  if(vid.sspeed >= 5 && gmatrix.count(cwt.c) && !elliptic) {
-    cwtV = gmatrix[cwt.c] * ddspin(cwt.c, cwt.spin);
+  if(vid.sspeed >= 5 && gmatrix.count(cwt.at) && !elliptic) {
+    cwtV = gmatrix[cwt.at] * ddspin(cwt.at, cwt.spin);
     if(cwt.mirrored) playerV = playerV * Mirror;
     }
 

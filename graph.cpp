@@ -135,7 +135,7 @@ void drawShield(const transmatrix& V, eItem it) {
   int col = iinf[it].color;
   if(it == itOrbShield && items[itOrbTime] && !orbused[it])
     col = (col & 0xFEFEFE) / 2;
-  if(sphere && cwt.c->land == laHalloween && !wmblack && !wmascii)
+  if(sphere && cwt.at->land == laHalloween && !wmblack && !wmascii)
     col = 0;
   double d = it == itOrbShield ? hexf : hexf - .1;
   int mt = sphere ? 7 : 5;
@@ -240,7 +240,7 @@ int displaydir(cell *c, int d) {
     auto& vs = irr::cells[id];
     if(d < 0 || d >= c->type) return 0;
     auto& p = vs.jpoints[vs.neid[d]];
-    return -int(atan2(p[1], p[0]) * S84 / 2 / M_PI + MODFIXER + .5);
+    return -int(atan2(p[1], p[0]) * S84 / 2 / M_PI + .5);
     }
   else if(binarytiling) {
     if(d == NODIR) return 0;
@@ -310,7 +310,7 @@ void drawPlayerEffects(const transmatrix& V, cell *c, bool onplayer) {
         if(a == ang && items[itOrbSword]) continue;
         if(nonbitrunc && !gp::on && !irr::on && a%3 != ang%3) continue;
         if((a+S21)%S42 == ang && items[itOrbSword2]) continue;
-        bool longer = sword::pos(cwt.c, a-1) != sword::pos(cwt.c, a+1);
+        bool longer = sword::pos(cwt.at, a-1) != sword::pos(cwt.at, a+1);
         int col = darkena(0xC0C0C0, 0, 0xFF);
         queueline(Vnow*ddi0(dda, nonbitrunc ? 0.6 * gp::scale : longer ? 0.36 : 0.4), Vnow*ddi0(dda, nonbitrunc ? 0.7 * gp::scale : longer ? 0.44 : 0.42), col, 1);
         }
@@ -562,8 +562,8 @@ void otherbodyparts(const transmatrix& V, int col, eMonster who, double footphas
 
 bool drawstar(cell *c) {
   for(int t=0; t<c->type; t++) 
-    if(c->mov[t] && c->mov[t]->wall != waSulphur && c->mov[t]->wall != waSulphurC &&
-     c->mov[t]->wall != waBarrier)
+    if(c->move(t) && c->move(t)->wall != waSulphur && c->move(t)->wall != waSulphurC &&
+     c->move(t)->wall != waBarrier)
        return false;
   return true;
   }
@@ -1801,7 +1801,7 @@ int cellcolor(cell *c) {
 int taildist(cell *c) {
   int s = 0;
   while(s < 1000 && c->mondir != NODIR && isWorm(c->monst)) {
-    s++; c = c->mov[c->mondir];
+    s++; c = c->move(c->mondir);
     }
   return s;
   }
@@ -1850,11 +1850,11 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, int col) {
       int d = c->mondir;
       if(d == NODIR)
         forCellIdEx(c2, i, c)
-          if(among(c2->monst, moHexSnakeTail, moHexSnake) && c2->mondir == c->spin(i))
+          if(among(c2->monst, moHexSnakeTail, moHexSnake) && c2->mondir == c->c.spin(i))
             d = i;
       if(d == NODIR) { d = hrand(c->type); createMov(c, d); }
       int c1 = nestcolors[pattern_threecolor(c)];
-      int c2 = nestcolors[pattern_threecolor(c->mov[d])];
+      int c2 = nestcolors[pattern_threecolor(c->move(d))];
       col = (c1 + c2); // sum works because they are dark and should be brightened
       }
 
@@ -1865,9 +1865,9 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, int col) {
       
       if(mmmon) {
         ld length;
-        // cell *c2 = c->mov[c->mondir];
+        // cell *c2 = c->move(c->mondir);
         if(nospinb) 
-          chainAnimation(c, Vb, c->mov[c->mondir], c->mondir, 0, Vparam, length);
+          chainAnimation(c, Vb, c->move(c->mondir), c->mondir, 0, Vparam, length);
         else {
           Vb = Vb * ddspin(c, c->mondir);
           length = cellgfxdist(c, c->mondir);
@@ -1968,8 +1968,8 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, int col) {
       else if(m == moDragonTail) {
         cell *c2 = NULL;
         for(int i=0; i<c->type; i++)
-          if(c->mov[i] && isDragon(c->mov[i]->monst) && c->mov[i]->mondir == c->spn(i))
-            c2 = c->mov[i];
+          if(c->move(i) && isDragon(c->move(i)->monst) && c->move(i)->mondir == c->c.spin(i))
+            c2 = c->move(i);
         int nd = neighborId(c, c2);
         char part = dragon::bodypart(c, dragon::findhead(c));
         if(part == 't') {
@@ -1990,7 +1990,7 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, int col) {
             ld length;
             chainAnimation(c, Vb, c2, nd, 0, Vparam, length);
             Vb = Vb * pispin;
-            double ang = chainAngle(c, Vb, c->mov[c->mondir], (displaydir(c, c->mondir) - displaydir(c, nd)) * M_PI / S42, Vparam);
+            double ang = chainAngle(c, Vb, c->move(c->mondir), (displaydir(c, c->mondir) - displaydir(c, nd)) * M_PI / S42, Vparam);
             ang /= 2;
             Vb = Vb * spin(M_PI-ang);
             }
@@ -2016,8 +2016,8 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, int col) {
           bool hexsnake = c->monst == moHexSnake || c->monst == moHexSnakeTail;
           cell *c2 = NULL;
           for(int i=0; i<c->type; i++)
-            if(c->mov[i] && isWorm(c->mov[i]->monst) && c->mov[i]->mondir == c->spn(i))
-              c2 = c->mov[i];
+            if(c->move(i) && isWorm(c->move(i)->monst) && c->move(i)->mondir == c->c.spin(i))
+              c2 = c->move(i);
           int nd = neighborId(c, c2);
           if(nospinb) {
             ld length;
@@ -2045,17 +2045,17 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, int col) {
       copies = 2;
       if(xdir == -1) copies = 6, xdir = 0;
       }
-    for(auto& m: mirror::mirrors) if(c == m.second.c) 
+    for(auto& m: mirror::mirrors) if(c == m.second.at) 
     for(int d=0; d<copies; d++) {
       multi::cpid = m.first;
       auto cw = m.second;
-      if(d&1) cwmirrorat(cw, xdir);
+      if(d&1) cw = cw.mirrorat(xdir);
       if(d>=2) cw += 2;
       if(d>=4) cw += 2;
       transmatrix Vs = Vparam;
       bool mirr = cw.mirrored;
       Vs = Vs * ddspin(c, cw.spin-cwt.spin, stdeuclid ? 0 : S42);
-      nospins = applyAnimation(cwt.c, Vs, footphase, LAYER_SMALL);
+      nospins = applyAnimation(cwt.at, Vs, footphase, LAYER_SMALL);
       if(!nospins) Vs = Vs * ddspin(c, cwt.spin);
       if(mirr) Vs = Vs * Mirror;
       if(inmirrorcount&1) mirr = !mirr;
@@ -2092,8 +2092,8 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, int col) {
     if(!nospins) {
       int d = 0;
       double bheat = -999;
-      for(int i=0; i<c->type; i++) if(c->mov[i] && HEAT(c->mov[i]) > bheat) {
-        bheat = HEAT(c->mov[i]);
+      for(int i=0; i<c->type; i++) if(c->move(i) && HEAT(c->move(i)) > bheat) {
+        bheat = HEAT(c->move(i));
         d = i;
         }
       Vs = Vs * ddspin(c, d);
@@ -2105,12 +2105,12 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, int col) {
     if(c->hitpoints == 0) col = 0x404040;
     if(nospinb) {
       ld length;
-      chainAnimation(c, Vb, c->mov[c->mondir], c->mondir, 0, Vparam, length);
+      chainAnimation(c, Vb, c->move(c->mondir), c->mondir, 0, Vparam, length);
       Vb = Vb * pispin;
       Vb = Vb * xpush(tentacle_length - cellgfxdist(c, c->mondir));
       }
     else if(gp::on || irr::on) {
-      transmatrix T = calc_relative_matrix(c->mov[c->mondir], c, c->mondir);
+      transmatrix T = calc_relative_matrix(c->move(c->mondir), c, c->mondir);
       Vb = Vb * T * rspintox(tC0(inverse(T))) * xpush(tentacle_length);
       }
     else {
@@ -2356,7 +2356,7 @@ void drawaura() {
 bool bugsNearby(cell *c, int dist = 2) {
   if(!(havewhat&HF_BUG)) return false;
   if(isBug(c)) return true;
-  if(dist) for(int t=0; t<c->type; t++) if(c->mov[t] && bugsNearby(c->mov[t], dist-1)) return true;
+  if(dist) for(int t=0; t<c->type; t++) if(c->move(t) && bugsNearby(c->move(t), dist-1)) return true;
   return false;
   }
 
@@ -2384,7 +2384,7 @@ const char* minetexts[8] = {
 int countMinesAround(cell *c) {
   int mines = 0;
   for(int i=0; i<c->type; i++)
-    if(c->mov[i] && c->mov[i]->wall == waMineMine)
+    if(c->move(i) && c->move(i)->wall == waMineMine)
       mines++;
   return mines;
   }
@@ -2552,7 +2552,7 @@ void viewBuggyCells(cell *c, transmatrix V) {
 
   for(int i=0; i<isize(buggycells); i++) {
     cell *c1 = buggycells[i];
-    cell *cf = cwt.c;
+    cell *cf = cwt.at;
     
     while(cf != c1) {
       cf = pathTowards(cf, c1);
@@ -2573,7 +2573,7 @@ void drawMovementArrows(cell *c, transmatrix V) {
     movedir md = vectodir(spin(-d * M_PI/4) * tC0(pushone()));
     int u = md.d;
     cellwalker xc = cwt + u + wstep;
-    if(xc.c == c) {
+    if(xc.at == c) {
       transmatrix fixrot = sphereflip * rgpushxto0(sphereflip * tC0(V));
       // make it more transparent
       int col = getcs().uicolor;
@@ -2639,7 +2639,7 @@ void setcolors(cell *c, int& wcol, int &fcol) {
       int mafcol = (kraken_pseudohept(c) ? 64 : 8);
       /* bool nearshore = false;
       for(int i=0; i<c->type; i++) 
-        if(c->mov[i]->wall != waSea && c->mov[i]->wall != waBoat)
+        if(c->move(i)->wall != waSea && c->move(i)->wall != waBoat)
           nearshore = true;
       if(nearshore) mafcol += 30; */
       fcol = fcol + mafcol * (4+sin(ticks / 500. + ((eubinary||c->master->alt) ? celldistAlt(c) : 0)*1.5))/5;
@@ -2962,7 +2962,7 @@ void setcolors(cell *c, int& wcol, int &fcol) {
         }  
       if(isHaunted(c->land)) {
         int itcolor = 0;
-        for(int i=0; i<c->type; i++) if(c->mov[i] && c->mov[i]->item)
+        for(int i=0; i<c->type; i++) if(c->move(i) && c->move(i)->item)
           itcolor = 1;
         if(c->item) itcolor |= 2;
         fcol = 0x609F60 + 0x202020 * itcolor;
@@ -3176,8 +3176,8 @@ bool placeSidewall(cell *c, int i, int sidepar, const transmatrix& V, int col) {
     return true;
     }
   
-  if(qfi.fshape == &shBigTriangle && pseudohept(c->mov[i])) return false;
-  if(qfi.fshape == &shTriheptaFloor && !pseudohept(c) && !pseudohept(c->mov[i])) return false;
+  if(qfi.fshape == &shBigTriangle && pseudohept(c->move(i))) return false;
+  if(qfi.fshape == &shTriheptaFloor && !pseudohept(c) && !pseudohept(c->move(i))) return false;
 
   int prio;
   /* if(mirr) prio = PPR_GLASS - 2;
@@ -3392,7 +3392,7 @@ void draw_wall(cell *c, const transmatrix& V, int wcol, int& zcol, int ct6, int 
 
   if(c->wall == waClosedGate) {
     int hdir = 0;
-    for(int i=0; i<c->type; i++) if(c->mov[i]->wall == waClosedGate)
+    for(int i=0; i<c->type; i++) if(c->move(i)->wall == waClosedGate)
       hdir = i;
     transmatrix V2 = mscale(V, wmspatial?geom3::WALL:1) * ddspin(c, hdir, S42);
     queuepolyat(V2, shPalaceGate, darkena(wcol, 0, 0xFF), wmspatial?PPR_WALL3A:PPR_WALL);
@@ -3565,8 +3565,8 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       int cmc = (cw.mirrored == mirrored) ? 2 : 1;
       inmirrorcount += cmc;
       if(cw.mirrored != mirrored) V = V * Mirror;
-      if(cw.spin) V = V * spin(2*M_PI*cw.spin/cw.c->type);
-      drawcell(cw.c, V, 0, cw.mirrored);
+      if(cw.spin) V = V * spin(2*M_PI*cw.spin/cw.at->type);
+      drawcell(cw.at, V, 0, cw.mirrored);
       inmirrorcount -= cmc;
       return;
       }                  
@@ -3621,7 +3621,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       }
     
     if(viewdists && !behindsphere(V)) {
-      int cd = (cwt.c == currentmap->gamestart() && numplayers() == 1) ? celldist(c) : celldistance(c, cwt.c);
+      int cd = (cwt.at == currentmap->gamestart() && numplayers() == 1) ? celldist(c) : celldistance(c, cwt.at);
       string label = its(cd);
       // string label = its(fieldpattern::getriverdistleft(c)) + its(fieldpattern::getriverdistright(c));
       int dc = distcolors[cd&7];
@@ -3726,7 +3726,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       int tim = ticks - lightat;
       if(tim > 1000) tim = 800;
       if(elec::havecharge && tim > 400) tim = 400;
-      for(int t=0; t<c->type; t++) if(c->mov[t] && c->mov[t]->ligon) {
+      for(int t=0; t<c->type; t++) if(c->move(t) && c->move(t)->ligon) {
         int hdir = displaydir(c, t);
         int lcol = darkena(gradient(iinf[itOrbLightning].color, 0, 0, tim, 1100), 0, 0xFF);
         queueline(V*ddi0(ticks, hexf/2), V*ddi0(hdir, crossf), lcol, 2 + vid.linequality);
@@ -3814,19 +3814,19 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         bool onleft = c->type == 7;
         if(c->type == 7 && c->barleft == laMirror)
           onleft = !onleft;
-        if(c->type == 6 && c->mov[d]->barleft == laMirror)
+        if(c->type == 6 && d != -1 && c->move(d)->barleft == laMirror)
           onleft = !onleft;
         if(nonbitrunc) onleft = !onleft;
         
         if(d == -1) {
-          for(d=0; d<6; d++) 
-            if(c->mov[d] && c->mov[(1+d)%6] && c->mov[d]->land == laMirrorWall && c->mov[(1+d)%6]->land == laMirrorWall)
+          for(d=0; d<c->type; d++)
+            if(c->move(d) && c->modmove(d+1) && c->move(d)->land == laMirrorWall && c->modmove(d+1)->land == laMirrorWall)
               break;
           qfi.spin = ddspin(c, d, 0);
-          transmatrix V2 = V * qfi.spin;          
-          if(!wmblack) for(int d=0; d<6; d++) {
+          transmatrix V2 = V * qfi.spin;
+          if(!wmblack) for(int d=0; d<c->type; d++) {
             inmirrorcount+=d;
-            queuepolyat(V2 * spin(d*M_PI/3), shHalfFloor[2], darkena(fcol, fd, 0xFF), PPR_FLOORa);
+            queuepolyat(V2 * spin(d*M_PI/S3), shHalfFloor[2], darkena(fcol, fd, 0xFF), PPR_FLOORa);
             inmirrorcount-=d;
             }          
           if(wmspatial) {
@@ -3860,7 +3860,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       else if(c->land == laWineyard && cellHalfvine(c)) {
 
         int i =-1;
-        for(int t=0;t<6; t++) if(c->mov[t] && c->mov[t]->wall == c->wall)
+        for(int t=0;t<6; t++) if(c->move(t) && c->move(t)->wall == c->wall)
           i = t;
 
         qfi.spin = ddspin(c, i, S14);
@@ -4104,8 +4104,8 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
             int bridgedir = -1;
             if(c->type == 6) {
               for(int i=1; i<c->type; i+=2)
-                if(pseudohept(c->mov[(i+5)%6]) && c->mov[(i+5)%6]->land == laMercuryRiver)
-                if(pseudohept(c->mov[(i+1)%6]) && c->mov[(i+1)%6]->land == laMercuryRiver)
+                if(pseudohept(c->modmove(i-1)) && c->modmove(i-1)->land == laMercuryRiver)
+                if(pseudohept(c->modmove(i+1)) && c->modmove(i+1)->land == laMercuryRiver)
                   bridgedir = i;
               }
             if(bridgedir == -1)
@@ -4114,7 +4114,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
               transmatrix bspin = ddspin(c, bridgedir);
               set_floor(bspin, shMercuryBridge[0]);
               // only needed in one direction
-              if(c < c->mov[bridgedir]) {
+              if(c < c->move(bridgedir)) {
                 bspin = Vf * bspin;
                 queuepoly(bspin, shMercuryBridge[1], darkena(fcol, fd+1, 0xFF));
                 if(wmspatial) {
@@ -4554,7 +4554,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         setcolors(c2, wcol2, fcol2);
         int col = (highwall(c2) || c->wall == waTower) ? wcol2 : fcol2;
         col = gradient(0, col, 0, spherity(V), 1);
-        int j = c->spin(i);
+        int j = c->c.spin(i);
         if(ticks % 500 < -250) {
           V2 = V2 * ddspin(c2, j);
           j = 0;
@@ -4627,7 +4627,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
 
       if(cellHalfvine(c)) {
         int i =-1;
-        for(int t=0;t<6; t++) if(c->mov[t] && c->mov[t]->wall == c->wall)
+        for(int t=0;t<6; t++) if(c->move(t) && c->move(t)->wall == c->wall)
           i = t;
     
         Vboat = &(Vboat0 = *Vboat * ddspin(c, i) * xpush(-.13));
@@ -4657,7 +4657,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
     if(ad == 1 || ad == 2) {
 
      for(int i=0; i<c->type; i++) {
-       cell *c2 = c->mov[i]; 
+       cell *c2 = c->move(i); 
        if(airdist(c2) < airdist(c)) {
          calcAirdir(c2); // printf("airdir = %d\n", airdir);
          transmatrix V0 = ddspin(c, i, S42);
@@ -4740,12 +4740,12 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         ld yx = log(2) / 2;
         ld yy = yx;
         ld xx = 1 / sqrt(2)/2;
-        queueline(V * get_horopoint(-yy, xx), V * get_horopoint(yy, 2*xx), gridcolor(c, c->mov[binary::bd_right]), prec);
+        queueline(V * get_horopoint(-yy, xx), V * get_horopoint(yy, 2*xx), gridcolor(c, c->move(binary::bd_right)), prec);
         auto horizontal = [&] (ld y, ld x1, ld x2, int steps, int dir) {
           if(vid.linequality > 0) steps <<= vid.linequality;
           if(vid.linequality < 0) steps >>= -vid.linequality;
           for(int i=0; i<=steps; i++) curvepoint(V * get_horopoint(y, x1 + (x2-x1) * i / steps));
-          queuecurve(gridcolor(c, c->mov[dir]), 0, PPR_LINE);
+          queuecurve(gridcolor(c, c->move(dir)), 0, PPR_LINE);
           lastptd().u.poly.linewidth = linewidthat(V * get_horopoint(y, (x1+x2)/2), vid.linewidth, 0);
           };
         horizontal(yy, 2*xx, xx, 4, binary::bd_up_right);
@@ -4756,14 +4756,14 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         if(pseudohept(c)) for(int t=0; t<c->type; t++)
           queueline(V * get_warp_corner(c, t%c->type),
                     V * get_warp_corner(c, (t+1)%c->type),
-                    gridcolor(c, c->mov[t]), prec);
+                    gridcolor(c, c->move(t)), prec);
         }
       else {
         for(int t=0; t<c->type; t++)
-          if(c->mov[t] && c->mov[t] < c)
+          if(c->move(t) && c->move(t) < c)
           queueline(V * get_corner_position(c, t),
                     V * get_corner_position(c, (t+1)%c->type),
-                    gridcolor(c, c->mov[t]), prec);
+                    gridcolor(c, c->move(t)), prec);
         }
       }
 
@@ -4779,34 +4779,34 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           }
         }
       
-      else if(isGravityLand(cwt.c->land)) {
-        if(cwt.c->land == laDungeon) rev = true;
+      else if(isGravityLand(cwt.at->land)) {
+        if(cwt.at->land == laDungeon) rev = true;
         if(conformal::do_rotate >= 1)
         if(!straightDownSeek || edgeDepth(c) < edgeDepth(straightDownSeek)) {
           usethis = true;
-          spd = cwt.c->landparam / 10.;
+          spd = cwt.at->landparam / 10.;
           }
         }
       
-      else if(c->master->alt && cwt.c->master->alt &&
-        (cwt.c->land == laMountain || 
+      else if(c->master->alt && cwt.at->master->alt &&
+        (cwt.at->land == laMountain || 
         (conformal::do_rotate >= 2 && 
-          (cwt.c->land == laTemple || cwt.c->land == laWhirlpool || 
-          (cheater && (cwt.c->land == laClearing || cwt.c->land == laCaribbean ||
-          cwt.c->land == laCamelot || cwt.c->land == laPalace))) 
+          (cwt.at->land == laTemple || cwt.at->land == laWhirlpool || 
+          (cheater && (cwt.at->land == laClearing || cwt.at->land == laCaribbean ||
+          cwt.at->land == laCamelot || cwt.at->land == laPalace))) 
           ))
-        && c->land == cwt.c->land && c->master->alt->alt == cwt.c->master->alt->alt) {
+        && c->land == cwt.at->land && c->master->alt->alt == cwt.at->master->alt->alt) {
         if(!straightDownSeek || !straightDownSeek->master->alt || celldistAlt(c) < celldistAlt(straightDownSeek)) {
           usethis = true;
           spd = .5;
-          if(cwt.c->land == laMountain) rev = true;
+          if(cwt.at->land == laMountain) rev = true;
           }
         }
   
-      else if(conformal::do_rotate >= 2 && cwt.c->land == laOcean && cwt.c->landparam < 25) {
+      else if(conformal::do_rotate >= 2 && cwt.at->land == laOcean && cwt.at->landparam < 25) {
         if(!straightDownSeek || coastval(c, laOcean) < coastval(straightDownSeek, laOcean)) {
           usethis = true;
-          spd = cwt.c->landparam / 10;
+          spd = cwt.at->landparam / 10;
           }
           
         }
@@ -4967,7 +4967,7 @@ void drawMarkers() {
           }
         hyperpoint H = tC0(ggmatrix(keycell));
         queuechr(H, 2*vid.fsize, 'X', 0x10101 * int(128 + 100 * sin(ticks / 150.)));
-        queuestr(H, vid.fsize, its(celldistance(cwt.c, yi[yii].key())), 0x10101 * int(128 - 100 * sin(ticks / 150.)));
+        queuestr(H, vid.fsize, its(celldistance(cwt.at, yi[yii].key())), 0x10101 * int(128 - 100 * sin(ticks / 150.)));
         addauraspecial(H, iinf[itOrbYendor].color, 0);
         }
       }
@@ -4983,7 +4983,7 @@ void drawMarkers() {
 
 #if CAP_SDLJOY
     if(joydir.d >= 0) 
-      queuecircleat(cwt.c->mov[(joydir.d+cwt.spin) % cwt.c->type], .78 - .02 * sin(ticks/199.0), 
+      queuecircleat(cwt.at->modmove(joydir.d+cwt.spin), .78 - .02 * sin(ticks/199.0), 
         darkena(0x00FF00, 0, 0xFF));
 #endif
 
@@ -4991,8 +4991,8 @@ void drawMarkers() {
 #if CAP_MODEL
     m = netgen::mode == 0;
 #endif
-    if(centerover.c && !playermoved && m && !conformal::on)
-      queuecircleat(centerover.c, .70 - .06 * sin(ticks/200.0), 
+    if(centerover.at && !playermoved && m && !conformal::on)
+      queuecircleat(centerover.at, .70 - .06 * sin(ticks/200.0), 
         darkena(int(175 + 25 * sin(ticks / 200.0)), 0, 0xFF));
 
     if(multi::players > 1 || multi::alwaysuse) for(int i=0; i<numplayers(); i++) {
@@ -5006,15 +5006,15 @@ void drawMarkers() {
 
     if((vid.axes == 4 || (vid.axes == 1 && !mousing)) && !shmup::on) {
       if(multi::players == 1) {
-        forCellIdAll(c2, d, cwt.c) IG(c2) drawMovementArrows(c2, confusingGeometry() ? Gm(cwt.c) * calc_relative_matrix(c2, cwt.c, d) : Gm(c2));
+        forCellIdAll(c2, d, cwt.at) IG(c2) drawMovementArrows(c2, confusingGeometry() ? Gm(cwt.at) * calc_relative_matrix(c2, cwt.at, d) : Gm(c2));
         }
       else if(multi::players > 1) for(int p=0; p<multi::players; p++) {
         if(multi::playerActive(p) && (vid.axes == 4 || !drawstaratvec(multi::mdx[p], multi::mdy[p]))) 
-        forCellIdAll(c2, d, multi::player[p].c) IG(c2) {
+        forCellIdAll(c2, d, multi::player[p].at) IG(c2) {
           multi::cpid = p;
           dynamicval<transmatrix> ttm(cwtV, multi::whereis[p]);
           dynamicval<cellwalker> tcw(cwt, multi::player[p]);
-          drawMovementArrows(c2, confusingGeometry() ? Gm(cwt.c) * calc_relative_matrix(c2, cwt.c, d) : Gm(c2));
+          drawMovementArrows(c2, confusingGeometry() ? Gm(cwt.at) * calc_relative_matrix(c2, cwt.at, d) : Gm(c2));
           }
         }
       }
@@ -5187,7 +5187,7 @@ void drawthemap() {
   compute_graphical_distance();
 
   centdist = 1e20; 
-  if(!stdeuclid) centerover.c = NULL; 
+  if(!stdeuclid) centerover.at = NULL; 
 
   for(int i=0; i<multi::players; i++) {
     multi::ccdist[i] = 1e20; multi::ccat[i] = NULL;
@@ -5279,7 +5279,7 @@ void drawthemap() {
     items[itWarning] -= 2;
     if(cw.spin != cwt.spin) mirror::act(-mousedest.d, mirror::SPINSINGLE);
     cwt = cw; flipplayer = f;
-    lmouseover = mousedest.d >= 0 ? cwt.c->mov[(cwt.spin + mousedest.d) % cwt.c->type] : cwt.c;
+    lmouseover = mousedest.d >= 0 ? cwt.at->modmove(cwt.spin + mousedest.d) : cwt.at;
     }
   #endif
   profile_stop(0);
@@ -5654,7 +5654,7 @@ void drawscreen() {
     SDL_FillRect(s, NULL, backcolor);
   #endif
    
-  // displaynum(vx,100, 0, 24, 0xc0c0c0, celldist(cwt.c), ":");
+  // displaynum(vx,100, 0, 24, 0xc0c0c0, celldist(cwt.at), ":");
   
   lgetcstat = getcstat;
   getcstat = 0; inslider = false;
@@ -5667,8 +5667,8 @@ void drawscreen() {
   screens.back()();
 
 #if !ISMOBILE
-  int col = linf[cwt.c->land].color;
-  if(cwt.c->land == laRedRock) col = 0xC00000;
+  int col = linf[cwt.at->land].color;
+  if(cwt.at->land == laRedRock) col = 0xC00000;
   if(!nohelp)
     displayfr(vid.xres/2, vid.fsize,   2, vid.fsize, mouseovers, col, 8);
 #endif
@@ -5687,10 +5687,10 @@ void drawscreen() {
     mines[p] = 0;
     cell *c = playerpos(p);
     if(!c) continue;
-    for(int i=0; i<c->type; i++) if(c->mov[i]) {
-      if(c->mov[i]->land == laMinefield) 
+    for(int i=0; i<c->type; i++) if(c->move(i)) {
+      if(c->move(i)->land == laMinefield) 
         minefieldNearby = true;
-      if(c->mov[i]->wall == waMineMine) {
+      if(c->move(i)->wall == waMineMine) {
         bool ep = false;
         if(!ep) mines[p]++, tmines++;
         }
@@ -5710,7 +5710,7 @@ void drawscreen() {
         vid.fsize, 
         XLAT(minetexts[mines[p]]), minecolors[mines[p]], 8);
 
-    if(minefieldNearby && !shmup::on && cwt.c->land != laMinefield && cwt.c->mov[cwt.spin]->land != laMinefield) {
+    if(minefieldNearby && !shmup::on && cwt.at->land != laMinefield && cwt.peek()->land != laMinefield) {
       displayfr(vid.xres/2, vid.ycenter - vid.radius * 3/4 - vid.fsize*3/2, 2,
         vid.fsize, 
         XLAT("WARNING: you are entering a minefield!"), 
@@ -5741,7 +5741,7 @@ void restartGraph() {
       centerover = vec_to_cellwalker(0);
       }
     else {
-      viewctr.h = currentmap->getOrigin();
+      viewctr.at = currentmap->getOrigin();
       viewctr.spin = 0;
       viewctr.mirrored = false;
       }
@@ -5757,7 +5757,7 @@ void clearAnimations() {
   
 auto graphcm = addHook(clearmemory, 0, [] () {
   DEBB(DF_INIT, (debugfile,"clear graph memory\n"));
-  mouseover = centerover.c = lmouseover = NULL;  
+  mouseover = centerover.at = lmouseover = NULL;  
   gmatrix.clear(); gmatrix0.clear();
   clearAnimations();
   });
@@ -5776,7 +5776,7 @@ map<cell*, animation> animations[ANIMLAYERS];
 unordered_map<cell*, transmatrix> gmatrix, gmatrix0;
 
 int revhint(cell *c, int hint) {
-  if(hint >= 0 && hint < c->type) return c->spin(hint);
+  if(hint >= 0 && hint < c->type) return c->c.spin(hint);
   else return hint;
   }
 
@@ -5862,16 +5862,16 @@ void animateReplacement(cell *a, cell *b, int layer, int direction_hinta, int di
 void drawBug(const cellwalker& cw, int col) {
 #if CAP_POLY
   initquickqueue();
-  transmatrix V = ggmatrix(cw.c);
-  if(cw.spin) V = V * ddspin(cw.c, cw.spin, S42);
+  transmatrix V = ggmatrix(cw.at);
+  if(cw.spin) V = V * ddspin(cw.at, cw.spin, S42);
   queuepoly(V, shBugBody, col);
   quickqueue();
 #endif
   }
 
 cell *viewcenter() {
-  if(stdeuclid) return centerover.c;
-  else return viewctr.h->c7;
+  if(stdeuclid) return centerover.at;
+  else return viewctr.at->c7;
   }
 
 bool inscreenrange(cell *c) {

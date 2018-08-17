@@ -145,7 +145,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           else prairie::generateBeast(c);
           }
         else if(!prairie::nearriver(c) && c->LHU.fi.flowerdist > 7) {
-          if(hrand(9000) < items[itGreenGrass] - (prairie::isriver(cwt.c) ? 40 : 0))
+          if(hrand(9000) < items[itGreenGrass] - (prairie::isriver(cwt.at) ? 40 : 0))
             c->monst = moGadfly;
           else buildPrizeMirror(c, 1000);
           }
@@ -277,17 +277,17 @@ void giantLandSwitch(cell *c, int d, cell *from) {
             else {
               int q = 0, s = 0;
               if(!ishept(c)) for(int i=0; i<c->type; i++)
-                if(cdist50(c->mov[i]) == 3 && polarb50(c->mov[i]) == 1 && !ishept(c->mov[i]))
+                if(cdist50(c->move(i)) == 3 && polarb50(c->move(i)) == 1 && !ishept(c->move(i)))
                   q++, s += i;
-              if(q == 1 && c->mov[s]->land == laPalace) {
+              if(q == 1 && c->move(s)->land == laPalace) {
                 switch(princess::generating ? 0 : hrand(2)) {
                   case 0: 
                     c->wall = waClosedGate;
-                    c->mov[s]->wall = waClosedGate;
+                    c->move(s)->wall = waClosedGate;
                     break;
                   case 1:
                     c->wall = waOpenGate;
-                    c->mov[s]->wall = waOpenGate;
+                    c->move(s)->wall = waOpenGate;
                     break;
                   }
                 }
@@ -302,7 +302,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
             c->wall = waTrapdoor;
           
           if(cdist50(c) == 0 && yendor::path) {
-            cell *c2 = c->mov[hrand(c->type)];
+            cell *c2 = c->move(hrand(c->type));
             if(c2->wall == waNone) c2->wall = waTrapdoor;
             }
     
@@ -330,9 +330,9 @@ void giantLandSwitch(cell *c, int d, cell *from) {
             for(int i=0; i<c->type; i++) {
               cellwalker cw(c, i);
               cw = cw + wstep + 4 + wstep + 2 + wstep + 4 + wstep + (2 + hrand(3)) + wstep;
-              if(!c2) c2 = cw.c;
-              else if(celldist(cw.c) > celldist(c2)) c2 = cw.c;
-              cw.c->monst = moMouse;
+              if(!c2) c2 = cw.at;
+              else if(celldist(cw.at) > celldist(c2)) c2 = cw.at;
+              cw.at->monst = moMouse;
               }
             c2->wall = waOpenPlate;
             }
@@ -429,7 +429,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
         if(hrand(nonbitrunc?400:1000) < PT(100 + 2 * (kills[moMiner] + kills[moLancer] + kills[moFlailer]), 200) && notDippingFor(itEmerald)) {
           // do not destroy walls!
           bool ok = true;
-          for(int i=0; i<c->type; i++) if(c->mov[i]->wall == waCavewall) ok = false;
+          for(int i=0; i<c->type; i++) if(c->move(i)->wall == waCavewall) ok = false;
           if(ok) c->item = itEmerald;
           }
         if(hrand(8000) < 50 + 10 * (items[itEmerald] + yendor::hardness())) {
@@ -511,12 +511,12 @@ void giantLandSwitch(cell *c, int d, cell *from) {
       // seal entrances to the Land of Power.
       if(d == 7 && ctof(c)) {
         bool onwall = false;
-        for(int i=0; i<7; i++) if(c->mov[i] && c->mov[i]->land == laBarrier)
+        for(int i=0; i<7; i++) if(c->move(i) && c->move(i)->land == laBarrier)
           onwall = true;
         if(!onwall) for(int i=0; i<c->type; i++) {
-          cell *c2 = c->mov[i];
+          cell *c2 = c->move(i);
           if(!c2) continue;
-          cell *c3 = c2->mov[(c->spn(i) + 3) % c2->type];
+          cell *c3 = c2->modmove(c->c.spin(i) + 3);
           if(c3->land != laPower && c3->land != laBarrier)
           if(c2->wall != waFire && c2->wall != waGlass) {
             if(isFire(c)) c->monst = moWitchWinter;
@@ -727,7 +727,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
             c2->wall = waIcewall;
             for(int j=0; j<c2->type; j++) if(hrand(100) < 20) {
               cell *c3 = createMov(c2, j);
-              setdist(c->mov[i], d+2, c);
+              setdist(c->move(i), d+2, c);
               if(c3->wall == waBarrier || c3->land != laIce) continue;
               c3->wall = waIcewall;
               }
@@ -770,7 +770,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
         // 40 is the usual rate of dragon generation
         int dchance = 40;
         // but it grows to 400 if no Dragons in sight, to make it faster
-        if(cwt.c->land == laDragon && !(havewhat&HF_DRAGON))
+        if(cwt.at->land == laDragon && !(havewhat&HF_DRAGON))
           dchance = 400;
         // also, don't generate additional Dragons for newbies
         else if((havewhat&HF_DRAGON) && items[itDragon] < 10)
@@ -780,7 +780,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           havewhat |= HF_DRAGON;
           // printf("dragon generated with dchance = %d\n", dchance);
           vector<int> possi;
-          for(int t=0; t<c->type; t++) if(c->mov[t]->mpdist > c->mpdist) possi.push_back(t);
+          for(int t=0; t<c->type; t++) if(c->move(t)->mpdist > c->mpdist) possi.push_back(t);
           if(isize(possi)) {
             int i = possi[hrand(isize(possi))];
             int dragonlength = 6 + items[itDragon] / 2;
@@ -794,8 +794,8 @@ void giantLandSwitch(cell *c, int d, cell *from) {
               preventbarriers(c2);
               c2->mondir = i;
               createMov(c2, i);
-              int j = c2->spn(i);
-              cell *c3 = c2->mov[i];
+              int j = c2->c.spin(i);
+              cell *c3 = c2->move(i);
               if(c3->monst || c3->bardir != NODIR || c3->wall || c3->mpdist <= 7) break;
               c2 = c3;
               c2->monst = moDragonTail;
@@ -891,10 +891,10 @@ void giantLandSwitch(cell *c, int d, cell *from) {
         if(hrand(16000) < (items[itSilver] + yendor::hardness())) {
           c->monst = moEarthElemental;
           for(int i=0; i<c->type; i++) {
-            cell *c2 = c->mov[i];
+            cell *c2 = c->move(i);
             earthFloor(c2);
             }
-          for(int i=0; i<c->type; i++) if(c->mov[i]->mpdist < c->mpdist) c->mondir = i;
+          for(int i=0; i<c->type; i++) if(c->move(i)->mpdist < c->mpdist) c->mondir = i;
           chasmifyEarth(c); c->wall = waDeadfloor2;
           }
         else if(hrand(8000) < 60 + 8 * (items[itSilver] + yendor::hardness())) {
@@ -967,8 +967,8 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           cell* cc[5];
           cc[2] = c;
           cellwalker cw2 = cw;
-          cw += wstep; cc[3] = cw.c; cw += revstep; cc[4] = cw.c;
-          cw2 += revstep; cc[1] = cw2.c; cw2 += revstep; cc[0] = cw2.c;
+          cw += wstep; cc[3] = cw.at; cw += revstep; cc[4] = cw.at;
+          cw2 += revstep; cc[1] = cw2.at; cw2 += revstep; cc[0] = cw2.at;
           bool ok = true;
           for(int i=0; i<5; i++) {
             if(cc[i]->land != laNone && cc[i]->land != laTerracotta) ok = false;
@@ -1031,8 +1031,8 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           c->landparam = items[itMutant] + 5 + hrand(11);
           c->wall = waNone;
           for(int i=0; i<c->type; i++) 
-            if(c->mov[i] && (c->mov[i]->wall == waBigTree || c->mov[i]->wall == waSmallTree)) 
-              c->mov[i]->wall = waNone;
+            if(c->move(i) && (c->move(i)->wall == waBigTree || c->move(i)->wall == waSmallTree)) 
+              c->move(i)->wall = waNone;
           }
         else if(hrand(15000) < 20 + (2 * items[itMutant] + yendor::hardness()) && !safety) {
           // for the Yendor Challenge, use only Mutants
@@ -1160,7 +1160,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
             bool sand = false;
             for(int i=0; i<c->type; i++) {
               createMov(c, i);
-              tie(x,y) = cell_to_pair(c->mov[i]);
+              tie(x,y) = cell_to_pair(c->move(i));
               if((x+1)%3 == 0 && (y)%3 == 0) sand = true;
               }
             if(sand && hrand(100) < 20)
@@ -1217,7 +1217,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           }
         
         for(int i=0; i<c->type; i++)
-          if(c->mov[i] && c->mov[i]->land != laStorms && c->mov[i]->land != laNone)
+          if(c->move(i) && c->move(i)->land != laStorms && c->move(i)->land != laNone)
             c->wall = waNone;
         }
       if(d == BARLEV && randstorm) {
@@ -1298,8 +1298,8 @@ void giantLandSwitch(cell *c, int d, cell *from) {
             
             for(int j=0; j<2; j++) {
               int i = hrand(c->type);
-              if(c->mov[i] && c->mov[i]->land == laRlyeh)
-                c->mov[i]->wall = waNone;
+              if(c->move(i) && c->move(i)->land == laRlyeh)
+                c->move(i)->wall = waNone;
               }
             }
           if(pseudohept(c) && hrand(2)) c->wall = waColumn;
@@ -1314,10 +1314,10 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           c->monst = hrand(3) ? ((hrand(40) < items[itStatue]-25) ? moCultistLeader : moCultist) : moPyroCultist;
         else if(hrand(8000) < 5 + items[itStatue] + yendor::hardness() && c->type == 6 && !(yendor::on && (yendor::clev().flags & YF_NEAR_TENT)) && celldist(c)>=3) {
           for(int t=0; t<c->type; t++) {
-            if(c->mov[t] && c->mov[t]->monst == moNone && (c->wall == waNone || c->wall == waColumn))
-              c->mov[t]->wall = ishept(c->mov[t]) ? waColumn : waNone;
-            if(c->mov[t]->wall == waColumn)
-              c->mov[t]->item = itNone;
+            if(c->move(t) && c->move(t)->monst == moNone && (c->wall == waNone || c->wall == waColumn))
+              c->move(t)->wall = ishept(c->move(t)) ? waColumn : waNone;
+            if(c->move(t)->wall == waColumn)
+              c->move(t)->item = itNone;
             }
           if(buildIvy(c, 0, 3) && !peace::on) c->item = itStatue;
           }
@@ -1410,7 +1410,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           hive::createBugArmy(c);
         if(hrand(2000) < 100 && !c->wall && !c->item && !c->monst) {
           int nww = 0;
-          for(int i=0; i<c->type; i++) if(c->mov[i] && c->mov[i]->wall == waWaxWall)
+          for(int i=0; i<c->type; i++) if(c->move(i) && c->move(i)->wall == waWaxWall)
             nww++;
           if(nww == 0) {
             c->wall = waWaxWall;
@@ -1449,7 +1449,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           forCellIdEx(c2, i, c) {
             c2->monst = moKrakenT;
             c2->hitpoints = 1;
-            c2->mondir = c->spn(i);
+            c2->mondir = c->c.spin(i);
             }
           if(!peace::on) playSound(c, "seen-kraken");
           }
@@ -1493,7 +1493,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
       if(d == 8 && !eubinary) {
         int mindist  = 9;
         for(int i=0; i<c->type; i++) {
-          cell *c2 = c->mov[i];
+          cell *c2 = c->move(i);
           if((eubinary || c2->master->alt) && celldistAlt(c2) < mindist)
             mindist = celldistAlt(c2);
           }
@@ -1502,7 +1502,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
       if(d == 7 && c->wall == waSea) {
         bool coast = false;
         for(int i=0; i<c->type; i++) {
-          cell *c2 = c->mov[i];
+          cell *c2 = c->move(i);
           if(passable(c2, c, 0) && c2->wall != waBoat) coast = true;
           }
         if(coast && hrand(10) < 5) {
@@ -1580,8 +1580,8 @@ void giantLandSwitch(cell *c, int d, cell *from) {
             
             for(int j=0; j<2; j++) {
               int i = hrand(c->type);
-              if(c->mov[i] && c->mov[i]->land == laDesert)
-                c->mov[i]->wall = waNone;
+              if(c->move(i) && c->move(i)->land == laDesert)
+                c->move(i)->wall = waNone;
               }
             }
           }
@@ -1615,12 +1615,12 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           int i = hrand(S7);
           buildRedWall(createMovR(c, i), 33);
           if(hrand(2) == 0) 
-            buildRedWall(createMovR(createMovR(c, i), c->spn(i)+(hrand(2)?2:4)), 20);
+            buildRedWall(createMovR(createMovR(c, i), c->c.spin(i)+(hrand(2)?2:4)), 20);
           i = (i + 3 + hrand(2)) % S7;
           if(hrand(6) < 4)
             buildRedWall(createMovR(c, i), 33);
           if(hrand(2) == 0) 
-            buildRedWall(createMovR(createMovR(c, i), c->spn(i)+(hrand(2)?2:4)), 20);
+            buildRedWall(createMovR(createMovR(c, i), c->c.spin(i)+(hrand(2)?2:4)), 20);
           }
         }
       if(d == 7 && c->wall == waNone)
@@ -1628,7 +1628,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
       ONEMPTY {
         if(hrand((doCross && celldist(c) <= 5) ?450:16000) < 30+items[itRedGem]+yendor::hardness() && !pseudohept(c) && !c->monst && !c->wall && !(nonbitrunc && S3==4)) {
           int i = -1;
-          for(int t=0; t<c->type; t++) if(c->mov[t]->mpdist > c->mpdist && !pseudohept(c->mov[t]))
+          for(int t=0; t<c->type; t++) if(c->move(t)->mpdist > c->mpdist && !pseudohept(c->move(t)))
             i = t;
           if(i != -1 && !peace::on) 
             generateSnake(c, i, 1);
@@ -1643,7 +1643,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
       ONEMPTY {
         if(hrand(30000) < 30+items[itSnake]+yendor::hardness() && !c->monst && !c->wall && !peace::on) {
           vector<int> gooddir;
-          for(int t=0; t<c->type; t++) if(c->mov[t]->mpdist > c->mpdist)
+          for(int t=0; t<c->type; t++) if(c->move(t)->mpdist > c->mpdist)
             gooddir.push_back(t);
           if(isize(gooddir))
             generateSnake(c, gooddir[hrand(isize(gooddir))], 2);
@@ -1670,7 +1670,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
             c->wall = waSmallTree;
           int q = 0;
           if(!nonbitrunc && !chaosmode && !weirdhyperbolic) for(int i=0; i<c->type; i++) 
-            if(c->mov[i] && !isWarped(c->mov[i]->land) && c->mov[i]->land != laCrossroads4) 
+            if(c->move(i) && !isWarped(c->move(i)->land) && c->move(i)->land != laCrossroads4) 
               q++;
           if(q == 1) c->wall = waWarpGate;
           }
@@ -1679,7 +1679,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           c->wall = waSea;
           int q = 0;
           if(!nonbitrunc && !chaosmode) for(int i=0; i<c->type; i++) 
-            if(c->mov[i] && !isWarped(c->mov[i]->land)) q++;
+            if(c->move(i) && !isWarped(c->move(i)->land)) q++;
           if(q == 1) c->wall = waWarpGate;
           }      
         }
@@ -1743,10 +1743,10 @@ void giantLandSwitch(cell *c, int d, cell *from) {
       if(d == 8 && c->land == laRose && hrand(2000) < 100 && !c->wall && !c->item && !c->monst) {
         int nww = 0;
         for(int i=0; i<c->type; i++) {
-          cell *c2 = c->mov[i];          
+          cell *c2 = c->move(i);          
           if(c2 && c2->wall == waRose) nww++;
           if(!chaosmode) for(int j=0; j<c2->type; j++) {
-            cell *c3 = c2->mov[j];
+            cell *c3 = c2->move(j);
             // note: c3->land is required for Android --
             // not strictly equivalent since another land there might be not yet generated
             if(c3 && c3->land != laRose && c3->land) nww++;
@@ -1760,7 +1760,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
         }
       ONEMPTY {
         if(hrand(2000) < PT(25 + min(kills[moFalsePrincess] + kills[moRoseBeauty] + kills[moRoseLady], 200), 100) && notDippingFor(itRose)) {
-          for(int t=0; t<c->type; t++) if(c->mov[t] && c->mov[t]->wall == waRose)
+          for(int t=0; t<c->type; t++) if(c->move(t) && c->move(t)->wall == waRose)
             c->item = itRose;
           }
         else {
@@ -1791,9 +1791,9 @@ void giantLandSwitch(cell *c, int d, cell *from) {
                   cellwalker ci(c, i);
                   cellwalker cw0 = ci + wstep + revstep;
                   cellwalker cw1 = ci + bonus + wstep + revstep;
-                  if(cw0.c->mpdist > 7)
-                  if(cw1.c->mpdist > 7)
-                    next.emplace_back(cw0.c, cw1.c);
+                  if(cw0.at->mpdist > 7)
+                  if(cw1.at->mpdist > 7)
+                    next.emplace_back(cw0.at, cw1.at);
                   }
                 if(isize(next)) {
                   c->item = itHunting;
@@ -2004,7 +2004,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           c->wall = hrand(2) ? waMirror : waCloud;
         else if(ishept(c) && hrand(5000) < 10 * PRIZEMUL)
           placePrizeOrb(c);
-        else if(hrand(cwt.c->land == laMirror ? 600 : 2400) < 8 + items[itShard] + yendor::hardness()) {
+        else if(hrand(cwt.at->land == laMirror ? 600 : 2400) < 8 + items[itShard] + yendor::hardness()) {
           if(items[itShard] >= 5 && hrand(120) <= 20)
             c->monst = moMirrorSpirit;
           else
@@ -2035,7 +2035,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
            // preset the movement direction
            // this will make the dog go in the direction of the center,
            // if the player is unreachable/invisible
-           for(int d=0; d<c->type; d++) if(c->mov[d] == from) {
+           for(int d=0; d<c->type; d++) if(c->move(d) == from) {
              c->mondir = (d+3) % c->type;
              }
            chasmify(c);
@@ -2357,7 +2357,7 @@ void repairLandgen(cell *c) {
 
   if(cellHalfvine(c)) {
     int i = -1;
-    for(int k=0; k<c->type; k++) if(c->mov[k] && c->mov[k]->wall == c->wall)
+    for(int k=0; k<c->type; k++) if(c->move(k) && c->move(k)->wall == c->wall)
       i = 0;
     if(i == -1) c->wall = waNone;
     }
@@ -2434,7 +2434,7 @@ void setdist(cell *c, int d, cell *from) {
     return;
     }
     
-  if(d == BARLEV && !euclid && c != cwt.c) 
+  if(d == BARLEV && !euclid && c != cwt.at) 
     buildBigStuff(c, from);
   
   if(buggyGeneration) return;

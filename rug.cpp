@@ -578,7 +578,7 @@ void buildRug() {
     return;
     }
   
-  celllister cl(centerover.c ? centerover.c : cwt.c, get_sightrange(), vertex_limit, NULL);
+  celllister cl(centerover.at ? centerover.at : cwt.at, get_sightrange(), vertex_limit, NULL);
 
   map<cell*, rugpoint *> vptr;
   
@@ -589,15 +589,15 @@ void buildRug() {
     cell *c = p.first;
     rugpoint *v = p.second;
     for(int j=0; j<c->type; j++) try {
-      cell *c2 = c->mov[j];
+      cell *c2 = c->move(j);
       rugpoint *w = vptr.at(c2);
       // if(v<w) addEdge(v, w);
       
-      cell *c3 = c->mov[(j+1) % c->type];
+      cell *c3 = c->modmove(j+1);
       rugpoint *w2 = vptr.at(c3);
       
       if(a4) {
-        cell *c4 = (cellwalker(c,j) + wstep - 1 + wstep).c;
+        cell *c4 = (cellwalker(c,j) + wstep - 1).cpeek();
         cell *cm = c; comp(cm, c); comp(cm, c2); comp(cm, c3); comp(cm, c4);
         if(cm == c || cm == c4)
           addTriangle(v, w, w2);

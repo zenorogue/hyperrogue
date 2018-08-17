@@ -65,12 +65,12 @@ eItem randomTreasure2(int cv) {
     if(itemclass(i) != IC_TREASURE) continue;
     int q = 2*items[i];
     if(a == lt) q -= (2*cv-1);
-    if(a == itEmerald && bearsCamelot(cwt.c->land)) q -= 8;
-    if(a == itElixir && isCrossroads(cwt.c->land)) q -= 7;
-    if(a == itIvory && isCrossroads(cwt.c->land)) q -= 6;
-    if(a == itPalace && isCrossroads(cwt.c->land)) q -= 5;
-    if(a == itIvory && cwt.c->land == laJungle) q -= 5;
-    if(a == itIvory && cwt.c->land == laPalace) q -= 5;
+    if(a == itEmerald && bearsCamelot(cwt.at->land)) q -= 8;
+    if(a == itElixir && isCrossroads(cwt.at->land)) q -= 7;
+    if(a == itIvory && isCrossroads(cwt.at->land)) q -= 6;
+    if(a == itPalace && isCrossroads(cwt.at->land)) q -= 5;
+    if(a == itIvory && cwt.at->land == laJungle) q -= 5;
+    if(a == itIvory && cwt.at->land == laPalace) q -= 5;
     if(q < bq) bq = q, cq = 0;
     if(q == bq) { cq++; if(hrand(cq) == 0) best = i; }
     }
@@ -128,10 +128,10 @@ bool applyCheat(char u, cell *c = NULL) {
     }
   if(u == 'O') {
     cheater++; addMessage(XLAT("Orbs summoned!"));
-    for(int i=0; i<cwt.c->type; i++) 
-      if(passable(cwt.c->mov[i], NULL, 0)) {
+    for(int i=0; i<cwt.at->type; i++) 
+      if(passable(cwt.at->move(i), NULL, 0)) {
         eItem it = nextOrb();
-        cwt.c->mov[i]->item = it;
+        cwt.at->move(i)->item = it;
         }
     return true;
     }
@@ -165,7 +165,7 @@ bool applyCheat(char u, cell *c = NULL) {
     return true;
     }
   if(u == 'A'-64) {
-    mapeditor::drawcell = mouseover ? mouseover : cwt.c;
+    mapeditor::drawcell = mouseover ? mouseover : cwt.at;
     pushScreen(mapeditor::showDrawEditor);
     return true;
     }
@@ -192,7 +192,7 @@ bool applyCheat(char u, cell *c = NULL) {
     }
   if(u == 'Z') {
     if (flipplayer) {
-      cwt += cwt.c->type/2;
+      cwt += cwt.at->type/2;
       flipplayer = false;
       }
     cwt++;
@@ -227,7 +227,7 @@ bool applyCheat(char u, cell *c = NULL) {
     cheater++; addMessage(XLAT("Collected the keys!"));
     }
   if(u == 'Y'-64) {
-    yendor::collected(cwt.c);
+    yendor::collected(cwt.at);
     cheater++;
     }
   if(u == 'P') {
@@ -240,7 +240,7 @@ bool applyCheat(char u, cell *c = NULL) {
     }
   if(u == 'S') {
     canmove = true;
-    cheatMoveTo(cwt.c->land);
+    cheatMoveTo(cwt.at->land);
     items[itOrbSafety] += 3;
     cheater++; addMessage(XLAT("Activated Orb of Safety!"));
     return true;
@@ -265,7 +265,7 @@ bool applyCheat(char u, cell *c = NULL) {
   if(u == 'L'-64) {
     cell *c = mouseover;
     describeCell(c);
-    printf("Neighbors:"); for(int i=0; i<c->type; i++) printf("%p ",  c->mov[i]);
+    printf("Neighbors:"); for(int i=0; i<c->type; i++) printf("%p ",  c->move(i));
     printf("Barrier: dir=%d left=%d right=%d\n",
       c->bardir, c->barleft, c->barright);
     return true;
@@ -399,7 +399,7 @@ void showCheatMenu() {
   }
 
 void modalDebug(cell *c) {
-  viewctr.h = c->master;
+  viewctr.at = c->master;
   if(noGUI) {
     fprintf(stderr, "fatal: modalDebug called on %p without GUI\n", c);
     exit(1);
@@ -537,7 +537,7 @@ int read_cheat_args() {
   else if(argis("-gencells")) {
     PHASEFROM(2); shift(); start_game();
     printf("Generating %d cells...\n", argi());
-    celllister cl(cwt.c, 50, argi(), NULL);
+    celllister cl(cwt.at, 50, argi(), NULL);
     printf("Cells generated: %d\n", isize(cl.lst));
     for(int i=0; i<isize(cl.lst); i++)
       setdist(cl.lst[i], 7, NULL);

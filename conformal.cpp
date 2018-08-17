@@ -303,13 +303,13 @@ namespace conformal {
     }
   
   void create() {
-    if(celldist(cwt.c) == 0) {
+    if(celldist(cwt.at) == 0) {
       addMessage("Must go a distance from the starting point");
       return;
       }
     
     on = true;
-    cell *c = cwt.c;
+    cell *c = cwt.at;
     
     while(true) {
       shmup::monster *m = new shmup::monster;
@@ -318,8 +318,8 @@ namespace conformal {
       v.push_back(m);
       if(c == currentmap->gamestart()) break;
       for(int i=0; i<c->type; i++)
-        if(celldist(c->mov[i]) < celldist(c)) {
-          c = c->mov[i];
+        if(celldist(c->move(i)) < celldist(c)) {
+          c = c->move(i);
           break;
           }
       }
@@ -373,7 +373,7 @@ namespace conformal {
     if(ph<0) ph = 0;
     if(ph >= siz-1) ph = siz-2;
     
-    viewctr.h = v[ph]->base->master;
+    viewctr.at = v[ph]->base->master;
     viewctr.spin = 0;
     
     View = inverse(master_relative(v[ph]->base) * v[ph]->at);
@@ -385,7 +385,7 @@ namespace conformal {
   
     View = spin(M_PI/180 * rotation) * xpush(-(phase-ph) * hdist(now, next)) * View;
     playermoved = false;
-    centerover.c = v[ph]->base;
+    centerover.at = v[ph]->base;
     compute_graphical_distance();
     }
   
@@ -528,7 +528,7 @@ namespace conformal {
             xpos += bwidth;      
             }
           
-          last_base = viewctr.h->c7;
+          last_base = viewctr.at->c7;
           last_relative = inverse(ggmatrix(last_base)) * C0;        
           }
         }
@@ -900,7 +900,7 @@ namespace conformal {
   
   void renderAutoband() {
 #if CAP_SDL
-    if(!cwt.c || celldist(cwt.c) <= 7) return;
+    if(!cwt.at || celldist(cwt.at) <= 7) return;
     if(!autoband) return;
     eModel spm = pmodel;
     bool ih = includeHistory;

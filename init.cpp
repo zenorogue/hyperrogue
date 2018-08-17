@@ -82,7 +82,7 @@ string buildScoreDescription() {
   s += XLAT("HyperRogue for Android");
   s += " ( " VER "), http://www.roguetemple.com/z/hyper/\n";
   s += XLAT("Date: %1 time: %2 s ", buf, getgametime_s());
-  s += XLAT("distance: %1\n", its(celldist(cwt.c)));
+  s += XLAT("distance: %1\n", its(celldist(cwt.at)));
   // s += buf2;
   if(cheater) s += XLAT("Cheats: ") + its(cheater) + "\n";
   s += XLAT("Score: ") + its(gold());
@@ -149,7 +149,7 @@ void handleclick(MOBPAR_FORMAL) {
       
       else if(statkeys && getcstat == 't') {
         if(playermoved && items[itStrongWind]) {
-          cell *c = whirlwind::jumpDestination(cwt.c);
+          cell *c = whirlwind::jumpDestination(cwt.at);
           if(c) centerover.c = c, centerover.spin = 0;
           }
         targetRangedOrb(centerover.c, roKeyboard);
@@ -172,7 +172,7 @@ void handleclick(MOBPAR_FORMAL) {
                 ors::reset();
                 centerpc(INF);
                 View = Id;
-                viewctr.h = cwt.c->master;
+                viewctr.h = cwt.at->master;
                 }
               andmode = 11;
               }
@@ -207,7 +207,7 @@ void handleclick(MOBPAR_FORMAL) {
       if(!playerfound) {
         centerpc(INF);
         View = Id;
-        viewctr.h = cwt.c->master;
+        viewctr.h = cwt.at->master;
         }
       playermoved = true;
       }
@@ -273,7 +273,7 @@ void mobile_draw(MOBPAR_FORMAL) {
       int dy = mousey - yb;
       int h = hypot(dx, dy);
       if(h < rad) {
-        if(h < rad*SKIPFAC) { lmouseover = cwt.c; mousedest.d = -1; }
+        if(h < rad*SKIPFAC) { lmouseover = cwt.at; mousedest.d = -1; }
         else {
           double d = vid.revcontrol ? -1 : 1;
           mouseh = hpxy(dx * d / rad, dy * d / rad);
@@ -282,7 +282,7 @@ void mobile_draw(MOBPAR_FORMAL) {
         }
       }
     if(andmode == 0 && !useRangedOrb && gtouched && lclicked) {
-      lmouseover = mousedest.d >= 0 ? cwt.c->mov[(cwt.spin + mousedest.d) % cwt.c->type] : cwt.c;
+      lmouseover = mousedest.d >= 0 ? cwt.at->modmove(cwt.spin + mousedest.d) : cwt.at;
       }
     }
 

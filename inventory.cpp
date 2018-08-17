@@ -423,7 +423,7 @@ namespace hr { namespace inv {
     if(it == itOrbSword || it == itOrbSword2) {
       for(int i=0; i<numplayers(); i++)
         if(multi::playerActive(i)) {
-          cwt.c = playerpos(i);
+          cwt.at = playerpos(i);
           multi::cpid = i;
           swordAttackStatic(it == itOrbSword2);
           }
@@ -576,7 +576,7 @@ namespace hr { namespace inv {
             addMessage(XLAT("You mirror %the1.", orb));
           if(mirroring) {
             bool next = false;
-            forCellEx(c2, cwt.c) if(c2->wall == waMirror || c2->wall == waCloud || c2->wall == waMirrorWall)
+            forCellEx(c2, cwt.at) if(c2->wall == waMirror || c2->wall == waCloud || c2->wall == waMirrorWall)
               next = true;
             if(!next) {
               addMessage(XLAT("You need to stand next to a magic mirror or cloud to use %the1.", itOrbMirror));
@@ -598,20 +598,20 @@ namespace hr { namespace inv {
             }
           else mirroring = false;
           }
-        else if((isHaunted(cwt.c->land) || cwt.c->land == laDungeon) && orb == itOrbSafety) {
+        else if((isHaunted(cwt.at->land) || cwt.at->land == laDungeon) && orb == itOrbSafety) {
           addMessage(XLAT("This would only move you deeper into the trap!"));
           }
         else {
-          eItem it = cwt.c->item; 
-          cwt.c->item = orbmap[uni];
+          eItem it = cwt.at->item; 
+          cwt.at->item = orbmap[uni];
           inv::activating = true;
-          collectItem(cwt.c, true);
+          collectItem(cwt.at, true);
           inv::activating = false;
           addMessage(XLAT("You activate %the1.", orbmap[uni]));
-          if(!cwt.c->item) usedup[orbmap[uni]]++;
+          if(!cwt.at->item) usedup[orbmap[uni]]++;
           if(getOLR(it, getPrizeLand()) == olrForbidden)
             usedForbidden = true;
-          cwt.c->item = it;
+          cwt.at->item = it;
           evokeOrb(orbmap[uni]);
           checkmove();
           popScreenAll();

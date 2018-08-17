@@ -195,8 +195,8 @@ void describeOrb(string& help, const orbinfo& oi) {
   if(inv::on) return;
   eOrbLandRelation olr = getOLR(oi.orb, getPrizeLand());
   eItem tr = treasureType(oi.l);
-  eItem tt = treasureTypeUnlock(cwt.c->land, oi.orb);
-  help += "\n\n" + XLAT(olrDescriptions[olr], cwt.c->land, tr, tt);
+  eItem tt = treasureTypeUnlock(cwt.at->land, oi.orb);
+  help += "\n\n" + XLAT(olrDescriptions[olr], cwt.at->land, tr, tt);
   int t = items[tr] * landMultiplier(oi.l);
   if(t >= 25)
   if(olr == olrPrize25 || olr == olrPrize3 || olr == olrGuest || olr == olrMonster || olr == olrAlways) {
@@ -381,7 +381,7 @@ string generateHelpForItem(eItem it) {
           help += XLAT("\n\nOrb unlocked: %1", oi.orb);
           describeOrb(help, oi);
           }
-        else if(oi.l == cwt.c->land || inv::on) {
+        else if(oi.l == cwt.at->land || inv::on) {
           help += XLAT("\n\nSecondary orb: %1", oi.orb);
           describeOrb(help, oi);
           }
@@ -759,7 +759,7 @@ hookset<void(cell*)> *hooks_mouseover;
 void describeMouseover() {
   DEBB(DF_GRAPH, (debugfile,"describeMouseover\n"));
 
-  cell *c = mousing ? mouseover : playermoved ? NULL : centerover.c;
+  cell *c = mousing ? mouseover : playermoved ? NULL : centerover.at;
   string& out = mouseovers;
   if(!c || instat || getcstat != '-') { }
   else if(c->wall != waInvisibleFloor) {
@@ -796,7 +796,7 @@ void describeMouseover() {
       int wm = windmap::at(c);
       windtotal += (signed char) (wm-lastval);
       lastval = wm;
-      if(c == cwt.c) windtotal = 0;
+      if(c == cwt.at) windtotal = 0;
       out += " [" + its(windtotal) + "]";
       }
 

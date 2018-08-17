@@ -635,19 +635,19 @@ void viewmat() {
   int id = 0;  
   if(gp::on) {
     gp::just_matrices = true;
-    gp::draw_li = gp::get_local_info(cwt.c);
+    gp::draw_li = gp::get_local_info(cwt.at);
     if(gp::draw_li.last_dir == -1) gp::draw_li.total_dir = 0;
     gp::draw_li.total_dir = fix6(gp::draw_li.total_dir);
-    gp::get_plainshape_id(cwt.c);
+    gp::get_plainshape_id(cwt.at);
     gp::just_matrices = false;
     }
-  // if(gp::on && !gp::usedml.count(cwt.c)) return;
-//  for(auto& v: (pseudohept(cwt.c) ? hept_matrices : hex_matrices).v) {
-//  for(auto& v: (gp::on ? gp::usedml[cwt.c] : pseudohept(cwt.c) ? hept_matrices : hex_matrices).v) {
+  // if(gp::on && !gp::usedml.count(cwt.at)) return;
+//  for(auto& v: (pseudohept(cwt.at) ? hept_matrices : hex_matrices).v) {
+//  for(auto& v: (gp::on ? gp::usedml[cwt.c] : pseudohept(cwt.at) ? hept_matrices : hex_matrices).v) {
 //    hyperpoint h1 = gmatrix[cwt.c] * v.second[0] * hpxyz(1,0,0);
   id = irr::cellindex[cwt.c];
   for(auto& v: irr::usedml[id].v) { 
-//  for(auto& v: (gp::on ? gp::usedml[cwt.c] : pseudohept(cwt.c) ? hept_matrices : hex_matrices).v) {
+//  for(auto& v: (gp::on ? gp::usedml[cwt.c] : pseudohept(cwt.at) ? hept_matrices : hex_matrices).v) {
     
     hyperpoint h1 = gmatrix[cwt.c] * v.second[0] * hpxyz(1,0,0);
     hyperpoint h2 = gmatrix[cwt.c] * v.second[0] * hpxyz(0,1,0);

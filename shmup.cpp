@@ -40,11 +40,11 @@ namespace multi {
 
   void recall() {
     for(int i=0; i<numplayers(); i++) {
-        int idir = (3 * i) % cwt.c->type;
-        cell *c2 = cwt.c->mov[idir];
+        int idir = (3 * i) % cwt.at->type;
+        cell *c2 = cwt.at->move(idir);
         makeEmpty(c2);
-        if(!passable(c2, NULL, P_ISPLAYER)) c2 = cwt.c;
-        multi::player[i].c = c2;
+        if(!passable(c2, NULL, P_ISPLAYER)) c2 = cwt.at;
+        multi::player[i].at = c2;
         multi::player[i].spin = 0;
         
         multi::flipped[i] = true;
@@ -699,7 +699,7 @@ void handleInput(int delta) {
 
 
   void leaveGame(int i) {
-    multi::player[i].c = NULL;
+    multi::player[i].at = NULL;
     multi::deaths[i]++;
     revive_queue.push_back(i);
     checklastmove();
@@ -707,7 +707,7 @@ void handleInput(int delta) {
 
   bool playerActive(int p) {
     if(multi::players == 1 || shmup::on) return true;
-    return player[p].c;
+    return player[p].at;
     }
   
   int activePlayers() {
@@ -718,13 +718,13 @@ void handleInput(int delta) {
   
   cell *multiPlayerTarget(int i) {
     cellwalker cwti = multi::player[i];
-    if(!cwti.c) return NULL;
+    if(!cwti.at) return NULL;
     int dir = multi::whereto[i].d;
     if(dir == MD_UNDECIDED) return NULL;
     if(dir == MD_USE_ORB) return multi::whereto[i].tgt;
     if(dir >= 0) 
       cwti = cwti + dir + wstep;
-    return cwti.c;
+    return cwti.at;
     }
   
   void checklastmove() {
@@ -802,7 +802,7 @@ void handleInput(int delta) {
       if(multi::actionspressed[b+pcFace])
         multi::whereto[i].d = MD_UNDECIDED;
       
-      cwt.c = multi::player[i].c;      
+      cwt.at = multi::player[i].at;      
       if(multi::ccat[i] && !multi::combo[i] && targetRangedOrb(multi::ccat[i], roMultiCheck)) {
         multi::whereto[i].d = MD_USE_ORB;
         multi::whereto[i].tgt = multi::ccat[i];
@@ -838,7 +838,7 @@ void handleInput(int delta) {
       needinput = true;
 
       for(int i=0; i<numplayers(); i++) if(playerActive(i)) {
-        origpos[i] = player[i].c;
+        origpos[i] = player[i].at;
         origtarget[i] = multiPlayerTarget(i);
         }
   
@@ -848,7 +848,7 @@ void handleInput(int delta) {
           addMessage("Two players cannot move/attack the same location!");
           return;
           }
-/*      if(multiPlayerTarget(i) == multi::player[j].c) {
+/*      if(multiPlayerTarget(i) == multi::player[j].at) {
           addMessage("Cannot move into the current location of another player!");
           return;
           }
@@ -946,7 +946,7 @@ cell *findbaseAround(hyperpoint p, cell *around) {
   cell *best = around;
   double d0 = intval(p, ggmatrix(around) * C0);
   for(int i=0; i<around->type; i++) {
-    cell *c2 = around->mov[i];
+    cell *c2 = around->move(i);
     if(c2) {
       double d1 = intval(p, ggmatrix(c2) * C0);
       if(d1 < d0) { best = c2; d0 = d1; }
@@ -1123,7 +1123,7 @@ bool playerfire[MAXPLAYER];
 
 void awakenMimics(monster *m, cell *c2) {
   for(auto& mi: mirror::mirrors) {
-    cell *c = mi.second.c;
+    cell *c = mi.second.at;
 
     transmatrix mirrortrans = Id;    
     if(mi.second.mirrored) mirrortrans[0][0] = -1;
@@ -1214,7 +1214,7 @@ void oceanCurrents(transmatrix& nat, monster *m, int delta) {
   cell *c = m->base;
   if(c->land == laWhirlpool) {
     for(int i=0; i<c->type; i++) {
-      cell *c2 = c->mov[i];
+      cell *c2 = c->move(i);
       if(!c2 || !gmatrix.count(c2)) continue;
       
       double spd = 0;
@@ -1244,7 +1244,7 @@ bool airCurrents(transmatrix& nat, monster *m, int delta) {
   if(c->land == laWhirlwind) {
     whirlwind::calcdirs(c);
     for(int i=0; i<whirlwind::qdirs; i++) {
-      cell *c2 = c->mov[whirlwind::dto[i]];
+      cell *c2 = c->move(whirlwind::dto[i]);
       if(!c2 || !gmatrix.count(c2)) continue;
       
       double spd = SCALE * delta / 900.;
@@ -1293,12 +1293,12 @@ void roseCurrents(transmatrix& nat, monster *m, int delta) {
   int qty = 0;
 
   for(int i=0; i<c->type; i++) {
-    cell *c2 = c->mov[i];
+    cell *c2 = c->move(i);
     if(c2 && rosedist(c2) == 2) qty++;
     }
   
   for(int i=0; i<c->type; i++) {
-    cell *c2 = c->mov[i];
+    cell *c2 = c->move(i);
     if(!c2 || !gmatrix.count(c2)) continue;
     if(rosedist(c2) != 2) continue;
     
@@ -1480,13 +1480,13 @@ void movePlayer(monster *m, int delta) {
   #endif
   
   if(actionspressed[b+pcOrbPower] && !lactionpressed[b+pcOrbPower] && mouseover) {
-    cwt.c = m->base;
+    cwt.at = m->base;
     targetRangedOrb(mouseover, roKeyboard);
     }
 
 #if !ISMOBILE
   if(haveRangedOrb()) {
-    cwt.c = m->base;
+    cwt.at = m->base;
     if(actionspressed[b+pcOrbKey] && !lactionpressed[b+pcOrbKey])
       keyresult[cpid] = targetRangedOrbKey(roKeyboard);
     else
@@ -1608,7 +1608,7 @@ void movePlayer(monster *m, int delta) {
       else if(c2->wall == waBigStatue && canPushStatueOn(m->base) && !nonAdjacent(c2, m->base)) {
         visibleFor(300);
         c2->wall = m->base->wall;
-        if(cellUnstable(cwt.c))
+        if(cellUnstable(cwt.at))
           m->base->wall = waChasm; 
         else {
           m->base->wall = waBigStatue;
@@ -1645,13 +1645,13 @@ void movePlayer(monster *m, int delta) {
         visibleFor(300);
         cellwalker push(c2, dirfromto(c2, m->base));
         push = push + 3 * (-subdir) + wstep;
-        if(!canPushThumperOn(push.c, c2, m->base) && c2->type == 7) {
+        if(!canPushThumperOn(push.at, c2, m->base) && c2->type == 7) {
           push = push + wstep - subdir + wstep;
           }
-        if(!canPushThumperOn(push.c, c2, m->base)) {
+        if(!canPushThumperOn(push.at, c2, m->base)) {
           go = false;
           }
-        else pushThumper(c2, push.c);
+        else pushThumper(c2, push.at);
         popmonsters();
         }
       else if(c2->wall == waRose && !nonAdjacent(m->base, c2)) {
@@ -1689,7 +1689,7 @@ void movePlayer(monster *m, int delta) {
         if(d >= 0 && earthMove(m->base, d)) markOrb(itOrbDigging);
         }
       
-      cwt.c = c2; afterplayermoved();
+      cwt.at = c2; afterplayermoved();
       if(c2->item && c2->land == laAlchemist) c2->wall = m->base->wall;
       if(m->base->wall == waRoundTable)
         roundTableMessage(c2);
@@ -1817,7 +1817,7 @@ void movePlayer(monster *m, int delta) {
     if(items[itOrbFlash]) {
       pushmonsters();
       killMonster(m->base, moNone);
-      cwt.c = m->base;
+      cwt.at = m->base;
       activateFlash();
       popmonsters();
       return;
@@ -1826,7 +1826,7 @@ void movePlayer(monster *m, int delta) {
     if(items[itOrbLightning]) {
       pushmonsters();
       killMonster(m->base, moLightningBolt);
-      cwt.c = m->base;
+      cwt.at = m->base;
       activateLightning();
       popmonsters();
       return;
@@ -1959,8 +1959,8 @@ void destroyMimics() {
 
 void teleported() {
   monster *m = pc[cpid];
-  m->base = cwt.c;
-  m->at = rgpushxto0(inverse(gmatrix[cwt.c]) * mouseh) * spin(rand() % 1000 * M_PI / 2000);
+  m->base = cwt.at;
+  m->at = rgpushxto0(inverse(gmatrix[cwt.at]) * mouseh) * spin(rand() % 1000 * M_PI / 2000);
   m->findpat();
   destroyMimics();
   }
@@ -2135,7 +2135,7 @@ void moveBullet(monster *m, int delta) {
   
   // destroy stray bullets
   if(!doall) for(int i=0; i<m->base->type; i++) 
-    if(!m->base->mov[i] || !gmatrix.count(m->base->mov[i]))
+    if(!m->base->move(i) || !gmatrix.count(m->base->move(i)))
       m->dead = true;
 
   // items[itOrbWinter] = 100; items[itOrbLife] = 100;
@@ -2422,7 +2422,7 @@ void moveMonster(monster *m, int delta) {
     else if(m->type == moWolf && !peace::on) {
       cell *cnext = c;
       for(int i=0; i<c->type; i++) {
-        cell *c2 = c->mov[i];
+        cell *c2 = c->move(i);
         if(c2 && gmatrix.count(c2) && (c2->land == laVolcano || (isIcyLand(c2) && HEAT(c2) > HEAT(c))) && passable(c2, c, 0))
           cnext = c2;
         }
@@ -2471,7 +2471,7 @@ void moveMonster(monster *m, int delta) {
         goal = gmatrix[c];
       cell *cnext = c;
       for(int i=0; i<c->type; i++) {
-        cell *c2 = c->mov[i];
+        cell *c2 = c->move(i);
         if(c2 && gmatrix.count(c2) && c2->pathdist < c->pathdist &&
           passable_for(m->type, c2, c, P_CHAIN | P_ONPLAYER))
           cnext = c2;
@@ -2661,7 +2661,7 @@ void moveMonster(monster *m, int delta) {
   
   if(c2 != m->base && m->type == moNecromancer && !c2->monst) {
     for(int i=0; i<m->base->type; i++) {
-      cell *c3 = m->base->mov[i];
+      cell *c3 = m->base->move(i);
       if(dirfromto(c3, c2) != -1 && c3->wall == waFreshGrave && gmatrix.count(c3)) {
         bool monstersNear = false;
         for(monster *m2: nonvirtual) {
@@ -2943,8 +2943,8 @@ void turn(int delta) {
       int d = c->pathdist;
       if(d == PINFD-1) continue;
       for(int i=0; i<c->type; i++) {
-        cell *c2 = c->mov[i];
-        // printf("i=%d cd=%d\n", i, c->mov[i]->cpdist);
+        cell *c2 = c->move(i);
+        // printf("i=%d cd=%d\n", i, c->move(i)->cpdist);
         if(c2 && c2->pathdist == PINFD && gmatrix.count(c2) && 
           (passable_for(eMonster(t), c, c2, P_CHAIN | P_ONPLAYER) || c->wall == waThumperOn)) {
           onpath(c2, d+1);
@@ -2967,7 +2967,7 @@ void turn(int delta) {
 
     bool tick = curtime >= nextmove;
     keepLightning = ticks <= lightat + 1000;
-    cwt.c = pc[0]->base;
+    cwt.at = pc[0]->base;
     bfs(); moverefresh(tick);
     countLocalTreasure();
     pushmonsters();
@@ -3091,13 +3091,13 @@ void turn(int delta) {
 
 void recall() {
   for(int i=0; i<players; i++) {
-    pc[i]->base = cwt.c;
+    pc[i]->base = cwt.at;
     if(players == 1)
       pc[i]->at = Id;
     else
       pc[i]->at = spin(2*M_PI*i/players) * xpush(firstland == laMotion ? .5 : .3) * Id;
-    /* ggmatrix(cwt.c);
-    display(gmatrix[cwt.c]);
+    /* ggmatrix(cwt.at);
+    display(gmatrix[cwt.at]);
     pc[i]->findpat(); */
     }
   destroyMimics();
@@ -3115,7 +3115,7 @@ void init() {
       pc[i]->at = Id;
     else
       pc[i]->at = spin(2*M_PI*i/players) * xpush(firstland == laMotion ? .5 : .3) * Id;
-    pc[i]->base = cwt.c;
+    pc[i]->base = cwt.at;
     pc[i]->inBoat = (firstland == laCaribbean || firstland == laOcean || firstland == laLivefjord ||
       firstland == laWhirlpool);
     pc[i]->store();
@@ -3322,7 +3322,7 @@ transmatrix master_relative(cell *c, bool get_inverse) {
       }
     }
   else if(!nonbitrunc && !euclid) {
-    for(int d=0; d<S7; d++) if(c->master->c7->mov[d] == c)
+    for(int d=0; d<S7; d++) if(c->master->c7->move(d) == c)
       return (get_inverse?invhexmove:hexmove)[d];
     return Id;
     }

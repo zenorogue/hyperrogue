@@ -84,8 +84,8 @@ namespace hr { namespace gp {
     else {
       vector<int> dirs;
       while(c != c->master->c7) {
-        dirs.push_back(c->spin(0));
-        c = c->mov[0];
+        dirs.push_back(c->c.spin(0));
+        c = c->move(0);
         }
       li.first_dir = dirs[0];
       li.last_dir = dirs.back();
@@ -125,7 +125,7 @@ namespace hr { namespace gp {
   goldberg_mapping_t goldberg_map[32][32];
   void clear_mapping() {
     for(int y=0; y<32; y++) for(int x=0; x<32; x++) {
-      goldberg_map[y][x].cw.c = NULL;
+      goldberg_map[y][x].cw.at = NULL;
       goldberg_map[y][x].rdir = -1;
       goldberg_map[y][x].mindir = 0;
       }
@@ -147,18 +147,14 @@ namespace hr { namespace gp {
     static char bufs[16][32];
     static int bufid;
     bufid++; bufid %= 16;
-    snprintf(bufs[bufid], 32, "[%p/%2d:%d:%d]", cw.c, cw.c?cw.c->type:-1, cw.spin, cw.mirrored);
+    snprintf(bufs[bufid], 32, "[%p/%2d:%d:%d]", cw.at, cw.at?cw.at->type:-1, cw.spin, cw.mirrored);
     return bufs[bufid];
     }
 
   int spawn;
 
-  bool operator != (cellwalker cw1, cellwalker cw2) {
-    return cw1.c != cw2.c || cw1.spin != cw2.spin || cw1.mirrored != cw2.mirrored;
-    }
-
   cell*& peek(cellwalker cw) {
-    return cw.c->mov[cw.spin];
+    return cw.at->move(cw.spin);
     }
 
   cellwalker get_localwalk(const goldberg_mapping_t& wc, int dir) {
@@ -179,7 +175,7 @@ namespace hr { namespace gp {
     int dir1 = fixg6(dir+SG3);
     cellwalker wcw = get_localwalk(wc, dir);
     auto& wc1= get_mapping(at1);
-    if(wc1.cw.c) {
+    if(wc1.cw.at) {
       if(peek(wcw)) {
         auto wcw1 = get_localwalk(wc1, dir1);
         if(wcw + wstep != wcw1) {
@@ -203,15 +199,15 @@ namespace hr { namespace gp {
     auto& wc1 = get_mapping(at + eudir(dir));
     WHD( Xprintf("  md:%02d s:%d", wc.mindir, wc.cw.spin); )
     WHD( Xprintf("  connection %s/%d %s=%s ~ %s/%d ", disp(at), dir, dcw(wc.cw+dir), dcw(wcw), disp(at+eudir(dir)), dir1); )
-    if(!wc1.cw.c) {
+    if(!wc1.cw.at) {
       wc1.start = wc.start;
       if(peek(wcw)) {
         WHD( Xprintf("(pulled) "); )
         set_localwalk(wc1, dir1, wcw + wstep);
         }
       else {
-        peek(wcw) = newCell(SG6, wc.cw.c->master);
-        tsetspin(wcw.c->spintable, wcw.spin, 0);
+        peek(wcw) = newCell(SG6, wc.cw.at->master);
+        wcw.at->c.setspin(wcw.spin, 0, false);
         set_localwalk(wc1, dir1, wcw + wstep);
         spawn++;
         WHD( Xprintf("(created) "); )
@@ -229,8 +225,8 @@ namespace hr { namespace gp {
       }
     else {
       WHD(Xprintf("ok\n"); )
-      peek(wcw) = wcw1.c;
-      tsetspin(wcw.c->spintable, wcw.spin, wcw1.spin + (wcw.mirrored != wcw1.mirrored ? 8 : 0));
+      peek(wcw) = wcw1.at;
+      wcw.at->c.setspin(wcw.spin, wcw1.spin, wcw.mirrored != wcw1.mirrored);
       if(wcw+wstep != wcw1) {
         Xprintf("assertion failed\n");
         exit(1);
@@ -245,7 +241,7 @@ namespace hr { namespace gp {
   
   goldberg_mapping_t& set_heptspin(loc at, heptspin hs) {
     auto& ac0 = get_mapping(at);
-    ac0.cw = cellwalker(hs.h->c7, hs.spin, hs.mirrored);
+    ac0.cw = cellwalker(hs.at->c7, hs.spin, hs.mirrored);
     ac0.start = at;
     WHD( Xprintf("%s : %s\n", disp(at), dcw(ac0.cw)); )
     return ac0;
@@ -255,15 +251,15 @@ namespace hr { namespace gp {
     WHD( Xprintf("EXTEND %p %d\n", c, d); )
     if(c->master->c7 != c) {
       while(c->master->c7 != c) {
-        WHD( Xprintf("%p direction 0 corresponds to %p direction %d\n", c, c->mov[0], c->spin(0)); )
-        d = c->spin(0);
-        c = c->mov[0];
+        WHD( Xprintf("%p direction 0 corresponds to %p direction %d\n", c, c->move(0), c->c.spin(0)); )
+        d = c->c.spin(0);
+        c = c->move(0);
         }
       // c move 0 equals c' move spin(0)
       extend_map(c, d);
       extend_map(c, fixdir(d-1, c));
       extend_map(c, fixdir(d+1, c));
-      if(S3 == 4 && !c->mov[d])
+      if(S3 == 4 && !c->move(d))
         for(int i=0; i<S7; i++)
         for(int j=0; j<S7; j++)
           extend_map(createStep(c->master, i)->c7, j);
@@ -419,7 +415,7 @@ namespace hr { namespace gp {
         case 1: {
           auto at2 = at + eudir(dx+1);
           auto& wc2 = get_mapping(at2);
-          if(wc2.cw.c) { at = at1; continue; }
+          if(wc2.cw.at) { at = at1; continue; }
           wc.rdir = (dx+1) % 6;
           conn(at, (dx+1) % 6);
           conn(at1, (dx+2) % 6);
@@ -440,7 +436,7 @@ namespace hr { namespace gp {
         case 1:
           auto at2 = at + eudir(dx+1);
           auto& wc2 = get_mapping(at2);
-          if(wc2.cw.c) {
+          if(wc2.cw.at) {
             auto at3 = at1 + eudir(wc1.rdir);
             auto& wc3 = get_mapping(at3);
             auto at4 = at3 + eudir(wc3.rdir);
@@ -462,7 +458,7 @@ namespace hr { namespace gp {
             int bdist = 100;
             for(int d=0; d<4; d++) {
               auto &wcm = get_mapping(at2 + eudir(d));
-              if(wcm.cw.c && length(wcm.start - at2) < bdist)
+              if(wcm.cw.at && length(wcm.start - at2) < bdist)
                 bdist = length(wcm.start - at2), bdir = d;
               }
             if(bdir != -1) conn(at2 + eudir(bdir), bdir ^ 2);
@@ -883,7 +879,7 @@ namespace hr { namespace gp {
     else if(irr::on)
       return irr::get_masters(c);
     else
-      return make_array(c->mov[0]->master, c->mov[2]->master, c->mov[4]->master);
+      return make_array(c->move(0)->master, c->move(2)->master, c->move(4)->master);
     }
   
   int compute_dist(cell *c, int master_function(cell*)) {
@@ -902,7 +898,7 @@ namespace hr { namespace gp {
     if(S3 == 4) {
       heptspin hs(cm->master, i);
       hs += wstep; hs+=-1; hs += wstep;
-      auto d2 = master_function(hs.h->c7);
+      auto d2 = master_function(hs.at->c7);
       return solve_quad(dmain, d0, d1, d2, at);
       }
     

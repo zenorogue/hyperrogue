@@ -316,15 +316,97 @@ struct gcell {
 
 #define fval LHU.fi.fieldval
 
-#define NODIR 8
-#define NOBARRIERS 9
-#define MODFIXER 23520
+#define NODIR 14
+#define NOBARRIERS 15
+#define MODFIXER 10090080
 
-inline void tsetspin(uint32_t& t, int d, int spin) { t &= ~(15 << (d<<2)); t |= spin << (d<<2); }
-inline int tspin(uint32_t& t, int d) { return (t >> (d<<2)) & 7; }
-inline bool tmirror(uint32_t& t, int d) { return (t >> ((d<<2)+3)) & 1; }
+template<class T> struct walker;
 
-int fixrot(struct heptagon *h, int a);
+template<class T> struct connection_table {
+  uint32_t spintable;
+  // neighbors; move[0] always goes towards origin, and then we go clockwise
+  T* move_table[8];
+  T* full() { T* x; return (T*)((char*)this - ((char*)(&(x->c)) - (char*)x)); }
+  void setspin(int d, int spin, bool mirror) { spintable &= ~(15 << (d<<2)); spintable |= spin << (d<<2); spintable |= mirror << ((d<<2)+3); }
+  // we are spin(i)-th neighbor of move[i]
+  int spin(int d) { return (spintable >> (d<<2)) & 7; }
+  bool mirror(int d) { return (spintable >> ((d<<2)+3)) & 1; }  
+  int fix(int d) { return (d + MODFIXER) % full()->degree(); }
+  T*& modmove(int i) { return move(fix(i)); }
+  T*& move(int i) { return move_table[i]; }
+  unsigned char modspin(int i) { return spin(fix(i)); }
+  void clear() { 
+    spintable = 0;
+    for(int i=0; i<8; i++) move_table[i] = NULL;
+    }
+  void connect(int d0, T* c1, int d1, bool m) {
+    move(d0) = c1;
+    c1->move(d1) = full();
+    setspin(d0, d1, m);
+    c1->c.setspin(d1, d0, m);    
+    }
+  void connect(int d0, walker<T> hs) {
+    connect(d0, hs.at, hs.spin, hs.mirrored);
+    }
+  };
+
+static const struct wstep_t { wstep_t() {} } wstep;
+static const struct wmirror_t { wmirror_t() {}} wmirror;
+static const struct rev_t { rev_t() {} } rev;
+static const struct revstep_t { revstep_t() {}} revstep;
+
+int hrand(int x);
+
+template<class T> struct walker {
+  T *at;
+  int spin;
+  bool mirrored;
+  walker<T> (T *at = NULL, int s = 0, bool m = false) : at(at), spin(s), mirrored(m) { }
+  walker<T>& operator += (int i) {
+    spin = at->c.fix(spin+(mirrored?-i:i));
+    return (*this);
+    }
+  walker<T>& operator -= (int i) {
+    spin = at->c.fix(spin-(mirrored?-i:i));
+    return (*this);
+    }
+  walker<T>& operator += (wmirror_t) {
+    mirrored = !mirrored;
+    return (*this);
+    }
+  walker<T>& operator += (wstep_t) {
+    at->cmove(spin);
+    int nspin = at->c.spin(spin);
+    if(at->c.mirror(spin)) mirrored = !mirrored;
+    at = at->move(spin);
+    spin = nspin;
+    return (*this);
+    }
+  walker<T>& operator += (rev_t) {
+    int d = at->degree();
+    return (*this) += d/2 + ((d&1)?hrand(2):0);
+    }
+  walker<T>& operator += (revstep_t) {
+    (*this) += rev; return (*this) += wstep; 
+    }
+  bool operator != (const walker<T>& x) const {
+    return at != x.at || spin != x.spin || mirrored != x.mirrored;
+    }
+  bool operator == (const walker<T>& x) const {
+    return at == x.at && spin == x.spin && mirrored == x.mirrored;
+    }
+
+
+
+  walker<T>& operator ++ (int) { return (*this) += 1; }
+  walker<T>& operator -- (int) { return (*this) -= 1; }
+  template<class U> walker operator + (U t) const { walker<T> w = *this; w += t; return w; }
+  template<class U> walker operator - (U t) const { walker<T> w = *this; w += (-t); return w; }
+  T*& peek() { return at->move(spin); }
+  T* cpeek() { return at->cmove(spin); }
+  bool creates() { return !peek(); }
+  walker<T> mirrorat(int d) { return walker<T> (at, at->c.fix(d+d - spin), !mirrored); }
+  };
 
 inline int fix42(int a) { return (a+MODFIXER)% S42; }
 
@@ -333,18 +415,13 @@ struct cell;
 // automaton state
 enum hstate { hsOrigin, hsA, hsB, hsError, hsA0, hsA1, hsB0, hsB1, hsC };
 
+struct cell *createMov(struct cell *c, int d);
+struct heptagon *createStep(struct heptagon *c, int d);
+
 struct heptagon {
   // automaton state
   hstate s : 6;
   unsigned int dm4: 2;
-  // we are spin[i]-th neighbor of move[i]
-  uint32_t spintable;
-  int spin(int d) { return tspin(spintable, d); }
-  bool mirror(int d) { return tmirror(spintable, d); }
-  void setspin(int d, int sp) { tsetspin(spintable, d, sp); }
-  // neighbors; move[0] always goes towards origin,
-  // and then we go clockwise
-  heptagon* move[MAX_EDGE];
   // distance from the origin
   short distance;
   // emerald/wineyard generator
@@ -362,46 +439,38 @@ struct heptagon {
   cell *c7;
   // associated generator of alternate structure, for Camelot and horocycles
   heptagon *alt;
+  // connection table
+  connection_table<heptagon> c;
+  heptagon*& move(int d) { return c.move(d); }
+  heptagon*& modmove(int d) { return c.modmove(d); }
   // functions
-  heptagon*& modmove(int i) { return move[fixrot(this, i)]; }
-  unsigned char gspin(int i) { return spin(fixrot(this, i)); }
   heptagon () { heptacount++; }
   ~heptagon () { heptacount--; }
-  };
-
-struct heptspin {
-  heptagon *h;
-  int spin;
-  bool mirrored;
-  heptspin() { mirrored = false; }
-  heptspin(heptagon *h, int s = 0, bool m = false) : h(h), spin(s), mirrored(m) { }
+  heptagon *cmove(int d) { return createStep(this, d); }
+  inline int degree(); 
   };
 
 struct cell : gcell {
   char type; // 6 for hexagons, 7 for heptagons
+  int degree() { return type; }
 
   // wall parameter, used for remaining power of Bonfires and Thumpers
   char wparam;
 
   int listindex;
 
-  uint32_t spintable;
-  int spin(int d) { return tspin(spintable, d); }
-  int spn(int d) { return tspin(spintable, d); }
-  bool mirror(int d) { return tmirror(spintable, d); }
-
   heptagon *master;
-  cell *mov[MAX_EDGE]; // meaning very similar to heptagon::move
+
+  connection_table<cell> c;
+  cell*& move(int d) { return c.move(d); }
+  cell*& modmove(int d) { return c.modmove(d); }
+  cell* cmove(int d) { return createMov(this, d); }
   };
 
-// similar to heptspin from heptagon.cpp
-struct cellwalker {
-  cell *c;
-  int spin;
-  bool mirrored;
-  cellwalker(cell *c, int spin, bool m=false) : c(c), spin(spin), mirrored(m) { }
-  cellwalker() { mirrored = false; }
-  };
+int heptagon::degree() { if(syntetic) return c7->type; else return S7; }
+
+using heptspin = walker<heptagon>;
+using cellwalker = walker<cell>;
 
 #define BUGCOLORS 3
 
@@ -520,7 +589,7 @@ eItem treasureType(eLand l);
 void buildBarrier(cell *c, int d, eLand l = laNone);
 void extendBarrier(cell *c);
 bool buildBarrier4(cell *c, int d, int mode, eLand ll, eLand lr);
-bool buildBarrier6(struct cellwalker cw, int type);
+bool buildBarrier6(cellwalker cw, int type);
 bool makeEmpty(cell *c);
 bool isCrossroads(eLand l);
 enum orbAction { roMouse, roKeyboard, roCheck, roMouseForce, roMultiCheck, roMultiGo };
@@ -537,7 +606,7 @@ void checkOnYendorPath();
 void killThePlayerAt(eMonster m, cell *c, flagtype flags);
 bool notDippingFor(eItem i);
 bool collectItem(cell *c2, bool telekinesis = false);
-void castLightningBolt(struct cellwalker lig);
+void castLightningBolt(cellwalker lig);
 bool movepcto(int d, int subdir = 1, bool checkonly = false);
 void stabbingAttack(cell *mf, cell *mt, eMonster who, int bonuskill = 0);
 bool earthMove(cell *from, int dir);
@@ -1322,7 +1391,7 @@ bool withRose(cell *cfrom, cell *cto);
 
 #define fakecellloop(ct) for(cell *ct = (cell*)1; ct; ct=NULL)
 
-#define forCellIdAll(ct, i, cf) fakecellloop(ct) for(int i=0; i<(cf)->type && (ct=(cf)->mov[i],true); i++) 
+#define forCellIdAll(ct, i, cf) fakecellloop(ct) for(int i=0; i<(cf)->type && (ct=(cf)->move(i),true); i++) 
 #define forCellIdCM(ct, i, cf)  fakecellloop(ct) for(int i=0; i<(cf)->type && (ct=createMov((cf),i),true); i++) 
 #define forCellIdEx(ct, i, cf)  forCellIdAll(ct,i,cf) if(ct)
 
@@ -2755,11 +2824,6 @@ extern int startseed;
 extern transmatrix heptmove[MAX_EDGE], hexmove[MAX_EDGE];
 extern transmatrix invheptmove[MAX_EDGE], invhexmove[MAX_EDGE];
 
-static const struct wstep_t { wstep_t() {} } wstep;
-static const struct wmirror_t { wmirror_t() {}} wmirror;
-
-heptspin operator + (const heptspin& hs, wstep_t);
-
 // heptspin hsstep(const heptspin &hs, int spin);
 
 extern void fixmatrix(transmatrix&);
@@ -3711,24 +3775,11 @@ void queuestr(int x, int y, int shift, int size, string str, int col, int frame 
 
 ld frac(ld x);
 
-cellwalker& operator += (cellwalker& cw, wstep_t);
-cellwalker& operator += (cellwalker& cw, int spin);
-
-template <class T> cellwalker operator + (cellwalker h, T t) { return h += t; }
-template <class T> cellwalker operator - (cellwalker h, T t) { return h += (-t); }
-
-bool cwstepcreates(cellwalker& cw);
 extern int poly_outline;
 
 extern hpcshape shDisk, shTriangle, shHeptaMarker, shSnowball, shDiskT, shDiskS, shDiskSq, shDiskM;
 
 extern std::mt19937 hrngen;
-
-heptspin& operator += (heptspin& hs, int spin);
-heptspin operator + (const heptspin& hs, wstep_t);
-heptspin operator + (heptspin h, int spin);
-heptspin operator - (heptspin h, int spin);
-heptspin& operator += (heptspin& h, wstep_t);
 
 bool anglestraight(cell *c, int d1, int d2);
 

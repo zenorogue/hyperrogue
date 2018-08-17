@@ -65,7 +65,7 @@ void showOverview() {
   
   int vf = min((vid.yres-64-vid.fsize*2) / nlm, vid.xres/40);
 
-  eLand curland = getLandForList(cwt.c);
+  eLand curland = getLandForList(cwt.at);
   
   getcstat = '0';
   
@@ -103,7 +103,7 @@ void showOverview() {
         getcstat = 3000+waMirror;
       if(getcstat == 3000+waMirror)
         mouseovers = XLAT(
-          olrDescriptions[getOLR(io, cwt.c->land)], cwt.c->land, it, treasureTypeUnlock(curland, io));
+          olrDescriptions[getOLR(io, cwt.at->land)], cwt.at->land, it, treasureTypeUnlock(curland, io));
       }
     else if(io) {
       if(lv >= 25) col = 0xFFD500;
@@ -376,7 +376,7 @@ void showDisplayMode() {
   #if CAP_EDIT
     else if(xuni == 'g') {
       pushScreen(mapeditor::showDrawEditor);
-      mapeditor::initdraw(cwt.c);
+      mapeditor::initdraw(cwt.at);
       }
   #endif
   
@@ -735,7 +735,7 @@ void showStartMenu() {
         config.tstate = config.tstate_max = tsActive;
         config.perform_mapping();
         config.finish_mapping();
-        mapeditor::initdraw(cwt.c);
+        mapeditor::initdraw(cwt.at);
         pushScreen(showMenu);
         pushScreen(mapeditor::showDrawEditor);
         }
