@@ -336,7 +336,7 @@ hyperpoint get_horopoint(ld y, ld x) {
   return xpush(-y) * binary::parabolic(x) * C0;
   }
 
-hyperpoint get_corner_position(cell *c, int cid, ld cf = 3) {
+hyperpoint get_corner_position(cell *c, int cid, ld cf) {
   if(gp::on) return gp::get_corner_position(c, cid, cf);
   if(irr::on) {
     auto& vs = irr::cells[irr::cellindex[c]];

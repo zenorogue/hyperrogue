@@ -3780,4 +3780,9 @@ namespace synt {
   void create_adjacent(heptagon*, int);
   int fix(heptagon *h, int spin);
   }
+
+hyperpoint get_warp_corner(cell *c, int cid);
+hyperpoint get_corner_position(cell *c, int cid, ld cf = 3);
+
 }
+
