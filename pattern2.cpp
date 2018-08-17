@@ -343,7 +343,7 @@ int fieldval_uniq(cell *c) {
     auto p = cell_to_pair(c);
     return gmod(p.first * torusconfig::dx + p.second * torusconfig::dy, torusconfig::qty);
     }
-  else if(binarytiling) return 0;
+  else if(binarytiling || syntetic) return 0;
   if(ctof(c) || gp::on || irr::on) return c->master->fieldval/S7;
   else {
     int z = 0;
@@ -873,6 +873,11 @@ namespace patterns {
     si.dir = 0; si.reflect = false; si.id = ctof(c);
     si.symmetries = c->type;
     
+    if(syntetic) {
+      si.id = synt::id_of(c->master);
+      return si;
+      }
+
     if(binarytiling) {
       if(pat == PAT_SINGLETYPE) si.id = 0;
       si.dir = 2;
@@ -1168,6 +1173,7 @@ int pattern_threecolor(cell *c) {
 bool pseudohept(cell *c) {
   if(irr::on) return irr::pseudohept(c);
   if(binarytiling) return c->type & c->master->distance & 1;
+  if(syntetic) return synt::id_of(c->master) < 2 * isize(synt::faces);
   if(gp::on && gp_threecolor() == 2)
     return gp::pseudohept_val(c) == 0;
   if(gp::on && gp_threecolor() == 1 && (S7&1) && (S3 == 3))
@@ -2071,6 +2077,12 @@ namespace linepatterns {
       case patPower: {
         if(gp::on) {
           for(int i=0; i<S7; i++) if(c->mov[i] && c->mov[i]->master != c->master && gmatrix.count(c->mov[i]))
+            queuelinef(tC0(V), gmatrix[c->mov[i]]*C0, 
+              col,
+              1 + vid.linequality);
+          }
+        else if(syntetic) {
+          if(!pseudohept(c)) for(int i=0; i<c->type; i++) if(c->mov[i] && c < c->mov[i] && !pseudohept(c->mov[i]) && gmatrix.count(c->mov[i])) 
             queuelinef(tC0(V), gmatrix[c->mov[i]]*C0, 
               col,
               1 + vid.linequality);

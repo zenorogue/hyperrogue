@@ -53,6 +53,8 @@ void precalc() {
   int vertexdegree = S6/2;
   ld fmin, fmax;  
 
+  if(syntetic) return;
+
   if(euclid) { 
     // dynamicval<eGeometry> g(geometry, gNormal);
     // precalc(); }

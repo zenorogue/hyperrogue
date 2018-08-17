@@ -73,7 +73,9 @@ hrmap_hyperbolic::hrmap_hyperbolic() {
   h.alt = NULL;
   h.distance = 0;
   isnonbitrunc = nonbitrunc;
-  if(binarytiling) {
+  if(syntetic)
+    synt::initialize(&h);
+  else if(binarytiling) {
     #if DEBUG_BINARY_TILING
     binary::xcode.clear();
     binary::rxcode.clear();
@@ -845,7 +847,7 @@ cell *createMov(cell *c, int d) {
     printf("ERROR createmov\n");
     }
 
-  if(euclid && !c->mov[d]) {
+  if(masterless && !c->mov[d]) {
     int id = decodeId(c->master);
     for(int dx=-1; dx<=1; dx++)
     for(int dy=-1; dy<=1; dy++)
@@ -864,7 +866,14 @@ cell *createMov(cell *c, int d) {
       exit(1);
       }
     }
-  else if(nonbitrunc) {
+  else if(nonbitrunc && syntetic) {
+    if(synt::id_of(c->master) <= synt::N * 2) {
+      heptspin hs = heptspin(c->master, d) + wstep + 2 + wstep + 1;
+      merge(c,d,hs.h->c7,hs.spin,false);
+      }
+    else merge(c, d, c, d, false);
+    }
+  else if(nonbitrunc || syntetic) {
     heptagon *h2 = createStep(c->master, d);
     merge(c,d,h2->c7,c->master->spin(d),false);
     }
@@ -933,7 +942,8 @@ cell*& euclideanAtCreate(int vec) {
 void initcells() {
   DEBB(DF_INIT, (debugfile,"initcells\n"));
   
-  if(torus) currentmap = new hrmap_torus;
+  if(syntetic) currentmap = new hrmap_hyperbolic;
+  else if(torus) currentmap = new hrmap_torus;
   else if(euclid) currentmap = new hrmap_euclidean;
   else if(sphere) currentmap = new hrmap_spherical;
   else if(quotient) currentmap = new quotientspace::hrmap_quotient;
@@ -1040,7 +1050,7 @@ void verifycell(cell *c) {
   for(int i=0; i<t; i++) {
     cell *c2 = c->mov[i];
     if(c2) {
-      if(!euclid && !nonbitrunc && c == c->master->c7) verifycell(c2);
+      if(!stdeuclid && !nonbitrunc && c == c->master->c7) verifycell(c2);
       if(c2->mov[c->spn(i)] && c2->mov[c->spn(i)] != c) {
         printf("cell error %p:%d [%d] %p:%d [%d]\n", c, i, c->type, c2, c->spn(i), c2->type);
         exit(1);
@@ -1050,7 +1060,7 @@ void verifycell(cell *c) {
   }
 
 void verifycells(heptagon *at) {
-  if(gp::on || irr::on) return;
+  if(gp::on || irr::on || syntetic) return;
   for(int i=0; i<S7; i++) if(at->move[i] && at->move[i]->move[at->spin(i)] && at->move[i]->move[at->spin(i)] != at) {
     printf("hexmix error %p [%d s=%d] %p %p\n", at, i, at->spin(i), at->move[i], at->move[i]->move[at->spin(i)]);
     }
@@ -1091,14 +1101,13 @@ int compdist(int dx[]) {
   }
 
 int celldist(cell *c) {
-  if(euclid) {
-    if(torus) 
-      return torusmap()->dists[decodeId(c->master)];
+  if(torus) 
+    return torusmap()->dists[decodeId(c->master)];
+  if(masterless)
     return eudist(decodeId(c->master));
-    }
   if(sphere) return celldistance(c, currentmap->gamestart());
   if(irr::on) return irr::celldist(c, false);
-  if(ctof(c)) return c->master->distance;
+  if(binarytiling || syntetic || ctof(c)) return c->master->distance;
   if(gp::on) return gp::compute_dist(c, celldist);
   int dx[MAX_S3];
   for(int u=0; u<S3; u++)
@@ -1115,7 +1124,7 @@ int celldist(cell *c) {
 int euclidAlt(short x, short y);
 
 int celldistAlt(cell *c) {
-  if(euclid) {
+  if(stdeuclid) {
     if(torus) return celldist(c);
     int x, y;
     tie(x,y) = vec_to_pair(decodeId(c->master));
@@ -1429,7 +1438,7 @@ cdata *getEuclidCdata(int h) {
   }
 
 int getCdata(cell *c, int j) {
-  if(euclid) return getEuclidCdata(decodeId(c->master))->val[j];
+  if(stdeuclid) return getEuclidCdata(decodeId(c->master))->val[j];
   else if(geometry) return 0;
   else if(ctof(c)) return getHeptagonCdata(c->master)->val[j]*3;
   else {
@@ -1442,7 +1451,7 @@ int getCdata(cell *c, int j) {
   }
 
 int getBits(cell *c) {
-  if(euclid) return getEuclidCdata(decodeId(c->master))->bits;
+  if(stdeuclid) return getEuclidCdata(decodeId(c->master))->bits;
   else if(geometry) return 0;
   else if(c->type != 6) return getHeptagonCdata(c->master)->bits;
   else {
@@ -1486,7 +1495,7 @@ map<pair<cell*, cell*>, int> saved_distances;
 int celldistance(cell *c1, cell *c2) {
   int d = 0;
   
-  if(euclid6 || (euclid4 && nonbitrunc)) {
+  if((stdeuclid) && (euclid6 || (euclid4 && nonbitrunc))) {
     if(!torus)
       return eudist(decodeId(c1->master) - decodeId(c2->master));
     else if(torus && torusconfig::torus_mode == 0) 
@@ -1511,7 +1520,7 @@ int celldistance(cell *c1, cell *c2) {
     return 64;
     }
   
-  if(gp::on || euclid || irr::on) {
+  if(gp::on || stdeuclid || irr::on) {
     
     if(saved_distances.count(make_pair(c1,c2)))
       return saved_distances[make_pair(c1,c2)];

@@ -3375,6 +3375,7 @@ transmatrix calc_relative_matrix(cell *c2, cell *c1, const hyperpoint& point_hin
     }
   
   if(binarytiling) return binary::relative_matrix(c2->master, c1->master);
+  if(syntetic) return synt::relative_matrix(c2->master, c1->master);
   
   if(torus) {
     transmatrix t = Id;

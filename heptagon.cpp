@@ -74,7 +74,7 @@ heptagon *buildHeptagon(heptagon *parent, int d, hstate s, int pard = 0, int fix
   h->spintable = 0;
   h->move[pard] = parent; tsetspin(h->spintable, pard, d);
   parent->move[d] = h; tsetspin(parent->spintable, d, pard);
-  if(binarytiling) return h;
+  if(binarytiling || syntetic) return h;
   if(parent->c7) {
     if(irr::on)
       irr::link_next(parent, d);
@@ -203,9 +203,9 @@ void connectHeptagons(heptagon *h1, int d1, heptagon *h2, int d2) {
 int recsteps;
 
 void addSpin(heptagon *h, int d, heptagon *from, int rot, int spin) {
-  rot = fixrot(rot);
+  rot = fixrot(h, rot);
   createStep(from, rot);
-  int fr = fixrot(from->spin(rot) + spin);
+  int fr = fixrot(from, from->spin(rot) + spin);
   connectHeptagons(h, d, from->move[rot], fr);
 /*  h->move[d] = from->move[rot];
   h->setspin(d, fr);
@@ -219,8 +219,13 @@ extern int hrand(int);
 // a structure used to walk on the heptagonal tesselation
 // (remembers not only the heptagon, but also direction)
 
+int fixrot(heptagon *h, int a) { 
+  if(syntetic) return synt::fix(h, a);
+  return (a+MODFIXER) % S7; 
+  }
+
 heptspin& operator += (heptspin& hs, int spin) {
-  hs.spin = fixrot(hs.spin + (MIRR(hs)?-spin:spin));
+  hs.spin = fixrot(hs.h, hs.spin + (MIRR(hs)?-spin:spin));
   return hs;
   }
 
@@ -238,9 +243,13 @@ heptspin operator - (heptspin h, int spin) { return h += -spin; }
 heptspin& operator += (heptspin& h, wstep_t) { h = h + wstep; return h; }
 
 heptagon *createStep(heptagon *h, int d) {
-  d = fixrot(d);
+  d = fixrot(h, d);
   if(!h->move[d] && binarytiling) 
     return binary::createStep(h, d);
+  if(!h->move[d] && syntetic) {
+    synt::create_adjacent(h, d); 
+    return h->move[d];
+    }
   if(!h->move[0] && h->s != hsOrigin && !binarytiling) {
     // cheating: 
     int pard=0;

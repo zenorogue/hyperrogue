@@ -499,18 +499,20 @@ bool confusingGeometry() {
   }
 
 ld master_to_c7_angle() {
-  return nonbitrunc ? M_PI + gp::alpha : 0;
+  return (nonbitrunc && !binarytiling && !syntetic) ? M_PI + gp::alpha : 0;
   }
 
 transmatrix actualV(const heptspin& hs, const transmatrix& V) {
   if(irr::on)
     return V * spin(M_PI + 2 * M_PI / S7 * (hs.spin + irr::periodmap[hs.h].base.spin));
+  if(syntetic) return V * spin(-synt::triangles[synt::id_of(hs.h)][hs.spin].first);
   if(binarytiling) return V;
   return (hs.spin || nonbitrunc) ? V * spin(hs.spin*2*M_PI/S7 + master_to_c7_angle()) : V;
   }
 
 transmatrix applyspin(const heptspin& hs, const transmatrix& V) {
   if(binarytiling) return V;
+  if(syntetic) return V * spin(synt::triangles[synt::id_of(hs.h)][hs.spin].first);
   return hs.spin ? V * spin(hs.spin*2*M_PI/S7) : V;
   }
 
@@ -608,7 +610,7 @@ void drawrec(const heptspin& hs, hstate s, const transmatrix& V) {
       }
     
     if(!nonbitrunc) for(int d=0; d<S7; d++) {
-      int ds = fixrot(hs.spin + d);
+      int ds = fixrot(hs.h, hs.spin + d);
       // createMov(c, ds);
       if(c->mov[ds] && c->spn(ds) == 0 && dodrawcell(c->mov[ds])) {
         transmatrix V2 = V1 * hexmove[d];
@@ -802,11 +804,11 @@ void optimizeview() {
   
   transmatrix TB = Id;
   
-  if(binarytiling) {
+  if(binarytiling || syntetic) {
     turn = -1, best = View[2][2];
     for(int i=0; i<viewctr.h->c7->type; i++) {
       heptagon *h2 = createStep(viewctr.h, i);
-      transmatrix T = binary::relative_matrix(h2, viewctr.h);
+      transmatrix T = (binarytiling) ? binary::relative_matrix(h2, viewctr.h) : synt::relative_matrix(h2, viewctr.h);
       hyperpoint H = View * tC0(T);
       if(H[2] < best) best = H[2], turn = i, TB = T;
       }
@@ -863,7 +865,7 @@ void resetview() {
   DEBB(DF_GRAPH, (debugfile,"reset view\n"));
   View = Id;
   // EUCLIDEAN
-  if(!euclid) 
+  if(!stdeuclid) 
     viewctr.h = cwt.c->master,
     viewctr.spin = cwt.spin;
   else centerover = cwt;

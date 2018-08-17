@@ -579,6 +579,7 @@ int read_geom_args() {
     }
   TOGGLE('7', nonbitrunc, stop_game_and_switch_mode(rg::bitrunc))
   else if(argis("-geo")) { 
+    PHASEFROM(2);
     shift(); targetgeometry = (eGeometry) argi();
     if(targetgeometry != geometry)
       stop_game_and_switch_mode(rg::geometry);

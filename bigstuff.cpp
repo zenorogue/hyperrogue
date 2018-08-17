@@ -976,7 +976,7 @@ int wallchance(cell *c, bool deepOcean) {
 
 bool horo_ok() {
   // do the horocycles work in the current geometry?
-  return hyperbolic && !binarytiling;
+  return hyperbolic && !binarytiling && !syntetic;
   }
 
 bool gp_wall_test() {

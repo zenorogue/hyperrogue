@@ -88,6 +88,7 @@ void addMessage(string s, char spamtype = 0);
 #define stdhyperbolic (S7 == 7 && S3 == 3 && !gp::on && !irr::on && !binarytiling)
 
 #define binarytiling (geometry == gBinaryTiling)
+#define syntetic (geometry == gSyntetic)
 #define eubinary (euclid || binarytiling)
 
 #define cgclass (ginf[geometry].cclass)
@@ -101,6 +102,10 @@ void addMessage(string s, char spamtype = 0);
 #define doall (ginf[geometry].quotientstyle)
 #define smallbounded (sphere || (quotient & qSMALL) || torus)
 #define bounded (sphere || quotient || torus)
+
+#define masterless among(geometry, gEuclid, gEuclidSquare)
+#define stdeuclid (torus || masterless)
+#define stdsphere (sphere && !syntetic)
 
 #define a4 (S3 == 4)
 #define a45 (S3 == 4 && S7 == 5)
@@ -319,7 +324,8 @@ inline void tsetspin(uint32_t& t, int d, int spin) { t &= ~(15 << (d<<2)); t |= 
 inline int tspin(uint32_t& t, int d) { return (t >> (d<<2)) & 7; }
 inline bool tmirror(uint32_t& t, int d) { return (t >> ((d<<2)+3)) & 1; }
 
-inline int fixrot(int a) { return (a+MODFIXER)% S7; }
+int fixrot(struct heptagon *h, int a);
+
 inline int fix42(int a) { return (a+MODFIXER)% S42; }
 
 struct cell;
@@ -357,8 +363,8 @@ struct heptagon {
   // associated generator of alternate structure, for Camelot and horocycles
   heptagon *alt;
   // functions
-  heptagon*& modmove(int i) { return move[fixrot(i)]; }
-  unsigned char gspin(int i) { return spin(fixrot(i)); }
+  heptagon*& modmove(int i) { return move[fixrot(this, i)]; }
+  unsigned char gspin(int i) { return spin(fixrot(this, i)); }
   heptagon () { heptacount++; }
   ~heptagon () { heptacount--; }
   };
@@ -3765,4 +3771,12 @@ namespace binary {
   heptagon *createStep(heptagon *parent, int d);
   }
 
+namespace synt {
+  void initialize(heptagon *root);
+  transmatrix relative_matrix(heptagon *h1, heptagon *h2);
+  short& id_of(heptagon *);
+  void draw();
+  void create_adjacent(heptagon*, int);
+  int fix(heptagon *h, int spin);
+  }
 }
