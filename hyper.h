@@ -84,8 +84,8 @@ void addMessage(string s, char spamtype = 0);
 #define S3 ginf[geometry].vertex
 #define hyperbolic_37 (S7 == 7 && S3 == 3 && !binarytiling)
 #define hyperbolic_not37 ((S7 > 7 || S3 > 3 || binarytiling) && hyperbolic)
-#define weirdhyperbolic ((S7 > 7 || S3 > 3 || gp::on || irr::on || binarytiling) && hyperbolic)
-#define stdhyperbolic (S7 == 7 && S3 == 3 && !gp::on && !irr::on && !binarytiling)
+#define weirdhyperbolic ((S7 > 7 || S3 > 3 || gp::on || irr::on || binarytiling || syntetic) && hyperbolic)
+#define stdhyperbolic (S7 == 7 && S3 == 3 && !gp::on && !irr::on && !binarytiling && !syntetic)
 
 #define binarytiling (geometry == gBinaryTiling)
 #define syntetic (geometry == gSyntetic)
