@@ -285,7 +285,7 @@ void generate_floorshapes_for(int id, cell *c, int siid, int sidir) {
   for(auto pfsh: all_plain_floorshapes) {
     auto& fsh = *pfsh;
 
-    if(!gp::on && !irr::on) {
+    if(!gp::on && !irr::on && !syntetic) {
 
       // standard and binary
       ld hexside = fsh.rad0, heptside = fsh.rad1;
@@ -400,7 +400,7 @@ void generate_floorshapes_for(int id, cell *c, int siid, int sidir) {
     
     sizeto(fsh.b, id);
     
-    if(!gp::on && !irr::on && !binarytiling) {
+    if(!gp::on && !irr::on && !binarytiling && !syntetic) {
       generate_matrices_scale(fsh.scale, fsh.noftype);
       if(nonbitrunc && geosupport_graveyard() < 2 && fsh.shapeid2) {
         if(id == 0) bshape2(fsh.b[0], fsh.prio, fsh.shapeid2, hept_matrices);
@@ -473,6 +473,18 @@ void generate_floorshapes() {
     }
     
   else if(gp::on) { /* will be generated on the fly */ }
+  
+  else if(syntetic) {
+    heptagon master;
+    cell model;
+    model.master = &master;
+    synt::parent_index_of(&master) = 0;
+    for(int i=0; i<2*synt::N + (nonbitrunc ? 0 : 2); i++) {
+      synt::id_of(&master) = i;
+      model.type = isize(synt::triangles[i]);
+      generate_floorshapes_for(i, &model, i >= 2*synt::N, 0);
+      }
+    }
   
   else {
     cell model;
@@ -592,6 +604,8 @@ void draw_shapevec(cell *c, const transmatrix& V, const vector<hpcshape> &shv, i
     queuepolyat(V, shv[pseudohept(c)], col, prio);
   else if(binarytiling)
     queuepolyat(V, shv[c->type-6], col, prio);
+  else if(syntetic)
+    queuepolyat(V, shv[synt::id_of(c->master)], col, prio);
   else
     queuepolyat(V, shv[ctof(c)], col, prio);
   }

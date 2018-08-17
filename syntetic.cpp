@@ -239,8 +239,6 @@ void prepare() {
 
 void initialize(heptagon *h) {
  
-  prepare();
-
   /* initialize the root */
 
   parent_index_of(h) = 0;

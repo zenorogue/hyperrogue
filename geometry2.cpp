@@ -356,6 +356,10 @@ hyperpoint get_corner_position(cell *c, int cid, ld cf) {
     vertices[6] = get_horopoint(-yy, 0);
     return mid_at_actual(vertices[cid], 3/cf);
     }
+  if(syntetic) {
+    int id = synt::id_of(c->master);
+    return spin(M_PI / c->type * (2*cid+0)) * xpush(synt::circumradius[id/2] * 3 / cf) * C0;
+    }
   if(nonbitrunc) {
     return ddspin(c,cid,S6) * xpush0(hcrossf * 3 / cf);
     }
@@ -394,6 +398,7 @@ hyperpoint midcorner(cell *c, int i, ld v) {
     hyperpoint nlfar = rel * vs2.vertices[(spin+2)%cor2];
     return mid_at(nfar, nlfar, .49);
     }
+  if(syntetic) return C0;
   printf("midcorner not handled\n");
   exit(1);
   }
@@ -410,6 +415,11 @@ hyperpoint nearcorner(cell *c, int i) {
     auto& vs = irr::cells[irr::cellindex[c]];
     hyperpoint nc = vs.jpoints[vs.neid[i]];
     return mid_at(C0, nc, .94);
+    }
+  if(syntetic) {
+    int id = synt::id_of(c->master);
+    auto& t1 = synt::triangles[id][i];
+    return spin(-t1.first) * xpush(t1.second) * C0;
     }
   if(binarytiling) {
     ld yx = log(2) / 2;
@@ -456,7 +466,7 @@ hyperpoint farcorner(cell *c, int i, int which) {
     if(which == 0) return rel * vs2.vertices[(spin+2)%cor2];
     if(which == 1) return rel * vs2.vertices[(spin+cor2-1)%cor2];
     }
-  if(binarytiling)
+  if(binarytiling || syntetic)
     return nearcorner(c, (i+which) % c->type); // lazy
   printf("farcorner not handled\n");
   exit(1);

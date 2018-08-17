@@ -3190,7 +3190,7 @@ bool placeSidewall(cell *c, int i, int sidepar, const transmatrix& V, int col) {
   
   transmatrix V2 = V * ddspin(c, i);
  
-  if(gp::on || irr::on || binarytiling) {
+  if(gp::on || irr::on || binarytiling || syntetic) {
     draw_shapevec(c, V2, qfi.fshape->gpside[sidepar][i], col, prio);
     return false;
     }
