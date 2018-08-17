@@ -581,7 +581,8 @@ void set_floor(const transmatrix& spin, hpcshape& sh) {
   }
 
 void draw_shapevec(cell *c, const transmatrix& V, const vector<hpcshape> &shv, int col, int prio = -1) {
-  if(gp::on) {
+  if(!c) queuepolyat(V, shv[0], col, prio);
+  else if(gp::on) {
     int id = gp::get_plainshape_id(c);
     queuepolyat(V, shv[id], col, prio);
     }
