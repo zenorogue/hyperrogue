@@ -508,10 +508,6 @@ namespace gp {
     nextid = 0;
     }
 
-  bool just_matrices = false;
-  
-  map<cell*, matrixlist> usedml;
-  
   void build_plainshape(int& id, gp::local_info& li, cell *c0, int siid, int sidir) {
     id = nextid++;
   
@@ -546,7 +542,7 @@ namespace gp {
       sidir = 0;
       }
     auto& id = pshid[siid][sidir][draw_li.relative.first&31][draw_li.relative.second&31][fix6(draw_li.total_dir)];
-    if(id == -1 || just_matrices) build_plainshape(id, draw_li, c, siid, sidir);
+    if(id == -1) build_plainshape(id, draw_li, c, siid, sidir);
     return id;
     }
   }
@@ -630,45 +626,34 @@ void draw_qfi(cell *c, const transmatrix& V, int col, int prio = -1, vector<hpcs
   else draw_shapevec(c, V, (qfi.fshape->*tab), col, prio);
   }
 
+bool floorshape_debug;
 void viewmat() {
-/*
-  int id = 0;  
-  if(gp::on) {
-    gp::just_matrices = true;
-    gp::draw_li = gp::get_local_info(cwt.at);
-    if(gp::draw_li.last_dir == -1) gp::draw_li.total_dir = 0;
-    gp::draw_li.total_dir = fix6(gp::draw_li.total_dir);
-    gp::get_plainshape_id(cwt.at);
-    gp::just_matrices = false;
-    }
-  // if(gp::on && !gp::usedml.count(cwt.at)) return;
-//  for(auto& v: (pseudohept(cwt.at) ? hept_matrices : hex_matrices).v) {
-//  for(auto& v: (gp::on ? gp::usedml[cwt.c] : pseudohept(cwt.at) ? hept_matrices : hex_matrices).v) {
-//    hyperpoint h1 = gmatrix[cwt.c] * v.second[0] * hpxyz(1,0,0);
-  id = irr::cellindex[cwt.c];
-  for(auto& v: irr::usedml[id].v) { 
-//  for(auto& v: (gp::on ? gp::usedml[cwt.c] : pseudohept(cwt.at) ? hept_matrices : hex_matrices).v) {
+  if(floorshape_debug) {
+    transmatrix V = ggmatrix(cwt.at);
     
-    hyperpoint h1 = gmatrix[cwt.c] * v.second[0] * hpxyz(1,0,0);
-    hyperpoint h2 = gmatrix[cwt.c] * v.second[0] * hpxyz(0,1,0);
-    hyperpoint h3 = gmatrix[cwt.c] * v.second[0] * hpxyz(0,0,1);
-    queueline(h1, h2, 0xFFFFFFFF, 4, PPR_LINE);
-    queueline(h2, h3, 0xFFFFFFFF, 4, PPR_LINE);
-    queueline(h3, h1, 0xFFFFFFFF, 4, PPR_LINE);
-    hyperpoint ch = mid3(h1, h2, h3);
-    queuestr(ch, vid.fsize, its(id), 0xFFFFFF);
-if(0) {
-    hyperpoint h1 = gmatrix[cwt.c] * inverse(v.first) * hpxyz(1,0,0);
-    hyperpoint h2 = gmatrix[cwt.c] * inverse(v.first) * hpxyz(0,1,0);
-    hyperpoint h3 = gmatrix[cwt.c] * inverse(v.first) * hpxyz(0,0,1);
-    queueline(h1, h2, 0xFF00FF80, 4, PPR_LINE);
-    queueline(h2, h3, 0xFF00FF80, 4, PPR_LINE);
-    queueline(h3, h1, 0xFF00FF80, 4, PPR_LINE);
-    hyperpoint ch = mid3(h1, h2, h3); 
-    queuestr(ch, vid.fsize, its(id), 0xFFFFFF);
+    for(int i=0; i<cwt.at->type; i++) {
+      hyperpoint ci = V * get_corner_position(cwt.at, i);
+      hyperpoint ci1 = V * get_corner_position(cwt.at, (i+1) % cwt.at->type);
+      hyperpoint cn = V * nearcorner(cwt.at, i);
+      hyperpoint cf0 = V * farcorner(cwt.at, i, 0);
+      hyperpoint cf1 = V * farcorner(cwt.at, i, 1);
+      queueline(V * C0, ci, 0xFFFFFFFF, 3);
+      queueline(ci, ci1, 0xFFFF00FF, 3);
+      queueline(ci, cn, 0xFF00FFFF, 3);
+      queueline(ci1, cn, 0xFF0000FF, 3);
+      queueline(ci, cf0, 0x00FFFFFF, 3);
+      queueline(cn, cf0, 0x00FF00FF, 3);
+      queueline(cn, cf1, 0x0000FFFF, 3);
+      }
     }
-    id++;
-    } */
   }
+
+auto hook = 
+  addHook(hooks_args, 100, [] () {
+    using namespace arg;             
+    if(argis("-floordebug")) { floorshape_debug = true; return 0; }
+    else return 1;
+    });
+
 
 }

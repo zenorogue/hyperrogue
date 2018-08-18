@@ -4934,6 +4934,8 @@ void drawMarkers() {
 
   if(!(cmode & sm::NORMAL)) return;
   
+  viewmat();
+  
   for(cell *c1: crush_now) 
     queuecircleat(c1, .8, darkena(minf[moCrusher].color, 0, 0xFF));
 
