@@ -66,13 +66,17 @@ template<class... T> auto iprintf(T... t) { for(int i=0; i<indent; i++) putchar(
 #define COMPUTE -1000000
 
 // create a new heptagon
-heptagon *buildHeptagon(heptagon *parent, int d, hstate s, int pard = 0, int fixdistance = COMPUTE) {
-  heptagon *h = new heptagon;
+heptagon *buildHeptagon1(heptagon *h, heptagon *parent, int d, hstate s, int pard = 0, int fixdistance = COMPUTE) {
   h->alt = NULL;
   h->s = s;
   h->c.clear();
   h->c.connect(pard, parent, d, false);
   h->cdata = NULL;
+  return h;
+  }
+  
+heptagon *buildHeptagon(heptagon *parent, int d, hstate s, int pard = 0, int fixdistance = COMPUTE) {
+  heptagon *h = buildHeptagon1(new heptagon, parent, d, s, pard, fixdistance);
   if(binarytiling || syntetic) return h;
   if(parent->c7) {
     if(irr::on)

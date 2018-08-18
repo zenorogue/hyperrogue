@@ -289,7 +289,7 @@ void debug(heptagon *h) {
 
 heptagon *build_child(heptagon *parent, int d, int id, int pindex) {
   indenter ind;
-  auto h = buildHeptagon(parent, d, hstate(1), 0);
+  auto h = buildHeptagon1(new heptagon, parent, d, hstate(1), 0);
   id_of(h) = id;
   parent_index_of(h) = pindex;
   int nei = neighbors_of(h);
