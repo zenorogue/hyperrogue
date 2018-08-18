@@ -399,6 +399,7 @@ void generate_floorshapes_for(int id, cell *c, int siid, int sidir) {
     auto& fsh = *pfsh;
     
     sizeto(fsh.b, id);
+    sizeto(fsh.shadow, id);
     
     if(!gp::on && !irr::on && !binarytiling && !syntetic) {
       generate_matrices_scale(fsh.scale, fsh.noftype);
@@ -409,6 +410,15 @@ void generate_floorshapes_for(int id, cell *c, int siid, int sidir) {
       else {
         if(id == 0) bshape2(fsh.b[0], fsh.prio, fsh.shapeid0, hex_matrices);
         if(id == 1) bshape2(fsh.b[1], fsh.prio, fsh.shapeid1, hept_matrices);
+        }
+      generate_matrices_scale(fsh.scale * SHADMUL, fsh.noftype);
+      if(nonbitrunc && geosupport_graveyard() < 2 && fsh.shapeid2) {
+        if(id == 0) bshape2(fsh.shadow[0], fsh.prio, fsh.shapeid2, hept_matrices);
+        if(id == 1) bshape2(fsh.shadow[1], fsh.prio, fsh.shapeid2, hept_matrices);
+        }
+      else {
+        if(id == 0) bshape2(fsh.shadow[0], fsh.prio, fsh.shapeid0, hex_matrices);
+        if(id == 1) bshape2(fsh.shadow[1], fsh.prio, fsh.shapeid1, hept_matrices);
         }
       }
     
@@ -421,32 +431,33 @@ void generate_floorshapes_for(int id, cell *c, int siid, int sidir) {
           
       m.n.sym = cor;
 
-      int i = 0;
-      
       int v = sidir+siid;
       
-      for(int d=0; d<m.o.sym; d++) {
-        hyperpoint center = hpxy(0,0);
-  
-        for(int cid=0; cid<cor; cid++) {
-          hyperpoint nlcorner = get_corner_position(c, (d+cid+v+1) % cor, 3 / fsh.scale);
-          hyperpoint nrcorner = get_corner_position(c, (d+cid+v+2) % cor, 3 / fsh.scale);
+      for(int ii=0; ii<2; ii++) {
+        int i = 0;       
+        for(int d=0; d<m.o.sym; d++) {
+          hyperpoint center = hpxy(0,0);
+    
+          for(int cid=0; cid<cor; cid++) {
+            hyperpoint nlcorner = get_corner_position(c, (d+cid+v+1) % cor, 3 / fsh.scale * (ii ? 1/SHADMUL : 1));
+            hyperpoint nrcorner = get_corner_position(c, (d+cid+v+2) % cor, 3 / fsh.scale * (ii ? 1/SHADMUL : 1));
+            
+            hyperpoint nfar = nearcorner(c, (d+cid+v+1) % cor);
+            
+            hyperpoint nlfar = farcorner(c, (d+cid+v+1) % cor, 0);
+            hyperpoint nrfar = farcorner(c, (d+cid+v+1) % cor, 1);
+            m.v[i].second[cid] = build_matrix(center, nlcorner, nrcorner);
+            m.v[i+1].second[cid] = build_matrix(nfar, nlcorner, nrcorner);
+            m.v[i+2].second[cid] = build_matrix(nfar, nlcorner, nlfar);
+            m.v[i+3].second[cid] = build_matrix(nfar, nrcorner, nrfar);
+            }
           
-          hyperpoint nfar = nearcorner(c, (d+cid+v+1) % cor);
-          
-          hyperpoint nlfar = farcorner(c, (d+cid+v+1) % cor, 0);
-          hyperpoint nrfar = farcorner(c, (d+cid+v+1) % cor, 1);
-          m.v[i].second[cid] = build_matrix(center, nlcorner, nrcorner);
-          m.v[i+1].second[cid] = build_matrix(nfar, nlcorner, nrcorner);
-          m.v[i+2].second[cid] = build_matrix(nfar, nlcorner, nlfar);
-          m.v[i+3].second[cid] = build_matrix(nfar, nrcorner, nrfar);
+          i += 4;
           }
-        
-        i += 4;
+  
+        if(i != isize(m.v)) printf("warning: i=%d sm=%d\n", i, isize(m.v));      
+        bshape2((ii?fsh.shadow:fsh.b)[id], fsh.prio, (fsh.shapeid2 && geosupport_graveyard() < 2) ? fsh.shapeid2 : siid?fsh.shapeid0:fsh.shapeid1, m);
         }
-
-      if(i != isize(m.v)) printf("warning: i=%d sm=%d\n", i, isize(m.v));      
-      bshape2(fsh.b[id], fsh.prio, (fsh.shapeid2 && geosupport_graveyard() < 2) ? fsh.shapeid2 : siid?fsh.shapeid0:fsh.shapeid1, m);
       }
     }
   }
