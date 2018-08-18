@@ -307,6 +307,41 @@ void virtualRebase(cell*& base, hyperpoint& h, bool tohex) {
   virtualRebase(base, h, tohex, [] (const hyperpoint& h) { return h; });
   }
 
+// works only in geometries similar to the standard one, and only on heptagons
+void virtualRebaseSimple(heptagon*& base, transmatrix& at) {
+
+  while(true) {
+  
+    double currz = at[2][2];
+    
+    heptagon *h = base;
+    
+    heptagon *newbase = NULL;
+    
+    transmatrix bestV;
+    
+    for(int d=0; d<S7; d++) {
+      heptspin hs(h, d, false);
+      heptspin hs2 = hs + wstep;
+      transmatrix V2 = spin(-hs2.spin*2*M_PI/S7) * invheptmove[d] * at;
+      double newz = V2[2][2];
+      if(newz < currz) {
+        currz = newz;
+        bestV = V2;
+        newbase = hs2.at;
+        }
+      }
+
+    if(newbase) {
+      base = newbase;
+      at = bestV;
+      continue;
+      }
+
+    return;
+    }
+  }
+
 double cellgfxdist(cell *c, int i) {
   if(gp::on || irr::on) return hdist0(tC0(calc_relative_matrix(c->move(i), c, i)));
   return nonbitrunc ? tessf * gp::scale : (c->type == 6 && (i&1)) ? hexhexdist : crossf;

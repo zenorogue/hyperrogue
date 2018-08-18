@@ -52,12 +52,10 @@ void precalc() {
   int vertexdegree = S6/2;
   ld fmin, fmax;  
 
-  if(syntetic) {
-    synt::prepare();
-    return;
-    }
+  if(syntetic) 
+    ginf[gSyntetic].cclass = gcHyperbolic;
 
-  if(euclid) { 
+  if(euclid) {
     // dynamicval<eGeometry> g(geometry, gNormal);
     // precalc(); }
     // for(int i=0; i<S84; i++) spinmatrix[i] = spin(i * M_PI / S42);
@@ -175,6 +173,7 @@ void precalc() {
   
   gp::compute_geometry();  
   irr::compute_geometry();
+  if(syntetic) synt::prepare();
   }
 
 transmatrix ddi(ld dir, ld dist) {

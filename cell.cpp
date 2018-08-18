@@ -349,9 +349,6 @@ namespace torusconfig {
     }
   }
 
-int decodeId(heptagon* h);
-heptagon* encodeId(int id);
-
 int euclid_getvec(int dx, int dy) {
   if(torus) return torusconfig::getvec(dx, dy);
   else return pair_to_vec(dx, dy);

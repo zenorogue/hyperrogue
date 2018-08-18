@@ -208,7 +208,7 @@ heptagon *createAlternateMap(cell *c, int rad, hstate firststate, int special) {
   alt->s = firststate;
   alt->emeraldval = 0;
   alt->zebraval = 0;
-  for(int i=0; i<MAX_EDGE; i++) alt->move(i) = NULL;
+  alt->c.clear();
   alt->distance = 0;
   alt->c7 = NULL;
   alt->alt = alt;

@@ -3840,5 +3840,10 @@ namespace synt {
 hyperpoint get_warp_corner(cell *c, int cid);
 hyperpoint get_corner_position(cell *c, int cid, ld cf = 3);
 
+int decodeId(heptagon* h);
+heptagon* encodeId(int id);
+
+void virtualRebaseSimple(heptagon*& base, transmatrix& at);
+
 }
 

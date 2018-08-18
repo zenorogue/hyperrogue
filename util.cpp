@@ -133,4 +133,15 @@ bool appears(const string& haystack, const string& needle) {
   return haystack.find(needle) != string::npos;
   }
 
+/* indenter */
+
+int current_indentation;
+
+struct indenter {
+  indenter() { current_indentation += 2; }
+  ~indenter() { current_indentation -= 2; }
+  };
+
+void doindent() { for(int i=0; i<current_indentation; i++) printf(" "); }
+
 }
