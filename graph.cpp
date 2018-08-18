@@ -3122,10 +3122,8 @@ void floorShadow(cell *c, const transmatrix& V, int col) {
   if(qfi.shape) {
     queuepolyat(V * qfi.spin * shadowmulmatrix, *qfi.shape, col, PPR_WALLSHADOW);
     }
-  else if(qfi.fshape->is_plain) 
+  else 
     draw_shapevec(c, V, qfi.fshape->shadow, col, PPR_WALLSHADOW);
-  else
-    draw_qfi(c, V * shadowmulmatrix, col, PPR_WALLSHADOW);
   }
 
 void set_maywarp_floor(cell *c) {
