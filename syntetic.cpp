@@ -306,6 +306,7 @@ void create_adjacent(heptagon *h, int d) {
   
   auto& t2 = get_triangle(get_adj(h, d));
   transmatrix T1 = T * spin(M_PI + t2.first);
+  fixmatrix(T1);
 
   heptagon *hnew = build_child(h, d, get_adj(h, d).first, get_adj(h, d).second);
   altmap[alt].emplace_back(hnew, T1);
