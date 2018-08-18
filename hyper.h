@@ -103,8 +103,7 @@ void addMessage(string s, char spamtype = 0);
 #define smallbounded (sphere || (quotient & qSMALL) || torus)
 #define bounded (sphere || quotient || torus)
 
-#define masterless among(geometry, gEuclid, gEuclidSquare)
-#define stdeuclid (torus || masterless)
+#define masterless among(geometry, gEuclid, gEuclidSquare, gTorus)
 #define stdsphere (sphere && !syntetic)
 
 #define a4 (S3 == 4)
@@ -119,8 +118,8 @@ void addMessage(string s, char spamtype = 0);
 #define smallsphere (S7 < 5)
 #define bigsphere (S7 == 5)
 #define ap4 (a4 && nonbitrunc)
-#define euclid4 (euclid && a4)
-#define euclid6 (euclid && !a4)
+#define euclid4 (masterless && a4)
+#define euclid6 (masterless && !a4)
 
 #define S6 (S3*2)
 #define S42 (S7*S6)

@@ -248,7 +248,7 @@ int displaydir(cell *c, int d) {
     int dirs[8] = {0, 11, 21, 31, 42, 53, 63, 73};
     return -21-dirs[d];
     }
-  else if(stdeuclid)
+  else if(masterless)
     return - d * S84 / c->type;
   else
     return S42 - d * S84 / c->type;
@@ -286,7 +286,7 @@ void drawPlayerEffects(const transmatrix& V, cell *c, bool onplayer) {
   if(onplayer && (items[itOrbSword] || items[itOrbSword2])) {
     using namespace sword;
   
-    double esh = stdeuclid ? M_PI - M_PI*3/S84 + 2.5 * M_PI/S42: 0;
+    double esh = masterless ? M_PI - M_PI*3/S84 + 2.5 * M_PI/S42: 0;
     
     if(shmup::on) {
 #if CAP_POLY
@@ -305,7 +305,7 @@ void drawPlayerEffects(const transmatrix& V, cell *c, bool onplayer) {
       transmatrix Vnow = gmatrix[c] * rgpushxto0(inverse(gmatrix[c]) * tC0(V)) * (irr::on ? ddspin(c,0,S42) : spin(-hexshiftat(c)));
       
 #if CAP_QUEUE
-      if(!stdeuclid) for(int a=0; a<S42; a++) {
+      if(!masterless) for(int a=0; a<S42; a++) {
         int dda = S42 + (-1-2*a);
         if(a == ang && items[itOrbSword]) continue;
         if(nonbitrunc && !gp::on && !irr::on && a%3 != ang%3) continue;
@@ -2054,7 +2054,7 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, int col) {
       if(d>=4) cw += 2;
       transmatrix Vs = Vparam;
       bool mirr = cw.mirrored;
-      Vs = Vs * ddspin(c, cw.spin-cwt.spin, stdeuclid ? 0 : S42);
+      Vs = Vs * ddspin(c, cw.spin-cwt.spin, masterless ? 0 : S42);
       nospins = applyAnimation(cwt.at, Vs, footphase, LAYER_SMALL);
       if(!nospins) Vs = Vs * ddspin(c, cwt.spin);
       if(mirr) Vs = Vs * Mirror;
@@ -2118,7 +2118,7 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, int col) {
       Vb = Vb * xpush(tentacle_length - cellgfxdist(c, c->mondir));
       }
       
-      // if(ctof(c) && !stdeuclid) Vb = Vb * xpush(hexhexdist - hcrossf);
+      // if(ctof(c) && !masterless) Vb = Vb * xpush(hexhexdist - hcrossf);
       // return nonbitrunc ? tessf * gp::scale : (c->type == 6 && (i&1)) ? hexhexdist : crossf;
     return drawMonsterTypeDH(m, c, Vb, col, darkhistory, footphase);
     }
@@ -2406,7 +2406,7 @@ void set_towerfloor(cell *c, cellfunction *cf = coastvalEdge) {
     }
   int j = -1;
 
-  if(stdeuclid) j = 10;
+  if(masterless) j = 10;
   else if((*cf)(c) > 1) { 
     int i = towerval(c, cf);
     if(i == 4) j = 0;
@@ -2431,7 +2431,7 @@ void set_towerfloor(cell *c, cellfunction *cf = coastvalEdge) {
 
 void set_zebrafloor(cell *c) {
 
-  if(stdeuclid) { set_floor(shTower[10]); return; }
+  if(masterless) { set_floor(shTower[10]); return; }
   if(weirdhyperbolic) {
     set_floor(shFloor); return;
     }
@@ -2520,7 +2520,7 @@ void draw_reptile(cell *c, const transmatrix &V, int col) {
   }      
 
 void set_emeraldfloor(cell *c) {
-  if(!stdeuclid && !nonbitrunc) {
+  if(!masterless && !nonbitrunc) {
     auto si = patterns::getpatterninfo(c, 'f', patterns::SPF_SYM0123);
   
     int j = -1;
@@ -2600,7 +2600,7 @@ bool drawstaratvec(double dx, double dy) {
 int reptilecolor(cell *c) {
   int i = zebra40(c);
   
-  if(!stdeuclid) {
+  if(!masterless) {
     if(i >= 4 && i < 16) i = 0; 
     else if(i >= 16 && i < 28) i = 1;
     else if(i >= 28 && i < 40) i = 2;
@@ -3107,7 +3107,7 @@ bool is_nice_dual(cell *c) {
   }
 
 bool use_swapped_duals() {
-  return (stdeuclid && !a4) || gp::on;
+  return (masterless && !a4) || gp::on;
   }
 
 void floorShadow(cell *c, const transmatrix& V, int col) {
@@ -5187,7 +5187,7 @@ void drawthemap() {
   compute_graphical_distance();
 
   centdist = 1e20; 
-  if(!stdeuclid) centerover.at = NULL; 
+  if(!masterless) centerover.at = NULL; 
 
   for(int i=0; i<multi::players; i++) {
     multi::ccdist[i] = 1e20; multi::ccat[i] = NULL;
@@ -5207,7 +5207,7 @@ void drawthemap() {
   arrowtraps.clear();
 
   profile_start(1);
-  if(stdeuclid)
+  if(masterless)
     drawEuclidean();
   else if(binarytiling)
     binary::draw();
@@ -5301,7 +5301,7 @@ void drawmovestar(double dx, double dy) {
   ld R = sqrt(H[0] * H[0] + H[1] * H[1]);
   transmatrix Centered = Id;
 
-  if(stdeuclid) 
+  if(masterless) 
     Centered = eupush(H[0], H[1]);
   else if(R > 1e-9) Centered = rgpushxto0(H);
   
@@ -5737,7 +5737,7 @@ void restartGraph() {
   View = Id;
   if(!autocheat) linepatterns::clearAll();
   if(currentmap) {
-    if(stdeuclid) {
+    if(masterless) {
       centerover = vec_to_cellwalker(0);
       }
     else {
@@ -5870,7 +5870,7 @@ void drawBug(const cellwalker& cw, int col) {
   }
 
 cell *viewcenter() {
-  if(stdeuclid) return centerover.at;
+  if(masterless) return centerover.at;
   else return viewctr.at->c7;
   }
 

@@ -865,7 +865,7 @@ void resetview() {
   DEBB(DF_GRAPH, (debugfile,"reset view\n"));
   View = Id;
   // EUCLIDEAN
-  if(!stdeuclid) 
+  if(!masterless) 
     viewctr.at = cwt.at->master,
     viewctr.spin = cwt.spin;
   else centerover = cwt;

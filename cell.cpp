@@ -987,7 +987,7 @@ void verifycell(cell *c) {
   for(int i=0; i<t; i++) {
     cell *c2 = c->move(i);
     if(c2) {
-      if(!stdeuclid && !nonbitrunc && c == c->master->c7) verifycell(c2);
+      if(!masterless && !nonbitrunc && c == c->master->c7) verifycell(c2);
       if(c2->move(c->c.spin(i)) && c2->move(c->c.spin(i)) != c) {
         printf("cell error %p:%d [%d] %p:%d [%d]\n", c, i, c->type, c2, c->c.spin(i), c2->type);
         exit(1);
@@ -1061,7 +1061,7 @@ int celldist(cell *c) {
 int euclidAlt(short x, short y);
 
 int celldistAlt(cell *c) {
-  if(stdeuclid) {
+  if(masterless) {
     if(torus) return celldist(c);
     int x, y;
     tie(x,y) = vec_to_pair(decodeId(c->master));
@@ -1375,7 +1375,7 @@ cdata *getEuclidCdata(int h) {
   }
 
 int getCdata(cell *c, int j) {
-  if(stdeuclid) return getEuclidCdata(decodeId(c->master))->val[j];
+  if(masterless) return getEuclidCdata(decodeId(c->master))->val[j];
   else if(geometry) return 0;
   else if(ctof(c)) return getHeptagonCdata(c->master)->val[j]*3;
   else {
@@ -1388,7 +1388,7 @@ int getCdata(cell *c, int j) {
   }
 
 int getBits(cell *c) {
-  if(stdeuclid) return getEuclidCdata(decodeId(c->master))->bits;
+  if(masterless) return getEuclidCdata(decodeId(c->master))->bits;
   else if(geometry) return 0;
   else if(c->type != 6) return getHeptagonCdata(c->master)->bits;
   else {
@@ -1432,7 +1432,7 @@ map<pair<cell*, cell*>, int> saved_distances;
 int celldistance(cell *c1, cell *c2) {
   int d = 0;
   
-  if((stdeuclid) && (euclid6 || (euclid4 && nonbitrunc))) {
+  if((masterless) && (euclid6 || (euclid4 && nonbitrunc))) {
     if(!torus)
       return eudist(decodeId(c1->master) - decodeId(c2->master));
     else if(torus && torusconfig::torus_mode == 0) 
@@ -1457,7 +1457,7 @@ int celldistance(cell *c1, cell *c2) {
     return 64;
     }
   
-  if(gp::on || stdeuclid || irr::on || syntetic || binarytiling) {
+  if(gp::on || masterless || irr::on || syntetic || binarytiling) {
     
     if(saved_distances.count(make_pair(c1,c2)))
       return saved_distances[make_pair(c1,c2)];
