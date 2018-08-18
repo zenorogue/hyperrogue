@@ -589,6 +589,10 @@ void draw_shapevec(cell *c, const transmatrix& V, const vector<hpcshape> &shv, i
       }
     queuepolyat(V, shv[id], col, prio);
     }
+  else if(syntetic) {
+    queuestr(V * C0, 10, its(synt::id_of(c->master)), 0xFFFFFFFF);
+    queuepolyat(V, shv[synt::id_of(c->master)], col, prio);
+    }
   else if((euclid || gp::on) && ishex1(c)) 
     queuepolyat(V * pispin, shv[0], col, prio);
   else if(!(S7&1) && nonbitrunc) {
@@ -601,8 +605,6 @@ void draw_shapevec(cell *c, const transmatrix& V, const vector<hpcshape> &shv, i
     queuepolyat(V, shv[pseudohept(c)], col, prio);
   else if(binarytiling)
     queuepolyat(V, shv[c->type-6], col, prio);
-  else if(syntetic)
-    queuepolyat(V, shv[synt::id_of(c->master)], col, prio);
   else
     queuepolyat(V, shv[ctof(c)], col, prio);
   }
