@@ -50,6 +50,14 @@ vector<vector<pair<ld, ld>>> triangles;
 // 0, 2, ..., 2(N-1) = as in the symbol
 // 2N = bitruncated tile
 
+map<heptagon*, int> create_order;
+
+map<heptagon*, transmatrix> syntetic_gmatrix;
+
+int nextorder = 1;
+
+static const int PRUNED = 100;
+
 short& id_of(heptagon *h) {
   return h->zebraval;
   }
@@ -84,6 +92,9 @@ int children_of(heptagon *h) {
 
 ld edgelength;
 vector<ld> inradius, circumradius, alphas;
+
+extern void draw_debug_map(heptagon *h);
+void draw_debug_map_exit(heptagon *h) { draw_debug_map(h); exit(1); }
 
 void prepare() {
 
@@ -245,26 +256,21 @@ void initialize(heptagon *h) {
   id_of(h) = 0;
   h->c7 = newCell(isize(adjacent[0]), h);
   
+  if(!hyperbolic) syntetic_gmatrix[h] = Id;
+  
   if(sphere) celllister cl(h->c7, 1000, 1000000, NULL);
-
-  /* test */
-  SDEBUG(
-  printf("started testing\n");
-  heptagon *htest = h;
-  for(int i=0; i<10000; i++) 
-    htest = createStep(htest, hrand(neighbors_of(htest))); 
-  )
   };
 
 void verify_distance_delta(heptagon *h, int d, int delta) {
   if(!h->move(d)) return;
   if(h->move(d)->distance != h->distance + delta) {
-    SDEBUG( printf("ERROR: delta %p.%d (%d/%d)\n", h, d, h->move(d)->distance, h->distance + delta); )
+    SDEBUG( printf("ERROR: delta H%d.%d (%d/%d)\n", create_order[h], d, h->move(d)->distance, h->distance + delta); )
     // exit(1);
     }
   }
 
 void debug(heptagon *h) {
+  if(id_of(h) == PRUNED) return;
   auto& p = adjacent[id_of(h)];
   if(h->s == hsOrigin) {
     for(int i=0; i<isize(p); i++) verify_distance_delta(h, i, 1);
@@ -280,12 +286,14 @@ void debug(heptagon *h) {
       auto& p = adjacent[id_of(h)];
       auto uv = p[(parent_index_of(h) + d) % isize(p)];
       if(neighbors_of(h->move(d)) != isize(adjacent[uv.first])) {
-        SDEBUG( printf("neighbors mismatch at %p/%d->%p: is %d expected %d\n", h, d, h->move(d), neighbors_of(h->move(d)), isize(adjacent[uv.first])); )
-        exit(1);
-        }        
+        SDEBUG( printf("neighbors mismatch at H%d.%d->H%d: is %d expected %d\n", create_order[h], d, create_order[h->move(d)], neighbors_of(h->move(d)), isize(adjacent[uv.first])); )
+        draw_debug_map_exit(h);
+        }
       }
     }
   }
+
+transmatrix adjcell_matrix(heptagon *h, int d);
 
 heptagon *build_child(heptagon *parent, int d, int id, int pindex) {
   indenter ind;
@@ -296,38 +304,44 @@ heptagon *build_child(heptagon *parent, int d, int id, int pindex) {
   right_sibling_of(h) = nei - 1;
   h->distance = parent->distance + 1;
   h->c7 = newCell(nei, h);
-  SDEBUG( printf("%p.%d/%d ~ %p.0/%d (state=1/NEW,id=%d,pindex=%d,distance=%d)\n", parent, d, neighbors_of(parent), h, neighbors_of(h), id, pindex, h->distance); )
-  debug(h); debug(parent);
+  SDEBUG( printf("H%d.%d/%d ~ H%d.0/%d (state=1/NEW,id=%d,pindex=%d,distance=%d)\n", create_order[parent], d, neighbors_of(parent), create_order[h], neighbors_of(h), id, pindex, h->distance); )
+  if(!hyperbolic) syntetic_gmatrix[h] = syntetic_gmatrix[parent] * adjcell_matrix(parent, d);
+  else { debug(h); debug(parent); }  
   return h;
   }
 
 void connectHeptagons(heptagon *h, int i, heptspin hs) {
+  if(id_of(h) == PRUNED) { h->move(i) = h; return; }
+  if(id_of(hs.at) == PRUNED) { hs.at->move(i) = hs.at; return; }
   indenter ind;
-  SDEBUG( printf("%p.%d/%d ~ %p.%d/%d (state=%d,id=%d,pindex=%d,distance=%d)\n", h, i, neighbors_of(h), hs.at, hs.spin, neighbors_of(hs.at), 
+  SDEBUG( printf("H%d.%d/%d ~ H%d.%d/%d (state=%d,id=%d,pindex=%d,distance=%d)\n", create_order[h], i, neighbors_of(h), create_order[hs.at], hs.spin, neighbors_of(hs.at), 
     hs.at->s, id_of(hs.at), parent_index_of(hs.at), hs.at->distance); )
   if(h->move(i) == hs.at && h->c.spin(i) == hs.spin) {
     SDEBUG( printf("WARNING: already connected\n"); )
     return;
     }
   if(h->move(i)) {
-    SDEBUG( printf("ERROR: already connected left to: %p not %p\n", h->move(i), hs.at); )
-    exit(1);
+    SDEBUG( printf("ERROR: already connected left to: H%d not H%d\n", create_order[h->move(i)], create_order[hs.at]); )
+    draw_debug_map_exit(h);
     }
   if(hs.peek()) {
-    SDEBUG( printf("ERROR: already connected right to: %p not %p\n", hs.peek(), h); )
-    exit(1);
+    SDEBUG( printf("ERROR: already connected right to: H%d not H%d\n", create_order[hs.peek()], create_order[h]); )
+    draw_debug_map_exit(h);
     // exit(1);
     }
   h->c.connect(i, hs);
-  debug(h);
-  debug(hs.at);
+  if(hyperbolic) {
+    debug(h);
+    debug(hs.at);
+    }
   }
 
 int prune(heptagon*& h) {
+  if(!h) return 0;
   int result = 1;
   int n = neighbors_of(h);
   auto h0 = h;
-  SDEBUG( printf("pruning: %p\n", h0); )
+  SDEBUG( printf("pruning: H%d\n", create_order[h0]); )
   for(int i=0; i<n; i++) 
     if(h0->move(i)) {
       if(h0->c.spin(i) == 0)
@@ -337,43 +351,57 @@ int prune(heptagon*& h) {
         h0->move(i) = NULL;
         }
       }
+  id_of(h0) = PRUNED;
+  /*
   delete h0->c7;
   delete h0;
+  */
   return result;
   }
 
+void mayprune(heptagon *hleft, heptagon *hright) {
+  if(children_of(hleft) >= 1 && children_of(hright) >= 1)
+  if(hleft->move(right_sibling_of(hleft) - 1) != hright->move(parents_of(hright)+1)) {
+    SDEBUG( printf("pruning extra children after contraction\n"); )
+    prune(hleft->move(right_sibling_of(hleft) - 1));
+    prune(hright->move(parents_of(hright)+1));
+    }
+  }
+
 void contract(heptagon *h) {
+  if(id_of(h) == PRUNED) return;
   switch(children_of(h)) {
     case 0: {
-      SDEBUG( printf("handling contraction (0) at %p\n", h); )
+      SDEBUG( printf("handling contraction (0) at H%d\n", create_order[h]); )
       heptspin right = heptspin(h, right_sibling_of(h)) + wstep + 1;
       heptspin left = heptspin(h, parents_of(h)) + wstep - 1;
       connectHeptagons(right.at, right.spin, left);
       right.at->s++;
       right_sibling_of(left.at)--;
+      mayprune(left.at, right.at);
       contract(right.at);
       contract(left.at);
       break;
       }
     case -1: {
-      SDEBUG( printf("handling contraction (-1) at %p\n", h); )
+      SDEBUG( printf("handling contraction (-1) at H%d\n", create_order[h]); )
       indenter ind2;
       heptspin hs0(h, neighbors_of(h)-1);
       heptspin hs = hs0;
       hs = hs + 1 + wstep + 1;
       while(hs.spin == neighbors_of(hs.at) - 1) {
-        SDEBUG( printf("hsr at %p.%d/%d (%d parents)\n", hs.at, hs.spin, neighbors_of(hs.at), parents_of(hs.at)); )
+        SDEBUG( printf("hsr at H%d.%d/%d (%d parents)\n", create_order[hs.at], hs.spin, neighbors_of(hs.at), parents_of(hs.at)); )
         hs = hs + wstep + 1;
         }
-      SDEBUG( printf("hsr at %p.%d/%d (%d parents)\n", hs.at, hs.spin, neighbors_of(hs.at), parents_of(hs.at)); )
+      SDEBUG( printf("hsr at H%d.%d/%d (%d parents)\n", create_order[hs.at], hs.spin, neighbors_of(hs.at), parents_of(hs.at)); )
       heptspin correct = hs + wstep;
-      SDEBUG( printf("correct is: %p.%d/%d (%d parents)\n", correct.at, correct.spin, neighbors_of(correct.at), parents_of(correct.at)); )
+      SDEBUG( printf("correct is: H%d.%d/%d (%d parents)\n", create_order[correct.at], correct.spin, neighbors_of(correct.at), parents_of(correct.at)); )
       heptspin hsl = hs0;
       correct = correct+1; correct.at->s++;
       connectHeptagons(hsl.at, hsl.spin, correct);
       hsl = hsl - 1 + wstep - 1;
       while(true) {
-        SDEBUG( printf("hsl at %p.%d/%d (%d parents)\n", hsl.at, hsl.spin, neighbors_of(hsl.at), parents_of(hsl.at)); )
+        SDEBUG( printf("hsl at %d.%d/%d (%d parents)\n", create_order[hsl.at], hsl.spin, neighbors_of(hsl.at), parents_of(hsl.at)); )
         if(hsl.spin == parents_of(hsl.at)) {
           SDEBUG(printf("go left\n"))
           hsl = hsl + wstep - 1;
@@ -385,7 +413,7 @@ void contract(heptagon *h) {
               neighbors_of(hsl.peek()),
               neighbors_of(correct.at)
               );)
-            exit(1);
+            draw_debug_map_exit(correct.at);
             }
           prune(hsl.peek());
           }
@@ -405,13 +433,12 @@ void contract(heptagon *h) {
       }
     case -2: {
       SDEBUG( printf("ERROR: contraction (-2) not handled\n"); )
-      exit(1);
       break;
       }
     }
   if(!sphere) for(int i=0; i<neighbors_of(h); i++) if(!h->move(i)) {
     auto uv = adjacent[id_of(h)][(parent_index_of(h) + i) % neighbors_of(h)];
-    if(isize(adjacent[uv.first]) < 6) {
+    if(isize(adjacent[uv.first]) < 5 && hyperbolic) {
       SDEBUG( printf("prebuilding weak neighbor\n") )
       createStep(h, i);
       }
@@ -423,7 +450,41 @@ void build_siblings(heptagon *h, int x) {
   for(int i=0; i<=parents_of(h); i++) createStep(h, i);
   }
 
+pair<int, int>& get_adj(heptagon *h, int cid);
+pair<ld, ld>& get_triangle(heptagon *h, int cid);
+
 void create_adjacent(heptagon *h, int d) {
+
+  if(!hyperbolic) {
+
+    SDEBUG( printf("h=%d dist=%d d=%d/%d s=%d id=%d pindex=%d\n",
+      create_order[h], h->distance, d, neighbors_of(h), h->s, id_of(h), parent_index_of(h)); )
+    indenter ind2;
+
+    auto& t1 = get_triangle(h, d);
+  
+    // * spin(-tri[id][pi+i].first) * xpush(t.second) * pispin * spin(tri[id'][p'+d'].first)
+  
+    transmatrix T = syntetic_gmatrix[h] * spin(-t1.first) * xpush(t1.second);
+
+    for(auto gm: syntetic_gmatrix) if(intval(gm.second * C0, T * C0) < 1e-6) {
+      SDEBUG( printf("cell found\n"); )
+      for(int d2=0; d2<gm.first->c7->type; d2++) {
+        auto& t2 = get_triangle(gm.first, d2);
+        transmatrix T1 = T * spin(M_PI + t2.first);
+        if(intval(T1 * xpush(1) * C0, gm.second * xpush(1) * C0) < 1e-6) {
+          connectHeptagons(h, d, heptspin(gm.first, d2));
+          return;
+          }
+        }
+      SDEBUG( printf("but rotation not found\n"));
+      }
+    build_child(h, d, get_adj(h, d).first, get_adj(h, d).second);
+    return;
+    }
+
+  if(id_of(h) == PRUNED) { h->move(d) = h; return; }
+  if(indent >= 200) draw_debug_map_exit(h);
   indenter ind;
   int nei = neighbors_of(h);
   
@@ -440,8 +501,8 @@ void create_adjacent(heptagon *h, int d) {
   
   else {
     int first = h->s + 1;
-    SDEBUG( printf("h=%p dist=%d d=%d/%d s=%d id=%d pindex=%d\n",
-      h, h->distance, d, nei, h->s, id_of(h), parent_index_of(h)); )
+    SDEBUG( printf("h=%d dist=%d d=%d/%d s=%d id=%d pindex=%d\n",
+      create_order[h], h->distance, d, nei, h->s, id_of(h), parent_index_of(h)); )
     indenter ind2;
       
     // these vertices are not children (or possibly contractions)
@@ -480,12 +541,14 @@ void create_adjacent(heptagon *h, int d) {
           SDEBUG( printf("solved itself\n"); )
           return;
           }
-        SDEBUG( printf("going right at %p.%d/%d parents = %d\n", hs.at, hs.spin, neighbors_of(hs.at), parents_of(hs.at)); )
+        SDEBUG( printf("going right at H%d.%d/%d parents = %d\n", create_order[hs.at], hs.spin, neighbors_of(hs.at), parents_of(hs.at)); )
+        if(id_of(hs.at) == PRUNED) { create_adjacent(h, d); return; }
         // rightmost child
         if(hs.spin == right_sibling_of(hs.at) - 1)
           hs = hs + 1 + wstep + 1;
         else if(children_of(hs.at) <= 0) {
           SDEBUG( printf("unexpected situation\n"); )
+          create_adjacent(h, d);
           return;
           }
         else break;
@@ -494,7 +557,8 @@ void create_adjacent(heptagon *h, int d) {
       heptagon *newchild = build_child(hs.at, hs.spin, uv.first, uv.second);
       bool add_parent = false;
       while(true) {
-        SDEBUG( printf("going left at %p.%d/%d parents = %d\n", hs.at, hs.spin, neighbors_of(hs.at), parents_of(hs.at)); )
+        if(id_of(hs.at) == PRUNED) { create_adjacent(h, d); return; }
+        SDEBUG( printf("going left at H%d.%d/%d parents = %d\n", create_order[hs.at], hs.spin, neighbors_of(hs.at), parents_of(hs.at)); )
         // add parent
         if(hs.spin > parents_of(hs.at) && add_parent) {
           SDEBUG( printf("add parent\n"); )
@@ -505,6 +569,7 @@ void create_adjacent(heptagon *h, int d) {
         // childless
         if(children_of(hs.at) <= 0) {
           SDEBUG( printf("unexpected situation v2\n"); )
+          create_adjacent(h, d);
           return;
           }
         // lefmost child
@@ -531,18 +596,29 @@ void enqueue(heptagon *h, const transmatrix& T) {
   drawqueue.emplace(h, T);
   }
 
+pair<ld, ld>& get_triangle(heptagon *h, int cid) {
+  return triangles[id_of(h)][(parent_index_of(h) + cid) % neighbors_of(h)];
+  }
+
+pair<int, int>& get_adj(heptagon *h, int cid) {
+  return adjacent[id_of(h)][(parent_index_of(h) + cid) % neighbors_of(h)];
+  }
+
+pair<ld, ld>& get_triangle(const pair<int, int>& p) {
+  return triangles[p.first][p.second];
+  }
+
+pair<int, int>& get_adj(const pair<int, int>& p, int delta = 0) {
+  return adjacent[p.first][(p.second + delta) % isize(adjacent[p.first])];
+  }
+
 transmatrix adjcell_matrix(heptagon *h, int d) {
-  int S = neighbors_of(h);
-  int pindex = parent_index_of(h);
-  int id = id_of(h);
-  auto& t1 = triangles[id][(pindex + d)%S];
+  auto& t1 = get_triangle(h, d);
 
   heptagon *h2 = h->move(d);
 
   int d2 = h->c.spin(d);
-  int id2 = id_of(h2);
-  int pindex2 = parent_index_of(h2);
-  auto& t2 = triangles[id2][(pindex2 + d2) % neighbors_of(h2)];
+  auto& t2 = get_triangle(h2, d2);
   
   // * spin(-tri[id][pi+i].first) * xpush(t.second) * pispin * spin(tri[id'][p'+d'].first)
 
@@ -568,6 +644,7 @@ void draw() {
       }
 
     for(int i=0; i<S; i++) {
+      h->cmove(i);
       if(nonbitrunc && id >= 2*N && h->move(i) && id_of(h->move(i)) >= 2*N) continue;
       enqueue(h->move(i), V * adjcell_matrix(h, i));
       }
@@ -617,13 +694,14 @@ void parse_symbol(string s) {
     }
   repetition = 1;
   N = isize(faces);
-  invert.clear(); invert.resize(N, 0);
+  invert.clear(); invert.resize(N, true);
   adj.clear(); adj.resize(N, 0); for(int i=0; i<N; i++) adj[i] = i;
   while(peek() != 0) {
     if(peek() == '^') at++, repetition = read_number();
     else if(peek() == '(') { 
       at++; int a = read_number(); while(!isnumber() && !among(peek(), '(', '[', ')',']', 0)) at++;
-      if(isnumber()) { int b = read_number(); adj[a] = b; adj[b] = a; }
+      if(isnumber()) { int b = read_number(); adj[a] = b; adj[b] = a; invert[a] = invert[b] = false; }
+      else { invert[a] = false; }
       }
     else if(peek() == '[') { 
       at++; int a = read_number(); while(!isnumber() && !among(peek(), '(', '[', ')',']', 0)) at++;
@@ -648,16 +726,51 @@ int readArgs() {
     shift(); parse_symbol(args());
     }
   else if(argis("-sd")) do_sdebug = true;
+  else if(argis("-sdeb")) { PHASE(3); draw_debug_map(cwt.at->master); }
   else return 1;
   return 0;
   }
 #endif
 
 
+map<heptagon*, transmatrix> debugmap;
+
+void add_to_debug(heptagon *h, transmatrix T) {
+  debugmap[h] = T;
+  for(int i=0; i<neighbors_of(h); i++)
+    if(h->move(i) && h->c.spin(i) == 0 && h->move(i)->s != hsOrigin)
+      add_to_debug(h->move(i), T * adjcell_matrix(h, i));
+  }
+
+void draw_debug_map(heptagon *h) {
+  debugmap.clear();
+  while(h->s != hsOrigin) h = h->move(0);
+  add_to_debug(h, Id);
+  svg::render("syntetic-debug.svg", [] () {
+    ptds.clear();
+    for(auto p: debugmap) {
+      heptagon *h = p.first;
+      queuestr(p.second*C0, vid.yres/50, its(create_order[h]) + "/" + its(h->c7->mpdist), 0xFF000000);
+      for(int i=0; i<neighbors_of(h); i++) {
+        if(h->move(i))
+          queueline(p.second*C0, debugmap[h->move(i)]*C0, 
+            i == parents_of(h) ? 0xFF0000FF :
+            i == right_sibling_of(h) ? 0x800000FF :
+            i == 0 ? 0x008000FF :
+            0x000000FF);
+        }
+      }
+    hr::drawqueue();
+    });
+  exit(1);
+  }
+
 #if CAP_COMMANDLINE
 auto hook = 
-  addHook(hooks_args, 100, readArgs); 
+  addHook(hooks_args, 100, readArgs);
 #endif
+
+
 
 }
 
