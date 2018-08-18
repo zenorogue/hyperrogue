@@ -810,7 +810,8 @@ void optimizeview() {
       heptagon *h2 = createStep(viewctr.at, i);
       transmatrix T = (binarytiling) ? binary::relative_matrix(h2, viewctr.at) : synt::relative_matrix(h2, viewctr.at);
       hyperpoint H = View * tC0(T);
-      if(H[2] < best) best = H[2], turn = i, TB = T;
+      ld quality = euclid ? hdist0(H) : H[2];
+      if(quality < best) best = quality, turn = i, TB = T;
       }
     if(turn >= 0) {
       View = View * TB;
