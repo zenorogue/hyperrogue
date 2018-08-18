@@ -3850,7 +3850,7 @@ void determinizeBull(cell *c, int *posdir, int& nc) {
   // determinize the Angry Beast movement:
   // use the previous PC's positions as the tiebreaker
   for(int k=0; k<SHSIZE && nc>1; k++) {
-    int pts[10];
+    int pts[MAX_EDGE];
     for(int d=0; d<nc; d++) pts[d] = totalbulldistance(c->move(posdir[d]), k);
 
     int bestpts = 1000;
@@ -3875,7 +3875,7 @@ int determinizeBullPush(cellwalker bull) {
   return 1;
   }    
 
-int posdir[10], nc;
+int posdir[MAX_EDGE], nc;
 
 int pickMoveDirection(cell *c, flagtype mf) {
   int bestval = stayval(c, mf);
@@ -3898,7 +3898,7 @@ int pickMoveDirection(cell *c, flagtype mf) {
   }
 
 int pickDownDirection(cell *c, flagtype mf) {
-  int downs[10], qdowns = 0;
+  int downs[MAX_EDGE], qdowns = 0;
   int bestdif = -100;
   forCellIdEx(c2, i, c) {
     if(gravityLevel(c2) < gravityLevel(c) && passable_for(c->monst, c2, c, P_MIRROR) &&
@@ -4609,7 +4609,7 @@ void groupmove(eMonster movtype, flagtype mf) {
   
   for(int i=0; i<isize(gendfs); i++) {
     cell *c = gendfs[i];
-    int dirtable[10], qdirtable=0;
+    int dirtable[MAX_EDGE], qdirtable=0;
     
     forCellIdAll(c2,t,c) dirtable[qdirtable++] = t;
     hrandom_shuffle(dirtable, qdirtable);
@@ -4741,7 +4741,7 @@ void movehex(bool mounted, int colorpair) {
   
   for(int i=0; i<isize(hexdfs); i++) {
     cell *c = hexdfs[i];
-    int dirtable[10], qdirtable=0;
+    int dirtable[MAX_EDGE], qdirtable=0;
     for(int t=0; t<c->type; t++) if(c->move(t) && inpair(c->move(t), colorpair))
       dirtable[qdirtable++] = t;
       

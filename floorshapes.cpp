@@ -39,7 +39,7 @@ hyperpoint adist(ld a, ld x) {
   return spin(a) * xpush(x) * C0;
   }
 
-typedef pair<transmatrix, array<transmatrix, 8>> matrixitem;
+typedef pair<transmatrix, array<transmatrix, MAX_EDGE>> matrixitem;
 
 struct mesher {
   eGeometry g;
