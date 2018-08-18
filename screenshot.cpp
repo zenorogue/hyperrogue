@@ -174,9 +174,7 @@ namespace svg {
     fprintf(f, "\n");
     }
   
-  void render(const char *fname) {
-
-    if(cheater) doOvergenerate();
+  void render(const char *fname, const function<void()>& what) {
 
     dynamicval<videopar> v(vid, vid);
     dynamicval<bool> v2(in, true);
@@ -196,7 +194,7 @@ namespace svg {
 
     f = fopen(fname, "wt");
     fprintf(f, "<svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" width=\"%s\" height=\"%s\">\n", coord(vid.xres), coord(vid.yres));
-    drawfullmap();
+    what();
     fprintf(f, "</svg>\n");
     fclose(f);
     addMessage(XLAT("Saved the SVG shot to %1 (sightrange %2)", fname, its(get_sightrange())));

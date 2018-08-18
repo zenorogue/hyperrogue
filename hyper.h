@@ -1673,7 +1673,7 @@ namespace svg {
   void text(int x, int y, int size, const string& str, bool frame, int col, int align);
   extern bool in;
   extern const string *link;
-  void render(const char *fname = NULL);
+  void render(const char *fname = NULL, const function<void()>& what = drawfullmap);
   }
 
 extern int sightrange_bonus, genrange_bonus, gamerange_bonus;
