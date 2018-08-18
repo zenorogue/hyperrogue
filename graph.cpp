@@ -235,7 +235,12 @@ void drawLightning(const transmatrix& V) {
   }
 
 int displaydir(cell *c, int d) {
-  if(irr::on) {
+  if(syntetic) {
+    auto& t1 = synt::get_triangle(c->master, d);
+    auto p = spin(-t1.first + M_PI / c->type) * xpush(t1.second) * C0;
+    return -int(atan2(p[1], p[0]) * S84 / 2 / M_PI + .5);
+    }
+  else if(irr::on) {
     auto id = irr::cellindex[c];
     auto& vs = irr::cells[id];
     if(d < 0 || d >= c->type) return 0;

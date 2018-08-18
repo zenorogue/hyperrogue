@@ -355,8 +355,8 @@ hyperpoint get_corner_position(cell *c, int cid, ld cf) {
     return mid_at_actual(vertices[cid], 3/cf);
     }
   if(syntetic) {
-    int id = synt::id_of(c->master);
-    return spin(M_PI / c->type * (2*cid+0)) * xpush(synt::circumradius[id/2] * 3 / cf) * C0;
+    auto& t = synt::get_triangle(c->master, cid);
+    return spin(-t.first) * xpush(t.second * 3 / cf) * C0;
     }
   if(nonbitrunc) {
     return ddspin(c,cid,S6) * xpush0(hcrossf * 3 / cf);
@@ -415,9 +415,10 @@ hyperpoint nearcorner(cell *c, int i) {
     return mid_at(C0, nc, .94);
     }
   if(syntetic) {
+    auto& t = synt::get_triangle(c->master, i);
     int id = synt::id_of(c->master);
-    auto& t1 = synt::triangles[id][i];
-    return spin(-t1.first) * xpush(t1.second) * C0;
+    int id1 = synt::get_adj(synt::get_adj(c->master, i), 2).first;
+    return spin(-t.first - M_PI / c->type) * xpush(synt::inradius[id/2] + synt::inradius[id1/2]) * C0;
     }
   if(binarytiling) {
     ld yx = log(2) / 2;
