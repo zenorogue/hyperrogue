@@ -129,7 +129,6 @@ void addMessage(string s, char spamtype = 0);
 #define S28 (S7*4)
 #define S36 (S6*6)
 #define S84 (S7*S6*2)
-#define MAX_EDGE 8
 #define MAX_S3 4
 #define MAX_S84 240
 
@@ -319,24 +318,31 @@ struct gcell {
 #define NOBARRIERS 15
 #define MODFIXER 10090080
 
+#define MAX_EDGE 12
+
 template<class T> struct walker;
 
 template<class T> struct connection_table {
-  uint32_t spintable;
+  unsigned char spintable[6];
+  unsigned short mirrortable;
   // neighbors; move[0] always goes towards origin, and then we go clockwise
-  T* move_table[8];
+  T* move_table[MAX_EDGE];
   T* full() { T* x; return (T*)((char*)this - ((char*)(&(x->c)) - (char*)x)); }
-  void setspin(int d, int spin, bool mirror) { spintable &= ~(15 << (d<<2)); spintable |= spin << (d<<2); spintable |= mirror << ((d<<2)+3); }
+  void setspin(int d, int spin, bool mirror) { 
+    spintable[d>>1] &= ~(15 << ((d&1) << 2));
+    spintable[d>>1] |= spin << ((d&1) << 2);
+    if(mirror) mirrortable |= (1 << d);
+    else mirrortable &=~ (1 << d);
+    }
   // we are spin(i)-th neighbor of move[i]
-  int spin(int d) { return (spintable >> (d<<2)) & 7; }
-  bool mirror(int d) { return (spintable >> ((d<<2)+3)) & 1; }  
+  int spin(int d) { return (spintable[d>>1] >> ((d&1)<<2)) & 15; }
+  bool mirror(int d) { return (mirrortable >> d) & 1; }  
   int fix(int d) { return (d + MODFIXER) % full()->degree(); }
   T*& modmove(int i) { return move(fix(i)); }
   T*& move(int i) { return move_table[i]; }
   unsigned char modspin(int i) { return spin(fix(i)); }
   void clear() { 
-    spintable = 0;
-    for(int i=0; i<8; i++) move_table[i] = NULL;
+    for(int i=0; i<MAX_EDGE; i++) move_table[i] = NULL;
     }
   void connect(int d0, T* c1, int d1, bool m) {
     move(d0) = c1;
