@@ -1109,6 +1109,7 @@ void initgraph() {
 #if CAP_COMMANDLINE
   arg::read(2);
 #endif
+  precalc();
 
 #if CAP_SDL
   setvideomode();

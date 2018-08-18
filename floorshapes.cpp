@@ -601,7 +601,6 @@ void draw_shapevec(cell *c, const transmatrix& V, const vector<hpcshape> &shv, i
     queuepolyat(V, shv[id], col, prio);
     }
   else if(syntetic) {
-    queuestr(V * C0, 10, its(synt::id_of(c->master)), 0xFFFFFFFF);
     queuepolyat(V, shv[synt::id_of(c->master)], col, prio);
     }
   else if((euclid || gp::on) && ishex1(c)) 

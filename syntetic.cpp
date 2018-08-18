@@ -298,6 +298,7 @@ transmatrix adjcell_matrix(heptagon *h, int d);
 heptagon *build_child(heptagon *parent, int d, int id, int pindex) {
   indenter ind;
   auto h = buildHeptagon1(new heptagon, parent, d, hstate(1), 0);
+  create_order[h] = nextorder++;
   id_of(h) = id;
   parent_index_of(h) = pindex;
   int nei = neighbors_of(h);
