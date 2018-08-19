@@ -1053,12 +1053,16 @@ int geosupport_threecolor() {
     return 2;
   if(a46 && nonbitrunc)
     return 1;
+  if(syntetic) return synt::support_threecolor();
   return 0;
   }
 
 int geosupport_graveyard() {
   // always works in bitrunc geometries
   if(!nonbitrunc) return 2;
+
+  if(syntetic) return synt::support_graveyard();
+
   if(irr::on) return irr::bitruncations_performed ? 2 : 1;
   
   // always works in patterns supporting three-color
@@ -1073,6 +1077,7 @@ int geosupport_graveyard() {
   }
 
 int pattern_threecolor(cell *c) {
+  if(syntetic) return synt::threecolor(synt::id_of(c->master));
   if(S3 == 3 && !(S7&1) && gp_threecolor() == 1 && c->master->c7 != c) {
     auto li = gp::get_local_info(c);
     int rel = (li.relative.first - li.relative.second + MODFIXER) % 3;
@@ -1173,7 +1178,7 @@ int pattern_threecolor(cell *c) {
 bool pseudohept(cell *c) {
   if(irr::on) return irr::pseudohept(c);
   if(binarytiling) return c->type & c->master->distance & 1;
-  if(syntetic) return synt::id_of(c->master) < 2 * isize(synt::faces);
+  if(syntetic) return synt::pseudohept(synt::id_of(c->master));
   if(gp::on && gp_threecolor() == 2)
     return gp::pseudohept_val(c) == 0;
   if(gp::on && gp_threecolor() == 1 && (S7&1) && (S3 == 3))
@@ -1215,6 +1220,8 @@ namespace patterns {
   char whichCanvas = 0;
 
   int generateCanvas(cell *c) {
+    if(whichCanvas == 'A' && syntetic)
+      return distcolors[synt::tilegroup[synt::id_of(c->master)] & 7];
     if(whichCanvas == 'C' && hyperbolic) {
       using namespace fieldpattern;
       int z = currfp.getdist(fieldval(c), make_pair(0,false));
@@ -1389,6 +1396,9 @@ namespace patterns {
       dialog::addSelItem(XLAT("field pattern N"), "field", 'N');
       dialog::addSelItem(XLAT("field pattern S"), "field", 'S');
       }
+    
+    if(syntetic)
+      dialog::addSelItem(XLAT("Archimedean"), "Archimedean", 'A');
 
     dialog::addBreak(100);
     dialog::addBoolItem(XLATN(winf[waInvisibleFloor].name), canvas_invisible, 'i');

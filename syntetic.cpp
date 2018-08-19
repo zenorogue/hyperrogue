@@ -8,9 +8,17 @@ namespace synt {
 vector<int> faces = {3, 6, 6, 6};
 vector<int> adj = {1, 0, 2, 3};
 vector<bool> invert = {false, false, true, false};
+vector<int> nflags;
+
+static const int sfPH = 1;
+static const int sfLINE = 2;
+
+bool have_ph, have_line, have_symmetry;
 
 int repetition = 1;
 int N;
+
+vector<int> flags;
 
 vector<vector<pair<int, int>>> adjacent;
 
@@ -41,13 +49,46 @@ ld edgelength;
 
 vector<ld> inradius, circumradius, alphas;
 
+int matches[30][30];
+int periods[30];
+int tilegroup[30], groupoffset[30], tilegroups;
+
+int gcd(int x, int y) { return x ? gcd(y%x, x) : y; }
+
+int errors;
+
+pair<int, int>& get_adj(heptagon *h, int cid);
+pair<ld, ld>& get_triangle(heptagon *h, int cid);
+pair<ld, ld>& get_triangle(const pair<int, int>& p, int delta = 0);
+pair<int, int>& get_adj(const pair<int, int>& p, int delta = 0);
+
+void make_match(int a, int i, int b, int j) {
+  if(periods[a] != periods[b]) 
+    errors++;
+  if(matches[a][b] == -1)
+    matches[a][b] = j - i, matches[b][a] = i - j;
+  else
+    periods[a] = periods[b] = gcd(matches[a][b] - (j-i), periods[a]);
+  }
+
 void prepare() {
+
+  errors = 0;
 
   /* build the 'adjacent' table */
 
   N = isize(faces);
+  int M = 2 * N + 2;
   adjacent.clear();
-  adjacent.resize(2*N+2);
+  adjacent.resize(M);
+
+  have_symmetry = false;
+  for(int i=0; i<N; i++) if(invert[i]) have_symmetry = true;  
+  
+  for(int i=0; i<M; i++) for(int j=0; j<M; j++) matches[i][j] = i==j ? 0 : -1;
+
+  for(int i=0; i<M; i++) periods[i] = i<2*N ? faces[i/2] : N;
+  
   for(int i=0; i<N; i++) {
     for(int oi=0; oi<1; oi++) {
       int at = (i+oi)%N;
@@ -62,24 +103,14 @@ void prepare() {
         else at = (at+N-1) % N;
         }
       printf("-> [%d %d]\n", at, inv);
-      if(faces[at] != faces[i]) printf("error!\n");
       }
     }
   for(int i=0; i<N; i++) {
     adjacent[2*N].emplace_back(2*i, 0);
     int ai = (i+1) % N;
     adjacent[2*N].emplace_back(2*N+int(invert[ai]), (2*adj[ai]+2*N-1) % (2*N));
-    }                                               
-
-  for(int i=0; i<2*N+2; i++) {
-    printf("prelim adjacent %2d:", i);
-    for(int j=0; j<isize(adjacent[i]); j++) {
-      auto p = adjacent[i][j];
-      printf(" (%d,%d)", p.first, p.second);
-      }
-    printf("\n");
     }
-
+  
   for(int d=0; d<=2*N; d+=2) {
     int s = isize(adjacent[d]);
     for(int i=0; i<s; i++) {
@@ -87,7 +118,7 @@ void prepare() {
       adjacent[d+1].emplace_back(orig.first ^ 1, orig.second);
       }
     }
-  for(int d=0; d<2*N+2; d++) {
+  for(int d=0; d<M; d++) {
     int s = isize(adjacent[d]);
     for(int i=0; i<s; i++) {
       auto& orig = adjacent[d][i];
@@ -95,20 +126,17 @@ void prepare() {
       }
     }
   
-  for(int i=0; i<2*N+2; i++) {
+  for(int i=0; i<M; i++) {
     printf("adjacent %2d:", i);
     for(int j=0; j<isize(adjacent[i]); j++) {
       auto p = adjacent[i][j];
       printf(" (%d,%d)", p.first, p.second);
-      auto q = adjacent[p.first][p.second];
-      printf(" <%d,%d>", q.first, q.second);
-      if(isize(adjacent[q.first]) != isize(adjacent[i])) printf(" {error}");
       }
     printf("\n");
     }
     
   /* verify all the triangles */
-  for(int i=0; i<2*N+2; i++) {
+  for(int i=0; i<M; i++) {
     for(int j=0; j<isize(adjacent[i]); j++) {
       int ai = i, aj = j;
       printf("triangle ");
@@ -118,10 +146,55 @@ void prepare() {
         aj++; if(aj >= isize(adjacent[ai])) aj = 0;
         }
       printf("-> [%d %d]\n", ai, aj);
-      if(isize(adjacent[ai]) != isize(adjacent[i])) printf("error!\n");
+      make_match(i, j, ai, aj);
+      }
+    }
+
+  for(int i=0; i<2*N; i++) {
+    for(int j=0; j<isize(adjacent[i]); j++) {
+      auto aa = make_pair(i, j);
+      aa = get_adj(aa, 1);
+      aa = get_adj(aa, 2);
+      aa = get_adj(aa, 1);
+      aa = get_adj(aa, 2);
+      make_match(i, j, aa.first, aa.second);
       }
     }
   
+  for(int i=0; i<M; i++) for(int j=0; j<M; j++) if(matches[i][j] != -1)
+  for(int l=0; l<M; l++) for(int k=0; k<M; k++) if(matches[j][k] != -1) {
+    make_match(i, 0, k, matches[i][j] + matches[j][k]);
+    make_match(i, 0, k, matches[i][j] + matches[j][k] + gcd(periods[i], periods[j]));
+    }
+  for(int i=0; i<M; i++) tilegroup[i] = -1;
+  tilegroups = 0;
+  for(int i=0; i<M; i+=(have_symmetry?1:2)) if(tilegroup[i] == -1) {
+    if(periods[i] < 0) periods[i] = -periods[i];
+    for(int j=0; j<M; j++) if(matches[i][j] != -1)
+      tilegroup[j] = tilegroups, groupoffset[j] = matches[i][j] % periods[i];
+    tilegroups++;
+    }
+  
+  flags.clear();
+  flags.resize(M);
+  for(int i=0; i<M; i++)
+  for(int j=0; j<2*N; j++)
+    if(tilegroup[i] == tilegroup[j]) flags[i] |= nflags[j/2];
+  
+  if(!have_ph) {
+    if(nonbitrunc) {
+      for(int i=0; i<M; i++) if(tilegroup[i] == 0) flags[i] |= sfPH;
+      }
+    else {
+      for(int z=2*N; z<2*N+2; z++) flags[z] |= sfPH;
+      }
+    }
+
+  for(int i=0; i<M; i+=(have_symmetry?1:2)) {
+    printf("tiling group of %2d: [%2d]%2d+Z%2d\n", i, tilegroup[i], groupoffset[i], periods[i]);
+    printf("\n");
+    }
+
   ld sum = 0;
   for(int f: faces) sum += (f-2.) / f;
   if(sum < 1.999999) ginf[gSyntetic].cclass = gcSphere;
@@ -167,7 +240,7 @@ void prepare() {
   printf("computed edgelength = %lf\n", double(edgelength));
   
   triangles.clear();
-  triangles.resize(2*N+2);
+  triangles.resize(M);
   for(int i=0; i<N; i++) for(int j=0; j<2; j++) 
     for(int k=0; k<faces[i]; k++) 
       triangles[2*i+j].emplace_back(2*M_PI/faces[i], circumradius[i]);
@@ -228,6 +301,7 @@ void initialize(heptagon *h) {
   base_distlimit = 0;
   celllister cl(h->c7, 1000, 200, NULL);
   base_distlimit = cl.dists.back();
+  if(sphere) base_distlimit = 15;
   };
 
 transmatrix adjcell_matrix(heptagon *h, int d);
@@ -259,11 +333,12 @@ void connectHeptagons(heptagon *h, int i, heptspin hs) {
     exit(1);
     }
   h->c.connect(i, hs);
-  }
 
-pair<int, int>& get_adj(heptagon *h, int cid);
-pair<ld, ld>& get_triangle(heptagon *h, int cid);
-pair<ld, ld>& get_triangle(const pair<int, int>& p, int delta = 0);
+  auto p = get_adj(h, i);
+  if(tilegroup[p.first] != tilegroup[id_of(hs.at)])
+    printf("should merge %d %d\n", p.first, id_of(hs.at));
+  // heptagon *hnew = build_child(h, d, get_adj(h, d).first, get_adj(h, d).second);
+  }
 
 void create_adjacent(heptagon *h, int d) {
 
@@ -323,23 +398,19 @@ void enqueue(heptagon *h, const transmatrix& T) {
   }
 
 pair<ld, ld>& get_triangle(heptagon *h, int cid) {
-  return triangles[id_of(h)][(parent_index_of(h) + cid) % neighbors_of(h)];
+  return triangles[id_of(h)][(parent_index_of(h) + cid + MODFIXER) % neighbors_of(h)];
   }
 
 pair<int, int>& get_adj(heptagon *h, int cid) {
-  return adjacent[id_of(h)][(parent_index_of(h) + cid) % neighbors_of(h)];
+  return adjacent[id_of(h)][(parent_index_of(h) + cid + MODFIXER) % neighbors_of(h)];
   }
 
-pair<ld, ld>& get_triangle(const pair<int, int>& p) {
-  return triangles[p.first][p.second];
-  }
-
-pair<int, int>& get_adj(const pair<int, int>& p, int delta = 0) {
-  return adjacent[p.first][(p.second + delta) % isize(adjacent[p.first])];
+pair<int, int>& get_adj(const pair<int, int>& p, int delta) {
+  return adjacent[p.first][(p.second + delta + MODFIXER) % isize(adjacent[p.first])];
   }
 
 pair<ld, ld>& get_triangle(const pair<int, int>& p, int delta) {
-  return triangles[p.first][(p.second + delta) % isize(adjacent[p.first])];
+  return triangles[p.first][(p.second + delta + MODFIXER) % isize(adjacent[p.first])];
   }
 
 transmatrix adjcell_matrix(heptagon *h, int d) {
@@ -414,10 +485,16 @@ void parse_symbol(string s) {
   auto isnumber = [&] () { char p = peek(); return p >= '0' && p <= '9'; };
   auto read_number = [&] () { int result = 0; while(isnumber()) result = 10 * result + peek() - '0', at++; return result; };
   
-  faces.clear();
+  faces.clear(); nflags.clear();
+  have_line = false;
+  have_ph = false;
   while(true) {
     if(peek() == ')' || peek() == '^' || (peek() == '(' && isize(faces)) || peek() == 0) break;
-    else if(isnumber()) faces.push_back(read_number());
+    else if((peek() == 'L' || peek() == 'l') && faces.size())
+      nflags.back() |= sfLINE, have_line = true;
+    else if((peek() == 'H' || peek() == 'h') && faces.size())
+      nflags.back() |= sfPH, have_ph = true;
+    else if(isnumber()) faces.push_back(read_number()), nflags.push_back(0);
     else at++;
     }
   repetition = 1;
@@ -463,6 +540,41 @@ int readArgs() {
 auto hook = 
   addHook(hooks_args, 100, readArgs);
 #endif
+
+int support_threecolor() {
+  if(nonbitrunc) 
+    return 
+      (isize(faces) == 3 && faces[0] % 2 == 0 && faces[1] % 2 == 0 && faces[2] % 2 == 0 && tilegroup[N*2] == 3) ? 2 :
+      tilegroup[N*2] > 1 ? 1 :
+      0;
+  for(int i: faces) if(faces[i] % 2) return tilegroup[N*2] > 1 ? 1 : 0;
+  return 2;
+  }
+
+int support_graveyard() {
+  if(!nonbitrunc) return 2;
+  return 
+    isize(synt::faces) == 3 && synt::faces[0] % 2 == 0 ? 2 :
+    synt::have_ph ? 1 :
+    0;
+  }
+
+bool pseudohept(int id) {
+  return flags[id] & synt::sfPH;
+  }
+
+bool linespattern(cell *c) {
+  return flags[id_of(c->master)] & synt::sfLINE;
+  }
+
+int threecolor(int id) {
+  if(nonbitrunc)
+    return tilegroup[id];
+  else {
+    if(support_threecolor() == 2) return id < N * 2 ? (id&1) : 2;
+    return tilegroup[id];
+    }
+  }
 
 }
 

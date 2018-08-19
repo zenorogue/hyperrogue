@@ -480,7 +480,9 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           else
             v = 6;
           }
-        else if(torus || hyperbolic_not37 || quotient) {
+        else if(syntetic && synt::have_line)
+          v = synt::linespattern(c) ? 24 : 16;
+        else if(torus || hyperbolic_not37 || quotient || syntetic) {
           v = hrand(100) < 25 ? 24 : 16;
           }
         else if(euclid) {
@@ -541,7 +543,9 @@ void giantLandSwitch(cell *c, int d, cell *from) {
     case laZebra:
       if(d==8) {
         if(torus) ;
-        else if(euclid) {
+        else if(syntetic && synt::have_line)
+          c->wall = synt::linespattern(c) ? waTrapdoor : waNone;        
+        else if(euclid && !syntetic) {
           int x,y;
           tie(x,y) = cell_to_pair(c);
           if(y&1) c->wall = waTrapdoor;
@@ -561,13 +565,15 @@ void giantLandSwitch(cell *c, int d, cell *from) {
     case laWineyard:
       if(d==8) {
         if(torus) ;
-        else if(euclid) {
+        else if(syntetic && synt::have_line)
+          c->wall = synt::linespattern(c) ? waVinePlant : waNone;
+        else if(euclid && !syntetic) {
           int x,y;
           tie(x,y) = cell_to_pair(c);
           int dy = gmod(y, 3);
           if(dy == 1) c->wall = waVinePlant;
           }
-        else if(a4 || sphere)
+        else if(a4 || sphere || syntetic)
           c->wall = hrand(100) < 50 ? waNone : waVinePlant;
         else {
           int v = emeraldval(c);

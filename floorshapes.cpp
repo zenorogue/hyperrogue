@@ -493,7 +493,7 @@ void generate_floorshapes() {
     for(int i=0; i<2*synt::N + (nonbitrunc ? 0 : 2); i++) {
       synt::id_of(&master) = i;
       model.type = isize(synt::triangles[i]);
-      generate_floorshapes_for(i, &model, i >= 2*synt::N, 0);
+      generate_floorshapes_for(i, &model, !synt::pseudohept(i), i/2);
       }
     }
   
