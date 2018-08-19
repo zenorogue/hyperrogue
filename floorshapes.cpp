@@ -489,7 +489,10 @@ void generate_floorshapes() {
     for(int i=0; i<2*synt::N + (nonbitrunc ? 0 : 2); i++) {
       synt::id_of(&master) = i;
       model.type = isize(synt::triangles[i]);
-      generate_floorshapes_for(i, &model, !synt::pseudohept(i), i/2);
+      if(geosupport_graveyard() == 2)
+        generate_floorshapes_for(i, &model, !synt::pseudohept(i), i/2);
+      else
+        generate_floorshapes_for(i, &model, 0, 0);
       }
     }
   
