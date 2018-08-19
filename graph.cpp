@@ -5136,6 +5136,34 @@ transmatrix cview() {
   return ypush(vid.yshift) * sphereflip * View;
   }
 
+void precise_mouseover() {
+  if(!mouseover) return;
+  cell *omouseover = mouseover;
+  for(int loop = 0; loop < 10; loop++) { 
+    bool found = false;
+    if(!gmatrix.count(mouseover)) return;
+    hyperpoint r_mouseh = inverse(gmatrix[mouseover]) * mouseh;
+    for(int i=0; i<mouseover->type; i++) {
+      hyperpoint h1 = get_corner_position(mouseover, (i+mouseover->type-1) % mouseover->type);
+      hyperpoint h2 = get_corner_position(mouseover, i);
+      using namespace hyperpoint_vec;
+      hyperpoint hx = r_mouseh - h1;
+      h2 = h2 - h1;
+      ld z = h2[1] * hx[0] - h2[0] * hx[1];
+      ld z0 = h2[1] * h1[0] - h2[0] * h1[1];
+      if(z * z0 > 0) {
+        mouseover2 = mouseover;
+        mouseover = mouseover->move(i);
+        found = true;
+        break;
+        }
+      }
+    if(!found) return;
+    }
+  // probably some error... just return the original
+  mouseover = omouseover;
+  }
+
 void drawthemap() {
 
   callhooks(hooks_drawmap);
@@ -5217,6 +5245,9 @@ void drawthemap() {
   drawWormSegments();
   drawBlizzards();
   drawArrowTraps();
+  
+  precise_mouseover();
+  
   ivoryz = false;
   
   linepatterns::drawAll();
