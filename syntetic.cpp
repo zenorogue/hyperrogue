@@ -270,39 +270,69 @@ map<heptagon*, vector<pair<heptagon*, transmatrix> > > altmap;
 
 map<heptagon*, pair<heptagon*, transmatrix>> syntetic_gmatrix;
 
-void initialize(heptagon *h) {
- 
-  /* initialize the root */
+hrmap *current_altmap;
 
-  parent_index_of(h) = 0;
-  id_of(h) = 0;
-  h->c7 = newCell(isize(adjacent[0]), h);
+struct hrmap_syntetic : hrmap {
+  heptagon *origin;
+  heptagon *getOrigin() { return origin; }
+
+  hrmap_syntetic() {
+    origin = new heptagon;
+    origin->s = hsOrigin;
+    origin->emeraldval = 0;
+    origin->zebraval = 0;
+    origin->fiftyval = 0;
+    origin->fieldval = 0;
+    origin->rval0 = origin->rval1 = 0;
+    origin->cdata = NULL;
+    origin->c.clear();
+    origin->alt = NULL;
+    origin->distance = 0;
+
+    parent_index_of(origin) = 0;
+    id_of(origin) = 0;
+    origin->c7 = newCell(isize(adjacent[0]), origin);
+    
+    heptagon *alt = NULL;
+    
+    if(hyperbolic) {
+      dynamicval<eGeometry> g(geometry, gNormal); 
+      alt = new heptagon;
+      alt->s = hsOrigin;
+      alt->emeraldval = 0;
+      alt->zebraval = 0;
+      alt->c.clear();
+      alt->distance = 0;
+      alt->c7 = NULL;
+      alt->alt = alt;
+      alt->cdata = NULL;
+      current_altmap = newAltMap(alt); 
+      }
   
-  heptagon *alt = NULL;
-  
-  if(hyperbolic) {
-    dynamicval<eGeometry> g(geometry, gNormal); 
-    alt = new heptagon;
-    alt->s = hsOrigin;
-    alt->emeraldval = 0;
-    alt->zebraval = 0;
-    alt->c.clear();
-    alt->distance = 0;
-    alt->c7 = NULL;
-    alt->alt = alt;
-    alt->cdata = NULL;
-    newAltMap(alt); 
+    transmatrix T = xpush(.01241) * spin(1.4117) * xpush(0.1241) * Id;
+    syntetic_gmatrix[origin] = make_pair(alt, T);
+    altmap[alt].emplace_back(origin, T);
+    
+    base_distlimit = 0;
+    celllister cl(origin->c7, 1000, 200, NULL);
+    base_distlimit = cl.dists.back();
+    if(sphere) base_distlimit = 15;
     }
 
-  transmatrix T = xpush(.01241) * spin(1.4117) * xpush(0.1241) * Id;
-  syntetic_gmatrix[h] = make_pair(alt, T);
-  altmap[alt].emplace_back(h, T);
-  
-  base_distlimit = 0;
-  celllister cl(h->c7, 1000, 200, NULL);
-  base_distlimit = cl.dists.back();
-  if(sphere) base_distlimit = 15;
+  ~hrmap_syntetic() {
+    clearfrom(origin);
+    altmap.clear();
+    syntetic_gmatrix.clear();
+    if(current_altmap) {
+      dynamicval<eGeometry> g(geometry, gNormal);       
+      delete current_altmap;
+      current_altmap = NULL;
+      }
+    }
+  void verify() { }
   };
+
+hrmap *new_map() { return new hrmap_syntetic; }
 
 transmatrix adjcell_matrix(heptagon *h, int d);
 

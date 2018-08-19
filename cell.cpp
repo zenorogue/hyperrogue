@@ -65,9 +65,7 @@ hrmap_hyperbolic::hrmap_hyperbolic() {
   h.alt = NULL;
   h.distance = 0;
   isnonbitrunc = nonbitrunc;
-  if(syntetic)
-    synt::initialize(&h);
-  else if(binarytiling) {
+  if(binarytiling) {
     #if DEBUG_BINARY_TILING
     binary::xcode.clear();
     binary::rxcode.clear();
@@ -876,7 +874,7 @@ cell*& euclideanAtCreate(int vec) {
 void initcells() {
   DEBB(DF_INIT, (debugfile,"initcells\n"));
   
-  if(syntetic) currentmap = new hrmap_hyperbolic;
+  if(syntetic) currentmap = synt::new_map();
   else if(torus) currentmap = new hrmap_torus;
   else if(euclid) currentmap = new hrmap_euclidean;
   else if(sphere) currentmap = new hrmap_spherical;
@@ -957,7 +955,7 @@ void clearfrom(heptagon *at) {
         at->cdata = NULL;
         }
       }
-    int edges = S7;
+    int edges = at->degree();
     if(binarytiling) edges = at->c7->type;
     for(int i=0; i<edges; i++) if(at->move(i)) {
       if(at->move(i)->alt != &deletion_marker)
