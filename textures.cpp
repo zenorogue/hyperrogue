@@ -266,10 +266,8 @@ int celltriangles(cell *c) {
   return c->type;
   }
 
-#define no_patterndir (gp::on || irr::on || binarytiling)
-
 array<hyperpoint, 3> findTextureTriangle(cell *c, patterns::patterninfo& si, int i) {
-  transmatrix M = no_patterndir ? ggmatrix(c) : ggmatrix(c) * applyPatterndir(c, si);
+  transmatrix M = ggmatrix(c) * applyPatterndir(c, si);
   return make_array(M * C0, M * get_corner_position(c, i), M * get_corner_position(c, i+1));
   }
 
@@ -299,7 +297,7 @@ void mapTexture(cell *c, textureinfo& mi, patterns::patterninfo &si, const trans
   mi.symmetries = si.symmetries;
   mi.current_type = celltriangles(c);
   
-  mi.M = no_patterndir ? T : T * applyPatterndir(c, si);
+  mi.M = T * applyPatterndir(c, si);
   mi.triangles.clear();
   
   for(int i=0; i<c->type; i++) {
@@ -351,7 +349,7 @@ bool texture_config::apply(cell *c, const transmatrix &V, int col) {
     
     set_floor(shFullFloor);
     qfi.tinf = &mi;
-    qfi.spin = no_patterndir ? Id : applyPatterndir(c, si);
+    qfi.spin = applyPatterndir(c, si);
 
     if(grid_color) {
       draw_floorshape(c, V, shFullFloor, 0, PPR_FLOOR);

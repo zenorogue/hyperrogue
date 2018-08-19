@@ -4,14 +4,14 @@ namespace synt {
 
 #define SDEBUG(x) if(debug_geometry) { doindent(); x; fflush(stdout); }
 
+static const int sfPH = 1;
+static const int sfLINE = 2;
+
 // Marek-snub
 vector<int> faces = {3, 6, 6, 6};
 vector<int> adj = {1, 0, 2, 3};
 vector<bool> invert = {false, false, true, false};
-vector<int> nflags;
-
-static const int sfPH = 1;
-static const int sfLINE = 2;
+vector<int> nflags = {sfPH | sfLINE, 0, 0, 0};
 
 bool have_ph, have_line, have_symmetry;
 
@@ -557,6 +557,10 @@ int support_graveyard() {
     isize(synt::faces) == 3 && synt::faces[0] % 2 == 0 ? 2 :
     synt::have_ph ? 1 :
     0;
+  }
+
+bool support_chessboard() {
+  return 0;
   }
 
 bool pseudohept(int id) {

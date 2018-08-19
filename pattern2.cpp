@@ -873,17 +873,12 @@ namespace patterns {
     si.dir = 0; si.reflect = false; si.id = ctof(c);
     si.symmetries = c->type;
     
-    if(syntetic) {
-      si.id = synt::id_of(c->master);
-      return si;
-      }
-
     if(binarytiling) {
       if(pat == PAT_SINGLETYPE) si.id = 0;
       si.dir = 2;
       return si;
       }
-
+    
     if(pat == PAT_SINGLETYPE) {
       si.id = 0; si.symmetries = 1;
       if(sub & SPF_TWOCOL) si.id = c->type & 1;
@@ -891,6 +886,17 @@ namespace patterns {
       return si;
       }
     
+    if(syntetic && pat == PAT_SIBLING) {
+      int id = synt::id_of(c->master);
+      si.id = synt::tilegroup[id];
+      si.symmetries = synt::periods[si.id];
+      si.dir = synt::groupoffset[id];
+      if((sub & SPF_EXTRASYM) && synt::have_symmetry && synt::tilegroup[id^1] < synt::tilegroup[id])
+        si.id = synt::tilegroup[id^1],
+        si.reflect = true;
+      return si;
+      }
+
     if(pat == PAT_ZEBRA && stdhyperbolic) {
 
       si.id = zebra40(c); // 4 to 43
@@ -1468,7 +1474,7 @@ namespace patterns {
     if(stdhyperbolic || euclid)
       dialog::addBoolItem(XLAT("Palace Pattern"), (whichPattern == PAT_PALACE), PAT_PALACE);
     
-    if(nonbitrunc && S3 == 4)
+    if((nonbitrunc && S3 == 4) || (syntetic && synt::support_chessboard()))
       dialog::addBoolItem(XLAT("chessboard"), (whichPattern == PAT_CHESS), PAT_CHESS);
 
     if(a38 || a46 || euclid || S3 == 4 || S7 == 4)
@@ -1476,6 +1482,9 @@ namespace patterns {
     
     if(sphere)
       dialog::addBoolItem(XLAT("siblings"), (whichPattern == PAT_SIBLING), PAT_SIBLING);
+    
+    if(syntetic)
+      dialog::addBoolItem(XLAT("Archimedean"), (whichPattern == PAT_SIBLING), PAT_SIBLING);
 
     if(euclid)
       dialog::addBoolItem(XLAT("torus pattern"), (whichPattern == PAT_FIELD), PAT_FIELD);
@@ -1520,7 +1529,10 @@ namespace patterns {
       dialog::addBoolItem(XLAT("symmetry 0-2"), subpattern_flags & SPF_SYM02, '2');
       dialog::addBoolItem(XLAT("symmetry 0-3"), subpattern_flags & SPF_SYM03, '3');
       }
-    if(euclid && among(whichPattern, PAT_COLORING, 0))
+    if(euclid && among(whichPattern, PAT_COLORING, 0) && !syntetic)
+      dialog::addBoolItem(XLAT("extra symmetries"), subpattern_flags & SPF_EXTRASYM, '=');
+    
+    if(syntetic && synt::have_symmetry && whichPattern == PAT_SIBLING)
       dialog::addBoolItem(XLAT("extra symmetries"), subpattern_flags & SPF_EXTRASYM, '=');
 
     if(whichPattern == PAT_SINGLETYPE) {
