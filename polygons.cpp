@@ -1326,6 +1326,7 @@ usershape *usershapes[USERSHAPEGROUPS][USERSHAPEIDS];
 
 void drawTentacle(hpcshape &h, ld rad, ld var, ld divby) {
   double tlength = max(crossf, hexhexdist * gp::scale * irr::scale);
+  if(syntetic) tlength = synt::edgelength;
   int max = int(20 * pow(2, vid.linequality));
   for(ld i=0; i<=max; i++)
     hpcpush(ddi(S21, rad + var * sin(i * M_PI/divby)) * ddi(0, tlength * i/max) * C0);
@@ -1633,7 +1634,8 @@ void buildpolys() {
     goldbf = 1;
     scalef = synt::edgelength / hcrossf7;
     floorrad0 = floorrad1 = triangleside * .45;
-    xcrossf = synt::edgelength * .4;
+    xcrossf = synt::edgelength;
+    zhexf = xcrossf * .55;
     }
 
   // sidewall parameters for the 3D mode
