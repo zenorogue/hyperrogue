@@ -471,18 +471,20 @@ ld det(const transmatrix& T) {
     det -= T[0][i] * T[1][(i+2)%3] * T[2][(i+1)%3];
   return det;
   }
-  
+
+void inverse_error(const transmatrix& T) {
+  printf("Warning: inverting a singular matrix\n");
+  display(T);
+  }
+
 transmatrix inverse(const transmatrix& T) {
   profile_start(7);
   
   ld d = det(T);
   transmatrix T2;
-  if(d == 0) { 
-    printf("Warning: inverting a singular matrix\n");
-    display(T);
-    display(T2);
-    T2 = Id; 
-    return T2; 
+  if(d == 0) {
+    inverse_error(T); 
+    return Id;
     }
   
   for(int i=0; i<3; i++) 
