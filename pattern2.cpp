@@ -49,6 +49,13 @@ bool ishex2(cell *c) {
   else return c->type != S6;
   }
 
+int chessvalue(cell *c) {
+  if(syntetic) 
+    return synt::chessvalue(c);
+  else
+    return celldist(c) & 1;
+  }
+
 int emeraldval(heptagon *h) { return h->emeraldval >> 3; }
 
 int emeraldval(cell *c) {
@@ -723,7 +730,7 @@ namespace patterns {
     }
 
   void val_all(cell *c, patterninfo &si, int sub, int pat) {
-    if(irr::on) si.symmetries = 1;
+    if(irr::on || syntetic || binarytiling) si.symmetries = 1;
     else if(a46) val46(c, si, sub, pat);
     else if(a38) val38(c, si, sub, pat);
     else if(sphere) valSibling(c, si, sub, pat);
@@ -1038,7 +1045,7 @@ namespace patterns {
     
     else if(pat == PAT_CHESS) {
       val_nopattern(c, si, sub);
-      si.id = celldist(c) & 1;      
+      si.id = chessvalue(c);
       }
 
     else 

@@ -6,6 +6,8 @@ namespace synt {
 
 static const int sfPH = 1;
 static const int sfLINE = 2;
+static const int sfCHESS = 4;
+static const int sfTHREE = 8;
 
 // Marek-snub
 vector<int> faces = {3, 6, 6, 6};
@@ -13,7 +15,7 @@ vector<int> adj = {1, 0, 2, 3};
 vector<bool> invert = {false, false, true, false};
 vector<int> nflags = {sfPH | sfLINE, 0, 0, 0};
 
-bool have_ph, have_line, have_symmetry;
+bool have_ph, have_line, have_symmetry, have_chessboard;
 
 int repetition = 1;
 int N;
@@ -595,6 +597,10 @@ bool support_chessboard() {
 
 bool pseudohept(int id) {
   return flags[id] & synt::sfPH;
+  }
+
+bool chessvalue(cell *c) {
+  return flags[id_of(c->master)] & synt::sfCHESS;
   }
 
 bool linespattern(cell *c) {
