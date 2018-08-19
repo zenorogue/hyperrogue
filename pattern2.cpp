@@ -1941,8 +1941,8 @@ namespace linepatterns {
           
           double x = hexhexdist / 2; // sphere?.3651:euclid?.2611:.2849;
           
-          queuelinef(V * ddspin(c,i,-S14) * xpush0(x), 
-            V * ddspin(c,i,+S14) * xpush0(x), 
+          queuelinef(V * ddspin(c,i,-M_PI/S3) * xpush0(x), 
+            V * ddspin(c,i,M_PI/S3) * xpush0(x), 
             col, 1 + vid.linequality);
           }
         break;
@@ -1993,8 +1993,8 @@ namespace linepatterns {
             cell *c1 = createMov(c, (i+3) % 7);
             cell *c2 = createMov(c, (i+4) % 7);
             if(polarb50(c1) != a && polarb50(c2) != a)
-                queuelinef(V * ddspin(c,i,84*5/14) * xpush0(tessf/2),
-                          V * ddspin(c,i,84*9/14) * xpush0(tessf/2),
+                queuelinef(V * ddspin(c,i,M_PI*5/7) * xpush0(tessf/2),
+                          V * ddspin(c,i,M_PI*9/7) * xpush0(tessf/2),
                                     col, 1 + vid.linequality);
             }
         break;
@@ -2002,8 +2002,8 @@ namespace linepatterns {
       
       case patPalacelike:
         if(pseudohept(c)) for(int i=0; i<7; i++) 
-          queuelinef(V * ddspin(c,i,84*5/14) * xpush0(tessf/2),
-                    V * ddspin(c,i,84*9/14) * xpush0(tessf/2),
+          queuelinef(V * ddspin(c,i,M_PI*5/7) * xpush0(tessf/2),
+                    V * ddspin(c,i,M_PI*9/7) * xpush0(tessf/2),
                               col, 1 + vid.linequality);
         break;
       
@@ -2095,8 +2095,8 @@ namespace linepatterns {
               heptagon *h2 = c->master->modmove(i-1);
               if(!h1 || !h2) continue;
               if(emeraldval(h1->c7)/4 == 8 && emeraldval(h2->c7)/4 == 8)
-                  queuelinef(V * ddspin(c,i,84*5/14) * xpush0(tessf/2),
-                            V * ddspin(c,i,84*9/14) * xpush0(tessf/2),
+                  queuelinef(V * ddspin(c,i,M_PI*5/7) * xpush0(tessf/2),
+                            V * ddspin(c,i,M_PI*9/7) * xpush0(tessf/2),
                                       col, 1 + vid.linequality);
               }
           }

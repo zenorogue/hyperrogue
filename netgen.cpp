@@ -74,24 +74,24 @@ namespace hr { namespace netgen {
     
       hcenter[ii][MAX_EDGE] = V * C0;
 
-      if(c->type == 7) {
+      if(c->type == S7) {
         for(int i=0; i<c->type; i++) {
   
-          int hdir = displaydir(c, i) + 6;
+          int hdir = displayspin(c, i) + M_PI / S7;
         
-          transmatrix V2 = V * spin(hdir * M_PI / 42) * xpush(hexf);
+          transmatrix V2 = V * spin(hdir) * xpush(hexf);
           
           hcenter[ii][i] = V2 * C0;
           }
         }
   
-      if(c->type == 6) {
+      if(c->type == S6) {
         for(int i=0; i<c->type; i++) {
   
-          int hdir = displaydir(c, i);
+          int hdir = displayspin(c, i);
         
           transmatrix V2 = 
-            V * spin(hdir * M_PI / 42) * xpush(crossf) * spin(M_PI*8/7) * xpush(hexf);
+            V * spin(hdir) * xpush(crossf) * spin(M_PI+M_PI/S7) * xpush(hexf);
           
           hcenter[ii][i] = V2 * C0;
           }

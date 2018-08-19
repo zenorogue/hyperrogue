@@ -457,8 +457,8 @@ bool bantar_stats() {
     for(auto gm: gmatrix) for(cell *c: {gm.first})
     if(euclid || !pseudohept(c)) for(int t=0; t<c->type; t++) if(infos.count(c) && infos.count(c->move(t)) && c->move(t) && infos[c].gid != infos[c->move(t)].gid)
       if(euclid ? c->move(t)<c : (((t^1)&1) || c->move(t) < c))
-        queueline(gm.second * ddspin(c,t,-S7) * xpush(x) * C0, 
-          gm.second * ddspin(c,t,+S7) * xpush(x) * C0, 
+        queueline(gm.second * ddspin(c,t,-M_PI/S6) * xpush(x) * C0, 
+          gm.second * ddspin(c,t,+M_PI/S6) * xpush(x) * C0, 
           0xFF0000FF, 1);
     vid.linewidth /= (inHighQual ? 10 : 2);
     drawqueue();

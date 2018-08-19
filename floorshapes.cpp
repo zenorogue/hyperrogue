@@ -35,10 +35,6 @@ escher_floorshape shStarFloor(1,2),
   shRedRockFloor[3] = {{55, 56}, {55, 56}, {55, 56}}, // 1 - .1 * i   
   shDragonFloor(181, 182, 2, 183); /* dragon */
 
-hyperpoint adist(ld a, ld x) {
-  return spin(a) * xpush(x) * C0;
-  }
-
 typedef pair<transmatrix, array<transmatrix, MAX_EDGE>> matrixitem;
 
 struct mesher {
@@ -59,10 +55,10 @@ mesher msh(eGeometry g, int sym, ld main, ld v0, ld v1, ld bspi, ld scale) {
   hyperpoint bnlfar = xpush(v0) * spin(M_PI) * rspintox(rot) * rspintox(rot) * rspintox(rot) * xpush(hdist0(rot)) * C0;
   hyperpoint bnrfar = xpush(v0) * spin(M_PI) * spintox(rot) * spintox(rot) * spintox(rot) * xpush(hdist0(rot)) * C0;
 
-  m.lcorner = adist (bspi-M_PI/sym, main);
-  m.rcorner = adist (bspi+M_PI/sym, main);
-  m.mfar[0] = adist (bspi, v0);
-  m.mfar[1] = adist (bspi, v1);
+  m.lcorner = xspinpush0 (bspi-M_PI/sym, main);
+  m.rcorner = xspinpush0 (bspi+M_PI/sym, main);
+  m.mfar[0] = xspinpush0 (bspi, v0);
+  m.mfar[1] = xspinpush0 (bspi, v1);
   m.vfar[0] = spin(bspi) * bnlfar;
   m.vfar[2] = spin(bspi) * bnrfar;
   m.vfar[1] = spin(-2*M_PI/sym) * m.vfar[2];

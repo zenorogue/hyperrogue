@@ -25,14 +25,7 @@ hyperpoint Crad[MAX_S84];
 transmatrix heptmove[MAX_EDGE], hexmove[MAX_EDGE];
 transmatrix invheptmove[MAX_EDGE], invhexmove[MAX_EDGE];
 
-transmatrix spinmatrix[MAX_S84];
-
 ld hexshift;
-
-const transmatrix& getspinmatrix(int id) {
-  id = (id + MODFIXER) % S84;
-  return spinmatrix[id];
-  }
 
 // the results are:
 // hexf = 0.378077 hcrossf = 0.620672 tessf = 1.090550
@@ -167,8 +160,6 @@ void precalc() {
   printf("S7=%d S6=%d hexf = " LDF" hcross = " LDF" tessf = " LDF" hexshift = " LDF " hexhex = " LDF " hexv = " LDF "\n", S7, S6, hexf, hcrossf, tessf, hexshift, 
     hexhexdist, hexvdist);  
   
-  for(int i=0; i<S84; i++) spinmatrix[i] = spin(i * M_PI / S42);
-
   base_distlimit = ginf[geometry].distlimit[nonbitrunc];
   
   gp::compute_geometry();  
@@ -176,18 +167,11 @@ void precalc() {
   if(syntetic) synt::prepare();
   }
 
-transmatrix ddi(ld dir, ld dist) {
+transmatrix xspinpush(ld dir, ld dist) {
   if(euclid)
-    return eupush(cos(M_PI*dir/S42) * dist, -sin(M_PI*dir/S42) * dist);
+    return eupush(cos(dir) * dist, -sin(dir) * dist);
   else
-    return spin(M_PI*dir/S42) * xpush(dist) * spin(-M_PI*dir/S42);
-  }
-
-hyperpoint ddi0(ld dir, ld dist) {
-  if(euclid)
-    return hpxy(cos(M_PI*dir/S42) * dist, -sin(M_PI*dir/S42) * dist);
-  else
-    return xspinpush0(M_PI*dir/S42, dist);
+    return spin(dir) * xpush(dist) * spin(-dir);
   }
 
 namespace geom3 {

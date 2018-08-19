@@ -306,7 +306,7 @@ bool reflectingBarrierAt(cell *c) {
 bool reflectingBarrierAt(cellwalker& c, int d) {
   if(d >= 3) return true;
   if(d <= -3) return true;
-  d = c.spin + d + 42;
+  d = c.spin + d + MODFIXER;
   d%=c.at->type;
   if(!c.at->move(d)) return true;
   

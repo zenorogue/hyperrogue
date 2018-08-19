@@ -852,7 +852,7 @@ bool outofmap(hyperpoint h);
 void applymodel(hyperpoint H, hyperpoint& Hscr);
 void drawCircle(int x, int y, int size, int color);
 void fixcolor(int& col);
-int displaydir(cell *c, int d);
+ld displayspin(cell *c, int d);
 hyperpoint gethyper(ld x, ld y);
 void resetview(); extern heptspin viewctr; extern cellwalker centerover;
 void drawthemap();
@@ -2070,8 +2070,8 @@ namespace linepatterns {
   void switchAlpha(ePattern id, int col);
   };
 
-transmatrix ddspin(cell *c, int d, int bonus = 0);
-transmatrix iddspin(cell *c, int d, int bonus = 0);
+transmatrix ddspin(cell *c, int d, ld bonus = 0);
+transmatrix iddspin(cell *c, int d, ld bonus = 0);
 bool doexiton(int sym, int uni);
 void switchFullscreen();
 string turnstring(int i);
@@ -2994,7 +2994,6 @@ namespace texture {
 void queueline(const hyperpoint& H1, const hyperpoint& H2, int col, int prf = 0, int prio = PPR_LINE);
 void queuelink(const string *link, int prio);
 
-hyperpoint ddi0(ld dir, ld dist);
 extern ld tessf, crossf, hexf, hcrossf, hexhexdist, hexvdist, hepvdist, rhexf;
 unsigned char& part(int& col, int i);
 unsigned char& part(unsigned& col, int i);
@@ -3154,6 +3153,7 @@ extern int lastsize;
 extern int noiseuntil;
 inline hyperpoint xpush0(ld x);
 extern eGeometry targetgeometry;
+transmatrix xspinpush(ld alpha, ld x);
 inline hyperpoint xspinpush0(ld alpha, ld x);
 
 #define DF_INIT              0 // always display these

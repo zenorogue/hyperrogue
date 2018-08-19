@@ -1324,6 +1324,8 @@ struct usershape {
 
 usershape *usershapes[USERSHAPEGROUPS][USERSHAPEIDS];
 
+transmatrix ddi(int a, ld x) { return xspinpush(a * M_PI / S42, x); }
+
 void drawTentacle(hpcshape &h, ld rad, ld var, ld divby) {
   double tlength = max(crossf, hexhexdist * gp::scale * irr::scale);
   if(syntetic) tlength = synt::edgelength;

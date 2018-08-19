@@ -350,7 +350,7 @@ double cellgfxdist(cell *c, int i) {
 transmatrix cellrelmatrix(cell *c, int i) {
   if(gp::on) return calc_relative_matrix(c->move(i), c, i);
   double d = cellgfxdist(c, i);
-  return ddspin(c, i) * xpush(d) * iddspin(c->move(i), c->c.spin(i), euclid ? 0 : S42);
+  return ddspin(c, i) * xpush(d) * iddspin(c->move(i), c->c.spin(i), euclid ? 0 : M_PI);
   }
 
 double randd() { return (rand() + .5) / (RAND_MAX + 1.); }
@@ -395,13 +395,13 @@ hyperpoint get_corner_position(cell *c, int cid, ld cf) {
     return spin(-t.first) * xpush(t.second * 3 / cf) * C0;
     }
   if(nonbitrunc) {
-    return ddspin(c,cid,S6) * xpush0(hcrossf * 3 / cf);
+    return ddspin(c,cid,M_PI/S7) * xpush0(hcrossf * 3 / cf);
     }
   if(!nonbitrunc) {
     if(!ishept(c))
-      return ddspin(c,cid,S7) * xpush0(hexvdist * 3 / cf);
+      return ddspin(c,cid,M_PI/S6) * xpush0(hexvdist * 3 / cf);
     else
-      return ddspin(c,cid,S6) * xpush0(rhexf * 3 / cf);
+      return ddspin(c,cid,M_PI/S7) * xpush0(rhexf * 3 / cf);
     }
   return C0;
   }
@@ -517,7 +517,7 @@ hyperpoint farcorner(cell *c, int i, int which) {
 hyperpoint get_warp_corner(cell *c, int cid) {
   if(gp::on) return gp::get_corner_position(c, cid, 2);
   if(irr::on) return midcorner(c, cid, .5);
-  return ddspin(c,cid,S6) * xpush0(tessf/2);
+  return ddspin(c,cid,M_PI/S7) * xpush0(tessf/2);
   }
   
   }

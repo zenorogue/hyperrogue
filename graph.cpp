@@ -140,7 +140,7 @@ void drawShield(const transmatrix& V, eItem it) {
   double d = it == itOrbShield ? hexf : hexf - .1;
   int mt = sphere ? 7 : 5;
   for(ld a=0; a<=S84*mt+1e-6; a+=pow(.5, vid.linequality))
-    curvepoint(V*ddi0(a, d + sin(ds + M_PI*2*a/4/mt)*.1));
+    curvepoint(V*xspinpush0(a * M_PI/S42, d + sin(ds + M_PI*2*a/4/mt)*.1));
   queuecurve(darkena(col, 0, 0xFF), 0x8080808, PPR_LINE);
 #endif
   }
@@ -151,7 +151,7 @@ void drawSpeed(const transmatrix& V) {
   int col = darkena(iinf[itOrbSpeed].color, 0, 0xFF);
   for(int b=0; b<S84; b+=S14) {
     PRING(a)
-      curvepoint(V*ddi0(ds+b+a, hexf*a/S84));
+      curvepoint(V*xspinpush0((ds+b+a) * M_PI/S42, hexf*a/S84));
     queuecurve(col, 0x8080808, PPR_LINE);
     }
 #endif
@@ -176,7 +176,7 @@ void drawSafety(const transmatrix& V, int ct) {
   ld ds = ticks / 50.;
   int col = darkena(iinf[itOrbSafety].color, 0, 0xFF);
   for(int a=0; a<ct; a++)
-    queueline(V*ddi0(ds+a*S84/ct, 2*hexf), V*ddi0(ds+(a+(ct-1)/2)*S84/ct, 2*hexf), col, vid.linequality);
+    queueline(V*xspinpush0((ds+a*S84/ct) * M_PI/S42, 2*hexf), V*xspinpush0((ds+(a+(ct-1)/2)*S84/ct) * M_PI / S42, 2*hexf), col, vid.linequality);
 #endif
   }
 
@@ -187,7 +187,7 @@ void drawFlash(const transmatrix& V) {
   col &= ~1;
   for(int u=0; u<5; u++) {
     ld rad = hexf * (2.5 + .5 * sin(ds+u*.3));
-    PRING(a) curvepoint(V*ddi0(a, rad));
+    PRING(a) curvepoint(V*xspinpush0(a * M_PI / S42, rad));
     queuecurve(col, 0x8080808, PPR_LINE);
     }
 #endif
@@ -205,20 +205,20 @@ void drawLove(const transmatrix& V, int hdir) {
       if(z <= 10) d += (10-z) * (10-z) * (10-z) / 3000.;
 
       ld rad = hexf * (2.5 + .5 * sin(ds+u*.3)) * d;
-      curvepoint(V*ddi0(S42+hdir+a-1, rad));
+      curvepoint(V*xspinpush0((S42+hdir+a-1) * M_PI/S42, rad));
       }
     queuecurve(col, 0x8080808, PPR_LINE);
     }
 #endif
   }
 
-void drawWinter(const transmatrix& V, int hdir) {
+void drawWinter(const transmatrix& V, ld hdir) {
 #if CAP_QUEUE
   float ds = ticks / 300.;
   int col = darkena(iinf[itOrbWinter].color, 0, 0xFF);
   for(int u=0; u<20; u++) {
-    ld rad = 6 * sin(ds+u * 2 * M_PI / 20);
-    queueline(V*ddi0(S42+hdir+rad, hexf*.5), V*ddi0(S42+hdir+rad, hexf*3), col, 2 + vid.linequality);
+    ld rad = sin(ds+u * 2 * M_PI / 20) * M_PI / S7;
+    queueline(V*xspinpush0(M_PI+hdir+rad, hexf*.5), V*xspinpush0(M_PI+hdir+rad, hexf*3), col, 2 + vid.linequality);
     }
 #endif
   }
@@ -228,35 +228,34 @@ void drawLightning(const transmatrix& V) {
   int col = darkena(iinf[itOrbLightning].color, 0, 0xFF);
   for(int u=0; u<20; u++) {
     ld leng = 0.5 / (0.1 + (rand() % 100) / 100.0);
-    ld rad = rand() % S84;
-    queueline(V*ddi0(rad, hexf*0.3), V*ddi0(rad, hexf*leng), col, 2 + vid.linequality);
+    ld rad = rand() % 1000;
+    queueline(V*xspinpush0(rad, hexf*0.3), V*xspinpush0(rad, hexf*leng), col, 2 + vid.linequality);
     }
 #endif
   }
 
-int displaydir(cell *c, int d) {
+ld displayspin(cell *c, int d) {
   if(syntetic) {
     auto& t1 = synt::get_triangle(c->master, d);
-    auto p = spin(-t1.first + M_PI / c->type) * xpush(t1.second) * C0;
-    return -int(atan2(p[1], p[0]) * S84 / 2 / M_PI + .5);
+    return t1.first + M_PI / c->type;
     }
   else if(irr::on) {
     auto id = irr::cellindex[c];
     auto& vs = irr::cells[id];
     if(d < 0 || d >= c->type) return 0;
     auto& p = vs.jpoints[vs.neid[d]];
-    return -int(atan2(p[1], p[0]) * S84 / 2 / M_PI + .5);
+    return -atan2(p[1], p[0]);
     }
   else if(binarytiling) {
     if(d == NODIR) return 0;
     if(d == c->type-1) d++;
     int dirs[8] = {0, 11, 21, 31, 42, 53, 63, 73};
-    return -21-dirs[d];
+    return (-21-dirs[d]) * 42 / M_PI;
     }
   else if(masterless)
-    return - d * S84 / c->type;
+    return - d * 2 * M_PI / c->type;
   else
-    return S42 - d * S84 / c->type;
+    return M_PI - d * 2 * M_PI / c->type;
   }
 
 double hexshiftat(cell *c) {
@@ -267,18 +266,12 @@ double hexshiftat(cell *c) {
   return 0;
   }
 
-transmatrix ddspin(cell *c, int d, int bonus) {
-  int hdir = displaydir(c, d) + bonus;
-  double ha = hexshiftat(c);
-  if(ha) return spin(-ha) * getspinmatrix(hdir);
-  return getspinmatrix(hdir);
+transmatrix ddspin(cell *c, int d, ld bonus) {
+  return spin(displayspin(c, d) + bonus - hexshiftat(c));
   }
 
-transmatrix iddspin(cell *c, int d, int bonus) {
-  int hdir = displaydir(c, d) + bonus;
-  double ha = hexshiftat(c);
-  if(ha) return spin(ha) * getspinmatrix(-hdir);
-  return getspinmatrix(-hdir);
+transmatrix iddspin(cell *c, int d, ld bonus) {
+  return spin(hexshiftat(c) - displayspin(c, d) + bonus);
   }
 
 void drawPlayerEffects(const transmatrix& V, cell *c, bool onplayer) {
@@ -307,7 +300,7 @@ void drawPlayerEffects(const transmatrix& V, cell *c, bool onplayer) {
       int& ang = angle[multi::cpid];
       ang %= S42;
       
-      transmatrix Vnow = gmatrix[c] * rgpushxto0(inverse(gmatrix[c]) * tC0(V)) * (irr::on ? ddspin(c,0,S42) : spin(-hexshiftat(c)));
+      transmatrix Vnow = gmatrix[c] * rgpushxto0(inverse(gmatrix[c]) * tC0(V)) * (irr::on ? ddspin(c,0,M_PI) : spin(-hexshiftat(c)));
       
 #if CAP_QUEUE
       if(!masterless) for(int a=0; a<S42; a++) {
@@ -317,7 +310,7 @@ void drawPlayerEffects(const transmatrix& V, cell *c, bool onplayer) {
         if((a+S21)%S42 == ang && items[itOrbSword2]) continue;
         bool longer = sword::pos(cwt.at, a-1) != sword::pos(cwt.at, a+1);
         int col = darkena(0xC0C0C0, 0, 0xFF);
-        queueline(Vnow*ddi0(dda, nonbitrunc ? 0.6 * gp::scale : longer ? 0.36 : 0.4), Vnow*ddi0(dda, nonbitrunc ? 0.7 * gp::scale : longer ? 0.44 : 0.42), col, 1);
+        queueline(Vnow*xspinpush0(dda * M_PI / S42, nonbitrunc ? 0.6 * gp::scale : longer ? 0.36 : 0.4), Vnow*xspinpush0(dda * M_PI/S42, nonbitrunc ? 0.7 * gp::scale : longer ? 0.44 : 0.42), col, 1);
         }
 #endif
 
@@ -349,7 +342,7 @@ void drawPlayerEffects(const transmatrix& V, cell *c, bool onplayer) {
       ld rad = hexf * u / 250;
       int col = darkena(iinf[itOrbSafety].color, 0, 0xFF);
       PRING(a)
-        curvepoint(V*ddi0(a, rad));
+        curvepoint(V*xspinpush0(a * M_PI / S42, rad));
       queuecurve(col, 0, PPR_LINE);
       }
     }
@@ -1762,9 +1755,9 @@ double chainAngle(cell *c, transmatrix& V, cell *c2, double dft, const transmatr
   }
 
 // equivalent to V = V * spin(-chainAngle(c,V,c2,dft));
-bool chainAnimation(cell *c, transmatrix& V, cell *c2, int i, int b, const transmatrix &Vwhere, ld& length) {
+bool chainAnimation(cell *c, transmatrix& V, cell *c2, int i, ld bonus, const transmatrix &Vwhere, ld& length) {
   if(!gmatrix0.count(c2)) {
-    V = V * ddspin(c,i,b);
+    V = V * ddspin(c,i,bonus);
     length = cellgfxdist(c,i);
     return false;
     }
@@ -1935,10 +1928,10 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, int col) {
         }
         
       else {
-        int hdir = displaydir(c, c->mondir);
+        int hdir = displayspin(c, c->mondir);
         int col = darkena(0x606020, 0, 0xFF);
         for(int u=-1; u<=1; u++)
-          queueline(Vparam*ddi0(hdir+S21, u*crossf/5), Vparam*ddi(hdir, crossf)*ddi0(hdir+S21, u*crossf/5), col, 2 + vid.linequality);
+          queueline(Vparam*xspinpush0(hdir+M_PI/2, u*crossf/5), Vparam*xspinpush(hdir, crossf)*xspinpush0(hdir+M_PI/2, u*crossf/5), col, 2 + vid.linequality);
         }
       }
 
@@ -1984,7 +1977,7 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, int col) {
             Vb = Vb * pispin;
             }
           else {
-            Vb = Vb0 * ddspin(c, nd, S42);
+            Vb = Vb0 * ddspin(c, nd, M_PI);
             }
           transmatrix Vbb = mmscale(Vb, geom3::ABODY);
           queuepoly(Vbb, shDragonTail, darkena(col, c->hitpoints?0:1, 0xFF));
@@ -1995,16 +1988,16 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, int col) {
             ld length;
             chainAnimation(c, Vb, c2, nd, 0, Vparam, length);
             Vb = Vb * pispin;
-            double ang = chainAngle(c, Vb, c->move(c->mondir), (displaydir(c, c->mondir) - displaydir(c, nd)) * M_PI / S42, Vparam);
+            double ang = chainAngle(c, Vb, c->move(c->mondir), displayspin(c, c->mondir) - displayspin(c, nd), Vparam);
             ang /= 2;
             Vb = Vb * spin(M_PI-ang);
             }
           else {
-            int hdir0 = displaydir(c, nd) + S42;
-            int hdir1 = displaydir(c, c->mondir);
-            while(hdir1 > hdir0 + S42) hdir1 -= S84;
-            while(hdir1 < hdir0 - S42) hdir1 += S84;
-            Vb = Vb0 * spin((hdir0 + hdir1)/2 * M_PI / S42 + M_PI);
+            ld hdir0 = displayspin(c, nd) + M_PI;
+            ld hdir1 = displayspin(c, c->mondir);
+            while(hdir1 > hdir0 + M_PI) hdir1 -= 2*M_PI;
+            while(hdir1 < hdir0 - M_PI) hdir1 += 2*M_PI;
+            Vb = Vb0 * spin((hdir0 + hdir1)/2 + M_PI);
             }
           transmatrix Vbb = mmscale(Vb, geom3::ABODY);
           if(part == 'l' || part == '2') {
@@ -2030,7 +2023,7 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, int col) {
             Vb = Vb * pispin;
             }
           else {
-            Vb = Vb0 * ddspin(c, nd, S42);
+            Vb = Vb0 * ddspin(c, nd, M_PI);
             }
           transmatrix Vbb = mmscale(Vb, geom3::ABODY) * pispin;
           hpcshape& sh = hexsnake ? shWormTail : shSmallWormTail;
@@ -2119,7 +2112,7 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, int col) {
       Vb = Vb * T * rspintox(tC0(inverse(T))) * xpush(tentacle_length);
       }
     else {
-      Vb = Vb * ddspin(c, c->mondir, S42);
+      Vb = Vb * ddspin(c, c->mondir, M_PI);
       Vb = Vb * xpush(tentacle_length - cellgfxdist(c, c->mondir));
       }
       
@@ -2134,7 +2127,7 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, int col) {
   else if(isFriendly(c) || isBug(c) || (c->monst && conformal::on) || c->monst == moKrakenH || (isBull(c->monst) && c->mondir != NODIR) || c->monst == moButterfly || isMagneticPole(c->monst) ||
     isSwitch(c->monst) || c->monst == moPair || (c->monst && (quotient || torus || dont_face_pc))) {
     if(c->monst == moKrakenH) Vs = Vb, nospins = nospinb;
-    if(!nospins) Vs = Vs * ddspin(c, c->mondir, S42);
+    if(!nospins) Vs = Vs * ddspin(c, c->mondir, M_PI);
     if(c->monst == moPair) Vs = Vs * xpush(-.12);
     if(isFriendly(c)) drawPlayerEffects(Vs, c, false);
     return drawMonsterTypeDH(m, c, Vs, col, darkhistory, footphase);
@@ -2396,14 +2389,14 @@ int countMinesAround(cell *c) {
 
 transmatrix applyPatterndir(cell *c, const patterns::patterninfo& si) {
   if(gp::on || irr::on || binarytiling) return Id;
-  transmatrix V = ddspin(c, si.dir, S42);  
+  transmatrix V = ddspin(c, si.dir, M_PI);
   if(si.reflect) return V * Mirror;
-  if(syntetic) return V * iddspin(c, 0, S42);
+  if(syntetic) return V * iddspin(c, 0, M_PI);
   return V;
   }
 
 transmatrix applyDowndir(cell *c, cellfunction *cf) {
-  return ddspin(c, patterns::downdir(c, cf), S42);
+  return ddspin(c, patterns::downdir(c, cf), M_PI);
   }
 
 void set_towerfloor(cell *c, cellfunction *cf = coastvalEdge) {
@@ -3399,7 +3392,7 @@ void draw_wall(cell *c, const transmatrix& V, int wcol, int& zcol, int ct6, int 
     int hdir = 0;
     for(int i=0; i<c->type; i++) if(c->move(i)->wall == waClosedGate)
       hdir = i;
-    transmatrix V2 = mscale(V, wmspatial?geom3::WALL:1) * ddspin(c, hdir, S42);
+    transmatrix V2 = mscale(V, wmspatial?geom3::WALL:1) * ddspin(c, hdir, M_PI);
     queuepolyat(V2, shPalaceGate, darkena(wcol, 0, 0xFF), wmspatial?PPR_WALL3A:PPR_WALL);
     starcol = 0;
     }
@@ -3522,7 +3515,6 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       }
     else {
       playerV = V * ddspin(c, cwt.spin);
-      //  playerV = V * spin(displaydir(c, cwt.spin) * M_PI/S42);
       if(cwt.mirrored) playerV = playerV * Mirror;
       if(orig) cwtV = playerV;
       }
@@ -3665,7 +3657,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         ld rad = hexf * (.3 * u + (ds%1000) * .0003);
         int tcol = darkena(gradient(forecolor, backcolor, 0, rad, 1.5 * hexf), 0, 0xFF);
         PRING(a)
-          curvepoint(V*ddi0(a, rad));
+          curvepoint(V*xspinpush0(a * M_PI / S42, rad));
         queuecurve(tcol, 0, PPR_LINE);
         }
       }
@@ -3732,9 +3724,9 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       if(tim > 1000) tim = 800;
       if(elec::havecharge && tim > 400) tim = 400;
       for(int t=0; t<c->type; t++) if(c->move(t) && c->move(t)->ligon) {
-        int hdir = displaydir(c, t);
+        ld hdir = displayspin(c, t);
         int lcol = darkena(gradient(iinf[itOrbLightning].color, 0, 0, tim, 1100), 0, 0xFF);
-        queueline(V*ddi0(ticks, hexf/2), V*ddi0(hdir, crossf), lcol, 2 + vid.linequality);
+        queueline(V*xspinpush0(ticks * M_PI / S42, hexf/2), V*xspinpush0(hdir, crossf), lcol, 2 + vid.linequality);
         }
       }
     
@@ -3843,7 +3835,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
             queuepolyat(V2, shHalfMirror[2], 0xC0C0C080, PPR_WALL3);
           }
         else {
-          qfi.spin = ddspin(c, d, S42);
+          qfi.spin = ddspin(c, d, M_PI);
           transmatrix V2 = V * qfi.spin;
           if(!wmblack) {
             inmirrorcount++;
@@ -3868,7 +3860,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         for(int t=0;t<6; t++) if(c->move(t) && c->move(t)->wall == c->wall)
           i = t;
 
-        qfi.spin = ddspin(c, i, S14);
+        qfi.spin = ddspin(c, i, M_PI/S3);
         transmatrix V2 = V * qfi.spin;
         
         if(wmspatial && wmescher) {
@@ -4048,8 +4040,8 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         
         case laSwitch:
           set_floor(shSwitchFloor);
-          if(ctof(c) && !gp::on && !irr::on) for(int i=0; i<c->type; i++)
-            queuepoly(Vf * ddspin(c, i, S6) * xpush(rhexf), shSwitchDisk, darkena(minf[active_switch()].color, fd, 0xFF));
+          if(ctof(c) && !gp::on && !irr::on && !syntetic && !binarytiling) for(int i=0; i<c->type; i++)
+            queuepoly(Vf * ddspin(c, i, M_PI/S7) * xpush(rhexf), shSwitchDisk, darkena(minf[active_switch()].color, fd, 0xFF));
           break;
 
         case laStorms:
@@ -4314,7 +4306,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           Vboat = &(Vboat0 = *Vboat); 
           if(wmspatial && c->wall == waBoat) {
             nospin = c->wall == waBoat && applyAnimation(c, Vboat0, footphase, LAYER_BOAT);
-            if(!nospin) Vboat0 = Vboat0 * ddspin(c, c->mondir, S42);
+            if(!nospin) Vboat0 = Vboat0 * ddspin(c, c->mondir, M_PI);
             queuepolyat(Vboat0, shBoatOuter, outcol, PPR_BOATLEV);
             Vboat = &(Vboat0 = V);
             }
@@ -4322,7 +4314,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
             nospin = applyAnimation(c, Vboat0, footphase, LAYER_BOAT);
             }
           if(!nospin) 
-            Vboat0 = Vboat0 * ddspin(c, c->mondir, S42);
+            Vboat0 = Vboat0 * ddspin(c, c->mondir, M_PI);
           else {
             transmatrix Vx;
             if(applyAnimation(c, Vx, footphase, LAYER_SMALL))
@@ -4665,7 +4657,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
        cell *c2 = c->move(i); 
        if(airdist(c2) < airdist(c)) {
          calcAirdir(c2); // printf("airdir = %d\n", airdir);
-         transmatrix V0 = ddspin(c, i, S42);
+         transmatrix V0 = ddspin(c, i, M_PI);
          
          double ph = ticks / (nonbitrunc?150:75.0) + airdir * M_PI / (S21+.0);
          
@@ -4696,8 +4688,8 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       whirlwind::calcdirs(c);
       
       for(int i=0; i<whirlwind::qdirs; i++) {
-        int hdir0 = displaydir(c, whirlwind::dfrom[i]) + S42;
-        int hdir1 = displaydir(c, whirlwind::dto[i]);
+        ld hdir0 = displayspin(c, whirlwind::dfrom[i]) + M_PI;
+        ld hdir1 = displayspin(c, whirlwind::dto[i]);
  
         double ph1 = fanframe;
         
@@ -4705,12 +4697,12 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         
         ph1 -= floor(ph1);
         
-        if(hdir1 < hdir0-S42) hdir1 += S84;
-        if(hdir1 >= hdir0+S42) hdir1 -= S84;
+        if(hdir1 < hdir0-M_PI) hdir1 += 2 * M_PI;
+        if(hdir1 >= hdir0+M_PI) hdir1 -= 2 * M_PI;
         
         int hdir = (hdir1*ph1+hdir0*(1-ph1));
  
-        transmatrix V0 = spin((hdir) * M_PI / S42);
+        transmatrix V0 = spin(hdir);
         
         double ldist = nonbitrunc ? crossf : c->type == 6 ? .2840 : 0.3399;
  
@@ -5090,7 +5082,7 @@ void drawFlashes() {
         int flashcol = f.color;
         if(u > 500) flashcol = gradient(flashcol, 0, 500, u, 1100);
         flashcol = darkena(flashcol, 0, 0xFF);
-        PRING(a) curvepoint(V*ddi0(a, rad));
+        PRING(a) curvepoint(V*xspinpush0(a * M_PI / S42, rad));
         queuecurve(flashcol, 0x8080808, PPR_LINE);
         }
       }
@@ -5104,7 +5096,7 @@ void drawFlashes() {
         int flashcol = f.color;
         if(u > 1000) flashcol = gradient(flashcol, 0, 1000, u, 2200);
         flashcol = darkena(flashcol, 0, 0xFF);
-        PRING(a) curvepoint(V*ddi0(a, rad));
+        PRING(a) curvepoint(V*xspinpush0(a * M_PI / S42, rad));
         queuecurve(flashcol, 0x8080808, PPR_LINE);
         }
       }
@@ -5338,7 +5330,7 @@ void drawmovestar(double dx, double dy) {
 
 #if CAP_QUEUE
     if(euclid)
-      queueline(tC0(Centered), Centered * ddi0(d * 10.5, 0.5) , col, vid.linequality);
+      queueline(tC0(Centered), Centered * xspinpush0(d * M_PI / 4, 0.5) , col, vid.linequality);
     else
 //    queueline(tC0(Centered), Centered * spin(M_PI*d/4)* xpush(d==0?.7:d==2?.6:.5) * C0, col >> darken);
       queueline(tC0(Centered), Centered * xspinpush0(M_PI*d/4, d==0?.7:d==2?.5:.2), col, 3 + vid.linequality);
@@ -5870,7 +5862,7 @@ void drawBug(const cellwalker& cw, int col) {
 #if CAP_POLY
   initquickqueue();
   transmatrix V = ggmatrix(cw.at);
-  if(cw.spin) V = V * ddspin(cw.at, cw.spin, S42);
+  if(cw.spin) V = V * ddspin(cw.at, cw.spin, M_PI);
   queuepoly(V, shBugBody, col);
   quickqueue();
 #endif
