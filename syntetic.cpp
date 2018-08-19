@@ -491,9 +491,9 @@ void parse_symbol(string s) {
   while(true) {
     if(peek() == ')' || peek() == '^' || (peek() == '(' && isize(faces)) || peek() == 0) break;
     else if((peek() == 'L' || peek() == 'l') && faces.size())
-      nflags.back() |= sfLINE, have_line = true;
+      nflags.back() |= sfLINE, have_line = true, at++;
     else if((peek() == 'H' || peek() == 'h') && faces.size())
-      nflags.back() |= sfPH, have_ph = true;
+      nflags.back() |= sfPH, have_ph = true, at++;
     else if(isnumber()) faces.push_back(read_number()), nflags.push_back(0);
     else at++;
     }
