@@ -499,20 +499,20 @@ bool confusingGeometry() {
   }
 
 ld master_to_c7_angle() {
-  return (nonbitrunc && !binarytiling && !syntetic) ? M_PI + gp::alpha : 0;
+  return (nonbitrunc && !binarytiling && !archimedean) ? M_PI + gp::alpha : 0;
   }
 
 transmatrix actualV(const heptspin& hs, const transmatrix& V) {
   if(irr::on)
     return V * spin(M_PI + 2 * M_PI / S7 * (hs.spin + irr::periodmap[hs.at].base.spin));
-  if(syntetic) return V * spin(-synt::triangles[synt::id_of(hs.at)][hs.spin].first);
+  if(archimedean) return V * spin(-arcm::triangles[arcm::id_of(hs.at)][hs.spin].first);
   if(binarytiling) return V;
   return (hs.spin || nonbitrunc) ? V * spin(hs.spin*2*M_PI/S7 + master_to_c7_angle()) : V;
   }
 
 transmatrix applyspin(const heptspin& hs, const transmatrix& V) {
   if(binarytiling) return V;
-  if(syntetic) return V * spin(synt::triangles[synt::id_of(hs.at)][hs.spin].first);
+  if(archimedean) return V * spin(arcm::triangles[arcm::id_of(hs.at)][hs.spin].first);
   return hs.spin ? V * spin(hs.spin*2*M_PI/S7) : V;
   }
 
@@ -804,11 +804,11 @@ void optimizeview() {
   
   transmatrix TB = Id;
   
-  if(binarytiling || syntetic) {
+  if(binarytiling || archimedean) {
     turn = -1, best = View[2][2];
     for(int i=0; i<viewctr.at->c7->type; i++) {
       heptagon *h2 = createStep(viewctr.at, i);
-      transmatrix T = (binarytiling) ? binary::relative_matrix(h2, viewctr.at) : synt::relative_matrix(h2, viewctr.at);
+      transmatrix T = (binarytiling) ? binary::relative_matrix(h2, viewctr.at) : arcm::relative_matrix(h2, viewctr.at);
       hyperpoint H = View * tC0(T);
       ld quality = euclid ? hdist0(H) : H[2];
       if(quality < best) best = quality, turn = i, TB = T;

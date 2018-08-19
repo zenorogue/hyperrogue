@@ -798,14 +798,14 @@ cell *createMov(cell *c, int d) {
       exit(1);
       }
     }
-  else if(nonbitrunc && syntetic) {
-    if(synt::id_of(c->master) <= synt::N * 2) {
+  else if(nonbitrunc && archimedean) {
+    if(arcm::id_of(c->master) <= arcm::N * 2) {
       heptspin hs = heptspin(c->master, d) + wstep + 2 + wstep + 1;
       c->c.connect(d, hs.at->c7, hs.spin, hs.mirrored);
       }
     else c->c.connect(d, c, d, false);
     }
-  else if(nonbitrunc || syntetic) {
+  else if(nonbitrunc || archimedean) {
     heptagon *h2 = createStep(c->master, d);
     c->c.connect(d, h2->c7,c->master->c.spin(d),false);
     }
@@ -874,7 +874,7 @@ cell*& euclideanAtCreate(int vec) {
 void initcells() {
   DEBB(DF_INIT, (debugfile,"initcells\n"));
   
-  if(syntetic) currentmap = synt::new_map();
+  if(archimedean) currentmap = arcm::new_map();
   else if(torus) currentmap = new hrmap_torus;
   else if(euclid) currentmap = new hrmap_euclidean;
   else if(sphere) currentmap = new hrmap_spherical;
@@ -913,7 +913,7 @@ template<class T> void subcell(cell *c, const T& t) {
       subcell(c2, t);
       }
     }
-  else if(!nonbitrunc && !syntetic && !binarytiling)
+  else if(!nonbitrunc && !archimedean && !binarytiling)
     forCellEx(c2, c) t(c2);
   t(c);
   }
@@ -992,7 +992,7 @@ void verifycell(cell *c) {
   }
 
 void verifycells(heptagon *at) {
-  if(gp::on || irr::on || syntetic) return;
+  if(gp::on || irr::on || archimedean) return;
   for(int i=0; i<S7; i++) if(at->move(i) && at->move(i)->move(at->c.spin(i)) && at->move(i)->move(at->c.spin(i)) != at) {
     printf("hexmix error %p [%d s=%d] %p %p\n", at, i, at->c.spin(i), at->move(i), at->move(i)->move(at->c.spin(i)));
     }
@@ -1039,7 +1039,7 @@ int celldist(cell *c) {
     return eudist(decodeId(c->master));
   if(sphere) return celldistance(c, currentmap->gamestart());
   if(irr::on) return irr::celldist(c, false);
-  if(binarytiling || syntetic || ctof(c)) return c->master->distance;
+  if(binarytiling || archimedean || ctof(c)) return c->master->distance;
   if(gp::on) return gp::compute_dist(c, celldist);
   int dx[MAX_S3];
   for(int u=0; u<S3; u++)
@@ -1452,7 +1452,7 @@ int celldistance(cell *c1, cell *c2) {
     return 64;
     }
   
-  if(gp::on || masterless || irr::on || syntetic || binarytiling) {
+  if(gp::on || masterless || irr::on || archimedean || binarytiling) {
     
     if(saved_distances.count(make_pair(c1,c2)))
       return saved_distances[make_pair(c1,c2)];

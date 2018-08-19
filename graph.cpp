@@ -235,8 +235,8 @@ void drawLightning(const transmatrix& V) {
   }
 
 ld displayspin(cell *c, int d) {
-  if(syntetic) {
-    auto& t1 = synt::get_triangle(c->master, d);
+  if(archimedean) {
+    auto& t1 = arcm::get_triangle(c->master, d);
     return -(t1.first + M_PI / c->type);
     }
   else if(irr::on) {
@@ -2391,7 +2391,7 @@ transmatrix applyPatterndir(cell *c, const patterns::patterninfo& si) {
   if(gp::on || irr::on || binarytiling) return Id;
   transmatrix V = ddspin(c, si.dir, M_PI);
   if(si.reflect) return V * Mirror;
-  if(syntetic) return V * iddspin(c, 0, M_PI);
+  if(archimedean) return V * iddspin(c, 0, M_PI);
   return V;
   }
 
@@ -3188,7 +3188,7 @@ bool placeSidewall(cell *c, int i, int sidepar, const transmatrix& V, int col) {
   
   transmatrix V2 = V * ddspin(c, i);
  
-  if(gp::on || irr::on || binarytiling || syntetic) {
+  if(gp::on || irr::on || binarytiling || archimedean) {
     draw_shapevec(c, V2, qfi.fshape->gpside[sidepar][i], col, prio);
     return false;
     }
@@ -4040,7 +4040,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         
         case laSwitch:
           set_floor(shSwitchFloor);
-          if(ctof(c) && !gp::on && !irr::on && !syntetic && !binarytiling) for(int i=0; i<c->type; i++)
+          if(ctof(c) && !gp::on && !irr::on && !archimedean && !binarytiling) for(int i=0; i<c->type; i++)
             queuepoly(Vf * ddspin(c, i, M_PI/S7) * xpush(rhexf), shSwitchDisk, darkena(minf[active_switch()].color, fd, 0xFF));
           break;
 
@@ -5238,8 +5238,8 @@ void drawthemap() {
     drawEuclidean();
   else if(binarytiling)
     binary::draw();
-  else if(syntetic)
-    synt::draw();
+  else if(archimedean)
+    arcm::draw();
   else
     drawrec(viewctr, hsOrigin, cview());
   drawWormSegments();

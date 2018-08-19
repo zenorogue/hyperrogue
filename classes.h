@@ -198,7 +198,7 @@ enum eLand { laNone, laBarrier, laCrossroads, laDesert, laIce, laCaves, laJungle
 
 enum eGeometry {
   gNormal, gEuclid, gSphere, gElliptic, gZebraQuotient, gFieldQuotient, gTorus, gOctagon, g45, g46, g47, gSmallSphere, gTinySphere, gEuclidSquare, gSmallElliptic, 
-  gKleinQuartic, gBolza, gBolza2, gMinimal, gBinaryTiling, gSyntetic,
+  gKleinQuartic, gBolza, gBolza2, gMinimal, gBinaryTiling, gArchimedean,
   gGUARD};
 
 enum eGeometryClass { gcHyperbolic, gcEuclid, gcSphere };

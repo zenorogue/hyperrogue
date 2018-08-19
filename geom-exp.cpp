@@ -336,8 +336,8 @@ void showEuclideanMenu() {
         break;
       }
   
-    dialog::addSelItem(XLAT("sides per face"), syntetic ? "?" : its(ts), 0);
-    dialog::addSelItem(XLAT("faces per vertex"), syntetic ? "?" : its(tv), 0);
+    dialog::addSelItem(XLAT("sides per face"), archimedean ? "?" : its(ts), 0);
+    dialog::addSelItem(XLAT("faces per vertex"), archimedean ? "?" : its(tv), 0);
   
     string qstring = "none";
     if(tq & qZEBRA) qstring = "zebra";
@@ -353,9 +353,9 @@ void showEuclideanMenu() {
     dialog::addSelItem(XLAT("quotient space"), XLAT(qstring), 0);
   
     dialog::addSelItem(XLAT("size of the world"), 
-      (syntetic && euclid) ? "∞" :
-      (syntetic && sphere) ? its(isize(currentmap->allcells())) :
-      (syntetic && hyperbolic) ? "exp(∞)*?" :
+      (archimedean && euclid) ? "∞" :
+      (archimedean && sphere) ? its(isize(currentmap->allcells())) :
+      (archimedean && hyperbolic) ? "exp(∞)*?" :
       worldsize < 0 ? "exp(∞)*" + (nom%denom ? its(nom)+"/"+its(-denom) : its(-worldsize)): 
       worldsize == 0 ? "∞" :
       its(worldsize),
@@ -389,8 +389,8 @@ void showEuclideanMenu() {
       dialog::handleNavigation(sym, uni);
       if(uni >= 'a' && uni < 'a'+gGUARD) {
         targetgeometry = eGeometry(uni - 'a');
-        if(targetgeometry == gSyntetic)
-          pushScreen(synt::show);
+        if(targetgeometry == gArchimedean)
+          pushScreen(arcm::show);
         else {
           stop_game_and_switch_mode(geometry == targetgeometry ? rg::nothing : rg::geometry);
           start_game();

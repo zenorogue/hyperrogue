@@ -45,8 +45,8 @@ void precalc() {
   int vertexdegree = S6/2;
   ld fmin, fmax;  
 
-  if(syntetic) 
-    ginf[gSyntetic].cclass = gcHyperbolic;
+  if(archimedean) 
+    ginf[gArchimedean].cclass = gcHyperbolic;
 
   if(euclid) {
     // dynamicval<eGeometry> g(geometry, gNormal);
@@ -164,7 +164,7 @@ void precalc() {
   
   gp::compute_geometry();  
   irr::compute_geometry();
-  if(syntetic) synt::prepare();
+  if(archimedean) arcm::prepare();
   }
 
 transmatrix xspinpush(ld dir, ld dist) {

@@ -77,7 +77,7 @@ heptagon *buildHeptagon1(heptagon *h, heptagon *parent, int d, hstate s, int par
   
 heptagon *buildHeptagon(heptagon *parent, int d, hstate s, int pard = 0, int fixdistance = COMPUTE) {
   heptagon *h = buildHeptagon1(new heptagon, parent, d, s, pard, fixdistance);
-  if(binarytiling || syntetic) return h;
+  if(binarytiling || archimedean) return h;
   if(parent->c7) {
     if(irr::on)
       irr::link_next(parent, d);
@@ -214,8 +214,8 @@ heptagon *createStep(heptagon *h, int d) {
   d = h->c.fix(d);
   if(!h->move(d) && binarytiling) 
     return binary::createStep(h, d);
-  if(!h->move(d) && syntetic) {
-    synt::create_adjacent(h, d); 
+  if(!h->move(d) && archimedean) {
+    arcm::create_adjacent(h, d); 
     return h->move(d);
     }
   if(!h->move(0) && h->s != hsOrigin && !binarytiling) {

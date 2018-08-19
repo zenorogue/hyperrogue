@@ -1,6 +1,6 @@
 namespace hr {
 
-namespace synt {
+namespace arcm {
 
 #define SDEBUG(x) if(debug_geometry) { doindent(); x; fflush(stdout); }
 
@@ -28,7 +28,7 @@ vector<vector<pair<int, int>>> adjacent;
 
 vector<vector<pair<ld, ld>>> triangles;
 
-// id of vertex in the syntetic tiling
+// id of vertex in the archimedean tiling
 // odd numbers = reflected tiles
 // 0, 2, ..., 2(N-1) = as in the symbol
 // 2N = bitruncated tile
@@ -244,13 +244,13 @@ void prepare() {
 
   euclidean_angle_sum = 0;
   for(int f: faces) euclidean_angle_sum += (f-2.) / f;
-  if(euclidean_angle_sum < 1.999999) ginf[gSyntetic].cclass = gcSphere;
-  else if(euclidean_angle_sum > 2.000001) ginf[gSyntetic].cclass = gcHyperbolic;
-  else ginf[gSyntetic].cclass = gcEuclid;
+  if(euclidean_angle_sum < 1.999999) ginf[gArchimedean].cclass = gcSphere;
+  else if(euclidean_angle_sum > 2.000001) ginf[gArchimedean].cclass = gcHyperbolic;
+  else ginf[gArchimedean].cclass = gcEuclid;
   
   SDEBUG( printf("euclidean_angle_sum = %lf\n", double(euclidean_angle_sum)); )
   
-  dynamicval<eGeometry> dv(geometry, gSyntetic);
+  dynamicval<eGeometry> dv(geometry, gArchimedean);
   
   /* compute the geometry */
   inradius.resize(N);
@@ -315,15 +315,15 @@ void prepare() {
 
 map<heptagon*, vector<pair<heptagon*, transmatrix> > > altmap;
 
-map<heptagon*, pair<heptagon*, transmatrix>> syntetic_gmatrix;
+map<heptagon*, pair<heptagon*, transmatrix>> archimedean_gmatrix;
 
 hrmap *current_altmap;
 
-struct hrmap_syntetic : hrmap {
+struct hrmap_archimedean : hrmap {
   heptagon *origin;
   heptagon *getOrigin() { return origin; }
 
-  hrmap_syntetic() {
+  hrmap_archimedean() {
     origin = new heptagon;
     origin->s = hsOrigin;
     origin->emeraldval = 0;
@@ -357,7 +357,7 @@ struct hrmap_syntetic : hrmap {
       }
   
     transmatrix T = xpush(.01241) * spin(1.4117) * xpush(0.1241) * Id;
-    syntetic_gmatrix[origin] = make_pair(alt, T);
+    archimedean_gmatrix[origin] = make_pair(alt, T);
     altmap[alt].emplace_back(origin, T);
     
     base_distlimit = 0;
@@ -366,10 +366,10 @@ struct hrmap_syntetic : hrmap {
     if(sphere) base_distlimit = 15;
     }
 
-  ~hrmap_syntetic() {
+  ~hrmap_archimedean() {
     clearfrom(origin);
     altmap.clear();
-    syntetic_gmatrix.clear();
+    archimedean_gmatrix.clear();
     if(current_altmap) {
       dynamicval<eGeometry> g(geometry, gNormal);       
       delete current_altmap;
@@ -379,7 +379,7 @@ struct hrmap_syntetic : hrmap {
   void verify() { }
   };
 
-hrmap *new_map() { return new hrmap_syntetic; }
+hrmap *new_map() { return new hrmap_archimedean; }
 
 transmatrix adjcell_matrix(heptagon *h, int d);
 
@@ -425,7 +425,7 @@ void create_adjacent(heptagon *h, int d) {
 
   // * spin(-tri[id][pi+i].first) * xpush(t.second) * pispin * spin(tri[id'][p'+d'].first)
   
-  auto& p = syntetic_gmatrix[h];
+  auto& p = archimedean_gmatrix[h];
   
   heptagon *alt = p.first;
 
@@ -462,7 +462,7 @@ void create_adjacent(heptagon *h, int d) {
 
   heptagon *hnew = build_child(h, d, get_adj(h, d).first, get_adj(h, d).second);
   altmap[alt].emplace_back(hnew, T1);
-  syntetic_gmatrix[hnew] = make_pair(alt, T1);
+  archimedean_gmatrix[hnew] = make_pair(alt, T1);
   }
 
 set<heptagon*> visited;
@@ -601,7 +601,7 @@ int readArgs() {
            
   if(0) ;
   else if(argis("-symbol")) {
-    targetgeometry = gSyntetic;
+    targetgeometry = gArchimedean;
     if(targetgeometry != geometry)
       stop_game_and_switch_mode(rg::geometry);
     showstartmenu = false;
@@ -631,8 +631,8 @@ int support_threecolor() {
 int support_graveyard() {
   if(!nonbitrunc) return 2;
   return 
-    isize(synt::faces) == 3 && synt::faces[0] % 2 == 0 ? 2 :
-    synt::have_ph ? 1 :
+    isize(arcm::faces) == 3 && arcm::faces[0] % 2 == 0 ? 2 :
+    arcm::have_ph ? 1 :
     0;
   }
 
@@ -641,15 +641,15 @@ bool support_chessboard() {
   }
 
 bool pseudohept(int id) {
-  return flags[id] & synt::sfPH;
+  return flags[id] & arcm::sfPH;
   }
 
 bool chessvalue(cell *c) {
-  return flags[id_of(c->master)] & synt::sfCHESS;
+  return flags[id_of(c->master)] & arcm::sfCHESS;
   }
 
 bool linespattern(cell *c) {
-  return flags[id_of(c->master)] & synt::sfLINE;
+  return flags[id_of(c->master)] & arcm::sfLINE;
   }
 
 int threecolor(int id) {
@@ -745,8 +745,16 @@ string active_symbol;
 
 bool manual_edit;
 
+void enable() {
+  stop_game();
+  if(geometry != gArchimedean) targetgeometry = gArchimedean, stop_game_and_switch_mode(rg::geometry);
+  nonbitrunc = true; need_reset_geometry = true;
+  parse_symbol(current_symbol);
+  start_game();
+  }
+
 void show() {
-  if(lastsample < isize(samples) && geometry != gSyntetic) {
+  if(lastsample < isize(samples) && geometry != gArchimedean) {
     string s = samples[lastsample++];
     parse_symbol(s);
     if(errors) {
@@ -782,11 +790,8 @@ void show() {
       parse_symbol(current_symbol);
       if(errors) parse_symbol(current_symbol = active_symbol);
       else {
-        stop_game();
-        need_reset_geometry = true;
-        if(geometry != gSyntetic) targetgeometry = gSyntetic, stop_game_and_switch_mode(rg::geometry);
-        nonbitrunc = true; need_reset_geometry = true;
-        start_game();
+        parse_symbol(active_symbol);
+        enable();
         }
       }
     });
@@ -798,12 +803,8 @@ void show() {
       auto &ps = prepsamples[j];
       dialog::addSelItem(ps.s, fts(ps.angle_sum) + "°", 'a' + i);
       dialog::add_action([&] () {
-        stop_game();
         current_symbol = ps.s;
-        if(geometry != gSyntetic) targetgeometry = gSyntetic, stop_game_and_switch_mode(rg::geometry);
-        nonbitrunc = true; need_reset_geometry = true;
-        parse_symbol(current_symbol);
-        start_game();
+        enable();
         });
       }
     dialog::addItem(XLAT("next page"), '-');

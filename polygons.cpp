@@ -1328,7 +1328,7 @@ transmatrix ddi(int a, ld x) { return xspinpush(a * M_PI / S42, x); }
 
 void drawTentacle(hpcshape &h, ld rad, ld var, ld divby) {
   double tlength = max(crossf, hexhexdist * gp::scale * irr::scale);
-  if(syntetic) tlength = synt::edgelength;
+  if(archimedean) tlength = arcm::edgelength;
   int max = int(20 * pow(2, vid.linequality));
   for(ld i=0; i<=max; i++)
     hpcpush(ddi(S21, rad + var * sin(i * M_PI/divby)) * ddi(0, tlength * i/max) * C0);
@@ -1432,7 +1432,7 @@ void bshape(hpcshape& sh, int p, double shzoom, int shapeid, double bonus = 0, f
   while(polydata[whereis + 2*qty] != NEWSHAPE) qty++;
   double shzoomx = shzoom;
   double shzoomy = shzoom;
-  if(shzoom == WOLF) shzoomx = 1.5 * (nonbitrunc && !syntetic ? crossf / hcrossf : 1), shzoomy = 1.6 * (nonbitrunc && !syntetic ? crossf / hcrossf : 1);
+  if(shzoom == WOLF) shzoomx = 1.5 * (nonbitrunc && !archimedean ? crossf / hcrossf : 1), shzoomy = 1.6 * (nonbitrunc && !archimedean ? crossf / hcrossf : 1);
   int rots2 = rots;
   // shapes 368..370 are specially designed
   if(!(shapeid >= 368 && shapeid <= 370)) {
@@ -1631,12 +1631,12 @@ void buildpolys() {
       floorrad1 = rhexf * .8;
     }
 
-  if(syntetic) {
-    triangleside = synt::edgelength;
+  if(archimedean) {
+    triangleside = arcm::edgelength;
     goldbf = 1;
-    scalef = synt::edgelength / hcrossf7;
+    scalef = arcm::edgelength / hcrossf7;
     floorrad0 = floorrad1 = triangleside * .45;
-    xcrossf = synt::edgelength;
+    xcrossf = arcm::edgelength;
     zhexf = xcrossf * .55;
     }
 
@@ -1994,8 +1994,8 @@ void buildpolys() {
   if(a46 && !nonbitrunc) spzoom6 *= .9;
   if(a47 && !nonbitrunc) spzoom6 *= .85;
   
-  if(syntetic)
-    shFullFloor.configure(synt::edgelength/2, synt::edgelength/2);
+  if(archimedean)
+    shFullFloor.configure(arcm::edgelength/2, arcm::edgelength/2);
   else
     shFullFloor.configure(hexvdist, rhexf);
   shFloor.configure(floorrad0, floorrad1);

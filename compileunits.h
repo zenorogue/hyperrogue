@@ -30,7 +30,7 @@
 #include "fieldpattern.cpp"
 #include "heptagon.cpp"
 #include "binary-tiling.cpp"
-#include "syntetic.cpp"
+#include "archimedean.cpp"
 #include "language.cpp"
 #include "cell.cpp"
 #include "goldberg.cpp"

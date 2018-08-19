@@ -55,7 +55,7 @@ namespace gp { extern gp::local_info draw_li; }
 
 transmatrix calc_relative_matrix(cell *c2, cell *c1, const hyperpoint& point_hint) {
 
-  if(stdsphere) {
+  if(sphere_narcm) {
     if(!gmatrix0.count(c2) || !gmatrix0.count(c1)) {
       printf("building gmatrix0 (size=%d)\n", isize(gmatrix0));
       auto bak = gp::draw_li;
@@ -79,7 +79,7 @@ transmatrix calc_relative_matrix(cell *c2, cell *c1, const hyperpoint& point_hin
     }
   
   if(binarytiling) return binary::relative_matrix(c2->master, c1->master);
-  if(syntetic) return synt::relative_matrix(c2->master, c1->master);
+  if(archimedean) return arcm::relative_matrix(c2->master, c1->master);
   
   if(torus) {
     transmatrix t = Id;
@@ -389,9 +389,9 @@ hyperpoint get_corner_position(cell *c, int cid, ld cf) {
     vertices[6] = get_horopoint(-yy, 0);
     return mid_at_actual(vertices[cid], 3/cf);
     }
-  if(syntetic) {
-    if(synt::id_of(c->master) >= synt::N*2) return C0;
-    auto& t = synt::get_triangle(c->master, cid);
+  if(archimedean) {
+    if(arcm::id_of(c->master) >= arcm::N*2) return C0;
+    auto& t = arcm::get_triangle(c->master, cid);
     return xspinpush0(-t.first, t.second * 3 / cf);
     }
   if(nonbitrunc) {
@@ -432,7 +432,7 @@ hyperpoint midcorner(cell *c, int i, ld v) {
     hyperpoint nlfar = rel * vs2.vertices[(spin+2)%cor2];
     return mid_at(nfar, nlfar, .49);
     }
-  if(syntetic) return C0;
+  if(archimedean) return C0;
   printf("midcorner not handled\n");
   exit(1);
   }
@@ -450,11 +450,11 @@ hyperpoint nearcorner(cell *c, int i) {
     hyperpoint nc = vs.jpoints[vs.neid[i]];
     return mid_at(C0, nc, .94);
     }
-  if(syntetic) {
-    auto& t = synt::get_triangle(c->master, i);
-    int id = synt::id_of(c->master);
-    int id1 = synt::get_adj(synt::get_adj(c->master, i), -2).first;
-    return xspinpush0(-t.first - M_PI / c->type, synt::inradius[id/2] + synt::inradius[id1/2]);
+  if(archimedean) {
+    auto& t = arcm::get_triangle(c->master, i);
+    int id = arcm::id_of(c->master);
+    int id1 = arcm::get_adj(arcm::get_adj(c->master, i), -2).first;
+    return xspinpush0(-t.first - M_PI / c->type, arcm::inradius[id/2] + arcm::inradius[id1/2]);
     }
   if(binarytiling) {
     ld yx = log(2) / 2;
@@ -503,12 +503,12 @@ hyperpoint farcorner(cell *c, int i, int which) {
     }
   if(binarytiling)
     return nearcorner(c, (i+which) % c->type); // lazy
-  if(syntetic) {
-    auto& t = synt::get_triangle(c->master, i);
-    int id = synt::id_of(c->master);
-    auto id1 = synt::get_adj(synt::get_adj(c->master, i), -2).first;
-    int n1 = isize(synt::adjacent[id1]);
-    return spin(-t.first - M_PI / c->type) * xpush(synt::inradius[id/2] + synt::inradius[id1/2]) * xspinpush0(M_PI + M_PI/n1*(which?3:-3), synt::circumradius[id1/2]);
+  if(archimedean) {
+    auto& t = arcm::get_triangle(c->master, i);
+    int id = arcm::id_of(c->master);
+    auto id1 = arcm::get_adj(arcm::get_adj(c->master, i), -2).first;
+    int n1 = isize(arcm::adjacent[id1]);
+    return spin(-t.first - M_PI / c->type) * xpush(arcm::inradius[id/2] + arcm::inradius[id1/2]) * xspinpush0(M_PI + M_PI/n1*(which?3:-3), arcm::circumradius[id1/2]);
     }
   
   return cellrelmatrix(c, i) * get_corner_position(c->move(i), (cellwalker(c, i) + wstep + (which?2:-1)).spin);

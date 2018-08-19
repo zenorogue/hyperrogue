@@ -84,11 +84,11 @@ void addMessage(string s, char spamtype = 0);
 #define S3 ginf[geometry].vertex
 #define hyperbolic_37 (S7 == 7 && S3 == 3 && !binarytiling)
 #define hyperbolic_not37 ((S7 > 7 || S3 > 3 || binarytiling) && hyperbolic)
-#define weirdhyperbolic ((S7 > 7 || S3 > 3 || gp::on || irr::on || binarytiling || syntetic) && hyperbolic)
-#define stdhyperbolic (S7 == 7 && S3 == 3 && !gp::on && !irr::on && !binarytiling && !syntetic)
+#define weirdhyperbolic ((S7 > 7 || S3 > 3 || gp::on || irr::on || binarytiling || archimedean) && hyperbolic)
+#define stdhyperbolic (S7 == 7 && S3 == 3 && !gp::on && !irr::on && !binarytiling && !archimedean)
 
 #define binarytiling (geometry == gBinaryTiling)
-#define syntetic (geometry == gSyntetic)
+#define archimedean (geometry == gArchimedean)
 #define eubinary (euclid || binarytiling)
 
 #define cgclass (ginf[geometry].cclass)
@@ -104,7 +104,7 @@ void addMessage(string s, char spamtype = 0);
 #define bounded (sphere || quotient || torus)
 
 #define masterless among(geometry, gEuclid, gEuclidSquare, gTorus)
-#define stdsphere (sphere && !syntetic)
+#define sphere_narcm (sphere && !archimedean)
 
 #define a4 (S3 == 4)
 #define a45 (S3 == 4 && S7 == 5)
@@ -472,7 +472,7 @@ struct cell : gcell {
   cell* cmove(int d) { return createMov(this, d); }
   };
 
-int heptagon::degree() { if(syntetic) return c7->type; else return S7; }
+int heptagon::degree() { if(archimedean) return c7->type; else return S7; }
 
 using heptspin = walker<heptagon>;
 using cellwalker = walker<cell>;
@@ -3828,7 +3828,7 @@ namespace binary {
   heptagon *createStep(heptagon *parent, int d);
   }
 
-namespace synt {
+namespace arcm {
   void initialize(heptagon *root);
   transmatrix relative_matrix(heptagon *h1, heptagon *h2);
   short& id_of(heptagon *);

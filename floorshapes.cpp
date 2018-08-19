@@ -281,7 +281,7 @@ void generate_floorshapes_for(int id, cell *c, int siid, int sidir) {
   for(auto pfsh: all_plain_floorshapes) {
     auto& fsh = *pfsh;
 
-    if(!gp::on && !irr::on && !syntetic) {
+    if(!gp::on && !irr::on && !archimedean) {
 
       // standard and binary
       ld hexside = fsh.rad0, heptside = fsh.rad1;
@@ -397,7 +397,7 @@ void generate_floorshapes_for(int id, cell *c, int siid, int sidir) {
     sizeto(fsh.b, id);
     sizeto(fsh.shadow, id);
     
-    if(!gp::on && !irr::on && !binarytiling && !syntetic) {
+    if(!gp::on && !irr::on && !binarytiling && !archimedean) {
       generate_matrices_scale(fsh.scale, fsh.noftype);
       if(nonbitrunc && geosupport_graveyard() < 2 && fsh.shapeid2) {
         if(id == 0) bshape2(fsh.b[0], fsh.prio, fsh.shapeid2, hept_matrices);
@@ -481,16 +481,16 @@ void generate_floorshapes() {
     
   else if(gp::on) { /* will be generated on the fly */ }
   
-  else if(syntetic) {
+  else if(archimedean) {
     heptagon master;
     cell model;
     model.master = &master;
-    synt::parent_index_of(&master) = 0;
-    for(int i=0; i<2*synt::N + (nonbitrunc ? 0 : 2); i++) {
-      synt::id_of(&master) = i;
-      model.type = isize(synt::triangles[i]);
+    arcm::parent_index_of(&master) = 0;
+    for(int i=0; i<2*arcm::N + (nonbitrunc ? 0 : 2); i++) {
+      arcm::id_of(&master) = i;
+      model.type = isize(arcm::triangles[i]);
       if(geosupport_graveyard() == 2)
-        generate_floorshapes_for(i, &model, !synt::pseudohept(i), i/2);
+        generate_floorshapes_for(i, &model, !arcm::pseudohept(i), i/2);
       else
         generate_floorshapes_for(i, &model, 0, 0);
       }
@@ -599,8 +599,8 @@ void draw_shapevec(cell *c, const transmatrix& V, const vector<hpcshape> &shv, i
       }
     queuepolyat(V, shv[id], col, prio);
     }
-  else if(syntetic) {
-    queuepolyat(V, shv[synt::id_of(c->master)], col, prio);
+  else if(archimedean) {
+    queuepolyat(V, shv[arcm::id_of(c->master)], col, prio);
     }
   else if((euclid || gp::on) && ishex1(c)) 
     queuepolyat(V * pispin, shv[0], col, prio);

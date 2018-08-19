@@ -50,8 +50,8 @@ bool ishex2(cell *c) {
   }
 
 int chessvalue(cell *c) {
-  if(syntetic) 
-    return synt::chessvalue(c);
+  if(archimedean) 
+    return arcm::chessvalue(c);
   else
     return celldist(c) & 1;
   }
@@ -350,7 +350,7 @@ int fieldval_uniq(cell *c) {
     auto p = cell_to_pair(c);
     return gmod(p.first * torusconfig::dx + p.second * torusconfig::dy, torusconfig::qty);
     }
-  else if(binarytiling || syntetic) return 0;
+  else if(binarytiling || archimedean) return 0;
   if(ctof(c) || gp::on || irr::on) return c->master->fieldval/S7;
   else {
     int z = 0;
@@ -730,7 +730,7 @@ namespace patterns {
     }
 
   void val_all(cell *c, patterninfo &si, int sub, int pat) {
-    if(irr::on || syntetic || binarytiling) si.symmetries = 1;
+    if(irr::on || archimedean || binarytiling) si.symmetries = 1;
     else if(a46) val46(c, si, sub, pat);
     else if(a38) val38(c, si, sub, pat);
     else if(sphere) valSibling(c, si, sub, pat);
@@ -893,13 +893,13 @@ namespace patterns {
       return si;
       }
     
-    if(syntetic && pat == PAT_SIBLING) {
-      int id = synt::id_of(c->master);
-      si.id = synt::tilegroup[id];
-      si.symmetries = synt::periods[si.id];
-      si.dir = synt::groupoffset[id];
-      if((sub & SPF_EXTRASYM) && synt::have_symmetry && synt::tilegroup[id^1] < synt::tilegroup[id])
-        si.id = synt::tilegroup[id^1],
+    if(archimedean && pat == PAT_SIBLING) {
+      int id = arcm::id_of(c->master);
+      si.id = arcm::tilegroup[id];
+      si.symmetries = arcm::periods[si.id];
+      si.dir = arcm::groupoffset[id];
+      if((sub & SPF_EXTRASYM) && arcm::have_symmetry && arcm::tilegroup[id^1] < arcm::tilegroup[id])
+        si.id = arcm::tilegroup[id^1],
         si.reflect = true;
       return si;
       }
@@ -1066,7 +1066,7 @@ int geosupport_threecolor() {
     return 2;
   if(a46 && nonbitrunc)
     return 1;
-  if(syntetic) return synt::support_threecolor();
+  if(archimedean) return arcm::support_threecolor();
   return 0;
   }
 
@@ -1074,7 +1074,7 @@ int geosupport_graveyard() {
   // always works in bitrunc geometries
   if(!nonbitrunc) return 2;
 
-  if(syntetic) return synt::support_graveyard();
+  if(archimedean) return arcm::support_graveyard();
 
   if(irr::on) return irr::bitruncations_performed ? 2 : 1;
   
@@ -1090,7 +1090,7 @@ int geosupport_graveyard() {
   }
 
 int pattern_threecolor(cell *c) {
-  if(syntetic) return synt::threecolor(synt::id_of(c->master));
+  if(archimedean) return arcm::threecolor(arcm::id_of(c->master));
   if(S3 == 3 && !(S7&1) && gp_threecolor() == 1 && c->master->c7 != c) {
     auto li = gp::get_local_info(c);
     int rel = (li.relative.first - li.relative.second + MODFIXER) % 3;
@@ -1191,7 +1191,7 @@ int pattern_threecolor(cell *c) {
 bool pseudohept(cell *c) {
   if(irr::on) return irr::pseudohept(c);
   if(binarytiling) return c->type & c->master->distance & 1;
-  if(syntetic) return synt::pseudohept(synt::id_of(c->master));
+  if(archimedean) return arcm::pseudohept(arcm::id_of(c->master));
   if(gp::on && gp_threecolor() == 2)
     return gp::pseudohept_val(c) == 0;
   if(gp::on && gp_threecolor() == 1 && (S7&1) && (S3 == 3))
@@ -1233,8 +1233,8 @@ namespace patterns {
   char whichCanvas = 0;
 
   int generateCanvas(cell *c) {
-    if(whichCanvas == 'A' && syntetic)
-      return distcolors[synt::tilegroup[synt::id_of(c->master)] & 7];
+    if(whichCanvas == 'A' && archimedean)
+      return distcolors[arcm::tilegroup[arcm::id_of(c->master)] & 7];
     if(whichCanvas == 'C' && hyperbolic) {
       using namespace fieldpattern;
       int z = currfp.getdist(fieldval(c), make_pair(0,false));
@@ -1410,7 +1410,7 @@ namespace patterns {
       dialog::addSelItem(XLAT("field pattern S"), "field", 'S');
       }
     
-    if(syntetic)
+    if(archimedean)
       dialog::addSelItem(XLAT("Archimedean"), "Archimedean", 'A');
 
     dialog::addBreak(100);
@@ -1481,7 +1481,7 @@ namespace patterns {
     if(stdhyperbolic || euclid)
       dialog::addBoolItem(XLAT("Palace Pattern"), (whichPattern == PAT_PALACE), PAT_PALACE);
     
-    if((nonbitrunc && S3 == 4) || (syntetic && synt::support_chessboard()))
+    if((nonbitrunc && S3 == 4) || (archimedean && arcm::support_chessboard()))
       dialog::addBoolItem(XLAT("chessboard"), (whichPattern == PAT_CHESS), PAT_CHESS);
 
     if(a38 || a46 || euclid || S3 == 4 || S7 == 4)
@@ -1490,7 +1490,7 @@ namespace patterns {
     if(sphere)
       dialog::addBoolItem(XLAT("siblings"), (whichPattern == PAT_SIBLING), PAT_SIBLING);
     
-    if(syntetic)
+    if(archimedean)
       dialog::addBoolItem(XLAT("Archimedean"), (whichPattern == PAT_SIBLING), PAT_SIBLING);
 
     if(euclid)
@@ -1536,10 +1536,10 @@ namespace patterns {
       dialog::addBoolItem(XLAT("symmetry 0-2"), subpattern_flags & SPF_SYM02, '2');
       dialog::addBoolItem(XLAT("symmetry 0-3"), subpattern_flags & SPF_SYM03, '3');
       }
-    if(euclid && among(whichPattern, PAT_COLORING, 0) && !syntetic)
+    if(euclid && among(whichPattern, PAT_COLORING, 0) && !archimedean)
       dialog::addBoolItem(XLAT("extra symmetries"), subpattern_flags & SPF_EXTRASYM, '=');
     
-    if(syntetic && synt::have_symmetry && whichPattern == PAT_SIBLING)
+    if(archimedean && arcm::have_symmetry && whichPattern == PAT_SIBLING)
       dialog::addBoolItem(XLAT("extra symmetries"), subpattern_flags & SPF_EXTRASYM, '=');
 
     if(whichPattern == PAT_SINGLETYPE) {
@@ -2089,7 +2089,7 @@ namespace linepatterns {
               col,
               1 + vid.linequality);
           }
-        else if(syntetic) {
+        else if(archimedean) {
           if(!pseudohept(c)) for(int i=0; i<c->type; i++) if(c->move(i) && c < c->move(i) && !pseudohept(c->move(i)) && gmatrix.count(c->move(i))) 
             queuelinef(tC0(V), gmatrix[c->move(i)]*C0, 
               col,

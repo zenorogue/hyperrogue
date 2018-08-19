@@ -336,8 +336,8 @@ void debugScreen() {
     dialog::addSelItem("temporary", its(mouseover->listindex), 0);
     if(gp::on)
       dialog::addSelItem("whirl", gp::disp(gp::get_local_info(mouseover).relative), 0);
-    if(syntetic)
-      dialog::addSelItem("ID", its(synt::id_of(mouseover->master)), 0);
+    if(archimedean)
+      dialog::addSelItem("ID", its(arcm::id_of(mouseover->master)), 0);
     dialog::addBreak(50);
     dialog::addSelItem("monster", dnameof2(mouseover->monst, mouseover->mondir), 0);
     dialog::addSelItem("stuntime/hitpoints", its(mouseover->stuntime)+"/"+its(mouseover->hitpoints), 0);
