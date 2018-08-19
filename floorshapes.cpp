@@ -51,9 +51,9 @@ mesher msh(eGeometry g, int sym, ld main, ld v0, ld v1, ld bspi, ld scale) {
   m.bspi = bspi;
   dynamicval<eGeometry> dg(geometry, g);
 
-  hyperpoint rot = xpush(v0) * spin(M_PI - M_PI/sym) * xpush(main) * C0;
-  hyperpoint bnlfar = xpush(v0) * spin(M_PI) * rspintox(rot) * rspintox(rot) * rspintox(rot) * xpush(hdist0(rot)) * C0;
-  hyperpoint bnrfar = xpush(v0) * spin(M_PI) * spintox(rot) * spintox(rot) * spintox(rot) * xpush(hdist0(rot)) * C0;
+  hyperpoint rot = xpush(v0) * xspinpush0(M_PI - M_PI/sym, main);
+  hyperpoint bnlfar = xpush(v0) * spin(M_PI) * rspintox(rot) * rspintox(rot) * rspintox(rot) * xpush0(hdist0(rot));
+  hyperpoint bnrfar = xpush(v0) * spin(M_PI) * spintox(rot) * spintox(rot) * spintox(rot) * xpush0(hdist0(rot));
 
   m.lcorner = xspinpush0 (bspi-M_PI/sym, main);
   m.rcorner = xspinpush0 (bspi+M_PI/sym, main);

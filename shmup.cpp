@@ -1319,7 +1319,7 @@ void roseCurrents(transmatrix& nat, monster *m, int delta) {
 
 hyperpoint keytarget(int i) {
   double d = 2 + sin(curtime / 350.);
-  return pc[i]->pat * xpush(d) * C0;
+  return pc[i]->pat * xpush0(d);
   }
 
 /* int charidof(int pid) {
@@ -1333,11 +1333,11 @@ double getSwordSize() { return 0.7255; }
 double getHornsSize() { return 0.33; }
 
 hyperpoint swordpos(int id, bool rev, double frac) {
-  return pc[id]->pat * spin(pc[id]->swordangle) * xpush((rev?-frac:frac) * getSwordSize()) * C0;
+  return pc[id]->pat * xspinpush0(pc[id]->swordangle, (rev?-frac:frac) * getSwordSize());
   }
 
 hyperpoint hornpos(int id) {
-  return pc[id]->pat * tC0(xpush(getHornsSize()));
+  return pc[id]->pat * xpush0(getHornsSize());
   }
 
 #define IGO 9

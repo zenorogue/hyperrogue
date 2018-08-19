@@ -250,8 +250,8 @@ void applymodel(hyperpoint H, hyperpoint& ret) {
     // map to plane
     if(false) {
       auto p = vid.twopoint_param;
-      ld dleft = hdist(H, xpush(-p) * C0);
-      ld dright = hdist(H, xpush(p) * C0);
+      ld dleft = hdist(H, xpush0(-p));
+      ld dright = hdist(H, xpush0(p));
       ld yf = 1, zf = 0;
       if(zlev_used) {
         ld y_orig = asin_auto(H[1]);

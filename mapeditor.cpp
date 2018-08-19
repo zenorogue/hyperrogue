@@ -911,12 +911,12 @@ namespace mapeditor {
     for(int d=0; d<S84; d++) {
       transmatrix d2 = drawtrans * rgpushxto0(ccenter) * rspintox(inverse(drawtrans * rgpushxto0(ccenter)) * coldcenter);
       unsigned col = (d % (S84/drawcell->type) == 0) ? gridcolor : lightgrid;
-      queueline(d2 * C0, d2 * spin(M_PI*d/S42)* xpush(1) * C0, col, 4 + vid.linequality);
+      queueline(d2 * C0, d2 * xspinpush0(M_PI*d/S42, 1), col, 4 + vid.linequality);
       }
     for(int u=2; u<=20; u++) {
       PRING(d) {
         transmatrix d2 = drawtrans * rgpushxto0(ccenter) * rspintox(inverse(drawtrans * rgpushxto0(ccenter)) * coldcenter);
-        curvepoint(d2 * spin(M_PI*d/S42)* xpush(u/20.) * C0);
+        curvepoint(d2 * xspinpush0(M_PI*d/S42, u/20.));
         }
       queuecurve((u%5==0) ? gridcolor : lightgrid, 0, PPR_LINE);
       }
@@ -1501,7 +1501,7 @@ namespace mapeditor {
           transmatrix T = rgpushxto0(lstart);
           texture::where = lstartcell;
           for(int i=0; i<circp; i++)
-            texture::drawPixel(T * spin(2 * M_PI * i / circp) * xpush(rad) * C0, tcolor);
+            texture::drawPixel(T * xspinpush0(2 * M_PI * i / circp, rad), tcolor);
           lstartcell = NULL;
           }
         }
@@ -1632,7 +1632,7 @@ namespace mapeditor {
     if(radius > .1) circp *= 2; 
     
     for(int j=0; j<circp; j++)
-      pts.push_back(Ctr * tC0(spin(M_PI*j*2/circp) * xpush(radius)));
+      pts.push_back(Ctr * xspinpush0(M_PI*j*2/circp, radius));
     for(int j=0; j<circp; j++) curvepoint(pts[j]);
     curvepoint(pts[0]);
     queuecurve(texture::config.paint_color, 0, PPR_LINE);

@@ -239,7 +239,7 @@ rugpoint *addRugpoint(hyperpoint h, double dist) {
       ld r = acosh(modelscale);
       // point on an equdistant going through C0 in distance d along the guiding line
       // hpoint = hpxy(cosh(r) * sinh(r) * (cosh(d) - 1), sinh(d) * cosh(r));
-      hpoint = xpush(r) * ypush(d) * xpush(-r) * C0;
+      hpoint = xpush(r) * ypush(d) * xpush0(-r);
       hpoint[0] = -hpoint[0];
       }
 
@@ -683,8 +683,8 @@ bool force(rugpoint& m1, rugpoint& m2, double rd, bool is_anticusp=false, double
     throw rug_exception();
     }
 
-  f1 = iT1 * xpush(d1*forcev) * C0;
-  f2 = iT1 * xpush(t-d2*forcev) * C0;
+  f1 = iT1 * xpush0(d1*forcev);
+  f2 = iT1 * xpush0(t-d2*forcev);
 
   m1.flat = n[f1];
   m2.flat = n[f2];
@@ -1242,7 +1242,7 @@ void prepareTexture() {
     transmatrix V = rgpushxto0(finger_center->h);
     queuechr(V, 0.5, 'X', 0xFFFFFFFF, 2);
     for(int i=0; i<72; i++)
-      queueline(tC0(V * spin(i*M_PI/32) * xpush(finger_range)), tC0(V * spin((i+1)*M_PI/32) * xpush(finger_range)), 0xFFFFFFFF, vid.linequality);
+      queueline(V * xspinpush0(i*M_PI/32, finger_range), V * xspinpush0((i+1)*M_PI/32, finger_range), 0xFFFFFFFF, vid.linequality);
     }
   drawqueue();
   vid = svid;

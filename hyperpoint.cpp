@@ -617,7 +617,7 @@ hyperpoint mid_at(hyperpoint h1, hyperpoint h2, ld v) {
 
 hyperpoint mid_at_actual(hyperpoint h, ld v) {
   using namespace hyperpoint_vec;
-  return rspintox(h) * xpush(hdist0(h) * v) * C0;
+  return rspintox(h) * xpush0(hdist0(h) * v);
   }
 
 }

@@ -242,7 +242,7 @@ bool step(int delta) {
          cells.emplace_back();
          cellinfo& s = cells.back();
          s.patterndir = -1;
-         s.owner = h, s.p = spin(hrand(1000)) * xpush(.01) * C0;
+         s.owner = h, s.p = xspinpush0(hrand(1000), .01);
          set_relmatrices(s);
          }
        }
@@ -489,9 +489,7 @@ bool step(int delta) {
         ld dist = hcrossf / 2;
         ld dists[8];
         for(int i=0; i<S7; i++) {
-          dists[i] = hdist(s.p, spin(hexshift - i * ALPHA) * xpush(-hcrossf) * C0);
-          // calc_relative_matrix(s.owner->move(i), s.owner, s.p) * C0);
-          // spin(2 * M_PI * i / S7) * xpush(hcrossf) * C0);
+          dists[i] = hdist(s.p, xspinpush0(hexshift - i * ALPHA, -hcrossf));
           if(dists[i] < dist)
             d = i, dist = dists[i];            
           }

@@ -46,7 +46,7 @@ transmatrix master_relative(cell *c, bool get_inverse) {
   }
 
 transmatrix calc_relative_matrix(cell *c2, cell *c1, int direction_hint) {
-  return calc_relative_matrix(c2, c1, ddspin(c1, direction_hint) * xpush(1e-2) * C0);
+  return calc_relative_matrix(c2, c1, ddspin(c1, direction_hint) * xpush0(1e-2));
   }
 
 // target, source, direction from source to target
@@ -357,7 +357,7 @@ double randd() { return (rand() + .5) / (RAND_MAX + 1.); }
 
 hyperpoint randomPointIn(int t) {
   while(true) {
-    hyperpoint h = spin(2*M_PI*(randd()-.5)/t) * tC0(xpush(asinh(randd())));
+    hyperpoint h = xspinpush0(2*M_PI*(randd()-.5)/t, asinh(randd()));
     double d =
       nonbitrunc ? tessf : t == 6 ? hexhexdist : crossf;
     if(hdist0(h) < hdist0(xpush(-d) * h))
@@ -392,7 +392,7 @@ hyperpoint get_corner_position(cell *c, int cid, ld cf) {
   if(syntetic) {
     if(synt::id_of(c->master) >= synt::N*2) return C0;
     auto& t = synt::get_triangle(c->master, cid);
-    return spin(-t.first) * xpush(t.second * 3 / cf) * C0;
+    return xspinpush0(-t.first, t.second * 3 / cf);
     }
   if(nonbitrunc) {
     return ddspin(c,cid,M_PI/S7) * xpush0(hcrossf * 3 / cf);
@@ -454,7 +454,7 @@ hyperpoint nearcorner(cell *c, int i) {
     auto& t = synt::get_triangle(c->master, i);
     int id = synt::id_of(c->master);
     int id1 = synt::get_adj(synt::get_adj(c->master, i), -2).first;
-    return spin(-t.first - M_PI / c->type) * xpush(synt::inradius[id/2] + synt::inradius[id1/2]) * C0;
+    return xspinpush0(-t.first - M_PI / c->type, synt::inradius[id/2] + synt::inradius[id1/2]);
     }
   if(binarytiling) {
     ld yx = log(2) / 2;
@@ -474,7 +474,7 @@ hyperpoint nearcorner(cell *c, int i) {
     return neis[i];
     }
   double d = cellgfxdist(c, i);
-  return ddspin(c, i) * xpush(d) * C0;
+  return ddspin(c, i) * xpush0(d);
   }
 
 hyperpoint farcorner(cell *c, int i, int which) {
@@ -508,7 +508,7 @@ hyperpoint farcorner(cell *c, int i, int which) {
     int id = synt::id_of(c->master);
     auto id1 = synt::get_adj(synt::get_adj(c->master, i), -2).first;
     int n1 = isize(synt::adjacent[id1]);
-    return spin(-t.first - M_PI / c->type) * xpush(synt::inradius[id/2] + synt::inradius[id1/2]) * spin(M_PI + M_PI/n1*(which?3:-3)) * xpush(synt::circumradius[id1/2]) * C0;
+    return spin(-t.first - M_PI / c->type) * xpush(synt::inradius[id/2] + synt::inradius[id1/2]) * xspinpush0(M_PI + M_PI/n1*(which?3:-3), synt::circumradius[id1/2]);
     }
   
   return cellrelmatrix(c, i) * get_corner_position(c->move(i), (cellwalker(c, i) + wstep + (which?2:-1)).spin);

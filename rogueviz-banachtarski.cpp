@@ -339,7 +339,7 @@ void bantar_frame() {
     transmatrix itView = inverse(tView);
     transmatrix z = rspintox(itView*C0) * xpush(hdist0(itView*C0) * part) * spintox(itView*C0);
     transmatrix ful = rspintox(itView*C0) * xpush(hdist0(itView*C0) * tmax / tmax) * spintox(itView*C0); // rgpushxto0(itView*C0);
-    hyperpoint C1 = xpush(1) * C0;
+    hyperpoint C1 = xpush0(1);
     ld bof = alphaof(tView * ful * C1);
     z = z * spin(bof * part);
     View = inverse(z);

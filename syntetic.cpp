@@ -219,13 +219,13 @@ void prepare() {
       ld crmin = 0, crmax = sphere ? M_PI : 10;
       for(int q=0; q<100; q++) {
         circumradius[i] = (crmin + crmax) / 2;
-        hyperpoint p1 = xpush(circumradius[i]) * C0;
+        hyperpoint p1 = xpush0(circumradius[i]);
         hyperpoint p2 = spin(2 * M_PI / faces[i]) * p1;
         inradius[i] = hdist0(mid(p1, p2));
         if(hdist(p1, p2) > edgelength) crmax = circumradius[i];
         else crmin = circumradius[i];
         }
-      hyperpoint h = xpush(edgelength/2) * spin(M_PI/2) * xpush(inradius[i]) * C0;
+      hyperpoint h = xpush(edgelength/2) * xspinpush0(M_PI/2, inradius[i]);
       alphas[i] = atan2(-h[1], h[0]);
       alpha_total += alphas[i];
       }
@@ -369,9 +369,9 @@ void create_adjacent(heptagon *h, int d) {
     for(int d2=0; d2<p.first->c7->type; d2++) {
       auto& t2 = get_triangle(p.first, d2);
       transmatrix T1 = T * spin(M_PI + t2.first);
-      SDEBUG( printf("compare: %s", display(T1 * xpush(1) * C0)); )
-      SDEBUG( printf(":: %s\n", display(p.second * xpush(1) * C0)); )
-      if(intval(T1 * xpush(1) * C0, p.second * xpush(1) * C0) < 1e-6) {        
+      SDEBUG( printf("compare: %s", display(T1 * xpush0(1)));  )
+      SDEBUG( printf(":: %s\n", display(p.second * xpush0(1)));  )
+      if(intval(T1 * xpush0(1), p.second * xpush0(1)) < 1e-6) {
         connectHeptagons(h, d, heptspin(p.first, d2));
         return;
         }

@@ -22,7 +22,7 @@ ld strafex, strafey;
 hyperpoint spcoord(hyperpoint h) {
   ld phi = h[0], y = h[1], z = h[2], r = global_r;
   dynamicval<eGeometry> gw(geometry, rug::gwhere == gElliptic ? gSphere : rug::gwhere);
-  hyperpoint inh = xpush(-acurvature*(y + r - frac(progress))/szoom) * spin(M_PI/2) * xpush(acurvature*z) * C0;
+  hyperpoint inh = xpush(-acurvature*(y + r - frac(progress))/szoom) * xspinpush0(M_PI/2, acurvature*z);
   hyperpoint i = inh * (hdist0(inh) / hypot2(inh));
   ld aphi = (r+phi + floor(progress))*M_PI/6;
   return hpxyz(i[1] * sin(aphi), i[1] * cos(aphi), i[0]);

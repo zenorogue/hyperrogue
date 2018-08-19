@@ -1011,7 +1011,7 @@ transmatrix change_geometry(const transmatrix& T) {
   push = hdist0(h);
   alpha = atan2(h[1], h[0]);
   if(push == 0) alpha = 0;
-  hyperpoint spinpoint = gpushxto0(h) * T * xpush(1) * C0;
+  hyperpoint spinpoint = gpushxto0(h) * T * xpush0(1);
   beta = atan2(spinpoint[1], spinpoint[0]);
   }
   

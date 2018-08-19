@@ -2069,7 +2069,7 @@ namespace linepatterns {
           if(pseudohept(c) && (p/4 == 10 || p/4 == 8))
           for(int i=0; i<S7; i++) if(c->move(i) && emeraldval(c->move(i)) == p-4) {
             queuelinef(tC0(V), V*tC0(heptmove[i]), col, 2 + vid.linequality);
-            queuelinef(tC0(V), V*tC0(spin(-i * ALPHA) * xpush(-hdist/2)), col, 2 + vid.linequality);
+            queuelinef(tC0(V), V*xspinpush0(-i * ALPHA, -hdist/2), col, 2 + vid.linequality);
             }
           }
         break;

@@ -1328,7 +1328,7 @@ void filltriangle(const array<hyperpoint, 3>& v, const array<point, 3>& p, int c
 
 void splitseg(const transmatrix& A, const array<ld, 2>& angles, const array<hyperpoint, 2>& h, const array<point, 2>& p, int col, int lev) {
   ld newangle = (angles[0] + angles[1]) / 2;
-  hyperpoint nh = A * spin(newangle) * xpush(penwidth) * C0;
+  hyperpoint nh = A * xspinpush0(newangle, penwidth);
   auto np = ptc(nh);
   
   filltriangle(make_array(h[0],h[1],nh), make_array(p[0],p[1],np), col, lev);
@@ -1345,7 +1345,7 @@ void fillcircle(hyperpoint h, int col) {
   
   ld step = M_PI * 2/3;
   
-  array<hyperpoint, 3> mh = make_array(A * xpush(penwidth) * C0, A * spin(step) * xpush(penwidth) * C0, A * spin(-step) * xpush(penwidth) * C0);
+  array<hyperpoint, 3> mh = make_array(A * xpush0(penwidth), A * xspinpush0(step, penwidth), A * xspinpush0(-step, penwidth));
   auto mp = ptc(mh);
 
   filltriangle(mh, mp, col, 0);

@@ -94,13 +94,13 @@ void precalc() {
     ld f =  (fmin+fmax) / 2;
     ld v1=0, v2=0;
     if(vertexdegree == 3) {
-      hyperpoint H = xpush(f) * C0;
+      hyperpoint H = xpush0(f);
       v1 = intval(H, C0), v2 = intval(H, spin(2*M_PI/S7)*H);
       }
     else if(vertexdegree == 4) {
-      hyperpoint H = xpush(f) * C0;
+      hyperpoint H = xpush0(f);
       ld opposite = hdist(H, spin(2*M_PI/S7)*H);
-      hyperpoint Hopposite = spin(M_PI/S7) * xpush(opposite) * C0;
+      hyperpoint Hopposite = xspinpush0(M_PI/S7, opposite);
       v2 = intval(H, Hopposite), v1 = intval(H, C0);
       }
     if(sphere ? v1 < v2 : v1 > v2) fmin = f; else fmax = f;
@@ -112,23 +112,23 @@ void precalc() {
     fmin = 0, fmax = sphere ? M_PI / 2 : 2;
     for(int p=0; p<100; p++) {
       ld f =  (fmin+fmax) / 2;
-      hyperpoint H = spin(M_PI/S7) * xpush(f) * C0;
-      ld v1 = intval(H, C0), v2 = intval(H, xpush(tessf) * C0);
+      hyperpoint H = xspinpush0(M_PI/S7, f);
+      ld v1 = intval(H, C0), v2 = intval(H, xpush0(tessf));
       if(v1 < v2) fmin = f; else fmax = f;
       }
     hcrossf = fmin;
     }
   else {
-    hcrossf = hdist(xpush(tessf) * C0, spin(2*M_PI/S7) * xpush(tessf) * C0) / 2;
+    hcrossf = hdist(xpush0(tessf), xspinpush0(2*M_PI/S7, tessf)) / 2;
     }
   crossf = nonbitrunc ? tessf : hcrossf;
   
   fmin = 0, fmax = tessf;
   for(int p=0; p<100; p++) {
     ld f =  (fmin+fmax) / 2;
-    hyperpoint H = xpush(f) * C0;
+    hyperpoint H = xpush0(f);
     hyperpoint H1 = spin(2*M_PI/S7) * H;
-    hyperpoint H2 = xpush(tessf-f) * C0;
+    hyperpoint H2 = xpush0(tessf-f);
     ld v1 = intval(H, H1), v2 = intval(H, H2);
     if(v1 < v2) fmin = f; else fmax = f;
     }
@@ -142,7 +142,7 @@ void precalc() {
   finish:
   
   for(int i=0; i<S42; i++)
-    Crad[i] = spin(2*M_PI*i/S42) * xpush(.4) * C0;
+    Crad[i] = xspinpush0(2*M_PI*i/S42, .4);
   for(int d=0; d<S7; d++)
     heptmove[d] = spin(-d * ALPHA) * xpush(tessf) * spin(M_PI);
     
@@ -152,9 +152,9 @@ void precalc() {
   for(int d=0; d<S7; d++) invheptmove[d] = inverse(heptmove[d]);
   for(int d=0; d<S7; d++) invhexmove[d] = inverse(hexmove[d]);
 
-  hexhexdist = hdist(xpush(crossf) * C0, spin(M_PI*2/S7) * xpush(crossf) * C0);
+  hexhexdist = hdist(xpush0(crossf), xspinpush0(M_PI*2/S7, crossf));
   
-  hexvdist = hdist(tC0(xpush(hexf)), spin(ALPHA/2) * tC0(xpush(hcrossf)));
+  hexvdist = hdist(xpush0(hexf), xspinpush0(ALPHA/2, hcrossf));
 
   if(debug_geometry) 
   printf("S7=%d S6=%d hexf = " LDF" hcross = " LDF" tessf = " LDF" hexshift = " LDF " hexhex = " LDF " hexv = " LDF "\n", S7, S6, hexf, hcrossf, tessf, hexshift, 

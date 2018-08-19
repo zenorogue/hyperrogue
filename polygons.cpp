@@ -1557,8 +1557,8 @@ void buildpolys() {
 
   bshape(shMovestar, PPR_MOVESTAR);
   for(int i=0; i<=8; i++) {
-    hpcpush(spin(M_PI * i/4) * xpush(crossf) * spin(M_PI * i/4) * C0);
-    if(i != 8) hpcpush(spin(M_PI * i/4 + M_PI/8) * xpush(crossf/4) * spin(M_PI * i/4 + M_PI/8) * C0);
+    hpcpush(xspinpush0(M_PI * i/4, crossf));
+    if(i != 8) hpcpush(xspinpush0(M_PI * i/4 + M_PI/8, crossf/4));
     }
   
   // scales
@@ -1603,10 +1603,10 @@ void buildpolys() {
   if(sphere&&S7==3) trihepta0 *= 1.3, trihepta1 *= 1.6;
 
   if(nonbitrunc) {
-    ld hedge = hdist(spin(M_PI/S7) * xpush(rhexf) * C0, spin(-M_PI/S7) * xpush(rhexf) * C0);
+    ld hedge = hdist(xspinpush0(M_PI/S7, rhexf), xspinpush0(-M_PI/S7, rhexf));
     
-    trihepta1 = hdist0(xpush(tessf) * spin(2*M_PI*2/S7) * xpush(tessf) * C0) / 2 * .98;
-    trihepta0 = hdist0(xpush(-tessf) * spin(M_PI/S7) * xpush(rhexf+hedge/2) * C0) * .98;
+    trihepta1 = hdist0(xpush(tessf) * xspinpush0(2*M_PI*2/S7, tessf)) / 2 * .98;
+    trihepta0 = hdist0(xpush(-tessf) * xspinpush0(M_PI/S7, rhexf+hedge/2)) * .98;
     }
 
   if(binarytiling) hexvdist = rhexf = 1, tessf = 1, gp::scale = 1, scalef = 1, crossf *= .8;
@@ -1749,7 +1749,7 @@ void buildpolys() {
 
   bshape(shCross, PPR_WALL);
   for(int i=0; i<=84; i+=7)
-    hpcpush(spin(2*M_PI*i/84) * xpush(zhexf * (i%3 ? 0.8 : 0.3)) * C0);
+    hpcpush(xspinpush0(2*M_PI*i/84, zhexf * (i%3 ? 0.8 : 0.3)));
 
 // items
   
@@ -1973,16 +1973,16 @@ void buildpolys() {
   
   bshape(shRose, PPR_ITEM);
   PRING(t)
-    hpcpush(spin(M_PI * t / (S42+.0)) * xpush(xcrossf * (0.2 + .15 * sin(M_PI * t / (S42+.0) * 3))) * C0);
+    hpcpush(xspinpush0(M_PI * t / (S42+.0), xcrossf * (0.2 + .15 * sin(M_PI * t / (S42+.0) * 3))));
 
   bshape(shThorns, PPR_THORNS);
   for(int t=0; t<=60; t++) 
-    hpcpush(spin(M_PI * t / 30.0) * xpush(xcrossf * ((t&1) ? 0.3 : 0.6)) * C0);
+    hpcpush(xspinpush0(M_PI * t / 30.0, xcrossf * ((t&1) ? 0.3 : 0.6)));
     
   for(int i=0; i<16; i++) {
     bshape(shParticle[i], PPR_PARTICLE);
     for(int t=0; t<6; t++) 
-      hpcpush(spin(M_PI * t * 2 / 6 + M_PI * 2/6 * hrand(100) / 150.) * xpush((0.03 + hrand(100) * 0.0003) * goldbf) * C0);
+      hpcpush(xspinpush0(M_PI * t * 2 / 6 + M_PI * 2/6 * hrand(100) / 150., (0.03 + hrand(100) * 0.0003) * goldbf));
     hpc.push_back(hpc[last->s]);
     }
   

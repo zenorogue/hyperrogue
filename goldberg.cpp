@@ -535,8 +535,8 @@ namespace hr { namespace gp {
     cell cc; cc.type = S7;
     return spin(-alpha) * build_matrix(
       C0, 
-      ddspin(&cc, i) * xpush(tessf) * C0,
-      ddspin(&cc, i+1) * xpush(tessf) * C0
+      ddspin(&cc, i) * xpush0(tessf),
+      ddspin(&cc, i+1) * xpush0(tessf)
       );
     }
   

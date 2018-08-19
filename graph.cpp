@@ -237,7 +237,7 @@ void drawLightning(const transmatrix& V) {
 ld displayspin(cell *c, int d) {
   if(syntetic) {
     auto& t1 = synt::get_triangle(c->master, d);
-    return t1.first + M_PI / c->type;
+    return -(t1.first + M_PI / c->type);
     }
   else if(irr::on) {
     auto id = irr::cellindex[c];
@@ -5329,11 +5329,7 @@ void drawmovestar(double dx, double dy) {
 //  EUCLIDEAN
 
 #if CAP_QUEUE
-    if(euclid)
-      queueline(tC0(Centered), Centered * xspinpush0(d * M_PI / 4, 0.5) , col, vid.linequality);
-    else
-//    queueline(tC0(Centered), Centered * spin(M_PI*d/4)* xpush(d==0?.7:d==2?.6:.5) * C0, col >> darken);
-      queueline(tC0(Centered), Centered * xspinpush0(M_PI*d/4, d==0?.7:d==2?.5:.2), col, 3 + vid.linequality);
+    queueline(tC0(Centered), Centered * xspinpush0(d * M_PI / 4, euclid ? 0.5 : d==0?.7:d==2?.5:.2), col, 3 + vid.linequality);
 #endif
     }
   }
@@ -5403,8 +5399,8 @@ void drawfullmap() {
   ptds.clear();
 
   if(pmodel == mdTwoPoint) {
-    queuechr(xpush(+vid.twopoint_param) * C0, vid.xres / 100, 'X', 0xFF0000);
-    queuechr(xpush(-vid.twopoint_param) * C0, vid.xres / 100, 'X', 0xFF0000);
+    queuechr(xpush0(+vid.twopoint_param), vid.xres / 100, 'X', 0xFF0000);
+    queuechr(xpush0(-vid.twopoint_param), vid.xres / 100, 'X', 0xFF0000);
     }
   
   /*
@@ -5496,10 +5492,10 @@ void drawfullmap() {
 #if CAP_QUEUE
     int col = darkena(0x80, 0, 0x80);
     queueline(hpxyz(0,0,1), hpxyz(0,0,-vid.alpha), col, 0, PPR_CIRCLE);
-    queueline(xpush(+4)*C0, hpxyz(0,0,0), col, 0, PPR_CIRCLE);
-    queueline(xpush(+4)*C0, hpxyz(0,0,-vid.alpha), col, 0, PPR_CIRCLE);
-    queueline(xpush(-4)*C0, hpxyz(0,0,0), col, 0, PPR_CIRCLE);
-    queueline(xpush(-4)*C0, hpxyz(0,0,-vid.alpha), col, 0, PPR_CIRCLE);
+    queueline(xpush0(+4), hpxyz(0,0,0), col, 0, PPR_CIRCLE);
+    queueline(xpush0(+4), hpxyz(0,0,-vid.alpha), col, 0, PPR_CIRCLE);
+    queueline(xpush0(-4), hpxyz(0,0,0), col, 0, PPR_CIRCLE);
+    queueline(xpush0(-4), hpxyz(0,0,-vid.alpha), col, 0, PPR_CIRCLE);
     queueline(hpxyz(-1,0,0), hpxyz(1,0,0), col, 0, PPR_CIRCLE);
 #endif
     }

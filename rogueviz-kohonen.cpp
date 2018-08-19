@@ -811,8 +811,8 @@ namespace levelline {
           auto draw = [&] () {
             auto vmid = *v1;
             queueline(
-              tC0(T * ddspin(c1,i) * xpush(d2 * (vmid-val1) / (val2-val1))), 
-              tC0(T * ddspin(c1,i-1) * xpush(d3 * (vmid-val1) / (val3-val1))), 
+              (T * ddspin(c1,i) * xpush0(d2 * (vmid-val1) / (val2-val1))), 
+              (T * ddspin(c1,i-1) * xpush0(d3 * (vmid-val1) / (val3-val1))), 
               l.color, vid.linequality);
             };
           while(v1 < v2 && v1 < v3) {
