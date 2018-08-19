@@ -281,7 +281,7 @@ void showEuclideanMenu() {
       }
     
     dialog::addBreak(50);
-    dialog::addBoolItem(XLAT("show quotient spaces"), showquotients, 'u');
+    dialog::addBoolItem(XLAT("show quotient spaces"), showquotients, 'z');
     dialog::addBreak(50);
   
     if(ts == 6 && tv == 3)
@@ -336,8 +336,8 @@ void showEuclideanMenu() {
         break;
       }
   
-    dialog::addSelItem(XLAT("sides per face"), its(ts), 0);
-    dialog::addSelItem(XLAT("faces per vertex"), its(tv), 0);
+    dialog::addSelItem(XLAT("sides per face"), syntetic ? "?" : its(ts), 0);
+    dialog::addSelItem(XLAT("faces per vertex"), syntetic ? "?" : its(tv), 0);
   
     string qstring = "none";
     if(tq & qZEBRA) qstring = "zebra";
@@ -353,6 +353,9 @@ void showEuclideanMenu() {
     dialog::addSelItem(XLAT("quotient space"), XLAT(qstring), 0);
   
     dialog::addSelItem(XLAT("size of the world"), 
+      (syntetic && euclid) ? "∞" :
+      (syntetic && sphere) ? its(isize(currentmap->allcells())) :
+      (syntetic && hyperbolic) ? "exp(∞)*?" :
       worldsize < 0 ? "exp(∞)*" + (nom%denom ? its(nom)+"/"+its(-denom) : its(-worldsize)): 
       worldsize == 0 ? "∞" :
       its(worldsize),
@@ -386,10 +389,14 @@ void showEuclideanMenu() {
       dialog::handleNavigation(sym, uni);
       if(uni >= 'a' && uni < 'a'+gGUARD) {
         targetgeometry = eGeometry(uni - 'a');
-        stop_game_and_switch_mode(geometry == targetgeometry ? rg::nothing : rg::geometry);
-        start_game();
+        if(targetgeometry == gSyntetic)
+          pushScreen(synt::show);
+        else {
+          stop_game_and_switch_mode(geometry == targetgeometry ? rg::nothing : rg::geometry);
+          start_game();
+          }
         }
-      else if(uni == 'u') 
+      else if(uni == 'z') 
         showquotients = !showquotients;
       else if(uni == 'v') {
         if(euclid6) ;
@@ -431,7 +438,7 @@ void showEuclideanMenu() {
           torusconfig::newmode = torusconfig::torus_mode,
           torus_bitrunc = nonbitrunc,
           pushScreen(showTorusConfig);
-        if(geometry == gFieldQuotient) 
+        else if(geometry == gFieldQuotient) 
           pushScreen(showQuotientConfig);
         }
       else if(doexiton(sym, uni))

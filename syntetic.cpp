@@ -20,6 +20,8 @@ bool have_ph, have_line, have_symmetry, have_chessboard;
 int repetition = 1;
 int N;
 
+ld euclidean_angle_sum;
+
 vector<int> flags;
 
 vector<vector<pair<int, int>>> adjacent;
@@ -55,9 +57,10 @@ int matches[30][30];
 int periods[30];
 int tilegroup[30], groupoffset[30], tilegroups;
 
-int gcd(int x, int y) { return x ? gcd(y%x, x) : y; }
+int gcd(int x, int y) { return x ? gcd(y%x, x) : y < 0 ? -y : y; }
 
 int errors;
+string errormsg;
 
 pair<int, int>& get_adj(heptagon *h, int cid);
 pair<ld, ld>& get_triangle(heptagon *h, int cid);
@@ -65,8 +68,11 @@ pair<ld, ld>& get_triangle(const pair<int, int>& p, int delta = 0);
 pair<int, int>& get_adj(const pair<int, int>& p, int delta = 0);
 
 void make_match(int a, int i, int b, int j) {
-  if(periods[a] != periods[b]) 
+  if(isize(adjacent[a]) != isize(adjacent[b])) {
+    SDEBUG(printf("(error here)"));
+    errormsg = XLAT("polygons match incorrectly");
     errors++;
+    }
   if(matches[a][b] == -1)
     matches[a][b] = j - i, matches[b][a] = i - j;
   else
@@ -74,6 +80,27 @@ void make_match(int a, int i, int b, int j) {
   }
 
 void prepare() {
+
+  for(int i: faces) if(i >= MAX_EDGE) {
+    errormsg = XLAT("currently no more than %1 edges", its(MAX_EDGE));
+    errors++;
+    return;
+    }
+  if(isize(faces) > MAX_EDGE/2) {
+    errormsg = XLAT("currently no more than %1 faces in vertex", its(MAX_EDGE));
+    errors++;
+    return;
+    }
+  if(isize(faces) < 3) {
+    errormsg = XLAT("not enough faces");
+    errors++;
+    return;
+    }
+  for(int i: faces) if(i < 3) {
+    errormsg = XLAT("not enough edges");
+    errors++;
+    return;
+    }
 
   errors = 0;
 
@@ -95,16 +122,16 @@ void prepare() {
     for(int oi=0; oi<1; oi++) {
       int at = (i+oi)%N;
       int inv = oi;
-      printf("vertex ");
+      SDEBUG(printf("vertex ");)
       for(int z=0; z<faces[i]; z++) {
-        printf("[%d %d] " , at, inv);
+        SDEBUG(printf("[%d %d] " , at, inv);)
         adjacent[2*i+oi].emplace_back(2*N+int(inv), inv ? (2*at+2*N-2) % (2*N) : 2*at);
         if(invert[at]) inv ^= 1;
         at = adj[at];
         if(inv) at = (at+1) % N;
         else at = (at+N-1) % N;
         }
-      printf("-> [%d %d]\n", at, inv);
+      SDEBUG(printf("-> [%d %d]\n", at, inv);)
       }
     }
   for(int i=0; i<N; i++) {
@@ -128,6 +155,7 @@ void prepare() {
       }
     }
   
+  SDEBUG(
   for(int i=0; i<M; i++) {
     printf("adjacent %2d:", i);
     for(int j=0; j<isize(adjacent[i]); j++) {
@@ -135,19 +163,19 @@ void prepare() {
       printf(" (%d,%d)", p.first, p.second);
       }
     printf("\n");
-    }
+    } )
     
   /* verify all the triangles */
   for(int i=0; i<M; i++) {
     for(int j=0; j<isize(adjacent[i]); j++) {
       int ai = i, aj = j;
-      printf("triangle ");
+      SDEBUG( printf("triangle "); )
       for(int s=0; s<3; s++) {
-        printf("[%d %d] ", ai, aj); fflush(stdout);
+        SDEBUG( printf("[%d %d] ", ai, aj); fflush(stdout); )
         tie(ai, aj) = adjacent[ai][aj];
         aj++; if(aj >= isize(adjacent[ai])) aj = 0;
         }
-      printf("-> [%d %d]\n", ai, aj);
+      SDEBUG( printf("-> [%d %d]\n", ai, aj); )
       make_match(i, j, ai, aj);
       }
     }
@@ -191,19 +219,36 @@ void prepare() {
       for(int z=2*N; z<2*N+2; z++) flags[z] |= sfPH;
       }
     }
-
-  for(int i=0; i<M; i+=(have_symmetry?1:2)) {
-    printf("tiling group of %2d: [%2d]%2d+Z%2d\n", i, tilegroup[i], groupoffset[i], periods[i]);
-    printf("\n");
+  
+  if(have_symmetry) {
+    have_chessboard = true;
+    for(int o=0; o<2; o++)
+    for(int i=o; i<2*N; i+=2) 
+    for(int j=i+2; j<2*N; j+=4)
+      if(tilegroup[i] == tilegroup[j])
+        have_chessboard = false;
+    for(int i=0; i<N; i+=2) 
+      for(int j=0; j<2*N; j++)
+        if(tilegroup[j] == tilegroup[i])
+          flags[j] |= sfCHESS;
+    }
+  else {
+    have_chessboard = N % 2 == 0;
+    for(int i=0; i<M; i+=4) flags[i] |= sfCHESS;
     }
 
-  ld sum = 0;
-  for(int f: faces) sum += (f-2.) / f;
-  if(sum < 1.999999) ginf[gSyntetic].cclass = gcSphere;
-  else if(sum > 2.000001) ginf[gSyntetic].cclass = gcHyperbolic;
+  SDEBUG( for(int i=0; i<M; i+=(have_symmetry?1:2)) {
+    printf("tiling group of %2d: [%2d]%2d+Z%2d\n", i, tilegroup[i], groupoffset[i], periods[i]);
+    printf("\n");
+    } )
+
+  euclidean_angle_sum = 0;
+  for(int f: faces) euclidean_angle_sum += (f-2.) / f;
+  if(euclidean_angle_sum < 1.999999) ginf[gSyntetic].cclass = gcSphere;
+  else if(euclidean_angle_sum > 2.000001) ginf[gSyntetic].cclass = gcHyperbolic;
   else ginf[gSyntetic].cclass = gcEuclid;
   
-  printf("sum = %lf\n", double(sum));
+  SDEBUG( printf("euclidean_angle_sum = %lf\n", double(euclidean_angle_sum)); )
   
   dynamicval<eGeometry> dv(geometry, gSyntetic);
   
@@ -239,7 +284,7 @@ void prepare() {
     if(euclid) break;
     }
   
-  printf("computed edgelength = %lf\n", double(edgelength));
+  SDEBUG( printf("computed edgelength = %lf\n", double(edgelength)); )
   
   triangles.clear();
   triangles.resize(M);
@@ -260,11 +305,11 @@ void prepare() {
     // printf("total = %lf\n", double(total));
     }
 
-  for(auto& ts: triangles) {
+  SDEBUG( for(auto& ts: triangles) {
     printf("T");
     for(auto& t: ts) printf(" %lf@%lf", double(t.first), double(t.second));
     printf("\n");
-    }
+    } )
   
   }
 
@@ -616,6 +661,178 @@ int threecolor(int id) {
     }
   }
 
-}
+vector<string> samples = {
+  /* Euclidean */
+  "(3,3,3,3,3,3)",
+  "(4,4,4,4)",
+  "(6,6,6)",
+  "(8,8,4)",
+  "(4,6,12)",
+  "(6,4,3,4)",
+  "(3,6,3,6)",
+  "(3,12,12)",
+  "(4,4,3L,3L,3L)[3,4]",
+  "(3,3,3,3,6)(1,2)(0,4)(3)",
+  "(3,3,4,3,4)(0,4)(1)(2,3)",
+  
+  /* Platonic */
+  "(3,3,3)",
+  "(3,3,3,3)",
+  "(3,3,3,3,3)",
+  "(4,4,4)",
+  "(5,5,5)",
+  
+  /* Archimedean solids */
+  "(3,6,6)",
+  "(3,4,3,4)",
+  "(3,8,8)",
+  "(4,6,6)",
+  "(3,4,4,4)",
+  "(4,6,8)",
+  "(3,3,3,3,4)(1,2)(0,4)(3)",
+  "(3,5,3,5)",
+  "(3,10,10)",
+  "(5,6,6)",
+  "(3,4,5,4)",
+  "(4,6,10)",
+  "(3,3,3,3,5)(1,2)(0,4)(3)",
+  
+  /* prisms */
+  "(4,4,3)",
+  "(4,4,5)",
+  "(4,4,6)",
+  "(4,4,7)",
+  
+  /* sample antiprisms */
+  "(3,3,3,4)(1)(2)",
+  "(3,3,3,5)(1)(2)",
+  "(3,3,3,6)(1)(2)",
+  "(3,3,3,7)(1)(2)",
+  
+  /* hyperbolic ones */
+  "(4,4,4,4,4)",
+  "(5,5,5,5)",
+  "(3,3,3,3,7)(1,2)(0,4)(3)",
+  "(3HL,6,6,6)(1,0)[2](3)",
+  "(3,4,4,4,4)",
+  "(3,4,4,4,4) (0 1)[2 3](4)",
+  "(3,4,4,4,4) (0 1)(2)(3)(4)",
+  "(6,6,3,3,3) (0 2)(1)(3)(4)",
+  "(5,3,5,3,3) (0 1)(2 3)(4)",
+  "(4,3,3,3,3,3) (0 1)(2 3)(4 5)",
+  "(3,5,5,5,5,5) (0 1)[2 3](4)(5)",
+  "(3,5,5,5,5,5) (0 1)(2 4)(3 5)",
+  "(3,5,5,5,5,5) (0 1)(2 4)[3 5]",
+  "(3,5,5,5,5,5) (0 1)[2 4](3)(5)",
+  "(3,5,5,5,5,5) (0 1)(2)(3)(4)(5)",
+  };
+
+int lastsample = 0;
+
+struct prepared_sample {
+  string s;
+  ld angle_sum;
+  int flags;
+  };
+  
+
+vector<prepared_sample> prepsamples;
+
+int spos = 0;
+
+string current_symbol;
+string active_symbol;
+
+bool manual_edit;
+
+void show() {
+  if(lastsample < isize(samples) && geometry != gSyntetic) {
+    string s = samples[lastsample++];
+    parse_symbol(s);
+    if(errors) {
+      printf("WARNING: %d errors on %s\n", errors, s.c_str());
+      }
+    else {
+      prepared_sample ps;
+      ps.s = s;
+      ps.flags = 0;
+      ps.angle_sum = euclidean_angle_sum * 180;
+      if(support_graveyard()) ps.flags |= sfPH;
+      if(support_threecolor()) ps.flags |= sfTHREE;
+      if(support_chessboard()) ps.flags |= sfCHESS;
+      prepsamples.push_back(ps);
+      }
+    }
+  sort(prepsamples.begin(), prepsamples.end(), [] (prepared_sample& s1, prepared_sample& s2) {
+    if(s1.angle_sum < s2.angle_sum - 1e-6) return true;
+    if(s2.angle_sum < s1.angle_sum - 1e-6) return false;
+    return s1.s < s2.s;
+    });
+  cmode = sm::SIDE | sm::MAYDARK;
+  gamescreen(0);  
+  dialog::init(XLAT("Archimedean tilings"));
+  if(current_symbol == "")
+    dialog::addBreak(100);
+  else
+    dialog::addSelItem("edit", current_symbol, '/');
+  dialog::add_action([] () { 
+    manual_edit = !manual_edit; 
+    if(manual_edit) active_symbol = current_symbol;
+    if(!manual_edit) {
+      parse_symbol(current_symbol);
+      if(errors) parse_symbol(current_symbol = active_symbol);
+      else {
+        stop_game();
+        need_reset_geometry = true;
+        if(geometry != gSyntetic) targetgeometry = gSyntetic, stop_game_and_switch_mode(rg::geometry);
+        nonbitrunc = true; need_reset_geometry = true;
+        start_game();
+        }
+      }
+    });
+  dialog::addBreak(100);
+  if(!manual_edit) {
+    for(int i=0; i<10; i++) {
+      int j = i + spos;
+      if(j >= isize(prepsamples)) continue;
+      auto &ps = prepsamples[j];
+      dialog::addSelItem(ps.s, fts(ps.angle_sum) + "°", 'a' + i);
+      dialog::add_action([&] () {
+        stop_game();
+        current_symbol = ps.s;
+        if(geometry != gSyntetic) targetgeometry = gSyntetic, stop_game_and_switch_mode(rg::geometry);
+        nonbitrunc = true; need_reset_geometry = true;
+        parse_symbol(current_symbol);
+        start_game();
+        });
+      }
+    dialog::addItem(XLAT("next page"), '-');
+    dialog::add_action([] () {
+      if(spos + 10 >= isize(prepsamples))
+        spos = 0;
+      else spos += 10;
+      });
+    }
+
+  dialog::addHelp();
+  dialog::addBack();
+  dialog::display();
+
+  keyhandler = [] (int sym, int uni) {
+    if(manual_edit && sym == SDLK_RETURN) sym = uni = '/';
+    dialog::handleNavigation(sym, uni);
+    if(manual_edit && uni == 8 && current_symbol != "") {
+      current_symbol = current_symbol.substr(0, isize(current_symbol) - 1);
+      return;
+      }
+    if(manual_edit && uni >= 32 && uni < 128) {
+      current_symbol += uni;
+      return;
+      }
+    if(doexiton(sym, uni)) popScreen();
+    };
+  }
+  
+  }
 
 }

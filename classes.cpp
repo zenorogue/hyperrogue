@@ -1681,7 +1681,7 @@ geometryinfo ginf[gGUARD] = {
   {"Bolza Surface x2",    "Bolza2",   8, 3, qSMALL | qDOCKS, gcHyperbolic, 0x18400, {{6, 4}}},
   {"minimal quotient",    "minimal",  7, 3, qSMALL | qNONOR, gcHyperbolic, 0x18600, {{7, 5}}},
   {"binary tiling",       "binary",   7, 3, 0,     gcHyperbolic,        0, {{7, 5}}},
-  {"syntetic tiling",     "syntetic", 7, 3, 0,     gcHyperbolic,        0, {{7, 5}}}
+  {"Archimedean",         "A",        7, 3, 0,     gcHyperbolic,        0, {{7, 5}}}
   };
 
 }
