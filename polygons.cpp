@@ -1429,7 +1429,7 @@ void bshape(hpcshape& sh, int p, double shzoom, int shapeid, double bonus = 0, f
   while(polydata[whereis + 2*qty] != NEWSHAPE) qty++;
   double shzoomx = shzoom;
   double shzoomy = shzoom;
-  if(shzoom == WOLF) shzoomx = 1.5 * (nonbitrunc ? crossf / hcrossf : 1), shzoomy = 1.6 * (nonbitrunc ? crossf / hcrossf : 1);
+  if(shzoom == WOLF) shzoomx = 1.5 * (nonbitrunc && !syntetic ? crossf / hcrossf : 1), shzoomy = 1.6 * (nonbitrunc && !syntetic ? crossf / hcrossf : 1);
   int rots2 = rots;
   // shapes 368..370 are specially designed
   if(!(shapeid >= 368 && shapeid <= 370)) {
@@ -1560,6 +1560,8 @@ void buildpolys() {
   
   // scales
   scalef = nonbitrunc ? crossf / hcrossf7 : hcrossf / hcrossf7;
+  
+  ld xcrossf = crossf;
 
   if(euclid) scalef *= .52/crossf;
 
@@ -1613,7 +1615,7 @@ void buildpolys() {
   if(gp::on) goldbf = gp::scale * 1.6;
   if(irr::on) goldbf = irr::scale * 1.6;
   if(gp::on) floorrad1 /= 1.6;
-
+  
   double triangleside = hcrossf*.94;
   if(nonbitrunc)
     triangleside = tessf * .94;
@@ -1624,6 +1626,14 @@ void buildpolys() {
     else
       floorrad0 = hexvdist * .9,
       floorrad1 = rhexf * .8;
+    }
+
+  if(syntetic) {
+    triangleside = synt::edgelength;
+    goldbf = 1;
+    scalef = synt::edgelength / hcrossf7;
+    floorrad0 = floorrad1 = triangleside * .45;
+    xcrossf = synt::edgelength * .4;
     }
 
   // sidewall parameters for the 3D mode
@@ -1773,7 +1783,7 @@ void buildpolys() {
     hpcpush(ddi(t*S28, zhexf*.5) * C0);
     }
   
-  double disksize = crossf;
+  double disksize = xcrossf;
   if(nonbitrunc && a38) disksize *= 2;
   else if(a38) disksize *= 1.5;
   else if(nonbitrunc && S6 == 8) disksize *= 1.5;
@@ -1907,23 +1917,23 @@ void buildpolys() {
   
   bshape(shCompass1, PPR_ITEM);
   RING(i)
-    hpcpush(ddi(i, crossf * .35) * C0);
+    hpcpush(ddi(i, xcrossf * .35) * C0);
   
   bshape(shCompass2, PPR_ITEMa);
   RING(i)
-    hpcpush(ddi(i, crossf * .3) * C0);
+    hpcpush(ddi(i, xcrossf * .3) * C0);
   
   bshape(shCompass3, PPR_ITEMb);
-  hpcpush(ddi(0, crossf * .29) * C0);
-  hpcpush(ddi(S21, crossf * .04) * C0);
-  hpcpush(ddi(-S21, crossf * .04) * C0);
-  hpcpush(ddi(0, crossf * .29) * C0);
+  hpcpush(ddi(0, xcrossf * .29) * C0);
+  hpcpush(ddi(S21, xcrossf * .04) * C0);
+  hpcpush(ddi(-S21, xcrossf * .04) * C0);
+  hpcpush(ddi(0, xcrossf * .29) * C0);
   
   /* bshape(shBranch, 32);
-  hpcpush(ddi(21, crossf/5) * C0);
-  hpcpush(ddi(21, -crossf/5) * C0);
-  hpcpush(ddi(21, -crossf/5) * ddi(0, crossf) * C0);
-  hpcpush(ddi(21, crossf/5) * ddi(0, crossf) * C0); */
+  hpcpush(ddi(21, xcrossf/5) * C0);
+  hpcpush(ddi(21, -xcrossf/5) * C0);
+  hpcpush(ddi(21, -xcrossf/5) * ddi(0, xcrossf) * C0);
+  hpcpush(ddi(21, xcrossf/5) * ddi(0, xcrossf) * C0); */
   
   bshape(shILeaf[0], PPR_ONTENTACLE);
   for(int t=0; t<=S6; t++) {
@@ -1945,11 +1955,11 @@ void buildpolys() {
 
   bshape(shSlime, 33);
   PRING(i)
-    hpcpush(ddi(i, crossf * (0.7 + .2 * sin(i * M_PI * 2 / S84 * 9))) * C0);
+    hpcpush(ddi(i, xcrossf * (0.7 + .2 * sin(i * M_PI * 2 / S84 * 9))) * C0);
 
   bshape(shJelly, 33);
   PRING(i)
-    hpcpush(ddi(i, crossf * (0.4 + .03 * sin(i * M_PI * 2 / S84 * 7))) * C0);
+    hpcpush(ddi(i, xcrossf * (0.4 + .03 * sin(i * M_PI * 2 / S84 * 7))) * C0);
 
   bshape(shHeptaMarker, PPR_HEPTAMARK);
   for(int t=0; t<=S7; t++) hpcpush(ddi(t*S12, zhexf*.2) * C0);
@@ -1959,11 +1969,11 @@ void buildpolys() {
   
   bshape(shRose, PPR_ITEM);
   PRING(t)
-    hpcpush(spin(M_PI * t / (S42+.0)) * xpush(crossf * (0.2 + .15 * sin(M_PI * t / (S42+.0) * 3))) * C0);
+    hpcpush(spin(M_PI * t / (S42+.0)) * xpush(xcrossf * (0.2 + .15 * sin(M_PI * t / (S42+.0) * 3))) * C0);
 
   bshape(shThorns, PPR_THORNS);
   for(int t=0; t<=60; t++) 
-    hpcpush(spin(M_PI * t / 30.0) * xpush(crossf * ((t&1) ? 0.3 : 0.6)) * C0);
+    hpcpush(spin(M_PI * t / 30.0) * xpush(xcrossf * ((t&1) ? 0.3 : 0.6)) * C0);
     
   for(int i=0; i<16; i++) {
     bshape(shParticle[i], PPR_PARTICLE);
@@ -1980,14 +1990,17 @@ void buildpolys() {
   if(a46 && !nonbitrunc) spzoom6 *= .9;
   if(a47 && !nonbitrunc) spzoom6 *= .85;
   
-  shFullFloor.configure(hexvdist, rhexf);
+  if(syntetic)
+    shFullFloor.configure(synt::edgelength/2, synt::edgelength/2);
+  else
+    shFullFloor.configure(hexvdist, rhexf);
   shFloor.configure(floorrad0, floorrad1);
   shMFloor.configure(floorrad0*7/8, floorrad1*7/8);
   shMFloor2.configure(floorrad0*6/8, floorrad1*6/8);
   shMFloor3.configure(floorrad0*5/8, floorrad1*5/8);
   shMFloor4.configure(floorrad0*4/8, floorrad1*4/8);
   shBigTriangle.configure(triangleside, 0); shBigTriangle.prio = PPR_FLOOR_TOWER;
-  shBigHepta.configure(0, (nonbitrunc ? tessf : crossf) * .97);
+  shBigHepta.configure(0, (nonbitrunc ? tessf : xcrossf) * .97);
   shTriheptaFloor.configure(trihepta0, trihepta1);
   shDragonFloor.prio = PPR_FLOOR_DRAGON;
   shPowerFloor.prio = PPR_FLOOR_DRAGON;
@@ -2070,11 +2083,11 @@ void buildpolys() {
 
   // first layer monsters
   bshape(shTentacleX, PPR_TENTACLE0);
-  drawTentacle(shTentacleX, crossf * .25, crossf * .1, 10);
+  drawTentacle(shTentacleX, xcrossf * .25, xcrossf * .1, 10);
   bshape(shIBranch, PPR_TENTACLE1);
-  drawTentacle(shIBranch, crossf * .1, crossf * .2, 5);
+  drawTentacle(shIBranch, xcrossf * .1, xcrossf * .2, 5);
   bshape(shTentacle, PPR_TENTACLE1);
-  drawTentacle(shTentacle, crossf * .2, crossf * .1, 10);
+  drawTentacle(shTentacle, xcrossf * .2, xcrossf * .1, 10);
   copyshape(shJoint, shDisk, PPR_ONTENTACLE);
   bshape(shTentHead, PPR_ONTENTACLE, scalef, 79);
   bshape(shWormHead, PPR_ONTENTACLE, scalef, 80);

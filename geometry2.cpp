@@ -55,7 +55,7 @@ namespace gp { extern gp::local_info draw_li; }
 
 transmatrix calc_relative_matrix(cell *c2, cell *c1, const hyperpoint& point_hint) {
 
-  if(sphere) {
+  if(stdsphere) {
     if(!gmatrix0.count(c2) || !gmatrix0.count(c1)) {
       printf("building gmatrix0 (size=%d)\n", isize(gmatrix0));
       auto bak = gp::draw_li;
