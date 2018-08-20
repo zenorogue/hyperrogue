@@ -356,6 +356,11 @@ transmatrix cellrelmatrix(cell *c, int i) {
 double randd() { return (rand() + .5) / (RAND_MAX + 1.); }
 
 hyperpoint randomPointIn(int t) {
+  if(irr::on || gp::on || archimedean) {
+    // Let these geometries be less confusing.
+    // Also easier to implement ;)
+    return xspinpush0(2 * M_PI * randd(), asinh(randd() / 20));
+    }
   while(true) {
     hyperpoint h = xspinpush0(2*M_PI*(randd()-.5)/t, asinh(randd()));
     double d =
