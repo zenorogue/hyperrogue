@@ -519,7 +519,7 @@ hyperpoint farcorner(cell *c, int i, int which) {
     return spin(-t.first - M_PI / c->type) * xpush(ac.inradius[id/2] + ac.inradius[id1/2]) * xspinpush0(M_PI + M_PI/n1*(which?3:-3), ac.circumradius[id1/2]);
     }
   
-  return cellrelmatrix(c, i) * get_corner_position(c->move(i), (cellwalker(c, i) + wstep + (which?2:-1)).spin);
+  return cellrelmatrix(c, i) * get_corner_position(c->move(i), (cellwalker(c, i) + wstep + (which?-1:2)).spin);
   }
 
 hyperpoint get_warp_corner(cell *c, int cid) {
