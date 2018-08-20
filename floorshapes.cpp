@@ -500,7 +500,7 @@ void generate_floorshapes() {
   else {
     cell model;
     model.type = S6; generate_floorshapes_for(0, &model, 0, 0);
-    model.type = S7; generate_floorshapes_for(1, &model, 1, 0);
+    model.type = S7; generate_floorshapes_for(1, &model, binarytiling ? 0 : 1, 0);
     }
   }
 
