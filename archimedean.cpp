@@ -753,7 +753,7 @@ bool symbol_editing;
 void enable(archimedean_tiling& arct) {
   stop_game();
   if(geometry != gArchimedean) targetgeometry = gArchimedean, stop_game_and_switch_mode(rg::geometry);
-  nonbitrunc = true; need_reset_geometry = true;
+  nonbitrunc = true; need_reset_geometry = true; gp::on = false; irr::on = false;
   patterns::whichPattern = 0;
   if(texture::config.tstate == texture::tsActive && texture::cgroup == cpThree)
     patterns::whichPattern = patterns::PAT_COLORING;
