@@ -844,10 +844,20 @@ void show() {
       });
     
     if(archimedean) {
-      dialog::addItem(XLAT("colored tiling"), 't');
+      dialog::addItem(XLAT("color by symmetries"), 't');
       dialog::add_action([] () {
-        specialland = laCanvas;
+        firstland = specialland = laCanvas;
         patterns::whichCanvas = 'A';
+        restart_game();
+        });
+      }
+    else dialog::addBreak(100);
+
+    if(true) {
+      dialog::addItem(XLAT("color by sides"), 'u');
+      dialog::add_action([] () {
+        firstland = specialland = laCanvas;
+        patterns::whichCanvas = 'B';
         restart_game();
         });
       }

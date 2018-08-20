@@ -1241,8 +1241,26 @@ namespace patterns {
   char whichCanvas = 0;
 
   int generateCanvas(cell *c) {
-    if(whichCanvas == 'A' && archimedean)
-      return distcolors[arcm::current.tilegroup[arcm::id_of(c->master)] & 7];
+    if(whichCanvas == 'A' && archimedean) {
+      int gcolors[16] = {
+        0xF04040, 0x40F040, 0x4040F0,
+        0xD0D000, 0xD000D0, 0x00D0D0,
+        0xC0C0C0, 0x404040, 0x808080,
+        0xF08040, 0xF04080, 0x40F080,
+        0x4080F0, 0x8040F0, 0x80F040,
+        0xFFD500 };
+      return gcolors[arcm::current.tilegroup[arcm::id_of(c->master)] & 15];
+      }
+    if(whichCanvas == 'B') {
+      int gcolors[16] = {
+        // trying to get colors as in Wikipedia [ https://en.wikipedia.org/wiki/Euclidean_tilings_by_convex_regular_polygons#k-uniform_tilings ]
+        0, 0, 0xFFFFFF, 0xFFFF00, 
+        0xFF0000, 0xC000C0 /* unknown5 */, 0x00FF00, 0x00C0C0 /* unknown7 */, 0xFF8000, 
+        0xFFFF80, 0xC040C0, 0xFFD500, 0x000080,
+        0x404040, 0x606060, 0x808080
+        };
+      return gcolors[c->type & 15];
+      }
     if(whichCanvas == 'C' && hyperbolic) {
       using namespace fieldpattern;
       int z = currfp.getdist(fieldval(c), make_pair(0,false));
@@ -1420,6 +1438,8 @@ namespace patterns {
     
     if(archimedean)
       dialog::addSelItem(XLAT("Archimedean"), "Archimedean", 'A');
+
+    dialog::addSelItem(XLAT("sides"), "sides", 'B');
 
     dialog::addBreak(100);
     dialog::addBoolItem(XLATN(winf[waInvisibleFloor].name), canvas_invisible, 'i');

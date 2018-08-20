@@ -507,8 +507,8 @@ void showEuclideanMenu() {
       else if(lid >= 0 && lid < isize(landlist)) {
         eLand nland = landlist[lid];
         if(landvisited[nland]) {
-          firstland = specialland = nland;
           stop_game_and_switch_mode(tactic::on ? rg::tactic : rg::nothing);
+          firstland = specialland = nland;
           start_game();
           }
         }
