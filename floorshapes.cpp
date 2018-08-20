@@ -253,11 +253,11 @@ void bshape_regular(floorshape &fsh, int id, int sides, int shift, ld size) {
   
   bshape(fsh.b[id], fsh.prio);
   for(int t=0; t<=sides; t++)
-    hpcpush(xspinpush0(t*2 * M_PI / sides + shift, size));
+    hpcpush(xspinpush0(t*2 * M_PI / sides + shift * M_PI / S42, size));
 
   bshape(fsh.shadow[id], fsh.prio);
   for(int t=0; t<=sides; t++)
-    hpcpush(xspinpush0(t*2 * M_PI / sides + shift, size * SHADMUL));
+    hpcpush(xspinpush0(t*2 * M_PI / sides + shift * M_PI / S42, size * SHADMUL));
 
   for(int k=0; k<SIDEPARS; k++) {
     fsh.side[k].resize(2);

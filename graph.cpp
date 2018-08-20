@@ -2390,9 +2390,8 @@ int countMinesAround(cell *c) {
 transmatrix applyPatterndir(cell *c, const patterns::patterninfo& si) {
   if(gp::on || irr::on || binarytiling) return Id;
   transmatrix V = ddspin(c, si.dir, M_PI);
-  if(si.reflect) return V * Mirror;
-  if(archimedean) return V * iddspin(c, 0, M_PI);
-  return V;
+  if(si.reflect) V = V * Mirror;
+  return V * iddspin(c, 0, M_PI);
   }
 
 transmatrix applyDowndir(cell *c, cellfunction *cf) {
