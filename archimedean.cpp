@@ -107,7 +107,7 @@ void archimedean_tiling::prepare() {
     errors++;
     return;
     }
-  if(isize(faces) < 3) {
+  if(isize(faces) < 2) {
     errormsg = XLAT("not enough faces");
     errors++;
     return;
@@ -259,7 +259,15 @@ void archimedean_tiling::compute_geometry() {
   circumradius.resize(N);
   alphas.resize(N);
   ld elmin = 0, elmax = hyperbolic ? 10 : sphere ? M_PI : 1;
-  for(int p=0; p<100; p++) {
+
+  if(N == 2) {
+    /* standard methods fail, but the answer is easy */
+    edgelength = 2 * M_PI / faces[0];
+    for(int i=0; i<2; i++)
+      alphas[i] = M_PI/2,
+      circumradius[i] = inradius[i] = M_PI/2;
+    }
+  else for(int p=0; p<100; p++) {
     edgelength = (elmin + elmax) / 2;
     
     ld alpha_total = 0;
