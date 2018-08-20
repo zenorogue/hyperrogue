@@ -339,10 +339,11 @@ pair<int, bool> fieldval(cell *c) {
   }
 
 int fieldval_uniq(cell *c) {
-  if(archimedean && sphere)
-    return c->master->fiftyval;
   if(sphere) {
-    if(ctof(c) || gp::on || irr::on) return c->master->fieldval;
+    if(archimedean) return c->master->fiftyval;
+    else if(irr::on) return irr::cellindex[c];
+    else if(gp::on) return (get_code(gp::get_local_info(c)) << 8) | (c->master->fieldval / S7);
+    if(ctof(c)) return c->master->fieldval;
     else return createMov(c, 0)->master->fieldval + 256 * createMov(c,2)->master->fieldval + (1<<16) * createMov(c,4)->master->fieldval;
     }
   else if(torus) {
@@ -353,7 +354,7 @@ int fieldval_uniq(cell *c) {
     return gmod(p.first * torusconfig::dx + p.second * torusconfig::dy, torusconfig::qty);
     }
   else if(binarytiling || archimedean) return 0;
-  if(ctof(c) || gp::on || irr::on) return c->master->fieldval/S7;
+  else if(ctof(c) || gp::on || irr::on) return c->master->fieldval/S7;
   else {
     int z = 0;
     for(int u=0; u<S6; u+=2) 
@@ -1018,7 +1019,7 @@ namespace patterns {
       if(euclid)
         // use the torus ID
         si.id = fieldpattern::fieldval_uniq(c);
-      else if(nonbitrunc && !archimedean)
+      else if(nonbitrunc && !archimedean && !gp::on && !irr::on)
         // use the actual field codes
         si.id = fieldpattern::fieldval(c).first;
       else          

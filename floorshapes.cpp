@@ -538,11 +538,11 @@ namespace gp {
     int siid, sidir;
     if(geosupport_threecolor() == 2) {
       auto si = patterns::getpatterninfo(c, patterns::PAT_COLORING, 0);
-      siid = (si.id>>2) ? 1 : 0;
+      siid = si.id>>2;
       // if(siid == 2) si.dir++;
       // if(siid != pattern_threecolor(c)) printf("threecolor mismatch\n");
       // if(pattern_threecolor(createMov(c, fixdir(si.dir, c))) != (siid+1)%3) printf("threecolor mismatch direction\n");
-      sidir = (fixdir(si.dir, c)) & 1;
+      sidir = fixdir(si.dir, c);
       }
     else if(geosupport_football() == 2) {
       siid = !pseudohept(c);
