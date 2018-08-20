@@ -3093,6 +3093,8 @@ bool noAdjacentChasms(cell *c) {
 // does the current geometry allow nice duals
 bool has_nice_dual() {
   if(irr::on) return irr::bitruncations_performed > 0;
+  if(archimedean) return geosupport_football() >= 2;
+  if(binarytiling) return false;
   if(!nonbitrunc) return true;
   if((S7 & 1) == 0) return true;
   if(!gp::on) return false;
@@ -3126,7 +3128,7 @@ void set_maywarp_floor(cell *c) {
     auto si = patterns::getpatterninfo(c, 0, 0);
     if(si.id == 0 || si.id == 1)
       set_floor(shTriheptaFloor);
-    else if(si.id >= 14)
+    else if(si.id >= 14 || !stdhyperbolic)
       set_floor(shFloor);
     else
       set_floor(applyPatterndir(c, si), shTriheptaSpecial[si.id]);

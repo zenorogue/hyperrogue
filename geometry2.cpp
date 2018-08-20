@@ -412,37 +412,6 @@ hyperpoint get_corner_position(cell *c, int cid, ld cf) {
   return C0;
   }
 
-hyperpoint hypercorner(cell *c, gp::local_info& li, int i) {
-  cellwalker cw(c, i);
-  cw += wstep;
-  transmatrix cwm = calc_relative_matrix(cw.at, c, i);
-  if(elliptic && cwm[2][2] < 0) cwm = centralsym * cwm;
-  return cwm * gp::get_corner_position(cw.at, (cw+2).spin);
-  }
-
-hyperpoint midcorner(cell *c, int i, ld v) {
-  if(gp::on) {
-    auto li = gp::get_local_info(c);
-    auto hcor = hypercorner(c, li, i);
-    auto tcor = get_corner_position(li, i, 3);
-    return mid_at(tcor, hcor, v);
-    }
-  if(irr::on) {
-    auto& vs = irr::cells[irr::cellindex[c]];
-    int neid = vs.neid[i];
-    int spin = vs.spin[i];
-    auto &vs2 = irr::cells[neid];
-    int cor2 = isize(vs2.vertices);
-    hyperpoint nfar = vs.vertices[i];
-    transmatrix rel = vs.rpusher * vs.relmatrices[vs2.owner] * vs2.pusher;
-    hyperpoint nlfar = rel * vs2.vertices[(spin+2)%cor2];
-    return mid_at(nfar, nlfar, .49);
-    }
-  if(archimedean) return C0;
-  printf("midcorner not handled\n");
-  exit(1);
-  }
-
 hyperpoint nearcorner(cell *c, int i) {
   if(gp::on) {
     cellwalker cw(c, i);
@@ -490,6 +459,7 @@ hyperpoint farcorner(cell *c, int i, int which) {
     int hint = cw.spin;
     cw += wstep;
     transmatrix cwm = calc_relative_matrix(cw.at, c, hint);
+    if(elliptic && cwm[2][2] < 0) cwm = centralsym * cwm;
     // hyperpoint nfar = cwm*C0;
     auto li1 = gp::get_local_info(cw.at);
     if(which == 0)
@@ -522,9 +492,16 @@ hyperpoint farcorner(cell *c, int i, int which) {
   return cellrelmatrix(c, i) * get_corner_position(c->move(i), (cellwalker(c, i) + wstep + (which?-1:2)).spin);
   }
 
+hyperpoint midcorner(cell *c, int i, ld v) {
+  auto hcor = farcorner(c, i, 0);
+  auto tcor = get_corner_position(c, i, 3);
+  return mid_at(tcor, hcor, v);
+  }
+
 hyperpoint get_warp_corner(cell *c, int cid) {
+  // midcorner(c, cid, .5) but sometimes easier versions exist
   if(gp::on) return gp::get_corner_position(c, cid, 2);
-  if(irr::on) return midcorner(c, cid, .5);
+  if(irr::on || archimedean) return midcorner(c, cid, .5);
   return ddspin(c,cid,M_PI/S7) * xpush0(tessf/2);
   }
   
