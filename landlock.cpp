@@ -1060,6 +1060,9 @@ namespace lv {
   land_validity_t inaccurate = {1, q1, "Somewhat inaccurate."};  
   land_validity_t great_walls_missing = {1, q1 | one_and_half, "Mercury rivers not implemented (or could not work) in this geometry."};
   land_validity_t pattern_compatibility = {3, qm3, "Patterns compatible."}; 
+  land_validity_t pattern_defined = {3, qm3, "Pattern defined."}; 
+  land_validity_t pattern_compatibility_sole = {3, qm3 &~ lv::appears_in_full, "Patterns compatible."}; 
+  land_validity_t pattern_compatibility_notrec = {2, qm2 &~ lv::appears_in_full, "Patterns compatible."}; 
   land_validity_t specially_designed = {3, qm3, "This land is specially designed for this geometry."};   
   land_validity_t needs_threecolor = {0, q0, "Three-colorability required."};  
   land_validity_t land_not_implemented = {0, q0 &~ lv::appears_in_geom_exp, "Land not implemented."};  
@@ -1076,10 +1079,29 @@ namespace lv {
   land_validity_t simplified_walls = { 1, q1, "Only simplified walls implemented."};  
   }
 
+// old Daily Challenges should keep their validity forever
+// set this number for historical values of land_validity
+
+int old_daily_id = 1000000;
+
 // check if the given land should appear in lists
 land_validity_t& land_validity(eLand l) {
 
   using namespace lv;
+  
+  if(binarytiling) {
+    if(among(l, laMountain, laTemple)) return lv::pattern_compatibility_sole;
+    if(among(l, laDungeon, laIvoryTower, laOcean, laEndorian)) return lv::pattern_compatibility;
+    if(among(l, laCaribbean, laCamelot)) return lv::pattern_compatibility_notrec;
+    // Clearing -- does not generate
+    /* laCamelot, laCaribbean -> they are OK but not recommended */
+    }
+  
+  if(archimedean) {
+    if(among(l, laPower, laZebra, laWineyard) && arcm::current.have_ph) return lv::pattern_defined;
+    // horocycles not implemented
+    if(isCyclic(l)) return not_implemented;
+    }
 
   // Random Pattern allowed only in some specific lands
   if(randomPatternsMode && !isRandland(l))
@@ -1280,7 +1302,7 @@ land_validity_t& land_validity(eLand l) {
     }
   
   // Warped Coast does not work on non-bitrunc S3s (except standard heptagonal where we have to keep it)
-  if(l == laWarpCoast && (S3==3) && geosupport_football() != 2) {
+  if(l == laWarpCoast && (S3==3) && geosupport_football() != 2 && !(old_daily_id >= 30 && geosupport_chessboard())) {
     return ugly_version;
     }
 
@@ -1403,7 +1425,7 @@ land_validity_t& land_validity(eLand l) {
   if(l == laWildWest && !randomPatternsMode)
     return out_of_theme;
   
-  if(l == laIce && !gp::on && !irr::on && hyperbolic_37 && !quotient)
+  if(l == laIce && !gp::on && !irr::on && hyperbolic_37 && !quotient && !archimedean && !binarytiling)
     return full_game;
 
   return ok;
