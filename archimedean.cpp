@@ -836,6 +836,15 @@ void show() {
         spos = 0;
       else spos += 10;
       });
+    
+    if(archimedean) {
+      dialog::addItem(XLAT("colored tiling"), 't');
+      dialog::add_action([] () {
+        specialland = laCanvas;
+        patterns::whichCanvas = 'A';
+        restart_game();
+        });
+      }
     }
 
   dialog::addHelp();
