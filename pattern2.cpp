@@ -1063,6 +1063,10 @@ namespace patterns {
 
   }
 
+bool geosupport_chessboard() {
+  return archimedean ? arcm::current.support_chessboard() : (nonbitrunc && S3 == 4);
+  }
+
 int geosupport_threecolor() {
   if(irr::on) return 0;
   if(!nonbitrunc && S3 == 3) {
@@ -1222,12 +1226,8 @@ bool kraken_pseudohept(cell *c) {
   }
 
 bool warptype(cell *c) {
-  if(a4 && nonbitrunc) {
-    if(euclid) 
-      return among(eupattern4(c), 1, 2);
-    else 
-      return c->master->distance & 1;
-    }
+  if(geosupport_chessboard()) 
+    return chessvalue(c);
   else if(gp::on || irr::on)
     return pseudohept(c);
   else
@@ -1366,7 +1366,7 @@ namespace patterns {
       return (0x202020 + col[0] + (col[1] << 8) + (col[2] << 16)) >> (err?2:0);
       }
     if(whichCanvas == 'c') {
-      return (c->master->distance&1) ? 0xC0C0C0 : 0x202020;
+      return chessvalue(c) ? 0xC0C0C0 : 0x202020;
       }
     if(whichCanvas == 'F') {
       return pseudohept(c) ? 0x202020 : 0xC0C0C0;
@@ -1393,7 +1393,7 @@ namespace patterns {
       }
 
     dialog::addItem(XLAT("football"), 'F');
-    if(S3 == 4 && nonbitrunc)
+    if(geosupport_chessboard())
       dialog::addItem(XLAT("chessboard"), 'c');
 
     dialog::addItem(XLAT("nice coloring"), 'T');
@@ -1490,7 +1490,7 @@ namespace patterns {
     if(stdhyperbolic || euclid)
       dialog::addBoolItem(XLAT("Palace Pattern"), (whichPattern == PAT_PALACE), PAT_PALACE);
     
-    if((nonbitrunc && S3 == 4) || (archimedean && arcm::current.support_chessboard()))
+    if(geosupport_chessboard())
       dialog::addBoolItem(XLAT("chessboard"), (whichPattern == PAT_CHESS), PAT_CHESS);
 
     if(a38 || a46 || euclid || S3 == 4 || S7 == 4)
@@ -1499,9 +1499,6 @@ namespace patterns {
     if(sphere)
       dialog::addBoolItem(XLAT("siblings"), (whichPattern == PAT_SIBLING), PAT_SIBLING);
     
-    if(archimedean)
-      dialog::addBoolItem(XLAT("Archimedean"), (whichPattern == PAT_SIBLING), PAT_SIBLING);
-
     if(euclid)
       dialog::addBoolItem(XLAT("torus pattern"), (whichPattern == PAT_FIELD), PAT_FIELD);
     else if(sphere)

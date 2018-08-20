@@ -18,7 +18,7 @@ struct archimedean_tiling {
   vector<bool> invert;
   vector<int> nflags;
 
-  bool have_ph, have_line, have_symmetry, have_chessboard;
+  bool have_ph, have_line, have_symmetry;
 
   int repetition = 1;
   int N;
@@ -236,23 +236,6 @@ void archimedean_tiling::prepare() {
       }
     }
   
-  if(have_symmetry) {
-    have_chessboard = true;
-    for(int o=0; o<2; o++)
-    for(int i=o; i<2*N; i+=2) 
-    for(int j=i+2; j<2*N; j+=4)
-      if(tilegroup[i] == tilegroup[j])
-        have_chessboard = false;
-    for(int i=0; i<N; i+=2) 
-      for(int j=0; j<2*N; j++)
-        if(tilegroup[j] == tilegroup[i])
-          flags[j] |= sfCHESS;
-    }
-  else {
-    have_chessboard = N % 2 == 0;
-    for(int i=0; i<M; i+=4) flags[i] |= sfCHESS;
-    }
-
   SDEBUG( for(int i=0; i<M; i+=(have_symmetry?1:2)) {
     printf("tiling group of %2d: [%2d]%2d+Z%2d\n", i, tilegroup[i], groupoffset[i], periods[i]);
     printf("\n");
@@ -411,6 +394,8 @@ heptagon *build_child(heptagon *parent, int d, int id, int pindex) {
   int nei = neighbors_of(h);
   h->c7 = newCell(nei, h);
   h->distance = parent->distance + 1;
+  if(id < 2*current.N)
+    h->fieldval = parent->move(0)->fieldval + (d/2);
   return h;
   }
 
@@ -663,7 +648,7 @@ int archimedean_tiling::support_graveyard() {
   }
 
 bool archimedean_tiling::support_chessboard() {
-  return 0;
+  return N % 2 == 0;
   }
 
 bool pseudohept(int id) {
@@ -671,7 +656,7 @@ bool pseudohept(int id) {
   }
 
 bool chessvalue(cell *c) {
-  return current.flags[id_of(c->master)] & arcm::sfCHESS;
+  return c->master->fieldval & 1;
   }
 
 bool linespattern(cell *c) {
