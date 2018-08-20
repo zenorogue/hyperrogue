@@ -3125,10 +3125,14 @@ void floorShadow(cell *c, const transmatrix& V, int col) {
 void set_maywarp_floor(cell *c) {
   bool warp = isWarped(c);
   if(warp && !shmup::on && geosupport_football() == 2) {
+    if(!stdhyperbolic) {
+      set_floor(shTriheptaFloor);
+      return;
+      }
     auto si = patterns::getpatterninfo(c, 0, 0);
     if(si.id == 0 || si.id == 1)
       set_floor(shTriheptaFloor);
-    else if(si.id >= 14 || !stdhyperbolic)
+    else if(si.id >= 14)
       set_floor(shFloor);
     else
       set_floor(applyPatterndir(c, si), shTriheptaSpecial[si.id]);
