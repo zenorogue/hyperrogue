@@ -1599,30 +1599,39 @@ namespace patterns {
         #if CAP_EDIT
         mapeditor::modelcell.clear();
         #endif
+        texture::config.remap();
         }
       
-      else if(uni >= '0' && uni <= '5') 
+      else if(uni >= '0' && uni <= '5') {
         subpattern_flags ^= (1 << (uni - '0'));
+        texture::config.remap();
+        }
 
-      else if(uni == '=') 
+      else if(uni == '=') {
         subpattern_flags ^= SPF_EXTRASYM;
+        texture::config.remap();
+        }
 
       else if(uni == '\'') {
         subpattern_flags ^= SPF_ALTERNATE;
         subpattern_flags &= ~SPF_FOOTBALL;
+        texture::config.remap();
         }
 
       else if(uni == '*') {
         subpattern_flags ^= SPF_FOOTBALL;
         subpattern_flags &= ~SPF_ALTERNATE;
+        texture::config.remap();
         }
 
       else if(uni == '!') {
         subpattern_flags ^= SPF_FULLSYM;
+        texture::config.remap();
         }
 
       else if(uni == '@') {
         subpattern_flags ^= SPF_DOCKS;
+        texture::config.remap();
         }
 
       else if(uni == '6' || uni == '7' || uni == '8' || uni == '9') {
@@ -1803,23 +1812,18 @@ namespace patterns {
       else if(uni >= '0' && uni < '0' + isize(cpatterns))
         cgroup = cpatterntype(uni - '0');
       else if(cgroup != cpUnknown && uni >= 'a' && uni < 'a' + isize(cpatterns[cgroup].geometries)) {
-#if CAP_TEXTURE      
-        auto old_tstate = texture::config.tstate;
-        auto old_tstate_max = texture::config.tstate_max;
-#endif
         auto &g = cpatterns[cgroup].geometries[uni - 'a'];
         if(g.geo != geometry) { targetgeometry = g.geo; stop_game_and_switch_mode(rg::geometry); }
         if(gp::on) stop_game_and_switch_mode(rg::gp);
         if(g.nonbitru != nonbitrunc) stop_game_and_switch_mode(rg::bitrunc);;
-        start_game();
         whichPattern = g.whichPattern;
         subpattern_flags = g.subpattern_flags;
-#if CAP_TEXTURE
-        texture::config.remap(old_tstate, old_tstate_max);
-#endif
+        bool not_restarted = game_active;
+        start_game();
+        if(not_restarted) texture::config.remap();
         }
       else if(uni == 'G' && (have_goldberg || have_variations))
-        gp::configure(true);
+        gp::configure();
       else if(doexiton(sym, uni))
         popScreen();
       };

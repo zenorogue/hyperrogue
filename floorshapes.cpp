@@ -631,7 +631,7 @@ void draw_qfi(cell *c, const transmatrix& V, int col, int prio = -1, vector<hpcs
   else if(qfi.tinf) {
     queuetable(V * qfi.spin, qfi.tinf->vertices, isize(qfi.tinf->vertices), texture::config.mesh_color, texture::config.recolor(col), prio == -1 ? PPR_FLOOR : prio);
     lastptd().u.poly.tinf = qfi.tinf;
-    if(gp::on || irr::on) 
+    if(true) 
       lastptd().u.poly.flags = POLY_INVERSE;
     }
 #endif

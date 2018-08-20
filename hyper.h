@@ -2941,7 +2941,9 @@ namespace texture {
     void mapTextureTriangle(textureinfo &mi, const array<hyperpoint, 3>& v, const array<hyperpoint, 3>& tv) { mapTextureTriangle(mi, v, tv, gsplits); }
     void mapTexture2(textureinfo& mi);
     void finish_mapping();
-    void remap(eTextureState old_tstate, eTextureState old_tstate_max);
+    void true_remap();
+    void remap();
+    bool correctly_mapped;
     hyperpoint texture_coordinates(hyperpoint);
   
     void drawRawTexture();
@@ -3262,7 +3264,7 @@ namespace gp {
   extern string operation_name();
   extern int pseudohept_val(cell *);
   extern int last_dir(cell *c);
-  extern void configure(bool texture_remap);
+  extern void configure();
   extern ld alpha;
   extern transmatrix Tf[8][32][32][6];
 
@@ -3844,6 +3846,8 @@ int decodeId(heptagon* h);
 heptagon* encodeId(int id);
 
 void virtualRebaseSimple(heptagon*& base, transmatrix& at);
+
+extern bool game_active;
 
 }
 

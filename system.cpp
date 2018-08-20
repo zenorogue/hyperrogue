@@ -1169,12 +1169,6 @@ void switch_game_mode(char switchWhat) {
       nonbitrunc = !nonbitrunc; irr::on = false;
       gp::on = (switchWhat == rg::gp && !gp::on);
       need_reset_geometry = true;
-      #if CAP_TEXTURE
-      if(texture::config.tstate == texture::tsActive) 
-        texture::config.tstate = texture::tsAdjusting;
-      if(texture::config.tstate_max == texture::tsActive)
-        texture::config.tstate = texture::tsAdjusting;
-      #endif
       break;
 
     case rg::geometry:
@@ -1194,12 +1188,6 @@ void switch_game_mode(char switchWhat) {
       if(geometry == gBinaryTiling) nonbitrunc = true, gp::on = irr::on = false;
   
       need_reset_geometry = true; 
-      #if CAP_TEXTURE
-      if(texture::config.tstate == texture::tsActive) 
-        texture::config.tstate = texture::tsOff;
-      if(texture::config.tstate_max == texture::tsActive)
-        texture::config.tstate = texture::tsAdjusting;
-      #endif
       break;
     
     case rg::yendor:
@@ -1284,6 +1272,9 @@ void start_game() {
   restartGraph();
   resetmusic();
   resetmusic();
+#if CAP_TEXTURE
+  texture::config.remap();
+#endif
   }
 
 void restart_game(char switchWhat) {

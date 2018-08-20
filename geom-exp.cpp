@@ -403,9 +403,7 @@ void showEuclideanMenu() {
         else if(binarytiling) {
           dialog::editNumber(vid.binary_width, 0, 2, 0.1, 1, XLAT("binary tiling width"), "");
           dialog::reaction = [] () {
-            resetGeometry();
-            if(texture::config.tstate == texture::tsActive)
-              texture::config.remap(texture::tsActive, texture::tsActive);
+            resetGeometry(); texture::config.remap();
             };
           }
         else // if(S3 == 3) 

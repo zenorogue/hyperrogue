@@ -647,11 +647,7 @@ namespace hr { namespace gp {
       }
     }
   
-  void whirl_set(loc xy, bool texture_remap) {
-#if CAP_TEXTURE
-    auto old_tstate = texture::config.tstate;
-    auto old_tstate_max = texture::config.tstate_max;
-#endif
+  void whirl_set(loc xy) {
     xy = internal_representation(xy);
     if(xy.second && xy.second != xy.first && nonorientable) {
       addMessage(XLAT("This does not work in non-orientable geometries"));
@@ -675,10 +671,6 @@ namespace hr { namespace gp {
       stop_game_and_switch_mode(rg::gp);
       }
     start_game();
-#if CAP_TEXTURE
-    if(texture_remap)
-      texture::config.remap(old_tstate, old_tstate_max);
-#endif
     screens = g;
     }
 
@@ -692,30 +684,25 @@ namespace hr { namespace gp {
       );
     }  
 
-  void show(bool texture_remap) {
+  void show() {
     cmode = sm::SIDE;
     gamescreen(0);  
     dialog::init(XLAT("variations"));
     
-    bool show_nonthree = !(texture_remap && (S7&1));
-    bool show_bitrunc  = !(texture_remap && !(S7&1));
-    bool show_irregular = true;
-    if(texture_remap) {
-      if(patterns::cgroup == cpSingle)
-        show_nonthree = true, show_bitrunc = false, show_irregular = true;
+    int min_quality = 0;
+    if((texture::config.tstate == texture::tsActive) && (S7 % 2 == 1)) {
+      if(texture::cgroup == cpFootball) min_quality = 1;
       }
     
-    if(show_nonthree) {
+    if(min_quality == 0) {
       dialog::addBoolItem(XLAT("OFF"), param == loc(1,0) && !irr::on, 'a');
       dialog::lastItem().value = "GP(1,0)";
       }
 
-    if(show_bitrunc) {
-      dialog::addBoolItem(XLAT("bitruncated"), param == loc(1,1) && !nonbitrunc, 'b');  
-      dialog::lastItem().value = S3 == 3 ? "GP(1,1)" : XLAT(nonbitrunc ? "OFF" : "ON");
-      }
+    dialog::addBoolItem(XLAT("bitruncated"), param == loc(1,1) && !nonbitrunc, 'b');  
+    dialog::lastItem().value = S3 == 3 ? "GP(1,1)" : XLAT(nonbitrunc ? "OFF" : "ON");
 
-    if(show_nonthree) {
+    if(min_quality == 0) {
       dialog::addBoolItem(XLAT(S3 == 3 ? "chamfered" : "expanded"), param == loc(2,0), 'c');
       dialog::lastItem().value = "GP(2,0)";
       }
@@ -736,17 +723,15 @@ namespace hr { namespace gp {
     if(config.second && config.second != config.first && nonorientable) {
       dialog::addInfo(XLAT("This does not work in non-orientable geometries"));
       }
-    else if((config.first-config.second)%3 && !show_nonthree)
+    else if((config.first-config.second)%3 && min_quality)
       dialog::addInfo(XLAT("This pattern needs x-y divisible by 3"));
-    else if(config == loc(1,1) && !show_bitrunc)
-      dialog::addInfo(XLAT("Select bitruncated from the previous menu"));
     else    
       dialog::addBoolItem(XLAT("select"), param == internal_representation(config) && !irr::on, 'f');
       
-    if(show_irregular && irr::supports(geometry)) {
+    if(irr::supports(geometry)) {
       dialog::addBoolItem(XLAT("irregular"), irr::on, 'i');
       dialog::add_action([=] () { 
-        if(texture_remap && !show_nonthree && !irr::bitruncations_requested) irr::bitruncations_requested++;
+        if(min_quality && !irr::bitruncations_requested) irr::bitruncations_requested++;
         if(!irr::on) irr::visual_creator(); 
         });
       }
@@ -756,24 +741,24 @@ namespace hr { namespace gp {
     dialog::addBack();
     dialog::display();
 
-    keyhandler = [show_nonthree, show_bitrunc, texture_remap] (int sym, int uni) {
+    keyhandler = [] (int sym, int uni) {
       dialog::handleNavigation(sym, uni);
-      if(uni == 'a' && show_nonthree) 
-        whirl_set(loc(1, 0), texture_remap);
-      else if(uni == 'b' && show_bitrunc) {
+      if(uni == 'a') 
+        whirl_set(loc(1, 0));
+      else if(uni == 'b') {
         if(S3 == 4) {
           if(nonbitrunc || gp::on)
             restart_game(rg::bitrunc);
           }
         else 
-          whirl_set(loc(1, 1), texture_remap);
+          whirl_set(loc(1, 1));
         }
-      else if(uni == 'c' && show_nonthree)
-        whirl_set(loc(2, 0), texture_remap);
+      else if(uni == 'c')
+        whirl_set(loc(2, 0));
       else if(uni == 'd')
-        whirl_set(S3 == 3 ? loc(3, 0) : loc(1,1), texture_remap);
-      else if(uni == 'f' && (config == loc(1,1) ? show_bitrunc : (show_nonthree || (config.first-config.second)%3 == 0)))
-        whirl_set(config, texture_remap);
+        whirl_set(S3 == 3 ? loc(3, 0) : loc(1,1));
+      else if(uni == 'f')
+        whirl_set(config);
       else if(uni == 'x')
         dialog::editNumber(config.first, 0, 8, 1, 1, "x", helptext());
       else if(uni == 'y')
@@ -793,11 +778,11 @@ namespace hr { namespace gp {
     else return loc(1,1);
     }
   
-  void configure(bool texture_remap = false) {
+  void configure() {
     auto l = univ_param();
     param = l;
     config = human_representation(l);
-    pushScreen([texture_remap] () { gp::show(texture_remap); });
+    pushScreen(gp::show);
     }
   
   void be_in_triangle(local_info& li) {

@@ -328,7 +328,7 @@ bool using_aura() {
   }
 
 bool texture_config::apply(cell *c, const transmatrix &V, int col) {
-  if(config.tstate == tsOff) return false;
+  if(config.tstate == tsOff || !correctly_mapped) return false;
 
   using namespace patterns;
   auto si = getpatterninfo0(c);
@@ -453,10 +453,15 @@ void texture_config::perform_mapping() {
     
   }
 
+set<int> missing_cells_known;
+
 void texture_config::finish_mapping() {
-  if(config.tstate == tsActive)
+  if(config.tstate == tsActive) {
     for(auto& mi: texture_map)
       mapTexture2(mi.second);
+    correctly_mapped = true;
+    missing_cells_known.clear();
+    }
 
   patterns::computeCgroup();
   texture::cgroup = patterns::cgroup;
@@ -1412,55 +1417,64 @@ void drawLine(hyperpoint h1, hyperpoint h2, int col, int steps) {
     drawPixel(h2, col);
   }
 
-void texture_config::remap(eTextureState old_tstate, eTextureState old_tstate_max) {
+void texture_config::true_remap() {
   drawthemap();
   clear_texture_map();
-  if(old_tstate == tsActive && patterns::compatible(texture::cgroup, patterns::cgroup)) {
-  
-    config.tstate = old_tstate;
-    config.tstate_max = old_tstate_max;
-    for(cell *c: dcal) {
-      auto si = patterns::getpatterninfo0(c);
-      int oldid = si.id;
-      
-      si.id += goldbergcode(c, si);
+  missing_cells_known.clear();
+  for(cell *c: dcal) {
+    auto si = patterns::getpatterninfo0(c);
+    int oldid = si.id;
+    
+    si.id += goldbergcode(c, si);
 
-      if(texture_map.count(si.id)) continue;
-      
-      int pshift = 0;
-      if(texture::cgroup == cpSingle) oldid = 0;
-      if(texture::cgroup == cpFootball && patterns::cgroup == cpThree) {
-        if(si.id == 4) pshift = 1;
-        oldid = !si.id;
+    if(texture_map.count(si.id)) continue;
+    
+    int pshift = 0;
+    if(texture::cgroup == cpSingle) oldid = 0;
+    if(texture::cgroup == cpFootball && patterns::cgroup == cpThree) {
+      if(si.id == 4) pshift = 1;
+      oldid = !si.id;
+      }
+
+    try {
+
+      auto& mi = texture_map_orig.at(oldid);  
+      int ncurr = isize(mi.tvertices);  
+      int ntarget = ncurr * celltriangles(c) / mi.current_type;
+      vector<glvertex> new_tvertices = mi.tvertices;
+      new_tvertices.resize(ntarget);
+      for(int i=ncurr; i<ntarget; i++) {
+        new_tvertices[i] = new_tvertices[i - ncurr];
         }
-
-      try {
-
-        auto& mi = texture_map_orig.at(oldid);  
-        int ncurr = isize(mi.tvertices);  
-        int ntarget = ncurr * celltriangles(c) / mi.current_type;
-        vector<glvertex> new_tvertices = mi.tvertices;
-        new_tvertices.resize(ntarget);
-        for(int i=ncurr; i<ntarget; i++) {
-          new_tvertices[i] = new_tvertices[i - ncurr];
-          }
-        
-        auto& mi2 = texture_map[si.id];
-        mi2 = mi;
-        mapTexture(c, mi2, si, ggmatrix(c), pshift);
-        mapTexture2(mi2);
-        mi2.tvertices = move(new_tvertices);
-        // printf("%08x remapping %d vertices to %d vertices\n", si.id, isize(mi.tvertices), isize(mi2.tvertices));
-        }
-      catch(out_of_range&) { 
+      
+      auto& mi2 = texture_map[si.id];
+      mi2 = mi;
+      if(gp::on || irr::on) pshift += si.dir;
+      mapTexture(c, mi2, si, ggmatrix(c), pshift);
+      mapTexture2(mi2);
+      mi2.tvertices = move(new_tvertices);
+      // printf("%08x remapping %d vertices to %d vertices\n", si.id, isize(mi.tvertices), isize(mi2.tvertices));
+      }
+    catch(out_of_range&) { 
+      if(missing_cells_known.count(si.id) == 0) {
+        missing_cells_known.insert(si.id);
         printf("Unexpected missing cell #%d/%d\n", si.id, oldid);
-        addMessage(XLAT("Unexpected missing cell #%d/%d", its(si.id), its(oldid)));
-        config.tstate_max = config.tstate = tsAdjusting;
-        return;
+        addMessage(XLAT("Unexpected missing cell #%1/%1", its(si.id), its(oldid)));
         }
-      }     
+      // config.tstate_max = config.tstate = tsAdjusting;
+      return;
+      }
     }
-  else if(old_tstate >= tsAdjusting || old_tstate_max >= tsAdjusting) {
+  }
+
+void texture_config::remap() {
+  if(tstate == tsActive) {
+    patterns::computeCgroup();
+    correctly_mapped = patterns::compatible(texture::cgroup, patterns::cgroup);
+    if(correctly_mapped) true_remap();
+    else addMessage(XLAT("Pattern incompatible."));
+    }
+  else if(tstate == tsAdjusting) {
     printf("perform_mapping %d/%d\n", config.tstate, config.tstate_max);
     calcparam();
     drawthemap();
@@ -1470,8 +1484,6 @@ void texture_config::remap(eTextureState old_tstate, eTextureState old_tstate_ma
     }
   }
 
-eTextureState old_tstate_cl, old_tstate_max_cl;  
-  
 int textureArgs() {
   using namespace arg;
            
@@ -1495,12 +1507,7 @@ int textureArgs() {
   else if(argis("-txcl")) {
     PHASE(3); drawscreen();
     config.load();
-    old_tstate_cl = texture::config.tstate;
-    old_tstate_max_cl = texture::config.tstate_max;
-    }
-
-  else if(argis("-txremap")) {
-    texture::config.remap(old_tstate_cl, old_tstate_max_cl);
+    need_reset_geometry = true;
     }
 
   else return 1;
