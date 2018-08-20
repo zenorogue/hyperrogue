@@ -106,6 +106,8 @@ void addMessage(string s, char spamtype = 0);
 #define masterless among(geometry, gEuclid, gEuclidSquare, gTorus)
 #define sphere_narcm (sphere && !archimedean)
 
+#define AS3 (archimedean?arcm::current.N : S3)
+
 #define a4 (S3 == 4)
 #define a45 (S3 == 4 && S7 == 5)
 #define a46 (S3 == 4 && S7 == 6)

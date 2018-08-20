@@ -62,7 +62,7 @@ bool checkBarriersBack(cellwalker bb, int q, bool cross) {
 
 // warp coasts use a different algorithm when has_nice_dual() is on
 bool warped_version(eLand l1, eLand l2) {
-  return (has_nice_dual() && (l1 == laWarpCoast || l1 == laWarpSea || l2 == laWarpSea || l2 == laWarpCoast)) || ((S3==4) && !nonbitrunc);
+  return (has_nice_dual() && (l1 == laWarpCoast || l1 == laWarpSea || l2 == laWarpSea || l2 == laWarpCoast)) || ((AS3==4) && !nonbitrunc);
   }
 
 bool checkBarriersNowall(cellwalker bb, int q, int dir, eLand l1=laNone, eLand l2=laNone) {
@@ -94,7 +94,7 @@ bool checkBarriersNowall(cellwalker bb, int q, int dir, eLand l1=laNone, eLand l
   if(warped_version(l1, l2)) {
     bb = bb + wstep + (2*dir) + wstep + dir;
     }
-  else if(S3==4) {
+  else if(AS3==4) {
     bb = bb + dir + wstep + dir;
     dir = -dir;
     swap(l1, l2);
@@ -257,7 +257,7 @@ void extendNowall(cell *c) {
     cw += wstep;
     setland(cw.at, c->barright);
     }
-  else if(S3 == 4) {
+  else if(AS3 == 4) {
     auto cw2 = cw + wstep;
     setland(cw2.at, c->barright);
     cw2.at->barleft = NOWALLSEP_USED;
@@ -270,7 +270,7 @@ void extendNowall(cell *c) {
     if(warpv) {
       cw0 = cw + (2*i) + wstep;
       }
-    else if(S3==4) {
+    else if(AS3==4) {
       cw0 = cw + i + wstep + i; 
       }
     else {
@@ -279,7 +279,7 @@ void extendNowall(cell *c) {
       }
     if(cw0.at->barleft != NOWALLSEP_USED) {
       cw0.at->barleft = NOWALLSEP;
-      if(S3 == 4 && nonbitrunc) {
+      if(AS3 == 4 && nonbitrunc) {
         cw0.at->barright = c->barright;
         cw0.at->bardir = cw0.spin;
         setland(cw0.at, c->land);
@@ -746,7 +746,7 @@ bool buildBarrierNowall(cell *c, eLand l2, int forced_dir) {
   for(int j=0; j<c->type; j++) swap(ds[j], ds[hrand(j+1)]);
 
   for(int i=0; i<c->type; i++) {
-    int d = forced_dir != NODIR ? forced_dir : (S3>3 && nonbitrunc && !gp::on) ? (2+(i&1)) : ds[i];
+    int d = forced_dir != NODIR ? forced_dir : (AS3>3 && nonbitrunc && !gp::on) ? (2+(i&1)) : ds[i];
 /*    if(warpv && gp::on) {
       d = hrand(c->type); */
     if(warpv && c->move(d) && c->move(d)->mpdist < c->mpdist) continue;
