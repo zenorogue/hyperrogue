@@ -3122,7 +3122,7 @@ void floorShadow(cell *c, const transmatrix& V, int col) {
 
 void set_maywarp_floor(cell *c) {
   bool warp = isWarped(c);
-  if(warp && !shmup::on && geosupport_graveyard() == 2) {
+  if(warp && !shmup::on && geosupport_football() == 2) {
     auto si = patterns::getpatterninfo(c, 0, 0);
     if(si.id == 0 || si.id == 1)
       set_floor(shTriheptaFloor);
@@ -4187,8 +4187,8 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       
         auto si = patterns::getpatterninfo0(c);
         
-        for(int i=0; i<c->type; i += si.symmetries) {
-          queuepoly(V * applyPatterndir(c,si), shAsymmetric, darkena(0x000000, 0, 0xC0));
+        for(int i=(si.dir + MODFIXER) % si.symmetries; i<c->type; i += si.symmetries) {
+          queuepoly(V * ddspin(c, i) * (si.reflect?Mirror:Id), shAsymmetric, darkena(0x000000, 0, 0xC0));
           si.dir += si.symmetries;
           }
         
@@ -4355,7 +4355,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         
         case waClosePlate: case waOpenPlate: {
           transmatrix V2 = V;
-          if(wmescher && geosupport_graveyard() == 2 && pseudohept(c)) V2 = V * spin(M_PI / c->type);
+          if(wmescher && geosupport_football() == 2 && pseudohept(c)) V2 = V * spin(M_PI / c->type);
           draw_floorshape(c, V2, shMFloor, darkena(winf[c->wall].color, 0, 0xFF));
           draw_floorshape(c, V2, shMFloor2, (!wmblack) ? darkena(fcol, 1, 0xFF) : darkena(0,1,0xFF));
           break;

@@ -54,7 +54,7 @@ struct archimedean_tiling {
   pair<int, int>& get_adj(const pair<int, int>& p, int delta = 0);
 
   int support_threecolor();
-  int support_graveyard();
+  int support_football();
   bool support_chessboard();
   };
 
@@ -396,6 +396,7 @@ heptagon *build_child(heptagon *parent, int d, int id, int pindex) {
   h->distance = parent->distance + 1;
   if(id < 2*current.N)
     h->fieldval = parent->move(0)->fieldval + (d/2);
+  h->fiftyval = isize(archimedean_gmatrix);
   return h;
   }
 
@@ -630,20 +631,19 @@ auto hook =
 #endif
 
 int archimedean_tiling::support_threecolor() {
-  if(nonbitrunc) 
-    return 
-      (isize(faces) == 3 && faces[0] % 2 == 0 && faces[1] % 2 == 0 && faces[2] % 2 == 0 && tilegroup[N*2] == 3) ? 2 :
-      tilegroup[N*2] > 1 ? 1 :
-      0;
-  for(int i: faces) if(faces[i] % 2) return tilegroup[N*2] > 1 ? 1 : 0;
+  // if(nonbitrunc) 
+  return (isize(faces) == 3 && invert[0] && invert[1] && invert[2] && faces[0] % 2 == 0 && faces[1] % 2 == 0 && faces[2] % 2 == 0) ? 2 :
+    tilegroup[N*2] > 1 ? 1 :
+    0;
+  // for(int i: faces) if(faces[i] % 2) return tilegroup[N*2] > 1 ? 1 : 0;
   return 2;
   }
 
-int archimedean_tiling::support_graveyard() {
-  if(!nonbitrunc) return 2;
+int archimedean_tiling::support_football() {
+  // if(!nonbitrunc) return 2;
   return 
-    isize(faces) == 3 && faces[0] % 2 == 0 ? 2 :
     have_ph ? 1 :
+    (isize(faces) == 3 && invert[0] && invert[1] && invert[2] && faces[1] % 2 == 0 && faces[2] % 2 == 0) ? 2 :
     0;
   }
 
@@ -709,10 +709,10 @@ vector<string> samples = {
   "(3,3,3,3,5)(1,2)(0,4)(3)",
   
   /* prisms */
-  "(4,4,3)",
-  "(4,4,5)",
-  "(4,4,6)",
-  "(4,4,7)",
+  "(3,4,4)",
+  "(5,4,4)",
+  "(6,4,4)",
+  "(7,4,4)",
   
   /* sample antiprisms */
   "(3,3,3,4)(1)(2)",
@@ -754,6 +754,13 @@ void enable(archimedean_tiling& arct) {
   stop_game();
   if(geometry != gArchimedean) targetgeometry = gArchimedean, stop_game_and_switch_mode(rg::geometry);
   nonbitrunc = true; need_reset_geometry = true;
+  patterns::whichPattern = 0;
+  if(texture::config.tstate == texture::tsActive && texture::cgroup == cpThree)
+    patterns::whichPattern = patterns::PAT_COLORING;
+  if(texture::config.tstate == texture::tsActive && texture::cgroup == cpFootball)
+    patterns::whichPattern = 0, patterns::subpattern_flags = patterns::SPF_FOOTBALL;
+  if(texture::config.tstate == texture::tsActive && texture::cgroup == cpChess)
+    patterns::whichPattern = patterns::PAT_CHESS;
   current = arct;
   start_game();
   }
@@ -792,8 +799,14 @@ void show() {
     dialog::addBreak(100);
     if(edited.errors)
       dialog::addInfo(edited.errormsg, 0xFF0000);
+    else if(texture::config.tstate == texture::tsActive &&
+      ((texture::cgroup == cpThree && edited.support_threecolor() < 2) ||
+       (texture::cgroup == cpFootball && edited.support_football() < 2) ||
+       (texture::cgroup == cpChess && !edited.support_chessboard())))
+      dialog::addInfo(XLAT("Pattern incompatible."), 0xC0C000);
     else
       dialog::addInfo(XLAT("OK"), 0x00FF00);
+    
     dialog::addBreak(100);
     dialog::addSelItem(XLAT("full angle"), fts(edited.euclidean_angle_sum * 180) + "°", 0);
     dialog::addBreak(100);
@@ -808,18 +821,26 @@ void show() {
       edited.parse();
       });
     dialog::addBreak(100);
-    for(int i=0; i<10; i++) {
-      int j = i + spos;
-      if(j >= isize(tilings)) continue;
-      auto &ps = tilings[j];
-      dialog::addSelItem(ps.symbol, fts(ps.euclidean_angle_sum * 180) + "°", 'a' + i);
+    int nextpos = spos;
+    int shown = 0;
+    while(nextpos < isize(tilings) && shown < 10) {
+      auto &ps = tilings[nextpos++];
+      if(texture::config.tstate == texture::tsActive && texture::cgroup == cpThree && ps.support_threecolor() < 2)
+        continue;
+      if(texture::config.tstate == texture::tsActive && texture::cgroup == cpFootball && ps.support_football() < 2)
+        continue;
+      if(texture::config.tstate == texture::tsActive && texture::cgroup == cpChess && !ps.support_chessboard())
+        continue;
+      dialog::addSelItem(ps.symbol, fts(ps.euclidean_angle_sum * 180) + "°", 'a' + shown);
       dialog::add_action([&] () { enable(ps); });
+      shown++;
       }
     dialog::addItem(XLAT("next page"), '-');
-    dialog::add_action([] () {
-      if(spos + 10 >= isize(tilings))
+    if(shown == 0) nextpos = 0;
+    dialog::add_action([nextpos] () {
+      if(nextpos >= isize(tilings))
         spos = 0;
-      else spos += 10;
+      else spos = nextpos;
       });
     
     if(archimedean) {

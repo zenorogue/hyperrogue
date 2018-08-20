@@ -108,7 +108,7 @@ void generate_matrices_scale(ld scale, int noft) {
   mesher ohept = msh(gNormal, 7, hexf7, hcrossf7, hcrossf7, M_PI/7, 1);
   if(nonbitrunc) {
     mesher nall = msh(geometry, S7, rhexf, tessf, tessf, -M_PI, scale);
-    bool use = geosupport_graveyard() < 2;
+    bool use = geosupport_football() < 2;
     if(use && noft == 1) {
       mesher opure = msh(gNormal, 7, 0.620672, 1.090550, 1.090550, M_PI/7, 1);
       generate_matrices(hept_matrices, opure, nall);
@@ -399,7 +399,7 @@ void generate_floorshapes_for(int id, cell *c, int siid, int sidir) {
     
     if(!gp::on && !irr::on && !binarytiling && !archimedean) {
       generate_matrices_scale(fsh.scale, fsh.noftype);
-      if(nonbitrunc && geosupport_graveyard() < 2 && fsh.shapeid2) {
+      if(nonbitrunc && geosupport_football() < 2 && fsh.shapeid2) {
         if(id == 0) bshape2(fsh.b[0], fsh.prio, fsh.shapeid2, hept_matrices);
         if(id == 1) bshape2(fsh.b[1], fsh.prio, fsh.shapeid2, hept_matrices);
         }
@@ -408,7 +408,7 @@ void generate_floorshapes_for(int id, cell *c, int siid, int sidir) {
         if(id == 1) bshape2(fsh.b[1], fsh.prio, fsh.shapeid1, hept_matrices);
         }
       generate_matrices_scale(fsh.scale * SHADMUL, fsh.noftype);
-      if(nonbitrunc && geosupport_graveyard() < 2 && fsh.shapeid2) {
+      if(nonbitrunc && geosupport_football() < 2 && fsh.shapeid2) {
         if(id == 0) bshape2(fsh.shadow[0], fsh.prio, fsh.shapeid2, hept_matrices);
         if(id == 1) bshape2(fsh.shadow[1], fsh.prio, fsh.shapeid2, hept_matrices);
         }
@@ -421,7 +421,7 @@ void generate_floorshapes_for(int id, cell *c, int siid, int sidir) {
     else {
       generate_matrices_scale(fsh.scale, fsh.noftype);
 
-      auto& m = (siid && geosupport_graveyard() == 2) ? hex_matrices : hept_matrices;
+      auto& m = (siid && geosupport_football() == 2) ? hex_matrices : hept_matrices;
       
       int cor = c->type;
           
@@ -452,7 +452,7 @@ void generate_floorshapes_for(int id, cell *c, int siid, int sidir) {
           }
   
         if(i != isize(m.v)) printf("warning: i=%d sm=%d\n", i, isize(m.v));      
-        bshape2((ii?fsh.shadow:fsh.b)[id], fsh.prio, (fsh.shapeid2 && geosupport_graveyard() < 2) ? fsh.shapeid2 : siid?fsh.shapeid0:fsh.shapeid1, m);
+        bshape2((ii?fsh.shadow:fsh.b)[id], fsh.prio, (fsh.shapeid2 && geosupport_football() < 2) ? fsh.shapeid2 : siid?fsh.shapeid0:fsh.shapeid1, m);
         }
       }
     }
@@ -490,8 +490,8 @@ void generate_floorshapes() {
     for(int i=0; i<2*ac.N + (nonbitrunc ? 0 : 2); i++) {
       arcm::id_of(&master) = i;
       model.type = isize(ac.triangles[i]);
-      if(geosupport_graveyard() == 2)
-        generate_floorshapes_for(i, &model, !arcm::pseudohept(i), i/2);
+      if(geosupport_football() == 2)
+        generate_floorshapes_for(i, &model, !arcm::pseudohept(i), i >= 4 ? 1 : 0);
       else
         generate_floorshapes_for(i, &model, 0, 0);
       }
@@ -544,7 +544,7 @@ namespace gp {
       // if(pattern_threecolor(createMov(c, fixdir(si.dir, c))) != (siid+1)%3) printf("threecolor mismatch direction\n");
       sidir = (fixdir(si.dir, c)) & 1;
       }
-    else if(geosupport_graveyard() == 2) {
+    else if(geosupport_football() == 2) {
       siid = !pseudohept(c);
       sidir = !ishex1(c);
       }
@@ -649,6 +649,11 @@ void viewmat() {
       hyperpoint cn = V * nearcorner(cwt.at, i);
       hyperpoint cf0 = V * farcorner(cwt.at, i, 0);
       hyperpoint cf1 = V * farcorner(cwt.at, i, 1);
+      queuestr(ci, 20, its(i), 0x0000FF, 1);
+      if(vid.grid)
+        queuestr(cn, 20, its(i), 0x00FF00, 1);
+      else
+        queuestr(gmatrix[cwt.at->move(i)] * C0, 20, its(i), 0x00FFFF, 1);
       queueline(V * C0, ci, 0xFFFFFFFF, 3);
       queueline(ci, ci1, 0xFFFF00FF, 3);
       queueline(ci, cn, 0xFF00FFFF, 3);

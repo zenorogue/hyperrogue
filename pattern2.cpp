@@ -339,6 +339,8 @@ pair<int, bool> fieldval(cell *c) {
   }
 
 int fieldval_uniq(cell *c) {
+  if(archimedean && sphere)
+    return c->master->fiftyval;
   if(sphere) {
     if(ctof(c) || gp::on || irr::on) return c->master->fieldval;
     else return createMov(c, 0)->master->fieldval + 256 * createMov(c,2)->master->fieldval + (1<<16) * createMov(c,4)->master->fieldval;
@@ -868,8 +870,7 @@ namespace patterns {
       }
     if(euclid6 && (sub & SPF_FULLSYM))
       si.symmetries = 1;
-    if(S7 == 4)
-      applyAlt(si, sub, PAT_COLORING);
+    applyAlt(si, sub, PAT_COLORING);
     }
   
   patterninfo getpatterninfo(cell *c, char pat, int sub) {
@@ -894,12 +895,10 @@ namespace patterns {
       }
     
     if(archimedean && pat == 0) {
-      si.id = pseudohept(c); si.symmetries = 1;
-      si.reflect = false; si.dir = 0;
-      return si;
-      }
-
-    if(archimedean && pat == PAT_SIBLING) {
+      if(sub & SPF_FOOTBALL) {
+        val_threecolors(c, si, sub);
+        return si;
+        }
       int id = arcm::id_of(c->master);
       auto& ca = arcm::current;
       si.id = ca.tilegroup[id];
@@ -1019,7 +1018,7 @@ namespace patterns {
       if(euclid)
         // use the torus ID
         si.id = fieldpattern::fieldval_uniq(c);
-      else if(nonbitrunc)
+      else if(nonbitrunc && !archimedean)
         // use the actual field codes
         si.id = fieldpattern::fieldval(c).first;
       else          
@@ -1042,7 +1041,7 @@ namespace patterns {
       else val_threecolors(c, si, sub);
       }
 
-    else if(pat == PAT_COLORING && (S7 == 4 || euclid || (a38 && gp_threecolor() == 1))) {
+    else if(pat == PAT_COLORING && (S7 == 4 || euclid || (a38 && gp_threecolor() == 1) || archimedean)) {
       val_threecolors(c, si, sub);
       }
 
@@ -1081,11 +1080,11 @@ int geosupport_threecolor() {
   return 0;
   }
 
-int geosupport_graveyard() {
+int geosupport_football() {
   // always works in bitrunc geometries
   if(!nonbitrunc) return 2;
 
-  if(archimedean) return arcm::current.support_graveyard();
+  if(archimedean) return arcm::current.support_football();
 
   if(irr::on) return irr::bitruncations_performed ? 2 : 1;
   
@@ -1493,10 +1492,10 @@ namespace patterns {
     if(geosupport_chessboard())
       dialog::addBoolItem(XLAT("chessboard"), (whichPattern == PAT_CHESS), PAT_CHESS);
 
-    if(a38 || a46 || euclid || S3 == 4 || S7 == 4)
+    if(geosupport_threecolor() == 2)
       dialog::addBoolItem(XLAT("coloring"), (whichPattern == PAT_COLORING), PAT_COLORING);
     
-    if(sphere)
+    if(sphere_narcm)
       dialog::addBoolItem(XLAT("siblings"), (whichPattern == PAT_SIBLING), PAT_SIBLING);
     
     if(euclid)
@@ -1545,7 +1544,7 @@ namespace patterns {
     if(euclid && among(whichPattern, PAT_COLORING, 0) && !archimedean)
       dialog::addBoolItem(XLAT("extra symmetries"), subpattern_flags & SPF_EXTRASYM, '=');
     
-    if(archimedean && arcm::current.have_symmetry && whichPattern == PAT_SIBLING)
+    if(archimedean && arcm::current.have_symmetry && whichPattern == 0)
       dialog::addBoolItem(XLAT("extra symmetries"), subpattern_flags & SPF_EXTRASYM, '=');
 
     if(whichPattern == PAT_SINGLETYPE) {
@@ -1564,7 +1563,7 @@ namespace patterns {
       dialog::addBoolItem(XLAT("extra symmetries"), subpattern_flags & SPF_EXTRASYM, '=');
       }
 
-    if((a38 || (sphere && S7 == 4) || euclid4 || a46) && !nonbitrunc) {
+    if((whichPattern == PAT_COLORING) || (whichPattern == 0 && archimedean)) {
       dialog::addBoolItem(XLAT("alternate coloring"), subpattern_flags & SPF_ALTERNATE, '\'');
       dialog::addBoolItem(XLAT("football pattern"), subpattern_flags & SPF_FOOTBALL, '*');
       }
@@ -1611,13 +1610,13 @@ namespace patterns {
 
       else if(uni == '\'') {
         subpattern_flags ^= SPF_ALTERNATE;
-        subpattern_flags &= ~SPF_FOOTBALL;
+        // subpattern_flags &= ~SPF_FOOTBALL;
         texture::config.remap();
         }
 
       else if(uni == '*') {
         subpattern_flags ^= SPF_FOOTBALL;
-        subpattern_flags &= ~SPF_ALTERNATE;
+        // subpattern_flags &= ~SPF_ALTERNATE;
         texture::config.remap();
         }
 
@@ -1828,6 +1827,19 @@ namespace patterns {
   
   void computeCgroup() {
     cgroup = cpUnknown;
+    if(whichPattern == PAT_SINGLETYPE) {
+      cgroup = cpSingle;
+      return;
+      }
+    if(archimedean) {
+      if(whichPattern == PAT_COLORING) {
+        if(subpattern_flags & SPF_FOOTBALL) cgroup = cpFootball;
+        else cgroup = cpThree;
+        }
+      else if(whichPattern == PAT_CHESS && arcm::current.support_chessboard()) cgroup = cpChess;
+      else if(whichPattern == 0 && (subpattern_flags & SPF_FOOTBALL) && arcm::current.support_football()) cgroup = cpFootball;
+      return;
+      }
     for(int i=0; i<isize(cpatterns); i++)
       for(int j=0; j<isize(cpatterns[i].geometries); j++) {
         auto &g = cpatterns[i].geometries[j];

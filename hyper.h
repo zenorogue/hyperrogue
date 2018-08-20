@@ -3516,7 +3516,7 @@ void queuechr(int x, int y, int shift, int size, char chr, int col, int frame = 
 
 int zebra3(cell *c);
 int geosupport_threecolor();
-int geosupport_graveyard();
+int geosupport_football();
 bool ishex1(cell *c);
 namespace fieldpattern { int fieldval_uniq(cell *c);  int fieldval_uniq_rand(cell *c, int d); }
 bool warptype(cell *c);
