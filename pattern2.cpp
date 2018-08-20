@@ -893,13 +893,20 @@ namespace patterns {
       return si;
       }
     
+    if(archimedean && pat == 0) {
+      si.id = pseudohept(c); si.symmetries = 1;
+      si.reflect = false; si.dir = 0;
+      return si;
+      }
+
     if(archimedean && pat == PAT_SIBLING) {
       int id = arcm::id_of(c->master);
-      si.id = arcm::tilegroup[id];
-      si.symmetries = arcm::periods[si.id];
-      si.dir = arcm::groupoffset[id];
-      if((sub & SPF_EXTRASYM) && arcm::have_symmetry && arcm::tilegroup[id^1] < arcm::tilegroup[id])
-        si.id = arcm::tilegroup[id^1],
+      auto& ca = arcm::current;
+      si.id = ca.tilegroup[id];
+      si.symmetries = ca.periods[si.id];
+      si.dir = ca.groupoffset[id];
+      if((sub & SPF_EXTRASYM) && ca.have_symmetry && ca.tilegroup[id^1] < ca.tilegroup[id])
+        si.id = ca.tilegroup[id^1],
         si.reflect = true;
       return si;
       }
@@ -1066,7 +1073,7 @@ int geosupport_threecolor() {
     return 2;
   if(a46 && nonbitrunc)
     return 1;
-  if(archimedean) return arcm::support_threecolor();
+  if(archimedean) return arcm::current.support_threecolor();
   return 0;
   }
 
@@ -1074,7 +1081,7 @@ int geosupport_graveyard() {
   // always works in bitrunc geometries
   if(!nonbitrunc) return 2;
 
-  if(archimedean) return arcm::support_graveyard();
+  if(archimedean) return arcm::current.support_graveyard();
 
   if(irr::on) return irr::bitruncations_performed ? 2 : 1;
   
@@ -1206,6 +1213,8 @@ bool kraken_pseudohept(cell *c) {
     return ishept(c);
   else if(irr::on)
     return c->type != 6;
+  else if(archimedean)
+    return c->type == isize(arcm::current.triangles[0]);
   else if(!euclid && S3 == 3 && !(S7&1) && gp_threecolor() == 1)
     return ishept(c);
   else
@@ -1234,7 +1243,7 @@ namespace patterns {
 
   int generateCanvas(cell *c) {
     if(whichCanvas == 'A' && archimedean)
-      return distcolors[arcm::tilegroup[arcm::id_of(c->master)] & 7];
+      return distcolors[arcm::current.tilegroup[arcm::id_of(c->master)] & 7];
     if(whichCanvas == 'C' && hyperbolic) {
       using namespace fieldpattern;
       int z = currfp.getdist(fieldval(c), make_pair(0,false));
@@ -1481,7 +1490,7 @@ namespace patterns {
     if(stdhyperbolic || euclid)
       dialog::addBoolItem(XLAT("Palace Pattern"), (whichPattern == PAT_PALACE), PAT_PALACE);
     
-    if((nonbitrunc && S3 == 4) || (archimedean && arcm::support_chessboard()))
+    if((nonbitrunc && S3 == 4) || (archimedean && arcm::current.support_chessboard()))
       dialog::addBoolItem(XLAT("chessboard"), (whichPattern == PAT_CHESS), PAT_CHESS);
 
     if(a38 || a46 || euclid || S3 == 4 || S7 == 4)
@@ -1539,7 +1548,7 @@ namespace patterns {
     if(euclid && among(whichPattern, PAT_COLORING, 0) && !archimedean)
       dialog::addBoolItem(XLAT("extra symmetries"), subpattern_flags & SPF_EXTRASYM, '=');
     
-    if(archimedean && arcm::have_symmetry && whichPattern == PAT_SIBLING)
+    if(archimedean && arcm::current.have_symmetry && whichPattern == PAT_SIBLING)
       dialog::addBoolItem(XLAT("extra symmetries"), subpattern_flags & SPF_EXTRASYM, '=');
 
     if(whichPattern == PAT_SINGLETYPE) {

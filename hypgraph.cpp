@@ -505,14 +505,14 @@ ld master_to_c7_angle() {
 transmatrix actualV(const heptspin& hs, const transmatrix& V) {
   if(irr::on)
     return V * spin(M_PI + 2 * M_PI / S7 * (hs.spin + irr::periodmap[hs.at].base.spin));
-  if(archimedean) return V * spin(-arcm::triangles[arcm::id_of(hs.at)][hs.spin].first);
+  if(archimedean) return V * spin(-arcm::current.triangles[arcm::id_of(hs.at)][hs.spin].first);
   if(binarytiling) return V;
   return (hs.spin || nonbitrunc) ? V * spin(hs.spin*2*M_PI/S7 + master_to_c7_angle()) : V;
   }
 
 transmatrix applyspin(const heptspin& hs, const transmatrix& V) {
   if(binarytiling) return V;
-  if(archimedean) return V * spin(arcm::triangles[arcm::id_of(hs.at)][hs.spin].first);
+  if(archimedean) return V * spin(arcm::current.triangles[arcm::id_of(hs.at)][hs.spin].first);
   return hs.spin ? V * spin(hs.spin*2*M_PI/S7) : V;
   }
 

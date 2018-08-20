@@ -9,24 +9,56 @@ static const int sfLINE = 2;
 static const int sfCHESS = 4;
 static const int sfTHREE = 8;
 
-// Marek-snub
-vector<int> faces = {3, 6, 6, 6};
-vector<int> adj = {1, 0, 2, 3};
-vector<bool> invert = {false, false, true, false};
-vector<int> nflags = {sfPH | sfLINE, 0, 0, 0};
+struct archimedean_tiling {
 
-bool have_ph, have_line, have_symmetry, have_chessboard;
+  string symbol;
+  
+  vector<int> faces;
+  vector<int> adj;
+  vector<bool> invert;
+  vector<int> nflags;
 
-int repetition = 1;
-int N;
+  bool have_ph, have_line, have_symmetry, have_chessboard;
 
-ld euclidean_angle_sum;
+  int repetition = 1;
+  int N;
 
-vector<int> flags;
+  ld euclidean_angle_sum;
 
-vector<vector<pair<int, int>>> adjacent;
+  vector<int> flags;
 
-vector<vector<pair<ld, ld>>> triangles;
+  vector<vector<pair<int, int>>> adjacent;
+  vector<vector<pair<ld, ld>>> triangles;
+  
+  void make_match(int a, int i, int b, int j);
+  void prepare();
+  void compute_geometry();
+  
+  void parse();
+  void parse(string s) { symbol = s; parse(); }
+
+  ld edgelength;
+  
+  vector<ld> inradius, circumradius, alphas;
+  
+  int matches[30][30];
+  int periods[30];
+  int tilegroup[30], groupoffset[30], tilegroups;
+
+  int errors;
+  string errormsg;
+
+  pair<int, int>& get_adj(heptagon *h, int cid);
+  pair<ld, ld>& get_triangle(heptagon *h, int cid);
+  pair<ld, ld>& get_triangle(const pair<int, int>& p, int delta = 0);
+  pair<int, int>& get_adj(const pair<int, int>& p, int delta = 0);
+
+  int support_threecolor();
+  int support_graveyard();
+  bool support_chessboard();
+  };
+
+archimedean_tiling current;
 
 // id of vertex in the archimedean tiling
 // odd numbers = reflected tiles
@@ -46,28 +78,12 @@ short& parent_index_of(heptagon *h) {
 // total number of neighbors
 
 int neighbors_of(heptagon *h) {
-  return isize(triangles[id_of(h)]);
+  return isize(current.triangles[id_of(h)]);
   }
-
-ld edgelength;
-
-vector<ld> inradius, circumradius, alphas;
-
-int matches[30][30];
-int periods[30];
-int tilegroup[30], groupoffset[30], tilegroups;
 
 int gcd(int x, int y) { return x ? gcd(y%x, x) : y < 0 ? -y : y; }
 
-int errors;
-string errormsg;
-
-pair<int, int>& get_adj(heptagon *h, int cid);
-pair<ld, ld>& get_triangle(heptagon *h, int cid);
-pair<ld, ld>& get_triangle(const pair<int, int>& p, int delta = 0);
-pair<int, int>& get_adj(const pair<int, int>& p, int delta = 0);
-
-void make_match(int a, int i, int b, int j) {
+void archimedean_tiling::make_match(int a, int i, int b, int j) {
   if(isize(adjacent[a]) != isize(adjacent[b])) {
     SDEBUG(printf("(error here)"));
     errormsg = XLAT("polygons match incorrectly");
@@ -79,9 +95,9 @@ void make_match(int a, int i, int b, int j) {
     periods[a] = periods[b] = gcd(matches[a][b] - (j-i), periods[a]);
   }
 
-void prepare() {
+void archimedean_tiling::prepare() {
 
-  for(int i: faces) if(i >= MAX_EDGE) {
+  for(int i: faces) if(i > MAX_EDGE) {
     errormsg = XLAT("currently no more than %1 edges", its(MAX_EDGE));
     errors++;
     return;
@@ -244,6 +260,9 @@ void prepare() {
 
   euclidean_angle_sum = 0;
   for(int f: faces) euclidean_angle_sum += (f-2.) / f;
+  }
+
+void archimedean_tiling::compute_geometry() {
   if(euclidean_angle_sum < 1.999999) ginf[gArchimedean].cclass = gcSphere;
   else if(euclidean_angle_sum > 2.000001) ginf[gArchimedean].cclass = gcHyperbolic;
   else ginf[gArchimedean].cclass = gcEuclid;
@@ -287,7 +306,7 @@ void prepare() {
   SDEBUG( printf("computed edgelength = %lf\n", double(edgelength)); )
   
   triangles.clear();
-  triangles.resize(M);
+  triangles.resize(2*N+2);
   for(int i=0; i<N; i++) for(int j=0; j<2; j++) 
     for(int k=0; k<faces[i]; k++) 
       triangles[2*i+j].emplace_back(2*M_PI/faces[i], circumradius[i]);
@@ -338,7 +357,7 @@ struct hrmap_archimedean : hrmap {
 
     parent_index_of(origin) = 0;
     id_of(origin) = 0;
-    origin->c7 = newCell(isize(adjacent[0]), origin);
+    origin->c7 = newCell(isize(current.adjacent[0]), origin);
     
     heptagon *alt = NULL;
     
@@ -411,8 +430,8 @@ void connectHeptagons(heptagon *h, int i, heptspin hs) {
     }
   h->c.connect(i, hs);
 
-  auto p = get_adj(h, i);
-  if(tilegroup[p.first] != tilegroup[id_of(hs.at)])
+  auto p = current.get_adj(h, i);
+  if(current.tilegroup[p.first] != current.tilegroup[id_of(hs.at)])
     printf("should merge %d %d\n", p.first, id_of(hs.at));
   // heptagon *hnew = build_child(h, d, get_adj(h, d).first, get_adj(h, d).second);
   }
@@ -421,7 +440,7 @@ void create_adjacent(heptagon *h, int d) {
 
   SDEBUG( printf("%p.%d ~ ?\n", h, d); )
 
-  auto& t1 = get_triangle(h, d);
+  auto& t1 = current.get_triangle(h, d);
 
   // * spin(-tri[id][pi+i].first) * xpush(t.second) * pispin * spin(tri[id'][p'+d'].first)
   
@@ -444,7 +463,7 @@ void create_adjacent(heptagon *h, int d) {
   for(auto& p: altmap[alt]) if(intval(p.second * C0, T * C0) < 1e-6) {
     SDEBUG( printf("cell found: %p\n", p.first); )
     for(int d2=0; d2<p.first->c7->type; d2++) {
-      auto& t2 = get_triangle(p.first, d2);
+      auto& t2 = current.get_triangle(p.first, d2);
       transmatrix T1 = T * spin(M_PI + t2.first);
       SDEBUG( printf("compare: %s", display(T1 * xpush0(1)));  )
       SDEBUG( printf(":: %s\n", display(p.second * xpush0(1)));  )
@@ -456,11 +475,11 @@ void create_adjacent(heptagon *h, int d) {
     SDEBUG( printf("but rotation not found\n"));
     }
   
-  auto& t2 = get_triangle(get_adj(h, d));
+  auto& t2 = current.get_triangle(current.get_adj(h, d));
   transmatrix T1 = T * spin(M_PI + t2.first);
   fixmatrix(T1);
 
-  heptagon *hnew = build_child(h, d, get_adj(h, d).first, get_adj(h, d).second);
+  heptagon *hnew = build_child(h, d, current.get_adj(h, d).first, current.get_adj(h, d).second);
   altmap[alt].emplace_back(hnew, T1);
   archimedean_gmatrix[hnew] = make_pair(alt, T1);
   }
@@ -474,29 +493,29 @@ void enqueue(heptagon *h, const transmatrix& T) {
   drawqueue.emplace(h, T);
   }
 
-pair<ld, ld>& get_triangle(heptagon *h, int cid) {
+pair<ld, ld>& archimedean_tiling::get_triangle(heptagon *h, int cid) {
   return triangles[id_of(h)][(parent_index_of(h) + cid + MODFIXER) % neighbors_of(h)];
   }
 
-pair<int, int>& get_adj(heptagon *h, int cid) {
+pair<int, int>& archimedean_tiling::get_adj(heptagon *h, int cid) {
   return adjacent[id_of(h)][(parent_index_of(h) + cid + MODFIXER) % neighbors_of(h)];
   }
 
-pair<int, int>& get_adj(const pair<int, int>& p, int delta) {
+pair<int, int>& archimedean_tiling::get_adj(const pair<int, int>& p, int delta) {
   return adjacent[p.first][(p.second + delta + MODFIXER) % isize(adjacent[p.first])];
   }
 
-pair<ld, ld>& get_triangle(const pair<int, int>& p, int delta) {
+pair<ld, ld>& archimedean_tiling::get_triangle(const pair<int, int>& p, int delta) {
   return triangles[p.first][(p.second + delta + MODFIXER) % isize(adjacent[p.first])];
   }
 
 transmatrix adjcell_matrix(heptagon *h, int d) {
-  auto& t1 = get_triangle(h, d);
+  auto& t1 = current.get_triangle(h, d);
 
   heptagon *h2 = h->move(d);
 
   int d2 = h->c.spin(d);
-  auto& t2 = get_triangle(h2, d2);
+  auto& t2 = current.get_triangle(h2, d2);
   
   return spin(-t1.first) * xpush(t1.second) * spin(M_PI + t2.first);
   }
@@ -512,16 +531,16 @@ void draw() {
     heptagon *h = p.first;
     transmatrix V = p.second;
     int id = id_of(h);
-    int S = isize(triangles[id]);
+    int S = isize(current.triangles[id]);
 
-    if(!nonbitrunc || id < 2*N) {
+    if(!nonbitrunc || id < 2*current.N) {
       if(!dodrawcell(h->c7)) continue;
       drawcell(h->c7, V, 0, false);
       }
 
     for(int i=0; i<S; i++) {
       h->cmove(i);
-      if(nonbitrunc && id >= 2*N && h->move(i) && id_of(h->move(i)) >= 2*N) continue;
+      if(nonbitrunc && id >= 2*current.N && h->move(i) && id_of(h->move(i)) >= 2*current.N) continue;
       enqueue(h->move(i), V * adjcell_matrix(h, i));
       }
     idx++;
@@ -549,16 +568,16 @@ transmatrix relative_matrix(heptagon *h2, heptagon *h1) {
   }
 
 int fix(heptagon *h, int spin) {
-  int type = isize(adjacent[id_of(h)]);
+  int type = isize(current.adjacent[id_of(h)]);
   spin %= type;
   if(spin < 0) spin += type;
   return spin;
   }
 
-void parse_symbol(string s) {
+void archimedean_tiling::parse() {
   int at = 0;
   
-  auto peek = [&] () { if(at == isize(s)) return char(0); else return s[at]; };
+  auto peek = [&] () { if(at == isize(symbol)) return char(0); else return symbol[at]; };
   auto isnumber = [&] () { char p = peek(); return p >= '0' && p <= '9'; };
   auto read_number = [&] () { int result = 0; while(isnumber()) result = 10 * result + peek() - '0', at++; return result; };
   
@@ -601,11 +620,18 @@ int readArgs() {
            
   if(0) ;
   else if(argis("-symbol")) {
-    targetgeometry = gArchimedean;
-    if(targetgeometry != geometry)
-      stop_game_and_switch_mode(rg::geometry);
-    showstartmenu = false;
-    shift(); parse_symbol(args());
+    archimedean_tiling at;
+    shift(); at.parse(args());
+    if(at.errors) {
+      printf("error: %s\n", at.errormsg.c_str());
+      }
+    else {
+      targetgeometry = gArchimedean;
+      if(targetgeometry != geometry)
+        stop_game_and_switch_mode(rg::geometry);
+      current = at;
+      showstartmenu = false;
+      }
     }
   else if(argis("-dgeom")) debug_geometry = true;
   else return 1;
@@ -618,7 +644,7 @@ auto hook =
   addHook(hooks_args, 100, readArgs);
 #endif
 
-int support_threecolor() {
+int archimedean_tiling::support_threecolor() {
   if(nonbitrunc) 
     return 
       (isize(faces) == 3 && faces[0] % 2 == 0 && faces[1] % 2 == 0 && faces[2] % 2 == 0 && tilegroup[N*2] == 3) ? 2 :
@@ -628,36 +654,36 @@ int support_threecolor() {
   return 2;
   }
 
-int support_graveyard() {
+int archimedean_tiling::support_graveyard() {
   if(!nonbitrunc) return 2;
   return 
-    isize(arcm::faces) == 3 && arcm::faces[0] % 2 == 0 ? 2 :
-    arcm::have_ph ? 1 :
+    isize(faces) == 3 && faces[0] % 2 == 0 ? 2 :
+    have_ph ? 1 :
     0;
   }
 
-bool support_chessboard() {
+bool archimedean_tiling::support_chessboard() {
   return 0;
   }
 
 bool pseudohept(int id) {
-  return flags[id] & arcm::sfPH;
+  return current.flags[id] & arcm::sfPH;
   }
 
 bool chessvalue(cell *c) {
-  return flags[id_of(c->master)] & arcm::sfCHESS;
+  return current.flags[id_of(c->master)] & arcm::sfCHESS;
   }
 
 bool linespattern(cell *c) {
-  return flags[id_of(c->master)] & arcm::sfLINE;
+  return current.flags[id_of(c->master)] & arcm::sfLINE;
   }
 
 int threecolor(int id) {
   if(nonbitrunc)
-    return tilegroup[id];
+    return current.tilegroup[id];
   else {
-    if(support_threecolor() == 2) return id < N * 2 ? (id&1) : 2;
-    return tilegroup[id];
+    if(current.support_threecolor() == 2) return id < current.N * 2 ? (id&1) : 2;
+    return current.tilegroup[id];
     }
   }
 
@@ -729,87 +755,84 @@ vector<string> samples = {
 
 int lastsample = 0;
 
-struct prepared_sample {
-  string s;
-  ld angle_sum;
-  int flags;
-  };
-  
-
-vector<prepared_sample> prepsamples;
+vector<archimedean_tiling> tilings;
 
 int spos = 0;
 
-string current_symbol;
-string active_symbol;
+int editpos = 0;
 
-bool manual_edit;
+archimedean_tiling edited;
 
-void enable() {
+bool symbol_editing;
+
+void enable(archimedean_tiling& arct) {
   stop_game();
   if(geometry != gArchimedean) targetgeometry = gArchimedean, stop_game_and_switch_mode(rg::geometry);
   nonbitrunc = true; need_reset_geometry = true;
-  parse_symbol(current_symbol);
+  current = arct;
   start_game();
   }
 
 void show() {
-  if(lastsample < isize(samples) && geometry != gArchimedean) {
+  if(lastsample < isize(samples)) {
     string s = samples[lastsample++];
-    parse_symbol(s);
-    if(errors) {
-      printf("WARNING: %d errors on %s\n", errors, s.c_str());
+    archimedean_tiling tested;
+    tested.parse(s);
+    if(tested.errors) {
+      printf("WARNING: %d errors on %s '%s'\n", tested.errors, s.c_str(), tested.errormsg.c_str());
       }
     else {
-      prepared_sample ps;
-      ps.s = s;
-      ps.flags = 0;
-      ps.angle_sum = euclidean_angle_sum * 180;
-      if(support_graveyard()) ps.flags |= sfPH;
-      if(support_threecolor()) ps.flags |= sfTHREE;
-      if(support_chessboard()) ps.flags |= sfCHESS;
-      prepsamples.push_back(ps);
+      tilings.push_back(move(tested));
+      sort(tilings.begin(), tilings.end(), [] (archimedean_tiling& s1, archimedean_tiling& s2) {
+        if(s1.euclidean_angle_sum < s2.euclidean_angle_sum - 1e-6) return true;
+        if(s2.euclidean_angle_sum < s1.euclidean_angle_sum - 1e-6) return false;
+        return s1.symbol < s2.symbol;
+        });
       }
     }
-  sort(prepsamples.begin(), prepsamples.end(), [] (prepared_sample& s1, prepared_sample& s2) {
-    if(s1.angle_sum < s2.angle_sum - 1e-6) return true;
-    if(s2.angle_sum < s1.angle_sum - 1e-6) return false;
-    return s1.s < s2.s;
-    });
   cmode = sm::SIDE | sm::MAYDARK;
   gamescreen(0);  
   dialog::init(XLAT("Archimedean tilings"));
-  if(current_symbol == "")
+  
+  if(symbol_editing) {
+    string cs = edited.symbol;
+    if(editpos < 0) editpos = 0;
+    if(editpos > isize(cs)) editpos = isize(cs);
+    cs.insert(editpos, "°");
+    dialog::addSelItem("edit", cs, '/');
+    dialog::add_action([] () { 
+      symbol_editing = false;
+      if(!edited.errors) enable(edited);
+      });
     dialog::addBreak(100);
-  else
-    dialog::addSelItem("edit", current_symbol, '/');
-  dialog::add_action([] () { 
-    manual_edit = !manual_edit; 
-    if(manual_edit) active_symbol = current_symbol;
-    if(!manual_edit) {
-      parse_symbol(current_symbol);
-      if(errors) parse_symbol(current_symbol = active_symbol);
-      else {
-        parse_symbol(active_symbol);
-        enable();
-        }
-      }
-    });
-  dialog::addBreak(100);
-  if(!manual_edit) {
+    if(edited.errors)
+      dialog::addInfo(edited.errormsg, 0xFF0000);
+    else
+      dialog::addInfo(XLAT("OK"), 0x00FF00);
+    dialog::addBreak(100);
+    dialog::addSelItem(XLAT("full angle"), fts(edited.euclidean_angle_sum * 180) + "°", 0);
+    dialog::addBreak(100);
+    }
+  else {
+    string cs = archimedean ? current.symbol : XLAT("OFF");
+    dialog::addSelItem("edit", cs, '/');  
+    dialog::add_action([] () { 
+      symbol_editing = true;
+      edited = current;
+      editpos = isize(current.symbol);
+      edited.parse();
+      });
+    dialog::addBreak(100);
     for(int i=0; i<10; i++) {
       int j = i + spos;
-      if(j >= isize(prepsamples)) continue;
-      auto &ps = prepsamples[j];
-      dialog::addSelItem(ps.s, fts(ps.angle_sum) + "°", 'a' + i);
-      dialog::add_action([&] () {
-        current_symbol = ps.s;
-        enable();
-        });
+      if(j >= isize(tilings)) continue;
+      auto &ps = tilings[j];
+      dialog::addSelItem(ps.symbol, fts(ps.euclidean_angle_sum * 180) + "°", 'a' + i);
+      dialog::add_action([&] () { enable(ps); });
       }
     dialog::addItem(XLAT("next page"), '-');
     dialog::add_action([] () {
-      if(spos + 10 >= isize(prepsamples))
+      if(spos + 10 >= isize(tilings))
         spos = 0;
       else spos += 10;
       });
@@ -820,14 +843,20 @@ void show() {
   dialog::display();
 
   keyhandler = [] (int sym, int uni) {
-    if(manual_edit && sym == SDLK_RETURN) sym = uni = '/';
+    if(symbol_editing && sym == SDLK_RETURN) sym = uni = '/';
+    if(sym == SDLK_LEFT) editpos--;
+    if(sym == SDLK_RIGHT) editpos++;
     dialog::handleNavigation(sym, uni);
-    if(manual_edit && uni == 8 && current_symbol != "") {
-      current_symbol = current_symbol.substr(0, isize(current_symbol) - 1);
+    if(symbol_editing && uni == 8 && editpos > 0) {
+      edited.symbol.replace(editpos-1, 1, "");
+      editpos--;
+      edited.parse(edited.symbol);
       return;
       }
-    if(manual_edit && uni >= 32 && uni < 128) {
-      current_symbol += uni;
+    if(symbol_editing && uni >= 32 && uni < 128) {
+      edited.symbol.insert(editpos, 1, uni);
+      editpos++;
+      edited.parse(edited.symbol);
       return;
       }
     if(doexiton(sym, uni)) popScreen();

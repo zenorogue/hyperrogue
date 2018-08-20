@@ -480,7 +480,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
           else
             v = 6;
           }
-        else if(archimedean && arcm::have_line)
+        else if(archimedean && arcm::current.have_line)
           v = arcm::linespattern(c) ? 24 : 16;
         else if(torus || hyperbolic_not37 || quotient || archimedean) {
           v = hrand(100) < 25 ? 24 : 16;
@@ -543,7 +543,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
     case laZebra:
       if(d==8) {
         if(torus) ;
-        else if(archimedean && arcm::have_line)
+        else if(archimedean && arcm::current.have_line)
           c->wall = arcm::linespattern(c) ? waTrapdoor : waNone;        
         else if(euclid && !archimedean) {
           int x,y;
@@ -565,7 +565,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
     case laWineyard:
       if(d==8) {
         if(torus) ;
-        else if(archimedean && arcm::have_line)
+        else if(archimedean && arcm::current.have_line)
           c->wall = arcm::linespattern(c) ? waVinePlant : waNone;
         else if(euclid && !archimedean) {
           int x,y;

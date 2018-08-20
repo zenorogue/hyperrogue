@@ -486,9 +486,10 @@ void generate_floorshapes() {
     cell model;
     model.master = &master;
     arcm::parent_index_of(&master) = 0;
-    for(int i=0; i<2*arcm::N + (nonbitrunc ? 0 : 2); i++) {
+    auto &ac = arcm::current;
+    for(int i=0; i<2*ac.N + (nonbitrunc ? 0 : 2); i++) {
       arcm::id_of(&master) = i;
-      model.type = isize(arcm::triangles[i]);
+      model.type = isize(ac.triangles[i]);
       if(geosupport_graveyard() == 2)
         generate_floorshapes_for(i, &model, !arcm::pseudohept(i), i/2);
       else

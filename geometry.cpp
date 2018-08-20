@@ -164,7 +164,7 @@ void precalc() {
   
   gp::compute_geometry();  
   irr::compute_geometry();
-  if(archimedean) arcm::prepare();
+  if(archimedean) arcm::current.compute_geometry();
   }
 
 transmatrix xspinpush(ld dir, ld dist) {

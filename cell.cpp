@@ -799,7 +799,7 @@ cell *createMov(cell *c, int d) {
       }
     }
   else if(nonbitrunc && archimedean) {
-    if(arcm::id_of(c->master) <= arcm::N * 2) {
+    if(arcm::id_of(c->master) <= arcm::current.N * 2) {
       heptspin hs = heptspin(c->master, d) + wstep + 2 + wstep + 1;
       c->c.connect(d, hs.at->c7, hs.spin, hs.mirrored);
       }

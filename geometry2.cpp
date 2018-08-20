@@ -390,8 +390,9 @@ hyperpoint get_corner_position(cell *c, int cid, ld cf) {
     return mid_at_actual(vertices[cid], 3/cf);
     }
   if(archimedean) {
-    if(arcm::id_of(c->master) >= arcm::N*2) return C0;
-    auto& t = arcm::get_triangle(c->master, cid);
+    auto &ac = arcm::current;
+    if(arcm::id_of(c->master) >= ac.N*2) return C0;
+    auto& t = ac.get_triangle(c->master, cid);
     return xspinpush0(-t.first, t.second * 3 / cf);
     }
   if(nonbitrunc) {
@@ -451,10 +452,11 @@ hyperpoint nearcorner(cell *c, int i) {
     return mid_at(C0, nc, .94);
     }
   if(archimedean) {
-    auto& t = arcm::get_triangle(c->master, i);
+    auto &ac = arcm::current;
+    auto& t = ac.get_triangle(c->master, i);
     int id = arcm::id_of(c->master);
-    int id1 = arcm::get_adj(arcm::get_adj(c->master, i), -2).first;
-    return xspinpush0(-t.first - M_PI / c->type, arcm::inradius[id/2] + arcm::inradius[id1/2]);
+    int id1 = ac.get_adj(ac.get_adj(c->master, i), -2).first;
+    return xspinpush0(-t.first - M_PI / c->type, ac.inradius[id/2] + ac.inradius[id1/2]);
     }
   if(binarytiling) {
     ld yx = log(2) / 2;
@@ -504,11 +506,12 @@ hyperpoint farcorner(cell *c, int i, int which) {
   if(binarytiling)
     return nearcorner(c, (i+which) % c->type); // lazy
   if(archimedean) {
-    auto& t = arcm::get_triangle(c->master, i);
+    auto &ac = arcm::current;
+    auto& t = ac.get_triangle(c->master, i);
     int id = arcm::id_of(c->master);
-    auto id1 = arcm::get_adj(arcm::get_adj(c->master, i), -2).first;
-    int n1 = isize(arcm::adjacent[id1]);
-    return spin(-t.first - M_PI / c->type) * xpush(arcm::inradius[id/2] + arcm::inradius[id1/2]) * xspinpush0(M_PI + M_PI/n1*(which?3:-3), arcm::circumradius[id1/2]);
+    auto id1 = ac.get_adj(ac.get_adj(c->master, i), -2).first;
+    int n1 = isize(ac.adjacent[id1]);
+    return spin(-t.first - M_PI / c->type) * xpush(ac.inradius[id/2] + ac.inradius[id1/2]) * xspinpush0(M_PI + M_PI/n1*(which?3:-3), ac.circumradius[id1/2]);
     }
   
   return cellrelmatrix(c, i) * get_corner_position(c->move(i), (cellwalker(c, i) + wstep + (which?2:-1)).spin);
