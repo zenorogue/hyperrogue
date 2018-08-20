@@ -553,6 +553,9 @@ namespace gp {
       sidir = 0;
       }
     auto& id = pshid[siid][sidir][draw_li.relative.first&31][draw_li.relative.second&31][fix6(draw_li.total_dir)];
+    if(id == -1 && sphere && isize(shFloor.b) > 0) {
+      forCellEx(c1, c) if(!gmatrix.count(c1)) return 0;
+      }
     if(id == -1) build_plainshape(id, draw_li, c, siid, sidir);
     return id;
     }

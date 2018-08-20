@@ -594,8 +594,8 @@ namespace hr { namespace gp {
         base_distlimit = (base_distlimit + log(scale) / log(2.618)) / scale;
       else
         base_distlimit = 3 * max(param.first, param.second) + 2 * min(param.first, param.second);
-      if(base_distlimit > 30)
-        base_distlimit = 30;
+      if(base_distlimit > SEE_ALL)
+        base_distlimit = SEE_ALL;
       prepare_matrices();
       if(debug_geometry)
         Xprintf("scale = " LDF "\n", scale);

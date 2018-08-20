@@ -222,7 +222,7 @@ static const int qDOCKS = 16;
 static const int qZEBRA = 32;
 
 // note: dnext assumes that x&7 equals 7
-static const int SEE_ALL = 15;
+static const int SEE_ALL = 50;
 static const int FORBIDDEN = -1;
 
 extern eGeometry geometry;
