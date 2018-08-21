@@ -1490,6 +1490,12 @@ namespace patterns {
       else if(doexiton(sym, uni)) popScreen();
       };    
     }
+
+#if CAP_TEXTURE
+#define REMAP_TEXTURE texture::config.remap()
+#else
+#define REMAP_TEXTURE
+#endif
   
   void showPattern() {
     cmode = sm::SIDE | sm::MAYDARK;
@@ -1616,39 +1622,39 @@ namespace patterns {
         #if CAP_EDIT
         mapeditor::modelcell.clear();
         #endif
-        texture::config.remap();
+        REMAP_TEXTURE;
         }
       
       else if(uni >= '0' && uni <= '5') {
         subpattern_flags ^= (1 << (uni - '0'));
-        texture::config.remap();
+        REMAP_TEXTURE;
         }
 
       else if(uni == '=') {
         subpattern_flags ^= SPF_EXTRASYM;
-        texture::config.remap();
+        REMAP_TEXTURE;
         }
 
       else if(uni == '\'') {
         subpattern_flags ^= SPF_ALTERNATE;
         // subpattern_flags &= ~SPF_FOOTBALL;
-        texture::config.remap();
+        REMAP_TEXTURE;
         }
 
       else if(uni == '*') {
         subpattern_flags ^= SPF_FOOTBALL;
         // subpattern_flags &= ~SPF_ALTERNATE;
-        texture::config.remap();
+        REMAP_TEXTURE;
         }
 
       else if(uni == '!') {
         subpattern_flags ^= SPF_FULLSYM;
-        texture::config.remap();
+        REMAP_TEXTURE;
         }
 
       else if(uni == '@') {
         subpattern_flags ^= SPF_DOCKS;
-        texture::config.remap();
+        REMAP_TEXTURE;
         }
 
       else if(uni == '6' || uni == '7' || uni == '8' || uni == '9') {
@@ -1837,7 +1843,7 @@ namespace patterns {
         subpattern_flags = g.subpattern_flags;
         bool not_restarted = game_active;
         start_game();
-        if(not_restarted) texture::config.remap();
+        if(not_restarted) REMAP_TEXTURE;
         }
       else if(uni == 'G' && (have_goldberg || have_variations))
         gp::configure();

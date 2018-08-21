@@ -947,12 +947,14 @@ void enable(archimedean_tiling& arct) {
   if(geometry != gArchimedean) targetgeometry = gArchimedean, stop_game_and_switch_mode(rg::geometry);
   nonbitrunc = true; need_reset_geometry = true; gp::on = false; irr::on = false;
   patterns::whichPattern = 0;
+#if CAP_TEXTURE
   if(texture::config.tstate == texture::tsActive && texture::cgroup == cpThree)
     patterns::whichPattern = patterns::PAT_COLORING;
   if(texture::config.tstate == texture::tsActive && texture::cgroup == cpFootball)
     patterns::whichPattern = 0, patterns::subpattern_flags = patterns::SPF_FOOTBALL;
   if(texture::config.tstate == texture::tsActive && texture::cgroup == cpChess)
     patterns::whichPattern = patterns::PAT_CHESS;
+#endif
   current = arct;
   start_game();
   }
@@ -994,11 +996,13 @@ void show() {
     dialog::addBreak(100);
     if(edited.errors)
       dialog::addInfo(edited.errormsg, 0xFF0000);
+#if CAP_TEXTURE
     else if(texture::config.tstate == texture::tsActive &&
       ((texture::cgroup == cpThree && edited.support_threecolor() < 2) ||
        (texture::cgroup == cpFootball && edited.support_football() < 2) ||
        (texture::cgroup == cpChess && !edited.support_chessboard())))
       dialog::addInfo(XLAT("Pattern incompatible."), 0xC0C000);
+#endif    
     else
       dialog::addInfo(XLAT("OK"), 0x00FF00);
     
@@ -1020,12 +1024,14 @@ void show() {
     int shown = 0;
     while(nextpos < isize(tilings) && shown < 10) {
       auto &ps = tilings[nextpos++];
+#if CAP_TEXTURE
       if(texture::config.tstate == texture::tsActive && texture::cgroup == cpThree && ps.support_threecolor() < 2)
         continue;
       if(texture::config.tstate == texture::tsActive && texture::cgroup == cpFootball && ps.support_football() < 2)
         continue;
       if(texture::config.tstate == texture::tsActive && texture::cgroup == cpChess && !ps.support_chessboard())
         continue;
+#endif
       dialog::addSelItem(ps.symbol, fts(ps.euclidean_angle_sum * 180) + "°", 'a' + shown);
       dialog::lastItem().color = ps.coloring;
       dialog::add_action([&] () { enable(ps); });

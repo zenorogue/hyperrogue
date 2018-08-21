@@ -405,7 +405,10 @@ void showEuclideanMenu() {
         else if(binarytiling) {
           dialog::editNumber(vid.binary_width, 0, 2, 0.1, 1, XLAT("binary tiling width"), "");
           dialog::reaction = [] () {
-            resetGeometry(); texture::config.remap();
+            resetGeometry(); 
+            #if CAP_TEXTURE
+            texture::config.remap();
+            #endif
             };
           }
         else // if(S3 == 3) 

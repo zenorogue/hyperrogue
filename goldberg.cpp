@@ -692,6 +692,7 @@ namespace hr { namespace gp {
     int min_quality_chess = 0;
     
     int min_quality = 0;
+#if CAP_TEXTURE
     if((texture::config.tstate == texture::tsActive) && (S7 % 2 == 1)) {
       if(texture::cgroup == cpFootball || texture::cgroup == cpThree) min_quality = 1;
       }
@@ -699,7 +700,7 @@ namespace hr { namespace gp {
     if((texture::config.tstate == texture::tsActive) && (S7 % 2 == 1) && (S3 == 4)) {
       if(texture::cgroup == cpChess) min_quality = 1;
       }
-    
+#endif    
     if(min_quality == 0 && min_quality_chess == 0) {
       dialog::addBoolItem(XLAT("OFF"), param == loc(1,0) && !irr::on, 'a');
       dialog::lastItem().value = "GP(1,0)";
