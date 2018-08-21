@@ -49,7 +49,9 @@ struct archimedean_tiling {
   string errormsg;
 
   pair<int, int>& get_adj(heptagon *h, int cid);
+  pair<int, int>& get_adj(heptspin hs) { return get_adj(hs.at, hs.spin); }
   pair<ld, ld>& get_triangle(heptagon *h, int cid);
+  pair<ld, ld>& get_triangle(heptspin hs) { return get_triangle(hs.at, hs.spin); }
   pair<ld, ld>& get_triangle(const pair<int, int>& p, int delta = 0);
   pair<int, int>& get_adj(const pair<int, int>& p, int delta = 0);
 
@@ -112,7 +114,7 @@ void archimedean_tiling::prepare() {
     errors++;
     return;
     }
-  for(int i: faces) if(i < 3) {
+  for(int i: faces) if(i < 2) {
     errormsg = XLAT("not enough edges");
     errors++;
     return;
@@ -259,13 +261,22 @@ void archimedean_tiling::compute_geometry() {
   circumradius.resize(N);
   alphas.resize(N);
   ld elmin = 0, elmax = hyperbolic ? 10 : sphere ? M_PI : 1;
+  
+  int real_faces = 0;
+  int rf = 0;
+  for(int i=0; i<N; i++) if(faces[i] > 2) real_faces++, rf += faces[i];
 
-  if(N == 2) {
+  if(real_faces == 2) {
     /* standard methods fail, but the answer is easy */
     edgelength = 2 * M_PI / faces[0];
-    for(int i=0; i<2; i++)
-      alphas[i] = M_PI/2,
-      circumradius[i] = inradius[i] = M_PI/2;
+    for(int i=0; i<N; i++)
+      if(faces[i] == 2)
+        alphas[i] = 0,
+        circumradius[i] = 2 * M_PI / rf,
+        inradius[i] = 0;
+      else
+        alphas[i] = M_PI/2,
+        circumradius[i] = inradius[i] = M_PI/2;
     }
   else for(int p=0; p<100; p++) {
     edgelength = (elmin + elmax) / 2;
@@ -369,6 +380,13 @@ struct hrmap_archimedean : hrmap {
     transmatrix T = xpush(.01241) * spin(1.4117) * xpush(0.1241) * Id;
     archimedean_gmatrix[origin] = make_pair(alt, T);
     altmap[alt].emplace_back(origin, T);
+  
+    if(origin->c7->type == 2) {
+      create_adjacent(origin, 0);
+      create_adjacent(origin, 1);
+      origin->move(0)->c.connect(1, origin->move(1), 2*current.N-1, false);
+      origin->move(1)->c.connect(1, origin->move(0), 2*current.N-1, false);
+      }
     
     base_distlimit = 0;
     celllister cl(origin->c7, 1000, 200, NULL);
@@ -393,28 +411,47 @@ hrmap *new_map() { return new hrmap_archimedean; }
 
 transmatrix adjcell_matrix(heptagon *h, int d);
 
-heptagon *build_child(heptagon *parent, int d, int id, int pindex) {
+heptagon *build_child(heptspin p, pair<int, int> adj) {
   indenter ind;
-  auto h = buildHeptagon1(new heptagon, parent, d, hstate(1), 0);
-  SDEBUG( printf("NEW %p.%d ~ %p.0\n", parent, d, h); )
-  id_of(h) = id;
-  parent_index_of(h) = pindex;
+  auto h = buildHeptagon1(new heptagon, p.at, p.spin, hstate(1), 0);
+  SDEBUG( printf("NEW %p.%d ~ %p.0\n", p.at, p.spin, h); )
+  id_of(h) = adj.first;
+  parent_index_of(h) = adj.second;
   int nei = neighbors_of(h);
   h->c7 = newCell(nei, h);
-  h->distance = parent->distance + 1;
-  if(id < 2*current.N)
-    h->fieldval = parent->move(0)->fieldval + (d/2);
+  h->distance = p.at->distance + 1;
+  if(adj.first < 2*current.N)
+    h->fieldval = p.at->move(0)->fieldval + (adj.second/2);
   h->fiftyval = isize(archimedean_gmatrix);
+  heptspin hs(h, 0);
   return h;
   }
 
-void connectHeptagons(heptagon *h, int i, heptspin hs) {
-  SDEBUG( printf("OLD %p.%d ~ %p.%d\n", h, i, hs.at, hs.spin); )
-  if(h->move(i) == hs.at && h->c.spin(i) == hs.spin) {
+bool skip_digons(heptspin hs, int step) {
+  return
+    isize(current.adjacent[current.get_adj(hs).first]) == 2 ||
+    isize(current.adjacent[current.get_adj(hs+step).first]) == 2;
+  }
+
+void connect_digons_too(heptspin h1, heptspin h2) {
+  if(skip_digons(h1, -1)) {
+    h1--, h2++;
+    heptagon *hnew = build_child(h1, current.get_adj(h1));
+    // no need to specify archimedean_gmatrix and altmap
+    hnew->c.connect(1, h2);
+    h1--, h2++;
+    SDEBUG( printf("OL2 %p.%d ~ %p.%d\n", h1.at, h1.spin, h2.at, h2.spin); )
+    h1.at->c.connect(h1.spin, h2);
+    }
+  }
+
+void connectHeptagons(heptspin hi, heptspin hs) {
+  SDEBUG( printf("OLD %p.%d ~ %p.%d\n", hi.at, hi.spin, hs.at, hs.spin); )
+  if(hi.at->move(hi.spin) == hs.at && hi.at->c.spin(hi.spin) == hs.spin) {
     SDEBUG( printf("WARNING: already connected\n"); )
     return;
     }
-  if(h->move(i)) {
+  if(hi.peek()) {
     SDEBUG( printf("ERROR: already connected left\n"); )
     exit(1);
     }
@@ -422,9 +459,9 @@ void connectHeptagons(heptagon *h, int i, heptspin hs) {
     SDEBUG( printf("ERROR: already connected right\n"); )
     exit(1);
     }
-  h->c.connect(i, hs);
+  hi.at->c.connect(hi.spin, hs);
 
-  auto p = current.get_adj(h, i);
+  auto p = current.get_adj(hi);
   if(current.tilegroup[p.first] != current.tilegroup[id_of(hs.at)])
     printf("should merge %d %d\n", p.first, id_of(hs.at));
   // heptagon *hnew = build_child(h, d, get_adj(h, d).first, get_adj(h, d).second);
@@ -434,7 +471,11 @@ void create_adjacent(heptagon *h, int d) {
 
   SDEBUG( printf("%p.%d ~ ?\n", h, d); )
 
-  auto& t1 = current.get_triangle(h, d);
+  heptspin hi(h, d);
+  
+  while(skip_digons(hi, 1)) hi++;
+  
+  auto& t1 = current.get_triangle(hi);
 
   // * spin(-tri[id][pi+i].first) * xpush(t.second) * pispin * spin(tri[id'][p'+d'].first)
   
@@ -454,28 +495,32 @@ void create_adjacent(heptagon *h, int d) {
     
   SDEBUG( printf("look for: %p / %s\n", alt, display(T * C0)); )
   
-  for(auto& p: altmap[alt]) if(intval(p.second * C0, T * C0) < 1e-6) {
+  for(auto& p: altmap[alt]) if(intval(p.second * C0, T * C0) < 1e-4) {
     SDEBUG( printf("cell found: %p\n", p.first); )
     for(int d2=0; d2<p.first->c7->type; d2++) {
+      heptspin hs(p.first, d2);
       auto& t2 = current.get_triangle(p.first, d2);
       transmatrix T1 = T * spin(M_PI + t2.first);
       SDEBUG( printf("compare: %s", display(T1 * xpush0(1)));  )
       SDEBUG( printf(":: %s\n", display(p.second * xpush0(1)));  )
-      if(intval(T1 * xpush0(1), p.second * xpush0(1)) < 1e-6) {
-        connectHeptagons(h, d, heptspin(p.first, d2));
+      if(intval(T1 * xpush0(1), p.second * xpush0(1)) < 1e-4) {
+        while(skip_digons(hs, -1)) hs--;
+        connectHeptagons(hi, hs);
+        connect_digons_too(hi, hs);
         return;
         }
       }
     SDEBUG( printf("but rotation not found\n"));
     }
   
-  auto& t2 = current.get_triangle(current.get_adj(h, d));
+  auto& t2 = current.get_triangle(current.get_adj(hi));
   transmatrix T1 = T * spin(M_PI + t2.first);
   fixmatrix(T1);
 
-  heptagon *hnew = build_child(h, d, current.get_adj(h, d).first, current.get_adj(h, d).second);
+  heptagon *hnew = build_child(hi, current.get_adj(hi));
   altmap[alt].emplace_back(hnew, T1);
   archimedean_gmatrix[hnew] = make_pair(alt, T1);
+  connect_digons_too(hi, heptspin(hnew, 0));
   }
 
 set<heptagon*> visited;
@@ -744,6 +789,9 @@ vector<string> samples = {
   "(3,5,5,5,5,5) (0 1)(2 4)[3 5]",
   "(3,5,5,5,5,5) (0 1)[2 4](3)(5)",
   "(3,5,5,5,5,5) (0 1)(2)(3)(4)(5)",
+  
+  /* with digons */
+  "2,3,3,3,3,3 (2,3) (4,5)"
   };
 
 int lastsample = 0;
