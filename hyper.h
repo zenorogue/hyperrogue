@@ -3200,10 +3200,10 @@ extern eLand safetyland;
 extern int sagephase;
 extern int lastsize;
 extern int noiseuntil;
-inline hyperpoint xpush0(ld x);
+hyperpoint xpush0(ld x);
 extern eGeometry targetgeometry;
 transmatrix xspinpush(ld alpha, ld x);
-inline hyperpoint xspinpush0(ld alpha, ld x);
+hyperpoint xspinpush0(ld alpha, ld x);
 
 #define DF_INIT              0 // always display these
 #define DF_MSG               0 // always display these
