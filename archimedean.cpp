@@ -132,8 +132,20 @@ void archimedean_tiling::prepare() {
   real_faces = 0, real_face_type = 0;
   for(int i=0; i<N; i++) if(faces[i] > 2) real_faces++, real_face_type += faces[i];
   real_face_type /= 2;
-  
-  
+
+  if(real_faces) {
+    for(int i=1; i<isize(faces); i++) if(faces[i] == 2 && faces[i-1] == 2) {
+      errormsg = XLAT("Not implemented.");
+      errors++;
+      return;
+      }
+    if(faces[0] == 2 && faces[isize(faces)-1] == 2) {
+      errormsg = XLAT("Not implemented.");
+      errors++;
+      return;
+      }
+    }
+
   if(real_faces == 2) {
     for(int i: faces) if(i != real_face_type) {
       errormsg = XLAT("polygons match incorrectly");
