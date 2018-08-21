@@ -196,6 +196,11 @@ void describeOrb(string& help, const orbinfo& oi) {
   eOrbLandRelation olr = getOLR(oi.orb, getPrizeLand());
   eItem tr = treasureType(oi.l);
   eItem tt = treasureTypeUnlock(cwt.at->land, oi.orb);
+  if(olr == olrGuest) {
+    for(auto& oi1: orbinfos) 
+      if((oi1.flags & orbgenflags::NATIVE) && oi1.orb == oi.orb)
+        tr = treasureType(oi1.l);
+    }
   help += "\n\n" + XLAT(olrDescriptions[olr], cwt.at->land, tr, tt);
   int t = items[tr] * landMultiplier(oi.l);
   if(t >= 25)
