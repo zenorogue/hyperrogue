@@ -1138,9 +1138,12 @@ land_validity_t& land_validity(eLand l) {
     return not_enough_space;
   
   // mirrors do not work in gp
-  if(among(l, laMirror, laMirrorOld) && gp::on)
+  if(among(l, laMirror, laMirrorOld) && (gp::on && old_daily_id < 33))
     return dont_work;
   
+  if(binarytiling && among(l, laMirror, laMirrorOld))
+    return dont_work;
+
   if(l == laWhirlwind && hyperbolic_not37)
     return pattern_incompatibility;
 

@@ -1056,6 +1056,33 @@ namespace whirlpool {
 
 namespace mirror {
 
+  bool build(cell *c) {
+    if(gp::on) {
+      if(c == c->master->c7) {
+        c->wall = ((gp::param.second == 0 || gp::param.first == gp::param.second) && hrand(2)) ? waMirror : waCloud;
+        return true;
+        }
+      return false;
+      }
+    if(archimedean) {
+      c->wall = hrand(2) ? waMirror : waCloud;
+      return true;
+      }
+    if(binarytiling || irr::on) {
+      // mirrors not supported
+      if(is_mirrorland(c)) {
+        c->item = itShard;
+        return true;
+        }
+      return false;
+      }
+    if(nonbitrunc?pseudohept(c):!ishept(c)) {
+      c->wall = hrand(2) ? waMirror : waCloud;
+      return true;
+      }
+    return false;
+    }
+
   vector<pair<int, cellwalker>> mirrors;
   static const int LIGHTNING = -1; // passed instead of cpid
   
@@ -1110,11 +1137,60 @@ namespace mirror {
       mirrors.emplace_back(cpid, cw);
       }
     }
+
+  // we go by heptagons in Archimedean, 
+  bool equal(heptspin h1, heptspin h2, int lev) {
+    if(h1.at->degree() != h2.at->degree()) return false;
+    if(lev) for(int i=0; i<h1.at->degree(); i++) {
+      heptspin h11 = h1 + i + wstep;
+      heptspin h21 = h2 + i + wstep;
+      if(!equal(h11, h21, lev-1)) return false;
+      }
+    return true;
+    }
+  
+  int create_archimedean_rec(heptspin hs, int cpid, heptspin hs0, int lev) {
+    int result = 0;
+    for(int i=0; i<hs.at->degree(); i++) {
+      heptspin hs1 = hs + i;
+      if(lev == 0) {
+        if(hs1.at != hs0.at && equal(hs1, hs0, 3)) {
+          createMirror(cellwalker(hs1.at->c7, hs1.spin, hs1.mirrored), cpid);
+          result++;
+          }
+        }
+      else result += create_archimedean_rec(hs1 + wstep, cpid, hs0, lev-1);
+      }
+    return result;
+    }
+
+  void create_archimedean(cellwalker cw, int cpid, bool mirrored) {
+    heptspin hs(cw.at->master, cw.spin, cw.mirrored);
+    heptspin hsx = hs;
+    if(mirrored) hsx += wmirror;
+    if(create_archimedean_rec(hsx, cpid, hs, 2)) return;
+    if(create_archimedean_rec(hsx, cpid, hs, 3)) return;
+    if(create_archimedean_rec(hsx, cpid, hs, 4)) return;
+    }
   
   void createMirrors(cellwalker cw, int cpid) {
+    
+    if(archimedean) {
+      create_archimedean(cw, cpid, true);
+      return;
+      }
+
     cw.mirrored = !cw.mirrored;
     cell *c = cw.at;
     
+    if(gp::on) {
+      for(int i=0; i<cw.at->type; i++) {
+        heptspin hs(cw.at->master, cw.spin, cw.mirrored);
+        hs = hs + i + wstep + i - (gp::param.first == gp::param.second ? 1 : 0);
+        createMirror(cellwalker(hs.at->c7, hs.spin, hs.mirrored), cpid);
+        }
+      return;
+      }
     for(int i=0; i<cw.at->type; i++) {
       auto cws = cw + wstep;
       if(cws.at->type == c->type) 
@@ -1124,9 +1200,39 @@ namespace mirror {
     }
   
   void createMirages(cellwalker cw, int cpid) {
-    if(nonbitrunc) {
+    if(archimedean) {
+      create_archimedean(cw, cpid, false);
+      return;
+      }
+    if(gp::on && !(S7 & 1)) {
+      for(int i=0; i<cw.at->type; i++) {
+        heptspin hs(cw.at->master, cw.spin, cw.mirrored);
+        hs = hs + i + wstep + 1 + wstep + 1 + (S7/2) - i + 1;
+        createMirror(cellwalker(hs.at->c7, hs.spin, hs.mirrored), cpid);
+        }
+      return;
+      }
+    if(gp::on && (S7 & 1)) {
+      for(int i=0; i<cw.at->type; i++) {
+        heptspin hs(cw.at->master, cw.spin, cw.mirrored);
+        hs = hs + i + wstep + (S7/2) + wstep - 2 + wstep + (S7/2) - i;
+        createMirror(cellwalker(hs.at->c7, hs.spin, hs.mirrored), cpid);
+        }
+      return;
+      }
+    if(nonbitrunc && !(S7 & 1)) {
       for(int i=0; i<cw.at->type; i++)
-        createMirror(cw + i + wstep + 3 + wstep + 5 + wstep + 3 - i, cpid);
+        createMirror(cw + i + wstep + 1 + wstep + 1 + (S7/2) - i, cpid);
+      return;
+      }
+    if(nonbitrunc && (S7 & 1) && (S3 == 4)) {
+      for(int i=0; i<cw.at->type; i++) 
+        createMirror(cw + i + wstep + 1 + wstep - (S7/2) + wstep - (S7/2) - i, cpid);
+      return;
+      }
+    if(nonbitrunc && (S7 & 1)) {
+      for(int i=0; i<cw.at->type; i++)
+        createMirror(cw + i + wstep + (S7/2) + wstep - 2 + wstep + (S7/2) - i, cpid);
       return;
       }
     for(int i=0; i<S6; i++) {

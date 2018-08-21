@@ -533,8 +533,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
             itOrbFlash, itOrbSpeed, itOrbFire, itOrbWinter, itOrbAether, itOrbLife};
           c->item = powerorbs[hrand(6)];
           }
-        else if(!ctof(c) && hrand(5000) < 10) 
-          c->wall = hrand(2) ? waMirror : waCloud;
+        else if(hrand(5000) < 10 && mirror::build(c)) ;
         else if(hrand(1000) < 10 + (items[itPower] ? 10:0) + (items[itPower] + yendor::hardness()))
           c->monst = eMonster(moWitch + hrand(NUMWITCH));
         }
@@ -1993,8 +1992,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
     
     case laMirrorOld:
       ONEMPTY {
-        if((nonbitrunc?pseudohept(c):!ishept(c)) && hrand(5000) < 120 && (peace::on || notDippingFor(itShard)))
-          c->wall = hrand(2) ? waMirror : waCloud;
+        if(hrand(5000) < 120 && (peace::on || notDippingFor(itShard)) && mirror::build(c));
         else if(ishept(c) && hrand(5000) < 10 * PRIZEMUL)
           placePrizeOrb(c);
         else if(hrand(12000) < 8 + items[itShard] + yendor::hardness())
@@ -2006,8 +2004,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
     
     case laMirror:
       ONEMPTY {
-        if((nonbitrunc?pseudohept(c):!ishept(c)) && hrand(1250) < 120 && (peace::on || notDippingFor(itShard)))
-          c->wall = hrand(2) ? waMirror : waCloud;
+        if(hrand(1250) < 120 && (peace::on || notDippingFor(itShard)) && mirror::build(c)) ;
         else if(ishept(c) && hrand(5000) < 10 * PRIZEMUL)
           placePrizeOrb(c);
         else if(hrand(cwt.at->land == laMirror ? 600 : 2400) < 8 + items[itShard] + yendor::hardness()) {
@@ -2205,12 +2202,9 @@ void giantLandSwitch(cell *c, int d, cell *from) {
       ONEMPTY {
         if(nonbitrunc && c->land == laCrossroads5 && hrand(100) < 60)
           c->wall = waBarrier;
-        else if(!ctof(c) && !inv::on && items[itShard] >= 10 && hrand(8000) < 120*orbcrossfun(items[itShard]) && !gp::on)
-          c->wall = hrand(2) ? waMirror : waCloud;
-        else if(!ctof(c) && hyperstonesUnlocked() && hrand(8000) < 100 && !gp::on)
-          c->wall = hrand(2) ? waMirror : waCloud;
-        else if(!ctof(c) && tactic::on && isCrossroads(specialland) && hrand(8000) < 120 && !gp::on)
-          c->wall = hrand(2) ? waMirror : waCloud;
+        else if(!inv::on && items[itShard] >= 10 && hrand(8000) < 120*orbcrossfun(items[itShard]) && mirror::build(c)) ;
+        else if(hyperstonesUnlocked() && hrand(8000) < 100 && mirror::build(c)) ;
+        else if(tactic::on && isCrossroads(specialland) && hrand(8000) < 120 && mirror::build(c)) ;
         else if(c->land == laCrossroads4 && hrand(24000) < 10 && tactic::on)
           c->wall = waRose;
         else {

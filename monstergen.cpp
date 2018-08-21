@@ -354,7 +354,8 @@ void wandering() {
           placeLocalOrbs(c);
         if(!c->item) c->item = wanderingTreasure(c);
         if(c->item == itShard) {
-          c->item = itNone, c->wall = hrand(2) ? waMirror : waCloud;
+          c->item = itNone;
+          mirror::build(c);
           }
         if(c->item == itFulgurite) {
           c->item = itNone, c->wall = waSandstone;

@@ -752,4 +752,8 @@ bool isTechnicalLand(eLand l) {
     l == laMirrorWall2 || l == laMercuryRiver || l == laMemory;
   }
 
+bool is_mirrorland(cell *c) {
+  return among(c->land, laMirror, laMirrorOld);
+  }
+
 }

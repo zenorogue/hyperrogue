@@ -2052,24 +2052,24 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, int col) {
       if(d>=4) cw += 2;
       transmatrix Vs = Vparam;
       bool mirr = cw.mirrored;
-      Vs = Vs * ddspin(c, cw.spin-cwt.spin, masterless ? 0 : M_PI);
-      nospins = applyAnimation(cwt.at, Vs, footphase, LAYER_SMALL);
-      if(!nospins) Vs = Vs * ddspin(c, cwt.spin);
+      transmatrix T = Id;
+      nospins = applyAnimation(cwt.at, T, footphase, LAYER_SMALL);
+      if(nospins) 
+        Vs = Vs * ddspin(c, cw.spin, 0) * iddspin(cwt.at, cwt.spin, 0) * T;
+      else
+        Vs = Vs * ddspin(c, cw.spin, 0);
       if(mirr) Vs = Vs * Mirror;
       if(inmirrorcount&1) mirr = !mirr;
       col = mirrorcolor(geometry == gElliptic ? det(Vs) < 0 : mirr);
+      if(!mouseout() && !nospins) {
+        hyperpoint P2 = Vs * inverse(cwtV) * mouseh;
+        queuechr(P2, 10, 'x', 0xFF00);
+        }     
       if(!nospins && flipplayer) Vs = Vs * pispin;
       if(mmmon) {
         drawMonsterType(moMimic, c, Vs, col, footphase);
         drawPlayerEffects(Vs, c, false);
         }
-      if(!mouseout() && !nospins) {
-        transmatrix invxy = Id;
-        if(flipplayer) invxy[0][0] = invxy[1][1] = -1;
-        
-        hyperpoint P2 = Vs * inverse(cwtV) * invxy * mouseh;
-        queuechr(P2, 10, 'x', 0xFF00);
-        }     
       }
     return !mmmon;
     }

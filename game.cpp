@@ -3320,7 +3320,7 @@ string itemcounter(int qty) {
 void gainShard(cell *c2, const char *msg) {
   invismove = false;
   string s = XLAT(msg);
-  if(among(c2->land, laMirror, laMirrorOld) && !peace::on) {
+  if(is_mirrorland(c2) && !peace::on) {
      gainItem(itShard);
      s += itemcounter(items[itShard]);
      collectMessage(c2, itShard);
