@@ -2052,7 +2052,7 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, int col) {
       if(d>=4) cw += 2;
       transmatrix Vs = Vparam;
       bool mirr = cw.mirrored;
-      Vs = Vs * ddspin(c, cw.spin-cwt.spin, masterless ? 0 : S42);
+      Vs = Vs * ddspin(c, cw.spin-cwt.spin, masterless ? 0 : M_PI);
       nospins = applyAnimation(cwt.at, Vs, footphase, LAYER_SMALL);
       if(!nospins) Vs = Vs * ddspin(c, cwt.spin);
       if(mirr) Vs = Vs * Mirror;
