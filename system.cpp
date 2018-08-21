@@ -773,6 +773,7 @@ void saveStats(bool emergency = false) {
   if(tour::on) return;
   #endif
   if(randomPatternsMode) return;
+  if(archimedean) return;
   if(daily::on) return;
   if(peace::on) return;
   if(!gold()) return;
