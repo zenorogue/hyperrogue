@@ -64,6 +64,7 @@ struct archimedean_tiling {
   int support_football();
   bool support_chessboard();
   void regroup();
+  string world_size();
   
   ld scale();
   };
@@ -891,7 +892,7 @@ vector<pair<string, int> > samples = {
   {"(2,2)", cWeird},
   {"(2,2,2,2,2,2)", cWeird},
   {"(6,6,2)", cWeird},
-  {"(6,6,2,2)", cWeird},
+  {"(6,2,6,2)", cWeird},
   };
 
 int lastsample = 0;
@@ -1047,7 +1048,37 @@ void show() {
     if(doexiton(sym, uni)) popScreen();
     };
   }
-  
+
+string archimedean_tiling::world_size() {
+  int nom = 2 - N, denom = 2;
+  for(int f: faces) {
+    int g = gcd(denom, f);
+    nom = (nom * f + denom) / g;
+    denom = denom / g * f;
+    printf("%d/%d after adding 1/%d\n", nom, denom, f);
+    }
+  printf("vertices = %d/%d\n", 2*denom, nom);
+  int anom = 0, adenom = 1;
+  for(int f: faces) {
+    int g = gcd(adenom, f);
+    anom = (anom * f + adenom) / g;
+    adenom = adenom / g * f;
+    printf("%d/%d after adding 1/%d (g=%d)\n", anom, adenom, f, g);
+    }
+  anom *= 2 * denom, adenom *= nom;
+  printf("faces = %d/%d\n", anom, adenom);
+  int g = gcd(anom, adenom);
+  anom /= g; adenom /= g;
+  if(adenom < 0) anom = -anom, adenom = -adenom;
+  string s;
+  if(anom < 0) s = "exp(∞)*", anom = -anom;
+  if(adenom > 1) 
+    s += its(anom) + "/" + its(adenom);
+  else
+    s += its(anom);
+  return s;
+  }
+
   }
 
 }
