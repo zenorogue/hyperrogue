@@ -11,6 +11,8 @@ static const int sfTHREE = 8;
 
 struct archimedean_tiling {
 
+  int coloring;
+
   string symbol;
   
   vector<int> faces;
@@ -758,73 +760,90 @@ int threecolor(int id) {
     }
   }
 
-vector<string> samples = {
+int cEucRegular = 0x008000;
+int cEucSemiregular = 0x40C040;
+int cPlatonic = 0x000080;
+int cArchimedean = 0x4040C0;
+int cPrism = 0x40A0A0;
+int cAntiPrism = 0x80A0A0;
+int cHyperRegular = 0x800000;
+int cHyperSemi = 0xC04040;
+
+int cWeird = 0xA000A0;
+
+vector<pair<string, int> > samples = {
   /* Euclidean */
-  "(3,3,3,3,3,3)",
-  "(4,4,4,4)",
-  "(6,6,6)",
-  "(8,8,4)",
-  "(4,6,12)",
-  "(6,4,3,4)",
-  "(3,6,3,6)",
-  "(3,12,12)",
-  "(4,4,3L,3L,3L)[3,4]",
-  "(3,3,3,3,6)(1,2)(0,4)(3)",
-  "(3,3,4,3,4)(0,4)(1)(2,3)",
+  {"(3,3,3,3,3,3)", cEucRegular},
+  {"(4,4,4,4)", cEucRegular},
+  {"(6,6,6)", cEucRegular},
+  {"(8,8,4)", cEucSemiregular},
+  {"(4,6,12)", cEucSemiregular},
+  {"(6,4,3,4)", cEucSemiregular}, 
+  {"(3,6,3,6)", cEucSemiregular}, 
+  {"(3,12,12)", cEucSemiregular}, 
+  {"(4,4,3L,3L,3L)[3,4]", cEucSemiregular},
+  {"(3,3,3,3,6)(1,2)(0,4)(3)", cEucSemiregular},
+  {"(3,3,4,3,4)(0,4)(1)(2,3)", cEucSemiregular},
   
   /* Platonic */
-  "(3,3,3)",
-  "(3,3,3,3)",
-  "(3,3,3,3,3)",
-  "(4,4,4)",
-  "(5,5,5)",
+  {"(3,3,3)", cPlatonic},
+  {"(3,3,3,3)", cPlatonic},
+  {"(3,3,3,3,3)", cPlatonic},
+  {"(4,4,4)", cPlatonic},
+  {"(5,5,5)", cPlatonic},
   
   /* Archimedean solids */
-  "(3,6,6)",
-  "(3,4,3,4)",
-  "(3,8,8)",
-  "(4,6,6)",
-  "(3,4,4,4)",
-  "(4,6,8)",
-  "(3,3,3,3,4)(1,2)(0,4)(3)",
-  "(3,5,3,5)",
-  "(3,10,10)",
-  "(5,6,6)",
-  "(3,4,5,4)",
-  "(4,6,10)",
-  "(3,3,3,3,5)(1,2)(0,4)(3)",
+  {"(3,6,6)", cArchimedean},
+  {"(3,4,3,4)", cArchimedean},
+  {"(3,8,8)", cArchimedean},
+  {"(4,6,6)", cArchimedean},
+  {"(3,4,4,4)", cArchimedean},
+  {"(4,6,8)", cArchimedean}, 
+  {"(3,3,3,3,4)(1,2)(0,4)(3)", cArchimedean},
+  {"(3,5,3,5)", cArchimedean},
+  {"(3,10,10)", cArchimedean},
+  {"(5,6,6)", cArchimedean},
+  {"(3,4,5,4)", cArchimedean},
+  {"(4,6,10)", cArchimedean},
+  {"(3,3,3,3,5)(1,2)(0,4)(3)", cArchimedean},
   
   /* prisms */
-  "(3,4,4)",
-  "(5,4,4)",
-  "(6,4,4)",
-  "(7,4,4)",
+  {"(3,4,4)", cPrism},
+  {"(5,4,4)", cPrism},
+  {"(6,4,4)", cPrism},
+  {"(7,4,4)", cPrism},
   
   /* sample antiprisms */
-  "(3,3,3,4)(1)(2)",
-  "(3,3,3,5)(1)(2)",
-  "(3,3,3,6)(1)(2)",
-  "(3,3,3,7)(1)(2)",
+  {"(3,3,3,4)(1)(2)", cAntiPrism},
+  {"(3,3,3,5)(1)(2)", cAntiPrism},
+  {"(3,3,3,6)(1)(2)", cAntiPrism},
+  {"(3,3,3,7)(1)(2)", cAntiPrism}, 
   
   /* hyperbolic ones */
-  "(4,4,4,4,4)",
-  "(5,5,5,5)",
-  "(3,3,3,3,7)(1,2)(0,4)(3)",
-  "(3HL,6,6,6)(1,0)[2](3)",
-  "(3,4,4,4,4)",
-  "(3,4,4,4,4) (0 1)[2 3](4)",
-  "(3,4,4,4,4) (0 1)(2)(3)(4)",
-  "(6,6,3,3,3) (0 2)(1)(3)(4)",
-  "(5,3,5,3,3) (0 1)(2 3)(4)",
-  "(4,3,3,3,3,3) (0 1)(2 3)(4 5)",
-  "(3,5,5,5,5,5) (0 1)[2 3](4)(5)",
-  "(3,5,5,5,5,5) (0 1)(2 4)(3 5)",
-  "(3,5,5,5,5,5) (0 1)(2 4)[3 5]",
-  "(3,5,5,5,5,5) (0 1)[2 4](3)(5)",
-  "(3,5,5,5,5,5) (0 1)(2)(3)(4)(5)",
+  {"(4,4,4,4,4)", cHyperRegular}, 
+  {"(5,5,5,5)", cHyperRegular},
+  {"(7,7,7)", cHyperRegular},
+  {"(8,8,8)", cHyperRegular},
+  {"(7,6,6)", cHyperSemi},
+  {"(3,3,3,3,7)(1,2)(0,4)(3)", cHyperSemi}, 
+  {"(3HL,6,6,6)(1,0)[2](3)", cHyperSemi},
+  {"(3,4,4,4,4)", cHyperSemi},
+  {"(3,4,4,4,4) (0 1)[2 3](4)", cHyperSemi},
+  {"(3,4,4,4,4) (0 1)(2)(3)(4)", cHyperSemi},
+  {"(6,6,3,3,3) (0 2)(1)(3)(4)", cHyperSemi},
+  {"(5,3,5,3,3) (0 1)(2 3)(4)", cHyperSemi}, 
+  {"(4,3,3,3,3,3) (0 1)(2 3)(4 5)", cHyperSemi},
+  {"(3,5,5,5,5,5) (0 1)[2 3](4)(5)", cHyperSemi},
+  {"(3,5,5,5,5,5) (0 1)(2 4)(3 5)", cHyperSemi}, 
+  {"(3,5,5,5,5,5) (0 1)(2 4)[3 5]", cHyperSemi},
+  {"(3,5,5,5,5,5) (0 1)[2 4](3)(5)", cHyperSemi}, 
+  {"(3,5,5,5,5,5) (0 1)(2)(3)(4)(5)", cHyperSemi}, 
   
   /* with digons */
-  "2,3,3,3,3,3 (2,3) (4,5)"
+  {"(2,3,3,3,3,3) (2,3) (4,5)", cWeird},
+  {"(6,6)", cWeird},
+  {"(2,2)", cWeird},
+  {"(2,2,2,2,2,2)", cWeird}
   };
 
 int lastsample = 0;
@@ -856,19 +875,22 @@ void enable(archimedean_tiling& arct) {
 
 void show() {
   if(lastsample < isize(samples)) {
-    string s = samples[lastsample++];
+    string s = samples[lastsample].first;
+    int col = samples[lastsample].second;
+    lastsample++;
     archimedean_tiling tested;
     tested.parse(s);
     if(tested.errors) {
       printf("WARNING: %d errors on %s '%s'\n", tested.errors, s.c_str(), tested.errormsg.c_str());
       }
     else {
+      tested.coloring = col;
       tilings.push_back(move(tested));
-      sort(tilings.begin(), tilings.end(), [] (archimedean_tiling& s1, archimedean_tiling& s2) {
+      /* sort(tilings.begin(), tilings.end(), [] (archimedean_tiling& s1, archimedean_tiling& s2) {
         if(s1.euclidean_angle_sum < s2.euclidean_angle_sum - 1e-6) return true;
         if(s2.euclidean_angle_sum < s1.euclidean_angle_sum - 1e-6) return false;
         return s1.symbol < s2.symbol;
-        });
+        }); */
       }
     }
   cmode = sm::SIDE | sm::MAYDARK;
@@ -921,6 +943,7 @@ void show() {
       if(texture::config.tstate == texture::tsActive && texture::cgroup == cpChess && !ps.support_chessboard())
         continue;
       dialog::addSelItem(ps.symbol, fts(ps.euclidean_angle_sum * 180) + "°", 'a' + shown);
+      dialog::lastItem().color = ps.coloring;
       dialog::add_action([&] () { enable(ps); });
       shown++;
       }
