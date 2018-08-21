@@ -1098,7 +1098,7 @@ land_validity_t& land_validity(eLand l) {
     }
   
   if(archimedean) {
-    if(among(l, laPower, laZebra, laWineyard) && arcm::current.have_ph) return lv::pattern_defined;
+    if(among(l, laPower, laZebra, laWineyard) && arcm::current.have_line) return lv::pattern_defined;
     // horocycles not implemented
     if(isCyclic(l)) return not_implemented;
     }

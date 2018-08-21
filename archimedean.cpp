@@ -8,6 +8,7 @@ static const int sfPH = 1;
 static const int sfLINE = 2;
 static const int sfCHESS = 4;
 static const int sfTHREE = 8;
+static const int sfSEMILINE = 16;
 
 struct archimedean_tiling {
 
@@ -22,6 +23,7 @@ struct archimedean_tiling {
 
   bool have_ph, have_line, have_symmetry;
   int real_faces;
+  int real_face_type;
 
   int repetition = 1;
   int N;
@@ -61,6 +63,7 @@ struct archimedean_tiling {
   int support_threecolor();
   int support_football();
   bool support_chessboard();
+  void regroup();
   
   ld scale();
   };
@@ -154,6 +157,7 @@ void archimedean_tiling::prepare() {
         if(inv) at = (at+1) % N;
         else at = (at+N-1) % N;
         }
+      if(!inv) make_match(2*i, 0, inv ? (2*at+2*N-1) % 2*N : 2*at, 0);
       SDEBUG(printf("-> [%d %d]\n", at, inv);)
       }
     }
@@ -187,6 +191,14 @@ void archimedean_tiling::prepare() {
       }
     printf("\n");
     } )
+
+  for(int i=0; i<M; i++) {
+    for(int j=0; j<isize(adjacent[i]); j++) {
+      auto p = adjacent[i][j];
+      auto q = adjacent[p.first][p.second];
+      make_match(i, j, q.first, q.second);
+      }
+    }
     
   /* verify all the triangles */
   for(int i=0; i<M; i++) {
@@ -214,6 +226,14 @@ void archimedean_tiling::prepare() {
       }
     }
   
+  regroup();
+  
+  euclidean_angle_sum = 0;
+  for(int f: faces) euclidean_angle_sum += (f-2.) / f;
+  }
+
+void archimedean_tiling::regroup() {
+  int M = 2 * N + 2;
   for(int i=0; i<M; i++) for(int j=0; j<M; j++) if(matches[i][j] != -1)
   for(int l=0; l<M; l++) for(int k=0; k<M; k++) if(matches[j][k] != -1) {
     make_match(i, 0, k, matches[i][j] + matches[j][k]);
@@ -227,12 +247,17 @@ void archimedean_tiling::prepare() {
       tilegroup[j] = tilegroups, groupoffset[j] = matches[i][j] % periods[i];
     tilegroups++;
     }
-  
+
   flags.clear();
   flags.resize(M);
   for(int i=0; i<M; i++)
-  for(int j=0; j<2*N; j++)
-    if(tilegroup[i] == tilegroup[j]) flags[i] |= nflags[j/2];
+  for(int j=0; j<2*N; j++) {
+    if(tilegroup[i] == tilegroup[j]) {
+      flags[i] |= nflags[j/2];
+      if(j%2 == 1 && (nflags[j/2] & sfSEMILINE))
+        flags[i] |= sfLINE;
+      }
+    }
   
   if(!have_ph) {
     if(true) {
@@ -247,9 +272,6 @@ void archimedean_tiling::prepare() {
     printf("tiling group of %2d: [%2d]%2d+Z%2d\n", i, tilegroup[i], groupoffset[i], periods[i]);
     printf("\n");
     } )
-
-  euclidean_angle_sum = 0;
-  for(int f: faces) euclidean_angle_sum += (f-2.) / f;
   }
 
 void archimedean_tiling::compute_geometry() {
@@ -506,8 +528,11 @@ void connectHeptagons(heptspin hi, heptspin hs) {
   hi.at->c.connect(hi.spin, hs);
 
   auto p = current.get_adj(hi);
-  if(current.tilegroup[p.first] != current.tilegroup[id_of(hs.at)])
+  if(current.tilegroup[p.first] != current.tilegroup[id_of(hs.at)]) {
     printf("should merge %d %d\n", p.first, id_of(hs.at));
+    current.make_match(p.first, p.second, id_of(hs.at), hs.spin + parent_index_of(hs.at));
+    current.regroup();
+    }
   // heptagon *hnew = build_child(h, d, get_adj(h, d).first, get_adj(h, d).second);
   }
 
@@ -669,8 +694,10 @@ void archimedean_tiling::parse() {
   have_ph = false;
   while(true) {
     if(peek() == ')' || peek() == '^' || (peek() == '(' && isize(faces)) || peek() == 0) break;
-    else if((peek() == 'L' || peek() == 'l') && faces.size())
+    else if((peek() == 'L') && faces.size())
       nflags.back() |= sfLINE, have_line = true, at++;
+    else if((peek() == 'l') && faces.size())
+      nflags.back() |= sfSEMILINE, have_line = true, at++;
     else if((peek() == 'H' || peek() == 'h') && faces.size())
       nflags.back() |= sfPH, have_ph = true, at++;
     else if(isnumber()) faces.push_back(read_number()), nflags.push_back(0);
@@ -830,29 +857,33 @@ vector<pair<string, int> > samples = {
   
   /* hyperbolic ones */
   {"(4,4,4,4,4)", cHyperRegular}, 
+  {"(4,4,4,4,4,4)", cHyperRegular}, 
   {"(5,5,5,5)", cHyperRegular},
   {"(7,7,7)", cHyperRegular},
   {"(8,8,8)", cHyperRegular},
   {"(7,6,6)", cHyperSemi},
   {"(3,3,3,3,7)(1,2)(0,4)(3)", cHyperSemi}, 
   {"(3HL,6,6,6)(1,0)[2](3)", cHyperSemi},
-  {"(3,4,4,4,4)", cHyperSemi},
-  {"(3,4,4,4,4) (0 1)[2 3](4)", cHyperSemi},
+  {"(3,4,4L,4L,4)", cHyperSemi}, // buggy
+  {"(3l,4l,4,4,4) (0 1)[2 3](4)", cHyperSemi},
   {"(3,4,4,4,4) (0 1)(2)(3)(4)", cHyperSemi},
-  {"(6,6,3,3,3) (0 2)(1)(3)(4)", cHyperSemi},
+  {"(3,4,4L,4L,4L,4)", cHyperSemi},
+  {"(6,6,3L,3L,3L) (0 2)(1)(3)(4)", cHyperSemi},
   {"(5,3,5,3,3) (0 1)(2 3)(4)", cHyperSemi}, 
   {"(4,3,3,3,3,3) (0 1)(2 3)(4 5)", cHyperSemi},
-  {"(3,5,5,5,5,5) (0 1)[2 3](4)(5)", cHyperSemi},
+  {"(3l,5l,5,5,5,5) (0 1)[2 3](4)(5)", cHyperSemi},
   {"(3,5,5,5,5,5) (0 1)(2 4)(3 5)", cHyperSemi}, 
-  {"(3,5,5,5,5,5) (0 1)(2 4)[3 5]", cHyperSemi},
-  {"(3,5,5,5,5,5) (0 1)[2 4](3)(5)", cHyperSemi}, 
+  {"(3l,5l,5,5,5,5) (0 1)(2 4)[3 5]", cHyperSemi},
+  {"(3l,5l,5,5,5,5) (0 1)[2 4](3)(5)", cHyperSemi}, 
   {"(3,5,5,5,5,5) (0 1)(2)(3)(4)(5)", cHyperSemi}, 
   
   /* with digons */
   {"(2,3,3,3,3,3) (2,3) (4,5)", cWeird},
   {"(6,6)", cWeird},
   {"(2,2)", cWeird},
-  {"(2,2,2,2,2,2)", cWeird}
+  {"(2,2,2,2,2,2)", cWeird},
+  {"(6,6,2)", cWeird},
+  {"(6,6,2,2)", cWeird},
   };
 
 int lastsample = 0;
