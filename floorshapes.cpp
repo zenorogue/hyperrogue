@@ -371,8 +371,13 @@ void generate_floorshapes_for(int id, cell *c, int siid, int sidir) {
       }
     
     sizeto(fsh.b, id);
+
     bshape(fsh.b[id], fsh.prio);
-    for(int i=0; i<=cor; i++) hpcpush(cornerlist[i%cor]);
+    if(&fsh == &shTriheptaFloor && cor == 4 && siid)
+      /* draw digons specially */
+      for(int i=0; i<=cor; i++) hpcpush(spin((i&1) ? .1 : -.1) * cornerlist[i%cor]);
+    else
+      for(int i=0; i<=cor; i++) hpcpush(cornerlist[i%cor]);
     
     sizeto(fsh.shadow, id);
     bshape(fsh.shadow[id], fsh.prio);
