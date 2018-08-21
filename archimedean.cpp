@@ -128,6 +128,18 @@ void archimedean_tiling::prepare() {
     return;
     }
 
+  real_faces = 0, real_face_type = 0;
+  for(int i=0; i<N; i++) if(faces[i] > 2) real_faces++, real_face_type += faces[i];
+  real_face_type /= 2;
+  
+  
+  if(real_faces == 2) {
+    for(int i: faces) if(i != real_face_type) {
+      errormsg = XLAT("polygons match incorrectly");
+      errors++;
+      }
+    }
+
   errors = 0;
 
   /* build the 'adjacent' table */
@@ -289,17 +301,13 @@ void archimedean_tiling::compute_geometry() {
   alphas.resize(N);
   ld elmin = 0, elmax = hyperbolic ? 10 : sphere ? M_PI : 1;
   
-  real_faces = 0;
-  int rf = 0;
-  for(int i=0; i<N; i++) if(faces[i] > 2) real_faces++, rf += faces[i];
-
   if(real_faces == 2) {
     /* standard methods fail for dihedra, but the answer is easy */
     edgelength = 2 * M_PI / faces[0];
     for(int i=0; i<N; i++)
       if(faces[i] == 2)
         alphas[i] = 0,
-        circumradius[i] = 2 * M_PI / rf,
+        circumradius[i] = M_PI / real_face_type,
         inradius[i] = 0;
       else
         alphas[i] = M_PI/2,
