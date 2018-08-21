@@ -889,6 +889,7 @@ void fullcenter() {
     resetview();
     drawthemap();
     centerpc(INF);
+    centerover = cwt.at;
     }
   playermoved = true;
   }
