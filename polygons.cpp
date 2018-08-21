@@ -1385,7 +1385,7 @@ transmatrix ddi(int a, ld x) { return xspinpush(a * M_PI / S42, x); }
 
 void drawTentacle(hpcshape &h, ld rad, ld var, ld divby) {
   double tlength = max(crossf, hexhexdist * gp::scale * irr::scale);
-  if(archimedean) tlength = arcm::current.edgelength;
+  if(archimedean) tlength = arcm::current.scale();
   int max = int(20 * pow(2, vid.linequality));
   for(ld i=0; i<=max; i++)
     hpcpush(ddi(S21, rad + var * sin(i * M_PI/divby)) * ddi(0, tlength * i/max) * C0);
@@ -1689,7 +1689,7 @@ void buildpolys() {
     }
 
   if(archimedean) {
-    triangleside = xcrossf = arcm::current.edgelength;
+    triangleside = xcrossf = arcm::current.scale();
     goldbf = 1;
     scalef = xcrossf / hcrossf7;
     floorrad0 = floorrad1 = triangleside * .45;
@@ -2051,7 +2051,7 @@ void buildpolys() {
   if(a47 && !nonbitrunc) spzoom6 *= .85;
   
   if(archimedean)
-    shFullFloor.configure(arcm::current.edgelength/2, arcm::current.edgelength/2);
+    shFullFloor.configure(arcm::current.scale()/2, arcm::current.scale()/2);
   else
     shFullFloor.configure(hexvdist, rhexf);
   shFloor.configure(floorrad0, floorrad1);

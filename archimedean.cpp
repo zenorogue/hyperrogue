@@ -59,6 +59,8 @@ struct archimedean_tiling {
   int support_threecolor();
   int support_football();
   bool support_chessboard();
+  
+  ld scale();
   };
 
 archimedean_tiling current;
@@ -341,6 +343,13 @@ void archimedean_tiling::compute_geometry() {
     printf("\n");
     } )
   
+  }
+
+ld archimedean_tiling::scale() {
+  if(real_faces == 0 && N == 2) return M_PI / 2;
+  if(real_faces == 2) return M_PI / 2;
+  if(real_faces == 0) return 2 * M_PI / N;
+  return edgelength;
   }
 
 map<heptagon*, vector<pair<heptagon*, transmatrix> > > altmap;

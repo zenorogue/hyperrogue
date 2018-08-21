@@ -398,7 +398,7 @@ hyperpoint get_corner_position(cell *c, int cid, ld cf) {
     auto &ac = arcm::current;
     if(arcm::id_of(c->master) >= ac.N*2) return C0;
     auto& t = ac.get_triangle(c->master, cid-1);
-    return xspinpush0(-t.first, t.second * 3 / cf);
+    return xspinpush0(-t.first, t.second * 3 / cf * (ac.real_faces == 0 ? 0.999 : 1));
     }
   if(nonbitrunc) {
     return ddspin(c,cid,M_PI/S7) * xpush0(hcrossf * 3 / cf);
@@ -430,7 +430,7 @@ hyperpoint nearcorner(cell *c, int i) {
     auto& t = ac.get_triangle(c->master, i-1);
     int id = arcm::id_of(c->master);
     int id1 = ac.get_adj(ac.get_adj(c->master, i-1), -2).first;
-    return xspinpush0(-t.first - M_PI / c->type, ac.inradius[id/2] + ac.inradius[id1/2]);
+    return xspinpush0(-t.first - M_PI / c->type, ac.inradius[id/2] + ac.inradius[id1/2] + (ac.real_faces == 0 ? 2 * M_PI / (ac.N == 2 ? 2.1 : ac.N) : 0));
     }
   if(binarytiling) {
     ld yx = log(2) / 2;
