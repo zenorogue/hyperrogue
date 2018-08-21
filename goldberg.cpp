@@ -689,20 +689,27 @@ namespace hr { namespace gp {
     gamescreen(0);  
     dialog::init(XLAT("variations"));
     
+    int min_quality_chess = 0;
+    
     int min_quality = 0;
     if((texture::config.tstate == texture::tsActive) && (S7 % 2 == 1)) {
-      if(texture::cgroup == cpFootball) min_quality = 1;
+      if(texture::cgroup == cpFootball || texture::cgroup == cpThree) min_quality = 1;
+      }
+
+    if((texture::config.tstate == texture::tsActive) && (S7 % 2 == 1) && (S3 == 4)) {
+      if(texture::cgroup == cpChess) min_quality = 1;
       }
     
-    if(min_quality == 0) {
+    if(min_quality == 0 && min_quality_chess == 0) {
       dialog::addBoolItem(XLAT("OFF"), param == loc(1,0) && !irr::on, 'a');
       dialog::lastItem().value = "GP(1,0)";
       }
-
-    dialog::addBoolItem(XLAT("bitruncated"), param == loc(1,1) && !nonbitrunc, 'b');  
+    
+    if(min_quality_chess == 0)
+      dialog::addBoolItem(XLAT("bitruncated"), param == loc(1,1) && !nonbitrunc, 'b');  
     dialog::lastItem().value = S3 == 3 ? "GP(1,1)" : XLAT(nonbitrunc ? "OFF" : "ON");
 
-    if(min_quality == 0) {
+    if(min_quality == 0 || min_quality_chess) {
       dialog::addBoolItem(XLAT(S3 == 3 ? "chamfered" : "expanded"), param == loc(2,0), 'c');
       dialog::lastItem().value = "GP(2,0)";
       }
@@ -725,6 +732,8 @@ namespace hr { namespace gp {
       }
     else if((config.first-config.second)%3 && min_quality)
       dialog::addInfo(XLAT("This pattern needs x-y divisible by 3"));
+    else if((config.first-config.second)%2 && min_quality_chess)
+      dialog::addInfo(XLAT("This pattern needs x-y divisible by 2"));
     else    
       dialog::addBoolItem(XLAT("select"), param == internal_representation(config) && !irr::on, 'f');
       
