@@ -7372,3 +7372,7 @@ S("not enough edges", "příliš málo hran")
 S("polygons match incorrectly", "mnohoúhelníky nesedí")
 S("currently no more than %1 edges", "momentálně maximálně %1 hran")
 S("currently no more than %1 faces in vertex", "momentálně maximálně %1 stěn v jednom vrcholu")
+
+N("Canvas", GEN_N, "Plátno", "Plátna", "Plátno", "na Plátně")
+S("find the player", "k hráči")
+S("press SPACE to find the player", "Mezerník = k hráči")

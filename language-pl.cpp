@@ -7128,3 +7128,6 @@ S("polygons match incorrectly", "wielokąty źle się łączą")
 S("currently no more than %1 edges", "obecnie nie więcej niż %1 krawędzi")
 S("currently no more than %1 faces in vertex", "obecnie nie więcej niż %1 ścian w wierzchołku")
 
+N("Canvas", GEN_N, "Płótno", "Płótna", "Płótno", "na Płótnie")
+S("find the player", "do gracza")
+S("press SPACE to find the player", "SPACE = do gracza")
