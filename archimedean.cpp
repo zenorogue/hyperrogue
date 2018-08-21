@@ -235,7 +235,7 @@ void archimedean_tiling::prepare() {
     if(tilegroup[i] == tilegroup[j]) flags[i] |= nflags[j/2];
   
   if(!have_ph) {
-    if(nonbitrunc) {
+    if(true) {
       for(int i=0; i<M; i++) if(tilegroup[i] == 0) flags[i] |= sfPH;
       }
     else {

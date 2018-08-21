@@ -739,7 +739,7 @@ bool buildBarrierNowall(cell *c, eLand l2, int forced_dir) {
     }
   
   bool warpv = warped_version(c->land, l2);
-  if(warpv && !pseudohept(c)) return false;
+  if(warpv && !archimedean && !pseudohept(c)) return false;
   
   int ds[8];
   for(int i=0; i<c->type; i++) ds[i] = i;

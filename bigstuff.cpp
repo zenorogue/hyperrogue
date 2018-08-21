@@ -1024,7 +1024,7 @@ void buildBigStuff(cell *c, cell *from) {
     }
   
   else if(chaosmode) {
-    if(pseudohept(c) && hrand(10000) < 9000 && c->land && !inmirror(c) && buildBarrierNowall(c, getNewLand(c->land))) 
+    if((archimedean || pseudohept(c)) && hrand(10000) < 9000 && c->land && !inmirror(c) && buildBarrierNowall(c, getNewLand(c->land))) 
       {}
     else if(ctof(c) && c->land == laMirror && hrand(10000) < 2000 && !weirdhyperbolic) {
       int bd = 2 + hrand(2) * 3;
@@ -1032,13 +1032,13 @@ void buildBigStuff(cell *c, cell *from) {
       }
     }
   
-  else if(pseudohept(c) && isWarped(c->land) && hrand(10000) < 3000 && c->land && 
+  else if((archimedean || pseudohept(c)) && isWarped(c->land) && hrand(10000) < 3000 && c->land && 
     buildBarrierNowall(c, eLand(c->land ^ laWarpSea ^ laWarpCoast))) ;
   
-  else if(pseudohept(c) && c->land == laCrossroads4 && hrand(10000) < 7000 && c->land && !c->master->alt && !tactic::on &&
+  else if((archimedean || pseudohept(c)) && c->land == laCrossroads4 && hrand(10000) < 7000 && c->land && !c->master->alt && !tactic::on &&
     buildBarrierNowall(c, getNewLand(laCrossroads4))) ;
   
-  else if(pseudohept(c) && hrand(I10000) < 20 && !generatingEquidistant && !yendor::on && !tactic::on && !isCrossroads(c->land) && 
+  else if((archimedean || pseudohept(c)) && hrand(I10000) < 20 && !generatingEquidistant && !yendor::on && !tactic::on && !isCrossroads(c->land) && 
     gold() >= R200 && !weirdhyperbolic &&
     !inmirror(c) && !isSealand(c->land) && !isHaunted(c->land) && !isGravityLand(c->land) && 
     (c->land != laRlyeh || rlyehComplete()) &&
