@@ -19,6 +19,7 @@ struct archimedean_tiling {
   vector<int> nflags;
 
   bool have_ph, have_line, have_symmetry;
+  int real_faces;
 
   int repetition = 1;
   int N;
@@ -262,12 +263,12 @@ void archimedean_tiling::compute_geometry() {
   alphas.resize(N);
   ld elmin = 0, elmax = hyperbolic ? 10 : sphere ? M_PI : 1;
   
-  int real_faces = 0;
+  real_faces = 0;
   int rf = 0;
   for(int i=0; i<N; i++) if(faces[i] > 2) real_faces++, rf += faces[i];
 
   if(real_faces == 2) {
-    /* standard methods fail, but the answer is easy */
+    /* standard methods fail for dihedra, but the answer is easy */
     edgelength = 2 * M_PI / faces[0];
     for(int i=0; i<N; i++)
       if(faces[i] == 2)
@@ -277,6 +278,14 @@ void archimedean_tiling::compute_geometry() {
       else
         alphas[i] = M_PI/2,
         circumradius[i] = inradius[i] = M_PI/2;
+    }
+  else if(real_faces == 0) {
+    // these are called hosohedra
+    edgelength = M_PI;
+    for(int i=0; i<N; i++)
+      alphas[i] = M_PI / N,
+      circumradius[i] = M_PI/2,
+      inradius[i] = 0;
     }
   else for(int p=0; p<100; p++) {
     edgelength = (elmin + elmax) / 2;
@@ -340,6 +349,8 @@ map<heptagon*, pair<heptagon*, transmatrix>> archimedean_gmatrix;
 
 hrmap *current_altmap;
 
+heptagon *build_child(heptspin p, pair<int, int> adj);
+
 struct hrmap_archimedean : hrmap {
   heptagon *origin;
   heptagon *getOrigin() { return origin; }
@@ -381,7 +392,20 @@ struct hrmap_archimedean : hrmap {
     archimedean_gmatrix[origin] = make_pair(alt, T);
     altmap[alt].emplace_back(origin, T);
   
-    if(origin->c7->type == 2) {
+    if(current.real_faces == 0) {
+      create_adjacent(origin, 0);
+      create_adjacent(origin, 1);
+      for(int s=1; s<2*current.N; s+=2)
+        origin->move(0)->c.connect(s, origin->move(1), 2*current.N-s, false);
+      for(int s=2; s<2*current.N; s+=2) {
+        heptspin hs(origin->move(0), s);
+        heptagon *hnew = build_child(hs, current.get_adj(hs));
+        // no need to specify archimedean_gmatrix and altmap
+        hnew->c.connect(1, heptspin(origin->move(1), 2*current.N-s));
+        }
+      origin->move(1)->c.connect(1, origin->move(0), 2*current.N-1, false);
+      }
+    else if(origin->c7->type == 2) {
       create_adjacent(origin, 0);
       create_adjacent(origin, 1);
       origin->move(0)->c.connect(1, origin->move(1), 2*current.N-1, false);
