@@ -4164,9 +4164,11 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       // actually draw the floor
 
       if(chasmg == 2) ;
+      else if(chasmg && wmspatial && detaillevel == 0) {
+        draw_qfi(c, (*Vdp), darkena(fcol, fd, 0x80), PPR_LAKELEV);
+        }
       else if(chasmg && wmspatial) {
-        if(detaillevel == 0) return;
-
+      
         int col = c->land == laCocytus ? 0x080808FF : 0x101010FF;
 
         if(qfi.fshape == &shCloudFloor) 
