@@ -713,14 +713,26 @@ void archimedean_tiling::parse() {
   have_line = false;
   have_ph = false;
   while(true) {
-    if(peek() == ')' || peek() == '^' || (peek() == '(' && isize(faces)) || peek() == 0) break;
-    else if((peek() == 'L') && faces.size())
-      nflags.back() |= sfLINE, have_line = true, at++;
-    else if((peek() == 'l') && faces.size())
-      nflags.back() |= sfSEMILINE, have_line = true, at++;
-    else if((peek() == 'H' || peek() == 'h') && faces.size())
-      nflags.back() |= sfPH, have_ph = true, at++;
+    if(peek() == ')' || (peek() == '(' && isize(faces)) || peek() == 0) break;
+    else if((peek() == 'L') && faces.size()) {
+      if(!nflags.empty()) nflags.back() |= sfLINE;
+      have_line = true, at++;
+      }
+    else if((peek() == 'l') && faces.size()) {
+      if(!nflags.empty()) nflags.back() |= sfSEMILINE;
+      have_line = true, at++;
+      }
+    else if((peek() == 'H' || peek() == 'h') && faces.size()) {
+      if(!nflags.empty()) nflags.back() |= sfPH;
+      have_ph = true, at++;
+      }
     else if(isnumber()) faces.push_back(read_number()), nflags.push_back(0);
+    else if(peek() == '^' && !faces.empty()) {
+      at++;
+      int rep = read_number();
+      if(rep == 0) nflags.pop_back(), faces.pop_back();
+      for(int i=1; i<rep; i++) nflags.push_back(nflags.back()), faces.push_back(faces.back());
+      }
     else at++;
     }
   repetition = 1;
@@ -741,6 +753,12 @@ void archimedean_tiling::parse() {
       }
     else at++;
     }
+  for(int i=0; i<N * (repetition-1); i++)
+    faces.push_back(faces[i]),
+    nflags.push_back(nflags[i]),
+    invert.push_back(invert[i]),
+    adj.push_back(adj[i] + N);
+  N *= repetition;
   prepare();  
   }
 
@@ -876,12 +894,15 @@ vector<pair<string, int> > samples = {
   {"(3,3,3,7)(1)(2)", cAntiPrism}, 
   
   /* hyperbolic ones */
-  {"(4,4,4,4,4)", cHyperRegular}, 
-  {"(4,4,4,4,4,4)", cHyperRegular}, 
+  {"(3)^7", cHyperRegular},
+  {"(4)^5", cHyperRegular}, 
+  {"(4)^6", cHyperRegular}, 
   {"(5,5,5,5)", cHyperRegular},
   {"(7,7,7)", cHyperRegular},
   {"(8,8,8)", cHyperRegular},
-  {"(7,6,6)", cHyperSemi},
+  {"(7,6^2)", cHyperSemi},
+  {"(4,6,14)", cHyperSemi},
+  {"(3,4,7,4)", cHyperSemi},
   {"(3,3,3,3,7)(1,2)(0,4)(3)", cHyperSemi}, 
   {"(3HL,6,6,6)(1,0)[2](3)", cHyperSemi},
   {"(3,4,4L,4L,4)", cHyperSemi}, // buggy
@@ -897,6 +918,9 @@ vector<pair<string, int> > samples = {
   {"(3l,5l,5,5,5,5) (0 1)[2 4](3)(5)", cHyperSemi}, 
   {"(3,5,5,5,5,5) (0 1)(2)(3)(4)(5)", cHyperSemi}, 
   
+  /* interesting symmetry variants */
+  {"(3,3,3,3,3,3)(0,1)(2,3)(4,5)", cEucRegular},
+
   /* with digons */
   {"(2,3,3,3,3,3) (2,3) (4,5)", cWeird},
   {"(6,6)", cWeird},
