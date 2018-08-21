@@ -7078,3 +7078,53 @@ S(
       "Najmniejszy dozwolony stosunek długości krawędzi do mediany długości krawędzi. "
       "Kafelki otrzymane dla małych wartości są łatwiejsze do wygenerowania, ale są zwykle brzydsze."
       )
+
+// missing
+
+S("The Orb of Love gives no bonus score in the Strange Challenge.", "Sfera Miłości nie daje permii w Dziwnej Misji.")
+S("This does not work in non-orientable geometries", "To nie działa w geometriach nieorientowalnych")
+S("This pattern needs x-y divisible by 3", "Ten wzór wymaga x-y podzielnego przez 3")
+S("This pattern needs x-y divisible by 2", "Ten wzór wymaga x-y podzielnego przez 2")
+
+// missing from the texture editor
+S("p = color", "p = kolor")
+S("b = brush size: %1", "b = pędzel: %1")
+S("d = draw", "d = rysuj")
+S("l = line", "l = linia")
+S("c = circle", "c = kółko")
+
+// new binary tiling
+
+S("binary tiling", "parkietaż binarny")
+
+// Archimedean tilings
+
+S("Archimedean tilings", "parkietaże Archimedesowe")
+S("Archimedean", "Archimedes")
+
+S("This lets you generate tilings where each cell is a regular polygon, and each vertex is identical. "
+  "You can choose from a big list of known Archimedean tilings, or create your own. "
+  "The format of specifying Archimedean tilings is based on one used by the Hyperbolic Applet by Don Hatch.\n\n"
+  "You can enhance the gameplay/land generation by adding special codes after faces: "
+  "H ('heptagon' for Ruined City, Graveyard, etc.), L ('line' for Zebra, Power, Vineyard, etc.).\n"
+  "Crystal World and Warped Coast work on (k,l,m) tilings by removing/enlarging the first tile listed ('k').",
+
+  "Tutaj możesz generować parkietaże, w których każde pole jest wielokątem foremnym, i każdy wierzchołek jest identyczny. "
+  "Możesz wybrać z dużej listy znanych parkietaży archimedesowych, lub stworzyć własny. "
+  "Format zadawania parkietaży jest oparty na Hyperbolic Applet Dona Hatcha.\n\n"
+  "Możesz ulepszyć rozgrywkę/generowanie świata przez dodanie specjalnych kodów po ścianach: "
+  "H ('siedmiokąt' dla Zrujnowanego Miasta, Cmentarza itd.), L ('linia' dla Zebry, Krainy Mocy, Winnicy, itd.).\n"
+  "Kryształowy Świat i Zakrzywiony Brzeg działają na parkietażach (k,l,m) poprzez usuwanie/powiększanie "
+  "pierszego podanego kafelka ('k').")
+
+S("color by symmetries", "koloruj przez symetrie")
+S("color by sides", "koloruj przez liczby boków")
+
+S("edit", "edytuj")
+S("full angle", "kąt pełny")
+S("not enough faces", "za mało ścian")
+S("not enough edges", "za mało krawędzi")
+S("polygons match incorrectly", "wielokąty źle się łączą")
+S("currently no more than %1 edges", "obecnie nie więcej niż %1 krawędzi")
+S("currently no more than %1 faces in vertex", "obecnie nie więcej niż %1 ścian w wierzchołku")
+

@@ -7317,3 +7317,58 @@ S("Bitruncation introduces some regularity, allowing more sophisticated floor ti
 S(
       "The smallest allowed ratio of edge length to median edge length. "
       "Tilings with low values are easier to generate, but tend to be more ugly.", "Nejmenší povolený poměr délky strany k mediánu délky strany. Dláždění s nízkými hodnotami se snáze generují, ale bývají ošklivější.")
+
+// 10.4q
+//-------
+
+// missing
+
+S("The Orb of Love gives no bonus score in the Strange Challenge.", "V Podivné misi nedává Sféra Lásky žádný bonus na skóre.")
+S("This does not work in non-orientable geometries", "Toto nefunguje v neorientovatelných geometriích")
+S("This pattern needs x-y divisible by 3", "Tento vzor vyžaduje, aby bylo x-y dělitelné třemi")
+S("This pattern needs x-y divisible by 2", "Tento vzor vyžaduje, aby bylo x-y dělitelné dvěma")
+
+// missing from the texture editor
+S("p = color", "p = barva")
+S("b = brush size: %1", "b = velikost štětce: %1")
+S("d = draw", "d = kresli")
+S("l = line", "l = čára")
+S("c = circle", "c = kruh")
+
+// new binary tiling
+
+S("binary tiling", "binární dělení")
+
+// Archimedean tilings
+
+S("Archimedean tilings", "archimédovská dělení")
+S("Archimedean", "Archimédovská")
+
+S("This lets you generate tilings where each cell is a regular polygon, and each vertex is identical. "
+  "You can choose from a big list of known Archimedean tilings, or create your own. "
+  "The format of specifying Archimedean tilings is based on one used by the Hyperbolic Applet by Don Hatch.\n\n"
+  "You can enhance the gameplay/land generation by adding special codes after faces: "
+  "H ('heptagon' for Ruined City, Graveyard, etc.), L ('line' for Zebra, Power, Vineyard, etc.).\n"
+  "Crystal World and Warped Coast work on (k,l,m) tilings by removing/enlarging the first tile listed ('k').",
+
+  "Tato volba ti umožňuje vytvářet dělení, jejichž políčka jsou pravidelné mnohoúhelníky "
+  "a jejichž vrcholy jsou identické. Můžeš si vybrat z velkého seznamu známých "
+  "archimédovských dělení nebo si vytvořit své vlastní. Formát pro specifikaci "
+  "archimédovského dělení je založený na formátu, který používá Hyperbolic "
+  "Applet od Dona Hatche.\n\n"
+  "Hru/generování terénu můžeš zlepšit tím, že za stranu přidáš speciální kód: "
+  "H ('sedmiúhelník' pro Zničené město, Hřbitov, atd.), L ('linie' pro "
+  "Zebru, Kraj moci, Vinici, atd.).\n"
+  "Křišťálový svět a Pokřivené pobřeží fungují na děleních (k,l,m) tak, "
+  "že odstraní/zvětší první uvedenou hodnotu ('k').")
+
+S("color by symmetries", "barvení pomocí symetrií")
+S("color by sides", "barvení pomocí stran")
+
+S("edit", "editace")
+S("full angle", "plný úhel")
+S("not enough faces", "příliš málo stěn")
+S("not enough edges", "příliš málo hran")
+S("polygons match incorrectly", "mnohoúhelníky nesedí")
+S("currently no more than %1 edges", "momentálně maximálně %1 hran")
+S("currently no more than %1 faces in vertex", "momentálně maximálně %1 stěn v jednom vrcholu")
