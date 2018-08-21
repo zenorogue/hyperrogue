@@ -1067,18 +1067,14 @@ string archimedean_tiling::world_size() {
     int g = gcd(denom, f);
     nom = (nom * f + denom) / g;
     denom = denom / g * f;
-    printf("%d/%d after adding 1/%d\n", nom, denom, f);
     }
-  printf("vertices = %d/%d\n", 2*denom, nom);
   int anom = 0, adenom = 1;
   for(int f: faces) {
     int g = gcd(adenom, f);
     anom = (anom * f + adenom) / g;
     adenom = adenom / g * f;
-    printf("%d/%d after adding 1/%d (g=%d)\n", anom, adenom, f, g);
     }
   anom *= 2 * denom, adenom *= nom;
-  printf("faces = %d/%d\n", anom, adenom);
   int g = gcd(anom, adenom);
   anom /= g; adenom /= g;
   if(adenom < 0) anom = -anom, adenom = -adenom;
