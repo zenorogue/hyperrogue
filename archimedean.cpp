@@ -455,8 +455,17 @@ heptagon *build_child(heptspin p, pair<int, int> adj) {
   int nei = neighbors_of(h);
   h->c7 = newCell(nei, h);
   h->distance = p.at->distance + 1;
-  if(adj.first < 2*current.N)
-    h->fieldval = p.at->move(0)->fieldval + (adj.second/2);
+  if(adj.first < 2*current.N) {
+    int s = 0;
+    heptspin hs(p);
+    while(id_of(hs.at->move(0)) >= 2 * current.N) {
+      s += hs.spin / 2 - 1;
+      hs = hs - hs.spin + wstep - 1;
+      }
+    h->fieldval = hs.at->move(0)->fieldval + s + hs.spin/2;
+    }
+  else
+    h->fieldval = -100;
   h->fiftyval = isize(archimedean_gmatrix);
   heptspin hs(h, 0);
   return h;
