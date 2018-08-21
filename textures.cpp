@@ -785,6 +785,8 @@ saverlist texturesavers;
 
 bool target_nonbitru;
 
+string csymbol;
+
 void init_textureconfig() {
 #if CAP_CONFIG
   texturesavers = move(savers);  
@@ -827,6 +829,8 @@ void init_textureconfig() {
   addsaver(config.texturename, "texture filename", "");
   addsaver(config.texture_tuner, "texture tuning", "");
   
+  addsaver(csymbol, "symbol", "");
+  
   swap(texturesavers, savers);
 #endif
   }
@@ -854,6 +858,9 @@ bool texture_config::save() {
   cell *ctr = euclid ? centerover.at : viewctr.at->c7;
   si_save = patterns::getpatterninfo0(ctr);
   
+  if(archimedean) csymbol = arcm::current.symbol;
+  else csymbol = "";
+  
   for(auto s: texturesavers) if(s->dosave())
     fprintf(f, "%s=%s\n", s->name.c_str(), s->save().c_str());
   
@@ -880,6 +887,16 @@ bool texture_config::load() {
     dynamicval<int> d2(patterns::subpattern_flags, patterns::subpattern_flags);
 
     if(targetgeometry != geometry) {
+      stop_game();
+      if(targetgeometry == gArchimedean) {
+        arcm::current.symbol = csymbol;
+        arcm::current.parse();
+        if(arcm::current.errors) {
+          printf("Error while reading Archimedean texture: %s\n", arcm::current.errormsg.c_str());
+          addMessage("Error: " + arcm::current.errormsg);
+          return false;
+          }
+        }
       stop_game_and_switch_mode(rg::geometry);
       start_game();
       return config.load();

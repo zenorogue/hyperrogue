@@ -132,6 +132,12 @@ namespace mapstream {
         save(fgeomextras[current_extra].current_prime_id);
         }
       }
+    if(geometry == gArchimedean) {
+      const string& symbol = arcm::current.symbol;
+      char size = isize(symbol);
+      save(size);
+      for(int i=0; i<size; i++) save(symbol[i]);
+      }
     addToQueue((bounded || euclid) ? currentmap->gamestart() : cwt.at->master->c7);
     for(int i=0; i<isize(cellbyid); i++) {
       cell *c = cellbyid[i];
@@ -223,6 +229,17 @@ namespace mapstream {
           load(current_extra);
           load(fgeomextras[current_extra].current_prime_id);
           enableFieldChange();
+          }
+        }
+      if(geometry == gArchimedean) {
+        string& symbol = arcm::current.symbol;
+        char size;
+        load(size);
+        symbol.resize(size);
+        for(int i=0; i<size; i++) load(symbol[i]);
+        arcm::current.parse();
+        if(arcm::current.errors > 0) {
+          printf("Errors! %s\n", arcm::current.errormsg.c_str());
           }
         }
       }
