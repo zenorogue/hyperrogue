@@ -1305,7 +1305,7 @@ land_validity_t& land_validity(eLand l) {
     }
   
   // Warped Coast does not work on non-bitrunc S3s (except standard heptagonal where we have to keep it)
-  if(l == laWarpCoast && (S3==3) && geosupport_football() != 2 && !(old_daily_id >= 30 && geosupport_chessboard())) {
+  if(l == laWarpCoast && (S3==3) && geosupport_football() != 2 && !(old_daily_id >= 33 && geosupport_chessboard())) {
     return ugly_version;
     }
 
