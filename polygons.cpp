@@ -188,34 +188,66 @@ bool nif_error_in(ld x1, ld y1, ld x2, ld y2) {
   return pow(x1 * x2 + y2 * y2, 2) < (x1*x1+y1*y1)*(x2*x2+y2*y2)*.5;
   }
 
+bool knowgood;
+hyperpoint goodpoint;
+vector<pair<int, hyperpoint>> tofix;
+
+bool correct_side(const hyperpoint& H) {
+  double curnorm = H[0]*H[0]+H[1]*H[1]+H[2]*H[2];
+  double horizon = curnorm / vid.alpha;
+  return (spherespecial>0) ^ (H[2] <= -horizon);
+  }
+
+void fixpoint(array<float, 3>& hscr, hyperpoint H) {
+  hyperpoint bad = H, good = goodpoint;
+
+  for(int i=0; i<10; i++) {
+    hyperpoint mid = midz(bad, good);
+    if(correct_side(mid))
+      good = mid;
+    else
+      bad = mid;
+    }
+  hyperpoint Hscr;
+  applymodel(good, Hscr); 
+  hscr = make_array<GLfloat>(Hscr[0]*vid.radius, Hscr[1]*vid.radius*vid.stretch, Hscr[2]*vid.radius); 
+  }
+
 void addpoint(const hyperpoint& H) {
   if(true) {
-    hyperpoint Hscr;
-    applymodel(H, Hscr); 
-    for(int i=0; i<3; i++) Hscr[i] *= vid.radius;
-    Hscr[1] *= vid.stretch;
+    ld z = vid.radius;
     // if(vid.alpha + H[2] <= BEHIND_LIMIT && pmodel == mdDisk) poly_flags |= POLY_BEHIND;
     
     if(spherespecial) {
-      double curnorm = H[0]*H[0]+H[1]*H[1]+H[2]*H[2];
-      double horizon = curnorm / vid.alpha;
       
-      if((spherespecial>0) ^ (H[2] <= -horizon)) poly_flags |= POLY_INFRONT, last_infront = false;
-      else {
+      if(correct_side(H)) {
+        poly_flags |= POLY_INFRONT, last_infront = false;
+        if(!knowgood || (spherespecial > 0 ? H[2]>goodpoint[2] : H[2]<goodpoint[2])) goodpoint = H, knowgood = true;
+        } 
+      else if(poly_flags & POLY_ISSIDE) {
+        double curnorm = H[0]*H[0]+H[1]*H[1]+H[2]*H[2];
+        double horizon = curnorm / vid.alpha;
         poly_flags |= POLY_NOTINFRONT;
-        if(last_infront && nif_error_in(glcoords.back()[0], glcoords.back()[1], Hscr[0], Hscr[1]))
+        if(last_infront && nif_error_in(glcoords.back()[0], glcoords.back()[1], H[0], H[1]))
           poly_flags |= POLY_NIF_ERROR;
+
         last_infront = true;
         
-        double coef = 
+        z *=
           (sqrt(curnorm - horizon*horizon) / (vid.alpha - horizon)) / 
           (sqrt(curnorm - H[2]*H[2]) / (vid.alpha+H[2]));
-            
-//      double coef = (vid.alpha + horizon) / (vid.alpha + H[2]); -< that one has a funny effect, seriously
-        Hscr[0] *= coef;
-        Hscr[1] *= coef;
+        }
+      else {
+        poly_flags |= POLY_NOTINFRONT;
+        tofix.push_back(make_pair(glcoords.size(), H));
+        add1(H);
+        return;
         }
       }
+    hyperpoint Hscr;
+    applymodel(H, Hscr); 
+    for(int i=0; i<3; i++) Hscr[i] *= z;
+    Hscr[1] *= vid.stretch;
     add1(Hscr);
     }
   }
@@ -233,6 +265,7 @@ void coords_to_poly() {
   }
 
 void addpoly(const transmatrix& V, const vector<glvertex> &tab, int ofs, int cnt) {
+  tofix.clear(); knowgood = false;
   hyperpoint last = V * glhr::gltopoint(tab[ofs]);
   bool last_behind = is_behind(last);
   if(!last_behind) addpoint(last);
@@ -255,6 +288,30 @@ void addpoly(const transmatrix& V, const vector<glvertex> &tab, int ofs, int cnt
   if(start_behind == 2) {
     if(firstleave[0] * enter[0] + firstleave[1] * enter[1] < 0) poly_flags |= POLY_BEHIND;
     else addpoint(firstleave);
+    }
+  if(knowgood && isize(tofix)) {
+    
+    if(true) {
+      hyperpoint Hx = V * C0, Hy = goodpoint;
+      for(int i=0; i<20; i++) {
+        hyperpoint mid = midz(Hx, Hy);
+        if(correct_side(mid)) Hy = mid;
+        else Hx = mid;
+        }
+      using namespace hyperpoint_vec;
+      goodpoint = midz(Hy, goodpoint);
+      }
+    
+    for(auto& p: tofix)
+      fixpoint(glcoords[p.first], p.second);
+    /*
+    hyperpoint Hscr;
+    applymodel(goodpoint, Hscr); 
+    glcoords.push_back(make_array<GLfloat>(Hscr[0]*vid.radius+10, Hscr[1]*vid.radius*vid.stretch, Hscr[2]*vid.radius)); 
+    glcoords.push_back(make_array<GLfloat>(Hscr[0]*vid.radius, Hscr[1]*vid.radius*vid.stretch+10, Hscr[2]*vid.radius)); 
+    glcoords.push_back(make_array<GLfloat>(Hscr[0]*vid.radius-10, Hscr[1]*vid.radius*vid.stretch, Hscr[2]*vid.radius)); 
+    glcoords.push_back(make_array<GLfloat>(Hscr[0]*vid.radius, Hscr[1]*vid.radius*vid.stretch-10, Hscr[2]*vid.radius)); 
+    glcoords.push_back(make_array<GLfloat>(Hscr[0]*vid.radius+10, Hscr[1]*vid.radius*vid.stretch, Hscr[2]*vid.radius));  */
     }
   }
 
