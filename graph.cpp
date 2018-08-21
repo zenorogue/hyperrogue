@@ -236,7 +236,7 @@ void drawLightning(const transmatrix& V) {
 
 ld displayspin(cell *c, int d) {
   if(archimedean) {
-    auto& t1 = arcm::current.get_triangle(c->master, d);
+    auto& t1 = arcm::current.get_triangle(c->master, d-1);
     return -(t1.first + M_PI / c->type);
     }
   else if(irr::on) {
