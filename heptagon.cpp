@@ -69,14 +69,13 @@ template<class... T> auto iprintf(T... t) { for(int i=0; i<indent; i++) putchar(
 heptagon *buildHeptagon1(heptagon *h, heptagon *parent, int d, hstate s, int pard = 0, int fixdistance = COMPUTE) {
   h->alt = NULL;
   h->s = s;
-  h->c.clear();
   h->c.connect(pard, parent, d, false);
   h->cdata = NULL;
   return h;
   }
   
 heptagon *buildHeptagon(heptagon *parent, int d, hstate s, int pard = 0, int fixdistance = COMPUTE) {
-  heptagon *h = buildHeptagon1(new heptagon, parent, d, s, pard, fixdistance);
+  heptagon *h = buildHeptagon1(tailored_alloc<heptagon> (S7), parent, d, s, pard, fixdistance);
   if(binarytiling || archimedean) return h;
   if(parent->c7) {
     if(irr::on)

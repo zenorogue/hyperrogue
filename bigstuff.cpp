@@ -202,13 +202,12 @@ heptagon *createAlternateMap(cell *c, int rad, hstate firststate, int special) {
     if(polarb50(c) != 1) return NULL;
     }
   
-  heptagon *alt = new heptagon;
+  heptagon *alt = tailored_alloc<heptagon> (S7);
   allmaps.push_back(newAltMap(alt));
 //printf("new alt {%p}\n", alt);
   alt->s = firststate;
   alt->emeraldval = 0;
   alt->zebraval = 0;
-  alt->c.clear();
   alt->distance = 0;
   alt->c7 = NULL;
   alt->alt = alt;

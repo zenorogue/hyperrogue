@@ -22,10 +22,9 @@ int cellcount = 0;
 void initcell(cell *c); // from game.cpp
 
 cell *newCell(int type, heptagon *master) {
-  cell *c = new cell;
+  cell *c = tailored_alloc<cell> (type);
   c->type = type;
   c->master = master;
-  for(int i=0; i<MAX_EDGE; i++) c->move(i) = NULL;
   initcell(c);
   return c;
   }
@@ -52,7 +51,7 @@ hrmap *newAltMap(heptagon *o) { return new hrmap_alternate(o); }
 
 hrmap_hyperbolic::hrmap_hyperbolic() {
   // printf("Creating hyperbolic map: %p\n", this);
-  origin = new heptagon;
+  origin = tailored_alloc<heptagon> (S7);
   heptagon& h = *origin;
   h.s = hsOrigin;
   h.emeraldval = a46 ? 0 : 98;
@@ -61,7 +60,6 @@ hrmap_hyperbolic::hrmap_hyperbolic() {
   h.fieldval = 0;
   h.rval0 = h.rval1 = 0;
   h.cdata = NULL;
-  h.c.clear();
   h.alt = NULL;
   h.distance = 0;
   isnonbitrunc = nonbitrunc;
@@ -109,7 +107,7 @@ struct hrmap_spherical : hrmap {
       h.rval0 = h.rval1 = 0;
       h.alt = NULL;
       h.cdata = NULL;
-      h.c.clear();
+      h.c.fullclear();
       h.fieldval = i;
       if(!irr::on) h.c7 = newCell(S7, &h);
       }

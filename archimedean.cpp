@@ -410,7 +410,8 @@ struct hrmap_archimedean : hrmap {
   heptagon *getOrigin() { return origin; }
 
   hrmap_archimedean() {
-    origin = new heptagon;
+    int N0 = isize(current.adjacent[0]);
+    origin = tailored_alloc<heptagon> (N0);
     origin->s = hsOrigin;
     origin->emeraldval = 0;
     origin->zebraval = 0;
@@ -418,23 +419,21 @@ struct hrmap_archimedean : hrmap {
     origin->fieldval = 0;
     origin->rval0 = origin->rval1 = 0;
     origin->cdata = NULL;
-    origin->c.clear();
     origin->alt = NULL;
     origin->distance = 0;
 
     parent_index_of(origin) = 0;
     id_of(origin) = 0;
-    origin->c7 = newCell(isize(current.adjacent[0]), origin);
+    origin->c7 = newCell(N0, origin);
     
     heptagon *alt = NULL;
     
     if(hyperbolic) {
       dynamicval<eGeometry> g(geometry, gNormal); 
-      alt = new heptagon;
+      alt = tailored_alloc<heptagon> (S7);
       alt->s = hsOrigin;
       alt->emeraldval = 0;
       alt->zebraval = 0;
-      alt->c.clear();
       alt->distance = 0;
       alt->c7 = NULL;
       alt->alt = alt;
@@ -491,7 +490,7 @@ transmatrix adjcell_matrix(heptagon *h, int d);
 
 heptagon *build_child(heptspin p, pair<int, int> adj) {
   indenter ind;
-  auto h = buildHeptagon1(new heptagon, p.at, p.spin, hstate(1), 0);
+  auto h = buildHeptagon1(tailored_alloc<heptagon> (isize(current.adjacent[adj.first])), p.at, p.spin, hstate(1), 0);
   SDEBUG( printf("NEW %p.%d ~ %p.0\n", p.at, p.spin, h); )
   id_of(h) = adj.first;
   parent_index_of(h) = adj.second;

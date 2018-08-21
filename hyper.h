@@ -320,30 +320,43 @@ struct gcell {
 #define NOBARRIERS 15
 #define MODFIXER 10090080
 
-#define MAX_EDGE 12
+#define MAX_EDGE 14
 
 template<class T> struct walker;
 
 template<class T> struct connection_table {
+
+  // Assumption: class T has a field c of type connection_table<T>.
+
+  // NOTE: since aconnection_table may be allocated with
+  // less than MAX_EDGE neighbors (see tailored_alloc),
+  // the order of fields matters.
+
   unsigned char spintable[6];
   unsigned short mirrortable;
-  // neighbors; move[0] always goes towards origin, and then we go clockwise
   T* move_table[MAX_EDGE];
+  unsigned char spintable_extra[2];
+  
   T* full() { T* x; return (T*)((char*)this - ((char*)(&(x->c)) - (char*)x)); }
+  unsigned char& get_spinchar(int d) {
+    if(d < 12) return spintable[d>>1];
+    else return spintable_extra[(d-12)>>1];
+    }
   void setspin(int d, int spin, bool mirror) { 
-    spintable[d>>1] &= ~(15 << ((d&1) << 2));
-    spintable[d>>1] |= spin << ((d&1) << 2);
+    unsigned char& c = get_spinchar(d);
+    c &= ~(15 << ((d&1) << 2));
+    c |= spin << ((d&1) << 2);
     if(mirror) mirrortable |= (1 << d);
     else mirrortable &=~ (1 << d);
     }
   // we are spin(i)-th neighbor of move[i]
-  int spin(int d) { return (spintable[d>>1] >> ((d&1)<<2)) & 15; }
+  int spin(int d) { return (get_spinchar(d) >> ((d&1)<<2)) & 15; }
   bool mirror(int d) { return (mirrortable >> d) & 1; }  
   int fix(int d) { return (d + MODFIXER) % full()->degree(); }
   T*& modmove(int i) { return move(fix(i)); }
   T*& move(int i) { return move_table[i]; }
   unsigned char modspin(int i) { return spin(fix(i)); }
-  void clear() { 
+  void fullclear() { 
     for(int i=0; i<MAX_EDGE; i++) move_table[i] = NULL;
     }
   void connect(int d0, T* c1, int d1, bool m) {
@@ -356,6 +369,29 @@ template<class T> struct connection_table {
     connect(d0, hs.at, hs.spin, hs.mirrored);
     }
   };
+
+// Allocate a class T with a connection_table, but 
+// with only `degree` connections. Also set yet
+// unknown connections to NULL.
+
+// Generating the hyperbolic world consumes lots of
+// RAM, so we really need to be careful on low memory devices. 
+
+template<class T> T* tailored_alloc(int degree) {
+  const T* sample = (T*) &degree;
+  T* result;
+#ifndef NO_TAILORED_ALLOC
+  if(degree <= 12) {
+    int b = (char*)&sample->c.move_table[degree] - (char*) sample;
+    result = (T*) new char[b];
+    new (result) T();
+    }
+  else 
+#endif
+    result = new T;
+  for(int i=0; i<degree; i++) result->c.move_table[i] = NULL;
+  return result;
+  }
 
 static const struct wstep_t { wstep_t() {} } wstep;
 static const struct wmirror_t { wmirror_t() {}} wmirror;
@@ -415,8 +451,6 @@ template<class T> struct walker {
   walker<T> mirrorat(int d) { return walker<T> (at, at->c.fix(d+d - spin), !mirrored); }
   };
 
-inline int fix42(int a) { return (a+MODFIXER)% S42; }
-
 struct cell;
 
 // automaton state
@@ -455,6 +489,11 @@ struct heptagon {
   ~heptagon () { heptacount--; }
   heptagon *cmove(int d) { return createStep(this, d); }
   inline int degree(); 
+
+  // prevent accidental copying
+  heptagon(const heptagon&) = delete;
+  heptagon& operator=(const heptagon&) = delete;
+  // do not add any fields after connection_table (see tailored_alloc)
   };
 
 struct cell : gcell {
@@ -472,6 +511,12 @@ struct cell : gcell {
   cell*& move(int d) { return c.move(d); }
   cell*& modmove(int d) { return c.modmove(d); }
   cell* cmove(int d) { return createMov(this, d); }
+  cell() {}
+
+  // prevent accidental copying
+  cell(const cell&) = delete;
+  heptagon& operator=(const cell&) = delete;
+  // do not add any fields after connection_table (see tailored_alloc)
   };
 
 int heptagon::degree() { if(archimedean) return c7->type; else return S7; }
