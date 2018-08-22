@@ -337,7 +337,7 @@ template<class T> struct connection_table {
   T* move_table[MAX_EDGE];
   unsigned char spintable_extra[2];
   
-  T* full() { T* x; return (T*)((char*)this - ((char*)(&(x->c)) - (char*)x)); }
+  T* full() { T* x = (T*) this; return (T*)((char*)this - ((char*)(&(x->c)) - (char*)x)); }
   unsigned char& get_spinchar(int d) {
     if(d < 12) return spintable[d>>1];
     else return spintable_extra[(d-12)>>1];
