@@ -355,10 +355,9 @@ void showEuclideanMenu() {
     dialog::addSelItem(XLAT("quotient space"), XLAT(qstring), 0);
     
     dialog::addSelItem(XLAT("size of the world"), 
-      (archimedean && euclid) ? "∞" :
       archimedean ? arcm::current.world_size() :
       (archimedean && sphere) ? its(isize(currentmap->allcells())) :
-      worldsize < 0 ? "exp(∞)*" + (nom%denom ? its(nom)+"/"+its(-denom) : its(-worldsize)): 
+      worldsize < 0 ? (nom%denom ? its(nom)+"/"+its(-denom) : its(-worldsize)) + " exp(∞)": 
       worldsize == 0 ? "∞" :
       its(worldsize),
       '3');

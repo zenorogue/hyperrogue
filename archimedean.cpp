@@ -66,6 +66,8 @@ struct archimedean_tiling {
   void regroup();
   string world_size();
   
+  eGeometryClass get_class();
+  
   ld scale();
   };
 
@@ -107,6 +109,9 @@ void archimedean_tiling::make_match(int a, int i, int b, int j) {
   }
 
 void archimedean_tiling::prepare() {
+
+  euclidean_angle_sum = 0;
+  for(int f: faces) euclidean_angle_sum += (f-2.) / f;
 
   for(int i: faces) if(i > MAX_EDGE) {
     errormsg = XLAT("currently no more than %1 edges", its(MAX_EDGE));
@@ -252,9 +257,6 @@ void archimedean_tiling::prepare() {
     }
   
   regroup();
-  
-  euclidean_angle_sum = 0;
-  for(int f: faces) euclidean_angle_sum += (f-2.) / f;
   }
 
 void archimedean_tiling::regroup() {
@@ -299,12 +301,16 @@ void archimedean_tiling::regroup() {
     } )
   }
 
+eGeometryClass archimedean_tiling::get_class() {
+  if(euclidean_angle_sum < 1.999999) return gcSphere;
+  else if(euclidean_angle_sum > 2.000001) return gcHyperbolic;
+  else return gcEuclid;
+  }
+
 void archimedean_tiling::compute_geometry() {
-  if(euclidean_angle_sum < 1.999999) ginf[gArchimedean].cclass = gcSphere;
-  else if(euclidean_angle_sum > 2.000001) ginf[gArchimedean].cclass = gcHyperbolic;
-  else ginf[gArchimedean].cclass = gcEuclid;
+  ginf[gArchimedean].cclass = get_class();
   
-  SDEBUG( printf("euclidean_angle_sum = %lf\n", double(euclidean_angle_sum)); )
+  SDEBUG( printf("euclidean_angle_sum = %f\n", float(euclidean_angle_sum)); )
   
   dynamicval<eGeometry> dv(geometry, gArchimedean);
   
@@ -340,28 +346,34 @@ void archimedean_tiling::compute_geometry() {
     ld alpha_total = 0;
 
     for(int i=0; i<N; i++) {
-      ld crmin = 0, crmax = sphere ? M_PI : 10;
+      ld crmin = 0, crmax = sphere ? M_PI/2 : 10;
+      ld el = 0;
       for(int q=0; q<100; q++) {
         circumradius[i] = (crmin + crmax) / 2;
         hyperpoint p1 = xpush0(circumradius[i]);
         hyperpoint p2 = spin(2 * M_PI / faces[i]) * p1;
         inradius[i] = hdist0(mid(p1, p2));
-        if(hdist(p1, p2) > edgelength) crmax = circumradius[i];
+        el = hdist(p1, p2);
+        if(el > edgelength) crmax = circumradius[i];
         else crmin = circumradius[i];
         }
+      if(el < edgelength - 1e-3) alpha_total += 100; // could not make an edge that long
       hyperpoint h = xpush(edgelength/2) * xspinpush0(M_PI/2, inradius[i]);
-      alphas[i] = atan2(-h[1], h[0]);
+      ld a = atan2(-h[1], h[0]);
+      if(a < 0) a += 2 * M_PI;
+      alphas[i] = a;
+      // printf("  H = %s alp = %f\n", display(h), (float) atan2(-h[1], h[0]));
       alpha_total += alphas[i];
       }
     
-    // printf("el = %lf alpha = %lf\n", double(edgelength), double(alpha_total));
+    // printf("el = %f alpha = %f\n", float(edgelength), float(alpha_total));
 
     if(sphere ^ (alpha_total > M_PI)) elmin = edgelength;
     else elmax = edgelength;
     if(euclid) break;
     }
   
-  SDEBUG( printf("computed edgelength = %lf\n", double(edgelength)); )
+  SDEBUG( printf("computed edgelength = %f\n", float(edgelength)); )
   
   triangles.clear();
   triangles.resize(2*N+2);
@@ -384,7 +396,7 @@ void archimedean_tiling::compute_geometry() {
 
   SDEBUG( for(auto& ts: triangles) {
     printf("T");
-    for(auto& t: ts) printf(" %lf@%lf", double(t.first), double(t.second));
+    for(auto& t: ts) printf(" %f@%f", float(t.first), float(t.second));
     printf("\n");
     } )
   
@@ -1010,6 +1022,11 @@ void show() {
     
     dialog::addBreak(100);
     dialog::addSelItem(XLAT("full angle"), fts(edited.euclidean_angle_sum * 180) + "°", 0);
+    dialog::addSelItem(XLAT("size of the world"), edited.world_size(), 0);
+
+    edited.compute_geometry();
+    dialog::addSelItem(XLAT("edge length"), fts(edited.edgelength) + (edited.get_class() == gcEuclid ? XLAT(" (arbitrary)") : ""), 0);
+    current.compute_geometry();
     dialog::addBreak(100);
     }
   else {
@@ -1048,6 +1065,9 @@ void show() {
       });
     
     if(archimedean) {
+      dialog::addSelItem(XLAT("size of the world"), current.world_size(), 0);
+      dialog::addSelItem(XLAT("edge length"), current.get_class() == gcEuclid ? (fts(current.edgelength) + XLAT(" (arbitrary)")) : fts6(current.edgelength), 0);
+
       dialog::addItem(XLAT("color by symmetries"), 't');
       dialog::add_action([] () {
         firstland = specialland = laCanvas;
@@ -1093,6 +1113,8 @@ void show() {
   }
 
 string archimedean_tiling::world_size() {
+  if(get_class() == gcEuclid) return "∞";
+
   int nom = 2 - N, denom = 2;
   for(int f: faces) {
     int g = gcd(denom, f);
@@ -1110,11 +1132,13 @@ string archimedean_tiling::world_size() {
   anom /= g; adenom /= g;
   if(adenom < 0) anom = -anom, adenom = -adenom;
   string s;
-  if(anom < 0) s = "exp(∞)*", anom = -anom;
+  bool hyp = (anom < 0);
+  if(hyp) anom = -anom;
   if(adenom > 1) 
     s += its(anom) + "/" + its(adenom);
   else
     s += its(anom);
+  if(hyp) s += " exp(∞)";
   return s;
   }
 
