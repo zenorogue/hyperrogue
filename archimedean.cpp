@@ -826,7 +826,7 @@ bool linespattern(cell *c) {
   }
 
 int threecolor(int id) {
-  if(haveph)
+  if(current.have_ph)
     return !pseudohept(id);
   else if(nonbitrunc)
     return current.tilegroup[id];
