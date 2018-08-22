@@ -249,8 +249,7 @@ ld displayspin(cell *c, int d) {
   else if(binarytiling) {
     if(d == NODIR) return 0;
     if(d == c->type-1) d++;
-    int dirs[8] = {0, 11, 21, 31, 42, 53, 63, 73};
-    return (-21-dirs[d]) * 42 / M_PI;
+    return -(d+2)*M_PI/4;
     }
   else if(masterless)
     return - d * 2 * M_PI / c->type;
