@@ -513,7 +513,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
       // seal entrances to the Land of Power.
       if(d == 7 && ctof(c)) {
         bool onwall = false;
-        for(int i=0; i<7; i++) if(c->move(i) && c->move(i)->land == laBarrier)
+        for(int i=0; i<c->type; i++) if(c->move(i) && c->move(i)->land == laBarrier)
           onwall = true;
         if(!onwall) for(int i=0; i<c->type; i++) {
           cell *c2 = c->move(i);
