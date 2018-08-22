@@ -538,9 +538,10 @@ void buildEquidistant(cell *c) {
     }
   
   if(c->land == laEndorian) {
+    int ct = c->type;
     if(c->landparam == 1 && ctof(c)) {
-      for(int i=0; i<S7; i++) {
-        int i1 = (i+1) % S7;
+      for(int i=0; i<ct; i++) {
+        int i1 = (i+1) % c->type;
         if(c->move(i) && c->move(i)->land != laEndorian && c->move(i)->land != laNone)
         if(c->move(i1) && c->move(i1)->land != laEndorian && c->move(i1)->land != laNone) {
           c->landflags = 2;
@@ -549,11 +550,12 @@ void buildEquidistant(cell *c) {
         }
       }
     else if(c->landparam == 1 && !ctof(c)) {
-      for(int i=0; i<S6; i++) {
-        int i1 = (i+1) % S6;
-        int i2 = (i+2) % S6;
-        int i4 = (i+4) % S6;
-        int i5 = (i+5) % S6;
+      int ct = c->type;
+      for(int i=0; i<ct; i++) {
+        int i1 = (i+1) % ct;
+        int i2 = (i+2) % ct;
+        int i4 = (i+4) % ct;
+        int i5 = (i+5) % ct;
         if(c->move(i) && c->move(i)->land == laBarrier && c->move(i)->type == 7)
         if(c->move(i1) && c->move(i1)->land != laBarrier)
         if(c->move(i2) && c->move(i2)->land != laBarrier) 
