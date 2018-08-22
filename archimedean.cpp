@@ -25,7 +25,7 @@ struct archimedean_tiling {
   int real_faces;
   int real_face_type;
 
-  int repetition = 1;
+  int repetition;
   int N;
 
   ld euclidean_angle_sum;

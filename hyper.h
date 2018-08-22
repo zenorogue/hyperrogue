@@ -521,8 +521,8 @@ struct cell : gcell {
 
 int heptagon::degree() { if(archimedean) return c7->type; else return S7; }
 
-using heptspin = walker<heptagon>;
-using cellwalker = walker<cell>;
+typedef walker<heptagon> heptspin;
+typedef walker<cell> cellwalker;
 
 #define BUGCOLORS 3
 
