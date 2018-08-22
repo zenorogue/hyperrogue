@@ -265,7 +265,7 @@ void initConfig() {
   addsaver(nofps, "no-fps", false);
   
   addsaver(irr::on, "irregular", false);
-  addsaver(irr::density, "irregular-density", 6);
+  addsaver(irr::density, "irregular-density", 2);
   addsaver(irr::cellcount, "irregular-cellcount", 150);
   addsaver(irr::quality, "irregular-quality", .2);
   addsaver(irr::place_attempts, "irregular-place", 10);
