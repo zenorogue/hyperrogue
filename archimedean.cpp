@@ -869,9 +869,9 @@ vector<pair<string, int> > samples = {
   {"(6,4,3,4)", cEucSemiregular}, 
   {"(3,6,3,6)", cEucSemiregular}, 
   {"(3,12,12)", cEucSemiregular}, 
-  {"(4,4,3L,3L,3L)[3,4]", cEucSemiregular},
-  {"(3,3,3,3,6)(1,2)(0,4)(3)", cEucSemiregular},
-  {"(3,3,4,3,4)(0,4)(1)(2,3)", cEucSemiregular},
+  {"(4,4,3L,3L,3L) [3,4]", cEucSemiregular},
+  {"(3,3,3,3,6) (1,2)(0,4)(3)", cEucSemiregular},
+  {"(3,3,4,3,4) (0,4)(1)(2,3)", cEucSemiregular},
   
   /* Platonic */
   {"(3,3,3)", cPlatonic},
@@ -887,13 +887,13 @@ vector<pair<string, int> > samples = {
   {"(4,6,6)", cArchimedean},
   {"(3,4,4,4)", cArchimedean},
   {"(4,6,8)", cArchimedean}, 
-  {"(3,3,3,3,4)(1,2)(0,4)(3)", cArchimedean},
+  {"(3,3,3,3,4) (1,2)(0,4)(3)", cArchimedean},
   {"(3,5,3,5)", cArchimedean},
   {"(3,10,10)", cArchimedean},
   {"(5,6,6)", cArchimedean},
   {"(3,4,5,4)", cArchimedean},
   {"(4,6,10)", cArchimedean},
-  {"(3,3,3,3,5)(1,2)(0,4)(3)", cArchimedean},
+  {"(3,3,3,3,5) (1,2)(0,4)(3)", cArchimedean},
   
   /* prisms */
   {"(3,4,4)", cPrism},
@@ -917,8 +917,10 @@ vector<pair<string, int> > samples = {
   {"(7,6^2)", cHyperSemi},
   {"(4,6,14)", cHyperSemi},
   {"(3,4,7,4)", cHyperSemi},
-  {"(3,3,3,3,7)(1,2)(0,4)(3)", cHyperSemi}, 
-  {"(3HL,6,6,6)(1,0)[2](3)", cHyperSemi},
+  {"(6,6,4L,4L)", cHyperSemi},
+  {"(8,8,4L,4L)", cHyperSemi},
+  {"(3,3,3,3,7) (1,2)(0,4)(3)", cHyperSemi}, 
+  {"(3H,6,6,6) (1,0)[2](3)", cHyperSemi},
   {"(3,4,4L,4L,4)", cHyperSemi}, // buggy
   {"(3l,4l,4,4,4) (0 1)[2 3](4)", cHyperSemi},
   {"(3,4,4,4,4) (0 1)(2)(3)(4)", cHyperSemi},
@@ -933,10 +935,10 @@ vector<pair<string, int> > samples = {
   {"(3,5,5,5,5,5) (0 1)(2)(3)(4)(5)", cHyperSemi}, 
   
   /* interesting symmetry variants */
-  {"(3,3,3,3,3,3)(0,1)(2,3)(4,5)", cEucRegular},
+  {"(3,3,3,3,3,3) (0,1)(2,3)(4,5)", cEucRegular},
 
   /* with digons */
-  {"(2,3,3,3,3,3) (2,3) (4,5)", cWeird},
+  {"(2,3,3,3,3,3) (2,3)(4,5)", cWeird},
   {"(6,6)", cWeird},
   {"(2,2)", cWeird},
   {"(2,2,2,2,2,2)", cWeird},
