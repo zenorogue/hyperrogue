@@ -1187,7 +1187,10 @@ land_validity_t& land_validity(eLand l) {
   if((isWarped(l) || l == laDual) && irr::on && !irr::bitruncations_performed)
     return dont_work;
   
-  if(irr::on && among(l, laPrairie, laBlizzard, laVolcano, laMirror, laMirrorOld))
+  if(irr::on && among(l, laPrairie, laMirror, laMirrorOld))
+    return dont_work;
+
+  if(irr::on && among(laBlizzard, laVolcano) && !sphere)
     return dont_work;
 
   // equidistant-based lands
@@ -1249,13 +1252,13 @@ land_validity_t& land_validity(eLand l) {
     return not_in_chaos;
   
   // this pattern does not work on elliptic and small spheres
-  if((l == laBlizzard || l == laVolcano) && elliptic && S7 < 5)
+  if((l == laBlizzard || l == laVolcano) && elliptic && S7 < 5 && !archimedean)
     return not_enough_space;
   
   // ... and it works in gp only partially
-  if((l == laBlizzard || l == laVolcano) && gp::on)
+  if((l == laBlizzard || l == laVolcano) && gp::on && (old_daily_id < 33 || !sphere))
     return partially_implemented;
-  
+
   // Kraken does not really work on odd-sided cells;
   // a nice football pattern will solve the problem by forbidding the Kraken to go there
   // (but we do have to allow it in non-bitrunc standard)
