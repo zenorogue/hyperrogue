@@ -1319,7 +1319,7 @@ land_validity_t& land_validity(eLand l) {
     else if(quotient) return pattern_incompatibility;
     }
 
-  if(among(l, laEmerald, laCamelot, laDryForest) && a4 && nonbitrunc)
+  if(among(l, laEmerald, laCamelot, laDryForest) && (AS3 != 3) && nonbitrunc)
     return hedgehogs;  
 
   // ... wineyard pattern is GOOD only in the standard geometry or Euclidean
