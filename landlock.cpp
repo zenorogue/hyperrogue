@@ -1148,11 +1148,11 @@ land_validity_t& land_validity(eLand l) {
     return pattern_incompatibility;
 
   // available only in non-standard geometries
-  if(l == laMirrorOld && !geometry)
+  if(l == laMirrorOld && !geometry && !gp::on && !irr::on)
     return better_version_exists;
   
   // available only in standard geometry
-  if(l == laMirror && geometry)
+  if(l == laMirror && (geometry || gp::on || irr::on))
     return not_implemented; 
   
   // Halloween needs bounded world (can be big bounded)
