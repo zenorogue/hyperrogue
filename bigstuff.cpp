@@ -1152,6 +1152,7 @@ bool openplains(cell *c) {
     return true;
     }
   int dlimit = getDistLimit();
+  if(archimedean) dlimit--;
   if(dlimit < 7) {
     celllister cl(c, dlimit, 1000000, NULL);
     int bad = 0;
