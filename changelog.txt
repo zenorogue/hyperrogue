@@ -2614,4 +2614,27 @@ Mobile version improvements (not yet released:)
 - Strange Challenge bans: Orb of the Warp and Orb of Lava in non-bitruncated geometries; Land of Storms in finite geometries
 - translation update (PL, CZ)
 
+2018.08.05 17:40 Update 10.4q
+
+New geometries:
+
+* Archimedean tilings. If all faces are regular, and all vertices are identical, you can pobably play HyperRogue on it.
+
+* A variant of the binary tiling. A horocycle-based tiling great with horocycle-based and equidistant-based lands.
+
+Bugfixes:
+
+* fixed Ocean not displaying at all at low detail
+* fixed crashes when collecting Hypersian Rugs in some geometries
+* fixed the description of treasures which unlock secondary orbs -- other treasure name given correctly
+* a button appears when player not visible; fixed space-centering
+* land validity: Warped Coast knows that it is OK in chessboard geometries
+* digons arising in the Warped Coast in some geometries are now shown as narrow tiles
+* Blizzard/Volcanic should now work on Goldberg, irregular, and Archimedean spheres
+* improved mirrors in various geometries
+* improved the display of huge shapes (such as tetrahedron faces) in spherical geometries
+* improved the shadows
+* GP(x,y) spheres were not displayed correctly if x and y were very large
+* texture remapping: better display of slave tiles, improved remapping chessboard tilings to Goldberg
+* reduced the default value of irregular density to 2
 
