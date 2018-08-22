@@ -1102,6 +1102,7 @@ int geosupport_football() {
 
 int pattern_threecolor(cell *c) {
   if(archimedean) return arcm::threecolor(arcm::id_of(c->master));
+  if(irr::on || binarytiling) return !pseudohept(c);
   if(S3 == 3 && !(S7&1) && gp_threecolor() == 1 && c->master->c7 != c) {
     auto li = gp::get_local_info(c);
     int rel = (li.relative.first - li.relative.second + MODFIXER) % 3;
