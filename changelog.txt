@@ -2647,3 +2647,10 @@ Bugfixes:
 * fixed a bug which crashed spherical Archimedean tilings on Windows
 * more statistics on Archimedean tilings
 * fixed the Land of Power in some geometries
+
+2018.08.24 23:53 Update 10.4s
+
+* previous page button
+* another 3666 variant
+* pressing Backspace while the Archimedean symbol is already deleted does nothing instead of leaving the menu
+* Hypersian Rug mode works with Archimedean tilings
