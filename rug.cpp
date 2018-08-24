@@ -588,7 +588,14 @@ void buildRug() {
   for(auto& p: vptr) {
     cell *c = p.first;
     rugpoint *v = p.second;
-    for(int j=0; j<c->type; j++) try {
+    
+    if(archimedean) {
+      rugpoint *p[MAX_EDGE+1];
+      for(int j=0; j<c->type; j++) p[j] = findOrAddRugpoint(ggmatrix(c) * get_corner_position(c, j), v->dist);
+      for(int j=0; j<c->type; j++) addTriangle(v, p[j], p[(j+1) % c->type]);
+      }
+    
+    else for(int j=0; j<c->type; j++) try {
       cell *c2 = c->move(j);
       rugpoint *w = vptr.at(c2);
       // if(v<w) addEdge(v, w);
