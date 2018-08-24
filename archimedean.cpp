@@ -1098,7 +1098,8 @@ void show() {
     if(sym == SDLK_LEFT) editpos--;
     if(sym == SDLK_RIGHT) editpos++;
     dialog::handleNavigation(sym, uni);
-    if(symbol_editing && uni == 8 && editpos > 0) {
+    if(symbol_editing && uni == 8) {
+      if(editpos == 0) return;
       edited.symbol.replace(editpos-1, 1, "");
       editpos--;
       edited.parse(edited.symbol);
