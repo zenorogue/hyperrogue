@@ -921,6 +921,7 @@ vector<pair<string, int> > samples = {
   {"(8,8,4L,4L)", cHyperSemi},
   {"(3,3,3,3,7) (1,2)(0,4)(3)", cHyperSemi}, 
   {"(3H,6,6,6) (1,0)[2](3)", cHyperSemi},
+  {"(3,6,6,6) (0 1)(2)(3)", cHyperSemi},
   {"(3,4,4L,4L,4)", cHyperSemi}, // buggy
   {"(3l,4l,4,4,4) (0 1)[2 3](4)", cHyperSemi},
   {"(3,4,4,4,4) (0 1)(2)(3)(4)", cHyperSemi},
