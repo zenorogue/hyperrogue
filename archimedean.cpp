@@ -1066,6 +1066,11 @@ void show() {
         spos = 0;
       else spos = nextpos;
       });
+    dialog::addItem(XLAT("previous page"), '=');
+    dialog::add_action([] () {
+      spos -= 10;
+      if(spos < 0) spos = 0;
+      });
     
     if(archimedean) {
       dialog::addSelItem(XLAT("size of the world"), current.world_size(), 0);
