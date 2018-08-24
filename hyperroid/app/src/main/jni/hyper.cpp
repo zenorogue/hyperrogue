@@ -58,9 +58,6 @@ void gdpush(int t);
 
 void shareScore(MOBPAR_FORMAL);
 
-const char *scorefile, *conffile;
-std::string levelfile, picfile;
-
 bool settingsChanged = false;
 
 struct transmatrix getOrientation();

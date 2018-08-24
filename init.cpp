@@ -150,9 +150,9 @@ void handleclick(MOBPAR_FORMAL) {
       else if(statkeys && getcstat == 't') {
         if(playermoved && items[itStrongWind]) {
           cell *c = whirlwind::jumpDestination(cwt.at);
-          if(c) centerover.c = c, centerover.spin = 0;
+          if(c) centerover.at = c, centerover.spin = 0;
           }
-        targetRangedOrb(centerover.c, roKeyboard);
+        targetRangedOrb(centerover.at, roKeyboard);
         getcstat = 0;
         }
 
@@ -172,7 +172,7 @@ void handleclick(MOBPAR_FORMAL) {
                 ors::reset();
                 centerpc(INF);
                 View = Id;
-                viewctr.h = cwt.at->master;
+                viewctr.at = cwt.at->master;
                 }
               andmode = 11;
               }
@@ -207,7 +207,7 @@ void handleclick(MOBPAR_FORMAL) {
       if(!playerfound) {
         centerpc(INF);
         View = Id;
-        viewctr.h = cwt.at->master;
+        viewctr.at = cwt.at->master;
         }
       playermoved = true;
       }
