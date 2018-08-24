@@ -186,6 +186,8 @@ Java_com_roguetemple_hyperroid_HyperRogue_getuColor(MOBPAR_FORMAL)
   return glhr::current->uColor;
   }
 
+const char *scorefile;
+
 string sscorefile, sconffile, scachefile;
 
 #include <sys/stat.h>
