@@ -7131,3 +7131,8 @@ S("currently no more than %1 faces in vertex", "obecnie nie więcej niż %1 ści
 N("Canvas", GEN_N, "Płótno", "Płótna", "Płótno", "na Płótnie")
 S("find the player", "do gracza")
 S("press SPACE to find the player", "SPACE = do gracza")
+
+S("edge length", "długość krawędzi")
+S(" (arbitrary)", " (dowolna)") // arbitrary edge length
+S("previous page", "poprzednia strona")
+S("Defined pattern.", "Wzór zdefiniowany.")

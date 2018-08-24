@@ -7376,3 +7376,9 @@ S("currently no more than %1 faces in vertex", "momentálně maximálně %1 stě
 N("Canvas", GEN_N, "Plátno", "Plátna", "Plátno", "na Plátně")
 S("find the player", "k hráči")
 S("press SPACE to find the player", "Mezerník = k hráči")
+
+S("edge length", "délka hrany")
+S(" (arbitrary)", " (libovolné)") // arbitrary edge length
+S("previous page", "předchozí stránka")
+S("Defined pattern.", "Vzor definován.")
+
