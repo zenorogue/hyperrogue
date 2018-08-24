@@ -2614,7 +2614,7 @@ Mobile version improvements (not yet released:)
 - Strange Challenge bans: Orb of the Warp and Orb of Lava in non-bitruncated geometries; Land of Storms in finite geometries
 - translation update (PL, CZ)
 
-2018.08.05 17:40 Update 10.4q
+2018.08.22 17:40 Update 10.4q
 
 New geometries:
 
@@ -2638,3 +2638,12 @@ Bugfixes:
 * texture remapping: better display of slave tiles, improved remapping chessboard tilings to Goldberg
 * reduced the default value of irregular density to 2
 
+2018.08.23 01:53 Update 10.4r
+
+* added spaces in sample Archimedean tiling specifications
+* added some new Archimedean tilings to the list
+* removed the 'L' marker from Fulgur14's snub tiling
+* changed the way 'size of the world' is displayed for hyperbolic tilings
+* fixed a bug which crashed spherical Archimedean tilings on Windows
+* more statistics on Archimedean tilings
+* fixed the Land of Power in some geometries
