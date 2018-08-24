@@ -14,7 +14,7 @@ namespace binary {
     bd_down_right = 6 /* for cells of degree 7 */
     };
   
-  int typeof(heptagon *h) {
+  int type_of(heptagon *h) {
     return h->c7->type;
     }
   
@@ -34,9 +34,9 @@ namespace binary {
     if(d == 2) return 2*r;
     if(d == 3) return 2*r - 1;
     if(d == 4) return r-1;
-    if(d == 5 && typeof(h) == 6) return r / 2;
-    if(d == 5 && typeof(h) == 7) return (r-1) / 2;
-    if(d == 6 && typeof(h) == 7) return (r+1) / 2;
+    if(d == 5 && type_of(h) == 6) return r / 2;
+    if(d == 5 && type_of(h) == 7) return (r-1) / 2;
+    if(d == 6 && type_of(h) == 7) return (r+1) / 2;
     breakhere();
     }
   #endif
@@ -48,7 +48,7 @@ namespace binary {
   heptagon *path(heptagon *h, int d, int d1, std::initializer_list<int> p) {
     static int rec = 0;
     rec++; if(rec>100) exit(1);
-    // printf("{generating path from %p (%d/%d) dir %d:", h, typeof(h), mapside(h), d);
+    // printf("{generating path from %p (%d/%d) dir %d:", h, type_of(h), mapside(h), d);
     heptagon *h1 = h;
     for(int d0: p) {
       // printf(" [%d]", d0);
@@ -97,21 +97,21 @@ namespace binary {
     auto h = parent;
     switch(d) {
       case bd_right: {
-        if(mapside(h) > 0 && typeof(h) == 7) 
+        if(mapside(h) > 0 && type_of(h) == 7) 
           return path(h, d, bd_left, {bd_left, bd_down, bd_right, bd_up});
         else if(mapside(h) >= 0) 
-          return build(parent, bd_right, bd_left, typeof(parent) ^ 1, 1, 0);
-        else if(typeof(h) == 6)
+          return build(parent, bd_right, bd_left, type_of(parent) ^ 1, 1, 0);
+        else if(type_of(h) == 6)
           return path(h, d, bd_left, {bd_down, bd_right, bd_up, bd_left});
         else
           return path(h, d, bd_left, {bd_down_right, bd_up});
         }
       case bd_left: {
-        if(mapside(h) < 0 && typeof(h) == 7) 
+        if(mapside(h) < 0 && type_of(h) == 7) 
           return path(h, d, bd_right, {bd_right, bd_down, bd_left, bd_up});
         else if(mapside(h) <= 0) 
-          return build(parent, bd_left, bd_right, typeof(parent) ^ 1, -1, 0);
-        else if(typeof(h) == 6)
+          return build(parent, bd_left, bd_right, type_of(parent) ^ 1, -1, 0);
+        else if(type_of(h) == 6)
           return path(h, d, bd_right, {bd_down, bd_left, bd_up, bd_right});
         else
           return path(h, d, bd_right, {bd_down_left, bd_up});
@@ -126,7 +126,7 @@ namespace binary {
         return build(parent, bd_up, bd_down, 6, mapside(parent), 1);
       default:
         /* bd_down */
-        if(typeof(h) == 6) {
+        if(type_of(h) == 6) {
           if(mapside(h) == 0)
             return build(parent, bd_down, bd_up, 6, 0, -1);
           else if(mapside(h) == 1)
@@ -185,7 +185,7 @@ namespace binary {
     transmatrix gm = Id, where = Id;
     while(h1 != h2) {
       if(h1->distance <= h2->distance) {
-        if(typeof(h2) == 6)
+        if(type_of(h2) == 6)
           h2 = hr::createStep(h2, bd_down), where = xpush(-log(2)) * where;
         else if(mapside(h2) == 1)
           h2 = hr::createStep(h2, bd_left), where = parabolic(+1) * where;
@@ -193,7 +193,7 @@ namespace binary {
           h2 = hr::createStep(h2, bd_right), where = parabolic(-1) * where;
         }
       else {
-        if(typeof(h1) == 6)
+        if(type_of(h1) == 6)
           h1 = hr::createStep(h1, bd_down), gm = gm * xpush(log(2));
         else if(mapside(h1) == 1)
           h1 = hr::createStep(h1, bd_left), gm = gm * parabolic(-1);
