@@ -4780,8 +4780,8 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
       else {
         for(int t=0; t<c->type; t++)
           if(c->move(t) && c->move(t) < c)
-          queueline(V * get_corner_position(c, (t+c->type-1)%c->type),
-                    V * get_corner_position(c, t%c->type),
+          queueline(V * get_corner_position(c, t%c->type),
+                    V * get_corner_position(c, (t+1)%c->type),
                     gridcolor(c, c->move(t)), prec);
         }
       }
