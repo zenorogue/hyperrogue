@@ -884,6 +884,7 @@ namespace patterns {
     
     if(binarytiling) {
       if(pat == PAT_SINGLETYPE) si.id = 0;
+      else si.id = c->type & 1;
       si.dir = 2;
       return si;
       }
