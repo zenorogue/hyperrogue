@@ -1067,7 +1067,7 @@ void showMenu() {
 #endif
     dialog::addSelItem(XLAT("precision"), its(config.gsplits), 'P');
 
-    dialog::addBoolItem(XLAT("Canvas"), specialland == laCanvas, 'X');
+    dialog::addBoolItem(XLATN("Canvas"), specialland == laCanvas, 'X');
     dialog::add_action([] () {
       bool inwhite = specialland == laCanvas && patterns::whichCanvas == 'g' && patterns::canvasback == 0xFFFFFF;
       if(inwhite) 
