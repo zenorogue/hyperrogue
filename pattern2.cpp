@@ -1882,6 +1882,16 @@ namespace patterns {
     pushScreen(showChangeablePatterns);
     computeCgroup(); 
     }  
+
+  int subcode(cell *c, const patterninfo& si) {
+    if(irr::on)
+      return irr::cellindex[c] << 8;
+    else if(archimedean)
+      return arcm::id_of(c->master) << 8;
+    else if(!gp::on) return 0;
+    else if(c == c->master->c7) return (fixdir(si.dir, c) << 8);
+    else return (get_code(gp::get_local_info(c)) << 16) | (fixdir(si.dir, c) << 8);
+    }  
   }
 
 bool is_master(cell *c) { 

@@ -172,13 +172,13 @@ namespace mapstream {
     int32_t id = cellids.count(cwt.at) ? cellids[cwt.at] : -1;
     save(id);
 
-    for(int i=0; i<USERSHAPEGROUPS; i++) for(int j=0; j<USERSHAPEIDS; j++) {
-      usershape *us = usershapes[i][j];
+    for(int i=0; i<mapeditor::USERSHAPEGROUPS; i++) for(auto usp: usershapes[i]) {
+      usershape *us = usp.second;
       if(!us) continue;
       
       for(int l=0; l<USERLAYERS; l++) if(isize(us->d[l].list)) {
         usershapelayer& ds(us->d[l]);
-        save(i); save(j); save(l); save(ds.sym); save(ds.rots); save(ds.color);
+        save(i); save(usp.first); save(l); save(ds.sym); save(ds.rots); save(ds.color);
         n = isize(ds.list); save(n);
         savePoint(ds.shift);
         savePoint(ds.spin);
@@ -335,8 +335,7 @@ namespace mapstream {
       int i = loadInt();
       if(i == -1) break;
       int j = loadInt(), l = loadInt();
-      if(i<0 || i >= USERSHAPEGROUPS) break;
-      if(j<0 || j >= USERSHAPEIDS) break;
+      if(i<0 || i >= mapeditor::USERSHAPEGROUPS) break;
       if(l<0 || l >= USERLAYERS) break;
 
       initShape(i, j);
@@ -532,18 +531,19 @@ namespace mapeditor {
     return 1;
     }
   
-  int drawcellShapeGroup() {
-    if(drawcell == cwt.at && drawplayer) return 0;
-    if(drawcell->monst) return 1;
-    if(drawcell->item) return 2;
-    return 3;
+  eShapegroup drawcellShapeGroup() {
+    if(drawcell == cwt.at && drawplayer) return sgPlayer;
+    if(drawcell->monst) return sgMonster;
+    if(drawcell->item) return sgItem;
+    return sgFloor;
     }
   
   int drawcellShapeID() {
     if(drawcell == cwt.at && drawplayer) return vid.cs.charid;
     if(drawcell->monst) return drawcell->monst;
     if(drawcell->item) return drawcell->item;
-    return patterns::getpatterninfo0(drawcell).id;
+    auto si = patterns::getpatterninfo0(drawcell);
+    return si.id + patterns::subcode(drawcell, si);
     }
 
   bool editingShape(int group, int id) {
@@ -995,31 +995,27 @@ namespace mapeditor {
       sg = drawcellShapeGroup();
       
       switch(sg) {
-        case 0:
+        case sgPlayer:
           line1 = XLAT("character");
           line2 = csname(vid.cs);
           break;
         
-        case 1:
+        case sgMonster:
           line1 = XLAT("monster");
           line2 = XLAT1(minf[drawcell->monst].name);
           break;
           
-        case 2:
+        case sgItem:
           line1 = XLAT("item");
           line2 = XLAT1(iinf[drawcell->item].name);
           break;
         
-        case 3:
+        case sgFloor:
           line1 = XLAT("floor");
-          line2 = XLAT(ishept(drawcell) ? "heptagonal" : 
-            ishex1(drawcell) ? "hexagonal #1" : "hexagonal");
-          break;
-        
-        default:
-          line1 = XLAT("floor/pattern");
-          line2 = "#" + its(patterns::getpatterninfo0(drawcell).id);
-          break;
+          line2 = "#" + its(drawcellShapeID());
+          /* line2 = XLAT(ishept(drawcell) ? "heptagonal" : 
+            ishex1(drawcell) ? "hexagonal #1" : "hexagonal"); */
+          break;        
         }
       
       us =usershapes[drawcellShapeGroup()][drawcellShapeID()];
@@ -1031,7 +1027,7 @@ namespace mapeditor {
     displayfr(8, 8+fs, 2, vid.fsize, line1, 0xC0C0C0, 0);
     
     if(!intexture) {
-      if(sg >= 3)
+      if(sg == sgFloor)
         displayButton(8, 8+fs*2, line2 + XLAT(" (r = complex tesselations)"), 'r', 0);
       else
         displayfr(8, 8+fs*2, 2, vid.fsize, line2, 0xC0C0C0, 0);
@@ -1387,14 +1383,14 @@ namespace mapeditor {
     fprintf(f, "%x\n", VERNUM_HEX);
     if(VERNUM_HEX >= 0xA0A0)
       fprintf(f, "%d %d %d %d\n", geometry, nonbitrunc, patterns::whichPattern, patterns::subpattern_flags);
-    for(int i=0; i<USERSHAPEGROUPS; i++) for(int j=0; j<USERSHAPEIDS; j++) {
-      usershape *us = usershapes[i][j];
+    for(int i=0; i<USERSHAPEGROUPS; i++) for(auto usp: usershapes[i]) {
+      usershape *us = usp.second;
       if(!us) continue;
       
       for(int l=0; l<USERLAYERS; l++) if(isize(us->d[l].list)) {
         usershapelayer& ds(us->d[l]);
         fprintf(f, "\n%d %d %d %d %d %6x %d\n", 
-          i, j, l, ds.sym, ds.rots, ds.color, int(isize(ds.list)));
+          i, usp.first, l, ds.sym, ds.rots, ds.color, int(isize(ds.list)));
         writeHyperpoint(f, ds.shift);
         writeHyperpoint(f, ds.spin);
         fprintf(f,"\n");
@@ -1552,10 +1548,7 @@ namespace mapeditor {
     else {
       dslayer %= USERLAYERS;
 
-      int sg = drawcellShapeGroup();
-
-      for(int i=0; i<USERSHAPEIDS; i++) if(editingShape(sg, i))
-        applyToShape(sg, i, uni, mh);
+      applyToShape(drawcellShapeGroup(), drawcellShapeID(), uni, mh);
 
       if(uni == 'e' || (uni == '-' && mousekey == 'e')) {
         initdraw(mouseover ? mouseover : cwt.at);
@@ -1568,13 +1561,13 @@ namespace mapeditor {
       if(uni == 'b') autochoose = !autochoose;
       
       if(uni == 'S') {
-        for(int i=0; i<USERSHAPEGROUPS; i++) for(int j=0; j<USERSHAPEIDS; j++) {
-          usershape *us = usershapes[i][j];
+        for(int i=0; i<USERSHAPEGROUPS; i++) for(auto usp: usershapes[i]) {
+          auto us = usp.second;
           if(!us) continue;
           
           for(int l=0; l<USERLAYERS; l++) if(isize(us->d[l].list)) {
             usershapelayer& ds(us->d[l]);
-            printf("// %d %d %d [%06X]\n", i, j, l, ds.color);
+            printf("// %d %d %d [%06X]\n", i, usp.first, l, ds.color);
             printf(" ID, %d, %d, ", us->d[l].rots, us->d[l].sym?2:1); 
             for(int i=0; i<isize(us->d[l].list); i++) 
               printf("%lf,%lf, ", double(us->d[l].list[i][0]), double(us->d[l].list[i][1]));
@@ -1603,10 +1596,12 @@ namespace mapeditor {
             });
 
       if(sym == SDLK_F5) {
-        for(int i=0; i<USERSHAPEGROUPS; i++)
-        for(int j=0; j<USERSHAPEIDS; j++)
-          if(usershapes[i][j]) delete usershapes[i][j];
-        }      
+        for(int i=0; i<USERSHAPEGROUPS; i++) {
+          for(auto us: usershapes[i])
+            if(us.second) delete us.second;
+          usershapes[i].clear();
+          }
+        }
       }
 
     if(rebuildPolys)
@@ -1656,12 +1651,18 @@ namespace mapeditor {
     }
 #endif
 
-  bool drawUserShape(transmatrix V, int group, int id, int color, cell *c) {
+  bool haveUserShape(eShapegroup group, int id) {
   #if !CAP_EDIT
     return false;
   #else
-  
-    id = id % USERSHAPEIDS;
+    return usershapes[group].count(id) && usershapes[group][id];
+  #endif
+    }
+
+  bool drawUserShape(transmatrix V, eShapegroup group, int id, int color, cell *c, int priority) {
+  #if !CAP_EDIT
+    return false;
+  #else
   
     usershape *us = usershapes[group][id];
     if(us) {  
@@ -1671,7 +1672,7 @@ namespace mapeditor {
         hpcshape& sh(ds.sh);
     
         if(sh.s != sh.e) 
-          queuepoly(V, sh, ds.color ? ds.color : color);
+          queuepolyat(V, sh, ds.color ? ds.color : color, priority);
         }
       }
   

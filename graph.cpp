@@ -603,6 +603,9 @@ bool drawItemType(eItem it, cell *c, const transmatrix& V, int icol, int ticks, 
     }
   
   if(c && conformal::includeHistory && conformal::infindhistory.count(c)) poly_outline = OUTLINE_DEAD;
+
+  if(c == mapeditor::drawcell && mapeditor::drawcellShapeGroup() == mapeditor::sgItem)
+    mapeditor::drawtrans = V;
     
   if(!mmitem && it) return true;
   
@@ -659,7 +662,7 @@ bool drawItemType(eItem it, cell *c, const transmatrix& V, int icol, int ticks, 
     xsh = NULL;
     }
   
-  else if(mapeditor::drawUserShape(V, 2, it, darkena(icol, 0, 0xFF), c)) ;
+  else if(mapeditor::drawUserShape(V, mapeditor::sgItem, it, darkena(icol, 0, 0xFF), c)) ;
   
   else if(it == itRose) {
     for(int u=0; u<4; u++)
@@ -766,6 +769,9 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, int col, dou
   else if (m == moTortoise || m == moPlayer || (where && !where->stuntime)) ;
   else if(where && !(isMetalBeast(m) && where->stuntime == 1))
     drawStunStars(V, where->stuntime);
+
+  if(where == mapeditor::drawcell && mapeditor::drawcellShapeGroup() == (m == moPlayer ? mapeditor::sgPlayer : mapeditor::sgMonster)) 
+    mapeditor::drawtrans = V;
     
   if(m == moTortoise) {
     int bits = where ? tortoise::getb(where) : tortoise::last;
@@ -777,10 +783,8 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, int col, dou
   else if(m == moPlayer) {
   
     charstyle& cs = getcs();
-      
-    bool havus = mapeditor::drawUserShape(V, 0, cs.charid, cs.skincolor, where);
-    
-    if(mapeditor::drawplayer && !havus) {
+
+    if(mapeditor::drawplayer && !mapeditor::drawUserShape(V, mapeditor::sgPlayer, cs.charid, cs.skincolor, where)) {
     
       if(cs.charid >= 8) {
         if(!mmspatial && !footphase)
@@ -906,12 +910,14 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, int col, dou
       }
     }
   
-  else if(mapeditor::drawUserShape(V, 1, m, darkena(col, 0, 0xFF), where)) return false;
+  else if(mapeditor::drawUserShape(V, mapeditor::sgMonster, m, darkena(col, 0, 0xFF), where)) {
+    return false;
+    }
 
   else if(isMimic(m) || m == moShadow || m == moIllusion) {
     charstyle& cs = getcs();
     
-    if(mapeditor::drawUserShape(V, 0, (cs.charid&1)?1:0, darkena(col, 0, 0x80), where)) return false;
+    if(mapeditor::drawUserShape(V, mapeditor::sgPlayer, cs.charid, darkena(col, 0, 0x80), where)) return false;
     
     if(cs.charid >= 8) {
       queuepoly(VABODY, shWolfBody, darkena(col, 0, 0xC0));
@@ -1869,8 +1875,14 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, int col) {
           Vb = Vb * ddspin(c, c->mondir);
           length = cellgfxdist(c, c->mondir);
           }
+        
+        if(c == mapeditor::drawcell && mapeditor::drawcellShapeGroup() == 1)
+          mapeditor::drawtrans = Vb;
 
-        if(mapeditor::drawUserShape(Vb, 1, c->monst, (col << 8) + 0xFF, c)) return false;
+        if(mapeditor::drawUserShape(Vb, mapeditor::sgMonster, c->monst, (col << 8) + 0xFF, c)) {
+          if(c == mapeditor::drawcell) mapeditor::drawtrans = Vb;
+          return false;
+          }
 
         if(isIvy(c) || isMutantIvy(c) || c->monst == moFriendlyIvy)
           queuepoly(Vb, shIBranch, (col << 8) + 0xFF);
@@ -3117,6 +3129,8 @@ void floorShadow(cell *c, const transmatrix& V, int col) {
   if(qfi.shape) {
     queuepolyat(V * qfi.spin * shadowmulmatrix, *qfi.shape, col, PPR_WALLSHADOW);
     }
+  else if(qfi.usershape >= 0)
+    mapeditor::drawUserShape(V * qfi.spin * shadowmulmatrix, mapeditor::sgFloor, qfi.usershape, col, c, PPR_WALLSHADOW);
   else 
     draw_shapevec(c, V, qfi.fshape->shadow, col, PPR_WALLSHADOW);
   }
@@ -3173,7 +3187,7 @@ void escherSidewall(cell *c, int sidepar, const transmatrix& V, int col) {
 
 bool placeSidewall(cell *c, int i, int sidepar, const transmatrix& V, int col) {
 
-  if(!qfi.fshape || !qfi.fshape->is_plain || !validsidepar[sidepar]) {
+  if(!qfi.fshape || !qfi.fshape->is_plain || !validsidepar[sidepar] || qfi.usershape >= 0) {
     escherSidewall(c, sidepar, V, col);
     return true;
     }
@@ -3742,7 +3756,12 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
     chasmg = chasmgraph(c);
     
     int fd = getfd(c);
-                     
+    
+    int flooralpha = 255;
+
+    if((cmode & sm::DRAW) && mapeditor::drawcell && mapeditor::drawcellShapeGroup() == 3)
+      flooralpha = 0xC0;
+
     if(c->wall == waMagma) fd = 0;
     
     poly_outline = OUTLINE_DEFAULT;
@@ -3766,6 +3785,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
     poly_outline = OUTLINE_DEFAULT;
 
     if(!wmascii) {
+      int gc;
     
       // floor
       
@@ -3775,6 +3795,9 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         
       bool eoh = euclid || nonbitrunc;
 
+      if(c == mapeditor::drawcell)
+        mapeditor::drawtrans = V * applyPatterndir(c, si);
+        
       if(c->wall == waChasm) {
         zcol = 0;
         int rd = rosedist(c);
@@ -3790,8 +3813,10 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         }
 
 #if CAP_EDIT
-      else if(mapeditor::drawUserShape(V * applyPatterndir(c, si), 3, si.id,
-        darkena(fcol, fd, (cmode & sm::DRAW) ? 0xC0 : 0xFF), c));
+      else if(mapeditor::haveUserShape(mapeditor::sgFloor, gc = si.id + patterns::subcode(c, si))) {
+        qfi.usershape = gc;
+        qfi.spin = applyPatterndir(c, si);
+        }
 
       else if(patterns::whichShape == '7')
         set_floor(shBigHepta);
@@ -4183,7 +4208,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         draw_qfi(c, (*Vdp), darkena(fcol, fd0, 0x80), PPR_LAKELEV);
         }
       else {
-        draw_qfi(c, V, darkena(fcol, fd, 0xFF));
+        draw_qfi(c, V, darkena(fcol, fd, flooralpha));
         }
       
       // walls
@@ -4611,15 +4636,6 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
          if(erase) fallanims.erase(c);
          }
        }
-
-#if CAP_EDIT
-    if(c == mapeditor::drawcell) {
-      if(mapeditor::drawcellShapeGroup() == 2) {
-        mapeditor::drawtrans = V;
-        }
-      qfi_dc = qfi;
-      }
-#endif
 
     if(it) {
       if((c->land == laWhirlwind || c->item == itBabyTortoise) && c->wall != waBoat) {

@@ -572,19 +572,21 @@ namespace gp {
   }
 
 qfloorinfo qfi;
-qfloorinfo qfi_dc;
 
 int chasmg;
 
 void set_no_floor() {
   qfi.fshape = NULL;
   qfi.shape = NULL;
+  qfi.tinf = NULL;
+  qfi.usershape = -1;
   }
 
 void set_floor(floorshape& sh) {
   qfi.fshape = &sh;
   qfi.shape = NULL;
   qfi.tinf = NULL;
+  qfi.usershape = -1;
   }
 
 void set_floor(hpcshape& sh) {
@@ -592,12 +594,14 @@ void set_floor(hpcshape& sh) {
   qfi.fshape = NULL;
   qfi.spin = Id;
   qfi.tinf = NULL;
+  qfi.usershape = -1;
   }
 
 void set_floor(const transmatrix& spin, hpcshape& sh) {
   qfi.shape = &sh;
   qfi.fshape = NULL;
   qfi.spin = spin;
+  qfi.usershape = -1;
   }
 
 void draw_shapevec(cell *c, const transmatrix& V, const vector<hpcshape> &shv, int col, int prio = -1) {
@@ -639,6 +643,9 @@ void draw_floorshape(cell *c, const transmatrix& V, const floorshape &fsh, int c
 void draw_qfi(cell *c, const transmatrix& V, int col, int prio = -1, vector<hpcshape> floorshape::* tab = &floorshape::b) {
   if(qfi.shape)
     queuepolyat(V * qfi.spin, *qfi.shape, col, prio);
+  else if(qfi.usershape >= 0) {
+    mapeditor::drawUserShape(V * qfi.spin, mapeditor::sgFloor, qfi.usershape, col, c);
+    }
   else if(!qfi.fshape) ;
 #if CAP_TEXTURE
   else if(qfi.tinf) {

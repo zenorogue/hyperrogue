@@ -1363,8 +1363,6 @@ hpcshape
 ld tentacle_length;
 
 #define USERLAYERS 32
-#define USERSHAPEGROUPS 4
-#define USERSHAPEIDS 4096
 
 struct usershapelayer {
   vector<hyperpoint> list;
@@ -1379,7 +1377,7 @@ struct usershape {
   usershapelayer d[USERLAYERS];
   };
 
-usershape *usershapes[USERSHAPEGROUPS][USERSHAPEIDS];
+array<map<int, usershape*>, mapeditor::USERSHAPEGROUPS> usershapes;
 
 transmatrix ddi(int a, ld x) { return xspinpush(a * M_PI / S42, x); }
 
@@ -2433,8 +2431,8 @@ void buildpolys() {
   prehpc = isize(hpc);
   DEBB(DF_INIT, (debugfile,"hpc = %d\n", prehpc));
   
-  for(int i=0; i<USERSHAPEGROUPS; i++) for(int j=0; j<USERSHAPEIDS; j++) {
-    usershape *us = usershapes[i][j];
+  for(int i=0; i<mapeditor::USERSHAPEGROUPS; i++) for(auto usp: usershapes[i]) {
+    auto us = usp.second;
     if(!us) continue;
     for(int l=0; l<USERLAYERS; l++) {
       bshape(us->d[l].sh, us->d[l].sh.prio);

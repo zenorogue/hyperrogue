@@ -284,16 +284,6 @@ int getTriangleID(cell *c, patterns::patterninfo& si, hyperpoint h) {
   return best;
   }
 
-int goldbergcode(cell *c, const patterns::patterninfo& si) {
-  if(irr::on)
-    return irr::cellindex[c] << 8;
-  else if(archimedean)
-    return arcm::id_of(c->master) << 8;
-  else if(!gp::on) return 0;
-  else if(c == c->master->c7) return (fixdir(si.dir, c) << 8);
-  else return (get_code(gp::get_local_info(c)) << 16) | (fixdir(si.dir, c) << 8);
-  }
-
 void mapTexture(cell *c, textureinfo& mi, patterns::patterninfo &si, const transmatrix& T, int shift = 0) {
   mi.c = c;
   mi.symmetries = si.symmetries;
@@ -347,7 +337,7 @@ bool texture_config::apply(cell *c, const transmatrix &V, int col) {
     return false;
     }
   try {
-    auto& mi = texture_map.at(si.id + goldbergcode(c, si));    
+    auto& mi = texture_map.at(si.id + patterns::subcode(c, si));    
     
     set_floor(shFullFloor);
     qfi.tinf = &mi;
@@ -382,7 +372,7 @@ bool texture_config::apply(cell *c, const transmatrix &V, int col) {
     return true;
     }
   catch(out_of_range&) {
-    // printf("Ignoring tile #%d / %08x: not mapped\n", si.id, goldbergcode(c, si));
+    // printf("Ignoring tile #%d / %08x: not mapped\n", si.id, patterns::subcode(c, si));
     return false;
     }
   }
@@ -425,7 +415,7 @@ void texture_config::perform_mapping() {
     
     // int sgn = sphere ? -1 : 1;
     
-    si.id += goldbergcode(c, si);
+    si.id += patterns::subcode(c, si);
 
     if(!texture_map.count(si.id)) 
       replace = true;
@@ -1458,7 +1448,7 @@ void texture_config::true_remap() {
     auto si = patterns::getpatterninfo0(c);
     int oldid = si.id;
     
-    si.id += goldbergcode(c, si);
+    si.id += patterns::subcode(c, si);
 
     if(texture_map.count(si.id)) continue;
     

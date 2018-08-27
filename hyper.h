@@ -1095,6 +1095,13 @@ namespace mapeditor {
   void initdraw(cell *c); 
   void showMapEditor();
   void showDrawEditor();
+  
+  enum eShapegroup { sgPlayer, sgMonster, sgItem, sgFloor };
+  static const int USERSHAPEGROUPS = 4;
+
+  bool drawUserShape(transmatrix V, eShapegroup group, int id, int color, cell *c, int priority = -1);
+  bool haveUserShape(eShapegroup group, int id);
+  
   }
 
 struct renderbuffer;
@@ -3538,10 +3545,10 @@ struct qfloorinfo {
   const hpcshape *shape;
   const floorshape *fshape;
   textureinfo *tinf;
+  int usershape;
   };
 
 extern qfloorinfo qfi;
-extern qfloorinfo qfi_dc;
 extern int chasmg;
 
 struct hpcshape {
