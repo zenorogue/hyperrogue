@@ -131,7 +131,7 @@ void generate_matrices_scale(ld scale, int noft) {
     }
   }
 
-void bshape2(hpcshape& sh, int p, int shapeid, matrixlist& m) {
+void bshape2(hpcshape& sh, PPR prio, int shapeid, matrixlist& m) {
   auto& matrices = m.v;
   int osym = m.o.sym;
   int nsym = m.n.sym;
@@ -175,7 +175,7 @@ void bshape2(hpcshape& sh, int p, int shapeid, matrixlist& m) {
     rots /= rep;
     }
   
-  bshape(sh, p);
+  bshape(sh, prio);
 
   for(int r=0; r<nsym; r+=osym/rots) {
     for(hyperpoint h: lst) {
@@ -604,7 +604,7 @@ void set_floor(const transmatrix& spin, hpcshape& sh) {
   qfi.usershape = -1;
   }
 
-void draw_shapevec(cell *c, const transmatrix& V, const vector<hpcshape> &shv, int col, int prio = -1) {
+void draw_shapevec(cell *c, const transmatrix& V, const vector<hpcshape> &shv, int col, PPR prio = PPR_DEFAULT) {
   if(!c) queuepolyat(V, shv[0], col, prio);
   else if(gp::on) {
     int id = gp::get_plainshape_id(c);
@@ -636,11 +636,11 @@ void draw_shapevec(cell *c, const transmatrix& V, const vector<hpcshape> &shv, i
     queuepolyat(V, shv[ctof(c)], col, prio);
   }
 
-void draw_floorshape(cell *c, const transmatrix& V, const floorshape &fsh, int col, int prio = -1) {
+void draw_floorshape(cell *c, const transmatrix& V, const floorshape &fsh, int col, PPR prio = PPR_DEFAULT) {
   draw_shapevec(c, V, fsh.b, col, prio);
   }
 
-void draw_qfi(cell *c, const transmatrix& V, int col, int prio = -1, vector<hpcshape> floorshape::* tab = &floorshape::b) {
+void draw_qfi(cell *c, const transmatrix& V, int col, PPR prio = PPR_DEFAULT, vector<hpcshape> floorshape::* tab = &floorshape::b) {
   if(qfi.shape)
     queuepolyat(V * qfi.spin, *qfi.shape, col, prio);
   else if(qfi.usershape >= 0) {
@@ -649,7 +649,7 @@ void draw_qfi(cell *c, const transmatrix& V, int col, int prio = -1, vector<hpcs
   else if(!qfi.fshape) ;
 #if CAP_TEXTURE
   else if(qfi.tinf) {
-    queuetable(V * qfi.spin, qfi.tinf->vertices, isize(qfi.tinf->vertices), texture::config.mesh_color, texture::config.recolor(col), prio == -1 ? PPR_FLOOR : prio);
+    queuetable(V * qfi.spin, qfi.tinf->vertices, isize(qfi.tinf->vertices), texture::config.mesh_color, texture::config.recolor(col), prio == PPR_DEFAULT ? PPR_FLOOR : prio);
     lastptd().u.poly.tinf = qfi.tinf;
     if(true) 
       lastptd().u.poly.flags = POLY_INVERSE;

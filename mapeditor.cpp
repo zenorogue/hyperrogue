@@ -546,7 +546,7 @@ namespace mapeditor {
     return si.id + patterns::subcode(drawcell, si);
     }
 
-  bool editingShape(int group, int id) {
+  bool editingShape(eShapegroup group, int id) {
     if(group != mapeditor::drawcellShapeGroup()) return false;
     return id == drawcellShapeID();
     }
@@ -1701,11 +1701,14 @@ namespace mapeditor {
   #endif
     }
 
-  bool drawUserShape(transmatrix V, eShapegroup group, int id, int color, cell *c, int priority) {
+  bool drawUserShape(const transmatrix& V, eShapegroup group, int id, int color, cell *c, PPR prio) {
   #if !CAP_EDIT
     return false;
   #else
   
+    if(c == drawcell && editingShape(group, id) && prio == PPR_DEFAULT)
+      drawtrans = V;
+
     usershape *us = usershapes[group][id];
     if(us) {  
       for(int i=0; i<USERLAYERS; i++) {
@@ -1714,7 +1717,7 @@ namespace mapeditor {
         hpcshape& sh(ds.sh);
     
         if(sh.s != sh.e) 
-          queuepolyat(V, sh, ds.color ? ds.color : color, priority);
+          queuepolyat(V, sh, ds.color ? ds.color : color, prio);
         }
       }
   
@@ -1853,7 +1856,7 @@ namespace mapeditor {
     return us;
   #endif
     }
-  
+
   }
 
 #if CAP_EDIT

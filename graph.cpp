@@ -466,7 +466,7 @@ void animallegs(const transmatrix& V, eMonster mo, int col, double footphase) {
 
 bool noshadow;
 
-void ShadowV(const transmatrix& V, const hpcshape& bp, int prio) {
+void ShadowV(const transmatrix& V, const hpcshape& bp, PPR prio) {
 #if CAP_POLY
   if(mmspatial) { 
     if(pmodel == mdHyperboloid || pmodel == mdBall || pmodel == mdHemisphere || noshadow) 
@@ -565,6 +565,10 @@ bool drawstar(cell *c) {
   return true;
   }
 
+bool drawing_usershape_on(cell *c, mapeditor::eShapegroup sg) {
+  return c && c == mapeditor::drawcell && mapeditor::drawcellShapeGroup() == mapeditor::sgItem;
+  }
+
 bool drawItemType(eItem it, cell *c, const transmatrix& V, int icol, int ticks, bool hidden) {
   char xch = iinf[it].glyph;
 #if !CAP_POLY
@@ -604,9 +608,6 @@ bool drawItemType(eItem it, cell *c, const transmatrix& V, int icol, int ticks, 
   
   if(c && conformal::includeHistory && conformal::infindhistory.count(c)) poly_outline = OUTLINE_DEAD;
 
-  if(c == mapeditor::drawcell && mapeditor::drawcellShapeGroup() == mapeditor::sgItem)
-    mapeditor::drawtrans = V;
-    
   if(!mmitem && it) return true;
   
   else if(it == itSavedPrincess) {
@@ -691,7 +692,7 @@ bool drawItemType(eItem it, cell *c, const transmatrix& V, int icol, int ticks, 
     if(xsh == &shBookCover && mmitem)
       queuepoly(V2, shBook, 0x805020FF);
     
-    int pr = PPR_ITEM;
+    PPR pr = PPR_ITEM;
     int alpha = hidden ? (it == itKraken ? 0xC0 : 0x40) : 0xF0;
     if(c && c->wall == waIcewall) pr = PPR_HIDDEN, alpha = 0x80;
 
@@ -705,9 +706,9 @@ bool drawItemType(eItem it, cell *c, const transmatrix& V, int icol, int ticks, 
   
   else if(xch == 'o' || it == itInventory) {
     if(it == itOrbFire) icol = firecolor(100);
-    int pr = PPR_ITEM;
+    PPR prio = PPR_ITEM;
     bool inice = c && c->wall == waIcewall;
-    if(inice) pr = PPR_HIDDEN;
+    if(inice) prio = PPR_HIDDEN;
 
     int icol1 = icol;
     if(it == itOrbFire) icol = firecolor(200);
@@ -724,7 +725,7 @@ bool drawItemType(eItem it, cell *c, const transmatrix& V, int icol, int ticks, 
     if(it == itOrbFish)
       queuepolyat(V * spin(ticks / 1500.), shFishTail, col, PPR_ITEM_BELOW);
 
-    queuepolyat(V, shDisk, darkena(icol1, 0, inice ? 0x80 : hidden ? 0x20 : 0xC0), pr);
+    queuepolyat(V, shDisk, darkena(icol1, 0, inice ? 0x80 : hidden ? 0x20 : 0xC0), prio);
     hpcshape& sh = 
       it == itOrbLove ? shLoveRing :
       isRangedOrb(it) ? shTargetRing :
@@ -734,7 +735,7 @@ bool drawItemType(eItem it, cell *c, const transmatrix& V, int icol, int ticks, 
       isDirectionalOrb(it) ? shSpearRing :
       it == itOrb37 ? shHeptaRing :
       shRing;
-    queuepolyat(V * spin(ticks / 1500.), sh, col, pr);
+    queuepolyat(V * spin(ticks / 1500.), sh, col, prio);
     }
 
   else if(it) return true;
@@ -770,9 +771,6 @@ bool drawMonsterType(eMonster m, cell *where, const transmatrix& V, int col, dou
   else if(where && !(isMetalBeast(m) && where->stuntime == 1))
     drawStunStars(V, where->stuntime);
 
-  if(where == mapeditor::drawcell && mapeditor::drawcellShapeGroup() == (m == moPlayer ? mapeditor::sgPlayer : mapeditor::sgMonster)) 
-    mapeditor::drawtrans = V;
-    
   if(m == moTortoise) {
     int bits = where ? tortoise::getb(where) : tortoise::last;
     tortoise::draw(V, bits, 0, where ? where->stuntime : 0);
@@ -1876,13 +1874,8 @@ bool drawMonster(const transmatrix& Vparam, int ct, cell *c, int col) {
           length = cellgfxdist(c, c->mondir);
           }
         
-        if(c == mapeditor::drawcell && mapeditor::drawcellShapeGroup() == 1)
-          mapeditor::drawtrans = Vb;
-
-        if(mapeditor::drawUserShape(Vb, mapeditor::sgMonster, c->monst, (col << 8) + 0xFF, c)) {
-          if(c == mapeditor::drawcell) mapeditor::drawtrans = Vb;
+        if(mapeditor::drawUserShape(Vb, mapeditor::sgMonster, c->monst, (col << 8) + 0xFF, c)) 
           return false;
-          }
 
         if(isIvy(c) || isMutantIvy(c) || c->monst == moFriendlyIvy)
           queuepoly(Vb, shIBranch, (col << 8) + 0xFF);
@@ -3160,28 +3153,28 @@ void escherSidewall(cell *c, int sidepar, const transmatrix& V, int col) {
   if(sidepar >= SIDE_SLEV && sidepar <= SIDE_SLEV+2) {
     int sl = sidepar - SIDE_SLEV;
     for(int z=1; z<=4; z++) if(z == 1 || (z == 4 && detaillevel == 2))
-      draw_qfi(c, mscale(V, zgrad0(geom3::slev * sl, geom3::slev * (sl+1), z, 4)), col, PPR_REDWALL-4+z+4*sl);
+      draw_qfi(c, mscale(V, zgrad0(geom3::slev * sl, geom3::slev * (sl+1), z, 4)), col, PPR(PPR_REDWALL-4+z+4*sl));
     }
   else if(sidepar == SIDE_WALL) {
     const int layers = 2 << detaillevel;
     for(int z=1; z<layers; z++) 
-      draw_qfi(c, mscale(V, zgrad0(0, geom3::actual_wall_height(), z, layers)), col, PPR_WALL3+z-layers);
+      draw_qfi(c, mscale(V, zgrad0(0, geom3::actual_wall_height(), z, layers)), col, PPR(PPR_WALL3+z-layers));
     }
   else if(sidepar == SIDE_LAKE) {
     const int layers = 1 << (detaillevel-1);
     if(detaillevel) for(int z=0; z<layers; z++) 
-      draw_qfi(c, mscale(V, zgrad0(-geom3::lake_top, 0, z, layers)), col, PPR_FLOOR+z-layers);
+      draw_qfi(c, mscale(V, zgrad0(-geom3::lake_top, 0, z, layers)), col, PPR(PPR_FLOOR+z-layers));
     }
   else if(sidepar == SIDE_LTOB) {
     const int layers = 1 << (detaillevel-1);
     if(detaillevel) for(int z=0; z<layers; z++) 
-      draw_qfi(c, mscale(V, zgrad0(-geom3::lake_bottom, -geom3::lake_top, z, layers)), col, PPR_INLAKEWALL+z-layers);
+      draw_qfi(c, mscale(V, zgrad0(-geom3::lake_bottom, -geom3::lake_top, z, layers)), col, PPR(PPR_INLAKEWALL+z-layers));
     }
   else if(sidepar == SIDE_BTOI) {
     const int layers = 1 << detaillevel;
     draw_qfi(c, mscale(V, geom3::INFDEEP), col, PPR_MINUSINF);
     for(int z=1; z<layers; z++) 
-      draw_qfi(c, mscale(V, zgrad0(-geom3::lake_bottom, -geom3::lake_top, -z, 1)), col, PPR_LAKEBOTTOM+z-layers);
+      draw_qfi(c, mscale(V, zgrad0(-geom3::lake_bottom, -geom3::lake_top, -z, 1)), col, PPR(PPR_LAKEBOTTOM+z-layers));
     }
   }
 
@@ -3195,14 +3188,14 @@ bool placeSidewall(cell *c, int i, int sidepar, const transmatrix& V, int col) {
   if(qfi.fshape == &shBigTriangle && pseudohept(c->move(i))) return false;
   if(qfi.fshape == &shTriheptaFloor && !pseudohept(c) && !pseudohept(c->move(i))) return false;
 
-  int prio;
+  PPR prio;
   /* if(mirr) prio = PPR_GLASS - 2;
-  else */ if(sidepar == SIDE_WALL) prio = PPR_WALL3 - 2;
-  else if(sidepar == SIDE_WTS3) prio = PPR_WALL3 - 2;
+  else */ if(sidepar == SIDE_WALL) prio = PPR(PPR_WALL3 - 2);
+  else if(sidepar == SIDE_WTS3) prio = PPR(PPR_WALL3 - 2);
   else if(sidepar == SIDE_LAKE) prio = PPR_LAKEWALL;
   else if(sidepar == SIDE_LTOB) prio = PPR_INLAKEWALL;
   else if(sidepar == SIDE_BTOI) prio = PPR_BELOWBOTTOM;
-  else prio = PPR_REDWALL-2+4*(sidepar-SIDE_SLEV);
+  else prio = PPR(PPR_REDWALL-2+4*(sidepar-SIDE_SLEV));
   
   transmatrix V2 = V * ddspin(c, i);
  
@@ -3422,7 +3415,7 @@ void draw_wall(cell *c, const transmatrix& V, int wcol, int& zcol, int ct6, int 
     for(int z=1; z<layers; z++) {
       double zg = zgrad0(0, geom3::actual_wall_height(), z, layers);
       draw_qfi(c, xyzscale(V, zg*(layers-z)/layers, zg),
-        darkena(gradient(0, wcol, -layers, z, layers), 0, 0xFF), PPR_WALL3+z-layers+2);
+        darkena(gradient(0, wcol, -layers, z, layers), 0, 0xFF), PPR(PPR_WALL3+z-layers+2));
       }
     floorShadow(c, V, SHADOW_WALL);
     }
@@ -3759,7 +3752,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
     
     int flooralpha = 255;
 
-    if((cmode & sm::DRAW) && mapeditor::drawcell && mapeditor::drawcellShapeGroup() == 3)
+    if((cmode & sm::DRAW) && mapeditor::drawcell && mapeditor::drawcellShapeGroup() == mapeditor::sgFloor)
       flooralpha = 0xC0;
 
     if(c->wall == waMagma) fd = 0;
@@ -3795,7 +3788,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
         
       bool eoh = euclid || nonbitrunc;
 
-      if(c == mapeditor::drawcell)
+      if(drawing_usershape_on(c, mapeditor::sgFloor))
         mapeditor::drawtrans = V * applyPatterndir(c, si);
         
       if(c->wall == waChasm) {
@@ -3858,7 +3851,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           if(wmspatial) {
             const int layers = 2 << detaillevel;
             for(int z=1; z<layers; z++) 
-              queuepolyat(mscale(V2, zgrad0(0, geom3::actual_wall_height(), z, layers)), shHalfMirror[2], 0xC0C0C080, PPR_WALL3+z-layers);
+              queuepolyat(mscale(V2, zgrad0(0, geom3::actual_wall_height(), z, layers)), shHalfMirror[2], 0xC0C0C080, PPR(PPR_WALL3+z-layers));
             }
           else
             queuepolyat(V2, shHalfMirror[2], 0xC0C0C080, PPR_WALL3);
@@ -3876,7 +3869,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           if(wmspatial) {
             const int layers = 2 << detaillevel;
             for(int z=1; z<layers; z++) 
-              queuepolyat(mscale(V2, zgrad0(0, geom3::actual_wall_height(), z, layers)), shHalfMirror[ct6], 0xC0C0C080, PPR_WALL3+z-layers);
+              queuepolyat(mscale(V2, zgrad0(0, geom3::actual_wall_height(), z, layers)), shHalfMirror[ct6], 0xC0C0C080, PPR(PPR_WALL3+z-layers));
             }
           else 
             queuepolyat(V2, shHalfMirror[ct6], 0xC0C0C080, PPR_WALL3);
@@ -3914,7 +3907,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
 
           queuepolyat(Vdepth, shSemiFloor[0], darkena(vcol, fd, 0xFF), PPR_WALL3A);
           {dynamicval<int> p(poly_outline, OUTLINE_TRANS); queuepolyat(V2 * spin(M_PI*2/3), shSemiFloorShadow, SHADOW_WALL, PPR_WALLSHADOW); }
-          queuepolyat(V2, shSemiFloorSide[SIDE_WALL], darkena(vcol, fd, 0xFF), PPR_WALL3A-2+away(V2));
+          queuepolyat(V2, shSemiFloorSide[SIDE_WALL], darkena(vcol, fd, 0xFF), PPR(PPR_WALL3A-2+away(V2)));
 
           if(validsidepar[SIDE_WALL]) forCellIdEx(c2, j, c) {
             int dis = i-j;
@@ -4275,20 +4268,20 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           if(detaillevel >= 2)
             queuepolyat(mmscale(V, zgrad0(0, geom3::slev, 1, 2)), shHeptaMarker, darkena(wcol, 0, 0xFF), PPR_REDWALL);
           if(detaillevel >= 1)
-            queuepolyat(mmscale(V, geom3::SLEV[1]) * pispin, shWeakBranch, darkena(wcol, 0, 0xFF), PPR_REDWALL+1);
+            queuepolyat(mmscale(V, geom3::SLEV[1]) * pispin, shWeakBranch, darkena(wcol, 0, 0xFF), PPR(PPR_REDWALL+1));
           if(detaillevel >= 2)
-            queuepolyat(mmscale(V, zgrad0(0, geom3::slev, 3, 2)), shHeptaMarker, darkena(wcol, 0, 0xFF), PPR_REDWALL+2);
-          queuepolyat(mmscale(V, geom3::SLEV[2]), shSolidBranch, darkena(wcol, 0, 0xFF), PPR_REDWALL+3);
+            queuepolyat(mmscale(V, zgrad0(0, geom3::slev, 3, 2)), shHeptaMarker, darkena(wcol, 0, 0xFF), PPR(PPR_REDWALL+2));
+          queuepolyat(mmscale(V, geom3::SLEV[2]), shSolidBranch, darkena(wcol, 0, 0xFF), PPR(PPR_REDWALL+3));
           break;
         
         case waSmallBush:
           if(detaillevel >= 2)
             queuepolyat(mmscale(V, zgrad0(0, geom3::slev, 1, 2)), shHeptaMarker, darkena(wcol, 0, 0xFF), PPR_REDWALL);
           if(detaillevel >= 1)
-            queuepolyat(mmscale(V, geom3::SLEV[1]) * pispin, shWeakBranch, darkena(wcol, 0, 0xFF), PPR_REDWALL+1);
+            queuepolyat(mmscale(V, geom3::SLEV[1]) * pispin, shWeakBranch, darkena(wcol, 0, 0xFF), PPR(PPR_REDWALL+1));
           if(detaillevel >= 2)
-            queuepolyat(mmscale(V, zgrad0(0, geom3::slev, 3, 2)), shHeptaMarker, darkena(wcol, 0, 0xFF), PPR_REDWALL+2);
-          queuepolyat(mmscale(V, geom3::SLEV[2]), shWeakBranch, darkena(wcol, 0, 0xFF), PPR_REDWALL+3);
+            queuepolyat(mmscale(V, zgrad0(0, geom3::slev, 3, 2)), shHeptaMarker, darkena(wcol, 0, 0xFF), PPR(PPR_REDWALL+2));
+          queuepolyat(mmscale(V, geom3::SLEV[2]), shWeakBranch, darkena(wcol, 0, 0xFF), PPR(PPR_REDWALL+3));
           break;
       
         case waSolidBranch:
@@ -4305,8 +4298,8 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
             draw_floorshape(c, V, shMFloor2, 0x000000FF);
             }
           else {
-            draw_floorshape(c, V, shFloor, 0x804000FF, PPR_FLOOR+1);
-            draw_floorshape(c, V, shMFloor, 0x000000FF, PPR_FLOOR+2);
+            draw_floorshape(c, V, shFloor, 0x804000FF, PPR(PPR_FLOOR+1));
+            draw_floorshape(c, V, shMFloor, 0x000000FF, PPR(PPR_FLOOR+2));
             }
           break;
         
@@ -4458,7 +4451,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
            for(int z=1; z<layers; z++) {
              double zg = zgrad0(-geom3::lake_top, geom3::actual_wall_height(), z, layers);
              draw_qfi(c, xyzscale(V, zg*(layers-z)/layers, zg),
-               darkena(gradient(0, wcol, -layers, z, layers), 0, 0xFF), PPR_WALL3+z-layers+2);
+               darkena(gradient(0, wcol, -layers, z, layers), 0, 0xFF), PPR(PPR_WALL3+z-layers+2));
              }
             }
           else goto wa_default;
@@ -4475,7 +4468,7 @@ void drawcell(cell *c, transmatrix V, int spinv, bool mirrored) {
           wa_default:
           if(sl && wmspatial) {
       
-            draw_qfi(c, (*Vdp), darkena(wcol, fd, 0xFF), PPR_REDWALL-4+4*sl);
+            draw_qfi(c, (*Vdp), darkena(wcol, fd, 0xFF), PPR(PPR_REDWALL-4+4*sl));
             floorShadow(c, V, SHADOW_SL * sl);
             for(int s=0; s<sl; s++) 
             forCellIdEx(c2, i, c) {

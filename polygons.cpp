@@ -72,7 +72,6 @@ bool fatborder;
 
 int poly_outline;
 
-#define PSHIFT 0
 // #define STLSORT
 
 #define NEWSHAPE (-13.5)
@@ -1134,7 +1133,7 @@ void drawqueue() {
   for(int i = 0; i<siz; i++) {
     if(ptds[i].prio < 0 || ptds[i].prio >= PPR_MAX) {
       printf("Illegal priority %d of kind %d\n", ptds[i].prio, ptds[i].kind);
-      ptds[i].prio = rand() % PPR_MAX;
+      ptds[i].prio = PPR(rand() % PPR_MAX);
       }
     qp[ptds[i].prio]++;
     }
@@ -1458,11 +1457,11 @@ void finishshape() {
     printf("bad end\n"); */
   }
 
-void bshape(hpcshape& sh, int p) {
+void bshape(hpcshape& sh, PPR prio) {
   if(last) finishshape();
   hpc.push_back(hpxy(0,0));
   last = &sh;
-  last->s = isize(hpc), last->prio = p;
+  last->s = isize(hpc), last->prio = prio;
   last->flags = 0;
   first = true; 
   }
@@ -1474,8 +1473,8 @@ static const
 #endif
 double bscale7 = 1, brot7 = 0, bscale6 = 1, brot6 = 0;
 
-void bshape(hpcshape& sh, int p, double shzoom, int shapeid, double bonus = 0, flagtype flags = 0) {
-  bshape(sh, p);
+void bshape(hpcshape& sh, PPR prio, double shzoom, int shapeid, double bonus = 0, flagtype flags = 0) {
+  bshape(sh, prio);
   int whereis = 0;
   while(polydata[whereis] != NEWSHAPE || polydata[whereis+1] != shapeid) whereis++;
   int rots = polydata[whereis+2]; int sym = polydata[whereis+3];
@@ -1537,14 +1536,14 @@ void bshape(hpcshape& sh, int p, double shzoom, int shapeid, double bonus = 0, f
   hpcpush(ipoint(0, 1));
   }
 
-void copyshape(hpcshape& sh, hpcshape& orig, int p) {
+void copyshape(hpcshape& sh, hpcshape& orig, PPR prio) {
   if(last) last->e = isize(hpc);
-  sh = orig; sh.prio = p;
+  sh = orig; sh.prio = prio;
   }
 
-void zoomShape(hpcshape& old, hpcshape& newsh, double factor, int lev) {
+void zoomShape(hpcshape& old, hpcshape& newsh, double factor, PPR prio) {
 
-  bshape(newsh, lev);
+  bshape(newsh, prio);
   for(int i=old.s; i<old.e; i++) {
     hyperpoint H = hpc[i];
     H = hpxyz(factor*H[0], factor*H[1], H[2]);
@@ -2011,11 +2010,11 @@ void buildpolys() {
       }
     }
 
-  bshape(shSlime, 33);
+  bshape(shSlime, PPR_MONSTER_BODY);
   PRING(i)
     hpcpush(ddi(i, xcrossf * (0.7 + .2 * sin(i * M_PI * 2 / S84 * 9))) * C0);
 
-  bshape(shJelly, 33);
+  bshape(shJelly, PPR_MONSTER_BODY);
   PRING(i)
     hpcpush(ddi(i, xcrossf * (0.4 + .03 * sin(i * M_PI * 2 / S84 * 7))) * C0);
 
@@ -2381,40 +2380,43 @@ void buildpolys() {
 
   for(int u=0; u<=2; u+=2) {
   
-    int sh = u ? PPR_ITEM : PPR_MONSTER_LEG;
+    PPR sh = u ? PPR_ITEM : PPR_MONSTER_LEG;
     int uz = u?2:1;
+    
+    PPR sh1 = PPR(sh + 1);
+    PPR sh2 = PPR(sh + 2);
   
-    bshape(shTortoise[0][0+u], sh+1, scalef/uz, 207);
-    bshape(shTortoise[1][0+u], sh+2, scalef/uz, 208);
-    bshape(shTortoise[2][0+u], sh+2, scalef/uz, 209);
-    bshape(shTortoise[3][0+u], sh+2, scalef/uz, 210);
-    bshape(shTortoise[4][0+u], sh+2, scalef/uz, 211);
-    bshape(shTortoise[5][0+u], sh+2, scalef/uz, 212);
-    bshape(shTortoise[6][0+u], sh+2, scalef/uz, 213);
-    bshape(shTortoise[7][0+u], sh+2, scalef/uz, 214);
+    bshape(shTortoise[0][0+u], sh1, scalef/uz, 207);
+    bshape(shTortoise[1][0+u], sh2, scalef/uz, 208);
+    bshape(shTortoise[2][0+u], sh2, scalef/uz, 209);
+    bshape(shTortoise[3][0+u], sh2, scalef/uz, 210);
+    bshape(shTortoise[4][0+u], sh2, scalef/uz, 211);
+    bshape(shTortoise[5][0+u], sh2, scalef/uz, 212);
+    bshape(shTortoise[6][0+u], sh2, scalef/uz, 213);
+    bshape(shTortoise[7][0+u], sh2, scalef/uz, 214);
     bshape(shTortoise[8][0+u], sh, scalef/uz, 215);
     bshape(shTortoise[9][0+u], sh, scalef/uz, 217);
     bshape(shTortoise[10][0+u], sh, scalef/uz, 218);
     bshape(shTortoise[11][0+u], sh, scalef/uz, 219);
-    bshape(shTortoise[12][0+u], sh+2, scalef/uz, 216);
+    bshape(shTortoise[12][0+u], sh2, scalef/uz, 216);
     
-    bshape(shTortoise[0][1+u], sh+1, scalef/uz, 220);
-    bshape(shTortoise[1][1+u], sh+2, scalef/uz, 221);
-    bshape(shTortoise[2][1+u], sh+2, scalef/uz, 222);
-    bshape(shTortoise[3][1+u], sh+2, scalef/uz, 223);
-    bshape(shTortoise[4][1+u], sh+2, scalef/uz, 224);
-    bshape(shTortoise[5][1+u], sh+2, scalef/uz, 225);
-    bshape(shTortoise[6][1+u], sh+2, scalef/uz, 226);
-    bshape(shTortoise[7][1+u], sh+2, scalef/uz, 227);
+    bshape(shTortoise[0][1+u], sh1, scalef/uz, 220);
+    bshape(shTortoise[1][1+u], sh2, scalef/uz, 221);
+    bshape(shTortoise[2][1+u], sh2, scalef/uz, 222);
+    bshape(shTortoise[3][1+u], sh2, scalef/uz, 223);
+    bshape(shTortoise[4][1+u], sh2, scalef/uz, 224);
+    bshape(shTortoise[5][1+u], sh2, scalef/uz, 225);
+    bshape(shTortoise[6][1+u], sh2, scalef/uz, 226);
+    bshape(shTortoise[7][1+u], sh2, scalef/uz, 227);
     bshape(shTortoise[8][1+u], sh, scalef/uz, 228);
     bshape(shTortoise[9][1+u], sh, scalef/uz, 230);
     bshape(shTortoise[10][1+u], sh, scalef/uz, 231);
     bshape(shTortoise[11][1+u], sh, scalef/uz, 232);
-    bshape(shTortoise[12][1+u], sh+2, scalef/uz, 229);
+    bshape(shTortoise[12][1+u], sh2, scalef/uz, 229);
     }
 
   for(int v=0; v<13; v++) for(int z=0; z<2; z++)
-    copyshape(shTortoise[v][4+z], shTortoise[v][2+z], shTortoise[v][2+z].prio + (PPR_CARRIED-PPR_ITEM));
+    copyshape(shTortoise[v][4+z], shTortoise[v][2+z], PPR(shTortoise[v][2+z].prio + (PPR_CARRIED-PPR_ITEM)));
 
   if(nonbitrunc) bshape(shMagicSword, PPR_MAGICSWORD, euclid4 ? gp::scale * irr::scale / 2 : gp::scale * irr::scale, 243);
   else bshape(shMagicSword, PPR_MAGICSWORD, 1, 244);
@@ -2422,8 +2424,8 @@ void buildpolys() {
   if(nonbitrunc) bshape(shMagicShovel, PPR_MAGICSWORD, euclid4 ? gp::scale * irr::scale / 2 : gp::scale * irr::scale, 333);
   else bshape(shMagicShovel, PPR_MAGICSWORD, 1, 333);
   
-  bshape(shBead0, 20, 1, 250);
-  bshape(shBead1, 20, 1, 251);
+  bshape(shBead0, PPR(20), 1, 250);
+  bshape(shBead1, PPR(20), 1, 251);
   bshape(shArrow, PPR_ARROW, 1, 252);
   
   bshapeend();
@@ -2469,7 +2471,7 @@ void initShape(int sg, int id) {
     usershapes[sg][id] = us;
 
     for(int i=0; i<USERLAYERS; i++) {
-      us->d[i].sh.prio = (sg >= 3 ? 1:50) + i;
+      us->d[i].sh.prio = PPR((sg >= 3 ? 1:50) + i);
 
       us->d[i].rots = 1;
       us->d[i].sym = 0;
@@ -2480,8 +2482,8 @@ void initShape(int sg, int id) {
     }
   }
 
-void queuepolyat(const transmatrix& V, const hpcshape& h, int col, int prio) {
-  if(prio == -1) prio = h.prio;
+void queuepolyat(const transmatrix& V, const hpcshape& h, int col, PPR prio) {
+  if(prio == PPR_DEFAULT) prio = h.prio;
 
   polytodraw& ptd = nextptd();
   ptd.kind = pkPoly;
@@ -2504,7 +2506,7 @@ void queuepolyat(const transmatrix& V, const hpcshape& h, int col, int prio) {
     part(col,2) = part(col,3) = (part(col,2) * 2 + part(col,3) + 1)/3;
     }
   ptd.col = (darkened(col >> 8) << 8) + (col & 0xFF);
-  ptd.prio = prio << PSHIFT;
+  ptd.prio = prio;
   ptd.u.poly.outline = poly_outline;
   ptd.u.poly.linewidth = vid.linewidth;
   ptd.u.poly.flags = h.flags;
@@ -2515,14 +2517,14 @@ void addfloats(vector<GLfloat>& v, hyperpoint h) {
   for(int i=0; i<3; i++) v.push_back(h[i]);
   }
 
-void queuereset(eModel md, int prio) {
+void queuereset(eModel md, PPR prio) {
   polytodraw& ptd = nextptd();
   ptd.kind = pkResetModel;
   ptd.col = md;
-  ptd.prio = prio << PSHIFT;
+  ptd.prio = prio;
   }
 
-void queuetable(const transmatrix& V, const vector<glvertex>& f, int cnt, int linecol, int fillcol, int prio) {
+void queuetable(const transmatrix& V, const vector<glvertex>& f, int cnt, int linecol, int fillcol, PPR prio) {
   polytodraw& ptd = nextptd();
   ptd.kind = pkPoly;
   ptd.u.poly.V = V;
@@ -2530,7 +2532,7 @@ void queuetable(const transmatrix& V, const vector<glvertex>& f, int cnt, int li
   ptd.u.poly.offset = 0;
   ptd.u.poly.cnt = cnt;
   ptd.col = fillcol;
-  ptd.prio = prio << PSHIFT;
+  ptd.prio = prio;
   ptd.u.poly.outline = linecol;
   ptd.u.poly.linewidth = vid.linewidth;
   ptd.u.poly.flags = 0;
@@ -2542,27 +2544,27 @@ void queuepoly(const transmatrix& V, const hpcshape& h, int col) {
   }
 
 void queuepolyb(const transmatrix& V, const hpcshape& h, int col, int b) {
-  queuepolyat(V,h,col,h.prio+b);
+  queuepolyat(V,h,col,PPR(h.prio+b));
   }
 
 void curvepoint(const hyperpoint& H1) {
   curvedata.push_back(glhr::pointtogl(H1));
   }
 
-void queuecurve(int linecol, int fillcol, int prio) {
+void queuecurve(int linecol, int fillcol, PPR prio) {
   queuetable(Id, curvedata, isize(curvedata)-curvestart, linecol, fillcol, prio);
   lastptd().u.poly.offset = curvestart;
   curvestart = isize(curvedata);
   }
 
-void queuelink(const string *link, int prio) {
+void queuelink(const string *link, PPR prio) {
   polytodraw& ptd = nextptd();
   ptd.kind = pkLink;
-  ptd.prio = prio << PSHIFT;
+  ptd.prio = prio;
   ptd.u.link.link = link;
   }
 
-void queueline(const hyperpoint& H1, const hyperpoint& H2, int col, int prf, int prio) {
+void queueline(const hyperpoint& H1, const hyperpoint& H2, int col, int prf, PPR prio) {
   polytodraw& ptd = nextptd();
   ptd.kind = pkLine;
   ptd.u.line.H1 = H1;
@@ -2570,7 +2572,7 @@ void queueline(const hyperpoint& H1, const hyperpoint& H2, int col, int prf, int
   ptd.u.line.prf = prf;
   ptd.u.line.width = (linewidthat(H1, vid.linewidth, 0) + linewidthat(H2, vid.linewidth, 0)) / 2;
   ptd.col = (darkened(col >> 8) << 8) + (col & 0xFF);
-  ptd.prio = prio << PSHIFT;
+  ptd.prio = prio;
   }
 
 void queuestr(int x, int y, int shift, int size, string str, int col, int frame, int align) {
@@ -2585,7 +2587,7 @@ void queuestr(int x, int y, int shift, int size, string str, int col, int frame,
   ptd.u.chr.size = size;
   ptd.col = darkened(col);
   ptd.u.chr.frame = frame ? ((poly_outline & ~ 255)+frame) : 0;
-  ptd.prio = PPR_TEXT << PSHIFT;
+  ptd.prio = PPR_TEXT;
   }
 
 void queuechr(int x, int y, int shift, int size, char chr, int col, int frame, int align) {
@@ -2600,10 +2602,10 @@ void queuechr(int x, int y, int shift, int size, char chr, int col, int frame, i
   ptd.u.chr.align = align;
   ptd.col = col;
   ptd.u.chr.frame = frame ? (poly_outline & ~ 255) : 0;
-  ptd.prio = PPR_TEXT << PSHIFT;
+  ptd.prio = PPR_TEXT;
   }
 
-void queuecircle(int x, int y, int size, int color, int prio = PPR_CIRCLE) {
+void queuecircle(int x, int y, int size, int color, PPR prio = PPR_CIRCLE) {
   polytodraw& ptd = nextptd();
   ptd.kind = pkCircle;
   ptd.u.cir.x = x;
@@ -2611,7 +2613,7 @@ void queuecircle(int x, int y, int size, int color, int prio = PPR_CIRCLE) {
   ptd.u.cir.size = size;
   ptd.u.cir.boundary = false;
   ptd.col = color;
-  ptd.prio = prio << PSHIFT;
+  ptd.prio = prio;
   }
 
 void getcoord0(const hyperpoint& h, int& xc, int &yc, int &sc) {

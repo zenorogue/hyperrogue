@@ -1103,7 +1103,6 @@ namespace mapeditor {
   enum eShapegroup { sgPlayer, sgMonster, sgItem, sgFloor };
   static const int USERSHAPEGROUPS = 4;
 
-  bool drawUserShape(transmatrix V, eShapegroup group, int id, int color, cell *c, int priority = -1);
   bool haveUserShape(eShapegroup group, int id);
   
   }
@@ -1841,10 +1840,15 @@ enum PPR {
   PPR_MINEMARK, PPR_ARROW,
   PPR_MOBILE_ARROW,
   PPR_LINE, PPR_TEXT, PPR_CIRCLE,
-  PPR_MAX
+  PPR_MAX,
+  PPR_DEFAULT = -1
   };
-  
-void ShadowV(const transmatrix& V, const struct hpcshape& bp, int prio = PPR_MONSTER_SHADOW);
+
+namespace mapeditor {
+  bool drawUserShape(const transmatrix& V, eShapegroup group, int id, int color, cell *c, PPR prio = PPR_DEFAULT);
+  }
+
+void ShadowV(const transmatrix& V, const struct hpcshape& bp, PPR prio = PPR_MONSTER_SHADOW);
 
 #define OUTLINE_NONE     0x000000FF
 #define OUTLINE_FRIEND   0x00FF00FF
@@ -2546,7 +2550,8 @@ union polyunion {
 
 struct polytodraw {
   eKind kind;
-  int prio, col;
+  PPR prio;
+  int col;
   polyunion u;
   polytodraw() {}
   };
@@ -3051,8 +3056,8 @@ namespace texture {
   }
 #endif
 
-void queueline(const hyperpoint& H1, const hyperpoint& H2, int col, int prf = 0, int prio = PPR_LINE);
-void queuelink(const string *link, int prio);
+void queueline(const hyperpoint& H1, const hyperpoint& H2, int col, int prf = 0, PPR prio = PPR_LINE);
+void queuelink(const string *link, PPR prio);
 
 extern ld tessf, crossf, hexf, hcrossf, hexhexdist, hexvdist, hepvdist, rhexf;
 unsigned char& part(int& col, int i);
@@ -3539,8 +3544,8 @@ namespace glhr {
 
 void prettypoly(const vector<hyperpoint>& t, int fillcol, int linecol, int lev);
 polytodraw& lastptd();
-void queuepolyat(const transmatrix& V, const hpcshape& h, int col, int prio);
-void queuetable(const transmatrix& V, const vector<glvertex>& f, int cnt, int linecol, int fillcol, int prio);
+void queuepolyat(const transmatrix& V, const hpcshape& h, int col, PPR prio);
+void queuetable(const transmatrix& V, const vector<glvertex>& f, int cnt, int linecol, int fillcol, PPR prio);
 
 struct floorshape;
 
@@ -3556,7 +3561,8 @@ extern qfloorinfo qfi;
 extern int chasmg;
 
 struct hpcshape {
-  int s, e, prio;
+  int s, e;
+  PPR prio;
   int flags;
   };
 
@@ -3690,7 +3696,7 @@ namespace gp {
 extern bool debug_geometry;
 
 void queuepoly(const transmatrix& V, const hpcshape& h, int col);
-void queuepolyat(const transmatrix& V, const hpcshape& h, int col, int prio);
+void queuepolyat(const transmatrix& V, const hpcshape& h, int col, PPR prio);
 
 void queuestr(const hyperpoint& h, int size, const string& chr, int col, int frame = 0);
 void queuechr(const transmatrix& V, double size, char chr, int col, int frame = 0);
@@ -3748,7 +3754,8 @@ void set_blizzard_frame(cell *c, int frameid);
 
 struct floorshape {
   bool is_plain;
-  int shapeid, prio;
+  int shapeid;
+  PPR prio;
   vector<hpcshape> b, shadow, side[SIDEPARS], gpside[SIDEPARS][MAX_EDGE];
   floorshape() { prio = PPR_FLOOR; }
   };
