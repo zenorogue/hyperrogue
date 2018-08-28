@@ -864,7 +864,6 @@ transmatrix calc_relative_matrix(cell *c, cell *c1, const hyperpoint& point_hint
 transmatrix calc_relative_matrix(cell *c, cell *c1, int direction_hint);
 
 static const int NOHINT = -1;
-
 // graph
 
 void showMissionScreen();

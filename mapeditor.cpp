@@ -1706,7 +1706,7 @@ namespace mapeditor {
     return false;
   #else
   
-    if(c == drawcell && editingShape(group, id) && prio == PPR_DEFAULT)
+    if(c && c == drawcell && editingShape(group, id) && prio == PPR_DEFAULT)
       drawtrans = V;
 
     usershape *us = usershapes[group][id];
@@ -1724,7 +1724,7 @@ namespace mapeditor {
     if(cmode & sm::DRAW) {
 
 #if CAP_TEXTURE    
-      if(texture::config.tstate == texture::tsActive && lmouseover && !mouseout() && (lstartcell || !holdmouse)) {
+      if(texture::config.tstate == texture::tsActive && lmouseover && !mouseout() && (lstartcell || !holdmouse) && c) {
         cell *ls = lstartcell ? lstartcell : lmouseover;
         auto sio = patterns::getpatterninfo0(ls);
         auto sih = patterns::getpatterninfo0(c);
@@ -1767,8 +1767,6 @@ namespace mapeditor {
             a == isize(ds.list)-1 ? 0xFF0000 :
             0xFFFF00);
           } */
-        
-        if(c == ew.c) mapeditor::drawtrans = V;
         
         if(!us) return false;
      
