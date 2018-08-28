@@ -62,6 +62,7 @@ int main(int argc, char **argv) {
   initAll();
 #if CAP_COMMANDLINE
   arg::read(3);
+  start_game();
 #endif
 #if !ISWEB
   if(showstartmenu && !vid.skipstart)
