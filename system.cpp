@@ -178,7 +178,7 @@ void initgame() {
     createMov(cwt.at, 0)->land = laCrossroads2;
     }
     
-  for(int i=0; i<numplayers(); i++) sword::angle[i] = 11;
+  for(int i=0; i<numplayers(); i++) sword::angle[i] = PURE ? 10 : 11;
 
   if(!safety) multi::players = vid.scfg.players;
   if(multi::players < 1 || multi::players > MAXPLAYER)

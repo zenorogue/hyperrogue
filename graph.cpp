@@ -309,7 +309,7 @@ void drawPlayerEffects(const transmatrix& V, cell *c, bool onplayer) {
         if((a+S21)%S42 == ang && items[itOrbSword2]) continue;
         bool longer = sword::pos(cwt.at, a-1) != sword::pos(cwt.at, a+1);
         int col = darkena(0xC0C0C0, 0, 0xFF);
-        queueline(Vnow*xspinpush0(dda * M_PI / S42, (!BITRUNCATED) ? 0.6 * gp::scale : longer ? 0.36 : 0.4), Vnow*xspinpush0(dda * M_PI/S42, (!BITRUNCATED) ? 0.7 * gp::scale : longer ? 0.44 : 0.42), col, 1);
+        queueline(Vnow*xspinpush0(dda * M_PI / S42, PURE ? 0.6 * scalefactor : longer ? 0.36 : 0.4), Vnow*xspinpush0(dda * M_PI/S42, PURE ? 0.7 * scalefactor : longer ? 0.44 : 0.42), col, 1);
         }
 #endif
 
