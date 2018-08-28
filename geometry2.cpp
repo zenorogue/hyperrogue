@@ -343,12 +343,12 @@ void virtualRebaseSimple(heptagon*& base, transmatrix& at) {
   }
 
 double cellgfxdist(cell *c, int i) {
-  if(NONSTDVAR) return hdist0(tC0(calc_relative_matrix(c->move(i), c, i)));
-  return !BITRUNCATED ? tessf * gp::scale : (c->type == 6 && (i&1)) ? hexhexdist : crossf;
+  if(NONSTDVAR || archimedean) return hdist0(tC0(calc_relative_matrix(c->move(i), c, i)));
+  return !BITRUNCATED ? tessf : (c->type == 6 && (i&1)) ? hexhexdist : crossf;
   }
 
 transmatrix cellrelmatrix(cell *c, int i) {
-  if(NONSTDVAR) return calc_relative_matrix(c->move(i), c, i);
+  if(NONSTDVAR || archimedean) return calc_relative_matrix(c->move(i), c, i);
   double d = cellgfxdist(c, i);
   return ddspin(c, i) * xpush(d) * iddspin(c->move(i), c->c.spin(i), euclid ? 0 : M_PI);
   }
