@@ -1912,7 +1912,7 @@ void buildpolys() {
     }
 
   bshape(shILeaf[1], PPR::ONTENTACLE);
-  if(S3 == 3) 
+  if(S3 == 3 && S7 % 3) 
     for(int t=0; t<=S7; t++) hpcpush(ddi(t*S36, zhexf*.8) * C0);
   else {
     for(int t=0; t<=S7; t++) {
