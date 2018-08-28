@@ -805,7 +805,7 @@ void giantLandSwitch(cell *c, int d, cell *from) {
               c2 = c3;
               c2->monst = moDragonTail;
               c2->hitpoints = 1;
-              i = j + 2 + hrand(c2->type-3);
+              i = j + (c2->type <= 3 ? 1 : 2 + hrand(c2->type-3));
               i %= c2->type;
               }
             if(isize(dragon) < 5 || isize(dragon) < dragonlength / 2) {
